@@ -879,18 +879,22 @@ with_system_zlib
 with_gnu_ld
 enable_rpath
 with_libiconv_prefix
+with_libiconv_type
 with_iconv_bin
 with_system_readline
 with_jit_reader_dir
 with_expat
 with_libexpat_prefix
+with_libexpat_type
 with_mpfr
 with_libmpfr_prefix
+with_libmpfr_type
 with_python
 with_guile
 enable_source_highlight
 with_intel_pt
 with_libipt_prefix
+with_libipt_type
 with_included_regex
 with_sysroot
 with_system_gdbinit
@@ -901,14 +905,17 @@ enable_gdb_build_warnings
 enable_ubsan
 with_lzma
 with_liblzma_prefix
+with_liblzma_type
 with_tcl
 with_tk
 with_x
 enable_sim
 with_babeltrace
 with_libbabeltrace_prefix
+with_libbabeltrace_type
 with_xxhash
 with_libxxhash_prefix
+with_libxxhash_type
 enable_unit_tests
 '
       ac_precious_vars='build_alias
@@ -1603,6 +1610,7 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-libiconv-prefix[=DIR]  search for libiconv in DIR/include and DIR/lib
   --without-libiconv-prefix     don't search for libiconv in includedir and libdir
+  --with-libiconv-type=TYPE     type of library to search for (auto/static/shared)
   --with-iconv-bin=PATH   specify where to find the iconv program
   --with-system-readline  use installed readline library
   --with-jit-reader-dir=PATH
@@ -1610,9 +1618,11 @@ Optional Packages:
   --with-expat            include expat support (auto/yes/no)
   --with-libexpat-prefix[=DIR]  search for libexpat in DIR/include and DIR/lib
   --without-libexpat-prefix     don't search for libexpat in includedir and libdir
+  --with-libexpat-type=TYPE     type of library to search for (auto/static/shared)
   --with-mpfr             include MPFR support (auto/yes/no)
   --with-libmpfr-prefix[=DIR]  search for libmpfr in DIR/include and DIR/lib
   --without-libmpfr-prefix     don't search for libmpfr in includedir and libdir
+  --with-libmpfr-type=TYPE     type of library to search for (auto/static/shared)
   --with-python[=PYTHON]  include python support
                           (auto/yes/no/<python-program>)
   --with-guile[=GUILE]    include guile support
@@ -1620,6 +1630,7 @@ Optional Packages:
   --with-intel-pt         include Intel Processor Trace support (auto/yes/no)
   --with-libipt-prefix[=DIR]  search for libipt in DIR/include and DIR/lib
   --without-libipt-prefix     don't search for libipt in includedir and libdir
+  --with-libipt-type=TYPE     type of library to search for (auto/static/shared)
   --without-included-regex
                           don't use included regex; this is the default on
                           systems with version 2 of the GNU C library (use
@@ -1633,15 +1644,18 @@ Optional Packages:
   --with-lzma             support lzma compression (auto/yes/no)
   --with-liblzma-prefix[=DIR]  search for liblzma in DIR/include and DIR/lib
   --without-liblzma-prefix     don't search for liblzma in includedir and libdir
+  --with-liblzma-type=TYPE     type of library to search for (auto/static/shared)
   --with-tcl              directory containing tcl configuration (tclConfig.sh)
   --with-tk               directory containing tk configuration (tkConfig.sh)
   --with-x                use the X Window System
   --with-babeltrace       include babeltrace support (auto/yes/no)
   --with-libbabeltrace-prefix[=DIR]  search for libbabeltrace in DIR/include and DIR/lib
   --without-libbabeltrace-prefix     don't search for libbabeltrace in includedir and libdir
+  --with-libbabeltrace-type=TYPE     type of library to search for (auto/static/shared)
   --with-xxhash           use libxxhash for hashing (faster) (auto/yes/no)
   --with-libxxhash-prefix[=DIR]  search for libxxhash in DIR/include and DIR/lib
   --without-libxxhash-prefix     don't search for libxxhash in includedir and libdir
+  --with-libxxhash-type=TYPE     type of library to search for (auto/static/shared)
 
 Some influential environment variables:
   CC          C compiler command
@@ -8204,6 +8218,16 @@ if test "${with_libiconv_prefix+set}" = set; then :
 
 fi
 
+
+# Check whether --with-libiconv-type was given.
+if test "${with_libiconv_type+set}" = set; then :
+  withval=$with_libiconv_type;  with_libiconv_type=$withval
+else
+   with_libiconv_type=auto
+fi
+
+  lib_type=`eval echo \$with_libiconv_type`
+
       LIBICONV=
   LTLIBICONV=
   INCICONV=
@@ -8241,13 +8265,13 @@ fi
           found_so=
           found_a=
           if test $use_additional = yes; then
-            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
+            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext" && test x$lib_type != xstatic; then
               found_dir="$additional_libdir"
               found_so="$additional_libdir/lib$name.$shlibext"
               if test -f "$additional_libdir/lib$name.la"; then
                 found_la="$additional_libdir/lib$name.la"
               fi
-            else
+            elif test x$lib_type != xshared; then
               if test -f "$additional_libdir/lib$name.$libext"; then
                 found_dir="$additional_libdir"
                 found_a="$additional_libdir/lib$name.$libext"
@@ -8271,13 +8295,13 @@ fi
               case "$x" in
                 -L*)
                   dir=`echo "X$x" | sed -e 's/^X-L//'`
-                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
+                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext" && test x$lib_type != xstatic; then
                     found_dir="$dir"
                     found_so="$dir/lib$name.$shlibext"
                     if test -f "$dir/lib$name.la"; then
                       found_la="$dir/lib$name.la"
                     fi
-                  else
+                  elif test x$lib_type != xshared; then
                     if test -f "$dir/lib$name.$libext"; then
                       found_dir="$dir"
                       found_a="$dir/lib$name.$libext"
@@ -8505,8 +8529,13 @@ fi
               done
             fi
           else
-                                                            LIBICONV="${LIBICONV}${LIBICONV:+ }-l$name"
-            LTLIBICONV="${LTLIBICONV}${LTLIBICONV:+ }-l$name"
+                                                            if test "x$lib_type" = "xauto" || test "x$lib_type" = "xshared"; then
+              LIBICONV="${LIBICONV}${LIBICONV:+ }-l$name"
+              LTLIBICONV="${LTLIBICONV}${LTLIBICONV:+ }-l$name"
+            else
+              LIBICONV="${LIBICONV}${LIBICONV:+ }-l:lib$name.$libext"
+              LTLIBICONV="${LTLIBICONV}${LTLIBICONV:+ }-l:lib$name.$libext"
+            fi
           fi
         fi
       fi
@@ -9306,6 +9335,16 @@ if test "${with_libexpat_prefix+set}" = set; then :
 
 fi
 
+
+# Check whether --with-libexpat-type was given.
+if test "${with_libexpat_type+set}" = set; then :
+  withval=$with_libexpat_type;  with_libexpat_type=$withval
+else
+   with_libexpat_type=auto
+fi
+
+  lib_type=`eval echo \$with_libexpat_type`
+
       LIBEXPAT=
   LTLIBEXPAT=
   INCEXPAT=
@@ -9343,13 +9382,13 @@ fi
           found_so=
           found_a=
           if test $use_additional = yes; then
-            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
+            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext" && test x$lib_type != xstatic; then
               found_dir="$additional_libdir"
               found_so="$additional_libdir/lib$name.$shlibext"
               if test -f "$additional_libdir/lib$name.la"; then
                 found_la="$additional_libdir/lib$name.la"
               fi
-            else
+            elif test x$lib_type != xshared; then
               if test -f "$additional_libdir/lib$name.$libext"; then
                 found_dir="$additional_libdir"
                 found_a="$additional_libdir/lib$name.$libext"
@@ -9373,13 +9412,13 @@ fi
               case "$x" in
                 -L*)
                   dir=`echo "X$x" | sed -e 's/^X-L//'`
-                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
+                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext" && test x$lib_type != xstatic; then
                     found_dir="$dir"
                     found_so="$dir/lib$name.$shlibext"
                     if test -f "$dir/lib$name.la"; then
                       found_la="$dir/lib$name.la"
                     fi
-                  else
+                  elif test x$lib_type != xshared; then
                     if test -f "$dir/lib$name.$libext"; then
                       found_dir="$dir"
                       found_a="$dir/lib$name.$libext"
@@ -9607,8 +9646,13 @@ fi
               done
             fi
           else
-                                                            LIBEXPAT="${LIBEXPAT}${LIBEXPAT:+ }-l$name"
-            LTLIBEXPAT="${LTLIBEXPAT}${LTLIBEXPAT:+ }-l$name"
+                                                            if test "x$lib_type" = "xauto" || test "x$lib_type" = "xshared"; then
+              LIBEXPAT="${LIBEXPAT}${LIBEXPAT:+ }-l$name"
+              LTLIBEXPAT="${LTLIBEXPAT}${LTLIBEXPAT:+ }-l$name"
+            else
+              LIBEXPAT="${LIBEXPAT}${LIBEXPAT:+ }-l:lib$name.$libext"
+              LTLIBEXPAT="${LTLIBEXPAT}${LTLIBEXPAT:+ }-l:lib$name.$libext"
+            fi
           fi
         fi
       fi
@@ -9811,6 +9855,16 @@ if test "${with_libmpfr_prefix+set}" = set; then :
 
 fi
 
+
+# Check whether --with-libmpfr-type was given.
+if test "${with_libmpfr_type+set}" = set; then :
+  withval=$with_libmpfr_type;  with_libmpfr_type=$withval
+else
+   with_libmpfr_type=auto
+fi
+
+  lib_type=`eval echo \$with_libmpfr_type`
+
       LIBMPFR=
   LTLIBMPFR=
   INCMPFR=
@@ -9848,13 +9902,13 @@ fi
           found_so=
           found_a=
           if test $use_additional = yes; then
-            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
+            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext" && test x$lib_type != xstatic; then
               found_dir="$additional_libdir"
               found_so="$additional_libdir/lib$name.$shlibext"
               if test -f "$additional_libdir/lib$name.la"; then
                 found_la="$additional_libdir/lib$name.la"
               fi
-            else
+            elif test x$lib_type != xshared; then
               if test -f "$additional_libdir/lib$name.$libext"; then
                 found_dir="$additional_libdir"
                 found_a="$additional_libdir/lib$name.$libext"
@@ -9878,13 +9932,13 @@ fi
               case "$x" in
                 -L*)
                   dir=`echo "X$x" | sed -e 's/^X-L//'`
-                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
+                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext" && test x$lib_type != xstatic; then
                     found_dir="$dir"
                     found_so="$dir/lib$name.$shlibext"
                     if test -f "$dir/lib$name.la"; then
                       found_la="$dir/lib$name.la"
                     fi
-                  else
+                  elif test x$lib_type != xshared; then
                     if test -f "$dir/lib$name.$libext"; then
                       found_dir="$dir"
                       found_a="$dir/lib$name.$libext"
@@ -10112,8 +10166,13 @@ fi
               done
             fi
           else
-                                                            LIBMPFR="${LIBMPFR}${LIBMPFR:+ }-l$name"
-            LTLIBMPFR="${LTLIBMPFR}${LTLIBMPFR:+ }-l$name"
+                                                            if test "x$lib_type" = "xauto" || test "x$lib_type" = "xshared"; then
+              LIBMPFR="${LIBMPFR}${LIBMPFR:+ }-l$name"
+              LTLIBMPFR="${LTLIBMPFR}${LTLIBMPFR:+ }-l$name"
+            else
+              LIBMPFR="${LIBMPFR}${LIBMPFR:+ }-l:lib$name.$libext"
+              LTLIBMPFR="${LTLIBMPFR}${LTLIBMPFR:+ }-l:lib$name.$libext"
+            fi
           fi
         fi
       fi
@@ -14004,6 +14063,16 @@ if test "${with_libipt_prefix+set}" = set; then :
 
 fi
 
+
+# Check whether --with-libipt-type was given.
+if test "${with_libipt_type+set}" = set; then :
+  withval=$with_libipt_type;  with_libipt_type=$withval
+else
+   with_libipt_type=auto
+fi
+
+  lib_type=`eval echo \$with_libipt_type`
+
       LIBIPT=
   LTLIBIPT=
   INCIPT=
@@ -14041,13 +14110,13 @@ fi
           found_so=
           found_a=
           if test $use_additional = yes; then
-            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
+            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext" && test x$lib_type != xstatic; then
               found_dir="$additional_libdir"
               found_so="$additional_libdir/lib$name.$shlibext"
               if test -f "$additional_libdir/lib$name.la"; then
                 found_la="$additional_libdir/lib$name.la"
               fi
-            else
+            elif test x$lib_type != xshared; then
               if test -f "$additional_libdir/lib$name.$libext"; then
                 found_dir="$additional_libdir"
                 found_a="$additional_libdir/lib$name.$libext"
@@ -14071,13 +14140,13 @@ fi
               case "$x" in
                 -L*)
                   dir=`echo "X$x" | sed -e 's/^X-L//'`
-                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
+                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext" && test x$lib_type != xstatic; then
                     found_dir="$dir"
                     found_so="$dir/lib$name.$shlibext"
                     if test -f "$dir/lib$name.la"; then
                       found_la="$dir/lib$name.la"
                     fi
-                  else
+                  elif test x$lib_type != xshared; then
                     if test -f "$dir/lib$name.$libext"; then
                       found_dir="$dir"
                       found_a="$dir/lib$name.$libext"
@@ -14305,8 +14374,13 @@ fi
               done
             fi
           else
-                                                            LIBIPT="${LIBIPT}${LIBIPT:+ }-l$name"
-            LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }-l$name"
+                                                            if test "x$lib_type" = "xauto" || test "x$lib_type" = "xshared"; then
+              LIBIPT="${LIBIPT}${LIBIPT:+ }-l$name"
+              LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }-l$name"
+            else
+              LIBIPT="${LIBIPT}${LIBIPT:+ }-l:lib$name.$libext"
+              LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }-l:lib$name.$libext"
+            fi
           fi
         fi
       fi
@@ -16594,6 +16668,16 @@ if test "${with_liblzma_prefix+set}" = set; then :
 
 fi
 
+
+# Check whether --with-liblzma-type was given.
+if test "${with_liblzma_type+set}" = set; then :
+  withval=$with_liblzma_type;  with_liblzma_type=$withval
+else
+   with_liblzma_type=auto
+fi
+
+  lib_type=`eval echo \$with_liblzma_type`
+
       LIBLZMA=
   LTLIBLZMA=
   INCLZMA=
@@ -16631,13 +16715,13 @@ fi
           found_so=
           found_a=
           if test $use_additional = yes; then
-            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
+            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext" && test x$lib_type != xstatic; then
               found_dir="$additional_libdir"
               found_so="$additional_libdir/lib$name.$shlibext"
               if test -f "$additional_libdir/lib$name.la"; then
                 found_la="$additional_libdir/lib$name.la"
               fi
-            else
+            elif test x$lib_type != xshared; then
               if test -f "$additional_libdir/lib$name.$libext"; then
                 found_dir="$additional_libdir"
                 found_a="$additional_libdir/lib$name.$libext"
@@ -16661,13 +16745,13 @@ fi
               case "$x" in
                 -L*)
                   dir=`echo "X$x" | sed -e 's/^X-L//'`
-                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
+                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext" && test x$lib_type != xstatic; then
                     found_dir="$dir"
                     found_so="$dir/lib$name.$shlibext"
                     if test -f "$dir/lib$name.la"; then
                       found_la="$dir/lib$name.la"
                     fi
-                  else
+                  elif test x$lib_type != xshared; then
                     if test -f "$dir/lib$name.$libext"; then
                       found_dir="$dir"
                       found_a="$dir/lib$name.$libext"
@@ -16895,8 +16979,13 @@ fi
               done
             fi
           else
-                                                            LIBLZMA="${LIBLZMA}${LIBLZMA:+ }-l$name"
-            LTLIBLZMA="${LTLIBLZMA}${LTLIBLZMA:+ }-l$name"
+                                                            if test "x$lib_type" = "xauto" || test "x$lib_type" = "xshared"; then
+              LIBLZMA="${LIBLZMA}${LIBLZMA:+ }-l$name"
+              LTLIBLZMA="${LTLIBLZMA}${LTLIBLZMA:+ }-l$name"
+            else
+              LIBLZMA="${LIBLZMA}${LIBLZMA:+ }-l:lib$name.$libext"
+              LTLIBLZMA="${LTLIBLZMA}${LTLIBLZMA:+ }-l:lib$name.$libext"
+            fi
           fi
         fi
       fi
@@ -17920,6 +18009,16 @@ if test "${with_libbabeltrace_prefix+set}" = set; then :
 
 fi
 
+
+# Check whether --with-libbabeltrace-type was given.
+if test "${with_libbabeltrace_type+set}" = set; then :
+  withval=$with_libbabeltrace_type;  with_libbabeltrace_type=$withval
+else
+   with_libbabeltrace_type=auto
+fi
+
+  lib_type=`eval echo \$with_libbabeltrace_type`
+
       LIBBABELTRACE=
   LTLIBBABELTRACE=
   INCBABELTRACE=
@@ -17957,13 +18056,13 @@ fi
           found_so=
           found_a=
           if test $use_additional = yes; then
-            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
+            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext" && test x$lib_type != xstatic; then
               found_dir="$additional_libdir"
               found_so="$additional_libdir/lib$name.$shlibext"
               if test -f "$additional_libdir/lib$name.la"; then
                 found_la="$additional_libdir/lib$name.la"
               fi
-            else
+            elif test x$lib_type != xshared; then
               if test -f "$additional_libdir/lib$name.$libext"; then
                 found_dir="$additional_libdir"
                 found_a="$additional_libdir/lib$name.$libext"
@@ -17987,13 +18086,13 @@ fi
               case "$x" in
                 -L*)
                   dir=`echo "X$x" | sed -e 's/^X-L//'`
-                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
+                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext" && test x$lib_type != xstatic; then
                     found_dir="$dir"
                     found_so="$dir/lib$name.$shlibext"
                     if test -f "$dir/lib$name.la"; then
                       found_la="$dir/lib$name.la"
                     fi
-                  else
+                  elif test x$lib_type != xshared; then
                     if test -f "$dir/lib$name.$libext"; then
                       found_dir="$dir"
                       found_a="$dir/lib$name.$libext"
@@ -18221,8 +18320,13 @@ fi
               done
             fi
           else
-                                                            LIBBABELTRACE="${LIBBABELTRACE}${LIBBABELTRACE:+ }-l$name"
-            LTLIBBABELTRACE="${LTLIBBABELTRACE}${LTLIBBABELTRACE:+ }-l$name"
+                                                            if test "x$lib_type" = "xauto" || test "x$lib_type" = "xshared"; then
+              LIBBABELTRACE="${LIBBABELTRACE}${LIBBABELTRACE:+ }-l$name"
+              LTLIBBABELTRACE="${LTLIBBABELTRACE}${LTLIBBABELTRACE:+ }-l$name"
+            else
+              LIBBABELTRACE="${LIBBABELTRACE}${LIBBABELTRACE:+ }-l:lib$name.$libext"
+              LTLIBBABELTRACE="${LTLIBBABELTRACE}${LTLIBBABELTRACE:+ }-l:lib$name.$libext"
+            fi
           fi
         fi
       fi
@@ -18416,6 +18520,16 @@ if test "${with_libxxhash_prefix+set}" = set; then :
 
 fi
 
+
+# Check whether --with-libxxhash-type was given.
+if test "${with_libxxhash_type+set}" = set; then :
+  withval=$with_libxxhash_type;  with_libxxhash_type=$withval
+else
+   with_libxxhash_type=auto
+fi
+
+  lib_type=`eval echo \$with_libxxhash_type`
+
       LIBXXHASH=
   LTLIBXXHASH=
   INCXXHASH=
@@ -18453,13 +18567,13 @@ fi
           found_so=
           found_a=
           if test $use_additional = yes; then
-            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
+            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext" && test x$lib_type != xstatic; then
               found_dir="$additional_libdir"
               found_so="$additional_libdir/lib$name.$shlibext"
               if test -f "$additional_libdir/lib$name.la"; then
                 found_la="$additional_libdir/lib$name.la"
               fi
-            else
+            elif test x$lib_type != xshared; then
               if test -f "$additional_libdir/lib$name.$libext"; then
                 found_dir="$additional_libdir"
                 found_a="$additional_libdir/lib$name.$libext"
@@ -18483,13 +18597,13 @@ fi
               case "$x" in
                 -L*)
                   dir=`echo "X$x" | sed -e 's/^X-L//'`
-                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
+                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext" && test x$lib_type != xstatic; then
                     found_dir="$dir"
                     found_so="$dir/lib$name.$shlibext"
                     if test -f "$dir/lib$name.la"; then
                       found_la="$dir/lib$name.la"
                     fi
-                  else
+                  elif test x$lib_type != xshared; then
                     if test -f "$dir/lib$name.$libext"; then
                       found_dir="$dir"
                       found_a="$dir/lib$name.$libext"
@@ -18717,8 +18831,13 @@ fi
               done
             fi
           else
-                                                            LIBXXHASH="${LIBXXHASH}${LIBXXHASH:+ }-l$name"
-            LTLIBXXHASH="${LTLIBXXHASH}${LTLIBXXHASH:+ }-l$name"
+                                                            if test "x$lib_type" = "xauto" || test "x$lib_type" = "xshared"; then
+              LIBXXHASH="${LIBXXHASH}${LIBXXHASH:+ }-l$name"
+              LTLIBXXHASH="${LTLIBXXHASH}${LTLIBXXHASH:+ }-l$name"
+            else
+              LIBXXHASH="${LIBXXHASH}${LIBXXHASH:+ }-l:lib$name.$libext"
+              LTLIBXXHASH="${LTLIBXXHASH}${LTLIBXXHASH:+ }-l:lib$name.$libext"
+            fi
           fi
         fi
       fi

@@ -1,3 +1,7 @@
+2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* configure: Regenerate.
+
 2020-02-14  Tom Tromey  <tom@tromey.com>
 
 	* common-defs.h: Change path to gnulib/config.h.

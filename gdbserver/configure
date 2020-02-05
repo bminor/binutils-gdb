@@ -738,6 +738,7 @@ with_intel_pt
 with_gnu_ld
 enable_rpath
 with_libipt_prefix
+with_libipt_type
 with_ust
 with_ust_include
 with_ust_lib
@@ -1400,6 +1401,7 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-libipt-prefix[=DIR]  search for libipt in DIR/include and DIR/lib
   --without-libipt-prefix     don't search for libipt in includedir and libdir
+  --with-libipt-type=TYPE     type of library to search for (auto/static/shared)
   --with-ust=PATH       Specify prefix directory for the installed UST package
                           Equivalent to --with-ust-include=PATH/include
                           plus --with-ust-lib=PATH/lib
@@ -8521,6 +8523,16 @@ if test "${with_libipt_prefix+set}" = set; then :
 
 fi
 
+
+# Check whether --with-libipt-type was given.
+if test "${with_libipt_type+set}" = set; then :
+  withval=$with_libipt_type;  with_libipt_type=$withval
+else
+   with_libipt_type=auto
+fi
+
+  lib_type=`eval echo \$with_libipt_type`
+
       LIBIPT=
   LTLIBIPT=
   INCIPT=
@@ -8558,13 +8570,13 @@ fi
           found_so=
           found_a=
           if test $use_additional = yes; then
-            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext"; then
+            if test -n "$shlibext" && test -f "$additional_libdir/lib$name.$shlibext" && test x$lib_type != xstatic; then
               found_dir="$additional_libdir"
               found_so="$additional_libdir/lib$name.$shlibext"
               if test -f "$additional_libdir/lib$name.la"; then
                 found_la="$additional_libdir/lib$name.la"
               fi
-            else
+            elif test x$lib_type != xshared; then
               if test -f "$additional_libdir/lib$name.$libext"; then
                 found_dir="$additional_libdir"
                 found_a="$additional_libdir/lib$name.$libext"
@@ -8588,13 +8600,13 @@ fi
               case "$x" in
                 -L*)
                   dir=`echo "X$x" | sed -e 's/^X-L//'`
-                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext"; then
+                  if test -n "$shlibext" && test -f "$dir/lib$name.$shlibext" && test x$lib_type != xstatic; then
                     found_dir="$dir"
                     found_so="$dir/lib$name.$shlibext"
                     if test -f "$dir/lib$name.la"; then
                       found_la="$dir/lib$name.la"
                     fi
-                  else
+                  elif test x$lib_type != xshared; then
                     if test -f "$dir/lib$name.$libext"; then
                       found_dir="$dir"
                       found_a="$dir/lib$name.$libext"
@@ -8822,8 +8834,13 @@ fi
               done
             fi
           else
-                                                            LIBIPT="${LIBIPT}${LIBIPT:+ }-l$name"
-            LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }-l$name"
+                                                            if test "x$lib_type" = "xauto" || test "x$lib_type" = "xshared"; then
+              LIBIPT="${LIBIPT}${LIBIPT:+ }-l$name"
+              LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }-l$name"
+            else
+              LIBIPT="${LIBIPT}${LIBIPT:+ }-l:lib$name.$libext"
+              LTLIBIPT="${LTLIBIPT}${LTLIBIPT:+ }-l:lib$name.$libext"
+            fi
           fi
         fi
       fi
