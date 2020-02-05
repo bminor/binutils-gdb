@@ -1051,10 +1051,7 @@ find_and_open_source (const char *filename,
       result = gdb_open_cloexec (fullname->get (), OPEN_MODE, 0);
       if (result >= 0)
 	{
-	  if (basenames_may_differ)
-	    *fullname = gdb_realpath (fullname->get ());
-	  else
-	    *fullname = gdb_abspath (fullname->get ());
+	  *fullname = gdb_realpath (fullname->get ());
 	  return scoped_fd (result);
 	}
 
@@ -1098,12 +1095,9 @@ find_and_open_source (const char *filename,
   if (rewritten_filename != NULL)
     filename = rewritten_filename.get ();
 
-  openp_flags flags = OPF_SEARCH_IN_PATH;
-  if (basenames_may_differ)
-    flags |= OPF_RETURN_REALPATH;
-
   /* Try to locate file using filename.  */
-  result = openp (path, flags, filename, OPEN_MODE, fullname);
+  result = openp (path, OPF_SEARCH_IN_PATH | OPF_RETURN_REALPATH, filename,
+		  OPEN_MODE, fullname);
   if (result < 0 && dirname != NULL)
     {
       /* Remove characters from the start of PATH that we don't need when
@@ -1124,15 +1118,16 @@ find_and_open_source (const char *filename,
       cdir_filename.append (SLASH_STRING);
       cdir_filename.append (filename_start);
 
-      result = openp (path, flags, cdir_filename.c_str (), OPEN_MODE,
-		      fullname);
+      result = openp (path, OPF_SEARCH_IN_PATH | OPF_RETURN_REALPATH,
+		      cdir_filename.c_str (), OPEN_MODE, fullname);
     }
   if (result < 0)
     {
       /* Didn't work.  Try using just the basename.  */
       p = lbasename (filename);
       if (p != filename)
-	result = openp (path, flags, p, OPEN_MODE, fullname);
+	result = openp (path, OPF_SEARCH_IN_PATH | OPF_RETURN_REALPATH, p,
+			OPEN_MODE, fullname);
     }
 
   return scoped_fd (result);

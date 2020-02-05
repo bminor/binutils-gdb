@@ -1,3 +1,8 @@
+2020-02-07  Tom Tromey  <tromey@adacore.com>
+
+	PR breakpoints/24915:
+	* source.c (find_and_open_source): Do not check basenames_may_differ.
+
 2020-02-07  Tom Tromey  <tom@tromey.com>
 
 	* README: Update gdbserver documentation.

@@ -47,5 +47,8 @@ gdb_breakpoint func message
 
 gdb_test_no_output "set annotate 1"
 
+# The patch to cause this output was reverted.
+# See PR breakpoints/24915.
+setup_xfail *-*-* 24915
 gdb_test "continue" \
     "Breakpoint .* func .*realname-expand-link.c:$decimal\r\n\032\032.*realname-expand-link.c:.*"
