@@ -6782,7 +6782,7 @@ remote_console_output (const char *msg)
 
       tb[0] = c;
       tb[1] = 0;
-      fputs_unfiltered (tb, gdb_stdtarg);
+      ui_file_puts (gdb_stdtarg, tb);
     }
   ui_file_flush (gdb_stdtarg);
 }

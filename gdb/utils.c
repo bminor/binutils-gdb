@@ -1405,7 +1405,7 @@ emit_style_escape (const ui_file_style &style,
   if (stream == nullptr)
     wrap_buffer.append (style.to_ansi ());
   else
-    fputs_unfiltered (style.to_ansi ().c_str (), stream);
+    ui_file_puts (stream, style.to_ansi ().c_str ());
 }
 
 /* Set the current output style.  This will affect future uses of the
@@ -1539,7 +1539,7 @@ flush_wrap_buffer (struct ui_file *stream)
 {
   if (stream == gdb_stdout && !wrap_buffer.empty ())
     {
-      fputs_unfiltered (wrap_buffer.c_str (), stream);
+      ui_file_puts (stream, wrap_buffer.c_str ());
       wrap_buffer.clear ();
     }
 }
@@ -1697,7 +1697,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
       || top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ())
     {
       flush_wrap_buffer (stream);
-      fputs_unfiltered (linebuffer, stream);
+      ui_file_puts (stream, linebuffer);
       return;
     }
 
@@ -1797,7 +1797,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      /* Now output indentation and wrapped string.  */
 	      if (wrap_column)
 		{
-		  fputs_unfiltered (wrap_indent, stream);
+		  ui_file_puts (stream, wrap_indent);
 		  if (stream->can_emit_style_escape ())
 		    emit_style_escape (save_style, stream);
 		  /* FIXME, this strlen is what prevents wrap_indent from
@@ -1833,6 +1833,12 @@ void
 fputs_filtered (const char *linebuffer, struct ui_file *stream)
 {
   fputs_maybe_filtered (linebuffer, stream, 1);
+}
+
+void
+fputs_unfiltered (const char *linebuffer, struct ui_file *stream)
+{
+  fputs_maybe_filtered (linebuffer, stream, 0);
 }
 
 /* See utils.h.  */

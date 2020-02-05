@@ -112,6 +112,8 @@ extern void ui_file_write_async_safe (struct ui_file *file, const char *buf,
 
 extern long ui_file_read (struct ui_file *file, char *buf, long length_buf);
 
+extern void ui_file_puts (struct ui_file *file, const char *buf);
+
 extern int gdb_console_fputs (const char *, FILE *);
 
 /* A std::string-based ui_file.  Can be used as a scratch buffer for

@@ -376,7 +376,7 @@ gdb_os_write_stderr (host_callback *p, const char *buf, int len)
     {
       b[0] = buf[i];
       b[1] = 0;
-      fputs_unfiltered (b, gdb_stdtargerr);
+      ui_file_puts (gdb_stdtargerr, b);
     }
   return len;
 }
