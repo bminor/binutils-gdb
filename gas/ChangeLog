@@ -1,5 +1,10 @@
 2020-02-19  Nelson Chu  <nelson.chu@sifive.com>
 
+	* doc/c-riscv.texi: Add the doc entries for -march-attr/
+	-mno-arch-attr command line options.
+
+2020-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
 	* testsuite/gas/riscv/c-add-addi.d: New testcase.
 	* testsuite/gas/riscv/c-add-addi.s: Likewise.
 

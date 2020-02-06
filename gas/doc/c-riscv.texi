@@ -59,6 +59,20 @@ required to materialize symbol addresses. (default)
 @item -mno-relax
 Don't do linker relaxations.
 
+@cindex @samp{-march-attr} option, RISC-V
+@item -march-attr
+Generate the default contents for the riscv elf attribute section if the
+.attribute directives are not set.  This section is used to record the
+information that a linker or runtime loader needs to check compatibility.
+This information includes ISA string, stack alignment requirement, unaligned
+memory accesses, and the major, minor and revision version of privileged
+specification.
+
+@cindex @samp{-mno-arch-attr} option, RISC-V
+@item -mno-arch-attr
+Don't generate the default riscv elf attribute section if the .attribute
+directives are not set.
+
 @end table
 @c man end
 
