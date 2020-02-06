@@ -323,8 +323,26 @@ case $host_os in
     enable_gdbtk=no ;;
 esac
 
-# Libunwind support for ia64.
+# Handle optional debuginfod support
+AC_ARG_WITH([debuginfod],
+  AC_HELP_STRING([--with-debuginfod], [Enable debuginfo lookups with debuginfod (auto/yes/no)]),
+  [], [with_debuginfod=auto])
+AC_MSG_CHECKING([whether to use debuginfod])
+AC_MSG_RESULT([$with_debuginfod])
 
+if test "x$with_debuginfod" != xno; then
+  PKG_CHECK_MODULES([DEBUGINFOD], [libdebuginfod >= 0.178],
+    [AC_DEFINE([HAVE_LIBDEBUGINFOD], [1], [Define to 1 if debuginfod is enabled.])],
+    [if test "x$with_debuginfod" = xyes; then
+       AC_MSG_ERROR(["--with-debuginfod was given, but libdebuginfod is missing or unusable."])
+     else
+       AC_MSG_WARN([libdebuginfod is missing or unusable; some features may be unavailable.])
+     fi])
+else
+  AC_MSG_WARN([debuginfod support disabled; some features may be unavailable.])
+fi
+
+# Libunwind support for ia64.
 AC_ARG_WITH(libunwind-ia64,
 AS_HELP_STRING([--with-libunwind-ia64],
 	       [use libunwind frame unwinding for ia64 targets]),,

@@ -1528,6 +1528,16 @@ This GDB was configured as follows:\n\
 "));
 #endif
 
+#if HAVE_LIBDEBUGINFOD
+  fprintf_filtered (stream, _("\
+             --with-debuginfod\n\
+"));
+#else
+   fprintf_filtered (stream, _("\
+             --without-debuginfod\n\
+"));
+#endif
+
 #if HAVE_GUILE
   fprintf_filtered (stream, _("\
              --with-guile\n\

@@ -227,6 +227,9 @@
 /* Define if you have the babeltrace library. */
 #undef HAVE_LIBBABELTRACE
 
+/* Define to 1 if debuginfod is enabled. */
+#undef HAVE_LIBDEBUGINFOD
+
 /* Define if you have the expat library. */
 #undef HAVE_LIBEXPAT
 

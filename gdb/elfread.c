@@ -49,6 +49,10 @@
 #include "mdebugread.h"
 #include "ctfread.h"
 #include "gdbsupport/gdb_string_view.h"
+#include "gdbsupport/scoped_fd.h"
+#if HAVE_LIBDEBUGINFOD
+#include "debuginfod-support.h"
+#endif
 
 /* Forward declarations.  */
 extern const struct sym_fns elf_sym_fns_gdb_index;
@@ -1316,8 +1320,33 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	  symbol_file_add_separate (debug_bfd.get (), debugfile.c_str (),
 				    symfile_flags, objfile);
 	}
-	else
-	  has_dwarf2 = false;
+      else
+        {
+          has_dwarf2 = false;
+
+#if HAVE_LIBDEBUGINFOD
+          const struct bfd_build_id *build_id = build_id_bfd_get (objfile->obfd);
+
+          if (build_id != nullptr)
+            {
+              char *symfile_path;
+              scoped_fd fd (debuginfod_debuginfo_query (build_id->data,
+                                                        build_id->size,
+                                                        &symfile_path));
+
+              if (fd.get () >= 0)
+                {
+                  /* File successfully retrieved from server.  */
+                  gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (symfile_path));
+
+                  symbol_file_add_separate (debug_bfd.get (), symfile_path,
+                                            symfile_flags, objfile);
+                  xfree (symfile_path);
+                  has_dwarf2 = true;
+                }
+            }
+#endif /* HAVE_LIBDEBUGINFOD */
+        }
     }
 
   /* Read the CTF section only if there is no DWARF info.  */

@@ -48,6 +48,10 @@
 #include "source-cache.h"
 #include "cli/cli-style.h"
 #include "observable.h"
+#include "build-id.h"
+#ifdef HAVE_LIBDEBUGINFOD
+#include "debuginfod-support.h"
+#endif
 
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
@@ -1153,6 +1157,46 @@ open_source_file (struct symtab *s)
   s->fullname = NULL;
   scoped_fd fd = find_and_open_source (s->filename, SYMTAB_DIRNAME (s),
 				       &fullname);
+
+#if HAVE_LIBDEBUGINFOD
+  if (fd.get () < 0)
+    {
+      if (SYMTAB_COMPUNIT (s) != nullptr)
+        {
+          const objfile *ofp = COMPUNIT_OBJFILE (SYMTAB_COMPUNIT (s));
+
+          std::string srcpath;
+          if (IS_DIR_SEPARATOR (s->filename[0]))
+            srcpath = s->filename;
+          else
+            {
+              srcpath = SYMTAB_DIRNAME (s);
+              srcpath += SLASH_STRING;
+              srcpath += s->filename;
+            }
+
+          const struct bfd_build_id *build_id = build_id_bfd_get (ofp->obfd);
+
+          if (build_id != nullptr)
+            {
+              /* Query debuginfod for the source file.  */
+              char *filename;
+              scoped_fd src_fd (debuginfod_source_query (build_id->data,
+                                                         build_id->size,
+                                                         srcpath.c_str (),
+                                                         &filename));
+
+              if (src_fd.get () >= 0)
+                fullname.reset (filename);
+
+              s->fullname = fullname.release ();
+              return src_fd;
+
+            }
+        }
+    }
+#endif /* HAVE_LIBDEBUGINFOD */
+
   s->fullname = fullname.release ();
   return fd;
 }
