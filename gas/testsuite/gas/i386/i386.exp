@@ -491,7 +491,6 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_list_test "inval-pseudo" "-al"
     run_dump_test "nop-1"
     run_dump_test "nop-2"
-    run_dump_test "unique"
     run_dump_test "optimize-1"
     run_dump_test "optimize-1a"
     run_dump_test "optimize-2"
@@ -590,6 +589,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	run_dump_test "nop-4"
 	run_dump_test "nop-5"
 	run_dump_test "nop-6"
+	run_dump_test "unique"
 
 	run_dump_test "evex-no-scale-32"
 	run_dump_test "property-1"
@@ -1051,7 +1051,6 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-movd-intel"
     run_dump_test "x86-64-nop-1"
     run_dump_test "x86-64-nop-2"
-    run_dump_test "x86-64-unique"
     run_dump_test "x86-64-movsxd"
     run_dump_test "x86-64-movsxd-intel"
     run_list_test "x86-64-movsxd-inval" "-al"
@@ -1150,6 +1149,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
 	run_dump_test "x86-64-nop-4"
 	run_dump_test "x86-64-nop-5"
 	run_dump_test "x86-64-nop-6"
+	run_dump_test "x86-64-unique"
 
 	run_dump_test "evex-no-scale-64"
 	run_dump_test "x86-64-property-1"

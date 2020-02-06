@@ -1,7 +1,6 @@
 #source: unique.s
 #objdump: -dw
 #name: 64bit unique sections
-#xfail: *-*-darwin *-*-pe *-*-*cygwin* *-*-mingw*
 
 .*: +file format .*
 

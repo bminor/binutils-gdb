@@ -1,6 +1,5 @@
 #objdump: -dw
 #name: i386 unique sections
-#xfail: *-*-darwin *-*-pe *-*-*cygwin* *-*-mingw*
 
 .*: +file format .*
 
