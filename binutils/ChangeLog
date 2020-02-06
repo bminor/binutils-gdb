@@ -1,4 +1,4 @@
-2020-02-06  Thomas Troeger  <tstroege@gmx.de>
+2020-02-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* objdump.c (print_jump_visualisation): New function.
 	(disassemble_bytes): Call new function.
