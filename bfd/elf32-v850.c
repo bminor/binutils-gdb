@@ -3837,7 +3837,7 @@ v850_elf_relax_section (bfd *abfd,
 		  if (no_match < 0
 		      && ((insn[2] & JMP_R_MASK) != JMP_R
 			   || MOVEA_R2 (insn[1]) != JMP_R1 (insn[2])))
-		    no_match = 4;
+		    no_match = 2;
 		}
 	      else
 		{
