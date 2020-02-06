@@ -176,7 +176,16 @@ source_cache::ensure (struct symtab *s)
 	}
     }
 
-  std::string contents = get_plain_source_lines (s, fullname);
+  std::string contents;
+  try
+    {
+      contents = get_plain_source_lines (s, fullname);
+    }
+  catch (const gdb_exception_error &e)
+    {
+      /* If 's' is not found, an exception is thrown.  */
+      return false;
+    }
 
   if (source_styling && gdb_stdout->can_emit_style_escape ())
     {
@@ -241,26 +250,20 @@ bool
 source_cache::get_line_charpos (struct symtab *s,
 				const std::vector<off_t> **offsets)
 {
-  try
-    {
-      std::string fullname = symtab_to_fullname (s);
+  std::string fullname = symtab_to_fullname (s);
 
-      auto iter = m_offset_cache.find (fullname);
-      if (iter == m_offset_cache.end ())
-	{
-	  ensure (s);
-	  iter = m_offset_cache.find (fullname);
-	  /* cache_source_text ensured this was entered.  */
-	  gdb_assert (iter != m_offset_cache.end ());
-	}
-
-      *offsets = &iter->second;
-      return true;
-    }
-  catch (const gdb_exception_error &e)
+  auto iter = m_offset_cache.find (fullname);
+  if (iter == m_offset_cache.end ())
     {
-      return false;
+      if (!ensure (s))
+	return false;
+      iter = m_offset_cache.find (fullname);
+      /* cache_source_text ensured this was entered.  */
+      gdb_assert (iter != m_offset_cache.end ());
     }
+
+  *offsets = &iter->second;
+  return true;
 }
 
 /* A helper function that extracts the desired source lines from TEXT,

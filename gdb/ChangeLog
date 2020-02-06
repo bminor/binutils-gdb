@@ -1,5 +1,14 @@
 2020-02-06  Shahab Vahedi  <shahab@synopsys.com>
 
+	* source-cache.c (source_cache::ensure): Surround
+	get_plain_source_lines with a try/catch.
+	(source_cache::get_line_charpos): Get rid of try/catch
+	and only check for the return value of "ensure".
+	* tui/tui-source.c (tui_source_window::set_contents):
+	Simplify "nlines" calculation.
+
+2020-02-06  Shahab Vahedi  <shahab@synopsys.com>
+
 	* MAINTAINERS (Write After Approval): Add myself.
 
 2020-02-05  Christian Biesinger  <cbiesinger@google.com>

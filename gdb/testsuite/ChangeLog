@@ -1,3 +1,8 @@
+2020-02-06  Shahab Vahedi  <shahab@synopsys.com>
+
+	* gdb.tui/tui-missing-src.exp: Add the "missing source
+	file" test for the TUI.
+
 2020-02-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.server/multi-ui-errors.exp: Give a test a real name to avoid
