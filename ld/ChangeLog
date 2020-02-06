@@ -1,3 +1,8 @@
+2020-02-06  Alan Modra  <amodra@gmail.com>
+
+	* configure.tgt (i[3-7]86-*-moss*): Don't clear targ_extra_ofiles.
+	(i[3-7]86-*-openbsd*, x86_64-*-openbsd*): Add.
+
 2020-02-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25380
