@@ -2474,6 +2474,47 @@ null_print (const void * stream ATTRIBUTE_UNUSED, const char * format ATTRIBUTE_
   return 1;
 }
 
+/* Print out jump visualization.  */
+
+static void
+print_jump_visualisation (bfd_vma addr, int max_level, char *line_buffer,
+			  uint8_t *color_buffer)
+{
+  if (!line_buffer)
+    return;
+
+  jump_info_visualize_address (addr, max_level, line_buffer, color_buffer);
+
+  size_t line_buffer_size = strlen (line_buffer);
+  char last_color = 0;
+  size_t i;
+
+  for (i = 0; i <= line_buffer_size; ++i)
+    {
+      if (color_output)
+	{
+	  uint8_t color = (i < line_buffer_size) ? color_buffer[i]: 0;
+
+	  if (color != last_color)
+	    {
+	      if (color)
+		if (extended_color_output)
+		  /* Use extended 8bit color, but
+		     do not choose dark colors.  */
+		  printf ("\033[38;5;%dm", 124 + (color % 108));
+		else
+		  /* Use simple terminal colors.  */
+		  printf ("\033[%dm", 31 + (color % 7));
+	      else
+		/* Clear color.  */
+		printf ("\033[0m");
+	      last_color = color;
+	    }
+	}
+      putchar ((i < line_buffer_size) ? line_buffer[i]: ' ');
+    }
+}
+
 /* Disassemble some data in memory between given values.  */
 
 static void
@@ -2632,43 +2673,9 @@ disassemble_bytes (struct disassemble_info * inf,
 	      putchar (' ');
 	    }
 
-	  /* Visualize jumps. */
-	  if (line_buffer)
-	    {
-	      jump_info_visualize_address (section->vma + addr_offset,
-					   max_level,
-					   line_buffer,
-					   color_buffer);
-
-	      size_t line_buffer_size = strlen (line_buffer);
-	      char last_color = 0;
-	      size_t i;
-
-	      for (i = 0; i <= line_buffer_size; ++i)
-		{
-		  if (color_output)
-		    {
-		      uint8_t color = (i < line_buffer_size) ? color_buffer[i]: 0;
-
-		      if (color != last_color)
-			{
-			  if (color)
-			    if (extended_color_output)
-			      /* Use extended 8bit color, but
-			         do not choose dark colors.  */
-			      printf ("\033[38;5;%dm", 124 + (color % 108));
-			    else
-			      /* Use simple terminal colors.  */
-			      printf ("\033[%dm", 31 + (color % 7));
-			  else
-			    /* Clear color.  */
-			    printf ("\033[0m");
-			  last_color = color;
-			}
-		    }
-		  putchar ((i < line_buffer_size) ? line_buffer[i]: ' ');
-		}
-	    }
+	  print_jump_visualisation (section->vma + addr_offset,
+				    max_level, line_buffer,
+				    color_buffer);
 
 	  if (insns)
 	    {
@@ -2859,6 +2866,10 @@ disassemble_bytes (struct disassemble_info * inf,
 		  if (*s == '\0')
 		    *--s = '0';
 		  printf ("%s:\t", buf + skip_addr_chars);
+
+		  print_jump_visualisation (section->vma + j / opb,
+					    max_level, line_buffer,
+					    color_buffer);
 
 		  pb += octets_per_line;
 		  if (pb > octets)
