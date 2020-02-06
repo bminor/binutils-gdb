@@ -1,3 +1,8 @@
+2020-02-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention x86 assembler options to align branches for
+	binutils 2.34.
+
 2020-02-01  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
