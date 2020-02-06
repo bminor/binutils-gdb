@@ -1,3 +1,10 @@
+2020-02-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR tui/25126
+	https://bugzilla.redhat.com/show_bug.cgi?id=1784210
+	* gdb.base/cached-source-file.c: New file.
+	* gdb.base/cached-source-file.exp: New file.
+
 2020-02-11  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/25488
