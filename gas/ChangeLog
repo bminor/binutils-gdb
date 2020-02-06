@@ -1,5 +1,12 @@
 2020-02-10  Alan Modra  <amodra@gmail.com>
 
+	* config/obj-elf.c (obj_elf_change_section): Error for section
+	type, attr or entsize changes in assembly.
+	* testsuite/gas/elf/elf.exp: Pass -Z to gas for section5 test.
+	* testsuite/gas/elf/section5.l: Update.
+
+2020-02-10  Alan Modra  <amodra@gmail.com>
+
 	* output-file.c (output_file_close): Do a normal close when
 	flag_always_generate_output.
 	* write.c (write_object_file): Don't stop output when

@@ -202,7 +202,7 @@ if { [is_elf_format] } then {
 	# new sections created without atrributes.
 	# The RX port does not complain about changing the attributes of the
 	# .data and .bss sections since it does not use those names.
-	run_elf_list_test "section5" "" "-al" "-SW" "| grep \" \\\\.test\\\[0-9\\\]\""
+	run_elf_list_test "section5" "" "-al -Z" "-SW" "| grep \" \\\\.test\\\[0-9\\\]\""
     }
     run_dump_test "struct"
     if { ![istarget "alpha*-*-*"] } then {

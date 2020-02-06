@@ -767,7 +767,17 @@ obj_elf_change_section (const char *name,
     {
       if (type != SHT_NULL
 	  && (unsigned) type != elf_section_type (old_sec))
-	as_warn (_("ignoring changed section type for %s"), name);
+	{
+	  if (ssect != NULL)
+	    /* This is a special section with known type.  User
+	       assembly might get the section type wrong; Even high
+	       profile projects like glibc have done so in the past.
+	       So don't error in this case.  */
+	    as_warn (_("ignoring changed section type for %s"), name);
+	  else
+	    /* Do error when assembly isn't self-consistent.  */
+	    as_bad (_("changed section type for %s"), name);
+	}
 
       if (attr != 0)
 	{
@@ -779,14 +789,19 @@ obj_elf_change_section (const char *name,
 		  | SEC_EXCLUDE | SEC_SORT_ENTRIES | SEC_MERGE | SEC_STRINGS
 		  | SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD
 		  | SEC_THREAD_LOCAL)))
-	    as_warn (_("ignoring changed section attributes for %s"), name);
+	    {
+	      if (ssect != NULL)
+		as_warn (_("ignoring changed section attributes for %s"), name);
+	      else
+		as_bad (_("changed section attributes for %s"), name);
+	    }
 	  else
 	    /* FIXME: Maybe we should consider removing a previously set
 	       processor or application specific attribute as suspicious ?  */
 	    elf_section_flags (sec) = attr;
 
 	  if ((flags & SEC_MERGE) && old_sec->entsize != (unsigned) entsize)
-	    as_warn (_("ignoring changed section entity size for %s"), name);
+	    as_bad (_("changed section entity size for %s"), name);
 	}
     }
 
