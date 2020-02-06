@@ -1,5 +1,10 @@
 2020-02-06  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/i386/unique.d: xfail for non-elf targets.
+	* testsuite/gas/i386/x86-64-unique.d: Likewise.
+
+2020-02-06  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/elf/section12a.d: Use supports_gnu_osabi in
 	xfail, and rename test.
 	* testsuite/gas/elf/section12b.d: Likewise.
