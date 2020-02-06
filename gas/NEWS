@@ -2,6 +2,11 @@
 
 Changes in 2.34:
 
+* Add -malign-branch-boundary=NUM, -malign-branch=TYPE[+TYPE...],
+  -malign-branch-prefix-size=NUM and -mbranches-within-32B-boundaries
+  options to x86 assembler to align branches within a fixed boundary
+  with segment prefixes or NOPs.
+
 * Add support for Zilog eZ80 and Zilog Z180 CPUs.
 
 * Add support for z80-elf target.
