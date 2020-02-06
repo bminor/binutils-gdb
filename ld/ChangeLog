@@ -1,5 +1,57 @@
 2020-02-06  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-ifunc/ifunc.exp: Enable for more targets, specifying
+	targets that don't support ifunc rather than ones that do.
+	(contains_irelative_reloc): Match R_PARISC_IPLT.
+	* testsuite/ld-ifunc/lib.c: Don't use .set in asm.
+	* testsuite/ld-ifunc/ifunc-23-x86.s,
+	* testsuite/ld-ifunc/ifunc-24-x86.s,
+	* testsuite/ld-ifunc/ifunc-25-x86.s,
+	* testsuite/ld-ifunc/ifunc-4-local-x86.s,
+	* testsuite/ld-ifunc/ifunc-4-x86.s: Define _main.
+	* testsuite/ld-ifunc/ifunc-10-i386.d,
+	* testsuite/ld-ifunc/ifunc-11-i386.d,
+	* testsuite/ld-ifunc/ifunc-12-i386.d,
+	* testsuite/ld-ifunc/ifunc-13-i386.d,
+	* testsuite/ld-ifunc/ifunc-14a-i386.d,
+	* testsuite/ld-ifunc/ifunc-14b-i386.d,
+	* testsuite/ld-ifunc/ifunc-14c-i386.d,
+	* testsuite/ld-ifunc/ifunc-14d-i386.d,
+	* testsuite/ld-ifunc/ifunc-14e-i386.d,
+	* testsuite/ld-ifunc/ifunc-14f-i386.d,
+	* testsuite/ld-ifunc/ifunc-15-i386.d,
+	* testsuite/ld-ifunc/ifunc-16-i386-now.d,
+	* testsuite/ld-ifunc/ifunc-16-i386.d,
+	* testsuite/ld-ifunc/ifunc-17a-i386.d,
+	* testsuite/ld-ifunc/ifunc-17b-i386.d,
+	* testsuite/ld-ifunc/ifunc-18a-i386.d,
+	* testsuite/ld-ifunc/ifunc-18b-i386.d,
+	* testsuite/ld-ifunc/ifunc-19a-i386.d,
+	* testsuite/ld-ifunc/ifunc-19b-i386.d,
+	* testsuite/ld-ifunc/ifunc-2-i386-now.d,
+	* testsuite/ld-ifunc/ifunc-2-i386.d,
+	* testsuite/ld-ifunc/ifunc-2-local-i386-now.d,
+	* testsuite/ld-ifunc/ifunc-2-local-i386.d,
+	* testsuite/ld-ifunc/ifunc-20-i386.d,
+	* testsuite/ld-ifunc/ifunc-21-i386.d,
+	* testsuite/ld-ifunc/ifunc-22-i386.d,
+	* testsuite/ld-ifunc/ifunc-26.d,
+	* testsuite/ld-ifunc/ifunc-5a-i386.d,
+	* testsuite/ld-ifunc/ifunc-5a-local-i386.d,
+	* testsuite/ld-ifunc/ifunc-5b-i386.d,
+	* testsuite/ld-ifunc/ifunc-5b-local-i386.d,
+	* testsuite/ld-ifunc/ifunc-5r-local-i386.d,
+	* testsuite/ld-ifunc/ifunc-6a-i386.d,
+	* testsuite/ld-ifunc/ifunc-6b-i386.d,
+	* testsuite/ld-ifunc/ifunc-7a-i386.d,
+	* testsuite/ld-ifunc/ifunc-7b-i386.d,
+	* testsuite/ld-ifunc/ifunc-8-i386.d,
+	* testsuite/ld-ifunc/ifunc-9-i386.d,
+	* testsuite/ld-ifunc/pr17154-i386-now.d,
+	* testsuite/ld-ifunc/pr17154-i386.d: xfail lynxos, nto, and solaris.
+
+2020-02-06  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/lib/ld-lib.exp (is_generic): Delete.
 	* testsuite/ld-unique/unique.exp: Exclude tic6x.
 

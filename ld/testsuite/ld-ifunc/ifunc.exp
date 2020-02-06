@@ -23,18 +23,27 @@
 # Written by Nick Clifton <nickc@redhat.com>
 
 
-# IFUNC support has only been implemented for the ix86, x86_64, powerpc,
-# aarch64, sparc, and S/390 so far.
-if {!(([istarget "i?86-*-*"]
-       || [istarget "x86_64-*-*"]
-       || [istarget "powerpc*-*-*"]
-       || [istarget "aarch64*-*-*"]
-       || [istarget "sparc*-*-*"]
-       || [istarget "s390*-*-*"])
-      && ([istarget "*-*-elf*"]
-	  || [istarget "*-*-nacl*"]
-	  || [istarget "*-*-linux*"]
-	  || [istarget "*-*-gnu*"])) } {
+if { ![is_elf_format] || ![supports_gnu_osabi]
+     || [istarget arc*-*-*]
+     || [istarget am33*-*-*]
+     || [istarget bfin-*-*]
+     || [istarget cris*-*-*]
+     || [istarget frv-*-*]
+     || [istarget lm32-*-*]
+     || [istarget m32r-*-*]
+     || [istarget m68k-*-*]
+     || [istarget microblaze-*-*]
+     || [istarget mips*-*-*]
+     || [istarget mn10300-*-*]
+     || [istarget nds32*-*-*]
+     || [istarget nios2-*-*]
+     || [istarget or1k-*-*]
+     || [istarget riscv*-*-*]
+     || [istarget score*-*-*]
+     || [istarget sh*-*-*]
+     || [istarget tic6x-*-*]
+     || [istarget tile*-*-*]
+     || [istarget vax-*-*] } {
     verbose "IFUNC tests not run - target does not support IFUNC"
     return
 }
@@ -139,7 +148,7 @@ proc contains_irelative_reloc { binary_file } {
     #    080496f4  0000002a R_386_IRELATIVE
 
 
-    if { ![regexp "\[0-9a-f\]+\[ \]+\[0-9a-f\]+\[ \]+R_\[_0-9A-Z\]+_IREL(|ATIVE)\[ \]*\[0-9a-f\]*\n" [file_contents readelf.out]] } {
+    if { ![regexp "\[0-9a-f\]+\[ \]+\[0-9a-f\]+\[ \]+R_(\[_0-9A-Z\]+_IREL(|ATIVE)|PARISC_IPLT)\[ \]*\[0-9a-f\]*\n" [file_contents readelf.out]] } {
 	return 0
     }
 
