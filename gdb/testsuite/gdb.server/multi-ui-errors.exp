@@ -65,7 +65,8 @@ with_spawn_id $extra_spawn_id {
 
 # Connect to the remote and continue its execution from the other UI.
 with_spawn_id $extra_spawn_id {
-    gdb_test "target $gdbserver_protocol $gdbserver_gdbport" ".*"
+    gdb_test "target $gdbserver_protocol $gdbserver_gdbport" ".*" \
+	"connect to gdbserver"
     send_gdb "continue\n"
 }
 
