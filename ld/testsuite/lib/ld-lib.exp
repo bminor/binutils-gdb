@@ -1062,7 +1062,8 @@ proc check_gc_sections_available { } {
 	    || [istarget pj*-*-*]
 	    || [istarget pru*-*-*]
 	    || [istarget s12z-*-*]
-	    || [istarget xgate-*-*] } {
+	    || [istarget xgate-*-*]
+	    || [istarget z80-*-*] } {
 	    set gc_sections_available_saved 0
 	    return 0
 	}

@@ -1,3 +1,8 @@
+2020-02-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/lib/ld-lib.exp (check_gc_sections_available): Mark
+	z80 as not supported.
+
 2020-02-06  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-ifunc/ifunc.exp: Enable for more targets, specifying
