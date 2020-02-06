@@ -12,21 +12,38 @@
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
+
+   You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <errno.h>
 #include "defs.h"
 #include "debuginfod-support.h"
-#if HAVE_LIBDEBUGINFOD
-#include <elfutils/debuginfod.h>
-#endif
 
-#if HAVE_LIBDEBUGINFOD
+#ifndef HAVE_LIBDEBUGINFOD
+int
+debuginfod_source_query (const unsigned char *build_id __attribute__((unused)),
+                         int build_id_len __attribute__((unused)),
+                         const char *srcpath __attribute__((unused)),
+                         char **filename __attribute__((unused)))
+{
+  return -ENOSYS;
+}
+
+int
+debuginfod_debuginfo_query (const unsigned char *build_id __attribute__((unused)),
+                            int build_id_len __attribute__((unused)),
+                            char **filename __attribute__((unused)))
+{
+  return -ENOSYS;
+}
+#else
+#include <elfutils/debuginfod.h>
+
 static int
 progressfn (debuginfod_client *c,
-             long a __attribute__ ((unused)),
-             long b __attribute__ ((unused)))
+             long a __attribute__((unused)),
+             long b __attribute__((unused)))
 {
   return check_quit_flag ();
 }
@@ -41,7 +58,6 @@ debuginfod_init ()
 
   return c;
 }
-#endif
 
 /* See debuginfod-support.h  */
 
@@ -51,7 +67,6 @@ debuginfod_source_query (const unsigned char *build_id,
                          const char *srcpath,
                          char **filename)
 {
-#if HAVE_LIBDEBUGINFOD
   debuginfod_client *c = debuginfod_init ();
 
   if (c == nullptr)
@@ -65,9 +80,6 @@ debuginfod_source_query (const unsigned char *build_id,
   debuginfod_end (c);
 
   return fd;
-#else
-  return -ENOSYS;
-#endif
 }
 
 /* See debuginfod-support.h  */
@@ -77,7 +89,6 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
                             int build_id_len,
                             char **filename)
 {
-#if HAVE_LIBDEBUGINFOD
   debuginfod_client *c = debuginfod_init ();
 
   if (c == nullptr)
@@ -87,7 +98,5 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
   debuginfod_end (c);
 
   return fd;
-#else
-  return -ENOSYS;
-#endif
 }
+#endif
