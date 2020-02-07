@@ -7360,14 +7360,9 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 
 	  /* PR 23932.  A corrupt input file may contain sections that cannot
 	     be assigned to any segment - because for example they have a
-	     negative size - or segments that do not contain any sections.  */
-	  if (map->count == 0)
-	    {
-	    sorry:
-	      bfd_set_error (bfd_error_sorry);
-	      free (sections);
-	      return FALSE;
-	    }
+	     negative size - or segments that do not contain any sections.
+	     But there are also valid reasons why a segment can be empty.
+	     So allow a count of zero.  */
 
 	  /* Add the current segment to the list of built segments.  */
 	  *pointer_to_map = map;
@@ -7399,6 +7394,12 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	      map->includes_filehdr = 0;
 	      map->includes_phdrs = 0;
 	    }
+
+	  continue;
+	sorry:
+	  bfd_set_error (bfd_error_sorry);
+	  free (sections);
+	  return FALSE;
 	}
       while (isec < section_count);
 

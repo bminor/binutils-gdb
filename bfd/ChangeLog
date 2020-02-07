@@ -1,3 +1,9 @@
+2020-02-07  Nick Clifton  <nickc@redhat.com>
+
+	PR 23932
+	* elf.c (rewrite_elf_program_header): Do not complain if no
+	sections are mapped to a segment.
+
 2020-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/25490
