@@ -76,9 +76,32 @@ run_ld_link_tests [list \
 if [is_elf64 tmpdir/symbol3w.a] {
     set ASFLAGS "$ASFLAGS --defsym ALIGN=3"
     set pr23900_1_exp "pr23900-1-64.rd"
+    set pr25490_2_exp "pr25490-2-64.rd"
+    set pr25490_3_exp "pr25490-3-64.rd"
+    set pr25490_4_exp "pr25490-4-64.rd"
+    set pr25490_5_exp "pr25490-5-64.rd"
+    set pr25490_6_exp "pr25490-6-64.rd"
 } else {
     set ASFLAGS "$ASFLAGS --defsym ALIGN=2"
     set pr23900_1_exp "pr23900-1-32.rd"
+    if {    [istarget avr-*-*]
+	 || [istarget h8300-*-*]
+	 || [istarget ip2k-*-*]
+	 || [istarget m68hc11-*]
+	 || [istarget "xc16x-*"]
+	 || [istarget "z80-*-*"] } {
+	set pr25490_2_exp "pr25490-2-16.rd"
+	set pr25490_3_exp "pr25490-3-16.rd"
+	set pr25490_4_exp "pr25490-4-16.rd"
+	set pr25490_5_exp "pr25490-5-16.rd"
+	set pr25490_6_exp "pr25490-6-16.rd"
+    } else {
+	set pr25490_2_exp "pr25490-2-32.rd"
+	set pr25490_3_exp "pr25490-3-32.rd"
+	set pr25490_4_exp "pr25490-4-32.rd"
+	set pr25490_5_exp "pr25490-5-32.rd"
+	set pr25490_6_exp "pr25490-6-32.rd"
+    }
 }
 
 
@@ -169,6 +192,46 @@ if { [istarget *-*-*linux*]
 	    {pr23900-1.s} \
 	    [list [list "readelf" {-Wl} $pr23900_1_exp]] \
 	    "pr23900-1.exe"] \
+	]
+}
+
+if [check_gc_sections_available] {
+    run_ld_link_tests [list \
+	[list "__patchable_function_entries section 2" \
+	    "--gc-sections -e _start" \
+	    "" \
+	    "" \
+	    {pr25490-2.s} \
+	    [list [list "readelf" {-SW} $pr25490_2_exp]] \
+	    "pr25490-2.exe"] \
+	[list "__patchable_function_entries section 3" \
+	    "--gc-sections -e _start" \
+	    "" \
+	    "" \
+	    {pr25490-3.s} \
+	    [list [list "readelf" {-SW} $pr25490_3_exp]] \
+	    "pr25490-3.exe"] \
+	[list "__patchable_function_entries section 4" \
+	    "--gc-sections -e _start" \
+	    "" \
+	    "" \
+	    {pr25490-4.s} \
+	    [list [list "readelf" {-SW} $pr25490_4_exp]] \
+	    "pr25490-4.exe"] \
+	[list "__patchable_function_entries section 5" \
+	    "--gc-sections -e _start" \
+	    "" \
+	    "" \
+	    {pr25490-5.s} \
+	    [list [list "readelf" {-SW} $pr25490_5_exp]] \
+	    "pr25490-5.exe"] \
+	[list "__patchable_function_entries section 6" \
+	    "--gc-sections -e _start" \
+	    "" \
+	    "" \
+	    {pr25490-6.s} \
+	    [list [list "readelf" {-SW} $pr25490_6_exp]] \
+	    "pr25490-6.exe"] \
 	]
 }
 

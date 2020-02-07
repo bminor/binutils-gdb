@@ -6599,6 +6599,9 @@ section is allocatable
 section is a GNU_MBIND section
 @item e
 section is excluded from executable and shared library.
+@item o
+section references a symbol defined in another section (the linked-to
+section) in the same file.
 @item w
 section is writable
 @item x
@@ -6678,6 +6681,23 @@ which is a suffix of a larger string is considered a duplicate.  Thus
 @code{"def"} will be merged with @code{"abcdef"};  A reference to the first
 @code{"def"} will be changed to a reference to @code{"abcdef"+3}.
 
+If @var{flags} contains the @code{o} flag, then the @var{type} argument
+must be present along with an additional field like this:
+
+@smallexample
+.section @var{name},"@var{flags}"o,@@@var{type},@var{SymbolName}
+@end smallexample
+
+The @var{SymbolName} field specifies the symbol name which the section
+references.
+
+Note: If both the @var{M} and @var{o} flags are present, then the fields
+for the Merge flag should come first, like this:
+
+@smallexample
+.section @var{name},"@var{flags}"Mo,@@@var{type},@var{entsize},@var{SymbolName}
+@end smallexample
+
 If @var{flags} contains the @code{G} symbol then the @var{type} argument must
 be present along with an additional field like this:
 
@@ -6700,6 +6720,13 @@ the Merge flag should come first, like this:
 
 @smallexample
 .section @var{name} , "@var{flags}"MG, @@@var{type}, @var{entsize}, @var{GroupName}[, @var{linkage}]
+@end smallexample
+
+If both @code{o} flag and @code{G} flag are present, then the
+@var{SymbolName} field for @code{o} comes first, like this:
+
+@smallexample
+.section @var{name},"@var{flags}"oG,@@@var{type},@var{SymbolName},@var{GroupName}[,@var{linkage}]
 @end smallexample
 
 If @var{flags} contains the @code{?} symbol then it may not also contain the

@@ -1185,10 +1185,12 @@ typedef struct bfd_section
   /* Early in the link process, map_head and map_tail are used to build
      a list of input sections attached to an output section.  Later,
      output sections use these fields for a list of bfd_link_order
-     structs.  */
+     structs.  The linked_to_symbol_name field is for ELF assembler
+     internal use.  */
   union {
     struct bfd_link_order *link_order;
     struct bfd_section *s;
+    const char *linked_to_symbol_name;
   } map_head, map_tail;
 } asection;
 

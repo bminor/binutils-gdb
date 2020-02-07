@@ -1,3 +1,13 @@
+2020-02-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25381
+	* bfd-in2.h: Regenerated.
+	* elflink.c (_bfd_elf_gc_mark_extra_sections): Call mark_hook
+	on section if gc_mark of any of its linked-to sections is set
+	and don't set gc_mark again.
+	* section.c (asection): Add linked_to_symbol_name to map_head
+	union.
+
 2020-02-06  Maciej W. Rozycki  <macro@wdc.com>
 
 	* elf32-v850.c (v850_elf_relax_section): Fix the index used for

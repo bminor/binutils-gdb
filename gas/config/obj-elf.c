@@ -524,6 +524,8 @@ get_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
   struct elf_section_match *match = (struct elf_section_match *) inf;
   const char *gname = match->group_name;
   const char *group_name = elf_group_name (sec);
+  const char *linked_to_symbol_name
+    = sec->map_head.linked_to_symbol_name;
   unsigned int info = elf_section_data (sec)->this_hdr.sh_info;
 
   return (info == match->info
@@ -533,7 +535,12 @@ get_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 	  && (group_name == gname
 	      || (group_name != NULL
 		  && gname != NULL
-		  && strcmp (group_name, gname) == 0)));
+		  && strcmp (group_name, gname) == 0))
+	  && (linked_to_symbol_name == match->linked_to_symbol_name
+	      || (linked_to_symbol_name != NULL
+		  && match->linked_to_symbol_name != NULL
+		  && strcmp (linked_to_symbol_name,
+			     match->linked_to_symbol_name) == 0)));
 }
 
 /* Handle the .section pseudo-op.  This code supports two different
@@ -740,6 +747,10 @@ obj_elf_change_section (const char *name,
       sec->section_id = match_p->section_id;
       flags |= match_p->flags;
 
+      /* Set the linked-to symbol name.  */
+      sec->map_head.linked_to_symbol_name
+	= match_p->linked_to_symbol_name;
+
       bfd_set_section_flags (sec, flags);
       if (flags & SEC_MERGE)
 	sec->entsize = entsize;
@@ -801,6 +812,9 @@ obj_elf_parse_section_letters (char *str, size_t len,
 	case 'e':
 	  attr |= SHF_EXCLUDE;
 	  break;
+	case 'o':
+	  attr |= SHF_LINK_ORDER;
+	  break;
 	case 'w':
 	  attr |= SHF_WRITE;
 	  break;
@@ -841,7 +855,7 @@ obj_elf_parse_section_letters (char *str, size_t len,
 	default:
 	  {
 	    const char *bad_msg = _("unrecognized .section attribute:"
-				    " want a,e,w,x,M,S,G,T or number");
+				    " want a,e,o,w,x,M,S,G,T or number");
 #ifdef md_elf_section_letter
 	    bfd_vma md_attr = md_elf_section_letter (*str, &bad_msg);
 	    if (md_attr != (bfd_vma) -1)
@@ -1152,6 +1166,19 @@ obj_elf_section (int push)
 	    {
 	      as_warn (_("entity size for SHF_MERGE not specified"));
 	      attr &= ~SHF_MERGE;
+	    }
+
+	  if ((attr & SHF_LINK_ORDER) != 0 && *input_line_pointer == ',')
+	    {
+	      char c;
+	      unsigned int length;
+	      ++input_line_pointer;
+	      SKIP_WHITESPACE ();
+	      c = get_symbol_name (& beg);
+	      (void) restore_line_pointer (c);
+	      length = input_line_pointer - beg;
+	      if (length)
+		match.linked_to_symbol_name = xmemdup0 (beg, length);
 	    }
 
 	  if ((attr & SHF_GROUP) != 0 && is_clone)
@@ -2476,16 +2503,30 @@ static struct group_list groups;
 /* Called via bfd_map_over_sections.  If SEC is a member of a group,
    add it to a list of sections belonging to the group.  INF is a
    pointer to a struct group_list, which is where we store the head of
-   each list.  */
+   each list.  If its link_to_symbol_name isn't NULL, set up its
+   linked-to section.  */
 
 static void
-build_group_lists (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
+build_additional_section_info (bfd *abfd ATTRIBUTE_UNUSED,
+				  asection *sec, void *inf)
 {
   struct group_list *list = (struct group_list *) inf;
   const char *group_name = elf_group_name (sec);
   unsigned int i;
   unsigned int *elem_idx;
   unsigned int *idx_ptr;
+
+  if (sec->map_head.linked_to_symbol_name)
+    {
+      symbolS *linked_to_sym;
+      linked_to_sym = symbol_find (sec->map_head.linked_to_symbol_name);
+      if (!linked_to_sym || !S_IS_DEFINED (linked_to_sym))
+	as_bad (_("undefined linked-to symbol `%s' on section `%s'"),
+		sec->map_head.linked_to_symbol_name,
+		bfd_section_name (sec));
+      else
+	elf_linked_to_section (sec) = S_GET_SEGMENT (linked_to_sym);
+    }
 
   if (group_name == NULL)
     return;
@@ -2533,7 +2574,8 @@ elf_adjust_symtab (void)
   groups.num_group = 0;
   groups.head = NULL;
   groups.indexes = hash_new ();
-  bfd_map_over_sections (stdoutput, build_group_lists, &groups);
+  bfd_map_over_sections (stdoutput, build_additional_section_info,
+			 &groups);
 
   /* Make the SHT_GROUP sections that describe each section group.  We
      can't set up the section contents here yet, because elf section

@@ -1,4 +1,35 @@
-2020-02-07  H.J. Lu  <hongjiu.lu@intel.com>
+2020-02-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24526
+	PR ld/25021
+	PR ld/25490
+	* testsuite/ld-elf/elf.exp: Run PR ld/25490 tests.
+	* testsuite/ld-elf/pr24526.d: New file.
+	* testsuite/ld-elf/pr24526.s: Likewise.
+	* testsuite/ld-elf/pr25021.d: Likewise.
+	* testsuite/ld-elf/pr25021.s: Likewise.
+	* testsuite/ld-elf/pr25490-2-16.rd: Likewise.
+	* testsuite/ld-elf/pr25490-2-32.rd: Likewise.
+	* testsuite/ld-elf/pr25490-2-64.rd: Likewise.
+	* testsuite/ld-elf/pr25490-2.s: Likewise.
+	* testsuite/ld-elf/pr25490-3-16.rd: Likewise.
+	* testsuite/ld-elf/pr25490-3-32.rd: Likewise.
+	* testsuite/ld-elf/pr25490-3-64.rd: Likewise.
+	* testsuite/ld-elf/pr25490-3.s: Likewise.
+	* testsuite/ld-elf/pr25490-4-16.rd: Likewise.
+	* testsuite/ld-elf/pr25490-4-32.rd: Likewise.
+	* testsuite/ld-elf/pr25490-4-64.rd: Likewise.
+	* testsuite/ld-elf/pr25490-4.s: Likewise.
+	* testsuite/ld-elf/pr25490-5-16.rd: Likewise.
+	* testsuite/ld-elf/pr25490-5-32.rd: Likewise.
+	* testsuite/ld-elf/pr25490-5-64.rd: Likewise.
+	* testsuite/ld-elf/pr25490-5.s: Likewise.
+	* testsuite/ld-elf/pr25490-6-16.rd: Likewise.
+	* testsuite/ld-elf/pr25490-6-32.rd: Likewise.
+	* testsuite/ld-elf/pr25490-6-64.rd: Likewise.
+	* testsuite/ld-elf/pr25490-6.s: Likewise.
+
+2020-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/lib/ld-lib.exp (check_gc_sections_available): Mark
 	z80 as not supported.

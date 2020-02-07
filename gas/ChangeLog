@@ -1,5 +1,29 @@
 2020-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/25381
+	* config/obj-elf.c (get_section): Also check
+	linked_to_symbol_name.
+	(obj_elf_change_section): Also set map_head.linked_to_symbol_name.
+	(obj_elf_parse_section_letters): Handle the 'o' flag.
+	(build_group_lists): Renamed to ...
+	(build_additional_section_info): This.  Set elf_linked_to_section
+	from map_head.linked_to_symbol_name.
+	(elf_adjust_symtab): Updated.
+	* config/obj-elf.h (elf_section_match): Add linked_to_symbol_name.
+	* doc/as.texi: Document the 'o' flag.
+	* testsuite/gas/elf/elf.exp: Run PR gas/25381 tests.
+	* testsuite/gas/elf/section18.d: New file.
+	* testsuite/gas/elf/section18.s: Likewise.
+	* testsuite/gas/elf/section19.d: Likewise.
+	* testsuite/gas/elf/section19.s: Likewise.
+	* testsuite/gas/elf/section20.d: Likewise.
+	* testsuite/gas/elf/section20.s: Likewise.
+	* testsuite/gas/elf/section21.d: Likewise.
+	* testsuite/gas/elf/section21.l: Likewise.
+	* testsuite/gas/elf/section21.s: Likewise.
+
+2020-02-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* NEWS: Mention x86 assembler options to align branches for
 	binutils 2.34.
 
