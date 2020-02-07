@@ -825,6 +825,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_AFTER_PARSE-after_parse_default},
   msp430_elf_after_open,
   after_check_relocs_default,
+  before_place_orphans_default,
   msp430_elf_after_allocation,
   ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},
   ${LDEMUL_CHOOSE_TARGET-ldemul_default_target},

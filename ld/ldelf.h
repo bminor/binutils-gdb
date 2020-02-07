@@ -30,3 +30,4 @@ extern bfd_boolean ldelf_open_dynamic_archive
   (const char *, search_dirs_type *, lang_input_statement_type *);
 extern lang_output_section_statement_type *ldelf_place_orphan
   (asection *, const char *, int);
+extern void ldelf_before_place_orphans (void);

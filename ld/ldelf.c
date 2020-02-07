@@ -2134,3 +2134,32 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
 
   return lang_insert_orphan (s, secname, constraint, after, place, NULL, NULL);
 }
+
+void
+ldelf_before_place_orphans (void)
+{
+  bfd *abfd;
+
+  for (abfd = link_info.input_bfds;
+       abfd != (bfd *) NULL; abfd = abfd->link.next)
+    if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+	&& bfd_count_sections (abfd) != 0
+	&& !bfd_input_just_syms (abfd))
+      {
+	asection *isec;
+	for (isec = abfd->sections; isec != NULL; isec = isec->next)
+	  {
+	    /* Discard a section if any of its linked-to section has
+	       been discarded.  */
+	    asection *linked_to_sec;
+	    for (linked_to_sec = elf_linked_to_section (isec);
+		 linked_to_sec != NULL;
+		 linked_to_sec = elf_linked_to_section (linked_to_sec))
+	      if (discarded_section (linked_to_sec))
+		{
+		  isec->output_section = bfd_abs_section_ptr;
+		  break;
+		}
+	  }
+      }
+}

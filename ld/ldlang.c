@@ -7837,6 +7837,8 @@ lang_process (void)
      output statement, so that it isn't reordered.  */
   process_insert_statements (&lang_os_list.head->header.next);
 
+  ldemul_before_place_orphans ();
+
   /* Find any sections not attached explicitly and handle them.  */
   lang_place_orphans ();
 

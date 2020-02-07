@@ -36,6 +36,8 @@ extern void ldemul_after_open
   (void);
 extern void ldemul_after_check_relocs
   (void);
+extern void ldemul_before_place_orphans
+  (void);
 extern void ldemul_after_allocation
   (void);
 extern void ldemul_before_allocation
@@ -79,6 +81,8 @@ extern void after_parse_default
 extern void after_open_default
   (void);
 extern void after_check_relocs_default
+  (void);
+extern void before_place_orphans_default
   (void);
 extern void after_allocation_default
   (void);
@@ -128,6 +132,9 @@ typedef struct ld_emulation_xfer_struct {
 
   /* Run after checking relocations.  */
   void   (*after_check_relocs)  (void);
+
+  /* Run before placing orphans.  */
+  void   (*before_place_orphans)  (void);
 
   /* Run after allocating output sections.  */
   void   (*after_allocation)  (void);

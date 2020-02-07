@@ -880,6 +880,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_AFTER_PARSE-ldelf_after_parse},
   ${LDEMUL_AFTER_OPEN-gld${EMULATION_NAME}_after_open},
   ${LDEMUL_AFTER_CHECK_RELOCS-after_check_relocs_default},
+  ${LDEMUL_BEFORE_PLACE_ORPHANS-ldelf_before_place_orphans},
   ${LDEMUL_AFTER_ALLOCATION-gld${EMULATION_NAME}_after_allocation},
   ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},
   ${LDEMUL_CHOOSE_TARGET-ldemul_default_target},
