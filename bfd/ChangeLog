@@ -1,5 +1,12 @@
 2020-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/25490
+	* elflink.c (_bfd_elf_gc_mark_extra_sections): Issue an error
+	for garbage collection on __patchable_function_entries section
+	without linked-to section.
+
+2020-02-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/25381
 	* bfd-in2.h: Regenerated.
 	* elflink.c (_bfd_elf_gc_mark_extra_sections): Call mark_hook

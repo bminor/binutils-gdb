@@ -13365,6 +13365,13 @@ _bfd_elf_gc_mark_extra_sections (struct bfd_link_info *info,
 	      && (isec->flags & SEC_DEBUGGING)
 	      && CONST_STRNEQ (isec->name, ".debug_line."))
 	    debug_frag_seen = TRUE;
+	  else if (strcmp (bfd_section_name (isec),
+			   "__patchable_function_entries") == 0
+		   && elf_linked_to_section (isec) == NULL)
+	      info->callbacks->einfo (_("%F%P: %pB(%pA): error: "
+					"need linked-to section "
+					"for --gc-sections\n"),
+				      isec->owner, isec);
 	}
 
       /* If no non-note alloc section in this file will be kept, then

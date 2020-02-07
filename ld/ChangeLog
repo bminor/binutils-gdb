@@ -1,5 +1,11 @@
 2020-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/25490
+	* testsuite/ld-elf/pr25490-1.d: New file.
+	* testsuite/ld-elf/pr25490-1.s: Likewise.
+
+2020-02-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/24526
 	PR ld/25021
 	PR ld/25490
