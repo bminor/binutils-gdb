@@ -297,6 +297,9 @@ When the time comes to actually make the release....
 
       Update the (local copy of the) index.html file to point to the
       new documentation and mention the new version and then upload it.
+      [NB/ FIXME: Special for updating from 2.34 documentation - restore
+      the link to the GAS/NEWS which has been changed for 2.34 to a
+      specific commit rather than the branch tag].
 
 	 cd ../docs-2.3x
 	 put index.html
