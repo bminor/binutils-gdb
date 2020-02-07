@@ -2163,6 +2163,7 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
 	{
 	case bfd_mach_z80strict << 12:
 	case bfd_mach_z80 << 12:
+	case bfd_mach_z80n << 12:
 	case bfd_mach_z80full << 12:
 	case bfd_mach_r800 << 12:
 	case bfd_mach_gbz80 << 12:
@@ -2655,6 +2656,7 @@ coff_set_flags (bfd * abfd,
 	{
 	case bfd_mach_z80strict:
 	case bfd_mach_z80:
+	case bfd_mach_z80n:
 	case bfd_mach_z80full:
 	case bfd_mach_r800:
 	case bfd_mach_gbz80:

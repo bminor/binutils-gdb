@@ -54,7 +54,8 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (bfd_mach_r800,	 "r800",       16, FALSE, M(4)),
   N (bfd_mach_gbz80,	 "gbz80",      16, FALSE, M(5)),
   N (bfd_mach_z180,	 "z180",       16, FALSE, M(6)),
-  N (bfd_mach_ez80_z80,	 "ez80-z80",   16, FALSE, M(7)),
+  N (bfd_mach_z80n,	 "z80n",       16, FALSE, M(7)),
+  N (bfd_mach_ez80_z80,	 "ez80-z80",   16, FALSE, M(8)),
   N (bfd_mach_ez80_adl,	 "ez80-adl",   24, FALSE, NULL)
 };
 

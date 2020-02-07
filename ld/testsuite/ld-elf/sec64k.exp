@@ -130,6 +130,10 @@ if { ![istarget "m32r-*-*"] } then {
     foreach sfile [lrange $sfiles 0 [expr [llength $sfiles] / 2]] {
 	puts $ofd "#source: $sfile"
     }
+    #force z80 target to compile for eZ80 in ADL mode
+    if { [istarget "z80-*-*"] } then {
+	puts $ofd "#as: -ez80-adl"
+    }
     puts $ofd "#ld: -r"
     puts $ofd "#readelf: -W -Ss"
     puts $ofd "There are 680.. section headers.*:"
@@ -179,6 +183,10 @@ if { ![istarget "d10v-*-*"]
 	puts $ofd "#ld: -z noseparate-code"
     } else {
 	puts $ofd "#ld:"
+    }
+    #force z80 target to compile for eZ80 in ADL mode
+    if { [istarget "z80-*-*"] } then {
+	puts $ofd "#as: -ez80-adl"
     }
     puts $ofd "#readelf: -W -Ss"
     puts $ofd "There are 660.. section headers.*:"

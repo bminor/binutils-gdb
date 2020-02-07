@@ -812,6 +812,7 @@ struct internal_reloc
 /* Z80 modes */
 #define R_OFF8    0x32		/* 8 bit signed abs, for (i[xy]+d) */
 #define R_IMM24   0x33          /* 24 bit abs */
+#define R_IMM16BE 0x3A          /* 16 bit abs, big endian */
 /* R_JR, R_IMM8, R_IMM16, R_IMM32 - as for Z8k */
 #define R_BYTE0  0x34		/* first (lowest) 8 bits of multibyte value */
 #define R_BYTE1  0x35		/* second 8 bits of multibyte value */

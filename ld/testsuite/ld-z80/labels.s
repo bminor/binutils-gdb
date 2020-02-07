@@ -9,6 +9,9 @@
 	.globl	label8
 	.globl	label9
 	.globl	value8
+	.globl	value8_1
+	.globl	value8_2
+	.globl	value8_3
 	.globl	value16
 	.globl	value24
 	.globl	value32
@@ -35,6 +38,9 @@ label9:
 	cpl
 
 value8	.equ 0x12
+value8_1	.equ 0xab
+value8_2	.equ 0xcd
+value8_3	.equ 0xef
 value16	.equ	0x1234
 value24	.equ	0x123456
 value32	.equ	0x12345678

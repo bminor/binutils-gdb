@@ -1,3 +1,22 @@
+2020-02-07  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25469
+	* emulparams/elf32z80.sh: Use z80 emulation.
+	* emultempl/z80.em: Make generic to both COFF and ELF Z80 emulations.
+	* emultempl/z80elf.em: Delete.
+	* testsuite/ld-elf/pr22450.d: Expect to fail for the Z80.
+	* testsuite/ld-elf/sec64k.exp: Fix Z80 assembly.
+	* testsuite/ld-unique/pr21529.s: Avoid register name conflict.
+	* testsuite/ld-unique/unique.s: Likewise.
+	* testsuite/ld-unique/unique_empty.s: Likewise.
+	* testsuite/ld-unique/unique_shared.s: Likewise.
+	* testsuite/ld-unique/unique.d: Updated expected output.
+	* testsuite/ld-z80/arch_z80n.d: New file.
+	* testsuite/ld-z80/comb_arch_z80_z80n.d: New file.
+	* testsuite/ld-z80/labels.s: Add more labels.
+	* testsuite/ld-z80/relocs.s: Add more reloc tests.
+	* testsuite/ld-z80/relocs_f_z80n.d: New file
+
 2020-02-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/25022

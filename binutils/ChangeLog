@@ -1,3 +1,9 @@
+2020-02-07  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25469
+	* readelf.c (get_machine_flags): Add support for Z80N machine
+	number.
+
 2020-02-07  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (display_debug_lines_decoded): Force a NUL termination

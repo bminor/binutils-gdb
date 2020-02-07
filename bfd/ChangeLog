@@ -1,3 +1,15 @@
+2020-02-07  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25469
+	* archures.c: Add GBZ80 and Z80N machine values.
+	* reloc.c: Add BFD_RELOC_Z80_16_BE.
+	* coff-z80.c: Add support for new reloc.
+	* coffcode.h: Add support for new machine values.
+	* cpu-z80.c: Add support for new machine names.
+	* elf32-z80.c: Add support for new reloc.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2020-02-07  Nick Clifton  <nickc@redhat.com>
 
 	PR 23932

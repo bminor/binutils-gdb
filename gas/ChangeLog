@@ -1,3 +1,18 @@
+2020-02-07  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25469
+	* config/tc-z80.c: Add -gbz80 command line option to generate code
+	for the GameBoy Z80.  Add support for generating DWARF.
+	* config/tc-z80.h: Add support for DWARF debug information
+	generation.
+	* doc/c-z80.texi: Document new command line option.
+	* testsuite/gas/z80/gbz80_all.d: New file.
+	* testsuite/gas/z80/gbz80_all.s: New file.
+	* testsuite/gas/z80/z80.exp: Run the new tests.
+	* testsuite/gas/z80/z80n_all.d: New file.
+	* testsuite/gas/z80/z80n_all.s: New file.
+	* testsuite/gas/z80/z80n_reloc.d: New file.
+
 2020-02-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25381

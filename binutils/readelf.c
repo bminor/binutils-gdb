@@ -3769,6 +3769,7 @@ get_machine_flags (Filedata * filedata, unsigned e_flags, unsigned e_machine)
 	    case EF_Z80_MACH_EZ80_Z80: strcat (buf, ", EZ80"); break;
 	    case EF_Z80_MACH_EZ80_ADL: strcat (buf, ", EZ80, ADL"); break;
 	    case EF_Z80_MACH_GBZ80: strcat (buf, ", GBZ80"); break;
+	    case EF_Z80_MACH_Z80N: strcat (buf, ", Z80N"); break;
 	    default:
 	      strcat (buf, _(", unknown")); break;
 	    }

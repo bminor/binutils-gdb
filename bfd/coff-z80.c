@@ -221,6 +221,21 @@ static bfd_howto_type howto_table[] =
      0,			/* src_mask */
      0xffff,		/* dst_mask */
      FALSE),		/* pcrel_offset */
+
+  BFD_HOWTO (BFD_RELOC_Z80_16_BE,
+     R_IMM16BE,		/* type */
+     0,			/* rightshift */
+     1,			/* size (0 = byte, 1 = short, 2 = long) */
+     16,		/* bitsize */
+     FALSE,		/* pc_relative */
+     0,			/* bitpos */
+     complain_overflow_bitfield, /* complain_on_overflow */
+     0,			/* special_function */
+     "r_imm16be",	/* name */
+     FALSE,		/* partial_inplace */
+     0x0000ffff,	/* src_mask */
+     0x0000ffff,	/* dst_mask */
+     FALSE),		/* pcrel_offset */
 };
 
 #define NUM_HOWTOS ARRAY_SIZE (howto_table)
@@ -420,6 +435,17 @@ extra_case (bfd *in_abfd,
 	(*src_ptr)++;
 	break;
       }
+
+    case R_IMM16BE:
+      if (reloc->howto->partial_inplace)
+	val += (bfd_get_8 ( in_abfd, data+*src_ptr+0) * 0x100 +
+		bfd_get_8 ( in_abfd, data+*src_ptr+1)) & reloc->howto->src_mask;
+      
+      bfd_put_8 (in_abfd, val >> 8, data + *dst_ptr+0);
+      bfd_put_8 (in_abfd, val, data + *dst_ptr+1);
+      (*dst_ptr) += 2;
+      (*src_ptr) += 2;
+      break;
 
     default:
       abort ();

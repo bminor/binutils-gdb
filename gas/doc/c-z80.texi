@@ -31,19 +31,19 @@
 @table @gcctabopt
 @cindex @code{-z80} command-line option, Z80
 @item -z80
-Produce code for the Z80 processor. By default accepted undocumented
-operations with halves of index registers (@code{IXL}, @code{IXH}, @code{IYL}, @code{IYH}) and
-instuction @code{IN F,(C)}. Other useful undocumented instructions produces
-warnings. Undocumented instructions may not work on some CPUs, use
-them on your own risk.
+Produce code for the Zilog Z80 processor. By default accepted undocumented
+operations with halves of index registers (@code{IXL}, @code{IXH}, @code{IYL},
+@code{IYH}) and instuction @code{IN F,(C)}. Other useful undocumented
+instructions produces warnings. Undocumented instructions may not work on some
+CPUs, use them on your own risk.
 
 @cindex @code{-r800} command-line option, Z80
 @item -r800
-Produce code for the R800 processor.
+Produce code for the Ascii R800 processor.
 
 @cindex @code{-z180} command-line option, Z80
 @item -z180
-Produce code for the Z180 processor.
+Produce code for the Zilog Z180 processor.
 
 @cindex @code{-ez80} command-line option, Z80
 @item -ez80
@@ -52,6 +52,14 @@ Produce code for the eZ80 processor in Z80 memory mode by default.
 @cindex @code{-ez80-adl} command-line option, Z80
 @item -ez80-adl
 Produce code for the eZ80 processor in ADL memory mode by default.
+
+@cindex @code{-gbz80} command-line option, Z80
+@item -gbz80
+Produce code for the GameBoy Z80 processor.
+
+@cindex @code{-z80n} command-line option, Z80
+@item -z80n
+Produce code for the Z80N processor.
 
 @cindex @code{-local-prefix} command-line option, Z80
 @item  -local-prefix=@var{prefix}

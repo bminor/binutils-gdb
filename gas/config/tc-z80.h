@@ -29,7 +29,6 @@
 #endif
 #define BFD_ARCH      TARGET_ARCH
 #define COFF_MAGIC    0x5A80
-#define TARGET_MACH   0
 #define TARGET_BYTES_BIG_ENDIAN  0
 
 /* If you define this macro, GAS will warn about the
@@ -115,5 +114,25 @@ extern int z80_tc_label_is_local (const char *name);
 
 #define elf_tc_final_processing	z80_elf_final_processing
 extern void z80_elf_final_processing (void);
+
+/* Define the column that represents the PC.  */
+#define DWARF2_DEFAULT_RETURN_COLUMN	5
+
+/* The stack grows down, and is only byte aligned.  */
+#define DWARF2_CIE_DATA_ALIGNMENT	-1
+
+/* Z80 instructions are 1 or 4 bytes long.  */
+#define DWARF2_LINE_MIN_INSN_LENGTH	1
+
+/* 16 bits addresses are used on Z80.  */
+#define DWARF2_ADDR_SIZE(bfd)		z80_dwarf2_addr_size(bfd)
+extern int z80_dwarf2_addr_size (const bfd *abfd);
+
+/* CFI hooks.  */
+#define tc_cfi_frame_initial_instructions z80_tc_frame_initial_instructions
+extern void z80_tc_frame_initial_instructions (void);
+
+#define tc_regname_to_dw2regnum z80_tc_regname_to_dw2regnum
+extern int z80_tc_regname_to_dw2regnum (const char *regname);
 
 #endif

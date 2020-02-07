@@ -12,6 +12,9 @@
 	.globl	label9
 
 	.globl	value8
+	.globl	value8_1
+	.globl	value8_2
+	.globl	value8_3
 	.globl	value16
 	.globl	value24
 	.globl	value32
@@ -73,6 +76,14 @@ field_0_1	.equ	field_0+90
 	ld	e,(value32 + 0x12345678) >> 16
 	ld	h,(value32 + 0x12345678) >> 8
 	ld	l,(value32 + 0x12345678) >> 0
+
+	.ifdef Z80N
+	push	label1
+	push	value16
+	nextreg	value8_1,value8_2
+	nextreg	value8_3,a
+	ld	a,a
+	.endif
 
 	.data
 	.db	value8

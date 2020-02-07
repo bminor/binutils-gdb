@@ -1,3 +1,10 @@
+2020-02-07  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25469
+	* coff/internal.h (R_IMM16BE): Define.
+	* elf/z80.h (EF_Z80_MACH_Z80N): Define.
+	(R_Z80_16_BE): New reloc.
+
 2020-02-04  Alan Modra  <amodra@gmail.com>
 
 	* opcode/d30v.h (struct pd_reg): Make value field unsigned.
