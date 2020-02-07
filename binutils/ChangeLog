@@ -1,3 +1,8 @@
+2020-03-24  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (display_debug_lines_decoded): Force a NUL termination
+	of the truncated file name.
+
 2020-02-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25584
