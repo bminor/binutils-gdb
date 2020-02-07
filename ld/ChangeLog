@@ -1,3 +1,7 @@
+2020-02-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-unique/unique.exp (contains_unique_symbol): Updated.
+
 2020-02-07  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25469

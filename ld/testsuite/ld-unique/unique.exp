@@ -92,7 +92,7 @@ proc contains_unique_symbol { binary_file } {
     # Look for a line like this:
     #    54: 0000000000400474     4 OBJECT  UNIQUE DEFAULT   13 a
 
-    if { ![regexp ".*\[ \]*OBJECT\[ \]+UNIQUE\[ \]+DEFAULT\[ \]+\[UND0-9\]+\[ \]+\[ab\]\n" [file_contents readelf.out]] } {
+    if { ![regexp ".*\[ \]*OBJECT\[ \]+UNIQUE\[ \]+DEFAULT\[ \]+\[UND0-9\]+\[ \]+\[ab\]_val\n" [file_contents readelf.out]] } {
 	return 0
     }
 
