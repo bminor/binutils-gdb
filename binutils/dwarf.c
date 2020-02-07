@@ -4905,6 +4905,11 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  strncpy (newFileName,
 			   fileName + fileNameLength - MAX_FILENAME_LENGTH,
 			   MAX_FILENAME_LENGTH + 1);
+		  /* FIXME: This is to pacify gcc-10 which can warn that the
+		     strncpy above might leave a non-NUL terminated string
+		     in newFileName.  It won't, but gcc's analysis doesn't
+		     quite go far enough to discover this.  */
+		  newFileName[MAX_FILENAME_LENGTH] = 0;
 		}
 	      else
 		{

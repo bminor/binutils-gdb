@@ -1,3 +1,8 @@
+2020-02-07  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (display_debug_lines_decoded): Force a NUL termination
+	of the truncated file name.
+
 2020-02-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* objdump.c (print_jump_visualisation): New function.
