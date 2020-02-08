@@ -1074,6 +1074,18 @@ struct line_header
      header.  These point into dwarf2_per_objfile->line_buffer.  */
   const gdb_byte *statement_program_start {}, *statement_program_end {};
 
+  /* Return the full name of file number I in this object's file name
+     table.  Use COMP_DIR as the name of the current directory of the
+     compilation.  The result is allocated using xmalloc; the caller
+     is responsible for freeing it.  */
+  char *file_full_name (int file, const char *comp_dir);
+
+  /* Return file name relative to the compilation directory of file
+     number I in this object's file name table.  The result is
+     allocated using xmalloc; the caller is responsible for freeing
+     it.  */
+  char *file_file_name (int file);
+
  private:
   /* The include_directories table.  Note these are observing
      pointers.  The memory is owned by debug_line_buffer.  */
@@ -1854,9 +1866,6 @@ struct file_and_directory
 
 static file_and_directory find_file_and_directory (struct die_info *die,
 						   struct dwarf2_cu *cu);
-
-static char *file_full_name (int file, struct line_header *lh,
-			     const char *comp_dir);
 
 /* Expected enum dwarf_unit_type for read_comp_unit_head.  */
 enum class rcuh_kind { COMPILE, TYPE };
@@ -3396,7 +3405,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   if (offset != 0)
     qfn->file_names[0] = xstrdup (fnd.name);
   for (int i = 0; i < lh->file_names_size (); ++i)
-    qfn->file_names[i + offset] = file_full_name (i + 1, lh.get (), fnd.comp_dir);
+    qfn->file_names[i + offset] = lh->file_full_name (i + 1, fnd.comp_dir);
   qfn->real_names = NULL;
 
   lh_cu->v.quick->file_names = qfn;
@@ -23745,22 +23754,18 @@ dwarf_alloc_die (struct dwarf2_cu *cu, int num_attrs)
 
 /* Macro support.  */
 
-/* Return file name relative to the compilation directory of file number I in
-   *LH's file name table.  The result is allocated using xmalloc; the caller is
-   responsible for freeing it.  */
-
-static char *
-file_file_name (int file, struct line_header *lh)
+char *
+line_header::file_file_name (int file)
 {
   /* Is the file number a valid index into the line header's file name
      table?  Remember that file numbers start with one, not zero.  */
-  if (lh->is_valid_file_index (file))
+  if (is_valid_file_index (file))
     {
-      const file_entry *fe = lh->file_name_at (file);
+      const file_entry *fe = file_name_at (file);
 
       if (!IS_ABSOLUTE_PATH (fe->name))
 	{
-	  const char *dir = fe->include_dir (lh);
+	  const char *dir = fe->include_dir (this);
 	  if (dir != NULL)
 	    return concat (dir, SLASH_STRING, fe->name, (char *) NULL);
 	}
@@ -23783,18 +23788,14 @@ file_file_name (int file, struct line_header *lh)
     }
 }
 
-/* Return the full name of file number I in *LH's file name table.
-   Use COMP_DIR as the name of the current directory of the
-   compilation.  The result is allocated using xmalloc; the caller is
-   responsible for freeing it.  */
-static char *
-file_full_name (int file, struct line_header *lh, const char *comp_dir)
+char *
+line_header::file_full_name (int file, const char *comp_dir)
 {
   /* Is the file number a valid index into the line header's file name
      table?  Remember that file numbers start with one, not zero.  */
-  if (lh->is_valid_file_index (file))
+  if (is_valid_file_index (file))
     {
-      char *relative = file_file_name (file, lh);
+      char *relative = file_file_name (file);
 
       if (IS_ABSOLUTE_PATH (relative) || comp_dir == NULL)
 	return relative;
@@ -23802,7 +23803,7 @@ file_full_name (int file, struct line_header *lh, const char *comp_dir)
 		       relative, (char *) NULL);
     }
   else
-    return file_file_name (file, lh);
+    return file_file_name (file);
 }
 
 
@@ -23813,7 +23814,7 @@ macro_start_file (struct dwarf2_cu *cu,
                   struct line_header *lh)
 {
   /* File name relative to the compilation directory of this source file.  */
-  char *file_name = file_file_name (file, lh);
+  char *file_name = lh->file_file_name (file);
 
   if (! current_file)
     {
