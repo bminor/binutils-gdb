@@ -1,3 +1,7 @@
+2020-02-12  Hannes Domani  <ssbssa@yahoo.de>
+
+	* win32-low.c (win32_create_inferior): Set signal_pid.
+
 2020-02-12  Maciej W. Rozycki <macro@wdc.com>
 	    Pedro Alves  <palves@redhat.com>
 
