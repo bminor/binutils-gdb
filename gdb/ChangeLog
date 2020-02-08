@@ -1,5 +1,10 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <imported_symtabs>:
+	Move earlier.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.h (dwarf_line_debug): Declare.
 	* Makefile.in (COMMON_SFILES): Add dwarf2/line-header.c.
 	* dwarf2/read.c: Move line_header code to new files.
