@@ -47,7 +47,6 @@ struct dwarf2_debug_sections;
 struct mapped_index;
 struct mapped_debug_names;
 struct signatured_type;
-struct die_info;
 
 /* Collection of data recorded per objfile.
    This hangs off of dwarf2_objfile_data_key.  */

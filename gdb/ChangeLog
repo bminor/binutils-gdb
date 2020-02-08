@@ -1,5 +1,9 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.h (struct die_info): Don't declare.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.h (die_info_ptr): Remove typedef.
 
 2020-02-08  Tom Tromey  <tom@tromey.com>
