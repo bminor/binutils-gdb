@@ -1,5 +1,26 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.h (struct dwarf2_per_objfile) <signatured_types>:
+	Change type to htab_up.
+	* dwarf2/read.c (create_signatured_type_table_from_index)
+	(create_signatured_type_table_from_debug_names)
+	(create_all_type_units, add_type_unit)
+	(lookup_dwo_signatured_type, lookup_signatured_type)
+	(process_skeletonless_type_unit): Update.
+	(create_debug_type_hash_table, create_debug_types_hash_table):
+	Change type of types_htab.
+	(allocate_signatured_type_table, allocate_dwo_unit_table): Return
+	htab_up.  Don't allocate on obstack.
+	(create_cus_hash_table): Change type of cus_htab parameter.
+	(struct dwo_file) <cus, tus>: Now htab_up.
+	(lookup_dwo_signatured_type, lookup_dwo_cutu)
+	(process_dwo_file_for_skeletonless_type_units, lookup_dwo_cutu)
+	(queue_and_load_all_dwo_tus): Update.
+	* dwarf2/index-write.c (write_gdbindex): Update.
+	(write_debug_names): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.h (struct dwarf2_queue_item): Move from
 	dwarf2/read.c.  Remove "next" member.  Add constructor ntad
 	destructor.

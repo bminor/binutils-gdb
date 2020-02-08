@@ -157,7 +157,7 @@ public:
 
   /* A table mapping .debug_types signatures to its signatured_type entry.
      This is NULL if the .debug_types section hasn't been read in yet.  */
-  htab_t signatured_types {};
+  htab_up signatured_types;
 
   /* Type unit statistics, to see how well the scaling improvements
      are doing.  */

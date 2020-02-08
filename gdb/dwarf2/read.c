@@ -727,11 +727,11 @@ struct dwo_file
      Each element is a struct dwo_unit. Multiple CUs per DWO are supported as
      an extension to handle LLVM's Link Time Optimization output (where
      multiple source files may be compiled into a single object/dwo pair). */
-  htab_t cus {};
+  htab_up cus;
 
   /* Table of TUs in the file.
      Each element is a struct dwo_unit.  */
-  htab_t tus {};
+  htab_up tus;
 };
 
 /* These sections are what may appear in a DWP file.  */
@@ -1868,9 +1868,9 @@ static const gdb_byte *read_and_check_comp_unit_head
    struct dwarf2_section_info *abbrev_section, const gdb_byte *info_ptr,
    rcuh_kind section_kind);
 
-static htab_t allocate_signatured_type_table (struct objfile *objfile);
+static htab_up allocate_signatured_type_table (struct objfile *objfile);
 
-static htab_t allocate_dwo_unit_table (struct objfile *objfile);
+static htab_up allocate_dwo_unit_table (struct objfile *objfile);
 
 static struct dwo_unit *lookup_dwo_unit_in_dwp
   (struct dwarf2_per_objfile *dwarf2_per_objfile,
@@ -2739,7 +2739,7 @@ create_signatured_type_table_from_index
   gdb_assert (dwarf2_per_objfile->all_type_units.empty ());
   dwarf2_per_objfile->all_type_units.reserve (elements / 3);
 
-  htab_t sig_types_hash = allocate_signatured_type_table (objfile);
+  htab_up sig_types_hash = allocate_signatured_type_table (objfile);
 
   for (offset_type i = 0; i < elements; i += 3)
     {
@@ -2769,13 +2769,13 @@ create_signatured_type_table_from_index
 	= OBSTACK_ZALLOC (&objfile->objfile_obstack,
 			  struct dwarf2_per_cu_quick_data);
 
-      slot = htab_find_slot (sig_types_hash, sig_type, INSERT);
+      slot = htab_find_slot (sig_types_hash.get (), sig_type, INSERT);
       *slot = sig_type;
 
       dwarf2_per_objfile->all_type_units.push_back (sig_type);
     }
 
-  dwarf2_per_objfile->signatured_types = sig_types_hash;
+  dwarf2_per_objfile->signatured_types = std::move (sig_types_hash);
 }
 
 /* Create the signatured type hash table from .debug_names.  */
@@ -2795,7 +2795,7 @@ create_signatured_type_table_from_debug_names
   gdb_assert (dwarf2_per_objfile->all_type_units.empty ());
   dwarf2_per_objfile->all_type_units.reserve (map.tu_count);
 
-  htab_t sig_types_hash = allocate_signatured_type_table (objfile);
+  htab_up sig_types_hash = allocate_signatured_type_table (objfile);
 
   for (uint32_t i = 0; i < map.tu_count; ++i)
     {
@@ -2826,13 +2826,13 @@ create_signatured_type_table_from_debug_names
 	= OBSTACK_ZALLOC (&objfile->objfile_obstack,
 			  struct dwarf2_per_cu_quick_data);
 
-      slot = htab_find_slot (sig_types_hash, sig_type, INSERT);
+      slot = htab_find_slot (sig_types_hash.get (), sig_type, INSERT);
       *slot = sig_type;
 
       dwarf2_per_objfile->all_type_units.push_back (sig_type);
     }
 
-  dwarf2_per_objfile->signatured_types = sig_types_hash;
+  dwarf2_per_objfile->signatured_types = std::move (sig_types_hash);
 }
 
 /* Read the address map data from the mapped index, and use it to
@@ -6400,16 +6400,13 @@ eq_signatured_type (const void *item_lhs, const void *item_rhs)
 
 /* Allocate a hash table for signatured types.  */
 
-static htab_t
+static htab_up
 allocate_signatured_type_table (struct objfile *objfile)
 {
-  return htab_create_alloc_ex (41,
-			       hash_signatured_type,
-			       eq_signatured_type,
-			       NULL,
-			       &objfile->objfile_obstack,
-			       hashtab_obstack_allocate,
-			       dummy_obstack_deallocate);
+  return htab_up (htab_create_alloc (41,
+				     hash_signatured_type,
+				     eq_signatured_type,
+				     NULL, xcalloc, xfree));
 }
 
 /* A helper function to add a signatured type CU to a table.  */
@@ -6433,7 +6430,7 @@ add_signatured_type_cu_to_table (void **slot, void *datum)
 static void
 create_debug_type_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			      struct dwo_file *dwo_file,
-			      dwarf2_section_info *section, htab_t &types_htab,
+			      dwarf2_section_info *section, htab_up &types_htab,
 			      rcuh_kind section_kind)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
@@ -6532,7 +6529,7 @@ create_debug_type_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 	  sig_type->per_cu.length = length;
 	}
 
-      slot = htab_find_slot (types_htab,
+      slot = htab_find_slot (types_htab.get (),
 			     dwo_file ? (void*) dwo_tu : (void *) sig_type,
 			     INSERT);
       gdb_assert (slot != NULL);
@@ -6584,7 +6581,7 @@ static void
 create_debug_types_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			       struct dwo_file *dwo_file,
 			       gdb::array_view<dwarf2_section_info> type_sections,
-			       htab_t &types_htab)
+			       htab_up &types_htab)
 {
   for (dwarf2_section_info &section : type_sections)
     create_debug_type_hash_table (dwarf2_per_objfile, dwo_file, &section,
@@ -6599,7 +6596,7 @@ create_debug_types_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 static int
 create_all_type_units (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
-  htab_t types_htab = NULL;
+  htab_up types_htab;
 
   create_debug_type_hash_table (dwarf2_per_objfile, NULL,
 				&dwarf2_per_objfile->info, types_htab,
@@ -6612,12 +6609,14 @@ create_all_type_units (struct dwarf2_per_objfile *dwarf2_per_objfile)
       return 0;
     }
 
-  dwarf2_per_objfile->signatured_types = types_htab;
+  dwarf2_per_objfile->signatured_types = std::move (types_htab);
 
   gdb_assert (dwarf2_per_objfile->all_type_units.empty ());
-  dwarf2_per_objfile->all_type_units.reserve (htab_elements (types_htab));
+  dwarf2_per_objfile->all_type_units.reserve
+    (htab_elements (dwarf2_per_objfile->signatured_types.get ()));
 
-  htab_traverse_noresize (types_htab, add_signatured_type_cu_to_table,
+  htab_traverse_noresize (dwarf2_per_objfile->signatured_types.get (),
+			  add_signatured_type_cu_to_table,
 			  &dwarf2_per_objfile->all_type_units);
 
   return 1;
@@ -6652,7 +6651,7 @@ add_type_unit (struct dwarf2_per_objfile *dwarf2_per_objfile, ULONGEST sig,
 
   if (slot == NULL)
     {
-      slot = htab_find_slot (dwarf2_per_objfile->signatured_types,
+      slot = htab_find_slot (dwarf2_per_objfile->signatured_types.get (),
 			     sig_type, INSERT);
     }
   gdb_assert (*slot == NULL);
@@ -6733,7 +6732,7 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
      .gdb_index with this TU.  */
 
   find_sig_entry.signature = sig;
-  slot = htab_find_slot (dwarf2_per_objfile->signatured_types,
+  slot = htab_find_slot (dwarf2_per_objfile->signatured_types.get (),
 			 &find_sig_entry, INSERT);
   sig_entry = (struct signatured_type *) *slot;
 
@@ -6757,7 +6756,8 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   if (dwo_file->tus == NULL)
     return NULL;
   find_dwo_entry.signature = sig;
-  dwo_entry = (struct dwo_unit *) htab_find (dwo_file->tus, &find_dwo_entry);
+  dwo_entry = (struct dwo_unit *) htab_find (dwo_file->tus.get (),
+					     &find_dwo_entry);
   if (dwo_entry == NULL)
     return NULL;
 
@@ -6798,7 +6798,7 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
     }
 
   find_sig_entry.signature = sig;
-  slot = htab_find_slot (dwarf2_per_objfile->signatured_types,
+  slot = htab_find_slot (dwarf2_per_objfile->signatured_types.get (),
 			 &find_sig_entry, INSERT);
   sig_entry = (struct signatured_type *) *slot;
 
@@ -6849,7 +6849,8 @@ lookup_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
 	return NULL;
       find_entry.signature = sig;
       entry = ((struct signatured_type *)
-	       htab_find (dwarf2_per_objfile->signatured_types, &find_entry));
+	       htab_find (dwarf2_per_objfile->signatured_types.get (),
+			  &find_entry));
       return entry;
     }
 }
@@ -8075,8 +8076,8 @@ process_skeletonless_type_unit (void **slot, void *info)
     }
 
   find_entry.signature = dwo_unit->signature;
-  slot = htab_find_slot (dwarf2_per_objfile->signatured_types, &find_entry,
-			 INSERT);
+  slot = htab_find_slot (dwarf2_per_objfile->signatured_types.get (),
+			 &find_entry, INSERT);
   /* If we've already seen this type there's nothing to do.  What's happening
      is we're doing our own version of comdat-folding here.  */
   if (*slot != NULL)
@@ -8105,10 +8106,8 @@ process_dwo_file_for_skeletonless_type_units (void **slot, void *info)
   struct dwo_file *dwo_file = (struct dwo_file *) *slot;
 
   if (dwo_file->tus != NULL)
-    {
-      htab_traverse_noresize (dwo_file->tus,
-			      process_skeletonless_type_unit, info);
-    }
+    htab_traverse_noresize (dwo_file->tus.get (),
+			    process_skeletonless_type_unit, info);
 
   return 1;
 }
@@ -11483,18 +11482,15 @@ eq_dwo_unit (const void *item_lhs, const void *item_rhs)
 /* Allocate a hash table for DWO CUs,TUs.
    There is one of these tables for each of CUs,TUs for each DWO file.  */
 
-static htab_t
+static htab_up
 allocate_dwo_unit_table (struct objfile *objfile)
 {
   /* Start out with a pretty small number.
      Generally DWO files contain only one CU and maybe some TUs.  */
-  return htab_create_alloc_ex (3,
-			       hash_dwo_unit,
-			       eq_dwo_unit,
-			       NULL,
-			       &objfile->objfile_obstack,
-			       hashtab_obstack_allocate,
-			       dummy_obstack_deallocate);
+  return htab_up (htab_create_alloc (3,
+				     hash_dwo_unit,
+				     eq_dwo_unit,
+				     NULL, xcalloc, xfree));
 }
 
 /* die_reader_func for create_dwo_cu.  */
@@ -11537,7 +11533,7 @@ create_dwo_cu_reader (const struct die_reader_specs *reader,
 static void
 create_cus_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 		       dwarf2_cu *cu, struct dwo_file &dwo_file,
-		       dwarf2_section_info &section, htab_t &cus_htab)
+		       dwarf2_section_info &section, htab_up &cus_htab)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   const gdb_byte *info_ptr, *end_ptr;
@@ -11585,7 +11581,7 @@ create_cus_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
       dwo_unit = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_unit);
       *dwo_unit = read_unit;
-      slot = htab_find_slot (cus_htab, dwo_unit, INSERT);
+      slot = htab_find_slot (cus_htab.get (), dwo_unit, INSERT);
       gdb_assert (slot != NULL);
       if (*slot != NULL)
 	{
@@ -12986,7 +12982,8 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
 	      memset (&find_dwo_cutu, 0, sizeof (find_dwo_cutu));
 	      find_dwo_cutu.signature = signature;
 	      dwo_cutu
-		= (struct dwo_unit *) htab_find (dwo_file->tus, &find_dwo_cutu);
+		= (struct dwo_unit *) htab_find (dwo_file->tus.get (),
+						 &find_dwo_cutu);
 	    }
 	  else if (!is_debug_types && dwo_file->cus)
 	    {
@@ -12994,7 +12991,7 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
 
 	      memset (&find_dwo_cutu, 0, sizeof (find_dwo_cutu));
 	      find_dwo_cutu.signature = signature;
-	      dwo_cutu = (struct dwo_unit *)htab_find (dwo_file->cus,
+	      dwo_cutu = (struct dwo_unit *)htab_find (dwo_file->cus.get (),
 						       &find_dwo_cutu);
 	    }
 
@@ -13109,7 +13106,8 @@ queue_and_load_all_dwo_tus (struct dwarf2_per_cu_data *per_cu)
 
   dwo_file = dwo_unit->dwo_file;
   if (dwo_file->tus != NULL)
-    htab_traverse_noresize (dwo_file->tus, queue_and_load_dwo_tu, per_cu);
+    htab_traverse_noresize (dwo_file->tus.get (), queue_and_load_dwo_tu,
+			    per_cu);
 }
 
 /* Read in various DIEs.  */
