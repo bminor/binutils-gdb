@@ -1,3 +1,7 @@
+2020-02-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* version.in: Set GDB version number to 9.1.
+
 2020-02-05  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	PR gdb/25190:
