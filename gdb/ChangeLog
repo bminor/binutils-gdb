@@ -1,5 +1,14 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_initial_length): Move to leb.c.
+	* dwarf2/leb.h (read_initial_length): Declare.
+	* dwarf2/leb.c (read_initial_length): Move from read.c.  Add
+	handle_nonstd parameter.
+	* dwarf2/frame.c (read_initial_length): Remove.
+	(decode_frame_entry_1): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/loc.c (dwarf2_find_location_expression)
 	(dwarf_evaluate_loc_desc::get_tls_address)
 	(dwarf_evaluate_loc_desc::push_dwarf_reg_entry_value)

@@ -83,3 +83,30 @@ read_signed_leb128 (bfd *abfd, const gdb_byte *buf,
   *bytes_read_ptr = num_read;
   return result;
 }
+
+/* See leb.h.  */
+
+LONGEST
+read_initial_length (bfd *abfd, const gdb_byte *buf, unsigned int *bytes_read,
+		     bool handle_nonstd)
+{
+  LONGEST length = bfd_get_32 (abfd, buf);
+
+  if (length == 0xffffffff)
+    {
+      length = bfd_get_64 (abfd, buf + 4);
+      *bytes_read = 12;
+    }
+  else if (handle_nonstd && length == 0)
+    {
+      /* Handle the (non-standard) 64-bit DWARF2 format used by IRIX.  */
+      length = bfd_get_64 (abfd, buf);
+      *bytes_read = 8;
+    }
+  else
+    {
+      *bytes_read = 4;
+    }
+
+  return length;
+}

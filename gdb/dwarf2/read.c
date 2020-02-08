@@ -1277,8 +1277,6 @@ static CORE_ADDR read_addr_index (struct dwarf2_cu *cu, unsigned int addr_index)
 static CORE_ADDR read_address (bfd *, const gdb_byte *ptr, struct dwarf2_cu *,
 			       unsigned int *);
 
-static LONGEST read_initial_length (bfd *, const gdb_byte *, unsigned int *);
-
 static LONGEST read_checked_initial_length_and_offset
   (bfd *, const gdb_byte *, const struct comp_unit_head *,
    unsigned int *, unsigned int *);
@@ -19014,68 +19012,6 @@ read_address (bfd *abfd, const gdb_byte *buf, struct dwarf2_cu *cu,
 
   *bytes_read = cu_header->addr_size;
   return retval;
-}
-
-/* Read the initial length from a section.  The (draft) DWARF 3
-   specification allows the initial length to take up either 4 bytes
-   or 12 bytes.  If the first 4 bytes are 0xffffffff, then the next 8
-   bytes describe the length and all offsets will be 8 bytes in length
-   instead of 4.
-
-   An older, non-standard 64-bit format is also handled by this
-   function.  The older format in question stores the initial length
-   as an 8-byte quantity without an escape value.  Lengths greater
-   than 2^32 aren't very common which means that the initial 4 bytes
-   is almost always zero.  Since a length value of zero doesn't make
-   sense for the 32-bit format, this initial zero can be considered to
-   be an escape value which indicates the presence of the older 64-bit
-   format.  As written, the code can't detect (old format) lengths
-   greater than 4GB.  If it becomes necessary to handle lengths
-   somewhat larger than 4GB, we could allow other small values (such
-   as the non-sensical values of 1, 2, and 3) to also be used as
-   escape values indicating the presence of the old format.
-
-   The value returned via bytes_read should be used to increment the
-   relevant pointer after calling read_initial_length().
-
-   [ Note:  read_initial_length() and read_offset() are based on the
-     document entitled "DWARF Debugging Information Format", revision
-     3, draft 8, dated November 19, 2001.  This document was obtained
-     from:
-
-	http://reality.sgiweb.org/davea/dwarf3-draft8-011125.pdf
-
-     This document is only a draft and is subject to change.  (So beware.)
-
-     Details regarding the older, non-standard 64-bit format were
-     determined empirically by examining 64-bit ELF files produced by
-     the SGI toolchain on an IRIX 6.5 machine.
-
-     - Kevin, July 16, 2002
-   ] */
-
-static LONGEST
-read_initial_length (bfd *abfd, const gdb_byte *buf, unsigned int *bytes_read)
-{
-  LONGEST length = bfd_get_32 (abfd, buf);
-
-  if (length == 0xffffffff)
-    {
-      length = bfd_get_64 (abfd, buf + 4);
-      *bytes_read = 12;
-    }
-  else if (length == 0)
-    {
-      /* Handle the (non-standard) 64-bit DWARF2 format used by IRIX.  */
-      length = bfd_get_64 (abfd, buf);
-      *bytes_read = 8;
-    }
-  else
-    {
-      *bytes_read = 4;
-    }
-
-  return length;
 }
 
 /* Cover function for read_initial_length.

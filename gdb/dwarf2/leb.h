@@ -89,4 +89,45 @@ extern LONGEST read_signed_leb128 (bfd *, const gdb_byte *, unsigned int *);
 
 extern ULONGEST read_unsigned_leb128 (bfd *, const gdb_byte *, unsigned int *);
 
+/* Read the initial length from a section.  The (draft) DWARF 3
+   specification allows the initial length to take up either 4 bytes
+   or 12 bytes.  If the first 4 bytes are 0xffffffff, then the next 8
+   bytes describe the length and all offsets will be 8 bytes in length
+   instead of 4.
+
+   An older, non-standard 64-bit format is also handled by this
+   function.  The older format in question stores the initial length
+   as an 8-byte quantity without an escape value.  Lengths greater
+   than 2^32 aren't very common which means that the initial 4 bytes
+   is almost always zero.  Since a length value of zero doesn't make
+   sense for the 32-bit format, this initial zero can be considered to
+   be an escape value which indicates the presence of the older 64-bit
+   format.  As written, the code can't detect (old format) lengths
+   greater than 4GB.  If it becomes necessary to handle lengths
+   somewhat larger than 4GB, we could allow other small values (such
+   as the non-sensical values of 1, 2, and 3) to also be used as
+   escape values indicating the presence of the old format.
+
+   The value returned via bytes_read should be used to increment the
+   relevant pointer after calling read_initial_length().
+
+   [ Note:  read_initial_length() and read_offset() are based on the
+     document entitled "DWARF Debugging Information Format", revision
+     3, draft 8, dated November 19, 2001.  This document was obtained
+     from:
+
+	http://reality.sgiweb.org/davea/dwarf3-draft8-011125.pdf
+
+     This document is only a draft and is subject to change.  (So beware.)
+
+     Details regarding the older, non-standard 64-bit format were
+     determined empirically by examining 64-bit ELF files produced by
+     the SGI toolchain on an IRIX 6.5 machine.
+
+     - Kevin, July 16, 2002
+   ] */
+extern LONGEST read_initial_length (bfd *abfd, const gdb_byte *buf,
+				    unsigned int *bytes_read,
+				    bool handle_nonstd = true);
+
 #endif /* GDB_DWARF2_LEB_H */

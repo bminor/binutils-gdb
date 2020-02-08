@@ -1475,24 +1475,6 @@ const struct objfile_key<dwarf2_fde_table,
 			 gdb::noop_deleter<dwarf2_fde_table>>
   dwarf2_frame_objfile_data;
 
-
-static ULONGEST
-read_initial_length (bfd *abfd, const gdb_byte *buf,
-		     unsigned int *bytes_read_ptr)
-{
-  ULONGEST result;
-
-  result = bfd_get_32 (abfd, buf);
-  if (result == 0xffffffff)
-    {
-      result = bfd_get_64 (abfd, buf + 4);
-      *bytes_read_ptr = 12;
-    }
-  else
-    *bytes_read_ptr = 4;
-
-  return result;
-}
 
 
 /* Pointer encoding helper functions.  */
@@ -1744,7 +1726,7 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
   uint64_t uleb128;
 
   buf = start;
-  length = read_initial_length (unit->abfd, buf, &bytes_read);
+  length = read_initial_length (unit->abfd, buf, &bytes_read, false);
   buf += bytes_read;
   end = buf + (size_t) length;
 
