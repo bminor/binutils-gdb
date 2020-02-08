@@ -1078,13 +1078,14 @@ struct line_header
      table.  Use COMP_DIR as the name of the current directory of the
      compilation.  The result is allocated using xmalloc; the caller
      is responsible for freeing it.  */
-  char *file_full_name (int file, const char *comp_dir);
+  gdb::unique_xmalloc_ptr<char> file_full_name (int file,
+						const char *comp_dir);
 
   /* Return file name relative to the compilation directory of file
      number I in this object's file name table.  The result is
      allocated using xmalloc; the caller is responsible for freeing
      it.  */
-  char *file_file_name (int file);
+  gdb::unique_xmalloc_ptr<char> file_file_name (int file);
 
  private:
   /* The include_directories table.  Note these are observing
@@ -3405,7 +3406,8 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   if (offset != 0)
     qfn->file_names[0] = xstrdup (fnd.name);
   for (int i = 0; i < lh->file_names_size (); ++i)
-    qfn->file_names[i + offset] = lh->file_full_name (i + 1, fnd.comp_dir);
+    qfn->file_names[i + offset] = lh->file_full_name (i + 1,
+						      fnd.comp_dir).release ();
   qfn->real_names = NULL;
 
   lh_cu->v.quick->file_names = qfn;
@@ -23754,7 +23756,7 @@ dwarf_alloc_die (struct dwarf2_cu *cu, int num_attrs)
 
 /* Macro support.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 line_header::file_file_name (int file)
 {
   /* Is the file number a valid index into the line header's file name
@@ -23767,9 +23769,11 @@ line_header::file_file_name (int file)
 	{
 	  const char *dir = fe->include_dir (this);
 	  if (dir != NULL)
-	    return concat (dir, SLASH_STRING, fe->name, (char *) NULL);
+	    return gdb::unique_xmalloc_ptr<char> (concat (dir, SLASH_STRING,
+							  fe->name,
+							  (char *) NULL));
 	}
-      return xstrdup (fe->name);
+      return make_unique_xstrdup (fe->name);
     }
   else
     {
@@ -23784,23 +23788,24 @@ line_header::file_file_name (int file)
       complaint (_("bad file number in macro information (%d)"),
                  file);
 
-      return xstrdup (fake_name);
+      return make_unique_xstrdup (fake_name);
     }
 }
 
-char *
+gdb::unique_xmalloc_ptr<char>
 line_header::file_full_name (int file, const char *comp_dir)
 {
   /* Is the file number a valid index into the line header's file name
      table?  Remember that file numbers start with one, not zero.  */
   if (is_valid_file_index (file))
     {
-      char *relative = file_file_name (file);
+      gdb::unique_xmalloc_ptr<char> relative = file_file_name (file);
 
-      if (IS_ABSOLUTE_PATH (relative) || comp_dir == NULL)
+      if (IS_ABSOLUTE_PATH (relative.get ()) || comp_dir == NULL)
 	return relative;
-      return reconcat (relative, comp_dir, SLASH_STRING,
-		       relative, (char *) NULL);
+      return gdb::unique_xmalloc_ptr<char> (concat (comp_dir, SLASH_STRING,
+						    relative.get (),
+						    (char *) NULL));
     }
   else
     return file_file_name (file);
@@ -23814,7 +23819,7 @@ macro_start_file (struct dwarf2_cu *cu,
                   struct line_header *lh)
 {
   /* File name relative to the compilation directory of this source file.  */
-  char *file_name = lh->file_file_name (file);
+  gdb::unique_xmalloc_ptr<char> file_name = lh->file_file_name (file);
 
   if (! current_file)
     {
@@ -23824,13 +23829,11 @@ macro_start_file (struct dwarf2_cu *cu,
 
       /* If we have no current file, then this must be the start_file
 	 directive for the compilation unit's main source file.  */
-      current_file = macro_set_main (macro_table, file_name);
+      current_file = macro_set_main (macro_table, file_name.get ());
       macro_define_special (macro_table);
     }
   else
-    current_file = macro_include (current_file, line, file_name);
-
-  xfree (file_name);
+    current_file = macro_include (current_file, line, file_name.get ());
 
   return current_file;
 }

@@ -1,6 +1,15 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (struct line_header) <file_full_name,
+	file_file_name>: Return unique_xmalloc_ptr.
+	(line_header::file_file_name): Update.
+	(line_header::file_full_name): Update.
+	(dw2_get_file_names_reader): Update.
+	(macro_start_file): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (struct line_header) <file_full_name,
 	file_file_name>: Declare methods.
 	(dw2_get_file_names_reader): Update.
 	(file_file_name): Now a method.
