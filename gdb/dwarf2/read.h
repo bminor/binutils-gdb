@@ -153,7 +153,7 @@ public:
 
   /* Table of struct type_unit_group objects.
      The hash key is the DW_AT_stmt_list value.  */
-  htab_t type_unit_groups {};
+  htab_up type_unit_groups;
 
   /* A table mapping .debug_types signatures to its signatured_type entry.
      This is NULL if the .debug_types section hasn't been read in yet.  */

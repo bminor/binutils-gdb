@@ -7520,16 +7520,13 @@ eq_type_unit_group (const void *item_lhs, const void *item_rhs)
 
 /* Allocate a hash table for type unit groups.  */
 
-static htab_t
+static htab_up
 allocate_type_unit_groups_table (struct objfile *objfile)
 {
-  return htab_create_alloc_ex (3,
-			       hash_type_unit_group,
-			       eq_type_unit_group,
-			       NULL,
-			       &objfile->objfile_obstack,
-			       hashtab_obstack_allocate,
-			       dummy_obstack_deallocate);
+  return htab_up (htab_create_alloc (3,
+				     hash_type_unit_group,
+				     eq_type_unit_group,
+				     NULL, xcalloc, xfree));
 }
 
 /* Type units that don't have DW_AT_stmt_list are grouped into their own
@@ -7625,7 +7622,7 @@ get_type_unit_group (struct dwarf2_cu *cu, const struct attribute *stmt_list)
 
   type_unit_group_for_lookup.hash.dwo_unit = cu->dwo_unit;
   type_unit_group_for_lookup.hash.line_sect_off = (sect_offset) line_offset;
-  slot = htab_find_slot (dwarf2_per_objfile->type_unit_groups,
+  slot = htab_find_slot (dwarf2_per_objfile->type_unit_groups.get (),
 			 &type_unit_group_for_lookup, INSERT);
   if (*slot != NULL)
     {
@@ -8193,7 +8190,7 @@ dwarf2_build_psymtabs_hard (struct dwarf2_per_objfile *dwarf2_per_objfile)
   /* Now that all TUs have been processed we can fill in the dependencies.  */
   if (dwarf2_per_objfile->type_unit_groups != NULL)
     {
-      htab_traverse_noresize (dwarf2_per_objfile->type_unit_groups,
+      htab_traverse_noresize (dwarf2_per_objfile->type_unit_groups.get (),
 			      build_type_psymtab_dependencies, dwarf2_per_objfile);
     }
 

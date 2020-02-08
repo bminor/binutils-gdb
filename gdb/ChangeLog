@@ -1,5 +1,13 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (allocate_type_unit_groups_table): Return
+	htab_up.  Don't allocate on obstack.
+	(get_type_unit_group, dwarf2_build_psymtabs_hard): Update.
+	* dwarf2/read.h (struct dwarf2_per_objfile) <type_unit_groups>:
+	Change type to htab_up.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.h (struct dwarf2_per_objfile) <signatured_types>:
 	Change type to htab_up.
 	* dwarf2/read.c (create_signatured_type_table_from_index)
