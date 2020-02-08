@@ -31,6 +31,7 @@
 #include "defs.h"
 #include "dwarf2read.h"
 #include "dwarf2/abbrev.h"
+#include "dwarf2/attribute.h"
 #include "dwarf-index-cache.h"
 #include "dwarf-index-common.h"
 #include "dwarf2/leb.h"
@@ -1233,29 +1234,6 @@ struct partial_die_info : public allocate_on_obstack
     }
   };
 
-/* Attributes have a name and a value.  */
-struct attribute
-  {
-    ENUM_BITFIELD(dwarf_attribute) name : 16;
-    ENUM_BITFIELD(dwarf_form) form : 15;
-
-    /* Has DW_STRING already been updated by dwarf2_canonicalize_name?  This
-       field should be in u.str (existing only for DW_STRING) but it is kept
-       here for better struct attribute alignment.  */
-    unsigned int string_is_canonical : 1;
-
-    union
-      {
-	const char *str;
-	struct dwarf_block *blk;
-	ULONGEST unsnd;
-	LONGEST snd;
-	CORE_ADDR addr;
-	ULONGEST signature;
-      }
-    u;
-  };
-
 /* This data structure holds a complete die structure.  */
 struct die_info
   {
@@ -1290,25 +1268,6 @@ struct die_info
        zero, but it's not common and zero-sized arrays are not
        sufficiently portable C.  */
     struct attribute attrs[1];
-  };
-
-/* Get at parts of an attribute structure.  */
-
-#define DW_STRING(attr)    ((attr)->u.str)
-#define DW_STRING_IS_CANONICAL(attr) ((attr)->string_is_canonical)
-#define DW_UNSND(attr)     ((attr)->u.unsnd)
-#define DW_BLOCK(attr)     ((attr)->u.blk)
-#define DW_SND(attr)       ((attr)->u.snd)
-#define DW_ADDR(attr)	   ((attr)->u.addr)
-#define DW_SIGNATURE(attr) ((attr)->u.signature)
-
-/* Blocks are a bunch of untyped bytes.  */
-struct dwarf_block
-  {
-    size_t size;
-
-    /* Valid only if SIZE is not zero.  */
-    const gdb_byte *data;
   };
 
 /* FIXME: We might want to set this from BFD via bfd_arch_bits_per_byte,
@@ -1780,14 +1739,6 @@ static struct die_info *dwarf_alloc_die (struct dwarf2_cu *, int);
 
 static void dwarf_decode_macros (struct dwarf2_cu *, unsigned int, int);
 
-static int attr_form_is_block (const struct attribute *);
-
-static int attr_form_is_section_offset (const struct attribute *);
-
-static int attr_form_is_constant (const struct attribute *);
-
-static int attr_form_is_ref (const struct attribute *);
-
 static void fill_in_loclist_baton (struct dwarf2_cu *cu,
 				   struct dwarf2_loclist_baton *baton,
 				   const struct attribute *attr);
@@ -2049,37 +2000,6 @@ line_header_eq_voidp (const void *item_lhs, const void *item_rhs)
 }
 
 
-
-/* Read the given attribute value as an address, taking the attribute's
-   form into account.  */
-
-static CORE_ADDR
-attr_value_as_address (struct attribute *attr)
-{
-  CORE_ADDR addr;
-
-  if (attr->form != DW_FORM_addr && attr->form != DW_FORM_addrx
-      && attr->form != DW_FORM_GNU_addr_index)
-    {
-      /* Aside from a few clearly defined exceptions, attributes that
-	 contain an address must always be in DW_FORM_addr form.
-	 Unfortunately, some compilers happen to be violating this
-	 requirement by encoding addresses using other forms, such
-	 as DW_FORM_data4 for example.  For those broken compilers,
-	 we try to do our best, without any guarantee of success,
-	 to interpret the address correctly.  It would also be nice
-	 to generate a complaint, but that would require us to maintain
-	 a list of legitimate cases where a non-address form is allowed,
-	 as well as update callers to pass in at least the CU's DWARF
-	 version.  This is more overhead than what we're willing to
-	 expand for a pretty rare case.  */
-      addr = DW_UNSND (attr);
-    }
-  else
-    addr = DW_ADDR (attr);
-
-  return addr;
-}
 
 /* See declaration.  */
 
@@ -24812,93 +24732,6 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 			    current_file, lh, section,
 			    section_is_gnu, 0, offset_size,
 			    include_hash.get ());
-}
-
-/* Check if the attribute's form is a DW_FORM_block*
-   if so return true else false.  */
-
-static int
-attr_form_is_block (const struct attribute *attr)
-{
-  return (attr == NULL ? 0 :
-      attr->form == DW_FORM_block1
-      || attr->form == DW_FORM_block2
-      || attr->form == DW_FORM_block4
-      || attr->form == DW_FORM_block
-      || attr->form == DW_FORM_exprloc);
-}
-
-/* Return non-zero if ATTR's value is a section offset --- classes
-   lineptr, loclistptr, macptr or rangelistptr --- or zero, otherwise.
-   You may use DW_UNSND (attr) to retrieve such offsets.
-
-   Section 7.5.4, "Attribute Encodings", explains that no attribute
-   may have a value that belongs to more than one of these classes; it
-   would be ambiguous if we did, because we use the same forms for all
-   of them.  */
-
-static int
-attr_form_is_section_offset (const struct attribute *attr)
-{
-  return (attr->form == DW_FORM_data4
-          || attr->form == DW_FORM_data8
-	  || attr->form == DW_FORM_sec_offset);
-}
-
-/* Return non-zero if ATTR's value falls in the 'constant' class, or
-   zero otherwise.  When this function returns true, you can apply
-   dwarf2_get_attr_constant_value to it.
-
-   However, note that for some attributes you must check
-   attr_form_is_section_offset before using this test.  DW_FORM_data4
-   and DW_FORM_data8 are members of both the constant class, and of
-   the classes that contain offsets into other debug sections
-   (lineptr, loclistptr, macptr or rangelistptr).  The DWARF spec says
-   that, if an attribute's can be either a constant or one of the
-   section offset classes, DW_FORM_data4 and DW_FORM_data8 should be
-   taken as section offsets, not constants.
-
-   DW_FORM_data16 is not considered as dwarf2_get_attr_constant_value
-   cannot handle that.  */
-
-static int
-attr_form_is_constant (const struct attribute *attr)
-{
-  switch (attr->form)
-    {
-    case DW_FORM_sdata:
-    case DW_FORM_udata:
-    case DW_FORM_data1:
-    case DW_FORM_data2:
-    case DW_FORM_data4:
-    case DW_FORM_data8:
-    case DW_FORM_implicit_const:
-      return 1;
-    default:
-      return 0;
-    }
-}
-
-
-/* DW_ADDR is always stored already as sect_offset; despite for the forms
-   besides DW_FORM_ref_addr it is stored as cu_offset in the DWARF file.  */
-
-static int
-attr_form_is_ref (const struct attribute *attr)
-{
-  switch (attr->form)
-    {
-    case DW_FORM_ref_addr:
-    case DW_FORM_ref1:
-    case DW_FORM_ref2:
-    case DW_FORM_ref4:
-    case DW_FORM_ref8:
-    case DW_FORM_ref_udata:
-    case DW_FORM_GNU_ref_alt:
-      return 1;
-    default:
-      return 0;
-    }
 }
 
 /* Return the .debug_loc section to use for CU.

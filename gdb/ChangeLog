@@ -1,5 +1,16 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (struct attribute, DW_STRING)
+	(DW_STRING_IS_CANONICAL, DW_UNSND, DW_BLOCK, DW_SND, DW_ADDR)
+	(DW_SIGNATURE, struct dwarf_block, attr_value_as_address)
+	(attr_form_is_block, attr_form_is_section_offset)
+	(attr_form_is_constant, attr_form_is_ref): Move.
+	* dwarf2/attribute.h: New file.
+	* dwarf2/attribute.c: New file, from dwarf2read.c.
+	* Makefile.in (COMMON_SFILES): Add dwarf2/attribute.c.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (abbrev_table_up, struct abbrev_info)
 	(struct attr_abbrev, ABBREV_HASH_SIZE, struct abbrev_table):
 	Move.
