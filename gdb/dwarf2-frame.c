@@ -22,6 +22,7 @@
 #include "defs.h"
 #include "dwarf2expr.h"
 #include "dwarf2.h"
+#include "dwarf2/leb.h"
 #include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
@@ -1474,23 +1475,6 @@ const struct objfile_key<dwarf2_fde_table,
 			 gdb::noop_deleter<dwarf2_fde_table>>
   dwarf2_frame_objfile_data;
 
-static unsigned int
-read_1_byte (bfd *abfd, const gdb_byte *buf)
-{
-  return bfd_get_8 (abfd, buf);
-}
-
-static unsigned int
-read_4_bytes (bfd *abfd, const gdb_byte *buf)
-{
-  return bfd_get_32 (abfd, buf);
-}
-
-static ULONGEST
-read_8_bytes (bfd *abfd, const gdb_byte *buf)
-{
-  return bfd_get_64 (abfd, buf);
-}
 
 static ULONGEST
 read_initial_length (bfd *abfd, const gdb_byte *buf,

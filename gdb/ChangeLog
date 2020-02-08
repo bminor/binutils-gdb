@@ -1,3 +1,17 @@
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2read.h (read_unsigned_leb128): Don't declare.
+	* dwarf2read.c (read_1_byte, read_1_signed_byte, read_2_bytes)
+	(read_2_signed_bytes, read_3_bytes, read_4_bytes)
+	(read_4_signed_bytes, read_8_bytes): Move to dwarf2/leb.h.
+	(read_unsigned_leb128, read_signed_leb128): Move to dwarf2/leb.c.
+	* dwarf2/leb.h: New file, from dwarf2read.c.
+	* dwarf2/leb.c: New file, from dwarf2read.c.
+	* dwarf2-frame.c (read_1_byte, read_4_bytes, read_8_bytes):
+	Remove.
+	* Makefile.in (CONFIG_SRC_SUBDIR): Add dwarf2.
+	(COMMON_SFILES): Add dwarf2/leb.c.
+
 2020-02-08  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 9.1 released.

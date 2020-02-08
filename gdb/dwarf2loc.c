@@ -38,6 +38,7 @@
 #include "dwarf2loc.h"
 #include "dwarf2read.h"
 #include "dwarf2-frame.h"
+#include "dwarf2/leb.h"
 #include "compile/compile.h"
 #include "gdbsupport/selftest.h"
 #include <algorithm>

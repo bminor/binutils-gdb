@@ -463,8 +463,6 @@ struct signatured_type
   struct dwo_unit *dwo_unit;
 };
 
-ULONGEST read_unsigned_leb128 (bfd *, const gdb_byte *, unsigned int *);
-
 /* This represents a '.dwz' file.  */
 
 struct dwz_file

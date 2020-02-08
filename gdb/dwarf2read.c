@@ -32,6 +32,7 @@
 #include "dwarf2read.h"
 #include "dwarf-index-cache.h"
 #include "dwarf-index-common.h"
+#include "dwarf2/leb.h"
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "symtab.h"
@@ -1551,19 +1552,6 @@ static void read_attribute_reprocess (const struct die_reader_specs *reader,
 
 static CORE_ADDR read_addr_index (struct dwarf2_cu *cu, unsigned int addr_index);
 
-static unsigned int read_1_byte (bfd *, const gdb_byte *);
-
-static int read_1_signed_byte (bfd *, const gdb_byte *);
-
-static unsigned int read_2_bytes (bfd *, const gdb_byte *);
-
-/* Read the next three bytes (little-endian order) as an unsigned integer.  */
-static unsigned int read_3_bytes (bfd *, const gdb_byte *);
-
-static unsigned int read_4_bytes (bfd *, const gdb_byte *);
-
-static ULONGEST read_8_bytes (bfd *, const gdb_byte *);
-
 static CORE_ADDR read_address (bfd *, const gdb_byte *ptr, struct dwarf2_cu *,
 			       unsigned int *);
 
@@ -1601,8 +1589,6 @@ static const char *read_indirect_string_at_offset
 
 static const char *read_indirect_string_from_dwz
   (struct objfile *objfile, struct dwz_file *, LONGEST);
-
-static LONGEST read_signed_leb128 (bfd *, const gdb_byte *, unsigned int *);
 
 static CORE_ADDR read_addr_index_from_leb128 (struct dwarf2_cu *,
 					      const gdb_byte *,
@@ -19685,63 +19671,6 @@ read_attribute (const struct die_reader_specs *reader,
 			       need_reprocess);
 }
 
-/* Read dwarf information from a buffer.  */
-
-static unsigned int
-read_1_byte (bfd *abfd, const gdb_byte *buf)
-{
-  return bfd_get_8 (abfd, buf);
-}
-
-static int
-read_1_signed_byte (bfd *abfd, const gdb_byte *buf)
-{
-  return bfd_get_signed_8 (abfd, buf);
-}
-
-static unsigned int
-read_2_bytes (bfd *abfd, const gdb_byte *buf)
-{
-  return bfd_get_16 (abfd, buf);
-}
-
-static int
-read_2_signed_bytes (bfd *abfd, const gdb_byte *buf)
-{
-  return bfd_get_signed_16 (abfd, buf);
-}
-
-static unsigned int
-read_3_bytes (bfd *abfd, const gdb_byte *buf)
-{
-  unsigned int result = 0;
-  for (int i = 0; i < 3; ++i)
-    {
-      unsigned char byte = bfd_get_8 (abfd, buf);
-      buf++;
-      result |= ((unsigned int) byte << (i * 8));
-    }
-  return result;
-}
-
-static unsigned int
-read_4_bytes (bfd *abfd, const gdb_byte *buf)
-{
-  return bfd_get_32 (abfd, buf);
-}
-
-static int
-read_4_signed_bytes (bfd *abfd, const gdb_byte *buf)
-{
-  return bfd_get_signed_32 (abfd, buf);
-}
-
-static ULONGEST
-read_8_bytes (bfd *abfd, const gdb_byte *buf)
-{
-  return bfd_get_64 (abfd, buf);
-}
-
 static CORE_ADDR
 read_address (bfd *abfd, const gdb_byte *buf, struct dwarf2_cu *cu,
 	      unsigned int *bytes_read)
@@ -20049,63 +19978,6 @@ read_indirect_line_string (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
   return read_indirect_line_string_at_offset (dwarf2_per_objfile, abfd,
 					      str_offset);
-}
-
-ULONGEST
-read_unsigned_leb128 (bfd *abfd, const gdb_byte *buf,
-			  unsigned int *bytes_read_ptr)
-{
-  ULONGEST result;
-  unsigned int num_read;
-  int shift;
-  unsigned char byte;
-
-  result = 0;
-  shift = 0;
-  num_read = 0;
-  while (1)
-    {
-      byte = bfd_get_8 (abfd, buf);
-      buf++;
-      num_read++;
-      result |= ((ULONGEST) (byte & 127) << shift);
-      if ((byte & 128) == 0)
-	{
-	  break;
-	}
-      shift += 7;
-    }
-  *bytes_read_ptr = num_read;
-  return result;
-}
-
-static LONGEST
-read_signed_leb128 (bfd *abfd, const gdb_byte *buf,
-		    unsigned int *bytes_read_ptr)
-{
-  ULONGEST result;
-  int shift, num_read;
-  unsigned char byte;
-
-  result = 0;
-  shift = 0;
-  num_read = 0;
-  while (1)
-    {
-      byte = bfd_get_8 (abfd, buf);
-      buf++;
-      num_read++;
-      result |= ((ULONGEST) (byte & 127) << shift);
-      shift += 7;
-      if ((byte & 128) == 0)
-	{
-	  break;
-	}
-    }
-  if ((shift < 8 * sizeof (result)) && (byte & 0x40))
-    result |= -(((ULONGEST) 1) << shift);
-  *bytes_read_ptr = num_read;
-  return result;
 }
 
 /* Given index ADDR_INDEX in .debug_addr, fetch the value.
