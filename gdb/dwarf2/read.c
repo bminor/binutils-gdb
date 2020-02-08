@@ -2011,9 +2011,6 @@ dwarf2_per_objfile::~dwarf2_per_objfile ()
   /* Cached DIE trees use xmalloc and the comp_unit_obstack.  */
   free_cached_comp_units ();
 
-  if (quick_file_names_table)
-    htab_delete (quick_file_names_table);
-
   for (dwarf2_per_cu_data *per_cu : all_comp_units)
     per_cu->imported_symtabs_free ();
 
@@ -2524,12 +2521,12 @@ delete_file_name_entry (void *e)
 
 /* Create a quick_file_names hash table.  */
 
-static htab_t
+static htab_up
 create_quick_file_names_table (unsigned int nr_initial_entries)
 {
-  return htab_create_alloc (nr_initial_entries,
-			    hash_file_name_entry, eq_file_name_entry,
-			    delete_file_name_entry, xcalloc, xfree);
+  return htab_up (htab_create_alloc (nr_initial_entries,
+				     hash_file_name_entry, eq_file_name_entry,
+				     delete_file_name_entry, xcalloc, xfree));
 }
 
 /* Read in PER_CU->CU.  This function is unrelated to symtabs, symtab would
@@ -3365,7 +3362,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 	 If we have we're done.  */
       find_entry.hash.dwo_unit = cu->dwo_unit;
       find_entry.hash.line_sect_off = line_offset;
-      slot = htab_find_slot (dwarf2_per_objfile->quick_file_names_table,
+      slot = htab_find_slot (dwarf2_per_objfile->quick_file_names_table.get (),
 			     &find_entry, INSERT);
       if (*slot != NULL)
 	{
@@ -3489,7 +3486,7 @@ dw2_forget_cached_source_info (struct objfile *objfile)
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = get_dwarf2_per_objfile (objfile);
 
-  htab_traverse_noresize (dwarf2_per_objfile->quick_file_names_table,
+  htab_traverse_noresize (dwarf2_per_objfile->quick_file_names_table.get (),
 			  dw2_free_cached_file_names, NULL);
 }
 

@@ -1,5 +1,14 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (~dwarf2_per_objfile): Update.
+	(create_quick_file_names_table): Return htab_up.
+	(dw2_get_file_names_reader, dw2_forget_cached_source_info):
+	Update.
+	* dwarf2/read.h (struct dwarf2_per_objfile)
+	<quick_file_names_table>: Now htab_up.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/abbrev.c (abbrev_table::read): Simplify.
 
 2020-02-08  Tom Tromey  <tom@tromey.com>

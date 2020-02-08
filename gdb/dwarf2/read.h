@@ -205,7 +205,7 @@ public:
      sorted all the TUs into "type unit groups", grouped by their
      DW_AT_stmt_list value.  Therefore the only sharing done here is with a
      CU and its associated TU group if there is one.  */
-  htab_t quick_file_names_table {};
+  htab_up quick_file_names_table;
 
   /* Set during partial symbol reading, to prevent queueing of full
      symbols.  */
