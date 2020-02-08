@@ -1,5 +1,10 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (allocate_dwo_file_hash_table): Don't allocate on
+	obstack.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (~dwarf2_per_objfile): Don't delete
 	line_header_hash.
 	(handle_DW_AT_stmt_list): Update.  Don't allocate on obstack.

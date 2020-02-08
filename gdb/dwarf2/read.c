@@ -11417,13 +11417,11 @@ allocate_dwo_file_hash_table (struct objfile *objfile)
       delete dwo_file;
     };
 
-  return htab_up (htab_create_alloc_ex (41,
-					hash_dwo_file,
-					eq_dwo_file,
-					delete_dwo_file,
-					&objfile->objfile_obstack,
-					hashtab_obstack_allocate,
-					dummy_obstack_deallocate));
+  return htab_up (htab_create_alloc (41,
+				     hash_dwo_file,
+				     eq_dwo_file,
+				     delete_dwo_file,
+				     xcalloc, xfree));
 }
 
 /* Lookup DWO file DWO_NAME.  */
