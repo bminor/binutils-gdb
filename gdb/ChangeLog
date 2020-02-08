@@ -1,5 +1,13 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (struct dwp_file) <loaded_cus, loaded_tus>: Now
+	htab_up.
+	(lookup_dwo_unit_in_dwp): Update.
+	(allocate_dwp_loaded_cutus_table): Return htab_up.  Don't allocate
+	on obstack.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (allocate_dwo_file_hash_table): Don't allocate on
 	obstack.
 

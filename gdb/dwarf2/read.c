@@ -868,8 +868,8 @@ struct dwp_file
   const struct dwp_hash_table *tus = nullptr;
 
   /* Tables of loaded CUs/TUs.  Each entry is a struct dwo_unit *.  */
-  htab_t loaded_cus {};
-  htab_t loaded_tus {};
+  htab_up loaded_cus;
+  htab_up loaded_tus;
 
   /* Table to map ELF section numbers to their sections.
      This is only needed for the DWP V1 file format.  */
@@ -12350,8 +12350,8 @@ lookup_dwo_unit_in_dwp (struct dwarf2_per_objfile *dwarf2_per_objfile,
   memset (&find_dwo_cu, 0, sizeof (find_dwo_cu));
   find_dwo_cu.signature = signature;
   slot = htab_find_slot (is_debug_types
-			 ? dwp_file->loaded_tus
-			 : dwp_file->loaded_cus,
+			 ? dwp_file->loaded_tus.get ()
+			 : dwp_file->loaded_cus.get (),
 			 &find_dwo_cu, INSERT);
 
   if (*slot != NULL)
@@ -12722,16 +12722,13 @@ eq_dwp_loaded_cutus (const void *a, const void *b)
 
 /* Allocate a hash table for dwp_file loaded CUs/TUs.  */
 
-static htab_t
+static htab_up
 allocate_dwp_loaded_cutus_table (struct objfile *objfile)
 {
-  return htab_create_alloc_ex (3,
-			       hash_dwp_loaded_cutus,
-			       eq_dwp_loaded_cutus,
-			       NULL,
-			       &objfile->objfile_obstack,
-			       hashtab_obstack_allocate,
-			       dummy_obstack_deallocate);
+  return htab_up (htab_create_alloc (3,
+				     hash_dwp_loaded_cutus,
+				     eq_dwp_loaded_cutus,
+				     NULL, xcalloc, xfree));
 }
 
 /* Try to open DWP file FILE_NAME.
