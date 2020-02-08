@@ -22,6 +22,7 @@
 
 #include <unordered_map>
 #include "dwarf-index-cache.h"
+#include "dwarf2/section.h"
 #include "filename-seen-cache.h"
 #include "gdb_obstack.h"
 #include "gdbsupport/hash_enum.h"
@@ -32,54 +33,6 @@ extern struct cmd_list_element *set_dwarf_cmdlist;
 extern struct cmd_list_element *show_dwarf_cmdlist;
 
 extern bool dwarf_always_disassemble;
-
-/* A descriptor for dwarf sections.
-
-   S.ASECTION, SIZE are typically initialized when the objfile is first
-   scanned.  BUFFER, READIN are filled in later when the section is read.
-   If the section contained compressed data then SIZE is updated to record
-   the uncompressed size of the section.
-
-   DWP file format V2 introduces a wrinkle that is easiest to handle by
-   creating the concept of virtual sections contained within a real section.
-   In DWP V2 the sections of the input DWO files are concatenated together
-   into one section, but section offsets are kept relative to the original
-   input section.
-   If this is a virtual dwp-v2 section, S.CONTAINING_SECTION is a backlink to
-   the real section this "virtual" section is contained in, and BUFFER,SIZE
-   describe the virtual section.  */
-
-struct dwarf2_section_info
-{
-  union
-  {
-    /* If this is a real section, the bfd section.  */
-    asection *section;
-    /* If this is a virtual section, pointer to the containing ("real")
-       section.  */
-    struct dwarf2_section_info *containing_section;
-  } s;
-  /* Pointer to section data, only valid if readin.  */
-  const gdb_byte *buffer;
-  /* The size of the section, real or virtual.  */
-  bfd_size_type size;
-  /* If this is a virtual section, the offset in the real section.
-     Only valid if is_virtual.  */
-  bfd_size_type virtual_offset;
-  /* True if we have tried to read this section.  */
-  bool readin;
-  /* True if this is a virtual section, False otherwise.
-     This specifies which of s.section and s.containing_section to use.  */
-  bool is_virtual;
-};
-
-/* Read the contents of the section INFO.
-   OBJFILE is the main object file, but not necessarily the file where
-   the section comes from.  E.g., for DWO files the bfd of INFO is the bfd
-   of the DWO file.
-   If the section is compressed, uncompress it before returning.  */
-
-void dwarf2_read_section (struct objfile *objfile, dwarf2_section_info *info);
 
 struct tu_stats
 {

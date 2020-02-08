@@ -1474,10 +1474,6 @@ show_dwarf_max_cache_age (struct ui_file *file, int from_tty,
 
 /* local function prototypes */
 
-static const char *get_section_name (const struct dwarf2_section_info *);
-
-static const char *get_section_file_name (const struct dwarf2_section_info *);
-
 static void dwarf2_find_base_address (struct die_info *die,
 				      struct dwarf2_cu *cu);
 
@@ -2264,88 +2260,6 @@ dwarf2_has_info (struct objfile *objfile,
 	  && dwarf2_per_objfile->abbrev.s.section != NULL);
 }
 
-/* Return the containing section of virtual section SECTION.  */
-
-static struct dwarf2_section_info *
-get_containing_section (const struct dwarf2_section_info *section)
-{
-  gdb_assert (section->is_virtual);
-  return section->s.containing_section;
-}
-
-/* Return the bfd owner of SECTION.  */
-
-static struct bfd *
-get_section_bfd_owner (const struct dwarf2_section_info *section)
-{
-  if (section->is_virtual)
-    {
-      section = get_containing_section (section);
-      gdb_assert (!section->is_virtual);
-    }
-  return section->s.section->owner;
-}
-
-/* Return the bfd section of SECTION.
-   Returns NULL if the section is not present.  */
-
-static asection *
-get_section_bfd_section (const struct dwarf2_section_info *section)
-{
-  if (section->is_virtual)
-    {
-      section = get_containing_section (section);
-      gdb_assert (!section->is_virtual);
-    }
-  return section->s.section;
-}
-
-/* Return the name of SECTION.  */
-
-static const char *
-get_section_name (const struct dwarf2_section_info *section)
-{
-  asection *sectp = get_section_bfd_section (section);
-
-  gdb_assert (sectp != NULL);
-  return bfd_section_name (sectp);
-}
-
-/* Return the name of the file SECTION is in.  */
-
-static const char *
-get_section_file_name (const struct dwarf2_section_info *section)
-{
-  bfd *abfd = get_section_bfd_owner (section);
-
-  return bfd_get_filename (abfd);
-}
-
-/* Return the id of SECTION.
-   Returns 0 if SECTION doesn't exist.  */
-
-static int
-get_section_id (const struct dwarf2_section_info *section)
-{
-  asection *sectp = get_section_bfd_section (section);
-
-  if (sectp == NULL)
-    return 0;
-  return sectp->id;
-}
-
-/* Return the flags of SECTION.
-   SECTION (or containing section if this is a virtual section) must exist.  */
-
-static int
-get_section_flags (const struct dwarf2_section_info *section)
-{
-  asection *sectp = get_section_bfd_section (section);
-
-  gdb_assert (sectp != NULL);
-  return bfd_section_flags (sectp);
-}
-
 /* When loading sections, we look either for uncompressed section or for
    compressed section names.  */
 
@@ -2486,95 +2400,6 @@ dwarf2_per_objfile::locate_sections (bfd *abfd, asection *sectp,
   if ((bfd_section_flags (sectp) & (SEC_LOAD | SEC_ALLOC))
       && bfd_section_vma (sectp) == 0)
     this->has_section_at_zero = true;
-}
-
-/* A helper function that decides whether a section is empty,
-   or not present.  */
-
-static int
-dwarf2_section_empty_p (const struct dwarf2_section_info *section)
-{
-  if (section->is_virtual)
-    return section->size == 0;
-  return section->s.section == NULL || section->size == 0;
-}
-
-/* See dwarf2read.h.  */
-
-void
-dwarf2_read_section (struct objfile *objfile, dwarf2_section_info *info)
-{
-  asection *sectp;
-  bfd *abfd;
-  gdb_byte *buf, *retbuf;
-
-  if (info->readin)
-    return;
-  info->buffer = NULL;
-  info->readin = true;
-
-  if (dwarf2_section_empty_p (info))
-    return;
-
-  sectp = get_section_bfd_section (info);
-
-  /* If this is a virtual section we need to read in the real one first.  */
-  if (info->is_virtual)
-    {
-      struct dwarf2_section_info *containing_section =
-	get_containing_section (info);
-
-      gdb_assert (sectp != NULL);
-      if ((sectp->flags & SEC_RELOC) != 0)
-	{
-	  error (_("Dwarf Error: DWP format V2 with relocations is not"
-		   " supported in section %s [in module %s]"),
-		 get_section_name (info), get_section_file_name (info));
-	}
-      dwarf2_read_section (objfile, containing_section);
-      /* Other code should have already caught virtual sections that don't
-	 fit.  */
-      gdb_assert (info->virtual_offset + info->size
-		  <= containing_section->size);
-      /* If the real section is empty or there was a problem reading the
-	 section we shouldn't get here.  */
-      gdb_assert (containing_section->buffer != NULL);
-      info->buffer = containing_section->buffer + info->virtual_offset;
-      return;
-    }
-
-  /* If the section has relocations, we must read it ourselves.
-     Otherwise we attach it to the BFD.  */
-  if ((sectp->flags & SEC_RELOC) == 0)
-    {
-      info->buffer = gdb_bfd_map_section (sectp, &info->size);
-      return;
-    }
-
-  buf = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack, info->size);
-  info->buffer = buf;
-
-  /* When debugging .o files, we may need to apply relocations; see
-     http://sourceware.org/ml/gdb-patches/2002-04/msg00136.html .
-     We never compress sections in .o files, so we only need to
-     try this when the section is not compressed.  */
-  retbuf = symfile_relocate_debug_section (objfile, sectp, buf);
-  if (retbuf != NULL)
-    {
-      info->buffer = retbuf;
-      return;
-    }
-
-  abfd = get_section_bfd_owner (info);
-  gdb_assert (abfd != NULL);
-
-  if (bfd_seek (abfd, sectp->filepos, SEEK_SET) != 0
-      || bfd_bread (buf, info->size, abfd) != info->size)
-    {
-      error (_("Dwarf Error: Can't read DWARF data"
-	       " in section %s [in module %s]"),
-	     bfd_section_name (sectp), bfd_get_filename (abfd));
-    }
 }
 
 /* A helper function that returns the size of a section in a safe way.

@@ -1,5 +1,18 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.h (struct dwarf2_section_info, dwarf2_read_section):
+	Move to dwarf2/section.h.
+	* dwarf2read.c (get_containing_section, get_section_bfd_owner)
+	(get_section_bfd_section, get_section_name)
+	(get_section_file_name, get_section_id, get_section_flags)
+	(dwarf2_section_empty_p, dwarf2_read_section): Moe to
+	dwarf2/section.c.
+	* dwarf2/section.h: New file.
+	* dwarf2/section.c: New file, from dwarf2read.c.
+	* Makefile.in (COMMON_SFILES): Add dwarf2/section.c.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.h (read_unsigned_leb128): Don't declare.
 	* dwarf2read.c (read_1_byte, read_1_signed_byte, read_2_bytes)
 	(read_2_signed_bytes, read_3_bytes, read_4_bytes)
