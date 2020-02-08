@@ -1,5 +1,14 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.h (dwarf_line_debug): Declare.
+	* Makefile.in (COMMON_SFILES): Add dwarf2/line-header.c.
+	* dwarf2/read.c: Move line_header code to new files.
+	(dwarf_line_debug): No longer static.
+	* dwarf2/line-header.c: New file.
+	* dwarf2/line-header.h: New file.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (struct line_header) <file_full_name,
 	file_file_name>: Return unique_xmalloc_ptr.
 	(line_header::file_file_name): Update.

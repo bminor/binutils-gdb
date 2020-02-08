@@ -473,4 +473,7 @@ struct dwz_file
 extern struct dwz_file *dwarf2_get_dwz_file
     (struct dwarf2_per_objfile *dwarf2_per_objfile);
 
+/* When non-zero, dump line number entries as they are read in.  */
+extern unsigned int dwarf_line_debug;
+
 #endif /* DWARF2READ_H */

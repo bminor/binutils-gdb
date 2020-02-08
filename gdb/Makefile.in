@@ -1003,6 +1003,7 @@ COMMON_SFILES = \
 	dwarf2/index-common.c \
 	dwarf2/index-write.c \
 	dwarf2/leb.c \
+	dwarf2/line-header.c \
 	dwarf2/loc.c \
 	dwarf2/read.c \
 	dwarf2/section.c \

@@ -35,6 +35,7 @@
 #include "dwarf2/index-cache.h"
 #include "dwarf2/index-common.h"
 #include "dwarf2/leb.h"
+#include "dwarf2/line-header.h"
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "symtab.h"
@@ -90,7 +91,7 @@ static unsigned int dwarf_read_debug = 0;
 static unsigned int dwarf_die_debug = 0;
 
 /* When non-zero, dump line number entries as they are read in.  */
-static unsigned int dwarf_line_debug = 0;
+unsigned int dwarf_line_debug = 0;
 
 /* When true, cross-check physname against demangler.  */
 static bool check_physname = false;
@@ -945,167 +946,6 @@ private:
   /* The DWO abbreviation table.  */
   abbrev_table_up m_dwo_abbrev_table;
 };
-
-/* dir_index is 1-based in DWARF 4 and before, and is 0-based in DWARF 5 and
-   later.  */
-typedef int dir_index;
-
-/* file_name_index is 1-based in DWARF 4 and before, and is 0-based in DWARF 5
-   and later.  */
-typedef int file_name_index;
-
-struct file_entry
-{
-  file_entry () = default;
-
-  file_entry (const char *name_, dir_index d_index_,
-	      unsigned int mod_time_, unsigned int length_)
-    : name (name_),
-      d_index (d_index_),
-      mod_time (mod_time_),
-      length (length_)
-  {}
-
-  /* Return the include directory at D_INDEX stored in LH.  Returns
-     NULL if D_INDEX is out of bounds.  */
-  const char *include_dir (const line_header *lh) const;
-
-  /* The file name.  Note this is an observing pointer.  The memory is
-     owned by debug_line_buffer.  */
-  const char *name {};
-
-  /* The directory index (1-based).  */
-  dir_index d_index {};
-
-  unsigned int mod_time {};
-
-  unsigned int length {};
-
-  /* True if referenced by the Line Number Program.  */
-  bool included_p {};
-
-  /* The associated symbol table, if any.  */
-  struct symtab *symtab {};
-};
-
-/* The line number information for a compilation unit (found in the
-   .debug_line section) begins with a "statement program header",
-   which contains the following information.  */
-struct line_header
-{
-  line_header ()
-    : offset_in_dwz {}
-  {}
-
-  /* Add an entry to the include directory table.  */
-  void add_include_dir (const char *include_dir);
-
-  /* Add an entry to the file name table.  */
-  void add_file_name (const char *name, dir_index d_index,
-		      unsigned int mod_time, unsigned int length);
-
-  /* Return the include dir at INDEX (0-based in DWARF 5 and 1-based before).
-     Returns NULL if INDEX is out of bounds.  */
-  const char *include_dir_at (dir_index index) const
-  {
-    int vec_index;
-    if (version >= 5)
-      vec_index = index;
-    else
-      vec_index = index - 1;
-    if (vec_index < 0 || vec_index >= m_include_dirs.size ())
-      return NULL;
-    return m_include_dirs[vec_index];
-  }
-
-  bool is_valid_file_index (int file_index)
-  {
-    if (version >= 5)
-      return 0 <= file_index && file_index < file_names_size ();
-    return 1 <= file_index && file_index <= file_names_size ();
-  }
-
-  /* Return the file name at INDEX (0-based in DWARF 5 and 1-based before).
-     Returns NULL if INDEX is out of bounds.  */
-  file_entry *file_name_at (file_name_index index)
-  {
-    int vec_index;
-    if (version >= 5)
-      vec_index = index;
-    else
-      vec_index = index - 1;
-    if (vec_index < 0 || vec_index >= m_file_names.size ())
-      return NULL;
-    return &m_file_names[vec_index];
-  }
-
-  /* The indexes are 0-based in DWARF 5 and 1-based in DWARF 4. Therefore,
-     this method should only be used to iterate through all file entries in an
-     index-agnostic manner.  */
-  std::vector<file_entry> &file_names ()
-  { return m_file_names; }
-
-  /* Offset of line number information in .debug_line section.  */
-  sect_offset sect_off {};
-
-  /* OFFSET is for struct dwz_file associated with dwarf2_per_objfile.  */
-  unsigned offset_in_dwz : 1; /* Can't initialize bitfields in-class.  */
-
-  unsigned int total_length {};
-  unsigned short version {};
-  unsigned int header_length {};
-  unsigned char minimum_instruction_length {};
-  unsigned char maximum_ops_per_instruction {};
-  unsigned char default_is_stmt {};
-  int line_base {};
-  unsigned char line_range {};
-  unsigned char opcode_base {};
-
-  /* standard_opcode_lengths[i] is the number of operands for the
-     standard opcode whose value is i.  This means that
-     standard_opcode_lengths[0] is unused, and the last meaningful
-     element is standard_opcode_lengths[opcode_base - 1].  */
-  std::unique_ptr<unsigned char[]> standard_opcode_lengths;
-
-  int file_names_size ()
-  { return m_file_names.size(); }
-
-  /* The start and end of the statement program following this
-     header.  These point into dwarf2_per_objfile->line_buffer.  */
-  const gdb_byte *statement_program_start {}, *statement_program_end {};
-
-  /* Return the full name of file number I in this object's file name
-     table.  Use COMP_DIR as the name of the current directory of the
-     compilation.  The result is allocated using xmalloc; the caller
-     is responsible for freeing it.  */
-  gdb::unique_xmalloc_ptr<char> file_full_name (int file,
-						const char *comp_dir);
-
-  /* Return file name relative to the compilation directory of file
-     number I in this object's file name table.  The result is
-     allocated using xmalloc; the caller is responsible for freeing
-     it.  */
-  gdb::unique_xmalloc_ptr<char> file_file_name (int file);
-
- private:
-  /* The include_directories table.  Note these are observing
-     pointers.  The memory is owned by debug_line_buffer.  */
-  std::vector<const char *> m_include_dirs;
-
-  /* The file_names table. This is private because the meaning of indexes
-     differs among DWARF versions (The first valid index is 1 in DWARF 4 and
-     before, and is 0 in DWARF 5 and later).  So the client should use
-     file_name_at method for access.  */
-  std::vector<file_entry> m_file_names;
-};
-
-typedef std::unique_ptr<line_header> line_header_up;
-
-const char *
-file_entry::include_dir (const line_header *lh) const
-{
-  return lh->include_dir_at (d_index);
-}
 
 /* When we construct a partial symbol table entry we only
    need this much information.  */
@@ -19850,41 +19690,6 @@ free_line_header_voidp (void *arg)
   delete lh;
 }
 
-void
-line_header::add_include_dir (const char *include_dir)
-{
-  if (dwarf_line_debug >= 2)
-    {
-      size_t new_size;
-      if (version >= 5)
-        new_size = m_include_dirs.size ();
-      else
-        new_size = m_include_dirs.size () + 1;
-      fprintf_unfiltered (gdb_stdlog, "Adding dir %zu: %s\n",
-			  new_size, include_dir);
-    }
-  m_include_dirs.push_back (include_dir);
-}
-
-void
-line_header::add_file_name (const char *name,
-			    dir_index d_index,
-			    unsigned int mod_time,
-			    unsigned int length)
-{
-  if (dwarf_line_debug >= 2)
-    {
-      size_t new_size;
-      if (version >= 5)
-        new_size = file_names_size ();
-      else
-        new_size = file_names_size () + 1;
-      fprintf_unfiltered (gdb_stdlog, "Adding file %zu: %s\n",
-			  new_size, name);
-    }
-  m_file_names.emplace_back (name, d_index, mod_time, length);
-}
-
 /* A convenience function to find the proper .debug_line section for a CU.  */
 
 static struct dwarf2_section_info *
@@ -23755,62 +23560,6 @@ dwarf_alloc_die (struct dwarf2_cu *cu, int num_attrs)
 
 
 /* Macro support.  */
-
-gdb::unique_xmalloc_ptr<char>
-line_header::file_file_name (int file)
-{
-  /* Is the file number a valid index into the line header's file name
-     table?  Remember that file numbers start with one, not zero.  */
-  if (is_valid_file_index (file))
-    {
-      const file_entry *fe = file_name_at (file);
-
-      if (!IS_ABSOLUTE_PATH (fe->name))
-	{
-	  const char *dir = fe->include_dir (this);
-	  if (dir != NULL)
-	    return gdb::unique_xmalloc_ptr<char> (concat (dir, SLASH_STRING,
-							  fe->name,
-							  (char *) NULL));
-	}
-      return make_unique_xstrdup (fe->name);
-    }
-  else
-    {
-      /* The compiler produced a bogus file number.  We can at least
-         record the macro definitions made in the file, even if we
-         won't be able to find the file by name.  */
-      char fake_name[80];
-
-      xsnprintf (fake_name, sizeof (fake_name),
-		 "<bad macro file number %d>", file);
-
-      complaint (_("bad file number in macro information (%d)"),
-                 file);
-
-      return make_unique_xstrdup (fake_name);
-    }
-}
-
-gdb::unique_xmalloc_ptr<char>
-line_header::file_full_name (int file, const char *comp_dir)
-{
-  /* Is the file number a valid index into the line header's file name
-     table?  Remember that file numbers start with one, not zero.  */
-  if (is_valid_file_index (file))
-    {
-      gdb::unique_xmalloc_ptr<char> relative = file_file_name (file);
-
-      if (IS_ABSOLUTE_PATH (relative.get ()) || comp_dir == NULL)
-	return relative;
-      return gdb::unique_xmalloc_ptr<char> (concat (comp_dir, SLASH_STRING,
-						    relative.get (),
-						    (char *) NULL));
-    }
-  else
-    return file_file_name (file);
-}
-
 
 static struct macro_source_file *
 macro_start_file (struct dwarf2_cu *cu,
