@@ -929,7 +929,6 @@ public:
 
   const gdb_byte *info_ptr = nullptr;
   struct die_info *comp_unit_die = nullptr;
-  int has_children = 0;
   bool dummy_p = false;
 
 private:
@@ -1247,6 +1246,9 @@ struct die_info
     /* True if this die is in process.  PR 16581.  */
     unsigned char in_process : 1;
 
+    /* True if this DIE has children.  */
+    unsigned char has_children : 1;
+
     /* Abbrev number */
     unsigned int abbrev;
 
@@ -1370,8 +1372,7 @@ static dwarf2_psymtab *create_partial_symtab
 
 static void build_type_psymtabs_reader (const struct die_reader_specs *reader,
 					const gdb_byte *info_ptr,
-					struct die_info *type_unit_die,
-					int has_children);
+					struct die_info *type_unit_die);
 
 static void dwarf2_build_psymtabs_hard
   (struct dwarf2_per_objfile *dwarf2_per_objfile);
@@ -1648,11 +1649,10 @@ static struct die_info *read_die_and_siblings (const struct die_reader_specs *,
 
 static const gdb_byte *read_full_die_1 (const struct die_reader_specs *,
 					struct die_info **, const gdb_byte *,
-					int *, int);
+					int);
 
 static const gdb_byte *read_full_die (const struct die_reader_specs *,
-				      struct die_info **, const gdb_byte *,
-				      int *);
+				      struct die_info **, const gdb_byte *);
 
 static void process_die (struct die_info *, struct dwarf2_cu *);
 
@@ -3338,8 +3338,7 @@ dwarf2_read_gdb_index
 static void
 dw2_get_file_names_reader (const struct die_reader_specs *reader,
 			   const gdb_byte *info_ptr,
-			   struct die_info *comp_unit_die,
-			   int has_children)
+			   struct die_info *comp_unit_die)
 {
   struct dwarf2_cu *cu = reader->cu;
   struct dwarf2_per_cu_data *this_cu = cu->per_cu;
@@ -3437,8 +3436,7 @@ dw2_get_file_names (struct dwarf2_per_cu_data *this_cu)
 
   cutu_reader reader (this_cu);
   if (!reader.dummy_p)
-    dw2_get_file_names_reader (&reader, reader.info_ptr, reader.comp_unit_die,
-			       reader.has_children);
+    dw2_get_file_names_reader (&reader, reader.info_ptr, reader.comp_unit_die);
 
   if (this_cu->v.quick->no_file_data)
     return NULL;
@@ -6925,7 +6923,7 @@ init_cu_die_reader (struct die_reader_specs *reader,
    from the DWO file, bypassing the stub, it contains the DW_AT_comp_dir
    attribute of the referencing CU.  At most one of STUB_COMP_UNIT_DIE and
    STUB_COMP_DIR may be non-NULL.
-   *RESULT_READER,*RESULT_INFO_PTR,*RESULT_COMP_UNIT_DIE,*RESULT_HAS_CHILDREN
+   *RESULT_READER,*RESULT_INFO_PTR,*RESULT_COMP_UNIT_DIE
    are filled in with the info of the DIE from the DWO file.
    *RESULT_DWO_ABBREV_TABLE will be filled in with the abbrev table allocated
    from the dwo.  Since *RESULT_READER references this abbrev table, it must be
@@ -6941,7 +6939,6 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
 			struct die_reader_specs *result_reader,
 			const gdb_byte **result_info_ptr,
 			struct die_info **result_comp_unit_die,
-			int *result_has_children,
 			abbrev_table_up *result_dwo_abbrev_table)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile = this_cu->dwarf2_per_objfile;
@@ -7065,7 +7062,7 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
 		     + (ranges != NULL)
 		     + (comp_dir != NULL));
   info_ptr = read_full_die_1 (result_reader, result_comp_unit_die, info_ptr,
-			      result_has_children, num_extra_attrs);
+			      num_extra_attrs);
 
   /* Copy over the attributes from the stub to the DIE we just read in.  */
   comp_unit_die = *result_comp_unit_die;
@@ -7196,7 +7193,7 @@ cutu_reader::init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
 			      NULL /* stub_comp_unit_die */,
 			      sig_type->dwo_unit->dwo_file->comp_dir,
 			      &reader, &info_ptr,
-			      &comp_unit_die, &has_children,
+			      &comp_unit_die,
 			      &m_dwo_abbrev_table) == 0)
     {
       /* Dummy die.  */
@@ -7355,7 +7352,7 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
 
   /* Read the top level CU/TU die.  */
   init_cu_die_reader (this, cu, section, NULL, abbrev_table);
-  info_ptr = read_full_die (this, &comp_unit_die, info_ptr, &has_children);
+  info_ptr = read_full_die (this, &comp_unit_die, info_ptr);
 
   if (skip_partial && comp_unit_die->tag == DW_TAG_partial_unit)
     {
@@ -7377,7 +7374,7 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
       struct dwo_unit *dwo_unit;
       struct die_info *dwo_comp_unit_die;
 
-      if (has_children)
+      if (comp_unit_die->has_children)
 	{
 	  complaint (_("compilation unit with DW_AT_GNU_dwo_name"
 		       " has children (offset %s) [in module %s]"),
@@ -7390,7 +7387,7 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
 	  if (read_cutu_die_from_dwo (this_cu, dwo_unit,
 				      comp_unit_die, NULL,
 				      this, &info_ptr,
-				      &dwo_comp_unit_die, &has_children,
+				      &dwo_comp_unit_die,
 				      &m_dwo_abbrev_table) == 0)
 	    {
 	      /* Dummy die.  */
@@ -7453,7 +7450,6 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
   bfd *abfd = section->get_bfd_owner ();
   struct dwarf2_section_info *abbrev_section;
   const gdb_byte *begin_info_ptr, *info_ptr;
-  int has_children;
 
   if (dwarf_die_debug)
     fprintf_unfiltered (gdb_stdlog, "Reading %s unit at offset %s\n",
@@ -7500,7 +7496,7 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
 
   init_cu_die_reader (this, m_new_cu.get (), section, dwo_file,
 		      m_abbrev_table_holder.get ());
-  info_ptr = read_full_die (this, &comp_unit_die, info_ptr, &has_children);
+  info_ptr = read_full_die (this, &comp_unit_die, info_ptr);
 }
 
 
@@ -7685,7 +7681,6 @@ static void
 process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
 				  const gdb_byte *info_ptr,
 				  struct die_info *comp_unit_die,
-				  int has_children,
 				  int want_partial_unit,
 				  enum language pretend_language)
 {
@@ -7741,7 +7736,7 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   /* Check if comp unit has_children.
      If so, read the rest of the partial symbols from this comp unit.
      If not, there's no more debug_info for this comp unit.  */
-  if (has_children)
+  if (comp_unit_die->has_children)
     {
       struct partial_die_info *first_die;
       CORE_ADDR lowpc, highpc;
@@ -7833,12 +7828,11 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
       /* Nothing.  */
     }
   else if (this_cu->is_debug_types)
-    build_type_psymtabs_reader (&reader, reader.info_ptr, reader.comp_unit_die,
-				reader.has_children);
+    build_type_psymtabs_reader (&reader, reader.info_ptr,
+				reader.comp_unit_die);
   else
     process_psymtab_comp_unit_reader (&reader, reader.info_ptr,
 				      reader.comp_unit_die,
-				      reader.has_children,
 				      want_partial_unit,
 				      pretend_language);
 
@@ -7851,8 +7845,7 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
 static void
 build_type_psymtabs_reader (const struct die_reader_specs *reader,
 			    const gdb_byte *info_ptr,
-			    struct die_info *type_unit_die,
-			    int has_children)
+			    struct die_info *type_unit_die)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = reader->cu->per_cu->dwarf2_per_objfile;
@@ -7869,7 +7862,7 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
   gdb_assert (per_cu->is_debug_types);
   sig_type = (struct signatured_type *) per_cu;
 
-  if (! has_children)
+  if (! type_unit_die->has_children)
     return;
 
   attr = dwarf2_attr_no_follow (type_unit_die, DW_AT_stmt_list);
@@ -8000,8 +7993,7 @@ build_type_psymtabs_1 (struct dwarf2_per_objfile *dwarf2_per_objfile)
 			  0, 0, false);
       if (!reader.dummy_p)
 	build_type_psymtabs_reader (&reader, reader.info_ptr,
-				    reader.comp_unit_die,
-				    reader.has_children);
+				    reader.comp_unit_die);
     }
 }
 
@@ -8109,7 +8101,7 @@ process_skeletonless_type_unit (void **slot, void *info)
   cutu_reader reader (&entry->per_cu, NULL, 0, 0, false);
   if (!reader.dummy_p)
     build_type_psymtabs_reader (&reader, reader.info_ptr,
-				reader.comp_unit_die, reader.has_children);
+				reader.comp_unit_die);
 
   return 1;
 }
@@ -8247,7 +8239,7 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu)
       /* Check if comp unit has_children.
 	 If so, read the rest of the partial symbols from this comp unit.
 	 If not, there's no more debug_info for this comp unit.  */
-      if (reader.has_children)
+      if (reader.comp_unit_die->has_children)
 	load_partial_dies (&reader, reader.info_ptr, 0);
     }
 }
@@ -9379,7 +9371,7 @@ load_full_comp_unit (struct dwarf2_per_cu_data *this_cu,
 			  hashtab_obstack_allocate,
 			  dummy_obstack_deallocate);
 
-  if (reader.has_children)
+  if (reader.comp_unit_die->has_children)
     reader.comp_unit_die->child
       = read_die_and_siblings (&reader, reader.info_ptr,
 			       &info_ptr, reader.comp_unit_die);
@@ -11535,7 +11527,6 @@ static void
 create_dwo_cu_reader (const struct die_reader_specs *reader,
 		      const gdb_byte *info_ptr,
 		      struct die_info *comp_unit_die,
-		      int has_children,
 		      struct dwo_file *dwo_file,
 		      struct dwo_unit *dwo_unit)
 {
@@ -11606,7 +11597,7 @@ create_cus_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
       cutu_reader reader (&per_cu, cu, &dwo_file);
       if (!reader.dummy_p)
 	create_dwo_cu_reader (&reader, reader.info_ptr, reader.comp_unit_die,
-			      reader.has_children, &dwo_file, &read_unit);
+			      &dwo_file, &read_unit);
       info_ptr += per_cu.length;
 
       // If the unit could not be parsed, skip it.
@@ -17911,9 +17902,8 @@ read_die_and_children (const struct die_reader_specs *reader,
 {
   struct die_info *die;
   const gdb_byte *cur_ptr;
-  int has_children;
 
-  cur_ptr = read_full_die_1 (reader, &die, info_ptr, &has_children, 0);
+  cur_ptr = read_full_die_1 (reader, &die, info_ptr, 0);
   if (die == NULL)
     {
       *new_info_ptr = cur_ptr;
@@ -17921,7 +17911,7 @@ read_die_and_children (const struct die_reader_specs *reader,
     }
   store_in_ref_table (die, reader->cu);
 
-  if (has_children)
+  if (die->has_children)
     die->child = read_die_and_siblings_1 (reader, cur_ptr, new_info_ptr, die);
   else
     {
@@ -18002,13 +17992,12 @@ read_die_and_siblings (const struct die_reader_specs *reader,
    The caller is responsible for filling in the extra attributes
    and updating (*DIEP)->num_attrs.
    Set DIEP to point to a newly allocated die with its information,
-   except for its child, sibling, and parent fields.
-   Set HAS_CHILDREN to tell whether the die has children or not.  */
+   except for its child, sibling, and parent fields.  */
 
 static const gdb_byte *
 read_full_die_1 (const struct die_reader_specs *reader,
 		 struct die_info **diep, const gdb_byte *info_ptr,
-		 int *has_children, int num_extra_attrs)
+		 int num_extra_attrs)
 {
   unsigned int abbrev_number, bytes_read, i;
   struct abbrev_info *abbrev;
@@ -18022,7 +18011,6 @@ read_full_die_1 (const struct die_reader_specs *reader,
   if (!abbrev_number)
     {
       *diep = NULL;
-      *has_children = 0;
       return info_ptr;
     }
 
@@ -18036,6 +18024,7 @@ read_full_die_1 (const struct die_reader_specs *reader,
   die->sect_off = sect_off;
   die->tag = abbrev->tag;
   die->abbrev = abbrev_number;
+  die->has_children = abbrev->has_children;
 
   /* Make the result usable.
      The caller needs to update num_attrs after adding the extra
@@ -18063,23 +18052,20 @@ read_full_die_1 (const struct die_reader_specs *reader,
   for (int index : indexes_that_need_reprocess)
     read_attribute_reprocess (reader, &die->attrs[index]);
   *diep = die;
-  *has_children = abbrev->has_children;
   return info_ptr;
 }
 
 /* Read a die and all its attributes.
    Set DIEP to point to a newly allocated die with its information,
-   except for its child, sibling, and parent fields.
-   Set HAS_CHILDREN to tell whether the die has children or not.  */
+   except for its child, sibling, and parent fields.  */
 
 static const gdb_byte *
 read_full_die (const struct die_reader_specs *reader,
-	       struct die_info **diep, const gdb_byte *info_ptr,
-	       int *has_children)
+	       struct die_info **diep, const gdb_byte *info_ptr)
 {
   const gdb_byte *result;
 
-  result = read_full_die_1 (reader, diep, info_ptr, has_children, 0);
+  result = read_full_die_1 (reader, diep, info_ptr, 0);
 
   if (dwarf_die_debug)
     {
@@ -23495,7 +23481,7 @@ read_signatured_type (struct signatured_type *sig_type)
 			      hashtab_obstack_allocate,
 			      dummy_obstack_deallocate);
 
-      if (reader.has_children)
+      if (reader.comp_unit_die->has_children)
 	reader.comp_unit_die->child
 	  = read_die_and_siblings (&reader, info_ptr, &info_ptr,
 				   reader.comp_unit_die);

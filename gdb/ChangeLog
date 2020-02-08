@@ -1,5 +1,23 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (struct die_info) <has_children>: New member.
+	(dw2_get_file_names_reader): Remove has_children.
+	(dw2_get_file_names): Update.
+	(read_cutu_die_from_dwo): Remove has_children.
+	(cutu_reader::init_tu_and_read_dwo_dies)
+	(cutu_reader::cutu_reader): Update.
+	(process_psymtab_comp_unit_reader, build_type_psymtabs_reader):
+	Remove has_children.
+	(build_type_psymtabs_1, process_skeletonless_type_unit)
+	(load_partial_comp_unit, load_full_comp_unit): Update.
+	(create_dwo_cu_reader): Remove has_children.
+	(create_cus_hash_table, read_die_and_children): Update.
+	(read_full_die_1,read_full_die): Remove has_children.
+	(read_signatured_type): Update.
+	(class cutu_reader) <has_children>: Remove.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/expr.c: Rename from dwarf2expr.c.
 	* dwarf2/expr.h: Rename from dwarf2expr.h.
 	* dwarf2/frame-tailcall.c: Rename from dwarf2-frame-tailcall.c.
