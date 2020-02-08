@@ -1,5 +1,11 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (set_die_type, get_die_type_at_offset): Update.
+	* dwarf2/read.h (struct dwarf2_per_objfile) <die_type_hash>: Now
+	htab_up.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (struct dwp_file) <loaded_cus, loaded_tus>: Now
 	htab_up.
 	(lookup_dwo_unit_in_dwp): Update.

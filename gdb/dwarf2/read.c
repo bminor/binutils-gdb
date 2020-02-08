@@ -25184,22 +25184,17 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
     add_dyn_prop (DYN_PROP_DATA_LOCATION, prop, type);
 
   if (dwarf2_per_objfile->die_type_hash == NULL)
-    {
-      dwarf2_per_objfile->die_type_hash =
-	htab_create_alloc_ex (127,
-			      per_cu_offset_and_type_hash,
-			      per_cu_offset_and_type_eq,
-			      NULL,
-			      &objfile->objfile_obstack,
-			      hashtab_obstack_allocate,
-			      dummy_obstack_deallocate);
-    }
+    dwarf2_per_objfile->die_type_hash
+      = htab_up (htab_create_alloc (127,
+				    per_cu_offset_and_type_hash,
+				    per_cu_offset_and_type_eq,
+				    NULL, xcalloc, xfree));
 
   ofs.per_cu = cu->per_cu;
   ofs.sect_off = die->sect_off;
   ofs.type = type;
   slot = (struct dwarf2_per_cu_offset_and_type **)
-    htab_find_slot (dwarf2_per_objfile->die_type_hash, &ofs, INSERT);
+    htab_find_slot (dwarf2_per_objfile->die_type_hash.get (), &ofs, INSERT);
   if (*slot)
     complaint (_("A problem internal to GDB: DIE %s has type already set"),
 	       sect_offset_str (die->sect_off));
@@ -25225,7 +25220,7 @@ get_die_type_at_offset (sect_offset sect_off,
   ofs.per_cu = per_cu;
   ofs.sect_off = sect_off;
   slot = ((struct dwarf2_per_cu_offset_and_type *)
-	  htab_find (dwarf2_per_objfile->die_type_hash, &ofs));
+	  htab_find (dwarf2_per_objfile->die_type_hash.get (), &ofs));
   if (slot)
     return slot->type;
   else
