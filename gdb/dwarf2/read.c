@@ -25345,18 +25345,6 @@ show_dwarf_cmd (const char *args, int from_tty)
   cmd_show_list (show_dwarf_cmdlist, from_tty, "");
 }
 
-bool dwarf_always_disassemble;
-
-static void
-show_dwarf_always_disassemble (struct ui_file *file, int from_tty,
-			       struct cmd_list_element *c, const char *value)
-{
-  fprintf_filtered (file,
-		    _("Whether to always disassemble "
-		      "DWARF expressions is %s.\n"),
-		    value);
-}
-
 static void
 show_check_physname (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
@@ -25393,18 +25381,6 @@ caching, which can slow down startup."),
 			    show_dwarf_max_cache_age,
 			    &set_dwarf_cmdlist,
 			    &show_dwarf_cmdlist);
-
-  add_setshow_boolean_cmd ("always-disassemble", class_obscure,
-			   &dwarf_always_disassemble, _("\
-Set whether `info address' always disassembles DWARF expressions."), _("\
-Show whether `info address' always disassembles DWARF expressions."), _("\
-When enabled, DWARF expressions are always printed in an assembly-like\n\
-syntax.  When disabled, expressions will be printed in a more\n\
-conversational style, when possible."),
-			   NULL,
-			   show_dwarf_always_disassemble,
-			   &set_dwarf_cmdlist,
-			   &show_dwarf_cmdlist);
 
   add_setshow_zuinteger_cmd ("dwarf-read", no_class, &dwarf_read_debug, _("\
 Set debugging of the DWARF reader."), _("\

@@ -1,5 +1,17 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (dwarf_always_disassemble)
+	(show_dwarf_always_disassemble): Move to loc.c.
+	(_initialize_dwarf2_read): Move "always-disassemble" registration
+	to loc.c.
+	* dwarf2/read.h (dwarf_always_disassemble): Don't declare.
+	* dwarf2/loc.c (dwarf_always_disassemble): Move from read.c.  Now
+	static.
+	(show_dwarf_always_disassemble): Move from read.c.
+	(_initialize_dwarf2loc): Move always-disassemble from read.c.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (~dwarf2_per_objfile): Update.
 	(create_quick_file_names_table): Return htab_up.
 	(dw2_get_file_names_reader, dw2_forget_cached_source_info):

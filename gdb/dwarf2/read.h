@@ -33,8 +33,6 @@
 extern struct cmd_list_element *set_dwarf_cmdlist;
 extern struct cmd_list_element *show_dwarf_cmdlist;
 
-extern bool dwarf_always_disassemble;
-
 struct tu_stats
 {
   int nr_uniq_abbrev_tables;
