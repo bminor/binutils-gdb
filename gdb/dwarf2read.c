@@ -30,6 +30,7 @@
 
 #include "defs.h"
 #include "dwarf2read.h"
+#include "dwarf2/abbrev.h"
 #include "dwarf-index-cache.h"
 #include "dwarf-index-common.h"
 #include "dwarf2/leb.h"
@@ -875,9 +876,6 @@ struct dwp_file
   asection **elf_sections = nullptr;
 };
 
-struct abbrev_table;
-typedef std::unique_ptr<struct abbrev_table> abbrev_table_up;
-
 /* Struct used to pass misc. parameters to read_die_and_children, et
    al.  which are used for both .debug_info and .debug_types dies.
    All parameters here are unchanging for the life of the call.  This
@@ -1235,72 +1233,6 @@ struct partial_die_info : public allocate_on_obstack
     }
   };
 
-/* This data structure holds the information of an abbrev.  */
-struct abbrev_info
-  {
-    unsigned int number;	/* number identifying abbrev */
-    enum dwarf_tag tag;		/* dwarf tag */
-    unsigned short has_children;		/* boolean */
-    unsigned short num_attrs;	/* number of attributes */
-    struct attr_abbrev *attrs;	/* an array of attribute descriptions */
-    struct abbrev_info *next;	/* next in chain */
-  };
-
-struct attr_abbrev
-  {
-    ENUM_BITFIELD(dwarf_attribute) name : 16;
-    ENUM_BITFIELD(dwarf_form) form : 16;
-
-    /* It is valid only if FORM is DW_FORM_implicit_const.  */
-    LONGEST implicit_const;
-  };
-
-/* Size of abbrev_table.abbrev_hash_table.  */
-#define ABBREV_HASH_SIZE 121
-
-/* Top level data structure to contain an abbreviation table.  */
-
-struct abbrev_table
-{
-  explicit abbrev_table (sect_offset off)
-    : sect_off (off)
-  {
-    m_abbrevs =
-      XOBNEWVEC (&abbrev_obstack, struct abbrev_info *, ABBREV_HASH_SIZE);
-    memset (m_abbrevs, 0, ABBREV_HASH_SIZE * sizeof (struct abbrev_info *));
-  }
-
-  DISABLE_COPY_AND_ASSIGN (abbrev_table);
-
-  /* Allocate space for a struct abbrev_info object in
-     ABBREV_TABLE.  */
-  struct abbrev_info *alloc_abbrev ();
-
-  /* Add an abbreviation to the table.  */
-  void add_abbrev (unsigned int abbrev_number, struct abbrev_info *abbrev);
-
-  /* Look up an abbrev in the table.
-     Returns NULL if the abbrev is not found.  */
-
-  struct abbrev_info *lookup_abbrev (unsigned int abbrev_number);
-
-
-  /* Where the abbrev table came from.
-     This is used as a sanity check when the table is used.  */
-  const sect_offset sect_off;
-
-  /* Storage for the abbrev table.  */
-  auto_obstack abbrev_obstack;
-
-private:
-
-  /* Hash table of abbrevs.
-     This is an array of size ABBREV_HASH_SIZE allocated in abbrev_obstack.
-     It could be statically allocated, but the previous code didn't so we
-     don't either.  */
-  struct abbrev_info **m_abbrevs;
-};
-
 /* Attributes have a name and a value.  */
 struct attribute
   {
@@ -1509,10 +1441,6 @@ static void add_partial_enumeration (struct partial_die_info *enum_pdi,
 static void add_partial_subprogram (struct partial_die_info *pdi,
 				    CORE_ADDR *lowpc, CORE_ADDR *highpc,
 				    int need_pc, struct dwarf2_cu *cu);
-
-static abbrev_table_up abbrev_table_read_table
-  (struct dwarf2_per_objfile *dwarf2_per_objfile, struct dwarf2_section_info *,
-   sect_offset);
 
 static unsigned int peek_abbrev_code (bfd *, const gdb_byte *);
 
@@ -7206,7 +7134,7 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
     }
 
   *result_dwo_abbrev_table
-    = abbrev_table_read_table (dwarf2_per_objfile, dwo_abbrev_section,
+    = abbrev_table_read_table (objfile, dwo_abbrev_section,
 			       cu->header.abbrev_sect_off);
   init_cu_die_reader (result_reader, cu, section, dwo_unit->dwo_file,
 		      result_dwo_abbrev_table->get ());
@@ -7511,7 +7439,7 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
   else
     {
       m_abbrev_table_holder
-	= abbrev_table_read_table (dwarf2_per_objfile, abbrev_section,
+	= abbrev_table_read_table (objfile, abbrev_section,
 				   cu->header.abbrev_sect_off);
       abbrev_table = m_abbrev_table_holder.get ();
     }
@@ -7658,7 +7586,7 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
     }
 
   m_abbrev_table_holder
-    = abbrev_table_read_table (dwarf2_per_objfile, abbrev_section,
+    = abbrev_table_read_table (objfile, abbrev_section,
 			       m_new_cu->header.abbrev_sect_off);
 
   init_cu_die_reader (this, m_new_cu.get (), section, dwo_file,
@@ -8153,7 +8081,7 @@ build_type_psymtabs_1 (struct dwarf2_per_objfile *dwarf2_per_objfile)
 	{
 	  abbrev_offset = tu.abbrev_offset;
 	  abbrev_table =
-	    abbrev_table_read_table (dwarf2_per_objfile,
+	    abbrev_table_read_table (dwarf2_per_objfile->objfile,
 				     &dwarf2_per_objfile->abbrev,
 				     abbrev_offset);
 	  ++tu_stats->nr_uniq_abbrev_tables;
@@ -18257,153 +18185,6 @@ read_full_die (const struct die_reader_specs *reader,
   return result;
 }
 
-/* Abbreviation tables.
-
-   In DWARF version 2, the description of the debugging information is
-   stored in a separate .debug_abbrev section.  Before we read any
-   dies from a section we read in all abbreviations and install them
-   in a hash table.  */
-
-/* Allocate space for a struct abbrev_info object in ABBREV_TABLE.  */
-
-struct abbrev_info *
-abbrev_table::alloc_abbrev ()
-{
-  struct abbrev_info *abbrev;
-
-  abbrev = XOBNEW (&abbrev_obstack, struct abbrev_info);
-  memset (abbrev, 0, sizeof (struct abbrev_info));
-
-  return abbrev;
-}
-
-/* Add an abbreviation to the table.  */
-
-void
-abbrev_table::add_abbrev (unsigned int abbrev_number,
-			  struct abbrev_info *abbrev)
-{
-  unsigned int hash_number;
-
-  hash_number = abbrev_number % ABBREV_HASH_SIZE;
-  abbrev->next = m_abbrevs[hash_number];
-  m_abbrevs[hash_number] = abbrev;
-}
-
-/* Look up an abbrev in the table.
-   Returns NULL if the abbrev is not found.  */
-
-struct abbrev_info *
-abbrev_table::lookup_abbrev (unsigned int abbrev_number)
-{
-  unsigned int hash_number;
-  struct abbrev_info *abbrev;
-
-  hash_number = abbrev_number % ABBREV_HASH_SIZE;
-  abbrev = m_abbrevs[hash_number];
-
-  while (abbrev)
-    {
-      if (abbrev->number == abbrev_number)
-	return abbrev;
-      abbrev = abbrev->next;
-    }
-  return NULL;
-}
-
-/* Read in an abbrev table.  */
-
-static abbrev_table_up
-abbrev_table_read_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
-			 struct dwarf2_section_info *section,
-			 sect_offset sect_off)
-{
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
-  bfd *abfd = section->get_bfd_owner ();
-  const gdb_byte *abbrev_ptr;
-  struct abbrev_info *cur_abbrev;
-  unsigned int abbrev_number, bytes_read, abbrev_name;
-  unsigned int abbrev_form;
-  std::vector<struct attr_abbrev> cur_attrs;
-
-  abbrev_table_up abbrev_table (new struct abbrev_table (sect_off));
-
-  section->read (objfile);
-  abbrev_ptr = section->buffer + to_underlying (sect_off);
-  abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
-  abbrev_ptr += bytes_read;
-
-  /* Loop until we reach an abbrev number of 0.  */
-  while (abbrev_number)
-    {
-      cur_attrs.clear ();
-      cur_abbrev = abbrev_table->alloc_abbrev ();
-
-      /* read in abbrev header */
-      cur_abbrev->number = abbrev_number;
-      cur_abbrev->tag
-	= (enum dwarf_tag) read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
-      abbrev_ptr += bytes_read;
-      cur_abbrev->has_children = read_1_byte (abfd, abbrev_ptr);
-      abbrev_ptr += 1;
-
-      /* now read in declarations */
-      for (;;)
-	{
-	  LONGEST implicit_const;
-
-	  abbrev_name = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
-	  abbrev_ptr += bytes_read;
-	  abbrev_form = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
-	  abbrev_ptr += bytes_read;
-	  if (abbrev_form == DW_FORM_implicit_const)
-	    {
-	      implicit_const = read_signed_leb128 (abfd, abbrev_ptr,
-						   &bytes_read);
-	      abbrev_ptr += bytes_read;
-	    }
-	  else
-	    {
-	      /* Initialize it due to a false compiler warning.  */
-	      implicit_const = -1;
-	    }
-
-	  if (abbrev_name == 0)
-	    break;
-
-	  cur_attrs.emplace_back ();
-	  struct attr_abbrev &cur_attr = cur_attrs.back ();
-	  cur_attr.name = (enum dwarf_attribute) abbrev_name;
-	  cur_attr.form = (enum dwarf_form) abbrev_form;
-	  cur_attr.implicit_const = implicit_const;
-	  ++cur_abbrev->num_attrs;
-	}
-
-      cur_abbrev->attrs =
-	XOBNEWVEC (&abbrev_table->abbrev_obstack, struct attr_abbrev,
-		   cur_abbrev->num_attrs);
-      memcpy (cur_abbrev->attrs, cur_attrs.data (),
-	      cur_abbrev->num_attrs * sizeof (struct attr_abbrev));
-
-      abbrev_table->add_abbrev (abbrev_number, cur_abbrev);
-
-      /* Get next abbreviation.
-         Under Irix6 the abbreviations for a compilation unit are not
-         always properly terminated with an abbrev number of 0.
-         Exit loop if we encounter an abbreviation which we have
-         already read (which means we are about to read the abbreviations
-         for the next compile unit) or if the end of the abbreviation
-         table is reached.  */
-      if ((unsigned int) (abbrev_ptr - section->buffer) >= section->size)
-	break;
-      abbrev_number = read_unsigned_leb128 (abfd, abbrev_ptr, &bytes_read);
-      abbrev_ptr += bytes_read;
-      if (abbrev_table->lookup_abbrev (abbrev_number) != NULL)
-	break;
-    }
-
-  return abbrev_table;
-}
 
 /* Returns nonzero if TAG represents a type that we might generate a partial
    symbol for.  */

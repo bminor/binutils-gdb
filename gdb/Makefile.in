@@ -1002,6 +1002,7 @@ COMMON_SFILES = \
 	dwarf2expr.c \
 	dwarf2loc.c \
 	dwarf2read.c \
+	dwarf2/abbrev.c \
 	dwarf2/leb.c \
 	dwarf2/section.c \
 	eval.c \

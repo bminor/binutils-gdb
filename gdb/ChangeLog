@@ -1,5 +1,18 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (abbrev_table_up, struct abbrev_info)
+	(struct attr_abbrev, ABBREV_HASH_SIZE, struct abbrev_table):
+	Move.
+	(read_cutu_die_from_dwo, build_type_psymtabs_1): Update.
+	(abbrev_table::alloc_abbrev, abbrev_table::add_abbrev)
+	(abbrev_table::lookup_abbrev, abbrev_table_read_table): Move to
+	abbrev.c.
+	* dwarf2/abbrev.h: New file.
+	* dwarf2/abbrev.c: New file, from dwarf2read.c.
+	* Makefile.in (COMMON_SFILES): Add dwarf2/abbrev.c.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (dwarf2_section_buffer_overflow_complaint)
 	(dwarf2_section_size, dwarf2_get_section_info)
 	(create_signatured_type_table_from_debug_names)
