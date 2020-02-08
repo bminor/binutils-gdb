@@ -1,5 +1,15 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_attribute_value, read_indirect_string)
+	(read_indirect_line_string): Update.
+	* dwarf2/comp-unit.c (read_offset): Remove.
+	(read_comp_unit_head): Update.
+	* dwarf2/comp-unit.h (struct comp_unit_head) <read_offset>: New
+	method.
+	(read_offset): Don't declare.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* Makefile.in (COMMON_SFILES): Add dwarf2/comp-unit.c.
 	* dwarf2/read.c (struct comp_unit_head): Move to
 	dwarf2/comp-unit.h.

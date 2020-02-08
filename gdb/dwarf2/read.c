@@ -18448,12 +18448,12 @@ read_attribute_value (const struct die_reader_specs *reader,
       if (cu->header.version == 2)
 	DW_UNSND (attr) = read_address (abfd, info_ptr, cu, &bytes_read);
       else
-	DW_UNSND (attr) = read_offset (abfd, info_ptr,
-				       &cu->header, &bytes_read);
+	DW_UNSND (attr) = cu->header.read_offset (abfd, info_ptr,
+						  &bytes_read);
       info_ptr += bytes_read;
       break;
     case DW_FORM_GNU_ref_alt:
-      DW_UNSND (attr) = read_offset (abfd, info_ptr, &cu->header, &bytes_read);
+      DW_UNSND (attr) = cu->header.read_offset (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
     case DW_FORM_addr:
@@ -18497,7 +18497,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       DW_BLOCK (attr) = blk;
       break;
     case DW_FORM_sec_offset:
-      DW_UNSND (attr) = read_offset (abfd, info_ptr, &cu->header, &bytes_read);
+      DW_UNSND (attr) = cu->header.read_offset (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
     case DW_FORM_string:
@@ -18530,8 +18530,8 @@ read_attribute_value (const struct die_reader_specs *reader,
     case DW_FORM_GNU_strp_alt:
       {
 	struct dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
-	LONGEST str_offset = read_offset (abfd, info_ptr, cu_header,
-					  &bytes_read);
+	LONGEST str_offset = cu_header->read_offset (abfd, info_ptr,
+						     &bytes_read);
 
 	DW_STRING (attr) = read_indirect_string_from_dwz (objfile,
 							  dwz, str_offset);
@@ -18892,7 +18892,7 @@ read_indirect_string (struct dwarf2_per_objfile *dwarf2_per_objfile, bfd *abfd,
 		      const struct comp_unit_head *cu_header,
 		      unsigned int *bytes_read_ptr)
 {
-  LONGEST str_offset = read_offset (abfd, buf, cu_header, bytes_read_ptr);
+  LONGEST str_offset = cu_header->read_offset (abfd, buf, bytes_read_ptr);
 
   return read_indirect_string_at_offset (dwarf2_per_objfile, abfd, str_offset);
 }
@@ -18907,7 +18907,7 @@ read_indirect_line_string (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			   const struct comp_unit_head *cu_header,
 			   unsigned int *bytes_read_ptr)
 {
-  LONGEST str_offset = read_offset (abfd, buf, cu_header, bytes_read_ptr);
+  LONGEST str_offset = cu_header->read_offset (abfd, buf, bytes_read_ptr);
 
   return read_indirect_line_string_at_offset (dwarf2_per_objfile, abfd,
 					      str_offset);

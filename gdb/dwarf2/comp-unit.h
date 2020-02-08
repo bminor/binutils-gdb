@@ -27,6 +27,7 @@
 #ifndef GDB_DWARF2_COMP_UNIT_H
 #define GDB_DWARF2_COMP_UNIT_H
 
+#include "dwarf2/leb.h"
 #include "gdbtypes.h"
 
 /* The data in a compilation unit header, after target2host
@@ -78,6 +79,16 @@ struct comp_unit_head
     sect_offset top = sect_off + get_length ();
     return off >= bottom && off < top;
   }
+
+  /* Read an offset from the data stream.  The size of the offset is
+     given by cu_header->offset_size.  */
+  LONGEST read_offset (bfd *abfd, const gdb_byte *buf,
+		       unsigned int *bytes_read) const
+  {
+    LONGEST offset = ::read_offset (abfd, buf, offset_size);
+    *bytes_read = offset_size;
+    return offset;
+  }
 };
 
 /* Expected enum dwarf_unit_type for read_comp_unit_head.  */
@@ -103,12 +114,5 @@ extern const gdb_byte *read_and_check_comp_unit_head
    struct dwarf2_section_info *abbrev_section,
    const gdb_byte *info_ptr,
    rcuh_kind section_kind);
-
-/* Read an offset from the data stream.  The size of the offset is
-   given by cu_header->offset_size.  */
-
-extern LONGEST read_offset (bfd *abfd, const gdb_byte *buf,
-			    const struct comp_unit_head *cu_header,
-			    unsigned int *bytes_read);
 
 #endif /* GDB_DWARF2_COMP_UNIT_H */

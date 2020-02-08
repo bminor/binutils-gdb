@@ -129,9 +129,8 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
       cu_header->addr_size = read_1_byte (abfd, info_ptr);
       info_ptr += 1;
     }
-  cu_header->abbrev_sect_off = (sect_offset) read_offset (abfd, info_ptr,
-							  cu_header,
-							  &bytes_read);
+  cu_header->abbrev_sect_off
+    = (sect_offset) cu_header->read_offset (abfd, info_ptr, &bytes_read);
   info_ptr += bytes_read;
   if (cu_header->version < 5)
     {
@@ -157,7 +156,7 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
   if (section_kind == rcuh_kind::TYPE)
     {
       LONGEST type_offset;
-      type_offset = read_offset (abfd, info_ptr, cu_header, &bytes_read);
+      type_offset = cu_header->read_offset (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       cu_header->type_cu_offset_in_tu = (cu_offset) type_offset;
       if (to_underlying (cu_header->type_cu_offset_in_tu) != type_offset)
@@ -221,17 +220,4 @@ read_and_check_comp_unit_head (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			      abbrev_section);
 
   return info_ptr;
-}
-
-/* See comp-unit.h.  */
-
-LONGEST
-read_offset (bfd *abfd, const gdb_byte *buf,
-	     const struct comp_unit_head *cu_header,
-             unsigned int *bytes_read)
-{
-  LONGEST offset = read_offset (abfd, buf, cu_header->offset_size);
-
-  *bytes_read = cu_header->offset_size;
-  return offset;
 }
