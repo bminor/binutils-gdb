@@ -26,7 +26,7 @@
 
 #include "hppa-tdep.h"
 #include "hppa-bsd-tdep.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "solib-svr4.h"
 
 static CORE_ADDR

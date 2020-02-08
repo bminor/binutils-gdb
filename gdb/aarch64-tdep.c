@@ -34,7 +34,7 @@
 #include "trad-frame.h"
 #include "objfiles.h"
 #include "dwarf2.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "gdbtypes.h"
 #include "prologue-value.h"
 #include "target-descriptions.h"

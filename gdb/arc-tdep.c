@@ -22,7 +22,7 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "disasm.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
 #include "gdbcore.h"

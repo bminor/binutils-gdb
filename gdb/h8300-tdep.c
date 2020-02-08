@@ -29,7 +29,7 @@
 #include "gdbcore.h"
 #include "objfiles.h"
 #include "dis-asm.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
 

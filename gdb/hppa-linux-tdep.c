@@ -26,7 +26,7 @@
 #include "glibc-tdep.h"
 #include "frame-unwind.h"
 #include "trad-frame.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "value.h"
 #include "regset.h"
 #include "regcache.h"

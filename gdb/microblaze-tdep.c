@@ -31,7 +31,7 @@
 #include "target.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "osabi.h"
 #include "target-descriptions.h"
 #include "opcodes/microblaze-opcm.h"

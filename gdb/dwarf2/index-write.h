@@ -21,7 +21,7 @@
 #define DWARF_INDEX_WRITE_H
 
 #include "symfile.h"
-#include "dwarf2read.h"
+#include "dwarf2/read.h"
 
 /* Create index files for OBJFILE in the directory DIR.
 

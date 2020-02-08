@@ -28,7 +28,7 @@
 #include "frame-unwind.h"
 #include "frame-base.h"
 #include "symtab.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "osabi.h"
 #include "infcall.h"
 #include "prologue-value.h"

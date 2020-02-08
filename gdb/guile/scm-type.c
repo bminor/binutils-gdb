@@ -27,7 +27,7 @@
 #include "objfiles.h"
 #include "language.h"
 #include "bcache.h"
-#include "dwarf2loc.h"
+#include "dwarf2/loc.h"
 #include "typeprint.h"
 #include "guile-internal.h"
 

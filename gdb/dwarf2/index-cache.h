@@ -20,7 +20,7 @@
 #ifndef DWARF_INDEX_CACHE_H
 #define DWARF_INDEX_CACHE_H
 
-#include "dwarf-index-common.h"
+#include "dwarf2/index-common.h"
 #include "gdbsupport/array-view.h"
 #include "symfile.h"
 

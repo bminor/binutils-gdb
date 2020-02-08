@@ -19,15 +19,15 @@
 
 #include "defs.h"
 #include "frame.h"
-#include "dwarf2-frame-tailcall.h"
-#include "dwarf2loc.h"
+#include "dwarf2/frame-tailcall.h"
+#include "dwarf2/loc.h"
 #include "frame-unwind.h"
 #include "block.h"
 #include "hashtab.h"
 #include "gdbtypes.h"
 #include "regcache.h"
 #include "value.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "gdbarch.h"
 
 /* Contains struct tailcall_cache indexed by next_bottom_frame.  */

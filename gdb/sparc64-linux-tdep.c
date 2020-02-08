@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "frame.h"
 #include "frame-unwind.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "regset.h"
 #include "regcache.h"
 #include "gdbarch.h"

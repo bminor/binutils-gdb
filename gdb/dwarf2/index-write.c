@@ -19,7 +19,7 @@
 
 #include "defs.h"
 
-#include "dwarf-index-write.h"
+#include "dwarf2/index-write.h"
 
 #include "addrmap.h"
 #include "cli/cli-decode.h"
@@ -29,9 +29,9 @@
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/scoped_fd.h"
 #include "complaints.h"
-#include "dwarf-index-common.h"
+#include "dwarf2/index-common.h"
 #include "dwarf2.h"
-#include "dwarf2read.h"
+#include "dwarf2/read.h"
 #include "gdb/gdb-index.h"
 #include "gdbcmd.h"
 #include "objfiles.h"

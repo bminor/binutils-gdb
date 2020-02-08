@@ -30,7 +30,7 @@
 #include "value.h"
 #include "exceptions.h"
 #include "gdbtypes.h"
-#include "dwarf2loc.h"
+#include "dwarf2/loc.h"
 #include "cp-support.h"
 #include "gdbcmd.h"
 #include "compile-c.h"

@@ -32,7 +32,7 @@
 #include "frame-base.h"
 #include "value.h"
 #include "gdbcore.h"
-#include "dwarf2-frame.h"
+#include "dwarf2/frame.h"
 #include "reggroups.h"
 
 #include "elf/rl78.h"
