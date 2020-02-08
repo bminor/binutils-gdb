@@ -48,7 +48,6 @@ struct mapped_index;
 struct mapped_debug_names;
 struct signatured_type;
 struct die_info;
-typedef struct die_info *die_info_ptr;
 
 /* Collection of data recorded per objfile.
    This hangs off of dwarf2_objfile_data_key.  */

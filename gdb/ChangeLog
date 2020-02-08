@@ -1,5 +1,9 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.h (die_info_ptr): Remove typedef.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (read_call_site_scope)
 	(handle_data_member_location, dwarf2_add_member_fn)
 	(mark_common_block_symbol_computed, read_common_block)
