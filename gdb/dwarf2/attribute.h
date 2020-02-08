@@ -79,6 +79,11 @@ struct attribute
 
   bool form_is_ref () const;
 
+  /* Check if the attribute's form is a DW_FORM_block*
+     if so return true else false.  */
+
+  bool form_is_block () const;
+
 
   ENUM_BITFIELD(dwarf_attribute) name : 16;
   ENUM_BITFIELD(dwarf_form) form : 15;
@@ -109,10 +114,5 @@ struct attribute
 #define DW_SND(attr)       ((attr)->u.snd)
 #define DW_ADDR(attr)	   ((attr)->u.addr)
 #define DW_SIGNATURE(attr) ((attr)->u.signature)
-
-/* Check if the attribute's form is a DW_FORM_block*
-   if so return true else false.  */
-
-extern int attr_form_is_block (const struct attribute *attr);
 
 #endif /* GDB_DWARF2_ATTRIBUTE_H */

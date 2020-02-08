@@ -59,15 +59,14 @@ attribute::value_as_address () const
 
 /* See attribute.h.  */
 
-int
-attr_form_is_block (const struct attribute *attr)
+bool
+attribute::form_is_block () const
 {
-  return (attr == NULL ? 0 :
-      attr->form == DW_FORM_block1
-      || attr->form == DW_FORM_block2
-      || attr->form == DW_FORM_block4
-      || attr->form == DW_FORM_block
-      || attr->form == DW_FORM_exprloc);
+  return (form == DW_FORM_block1
+	  || form == DW_FORM_block2
+	  || form == DW_FORM_block4
+	  || form == DW_FORM_block
+	  || form == DW_FORM_exprloc);
 }
 
 /* See attribute.h.  */

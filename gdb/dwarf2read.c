@@ -13693,9 +13693,9 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       attr = dwarf2_attr (die, DW_AT_abstract_origin, cu);
     }
   SET_FIELD_DWARF_BLOCK (call_site->target, NULL);
-  if (!attr || (attr_form_is_block (attr) && DW_BLOCK (attr)->size == 0))
+  if (!attr || (attr->form_is_block () && DW_BLOCK (attr)->size == 0))
     /* Keep NULL DWARF_BLOCK.  */;
-  else if (attr_form_is_block (attr))
+  else if (attr->form_is_block ())
     {
       struct dwarf2_locexpr_baton *dlbaton;
 
@@ -13801,7 +13801,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  parameter->u.param_cu_off
 	    = (cu_offset) (sect_off - cu->header.sect_off);
 	}
-      else if (loc == NULL || origin != NULL || !attr_form_is_block (loc))
+      else if (loc == NULL || origin != NULL || !loc->form_is_block ())
 	{
 	  complaint (_("No DW_FORM_block* DW_AT_location for "
 		       "DW_TAG_call_site child DIE %s [in module %s]"),
@@ -13833,7 +13833,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       attr = dwarf2_attr (child_die, DW_AT_call_value, cu);
       if (attr == NULL)
 	attr = dwarf2_attr (child_die, DW_AT_GNU_call_site_value, cu);
-      if (!attr_form_is_block (attr))
+      if (attr == NULL || !attr->form_is_block ())
 	{
 	  complaint (_("No DW_FORM_block* DW_AT_call_value for "
 		       "DW_TAG_call_site child DIE %s [in module %s]"),
@@ -13854,7 +13854,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	attr = dwarf2_attr (child_die, DW_AT_GNU_call_site_data_value, cu);
       if (attr != nullptr)
 	{
-	  if (!attr_form_is_block (attr))
+	  if (!attr->form_is_block ())
 	    complaint (_("No DW_FORM_block* DW_AT_call_data_value for "
 			 "DW_TAG_call_site child DIE %s [in module %s]"),
 		       sect_offset_str (child_die->sect_off),
@@ -14627,7 +14627,7 @@ handle_data_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	*offset = dwarf2_get_attr_constant_value (attr, 0);
       else if (attr->form_is_section_offset ())
 	dwarf2_complex_location_expr_complaint ();
-      else if (attr_form_is_block (attr))
+      else if (attr->form_is_block ())
 	*offset = decode_locdesc (DW_BLOCK (attr), cu);
       else
 	dwarf2_complex_location_expr_complaint ();
@@ -15205,7 +15205,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
   attr = dwarf2_attr (die, DW_AT_vtable_elem_location, cu);
   if (attr != nullptr)
     {
-      if (attr_form_is_block (attr) && DW_BLOCK (attr)->size > 0)
+      if (attr->form_is_block () && DW_BLOCK (attr)->size > 0)
         {
 	  if (DW_BLOCK (attr)->data[0] == DW_OP_constu)
 	    {
@@ -16416,8 +16416,8 @@ mark_common_block_symbol_computed (struct symbol *sym,
   LONGEST offset = 0;
 
   gdb_assert (common_loc && member_loc);
-  gdb_assert (attr_form_is_block (common_loc));
-  gdb_assert (attr_form_is_block (member_loc)
+  gdb_assert (common_loc->form_is_block ());
+  gdb_assert (member_loc->form_is_block ()
 	      || member_loc->form_is_constant ());
 
   baton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
@@ -16478,7 +16478,7 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
   if (attr != nullptr)
     {
       /* Support the .debug_loc offsets.  */
-      if (attr_form_is_block (attr))
+      if (attr->form_is_block ())
         {
 	  /* Ok.  */
         }
@@ -16546,7 +16546,7 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
 		  if (member_loc->form_is_section_offset ())
 		    dwarf2_complex_location_expr_complaint ();
 		  else if (member_loc->form_is_constant ()
-			   || attr_form_is_block (member_loc))
+			   || member_loc->form_is_block ())
 		    {
 		      if (attr != nullptr)
 			mark_common_block_symbol_computed (sym, die, attr,
@@ -17530,7 +17530,7 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
   if (attr == NULL || prop == NULL)
     return 0;
 
-  if (attr_form_is_block (attr))
+  if (attr->form_is_block ())
     {
       baton = XOBNEW (obstack, struct dwarf2_property_baton);
       baton->property_type = default_type;
@@ -17576,7 +17576,7 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 		prop->kind = PROP_LOCLIST;
 		gdb_assert (prop->data.baton != NULL);
 	      }
-	    else if (attr_form_is_block (target_attr))
+	    else if (target_attr->form_is_block ())
 	      {
 		baton = XOBNEW (obstack, struct dwarf2_property_baton);
 		baton->property_type = die_type (target_die, target_cu);
@@ -18486,7 +18486,7 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	  break;
 	case DW_AT_location:
           /* Support the .debug_loc offsets.  */
-          if (attr_form_is_block (&attr))
+          if (attr.form_is_block ())
             {
 	       d.locdesc = DW_BLOCK (&attr);
             }
@@ -21131,7 +21131,7 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
 
   /* A DW_AT_location attribute with no contents indicates that a
      variable has been optimized away.  */
-  if (attr_form_is_block (attr) && DW_BLOCK (attr)->size == 0)
+  if (attr->form_is_block () && DW_BLOCK (attr)->size == 0)
     {
       SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
       return;
@@ -21142,7 +21142,7 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
      specified.  If this is just a DW_OP_addr, DW_OP_addrx, or
      DW_OP_GNU_addr_index then mark this symbol as LOC_STATIC.  */
 
-  if (attr_form_is_block (attr)
+  if (attr->form_is_block ()
       && ((DW_BLOCK (attr)->data[0] == DW_OP_addr
 	   && DW_BLOCK (attr)->size == 1 + cu_header->addr_size)
 	  || ((DW_BLOCK (attr)->data[0] == DW_OP_GNU_addr_index
@@ -23057,7 +23057,7 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
     }
   else
     {
-      if (!attr_form_is_block (attr))
+      if (!attr->form_is_block ())
 	error (_("Dwarf Error: DIE at %s referenced in module %s "
 		 "is neither DW_FORM_block* nor DW_FORM_exprloc"),
 	       sect_offset_str (sect_off), objfile_name (objfile));
@@ -24814,7 +24814,7 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
       baton->per_cu = cu->per_cu;
       gdb_assert (baton->per_cu);
 
-      if (attr_form_is_block (attr))
+      if (attr->form_is_block ())
 	{
 	  /* Note that we're just copying the block's data pointer
 	     here, not the actual data.  We're still pointing into the
@@ -25212,7 +25212,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 
   /* Read DW_AT_allocated and set in type.  */
   attr = dwarf2_attr (die, DW_AT_allocated, cu);
-  if (attr_form_is_block (attr))
+  if (attr != NULL && attr->form_is_block ())
     {
       struct type *prop_type
 	= dwarf2_per_cu_addr_sized_int_type (cu->per_cu, false);
@@ -25228,7 +25228,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 
   /* Read DW_AT_associated and set in type.  */
   attr = dwarf2_attr (die, DW_AT_associated, cu);
-  if (attr_form_is_block (attr))
+  if (attr != NULL && attr->form_is_block ())
     {
       struct type *prop_type
 	= dwarf2_per_cu_addr_sized_int_type (cu->per_cu, false);

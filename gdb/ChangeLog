@@ -1,5 +1,18 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (read_call_site_scope)
+	(handle_data_member_location, dwarf2_add_member_fn)
+	(mark_common_block_symbol_computed, read_common_block)
+	(attr_to_dynamic_prop, partial_die_info::read)
+	(var_decode_location, dwarf2_fetch_die_loc_sect_off)
+	(dwarf2_symbol_mark_computed, set_die_type): Update.
+	* dwarf2/attribute.h (struct attribute) <form_is_block>: Declare
+	method.
+	(attr_form_is_block): Don't declare.
+	* dwarf2/attribute.c (attribute::form_is_block): Now a method.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (dwarf2_find_base_address, )
 	(read_call_site_scope, rust_containing_type)
 	(dwarf2_get_pc_bounds, dwarf2_record_block_ranges)
