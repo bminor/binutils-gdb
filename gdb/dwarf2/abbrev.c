@@ -44,7 +44,7 @@ abbrev_table::alloc_abbrev ()
 {
   struct abbrev_info *abbrev;
 
-  abbrev = XOBNEW (&abbrev_obstack, struct abbrev_info);
+  abbrev = XOBNEW (&m_abbrev_obstack, struct abbrev_info);
   memset (abbrev, 0, sizeof (struct abbrev_info));
 
   return abbrev;
@@ -87,9 +87,9 @@ abbrev_table::lookup_abbrev (unsigned int abbrev_number)
 /* Read in an abbrev table.  */
 
 abbrev_table_up
-abbrev_table_read_table (struct objfile *objfile,
-			 struct dwarf2_section_info *section,
-			 sect_offset sect_off)
+abbrev_table::read (struct objfile *objfile,
+		    struct dwarf2_section_info *section,
+		    sect_offset sect_off)
 {
   bfd *abfd = section->get_bfd_owner ();
   const gdb_byte *abbrev_ptr;
@@ -152,7 +152,7 @@ abbrev_table_read_table (struct objfile *objfile,
 	}
 
       cur_abbrev->attrs =
-	XOBNEWVEC (&abbrev_table->abbrev_obstack, struct attr_abbrev,
+	XOBNEWVEC (&abbrev_table->m_abbrev_obstack, struct attr_abbrev,
 		   cur_abbrev->num_attrs);
       memcpy (cur_abbrev->attrs, cur_attrs.data (),
 	      cur_abbrev->num_attrs * sizeof (struct attr_abbrev));

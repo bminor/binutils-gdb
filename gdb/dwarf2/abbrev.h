@@ -50,15 +50,34 @@ struct attr_abbrev
 /* Size of abbrev_table.abbrev_hash_table.  */
 #define ABBREV_HASH_SIZE 121
 
+struct abbrev_table;
+typedef std::unique_ptr<struct abbrev_table> abbrev_table_up;
+
 /* Top level data structure to contain an abbreviation table.  */
 
 struct abbrev_table
 {
+  static abbrev_table_up read (struct objfile *objfile,
+			       struct dwarf2_section_info *section,
+			       sect_offset sect_off);
+
+  /* Look up an abbrev in the table.
+     Returns NULL if the abbrev is not found.  */
+
+  struct abbrev_info *lookup_abbrev (unsigned int abbrev_number);
+
+
+  /* Where the abbrev table came from.
+     This is used as a sanity check when the table is used.  */
+  const sect_offset sect_off;
+
+private:
+
   explicit abbrev_table (sect_offset off)
     : sect_off (off)
   {
     m_abbrevs =
-      XOBNEWVEC (&abbrev_obstack, struct abbrev_info *, ABBREV_HASH_SIZE);
+      XOBNEWVEC (&m_abbrev_obstack, struct abbrev_info *, ABBREV_HASH_SIZE);
     memset (m_abbrevs, 0, ABBREV_HASH_SIZE * sizeof (struct abbrev_info *));
   }
 
@@ -71,33 +90,14 @@ struct abbrev_table
   /* Add an abbreviation to the table.  */
   void add_abbrev (unsigned int abbrev_number, struct abbrev_info *abbrev);
 
-  /* Look up an abbrev in the table.
-     Returns NULL if the abbrev is not found.  */
-
-  struct abbrev_info *lookup_abbrev (unsigned int abbrev_number);
-
-
-  /* Where the abbrev table came from.
-     This is used as a sanity check when the table is used.  */
-  const sect_offset sect_off;
-
-  /* Storage for the abbrev table.  */
-  auto_obstack abbrev_obstack;
-
-private:
-
   /* Hash table of abbrevs.
      This is an array of size ABBREV_HASH_SIZE allocated in abbrev_obstack.
      It could be statically allocated, but the previous code didn't so we
      don't either.  */
   struct abbrev_info **m_abbrevs;
+
+  /* Storage for the abbrev table.  */
+  auto_obstack m_abbrev_obstack;
 };
-
-typedef std::unique_ptr<struct abbrev_table> abbrev_table_up;
-
-extern abbrev_table_up abbrev_table_read_table
-  (struct objfile *objfile,
-   struct dwarf2_section_info *section,
-   sect_offset sect_off);
 
 #endif /* GDB_DWARF2_ABBREV_H */

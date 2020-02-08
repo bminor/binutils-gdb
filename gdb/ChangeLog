@@ -1,5 +1,20 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_cutu_die_from_dwo): Update.
+	(cutu_reader): Update.
+	(build_type_psymtabs_1): Update.
+	* dwarf2/abbrev.c (abbrev_table::read): Rename.
+	(abbrev_table::alloc_abbrev): Update.
+	* dwarf2/abbrev.h (abbrev_table_up): Move earlier.
+	(abbrev_table::read): New static method, renamed from
+	abbrev_table_read_table.
+	(abbrev_table::alloc_abbrev)
+	(abbrev_table::add_abbrev): Now private.
+	(abbrev_table::abbrev_table): Now private.
+	(abbrev_table::m_abbrev_obstack): Now private.  Rename.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (set_die_type, get_die_type_at_offset): Update.
 	* dwarf2/read.h (struct dwarf2_per_objfile) <die_type_hash>: Now
 	htab_up.
