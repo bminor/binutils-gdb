@@ -2073,22 +2073,6 @@ dwarf2_per_objfile::locate_sections (bfd *abfd, asection *sectp,
     this->has_section_at_zero = true;
 }
 
-/* A helper function that returns the size of a section in a safe way.
-   If you are positive that the section has been read before using the
-   size, then it is safe to refer to the dwarf2_section_info object's
-   "size" field directly.  In other cases, you must call this
-   function, because for compressed sections the size field is not set
-   correctly until the section has been read.  */
-
-static bfd_size_type
-dwarf2_section_size (struct objfile *objfile,
-		     struct dwarf2_section_info *info)
-{
-  if (!info->readin)
-    info->read (objfile);
-  return info->size;
-}
-
 /* Fill in SECTP, BUFP and SIZEP with section info, given OBJFILE and
    SECTION_NAME.  */
 
@@ -6092,7 +6076,7 @@ error_check_comp_unit_head (struct dwarf2_per_objfile *dwarf2_per_objfile,
   const char *filename = section->get_file_name ();
 
   if (to_underlying (header->abbrev_sect_off)
-      >= dwarf2_section_size (dwarf2_per_objfile->objfile, abbrev_section))
+      >= abbrev_section->get_size (dwarf2_per_objfile->objfile))
     error (_("Dwarf Error: bad offset (%s) in compilation unit header "
 	   "(offset %s + 6) [in module %s]"),
 	   sect_offset_str (header->abbrev_sect_off),
@@ -24395,7 +24379,7 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
       /* .debug_loc{,.dwo} may not exist at all, or the offset may be outside
 	 the section.  If so, fall through to the complaint in the
 	 other branch.  */
-      && DW_UNSND (attr) < dwarf2_section_size (objfile, section))
+      && DW_UNSND (attr) < section->get_size (objfile))
     {
       struct dwarf2_loclist_baton *baton;
 
