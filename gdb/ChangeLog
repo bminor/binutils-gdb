@@ -1,5 +1,15 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/abbrev.c (abbrev_table): Move constructor from header.
+	Rewrite.
+	(abbrev_table::add_abbrev, abbrev_table::lookup_abbrev): Rewrite.
+	* dwarf2/abbrev.h (struct abbrev_info) <next>: Remove.
+	(abbrev_table::abbrev_table): No longer inline.
+	(ABBREV_HASH_SIZE): Remove.
+	(abbrev_table::m_abbrevs): Now an htab_up.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_cutu_die_from_dwo): Update.
 	(cutu_reader): Update.
 	(build_type_psymtabs_1): Update.

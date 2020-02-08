@@ -35,7 +35,6 @@ struct abbrev_info
     unsigned short has_children;		/* boolean */
     unsigned short num_attrs;	/* number of attributes */
     struct attr_abbrev *attrs;	/* an array of attribute descriptions */
-    struct abbrev_info *next;	/* next in chain */
   };
 
 struct attr_abbrev
@@ -46,9 +45,6 @@ struct attr_abbrev
     /* It is valid only if FORM is DW_FORM_implicit_const.  */
     LONGEST implicit_const;
   };
-
-/* Size of abbrev_table.abbrev_hash_table.  */
-#define ABBREV_HASH_SIZE 121
 
 struct abbrev_table;
 typedef std::unique_ptr<struct abbrev_table> abbrev_table_up;
@@ -73,13 +69,7 @@ struct abbrev_table
 
 private:
 
-  explicit abbrev_table (sect_offset off)
-    : sect_off (off)
-  {
-    m_abbrevs =
-      XOBNEWVEC (&m_abbrev_obstack, struct abbrev_info *, ABBREV_HASH_SIZE);
-    memset (m_abbrevs, 0, ABBREV_HASH_SIZE * sizeof (struct abbrev_info *));
-  }
+  explicit abbrev_table (sect_offset off);
 
   DISABLE_COPY_AND_ASSIGN (abbrev_table);
 
@@ -90,11 +80,8 @@ private:
   /* Add an abbreviation to the table.  */
   void add_abbrev (unsigned int abbrev_number, struct abbrev_info *abbrev);
 
-  /* Hash table of abbrevs.
-     This is an array of size ABBREV_HASH_SIZE allocated in abbrev_obstack.
-     It could be statically allocated, but the previous code didn't so we
-     don't either.  */
-  struct abbrev_info **m_abbrevs;
+  /* Hash table of abbrevs.  */
+  htab_up m_abbrevs;
 
   /* Storage for the abbrev table.  */
   auto_obstack m_abbrev_obstack;

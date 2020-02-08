@@ -30,12 +30,38 @@
 #include "dwarf2/leb.h"
 #include "bfd.h"
 
+/* Hash function for an abbrev.  */
+
+static hashval_t
+hash_abbrev (const void *item)
+{
+  const struct abbrev_info *info = (const struct abbrev_info *) item;
+  return info->number;
+}
+
+/* Comparison function for abbrevs.  */
+
+static int
+eq_abbrev (const void *lhs, const void *rhs)
+{
+  const struct abbrev_info *l_info = (const struct abbrev_info *) lhs;
+  const struct abbrev_info *r_info = (const struct abbrev_info *) rhs;
+  return l_info->number == r_info->number;
+}
+
 /* Abbreviation tables.
 
    In DWARF version 2, the description of the debugging information is
    stored in a separate .debug_abbrev section.  Before we read any
    dies from a section we read in all abbreviations and install them
    in a hash table.  */
+
+abbrev_table::abbrev_table (sect_offset off)
+  : sect_off (off),
+    m_abbrevs (htab_create_alloc (20, hash_abbrev, eq_abbrev,
+				  nullptr, xcalloc, xfree))
+{
+}
 
 /* Allocate space for a struct abbrev_info object in ABBREV_TABLE.  */
 
@@ -56,11 +82,8 @@ void
 abbrev_table::add_abbrev (unsigned int abbrev_number,
 			  struct abbrev_info *abbrev)
 {
-  unsigned int hash_number;
-
-  hash_number = abbrev_number % ABBREV_HASH_SIZE;
-  abbrev->next = m_abbrevs[hash_number];
-  m_abbrevs[hash_number] = abbrev;
+  void **slot = htab_find_slot (m_abbrevs.get (), abbrev, INSERT);
+  *slot = abbrev;
 }
 
 /* Look up an abbrev in the table.
@@ -69,19 +92,10 @@ abbrev_table::add_abbrev (unsigned int abbrev_number,
 struct abbrev_info *
 abbrev_table::lookup_abbrev (unsigned int abbrev_number)
 {
-  unsigned int hash_number;
-  struct abbrev_info *abbrev;
+  struct abbrev_info search;
+  search.number = abbrev_number;
 
-  hash_number = abbrev_number % ABBREV_HASH_SIZE;
-  abbrev = m_abbrevs[hash_number];
-
-  while (abbrev)
-    {
-      if (abbrev->number == abbrev_number)
-	return abbrev;
-      abbrev = abbrev->next;
-    }
-  return NULL;
+  return (struct abbrev_info *) htab_find (m_abbrevs.get (), &search);
 }
 
 /* Read in an abbrev table.  */
