@@ -1,5 +1,28 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (dwarf2_find_base_address, )
+	(read_call_site_scope, rust_containing_type)
+	(dwarf2_get_pc_bounds, dwarf2_record_block_ranges)
+	(handle_data_member_location, dwarf2_add_member_fn)
+	(get_alignment, read_structure_type, process_structure_scope)
+	(mark_common_block_symbol_computed, read_common_block)
+	(read_tag_string_type, attr_to_dynamic_prop, read_subrange_type)
+	(partial_die_info::read, read_attribute_value, new_symbol)
+	(lookup_die_type, dwarf2_get_ref_die_offset)
+	(dwarf2_get_attr_constant_value, follow_die_ref_or_sig)
+	(dwarf2_fetch_die_loc_sect_off, get_DW_AT_signature_type)
+	(dwarf2_symbol_mark_computed): Update.
+	* dwarf2/attribute.h (struct attribute) <value_as_address,
+	form_is_section_offset, form_is_constant, form_is_ref>: Declare
+	methods.
+	(value_as_address, attr_form_is_section_offset)
+	(attr_form_is_constant, attr_form_is_ref): Don't declare.
+	* dwarf2/attribute.c (attribute::value_as_address)
+	(attribute::form_is_section_offset, attribute::form_is_constant)
+	(attribute::form_is_ref): Now methods.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (struct attribute, DW_STRING)
 	(DW_STRING_IS_CANONICAL, DW_UNSND, DW_BLOCK, DW_SND, DW_ADDR)
 	(DW_SIGNATURE, struct dwarf_block, attr_value_as_address)

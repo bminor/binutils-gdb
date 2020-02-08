@@ -6112,7 +6112,7 @@ dwarf2_find_base_address (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_entry_pc, cu);
   if (attr != nullptr)
     {
-      cu->base_address = attr_value_as_address (attr);
+      cu->base_address = attr->value_as_address ();
       cu->base_known = 1;
     }
   else
@@ -6120,7 +6120,7 @@ dwarf2_find_base_address (struct die_info *die, struct dwarf2_cu *cu)
       attr = dwarf2_attr (die, DW_AT_low_pc, cu);
       if (attr != nullptr)
 	{
-	  cu->base_address = attr_value_as_address (attr);
+	  cu->base_address = attr->value_as_address ();
 	  cu->base_known = 1;
 	}
     }
@@ -13587,7 +13587,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 		 sect_offset_str (die->sect_off), objfile_name (objfile));
       return;
     }
-  pc = attr_value_as_address (attr) + baseaddr;
+  pc = attr->value_as_address () + baseaddr;
   pc = gdbarch_adjust_dwarf2_addr (gdbarch, pc);
 
   if (cu->call_site_htab == NULL)
@@ -13706,7 +13706,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       SET_FIELD_DWARF_BLOCK (call_site->target, dlbaton);
     }
-  else if (attr_form_is_ref (attr))
+  else if (attr->form_is_ref ())
     {
       struct dwarf2_cu *target_cu = cu;
       struct die_info *target_die;
@@ -13781,7 +13781,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	     for DW_AT_call_parameter.  */
 	  origin = dwarf2_attr (child_die, DW_AT_abstract_origin, cu);
 	}
-      if (loc == NULL && origin != NULL && attr_form_is_ref (origin))
+      if (loc == NULL && origin != NULL && origin->form_is_ref ())
 	{
 	  parameter->kind = CALL_SITE_PARAMETER_PARAM_OFFSET;
 
@@ -13883,7 +13883,7 @@ rust_containing_type (struct die_info *die, struct dwarf2_cu *cu)
   struct die_info *type_die = NULL;
   struct dwarf2_cu *type_cu = cu;
 
-  if (attr_form_is_ref (attr))
+  if (attr->form_is_ref ())
     type_die = follow_die_ref (die, attr, &type_cu);
   if (type_die == NULL)
     return NULL;
@@ -14294,9 +14294,9 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
       attr = dwarf2_attr (die, DW_AT_low_pc, cu);
       if (attr != nullptr)
         {
-	  low = attr_value_as_address (attr);
-	  high = attr_value_as_address (attr_high);
-	  if (cu->header.version >= 4 && attr_form_is_constant (attr_high))
+	  low = attr->value_as_address ();
+	  high = attr_high->value_as_address ();
+	  if (cu->header.version >= 4 && attr_high->form_is_constant ())
 	    high += low;
 	}
       else
@@ -14467,10 +14467,10 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
       attr = dwarf2_attr (die, DW_AT_low_pc, cu);
       if (attr != nullptr)
         {
-          CORE_ADDR low = attr_value_as_address (attr);
-	  CORE_ADDR high = attr_value_as_address (attr_high);
+          CORE_ADDR low = attr->value_as_address ();
+	  CORE_ADDR high = attr_high->value_as_address ();
 
-	  if (cu->header.version >= 4 && attr_form_is_constant (attr_high))
+	  if (cu->header.version >= 4 && attr_high->form_is_constant ())
 	    high += low;
 
 	  low = gdbarch_adjust_dwarf2_addr (gdbarch, low + baseaddr);
@@ -14623,9 +14623,9 @@ handle_data_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	 This is because DW_AT_data_member_location is new in DWARF 4,
 	 so if we see it, we can assume that a constant form is really
 	 a constant and not a section offset.  */
-      if (attr_form_is_constant (attr))
+      if (attr->form_is_constant ())
 	*offset = dwarf2_get_attr_constant_value (attr, 0);
-      else if (attr_form_is_section_offset (attr))
+      else if (attr->form_is_section_offset ())
 	dwarf2_complex_location_expr_complaint ();
       else if (attr_form_is_block (attr))
 	*offset = decode_locdesc (DW_BLOCK (attr), cu);
@@ -15246,7 +15246,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 		}
 	    }
 	}
-      else if (attr_form_is_section_offset (attr))
+      else if (attr->form_is_section_offset ())
         {
 	  dwarf2_complex_location_expr_complaint ();
         }
@@ -15373,7 +15373,7 @@ get_alignment (struct dwarf2_cu *cu, struct die_info *die)
   if (attr == nullptr)
     return 0;
 
-  if (!attr_form_is_constant (attr))
+  if (!attr->form_is_constant ())
     {
       complaint (_("DW_AT_alignment must have constant form"
 		   " - DIE at %s [in module %s]"),
@@ -15575,7 +15575,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
     {
-      if (attr_form_is_constant (attr))
+      if (attr->form_is_constant ())
         TYPE_LENGTH (type) = DW_UNSND (attr);
       else
 	{
@@ -15740,7 +15740,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	     In this case arrange not to check the offset.  */
 	  is_variant_part = false;
 	}
-      else if (attr_form_is_ref (discr))
+      else if (discr->form_is_ref ())
 	{
 	  struct dwarf2_cu *target_cu = cu;
 	  struct die_info *target_die = follow_die_ref (die, discr, &target_cu);
@@ -16418,7 +16418,7 @@ mark_common_block_symbol_computed (struct symbol *sym,
   gdb_assert (common_loc && member_loc);
   gdb_assert (attr_form_is_block (common_loc));
   gdb_assert (attr_form_is_block (member_loc)
-	      || attr_form_is_constant (member_loc));
+	      || member_loc->form_is_constant ());
 
   baton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
   baton->per_cu = cu->per_cu;
@@ -16426,7 +16426,7 @@ mark_common_block_symbol_computed (struct symbol *sym,
 
   baton->size = 5 /* DW_OP_call4 */ + 1 /* DW_OP_plus */;
 
-  if (attr_form_is_constant (member_loc))
+  if (member_loc->form_is_constant ())
     {
       offset = dwarf2_get_attr_constant_value (member_loc, 0);
       baton->size += 1 /* DW_OP_addr */ + cu->header.addr_size;
@@ -16442,7 +16442,7 @@ mark_common_block_symbol_computed (struct symbol *sym,
   store_unsigned_integer (ptr, 4, byte_order, cu_off);
   ptr += 4;
 
-  if (attr_form_is_constant (member_loc))
+  if (member_loc->form_is_constant ())
     {
       *ptr++ = DW_OP_addr;
       store_unsigned_integer (ptr, cu->header.addr_size, byte_order, offset);
@@ -16482,7 +16482,7 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
         {
 	  /* Ok.  */
         }
-      else if (attr_form_is_section_offset (attr))
+      else if (attr->form_is_section_offset ())
         {
 	  dwarf2_complex_location_expr_complaint ();
 	  attr = NULL;
@@ -16543,9 +16543,9 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
 			       sect_offset_str (child_die->sect_off),
 			     objfile_name (objfile));
 
-		  if (attr_form_is_section_offset (member_loc))
+		  if (member_loc->form_is_section_offset ())
 		    dwarf2_complex_location_expr_complaint ();
-		  else if (attr_form_is_constant (member_loc)
+		  else if (member_loc->form_is_constant ()
 			   || attr_form_is_block (member_loc))
 		    {
 		      if (attr != nullptr)
@@ -17006,7 +17006,7 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   attr = dwarf2_attr (die, DW_AT_string_length, cu);
-  if (attr != nullptr && !attr_form_is_constant (attr))
+  if (attr != nullptr && !attr->form_is_constant ())
     {
       /* The string length describes the location at which the length of
 	 the string can be found.  The size of the length field can be
@@ -17016,7 +17016,7 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
 	= dwarf2_attr (die, DW_AT_string_length_byte_size, cu);
       if (len == nullptr)
 	len = dwarf2_attr (die, DW_AT_byte_size, cu);
-      if (len != nullptr && attr_form_is_constant (len))
+      if (len != nullptr && len->form_is_constant ())
 	{
 	  /* Pass 0 as the default as we know this attribute is constant
 	     and the default value will not be returned.  */
@@ -17550,7 +17550,7 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
       prop->kind = PROP_LOCEXPR;
       gdb_assert (prop->data.baton != NULL);
     }
-  else if (attr_form_is_ref (attr))
+  else if (attr->form_is_ref ())
     {
       struct dwarf2_cu *target_cu = cu;
       struct die_info *target_die;
@@ -17567,7 +17567,7 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
       switch (target_attr->name)
 	{
 	  case DW_AT_location:
-	    if (attr_form_is_section_offset (target_attr))
+	    if (target_attr->form_is_section_offset ())
 	      {
 		baton = XOBNEW (obstack, struct dwarf2_property_baton);
 		baton->property_type = die_type (target_die, target_cu);
@@ -17614,7 +17614,7 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 	    }
 	}
     }
-  else if (attr_form_is_constant (attr))
+  else if (attr->form_is_constant ())
     {
       prop->data.const_val = dwarf2_get_attr_constant_value (attr, 0);
       prop->kind = PROP_CONST;
@@ -17798,7 +17798,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 
   LONGEST bias = 0;
   struct attribute *bias_attr = dwarf2_attr (die, DW_AT_GNU_bias, cu);
-  if (bias_attr != nullptr && attr_form_is_constant (bias_attr))
+  if (bias_attr != nullptr && bias_attr->form_is_constant ())
     bias = dwarf2_get_attr_constant_value (bias_attr, 0);
 
   /* Normally, the DWARF producers are expected to use a signed
@@ -18476,12 +18476,12 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	  break;
 	case DW_AT_low_pc:
 	  has_low_pc_attr = 1;
-	  lowpc = attr_value_as_address (&attr);
+	  lowpc = attr.value_as_address ();
 	  break;
 	case DW_AT_high_pc:
 	  has_high_pc_attr = 1;
-	  highpc = attr_value_as_address (&attr);
-	  if (cu->header.version >= 4 && attr_form_is_constant (&attr))
+	  highpc = attr.value_as_address ();
+	  if (cu->header.version >= 4 && attr.form_is_constant ())
 		high_pc_relative = 1;
 	  break;
 	case DW_AT_location:
@@ -18490,7 +18490,7 @@ partial_die_info::read (const struct die_reader_specs *reader,
             {
 	       d.locdesc = DW_BLOCK (&attr);
             }
-          else if (attr_form_is_section_offset (&attr))
+          else if (attr.form_is_section_offset ())
             {
 	      dwarf2_complex_location_expr_complaint ();
             }
@@ -19162,7 +19162,7 @@ read_attribute_value (const struct die_reader_specs *reader,
     }
 
   /* Super hack.  */
-  if (cu->per_cu->is_dwz && attr_form_is_ref (attr))
+  if (cu->per_cu->is_dwz && attr->form_is_ref ())
     attr->form = DW_FORM_GNU_ref_alt;
 
   /* We have seen instances where the compiler tried to emit a byte
@@ -21278,7 +21278,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    {
 	      CORE_ADDR addr;
 
-	      addr = attr_value_as_address (attr);
+	      addr = attr->value_as_address ();
 	      addr = gdbarch_adjust_dwarf2_addr (gdbarch, addr + baseaddr);
 	      SET_SYMBOL_VALUE_ADDRESS (sym, addr);
 	    }
@@ -21896,7 +21896,7 @@ lookup_die_type (struct die_info *die, const struct attribute *attr,
 						 dwarf2_per_objfile);
       this_type = get_die_type_at_offset (sect_off, per_cu);
     }
-  else if (attr_form_is_ref (attr))
+  else if (attr->form_is_ref ())
     {
       sect_offset sect_off = dwarf2_get_ref_die_offset (attr);
 
@@ -21924,7 +21924,7 @@ lookup_die_type (struct die_info *die, const struct attribute *attr,
       struct die_info *type_die = NULL;
       struct dwarf2_cu *type_cu = cu;
 
-      if (attr_form_is_ref (attr))
+      if (attr->form_is_ref ())
 	type_die = follow_die_ref (die, attr, &type_cu);
       if (type_die == NULL)
 	return build_error_marker_type (cu, die);
@@ -22828,7 +22828,7 @@ store_in_ref_table (struct die_info *die, struct dwarf2_cu *cu)
 static sect_offset
 dwarf2_get_ref_die_offset (const struct attribute *attr)
 {
-  if (attr_form_is_ref (attr))
+  if (attr->form_is_ref ())
     return (sect_offset) DW_UNSND (attr);
 
   complaint (_("unsupported die ref attribute form: '%s'"),
@@ -22852,7 +22852,7 @@ dwarf2_get_attr_constant_value (const struct attribute *attr, int default_value)
     return DW_UNSND (attr);
   else
     {
-      /* For DW_FORM_data16 see attr_form_is_constant.  */
+      /* For DW_FORM_data16 see attribute::form_is_constant.  */
       complaint (_("Attribute value is not a constant (%s)"),
                  dwarf_form_name (attr->form));
       return default_value;
@@ -22869,7 +22869,7 @@ follow_die_ref_or_sig (struct die_info *src_die, const struct attribute *attr,
 {
   struct die_info *die;
 
-  if (attr_form_is_ref (attr))
+  if (attr->form_is_ref ())
     die = follow_die_ref (src_die, attr, ref_cu);
   else if (attr->form == DW_FORM_ref_sig8)
     die = follow_die_sig (src_die, attr, ref_cu);
@@ -23043,7 +23043,7 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
       retval.data = NULL;
       retval.size = 0;
     }
-  else if (attr_form_is_section_offset (attr))
+  else if (attr->form_is_section_offset ())
     {
       struct dwarf2_loclist_baton loclist_baton;
       CORE_ADDR pc = (*get_frame_pc) (baton);
@@ -23431,7 +23431,7 @@ get_DW_AT_signature_type (struct die_info *die, const struct attribute *attr,
 			  struct dwarf2_cu *cu) /* ARI: editCase function */
 {
   /* Yes, DW_AT_signature can use a non-ref_sig8 reference.  */
-  if (attr_form_is_ref (attr))
+  if (attr->form_is_ref ())
     {
       struct dwarf2_cu *type_cu = cu;
       struct die_info *type_die = follow_die_ref (die, attr, &type_cu);
@@ -24785,7 +24785,7 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_section_info *section = cu_debug_loc_section (cu);
 
-  if (attr_form_is_section_offset (attr)
+  if (attr->form_is_section_offset ()
       /* .debug_loc{,.dwo} may not exist at all, or the offset may be outside
 	 the section.  If so, fall through to the complaint in the
 	 other branch.  */

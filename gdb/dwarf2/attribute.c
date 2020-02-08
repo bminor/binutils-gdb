@@ -30,12 +30,12 @@
 /* See attribute.h.  */
 
 CORE_ADDR
-attr_value_as_address (struct attribute *attr)
+attribute::value_as_address () const
 {
   CORE_ADDR addr;
 
-  if (attr->form != DW_FORM_addr && attr->form != DW_FORM_addrx
-      && attr->form != DW_FORM_GNU_addr_index)
+  if (form != DW_FORM_addr && form != DW_FORM_addrx
+      && form != DW_FORM_GNU_addr_index)
     {
       /* Aside from a few clearly defined exceptions, attributes that
 	 contain an address must always be in DW_FORM_addr form.
@@ -49,10 +49,10 @@ attr_value_as_address (struct attribute *attr)
 	 as well as update callers to pass in at least the CU's DWARF
 	 version.  This is more overhead than what we're willing to
 	 expand for a pretty rare case.  */
-      addr = DW_UNSND (attr);
+      addr = DW_UNSND (this);
     }
   else
-    addr = DW_ADDR (attr);
+    addr = DW_ADDR (this);
 
   return addr;
 }
@@ -72,20 +72,20 @@ attr_form_is_block (const struct attribute *attr)
 
 /* See attribute.h.  */
 
-int
-attr_form_is_section_offset (const struct attribute *attr)
+bool
+attribute::form_is_section_offset () const
 {
-  return (attr->form == DW_FORM_data4
-          || attr->form == DW_FORM_data8
-	  || attr->form == DW_FORM_sec_offset);
+  return (form == DW_FORM_data4
+          || form == DW_FORM_data8
+	  || form == DW_FORM_sec_offset);
 }
 
 /* See attribute.h.  */
 
-int
-attr_form_is_constant (const struct attribute *attr)
+bool
+attribute::form_is_constant () const
 {
-  switch (attr->form)
+  switch (form)
     {
     case DW_FORM_sdata:
     case DW_FORM_udata:
@@ -94,19 +94,19 @@ attr_form_is_constant (const struct attribute *attr)
     case DW_FORM_data4:
     case DW_FORM_data8:
     case DW_FORM_implicit_const:
-      return 1;
+      return true;
     default:
-      return 0;
+      return false;
     }
 }
 
 /* DW_ADDR is always stored already as sect_offset; despite for the forms
    besides DW_FORM_ref_addr it is stored as cu_offset in the DWARF file.  */
 
-int
-attr_form_is_ref (const struct attribute *attr)
+bool
+attribute::form_is_ref () const
 {
-  switch (attr->form)
+  switch (form)
     {
     case DW_FORM_ref_addr:
     case DW_FORM_ref1:
@@ -115,8 +115,8 @@ attr_form_is_ref (const struct attribute *attr)
     case DW_FORM_ref8:
     case DW_FORM_ref_udata:
     case DW_FORM_GNU_ref_alt:
-      return 1;
+      return true;
     default:
-      return 0;
+      return false;
     }
 }

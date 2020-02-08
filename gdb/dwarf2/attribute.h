@@ -41,6 +41,45 @@ struct dwarf_block
 /* Attributes have a name and a value.  */
 struct attribute
 {
+  /* Read the given attribute value as an address, taking the
+     attribute's form into account.  */
+  CORE_ADDR value_as_address () const;
+
+  /* Return non-zero if ATTR's value is a section offset --- classes
+     lineptr, loclistptr, macptr or rangelistptr --- or zero, otherwise.
+     You may use DW_UNSND (attr) to retrieve such offsets.
+
+     Section 7.5.4, "Attribute Encodings", explains that no attribute
+     may have a value that belongs to more than one of these classes; it
+     would be ambiguous if we did, because we use the same forms for all
+     of them.  */
+
+  bool form_is_section_offset () const;
+
+  /* Return non-zero if ATTR's value falls in the 'constant' class, or
+     zero otherwise.  When this function returns true, you can apply
+     dwarf2_get_attr_constant_value to it.
+
+     However, note that for some attributes you must check
+     attr_form_is_section_offset before using this test.  DW_FORM_data4
+     and DW_FORM_data8 are members of both the constant class, and of
+     the classes that contain offsets into other debug sections
+     (lineptr, loclistptr, macptr or rangelistptr).  The DWARF spec says
+     that, if an attribute's can be either a constant or one of the
+     section offset classes, DW_FORM_data4 and DW_FORM_data8 should be
+     taken as section offsets, not constants.
+
+     DW_FORM_data16 is not considered as dwarf2_get_attr_constant_value
+     cannot handle that.  */
+
+  bool form_is_constant () const;
+
+  /* DW_ADDR is always stored already as sect_offset; despite for the forms
+     besides DW_FORM_ref_addr it is stored as cu_offset in the DWARF file.  */
+
+  bool form_is_ref () const;
+
+
   ENUM_BITFIELD(dwarf_attribute) name : 16;
   ENUM_BITFIELD(dwarf_form) form : 15;
 
@@ -71,48 +110,9 @@ struct attribute
 #define DW_ADDR(attr)	   ((attr)->u.addr)
 #define DW_SIGNATURE(attr) ((attr)->u.signature)
 
-/* Read the given attribute value as an address, taking the attribute's
-   form into account.  */
-
-extern CORE_ADDR attr_value_as_address (struct attribute *attr);
-
 /* Check if the attribute's form is a DW_FORM_block*
    if so return true else false.  */
 
 extern int attr_form_is_block (const struct attribute *attr);
-
-/* Return non-zero if ATTR's value is a section offset --- classes
-   lineptr, loclistptr, macptr or rangelistptr --- or zero, otherwise.
-   You may use DW_UNSND (attr) to retrieve such offsets.
-
-   Section 7.5.4, "Attribute Encodings", explains that no attribute
-   may have a value that belongs to more than one of these classes; it
-   would be ambiguous if we did, because we use the same forms for all
-   of them.  */
-
-extern int attr_form_is_section_offset (const struct attribute *attr);
-
-/* Return non-zero if ATTR's value falls in the 'constant' class, or
-   zero otherwise.  When this function returns true, you can apply
-   dwarf2_get_attr_constant_value to it.
-
-   However, note that for some attributes you must check
-   attr_form_is_section_offset before using this test.  DW_FORM_data4
-   and DW_FORM_data8 are members of both the constant class, and of
-   the classes that contain offsets into other debug sections
-   (lineptr, loclistptr, macptr or rangelistptr).  The DWARF spec says
-   that, if an attribute's can be either a constant or one of the
-   section offset classes, DW_FORM_data4 and DW_FORM_data8 should be
-   taken as section offsets, not constants.
-
-   DW_FORM_data16 is not considered as dwarf2_get_attr_constant_value
-   cannot handle that.  */
-
-extern int attr_form_is_constant (const struct attribute *attr);
-
-/* DW_ADDR is always stored already as sect_offset; despite for the forms
-   besides DW_FORM_ref_addr it is stored as cu_offset in the DWARF file.  */
-
-extern int attr_form_is_ref (const struct attribute *attr);
 
 #endif /* GDB_DWARF2_ATTRIBUTE_H */
