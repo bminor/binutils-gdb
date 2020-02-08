@@ -960,8 +960,7 @@ private:
       : m_abfd (dwarf2_per_objfile->objfile->obfd),
 	m_dwarf2_per_objfile (dwarf2_per_objfile)
     {
-      dwarf2_read_section (dwarf2_per_objfile->objfile,
-			   &dwarf2_per_objfile->str);
+      dwarf2_per_objfile->str.read (dwarf2_per_objfile->objfile);
       if (dwarf2_per_objfile->str.buffer == NULL)
 	return;
       for (const gdb_byte *data = dwarf2_per_objfile->str.buffer;

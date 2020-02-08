@@ -45,6 +45,42 @@
 
 struct dwarf2_section_info
 {
+  /* Return the name of this section.  */
+  const char *get_name () const;
+
+  /* Return the containing section of this section, which must be a
+     virtual section.  */
+  struct dwarf2_section_info *get_containing_section () const;
+
+  /* Return the bfd owner of this section.  */
+  struct bfd *get_bfd_owner () const;
+
+  /* Return the bfd section of this section.
+     Returns NULL if the section is not present.  */
+  asection *get_bfd_section () const;
+
+  /* Return the name of the file this section is in.  */
+  const char *get_file_name () const;
+
+  /* Return the id of this section.
+     Returns 0 if this section doesn't exist.  */
+  int get_id () const;
+
+  /* Return the flags of this section.  This section (or containing
+     section if this is a virtual section) must exist.  */
+  int get_flags () const;
+
+  /* Return true if this section does not exist or if it has no
+     contents. */
+  bool empty () const;
+
+  /* Read the contents of this section.
+     OBJFILE is the main object file, but not necessarily the file where
+     the section comes from.  E.g., for DWO files the bfd of INFO is the bfd
+     of the DWO file.
+     If the section is compressed, uncompress it before returning.  */
+  void read (struct objfile *objfile);
+
   union
   {
     /* If this is a real section, the bfd section.  */
@@ -66,56 +102,5 @@ struct dwarf2_section_info
      This specifies which of s.section and s.containing_section to use.  */
   bool is_virtual;
 };
-
-/* Read the contents of the section INFO.
-   OBJFILE is the main object file, but not necessarily the file where
-   the section comes from.  E.g., for DWO files the bfd of INFO is the bfd
-   of the DWO file.
-   If the section is compressed, uncompress it before returning.  */
-
-extern void dwarf2_read_section (struct objfile *objfile,
-				 dwarf2_section_info *info);
-
-extern const char *get_section_name (const struct dwarf2_section_info *);
-
-extern const char *get_section_file_name (const struct dwarf2_section_info *);
-
-/* Return the containing section of virtual section SECTION.  */
-
-extern struct dwarf2_section_info *get_containing_section
-  (const struct dwarf2_section_info *section);
-
-/* Return the bfd owner of SECTION.  */
-
-extern struct bfd *get_section_bfd_owner
-  (const struct dwarf2_section_info *section);
-
-/* Return the bfd section of SECTION.
-   Returns NULL if the section is not present.  */
-
-extern asection *get_section_bfd_section
-  (const struct dwarf2_section_info *section);
-
-/* Return the name of SECTION.  */
-
-extern const char *get_section_name
-  (const struct dwarf2_section_info *section);
-
-/* Return the name of the file SECTION is in.  */
-
-extern const char *get_section_file_name
-  (const struct dwarf2_section_info *section);
-
-/* Return the id of SECTION.
-   Returns 0 if SECTION doesn't exist.  */
-
-extern int get_section_id (const struct dwarf2_section_info *section);
-
-/* Return the flags of SECTION.
-   SECTION (or containing section if this is a virtual section) must exist.  */
-
-extern int get_section_flags (const struct dwarf2_section_info *section);
-
-extern int dwarf2_section_empty_p (const struct dwarf2_section_info *section);
 
 #endif /* GDB_DWARF2_SECTION_H */

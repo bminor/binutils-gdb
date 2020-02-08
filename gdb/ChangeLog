@@ -1,5 +1,41 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (dwarf2_section_buffer_overflow_complaint)
+	(dwarf2_section_size, dwarf2_get_section_info)
+	(create_signatured_type_table_from_debug_names)
+	(create_addrmap_from_aranges, read_debug_names_from_section)
+	(get_gdb_index_contents_from_section, read_comp_unit_head)
+	(error_check_comp_unit_head, read_abbrev_offset)
+	(create_debug_type_hash_table, init_cu_die_reader)
+	(read_cutu_die_from_dwo, dwarf2_build_psymtabs_hard)
+	(read_comp_units_from_section, create_cus_hash_table)
+	(create_dwp_hash_table, create_dwo_unit_in_dwp_v1)
+	(create_dwp_v2_section, dwarf2_rnglists_process)
+	(dwarf2_ranges_process, read_die_and_siblings, read_full_die)
+	(abbrev_table_read_table, read_indirect_string_at_offset_from)
+	(read_indirect_string_from_dwz, read_addr_index_1)
+	(read_str_index, dwarf_decode_line_header, skip_form_bytes)
+	(dwarf_decode_macro_bytes, dwarf_decode_macros)
+	(fill_in_loclist_baton): Update.
+	* dwarf2/section.h (struct dwarf2_section_info) <get_name,
+	get_containing_section, get_bfd_owner, get_bfd_section,
+	get_file_name, get_id, get_flags, empty, read>: Declare methods.
+	(dwarf2_read_section, get_section_name, get_section_file_name)
+	(get_containing_section, get_section_bfd_owner)
+	(get_section_bfd_section, get_section_name, get_section_file_name)
+	(get_section_id, get_section_flags, dwarf2_section_empty_p): Don't
+	declare.
+	* dwarf2/section.c (dwarf2_section_info::get_containing_section)
+	(dwarf2_section_info::get_bfd_owner)
+	(dwarf2_section_info::get_bfd_section)
+	(dwarf2_section_info::get_name)
+	(dwarf2_section_info::get_file_name, dwarf2_section_info::get_id)
+	(dwarf2_section_info::get_flags, dwarf2_section_info::empty)
+	(dwarf2_section_info::read): Now methods.
+	* dwarf-index-write.c (class debug_names): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.h (struct dwarf2_section_info, dwarf2_read_section):
 	Move to dwarf2/section.h.
 	* dwarf2read.c (get_containing_section, get_section_bfd_owner)

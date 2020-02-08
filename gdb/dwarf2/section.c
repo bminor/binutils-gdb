@@ -30,55 +30,57 @@
 #include "objfiles.h"
 
 struct dwarf2_section_info *
-get_containing_section (const struct dwarf2_section_info *section)
+dwarf2_section_info::get_containing_section () const
 {
-  gdb_assert (section->is_virtual);
-  return section->s.containing_section;
+  gdb_assert (is_virtual);
+  return s.containing_section;
 }
 
 struct bfd *
-get_section_bfd_owner (const struct dwarf2_section_info *section)
+dwarf2_section_info::get_bfd_owner () const
 {
-  if (section->is_virtual)
+  const dwarf2_section_info *section = this;
+  if (is_virtual)
     {
-      section = get_containing_section (section);
+      section = get_containing_section ();
       gdb_assert (!section->is_virtual);
     }
   return section->s.section->owner;
 }
 
 asection *
-get_section_bfd_section (const struct dwarf2_section_info *section)
+dwarf2_section_info::get_bfd_section () const
 {
+  const dwarf2_section_info *section = this;
   if (section->is_virtual)
     {
-      section = get_containing_section (section);
+      section = get_containing_section ();
       gdb_assert (!section->is_virtual);
     }
   return section->s.section;
 }
 
 const char *
-get_section_name (const struct dwarf2_section_info *section)
+dwarf2_section_info::get_name () const
 {
-  asection *sectp = get_section_bfd_section (section);
+  asection *sectp = get_bfd_section ();
 
   gdb_assert (sectp != NULL);
   return bfd_section_name (sectp);
 }
 
 const char *
-get_section_file_name (const struct dwarf2_section_info *section)
+dwarf2_section_info::get_file_name () const
 {
-  bfd *abfd = get_section_bfd_owner (section);
+  bfd *abfd = get_bfd_owner ();
 
   return bfd_get_filename (abfd);
 }
 
 int
-get_section_id (const struct dwarf2_section_info *section)
+dwarf2_section_info::get_id () const
 {
-  asection *sectp = get_section_bfd_section (section);
+  asection *sectp = get_bfd_section ();
 
   if (sectp == NULL)
     return 0;
@@ -86,61 +88,60 @@ get_section_id (const struct dwarf2_section_info *section)
 }
 
 int
-get_section_flags (const struct dwarf2_section_info *section)
+dwarf2_section_info::get_flags () const
 {
-  asection *sectp = get_section_bfd_section (section);
+  asection *sectp = get_bfd_section ();
 
   gdb_assert (sectp != NULL);
   return bfd_section_flags (sectp);
 }
 
-int
-dwarf2_section_empty_p (const struct dwarf2_section_info *section)
+bool
+dwarf2_section_info::empty () const
 {
-  if (section->is_virtual)
-    return section->size == 0;
-  return section->s.section == NULL || section->size == 0;
+  if (is_virtual)
+    return size == 0;
+  return s.section == NULL || size == 0;
 }
 
 void
-dwarf2_read_section (struct objfile *objfile, dwarf2_section_info *info)
+dwarf2_section_info::read (struct objfile *objfile)
 {
   asection *sectp;
   bfd *abfd;
   gdb_byte *buf, *retbuf;
 
-  if (info->readin)
+  if (readin)
     return;
-  info->buffer = NULL;
-  info->readin = true;
+  buffer = NULL;
+  readin = true;
 
-  if (dwarf2_section_empty_p (info))
+  if (empty ())
     return;
 
-  sectp = get_section_bfd_section (info);
+  sectp = get_bfd_section ();
 
   /* If this is a virtual section we need to read in the real one first.  */
-  if (info->is_virtual)
+  if (is_virtual)
     {
       struct dwarf2_section_info *containing_section =
-	get_containing_section (info);
+	get_containing_section ();
 
       gdb_assert (sectp != NULL);
       if ((sectp->flags & SEC_RELOC) != 0)
 	{
 	  error (_("Dwarf Error: DWP format V2 with relocations is not"
 		   " supported in section %s [in module %s]"),
-		 get_section_name (info), get_section_file_name (info));
+		 get_name (), get_file_name ());
 	}
-      dwarf2_read_section (objfile, containing_section);
+      containing_section->read (objfile);
       /* Other code should have already caught virtual sections that don't
 	 fit.  */
-      gdb_assert (info->virtual_offset + info->size
-		  <= containing_section->size);
+      gdb_assert (virtual_offset + size <= containing_section->size);
       /* If the real section is empty or there was a problem reading the
 	 section we shouldn't get here.  */
       gdb_assert (containing_section->buffer != NULL);
-      info->buffer = containing_section->buffer + info->virtual_offset;
+      buffer = containing_section->buffer + virtual_offset;
       return;
     }
 
@@ -148,12 +149,12 @@ dwarf2_read_section (struct objfile *objfile, dwarf2_section_info *info)
      Otherwise we attach it to the BFD.  */
   if ((sectp->flags & SEC_RELOC) == 0)
     {
-      info->buffer = gdb_bfd_map_section (sectp, &info->size);
+      buffer = gdb_bfd_map_section (sectp, &size);
       return;
     }
 
-  buf = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack, info->size);
-  info->buffer = buf;
+  buf = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack, size);
+  buffer = buf;
 
   /* When debugging .o files, we may need to apply relocations; see
      http://sourceware.org/ml/gdb-patches/2002-04/msg00136.html .
@@ -162,15 +163,15 @@ dwarf2_read_section (struct objfile *objfile, dwarf2_section_info *info)
   retbuf = symfile_relocate_debug_section (objfile, sectp, buf);
   if (retbuf != NULL)
     {
-      info->buffer = retbuf;
+      buffer = retbuf;
       return;
     }
 
-  abfd = get_section_bfd_owner (info);
+  abfd = get_bfd_owner ();
   gdb_assert (abfd != NULL);
 
   if (bfd_seek (abfd, sectp->filepos, SEEK_SET) != 0
-      || bfd_bread (buf, info->size, abfd) != info->size)
+      || bfd_bread (buf, size, abfd) != size)
     {
       error (_("Dwarf Error: Can't read DWARF data"
 	       " in section %s [in module %s]"),
