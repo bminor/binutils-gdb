@@ -903,9 +903,6 @@ struct die_reader_specs
   /* The end of the buffer.  */
   const gdb_byte *buffer_end;
 
-  /* The value of the DW_AT_comp_dir attribute.  */
-  const char *comp_dir;
-
   /* The abbreviation table to use when reading the DIEs.  */
   struct abbrev_table *abbrev_table;
 };
@@ -6914,7 +6911,6 @@ init_cu_die_reader (struct die_reader_specs *reader,
   reader->die_section = section;
   reader->buffer = section->buffer;
   reader->buffer_end = section->buffer + section->size;
-  reader->comp_dir = NULL;
   reader->abbrev_table = abbrev_table;
 }
 
@@ -7095,13 +7091,6 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
 			  bfd_get_filename (abfd));
       dump_die (comp_unit_die, dwarf_die_debug);
     }
-
-  /* Save the comp_dir attribute.  If there is no DWP file then we'll read
-     TUs by skipping the stub and going directly to the entry in the DWO file.
-     However, skipping the stub means we won't get DW_AT_comp_dir, so we have
-     to get it via circuitous means.  Blech.  */
-  if (comp_dir != NULL)
-    result_reader->comp_dir = DW_STRING (comp_dir);
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= begin_info_ptr + dwo_unit->length

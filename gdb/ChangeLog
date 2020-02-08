@@ -1,5 +1,10 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2read.c (struct die_reader_specs) <comp_dir>: Remove.
+	(init_cu_die_reader, read_cutu_die_from_dwo): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.h (struct die_info): Don't declare.
 
 2020-02-08  Tom Tromey  <tom@tromey.com>
