@@ -312,13 +312,13 @@ const gdb_byte *
 dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 				 size_t *locexpr_length, CORE_ADDR pc)
 {
-  struct objfile *objfile = dwarf2_per_cu_objfile (baton->per_cu);
+  struct objfile *objfile = baton->per_cu->objfile ();
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  unsigned int addr_size = dwarf2_per_cu_addr_size (baton->per_cu);
+  unsigned int addr_size = baton->per_cu->addr_size ();
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
   /* Adjust base_address for relocatable objects.  */
-  CORE_ADDR base_offset = dwarf2_per_cu_text_offset (baton->per_cu);
+  CORE_ADDR base_offset = baton->per_cu->text_offset ();
   CORE_ADDR base_address = baton->base_address + base_offset;
   const gdb_byte *loc_ptr, *buf_end;
 
@@ -336,7 +336,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	kind = decode_debug_loc_dwo_addresses (baton->per_cu,
 					       loc_ptr, buf_end, &new_ptr,
 					       &low, &high, byte_order);
-      else if (dwarf2_version (baton->per_cu) < 5)
+      else if (baton->per_cu->version () < 5)
 	kind = decode_debug_loc_addresses (loc_ptr, buf_end, &new_ptr,
 					   &low, &high,
 					   byte_order, addr_size,
@@ -382,7 +382,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	  high += base_address;
 	}
 
-      if (dwarf2_version (baton->per_cu) < 5)
+      if (baton->per_cu->version () < 5)
 	{
 	  length = extract_unsigned_integer (loc_ptr, 2, byte_order);
 	  loc_ptr += 2;
@@ -643,7 +643,7 @@ class dwarf_evaluate_loc_desc : public dwarf_expr_context
      current thread's thread-local storage with offset OFFSET.  */
   CORE_ADDR get_tls_address (CORE_ADDR offset) override
   {
-    struct objfile *objfile = dwarf2_per_cu_objfile (per_cu);
+    struct objfile *objfile = per_cu->objfile ();
 
     return target_translate_tls_address (objfile, offset);
   }
@@ -730,12 +730,11 @@ class dwarf_evaluate_loc_desc : public dwarf_expr_context
 							(CORE_ADDR) 0);
 
     scoped_restore save_arch = make_scoped_restore (&this->gdbarch);
-    this->gdbarch
-      = get_objfile_arch (dwarf2_per_cu_objfile (per_cu));
+    this->gdbarch = get_objfile_arch (per_cu->objfile ());
     scoped_restore save_addr_size = make_scoped_restore (&this->addr_size);
-    this->addr_size = dwarf2_per_cu_addr_size (per_cu);
+    this->addr_size = per_cu->addr_size ();
     scoped_restore save_offset = make_scoped_restore (&this->offset);
-    this->offset = dwarf2_per_cu_text_offset (per_cu);
+    this->offset = per_cu->text_offset ();
 
     this->eval (data_src, size);
   }
@@ -1819,7 +1818,7 @@ rw_pieced_value (struct value *v, struct value *from)
 		break;
 	      }
 
-	    struct objfile *objfile = dwarf2_per_cu_objfile (c->per_cu);
+	    struct objfile *objfile = c->per_cu->objfile ();
 	    struct gdbarch *objfile_gdbarch = get_objfile_arch (objfile);
 	    ULONGEST stack_value_size_bits
 	      = 8 * TYPE_LENGTH (value_type (p->v.value));
@@ -2176,7 +2175,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 			       LONGEST subobj_byte_offset)
 {
   struct value *retval;
-  struct objfile *objfile = dwarf2_per_cu_objfile (per_cu);
+  struct objfile *objfile = per_cu->objfile ();
 
   if (subobj_type == NULL)
     {
@@ -2197,9 +2196,9 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   scoped_value_mark free_values;
 
   ctx.gdbarch = get_objfile_arch (objfile);
-  ctx.addr_size = dwarf2_per_cu_addr_size (per_cu);
-  ctx.ref_addr_size = dwarf2_per_cu_ref_addr_size (per_cu);
-  ctx.offset = dwarf2_per_cu_text_offset (per_cu);
+  ctx.addr_size = per_cu->addr_size ();
+  ctx.ref_addr_size = per_cu->ref_addr_size ();
+  ctx.offset = per_cu->text_offset ();
 
   try
     {
@@ -2411,12 +2410,12 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
   ctx.per_cu = dlbaton->per_cu;
   ctx.obj_address = addr;
 
-  objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
+  objfile = dlbaton->per_cu->objfile ();
 
   ctx.gdbarch = get_objfile_arch (objfile);
-  ctx.addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
-  ctx.ref_addr_size = dwarf2_per_cu_ref_addr_size (dlbaton->per_cu);
-  ctx.offset = dwarf2_per_cu_text_offset (dlbaton->per_cu);
+  ctx.addr_size = dlbaton->per_cu->addr_size ();
+  ctx.ref_addr_size = dlbaton->per_cu->ref_addr_size ();
+  ctx.offset = dlbaton->per_cu->text_offset ();
 
   try
     {
@@ -2504,7 +2503,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 		       CORE_ADDR on 64bit machine has 8 bytes but address
 		       size of an 32bit application is bytes.  */
 		    const int addr_size
-		      = (dwarf2_per_cu_addr_size (baton->locexpr.per_cu)
+		      = (baton->locexpr.per_cu->addr_size ()
 			 * TARGET_CHAR_BIT);
 		    const CORE_ADDR neg_mask
 		      = (~((CORE_ADDR) 0) <<  (addr_size - 1));
@@ -2610,7 +2609,7 @@ dwarf2_compile_property_to_c (string_file *stream,
 
   compile_dwarf_bounds_to_c (stream, result_name, prop, sym, pc,
 			     gdbarch, registers_used,
-			     dwarf2_per_cu_addr_size (per_cu),
+			     per_cu->addr_size (),
 			     data, data + size, per_cu);
 }
 
@@ -2732,7 +2731,7 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
 				       struct dwarf2_per_cu_data *per_cu)
 {
   int in_reg;
-  struct objfile *objfile = dwarf2_per_cu_objfile (per_cu);
+  struct objfile *objfile = per_cu->objfile ();
 
   scoped_value_mark free_values;
 
@@ -2741,9 +2740,9 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
   ctx.needs = SYMBOL_NEEDS_NONE;
   ctx.per_cu = per_cu;
   ctx.gdbarch = get_objfile_arch (objfile);
-  ctx.addr_size = dwarf2_per_cu_addr_size (per_cu);
-  ctx.ref_addr_size = dwarf2_per_cu_ref_addr_size (per_cu);
-  ctx.offset = dwarf2_per_cu_text_offset (per_cu);
+  ctx.addr_size = per_cu->addr_size ();
+  ctx.ref_addr_size = per_cu->ref_addr_size ();
+  ctx.offset = per_cu->text_offset ();
 
   ctx.eval (data, size);
 
@@ -2984,7 +2983,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	     index, not an address.  We don't support things like
 	     branching between the address and the TLS op.  */
 	  if (op_ptr >= op_end || *op_ptr != DW_OP_GNU_push_tls_address)
-	    uoffset += dwarf2_per_cu_text_offset (per_cu);
+	    uoffset += per_cu->text_offset ();
 	  ax_const_l (expr, uoffset);
 	  break;
 
@@ -4292,9 +4291,9 @@ locexpr_describe_location (struct symbol *symbol, CORE_ADDR addr,
 {
   struct dwarf2_locexpr_baton *dlbaton
     = (struct dwarf2_locexpr_baton *) SYMBOL_LOCATION_BATON (symbol);
-  struct objfile *objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
-  unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
-  int offset_size = dwarf2_per_cu_offset_size (dlbaton->per_cu);
+  struct objfile *objfile = dlbaton->per_cu->objfile ();
+  unsigned int addr_size = dlbaton->per_cu->addr_size ();
+  int offset_size = dlbaton->per_cu->offset_size ();
 
   locexpr_describe_location_1 (symbol, addr, stream,
 			       dlbaton->data, dlbaton->size,
@@ -4311,7 +4310,7 @@ locexpr_tracepoint_var_ref (struct symbol *symbol, struct agent_expr *ax,
 {
   struct dwarf2_locexpr_baton *dlbaton
     = (struct dwarf2_locexpr_baton *) SYMBOL_LOCATION_BATON (symbol);
-  unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
+  unsigned int addr_size = dlbaton->per_cu->addr_size ();
 
   if (dlbaton->size == 0)
     value->optimized_out = 1;
@@ -4330,7 +4329,7 @@ locexpr_generate_c_location (struct symbol *sym, string_file *stream,
 {
   struct dwarf2_locexpr_baton *dlbaton
     = (struct dwarf2_locexpr_baton *) SYMBOL_LOCATION_BATON (sym);
-  unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
+  unsigned int addr_size = dlbaton->per_cu->addr_size ();
 
   if (dlbaton->size == 0)
     error (_("symbol \"%s\" is optimized out"), sym->natural_name ());
@@ -4429,14 +4428,14 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
   struct dwarf2_loclist_baton *dlbaton
     = (struct dwarf2_loclist_baton *) SYMBOL_LOCATION_BATON (symbol);
   const gdb_byte *loc_ptr, *buf_end;
-  struct objfile *objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
+  struct objfile *objfile = dlbaton->per_cu->objfile ();
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
-  int offset_size = dwarf2_per_cu_offset_size (dlbaton->per_cu);
+  unsigned int addr_size = dlbaton->per_cu->addr_size ();
+  int offset_size = dlbaton->per_cu->offset_size ();
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
   /* Adjust base_address for relocatable objects.  */
-  CORE_ADDR base_offset = dwarf2_per_cu_text_offset (dlbaton->per_cu);
+  CORE_ADDR base_offset = dlbaton->per_cu->text_offset ();
   CORE_ADDR base_address = dlbaton->base_address + base_offset;
   int done = 0;
 
@@ -4520,7 +4519,7 @@ loclist_tracepoint_var_ref (struct symbol *symbol, struct agent_expr *ax,
     = (struct dwarf2_loclist_baton *) SYMBOL_LOCATION_BATON (symbol);
   const gdb_byte *data;
   size_t size;
-  unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
+  unsigned int addr_size = dlbaton->per_cu->addr_size ();
 
   data = dwarf2_find_location_expression (dlbaton, &size, ax->scope);
   if (size == 0)
@@ -4540,7 +4539,7 @@ loclist_generate_c_location (struct symbol *sym, string_file *stream,
 {
   struct dwarf2_loclist_baton *dlbaton
     = (struct dwarf2_loclist_baton *) SYMBOL_LOCATION_BATON (sym);
-  unsigned int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
+  unsigned int addr_size = dlbaton->per_cu->addr_size ();
   const gdb_byte *data;
   size_t size;
 

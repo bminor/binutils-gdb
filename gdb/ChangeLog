@@ -1,5 +1,37 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/loc.c (dwarf2_find_location_expression)
+	(dwarf_evaluate_loc_desc::get_tls_address)
+	(dwarf_evaluate_loc_desc::push_dwarf_reg_entry_value)
+	(rw_pieced_value, dwarf2_evaluate_loc_desc_full)
+	(dwarf2_locexpr_baton_eval, dwarf2_evaluate_property)
+	(dwarf2_compile_property_to_c)
+	(dwarf2_loc_desc_get_symbol_read_needs)
+	(dwarf2_compile_expr_to_ax, locexpr_describe_location)
+	(locexpr_tracepoint_var_ref, locexpr_generate_c_location)
+	(loclist_describe_location, loclist_tracepoint_var_ref)
+	(loclist_generate_c_location): Update.
+	* compile/compile-loc2c.c (do_compile_dwarf_expr_to_c): Update.
+	* dwarf2/loc.h (dwarf2_per_cu_objfile, dwarf2_per_cu_addr_size)
+	(dwarf2_per_cu_ref_addr_size, dwarf2_per_cu_offset_size)
+	(dwarf2_per_cu_text_offset, dwarf2_version): Don't declare.
+	* dwarf2/read.c (dwarf2_per_cu_data::objfile)
+	(dwarf2_per_cu_data::addr_size)
+	(dwarf2_per_cu_data::ref_addr_size)
+	(dwarf2_per_cu_data::text_offset)
+	(dwarf2_per_cu_data::addr_type): Now methods.
+	(per_cu_header_read_in): Make per_cu "const".
+	(dwarf2_version): Remove.
+	(dwarf2_per_cu_data::int_type): Now a method.
+	(dwarf2_per_cu_data::_addr_sized_int_type): Likewise.
+	(set_die_type, read_array_type, read_subrange_index_type)
+	(read_tag_string_type, read_subrange_type): Update.
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <addr_size,
+	offset_size, ref_addr_size, text_offset, addr_type, version,
+	objfile, int_type, addr_sized_int_type>: Declare methods.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.h (struct dwarf2_per_cu_data) <imported_symtabs>:
 	Move earlier.
 

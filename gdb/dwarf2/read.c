@@ -1639,13 +1639,6 @@ static void queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
 
 static void process_queue (struct dwarf2_per_objfile *dwarf2_per_objfile);
 
-static struct type *dwarf2_per_cu_addr_type (struct dwarf2_per_cu_data *per_cu);
-static struct type *dwarf2_per_cu_addr_sized_int_type
-	(struct dwarf2_per_cu_data *per_cu, bool unsigned_p);
-static struct type *dwarf2_per_cu_int_type
-	(struct dwarf2_per_cu_data *per_cu, int size_in_bytes,
-	 bool unsigned_p);
-
 /* Class, the destructor of which frees all allocated queue entries.  This
    will only have work to do if an error was thrown while processing the
    dwarf.  If no error was thrown then the queue entries should have all
@@ -13169,7 +13162,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
       newobj->static_link
 	= XOBNEW (&objfile->objfile_obstack, struct dynamic_prop);
       attr_to_dynamic_prop (attr, die, cu, newobj->static_link,
-			    dwarf2_per_cu_addr_type (cu->per_cu));
+			    cu->per_cu->addr_type ());
     }
 
   cu->list_in_scope = cu->get_builder ()->get_local_symbols ();
@@ -16006,8 +15999,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   if (attr != NULL)
     {
       int stride_ok;
-      struct type *prop_type
-	= dwarf2_per_cu_addr_sized_int_type (cu->per_cu, false);
+      struct type *prop_type = cu->per_cu->addr_sized_int_type (false);
 
       byte_stride_prop
 	= (struct dynamic_prop *) alloca (sizeof (struct dynamic_prop));
@@ -16809,13 +16801,13 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
 	  /* Pass 0 as the default as we know this attribute is constant
 	     and the default value will not be returned.  */
 	  LONGEST sz = dwarf2_get_attr_constant_value (len, 0);
-	  prop_type = dwarf2_per_cu_int_type (cu->per_cu, sz, true);
+	  prop_type = cu->per_cu->int_type (sz, true);
 	}
       else
 	{
 	  /* If the size is not specified then we assume it is the size of
 	     an address on this target.  */
-	  prop_type = dwarf2_per_cu_addr_sized_int_type (cu->per_cu, true);
+	  prop_type = cu->per_cu->addr_sized_int_type (true);
 	}
 
       /* Convert the attribute into a dynamic property.  */
@@ -17417,14 +17409,12 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
   return 1;
 }
 
-/* Find an integer type SIZE_IN_BYTES bytes in size and return it.
-   UNSIGNED_P controls if the integer is unsigned or not.  */
+/* See read.h.  */
 
-static struct type *
-dwarf2_per_cu_int_type (struct dwarf2_per_cu_data *per_cu,
-			int size_in_bytes, bool unsigned_p)
+struct type *
+dwarf2_per_cu_data::int_type (int size_in_bytes, bool unsigned_p) const
 {
-  struct objfile *objfile = per_cu->dwarf2_per_objfile->objfile;
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct type *int_type;
 
   /* Helper macro to examine the various builtin types.  */
@@ -17446,16 +17436,13 @@ dwarf2_per_cu_int_type (struct dwarf2_per_cu_data *per_cu,
   gdb_assert_not_reached ("unable to find suitable integer type");
 }
 
-/* Find an integer type the same size as the address size given in the
-   compilation unit header for PER_CU.  UNSIGNED_P controls if the integer
-   is unsigned or not.  */
+/* See read.h.  */
 
-static struct type *
-dwarf2_per_cu_addr_sized_int_type (struct dwarf2_per_cu_data *per_cu,
-				   bool unsigned_p)
+struct type *
+dwarf2_per_cu_data::addr_sized_int_type (bool unsigned_p) const
 {
-  int addr_size = dwarf2_per_cu_addr_size (per_cu);
-  return dwarf2_per_cu_int_type (per_cu, addr_size, unsigned_p);
+  int addr_size = this->addr_size ();
+  return int_type (addr_size, unsigned_p);
 }
 
 /* Read the DW_AT_type attribute for a sub-range.  If this attribute is not
@@ -17480,7 +17467,7 @@ read_subrange_index_type (struct die_info *die, struct dwarf2_cu *cu)
      FIXME: muller/2010-05-28: Possible references to object for low bound,
      high bound or count are not yet handled by this code.  */
   if (TYPE_CODE (index_type) == TYPE_CODE_VOID)
-    index_type = dwarf2_per_cu_addr_sized_int_type (cu->per_cu, false);
+    index_type = cu->per_cu->addr_sized_int_type (false);
 
   return index_type;
 }
@@ -17610,8 +17597,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   attribute *attr_byte_stride = dwarf2_attr (die, DW_AT_byte_stride, cu);
   if (attr_byte_stride != nullptr)
     {
-      struct type *prop_type
-	= dwarf2_per_cu_addr_sized_int_type (cu->per_cu, false);
+      struct type *prop_type = cu->per_cu->addr_sized_int_type (false);
       attr_to_dynamic_prop (attr_byte_stride, die, cu, &byte_stride_prop,
 			    prop_type);
     }
@@ -17631,8 +17617,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
       else
 	{
-	  struct type *prop_type
-	    = dwarf2_per_cu_addr_sized_int_type (cu->per_cu, false);
+	  struct type *prop_type = cu->per_cu->addr_sized_int_type (false);
 	  attr_to_dynamic_prop (attr_bit_stride, die, cu, &bit_stride_prop,
 				prop_type);
 	}
@@ -24523,14 +24508,12 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
     }
 }
 
-/* Return the OBJFILE associated with the compilation unit CU.  If CU
-   came from a separate debuginfo file, then the master objfile is
-   returned.  */
+/* See read.h.  */
 
 struct objfile *
-dwarf2_per_cu_objfile (struct dwarf2_per_cu_data *per_cu)
+dwarf2_per_cu_data::objfile () const
 {
-  struct objfile *objfile = per_cu->dwarf2_per_objfile->objfile;
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
 
   /* Return the master objfile, so that we can report and look up the
      correct file containing this variable.  */
@@ -24546,7 +24529,7 @@ dwarf2_per_cu_objfile (struct dwarf2_per_cu_data *per_cu)
 
 static const struct comp_unit_head *
 per_cu_header_read_in (struct comp_unit_head *cu_headerp,
-		       struct dwarf2_per_cu_data *per_cu)
+		       const struct dwarf2_per_cu_data *per_cu)
 {
   const gdb_byte *info_ptr;
 
@@ -24562,41 +24545,41 @@ per_cu_header_read_in (struct comp_unit_head *cu_headerp,
   return cu_headerp;
 }
 
-/* Return the address size given in the compilation unit header for CU.  */
+/* See read.h.  */
 
 int
-dwarf2_per_cu_addr_size (struct dwarf2_per_cu_data *per_cu)
+dwarf2_per_cu_data::addr_size () const
 {
   struct comp_unit_head cu_header_local;
   const struct comp_unit_head *cu_headerp;
 
-  cu_headerp = per_cu_header_read_in (&cu_header_local, per_cu);
+  cu_headerp = per_cu_header_read_in (&cu_header_local, this);
 
   return cu_headerp->addr_size;
 }
 
-/* Return the offset size given in the compilation unit header for CU.  */
+/* See read.h.  */
 
 int
-dwarf2_per_cu_offset_size (struct dwarf2_per_cu_data *per_cu)
+dwarf2_per_cu_data::offset_size () const
 {
   struct comp_unit_head cu_header_local;
   const struct comp_unit_head *cu_headerp;
 
-  cu_headerp = per_cu_header_read_in (&cu_header_local, per_cu);
+  cu_headerp = per_cu_header_read_in (&cu_header_local, this);
 
   return cu_headerp->offset_size;
 }
 
-/* See its dwarf2loc.h declaration.  */
+/* See read.h.  */
 
 int
-dwarf2_per_cu_ref_addr_size (struct dwarf2_per_cu_data *per_cu)
+dwarf2_per_cu_data::ref_addr_size () const
 {
   struct comp_unit_head cu_header_local;
   const struct comp_unit_head *cu_headerp;
 
-  cu_headerp = per_cu_header_read_in (&cu_header_local, per_cu);
+  cu_headerp = per_cu_header_read_in (&cu_header_local, this);
 
   if (cu_headerp->version == 2)
     return cu_headerp->addr_size;
@@ -24604,41 +24587,31 @@ dwarf2_per_cu_ref_addr_size (struct dwarf2_per_cu_data *per_cu)
     return cu_headerp->offset_size;
 }
 
-/* Return the text offset of the CU.  The returned offset comes from
-   this CU's objfile.  If this objfile came from a separate debuginfo
-   file, then the offset may be different from the corresponding
-   offset in the parent objfile.  */
+/* See read.h.  */
 
 CORE_ADDR
-dwarf2_per_cu_text_offset (struct dwarf2_per_cu_data *per_cu)
+dwarf2_per_cu_data::text_offset () const
 {
-  return per_cu->dwarf2_per_objfile->objfile->text_section_offset ();
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
+
+  return objfile->text_section_offset ();
 }
 
-/* Return a type that is a generic pointer type, the size of which matches
-   the address size given in the compilation unit header for PER_CU.  */
-static struct type *
-dwarf2_per_cu_addr_type (struct dwarf2_per_cu_data *per_cu)
+/* See read.h.  */
+
+struct type *
+dwarf2_per_cu_data::addr_type () const
 {
-  struct objfile *objfile = per_cu->dwarf2_per_objfile->objfile;
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct type *void_type = objfile_type (objfile)->builtin_void;
   struct type *addr_type = lookup_pointer_type (void_type);
-  int addr_size = dwarf2_per_cu_addr_size (per_cu);
+  int addr_size = this->addr_size ();
 
   if (TYPE_LENGTH (addr_type) == addr_size)
     return addr_type;
 
-  addr_type
-    = dwarf2_per_cu_addr_sized_int_type (per_cu, TYPE_UNSIGNED (addr_type));
+  addr_type = addr_sized_int_type (TYPE_UNSIGNED (addr_type));
   return addr_type;
-}
-
-/* Return DWARF version number of PER_CU.  */
-
-short
-dwarf2_version (struct dwarf2_per_cu_data *per_cu)
-{
-  return per_cu->dwarf_version;
 }
 
 /* Locate the .debug_info compilation unit from CU's objfile which contains
@@ -24899,8 +24872,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_allocated, cu);
   if (attr != NULL && attr->form_is_block ())
     {
-      struct type *prop_type
-	= dwarf2_per_cu_addr_sized_int_type (cu->per_cu, false);
+      struct type *prop_type = cu->per_cu->addr_sized_int_type (false);
       if (attr_to_dynamic_prop (attr, die, cu, &prop, prop_type))
         add_dyn_prop (DYN_PROP_ALLOCATED, prop, type);
     }
@@ -24915,8 +24887,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_associated, cu);
   if (attr != NULL && attr->form_is_block ())
     {
-      struct type *prop_type
-	= dwarf2_per_cu_addr_sized_int_type (cu->per_cu, false);
+      struct type *prop_type = cu->per_cu->addr_sized_int_type (false);
       if (attr_to_dynamic_prop (attr, die, cu, &prop, prop_type))
         add_dyn_prop (DYN_PROP_ASSOCIATED, prop, type);
     }
@@ -24930,7 +24901,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   /* Read DW_AT_data_location and set in type.  */
   attr = dwarf2_attr (die, DW_AT_data_location, cu);
   if (attr_to_dynamic_prop (attr, die, cu, &prop,
-			    dwarf2_per_cu_addr_type (cu->per_cu)))
+			    cu->per_cu->addr_type ()))
     add_dyn_prop (DYN_PROP_DATA_LOCATION, prop, type);
 
   if (dwarf2_per_objfile->die_type_hash == NULL)

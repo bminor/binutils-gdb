@@ -35,29 +35,6 @@ struct axs_value;
 /* `set debug entry-values' setting.  */
 extern unsigned int entry_values_debug;
 
-/* Return the OBJFILE associated with the compilation unit CU.  If CU
-   came from a separate debuginfo file, then the master objfile is
-   returned.  */
-struct objfile *dwarf2_per_cu_objfile (struct dwarf2_per_cu_data *cu);
-
-/* Return the address size given in the compilation unit header for CU.  */
-int dwarf2_per_cu_addr_size (struct dwarf2_per_cu_data *cu);
-
-/* Return the DW_FORM_ref_addr size given in the compilation unit header for
-   CU.  */
-int dwarf2_per_cu_ref_addr_size (struct dwarf2_per_cu_data *cu);
-
-/* Return the offset size given in the compilation unit header for CU.  */
-int dwarf2_per_cu_offset_size (struct dwarf2_per_cu_data *cu);
-
-/* Return the text offset of the CU.  The returned offset comes from
-   this CU's objfile.  If this objfile came from a separate debuginfo
-   file, then the offset may be different from the corresponding
-   offset in the parent objfile.  */
-CORE_ADDR dwarf2_per_cu_text_offset (struct dwarf2_per_cu_data *cu);
-
-short dwarf2_version (struct dwarf2_per_cu_data *per_cu);
-
 /* Find a particular location expression from a location list.  */
 const gdb_byte *dwarf2_find_location_expression
   (struct dwarf2_loclist_baton *baton,

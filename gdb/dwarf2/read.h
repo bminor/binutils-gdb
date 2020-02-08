@@ -394,6 +394,49 @@ struct dwarf2_per_cu_data
     delete imported_symtabs;
     imported_symtabs = nullptr;
   }
+
+  /* Return the OBJFILE associated with this compilation unit.  If
+     this compilation unit came from a separate debuginfo file, then
+     the master objfile is returned.  */
+  struct objfile *objfile () const;
+
+  /* Return the address size given in the compilation unit header for
+     this CU.  */
+  int addr_size () const;
+
+  /* Return the offset size given in the compilation unit header for
+     this CU.  */
+  int offset_size () const;
+
+  /* Return the DW_FORM_ref_addr size given in the compilation unit
+     header for this CU.  */
+  int ref_addr_size () const;
+
+  /* Return the text offset of the CU.  The returned offset comes from
+     this CU's objfile.  If this objfile came from a separate
+     debuginfo file, then the offset may be different from the
+     corresponding offset in the parent objfile.  */
+  CORE_ADDR text_offset () const;
+
+  /* Return a type that is a generic pointer type, the size of which
+     matches the address size given in the compilation unit header for
+     this CU.  */
+  struct type *addr_type () const;
+
+  /* Find an integer type SIZE_IN_BYTES bytes in size and return it.
+     UNSIGNED_P controls if the integer is unsigned or not.  */
+  struct type *int_type (int size_in_bytes, bool unsigned_p) const;
+
+  /* Find an integer type the same size as the address size given in
+     the compilation unit header for this CU.  UNSIGNED_P controls if
+     the integer is unsigned or not.  */
+  struct type *addr_sized_int_type (bool unsigned_p) const;
+
+  /* Return DWARF version number of this CU.  */
+  short version () const
+  {
+    return dwarf_version;
+  }
 };
 
 /* Entry in the signatured_types hash table.  */
