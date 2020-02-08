@@ -1,5 +1,9 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/abbrev.c (abbrev_table::read): Simplify.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/abbrev.c (abbrev_table): Move constructor from header.
 	Rewrite.
 	(abbrev_table::add_abbrev, abbrev_table::lookup_abbrev): Rewrite.

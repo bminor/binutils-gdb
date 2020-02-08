@@ -162,9 +162,9 @@ abbrev_table::read (struct objfile *objfile,
 	  cur_attr.name = (enum dwarf_attribute) abbrev_name;
 	  cur_attr.form = (enum dwarf_form) abbrev_form;
 	  cur_attr.implicit_const = implicit_const;
-	  ++cur_abbrev->num_attrs;
 	}
 
+      cur_abbrev->num_attrs = cur_attrs.size ();
       cur_abbrev->attrs =
 	XOBNEWVEC (&abbrev_table->m_abbrev_obstack, struct attr_abbrev,
 		   cur_abbrev->num_attrs);
