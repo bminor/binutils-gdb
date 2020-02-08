@@ -2014,9 +2014,6 @@ dwarf2_per_objfile::~dwarf2_per_objfile ()
   if (quick_file_names_table)
     htab_delete (quick_file_names_table);
 
-  if (line_header_hash)
-    htab_delete (line_header_hash);
-
   for (dwarf2_per_cu_data *per_cu : all_comp_units)
     per_cu->imported_symtabs_free ();
 
@@ -11059,7 +11056,6 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = cu->per_cu->dwarf2_per_objfile;
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct attribute *attr;
   struct line_header line_header_local;
   hashval_t line_header_local_hash;
@@ -11084,12 +11080,10 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
       && die->tag == DW_TAG_partial_unit)
     {
       dwarf2_per_objfile->line_header_hash
-	= htab_create_alloc_ex (127, line_header_hash_voidp,
-				line_header_eq_voidp,
-				free_line_header_voidp,
-				&objfile->objfile_obstack,
-				hashtab_obstack_allocate,
-				dummy_obstack_deallocate);
+	.reset (htab_create_alloc (127, line_header_hash_voidp,
+				   line_header_eq_voidp,
+				   free_line_header_voidp,
+				   xcalloc, xfree));
     }
 
   line_header_local.sect_off = line_offset;
@@ -11097,7 +11091,7 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
   line_header_local_hash = line_header_hash (&line_header_local);
   if (dwarf2_per_objfile->line_header_hash != NULL)
     {
-      slot = htab_find_slot_with_hash (dwarf2_per_objfile->line_header_hash,
+      slot = htab_find_slot_with_hash (dwarf2_per_objfile->line_header_hash.get (),
 				       &line_header_local,
 				       line_header_local_hash, NO_INSERT);
 
@@ -11125,7 +11119,7 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
     slot = NULL;
   else
     {
-      slot = htab_find_slot_with_hash (dwarf2_per_objfile->line_header_hash,
+      slot = htab_find_slot_with_hash (dwarf2_per_objfile->line_header_hash.get (),
 				       &line_header_local,
 				       line_header_local_hash, INSERT);
       gdb_assert (slot != NULL);

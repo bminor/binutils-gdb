@@ -1,5 +1,13 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (~dwarf2_per_objfile): Don't delete
+	line_header_hash.
+	(handle_DW_AT_stmt_list): Update.  Don't allocate on obstack.
+	* dwarf2/read.h (struct dwarf2_per_objfile) <line_header_hash>:
+	Change type to htab_up.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (allocate_type_unit_groups_table): Return
 	htab_up.  Don't allocate on obstack.
 	(get_type_unit_group, dwarf2_build_psymtabs_hard): Update.
