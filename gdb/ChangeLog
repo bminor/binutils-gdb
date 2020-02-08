@@ -1,5 +1,13 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (process_psymtab_comp_unit_reader): Remove
+	"want_partial_unit" parameter.
+	(process_psymtab_comp_unit): Change want_partial_unit to bool.
+	Inline check for DW_TAG_partial_unit.
+	(dwarf2_build_psymtabs_hard, scan_partial_symbols): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_n_bytes, read_direct_string): Move to
 	read.c.
 	* dwarf2/leb.h (read_n_bytes, read_direct_string): Move from

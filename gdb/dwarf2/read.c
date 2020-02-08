@@ -7240,7 +7240,6 @@ static void
 process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
 				  const gdb_byte *info_ptr,
 				  struct die_info *comp_unit_die,
-				  int want_partial_unit,
 				  enum language pretend_language)
 {
   struct dwarf2_cu *cu = reader->cu;
@@ -7252,9 +7251,6 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   dwarf2_psymtab *pst;
   enum pc_bounds_kind cu_bounds_kind;
   const char *filename;
-
-  if (comp_unit_die->tag == DW_TAG_partial_unit && !want_partial_unit)
-    return;
 
   gdb_assert (! per_cu->is_debug_types);
 
@@ -7369,7 +7365,7 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
 
 static void
 process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
-			   int want_partial_unit,
+			   bool want_partial_unit,
 			   enum language pretend_language)
 {
   /* If this compilation unit was already read in, free the
@@ -7389,10 +7385,10 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
   else if (this_cu->is_debug_types)
     build_type_psymtabs_reader (&reader, reader.info_ptr,
 				reader.comp_unit_die);
-  else
+  else if (want_partial_unit
+	   || reader.comp_unit_die->tag != DW_TAG_partial_unit)
     process_psymtab_comp_unit_reader (&reader, reader.info_ptr,
 				      reader.comp_unit_die,
-				      want_partial_unit,
 				      pretend_language);
 
   /* Age out any secondary CUs.  */
@@ -7752,7 +7748,7 @@ dwarf2_build_psymtabs_hard (struct dwarf2_per_objfile *dwarf2_per_objfile)
 			   addrmap_create_mutable (&temp_obstack));
 
   for (dwarf2_per_cu_data *per_cu : dwarf2_per_objfile->all_comp_units)
-    process_psymtab_comp_unit (per_cu, 0, language_minimal);
+    process_psymtab_comp_unit (per_cu, false, language_minimal);
 
   /* This has to wait until we read the CUs, we need the list of DWOs.  */
   process_skeletonless_type_units (dwarf2_per_objfile);
@@ -7969,7 +7965,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 
 		/* Go read the partial unit, if needed.  */
 		if (per_cu->v.psymtab == NULL)
-		  process_psymtab_comp_unit (per_cu, 1, cu->language);
+		  process_psymtab_comp_unit (per_cu, true, cu->language);
 
 		cu->per_cu->imported_symtabs_push (per_cu);
 	      }
