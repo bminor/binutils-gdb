@@ -20,6 +20,7 @@
 #ifndef DWARF2READ_H
 #define DWARF2READ_H
 
+#include <queue>
 #include <unordered_map>
 #include "dwarf2/index-cache.h"
 #include "dwarf2/section.h"
@@ -44,9 +45,28 @@ struct tu_stats
 };
 
 struct dwarf2_debug_sections;
+struct dwarf2_per_cu_data;
 struct mapped_index;
 struct mapped_debug_names;
 struct signatured_type;
+
+/* One item on the queue of compilation units to read in full symbols
+   for.  */
+struct dwarf2_queue_item
+{
+  dwarf2_queue_item (dwarf2_per_cu_data *cu, enum language lang)
+    : per_cu (cu),
+      pretend_language (lang)
+  {
+  }
+
+  ~dwarf2_queue_item ();
+
+  DISABLE_COPY_AND_ASSIGN (dwarf2_queue_item);
+
+  struct dwarf2_per_cu_data *per_cu;
+  enum language pretend_language;
+};
 
 /* Collection of data recorded per objfile.
    This hangs off of dwarf2_objfile_data_key.  */
@@ -215,6 +235,9 @@ public:
   std::unordered_map<sect_offset, std::vector<sect_offset>,
 		     gdb::hash_enum<sect_offset>>
     abstract_to_concrete;
+
+  /* CUs that are queued to be read.  */
+  std::queue<dwarf2_queue_item> queue;
 };
 
 /* Get the dwarf2_per_objfile associated to OBJFILE.  */

@@ -1335,18 +1335,6 @@ struct field_info
     std::vector<struct decl_field> nested_types_list;
   };
 
-/* One item on the queue of compilation units to read in full symbols
-   for.  */
-struct dwarf2_queue_item
-{
-  struct dwarf2_per_cu_data *per_cu;
-  enum language pretend_language;
-  struct dwarf2_queue_item *next;
-};
-
-/* The current queue.  */
-static struct dwarf2_queue_item *dwarf2_queue, *dwarf2_queue_tail;
-
 /* Loaded secondary compilation units are kept in memory until they
    have not been referenced for the processing of this many
    compilation units.  Set this to zero to disable caching.  Cache
@@ -1813,34 +1801,37 @@ static struct type *dwarf2_per_cu_int_type
 class dwarf2_queue_guard
 {
 public:
-  dwarf2_queue_guard () = default;
+  explicit dwarf2_queue_guard (dwarf2_per_objfile *per_objfile)
+    : m_per_objfile (per_objfile)
+  {
+  }
 
   /* Free any entries remaining on the queue.  There should only be
      entries left if we hit an error while processing the dwarf.  */
   ~dwarf2_queue_guard ()
   {
-    struct dwarf2_queue_item *item, *last;
-
-    item = dwarf2_queue;
-    while (item)
-      {
-	/* Anything still marked queued is likely to be in an
-	   inconsistent state, so discard it.  */
-	if (item->per_cu->queued)
-	  {
-	    if (item->per_cu->cu != NULL)
-	      free_one_cached_comp_unit (item->per_cu);
-	    item->per_cu->queued = 0;
-	  }
-
-	last = item;
-	item = item->next;
-	xfree (last);
-      }
-
-    dwarf2_queue = dwarf2_queue_tail = NULL;
+    /* Ensure that no memory is allocated by the queue.  */
+    std::queue<dwarf2_queue_item> empty;
+    std::swap (m_per_objfile->queue, empty);
   }
+
+  DISABLE_COPY_AND_ASSIGN (dwarf2_queue_guard);
+
+private:
+  dwarf2_per_objfile *m_per_objfile;
 };
+
+dwarf2_queue_item::~dwarf2_queue_item ()
+{
+  /* Anything still marked queued is likely to be in an
+     inconsistent state, so discard it.  */
+  if (per_cu->queued)
+    {
+      if (per_cu->cu != NULL)
+	free_one_cached_comp_unit (per_cu);
+      per_cu->queued = 0;
+    }
+}
 
 /* The return type of find_file_and_directory.  Note, the enclosed
    string pointers are only valid while this object is valid.  */
@@ -2577,7 +2568,7 @@ dw2_do_instantiate_symtab (struct dwarf2_per_cu_data *per_cu, bool skip_partial)
   /* The destructor of dwarf2_queue_guard frees any entries left on
      the queue.  After this point we're guaranteed to leave this function
      with the dwarf queue empty.  */
-  dwarf2_queue_guard q_guard;
+  dwarf2_queue_guard q_guard (dwarf2_per_objfile);
 
   if (dwarf2_per_objfile->using_index
       ? per_cu->v.quick->compunit_symtab == NULL
@@ -9161,20 +9152,8 @@ static void
 queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
 		 enum language pretend_language)
 {
-  struct dwarf2_queue_item *item;
-
   per_cu->queued = 1;
-  item = XNEW (struct dwarf2_queue_item);
-  item->per_cu = per_cu;
-  item->pretend_language = pretend_language;
-  item->next = NULL;
-
-  if (dwarf2_queue == NULL)
-    dwarf2_queue = item;
-  else
-    dwarf2_queue_tail->next = item;
-
-  dwarf2_queue_tail = item;
+  per_cu->dwarf2_per_objfile->queue.emplace (per_cu, pretend_language);
 }
 
 /* If PER_CU is not yet queued, add it to the queue.
@@ -9229,8 +9208,6 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
 static void
 process_queue (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
-  struct dwarf2_queue_item *item, *next_item;
-
   if (dwarf_read_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
@@ -9240,15 +9217,17 @@ process_queue (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
   /* The queue starts out with one item, but following a DIE reference
      may load a new CU, adding it to the end of the queue.  */
-  for (item = dwarf2_queue; item != NULL; dwarf2_queue = item = next_item)
+  while (!dwarf2_per_objfile->queue.empty ())
     {
+      dwarf2_queue_item &item = dwarf2_per_objfile->queue.front ();
+
       if ((dwarf2_per_objfile->using_index
-	   ? !item->per_cu->v.quick->compunit_symtab
-	   : (item->per_cu->v.psymtab && !item->per_cu->v.psymtab->readin))
+	   ? !item.per_cu->v.quick->compunit_symtab
+	   : (item.per_cu->v.psymtab && !item.per_cu->v.psymtab->readin))
 	  /* Skip dummy CUs.  */
-	  && item->per_cu->cu != NULL)
+	  && item.per_cu->cu != NULL)
 	{
-	  struct dwarf2_per_cu_data *per_cu = item->per_cu;
+	  struct dwarf2_per_cu_data *per_cu = item.per_cu;
 	  unsigned int debug_print_threshold;
 	  char buf[100];
 
@@ -9275,20 +9254,17 @@ process_queue (struct dwarf2_per_objfile *dwarf2_per_objfile)
 	    fprintf_unfiltered (gdb_stdlog, "Expanding symtab of %s\n", buf);
 
 	  if (per_cu->is_debug_types)
-	    process_full_type_unit (per_cu, item->pretend_language);
+	    process_full_type_unit (per_cu, item.pretend_language);
 	  else
-	    process_full_comp_unit (per_cu, item->pretend_language);
+	    process_full_comp_unit (per_cu, item.pretend_language);
 
 	  if (dwarf_read_debug >= debug_print_threshold)
 	    fprintf_unfiltered (gdb_stdlog, "Done expanding %s\n", buf);
 	}
 
-      item->per_cu->queued = 0;
-      next_item = item->next;
-      xfree (item);
+      item.per_cu->queued = 0;
+      dwarf2_per_objfile->queue.pop ();
     }
-
-  dwarf2_queue_tail = NULL;
 
   if (dwarf_read_debug)
     {

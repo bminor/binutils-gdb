@@ -1,5 +1,22 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.h (struct dwarf2_queue_item): Move from
+	dwarf2/read.c.  Remove "next" member.  Add constructor ntad
+	destructor.
+	(struct dwarf2_per_objfile) <queue>: New member.
+	* dwarf2/read.c (struct dwarf2_queue_item): Move to
+	dwarf2/read.h.
+	(dwarf2_queue, dwarf2_queue_tail): Remove.
+	(class dwarf2_queue_guard): Add parameter to constructor.  Use
+	DISABLE_COPY_AND_ASSIGN.
+	<m_per_objfile>: New member.
+	<~dwarf2_queue_guard>: Rewrite.
+	(dw2_do_instantiate_symtab, queue_comp_unit, process_queue):
+	Update.
+	(~dwarf2_queue_item): New.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (struct die_info) <has_children>: New member.
 	(dw2_get_file_names_reader): Remove has_children.
 	(dw2_get_file_names): Update.
