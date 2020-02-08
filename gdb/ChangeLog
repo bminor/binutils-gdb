@@ -1,5 +1,16 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_address): Move to comp-unit.c.
+	(dwarf2_rnglists_process, dwarf2_ranges_process)
+	(read_attribute_value, dwarf_decode_lines_1)
+	(var_decode_location, decode_locdesc): Update.
+	* dwarf2/comp-unit.c (comp_unit_head::read_address): Move from
+	read.c.  Remove "cu" parameter.
+	* dwarf2/comp-unit.h (struct comp_unit_head) <read_address>: New
+	method.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_attribute_value, read_indirect_string)
 	(read_indirect_line_string): Update.
 	* dwarf2/comp-unit.c (read_offset): Remove.

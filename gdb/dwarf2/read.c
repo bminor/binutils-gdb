@@ -1238,9 +1238,6 @@ static void read_attribute_reprocess (const struct die_reader_specs *reader,
 
 static CORE_ADDR read_addr_index (struct dwarf2_cu *cu, unsigned int addr_index);
 
-static CORE_ADDR read_address (bfd *, const gdb_byte *ptr, struct dwarf2_cu *,
-			       unsigned int *);
-
 static LONGEST read_checked_initial_length_and_offset
   (bfd *, const gdb_byte *, const struct comp_unit_head *,
    unsigned int *, unsigned int *);
@@ -13514,7 +13511,7 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 	      overflow = true;
 	      break;
 	    }
-	  base = read_address (obfd, buffer, cu, &bytes_read);
+	  base = cu->header.read_address (obfd, buffer, &bytes_read);
 	  found_base = 1;
 	  buffer += bytes_read;
 	  break;
@@ -13524,7 +13521,8 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 	      overflow = true;
 	      break;
 	    }
-	  range_beginning = read_address (obfd, buffer, cu, &bytes_read);
+	  range_beginning = cu->header.read_address (obfd, buffer,
+						     &bytes_read);
 	  buffer += bytes_read;
 	  range_end = (range_beginning
 		       + read_unsigned_leb128 (obfd, buffer, &bytes_read));
@@ -13557,9 +13555,10 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 	      overflow = true;
 	      break;
 	    }
-	  range_beginning = read_address (obfd, buffer, cu, &bytes_read);
+	  range_beginning = cu->header.read_address (obfd, buffer,
+						     &bytes_read);
 	  buffer += bytes_read;
-	  range_end = read_address (obfd, buffer, cu, &bytes_read);
+	  range_end = cu->header.read_address (obfd, buffer, &bytes_read);
 	  buffer += bytes_read;
 	  break;
 	default:
@@ -13662,9 +13661,9 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu,
     {
       CORE_ADDR range_beginning, range_end;
 
-      range_beginning = read_address (obfd, buffer, cu, &dummy);
+      range_beginning = cu->header.read_address (obfd, buffer, &dummy);
       buffer += addr_size;
-      range_end = read_address (obfd, buffer, cu, &dummy);
+      range_end = cu->header.read_address (obfd, buffer, &dummy);
       buffer += addr_size;
       offset += 2 * addr_size;
 
@@ -18446,7 +18445,8 @@ read_attribute_value (const struct die_reader_specs *reader,
     {
     case DW_FORM_ref_addr:
       if (cu->header.version == 2)
-	DW_UNSND (attr) = read_address (abfd, info_ptr, cu, &bytes_read);
+	DW_UNSND (attr) = cu->header.read_address (abfd, info_ptr,
+						   &bytes_read);
       else
 	DW_UNSND (attr) = cu->header.read_offset (abfd, info_ptr,
 						  &bytes_read);
@@ -18457,7 +18457,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += bytes_read;
       break;
     case DW_FORM_addr:
-      DW_ADDR (attr) = read_address (abfd, info_ptr, cu, &bytes_read);
+      DW_ADDR (attr) = cu->header.read_address (abfd, info_ptr, &bytes_read);
       DW_ADDR (attr) = gdbarch_adjust_dwarf2_addr (gdbarch, DW_ADDR (attr));
       info_ptr += bytes_read;
       break;
@@ -18702,57 +18702,6 @@ read_attribute (const struct die_reader_specs *reader,
   return read_attribute_value (reader, attr, abbrev->form,
 			       abbrev->implicit_const, info_ptr,
 			       need_reprocess);
-}
-
-static CORE_ADDR
-read_address (bfd *abfd, const gdb_byte *buf, struct dwarf2_cu *cu,
-	      unsigned int *bytes_read)
-{
-  struct comp_unit_head *cu_header = &cu->header;
-  CORE_ADDR retval = 0;
-
-  if (cu_header->signed_addr_p)
-    {
-      switch (cu_header->addr_size)
-	{
-	case 2:
-	  retval = bfd_get_signed_16 (abfd, buf);
-	  break;
-	case 4:
-	  retval = bfd_get_signed_32 (abfd, buf);
-	  break;
-	case 8:
-	  retval = bfd_get_signed_64 (abfd, buf);
-	  break;
-	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("read_address: bad switch, signed [in module %s]"),
-			  bfd_get_filename (abfd));
-	}
-    }
-  else
-    {
-      switch (cu_header->addr_size)
-	{
-	case 2:
-	  retval = bfd_get_16 (abfd, buf);
-	  break;
-	case 4:
-	  retval = bfd_get_32 (abfd, buf);
-	  break;
-	case 8:
-	  retval = bfd_get_64 (abfd, buf);
-	  break;
-	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("read_address: bad switch, "
-			    "unsigned [in module %s]"),
-			  bfd_get_filename (abfd));
-	}
-    }
-
-  *bytes_read = cu_header->addr_size;
-  return retval;
 }
 
 /* Cover function for read_initial_length.
@@ -20204,7 +20153,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 		case DW_LNE_set_address:
 		  {
 		    CORE_ADDR address
-		      = read_address (abfd, line_ptr, cu, &bytes_read);
+		      = cu->header.read_address (abfd, line_ptr, &bytes_read);
 		    line_ptr += bytes_read;
 
 		    state_machine.check_line_address (cu, line_ptr,
@@ -20525,10 +20474,10 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
       unsigned int dummy;
 
       if (DW_BLOCK (attr)->data[0] == DW_OP_addr)
-	SET_SYMBOL_VALUE_ADDRESS (sym,
-				  read_address (objfile->obfd,
-						DW_BLOCK (attr)->data + 1,
-						cu, &dummy));
+	SET_SYMBOL_VALUE_ADDRESS
+	  (sym, cu->header.read_address (objfile->obfd,
+					 DW_BLOCK (attr)->data + 1,
+					 &dummy));
       else
 	SET_SYMBOL_VALUE_ADDRESS
 	  (sym, read_addr_index_from_leb128 (cu, DW_BLOCK (attr)->data + 1,
@@ -22994,8 +22943,8 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
 	  break;
 
 	case DW_OP_addr:
-	  stack[++stacki] = read_address (objfile->obfd, &data[i],
-					  cu, &bytes_read);
+	  stack[++stacki] = cu->header.read_address (objfile->obfd, &data[i],
+						     &bytes_read);
 	  i += bytes_read;
 	  break;
 

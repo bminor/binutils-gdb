@@ -221,3 +221,53 @@ read_and_check_comp_unit_head (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
   return info_ptr;
 }
+
+CORE_ADDR
+comp_unit_head::read_address (bfd *abfd, const gdb_byte *buf,
+			      unsigned int *bytes_read) const
+{
+  CORE_ADDR retval = 0;
+
+  if (signed_addr_p)
+    {
+      switch (addr_size)
+	{
+	case 2:
+	  retval = bfd_get_signed_16 (abfd, buf);
+	  break;
+	case 4:
+	  retval = bfd_get_signed_32 (abfd, buf);
+	  break;
+	case 8:
+	  retval = bfd_get_signed_64 (abfd, buf);
+	  break;
+	default:
+	  internal_error (__FILE__, __LINE__,
+			  _("read_address: bad switch, signed [in module %s]"),
+			  bfd_get_filename (abfd));
+	}
+    }
+  else
+    {
+      switch (addr_size)
+	{
+	case 2:
+	  retval = bfd_get_16 (abfd, buf);
+	  break;
+	case 4:
+	  retval = bfd_get_32 (abfd, buf);
+	  break;
+	case 8:
+	  retval = bfd_get_64 (abfd, buf);
+	  break;
+	default:
+	  internal_error (__FILE__, __LINE__,
+			  _("read_address: bad switch, "
+			    "unsigned [in module %s]"),
+			  bfd_get_filename (abfd));
+	}
+    }
+
+  *bytes_read = addr_size;
+  return retval;
+}
