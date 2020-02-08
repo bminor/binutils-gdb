@@ -881,14 +881,12 @@ public:
 
   cutu_reader (struct dwarf2_per_cu_data *this_cu,
 	       struct abbrev_table *abbrev_table,
-	       int use_existing_cu, int keep,
+	       int use_existing_cu,
 	       bool skip_partial);
 
   explicit cutu_reader (struct dwarf2_per_cu_data *this_cu,
 			struct dwarf2_cu *parent_cu = nullptr,
 			struct dwo_file *dwo_file = nullptr);
-
-  ~cutu_reader ();
 
   DISABLE_COPY_AND_ASSIGN (cutu_reader);
 
@@ -896,12 +894,15 @@ public:
   struct die_info *comp_unit_die = nullptr;
   bool dummy_p = false;
 
+  /* Release the new CU, putting it on the chain.  This cannot be done
+     for dummy CUs.  */
+  void keep ();
+
 private:
   void init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
-				  int use_existing_cu, int keep);
+				  int use_existing_cu);
 
   struct dwarf2_per_cu_data *m_this_cu;
-  int m_keep = 0;
   std::unique_ptr<dwarf2_cu> m_new_cu;
 
   /* The ordinary abbreviation table.  */
@@ -6723,7 +6724,7 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
 
 void
 cutu_reader::init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
-					int use_existing_cu, int keep)
+					int use_existing_cu)
 {
   struct signatured_type *sig_type;
   struct die_reader_specs reader;
@@ -6771,19 +6772,14 @@ cutu_reader::init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
    This is an optimization for when we already have the abbrev table.
 
    If USE_EXISTING_CU is non-zero, and THIS_CU->cu is non-NULL, then use it.
-   Otherwise, a new CU is allocated with xmalloc.
-
-   If KEEP is non-zero, then if we allocated a dwarf2_cu we add it to
-   read_in_chain.  Otherwise the dwarf2_cu data is freed at the
-   end.  */
+   Otherwise, a new CU is allocated with xmalloc.  */
 
 cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
 			  struct abbrev_table *abbrev_table,
-			  int use_existing_cu, int keep,
+			  int use_existing_cu,
 			  bool skip_partial)
   : die_reader_specs {},
-    m_this_cu (this_cu),
-    m_keep (keep)
+    m_this_cu (this_cu)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile = this_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
@@ -6803,9 +6799,6 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
 			this_cu->is_debug_types ? "type" : "comp",
 			sect_offset_str (this_cu->sect_off));
 
-  if (use_existing_cu)
-    gdb_assert (keep);
-
   /* If we're reading a TU directly from a DWO file, including a virtual DWO
      file (instead of going through the stub), short-circuit all of this.  */
   if (this_cu->reading_dwo_directly)
@@ -6813,7 +6806,7 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
       /* Narrow down the scope of possibilities to have to understand.  */
       gdb_assert (this_cu->is_debug_types);
       gdb_assert (abbrev_table == NULL);
-      init_tu_and_read_dwo_dies (this_cu, use_existing_cu, keep);
+      init_tu_and_read_dwo_dies (this_cu, use_existing_cu);
       return;
     }
 
@@ -6969,10 +6962,12 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
     }
 }
 
-cutu_reader::~cutu_reader ()
+void
+cutu_reader::keep ()
 {
   /* Done, clean up.  */
-  if (m_new_cu != NULL && m_keep && !dummy_p)
+  gdb_assert (!dummy_p);
+  if (m_new_cu != NULL)
     {
       struct dwarf2_per_objfile *dwarf2_per_objfile
 	= m_this_cu->dwarf2_per_objfile;
@@ -7376,7 +7371,7 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
   if (this_cu->cu != NULL)
     free_one_cached_comp_unit (this_cu);
 
-  cutu_reader reader (this_cu, NULL, 0, 0, false);
+  cutu_reader reader (this_cu, NULL, 0, false);
 
   if (reader.dummy_p)
     {
@@ -7545,7 +7540,7 @@ build_type_psymtabs_1 (struct dwarf2_per_objfile *dwarf2_per_objfile)
 	}
 
       cutu_reader reader (&tu.sig_type->per_cu, abbrev_table.get (),
-			  0, 0, false);
+			  0, false);
       if (!reader.dummy_p)
 	build_type_psymtabs_reader (&reader, reader.info_ptr,
 				    reader.comp_unit_die);
@@ -7653,7 +7648,7 @@ process_skeletonless_type_unit (void **slot, void *info)
   *slot = entry;
 
   /* This does the job that build_type_psymtabs_1 would have done.  */
-  cutu_reader reader (&entry->per_cu, NULL, 0, 0, false);
+  cutu_reader reader (&entry->per_cu, NULL, 0, false);
   if (!reader.dummy_p)
     build_type_psymtabs_reader (&reader, reader.info_ptr,
 				reader.comp_unit_die);
@@ -7782,7 +7777,7 @@ dwarf2_build_psymtabs_hard (struct dwarf2_per_objfile *dwarf2_per_objfile)
 static void
 load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu)
 {
-  cutu_reader reader (this_cu, NULL, 1, 1, false);
+  cutu_reader reader (this_cu, NULL, 1, false);
 
   if (!reader.dummy_p)
     {
@@ -7794,6 +7789,8 @@ load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu)
 	 If not, there's no more debug_info for this comp unit.  */
       if (reader.comp_unit_die->has_children)
 	load_partial_dies (&reader, reader.info_ptr, 0);
+
+      reader.keep ();
     }
 }
 
@@ -8892,7 +8889,7 @@ load_full_comp_unit (struct dwarf2_per_cu_data *this_cu,
 {
   gdb_assert (! this_cu->is_debug_types);
 
-  cutu_reader reader (this_cu, NULL, 1, 1, skip_partial);
+  cutu_reader reader (this_cu, NULL, 1, skip_partial);
   if (reader.dummy_p)
     return;
 
@@ -8923,6 +8920,8 @@ load_full_comp_unit (struct dwarf2_per_cu_data *this_cu,
      Similarly, if we do not read the producer, we can not apply
      producer-specific interpretation.  */
   prepare_one_comp_unit (cu, cu->dies, pretend_language);
+
+  reader.keep ();
 }
 
 /* Add a DIE to the delayed physname list.  */
@@ -18916,7 +18915,7 @@ dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
     }
   else
     {
-      cutu_reader reader (per_cu, NULL, 0, 0, false);
+      cutu_reader reader (per_cu, NULL, 0, false);
       addr_base = reader.cu->addr_base;
       addr_size = reader.cu->header.addr_size;
     }
@@ -22748,7 +22747,7 @@ read_signatured_type (struct signatured_type *sig_type)
   gdb_assert (per_cu->is_debug_types);
   gdb_assert (per_cu->cu == NULL);
 
-  cutu_reader reader (per_cu, NULL, 0, 1, false);
+  cutu_reader reader (per_cu, NULL, 0, false);
 
   if (!reader.dummy_p)
     {
@@ -22779,6 +22778,8 @@ read_signatured_type (struct signatured_type *sig_type)
 	 correctly.  Similarly, if we do not read the producer, we can
 	 not apply producer-specific interpretation.  */
       prepare_one_comp_unit (cu, cu->dies, language_minimal);
+
+      reader.keep ();
     }
 
   sig_type->per_cu.tu_read = 1;

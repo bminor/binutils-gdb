@@ -1,5 +1,20 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (class cutu_reader) <cutu_reader,
+	init_tu_and_read_dwo_dies>: Remove "keep" parameter.
+	<keep>: Declare method.
+	<m_keep>: Remove member.
+	<~cutu_reader>: Remove.
+	(cutu_reader::init_tu_and_read_dwo_dies): Update.
+	(cutu_reader::cutu_reader): Update.
+	(cutu_reader::keep): Rename from ~cutu_reader.
+	(process_psymtab_comp_unit, build_type_psymtabs_1)
+	(process_skeletonless_type_unit, load_partial_comp_unit)
+	(load_full_comp_unit, dwarf2_read_addr_index)
+	(read_signatured_type): Update.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (process_psymtab_comp_unit_reader): Remove
 	"want_partial_unit" parameter.
 	(process_psymtab_comp_unit): Change want_partial_unit to bool.
