@@ -1285,8 +1285,6 @@ static LONGEST read_offset (bfd *, const gdb_byte *,
 			    const struct comp_unit_head *,
 			    unsigned int *);
 
-static LONGEST read_offset_1 (bfd *, const gdb_byte *, unsigned int);
-
 static sect_offset read_abbrev_offset
   (struct dwarf2_per_objfile *dwarf2_per_objfile,
    struct dwarf2_section_info *, sect_offset);
@@ -6145,7 +6143,7 @@ read_abbrev_offset (struct dwarf2_per_objfile *dwarf2_per_objfile,
       info_ptr += 2;
     }
 
-  return (sect_offset) read_offset_1 (abfd, info_ptr, offset_size);
+  return (sect_offset) read_offset (abfd, info_ptr, offset_size);
 }
 
 /* Allocate a new partial symtab for file named NAME and mark this new
@@ -19033,34 +19031,10 @@ read_offset (bfd *abfd, const gdb_byte *buf,
 	     const struct comp_unit_head *cu_header,
              unsigned int *bytes_read)
 {
-  LONGEST offset = read_offset_1 (abfd, buf, cu_header->offset_size);
+  LONGEST offset = read_offset (abfd, buf, cu_header->offset_size);
 
   *bytes_read = cu_header->offset_size;
   return offset;
-}
-
-/* Read an offset from the data stream.  */
-
-static LONGEST
-read_offset_1 (bfd *abfd, const gdb_byte *buf, unsigned int offset_size)
-{
-  LONGEST retval = 0;
-
-  switch (offset_size)
-    {
-    case 4:
-      retval = bfd_get_32 (abfd, buf);
-      break;
-    case 8:
-      retval = bfd_get_64 (abfd, buf);
-      break;
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("read_offset_1: bad switch [in module %s]"),
-		      bfd_get_filename (abfd));
-    }
-
-  return retval;
 }
 
 static const gdb_byte *
@@ -19847,7 +19821,7 @@ dwarf_decode_line_header (sect_offset sect_off, struct dwarf2_cu *cu)
 	  return NULL;
 	}
     }
-  lh->header_length = read_offset_1 (abfd, line_ptr, offset_size);
+  lh->header_length = read_offset (abfd, line_ptr, offset_size);
   line_ptr += offset_size;
   lh->statement_program_start = line_ptr + lh->header_length;
   lh->minimum_instruction_length = read_1_byte (abfd, line_ptr);
@@ -23922,7 +23896,7 @@ dwarf_decode_macro_bytes (struct dwarf2_cu *cu,
 	      {
 		LONGEST str_offset;
 
-		str_offset = read_offset_1 (abfd, mac_ptr, offset_size);
+		str_offset = read_offset (abfd, mac_ptr, offset_size);
 		mac_ptr += offset_size;
 
 		if (macinfo_type == DW_MACRO_define_sup
@@ -24062,7 +24036,7 @@ dwarf_decode_macro_bytes (struct dwarf2_cu *cu,
 	    int is_dwz = section_is_dwz;
 	    const gdb_byte *new_mac_ptr;
 
-	    offset = read_offset_1 (abfd, mac_ptr, offset_size);
+	    offset = read_offset (abfd, mac_ptr, offset_size);
 	    mac_ptr += offset_size;
 
 	    if (macinfo_type == DW_MACRO_import_sup)

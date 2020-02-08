@@ -130,4 +130,8 @@ extern LONGEST read_initial_length (bfd *abfd, const gdb_byte *buf,
 				    unsigned int *bytes_read,
 				    bool handle_nonstd = true);
 
+/* Read an offset from the data stream.  */
+extern LONGEST read_offset (bfd *abfd, const gdb_byte *buf,
+			    unsigned int offset_size);
+
 #endif /* GDB_DWARF2_LEB_H */

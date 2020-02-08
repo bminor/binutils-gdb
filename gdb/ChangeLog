@@ -1,5 +1,13 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_offset_1): Move to leb.c.
+	(read_abbrev_offset, read_offset, dwarf_decode_line_header)
+	(dwarf_decode_macro_bytes): Update.
+	* dwarf2/leb.c (read_offset): Rename; move from read.c.
+	* dwarf2/leb.h (read_offset): Declare.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dwarf2_section_size): Remove.
 	(error_check_comp_unit_head, dwarf2_symbol_mark_computed):
 	Update.
