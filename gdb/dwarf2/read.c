@@ -32,6 +32,7 @@
 #include "dwarf2/read.h"
 #include "dwarf2/abbrev.h"
 #include "dwarf2/attribute.h"
+#include "dwarf2/comp-unit.h"
 #include "dwarf2/index-cache.h"
 #include "dwarf2/index-common.h"
 #include "dwarf2/leb.h"
@@ -339,43 +340,6 @@ dwop_section_names =
 };
 
 /* local data types */
-
-/* The data in a compilation unit header, after target2host
-   translation, looks like this.  */
-struct comp_unit_head
-{
-  unsigned int length;
-  short version;
-  unsigned char addr_size;
-  unsigned char signed_addr_p;
-  sect_offset abbrev_sect_off;
-
-  /* Size of file offsets; either 4 or 8.  */
-  unsigned int offset_size;
-
-  /* Size of the length field; either 4 or 12.  */
-  unsigned int initial_length_size;
-
-  enum dwarf_unit_type unit_type;
-
-  /* Offset to the first byte of this compilation unit header in the
-     .debug_info section, for resolving relative reference dies.  */
-  sect_offset sect_off;
-
-  /* Offset to first die in this cu from the start of the cu.
-     This will be the first byte following the compilation unit header.  */
-  cu_offset first_die_cu_offset;
-
-
-  /* 64-bit signature of this unit. For type units, it denotes the signature of
-     the type (DW_UT_type in DWARF 4, additionally DW_UT_split_type in DWARF 5).
-     Also used in DWARF 5, to denote the dwo id when the unit type is
-     DW_UT_skeleton or DW_UT_split_compile.  */
-  ULONGEST signature;
-
-  /* For types, offset in the type's DIE of the type defined by this TU.  */
-  cu_offset type_cu_offset_in_tu;
-};
 
 /* Type used for delaying computation of method physnames.
    See comments for compute_delayed_physnames.  */
@@ -1281,10 +1245,6 @@ static LONGEST read_checked_initial_length_and_offset
   (bfd *, const gdb_byte *, const struct comp_unit_head *,
    unsigned int *, unsigned int *);
 
-static LONGEST read_offset (bfd *, const gdb_byte *,
-			    const struct comp_unit_head *,
-			    unsigned int *);
-
 static sect_offset read_abbrev_offset
   (struct dwarf2_per_objfile *dwarf2_per_objfile,
    struct dwarf2_section_info *, sect_offset);
@@ -1512,8 +1472,6 @@ static const char *dwarf_tag_name (unsigned int);
 
 static const char *dwarf_attr_name (unsigned int);
 
-static const char *dwarf_unit_type_name (int unit_type);
-
 static const char *dwarf_form_name (unsigned int);
 
 static const char *dwarf_bool_name (unsigned int);
@@ -1696,16 +1654,6 @@ struct file_and_directory
 
 static file_and_directory find_file_and_directory (struct die_info *die,
 						   struct dwarf2_cu *cu);
-
-/* Expected enum dwarf_unit_type for read_comp_unit_head.  */
-enum class rcuh_kind { COMPILE, TYPE };
-
-static const gdb_byte *read_and_check_comp_unit_head
-  (struct dwarf2_per_objfile* dwarf2_per_objfile,
-   struct comp_unit_head *header,
-   struct dwarf2_section_info *section,
-   struct dwarf2_section_info *abbrev_section, const gdb_byte *info_ptr,
-   rcuh_kind section_kind);
 
 static htab_up allocate_signatured_type_table (struct objfile *objfile);
 
@@ -5880,25 +5828,6 @@ dwarf2_build_psymtabs (struct objfile *objfile)
     }
 }
 
-/* Return the total length of the CU described by HEADER.  */
-
-static unsigned int
-get_cu_length (const struct comp_unit_head *header)
-{
-  return header->initial_length_size + header->length;
-}
-
-/* Return TRUE if SECT_OFF is within CU_HEADER.  */
-
-static inline bool
-offset_in_cu_p (const comp_unit_head *cu_header, sect_offset sect_off)
-{
-  sect_offset bottom = cu_header->sect_off;
-  sect_offset top = cu_header->sect_off + get_cu_length (cu_header);
-
-  return sect_off >= bottom && sect_off < top;
-}
-
 /* Find the base address of the compilation unit for range lists and
    location lists.  It will normally be specified by DW_AT_low_pc.
    In DWARF-3 draft 4, the base address could be overridden by
@@ -5930,120 +5859,6 @@ dwarf2_find_base_address (struct die_info *die, struct dwarf2_cu *cu)
     }
 }
 
-/* Read in the comp unit header information from the debug_info at info_ptr.
-   Use rcuh_kind::COMPILE as the default type if not known by the caller.
-   NOTE: This leaves members offset, first_die_offset to be filled in
-   by the caller.  */
-
-static const gdb_byte *
-read_comp_unit_head (struct comp_unit_head *cu_header,
-		     const gdb_byte *info_ptr,
-		     struct dwarf2_section_info *section,
-		     rcuh_kind section_kind)
-{
-  int signed_addr;
-  unsigned int bytes_read;
-  const char *filename = section->get_file_name ();
-  bfd *abfd = section->get_bfd_owner ();
-
-  cu_header->length = read_initial_length (abfd, info_ptr, &bytes_read);
-  cu_header->initial_length_size = bytes_read;
-  cu_header->offset_size = (bytes_read == 4) ? 4 : 8;
-  info_ptr += bytes_read;
-  cu_header->version = read_2_bytes (abfd, info_ptr);
-  if (cu_header->version < 2 || cu_header->version > 5)
-    error (_("Dwarf Error: wrong version in compilation unit header "
-	   "(is %d, should be 2, 3, 4 or 5) [in module %s]"),
-	   cu_header->version, filename);
-  info_ptr += 2;
-  if (cu_header->version < 5)
-    switch (section_kind)
-      {
-      case rcuh_kind::COMPILE:
-	cu_header->unit_type = DW_UT_compile;
-	break;
-      case rcuh_kind::TYPE:
-	cu_header->unit_type = DW_UT_type;
-	break;
-      default:
-	internal_error (__FILE__, __LINE__,
-			_("read_comp_unit_head: invalid section_kind"));
-      }
-  else
-    {
-      cu_header->unit_type = static_cast<enum dwarf_unit_type>
-						 (read_1_byte (abfd, info_ptr));
-      info_ptr += 1;
-      switch (cu_header->unit_type)
-	{
-	case DW_UT_compile:
-	case DW_UT_partial:
-	case DW_UT_skeleton:
-	case DW_UT_split_compile:
-	  if (section_kind != rcuh_kind::COMPILE)
-	    error (_("Dwarf Error: wrong unit_type in compilation unit header "
-		   "(is %s, should be %s) [in module %s]"),
-		   dwarf_unit_type_name (cu_header->unit_type),
-		   dwarf_unit_type_name (DW_UT_type), filename);
-	  break;
-	case DW_UT_type:
-	case DW_UT_split_type:
-	  section_kind = rcuh_kind::TYPE;
-	  break;
-	default:
-	  error (_("Dwarf Error: wrong unit_type in compilation unit header "
-		 "(is %#04x, should be one of: %s, %s, %s, %s or %s) "
-		 "[in module %s]"), cu_header->unit_type,
-		 dwarf_unit_type_name (DW_UT_compile),
-		 dwarf_unit_type_name (DW_UT_skeleton),
-		 dwarf_unit_type_name (DW_UT_split_compile),
-		 dwarf_unit_type_name (DW_UT_type),
-		 dwarf_unit_type_name (DW_UT_split_type), filename);
-	}
-
-      cu_header->addr_size = read_1_byte (abfd, info_ptr);
-      info_ptr += 1;
-    }
-  cu_header->abbrev_sect_off = (sect_offset) read_offset (abfd, info_ptr,
-							  cu_header,
-							  &bytes_read);
-  info_ptr += bytes_read;
-  if (cu_header->version < 5)
-    {
-      cu_header->addr_size = read_1_byte (abfd, info_ptr);
-      info_ptr += 1;
-    }
-  signed_addr = bfd_get_sign_extend_vma (abfd);
-  if (signed_addr < 0)
-    internal_error (__FILE__, __LINE__,
-		    _("read_comp_unit_head: dwarf from non elf file"));
-  cu_header->signed_addr_p = signed_addr;
-
-  bool header_has_signature = section_kind == rcuh_kind::TYPE
-    || cu_header->unit_type == DW_UT_skeleton
-    || cu_header->unit_type == DW_UT_split_compile;
-
-  if (header_has_signature)
-    {
-      cu_header->signature = read_8_bytes (abfd, info_ptr);
-      info_ptr += 8;
-    }
-
-  if (section_kind == rcuh_kind::TYPE)
-    {
-      LONGEST type_offset;
-      type_offset = read_offset (abfd, info_ptr, cu_header, &bytes_read);
-      info_ptr += bytes_read;
-      cu_header->type_cu_offset_in_tu = (cu_offset) type_offset;
-      if (to_underlying (cu_header->type_cu_offset_in_tu) != type_offset)
-	error (_("Dwarf Error: Too big type_offset in compilation unit "
-	       "header (is %s) [in module %s]"), plongest (type_offset),
-	       filename);
-    }
-
-  return info_ptr;
-}
-
 /* Helper function that returns the proper abbrev section for
    THIS_CU.  */
 
@@ -6059,62 +5874,6 @@ get_abbrev_section_for_cu (struct dwarf2_per_cu_data *this_cu)
     abbrev = &dwarf2_per_objfile->abbrev;
 
   return abbrev;
-}
-
-/* Subroutine of read_and_check_comp_unit_head and
-   read_and_check_type_unit_head to simplify them.
-   Perform various error checking on the header.  */
-
-static void
-error_check_comp_unit_head (struct dwarf2_per_objfile *dwarf2_per_objfile,
-			    struct comp_unit_head *header,
-			    struct dwarf2_section_info *section,
-			    struct dwarf2_section_info *abbrev_section)
-{
-  const char *filename = section->get_file_name ();
-
-  if (to_underlying (header->abbrev_sect_off)
-      >= abbrev_section->get_size (dwarf2_per_objfile->objfile))
-    error (_("Dwarf Error: bad offset (%s) in compilation unit header "
-	   "(offset %s + 6) [in module %s]"),
-	   sect_offset_str (header->abbrev_sect_off),
-	   sect_offset_str (header->sect_off),
-	   filename);
-
-  /* Cast to ULONGEST to use 64-bit arithmetic when possible to
-     avoid potential 32-bit overflow.  */
-  if (((ULONGEST) header->sect_off + get_cu_length (header))
-      > section->size)
-    error (_("Dwarf Error: bad length (0x%x) in compilation unit header "
-	   "(offset %s + 0) [in module %s]"),
-	   header->length, sect_offset_str (header->sect_off),
-	   filename);
-}
-
-/* Read in a CU/TU header and perform some basic error checking.
-   The contents of the header are stored in HEADER.
-   The result is a pointer to the start of the first DIE.  */
-
-static const gdb_byte *
-read_and_check_comp_unit_head (struct dwarf2_per_objfile *dwarf2_per_objfile,
-			       struct comp_unit_head *header,
-			       struct dwarf2_section_info *section,
-			       struct dwarf2_section_info *abbrev_section,
-			       const gdb_byte *info_ptr,
-			       rcuh_kind section_kind)
-{
-  const gdb_byte *beg_of_comp_unit = info_ptr;
-
-  header->sect_off = (sect_offset) (beg_of_comp_unit - section->buffer);
-
-  info_ptr = read_comp_unit_head (header, info_ptr, section, section_kind);
-
-  header->first_die_cu_offset = (cu_offset) (info_ptr - beg_of_comp_unit);
-
-  error_check_comp_unit_head (dwarf2_per_objfile, header, section,
-			      abbrev_section);
-
-  return info_ptr;
 }
 
 /* Fetch the abbreviation table offset from a comp or type unit header.  */
@@ -6300,7 +6059,7 @@ create_debug_type_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
       ptr = read_and_check_comp_unit_head (dwarf2_per_objfile, &header, section,
 					   abbrev_section, ptr, section_kind);
 
-      length = get_cu_length (&header);
+      length = header.get_length ();
 
       /* Skip dummy type units.  */
       if (ptr >= info_ptr + length
@@ -6836,7 +6595,7 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
       gdb_assert (dwo_unit->sect_off == cu->header.sect_off);
       /* For DWOs coming from DWP files, we don't know the CU length
 	 nor the type's offset in the TU until now.  */
-      dwo_unit->length = get_cu_length (&cu->header);
+      dwo_unit->length = cu->header.get_length ();
       dwo_unit->type_offset_in_tu = cu->header.type_cu_offset_in_tu;
 
       /* Establish the type offset that can be used to lookup the type.
@@ -6853,7 +6612,7 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
       gdb_assert (dwo_unit->sect_off == cu->header.sect_off);
       /* For DWOs coming from DWP files, we don't know the CU length
 	 until now.  */
-      dwo_unit->length = get_cu_length (&cu->header);
+      dwo_unit->length = cu->header.get_length ();
     }
 
   *result_dwo_abbrev_table
@@ -7117,7 +6876,7 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
 
 	  /* LENGTH has not been set yet for type units if we're
 	     using .gdb_index.  */
-	  this_cu->length = get_cu_length (&cu->header);
+	  this_cu->length = cu->header.get_length ();
 
 	  /* Establish the type offset that can be used to lookup the type.  */
 	  sig_type->type_offset_in_section =
@@ -7134,7 +6893,7 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
 						    rcuh_kind::COMPILE);
 
 	  gdb_assert (this_cu->sect_off == cu->header.sect_off);
-	  gdb_assert (this_cu->length == get_cu_length (&cu->header));
+	  gdb_assert (this_cu->length == cu->header.get_length ());
 	  this_cu->dwarf_version = cu->header.version;
 	}
     }
@@ -7290,7 +7049,7 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
       m_new_cu->str_offsets_base = parent_cu->str_offsets_base;
       m_new_cu->addr_base = parent_cu->addr_base;
     }
-  this_cu->length = get_cu_length (&m_new_cu->header);
+  this_cu->length = m_new_cu->header.get_length ();
 
   /* Skip dummy compilation units.  */
   if (info_ptr >= begin_info_ptr + this_cu->length
@@ -13548,7 +13307,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 
 	  sect_offset sect_off
 	    = (sect_offset) dwarf2_get_ref_die_offset (origin);
-	  if (!offset_in_cu_p (&cu->header, sect_off))
+	  if (!cu->header.offset_in_cu_p (sect_off))
 	    {
 	      /* As DW_OP_GNU_parameter_ref uses CU-relative offset this
 		 binding can be done only inside one CU.  Such referenced DIE
@@ -18434,7 +18193,7 @@ find_partial_die (sect_offset sect_off, int offset_in_dwz, struct dwarf2_cu *cu)
   struct partial_die_info *pd = NULL;
 
   if (offset_in_dwz == cu->per_cu->is_dwz
-      && offset_in_cu_p (&cu->header, sect_off))
+      && cu->header.offset_in_cu_p (sect_off))
     {
       pd = cu->find_partial_die (sect_off);
       if (pd != NULL)
@@ -19021,20 +18780,6 @@ read_checked_initial_length_and_offset (bfd *abfd, const gdb_byte *buf,
 
   *offset_size = (*bytes_read == 4) ? 4 : 8;
   return length;
-}
-
-/* Read an offset from the data stream.  The size of the offset is
-   given by cu_header->offset_size.  */
-
-static LONGEST
-read_offset (bfd *abfd, const gdb_byte *buf,
-	     const struct comp_unit_head *cu_header,
-             unsigned int *bytes_read)
-{
-  LONGEST offset = read_offset (abfd, buf, cu_header->offset_size);
-
-  *bytes_read = cu_header->offset_size;
-  return offset;
 }
 
 static const gdb_byte *
@@ -22201,33 +21946,6 @@ dwarf_attr_name (unsigned attr)
   return name;
 }
 
-/* Convert a unit type to corresponding DW_UT name.  */
-
-static const char *
-dwarf_unit_type_name (int unit_type) {
-  switch (unit_type)
-    {
-      case 0x01:
-	return "DW_UT_compile (0x01)";
-      case 0x02:
-	return "DW_UT_type (0x02)";
-      case 0x03:
-	return "DW_UT_partial (0x03)";
-      case 0x04:
-	return "DW_UT_skeleton (0x04)";
-      case 0x05:
-	return "DW_UT_split_compile (0x05)";
-      case 0x06:
-	return "DW_UT_split_type (0x06)";
-      case 0x80:
-	return "DW_UT_lo_user (0x80)";
-      case 0xff:
-	return "DW_UT_hi_user (0xff)";
-      default:
-	return nullptr;
-    }
-}
-
 /* Convert a DWARF value form code into its string name.  */
 
 static const char *
@@ -22533,11 +22251,11 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
       /* .debug_types CUs cannot reference anything outside their CU.
 	 If they need to, they have to reference a signatured type via
 	 DW_FORM_ref_sig8.  */
-      if (!offset_in_cu_p (&cu->header, sect_off))
+      if (!cu->header.offset_in_cu_p (sect_off))
 	return NULL;
     }
   else if (offset_in_dwz != cu->per_cu->is_dwz
-	   || !offset_in_cu_p (&cu->header, sect_off))
+	   || !cu->header.offset_in_cu_p (sect_off))
     {
       struct dwarf2_per_cu_data *per_cu;
 

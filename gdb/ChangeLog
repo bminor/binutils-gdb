@@ -1,5 +1,20 @@
 2020-02-08  Tom Tromey  <tom@tromey.com>
 
+	* Makefile.in (COMMON_SFILES): Add dwarf2/comp-unit.c.
+	* dwarf2/read.c (struct comp_unit_head): Move to
+	dwarf2/comp-unit.h.
+	(enum class rcuh_kind): Move to comp-unit.h.
+	(get_cu_length, offset_in_cu_p): Now methods on comp_unit_head.
+	(read_comp_unit_head, error_check_comp_unit_head)
+	(read_and_check_comp_unit_head): Move to comp-unit.c.
+	(read_offset, dwarf_unit_type_name): Likewise.
+	(create_debug_type_hash_table, read_cutu_die_from_dwo)
+	(cutu_reader::cutu_reader, read_call_site_scope)
+	(find_partial_die, follow_die_offset): Update.
+	* dwarf2/comp-unit.h: New file, from dwarf2read.c.
+
+2020-02-08  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_offset_1): Move to leb.c.
 	(read_abbrev_offset, read_offset, dwarf_decode_line_header)
 	(dwarf_decode_macro_bytes): Update.
