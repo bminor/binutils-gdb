@@ -134,4 +134,31 @@ extern LONGEST read_initial_length (bfd *abfd, const gdb_byte *buf,
 extern LONGEST read_offset (bfd *abfd, const gdb_byte *buf,
 			    unsigned int offset_size);
 
+static inline const gdb_byte *
+read_n_bytes (bfd *abfd, const gdb_byte *buf, unsigned int size)
+{
+  /* If the size of a host char is 8 bits, we can return a pointer
+     to the buffer, otherwise we have to copy the data to a buffer
+     allocated on the temporary obstack.  */
+  gdb_assert (HOST_CHAR_BIT == 8);
+  return buf;
+}
+
+static inline const char *
+read_direct_string (bfd *abfd, const gdb_byte *buf,
+		    unsigned int *bytes_read_ptr)
+{
+  /* If the size of a host char is 8 bits, we can return a pointer
+     to the string, otherwise we have to copy the string to a buffer
+     allocated on the temporary obstack.  */
+  gdb_assert (HOST_CHAR_BIT == 8);
+  if (*buf == '\0')
+    {
+      *bytes_read_ptr = 1;
+      return NULL;
+    }
+  *bytes_read_ptr = strlen ((const char *) buf) + 1;
+  return (const char *) buf;
+}
+
 #endif /* GDB_DWARF2_LEB_H */

@@ -1246,10 +1246,6 @@ static sect_offset read_abbrev_offset
   (struct dwarf2_per_objfile *dwarf2_per_objfile,
    struct dwarf2_section_info *, sect_offset);
 
-static const gdb_byte *read_n_bytes (bfd *, const gdb_byte *, unsigned int);
-
-static const char *read_direct_string (bfd *, const gdb_byte *, unsigned int *);
-
 static const char *read_indirect_string
   (struct dwarf2_per_objfile *dwarf2_per_objfile, bfd *, const gdb_byte *,
    const struct comp_unit_head *, unsigned int *);
@@ -18729,33 +18725,6 @@ read_checked_initial_length_and_offset (bfd *abfd, const gdb_byte *buf,
 
   *offset_size = (*bytes_read == 4) ? 4 : 8;
   return length;
-}
-
-static const gdb_byte *
-read_n_bytes (bfd *abfd, const gdb_byte *buf, unsigned int size)
-{
-  /* If the size of a host char is 8 bits, we can return a pointer
-     to the buffer, otherwise we have to copy the data to a buffer
-     allocated on the temporary obstack.  */
-  gdb_assert (HOST_CHAR_BIT == 8);
-  return buf;
-}
-
-static const char *
-read_direct_string (bfd *abfd, const gdb_byte *buf,
-		    unsigned int *bytes_read_ptr)
-{
-  /* If the size of a host char is 8 bits, we can return a pointer
-     to the string, otherwise we have to copy the string to a buffer
-     allocated on the temporary obstack.  */
-  gdb_assert (HOST_CHAR_BIT == 8);
-  if (*buf == '\0')
-    {
-      *bytes_read_ptr = 1;
-      return NULL;
-    }
-  *bytes_read_ptr = strlen ((const char *) buf) + 1;
-  return (const char *) buf;
 }
 
 /* Return pointer to string at section SECT offset STR_OFFSET with error
