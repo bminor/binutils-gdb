@@ -158,6 +158,7 @@ static struct gdbarch_data *windows_gdbarch_data_handle;
 struct windows_gdbarch_data
 {
   struct type *siginfo_type;
+  struct type *tib_ptr_type; /* Type of thread information block */
 };
 
 /* Allocate windows_gdbarch_data for an arch.  */
@@ -182,8 +183,6 @@ get_windows_gdbarch_data (struct gdbarch *gdbarch)
 static struct type *
 windows_get_tlb_type (struct gdbarch *gdbarch)
 {
-  static struct gdbarch *last_gdbarch = NULL;
-  static struct type *last_tlb_type = NULL;
   struct type *dword_ptr_type, *dword32_type, *void_ptr_type;
   struct type *peb_ldr_type, *peb_ldr_ptr_type;
   struct type *peb_type, *peb_ptr_type, *list_type;
@@ -192,10 +191,11 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   struct type *word_type, *wchar_type, *wchar_ptr_type;
   struct type *uni_str_type, *rupp_type, *rupp_ptr_type;
 
-  /* Do not rebuild type if same gdbarch as last time.  */
-  if (last_tlb_type && last_gdbarch == gdbarch)
-    return last_tlb_type;
-  
+  windows_gdbarch_data *windows_gdbarch_data
+    = get_windows_gdbarch_data (gdbarch);
+  if (windows_gdbarch_data->tib_ptr_type != nullptr)
+    return windows_gdbarch_data->tib_ptr_type;
+
   dword_ptr_type = arch_integer_type (gdbarch, gdbarch_ptr_bit (gdbarch),
 				 1, "DWORD_PTR");
   dword32_type = arch_integer_type (gdbarch, 32,
@@ -365,8 +365,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
 			    NULL);
   TYPE_TARGET_TYPE (tib_ptr_type) = tib_type;
 
-  last_tlb_type = tib_ptr_type;
-  last_gdbarch = gdbarch;
+  windows_gdbarch_data->tib_ptr_type = tib_ptr_type;
 
   return tib_ptr_type;
 }
