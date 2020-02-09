@@ -1,3 +1,8 @@
+2020-02-09  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2read.c (process_psymtab_comp_unit_reader): Append CU offset to
+	filename if it matches "<artificial>".
+
 2020-02-09  Hannes Domani  <ssbssa@yahoo.de>
 
 	* windows-tdep.c (struct enum_value_name): New struct.

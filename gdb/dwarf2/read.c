@@ -7252,9 +7252,17 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   prepare_one_comp_unit (cu, comp_unit_die, pretend_language);
 
   /* Allocate a new partial symbol table structure.  */
+  gdb::unique_xmalloc_ptr<char> debug_filename;
+  static const char artificial[] = "<artificial>";
   filename = dwarf2_string_attr (comp_unit_die, DW_AT_name, cu);
   if (filename == NULL)
     filename = "";
+  else if (strcmp (filename, artificial) == 0)
+    {
+      debug_filename.reset (concat (artificial, "@",
+				    sect_offset_str (per_cu->sect_off), NULL));
+      filename = debug_filename.get ();
+    }
 
   pst = create_partial_symtab (per_cu, filename);
 
