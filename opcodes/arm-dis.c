@@ -514,6 +514,27 @@ static const struct cdeopcode32 cde_opcodes[] =
 	      0xee800040, 0xef800840,
 	     "cx3d%a\t%p, %0-3S, %0-3T, %16-19n, %12-15n, #%4-5,7,20-22d"),
 
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xec200000, 0xeeb00840,
+	      "vcx1%a\t%p, %12-15,22V, #%0-5,7,16-19d"),
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xec200040, 0xeeb00840,
+	      "vcx1%a\t%p, %12-15,22V, #%0-5,7,16-19,24d"),
+
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xec300000, 0xeeb00840,
+	      "vcx2%a\t%p, %12-15,22V, %0-3,5V, #%4,7,16-19d"),
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xec300040, 0xeeb00840,
+	      "vcx2%a\t%p, %12-15,22V, %0-3,5V, #%4,7,16-19,24d"),
+
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xec800000, 0xee800840,
+	      "vcx3%a\t%p, %12-15,22V, %16-19,7V, %0-3,5V, #%4,20-21d"),
+  CDE_OPCODE (ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE),
+	      0xec800040, 0xee800840,
+	      "vcx3%a\t%p, %12-15,22V, %16-19,7V, %0-3,5V, #%4,20-21,24d"),
+
   CDE_OPCODE (ARM_FEATURE_CORE_LOW (0), 0, 0, 0)
 
 };
@@ -8918,6 +8939,25 @@ print_insn_cde (struct disassemble_info *info, long given, bfd_boolean thumb)
 
 		  case 'd':
 		    func (stream, "%ld", value);
+		    break;
+
+		  case 'V':
+		    if (given & (1 << 6))
+		      func (stream, "q%ld", value >> 1);
+		    else if (given & (1 << 24))
+		      func (stream, "d%ld", value);
+		    else
+		      {
+			/* Encoding for S register is different than for D and
+			   Q registers.  S registers are encoded using the top
+			   single bit in position 22 as the lowest bit of the
+			   register number, while for Q and D it represents the
+			   highest bit of the register number.  */
+			uint8_t top_bit = (value >> 4) & 1;
+			uint8_t tmp = (value << 1) & 0x1e;
+			uint8_t res = tmp | top_bit;
+			func (stream, "s%u", res);
+		      }
 		    break;
 
 		default:

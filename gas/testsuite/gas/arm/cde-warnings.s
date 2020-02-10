@@ -333,3 +333,272 @@ cx3da p0, r0, r1, r0, r0, r0, #0
 
 cx3d p0, r0, r0, r0, #0
 cx3da p0, r0, r0, r0, #0
+
+# vcx1{a}
+# Immediate out of range.
+# Each register out of range.
+# IT block => constrained unpredictable
+#
+# Error given when using coprocessor number not enabled on command line.
+# Too many arguments
+# Too little arguments
+
+vcx1 p0, q0, #4096
+vcx1a p0, q0, #4096
+vcx1 p0, q0, #-1
+vcx1a p0, q0, #-1
+
+vcx1 p8, q0, #0
+vcx1a p8, q0, #0
+vcx1 p0, q8, #0
+vcx1a p0, q8, #0
+
+itttt ne
+vcx1 p0, q0, #0
+vcx1ne p0, q0, #0
+vcx1a p0, q0, #0
+vcx1ane p0, q0, #0
+
+vcx1 p1, q0, #0
+vcx1a p1, q0, #0
+
+vcx1 p0, q0, q0, #0
+vcx1a p0, q0, q0, #0
+vcx1 p0, #0
+vcx1a p0, #0
+
+
+vcx1 p0, d0, #2048
+vcx1a p0, d0, #2048
+vcx1 p0, d0, #-1
+vcx1a p0, d0, #-1
+
+vcx1 p8, d0, #0
+vcx1a p8, d0, #0
+vcx1 p0, d16, #0
+vcx1a p0, d16, #0
+
+itttt ne
+vcx1 p0, d0, #0
+vcx1ne p0, d0, #0
+vcx1a p0, d0, #0
+vcx1ane p0, d0, #0
+
+vcx1 p1, d0, #0
+vcx1a p1, d0, #0
+
+vcx1 p0, d0, d0, #0
+vcx1a p0, d0, d0, #0
+vcx1 p0, #0
+vcx1a p0, #0
+
+
+vcx1 p0, s0, #2048
+vcx1a p0, s0, #2048
+vcx1 p0, s0, #-1
+vcx1a p0, s0, #-1
+
+vcx1 p8, s0, #0
+vcx1a p8, s0, #0
+vcx1 p0, s32, #0
+vcx1a p0, s32, #0
+
+itttt ne
+vcx1 p0, s0, #0
+vcx1ne p0, s0, #0
+vcx1a p0, s0, #0
+vcx1ane p0, s0, #0
+
+vcx1 p1, s0, #0
+vcx1a p1, s0, #0
+
+vcx1 p0, s0, s0, #0
+vcx1a p0, s0, s0, #0
+vcx1 p0, #0
+vcx1a p0, #0
+
+
+# vcx2{a}
+# Immediate out of range.
+# Each register out of range.
+# IT block => constrained unpredictable
+#
+# Error given when using coprocessor number not enabled on command line.
+# Too many arguments
+# Too little arguments
+
+vcx2 p0, q0, q0, #128
+vcx2a p0, q0, q0, #128
+vcx2 p0, q0, q0, #-1
+vcx2a p0, q0, q0, #-1
+
+vcx2 p8, q0, q0, #0
+vcx2a p8, q0, q0, #0
+vcx2 p0, q8, q0, #0
+vcx2a p0, q8, q0, #0
+vcx2 p0, q0, q8, #0
+vcx2a p0, q0, q8, #0
+
+itttt ne
+vcx2 p0, q0, q0, #0
+vcx2ne p0, q0, q0, #0
+vcx2a p0, q0, q0, #0
+vcx2ane p0, q0, q0, #0
+
+vcx2 p1, q0, q0, #0
+vcx2a p1, q0, q0, #0
+
+vcx2 p0, q0, q0, q0, #0
+vcx2a p0, q0, q0, q0, #0
+vcx2 p0, q0, #0
+vcx2a p0, q0, #0
+
+
+vcx2 p0, d0, d0, #64
+vcx2a p0, d0, d0, #64
+vcx2 p0, d0, d0, #-1
+vcx2a p0, d0, d0, #-1
+
+vcx2 p8, d0, d0, #0
+vcx2a p8, d0, d0, #0
+vcx2 p0, d16, d0, #0
+vcx2a p0, d16, d0, #0
+vcx2 p0, d0, d16, #0
+vcx2a p0, d0, d16, #0
+
+itttt ne
+vcx2 p0, d0, d0, #0
+vcx2ne p0, d0, d0, #0
+vcx2a p0, d0, d0, #0
+vcx2ane p0, d0, d0, #0
+
+vcx2 p1, d0, d0, #0
+vcx2a p1, d0, d0, #0
+
+vcx2 p0, d0, d0, d0, #0
+vcx2a p0, d0, d0, d0, #0
+vcx2 p0, d0, #0
+vcx2a p0, d0, #0
+
+
+vcx2 p0, s0, s0, #64
+vcx2a p0, s0, s0, #64
+vcx2 p0, s0, s0, #-1
+vcx2a p0, s0, s0, #-1
+
+vcx2 p8, s0, s0, #0
+vcx2a p8, s0, s0, #0
+vcx2 p0, s32, s0, #0
+vcx2a p0, s32, s0, #0
+vcx2 p0, s0, s32, #0
+vcx2a p0, s0, s32, #0
+
+itttt ne
+vcx2 p0, s0, s0, #0
+vcx2ne p0, s0, s0, #0
+vcx2a p0, s0, s0, #0
+vcx2ane p0, s0, s0, #0
+
+vcx2 p1, s0, s0, #0
+vcx2a p1, s0, s0, #0
+
+vcx2 p0, s0, s0, s0, #0
+vcx2a p0, s0, s0, s0, #0
+vcx2 p0, s0, #0
+vcx2a p0, s0, #0
+
+# vcx3{a}
+# Immediate out of range.
+# Each register out of range.
+# IT block => constrained unpredictable
+#
+# Error given when using coprocessor number not enabled on command line.
+# Too many arguments
+# Too little arguments
+
+vcx3 p0, q0, q0, q0, #16
+vcx3a p0, q0, q0, q0, #16
+vcx3 p0, q0, q0, q0, #-1
+vcx3a p0, q0, q0, q0, #-1
+
+vcx3 p8, q0, q0, q0, #0
+vcx3a p8, q0, q0, q0, #0
+vcx3 p0, q8, q0, q0, #0
+vcx3a p0, q8, q0, q0, #0
+vcx3 p0, q8, q0, q0, #0
+vcx3a p0, q0, q8, q0, #0
+vcx3 p0, q0, q0, q8, #0
+vcx3a p0, q0, q0, q8, #0
+
+itttt ne
+vcx3 p0, q0, q0, q0, #0
+vcx3ne p0, q0, q0, q0, #0
+vcx3a p0, q0, q0, q0, #0
+vcx3ane p0, q0, q0, q0, #0
+
+vcx3 p1, q0, q0, q0, #0
+vcx3a p1, q0, q0, q0, #0
+
+vcx3 p0, q0, q0, q0, q0, #0
+vcx3a p0, q0, q0, q0, q0, #0
+vcx3 p0, q0, q0, #0
+vcx3a p0, q0, q0, #0
+
+
+vcx3 p0, d0, d0, d0, #8
+vcx3a p0, d0, d0, d0, #8
+vcx3 p0, d0, d0, d0, #-1
+vcx3a p0, d0, d0, d0, #-1
+
+vcx3 p8, d0, d0, d0, #0
+vcx3a p8, d0, d0, d0, #0
+vcx3 p0, d16, d0, d0, #0
+vcx3a p0, d16, d0, d0, #0
+vcx3 p0, d0, d16, d0, #0
+vcx3a p0, d0, d16, d0, #0
+vcx3 p0, d0, d0, d16, #0
+vcx3a p0, d0, d0, d16, #0
+
+itttt ne
+vcx3 p0, d0, d0, d0, #0
+vcx3ne p0, d0, d0, d0, #0
+vcx3a p0, d0, d0, d0, #0
+vcx3ane p0, d0, d0, d0, #0
+
+vcx3 p1, d0, d0, d0, #0
+vcx3a p1, d0, d0, d0, #0
+
+vcx3 p0, d0, d0, d0, d0, #0
+vcx3a p0, d0, d0, d0, d0, #0
+vcx3 p0, d0, d0, #0
+vcx3a p0, d0, d0, #0
+
+
+vcx3 p0, s0, s0, s0, #8
+vcx3a p0, s0, s0, s0, #8
+vcx3 p0, s0, s0, s0, #-1
+vcx3a p0, s0, s0, s0, #-1
+
+vcx3 p8, s0, s0, s0, #0
+vcx3a p8, s0, s0, s0, #0
+vcx3 p0, s32, s0, s0, #0
+vcx3a p0, s32, s0, s0, #0
+vcx3 p0, s0, s32, s0, #0
+vcx3a p0, s0, s32, s0, #0
+vcx3 p0, s0, s0, s32, #0
+vcx3a p0, s0, s0, s32, #0
+
+itttt ne
+vcx3 p0, s0, s0, s0, #0
+vcx3ne p0, s0, s0, s0, #0
+vcx3a p0, s0, s0, s0, #0
+vcx3ane p0, s0, s0, s0, #0
+
+vcx3 p1, s0, s0, s0, #0
+vcx3a p1, s0, s0, s0, #0
+
+vcx3 p0, s0, s0, s0, s0, #0
+vcx3a p0, s0, s0, s0, s0, #0
+vcx3 p0, s0, s0, #0
+vcx3a p0, s0, s0, #0
+

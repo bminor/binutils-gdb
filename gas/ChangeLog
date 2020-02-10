@@ -1,3 +1,41 @@
+2020-02-10  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* config/tc-arm.c (NEON_MAX_TYPE_ELS): Increment to account for
+	instructions that can have 5 arguments.
+	(enum operand_parse_code): Add new operands.
+	(parse_operands): Account for new operands.
+	(S5): New macro.
+	(enum neon_shape_el): Introduce P suffixes for coprocessor.
+	(neon_select_shape): Account for P suffix.
+	(LOW1): Move macro to global position.
+	(HI4): Move macro to global position.
+	(vcx_assign_vec_d): New.
+	(vcx_assign_vec_m): New.
+	(vcx_assign_vec_n): New.
+	(enum vcx_reg_type): New.
+	(vcx_get_reg_type): New.
+	(vcx_size_pos): New.
+	(vcx_vec_pos): New.
+	(vcx_handle_shape): New.
+	(vcx_ensure_register_in_range): New.
+	(vcx_handle_register_arguments): New.
+	(vcx_handle_insn_block): New.
+	(vcx_handle_common_checks): New.
+	(do_vcx1): New.
+	(do_vcx2): New.
+	(do_vcx3): New.
+	* testsuite/gas/arm/cde-missing-fp.d: New test.
+	* testsuite/gas/arm/cde-missing-fp.l: New test.
+	* testsuite/gas/arm/cde-missing-mve.d: New test.
+	* testsuite/gas/arm/cde-missing-mve.l: New test.
+	* testsuite/gas/arm/cde-mve-or-neon.d: New test.
+	* testsuite/gas/arm/cde-mve-or-neon.s: New test.
+	* testsuite/gas/arm/cde-mve.s: New test.
+	* testsuite/gas/arm/cde-warnings.l:
+	* testsuite/gas/arm/cde-warnings.s:
+	* testsuite/gas/arm/cde.d:
+	* testsuite/gas/arm/cde.s:
+
 2020-02-10  Stam Markianos-Wright  <stam.markianos-wright@arm.com>
 	    Matthew Malcomson  <matthew.malcomson@arm.com>
 

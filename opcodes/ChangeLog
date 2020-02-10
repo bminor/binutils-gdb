@@ -1,3 +1,8 @@
+2020-02-10  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* arm-dis.c (print_insn_cde): Define 'V' parse character.
+	(cde_opcodes): Add VCX* instructions.
+
 2020-02-10  Stam Markianos-Wright  <stam.markianos-wright@arm.com>
 	    Matthew Malcomson  <matthew.malcomson@arm.com>
 

@@ -339,6 +339,11 @@ static const arm_feature_set mve_ext =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE);
 static const arm_feature_set mve_fp_ext =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_MVE_FP);
+/* Note: This has more than one bit set, which means using it with
+   mark_feature_used (which returns if *any* of the bits are set in the current
+   cpu variant) can give surprising results.  */
+static const arm_feature_set armv8m_fp =
+  ARM_FEATURE_COPROC (FPU_VFP_V5_SP_D16);
 #ifdef OBJ_ELF
 static const arm_feature_set fpu_vfp_fp16 =
   ARM_FEATURE_COPROC (FPU_VFP_EXT_FP16);
@@ -478,7 +483,7 @@ struct neon_type_el
   unsigned size;
 };
 
-#define NEON_MAX_TYPE_ELS 4
+#define NEON_MAX_TYPE_ELS 5
 
 struct neon_type
 {
@@ -7092,6 +7097,7 @@ enum operand_parse_code
   OP_RIWG,	/* iWMMXt wCG register */
   OP_RXA,	/* XScale accumulator register */
 
+  OP_RNSDMQ,	/* Neon single, double or MVE vector register */
   OP_RNSDQMQ,	/* Neon single, double or quad register or MVE vector register
 		 */
   OP_RNSDQMQR,	/* Neon single, double or quad register, MVE vector register or
@@ -7160,8 +7166,10 @@ enum operand_parse_code
   OP_I63s,	/*		 -64 .. 63 */
   OP_I64,	/*		   1 .. 64 */
   OP_I64z,	/*		   0 .. 64 */
+  OP_I127,	/*		   0 .. 127 */
   OP_I255,	/*		   0 .. 255 */
   OP_I511,	/*		   0 .. 511 */
+  OP_I4095,	/*		   0 .. 4095 */
   OP_I8191,	/*		   0 .. 8191 */
   OP_I4b,	/* immediate, prefix optional, 1 .. 4 */
   OP_I7b,	/*			       0 .. 7 */
@@ -7480,6 +7488,12 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_RVSD_COND:
 	  po_reg_or_goto (REG_TYPE_VFSD, try_cond);
 	  break;
+	case OP_RNSDMQ:
+	  po_reg_or_goto (REG_TYPE_NSD, try_mq2);
+	  break;
+	  try_mq2:
+	  po_reg_or_fail (REG_TYPE_MQ);
+	  break;
 	case OP_oRNSDQ:
 	case OP_RNSDQ: po_reg_or_fail (REG_TYPE_NSDQ);    break;
 	case OP_RNSDQMQR:
@@ -7676,8 +7690,10 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_I63:	 po_imm_or_fail (  0,     63, FALSE);   break;
 	case OP_I64:	 po_imm_or_fail (  1,     64, FALSE);   break;
 	case OP_I64z:	 po_imm_or_fail (  0,     64, FALSE);   break;
+	case OP_I127:	 po_imm_or_fail (  0,	 127, FALSE);	break;
 	case OP_I255:	 po_imm_or_fail (  0,	 255, FALSE);	break;
 	case OP_I511:	 po_imm_or_fail (  0,	 511, FALSE);	break;
+	case OP_I4095:	 po_imm_or_fail (  0,	 4095, FALSE);	break;
 	case OP_I8191:   po_imm_or_fail (  0,	 8191, FALSE);	break;
 	case OP_I4b:	 po_imm_or_fail (  1,	   4, TRUE);	break;
 	case OP_oI7b:
@@ -14797,6 +14813,15 @@ NEON_ENC_TAB
   X(2, (Q, R), QUAD),			\
   X(2, (D, I), DOUBLE),			\
   X(2, (Q, I), QUAD),			\
+  X(3, (P, F, I), SINGLE),		\
+  X(3, (P, D, I), DOUBLE),		\
+  X(3, (P, Q, I), QUAD),		\
+  X(4, (P, F, F, I), SINGLE),		\
+  X(4, (P, D, D, I), DOUBLE),		\
+  X(4, (P, Q, Q, I), QUAD),		\
+  X(5, (P, F, F, F, I), SINGLE),	\
+  X(5, (P, D, D, D, I), DOUBLE),	\
+  X(5, (P, Q, Q, Q, I), QUAD),		\
   X(3, (D, L, D), DOUBLE),		\
   X(2, (D, Q), MIXED),			\
   X(2, (Q, D), MIXED),			\
@@ -14845,6 +14870,7 @@ NEON_ENC_TAB
 #define S2(A,B)		NS_##A##B
 #define S3(A,B,C)	NS_##A##B##C
 #define S4(A,B,C,D)	NS_##A##B##C##D
+#define S5(A,B,C,D,E)	NS_##A##B##C##D##E
 
 #define X(N, L, C) S##N L
 
@@ -14858,6 +14884,7 @@ enum neon_shape
 #undef S2
 #undef S3
 #undef S4
+#undef S5
 
 enum neon_shape_class
 {
@@ -14886,7 +14913,8 @@ enum neon_shape_el
   SE_I,
   SE_S,
   SE_R,
-  SE_L
+  SE_L,
+  SE_P
 };
 
 /* Register widths of above.  */
@@ -14899,6 +14927,7 @@ static unsigned neon_shape_el_size[] =
   0,
   32,
   32,
+  0,
   0
 };
 
@@ -14911,6 +14940,7 @@ struct neon_shape_info
 #define S2(A,B)		{ SE_##A, SE_##B }
 #define S3(A,B,C)	{ SE_##A, SE_##B, SE_##C }
 #define S4(A,B,C,D)	{ SE_##A, SE_##B, SE_##C, SE_##D }
+#define S5(A,B,C,D,E)	{ SE_##A, SE_##B, SE_##C, SE_##D, SE_##E }
 
 #define X(N, L, C) { N, S##N L }
 
@@ -14923,6 +14953,7 @@ static struct neon_shape_info neon_shape_tab[] =
 #undef S2
 #undef S3
 #undef S4
+#undef S5
 
 /* Bit masks used in type checking given instructions.
   'N_EQK' means the type must be the same as (or based on in some way) the key
@@ -15112,6 +15143,7 @@ neon_select_shape (enum neon_shape shape, ...)
 		matches = 0;
 	      break;
 
+	    case SE_P:
 	    case SE_L:
 	      break;
 	    }
@@ -15840,6 +15872,8 @@ neon_logbits (unsigned x)
 
 #define LOW4(R) ((R) & 0xf)
 #define HI1(R) (((R) >> 4) & 1)
+#define LOW1(R) ((R) & 0x1)
+#define HI4(R) (((R) >> 1) & 0xf)
 
 static unsigned
 mve_get_vcmp_vpt_cond (struct neon_type_el et)
@@ -19728,8 +19762,6 @@ do_neon_fmac_maybe_scalar_long (int subtype)
   inst.instruction &= 0x00ffffff;
   inst.instruction |= high8;
 
-#define LOW1(R) ((R) & 0x1)
-#define HI4(R) (((R) >> 1) & 0xf)
   /* Unlike usually NEON three-same, encoding for Vn and Vm will depend on
      whether the instruction is in Q form and whether Vm is a scalar indexed
      operand.  */
@@ -21838,6 +21870,212 @@ static void
 do_cx3da (void)
 {
   return do_custom_instruction_3 (1, 1);
+}
+
+static void
+vcx_assign_vec_d (unsigned regnum)
+{
+  inst.instruction |= HI4 (regnum) << 12;
+  inst.instruction |= LOW1 (regnum) << 22;
+}
+
+static void
+vcx_assign_vec_m (unsigned regnum)
+{
+  inst.instruction |= HI4 (regnum);
+  inst.instruction |= LOW1 (regnum) << 5;
+}
+
+static void
+vcx_assign_vec_n (unsigned regnum)
+{
+  inst.instruction |= HI4 (regnum) << 16;
+  inst.instruction |= LOW1 (regnum) << 7;
+}
+
+enum vcx_reg_type {
+    q_reg,
+    d_reg,
+    s_reg
+};
+
+static enum vcx_reg_type
+vcx_get_reg_type (enum neon_shape ns)
+{
+  gas_assert (ns == NS_PQI
+	      || ns == NS_PDI
+	      || ns == NS_PFI
+	      || ns == NS_PQQI
+	      || ns == NS_PDDI
+	      || ns == NS_PFFI
+	      || ns == NS_PQQQI
+	      || ns == NS_PDDDI
+	      || ns == NS_PFFFI);
+  if (ns == NS_PQI || ns == NS_PQQI || ns == NS_PQQQI)
+    return q_reg;
+  if (ns == NS_PDI || ns == NS_PDDI || ns == NS_PDDDI)
+    return d_reg;
+  return s_reg;
+}
+
+#define vcx_size_pos 24
+#define vcx_vec_pos 6
+static unsigned
+vcx_handle_shape (enum vcx_reg_type reg_type)
+{
+  unsigned mult = 2;
+  if (reg_type == q_reg)
+    inst.instruction |= 1 << vcx_vec_pos;
+  else if (reg_type == d_reg)
+    inst.instruction |= 1 << vcx_size_pos;
+  else
+    mult = 1;
+  /* NOTE:
+     The documentation says that the Q registers are encoded as 2*N in the D:Vd
+     bits (or equivalent for N and M registers).
+     Similarly the D registers are encoded as N in D:Vd bits.
+     While the S registers are encoded as N in the Vd:D bits.
+
+     Taking into account the maximum values of these registers we can see a
+     nicer pattern for calculation:
+       Q -> 7, D -> 15, S -> 31
+
+     If we say that everything is encoded in the Vd:D bits, then we can say
+     that Q is encoded as 4*N, and D is encoded as 2*N.
+     This way the bits will end up the same, and calculation is simpler.
+     (calculation is now:
+	1. Multiply by a number determined by the register letter.
+	2. Encode resulting number in Vd:D bits.)
+
+      This is made a little more complicated by automatic handling of 'Q'
+      registers elsewhere, which means the register number is already 2*N where
+      N is the number the user wrote after the register letter.
+     */
+  return mult;
+}
+#undef vcx_vec_pos
+#undef vcx_size_pos
+
+static void
+vcx_ensure_register_in_range (unsigned R, enum vcx_reg_type reg_type)
+{
+  if (reg_type == q_reg)
+    {
+      gas_assert (R % 2 == 0);
+      constraint (R >= 16, _("'q' register must be in range 0-7"));
+    }
+  else if (reg_type == d_reg)
+    constraint (R >= 16, _("'d' register must be in range 0-15"));
+  else
+    constraint (R >= 32, _("'s' register must be in range 0-31"));
+}
+
+static void (*vcx_assign_vec[3]) (unsigned) = {
+    vcx_assign_vec_d,
+    vcx_assign_vec_m,
+    vcx_assign_vec_n
+};
+
+static void
+vcx_handle_register_arguments (unsigned num_registers,
+			       enum vcx_reg_type reg_type)
+{
+  unsigned R;
+  unsigned reg_mult = vcx_handle_shape (reg_type);
+  for (unsigned i = 0; i < num_registers; i++)
+    {
+      R = inst.operands[i+1].reg;
+      vcx_ensure_register_in_range (R, reg_type);
+      if (num_registers == 3 && i > 0)
+	{
+	  if (i == 2)
+	    vcx_assign_vec[1] (R * reg_mult);
+	  else
+	    vcx_assign_vec[2] (R * reg_mult);
+	  continue;
+	}
+      vcx_assign_vec[i](R * reg_mult);
+    }
+}
+
+static void
+vcx_handle_insn_block (enum vcx_reg_type reg_type)
+{
+  if (reg_type == q_reg)
+    if (inst.cond > COND_ALWAYS)
+      inst.pred_insn_type = INSIDE_VPT_INSN;
+    else
+      inst.pred_insn_type = MVE_OUTSIDE_PRED_INSN;
+  else if (inst.cond == COND_ALWAYS)
+    inst.pred_insn_type = OUTSIDE_PRED_INSN;
+  else
+    inst.error = BAD_NOT_IT;
+}
+
+static void
+vcx_handle_common_checks (unsigned num_args, enum neon_shape rs)
+{
+  constraint (!mark_feature_used (&arm_ext_cde), _(BAD_CDE));
+  cde_handle_coproc ();
+  enum vcx_reg_type reg_type = vcx_get_reg_type (rs);
+  vcx_handle_register_arguments (num_args, reg_type);
+  vcx_handle_insn_block (reg_type);
+  if (reg_type == q_reg)
+    constraint (!mark_feature_used (&mve_ext),
+		_("vcx instructions with Q registers require MVE"));
+  else
+    constraint (!(ARM_FSET_CPU_SUBSET (armv8m_fp, cpu_variant)
+		  && mark_feature_used (&armv8m_fp))
+		&& !mark_feature_used (&mve_ext),
+		_("vcx instructions with S or D registers require either MVE"
+		  " or Armv8-M floating point etension."));
+}
+
+static void
+do_vcx1 (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_PQI, NS_PDI, NS_PFI, NS_NULL);
+  vcx_handle_common_checks (1, rs);
+
+  unsigned imm = inst.operands[2].imm;
+  inst.instruction |= (imm & 0x03f);
+  inst.instruction |= (imm & 0x040) << 1;
+  inst.instruction |= (imm & 0x780) << 9;
+  if (rs != NS_PQI)
+    constraint (imm >= 2048,
+		_("vcx1 with S or D registers takes immediate within 0-2047"));
+  inst.instruction |= (imm & 0x800) << 13;
+}
+
+static void
+do_vcx2 (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_PQQI, NS_PDDI, NS_PFFI, NS_NULL);
+  vcx_handle_common_checks (2, rs);
+
+  unsigned imm = inst.operands[3].imm;
+  inst.instruction |= (imm & 0x01) << 4;
+  inst.instruction |= (imm & 0x02) << 6;
+  inst.instruction |= (imm & 0x3c) << 14;
+  if (rs != NS_PQQI)
+    constraint (imm >= 64,
+		_("vcx2 with S or D registers takes immediate within 0-63"));
+  inst.instruction |= (imm & 0x40) << 18;
+}
+
+static void
+do_vcx3 (void)
+{
+  enum neon_shape rs = neon_select_shape (NS_PQQQI, NS_PDDDI, NS_PFFFI, NS_NULL);
+  vcx_handle_common_checks (3, rs);
+
+  unsigned imm = inst.operands[4].imm;
+  inst.instruction |= (imm & 0x1) << 4;
+  inst.instruction |= (imm & 0x6) << 19;
+  if (rs != NS_PQQQI)
+    constraint (imm >= 8,
+		_("vcx2 with S or D registers takes immediate within 0-7"));
+  inst.instruction |= (imm & 0x8) << 21;
 }
 
 /* Crypto v1 instructions.  */
@@ -26400,7 +26638,17 @@ static const struct asm_opcode insns[] =
  ToC ("cx3a", fe800000, 5, (RCP, APSR_RR, APSR_RR, APSR_RR, I63), cx3a),
  ToC ("cx3d", ee800040, 6, (RCP, RR, APSR_RR, APSR_RR, APSR_RR, I63), cx3d),
  ToC ("cx3da", fe800040, 6, (RCP, RR, APSR_RR, APSR_RR, APSR_RR, I63), cx3da),
+
+ mToC ("vcx1", ec200000, 3, (RCP, RNSDMQ, I4095), vcx1),
+ mToC ("vcx1a", fc200000, 3, (RCP, RNSDMQ, I4095), vcx1),
+
+ mToC ("vcx2", ec300000, 4, (RCP, RNSDMQ, RNSDMQ, I127), vcx2),
+ mToC ("vcx2a", fc300000, 4, (RCP, RNSDMQ, RNSDMQ, I127), vcx2),
+
+ mToC ("vcx3", ec800000, 5, (RCP, RNSDMQ, RNSDMQ, RNSDMQ, I15), vcx3),
+ mToC ("vcx3a", fc800000, 5, (RCP, RNSDMQ, RNSDMQ, RNSDMQ, I15), vcx3),
 };
+
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
 #undef TCE
