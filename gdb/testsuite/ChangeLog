@@ -1,3 +1,8 @@
+2020-02-10  Maciej W. Rozycki  <macro@wdc.com>
+
+	* gdb.base/step-over-no-symbols.exp: Verify that $before_addr
+	and $after_addr are both integers before making a comparison.
+
 2020-02-09  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/many-headers.exp: Echo gdb command to gdb.log.  Capture gdb
