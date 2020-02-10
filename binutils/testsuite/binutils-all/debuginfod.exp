@@ -78,9 +78,9 @@ set port [exec sh -c "while true; do PORT=`expr '(' \$RANDOM % 1000 ')' + 9000`;
 # Specify the directory that files retrieved from the server are written to.
 set cache [file join [pwd] "tmpdir/.debuginfod_cache"]
 
-set ::env(DEBUGINFOD_URLS) http://127.0.0.1:$port
-set ::env(DEBUGINFOD_TIMEOUT) 30
-set ::env(DEBUGINFOD_CACHE_PATH) $cache
+setenv DEBUGINFOD_URLS http://127.0.0.1:$port
+setenv DEBUGINFOD_TIMEOUT 30
+setenv DEBUGINFOD_CACHE_PATH $cache
 
 # Move debug files into another directory so that readelf and objdump cannot
 # find them without debuginfod.
