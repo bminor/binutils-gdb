@@ -37,12 +37,10 @@ if { [string first "with-debuginfod" [exec $GDB --configuration]] == -1 } {
 
 set cache [standard_output_file ".client_cache"]
 set db [standard_output_file ".debuginfod.db"]
-set log [standard_output_file "debuginfod.log"]
 
 # Delete any preexisting test files
 file delete -force $cache
 file delete -force $db
-file delete -force $log
 
 set sourcetmp [standard_output_file tmp-${srcfile}]
 set outputdir [standard_output_file {}]
