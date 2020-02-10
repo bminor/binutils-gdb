@@ -1644,10 +1644,10 @@ Set the flags for any sections matching @var{sectionpattern}.  The
 @var{flags} argument is a comma separated string of flag names.  The
 recognized names are @samp{alloc}, @samp{contents}, @samp{load},
 @samp{noload}, @samp{readonly}, @samp{code}, @samp{data}, @samp{rom},
-@samp{share}, and @samp{debug}.  You can set the @samp{contents} flag
-for a section which does not have contents, but it is not meaningful
-to clear the @samp{contents} flag of a section which does have
-contents--just remove the section instead.  Not all flags are
+@samp{exclude}, @samp{share}, and @samp{debug}.  You can set the
+@samp{contents} flag for a section which does not have contents, but it
+is not meaningful to clear the @samp{contents} flag of a section which
+does have contents--just remove the section instead.  Not all flags are
 meaningful for all object file formats.
 
 @item --set-section-alignment @var{sectionpattern}=@var{align}

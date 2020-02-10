@@ -1,3 +1,8 @@
+2020-02-10  Fangrui Song   <maskray@google.com>
+
+	* objcopy.c (parse_flags): Handle "exclude".
+	* doc/binutils.texi: Document the support.
+
 2020-02-10  Aaron Merey  <amerey@redhat.com>
 
 	* binutils/testsuite/binutils-all/debuginfod.exp:
