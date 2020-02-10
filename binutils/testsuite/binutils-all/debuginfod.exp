@@ -75,10 +75,10 @@ if { ![binutils_assemble $srcdir/$subdir/linkdebug.s tmpdir/linkdebug.debug] } {
 # Find an unused port
 set port [exec sh -c "while true; do PORT=`expr '(' \$RANDOM % 1000 ')' + 9000`; ss -atn | fgrep \":\$PORT\" || break; done; echo \$PORT"]
 
-# Specify the directory that files retrieved from the server are written to.
 set cache [file join [pwd] "tmpdir/.debuginfod_cache"]
+set db [file join [pwd] "tmpdir/.debuginfod.db"]
 
-setenv DEBUGINFOD_URLS http://127.0.0.1:$port
+setenv DEBUGINFOD_URLS ""
 setenv DEBUGINFOD_TIMEOUT 30
 setenv DEBUGINFOD_CACHE_PATH $cache
 
@@ -88,8 +88,9 @@ file mkdir tmpdir/dbg
 file rename -force tmpdir/testprog.debug tmpdir/dbg
 file rename -force tmpdir/linkdebug.debug tmpdir/dbg
 
-# Remove an old cache if it exists
+# Remove old cache and database if they exist.
 file delete -force $cache
+file delete -force $db
 
 # Check whether objdump and readelf are configured with debuginfod.
 # To check this we attempt to follow a broken debuglink. If configured
@@ -114,31 +115,42 @@ proc sigint_handler {} {
 trap sigint_handler INT
 
 # Start a debuginfod server.
-set debuginfod_pid [exec debuginfod -p $port -F tmpdir/dbg 2>/dev/null &]
+set debuginfod_pid [exec debuginfod -d $db -p $port -F tmpdir/dbg 2>/dev/null &]
 
 if { !$debuginfod_pid } {
     fail "$test (server init)"
     return
 }
 
-# Wait for debuginfod indicate it's ready.
-set ready 0
-for {set timelim 30} {$timelim != 0} {incr timelim -1} {
-    sleep 1
-    set want ".*ready 1.*"
+set metrics [list "ready 1" \
+             "thread_work_total{role=\"traverse\"} 1" \
+             "thread_work_pending{role=\"scan\"} 0" \
+             "thread_busy{role=\"scan\"} 0" \
+             "groom{statistic=\"buildids\"} 2"]
+
+# Check server metrics to confirm init has completed.
+foreach m $metrics {
+  set timelim 20
+  while { $timelim != 0 } {
+    sleep 0.5
+
     catch {exec curl -s http://127.0.0.1:$port/metrics} got
 
-    if { [regexp $want $got] } {
-      set ready 1
+    if { [regexp $m $got] } {
       break
     }
-}
 
-if { !$ready } {
-    fail "$test (server ready)"
+    incr timelim -1
+  }
+
+  if { $timelim == 0 } {
+    fail "$test (server init timeout)"
     catch {exec kill -INT $debuginfod_pid}
     return
+  }
 }
+
+setenv DEBUGINFOD_URLS http://127.0.0.1:$port
 
 # Test whether prog can fetch separate debuginfo using debuginfod
 # if it's configured to do so.
@@ -185,5 +197,4 @@ if { [regexp ".*DEBUGINFOD.*" $conf_readelf] } {
     untested "$test (readelf not configured with debuginfod)"
 }
 
-file delete -force $cache
 catch {exec kill -INT $debuginfod_pid}

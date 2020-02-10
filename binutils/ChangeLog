@@ -2,6 +2,10 @@
 
 	* binutils/testsuite/binutils-all/debuginfod.exp:
 	Replace set ::env with setenv.
+	Start server before setting environment variable.
+	Specify tmpdir as the location of the server's
+	database.
+	Check additional server metrics at start-up.
 
 2020-02-07  Nick Clifton  <nickc@redhat.com>
 
