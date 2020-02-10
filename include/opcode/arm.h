@@ -79,6 +79,15 @@
 #define ARM_EXT2_CRC	     0x00080000	/* ARMv8 CRC32 */
 #define ARM_EXT2_MVE	     0x00100000	/* MVE Integer extension.	   */
 #define ARM_EXT2_MVE_FP	     0x00200000	/* MVE Floating Point extension.   */
+#define ARM_EXT2_CDE	     0x00400000 /* Custom Datapath Extension.	   */
+#define ARM_EXT2_CDE0	     0x00800000 /* Using CDE coproc 0.	   */
+#define ARM_EXT2_CDE1	     0x01000000 /* Using CDE coproc 1.	   */
+#define ARM_EXT2_CDE2	     0x02000000 /* Using CDE coproc 2.	   */
+#define ARM_EXT2_CDE3	     0x04000000 /* Using CDE coproc 3.	   */
+#define ARM_EXT2_CDE4	     0x08000000 /* Using CDE coproc 4.	   */
+#define ARM_EXT2_CDE5	     0x10000000 /* Using CDE coproc 5.	   */
+#define ARM_EXT2_CDE6	     0x20000000 /* Using CDE coproc 6.	   */
+#define ARM_EXT2_CDE7	     0x40000000 /* Using CDE coproc 7.	   */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE	     0x00000001	/* Allow MIA etc.	 	   */

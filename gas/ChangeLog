@@ -1,3 +1,47 @@
+2020-02-10  Stam Markianos-Wright  <stam.markianos-wright@arm.com>
+	    Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* config/tc-arm.c (arm_ext_cde*): New feature sets for each
+	CDE coprocessor that can be enabled.
+	(enum pred_instruction_type): New pred type.
+	(BAD_NO_VPT): New error message.
+	(BAD_CDE): New error message.
+	(BAD_CDE_COPROC): New error message.
+	(enum operand_parse_code): Add new immediate operands.
+	(parse_operands): Account for new immediate operands.
+	(check_cde_operand): New.
+	(cde_coproc_enabled): New.
+	(cde_coproc_pos): New.
+	(cde_handle_coproc): New.
+	(cxn_handle_predication): New.
+	(do_custom_instruction_1): New.
+	(do_custom_instruction_2): New.
+	(do_custom_instruction_3): New.
+	(do_cx1): New.
+	(do_cx1a): New.
+	(do_cx1d): New.
+	(do_cx1da): New.
+	(do_cx2): New.
+	(do_cx2a): New.
+	(do_cx2d): New.
+	(do_cx2da): New.
+	(do_cx3): New.
+	(do_cx3a): New.
+	(do_cx3d): New.
+	(do_cx3da): New.
+	(handle_pred_state): Define new IT block behaviour.
+	(insns): Add newn CX*{,d}{,a} instructions.
+	(CDE_EXTENSIONS,armv8m_main_ext_table,armv8_1m_main_ext_table):
+	Define new cdecp extension strings.
+	* doc/c-arm.texi: Document new cdecp extension arguments.
+	* testsuite/gas/arm/cde-scalar.d: New test.
+	* testsuite/gas/arm/cde-scalar.s: New test.
+	* testsuite/gas/arm/cde-warnings.d: New test.
+	* testsuite/gas/arm/cde-warnings.l: New test.
+	* testsuite/gas/arm/cde-warnings.s: New test.
+	* testsuite/gas/arm/cde.d: New test.
+	* testsuite/gas/arm/cde.s: New test.
+
 2020-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25516

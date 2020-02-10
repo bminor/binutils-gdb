@@ -359,6 +359,14 @@ For @code{armv8-m.main}:
 @code{+fp}: Enables single-precision only VFPv5 instructions with 16
 double-word registers.
 @code{+fp.dp}: Enables VFPv5 instructions with 16 double-word registers.
+@code{+cdecp0} (CDE extensions for v8-m architecture with coprocessor 0),
+@code{+cdecp1} (CDE extensions for v8-m architecture with coprocessor 1),
+@code{+cdecp2} (CDE extensions for v8-m architecture with coprocessor 2),
+@code{+cdecp3} (CDE extensions for v8-m architecture with coprocessor 3),
+@code{+cdecp4} (CDE extensions for v8-m architecture with coprocessor 4),
+@code{+cdecp5} (CDE extensions for v8-m architecture with coprocessor 5),
+@code{+cdecp6} (CDE extensions for v8-m architecture with coprocessor 6),
+@code{+cdecp7} (CDE extensions for v8-m architecture with coprocessor 7),
 @code{+nofp}: Disables all FPU instructions.
 @code{+nodsp}: Disables DSP Extension.
 

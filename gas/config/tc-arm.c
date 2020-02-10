@@ -282,6 +282,24 @@ static const arm_feature_set arm_ext_i8mm =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_I8MM);
 static const arm_feature_set arm_ext_crc =
   ARM_FEATURE_CORE_HIGH (ARM_EXT2_CRC);
+static const arm_feature_set arm_ext_cde =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE);
+static const arm_feature_set arm_ext_cde0 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE0);
+static const arm_feature_set arm_ext_cde1 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE1);
+static const arm_feature_set arm_ext_cde2 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE2);
+static const arm_feature_set arm_ext_cde3 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE3);
+static const arm_feature_set arm_ext_cde4 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE4);
+static const arm_feature_set arm_ext_cde5 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE5);
+static const arm_feature_set arm_ext_cde6 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE6);
+static const arm_feature_set arm_ext_cde7 =
+  ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE7);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set fpu_any = FPU_ANY;
@@ -482,7 +500,9 @@ enum pred_instruction_type
    VPT_INSN,		   /* The VPT/VPST insn has been parsed.  */
    MVE_OUTSIDE_PRED_INSN , /* Instruction to indicate a MVE instruction without
 			      a predication code.  */
-   MVE_UNPREDICABLE_INSN   /* MVE instruction that is non-predicable.  */
+   MVE_UNPREDICABLE_INSN,  /* MVE instruction that is non-predicable.  */
+   NEUTRAL_IT_NO_VPT_INSN, /* Instruction that can be either inside or outside
+			      an IT block, but must not be in a VPT block.  */
 };
 
 /* The maximum number of operands we need.  */
@@ -882,6 +902,7 @@ struct asm_opcode
 #define BAD_ADDR_MODE   _("instruction does not accept this addressing mode")
 #define BAD_BRANCH	_("branch must be last instruction in IT block")
 #define BAD_BRANCH_OFF	_("branch out of range or not a multiple of 2")
+#define BAD_NO_VPT	_("instruction not allowed in VPT block")
 #define BAD_NOT_IT	_("instruction not allowed in IT block")
 #define BAD_NOT_VPT	_("instruction missing MVE vector predication code")
 #define BAD_FPU		_("selected FPU does not support instruction")
@@ -899,6 +920,8 @@ struct asm_opcode
 #define BAD_RANGE	_("branch out of range")
 #define BAD_FP16	_("selected processor does not support fp16 instruction")
 #define BAD_BF16	_("selected processor does not support bf16 instruction")
+#define BAD_CDE	_("selected processor does not support cde instruction")
+#define BAD_CDE_COPROC	_("coprocessor for insn is not enabled for cde")
 #define UNPRED_REG(R)	_("using " R " results in unpredictable behaviour")
 #define THUMB1_RELOC_ONLY  _("relocation valid in thumb1 code only")
 #define MVE_NOT_IT	_("Warning: instruction is UNPREDICTABLE in an IT " \
@@ -7138,7 +7161,8 @@ enum operand_parse_code
   OP_I64,	/*		   1 .. 64 */
   OP_I64z,	/*		   0 .. 64 */
   OP_I255,	/*		   0 .. 255 */
-
+  OP_I511,	/*		   0 .. 511 */
+  OP_I8191,	/*		   0 .. 8191 */
   OP_I4b,	/* immediate, prefix optional, 1 .. 4 */
   OP_I7b,	/*			       0 .. 7 */
   OP_I15b,	/*			       0 .. 15 */
@@ -7653,7 +7677,8 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_I64:	 po_imm_or_fail (  1,     64, FALSE);   break;
 	case OP_I64z:	 po_imm_or_fail (  0,     64, FALSE);   break;
 	case OP_I255:	 po_imm_or_fail (  0,	 255, FALSE);	break;
-
+	case OP_I511:	 po_imm_or_fail (  0,	 511, FALSE);	break;
+	case OP_I8191:   po_imm_or_fail (  0,	 8191, FALSE);	break;
 	case OP_I4b:	 po_imm_or_fail (  1,	   4, TRUE);	break;
 	case OP_oI7b:
 	case OP_I7b:	 po_imm_or_fail (  0,	   7, TRUE);	break;
@@ -21572,6 +21597,249 @@ do_vummla (void)
 
 }
 
+static void
+check_cde_operand (size_t index, int is_dual)
+{
+  unsigned Rx = inst.operands[index].reg;
+  bfd_boolean isvec = inst.operands[index].isvec;
+  if (is_dual == 0 && thumb_mode)
+    constraint (
+		!((Rx <= 14 && Rx != 13) || (Rx == REG_PC && isvec)),
+		_("Register must be r0-r14 except r13, or APSR_nzcv."));
+  else
+    constraint ( !((Rx <= 10 && Rx % 2 == 0 )),
+      _("Register must be an even register between r0-r10."));
+}
+
+static bfd_boolean
+cde_coproc_enabled (unsigned coproc)
+{
+  switch (coproc)
+  {
+    case 0: return mark_feature_used (&arm_ext_cde0);
+    case 1: return mark_feature_used (&arm_ext_cde1);
+    case 2: return mark_feature_used (&arm_ext_cde2);
+    case 3: return mark_feature_used (&arm_ext_cde3);
+    case 4: return mark_feature_used (&arm_ext_cde4);
+    case 5: return mark_feature_used (&arm_ext_cde5);
+    case 6: return mark_feature_used (&arm_ext_cde6);
+    case 7: return mark_feature_used (&arm_ext_cde7);
+    default: return FALSE;
+  }
+}
+
+#define cde_coproc_pos 8
+static void
+cde_handle_coproc (void)
+{
+  unsigned coproc = inst.operands[0].reg;
+  constraint (coproc > 7, _("CDE Coprocessor must be in range 0-7"));
+  constraint (!(cde_coproc_enabled (coproc)), BAD_CDE_COPROC);
+  inst.instruction |= coproc << cde_coproc_pos;
+}
+#undef cde_coproc_pos
+
+static void
+cxn_handle_predication (bfd_boolean is_accum)
+{
+  /* This function essentially checks for a suffix, not whether the instruction
+     is inside an IT block or not.
+     The CX* instructions should never have a conditional suffix -- this is not
+     mentioned in the syntax.  */
+  if (conditional_insn ())
+    inst.error = BAD_SYNTAX;
+  /* Here we ensure that if the current element  */
+  else if (is_accum)
+    set_pred_insn_type (NEUTRAL_IT_NO_VPT_INSN);
+  else
+    set_pred_insn_type (OUTSIDE_PRED_INSN);
+}
+
+static void
+do_custom_instruction_1 (int is_dual, bfd_boolean is_accum)
+{
+
+  constraint (!mark_feature_used (&arm_ext_cde), _(BAD_CDE));
+
+  unsigned imm, Rd;
+
+  Rd = inst.operands[1].reg;
+  check_cde_operand (1, is_dual);
+
+  if (is_dual == 1)
+    {
+      constraint (inst.operands[2].reg != Rd + 1,
+		  _("cx1d requires consecutive destination registers."));
+      imm = inst.operands[3].imm;
+    }
+  else if (is_dual == 0)
+    imm = inst.operands[2].imm;
+  else
+    abort ();
+
+  inst.instruction |= Rd << 12;
+  inst.instruction |= (imm & 0x1F80) << 9;
+  inst.instruction |= (imm & 0x0040) << 1;
+  inst.instruction |= (imm & 0x003f);
+
+  cde_handle_coproc ();
+  cxn_handle_predication (is_accum);
+}
+
+static void
+do_custom_instruction_2 (int is_dual, bfd_boolean is_accum)
+{
+
+  constraint (!mark_feature_used (&arm_ext_cde), _(BAD_CDE));
+
+  unsigned imm, Rd, Rn;
+
+  Rd = inst.operands[1].reg;
+
+  if (is_dual == 1)
+    {
+      constraint (inst.operands[2].reg != Rd + 1,
+		  _("cx2d requires consecutive destination registers."));
+      imm = inst.operands[4].imm;
+      Rn = inst.operands[3].reg;
+    }
+  else if (is_dual == 0)
+  {
+    imm = inst.operands[3].imm;
+    Rn = inst.operands[2].reg;
+  }
+  else
+    abort ();
+
+  check_cde_operand (2 + is_dual, /* is_dual = */0);
+  check_cde_operand (1, is_dual);
+
+  inst.instruction |= Rd << 12;
+  inst.instruction |= Rn << 16;
+
+  inst.instruction |= (imm & 0x0380) << 13;
+  inst.instruction |= (imm & 0x0040) << 1;
+  inst.instruction |= (imm & 0x003f);
+
+  cde_handle_coproc ();
+  cxn_handle_predication (is_accum);
+}
+
+static void
+do_custom_instruction_3 (int is_dual, bfd_boolean is_accum)
+{
+
+  constraint (!mark_feature_used (&arm_ext_cde), _(BAD_CDE));
+
+  unsigned imm, Rd, Rn, Rm;
+
+  Rd = inst.operands[1].reg;
+
+  if (is_dual == 1)
+    {
+      constraint (inst.operands[2].reg != Rd + 1,
+		  _("cx3d requires consecutive destination registers."));
+      imm = inst.operands[5].imm;
+      Rn = inst.operands[3].reg;
+      Rm = inst.operands[4].reg;
+    }
+  else if (is_dual == 0)
+  {
+    imm = inst.operands[4].imm;
+    Rn = inst.operands[2].reg;
+    Rm = inst.operands[3].reg;
+  }
+  else
+    abort ();
+
+  check_cde_operand (1, is_dual);
+  check_cde_operand (2 + is_dual, /* is_dual = */0);
+  check_cde_operand (3 + is_dual, /* is_dual = */0);
+
+  inst.instruction |= Rd;
+  inst.instruction |= Rn << 16;
+  inst.instruction |= Rm << 12;
+
+  inst.instruction |= (imm & 0x0038) << 17;
+  inst.instruction |= (imm & 0x0004) << 5;
+  inst.instruction |= (imm & 0x0003) << 4;
+
+  cde_handle_coproc ();
+  cxn_handle_predication (is_accum);
+}
+
+static void
+do_cx1 (void)
+{
+  return do_custom_instruction_1 (0, 0);
+}
+
+static void
+do_cx1a (void)
+{
+  return do_custom_instruction_1 (0, 1);
+}
+
+static void
+do_cx1d (void)
+{
+  return do_custom_instruction_1 (1, 0);
+}
+
+static void
+do_cx1da (void)
+{
+  return do_custom_instruction_1 (1, 1);
+}
+
+static void
+do_cx2 (void)
+{
+  return do_custom_instruction_2 (0, 0);
+}
+
+static void
+do_cx2a (void)
+{
+  return do_custom_instruction_2 (0, 1);
+}
+
+static void
+do_cx2d (void)
+{
+  return do_custom_instruction_2 (1, 0);
+}
+
+static void
+do_cx2da (void)
+{
+  return do_custom_instruction_2 (1, 1);
+}
+
+static void
+do_cx3 (void)
+{
+  return do_custom_instruction_3 (0, 0);
+}
+
+static void
+do_cx3a (void)
+{
+  return do_custom_instruction_3 (0, 1);
+}
+
+static void
+do_cx3d (void)
+{
+  return do_custom_instruction_3 (1, 0);
+}
+
+static void
+do_cx3da (void)
+{
+  return do_custom_instruction_3 (1, 1);
+}
+
 /* Crypto v1 instructions.  */
 static void
 do_crypto_2op_1 (unsigned elttype, int op)
@@ -22474,6 +22742,7 @@ handle_pred_state (void)
 	    gas_assert (0);
 	case IF_INSIDE_IT_LAST_INSN:
 	case NEUTRAL_IT_INSN:
+	case NEUTRAL_IT_NO_VPT_INSN:
 	  break;
 
 	case VPT_INSN:
@@ -22537,6 +22806,13 @@ handle_pred_state (void)
 	    close_automatic_it_block ();
 	  break;
 
+	case NEUTRAL_IT_NO_VPT_INSN:
+	  if (now_pred.type == VECTOR_PRED)
+	    {
+	      inst.error = BAD_NO_VPT;
+	      break;
+	    }
+	  /* Fallthrough.  */
 	case NEUTRAL_IT_INSN:
 	  now_pred.block_length++;
 	  now_pred.insn_cond = TRUE;
@@ -22720,6 +22996,13 @@ handle_pred_state (void)
 	      }
 	    break;
 
+	  case NEUTRAL_IT_NO_VPT_INSN:
+	    if (now_pred.type == VECTOR_PRED)
+	      {
+		inst.error = BAD_NO_VPT;
+		break;
+	      }
+	    /* Fallthrough.  */
 	  case NEUTRAL_IT_INSN:
 	    /* The BKPT instruction is unconditional even in a IT or VPT
 	       block.  */
@@ -26099,6 +26382,24 @@ static const struct asm_opcode insns[] =
  TUF ("vusmmla", ca00c40, fca00c40, 3, (RNQ, RNQ, RNQ), vsmmla, vsmmla),
  TUF ("vusdot", c800d00, fc800d00, 3, (RNDQ, RNDQ, RNDQ_RNSC), vusdot, vusdot),
  TUF ("vsudot", c800d10, fc800d10, 3, (RNDQ, RNDQ, RNSC), vsudot, vsudot),
+
+#undef	ARM_VARIANT
+#undef	THUMB_VARIANT
+#define	THUMB_VARIANT &arm_ext_cde
+ ToC ("cx1", ee000000, 3, (RCP, APSR_RR, I8191), cx1),
+ ToC ("cx1a", fe000000, 3, (RCP, APSR_RR, I8191), cx1a),
+ ToC ("cx1d", ee000040, 4, (RCP, RR, APSR_RR, I8191), cx1d),
+ ToC ("cx1da", fe000040, 4, (RCP, RR, APSR_RR, I8191), cx1da),
+
+ ToC ("cx2", ee400000, 4, (RCP, APSR_RR, APSR_RR, I511), cx2),
+ ToC ("cx2a", fe400000, 4, (RCP, APSR_RR, APSR_RR, I511), cx2a),
+ ToC ("cx2d", ee400040, 5, (RCP, RR, APSR_RR, APSR_RR, I511), cx2d),
+ ToC ("cx2da", fe400040, 5, (RCP, RR, APSR_RR, APSR_RR, I511), cx2da),
+
+ ToC ("cx3", ee800000, 5, (RCP, APSR_RR, APSR_RR, APSR_RR, I63), cx3),
+ ToC ("cx3a", fe800000, 5, (RCP, APSR_RR, APSR_RR, APSR_RR, I63), cx3a),
+ ToC ("cx3d", ee800040, 6, (RCP, RR, APSR_RR, APSR_RR, APSR_RR, I63), cx3d),
+ ToC ("cx3da", fe800040, 6, (RCP, RR, APSR_RR, APSR_RR, APSR_RR, I63), cx3da),
 };
 #undef ARM_VARIANT
 #undef THUMB_VARIANT
@@ -31280,12 +31581,23 @@ static const struct arm_ext_table armv86a_ext_table[] =
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 
+#define CDE_EXTENSIONS \
+  ARM_ADD ("cdecp0", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE0)), \
+  ARM_ADD ("cdecp1", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE1)), \
+  ARM_ADD ("cdecp2", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE2)), \
+  ARM_ADD ("cdecp3", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE3)), \
+  ARM_ADD ("cdecp4", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE4)), \
+  ARM_ADD ("cdecp5", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE5)), \
+  ARM_ADD ("cdecp6", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE6)), \
+  ARM_ADD ("cdecp7", ARM_FEATURE_CORE_HIGH (ARM_EXT2_CDE | ARM_EXT2_CDE7))
+
 static const struct arm_ext_table armv8m_main_ext_table[] =
 {
   ARM_EXT ("dsp", ARM_FEATURE_CORE_LOW (ARM_AEXT_V8M_MAIN_DSP),
 		  ARM_FEATURE_CORE_LOW (ARM_AEXT_V8M_MAIN_DSP)),
   ARM_EXT ("fp", FPU_ARCH_VFP_V5_SP_D16, ALL_FP),
   ARM_ADD ("fp.dp", FPU_ARCH_VFP_V5D16),
+  CDE_EXTENSIONS,
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
 
@@ -31307,8 +31619,11 @@ static const struct arm_ext_table armv8_1m_main_ext_table[] =
 	   ARM_FEATURE (ARM_AEXT_V8M_MAIN_DSP,
 			ARM_EXT2_FP16_INST | ARM_EXT2_MVE | ARM_EXT2_MVE_FP,
 			FPU_VFP_V5_SP_D16 | FPU_VFP_EXT_FP16 | FPU_VFP_EXT_FMA)),
+  CDE_EXTENSIONS,
   { NULL, 0, ARM_ARCH_NONE, ARM_ARCH_NONE }
 };
+
+#undef CDE_EXTENSIONS
 
 static const struct arm_ext_table armv8r_ext_table[] =
 {

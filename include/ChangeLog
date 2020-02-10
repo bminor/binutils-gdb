@@ -1,3 +1,16 @@
+2020-02-10  Stam Markianos-Wright  <stam.markianos-wright@arm.com>
+	    Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* opcode/arm.h (ARM_EXT2_CDE): New extension macro.
+	(ARM_EXT2_CDE0): New extension macro.
+	(ARM_EXT2_CDE1): New extension macro.
+	(ARM_EXT2_CDE2): New extension macro.
+	(ARM_EXT2_CDE3): New extension macro.
+	(ARM_EXT2_CDE4): New extension macro.
+	(ARM_EXT2_CDE5): New extension macro.
+	(ARM_EXT2_CDE6): New extension macro.
+	(ARM_EXT2_CDE7): New extension macro.
+
 2020-02-07  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25469

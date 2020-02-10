@@ -1,3 +1,15 @@
+2020-02-10  Stam Markianos-Wright  <stam.markianos-wright@arm.com>
+	    Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* arm-dis.c (struct cdeopcode32): New.
+	(CDE_OPCODE): New macro.
+	(cde_opcodes): New disassembly table.
+	(regnames): New option to table.
+	(cde_coprocs): New global variable.
+	(print_insn_cde): New
+	(print_insn_thumb32): Use print_insn_cde.
+	(parse_arm_disassembler_options): Parse coprocN args.
+
 2020-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25516
