@@ -13,83 +13,76 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# test debuginfod functionality
-
-set test "debuginfod"
+# Test debuginfod functionality
 
 standard_testfile main.c
 
 load_lib dwarf.exp
 
 if { [which debuginfod] == 0 } {
-    untested "$test (cannot find debuginfod)"
+    untested "cannot find debuginfod"
     return -1
 }
 
 if { [which curl] == 0 } {
-    untested "$test (cannot find curl)"
+    untested "cannot find curl"
     return -1
 }
 
-# skip testing if gdb was not configured with debuginfod
+# Skip testing if gdb was not configured with debuginfod
 if { [string first "with-debuginfod" [exec $GDB --configuration]] == -1 } {
-    untested "$test (gdb not configured with debuginfod)"
+    untested "gdb not configured with debuginfod"
     return -1
 }
 
-set cache [file join [standard_output_file {}] ".client_cache"]
-set db [file join [standard_output_file {}] ".debuginfod.db"]
+set cache [standard_output_file ".client_cache"]
+set db [standard_output_file ".debuginfod.db"]
+set log [standard_output_file "debuginfod.log"]
 
-# make sure there isn't an old client cache or db lying around
+# Delete any preexisting test files
 file delete -force $cache
 file delete -force $db
-
-# make a copy source file that we can move around
-if { [catch {file copy -force ${srcdir}/${subdir}/${srcfile} \
-              [standard_output_file tmp-${srcfile}]}] != 0 } {
-    error "$test (create temporary file)"
-    return -1
-}
+file delete -force $log
 
 set sourcetmp [standard_output_file tmp-${srcfile}]
 set outputdir [standard_output_file {}]
 
-if { [gdb_compile "$sourcetmp" "$binfile" executable {debug}] != "" } {
-    fail "$test (compile)"
+# Make a copy source file that we can move around
+if { [catch {file copy -force ${srcdir}/${subdir}/${srcfile} \
+              [standard_output_file ${sourcetmp}]}] != 0 } {
+    error "create temporary file"
     return -1
 }
 
-# Find an unused port
-set port [exec sh -c "while true; do PORT=`expr '(' \$RANDOM % 1000 ')' + 9000`; ss -atn | fgrep \":\$PORT\" || break; done; echo \$PORT"]
+if { [gdb_compile "$sourcetmp" "$binfile" executable {debug}] != "" } {
+    fail "compile"
+    return -1
+}
 
 setenv DEBUGINFOD_URLS ""
 setenv DEBUGINFOD_TIMEOUT 30
 setenv DEBUGINFOD_CACHE_PATH $cache
 
-# test that gdb cannot find source without debuginfod
-gdb_start
-gdb_load $binfile
+# Test that gdb cannot find source without debuginfod
+clean_restart $binfile
 gdb_test_no_output "set substitute-path $outputdir /dev/null"
 gdb_test "list" ".*No such file or directory.*"
-gdb_exit
 
-# strip symbols into separate file and move it so gdb cannot find it without debuginfod
+# Strip symbols into separate file and move it so gdb cannot find it without debuginfod
 if { [gdb_gnu_strip_debug $binfile ""] != 0 } {
-    fail "$test (strip debuginfo)"
+    fail "strip debuginfo"
     return -1
 }
 
-set debugdir [file join [standard_output_file {}] "debug"]
-set debuginfo [file join [standard_output_file {}] "fetch_src_and_symbols.debug"]
+set debugdir [standard_output_file "debug"]
+set debuginfo [standard_output_file "fetch_src_and_symbols.debug"]
 
 file mkdir $debugdir
 file rename -force $debuginfo $debugdir
 
-# test that gdb cannot find symbols without debuginfod
-gdb_start
-gdb_load $binfile
+# Test that gdb cannot find symbols without debuginfod
+clean_restart $binfile
 gdb_test "file" ".*No symbol file.*"
-gdb_exit
 
 # Write some assembly that just has a .gnu_debugaltlink section.
 # Copied from testsuite/gdb.dwarf2/dwzbuildid.exp.
@@ -148,43 +141,40 @@ write_just_debugaltlink ${binfile}_has_altlink.S ${binfile}_dwz.o $buildid
 write_dwarf_file ${binfile}_dwz.S $buildid
 
 if {[gdb_compile ${binfile}_has_altlink.S ${binfile}_alt.o object nodebug] != ""} {
-    fail "$test (compile main with altlink)"
+    fail "compile main with altlink"
     return -1
 }
 
 if {[gdb_compile ${binfile}_dwz.S ${binfile}_dwz.o object nodebug] != ""} {
-    fail "$test (compile altlink)"
+    fail "compile altlink"
     return -1
 }
 
 file rename -force ${binfile}_dwz.o $debugdir
 
 # Test that gdb cannot find dwz without debuginfod.
-gdb_start
+clean_restart
 gdb_test "file ${binfile}_alt.o" ".*could not find '.gnu_debugaltlink'.*"
-gdb_exit
 
-set debuginfod_pid 0
-
-# Kill the server if we abort early
-proc sigint_handler {} {
-    global debuginfod_pid
-
-    if { $debuginfod_pid != 0 } {
-        catch {exec kill -INT $debuginfod_pid}
-    }
-
-    exit
-}
-
-trap sigint_handler INT
-
-# Start up debuginfod
-set debuginfod_pid [exec debuginfod -d $db -p $port -F $debugdir 2>/dev/null &]
-
-if { !$debuginfod_pid } {
-    fail "$test (server init)"
+# Find an unused port
+set port 7999
+set found 0
+while { ! $found } {
+  incr port
+  if { $port == 65536 } {
+    fail "no available ports"
     return -1
+  }
+
+  spawn debuginfod -vvvv -d $db -p $port -F $debugdir
+  expect {
+    "started http server on IPv4 IPv6 port=$port" { set found 1 }
+    "failed to bind to port" { kill_wait_spawned_process $spawn_id }
+    timeout {
+      fail "find port timeout"
+      return -1
+    }
+  }
 }
 
 set metrics [list "ready 1" \
@@ -207,8 +197,7 @@ foreach m $metrics {
   }
 
   if { $timelim == 0 } {
-    fail "$test (server init timeout)"
-    catch {exec kill -INT $debuginfod_pid}
+    fail "server init timeout"
     return -1
   }
 }
@@ -217,16 +206,11 @@ foreach m $metrics {
 setenv DEBUGINFOD_URLS http://127.0.0.1:$port
 
 # gdb should now find the symbol and source files
-gdb_start
-gdb_load $binfile
+clean_restart $binfile
 gdb_test_no_output "set substitute-path $outputdir /dev/null"
 gdb_test "br main" "Breakpoint 1 at.*file.*"
 gdb_test "l" ".*This program is distributed in the hope.*"
-gdb_exit
 
 # gdb should now find the debugaltlink file
-gdb_start
+clean_restart
 gdb_test "file ${binfile}_alt.o" ".*Reading symbols from ${binfile}_alt.o\.\.\.\[\r\n\]"
-gdb_exit
-
-catch {exec kill -INT $debuginfod_pid}
