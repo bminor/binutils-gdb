@@ -7260,7 +7260,8 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
   else if (strcmp (filename, artificial) == 0)
     {
       debug_filename.reset (concat (artificial, "@",
-				    sect_offset_str (per_cu->sect_off), NULL));
+				    sect_offset_str (per_cu->sect_off),
+				    (char *) NULL));
       filename = debug_filename.get ();
     }
 

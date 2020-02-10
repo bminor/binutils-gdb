@@ -1,3 +1,8 @@
+2020-02-10  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c (process_psymtab_comp_unit_reader): Cast concat NULL
+	sentinel to char *.
+
 2020-02-09  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2read.c (process_psymtab_comp_unit_reader): Append CU offset to

@@ -105,7 +105,7 @@ gdb_environ::get (const char *var) const
 void
 gdb_environ::set (const char *var, const char *value)
 {
-  char *fullvar = concat (var, "=", value, NULL);
+  char *fullvar = concat (var, "=", value, (char *) NULL);
 
   /* We have to unset the variable in the vector if it exists.  */
   unset (var, false);

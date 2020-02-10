@@ -1,3 +1,7 @@
+2020-02-10  Tom de Vries  <tdevries@suse.de>
+
+	* environ.c (gdb_environ::set): Cast concat NULL sentinel to char *.
+
 2020-01-24  Christian Biesinger  <cbiesinger@google.com>
 
 	* thread-pool.c (set_thread_name): Add an overload for the NetBSD
