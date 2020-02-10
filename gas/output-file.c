@@ -58,7 +58,7 @@ output_file_close (const char *filename)
     return;
 
   /* Close the bfd.  */
-  if (had_errors ())
+  if (!flag_always_generate_output && had_errors ())
     res = bfd_cache_close_all ();
   else
     res = bfd_close (stdoutput);
