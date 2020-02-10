@@ -1768,11 +1768,11 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
   return TRUE;
 }
 
-/* Insert two words into a section whilst relaxing.  */
+/* Insert one or two words into a section whilst relaxing.  */
 
 static bfd_byte *
-msp430_elf_relax_add_two_words (bfd * abfd, asection * sec, bfd_vma addr,
-				int word1, int word2)
+msp430_elf_relax_add_words (bfd * abfd, asection * sec, bfd_vma addr,
+			    int num_words, int word1, int word2)
 {
   Elf_Internal_Shdr *symtab_hdr;
   unsigned int sec_shndx;
@@ -1787,22 +1787,24 @@ msp430_elf_relax_add_two_words (bfd * abfd, asection * sec, bfd_vma addr,
   bfd_vma sec_end;
   asection *p;
   if (debug_relocs)
-    printf ("      adding two words at 0x%lx\n",
+    printf ("      adding %d words at 0x%lx\n", num_words,
 	    sec->output_section->vma + sec->output_offset + addr);
 
   contents = elf_section_data (sec)->this_hdr.contents;
   sec_end = sec->size;
+  int num_bytes = num_words * 2;
 
   /* Make space for the new words.  */
-  contents = bfd_realloc (contents, sec_end + 4);
-  memmove (contents + addr + 4, contents + addr, sec_end - addr);
+  contents = bfd_realloc (contents, sec_end + num_bytes);
+  memmove (contents + addr + num_bytes, contents + addr, sec_end - addr);
 
   /* Insert the new words.  */
   bfd_put_16 (abfd, word1, contents + addr);
-  bfd_put_16 (abfd, word2, contents + addr + 2);
+  if (num_words == 2)
+    bfd_put_16 (abfd, word2, contents + addr + 2);
 
   /* Update the section information.  */
-  sec->size += 4;
+  sec->size += num_bytes;
   elf_section_data (sec)->this_hdr.contents = contents;
 
   /* Adjust all the relocs.  */
@@ -1811,12 +1813,12 @@ msp430_elf_relax_add_two_words (bfd * abfd, asection * sec, bfd_vma addr,
 
   for (; irel < irelend; irel++)
     if ((irel->r_offset >= addr && irel->r_offset < sec_end))
-      irel->r_offset += 4;
+      irel->r_offset += num_bytes;
 
   /* Adjust the local symbols defined in this section.  */
   sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
   for (p = abfd->sections; p != NULL; p = p->next)
-    msp430_elf_relax_adjust_locals (abfd, p, addr, -4,
+    msp430_elf_relax_adjust_locals (abfd, p, addr, -num_bytes,
 				    sec_shndx, sec_end);
 
   /* Adjust the global symbols affected by the move.  */
@@ -1830,8 +1832,8 @@ msp430_elf_relax_add_two_words (bfd * abfd, asection * sec, bfd_vma addr,
 	  printf ("      adjusting value of local symbol %s from 0x%lx to "
 		  "0x%lx\n", bfd_elf_string_from_elf_section
 		  (abfd, symtab_hdr->sh_link, isym->st_name),
-		  isym->st_value, isym->st_value + 4);
-	isym->st_value += 4;
+		  isym->st_value, isym->st_value + num_bytes);
+	isym->st_value += num_bytes;
       }
 
   /* Now adjust the global symbols defined in this section.  */
@@ -1848,7 +1850,7 @@ msp430_elf_relax_add_two_words (bfd * abfd, asection * sec, bfd_vma addr,
 	  && sym_hash->root.u.def.section == sec
 	  && sym_hash->root.u.def.value >= addr
 	  && sym_hash->root.u.def.value < sec_end)
-	sym_hash->root.u.def.value += 4;
+	sym_hash->root.u.def.value += num_bytes;
     }
 
   return contents;
@@ -2015,8 +2017,12 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
       opcode = bfd_get_16 (abfd, contents + irel->r_offset);
 
       /* Compute the new opcode.  We are going to convert:
+	 JMP label
+	   into:
+	 BR[A] label
+	   or
 	 J<cond> label
-	 into:
+	   into:
 	 J<inv-cond> 1f
 	 BR[A] #label
 	 1:			*/
@@ -2036,8 +2042,14 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	     1: br label
 	     2:		       */
 	  continue;
+	case 0x3c00:
+	  if (uses_msp430x_relocs (abfd))
+	    opcode = 0x0080;	/* JMP -> BRA  */
+	  else
+	    opcode = 0x4030;	/* JMP -> BR  */
+	  break;
 	default:
-	  /* Not a conditional branch instruction.  */
+	  /* Unhandled branch instruction.  */
 	  /* fprintf (stderr, "unrecog: %x\n", opcode); */
 	  continue;
 	}
@@ -2057,16 +2069,29 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	    printf ("      R_MSP430X_10_PCREL -> R_MSP430X_ABS20_ADR_SRC "
 		    "(growing with new opcode 0x%x)\n", opcode);
 
-	  /* Insert an absolute branch (aka MOVA) instruction.  */
-	  contents = msp430_elf_relax_add_two_words
-	    (abfd, sec, irel->r_offset + 2, 0x0080, 0x0000);
+	  /* Insert an absolute branch (aka MOVA) instruction.
+	     Note that bits 19:16 of the address are stored in the first word
+	     of the insn, so this is where r_offset will point to.  */
+	  if (opcode == 0x0080)
+	    {
+	      /* If we're inserting a BRA because we are converting from a JMP,
+		 then only add one word for destination address; the BRA opcode
+		 has already been written.  */
+	      contents = msp430_elf_relax_add_words
+		(abfd, sec, irel->r_offset + 2, 1, 0x0000, 0);
+	    }
+	  else
+	    {
+	      contents = msp430_elf_relax_add_words
+		(abfd, sec, irel->r_offset + 2, 2, 0x0080, 0x0000);
+	      /* Update the relocation to point to the inserted branch
+		 instruction.  Note - we are changing a PC-relative reloc
+		 into an absolute reloc, but this is OK because we have
+		 arranged with the assembler to have the reloc's value be
+		 a (local) symbol, not a section+offset value.  */
+	      irel->r_offset += 2;
+	    }
 
-	  /* Update the relocation to point to the inserted branch
-	     instruction.  Note - we are changing a PC-relative reloc
-	     into an absolute reloc, but this is OK because we have
-	     arranged with the assembler to have the reloc's value be
-	     a (local) symbol, not a section+offset value.  */
-	  irel->r_offset += 2;
 	  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 				       R_MSP430X_ABS20_ADR_SRC);
 	}
@@ -2075,12 +2100,23 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	  if (debug_relocs)
 	    printf ("      R_MSP430_10_PCREL -> R_MSP430_16 "
 		    "(growing with new opcode 0x%x)\n", opcode);
-	  contents = msp430_elf_relax_add_two_words
-	    (abfd, sec, irel->r_offset + 2, 0x4030, 0x0000);
-
-	  /* See comment above about converting a 10-bit PC-rel
-	     relocation into a 16-bit absolute relocation.  */
-	  irel->r_offset += 4;
+	  if (opcode == 0x4030)
+	    {
+	      /* If we're inserting a BR because we are converting from a JMP,
+		 then only add one word for destination address; the BR opcode
+		 has already been written.  */
+	      contents = msp430_elf_relax_add_words
+		(abfd, sec, irel->r_offset + 2, 1, 0x0000, 0);
+	      irel->r_offset += 2;
+	    }
+	  else
+	    {
+	      contents = msp430_elf_relax_add_words
+		(abfd, sec, irel->r_offset + 2, 2, 0x4030, 0x0000);
+	      /* See comment above about converting a 10-bit PC-rel
+		 relocation into a 16-bit absolute relocation.  */
+	      irel->r_offset += 4;
+	    }
 	  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 				       R_MSP430_16);
 	}
