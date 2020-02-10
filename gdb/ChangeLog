@@ -1,5 +1,10 @@
 2020-02-11  Christian Biesinger  <cbiesinger@google.com>
 
+	* arch/arm.h (enum gdb_regnum): Add comment for the FP0..7
+	registers.
+
+2020-02-11  Christian Biesinger  <cbiesinger@google.com>
+
 	* arm-tdep.c (arm_dump_tdep): Add \n in fprintf.
 
 2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
