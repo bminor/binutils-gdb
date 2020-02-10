@@ -487,7 +487,8 @@ with 01, 10 and 11 RC bits, respectively.
 @item -mamd64
 @itemx -mintel64
 This option specifies that the assembler should accept only AMD64 or
-Intel64 ISA in 64-bit mode.  The default is to accept both.
+Intel64 ISA in 64-bit mode.  The default is to accept common, Intel64
+only and AMD64 ISAs.
 
 @cindex @samp{-O0} option, i386
 @cindex @samp{-O0} option, x86-64

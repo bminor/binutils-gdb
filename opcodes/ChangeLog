@@ -1,3 +1,21 @@
+2020-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25516
+	* i386-gen.c (opcode_modifiers): Replace AMD64 and Intel64
+	with ISA64.
+	* i386-opc.h (AMD64): Removed.
+	(Intel64): Likewose.
+	(AMD64): New.
+	(INTEL64): Likewise.
+	(INTEL64ONLY): Likewise.
+	(i386_opcode_modifier): Replace amd64 and intel64 with isa64.
+	* i386-opc.tbl (Amd64): New.
+	(Intel64): Likewise.
+	(Intel64Only): Likewise.
+	Replace AMD64 with Amd64.  Update sysenter/sysenter with
+	Cpu64 and Intel64Only.  Remove AMD64 from sysenter/sysenter.
+	* i386-tbl.h: Regenerated.
+
 2020-02-10  Richard Sandiford  <richard.sandiford@arm.com>
 
 	* aarch64-tbl.h (aarch64_opcode): Set C_MAX_ELEM for SVE bfcvt.

@@ -22,6 +22,10 @@
 #include "i386-opc.h"
 #undef None
 
+#define Amd64		ISA64=AMD64
+#define Intel64		ISA64=INTEL64
+#define Intel64Only	ISA64=INTEL64ONLY
+
 #define Reg8  Class=Reg|Byte
 #define Reg16 Class=Reg|Word
 #define Reg32 Class=Reg|Dword
@@ -371,10 +375,10 @@ shrd, 2, 0xfad, None, 2, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { 
 
 // Control transfer instructions.
 call, 1, 0xe8, None, 1, CpuNo64, JumpDword|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp16|Disp32 }
-call, 1, 0xe8, None, 1, Cpu64, AMD64|JumpDword|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk, { Disp16|Disp32S }
+call, 1, 0xe8, None, 1, Cpu64, Amd64|JumpDword|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk, { Disp16|Disp32S }
 call, 1, 0xe8, None, 1, Cpu64, Intel64|JumpDword|DefaultSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk, { Disp32S }
 call, 1, 0xff, 0x2, 1, CpuNo64, Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg32|Unspecified|BaseIndex }
-call, 1, 0xff, 0x2, 1, Cpu64, AMD64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
+call, 1, 0xff, 0x2, 1, Cpu64, Amd64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
 call, 1, 0xff, 0x2, 1, Cpu64, Intel64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
 // Intel Syntax
 call, 2, 0x9a, None, 1, CpuNo64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16, Imm16|Imm32 }
@@ -384,10 +388,10 @@ lcall, 2, 0x9a, None, 1, CpuNo64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|N
 lcall, 1, 0xff, 0x3, 1, 0, Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
 
 jmp, 1, 0xeb, None, 1, CpuNo64, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp16|Disp32 }
-jmp, 1, 0xeb, None, 1, Cpu64, AMD64|Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp16|Disp32S }
+jmp, 1, 0xeb, None, 1, Cpu64, Amd64|Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp16|Disp32S }
 jmp, 1, 0xeb, None, 1, Cpu64, Intel64|Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp32S }
 jmp, 1, 0xff, 0x4, 1, CpuNo64, Modrm|JumpAbsolute|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg32|Unspecified|BaseIndex }
-jmp, 1, 0xff, 0x4, 1, Cpu64, AMD64|Modrm|JumpAbsolute|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
+jmp, 1, 0xff, 0x4, 1, Cpu64, Amd64|Modrm|JumpAbsolute|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
 jmp, 1, 0xff, 0x4, 1, Cpu64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
 // Intel Syntax.
 jmp, 2, 0xea, None, 1, CpuNo64, JumpInterSegment|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16, Imm16|Imm32 }
@@ -905,10 +909,10 @@ rdmsr, 0, 0xf32, None, 2, Cpu586, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldS
 cmpxchg8b, 1, 0xfc7, 0x1, 2, Cpu586, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|IsLockable|NoRex64|HLEPrefixOk, { Qword|Unspecified|BaseIndex }
 
 // Pentium II/Pentium Pro extensions.
-sysenter, 0, 0xf34, None, 2, Cpu686, Intel64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
-sysenter, 0, 0xf34, None, 2, Cpu686|CpuNo64, AMD64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
-sysexit, 0, 0xf35, None, 2, Cpu686, Intel64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
-sysexit, 0, 0xf35, None, 2, Cpu686|CpuNo64, AMD64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+sysenter, 0, 0xf34, None, 2, Cpu64, Intel64Only|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+sysenter, 0, 0xf34, None, 2, Cpu686|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+sysexit, 0, 0xf35, None, 2, Cpu64, Intel64Only|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+sysexit, 0, 0xf35, None, 2, Cpu686|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 fxsave, 1, 0xfae, 0x0, 2, CpuFXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex }
 fxsave64, 1, 0xfae, 0x0, 2, CpuFXSR|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex }
 fxrstor, 1, 0xfae, 0x1, 2, CpuFXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex }

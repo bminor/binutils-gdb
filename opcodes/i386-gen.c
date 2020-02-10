@@ -666,8 +666,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (ATTMnemonic),
   BITFIELD (ATTSyntax),
   BITFIELD (IntelSyntax),
-  BITFIELD (AMD64),
-  BITFIELD (Intel64),
+  BITFIELD (ISA64),
 };
 
 #define CLASS(n) #n, n
