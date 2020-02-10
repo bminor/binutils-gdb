@@ -2362,11 +2362,11 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	       able to relax.  */
 	    if ((long) value < 1016 && (long) value > -1016)
 	      {
-		int code2;
+		int code1, code2, opcode;
 
 		/* Get the opcode.  */
 		code2 = bfd_get_16 (abfd, contents + irel->r_offset - 2);
-		if (code2 != 0x4030)
+		if (code2 != 0x4030) /* BR -> JMP */
 		  continue;
 		/* FIXME: check r4 and r3 ? */
 		/* FIXME: Handle 0x4010 as well ?  */
@@ -2391,17 +2391,65 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 		    if (debug_relocs)
 		      printf ("      R_MSP430_16 -> R_MSP430_10_PCREL ");
 		  }
+		/* If we're trying to shrink a BR[A] after previously having
+		   grown a JMP for this reloc, then we have a sequence like
+		   this:
+		     J<cond> 1f
+		     BR[A]
+		     1:
+		   The opcode for J<cond> has the target hard-coded as 2 words
+		   ahead of the insn, instead of using a reloc.
+		   This means we cannot rely on any of the helper functions to
+		   update this hard-coded jump destination if we remove the
+		   BR[A] insn, so we must explicitly update it here.
+		   This does mean that we can remove the entire branch
+		   instruction, and invert the conditional jump, saving us 4
+		   bytes rather than only 2 if we detected this in the normal
+		   way.  */
+		code1 = bfd_get_16 (abfd, contents + irel->r_offset - 4);
+		switch (code1)
+		  {
+		    case 0x3802: opcode = 0x3401; break; /* Jl  +2 -> Jge +1 */
+		    case 0x3402: opcode = 0x3801; break; /* Jge +2 -> Jl  +1 */
+		    case 0x2c02: opcode = 0x2801; break; /* Jhs +2 -> Jlo +1 */
+		    case 0x2802: opcode = 0x2c01; break; /* Jlo +2 -> Jhs +1 */
+		    case 0x2402: opcode = 0x2001; break; /* Jeq +2 -> Jne +1 */
+		    case 0x2002: opcode = 0x2401; break; /* jne +2 -> Jeq +1 */
+		    case 0x3002: /* jn +2   */
+		      /* FIXME: There is no direct inverse of the Jn insn.  */
+		      continue;
+		    default:
+		      /* The previous opcode does not have a hard-coded jump
+			 that we added when previously relaxing, so relax the
+			 current branch as normal.  */
+		      opcode = 0x3c00;
+		      break;
+		    }
 		if (debug_relocs)
-		  printf ("(shrinking with new opcode 0x3c00)\n");
+		  printf ("(shrinking with new opcode 0x%x)\n", opcode);
 
-		/* Fix the opcode right way.  */
-		bfd_put_16 (abfd, 0x3c00, contents + irel->r_offset - 2);
-		irel->r_offset -= 2;
+		if (opcode != 0x3c00)
+		  {
+		    /* Invert the opcode of the conditional jump.  */
+		    bfd_put_16 (abfd, opcode, contents + irel->r_offset - 4);
+		    irel->r_offset -= 4;
 
-		/* Delete bytes.  */
-		if (!msp430_elf_relax_delete_bytes (abfd, sec,
-						    irel->r_offset + 2, 2))
-		  goto error_return;
+		    /* Delete 4 bytes - the full BR insn.  */
+		    if (!msp430_elf_relax_delete_bytes (abfd, sec,
+							irel->r_offset + 2, 4))
+		      goto error_return;
+		  }
+		else
+		  {
+		    /* Fix the opcode right way.  */
+		    bfd_put_16 (abfd, opcode, contents + irel->r_offset - 2);
+		    irel->r_offset -= 2;
+
+		    /* Delete bytes.  */
+		    if (!msp430_elf_relax_delete_bytes (abfd, sec,
+							irel->r_offset + 2, 2))
+		      goto error_return;
+		  }
 
 		/* That will change things, so, we should relax again.
 		   Note that this is not required, and it may be slow.  */

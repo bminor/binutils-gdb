@@ -16,6 +16,12 @@
 	needs to be grown. Handle insertion of branch instruction to replace
 	jump.
 
+	2020-02-10  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* elf32-msp430.c (msp430_elf_relax_section): Before relaxing a branch,
+	check if previous instruction matches a conditional jump inserted
+	earlier. Invert conditional jump and delete branch in this case.
+
 2020-02-01  Nick Clifton  <nickc@redhat.com>
 
 	* development.sh: Set development to true.
