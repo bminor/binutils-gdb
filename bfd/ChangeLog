@@ -1,5 +1,14 @@
 2020-02-10  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
+	* elf32-msp430.c (msp430_elf_relax_add_two_words): Rename to
+	msp430_elf_relax_add_words. Support insertion of either one or two
+	words.
+	(msp430_elf_relax_section): Catch opcode of 0x3c00 when relocation
+	needs to be grown. Handle insertion of branch instruction to replace
+	jump.
+
+2020-02-10  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
 	* elf32-msp430.c (msp430_final_link_relocate): Add printf statements for
 	debugging relocations.
 	(msp430_elf_relax_delete_bytes): Likewise.
