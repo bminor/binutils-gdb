@@ -20,24 +20,36 @@
 #define DEBUGINFOD_SUPPORT_H
 
 /* Query debuginfod servers for a source file associated with an
-   an executable with build_id. src_path should be the source
-   file's absolute path that includes the compilation directory of
-   the CU associated with the source file. If the file is
-   successfully retrieved, its path on the local machine is stored
-   at filename. The caller should free() this value. If GDB is not
-   built with debuginfod, this function returns -ENOSYS.  */
+   executable with BUILD_ID. BUILD_ID can be given as a binary blob or
+   a null-terminated string. If given as a binary blob, BUILD_ID_LEN
+   should be the number of bytes. If given as a null-terminated string,
+   BUILD_ID_LEN should be 0.
+
+   SRC_PATH should be the source file's absolute path that includes the
+   compilation directory of the CU associated with the source file.
+   For example if a CU's compilation directory is `/my/build` and the
+   source file path is `/my/source/foo.c`, then SRC_PATH should be
+   `/my/build/../source/foo.c`.
+
+   If the file is successfully retrieved, its path on the local machine
+   is stored in FILENAME. If GDB is not built with debuginfod, this
+   function returns -ENOSYS.  */
 
 extern int debuginfod_source_query (const unsigned char *build_id,
                                     int build_id_len,
                                     const char *src_path,
-                                    char **filename);
+                                    gdb::unique_xmalloc_ptr<char> *filename);
 
-/* Query debuginfod servers for a debuginfo file with build_id. If the
-   file is successfully retrieved, its path on the local machine is
-   stored at filename. The caller should free() this value. If GDB
-   is not built with debuginfod, this function returns -ENOSYS.  */
+/* Query debuginfod servers for a debuginfo file with BUILD_ID.
+   BUILD_ID can be given as a binary blob or a null-terminated string.
+   If given as a binary blob, BUILD_ID_LEN should be the number of bytes.
+   If given as a null-terminated string, BUILD_ID_LEN should be 0.
+
+   If the file is successfully retrieved, its path on the local machine
+   is stored in FILENAME. If GDB is not built with debuginfod, this
+   function returns -ENOSYS.  */
 
 extern int debuginfod_debuginfo_query (const unsigned char *build_id,
                                        int build_id_len,
-                                       char **filename);
+                                       gdb::unique_xmalloc_ptr<char> *filename);
 #endif /* DEBUGINFOD_SUPPORT_H */

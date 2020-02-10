@@ -25,7 +25,7 @@ int
 debuginfod_source_query (const unsigned char *build_id __attribute__((unused)),
                          int build_id_len __attribute__((unused)),
                          const char *srcpath __attribute__((unused)),
-                         char **filename __attribute__((unused)))
+                         gdb::unique_xmalloc_ptr<char> *filename __attribute__((unused)))
 {
   return -ENOSYS;
 }
@@ -33,7 +33,7 @@ debuginfod_source_query (const unsigned char *build_id __attribute__((unused)),
 int
 debuginfod_debuginfo_query (const unsigned char *build_id __attribute__((unused)),
                             int build_id_len __attribute__((unused)),
-                            char **filename __attribute__((unused)))
+                            gdb::unique_xmalloc_ptr<char> *filename __attribute__((unused)))
 {
   return -ENOSYS;
 }
@@ -45,7 +45,13 @@ progressfn (debuginfod_client *c,
              long a __attribute__((unused)),
              long b __attribute__((unused)))
 {
-  return check_quit_flag ();
+  int quit_flag = check_quit_flag ();
+
+  /* Avoid swallowing quit_flag's current value.  */
+  if (quit_flag)
+    set_quit_flag ();
+
+  return quit_flag;
 }
 
 static debuginfod_client *
@@ -65,19 +71,21 @@ int
 debuginfod_source_query (const unsigned char *build_id,
                          int build_id_len,
                          const char *srcpath,
-                         char **filename)
+                         gdb::unique_xmalloc_ptr<char> *filename)
 {
   debuginfod_client *c = debuginfod_init ();
 
   if (c == nullptr)
     return -ENOMEM;
 
+  char *fname = NULL;
   int fd = debuginfod_find_source (c,
                                    build_id,
                                    build_id_len,
                                    srcpath,
-                                   filename);
+                                   &fname);
   debuginfod_end (c);
+  filename->reset (fname);
 
   return fd;
 }
@@ -87,15 +95,17 @@ debuginfod_source_query (const unsigned char *build_id,
 int
 debuginfod_debuginfo_query (const unsigned char *build_id,
                             int build_id_len,
-                            char **filename)
+                            gdb::unique_xmalloc_ptr<char> *filename)
 {
   debuginfod_client *c = debuginfod_init ();
 
   if (c == nullptr)
     return -ENOMEM;
 
-  int fd = debuginfod_find_debuginfo (c, build_id, build_id_len, filename);
+  char *fname = NULL;
+  int fd = debuginfod_find_debuginfo (c, build_id, build_id_len, &fname);
   debuginfod_end (c);
+  filename->reset (fname);
 
   return fd;
 }

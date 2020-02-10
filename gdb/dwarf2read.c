@@ -77,9 +77,7 @@
 #include "gdbsupport/selftest.h"
 #include "rust-lang.h"
 #include "gdbsupport/pathstuff.h"
-#if HAVE_LIBDEBUGINFOD
 #include "debuginfod-support.h"
-#endif
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
@@ -2749,10 +2747,9 @@ dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
   if (dwz_bfd == NULL)
     dwz_bfd = build_id_to_debug_bfd (buildid_len, buildid);
 
-#if HAVE_LIBDEBUGINFOD
   if (dwz_bfd == nullptr)
     {
-      char *alt_filename;
+      gdb::unique_xmalloc_ptr<char> alt_filename;
       scoped_fd fd (debuginfod_debuginfo_query (buildid,
                                                 buildid_len,
                                                 &alt_filename));
@@ -2760,16 +2757,13 @@ dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
       if (fd.get () >= 0)
         {
           /* File successfully retrieved from server.  */
-          dwz_bfd = gdb_bfd_open (alt_filename, gnutarget, -1);
+          dwz_bfd = gdb_bfd_open (alt_filename.get (), gnutarget, -1);
 
           if (dwz_bfd != nullptr
               && !build_id_verify (dwz_bfd.get (), buildid_len, buildid))
             dwz_bfd.reset (nullptr);
-
-          xfree (alt_filename);
         }
     }
-#endif /* HAVE_LIBDEBUGINFOD */
 
   if (dwz_bfd == NULL)
     error (_("could not find '.gnu_debugaltlink' file for %s"),

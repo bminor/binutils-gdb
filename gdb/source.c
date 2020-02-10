@@ -49,9 +49,7 @@
 #include "cli/cli-style.h"
 #include "observable.h"
 #include "build-id.h"
-#ifdef HAVE_LIBDEBUGINFOD
 #include "debuginfod-support.h"
-#endif
 
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
@@ -1158,7 +1156,6 @@ open_source_file (struct symtab *s)
   scoped_fd fd = find_and_open_source (s->filename, SYMTAB_DIRNAME (s),
 				       &fullname);
 
-#if HAVE_LIBDEBUGINFOD
   if (fd.get () < 0)
     {
       if (SYMTAB_COMPUNIT (s) != nullptr)
@@ -1180,22 +1177,16 @@ open_source_file (struct symtab *s)
           if (build_id != nullptr)
             {
               /* Query debuginfod for the source file.  */
-              char *filename;
               scoped_fd src_fd (debuginfod_source_query (build_id->data,
                                                          build_id->size,
                                                          srcpath.c_str (),
-                                                         &filename));
-
-              if (src_fd.get () >= 0)
-                fullname.reset (filename);
+                                                         &fullname));
 
               s->fullname = fullname.release ();
               return src_fd;
-
             }
         }
     }
-#endif /* HAVE_LIBDEBUGINFOD */
 
   s->fullname = fullname.release ();
   return fd;
