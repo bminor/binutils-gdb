@@ -26,6 +26,8 @@
 #include "elf-bfd.h"
 #include "elf/msp430.h"
 
+static bfd_boolean debug_relocs = 0;
+
 /* All users of this file have bfd_octets_per_byte (abfd, sec) == 1.  */
 #define OCTETS_PER_BYTE(ABFD, SEC) 1
 
@@ -742,6 +744,10 @@ msp430_final_link_relocate (reloc_howto_type *	   howto,
       BFD_ASSERT (! is_rel_reloc || rel->r_addend == 0);
     }
 
+  if (debug_relocs)
+    printf ("writing relocation (%p) at 0x%lx type: %d\n", rel,
+	    input_section->output_section->vma + input_section->output_offset
+	    + rel->r_offset, howto->type);
   if (sym_diff_section != NULL)
     {
       BFD_ASSERT (sym_diff_section == input_section);
@@ -1663,6 +1669,9 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
   contents = elf_section_data (sec)->this_hdr.contents;
 
   toaddr = sec->size;
+  if (debug_relocs)
+    printf ("      deleting %d bytes between 0x%lx to 0x%lx\n",
+	    count, addr, toaddr);
 
   irel = elf_section_data (sec)->relocs;
   irelend = irel + sec->reloc_count;
@@ -1710,10 +1719,15 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
 		  && (CONST_STRNEQ (name, ".Letext")
 		      || CONST_STRNEQ (name, ".LFE")))))
 	{
+	  if (debug_relocs)
+	    printf ("      adjusting value of local symbol %s from 0x%lx ",
+		    name, isym->st_value);
 	  if (isym->st_value < addr + count)
 	    isym->st_value = addr;
 	  else
 	    isym->st_value -= count;
+	  if (debug_relocs)
+	    printf ("to 0x%lx\n", isym->st_value);
 	}
       /* Adjust the function symbol's size as well.  */
       else if (ELF_ST_TYPE (isym->st_info) == STT_FUNC
@@ -1772,6 +1786,9 @@ msp430_elf_relax_add_two_words (bfd * abfd, asection * sec, bfd_vma addr,
   unsigned int symcount;
   bfd_vma sec_end;
   asection *p;
+  if (debug_relocs)
+    printf ("      adding two words at 0x%lx\n",
+	    sec->output_section->vma + sec->output_offset + addr);
 
   contents = elf_section_data (sec)->this_hdr.contents;
   sec_end = sec->size;
@@ -1808,7 +1825,14 @@ msp430_elf_relax_add_two_words (bfd * abfd, asection * sec, bfd_vma addr,
   for (isymend = isym + symtab_hdr->sh_info; isym < isymend; isym++)
     if (isym->st_shndx == sec_shndx
 	&& isym->st_value >= addr && isym->st_value < sec_end)
-      isym->st_value += 4;
+      {
+	if (debug_relocs)
+	  printf ("      adjusting value of local symbol %s from 0x%lx to "
+		  "0x%lx\n", bfd_elf_string_from_elf_section
+		  (abfd, symtab_hdr->sh_link, isym->st_name),
+		  isym->st_value, isym->st_value + 4);
+	isym->st_value += 4;
+      }
 
   /* Now adjust the global symbols defined in this section.  */
   symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
@@ -1853,6 +1877,10 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
     || sec->reloc_count == 0 || (sec->flags & SEC_CODE) == 0)
     return TRUE;
 
+  if (debug_relocs)
+    printf ("Relaxing %s (%p), output_offset: 0x%lx sec size: 0x%lx\n",
+	    sec->name, sec, sec->output_offset, sec->size);
+
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
 
   /* Get a copy of the native relocations.  */
@@ -1864,6 +1892,8 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
   /* Walk through them looking for relaxing opportunities.  */
   irelend = internal_relocs + sec->reloc_count;
 
+  if (debug_relocs)
+    printf ("  trying code size growing relocs\n");
   /* Do code size growing relocs first.  */
   for (irel = internal_relocs; irel < irelend; irel++)
     {
@@ -1920,6 +1950,14 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	    sym_sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 	  symval = (isym->st_value
 		    + sym_sec->output_section->vma + sym_sec->output_offset);
+
+	  if (debug_relocs)
+	    printf ("    processing reloc at 0x%lx for local sym: %s "
+		    "st_value: 0x%lx adj value: 0x%lx\n", sec->output_offset
+		    + sec->output_section->vma + irel->r_offset,
+		    bfd_elf_string_from_elf_section (abfd, symtab_hdr->sh_link,
+						     isym->st_name),
+		    isym->st_value, symval);
 	}
       else
 	{
@@ -1941,6 +1979,11 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	  symval = (h->root.u.def.value
 		    + h->root.u.def.section->output_section->vma
 		    + h->root.u.def.section->output_offset);
+	  if (debug_relocs)
+	    printf ("    processing reloc at 0x%lx for global sym: %s "
+		    "st_value: 0x%lx adj value: 0x%lx\n", sec->output_offset
+		    + sec->output_section->vma + irel->r_offset,
+		    h->root.root.string, h->root.u.def.value, symval);
 	}
 
       /* For simplicity of coding, we are going to modify the section
@@ -1960,6 +2003,7 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
       value -= (sec->output_section->vma + sec->output_offset);
       value -= irel->r_offset;
       value -= 2;
+
       /* Scale.  */
       value >>= 1;
 
@@ -2009,6 +2053,10 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
       /* Insert the new branch instruction.  */
       if (uses_msp430x_relocs (abfd))
 	{
+	  if (debug_relocs)
+	    printf ("      R_MSP430X_10_PCREL -> R_MSP430X_ABS20_ADR_SRC "
+		    "(growing with new opcode 0x%x)\n", opcode);
+
 	  /* Insert an absolute branch (aka MOVA) instruction.  */
 	  contents = msp430_elf_relax_add_two_words
 	    (abfd, sec, irel->r_offset + 2, 0x0080, 0x0000);
@@ -2024,6 +2072,9 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	}
       else
 	{
+	  if (debug_relocs)
+	    printf ("      R_MSP430_10_PCREL -> R_MSP430_16 "
+		    "(growing with new opcode 0x%x)\n", opcode);
 	  contents = msp430_elf_relax_add_two_words
 	    (abfd, sec, irel->r_offset + 2, 0x4030, 0x0000);
 
@@ -2038,6 +2089,9 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	 conditional branches need to be fixed.  */
       *again = TRUE;
     }
+
+    if (debug_relocs)
+      printf ("  trying code size shrinking relocs\n");
 
     for (irel = internal_relocs; irel < irelend; irel++)
       {
@@ -2083,6 +2137,14 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	      sym_sec = bfd_section_from_elf_index (abfd, isym->st_shndx);
 	    symval = (isym->st_value
 		      + sym_sec->output_section->vma + sym_sec->output_offset);
+
+	    if (debug_relocs)
+	      printf ("    processing reloc at 0x%lx for local sym: %s "
+		      "st_value: 0x%lx adj value: 0x%lx\n", sec->output_offset
+		      + sec->output_section->vma + irel->r_offset,
+		      bfd_elf_string_from_elf_section
+		      (abfd, symtab_hdr->sh_link, isym->st_name),
+		      isym->st_value, symval);
 	  }
 	else
 	  {
@@ -2104,6 +2166,11 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 	    symval = (h->root.u.def.value
 		      + h->root.u.def.section->output_section->vma
 		      + h->root.u.def.section->output_offset);
+	    if (debug_relocs)
+	      printf ("    processing reloc at 0x%lx for global sym: %s "
+		      "st_value: 0x%lx adj value: 0x%lx\n", sec->output_offset
+		      + sec->output_section->vma + irel->r_offset,
+		      h->root.root.string, h->root.u.def.value, symval);
 	  }
 
 	/* For simplicity of coding, we are going to modify the section
@@ -2187,6 +2254,8 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 		elf_section_data (sec)->this_hdr.contents = contents;
 		symtab_hdr->contents = (unsigned char *) isymbuf;
 
+		if (debug_relocs)
+		  printf ("      R_MSP430_RL_PCREL -> ");
 		/* Fix the relocation's type.  */
 		if (uses_msp430x_relocs (abfd))
 		  {
@@ -2200,11 +2269,21 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 		else
 		  {
 		    if (rx->labels == 3)	/* Handle special cases.  */
-		      irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
-						   R_MSP430_2X_PCREL);
+		      {
+			irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+						     R_MSP430_2X_PCREL);
+			if (debug_relocs)
+			  printf ("R_MSP430_2X_PCREL (shrinking with new opcode"
+				  " 0x%x)\n", rx->t0);
+		      }
 		    else
-		      irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
-						   R_MSP430_10_PCREL);
+		      {
+			irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
+						     R_MSP430_10_PCREL);
+			if (debug_relocs)
+			  printf ("R_MSP430_10_PCREL (shrinking with new opcode"
+				  " 0x%x)\n", rx->t0);
+		      }
 		  }
 
 		/* Fix the opcode right way.  */
@@ -2266,12 +2345,18 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 		  {
 		    irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 						 R_MSP430X_10_PCREL);
+		    if (debug_relocs)
+		      printf ("      R_MSP430X_16 -> R_MSP430X_10_PCREL ");
 		  }
 		else
 		  {
 		    irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 						 R_MSP430_10_PCREL);
+		    if (debug_relocs)
+		      printf ("      R_MSP430_16 -> R_MSP430_10_PCREL ");
 		  }
+		if (debug_relocs)
+		  printf ("(shrinking with new opcode 0x3c00)\n");
 
 		/* Fix the opcode right way.  */
 		bfd_put_16 (abfd, 0x3c00, contents + irel->r_offset - 2);
