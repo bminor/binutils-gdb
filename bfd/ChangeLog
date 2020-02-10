@@ -1,3 +1,13 @@
+2020-02-10  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	Apply from master
+	2020-02-10  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+	* elf32-msp430.c (msp430_final_link_relocate): Add printf statements for
+	debugging relocations.
+	(msp430_elf_relax_delete_bytes): Likewise.
+	(msp430_elf_relax_add_two_words): Likewise.
+	(msp430_elf_relax_section): Likewise.
+
 2020-02-01  Nick Clifton  <nickc@redhat.com>
 
 	* development.sh: Set development to true.
