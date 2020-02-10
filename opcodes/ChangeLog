@@ -1,3 +1,11 @@
+2020-02-11  Alan Modra  <amodra@gmail.com>
+
+	* cgen-ibld.in (extract_normal): Set *valuep on all return paths.
+	* bpf-ibld.c, * epiphany-ibld.c, * fr30-ibld.c, * frv-ibld.c,
+	* ip2k-ibld.c, * iq2000-ibld.c, * lm32-ibld.c, * m32c-ibld.c,
+	* m32r-ibld.c, * mep-ibld.c, * mt-ibld.c, * or1k-ibld.c,
+	* xc16x-ibld.c, * xstormy16-ibld.c: Regenerate.
+
 2020-02-10  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* arm-dis.c (print_insn_cde): Define 'V' parse character.
