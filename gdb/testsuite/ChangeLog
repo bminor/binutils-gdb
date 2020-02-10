@@ -1,3 +1,7 @@
+2020-02-10  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.multi/multi-target.exp: Skip if skip_gdbserver_tests.
+
 2020-02-10  Maciej W. Rozycki  <macro@wdc.com>
 
 	* gdb.base/step-over-no-symbols.exp: Verify that $before_addr
