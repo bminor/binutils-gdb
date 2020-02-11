@@ -1,3 +1,10 @@
+2020-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25355
+	* plugin.c (try_claim): Always clean up for LTO wrapper.
+	(try_load_plugin): Treat each object as independent.  Create a
+	copy for plugin name.
+
 2020-02-11  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-msp430.c (msp430_final_link_relocate): Always use longs
