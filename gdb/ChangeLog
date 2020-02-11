@@ -1,5 +1,15 @@
 2020-02-11  Christian Biesinger  <cbiesinger@google.com>
 
+	* cris-tdep.c (cris_supply_gregset): Change signature to match
+	what struct regset expects.
+	(cris_regset): New struct.
+	(fetch_core_registers): Remove.
+	(cris_iterate_over_regset_sections): New function.
+	(_initialize_cris_tdep): Don't call deprecated_add_core_fns.
+	(cris_gdbarch_init): Call set_gdbarch_iterate_over_regset_sections.
+
+2020-02-11  Christian Biesinger  <cbiesinger@google.com>
+
 	* arch/arm.h (enum gdb_regnum): Add comment for the FP0..7
 	registers.
 
