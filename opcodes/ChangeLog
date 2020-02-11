@@ -1,3 +1,9 @@
+2020-02-11  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (fcomi, fucomi, fcomip, fcompi, fucomip,
+	fucompi): Drop ShortForm from operand-less templates.
+	* i386-tbl.h: Re-generate.
+
 2020-02-11  Alan Modra  <amodra@gmail.com>
 
 	* cgen-ibld.in (extract_normal): Set *valuep on all return paths.

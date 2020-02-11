@@ -978,22 +978,22 @@ fcmovnbe, 2, 0xdbd0, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|
 fcmovnu, 2, 0xdbd8, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg, FloatAcc }
 
 fcomi, 2, 0xdbf0, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg, FloatAcc }
-fcomi, 0, 0xdbf1, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+fcomi, 0, 0xdbf1, None, 2, Cpu687, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 fcomi, 1, 0xdbf0, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg }
 fucomi, 2, 0xdbe8, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg, FloatAcc }
-fucomi, 0, 0xdbe9, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+fucomi, 0, 0xdbe9, None, 2, Cpu687, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 fucomi, 1, 0xdbe8, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg }
 fcomip, 2, 0xdff0, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg, FloatAcc }
-fcomip, 0, 0xdff1, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+fcomip, 0, 0xdff1, None, 2, Cpu687, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 fcomip, 1, 0xdff0, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg }
 fcompi, 2, 0xdff0, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg, FloatAcc }
-fcompi, 0, 0xdff1, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+fcompi, 0, 0xdff1, None, 2, Cpu687, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 fcompi, 1, 0xdff0, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg }
 fucomip, 2, 0xdfe8, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg, FloatAcc }
-fucomip, 0, 0xdfe9, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+fucomip, 0, 0xdfe9, None, 2, Cpu687, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 fucomip, 1, 0xdfe8, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg }
 fucompi, 2, 0xdfe8, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg, FloatAcc }
-fucompi, 0, 0xdfe9, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+fucompi, 0, 0xdfe9, None, 2, Cpu687, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 fucompi, 1, 0xdfe8, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg }
 
 // Pentium4 extensions.
