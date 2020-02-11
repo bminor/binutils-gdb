@@ -4,6 +4,10 @@
 
 2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
 
+	* configure: Re-generate.
+
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
 	* acinclude: Update warning.m4 path.
 	* warning.m4: Move to gdbsupport.
 

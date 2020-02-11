@@ -1,5 +1,9 @@
 2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
 
+	* configure: Re-generate.
+
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
 	* warning.m4: Add -Wstrict-null-sentinel.
 	* configure: Re-generate.
 

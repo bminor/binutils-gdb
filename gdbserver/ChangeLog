@@ -4,6 +4,10 @@
 
 2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
 
+	* configure: Re-generate.
+
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
 	* acinclude.m4: Update warning.m4 path.
 
 2020-02-09  Hannes Domani  <ssbssa@yahoo.de>
