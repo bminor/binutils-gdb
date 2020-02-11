@@ -9468,7 +9468,7 @@ arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
-  fprintf_unfiltered (file, _("arm_dump_tdep: Lowest pc = 0x%lx"),
+  fprintf_unfiltered (file, _("arm_dump_tdep: Lowest pc = 0x%lx\n"),
 		      (unsigned long) tdep->lowest_pc);
 }
 
