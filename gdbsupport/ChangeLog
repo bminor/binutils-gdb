@@ -1,3 +1,11 @@
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* acinclude.m4: Include ../gdb/warning.m4.
+	* configure.ac: Use AM_GDB_WARNINGS.
+	* Makefile.am: Set AM_CFLAGS to WARN_CFLAGS and WERROR_CFLAGS.
+	* Makefile.in: Re-generate.
+	* configure: Re-generate.
+
 2020-02-10  Tom de Vries  <tdevries@suse.de>
 
 	* environ.c (gdb_environ::set): Cast concat NULL sentinel to char *.

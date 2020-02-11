@@ -29,6 +29,8 @@ override CXX += $(CXX_DIALECT)
 override CC := $(CXX)
 override CFLAGS := $(CXXFLAGS)
 
+AM_CFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS)
+
 noinst_LIBRARIES = libgdbsupport.a
 
 if SELFTEST
