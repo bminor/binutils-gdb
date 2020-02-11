@@ -746,8 +746,8 @@ msp430_final_link_relocate (reloc_howto_type *	   howto,
 
   if (debug_relocs)
     printf ("writing relocation (%p) at 0x%lx type: %d\n", rel,
-	    input_section->output_section->vma + input_section->output_offset
-	    + rel->r_offset, howto->type);
+	    (long) (input_section->output_section->vma + input_section->output_offset
+		    + rel->r_offset), howto->type);
   if (sym_diff_section != NULL)
     {
       BFD_ASSERT (sym_diff_section == input_section);
@@ -1671,7 +1671,7 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
   toaddr = sec->size;
   if (debug_relocs)
     printf ("      deleting %d bytes between 0x%lx to 0x%lx\n",
-	    count, addr, toaddr);
+	    count, (long) addr, (long) toaddr);
 
   irel = elf_section_data (sec)->relocs;
   irelend = irel + sec->reloc_count;
@@ -1721,13 +1721,13 @@ msp430_elf_relax_delete_bytes (bfd * abfd, asection * sec, bfd_vma addr,
 	{
 	  if (debug_relocs)
 	    printf ("      adjusting value of local symbol %s from 0x%lx ",
-		    name, isym->st_value);
+		    name, (long) isym->st_value);
 	  if (isym->st_value < addr + count)
 	    isym->st_value = addr;
 	  else
 	    isym->st_value -= count;
 	  if (debug_relocs)
-	    printf ("to 0x%lx\n", isym->st_value);
+	    printf ("to 0x%lx\n", (long) isym->st_value);
 	}
       /* Adjust the function symbol's size as well.  */
       else if (ELF_ST_TYPE (isym->st_info) == STT_FUNC
@@ -1788,7 +1788,7 @@ msp430_elf_relax_add_words (bfd * abfd, asection * sec, bfd_vma addr,
   asection *p;
   if (debug_relocs)
     printf ("      adding %d words at 0x%lx\n", num_words,
-	    sec->output_section->vma + sec->output_offset + addr);
+	    (long) (sec->output_section->vma + sec->output_offset + addr));
 
   contents = elf_section_data (sec)->this_hdr.contents;
   sec_end = sec->size;
@@ -1832,7 +1832,7 @@ msp430_elf_relax_add_words (bfd * abfd, asection * sec, bfd_vma addr,
 	  printf ("      adjusting value of local symbol %s from 0x%lx to "
 		  "0x%lx\n", bfd_elf_string_from_elf_section
 		  (abfd, symtab_hdr->sh_link, isym->st_name),
-		  isym->st_value, isym->st_value + num_bytes);
+		  (long) isym->st_value, (long)(isym->st_value + num_bytes));
 	isym->st_value += num_bytes;
       }
 
@@ -1881,7 +1881,7 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 
   if (debug_relocs)
     printf ("Relaxing %s (%p), output_offset: 0x%lx sec size: 0x%lx\n",
-	    sec->name, sec, sec->output_offset, sec->size);
+	    sec->name, sec, (long) sec->output_offset, (long) sec->size);
 
   symtab_hdr = & elf_tdata (abfd)->symtab_hdr;
 
@@ -1955,11 +1955,12 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 
 	  if (debug_relocs)
 	    printf ("    processing reloc at 0x%lx for local sym: %s "
-		    "st_value: 0x%lx adj value: 0x%lx\n", sec->output_offset
-		    + sec->output_section->vma + irel->r_offset,
+		    "st_value: 0x%lx adj value: 0x%lx\n",
+		    (long) (sec->output_offset + sec->output_section->vma
+			    + irel->r_offset),
 		    bfd_elf_string_from_elf_section (abfd, symtab_hdr->sh_link,
 						     isym->st_name),
-		    isym->st_value, symval);
+		    (long) isym->st_value, (long) symval);
 	}
       else
 	{
@@ -1983,9 +1984,11 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 		    + h->root.u.def.section->output_offset);
 	  if (debug_relocs)
 	    printf ("    processing reloc at 0x%lx for global sym: %s "
-		    "st_value: 0x%lx adj value: 0x%lx\n", sec->output_offset
-		    + sec->output_section->vma + irel->r_offset,
-		    h->root.root.string, h->root.u.def.value, symval);
+		    "st_value: 0x%lx adj value: 0x%lx\n",
+		    (long) (sec->output_offset + sec->output_section->vma
+		    + irel->r_offset),
+	      h->root.root.string, (long) h->root.u.def.value,
+	      (long) symval);
 	}
 
       /* For simplicity of coding, we are going to modify the section
@@ -2176,11 +2179,12 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 
 	    if (debug_relocs)
 	      printf ("    processing reloc at 0x%lx for local sym: %s "
-		      "st_value: 0x%lx adj value: 0x%lx\n", sec->output_offset
-		      + sec->output_section->vma + irel->r_offset,
+		      "st_value: 0x%lx adj value: 0x%lx\n",
+		      (long) (sec->output_offset + sec->output_section->vma
+			      + irel->r_offset),
 		      bfd_elf_string_from_elf_section
 		      (abfd, symtab_hdr->sh_link, isym->st_name),
-		      isym->st_value, symval);
+		      (long) isym->st_value, (long) symval);
 	  }
 	else
 	  {
@@ -2204,9 +2208,11 @@ msp430_elf_relax_section (bfd * abfd, asection * sec,
 		      + h->root.u.def.section->output_offset);
 	    if (debug_relocs)
 	      printf ("    processing reloc at 0x%lx for global sym: %s "
-		      "st_value: 0x%lx adj value: 0x%lx\n", sec->output_offset
-		      + sec->output_section->vma + irel->r_offset,
-		      h->root.root.string, h->root.u.def.value, symval);
+		      "st_value: 0x%lx adj value: 0x%lx\n", (long)
+		      (sec->output_offset + sec->output_section->vma
+		       + irel->r_offset),
+		      h->root.root.string, (long) h->root.u.def.value,
+		      (long) symval);
 	  }
 
 	/* For simplicity of coding, we are going to modify the section
