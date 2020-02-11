@@ -21980,9 +21980,9 @@ static void
 vcx_handle_register_arguments (unsigned num_registers,
 			       enum vcx_reg_type reg_type)
 {
-  unsigned R;
+  unsigned R, i;
   unsigned reg_mult = vcx_handle_shape (reg_type);
-  for (unsigned i = 0; i < num_registers; i++)
+  for (i = 0; i < num_registers; i++)
     {
       R = inst.operands[i+1].reg;
       vcx_ensure_register_in_range (R, reg_type);

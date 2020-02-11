@@ -1,3 +1,8 @@
+2020-02-11  Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* config/tc-arm.c (vcx_handle_register_arguments): Remove `for`
+	loop initial declaration.
+
 2020-02-10  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* config/tc-arm.c (NEON_MAX_TYPE_ELS): Increment to account for
