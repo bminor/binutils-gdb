@@ -90,18 +90,6 @@ null_file::write_async_safe (const char *buf, long sizeof_buf)
 
 
 
-void
-ui_file_flush (struct ui_file *file)
-{
-  file->flush ();
-}
-
-int
-ui_file_isatty (struct ui_file *file)
-{
-  return file->isatty ();
-}
-
 /* true if the gdb terminal supports styling, and styling is enabled.  */
 
 static bool
@@ -124,35 +112,6 @@ term_cli_styling ()
     return false;
 #endif
   return true;
-}
-
-
-void
-ui_file_write (struct ui_file *file,
-		const char *buf,
-		long length_buf)
-{
-  file->write (buf, length_buf);
-}
-
-void
-ui_file_write_async_safe (struct ui_file *file,
-			  const char *buf,
-			  long length_buf)
-{
-  file->write_async_safe (buf, length_buf);
-}
-
-long
-ui_file_read (struct ui_file *file, char *buf, long length_buf)
-{
-  return file->read (buf, length_buf);
-}
-
-void
-ui_file_puts (struct ui_file *file, const char *buf)
-{
-  file->puts (buf);
 }
 
 
@@ -315,7 +274,7 @@ stdio_file::can_emit_style_escape ()
 void
 stderr_file::write (const char *buf, long length_buf)
 {
-  ui_file_flush (gdb_stdout);
+  gdb_stdout->flush ();
   stdio_file::write (buf, length_buf);
 }
 
@@ -325,7 +284,7 @@ stderr_file::write (const char *buf, long length_buf)
 void
 stderr_file::puts (const char *linebuffer)
 {
-  ui_file_flush (gdb_stdout);
+  gdb_stdout->flush ();
   stdio_file::puts (linebuffer);
 }
 

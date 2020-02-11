@@ -425,7 +425,7 @@ tui_enable (void)
 
       /* Don't try to setup curses (and print funny control
 	 characters) if we're not outputting to a terminal.  */
-      if (!ui_file_isatty (gdb_stdout))
+      if (!gdb_stderr->isatty ())
 	error (_("Cannot enable the TUI when output is not a terminal"));
 
       s = newterm (NULL, stdout, stdin);

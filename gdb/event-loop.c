@@ -750,8 +750,8 @@ gdb_wait_for_event (int block)
   int num_found = 0;
 
   /* Make sure all output is done before getting another event.  */
-  ui_file_flush (gdb_stdout);
-  ui_file_flush (gdb_stderr);
+  gdb_stdout->flush ();
+  gdb_stderr->flush ();
 
   if (gdb_notifier.num_fds == 0)
     return -1;

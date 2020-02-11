@@ -1,3 +1,31 @@
+2020-02-11  Tom Tromey  <tromey@adacore.com>
+
+	* remote.c (remote_console_output): Update.
+	* printcmd.c (printf_command): Update.
+	* event-loop.c (gdb_wait_for_event): Update.
+	* linux-nat.c (sigchld_handler): Update.
+	* remote-sim.c (gdb_os_write_stdout): Update.
+	(gdb_os_flush_stdout): Update.
+	(gdb_os_flush_stderr): Update.
+	(gdb_os_write_stderr): Update.
+	* exceptions.c (print_exception): Update.
+	* remote-fileio.c (remote_fileio_func_read): Update.
+	(remote_fileio_func_write): Update.
+	* tui/tui.c (tui_enable): Update.
+	* tui/tui-interp.c (tui_interp::init): Update.
+	* utils.c (init_page_info): Update.
+	(putchar_unfiltered, fputc_unfiltered): Update.
+	(gdb_flush): Update.
+	(emit_style_escape): Update.
+	(flush_wrap_buffer, fputs_maybe_filtered): Update.
+	* ui-file.c (ui_file_isatty, ui_file_read, ui_file_write)
+	(ui_file_write_async_safe, ui_file_flush, ui_file_puts): Remove.
+	(stderr_file::write): Update.
+	(stderr_file::puts): Update.
+	* ui-file.h (ui_file_isatty, ui_file_write)
+	(ui_file_write_async_safe, ui_file_read, ui_file_flush)
+	(ui_file_puts): Don't declare.
+
 2020-02-10  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2/read.c (process_psymtab_comp_unit_reader): Cast concat NULL

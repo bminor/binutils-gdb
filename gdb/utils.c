@@ -1277,7 +1277,7 @@ init_page_info (void)
 	}
 
       /* If the output is not a terminal, don't paginate it.  */
-      if (!ui_file_isatty (gdb_stdout))
+      if (!gdb_stdout->isatty ())
 	lines_per_page = UINT_MAX;
 #endif
     }
@@ -1405,7 +1405,7 @@ emit_style_escape (const ui_file_style &style,
   if (stream == nullptr)
     wrap_buffer.append (style.to_ansi ());
   else
-    ui_file_puts (stream, style.to_ansi ().c_str ());
+    stream->puts (style.to_ansi ().c_str ());
 }
 
 /* Set the current output style.  This will affect future uses of the
@@ -1539,7 +1539,7 @@ flush_wrap_buffer (struct ui_file *stream)
 {
   if (stream == gdb_stdout && !wrap_buffer.empty ())
     {
-      ui_file_puts (stream, wrap_buffer.c_str ());
+      stream->puts (wrap_buffer.c_str ());
       wrap_buffer.clear ();
     }
 }
@@ -1550,7 +1550,7 @@ void
 gdb_flush (struct ui_file *stream)
 {
   flush_wrap_buffer (stream);
-  ui_file_flush (stream);
+  stream->flush ();
 }
 
 /* Indicate that if the next sequence of characters overflows the line,
@@ -1697,7 +1697,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
       || top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ())
     {
       flush_wrap_buffer (stream);
-      ui_file_puts (stream, linebuffer);
+      stream->puts (linebuffer);
       return;
     }
 
@@ -1797,7 +1797,7 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      /* Now output indentation and wrapped string.  */
 	      if (wrap_column)
 		{
-		  ui_file_puts (stream, wrap_indent);
+		  stream->puts (wrap_indent);
 		  if (stream->can_emit_style_escape ())
 		    emit_style_escape (save_style, stream);
 		  /* FIXME, this strlen is what prevents wrap_indent from
@@ -1918,7 +1918,7 @@ putchar_unfiltered (int c)
 {
   char buf = c;
 
-  ui_file_write (gdb_stdout, &buf, 1);
+  gdb_stdout->write (&buf, 1);
   return c;
 }
 
@@ -1936,7 +1936,7 @@ fputc_unfiltered (int c, struct ui_file *stream)
 {
   char buf = c;
 
-  ui_file_write (stream, &buf, 1);
+  stream->write (&buf, 1);
   return c;
 }
 

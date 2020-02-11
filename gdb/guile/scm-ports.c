@@ -234,7 +234,7 @@ ioscm_fill_input (SCM port)
   gdb_flush (gdb_stdout);
   gdb_flush (gdb_stderr);
 
-  count = ui_file_read (gdb_stdin, (char *) pt->read_buf, pt->read_buf_size);
+  count = gdb_stdin->read ((char *) pt->read_buf, pt->read_buf_size);
   if (count == -1)
     scm_syserror (FUNC_NAME);
   if (count == 0)
