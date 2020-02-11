@@ -1,3 +1,37 @@
+2020-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25355
+	* configure.ac (HAVE_EXECUTABLE_SUFFIX): New AC_DEFINE.
+	(EXECUTABLE_SUFFIX): Likewise.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* plugin.c (bfd_plugin_close_and_cleanup): Removed.
+	(plugin_list_entry): Add all_symbols_read, cleanup_handler,
+	gcc, lto_wrapper, resolution_file, resolution_option, gcc_env,
+	real_bfd, real_nsyms, real_syms, lto_nsyms and lto_syms.
+	(get_lto_wrapper): New.
+	(setup_lto_wrapper_env): Likewise.
+	(current_plugin): Likewise.
+	(register_all_symbols_read): Likewise.
+	(register_cleanup): Likewise.
+	(get_symbols): Likewise.
+	(add_input_file): Likewise.
+	(bfd_plugin_close_and_cleanup): Likewise.
+	(claim_file): Removed.
+	(register_claim_file): Set current_plugin->claim_file.
+	(add_symbols): Make a copy of LTO symbols.  Set lto_nsyms and
+	lto_syms in current_plugin.
+	(try_claim): Use current_plugin->claim_file.  Call LTO plugin
+	all_symbols_read handler.  Copy real symbols to plugin_data.
+	Call LTO plugin cleanup handler.  Clean up for LTO wrapper.
+	(try_load_plugin): Don't reuse the previous plugin for LTO
+	wrapper.  Set up GCC LTO wrapper if possible.  Don't set
+	plugin_list_iter->claim_file.
+	(bfd_plugin_canonicalize_symtab): Use real LTO symbols if
+	possible.
+	* plugin.h (plugin_data_struct): Add real_bfd, real_nsyms and
+	real_syms.
+
 2020-02-10  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* elf32-msp430.c (msp430_elf_relax_section): Before relaxing a branch,
