@@ -448,6 +448,8 @@ add_symbols (void * handle,
       size_t sym_info_size, name_length;
       int i;
 
+      memset (plugin_data, 0, sizeof (*plugin_data));
+
       abfd->tdata.plugin_data = plugin_data;
 
       /* NB: LTO symbols are owned by LTO plugin.  Create a copy so

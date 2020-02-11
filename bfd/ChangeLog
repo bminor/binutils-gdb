@@ -1,3 +1,7 @@
+2020-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (add_symbols): Clear plugin_data memory.
+
 2020-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25355
