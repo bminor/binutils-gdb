@@ -7,4 +7,4 @@ m4_include([../gdb/selftest.m4])
 m4_include([../gdb/ptrace.m4])
 
 dnl This gets AM_GDB_WARNINGS.
-m4_include(../gdb/warning.m4)
+m4_include(warning.m4)

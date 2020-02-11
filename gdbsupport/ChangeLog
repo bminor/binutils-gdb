@@ -1,5 +1,11 @@
 2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
 
+	* warning.m4: Move here, from gdb/warning.m4.
+	* acinclude.m4: Update warning.m4 path.
+	* Makefile.in: Re-generate.
+
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
 	* acinclude.m4: Include ../gdb/warning.m4.
 	* configure.ac: Use AM_GDB_WARNINGS.
 	* Makefile.am: Set AM_CFLAGS to WARN_CFLAGS and WERROR_CFLAGS.

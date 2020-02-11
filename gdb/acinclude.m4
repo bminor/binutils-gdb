@@ -10,7 +10,7 @@ m4_include(acx_configure_dir.m4)
 m4_include(transform.m4)
 
 # This gets AM_GDB_WARNINGS.
-m4_include(warning.m4)
+m4_include(../gdbsupport/warning.m4)
 
 # AM_GDB_UBSAN
 m4_include(sanitize.m4)

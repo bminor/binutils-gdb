@@ -1,3 +1,8 @@
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* acinclude: Update warning.m4 path.
+	* warning.m4: Move to gdbsupport.
+
 2020-02-11  Tom Tromey  <tromey@adacore.com>
 
 	* remote.c (remote_console_output): Update.
