@@ -33,7 +33,7 @@ proc compile_jit_test {testname binsuffix options} {
     global solib_testfile solib_srcfile solib_binfile solib_binfile_test_msg
     global solib_binfile_target
 
-    set testfile jit-main
+    set testfile jit-elf-main
     set srcfile ${testfile}.c
     set binfile [standard_output_file $testfile$binsuffix]
     if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
@@ -42,7 +42,7 @@ proc compile_jit_test {testname binsuffix options} {
 	return -1
     }
 
-    set solib_testfile "jit-solib"
+    set solib_testfile "jit-elf-solib"
     set solib_srcfile "${srcdir}/${subdir}/${solib_testfile}.c"
     set solib_binfile [standard_output_file ${solib_testfile}$binsuffix.so]
     set solib_binfile_test_msg "SHLIBDIR/${solib_testfile}$binsuffix.so"

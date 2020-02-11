@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2016-2020 Free Software Foundation, Inc.
+   Copyright 2018-2020 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,10 +17,12 @@
 
 /* Simple standalone program using the JIT API.  */
 
-#include "jit-simple-jit.c"
+#include "jit-reader-simple-jit.c"
+#include <unistd.h>
 
 int
-main (void)
+main (int argc, char **argv)
 {
-  return 0;
+  execl (PROGRAM, PROGRAM, (char *) 0);
+  return 99;
 }

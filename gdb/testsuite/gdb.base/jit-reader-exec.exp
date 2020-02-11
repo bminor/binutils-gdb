@@ -21,9 +21,9 @@ if { ![istarget "*-linux*"] } then {
     return
 }
 
-standard_testfile jit-exec.c
+standard_testfile jit-reader-exec.c
 
-set testfile2 "jit-execd"
+set testfile2 "jit-reader-execd"
 set srcfile2 ${testfile2}.c
 set binfile2 [standard_output_file ${testfile2}]
 

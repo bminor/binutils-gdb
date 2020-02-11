@@ -30,7 +30,7 @@ if {[get_compiler_info]} {
 # test running programs
 #
 
-set testfile jit-dlmain
+set testfile jit-elf-dlmain
 set srcfile ${testfile}.c
 set binfile [standard_output_file ${testfile}]
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug shlib_load}] != "" } {
@@ -38,7 +38,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     return -1
 }
 
-set testfile2 jit-main
+set testfile2 jit-elf-main
 set srcfile2 ${testfile2}.c
 set binfile2 [standard_output_file ${testfile2}.so]
 set binfile2_dlopen [shlib_target_file ${testfile2}.so]
@@ -47,7 +47,7 @@ if { [gdb_compile_shlib "${srcdir}/${subdir}/${srcfile2}" ${binfile2} {debug add
     return -1
 }
 
-set solib_testfile "jit-solib"
+set solib_testfile "jit-elf-solib"
 set solib_srcfile "${srcdir}/${subdir}/${solib_testfile}.c"
 set solib_binfile [standard_output_file ${solib_testfile}.so]
 set solib_binfile_test_msg "SHLIBDIR/${solib_testfile}.so"

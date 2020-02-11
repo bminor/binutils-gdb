@@ -23,7 +23,7 @@
 #include <sys/mman.h>
 
 #include JIT_READER_H  /* Please see jit-reader.exp for an explanation.  */
-#include "jithost.h"
+#include "jit-reader-host.h"
 #include "jit-protocol.h"
 
 void __attribute__((noinline)) __jit_debug_register_code () { }

@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include JIT_READER_H  /* Please see jit-reader.exp for an explanation.  */
-#include "jithost.h"
+#include "jit-reader-host.h"
 
 GDB_DECLARE_GPL_COMPATIBLE_READER;
 
