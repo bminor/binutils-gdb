@@ -1,5 +1,10 @@
 2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
 
+	* warning.m4: Add -Wstrict-null-sentinel.
+	* configure: Re-generate.
+
+2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
+
 	* warning.m4: Move here, from gdb/warning.m4.
 	* acinclude.m4: Update warning.m4 path.
 	* Makefile.in: Re-generate.

@@ -50,7 +50,9 @@ build_warnings="-Wall -Wpointer-arith \
 -Wdeprecated-copy \
 -Wdeprecated-copy-dtor \
 -Wredundant-move \
--Wmissing-declarations"
+-Wmissing-declarations \
+-Wstrict-null-sentinel \
+"
 
 case "${host}" in
   *-*-mingw32*)
