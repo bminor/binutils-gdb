@@ -549,9 +549,8 @@ try_claim (bfd *abfd)
   struct ld_plugin_input_file file;
 
   file.handle = abfd;
-  if (!bfd_plugin_open_input (abfd, &file))
-    return 0;
-  if (current_plugin->claim_file)
+  if (bfd_plugin_open_input (abfd, &file)
+      && current_plugin->claim_file)
     {
       current_plugin->claim_file (&file, &claimed);
       if (claimed)
@@ -577,14 +576,18 @@ try_claim (bfd *abfd)
 	    }
 	}
 
-      if (current_plugin->lto_wrapper)
-	{
-	  /* Clean up for LTO wrapper.  */
-	  unlink (current_plugin->resolution_file);
-	  free (current_plugin->resolution_option);
-	}
+      close (file.fd);
     }
-  close (file.fd);
+
+  if (current_plugin->lto_wrapper)
+    {
+      /* Clean up for LTO wrapper.  NB: Resolution file and option
+	 have been created regardless if an IR object is claimed or
+	 not.  */
+      unlink (current_plugin->resolution_file);
+      free (current_plugin->resolution_option);
+    }
+
   return claimed;
 }
 
@@ -600,16 +603,15 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
 
   *has_plugin_p = 0;
 
-  /* NB: Each object is inddependent.  Reuse the previous plugin from
-     the last LTO wrapper run will lead to wrong LTO data.  */
-  if (current_plugin
-      && current_plugin->handle
-      && current_plugin->lto_wrapper
-      && strcmp (current_plugin->plugin_name, pname) == 0)
+  /* NB: Each object is independent.  Reuse the previous plugin from
+     the last run will lead to wrong result.  */
+  if (current_plugin)
     {
-      dlclose (current_plugin->handle);
+      if (current_plugin->handle)
+	dlclose (current_plugin->handle);
       memset (current_plugin, 0,
 	      offsetof (struct plugin_list_entry, next));
+      current_plugin = NULL;
     }
 
   plugin_handle = dlopen (pname, RTLD_NOW);
@@ -622,31 +624,30 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
   for (plugin_list_iter = plugin_list;
        plugin_list_iter;
        plugin_list_iter = plugin_list_iter->next)
-    {
-      if (plugin_handle == plugin_list_iter->handle)
-	{
-	  dlclose (plugin_handle);
-	  if (!plugin_list_iter->claim_file)
-	    return 0;
+    if (strcmp (plugin_list_iter->plugin_name, pname) == 0)
+      break;
 
-	  register_claim_file (plugin_list_iter->claim_file);
-	  current_plugin = plugin_list_iter;
-	  goto have_claim_file;
+  if (plugin_list_iter == NULL)
+    {
+      size_t length_plugin_name = strlen (pname) + 1;
+      char *plugin_name = bfd_malloc (length_plugin_name);
+      if (plugin_name == NULL)
+	return 0;
+      plugin_list_iter = bfd_malloc (sizeof *plugin_list_iter);
+      if (plugin_list_iter == NULL)
+	{
+	  free (plugin_name);
+	  return 0;
 	}
-      else if (plugin_list_iter->lto_wrapper
-	       && strcmp (plugin_list_iter->plugin_name, pname) == 0)
-	goto have_lto_wrapper;
+      /* Make a copy of PNAME since PNAME from load_plugin () will be
+	 freed.  */
+      memcpy (plugin_name, pname, length_plugin_name);
+      memset (plugin_list_iter, 0, sizeof (*plugin_list_iter));
+      plugin_list_iter->plugin_name = plugin_name;
+      plugin_list_iter->next = plugin_list;
+      plugin_list = plugin_list_iter;
     }
 
-  plugin_list_iter = bfd_malloc (sizeof *plugin_list_iter);
-  if (plugin_list_iter == NULL)
-    return 0;
-  memset (plugin_list_iter, 0, sizeof (*plugin_list_iter));
-  plugin_list_iter->plugin_name = pname;
-  plugin_list_iter->next = plugin_list;
-  plugin_list = plugin_list_iter;
-
-have_lto_wrapper:
   plugin_list_iter->handle = plugin_handle;
 
   onload = dlsym (plugin_handle, "onload");
@@ -716,7 +717,6 @@ have_lto_wrapper:
       && setup_lto_wrapper_env (current_plugin))
     return 0;
 
-have_claim_file:
   *has_plugin_p = 1;
 
   abfd->plugin_format = bfd_plugin_no;
