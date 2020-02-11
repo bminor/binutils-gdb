@@ -1,3 +1,10 @@
+2020-02-11  Jan Beulich  <jbeulich@suse.com>
+
+	(struct _i386_insn): New field "short_form".
+	(optimize_encoding): Drop setting of shortform field.
+	(process_suffix): Set i.short_form. Replace shortform use.
+	(process_operands): Replace shortform use.
+
 2020-02-11  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* config/tc-arm.c (vcx_handle_register_arguments): Remove `for`

@@ -1,5 +1,17 @@
 2020-02-11  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (opcode_modifiers): Remove ShortForm entry.
+	* i386-opc.h (ShortForm): Delete.
+	(struct i386_opcode_modifier): Remove shortform field.
+	* i386-opc.tbl (mov, movabs, push, pop, xchg, inc, dec, fld,
+	fst, fstp, fxch, fcom, fcomp, fucom, fucomp, fadd, faddp, fsub,
+	fsubp, fsubr, fsubrp, fmul, fmulp, fdiv, fdivp, fdivr, fdivrp,
+	ffreep, bswap, fcmov*, fcomi, fcomip, fucomi, fucomip, movq):
+	Drop ShortForm.
+	* i386-tbl.h: Re-generate.
+
+2020-02-11  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (fcomi, fucomi, fcomip, fcompi, fucomip,
 	fucompi): Drop ShortForm from operand-less templates.
 	* i386-tbl.h: Re-generate.

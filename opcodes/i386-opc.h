@@ -401,8 +401,6 @@ enum
   Load,
   /* insn has a modrm byte. */
   Modrm,
-  /* register is in low 3 bits of opcode */
-  ShortForm,
   /* special case for jump insns; value has to be 1 */
 #define JUMP 1
   /* call and jump */
@@ -658,7 +656,6 @@ typedef struct i386_opcode_modifier
   unsigned int w:1;
   unsigned int load:1;
   unsigned int modrm:1;
-  unsigned int shortform:1;
   unsigned int jump:3;
   unsigned int floatmf:1;
   unsigned int floatr:1;

@@ -354,6 +354,9 @@ struct _i386_insn
     unsigned int prefixes;
     unsigned char prefix[MAX_PREFIXES];
 
+    /* Register is in low 3 bits of opcode.  */
+    bfd_boolean short_form;
+
     /* The operand to a branch insn indicates an absolute branch.  */
     bfd_boolean jumpabsolute;
 
@@ -4084,7 +4087,6 @@ optimize_encoding (void)
 	      i.tm.base_opcode = 0xb8;
 	      i.tm.extension_opcode = None;
 	      i.tm.opcode_modifier.w = 0;
-	      i.tm.opcode_modifier.shortform = 1;
 	      i.tm.opcode_modifier.modrm = 0;
 	    }
 	}
@@ -6495,6 +6497,10 @@ process_suffix (void)
 	}
     }
 
+  if (!i.tm.opcode_modifier.modrm && i.reg_operands && i.tm.operands < 3)
+    i.short_form = (i.tm.operand_types[0].bitfield.class == Reg)
+		   != (i.tm.operand_types[1].bitfield.class == Reg);
+
   /* Change the opcode based on the operand size given by i.suffix.  */
   switch (i.suffix)
     {
@@ -6511,7 +6517,7 @@ process_suffix (void)
       /* It's not a byte, select word/dword operation.  */
       if (i.tm.opcode_modifier.w)
 	{
-	  if (i.tm.opcode_modifier.shortform)
+	  if (i.short_form)
 	    i.tm.base_opcode |= 8;
 	  else
 	    i.tm.base_opcode |= 1;
@@ -7109,7 +7115,7 @@ duplicate:
 	 on one of their operands, the default segment is ds.  */
       default_seg = &ds;
     }
-  else if (i.tm.opcode_modifier.shortform)
+  else if (i.short_form)
     {
       /* The register or float register operand is in operand
 	 0 or 1.  */
