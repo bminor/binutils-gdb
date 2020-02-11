@@ -2,6 +2,15 @@
 
 	Import from the mainline:
 
+	PR 25447
+	* coffgen.c (_bfd_coff_close_and_cleanup): Do not clear the keep
+	syms and keep strings flags as these may have been set in order to
+	prevent a bogus call to free.
+
+2020-02-11  Nick Clifton  <nickc@redhat.com>
+
+	Import from the mainline:
+
 	* elf32-msp430.c (msp430_final_link_relocate): Always use longs
 	for addresses in print statements.
 	(msp430_elf_relax_delete_bytes): Likewise.
