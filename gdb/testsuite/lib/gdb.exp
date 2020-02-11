@@ -5053,6 +5053,10 @@ proc gdb_init { test_file_name } {
     set gdbserver_reconnect_p 1
     unset gdbserver_reconnect_p
 
+    # Clear $last_loaded_file
+    global last_loaded_file
+    unset -nocomplain last_loaded_file
+
     # Reset GDB number of instances
     global gdb_instances
     set gdb_instances 0
