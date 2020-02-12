@@ -1480,8 +1480,14 @@ dwarf2_frame_cfa (struct frame_info *this_frame)
   return get_frame_base (this_frame);
 }
 
-static const struct objfile_key<comp_unit> dwarf2_frame_objfile_data;
+/* We store the frame data on the BFD.  This is only done if it is
+   independent of the address space and so can be shared.  */
+static const struct bfd_key<comp_unit> dwarf2_frame_bfd_data;
 
+/* If any BFD sections require relocations (note; really should be if
+   any debug info requires relocations), then we store the frame data
+   on the objfile instead, and do not share it.  */
+const struct objfile_key<comp_unit> dwarf2_frame_objfile_data;
 
 
 /* Pointer encoding helper functions.  */
@@ -1635,6 +1641,29 @@ bsearch_fde_cmp (const dwarf2_fde *fde, CORE_ADDR seek_pc)
   return 1;
 }
 
+/* Find an existing comp_unit for an objfile, if any.  */
+
+static comp_unit *
+find_comp_unit (struct objfile *objfile)
+{
+  bfd *abfd = objfile->obfd;
+  if (gdb_bfd_requires_relocations (abfd))
+    return dwarf2_frame_bfd_data.get (abfd);
+  return dwarf2_frame_objfile_data.get (objfile);
+}
+
+/* Store the comp_unit on OBJFILE, or the corresponding BFD, as
+   appropriate.  */
+
+static void
+set_comp_unit (struct objfile *objfile, struct comp_unit *unit)
+{
+  bfd *abfd = objfile->obfd;
+  if (gdb_bfd_requires_relocations (abfd))
+    return dwarf2_frame_bfd_data.set (abfd, unit);
+  return dwarf2_frame_objfile_data.set (objfile, unit);
+}
+
 /* Find the FDE for *PC.  Return a pointer to the FDE, and store the
    initial location associated with it into *PC.  */
 
@@ -1646,11 +1675,11 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
       CORE_ADDR offset;
       CORE_ADDR seek_pc;
 
-      comp_unit *unit = dwarf2_frame_objfile_data.get (objfile);
+      comp_unit *unit = find_comp_unit (objfile);
       if (unit == NULL)
 	{
 	  dwarf2_build_frame_info (objfile);
-	  unit = dwarf2_frame_objfile_data.get (objfile);
+	  unit = find_comp_unit (objfile);
 	}
       gdb_assert (unit != NULL);
 
@@ -2262,7 +2291,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
     }
   unit->fde_table.shrink_to_fit ();
 
-  dwarf2_frame_objfile_data.set (objfile, unit.release ());
+  set_comp_unit (objfile, unit.release ());
 }
 
 /* Handle 'maintenance show dwarf unwinders'.  */
