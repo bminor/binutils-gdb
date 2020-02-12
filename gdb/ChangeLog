@@ -1,5 +1,10 @@
 2020-02-12  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/frame.c (struct comp_unit) <obstack>: New member.
+	(decode_frame_entry_1): Use the comp_unit obstack.
+
+2020-02-12  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/frame.c (struct comp_unit): Add initializers and
 	constructor.
 	(dwarf2_frame_objfile_data): Store a comp_unit.

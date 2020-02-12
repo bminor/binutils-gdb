@@ -164,6 +164,9 @@ struct comp_unit
 
   /* The FDE table.  */
   dwarf2_fde_table fde_table;
+
+  /* Hold data used by this module.  */
+  auto_obstack obstack;
 };
 
 static struct dwarf2_fde *dwarf2_frame_find_fde (CORE_ADDR *pc,
@@ -1777,7 +1780,7 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
       if (find_cie (cie_table, cie_pointer))
 	return end;
 
-      cie = XOBNEW (&unit->objfile->objfile_obstack, struct dwarf2_cie);
+      cie = XOBNEW (&unit->obstack, struct dwarf2_cie);
       cie->initial_instructions = NULL;
       cie->cie_pointer = cie_pointer;
 
@@ -1956,7 +1959,7 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
       if (cie_pointer >= unit->dwarf_frame_size)
 	return NULL;
 
-      fde = XOBNEW (&unit->objfile->objfile_obstack, struct dwarf2_fde);
+      fde = XOBNEW (&unit->obstack, struct dwarf2_fde);
       fde->cie = find_cie (cie_table, cie_pointer);
       if (fde->cie == NULL)
 	{
