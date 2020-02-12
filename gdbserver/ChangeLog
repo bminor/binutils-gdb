@@ -1,3 +1,10 @@
+2020-02-12  Maciej W. Rozycki <macro@wdc.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	Skip building gdbserver in a cross-configuration.
+	* configure.srv: Set $gdbserver_host depending on whether $target
+	is $host.  Use $gdbserver_host instead of $host.
+
 2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
 
 	* configure: Re-generate.

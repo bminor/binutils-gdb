@@ -33,9 +33,16 @@ ipa_ppc_linux_regobj="powerpc-32l-ipa.o powerpc-altivec32l-ipa.o powerpc-vsx32l-
 # these files over and over again.
 srv_linux_obj="linux-low.o nat/linux-osdata.o nat/linux-procfs.o nat/linux-ptrace.o nat/linux-waitpid.o nat/linux-personality.o nat/linux-namespaces.o fork-child.o nat/fork-inferior.o"
 
-# Input is taken from the "${host}" variable.
+# Input is taken from the "${host}" and "${target}" variables.
 
-case "${host}" in
+# GDBserver can only debug native programs.
+if test "${target}" = "${host}"; then
+    gdbserver_host=${host}
+else
+    gdbserver_host=
+fi
+
+case "${gdbserver_host}" in
   aarch64*-*-linux*)	srv_tgtobj="linux-aarch64-low.o"
 			srv_tgtobj="$srv_tgtobj nat/aarch64-linux-hw-point.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"
