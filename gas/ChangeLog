@@ -1,5 +1,22 @@
 2020-02-12  Jan Beulich  <jbeulich@suse.com>
 
+	PR gas/24546
+	* config/tc-i386.c (match_template): Apply AMD64 check to 64-bit
+	code only.
+	* config/tc-i386-intel.c (i386_intel_operand): Also handle
+	CALL/JMP in O_tbyte_ptr case.
+	* doc/c-i386.texi: Mention far call and full pointer load ISA
+	differences.
+	* testsuite/gas/i386/x86-64-branch-3.s,
+	testsuite/gas/i386/x86-64-intel64.s: Add 64-bit far call cases.
+	* testsuite/gas/i386/x86-64-branch-3.d,
+	testsuite/gas/i386/x86-64-intel64.d: Adjust expectations.
+	* testsuite/gas/i386/x86-64-branch-5.l,
+	testsuite/gas/i386/x86-64-branch-5.s: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
+2020-02-12  Jan Beulich  <jbeulich@suse.com>
+
 	PR gas/25438
 	* config/tc-i386.c (REGISTER_WARNINGS): Delete.
 	(check_byte_reg): Skip only source operand of CRC32. Drop Non-

@@ -2331,8 +2331,8 @@ struct dis386 {
    'Z' => print 'q' in 64bit mode and behave as 'L' otherwise
    '!' => change condition from true to false or from false to true.
    '%' => add 1 upper case letter to the macro.
-   '^' => print 'w' or 'l' depending on operand size prefix or
-	  suffix_always is true (lcall/ljmp).
+   '^' => print 'w', 'l', or 'q' (Intel64 ISA only) depending on operand size
+	  prefix or suffix_always is true (lcall/ljmp).
    '@' => print 'q' for Intel64 ISA, 'w' or 'q' for AMD64 ISA depending
 	  on operand size prefix.
    '&' => print 'q' in 64bit mode for Intel64 ISA or if instruction
@@ -13296,6 +13296,12 @@ case_S:
 	case '^':
 	  if (intel_syntax)
 	    break;
+	  if (isa64 == intel64 && (rex & REX_W))
+	    {
+	      USED_REX (REX_W);
+	      *obufp++ = 'q';
+	      break;
+	    }
 	  if ((prefixes & PREFIX_DATA) || (sizeflag & SUFFIX_ALWAYS))
 	    {
 	      if (sizeflag & DFLAG)

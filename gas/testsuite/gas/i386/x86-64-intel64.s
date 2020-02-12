@@ -10,6 +10,9 @@ _start:
 	lss	(%rdx), %rbx
 	lssq	(%rdx), %rbx
 
+	lcallq	*(%rax)
+	ljmpq	*(%rcx)
+
 	syscall
 	sysretl
 	sysretq
@@ -21,3 +24,6 @@ _start:
 	lgs	rcx, tbyte ptr [rdx]
 	lss	rdx, [rbx]
 	lss	rdx, tbyte ptr [rbx]
+
+	call	tbyte ptr [rcx]
+	jmp	tbyte ptr [rdx]

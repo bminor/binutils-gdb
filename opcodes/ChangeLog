@@ -1,3 +1,13 @@
+2020-02-12  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/24546
+	* i386-dis.c (putop): Handle REX.W in '^' case for Intel64 mode.
+	* i386-opc.tbl (lfs, lgs, lss, lcall, ljmp): Split into
+	Amd64 and Intel64 templates.
+	(call, jmp): Likewise for far indirect variants. Dro
+	Unspecified.
+	* i386-tbl.h: Re-generate.
+
 2020-02-11  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (opcode_modifiers): Remove ShortForm entry.

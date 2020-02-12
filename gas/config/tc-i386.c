@@ -5827,7 +5827,7 @@ match_template (char mnem_suffix)
 	  break;
 	case intel64:
 	  /* -mintel64: Don't accept AMD64.  */
-	  if (t->opcode_modifier.isa64 == AMD64)
+	  if (t->opcode_modifier.isa64 == AMD64 && flag_code == CODE_64BIT)
 	    continue;
 	  break;
 	}

@@ -1455,6 +1455,18 @@ There are some discrepancies between AMD64 and Intel64 ISAs.
 @item For @samp{movsxd} with 16-bit destination register, AMD64
 supports 32-bit source operand and Intel64 supports 16-bit source
 operand.
+
+@item For far branches (with explicit memory operand), both ISAs support
+32- and 16-bit operand size.  Intel64 additionally supports 64-bit
+operand size, encoded as @samp{ljmpq} and @samp{lcallq} in AT&T syntax
+and with an explicit @samp{tbyte ptr} operand size specifier in Intel
+syntax.
+
+@item @samp{lfs}, @samp{lgs}, and @samp{lss} similarly allow for 16-
+and 32-bit operand size (32- and 48-bit memory operand) in both ISAs,
+while Intel64 additionally supports 64-bit operand sise (80-bit memory
+operands).
+
 @end itemize
 
 @node i386-Bugs
