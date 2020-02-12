@@ -1701,7 +1701,8 @@ enum eh_frame_type
   EH_CIE_OR_FDE_TYPE_ID = EH_CIE_TYPE_ID | EH_FDE_TYPE_ID
 };
 
-static const gdb_byte *decode_frame_entry (struct comp_unit *unit,
+static const gdb_byte *decode_frame_entry (struct gdbarch *gdbarch,
+					   struct comp_unit *unit,
 					   const gdb_byte *start,
 					   int eh_frame_p,
 					   dwarf2_cie_table &cie_table,
@@ -1712,13 +1713,13 @@ static const gdb_byte *decode_frame_entry (struct comp_unit *unit,
    Return NULL if invalid input, otherwise the next byte to be processed.  */
 
 static const gdb_byte *
-decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
+decode_frame_entry_1 (struct gdbarch *gdbarch,
+		      struct comp_unit *unit, const gdb_byte *start,
 		      int eh_frame_p,
                       dwarf2_cie_table &cie_table,
                       dwarf2_fde_table *fde_table,
                       enum eh_frame_type entry_type)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (unit->objfile);
   const gdb_byte *buf, *end;
   ULONGEST length;
   unsigned int bytes_read;
@@ -1963,7 +1964,8 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
       fde->cie = find_cie (cie_table, cie_pointer);
       if (fde->cie == NULL)
 	{
-	  decode_frame_entry (unit, unit->dwarf_frame_buffer + cie_pointer,
+	  decode_frame_entry (gdbarch, unit,
+			      unit->dwarf_frame_buffer + cie_pointer,
 			      eh_frame_p, cie_table, fde_table,
 			      EH_CIE_TYPE_ID);
 	  fde->cie = find_cie (cie_table, cie_pointer);
@@ -2014,7 +2016,8 @@ decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
    expect an FDE or a CIE.  */
 
 static const gdb_byte *
-decode_frame_entry (struct comp_unit *unit, const gdb_byte *start,
+decode_frame_entry (struct gdbarch *gdbarch,
+		    struct comp_unit *unit, const gdb_byte *start,
 		    int eh_frame_p,
 		    dwarf2_cie_table &cie_table,
                     dwarf2_fde_table *fde_table,
@@ -2026,7 +2029,7 @@ decode_frame_entry (struct comp_unit *unit, const gdb_byte *start,
 
   while (1)
     {
-      ret = decode_frame_entry_1 (unit, start, eh_frame_p,
+      ret = decode_frame_entry_1 (gdbarch, unit, start, eh_frame_p,
 				  cie_table, fde_table, entry_type);
       if (ret != NULL)
 	break;
@@ -2132,6 +2135,8 @@ dwarf2_build_frame_info (struct objfile *objfile)
   dwarf2_cie_table cie_table;
   dwarf2_fde_table fde_table;
 
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+
   /* Build a minimal decoding of the DWARF2 compilation unit.  */
   std::unique_ptr<comp_unit> unit (new comp_unit (objfile));
 
@@ -2165,7 +2170,8 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	    {
 	      frame_ptr = unit->dwarf_frame_buffer;
 	      while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
-		frame_ptr = decode_frame_entry (unit.get (), frame_ptr, 1,
+		frame_ptr = decode_frame_entry (gdbarch, unit.get (),
+						frame_ptr, 1,
 						cie_table, &fde_table,
 						EH_CIE_OR_FDE_TYPE_ID);
 	    }
@@ -2195,7 +2201,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	{
 	  frame_ptr = unit->dwarf_frame_buffer;
 	  while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
-	    frame_ptr = decode_frame_entry (unit.get (), frame_ptr, 0,
+	    frame_ptr = decode_frame_entry (gdbarch, unit.get (), frame_ptr, 0,
 					    cie_table, &fde_table,
 					    EH_CIE_OR_FDE_TYPE_ID);
 	}
