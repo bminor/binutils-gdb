@@ -1,5 +1,20 @@
 2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
 
+	* config/tc-riscv.c (riscv_ip): New boolean insn_with_csr to indicate
+	we are assembling instruction with CSR.  Call riscv_csr_read_only_check
+	after parsing all arguments.
+	(enum csr_insn_type): New enum is used to classify the CSR instruction.
+	(riscv_csr_insn_type, riscv_csr_read_only_check): New functions.  These
+	are used to check if we write a read-only CSR by the CSR instruction.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-01.s: New testcase.  Test
+	all CSR for the read-only CSR checking.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-01.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-01.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-02.s: New testcase.  Test
+	all CSR instructions for the read-only CSR checking.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-02.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-02.l: Likewise.
+
 	* config/tc-riscv.c (struct riscv_set_options): New field csr_check.
 	(riscv_opts): Initialize it.
 	(reg_lookup_internal): Check the `riscv_opts.csr_check`

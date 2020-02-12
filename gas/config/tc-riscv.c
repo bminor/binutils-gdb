@@ -1486,6 +1486,56 @@ riscv_handle_implicit_zero_offset (expressionS *ep, const char *s)
   return FALSE;
 }
 
+/* All RISC-V CSR instructions belong to one of these classes.  */
+
+enum csr_insn_type
+{
+  INSN_NOT_CSR,
+  INSN_CSRRW,
+  INSN_CSRRS,
+  INSN_CSRRC
+};
+
+/* Return which CSR instruction is checking.  */
+
+static enum csr_insn_type
+riscv_csr_insn_type (insn_t insn)
+{
+  if (((insn ^ MATCH_CSRRW) & MASK_CSRRW) == 0
+      || ((insn ^ MATCH_CSRRWI) & MASK_CSRRWI) == 0)
+    return INSN_CSRRW;
+  else if (((insn ^ MATCH_CSRRS) & MASK_CSRRS) == 0
+	   || ((insn ^ MATCH_CSRRSI) & MASK_CSRRSI) == 0)
+    return INSN_CSRRS;
+  else if (((insn ^ MATCH_CSRRC) & MASK_CSRRC) == 0
+	   || ((insn ^ MATCH_CSRRCI) & MASK_CSRRCI) == 0)
+    return INSN_CSRRC;
+  else
+    return INSN_NOT_CSR;
+}
+
+/* CSRRW and CSRRWI always write CSR.  CSRRS, CSRRC, CSRRSI and CSRRCI write
+   CSR when RS1 isn't zero.  The CSR is read only if the [11:10] bits of
+   CSR address is 0x3.  */
+
+static bfd_boolean
+riscv_csr_read_only_check (insn_t insn)
+{
+  int csr = (insn & (OP_MASK_CSR << OP_SH_CSR)) >> OP_SH_CSR;
+  int rs1 = (insn & (OP_MASK_RS1 << OP_SH_RS1)) >> OP_SH_RS1;
+  int readonly = (((csr & (0x3 << 10)) >> 10) == 0x3);
+  enum csr_insn_type csr_insn = riscv_csr_insn_type (insn);
+
+  if (readonly
+      && (((csr_insn == INSN_CSRRS
+	    || csr_insn == INSN_CSRRC)
+	   && rs1 != 0)
+	  || csr_insn == INSN_CSRRW))
+    return FALSE;
+
+  return TRUE;
+}
+
 /* This routine assembles an instruction into its binary format.  As a
    side effect, it sets the global variable imm_reloc to the type of
    relocation to do if one of the operands is an address expression.  */
@@ -1504,6 +1554,8 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
   int argnum;
   const struct percent_op_match *p;
   const char *error = "unrecognized opcode";
+  /* Indicate we are assembling instruction with CSR.  */
+  bfd_boolean insn_with_csr = FALSE;
 
   /* Parse the name of the instruction.  Terminate the string if whitespace
      is found so that hash_find only sees the name part of the string.  */
@@ -1550,11 +1602,26 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 					 : insn->match) == 2
 		      && !riscv_opts.rvc)
 		    break;
+
+		  /* Check if we write a read-only CSR by the CSR
+		     instruction.  */
+		  if (insn_with_csr
+		      && riscv_opts.csr_check
+		      && !riscv_csr_read_only_check (ip->insn_opcode))
+		    {
+		      /* Restore the character in advance, since we want to
+			 report the detailed warning message here.  */
+		      if (save_c)
+			*(argsStart - 1) = save_c;
+		      as_warn (_("Read-only CSR is written `%s'"), str);
+		      insn_with_csr = FALSE;
+		    }
 		}
 	      if (*s != '\0')
 		break;
 	      /* Successful assembly.  */
 	      error = NULL;
+	      insn_with_csr = FALSE;
 	      goto out;
 
 	    case 'C': /* RVC */
@@ -1899,6 +1966,7 @@ rvc_lui:
 	      continue;
 
 	    case 'E':		/* Control register.  */
+	      insn_with_csr = TRUE;
 	      if (reg_lookup (&s, RCLASS_CSR, &regno))
 		INSERT_OPERAND (CSR, *ip, regno);
 	      else
@@ -2219,6 +2287,7 @@ jump:
 	}
       s = argsStart;
       error = _("illegal operands");
+      insn_with_csr = FALSE;
     }
 
 out:
