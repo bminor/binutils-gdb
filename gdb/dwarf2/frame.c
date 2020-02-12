@@ -137,15 +137,12 @@ typedef std::vector<dwarf2_fde *> dwarf2_fde_table;
 struct comp_unit
 {
   comp_unit (struct objfile *objf)
-    : abfd (objf->obfd),
-      objfile (objf)
+    : abfd (objf->obfd)
   {
   }
 
   /* Keep the bfd convenient.  */
   bfd *abfd;
-
-  struct objfile *objfile;
 
   /* Pointer to the .debug_frame section loaded into memory.  */
   const gdb_byte *dwarf_frame_buffer = nullptr;
@@ -355,7 +352,8 @@ Not implemented: computing unwound register using explicit value operator"));
 static const gdb_byte *
 execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 		     const gdb_byte *insn_end, struct gdbarch *gdbarch,
-		     CORE_ADDR pc, struct dwarf2_frame_state *fs)
+		     CORE_ADDR pc, struct dwarf2_frame_state *fs,
+		     CORE_ADDR text_offset)
 {
   int eh_frame_p = fde->eh_frame_p;
   unsigned int bytes_read;
@@ -392,8 +390,8 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 	      fs->pc = read_encoded_value (fde->cie->unit, fde->cie->encoding,
 					   fde->cie->ptr_size, insn_ptr,
 					   &bytes_read, fde->initial_location);
-	      /* Apply the objfile offset for relocatable objects.  */
-	      fs->pc += fde->cie->unit->objfile->text_section_offset ();
+	      /* Apply the text offset for relocatable objects.  */
+	      fs->pc += text_offset;
 	      insn_ptr += bytes_read;
 	      break;
 
@@ -652,7 +650,7 @@ execute_cfa_program_test (struct gdbarch *gdbarch)
 
   const gdb_byte *insn_end = insns + sizeof (insns);
   const gdb_byte *out = execute_cfa_program (&fde, insns, insn_end, gdbarch,
-					     0, &fs);
+					     0, &fs, 0);
 
   SELF_CHECK (out == insn_end);
   SELF_CHECK (fs.pc == 0);
@@ -900,13 +898,14 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
 
   /* First decode all the insns in the CIE.  */
   execute_cfa_program (fde, fde->cie->initial_instructions,
-		       fde->cie->end, gdbarch, pc, &fs);
+		       fde->cie->end, gdbarch, pc, &fs, text_offset);
 
   /* Save the initialized register set.  */
   fs.initial = fs.regs;
 
   /* Then decode the insns in the FDE up to our target PC.  */
-  execute_cfa_program (fde, fde->instructions, fde->end, gdbarch, pc, &fs);
+  execute_cfa_program (fde, fde->instructions, fde->end, gdbarch, pc, &fs,
+		       text_offset);
 
   /* Calculate the CFA.  */
   switch (fs.regs.cfa_how)
@@ -1028,7 +1027,8 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* First decode all the insns in the CIE.  */
   execute_cfa_program (fde, fde->cie->initial_instructions,
 		       fde->cie->end, gdbarch,
-		       get_frame_address_in_block (this_frame), &fs);
+		       get_frame_address_in_block (this_frame), &fs,
+		       cache->text_offset);
 
   /* Save the initialized register set.  */
   fs.initial = fs.regs;
@@ -1043,7 +1043,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
     {
       /* Decode the insns in the FDE up to the entry PC.  */
       instr = execute_cfa_program (fde, fde->instructions, fde->end, gdbarch,
-				   entry_pc, &fs);
+				   entry_pc, &fs, cache->text_offset);
 
       if (fs.regs.cfa_how == CFA_REG_OFFSET
 	  && (dwarf_reg_to_regnum (gdbarch, fs.regs.cfa_reg)
@@ -1058,7 +1058,8 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   /* Then decode the insns in the FDE up to our target PC.  */
   execute_cfa_program (fde, instr, fde->end, gdbarch,
-		       get_frame_address_in_block (this_frame), &fs);
+		       get_frame_address_in_block (this_frame), &fs,
+		       cache->text_offset);
 
   try
     {

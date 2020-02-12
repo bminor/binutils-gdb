@@ -1,5 +1,14 @@
 2020-02-12  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/frame.c (struct comp_unit) <objfile>: Remove.
+	(comp_unit): Don't initialize objfile.
+	(execute_cfa_program): Add text_offset parameter.
+	(execute_cfa_program_test, dwarf2_fetch_cfa_info)
+	(dwarf2_frame_cache): Update.
+	(dwarf2_build_frame_info): Don't set "objfile" member.
+
+2020-02-12  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/frame.c (decode_frame_entry_1): Add gdbarch parameter.
 	(decode_frame_entry): Likewise.
 	(dwarf2_build_frame_info): Update.
