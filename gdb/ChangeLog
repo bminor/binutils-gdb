@@ -1,5 +1,12 @@
 2020-02-12  Christian Biesinger  <cbiesinger@google.com>
 
+	* arm-tdep.c (arm_gdbarch_init): Update.
+	* arm-tdep.h (struct gdbarch_tdep) <have_fpa_registers,
+	have_wmmx_registers, have_vfp_pseudos, have_neon_pseudos,
+	have_neon, is_m>: Change to bool.
+
+2020-02-12  Christian Biesinger  <cbiesinger@google.com>
+
 	* arm-tdep.c (arm_dump_tdep): Print more fields of tdep.
 
 2020-02-12  Tom Tromey  <tom@tromey.com>

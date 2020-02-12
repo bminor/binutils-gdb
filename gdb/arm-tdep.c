@@ -8870,11 +8870,13 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   enum arm_abi_kind arm_abi = arm_abi_global;
   enum arm_float_model fp_model = arm_fp_model;
   struct tdesc_arch_data *tdesc_data = NULL;
-  int i, is_m = 0;
-  int vfp_register_count = 0, have_vfp_pseudos = 0, have_neon_pseudos = 0;
-  int have_wmmx_registers = 0;
-  int have_neon = 0;
-  int have_fpa_registers = 1;
+  int i;
+  bool is_m = false;
+  int vfp_register_count = 0;
+  bool have_vfp_pseudos = false, have_neon_pseudos = false;
+  bool have_wmmx_registers = false;
+  bool have_neon = false;
+  bool have_fpa_registers = true;
   const struct target_desc *tdesc = info.target_desc;
 
   /* If we have an object to base this architecture on, try to determine
@@ -8991,7 +8993,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		  && (attr_arch == TAG_CPU_ARCH_V6_M
 		      || attr_arch == TAG_CPU_ARCH_V6S_M
 		      || attr_profile == 'M'))
-		is_m = 1;
+		is_m = true;
 #endif
 	    }
 
@@ -9049,7 +9051,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	  if (feature == NULL)
 	    return NULL;
 	  else
-	    is_m = 1;
+	    is_m = true;
 	}
 
       tdesc_data = tdesc_data_alloc ();
@@ -9095,7 +9097,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    }
 	}
       else
-	have_fpa_registers = 0;
+	have_fpa_registers = false;
 
       feature = tdesc_find_feature (tdesc,
 				    "org.gnu.gdb.xscale.iwmmxt");
@@ -9131,7 +9133,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	      return NULL;
 	    }
 
-	  have_wmmx_registers = 1;
+	  have_wmmx_registers = true;
 	}
 
       /* If we have a VFP unit, check whether the single precision registers
@@ -9172,7 +9174,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    }
 
 	  if (tdesc_unnumbered_register (feature, "s0") == 0)
-	    have_vfp_pseudos = 1;
+	    have_vfp_pseudos = true;
 
 	  vfp_register_count = i;
 
@@ -9194,9 +9196,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		 their type; otherwise (normally) provide them with
 		 the default type.  */
 	      if (tdesc_unnumbered_register (feature, "q0") == 0)
-		have_neon_pseudos = 1;
+		have_neon_pseudos = true;
 
-	      have_neon = 1;
+	      have_neon = true;
 	    }
 	}
     }
