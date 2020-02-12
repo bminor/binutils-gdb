@@ -1,5 +1,9 @@
 2020-02-11  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.h: Update comment.
+
+2020-02-11  Tom Tromey  <tom@tromey.com>
+
 	* gdb_obstack.h (struct auto_obstack): Use
 	DISABLE_COPY_AND_ASSIGN.
 
