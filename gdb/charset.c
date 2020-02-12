@@ -818,7 +818,8 @@ find_charset_names (void)
   {
     std::string iconv_dir = relocate_gdb_directory (ICONV_BIN,
 						    ICONV_BIN_RELOCATABLE);
-    iconv_program = concat (iconv_dir.c_str(), SLASH_STRING, "iconv", NULL);
+    iconv_program
+      = concat (iconv_dir.c_str(), SLASH_STRING, "iconv", (char *) NULL);
   }
 #else
   iconv_program = xstrdup ("iconv");
