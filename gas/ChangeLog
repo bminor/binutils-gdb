@@ -1,5 +1,20 @@
 2020-02-12  Jan Beulich  <jbeulich@suse.com>
 
+	PR gas/25438
+	* config/tc-i386.c (REGISTER_WARNINGS): Delete.
+	(check_byte_reg): Skip only source operand of CRC32. Drop Non-
+	64-bit-only warning.
+	(check_word_reg): Consistently error on mismatching register
+	size and suffix.
+	* testsuite/gas/i386/general.s: Replace dword GPR with word one
+	for movw. Replace suffix / GPR for orb.
+	* testsuite/gas/i386/inval.s: Add tests for movw with dword and
+	byte GPRs as well as ones for inb/outb with a word accumulator.
+	* testsuite/gas/i386/general.l, testsuite/gas/i386/intelbad.l,
+	testsuite/gas/i386/inval.l: Adjust expectations.
+
+2020-02-12  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (operand_type_register_match): Also fall
 	through initial two if()-s when the template allows for a GPR
 	operand. Adjust comment.

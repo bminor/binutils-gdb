@@ -45,10 +45,10 @@
 	popw	%ds
 	mov	%ds,%ax
 	movw	%ds,%ax
-	movw	%ds,%eax
+	movw	%ds,%di
 	mov	%ax,%ds
 	movw	%ax,%ds
-	movw	%eax,%ds
+	movw	%di,%ds
 
 # test various pushes
 	pushl	$10
@@ -120,11 +120,11 @@
 	setaeb	(%ebx)
 	setae	%al
 
+	orb	$1,%al
+	orl	$0x100,%eax
+	orb	$1,%bl
+
 #these should give warnings
-	orb	$1,%ax
-	orb	$1,%eax
-	orb	$1,%bx
-	orb	$1,%ebx
 	fldl	%st(1)
 	fstl	%st(2)
 	fstpl	%st(3)

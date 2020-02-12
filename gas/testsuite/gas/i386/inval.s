@@ -104,3 +104,11 @@ movnti word ptr [eax], ax
 	movl	%ds, %ax
 	movl	%ax, %ds
 	movl	%ax, %bx
+
+	movw	%ds, %eax
+	movw	%eax, %ds
+	movw	%eax, %ebx
+
+	inb	%dx, %ax
+	outb	%ax, %dx
+	movb	%ax, %bx
