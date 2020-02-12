@@ -1,3 +1,9 @@
+2020-02-12  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (operand_type_register_match): Also fall
+	through initial two if()-s when the template allows for a GPR
+	operand. Adjust comment.
+
 2020-02-11  Jan Beulich  <jbeulich@suse.com>
 
 	(struct _i386_insn): New field "short_form".
