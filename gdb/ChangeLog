@@ -1,3 +1,12 @@
+2020-02-12  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/frame.c (struct dwarf2_fde_table): Remove.
+	(dwarf2_fde_table): Typedef for std::vector.
+	(dwarf2_frame_objfile_data): Remove the deleter.  Now static.
+	(dwarf2_frame_find_fde, add_fde, decode_frame_entry_1)
+	(decode_frame_entry): Update.
+	(dwarf2_build_frame_info): Use "new".
+
 2020-02-12  Christian Biesinger  <cbiesinger@google.com>
 
 	* arm-tdep.c (arm_gdbarch_init): Update.

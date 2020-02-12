@@ -129,11 +129,7 @@ struct dwarf2_fde
   unsigned char eh_frame_p;
 };
 
-struct dwarf2_fde_table
-{
-  int num_entries;
-  struct dwarf2_fde **entries;
-};
+typedef std::vector<dwarf2_fde *> dwarf2_fde_table;
 
 /* A minimal decoding of DWARF2 compilation units.  We only decode
    what's needed to get to the call frame information.  */
@@ -1471,9 +1467,7 @@ dwarf2_frame_cfa (struct frame_info *this_frame)
   return get_frame_base (this_frame);
 }
 
-const struct objfile_key<dwarf2_fde_table,
-			 gdb::noop_deleter<dwarf2_fde_table>>
-  dwarf2_frame_objfile_data;
+static const struct objfile_key<dwarf2_fde_table> dwarf2_frame_objfile_data;
 
 
 
@@ -1636,7 +1630,7 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
 {
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      struct dwarf2_fde_table *fde_table;
+      dwarf2_fde_table *fde_table;
       CORE_ADDR offset;
       CORE_ADDR seek_pc;
 
@@ -1648,20 +1642,20 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
 	}
       gdb_assert (fde_table != NULL);
 
-      if (fde_table->num_entries == 0)
+      if (fde_table->empty ())
 	continue;
 
       gdb_assert (!objfile->section_offsets.empty ());
       offset = objfile->text_section_offset ();
 
-      gdb_assert (fde_table->num_entries > 0);
-      if (*pc < offset + fde_table->entries[0]->initial_location)
+      gdb_assert (!fde_table->empty ());
+      if (*pc < offset + (*fde_table)[0]->initial_location)
         continue;
 
       seek_pc = *pc - offset;
-      auto end = fde_table->entries + fde_table->num_entries;
-      auto it = gdb::binary_search (fde_table->entries, end, seek_pc, bsearch_fde_cmp);
-      if (it != end)
+      auto it = gdb::binary_search (fde_table->begin (), fde_table->end (),
+				    seek_pc, bsearch_fde_cmp);
+      if (it != fde_table->end ())
         {
           *pc = (*it)->initial_location + offset;
 	  if (out_offset)
@@ -1672,18 +1666,15 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
   return NULL;
 }
 
-/* Add a pointer to new FDE to the FDE_TABLE, allocating space for it.  */
+/* Add FDE to FDE_TABLE.  */
 static void
-add_fde (struct dwarf2_fde_table *fde_table, struct dwarf2_fde *fde)
+add_fde (dwarf2_fde_table *fde_table, struct dwarf2_fde *fde)
 {
   if (fde->address_range == 0)
     /* Discard useless FDEs.  */
     return;
 
-  fde_table->num_entries += 1;
-  fde_table->entries = XRESIZEVEC (struct dwarf2_fde *, fde_table->entries,
-				   fde_table->num_entries);
-  fde_table->entries[fde_table->num_entries - 1] = fde;
+  fde_table->push_back (fde);
 }
 
 #define DW64_CIE_ID 0xffffffffffffffffULL
@@ -1702,7 +1693,7 @@ static const gdb_byte *decode_frame_entry (struct comp_unit *unit,
 					   const gdb_byte *start,
 					   int eh_frame_p,
 					   dwarf2_cie_table &cie_table,
-					   struct dwarf2_fde_table *fde_table,
+					   dwarf2_fde_table *fde_table,
 					   enum eh_frame_type entry_type);
 
 /* Decode the next CIE or FDE, entry_type specifies the expected type.
@@ -1712,7 +1703,7 @@ static const gdb_byte *
 decode_frame_entry_1 (struct comp_unit *unit, const gdb_byte *start,
 		      int eh_frame_p,
                       dwarf2_cie_table &cie_table,
-                      struct dwarf2_fde_table *fde_table,
+                      dwarf2_fde_table *fde_table,
                       enum eh_frame_type entry_type)
 {
   struct gdbarch *gdbarch = get_objfile_arch (unit->objfile);
@@ -2014,7 +2005,7 @@ static const gdb_byte *
 decode_frame_entry (struct comp_unit *unit, const gdb_byte *start,
 		    int eh_frame_p,
 		    dwarf2_cie_table &cie_table,
-                    struct dwarf2_fde_table *fde_table,
+                    dwarf2_fde_table *fde_table,
                     enum eh_frame_type entry_type)
 {
   enum { NONE, ALIGN4, ALIGN8, FAIL } workaround = NONE;
@@ -2128,11 +2119,8 @@ dwarf2_build_frame_info (struct objfile *objfile)
   struct comp_unit *unit;
   const gdb_byte *frame_ptr;
   dwarf2_cie_table cie_table;
-  struct dwarf2_fde_table fde_table;
-  struct dwarf2_fde_table *fde_table2;
-
-  fde_table.num_entries = 0;
-  fde_table.entries = NULL;
+  dwarf2_fde_table fde_table;
+  dwarf2_fde_table *fde_table2;
 
   /* Build a minimal decoding of the DWARF2 compilation unit.  */
   unit = XOBNEW (&objfile->objfile_obstack, comp_unit);
@@ -2181,12 +2169,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	      warning (_("skipping .eh_frame info of %s: %s"),
 		       objfile_name (objfile), e.what ());
 
-	      if (fde_table.num_entries != 0)
-		{
-                  xfree (fde_table.entries);
-		  fde_table.entries = NULL;
-		  fde_table.num_entries = 0;
-		}
+	      fde_table.clear ();
 	      /* The cie_table is discarded below.  */
 	    }
 
@@ -2200,7 +2183,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
                            &unit->dwarf_frame_size);
   if (unit->dwarf_frame_size)
     {
-      int num_old_fde_entries = fde_table.num_entries;
+      size_t num_old_fde_entries = fde_table.size ();
 
       try
 	{
@@ -2215,95 +2198,58 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	  warning (_("skipping .debug_frame info of %s: %s"),
 		   objfile_name (objfile), e.what ());
 
-	  if (fde_table.num_entries != 0)
-	    {
-	      fde_table.num_entries = num_old_fde_entries;
-	      if (num_old_fde_entries == 0)
-		{
-		  xfree (fde_table.entries);
-		  fde_table.entries = NULL;
-		}
-	      else
-		{
-		  fde_table.entries
-		    = XRESIZEVEC (struct dwarf2_fde *, fde_table.entries,
-				  fde_table.num_entries);
-		}
-	    }
-	  fde_table.num_entries = num_old_fde_entries;
+	  fde_table.resize (num_old_fde_entries);
 	}
     }
 
-  /* Copy fde_table to obstack: it is needed at runtime.  */
-  fde_table2 = XOBNEW (&objfile->objfile_obstack, struct dwarf2_fde_table);
+  fde_table2 = new dwarf2_fde_table;
 
-  if (fde_table.num_entries == 0)
+  struct dwarf2_fde *fde_prev = NULL;
+  struct dwarf2_fde *first_non_zero_fde = NULL;
+
+  /* Prepare FDE table for lookups.  */
+  std::sort (fde_table.begin (), fde_table.end (), fde_is_less_than);
+
+  /* Check for leftovers from --gc-sections.  The GNU linker sets
+     the relevant symbols to zero, but doesn't zero the FDE *end*
+     ranges because there's no relocation there.  It's (offset,
+     length), not (start, end).  On targets where address zero is
+     just another valid address this can be a problem, since the
+     FDEs appear to be non-empty in the output --- we could pick
+     out the wrong FDE.  To work around this, when overlaps are
+     detected, we prefer FDEs that do not start at zero.
+
+     Start by finding the first FDE with non-zero start.  Below
+     we'll discard all FDEs that start at zero and overlap this
+     one.  */
+  for (struct dwarf2_fde *fde : fde_table)
     {
-      fde_table2->entries = NULL;
-      fde_table2->num_entries = 0;
+      if (fde->initial_location != 0)
+	{
+	  first_non_zero_fde = fde;
+	  break;
+	}
     }
-  else
+
+  /* Since we'll be doing bsearch, squeeze out identical (except
+     for eh_frame_p) fde entries so bsearch result is predictable.
+     Also discard leftovers from --gc-sections.  */
+  for (struct dwarf2_fde *fde : fde_table)
     {
-      struct dwarf2_fde *fde_prev = NULL;
-      struct dwarf2_fde *first_non_zero_fde = NULL;
-      int i;
+      if (fde->initial_location == 0
+	  && first_non_zero_fde != NULL
+	  && (first_non_zero_fde->initial_location
+	      < fde->initial_location + fde->address_range))
+	continue;
 
-      /* Prepare FDE table for lookups.  */
-      std::sort (fde_table.entries, fde_table.entries + fde_table.num_entries,
-		 fde_is_less_than);
+      if (fde_prev != NULL
+	  && fde_prev->initial_location == fde->initial_location)
+	continue;
 
-      /* Check for leftovers from --gc-sections.  The GNU linker sets
-	 the relevant symbols to zero, but doesn't zero the FDE *end*
-	 ranges because there's no relocation there.  It's (offset,
-	 length), not (start, end).  On targets where address zero is
-	 just another valid address this can be a problem, since the
-	 FDEs appear to be non-empty in the output --- we could pick
-	 out the wrong FDE.  To work around this, when overlaps are
-	 detected, we prefer FDEs that do not start at zero.
-
-	 Start by finding the first FDE with non-zero start.  Below
-	 we'll discard all FDEs that start at zero and overlap this
-	 one.  */
-      for (i = 0; i < fde_table.num_entries; i++)
-	{
-	  struct dwarf2_fde *fde = fde_table.entries[i];
-
-	  if (fde->initial_location != 0)
-	    {
-	      first_non_zero_fde = fde;
-	      break;
-	    }
-	}
-
-      /* Since we'll be doing bsearch, squeeze out identical (except
-	 for eh_frame_p) fde entries so bsearch result is predictable.
-	 Also discard leftovers from --gc-sections.  */
-      fde_table2->num_entries = 0;
-      for (i = 0; i < fde_table.num_entries; i++)
-	{
-	  struct dwarf2_fde *fde = fde_table.entries[i];
-
-	  if (fde->initial_location == 0
-	      && first_non_zero_fde != NULL
-	      && (first_non_zero_fde->initial_location
-		  < fde->initial_location + fde->address_range))
-	    continue;
-
-	  if (fde_prev != NULL
-	      && fde_prev->initial_location == fde->initial_location)
-	    continue;
-
-	  obstack_grow (&objfile->objfile_obstack, &fde_table.entries[i],
-			sizeof (fde_table.entries[0]));
-	  ++fde_table2->num_entries;
-	  fde_prev = fde;
-	}
-      fde_table2->entries
-	= (struct dwarf2_fde **) obstack_finish (&objfile->objfile_obstack);
-
-      /* Discard the original fde_table.  */
-      xfree (fde_table.entries);
+      fde_table2->push_back (fde);
+      fde_prev = fde;
     }
+  fde_table2->shrink_to_fit ();
 
   dwarf2_frame_objfile_data.set (objfile, fde_table2);
 }
