@@ -1,3 +1,8 @@
+2020-03-03  Hannes Domani  <ssbssa@yahoo.de>
+
+	* windows-tdep.c (windows_solib_create_inferior_hook): New function.
+	(windows_init_abi): Set and use windows_so_ops.
+
 2020-03-03  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* printcmd.c (print_c_string): Check also for TYPE_CODE_PTR
