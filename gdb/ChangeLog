@@ -1,5 +1,13 @@
 2020-02-12  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/frame.c (struct comp_unit): Add initializers and
+	constructor.
+	(dwarf2_frame_objfile_data): Store a comp_unit.
+	(dwarf2_frame_find_fde): Update.
+	(dwarf2_build_frame_info): Use "new".
+
+2020-02-12  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/frame.c (struct dwarf2_fde_table): Remove.
 	(dwarf2_fde_table): Typedef for std::vector.
 	(dwarf2_frame_objfile_data): Remove the deleter.  Now static.

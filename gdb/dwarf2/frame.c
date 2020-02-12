@@ -136,25 +136,34 @@ typedef std::vector<dwarf2_fde *> dwarf2_fde_table;
 
 struct comp_unit
 {
+  comp_unit (struct objfile *objf)
+    : abfd (objf->obfd),
+      objfile (objf)
+  {
+  }
+
   /* Keep the bfd convenient.  */
   bfd *abfd;
 
   struct objfile *objfile;
 
   /* Pointer to the .debug_frame section loaded into memory.  */
-  const gdb_byte *dwarf_frame_buffer;
+  const gdb_byte *dwarf_frame_buffer = nullptr;
 
   /* Length of the loaded .debug_frame section.  */
-  bfd_size_type dwarf_frame_size;
+  bfd_size_type dwarf_frame_size = 0;
 
   /* Pointer to the .debug_frame section.  */
-  asection *dwarf_frame_section;
+  asection *dwarf_frame_section = nullptr;
 
   /* Base for DW_EH_PE_datarel encodings.  */
-  bfd_vma dbase;
+  bfd_vma dbase = 0;
 
   /* Base for DW_EH_PE_textrel encodings.  */
-  bfd_vma tbase;
+  bfd_vma tbase = 0;
+
+  /* The FDE table.  */
+  dwarf2_fde_table fde_table;
 };
 
 static struct dwarf2_fde *dwarf2_frame_find_fde (CORE_ADDR *pc,
@@ -1467,7 +1476,7 @@ dwarf2_frame_cfa (struct frame_info *this_frame)
   return get_frame_base (this_frame);
 }
 
-static const struct objfile_key<dwarf2_fde_table> dwarf2_frame_objfile_data;
+static const struct objfile_key<comp_unit> dwarf2_frame_objfile_data;
 
 
 
@@ -1630,18 +1639,18 @@ dwarf2_frame_find_fde (CORE_ADDR *pc, CORE_ADDR *out_offset)
 {
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      dwarf2_fde_table *fde_table;
       CORE_ADDR offset;
       CORE_ADDR seek_pc;
 
-      fde_table = dwarf2_frame_objfile_data.get (objfile);
-      if (fde_table == NULL)
+      comp_unit *unit = dwarf2_frame_objfile_data.get (objfile);
+      if (unit == NULL)
 	{
 	  dwarf2_build_frame_info (objfile);
-	  fde_table = dwarf2_frame_objfile_data.get (objfile);
+	  unit = dwarf2_frame_objfile_data.get (objfile);
 	}
-      gdb_assert (fde_table != NULL);
+      gdb_assert (unit != NULL);
 
+      dwarf2_fde_table *fde_table = &unit->fde_table;
       if (fde_table->empty ())
 	continue;
 
@@ -2116,18 +2125,12 @@ fde_is_less_than (const dwarf2_fde *aa, const dwarf2_fde *bb)
 void
 dwarf2_build_frame_info (struct objfile *objfile)
 {
-  struct comp_unit *unit;
   const gdb_byte *frame_ptr;
   dwarf2_cie_table cie_table;
   dwarf2_fde_table fde_table;
-  dwarf2_fde_table *fde_table2;
 
   /* Build a minimal decoding of the DWARF2 compilation unit.  */
-  unit = XOBNEW (&objfile->objfile_obstack, comp_unit);
-  unit->abfd = objfile->obfd;
-  unit->objfile = objfile;
-  unit->dbase = 0;
-  unit->tbase = 0;
+  std::unique_ptr<comp_unit> unit (new comp_unit (objfile));
 
   if (objfile->separate_debug_objfile_backlink == NULL)
     {
@@ -2159,7 +2162,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	    {
 	      frame_ptr = unit->dwarf_frame_buffer;
 	      while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
-		frame_ptr = decode_frame_entry (unit, frame_ptr, 1,
+		frame_ptr = decode_frame_entry (unit.get (), frame_ptr, 1,
 						cie_table, &fde_table,
 						EH_CIE_OR_FDE_TYPE_ID);
 	    }
@@ -2189,7 +2192,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	{
 	  frame_ptr = unit->dwarf_frame_buffer;
 	  while (frame_ptr < unit->dwarf_frame_buffer + unit->dwarf_frame_size)
-	    frame_ptr = decode_frame_entry (unit, frame_ptr, 0,
+	    frame_ptr = decode_frame_entry (unit.get (), frame_ptr, 0,
 					    cie_table, &fde_table,
 					    EH_CIE_OR_FDE_TYPE_ID);
 	}
@@ -2201,8 +2204,6 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	  fde_table.resize (num_old_fde_entries);
 	}
     }
-
-  fde_table2 = new dwarf2_fde_table;
 
   struct dwarf2_fde *fde_prev = NULL;
   struct dwarf2_fde *first_non_zero_fde = NULL;
@@ -2246,12 +2247,12 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	  && fde_prev->initial_location == fde->initial_location)
 	continue;
 
-      fde_table2->push_back (fde);
+      unit->fde_table.push_back (fde);
       fde_prev = fde;
     }
-  fde_table2->shrink_to_fit ();
+  unit->fde_table.shrink_to_fit ();
 
-  dwarf2_frame_objfile_data.set (objfile, fde_table2);
+  dwarf2_frame_objfile_data.set (objfile, unit.release ());
 }
 
 /* Handle 'maintenance show dwarf unwinders'.  */
