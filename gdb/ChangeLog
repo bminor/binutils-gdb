@@ -1,3 +1,7 @@
+2020-02-12  Christian Biesinger  <cbiesinger@google.com>
+
+	* arm-tdep.c (arm_dump_tdep): Print more fields of tdep.
+
 2020-02-12  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/loc.c (struct dwarf_expr_baton): Remove.

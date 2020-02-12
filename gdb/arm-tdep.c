@@ -9468,6 +9468,20 @@ arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   if (tdep == NULL)
     return;
 
+  fprintf_unfiltered (file, _("arm_dump_tdep: fp_model = %i\n"),
+		      (int) tdep->fp_model);
+  fprintf_unfiltered (file, _("arm_dump_tdep: have_fpa_registers = %i\n"),
+		      (int) tdep->have_fpa_registers);
+  fprintf_unfiltered (file, _("arm_dump_tdep: have_wmmx_registers = %i\n"),
+		      (int) tdep->have_wmmx_registers);
+  fprintf_unfiltered (file, _("arm_dump_tdep: vfp_register_count = %i\n"),
+		      (int) tdep->vfp_register_count);
+  fprintf_unfiltered (file, _("arm_dump_tdep: have_vfp_pseudos = %i\n"),
+		      (int) tdep->have_vfp_pseudos);
+  fprintf_unfiltered (file, _("arm_dump_tdep: have_neon_pseudos = %i\n"),
+		      (int) tdep->have_neon_pseudos);
+  fprintf_unfiltered (file, _("arm_dump_tdep: have_neon = %i\n"),
+		      (int) tdep->have_neon);
   fprintf_unfiltered (file, _("arm_dump_tdep: Lowest pc = 0x%lx\n"),
 		      (unsigned long) tdep->lowest_pc);
 }
