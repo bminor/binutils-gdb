@@ -393,8 +393,7 @@ lcall, 2, 0x9a, None, 1, CpuNo64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|N
 lcall, 1, 0xff, 0x3, 1, 0, Amd64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
 lcall, 1, 0xff, 0x3, 1, Cpu64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex }
 
-jmp, 1, 0xeb, None, 1, CpuNo64, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp16|Disp32 }
-jmp, 1, 0xeb, None, 1, Cpu64, Amd64|Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp16|Disp32S }
+jmp, 1, 0xeb, None, 1, 0, Amd64|Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp16|Disp32|Disp32S }
 jmp, 1, 0xeb, None, 1, Cpu64, Intel64|Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp32S }
 jmp, 1, 0xff, 0x4, 1, CpuNo64, Modrm|JumpAbsolute|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg32|Unspecified|BaseIndex }
 jmp, 1, 0xff, 0x4, 1, Cpu64, Amd64|Modrm|JumpAbsolute|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
