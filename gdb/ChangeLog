@@ -1,5 +1,10 @@
 2020-02-11  Tom Tromey  <tom@tromey.com>
 
+	* gdb_obstack.h (struct auto_obstack): Use
+	DISABLE_COPY_AND_ASSIGN.
+
+2020-02-11  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/frame.h (struct objfile): Don't forward declare.
 
 2020-02-11  Christian Biesinger  <cbiesinger@google.com>

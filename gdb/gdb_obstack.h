@@ -125,6 +125,8 @@ struct auto_obstack : obstack
   ~auto_obstack ()
   { obstack_free (this, NULL); }
 
+  DISABLE_COPY_AND_ASSIGN (auto_obstack);
+
   /* Free all memory in the obstack but leave it valid for further
      allocation.  */
   void clear ()
