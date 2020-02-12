@@ -1840,6 +1840,8 @@ cpu_flags_and_not (i386_cpu_flags x, i386_cpu_flags y)
   return x;
 }
 
+static const i386_cpu_flags avx512 = CPU_ANY_AVX512F_FLAGS;
+
 #define CPU_FLAGS_ARCH_MATCH		0x1
 #define CPU_FLAGS_64BIT_MATCH		0x2
 
@@ -5369,7 +5371,6 @@ check_VecOperands (const insn_template *t)
 {
   unsigned int op;
   i386_cpu_flags cpu;
-  static const i386_cpu_flags avx512 = CPU_ANY_AVX512F_FLAGS;
 
   /* Templates allowing for ZMMword as well as YMMword and/or XMMword for
      any one operand are implicity requiring AVX512VL support if the actual
@@ -6445,7 +6446,7 @@ process_suffix (void)
       /* Accept FLDENV et al without suffix.  */
       && (i.tm.opcode_modifier.no_ssuf || i.tm.opcode_modifier.floatmf))
     {
-      unsigned int suffixes;
+      unsigned int suffixes, evex = 0;
 
       suffixes = !i.tm.opcode_modifier.no_bsuf;
       if (!i.tm.opcode_modifier.no_wsuf)
@@ -6459,7 +6460,61 @@ process_suffix (void)
       if (flag_code == CODE_64BIT && !i.tm.opcode_modifier.no_qsuf)
 	suffixes |= 1 << 5;
 
-      /* Are multiple suffixes allowed?  */
+      /* For [XYZ]MMWORD operands inspect operand sizes.  While generally
+	 also suitable for AT&T syntax mode, it was requested that this be
+	 restricted to just Intel syntax.  */
+      if (intel_syntax)
+	{
+	  i386_cpu_flags cpu = cpu_flags_and (i.tm.cpu_flags, avx512);
+
+	  if (!cpu_flags_all_zero (&cpu) && !i.broadcast)
+	    {
+	      unsigned int op;
+
+	      for (op = 0; op < i.tm.operands; ++op)
+		{
+		  if (!cpu_arch_flags.bitfield.cpuavx512vl)
+		    {
+		      if (i.tm.operand_types[op].bitfield.ymmword)
+			i.tm.operand_types[op].bitfield.xmmword = 0;
+		      if (i.tm.operand_types[op].bitfield.zmmword)
+			i.tm.operand_types[op].bitfield.ymmword = 0;
+		      if (!i.tm.opcode_modifier.evex
+			  || i.tm.opcode_modifier.evex == EVEXDYN)
+			i.tm.opcode_modifier.evex = EVEX512;
+		    }
+
+		  if (i.tm.operand_types[op].bitfield.xmmword
+		      + i.tm.operand_types[op].bitfield.ymmword
+		      + i.tm.operand_types[op].bitfield.zmmword < 2)
+		    continue;
+
+		  /* Any properly sized operand disambiguates the insn.  */
+		  if (i.types[op].bitfield.xmmword
+		      || i.types[op].bitfield.ymmword
+		      || i.types[op].bitfield.zmmword)
+		    {
+		      suffixes &= ~(7 << 6);
+		      evex = 0;
+		      break;
+		    }
+
+		  if ((i.flags[op] & Operand_Mem)
+		      && i.tm.operand_types[op].bitfield.unspecified)
+		    {
+		      if (i.tm.operand_types[op].bitfield.xmmword)
+			suffixes |= 1 << 6;
+		      if (i.tm.operand_types[op].bitfield.ymmword)
+			suffixes |= 1 << 7;
+		      if (i.tm.operand_types[op].bitfield.zmmword)
+			suffixes |= 1 << 8;
+		      evex = EVEX512;
+		    }
+		}
+	    }
+	}
+
+      /* Are multiple suffixes / operand sizes allowed?  */
       if (suffixes & (suffixes - 1))
 	{
 	  if (intel_syntax
@@ -6485,6 +6540,8 @@ process_suffix (void)
 
 	  if (i.tm.opcode_modifier.floatmf)
 	    i.suffix = SHORT_MNEM_SUFFIX;
+	  else if (evex)
+	    i.tm.opcode_modifier.evex = evex;
 	  else if (flag_code == CODE_16BIT)
 	    i.suffix = WORD_MNEM_SUFFIX;
 	  else if (!i.tm.opcode_modifier.no_lsuf)

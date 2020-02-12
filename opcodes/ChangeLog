@@ -1,5 +1,11 @@
 2020-02-12  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (vfpclasspd, vfpclassps): Add Intel sytax form
+	with Unspecified, making the present one AT&T syntax only.
+	* i386-tbl.h: Re-generate.
+
+2020-02-12  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (jmp): Fold CpuNo64 and Amd64 direct variants.
 	* i386-tbl.h: Re-generate.
 

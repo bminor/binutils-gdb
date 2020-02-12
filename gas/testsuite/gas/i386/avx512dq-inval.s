@@ -1,4 +1,4 @@
-# Check AVX512DQ instructions not to be accepted outside of 64-bit mode
+# Check AVX512DQ instructions not to be accepted (in part only outside of 64-bit mode)
 
 	.text
 _start:
@@ -20,3 +20,10 @@ _start:
 	       vpinsrq	xmm0, xmm0, qword ptr [eax], 0
 	{evex} vpinsrq	xmm0, xmm0, qword ptr [eax], 0
 
+	vfpclasspd	k0, [eax], 0
+	vfpclassps	k0, [eax], 0
+
+	.att_syntax prefix
+
+	vfpclasspd	$0, (%eax), %k0
+	vfpclassps	$0, (%eax), %k0
