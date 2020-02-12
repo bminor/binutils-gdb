@@ -1,3 +1,11 @@
+2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-tdep.c: Updated since the DECLARE_CSR is changed.
+	* riscv-tdep.h: Likewise.
+	* features/riscv/rebuild-csr-xml.sh: Generate the 64bit-csr.xml without
+	rv32-only CSR.
+	* features/riscv/64bit-csr.xml: Regenerated.
+
 2020-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
 	    Tom Tromey  <tom@tromey.com>
 

@@ -1,3 +1,8 @@
+2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv-opc.h: Extend DECLARE_CSR and DECLARE_CSR_ALIAS to
+	record riscv_csr_class.
+
 2020-02-10  Stam Markianos-Wright  <stam.markianos-wright@arm.com>
 	    Matthew Malcomson  <matthew.malcomson@arm.com>
 

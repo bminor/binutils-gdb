@@ -1,3 +1,8 @@
+2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* dwarf.c (regname_internal_riscv): Updated since the DECLARE_CSR
+	is changed.
+
 2020-02-19  Jordan Rupprecht  <rupprecht@google.com>
 
 	* objdump.c (show_line): call bfd_demangle when using do_demangle.

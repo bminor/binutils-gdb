@@ -455,6 +455,7 @@ enum reg_class
 };
 
 static struct hash_control *reg_names_hash = NULL;
+static struct hash_control *csr_extra_hash = NULL;
 
 #define ENCODE_REG_HASH(cls, n) \
   ((void *)(uintptr_t)((n) * RCLASS_MAX + (cls) + 1))
@@ -480,6 +481,86 @@ hash_reg_names (enum reg_class class, const char * const names[], unsigned n)
     hash_reg_name (class, names[i], i);
 }
 
+/* All RISC-V CSRs belong to one of these classes.  */
+
+enum riscv_csr_class
+{
+  CSR_CLASS_NONE,
+
+  CSR_CLASS_I,
+  CSR_CLASS_I_32,	/* rv32 only */
+  CSR_CLASS_F,		/* f-ext only */
+};
+
+/* This structure holds all restricted conditions for a CSR.  */
+
+struct riscv_csr_extra
+{
+  /* Class to which this CSR belongs.  Used to decide whether or
+     not this CSR is legal in the current -march context.  */
+  enum riscv_csr_class csr_class;
+};
+
+/* Init two hashes, csr_extra_hash and reg_names_hash, for CSR.  */
+
+static void
+riscv_init_csr_hashes (const char *name,
+		       unsigned address,
+		       enum riscv_csr_class class)
+{
+  struct riscv_csr_extra *entry = XNEW (struct riscv_csr_extra);
+  entry->csr_class = class;
+
+  const char *hash_error =
+    hash_insert (csr_extra_hash, name, (void *) entry);
+  if (hash_error != NULL)
+    {
+      fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
+		      name, hash_error);
+      /* Probably a memory allocation problem?  Give up now.  */
+	as_fatal (_("Broken assembler.  No assembly attempted."));
+    }
+
+  hash_reg_name (RCLASS_CSR, name, address);
+}
+
+/* Check wether the CSR is valid according to the ISA.  */
+
+static bfd_boolean
+riscv_csr_class_check (enum riscv_csr_class csr_class)
+{
+  switch (csr_class)
+    {
+    case CSR_CLASS_I: return riscv_subset_supports ("i");
+    case CSR_CLASS_F: return riscv_subset_supports ("f");
+    case CSR_CLASS_I_32:
+      return (xlen == 32 && riscv_subset_supports ("i"));
+
+    default:
+      return FALSE;
+    }
+}
+
+/* If the CSR is defined, then we call `riscv_csr_class_check` to do the
+   further checking.  Return FALSE if the CSR is not defined.  Otherwise,
+   return TRUE.  */
+
+static bfd_boolean
+reg_csr_lookup_internal (const char *s)
+{
+  struct riscv_csr_extra *r =
+    (struct riscv_csr_extra *) hash_find (csr_extra_hash, s);
+
+  if (r == NULL)
+    return FALSE;
+
+  /* We just report the warning when the CSR is invalid.  */
+  if (!riscv_csr_class_check (r->csr_class))
+    as_warn (_("Invalid CSR `%s' for the current ISA"), s);
+
+  return TRUE;
+}
+
 static unsigned int
 reg_lookup_internal (const char *s, enum reg_class class)
 {
@@ -489,6 +570,9 @@ reg_lookup_internal (const char *s, enum reg_class class)
     return -1;
 
   if (riscv_opts.rve && class == RCLASS_GPR && DECODE_REG_NUM (r) > 15)
+    return -1;
+
+  if (class == RCLASS_CSR && !reg_csr_lookup_internal (s))
     return -1;
 
   return DECODE_REG_NUM (r);
@@ -721,7 +805,7 @@ init_opcode_hash (const struct riscv_opcode *opcodes,
       const char *hash_error =
 	hash_insert (hash, name, (void *) &opcodes[i]);
 
-      if (hash_error)
+      if (hash_error != NULL)
 	{
 	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
 		   opcodes[i].name, hash_error);
@@ -769,17 +853,18 @@ md_begin (void)
   hash_reg_names (RCLASS_GPR, riscv_gpr_names_abi, NGPR);
   hash_reg_names (RCLASS_FPR, riscv_fpr_names_numeric, NFPR);
   hash_reg_names (RCLASS_FPR, riscv_fpr_names_abi, NFPR);
-
   /* Add "fp" as an alias for "s0".  */
   hash_reg_name (RCLASS_GPR, "fp", 8);
 
-  opcode_names_hash = hash_new ();
-  init_opcode_names_hash ();
-
-#define DECLARE_CSR(name, num) hash_reg_name (RCLASS_CSR, #name, num);
-#define DECLARE_CSR_ALIAS(name, num) DECLARE_CSR(name, num);
+  /* Create and insert CSR hash tables.  */
+  csr_extra_hash = hash_new ();
+#define DECLARE_CSR(name, num, class) riscv_init_csr_hashes (#name, num, class);
+#define DECLARE_CSR_ALIAS(name, num, class) DECLARE_CSR(name, num, class);
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
+
+  opcode_names_hash = hash_new ();
+  init_opcode_names_hash ();
 
   /* Set the default alignment for the text section.  */
   record_alignment (text_section, riscv_opts.rvc ? 1 : 2);

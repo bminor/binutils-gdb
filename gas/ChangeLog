@@ -1,3 +1,31 @@
+2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (csr_extra_hash): New.
+	(enum riscv_csr_class): New enum.  Used to decide
+	whether or not this CSR is legal in the current ISA string.
+	(struct riscv_csr_extra): New structure to hold all extra information
+	of CSR.
+	(riscv_init_csr_hashes): New.  According to the DECLARE_CSR and
+	DECLARE_CSR_ALIAS, insert CSR extra information into csr_extra_hash.
+	Call hash_reg_name to insert CSR address into reg_names_hash.
+	(reg_csr_lookup_internal, riscv_csr_class_check): New functions.
+	Decide whether the CSR is valid according to the csr_extra_hash.
+	(reg_lookup_internal): Call reg_csr_lookup_internal for CSRs.
+	(init_opcode_hash): Update 'if (hash_error != NULL)' as hash_error is
+	not a boolean.  This is same as riscv_init_csr_hash, so keep the
+	consistent usage.
+	(md_begin): Call riscv_init_csr_hashes for each DECLARE_CSR.
+	* testsuite/gas/riscv/csr-dw-regnums.d: Add -march=rv32if option.
+	* testsuite/gas/riscv/priv-reg.d: Add f-ext by -march option.
+	* testsuite/gas/riscv/priv-reg-fail-fext.d: New testcase.  The source
+	file is `priv-reg.s`, and the ISA is rv32i without f-ext, so the
+	f-ext CSR are not allowed.
+	* testsuite/gas/riscv/priv-reg-fail-fext.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-rv32-only.d: New testcase.  The
+	source file is `priv-reg.s`, and the ISA is rv64if, so the
+	rv32-only CSR are not allowed.
+	* testsuite/gas/riscv/priv-reg-fail-rv32-only.l: Likewise.
+
 2020-02-21  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-pdp11.c (md_apply_fix): Handle BFD_RELOC_32.
