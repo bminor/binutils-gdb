@@ -1,5 +1,19 @@
 2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
 
+	* config/tc-riscv.c (struct riscv_set_options): New field csr_check.
+	(riscv_opts): Initialize it.
+	(reg_lookup_internal): Check the `riscv_opts.csr_check`
+	before doing the CSR checking.
+	(enum options): Add OPTION_CSR_CHECK and OPTION_NO_CSR_CHECK.
+	(md_longopts): Add mcsr-check and mno-csr-check.
+	(md_parse_option): Handle new enum option values.
+	(s_riscv_option): Handle new long options.
+	* doc/c-riscv.texi: Add description for the new .option and assembler
+	options.
+	* testsuite/gas/riscv/priv-reg-fail-fext.d: Add `-mcsr-check` to enable
+	the CSR checking.
+	* testsuite/gas/riscv/priv-reg-fail-rv32-only.d: Likewise.
+
 	* config/tc-riscv.c (csr_extra_hash): New.
 	(enum riscv_csr_class): New enum.  Used to decide
 	whether or not this CSR is legal in the current ISA string.

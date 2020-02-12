@@ -73,6 +73,15 @@ specification.
 Don't generate the default riscv elf attribute section if the .attribute
 directives are not set.
 
+@cindex @samp{-mcsr-check} option, RISC-V
+@item -mcsr-check
+Enable the CSR checking for the ISA-dependent CRS and the read-only CSR.
+The ISA-dependent CSR are only valid when the specific ISA is set.  The
+read-only CSR can not be written by the CSR instructions.
+
+@cindex @samp{-mno-csr-check} option, RISC-V
+@item -mno-csr-check
+Don't do CSR cheching.
 @end table
 @c man end
 
@@ -173,6 +182,10 @@ Enables or disables relaxation.  The RISC-V assembler and linker
 opportunistically relax some code sequences, but sometimes this behavior is not
 desirable.
 @end table
+
+@item csr-check
+@itemx no-csr-check
+Enables or disables the CSR checking.
 
 @cindex INSN directives
 @item .insn @var{value}

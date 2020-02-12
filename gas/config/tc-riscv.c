@@ -83,6 +83,7 @@ struct riscv_set_options
   int rve; /* Generate RVE code.  */
   int relax; /* Emit relocs the linker is allowed to relax.  */
   int arch_attr; /* Emit arch attribute.  */
+  int csr_check; /* Enable the CSR checking.  */
 };
 
 static struct riscv_set_options riscv_opts =
@@ -92,6 +93,7 @@ static struct riscv_set_options riscv_opts =
   0,	/* rve */
   1,	/* relax */
   DEFAULT_RISCV_ATTR, /* arch_attr */
+  0.	/* csr_check */
 };
 
 static void
@@ -572,7 +574,9 @@ reg_lookup_internal (const char *s, enum reg_class class)
   if (riscv_opts.rve && class == RCLASS_GPR && DECODE_REG_NUM (r) > 15)
     return -1;
 
-  if (class == RCLASS_CSR && !reg_csr_lookup_internal (s))
+  if (class == RCLASS_CSR
+      && riscv_opts.csr_check
+      && !reg_csr_lookup_internal (s))
     return -1;
 
   return DECODE_REG_NUM (r);
@@ -2272,6 +2276,8 @@ enum options
   OPTION_NO_RELAX,
   OPTION_ARCH_ATTR,
   OPTION_NO_ARCH_ATTR,
+  OPTION_CSR_CHECK,
+  OPTION_NO_CSR_CHECK,
   OPTION_END_OF_ENUM
 };
 
@@ -2286,6 +2292,8 @@ struct option md_longopts[] =
   {"mno-relax", no_argument, NULL, OPTION_NO_RELAX},
   {"march-attr", no_argument, NULL, OPTION_ARCH_ATTR},
   {"mno-arch-attr", no_argument, NULL, OPTION_NO_ARCH_ATTR},
+  {"mcsr-check", no_argument, NULL, OPTION_CSR_CHECK},
+  {"mno-csr-check", no_argument, NULL, OPTION_NO_CSR_CHECK},
 
   {NULL, no_argument, NULL, 0}
 };
@@ -2362,6 +2370,14 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_NO_ARCH_ATTR:
       riscv_opts.arch_attr = FALSE;
+      break;
+
+    case OPTION_CSR_CHECK:
+      riscv_opts.csr_check = TRUE;
+      break;
+
+    case OPTION_NO_CSR_CHECK:
+      riscv_opts.csr_check = FALSE;
       break;
 
     default:
@@ -2756,6 +2772,10 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
     riscv_opts.relax = TRUE;
   else if (strcmp (name, "norelax") == 0)
     riscv_opts.relax = FALSE;
+  else if (strcmp (name, "csr-check") == 0)
+    riscv_opts.csr_check = TRUE;
+  else if (strcmp (name, "no-csr-check") == 0)
+    riscv_opts.csr_check = FALSE;
   else if (strcmp (name, "push") == 0)
     {
       struct riscv_option_stack *s;
