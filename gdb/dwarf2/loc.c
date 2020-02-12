@@ -423,15 +423,6 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
     }
 }
 
-/* This is the baton used when performing dwarf2 expression
-   evaluation.  */
-struct dwarf_expr_baton
-{
-  struct frame_info *frame;
-  struct dwarf2_per_cu_data *per_cu;
-  CORE_ADDR obj_address;
-};
-
 /* Implement find_frame_base_location method for LOC_BLOCK functions using
    DWARF expression for its DW_AT_frame_base.  */
 
