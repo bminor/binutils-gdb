@@ -1,3 +1,7 @@
+2020-02-13  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* MAINTAINERS (Write After Approval): Adding myself.
+
 2020-02-12  Tom Tromey  <tom@tromey.com>
 
 	* event-loop.c (event_data, gdb_event, event_handler_func):
