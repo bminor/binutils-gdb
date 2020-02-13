@@ -1,5 +1,12 @@
 2020-02-13  Simon Marchi  <simon.marchi@efficios.com>
 
+	* Makefile.in: Rename source files from .c to .cc.
+	* %.c: Rename to %.cc.
+	* configure.ac: Rename server.c to server.cc.
+	* configure: Re-generate.
+
+2020-02-13  Simon Marchi  <simon.marchi@efficios.com>
+
 	* Makefile.in: Rename gdbsupport source files from .c to .cc.
 
 2020-02-12  Hannes Domani  <ssbssa@yahoo.de>

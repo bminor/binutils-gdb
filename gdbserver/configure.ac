@@ -18,7 +18,7 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(server.c)
+AC_INIT(server.cc)
 AC_CONFIG_HEADERS(config.h:config.in, [echo > stamp-h])
 
 AM_MAINTAINER_MODE
