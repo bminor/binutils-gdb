@@ -1180,7 +1180,7 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("nossse3"),  CPU_ANY_SSSE3_FLAGS },
   { STRING_COMMA_LEN ("nosse4.1"),  CPU_ANY_SSE4_1_FLAGS },
   { STRING_COMMA_LEN ("nosse4.2"),  CPU_ANY_SSE4_2_FLAGS },
-  { STRING_COMMA_LEN ("nosse4"),  CPU_ANY_SSE4_1_FLAGS },
+  { STRING_COMMA_LEN ("nosse4"),  CPU_ANY_SSE4_FLAGS },
   { STRING_COMMA_LEN ("noavx"),  CPU_ANY_AVX_FLAGS },
   { STRING_COMMA_LEN ("noavx2"),  CPU_ANY_AVX2_FLAGS },
   { STRING_COMMA_LEN ("noavx512f"), CPU_ANY_AVX512F_FLAGS },
