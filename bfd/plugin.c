@@ -592,16 +592,15 @@ try_claim (bfd *abfd)
 }
 
 static int
-try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
+try_load_plugin (const char *pname,
+		 struct plugin_list_entry *plugin_list_iter,
+		 bfd *abfd, bfd_boolean build_list_p)
 {
   void *plugin_handle = NULL;
   struct ld_plugin_tv tv[12];
   int i;
   ld_plugin_onload onload;
   enum ld_plugin_status status;
-  struct plugin_list_entry *plugin_list_iter;
-
-  *has_plugin_p = 0;
 
   /* NB: Each object is independent.  Reuse the previous plugin from
      the last run will lead to wrong result.  */
@@ -614,18 +613,15 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
       current_plugin = NULL;
     }
 
+  if (plugin_list_iter)
+    pname = plugin_list_iter->plugin_name;
+
   plugin_handle = dlopen (pname, RTLD_NOW);
   if (!plugin_handle)
     {
       _bfd_error_handler ("%s\n", dlerror ());
       return 0;
     }
-
-  for (plugin_list_iter = plugin_list;
-       plugin_list_iter;
-       plugin_list_iter = plugin_list_iter->next)
-    if (strcmp (plugin_list_iter->plugin_name, pname) == 0)
-      break;
 
   if (plugin_list_iter == NULL)
     {
@@ -649,6 +645,8 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
     }
 
   plugin_list_iter->handle = plugin_handle;
+  if (build_list_p)
+    return 0;
 
   onload = dlsym (plugin_handle, "onload");
   if (!onload)
@@ -717,8 +715,6 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
       && setup_lto_wrapper_env (current_plugin))
     return 0;
 
-  *has_plugin_p = 1;
-
   abfd->plugin_format = bfd_plugin_no;
 
   if (!current_plugin->claim_file)
@@ -732,8 +728,7 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
 }
 
 /* There may be plugin libraries in lib/bfd-plugins.  */
-
-static int has_plugin = -1;
+static int has_plugin_list = -1;
 
 static const bfd_target *(*ld_plugin_object_p) (bfd *);
 
@@ -743,7 +738,6 @@ void
 bfd_plugin_set_plugin (const char *p)
 {
   plugin_name = p;
-  has_plugin = p != NULL;
 }
 
 /* Return TRUE if a plugin library is used.  */
@@ -751,7 +745,7 @@ bfd_plugin_set_plugin (const char *p)
 bfd_boolean
 bfd_plugin_specified_p (void)
 {
-  return has_plugin > 0;
+  return plugin_list != NULL;
 }
 
 /* Return TRUE if ABFD can be claimed by linker LTO plugin.  */
@@ -782,8 +776,8 @@ register_ld_plugin_object_p (const bfd_target *(*object_p) (bfd *))
   ld_plugin_object_p = object_p;
 }
 
-static int
-load_plugin (bfd *abfd)
+static void
+build_plugin_list (bfd *abfd)
 {
   /* The intent was to search ${libdir}/bfd-plugins for plugins, but
      unfortunately the original implementation wasn't precisely that
@@ -792,17 +786,10 @@ load_plugin (bfd *abfd)
   static const char *path[]
     = { LIBDIR "/bfd-plugins", BINDIR "/../lib/bfd-plugins" };
   struct stat last_st;
-  int found = 0;
   unsigned int i;
 
-  if (!has_plugin)
-    return found;
-
-  if (plugin_name)
-    return try_load_plugin (plugin_name, abfd, &has_plugin);
-
-  if (plugin_program_name == NULL)
-    return found;
+  if (has_plugin_list >= 0)
+    return;
 
   /* Try not to search the same dir twice, by looking at st_dev and
      st_ino for the dir.  If we are on a file system that always sets
@@ -837,26 +824,38 @@ load_plugin (bfd *abfd)
 
 		  full_name = concat (plugin_dir, "/", ent->d_name, NULL);
 		  if (stat (full_name, &st) == 0 && S_ISREG (st.st_mode))
-		    {
-		      int valid_plugin;
-
-		      found = try_load_plugin (full_name, abfd, &valid_plugin);
-		      if (has_plugin <= 0)
-			has_plugin = valid_plugin;
-		    }
+		    try_load_plugin (full_name, NULL, abfd, TRUE);
 		  free (full_name);
-		  if (found)
-		    break;
 		}
 	      closedir (d);
 	    }
 	  free (plugin_dir);
 	}
-      if (found)
-	break;
     }
 
-  return found;
+  has_plugin_list = plugin_list != NULL;
+}
+
+static int
+load_plugin (bfd *abfd)
+{
+  struct plugin_list_entry *plugin_list_iter;
+
+  if (plugin_name)
+    return try_load_plugin (plugin_name, plugin_list, abfd, FALSE);
+
+  if (plugin_program_name == NULL)
+    return 0;
+
+  build_plugin_list (abfd);
+
+  for (plugin_list_iter = plugin_list;
+       plugin_list_iter;
+       plugin_list_iter = plugin_list_iter->next)
+    if (try_load_plugin (NULL, plugin_list_iter, abfd, FALSE))
+      return 1;
+
+  return 0;
 }
 
 

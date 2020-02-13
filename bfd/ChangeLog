@@ -1,3 +1,15 @@
+2020-02-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (try_load_plugin): Make plugin_list_iter an argument
+	and use it if it isn't NULL.  Remove has_plugin_p argument.  Add
+	a build_list_p argument.  Don't search plugin_list.  Short circuit
+	when building the plugin list.
+	(has_plugin): Renamed to has_plugin_list.
+	(bfd_plugin_set_plugin): Don't set has_plugin.
+	(bfd_plugin_specified_p): Check plugin_list instead.
+	(build_plugin_list): New function.
+	(load_plugin): Call build_plugin_list and use plugin_list.
+
 2020-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25355
