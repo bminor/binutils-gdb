@@ -43,39 +43,6 @@
 #define GDB_WRITABLE	(1<<2)
 #define GDB_EXCEPTION	(1<<3)
 
-/* Data point to pass to the event handler.  */
-typedef union event_data
-{
-  void *ptr;
-  int integer;
-} event_data;
-
-typedef struct gdb_event gdb_event;
-typedef void (event_handler_func) (event_data);
-
-/* Event for the GDB event system.  Events are queued by calling
-   async_queue_event and serviced later on by gdb_do_one_event.  An
-   event can be, for instance, a file descriptor becoming ready to be
-   read.  Servicing an event simply means that the procedure PROC will
-   be called.  We have 2 queues, one for file handlers that we listen
-   to in the event loop, and one for the file handlers+events that are
-   ready.  The procedure PROC associated with each event is dependant
-   of the event source.  In the case of monitored file descriptors, it
-   is always the same (handle_file_event).  Its duty is to invoke the
-   handler associated with the file descriptor whose state change
-   generated the event, plus doing other cleanups and such.  In the
-   case of async signal handlers, it is
-   invoke_async_signal_handler.  */
-
-typedef struct gdb_event
-  {
-    /* Procedure to call to service this event.  */
-    event_handler_func *proc;
-
-    /* Data to pass to the event handler.  */
-    event_data data;
-  } *gdb_event_p;
-
 /* Information about each file descriptor we register with the event
    loop.  */
 

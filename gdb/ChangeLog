@@ -1,5 +1,10 @@
 2020-02-12  Tom Tromey  <tom@tromey.com>
 
+	* event-loop.c (event_data, gdb_event, event_handler_func):
+	Remove.
+
+2020-02-12  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/frame.c (dwarf2_frame_bfd_data): New global.
 	(dwarf2_frame_objfile_data): Add comment.
 	(find_comp_unit, set_comp_unit): New functions.
