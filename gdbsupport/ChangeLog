@@ -1,3 +1,12 @@
+2020-02-13  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.am: Rename source files from .c to .cc.
+	(CC, CFLAGS): Don't override.
+	(AM_CFLAGS): Rename to ...
+	(AM_CXXFLAGS): ... this.
+	* Makefile.in: Re-generate.
+	* %.c: Rename to %.cc.
+
 2020-02-11  Simon Marchi  <simon.marchi@efficios.com>
 
 	* configure: Re-generate.

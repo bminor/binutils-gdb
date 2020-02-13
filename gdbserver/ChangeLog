@@ -1,3 +1,7 @@
+2020-02-13  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.in: Rename gdbsupport source files from .c to .cc.
+
 2020-02-12  Hannes Domani  <ssbssa@yahoo.de>
 
 	* win32-low.c (win32_create_inferior): Set signal_pid.

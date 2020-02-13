@@ -26,51 +26,48 @@ AM_CPPFLAGS = -I$(srcdir)/../include -I$(srcdir)/../gdb \
 
 override CXX += $(CXX_DIALECT)
 
-override CC := $(CXX)
-override CFLAGS := $(CXXFLAGS)
-
-AM_CFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS)
+AM_CXXFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS)
 
 noinst_LIBRARIES = libgdbsupport.a
 
 if SELFTEST
-selftest = selftest.c
+selftest = selftest.cc
 endif
 
 libgdbsupport_a_SOURCES = \
-    agent.c \
-    btrace-common.c \
-    buffer.c \
-    cleanups.c \
-    common-debug.c \
-    common-exceptions.c	\
-    common-inferior.c \
-    common-regcache.c \
-    common-utils.c \
-    environ.c \
-    errors.c \
-    fileio.c \
-    filestuff.c	\
-    format.c \
-    gdb-dlfcn.c	\
-    gdb_tilde_expand.c \
-    gdb_wait.c \
-    gdb_vecs.c \
-    job-control.c \
-    netstuff.c \
-    new-op.c \
-    pathstuff.c	\
-    print-utils.c \
-    ptid.c \
-    rsp-low.c \
-    run-time-clock.c \
-    safe-strerror.c \
-    scoped_mmap.c \
-    signals.c \
-    signals-state-save-restore.c \
-    tdesc.c \
-    thread-pool.c \
-    xml-utils.c	\
+    agent.cc \
+    btrace-common.cc \
+    buffer.cc \
+    cleanups.cc \
+    common-debug.cc \
+    common-exceptions.cc \
+    common-inferior.cc \
+    common-regcache.cc \
+    common-utils.cc \
+    environ.cc \
+    errors.cc \
+    fileio.cc \
+    filestuff.cc \
+    format.cc \
+    gdb-dlfcn.cc \
+    gdb_tilde_expand.cc \
+    gdb_wait.cc \
+    gdb_vecs.cc \
+    job-control.cc \
+    netstuff.cc \
+    new-op.cc \
+    pathstuff.cc \
+    print-utils.cc \
+    ptid.cc \
+    rsp-low.cc \
+    run-time-clock.cc \
+    safe-strerror.cc \
+    scoped_mmap.cc \
+    signals.cc \
+    signals-state-save-restore.cc \
+    tdesc.cc \
+    thread-pool.cc \
+    xml-utils.cc \
     $(selftest)
 
 # Double-check that no defines are missing from our configury.

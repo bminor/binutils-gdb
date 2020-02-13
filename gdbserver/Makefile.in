@@ -207,32 +207,32 @@ SFILES = \
 	$(srcdir)/../gdb/arch/arm-get-next-pcs.c \
 	$(srcdir)/../gdb/arch/arm-linux.c \
 	$(srcdir)/../gdb/arch/ppc-linux-common.c \
-	$(srcdir)/../gdbsupport/btrace-common.c \
-	$(srcdir)/../gdbsupport/buffer.c \
-	$(srcdir)/../gdbsupport/cleanups.c \
-	$(srcdir)/../gdbsupport/common-debug.c \
-	$(srcdir)/../gdbsupport/common-exceptions.c \
-	$(srcdir)/../gdbsupport/common-inferior.c \
-	$(srcdir)/../gdbsupport/common-regcache.c \
-	$(srcdir)/../gdbsupport/common-utils.c \
-	$(srcdir)/../gdbsupport/errors.c \
-	$(srcdir)/../gdbsupport/environ.c \
-	$(srcdir)/../gdbsupport/fileio.c \
-	$(srcdir)/../gdbsupport/filestuff.c \
-	$(srcdir)/../gdbsupport/job-control.c \
-	$(srcdir)/../gdbsupport/gdb-dlfcn.c \
-	$(srcdir)/../gdbsupport/gdb_tilde_expand.c \
-	$(srcdir)/../gdbsupport/gdb_vecs.c \
-	$(srcdir)/../gdbsupport/gdb_wait.c \
-	$(srcdir)/../gdbsupport/netstuff.c \
-	$(srcdir)/../gdbsupport/new-op.c \
-	$(srcdir)/../gdbsupport/pathstuff.c \
-	$(srcdir)/../gdbsupport/print-utils.c \
-	$(srcdir)/../gdbsupport/ptid.c \
-	$(srcdir)/../gdbsupport/rsp-low.c \
-	$(srcdir)/../gdbsupport/safe-strerror.c \
-	$(srcdir)/../gdbsupport/tdesc.c \
-	$(srcdir)/../gdbsupport/xml-utils.c \
+	$(srcdir)/../gdbsupport/btrace-common.cc \
+	$(srcdir)/../gdbsupport/buffer.cc \
+	$(srcdir)/../gdbsupport/cleanups.cc \
+	$(srcdir)/../gdbsupport/common-debug.cc \
+	$(srcdir)/../gdbsupport/common-exceptions.cc \
+	$(srcdir)/../gdbsupport/common-inferior.cc \
+	$(srcdir)/../gdbsupport/common-regcache.cc \
+	$(srcdir)/../gdbsupport/common-utils.cc \
+	$(srcdir)/../gdbsupport/errors.cc \
+	$(srcdir)/../gdbsupport/environ.cc \
+	$(srcdir)/../gdbsupport/fileio.cc \
+	$(srcdir)/../gdbsupport/filestuff.cc \
+	$(srcdir)/../gdbsupport/job-control.cc \
+	$(srcdir)/../gdbsupport/gdb-dlfcn.cc \
+	$(srcdir)/../gdbsupport/gdb_tilde_expand.cc \
+	$(srcdir)/../gdbsupport/gdb_vecs.cc \
+	$(srcdir)/../gdbsupport/gdb_wait.cc \
+	$(srcdir)/../gdbsupport/netstuff.cc \
+	$(srcdir)/../gdbsupport/new-op.cc \
+	$(srcdir)/../gdbsupport/pathstuff.cc \
+	$(srcdir)/../gdbsupport/print-utils.cc \
+	$(srcdir)/../gdbsupport/ptid.cc \
+	$(srcdir)/../gdbsupport/rsp-low.cc \
+	$(srcdir)/../gdbsupport/safe-strerror.cc \
+	$(srcdir)/../gdbsupport/tdesc.cc \
+	$(srcdir)/../gdbsupport/xml-utils.cc \
 	$(srcdir)/../gdb/nat/aarch64-sve-linux-ptrace.c \
 	$(srcdir)/../gdb/nat/linux-btrace.c \
 	$(srcdir)/../gdb/nat/linux-namespaces.c \
@@ -600,7 +600,7 @@ arch/%-ipa.o: ../gdb/arch/%.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
-gdbsupport/%-ipa.o: ../gdbsupport/%.c
+gdbsupport/%-ipa.o: ../gdbsupport/%.cc
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 
@@ -633,7 +633,7 @@ arch/%.o: ../gdb/arch/%.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-gdbsupport/%.o: ../gdbsupport/%.c
+gdbsupport/%.o: ../gdbsupport/%.cc
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
