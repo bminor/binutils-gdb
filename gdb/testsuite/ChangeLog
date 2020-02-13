@@ -1,5 +1,9 @@
 2020-02-13  Tom de Vries  <tdevries@suse.de>
 
+	* lib/ada.exp (gdb_compile_ada): Delete stale exec before compilation.
+
+2020-02-13  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.ada/catch_ex_std.exp: Indicate unsupported if gnatbind/gnatlink
 	are missing.
 

@@ -60,6 +60,8 @@ proc gdb_compile_ada {source dest type options} {
     set gprdir [file dirname $srcdir]
     set objdir [file dirname $dest]
 
+    file delete $dest
+
     # Although strictly not necessary, we force the recompilation
     # of all units (additional_flags=-f).  This is what is done
     # when using GCC to build programs in the other languages,
