@@ -136,7 +136,9 @@ proc find_ada_tool {tool} {
 proc gnatmake_version_at_least { major } {
     set gnatmake [gdb_find_gnatmake]
     set gnatmake [lindex [split $gnatmake] 0]
-    set output [exec $gnatmake --version]
+    if {[catch {exec $gnatmake --version} output]} {
+	return 0
+    }
     if { [regexp {GNATMAKE ([^ .]+).([^ .]+).([^ .]+)} $output \
 	      match gnatmake_major gnatmake_minor gnatmake_micro] } {
 	if { $gnatmake_major >= $major } {

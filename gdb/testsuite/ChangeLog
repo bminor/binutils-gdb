@@ -1,3 +1,8 @@
+2020-02-13  Tom de Vries  <tdevries@suse.de>
+
+	* lib/ada.exp (gnatmake_version_at_least): Wrap exec call in a catch
+	call.
+
 2020-02-11  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR tui/25126
