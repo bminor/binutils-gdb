@@ -29,6 +29,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include "jit-protocol.h"
+
 /* ElfW is coming from linux. On other platforms it does not exist.
    Let us define it here. */
 #ifndef ElfW
@@ -41,38 +43,6 @@
 #define _ElfW(e,w,t)    _ElfW_1 (e, w, _##t)
 #define _ElfW_1(e,w,t)  e##w##t
 #endif /* !ElfW  */
-
-typedef enum
-{
-  JIT_NOACTION = 0,
-  JIT_REGISTER_FN,
-  JIT_UNREGISTER_FN
-} jit_actions_t;
-
-struct jit_code_entry
-{
-  struct jit_code_entry *next_entry;
-  struct jit_code_entry *prev_entry;
-  const char *symfile_addr;
-  uint64_t symfile_size;
-};
-
-struct jit_descriptor
-{
-  uint32_t version;
-  /* This type should be jit_actions_t, but we use uint32_t
-     to be explicit about the bitwidth.  */
-  uint32_t action_flag;
-  struct jit_code_entry *relevant_entry;
-  struct jit_code_entry *first_entry;
-};
-
-/* GDB puts a breakpoint in this function.  */
-void __attribute__((noinline)) __jit_debug_register_code () { }
-
-/* Make sure to specify the version statically, because the
-   debugger may check the version before we can set it.  */
-struct jit_descriptor __jit_debug_descriptor = { 1, 0, 0, 0 };
 
 static void
 usage (const char *const argv0)
@@ -203,7 +173,7 @@ MAIN (int argc, char *argv[])
 	__jit_debug_descriptor.first_entry = entry;
 
       /* Notify GDB.  */
-      __jit_debug_descriptor.action_flag = JIT_REGISTER_FN;
+      __jit_debug_descriptor.action_flag = JIT_REGISTER;
       __jit_debug_register_code ();
     }
 
@@ -225,7 +195,7 @@ MAIN (int argc, char *argv[])
 	__jit_debug_descriptor.first_entry = NULL;
 
       /* Notify GDB.  */
-      __jit_debug_descriptor.action_flag = JIT_UNREGISTER_FN;
+      __jit_debug_descriptor.action_flag = JIT_UNREGISTER;
       __jit_debug_register_code ();
 
       __jit_debug_descriptor.relevant_entry = prev_entry;
