@@ -277,9 +277,8 @@ struct call_site_chain
   };
 
 struct call_site_stuff;
-extern struct call_site_chain *call_site_find_chain (struct gdbarch *gdbarch,
-						     CORE_ADDR caller_pc,
-						     CORE_ADDR callee_pc);
+extern gdb::unique_xmalloc_ptr<call_site_chain> call_site_find_chain
+  (struct gdbarch *gdbarch, CORE_ADDR caller_pc, CORE_ADDR callee_pc);
 
 /* A helper function to convert a DWARF register to an arch register.
    ARCH is the architecture.

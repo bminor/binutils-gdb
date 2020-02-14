@@ -1,3 +1,12 @@
+2020-02-14  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/frame-tailcall.c (dwarf2_tailcall_sniffer_first):
+	Update.
+	* dwarf2/loc.h (call_site_find_chain): Return unique_xmalloc_ptr.
+	* dwarf2/loc.c (call_site_find_chain_1): Return
+	unique_xmalloc_ptr.
+	(call_site_find_chain): Likewise.
+
 2020-02-14  Richard Biener  <rguenther@suse.de>
 
 	* dwarf2/read.c (lnp_state_machine::handle_special_opcode): Apply CSE
