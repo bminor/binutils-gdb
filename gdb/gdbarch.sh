@@ -816,7 +816,7 @@ V;ULONGEST;max_insn_length;;;0;0
 # If the instruction cannot execute out of line, return NULL.  The
 # core falls back to stepping past the instruction in-line instead in
 # that case.
-M;std::unique_ptr<displaced_step_closure>;displaced_step_copy_insn;CORE_ADDR from, CORE_ADDR to, struct regcache *regs;from, to, regs
+M;displaced_step_closure_up;displaced_step_copy_insn;CORE_ADDR from, CORE_ADDR to, struct regcache *regs;from, to, regs
 
 # Return true if GDB should use hardware single-stepping to execute
 # the displaced instruction identified by CLOSURE.  If false,
@@ -1312,6 +1312,7 @@ cat <<EOF
 #include "frame.h"
 #include "dis-asm.h"
 #include "gdb_obstack.h"
+#include "infrun.h"
 
 struct floatformat;
 struct ui_file;
@@ -1328,7 +1329,6 @@ struct obstack;
 struct bp_target_info;
 struct target_desc;
 struct symbol;
-struct displaced_step_closure;
 struct syscall;
 struct agent_expr;
 struct axs_value;

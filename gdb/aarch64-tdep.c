@@ -2999,7 +2999,7 @@ static const struct aarch64_insn_visitor visitor =
 
 /* Implement the "displaced_step_copy_insn" gdbarch method.  */
 
-std::unique_ptr<displaced_step_closure>
+displaced_step_closure_up
 aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				  CORE_ADDR from, CORE_ADDR to,
 				  struct regcache *regs)

@@ -39,6 +39,7 @@
 #include "frame.h"
 #include "dis-asm.h"
 #include "gdb_obstack.h"
+#include "infrun.h"
 
 struct floatformat;
 struct ui_file;
@@ -55,7 +56,6 @@ struct obstack;
 struct bp_target_info;
 struct target_desc;
 struct symbol;
-struct displaced_step_closure;
 struct syscall;
 struct agent_expr;
 struct axs_value;
@@ -1036,8 +1036,8 @@ extern void set_gdbarch_max_insn_length (struct gdbarch *gdbarch, ULONGEST max_i
 
 extern int gdbarch_displaced_step_copy_insn_p (struct gdbarch *gdbarch);
 
-typedef std::unique_ptr<displaced_step_closure> (gdbarch_displaced_step_copy_insn_ftype) (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
-extern std::unique_ptr<displaced_step_closure> gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
+typedef displaced_step_closure_up (gdbarch_displaced_step_copy_insn_ftype) (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
+extern displaced_step_closure_up gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to, struct regcache *regs);
 extern void set_gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch, gdbarch_displaced_step_copy_insn_ftype *displaced_step_copy_insn);
 
 /* Return true if GDB should use hardware single-stepping to execute

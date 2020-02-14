@@ -1103,7 +1103,7 @@ arm_catch_kernel_helper_return (struct gdbarch *gdbarch, CORE_ADDR from,
    the program has stepped into a Linux kernel helper routine (which must be
    handled as a special case).  */
 
-static std::unique_ptr<displaced_step_closure>
+static displaced_step_closure_up
 arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				    CORE_ADDR from, CORE_ADDR to,
 				    struct regcache *regs)

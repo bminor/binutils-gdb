@@ -425,7 +425,7 @@ typedef buf_displaced_step_closure s390_displaced_step_closure;
 
 /* Implementation of gdbarch_displaced_step_copy_insn.  */
 
-static std::unique_ptr<displaced_step_closure>
+static displaced_step_closure_up
 s390_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			       CORE_ADDR from, CORE_ADDR to,
 			       struct regcache *regs)

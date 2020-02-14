@@ -1465,7 +1465,7 @@ fixup_displaced_copy (struct gdbarch *gdbarch,
     }
 }
 
-std::unique_ptr<displaced_step_closure>
+displaced_step_closure_up
 amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				CORE_ADDR from, CORE_ADDR to,
 				struct regcache *regs)

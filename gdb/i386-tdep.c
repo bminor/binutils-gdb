@@ -798,7 +798,7 @@ i386_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr)
 
 /* Some kernels may run one past a syscall insn, so we have to cope.  */
 
-std::unique_ptr<displaced_step_closure>
+displaced_step_closure_up
 i386_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			       CORE_ADDR from, CORE_ADDR to,
 			       struct regcache *regs)
