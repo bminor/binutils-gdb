@@ -20,6 +20,6 @@ Disassembly of section .text:
  +[a-f0-9]+:	63 08                	movsxd \(%rax\),%ecx
  +[a-f0-9]+:	63 08                	movsxd \(%rax\),%ecx
  +[a-f0-9]+:	66 63 c8             	movsxd %eax,%cx
- +[a-f0-9]+:	63 08                	movsxd \(%rax\),%ecx
+ +[a-f0-9]+:	66 63 08             	movsxd \(%rax\),%cx
  +[a-f0-9]+:	66 63 08             	movsxd \(%rax\),%cx
 #pass

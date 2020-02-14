@@ -80,6 +80,10 @@ Disassembly of section .text:
  *[a-f0-9]+:	8e 00                	mov    \(%eax\),%es
  *[a-f0-9]+:	a5                   	movsl  %ds:\(%esi\),%es:\(%edi\)
  *[a-f0-9]+:	a5                   	movsl  %ds:\(%esi\),%es:\(%edi\)
+ *[a-f0-9]+:	66 0f be 00          	movsbw \(%eax\),%ax
+ *[a-f0-9]+:	0f be 00             	movsbl \(%eax\),%eax
+ *[a-f0-9]+:	66 0f b6 00          	movzbw \(%eax\),%ax
+ *[a-f0-9]+:	0f b6 00             	movzbl \(%eax\),%eax
  *[a-f0-9]+:	f7 20                	mull   \(%eax\)
  *[a-f0-9]+:	f7 18                	negl   \(%eax\)
  *[a-f0-9]+:	0f 1f 00             	nopl   \(%eax\)

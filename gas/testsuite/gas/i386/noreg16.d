@@ -75,6 +75,10 @@ Disassembly of section .text:
  *[a-f0-9]+:	8e 07                	mov    \(%bx\),%es
  *[a-f0-9]+:	a5                   	movsw  %ds:\(%si\),%es:\(%di\)
  *[a-f0-9]+:	67 a5                	movsw  %ds:\(%esi\),%es:\(%edi\)
+ *[a-f0-9]+:	0f be 07             	movsbw \(%bx\),%ax
+ *[a-f0-9]+:	66 0f be 07          	movsbl \(%bx\),%eax
+ *[a-f0-9]+:	0f b6 07             	movzbw \(%bx\),%ax
+ *[a-f0-9]+:	66 0f b6 07          	movzbl \(%bx\),%eax
  *[a-f0-9]+:	f7 27                	mulw   \(%bx\)
  *[a-f0-9]+:	f7 1f                	negw   \(%bx\)
  *[a-f0-9]+:	0f 1f 07             	nopw   \(%bx\)

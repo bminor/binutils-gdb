@@ -173,8 +173,6 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f bf f0             	movsx  esi,ax
 [ 	]*[a-f0-9]+:	48 0f bf f0          	movsx  rsi,ax
 [ 	]*[a-f0-9]+:	48 63 f0             	movsxd rsi,eax
-[ 	]*[a-f0-9]+:	0f be 10             	movsx  edx,BYTE PTR \[rax\]
-[ 	]*[a-f0-9]+:	48 0f be 10          	movsx  rdx,BYTE PTR \[rax\]
 [ 	]*[a-f0-9]+:	66 0f be 10          	movsx  dx,BYTE PTR \[rax\]
 [ 	]*[a-f0-9]+:	0f be 10             	movsx  edx,BYTE PTR \[rax\]
 [ 	]*[a-f0-9]+:	48 0f be 10          	movsx  rdx,BYTE PTR \[rax\]
@@ -186,8 +184,6 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	48 0f b6 f0          	movzx  rsi,al
 [ 	]*[a-f0-9]+:	0f b7 f0             	movzx  esi,ax
 [ 	]*[a-f0-9]+:	48 0f b7 f0          	movzx  rsi,ax
-[ 	]*[a-f0-9]+:	0f b6 10             	movzx  edx,BYTE PTR \[rax\]
-[ 	]*[a-f0-9]+:	48 0f b6 10          	movzx  rdx,BYTE PTR \[rax\]
 [ 	]*[a-f0-9]+:	66 0f b6 10          	movzx  dx,BYTE PTR \[rax\]
 [ 	]*[a-f0-9]+:	0f b6 10             	movzx  edx,BYTE PTR \[rax\]
 [ 	]*[a-f0-9]+:	48 0f b6 10          	movzx  rdx,BYTE PTR \[rax\]
@@ -231,8 +227,6 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	9b df e0             	fstsw  ax
 [ 	]*[a-f0-9]+:	9b df e0             	fstsw  ax
 [ 	]*[a-f0-9]+:	66 0f be 00          	movsx  ax,BYTE PTR \[rax\]
-[ 	]*[a-f0-9]+:	0f be 00             	movsx  eax,BYTE PTR \[rax\]
-[ 	]*[a-f0-9]+:	48 0f be 00          	movsx  rax,BYTE PTR \[rax\]
 [ 	]*[a-f0-9]+:	66 0f be 10          	movsx  dx,BYTE PTR \[rax\]
 [ 	]*[a-f0-9]+:	0f be 10             	movsx  edx,BYTE PTR \[rax\]
 [ 	]*[a-f0-9]+:	48 0f be 10          	movsx  rdx,BYTE PTR \[rax\]
@@ -241,8 +235,6 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	48 63 10             	movsxd rdx,DWORD PTR \[rax\]
 [ 	]*[a-f0-9]+:	48 63 00             	movsxd rax,DWORD PTR \[rax\]
 [ 	]*[a-f0-9]+:	66 0f b6 00          	movzx  ax,BYTE PTR \[rax\]
-[ 	]*[a-f0-9]+:	0f b6 00             	movzx  eax,BYTE PTR \[rax\]
-[ 	]*[a-f0-9]+:	48 0f b6 00          	movzx  rax,BYTE PTR \[rax\]
 [ 	]*[a-f0-9]+:	66 0f b6 10          	movzx  dx,BYTE PTR \[rax\]
 [ 	]*[a-f0-9]+:	0f b6 10             	movzx  edx,BYTE PTR \[rax\]
 [ 	]*[a-f0-9]+:	48 0f b6 10          	movzx  rdx,BYTE PTR \[rax\]

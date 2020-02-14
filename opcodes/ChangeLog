@@ -1,3 +1,11 @@
+2020-02-14  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/25438
+	* i386-opc.tbl (movsx): Fold patterns. Also allow Reg32 as
+	destination for Cpu64-only variant.
+	(movzx): Fold patterns.
+	* i386-tbl.h: Re-generate.
+
 2020-02-13  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-gen.c (cpu_flag_init): Move CpuSSE4a from

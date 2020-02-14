@@ -208,8 +208,6 @@ cmpxchg16b oword ptr [rax]
 	movsx	%ax, %esi
 	movsx	%ax, %rsi
 	movsx	%eax, %rsi
-	movsx	(%rax), %edx
-	movsx	(%rax), %rdx
 	movsx	(%rax), %dx
 	movsbl	(%rax), %edx
 	movsbq	(%rax), %rdx
@@ -222,8 +220,6 @@ cmpxchg16b oword ptr [rax]
 	movzx	%al, %rsi
 	movzx	%ax, %esi
 	movzx	%ax, %rsi
-	movzx	(%rax), %edx
-	movzx	(%rax), %rdx
 	movzx	(%rax), %dx
 	movzb	(%rax), %edx
 	movzb	(%rax), %rdx
@@ -277,8 +273,6 @@ cmpxchg16b oword ptr [rax]
 
 .att_syntax
 movsx (%rax),%ax
-movsx (%rax),%eax
-movsx (%rax),%rax
 movsxb	(%rax), %dx
 movsxb	(%rax), %edx
 movsxb	(%rax), %rdx
@@ -287,8 +281,6 @@ movsxw	(%rax), %rdx
 movsxl	(%rax), %rdx
 movsxd (%rax),%rax
 movzx (%rax),%ax
-movzx (%rax),%eax
-movzx (%rax),%rax
 movzxb	(%rax), %dx
 movzxb	(%rax), %edx
 movzxb	(%rax), %rdx

@@ -21,6 +21,6 @@ Disassembly of section .text:
  +[a-f0-9]+:	63 08                	movsxd ecx,DWORD PTR \[rax\]
  +[a-f0-9]+:	63 08                	movsxd ecx,DWORD PTR \[rax\]
  +[a-f0-9]+:	66 63 c8             	movsxd cx,eax
- +[a-f0-9]+:	63 08                	movsxd ecx,DWORD PTR \[rax\]
+ +[a-f0-9]+:	66 63 08             	movsxd cx,DWORD PTR \[rax\]
  +[a-f0-9]+:	66 63 08             	movsxd cx,DWORD PTR \[rax\]
 #pass
