@@ -132,7 +132,6 @@ movswl, 2, 0xfbf, None, 2, Cpu386, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf
 movsbq, 2, 0xfbe, None, 2, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg8|Byte|Unspecified|BaseIndex, Reg64 }
 movswq, 2, 0xfbf, None, 2, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg16|Word|Unspecified|BaseIndex, Reg64 }
 movslq, 2, 0x63, None, 1, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg32|Dword|Unspecified|BaseIndex, Reg64 }
-// Intel Syntax next 2 insns
 movsx, 2, 0xfbe, None, 2, Cpu386, W|Modrm|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg8|Reg16|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 movsx, 2, 0x63, None, 1, Cpu64, Modrm|No_bSuf|No_wSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Unspecified|BaseIndex, Reg32|Reg64 }
 movsxd, 2, 0x63, None, 1, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Unspecified|BaseIndex, Reg32|Reg64 }
@@ -142,8 +141,8 @@ movsxd, 2, 0x63, None, 1, Cpu64, Intel64|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|N
 // Move with zero extend.
 movzb, 2, 0xfb6, None, 2, Cpu386, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg8|Byte|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 movzw, 2, 0xfb7, None, 2, Cpu386, Modrm|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg16|Word|Unspecified|BaseIndex, Reg32|Reg64 }
-// Intel Syntax next insn (the 64-bit variant is not particulary
-// useful since the zero extend 32->64 is implicit, but we can encode them).
+// The 64-bit variant is not particularly useful since the zero extend
+// 32->64 is implicit, but we can encode them.
 movzx, 2, 0xfb6, None, 2, Cpu386, W|Modrm|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg8|Reg16|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // Push instructions.
