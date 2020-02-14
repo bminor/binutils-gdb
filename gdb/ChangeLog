@@ -1,5 +1,25 @@
 2020-02-14  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbarch.sh (displaced_step_copy_insn): Change return type to an
+	std::unique_ptr.
+	* gdbarch.c: Re-generate.
+	* gdbarch.h: Re-generate.
+	* infrun.c (displaced_step_prepare_throw): Adjust to std::unique_ptr
+	change.
+	* aarch64-tdep.c (aarch64_displaced_step_copy_insn): Change return
+	type to std::unique_ptr.
+	* aarch64-tdep.h (aarch64_displaced_step_copy_insn): Likewise.
+	* amd64-tdep.c (amd64_displaced_step_copy_insn): Likewise.
+	* amd64-tdep.h (amd64_displaced_step_copy_insn): Likewise.
+	* arm-linux-tdep.c (arm_linux_displaced_step_copy_insn): Likewise.
+	* i386-linux-tdep.c (i386_linux_displaced_step_copy_insn): Likewise.
+	* i386-tdep.c (i386_displaced_step_copy_insn): Likewise.
+	* i386-tdep.h (i386_displaced_step_copy_insn): Likewise.
+	* rs6000-tdep.c (ppc_displaced_step_copy_insn): Likewise.
+	* s390-tdep.c (s390_displaced_step_copy_insn): Likewise.
+
+2020-02-14  Simon Marchi  <simon.marchi@efficios.com>
+
 	* infrun.c (get_displaced_step_closure_by_addr): Adjust to
 	std::unique_ptr.
 	(displaced_step_clear): Rename to...

@@ -798,13 +798,14 @@ i386_insn_is_jump (struct gdbarch *gdbarch, CORE_ADDR addr)
 
 /* Some kernels may run one past a syscall insn, so we have to cope.  */
 
-struct displaced_step_closure *
+std::unique_ptr<displaced_step_closure>
 i386_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			       CORE_ADDR from, CORE_ADDR to,
 			       struct regcache *regs)
 {
   size_t len = gdbarch_max_insn_length (gdbarch);
-  i386_displaced_step_closure *closure = new i386_displaced_step_closure (len);
+  std::unique_ptr<i386_displaced_step_closure> closure
+    (new i386_displaced_step_closure (len));
   gdb_byte *buf = closure->buf.data ();
 
   read_memory (from, buf, len);

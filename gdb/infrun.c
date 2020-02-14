@@ -1646,7 +1646,6 @@ displaced_step_prepare_throw (thread_info *tp)
   const address_space *aspace = regcache->aspace ();
   CORE_ADDR original, copy;
   ULONGEST len;
-  struct displaced_step_closure *closure;
   int status;
 
   /* We should never reach this function if the architecture does not
@@ -1738,9 +1737,9 @@ displaced_step_prepare_throw (thread_info *tp)
 				 len);
     };
 
-  closure = gdbarch_displaced_step_copy_insn (gdbarch,
-					      original, copy, regcache);
-  if (closure == NULL)
+  displaced->step_closure
+    = gdbarch_displaced_step_copy_insn (gdbarch, original, copy, regcache);
+  if (displaced->step_closure == NULL)
     {
       /* The architecture doesn't know how or want to displaced step
 	 this instruction or instruction sequence.  Fallback to
@@ -1752,7 +1751,6 @@ displaced_step_prepare_throw (thread_info *tp)
      succeeds.  */
   displaced->step_thread = tp;
   displaced->step_gdbarch = gdbarch;
-  displaced->step_closure.reset (closure);
   displaced->step_original = original;
   displaced->step_copy = copy;
 

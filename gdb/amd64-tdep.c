@@ -1465,7 +1465,7 @@ fixup_displaced_copy (struct gdbarch *gdbarch,
     }
 }
 
-struct displaced_step_closure *
+std::unique_ptr<displaced_step_closure>
 amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				CORE_ADDR from, CORE_ADDR to,
 				struct regcache *regs)
@@ -1474,8 +1474,8 @@ amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
   /* Extra space for sentinels so fixup_{riprel,displaced_copy} don't have to
      continually watch for running off the end of the buffer.  */
   int fixup_sentinel_space = len;
-  amd64_displaced_step_closure *dsc
-    = new amd64_displaced_step_closure (len + fixup_sentinel_space);
+  std::unique_ptr<amd64_displaced_step_closure> dsc
+    (new amd64_displaced_step_closure (len + fixup_sentinel_space));
   gdb_byte *buf = &dsc->insn_buf[0];
   struct amd64_insn *details = &dsc->insn_details;
 
@@ -1500,7 +1500,7 @@ amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   /* Modify the insn to cope with the address where it will be executed from.
      In particular, handle any rip-relative addressing.	 */
-  fixup_displaced_copy (gdbarch, dsc, from, to, regs);
+  fixup_displaced_copy (gdbarch, dsc.get (), from, to, regs);
 
   write_memory (to, buf, len);
 

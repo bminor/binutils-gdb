@@ -3936,7 +3936,7 @@ gdbarch_displaced_step_copy_insn_p (struct gdbarch *gdbarch)
   return gdbarch->displaced_step_copy_insn != NULL;
 }
 
-struct displaced_step_closure *
+std::unique_ptr<displaced_step_closure>
 gdbarch_displaced_step_copy_insn (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to, struct regcache *regs)
 {
   gdb_assert (gdbarch != NULL);

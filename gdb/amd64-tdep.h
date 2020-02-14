@@ -87,7 +87,7 @@ enum amd64_regnum
 
 #define AMD64_NUM_REGS		(AMD64_GSBASE_REGNUM + 1)
 
-extern struct displaced_step_closure *amd64_displaced_step_copy_insn
+extern std::unique_ptr<displaced_step_closure> amd64_displaced_step_copy_insn
   (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to,
    struct regcache *regs);
 extern void amd64_displaced_step_fixup (struct gdbarch *gdbarch,

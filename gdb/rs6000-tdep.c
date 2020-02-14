@@ -855,7 +855,7 @@ typedef buf_displaced_step_closure ppc_displaced_step_closure;
 
 /* We can't displaced step atomic sequences.  */
 
-static struct displaced_step_closure *
+static std::unique_ptr<displaced_step_closure>
 ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
 			      CORE_ADDR from, CORE_ADDR to,
 			      struct regcache *regs)
@@ -894,7 +894,7 @@ ppc_displaced_step_copy_insn (struct gdbarch *gdbarch,
       displaced_step_dump_bytes (gdb_stdlog, buf, len);
     }
 
-  return closure.release ();
+  return closure;
 }
 
 /* Fix up the state of registers and memory after having single-stepped

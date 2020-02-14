@@ -1103,12 +1103,13 @@ arm_catch_kernel_helper_return (struct gdbarch *gdbarch, CORE_ADDR from,
    the program has stepped into a Linux kernel helper routine (which must be
    handled as a special case).  */
 
-static struct displaced_step_closure *
+static std::unique_ptr<displaced_step_closure>
 arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				    CORE_ADDR from, CORE_ADDR to,
 				    struct regcache *regs)
 {
-  arm_displaced_step_closure *dsc = new arm_displaced_step_closure;
+  std::unique_ptr<arm_displaced_step_closure> dsc
+    (new arm_displaced_step_closure);
 
   /* Detect when we enter an (inaccessible by GDB) Linux kernel helper, and
      stop at the return location.  */
@@ -1118,17 +1119,17 @@ arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
         fprintf_unfiltered (gdb_stdlog, "displaced: detected kernel helper "
 			    "at %.8lx\n", (unsigned long) from);
 
-      arm_catch_kernel_helper_return (gdbarch, from, to, regs, dsc);
+      arm_catch_kernel_helper_return (gdbarch, from, to, regs, dsc.get ());
     }
   else
     {
       /* Override the default handling of SVC instructions.  */
       dsc->u.svc.copy_svc_os = arm_linux_copy_svc;
 
-      arm_process_displaced_insn (gdbarch, from, to, regs, dsc);
+      arm_process_displaced_insn (gdbarch, from, to, regs, dsc.get ());
     }
 
-  arm_displaced_init_closure (gdbarch, from, to, dsc);
+  arm_displaced_init_closure (gdbarch, from, to, dsc.get ());
 
   return dsc;
 }
