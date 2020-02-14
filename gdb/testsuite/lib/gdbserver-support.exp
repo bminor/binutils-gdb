@@ -138,13 +138,15 @@ proc find_gdbserver { } {
     return [target_info gdb_server_prog]
   }
 
-  set gdbserver "${GDB}server"
-  if { [file isdirectory $gdbserver] } {
-    append gdbserver "/gdbserver"
-  }
+  set toplevel [file join [file dirname $GDB] .. gdbserver]
+  foreach gdbserver [list "${GDB}server" $toplevel] {
+      if { [file isdirectory $gdbserver] } {
+	  append gdbserver "/gdbserver"
+      }
 
-  if { [file executable $gdbserver] } {
-    return $gdbserver
+      if { [file executable $gdbserver] } {
+	  return $gdbserver
+      }
   }
 
   return ""

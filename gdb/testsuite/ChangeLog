@@ -1,3 +1,9 @@
+2020-02-14  Tom Tromey  <tom@tromey.com>
+
+	* lib/gdbserver-support.exp (find_gdbserver): Find gdbserver in
+	build directory.
+	* boards/gdbserver-base.exp: Update path to gdbserver.
+
 2020-02-13  Tom de Vries  <tdevries@suse.de>
 
 	* lib/ada.exp (gdb_compile_ada): Delete stale exec before compilation.
