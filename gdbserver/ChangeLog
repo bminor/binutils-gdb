@@ -1,3 +1,10 @@
+2020-02-14  Eli Zaretskii  <eliz@gnu.org>
+
+	* win32-low.c (create_process): Prepend PROGRAM to ARGS when
+	preparing the command line for CreateProcess.
+	(win32_create_inferior): Reflect the program name in debugging
+	output that shows the process and its command line.
+
 2020-02-13  Simon Marchi  <simon.marchi@efficios.com>
 
 	* Makefile.in: Rename source files from .c to .cc.

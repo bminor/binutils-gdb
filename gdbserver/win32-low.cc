@@ -559,21 +559,25 @@ create_process (const char *program, char *args,
 {
   const char *inferior_cwd = get_inferior_cwd ();
   BOOL ret;
+  size_t argslen, proglen;
+
+  proglen = strlen (program) + 1;
+  argslen = strlen (args) + proglen;
 
 #ifdef _WIN32_WCE
   wchar_t *p, *wprogram, *wargs, *wcwd = NULL;
-  size_t argslen;
 
-  wprogram = alloca ((strlen (program) + 1) * sizeof (wchar_t));
-  mbstowcs (wprogram, program, strlen (program) + 1);
+  wprogram = (wchar_t *) alloca (proglen * sizeof (wchar_t));
+  mbstowcs (wprogram, program, proglen);
 
   for (p = wprogram; *p; ++p)
     if (L'/' == *p)
       *p = L'\\';
 
-  argslen = strlen (args);
   wargs = alloca ((argslen + 1) * sizeof (wchar_t));
-  mbstowcs (wargs, args, argslen + 1);
+  wcscpy (wargs, wprogram);
+  wcscat (wargs, L" ");
+  mbstowcs (wargs + proglen, args, argslen + 1 - proglen);
 
   if (inferior_cwd != NULL)
     {
@@ -601,20 +605,24 @@ Could not convert the expanded inferior cwd to wide-char."));
 			pi);      /* proc info */
 #else
   STARTUPINFOA si = { sizeof (STARTUPINFOA) };
+  char *program_and_args = (char *) alloca (argslen + 1);
 
-  ret = CreateProcessA (program,  /* image name */
-			args,     /* command line */
-			NULL,     /* security */
-			NULL,     /* thread */
-			TRUE,     /* inherit handles */
-			flags,    /* start flags */
-			NULL,     /* environment */
+  strcpy (program_and_args, program);
+  strcat (program_and_args, " ");
+  strcat (program_and_args, args);
+  ret = CreateProcessA (program,           /* image name */
+			program_and_args,  /* command line */
+			NULL,              /* security */
+			NULL,              /* thread */
+			TRUE,              /* inherit handles */
+			flags,             /* start flags */
+			NULL,              /* environment */
 			/* current directory */
 			(inferior_cwd == NULL
 			 ? NULL
 			 : gdb_tilde_expand (inferior_cwd).c_str()),
-			&si,      /* start info */
-			pi);      /* proc info */
+			&si,               /* start info */
+			pi);               /* proc info */
 #endif
 
   return ret;
@@ -665,7 +673,7 @@ win32_create_inferior (const char *program,
   program = real_path;
 #endif
 
-  OUTMSG2 (("Command line is \"%s\"\n", args));
+  OUTMSG2 (("Command line is \"%s %s\"\n", program, args));
 
 #ifdef CREATE_NEW_PROCESS_GROUP
   flags |= CREATE_NEW_PROCESS_GROUP;
@@ -688,12 +696,12 @@ win32_create_inferior (const char *program,
 
   if (!ret)
     {
-      error ("Error creating process \"%s%s\", (error %d): %s\n",
+      error ("Error creating process \"%s %s\", (error %d): %s\n",
 	     program, args, (int) err, strwinerror (err));
     }
   else
     {
-      OUTMSG2 (("Process created: %s\n", (char *) args));
+      OUTMSG2 (("Process created: %s %s\n", program, (char *) args));
     }
 
 #ifndef _WIN32_WCE
