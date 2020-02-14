@@ -57,6 +57,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module cloexec:
   # Code from module close:
   # Code from module closedir:
+  # Code from module count-one-bits:
   # Code from module d-ino:
   # Code from module d-type:
   # Code from module dirent:
@@ -250,6 +251,7 @@ AC_DEFUN([gl_INIT],
     AC_LIBOBJ([closedir])
   fi
   gl_DIRENT_MODULE_INDICATOR([closedir])
+  gl_COUNT_ONE_BITS
   gl_CHECK_TYPE_STRUCT_DIRENT_D_INO
   gl_CHECK_TYPE_STRUCT_DIRENT_D_TYPE
   gl_DIRENT_H
@@ -855,6 +857,8 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/cloexec.h
   lib/close.c
   lib/closedir.c
+  lib/count-one-bits.c
+  lib/count-one-bits.h
   lib/dirent-private.h
   lib/dirent.in.h
   lib/dirfd.c
@@ -1045,6 +1049,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/close.m4
   m4/closedir.m4
   m4/codeset.m4
+  m4/count-one-bits.m4
   m4/d-ino.m4
   m4/d-type.m4
   m4/dirent_h.m4

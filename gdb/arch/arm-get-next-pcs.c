@@ -22,6 +22,7 @@
 #include "gdbsupport/common-regcache.h"
 #include "arm.h"
 #include "arm-get-next-pcs.h"
+#include "count-one-bits.h"
 
 /* See arm-get-next-pcs.h.  */
 
@@ -408,8 +409,8 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 
       /* Fetch the saved PC from the stack.  It's stored above
          all of the other registers.  */
-      unsigned long offset = bitcount (bits (inst1, 0, 7))
-			     * ARM_INT_REGISTER_SIZE;
+      unsigned long offset
+	= count_one_bits (bits (inst1, 0, 7)) * ARM_INT_REGISTER_SIZE;
       sp = regcache_raw_get_unsigned (regcache, ARM_SP_REGNUM);
       nextpc = self->ops->read_mem_uint (sp + offset, 4, byte_order);
     }
@@ -496,7 +497,7 @@ thumb_get_next_pcs_raw (struct arm_get_next_pcs *self)
 	      /* LDMIA or POP */
 	      if (!bit (inst2, 15))
 		load_pc = 0;
-	      offset = bitcount (inst2) * 4 - 4;
+	      offset = count_one_bits (inst2) * 4 - 4;
 	    }
 	  else if (!bit (inst1, 7) && bit (inst1, 8))
 	    {
@@ -864,7 +865,7 @@ arm_get_next_pcs_raw (struct arm_get_next_pcs *self)
 		    {
 		      /* up */
 		      unsigned long reglist = bits (this_instr, 0, 14);
-		      offset = bitcount (reglist) * 4;
+		      offset = count_one_bits_l (reglist) * 4;
 		      if (bit (this_instr, 24))		/* pre */
 			offset += 4;
 		    }

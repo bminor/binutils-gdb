@@ -1,3 +1,18 @@
+2020-02-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Import
+	count-one-bits module.
+	* configure: Re-generate.
+	* aclocal.m4: Re-generate.
+	* Makefile.in: Re-generate.
+	* import/count-one-bits.c: New file.
+	* import/count-one-bits.h: New file.
+	* import/Makefile.am: Re-generate.
+	* import/Makefile.in: Re-generate.
+	* import/m4/gnulib-cache.m4: Re-generate.
+	* import/m4/gnulib-comp.m4: Re-generate.
+	* import/m4/count-one-bits.m4: New file.
+
 2019-12-16  Christian Biesinger  <cbiesinger@google.com>
 
 	* Makefile.am: Set MAKEOVERRIDES.

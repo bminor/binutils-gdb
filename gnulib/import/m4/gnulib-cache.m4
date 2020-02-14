@@ -40,6 +40,7 @@
 #  --no-vc-files \
 #  alloca \
 #  canonicalize-lgpl \
+#  count-one-bits \
 #  dirent \
 #  dirfd \
 #  errno \
@@ -79,6 +80,7 @@ gl_LOCAL_DIR([])
 gl_MODULES([
   alloca
   canonicalize-lgpl
+  count-one-bits
   dirent
   dirfd
   errno

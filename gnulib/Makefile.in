@@ -123,6 +123,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/close.m4 \
 	$(top_srcdir)/import/m4/closedir.m4 \
 	$(top_srcdir)/import/m4/codeset.m4 \
+	$(top_srcdir)/import/m4/count-one-bits.m4 \
 	$(top_srcdir)/import/m4/d-ino.m4 \
 	$(top_srcdir)/import/m4/d-type.m4 \
 	$(top_srcdir)/import/m4/dirent_h.m4 \

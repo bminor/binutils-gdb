@@ -35,6 +35,7 @@
 #  --no-vc-files \
 #  alloca \
 #  canonicalize-lgpl \
+#  count-one-bits \
 #  dirent \
 #  dirfd \
 #  errno \
@@ -235,6 +236,14 @@ EXTRA_DIST += closedir.c dirent-private.h
 EXTRA_libgnu_a_SOURCES += closedir.c
 
 ## end   gnulib module closedir
+
+## begin gnulib module count-one-bits
+
+libgnu_a_SOURCES += count-one-bits.c
+
+EXTRA_DIST += count-one-bits.h
+
+## end   gnulib module count-one-bits
 
 ## begin gnulib module dirent
 

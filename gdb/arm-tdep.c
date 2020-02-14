@@ -45,6 +45,7 @@
 #include "target-descriptions.h"
 #include "user-regs.h"
 #include "observable.h"
+#include "count-one-bits.h"
 
 #include "arch/arm.h"
 #include "arch/arm-get-next-pcs.h"
@@ -5798,7 +5799,8 @@ cleanup_block_store_pc (struct gdbarch *gdbarch, struct regcache *regs,
 {
   uint32_t status = displaced_read_reg (regs, dsc, ARM_PS_REGNUM);
   int store_executed = condition_true (dsc->u.block.cond, status);
-  CORE_ADDR pc_stored_at, transferred_regs = bitcount (dsc->u.block.regmask);
+  CORE_ADDR pc_stored_at, transferred_regs
+    = count_one_bits (dsc->u.block.regmask);
   CORE_ADDR stm_insn_addr;
   uint32_t pc_val;
   long offset;
@@ -5850,7 +5852,7 @@ cleanup_block_load_pc (struct gdbarch *gdbarch,
   uint32_t status = displaced_read_reg (regs, dsc, ARM_PS_REGNUM);
   int load_executed = condition_true (dsc->u.block.cond, status);
   unsigned int mask = dsc->u.block.regmask, write_reg = ARM_PC_REGNUM;
-  unsigned int regs_loaded = bitcount (mask);
+  unsigned int regs_loaded = count_one_bits (mask);
   unsigned int num_to_shuffle = regs_loaded, clobbered;
 
   /* The method employed here will fail if the register list is fully populated
@@ -5982,7 +5984,7 @@ arm_copy_block_xfer (struct gdbarch *gdbarch, uint32_t insn,
 	     contiguous chunk r0...rX before doing the transfer, then shuffling
 	     registers into the correct places in the cleanup routine.  */
 	  unsigned int regmask = insn & 0xffff;
-	  unsigned int num_in_list = bitcount (regmask), new_regmask;
+	  unsigned int num_in_list = count_one_bits (regmask), new_regmask;
 	  unsigned int i;
 
 	  for (i = 0; i < num_in_list; i++)
@@ -6084,7 +6086,7 @@ thumb2_copy_block_xfer (struct gdbarch *gdbarch, uint16_t insn1, uint16_t insn2,
       else
 	{
 	  unsigned int regmask = dsc->u.block.regmask;
-	  unsigned int num_in_list = bitcount (regmask), new_regmask;
+	  unsigned int num_in_list = count_one_bits (regmask), new_regmask;
 	  unsigned int i;
 
 	  for (i = 0; i < num_in_list; i++)
@@ -7102,7 +7104,7 @@ thumb_copy_pop_pc_16bit (struct gdbarch *gdbarch, uint16_t insn1,
     }
   else
     {
-      unsigned int num_in_list = bitcount (dsc->u.block.regmask);
+      unsigned int num_in_list = count_one_bits (dsc->u.block.regmask);
       unsigned int i;
       unsigned int new_regmask;
 

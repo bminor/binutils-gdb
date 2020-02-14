@@ -1,3 +1,17 @@
+2020-02-14  Simon Marchi  <simon.marchi@efficios.com>
+
+	* arm-tdep.c: Include count-one-bits.h.
+	(cleanup_block_store_pc): Use count_one_bits.
+	(cleanup_block_load_pc): Use count_one_bits.
+	(arm_copy_block_xfer): Use count_one_bits.
+	(thumb2_copy_block_xfer): Use count_one_bits.
+	(thumb_copy_pop_pc_16bit): Use count_one_bits.
+	* arch/arm-get-next-pcs.c: Include count-one-bits.h.
+	(thumb_get_next_pcs_raw): Use count_one_bits.
+	(arm_get_next_pcs_raw): Use count_one_bits_l.
+	* arch/arm.c (bitcount): Remove.
+	* arch/arm.h (bitcount): Remove.
+
 2020-02-14  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2/frame-tailcall.c (dwarf2_tailcall_sniffer_first):

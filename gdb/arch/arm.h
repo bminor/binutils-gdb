@@ -160,9 +160,6 @@ int thumb_insn_size (unsigned short inst1);
 /* Returns true if the condition evaluates to true.  */
 int condition_true (unsigned long cond, unsigned long status_reg);
 
-/* Return number of 1-bits in VAL.  */
-int bitcount (unsigned long val);
-
 /* Return 1 if THIS_INSTR might change control flow, 0 otherwise.  */
 int arm_instruction_changes_pc (uint32_t this_instr);
 

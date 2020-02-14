@@ -42,17 +42,6 @@ thumb_insn_size (unsigned short inst1)
 /* See arm.h.  */
 
 int
-bitcount (unsigned long val)
-{
-  int nbits;
-  for (nbits = 0; val != 0; nbits++)
-    val &= val - 1;		/* Delete rightmost 1-bit in val.  */
-  return nbits;
-}
-
-/* See arm.h.  */
-
-int
 condition_true (unsigned long cond, unsigned long status_reg)
 {
   if (cond == INST_AL || cond == INST_NV)

@@ -49,6 +49,7 @@
 #  --no-vc-files \
 #  alloca \
 #  canonicalize-lgpl \
+#  count-one-bits \
 #  dirent \
 #  dirfd \
 #  errno \
@@ -178,6 +179,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/import/m4/close.m4 \
 	$(top_srcdir)/import/m4/closedir.m4 \
 	$(top_srcdir)/import/m4/codeset.m4 \
+	$(top_srcdir)/import/m4/count-one-bits.m4 \
 	$(top_srcdir)/import/m4/d-ino.m4 \
 	$(top_srcdir)/import/m4/d-type.m4 \
 	$(top_srcdir)/import/m4/dirent_h.m4 \
@@ -326,14 +328,15 @@ am__v_AR_1 =
 libgnu_a_AR = $(AR) $(ARFLAGS)
 am__DEPENDENCIES_1 =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_libgnu_a_OBJECTS = cloexec.$(OBJEXT) dirname-lgpl.$(OBJEXT) \
-	basename-lgpl.$(OBJEXT) stripslash.$(OBJEXT) \
-	exitfail.$(OBJEXT) fd-hook.$(OBJEXT) fd-safer-flag.$(OBJEXT) \
-	dup-safer-flag.$(OBJEXT) filenamecat-lgpl.$(OBJEXT) \
-	getprogname.$(OBJEXT) hard-locale.$(OBJEXT) \
-	localcharset.$(OBJEXT) glthread/lock.$(OBJEXT) \
-	malloca.$(OBJEXT) math.$(OBJEXT) openat-die.$(OBJEXT) \
-	save-cwd.$(OBJEXT) malloc/scratch_buffer_grow.$(OBJEXT) \
+am_libgnu_a_OBJECTS = cloexec.$(OBJEXT) count-one-bits.$(OBJEXT) \
+	dirname-lgpl.$(OBJEXT) basename-lgpl.$(OBJEXT) \
+	stripslash.$(OBJEXT) exitfail.$(OBJEXT) fd-hook.$(OBJEXT) \
+	fd-safer-flag.$(OBJEXT) dup-safer-flag.$(OBJEXT) \
+	filenamecat-lgpl.$(OBJEXT) getprogname.$(OBJEXT) \
+	hard-locale.$(OBJEXT) localcharset.$(OBJEXT) \
+	glthread/lock.$(OBJEXT) malloca.$(OBJEXT) math.$(OBJEXT) \
+	openat-die.$(OBJEXT) save-cwd.$(OBJEXT) \
+	malloc/scratch_buffer_grow.$(OBJEXT) \
 	malloc/scratch_buffer_grow_preserve.$(OBJEXT) \
 	malloc/scratch_buffer_set_array_size.$(OBJEXT) \
 	stat-time.$(OBJEXT) strnlen1.$(OBJEXT) sys_socket.$(OBJEXT) \
@@ -1620,15 +1623,15 @@ noinst_LTLIBRARIES =
 EXTRA_DIST = m4/gnulib-cache.m4 alloca.c alloca.in.h arpa_inet.in.h \
 	assure.h openat-priv.h openat-proc.c canonicalize-lgpl.c \
 	chdir-long.c chdir-long.h cloexec.h close.c closedir.c \
-	dirent-private.h dirent.in.h dirfd.c dirname.h dosname.h dup.c \
-	dup2.c errno.in.h error.c error.h exitfail.h fchdir.c fcntl.c \
-	fcntl.in.h fd-hook.h fdopendir.c filename.h filenamecat.h \
-	flexmember.h float.c float.in.h itold.c fnmatch.c \
-	fnmatch_loop.c fnmatch.in.h fpucw.h frexp.c frexp.c frexpl.c \
-	fstat.c stat-w32.c stat-w32.h at-func.c fstatat.c getcwd.c \
-	getcwd-lgpl.c getdtablesize.c getlogin_r.c gettimeofday.c \
-	glob.c glob_internal.h glob_pattern_p.c globfree.c glob-libc.h \
-	glob.in.h hard-locale.h \
+	dirent-private.h count-one-bits.h dirent.in.h dirfd.c \
+	dirname.h dosname.h dup.c dup2.c errno.in.h error.c error.h \
+	exitfail.h fchdir.c fcntl.c fcntl.in.h fd-hook.h fdopendir.c \
+	filename.h filenamecat.h flexmember.h float.c float.in.h \
+	itold.c fnmatch.c fnmatch_loop.c fnmatch.in.h fpucw.h frexp.c \
+	frexp.c frexpl.c fstat.c stat-w32.c stat-w32.h at-func.c \
+	fstatat.c getcwd.c getcwd-lgpl.c getdtablesize.c getlogin_r.c \
+	gettimeofday.c glob.c glob_internal.h glob_pattern_p.c \
+	globfree.c glob-libc.h glob.in.h hard-locale.h \
 	$(top_srcdir)/import/extra/config.rpath inet_ntop.c intprops.h \
 	inttypes.in.h float+.h isnan.c isnand-nolibm.h isnand.c \
 	float+.h isnan.c isnanl-nolibm.h isnanl.c cdefs.h \
@@ -1682,12 +1685,12 @@ DISTCLEANFILES =
 MAINTAINERCLEANFILES = 
 AM_CPPFLAGS = 
 AM_CFLAGS = 
-libgnu_a_SOURCES = cloexec.c dirname-lgpl.c basename-lgpl.c \
-	stripslash.c exitfail.c fd-hook.c fd-safer-flag.c \
-	dup-safer-flag.c filenamecat-lgpl.c getprogname.h \
-	getprogname.c gettext.h hard-locale.c localcharset.c \
-	glthread/lock.h glthread/lock.c malloca.c math.c openat-die.c \
-	save-cwd.c malloc/scratch_buffer_grow.c \
+libgnu_a_SOURCES = cloexec.c count-one-bits.c dirname-lgpl.c \
+	basename-lgpl.c stripslash.c exitfail.c fd-hook.c \
+	fd-safer-flag.c dup-safer-flag.c filenamecat-lgpl.c \
+	getprogname.h getprogname.c gettext.h hard-locale.c \
+	localcharset.c glthread/lock.h glthread/lock.c malloca.c \
+	math.c openat-die.c save-cwd.c malloc/scratch_buffer_grow.c \
 	malloc/scratch_buffer_grow_preserve.c \
 	malloc/scratch_buffer_set_array_size.c stat-time.c strnlen1.h \
 	strnlen1.c sys_socket.c tempname.c glthread/threadlib.c \
@@ -1827,6 +1830,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cloexec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/close.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/closedir.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/count-one-bits.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dirfd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dirname-lgpl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dup-safer-flag.Po@am__quote@
