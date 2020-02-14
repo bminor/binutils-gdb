@@ -97,7 +97,7 @@ CC_LD = $(CXX) $(CXX_DIALECT)
 INCLUDE_DIR = ${srcdir}/../include
 INCLUDE_DEP = $$(INCLUDE_DIR)
 
-LIBIBERTY_BUILDDIR = build-libiberty-gdbserver
+LIBIBERTY_BUILDDIR = ../libiberty
 LIBIBERTY = $(LIBIBERTY_BUILDDIR)/libiberty.a
 
 # Where is ust?  These will be empty if ust was not available.
@@ -105,13 +105,9 @@ ustlibs = @ustlibs@
 ustinc = @ustinc@
 
 # gnulib
-GNULIB_BUILDDIR = build-gnulib-gdbserver
+GNULIB_BUILDDIR = ../gnulib
 LIBGNU = $(GNULIB_BUILDDIR)/import/libgnu.a
 INCGNU = -I$(srcdir)/../gnulib/import -I$(GNULIB_BUILDDIR)/import
-
-# Generated headers in the gnulib directory.  These must be listed
-# so that they are generated before other files are compiled.
-GNULIB_H = $(GNULIB_BUILDDIR)/import/string.h @GNULIB_STDINT_H@
 
 INCSUPPORT = -I$(srcdir)/.. -I..
 
@@ -329,15 +325,6 @@ XML_BUILTIN = @srv_xmlbuiltin@
 IPA_DEPFILES = @IPA_DEPFILES@
 extra_libraries = @extra_libraries@
 
-SUBDIRS = $(GNULIB_BUILDDIR) $(LIBIBERTY_BUILDDIR)
-CLEANDIRS = $(SUBDIRS)
-
-# List of subdirectories in the build tree that must exist.
-# This is used to force build failures in existing trees when
-# a new directory is added.
-# The format here is for the `case' shell command.
-REQUIRED_SUBDIRS = $(GNULIB_BUILDDIR) | $(LIBIBERTY_BUILDDIR)
-
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
@@ -371,10 +358,9 @@ FLAGS_TO_PASS = \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
 
 # All generated files which can be included by another file.
-generated_files = config.h $(GNULIB_H)
+generated_files = config.h
 
 all: gdbserver$(EXEEXT) gdbreplay$(EXEEXT) $(extra_libraries)
-	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 # Traditionally "install" depends on "all".  But it may be useful
 # not to; for example, if the user has made some trivial change to a
@@ -393,10 +379,6 @@ install-only:
 	fi; \
 	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir); \
 	$(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) gdbserver$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
-	# Note that we run install and not install-only, as the latter
-	# is not part of GNU standards and in particular not provided
-	# in libiberty.
-	@$(MAKE) $(FLAGS_TO_PASS) DO=install "DODIRS=$(SUBDIRS)" subdir_do
 
 install-strip:
 	$(MAKE) $(FLAGS_TO_PASS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
@@ -408,7 +390,6 @@ uninstall: force
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
 	rm -f $(DESTDIR)/$(bindir)/$$n$(EXEEXT) $(DESTDIR)$(man1dir)/$$n.1
-	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 installcheck:
 check:
@@ -417,19 +398,13 @@ install-info:
 install-pdf:
 html:
 install-html:
-clean-info: force
-	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
+clean-info:
 
 gdbserver$(EXEEXT): $(sort $(OBS)) ${CDEPS} $(LIBGNU) $(LIBIBERTY)
 	$(SILENCE) rm -f gdbserver$(EXEEXT)
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
 		-o gdbserver$(EXEEXT) $(OBS) $(LIBGNU) $(LIBIBERTY) \
 		$(GDBSERVER_LIBS) $(XM_CLIBS)
-
-$(LIBGNU) $(LIBIBERTY) $(GNULIB_H): all-lib
-all-lib: $(GNULIB_BUILDDIR)/Makefile $(LIBIBERTY_BUILDDIR)/Makefile
-	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS="$(SUBDIRS)" subdir_do
-.PHONY: all-lib
 
 gdbreplay$(EXEEXT): $(sort $(GDBREPLAY_OBS)) $(LIBGNU) $(LIBIBERTY)
 	$(SILENCE) rm -f gdbreplay$(EXEEXT)
@@ -488,31 +463,12 @@ clean:
 		rm -f $$i/*.o;	\
 		rm -f $$i/$(DEPDIR)/*; \
 	done
-	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
 
 maintainer-clean realclean distclean: clean
-	@$(MAKE) $(FLAGS_TO_PASS) DO=$@ "DODIRS=$(SUBDIRS)" subdir_do
-	rm -rf $(GNULIB_BUILDDIR)
 	rm -f Makefile config.status config.h stamp-h config.log
 	rm -f Makefile
 	for i in $(CONFIG_SRC_SUBDIR); do \
 		rmdir $$i/$(DEPDIR); \
-	done
-
-subdir_do: force
-	@for i in $(DODIRS); do \
-		case $$i in \
-		$(REQUIRED_SUBDIRS)) \
-			if [ ! -f ./$$i/Makefile ] ; then \
-				echo "Missing $$i/Makefile" >&2 ; \
-				exit 1 ; \
-			fi ;; \
-		esac ; \
-		if [ -f ./$$i/Makefile ] ; then \
-			if (cd ./$$i; \
-				$(MAKE) $(FLAGS_TO_PASS) $(DO)) ; then true ; \
-			else exit 1 ; fi ; \
-		else true ; fi ; \
 	done
 
 config.h: stamp-h ; @true
@@ -521,13 +477,6 @@ stamp-h: config.in config.status
 
 Makefile: Makefile.in config.status
 	$(SHELL) ./config.status $@
-
-$(GNULIB_BUILDDIR)/Makefile: $(srcdir)/../gnulib/Makefile.in config.status
-	  @cd $(GNULIB_BUILDDIR); CONFIG_FILES="Makefile" \
-	  CONFIG_COMMANDS="depfiles" \
-	  CONFIG_HEADERS= \
-	  CONFIG_LINKS= \
-	  $(SHELL) config.status
 
 config.status: configure configure.srv $(srcdir)/../bfd/development.sh
 	$(SHELL) ./config.status --recheck

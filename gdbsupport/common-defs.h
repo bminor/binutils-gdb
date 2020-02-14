@@ -22,7 +22,7 @@
 
 #ifdef GDBSERVER
 
-#include <build-gnulib-gdbserver/config.h>
+#include <gnulib/config.h>
 
 #undef PACKAGE_NAME
 #undef PACKAGE

@@ -1,3 +1,7 @@
+2020-02-14  Tom Tromey  <tom@tromey.com>
+
+	* common-defs.h: Change path to gnulib/config.h.
+
 2020-02-13  Simon Marchi  <simon.marchi@efficios.com>
 
 	* Makefile.am: Rename source files from .c to .cc.

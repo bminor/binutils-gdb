@@ -1,3 +1,19 @@
+2020-02-14  Tom Tromey  <tom@tromey.com>
+
+	* acinclude.m4: Don't include acx_configure_dir.m4.
+	* Makefile.in (LIBIBERTY_BUILDDIR, GNULIB_BUILDDIR): Update.
+	(SUBDIRS, CLEANDIRS, REQUIRED_SUBDIRS): Remove.
+	(all, install-only, uninstall, clean-info, clean)
+	(maintainer-clean): Don't recurse.
+	(subdir_do, all-lib): Remove.
+	($(LIBGNU) $(LIBIBERTY) $(GNULIB_H)): Remove rule.
+	(GNULIB_H): Remove.
+	(generated_files): Update.
+	($(GNULIB_BUILDDIR)/Makefile): Remove rule.
+	* configure: Rebuild.
+	* configure.ac: Don't configure gnulib or libiberty.
+	(GNULIB): Update.
+
 2020-02-14  Eli Zaretskii  <eliz@gnu.org>
 
 	* win32-low.c (create_process): Prepend PROGRAM to ARGS when
