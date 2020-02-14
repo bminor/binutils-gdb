@@ -7165,10 +7165,17 @@ duplicate:
     }
 
   if ((i.seg[0] || i.prefix[SEG_PREFIX])
-      && !quiet_warnings
       && i.tm.base_opcode == 0x8d /* lea */
       && !is_any_vex_encoding(&i.tm))
-    as_warn (_("segment override on `%s' is ineffectual"), i.tm.name);
+    {
+      if (!quiet_warnings)
+	as_warn (_("segment override on `%s' is ineffectual"), i.tm.name);
+      if (optimize)
+	{
+	  i.seg[0] = NULL;
+	  i.prefix[SEG_PREFIX] = 0;
+	}
+    }
 
   /* If a segment was explicitly specified, and the specified segment
      is not the default, use an opcode prefix to select it.  If we

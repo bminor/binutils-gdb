@@ -502,6 +502,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_list_test "optimize-6a" "-I${srcdir}/$subdir -march=+noavx -al"
     run_dump_test "optimize-6b"
     run_list_test "optimize-7" "-I${srcdir}/$subdir -march=+noavx2 -al"
+    run_dump_test "lea-optimize"
     run_dump_test "align-branch-1a"
     run_dump_test "align-branch-1b"
     run_dump_test "align-branch-1c"
