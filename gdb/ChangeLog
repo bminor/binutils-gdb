@@ -1,5 +1,22 @@
 2020-02-14  Simon Marchi  <simon.marchi@efficios.com>
 
+	* infrun.c (get_displaced_step_closure_by_addr): Adjust to
+	std::unique_ptr.
+	(displaced_step_clear): Rename to...
+	(displaced_step_reset): ... this.  Just call displaced->reset ().
+	(displaced_step_clear_cleanup): Rename to...
+	(displaced_step_reset_cleanup): ... this.
+	(displaced_step_prepare_throw): Adjust to std::unique_ptr.
+	(displaced_step_fixup): Likewise.
+	(resume_1): Likewise.
+	(handle_inferior_event): Restore child's memory before calling
+	displaced_step_fixup on the parent.
+	* infrun.h (displaced_step_inferior_state) <reset>: Adjust
+	to std::unique_ptr.
+	<step_closure>: Change type to std::unique_ptr.
+
+2020-02-14  Simon Marchi  <simon.marchi@efficios.com>
+
 	* arm-tdep.c: Include count-one-bits.h.
 	(cleanup_block_store_pc): Use count_one_bits.
 	(cleanup_block_load_pc): Use count_one_bits.
