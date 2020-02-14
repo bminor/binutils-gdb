@@ -7164,9 +7164,10 @@ duplicate:
 	}
     }
 
-  if (i.tm.base_opcode == 0x8d /* lea */
-      && i.seg[0]
-      && !quiet_warnings)
+  if ((i.seg[0] || i.prefix[SEG_PREFIX])
+      && !quiet_warnings
+      && i.tm.base_opcode == 0x8d /* lea */
+      && !is_any_vex_encoding(&i.tm))
     as_warn (_("segment override on `%s' is ineffectual"), i.tm.name);
 
   /* If a segment was explicitly specified, and the specified segment
