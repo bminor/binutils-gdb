@@ -1,3 +1,8 @@
+2020-02-14  Tom Tromey  <tom@tromey.com>
+
+	* minidebug.c (gnu_debug_key): New global.
+	(find_separate_debug_file_in_section): Use it.
+
 2020-02-14  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbarch.sh (displaced_step_copy_insn): Change return type to an

@@ -26,6 +26,10 @@
 
 #ifdef HAVE_LIBLZMA
 
+/* We stash a reference to the .gnu_debugdata BFD on the enclosing
+   BFD.  */
+static const bfd_key<gdb_bfd_ref_ptr> gnu_debug_key;
+
 #include <lzma.h>
 
 /* Allocator function for LZMA.  */
@@ -269,6 +273,10 @@ find_separate_debug_file_in_section (struct objfile *objfile)
     return NULL;
 
 #ifdef HAVE_LIBLZMA
+  gdb_bfd_ref_ptr *shared = gnu_debug_key.get (objfile->obfd);
+  if (shared != nullptr)
+    return *shared;
+
   std::string filename = string_printf (_(".gnu_debugdata for %s"),
 					objfile_name (objfile));
 
@@ -282,6 +290,9 @@ find_separate_debug_file_in_section (struct objfile *objfile)
       warning (_("Cannot parse .gnu_debugdata section; not a BFD object"));
       return NULL;
     }
+
+  gnu_debug_key.emplace (objfile->obfd, abfd);
+
 #else
   warning (_("Cannot parse .gnu_debugdata section; LZMA support was "
 	     "disabled at compile time"));
