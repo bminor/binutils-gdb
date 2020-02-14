@@ -8,6 +8,7 @@
 .*:19: Error: same type of prefix .*
 .*:20: Error: data size .* `vaddps'
 .*:21: Error: data size .* `vaddpd'
+.*:25: Error: same type of prefix .*
 GAS LISTING .*
 #...
 [ 	]*1[ 	]+\.text
@@ -33,4 +34,10 @@ GAS LISTING .*
 [ 	]*20[ 	]+data16 vaddps	%xmm0, %xmm0, %xmm0
 [ 	]*21[ 	]+data16 vaddpd	%xmm0, %xmm0, %xmm0
 [ 	]*22[ 	]*
-[ 	]*23[ 	]*[\?]+ 0+[ \t]+\.p2align	4,0
+[ 	]*23[ 	]+\.Lsegment:
+[ 	]*24[ 	]+\?\?\?\? 368B4500[ 	]+ss mov		%ss:\(%ebp\), %eax
+[ 	]*25[ 	]+ss mov		%ds:\(%ebp\), %eax
+[ 	]*26[ 	]+\?\?\?\? 3E8B4500[ 	]+ds mov		%ss:\(%ebp\), %eax
+[ 	]*27[ 	]+\?\?\?\? 3E8B4500[ 	]+ds mov		%ds:\(%ebp\), %eax
+[ 	]*28[ 	]*
+#pass

@@ -7178,11 +7178,13 @@ duplicate:
     }
 
   /* If a segment was explicitly specified, and the specified segment
-     is not the default, use an opcode prefix to select it.  If we
-     never figured out what the default segment is, then default_seg
-     will be zero at this point, and the specified segment prefix will
-     always be used.  */
-  if ((i.seg[0]) && (i.seg[0] != default_seg))
+     is neither the default nor the one already recorded from a prefix,
+     use an opcode prefix to select it.  If we never figured out what
+     the default segment is, then default_seg will be zero at this
+     point, and the specified segment prefix will always be used.  */
+  if (i.seg[0]
+      && i.seg[0] != default_seg
+      && i.seg[0]->seg_prefix != i.prefix[SEG_PREFIX])
     {
       if (!add_prefix (i.seg[0]->seg_prefix))
 	return 0;

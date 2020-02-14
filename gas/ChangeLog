@@ -1,5 +1,13 @@
 2020-02-14  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (process_operands): Also skip segment
+	override prefix emission if it matches an already present one.
+	* testsuite/gas/i386/prefix32.s: Add double segment override
+	cases.
+	* testsuite/gas/i386/prefix32.l: Adjust expectations.
+
+2020-02-14  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (process_operands): Drop ineffectual segment
 	overrides when optimizing.
 	* testsuite/gas/i386/lea-optimize.d: New.

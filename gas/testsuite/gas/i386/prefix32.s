@@ -20,4 +20,10 @@ prefix:
 	data16 vaddps	%xmm0, %xmm0, %xmm0
 	data16 vaddpd	%xmm0, %xmm0, %xmm0
 
+.Lsegment:
+	ss mov		%ss:(%ebp), %eax
+	ss mov		%ds:(%ebp), %eax
+	ds mov		%ss:(%ebp), %eax
+	ds mov		%ds:(%ebp), %eax
+
 	.p2align	4,0
