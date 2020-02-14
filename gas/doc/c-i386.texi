@@ -750,22 +750,6 @@ operand.
 
 @end itemize
 
-Almost all instructions have the same names in AT&T and Intel format.
-There are a few exceptions.  The sign extend and zero extend
-instructions need two sizes to specify them.  They need a size to
-sign/zero extend @emph{from} and a size to zero extend @emph{to}.  This
-is accomplished by using two instruction mnemonic suffixes in AT&T
-syntax.  Base names for sign extend and zero extend are
-@samp{movs@dots{}} and @samp{movz@dots{}} in AT&T syntax (@samp{movsx}
-and @samp{movzx} in Intel syntax).  The instruction mnemonic suffixes
-are tacked on to this base name, the @emph{from} suffix before the
-@emph{to} suffix.  Thus, @samp{movsbl %al, %edx} is AT&T syntax for
-``move sign extend @emph{from} %al @emph{to} %edx.''  Possible suffixes,
-thus, are @samp{bl} (from byte to long), @samp{bw} (from byte to word),
-@samp{wl} (from word to long), @samp{bq} (from byte to quadruple word),
-@samp{wq} (from word to quadruple word), and @samp{lq} (from long to
-quadruple word).
-
 @cindex encoding options, i386
 @cindex encoding options, x86-64
 
