@@ -19812,16 +19812,16 @@ void
 lnp_state_machine::handle_special_opcode (unsigned char op_code)
 {
   unsigned char adj_opcode = op_code - m_line_header->opcode_base;
-  CORE_ADDR addr_adj = (((m_op_index
-			  + (adj_opcode / m_line_header->line_range))
+  unsigned char adj_opcode_d = adj_opcode / m_line_header->line_range;
+  unsigned char adj_opcode_r = adj_opcode % m_line_header->line_range;
+  CORE_ADDR addr_adj = (((m_op_index + adj_opcode_d)
 			 / m_line_header->maximum_ops_per_instruction)
 			* m_line_header->minimum_instruction_length);
   m_address += gdbarch_adjust_dwarf2_line (m_gdbarch, addr_adj, true);
-  m_op_index = ((m_op_index + (adj_opcode / m_line_header->line_range))
+  m_op_index = ((m_op_index + adj_opcode_d)
 		% m_line_header->maximum_ops_per_instruction);
 
-  int line_delta = (m_line_header->line_base
-		    + (adj_opcode % m_line_header->line_range));
+  int line_delta = m_line_header->line_base + adj_opcode_r;
   advance_line (line_delta);
   record_line (false);
   m_discriminator = 0;

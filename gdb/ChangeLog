@@ -1,3 +1,8 @@
+2020-02-14  Richard Biener  <rguenther@suse.de>
+
+	* dwarf2/read.c (lnp_state_machine::handle_special_opcode): Apply CSE
+	on expression with division operators.
+
 2020-02-13  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
 
 	* MAINTAINERS (Write After Approval): Adding myself.
