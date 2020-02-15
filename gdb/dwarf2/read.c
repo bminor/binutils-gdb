@@ -105,7 +105,19 @@ static bool check_physname = false;
 /* When true, do not reject deprecated .gdb_index sections.  */
 static bool use_deprecated_index_sections = false;
 
-static const struct objfile_key<dwarf2_per_objfile> dwarf2_objfile_data_key;
+/* This is used to store the data that is always per objfile.  */
+static const objfile_key<dwarf2_per_objfile> dwarf2_objfile_data_key;
+
+/* These are used to store the dwarf2_per_bfd objects.
+
+   objfiles having the same BFD, which doesn't require relocations, are going to
+   share a dwarf2_per_bfd object, which is held in the _bfd_data_key version.
+
+   Other objfiles are not going to share a dwarf2_per_bfd with any other
+   objfiles, so they'll have their own version kept in the _objfile_data_key
+   version.  */
+static const struct bfd_key<dwarf2_per_bfd> dwarf2_per_bfd_bfd_data_key;
+static const struct objfile_key<dwarf2_per_bfd> dwarf2_per_bfd_objfile_data_key;
 
 /* The "aclass" indices for various kinds of computed DWARF symbols.  */
 
@@ -1853,9 +1865,30 @@ dwarf2_has_info (struct objfile *objfile,
 
   if (dwarf2_per_objfile == NULL)
     {
-      /* For now, each dwarf2_per_objfile owns its own dwarf2_per_bfd (no
-         sharing yet).  */
-      dwarf2_per_bfd *per_bfd = new dwarf2_per_bfd (objfile->obfd, names, can_copy);
+      dwarf2_per_bfd *per_bfd;
+
+      /* We can share a "dwarf2_per_bfd" with other objfiles if the BFD
+         doesn't require relocations and if there aren't partial symbols
+	 from some other reader.  */
+      if (!objfile_has_partial_symbols (objfile)
+	  && !gdb_bfd_requires_relocations (objfile->obfd))
+	{
+	  /* See if one has been created for this BFD yet.  */
+	  per_bfd = dwarf2_per_bfd_bfd_data_key.get (objfile->obfd);
+
+	  if (per_bfd == nullptr)
+	    {
+	      /* No, create it now.  */
+	      per_bfd = new dwarf2_per_bfd (objfile->obfd, names, can_copy);
+	      dwarf2_per_bfd_bfd_data_key.set (objfile->obfd, per_bfd);
+	    }
+	}
+      else
+	{
+	  /* No sharing possible, create one specifically for this objfile.  */
+	  per_bfd = new dwarf2_per_bfd (objfile->obfd, names, can_copy);
+	  dwarf2_per_bfd_objfile_data_key.set (objfile, per_bfd);
+	}
 
       dwarf2_per_objfile = dwarf2_objfile_data_key.emplace (objfile, objfile, per_bfd);
     }
@@ -2017,7 +2050,7 @@ dwarf2_get_section_info (struct objfile *objfile,
                          asection **sectp, const gdb_byte **bufp,
                          bfd_size_type *sizep)
 {
-  struct dwarf2_per_objfile *data = dwarf2_objfile_data_key.get (objfile);
+  struct dwarf2_per_objfile *data = get_dwarf2_per_objfile (objfile);
   struct dwarf2_section_info *info;
 
   /* We may see an objfile without any DWARF, in which case we just
@@ -5874,6 +5907,7 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = get_dwarf2_per_objfile (objfile);
+  dwarf2_per_bfd *per_bfd = dwarf2_per_objfile->per_bfd;
 
   /* If we're about to read full symbols, don't bother with the
      indices.  In this case we also don't care if some other debug
@@ -5881,20 +5915,28 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
      expanded anyway.  */
   if ((objfile->flags & OBJF_READNOW))
     {
-      dwarf2_per_objfile->per_bfd->using_index = 1;
+      /* When using READNOW, the using_index flag (set below) indicates that
+	 PER_BFD was already initialized, when we loaded some other objfile.  */
+      if (per_bfd->using_index)
+	{
+	  *index_kind = dw_index_kind::GDB_INDEX;
+	  dwarf2_per_objfile->resize_symtabs ();
+	  return true;
+	}
+
+      per_bfd->using_index = 1;
       create_all_comp_units (dwarf2_per_objfile);
       create_all_type_units (dwarf2_per_objfile);
-      dwarf2_per_objfile->per_bfd->quick_file_names_table
-	= create_quick_file_names_table
-	    (dwarf2_per_objfile->per_bfd->all_comp_units.size ());
+      per_bfd->quick_file_names_table
+	= create_quick_file_names_table (per_bfd->all_comp_units.size ());
       dwarf2_per_objfile->resize_symtabs ();
 
-      for (int i = 0; i < (dwarf2_per_objfile->per_bfd->all_comp_units.size ()
-			   + dwarf2_per_objfile->per_bfd->all_type_units.size ()); ++i)
+      for (int i = 0; i < (per_bfd->all_comp_units.size ()
+			   + per_bfd->all_type_units.size ()); ++i)
 	{
-	  dwarf2_per_cu_data *per_cu = dwarf2_per_objfile->per_bfd->get_cutu (i);
+	  dwarf2_per_cu_data *per_cu = per_bfd->get_cutu (i);
 
-	  per_cu->v.quick = OBSTACK_ZALLOC (&dwarf2_per_objfile->per_bfd->obstack,
+	  per_cu->v.quick = OBSTACK_ZALLOC (&per_bfd->obstack,
 					    struct dwarf2_per_cu_quick_data);
 	}
 
@@ -5902,6 +5944,24 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
 	 these functions will be no-ops because we will have expanded
 	 all symtabs.  */
       *index_kind = dw_index_kind::GDB_INDEX;
+      return true;
+    }
+
+  /* Was a debug names index already read when we processed an objfile sharing
+     PER_BFD?  */
+  if (per_bfd->debug_names_table != nullptr)
+    {
+      *index_kind = dw_index_kind::DEBUG_NAMES;
+      dwarf2_per_objfile->resize_symtabs ();
+      return true;
+    }
+
+  /* Was a GDB index already read when we processed an objfile sharing
+     PER_BFD?  */
+  if (per_bfd->index_table != nullptr)
+    {
+      *index_kind = dw_index_kind::GDB_INDEX;
+      dwarf2_per_objfile->resize_symtabs ();
       return true;
     }
 
@@ -5945,6 +6005,16 @@ dwarf2_build_psymtabs (struct objfile *objfile)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = get_dwarf2_per_objfile (objfile);
+  dwarf2_per_bfd *per_bfd = dwarf2_per_objfile->per_bfd;
+
+  if (per_bfd->partial_symtabs != nullptr)
+    {
+      /* Partial symbols were already read, so now we can simply
+	 attach them.  */
+      objfile->partial_symtabs = per_bfd->partial_symtabs;
+      dwarf2_per_objfile->resize_symtabs ();
+      return;
+    }
 
   init_psymbol_list (objfile, 1024);
 
@@ -5966,6 +6036,12 @@ dwarf2_build_psymtabs (struct objfile *objfile)
     {
       exception_print (gdb_stderr, except);
     }
+
+  /* Finish by setting the local reference to partial symtabs, so that
+     we don't try to read them again if reading another objfile with the same
+     BFD.  If we can't in fact share, this won't make a difference anyway as
+     the dwarf2_per_bfd object won't be shared.  */
+  per_bfd->partial_symtabs = objfile->partial_symtabs;
 }
 
 /* Find the base address of the compilation unit for range lists and
@@ -9014,9 +9090,10 @@ dwarf2_psymtab::expand_psymtab (struct objfile *objfile)
 {
   gdb_assert (!readin_p (objfile));
 
+  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+  free_cached_comp_units freer (per_objfile);
   expand_dependencies (objfile);
 
-  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
   dw2_do_instantiate_symtab (per_cu_data, per_objfile, false);
   gdb_assert (get_compunit_symtab (objfile) != nullptr);
 }
