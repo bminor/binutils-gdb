@@ -1,3 +1,15 @@
+2020-02-14  Nick Clifton  <nickc@redhat.com>
+
+	Import from the mainline:
+	2020-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25355
+	* testsuite/ld-plugin/lto.exp: Run PR binutils/25355 test.
+	* testsuite/ld-plugin/pr25355.c: New file.
+	* testsuite/ld-plugin/pr25355.d: Likewise.
+	* testsuite/lib/ld-lib.exp (run_cc_link_tests): Support compile
+	only dump.
+
 2020-02-01  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.

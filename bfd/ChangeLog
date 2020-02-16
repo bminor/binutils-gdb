@@ -1,3 +1,63 @@
+2020-02-14  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+	2020-02-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (try_load_plugin): Make plugin_list_iter an argument
+	and use it if it isn't NULL.  Remove has_plugin_p argument.  Add
+	a build_list_p argument.  Don't search plugin_list.  Short circuit
+	when building the plugin list.
+	(has_plugin): Renamed to has_plugin_list.
+	(bfd_plugin_set_plugin): Don't set has_plugin.
+	(bfd_plugin_specified_p): Check plugin_list instead.
+	(build_plugin_list): New function.
+	(load_plugin): Call build_plugin_list and use plugin_list.
+
+	2020-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25355
+	* plugin.c (try_claim): Always clean up for LTO wrapper.
+	(try_load_plugin): Treat each object as independent.  Create a
+	copy for plugin name.
+
+	2020-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (add_symbols): Clear plugin_data memory.
+
+	2020-02-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25355
+	* configure.ac (HAVE_EXECUTABLE_SUFFIX): New AC_DEFINE.
+	(EXECUTABLE_SUFFIX): Likewise.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* plugin.c (bfd_plugin_close_and_cleanup): Removed.
+	(plugin_list_entry): Add all_symbols_read, cleanup_handler,
+	gcc, lto_wrapper, resolution_file, resolution_option, gcc_env,
+	real_bfd, real_nsyms, real_syms, lto_nsyms and lto_syms.
+	(get_lto_wrapper): New.
+	(setup_lto_wrapper_env): Likewise.
+	(current_plugin): Likewise.
+	(register_all_symbols_read): Likewise.
+	(register_cleanup): Likewise.
+	(get_symbols): Likewise.
+	(add_input_file): Likewise.
+	(bfd_plugin_close_and_cleanup): Likewise.
+	(claim_file): Removed.
+	(register_claim_file): Set current_plugin->claim_file.
+	(add_symbols): Make a copy of LTO symbols.  Set lto_nsyms and
+	lto_syms in current_plugin.
+	(try_claim): Use current_plugin->claim_file.  Call LTO plugin
+	all_symbols_read handler.  Copy real symbols to plugin_data.
+	Call LTO plugin cleanup handler.  Clean up for LTO wrapper.
+	(try_load_plugin): Don't reuse the previous plugin for LTO
+	wrapper.  Set up GCC LTO wrapper if possible.  Don't set
+	plugin_list_iter->claim_file.
+	(bfd_plugin_canonicalize_symtab): Use real LTO symbols if
+	possible.
+	* plugin.h (plugin_data_struct): Add real_bfd, real_nsyms and
+	real_syms.
+
 2020-02-11  Nick Clifton  <nickc@redhat.com>
 
 	Import from the mainline:

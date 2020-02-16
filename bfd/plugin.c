@@ -69,7 +69,6 @@ dlerror (void)
 
 #endif /* !defined (HAVE_DLFCN_H) && defined (HAVE_WINDOWS_H)  */
 
-#define bfd_plugin_close_and_cleanup		      _bfd_generic_close_and_cleanup
 #define bfd_plugin_bfd_free_cached_info		      _bfd_generic_bfd_free_cached_info
 #define bfd_plugin_new_section_hook		      _bfd_generic_new_section_hook
 #define bfd_plugin_get_section_contents		      _bfd_generic_get_section_contents
@@ -124,13 +123,312 @@ message (int level ATTRIBUTE_UNUSED,
   return LDPS_OK;
 }
 
+struct plugin_list_entry
+{
+  /* These must be initialized for each IR object with LTO wrapper.  */
+  void *handle;
+  ld_plugin_claim_file_handler claim_file;
+  ld_plugin_all_symbols_read_handler all_symbols_read;
+  ld_plugin_all_symbols_read_handler cleanup_handler;
+  char *resolution_file;
+  char *resolution_option;
+  bfd *real_bfd;
+  long real_nsyms;
+  asymbol **real_syms;
+  int lto_nsyms;
+  const struct ld_plugin_symbol *lto_syms;
+
+  struct plugin_list_entry *next;
+
+  /* These can be reused for all IR objects.  */
+  const char *plugin_name;
+  char *gcc;
+  char *lto_wrapper;
+  char *gcc_env;
+  bfd_boolean initialized;
+};
+
+/* Use GCC LTO wrapper to covert LTO IR object to the real object.  */
+
+static bfd_boolean
+get_lto_wrapper (struct plugin_list_entry *plugin)
+{
+  struct stat st;
+  const char *real_name;
+  const char *base_name;
+  size_t length;
+  const char *target_start = NULL;
+  const char *target_end = NULL;
+  size_t target_length = 0;
+  char *gcc_name;
+  char *wrapper_name;
+  char *p;
+  char dir_seperator = '\0';
+  char *resolution_file;
+
+  if (plugin->initialized)
+    {
+      if (plugin->lto_wrapper)
+	{
+	  resolution_file = make_temp_file (".res");
+	  if (resolution_file)
+	    {
+	      plugin->resolution_file = resolution_file;
+	      plugin->resolution_option = concat ("-fresolution=",
+						  resolution_file, NULL);
+	      return TRUE;
+	    }
+	  else
+	    {
+	      /* Something is wrong.  Give up.  */
+	      free (plugin->gcc);
+	      free (plugin->lto_wrapper);
+	      free (plugin->gcc_env);
+	      plugin->gcc = NULL;
+	      plugin->gcc_env = NULL;
+	      plugin->lto_wrapper = NULL;
+	    }
+	}
+
+      return FALSE;
+    }
+
+  plugin->initialized = TRUE;
+
+  /* Check for PREFIX/libexec/gcc/TARGET/VERSION/liblto_plugin.so.  */
+  real_name = lrealpath (plugin->plugin_name);
+  base_name = lbasename (real_name);
+
+  /* The directory length in plugin pathname.  */
+  length = base_name - real_name;
+
+  /* Skip if there is no PREFIX.  */
+  if (!length)
+    return FALSE;
+
+  p = (char *) real_name + length - 1;
+  if (IS_DIR_SEPARATOR (*p))
+    {
+      int level = 0;
+      for (; p != real_name; p--)
+	if (IS_DIR_SEPARATOR (*p))
+	  {
+	    level++;
+	    if (level == 2)
+	      target_end = p;
+	    else if (level == 3)
+	      {
+		target_start = p + 1;
+		target_length = target_end - target_start;
+	      }
+	    else if (level == 5)
+	      {
+		dir_seperator = *p;
+		break;
+	      }
+	  }
+    }
+
+  /* Skip if there is no TARGET nor PREFIX.  */
+  if (!target_length || !dir_seperator)
+    return FALSE;
+
+#ifdef HAVE_EXECUTABLE_SUFFIX
+# define GCC_EXECUTABLE		"gcc" EXECUTABLE_SUFFIX
+# define LTO_WRAPPER_EXECUTABLE	"lto-wrapper" EXECUTABLE_SUFFIX
+#else
+# define GCC_EXECUTABLE		"gcc"
+# define LTO_WRAPPER_EXECUTABLE	"lto-wrapper"
+#endif
+  gcc_name = bfd_malloc (length + target_length
+			 + sizeof (GCC_EXECUTABLE));
+  if (gcc_name == NULL)
+    return FALSE;
+  memcpy (gcc_name, real_name, length);
+
+  /* Get PREFIX/bin/.  */
+  p += gcc_name - real_name;
+  memcpy (p + 1, "bin", 3);
+  p[4] = dir_seperator;
+
+  /* Try PREFIX/bin/TARGET-gcc first.  */
+  memcpy (p + 5, target_start, target_length);
+  p[5 + target_length] = '-';
+  memcpy (p + 5 + target_length + 1, GCC_EXECUTABLE,
+	  sizeof (GCC_EXECUTABLE));
+  if (stat (gcc_name, &st) != 0 || !S_ISREG (st.st_mode))
+    {
+      /* Then try PREFIX/bin/gcc.  */
+      memcpy (p + 5, GCC_EXECUTABLE, sizeof (GCC_EXECUTABLE));
+      if (stat (gcc_name, &st) != 0 || !S_ISREG (st.st_mode))
+	{
+	  free (gcc_name);
+	  return FALSE;
+	}
+    }
+
+  /* lto-wrapper should be in the same directory with LTO plugin.  */
+  wrapper_name = bfd_malloc (length + sizeof (LTO_WRAPPER_EXECUTABLE));
+  if (wrapper_name == NULL)
+    {
+      free (gcc_name);
+      return FALSE;
+    }
+  memcpy (wrapper_name, real_name, length);
+  memcpy (wrapper_name + length, LTO_WRAPPER_EXECUTABLE,
+	  sizeof (LTO_WRAPPER_EXECUTABLE));
+  if (stat (wrapper_name, &st) == 0 && S_ISREG (st.st_mode))
+    {
+      resolution_file = make_temp_file (".res");
+      if (resolution_file)
+	{
+	  plugin->gcc = gcc_name;
+	  plugin->lto_wrapper = wrapper_name;
+	  plugin->gcc_env = concat ("COLLECT_GCC=", gcc_name, NULL);
+	  plugin->resolution_file = resolution_file;
+	  plugin->resolution_option = concat ("-fresolution=",
+					      resolution_file, NULL);
+	  return TRUE;
+	}
+    }
+
+  free (gcc_name);
+  free (wrapper_name);
+  return FALSE;
+}
+
+/* Set environment variables for GCC LTO wrapper to covert LTO IR
+   object to the real object.  */
+
+static int
+setup_lto_wrapper_env (struct plugin_list_entry *plugin)
+{
+  return (putenv (plugin->gcc_env)
+	  || putenv ("COLLECT_GCC_OPTIONS="));
+}
+
+static struct plugin_list_entry *plugin_list = NULL;
+static struct plugin_list_entry *current_plugin = NULL;
+
 /* Register a claim-file handler. */
-static ld_plugin_claim_file_handler claim_file = NULL;
 
 static enum ld_plugin_status
 register_claim_file (ld_plugin_claim_file_handler handler)
 {
-  claim_file = handler;
+  current_plugin->claim_file = handler;
+  return LDPS_OK;
+}
+
+/* Register an all-symbols-read handler.  */
+
+static enum ld_plugin_status
+register_all_symbols_read (ld_plugin_all_symbols_read_handler handler)
+{
+  current_plugin->all_symbols_read = handler;
+  return LDPS_OK;
+}
+
+/* Register a cleanup handler.  */
+
+static enum ld_plugin_status
+register_cleanup (ld_plugin_all_symbols_read_handler handler)
+{
+  current_plugin->cleanup_handler = handler;
+  return LDPS_OK;
+}
+
+/* Get the symbol resolution info for a plugin-claimed input file.  */
+
+static enum ld_plugin_status
+get_symbols (const void *handle ATTRIBUTE_UNUSED, int nsyms,
+	     struct ld_plugin_symbol *syms)
+{
+  if (syms)
+    {
+      int n;
+      for (n = 0; n < nsyms; n++)
+	{
+	  switch (syms[n].def)
+	    {
+	    default:
+	      BFD_ASSERT (0);
+	      break;
+	    case LDPK_UNDEF:
+	    case LDPK_WEAKUNDEF:
+	      syms[n].resolution = LDPR_UNDEF;
+	      break;
+	    case LDPK_DEF:
+	    case LDPK_WEAKDEF:
+	    case LDPK_COMMON:
+	      /* Tell plugin that LTO symbol has references from regular
+		 object code. */
+	      syms[n].resolution  = LDPR_PREVAILING_DEF;
+	      break;
+	    }
+      }
+    }
+
+  return LDPS_OK;
+}
+
+/* Add a new (real) input file generated by a plugin.  */
+
+static enum ld_plugin_status
+add_input_file (const char *pathname)
+{
+  /* Get symbols from the real LTO object.  */
+  char **matching;
+  long real_symsize;
+  long real_nsyms;
+  asymbol **real_syms;
+  int lto_nsyms;
+  bfd_boolean lto_symbol_found = FALSE;
+  const struct ld_plugin_symbol *lto_syms;
+  bfd *rbfd;
+  int i, j;
+
+  rbfd = bfd_openr (pathname, NULL);
+  if (!bfd_check_format_matches (rbfd, bfd_object, &matching))
+    BFD_ASSERT (0);
+
+  real_symsize = bfd_get_symtab_upper_bound (rbfd);
+  if (real_symsize < 0)
+    BFD_ASSERT (0);
+
+  real_syms = (asymbol **) bfd_malloc (real_symsize);
+  if (real_syms)
+    {
+      real_nsyms = bfd_canonicalize_symtab (rbfd, real_syms);
+      if (real_nsyms < 0)
+	BFD_ASSERT (0);
+
+      /* NB: LTO plugin may generate more than one real object from one
+	 LTO IR object.  We use the one which contains LTO symbols.  */
+      lto_syms = current_plugin->lto_syms;
+      lto_nsyms = current_plugin->lto_nsyms;
+      for (i = 0; i < lto_nsyms; i++)
+	for (j = 0; j < real_nsyms; j++)
+	  if (real_syms[j]->name
+	      && strcmp (lto_syms[i].name, real_syms[j]->name) == 0)
+	    {
+	      lto_symbol_found = TRUE;
+	      break;
+	    }
+    }
+
+  if (lto_symbol_found)
+    {
+      current_plugin->real_nsyms = real_nsyms;
+      current_plugin->real_syms = real_syms;
+      /* NB: We can't close RBFD which own the real symbol info.  */
+      current_plugin->real_bfd = rbfd;
+    }
+  else
+    {
+      bfd_close (rbfd);
+      free (real_syms);
+    }
+
   return LDPS_OK;
 }
 
@@ -143,13 +441,52 @@ add_symbols (void * handle,
   struct plugin_data_struct *plugin_data =
     bfd_alloc (abfd, sizeof (plugin_data_struct));
 
-  plugin_data->nsyms = nsyms;
-  plugin_data->syms = syms;
+  if (plugin_data)
+    {
+      struct ld_plugin_symbol *sym_info;
+      char *strtab;
+      size_t sym_info_size, name_length;
+      int i;
+
+      memset (plugin_data, 0, sizeof (*plugin_data));
+
+      abfd->tdata.plugin_data = plugin_data;
+
+      /* NB: LTO symbols are owned by LTO plugin.  Create a copy so
+	 that we can use it in bfd_plugin_canonicalize_symtab.  */
+      sym_info_size = nsyms * sizeof (*syms);
+
+      /* Allocate a string table  */
+      for (i = 0; i < nsyms; i++)
+	sym_info_size += strlen (syms[i].name) + 1;
+
+      sym_info = bfd_alloc (abfd, sym_info_size);
+      if (sym_info)
+	{
+	  /* Copy symbol table.  */
+	  memcpy (sym_info, syms, nsyms * sizeof (*syms));
+
+	  /* Copy symbol names in symbol table.  */
+	  strtab = (char *) (sym_info + nsyms);
+	  for (i = 0; i < nsyms; i++)
+	    {
+	      name_length = strlen (syms[i].name);
+	      memcpy (strtab, syms[i].name, name_length + 1);
+	      sym_info[i].name = strtab;
+	      strtab += name_length + 1;
+	    }
+
+	  plugin_data->nsyms = nsyms;
+	  plugin_data->syms = sym_info;
+
+	  current_plugin->lto_nsyms = nsyms;
+	  current_plugin->lto_syms = sym_info;
+	}
+    }
 
   if (nsyms != 0)
     abfd->flags |= HAS_SYMS;
 
-  abfd->tdata.plugin_data = plugin_data;
   return LDPS_OK;
 }
 
@@ -212,34 +549,72 @@ try_claim (bfd *abfd)
   struct ld_plugin_input_file file;
 
   file.handle = abfd;
-  if (!bfd_plugin_open_input (abfd, &file))
-    return 0;
-  if (claim_file)
-    claim_file (&file, &claimed);
-  close (file.fd);
+  if (bfd_plugin_open_input (abfd, &file)
+      && current_plugin->claim_file)
+    {
+      current_plugin->claim_file (&file, &claimed);
+      if (claimed)
+	{
+	  if (current_plugin->all_symbols_read)
+	    {
+	      struct plugin_data_struct *plugin_data
+		= abfd->tdata.plugin_data;
+	      if (plugin_data)
+		{
+		  /* Get real symbols from LTO wrapper.  */
+		  current_plugin->all_symbols_read ();
+
+		  /* Copy real symbols to plugin_data.  */
+		  plugin_data->real_bfd = current_plugin->real_bfd;
+		  plugin_data->real_nsyms = current_plugin->real_nsyms;
+		  plugin_data->real_syms = current_plugin->real_syms;
+
+		  /* Clean up LTO plugin.  */
+		  if (current_plugin->cleanup_handler)
+		    current_plugin->cleanup_handler ();
+		}
+	    }
+	}
+
+      close (file.fd);
+    }
+
+  if (current_plugin->lto_wrapper)
+    {
+      /* Clean up for LTO wrapper.  NB: Resolution file and option
+	 have been created regardless if an IR object is claimed or
+	 not.  */
+      unlink (current_plugin->resolution_file);
+      free (current_plugin->resolution_option);
+    }
+
   return claimed;
 }
 
-struct plugin_list_entry
-{
-  void *                        handle;
-  ld_plugin_claim_file_handler  claim_file;
-  struct plugin_list_entry *    next;
-};
-
-static struct plugin_list_entry * plugin_list = NULL;
-
 static int
-try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
+try_load_plugin (const char *pname,
+		 struct plugin_list_entry *plugin_list_iter,
+		 bfd *abfd, bfd_boolean build_list_p)
 {
   void *plugin_handle = NULL;
-  struct ld_plugin_tv tv[4];
+  struct ld_plugin_tv tv[12];
   int i;
   ld_plugin_onload onload;
   enum ld_plugin_status status;
-  struct plugin_list_entry *plugin_list_iter;
 
-  *has_plugin_p = 0;
+  /* NB: Each object is independent.  Reuse the previous plugin from
+     the last run will lead to wrong result.  */
+  if (current_plugin)
+    {
+      if (current_plugin->handle)
+	dlclose (current_plugin->handle);
+      memset (current_plugin, 0,
+	      offsetof (struct plugin_list_entry, next));
+      current_plugin = NULL;
+    }
+
+  if (plugin_list_iter)
+    pname = plugin_list_iter->plugin_name;
 
   plugin_handle = dlopen (pname, RTLD_NOW);
   if (!plugin_handle)
@@ -248,28 +623,30 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
       return 0;
     }
 
-  for (plugin_list_iter = plugin_list;
-       plugin_list_iter;
-       plugin_list_iter = plugin_list_iter->next)
+  if (plugin_list_iter == NULL)
     {
-      if (plugin_handle == plugin_list_iter->handle)
+      size_t length_plugin_name = strlen (pname) + 1;
+      char *plugin_name = bfd_malloc (length_plugin_name);
+      if (plugin_name == NULL)
+	return 0;
+      plugin_list_iter = bfd_malloc (sizeof *plugin_list_iter);
+      if (plugin_list_iter == NULL)
 	{
-	  dlclose (plugin_handle);
-	  if (!plugin_list_iter->claim_file)
-	    return 0;
-
-	  register_claim_file (plugin_list_iter->claim_file);
-	  goto have_claim_file;
+	  free (plugin_name);
+	  return 0;
 	}
+      /* Make a copy of PNAME since PNAME from load_plugin () will be
+	 freed.  */
+      memcpy (plugin_name, pname, length_plugin_name);
+      memset (plugin_list_iter, 0, sizeof (*plugin_list_iter));
+      plugin_list_iter->plugin_name = plugin_name;
+      plugin_list_iter->next = plugin_list;
+      plugin_list = plugin_list_iter;
     }
 
-  plugin_list_iter = bfd_malloc (sizeof *plugin_list_iter);
-  if (plugin_list_iter == NULL)
-    return 0;
   plugin_list_iter->handle = plugin_handle;
-  plugin_list_iter->claim_file = NULL;
-  plugin_list_iter->next = plugin_list;
-  plugin_list = plugin_list_iter;
+  if (build_list_p)
+    return 0;
 
   onload = dlsym (plugin_handle, "onload");
   if (!onload)
@@ -287,23 +664,60 @@ try_load_plugin (const char *pname, bfd *abfd, int *has_plugin_p)
   tv[i].tv_tag = LDPT_ADD_SYMBOLS;
   tv[i].tv_u.tv_add_symbols = add_symbols;
 
+  if (get_lto_wrapper (plugin_list_iter))
+    {
+      ++i;
+      tv[i].tv_tag = LDPT_REGISTER_ALL_SYMBOLS_READ_HOOK;
+      tv[i].tv_u.tv_register_all_symbols_read = register_all_symbols_read;
+
+      ++i;
+      tv[i].tv_tag = LDPT_REGISTER_CLEANUP_HOOK;
+      tv[i].tv_u.tv_register_cleanup = register_cleanup;
+
+      ++i;
+      tv[i].tv_tag = LDPT_GET_SYMBOLS;
+      tv[i].tv_u.tv_get_symbols = get_symbols;
+
+      ++i;
+      tv[i].tv_tag = LDPT_GET_SYMBOLS_V2;
+      tv[i].tv_u.tv_get_symbols = get_symbols;
+
+      ++i;
+      tv[i].tv_tag = LDPT_OPTION;
+      tv[i].tv_u.tv_string = plugin_list_iter->lto_wrapper;
+
+      ++i;
+      tv[i].tv_tag = LDPT_OPTION;
+      tv[i].tv_u.tv_string = plugin_list_iter->resolution_option;
+
+      ++i;
+      tv[i].tv_tag = LDPT_LINKER_OUTPUT;
+      tv[i].tv_u.tv_val = LDPO_EXEC;
+
+      ++i;
+      tv[i].tv_tag = LDPT_ADD_INPUT_FILE;
+      tv[i].tv_u.tv_add_input_file = add_input_file;
+    }
+
   ++i;
   tv[i].tv_tag = LDPT_NULL;
   tv[i].tv_u.tv_val = 0;
 
+  current_plugin = plugin_list_iter;
+
+  /* LTO plugin will call handler hooks to set up plugin handlers.  */
   status = (*onload)(tv);
 
   if (status != LDPS_OK)
     return 0;
 
-  plugin_list_iter->claim_file = claim_file;
-
-have_claim_file:
-  *has_plugin_p = 1;
+  if (current_plugin->lto_wrapper
+      && setup_lto_wrapper_env (current_plugin))
+    return 0;
 
   abfd->plugin_format = bfd_plugin_no;
 
-  if (!claim_file)
+  if (!current_plugin->claim_file)
     return 0;
 
   if (!try_claim (abfd))
@@ -314,8 +728,7 @@ have_claim_file:
 }
 
 /* There may be plugin libraries in lib/bfd-plugins.  */
-
-static int has_plugin = -1;
+static int has_plugin_list = -1;
 
 static const bfd_target *(*ld_plugin_object_p) (bfd *);
 
@@ -325,7 +738,6 @@ void
 bfd_plugin_set_plugin (const char *p)
 {
   plugin_name = p;
-  has_plugin = p != NULL;
 }
 
 /* Return TRUE if a plugin library is used.  */
@@ -333,7 +745,7 @@ bfd_plugin_set_plugin (const char *p)
 bfd_boolean
 bfd_plugin_specified_p (void)
 {
-  return has_plugin > 0;
+  return plugin_list != NULL;
 }
 
 /* Return TRUE if ABFD can be claimed by linker LTO plugin.  */
@@ -364,8 +776,8 @@ register_ld_plugin_object_p (const bfd_target *(*object_p) (bfd *))
   ld_plugin_object_p = object_p;
 }
 
-static int
-load_plugin (bfd *abfd)
+static void
+build_plugin_list (bfd *abfd)
 {
   /* The intent was to search ${libdir}/bfd-plugins for plugins, but
      unfortunately the original implementation wasn't precisely that
@@ -374,17 +786,10 @@ load_plugin (bfd *abfd)
   static const char *path[]
     = { LIBDIR "/bfd-plugins", BINDIR "/../lib/bfd-plugins" };
   struct stat last_st;
-  int found = 0;
   unsigned int i;
 
-  if (!has_plugin)
-    return found;
-
-  if (plugin_name)
-    return try_load_plugin (plugin_name, abfd, &has_plugin);
-
-  if (plugin_program_name == NULL)
-    return found;
+  if (has_plugin_list >= 0)
+    return;
 
   /* Try not to search the same dir twice, by looking at st_dev and
      st_ino for the dir.  If we are on a file system that always sets
@@ -419,26 +824,38 @@ load_plugin (bfd *abfd)
 
 		  full_name = concat (plugin_dir, "/", ent->d_name, NULL);
 		  if (stat (full_name, &st) == 0 && S_ISREG (st.st_mode))
-		    {
-		      int valid_plugin;
-
-		      found = try_load_plugin (full_name, abfd, &valid_plugin);
-		      if (has_plugin <= 0)
-			has_plugin = valid_plugin;
-		    }
+		    try_load_plugin (full_name, NULL, abfd, TRUE);
 		  free (full_name);
-		  if (found)
-		    break;
 		}
 	      closedir (d);
 	    }
 	  free (plugin_dir);
 	}
-      if (found)
-	break;
     }
 
-  return found;
+  has_plugin_list = plugin_list != NULL;
+}
+
+static int
+load_plugin (bfd *abfd)
+{
+  struct plugin_list_entry *plugin_list_iter;
+
+  if (plugin_name)
+    return try_load_plugin (plugin_name, plugin_list, abfd, FALSE);
+
+  if (plugin_program_name == NULL)
+    return 0;
+
+  build_plugin_list (abfd);
+
+  for (plugin_list_iter = plugin_list;
+       plugin_list_iter;
+       plugin_list_iter = plugin_list_iter->next)
+    if (try_load_plugin (NULL, plugin_list_iter, abfd, FALSE))
+      return 1;
+
+  return 0;
 }
 
 
@@ -562,7 +979,15 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
 			SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS);
   static asection fake_common_section
     = BFD_FAKE_SECTION (fake_common_section, NULL, "plug", 0, SEC_IS_COMMON);
-  int i;
+  int i, j;
+  long real_nsyms;
+  asymbol **real_syms;
+
+  real_syms = plugin_data->real_syms;
+  if (real_syms)
+    real_nsyms = plugin_data->real_nsyms;
+  else
+    real_nsyms = 0;
 
   for (i = 0; i < nsyms; i++)
     {
@@ -587,6 +1012,15 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
 	case LDPK_DEF:
 	case LDPK_WEAKDEF:
 	  s->section = &fake_section;
+	  if (real_nsyms)
+	    /* Use real LTO symbols if possible.  */
+	    for (j = 0; j < real_nsyms; j++)
+	      if (real_syms[j]->name
+		  && strcmp (syms[i].name, real_syms[j]->name) == 0)
+		{
+		  s->section = real_syms[j]->section;
+		  break;
+		}
 	  break;
 	default:
 	  BFD_ASSERT (0);
@@ -633,6 +1067,24 @@ bfd_plugin_sizeof_headers (bfd *a ATTRIBUTE_UNUSED,
 {
   BFD_ASSERT (0);
   return 0;
+}
+
+static bfd_boolean
+bfd_plugin_close_and_cleanup (bfd *abfd)
+{
+  struct plugin_data_struct *plugin_data;
+
+  if (abfd->format != bfd_archive
+      && (plugin_data = abfd->tdata.plugin_data))
+    {
+      if (plugin_data->real_bfd)
+	bfd_close (plugin_data->real_bfd);
+
+      if (plugin_data->real_syms)
+	free (plugin_data->real_syms);
+    }
+
+  return _bfd_generic_close_and_cleanup (abfd);
 }
 
 const bfd_target plugin_vec =
