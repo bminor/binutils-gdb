@@ -831,7 +831,8 @@ i386_displaced_step_copy_insn (struct gdbarch *gdbarch,
       displaced_step_dump_bytes (gdb_stdlog, buf, len);
     }
 
-  return closure;
+  /* This is a work around for a problem with g++ 4.8.  */
+  return displaced_step_closure_up (closure.release ());
 }
 
 /* Fix up the state of registers and memory after having single-stepped

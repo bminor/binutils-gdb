@@ -1511,7 +1511,8 @@ amd64_displaced_step_copy_insn (struct gdbarch *gdbarch,
       displaced_step_dump_bytes (gdb_stdlog, buf, len);
     }
 
-  return dsc;
+  /* This is a work around for a problem with g++ 4.8.  */
+  return displaced_step_closure_up (dsc.release ());
 }
 
 static int

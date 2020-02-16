@@ -1,3 +1,13 @@
+2020-02-18  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* aarch64-tdep.c (aarch64_displaced_step_copy_insn): Use an explicit
+	conversion.
+	* amd64-tdep.c (amd64_displaced_step_copy_insn): Likewise.
+	* arm-linux-tdep.c (arm_linux_displaced_step_copy_insn): Likewise.
+	* i386-tdep.c (i386_displaced_step_copy_insn): Likewise.
+	* rs6000-tdep.c (ppc_displaced_step_copy_insn): Likewise.
+	* s390-tdep.c (s390_displaced_step_copy_insn): Likewise.
+
 2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
 
 	* MAINTAINERS: Change palmer@sifive.com to palmer@dabbelt.com.

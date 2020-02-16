@@ -3053,7 +3053,8 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
       dsc = NULL;
     }
 
-  return dsc;
+  /* This is a work around for a problem with g++ 4.8.  */
+  return displaced_step_closure_up (dsc.release ());
 }
 
 /* Implement the "displaced_step_fixup" gdbarch method.  */

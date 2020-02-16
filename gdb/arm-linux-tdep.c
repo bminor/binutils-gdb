@@ -1131,7 +1131,8 @@ arm_linux_displaced_step_copy_insn (struct gdbarch *gdbarch,
 
   arm_displaced_init_closure (gdbarch, from, to, dsc.get ());
 
-  return dsc;
+  /* This is a work around for a problem with g++ 4.8.  */
+  return displaced_step_closure_up (dsc.release ());
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
