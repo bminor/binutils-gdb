@@ -1,3 +1,9 @@
+2020-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .sse4a and nosse4a.  Restore
+	nosse4.
+	* doc/c-i386.texi: Document sse4a and nosse4a.
+
 2020-02-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/c-i386.texi: Remove the old movsx and movzx documentation

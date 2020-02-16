@@ -151,6 +151,7 @@ accept various extension mnemonics.  For example,
 @code{sse},
 @code{sse2},
 @code{sse3},
+@code{sse4a},
 @code{ssse3},
 @code{sse4.1},
 @code{sse4.2},
@@ -158,6 +159,7 @@ accept various extension mnemonics.  For example,
 @code{nosse},
 @code{nosse2},
 @code{nosse3},
+@code{nosse4a},
 @code{nossse3},
 @code{nosse4.1},
 @code{nosse4.2},
@@ -1428,7 +1430,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{bdver4} @tab @samp{znver1} @tab @samp{znver2} @tab @samp{btver1}
 @item @samp{btver2} @tab @samp{generic32} @tab @samp{generic64}
 @item @samp{.cmov} @tab @samp{.fxsr} @tab @samp{.mmx}
-@item @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3}
+@item @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3} @samp{.sse4a}
 @item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}
 @item @samp{.avx} @tab @samp{.vmx} @tab @samp{.smx} @tab @samp{.ept}
 @item @samp{.clflush} @tab @samp{.movbe} @tab @samp{.xsave} @tab @samp{.xsaveopt}
