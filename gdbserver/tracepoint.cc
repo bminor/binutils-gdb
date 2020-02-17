@@ -3117,17 +3117,11 @@ install_fast_tracepoint (struct tracepoint *tpoint, char *errbuf)
   trampoline_size = 0;
 
   /* Install the jump pad.  */
-  err = install_fast_tracepoint_jump_pad (tpoint->obj_addr_on_target,
-					  tpoint->address,
-					  collect,
-					  ipa_sym_addrs.addr_collecting,
-					  tpoint->orig_size,
-					  &jentry,
-					  &trampoline, &trampoline_size,
-					  fjump, &fjump_size,
-					  &tpoint->adjusted_insn_addr,
-					  &tpoint->adjusted_insn_addr_end,
-					  errbuf);
+  err = target_install_fast_tracepoint_jump_pad
+    (tpoint->obj_addr_on_target, tpoint->address, collect,
+     ipa_sym_addrs.addr_collecting, tpoint->orig_size, &jentry,
+     &trampoline, &trampoline_size, fjump, &fjump_size,
+     &tpoint->adjusted_insn_addr, &tpoint->adjusted_insn_addr_end, errbuf);
 
   if (err)
     return 1;

@@ -1,5 +1,37 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's install_fast_tracepoint_jump_pad
+	and get_min_fast_tracepoint_insn_len ops into methods of
+	process_target.
+
+	* target.h (struct process_stratum_target): Remove the target ops.
+	(class process_target): Add the target ops.  Also add
+	'supports_fast_tracepoints'.
+	(target_supports_fast_tracepoints): Update the macro.
+	(target_get_min_fast_tracepoint_insn_len): Update the macro.
+	(install_fast_tracepoint_jump_pad): Update and rename the macro
+	to ...
+	(target_install_fast_tracepoint_jump_pad): ... this.
+	* target.cc (process_target::supports_fast_tracepoints): Define.
+	(process_target::install_fast_tracepoint_jump_pad): Define.
+	(process_target::get_min_fast_tracepoint_insn_len): Define.
+
+	Update the derived classes and callers below.
+
+	* tracepoint.cc (install_fast_tracepoint): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_process_target::supports_fast_tracepoints): Define.
+	(linux_install_fast_tracepoint_jump_pad): Turn into ...
+	(linux_process_target::install_fast_tracepoint_jump_pad): ... this.
+	(linux_get_min_fast_tracepoint_insn_len): Turn into ...
+	(linux_process_target::get_min_fast_tracepoint_insn_len): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	* win32-low.cc (win32_target_ops): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's stabilize_threads op into a
 	method of process_target.
 

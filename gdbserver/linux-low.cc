@@ -6620,19 +6620,20 @@ linux_process_target::done_accessing_memory ()
     target_unpause_all (true);
 }
 
-static int
-linux_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
-					CORE_ADDR collector,
-					CORE_ADDR lockaddr,
-					ULONGEST orig_size,
-					CORE_ADDR *jump_entry,
-					CORE_ADDR *trampoline,
-					ULONGEST *trampoline_size,
-					unsigned char *jjump_pad_insn,
-					ULONGEST *jjump_pad_insn_size,
-					CORE_ADDR *adjusted_insn_addr,
-					CORE_ADDR *adjusted_insn_addr_end,
-					char *err)
+bool
+linux_process_target::supports_fast_tracepoints ()
+{
+  return the_low_target.install_fast_tracepoint_jump_pad != nullptr;
+}
+
+int
+linux_process_target::install_fast_tracepoint_jump_pad
+  (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+   CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+   CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+   unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+   CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+   char *err)
 {
   return (*the_low_target.install_fast_tracepoint_jump_pad)
     (tpoint, tpaddr, collector, lockaddr, orig_size,
@@ -6651,8 +6652,8 @@ linux_emit_ops (void)
     return NULL;
 }
 
-static int
-linux_get_min_fast_tracepoint_insn_len (void)
+int
+linux_process_target::get_min_fast_tracepoint_insn_len ()
 {
   return (*the_low_target.get_min_fast_tracepoint_insn_len) ();
 }
@@ -7455,10 +7456,8 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_install_fast_tracepoint_jump_pad,
   linux_emit_ops,
   linux_supports_disable_randomization,
-  linux_get_min_fast_tracepoint_insn_len,
   linux_qxfer_libraries_svr4,
   linux_supports_agent,
 #ifdef HAVE_LINUX_BTRACE

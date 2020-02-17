@@ -402,6 +402,24 @@ public:
   void unpause_all (bool unfreeze) override;
 
   void stabilize_threads () override;
+
+  bool supports_fast_tracepoints () override;
+
+  int install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
+					CORE_ADDR tpaddr,
+					CORE_ADDR collector,
+					CORE_ADDR lockaddr,
+					ULONGEST orig_size,
+					CORE_ADDR *jump_entry,
+					CORE_ADDR *trampoline,
+					ULONGEST *trampoline_size,
+					unsigned char *jjump_pad_insn,
+					ULONGEST *jjump_pad_insn_size,
+					CORE_ADDR *adjusted_insn_addr,
+					CORE_ADDR *adjusted_insn_addr_end,
+					char *err) override;
+
+  int get_min_fast_tracepoint_insn_len () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

@@ -668,3 +668,28 @@ process_target::stabilize_threads ()
 {
   /* Nop.  */
 }
+
+bool
+process_target::supports_fast_tracepoints ()
+{
+  return false;
+}
+
+int
+process_target::install_fast_tracepoint_jump_pad
+  (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+   CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+   CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+   unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+   CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+   char *err)
+{
+  gdb_assert_not_reached ("target op install_fast_tracepoint_jump_pad "
+			  "not supported");
+}
+
+int
+process_target::get_min_fast_tracepoint_insn_len ()
+{
+  return 0;
+}

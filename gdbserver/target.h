@@ -70,44 +70,12 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Install a fast tracepoint jump pad.  TPOINT is the address of the
-     tracepoint internal object as used by the IPA agent.  TPADDR is
-     the address of tracepoint.  COLLECTOR is address of the function
-     the jump pad redirects to.  LOCKADDR is the address of the jump
-     pad lock object.  ORIG_SIZE is the size in bytes of the
-     instruction at TPADDR.  JUMP_ENTRY points to the address of the
-     jump pad entry, and on return holds the address past the end of
-     the created jump pad.  If a trampoline is created by the function,
-     then TRAMPOLINE and TRAMPOLINE_SIZE return the address and size of
-     the trampoline, else they remain unchanged.  JJUMP_PAD_INSN is a
-     buffer containing a copy of the instruction at TPADDR.
-     ADJUST_INSN_ADDR and ADJUST_INSN_ADDR_END are output parameters that
-     return the address range where the instruction at TPADDR was relocated
-     to.  If an error occurs, the ERR may be used to pass on an error
-     message.  */
-  int (*install_fast_tracepoint_jump_pad) (CORE_ADDR tpoint, CORE_ADDR tpaddr,
-					   CORE_ADDR collector,
-					   CORE_ADDR lockaddr,
-					   ULONGEST orig_size,
-					   CORE_ADDR *jump_entry,
-					   CORE_ADDR *trampoline,
-					   ULONGEST *trampoline_size,
-					   unsigned char *jjump_pad_insn,
-					   ULONGEST *jjump_pad_insn_size,
-					   CORE_ADDR *adjusted_insn_addr,
-					   CORE_ADDR *adjusted_insn_addr_end,
-					   char *err);
-
   /* Return the bytecode operations vector for the current inferior.
      Returns NULL if bytecode compilation is not supported.  */
   struct emit_ops *(*emit_ops) (void);
 
   /* Returns true if the target supports disabling randomization.  */
   int (*supports_disable_randomization) (void);
-
-  /* Return the minimum length of an instruction that can be safely overwritten
-     for use as a fast tracepoint.  */
-  int (*get_min_fast_tracepoint_insn_len) (void);
 
   /* Read solib info on SVR4 platforms.  */
   int (*qxfer_libraries_svr4) (const char *annex, unsigned char *readbuf,
@@ -494,6 +462,37 @@ public:
 
   /* Stabilize all threads.  That is, force them out of jump pads.  */
   virtual void stabilize_threads ();
+
+  /* Return true if the install_fast_tracepoint_jump_pad op is
+     supported.  */
+  virtual bool supports_fast_tracepoints ();
+
+  /* Install a fast tracepoint jump pad.  TPOINT is the address of the
+     tracepoint internal object as used by the IPA agent.  TPADDR is
+     the address of tracepoint.  COLLECTOR is address of the function
+     the jump pad redirects to.  LOCKADDR is the address of the jump
+     pad lock object.  ORIG_SIZE is the size in bytes of the
+     instruction at TPADDR.  JUMP_ENTRY points to the address of the
+     jump pad entry, and on return holds the address past the end of
+     the created jump pad.  If a trampoline is created by the function,
+     then TRAMPOLINE and TRAMPOLINE_SIZE return the address and size of
+     the trampoline, else they remain unchanged.  JJUMP_PAD_INSN is a
+     buffer containing a copy of the instruction at TPADDR.
+     ADJUST_INSN_ADDR and ADJUST_INSN_ADDR_END are output parameters that
+     return the address range where the instruction at TPADDR was relocated
+     to.  If an error occurs, the ERR may be used to pass on an error
+     message.  */
+  virtual int install_fast_tracepoint_jump_pad
+    (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+     CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+     CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+     unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+     CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+     char *err);
+
+  /* Return the minimum length of an instruction that can be safely
+     overwritten for use as a fast tracepoint.  */
+  virtual int get_min_fast_tracepoint_insn_len ();
 };
 
 extern process_stratum_target *the_target;
@@ -559,11 +558,10 @@ int kill_inferior (process_info *proc);
   the_target->pt->supports_tracepoints ()
 
 #define target_supports_fast_tracepoints()		\
-  (the_target->install_fast_tracepoint_jump_pad != NULL)
+  the_target->pt->supports_fast_tracepoints ()
 
 #define target_get_min_fast_tracepoint_insn_len()	\
-  (the_target->get_min_fast_tracepoint_insn_len		\
-   ? (*the_target->get_min_fast_tracepoint_insn_len) () : 0)
+  the_target->pt->get_min_fast_tracepoint_insn_len ()
 
 #define target_thread_stopped(thread) \
   the_target->pt->thread_stopped (thread)
@@ -577,26 +575,26 @@ int kill_inferior (process_info *proc);
 #define target_stabilize_threads()		\
   the_target->pt->stabilize_threads ()
 
-#define install_fast_tracepoint_jump_pad(tpoint, tpaddr,		\
-					 collector, lockaddr,		\
-					 orig_size,			\
-					 jump_entry,			\
-					 trampoline, trampoline_size,	\
-					 jjump_pad_insn,		\
-					 jjump_pad_insn_size,		\
-					 adjusted_insn_addr,		\
-					 adjusted_insn_addr_end,	\
-					 err)				\
-  (*the_target->install_fast_tracepoint_jump_pad) (tpoint, tpaddr,	\
-						   collector,lockaddr,	\
-						   orig_size, jump_entry, \
-						   trampoline,		\
-						   trampoline_size,	\
-						   jjump_pad_insn,	\
-						   jjump_pad_insn_size, \
-						   adjusted_insn_addr,	\
-						   adjusted_insn_addr_end, \
-						   err)
+#define target_install_fast_tracepoint_jump_pad(tpoint, tpaddr,		\
+						collector, lockaddr,	\
+						orig_size,		\
+						jump_entry,		\
+						trampoline, trampoline_size, \
+						jjump_pad_insn,		\
+						jjump_pad_insn_size,	\
+						adjusted_insn_addr,	\
+						adjusted_insn_addr_end,	\
+						err)			\
+  the_target->pt->install_fast_tracepoint_jump_pad (tpoint, tpaddr,	\
+						    collector,lockaddr,	\
+						    orig_size, jump_entry, \
+						    trampoline,		\
+						    trampoline_size,	\
+						    jjump_pad_insn,	\
+						    jjump_pad_insn_size, \
+						    adjusted_insn_addr,	\
+						    adjusted_insn_addr_end, \
+						    err)
 
 #define target_emit_ops() \
   (the_target->emit_ops ? (*the_target->emit_ops) () : NULL)
