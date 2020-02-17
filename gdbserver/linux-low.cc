@@ -6546,11 +6546,11 @@ linux_get_ipa_tdesc_idx (void)
   return (*the_low_target.get_ipa_tdesc_idx) ();
 }
 
-static int
-linux_supports_tracepoints (void)
+bool
+linux_process_target::supports_tracepoints ()
 {
   if (*the_low_target.supports_tracepoints == NULL)
-    return 0;
+    return false;
 
   return (*the_low_target.supports_tracepoints) ();
 }
@@ -7449,7 +7449,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_supports_tracepoints,
   linux_read_pc,
   linux_write_pc,
   linux_thread_stopped,

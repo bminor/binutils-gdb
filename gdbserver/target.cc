@@ -608,3 +608,9 @@ process_target::process_qsupported (char **features, int count)
 {
   /* Nop.  */
 }
+
+bool
+process_target::supports_tracepoints ()
+{
+  return false;
+}

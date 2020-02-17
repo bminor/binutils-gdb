@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Return 1 if the target supports tracepoints, 0 (or leave the
-     callback NULL) otherwise.  */
-  int (*supports_tracepoints) (void);
-
   /* Read PC from REGCACHE.  */
   CORE_ADDR (*read_pc) (struct regcache *regcache);
 
@@ -489,6 +485,9 @@ public:
   /* Target specific qSupported support.  FEATURES is an array of
      features with COUNT elements.  */
   virtual void process_qsupported (char **features, int count);
+
+  /* Return true if the target supports tracepoints, false otherwise.  */
+  virtual bool supports_tracepoints ();
 };
 
 extern process_stratum_target *the_target;
@@ -551,8 +550,7 @@ int kill_inferior (process_info *proc);
    ? (*the_target->get_ipa_tdesc_idx) () : 0)
 
 #define target_supports_tracepoints()			\
-  (the_target->supports_tracepoints			\
-   ? (*the_target->supports_tracepoints) () : 0)
+  the_target->pt->supports_tracepoints ()
 
 #define target_supports_fast_tracepoints()		\
   (the_target->install_fast_tracepoint_jump_pad != NULL)
