@@ -570,8 +570,8 @@ lynx_process_target::join (int pid)
 
 /* Implement the thread_alive target_ops method.  */
 
-static int
-lynx_thread_alive (ptid_t ptid)
+bool
+lynx_process_target::thread_alive (ptid_t ptid)
 {
   /* The list of threads is updated at the end of each wait, so it
      should be up to date.  No need to re-fetch it.  */
@@ -726,7 +726,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  lynx_thread_alive,
   lynx_resume,
   lynx_wait,
   lynx_fetch_registers,

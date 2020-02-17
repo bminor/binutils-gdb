@@ -431,10 +431,10 @@ nto_process_target::join (int pid)
 
 /* Check if the given thread is alive.  
 
-   Return 1 if alive, 0 otherwise.  */
+   Return true if alive, false otherwise.  */
 
-static int
-nto_thread_alive (ptid_t ptid)
+bool
+nto_process_target::thread_alive (ptid_t ptid)
 {
   int res;
 
@@ -941,7 +941,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_thread_alive,
   nto_resume,
   nto_wait,
   nto_fetch_registers,

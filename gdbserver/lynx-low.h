@@ -70,6 +70,8 @@ public:
   void mourn (process_info *proc) override;
 
   void join (int pid) override;
+
+  bool thread_alive (ptid_t pid) override;
 };
 
 /* The inferior's target description.  This is a global because the

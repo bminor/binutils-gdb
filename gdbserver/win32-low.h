@@ -119,6 +119,8 @@ public:
   void mourn (process_info *proc) override;
 
   void join (int pid) override;
+
+  bool thread_alive (ptid_t pid) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */

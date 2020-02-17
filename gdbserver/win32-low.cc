@@ -897,9 +897,9 @@ win32_process_target::join (int pid)
     }
 }
 
-/* Return 1 iff the thread with thread ID TID is alive.  */
-static int
-win32_thread_alive (ptid_t ptid)
+/* Return true iff the thread with thread ID TID is alive.  */
+bool
+win32_process_target::thread_alive (ptid_t ptid)
 {
   /* Our thread list is reliable; don't bother to poll target
      threads.  */
@@ -1839,7 +1839,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_thread_alive,
   win32_resume,
   win32_wait,
   win32_fetch_inferior_registers,

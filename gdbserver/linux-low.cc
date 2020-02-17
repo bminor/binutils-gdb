@@ -1681,9 +1681,10 @@ linux_process_target::join (int pid)
   } while (ret != -1 || errno != ECHILD);
 }
 
-/* Return nonzero if the given thread is still alive.  */
-static int
-linux_thread_alive (ptid_t ptid)
+/* Return true if the given thread is still alive.  */
+
+bool
+linux_process_target::thread_alive (ptid_t ptid)
 {
   struct lwp_info *lwp = find_lwp_pid (ptid);
 
@@ -4004,7 +4005,7 @@ wait_for_sigstop (void)
 				       &wstat, __WALL);
   gdb_assert (ret == -1);
 
-  if (saved_thread == NULL || linux_thread_alive (saved_tid))
+  if (saved_thread == NULL || mythread_alive (saved_tid))
     current_thread = saved_thread;
   else
     {
@@ -7358,7 +7359,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_thread_alive,
   linux_resume,
   linux_wait,
   linux_fetch_registers,

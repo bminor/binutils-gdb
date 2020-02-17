@@ -284,6 +284,8 @@ public:
   void mourn (process_info *proc) override;
 
   void join (int pid) override;
+
+  bool thread_alive (ptid_t pid) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

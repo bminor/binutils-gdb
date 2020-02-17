@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Return 1 iff the thread with process ID PID is alive.  */
-
-  int (*thread_alive) (ptid_t pid);
-
   /* Resume the inferior process.  */
 
   void (*resume) (struct thread_resume *resume_info, size_t n);
@@ -484,6 +480,9 @@ public:
 
   /* Wait for process PID to exit.  */
   virtual void join (int pid) = 0;
+
+  /* Return true iff the thread with process ID PID is alive.  */
+  virtual bool thread_alive (ptid_t pid) = 0;
 };
 
 extern process_stratum_target *the_target;
@@ -524,7 +523,7 @@ int kill_inferior (process_info *proc);
   the_target->pt->detach (proc)
 
 #define mythread_alive(pid) \
-  (*the_target->thread_alive) (pid)
+  the_target->pt->thread_alive (pid)
 
 #define fetch_inferior_registers(regcache, regno)	\
   (*the_target->fetch_registers) (regcache, regno)
