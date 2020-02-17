@@ -64,6 +64,9 @@ public:
   bool thread_alive (ptid_t pid) override;
 
   void resume (thread_resume *resume_info, size_t n) override;
+
+  ptid_t wait (ptid_t ptid, target_waitstatus *status,
+	       int options) override;
 };
 
 /* The inferior's target description.  This is a global because the

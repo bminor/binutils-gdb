@@ -223,7 +223,7 @@ target_stop_and_wait (ptid_t ptid)
 ptid_t
 target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 {
-  return (*the_target->wait) (ptid, status, options);
+  return the_target->pt->wait (ptid, status, options);
 }
 
 /* See target/target.h.  */

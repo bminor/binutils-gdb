@@ -3833,9 +3833,10 @@ async_file_mark (void)
      be awakened anyway.  */
 }
 
-static ptid_t
-linux_wait (ptid_t ptid,
-	    struct target_waitstatus *ourstatus, int target_options)
+ptid_t
+linux_process_target::wait (ptid_t ptid,
+			    target_waitstatus *ourstatus,
+			    int target_options)
 {
   ptid_t event_ptid;
 
@@ -7358,7 +7359,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_wait,
   linux_fetch_registers,
   linux_store_registers,
   linux_prepare_to_access_memory,

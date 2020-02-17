@@ -518,9 +518,9 @@ nto_process_target::resume (thread_resume *resume_info, size_t n)
 
    Return ptid of thread that caused the event.  */
 
-static ptid_t
-nto_wait (ptid_t ptid,
-	  struct target_waitstatus *ourstatus, int target_options)
+ptid_t
+nto_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
+			  int target_options)
 {
   sigset_t set;
   siginfo_t info;
@@ -941,7 +941,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_wait,
   nto_fetch_registers,
   nto_store_registers,
   NULL, /* prepare_to_access_memory */

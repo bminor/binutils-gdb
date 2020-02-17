@@ -70,19 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Wait for the inferior process or thread to change state.  Store
-     status through argument pointer STATUS.
-
-     PTID = -1 to wait for any pid to do something, PTID(pid,0,0) to
-     wait for any thread of process pid to do something.  Return ptid
-     of child, or -1 in case of error; store status through argument
-     pointer STATUS.  OPTIONS is a bit set of options defined as
-     TARGET_W* above.  If options contains TARGET_WNOHANG and there's
-     no child stop to report, return is
-     null_ptid/TARGET_WAITKIND_IGNORE.  */
-
-  ptid_t (*wait) (ptid_t ptid, struct target_waitstatus *status, int options);
-
   /* Fetch registers from the inferior process.
 
      If REGNO is -1, fetch all registers; otherwise, fetch at least REGNO.  */
@@ -482,6 +469,19 @@ public:
 
   /* Resume the inferior process.  */
   virtual void resume (thread_resume *resume_info, size_t n) = 0;
+
+  /* Wait for the inferior process or thread to change state.  Store
+     status through argument pointer STATUS.
+
+     PTID = -1 to wait for any pid to do something, PTID(pid,0,0) to
+     wait for any thread of process pid to do something.  Return ptid
+     of child, or -1 in case of error; store status through argument
+     pointer STATUS.  OPTIONS is a bit set of options defined as
+     TARGET_W* above.  If options contains TARGET_WNOHANG and there's
+     no child stop to report, return is
+     null_ptid/TARGET_WAITKIND_IGNORE.  */
+  virtual ptid_t wait (ptid_t ptid, target_waitstatus *status,
+		       int options) = 0;
 };
 
 extern process_stratum_target *the_target;

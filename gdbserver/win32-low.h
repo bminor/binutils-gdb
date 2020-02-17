@@ -123,6 +123,9 @@ public:
   bool thread_alive (ptid_t pid) override;
 
   void resume (thread_resume *resume_info, size_t n) override;
+
+  ptid_t wait (ptid_t ptid, target_waitstatus *status,
+	       int options) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */
