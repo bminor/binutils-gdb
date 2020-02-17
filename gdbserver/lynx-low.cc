@@ -729,7 +729,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  NULL,  /* supports_z_point_type */
   NULL,  /* insert_point */
   NULL,  /* remove_point */
   NULL,  /* stopped_by_sw_breakpoint */

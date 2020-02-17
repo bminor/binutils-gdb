@@ -789,8 +789,8 @@ nto_process_target::read_auxv (CORE_ADDR offset, unsigned char *myaddr,
   return nto_read_auxv_from_initial_stack (initial_stack, myaddr, len);
 }
 
-static int
-nto_supports_z_point_type (char z_type)
+bool
+nto_process_target::supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
@@ -799,9 +799,9 @@ nto_supports_z_point_type (char z_type)
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_READ_WP:
     case Z_PACKET_ACCESS_WP:
-      return 1;
+      return true;
     default:
-      return 0;
+      return false;
     }
 }
 
@@ -950,7 +950,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_supports_z_point_type,
   nto_insert_point,
   nto_remove_point,
   NULL, /* stopped_by_sw_breakpoint */

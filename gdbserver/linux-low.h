@@ -314,6 +314,8 @@ public:
 
   int read_auxv (CORE_ADDR offset, unsigned char *myaddr,
 		 unsigned int len) override;
+
+  bool supports_z_point_type (char z_type) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

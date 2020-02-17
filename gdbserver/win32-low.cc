@@ -254,8 +254,8 @@ child_delete_thread (DWORD pid, DWORD tid)
 /* These watchpoint related wrapper functions simply pass on the function call
    if the low target has registered a corresponding function.  */
 
-static int
-win32_supports_z_point_type (char z_type)
+bool
+win32_process_target::supports_z_point_type (char z_type)
 {
   return (the_low_target.supports_z_point_type != NULL
 	  && the_low_target.supports_z_point_type (z_type));
@@ -1838,7 +1838,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_supports_z_point_type,
   win32_insert_point,
   win32_remove_point,
   NULL, /* stopped_by_sw_breakpoint */

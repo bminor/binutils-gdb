@@ -1,5 +1,31 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's supports_z_point_type op into a
+	method of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target op.
+	(class process_target): Add the target op.
+	* target.cc (process_target::supports_z_point_type): Define.
+
+	Update the derived classes and callers below.
+
+	* mem-break.cc (z_type_supported): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_supports_z_point_type): Turn into ...
+	(linux_process_target::supports_z_point_type): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	(nto_supports_z_point_type): Turn into ...
+	(nto_process_target::supports_z_point_type): ... this.
+	* nto-low.h (class nto_process_target): Update.
+	* win32-low.cc (win32_target_ops): Update.
+	(win32_supports_z_point_type): Turn into ...
+	(win32_process_target::supports_z_point_type): ... this.
+	* win32-low.h (class win32_process_target): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's read_auxv op into a method of
 	process_target.
 

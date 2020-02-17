@@ -5957,8 +5957,8 @@ linux_process_target::read_auxv (CORE_ADDR offset, unsigned char *myaddr,
    pass on the function call if the target has registered a
    corresponding function.  */
 
-static int
-linux_supports_z_point_type (char z_type)
+bool
+linux_process_target::supports_z_point_type (char z_type)
 {
   return (the_low_target.supports_z_point_type != NULL
 	  && the_low_target.supports_z_point_type (z_type));
@@ -7376,7 +7376,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_supports_z_point_type,
   linux_insert_point,
   linux_remove_point,
   linux_stopped_by_sw_breakpoint,

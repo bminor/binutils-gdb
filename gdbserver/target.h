@@ -70,16 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Returns true if GDB Z breakpoint type TYPE is supported, false
-     otherwise.  The type is coded as follows:
-       '0' - software-breakpoint
-       '1' - hardware-breakpoint
-       '2' - write watchpoint
-       '3' - read watchpoint
-       '4' - access watchpoint
-  */
-  int (*supports_z_point_type) (char z_type);
-
   /* Insert and remove a break or watchpoint.
      Returns 0 on success, -1 on failure and 1 on unsupported.  */
 
@@ -476,6 +466,16 @@ public:
      Read LEN bytes at OFFSET into a buffer at MYADDR.  */
   virtual int read_auxv (CORE_ADDR offset, unsigned char *myaddr,
 			 unsigned int len);
+
+  /* Returns true if GDB Z breakpoint type TYPE is supported, false
+     otherwise.  The type is coded as follows:
+       '0' - software-breakpoint
+       '1' - hardware-breakpoint
+       '2' - write watchpoint
+       '3' - read watchpoint
+       '4' - access watchpoint
+  */
+  virtual bool supports_z_point_type (char z_type);
 };
 
 extern process_stratum_target *the_target;

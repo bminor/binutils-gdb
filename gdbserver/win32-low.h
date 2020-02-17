@@ -138,6 +138,8 @@ public:
 		    int len) override;
 
   void request_interrupt () override;
+
+  bool supports_z_point_type (char z_type) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */

@@ -427,3 +427,9 @@ process_target::read_auxv (CORE_ADDR offset, unsigned char *myaddr,
 {
   gdb_assert_not_reached ("target op read_auxv not supported");
 }
+
+bool
+process_target::supports_z_point_type (char z_type)
+{
+  return false;
+}
