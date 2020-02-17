@@ -371,6 +371,8 @@ public:
   bool supports_vfork_events () override;
 
   bool supports_exec_events () override;
+
+  void handle_new_gdb_connection () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

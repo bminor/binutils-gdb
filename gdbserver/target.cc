@@ -571,3 +571,9 @@ process_target::supports_exec_events ()
 {
   return false;
 }
+
+void
+process_target::handle_new_gdb_connection ()
+{
+  /* Nop.  */
+}

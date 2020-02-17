@@ -6372,8 +6372,8 @@ linux_process_target::supports_exec_events ()
    ptrace flags for all inferiors.  This is in case the new GDB connection
    doesn't support the same set of events that the previous one did.  */
 
-static void
-linux_handle_new_gdb_connection (void)
+void
+linux_process_target::handle_new_gdb_connection ()
 {
   /* Request that all the lwps reset their ptrace options.  */
   for_each_thread ([] (thread_info *thread)
@@ -7429,7 +7429,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_handle_new_gdb_connection,
 #ifdef USE_THREAD_DB
   thread_db_handle_monitor_command,
 #else

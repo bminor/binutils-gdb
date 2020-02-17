@@ -70,9 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Allows target to re-initialize connection-specific settings.  */
-  void (*handle_new_gdb_connection) (void);
-
   /* If not NULL, target-specific routine to process monitor command.
      Returns 1 if handled, or 0 to perform default processing.  */
   int (*handle_monitor_command) (char *);
@@ -486,6 +483,9 @@ public:
 
   /* Returns true if exec events are supported.  */
   virtual bool supports_exec_events ();
+
+  /* Allows target to re-initialize connection-specific settings.  */
+  virtual void handle_new_gdb_connection ();
 };
 
 extern process_stratum_target *the_target;
@@ -513,11 +513,7 @@ int kill_inferior (process_info *proc);
   the_target->pt->supports_exec_events ()
 
 #define target_handle_new_gdb_connection()		 \
-  do							 \
-    {							 \
-      if (the_target->handle_new_gdb_connection != NULL) \
-	(*the_target->handle_new_gdb_connection) ();	 \
-    } while (0)
+  the_target->pt->handle_new_gdb_connection ()
 
 #define detach_inferior(proc) \
   the_target->pt->detach (proc)
