@@ -801,3 +801,16 @@ process_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
 {
   return breakpoint_kind_from_pc (pcptr);
 }
+
+const char *
+process_target::thread_name (ptid_t thread)
+{
+  return nullptr;
+}
+
+bool
+process_target::thread_handle (ptid_t ptid, gdb_byte **handle,
+			       int *handle_len)
+{
+  return false;
+}

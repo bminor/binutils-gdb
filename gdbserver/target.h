@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Return the thread's name, or NULL if the target is unable to determine it.
-     The returned value must not be freed by the caller.  */
-  const char *(*thread_name) (ptid_t thread);
-
   /* Returns true if the target can software single step.  */
   int (*supports_software_single_step) (void);
 
@@ -83,11 +79,6 @@ struct process_stratum_target
 
   /* Return tdesc index for IPA.  */
   int (*get_ipa_tdesc_idx) (void);
-
-  /* Thread ID to (numeric) thread handle: Return true on success and
-     false for failure.  Return pointer to thread handle via HANDLE
-     and the handle's length via HANDLE_LEN.  */
-  bool (*thread_handle) (ptid_t ptid, gdb_byte **handle, int *handle_len);
 
   /* The object that will gradually replace this struct.  */
   process_target *pt;
@@ -503,6 +494,17 @@ public:
      PC.  The PCPTR is adjusted to the real memory location in case a
      flag (e.g., the Thumb bit on ARM) is present in the  PC.  */
   virtual int breakpoint_kind_from_current_state (CORE_ADDR *pcptr);
+
+  /* Return the thread's name, or NULL if the target is unable to
+     determine it.  The returned value must not be freed by the
+     caller.  */
+  virtual const char *thread_name (ptid_t thread);
+
+  /* Thread ID to (numeric) thread handle: Return true on success and
+     false for failure.  Return pointer to thread handle via HANDLE
+     and the handle's length via HANDLE_LEN.  */
+  virtual bool thread_handle (ptid_t ptid, gdb_byte **handle,
+			      int *handle_len);
 };
 
 extern process_stratum_target *the_target;
@@ -683,13 +685,10 @@ void done_accessing_memory (void);
   the_target->pt->core_of_thread (ptid)
 
 #define target_thread_name(ptid)                                \
-  (the_target->thread_name ? (*the_target->thread_name) (ptid)  \
-   : NULL)
+  the_target->pt->thread_name (ptid)
 
 #define target_thread_handle(ptid, handle, handle_len) \
-   (the_target->thread_handle ? (*the_target->thread_handle) \
-                                  (ptid, handle, handle_len) \
-   : false)
+  the_target->pt->thread_handle (ptid, handle, handle_len)
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 

@@ -741,11 +741,9 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  NULL,  /* thread_name */
   NULL,  /* supports_software_single_step */
   NULL,  /* supports_catch_syscall */
   NULL,  /* get_ipa_tdesc_idx */
-  NULL,  /* thread_handle */
   &the_lynx_target,
 };
 

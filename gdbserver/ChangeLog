@@ -1,5 +1,27 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's thread_name and thread_handle ops
+	into methods of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target ops.
+	(class process_target): Add the target ops.
+	(target_thread_name): Update the macro.
+	(target_thread_handle): Update the macro.
+	* target.cc (process_target::thread_name): Define.
+	(process_target::thread_handle): Define.
+
+	Update the derived classes and callers below.
+
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_process_target::thread_name): Define.
+	(linux_process_target::thread_handle): Define.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	* win32-low.cc (win32_target_ops): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's breakpoint_kind_from_pc,
 	sw_breakpoint_from_kind, and breakpoint_kind_from_current_state
 	ops into methods of process_target.

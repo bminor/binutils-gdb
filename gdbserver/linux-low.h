@@ -468,6 +468,13 @@ public:
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
   int breakpoint_kind_from_current_state (CORE_ADDR *pcptr) override;
+
+  const char *thread_name (ptid_t thread) override;
+
+#if USE_THREAD_DB
+  bool thread_handle (ptid_t ptid, gdb_byte **handle,
+		      int *handle_len) override;
+#endif
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

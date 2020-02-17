@@ -7397,6 +7397,21 @@ linux_process_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
     return breakpoint_kind_from_pc (pcptr);
 }
 
+const char *
+linux_process_target::thread_name (ptid_t thread)
+{
+  return linux_proc_tid_get_name (thread);
+}
+
+#if USE_THREAD_DB
+bool
+linux_process_target::thread_handle (ptid_t ptid, gdb_byte **handle,
+				     int *handle_len)
+{
+  return thread_db_thread_handle (ptid, handle, handle_len);
+}
+#endif
+
 /* Default implementation of linux_target_ops method "set_pc" for
    32-bit pc register which is literally named "pc".  */
 
@@ -7509,15 +7524,9 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_proc_tid_get_name,
   linux_supports_software_single_step,
   linux_supports_catch_syscall,
   linux_get_ipa_tdesc_idx,
-#if USE_THREAD_DB
-  thread_db_thread_handle,
-#else
-  NULL,
-#endif
   &the_linux_target,
 };
 
