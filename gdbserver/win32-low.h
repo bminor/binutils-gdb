@@ -101,6 +101,14 @@ struct win32_target_ops
 
 extern struct win32_target_ops the_low_target;
 
+/* Target ops definitions for a Win32 target.  */
+
+class win32_process_target : public process_target
+{
+public:
+
+};
+
 /* Retrieve the context for this thread, if not already retrieved.  */
 extern void win32_require_context (win32_thread_info *th);
 

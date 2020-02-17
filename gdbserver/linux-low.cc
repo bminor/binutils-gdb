@@ -7354,6 +7354,10 @@ linux_get_hwcap2 (int wordsize)
   return hwcap2;
 }
 
+/* The linux target ops object.  */
+
+static linux_process_target the_linux_target;
+
 static process_stratum_target linux_target_ops = {
   linux_create_inferior,
   linux_post_create_inferior,
@@ -7457,6 +7461,7 @@ static process_stratum_target linux_target_ops = {
 #else
   NULL,
 #endif
+  &the_linux_target,
 };
 
 #ifdef HAVE_LINUX_REGSETS

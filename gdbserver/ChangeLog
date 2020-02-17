@@ -1,3 +1,25 @@
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* target.h (class process_target): New class definition.
+	(struct process_stratum_target) <pt>: New field with type
+	'process_target*'.
+	* linux-low.h (class linux_process_target): Define as a derived
+	class of 'process_target'.
+	* linux-low.cc (linux_target_ops): Add a linux_process_target*
+	as the 'pt' field.
+	* lynx-low.h (class lynx_process_target): Define as a derived
+	class of 'process_target'.
+	* lynx-low.cc (lynx_target_ops): Add a lynx_process_target*
+	as the 'pt' field.
+	* nto-low.h (class nto_process_target): Define as a derived
+	class of 'process_target'.
+	* nto-low.cc (nto_target_ops): Add an nto_process_target*
+	as the 'pt' field.
+	* win32-low.h (class win32_process_target): Define as a derived
+	class of 'process_target'.
+	* win32-low.cc (win32_target_ops): Add a win32_process_target*
+	as the 'pt' field.
+
 2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* configure: Regenerate.

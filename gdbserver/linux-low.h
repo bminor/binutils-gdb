@@ -264,6 +264,14 @@ struct linux_target_ops
 
 extern struct linux_target_ops the_low_target;
 
+/* Target ops definitions for a Linux target.  */
+
+class linux_process_target : public process_target
+{
+public:
+
+};
+
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))
 #define get_lwp_thread(lwp) ((lwp)->thread)
 

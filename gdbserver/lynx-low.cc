@@ -719,6 +719,10 @@ lynx_request_interrupt (void)
   kill (lynx_ptid_get_pid (inferior_ptid), SIGINT);
 }
 
+/* The LynxOS target ops object.  */
+
+static lynx_process_target the_lynx_target;
+
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
@@ -765,6 +769,41 @@ static process_stratum_target lynx_target_ops = {
   NULL,  /* supports_exec_events */
   NULL,  /* handle_new_gdb_connection */
   NULL,  /* handle_monitor_command */
+  NULL,  /* core_of_thread */
+  NULL,  /* read_loadmap */
+  NULL,  /* process_qsupported */
+  NULL,  /* supports_tracepoints */
+  NULL,  /* read_pc */
+  NULL,  /* write_pc */
+  NULL,  /* thread_stopped */
+  NULL,  /* get_tib_address */
+  NULL,  /* pause_all */
+  NULL,  /* unpause_all */
+  NULL,  /* stabilize_threads */
+  NULL,  /* install_fast_tracepoint_jump_pad */
+  NULL,  /* emit_ops */
+  NULL,  /* supports_disable_randomization */
+  NULL,  /* get_min_fast_tracepoint_insn_len */
+  NULL,  /* qxfer_libraries_svr4 */
+  NULL,  /* support_agent */
+  NULL,  /* enable_btrace */
+  NULL,  /* disable_btrace */
+  NULL,  /* read_btrace */
+  NULL,  /* read_btrace_conf */
+  NULL,  /* supports_range_stepping */
+  NULL,  /* pid_to_exec_file */
+  NULL,  /* multifs_open */
+  NULL,  /* multifs_unlink */
+  NULL,  /* multifs_readlink */
+  NULL,  /* breakpoint_kind_from_pc */
+  NULL,  /* sw_breakpoint_from_kind */
+  NULL,  /* thread_name */
+  NULL,  /* breakpoint_kind_from_current_state */
+  NULL,  /* supports_software_single_step */
+  NULL,  /* supports_catch_syscall */
+  NULL,  /* get_ipa_tdesc_idx */
+  NULL,  /* thread_handle */
+  &the_lynx_target,
 };
 
 void

@@ -52,6 +52,14 @@ struct lynx_target_ops
 
 extern struct lynx_target_ops the_low_target;
 
+/* Target ops definitions for a LynxOS target.  */
+
+class lynx_process_target : public process_target
+{
+public:
+
+};
+
 /* The inferior's target description.  This is a global because the
    LynxOS ports support neither bi-arch nor multi-process.  */
 extern const struct target_desc *lynx_tdesc;

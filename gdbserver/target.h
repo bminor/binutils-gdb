@@ -63,6 +63,8 @@ struct thread_resume
   CORE_ADDR step_range_end;	/* Exclusive */
 };
 
+class process_target;
+
 /* GDBserver doesn't have a concept of strata like GDB, but we call
    its target vector "process_stratum" anyway for the benefit of
    shared code.  */
@@ -477,6 +479,16 @@ struct process_stratum_target
      false for failure.  Return pointer to thread handle via HANDLE
      and the handle's length via HANDLE_LEN.  */
   bool (*thread_handle) (ptid_t ptid, gdb_byte **handle, int *handle_len);
+
+  /* The object that will gradually replace this struct.  */
+  process_target *pt;
+};
+
+class process_target
+{
+public:
+
+  virtual ~process_target () = default;
 };
 
 extern process_stratum_target *the_target;
