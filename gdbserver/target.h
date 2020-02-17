@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Return 1 if the target supports catch syscall, 0 (or leave the
-     callback NULL) otherwise.  */
-  int (*supports_catch_syscall) (void);
-
   /* Return tdesc index for IPA.  */
   int (*get_ipa_tdesc_idx) (void);
 
@@ -505,6 +501,9 @@ public:
 
   /* Returns true if the target can software single step.  */
   virtual bool supports_software_single_step ();
+
+  /* Return true if the target supports catch syscall.  */
+  virtual bool supports_catch_syscall ();
 };
 
 extern process_stratum_target *the_target;
@@ -559,8 +558,7 @@ int kill_inferior (process_info *proc);
   the_target->pt->process_qsupported (features, count)
 
 #define target_supports_catch_syscall()              	\
-  (the_target->supports_catch_syscall ?			\
-   (*the_target->supports_catch_syscall) () : 0)
+  the_target->pt->supports_catch_syscall ()
 
 #define target_get_ipa_tdesc_idx()			\
   (the_target->get_ipa_tdesc_idx			\

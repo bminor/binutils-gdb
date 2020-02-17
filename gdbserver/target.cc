@@ -820,3 +820,9 @@ process_target::supports_software_single_step ()
 {
   return false;
 }
+
+bool
+process_target::supports_catch_syscall ()
+{
+  return false;
+}

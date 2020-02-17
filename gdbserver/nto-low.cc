@@ -947,7 +947,6 @@ nto_process_target::sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  NULL, /* supports_catch_syscall */
   NULL, /* get_ipa_tdesc_idx */
   &the_nto_target,
 };

@@ -6568,8 +6568,8 @@ linux_process_target::process_qsupported (char **features, int count)
     the_low_target.process_qsupported (features, count);
 }
 
-static int
-linux_supports_catch_syscall (void)
+bool
+linux_process_target::supports_catch_syscall ()
 {
   return (the_low_target.get_syscall_trapinfo != NULL
 	  && linux_supports_tracesysgood ());
@@ -7524,7 +7524,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_supports_catch_syscall,
   linux_get_ipa_tdesc_idx,
   &the_linux_target,
 };

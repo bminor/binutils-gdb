@@ -477,6 +477,8 @@ public:
 #endif
 
   bool supports_software_single_step () override;
+
+  bool supports_catch_syscall () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))
