@@ -1055,6 +1055,8 @@ static const arch_entry cpu_arch[] =
     CPU_EPT_FLAGS, 0 },
   { STRING_COMMA_LEN (".lzcnt"), PROCESSOR_UNKNOWN,
     CPU_LZCNT_FLAGS, 0 },
+  { STRING_COMMA_LEN (".popcnt"), PROCESSOR_UNKNOWN,
+    CPU_POPCNT_FLAGS, 0 },
   { STRING_COMMA_LEN (".hle"), PROCESSOR_UNKNOWN,
     CPU_HLE_FLAGS, 0 },
   { STRING_COMMA_LEN (".rtm"), PROCESSOR_UNKNOWN,

@@ -238,6 +238,7 @@ accept various extension mnemonics.  For example,
 @code{movbe},
 @code{ept},
 @code{lzcnt},
+@code{popcnt},
 @code{hle},
 @code{rtm},
 @code{invpcid},
@@ -260,8 +261,7 @@ accept various extension mnemonics.  For example,
 @code{3dnowa},
 @code{sse4a},
 @code{sse5},
-@code{svme},
-@code{abm} and
+@code{svme} and
 @code{padlock}.
 Note that rather than extending a basic instruction set, the extension
 mnemonics starting with @code{no} revoke the respective functionality.
@@ -1430,13 +1430,14 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{bdver4} @tab @samp{znver1} @tab @samp{znver2} @tab @samp{btver1}
 @item @samp{btver2} @tab @samp{generic32} @tab @samp{generic64}
 @item @samp{.cmov} @tab @samp{.fxsr} @tab @samp{.mmx}
-@item @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3} @samp{.sse4a}
+@item @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3} @tab @samp{.sse4a}
 @item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}
 @item @samp{.avx} @tab @samp{.vmx} @tab @samp{.smx} @tab @samp{.ept}
 @item @samp{.clflush} @tab @samp{.movbe} @tab @samp{.xsave} @tab @samp{.xsaveopt}
 @item @samp{.aes} @tab @samp{.pclmul} @tab @samp{.fma} @tab @samp{.fsgsbase}
 @item @samp{.rdrnd} @tab @samp{.f16c} @tab @samp{.avx2} @tab @samp{.bmi2}
-@item @samp{.lzcnt} @tab @samp{.invpcid} @tab @samp{.vmfunc} @tab @samp{.hle}
+@item @samp{.lzcnt} @tab @samp{.popcnt} @tab @samp{.invpcid} @tab @samp{.vmfunc}
+@item @samp{.hle}
 @item @samp{.rtm} @tab @samp{.adx} @tab @samp{.rdseed} @tab @samp{.prfchw}
 @item @samp{.smap} @tab @samp{.mpx} @tab @samp{.sha} @tab @samp{.prefetchwt1}
 @item @samp{.clflushopt} @tab @samp{.xsavec} @tab @samp{.xsaves} @tab @samp{.se1}
@@ -1450,7 +1451,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.shstk} @tab @samp{.gfni} @tab @samp{.vaes} @tab @samp{.vpclmulqdq}
 @item @samp{.movdiri} @tab @samp{.movdir64b} @tab @samp{.enqcmd}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
-@item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
+@item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
 @item @samp{.padlock} @tab @samp{.clzero} @tab @samp{.mwaitx} @tab @samp{.rdpru}
 @item @samp{.mcommit}

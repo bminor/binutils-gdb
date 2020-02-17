@@ -2843,9 +2843,11 @@ extrq, 2, 0x660f79, None, 2, CpuSSE4a, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_
 insertq, 2, 0xf20f79, None, 2, CpuSSE4a, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM, RegXMM }
 insertq, 4, 0xf20f78, None, 2, CpuSSE4a, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, Imm8, RegXMM, RegXMM }
 
-// ABM instructions
-popcnt, 2, 0xf30fb8, None, 2, CpuABM|CpuSSE4_2, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf|NoAVX, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-lzcnt, 2, 0xf30fbd, None, 2, CpuABM|CpuLZCNT, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+// LZCNT instruction
+lzcnt, 2, 0xf30fbd, None, 2, CpuLZCNT, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
+
+// POPCNT instruction
+popcnt, 2, 0xf30fb8, None, 2, CpuPOPCNT, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf|NoAVX, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // VIA PadLock extensions.
 xstore-rng, 0, 0xfa7c0, None, 3, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, { 0 }

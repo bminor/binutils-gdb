@@ -87,8 +87,10 @@ enum
   CpuSSSE3,
   /* SSE4a support required */
   CpuSSE4a,
-  /* ABM New Instructions required */
-  CpuABM,
+  /* LZCNT support required */
+  CpuLZCNT,
+  /* POPCNT support required */
+  CpuPOPCNT,
   /* SSE4.1 support required */
   CpuSSE4_1,
   /* SSE4.2 support required */
@@ -154,8 +156,6 @@ enum
   CpuF16C,
   /* Intel BMI2 support required */
   CpuBMI2,
-  /* LZCNT support required */
-  CpuLZCNT,
   /* HLE support required */
   CpuHLE,
   /* RTM support required */
@@ -298,7 +298,8 @@ typedef union i386_cpu_flags
       unsigned int cpusmx:1;
       unsigned int cpussse3:1;
       unsigned int cpusse4a:1;
-      unsigned int cpuabm:1;
+      unsigned int cpulzcnt:1;
+      unsigned int cpupopcnt:1;
       unsigned int cpusse4_1:1;
       unsigned int cpusse4_2:1;
       unsigned int cpuavx:1;
@@ -331,7 +332,6 @@ typedef union i386_cpu_flags
       unsigned int cpurdrnd:1;
       unsigned int cpuf16c:1;
       unsigned int cpubmi2:1;
-      unsigned int cpulzcnt:1;
       unsigned int cpuhle:1;
       unsigned int cpurtm:1;
       unsigned int cpuinvpcid:1;

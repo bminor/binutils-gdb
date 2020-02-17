@@ -1,3 +1,17 @@
+2020-02-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Replace CpuABM with
+	CpuLZCNT|CpuPOPCNT.  Add CpuPOPCNT to CPU_SSE4_2_FLAGS.  Add
+	CPU_POPCNT_FLAGS.
+	(cpu_flags): Remove CpuABM.  Add CpuPOPCNT.
+	* i386-opc.h (CpuABM): Removed.
+	(CpuPOPCNT): New.
+	(i386_cpu_flags): Remove cpuabm.  Add cpupopcnt.
+	* i386-opc.tbl: Replace CpuABM|CpuSSE4_2 with CpuPOPCNT on
+	popcnt.  Remove CpuABM from lzcnt.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2020-02-17  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (vcvtsi2sd, vcvtsi2ss, vcvtusi2sd, vcvtusi2ss):

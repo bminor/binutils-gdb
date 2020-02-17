@@ -1,3 +1,9 @@
+2020-02-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .popcnt.
+	* doc/c-i386.texi: Remove abm and .abm.  Add popcnt and .popcnt.
+	Add a tab before @samp{.sse4a}.
+
 2020-02-17  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (process_suffix): Don't try to guess a suffix
