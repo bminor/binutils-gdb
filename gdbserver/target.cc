@@ -493,3 +493,16 @@ process_target::read_offsets (CORE_ADDR *text, CORE_ADDR *data)
 {
   gdb_assert_not_reached ("target op read_offsets not supported");
 }
+
+bool
+process_target::supports_get_tls_address ()
+{
+  return false;
+}
+
+int
+process_target::get_tls_address (thread_info *thread, CORE_ADDR offset,
+				 CORE_ADDR load_module, CORE_ADDR *address)
+{
+  gdb_assert_not_reached ("target op get_tls_address not supported");
+}

@@ -2467,7 +2467,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
     }
 
   /* Thread-local storage support.  */
-  if (the_target->get_tls_address != NULL
+  if (the_target->pt->supports_get_tls_address ()
       && startswith (own_buf, "qGetTLSAddr:"))
     {
       char *p = own_buf + 12;
@@ -2513,8 +2513,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  if (thread == NULL)
 	    err = 2;
 	  else
-	    err = the_target->get_tls_address (thread, parts[0], parts[1],
-					       &address);
+	    err = the_target->pt->get_tls_address (thread, parts[0], parts[1],
+						   &address);
 	}
 
       if (err == 0)

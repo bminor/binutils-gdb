@@ -70,15 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Fetch the address associated with a specific thread local storage
-     area, determined by the specified THREAD, OFFSET, and LOAD_MODULE.
-     Stores it in *ADDRESS and returns zero on success; otherwise returns
-     an error code.  A return value of -1 means this system does not
-     support the operation.  */
-
-  int (*get_tls_address) (struct thread_info *thread, CORE_ADDR offset,
-			  CORE_ADDR load_module, CORE_ADDR *address);
-
   /* Fill BUF with an hostio error packet representing the last hostio
      error.  */
   void (*hostio_last_error) (char *buf);
@@ -477,6 +468,17 @@ public:
      needed for uclinux where the executable is relocated during load
      time.  */
   virtual int read_offsets (CORE_ADDR *text, CORE_ADDR *data);
+
+  /* Return true if the get_tls_address target op is supported.  */
+  virtual bool supports_get_tls_address ();
+
+  /* Fetch the address associated with a specific thread local storage
+     area, determined by the specified THREAD, OFFSET, and LOAD_MODULE.
+     Stores it in *ADDRESS and returns zero on success; otherwise returns
+     an error code.  A return value of -1 means this system does not
+     support the operation.  */
+  virtual int get_tls_address (thread_info *thread, CORE_ADDR offset,
+			       CORE_ADDR load_module, CORE_ADDR *address);
 };
 
 extern process_stratum_target *the_target;

@@ -6123,6 +6123,29 @@ linux_process_target::read_offsets (CORE_ADDR *text_p, CORE_ADDR *data_p)
 #endif
 }
 
+bool
+linux_process_target::supports_get_tls_address ()
+{
+#ifdef USE_THREAD_DB
+  return true;
+#else
+  return false;
+#endif
+}
+
+int
+linux_process_target::get_tls_address (thread_info *thread,
+				       CORE_ADDR offset,
+				       CORE_ADDR load_module,
+				       CORE_ADDR *address)
+{
+#ifdef USE_THREAD_DB
+  return thread_db_get_tls_address (thread, offset, load_module, address);
+#else
+  return -1;
+#endif
+}
+
 static int
 linux_qxfer_osdata (const char *annex,
 		    unsigned char *readbuf, unsigned const char *writebuf,
@@ -7392,11 +7415,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-#ifdef USE_THREAD_DB
-  thread_db_get_tls_address,
-#else
-  NULL,
-#endif
   hostio_last_error_from_errno,
   linux_qxfer_osdata,
   linux_xfer_siginfo,
