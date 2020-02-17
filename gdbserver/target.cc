@@ -447,3 +447,15 @@ process_target::remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   return 1;
 }
+
+bool
+process_target::stopped_by_sw_breakpoint ()
+{
+  return false;
+}
+
+bool
+process_target::supports_stopped_by_sw_breakpoint ()
+{
+  return false;
+}

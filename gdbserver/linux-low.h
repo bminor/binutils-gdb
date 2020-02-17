@@ -322,6 +322,10 @@ public:
 
   int remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 		    int size, raw_breakpoint *bp) override;
+
+  bool stopped_by_sw_breakpoint () override;
+
+  bool supports_stopped_by_sw_breakpoint () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

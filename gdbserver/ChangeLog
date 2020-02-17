@@ -1,5 +1,29 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's {supports_}stopped_by_sw_breakpoint
+	ops into methods of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target ops.
+	(class process_target): Add the target ops.
+	(target_stopped_by_sw_breakpoint): Update the macro.
+	(target_supports_stopped_by_sw_breakpoint): Update the macro.
+	* target.cc (process_target::stopped_by_sw_breakpoint): Define.
+	(process_target::supports_stopped_by_sw_breakpoint): Define.
+
+	Update the derived classes and callers below.
+
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_stopped_by_sw_breakpoint): Turn into ...
+	(linux_process_target::stopped_by_sw_breakpoint): ... this.
+	(linux_supports_stopped_by_sw_breakpoint): Turn into ...
+	(linux_process_target::supports_stopped_by_sw_breakpoint): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	* win32-low.cc (win32_target_ops): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's insert_point and remove_point ops
 	into methods of process_target.
 

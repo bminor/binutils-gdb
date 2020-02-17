@@ -70,14 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Returns 1 if the target stopped because it executed a software
-     breakpoint instruction, 0 otherwise.  */
-  int (*stopped_by_sw_breakpoint) (void);
-
-  /* Returns true if the target knows whether a trap was caused by a
-     SW breakpoint triggering.  */
-  int (*supports_stopped_by_sw_breakpoint) (void);
-
   /* Returns 1 if the target stopped for a hardware breakpoint.  */
   int (*stopped_by_hw_breakpoint) (void);
 
@@ -476,6 +468,14 @@ public:
 
   virtual int remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 			    int size, raw_breakpoint *bp);
+
+  /* Returns true if the target stopped because it executed a software
+     breakpoint instruction, false otherwise.  */
+  virtual bool stopped_by_sw_breakpoint ();
+
+  /* Returns true if the target knows whether a trap was caused by a
+     SW breakpoint triggering.  */
+  virtual bool supports_stopped_by_sw_breakpoint ();
 };
 
 extern process_stratum_target *the_target;
@@ -659,12 +659,10 @@ target_read_btrace_conf (struct btrace_target_info *tinfo,
    (*the_target->supports_range_stepping) () : 0)
 
 #define target_supports_stopped_by_sw_breakpoint() \
-  (the_target->supports_stopped_by_sw_breakpoint ? \
-   (*the_target->supports_stopped_by_sw_breakpoint) () : 0)
+  the_target->pt->supports_stopped_by_sw_breakpoint ()
 
 #define target_stopped_by_sw_breakpoint() \
-  (the_target->stopped_by_sw_breakpoint ? \
-   (*the_target->stopped_by_sw_breakpoint) () : 0)
+  the_target->pt->stopped_by_sw_breakpoint ()
 
 #define target_supports_stopped_by_hw_breakpoint() \
   (the_target->supports_stopped_by_hw_breakpoint ? \
