@@ -807,9 +807,9 @@ nto_process_target::supports_z_point_type (char z_type)
 
 /* Insert {break/watch}point at address ADDR.  SIZE is not used.  */
 
-static int
-nto_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		  int size, struct raw_breakpoint *bp)
+int
+nto_process_target::insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+				  int size, raw_breakpoint *bp)
 {
   int wtype = _DEBUG_BREAK_HW; /* Always request HW.  */
 
@@ -839,9 +839,9 @@ nto_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 
 /* Remove {break/watch}point at address ADDR.  SIZE is not used.  */
 
-static int
-nto_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		  int size, struct raw_breakpoint *bp)
+int
+nto_process_target::remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+				  int size, raw_breakpoint *bp)
 {
   int wtype = _DEBUG_BREAK_HW; /* Always request HW.  */
 
@@ -950,8 +950,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_insert_point,
-  nto_remove_point,
   NULL, /* stopped_by_sw_breakpoint */
   NULL, /* supports_stopped_by_sw_breakpoint */
   NULL, /* stopped_by_hw_breakpoint */

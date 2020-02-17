@@ -5964,9 +5964,9 @@ linux_process_target::supports_z_point_type (char z_type)
 	  && the_low_target.supports_z_point_type (z_type));
 }
 
-static int
-linux_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		    int size, struct raw_breakpoint *bp)
+int
+linux_process_target::insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+				    int size, raw_breakpoint *bp)
 {
   if (type == raw_bkpt_type_sw)
     return insert_memory_breakpoint (bp);
@@ -5977,9 +5977,9 @@ linux_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
     return 1;
 }
 
-static int
-linux_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		    int size, struct raw_breakpoint *bp)
+int
+linux_process_target::remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+				    int size, raw_breakpoint *bp)
 {
   if (type == raw_bkpt_type_sw)
     return remove_memory_breakpoint (bp);
@@ -7376,8 +7376,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_insert_point,
-  linux_remove_point,
   linux_stopped_by_sw_breakpoint,
   linux_supports_stopped_by_sw_breakpoint,
   linux_stopped_by_hw_breakpoint,

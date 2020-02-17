@@ -140,6 +140,12 @@ public:
   void request_interrupt () override;
 
   bool supports_z_point_type (char z_type) override;
+
+  int insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		    int size, raw_breakpoint *bp) override;
+
+  int remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+		    int size, raw_breakpoint *bp) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */

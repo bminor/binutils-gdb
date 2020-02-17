@@ -70,14 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Insert and remove a break or watchpoint.
-     Returns 0 on success, -1 on failure and 1 on unsupported.  */
-
-  int (*insert_point) (enum raw_bkpt_type type, CORE_ADDR addr,
-		       int size, struct raw_breakpoint *bp);
-  int (*remove_point) (enum raw_bkpt_type type, CORE_ADDR addr,
-		       int size, struct raw_breakpoint *bp);
-
   /* Returns 1 if the target stopped because it executed a software
      breakpoint instruction, 0 otherwise.  */
   int (*stopped_by_sw_breakpoint) (void);
@@ -476,6 +468,14 @@ public:
        '4' - access watchpoint
   */
   virtual bool supports_z_point_type (char z_type);
+
+  /* Insert and remove a break or watchpoint.
+     Returns 0 on success, -1 on failure and 1 on unsupported.  */
+  virtual int insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+			    int size, raw_breakpoint *bp);
+
+  virtual int remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+			    int size, raw_breakpoint *bp);
 };
 
 extern process_stratum_target *the_target;

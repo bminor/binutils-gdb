@@ -460,7 +460,7 @@ set_raw_breakpoint_at (enum raw_bkpt_type type, CORE_ADDR where, int kind,
 
   if (!bp->inserted)
     {
-      *err = the_target->insert_point (bp->raw_type, bp->pc, bp->kind, bp);
+      *err = the_target->pt->insert_point (bp->raw_type, bp->pc, bp->kind, bp);
       if (*err != 0)
 	{
 	  if (debug_threads)
@@ -890,8 +890,8 @@ delete_raw_breakpoint (struct process_info *proc, struct raw_breakpoint *todel)
 
 	      *bp_link = bp->next;
 
-	      ret = the_target->remove_point (bp->raw_type, bp->pc, bp->kind,
-					      bp);
+	      ret = the_target->pt->remove_point (bp->raw_type, bp->pc,
+						  bp->kind, bp);
 	      if (ret != 0)
 		{
 		  /* Something went wrong, relink the breakpoint.  */
@@ -1532,7 +1532,7 @@ uninsert_raw_breakpoint (struct raw_breakpoint *bp)
 
       bp->inserted = 0;
 
-      err = the_target->remove_point (bp->raw_type, bp->pc, bp->kind, bp);
+      err = the_target->pt->remove_point (bp->raw_type, bp->pc, bp->kind, bp);
       if (err != 0)
 	{
 	  bp->inserted = 1;
@@ -1621,7 +1621,7 @@ reinsert_raw_breakpoint (struct raw_breakpoint *bp)
   if (bp->inserted)
     return;
 
-  err = the_target->insert_point (bp->raw_type, bp->pc, bp->kind, bp);
+  err = the_target->pt->insert_point (bp->raw_type, bp->pc, bp->kind, bp);
   if (err == 0)
     bp->inserted = 1;
   else if (debug_threads)

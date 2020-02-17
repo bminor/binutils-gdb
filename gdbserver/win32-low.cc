@@ -261,9 +261,9 @@ win32_process_target::supports_z_point_type (char z_type)
 	  && the_low_target.supports_z_point_type (z_type));
 }
 
-static int
-win32_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		    int size, struct raw_breakpoint *bp)
+int
+win32_process_target::insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+				    int size, raw_breakpoint *bp)
 {
   if (the_low_target.insert_point != NULL)
     return the_low_target.insert_point (type, addr, size, bp);
@@ -272,9 +272,9 @@ win32_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
     return 1;
 }
 
-static int
-win32_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		    int size, struct raw_breakpoint *bp)
+int
+win32_process_target::remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+				    int size, raw_breakpoint *bp)
 {
   if (the_low_target.remove_point != NULL)
     return the_low_target.remove_point (type, addr, size, bp);
@@ -1838,8 +1838,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_insert_point,
-  win32_remove_point,
   NULL, /* stopped_by_sw_breakpoint */
   NULL, /* supports_stopped_by_sw_breakpoint */
   NULL, /* stopped_by_hw_breakpoint */

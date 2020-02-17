@@ -1,5 +1,41 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's insert_point and remove_point ops
+	into methods of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target ops.
+	(class process_target): Add the target ops.
+	* target.cc (process_target::insert_point): Define.
+	(process_target::remove_point): Define.
+
+	Update the derived classes and callers below.
+
+	* mem-break.cc (set_raw_breakpoint_at): Update.
+	(delete_raw_breakpoint): Update.
+	(uninsert_raw_breakpoint): Update.
+	(reinsert_raw_breakpoint): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_insert_point): Turn into ...
+	(linux_process_target::insert_point): ... this.
+	(linux_remove_point): Turn into ...
+	(linux_process_target::remove_point): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	(nto_insert_point): Turn into ...
+	(nto_process_target::insert_point): ... this.
+	(nto_remove_point): Turn into ...
+	(nto_process_target::remove_point): ... this.
+	* nto-low.h (class nto_process_target): Update.
+	* win32-low.cc (win32_target_ops): Update.
+	(win32_insert_point): Turn into ...
+	(win32_process_target::insert_point): ... this.
+	(win32_remove_point): Turn into ...
+	(win32_process_target::remove_point): ... this.
+	* win32-low.h (class win32_process_target): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's supports_z_point_type op into a
 	method of process_target.
 

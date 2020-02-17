@@ -433,3 +433,17 @@ process_target::supports_z_point_type (char z_type)
 {
   return false;
 }
+
+int
+process_target::insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
+			      int size, raw_breakpoint *bp)
+{
+  return 1;
+}
+
+int
+process_target::remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
+			      int size, raw_breakpoint *bp)
+{
+  return 1;
+}
