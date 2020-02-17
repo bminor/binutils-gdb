@@ -1603,8 +1603,8 @@ linux_detach_lwp_callback (thread_info *thread)
   linux_detach_one_lwp (lwp);
 }
 
-static int
-linux_detach (process_info *process)
+int
+linux_process_target::detach (process_info *process)
 {
   struct lwp_info *main_lwp;
 
@@ -7359,7 +7359,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_detach,
   linux_mourn,
   linux_join,
   linux_thread_alive,

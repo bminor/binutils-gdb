@@ -409,8 +409,8 @@ nto_process_target::kill (process_info *proc)
 
 /* Detach from process PID.  */
 
-static int
-nto_detach (process_info *proc)
+int
+nto_process_target::detach (process_info *proc)
 {
   TRACE ("%s %d\n", __func__, proc->pid);
   do_detach ();
@@ -935,7 +935,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_detach,
   nto_mourn,
   NULL, /* nto_join */
   nto_thread_alive,

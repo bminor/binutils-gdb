@@ -843,8 +843,8 @@ win32_process_target::kill (process_info *process)
 
 /* Implementation of target_ops::detach.  */
 
-static int
-win32_detach (process_info *process)
+int
+win32_process_target::detach (process_info *process)
 {
   winapi_DebugActiveProcessStop DebugActiveProcessStop = NULL;
   winapi_DebugSetProcessKillOnExit DebugSetProcessKillOnExit = NULL;
@@ -1839,7 +1839,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_detach,
   win32_mourn,
   win32_join,
   win32_thread_alive,

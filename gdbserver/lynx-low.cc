@@ -535,8 +535,8 @@ lynx_process_target::kill (process_info *process)
 
 /* Implement the detach target_ops method.  */
 
-static int
-lynx_detach (process_info *process)
+int
+lynx_process_target::detach (process_info *process)
 {
   ptid_t ptid = lynx_ptid_t (process->pid, 0);
 
@@ -726,7 +726,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  lynx_detach,
   lynx_mourn,
   lynx_join,
   lynx_thread_alive,

@@ -70,11 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Detach from process PROC.  Return -1 on failure, and 0 on
-     success.  */
-
-  int (*detach) (process_info *proc);
-
   /* The inferior process has died.  Do what is right.  */
 
   void (*mourn) (struct process_info *proc);
@@ -487,6 +482,10 @@ public:
 
   /* Kill process PROC.  Return -1 on failure, and 0 on success.  */
   virtual int kill (process_info *proc) = 0;
+
+  /* Detach from process PROC.  Return -1 on failure, and 0 on
+     success.  */
+  virtual int detach (process_info *proc) = 0;
 };
 
 extern process_stratum_target *the_target;
@@ -524,7 +523,7 @@ int kill_inferior (process_info *proc);
     } while (0)
 
 #define detach_inferior(proc) \
-  (*the_target->detach) (proc)
+  the_target->pt->detach (proc)
 
 #define mythread_alive(pid) \
   (*the_target->thread_alive) (pid)

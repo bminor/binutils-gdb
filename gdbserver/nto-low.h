@@ -54,6 +54,8 @@ public:
   int attach (unsigned long pid) override;
 
   int kill (process_info *proc) override;
+
+  int detach (process_info *proc) override;
 };
 
 /* The inferior's target description.  This is a global because the
