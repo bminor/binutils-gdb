@@ -1858,7 +1858,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  NULL, /* supports_disable_randomization */
   NULL, /* qxfer_libraries_svr4 */
   NULL, /* support_agent */
   NULL, /* enable_btrace */

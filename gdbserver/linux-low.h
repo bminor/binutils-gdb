@@ -422,6 +422,8 @@ public:
   int get_min_fast_tracepoint_insn_len () override;
 
   struct emit_ops *emit_ops () override;
+
+  bool supports_disable_randomization () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

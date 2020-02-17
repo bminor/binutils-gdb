@@ -699,3 +699,9 @@ process_target::emit_ops ()
 {
   return nullptr;
 }
+
+bool
+process_target::supports_disable_randomization ()
+{
+  return false;
+}

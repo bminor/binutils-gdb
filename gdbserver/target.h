@@ -70,9 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Returns true if the target supports disabling randomization.  */
-  int (*supports_disable_randomization) (void);
-
   /* Read solib info on SVR4 platforms.  */
   int (*qxfer_libraries_svr4) (const char *annex, unsigned char *readbuf,
 			       unsigned const char *writebuf,
@@ -493,6 +490,9 @@ public:
   /* Return the bytecode operations vector for the current inferior.
      Returns nullptr if bytecode compilation is not supported.  */
   virtual struct emit_ops *emit_ops ();
+
+  /* Returns true if the target supports disabling randomization.  */
+  virtual bool supports_disable_randomization ();
 };
 
 extern process_stratum_target *the_target;
@@ -600,8 +600,7 @@ int kill_inferior (process_info *proc);
   the_target->pt->emit_ops ()
 
 #define target_supports_disable_randomization() \
-  (the_target->supports_disable_randomization ? \
-   (*the_target->supports_disable_randomization) () : 0)
+  the_target->pt->supports_disable_randomization ()
 
 #define target_supports_agent() \
   (the_target->supports_agent ? \
