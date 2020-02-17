@@ -1852,9 +1852,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  NULL, /* supports_non_stop */
-  NULL, /* async */
-  NULL, /* start_non_stop */
   NULL, /* supports_multi_process */
   NULL, /* supports_fork_events */
   NULL, /* supports_vfork_events */

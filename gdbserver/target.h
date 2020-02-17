@@ -70,16 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  int (*supports_non_stop) (void);
-
-  /* Enables async target events.  Returns the previous enable
-     state.  */
-  int (*async) (int enable);
-
-  /* Switch to non-stop (1) or all-stop (0) mode.  Return 0 on
-     success, -1 otherwise.  */
-  int (*start_non_stop) (int);
-
   /* Returns true if the target supports multi-process debugging.  */
   int (*supports_multi_process) (void);
 
@@ -485,6 +475,17 @@ public:
   virtual int qxfer_siginfo (const char *annex, unsigned char *readbuf,
 			     unsigned const char *writebuf,
 			     CORE_ADDR offset, int len);
+
+  /* Return true if non-stop mode is supported.  */
+  virtual bool supports_non_stop ();
+
+  /* Enables async target events.  Returns the previous enable
+     state.  */
+  virtual bool async (bool enable);
+
+  /* Switch to non-stop (ENABLE == true) or all-stop (ENABLE == false)
+     mode.  Return 0 on success, -1 otherwise.  */
+  virtual int start_non_stop (bool enable);
 };
 
 extern process_stratum_target *the_target;
@@ -537,10 +538,10 @@ int kill_inferior (process_info *proc);
   the_target->pt->join (pid)
 
 #define target_supports_non_stop() \
-  (the_target->supports_non_stop ? (*the_target->supports_non_stop ) () : 0)
+  the_target->pt->supports_non_stop ()
 
 #define target_async(enable) \
-  (the_target->async ? (*the_target->async) (enable) : 0)
+  the_target->pt->async (enable)
 
 #define target_process_qsupported(features, count)	\
   do							\
@@ -695,10 +696,6 @@ target_read_btrace_conf (struct btrace_target_info *tinfo,
 #define target_supports_software_single_step() \
   (the_target->supports_software_single_step ? \
    (*the_target->supports_software_single_step) () : 0)
-
-/* Start non-stop mode, returns 0 on success, -1 on failure.   */
-
-int start_non_stop (int nonstop);
 
 ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
 	       int connected_wait);

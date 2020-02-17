@@ -740,7 +740,7 @@ handle_general_set (char *own_buf)
 	}
 
       req_str = req ? "non-stop" : "all-stop";
-      if (start_non_stop (req) != 0)
+      if (the_target->pt->start_non_stop (req == 1) != 0)
 	{
 	  fprintf (stderr, "Setting %s mode failed\n", req_str);
 	  write_enn (own_buf);
@@ -1234,7 +1234,7 @@ handle_detach (char *own_buf)
 	    debug_printf ("Forcing non-stop mode\n");
 
 	  non_stop = true;
-	  start_non_stop (1);
+	  the_target->pt->start_non_stop (true);
 	}
 
       process->gdb_detached = 1;
@@ -3885,7 +3885,7 @@ captured_main (int argc, char *argv[])
 		     down without informing GDB.  */
 		  if (!non_stop)
 		    {
-		      if (start_non_stop (1))
+		      if (the_target->pt->start_non_stop (true))
 			non_stop = 1;
 
 		      /* Detaching implicitly resumes all threads;

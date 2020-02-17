@@ -357,6 +357,12 @@ public:
   int qxfer_siginfo (const char *annex, unsigned char *readbuf,
 		     unsigned const char *writebuf,
 		     CORE_ADDR offset, int len) override;
+
+  bool supports_non_stop () override;
+
+  bool async (bool enable) override;
+
+  int start_non_stop (bool enable) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

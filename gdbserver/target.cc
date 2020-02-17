@@ -264,20 +264,6 @@ target_supports_multi_process (void)
 	  (*the_target->supports_multi_process) () : 0);
 }
 
-int
-start_non_stop (int nonstop)
-{
-  if (the_target->start_non_stop == NULL)
-    {
-      if (nonstop)
-	return -1;
-      else
-	return 0;
-    }
-
-  return (*the_target->start_non_stop) (nonstop);
-}
-
 void
 set_target_ops (process_stratum_target *target)
 {
@@ -540,4 +526,25 @@ process_target::qxfer_siginfo (const char *annex, unsigned char *readbuf,
 			       CORE_ADDR offset, int len)
 {
   gdb_assert_not_reached ("target op qxfer_siginfo not supported");
+}
+
+bool
+process_target::supports_non_stop ()
+{
+  return false;
+}
+
+bool
+process_target::async (bool enable)
+{
+  return false;
+}
+
+int
+process_target::start_non_stop (bool enable)
+{
+  if (enable)
+    return -1;
+  else
+    return 0;
 }

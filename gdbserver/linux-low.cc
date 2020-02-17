@@ -6265,16 +6265,16 @@ sigchld_handler (int signo)
   errno = old_errno;
 }
 
-static int
-linux_supports_non_stop (void)
+bool
+linux_process_target::supports_non_stop ()
 {
-  return 1;
+  return true;
 }
 
-static int
-linux_async (int enable)
+bool
+linux_process_target::async (bool enable)
 {
-  int previous = target_is_async_p ();
+  bool previous = target_is_async_p ();
 
   if (debug_threads)
     debug_printf ("linux_async (%d), previous=%d\n",
@@ -6326,13 +6326,13 @@ linux_async (int enable)
   return previous;
 }
 
-static int
-linux_start_non_stop (int nonstop)
+int
+linux_process_target::start_non_stop (bool nonstop)
 {
   /* Register or unregister from event-loop accordingly.  */
-  linux_async (nonstop);
+  target_async (nonstop);
 
-  if (target_is_async_p () != (nonstop != 0))
+  if (target_is_async_p () != (nonstop != false))
     return -1;
 
   return 0;
@@ -7429,9 +7429,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_supports_non_stop,
-  linux_async,
-  linux_start_non_stop,
   linux_supports_multi_process,
   linux_supports_fork_events,
   linux_supports_vfork_events,

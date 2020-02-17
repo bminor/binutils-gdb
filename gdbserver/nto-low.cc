@@ -933,15 +933,6 @@ nto_process_target::stopped_data_address ()
   return ret;
 }
 
-/* We do not currently support non-stop.  */
-
-static int
-nto_supports_non_stop (void)
-{
-  TRACE ("%s\n", __func__);
-  return 0;
-}
-
 /* Implementation of the target_ops method "sw_breakpoint_from_kind".  */
 
 static const gdb_byte *
@@ -956,9 +947,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_supports_non_stop,
-  NULL, /* async */
-  NULL, /* start_non_stop */
   NULL, /* supports_multi_process */
   NULL, /* supports_fork_events */
   NULL, /* supports_vfork_events */
