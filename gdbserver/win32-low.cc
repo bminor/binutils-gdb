@@ -1839,7 +1839,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  NULL,  /* post_create_inferior */
   win32_attach,
   win32_kill,
   win32_detach,

@@ -1029,8 +1029,8 @@ linux_process_target::create_inferior (const char *program,
 
 /* Implement the post_create_inferior target_ops method.  */
 
-static void
-linux_post_create_inferior (void)
+void
+linux_process_target::post_create_inferior ()
 {
   struct lwp_info *lwp = get_thread_lwp (current_thread);
 
@@ -7359,7 +7359,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_post_create_inferior,
   linux_attach,
   linux_kill,
   linux_detach,

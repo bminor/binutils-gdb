@@ -393,3 +393,12 @@ target_terminal::info (const char *arg, int from_tty)
 {
   /* Placeholder.  */
 }
+
+/* Default implementations of target ops.
+   See target.h for definitions.  */
+
+void
+process_target::post_create_inferior ()
+{
+  /* Nop.  */
+}

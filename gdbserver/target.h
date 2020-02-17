@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Do additional setup after a new process is created, including
-     exec-wrapper completion.  */
-  void (*post_create_inferior) (void);
-
   /* Attach to a running process.
 
      PID is the process ID to attach to, specified by the user
@@ -489,6 +485,10 @@ public:
      process with the process list.  */
   virtual int create_inferior (const char *program,
 			       const std::vector<char *> &program_args) = 0;
+
+  /* Do additional setup after a new process is created, including
+     exec-wrapper completion.  */
+  virtual void post_create_inferior ();
 };
 
 extern process_stratum_target *the_target;
@@ -499,11 +499,7 @@ void set_target_ops (process_stratum_target *);
   the_target->pt->create_inferior (program, program_args)
 
 #define target_post_create_inferior()			 \
-  do							 \
-    {							 \
-      if (the_target->post_create_inferior != NULL)	 \
-	(*the_target->post_create_inferior) ();		 \
-    } while (0)
+  the_target->pt->post_create_inferior ()
 
 #define myattach(pid) \
   (*the_target->attach) (pid)

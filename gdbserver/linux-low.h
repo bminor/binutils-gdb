@@ -272,6 +272,8 @@ public:
 
   int create_inferior (const char *program,
 		       const std::vector<char *> &program_args) override;
+
+  void post_create_inferior () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))
