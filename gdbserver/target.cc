@@ -726,3 +726,30 @@ process_target::supports_agent ()
 {
   return false;
 }
+
+btrace_target_info *
+process_target::enable_btrace (ptid_t ptid, const btrace_config *conf)
+{
+  error (_("Target does not support branch tracing."));
+}
+
+int
+process_target::disable_btrace (btrace_target_info *tinfo)
+{
+  error (_("Target does not support branch tracing."));
+}
+
+int
+process_target::read_btrace (btrace_target_info *tinfo,
+			     buffer *buffer,
+			     enum btrace_read_type type)
+{
+  error (_("Target does not support branch tracing."));
+}
+
+int
+process_target::read_btrace_conf (const btrace_target_info *tinfo,
+				  buffer *buffer)
+{
+  error (_("Target does not support branch tracing."));
+}

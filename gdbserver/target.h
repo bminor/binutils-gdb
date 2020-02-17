@@ -70,26 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Enable branch tracing for PTID based on CONF and allocate a branch trace
-     target information struct for reading and for disabling branch trace.  */
-  struct btrace_target_info *(*enable_btrace)
-    (ptid_t ptid, const struct btrace_config *conf);
-
-  /* Disable branch tracing.
-     Returns zero on success, non-zero otherwise.  */
-  int (*disable_btrace) (struct btrace_target_info *tinfo);
-
-  /* Read branch trace data into buffer.
-     Return 0 on success; print an error message into BUFFER and return -1,
-     otherwise.  */
-  int (*read_btrace) (struct btrace_target_info *, struct buffer *,
-		      enum btrace_read_type type);
-
-  /* Read the branch trace configuration into BUFFER.
-     Return 0 on success; print an error message into BUFFER and return -1
-     otherwise.  */
-  int (*read_btrace_conf) (const struct btrace_target_info *, struct buffer *);
-
   /* Return true if target supports range stepping.  */
   int (*supports_range_stepping) (void);
 
@@ -497,6 +477,27 @@ public:
 
   /* Return true if target supports debugging agent.  */
   virtual bool supports_agent ();
+
+  /* Enable branch tracing for PTID based on CONF and allocate a branch trace
+     target information struct for reading and for disabling branch trace.  */
+  virtual btrace_target_info *enable_btrace (ptid_t ptid,
+					     const btrace_config *conf);
+
+  /* Disable branch tracing.
+     Returns zero on success, non-zero otherwise.  */
+  virtual int disable_btrace (btrace_target_info *tinfo);
+
+  /* Read branch trace data into buffer.
+     Return 0 on success; print an error message into BUFFER and return -1,
+     otherwise.  */
+  virtual int read_btrace (btrace_target_info *tinfo, buffer *buf,
+			   enum btrace_read_type type);
+
+  /* Read the branch trace configuration into BUFFER.
+     Return 0 on success; print an error message into BUFFER and return -1
+     otherwise.  */
+  virtual int read_btrace_conf (const btrace_target_info *tinfo,
+				buffer *buf);
 };
 
 extern process_stratum_target *the_target;
@@ -612,19 +613,13 @@ int kill_inferior (process_info *proc);
 static inline struct btrace_target_info *
 target_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
 {
-  if (the_target->enable_btrace == nullptr)
-    error (_("Target does not support branch tracing."));
-
-  return (*the_target->enable_btrace) (ptid, conf);
+  return the_target->pt->enable_btrace (ptid, conf);
 }
 
 static inline int
 target_disable_btrace (struct btrace_target_info *tinfo)
 {
-  if (the_target->disable_btrace == nullptr)
-    error (_("Target does not support branch tracing."));
-
-  return (*the_target->disable_btrace) (tinfo);
+  return the_target->pt->disable_btrace (tinfo);
 }
 
 static inline int
@@ -632,20 +627,14 @@ target_read_btrace (struct btrace_target_info *tinfo,
 		    struct buffer *buffer,
 		    enum btrace_read_type type)
 {
-  if (the_target->read_btrace == nullptr)
-    error (_("Target does not support branch tracing."));
-
-  return (*the_target->read_btrace) (tinfo, buffer, type);
+  return the_target->pt->read_btrace (tinfo, buffer, type);
 }
 
 static inline int
 target_read_btrace_conf (struct btrace_target_info *tinfo,
 			 struct buffer *buffer)
 {
-  if (the_target->read_btrace_conf == nullptr)
-    error (_("Target does not support branch tracing."));
-
-  return (*the_target->read_btrace_conf) (tinfo, buffer);
+  return the_target->pt->read_btrace_conf (tinfo, buffer);
 }
 
 #define target_supports_range_stepping() \

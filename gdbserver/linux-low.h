@@ -433,6 +433,19 @@ public:
 			    CORE_ADDR offset, int len) override;
 
   bool supports_agent () override;
+
+#ifdef HAVE_LINUX_BTRACE
+  btrace_target_info *enable_btrace (ptid_t ptid,
+				     const btrace_config *conf) override;
+
+  int disable_btrace (btrace_target_info *tinfo) override;
+
+  int read_btrace (btrace_target_info *tinfo, buffer *buf,
+		   enum btrace_read_type type) override;
+
+  int read_btrace_conf (const btrace_target_info *tinfo,
+			buffer *buf) override;
+#endif
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

@@ -7153,10 +7153,17 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
 
 #ifdef HAVE_LINUX_BTRACE
 
+btrace_target_info *
+linux_process_target::enable_btrace (ptid_t ptid,
+				     const btrace_config *conf)
+{
+  return linux_enable_btrace (ptid, conf);
+}
+
 /* See to_disable_btrace target method.  */
 
-static int
-linux_low_disable_btrace (struct btrace_target_info *tinfo)
+int
+linux_process_target::disable_btrace (btrace_target_info *tinfo)
 {
   enum btrace_error err;
 
@@ -7215,9 +7222,10 @@ linux_low_encode_raw (struct buffer *buffer, const gdb_byte *data,
 
 /* See to_read_btrace target method.  */
 
-static int
-linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
-		       enum btrace_read_type type)
+int
+linux_process_target::read_btrace (btrace_target_info *tinfo,
+				   buffer *buffer,
+				   enum btrace_read_type type)
 {
   struct btrace_data btrace;
   enum btrace_error err;
@@ -7274,9 +7282,9 @@ linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
 
 /* See to_btrace_conf target method.  */
 
-static int
-linux_low_btrace_conf (const struct btrace_target_info *tinfo,
-		       struct buffer *buffer)
+int
+linux_process_target::read_btrace_conf (const btrace_target_info *tinfo,
+					buffer *buffer)
 {
   const struct btrace_config *conf;
 
@@ -7463,17 +7471,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-#ifdef HAVE_LINUX_BTRACE
-  linux_enable_btrace,
-  linux_low_disable_btrace,
-  linux_low_read_btrace,
-  linux_low_btrace_conf,
-#else
-  NULL,
-  NULL,
-  NULL,
-  NULL,
-#endif
   linux_supports_range_stepping,
   linux_proc_pid_to_exec_file,
   linux_mntns_open_cloexec,

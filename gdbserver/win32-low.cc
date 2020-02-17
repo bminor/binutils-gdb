@@ -1858,10 +1858,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  NULL, /* enable_btrace */
-  NULL, /* disable_btrace */
-  NULL, /* read_btrace */
-  NULL, /* read_btrace_conf */
   NULL, /* supports_range_stepping */
   NULL, /* pid_to_exec_file */
   NULL, /* multifs_open */

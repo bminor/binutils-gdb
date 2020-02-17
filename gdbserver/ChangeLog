@@ -1,5 +1,38 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's btrace-related ops (enable_btrace,
+	disable_btrace, read_btrace, read_btrace_conf) into methods of
+	process_target.
+
+	* target.h (struct process_stratum_target): Remove the target ops.
+	(class process_target): Add the target ops.
+	(target_enable_btrace): Update.
+	(target_disable_btrace): Update.
+	(target_read_btrace): Update.
+	(target_read_btrace_conf): Update.
+	* target.cc (process_target::enable_btrace): Define.
+	(process_target::disable_btrace): Define.
+	(process_target::read_btrace): Define.
+	(process_target::read_btrace_conf): Define.
+
+	Update the derived classes and callers below.
+
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_process_target:enable_btrace): Define as a wrapper around
+	linux_enable_btrace.
+	(linux_low_disable_btrace): Turn into ...
+	(linux_process_target::disable_btrace): ... this.
+	(linux_low_read_btrace): Turn into ...
+	(linux_process_target::read_btrace): ... this.
+	(linux_low_btrace_conf): Turn into ...
+	(linux_process_target::read_btrace_conf): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	* win32-low.cc (win32_target_ops): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's supports_agent op into a method of
 	process_target.
 
