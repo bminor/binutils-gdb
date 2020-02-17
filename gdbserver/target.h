@@ -70,16 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Attach to a running process.
-
-     PID is the process ID to attach to, specified by the user
-     or a higher layer.
-
-     Returns -1 if attaching is unsupported, 0 on success, and calls
-     error() otherwise.  */
-
-  int (*attach) (unsigned long pid);
-
   /* Kill process PROC.  Return -1 on failure, and 0 on success.  */
 
   int (*kill) (process_info *proc);
@@ -489,6 +479,15 @@ public:
   /* Do additional setup after a new process is created, including
      exec-wrapper completion.  */
   virtual void post_create_inferior ();
+
+  /* Attach to a running process.
+
+     PID is the process ID to attach to, specified by the user
+     or a higher layer.
+
+     Returns -1 if attaching is unsupported, 0 on success, and calls
+     error() otherwise.  */
+  virtual int attach (unsigned long pid) = 0;
 };
 
 extern process_stratum_target *the_target;
@@ -502,7 +501,7 @@ void set_target_ops (process_stratum_target *);
   the_target->pt->post_create_inferior ()
 
 #define myattach(pid) \
-  (*the_target->attach) (pid)
+  the_target->pt->attach (pid)
 
 int kill_inferior (process_info *proc);
 

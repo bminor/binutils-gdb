@@ -1181,8 +1181,8 @@ static void async_file_mark (void);
 /* Attach to PID.  If PID is the tgid, attach to it and all
    of its threads.  */
 
-static int
-linux_attach (unsigned long pid)
+int
+linux_process_target::attach (unsigned long pid)
 {
   struct process_info *proc;
   struct thread_info *initial_thread;
@@ -7359,7 +7359,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_attach,
   linux_kill,
   linux_detach,
   linux_mourn,

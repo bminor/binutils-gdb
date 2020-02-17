@@ -385,8 +385,8 @@ nto_process_target::create_inferior (const char *program,
 
 /* Attach to process PID.  */
 
-static int
-nto_attach (unsigned long pid)
+int
+nto_process_target::attach (unsigned long pid)
 {
   TRACE ("%s %ld\n", __func__, pid);
   if (do_attach (pid) != pid)
@@ -935,7 +935,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_attach,
   nto_kill,
   nto_detach,
   nto_mourn,

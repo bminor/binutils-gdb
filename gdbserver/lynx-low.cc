@@ -309,8 +309,8 @@ lynx_add_threads_after_attach (int pid)
 
 /* Implement the attach target_ops method.  */
 
-static int
-lynx_attach (unsigned long pid)
+int
+lynx_process_target::attach (unsigned long pid)
 {
   ptid_t ptid = lynx_ptid_t (pid, 0);
 
@@ -726,7 +726,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  lynx_attach,
   lynx_kill,
   lynx_detach,
   lynx_mourn,

@@ -274,6 +274,8 @@ public:
 		       const std::vector<char *> &program_args) override;
 
   void post_create_inferior () override;
+
+  int attach (unsigned long pid) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

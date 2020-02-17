@@ -60,6 +60,8 @@ public:
 
   int create_inferior (const char *program,
 		       const std::vector<char *> &program_args) override;
+
+  int attach (unsigned long pid) override;
 };
 
 /* The inferior's target description.  This is a global because the

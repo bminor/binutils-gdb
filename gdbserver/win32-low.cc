@@ -726,8 +726,8 @@ win32_process_target::create_inferior (const char *program,
 /* Attach to a running process.
    PID is the process ID to attach to, specified by the user
    or a higher layer.  */
-static int
-win32_attach (unsigned long pid)
+int
+win32_process_target::attach (unsigned long pid)
 {
   HANDLE h;
   winapi_DebugSetProcessKillOnExit DebugSetProcessKillOnExit = NULL;
@@ -1839,7 +1839,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_attach,
   win32_kill,
   win32_detach,
   win32_mourn,
