@@ -6931,6 +6931,12 @@ read_one_ptr (CORE_ADDR memaddr, CORE_ADDR *ptr, int ptr_size)
   return ret;
 }
 
+bool
+linux_process_target::supports_qxfer_libraries_svr4 ()
+{
+  return true;
+}
+
 struct link_map_offsets
   {
     /* Offset and size of r_debug.r_version.  */
@@ -6957,10 +6963,11 @@ struct link_map_offsets
 
 /* Construct qXfer:libraries-svr4:read reply.  */
 
-static int
-linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
-			    unsigned const char *writebuf,
-			    CORE_ADDR offset, int len)
+int
+linux_process_target::qxfer_libraries_svr4 (const char *annex,
+					    unsigned char *readbuf,
+					    unsigned const char *writebuf,
+					    CORE_ADDR offset, int len)
 {
   struct process_info_private *const priv = current_process ()->priv;
   char filename[PATH_MAX];
@@ -7456,7 +7463,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_qxfer_libraries_svr4,
   linux_supports_agent,
 #ifdef HAVE_LINUX_BTRACE
   linux_enable_btrace,

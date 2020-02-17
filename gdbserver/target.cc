@@ -705,3 +705,18 @@ process_target::supports_disable_randomization ()
 {
   return false;
 }
+
+bool
+process_target::supports_qxfer_libraries_svr4 ()
+{
+  return false;
+}
+
+int
+process_target::qxfer_libraries_svr4 (const char *annex,
+				      unsigned char *readbuf,
+				      unsigned const char *writebuf,
+				      CORE_ADDR offset, int len)
+{
+  gdb_assert_not_reached ("target op qxfer_libraries_svr4 not supported");
+}

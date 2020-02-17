@@ -424,6 +424,13 @@ public:
   struct emit_ops *emit_ops () override;
 
   bool supports_disable_randomization () override;
+
+  bool supports_qxfer_libraries_svr4 () override;
+
+  int qxfer_libraries_svr4 (const char *annex,
+			    unsigned char *readbuf,
+			    unsigned const char *writebuf,
+			    CORE_ADDR offset, int len) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

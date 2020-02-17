@@ -1574,10 +1574,12 @@ handle_qxfer_libraries_svr4 (const char *annex,
   if (writebuf != NULL)
     return -2;
 
-  if (current_thread == NULL || the_target->qxfer_libraries_svr4 == NULL)
+  if (current_thread == NULL
+      || !the_target->pt->supports_qxfer_libraries_svr4 ())
     return -1;
 
-  return the_target->qxfer_libraries_svr4 (annex, readbuf, writebuf, offset, len);
+  return the_target->pt->qxfer_libraries_svr4 (annex, readbuf, writebuf,
+					       offset, len);
 }
 
 /* Handle qXfer:osadata:read.  */
@@ -2364,7 +2366,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (target_supports_catch_syscall ())
 	strcat (own_buf, ";QCatchSyscalls+");
 
-      if (the_target->qxfer_libraries_svr4 != NULL)
+      if (the_target->pt->supports_qxfer_libraries_svr4 ())
 	strcat (own_buf, ";qXfer:libraries-svr4:read+"
 		";augmented-libraries-svr4-read+");
       else

@@ -70,11 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Read solib info on SVR4 platforms.  */
-  int (*qxfer_libraries_svr4) (const char *annex, unsigned char *readbuf,
-			       unsigned const char *writebuf,
-			       CORE_ADDR offset, int len);
-
   /* Return true if target supports debugging agent.  */
   int (*supports_agent) (void);
 
@@ -493,6 +488,15 @@ public:
 
   /* Returns true if the target supports disabling randomization.  */
   virtual bool supports_disable_randomization ();
+
+  /* Return true if the qxfer_libraries_svr4 op is supported.  */
+  virtual bool supports_qxfer_libraries_svr4 ();
+
+  /* Read solib info on SVR4 platforms.  */
+  virtual int qxfer_libraries_svr4 (const char *annex,
+				    unsigned char *readbuf,
+				    unsigned const char *writebuf,
+				    CORE_ADDR offset, int len);
 };
 
 extern process_stratum_target *the_target;
