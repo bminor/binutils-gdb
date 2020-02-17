@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Return the bytecode operations vector for the current inferior.
-     Returns NULL if bytecode compilation is not supported.  */
-  struct emit_ops *(*emit_ops) (void);
-
   /* Returns true if the target supports disabling randomization.  */
   int (*supports_disable_randomization) (void);
 
@@ -493,6 +489,10 @@ public:
   /* Return the minimum length of an instruction that can be safely
      overwritten for use as a fast tracepoint.  */
   virtual int get_min_fast_tracepoint_insn_len ();
+
+  /* Return the bytecode operations vector for the current inferior.
+     Returns nullptr if bytecode compilation is not supported.  */
+  virtual struct emit_ops *emit_ops ();
 };
 
 extern process_stratum_target *the_target;
@@ -597,7 +597,7 @@ int kill_inferior (process_info *proc);
 						    err)
 
 #define target_emit_ops() \
-  (the_target->emit_ops ? (*the_target->emit_ops) () : NULL)
+  the_target->pt->emit_ops ()
 
 #define target_supports_disable_randomization() \
   (the_target->supports_disable_randomization ? \

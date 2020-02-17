@@ -693,3 +693,9 @@ process_target::get_min_fast_tracepoint_insn_len ()
 {
   return 0;
 }
+
+struct emit_ops *
+process_target::emit_ops ()
+{
+  return nullptr;
+}

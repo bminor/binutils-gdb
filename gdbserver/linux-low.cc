@@ -6643,8 +6643,8 @@ linux_process_target::install_fast_tracepoint_jump_pad
      err);
 }
 
-static struct emit_ops *
-linux_emit_ops (void)
+emit_ops *
+linux_process_target::emit_ops ()
 {
   if (the_low_target.emit_ops != NULL)
     return (*the_low_target.emit_ops) ();
@@ -7456,7 +7456,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_emit_ops,
   linux_supports_disable_randomization,
   linux_qxfer_libraries_svr4,
   linux_supports_agent,
