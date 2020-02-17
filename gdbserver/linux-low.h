@@ -345,6 +345,12 @@ public:
 
   int get_tls_address (thread_info *thread, CORE_ADDR offset,
 		       CORE_ADDR load_module, CORE_ADDR *address) override;
+
+  bool supports_qxfer_osdata () override;
+
+  int qxfer_osdata (const char *annex, unsigned char *readbuf,
+		    unsigned const char *writebuf,
+		    CORE_ADDR offset, int len) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

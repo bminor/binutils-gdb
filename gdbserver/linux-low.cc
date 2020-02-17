@@ -6145,10 +6145,17 @@ linux_process_target::get_tls_address (thread_info *thread,
 #endif
 }
 
-static int
-linux_qxfer_osdata (const char *annex,
-		    unsigned char *readbuf, unsigned const char *writebuf,
-		    CORE_ADDR offset, int len)
+bool
+linux_process_target::supports_qxfer_osdata ()
+{
+  return true;
+}
+
+int
+linux_process_target::qxfer_osdata (const char *annex,
+				    unsigned char *readbuf,
+				    unsigned const char *writebuf,
+				    CORE_ADDR offset, int len)
 {
   return linux_common_xfer_osdata (annex, readbuf, offset, len);
 }
@@ -7414,7 +7421,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_qxfer_osdata,
   linux_xfer_siginfo,
   linux_supports_non_stop,
   linux_async,

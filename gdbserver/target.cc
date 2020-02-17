@@ -513,3 +513,17 @@ process_target::hostio_last_error (char *buf)
 {
   hostio_last_error_from_errno (buf);
 }
+
+bool
+process_target::supports_qxfer_osdata ()
+{
+  return false;
+}
+
+int
+process_target::qxfer_osdata (const char *annex, unsigned char *readbuf,
+			      unsigned const char *writebuf,
+			      CORE_ADDR offset, int len)
+{
+  gdb_assert_not_reached ("target op qxfer_osdata not supported");
+}

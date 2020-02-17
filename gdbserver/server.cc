@@ -1587,10 +1587,10 @@ handle_qxfer_osdata (const char *annex,
 		     gdb_byte *readbuf, const gdb_byte *writebuf,
 		     ULONGEST offset, LONGEST len)
 {
-  if (the_target->qxfer_osdata == NULL || writebuf != NULL)
+  if (!the_target->pt->supports_qxfer_osdata () || writebuf != NULL)
     return -2;
 
-  return (*the_target->qxfer_osdata) (annex, readbuf, NULL, offset, len);
+  return the_target->pt->qxfer_osdata (annex, readbuf, NULL, offset, len);
 }
 
 /* Handle qXfer:siginfo:read and qXfer:siginfo:write.  */
@@ -2392,7 +2392,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (cs.transport_is_reliable)
 	strcat (own_buf, ";QStartNoAckMode+");
 
-      if (the_target->qxfer_osdata != NULL)
+      if (the_target->pt->supports_qxfer_osdata ())
 	strcat (own_buf, ";qXfer:osdata:read+");
 
       if (target_supports_multi_process ())
