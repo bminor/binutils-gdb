@@ -260,8 +260,7 @@ target_continue (ptid_t ptid, enum gdb_signal signal)
 int
 target_supports_multi_process (void)
 {
-  return (the_target->supports_multi_process != NULL ?
-	  (*the_target->supports_multi_process) () : 0);
+  return the_target->pt->supports_multi_process ();
 }
 
 void
@@ -547,4 +546,10 @@ process_target::start_non_stop (bool enable)
     return -1;
   else
     return 0;
+}
+
+bool
+process_target::supports_multi_process ()
+{
+  return false;
 }

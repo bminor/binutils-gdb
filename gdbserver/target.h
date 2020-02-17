@@ -70,9 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Returns true if the target supports multi-process debugging.  */
-  int (*supports_multi_process) (void);
-
   /* Returns true if fork events are supported.  */
   int (*supports_fork_events) (void);
 
@@ -486,6 +483,9 @@ public:
   /* Switch to non-stop (ENABLE == true) or all-stop (ENABLE == false)
      mode.  Return 0 on success, -1 otherwise.  */
   virtual int start_non_stop (bool enable);
+
+  /* Returns true if the target supports multi-process debugging.  */
+  virtual bool supports_multi_process ();
 };
 
 extern process_stratum_target *the_target;

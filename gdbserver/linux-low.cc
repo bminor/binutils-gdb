@@ -6338,10 +6338,10 @@ linux_process_target::start_non_stop (bool nonstop)
   return 0;
 }
 
-static int
-linux_supports_multi_process (void)
+bool
+linux_process_target::supports_multi_process ()
 {
-  return 1;
+  return true;
 }
 
 /* Check if fork events are supported.  */
@@ -7429,7 +7429,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_supports_multi_process,
   linux_supports_fork_events,
   linux_supports_vfork_events,
   linux_supports_exec_events,

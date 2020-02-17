@@ -363,6 +363,8 @@ public:
   bool async (bool enable) override;
 
   int start_non_stop (bool enable) override;
+
+  bool supports_multi_process () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

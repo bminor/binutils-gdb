@@ -947,7 +947,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  NULL, /* supports_multi_process */
   NULL, /* supports_fork_events */
   NULL, /* supports_vfork_events */
   NULL, /* supports_exec_events */
