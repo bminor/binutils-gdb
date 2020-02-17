@@ -70,9 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Return true if THREAD is known to be stopped now.  */
-  int (*thread_stopped) (struct thread_info *thread);
-
   /* Read Thread Information Block address.  */
   int (*get_tib_address) (ptid_t ptid, CORE_ADDR *address);
 
@@ -488,6 +485,12 @@ public:
 
   /* Write PC to REGCACHE.  */
   virtual void write_pc (regcache *regcache, CORE_ADDR pc);
+
+  /* Return true if the thread_stopped op is supported.  */
+  virtual bool supports_thread_stopped ();
+
+  /* Return true if THREAD is known to be stopped now.  */
+  virtual bool thread_stopped (thread_info *thread);
 };
 
 extern process_stratum_target *the_target;
@@ -559,8 +562,8 @@ int kill_inferior (process_info *proc);
   (the_target->get_min_fast_tracepoint_insn_len		\
    ? (*the_target->get_min_fast_tracepoint_insn_len) () : 0)
 
-#define thread_stopped(thread) \
-  (*the_target->thread_stopped) (thread)
+#define target_thread_stopped(thread) \
+  the_target->pt->thread_stopped (thread)
 
 #define pause_all(freeze)			\
   do						\

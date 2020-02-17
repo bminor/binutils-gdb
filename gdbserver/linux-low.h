@@ -392,6 +392,10 @@ public:
   CORE_ADDR read_pc (regcache *regcache) override;
 
   void write_pc (regcache *regcache, CORE_ADDR pc) override;
+
+  bool supports_thread_stopped () override;
+
+  bool thread_stopped (thread_info *thread) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

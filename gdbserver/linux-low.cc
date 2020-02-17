@@ -6572,8 +6572,14 @@ linux_process_target::write_pc (regcache *regcache, CORE_ADDR pc)
   (*the_low_target.set_pc) (regcache, pc);
 }
 
-static int
-linux_thread_stopped (struct thread_info *thread)
+bool
+linux_process_target::supports_thread_stopped ()
+{
+  return true;
+}
+
+bool
+linux_process_target::thread_stopped (thread_info *thread)
 {
   return get_thread_lwp (thread)->stopped;
 }
@@ -7449,7 +7455,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_thread_stopped,
   NULL,
   linux_pause_all,
   linux_unpause_all,

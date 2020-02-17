@@ -3217,7 +3217,7 @@ queue_stop_reply_callback (thread_info *thread)
 {
   /* For now, assume targets that don't have this callback also don't
      manage the thread's last_status field.  */
-  if (the_target->thread_stopped == NULL)
+  if (!the_target->pt->supports_thread_stopped ())
     {
       struct vstop_notif *new_notif = new struct vstop_notif;
 
@@ -3229,7 +3229,7 @@ queue_stop_reply_callback (thread_info *thread)
     }
   else
     {
-      if (thread_stopped (thread))
+      if (target_thread_stopped (thread))
 	{
 	  if (debug_threads)
 	    {

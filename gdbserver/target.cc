@@ -66,8 +66,8 @@ prepare_to_access_memory (void)
     {
       if (mythread_alive (thread->id))
 	{
-	  if (stopped == NULL && the_target->thread_stopped != NULL
-	      && thread_stopped (thread))
+	  if (stopped == NULL && the_target->pt->supports_thread_stopped ()
+	      && target_thread_stopped (thread))
 	    stopped = thread;
 
 	  if (first == NULL)
@@ -625,4 +625,16 @@ void
 process_target::write_pc (regcache *regcache, CORE_ADDR pc)
 {
   gdb_assert_not_reached ("process_target::write_pc: Unable to update PC");
+}
+
+bool
+process_target::supports_thread_stopped ()
+{
+  return false;
+}
+
+bool
+process_target::thread_stopped (thread_info *thread)
+{
+  gdb_assert_not_reached ("target op thread_stopped not supported");
 }
