@@ -6505,8 +6505,8 @@ linux_unpause_all (int unfreeze)
   unstop_all_lwps (unfreeze, NULL);
 }
 
-static int
-linux_prepare_to_access_memory (void)
+int
+linux_process_target::prepare_to_access_memory ()
 {
   /* Neither ptrace nor /proc/PID/mem allow accessing memory through a
      running LWP.  */
@@ -6515,8 +6515,8 @@ linux_prepare_to_access_memory (void)
   return 0;
 }
 
-static void
-linux_done_accessing_memory (void)
+void
+linux_process_target::done_accessing_memory ()
 {
   /* Neither ptrace nor /proc/PID/mem allow accessing memory through a
      running LWP.  */
@@ -7359,8 +7359,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_prepare_to_access_memory,
-  linux_done_accessing_memory,
   linux_read_memory,
   linux_write_memory,
   linux_look_up_symbols,

@@ -57,14 +57,9 @@ prepare_to_access_memory (void)
      it.  */
   prev_general_thread = cs.general_thread;
 
-  if (the_target->prepare_to_access_memory != NULL)
-    {
-      int res;
-
-      res = the_target->prepare_to_access_memory ();
-      if (res != 0)
-	return res;
-    }
+  int res = the_target->pt->prepare_to_access_memory ();
+  if (res != 0)
+    return res;
 
   for_each_thread (prev_general_thread.pid (), [&] (thread_info *thread)
     {
@@ -114,8 +109,7 @@ done_accessing_memory (void)
 {
   client_state &cs = get_client_state ();
 
-  if (the_target->done_accessing_memory != NULL)
-    the_target->done_accessing_memory ();
+  the_target->pt->done_accessing_memory ();
 
   /* Restore the previous selected thread.  */
   cs.general_thread = prev_general_thread;
@@ -399,6 +393,18 @@ target_terminal::info (const char *arg, int from_tty)
 
 void
 process_target::post_create_inferior ()
+{
+  /* Nop.  */
+}
+
+int
+process_target::prepare_to_access_memory ()
+{
+  return 0;
+}
+
+void
+process_target::done_accessing_memory ()
 {
   /* Nop.  */
 }

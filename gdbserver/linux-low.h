@@ -295,6 +295,10 @@ public:
   void fetch_registers (regcache *regcache, int regno) override;
 
   void store_registers (regcache *regcache, int regno) override;
+
+  int prepare_to_access_memory () override;
+
+  void done_accessing_memory () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

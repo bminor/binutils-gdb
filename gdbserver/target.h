@@ -70,23 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Prepare to read or write memory from the inferior process.
-     Targets use this to do what is necessary to get the state of the
-     inferior such that it is possible to access memory.
-
-     This should generally only be called from client facing routines,
-     such as gdb_read_memory/gdb_write_memory, or the GDB breakpoint
-     insertion routine.
-
-     Like `read_memory' and `write_memory' below, returns 0 on success
-     and errno on failure.  */
-
-  int (*prepare_to_access_memory) (void);
-
-  /* Undo the effects of prepare_to_access_memory.  */
-
-  void (*done_accessing_memory) (void);
-
   /* Read memory from the inferior process.  This should generally be
      called through read_inferior_memory, which handles breakpoint shadowing.
 
@@ -480,6 +463,21 @@ public:
 
      If REGNO is -1, store all registers; otherwise, store at least REGNO.  */
   virtual void store_registers (regcache *regcache, int regno) = 0;
+
+  /* Prepare to read or write memory from the inferior process.
+     Targets use this to do what is necessary to get the state of the
+     inferior such that it is possible to access memory.
+
+     This should generally only be called from client facing routines,
+     such as gdb_read_memory/gdb_write_memory, or the GDB breakpoint
+     insertion routine.
+
+     Like `read_memory' and `write_memory' below, returns 0 on success
+     and errno on failure.  */
+  virtual int prepare_to_access_memory ();
+
+  /* Undo the effects of prepare_to_access_memory.  */
+  virtual void done_accessing_memory ();
 };
 
 extern process_stratum_target *the_target;

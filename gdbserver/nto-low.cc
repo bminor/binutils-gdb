@@ -941,8 +941,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  NULL, /* prepare_to_access_memory */
-  NULL, /* done_accessing_memory */
   nto_read_memory,
   nto_write_memory,
   NULL, /* nto_look_up_symbols */

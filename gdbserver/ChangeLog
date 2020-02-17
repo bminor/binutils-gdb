@@ -1,5 +1,29 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's prepare_to_access_memory and
+	done_accessing_memory ops into methods of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target ops.
+	(class process_target): Add the target ops.
+	* target.cc (process_target::prepare_to_access_memory): Define.
+	(process_target::done_accessing_memory): Define.
+	(prepare_to_access_memory): Update.
+	(done_accessing_memory): Update.
+
+	Update the derived classes and callers below.
+
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_prepare_to_access_memory): Turn into ...
+	(linux_process_target::prepare_to_access_memory): ... this.
+	(linux_done_accessing_memory): Turn into ...
+	(linux_process_target::done_accessing_memory): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	* win32-low.cc (win32_target_ops): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's fetch_registers and store_registers
 	ops into methods of process_target.
 
