@@ -291,6 +291,10 @@ public:
 
   ptid_t wait (ptid_t ptid, target_waitstatus *status,
 	       int options) override;
+
+  void fetch_registers (regcache *regcache, int regno) override;
+
+  void store_registers (regcache *regcache, int regno) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

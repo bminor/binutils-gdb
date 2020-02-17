@@ -70,18 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Fetch registers from the inferior process.
-
-     If REGNO is -1, fetch all registers; otherwise, fetch at least REGNO.  */
-
-  void (*fetch_registers) (struct regcache *regcache, int regno);
-
-  /* Store registers to the inferior process.
-
-     If REGNO is -1, store all registers; otherwise, store at least REGNO.  */
-
-  void (*store_registers) (struct regcache *regcache, int regno);
-
   /* Prepare to read or write memory from the inferior process.
      Targets use this to do what is necessary to get the state of the
      inferior such that it is possible to access memory.
@@ -482,6 +470,16 @@ public:
      null_ptid/TARGET_WAITKIND_IGNORE.  */
   virtual ptid_t wait (ptid_t ptid, target_waitstatus *status,
 		       int options) = 0;
+
+  /* Fetch registers from the inferior process.
+
+     If REGNO is -1, fetch all registers; otherwise, fetch at least REGNO.  */
+  virtual void fetch_registers (regcache *regcache, int regno) = 0;
+
+  /* Store registers to the inferior process.
+
+     If REGNO is -1, store all registers; otherwise, store at least REGNO.  */
+  virtual void store_registers (regcache *regcache, int regno) = 0;
 };
 
 extern process_stratum_target *the_target;
@@ -525,10 +523,10 @@ int kill_inferior (process_info *proc);
   the_target->pt->thread_alive (pid)
 
 #define fetch_inferior_registers(regcache, regno)	\
-  (*the_target->fetch_registers) (regcache, regno)
+  the_target->pt->fetch_registers (regcache, regno)
 
 #define store_inferior_registers(regcache, regno) \
-  (*the_target->store_registers) (regcache, regno)
+  the_target->pt->store_registers (regcache, regno)
 
 #define join_inferior(pid) \
   the_target->pt->join (pid)

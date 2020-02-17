@@ -5650,8 +5650,8 @@ usr_store_inferior_registers (const struct regs_info *regs_info,
 #endif
 
 
-static void
-linux_fetch_registers (struct regcache *regcache, int regno)
+void
+linux_process_target::fetch_registers (regcache *regcache, int regno)
 {
   int use_regsets;
   int all = 0;
@@ -5683,8 +5683,8 @@ linux_fetch_registers (struct regcache *regcache, int regno)
     }
 }
 
-static void
-linux_store_registers (struct regcache *regcache, int regno)
+void
+linux_process_target::store_registers (regcache *regcache, int regno)
 {
   int use_regsets;
   int all = 0;
@@ -7359,8 +7359,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_fetch_registers,
-  linux_store_registers,
   linux_prepare_to_access_memory,
   linux_done_accessing_memory,
   linux_read_memory,

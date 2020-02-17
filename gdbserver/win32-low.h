@@ -126,6 +126,10 @@ public:
 
   ptid_t wait (ptid_t ptid, target_waitstatus *status,
 	       int options) override;
+
+  void fetch_registers (regcache *regcache, int regno) override;
+
+  void store_registers (regcache *regcache, int regno) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */

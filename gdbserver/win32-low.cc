@@ -1659,16 +1659,16 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 
 /* Fetch registers from the inferior process.
    If REGNO is -1, fetch all registers; otherwise, fetch at least REGNO.  */
-static void
-win32_fetch_inferior_registers (struct regcache *regcache, int regno)
+void
+win32_process_target::fetch_registers (regcache *regcache, int regno)
 {
   child_fetch_inferior_registers (regcache, regno);
 }
 
 /* Store registers to the inferior process.
    If REGNO is -1, store all registers; otherwise, store at least REGNO.  */
-static void
-win32_store_inferior_registers (struct regcache *regcache, int regno)
+void
+win32_process_target::store_registers (regcache *regcache, int regno)
 {
   child_store_inferior_registers (regcache, regno);
 }
@@ -1837,8 +1837,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_fetch_inferior_registers,
-  win32_store_inferior_registers,
   NULL, /* prepare_to_access_memory */
   NULL, /* done_accessing_memory */
   win32_read_inferior_memory,

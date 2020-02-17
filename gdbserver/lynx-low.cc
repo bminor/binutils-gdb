@@ -581,13 +581,13 @@ lynx_process_target::thread_alive (ptid_t ptid)
 
 /* Implement the fetch_registers target_ops method.  */
 
-static void
-lynx_fetch_registers (struct regcache *regcache, int regno)
+void
+lynx_process_target::fetch_registers (regcache *regcache, int regno)
 {
   struct lynx_regset_info *regset = lynx_target_regsets;
   ptid_t inferior_ptid = ptid_of (current_thread);
 
-  lynx_debug ("lynx_fetch_registers (regno = %d)", regno);
+  lynx_debug ("fetch_registers (regno = %d)", regno);
 
   while (regset->size >= 0)
     {
@@ -606,13 +606,13 @@ lynx_fetch_registers (struct regcache *regcache, int regno)
 
 /* Implement the store_registers target_ops method.  */
 
-static void
-lynx_store_registers (struct regcache *regcache, int regno)
+void
+lynx_process_target::store_registers (regcache *regcache, int regno)
 {
   struct lynx_regset_info *regset = lynx_target_regsets;
   ptid_t inferior_ptid = ptid_of (current_thread);
 
-  lynx_debug ("lynx_store_registers (regno = %d)", regno);
+  lynx_debug ("store_registers (regno = %d)", regno);
 
   while (regset->size >= 0)
     {
@@ -727,8 +727,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  lynx_fetch_registers,
-  lynx_store_registers,
   NULL,  /* prepare_to_access_memory */
   NULL,  /* done_accessing_memory */
   lynx_read_memory,

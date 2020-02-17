@@ -623,8 +623,8 @@ nto_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 /* Fetch inferior's registers for currently selected thread (CURRENT_INFERIOR).
    If REGNO is -1, fetch all registers, or REGNO register only otherwise.  */
 
-static void
-nto_fetch_registers (struct regcache *regcache, int regno)
+void
+nto_process_target::fetch_registers (regcache *regcache, int regno)
 {
   int regsize;
   procfs_greg greg;
@@ -671,8 +671,8 @@ nto_fetch_registers (struct regcache *regcache, int regno)
 /* Store registers for currently selected thread (CURRENT_INFERIOR).  
    We always store all registers, regardless of REGNO.  */
 
-static void
-nto_store_registers (struct regcache *regcache, int regno)
+void
+nto_process_target::store_registers (regcache *regcache, int regno)
 {
   procfs_greg greg;
   int err;
@@ -941,8 +941,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_fetch_registers,
-  nto_store_registers,
   NULL, /* prepare_to_access_memory */
   NULL, /* done_accessing_memory */
   nto_read_memory,

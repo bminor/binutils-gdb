@@ -1,5 +1,42 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's fetch_registers and store_registers
+	ops into methods of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target ops.
+	(class process_target): Add the target ops.
+	(fetch_inferior_registers): Update the macro.
+	(store_inferior_registers): Update the macro.
+
+	Update the derived classes and callers below.
+
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_fetch_registers): Turn into ...
+	(linux_process_target::fetch_registers): ... this.
+	(linux_store_registers): Turn into ...
+	(linux_process_target::store_registers): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	(lynx_fetch_registers): Turn into ...
+	(lynx_process_target::fetch_registers): ... this.
+	(lynx_store_registers): Turn into ...
+	(lynx_process_target::store_registers): ... this.
+	* lynx-low.h (class lynx_process_target): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	(nto_fetch_registers): Turn into ...
+	(nto_process_target::fetch_registers): ... this.
+	(nto_store_registers): Turn into ...
+	(nto_process_target::store_registers): ... this.
+	* nto-low.h (class nto_process_target): Update.
+	* win32-low.cc (win32_target_ops): Update.
+	(win32_fetch_inferior_registers): Turn into ...
+	(win32_process_target::fetch_registers): ... this.
+	(win32_store_inferior_registers): Turn into ...
+	(win32_process_target::store_registers): ... this.
+	* win32-low.h (class win32_process_target): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's wait op into a method of
 	process_target.
 
