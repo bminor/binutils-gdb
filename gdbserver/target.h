@@ -70,9 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Stabilize all threads.  That is, force them out of jump pads.  */
-  void (*stabilize_threads) (void);
-
   /* Install a fast tracepoint jump pad.  TPOINT is the address of the
      tracepoint internal object as used by the IPA agent.  TPADDR is
      the address of tracepoint.  COLLECTOR is address of the function
@@ -494,6 +491,9 @@ public:
      pair should not end up resuming threads that were stopped before
      the pause call.  */
   virtual void unpause_all (bool unfreeze);
+
+  /* Stabilize all threads.  That is, force them out of jump pads.  */
+  virtual void stabilize_threads ();
 };
 
 extern process_stratum_target *the_target;
@@ -574,12 +574,8 @@ int kill_inferior (process_info *proc);
 #define target_unpause_all(unfreeze)		\
   the_target->pt->unpause_all (unfreeze)
 
-#define stabilize_threads()			\
-  do						\
-    {						\
-      if (the_target->stabilize_threads)     	\
-	(*the_target->stabilize_threads) ();  	\
-    } while (0)
+#define target_stabilize_threads()		\
+  the_target->pt->stabilize_threads ()
 
 #define install_fast_tracepoint_jump_pad(tpoint, tpaddr,		\
 					 collector, lockaddr,		\

@@ -1628,7 +1628,7 @@ linux_process_target::detach (process_info *process)
 #endif
 
   /* Stabilize threads (move out of jump pads).  */
-  stabilize_threads ();
+  target_stabilize_threads ();
 
   /* Detach from the clone lwps first.  If the thread group exits just
      while we're detaching, we must reap the clone lwps before we're
@@ -2934,8 +2934,8 @@ static ptid_t linux_wait_1 (ptid_t ptid,
    since for something else in the new run, the thread would now
    execute the wrong / random instructions.  */
 
-static void
-linux_stabilize_threads (void)
+void
+linux_process_target::stabilize_threads ()
 {
   thread_info *thread_stuck = find_thread (stuck_in_jump_pad_callback);
 
@@ -3721,7 +3721,7 @@ linux_wait_1 (ptid_t ptid,
 
       /* Stabilize threads (move out of jump pads).  */
       if (!non_stop)
-	stabilize_threads ();
+	target_stabilize_threads ();
     }
   else
     {
@@ -7455,7 +7455,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_stabilize_threads,
   linux_install_fast_tracepoint_jump_pad,
   linux_emit_ops,
   linux_supports_disable_randomization,

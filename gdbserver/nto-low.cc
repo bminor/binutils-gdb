@@ -947,7 +947,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  NULL, /* stabilize_threads */
   NULL, /* install_fast_tracepoint_jump_pad */
   NULL, /* emit_ops */
   NULL, /* supports_disable_randomization */

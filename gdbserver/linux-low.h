@@ -400,6 +400,8 @@ public:
   void pause_all (bool freeze) override;
 
   void unpause_all (bool unfreeze) override;
+
+  void stabilize_threads () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

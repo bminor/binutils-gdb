@@ -2606,7 +2606,7 @@ cmd_qtdp (char *own_buf)
 
       /* download_tracepoint will update global `tracepoints'
 	 list, so it is unsafe to leave threads in jump pad.  */
-      stabilize_threads ();
+      target_stabilize_threads ();
 
       /* Freeze threads.  */
       target_pause_all (true);
@@ -3226,7 +3226,7 @@ cmd_qtstart (char *packet)
      top level command.  And, required to do here, since we're
      deleting/rewriting jump pads.  */
 
-  stabilize_threads ();
+  target_stabilize_threads ();
 
   /* Freeze threads.  */
   target_pause_all (true);

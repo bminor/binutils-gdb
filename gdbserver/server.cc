@@ -3324,7 +3324,7 @@ handle_status (char *own_buf)
       thread_info *thread = NULL;
 
       target_pause_all (false);
-      stabilize_threads ();
+      target_stabilize_threads ();
       gdb_wants_all_threads_stopped ();
 
       /* We can only report one status, but we might be coming out of

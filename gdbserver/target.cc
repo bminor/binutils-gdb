@@ -662,3 +662,9 @@ process_target::unpause_all (bool unfreeze)
 {
   /* Nop.  */
 }
+
+void
+process_target::stabilize_threads ()
+{
+  /* Nop.  */
+}
