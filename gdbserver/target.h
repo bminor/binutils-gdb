@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Wait for process PID to exit.  */
-
-  void (*join) (int pid);
-
   /* Return 1 iff the thread with process ID PID is alive.  */
 
   int (*thread_alive) (ptid_t pid);
@@ -485,6 +481,9 @@ public:
 
   /* The inferior process has died.  Do what is right.  */
   virtual void mourn (process_info *proc) = 0;
+
+  /* Wait for process PID to exit.  */
+  virtual void join (int pid) = 0;
 };
 
 extern process_stratum_target *the_target;
@@ -534,7 +533,7 @@ int kill_inferior (process_info *proc);
   (*the_target->store_registers) (regcache, regno)
 
 #define join_inferior(pid) \
-  (*the_target->join) (pid)
+  the_target->pt->join (pid)
 
 #define target_supports_non_stop() \
   (the_target->supports_non_stop ? (*the_target->supports_non_stop ) () : 0)

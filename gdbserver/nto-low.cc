@@ -423,6 +423,12 @@ nto_process_target::mourn (struct process_info *process)
   remove_process (process);
 }
 
+void
+nto_process_target::join (int pid)
+{
+  error (_("nto target does not implement the join op"));
+}
+
 /* Check if the given thread is alive.  
 
    Return 1 if alive, 0 otherwise.  */
@@ -935,7 +941,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  NULL, /* nto_join */
   nto_thread_alive,
   nto_resume,
   nto_wait,

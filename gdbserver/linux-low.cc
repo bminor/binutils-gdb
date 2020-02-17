@@ -1669,8 +1669,8 @@ linux_process_target::mourn (process_info *process)
   remove_process (process);
 }
 
-static void
-linux_join (int pid)
+void
+linux_process_target::join (int pid)
 {
   int status, ret;
 
@@ -7358,7 +7358,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_join,
   linux_thread_alive,
   linux_resume,
   linux_wait,

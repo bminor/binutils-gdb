@@ -282,6 +282,8 @@ public:
   int detach (process_info *proc) override;
 
   void mourn (process_info *proc) override;
+
+  void join (int pid) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

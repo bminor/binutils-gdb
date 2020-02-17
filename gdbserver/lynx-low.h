@@ -68,6 +68,8 @@ public:
   int detach (process_info *proc) override;
 
   void mourn (process_info *proc) override;
+
+  void join (int pid) override;
 };
 
 /* The inferior's target description.  This is a global because the

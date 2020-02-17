@@ -117,6 +117,8 @@ public:
   int detach (process_info *proc) override;
 
   void mourn (process_info *proc) override;
+
+  void join (int pid) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */

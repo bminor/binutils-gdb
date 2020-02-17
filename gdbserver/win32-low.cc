@@ -886,8 +886,8 @@ win32_process_target::mourn (struct process_info *process)
 
 /* Implementation of target_ops::join.  */
 
-static void
-win32_join (int pid)
+void
+win32_process_target::join (int pid)
 {
   HANDLE h = OpenProcess (PROCESS_ALL_ACCESS, FALSE, pid);
   if (h != NULL)
@@ -1839,7 +1839,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_join,
   win32_thread_alive,
   win32_resume,
   win32_wait,
