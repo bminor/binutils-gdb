@@ -1,5 +1,12 @@
 2020-02-17  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (vcvtsi2sd, vcvtsi2ss, vcvtusi2sd, vcvtusi2ss):
+	Fold CpuNo64 and Cpu64 templates. Use VexLIG/EVexLIG and VexW0/
+	VexW1 instead of open-coding them.
+	* i386-tbl.h: Re-generate.
+
+2020-02-17  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (AddrPrefixOpReg): Define.
 	(monitor, invlpga, vmload, vmrun, vmsave, clzero, monitorx,
 	umonitor, movdir64b, enqcmd, enqcmds): Fold Cpu64 and CpuNo64
