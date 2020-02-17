@@ -3323,7 +3323,7 @@ handle_status (char *own_buf)
     {
       thread_info *thread = NULL;
 
-      pause_all (0);
+      target_pause_all (false);
       stabilize_threads ();
       gdb_wants_all_threads_stopped ();
 

@@ -70,18 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Pause all threads.  If FREEZE, arrange for any resume attempt to
-     be ignored until an unpause_all call unfreezes threads again.
-     There can be nested calls to pause_all, so a freeze counter
-     should be maintained.  */
-  void (*pause_all) (int freeze);
-
-  /* Unpause all threads.  Threads that hadn't been resumed by the
-     client should be left stopped.  Basically a pause/unpause call
-     pair should not end up resuming threads that were stopped before
-     the pause call.  */
-  void (*unpause_all) (int unfreeze);
-
   /* Stabilize all threads.  That is, force them out of jump pads.  */
   void (*stabilize_threads) (void);
 
@@ -494,6 +482,18 @@ public:
 
   /* Read Thread Information Block address.  */
   virtual int get_tib_address (ptid_t ptid, CORE_ADDR *address);
+
+  /* Pause all threads.  If FREEZE, arrange for any resume attempt to
+     be ignored until an unpause_all call unfreezes threads again.
+     There can be nested calls to pause_all, so a freeze counter
+     should be maintained.  */
+  virtual void pause_all (bool freeze);
+
+  /* Unpause all threads.  Threads that hadn't been resumed by the
+     client should be left stopped.  Basically a pause/unpause call
+     pair should not end up resuming threads that were stopped before
+     the pause call.  */
+  virtual void unpause_all (bool unfreeze);
 };
 
 extern process_stratum_target *the_target;
@@ -568,19 +568,11 @@ int kill_inferior (process_info *proc);
 #define target_thread_stopped(thread) \
   the_target->pt->thread_stopped (thread)
 
-#define pause_all(freeze)			\
-  do						\
-    {						\
-      if (the_target->pause_all)		\
-	(*the_target->pause_all) (freeze);	\
-    } while (0)
+#define target_pause_all(freeze)		\
+  the_target->pt->pause_all (freeze)
 
-#define unpause_all(unfreeze)			\
-  do						\
-    {						\
-      if (the_target->unpause_all)		\
-	(*the_target->unpause_all) (unfreeze);	\
-    } while (0)
+#define target_unpause_all(unfreeze)		\
+  the_target->pt->unpause_all (unfreeze)
 
 #define stabilize_threads()			\
   do						\

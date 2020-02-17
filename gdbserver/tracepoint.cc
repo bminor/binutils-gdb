@@ -2433,7 +2433,7 @@ clear_installed_tracepoints (void)
   struct tracepoint *tpoint;
   struct tracepoint *prev_stpoint;
 
-  pause_all (1);
+  target_pause_all (true);
 
   prev_stpoint = NULL;
 
@@ -2486,7 +2486,7 @@ clear_installed_tracepoints (void)
       tpoint->handle = NULL;
     }
 
-  unpause_all (1);
+  target_unpause_all (true);
 }
 
 /* Parse a packet that defines a tracepoint.  */
@@ -2602,14 +2602,14 @@ cmd_qtdp (char *own_buf)
       struct tracepoint *tp = NULL;
 
       /* Pause all threads temporarily while we patch tracepoints.  */
-      pause_all (0);
+      target_pause_all (false);
 
       /* download_tracepoint will update global `tracepoints'
 	 list, so it is unsafe to leave threads in jump pad.  */
       stabilize_threads ();
 
       /* Freeze threads.  */
-      pause_all (1);
+      target_pause_all (true);
 
 
       if (tpoint->type != trap_tracepoint)
@@ -2658,7 +2658,7 @@ cmd_qtdp (char *own_buf)
 	    write_ok (own_buf);
 	}
 
-      unpause_all (1);
+      target_unpause_all (true);
       return;
     }
 
@@ -3220,7 +3220,7 @@ cmd_qtstart (char *packet)
   trace_debug ("Starting the trace");
 
   /* Pause all threads temporarily while we patch tracepoints.  */
-  pause_all (0);
+  target_pause_all (false);
 
   /* Get threads out of jump pads.  Safe to do here, since this is a
      top level command.  And, required to do here, since we're
@@ -3229,7 +3229,7 @@ cmd_qtstart (char *packet)
   stabilize_threads ();
 
   /* Freeze threads.  */
-  pause_all (1);
+  target_pause_all (true);
 
   /* Sync the fast tracepoints list in the inferior ftlib.  */
   if (agent_loaded_p ())
@@ -3370,7 +3370,7 @@ cmd_qtstart (char *packet)
       clear_installed_tracepoints ();
       if (*packet == '\0')
 	write_enn (packet);
-      unpause_all (1);
+      target_unpause_all (true);
       return;
     }
 
@@ -3418,7 +3418,7 @@ cmd_qtstart (char *packet)
 	error ("Error setting flush_trace_buffer breakpoint");
     }
 
-  unpause_all (1);
+  target_unpause_all (true);
 
   write_ok (packet);
 }
@@ -3445,7 +3445,7 @@ stop_tracing (void)
      when we're sure we can move all threads out of the jump pads).
      We can't now, since we may be getting here due to the inferior
      agent calling us.  */
-  pause_all (1);
+  target_pause_all (true);
 
   /* Stop logging. Tracepoints can still be hit, but they will not be
      recorded.  */
@@ -3522,7 +3522,7 @@ stop_tracing (void)
       flush_trace_buffer_bkpt = NULL;
     }
 
-  unpause_all (1);
+  target_unpause_all (true);
 }
 
 static int
@@ -3668,11 +3668,11 @@ cmd_qtstatus (char *packet)
 
   if (agent_loaded_p ())
     {
-      pause_all (1);
+      target_pause_all (true);
 
       upload_fast_traceframes ();
 
-      unpause_all (1);
+      target_unpause_all (true);
    }
 
   stop_reason_rsp = (char *) tracing_stop_reason;
@@ -6578,12 +6578,12 @@ upload_fast_traceframes (void)
 
   trace_debug ("Done uploading traceframes [%d]\n", curr_tbctrl_idx);
 
-  pause_all (1);
+  target_pause_all (true);
 
   delete_breakpoint (about_to_request_buffer_space_bkpt);
   about_to_request_buffer_space_bkpt = NULL;
 
-  unpause_all (1);
+  target_unpause_all (true);
 
   if (trace_buffer_is_full)
     stop_tracing ();
@@ -6861,13 +6861,13 @@ run_inferior_command (char *cmd, int len)
 
   trace_debug ("run_inferior_command: running: %s", cmd);
 
-  pause_all (0);
+  target_pause_all (false);
   uninsert_all_breakpoints ();
 
   err = agent_run_command (pid, (const char *) cmd, len);
 
   reinsert_all_breakpoints ();
-  unpause_all (0);
+  target_unpause_all (false);
 
   return err;
 }

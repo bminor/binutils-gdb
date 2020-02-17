@@ -396,6 +396,10 @@ public:
   bool supports_thread_stopped () override;
 
   bool thread_stopped (thread_info *thread) override;
+
+  void pause_all (bool freeze) override;
+
+  void unpause_all (bool unfreeze) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

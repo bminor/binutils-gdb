@@ -650,3 +650,15 @@ process_target::get_tib_address (ptid_t ptid, CORE_ADDR *address)
 {
   gdb_assert_not_reached ("target op get_tib_address not supported");
 }
+
+void
+process_target::pause_all (bool freeze)
+{
+  /* Nop.  */
+}
+
+void
+process_target::unpause_all (bool unfreeze)
+{
+  /* Nop.  */
+}

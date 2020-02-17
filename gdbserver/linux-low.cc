@@ -6586,8 +6586,8 @@ linux_process_target::thread_stopped (thread_info *thread)
 
 /* This exposes stop-all-threads functionality to other modules.  */
 
-static void
-linux_pause_all (int freeze)
+void
+linux_process_target::pause_all (bool freeze)
 {
   stop_all_lwps (freeze, NULL);
 }
@@ -6595,8 +6595,8 @@ linux_pause_all (int freeze)
 /* This exposes unstop-all-threads functionality to other gdbserver
    modules.  */
 
-static void
-linux_unpause_all (int unfreeze)
+void
+linux_process_target::unpause_all (bool unfreeze)
 {
   unstop_all_lwps (unfreeze, NULL);
 }
@@ -6607,7 +6607,7 @@ linux_process_target::prepare_to_access_memory ()
   /* Neither ptrace nor /proc/PID/mem allow accessing memory through a
      running LWP.  */
   if (non_stop)
-    linux_pause_all (1);
+    target_pause_all (true);
   return 0;
 }
 
@@ -6617,7 +6617,7 @@ linux_process_target::done_accessing_memory ()
   /* Neither ptrace nor /proc/PID/mem allow accessing memory through a
      running LWP.  */
   if (non_stop)
-    linux_unpause_all (1);
+    target_unpause_all (true);
 }
 
 static int
@@ -7455,8 +7455,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_pause_all,
-  linux_unpause_all,
   linux_stabilize_threads,
   linux_install_fast_tracepoint_jump_pad,
   linux_emit_ops,

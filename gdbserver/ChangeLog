@@ -1,5 +1,41 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's pause_all and unpause_all ops
+	into methods of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target ops.
+	(class process_target): Add the target ops.
+	(pause_all): Update the macro and rename to...
+	(target_pause_all): ... this.
+	(unpause_all): Update the macro and rename to...
+	(target_unpause_all): ... this.
+	* target.cc (process_target::pause_all): Define.
+	(process_target::unpause_all): Define.
+
+	Update the derived classes and callers below.
+
+	* server.cc (handle_status): Update.
+	* tracepoint.cc (clear_installed_tracepoints): Update.
+	(cmd_qtdp): Update.
+	(cmd_qtstart): Update.
+	(stop_tracing): Update.
+	(cmd_qtstatus): Update.
+	(upload_fast_traceframes): Update.
+	(run_inferior_command): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_pause_all): Turn into ...
+	(linux_process_target::pause_all): ... this.
+	(linux_unpause_all): Turn into ...
+	(linux_process_target::unpause_all): ... this.
+	(linux_process_target::prepare_to_access_memory): Update.
+	(linux_process_target::done_accessing_memory): Update.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	* win32-low.cc (win32_target_ops): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's get_tib_address op into a method of
 	process_target.
 
