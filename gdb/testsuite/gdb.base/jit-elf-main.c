@@ -51,19 +51,15 @@ usage (void)
   exit (1);
 }
 
-/* Update .p_vaddr and .sh_addr as if the code was JITted to ADDR.  */
+/* Rename jit_function_XXXX to match idx  */
 
 static void
-update_locations (const void *const addr, int idx)
+update_name (const void *const addr, int idx)
 {
   const ElfW (Ehdr) *const ehdr = (ElfW (Ehdr) *)addr;
   ElfW (Shdr) *const shdr = (ElfW (Shdr) *)((char *)addr + ehdr->e_shoff);
   ElfW (Phdr) *const phdr = (ElfW (Phdr) *)((char *)addr + ehdr->e_phoff);
   int i;
-
-  for (i = 0; i < ehdr->e_phnum; ++i)
-    if (phdr[i].p_type == PT_LOAD)
-      phdr[i].p_vaddr += (ElfW (Addr))addr;
 
   for (i = 0; i < ehdr->e_shnum; ++i)
     {
@@ -81,9 +77,6 @@ update_locations (const void *const addr, int idx)
             if (strcmp (p, "jit_function_XXXX") == 0)
               sprintf (p, "jit_function_%04d", idx);
         }
-
-      if (shdr[i].sh_flags & SHF_ALLOC)
-        shdr[i].sh_addr += (ElfW (Addr))addr;
     }
 }
 
@@ -94,6 +87,15 @@ update_locations (const void *const addr, int idx)
 
 #ifndef MAIN
 #define MAIN main
+#endif
+
+/* Must be defined by .exp file when compiling to know
+   what address to map the ELF binary to.  */
+#ifndef LOAD_ADDRESS
+#error "Must define LOAD_ADDRESS"
+#endif
+#ifndef LOAD_INCREMENT
+#error "Must define LOAD_INCREMENT"
 #endif
 
 /* Used to spin waiting for GDB.  */
@@ -139,8 +141,9 @@ MAIN (int argc, char *argv[])
 	  exit (1);
 	}
 
-      const void *const addr = mmap (0, st.st_size, PROT_READ|PROT_WRITE,
-				     MAP_PRIVATE, fd, 0);
+      void *load_addr = (void *) (size_t) (LOAD_ADDRESS + (i - 1) * LOAD_INCREMENT);
+      const void *const addr = mmap (load_addr, st.st_size, PROT_READ|PROT_WRITE,
+				     MAP_PRIVATE | MAP_FIXED, fd, 0);
       struct jit_code_entry *const entry = calloc (1, sizeof (*entry));
 
       if (addr == MAP_FAILED)
@@ -149,7 +152,7 @@ MAIN (int argc, char *argv[])
 	  exit (1);
 	}
 
-      update_locations (addr, i);
+      update_name (addr, i);
 
       /* Link entry at the end of the list.  */
       entry->symfile_addr = (const char *)addr;
