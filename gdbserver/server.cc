@@ -2847,7 +2847,7 @@ resume (struct thread_resume *actions, size_t num_actions)
       enable_async_io ();
     }
 
-  (*the_target->resume) (actions, num_actions);
+  the_target->pt->resume (actions, num_actions);
 
   if (non_stop)
     write_ok (cs.own_buf);

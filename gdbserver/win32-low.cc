@@ -105,7 +105,6 @@ typedef BOOL (WINAPI *winapi_GenerateConsoleCtrlEvent) (DWORD, DWORD);
 
 static ptid_t win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 			  int options);
-static void win32_resume (struct thread_resume *resume_info, size_t n);
 #ifndef _WIN32_WCE
 static void win32_add_all_dlls (void);
 #endif
@@ -396,7 +395,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 	resume.kind = resume_continue;
 	resume.sig = 0;
 
-	win32_resume (&resume, 1);
+	the_target->pt->resume (&resume, 1);
       }
     }
 
@@ -865,7 +864,7 @@ win32_process_target::detach (process_info *process)
     resume.thread = minus_one_ptid;
     resume.kind = resume_continue;
     resume.sig = 0;
-    win32_resume (&resume, 1);
+    this->resume (&resume, 1);
   }
 
   if (!DebugActiveProcessStop (current_process_id))
@@ -908,8 +907,8 @@ win32_process_target::thread_alive (ptid_t ptid)
 
 /* Resume the inferior process.  RESUME_INFO describes how we want
    to resume.  */
-static void
-win32_resume (struct thread_resume *resume_info, size_t n)
+void
+win32_process_target::resume (thread_resume *resume_info, size_t n)
 {
   DWORD tid;
   enum gdb_signal sig;
@@ -1839,7 +1838,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_resume,
   win32_wait,
   win32_fetch_inferior_registers,
   win32_store_inferior_registers,

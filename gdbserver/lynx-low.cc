@@ -326,8 +326,8 @@ lynx_process_target::attach (unsigned long pid)
 
 /* Implement the resume target_ops method.  */
 
-static void
-lynx_resume (struct thread_resume *resume_info, size_t n)
+void
+lynx_process_target::resume (thread_resume *resume_info, size_t n)
 {
   ptid_t ptid = resume_info[0].thread;
   const int request
@@ -726,7 +726,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  lynx_resume,
   lynx_wait,
   lynx_fetch_registers,
   lynx_store_registers,

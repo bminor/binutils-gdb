@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Resume the inferior process.  */
-
-  void (*resume) (struct thread_resume *resume_info, size_t n);
-
   /* Wait for the inferior process or thread to change state.  Store
      status through argument pointer STATUS.
 
@@ -483,6 +479,9 @@ public:
 
   /* Return true iff the thread with process ID PID is alive.  */
   virtual bool thread_alive (ptid_t pid) = 0;
+
+  /* Resume the inferior process.  */
+  virtual void resume (thread_resume *resume_info, size_t n) = 0;
 };
 
 extern process_stratum_target *the_target;

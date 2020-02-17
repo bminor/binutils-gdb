@@ -286,6 +286,8 @@ public:
   void join (int pid) override;
 
   bool thread_alive (ptid_t pid) override;
+
+  void resume (thread_resume *resume_info, size_t n) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

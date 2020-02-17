@@ -1,5 +1,38 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's resume op into a method of
+	process_target.
+
+	* target.h (struct process_stratum_target): Remove the target op.
+	(class process_target): Add the target op.
+
+	Update the derived classes and callers below.
+
+	* server.cc (resume): Update.
+	* target.cc (target_stop_and_wait): Update.
+	(target_continue_no_signal): Update.
+	(target_continue): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_resume): Turn into ...
+	(linux_process_target::resume): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	(lynx_resume): Turn into ...
+	(lynx_process_target::resume): ... this.
+	* lynx-low.h (class lynx_process_target): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	(nto_resume): Turn into ...
+	(nto_process_target::resume): ... this.
+	* nto-low.h (class nto_process_target): Update.
+	* win32-low.cc (win32_target_ops): Update.
+	(win32_resume): Turn into ...
+	(win32_process_target::resume): ... this.
+	(win32_process_target::detach): Update.
+	(do_initial_child_stuff): Update.
+	* win32-low.h (class win32_process_target): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's thread_alive op into a method of
 	process_target.
 

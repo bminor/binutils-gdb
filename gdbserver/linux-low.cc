@@ -262,7 +262,6 @@ static int stabilizing_threads;
 
 static void linux_resume_one_lwp (struct lwp_info *lwp,
 				  int step, int signal, siginfo_t *info);
-static void linux_resume (struct thread_resume *resume_info, size_t n);
 static void stop_all_lwps (int suspend, struct lwp_info *except);
 static void unstop_all_lwps (int unsuspend, struct lwp_info *except);
 static void unsuspend_all_lwps (struct lwp_info *except);
@@ -5002,8 +5001,8 @@ linux_resume_one_thread (thread_info *thread, bool leave_all_stopped)
   lwp->resume = NULL;
 }
 
-static void
-linux_resume (struct thread_resume *resume_info, size_t n)
+void
+linux_process_target::resume (thread_resume *resume_info, size_t n)
 {
   struct thread_info *need_step_over = NULL;
 
@@ -7359,7 +7358,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_resume,
   linux_wait,
   linux_fetch_registers,
   linux_store_registers,
