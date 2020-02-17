@@ -1,5 +1,27 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's hostio_last_error op into a
+	method of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target op.
+	(class process_target): Add the target op.
+	* target.cc: Add "hostio.h" to includes.
+	(process_target::hostio_last_error): Define.
+
+	Update the derived classes and callers below.
+
+	* hostio.cc (hostio_error): Update.
+	* linux-low.cc: Remove "hostio.h" from includes.
+	(linux_target_ops): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	* win32-low.h (class win32_process_target): Update.
+	* win32-low.cc (win32_target_ops): Update.
+	(wince_hostio_last_error): Turn into ...
+	(win32_process_target::hostio_last_error): ... this.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's get_tls_address op into a method of
 	process_target.
 

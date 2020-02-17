@@ -21,6 +21,7 @@
 #include "server.h"
 #include "tracepoint.h"
 #include "gdbsupport/byte-vector.h"
+#include "hostio.h"
 
 process_stratum_target *the_target;
 
@@ -505,4 +506,10 @@ process_target::get_tls_address (thread_info *thread, CORE_ADDR offset,
 				 CORE_ADDR load_module, CORE_ADDR *address)
 {
   gdb_assert_not_reached ("target op get_tls_address not supported");
+}
+
+void
+process_target::hostio_last_error (char *buf)
+{
+  hostio_last_error_from_errno (buf);
 }

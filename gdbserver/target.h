@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Fill BUF with an hostio error packet representing the last hostio
-     error.  */
-  void (*hostio_last_error) (char *buf);
-
   /* Read/Write OS data using qXfer packets.  */
   int (*qxfer_osdata) (const char *annex, unsigned char *readbuf,
 		       unsigned const char *writebuf, CORE_ADDR offset,
@@ -479,6 +475,10 @@ public:
      support the operation.  */
   virtual int get_tls_address (thread_info *thread, CORE_ADDR offset,
 			       CORE_ADDR load_module, CORE_ADDR *address);
+
+  /* Fill BUF with an hostio error packet representing the last hostio
+     error.  */
+  virtual void hostio_last_error (char *buf);
 };
 
 extern process_stratum_target *the_target;

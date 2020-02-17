@@ -956,7 +956,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  hostio_last_error_from_errno,
   NULL, /* nto_qxfer_osdata */
   NULL, /* xfer_siginfo */
   nto_supports_non_stop,

@@ -196,7 +196,7 @@ require_valid_fd (int fd)
 static void
 hostio_error (char *own_buf)
 {
-  the_target->hostio_last_error (own_buf);
+  the_target->pt->hostio_last_error (own_buf);
 }
 
 static void

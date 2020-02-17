@@ -45,7 +45,6 @@
 #include <sys/uio.h>
 #include "gdbsupport/filestuff.h"
 #include "tracepoint.h"
-#include "hostio.h"
 #include <inttypes.h>
 #include "gdbsupport/common-inferior.h"
 #include "nat/fork-inferior.h"
@@ -7415,7 +7414,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  hostio_last_error_from_errno,
   linux_qxfer_osdata,
   linux_xfer_siginfo,
   linux_supports_non_stop,

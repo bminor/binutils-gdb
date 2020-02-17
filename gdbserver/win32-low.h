@@ -152,6 +152,10 @@ public:
   bool stopped_by_watchpoint () override;
 
   CORE_ADDR stopped_data_address () override;
+
+#ifdef _WIN32_WCE
+  void hostio_last_error (char *buf) override;
+#endif
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */
