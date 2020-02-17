@@ -6346,24 +6346,24 @@ linux_process_target::supports_multi_process ()
 
 /* Check if fork events are supported.  */
 
-static int
-linux_supports_fork_events (void)
+bool
+linux_process_target::supports_fork_events ()
 {
   return linux_supports_tracefork ();
 }
 
 /* Check if vfork events are supported.  */
 
-static int
-linux_supports_vfork_events (void)
+bool
+linux_process_target::supports_vfork_events ()
 {
   return linux_supports_tracefork ();
 }
 
 /* Check if exec events are supported.  */
 
-static int
-linux_supports_exec_events (void)
+bool
+linux_process_target::supports_exec_events ()
 {
   return linux_supports_traceexec ();
 }
@@ -7429,9 +7429,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_supports_fork_events,
-  linux_supports_vfork_events,
-  linux_supports_exec_events,
   linux_handle_new_gdb_connection,
 #ifdef USE_THREAD_DB
   thread_db_handle_monitor_command,

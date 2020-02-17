@@ -1,5 +1,34 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's supports_fork_events,
+	supports_vfork_events, and supports_exec_events ops into methods
+	of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target ops.
+	(class process_target): Add the target ops.
+	(target_supports_fork_events): Update the macro.
+	(target_supports_vfork_events): Update the macro.
+	(target_supports_exec_events): Update the macro.
+	* target.cc (process_target::supports_fork_events): Define.
+	(process_target::supports_vfork_events): Define.
+	(process_target::supports_exec_events): Define.
+
+	Update the derived classes and callers below.
+
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_supports_fork_events): Turn into ...
+	(linux_process_target::supports_fork_events): ... this.
+	(linux_supports_vfork_events): Turn into ...
+	(linux_process_target::supports_vfork_events): ... this.
+	(linux_supports_exec_events): Turn into ...
+	(linux_process_target::supports_exec_events): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	* win32-low.cc (win32_target_ops): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's supports_multi_process op into a
 	method of process_target.
 

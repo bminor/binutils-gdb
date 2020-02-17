@@ -70,15 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Returns true if fork events are supported.  */
-  int (*supports_fork_events) (void);
-
-  /* Returns true if vfork events are supported.  */
-  int (*supports_vfork_events) (void);
-
-  /* Returns true if exec events are supported.  */
-  int (*supports_exec_events) (void);
-
   /* Allows target to re-initialize connection-specific settings.  */
   void (*handle_new_gdb_connection) (void);
 
@@ -486,6 +477,15 @@ public:
 
   /* Returns true if the target supports multi-process debugging.  */
   virtual bool supports_multi_process ();
+
+  /* Returns true if fork events are supported.  */
+  virtual bool supports_fork_events ();
+
+  /* Returns true if vfork events are supported.  */
+  virtual bool supports_vfork_events ();
+
+  /* Returns true if exec events are supported.  */
+  virtual bool supports_exec_events ();
 };
 
 extern process_stratum_target *the_target;
@@ -504,16 +504,13 @@ void set_target_ops (process_stratum_target *);
 int kill_inferior (process_info *proc);
 
 #define target_supports_fork_events() \
-  (the_target->supports_fork_events ? \
-   (*the_target->supports_fork_events) () : 0)
+  the_target->pt->supports_fork_events ()
 
 #define target_supports_vfork_events() \
-  (the_target->supports_vfork_events ? \
-   (*the_target->supports_vfork_events) () : 0)
+  the_target->pt->supports_vfork_events ()
 
 #define target_supports_exec_events() \
-  (the_target->supports_exec_events ? \
-   (*the_target->supports_exec_events) () : 0)
+  the_target->pt->supports_exec_events ()
 
 #define target_handle_new_gdb_connection()		 \
   do							 \

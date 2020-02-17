@@ -365,6 +365,12 @@ public:
   int start_non_stop (bool enable) override;
 
   bool supports_multi_process () override;
+
+  bool supports_fork_events () override;
+
+  bool supports_vfork_events () override;
+
+  bool supports_exec_events () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

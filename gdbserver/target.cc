@@ -553,3 +553,21 @@ process_target::supports_multi_process ()
 {
   return false;
 }
+
+bool
+process_target::supports_fork_events ()
+{
+  return false;
+}
+
+bool
+process_target::supports_vfork_events ()
+{
+  return false;
+}
+
+bool
+process_target::supports_exec_events ()
+{
+  return false;
+}
