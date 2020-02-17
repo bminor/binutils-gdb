@@ -270,8 +270,7 @@ target_supports_multi_process (void)
 void
 set_target_ops (process_stratum_target *target)
 {
-  the_target = XNEW (process_stratum_target);
-  memcpy (the_target, target, sizeof (*the_target));
+  the_target = target;
 }
 
 /* Convert pid to printable format.  */
