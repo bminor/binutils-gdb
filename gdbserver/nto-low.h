@@ -79,6 +79,11 @@ public:
 		    int len) override;
 
   void request_interrupt () override;
+
+  bool supports_read_auxv () override;
+
+  int read_auxv (CORE_ADDR offset, unsigned char *myaddr,
+		 unsigned int len) override;
 };
 
 /* The inferior's target description.  This is a global because the

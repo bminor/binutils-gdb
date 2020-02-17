@@ -1,5 +1,33 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's read_auxv op into a method of
+	process_target.
+
+	* target.h (class process_stratum_target): Remove the target op.
+	(struct process_target): Add the target op.  Also add
+	'supports_read_auxv'.
+	* target.cc (process_target::read_auxv): Define.
+	(process_target::supports_read_auxv): Define.
+
+	Update the derived classes and callers below.
+
+	* server.cc (handle_qxfer_auxv): Update.
+	(handle_query): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_process_target::supports_read_auxv): Define.
+	(linux_read_auxv): Turn into ...
+	(linux_process_target::read_auxv): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	(nto_process_target::supports_read_auxv): Define.
+	(nto_read_auxv): Turn into ...
+	(nto_process_target::read_auxv): ... this.
+	* nto-low.h (class nto_process_target): Update.
+	* win32-low.cc (win32_target_ops): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's request_interrupt op into a method of
 	process_target.
 

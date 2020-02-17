@@ -309,6 +309,11 @@ public:
   void look_up_symbols () override;
 
   void request_interrupt () override;
+
+  bool supports_read_auxv () override;
+
+  int read_auxv (CORE_ADDR offset, unsigned char *myaddr,
+		 unsigned int len) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

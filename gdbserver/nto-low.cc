@@ -755,14 +755,21 @@ nto_process_target::request_interrupt ()
     TRACE ("Error stopping inferior.\n");
 }
 
+bool
+nto_process_target::supports_read_auxv ()
+{
+  return true;
+}
+
 /* Read auxiliary vector from inferior's memory into gdbserver's buffer
    MYADDR.  We always read whole auxv.  
    
    Return number of bytes stored in MYADDR buffer, 0 if OFFSET > 0
    or -1 on error.  */
 
-static int
-nto_read_auxv (CORE_ADDR offset, unsigned char *myaddr, unsigned int len)
+int
+nto_process_target::read_auxv (CORE_ADDR offset, unsigned char *myaddr,
+			       unsigned int len)
 {
   int err;
   CORE_ADDR initial_stack;
@@ -943,7 +950,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_read_auxv,
   nto_supports_z_point_type,
   nto_insert_point,
   nto_remove_point,

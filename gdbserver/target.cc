@@ -414,3 +414,16 @@ process_target::look_up_symbols ()
 {
   /* Nop.  */
 }
+
+bool
+process_target::supports_read_auxv ()
+{
+  return false;
+}
+
+int
+process_target::read_auxv (CORE_ADDR offset, unsigned char *myaddr,
+			   unsigned int len)
+{
+  gdb_assert_not_reached ("target op read_auxv not supported");
+}

@@ -70,13 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Read auxiliary vector data from the inferior process.
-
-     Read LEN bytes at OFFSET into a buffer at MYADDR.  */
-
-  int (*read_auxv) (CORE_ADDR offset, unsigned char *myaddr,
-		    unsigned int len);
-
   /* Returns true if GDB Z breakpoint type TYPE is supported, false
      otherwise.  The type is coded as follows:
        '0' - software-breakpoint
@@ -474,6 +467,15 @@ public:
   /* Send an interrupt request to the inferior process,
      however is appropriate.  */
   virtual void request_interrupt () = 0;
+
+  /* Return true if the read_auxv target op is supported.  */
+  virtual bool supports_read_auxv ();
+
+  /* Read auxiliary vector data from the inferior process.
+
+     Read LEN bytes at OFFSET into a buffer at MYADDR.  */
+  virtual int read_auxv (CORE_ADDR offset, unsigned char *myaddr,
+			 unsigned int len);
 };
 
 extern process_stratum_target *the_target;

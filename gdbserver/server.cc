@@ -1442,13 +1442,13 @@ handle_qxfer_auxv (const char *annex,
 		   gdb_byte *readbuf, const gdb_byte *writebuf,
 		   ULONGEST offset, LONGEST len)
 {
-  if (the_target->read_auxv == NULL || writebuf != NULL)
+  if (!the_target->pt->supports_read_auxv () || writebuf != NULL)
     return -2;
 
   if (annex[0] != '\0' || current_thread == NULL)
     return -1;
 
-  return (*the_target->read_auxv) (offset, readbuf, len);
+  return the_target->pt->read_auxv (offset, readbuf, len);
 }
 
 /* Handle qXfer:exec-file:read.  */
@@ -2374,7 +2374,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  strcat (own_buf, ";qXfer:libraries:read+");
 	}
 
-      if (the_target->read_auxv != NULL)
+      if (the_target->pt->supports_read_auxv ())
 	strcat (own_buf, ";qXfer:auxv:read+");
 
       if (the_target->qxfer_siginfo != NULL)

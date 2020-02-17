@@ -5919,11 +5919,18 @@ linux_process_target::request_interrupt ()
   ::kill (-signal_pid, SIGINT);
 }
 
+bool
+linux_process_target::supports_read_auxv ()
+{
+  return true;
+}
+
 /* Copy LEN bytes from inferior's auxiliary vector starting at OFFSET
    to debugger memory starting at MYADDR.  */
 
-static int
-linux_read_auxv (CORE_ADDR offset, unsigned char *myaddr, unsigned int len)
+int
+linux_process_target::read_auxv (CORE_ADDR offset, unsigned char *myaddr,
+				 unsigned int len)
 {
   char filename[PATH_MAX];
   int fd, n;
@@ -7317,7 +7324,7 @@ linux_get_auxv (int wordsize, CORE_ADDR match, CORE_ADDR *valp)
 
   gdb_assert (wordsize == 4 || wordsize == 8);
 
-  while ((*the_target->read_auxv) (offset, data, 2 * wordsize) == 2 * wordsize)
+  while (the_target->pt->read_auxv (offset, data, 2 * wordsize) == 2 * wordsize)
     {
       if (wordsize == 4)
 	{
@@ -7369,7 +7376,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_read_auxv,
   linux_supports_z_point_type,
   linux_insert_point,
   linux_remove_point,
