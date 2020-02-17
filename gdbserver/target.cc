@@ -577,3 +577,9 @@ process_target::handle_new_gdb_connection ()
 {
   /* Nop.  */
 }
+
+int
+process_target::handle_monitor_command (char *mon)
+{
+  return 0;
+}

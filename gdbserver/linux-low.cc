@@ -6398,6 +6398,16 @@ linux_process_target::handle_new_gdb_connection ()
     });
 }
 
+int
+linux_process_target::handle_monitor_command (char *mon)
+{
+#ifdef USE_THREAD_DB
+  return thread_db_handle_monitor_command (mon);
+#else
+  return 0;
+#endif
+}
+
 static int
 linux_supports_disable_randomization (void)
 {
@@ -7429,11 +7439,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-#ifdef USE_THREAD_DB
-  thread_db_handle_monitor_command,
-#else
-  NULL,
-#endif
   linux_common_core_of_thread,
   linux_read_loadmap,
   linux_process_qsupported,

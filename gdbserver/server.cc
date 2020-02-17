@@ -2577,8 +2577,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       write_ok (own_buf);
 
-      if (the_target->handle_monitor_command == NULL
-	  || (*the_target->handle_monitor_command) (mon) == 0)
+      if (the_target->pt->handle_monitor_command (mon) == 0)
 	/* Default processing.  */
 	handle_monitor_command (mon, own_buf);
 

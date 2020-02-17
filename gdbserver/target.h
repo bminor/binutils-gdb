@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* If not NULL, target-specific routine to process monitor command.
-     Returns 1 if handled, or 0 to perform default processing.  */
-  int (*handle_monitor_command) (char *);
-
   /* Returns the core given a thread, or -1 if not known.  */
   int (*core_of_thread) (ptid_t);
 
@@ -486,6 +482,10 @@ public:
 
   /* Allows target to re-initialize connection-specific settings.  */
   virtual void handle_new_gdb_connection ();
+
+  /* The target-specific routine to process monitor command.
+     Returns 1 if handled, or 0 to perform default processing.  */
+  virtual int handle_monitor_command (char *mon);
 };
 
 extern process_stratum_target *the_target;
