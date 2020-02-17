@@ -6555,8 +6555,8 @@ linux_process_target::supports_tracepoints ()
   return (*the_low_target.supports_tracepoints) ();
 }
 
-static CORE_ADDR
-linux_read_pc (struct regcache *regcache)
+CORE_ADDR
+linux_process_target::read_pc (regcache *regcache)
 {
   if (the_low_target.get_pc == NULL)
     return 0;
@@ -6564,8 +6564,8 @@ linux_read_pc (struct regcache *regcache)
   return (*the_low_target.get_pc) (regcache);
 }
 
-static void
-linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
+void
+linux_process_target::write_pc (regcache *regcache, CORE_ADDR pc)
 {
   gdb_assert (the_low_target.set_pc != NULL);
 
@@ -7449,8 +7449,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_read_pc,
-  linux_write_pc,
   linux_thread_stopped,
   NULL,
   linux_pause_all,

@@ -1,5 +1,29 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's read_pc and write_pc ops into
+	methods of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target ops.
+	(class process_target): Add the target ops.
+	* target.cc (process_target::read_pc): Define.
+	(process_target::write_pc): Define.
+
+	Update the derived classes and callers below.
+
+	* regcache.cc (regcache_read_pc): Update.
+	(regcache_write_pc): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_read_pc): Turn into ...
+	(linux_process_target::read_pc): ... this.
+	(linux_write_pc): Turn into ...
+	(linux_process_target::write_pc): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	* win32-low.cc (win32_target_ops): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's supports_tracepoints op into a
 	method of process_target.
 

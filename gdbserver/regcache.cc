@@ -477,25 +477,13 @@ collect_register_by_name (struct regcache *regcache,
 CORE_ADDR
 regcache_read_pc (struct regcache *regcache)
 {
-  CORE_ADDR pc_val;
-
-  if (the_target->read_pc)
-    pc_val = the_target->read_pc (regcache);
-  else
-    internal_error (__FILE__, __LINE__,
-		    "regcache_read_pc: Unable to find PC");
-
-  return pc_val;
+  return the_target->pt->read_pc (regcache);
 }
 
 void
 regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  if (the_target->write_pc)
-    the_target->write_pc (regcache, pc);
-  else
-    internal_error (__FILE__, __LINE__,
-		    "regcache_write_pc: Unable to update PC");
+  the_target->pt->write_pc (regcache, pc);
 }
 
 #endif

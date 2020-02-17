@@ -614,3 +614,15 @@ process_target::supports_tracepoints ()
 {
   return false;
 }
+
+CORE_ADDR
+process_target::read_pc (regcache *regcache)
+{
+  gdb_assert_not_reached ("process_target::read_pc: Unable to find PC");
+}
+
+void
+process_target::write_pc (regcache *regcache, CORE_ADDR pc)
+{
+  gdb_assert_not_reached ("process_target::write_pc: Unable to update PC");
+}

@@ -70,12 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Read PC from REGCACHE.  */
-  CORE_ADDR (*read_pc) (struct regcache *regcache);
-
-  /* Write PC to REGCACHE.  */
-  void (*write_pc) (struct regcache *regcache, CORE_ADDR pc);
-
   /* Return true if THREAD is known to be stopped now.  */
   int (*thread_stopped) (struct thread_info *thread);
 
@@ -488,6 +482,12 @@ public:
 
   /* Return true if the target supports tracepoints, false otherwise.  */
   virtual bool supports_tracepoints ();
+
+  /* Read PC from REGCACHE.  */
+  virtual CORE_ADDR read_pc (regcache *regcache);
+
+  /* Write PC to REGCACHE.  */
+  virtual void write_pc (regcache *regcache, CORE_ADDR pc);
 };
 
 extern process_stratum_target *the_target;

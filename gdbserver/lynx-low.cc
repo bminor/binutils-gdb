@@ -735,8 +735,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  NULL,  /* read_pc */
-  NULL,  /* write_pc */
   NULL,  /* thread_stopped */
   NULL,  /* get_tib_address */
   NULL,  /* pause_all */

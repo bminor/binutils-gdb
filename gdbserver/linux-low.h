@@ -388,6 +388,10 @@ public:
   void process_qsupported (char **features, int count) override;
 
   bool supports_tracepoints () override;
+
+  CORE_ADDR read_pc (regcache *regcache) override;
+
+  void write_pc (regcache *regcache, CORE_ADDR pc) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))
