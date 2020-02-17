@@ -276,6 +276,8 @@ public:
   void post_create_inferior () override;
 
   int attach (unsigned long pid) override;
+
+  int kill (process_info *proc) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

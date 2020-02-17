@@ -396,8 +396,8 @@ nto_process_target::attach (unsigned long pid)
 
 /* Send signal to process PID.  */
 
-static int
-nto_kill (process_info *proc)
+int
+nto_process_target::kill (process_info *proc)
 {
   int pid = proc->pid;
 
@@ -935,7 +935,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_kill,
   nto_detach,
   nto_mourn,
   NULL, /* nto_join */

@@ -819,8 +819,8 @@ win32_clear_inferiors (void)
 
 /* Implementation of target_ops::kill.  */
 
-static int
-win32_kill (process_info *process)
+int
+win32_process_target::kill (process_info *process)
 {
   TerminateProcess (current_process_handle, 0);
   for (;;)
@@ -1839,7 +1839,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_kill,
   win32_detach,
   win32_mourn,
   win32_join,

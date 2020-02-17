@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Kill process PROC.  Return -1 on failure, and 0 on success.  */
-
-  int (*kill) (process_info *proc);
-
   /* Detach from process PROC.  Return -1 on failure, and 0 on
      success.  */
 
@@ -488,6 +484,9 @@ public:
      Returns -1 if attaching is unsupported, 0 on success, and calls
      error() otherwise.  */
   virtual int attach (unsigned long pid) = 0;
+
+  /* Kill process PROC.  Return -1 on failure, and 0 on success.  */
+  virtual int kill (process_info *proc) = 0;
 };
 
 extern process_stratum_target *the_target;

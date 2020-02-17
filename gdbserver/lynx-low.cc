@@ -521,8 +521,8 @@ lynx_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 
 /* Implement the kill target_ops method.  */
 
-static int
-lynx_kill (process_info *process)
+int
+lynx_process_target::kill (process_info *process)
 {
   ptid_t ptid = lynx_ptid_t (process->pid, 0);
   struct target_waitstatus status;
@@ -726,7 +726,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  lynx_kill,
   lynx_detach,
   lynx_mourn,
   lynx_join,

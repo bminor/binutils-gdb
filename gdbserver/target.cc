@@ -319,7 +319,7 @@ kill_inferior (process_info *proc)
 {
   gdb_agent_about_to_close (proc->pid);
 
-  return (*the_target->kill) (proc);
+  return the_target->pt->kill (proc);
 }
 
 /* Target can do hardware single step.  */

@@ -1386,8 +1386,8 @@ kill_one_lwp_callback (thread_info *thread, int pid)
   kill_wait_lwp (lwp);
 }
 
-static int
-linux_kill (process_info *process)
+int
+linux_process_target::kill (process_info *process)
 {
   int pid = process->pid;
 
@@ -7359,7 +7359,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_kill,
   linux_detach,
   linux_mourn,
   linux_join,

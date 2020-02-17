@@ -111,6 +111,8 @@ public:
 		       const std::vector<char *> &program_args) override;
 
   int attach (unsigned long pid) override;
+
+  int kill (process_info *proc) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */
