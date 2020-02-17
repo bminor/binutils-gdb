@@ -878,12 +878,12 @@ nto_process_target::supports_hardware_single_step ()
 /* Check if the reason of stop for current thread (CURRENT_INFERIOR) is
    a watchpoint.
 
-   Return 1 if stopped by watchpoint, 0 otherwise.  */
+   Return true if stopped by watchpoint, false otherwise.  */
 
-static int
-nto_stopped_by_watchpoint (void)
+bool
+nto_process_target::stopped_by_watchpoint ()
 {
-  int ret = 0;
+  bool ret = false;
 
   TRACE ("%s\n", __func__);
   if (nto_inferior.ctl_fd != -1 && current_thread != NULL)
@@ -899,7 +899,7 @@ nto_stopped_by_watchpoint (void)
 	  err = devctl (nto_inferior.ctl_fd, DCMD_PROC_STATUS, &status,
 			sizeof (status), 0);
 	  if (err == EOK && (status.flags & watchmask))
-	    ret = 1;
+	    ret = true;
 	}
     }
   TRACE ("%s: %s\n", __func__, ret ? "yes" : "no");
@@ -910,8 +910,8 @@ nto_stopped_by_watchpoint (void)
 
    Return inferior's instruction pointer value, or 0 on error.  */ 
 
-static CORE_ADDR
-nto_stopped_data_address (void)
+CORE_ADDR
+nto_process_target::stopped_data_address ()
 {
   CORE_ADDR ret = (CORE_ADDR)0;
 
@@ -956,8 +956,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_stopped_by_watchpoint,
-  nto_stopped_data_address,
   NULL, /* nto_read_offsets */
   NULL, /* thread_db_set_tls_address */
   hostio_last_error_from_errno,

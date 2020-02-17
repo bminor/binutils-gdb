@@ -469,3 +469,15 @@ process_target::supports_hardware_single_step ()
 {
   return false;
 }
+
+bool
+process_target::stopped_by_watchpoint ()
+{
+  return false;
+}
+
+CORE_ADDR
+process_target::stopped_data_address ()
+{
+  return 0;
+}

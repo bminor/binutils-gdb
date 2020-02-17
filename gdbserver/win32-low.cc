@@ -283,17 +283,17 @@ win32_process_target::remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
     return 1;
 }
 
-static int
-win32_stopped_by_watchpoint (void)
+bool
+win32_process_target::stopped_by_watchpoint ()
 {
   if (the_low_target.stopped_by_watchpoint != NULL)
     return the_low_target.stopped_by_watchpoint ();
   else
-    return 0;
+    return false;
 }
 
-static CORE_ADDR
-win32_stopped_data_address (void)
+CORE_ADDR
+win32_process_target::stopped_data_address ()
 {
   if (the_low_target.stopped_data_address != NULL)
     return the_low_target.stopped_data_address ();
@@ -1844,8 +1844,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_stopped_by_watchpoint,
-  win32_stopped_data_address,
   NULL, /* read_offsets */
   NULL, /* get_tls_address */
 #ifdef _WIN32_WCE

@@ -70,15 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Returns 1 if target was stopped due to a watchpoint hit, 0 otherwise.  */
-
-  int (*stopped_by_watchpoint) (void);
-
-  /* Returns the address associated with the watchpoint that hit, if any;
-     returns 0 otherwise.  */
-
-  CORE_ADDR (*stopped_data_address) (void);
-
   /* Reports the text, data offsets of the executable.  This is
      needed for uclinux where the executable is relocated during load
      time.  */
@@ -476,6 +467,14 @@ public:
 
   /* Returns true if the target can do hardware single step.  */
   virtual bool supports_hardware_single_step ();
+
+  /* Returns true if target was stopped due to a watchpoint hit, false
+     otherwise.  */
+  virtual bool stopped_by_watchpoint ();
+
+  /* Returns the address associated with the watchpoint that hit, if any;
+     returns 0 otherwise.  */
+  virtual CORE_ADDR stopped_data_address ();
 };
 
 extern process_stratum_target *the_target;

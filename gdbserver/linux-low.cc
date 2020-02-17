@@ -269,7 +269,6 @@ static int linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 					  int *wstat, int options);
 static int linux_wait_for_event (ptid_t ptid, int *wstat, int options);
 static struct lwp_info *add_lwp (ptid_t ptid);
-static int linux_stopped_by_watchpoint (void);
 static void mark_lwp_dead (struct lwp_info *lwp, int wstat);
 static int lwp_is_marked_dead (struct lwp_info *lwp);
 static void proceed_all_lwps (void);
@@ -6044,16 +6043,16 @@ linux_supports_software_single_step (void)
   return can_software_single_step ();
 }
 
-static int
-linux_stopped_by_watchpoint (void)
+bool
+linux_process_target::stopped_by_watchpoint ()
 {
   struct lwp_info *lwp = get_thread_lwp (current_thread);
 
   return lwp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
 }
 
-static CORE_ADDR
-linux_stopped_data_address (void)
+CORE_ADDR
+linux_process_target::stopped_data_address ()
 {
   struct lwp_info *lwp = get_thread_lwp (current_thread);
 
@@ -7376,8 +7375,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_stopped_by_watchpoint,
-  linux_stopped_data_address,
 #if defined(__UCLIBC__) && defined(HAS_NOMMU)	      \
     && defined(PT_TEXT_ADDR) && defined(PT_DATA_ADDR) \
     && defined(PT_TEXT_END_ADDR)

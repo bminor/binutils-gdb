@@ -1,5 +1,38 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's stopped_by_watchpoint and
+	stopped_data_address ops into methods of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target ops.
+	(class process_target): Add the target ops.
+	* target.cc (process_target::stopped_by_watchpoint): Define.
+	(process_target::stopped_data_address): Define.
+
+	Update the derived classes and callers below.
+
+	* remote-utils.cc (prepare_resume_reply): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_stopped_by_watchpoint): Turn into ...
+	(linux_process_target::stopped_by_watchpoint): ... this.
+	(linux_stopped_data_address): Turn into ...
+	(linux_process_target::stopped_data_address): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	(nto_stopped_by_watchpoint): Turn into ...
+	(nto_process_target::stopped_by_watchpoint): ... this.
+	(nto_stopped_data_address): Turn into ...
+	(nto_process_target::stopped_data_address): ... this.
+	* nto-low.h (class nto_process_target): Update.
+	* win32-low.cc (win32_target_ops): Update.
+	(win32_stopped_by_watchpoint): Turn into ...
+	(win32_process_target::stopped_by_watchpoint): ... this.
+	(win32_stopped_data_address): Turn into ...
+	(win32_process_target::stopped_data_address): ... this.
+	* win32-low.h (class win32_process_target): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's supports_hardware_single_step op into
 	a method of process_target.
 

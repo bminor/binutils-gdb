@@ -1214,8 +1214,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 
 	regcache = get_thread_regcache (current_thread, 1);
 
-	if (the_target->stopped_by_watchpoint != NULL
-	    && (*the_target->stopped_by_watchpoint) ())
+	if (the_target->pt->stopped_by_watchpoint ())
 	  {
 	    CORE_ADDR addr;
 	    int i;
@@ -1223,7 +1222,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	    memcpy (buf, "watch:", 6);
 	    buf += 6;
 
-	    addr = (*the_target->stopped_data_address) ();
+	    addr = the_target->pt->stopped_data_address ();
 
 	    /* Convert each byte of the address into two hexadecimal
 	       chars.  Note that we take sizeof (void *) instead of

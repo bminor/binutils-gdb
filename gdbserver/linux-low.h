@@ -332,6 +332,10 @@ public:
   bool supports_stopped_by_hw_breakpoint () override;
 
   bool supports_hardware_single_step () override;
+
+  bool stopped_by_watchpoint () override;
+
+  CORE_ADDR stopped_data_address () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

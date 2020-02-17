@@ -148,6 +148,10 @@ public:
 		    int size, raw_breakpoint *bp) override;
 
   bool supports_hardware_single_step () override;
+
+  bool stopped_by_watchpoint () override;
+
+  CORE_ADDR stopped_data_address () override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */
