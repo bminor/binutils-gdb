@@ -375,6 +375,8 @@ public:
   void handle_new_gdb_connection () override;
 
   int handle_monitor_command (char *mon) override;
+
+  int core_of_thread (ptid_t ptid) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

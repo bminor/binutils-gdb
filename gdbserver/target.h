@@ -70,9 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Returns the core given a thread, or -1 if not known.  */
-  int (*core_of_thread) (ptid_t);
-
   /* Read loadmaps.  Read LEN bytes at OFFSET into a buffer at MYADDR.  */
   int (*read_loadmap) (const char *annex, CORE_ADDR offset,
 		       unsigned char *myaddr, unsigned int len);
@@ -486,6 +483,9 @@ public:
   /* The target-specific routine to process monitor command.
      Returns 1 if handled, or 0 to perform default processing.  */
   virtual int handle_monitor_command (char *mon);
+
+  /* Returns the core given a thread, or -1 if not known.  */
+  virtual int core_of_thread (ptid_t ptid);
 };
 
 extern process_stratum_target *the_target;
@@ -700,8 +700,7 @@ int prepare_to_access_memory (void);
 void done_accessing_memory (void);
 
 #define target_core_of_thread(ptid)		\
-  (the_target->core_of_thread ? (*the_target->core_of_thread) (ptid) \
-   : -1)
+  the_target->pt->core_of_thread (ptid)
 
 #define target_thread_name(ptid)                                \
   (the_target->thread_name ? (*the_target->thread_name) (ptid)  \

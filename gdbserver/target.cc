@@ -583,3 +583,9 @@ process_target::handle_monitor_command (char *mon)
 {
   return 0;
 }
+
+int
+process_target::core_of_thread (ptid_t ptid)
+{
+  return -1;
+}
