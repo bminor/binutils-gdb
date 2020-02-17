@@ -448,6 +448,10 @@ public:
 #endif
 
   bool supports_range_stepping () override;
+
+  bool supports_pid_to_exec_file () override;
+
+  char *pid_to_exec_file (int pid) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

@@ -70,14 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Return the full absolute name of the executable file that was
-     run to create the process PID.  If the executable file cannot
-     be determined, NULL is returned.  Otherwise, a pointer to a
-     character string containing the pathname is returned.  This
-     string should be copied into a buffer by the client if the string
-     will not be immediately used, or if it must persist.  */
-  char *(*pid_to_exec_file) (int pid);
-
   /* Multiple-filesystem-aware open.  Like open(2), but operating in
      the filesystem as it appears to process PID.  Systems where all
      processes share a common filesystem should set this to NULL.
@@ -498,6 +490,17 @@ public:
 
   /* Return true if target supports range stepping.  */
   virtual bool supports_range_stepping ();
+
+  /* Return true if the pid_to_exec_file op is supported.  */
+  virtual bool supports_pid_to_exec_file ();
+
+  /* Return the full absolute name of the executable file that was
+     run to create the process PID.  If the executable file cannot
+     be determined, NULL is returned.  Otherwise, a pointer to a
+     character string containing the pathname is returned.  This
+     string should be copied into a buffer by the client if the string
+     will not be immediately used, or if it must persist.  */
+  virtual char *pid_to_exec_file (int pid);
 };
 
 extern process_stratum_target *the_target;

@@ -1462,7 +1462,7 @@ handle_qxfer_exec_file (const char *annex,
   ULONGEST pid;
   int total_len;
 
-  if (the_target->pid_to_exec_file == NULL || writebuf != NULL)
+  if (!the_target->pt->supports_pid_to_exec_file () || writebuf != NULL)
     return -2;
 
   if (annex[0] == '\0')
@@ -1482,7 +1482,7 @@ handle_qxfer_exec_file (const char *annex,
   if (pid <= 0)
     return -1;
 
-  file = (*the_target->pid_to_exec_file) (pid);
+  file = the_target->pt->pid_to_exec_file (pid);
   if (file == NULL)
     return -1;
 
@@ -2452,7 +2452,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (target_supports_stopped_by_hw_breakpoint ())
 	strcat (own_buf, ";hwbreak+");
 
-      if (the_target->pid_to_exec_file != NULL)
+      if (the_target->pt->supports_pid_to_exec_file ())
 	strcat (own_buf, ";qXfer:exec-file:read+");
 
       strcat (own_buf, ";vContSupported+");

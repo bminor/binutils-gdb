@@ -6441,6 +6441,18 @@ linux_process_target::supports_range_stepping ()
   return (*the_low_target.supports_range_stepping) ();
 }
 
+bool
+linux_process_target::supports_pid_to_exec_file ()
+{
+  return true;
+}
+
+char *
+linux_process_target::pid_to_exec_file (int pid)
+{
+  return linux_proc_pid_to_exec_file (pid);
+}
+
 #if defined PT_GETDSBT || defined PTRACE_GETFDPIC
 struct target_loadseg
 {
@@ -7471,7 +7483,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_proc_pid_to_exec_file,
   linux_mntns_open_cloexec,
   linux_mntns_unlink,
   linux_mntns_readlink,

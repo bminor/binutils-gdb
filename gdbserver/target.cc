@@ -759,3 +759,15 @@ process_target::supports_range_stepping ()
 {
   return false;
 }
+
+bool
+process_target::supports_pid_to_exec_file ()
+{
+  return false;
+}
+
+char *
+process_target::pid_to_exec_file (int pid)
+{
+  gdb_assert_not_reached ("target op pid_to_exec_file not supported");
+}
