@@ -6523,8 +6523,8 @@ linux_process_target::read_loadmap (const char *annex, CORE_ADDR offset,
 }
 #endif /* defined PT_GETDSBT || defined PTRACE_GETFDPIC */
 
-static void
-linux_process_qsupported (char **features, int count)
+void
+linux_process_target::process_qsupported (char **features, int count)
 {
   if (the_low_target.process_qsupported != NULL)
     the_low_target.process_qsupported (features, count);
@@ -7449,7 +7449,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_process_qsupported,
   linux_supports_tracepoints,
   linux_read_pc,
   linux_write_pc,

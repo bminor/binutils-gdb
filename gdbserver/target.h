@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Target specific qSupported support.  FEATURES is an array of
-     features with COUNT elements.  */
-  void (*process_qsupported) (char **features, int count);
-
   /* Return 1 if the target supports tracepoints, 0 (or leave the
      callback NULL) otherwise.  */
   int (*supports_tracepoints) (void);
@@ -489,6 +485,10 @@ public:
   /* Read loadmaps.  Read LEN bytes at OFFSET into a buffer at MYADDR.  */
   virtual int read_loadmap (const char *annex, CORE_ADDR offset,
 			    unsigned char *myaddr, unsigned int len);
+
+  /* Target specific qSupported support.  FEATURES is an array of
+     features with COUNT elements.  */
+  virtual void process_qsupported (char **features, int count);
 };
 
 extern process_stratum_target *the_target;
@@ -540,11 +540,7 @@ int kill_inferior (process_info *proc);
   the_target->pt->async (enable)
 
 #define target_process_qsupported(features, count)	\
-  do							\
-    {							\
-      if (the_target->process_qsupported)		\
-	the_target->process_qsupported (features, count); \
-    } while (0)
+  the_target->pt->process_qsupported (features, count)
 
 #define target_supports_catch_syscall()              	\
   (the_target->supports_catch_syscall ?			\

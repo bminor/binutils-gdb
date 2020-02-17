@@ -384,6 +384,8 @@ public:
   int read_loadmap (const char *annex, CORE_ADDR offset,
 		    unsigned char *myaddr, unsigned int len) override;
 #endif
+
+  void process_qsupported (char **features, int count) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

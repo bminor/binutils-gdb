@@ -602,3 +602,9 @@ process_target::read_loadmap (const char *annex, CORE_ADDR offset,
 {
   gdb_assert_not_reached ("target op read_loadmap not supported");
 }
+
+void
+process_target::process_qsupported (char **features, int count)
+{
+  /* Nop.  */
+}
