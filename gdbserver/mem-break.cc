@@ -223,7 +223,7 @@ bp_size (struct raw_breakpoint *bp)
 {
   int size = 0;
 
-  the_target->sw_breakpoint_from_kind (bp->kind, &size);
+  the_target->pt->sw_breakpoint_from_kind (bp->kind, &size);
   return size;
 }
 
@@ -234,7 +234,7 @@ bp_opcode (struct raw_breakpoint *bp)
 {
   int size = 0;
 
-  return the_target->sw_breakpoint_from_kind (bp->kind, &size);
+  return the_target->pt->sw_breakpoint_from_kind (bp->kind, &size);
 }
 
 /* See mem-break.h.  */

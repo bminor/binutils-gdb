@@ -728,6 +728,12 @@ lynx_process_target::supports_hardware_single_step ()
   return true;
 }
 
+const gdb_byte *
+lynx_process_target::sw_breakpoint_from_kind (int kind, int *size)
+{
+  error (_("Target does not implement the sw_breakpoint_from_kind op"));
+}
+
 /* The LynxOS target ops object.  */
 
 static lynx_process_target the_lynx_target;
@@ -735,10 +741,7 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  NULL,  /* breakpoint_kind_from_pc */
-  NULL,  /* sw_breakpoint_from_kind */
   NULL,  /* thread_name */
-  NULL,  /* breakpoint_kind_from_current_state */
   NULL,  /* supports_software_single_step */
   NULL,  /* supports_catch_syscall */
   NULL,  /* get_ipa_tdesc_idx */

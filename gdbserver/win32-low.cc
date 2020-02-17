@@ -1846,8 +1846,8 @@ win32_process_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 
 /* Implementation of the target_ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-win32_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+win32_process_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = the_low_target.breakpoint_len;
   return the_low_target.breakpoint;
@@ -1858,10 +1858,7 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  NULL, /* breakpoint_kind_from_pc */
-  win32_sw_breakpoint_from_kind,
   NULL, /* thread_name */
-  NULL, /* breakpoint_kind_from_current_state */
   NULL, /* supports_software_single_step */
   NULL, /* supports_catch_syscall */
   NULL, /* get_ipa_tdesc_idx */

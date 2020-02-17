@@ -166,6 +166,8 @@ public:
   bool supports_get_tib_address () override;
 
   int get_tib_address (ptid_t ptid, CORE_ADDR *addr) override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */

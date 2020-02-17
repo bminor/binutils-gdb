@@ -98,6 +98,8 @@ public:
   bool stopped_by_watchpoint () override;
 
   CORE_ADDR stopped_data_address () override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 };
 
 /* The inferior's target description.  This is a global because the

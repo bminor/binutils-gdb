@@ -3226,8 +3226,8 @@ linux_wait_1 (ptid_t ptid,
       CORE_ADDR stop_pc = event_child->stop_pc;
 
       breakpoint_kind =
-	the_target->breakpoint_kind_from_current_state (&stop_pc);
-      the_target->sw_breakpoint_from_kind (breakpoint_kind, &increment_pc);
+	the_target->pt->breakpoint_kind_from_current_state (&stop_pc);
+      the_target->pt->sw_breakpoint_from_kind (breakpoint_kind, &increment_pc);
 
       if (debug_threads)
 	{
@@ -7366,19 +7366,19 @@ current_lwp_ptid (void)
 
 /* Implementation of the target_ops method "breakpoint_kind_from_pc".  */
 
-static int
-linux_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+int
+linux_process_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
 {
   if (the_low_target.breakpoint_kind_from_pc != NULL)
     return (*the_low_target.breakpoint_kind_from_pc) (pcptr);
   else
-    return default_breakpoint_kind_from_pc (pcptr);
+    return process_target::breakpoint_kind_from_pc (pcptr);
 }
 
 /* Implementation of the target_ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-linux_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+linux_process_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   gdb_assert (the_low_target.sw_breakpoint_from_kind != NULL);
 
@@ -7388,13 +7388,13 @@ linux_sw_breakpoint_from_kind (int kind, int *size)
 /* Implementation of the target_ops method
    "breakpoint_kind_from_current_state".  */
 
-static int
-linux_breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
+int
+linux_process_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
 {
   if (the_low_target.breakpoint_kind_from_current_state != NULL)
     return (*the_low_target.breakpoint_kind_from_current_state) (pcptr);
   else
-    return linux_breakpoint_kind_from_pc (pcptr);
+    return breakpoint_kind_from_pc (pcptr);
 }
 
 /* Default implementation of linux_target_ops method "set_pc" for
@@ -7509,10 +7509,7 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_breakpoint_kind_from_pc,
-  linux_sw_breakpoint_from_kind,
   linux_proc_tid_get_name,
-  linux_breakpoint_kind_from_current_state,
   linux_supports_software_single_step,
   linux_supports_catch_syscall,
   linux_get_ipa_tdesc_idx,

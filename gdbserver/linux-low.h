@@ -462,6 +462,12 @@ public:
 
   ssize_t multifs_readlink (int pid, const char *filename, char *buf,
 			    size_t bufsiz) override;
+
+  int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
+
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+  int breakpoint_kind_from_current_state (CORE_ADDR *pcptr) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

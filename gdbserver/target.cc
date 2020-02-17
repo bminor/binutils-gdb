@@ -306,22 +306,6 @@ kill_inferior (process_info *proc)
   return the_target->pt->kill (proc);
 }
 
-/* Default implementation for breakpoint_kind_for_pc.
-
-   The default behavior for targets that don't implement breakpoint_kind_for_pc
-   is to use the size of a breakpoint as the kind.  */
-
-int
-default_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
-{
-  int size = 0;
-
-  gdb_assert (the_target->sw_breakpoint_from_kind != NULL);
-
-  (*the_target->sw_breakpoint_from_kind) (0, &size);
-  return size;
-}
-
 /* Define it.  */
 
 target_terminal_state target_terminal::m_terminal_state
@@ -800,4 +784,20 @@ process_target::multifs_readlink (int pid, const char *filename,
 				  char *buf, size_t bufsiz)
 {
   return readlink (filename, buf, bufsiz);
+}
+
+int
+process_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+{
+  /* The default behavior is to use the size of a breakpoint as the
+     kind.  */
+  int size = 0;
+  sw_breakpoint_from_kind (0, &size);
+  return size;
+}
+
+int
+process_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
+{
+  return breakpoint_kind_from_pc (pcptr);
 }

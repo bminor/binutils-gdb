@@ -935,8 +935,8 @@ nto_process_target::stopped_data_address ()
 
 /* Implementation of the target_ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-nto_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+nto_process_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = the_low_target.breakpoint_len;
   return the_low_target.breakpoint;
@@ -947,10 +947,7 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  NULL, /* breakpoint_kind_from_pc */
-  nto_sw_breakpoint_from_kind,
   NULL, /* thread_name */
-  NULL, /* breakpoint_kind_from_current_state */
   NULL, /* supports_software_single_step */
   NULL, /* supports_catch_syscall */
   NULL, /* get_ipa_tdesc_idx */

@@ -1,5 +1,45 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's breakpoint_kind_from_pc,
+	sw_breakpoint_from_kind, and breakpoint_kind_from_current_state
+	ops into methods of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target op.
+	(class process_target): Add the target op.
+	(target_breakpoint_kind_from_pc): Update the macro.
+	(target_breakpoint_kind_from_current_state): Update the macro.
+	(default_breakpoint_kind_from_pc): Remove declaration.
+	* target.cc (default_breakpoint_kind_from_pc): Turn into ...
+	(process_target::breakpoint_kind_from_pc): ... this.
+	(process_target::breakpoint_kind_from_current_state): Define.
+
+	Update the derived classes and callers below.
+
+	* mem-break.cc (bp_size): Update.
+	(bp_opcode): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_wait_1): Update.
+	(linux_breakpoint_kind_from_pc): Turn into ...
+	(linux_process_target::breakpoint_kind_from_pc): ... this.
+	(linux_sw_breakpoint_from_kind): Turn into ...
+	(linux_process_target::sw_breakpoint_from_kind): ... this.
+	(linux_breakpoint_kind_from_current_state): Turn into ...
+	(linux_process_target::breakpoint_kind_from_current_state): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	(lynx_process_target::sw_breakpoint_from_kind): Define.
+	* lynx-low.h (class lynx_process_target): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	(nto_sw_breakpoint_from_kind): Turn into ...
+	(nto_process_target::sw_breakpoint_from_kind): ... this.
+	* nto-low.h (class nto_process_target): Update.
+	* win32-low.cc (win32_target_ops): Update.
+	(win32_sw_breakpoint_from_kind): Turn into ...
+	(win32_process_target::sw_breakpoint_from_kind): ... this.
+	* win32-low.h (class win32_process_target): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's multifs_open, multifs_readlink,
 	multifs_unlink ops into methods of process_target.
 

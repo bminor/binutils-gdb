@@ -70,25 +70,9 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Return the breakpoint kind for this target based on PC.  The PCPTR is
-     adjusted to the real memory location in case a flag (e.g., the Thumb bit on
-     ARM) was present in the PC.  */
-  int (*breakpoint_kind_from_pc) (CORE_ADDR *pcptr);
-
-  /* Return the software breakpoint from KIND.  KIND can have target
-     specific meaning like the Z0 kind parameter.
-     SIZE is set to the software breakpoint's length in memory.  */
-  const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
-
   /* Return the thread's name, or NULL if the target is unable to determine it.
      The returned value must not be freed by the caller.  */
   const char *(*thread_name) (ptid_t thread);
-
-  /* Return the breakpoint kind for this target based on the current
-     processor state (e.g. the current instruction mode on ARM) and the
-     PC.  The PCPTR is adjusted to the real memory location in case a flag
-     (e.g., the Thumb bit on ARM) is present in the PC.  */
-  int (*breakpoint_kind_from_current_state) (CORE_ADDR *pcptr);
 
   /* Returns true if the target can software single step.  */
   int (*supports_software_single_step) (void);
@@ -503,6 +487,22 @@ public:
      not override this.  The default behavior is to use readlink(2).  */
   virtual ssize_t multifs_readlink (int pid, const char *filename,
 				    char *buf, size_t bufsiz);
+
+  /* Return the breakpoint kind for this target based on PC.  The
+     PCPTR is adjusted to the real memory location in case a flag
+     (e.g., the Thumb bit on ARM) was present in the PC.  */
+  virtual int breakpoint_kind_from_pc (CORE_ADDR *pcptr);
+
+  /* Return the software breakpoint from KIND.  KIND can have target
+     specific meaning like the Z0 kind parameter.
+     SIZE is set to the software breakpoint's length in memory.  */
+  virtual const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) = 0;
+
+  /* Return the breakpoint kind for this target based on the current
+     processor state (e.g. the current instruction mode on ARM) and the
+     PC.  The PCPTR is adjusted to the real memory location in case a
+     flag (e.g., the Thumb bit on ARM) is present in the  PC.  */
+  virtual int breakpoint_kind_from_current_state (CORE_ADDR *pcptr);
 };
 
 extern process_stratum_target *the_target;
@@ -661,14 +661,10 @@ target_read_btrace_conf (struct btrace_target_info *tinfo,
   the_target->pt->stopped_by_hw_breakpoint ()
 
 #define target_breakpoint_kind_from_pc(pcptr) \
-  (the_target->breakpoint_kind_from_pc \
-   ? (*the_target->breakpoint_kind_from_pc) (pcptr) \
-   : default_breakpoint_kind_from_pc (pcptr))
+  the_target->pt->breakpoint_kind_from_pc (pcptr)
 
 #define target_breakpoint_kind_from_current_state(pcptr) \
-  (the_target->breakpoint_kind_from_current_state \
-   ? (*the_target->breakpoint_kind_from_current_state) (pcptr) \
-   : target_breakpoint_kind_from_pc (pcptr))
+  the_target->pt->breakpoint_kind_from_current_state (pcptr)
 
 #define target_supports_software_single_step() \
   (the_target->supports_software_single_step ? \
@@ -700,7 +696,5 @@ int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 int set_desired_thread ();
 
 const char *target_pid_to_str (ptid_t);
-
-int default_breakpoint_kind_from_pc (CORE_ADDR *pcptr);
 
 #endif /* GDBSERVER_TARGET_H */
