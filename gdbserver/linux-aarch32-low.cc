@@ -192,13 +192,13 @@ arm_breakpoint_at (CORE_ADDR where)
       /* Thumb mode.  */
       unsigned short insn;
 
-      the_target->pt->read_memory (where, (unsigned char *) &insn, 2);
+      the_target->read_memory (where, (unsigned char *) &insn, 2);
       if (insn == thumb_breakpoint)
 	return 1;
 
       if (insn == thumb2_breakpoint[0])
 	{
-	  the_target->pt->read_memory (where + 2, (unsigned char *) &insn, 2);
+	  the_target->read_memory (where + 2, (unsigned char *) &insn, 2);
 	  if (insn == thumb2_breakpoint[1])
 	    return 1;
 	}
@@ -208,7 +208,7 @@ arm_breakpoint_at (CORE_ADDR where)
       /* ARM mode.  */
       unsigned long insn;
 
-      the_target->pt->read_memory (where, (unsigned char *) &insn, 4);
+      the_target->read_memory (where, (unsigned char *) &insn, 4);
       if (insn == arm_abi_breakpoint)
 	return 1;
 

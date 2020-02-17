@@ -1,3 +1,296 @@
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* target.h (struct process_stratum_target): Remove.
+	(class process_target): Rename to ...
+	(class process_stratum_target): ... this.
+	* linux-low.h (class linux_process_target): Derive from
+	'process_stratum_target'.
+	* linux-low.cc (linux_target_ops): Remove.
+	(initialize_low): Set the_target to the singleton instance of
+	linux_process_target.
+	* lynx-low.h (class lynx_process_target): Derive from
+	'process_stratum_target'.
+	* lynx-low.cc (lynx_target_ops): Remove.
+	(initialize_low): Set the_target to the singleton instance of
+	lynx_process_target.
+	* nto-low.h (class nto_process_target): Derive from
+	'process_stratum_target'.
+	* nto-low.cc (nto_target_ops): Remove.
+	(initialize_low): Set the_target to the singleton instance of
+	nto_process_target.
+	* win32-low.h (class win32_process_target): Derive from
+	'process_stratum_target'.
+	* win32-low.cc (win32_target_ops): Remove.
+	(initialize_low): Set the_target to the singleton instance of
+	win32_process_target.
+
+	Replace 'the_target->pt' with 'the_target' in the uses below.
+
+	* hostio.cc (hostio_error)
+	(handle_setfs)
+	(handle_open)
+	(handle_unlink)
+	(handle_readlink)
+	* linux-aarch32-low.cc (arm_breakpoint_at)
+	* linux-aarch64-low.cc (aarch64_breakpoint_at)
+	* linux-arm-low.cc (arm_sigreturn_next_pc)
+	(arm_get_hwcap)
+	(arm_get_syscall_trapinfo)
+	* linux-cris-low.cc (cris_breakpoint_at)
+	* linux-crisv32-low.cc (cris_breakpoint_at)
+	* linux-low.cc (handle_extended_wait)
+	(linux_wait_1)
+	(linux_read_memory)
+	(linux_process_target::breakpoint_kind_from_pc)
+	(linux_get_auxv)
+	* linux-m32r-low.cc (m32r_breakpoint_at)
+	* linux-mips-low.cc (mips_breakpoint_at)
+	* linux-nios2-low.cc (nios2_breakpoint_at)
+	* linux-ppc-low.cc (ppc_breakpoint_at)
+	* linux-s390-low.cc (s390_get_hwcap)
+	* linux-sh-low.cc (sh_breakpoint_at)
+	* linux-sparc-low.cc (sparc_fill_gregset_to_stack)
+	(sparc_store_gregset_from_stack)
+	(sparc_breakpoint_at)
+	* linux-tic6x-low.cc (tic6x_breakpoint_at)
+	* linux-tile-low.cc (tile_breakpoint_at)
+	* linux-x86-low.cc (x86_breakpoint_at)
+	* linux-xtensa-low.cc (xtensa_breakpoint_at)
+	* mem-break.cc (bp_size)
+	(bp_opcode)
+	(insert_memory_breakpoint)
+	(set_raw_breakpoint_at)
+	(delete_raw_breakpoint)
+	(z_type_supported)
+	(uninsert_raw_breakpoint)
+	(reinsert_raw_breakpoint)
+	(validate_inserted_breakpoint)
+	* regcache.cc (regcache_read_pc)
+	(regcache_write_pc)
+	* remote-utils.cc (putpkt_binary_1)
+	(input_interrupt)
+	(getpkt)
+	(prepare_resume_reply)
+	* server.cc (handle_general_set)
+	(handle_detach)
+	(handle_qxfer_auxv)
+	(handle_qxfer_exec_file)
+	(handle_qxfer_libraries_svr4)
+	(handle_qxfer_osdata)
+	(handle_qxfer_siginfo)
+	(handle_qxfer_fdpic)
+	(handle_query)
+	(resume)
+	(handle_v_requests)
+	(queue_stop_reply_callback)
+	(captured_main)
+	* target.cc (prepare_to_access_memory)
+	(done_accessing_memory)
+	(read_inferior_memory)
+	(target_write_memory)
+	(target_stop_and_wait)
+	(target_wait)
+	(target_mourn_inferior)
+	(target_continue_no_signal)
+	(target_continue)
+	(target_supports_multi_process)
+	(kill_inferior)
+	* target.h
+	(target_create_inferior)
+	(target_post_create_inferior)
+	(myattach)
+	(target_supports_fork_events)
+	(target_supports_vfork_events)
+	(target_supports_exec_events)
+	(target_handle_new_gdb_connection)
+	(detach_inferior)
+	(mythread_alive)
+	(fetch_inferior_registers)
+	(store_inferior_registers)
+	(join_inferior)
+	(target_supports_non_stop)
+	(target_async)
+	(target_process_qsupported)
+	(target_supports_catch_syscall)
+	(target_get_ipa_tdesc_idx)
+	(target_supports_tracepoints)
+	(target_supports_fast_tracepoints)
+	(target_get_min_fast_tracepoint_insn_len)
+	(target_thread_stopped)
+	(target_pause_all)
+	(target_unpause_all)
+	(target_stabilize_threads)
+	(target_install_fast_tracepoint_jump_pad)
+	(target_emit_ops)
+	(target_supports_disable_randomization)
+	(target_supports_agent)
+	(target_enable_btrace)
+	(target_disable_btrace)
+	(target_read_btrace)
+	(target_read_btrace_conf)
+	(target_supports_range_stepping)
+	(target_supports_stopped_by_sw_breakpoint)
+	(target_stopped_by_sw_breakpoint)
+	(target_supports_stopped_by_hw_breakpoint)
+	(target_supports_hardware_single_step)
+	(target_stopped_by_hw_breakpoint)
+	(target_breakpoint_kind_from_pc)
+	(target_breakpoint_kind_from_current_state)
+	(target_supports_software_single_step)
+	(target_core_of_thread)
+	(target_thread_name)
+	(target_thread_handle)
+	* win32-low.cc (do_initial_child_stuff)
+
+	Rename target op default definitions listed below.
+
+	* target.cc (process_target::post_create_inferior): Rename as ...
+	(process_stratum_target::post_create_inferior): ... this.
+	(process_target::prepare_to_access_memory): Rename as ...
+	(process_stratum_target::prepare_to_access_memory): ... this.
+	(process_target::done_accessing_memory): Rename as ...
+	(process_stratum_target::done_accessing_memory): ... this.
+	(process_target::look_up_symbols): Rename as ...
+	(process_stratum_target::look_up_symbols): ... this.
+	(process_target::supports_read_auxv): Rename as ...
+	(process_stratum_target::supports_read_auxv): ... this.
+	(process_target::read_auxv): Rename as ...
+	(process_stratum_target::read_auxv): ... this.
+	(process_target::supports_z_point_type): Rename as ...
+	(process_stratum_target::supports_z_point_type): ... this.
+	(process_target::insert_point): Rename as ...
+	(process_stratum_target::insert_point): ... this.
+	(process_target::remove_point): Rename as ...
+	(process_stratum_target::remove_point): ... this.
+	(process_target::stopped_by_sw_breakpoint): Rename as ...
+	(process_stratum_target::stopped_by_sw_breakpoint): ... this.
+	(process_target::supports_stopped_by_sw_breakpoint): Rename as ...
+	(process_stratum_target::supports_stopped_by_sw_breakpoint): ... this.
+	(process_target::stopped_by_hw_breakpoint): Rename as ...
+	(process_stratum_target::stopped_by_hw_breakpoint): ... this.
+	(process_target::supports_stopped_by_hw_breakpoint): Rename as ...
+	(process_stratum_target::supports_stopped_by_hw_breakpoint): ... this.
+	(process_target::supports_hardware_single_step): Rename as ...
+	(process_stratum_target::supports_hardware_single_step): ... this.
+	(process_target::stopped_by_watchpoint): Rename as ...
+	(process_stratum_target::stopped_by_watchpoint): ... this.
+	(process_target::stopped_data_address): Rename as ...
+	(process_stratum_target::stopped_data_address): ... this.
+	(process_target::supports_read_offsets): Rename as ...
+	(process_stratum_target::supports_read_offsets): ... this.
+	(process_target::read_offsets): Rename as ...
+	(process_stratum_target::read_offsets): ... this.
+	(process_target::supports_get_tls_address): Rename as ...
+	(process_stratum_target::supports_get_tls_address): ... this.
+	(process_target::get_tls_address): Rename as ...
+	(process_stratum_target::get_tls_address): ... this.
+	(process_target::hostio_last_error): Rename as ...
+	(process_stratum_target::hostio_last_error): ... this.
+	(process_target::supports_qxfer_osdata): Rename as ...
+	(process_stratum_target::supports_qxfer_osdata): ... this.
+	(process_target::qxfer_osdata): Rename as ...
+	(process_stratum_target::qxfer_osdata): ... this.
+	(process_target::supports_qxfer_siginfo): Rename as ...
+	(process_stratum_target::supports_qxfer_siginfo): ... this.
+	(process_target::qxfer_siginfo): Rename as ...
+	(process_stratum_target::qxfer_siginfo): ... this.
+	(process_target::supports_non_stop): Rename as ...
+	(process_stratum_target::supports_non_stop): ... this.
+	(process_target::async): Rename as ...
+	(process_stratum_target::async): ... this.
+	(process_target::start_non_stop): Rename as ...
+	(process_stratum_target::start_non_stop): ... this.
+	(process_target::supports_multi_process): Rename as ...
+	(process_stratum_target::supports_multi_process): ... this.
+	(process_target::supports_fork_events): Rename as ...
+	(process_stratum_target::supports_fork_events): ... this.
+	(process_target::supports_vfork_events): Rename as ...
+	(process_stratum_target::supports_vfork_events): ... this.
+	(process_target::supports_exec_events): Rename as ...
+	(process_stratum_target::supports_exec_events): ... this.
+	(process_target::handle_new_gdb_connection): Rename as ...
+	(process_stratum_target::handle_new_gdb_connection): ... this.
+	(process_target::handle_monitor_command): Rename as ...
+	(process_stratum_target::handle_monitor_command): ... this.
+	(process_target::core_of_thread): Rename as ...
+	(process_stratum_target::core_of_thread): ... this.
+	(process_target::supports_read_loadmap): Rename as ...
+	(process_stratum_target::supports_read_loadmap): ... this.
+	(process_target::read_loadmap): Rename as ...
+	(process_stratum_target::read_loadmap): ... this.
+	(process_target::process_qsupported): Rename as ...
+	(process_stratum_target::process_qsupported): ... this.
+	(process_target::supports_tracepoints): Rename as ...
+	(process_stratum_target::supports_tracepoints): ... this.
+	(process_target::read_pc): Rename as ...
+	(process_stratum_target::read_pc): ... this.
+	(process_target::write_pc): Rename as ...
+	(process_stratum_target::write_pc): ... this.
+	(process_target::supports_thread_stopped): Rename as ...
+	(process_stratum_target::supports_thread_stopped): ... this.
+	(process_target::thread_stopped): Rename as ...
+	(process_stratum_target::thread_stopped): ... this.
+	(process_target::supports_get_tib_address): Rename as ...
+	(process_stratum_target::supports_get_tib_address): ... this.
+	(process_target::get_tib_address): Rename as ...
+	(process_stratum_target::get_tib_address): ... this.
+	(process_target::pause_all): Rename as ...
+	(process_stratum_target::pause_all): ... this.
+	(process_target::unpause_all): Rename as ...
+	(process_stratum_target::unpause_all): ... this.
+	(process_target::stabilize_threads): Rename as ...
+	(process_stratum_target::stabilize_threads): ... this.
+	(process_target::supports_fast_tracepoints): Rename as ...
+	(process_stratum_target::supports_fast_tracepoints): ... this.
+	(process_target::get_min_fast_tracepoint_insn_len): Rename as ...
+	(process_stratum_target::get_min_fast_tracepoint_insn_len): ... this.
+	(process_target::emit_ops): Rename as ...
+	(process_stratum_target::emit_ops): ... this.
+	(process_target::supports_disable_randomization): Rename as ...
+	(process_stratum_target::supports_disable_randomization): ... this.
+	(process_target::supports_qxfer_libraries_svr4): Rename as ...
+	(process_stratum_target::supports_qxfer_libraries_svr4): ... this.
+	(process_target::qxfer_libraries_svr4): Rename as ...
+	(process_stratum_target::qxfer_libraries_svr4): ... this.
+	(process_target::supports_agent): Rename as ...
+	(process_stratum_target::supports_agent): ... this.
+	(process_target::enable_btrace): Rename as ...
+	(process_stratum_target::enable_btrace): ... this.
+	(process_target::disable_btrace): Rename as ...
+	(process_stratum_target::disable_btrace): ... this.
+	(process_target::read_btrace): Rename as ...
+	(process_stratum_target::read_btrace): ... this.
+	(process_target::read_btrace_conf): Rename as ...
+	(process_stratum_target::read_btrace_conf): ... this.
+	(process_target::supports_range_stepping): Rename as ...
+	(process_stratum_target::supports_range_stepping): ... this.
+	(process_target::supports_pid_to_exec_file): Rename as ...
+	(process_stratum_target::supports_pid_to_exec_file): ... this.
+	(process_target::pid_to_exec_file): Rename as ...
+	(process_stratum_target::pid_to_exec_file): ... this.
+	(process_target::supports_multifs): Rename as ...
+	(process_stratum_target::supports_multifs): ... this.
+	(process_target::multifs_open): Rename as ...
+	(process_stratum_target::multifs_open): ... this.
+	(process_target::multifs_unlink): Rename as ...
+	(process_stratum_target::multifs_unlink): ... this.
+	(process_target::multifs_readlink): Rename as ...
+	(process_stratum_target::multifs_readlink): ... this.
+	(process_target::breakpoint_kind_from_pc): Rename as ...
+	(process_stratum_target::breakpoint_kind_from_pc): ... this.
+	(process_target::breakpoint_kind_from_current_state): Rename as ...
+	(process_stratum_target::breakpoint_kind_from_current_state): ... this.
+	(process_target::thread_name): Rename as ...
+	(process_stratum_target::thread_name): ... this.
+	(process_target::thread_handle): Rename as ...
+	(process_stratum_target::thread_handle): ... this.
+	(process_target::supports_software_single_step): Rename as ...
+	(process_stratum_target::supports_software_single_step): ... this.
+	(process_target::supports_catch_syscall): Rename as ...
+	(process_stratum_target::supports_catch_syscall): ... this.
+	(process_target::get_ipa_tdesc_idx): Rename as ...
+	(process_stratum_target::get_ipa_tdesc_idx): ... this.
+
 2020-02-20  Pedro Alves  <palves@redhat.com>
 
 	* target.cc (set_target_ops): Simply copy the given target pointer

@@ -103,7 +103,7 @@ extern struct win32_target_ops the_low_target;
 
 /* Target ops definitions for a Win32 target.  */
 
-class win32_process_target : public process_target
+class win32_process_target : public process_stratum_target
 {
 public:
 

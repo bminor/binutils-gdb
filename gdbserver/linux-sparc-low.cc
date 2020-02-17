@@ -133,7 +133,7 @@ sparc_fill_gregset_to_stack (struct regcache *regcache, const void *buf)
   for (i = l0_regno; i <= i7_regno; i++)
     {
       collect_register (regcache, i, tmp_reg_buf);
-      the_target->pt->write_memory (addr, tmp_reg_buf, sizeof (tmp_reg_buf));
+      the_target->write_memory (addr, tmp_reg_buf, sizeof (tmp_reg_buf));
       addr += sizeof (tmp_reg_buf);
     }
 }
@@ -184,7 +184,7 @@ sparc_store_gregset_from_stack (struct regcache *regcache, const void *buf)
 
   for (i = l0_regno; i <= i7_regno; i++)
     {
-      the_target->pt->read_memory (addr, tmp_reg_buf, sizeof (tmp_reg_buf));
+      the_target->read_memory (addr, tmp_reg_buf, sizeof (tmp_reg_buf));
       supply_register (regcache, i, tmp_reg_buf);
       addr += sizeof (tmp_reg_buf);
     }
@@ -242,7 +242,7 @@ sparc_breakpoint_at (CORE_ADDR where)
 {
   unsigned char insn[INSN_SIZE];
 
-  the_target->pt->read_memory (where, (unsigned char *) insn, sizeof (insn));
+  the_target->read_memory (where, (unsigned char *) insn, sizeof (insn));
 
   if (memcmp (sparc_breakpoint, insn, sizeof (insn)) == 0)
     return 1;

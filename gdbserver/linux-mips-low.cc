@@ -302,7 +302,7 @@ mips_breakpoint_at (CORE_ADDR where)
 {
   unsigned int insn;
 
-  the_target->pt->read_memory (where, (unsigned char *) &insn, 4);
+  the_target->read_memory (where, (unsigned char *) &insn, 4);
   if (insn == mips_breakpoint)
     return 1;
 

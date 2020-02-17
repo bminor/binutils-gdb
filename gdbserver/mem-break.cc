@@ -223,7 +223,7 @@ bp_size (struct raw_breakpoint *bp)
 {
   int size = 0;
 
-  the_target->pt->sw_breakpoint_from_kind (bp->kind, &size);
+  the_target->sw_breakpoint_from_kind (bp->kind, &size);
   return size;
 }
 
@@ -234,7 +234,7 @@ bp_opcode (struct raw_breakpoint *bp)
 {
   int size = 0;
 
-  return the_target->pt->sw_breakpoint_from_kind (bp->kind, &size);
+  return the_target->sw_breakpoint_from_kind (bp->kind, &size);
 }
 
 /* See mem-break.h.  */
@@ -380,8 +380,8 @@ insert_memory_breakpoint (struct raw_breakpoint *bp)
     {
       memcpy (bp->old_data, buf, bp_size (bp));
 
-      err = the_target->pt->write_memory (bp->pc, bp_opcode (bp),
-					  bp_size (bp));
+      err = the_target->write_memory (bp->pc, bp_opcode (bp),
+				      bp_size (bp));
       if (err != 0)
 	{
 	  if (debug_threads)
@@ -460,7 +460,7 @@ set_raw_breakpoint_at (enum raw_bkpt_type type, CORE_ADDR where, int kind,
 
   if (!bp->inserted)
     {
-      *err = the_target->pt->insert_point (bp->raw_type, bp->pc, bp->kind, bp);
+      *err = the_target->insert_point (bp->raw_type, bp->pc, bp->kind, bp);
       if (*err != 0)
 	{
 	  if (debug_threads)
@@ -890,8 +890,8 @@ delete_raw_breakpoint (struct process_info *proc, struct raw_breakpoint *todel)
 
 	      *bp_link = bp->next;
 
-	      ret = the_target->pt->remove_point (bp->raw_type, bp->pc,
-						  bp->kind, bp);
+	      ret = the_target->remove_point (bp->raw_type, bp->pc,
+					      bp->kind, bp);
 	      if (ret != 0)
 		{
 		  /* Something went wrong, relink the breakpoint.  */
@@ -1005,7 +1005,7 @@ static int
 z_type_supported (char z_type)
 {
   return (z_type >= '0' && z_type <= '4'
-	  && the_target->pt->supports_z_point_type (z_type));
+	  && the_target->supports_z_point_type (z_type));
 }
 
 /* Create a new GDB breakpoint of type Z_TYPE at ADDR with kind KIND.
@@ -1532,7 +1532,7 @@ uninsert_raw_breakpoint (struct raw_breakpoint *bp)
 
       bp->inserted = 0;
 
-      err = the_target->pt->remove_point (bp->raw_type, bp->pc, bp->kind, bp);
+      err = the_target->remove_point (bp->raw_type, bp->pc, bp->kind, bp);
       if (err != 0)
 	{
 	  bp->inserted = 1;
@@ -1621,7 +1621,7 @@ reinsert_raw_breakpoint (struct raw_breakpoint *bp)
   if (bp->inserted)
     return;
 
-  err = the_target->pt->insert_point (bp->raw_type, bp->pc, bp->kind, bp);
+  err = the_target->insert_point (bp->raw_type, bp->pc, bp->kind, bp);
   if (err == 0)
     bp->inserted = 1;
   else if (debug_threads)
@@ -1856,7 +1856,7 @@ validate_inserted_breakpoint (struct raw_breakpoint *bp)
   gdb_assert (bp->raw_type == raw_bkpt_type_sw);
 
   buf = (unsigned char *) alloca (bp_size (bp));
-  err = the_target->pt->read_memory (bp->pc, buf, bp_size (bp));
+  err = the_target->read_memory (bp->pc, buf, bp_size (bp));
   if (err || memcmp (buf, bp_opcode (bp), bp_size (bp)) != 0)
     {
       /* Tag it as gone.  */

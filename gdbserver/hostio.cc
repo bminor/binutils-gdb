@@ -196,7 +196,7 @@ require_valid_fd (int fd)
 static void
 hostio_error (char *own_buf)
 {
-  the_target->pt->hostio_last_error (own_buf);
+  the_target->hostio_last_error (own_buf);
 }
 
 static void
@@ -272,7 +272,7 @@ handle_setfs (char *own_buf)
      then there's no point in GDB sending "vFile:setfs:" packets.  We
      reply with an empty packet (i.e. we pretend we don't understand
      "vFile:setfs:") and that should stop GDB sending any more.  */
-  if (!the_target->pt->supports_multifs ())
+  if (!the_target->supports_multifs ())
     {
       own_buf[0] = '\0';
       return;
@@ -320,8 +320,7 @@ handle_open (char *own_buf)
   /* We do not need to convert MODE, since the fileio protocol
      uses the standard values.  */
   if (hostio_fs_pid != 0)
-    fd = the_target->pt->multifs_open (hostio_fs_pid, filename,
-				       flags, mode);
+    fd = the_target->multifs_open (hostio_fs_pid, filename, flags, mode);
   else
     fd = open (filename, flags, mode);
 
@@ -540,7 +539,7 @@ handle_unlink (char *own_buf)
     }
 
   if (hostio_fs_pid != 0)
-    ret = the_target->pt->multifs_unlink (hostio_fs_pid, filename);
+    ret = the_target->multifs_unlink (hostio_fs_pid, filename);
   else
     ret = unlink (filename);
 
@@ -570,9 +569,9 @@ handle_readlink (char *own_buf, int *new_packet_len)
     }
 
   if (hostio_fs_pid != 0)
-    ret = the_target->pt->multifs_readlink (hostio_fs_pid, filename,
-					    linkname,
-					    sizeof (linkname) - 1);
+    ret = the_target->multifs_readlink (hostio_fs_pid, filename,
+					linkname,
+					sizeof (linkname) - 1);
   else
     ret = readlink (filename, linkname, sizeof (linkname) - 1);
 

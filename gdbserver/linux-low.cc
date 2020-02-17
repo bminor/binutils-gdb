@@ -711,7 +711,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
       syscalls_to_catch = std::move (proc->syscalls_to_catch);
 
       /* Delete the execing process and all its threads.  */
-      the_target->pt->mourn (proc);
+      the_target->mourn (proc);
       current_thread = NULL;
 
       /* Create a new process/lwp/thread.  */
@@ -3226,8 +3226,8 @@ linux_wait_1 (ptid_t ptid,
       CORE_ADDR stop_pc = event_child->stop_pc;
 
       breakpoint_kind =
-	the_target->pt->breakpoint_kind_from_current_state (&stop_pc);
-      the_target->pt->sw_breakpoint_from_kind (breakpoint_kind, &increment_pc);
+	the_target->breakpoint_kind_from_current_state (&stop_pc);
+      the_target->sw_breakpoint_from_kind (breakpoint_kind, &increment_pc);
 
       if (debug_threads)
 	{
@@ -5720,7 +5720,7 @@ linux_process_target::store_registers (regcache *regcache, int regno)
 static int
 linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
-  return the_target->pt->read_memory (memaddr, myaddr, len);
+  return the_target->read_memory (memaddr, myaddr, len);
 }
 
 /* Copy LEN bytes from inferior's memory starting at MEMADDR
@@ -7372,7 +7372,7 @@ linux_process_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
   if (the_low_target.breakpoint_kind_from_pc != NULL)
     return (*the_low_target.breakpoint_kind_from_pc) (pcptr);
   else
-    return process_target::breakpoint_kind_from_pc (pcptr);
+    return process_stratum_target::breakpoint_kind_from_pc (pcptr);
 }
 
 /* Implementation of the target_ops method "sw_breakpoint_from_kind".  */
@@ -7472,7 +7472,7 @@ linux_get_auxv (int wordsize, CORE_ADDR match, CORE_ADDR *valp)
 
   gdb_assert (wordsize == 4 || wordsize == 8);
 
-  while (the_target->pt->read_auxv (offset, data, 2 * wordsize) == 2 * wordsize)
+  while (the_target->read_auxv (offset, data, 2 * wordsize) == 2 * wordsize)
     {
       if (wordsize == 4)
 	{
@@ -7523,10 +7523,6 @@ linux_get_hwcap2 (int wordsize)
 
 static linux_process_target the_linux_target;
 
-static process_stratum_target linux_target_ops = {
-  &the_linux_target,
-};
-
 #ifdef HAVE_LINUX_REGSETS
 void
 initialize_regsets_info (struct regsets_info *info)
@@ -7544,7 +7540,7 @@ initialize_low (void)
   struct sigaction sigchld_action;
 
   memset (&sigchld_action, 0, sizeof (sigchld_action));
-  set_target_ops (&linux_target_ops);
+  set_target_ops (&the_linux_target);
 
   linux_ptrace_init_warnings ();
   linux_proc_init_warnings ();

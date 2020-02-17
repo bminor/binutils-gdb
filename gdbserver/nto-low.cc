@@ -946,11 +946,6 @@ nto_process_target::sw_breakpoint_from_kind (int kind, int *size)
 
 static nto_process_target the_nto_target;
 
-static process_stratum_target nto_target_ops = {
-  &the_nto_target,
-};
-
-
 /* Global function called by server.c.  Initializes QNX Neutrino
    gdbserver.  */
 
@@ -960,7 +955,7 @@ initialize_low (void)
   sigset_t set;
 
   TRACE ("%s\n", __func__);
-  set_target_ops (&nto_target_ops);
+  set_target_ops (&the_nto_target);
 
   /* We use SIGUSR1 to gain control after we block waiting for a process.
      We use sigwaitevent to wait.  */

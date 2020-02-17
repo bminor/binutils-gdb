@@ -62,7 +62,7 @@ prepare_to_access_memory (void)
      it.  */
   prev_general_thread = cs.general_thread;
 
-  int res = the_target->pt->prepare_to_access_memory ();
+  int res = the_target->prepare_to_access_memory ();
   if (res != 0)
     return res;
 
@@ -70,7 +70,7 @@ prepare_to_access_memory (void)
     {
       if (mythread_alive (thread->id))
 	{
-	  if (stopped == NULL && the_target->pt->supports_thread_stopped ()
+	  if (stopped == NULL && the_target->supports_thread_stopped ()
 	      && target_thread_stopped (thread))
 	    stopped = thread;
 
@@ -114,7 +114,7 @@ done_accessing_memory (void)
 {
   client_state &cs = get_client_state ();
 
-  the_target->pt->done_accessing_memory ();
+  the_target->done_accessing_memory ();
 
   /* Restore the previous selected thread.  */
   cs.general_thread = prev_general_thread;
@@ -125,7 +125,7 @@ int
 read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   int res;
-  res = the_target->pt->read_memory (memaddr, myaddr, len);
+  res = the_target->read_memory (memaddr, myaddr, len);
   check_mem_read (memaddr, myaddr, len);
   return res;
 }
@@ -156,7 +156,7 @@ target_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
      update it.  */
   gdb::byte_vector buffer (myaddr, myaddr + len);
   check_mem_write (memaddr, buffer.data (), myaddr, len);
-  return the_target->pt->write_memory (memaddr, buffer.data (), len);
+  return the_target->write_memory (memaddr, buffer.data (), len);
 }
 
 ptid_t
@@ -210,7 +210,7 @@ target_stop_and_wait (ptid_t ptid)
   resume_info.thread = ptid;
   resume_info.kind = resume_stop;
   resume_info.sig = GDB_SIGNAL_0;
-  the_target->pt->resume (&resume_info, 1);
+  the_target->resume (&resume_info, 1);
 
   non_stop = true;
   mywait (ptid, &status, 0, 0);
@@ -222,7 +222,7 @@ target_stop_and_wait (ptid_t ptid)
 ptid_t
 target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 {
-  return the_target->pt->wait (ptid, status, options);
+  return the_target->wait (ptid, status, options);
 }
 
 /* See target/target.h.  */
@@ -230,7 +230,7 @@ target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 void
 target_mourn_inferior (ptid_t ptid)
 {
-  the_target->pt->mourn (find_process_pid (ptid.pid ()));
+  the_target->mourn (find_process_pid (ptid.pid ()));
 }
 
 /* See target/target.h.  */
@@ -243,7 +243,7 @@ target_continue_no_signal (ptid_t ptid)
   resume_info.thread = ptid;
   resume_info.kind = resume_continue;
   resume_info.sig = GDB_SIGNAL_0;
-  the_target->pt->resume (&resume_info, 1);
+  the_target->resume (&resume_info, 1);
 }
 
 /* See target/target.h.  */
@@ -256,7 +256,7 @@ target_continue (ptid_t ptid, enum gdb_signal signal)
   resume_info.thread = ptid;
   resume_info.kind = resume_continue;
   resume_info.sig = gdb_signal_to_host (signal);
-  the_target->pt->resume (&resume_info, 1);
+  the_target->resume (&resume_info, 1);
 }
 
 /* See target/target.h.  */
@@ -264,7 +264,7 @@ target_continue (ptid_t ptid, enum gdb_signal signal)
 int
 target_supports_multi_process (void)
 {
-  return the_target->pt->supports_multi_process ();
+  return the_target->supports_multi_process ();
 }
 
 void
@@ -302,7 +302,7 @@ kill_inferior (process_info *proc)
 {
   gdb_agent_about_to_close (proc->pid);
 
-  return the_target->pt->kill (proc);
+  return the_target->kill (proc);
 }
 
 /* Define it.  */
@@ -357,177 +357,183 @@ target_terminal::info (const char *arg, int from_tty)
    See target.h for definitions.  */
 
 void
-process_target::post_create_inferior ()
+process_stratum_target::post_create_inferior ()
 {
   /* Nop.  */
 }
 
 int
-process_target::prepare_to_access_memory ()
+process_stratum_target::prepare_to_access_memory ()
 {
   return 0;
 }
 
 void
-process_target::done_accessing_memory ()
+process_stratum_target::done_accessing_memory ()
 {
   /* Nop.  */
 }
 
 void
-process_target::look_up_symbols ()
+process_stratum_target::look_up_symbols ()
 {
   /* Nop.  */
 }
 
 bool
-process_target::supports_read_auxv ()
+process_stratum_target::supports_read_auxv ()
 {
   return false;
 }
 
 int
-process_target::read_auxv (CORE_ADDR offset, unsigned char *myaddr,
-			   unsigned int len)
+process_stratum_target::read_auxv (CORE_ADDR offset, unsigned char *myaddr,
+				   unsigned int len)
 {
   gdb_assert_not_reached ("target op read_auxv not supported");
 }
 
 bool
-process_target::supports_z_point_type (char z_type)
+process_stratum_target::supports_z_point_type (char z_type)
 {
   return false;
 }
 
 int
-process_target::insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-			      int size, raw_breakpoint *bp)
+process_stratum_target::insert_point (enum raw_bkpt_type type,
+				      CORE_ADDR addr,
+				      int size, raw_breakpoint *bp)
 {
   return 1;
 }
 
 int
-process_target::remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-			      int size, raw_breakpoint *bp)
+process_stratum_target::remove_point (enum raw_bkpt_type type,
+				      CORE_ADDR addr,
+				      int size, raw_breakpoint *bp)
 {
   return 1;
 }
 
 bool
-process_target::stopped_by_sw_breakpoint ()
+process_stratum_target::stopped_by_sw_breakpoint ()
 {
   return false;
 }
 
 bool
-process_target::supports_stopped_by_sw_breakpoint ()
+process_stratum_target::supports_stopped_by_sw_breakpoint ()
 {
   return false;
 }
 
 bool
-process_target::stopped_by_hw_breakpoint ()
+process_stratum_target::stopped_by_hw_breakpoint ()
 {
   return false;
 }
 
 bool
-process_target::supports_stopped_by_hw_breakpoint ()
+process_stratum_target::supports_stopped_by_hw_breakpoint ()
 {
   return false;
 }
 
 bool
-process_target::supports_hardware_single_step ()
+process_stratum_target::supports_hardware_single_step ()
 {
   return false;
 }
 
 bool
-process_target::stopped_by_watchpoint ()
+process_stratum_target::stopped_by_watchpoint ()
 {
   return false;
 }
 
 CORE_ADDR
-process_target::stopped_data_address ()
+process_stratum_target::stopped_data_address ()
 {
   return 0;
 }
 
 bool
-process_target::supports_read_offsets ()
+process_stratum_target::supports_read_offsets ()
 {
   return false;
 }
 
 int
-process_target::read_offsets (CORE_ADDR *text, CORE_ADDR *data)
+process_stratum_target::read_offsets (CORE_ADDR *text, CORE_ADDR *data)
 {
   gdb_assert_not_reached ("target op read_offsets not supported");
 }
 
 bool
-process_target::supports_get_tls_address ()
+process_stratum_target::supports_get_tls_address ()
 {
   return false;
 }
 
 int
-process_target::get_tls_address (thread_info *thread, CORE_ADDR offset,
-				 CORE_ADDR load_module, CORE_ADDR *address)
+process_stratum_target::get_tls_address (thread_info *thread,
+					 CORE_ADDR offset,
+					 CORE_ADDR load_module,
+					 CORE_ADDR *address)
 {
   gdb_assert_not_reached ("target op get_tls_address not supported");
 }
 
 void
-process_target::hostio_last_error (char *buf)
+process_stratum_target::hostio_last_error (char *buf)
 {
   hostio_last_error_from_errno (buf);
 }
 
 bool
-process_target::supports_qxfer_osdata ()
+process_stratum_target::supports_qxfer_osdata ()
 {
   return false;
 }
 
 int
-process_target::qxfer_osdata (const char *annex, unsigned char *readbuf,
-			      unsigned const char *writebuf,
-			      CORE_ADDR offset, int len)
+process_stratum_target::qxfer_osdata (const char *annex,
+				      unsigned char *readbuf,
+				      unsigned const char *writebuf,
+				      CORE_ADDR offset, int len)
 {
   gdb_assert_not_reached ("target op qxfer_osdata not supported");
 }
 
 bool
-process_target::supports_qxfer_siginfo ()
+process_stratum_target::supports_qxfer_siginfo ()
 {
   return false;
 }
 
 int
-process_target::qxfer_siginfo (const char *annex, unsigned char *readbuf,
-			       unsigned const char *writebuf,
-			       CORE_ADDR offset, int len)
+process_stratum_target::qxfer_siginfo (const char *annex,
+				       unsigned char *readbuf,
+				       unsigned const char *writebuf,
+				       CORE_ADDR offset, int len)
 {
   gdb_assert_not_reached ("target op qxfer_siginfo not supported");
 }
 
 bool
-process_target::supports_non_stop ()
+process_stratum_target::supports_non_stop ()
 {
   return false;
 }
 
 bool
-process_target::async (bool enable)
+process_stratum_target::async (bool enable)
 {
   return false;
 }
 
 int
-process_target::start_non_stop (bool enable)
+process_stratum_target::start_non_stop (bool enable)
 {
   if (enable)
     return -1;
@@ -536,134 +542,136 @@ process_target::start_non_stop (bool enable)
 }
 
 bool
-process_target::supports_multi_process ()
+process_stratum_target::supports_multi_process ()
 {
   return false;
 }
 
 bool
-process_target::supports_fork_events ()
+process_stratum_target::supports_fork_events ()
 {
   return false;
 }
 
 bool
-process_target::supports_vfork_events ()
+process_stratum_target::supports_vfork_events ()
 {
   return false;
 }
 
 bool
-process_target::supports_exec_events ()
+process_stratum_target::supports_exec_events ()
 {
   return false;
 }
 
 void
-process_target::handle_new_gdb_connection ()
+process_stratum_target::handle_new_gdb_connection ()
 {
   /* Nop.  */
 }
 
 int
-process_target::handle_monitor_command (char *mon)
+process_stratum_target::handle_monitor_command (char *mon)
 {
   return 0;
 }
 
 int
-process_target::core_of_thread (ptid_t ptid)
+process_stratum_target::core_of_thread (ptid_t ptid)
 {
   return -1;
 }
 
 bool
-process_target::supports_read_loadmap ()
+process_stratum_target::supports_read_loadmap ()
 {
   return false;
 }
 
 int
-process_target::read_loadmap (const char *annex, CORE_ADDR offset,
-			      unsigned char *myaddr, unsigned int len)
+process_stratum_target::read_loadmap (const char *annex,
+				      CORE_ADDR offset,
+				      unsigned char *myaddr,
+				      unsigned int len)
 {
   gdb_assert_not_reached ("target op read_loadmap not supported");
 }
 
 void
-process_target::process_qsupported (char **features, int count)
+process_stratum_target::process_qsupported (char **features, int count)
 {
   /* Nop.  */
 }
 
 bool
-process_target::supports_tracepoints ()
+process_stratum_target::supports_tracepoints ()
 {
   return false;
 }
 
 CORE_ADDR
-process_target::read_pc (regcache *regcache)
+process_stratum_target::read_pc (regcache *regcache)
 {
   gdb_assert_not_reached ("process_target::read_pc: Unable to find PC");
 }
 
 void
-process_target::write_pc (regcache *regcache, CORE_ADDR pc)
+process_stratum_target::write_pc (regcache *regcache, CORE_ADDR pc)
 {
   gdb_assert_not_reached ("process_target::write_pc: Unable to update PC");
 }
 
 bool
-process_target::supports_thread_stopped ()
+process_stratum_target::supports_thread_stopped ()
 {
   return false;
 }
 
 bool
-process_target::thread_stopped (thread_info *thread)
+process_stratum_target::thread_stopped (thread_info *thread)
 {
   gdb_assert_not_reached ("target op thread_stopped not supported");
 }
 
 bool
-process_target::supports_get_tib_address ()
+process_stratum_target::supports_get_tib_address ()
 {
   return false;
 }
 
 int
-process_target::get_tib_address (ptid_t ptid, CORE_ADDR *address)
+process_stratum_target::get_tib_address (ptid_t ptid, CORE_ADDR *address)
 {
   gdb_assert_not_reached ("target op get_tib_address not supported");
 }
 
 void
-process_target::pause_all (bool freeze)
+process_stratum_target::pause_all (bool freeze)
 {
   /* Nop.  */
 }
 
 void
-process_target::unpause_all (bool unfreeze)
+process_stratum_target::unpause_all (bool unfreeze)
 {
   /* Nop.  */
 }
 
 void
-process_target::stabilize_threads ()
+process_stratum_target::stabilize_threads ()
 {
   /* Nop.  */
 }
 
 bool
-process_target::supports_fast_tracepoints ()
+process_stratum_target::supports_fast_tracepoints ()
 {
   return false;
 }
 
 int
-process_target::install_fast_tracepoint_jump_pad
+process_stratum_target::install_fast_tracepoint_jump_pad
   (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
    CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
    CORE_ADDR *trampoline, ULONGEST *trampoline_size,
@@ -676,58 +684,58 @@ process_target::install_fast_tracepoint_jump_pad
 }
 
 int
-process_target::get_min_fast_tracepoint_insn_len ()
+process_stratum_target::get_min_fast_tracepoint_insn_len ()
 {
   return 0;
 }
 
 struct emit_ops *
-process_target::emit_ops ()
+process_stratum_target::emit_ops ()
 {
   return nullptr;
 }
 
 bool
-process_target::supports_disable_randomization ()
+process_stratum_target::supports_disable_randomization ()
 {
   return false;
 }
 
 bool
-process_target::supports_qxfer_libraries_svr4 ()
+process_stratum_target::supports_qxfer_libraries_svr4 ()
 {
   return false;
 }
 
 int
-process_target::qxfer_libraries_svr4 (const char *annex,
-				      unsigned char *readbuf,
-				      unsigned const char *writebuf,
-				      CORE_ADDR offset, int len)
+process_stratum_target::qxfer_libraries_svr4 (const char *annex,
+					      unsigned char *readbuf,
+					      unsigned const char *writebuf,
+					      CORE_ADDR offset, int len)
 {
   gdb_assert_not_reached ("target op qxfer_libraries_svr4 not supported");
 }
 
 bool
-process_target::supports_agent ()
+process_stratum_target::supports_agent ()
 {
   return false;
 }
 
 btrace_target_info *
-process_target::enable_btrace (ptid_t ptid, const btrace_config *conf)
+process_stratum_target::enable_btrace (ptid_t ptid, const btrace_config *conf)
 {
   error (_("Target does not support branch tracing."));
 }
 
 int
-process_target::disable_btrace (btrace_target_info *tinfo)
+process_stratum_target::disable_btrace (btrace_target_info *tinfo)
 {
   error (_("Target does not support branch tracing."));
 }
 
 int
-process_target::read_btrace (btrace_target_info *tinfo,
+process_stratum_target::read_btrace (btrace_target_info *tinfo,
 			     buffer *buffer,
 			     enum btrace_read_type type)
 {
@@ -735,58 +743,58 @@ process_target::read_btrace (btrace_target_info *tinfo,
 }
 
 int
-process_target::read_btrace_conf (const btrace_target_info *tinfo,
-				  buffer *buffer)
+process_stratum_target::read_btrace_conf (const btrace_target_info *tinfo,
+					  buffer *buffer)
 {
   error (_("Target does not support branch tracing."));
 }
 
 bool
-process_target::supports_range_stepping ()
+process_stratum_target::supports_range_stepping ()
 {
   return false;
 }
 
 bool
-process_target::supports_pid_to_exec_file ()
+process_stratum_target::supports_pid_to_exec_file ()
 {
   return false;
 }
 
 char *
-process_target::pid_to_exec_file (int pid)
+process_stratum_target::pid_to_exec_file (int pid)
 {
   gdb_assert_not_reached ("target op pid_to_exec_file not supported");
 }
 
 bool
-process_target::supports_multifs ()
+process_stratum_target::supports_multifs ()
 {
   return false;
 }
 
 int
-process_target::multifs_open (int pid, const char *filename,
-			      int flags, mode_t mode)
+process_stratum_target::multifs_open (int pid, const char *filename,
+				      int flags, mode_t mode)
 {
   return open (filename, flags, mode);
 }
 
 int
-process_target::multifs_unlink (int pid, const char *filename)
+process_stratum_target::multifs_unlink (int pid, const char *filename)
 {
   return unlink (filename);
 }
 
 ssize_t
-process_target::multifs_readlink (int pid, const char *filename,
-				  char *buf, size_t bufsiz)
+process_stratum_target::multifs_readlink (int pid, const char *filename,
+					  char *buf, size_t bufsiz)
 {
   return readlink (filename, buf, bufsiz);
 }
 
 int
-process_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+process_stratum_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
 {
   /* The default behavior is to use the size of a breakpoint as the
      kind.  */
@@ -796,38 +804,38 @@ process_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
 }
 
 int
-process_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
+process_stratum_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
 {
   return breakpoint_kind_from_pc (pcptr);
 }
 
 const char *
-process_target::thread_name (ptid_t thread)
+process_stratum_target::thread_name (ptid_t thread)
 {
   return nullptr;
 }
 
 bool
-process_target::thread_handle (ptid_t ptid, gdb_byte **handle,
-			       int *handle_len)
+process_stratum_target::thread_handle (ptid_t ptid, gdb_byte **handle,
+				       int *handle_len)
 {
   return false;
 }
 
 bool
-process_target::supports_software_single_step ()
+process_stratum_target::supports_software_single_step ()
 {
   return false;
 }
 
 bool
-process_target::supports_catch_syscall ()
+process_stratum_target::supports_catch_syscall ()
 {
   return false;
 }
 
 int
-process_target::get_ipa_tdesc_idx ()
+process_stratum_target::get_ipa_tdesc_idx ()
 {
   return 0;
 }

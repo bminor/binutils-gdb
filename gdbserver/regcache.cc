@@ -477,13 +477,13 @@ collect_register_by_name (struct regcache *regcache,
 CORE_ADDR
 regcache_read_pc (struct regcache *regcache)
 {
-  return the_target->pt->read_pc (regcache);
+  return the_target->read_pc (regcache);
 }
 
 void
 regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  the_target->pt->write_pc (regcache, pc);
+  the_target->write_pc (regcache, pc);
 }
 
 #endif

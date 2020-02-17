@@ -740,7 +740,7 @@ handle_general_set (char *own_buf)
 	}
 
       req_str = req ? "non-stop" : "all-stop";
-      if (the_target->pt->start_non_stop (req == 1) != 0)
+      if (the_target->start_non_stop (req == 1) != 0)
 	{
 	  fprintf (stderr, "Setting %s mode failed\n", req_str);
 	  write_enn (own_buf);
@@ -1234,7 +1234,7 @@ handle_detach (char *own_buf)
 	    debug_printf ("Forcing non-stop mode\n");
 
 	  non_stop = true;
-	  the_target->pt->start_non_stop (true);
+	  the_target->start_non_stop (true);
 	}
 
       process->gdb_detached = 1;
@@ -1442,13 +1442,13 @@ handle_qxfer_auxv (const char *annex,
 		   gdb_byte *readbuf, const gdb_byte *writebuf,
 		   ULONGEST offset, LONGEST len)
 {
-  if (!the_target->pt->supports_read_auxv () || writebuf != NULL)
+  if (!the_target->supports_read_auxv () || writebuf != NULL)
     return -2;
 
   if (annex[0] != '\0' || current_thread == NULL)
     return -1;
 
-  return the_target->pt->read_auxv (offset, readbuf, len);
+  return the_target->read_auxv (offset, readbuf, len);
 }
 
 /* Handle qXfer:exec-file:read.  */
@@ -1462,7 +1462,7 @@ handle_qxfer_exec_file (const char *annex,
   ULONGEST pid;
   int total_len;
 
-  if (!the_target->pt->supports_pid_to_exec_file () || writebuf != NULL)
+  if (!the_target->supports_pid_to_exec_file () || writebuf != NULL)
     return -2;
 
   if (annex[0] == '\0')
@@ -1482,7 +1482,7 @@ handle_qxfer_exec_file (const char *annex,
   if (pid <= 0)
     return -1;
 
-  file = the_target->pt->pid_to_exec_file (pid);
+  file = the_target->pid_to_exec_file (pid);
   if (file == NULL)
     return -1;
 
@@ -1575,11 +1575,11 @@ handle_qxfer_libraries_svr4 (const char *annex,
     return -2;
 
   if (current_thread == NULL
-      || !the_target->pt->supports_qxfer_libraries_svr4 ())
+      || !the_target->supports_qxfer_libraries_svr4 ())
     return -1;
 
-  return the_target->pt->qxfer_libraries_svr4 (annex, readbuf, writebuf,
-					       offset, len);
+  return the_target->qxfer_libraries_svr4 (annex, readbuf, writebuf,
+					   offset, len);
 }
 
 /* Handle qXfer:osadata:read.  */
@@ -1589,10 +1589,10 @@ handle_qxfer_osdata (const char *annex,
 		     gdb_byte *readbuf, const gdb_byte *writebuf,
 		     ULONGEST offset, LONGEST len)
 {
-  if (!the_target->pt->supports_qxfer_osdata () || writebuf != NULL)
+  if (!the_target->supports_qxfer_osdata () || writebuf != NULL)
     return -2;
 
-  return the_target->pt->qxfer_osdata (annex, readbuf, NULL, offset, len);
+  return the_target->qxfer_osdata (annex, readbuf, NULL, offset, len);
 }
 
 /* Handle qXfer:siginfo:read and qXfer:siginfo:write.  */
@@ -1602,13 +1602,13 @@ handle_qxfer_siginfo (const char *annex,
 		      gdb_byte *readbuf, const gdb_byte *writebuf,
 		      ULONGEST offset, LONGEST len)
 {
-  if (!the_target->pt->supports_qxfer_siginfo ())
+  if (!the_target->supports_qxfer_siginfo ())
     return -2;
 
   if (annex[0] != '\0' || current_thread == NULL)
     return -1;
 
-  return the_target->pt->qxfer_siginfo (annex, readbuf, writebuf, offset, len);
+  return the_target->qxfer_siginfo (annex, readbuf, writebuf, offset, len);
 }
 
 /* Handle qXfer:statictrace:read.  */
@@ -1794,13 +1794,13 @@ static int
 handle_qxfer_fdpic (const char *annex, gdb_byte *readbuf,
 		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
-  if (!the_target->pt->supports_read_loadmap ())
+  if (!the_target->supports_read_loadmap ())
     return -2;
 
   if (current_thread == NULL)
     return -1;
 
-  return the_target->pt->read_loadmap (annex, offset, readbuf, len);
+  return the_target->read_loadmap (annex, offset, readbuf, len);
 }
 
 /* Handle qXfer:btrace:read.  */
@@ -2195,7 +2195,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	tracepoint_look_up_symbols ();
 
       if (current_thread != NULL)
-	the_target->pt->look_up_symbols ();
+	the_target->look_up_symbols ();
 
       current_thread = save_thread;
 
@@ -2236,13 +2236,13 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	}
     }
 
-  if (the_target->pt->supports_read_offsets ()
+  if (the_target->supports_read_offsets ()
       && strcmp ("qOffsets", own_buf) == 0)
     {
       CORE_ADDR text, data;
 
       require_running_or_return (own_buf);
-      if (the_target->pt->read_offsets (&text, &data))
+      if (the_target->read_offsets (&text, &data))
 	sprintf (own_buf, "Text=%lX;Data=%lX;Bss=%lX",
 		 (long)text, (long)data, (long)data);
       else
@@ -2366,7 +2366,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (target_supports_catch_syscall ())
 	strcat (own_buf, ";QCatchSyscalls+");
 
-      if (the_target->pt->supports_qxfer_libraries_svr4 ())
+      if (the_target->supports_qxfer_libraries_svr4 ())
 	strcat (own_buf, ";qXfer:libraries-svr4:read+"
 		";augmented-libraries-svr4-read+");
       else
@@ -2376,13 +2376,13 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  strcat (own_buf, ";qXfer:libraries:read+");
 	}
 
-      if (the_target->pt->supports_read_auxv ())
+      if (the_target->supports_read_auxv ())
 	strcat (own_buf, ";qXfer:auxv:read+");
 
-      if (the_target->pt->supports_qxfer_siginfo ())
+      if (the_target->supports_qxfer_siginfo ())
 	strcat (own_buf, ";qXfer:siginfo:read+;qXfer:siginfo:write+");
 
-      if (the_target->pt->supports_read_loadmap ())
+      if (the_target->supports_read_loadmap ())
 	strcat (own_buf, ";qXfer:fdpic:read+");
 
       /* We always report qXfer:features:read, as targets may
@@ -2394,7 +2394,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (cs.transport_is_reliable)
 	strcat (own_buf, ";QStartNoAckMode+");
 
-      if (the_target->pt->supports_qxfer_osdata ())
+      if (the_target->supports_qxfer_osdata ())
 	strcat (own_buf, ";qXfer:osdata:read+");
 
       if (target_supports_multi_process ())
@@ -2452,7 +2452,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (target_supports_stopped_by_hw_breakpoint ())
 	strcat (own_buf, ";hwbreak+");
 
-      if (the_target->pt->supports_pid_to_exec_file ())
+      if (the_target->supports_pid_to_exec_file ())
 	strcat (own_buf, ";qXfer:exec-file:read+");
 
       strcat (own_buf, ";vContSupported+");
@@ -2469,7 +2469,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
     }
 
   /* Thread-local storage support.  */
-  if (the_target->pt->supports_get_tls_address ()
+  if (the_target->supports_get_tls_address ()
       && startswith (own_buf, "qGetTLSAddr:"))
     {
       char *p = own_buf + 12;
@@ -2515,8 +2515,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  if (thread == NULL)
 	    err = 2;
 	  else
-	    err = the_target->pt->get_tls_address (thread, parts[0], parts[1],
-						   &address);
+	    err = the_target->get_tls_address (thread, parts[0], parts[1],
+					       &address);
 	}
 
       if (err == 0)
@@ -2534,7 +2534,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
     }
 
   /* Windows OS Thread Information Block address support.  */
-  if (the_target->pt->supports_get_tib_address ()
+  if (the_target->supports_get_tib_address ()
       && startswith (own_buf, "qGetTIBAddr:"))
     {
       const char *annex;
@@ -2542,7 +2542,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       CORE_ADDR tlb;
       ptid_t ptid = read_ptid (own_buf + 12, &annex);
 
-      n = the_target->pt->get_tib_address (ptid, &tlb);
+      n = the_target->get_tib_address (ptid, &tlb);
       if (n == 1)
 	{
 	  strcpy (own_buf, paddress(tlb));
@@ -2579,7 +2579,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       write_ok (own_buf);
 
-      if (the_target->pt->handle_monitor_command (mon) == 0)
+      if (the_target->handle_monitor_command (mon) == 0)
 	/* Default processing.  */
 	handle_monitor_command (mon, own_buf);
 
@@ -2848,7 +2848,7 @@ resume (struct thread_resume *actions, size_t num_actions)
       enable_async_io ();
     }
 
-  the_target->pt->resume (actions, num_actions);
+  the_target->resume (actions, num_actions);
 
   if (non_stop)
     write_ok (cs.own_buf);
@@ -3089,7 +3089,7 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
     {
       if (strcmp (own_buf, "vCtrlC") == 0)
 	{
-	  the_target->pt->request_interrupt ();
+	  the_target->request_interrupt ();
 	  write_ok (own_buf);
 	  return;
 	}
@@ -3219,7 +3219,7 @@ queue_stop_reply_callback (thread_info *thread)
 {
   /* For now, assume targets that don't have this callback also don't
      manage the thread's last_status field.  */
-  if (!the_target->pt->supports_thread_stopped ())
+  if (!the_target->supports_thread_stopped ())
     {
       struct vstop_notif *new_notif = new struct vstop_notif;
 
@@ -3886,7 +3886,7 @@ captured_main (int argc, char *argv[])
 		     down without informing GDB.  */
 		  if (!non_stop)
 		    {
-		      if (the_target->pt->start_non_stop (true))
+		      if (the_target->start_non_stop (true))
 			non_stop = 1;
 
 		      /* Detaching implicitly resumes all threads;

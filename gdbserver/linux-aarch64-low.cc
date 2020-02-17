@@ -192,8 +192,8 @@ aarch64_breakpoint_at (CORE_ADDR where)
     {
       gdb_byte insn[aarch64_breakpoint_len];
 
-      the_target->pt->read_memory (where, (unsigned char *) &insn,
-				   aarch64_breakpoint_len);
+      the_target->read_memory (where, (unsigned char *) &insn,
+			       aarch64_breakpoint_len);
       if (memcmp (insn, aarch64_breakpoint, aarch64_breakpoint_len) == 0)
 	return 1;
 

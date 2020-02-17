@@ -76,7 +76,7 @@ sh_breakpoint_at (CORE_ADDR where)
 {
   unsigned short insn;
 
-  the_target->pt->read_memory (where, (unsigned char *) &insn, 2);
+  the_target->read_memory (where, (unsigned char *) &insn, 2);
   if (insn == sh_breakpoint)
     return 1;
 

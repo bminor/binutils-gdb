@@ -63,22 +63,15 @@ struct thread_resume
   CORE_ADDR step_range_end;	/* Exclusive */
 };
 
-class process_target;
-
 /* GDBserver doesn't have a concept of strata like GDB, but we call
    its target vector "process_stratum" anyway for the benefit of
    shared code.  */
-struct process_stratum_target
-{
-  /* The object that will gradually replace this struct.  */
-  process_target *pt;
-};
 
-class process_target
+class process_stratum_target
 {
 public:
 
-  virtual ~process_target () = default;
+  virtual ~process_stratum_target () = default;
 
   /* Start a new process.
 
@@ -511,78 +504,78 @@ extern process_stratum_target *the_target;
 void set_target_ops (process_stratum_target *);
 
 #define target_create_inferior(program, program_args)	\
-  the_target->pt->create_inferior (program, program_args)
+  the_target->create_inferior (program, program_args)
 
 #define target_post_create_inferior()			 \
-  the_target->pt->post_create_inferior ()
+  the_target->post_create_inferior ()
 
 #define myattach(pid) \
-  the_target->pt->attach (pid)
+  the_target->attach (pid)
 
 int kill_inferior (process_info *proc);
 
 #define target_supports_fork_events() \
-  the_target->pt->supports_fork_events ()
+  the_target->supports_fork_events ()
 
 #define target_supports_vfork_events() \
-  the_target->pt->supports_vfork_events ()
+  the_target->supports_vfork_events ()
 
 #define target_supports_exec_events() \
-  the_target->pt->supports_exec_events ()
+  the_target->supports_exec_events ()
 
 #define target_handle_new_gdb_connection()		 \
-  the_target->pt->handle_new_gdb_connection ()
+  the_target->handle_new_gdb_connection ()
 
 #define detach_inferior(proc) \
-  the_target->pt->detach (proc)
+  the_target->detach (proc)
 
 #define mythread_alive(pid) \
-  the_target->pt->thread_alive (pid)
+  the_target->thread_alive (pid)
 
 #define fetch_inferior_registers(regcache, regno)	\
-  the_target->pt->fetch_registers (regcache, regno)
+  the_target->fetch_registers (regcache, regno)
 
 #define store_inferior_registers(regcache, regno) \
-  the_target->pt->store_registers (regcache, regno)
+  the_target->store_registers (regcache, regno)
 
 #define join_inferior(pid) \
-  the_target->pt->join (pid)
+  the_target->join (pid)
 
 #define target_supports_non_stop() \
-  the_target->pt->supports_non_stop ()
+  the_target->supports_non_stop ()
 
 #define target_async(enable) \
-  the_target->pt->async (enable)
+  the_target->async (enable)
 
 #define target_process_qsupported(features, count)	\
-  the_target->pt->process_qsupported (features, count)
+  the_target->process_qsupported (features, count)
 
 #define target_supports_catch_syscall()              	\
-  the_target->pt->supports_catch_syscall ()
+  the_target->supports_catch_syscall ()
 
 #define target_get_ipa_tdesc_idx()			\
-  the_target->pt->get_ipa_tdesc_idx ()
+  the_target->get_ipa_tdesc_idx ()
 
 #define target_supports_tracepoints()			\
-  the_target->pt->supports_tracepoints ()
+  the_target->supports_tracepoints ()
 
 #define target_supports_fast_tracepoints()		\
-  the_target->pt->supports_fast_tracepoints ()
+  the_target->supports_fast_tracepoints ()
 
 #define target_get_min_fast_tracepoint_insn_len()	\
-  the_target->pt->get_min_fast_tracepoint_insn_len ()
+  the_target->get_min_fast_tracepoint_insn_len ()
 
 #define target_thread_stopped(thread) \
-  the_target->pt->thread_stopped (thread)
+  the_target->thread_stopped (thread)
 
 #define target_pause_all(freeze)		\
-  the_target->pt->pause_all (freeze)
+  the_target->pause_all (freeze)
 
 #define target_unpause_all(unfreeze)		\
-  the_target->pt->unpause_all (unfreeze)
+  the_target->unpause_all (unfreeze)
 
 #define target_stabilize_threads()		\
-  the_target->pt->stabilize_threads ()
+  the_target->stabilize_threads ()
 
 #define target_install_fast_tracepoint_jump_pad(tpoint, tpaddr,		\
 						collector, lockaddr,	\
@@ -594,36 +587,36 @@ int kill_inferior (process_info *proc);
 						adjusted_insn_addr,	\
 						adjusted_insn_addr_end,	\
 						err)			\
-  the_target->pt->install_fast_tracepoint_jump_pad (tpoint, tpaddr,	\
-						    collector,lockaddr,	\
-						    orig_size, jump_entry, \
-						    trampoline,		\
-						    trampoline_size,	\
-						    jjump_pad_insn,	\
-						    jjump_pad_insn_size, \
-						    adjusted_insn_addr,	\
-						    adjusted_insn_addr_end, \
-						    err)
+  the_target->install_fast_tracepoint_jump_pad (tpoint, tpaddr,	\
+						collector,lockaddr,	\
+						orig_size, jump_entry,	\
+						trampoline,		\
+						trampoline_size,	\
+						jjump_pad_insn,		\
+						jjump_pad_insn_size,	\
+						adjusted_insn_addr,	\
+						adjusted_insn_addr_end, \
+						err)
 
 #define target_emit_ops() \
-  the_target->pt->emit_ops ()
+  the_target->emit_ops ()
 
 #define target_supports_disable_randomization() \
-  the_target->pt->supports_disable_randomization ()
+  the_target->supports_disable_randomization ()
 
 #define target_supports_agent() \
-  the_target->pt->supports_agent ()
+  the_target->supports_agent ()
 
 static inline struct btrace_target_info *
 target_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
 {
-  return the_target->pt->enable_btrace (ptid, conf);
+  return the_target->enable_btrace (ptid, conf);
 }
 
 static inline int
 target_disable_btrace (struct btrace_target_info *tinfo)
 {
-  return the_target->pt->disable_btrace (tinfo);
+  return the_target->disable_btrace (tinfo);
 }
 
 static inline int
@@ -631,42 +624,42 @@ target_read_btrace (struct btrace_target_info *tinfo,
 		    struct buffer *buffer,
 		    enum btrace_read_type type)
 {
-  return the_target->pt->read_btrace (tinfo, buffer, type);
+  return the_target->read_btrace (tinfo, buffer, type);
 }
 
 static inline int
 target_read_btrace_conf (struct btrace_target_info *tinfo,
 			 struct buffer *buffer)
 {
-  return the_target->pt->read_btrace_conf (tinfo, buffer);
+  return the_target->read_btrace_conf (tinfo, buffer);
 }
 
 #define target_supports_range_stepping() \
-  the_target->pt->supports_range_stepping ()
+  the_target->supports_range_stepping ()
 
 #define target_supports_stopped_by_sw_breakpoint() \
-  the_target->pt->supports_stopped_by_sw_breakpoint ()
+  the_target->supports_stopped_by_sw_breakpoint ()
 
 #define target_stopped_by_sw_breakpoint() \
-  the_target->pt->stopped_by_sw_breakpoint ()
+  the_target->stopped_by_sw_breakpoint ()
 
 #define target_supports_stopped_by_hw_breakpoint() \
-  the_target->pt->supports_stopped_by_hw_breakpoint ()
+  the_target->supports_stopped_by_hw_breakpoint ()
 
 #define target_supports_hardware_single_step() \
-  the_target->pt->supports_hardware_single_step ()
+  the_target->supports_hardware_single_step ()
 
 #define target_stopped_by_hw_breakpoint() \
-  the_target->pt->stopped_by_hw_breakpoint ()
+  the_target->stopped_by_hw_breakpoint ()
 
 #define target_breakpoint_kind_from_pc(pcptr) \
-  the_target->pt->breakpoint_kind_from_pc (pcptr)
+  the_target->breakpoint_kind_from_pc (pcptr)
 
 #define target_breakpoint_kind_from_current_state(pcptr) \
-  the_target->pt->breakpoint_kind_from_current_state (pcptr)
+  the_target->breakpoint_kind_from_current_state (pcptr)
 
 #define target_supports_software_single_step() \
-  the_target->pt->supports_software_single_step ()
+  the_target->supports_software_single_step ()
 
 ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
 	       int connected_wait);
@@ -678,13 +671,13 @@ int prepare_to_access_memory (void);
 void done_accessing_memory (void);
 
 #define target_core_of_thread(ptid)		\
-  the_target->pt->core_of_thread (ptid)
+  the_target->core_of_thread (ptid)
 
 #define target_thread_name(ptid)                                \
-  the_target->pt->thread_name (ptid)
+  the_target->thread_name (ptid)
 
 #define target_thread_handle(ptid, handle, handle_len) \
-  the_target->pt->thread_handle (ptid, handle, handle_len)
+  the_target->thread_handle (ptid, handle, handle_len)
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 

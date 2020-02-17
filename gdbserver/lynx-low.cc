@@ -738,16 +738,10 @@ lynx_process_target::sw_breakpoint_from_kind (int kind, int *size)
 
 static lynx_process_target the_lynx_target;
 
-/* The LynxOS target_ops vector.  */
-
-static process_stratum_target lynx_target_ops = {
-  &the_lynx_target,
-};
-
 void
 initialize_low (void)
 {
-  set_target_ops (&lynx_target_ops);
+  set_target_ops (&the_lynx_target);
   the_low_target.arch_setup ();
 }
 

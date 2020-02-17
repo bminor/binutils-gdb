@@ -779,15 +779,15 @@ arm_sigreturn_next_pc (struct regcache *regcache, int svc_number,
   gdb_assert (svc_number == __NR_sigreturn || svc_number == __NR_rt_sigreturn);
 
   collect_register_by_name (regcache, "sp", &sp);
-  the_target->pt->read_memory (sp, (unsigned char *) &sp_data, 4);
+  the_target->read_memory (sp, (unsigned char *) &sp_data, 4);
 
   pc_offset = arm_linux_sigreturn_next_pc_offset
     (sp, sp_data, svc_number, __NR_sigreturn == svc_number ? 1 : 0);
 
-  the_target->pt->read_memory (sp + pc_offset, (unsigned char *) &next_pc, 4);
+  the_target->read_memory (sp + pc_offset, (unsigned char *) &next_pc, 4);
 
   /* Set IS_THUMB according the CPSR saved on the stack.  */
-  the_target->pt->read_memory (sp + pc_offset + 4, (unsigned char *) &cpsr, 4);
+  the_target->read_memory (sp + pc_offset + 4, (unsigned char *) &cpsr, 4);
   *is_thumb = ((cpsr & CPSR_T) != 0);
 
   return next_pc;
@@ -939,7 +939,7 @@ arm_get_syscall_trapinfo (struct regcache *regcache, int *sysno)
 
       collect_register_by_name (regcache, "pc", &pc);
 
-      if (the_target->pt->read_memory (pc - 4, (unsigned char *) &insn, 4))
+      if (the_target->read_memory (pc - 4, (unsigned char *) &insn, 4))
 	*sysno = UNKNOWN_SYSCALL;
       else
 	{

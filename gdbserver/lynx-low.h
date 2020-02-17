@@ -54,7 +54,7 @@ extern struct lynx_target_ops the_low_target;
 
 /* Target ops definitions for a LynxOS target.  */
 
-class lynx_process_target : public process_target
+class lynx_process_target : public process_stratum_target
 {
 public:
 

@@ -85,7 +85,7 @@ tile_breakpoint_at (CORE_ADDR where)
 {
   uint64_t insn;
 
-  the_target->pt->read_memory (where, (unsigned char *) &insn, 8);
+  the_target->read_memory (where, (unsigned char *) &insn, 8);
   if (insn == tile_breakpoint)
     return 1;
 

@@ -710,7 +710,7 @@ putpkt_binary_1 (char *buf, int cnt, int is_notif)
 
       /* Check for an input interrupt while we're here.  */
       if (cc == '\003' && current_thread != NULL)
-	the_target->pt->request_interrupt ();
+	the_target->request_interrupt ();
     }
   while (cc != '+');
 
@@ -779,7 +779,7 @@ input_interrupt (int unused)
 	  return;
 	}
 
-      the_target->pt->request_interrupt ();
+      the_target->request_interrupt ();
     }
 }
 
@@ -986,7 +986,7 @@ getpkt (char *buf)
 	     check for an input interrupt.  */
 	  if (c == '\003')
 	    {
-	      the_target->pt->request_interrupt ();
+	      the_target->request_interrupt ();
 	      continue;
 	    }
 
@@ -1076,7 +1076,7 @@ getpkt (char *buf)
     {
       /* Consume the interrupt character in the buffer.  */
       readchar ();
-      the_target->pt->request_interrupt ();
+      the_target->request_interrupt ();
     }
 
   return bp - buf;
@@ -1214,7 +1214,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 
 	regcache = get_thread_regcache (current_thread, 1);
 
-	if (the_target->pt->stopped_by_watchpoint ())
+	if (the_target->stopped_by_watchpoint ())
 	  {
 	    CORE_ADDR addr;
 	    int i;
@@ -1222,7 +1222,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	    memcpy (buf, "watch:", 6);
 	    buf += 6;
 
-	    addr = the_target->pt->stopped_data_address ();
+	    addr = the_target->stopped_data_address ();
 
 	    /* Convert each byte of the address into two hexadecimal
 	       chars.  Note that we take sizeof (void *) instead of

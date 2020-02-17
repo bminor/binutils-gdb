@@ -44,7 +44,7 @@ extern struct nto_target_ops the_low_target;
 
 /* Target ops definitions for a QNX Neutrino target.  */
 
-class nto_process_target : public process_target
+class nto_process_target : public process_stratum_target
 {
 public:
 

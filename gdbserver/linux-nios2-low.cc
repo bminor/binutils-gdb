@@ -131,12 +131,12 @@ nios2_breakpoint_at (CORE_ADDR where)
 
   /* For R2, first check for the 2-byte CDX trap.n breakpoint encoding.  */
 #if defined(__nios2_arch__) && __nios2_arch__ == 2
-  the_target->pt->read_memory (where, (unsigned char *) &insn, 2);
+  the_target->read_memory (where, (unsigned char *) &insn, 2);
   if (insn == CDX_BREAKPOINT)
     return 1;
 #endif
 
-  the_target->pt->read_memory (where, (unsigned char *) &insn, 4);
+  the_target->read_memory (where, (unsigned char *) &insn, 4);
   if (insn == nios2_breakpoint)
     return 1;
   return 0;
