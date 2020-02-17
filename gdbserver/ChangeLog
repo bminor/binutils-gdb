@@ -1,5 +1,29 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's read_loadmap op into a method of
+	process_target.
+
+	* target.h (struct process_stratum_target): Remove the target op.
+	(class process_target): Add the target op.  Also add
+	'supports_read_loadmap'.
+	* target.cc (process_target::read_loadmap): Define.
+	(process_target::supports_read_loadmap): Define.
+
+	Update the derived classes and callers below.
+
+	* server.cc (handle_qxfer_fdpic): Update.
+	(handle_query): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_process_target::supports_read_loadmap): Define.
+	(linux_read_loadmap): Turn into ...
+	(linux_process_target::read_loadmap): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	* win32-low.cc (win32_target_ops): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's core_of_thread op into a method of
 	process_target.
 

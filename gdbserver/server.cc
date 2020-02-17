@@ -1792,13 +1792,13 @@ static int
 handle_qxfer_fdpic (const char *annex, gdb_byte *readbuf,
 		    const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
-  if (the_target->read_loadmap == NULL)
+  if (!the_target->pt->supports_read_loadmap ())
     return -2;
 
   if (current_thread == NULL)
     return -1;
 
-  return (*the_target->read_loadmap) (annex, offset, readbuf, len);
+  return the_target->pt->read_loadmap (annex, offset, readbuf, len);
 }
 
 /* Handle qXfer:btrace:read.  */
@@ -2380,7 +2380,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (the_target->pt->supports_qxfer_siginfo ())
 	strcat (own_buf, ";qXfer:siginfo:read+;qXfer:siginfo:write+");
 
-      if (the_target->read_loadmap != NULL)
+      if (the_target->pt->supports_read_loadmap ())
 	strcat (own_buf, ";qXfer:fdpic:read+");
 
       /* We always report qXfer:features:read, as targets may

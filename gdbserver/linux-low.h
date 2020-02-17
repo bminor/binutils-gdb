@@ -377,6 +377,13 @@ public:
   int handle_monitor_command (char *mon) override;
 
   int core_of_thread (ptid_t ptid) override;
+
+#if defined PT_GETDSBT || defined PTRACE_GETFDPIC
+  bool supports_read_loadmap () override;
+
+  int read_loadmap (const char *annex, CORE_ADDR offset,
+		    unsigned char *myaddr, unsigned int len) override;
+#endif
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

@@ -6483,9 +6483,15 @@ struct target_loadmap
 #  define LINUX_LOADMAP_INTERP	PTRACE_GETFDPIC_INTERP
 # endif
 
-static int
-linux_read_loadmap (const char *annex, CORE_ADDR offset,
-		    unsigned char *myaddr, unsigned int len)
+bool
+linux_process_target::supports_read_loadmap ()
+{
+  return true;
+}
+
+int
+linux_process_target::read_loadmap (const char *annex, CORE_ADDR offset,
+				    unsigned char *myaddr, unsigned int len)
 {
   int pid = lwpid_of (current_thread);
   int addr = -1;
@@ -6515,8 +6521,6 @@ linux_read_loadmap (const char *annex, CORE_ADDR offset,
   memcpy (myaddr, (char *) data + offset, copy_length);
   return copy_length;
 }
-#else
-# define linux_read_loadmap NULL
 #endif /* defined PT_GETDSBT || defined PTRACE_GETFDPIC */
 
 static void
@@ -7445,7 +7449,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_read_loadmap,
   linux_process_qsupported,
   linux_supports_tracepoints,
   linux_read_pc,

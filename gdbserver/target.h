@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Read loadmaps.  Read LEN bytes at OFFSET into a buffer at MYADDR.  */
-  int (*read_loadmap) (const char *annex, CORE_ADDR offset,
-		       unsigned char *myaddr, unsigned int len);
-
   /* Target specific qSupported support.  FEATURES is an array of
      features with COUNT elements.  */
   void (*process_qsupported) (char **features, int count);
@@ -486,6 +482,13 @@ public:
 
   /* Returns the core given a thread, or -1 if not known.  */
   virtual int core_of_thread (ptid_t ptid);
+
+  /* Returns true if the read_loadmap target op is supported.  */
+  virtual bool supports_read_loadmap ();
+
+  /* Read loadmaps.  Read LEN bytes at OFFSET into a buffer at MYADDR.  */
+  virtual int read_loadmap (const char *annex, CORE_ADDR offset,
+			    unsigned char *myaddr, unsigned int len);
 };
 
 extern process_stratum_target *the_target;

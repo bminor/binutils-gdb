@@ -589,3 +589,16 @@ process_target::core_of_thread (ptid_t ptid)
 {
   return -1;
 }
+
+bool
+process_target::supports_read_loadmap ()
+{
+  return false;
+}
+
+int
+process_target::read_loadmap (const char *annex, CORE_ADDR offset,
+			      unsigned char *myaddr, unsigned int len)
+{
+  gdb_assert_not_reached ("target op read_loadmap not supported");
+}
