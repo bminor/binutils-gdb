@@ -459,3 +459,15 @@ process_target::supports_stopped_by_sw_breakpoint ()
 {
   return false;
 }
+
+bool
+process_target::stopped_by_hw_breakpoint ()
+{
+  return false;
+}
+
+bool
+process_target::supports_stopped_by_hw_breakpoint ()
+{
+  return false;
+}

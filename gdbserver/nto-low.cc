@@ -950,8 +950,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  NULL, /* stopped_by_hw_breakpoint */
-  NULL, /* supports_stopped_by_hw_breakpoint */
   target_can_do_hardware_single_step,
   nto_stopped_by_watchpoint,
   nto_stopped_data_address,

@@ -6010,22 +6010,22 @@ linux_process_target::supports_stopped_by_sw_breakpoint ()
   return USE_SIGTRAP_SIGINFO;
 }
 
-/* Implement the to_stopped_by_hw_breakpoint target_ops
+/* Implement the stopped_by_hw_breakpoint target_ops
    method.  */
 
-static int
-linux_stopped_by_hw_breakpoint (void)
+bool
+linux_process_target::stopped_by_hw_breakpoint ()
 {
   struct lwp_info *lwp = get_thread_lwp (current_thread);
 
   return (lwp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT);
 }
 
-/* Implement the to_supports_stopped_by_hw_breakpoint target_ops
+/* Implement the supports_stopped_by_hw_breakpoint target_ops
    method.  */
 
-static int
-linux_supports_stopped_by_hw_breakpoint (void)
+bool
+linux_process_target::supports_stopped_by_hw_breakpoint ()
 {
   return USE_SIGTRAP_SIGINFO;
 }
@@ -7376,8 +7376,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_stopped_by_hw_breakpoint,
-  linux_supports_stopped_by_hw_breakpoint,
   linux_supports_hardware_single_step,
   linux_stopped_by_watchpoint,
   linux_stopped_data_address,

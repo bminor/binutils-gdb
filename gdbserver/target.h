@@ -70,13 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Returns 1 if the target stopped for a hardware breakpoint.  */
-  int (*stopped_by_hw_breakpoint) (void);
-
-  /* Returns true if the target knows whether a trap was caused by a
-     HW breakpoint triggering.  */
-  int (*supports_stopped_by_hw_breakpoint) (void);
-
   /* Returns true if the target can do hardware single step.  */
   int (*supports_hardware_single_step) (void);
 
@@ -476,6 +469,13 @@ public:
   /* Returns true if the target knows whether a trap was caused by a
      SW breakpoint triggering.  */
   virtual bool supports_stopped_by_sw_breakpoint ();
+
+  /* Returns true if the target stopped for a hardware breakpoint.  */
+  virtual bool stopped_by_hw_breakpoint ();
+
+  /* Returns true if the target knows whether a trap was caused by a
+     HW breakpoint triggering.  */
+  virtual bool supports_stopped_by_hw_breakpoint ();
 };
 
 extern process_stratum_target *the_target;
@@ -665,16 +665,14 @@ target_read_btrace_conf (struct btrace_target_info *tinfo,
   the_target->pt->stopped_by_sw_breakpoint ()
 
 #define target_supports_stopped_by_hw_breakpoint() \
-  (the_target->supports_stopped_by_hw_breakpoint ? \
-   (*the_target->supports_stopped_by_hw_breakpoint) () : 0)
+  the_target->pt->supports_stopped_by_hw_breakpoint ()
 
 #define target_supports_hardware_single_step() \
   (the_target->supports_hardware_single_step ? \
    (*the_target->supports_hardware_single_step) () : 0)
 
 #define target_stopped_by_hw_breakpoint() \
-  (the_target->stopped_by_hw_breakpoint ? \
-   (*the_target->stopped_by_hw_breakpoint) () : 0)
+  the_target->pt->stopped_by_hw_breakpoint ()
 
 #define target_breakpoint_kind_from_pc(pcptr) \
   (the_target->breakpoint_kind_from_pc \
