@@ -70,9 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Return true if target supports debugging agent.  */
-  int (*supports_agent) (void);
-
   /* Enable branch tracing for PTID based on CONF and allocate a branch trace
      target information struct for reading and for disabling branch trace.  */
   struct btrace_target_info *(*enable_btrace)
@@ -497,6 +494,9 @@ public:
 				    unsigned char *readbuf,
 				    unsigned const char *writebuf,
 				    CORE_ADDR offset, int len);
+
+  /* Return true if target supports debugging agent.  */
+  virtual bool supports_agent ();
 };
 
 extern process_stratum_target *the_target;
@@ -607,8 +607,7 @@ int kill_inferior (process_info *proc);
   the_target->pt->supports_disable_randomization ()
 
 #define target_supports_agent() \
-  (the_target->supports_agent ? \
-   (*the_target->supports_agent) () : 0)
+  the_target->pt->supports_agent ()
 
 static inline struct btrace_target_info *
 target_enable_btrace (ptid_t ptid, const struct btrace_config *conf)

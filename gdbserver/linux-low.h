@@ -431,6 +431,8 @@ public:
 			    unsigned char *readbuf,
 			    unsigned const char *writebuf,
 			    CORE_ADDR offset, int len) override;
+
+  bool supports_agent () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

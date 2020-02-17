@@ -735,7 +735,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  NULL,  /* support_agent */
   NULL,  /* enable_btrace */
   NULL,  /* disable_btrace */
   NULL,  /* read_btrace */

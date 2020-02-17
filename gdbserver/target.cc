@@ -720,3 +720,9 @@ process_target::qxfer_libraries_svr4 (const char *annex,
 {
   gdb_assert_not_reached ("target op qxfer_libraries_svr4 not supported");
 }
+
+bool
+process_target::supports_agent ()
+{
+  return false;
+}

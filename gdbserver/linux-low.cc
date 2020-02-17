@@ -6424,10 +6424,10 @@ linux_process_target::supports_disable_randomization ()
 #endif
 }
 
-static int
-linux_supports_agent (void)
+bool
+linux_process_target::supports_agent ()
 {
-  return 1;
+  return true;
 }
 
 static int
@@ -7463,7 +7463,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_supports_agent,
 #ifdef HAVE_LINUX_BTRACE
   linux_enable_btrace,
   linux_low_disable_btrace,
