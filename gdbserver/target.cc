@@ -120,7 +120,7 @@ int
 read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
   int res;
-  res = (*the_target->read_memory) (memaddr, myaddr, len);
+  res = the_target->pt->read_memory (memaddr, myaddr, len);
   check_mem_read (memaddr, myaddr, len);
   return res;
 }
@@ -151,7 +151,7 @@ target_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
      update it.  */
   gdb::byte_vector buffer (myaddr, myaddr + len);
   check_mem_write (memaddr, buffer.data (), myaddr, len);
-  return (*the_target->write_memory) (memaddr, buffer.data (), len);
+  return the_target->pt->write_memory (memaddr, buffer.data (), len);
 }
 
 ptid_t

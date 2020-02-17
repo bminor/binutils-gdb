@@ -5709,11 +5709,20 @@ linux_process_target::store_registers (regcache *regcache, int regno)
 }
 
 
-/* Copy LEN bytes from inferior's memory starting at MEMADDR
-   to debugger memory starting at MYADDR.  */
+/* A wrapper for the read_memory target op.  */
 
 static int
 linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
+{
+  return the_target->pt->read_memory (memaddr, myaddr, len);
+}
+
+/* Copy LEN bytes from inferior's memory starting at MEMADDR
+   to debugger memory starting at MYADDR.  */
+
+int
+linux_process_target::read_memory (CORE_ADDR memaddr,
+				   unsigned char *myaddr, int len)
 {
   int pid = lwpid_of (current_thread);
   PTRACE_XFER_TYPE *buffer;
@@ -5801,8 +5810,9 @@ linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
    memory at MEMADDR.  On failure (cannot write to the inferior)
    returns the value of errno.  Always succeeds if LEN is zero.  */
 
-static int
-linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
+int
+linux_process_target::write_memory (CORE_ADDR memaddr,
+				    const unsigned char *myaddr, int len)
 {
   int i;
   /* Round starting address down to longword boundary.  */
@@ -7359,8 +7369,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_read_memory,
-  linux_write_memory,
   linux_look_up_symbols,
   linux_request_interrupt,
   linux_read_auxv,

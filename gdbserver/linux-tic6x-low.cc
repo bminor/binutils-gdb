@@ -241,7 +241,7 @@ tic6x_breakpoint_at (CORE_ADDR where)
 {
   unsigned int insn;
 
-  (*the_target->read_memory) (where, (unsigned char *) &insn, 4);
+  the_target->pt->read_memory (where, (unsigned char *) &insn, 4);
   if (insn == tic6x_breakpoint)
     return 1;
 

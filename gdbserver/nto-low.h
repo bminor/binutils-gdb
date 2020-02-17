@@ -71,6 +71,12 @@ public:
   void fetch_registers (regcache *regcache, int regno) override;
 
   void store_registers (regcache *regcache, int regno) override;
+
+  int read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
+		   int len) override;
+
+  int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
+		    int len) override;
 };
 
 /* The inferior's target description.  This is a global because the

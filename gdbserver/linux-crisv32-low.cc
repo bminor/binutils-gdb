@@ -72,8 +72,8 @@ cris_breakpoint_at (CORE_ADDR where)
 {
   unsigned short insn;
 
-  (*the_target->read_memory) (where, (unsigned char *) &insn,
-			      cris_breakpoint_len);
+  the_target->pt->read_memory (where, (unsigned char *) &insn,
+			       cris_breakpoint_len);
   if (insn == cris_breakpoint)
     return 1;
 

@@ -70,25 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Read memory from the inferior process.  This should generally be
-     called through read_inferior_memory, which handles breakpoint shadowing.
-
-     Read LEN bytes at MEMADDR into a buffer at MYADDR.
-  
-     Returns 0 on success and errno on failure.  */
-
-  int (*read_memory) (CORE_ADDR memaddr, unsigned char *myaddr, int len);
-
-  /* Write memory to the inferior process.  This should generally be
-     called through target_write_memory, which handles breakpoint shadowing.
-
-     Write LEN bytes from the buffer at MYADDR to MEMADDR.
-
-     Returns 0 on success and errno on failure.  */
-
-  int (*write_memory) (CORE_ADDR memaddr, const unsigned char *myaddr,
-		       int len);
-
   /* Query GDB for the values of any symbols we're interested in.
      This function is called whenever we receive a "qSymbols::"
      query, which corresponds to every time more symbols (might)
@@ -478,6 +459,24 @@ public:
 
   /* Undo the effects of prepare_to_access_memory.  */
   virtual void done_accessing_memory ();
+
+  /* Read memory from the inferior process.  This should generally be
+     called through read_inferior_memory, which handles breakpoint shadowing.
+
+     Read LEN bytes at MEMADDR into a buffer at MYADDR.
+
+     Returns 0 on success and errno on failure.  */
+  virtual int read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
+			   int len) = 0;
+
+  /* Write memory to the inferior process.  This should generally be
+     called through target_write_memory, which handles breakpoint shadowing.
+
+     Write LEN bytes from the buffer at MYADDR to MEMADDR.
+
+     Returns 0 on success and errno on failure.  */
+  virtual int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
+			    int len) = 0;
 };
 
 extern process_stratum_target *the_target;

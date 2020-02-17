@@ -1,5 +1,63 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's read_memory and write_memory
+	ops into methods of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target ops.
+	(class process_target): Add the target ops.
+
+	Update the derived classes and callers below.
+
+	* linux-aarch32-low.cc (arm_breakpoint_at): Update.
+	* linux-aarch64-low.cc (aarch64_breakpoint_at): Update.
+	* linux-arm-low.cc (arm_sigreturn_next_pc): Update.
+	(arm_get_syscall_trapinfo): Update.
+	* linux-cris-low.cc (cris_breakpoint_at): Update.
+	* linux-crisv32-low.cc (cris_breakpoint_at): Update.
+	* linux-m32r-low.cc (m32r_breakpoint_at): Update.
+	* linux-mips-low.cc (mips_breakpoint_at): Update.
+	* linux-nios2-low.cc (nios2_breakpoint_at): Update.
+	* linux-ppc-low.cc (ppc_breakpoint_at): Update.
+	* linux-sh-low.cc (sh_breakpoint_at): Update.
+	* linux-sparc-low.cc (sparc_fill_gregset_to_stack): Update.
+	(sparc_store_gregset_from_stack): Update.
+	(sparc_breakpoint_at): Update.
+	* linux-tic6x-low.cc (tic6x_breakpoint_at): Update.
+	* linux-tile-low.cc (tile_breakpoint_at): Update.
+	* linux-x86-low.cc (x86_breakpoint_at): Update.
+	* linux-xtensa-low.cc (xtensa_breakpoint_at): Update.
+	* mem-brea.cc (insert_memory_breakpoint): Update.
+	(validate_inserted_breakpoint): Update.
+	* target.cc (read_inferior_memory): Update.
+	(target_write_memory): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_read_memory): Make a wrapper around the read_memory target
+	op call.
+	(linux_process_target::read_memory): Rename from linux_read_memory.
+	(linux_write_memory): Turn into ...
+	(linux_process_target::write_memory): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	(lynx_read_memory): Turn into ...
+	(lynx_process_target::read_memory): ... this.
+	(lynx_write_memory): Turn into ...
+	(lynx_process_target::write_memory): ... this.
+	* lynx-low.h (class lynx_process_target): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	(nto_read_memory): Turn into ...
+	(nto_process_target::read_memory): ... this.
+	(nto_write_memory): Turn into ...
+	(nto_process_target::write_memory): ... this.
+	* nto-low.h (class nto_process_target): Update.
+	* win32-low.cc (win32_target_ops): Update.
+	(win32_read_inferior_memory): Turn into ...
+	(win32_process_target::read_memory): ... this.
+	(win32_write_inferior_memory): Turn into ...
+	(win32_process_target::write_memory): ... this.
+	* win32-low.h (class win32_process_target): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's prepare_to_access_memory and
 	done_accessing_memory ops into methods of process_target.
 

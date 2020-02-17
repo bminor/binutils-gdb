@@ -706,8 +706,9 @@ nto_process_target::store_registers (regcache *regcache, int regno)
 
    Return 0 on success -1 otherwise.  */
 
-static int
-nto_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
+int
+nto_process_target::read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
+				 int len)
 {
   TRACE ("%s memaddr:0x%08lx, len:%d\n", __func__, memaddr, len);
 
@@ -725,8 +726,9 @@ nto_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 
    Return 0 on success -1 otherwise.  */
 
-static int
-nto_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
+int
+nto_process_target::write_memory (CORE_ADDR memaddr,
+				  const unsigned char *myaddr, int len)
 {
   int len_written;
 
@@ -941,8 +943,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_read_memory,
-  nto_write_memory,
   NULL, /* nto_look_up_symbols */
   nto_request_interrupt,
   nto_read_auxv,

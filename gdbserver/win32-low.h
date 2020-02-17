@@ -130,6 +130,12 @@ public:
   void fetch_registers (regcache *regcache, int regno) override;
 
   void store_registers (regcache *regcache, int regno) override;
+
+  int read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
+		   int len) override;
+
+  int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
+		    int len) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */

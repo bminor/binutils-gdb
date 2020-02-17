@@ -1676,8 +1676,9 @@ win32_process_target::store_registers (regcache *regcache, int regno)
 /* Read memory from the inferior process.  This should generally be
    called through read_inferior_memory, which handles breakpoint shadowing.
    Read LEN bytes at MEMADDR into a buffer at MYADDR.  */
-static int
-win32_read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
+int
+win32_process_target::read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
+				   int len)
 {
   return child_xfer_memory (memaddr, (char *) myaddr, len, 0, 0) != len;
 }
@@ -1686,9 +1687,9 @@ win32_read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
    called through write_inferior_memory, which handles breakpoint shadowing.
    Write LEN bytes from the buffer at MYADDR to MEMADDR.
    Returns 0 on success and errno on failure.  */
-static int
-win32_write_inferior_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
-			     int len)
+int
+win32_process_target::write_memory (CORE_ADDR memaddr,
+				    const unsigned char *myaddr, int len)
 {
   return child_xfer_memory (memaddr, (char *) myaddr, len, 1, 0) != len;
 }
@@ -1837,8 +1838,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_read_inferior_memory,
-  win32_write_inferior_memory,
   NULL, /* lookup_symbols */
   win32_request_interrupt,
   NULL, /* read_auxv */

@@ -638,8 +638,9 @@ lynx_process_target::store_registers (regcache *regcache, int regno)
 
 /* Implement the read_memory target_ops method.  */
 
-static int
-lynx_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
+int
+lynx_process_target::read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
+				  int len)
 {
   /* On LynxOS, memory reads needs to be performed in chunks the size
      of int types, and they should also be aligned accordingly.  */
@@ -671,8 +672,9 @@ lynx_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 
 /* Implement the write_memory target_ops method.  */
 
-static int
-lynx_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
+int
+lynx_process_target::write_memory (CORE_ADDR memaddr,
+				   const unsigned char *myaddr, int len)
 {
   /* On LynxOS, memory writes needs to be performed in chunks the size
      of int types, and they should also be aligned accordingly.  */
@@ -694,7 +696,7 @@ lynx_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
 	{
 	  /* We need to read the memory at this address in order to preserve
 	     the data that we are not overwriting.  */
-	  lynx_read_memory (addr, (unsigned char *) &buf, xfer_size);
+	  read_memory (addr, (unsigned char *) &buf, xfer_size);
 	  if (errno)
 	    return errno;
 	}
@@ -727,8 +729,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  lynx_read_memory,
-  lynx_write_memory,
   NULL,  /* look_up_symbols */
   lynx_request_interrupt,
   NULL,  /* read_auxv */

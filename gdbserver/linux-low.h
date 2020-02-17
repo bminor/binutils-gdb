@@ -299,6 +299,12 @@ public:
   int prepare_to_access_memory () override;
 
   void done_accessing_memory () override;
+
+  int read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
+		   int len) override;
+
+  int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
+		    int len) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))
