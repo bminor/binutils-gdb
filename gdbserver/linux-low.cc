@@ -6430,13 +6430,13 @@ linux_process_target::supports_agent ()
   return true;
 }
 
-static int
-linux_supports_range_stepping (void)
+bool
+linux_process_target::supports_range_stepping ()
 {
   if (can_software_single_step ())
-    return 1;
+    return true;
   if (*the_low_target.supports_range_stepping == NULL)
-    return 0;
+    return false;
 
   return (*the_low_target.supports_range_stepping) ();
 }
@@ -7471,7 +7471,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_supports_range_stepping,
   linux_proc_pid_to_exec_file,
   linux_mntns_open_cloexec,
   linux_mntns_unlink,

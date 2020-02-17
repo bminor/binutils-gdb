@@ -446,6 +446,8 @@ public:
   int read_btrace_conf (const btrace_target_info *tinfo,
 			buffer *buf) override;
 #endif
+
+  bool supports_range_stepping () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

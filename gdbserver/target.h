@@ -70,9 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Return true if target supports range stepping.  */
-  int (*supports_range_stepping) (void);
-
   /* Return the full absolute name of the executable file that was
      run to create the process PID.  If the executable file cannot
      be determined, NULL is returned.  Otherwise, a pointer to a
@@ -498,6 +495,9 @@ public:
      otherwise.  */
   virtual int read_btrace_conf (const btrace_target_info *tinfo,
 				buffer *buf);
+
+  /* Return true if target supports range stepping.  */
+  virtual bool supports_range_stepping ();
 };
 
 extern process_stratum_target *the_target;
@@ -638,8 +638,7 @@ target_read_btrace_conf (struct btrace_target_info *tinfo,
 }
 
 #define target_supports_range_stepping() \
-  (the_target->supports_range_stepping ? \
-   (*the_target->supports_range_stepping) () : 0)
+  the_target->pt->supports_range_stepping ()
 
 #define target_supports_stopped_by_sw_breakpoint() \
   the_target->pt->supports_stopped_by_sw_breakpoint ()

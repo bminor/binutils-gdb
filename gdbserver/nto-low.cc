@@ -947,7 +947,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  NULL, /* supports_range_stepping */
   NULL, /* pid_to_exec_file */
   NULL, /* multifs_open */
   NULL, /* multifs_unlink */

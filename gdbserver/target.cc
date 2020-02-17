@@ -753,3 +753,9 @@ process_target::read_btrace_conf (const btrace_target_info *tinfo,
 {
   error (_("Target does not support branch tracing."));
 }
+
+bool
+process_target::supports_range_stepping ()
+{
+  return false;
+}

@@ -735,7 +735,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  NULL,  /* supports_range_stepping */
   NULL,  /* pid_to_exec_file */
   NULL,  /* multifs_open */
   NULL,  /* multifs_unlink */
