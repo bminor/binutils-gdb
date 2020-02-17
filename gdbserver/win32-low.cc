@@ -878,8 +878,8 @@ win32_process_target::detach (process_info *process)
   return 0;
 }
 
-static void
-win32_mourn (struct process_info *process)
+void
+win32_process_target::mourn (struct process_info *process)
 {
   remove_process (process);
 }
@@ -1839,7 +1839,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_mourn,
   win32_join,
   win32_thread_alive,
   win32_resume,

@@ -417,8 +417,8 @@ nto_process_target::detach (process_info *proc)
   return 0;
 }
 
-static void
-nto_mourn (struct process_info *process)
+void
+nto_process_target::mourn (struct process_info *process)
 {
   remove_process (process);
 }
@@ -935,7 +935,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_mourn,
   NULL, /* nto_join */
   nto_thread_alive,
   nto_resume,

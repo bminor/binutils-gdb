@@ -231,7 +231,7 @@ target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 void
 target_mourn_inferior (ptid_t ptid)
 {
-  (*the_target->mourn) (find_process_pid (ptid.pid ()));
+  the_target->pt->mourn (find_process_pid (ptid.pid ()));
 }
 
 /* See target/target.h.  */

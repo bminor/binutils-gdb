@@ -1,5 +1,36 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's mourn op into a method of
+	process_target.
+
+	* target.h (struct process_stratum_target): Remove the target op.
+	(class process_target): Add the target op.
+
+	Update the derived classes and callers below.
+
+	* target.cc (target_mourn_inferior): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_mourn): Turn into ...
+	(linux_process_target::mourn): ... this.
+	(handle_extended_wait): Update.
+	(linux_process_target::kill): Update.
+	(linux_process_target::detach): Update.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	(lynx_mourn): Turn into ...
+	(lynx_process_target::mourn): ... this.
+	* lynx-low.h (class lynx_process_target): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	(nto_mourn): Turn into ...
+	(nto_process_target::mourn): ... this.
+	* nto-low.h (class nto_process_target): Update.
+	* win32-low.cc (win32_target_ops): Update.
+	(win32_mourn): Turn into ...
+	(win32_process_target::mourn): ... this.
+	* win32-low.h (class win32_process_target): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's detach op into a method of
 	process_target.
 

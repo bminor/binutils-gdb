@@ -529,7 +529,7 @@ lynx_process_target::kill (process_info *process)
 
   lynx_ptrace (PTRACE_KILL, ptid, 0, 0, 0);
   lynx_wait (ptid, &status, 0);
-  the_target->mourn (process);
+  mourn (process);
   return 0;
 }
 
@@ -541,14 +541,14 @@ lynx_process_target::detach (process_info *process)
   ptid_t ptid = lynx_ptid_t (process->pid, 0);
 
   lynx_ptrace (PTRACE_DETACH, ptid, 0, 0, 0);
-  the_target->mourn (process);
+  mourn (process);
   return 0;
 }
 
 /* Implement the mourn target_ops method.  */
 
-static void
-lynx_mourn (struct process_info *proc)
+void
+lynx_process_target::mourn (struct process_info *proc)
 {
   for_each_thread (proc->pid, remove_thread);
 
@@ -726,7 +726,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  lynx_mourn,
   lynx_join,
   lynx_thread_alive,
   lynx_resume,

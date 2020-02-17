@@ -270,7 +270,6 @@ static int linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 					  int *wstat, int options);
 static int linux_wait_for_event (ptid_t ptid, int *wstat, int options);
 static struct lwp_info *add_lwp (ptid_t ptid);
-static void linux_mourn (struct process_info *process);
 static int linux_stopped_by_watchpoint (void);
 static void mark_lwp_dead (struct lwp_info *lwp, int wstat);
 static int lwp_is_marked_dead (struct lwp_info *lwp);
@@ -707,7 +706,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
       syscalls_to_catch = std::move (proc->syscalls_to_catch);
 
       /* Delete the execing process and all its threads.  */
-      linux_mourn (proc);
+      the_target->pt->mourn (proc);
       current_thread = NULL;
 
       /* Create a new process/lwp/thread.  */
@@ -1413,7 +1412,7 @@ linux_process_target::kill (process_info *process)
   else
     kill_wait_lwp (lwp);
 
-  the_target->mourn (process);
+  mourn (process);
 
   /* Since we presently can only stop all lwps of all processes, we
      need to unstop lwps of other processes.  */
@@ -1634,7 +1633,7 @@ linux_process_target::detach (process_info *process)
   main_lwp = find_lwp_pid (ptid_t (process->pid));
   linux_detach_one_lwp (main_lwp);
 
-  the_target->mourn (process);
+  mourn (process);
 
   /* Since we presently can only stop all lwps of all processes, we
      need to unstop lwps of other processes.  */
@@ -1644,8 +1643,8 @@ linux_process_target::detach (process_info *process)
 
 /* Remove all LWPs that belong to process PROC from the lwp list.  */
 
-static void
-linux_mourn (struct process_info *process)
+void
+linux_process_target::mourn (process_info *process)
 {
   struct process_info_private *priv;
 
@@ -7359,7 +7358,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_mourn,
   linux_join,
   linux_thread_alive,
   linux_resume,

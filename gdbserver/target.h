@@ -70,10 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* The inferior process has died.  Do what is right.  */
-
-  void (*mourn) (struct process_info *proc);
-
   /* Wait for process PID to exit.  */
 
   void (*join) (int pid);
@@ -486,6 +482,9 @@ public:
   /* Detach from process PROC.  Return -1 on failure, and 0 on
      success.  */
   virtual int detach (process_info *proc) = 0;
+
+  /* The inferior process has died.  Do what is right.  */
+  virtual void mourn (process_info *proc) = 0;
 };
 
 extern process_stratum_target *the_target;
