@@ -6466,53 +6466,50 @@ process_suffix (void)
       /* For [XYZ]MMWORD operands inspect operand sizes.  While generally
 	 also suitable for AT&T syntax mode, it was requested that this be
 	 restricted to just Intel syntax.  */
-      if (intel_syntax)
+      if (intel_syntax && is_any_vex_encoding (&i.tm) && !i.broadcast)
 	{
-	  i386_cpu_flags cpu = cpu_flags_and (i.tm.cpu_flags, avx512);
+	  unsigned int op;
 
-	  if (!cpu_flags_all_zero (&cpu) && !i.broadcast)
+	  for (op = 0; op < i.tm.operands; ++op)
 	    {
-	      unsigned int op;
-
-	      for (op = 0; op < i.tm.operands; ++op)
+	      if (is_evex_encoding (&i.tm)
+		  && !cpu_arch_flags.bitfield.cpuavx512vl)
 		{
-		  if (!cpu_arch_flags.bitfield.cpuavx512vl)
-		    {
-		      if (i.tm.operand_types[op].bitfield.ymmword)
-			i.tm.operand_types[op].bitfield.xmmword = 0;
-		      if (i.tm.operand_types[op].bitfield.zmmword)
-			i.tm.operand_types[op].bitfield.ymmword = 0;
-		      if (!i.tm.opcode_modifier.evex
-			  || i.tm.opcode_modifier.evex == EVEXDYN)
-			i.tm.opcode_modifier.evex = EVEX512;
-		    }
+		  if (i.tm.operand_types[op].bitfield.ymmword)
+		    i.tm.operand_types[op].bitfield.xmmword = 0;
+		  if (i.tm.operand_types[op].bitfield.zmmword)
+		    i.tm.operand_types[op].bitfield.ymmword = 0;
+		  if (!i.tm.opcode_modifier.evex
+		      || i.tm.opcode_modifier.evex == EVEXDYN)
+		    i.tm.opcode_modifier.evex = EVEX512;
+		}
 
-		  if (i.tm.operand_types[op].bitfield.xmmword
-		      + i.tm.operand_types[op].bitfield.ymmword
-		      + i.tm.operand_types[op].bitfield.zmmword < 2)
-		    continue;
+	      if (i.tm.operand_types[op].bitfield.xmmword
+		  + i.tm.operand_types[op].bitfield.ymmword
+		  + i.tm.operand_types[op].bitfield.zmmword < 2)
+		continue;
 
-		  /* Any properly sized operand disambiguates the insn.  */
-		  if (i.types[op].bitfield.xmmword
-		      || i.types[op].bitfield.ymmword
-		      || i.types[op].bitfield.zmmword)
-		    {
-		      suffixes &= ~(7 << 6);
-		      evex = 0;
-		      break;
-		    }
+	      /* Any properly sized operand disambiguates the insn.  */
+	      if (i.types[op].bitfield.xmmword
+		  || i.types[op].bitfield.ymmword
+		  || i.types[op].bitfield.zmmword)
+		{
+		  suffixes &= ~(7 << 6);
+		  evex = 0;
+		  break;
+		}
 
-		  if ((i.flags[op] & Operand_Mem)
-		      && i.tm.operand_types[op].bitfield.unspecified)
-		    {
-		      if (i.tm.operand_types[op].bitfield.xmmword)
-			suffixes |= 1 << 6;
-		      if (i.tm.operand_types[op].bitfield.ymmword)
-			suffixes |= 1 << 7;
-		      if (i.tm.operand_types[op].bitfield.zmmword)
-			suffixes |= 1 << 8;
-		      evex = EVEX512;
-		    }
+	      if ((i.flags[op] & Operand_Mem)
+		  && i.tm.operand_types[op].bitfield.unspecified)
+		{
+		  if (i.tm.operand_types[op].bitfield.xmmword)
+		    suffixes |= 1 << 6;
+		  if (i.tm.operand_types[op].bitfield.ymmword)
+		    suffixes |= 1 << 7;
+		  if (i.tm.operand_types[op].bitfield.zmmword)
+		    suffixes |= 1 << 8;
+		  if (is_evex_encoding (&i.tm))
+		    evex = EVEX512;
 		}
 	    }
 	}

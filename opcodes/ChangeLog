@@ -1,3 +1,14 @@
+2020-02-17  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/6518
+	* i386-opc.tbl (vcvtpd2dq, vcvtpd2ps, vcvttpd2dq, vcvtpd2udq,
+	vcvttpd2udq, vcvtqq2ps, vcvtuqq2ps): Split XMM/YMM source forms
+	into Intel syntax instance (with Unpsecified) and AT&T one
+	(without).
+	(vcvtneps2bf16): Likewise, along with folding the two so far
+	separate ones.
+	* i386-tbl.h: Re-generate.
+
 2020-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Remove CPU_ANY_SSE3_FLAGS from

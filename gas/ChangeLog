@@ -1,3 +1,19 @@
+2020-02-17  Jan Beulich  <jbeulich@suse.com>
+
+	PR gas/6518
+	* config/tc-i386.c (process_suffix): Re-work Intel-syntax
+	[XYZ]MMWord memory operand ambiguity recognition logic (largely
+	re-indentation).
+	* testsuite/gas/i386/avx512dq-inval.s: Add vcvtqq2ps/vcvtuqq2ps
+	cases.
+	* testsuite/gas/i386/inval-avx512f.s: Also test vcvtneps2bf16.
+	* testsuite/gas/i386/avx512dq-inval.l,
+	testsuite/gas/i386/inval-avx.l,
+	testsuite/gas/i386/inval-avx512f.l: Adjust expectations.
+	* testsuite/gas/i386/avx512vl-ambig.s,
+	testsuite/gas/i386/avx512vl-ambig.l: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
 2020-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .sse4a and nosse4a.  Restore

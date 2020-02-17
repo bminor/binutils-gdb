@@ -307,3 +307,13 @@ _start:
 
 	vdpbf16ps 8(%eax){1to8}, %zmm2, %zmm2
 	vcvtne2ps2bf16 8(%eax){1to8}, %zmm2, %zmm2
+
+	vcvtneps2bf16 (%eax){1to2}, %ymm1
+	vcvtneps2bf16 (%eax){1to4}, %ymm1
+	vcvtneps2bf16 (%eax){1to8}, %ymm1
+	vcvtneps2bf16 (%eax){1to16}, %ymm1
+
+	vcvtneps2bf16 (%eax){1to2}, %xmm1
+	vcvtneps2bf16 (%eax){1to4}, %xmm1
+	vcvtneps2bf16 (%eax){1to8}, %xmm1
+	vcvtneps2bf16 (%eax){1to16}, %xmm1

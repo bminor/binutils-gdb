@@ -20,10 +20,16 @@ _start:
 	       vpinsrq	xmm0, xmm0, qword ptr [eax], 0
 	{evex} vpinsrq	xmm0, xmm0, qword ptr [eax], 0
 
+	vcvtqq2ps	xmm0, [rax]
+	vcvtuqq2ps	xmm0, [rax]
+
 	vfpclasspd	k0, [eax], 0
 	vfpclassps	k0, [eax], 0
 
 	.att_syntax prefix
+
+	vcvtqq2ps	(%eax), %xmm0
+	vcvtuqq2ps	(%eax), %xmm0
 
 	vfpclasspd	$0, (%eax), %k0
 	vfpclassps	$0, (%eax), %k0
