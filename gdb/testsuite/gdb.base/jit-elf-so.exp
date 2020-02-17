@@ -26,6 +26,8 @@ if {[get_compiler_info]} {
     return 1
 }
 
+load_lib jit-elf-helpers.exp
+
 # The "real" main of this test, which loads jit-elf-main
 # as a shared library.
 set main_loader_basename jit-elf-dlmain
@@ -40,25 +42,6 @@ set main_solib_binfile [standard_output_file ${main_solib_basename}.so]
 # The shared library that gets loaded as JIT objects.
 set jit_solib_basename jit-elf-solib
 set jit_solib_srcfile ${srcdir}/${subdir}/${jit_solib_basename}.c
-
-# Compile jit-elf-main.c as a shared library.
-#
-# OPTIONS is passed to gdb_compile when compiling the program.
-#
-# On success, return 0.
-# On failure, return -1.
-proc compile_jit_elf_main_as_so {options} {
-    global main_solib_srcfile main_solib_binfile
-    set options [concat $options debug]
-
-    if { [gdb_compile_shlib ${main_solib_srcfile} ${main_solib_binfile} \
-	    $options] != "" } {
-	untested "failed to compile ${main_solib_basename}.c as a shared library"
-	return -1
-    }
-
-    return 0
-}
 
 # Compile the testcase shared library loader.
 #
@@ -79,34 +62,6 @@ proc compile_jit_dlmain {options} {
     return 0
 }
 
-# Compile jit-elf-solib.c as a shared library in multiple copies and
-# upload them to the target.
-#
-# On success, return a list of target path to the shared libraries.
-# On failure, return -1.
-proc compile_and_download_n_jit_so {count} {
-    global jit_solib_basename jit_solib_srcfile
-    set binfiles_target {}
-
-    for {set i 1} {$i <= $count} {incr i} {
-	set binfile [standard_output_file ${jit_solib_basename}.$i.so]
-
-	# Note: compiling without debug info by default: some test
-	# do symbol renaming by munging on ELF symbol table, and that
-	# wouldn't work for .debug sections.  Also, output for "info
-	# function" changes when debug info is present.
-	if { [gdb_compile_shlib ${jit_solib_srcfile} ${binfile} {}] != "" } {
-	    untested "failed to compile ${jit_solib_basename}.c as a shared library"
-	    return -1
-	}
-
-	set path [gdb_remote_download target ${binfile}]
-	lappend binfiles_target $path
-    }
-
-    return $binfiles_target
-}
-
 # Run $main_loader_binfile and load $main_solib_binfile in
 # GDB.  Check jit-related debug output and matches `info function`
 # output for a jit loaded function using MATCH_STR.
@@ -117,7 +72,6 @@ proc compile_and_download_n_jit_so {count} {
 # must match.
 proc one_jit_test {solib_binfiles_target match_str} {
     set count [llength $solib_binfiles_target]
-
     with_test_prefix "one_jit_test-$count" {
 	global verbose
 	global main_loader_binfile main_loader_srcfile
@@ -184,7 +138,8 @@ proc one_jit_test {solib_binfiles_target match_str} {
 }
 
 # Compile the main code (which loads the JIT objects) as a shared library.
-if { [compile_jit_elf_main_as_so {additional_flags="-DMAIN=jit_dl_main"}] < 0 } {
+if { [compile_jit_elf_main_as_so $main_solib_srcfile $main_solib_binfile \
+	{additional_flags="-DMAIN=jit_dl_main"}] < 0 } {
     return
 }
 
@@ -194,7 +149,8 @@ if { [compile_jit_dlmain {shlib_load}] < 0 } {
 }
 
 # Compile two shared libraries to use as JIT objects.
-set jit_solibs_target [compile_and_download_n_jit_so 2]
+set jit_solibs_target [compile_and_download_n_jit_so \
+		      $jit_solib_basename $jit_solib_srcfile 2]
 if { $jit_solibs_target == -1 } {
     return
 }
