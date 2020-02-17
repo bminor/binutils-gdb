@@ -70,9 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Return tdesc index for IPA.  */
-  int (*get_ipa_tdesc_idx) (void);
-
   /* The object that will gradually replace this struct.  */
   process_target *pt;
 };
@@ -504,6 +501,9 @@ public:
 
   /* Return true if the target supports catch syscall.  */
   virtual bool supports_catch_syscall ();
+
+  /* Return tdesc index for IPA.  */
+  virtual int get_ipa_tdesc_idx ();
 };
 
 extern process_stratum_target *the_target;
@@ -561,8 +561,7 @@ int kill_inferior (process_info *proc);
   the_target->pt->supports_catch_syscall ()
 
 #define target_get_ipa_tdesc_idx()			\
-  (the_target->get_ipa_tdesc_idx			\
-   ? (*the_target->get_ipa_tdesc_idx) () : 0)
+  the_target->pt->get_ipa_tdesc_idx ()
 
 #define target_supports_tracepoints()			\
   the_target->pt->supports_tracepoints ()

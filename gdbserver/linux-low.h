@@ -479,6 +479,8 @@ public:
   bool supports_software_single_step () override;
 
   bool supports_catch_syscall () override;
+
+  int get_ipa_tdesc_idx () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

@@ -6575,8 +6575,8 @@ linux_process_target::supports_catch_syscall ()
 	  && linux_supports_tracesysgood ());
 }
 
-static int
-linux_get_ipa_tdesc_idx (void)
+int
+linux_process_target::get_ipa_tdesc_idx ()
 {
   if (the_low_target.get_ipa_tdesc_idx == NULL)
     return 0;
@@ -7524,7 +7524,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_get_ipa_tdesc_idx,
   &the_linux_target,
 };
 

@@ -826,3 +826,9 @@ process_target::supports_catch_syscall ()
 {
   return false;
 }
+
+int
+process_target::get_ipa_tdesc_idx ()
+{
+  return 0;
+}
