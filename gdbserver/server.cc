@@ -2234,13 +2234,13 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	}
     }
 
-  if (the_target->read_offsets != NULL
+  if (the_target->pt->supports_read_offsets ()
       && strcmp ("qOffsets", own_buf) == 0)
     {
       CORE_ADDR text, data;
 
       require_running_or_return (own_buf);
-      if (the_target->read_offsets (&text, &data))
+      if (the_target->pt->read_offsets (&text, &data))
 	sprintf (own_buf, "Text=%lX;Data=%lX;Bss=%lX",
 		 (long)text, (long)data, (long)data);
       else

@@ -100,6 +100,14 @@
 #endif
 #endif
 
+#if (defined(__UCLIBC__)		\
+     && defined(HAS_NOMMU)		\
+     && defined(PT_TEXT_ADDR)		\
+     && defined(PT_DATA_ADDR)		\
+     && defined(PT_TEXT_END_ADDR))
+#define SUPPORTS_READ_OFFSETS
+#endif
+
 #ifdef HAVE_LINUX_BTRACE
 # include "nat/linux-btrace.h"
 # include "gdbsupport/btrace-common.h"
@@ -6059,21 +6067,28 @@ linux_process_target::stopped_data_address ()
   return lwp->stopped_data_address;
 }
 
-#if defined(__UCLIBC__) && defined(HAS_NOMMU)	      \
-    && defined(PT_TEXT_ADDR) && defined(PT_DATA_ADDR) \
-    && defined(PT_TEXT_END_ADDR)
-
 /* This is only used for targets that define PT_TEXT_ADDR,
    PT_DATA_ADDR and PT_TEXT_END_ADDR.  If those are not defined, supposedly
    the target has different ways of acquiring this information, like
    loadmaps.  */
 
+bool
+linux_process_target::supports_read_offsets ()
+{
+#ifdef SUPPORTS_READ_OFFSETS
+  return true;
+#else
+  return false;
+#endif
+}
+
 /* Under uClinux, programs are loaded at non-zero offsets, which we need
    to tell gdb about.  */
 
-static int
-linux_read_offsets (CORE_ADDR *text_p, CORE_ADDR *data_p)
+int
+linux_process_target::read_offsets (CORE_ADDR *text_p, CORE_ADDR *data_p)
 {
+#ifdef SUPPORTS_READ_OFFSETS
   unsigned long text, text_end, data;
   int pid = lwpid_of (current_thread);
 
@@ -6102,9 +6117,11 @@ linux_read_offsets (CORE_ADDR *text_p, CORE_ADDR *data_p)
 
       return 1;
     }
- return 0;
-}
+  return 0;
+#else
+  gdb_assert_not_reached ("target op read_offsets not supported");
 #endif
+}
 
 static int
 linux_qxfer_osdata (const char *annex,
@@ -7375,13 +7392,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-#if defined(__UCLIBC__) && defined(HAS_NOMMU)	      \
-    && defined(PT_TEXT_ADDR) && defined(PT_DATA_ADDR) \
-    && defined(PT_TEXT_END_ADDR)
-  linux_read_offsets,
-#else
-  NULL,
-#endif
 #ifdef USE_THREAD_DB
   thread_db_get_tls_address,
 #else

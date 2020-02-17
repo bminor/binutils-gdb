@@ -336,6 +336,10 @@ public:
   bool stopped_by_watchpoint () override;
 
   CORE_ADDR stopped_data_address () override;
+
+  bool supports_read_offsets () override;
+
+  int read_offsets (CORE_ADDR *text, CORE_ADDR *data) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

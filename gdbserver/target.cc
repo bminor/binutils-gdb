@@ -481,3 +481,15 @@ process_target::stopped_data_address ()
 {
   return 0;
 }
+
+bool
+process_target::supports_read_offsets ()
+{
+  return false;
+}
+
+int
+process_target::read_offsets (CORE_ADDR *text, CORE_ADDR *data)
+{
+  gdb_assert_not_reached ("target op read_offsets not supported");
+}

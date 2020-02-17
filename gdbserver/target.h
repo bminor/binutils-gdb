@@ -70,12 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Reports the text, data offsets of the executable.  This is
-     needed for uclinux where the executable is relocated during load
-     time.  */
-
-  int (*read_offsets) (CORE_ADDR *text, CORE_ADDR *data);
-
   /* Fetch the address associated with a specific thread local storage
      area, determined by the specified THREAD, OFFSET, and LOAD_MODULE.
      Stores it in *ADDRESS and returns zero on success; otherwise returns
@@ -475,6 +469,14 @@ public:
   /* Returns the address associated with the watchpoint that hit, if any;
      returns 0 otherwise.  */
   virtual CORE_ADDR stopped_data_address ();
+
+  /* Return true if the read_offsets target op is supported.  */
+  virtual bool supports_read_offsets ();
+
+  /* Reports the text, data offsets of the executable.  This is
+     needed for uclinux where the executable is relocated during load
+     time.  */
+  virtual int read_offsets (CORE_ADDR *text, CORE_ADDR *data);
 };
 
 extern process_stratum_target *the_target;
