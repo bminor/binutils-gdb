@@ -5898,8 +5898,8 @@ linux_process_target::write_memory (CORE_ADDR memaddr,
   return 0;
 }
 
-static void
-linux_look_up_symbols (void)
+void
+linux_process_target::look_up_symbols ()
 {
 #ifdef USE_THREAD_DB
   struct process_info *proc = current_process ();
@@ -7369,7 +7369,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_look_up_symbols,
   linux_request_interrupt,
   linux_read_auxv,
   linux_supports_z_point_type,

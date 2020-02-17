@@ -408,3 +408,9 @@ process_target::done_accessing_memory ()
 {
   /* Nop.  */
 }
+
+void
+process_target::look_up_symbols ()
+{
+  /* Nop.  */
+}

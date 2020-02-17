@@ -305,6 +305,8 @@ public:
 
   int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 		    int len) override;
+
+  void look_up_symbols () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

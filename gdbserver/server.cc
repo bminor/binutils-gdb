@@ -2192,8 +2192,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (target_supports_tracepoints ())
 	tracepoint_look_up_symbols ();
 
-      if (current_thread != NULL && the_target->look_up_symbols != NULL)
-	(*the_target->look_up_symbols) ();
+      if (current_thread != NULL)
+	the_target->pt->look_up_symbols ();
 
       current_thread = save_thread;
 

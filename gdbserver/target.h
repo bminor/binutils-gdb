@@ -70,14 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Query GDB for the values of any symbols we're interested in.
-     This function is called whenever we receive a "qSymbols::"
-     query, which corresponds to every time more symbols (might)
-     become available.  NULL if we aren't interested in any
-     symbols.  */
-
-  void (*look_up_symbols) (void);
-
   /* Send an interrupt request to the inferior process,
      however is appropriate.  */
 
@@ -477,6 +469,12 @@ public:
      Returns 0 on success and errno on failure.  */
   virtual int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 			    int len) = 0;
+
+  /* Query GDB for the values of any symbols we're interested in.
+     This function is called whenever we receive a "qSymbols::"
+     query, which corresponds to every time more symbols (might)
+     become available.  */
+  virtual void look_up_symbols ();
 };
 
 extern process_stratum_target *the_target;
