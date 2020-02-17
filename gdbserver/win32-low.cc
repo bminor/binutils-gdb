@@ -633,9 +633,9 @@ Could not convert the expanded inferior cwd to wide-char."));
    PROGRAM_ARGS is the vector containing the inferior's args.
    Returns the new PID on success, -1 on failure.  Registers the new
    process with the process list.  */
-static int
-win32_create_inferior (const char *program,
-		       const std::vector<char *> &program_args)
+int
+win32_process_target::create_inferior (const char *program,
+				       const std::vector<char *> &program_args)
 {
   client_state &cs = get_client_state ();
 #ifndef USE_WIN32API
@@ -1839,7 +1839,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_create_inferior,
   NULL,  /* post_create_inferior */
   win32_attach,
   win32_kill,

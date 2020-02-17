@@ -996,9 +996,9 @@ linux_ptrace_fun ()
    PROGRAM is the name of the program to be started, and PROGRAM_ARGS
    are its arguments.  */
 
-static int
-linux_create_inferior (const char *program,
-		       const std::vector<char *> &program_args)
+int
+linux_process_target::create_inferior (const char *program,
+				       const std::vector<char *> &program_args)
 {
   client_state &cs = get_client_state ();
   struct lwp_info *new_lwp;
@@ -7359,7 +7359,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_create_inferior,
   linux_post_create_inferior,
   linux_attach,
   linux_kill,

@@ -350,9 +350,9 @@ nto_read_auxv_from_initial_stack (CORE_ADDR initial_stack,
 /* Start inferior specified by PROGRAM, using PROGRAM_ARGS as its
    arguments.  */
 
-static int
-nto_create_inferior (const char *program,
-		     const std::vector<char *> &program_args)
+int
+nto_process_target::create_inferior (const char *program,
+				     const std::vector<char *> &program_args)
 {
   struct inheritance inherit;
   pid_t pid;
@@ -935,7 +935,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_create_inferior,
   NULL,  /* post_create_inferior */
   nto_attach,
   nto_kill,

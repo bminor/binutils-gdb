@@ -3028,7 +3028,7 @@ handle_v_run (char *own_buf)
   free_vector_argv (program_args);
   program_args = new_argv;
 
-  create_inferior (program_path.get (), program_args);
+  target_create_inferior (program_path.get (), program_args);
 
   if (cs.last_status.kind == TARGET_WAITKIND_STOPPED)
     {
@@ -3784,7 +3784,7 @@ captured_main (int argc, char *argv[])
       program_args.push_back (NULL);
 
       /* Wait till we are at first instruction in program.  */
-      create_inferior (program_path.get (), program_args);
+      target_create_inferior (program_path.get (), program_args);
 
       /* We are now (hopefully) stopped at the first instruction of
 	 the target process.  This assumes that the target process was
@@ -4303,7 +4303,7 @@ process_serial_event (void)
 	  /* Wait till we are at 1st instruction in prog.  */
 	  if (program_path.get () != NULL)
 	    {
-	      create_inferior (program_path.get (), program_args);
+	      target_create_inferior (program_path.get (), program_args);
 
 	      if (cs.last_status.kind == TARGET_WAITKIND_STOPPED)
 		{

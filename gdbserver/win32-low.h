@@ -107,6 +107,8 @@ class win32_process_target : public process_target
 {
 public:
 
+  int create_inferior (const char *program,
+		       const std::vector<char *> &program_args) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */

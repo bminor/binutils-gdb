@@ -48,6 +48,8 @@ class nto_process_target : public process_target
 {
 public:
 
+  int create_inferior (const char *program,
+		       const std::vector<char *> &program_args) override;
 };
 
 /* The inferior's target description.  This is a global because the

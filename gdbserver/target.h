@@ -70,17 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Start a new process.
-
-     PROGRAM is a path to the program to execute.
-     PROGRAM_ARGS is a standard NULL-terminated array of arguments,
-     to be passed to the inferior as ``argv'' (along with PROGRAM).
-
-     Returns the new PID on success, -1 on failure.  Registers the new
-     process with the process list.  */
-  int (*create_inferior) (const char *program,
-			  const std::vector<char *> &program_args);
-
   /* Do additional setup after a new process is created, including
      exec-wrapper completion.  */
   void (*post_create_inferior) (void);
@@ -489,14 +478,25 @@ class process_target
 public:
 
   virtual ~process_target () = default;
+
+  /* Start a new process.
+
+     PROGRAM is a path to the program to execute.
+     PROGRAM_ARGS is a standard NULL-terminated array of arguments,
+     to be passed to the inferior as ``argv'' (along with PROGRAM).
+
+     Returns the new PID on success, -1 on failure.  Registers the new
+     process with the process list.  */
+  virtual int create_inferior (const char *program,
+			       const std::vector<char *> &program_args) = 0;
 };
 
 extern process_stratum_target *the_target;
 
 void set_target_ops (process_stratum_target *);
 
-#define create_inferior(program, program_args)	\
-  (*the_target->create_inferior) (program, program_args)
+#define target_create_inferior(program, program_args)	\
+  the_target->pt->create_inferior (program, program_args)
 
 #define target_post_create_inferior()			 \
   do							 \

@@ -248,14 +248,14 @@ lynx_ptrace_fun ()
 
 /* Implement the create_inferior method of the target_ops vector.  */
 
-static int
-lynx_create_inferior (const char *program,
-		      const std::vector<char *> &program_args)
+int
+lynx_process_target::create_inferior (const char *program,
+				      const std::vector<char *> &program_args)
 {
   int pid;
   std::string str_program_args = stringify_argv (program_args);
 
-  lynx_debug ("lynx_create_inferior ()");
+  lynx_debug ("create_inferior ()");
 
   pid = fork_inferior (program,
 		       str_program_args.c_str (),
@@ -726,7 +726,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  lynx_create_inferior,
   NULL,  /* post_create_inferior */
   lynx_attach,
   lynx_kill,

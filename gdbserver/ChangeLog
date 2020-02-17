@@ -1,5 +1,37 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's create_inferior op into a method of
+	process_target.
+
+	* target.h (struct process_stratum_target): Remove the target op.
+	(class process_target): Add the target op.
+	(create_inferior): Rename the macro to ...
+	(target_create_inferior): ... this.
+
+	Update the derived classes and callers below.
+
+	* server.cc (handle_v_run): Update.
+	(captured_main): Update.
+	(process_serial_event): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_create_inferior): Turn into ...
+	(linux_process_target::create_inferior): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	(lynx_create_inferior): Turn into ...
+	(lynx_process_target::create_inferior): ... this.
+	* lynx-low.h (class lynx_process_target): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	(nto_create_inferior): Turn into ...
+	(nto_process_target::create_inferior): ... this.
+	* nto-low.h (class nto_process_target): Update.
+	* win32-low.cc (win32_target_ops): Update.
+	(win32_create_inferior): Turn into ...
+	(win32_process_target::create_inferior): ... this.
+	* win32-low.h (class win32_process_target): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* target.h (class process_target): New class definition.
 	(struct process_stratum_target) <pt>: New field with type
 	'process_target*'.
