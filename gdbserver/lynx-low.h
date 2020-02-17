@@ -87,6 +87,8 @@ public:
 
   int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 		    int len) override;
+
+  void request_interrupt () override;
 };
 
 /* The inferior's target description.  This is a global because the

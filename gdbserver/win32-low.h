@@ -136,6 +136,8 @@ public:
 
   int write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 		    int len) override;
+
+  void request_interrupt () override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */

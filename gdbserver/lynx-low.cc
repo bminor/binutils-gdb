@@ -714,8 +714,8 @@ lynx_process_target::write_memory (CORE_ADDR memaddr,
 
 /* Implement the kill_request target_ops method.  */
 
-static void
-lynx_request_interrupt (void)
+void
+lynx_process_target::request_interrupt ()
 {
   ptid_t inferior_ptid = ptid_of (get_first_thread ());
 
@@ -729,7 +729,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  lynx_request_interrupt,
   NULL,  /* read_auxv */
   NULL,  /* supports_z_point_type */
   NULL,  /* insert_point */

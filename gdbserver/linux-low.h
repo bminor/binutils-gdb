@@ -307,6 +307,8 @@ public:
 		    int len) override;
 
   void look_up_symbols () override;
+
+  void request_interrupt () override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

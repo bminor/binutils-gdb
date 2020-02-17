@@ -70,11 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Send an interrupt request to the inferior process,
-     however is appropriate.  */
-
-  void (*request_interrupt) (void);
-
   /* Read auxiliary vector data from the inferior process.
 
      Read LEN bytes at OFFSET into a buffer at MYADDR.  */
@@ -475,6 +470,10 @@ public:
      query, which corresponds to every time more symbols (might)
      become available.  */
   virtual void look_up_symbols ();
+
+  /* Send an interrupt request to the inferior process,
+     however is appropriate.  */
+  virtual void request_interrupt () = 0;
 };
 
 extern process_stratum_target *the_target;

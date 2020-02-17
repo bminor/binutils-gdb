@@ -746,8 +746,8 @@ nto_process_target::write_memory (CORE_ADDR memaddr,
 
 /* Stop inferior.  We always stop all threads.  */
 
-static void
-nto_request_interrupt (void)
+void
+nto_process_target::request_interrupt ()
 {
   TRACE ("%s\n", __func__);
   nto_set_thread (ptid_t (nto_inferior.pid, 1, 0));
@@ -943,7 +943,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  nto_request_interrupt,
   nto_read_auxv,
   nto_supports_z_point_type,
   nto_insert_point,

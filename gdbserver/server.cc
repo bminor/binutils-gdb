@@ -3088,7 +3088,7 @@ handle_v_requests (char *own_buf, int packet_len, int *new_packet_len)
     {
       if (strcmp (own_buf, "vCtrlC") == 0)
 	{
-	  (*the_target->request_interrupt) ();
+	  the_target->pt->request_interrupt ();
 	  write_ok (own_buf);
 	  return;
 	}

@@ -1695,8 +1695,8 @@ win32_process_target::write_memory (CORE_ADDR memaddr,
 }
 
 /* Send an interrupt request to the inferior process. */
-static void
-win32_request_interrupt (void)
+void
+win32_process_target::request_interrupt ()
 {
   winapi_DebugBreakProcess DebugBreakProcess;
   winapi_GenerateConsoleCtrlEvent GenerateConsoleCtrlEvent;
@@ -1838,7 +1838,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_request_interrupt,
   NULL, /* read_auxv */
   win32_supports_z_point_type,
   win32_insert_point,

@@ -5911,12 +5911,12 @@ linux_process_target::look_up_symbols ()
 #endif
 }
 
-static void
-linux_request_interrupt (void)
+void
+linux_process_target::request_interrupt ()
 {
   /* Send a SIGINT to the process group.  This acts just like the user
      typed a ^C on the controlling terminal.  */
-  kill (-signal_pid, SIGINT);
+  ::kill (-signal_pid, SIGINT);
 }
 
 /* Copy LEN bytes from inferior's auxiliary vector starting at OFFSET
@@ -7369,7 +7369,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_request_interrupt,
   linux_read_auxv,
   linux_supports_z_point_type,
   linux_insert_point,
