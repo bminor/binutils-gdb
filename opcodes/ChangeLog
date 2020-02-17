@@ -1,3 +1,8 @@
+2020-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Remove CPU_ANY_SSE3_FLAGS from
+	CPU_ANY_SSE4A_FLAGS.
+
 2020-02-17  Alan Modra  <amodra@gmail.com>
 
 	* i386-gen.c (cpu_flag_init): Correct last change.

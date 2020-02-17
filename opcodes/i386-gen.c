@@ -334,7 +334,7 @@ static initializer cpu_flag_init[] =
   { "CPU_ANY_SSE4_2_FLAGS",
     "CpuSSE4_2" },
   { "CPU_ANY_SSE4A_FLAGS",
-    "CPU_ANY_SSE3_FLAGS|CpuSSE4a" },
+    "CpuSSE4a" },
   { "CPU_ANY_AVX_FLAGS",
     "CPU_ANY_AVX2_FLAGS|CpuF16C|CpuFMA|CpuFMA4|CpuXOP|CpuAVX" },
   { "CPU_ANY_AVX2_FLAGS",
