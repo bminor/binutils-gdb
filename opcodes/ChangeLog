@@ -1,5 +1,13 @@
 2020-02-17  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (AddrPrefixOpReg): Define.
+	(monitor, invlpga, vmload, vmrun, vmsave, clzero, monitorx,
+	umonitor, movdir64b, enqcmd, enqcmds): Fold Cpu64 and CpuNo64
+	templates. Drop NoRex64.
+	* i386-tbl.h: Re-generate.
+
+2020-02-17  Jan Beulich  <jbeulich@suse.com>
+
 	PR gas/6518
 	* i386-opc.tbl (vcvtpd2dq, vcvtpd2ps, vcvttpd2dq, vcvtpd2udq,
 	vcvttpd2udq, vcvtqq2ps, vcvtuqq2ps): Split XMM/YMM source forms

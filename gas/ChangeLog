@@ -1,5 +1,12 @@
 2020-02-17  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (process_suffix): Don't try to guess a suffix
+	for AddrPrefixOpReg templates. Combine the two pieces of
+	addrprefixopreg handling. Reject 16-bit address reg in 64-bit
+	mode.
+
+2020-02-17  Jan Beulich  <jbeulich@suse.com>
+
 	PR gas/14439
 	* config/tc-i386.c (md_assemble): Also suppress operand
 	swapping for MONITOR{,X} and MWAIT{,X}.

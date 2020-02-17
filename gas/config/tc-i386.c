@@ -6298,7 +6298,8 @@ process_suffix (void)
   else if (i.tm.opcode_modifier.size == SIZE64)
     i.suffix = QWORD_MNEM_SUFFIX;
   else if (i.reg_operands
-	   && (i.operands > 1 || i.types[0].bitfield.class == Reg))
+	   && (i.operands > 1 || i.types[0].bitfield.class == Reg)
+	   && !i.tm.opcode_modifier.addrprefixopreg)
     {
       unsigned int numop = i.operands;
 
@@ -6613,28 +6614,13 @@ process_suffix (void)
       /* Now select between word & dword operations via the operand
 	 size prefix, except for instructions that will ignore this
 	 prefix anyway.  */
-      if (i.reg_operands > 0
-	  && i.types[0].bitfield.class == Reg
-	  && i.tm.opcode_modifier.addrprefixopreg
-	  && (i.tm.operand_types[0].bitfield.instance == Accum
-	      || i.operands == 1))
-	{
-	  /* The address size override prefix changes the size of the
-	     first operand.  */
-	  if ((flag_code == CODE_32BIT
-	       && i.op[0].regs->reg_type.bitfield.word)
-	      || (flag_code != CODE_32BIT
-		  && i.op[0].regs->reg_type.bitfield.dword))
-	    if (!add_prefix (ADDR_PREFIX_OPCODE))
-	      return 0;
-	}
-      else if (i.suffix != QWORD_MNEM_SUFFIX
-	       && !i.tm.opcode_modifier.ignoresize
-	       && !i.tm.opcode_modifier.floatmf
-	       && !is_any_vex_encoding (&i.tm)
-	       && ((i.suffix == LONG_MNEM_SUFFIX) == (flag_code == CODE_16BIT)
-		   || (flag_code == CODE_64BIT
-		       && i.tm.opcode_modifier.jump == JUMP_BYTE)))
+      if (i.suffix != QWORD_MNEM_SUFFIX
+	  && !i.tm.opcode_modifier.ignoresize
+	  && !i.tm.opcode_modifier.floatmf
+	  && !is_any_vex_encoding (&i.tm)
+	  && ((i.suffix == LONG_MNEM_SUFFIX) == (flag_code == CODE_16BIT)
+	      || (flag_code == CODE_64BIT
+		  && i.tm.opcode_modifier.jump == JUMP_BYTE)))
 	{
 	  unsigned int prefix = DATA_PREFIX_OPCODE;
 
@@ -6663,39 +6649,70 @@ process_suffix (void)
       break;
     }
 
-  if (i.reg_operands != 0
-      && i.operands > 1
-      && i.tm.opcode_modifier.addrprefixopreg
-      && i.tm.operand_types[0].bitfield.instance != Accum)
+  if (i.tm.opcode_modifier.addrprefixopreg)
     {
-      /* Check invalid register operand when the address size override
-	 prefix changes the size of register operands.  */
-      unsigned int op;
-      enum { need_word, need_dword, need_qword } need;
+      gas_assert (!i.suffix);
+      gas_assert (i.reg_operands);
 
-      if (flag_code == CODE_32BIT)
-	need = i.prefix[ADDR_PREFIX] ? need_word : need_dword;
+      if (i.tm.operand_types[0].bitfield.instance == Accum
+	  || i.operands == 1)
+	{
+	  /* The address size override prefix changes the size of the
+	     first operand.  */
+	  if (flag_code == CODE_64BIT
+	      && i.op[0].regs->reg_type.bitfield.word)
+	    {
+	      as_bad (_("16-bit addressing unavailable for `%s'"),
+		      i.tm.name);
+	      return 0;
+	    }
+
+	  if ((flag_code == CODE_32BIT
+	       ? i.op[0].regs->reg_type.bitfield.word
+	       : i.op[0].regs->reg_type.bitfield.dword)
+	      && !add_prefix (ADDR_PREFIX_OPCODE))
+	    return 0;
+	}
       else
 	{
-	  if (i.prefix[ADDR_PREFIX])
+	  /* Check invalid register operand when the address size override
+	     prefix changes the size of register operands.  */
+	  unsigned int op;
+	  enum { need_word, need_dword, need_qword } need;
+
+	  if (flag_code == CODE_32BIT)
+	    need = i.prefix[ADDR_PREFIX] ? need_word : need_dword;
+	  else if (i.prefix[ADDR_PREFIX])
 	    need = need_dword;
 	  else
 	    need = flag_code == CODE_64BIT ? need_qword : need_word;
-	}
 
-      for (op = 0; op < i.operands; op++)
-	if (i.types[op].bitfield.class == Reg
-	    && ((need == need_word
-		 && !i.op[op].regs->reg_type.bitfield.word)
-		|| (need == need_dword
-		    && !i.op[op].regs->reg_type.bitfield.dword)
-		|| (need == need_qword
-		    && !i.op[op].regs->reg_type.bitfield.qword)))
-	  {
-	    as_bad (_("invalid register operand size for `%s'"),
-		    i.tm.name);
-	    return 0;
-	  }
+	  for (op = 0; op < i.operands; op++)
+	    {
+	      if (i.types[op].bitfield.class != Reg)
+		continue;
+
+	      switch (need)
+		{
+		case need_word:
+		  if (i.op[op].regs->reg_type.bitfield.word)
+		    continue;
+		  break;
+		case need_dword:
+		  if (i.op[op].regs->reg_type.bitfield.dword)
+		    continue;
+		  break;
+		case need_qword:
+		  if (i.op[op].regs->reg_type.bitfield.qword)
+		    continue;
+		  break;
+		}
+
+	      as_bad (_("invalid register operand size for `%s'"),
+		      i.tm.name);
+	      return 0;
+	    }
+	}
     }
 
   return 1;
