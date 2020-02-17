@@ -156,6 +156,12 @@ public:
 #ifdef _WIN32_WCE
   void hostio_last_error (char *buf) override;
 #endif
+
+  bool supports_qxfer_siginfo () override;
+
+  int qxfer_siginfo (const char *annex, unsigned char *readbuf,
+		     unsigned const char *writebuf,
+		     CORE_ADDR offset, int len) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */

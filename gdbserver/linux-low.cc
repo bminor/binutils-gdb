@@ -6182,9 +6182,17 @@ siginfo_fixup (siginfo_t *siginfo, gdb_byte *inf_siginfo, int direction)
     }
 }
 
-static int
-linux_xfer_siginfo (const char *annex, unsigned char *readbuf,
-		    unsigned const char *writebuf, CORE_ADDR offset, int len)
+bool
+linux_process_target::supports_qxfer_siginfo ()
+{
+  return true;
+}
+
+int
+linux_process_target::qxfer_siginfo (const char *annex,
+				     unsigned char *readbuf,
+				     unsigned const char *writebuf,
+				     CORE_ADDR offset, int len)
 {
   int pid;
   siginfo_t siginfo;
@@ -7421,7 +7429,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_xfer_siginfo,
   linux_supports_non_stop,
   linux_async,
   linux_start_non_stop,

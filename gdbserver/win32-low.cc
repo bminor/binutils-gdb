@@ -1793,11 +1793,19 @@ win32_process_target::hostio_last_error (char *buf)
 }
 #endif
 
+bool
+win32_process_target::supports_qxfer_siginfo ()
+{
+  return true;
+}
+
 /* Write Windows signal info.  */
 
-static int
-win32_xfer_siginfo (const char *annex, unsigned char *readbuf,
-		    unsigned const char *writebuf, CORE_ADDR offset, int len)
+int
+win32_process_target::qxfer_siginfo (const char *annex,
+				     unsigned char *readbuf,
+				     unsigned const char *writebuf,
+				     CORE_ADDR offset, int len)
 {
   if (siginfo_er.ExceptionCode == 0)
     return -1;
@@ -1844,7 +1852,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_xfer_siginfo,
   NULL, /* supports_non_stop */
   NULL, /* async */
   NULL, /* start_non_stop */

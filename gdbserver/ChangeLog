@@ -1,5 +1,29 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's qxfer_siginfo op into a method of
+	process_target.
+
+	* target.h (struct process_stratum_target): Remove the target op.
+	(class process_target): Add the target op.  Also add
+	'supports_qxfer_siginfo'.
+	* target.cc (process_target::qxfer_siginfo): Define.
+	(process_target::supports_qxfer_siginfo): Define.
+
+	Update the derived classes and callers below.
+
+	* server.cc (handle_qxfer_siginfo): Update.
+	(handle_query): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_process_target::supports_qxfer_siginfo): Define.
+	(linux_xfer_siginfo): Turn into ...
+	(linux_process_target::qxfer_siginfo): ... this.
+	* linux-low.h (class linux_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	* win32-low.cc (win32_target_ops): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's qxfer_osdata op into a method of
 	process_target.
 

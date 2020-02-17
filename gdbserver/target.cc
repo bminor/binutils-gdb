@@ -527,3 +527,17 @@ process_target::qxfer_osdata (const char *annex, unsigned char *readbuf,
 {
   gdb_assert_not_reached ("target op qxfer_osdata not supported");
 }
+
+bool
+process_target::supports_qxfer_siginfo ()
+{
+  return false;
+}
+
+int
+process_target::qxfer_siginfo (const char *annex, unsigned char *readbuf,
+			       unsigned const char *writebuf,
+			       CORE_ADDR offset, int len)
+{
+  gdb_assert_not_reached ("target op qxfer_siginfo not supported");
+}
