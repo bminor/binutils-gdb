@@ -638,3 +638,15 @@ process_target::thread_stopped (thread_info *thread)
 {
   gdb_assert_not_reached ("target op thread_stopped not supported");
 }
+
+bool
+process_target::supports_get_tib_address ()
+{
+  return false;
+}
+
+int
+process_target::get_tib_address (ptid_t ptid, CORE_ADDR *address)
+{
+  gdb_assert_not_reached ("target op get_tib_address not supported");
+}

@@ -7455,7 +7455,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  NULL,
   linux_pause_all,
   linux_unpause_all,
   linux_stabilize_threads,

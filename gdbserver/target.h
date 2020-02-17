@@ -70,9 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Read Thread Information Block address.  */
-  int (*get_tib_address) (ptid_t ptid, CORE_ADDR *address);
-
   /* Pause all threads.  If FREEZE, arrange for any resume attempt to
      be ignored until an unpause_all call unfreezes threads again.
      There can be nested calls to pause_all, so a freeze counter
@@ -491,6 +488,12 @@ public:
 
   /* Return true if THREAD is known to be stopped now.  */
   virtual bool thread_stopped (thread_info *thread);
+
+  /* Return true if the get_tib_address op is supported.  */
+  virtual bool supports_get_tib_address ();
+
+  /* Read Thread Information Block address.  */
+  virtual int get_tib_address (ptid_t ptid, CORE_ADDR *address);
 };
 
 extern process_stratum_target *the_target;

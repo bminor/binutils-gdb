@@ -1,5 +1,28 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's get_tib_address op into a method of
+	process_target.
+
+	* target.h (struct process_stratum_target): Remove the target op.
+	(class process_target): Add the target op.  Also add
+	'supports_get_tib_address'.
+	* target.cc (process_target::get_tib_address): Define.
+	(process_target::supports_get_tib_address): Define.
+
+	Update the derived classes and callers below.
+
+	* server.cc (handle_query): Update.
+	* linux-low.cc (win32_target_ops): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	* win32-low.cc (win32_target_ops): Update.
+	(win32_process_target::supports_get_tib_address): Define.
+	(win32_get_tib_address): Turn into ...
+	(win32_process_target::get_tib_address): ... this.
+	* win32-low.h (class win32_process_target): Update.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's thread_stopped op into a method of
 	process_target.
 

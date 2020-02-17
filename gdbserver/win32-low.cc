@@ -1824,10 +1824,16 @@ win32_process_target::qxfer_siginfo (const char *annex,
   return len;
 }
 
+bool
+win32_process_target::supports_get_tib_address ()
+{
+  return true;
+}
+
 /* Write Windows OS Thread Information Block address.  */
 
-static int
-win32_get_tib_address (ptid_t ptid, CORE_ADDR *addr)
+int
+win32_process_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 {
   win32_thread_info *th;
   th = thread_rec (ptid, 0);
@@ -1852,7 +1858,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  win32_get_tib_address,
   NULL, /* pause_all */
   NULL, /* unpause_all */
   NULL, /* stabilize_threads */

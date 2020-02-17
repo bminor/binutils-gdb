@@ -2532,7 +2532,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
     }
 
   /* Windows OS Thread Information Block address support.  */
-  if (the_target->get_tib_address != NULL
+  if (the_target->pt->supports_get_tib_address ()
       && startswith (own_buf, "qGetTIBAddr:"))
     {
       const char *annex;
@@ -2540,7 +2540,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       CORE_ADDR tlb;
       ptid_t ptid = read_ptid (own_buf + 12, &annex);
 
-      n = (*the_target->get_tib_address) (ptid, &tlb);
+      n = the_target->pt->get_tib_address (ptid, &tlb);
       if (n == 1)
 	{
 	  strcpy (own_buf, paddress(tlb));

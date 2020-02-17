@@ -162,6 +162,10 @@ public:
   int qxfer_siginfo (const char *annex, unsigned char *readbuf,
 		     unsigned const char *writebuf,
 		     CORE_ADDR offset, int len) override;
+
+  bool supports_get_tib_address () override;
+
+  int get_tib_address (ptid_t ptid, CORE_ADDR *addr) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */
