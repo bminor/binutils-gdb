@@ -1,5 +1,33 @@
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn process_stratum_target's supports_hardware_single_step op into
+	a method of process_target.
+
+	* target.h (struct process_stratum_target): Remove the target op.
+	(class process_target): Add the target op.
+	(target_supports_hardware_single_step): Update the macro.
+	(target_can_do_hardware_single_step): Remove declaration.
+	* target.cc (process_target::supports_hardware_single_step): Define.
+	(target_can_do_hardware_single_step): Remove.
+
+	Update the derived classes and callers below.
+
+	* linux-low.h (class linux_process_target): Update.
+	* linux-low.cc (linux_target_ops): Update.
+	(linux_supports_hardware_single_step): Turn into ...
+	(linux_process_target::supports_hardware_single_step): ... this.
+	* lynx-low.h (class lynx_process_target): Update.
+	* lynx-low.cc (lynx_target_ops): Update.
+	(lynx_process_target::supports_hardware_single_step): Define.
+	* nto-low.h (class nto_process_target): Update.
+	* nto-low.cc (nto_target_ops): Update.
+	(nto_process_target::supports_hardware_single_step): Define.
+	* win32-low.h (class win32_process_target): Update.
+	* win32-low.cc (win32_target_ops): Update.
+	(win32_process_target::supports_hardware_single_step): Define.
+
+2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn process_stratum_target's {supports_}stopped_by_hw_breakpoint
 	ops into methods of process_target.
 

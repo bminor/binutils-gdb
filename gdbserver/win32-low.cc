@@ -1728,6 +1728,12 @@ win32_process_target::request_interrupt ()
   soft_interrupt_requested = 1;
 }
 
+bool
+win32_process_target::supports_hardware_single_step ()
+{
+  return true;
+}
+
 #ifdef _WIN32_WCE
 int
 win32_error_to_fileio_error (DWORD err)
@@ -1838,7 +1844,6 @@ win32_sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  target_can_do_hardware_single_step,
   win32_stopped_by_watchpoint,
   win32_stopped_data_address,
   NULL, /* read_offsets */

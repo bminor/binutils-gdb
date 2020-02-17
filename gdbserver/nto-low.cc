@@ -869,6 +869,12 @@ nto_process_target::remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
   return nto_breakpoint (addr, wtype, -1);
 }
 
+bool
+nto_process_target::supports_hardware_single_step ()
+{
+  return true;
+}
+
 /* Check if the reason of stop for current thread (CURRENT_INFERIOR) is
    a watchpoint.
 
@@ -950,7 +956,6 @@ nto_sw_breakpoint_from_kind (int kind, int *size)
 static nto_process_target the_nto_target;
 
 static process_stratum_target nto_target_ops = {
-  target_can_do_hardware_single_step,
   nto_stopped_by_watchpoint,
   nto_stopped_data_address,
   NULL, /* nto_read_offsets */

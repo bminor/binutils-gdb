@@ -146,6 +146,8 @@ public:
 
   int remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 		    int size, raw_breakpoint *bp) override;
+
+  bool supports_hardware_single_step () override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */

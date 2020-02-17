@@ -722,6 +722,12 @@ lynx_process_target::request_interrupt ()
   kill (lynx_ptid_get_pid (inferior_ptid), SIGINT);
 }
 
+bool
+lynx_process_target::supports_hardware_single_step ()
+{
+  return true;
+}
+
 /* The LynxOS target ops object.  */
 
 static lynx_process_target the_lynx_target;
@@ -729,7 +735,6 @@ static lynx_process_target the_lynx_target;
 /* The LynxOS target_ops vector.  */
 
 static process_stratum_target lynx_target_ops = {
-  target_can_do_hardware_single_step,
   NULL,  /* stopped_by_watchpoint */
   NULL,  /* stopped_data_address */
   NULL,  /* read_offsets */

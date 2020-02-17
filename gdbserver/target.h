@@ -70,9 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Returns true if the target can do hardware single step.  */
-  int (*supports_hardware_single_step) (void);
-
   /* Returns 1 if target was stopped due to a watchpoint hit, 0 otherwise.  */
 
   int (*stopped_by_watchpoint) (void);
@@ -476,6 +473,9 @@ public:
   /* Returns true if the target knows whether a trap was caused by a
      HW breakpoint triggering.  */
   virtual bool supports_stopped_by_hw_breakpoint ();
+
+  /* Returns true if the target can do hardware single step.  */
+  virtual bool supports_hardware_single_step ();
 };
 
 extern process_stratum_target *the_target;
@@ -668,8 +668,7 @@ target_read_btrace_conf (struct btrace_target_info *tinfo,
   the_target->pt->supports_stopped_by_hw_breakpoint ()
 
 #define target_supports_hardware_single_step() \
-  (the_target->supports_hardware_single_step ? \
-   (*the_target->supports_hardware_single_step) () : 0)
+  the_target->pt->supports_hardware_single_step ()
 
 #define target_stopped_by_hw_breakpoint() \
   the_target->pt->stopped_by_hw_breakpoint ()
@@ -719,8 +718,6 @@ int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 int set_desired_thread ();
 
 const char *target_pid_to_str (ptid_t);
-
-int target_can_do_hardware_single_step (void);
 
 int default_breakpoint_kind_from_pc (CORE_ADDR *pcptr);
 

@@ -89,6 +89,8 @@ public:
 		    int len) override;
 
   void request_interrupt () override;
+
+  bool supports_hardware_single_step () override;
 };
 
 /* The inferior's target description.  This is a global because the

@@ -316,14 +316,6 @@ kill_inferior (process_info *proc)
   return the_target->pt->kill (proc);
 }
 
-/* Target can do hardware single step.  */
-
-int
-target_can_do_hardware_single_step (void)
-{
-  return 1;
-}
-
 /* Default implementation for breakpoint_kind_for_pc.
 
    The default behavior for targets that don't implement breakpoint_kind_for_pc
@@ -468,6 +460,12 @@ process_target::stopped_by_hw_breakpoint ()
 
 bool
 process_target::supports_stopped_by_hw_breakpoint ()
+{
+  return false;
+}
+
+bool
+process_target::supports_hardware_single_step ()
 {
   return false;
 }

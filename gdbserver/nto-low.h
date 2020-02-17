@@ -92,6 +92,8 @@ public:
 
   int remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 		    int size, raw_breakpoint *bp) override;
+
+  bool supports_hardware_single_step () override;
 };
 
 /* The inferior's target description.  This is a global because the
