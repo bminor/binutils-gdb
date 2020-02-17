@@ -452,6 +452,16 @@ public:
   bool supports_pid_to_exec_file () override;
 
   char *pid_to_exec_file (int pid) override;
+
+  bool supports_multifs () override;
+
+  int multifs_open (int pid, const char *filename, int flags,
+		    mode_t mode) override;
+
+  int multifs_unlink (int pid, const char *filename) override;
+
+  ssize_t multifs_readlink (int pid, const char *filename, char *buf,
+			    size_t bufsiz) override;
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

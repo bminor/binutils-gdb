@@ -22,6 +22,10 @@
 #include "tracepoint.h"
 #include "gdbsupport/byte-vector.h"
 #include "hostio.h"
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 process_stratum_target *the_target;
 
@@ -770,4 +774,30 @@ char *
 process_target::pid_to_exec_file (int pid)
 {
   gdb_assert_not_reached ("target op pid_to_exec_file not supported");
+}
+
+bool
+process_target::supports_multifs ()
+{
+  return false;
+}
+
+int
+process_target::multifs_open (int pid, const char *filename,
+			      int flags, mode_t mode)
+{
+  return open (filename, flags, mode);
+}
+
+int
+process_target::multifs_unlink (int pid, const char *filename)
+{
+  return unlink (filename);
+}
+
+ssize_t
+process_target::multifs_readlink (int pid, const char *filename,
+				  char *buf, size_t bufsiz)
+{
+  return readlink (filename, buf, bufsiz);
 }

@@ -6453,6 +6453,32 @@ linux_process_target::pid_to_exec_file (int pid)
   return linux_proc_pid_to_exec_file (pid);
 }
 
+bool
+linux_process_target::supports_multifs ()
+{
+  return true;
+}
+
+int
+linux_process_target::multifs_open (int pid, const char *filename,
+				    int flags, mode_t mode)
+{
+  return linux_mntns_open_cloexec (pid, filename, flags, mode);
+}
+
+int
+linux_process_target::multifs_unlink (int pid, const char *filename)
+{
+  return linux_mntns_unlink (pid, filename);
+}
+
+ssize_t
+linux_process_target::multifs_readlink (int pid, const char *filename,
+					char *buf, size_t bufsiz)
+{
+  return linux_mntns_readlink (pid, filename, buf, bufsiz);
+}
+
 #if defined PT_GETDSBT || defined PTRACE_GETFDPIC
 struct target_loadseg
 {
@@ -7483,9 +7509,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_mntns_open_cloexec,
-  linux_mntns_unlink,
-  linux_mntns_readlink,
   linux_breakpoint_kind_from_pc,
   linux_sw_breakpoint_from_kind,
   linux_proc_tid_get_name,
