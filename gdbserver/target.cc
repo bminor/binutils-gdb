@@ -814,3 +814,9 @@ process_target::thread_handle (ptid_t ptid, gdb_byte **handle,
 {
   return false;
 }
+
+bool
+process_target::supports_software_single_step ()
+{
+  return false;
+}

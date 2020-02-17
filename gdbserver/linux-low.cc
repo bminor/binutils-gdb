@@ -6044,8 +6044,8 @@ linux_process_target::supports_hardware_single_step ()
   return can_hardware_single_step ();
 }
 
-static int
-linux_supports_software_single_step (void)
+bool
+linux_process_target::supports_software_single_step ()
 {
   return can_software_single_step ();
 }
@@ -7524,7 +7524,6 @@ linux_get_hwcap2 (int wordsize)
 static linux_process_target the_linux_target;
 
 static process_stratum_target linux_target_ops = {
-  linux_supports_software_single_step,
   linux_supports_catch_syscall,
   linux_get_ipa_tdesc_idx,
   &the_linux_target,

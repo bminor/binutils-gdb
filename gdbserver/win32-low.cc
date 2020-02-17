@@ -1858,7 +1858,6 @@ win32_process_target::sw_breakpoint_from_kind (int kind, int *size)
 static win32_process_target the_win32_target;
 
 static process_stratum_target win32_target_ops = {
-  NULL, /* supports_software_single_step */
   NULL, /* supports_catch_syscall */
   NULL, /* get_ipa_tdesc_idx */
   &the_win32_target,

@@ -70,9 +70,6 @@ class process_target;
    shared code.  */
 struct process_stratum_target
 {
-  /* Returns true if the target can software single step.  */
-  int (*supports_software_single_step) (void);
-
   /* Return 1 if the target supports catch syscall, 0 (or leave the
      callback NULL) otherwise.  */
   int (*supports_catch_syscall) (void);
@@ -505,6 +502,9 @@ public:
      and the handle's length via HANDLE_LEN.  */
   virtual bool thread_handle (ptid_t ptid, gdb_byte **handle,
 			      int *handle_len);
+
+  /* Returns true if the target can software single step.  */
+  virtual bool supports_software_single_step ();
 };
 
 extern process_stratum_target *the_target;
@@ -669,8 +669,7 @@ target_read_btrace_conf (struct btrace_target_info *tinfo,
   the_target->pt->breakpoint_kind_from_current_state (pcptr)
 
 #define target_supports_software_single_step() \
-  (the_target->supports_software_single_step ? \
-   (*the_target->supports_software_single_step) () : 0)
+  the_target->pt->supports_software_single_step ()
 
 ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
 	       int connected_wait);
