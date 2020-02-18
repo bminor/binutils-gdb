@@ -1,5 +1,11 @@
 2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
 
+	* valprint.c (generic_val_print_enum_1): When printing a flag
+	enum with value 0 and there is no enumerator with value 0, print
+	just "0" instead of "(unknown: 0x0)".
+
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
 	* valprint.c (generic_val_print_enum_1): Print unknown part of
 	flag enum in hex.
 

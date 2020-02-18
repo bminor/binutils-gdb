@@ -635,7 +635,6 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
 	 appropriate.  The enum may have multiple enumerators representing
 	 the same bit, in which case we choose to only print the first one
 	 we find.  */
-      fputs_filtered ("(", stream);
       for (i = 0; i < len; ++i)
 	{
 	  QUIT;
@@ -647,24 +646,42 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
 
 	  if ((val & enumval) != 0)
 	    {
-	      if (!first)
+	      if (first)
+		{
+		  fputs_filtered ("(", stream);
+		  first = 0;
+		}
+	      else
 		fputs_filtered (" | ", stream);
-	      first = 0;
 
 	      val &= ~TYPE_FIELD_ENUMVAL (type, i);
 	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
 	    }
 	}
 
-      if (first || val != 0)
+      if (val != 0)
 	{
-	  if (!first)
+	  /* There are leftover bits, print them.  */
+	  if (first)
+	    fputs_filtered ("(", stream);
+	  else
 	    fputs_filtered (" | ", stream);
+
 	  fputs_filtered ("unknown: 0x", stream);
 	  print_longest (stream, 'x', 0, val);
+	  fputs_filtered (")", stream);
 	}
-
-      fputs_filtered (")", stream);
+      else if (first)
+	{
+	  /* Nothing has been printed and the value is 0, the enum value must
+	     have been 0.  */
+	  fputs_filtered ("0", stream);
+	}
+      else
+	{
+	  /* Something has been printed, close the parenthesis.  */
+	  fputs_filtered (")", stream);
+	}
     }
   else
     print_longest (stream, 'd', 0, val);
