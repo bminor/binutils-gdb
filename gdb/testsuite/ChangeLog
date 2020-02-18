@@ -1,3 +1,15 @@
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.base/printcmds.c (enum flag_enum): Prefix enumerators with
+	FE_, add FE_NONE.
+	(three): Update.
+	(enum flag_enum_without_zero): New enum.
+	(flag_enum_without_zero): New variable.
+	(enum not_flag_enum): New enum.
+	(three_not_flag): New variable.
+	* gdb.base/printcmds.exp (test_artificial_arrays): Update.
+	(test_print_enums): Add more tests for printing flag enums.
+
 2020-02-18  Tom de Vries  <tdevries@suse.de>
 
 	* lib/ada.exp (gdb_compile_ada_1): Factor out of ...

@@ -39,6 +39,7 @@
 #include "cli/cli-option.h"
 #include "gdbarch.h"
 #include "cli/cli-style.h"
+#include "count-one-bits.h"
 
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
@@ -638,7 +639,12 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
 	{
 	  QUIT;
 
-	  if ((val & TYPE_FIELD_ENUMVAL (type, i)) != 0)
+	  ULONGEST enumval = TYPE_FIELD_ENUMVAL (type, i);
+	  int nbits = count_one_bits_ll (enumval);
+
+	  gdb_assert (nbits == 0 || nbits == 1);
+
+	  if ((val & enumval) != 0)
 	    {
 	      if (!first)
 		fputs_filtered (" | ", stream);

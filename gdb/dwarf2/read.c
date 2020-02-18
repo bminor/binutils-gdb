@@ -82,6 +82,7 @@
 #include "gdbsupport/selftest.h"
 #include "rust-lang.h"
 #include "gdbsupport/pathstuff.h"
+#include "count-one-bits.h"
 
 /* When == 1, print basic high level tracing messages.
    When > 1, be more verbose.
@@ -15526,10 +15527,15 @@ update_enumeration_type_from_children (struct die_info *die,
 	  unsigned_enum = 0;
 	  flag_enum = 0;
 	}
-      else if ((mask & value) != 0)
-	flag_enum = 0;
       else
-	mask |= value;
+	{
+	  if (count_one_bits_ll (value) >= 2)
+	    flag_enum = 0;
+	  else if ((mask & value) != 0)
+	    flag_enum = 0;
+	  else
+	    mask |= value;
+	}
 
       /* If we already know that the enum type is neither unsigned, nor
 	 a flag type, no need to look at the rest of the enumerates.  */
