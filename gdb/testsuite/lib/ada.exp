@@ -52,9 +52,9 @@ proc target_compile_ada_from_dir {builddir source dest type options} {
     return -options $options $result
 }
 
-# Compile some Ada code.
+# Compile some Ada code.  Return "" if the compile was successful.
 
-proc gdb_compile_ada {source dest type options} {
+proc gdb_compile_ada_1 {source dest type options} {
 
     set srcdir [file dirname $source]
     set gprdir [file dirname $srcdir]
@@ -80,6 +80,15 @@ proc gdb_compile_ada {source dest type options} {
     # We therefore simply check whether the dest file has been created
     # or not. Unless not present, the build has succeeded.
     if [file exists $dest] { set result "" }
+    return $result
+}
+
+# Compile some Ada code.  Generate "PASS: foo.exp: compilation SOURCE" if the
+# compile was successful.
+
+proc gdb_compile_ada {source dest type options} {
+    set result [gdb_compile_ada_1 $source $dest $type $options]
+
     gdb_compile_test $source $result
     return $result
 }
@@ -162,8 +171,7 @@ gdb_caching_proc gnat_runtime_has_debug_info {
     set src "$srcdir/lib/gnat_debug_info_test.adb"
     set dst [standard_output_file "gnat_debug_info_test"]
 
-    if { [gdb_compile_ada $src $dst executable {debug}] != "" } {
-	fail "failed to compile gnat-debug-info test binary"
+    if { [gdb_compile_ada_1 $src $dst executable {debug}] != "" } {
 	return 0
     }
 

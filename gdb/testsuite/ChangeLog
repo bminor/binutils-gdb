@@ -1,3 +1,10 @@
+2020-02-18  Tom de Vries  <tdevries@suse.de>
+
+	* lib/ada.exp (gdb_compile_ada_1): Factor out of ...
+	(gdb_compile_ada): ... here.
+	(gnat_runtime_has_debug_info): Remove fail call for gdb_compile_ada
+	failure.  Use gdb_compile_ada_1 instead of gdb_compile_ada.
+
 2020-02-14  Tom Tromey  <tom@tromey.com>
 
 	* lib/gdbserver-support.exp (find_gdbserver): Find gdbserver in
