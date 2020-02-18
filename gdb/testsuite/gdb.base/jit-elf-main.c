@@ -30,19 +30,7 @@
 #include <unistd.h>
 
 #include "jit-protocol.h"
-
-/* ElfW is coming from linux. On other platforms it does not exist.
-   Let us define it here. */
-#ifndef ElfW
-# if (defined  (_LP64) || defined (__LP64__)) 
-#   define WORDSIZE 64
-# else
-#   define WORDSIZE 32
-# endif /* _LP64 || __LP64__  */
-#define ElfW(type)      _ElfW (Elf, WORDSIZE, type)
-#define _ElfW(e,w,t)    _ElfW_1 (e, w, _##t)
-#define _ElfW_1(e,w,t)  e##w##t
-#endif /* !ElfW  */
+#include "jit-elf-util.h"
 
 static void
 usage (void)
@@ -95,37 +83,19 @@ MAIN (int argc, char *argv[])
 
   for (i = 1; i < argc; ++i)
     {
-      struct stat st;
-      int fd;
-
-      printf ("%s:%d: libname = %s, i = %d\n", __FILE__, __LINE__, argv[i], i);
-      if ((fd = open (argv[i], O_RDONLY)) == -1)
-	{
-	  fprintf (stderr, "open (\"%s\", O_RDONLY): %s\n", argv[i],
-		   strerror (errno));
-	  exit (1);
-	}
-
-      if (fstat (fd, &st) != 0)
-	{
-	  fprintf (stderr, "fstat (\"%d\"): %s\n", fd, strerror (errno));
-	  exit (1);
-	}
-
+      size_t obj_size;
       void *load_addr = (void *) (size_t) (LOAD_ADDRESS + (i - 1) * LOAD_INCREMENT);
-      const void *const addr = mmap (load_addr, st.st_size, PROT_READ|PROT_WRITE,
-				     MAP_PRIVATE | MAP_FIXED, fd, 0);
-      struct jit_code_entry *const entry = calloc (1, sizeof (*entry));
+      printf ("Loading %s as JIT at %p\n", argv[i], load_addr);
+      void *addr = load_elf (argv[i], &obj_size, load_addr);
 
-      if (addr == MAP_FAILED)
-	{
-	  fprintf (stderr, "mmap: %s\n", strerror (errno));
-	  exit (1);
-	}
+      char name[32];
+      sprintf (name, "jit_function_%04d", i);
+      int (*jit_function) (void) = (int (*) (void)) load_symbol (addr, name);
 
       /* Link entry at the end of the list.  */
+      struct jit_code_entry *const entry = calloc (1, sizeof (*entry));
       entry->symfile_addr = (const char *)addr;
-      entry->symfile_size = st.st_size;
+      entry->symfile_size = obj_size;
       entry->prev_entry = __jit_debug_descriptor.relevant_entry;
       __jit_debug_descriptor.relevant_entry = entry;
 
@@ -137,6 +107,12 @@ MAIN (int argc, char *argv[])
       /* Notify GDB.  */
       __jit_debug_descriptor.action_flag = JIT_REGISTER;
       __jit_debug_register_code ();
+
+      if (jit_function () != 42)
+	{
+	  fprintf (stderr, "unexpected return value\n");
+	  exit (1);
+	}
     }
 
   WAIT_FOR_GDB; i = 0;  /* gdb break here 1 */
