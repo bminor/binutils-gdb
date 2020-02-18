@@ -1,5 +1,10 @@
 2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
 
+	* valprint.c (generic_val_print_enum_1): Print unknown part of
+	flag enum in hex.
+
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c (update_enumeration_type_from_children): Allow
 	flag enums to contain duplicate enumerators.
 	* valprint.c (generic_val_print_enum_1): Update comment.

@@ -660,8 +660,8 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
 	{
 	  if (!first)
 	    fputs_filtered (" | ", stream);
-	  fputs_filtered ("unknown: ", stream);
-	  print_longest (stream, 'd', 0, val);
+	  fputs_filtered ("unknown: 0x", stream);
+	  print_longest (stream, 'x', 0, val);
 	}
 
       fputs_filtered (")", stream);

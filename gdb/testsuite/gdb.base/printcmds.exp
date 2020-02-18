@@ -743,10 +743,10 @@ proc test_print_enums {} {
     gdb_test "print (enum flag_enum) 0x0" [string_to_regexp " = FE_NONE"]
 
     # Print a flag enum with value 0, where no enumerator has value 0.
-    gdb_test "print flag_enum_without_zero" [string_to_regexp " = (unknown: 0)"]
+    gdb_test "print flag_enum_without_zero" [string_to_regexp " = (unknown: 0x0)"]
 
     # Print a flag enum with unknown bits set.
-    gdb_test "print (enum flag_enum) 0xf1" [string_to_regexp " = (FE_ONE | unknown: 240)"]
+    gdb_test "print (enum flag_enum) 0xf1" [string_to_regexp " = (FE_ONE | unknown: 0xf0)"]
 
     # Test printing an enum not considered a "flag enum" (because one of its
     # enumerators has multiple bits set).
