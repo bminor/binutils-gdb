@@ -1,3 +1,7 @@
+2020-02-26  Jérémie Galarneau  <jeremie.galarneau@efficios.com>
+
+	* thread.c (thr_try_catch_cmd): Print thread name.
+
 2020-02-26  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2/loc.h (dwarf2_fetch_die_loc_sect_off,
