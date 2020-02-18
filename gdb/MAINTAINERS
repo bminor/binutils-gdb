@@ -304,7 +304,7 @@ the native maintainer when resolving ABI issues.
 	riscv		--target=riscv32-elf ,-Werror
 			--target=riscv64-elf ,-Werror
 			Andrew Burgess		andrew.burgess@embecosm.com
-			Palmer Dabbelt		palmer@sifive.com
+			Palmer Dabbelt		palmer@dabbelt.com
 
 	rl78		--target=rl78-elf ,-Werror
 

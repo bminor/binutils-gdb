@@ -1,3 +1,7 @@
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
+	* MAINTAINERS: Change palmer@sifive.com to palmer@dabbelt.com.
+
 2020-02-14  Simon Marchi  <simon.marchi@efficios.com>
 
 	* aarch64-tdep.c (aarch64_displaced_step_copy_insn): Use
