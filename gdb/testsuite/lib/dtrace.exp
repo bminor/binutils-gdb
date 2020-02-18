@@ -52,7 +52,8 @@ proc dtrace_build_usdt_test_program {} {
     }
 
     # 2. Compile testprogram.c.
-    set options [list debug additional_flags=-I[file dirname $out_header_file]]
+    set options [list debug quiet \
+		     additional_flags=-I[file dirname $out_header_file]]
     if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}.o" object ${options}] != ""} {
         return -1
     }
@@ -65,7 +66,8 @@ proc dtrace_build_usdt_test_program {} {
     }
 
     # 4. Link everything together to get the test program.
-    if {[gdb_compile "${binfile}.o ${binfile}-p.o" ${binfile} executable {debug}] != ""} {
+    if {[gdb_compile "${binfile}.o ${binfile}-p.o" ${binfile} executable \
+	     {debug quiet}] != ""} {
         return -1
     }
 }

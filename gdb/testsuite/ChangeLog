@@ -1,3 +1,8 @@
+2020-02-19  Tom de Vries  <tdevries@suse.de>
+
+	* lib/dtrace.exp (dtrace_build_usdt_test_program): Use quiet as
+	gdb_compile option.
+
 2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.base/printcmds.exp (test_print_enums): Update expected
