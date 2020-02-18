@@ -631,9 +631,10 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
     {
       int first = 1;
 
-      /* We have a "flag" enum, so we try to decompose it into
-	 pieces as appropriate.  A flag enum has disjoint
-	 constants by definition.  */
+      /* We have a "flag" enum, so we try to decompose it into pieces as
+	 appropriate.  The enum may have multiple enumerators representing
+	 the same bit, in which case we choose to only print the first one
+	 we find.  */
       fputs_filtered ("(", stream);
       for (i = 0; i < len; ++i)
 	{

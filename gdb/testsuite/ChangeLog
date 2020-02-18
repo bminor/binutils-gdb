@@ -1,5 +1,10 @@
 2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdb.base/printcmds.c (enum flag_enum): Add FE_TWO_LEGACY
+	enumerator.
+
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdb.base/printcmds.c (enum flag_enum): Prefix enumerators with
 	FE_, add FE_NONE.
 	(three): Update.

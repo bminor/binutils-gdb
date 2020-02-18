@@ -99,9 +99,10 @@ volatile enum some_volatile_enum some_volatile_enum = enumvolval1;
 /* An enum considered as a "flag enum".  */
 enum flag_enum
 {
-  FE_NONE = 0x00,
-  FE_ONE  = 0x01,
-  FE_TWO  = 0x02,
+  FE_NONE       = 0x00,
+  FE_ONE        = 0x01,
+  FE_TWO        = 0x02,
+  FE_TWO_LEGACY = 0x02,
 };
 
 enum flag_enum three = FE_ONE | FE_TWO;

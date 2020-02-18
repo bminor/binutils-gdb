@@ -1,5 +1,11 @@
 2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.c (update_enumeration_type_from_children): Allow
+	flag enums to contain duplicate enumerators.
+	* valprint.c (generic_val_print_enum_1): Update comment.
+
+2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c: Include "count-one-bits.h".
 	(update_enumeration_type_from_children): If an enumerator has
 	multiple bits set, don't treat the enumeration as a "flag enum".

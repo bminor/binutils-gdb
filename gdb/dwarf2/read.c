@@ -15495,7 +15495,6 @@ update_enumeration_type_from_children (struct die_info *die,
   struct die_info *child_die;
   int unsigned_enum = 1;
   int flag_enum = 1;
-  ULONGEST mask = 0;
 
   auto_obstack obstack;
 
@@ -15531,10 +15530,6 @@ update_enumeration_type_from_children (struct die_info *die,
 	{
 	  if (count_one_bits_ll (value) >= 2)
 	    flag_enum = 0;
-	  else if ((mask & value) != 0)
-	    flag_enum = 0;
-	  else
-	    mask |= value;
 	}
 
       /* If we already know that the enum type is neither unsigned, nor
