@@ -3577,11 +3577,20 @@ proc gdb_wrapper_init { args } {
     global gdb_wrapper_flags
     global gdb_wrapper_target
 
+    # If the wrapper is initialized but the wrapper file cannot be
+    # found anymore, the wrapper file must be built again.
+    if { $gdb_wrapper_initialized == 1 && \
+	    [info exists gdb_wrapper_file] && \
+	    ![file exists $gdb_wrapper_file] } {
+	verbose "reinitializing the wrapper"
+	set gdb_wrapper_initialized 0
+    }
+
     if { $gdb_wrapper_initialized == 1 } { return; }
 
     if {[target_info exists needs_status_wrapper] && \
 	    [target_info needs_status_wrapper] != "0"} {
-	set result [build_wrapper "testglue.o"]
+	set result [build_wrapper [standard_output_file "testglue.o"]]
 	if { $result != "" } {
 	    set gdb_wrapper_file [lindex $result 0]
 	    set gdb_wrapper_flags [lindex $result 1]
@@ -3831,7 +3840,7 @@ proc gdb_compile {source dest type options} {
     verbose "options are $options"
     verbose "source is $source $dest $type $options"
 
-    if { $gdb_wrapper_initialized == 0 } { gdb_wrapper_init }
+    gdb_wrapper_init
 
     if {[target_info exists needs_status_wrapper] && \
 	    [target_info needs_status_wrapper] != "0" && \
