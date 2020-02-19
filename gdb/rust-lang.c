@@ -481,7 +481,8 @@ rust_print_enum (struct type *type, int embedded_offset,
     }
 
   const gdb_byte *valaddr = value_contents_for_printing (val);
-  struct field *variant_field = rust_enum_variant (type, valaddr);
+  struct field *variant_field = rust_enum_variant (type,
+						   valaddr + embedded_offset);
   embedded_offset += FIELD_BITPOS (*variant_field) / 8;
   struct type *variant_type = FIELD_TYPE (*variant_field);
 

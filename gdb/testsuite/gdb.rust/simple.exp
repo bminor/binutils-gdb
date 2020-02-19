@@ -357,6 +357,8 @@ gdb_test_sequence "ptype/o SimpleLayout" "" {
 
 gdb_test "print u2" " = simple::Union2 {name: \\\[1\\\]}"
 
+gdb_test "print nonzero_offset" " = simple::EnumWithNonzeroOffset {a: core::option::Option<u8>::Some\\(1\\), b: core::option::Option<u8>::None}"
+
 # PR rust/23626 - this used to crash.  Note that the results are
 # fairly lax because most existing versions of Rust (those before the
 # DW_TAG_variant patches) do not emit what gdb wants here; and there
