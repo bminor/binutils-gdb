@@ -1,5 +1,9 @@
 2020-02-19  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.python/lib-types.exp: Make xfail more strict.
+
+2020-02-19  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.ada/funcall_ref.exp: Replace xfail setup by unsupported check.
 
 2020-02-19  Doug Evans  <dje@google.com>
