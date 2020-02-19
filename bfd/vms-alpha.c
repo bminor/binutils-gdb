@@ -368,14 +368,16 @@ struct vms_private_data_struct *bfd_vms_get_data (bfd *);
 
 static int vms_get_remaining_object_record (bfd *, unsigned int);
 static bfd_boolean _bfd_vms_slurp_object_records (bfd * abfd);
-static void alpha_vms_add_fixup_lp (struct bfd_link_info *, bfd *, bfd *);
-static void alpha_vms_add_fixup_ca (struct bfd_link_info *, bfd *, bfd *);
-static void alpha_vms_add_fixup_qr (struct bfd_link_info *, bfd *, bfd *,
-				    bfd_vma);
-static void alpha_vms_add_fixup_lr (struct bfd_link_info *, unsigned int,
-				    bfd_vma);
-static void alpha_vms_add_lw_reloc (struct bfd_link_info *);
-static void alpha_vms_add_qw_reloc (struct bfd_link_info *);
+static bfd_boolean alpha_vms_add_fixup_lp (struct bfd_link_info *,
+					   bfd *, bfd *);
+static bfd_boolean alpha_vms_add_fixup_ca (struct bfd_link_info *,
+					   bfd *, bfd *);
+static bfd_boolean alpha_vms_add_fixup_qr (struct bfd_link_info *,
+					   bfd *, bfd *, bfd_vma);
+static bfd_boolean alpha_vms_add_fixup_lr (struct bfd_link_info *,
+					   unsigned int, bfd_vma);
+static bfd_boolean alpha_vms_add_lw_reloc (struct bfd_link_info *);
+static bfd_boolean alpha_vms_add_qw_reloc (struct bfd_link_info *);
 
 struct vector_type
 {
@@ -401,17 +403,12 @@ struct vector_type
 
 /* Be sure there is room for a new element.  */
 
-static void vector_grow1 (struct vector_type *vec, size_t elsz);
+static void *vector_grow1 (struct vector_type *vec, size_t elsz);
 
 /* Allocate room for a new element and return its address.  */
 
 #define VEC_APPEND(VEC, TYPE)					\
-  (vector_grow1 (&VEC, sizeof (TYPE)), &VEC_EL(VEC, TYPE, (VEC).nbr_el++))
-
-/* Append an element.  */
-
-#define VEC_APPEND_EL(VEC, TYPE, EL)		\
-  (*(VEC_APPEND (VEC, TYPE)) = EL)
+  ((TYPE *) vector_grow1 (&VEC, sizeof (TYPE)))
 
 struct alpha_vms_vma_ref
 {
@@ -2004,14 +2001,16 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    }
 	  else if (rel1 & RELC_SHR_BASE)
 	    {
-	      alpha_vms_add_fixup_lr (info, rel1 & RELC_MASK, op1);
+	      if (!alpha_vms_add_fixup_lr (info, rel1 & RELC_MASK, op1))
+		return FALSE;
 	      rel1 = RELC_NONE;
 	    }
 	  if (rel1 != RELC_NONE)
 	    {
 	      if (rel1 != RELC_REL)
 		abort ();
-	      alpha_vms_add_lw_reloc (info);
+	      if (!alpha_vms_add_lw_reloc (info))
+		return FALSE;
 	    }
 	  image_write_l (abfd, op1);
 	  break;
@@ -2032,7 +2031,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      if (rel1 != RELC_REL)
 		abort ();
-	      alpha_vms_add_qw_reloc (info);
+	      if (!alpha_vms_add_qw_reloc (info))
+		return FALSE;
 	    }
 	  image_write_q (abfd, op1);
 	  break;
@@ -2064,15 +2064,17 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      if (h->sym->typ == EGSD__C_SYMG)
 		{
-		  alpha_vms_add_fixup_qr
-		    (info, abfd, h->sym->owner, h->sym->symbol_vector);
+		  if (!alpha_vms_add_fixup_qr (info, abfd, h->sym->owner,
+					       h->sym->symbol_vector))
+		    return FALSE;
 		  op1 = 0;
 		}
 	      else
 		{
 		  op1 = alpha_vms_get_sym_value (h->sym->section,
 						 h->sym->value);
-		  alpha_vms_add_qw_reloc (info);
+		  if (!alpha_vms_add_qw_reloc (info))
+		    return FALSE;
 		}
 	    }
 	  image_write_q (abfd, op1);
@@ -2089,14 +2091,16 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 		  /* That's really a procedure.  */
 		  if (h->sym->typ == EGSD__C_SYMG)
 		    {
-		      alpha_vms_add_fixup_ca (info, abfd, h->sym->owner);
+		      if (!alpha_vms_add_fixup_ca (info, abfd, h->sym->owner))
+			return FALSE;
 		      op1 = h->sym->symbol_vector;
 		    }
 		  else
 		    {
 		      op1 = alpha_vms_get_sym_value (h->sym->code_section,
 						     h->sym->code_value);
-		      alpha_vms_add_qw_reloc (info);
+		      if (!alpha_vms_add_qw_reloc (info))
+			return FALSE;
 		    }
 		}
 	      else
@@ -2201,7 +2205,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    {
 	      if (h->sym->typ == EGSD__C_SYMG)
 		{
-		  alpha_vms_add_fixup_lp (info, abfd, h->sym->owner);
+		  if (!alpha_vms_add_fixup_lp (info, abfd, h->sym->owner))
+		    return FALSE;
 		  op1 = h->sym->symbol_vector;
 		  op2 = 0;
 		}
@@ -2950,22 +2955,30 @@ _bfd_vms_write_eeom (bfd *abfd)
   return TRUE;
 }
 
-static void
+static void *
 vector_grow1 (struct vector_type *vec, size_t elsz)
 {
-  if (vec->nbr_el + 1 < vec->max_el)
-    return;
-
-  if (vec->max_el == 0)
+  if (vec->nbr_el >= vec->max_el)
     {
-      vec->max_el = 16;
-      vec->els = bfd_malloc2 (vec->max_el, elsz);
+      if (vec->max_el == 0)
+	{
+	  vec->max_el = 16;
+	  vec->els = bfd_malloc2 (vec->max_el, elsz);
+	}
+      else
+	{
+	  if (vec->max_el > -1u / 2)
+	    {
+	      bfd_set_error (bfd_error_file_too_big);
+	      return NULL;
+	    }
+	  vec->max_el *= 2;
+	  vec->els = bfd_realloc2 (vec->els, vec->max_el, elsz);
+	}
     }
-  else
-    {
-      vec->max_el *= 2;
-      vec->els = bfd_realloc2 (vec->els, vec->max_el, elsz);
-    }
+  if (vec->els == NULL)
+    return NULL;
+  return (char *) vec->els + elsz * vec->nbr_el++;
 }
 
 /* Bump ABFD file position to next block.  */
@@ -8330,41 +8343,49 @@ alpha_vms_sizeof_headers (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Add a linkage pair fixup at address SECT + OFFSET to SHLIB. */
 
-static void
+static bfd_boolean
 alpha_vms_add_fixup_lp (struct bfd_link_info *info, bfd *src, bfd *shlib)
 {
   struct alpha_vms_shlib_el *sl;
   asection *sect = PRIV2 (src, image_section);
   file_ptr offset = PRIV2 (src, image_offset);
+  bfd_vma *p;
 
   sl = &VEC_EL (alpha_vms_link_hash (info)->shrlibs,
 		struct alpha_vms_shlib_el, PRIV2 (shlib, shr_index));
   sl->has_fixups = TRUE;
-  VEC_APPEND_EL (sl->lp, bfd_vma,
-		 sect->output_section->vma + sect->output_offset + offset);
+  p = VEC_APPEND (sl->lp, bfd_vma);
+  if (p == NULL)
+    return FALSE;
+  *p = sect->output_section->vma + sect->output_offset + offset;
   sect->output_section->flags |= SEC_RELOC;
+  return TRUE;
 }
 
 /* Add a code address fixup at address SECT + OFFSET to SHLIB. */
 
-static void
+static bfd_boolean
 alpha_vms_add_fixup_ca (struct bfd_link_info *info, bfd *src, bfd *shlib)
 {
   struct alpha_vms_shlib_el *sl;
   asection *sect = PRIV2 (src, image_section);
   file_ptr offset = PRIV2 (src, image_offset);
+  bfd_vma *p;
 
   sl = &VEC_EL (alpha_vms_link_hash (info)->shrlibs,
 		struct alpha_vms_shlib_el, PRIV2 (shlib, shr_index));
   sl->has_fixups = TRUE;
-  VEC_APPEND_EL (sl->ca, bfd_vma,
-		 sect->output_section->vma + sect->output_offset + offset);
+  p = VEC_APPEND (sl->ca, bfd_vma);
+  if (p == NULL)
+    return FALSE;
+  *p = sect->output_section->vma + sect->output_offset + offset;
   sect->output_section->flags |= SEC_RELOC;
+  return TRUE;
 }
 
 /* Add a quad word relocation fixup at address SECT + OFFSET to SHLIB. */
 
-static void
+static bfd_boolean
 alpha_vms_add_fixup_qr (struct bfd_link_info *info, bfd *src,
 			bfd *shlib, bfd_vma vec)
 {
@@ -8377,30 +8398,35 @@ alpha_vms_add_fixup_qr (struct bfd_link_info *info, bfd *src,
 		struct alpha_vms_shlib_el, PRIV2 (shlib, shr_index));
   sl->has_fixups = TRUE;
   r = VEC_APPEND (sl->qr, struct alpha_vms_vma_ref);
+  if (r == NULL)
+    return FALSE;
   r->vma = sect->output_section->vma + sect->output_offset + offset;
   r->ref = vec;
   sect->output_section->flags |= SEC_RELOC;
+  return TRUE;
 }
 
-static void
+static bfd_boolean
 alpha_vms_add_fixup_lr (struct bfd_link_info *info ATTRIBUTE_UNUSED,
 			unsigned int shr ATTRIBUTE_UNUSED,
 			bfd_vma vec ATTRIBUTE_UNUSED)
 {
   /* Not yet supported.  */
-  abort ();
+  return FALSE;
 }
 
 /* Add relocation.  FIXME: Not yet emitted.  */
 
-static void
+static bfd_boolean
 alpha_vms_add_lw_reloc (struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
+  return FALSE;
 }
 
-static void
+static bfd_boolean
 alpha_vms_add_qw_reloc (struct bfd_link_info *info ATTRIBUTE_UNUSED)
 {
+  return FALSE;
 }
 
 static struct bfd_hash_entry *
@@ -8527,6 +8553,8 @@ alpha_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
       shlib = VEC_APPEND (alpha_vms_link_hash (info)->shrlibs,
 			  struct alpha_vms_shlib_el);
+      if (shlib == NULL)
+	return FALSE;
       shlib->abfd = abfd;
       VEC_INIT (shlib->ca);
       VEC_INIT (shlib->lp);

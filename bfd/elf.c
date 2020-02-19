@@ -2071,6 +2071,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	{
 	  sections_being_created = (bfd_boolean *)
 	    bfd_zalloc2 (abfd, elf_numsections (abfd), sizeof (bfd_boolean));
+	  if (sections_being_created == NULL)
+	    return FALSE;
 	  sections_being_created_abfd = abfd;
 	}
       if (sections_being_created [shindex])

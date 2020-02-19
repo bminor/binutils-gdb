@@ -1,5 +1,25 @@
 2020-02-19  Alan Modra  <amodra@gmail.com>
 
+	* mach-o.c (bfd_mach_o_flatten_sections): Return a bfd_boolean,
+	FALSE if memory alloc fails.  Adjust calls.
+	* som.c (som_prep_for_fixups): Likewise.
+	* vms-alpha.c (alpha_vms_add_fixup_lp, alpha_vms_add_fixup_ca),
+	(alpha_vms_add_fixup_qr, alpha_vms_add_fixup_lr),
+	(alpha_vms_add_lw_reloc, alpha_vms_add_qw_reloc): Likewise.
+	* som.c (som_build_and_write_symbol_table): Return via error_return
+	on seek failure.
+	* vms-alpha.c (VEC_APPEND): Adjust for vector_grow1 changes.
+	(VEC_APPEND_EL): Delete.
+	(vector_grow1): Return pointer to element.  Catch overflow.
+	Return NULL on memory allocation failure.
+	(alpha_vms_add_fixup_lp): Replace VEC_APPEND_EL with VEC_APPEND.
+	(alpha_vms_add_fixup_ca): Likewise.
+	(alpha_vms_link_add_object_symbols): Check VEC_APPEND result
+	before using.
+	* elf.c (bfd_section_from_shdr): Check bfd_zalloc2 result.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
 	* aix386-core.c (aix386_core_file_p): Use size_t for "amt".
 	* aout-target.h (object_p): Likewise.
 	* aout-tic30.c (tic30_aout_object_p): Likewise.

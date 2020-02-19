@@ -4999,7 +4999,7 @@ bfd_mach_o_read_command (bfd *abfd, bfd_mach_o_load_command *command)
   return TRUE;
 }
 
-static void
+static bfd_boolean
 bfd_mach_o_flatten_sections (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
@@ -5023,6 +5023,8 @@ bfd_mach_o_flatten_sections (bfd *abfd)
   /* Allocate sections array.  */
   mdata->sections = bfd_alloc2 (abfd,
 				mdata->nsects, sizeof (bfd_mach_o_section *));
+  if (mdata->sections == NULL && mdata->nsects != 0)
+    return FALSE;
 
   /* Fill the array.  */
   csect = 0;
@@ -5041,6 +5043,7 @@ bfd_mach_o_flatten_sections (bfd *abfd)
 	    mdata->sections[csect++] = sec;
 	}
     }
+  return TRUE;
 }
 
 static bfd_boolean
@@ -5220,7 +5223,8 @@ bfd_mach_o_scan (bfd *abfd,
     }
 
   /* Sections should be flatten before scanning start address.  */
-  bfd_mach_o_flatten_sections (abfd);
+  if (!bfd_mach_o_flatten_sections (abfd))
+    return FALSE;
   if (!bfd_mach_o_scan_start_address (abfd))
     return FALSE;
 

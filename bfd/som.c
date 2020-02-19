@@ -2798,7 +2798,7 @@ compare_subspaces (const void *arg1, const void *arg2)
 
 /* Perform various work in preparation for emitting the fixup stream.  */
 
-static void
+static bfd_boolean
 som_prep_for_fixups (bfd *abfd, asymbol **syms, unsigned long num_syms)
 {
   unsigned long i;
@@ -2876,6 +2876,8 @@ som_prep_for_fixups (bfd *abfd, asymbol **syms, unsigned long num_syms)
   /* Sort a copy of the symbol table, rather than the canonical
      output symbol table.  */
   sorted_syms = bfd_zalloc2 (abfd, num_syms, sizeof (asymbol *));
+  if (sorted_syms == NULL)
+    return FALSE;
   memcpy (sorted_syms, syms, num_syms * sizeof (asymbol *));
   qsort (sorted_syms, num_syms, sizeof (asymbol *), compare_syms);
   obj_som_sorted_syms (abfd) = sorted_syms;
@@ -2891,6 +2893,7 @@ som_prep_for_fixups (bfd *abfd, asymbol **syms, unsigned long num_syms)
       else
 	som_symbol_data (sorted_syms[i])->index = i;
     }
+  return TRUE;
 }
 
 static bfd_boolean
@@ -4009,9 +4012,10 @@ som_finish_writing (bfd *abfd)
   current_offset += strings_size;
 
   /* Do prep work before handling fixups.  */
-  som_prep_for_fixups (abfd,
-		       bfd_get_outsymbols (abfd),
-		       bfd_get_symcount (abfd));
+  if (!som_prep_for_fixups (abfd,
+			    bfd_get_outsymbols (abfd),
+			    bfd_get_symcount (abfd)))
+    return FALSE;
 
   /* At the end of the file is the fixup stream which starts on a
      word boundary.  */
@@ -4500,7 +4504,7 @@ som_build_and_write_symbol_table (bfd *abfd)
   /* Everything is ready, seek to the right location and
      scribble out the symbol table.  */
   if (bfd_seek (abfd, symtab_location, SEEK_SET) != 0)
-    return FALSE;
+    goto error_return;
 
   symtab_size = num_syms;
   symtab_size *= sizeof (struct som_external_symbol_dictionary_record);
