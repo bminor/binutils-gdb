@@ -4010,14 +4010,11 @@ mips_elf64_slurp_one_reloc_table (bfd *abfd, asection *asect,
   int entsize;
   bfd_boolean rela_p;
 
-  allocated = bfd_malloc (rel_hdr->sh_size);
+  if (bfd_seek (abfd, rel_hdr->sh_offset, SEEK_SET) != 0)
+    return FALSE;
+  allocated = _bfd_malloc_and_read (abfd, rel_hdr->sh_size, rel_hdr->sh_size);
   if (allocated == NULL)
     return FALSE;
-
-  if (bfd_seek (abfd, rel_hdr->sh_offset, SEEK_SET) != 0
-      || (bfd_bread (allocated, rel_hdr->sh_size, abfd)
-	  != rel_hdr->sh_size))
-    goto error_return;
 
   native_relocs = allocated;
 

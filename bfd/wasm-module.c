@@ -452,11 +452,9 @@ wasm_scan (bfd *abfd)
 
       if (bfdsec->size != 0)
 	{
-	  bfdsec->contents = bfd_alloc (abfd, bfdsec->size);
+	  bfdsec->contents = _bfd_alloc_and_read (abfd, bfdsec->size,
+						  bfdsec->size);
 	  if (!bfdsec->contents)
-	    goto error_return;
-
-	  if (bfd_bread (bfdsec->contents, bfdsec->size, abfd) != bfdsec->size)
 	    goto error_return;
 	}
 

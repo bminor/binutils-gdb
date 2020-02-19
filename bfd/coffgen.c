@@ -275,11 +275,8 @@ coff_real_object_p (bfd *abfd,
 
   scnhsz = bfd_coff_scnhsz (abfd);
   readsize = (bfd_size_type) nscns * scnhsz;
-  external_sections = (char *) bfd_alloc (abfd, readsize);
+  external_sections = (char *) _bfd_alloc_and_read (abfd, readsize, readsize);
   if (!external_sections)
-    goto fail;
-
-  if (bfd_bread ((void *) external_sections, readsize, abfd) != readsize)
     goto fail;
 
   /* Set the arch/mach *before* swapping in sections; section header swapping
@@ -332,14 +329,11 @@ coff_object_p (bfd *abfd)
   filhsz = bfd_coff_filhsz (abfd);
   aoutsz = bfd_coff_aoutsz (abfd);
 
-  filehdr = bfd_alloc (abfd, filhsz);
+  filehdr = _bfd_alloc_and_read (abfd, filhsz, filhsz);
   if (filehdr == NULL)
-    return NULL;
-  if (bfd_bread (filehdr, filhsz, abfd) != filhsz)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
-      bfd_release (abfd, filehdr);
       return NULL;
     }
   bfd_coff_swap_filehdr_in (abfd, filehdr, &internal_f);
@@ -365,18 +359,13 @@ coff_object_p (bfd *abfd)
     {
       void * opthdr;
 
-      opthdr = bfd_alloc (abfd, aoutsz);
+      opthdr = _bfd_alloc_and_read (abfd, aoutsz, internal_f.f_opthdr);
       if (opthdr == NULL)
 	return NULL;
-      if (bfd_bread (opthdr, (bfd_size_type) internal_f.f_opthdr, abfd)
-	  != internal_f.f_opthdr)
-	{
-	  bfd_release (abfd, opthdr);
-	  return NULL;
-	}
       /* PR 17512: file: 11056-1136-0.004.  */
       if (internal_f.f_opthdr < aoutsz)
-	memset (((char *) opthdr) + internal_f.f_opthdr, 0, aoutsz - internal_f.f_opthdr);
+	memset (((char *) opthdr) + internal_f.f_opthdr, 0,
+		aoutsz - internal_f.f_opthdr);
 
       bfd_coff_swap_aouthdr_in (abfd, opthdr, (void *) &internal_a);
       bfd_release (abfd, opthdr);
@@ -1593,19 +1582,20 @@ build_debug_section (bfd *abfd, asection ** sect_return)
       return NULL;
     }
 
-  sec_size = sect->size;
-  debug_section = (char *) bfd_alloc (abfd, sec_size);
-  if (debug_section == NULL)
-    return NULL;
-
   /* Seek to the beginning of the `.debug' section and read it.
      Save the current position first; it is needed by our caller.
      Then read debug section and reset the file pointer.  */
 
   position = bfd_tell (abfd);
-  if (bfd_seek (abfd, sect->filepos, SEEK_SET) != 0
-      || bfd_bread (debug_section, sec_size, abfd) != sec_size
-      || bfd_seek (abfd, position, SEEK_SET) != 0)
+  if (bfd_seek (abfd, sect->filepos, SEEK_SET) != 0)
+    return NULL;
+
+  sec_size = sect->size;
+  debug_section = (char *) _bfd_alloc_and_read (abfd, sec_size, sec_size);
+  if (debug_section == NULL)
+    return NULL;
+
+  if (bfd_seek (abfd, position, SEEK_SET) != 0)
     return NULL;
 
   * sect_return = sect;
@@ -1662,27 +1652,11 @@ _bfd_coff_get_external_symbols (bfd *abfd)
   if (size == 0)
     return TRUE;
 
-  syms = bfd_malloc (size);
-  if (syms == NULL)
-    {
-      /* PR 21013: Provide an error message when the alloc fails.  */
-      _bfd_error_handler (_("%pB: not enough memory to allocate space "
-			    "for %#" PRIx64 " symbols of size %#" PRIx64),
-			  abfd, (uint64_t) obj_raw_syment_count (abfd),
-			  (uint64_t) symesz);
-      return FALSE;
-    }
-
-  if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
-      || bfd_bread (syms, size, abfd) != size)
-    {
-      if (syms != NULL)
-	free (syms);
-      return FALSE;
-    }
-
+  if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
+    return FALSE;
+  syms = _bfd_malloc_and_read (abfd, size, size);
   obj_coff_external_syms (abfd) = syms;
-  return TRUE;
+  return syms != NULL;
 }
 
 /* Read in the external strings.  The strings are not loaded until

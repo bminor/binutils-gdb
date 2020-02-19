@@ -1317,14 +1317,17 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	{
 	  bfd_byte *linenos;
 
-	  amt = linesz * o->lineno_count;
-	  linenos = bfd_malloc (amt);
+	  if (bfd_seek (abfd, o->line_filepos, SEEK_SET) != 0)
+	    goto error_return;
+	  if (_bfd_mul_overflow (linesz, o->lineno_count, &amt))
+	    {
+	      bfd_set_error (bfd_error_file_too_big);
+	      goto error_return;
+	    }
+	  linenos = _bfd_malloc_and_read (abfd, amt, amt);
 	  if (linenos == NULL)
 	    goto error_return;
 	  reloc_info[o->target_index].linenos = linenos;
-	  if (bfd_seek (abfd, o->line_filepos, SEEK_SET) != 0
-	      || bfd_bread (linenos, amt, abfd) != amt)
-	    goto error_return;
 	}
     }
 

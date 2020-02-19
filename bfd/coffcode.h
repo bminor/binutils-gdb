@@ -2222,15 +2222,11 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
 		struct internal_syment sym;
 		bfd_size_type amt = bfd_coff_symesz (abfd);
 
-		buf = bfd_malloc (amt);
+		if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
+		  return FALSE;
+		buf = _bfd_malloc_and_read (abfd, amt, amt);
 		if (buf == NULL)
 		  return FALSE;
-		if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
-		    || bfd_bread (buf, amt, abfd) != amt)
-		  {
-		    free (buf);
-		    return FALSE;
-		  }
 		bfd_coff_swap_sym_in (abfd, buf, & sym);
 		if (sym.n_sclass == C_FILE)
 		  cputype = sym.n_type & 0xff;
@@ -4200,7 +4196,6 @@ static void *
 buy_and_read (bfd *abfd, file_ptr where,
 	      bfd_size_type nmemb, bfd_size_type size)
 {
-  void *area;
   size_t amt;
 
   if (_bfd_mul_overflow (nmemb, size, &amt))
@@ -4208,13 +4203,9 @@ buy_and_read (bfd *abfd, file_ptr where,
       bfd_set_error (bfd_error_file_too_big);
       return NULL;
     }
-  area = bfd_alloc (abfd, amt);
-  if (!area)
+  if (bfd_seek (abfd, where, SEEK_SET) != 0)
     return NULL;
-  if (bfd_seek (abfd, where, SEEK_SET) != 0
-      || bfd_bread (area, amt, abfd) != amt)
-    return NULL;
-  return area;
+  return _bfd_alloc_and_read (abfd, amt, amt);
 }
 
 /*

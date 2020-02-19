@@ -1,5 +1,57 @@
 2020-02-19  Alan Modra  <amodra@gmail.com>
 
+	* libbfd-in.h (_bfd_alloc_and_read, _bfd_malloc_and_read): New.
+	* aoutx.h (aout_get_external_symbols): Replace calls to
+	bfd_[m]alloc and bfd_bread with call to _bfd_[m]alloc_and_read.
+	(slurp_reloc_table): Likewise.
+	* archive.c (do_slurp_bsd_armap): Likewise.
+	(do_slurp_coff_armap): Likewise.
+	* archive64.c (_bfd_archive_64_bit_slurp_armap): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_slurp_armap): Likewise.
+	* coff64-rs6000.c (xcoff64_slurp_armap): Likewise.
+	* coffcode.h (coff_set_arch_mach_hook, buy_and_read): Likewise.
+	* coffgen.c (coff_real_object_p, coff_object_p, build_debug_section),
+	(_bfd_coff_get_external_symbols): Likewise.
+	* ecoff.c (ecoff_slurp_symbolic_header),
+	(_bfd_ecoff_slurp_symbolic_info, ecoff_slurp_reloc_table),
+	(_bfd_ecoff_slurp_armap, ecoff_link_add_object_symbols, READ),
+	(ecoff_indirect_link_order): Likewise.
+	* elf.c (bfd_elf_get_str_section, setup_group, elf_read_notes),
+	(_bfd_elf_slurp_version_tables): Likewise.
+	* elf32-m32c.c (m32c_elf_relax_section): Likewise.
+	* elf32-rl78.c (rl78_elf_relax_section): Likewise.
+	* elf32-rx.c (elf32_rx_relax_section): Likewise.
+	* elf64-alpha.c (READ): Likewise.
+	* elf64-mips.c (mips_elf64_slurp_one_reloc_table): Likewise.
+	* elf64-sparc.c (elf64_sparc_slurp_one_reloc_table): Likewise.
+	* elfcode.h (elf_slurp_symbol_table),
+	(elf_slurp_reloc_table_from_section): Likewise.
+	* elflink.c (elf_link_add_object_symbols),
+	(elf_link_check_versioned_symbol): Likewise.
+	* elfxx-mips.c (READ): Likewise.
+	* i386lynx.c (slurp_reloc_table): Likewise.
+	* lynx-core.c (lynx_core_file_p): Likewise.
+	* mach-o.c (bfd_mach_o_canonicalize_relocs),
+	(bfd_mach_o_read_symtab_strtab, bfd_mach_o_alloc_and_read),
+	(bfd_mach_o_read_prebound_dylib, bfd_mach_o_read_dyld_content
+	* pdp11.c (aout_get_external_symbols, slurp_reloc_table
+	* pef.c (bfd_pef_print_loader_section, bfd_pef_scan_start_address),
+	(bfd_pef_parse_symbols): Likewise.
+	* peicode.h (pe_ILF_object_p, pe_bfd_object_p
+	* som.c (setup_sections, som_slurp_string_table),
+	(som_slurp_reloc_table, som_bfd_count_ar_symbols),
+	(som_bfd_fill_in_ar_symbols): Likewise.
+	* vms-alpha.c (module_find_nearest_line, evax_bfd_print_dst),
+	(evax_bfd_print_image): Likewise.
+	* vms-lib.c (_bfd_vms_lib_archive_p): Likewise.
+	* wasm-module.c (wasm_scan): Likewise.
+	* xcofflink.c (xcoff_link_add_symbols): Likewise.
+	* xsym.c (bfd_sym_read_name_table),
+	(bfd_sym_print_type_information_table_entry): Likewise.
+	* libbfd.h: Regenerate.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
 	* aoutx.h (slurp_reloc_table): Allocate reloc_cache after
 	reading external relocs.
 	* ecoff.c (ecoff_slurp_reloc_table): Likewise.

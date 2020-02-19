@@ -2129,11 +2129,10 @@ rl78_elf_relax_section
 	  bfd_set_error (bfd_error_no_memory);
 	  goto error_return;
 	}
-      shndx_buf = bfd_malloc (amt);
-      if (shndx_buf == NULL)
+      if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0)
 	goto error_return;
-      if (bfd_seek (abfd, shndx_hdr->sh_offset, SEEK_SET) != 0
-	  || bfd_bread (shndx_buf, amt, abfd) != amt)
+      shndx_buf = _bfd_malloc_and_read (abfd, amt, amt);
+      if (shndx_buf == NULL)
 	goto error_return;
       shndx_hdr->contents = shndx_buf;
     }

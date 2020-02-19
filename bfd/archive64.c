@@ -108,11 +108,8 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
   carsyms = ardata->symdefs;
   stringbase = ((char *) ardata->symdefs) + carsym_size;
 
-  raw_armap = (bfd_byte *) bfd_alloc (abfd, ptrsize);
-  if (raw_armap == NULL)
-    goto release_symdefs;
-
-  if (bfd_bread (raw_armap, ptrsize, abfd) != ptrsize
+  raw_armap = (bfd_byte *) _bfd_alloc_and_read (abfd, ptrsize, ptrsize);
+  if (raw_armap == NULL
       || bfd_bread (stringbase, stringsize, abfd) != stringsize)
     {
       if (bfd_get_error () != bfd_error_system_call)

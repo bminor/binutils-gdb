@@ -1424,11 +1424,10 @@ _bfd_mips_elf_read_ecoff_info (bfd *abfd, asection *section,
 	  bfd_set_error (bfd_error_file_too_big);			\
 	  goto error_return;						\
 	}								\
-      debug->ptr = bfd_malloc (amt);					\
-      if (debug->ptr == NULL)						\
+      if (bfd_seek (abfd, symhdr->offset, SEEK_SET) != 0)		\
 	goto error_return;						\
-      if (bfd_seek (abfd, symhdr->offset, SEEK_SET) != 0		\
-	  || bfd_bread (debug->ptr, amt, abfd) != amt)			\
+      debug->ptr = (type) _bfd_malloc_and_read (abfd, amt, amt);	\
+      if (debug->ptr == NULL)						\
 	goto error_return;						\
     } while (0)
 

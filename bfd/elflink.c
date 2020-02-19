@@ -4332,12 +4332,12 @@ error_free_dyn:
 	  Elf_Internal_Shdr *versymhdr = &elf_tdata (abfd)->dynversym_hdr;
 	  bfd_size_type amt = versymhdr->sh_size;
 
-	  extversym = (Elf_External_Versym *) bfd_malloc (amt);
+	  if (bfd_seek (abfd, versymhdr->sh_offset, SEEK_SET) != 0)
+	    goto error_free_sym;
+	  extversym = (Elf_External_Versym *)
+	    _bfd_malloc_and_read (abfd, amt, amt);
 	  if (extversym == NULL)
 	    goto error_free_sym;
-	  if (bfd_seek (abfd, versymhdr->sh_offset, SEEK_SET) != 0
-	      || bfd_bread (extversym, amt, abfd) != amt)
-	    goto error_free_vers;
 	  extversym_end = extversym + amt / sizeof (*extversym);
 	}
     }
@@ -9737,16 +9737,11 @@ elf_link_check_versioned_symbol (struct bfd_link_info *info,
 
       /* Read in any version definitions.  */
       versymhdr = &elf_tdata (input)->dynversym_hdr;
-      extversym = (Elf_External_Versym *) bfd_malloc (versymhdr->sh_size);
-      if (extversym == NULL)
-	goto error_ret;
-
       if (bfd_seek (input, versymhdr->sh_offset, SEEK_SET) != 0
-	  || (bfd_bread (extversym, versymhdr->sh_size, input)
-	      != versymhdr->sh_size))
+	  || (extversym = (Elf_External_Versym *)
+	      _bfd_malloc_and_read (input, versymhdr->sh_size,
+				    versymhdr->sh_size)) == NULL)
 	{
-	  free (extversym);
-	error_ret:
 	  free (isymbuf);
 	  return FALSE;
 	}

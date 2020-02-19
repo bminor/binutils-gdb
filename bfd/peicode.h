@@ -1273,15 +1273,9 @@ pe_ILF_object_p (bfd * abfd)
   /* ptr += 2; */
 
   /* Now read in the two strings that follow.  */
-  ptr = (bfd_byte *) bfd_alloc (abfd, size);
+  ptr = (bfd_byte *) _bfd_alloc_and_read (abfd, size, size);
   if (ptr == NULL)
     return NULL;
-
-  if (bfd_bread (ptr, size, abfd) != size)
-    {
-      bfd_release (abfd, ptr);
-      return NULL;
-    }
 
   symbol_name = (char *) ptr;
   /* See PR 20905 for an example of where the strnlen is necessary.  */
@@ -1494,11 +1488,8 @@ pe_bfd_object_p (bfd * abfd)
       if (amt < sizeof (PEAOUTHDR))
 	amt = sizeof (PEAOUTHDR);
 
-      opthdr = bfd_alloc (abfd, amt);
+      opthdr = _bfd_alloc_and_read (abfd, amt, opt_hdr_size);
       if (opthdr == NULL)
-	return NULL;
-      if (bfd_bread (opthdr, opt_hdr_size, abfd)
-	  != (bfd_size_type) opt_hdr_size)
 	return NULL;
       if (amt > opt_hdr_size)
 	memset (opthdr + opt_hdr_size, 0, amt - opt_hdr_size);

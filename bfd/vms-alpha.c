@@ -4822,10 +4822,10 @@ module_find_nearest_line (bfd *abfd, struct module *module, bfd_vma addr,
     {
       unsigned int size = module->size;
       unsigned int modbeg = PRIV (dst_section)->filepos + module->modbeg;
-      unsigned char *buffer = (unsigned char *) bfd_malloc (module->size);
+      unsigned char *buffer;
 
       if (bfd_seek (abfd, modbeg, SEEK_SET) != 0
-	  || bfd_bread (buffer, size, abfd) != size)
+	  || (buffer = _bfd_malloc_and_read (abfd, size, size)) == NULL)
 	{
 	  bfd_set_error (bfd_error_no_debug_section);
 	  return FALSE;
@@ -7149,8 +7149,8 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
       dst_size -= len;
       off += len;
       len -= sizeof (dsth);
-      buf = bfd_malloc (len);
-      if (bfd_bread (buf, len, abfd) != len)
+      buf = _bfd_malloc_and_read (abfd, len, len);
+      if (buf == NULL)
 	{
 	  fprintf (file, _("cannot read DST symbol\n"));
 	  return;
@@ -8065,14 +8065,12 @@ evax_bfd_print_image (bfd *abfd, FILE *file)
       unsigned int codeadroff;
       unsigned int lpfixoff;
       unsigned int chgprtoff;
+      file_ptr f_off = (file_ptr) (eiaf_vbn - 1) * VMS_BLOCK_SIZE;
 
-      buf = bfd_malloc (eiaf_size);
-
-      if (bfd_seek (abfd, (file_ptr) (eiaf_vbn - 1) * VMS_BLOCK_SIZE, SEEK_SET)
-	  || bfd_bread (buf, eiaf_size, abfd) != eiaf_size)
+      if (bfd_seek (abfd, f_off, SEEK_SET) != 0
+	  || (buf = _bfd_malloc_and_read (abfd, eiaf_size, eiaf_size)) == NULL)
 	{
 	  fprintf (file, _("cannot read EIHA\n"));
-	  free (buf);
 	  return;
 	}
       eiaf = (struct vms_eiaf *)buf;

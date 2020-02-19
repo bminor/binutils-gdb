@@ -127,24 +127,12 @@ bfd_sym_valid (bfd *abfd)
 unsigned char *
 bfd_sym_read_name_table (bfd *abfd, bfd_sym_header_block *dshb)
 {
-  unsigned char *rstr;
-  long ret;
   size_t table_size = dshb->dshb_nte.dti_page_count * dshb->dshb_page_size;
   size_t table_offset = dshb->dshb_nte.dti_first_page * dshb->dshb_page_size;
 
-  rstr = bfd_alloc (abfd, table_size);
-  if (rstr == NULL)
-    return rstr;
-
-  bfd_seek (abfd, table_offset, SEEK_SET);
-  ret = bfd_bread (rstr, table_size, abfd);
-  if (ret < 0 || (unsigned long) ret != table_size)
-    {
-      bfd_release (abfd, rstr);
-      return NULL;
-    }
-
-  return rstr;
+  if (bfd_seek (abfd, table_offset, SEEK_SET) != 0)
+    return FALSE;
+  return _bfd_alloc_and_read (abfd, table_size, table_size);
 }
 
 void
@@ -1808,22 +1796,11 @@ bfd_sym_print_type_information_table_entry (bfd *abfd,
 
   fprintf (f, "\n            ");
 
-  buf = malloc (entry->physical_size);
-  if (buf == NULL)
+  if (bfd_seek (abfd, entry->offset, SEEK_SET) != 0
+      || (buf = _bfd_malloc_and_read (abfd, entry->physical_size,
+				      entry->physical_size)) == NULL)
     {
       fprintf (f, "[ERROR]\n");
-      return;
-    }
-  if (bfd_seek (abfd, entry->offset, SEEK_SET) < 0)
-    {
-      fprintf (f, "[ERROR]\n");
-      free (buf);
-      return;
-    }
-  if (bfd_bread (buf, entry->physical_size, abfd) != entry->physical_size)
-    {
-      fprintf (f, "[ERROR]\n");
-      free (buf);
       return;
     }
 

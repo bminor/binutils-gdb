@@ -298,14 +298,9 @@ bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
       if (shstrtabsize + 1 <= 1
 	  || shstrtabsize > bfd_get_file_size (abfd)
 	  || bfd_seek (abfd, offset, SEEK_SET) != 0
-	  || (shstrtab = (bfd_byte *) bfd_alloc (abfd, shstrtabsize + 1)) == NULL)
-	shstrtab = NULL;
-      else if (bfd_bread (shstrtab, shstrtabsize, abfd) != shstrtabsize)
+	  || (shstrtab = _bfd_alloc_and_read (abfd, shstrtabsize + 1,
+					      shstrtabsize)) == NULL)
 	{
-	  if (bfd_get_error () != bfd_error_system_call)
-	    bfd_set_error (bfd_error_file_truncated);
-	  bfd_release (abfd, shstrtab);
-	  shstrtab = NULL;
 	  /* Once we've failed to read it, make sure we don't keep
 	     trying.  Otherwise, we'll keep allocating space for
 	     the string table over and over.  */
@@ -675,10 +670,9 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		  shdr->contents = NULL;
 		  if (_bfd_mul_overflow (shdr->sh_size,
 					 sizeof (*dest) / 4, &amt)
-		      || (shdr->contents = bfd_alloc (abfd, amt)) == NULL
 		      || bfd_seek (abfd, shdr->sh_offset, SEEK_SET) != 0
-		      || (bfd_bread (shdr->contents, shdr->sh_size, abfd)
-			  != shdr->sh_size))
+		      || !(shdr->contents
+			   = _bfd_alloc_and_read (abfd, amt, shdr->sh_size)))
 		    {
 		      _bfd_error_handler
 			/* xgettext:c-format */
@@ -687,14 +681,6 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 			 abfd, (uint64_t) shdr->sh_size);
 		      bfd_set_error (bfd_error_bad_value);
 		      -- num_group;
-		      /* PR 17510: If the group contents are even
-			 partially corrupt, do not allow any of the
-			 contents to be used.  */
-		      if (shdr->contents != NULL)
-			{
-			  bfd_release (abfd, shdr->contents);
-			  shdr->contents = NULL;
-			}
 		      continue;
 		    }
 
@@ -8612,12 +8598,11 @@ error_return_verref:
 	     abfd, (uint64_t) hdr->sh_size);
 	  goto error_return_verref;
 	}
-      contents = (bfd_byte *) bfd_malloc (hdr->sh_size);
-      if (contents == NULL)
-	goto error_return_verref;
 
-      if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) != 0
-	  || bfd_bread (contents, hdr->sh_size, abfd) != hdr->sh_size)
+      if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) != 0)
+	goto error_return_verref;
+      contents = _bfd_malloc_and_read (abfd, hdr->sh_size, hdr->sh_size);
+      if (contents == NULL)
 	goto error_return_verref;
 
       if (_bfd_mul_overflow (hdr->sh_info, sizeof (Elf_Internal_Verneed), &amt))
@@ -8747,11 +8732,10 @@ error_return_verref:
 	  goto error_return;
 	}
 
-      contents = (bfd_byte *) bfd_malloc (hdr->sh_size);
-      if (contents == NULL)
+      if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) != 0)
 	goto error_return_verdef;
-      if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) != 0
-	  || bfd_bread (contents, hdr->sh_size, abfd) != hdr->sh_size)
+      contents = _bfd_malloc_and_read (abfd, hdr->sh_size, hdr->sh_size);
+      if (contents == NULL)
 	goto error_return_verdef;
 
       BFD_ASSERT (sizeof (Elf_External_Verdef)
@@ -11937,7 +11921,7 @@ elf_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size,
   if (bfd_seek (abfd, offset, SEEK_SET) != 0)
     return FALSE;
 
-  buf = (char *) bfd_malloc (size + 1);
+  buf = (char *) _bfd_malloc_and_read (abfd, size + 1, size);
   if (buf == NULL)
     return FALSE;
 
@@ -11945,8 +11929,7 @@ elf_read_notes (bfd *abfd, file_ptr offset, bfd_size_type size,
      0-termintate the buffer so that string searches will not overflow.  */
   buf[size] = 0;
 
-  if (bfd_bread (buf, size, abfd) != size
-      || !elf_parse_notes (abfd, buf, size, offset, align))
+  if (!elf_parse_notes (abfd, buf, size, offset, align))
     {
       free (buf);
       return FALSE;

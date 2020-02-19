@@ -1182,17 +1182,13 @@ aout_get_external_symbols (bfd *abfd)
       /* We allocate using malloc to make the values easy to free
 	 later on.  If we put them on the objalloc it might not be
 	 possible to free them.  */
-      syms = bfd_malloc (count * EXTERNAL_NLIST_SIZE);
+      if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
+	return FALSE;
+      syms = (struct external_nlist *)
+	_bfd_malloc_and_read (abfd, count * EXTERNAL_NLIST_SIZE,
+			      count * EXTERNAL_NLIST_SIZE);
       if (syms == NULL && count != 0)
 	return FALSE;
-
-      if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
-	  || (bfd_bread (syms, exec_hdr (abfd)->a_syms, abfd)
-	      != exec_hdr (abfd)->a_syms))
-	{
-	  free (syms);
-	  return FALSE;
-	}
 #endif
 
       obj_aout_external_syms (abfd) = syms;
@@ -1829,19 +1825,11 @@ NAME (aout, slurp_reloc_table) (bfd *abfd, sec_ptr asect, asymbol **symbols)
 
   if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
     return FALSE;
-
-  each_size = obj_reloc_entry_size (abfd);
-
-  relocs = bfd_malloc (reloc_size);
+  relocs = _bfd_malloc_and_read (abfd, reloc_size, reloc_size);
   if (relocs == NULL && reloc_size != 0)
     return FALSE;
 
-  if (bfd_bread (relocs, reloc_size, abfd) != reloc_size)
-    {
-      free (relocs);
-      return FALSE;
-    }
-
+  each_size = obj_reloc_entry_size (abfd);
   count = reloc_size / each_size;
 
   /* Count the number of NON-ZERO relocs, this is the count we want.  */

@@ -908,6 +908,32 @@ extern bfd_vma _bfd_safe_read_leb128
 #define _bfd_mul_overflow(a, b, res) \
   ((*res) = (a), (*res) *= (b), (b) != 0 && (*res) / (b) != (a))
 #endif
+
+static inline bfd_byte *
+_bfd_alloc_and_read (bfd *abfd, bfd_size_type asize, bfd_size_type rsize)
+{
+  bfd_byte *mem = bfd_alloc (abfd, asize);
+  if (mem != NULL)
+    {
+      if (bfd_bread (mem, rsize, abfd) == rsize)
+	return mem;
+      bfd_release (abfd, mem);
+    }
+  return NULL;
+}
+
+static inline bfd_byte *
+_bfd_malloc_and_read (bfd *abfd, bfd_size_type asize, bfd_size_type rsize)
+{
+  bfd_byte *mem = bfd_malloc (asize);
+  if (mem != NULL)
+    {
+      if (bfd_bread (mem, rsize, abfd) == rsize)
+	return mem;
+      free (mem);
+    }
+  return NULL;
+}
 /* Extracted from libbfd.c.  */
 bfd_boolean bfd_write_bigendian_4byte_int (bfd *, unsigned int);
 

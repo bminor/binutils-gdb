@@ -568,14 +568,9 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
 	  != sizeof (buf_reclen))
 	goto err;
       reclen = bfd_getl32 (buf_reclen);
-      buf = bfd_malloc (reclen);
+      buf = _bfd_malloc_and_read (abfd, reclen, reclen);
       if (buf == NULL)
 	goto err;
-      if (bfd_bread (buf, reclen, abfd) != reclen)
-	{
-	  free (buf);
-	  goto err;
-	}
       map = (struct vms_dcxmap *)buf;
       tdata->nbr_dcxsbm = bfd_getl16 (map->nsubs);
       sbm_off = bfd_getl16 (map->sub0);

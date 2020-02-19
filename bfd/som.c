@@ -2088,14 +2088,11 @@ setup_sections (bfd *abfd,
       bfd_set_error (bfd_error_no_memory);
       goto error_return;
     }
-  space_strings = bfd_malloc (amt + 1);
-  if (space_strings == NULL)
-    goto error_return;
-
   if (bfd_seek (abfd, current_offset + file_hdr->space_strings_location,
 		SEEK_SET) != 0)
     goto error_return;
-  if (bfd_bread (space_strings, amt, abfd) != amt)
+  space_strings = (char *) _bfd_malloc_and_read (abfd, amt + 1, amt);
+  if (space_strings == NULL)
     goto error_return;
   /* Make sure that the string table is NUL terminated.  */
   space_strings[amt] = 0;
@@ -4578,15 +4575,11 @@ som_slurp_string_table (bfd *abfd)
     }
 
   /* Allocate and read in the string table.  */
-  amt = obj_som_stringtab_size (abfd);
-  stringtab = bfd_zmalloc (amt);
-  if (stringtab == NULL)
-    return FALSE;
-
   if (bfd_seek (abfd, obj_som_str_filepos (abfd), SEEK_SET) != 0)
     return FALSE;
-
-  if (bfd_bread (stringtab, amt, abfd) != amt)
+  amt = obj_som_stringtab_size (abfd);
+  stringtab = (char *) _bfd_malloc_and_read (abfd, amt, amt);
+  if (stringtab == NULL)
     return FALSE;
 
   /* Save our results and return success.  */
@@ -4681,12 +4674,11 @@ som_slurp_symbol_table (bfd *abfd)
       bfd_set_error (bfd_error_file_too_big);
       goto error_return;
     }
-  buf = bfd_malloc (amt);
-  if (buf == NULL)
-    goto error_return;
   if (bfd_seek (abfd, obj_som_sym_filepos (abfd), SEEK_SET) != 0)
     goto error_return;
-  if (bfd_bread (buf, amt, abfd) != amt)
+  buf = (struct som_external_symbol_dictionary_record *)
+    _bfd_malloc_and_read (abfd, amt, amt);
+  if (buf == NULL)
     goto error_return;
 
   if (_bfd_mul_overflow (symbol_count, sizeof (som_symbol_type), &amt))
@@ -5297,17 +5289,13 @@ som_slurp_reloc_table (bfd *abfd,
      parsed.  We must do so now to know how many relocations exist.  */
   if (section->reloc_count == (unsigned) -1)
     {
-      amt = fixup_stream_size;
-      external_relocs = bfd_malloc (amt);
-      if (external_relocs == NULL)
-	return FALSE;
       /* Read in the external forms.  */
-      if (bfd_seek (abfd,
-		    obj_som_reloc_filepos (abfd) + section->rel_filepos,
-		    SEEK_SET)
-	  != 0)
+      if (bfd_seek (abfd, obj_som_reloc_filepos (abfd) + section->rel_filepos,
+		    SEEK_SET) != 0)
 	return FALSE;
-      if (bfd_bread (external_relocs, amt, abfd) != amt)
+      amt = fixup_stream_size;
+      external_relocs = _bfd_malloc_and_read (abfd, amt, amt);
+      if (external_relocs == NULL)
 	return FALSE;
 
       /* Let callers know how many relocations found.
@@ -5921,22 +5909,19 @@ som_bfd_count_ar_symbols (bfd *abfd,
 
   lst_filepos = bfd_tell (abfd) - sizeof (struct som_external_lst_header);
 
+  /* Read in the hash table.  The hash table is an array of 32-bit
+     file offsets which point to the hash chains.  */
   if (_bfd_mul_overflow (lst_header->hash_size, 4, &amt))
     {
       bfd_set_error (bfd_error_file_too_big);
       return FALSE;
     }
-  hash_table = bfd_malloc (amt);
+  hash_table = _bfd_malloc_and_read (abfd, amt, amt);
   if (hash_table == NULL && lst_header->hash_size != 0)
     goto error_return;
 
   /* Don't forget to initialize the counter!  */
   *count = 0;
-
-  /* Read in the hash table.  The hash table is an array of 32-bit
-     file offsets which point to the hash chains.  */
-  if (bfd_bread ((void *) hash_table, amt, abfd) != amt)
-    goto error_return;
 
   /* Walk each chain counting the number of symbols found on that particular
      chain.  */
@@ -6016,18 +6001,16 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
   unsigned int string_loc;
 
   lst_filepos = bfd_tell (abfd) - sizeof (struct som_external_lst_header);
+
+  /* Read in the hash table.  The has table is an array of 32bit file offsets
+     which point to the hash chains.  */
   if (_bfd_mul_overflow (lst_header->hash_size, 4, &amt))
     {
       bfd_set_error (bfd_error_file_too_big);
       return FALSE;
     }
-  hash_table = bfd_malloc (amt);
+  hash_table = _bfd_malloc_and_read (abfd, amt, amt);
   if (hash_table == NULL && lst_header->hash_size != 0)
-    goto error_return;
-
-  /* Read in the hash table.  The has table is an array of 32bit file offsets
-     which point to the hash chains.  */
-  if (bfd_bread ((void *) hash_table, amt, abfd) != amt)
     goto error_return;
 
   /* Seek to and read in the SOM dictionary.  We will need this to fill
@@ -6041,11 +6024,9 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
       bfd_set_error (bfd_error_file_too_big);
       goto error_return;
     }
-  som_dict = bfd_malloc (amt);
+  som_dict = (struct som_external_som_entry *)
+    _bfd_malloc_and_read (abfd, amt, amt);
   if (som_dict == NULL && lst_header->module_count != 0)
-    goto error_return;
-
-  if (bfd_bread ((void *) som_dict, amt, abfd) != amt)
     goto error_return;
 
   string_loc = lst_header->string_loc;
@@ -6094,12 +6075,9 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
 	  bfd_set_error (bfd_error_no_memory);
 	  goto error_return;
 	}
-      name = bfd_zalloc (abfd, (bfd_size_type) len + 1);
+      name = (char *) _bfd_alloc_and_read (abfd, len + 1, len);
       if (!name)
 	goto error_return;
-      if (bfd_bread (name, (bfd_size_type) len, abfd) != len)
-	goto error_return;
-
       name[len] = 0;
       set->name = name;
 
@@ -6148,11 +6126,8 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
 	      bfd_set_error (bfd_error_no_memory);
 	      goto error_return;
 	    }
-	  name = bfd_zalloc (abfd, (bfd_size_type) len + 1);
+	  name = (char *) _bfd_alloc_and_read (abfd, len + 1, len);
 	  if (!name)
-	    goto error_return;
-
-	  if (bfd_bread (name, (bfd_size_type) len, abfd) != len)
 	    goto error_return;
 	  name[len] = 0;
 	  set->name = name;

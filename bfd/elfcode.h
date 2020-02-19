@@ -1234,12 +1234,9 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	{
 	  if (bfd_seek (abfd, verhdr->sh_offset, SEEK_SET) != 0)
 	    goto error_return;
-
-	  xverbuf = (Elf_External_Versym *) bfd_malloc (verhdr->sh_size);
+	  xverbuf = (Elf_External_Versym *)
+	    _bfd_malloc_and_read (abfd, verhdr->sh_size, verhdr->sh_size);
 	  if (xverbuf == NULL && verhdr->sh_size != 0)
-	    goto error_return;
-
-	  if (bfd_bread (xverbuf, verhdr->sh_size, abfd) != verhdr->sh_size)
 	    goto error_return;
 	}
 
@@ -1429,14 +1426,11 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
   int entsize;
   unsigned int symcount;
 
-  allocated = bfd_malloc (rel_hdr->sh_size);
+  if (bfd_seek (abfd, rel_hdr->sh_offset, SEEK_SET) != 0)
+    return FALSE;
+  allocated = _bfd_malloc_and_read (abfd, rel_hdr->sh_size, rel_hdr->sh_size);
   if (allocated == NULL)
-    goto error_return;
-
-  if (bfd_seek (abfd, rel_hdr->sh_offset, SEEK_SET) != 0
-      || (bfd_bread (allocated, rel_hdr->sh_size, abfd)
-	  != rel_hdr->sh_size))
-    goto error_return;
+    return FALSE;
 
   native_relocs = (bfd_byte *) allocated;
 

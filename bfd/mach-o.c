@@ -1623,14 +1623,12 @@ bfd_mach_o_canonicalize_relocs (bfd *abfd, unsigned long filepos,
   if (native_size < count)
     goto err;
 
-  native_relocs =
-    (struct mach_o_reloc_info_external *) bfd_malloc (native_size);
+  if (bfd_seek (abfd, filepos, SEEK_SET) != 0)
+    return -1;
+  native_relocs = (struct mach_o_reloc_info_external *)
+    _bfd_malloc_and_read (abfd, native_size, native_size);
   if (native_relocs == NULL)
     return -1;
-
-  if (bfd_seek (abfd, filepos, SEEK_SET) != 0
-      || bfd_bread (native_relocs, native_size, abfd) != native_size)
-    goto err;
 
   for (i = 0; i < count; i++)
     {
@@ -3902,19 +3900,13 @@ bfd_mach_o_read_symtab_strtab (bfd *abfd)
       /* See PR 21840 for a reproducer.  */
       if ((sym->strsize + 1) == 0)
 	return FALSE;
-      sym->strtab = bfd_alloc (abfd, sym->strsize + 1);
+      if (bfd_seek (abfd, sym->stroff, SEEK_SET) != 0)
+	return FALSE;
+      sym->strtab = (char *) _bfd_alloc_and_read (abfd, sym->strsize + 1,
+						  sym->strsize);
       if (sym->strtab == NULL)
 	return FALSE;
 
-      if (bfd_seek (abfd, sym->stroff, SEEK_SET) != 0
-	  || bfd_bread (sym->strtab, sym->strsize, abfd) != sym->strsize)
-	{
-	  /* PR 17512: file: 10888-1609-0.004.  */
-	  bfd_release (abfd, sym->strtab);
-	  sym->strtab = NULL;
-	  bfd_set_error (bfd_error_file_truncated);
-	  return FALSE;
-	}
       /* Zero terminate the string table.  */
       sym->strtab[sym->strsize] = 0;
     }
@@ -4000,15 +3992,9 @@ bfd_mach_o_ppc_flavour_string (unsigned int flavour)
 static unsigned char *
 bfd_mach_o_alloc_and_read (bfd *abfd, file_ptr filepos, size_t size)
 {
-  unsigned char *buf;
-
-  buf = bfd_alloc (abfd, size);
-  if (buf == NULL)
+  if (bfd_seek (abfd, filepos, SEEK_SET) != 0)
     return NULL;
-  if (bfd_seek (abfd, filepos, SEEK_SET) != 0
-      || bfd_bread (buf, size, abfd) != size)
-    return NULL;
-  return buf;
+  return _bfd_alloc_and_read (abfd, size, size);
 }
 
 static bfd_boolean
@@ -4100,10 +4086,8 @@ bfd_mach_o_read_prebound_dylib (bfd *abfd,
     return FALSE;
 
   str_len = command->len - sizeof (raw);
-  str = bfd_alloc (abfd, str_len);
+  str = _bfd_alloc_and_read (abfd, str_len, str_len);
   if (str == NULL)
-    return FALSE;
-  if (bfd_bread (str, str_len, abfd) != str_len)
     return FALSE;
 
   cmd->name_offset = command->offset + nameoff;
@@ -4581,8 +4565,8 @@ bfd_mach_o_read_dyld_content (bfd *abfd, bfd_mach_o_dyld_info_command *cmd)
   /* Read rebase content.  */
   if (cmd->rebase_content == NULL && cmd->rebase_size != 0)
     {
-      cmd->rebase_content =
-	bfd_mach_o_alloc_and_read (abfd, cmd->rebase_off, cmd->rebase_size);
+      cmd->rebase_content
+	= bfd_mach_o_alloc_and_read (abfd, cmd->rebase_off, cmd->rebase_size);
       if (cmd->rebase_content == NULL)
 	return FALSE;
     }
@@ -4590,8 +4574,8 @@ bfd_mach_o_read_dyld_content (bfd *abfd, bfd_mach_o_dyld_info_command *cmd)
   /* Read bind content.  */
   if (cmd->bind_content == NULL && cmd->bind_size != 0)
     {
-      cmd->bind_content =
-	bfd_mach_o_alloc_and_read (abfd, cmd->bind_off, cmd->bind_size);
+      cmd->bind_content
+	= bfd_mach_o_alloc_and_read (abfd, cmd->bind_off, cmd->bind_size);
       if (cmd->bind_content == NULL)
 	return FALSE;
     }

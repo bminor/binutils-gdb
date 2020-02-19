@@ -411,16 +411,9 @@ doit:
   if (!reloc_cache && count != 0)
     return FALSE;
 
-  relocs = bfd_alloc (abfd, reloc_size);
+  relocs = _bfd_alloc_and_read (abfd, reloc_size, reloc_size);
   if (!relocs && reloc_size != 0)
     {
-      free (reloc_cache);
-      return FALSE;
-    }
-
-  if (bfd_bread (relocs, reloc_size, abfd) != reloc_size)
-    {
-      bfd_release (abfd, relocs);
       free (reloc_cache);
       return FALSE;
     }

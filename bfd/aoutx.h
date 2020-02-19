@@ -1303,16 +1303,11 @@ aout_get_external_symbols (bfd *abfd)
       /* We allocate using malloc to make the values easy to free
 	 later on.  If we put them on the objalloc it might not be
 	 possible to free them.  */
-      syms = (struct external_nlist *) bfd_malloc (amt);
+      if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0)
+	return FALSE;
+      syms = (struct external_nlist *) _bfd_malloc_and_read (abfd, amt, amt);
       if (syms == NULL)
 	return FALSE;
-
-      if (bfd_seek (abfd, obj_sym_filepos (abfd), SEEK_SET) != 0
-	  || bfd_bread (syms, amt, abfd) != amt)
-	{
-	  free (syms);
-	  return FALSE;
-	}
 #endif
 
       obj_aout_external_syms (abfd) = syms;
@@ -2323,16 +2318,9 @@ NAME (aout, slurp_reloc_table) (bfd *abfd, sec_ptr asect, asymbol **symbols)
 
   if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
     return FALSE;
-
-  relocs = bfd_malloc (reloc_size);
+  relocs = _bfd_malloc_and_read (abfd, reloc_size, reloc_size);
   if (relocs == NULL)
     return FALSE;
-
-  if (bfd_bread (relocs, reloc_size, abfd) != reloc_size)
-    {
-      free (relocs);
-      return FALSE;
-    }
 
   amt = count * sizeof (arelent);
   reloc_cache = (arelent *) bfd_zmalloc (amt);

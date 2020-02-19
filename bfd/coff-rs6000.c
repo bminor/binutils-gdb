@@ -1267,10 +1267,8 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 	}
 
       /* Read in the entire symbol table.  */
-      contents = (bfd_byte *) bfd_alloc (abfd, sz + 1);
+      contents = (bfd_byte *) _bfd_alloc_and_read (abfd, sz + 1, sz);
       if (contents == NULL)
-	return FALSE;
-      if (bfd_bread (contents, sz, abfd) != sz)
 	return FALSE;
 
       /* Ensure strings are NULL terminated so we don't wander off the
@@ -1331,10 +1329,8 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 	}
 
       /* Read in the entire symbol table.  */
-      contents = (bfd_byte *) bfd_alloc (abfd, sz + 1);
+      contents = (bfd_byte *) _bfd_alloc_and_read (abfd, sz + 1, sz);
       if (contents == NULL)
-	return FALSE;
-      if (bfd_bread (contents, sz, abfd) != sz)
 	return FALSE;
 
       /* Ensure strings are NULL terminated so we don't wander off the
