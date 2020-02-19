@@ -909,10 +909,26 @@ extern bfd_vma _bfd_safe_read_leb128
   ((*res) = (a), (*res) *= (b), (b) != 0 && (*res) / (b) != (a))
 #endif
 
+#ifdef __GNUC__
+#define _bfd_constant_p(v) __builtin_constant_p (v)
+#else
+#define _bfd_constant_p(v) 0
+#endif
+
 static inline bfd_byte *
 _bfd_alloc_and_read (bfd *abfd, bfd_size_type asize, bfd_size_type rsize)
 {
-  bfd_byte *mem = bfd_alloc (abfd, asize);
+  bfd_byte *mem;
+  if (!_bfd_constant_p (rsize))
+    {
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+      if (filesize != 0 && rsize > filesize)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return NULL;
+	}
+    }
+  mem = bfd_alloc (abfd, asize);
   if (mem != NULL)
     {
       if (bfd_bread (mem, rsize, abfd) == rsize)
@@ -925,7 +941,17 @@ _bfd_alloc_and_read (bfd *abfd, bfd_size_type asize, bfd_size_type rsize)
 static inline bfd_byte *
 _bfd_malloc_and_read (bfd *abfd, bfd_size_type asize, bfd_size_type rsize)
 {
-  bfd_byte *mem = bfd_malloc (asize);
+  bfd_byte *mem;
+  if (!_bfd_constant_p (rsize))
+    {
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+      if (filesize != 0 && rsize > filesize)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return NULL;
+	}
+    }
+  mem = bfd_malloc (asize);
   if (mem != NULL)
     {
       if (bfd_bread (mem, rsize, abfd) == rsize)

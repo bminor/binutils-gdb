@@ -1,5 +1,15 @@
 2020-02-19  Alan Modra  <amodra@gmail.com>
 
+	* libbfd-in.h (_bfd_constant_p): Define.
+	(_bfd_alloc_and_read, _bfd_malloc_and_read): Check read size against
+	file size before allocating memory.
+	* coffgen.c (_bfd_coff_get_external_symbols): Remove file size check.
+	* elf.c (bfd_elf_get_str_section): Likewise.
+	(_bfd_elf_slurp_version_tables): Likewise.
+	* libbfd.h: Regenerate.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
 	* libbfd-in.h (_bfd_alloc_and_read, _bfd_malloc_and_read): New.
 	* aoutx.h (aout_get_external_symbols): Replace calls to
 	bfd_[m]alloc and bfd_bread with call to _bfd_[m]alloc_and_read.

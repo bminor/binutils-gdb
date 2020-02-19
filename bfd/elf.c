@@ -296,7 +296,6 @@ bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
       /* Allocate and clear an extra byte at the end, to prevent crashes
 	 in case the string table is not terminated.  */
       if (shstrtabsize + 1 <= 1
-	  || shstrtabsize > bfd_get_file_size (abfd)
 	  || bfd_seek (abfd, offset, SEEK_SET) != 0
 	  || (shstrtab = _bfd_alloc_and_read (abfd, shstrtabsize + 1,
 					      shstrtabsize)) == NULL)
@@ -8584,19 +8583,6 @@ error_return_verref:
 	  elf_tdata (abfd)->verref = NULL;
 	  elf_tdata (abfd)->cverrefs = 0;
 	  goto error_return;
-	}
-
-      ufile_ptr filesize = bfd_get_file_size (abfd);
-      if (filesize > 0 && filesize < hdr->sh_size)
-	{
-	  /* PR 24708: Avoid attempts to allocate a ridiculous amount
-	     of memory.  */
-	  bfd_set_error (bfd_error_no_memory);
-	  _bfd_error_handler
-	    /* xgettext:c-format */
-	    (_("error: %pB version reference section is too large (%#" PRIx64 " bytes)"),
-	     abfd, (uint64_t) hdr->sh_size);
-	  goto error_return_verref;
 	}
 
       if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) != 0)
