@@ -2069,8 +2069,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	sections_being_created = NULL;
       if (sections_being_created == NULL)
 	{
-	  sections_being_created = (bfd_boolean *)
-	    bfd_zalloc2 (abfd, elf_numsections (abfd), sizeof (bfd_boolean));
+	  size_t amt = elf_numsections (abfd) * sizeof (bfd_boolean);
+	  sections_being_created = (bfd_boolean *) bfd_zalloc (abfd, amt);
 	  if (sections_being_created == NULL)
 	    return FALSE;
 	  sections_being_created_abfd = abfd;
@@ -3723,6 +3723,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
   Elf_Internal_Shdr **i_shdrp;
   struct bfd_elf_section_data *d;
   bfd_boolean need_symtab;
+  size_t amt;
 
   section_number = 1;
 
@@ -3830,8 +3831,8 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 
   /* Set up the list of section header pointers, in agreement with the
      indices.  */
-  i_shdrp = (Elf_Internal_Shdr **) bfd_zalloc2 (abfd, section_number,
-						sizeof (Elf_Internal_Shdr *));
+  amt = section_number * sizeof (Elf_Internal_Shdr *);
+  i_shdrp = (Elf_Internal_Shdr **) bfd_zalloc (abfd, amt);
   if (i_shdrp == NULL)
     return FALSE;
 
@@ -4150,6 +4151,7 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
   unsigned int idx;
   asection *asect;
   asymbol **new_syms;
+  size_t amt;
 
 #ifdef DEBUG
   fprintf (stderr, "elf_map_symbols\n");
@@ -4163,7 +4165,8 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
     }
 
   max_index++;
-  sect_syms = (asymbol **) bfd_zalloc2 (abfd, max_index, sizeof (asymbol *));
+  amt = max_index * sizeof (asymbol *);
+  sect_syms = (asymbol **) bfd_zalloc (abfd, amt);
   if (sect_syms == NULL)
     return FALSE;
   elf_section_syms (abfd) = sect_syms;
@@ -4214,9 +4217,8 @@ elf_map_symbols (bfd *abfd, unsigned int *pnum_locals)
     }
 
   /* Now sort the symbols so the local symbols are first.  */
-  new_syms = (asymbol **) bfd_alloc2 (abfd, num_locals + num_globals,
-				      sizeof (asymbol *));
-
+  amt = (num_locals + num_globals) * sizeof (asymbol *);
+  new_syms = (asymbol **) bfd_alloc (abfd, amt);
   if (new_syms == NULL)
     return FALSE;
 
@@ -4680,18 +4682,18 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       bfd_boolean phdr_in_segment;
       bfd_boolean writable;
       bfd_boolean executable;
-      int tls_count = 0;
+      unsigned int tls_count = 0;
       asection *first_tls = NULL;
       asection *first_mbind = NULL;
       asection *dynsec, *eh_frame_hdr;
-      bfd_size_type amt;
+      size_t amt;
       bfd_vma addr_mask, wrap_to = 0;
       bfd_size_type phdr_size;
 
       /* Select the allocated sections, and sort them.  */
 
-      sections = (asection **) bfd_malloc2 (bfd_count_sections (abfd),
-					    sizeof (asection *));
+      amt = bfd_count_sections (abfd) * sizeof (asection *);
+      sections = (asection **) bfd_malloc (amt);
       if (sections == NULL)
 	goto error_return;
 
@@ -5076,7 +5078,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  m->p_flags = PF_R;
 	  m->p_flags_valid = 1;
 	  s = first_tls;
-	  for (i = 0; i < (unsigned int) tls_count; ++i)
+	  for (i = 0; i < tls_count; ++i)
 	    {
 	      if ((s->flags & SEC_THREAD_LOCAL) == 0)
 		{
@@ -5084,7 +5086,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 		    (_("%pB: TLS sections are not adjacent:"), abfd);
 		  s = first_tls;
 		  i = 0;
-		  while (i < (unsigned int) tls_count)
+		  while (i < tls_count)
 		    {
 		      if ((s->flags & SEC_THREAD_LOCAL) != 0)
 			{
@@ -7029,7 +7031,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
       asection *matching_lma;
       asection *suggested_lma;
       unsigned int j;
-      bfd_size_type amt;
+      size_t amt;
       asection *first_section;
 
       if (segment->p_type == PT_NULL)
@@ -7055,7 +7057,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
       /* Allocate a segment map big enough to contain
 	 all of the sections we have selected.  */
       amt = sizeof (struct elf_segment_map) - sizeof (asection *);
-      amt += (bfd_size_type) section_count * sizeof (asection *);
+      amt += section_count * sizeof (asection *);
       map = (struct elf_segment_map *) bfd_zalloc (obfd, amt);
       if (map == NULL)
 	return FALSE;
@@ -7147,7 +7149,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	 pointers that we are interested in.  As these sections get assigned
 	 to a segment, they are removed from this array.  */
 
-      sections = (asection **) bfd_malloc2 (section_count, sizeof (asection *));
+      amt = section_count * sizeof (asection *);
+      sections = (asection **) bfd_malloc (amt);
       if (sections == NULL)
 	return FALSE;
 
@@ -7376,7 +7379,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 		 segments.  Create a new segment here, initialise it
 		 and carry on looping.  */
 	      amt = sizeof (struct elf_segment_map) - sizeof (asection *);
-	      amt += (bfd_size_type) section_count * sizeof (asection *);
+	      amt += section_count * sizeof (asection *);
 	      map = (struct elf_segment_map *) bfd_zalloc (obfd, amt);
 	      if (map == NULL)
 		{

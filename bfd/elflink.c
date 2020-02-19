@@ -7931,9 +7931,10 @@ elf_create_symbuf (size_t symcount, Elf_Internal_Sym *isymbuf)
   Elf_Internal_Sym **ind, **indbufend, **indbuf;
   struct elf_symbuf_symbol *ssym;
   struct elf_symbuf_head *ssymbuf, *ssymhead;
-  size_t i, shndx_count, total_size;
+  size_t i, shndx_count, total_size, amt;
 
-  indbuf = (Elf_Internal_Sym **) bfd_malloc2 (symcount, sizeof (*indbuf));
+  amt = symcount * sizeof (*indbuf);
+  indbuf = (Elf_Internal_Sym **) bfd_malloc (amt);
   if (indbuf == NULL)
     return NULL;
 
@@ -11657,6 +11658,7 @@ elf_output_implib (bfd *abfd, struct bfd_link_info *info)
   long symcount;
   long src_count;
   elf_symbol_type *osymbuf;
+  size_t amt;
 
   implib_bfd = info->out_implib_bfd;
   bed = get_elf_backend_data (abfd);
@@ -11714,8 +11716,8 @@ elf_output_implib (bfd *abfd, struct bfd_link_info *info)
 
 
   /* Make symbols absolute.  */
-  osymbuf = (elf_symbol_type *) bfd_alloc2 (implib_bfd, symcount,
-					    sizeof (*osymbuf));
+  amt = symcount * sizeof (*osymbuf);
+  osymbuf = (elf_symbol_type *) bfd_alloc (implib_bfd, amt);
   if (osymbuf == NULL)
     goto free_sym_buf;
 

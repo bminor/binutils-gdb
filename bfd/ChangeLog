@@ -1,5 +1,17 @@
 2020-02-19  Alan Modra  <amodra@gmail.com>
 
+	* elf.c (bfd_section_from_shdr): Use bfd_zalloc rather than
+	bfd_zalloc2.
+	(assign_section_numbers): Likewise.
+	(elf_map_symbols): Likewise, and bfd_alloc rather than bfd_alloc2.
+	(_bfd_elf_map_sections_to_segments): Use bfd_malloc rather than
+	bfd_malloc2, size_t amt, and unsigned tls_count.
+	(rewrite_elf_program_header): Use bfd_malloc and size_t amt.
+	* elflink.c (elf_create_symbuf): Use bfd_malloc.
+	(elf_output_implib): Use bfd_alloc.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
 	* bfd.c (struct bfd): Move format and direction to other
 	bitfields.  Add "size".
 	* bfdio.c (bfd_get_size): Cache size when not writing file.
