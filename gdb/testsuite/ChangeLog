@@ -1,3 +1,8 @@
+2020-02-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/cpp-linkage-name.c: New file.
+	* gdb.dwarf2/cpp-linkage-name.exp: New file.
+
 2020-02-21  Shahab Vahedi  <shahab@synopsys.com>
 
 	* lib/gdb.exp (gdb_wrapper_init): Reset
