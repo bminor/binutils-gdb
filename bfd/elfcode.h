@@ -317,11 +317,16 @@ elf_swap_shdr_in (bfd *abfd,
   /* PR 23657.  Check for invalid section size, in sections with contents.
      Note - we do not set an error value here because the contents
      of this particular section might not be needed by the consumer.  */
-  if (dst->sh_type != SHT_NOBITS
-      && dst->sh_size > bfd_get_file_size (abfd))
-    _bfd_error_handler
-      (_("warning: %pB has a corrupt section with a size (%" BFD_VMA_FMT "x) larger than the file size"),
-       abfd, dst->sh_size);
+  if (dst->sh_type != SHT_NOBITS)
+    {
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+
+      if (filesize != 0 && dst->sh_size > filesize)
+	_bfd_error_handler
+	  (_("warning: %pB has a corrupt section with a size (%"
+	     BFD_VMA_FMT "x) larger than the file size"),
+	   abfd, dst->sh_size);
+    }
   dst->sh_link = H_GET_32 (abfd, src->sh_link);
   dst->sh_info = H_GET_32 (abfd, src->sh_info);
   dst->sh_addralign = H_GET_WORD (abfd, src->sh_addralign);
@@ -775,6 +780,7 @@ elf_object_p (bfd *abfd)
     {
       Elf_Internal_Phdr *i_phdr;
       unsigned int i;
+      ufile_ptr filesize;
 
 #ifndef BFD64
       if (i_ehdrp->e_phnum > ((bfd_size_type) -1) / sizeof (*i_phdr))
@@ -782,9 +788,10 @@ elf_object_p (bfd *abfd)
 #endif
       /* Check for a corrupt input file with an impossibly large number
 	 of program headers.  */
-      if (bfd_get_file_size (abfd) > 0
-	  && i_ehdrp->e_phnum > bfd_get_file_size (abfd))
-	goto got_no_match;
+      filesize = bfd_get_file_size (abfd);
+      if (filesize != 0
+	  && i_ehdrp->e_phnum > filesize / sizeof (Elf_External_Phdr))
+	goto got_wrong_format_error;
       elf_tdata (abfd)->phdr
 	= (Elf_Internal_Phdr *) bfd_alloc2 (abfd, i_ehdrp->e_phnum,
 					    sizeof (*i_phdr));

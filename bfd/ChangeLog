@@ -1,5 +1,16 @@
 2020-02-19  Alan Modra  <amodra@gmail.com>
 
+	* coffgen.c (_bfd_coff_get_external_symbols): Don't call
+	bfd_get_file_size twice.
+	(_bfd_coff_read_string_table): Allow for bfd_get_file_size
+	zero, ie. unknown, return.
+	* elf-attrs.c (_bfd_elf_parse_attributes): Likewise.
+	* elfcode.h (elf_swap_shdr_in): Likewise.
+	(elf_object_p): Don't call bfd_get_file_size twice and correct
+	file size check.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
 	* mach-o.c (bfd_mach_o_flatten_sections): Return a bfd_boolean,
 	FALSE if memory alloc fails.  Adjust calls.
 	* som.c (som_prep_for_fixups): Likewise.

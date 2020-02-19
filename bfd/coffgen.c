@@ -1642,19 +1642,20 @@ _bfd_coff_get_external_symbols (bfd *abfd)
   bfd_size_type symesz;
   bfd_size_type size;
   void * syms;
+  ufile_ptr filesize;
 
   if (obj_coff_external_syms (abfd) != NULL)
     return TRUE;
 
   symesz = bfd_coff_symesz (abfd);
-
   size = obj_raw_syment_count (abfd) * symesz;
   if (size == 0)
     return TRUE;
+
   /* Check for integer overflow and for unreasonable symbol counts.  */
+  filesize = bfd_get_file_size (abfd);
   if (size < obj_raw_syment_count (abfd)
-      || (bfd_get_file_size (abfd) > 0
-	  && size > bfd_get_file_size (abfd)))
+      || (filesize != 0 && size > filesize))
 
     {
       _bfd_error_handler (_("%pB: corrupt symbol count: %#" PRIx64 ""),
@@ -1698,6 +1699,7 @@ _bfd_coff_read_string_table (bfd *abfd)
   bfd_size_type strsize;
   char *strings;
   file_ptr pos;
+  ufile_ptr filesize;
 
   if (obj_coff_strings (abfd) != NULL)
     return obj_coff_strings (abfd);
@@ -1731,7 +1733,9 @@ _bfd_coff_read_string_table (bfd *abfd)
 #endif
     }
 
-  if (strsize < STRING_SIZE_SIZE || strsize > bfd_get_file_size (abfd))
+  filesize = bfd_get_file_size (abfd);
+  if (strsize < STRING_SIZE_SIZE
+      || (filesize != 0 && strsize > filesize))
     {
       _bfd_error_handler
 	/* xgettext: c-format */
