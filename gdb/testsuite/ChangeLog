@@ -1,5 +1,9 @@
 2020-02-19  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.cp/cpexprs.exp: Remove c++/14186 kfail.
+
+2020-02-19  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/solib-overlap.exp: Use exec instead of system to execute
 	prelink.
 
