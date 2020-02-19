@@ -1,3 +1,10 @@
+2020-02-19  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (allocate_signatured_type_table,
+	allocate_dwo_unit_table, allocate_type_unit_groups_table,
+	allocate_dwo_file_hash_table, allocate_dwp_loaded_cutus_table):
+	Remove objfile parameter, update all callers.
+
 2020-02-19  Doug Evans  <dje@google.com>
 
 	PR rust/25535
