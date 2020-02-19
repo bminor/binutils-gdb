@@ -1,5 +1,9 @@
 2020-02-19  Tom Tromey  <tromey@adacore.com>
 
+	* mips-tdep.h (mips_pc_is_mips): Parameter type is CORE_ADDR.
+
+2020-02-19  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (cache_symbol): Use obstack_strdup.
 
 2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
