@@ -1,3 +1,11 @@
+2020-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	Import from gcc mainline:
+	2020-02-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* hashtab.h (htab_remove_elt): Make a parameter const.
+	(htab_remove_elt_with_hash): Likewise.
+
 2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
 
 	* opcode/riscv-opc.h: Extend DECLARE_CSR and DECLARE_CSR_ALIAS to

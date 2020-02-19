@@ -1,3 +1,23 @@
+2020-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* rust-demangle.h: Removed.
+
+	Import from gcc mainline:
+	2020-02-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* hashtab.c (htab_remove_elt): Make a parameter const.
+	(htab_remove_elt_with_hash): Likewise.
+
+	2020-01-23  Alexandre Oliva <oliva@adacore.com>
+
+	* argv.c (writeargv): Output empty args as "".
+
+	2020-01-18  Iain Sandoe  <iain@sandoe.co.uk>
+
+	* cp-demangle.c (cplus_demangle_operators): Add the co_await
+	operator.
+	* testsuite/demangle-expected: Test co_await operator mangling.
+
 2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* configure: Regenerate.
