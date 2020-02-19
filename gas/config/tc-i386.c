@@ -8636,7 +8636,9 @@ output_insn (void)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_X87;
       if (i.has_regmmx
 	  || i.tm.base_opcode == 0xf77 /* emms */
-	  || i.tm.base_opcode == 0xf0e /* femms */)
+	  || i.tm.base_opcode == 0xf0e /* femms */
+	  || i.tm.base_opcode == 0xf2a /* cvtpi2ps */
+	  || i.tm.base_opcode == 0x660f2a /* cvtpi2pd */)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MMX;
       if (i.has_regxmm)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XMM;
