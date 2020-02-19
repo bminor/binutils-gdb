@@ -32,13 +32,28 @@ runto "foo.adb:$bp_location"
 
 # Currently, GCC describes such functions as returning pointers (instead of
 # references).
-setup_xfail *-*-*
-gdb_test "p get (\"Hello world!\")" \
-         "= \\(n => 12, s => \"Hello world!\"\\)" \
+set pass_re [multi_line "type = <ref> record" \
+		 "    n: natural;" \
+		 "    s: access array \\(1 \\.\\. n\\) of character;" \
+		 "end record"]
+set unsupported_re [multi_line "type = access record" \
+		 "    n: natural;" \
+		 "    s: access array \\(1 \\.\\. n\\) of character;" \
+		 "end record"]
+set supported 1
+gdb_test_multiple "ptype get (\"Hello world!\")" "" {
+    -re -wrap $pass_re {
+	pass $gdb_test_name
+    }
+    -re -wrap $unsupported_re {
+	unsupported $gdb_test_name
+	set supported 0
+    }
+}
 
-setup_xfail *-*-*
-gdb_test "ptype get (\"Hello world!\")" \
-         [multi_line "type = <ref> record" \
-                     "    n: natural;" \
-                     "    s: access array \\(1 \\.\\. n\\) of character;" \
-                     "end record"] \
+if { $supported == 0 } {
+    return 0
+}
+
+gdb_test "p get (\"Hello world!\")" \
+    "= \\(n => 12, s => \"Hello world!\"\\)"
