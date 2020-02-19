@@ -2316,34 +2316,29 @@ NAME (aout, slurp_reloc_table) (bfd *abfd, sec_ptr asect, asymbol **symbols)
       return FALSE;
     }
 
-  if (reloc_size == 0)
+  each_size = obj_reloc_entry_size (abfd);
+  count = reloc_size / each_size;
+  if (count == 0)
     return TRUE;		/* Nothing to be done.  */
 
   if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
     return FALSE;
 
-  each_size = obj_reloc_entry_size (abfd);
-
-  count = reloc_size / each_size;
-  if (count == 0)
-    return TRUE;		/* Nothing to be done.  */
-
-  amt = count * sizeof (arelent);
-  reloc_cache = (arelent *) bfd_zmalloc (amt);
-  if (reloc_cache == NULL)
-    return FALSE;
-
   relocs = bfd_malloc (reloc_size);
   if (relocs == NULL)
-    {
-      free (reloc_cache);
-      return FALSE;
-    }
+    return FALSE;
 
   if (bfd_bread (relocs, reloc_size, abfd) != reloc_size)
     {
       free (relocs);
-      free (reloc_cache);
+      return FALSE;
+    }
+
+  amt = count * sizeof (arelent);
+  reloc_cache = (arelent *) bfd_zmalloc (amt);
+  if (reloc_cache == NULL)
+    {
+      free (relocs);
       return FALSE;
     }
 

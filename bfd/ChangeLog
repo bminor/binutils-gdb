@@ -1,5 +1,29 @@
 2020-02-19  Alan Modra  <amodra@gmail.com>
 
+	* aoutx.h (slurp_reloc_table): Allocate reloc_cache after
+	reading external relocs.
+	* ecoff.c (ecoff_slurp_reloc_table): Likewise.
+	* archive.c (_bfd_write_archive_contents): Don't twiddle bfd_error
+	after bfd_bread.
+	* archive64.c (_bfd_archive_64_bit_slurp_armap): Remove unnecessary
+	bfd_release.
+	* elf32-m32c.c (m32c_offset_for_reloc): Make shndx_buf a bfd_byte*.
+	(m32c_elf_relax_section): Likewise.
+	* elf32-rl78.c (rl78_offset_for_reloc): Likewise.
+	(rl78_elf_relax_section): Likewise.
+	* elf32-rx.c (rx_offset_for_reloc): Likewise.
+	(elf32_rx_relax_section): Likewise.
+	* mach-o.c (bfd_mach_o_alloc_and_read): Move earlier with better
+	parameter types and use..
+	(bfd_mach_o_read_dylinker, bfd_mach_o_read_dylib),
+	(bfd_mach_o_read_fvmlib, bfd_mach_o_read_str): ..in these functions.
+	* peicode.h (pe_bfd_object_p): Don't zero the part of opthdr
+	being read from file, just the extra.
+	* som.c (som_slurp_symbol_table): Allocate internal symbol buffer
+	after reading external syms.  Free on failure.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
 	* coffcode.h (buy_and_read, coff_slurp_line_table),
 	(coff_slurp_symbol_table, coff_slurp_reloc_table): Replace
 	bfd_[z][m]alloc2 calls with _bfd_mul_overflow followed by the

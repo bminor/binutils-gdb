@@ -117,7 +117,7 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_malformed_archive);
-      goto release_raw_armap;
+      goto release_symdefs;
     }
 
   stringend = stringbase + stringsize;
@@ -142,8 +142,6 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
 
   return TRUE;
 
-release_raw_armap:
-  bfd_release (abfd, raw_armap);
 release_symdefs:
   bfd_release (abfd, ardata->symdefs);
   return FALSE;

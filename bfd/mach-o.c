@@ -3997,6 +3997,20 @@ bfd_mach_o_ppc_flavour_string (unsigned int flavour)
     }
 }
 
+static unsigned char *
+bfd_mach_o_alloc_and_read (bfd *abfd, file_ptr filepos, size_t size)
+{
+  unsigned char *buf;
+
+  buf = bfd_alloc (abfd, size);
+  if (buf == NULL)
+    return NULL;
+  if (bfd_seek (abfd, filepos, SEEK_SET) != 0
+      || bfd_bread (buf, size, abfd) != size)
+    return NULL;
+  return buf;
+}
+
 static bfd_boolean
 bfd_mach_o_read_dylinker (bfd *abfd, bfd_mach_o_load_command *command)
 {
@@ -4017,13 +4031,8 @@ bfd_mach_o_read_dylinker (bfd *abfd, bfd_mach_o_load_command *command)
   cmd->name_offset = nameoff;
   namelen = command->len - nameoff;
   nameoff += command->offset;
-  cmd->name_str = bfd_alloc (abfd, namelen);
-  if (cmd->name_str == NULL)
-    return FALSE;
-  if (bfd_seek (abfd, nameoff, SEEK_SET) != 0
-      || bfd_bread (cmd->name_str, namelen, abfd) != namelen)
-    return FALSE;
-  return TRUE;
+  cmd->name_str = (char *) bfd_mach_o_alloc_and_read (abfd, nameoff, namelen);
+  return cmd->name_str != NULL;
 }
 
 static bfd_boolean
@@ -4034,6 +4043,7 @@ bfd_mach_o_read_dylib (bfd *abfd, bfd_mach_o_load_command *command)
   struct mach_o_dylib_command_external raw;
   unsigned int nameoff;
   unsigned int namelen;
+  file_ptr pos;
 
   if (command->len < sizeof (raw) + 8)
     return FALSE;
@@ -4063,13 +4073,9 @@ bfd_mach_o_read_dylib (bfd *abfd, bfd_mach_o_load_command *command)
 
   cmd->name_offset = command->offset + nameoff;
   namelen = command->len - nameoff;
-  cmd->name_str = bfd_alloc (abfd, namelen);
-  if (cmd->name_str == NULL)
-    return FALSE;
-  if (bfd_seek (abfd, mdata->hdr_offset + cmd->name_offset, SEEK_SET) != 0
-      || bfd_bread (cmd->name_str, namelen, abfd) != namelen)
-    return FALSE;
-  return TRUE;
+  pos = mdata->hdr_offset + cmd->name_offset;
+  cmd->name_str = (char *) bfd_mach_o_alloc_and_read (abfd, pos, namelen);
+  return cmd->name_str != NULL;
 }
 
 static bfd_boolean
@@ -4163,13 +4169,9 @@ bfd_mach_o_read_fvmlib (bfd *abfd, bfd_mach_o_load_command *command)
 
   fvm->name_offset = command->offset + nameoff;
   namelen = command->len - nameoff;
-  fvm->name_str = bfd_alloc (abfd, namelen);
-  if (fvm->name_str == NULL)
-    return FALSE;
-  if (bfd_seek (abfd, fvm->name_offset, SEEK_SET) != 0
-      || bfd_bread (fvm->name_str, namelen, abfd) != namelen)
-    return FALSE;
-  return TRUE;
+  fvm->name_str = (char *) bfd_mach_o_alloc_and_read (abfd, fvm->name_offset,
+						      namelen);
+  return fvm->name_str != NULL;
 }
 
 static bfd_boolean
@@ -4568,27 +4570,9 @@ bfd_mach_o_read_str (bfd *abfd, bfd_mach_o_load_command *command)
 
   cmd->stroff = command->offset + off;
   cmd->str_len = command->len - off;
-  cmd->str = bfd_alloc (abfd, cmd->str_len);
-  if (cmd->str == NULL)
-    return FALSE;
-  if (bfd_seek (abfd, cmd->stroff, SEEK_SET) != 0
-      || bfd_bread ((void *) cmd->str, cmd->str_len, abfd) != cmd->str_len)
-    return FALSE;
-  return TRUE;
-}
-
-static unsigned char *
-bfd_mach_o_alloc_and_read (bfd *abfd, unsigned int off, unsigned int size)
-{
-  unsigned char *buf;
-
-  buf = bfd_alloc (abfd, size);
-  if (buf == NULL)
-    return NULL;
-  if (bfd_seek (abfd, off, SEEK_SET) != 0
-      || bfd_bread (buf, size, abfd) != size)
-    return NULL;
-  return buf;
+  cmd->str = (char *) bfd_mach_o_alloc_and_read (abfd, cmd->stroff,
+						 cmd->str_len);
+  return cmd->str != NULL;
 }
 
 static bfd_boolean

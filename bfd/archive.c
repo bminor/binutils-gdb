@@ -2193,11 +2193,7 @@ _bfd_write_archive_contents (bfd *arch)
 	    amt = remaining;
 	  errno = 0;
 	  if (bfd_bread (buffer, amt, current) != amt)
-	    {
-	      if (bfd_get_error () != bfd_error_system_call)
-		bfd_set_error (bfd_error_file_truncated);
-	      goto input_err;
-	    }
+	    goto input_err;
 	  if (bfd_bwrite (buffer, amt, arch) != amt)
 	    return FALSE;
 	  remaining -= amt;

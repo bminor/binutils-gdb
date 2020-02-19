@@ -4659,7 +4659,7 @@ som_slurp_symbol_table (bfd *abfd)
   size_t symsize = sizeof (struct som_external_symbol_dictionary_record);
   char *stringtab;
   struct som_external_symbol_dictionary_record *buf = NULL, *bufp, *endbufp;
-  som_symbol_type *sym, *symbase;
+  som_symbol_type *sym, *symbase = NULL;
   size_t amt;
 
   /* Return saved value if it exists.  */
@@ -4675,15 +4675,6 @@ som_slurp_symbol_table (bfd *abfd)
 
   stringtab = obj_som_stringtab (abfd);
 
-  if (_bfd_mul_overflow (symbol_count, sizeof (som_symbol_type), &amt))
-    {
-      bfd_set_error (bfd_error_file_too_big);
-      goto error_return;
-    }
-  symbase = bfd_zmalloc (amt);
-  if (symbase == NULL)
-    goto error_return;
-
   /* Read in the external SOM representation.  */
   if (_bfd_mul_overflow (symbol_count, symsize, &amt))
     {
@@ -4696,6 +4687,15 @@ som_slurp_symbol_table (bfd *abfd)
   if (bfd_seek (abfd, obj_som_sym_filepos (abfd), SEEK_SET) != 0)
     goto error_return;
   if (bfd_bread (buf, amt, abfd) != amt)
+    goto error_return;
+
+  if (_bfd_mul_overflow (symbol_count, sizeof (som_symbol_type), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      goto error_return;
+    }
+  symbase = bfd_zmalloc (amt);
+  if (symbase == NULL)
     goto error_return;
 
   /* Iterate over all the symbols and internalize them.  */
@@ -4837,6 +4837,8 @@ som_slurp_symbol_table (bfd *abfd)
   return (TRUE);
 
  error_return:
+  if (symbase != NULL)
+    free (symbase);
   if (buf != NULL)
     free (buf);
   return FALSE;

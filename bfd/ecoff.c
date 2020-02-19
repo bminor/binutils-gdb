@@ -1623,19 +1623,24 @@ ecoff_slurp_reloc_table (bfd *abfd,
   if (! _bfd_ecoff_slurp_symbol_table (abfd))
     return FALSE;
 
-  amt = section->reloc_count;
-  amt *= sizeof (arelent);
-  internal_relocs = (arelent *) bfd_alloc (abfd, amt);
-
   external_reloc_size = backend->external_reloc_size;
   amt = external_reloc_size * section->reloc_count;
   external_relocs = (char *) bfd_alloc (abfd, amt);
-  if (internal_relocs == NULL || external_relocs == NULL)
+  if (external_relocs == NULL)
     return FALSE;
   if (bfd_seek (abfd, section->rel_filepos, SEEK_SET) != 0)
     return FALSE;
   if (bfd_bread (external_relocs, amt, abfd) != amt)
     return FALSE;
+
+  amt = section->reloc_count;
+  amt *= sizeof (arelent);
+  internal_relocs = (arelent *) bfd_alloc (abfd, amt);
+  if (internal_relocs == NULL)
+    {
+      bfd_release (abfd, external_relocs);
+      return FALSE;
+    }
 
   for (i = 0, rptr = internal_relocs; i < section->reloc_count; i++, rptr++)
     {
