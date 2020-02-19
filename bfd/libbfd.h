@@ -121,12 +121,6 @@ extern void *bfd_realloc_or_free
   (void *, bfd_size_type) ATTRIBUTE_HIDDEN;
 extern void *bfd_zmalloc
   (bfd_size_type) ATTRIBUTE_HIDDEN;
-extern void *bfd_malloc2
-  (bfd_size_type, bfd_size_type) ATTRIBUTE_HIDDEN;
-extern void *bfd_realloc2
-  (void *, bfd_size_type, bfd_size_type) ATTRIBUTE_HIDDEN;
-extern void *bfd_zmalloc2
-  (bfd_size_type, bfd_size_type) ATTRIBUTE_HIDDEN;
 
 static inline char *
 bfd_strdup (const char *str)
@@ -139,10 +133,6 @@ bfd_strdup (const char *str)
 }
 /* These routines allocate and free things on the BFD's objalloc.  */
 
-extern void *bfd_alloc2
-  (bfd *, bfd_size_type, bfd_size_type) ATTRIBUTE_HIDDEN;
-extern void *bfd_zalloc2
-  (bfd *, bfd_size_type, bfd_size_type) ATTRIBUTE_HIDDEN;
 extern void bfd_release
   (bfd *, void *) ATTRIBUTE_HIDDEN;
 
@@ -910,6 +900,14 @@ extern bfd_signed_vma _bfd_read_signed_leb128
 extern bfd_vma _bfd_safe_read_leb128
   (bfd *, bfd_byte *, unsigned int *, bfd_boolean, const bfd_byte * const)
   ATTRIBUTE_HIDDEN;
+
+#if GCC_VERSION >= 7000
+#define _bfd_mul_overflow(a, b, res) __builtin_mul_overflow (a, b, res)
+#else
+/* Assumes unsigned values.  Careful!  Args evaluated multiple times.  */
+#define _bfd_mul_overflow(a, b, res) \
+  ((*res) = (a), (*res) *= (b), (b) != 0 && (*res) / (b) != (a))
+#endif
 /* Extracted from libbfd.c.  */
 bfd_boolean bfd_write_bigendian_4byte_int (bfd *, unsigned int);
 

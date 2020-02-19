@@ -514,6 +514,7 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
   bfd_size_type raw_end;
   bfd_size_type cb_end;
   file_ptr pos;
+  size_t amt;
 
   BFD_ASSERT (debug == &ecoff_data (abfd)->debug_info);
 
@@ -615,8 +616,13 @@ _bfd_ecoff_slurp_symbolic_info (bfd *abfd,
 
      We need to look at the fdr to deal with a lot of information in
      the symbols, so we swap them here.  */
-  debug->fdr = (FDR *) bfd_alloc2 (abfd, internal_symhdr->ifdMax,
-				   sizeof (struct fdr));
+  if (_bfd_mul_overflow ((unsigned long) internal_symhdr->ifdMax,
+			 sizeof (struct fdr), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return FALSE;
+    }
+  debug->fdr = (FDR *) bfd_alloc (abfd, amt);
   if (debug->fdr == NULL)
     return FALSE;
   external_fdr_size = backend->debug_swap.external_fdr_size;
@@ -872,6 +878,7 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
   char *eraw_end;
   FDR *fdr_ptr;
   FDR *fdr_end;
+  size_t amt;
 
   /* If we've already read in the symbol table, do nothing.  */
   if (ecoff_data (abfd)->canonical_symbols != NULL)
@@ -884,8 +891,13 @@ _bfd_ecoff_slurp_symbol_table (bfd *abfd)
   if (bfd_get_symcount (abfd) == 0)
     return TRUE;
 
-  internal = (ecoff_symbol_type *) bfd_alloc2 (abfd, bfd_get_symcount (abfd),
-					       sizeof (ecoff_symbol_type));
+  if (_bfd_mul_overflow (bfd_get_symcount (abfd),
+			 sizeof (ecoff_symbol_type), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return FALSE;
+    }
+  internal = (ecoff_symbol_type *) bfd_alloc (abfd, amt);
   if (internal == NULL)
     return FALSE;
 
@@ -3745,25 +3757,32 @@ ecoff_final_link_debug_accumulate (bfd *output_bfd,
   HDRR *symhdr = &debug->symbolic_header;
   bfd_boolean ret;
 
-#define READ(ptr, offset, count, size, type)				 \
-  if (symhdr->count == 0)						 \
-    debug->ptr = NULL;							 \
-  else									 \
-    {									 \
-      bfd_size_type amt = (bfd_size_type) size * symhdr->count;		 \
-      debug->ptr = (type) bfd_malloc (amt);				 \
-      if (debug->ptr == NULL)						 \
-	{								 \
-	  ret = FALSE;							 \
-	  goto return_something;					 \
-	}								 \
-      if (bfd_seek (input_bfd, (file_ptr) symhdr->offset, SEEK_SET) != 0 \
-	  || bfd_bread (debug->ptr, amt, input_bfd) != amt)		 \
-	{								 \
-	  ret = FALSE;							 \
-	  goto return_something;					 \
-	}								 \
-    }
+#define READ(ptr, offset, count, size, type)				\
+  do									\
+    {									\
+      size_t amt;							\
+      debug->ptr = NULL;						\
+      if (symhdr->count == 0)						\
+	break;								\
+      if (_bfd_mul_overflow (size, symhdr->count, &amt))		\
+	{								\
+	  bfd_set_error (bfd_error_file_too_big);			\
+	  ret = FALSE;							\
+	  goto return_something;					\
+	}								\
+      debug->ptr = (type) bfd_malloc (amt);				\
+      if (debug->ptr == NULL)						\
+	{								\
+	  ret = FALSE;							\
+	  goto return_something;					\
+	}								\
+      if (bfd_seek (input_bfd, symhdr->offset, SEEK_SET) != 0		\
+	  || bfd_bread (debug->ptr, amt, input_bfd) != amt)		\
+	{								\
+	  ret = FALSE;							\
+	  goto return_something;					\
+	}								\
+    } while (0)
 
   /* If raw_syments is not NULL, then the data was already by read by
      _bfd_ecoff_slurp_symbolic_info.  */

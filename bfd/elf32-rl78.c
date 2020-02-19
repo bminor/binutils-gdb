@@ -2121,10 +2121,14 @@ rl78_elf_relax_section
 
   if (shndx_hdr && shndx_hdr->sh_size != 0)
     {
-      bfd_size_type amt;
+      size_t amt;
 
-      amt = symtab_hdr->sh_info;
-      amt *= sizeof (Elf_External_Sym_Shndx);
+      if (_bfd_mul_overflow (symtab_hdr->sh_info,
+			     sizeof (Elf_External_Sym_Shndx), &amt))
+	{
+	  bfd_set_error (bfd_error_no_memory);
+	  goto error_return;
+	}
       shndx_buf = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
       if (shndx_buf == NULL)
 	goto error_return;

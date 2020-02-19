@@ -402,7 +402,7 @@ bfd_elf_get_elf_syms (bfd *ibfd,
   Elf_Internal_Sym *isymend;
   const struct elf_backend_data *bed;
   size_t extsym_size;
-  bfd_size_type amt;
+  size_t amt;
   file_ptr pos;
 
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
@@ -448,11 +448,16 @@ bfd_elf_get_elf_syms (bfd *ibfd,
   alloc_intsym = NULL;
   bed = get_elf_backend_data (ibfd);
   extsym_size = bed->s->sizeof_sym;
-  amt = (bfd_size_type) symcount * extsym_size;
+  if (_bfd_mul_overflow (symcount, extsym_size, &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      intsym_buf = NULL;
+      goto out;
+    }
   pos = symtab_hdr->sh_offset + symoffset * extsym_size;
   if (extsym_buf == NULL)
     {
-      alloc_ext = bfd_malloc2 (symcount, extsym_size);
+      alloc_ext = bfd_malloc (amt);
       extsym_buf = alloc_ext;
     }
   if (extsym_buf == NULL
@@ -467,12 +472,16 @@ bfd_elf_get_elf_syms (bfd *ibfd,
     extshndx_buf = NULL;
   else
     {
-      amt = (bfd_size_type) symcount * sizeof (Elf_External_Sym_Shndx);
+      if (_bfd_mul_overflow (symcount, sizeof (Elf_External_Sym_Shndx), &amt))
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  intsym_buf = NULL;
+	  goto out;
+	}
       pos = shndx_hdr->sh_offset + symoffset * sizeof (Elf_External_Sym_Shndx);
       if (extshndx_buf == NULL)
 	{
-	  alloc_extshndx = (Elf_External_Sym_Shndx *)
-	      bfd_malloc2 (symcount, sizeof (Elf_External_Sym_Shndx));
+	  alloc_extshndx = (Elf_External_Sym_Shndx *) bfd_malloc (amt);
 	  extshndx_buf = alloc_extshndx;
 	}
       if (extshndx_buf == NULL
@@ -486,8 +495,12 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 
   if (intsym_buf == NULL)
     {
-      alloc_intsym = (Elf_Internal_Sym *)
-	  bfd_malloc2 (symcount, sizeof (Elf_Internal_Sym));
+      if (_bfd_mul_overflow (symcount, sizeof (Elf_Internal_Sym), &amt))
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  goto out;
+	}
+      alloc_intsym = (Elf_Internal_Sym *) bfd_malloc (amt);
       intsym_buf = alloc_intsym;
       if (intsym_buf == NULL)
 	goto out;
@@ -629,15 +642,14 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 	{
 	  /* We keep a list of elf section headers for group sections,
 	     so we can find them quickly.  */
-	  bfd_size_type amt;
+	  size_t amt;
 
 	  elf_tdata (abfd)->num_group = num_group;
-	  elf_tdata (abfd)->group_sect_ptr = (Elf_Internal_Shdr **)
-	      bfd_alloc2 (abfd, num_group, sizeof (Elf_Internal_Shdr *));
+	  amt = num_group * sizeof (Elf_Internal_Shdr *);
+	  elf_tdata (abfd)->group_sect_ptr
+	    = (Elf_Internal_Shdr **) bfd_zalloc (abfd, amt);
 	  if (elf_tdata (abfd)->group_sect_ptr == NULL)
 	    return FALSE;
-	  memset (elf_tdata (abfd)->group_sect_ptr, 0,
-		  num_group * sizeof (Elf_Internal_Shdr *));
 	  num_group = 0;
 
 	  for (i = 0; i < shnum; i++)
@@ -659,24 +671,12 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		  num_group += 1;
 
 		  /* Read the raw contents.  */
-		  BFD_ASSERT (sizeof (*dest) >= 4);
-		  amt = shdr->sh_size * sizeof (*dest) / 4;
-		  shdr->contents = (unsigned char *)
-		    bfd_alloc2 (abfd, shdr->sh_size, sizeof (*dest) / 4);
-		  /* PR binutils/4110: Handle corrupt group headers.  */
-		  if (shdr->contents == NULL)
-		    {
-		      _bfd_error_handler
-			/* xgettext:c-format */
-			(_("%pB: corrupt size field in group section"
-			   " header: %#" PRIx64),
-			 abfd, (uint64_t) shdr->sh_size);
-		      bfd_set_error (bfd_error_bad_value);
-		      -- num_group;
-		      continue;
-		    }
-
-		  if (bfd_seek (abfd, shdr->sh_offset, SEEK_SET) != 0
+		  BFD_ASSERT (sizeof (*dest) >= 4 && sizeof (*dest) % 4 == 0);
+		  shdr->contents = NULL;
+		  if (_bfd_mul_overflow (shdr->sh_size,
+					 sizeof (*dest) / 4, &amt)
+		      || (shdr->contents = bfd_alloc (abfd, amt)) == NULL
+		      || bfd_seek (abfd, shdr->sh_offset, SEEK_SET) != 0
 		      || (bfd_bread (shdr->contents, shdr->sh_size, abfd)
 			  != shdr->sh_size))
 		    {
@@ -690,8 +690,11 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
 		      /* PR 17510: If the group contents are even
 			 partially corrupt, do not allow any of the
 			 contents to be used.  */
-		      bfd_release (abfd, shdr->contents);
-		      shdr->contents = NULL;
+		      if (shdr->contents != NULL)
+			{
+			  bfd_release (abfd, shdr->contents);
+			  shdr->contents = NULL;
+			}
 		      continue;
 		    }
 
@@ -8015,7 +8018,7 @@ swap_out_syms (bfd *abfd,
 	       int relocatable_p)
 {
   const struct elf_backend_data *bed;
-  int symcount;
+  unsigned int symcount;
   asymbol **syms;
   struct elf_strtab_hash *stt;
   Elf_Internal_Shdr *symtab_hdr;
@@ -8026,9 +8029,9 @@ swap_out_syms (bfd *abfd,
   bfd_byte *outbound_shndx;
   unsigned long outbound_syms_index;
   unsigned long outbound_shndx_index;
-  int idx;
+  unsigned int idx;
   unsigned int num_locals;
-  bfd_size_type amt;
+  size_t amt;
   bfd_boolean name_local_sections;
 
   if (!elf_map_symbols (abfd, &num_locals))
@@ -8052,21 +8055,22 @@ swap_out_syms (bfd *abfd,
   symstrtab_hdr->sh_type = SHT_STRTAB;
 
   /* Allocate buffer to swap out the .strtab section.  */
-  symstrtab = (struct elf_sym_strtab *) bfd_malloc2 (symcount + 1,
-						     sizeof (*symstrtab));
-  if (symstrtab == NULL)
+  if (_bfd_mul_overflow (symcount + 1, sizeof (*symstrtab), &amt)
+      || (symstrtab = (struct elf_sym_strtab *) bfd_malloc (amt)) == NULL)
     {
+      bfd_set_error (bfd_error_no_memory);
       _bfd_elf_strtab_free (stt);
       return FALSE;
     }
 
-  outbound_syms = (bfd_byte *) bfd_alloc2 (abfd, 1 + symcount,
-					   bed->s->sizeof_sym);
-  if (outbound_syms == NULL)
+  if (_bfd_mul_overflow (symcount + 1, bed->s->sizeof_sym, &amt)
+      || (outbound_syms = (bfd_byte *) bfd_alloc (abfd, amt)) == NULL)
     {
-error_return:
-      _bfd_elf_strtab_free (stt);
+    error_no_mem:
+      bfd_set_error (bfd_error_no_memory);
+    error_return:
       free (symstrtab);
+      _bfd_elf_strtab_free (stt);
       return FALSE;
     }
   symtab_hdr->contents = outbound_syms;
@@ -8080,9 +8084,10 @@ error_return:
       symtab_shndx_hdr = & elf_symtab_shndx_list (abfd)->hdr;
       if (symtab_shndx_hdr->sh_name != 0)
 	{
-	  amt = (bfd_size_type) (1 + symcount) * sizeof (Elf_External_Sym_Shndx);
-	  outbound_shndx =  (bfd_byte *)
-	    bfd_zalloc2 (abfd, 1 + symcount, sizeof (Elf_External_Sym_Shndx));
+	  if (_bfd_mul_overflow (symcount + 1,
+				 sizeof (Elf_External_Sym_Shndx), &amt))
+	    goto error_no_mem;
+	  outbound_shndx =  (bfd_byte *) bfd_zalloc (abfd, amt);
 	  if (outbound_shndx == NULL)
 	    goto error_return;
 
@@ -8570,6 +8575,7 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bfd_boolean default_imported_symver)
 {
   bfd_byte *contents = NULL;
   unsigned int freeidx = 0;
+  size_t amt;
 
   if (elf_dynverref (abfd) != 0)
     {
@@ -8614,9 +8620,12 @@ error_return_verref:
 	  || bfd_bread (contents, hdr->sh_size, abfd) != hdr->sh_size)
 	goto error_return_verref;
 
-      elf_tdata (abfd)->verref = (Elf_Internal_Verneed *)
-	bfd_alloc2 (abfd, hdr->sh_info, sizeof (Elf_Internal_Verneed));
-
+      if (_bfd_mul_overflow (hdr->sh_info, sizeof (Elf_Internal_Verneed), &amt))
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  goto error_return_verref;
+	}
+      elf_tdata (abfd)->verref = (Elf_Internal_Verneed *) bfd_alloc (abfd, amt);
       if (elf_tdata (abfd)->verref == NULL)
 	goto error_return_verref;
 
@@ -8645,9 +8654,14 @@ error_return_verref:
 	    iverneed->vn_auxptr = NULL;
 	  else
 	    {
+	      if (_bfd_mul_overflow (iverneed->vn_cnt,
+				     sizeof (Elf_Internal_Vernaux), &amt))
+		{
+		  bfd_set_error (bfd_error_file_too_big);
+		  goto error_return_verref;
+		}
 	      iverneed->vn_auxptr = (struct elf_internal_vernaux *)
-		  bfd_alloc2 (abfd, iverneed->vn_cnt,
-			      sizeof (Elf_Internal_Vernaux));
+		bfd_alloc (abfd, amt);
 	      if (iverneed->vn_auxptr == NULL)
 		goto error_return_verref;
 	    }
@@ -8779,9 +8793,12 @@ error_return_verref:
 	  else
 	    freeidx = ++maxidx;
 	}
-
-      elf_tdata (abfd)->verdef = (Elf_Internal_Verdef *)
-	bfd_zalloc2 (abfd, maxidx, sizeof (Elf_Internal_Verdef));
+      if (_bfd_mul_overflow (maxidx, sizeof (Elf_Internal_Verdef), &amt))
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  goto error_return_verdef;
+	}
+      elf_tdata (abfd)->verdef = (Elf_Internal_Verdef *) bfd_zalloc (abfd, amt);
       if (elf_tdata (abfd)->verdef == NULL)
 	goto error_return_verdef;
 
@@ -8809,9 +8826,14 @@ error_return_verref:
 	    iverdef->vd_auxptr = NULL;
 	  else
 	    {
+	      if (_bfd_mul_overflow (iverdef->vd_cnt,
+				     sizeof (Elf_Internal_Verdaux), &amt))
+		{
+		  bfd_set_error (bfd_error_file_too_big);
+		  goto error_return_verdef;
+		}
 	      iverdef->vd_auxptr = (struct elf_internal_verdaux *)
-		  bfd_alloc2 (abfd, iverdef->vd_cnt,
-			      sizeof (Elf_Internal_Verdaux));
+		bfd_alloc (abfd, amt);
 	      if (iverdef->vd_auxptr == NULL)
 		goto error_return_verdef;
 	    }
@@ -8874,8 +8896,12 @@ error_return_verref:
       else
 	freeidx++;
 
-      elf_tdata (abfd)->verdef = (Elf_Internal_Verdef *)
-	  bfd_zalloc2 (abfd, freeidx, sizeof (Elf_Internal_Verdef));
+      if (_bfd_mul_overflow (freeidx, sizeof (Elf_Internal_Verdef), &amt))
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  goto error_return;
+	}
+      elf_tdata (abfd)->verdef = (Elf_Internal_Verdef *) bfd_zalloc (abfd, amt);
       if (elf_tdata (abfd)->verdef == NULL)
 	goto error_return;
 

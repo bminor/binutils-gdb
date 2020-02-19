@@ -1,5 +1,44 @@
 2020-02-19  Alan Modra  <amodra@gmail.com>
 
+	* coffcode.h (buy_and_read, coff_slurp_line_table),
+	(coff_slurp_symbol_table, coff_slurp_reloc_table): Replace
+	bfd_[z][m]alloc2 calls with _bfd_mul_overflow followed by the
+	corresponding bfd_alloc call.  Adjust variables to suit.
+	* coffgen.c (_bfd_coff_get_external_symbols): Likewise.
+	* ecoff.c (_bfd_ecoff_slurp_symbolic_info),
+	(_bfd_ecoff_slurp_symbol_table, READ): Likewise.
+	* elf.c (bfd_elf_get_elf_syms, setup_group, bfd_section_from_shdr),
+	(swap_out_syms, _bfd_elf_slurp_version_tables): Likewise.
+	* elf32-m32c.c (m32c_elf_relax_section): Likewise.
+	* elf32-rl78.c (rl78_elf_relax_section): Likewise.
+	* elf32-rx.c (elf32_rx_relax_section): Likewise.
+	* elf64-alpha.c (READ): Likewise.
+	* elfcode.h (elf_object_p, elf_write_relocs, elf_write_shdrs_and_ehdr),
+	(elf_slurp_symbol_table, elf_slurp_reloc_table),
+	(bfd_from_remote_memory): Likewise.
+	* elfcore.h (core_find_build_id): Likewise.
+	* elfxx-mips.c (READ): Likewise.
+	* mach-o.c (bfd_mach_o_mangle_sections),
+	(bfd_mach_o_read_symtab_symbols, bfd_mach_o_read_thread),
+	(bfd_mach_o_read_dysymtab, bfd_mach_o_flatten_sections),
+	(bfd_mach_o_scan, bfd_mach_o_fat_archive_p): Likewise.
+	* som.c (setup_sections, som_prep_for_fixups)
+	(som_build_and_write_symbol_table, som_slurp_symbol_table),
+	(som_slurp_reloc_table, som_bfd_count_ar_symbols),
+	(som_bfd_fill_in_ar_symbols, som_slurp_armap),
+	(som_bfd_ar_write_symbol_stuff): Likewise.
+	* vms-alpha.c (vector_grow1): Likewise.
+	* vms-lib.c (vms_add_index): Likewise.
+	* wasm-module.c (wasm_scan_name_function_section): Likewise.
+	* libbfd.c (bfd_malloc2, bfd_realloc2, bfd_zmalloc2): Delete.
+	* opncls.c (bfd_alloc2, bfd_zalloc2): Delete.
+	* libbfd-in.h (bfd_malloc2, bfd_realloc2, bfd_zmalloc2),
+	(bfd_alloc2, bfd_zalloc2): Delete.
+	(_bfd_mul_overflow): Define.
+	* libbfd.h: Regenerate.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
 	* elf.c (bfd_section_from_shdr): Use bfd_zalloc rather than
 	bfd_zalloc2.
 	(assign_section_numbers): Likewise.

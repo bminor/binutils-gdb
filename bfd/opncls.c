@@ -982,32 +982,6 @@ bfd_alloc (bfd *abfd, bfd_size_type size)
 }
 
 /*
-INTERNAL_FUNCTION
-	bfd_alloc2
-
-SYNOPSIS
-	void *bfd_alloc2 (bfd *abfd, bfd_size_type nmemb, bfd_size_type size);
-
-DESCRIPTION
-	Allocate a block of @var{nmemb} elements of @var{size} bytes each
-	of memory attached to <<abfd>> and return a pointer to it.
-*/
-
-void *
-bfd_alloc2 (bfd *abfd, bfd_size_type nmemb, bfd_size_type size)
-{
-  if ((nmemb | size) >= HALF_BFD_SIZE_TYPE
-      && size != 0
-      && nmemb > ~(bfd_size_type) 0 / size)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
-
-  return bfd_alloc (abfd, size * nmemb);
-}
-
-/*
 FUNCTION
 	bfd_zalloc
 
@@ -1023,39 +997,6 @@ void *
 bfd_zalloc (bfd *abfd, bfd_size_type size)
 {
   void *res;
-
-  res = bfd_alloc (abfd, size);
-  if (res)
-    memset (res, 0, (size_t) size);
-  return res;
-}
-
-/*
-INTERNAL_FUNCTION
-	bfd_zalloc2
-
-SYNOPSIS
-	void *bfd_zalloc2 (bfd *abfd, bfd_size_type nmemb, bfd_size_type size);
-
-DESCRIPTION
-	Allocate a block of @var{nmemb} elements of @var{size} bytes each
-	of zeroed memory attached to <<abfd>> and return a pointer to it.
-*/
-
-void *
-bfd_zalloc2 (bfd *abfd, bfd_size_type nmemb, bfd_size_type size)
-{
-  void *res;
-
-  if ((nmemb | size) >= HALF_BFD_SIZE_TYPE
-      && size != 0
-      && nmemb > ~(bfd_size_type) 0 / size)
-    {
-      bfd_set_error (bfd_error_no_memory);
-      return NULL;
-    }
-
-  size *= nmemb;
 
   res = bfd_alloc (abfd, size);
   if (res)

@@ -4200,13 +4200,19 @@ static void *
 buy_and_read (bfd *abfd, file_ptr where,
 	      bfd_size_type nmemb, bfd_size_type size)
 {
-  void *area = bfd_alloc2 (abfd, nmemb, size);
+  void *area;
+  size_t amt;
 
+  if (_bfd_mul_overflow (nmemb, size, &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return NULL;
+    }
+  area = bfd_alloc (abfd, amt);
   if (!area)
     return NULL;
-  size *= nmemb;
   if (bfd_seek (abfd, where, SEEK_SET) != 0
-      || bfd_bread (area, size, abfd) != size)
+      || bfd_bread (area, amt, abfd) != amt)
     return NULL;
   return area;
 }
@@ -4265,6 +4271,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
   LINENO *src;
   bfd_boolean have_func;
   bfd_boolean ret = TRUE;
+  size_t amt;
 
   if (asect->lineno_count == 0)
     return TRUE;
@@ -4279,9 +4286,12 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
       return FALSE;
     }
 
-  lineno_cache = (alent *) bfd_alloc2 (abfd,
-				       (bfd_size_type) asect->lineno_count + 1,
-				       sizeof (alent));
+  if (_bfd_mul_overflow (asect->lineno_count + 1, sizeof (alent), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return FALSE;
+    }
+  lineno_cache = (alent *) bfd_alloc (abfd, amt);
   if (lineno_cache == NULL)
     return FALSE;
 
@@ -4395,8 +4405,12 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
       alent *n_lineno_cache;
 
       /* Create a table of functions.  */
-      func_table = (alent **) bfd_alloc2 (abfd, nbr_func, sizeof (alent *));
-      if (func_table != NULL)
+      if (_bfd_mul_overflow (nbr_func, sizeof (alent *), &amt))
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  ret = FALSE;
+	}
+      else if ((func_table = (alent **) bfd_alloc (abfd, amt)) != NULL)
 	{
 	  alent **p = func_table;
 	  unsigned int i;
@@ -4411,9 +4425,12 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	  qsort (func_table, nbr_func, sizeof (alent *), coff_sort_func_alent);
 
 	  /* Create the new sorted table.  */
-	  n_lineno_cache = (alent *) bfd_alloc2 (abfd, asect->lineno_count,
-						 sizeof (alent));
-	  if (n_lineno_cache != NULL)
+	  if (_bfd_mul_overflow (asect->lineno_count, sizeof (alent), &amt))
+	    {
+	      bfd_set_error (bfd_error_file_too_big);
+	      ret = FALSE;
+	    }
+	  else if ((n_lineno_cache = (alent *) bfd_alloc (abfd, amt)) != NULL)
 	    {
 	      alent *n_cache_ptr = n_lineno_cache;
 
@@ -4459,6 +4476,7 @@ coff_slurp_symbol_table (bfd * abfd)
   unsigned int *table_ptr;
   unsigned int number_of_symbols = 0;
   bfd_boolean ret = TRUE;
+  size_t amt;
 
   if (obj_symbols (abfd))
     return TRUE;
@@ -4468,15 +4486,23 @@ coff_slurp_symbol_table (bfd * abfd)
     return FALSE;
 
   /* Allocate enough room for all the symbols in cached form.  */
-  cached_area = (coff_symbol_type *) bfd_alloc2 (abfd,
-						 obj_raw_syment_count (abfd),
-						 sizeof (coff_symbol_type));
+  if (_bfd_mul_overflow (obj_raw_syment_count (abfd),
+			 sizeof (*cached_area), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return FALSE;
+    }
+  cached_area = (coff_symbol_type *) bfd_alloc (abfd, amt);
   if (cached_area == NULL)
     return FALSE;
 
-  table_ptr = (unsigned int *) bfd_zalloc2 (abfd, obj_raw_syment_count (abfd),
-					    sizeof (unsigned int));
-
+  if (_bfd_mul_overflow (obj_raw_syment_count (abfd),
+			 sizeof (*table_ptr), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return FALSE;
+    }
+  table_ptr = (unsigned int *) bfd_zalloc (abfd, amt);
   if (table_ptr == NULL)
     return FALSE;
   else
@@ -4963,6 +4989,7 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
   arelent *reloc_cache;
   arelent *cache_ptr;
   unsigned int idx;
+  size_t amt;
 
   if (asect->relocation)
     return TRUE;
@@ -4976,9 +5003,12 @@ coff_slurp_reloc_table (bfd * abfd, sec_ptr asect, asymbol ** symbols)
   native_relocs = (RELOC *) buy_and_read (abfd, asect->rel_filepos,
 					  asect->reloc_count,
 					  bfd_coff_relsz (abfd));
-  reloc_cache = (arelent *) bfd_alloc2 (abfd, asect->reloc_count,
-					sizeof (arelent));
-
+  if (_bfd_mul_overflow (asect->reloc_count, sizeof (arelent), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return FALSE;
+    }
+  reloc_cache = (arelent *) bfd_alloc (abfd, amt);
   if (reloc_cache == NULL || native_relocs == NULL)
     return FALSE;
 

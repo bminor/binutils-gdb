@@ -2554,6 +2554,7 @@ bfd_mach_o_mangle_sections (bfd *abfd, bfd_mach_o_data_struct *mdata)
   asection *sec;
   unsigned target_index;
   unsigned nsect;
+  size_t amt;
 
   nsect = bfd_count_sections (abfd);
 
@@ -2572,8 +2573,12 @@ bfd_mach_o_mangle_sections (bfd *abfd, bfd_mach_o_data_struct *mdata)
     }
 
   mdata->nsects = nsect;
-  mdata->sections = bfd_alloc2 (abfd,
-				mdata->nsects, sizeof (bfd_mach_o_section *));
+  if (_bfd_mul_overflow (mdata->nsects, sizeof (bfd_mach_o_section *), &amt))
+    {
+      bfd_set_error (bfd_error_no_memory);
+      return FALSE;
+    }
+  mdata->sections = bfd_alloc (abfd, amt);
   if (mdata->sections == NULL)
     return FALSE;
 
@@ -3923,14 +3928,16 @@ bfd_mach_o_read_symtab_symbols (bfd *abfd)
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   bfd_mach_o_symtab_command *sym = mdata->symtab;
   unsigned long i;
+  size_t amt;
 
   if (sym == NULL || sym->symbols)
     /* Return now if there are no symbols or if already loaded.  */
     return TRUE;
 
-  sym->symbols = bfd_alloc2 (abfd, sym->nsyms, sizeof (bfd_mach_o_asymbol));
-  if (sym->symbols == NULL)
+  if (_bfd_mul_overflow (sym->nsyms, sizeof (bfd_mach_o_asymbol), &amt)
+      || (sym->symbols = bfd_alloc (abfd, amt)) == NULL)
     {
+      bfd_set_error (bfd_error_no_memory);
       _bfd_error_handler (_("bfd_mach_o_read_symtab_symbols: "
 			    "unable to allocate memory for symbols"));
       sym->nsyms = 0;
@@ -4174,6 +4181,7 @@ bfd_mach_o_read_thread (bfd *abfd, bfd_mach_o_load_command *command)
   unsigned int nflavours;
   unsigned int i;
   struct mach_o_thread_command_external raw;
+  size_t amt;
 
   BFD_ASSERT ((command->type == BFD_MACH_O_LC_THREAD)
 	      || (command->type == BFD_MACH_O_LC_UNIXTHREAD));
@@ -4200,8 +4208,12 @@ bfd_mach_o_read_thread (bfd *abfd, bfd_mach_o_load_command *command)
     return FALSE;
 
   /* Allocate threads.  */
-  cmd->flavours = bfd_alloc2 (abfd, nflavours,
-			      sizeof (bfd_mach_o_thread_flavour));
+  if (_bfd_mul_overflow (nflavours, sizeof (bfd_mach_o_thread_flavour), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return FALSE;
+    }
+  cmd->flavours = bfd_alloc (abfd, amt);
   if (cmd->flavours == NULL)
     return FALSE;
   cmd->nflavours = nflavours;
@@ -4315,9 +4327,15 @@ bfd_mach_o_read_dysymtab (bfd *abfd, bfd_mach_o_load_command *command)
       unsigned int i;
       int wide = bfd_mach_o_wide_p (abfd);
       unsigned int module_len = wide ? 56 : 52;
+      size_t amt;
 
-      cmd->dylib_module =
-	bfd_alloc2 (abfd, cmd->nmodtab, sizeof (bfd_mach_o_dylib_module));
+      if (_bfd_mul_overflow (cmd->nmodtab,
+			     sizeof (bfd_mach_o_dylib_module), &amt))
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  return FALSE;
+	}
+      cmd->dylib_module = bfd_alloc (abfd, amt);
       if (cmd->dylib_module == NULL)
 	return FALSE;
 
@@ -4364,9 +4382,15 @@ bfd_mach_o_read_dysymtab (bfd *abfd, bfd_mach_o_load_command *command)
   if (cmd->ntoc != 0)
     {
       unsigned long i;
+      size_t amt;
 
-      cmd->dylib_toc = bfd_alloc2
-	(abfd, cmd->ntoc, sizeof (bfd_mach_o_dylib_table_of_content));
+      if (_bfd_mul_overflow (cmd->ntoc,
+			     sizeof (bfd_mach_o_dylib_table_of_content), &amt))
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  return FALSE;
+	}
+      cmd->dylib_toc = bfd_alloc (abfd, amt);
       if (cmd->dylib_toc == NULL)
 	return FALSE;
 
@@ -4389,9 +4413,14 @@ bfd_mach_o_read_dysymtab (bfd *abfd, bfd_mach_o_load_command *command)
   if (cmd->nindirectsyms != 0)
     {
       unsigned int i;
+      size_t amt;
 
-      cmd->indirect_syms = bfd_alloc2
-	(abfd, cmd->nindirectsyms, sizeof (unsigned int));
+      if (_bfd_mul_overflow (cmd->nindirectsyms, sizeof (unsigned int), &amt))
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  return FALSE;
+	}
+      cmd->indirect_syms = bfd_alloc (abfd, amt);
       if (cmd->indirect_syms == NULL)
 	return FALSE;
 
@@ -4414,9 +4443,15 @@ bfd_mach_o_read_dysymtab (bfd *abfd, bfd_mach_o_load_command *command)
     {
       unsigned long v;
       unsigned int i;
+      size_t amt;
 
-      cmd->ext_refs = bfd_alloc2
-	(abfd, cmd->nextrefsyms, sizeof (bfd_mach_o_dylib_reference));
+      if (_bfd_mul_overflow (cmd->nextrefsyms,
+			     sizeof (bfd_mach_o_dylib_reference), &amt))
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  return FALSE;
+	}
+      cmd->ext_refs = bfd_alloc (abfd, amt);
       if (cmd->ext_refs == NULL)
 	return FALSE;
 
@@ -5005,6 +5040,7 @@ bfd_mach_o_flatten_sections (bfd *abfd)
   bfd_mach_o_data_struct *mdata = bfd_mach_o_get_data (abfd);
   bfd_mach_o_load_command *cmd;
   long csect = 0;
+  size_t amt;
 
   /* Count total number of sections.  */
   mdata->nsects = 0;
@@ -5021,8 +5057,12 @@ bfd_mach_o_flatten_sections (bfd *abfd)
     }
 
   /* Allocate sections array.  */
-  mdata->sections = bfd_alloc2 (abfd,
-				mdata->nsects, sizeof (bfd_mach_o_section *));
+  if (_bfd_mul_overflow (mdata->nsects, sizeof (bfd_mach_o_section *), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      return FALSE;
+    }
+  mdata->sections = bfd_alloc (abfd, amt);
   if (mdata->sections == NULL && mdata->nsects != 0)
     return FALSE;
 
@@ -5195,11 +5235,18 @@ bfd_mach_o_scan (bfd *abfd,
   if (header->ncmds != 0)
     {
       bfd_mach_o_load_command *cmd;
+      size_t amt;
 
       mdata->first_command = NULL;
       mdata->last_command = NULL;
 
-      cmd = bfd_alloc2 (abfd, header->ncmds, sizeof (bfd_mach_o_load_command));
+      if (_bfd_mul_overflow (header->ncmds,
+			     sizeof (bfd_mach_o_load_command), &amt))
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  return FALSE;
+	}
+      cmd = bfd_alloc (abfd, amt);
       if (cmd == NULL)
 	return FALSE;
 
@@ -5418,6 +5465,7 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
   mach_o_fat_data_struct *adata = NULL;
   struct mach_o_fat_header_external hdr;
   unsigned long i;
+  size_t amt;
 
   if (bfd_seek (abfd, 0, SEEK_SET) != 0
       || bfd_bread (&hdr, sizeof (hdr), abfd) != sizeof (hdr))
@@ -5437,8 +5485,13 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
   if (adata->nfat_arch > 30)
     goto error;
 
-  adata->archentries =
-    bfd_alloc2 (abfd, adata->nfat_arch, sizeof (mach_o_fat_archentry));
+  if (_bfd_mul_overflow (adata->nfat_arch,
+			 sizeof (mach_o_fat_archentry), &amt))
+    {
+      bfd_set_error (bfd_error_file_too_big);
+      goto error;
+    }
+  adata->archentries = bfd_alloc (abfd, amt);
   if (adata->archentries == NULL)
     goto error;
 

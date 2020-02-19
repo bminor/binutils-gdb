@@ -2963,17 +2963,23 @@ vector_grow1 (struct vector_type *vec, size_t elsz)
       if (vec->max_el == 0)
 	{
 	  vec->max_el = 16;
-	  vec->els = bfd_malloc2 (vec->max_el, elsz);
+	  vec->els = bfd_malloc (vec->max_el * elsz);
 	}
       else
 	{
+	  size_t amt;
 	  if (vec->max_el > -1u / 2)
 	    {
 	      bfd_set_error (bfd_error_file_too_big);
 	      return NULL;
 	    }
 	  vec->max_el *= 2;
-	  vec->els = bfd_realloc2 (vec->els, vec->max_el, elsz);
+	  if (_bfd_mul_overflow (vec->max_el, elsz, &amt))
+	    {
+	      bfd_set_error (bfd_error_file_too_big);
+	      return NULL;
+	    }
+	  vec->els = bfd_realloc (vec->els, amt);
 	}
     }
   if (vec->els == NULL)

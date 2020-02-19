@@ -134,12 +134,23 @@ vms_add_index (struct carsym_mem *cs, char *name,
   if (cs->nbr == cs->max)
     {
       struct carsym *n;
+      size_t amt;
 
+      if (cs->max > -33u / 2)
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  return FALSE;
+	}
       cs->max = 2 * cs->max + 32;
+      if (_bfd_mul_overflow (cs->max, sizeof (struct carsym), &amt))
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  return FALSE;
+	}
 
       if (!cs->realloced)
 	{
-	  n = bfd_malloc2 (cs->max, sizeof (struct carsym));
+	  n = bfd_malloc (amt);
 	  if (n == NULL)
 	    return FALSE;
 	  memcpy (n, cs->idx, cs->nbr * sizeof (struct carsym));
@@ -147,7 +158,7 @@ vms_add_index (struct carsym_mem *cs, char *name,
 	}
       else
 	{
-	  n = bfd_realloc_or_free (cs->idx, cs->nbr * sizeof (struct carsym));
+	  n = bfd_realloc_or_free (cs->idx, amt);
 	  if (n == NULL)
 	    return FALSE;
 	}

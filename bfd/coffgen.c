@@ -1639,29 +1639,28 @@ copy_name (bfd *abfd, char *name, size_t maxlen)
 bfd_boolean
 _bfd_coff_get_external_symbols (bfd *abfd)
 {
-  bfd_size_type symesz;
-  bfd_size_type size;
+  size_t symesz;
+  size_t size;
   void * syms;
   ufile_ptr filesize;
 
   if (obj_coff_external_syms (abfd) != NULL)
     return TRUE;
 
-  symesz = bfd_coff_symesz (abfd);
-  size = obj_raw_syment_count (abfd) * symesz;
-  if (size == 0)
-    return TRUE;
-
   /* Check for integer overflow and for unreasonable symbol counts.  */
   filesize = bfd_get_file_size (abfd);
-  if (size < obj_raw_syment_count (abfd)
+  symesz = bfd_coff_symesz (abfd);
+  if (_bfd_mul_overflow (obj_raw_syment_count (abfd), symesz, &size)
       || (filesize != 0 && size > filesize))
-
     {
+      bfd_set_error (bfd_error_file_truncated);
       _bfd_error_handler (_("%pB: corrupt symbol count: %#" PRIx64 ""),
 			  abfd, (uint64_t) obj_raw_syment_count (abfd));
       return FALSE;
     }
+
+  if (size == 0)
+    return TRUE;
 
   syms = bfd_malloc (size);
   if (syms == NULL)
