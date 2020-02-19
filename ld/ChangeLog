@@ -1,3 +1,7 @@
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-plugin/pr25355.d: Allow alpha-linux nm result.
+
 2020-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25355
