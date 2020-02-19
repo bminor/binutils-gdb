@@ -1,5 +1,15 @@
 2020-02-19  Alan Modra  <amodra@gmail.com>
 
+	* bfd.c (struct bfd): Move format and direction to other
+	bitfields.  Add "size".
+	* bfdio.c (bfd_get_size): Cache size when not writing file.
+	* opncls.c (bfd_get_debug_link_info_1): Allow for bfd_get_size
+	returning zero, ie. unknown.
+	(bfd_get_alt_debug_link_info): Likewise.
+	* bfd-in2.h: Regenerate.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
 	* coffgen.c (_bfd_coff_get_external_symbols): Don't call
 	bfd_get_file_size twice.
 	(_bfd_coff_read_string_table): Allow for bfd_get_file_size

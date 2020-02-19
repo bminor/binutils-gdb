@@ -1209,6 +1209,7 @@ bfd_get_debug_link_info_1 (bfd *abfd, void *crc32_out)
   unsigned int crc_offset;
   char *name;
   bfd_size_type size;
+  ufile_ptr file_size;
 
   BFD_ASSERT (abfd);
   BFD_ASSERT (crc32_out);
@@ -1219,9 +1220,10 @@ bfd_get_debug_link_info_1 (bfd *abfd, void *crc32_out)
     return NULL;
 
   size = bfd_section_size (sect);
+  file_size = bfd_get_size (abfd);
 
   /* PR 22794: Make sure that the section has a reasonable size.  */
-  if (size < 8 || size >= bfd_get_size (abfd))
+  if (size < 8 || (file_size != 0 && size >= file_size))
     return NULL;
 
   if (!bfd_malloc_and_get_section (abfd, sect, &contents))
@@ -1298,6 +1300,7 @@ bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
   unsigned int buildid_offset;
   char *name;
   bfd_size_type size;
+  ufile_ptr file_size;
 
   BFD_ASSERT (abfd);
   BFD_ASSERT (buildid_len);
@@ -1309,7 +1312,8 @@ bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
     return NULL;
 
   size = bfd_section_size (sect);
-  if (size < 8 || size >= bfd_get_size (abfd))
+  file_size = bfd_get_size (abfd);
+  if (size < 8 || (file_size != 0 && size >= file_size))
     return NULL;
 
   if (!bfd_malloc_and_get_section (abfd, sect, & contents))
