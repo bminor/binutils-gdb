@@ -1401,11 +1401,11 @@ static bfd_boolean
 riscv_multi_letter_ext_valid_p (const char *ext,
 				const char *const *known_exts)
 {
-  for (size_t i = 0; known_exts[i]; ++i)
-    {
-      if (!strcmp (ext, known_exts[i]))
-	return TRUE;
-    }
+  size_t i;
+
+  for (i = 0; known_exts[i]; ++i)
+    if (!strcmp (ext, known_exts[i]))
+      return TRUE;
 
   return FALSE;
 }
