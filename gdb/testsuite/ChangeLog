@@ -1,5 +1,10 @@
 2020-02-19  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/corefile-buildid.exp (check_exec_file): Match info files
+	output line-by-line.
+
+2020-02-19  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.cp/cpexprs.exp: Remove c++/14186 kfail.
 
 2020-02-19  Tom de Vries  <tdevries@suse.de>
