@@ -1776,7 +1776,12 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 		     newline -- if chars_per_line is right, we
 		     probably just overflowed anyway; if it's wrong,
 		     let us keep going.  */
-		  fputc_unfiltered ('\n', stream);
+		  /* XXX: The ideal thing would be to call
+		     'stream->putc' here, but we can't because it
+		     currently calls 'fputc_unfiltered', which ends up
+		     calling us, which generates an infinite
+		     recursion.  */
+		  stream->puts ("\n");
 		}
 	      else
 		{
@@ -1821,7 +1826,12 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	  wrap_here ((char *) 0);	/* Spit out chars, cancel
 					   further wraps.  */
 	  lines_printed++;
-	  fputc_unfiltered ('\n', stream);
+	  /* XXX: The ideal thing would be to call
+	     'stream->putc' here, but we can't because it
+	     currently calls 'fputc_unfiltered', which ends up
+	     calling us, which generates an infinite
+	     recursion.  */
+	  stream->puts ("\n");
 	  lineptr++;
 	}
     }
@@ -1916,10 +1926,7 @@ fputs_highlighted (const char *str, const compiled_regex &highlight,
 int
 putchar_unfiltered (int c)
 {
-  char buf = c;
-
-  gdb_stdout->write (&buf, 1);
-  return c;
+  return fputc_unfiltered (c, gdb_stdout);
 }
 
 /* Write character C to gdb_stdout using GDB's paging mechanism and return C.
@@ -1934,9 +1941,11 @@ putchar_filtered (int c)
 int
 fputc_unfiltered (int c, struct ui_file *stream)
 {
-  char buf = c;
+  char buf[2];
 
-  stream->write (&buf, 1);
+  buf[0] = c;
+  buf[1] = 0;
+  fputs_unfiltered (buf, stream);
   return c;
 }
 

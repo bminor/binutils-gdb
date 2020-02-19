@@ -1,3 +1,11 @@
+2020-02-20  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Tom Tromey  <tom@tromey.com>
+
+	* utils.c (fputs_maybe_filtered): Call 'stream->puts' instead
+	of 'fputc_unfiltered'.
+	(putchar_unfiltered): Call 'fputc_unfiltered'.
+	(fputc_unfiltered): Call 'fputs_unfiltered'.
+
 2020-02-20  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* config.in: Regenerate.
