@@ -1,4 +1,4 @@
-#as: -r800
+#as: -march=r800
 #objdump: -d
 #name: All Z80 documented instructions for R800
 #source: z80_doc.s

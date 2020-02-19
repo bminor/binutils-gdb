@@ -1,4 +1,4 @@
-#as: -ez80
+#as: -march=ez80
 #objdump: -d
 #name: All eZ80 instructions in Z80 cpu mode
 

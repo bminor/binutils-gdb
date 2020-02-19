@@ -1,4 +1,4 @@
-#as: --with-inst=idx-reg-halves
+#as: -march=z80-full+xyhl
 #objdump: -d
 #name: halves of index register
 

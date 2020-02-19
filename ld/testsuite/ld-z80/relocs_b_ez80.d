@@ -1,6 +1,7 @@
 #name: eZ80 backward relocation in ADL mode
-#source: labels.s -ez80-adl
-#source: relocs.s -ez80-adl --defsym ADLMODE=1
+#source: labels.s
+#source: relocs.s --defsym ADLMODE=1
+#as: -march=ez80+adl
 #ld: -e 0 -Ttext 0x100 -Tdata 0x200 -s
 #objdump: -d
 

@@ -1,4 +1,4 @@
-#as: -r800
+#as: -march=r800
 #objdump: -d
 #name: R800 specific instructions
 

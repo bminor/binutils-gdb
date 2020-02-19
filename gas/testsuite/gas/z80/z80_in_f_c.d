@@ -1,4 +1,4 @@
-#as: --with-inst=in-f-c
+#as: -march=z80-full+infc
 #objdump: -d
 #name: Z80 undocumented instruction IN F,(C)
 

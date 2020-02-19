@@ -1,6 +1,6 @@
 #name: Z80 backward relocation
-#source: labels.s -z80
-#source: relocs.s -z80
+#source: labels.s
+#source: relocs.s
 #ld: -e 0 -Ttext 0x100 -Tdata 0x200 -s
 #objdump: -d
 

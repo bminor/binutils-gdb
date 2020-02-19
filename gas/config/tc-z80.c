@@ -38,13 +38,12 @@ const char * md_shortopts = ""; /* None yet.  */
 
 enum options
 {
-  OPTION_MACH_Z80 = OPTION_MD_BASE,
+  OPTION_MARCH = OPTION_MD_BASE,
+  OPTION_MACH_Z80,
   OPTION_MACH_R800,
   OPTION_MACH_Z180,
   OPTION_MACH_EZ80_Z80,
   OPTION_MACH_EZ80_ADL,
-  OPTION_MACH_GBZ80,
-  OPTION_MACH_Z80N,
   OPTION_MACH_INST,
   OPTION_MACH_NO_INST,
   OPTION_MACH_IUD,
@@ -83,13 +82,12 @@ enum options
 
 struct option md_longopts[] =
 {
+  { "march",     required_argument, NULL, OPTION_MARCH},
   { "z80",       no_argument, NULL, OPTION_MACH_Z80},
   { "r800",      no_argument, NULL, OPTION_MACH_R800},
   { "z180",      no_argument, NULL, OPTION_MACH_Z180},
   { "ez80",      no_argument, NULL, OPTION_MACH_EZ80_Z80},
   { "ez80-adl",  no_argument, NULL, OPTION_MACH_EZ80_ADL},
-  { "gbz80",     no_argument, NULL, OPTION_MACH_GBZ80},
-  { "z80n",      no_argument, NULL, OPTION_MACH_Z80N},
   { "fp-s",      required_argument, NULL, OPTION_FP_SINGLE_FORMAT},
   { "fp-d",      required_argument, NULL, OPTION_FP_DOUBLE_FORMAT},
   { "strict",    no_argument, NULL, OPTION_MACH_FUD},
@@ -144,6 +142,83 @@ static str_to_float_t str_to_double;
 #define INST_MODE_IL 1     /* long instruction mode */
 #define INST_MODE_FORCED 4 /* CPU mode changed by instruction suffix*/
 static char inst_mode;
+
+struct match_info
+{
+  const char *name;
+  int ins_ok;
+  int ins_err;
+  int cpu_mode;
+  const char *comment;
+};
+
+static const struct match_info
+match_cpu_table [] =
+{
+  {"z80",     INS_Z80, 0, 0, "Zilog Z80 (+infc+xyhl)" },
+  {"ez80",    INS_EZ80, 0, 0, "Zilog eZ80" },
+  {"gbz80",   INS_GBZ80, INS_UNDOC|INS_UNPORT, 0, "GameBoy Z80" },
+  {"r800",    INS_R800, INS_UNPORT, 0, "Ascii R800" },
+  {"z180",    INS_Z180, INS_UNDOC|INS_UNPORT, 0, "Zilog Z180" },
+  {"z80n",    INS_Z80N, 0, 0, "Z80 Next" }
+};
+
+static const struct match_info
+match_ext_table [] =
+{
+  {"full",    INS_UNDOC|INS_UNPORT, 0, 0, "assemble all known instructions" },
+  {"adl",     0, 0, 1, "eZ80 ADL mode by default" },
+  {"xyhl",    INS_IDX_HALF, 0, 0, "instructions with halves of index registers" },
+  {"infc",    INS_IN_F_C, 0, 0, "instruction IN F,(C)" },
+  {"outc0",   INS_OUT_C_0, 0, 0, "instruction OUT (C),0" },
+  {"sli",     INS_SLI, 0, 0, "instruction known as SLI, SLL, or SL1" },
+  {"xdcb",    INS_ROT_II_LD, 0, 0, "instructions like RL (IX+d),R (DD/FD CB dd oo)" }
+};
+
+static void
+setup_march (const char *name, int *ok, int *err, int *mode)
+{
+  unsigned i;
+  size_t len = strcspn (name, "+-");
+  for (i = 0; i < ARRAY_SIZE (match_cpu_table); ++i)
+    if (!strncasecmp (name, match_cpu_table[i].name, len)
+	&& strlen (match_cpu_table[i].name) == len)
+      {
+	*ok = match_cpu_table[i].ins_ok;
+	*err = match_cpu_table[i].ins_err;
+	*mode = match_cpu_table[i].cpu_mode;
+	break;
+      }
+
+  if (i >= ARRAY_SIZE (match_cpu_table))
+    as_fatal (_("Invalid CPU is specified: %s"), name);
+
+  while (name[len])
+    {
+      name = &name[len + 1];
+      len = strcspn (name, "+-");
+      for (i = 0; i < ARRAY_SIZE (match_ext_table); ++i)
+	if (!strncasecmp (name, match_ext_table[i].name, len)
+	    && strlen (match_ext_table[i].name) == len)
+	  {
+	    if (name[-1] == '+')
+	      {
+		*ok |= match_ext_table[i].ins_ok;
+		*err &= ~match_ext_table[i].ins_ok;
+		*mode |= match_ext_table[i].cpu_mode;
+	      }
+	    else
+	      {
+		*ok &= ~match_ext_table[i].ins_ok;
+		*err |= match_ext_table[i].ins_ok;
+		*mode &= ~match_ext_table[i].cpu_mode;
+	      }
+	    break;
+	  }
+      if (i >= ARRAY_SIZE (match_ext_table))
+	as_fatal (_("Invalid EXTENTION is specified: %s"), name);
+    }
+}
 
 static int
 setup_instruction (const char *inst, int *add, int *sub)
@@ -243,35 +318,23 @@ md_parse_option (int c, const char* arg)
     {
     default:
       return 0;
+    case OPTION_MARCH:
+      setup_march (arg, & ins_ok, & ins_err, & cpu_mode);
+      break;
     case OPTION_MACH_Z80:
-      ins_ok = (ins_ok & INS_TUNE_MASK) | INS_Z80;
-      ins_err = (ins_err & INS_MARCH_MASK) | (~INS_Z80 & INS_MARCH_MASK);
+      setup_march ("z80", & ins_ok, & ins_err, & cpu_mode);
       break;
     case OPTION_MACH_R800:
-      ins_ok = INS_R800 | INS_IDX_HALF | INS_IN_F_C;
-      ins_err = INS_UNPORT;
+      setup_march ("r800", & ins_ok, & ins_err, & cpu_mode);
       break;
     case OPTION_MACH_Z180:
-      ins_ok = INS_Z180;
-      ins_err = INS_UNDOC | INS_UNPORT;
+      setup_march ("z180", & ins_ok, & ins_err, & cpu_mode);
       break;
     case OPTION_MACH_EZ80_Z80:
-      ins_ok = INS_EZ80 | INS_IDX_HALF;
-      ins_err = (INS_UNDOC | INS_UNPORT) & ~INS_IDX_HALF;
-      cpu_mode = 0;
+      setup_march ("ez80", & ins_ok, & ins_err, & cpu_mode);
       break;
     case OPTION_MACH_EZ80_ADL:
-      ins_ok = INS_EZ80 | INS_IDX_HALF;
-      ins_err = (INS_UNDOC | INS_UNPORT) & ~INS_IDX_HALF;
-      cpu_mode = 1;
-      break;
-    case OPTION_MACH_GBZ80:
-      ins_ok = INS_GBZ80;
-      ins_err = INS_UNDOC | INS_UNPORT;
-      break;
-    case OPTION_MACH_Z80N:
-      ins_ok = INS_Z80N | INS_UNPORT | INS_UNDOC;
-      ins_err = 0;
+      setup_march ("ez80+adl", & ins_ok, & ins_err, & cpu_mode);
       break;
     case OPTION_FP_SINGLE_FORMAT:
       str_to_float = get_str_to_float (arg);
@@ -319,7 +382,6 @@ md_parse_option (int c, const char* arg)
       break;
     case OPTION_COMPAT_SDCC:
       sdcc_compat = 1;
-      local_label_prefix = "_";
       break;
     case OPTION_COMPAT_COLONLESS:
       colonless_labels = 1;
@@ -332,16 +394,17 @@ md_parse_option (int c, const char* arg)
 void
 md_show_usage (FILE * f)
 {
-  fprintf (f, "\n\
+  unsigned i;
+  fprintf (f, _("\n\
 CPU model options:\n\
-  -z80\t\t\t  assemble for Zilog Z80\n\
-  -r800\t\t\t  assemble for Ascii R800\n\
-  -z180\t\t\t  assemble for Zilog Z180\n\
-  -ez80\t\t\t  assemble for Zilog eZ80 in Z80 mode by default\n\
-  -ez80-adl\t\t  assemble for Zilog eZ80 in ADL mode by default\n\
-  -gbz80\t\t  assemble for GameBoy Z80\n\
-  -z80n\t\t\t  assemble for Z80N\n\
-\n\
+  -march=CPU[+EXT...][-EXT...]\n\
+\t\t\t  generate code for CPU, where CPU is one of:\n"));
+  for (i = 0; i < ARRAY_SIZE(match_cpu_table); ++i)
+    fprintf (f, "  %-8s\t\t  %s\n", match_cpu_table[i].name, match_cpu_table[i].comment);
+  fprintf (f, _("And EXT is combination (+EXT - add, -EXT - remove) of:\n"));
+  for (i = 0; i < ARRAY_SIZE(match_ext_table); ++i)
+    fprintf (f, "  %-8s\t\t  %s\n", match_ext_table[i].name, match_ext_table[i].comment);
+  fprintf (f, _("\n\
 Compatibility options:\n\
   -local-prefix=TEXT\t  treat labels prefixed by TEXT as local\n\
   -colonless\t\t  permit colonless labels\n\
@@ -349,42 +412,14 @@ Compatibility options:\n\
   -fp-s=FORMAT\t\t  set single precission FP numbers format\n\
   -fp-d=FORMAT\t\t  set double precission FP numbers format\n\
 Where FORMAT one of:\n\
-  ieee754\t\t  IEEE754 compatible\n\
+  ieee754\t\t  IEEE754 compatible (depends on directive)\n\
   half\t\t\t  IEEE754 half precision (16 bit)\n\
   single\t\t  IEEE754 single precision (32 bit)\n\
   double\t\t  IEEE754 double precision (64 bit)\n\
   zeda32\t\t  Zeda z80float library 32 bit format\n\
   math48\t\t  48 bit format from Math48 library\n\
 \n\
-Support for known undocumented instructions:\n\
-  -strict\t\t  assemble only documented instructions\n\
-  -full\t\t\t  assemble all undocumented instructions\n\
-  -with-inst=INST[,...]\n\
-  -Wnins INST[,...]\t  assemble specified instruction(s)\n\
-  -without-inst=INST[,...]\n\
-  -Fins INST[,...]\t  do not assemble specified instruction(s)\n\
-Where INST is one of:\n\
-  idx-reg-halves\t  instructions with halves of index registers\n\
-  sli\t\t\t  instruction SLI/SLL\n\
-  op-ii-ld\t\t  instructions like SLA (II+dd),R (opcodes DD/FD CB dd xx)\n\
-  in-f-c\t\t  instruction IN F,(C)\n\
-  out-c-0\t\t  instruction OUT (C),0\n\
-\n\
-Obsolete options:\n\
-  -ignore-undocumented-instructions\n\
-  -Wnud\t\t\t  silently assemble undocumented Z80-instructions that work on R800\n\
-  -ignore-unportable-instructions\n\
-  -Wnup\t\t\t  silently assemble all undocumented Z80-instructions\n\
-  -warn-undocumented-instructions\n\
-  -Wud\t\t\t  issue warnings for undocumented Z80-instructions that work on R800\n\
-  -warn-unportable-instructions\n\
-  -Wup\t\t\t  issue warnings for other undocumented Z80-instructions\n\
-  -forbid-undocumented-instructions\n\
-  -Fud\t\t\t  treat all undocumented Z80-instructions as errors\n\
-  -forbid-unportable-instructions\n\
-  -Fup\t\t\t  treat undocumented Z80-instructions that do not work on R800 as errors\n\
-\n\
-Default: -z80 -ignore-undocumented-instructions -warn-unportable-instructions.\n");
+Default: -march=z80+xyhl+infc\n"));
 }
 
 static symbolS * zero;
@@ -499,12 +534,7 @@ z80_md_end (void)
   switch (ins_ok & INS_MARCH_MASK)
     {
     case INS_Z80:
-      if (ins_ok & INS_UNPORT)
-        mach_type = bfd_mach_z80full;
-      else if (ins_ok & INS_UNDOC)
-        mach_type = bfd_mach_z80;
-      else
-        mach_type = bfd_mach_z80strict;
+      mach_type = bfd_mach_z80;
       break;
     case INS_R800:
       mach_type = bfd_mach_r800;
@@ -524,40 +554,17 @@ z80_md_end (void)
     default:
       mach_type = 0;
     }
-
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach_type);
 }
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 void
 z80_elf_final_processing (void)
-{
+{/* nothing to do, all is done by BFD itself */
+/*
   unsigned elf_flags;
-  switch (ins_ok & INS_MARCH_MASK)
-    {
-    case INS_Z80:
-      elf_flags = EF_Z80_MACH_Z80;
-      break;
-    case INS_R800:
-      elf_flags = EF_Z80_MACH_R800;
-      break;
-    case INS_Z180:
-      elf_flags = EF_Z80_MACH_Z180;
-      break;
-    case INS_GBZ80:
-      elf_flags = EF_Z80_MACH_GBZ80;
-      break;
-    case INS_EZ80:
-      elf_flags = cpu_mode ? EF_Z80_MACH_EZ80_ADL : EF_Z80_MACH_EZ80_Z80;
-      break;
-    case INS_Z80N:
-      elf_flags = EF_Z80_MACH_Z80N;
-      break;
-    default:
-      elf_flags = 0;
-    }
-
   elf_elfheader (stdoutput)->e_flags = elf_flags;
+*/
 }
 #endif
 
@@ -631,8 +638,6 @@ z80_start_line_hook (void)
             }
           c = ':';
         }
-      if (c == ':' && sdcc_compat && rest[-2] != '$')
-        dollar_label_clear ();
       if (*rest == ':')
         {
           /* remove second colon if SDCC compatibility enabled */
@@ -1222,7 +1227,7 @@ emit_mx (char prefix, char opcode, int shift, expressionS * arg)
 	  if ((prefix == 0) && (rnum & R_INDEX))
 	    {
 	      prefix = (rnum & R_IX) ? 0xDD : 0xFD;
-              if (!(ins_ok & INS_EZ80))
+	      if (!(ins_ok & (INS_EZ80|INS_R800|INS_Z80N)))
                 check_mach (INS_IDX_HALF);
 	      rnum &= ~R_INDEX;
 	    }
@@ -1312,7 +1317,8 @@ emit_mr (char prefix, char opcode, const char *args)
 	      ill_op ();
 	      break;
 	    }
-	  check_mach (INS_ROT_II_LD);
+	  if (!(ins_ok & INS_Z80N))
+	    check_mach (INS_ROT_II_LD);
 	}
       /* Fall through.  */
     case O_register:
@@ -1926,7 +1932,7 @@ emit_in (char prefix ATTRIBUTE_UNUSED, char opcode ATTRIBUTE_UNUSED,
 	    {
               if (port.X_add_number == REG_BC && !(ins_ok & INS_EZ80))
                 ill_op ();
-              else if (reg.X_add_number == REG_F && !(ins_ok & INS_R800))
+	      else if (reg.X_add_number == REG_F && !(ins_ok & (INS_R800|INS_Z80N)))
                 check_mach (INS_IN_F_C);
           q = frag_more (2);
           *q++ = 0xED;
@@ -1994,7 +2000,8 @@ emit_out (char prefix ATTRIBUTE_UNUSED, char opcode ATTRIBUTE_UNUSED,
   /* Allow "out (c), 0" as unportable instruction.  */
   if (reg.X_op == O_constant && reg.X_add_number == 0)
     {
-      check_mach (INS_OUT_C_0);
+      if (!(ins_ok & INS_Z80N))
+	check_mach (INS_OUT_C_0);
       reg.X_op = O_register;
       reg.X_add_number = 6;
     }
@@ -2368,7 +2375,7 @@ emit_ld_r_n (expressionS *dst, expressionS *src)
     {
       if (ins_ok & INS_GBZ80)
         ill_op ();
-      else if (!(ins_ok & INS_EZ80))
+      else if (!(ins_ok & (INS_EZ80|INS_R800|INS_Z80N)))
         check_mach (INS_IDX_HALF);
       *q++ = prefix;
     }
@@ -2529,7 +2536,7 @@ emit_ld_r_r (expressionS *dst, expressionS *src)
     }
   if ((ins_ok & INS_GBZ80) && prefix != 0)
     ill_op ();
-  if (ii_halves && !(ins_ok & INS_EZ80))
+  if (ii_halves && !(ins_ok & (INS_EZ80|INS_R800|INS_Z80N)))
     check_mach (INS_IDX_HALF);
   if (prefix == 0 && (ins_ok & INS_EZ80))
     {
@@ -3545,10 +3552,10 @@ static table_t instab[] =
   { "scf",  0x00, 0x37, emit_insn, INS_ALL },
   { "set",  0xCB, 0xC0, emit_bit,  INS_ALL },
   { "setae",0xED, 0x95, emit_insn, INS_Z80N },
-  { "sl1",  0xCB, 0x30, emit_mr,   INS_SLI },
+  { "sl1",  0xCB, 0x30, emit_mr,   INS_SLI|INS_Z80N },
   { "sla",  0xCB, 0x20, emit_mr,   INS_ALL },
-  { "sli",  0xCB, 0x30, emit_mr,   INS_SLI },
-  { "sll",  0xCB, 0x30, emit_mr,   INS_SLI },
+  { "sli",  0xCB, 0x30, emit_mr,   INS_SLI|INS_Z80N },
+  { "sll",  0xCB, 0x30, emit_mr,   INS_SLI|INS_Z80N },
   { "slp",  0xED, 0x76, emit_insn, INS_Z180|INS_EZ80 },
   { "sra",  0xCB, 0x28, emit_mr,   INS_ALL },
   { "srl",  0xCB, 0x38, emit_mr,   INS_ALL },

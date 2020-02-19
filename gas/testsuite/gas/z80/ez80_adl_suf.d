@@ -1,4 +1,4 @@
-#as: -ez80-adl
+#as: -march=ez80+adl
 #objdump: -d
 #name: eZ80 instructions with sufficies in ADL cpu mode
 #source: ez80_isuf.s

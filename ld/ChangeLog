@@ -1,3 +1,27 @@
+2020-02-19  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25537
+	* emultempl/z80.em: Remove machine compatability checking.
+
+2020-02-19  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25517
+	* testsuite/ld-z80/arch_ez80_adl.d: Update command line.
+	* testsuite/ld-z80/arch_ez80_z80.d: Likewise.
+	* testsuite/ld-z80/arch_r800.d: Likewise.
+	* testsuite/ld-z80/arch_z180.d: Likewise.
+	* testsuite/ld-z80/arch_z80n.d: Likewise.
+	* testsuite/ld-z80/comb_arch_ez80_z80.d: Likewise.
+	* testsuite/ld-z80/comb_arch_z180_z80.d: Likewise.
+	* testsuite/ld-z80/comb_arch_z80_ez80.d: Likewise.
+	* testsuite/ld-z80/comb_arch_z80_z180.d: Likewise.
+	* testsuite/ld-z80/comb_arch_z80_z80n.d: Likewise.
+	* testsuite/ld-z80/relocs_b_ez80.d: Likewise.
+	* testsuite/ld-z80/relocs_b_z80.d: Likewise.
+	* testsuite/ld-z80/relocs_f_ez80.d: Likewise.
+	* testsuite/ld-z80/relocs_f_z80.d: Likewise.
+	* testsuite/ld-z80/relocs_f_z80n.d: Likewise.
+
 2020-02-19  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-plugin/pr25355.d: Allow alpha-linux nm result.

@@ -1,4 +1,4 @@
-#as: -z80n
+#as: -march=z80n
 #source: z80n_all.s
 #objdump: -r
 #name: Z80N big-endian relocation

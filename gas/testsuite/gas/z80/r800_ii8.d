@@ -1,4 +1,4 @@
-#as: -r800
+#as: -march=r800
 #objdump: -d
 #name: halves of index register for R800
 #source: z80_ii8.s

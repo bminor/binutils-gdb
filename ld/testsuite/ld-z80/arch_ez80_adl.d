@@ -1,6 +1,7 @@
 #name: eZ80 ADL mode arch test
-#source: dummy1.s -ez80-adl
-#source: dummy2.s -ez80-adl
+#source: dummy1.s
+#source: dummy2.s
+#as: -march=ez80+adl
 #ld: -e 0
 #objdump: -f
 

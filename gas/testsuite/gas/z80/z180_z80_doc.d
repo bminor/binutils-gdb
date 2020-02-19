@@ -1,4 +1,4 @@
-#as: -z180
+#as: -march=z180
 #objdump: -d
 #name: All Z80 documented instructions for Z180
 #source: z80_doc.s

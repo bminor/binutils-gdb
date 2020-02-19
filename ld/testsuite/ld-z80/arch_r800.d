@@ -1,6 +1,7 @@
 #name: R800 arch test
-#source: dummy1.s -r800
-#source: dummy2.s -r800
+#source: dummy1.s
+#source: dummy2.s
+#as: -march=r800
 #ld: -e 0
 #objdump: -f
 

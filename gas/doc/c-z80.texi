@@ -29,37 +29,35 @@
 @cindex options for Z80
 @c man begin OPTIONS
 @table @gcctabopt
-@cindex @code{-z80} command-line option, Z80
-@item -z80
-Produce code for the Zilog Z80 processor. By default accepted undocumented
-operations with halves of index registers (@code{IXL}, @code{IXH}, @code{IYL},
-@code{IYH}) and instuction @code{IN F,(C)}. Other useful undocumented
-instructions produces warnings. Undocumented instructions may not work on some
-CPUs, use them on your own risk.
 
-@cindex @code{-r800} command-line option, Z80
-@item -r800
-Produce code for the Ascii R800 processor.
-
-@cindex @code{-z180} command-line option, Z80
-@item -z180
-Produce code for the Zilog Z180 processor.
-
-@cindex @code{-ez80} command-line option, Z80
-@item -ez80
-Produce code for the eZ80 processor in Z80 memory mode by default.
-
-@cindex @code{-ez80-adl} command-line option, Z80
-@item -ez80-adl
-Produce code for the eZ80 processor in ADL memory mode by default.
-
-@cindex @code{-gbz80} command-line option, Z80
-@item -gbz80
-Produce code for the GameBoy Z80 processor.
-
-@cindex @code{-z80n} command-line option, Z80
-@item -z80n
-Produce code for the Z80N processor.
+@cindex @samp{-march=} option, Z80
+@item -march=@var{CPU}[-@var{EXT}@dots{}][+@var{EXT}@dots{}]
+This option specifies the target processor. The assembler will issue
+an error message if an attempt is made to assemble an instruction which
+will not execute on the target processor. The following processor names
+are recognized:
+@code{z80},
+@code{z180},
+@code{ez80},
+@code{gbz80},
+@code{z80n},
+@code{r800}.
+In addition to the basic instruction set, the assembler can be told to
+accept some extention mnemonics. For example,
+@code{-march=z180+sli+infc} extends @var{z180} with @var{SLI} instructions and
+@var{IN F,(C)}. The following instructions are currently supported:
+@code{full} (all known instructions),
+@code{adl} (ADL CPU mode by default),
+@code{sli} (instruction known as @var{SLI}, @var{SLL} or @var{SL1}),
+@code{xyhl} (instructions with halves of index registers: @var{IXL}, @var{IXH},
+@var{IYL}, @var{IYH}),
+@code{xdcb} (instructions like @var{RotOp (II+d),R} and @var{BitOp n,(II+d),R}),
+@code{infc} (instruction @var{IN F,(C)} or @var{IN (C)}),
+@code{outc0} (instruction @var{OUT (C),0}).
+Note that rather than extending a basic instruction set, the extention
+mnemonics starting with @code{-} revoke the respective functionality:
+@code{-march=z80-full+xyhl} first removes all default extentions and adds
+support for index registers halves only.
 
 @cindex @code{-local-prefix} command-line option, Z80
 @item  -local-prefix=@var{prefix}
@@ -82,44 +80,6 @@ Single precision floating point numbers format. Default: ieee754 (32 bit).
 @cindex @code{-fp-d} command-line option, Z80
 @item -fp-d=@var{FORMAT}
 Double precision floating point numbers format. Default: ieee754 (64 bit).
-
-@cindex @code{-strict} command-line option, Z80
-@item  -strict
-Accept documented instructions only.
-
-@cindex @code{-full} command-line option, Z80
-@item  -full
-Accept all known Z80 instructions.
-
-@item  -with-inst=@var{INST}[,...]
-@itemx -Wnins @var{INST}[,...]
-Enable specified undocumented instruction(s).
-
-@item  -without-inst=@var{INST}[,...]
-@itemx -Fins @var{INST}[,...]
-Disable specified undocumented instruction(s).
-
-@item  -ignore-undocumented-instructions
-@itemx -Wnud
-Silently assemble undocumented Z80-instructions that have been adopted
-as documented R800-instructions .
-@item  -ignore-unportable-instructions
-@itemx -Wnup
-Silently assemble all undocumented Z80-instructions.
-@item  -warn-undocumented-instructions
-@itemx -Wud
-Issue warnings for undocumented Z80-instructions that work on R800, do
-not assemble other undocumented instructions without warning.
-@item  -warn-unportable-instructions
-@itemx -Wup
-Issue warnings for other undocumented Z80-instructions, do not treat any
-undocumented instructions as errors.
-@item  -forbid-undocumented-instructions
-@itemx -Fud
-Treat all undocumented z80-instructions as errors.
-@item  -forbid-unportable-instructions
-@itemx -Fup
-Treat undocumented z80-instructions that do not work on R800 as errors.
 @end table
 @c man end
 
@@ -142,21 +102,6 @@ Double precision IEEE754 compatible format (64 bits).
 
 @item @code{math48}
 48 bit floating point format from Math48 package by Anders Hejlsberg.
-@end table
-
-Known undocumented instructions.
-@table @option
-@cindex Known undocumented instructions
-@item  @code{idx-reg-halves}
-All operations with halves of index registers (@code{IXL}, @code{IXH}, @code{IYL}, @code{IYH}).
-@item  @code{sli}
-@code{SLI} or @code{SLL} instruction. Same as @code{SLA r; INC r}.
-@item  @code{op-ii-ld}
-Istructions like @code{<op> (<ii>+<d>),<r>}. For example: @code{RL (IX+5),C}
-@item @code{in-f-c}
-Instruction @code{IN F,(C)}.
-@item @code{out-c-0}
-Instruction @code{OUT (C),0}
 @end table
 
 @cindex Z80 Syntax
@@ -350,7 +295,7 @@ The section is marked as read only.
 @node Z80 Opcodes
 @section Opcodes
 In line with common practice, Z80 mnemonics are used for the Z80,
-the Z180, eZ80 and the R800.
+Z80N, Z180, eZ80, Ascii R800 and the GameBoy Z80.
 
 In many instructions it is possible to use one of the half index
 registers (@samp{ixl},@samp{ixh},@samp{iyl},@samp{iyh}) in stead of an
@@ -376,17 +321,17 @@ This is equivalent to
 
 @example
 ld @var{r}, (ix+@var{d})
-@var{opc} @var{r}
+@var{op} @var{r}
 ld (ix+@var{d}), @var{r}
 @end example
 
-The operation @samp{@var{opc}} may be any of @samp{res @var{b},},
+The operation @samp{@var{op}} may be any of @samp{res @var{b},},
 @samp{set @var{b},}, @samp{rl}, @samp{rlc}, @samp{rr}, @samp{rrc},
 @samp{sla}, @samp{sli}, @samp{sra} and @samp{srl}, and the register
 @samp{@var{r}} may be any of @samp{a}, @samp{b}, @samp{c}, @samp{d},
 @samp{e}, @samp{h} and @samp{l}.
 
-@item @var{opc} (iy+@var{d}), @var{r}
+@item @var{op} (iy+@var{d}), @var{r}
 As above, but with @samp{iy} instead of @samp{ix}.
 @end table
 

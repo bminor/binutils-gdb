@@ -1,4 +1,4 @@
-#as: -ez80-adl
+#as: -march=ez80+adl
 #objdump: -d
 #name: All eZ80 instructions in ADL cpu mode
 

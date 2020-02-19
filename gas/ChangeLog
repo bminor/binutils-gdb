@@ -1,3 +1,39 @@
+2020-02-19  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25576
+	* config/tc-z80.c (md_parse_option): Do not use an underscore
+	prefix for local labels in SDCC compatability mode.
+	(z80_start_line_hook): Remove SDCC dollar label support.
+	* testsuite/gas/z80/sdcc.d: Update expected disassembly.
+	* testsuite/gas/z80/sdcc.s: Likewise.
+
+2020-02-19  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25517
+	* config/tc-z80.c: Add -march option.
+	* doc/as.texi: Update Z80 documentation.
+	* doc/c-z80.texi: Likewise.
+	* testsuite/gas/z80/ez80_adl_all.d: Update command line.
+	* testsuite/gas/z80/ez80_adl_suf.d: Likewise.
+	* testsuite/gas/z80/ez80_pref_dis.d: Likewise.
+	* testsuite/gas/z80/ez80_z80_all.d: Likewise.
+	* testsuite/gas/z80/ez80_z80_suf.d: Likewise.
+	* testsuite/gas/z80/gbz80_all.d: Likewise.
+	* testsuite/gas/z80/r800_extra.d: Likewise.
+	* testsuite/gas/z80/r800_ii8.d: Likewise.
+	* testsuite/gas/z80/r800_z80_doc.d: Likewise.
+	* testsuite/gas/z80/sdcc.d: Likewise.
+	* testsuite/gas/z80/z180.d: Likewise.
+	* testsuite/gas/z80/z180_z80_doc.d: Likewise.
+	* testsuite/gas/z80/z80_doc.d: Likewise.
+	* testsuite/gas/z80/z80_ii8.d: Likewise.
+	* testsuite/gas/z80/z80_in_f_c.d: Likewise.
+	* testsuite/gas/z80/z80_op_ii_ld.d: Likewise.
+	* testsuite/gas/z80/z80_out_c_0.d: Likewise.
+	* testsuite/gas/z80/z80_sli.d: Likewise.
+	* testsuite/gas/z80/z80n_all.d: Likewise.
+	* testsuite/gas/z80/z80n_reloc.d: Likewise.
+
 2020-02-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (output_insn): Mark cvtpi2ps and cvtpi2pd

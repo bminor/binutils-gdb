@@ -1,4 +1,4 @@
-#as: --with-inst=sli
+#as: -march=z80-full+sli
 #objdump: -d
 #name: Z80 instruction SLI/SLL
 
