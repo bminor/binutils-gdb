@@ -19,9 +19,10 @@
 #ifndef NAT_RISCV_LINUX_TDESC_H
 #define NAT_RISCV_LINUX_TDESC_H
 
-struct target_desc;
+#include "arch/riscv.h"
 
-/* Return a target description for the LWP identified by TID.  */
-const struct target_desc *riscv_linux_read_description (int tid);
+/* Determine XLEN and FLEN for the LWP identified by TID, and return a
+   corresponding features object.  */
+struct riscv_gdbarch_features riscv_linux_read_features (int tid);
 
 #endif /* NAT_RISCV_LINUX_TDESC_H */

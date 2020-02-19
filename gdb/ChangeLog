@@ -1,3 +1,30 @@
+2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arch/riscv.c (struct riscv_gdbarch_features_hasher): Only define
+	if GDBSERVER is not defined.
+	(riscv_tdesc_cache): Likewise, also store const target_desc.
+	(STATIC_IN_GDB): Define.
+	(riscv_create_target_description): Update declaration with
+	STATIC_IN_GDB.
+	(riscv_lookup_target_description): New function, only define if
+	GDBSERVER is not defined.
+	* arch/riscv.h (riscv_create_target_description): Declare only
+	when GDBSERVER is defined.
+	(riscv_lookup_target_description): New declaration when GDBSERVER
+	is not defined.
+	* nat/riscv-linux-tdesc.c (riscv_linux_read_description): Rename to...
+	(riscv_linux_read_features): ...this, and return
+	riscv_gdbarch_features instead of target_desc.
+	* nat/riscv-linux-tdesc.h: Include 'arch/riscv.h'.
+	(riscv_linux_read_description): Rename to...
+	(riscv_linux_read_features): ...this.
+	* riscv-linux-nat.c (riscv_linux_nat_target::read_description):
+	Update to use riscv_gdbarch_features and
+	riscv_lookup_target_description.
+	* riscv-tdep.c (riscv_find_default_target_description): Use
+	riscv_lookup_target_description instead of
+	riscv_create_target_description.
+
 2020-02-18  Simon Marchi  <simon.marchi@efficios.com>
 
 	* valprint.c (generic_val_print_enum_1): When printing a flag

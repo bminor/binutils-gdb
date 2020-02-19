@@ -2973,7 +2973,7 @@ riscv_find_default_target_description (const struct gdbarch_info info)
     features.xlen = 8;
 
   /* Now build a target description based on the feature set.  */
-  return riscv_create_target_description (features);
+  return riscv_lookup_target_description (features);
 }
 
 /* All of the registers in REG_SET are checked for in FEATURE, TDESC_DATA

@@ -31,10 +31,10 @@
 # define NFPREG 33
 #endif
 
-/* Determine XLEN and FLEN and return a corresponding target description.  */
+/* See nat/riscv-linux-tdesc.h.  */
 
-const struct target_desc *
-riscv_linux_read_description (int tid)
+struct riscv_gdbarch_features
+riscv_linux_read_features (int tid)
 {
   struct riscv_gdbarch_features features;
   elf_fpregset_t regs;
@@ -79,5 +79,5 @@ riscv_linux_read_description (int tid)
       break;
     }
 
-  return riscv_create_target_description (features);
+  return features;
 }
