@@ -1,3 +1,7 @@
+2020-02-19  Maciej W. Rozycki  <macro@wdc.com>
+
+	* NEWS: Mention RISC-V GNU/Linux GDBserver support.
+
 2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arch/riscv.c (struct riscv_gdbarch_features_hasher): Only define

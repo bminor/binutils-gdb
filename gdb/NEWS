@@ -3,6 +3,10 @@
 
 *** Changes since GDB 9
 
+* New features in the GDB remote stub, GDBserver
+
+  ** GDBserver is now supported on RISC-V GNU/Linux.
+
 * Debugging MS-Windows processes now sets $_exitsignal when the
   inferior is terminated by a signal, instead of setting $_exitcode.
 
@@ -25,6 +29,10 @@ show exec-file-mismatch -- Show exec-file-mismatch handling (ask|warn|off).
   If 'ask', the default, display a warning and ask the user
   whether to load the process executable file; if 'warn', just display
   a warning; if 'off', don't attempt to detect a mismatch.
+
+* New targets
+
+GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*
 
 *** Changes in GDB 9
 

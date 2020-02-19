@@ -1,3 +1,13 @@
+2020-02-19  Maciej W. Rozycki  <macro@wdc.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* linux-riscv-low.cc: New file.
+	* Makefile.in (SFILES): Add linux-riscv-low.cc, arch/riscv.c,
+	and nat/riscv-linux-tdesc.c.
+	* configure.srv <riscv*-*-linux*> (srv_tgtobj)
+	(srv_linux_regsets, srv_linux_usrregs, srv_linux_thread_db):
+	Define.
+
 2020-02-14  Tom Tromey  <tom@tromey.com>
 
 	* acinclude.m4: Don't include acx_configure_dir.m4.
