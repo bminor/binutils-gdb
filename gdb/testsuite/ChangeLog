@@ -1,5 +1,11 @@
 2020-02-19  Tom de Vries  <tdevries@suse.de>
 
+	* lib/cache.exp (ignore_pass, gdb_do_cache_wrap): New proc.
+	(gdb_do_cache): Use gdb_do_cache_wrap.
+	* gdb.base/gdb-caching-proc.exp (test_proc): Use gdb_do_cache_wrap.
+
+2020-02-19  Tom de Vries  <tdevries@suse.de>
+
 	* lib/dtrace.exp (dtrace_build_usdt_test_program): Use quiet as
 	gdb_compile option.
 

@@ -17,6 +17,35 @@
 # The in-memory cache.
 array set gdb_data_cache {}
 
+# Print pass message msg into gdb.log
+proc ignore_pass { msg } {
+    verbose -log "gdb_do_cache_wrap ignoring pass: $msg"
+}
+
+# Call proc real_name and return the result, while ignoring calls to pass.
+proc gdb_do_cache_wrap {real_name} {
+    if { [info procs save_pass] != "" } {
+	return [uplevel 2 $real_name]
+    }
+
+    rename pass save_pass
+    rename ignore_pass pass
+
+    set code [catch {uplevel 2 $real_name} result]
+
+    rename pass ignore_pass
+    rename save_pass pass
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code error -errorinfo $errorInfo -errorcode $errorCode $result
+    } elseif {$code > 1} {
+	return -code $code $result
+    }
+
+    return $result
+}
+
 # A helper for gdb_caching_proc that handles the caching.
 
 proc gdb_do_cache {name} {
@@ -46,7 +75,7 @@ proc gdb_do_cache {name} {
     }
 
     set real_name gdb_real__$name
-    set gdb_data_cache($cache_name) [uplevel 1 $real_name]
+    set gdb_data_cache($cache_name) [gdb_do_cache_wrap $real_name]
 
     if {[info exists GDB_PARALLEL]} {
 	verbose "$name: returning '$gdb_data_cache($cache_name)' and writing file" 2
