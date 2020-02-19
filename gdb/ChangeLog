@@ -1,3 +1,8 @@
+2020-02-19  Tom Tromey  <tromey@adacore.com>
+
+	* python/python.c (do_start_initialization): Use XNEWVEC.  Remove
+	NULL check.
+
 2020-02-19  Maciej W. Rozycki  <macro@wdc.com>
 
 	* NEWS: Mention RISC-V GNU/Linux GDBserver support.

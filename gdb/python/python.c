@@ -1679,12 +1679,7 @@ do_start_initialization ()
   std::string oldloc = setlocale (LC_ALL, NULL);
   setlocale (LC_ALL, "");
   progsize = strlen (progname.get ());
-  progname_copy = (wchar_t *) xmalloc ((progsize + 1) * sizeof (wchar_t));
-  if (!progname_copy)
-    {
-      fprintf (stderr, "out of memory\n");
-      return false;
-    }
+  progname_copy = XNEWVEC (wchar_t, progsize + 1);
   count = mbstowcs (progname_copy, progname.get (), progsize + 1);
   if (count == (size_t) -1)
     {
