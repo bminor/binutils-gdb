@@ -1,3 +1,9 @@
+2020-02-28  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2020-02-19  Alan Modra  <amodra@gmail.com>
+	* testsuite/ld-plugin/pr25355.d: Allow alpha-linux nm result.
+
 2020-02-22  Alan Modra  <amodra@gmail.com>
 
 	PR 25585
