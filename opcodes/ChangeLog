@@ -1,3 +1,8 @@
+2020-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-opc.c (riscv_opcodes): Convert add/addi to the compressed
+	c.mv/c.li if rs1 is zero.
+
 2020-02-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Replace CpuABM with

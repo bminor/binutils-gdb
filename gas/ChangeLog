@@ -1,3 +1,8 @@
+2020-02-19  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/gas/riscv/c-add-addi.d: New testcase.
+	* testsuite/gas/riscv/c-add-addi.s: Likewise.
+
 2020-02-19  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25576
