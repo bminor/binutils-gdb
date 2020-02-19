@@ -1,3 +1,7 @@
+2020-02-19  Jordan Rupprecht  <rupprecht@google.com>
+
+	* objdump.c (show_line): call bfd_demangle when using do_demangle.
+
 2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* configure: Regenerate.

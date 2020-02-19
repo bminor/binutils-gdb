@@ -1734,8 +1734,22 @@ show_line (bfd *abfd, asection *section, bfd_vma addr_offset)
 	  && (prev_functionname == NULL
 	      || strcmp (functionname, prev_functionname) != 0))
 	{
-	  printf ("%s():\n", sanitize_string (functionname));
+	  char *demangle_alloc = NULL;
+	  if (do_demangle && functionname[0] != '\0')
+	    {
+	      /* Demangle the name.  */
+	      demangle_alloc = bfd_demangle (abfd, functionname,
+	                                          demangle_flags);
+	    }
+
+	  /* Demangling adds trailing parens, so don't print those.  */
+	  if (demangle_alloc != NULL)
+	    printf ("%s:\n", sanitize_string (demangle_alloc));
+	  else
+	    printf ("%s():\n", sanitize_string (functionname));
+
 	  prev_line = -1;
+	  free (demangle_alloc);
 	}
       if (linenumber > 0
 	  && (linenumber != prev_line
