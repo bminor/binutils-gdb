@@ -4710,7 +4710,6 @@ cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
   struct ada_symbol_cache *sym_cache
     = ada_get_symbol_cache (current_program_space);
   int h;
-  char *copy;
   struct cache_entry *e;
 
   /* Symbols for builtin types don't have a block.
@@ -4733,9 +4732,7 @@ cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
   e = XOBNEW (&sym_cache->cache_space, cache_entry);
   e->next = sym_cache->root[h];
   sym_cache->root[h] = e;
-  e->name = copy
-    = (char *) obstack_alloc (&sym_cache->cache_space, strlen (name) + 1);
-  strcpy (copy, name);
+  e->name = obstack_strdup (&sym_cache->cache_space, name);
   e->sym = sym;
   e->domain = domain;
   e->block = block;

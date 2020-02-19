@@ -1,3 +1,7 @@
+2020-02-19  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (cache_symbol): Use obstack_strdup.
+
 2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* configure: Regenerate.
