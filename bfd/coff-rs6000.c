@@ -323,7 +323,7 @@ bfd_boolean
 _bfd_xcoff_mkobject (bfd *abfd)
 {
   coff_data_type *coff;
-  bfd_size_type amt = sizeof (struct xcoff_tdata);
+  size_t amt = sizeof (struct xcoff_tdata);
 
   abfd->tdata.xcoff_obj_data = (struct xcoff_tdata *) bfd_zalloc (abfd, amt);
   if (abfd->tdata.xcoff_obj_data == NULL)
@@ -1389,7 +1389,7 @@ _bfd_xcoff_archive_p (bfd *abfd)
 {
   struct artdata *tdata_hold;
   char magic[SXCOFFARMAG];
-  bfd_size_type amt = SXCOFFARMAG;
+  size_t amt = SXCOFFARMAG;
 
   if (bfd_bread (magic, amt, abfd) != amt)
     {

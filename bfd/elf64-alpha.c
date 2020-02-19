@@ -280,7 +280,7 @@ static struct bfd_link_hash_table *
 elf64_alpha_bfd_link_hash_table_create (bfd *abfd)
 {
   struct alpha_elf_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct alpha_elf_link_hash_table);
+  size_t amt = sizeof (struct alpha_elf_link_hash_table);
 
   ret = (struct alpha_elf_link_hash_table *) bfd_zmalloc (amt);
   if (ret == (struct alpha_elf_link_hash_table *) NULL)
@@ -1724,7 +1724,7 @@ get_got_entry (bfd *abfd, struct alpha_elf_link_hash_entry *h,
   if (!gotent)
     {
       int entry_size;
-      bfd_size_type amt;
+      size_t amt;
 
       amt = sizeof (struct alpha_elf_got_entry);
       gotent = (struct alpha_elf_got_entry *) bfd_alloc (abfd, amt);
@@ -1787,7 +1787,6 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
   Elf_Internal_Shdr *symtab_hdr;
   struct alpha_elf_link_hash_entry **sym_hashes;
   const Elf_Internal_Rela *rel, *relend;
-  bfd_size_type amt;
 
   if (bfd_link_relocatable (info))
     return TRUE;
@@ -1990,7 +1989,7 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	      if (!rent)
 		{
-		  amt = sizeof (struct alpha_elf_reloc_entry);
+		  size_t amt = sizeof (struct alpha_elf_reloc_entry);
 		  rent = (struct alpha_elf_reloc_entry *) bfd_alloc (abfd, amt);
 		  if (!rent)
 		    return FALSE;

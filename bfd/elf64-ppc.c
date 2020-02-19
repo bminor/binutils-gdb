@@ -2000,7 +2000,7 @@ ppc64_elf_new_section_hook (bfd *abfd, asection *sec)
   if (!sec->used_by_bfd)
     {
       struct _ppc64_elf_section_data *sdata;
-      bfd_size_type amt = sizeof (*sdata);
+      size_t amt = sizeof (*sdata);
 
       sdata = bfd_zalloc (abfd, amt);
       if (sdata == NULL)
@@ -3435,7 +3435,7 @@ static struct bfd_link_hash_table *
 ppc64_elf_link_hash_table_create (bfd *abfd)
 {
   struct ppc_link_hash_table *htab;
-  bfd_size_type amt = sizeof (struct ppc_link_hash_table);
+  size_t amt = sizeof (struct ppc_link_hash_table);
 
   htab = bfd_zmalloc (amt);
   if (htab == NULL)
@@ -4431,7 +4431,7 @@ update_local_sym_info (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 	  break;
       if (ent == NULL)
 	{
-	  bfd_size_type amt = sizeof (*ent);
+	  size_t amt = sizeof (*ent);
 	  ent = bfd_alloc (abfd, amt);
 	  if (ent == NULL)
 	    return FALSE;
@@ -4463,7 +4463,7 @@ update_plt_info (bfd *abfd, struct plt_entry **plist, bfd_vma addend)
       break;
   if (ent == NULL)
     {
-      bfd_size_type amt = sizeof (*ent);
+      size_t amt = sizeof (*ent);
       ent = bfd_alloc (abfd, amt);
       if (ent == NULL)
 	return FALSE;
@@ -4741,7 +4741,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  break;
 	      if (ent == NULL)
 		{
-		  bfd_size_type amt = sizeof (*ent);
+		  size_t amt = sizeof (*ent);
 		  ent = bfd_alloc (abfd, amt);
 		  if (ent == NULL)
 		    return FALSE;
@@ -12216,7 +12216,7 @@ int
 ppc64_elf_setup_section_lists (struct bfd_link_info *info)
 {
   unsigned int id;
-  bfd_size_type amt;
+  size_t amt;
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
   if (htab == NULL)

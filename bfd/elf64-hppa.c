@@ -289,7 +289,7 @@ static struct bfd_link_hash_table*
 elf64_hppa_hash_table_create (bfd *abfd)
 {
   struct elf64_hppa_link_hash_table *htab;
-  bfd_size_type amt = sizeof (*htab);
+  size_t amt = sizeof (*htab);
 
   htab = bfd_zmalloc (amt);
   if (htab == NULL)

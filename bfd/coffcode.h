@@ -1109,7 +1109,7 @@ handle_COMDAT (bfd * abfd,
 		 drop through from the above).  */
 	      {
 		char *newname;
-		bfd_size_type amt;
+		size_t amt;
 
 		/* This must the second symbol with the
 		   section #.  It is the actual symbol name.
@@ -1752,7 +1752,7 @@ static bfd_boolean
 coff_new_section_hook (bfd * abfd, asection * section)
 {
   combined_entry_type *native;
-  bfd_size_type amt;
+  size_t amt;
   unsigned char sclass = C_STAT;
 
   section->alignment_power = COFF_DEFAULT_SECTION_ALIGNMENT_POWER;
@@ -1843,7 +1843,7 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
 			 void * scnhdr)
 {
   struct internal_scnhdr *hdr = (struct internal_scnhdr *) scnhdr;
-  bfd_size_type amt;
+  size_t amt;
   unsigned int alignment_power_const
     = hdr->s_flags & IMAGE_SCN_ALIGN_POWER_BIT_MASK;
 
@@ -1972,7 +1972,7 @@ static bfd_boolean
 coff_mkobject (bfd * abfd)
 {
   coff_data_type *coff;
-  bfd_size_type amt = sizeof (coff_data_type);
+  size_t amt = sizeof (coff_data_type);
 
   abfd->tdata.coff_obj_data = bfd_zalloc (abfd, amt);
   if (abfd->tdata.coff_obj_data == NULL)
@@ -3088,7 +3088,7 @@ coff_compute_section_file_positions (bfd * abfd)
 	 page size too, and remember both sizes.  */
       if (coff_section_data (abfd, current) == NULL)
 	{
-	  bfd_size_type amt = sizeof (struct coff_section_tdata);
+	  size_t amt = sizeof (struct coff_section_tdata);
 
 	  current->used_by_bfd = bfd_zalloc (abfd, amt);
 	  if (current->used_by_bfd == NULL)
@@ -3096,7 +3096,7 @@ coff_compute_section_file_positions (bfd * abfd)
 	}
       if (pei_section_data (abfd, current) == NULL)
 	{
-	  bfd_size_type amt = sizeof (struct pei_section_tdata);
+	  size_t amt = sizeof (struct pei_section_tdata);
 
 	  coff_section_data (abfd, current)->tdata = bfd_zalloc (abfd, amt);
 	  if (coff_section_data (abfd, current)->tdata == NULL)

@@ -3684,7 +3684,7 @@ nds32_elf_link_hash_table_create (bfd *abfd)
 {
   struct elf_nds32_link_hash_table *ret;
 
-  bfd_size_type amt = sizeof (struct elf_nds32_link_hash_table);
+  size_t amt = sizeof (struct elf_nds32_link_hash_table);
 
   ret = (struct elf_nds32_link_hash_table *) bfd_zmalloc (amt);
   if (ret == NULL)
@@ -7442,7 +7442,7 @@ nds32_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      p = *head;
 	      if (p == NULL || p->sec != sec)
 		{
-		  bfd_size_type amt = sizeof (*p);
+		  size_t amt = sizeof (*p);
 		  p = (struct elf_dyn_relocs *) bfd_alloc (dynobj, amt);
 		  if (p == NULL)
 		    return FALSE;

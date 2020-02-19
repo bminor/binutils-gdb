@@ -2169,7 +2169,7 @@ bfd_record_phdr (bfd *abfd,
 		 asection **secs)
 {
   struct elf_segment_map *m, **pm;
-  bfd_size_type amt;
+  size_t amt;
 
   if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
     return TRUE;

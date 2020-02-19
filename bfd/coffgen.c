@@ -2025,7 +2025,7 @@ coff_get_reloc_upper_bound (bfd *abfd, sec_ptr asect)
 asymbol *
 coff_make_empty_symbol (bfd *abfd)
 {
-  bfd_size_type amt = sizeof (coff_symbol_type);
+  size_t amt = sizeof (coff_symbol_type);
   coff_symbol_type *new_symbol = (coff_symbol_type *) bfd_zalloc (abfd, amt);
 
   if (new_symbol == NULL)
@@ -2046,7 +2046,7 @@ coff_bfd_make_debug_symbol (bfd *abfd,
 			    void * ptr ATTRIBUTE_UNUSED,
 			    unsigned long sz ATTRIBUTE_UNUSED)
 {
-  bfd_size_type amt = sizeof (coff_symbol_type);
+  size_t amt = sizeof (coff_symbol_type);
   coff_symbol_type *new_symbol = (coff_symbol_type *) bfd_alloc (abfd, amt);
 
   if (new_symbol == NULL)
@@ -2271,7 +2271,7 @@ coff_find_nearest_line_with_names (bfd *abfd,
   combined_entry_type *pend;
   alent *l;
   struct coff_section_tdata *sec_data;
-  bfd_size_type amt;
+  size_t amt;
 
   /* Before looking through the symbol table, try to use a .stab
      section to find the information.  */
@@ -2594,7 +2594,7 @@ bfd_coff_set_symbol_class (bfd *	 abfd,
 	 coff_write_alien_symbol().  */
 
       combined_entry_type * native;
-      bfd_size_type amt = sizeof (* native);
+      size_t amt = sizeof (* native);
 
       native = (combined_entry_type *) bfd_zalloc (abfd, amt);
       if (native == NULL)

@@ -553,7 +553,7 @@ tic30_aout_object_p (bfd *abfd)
   struct external_exec exec_bytes;	/* Raw exec header from file.  */
   struct internal_exec exec;		/* Cleaned-up exec header.  */
   const bfd_target *target;
-  bfd_size_type amt = EXEC_BYTES_SIZE;
+  size_t amt = EXEC_BYTES_SIZE;
 
   if (bfd_bread (& exec_bytes, amt, abfd) != amt)
     {

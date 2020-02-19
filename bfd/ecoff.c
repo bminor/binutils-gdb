@@ -87,7 +87,7 @@ static asection bfd_debug_section =
 bfd_boolean
 _bfd_ecoff_mkobject (bfd *abfd)
 {
-  bfd_size_type amt = sizeof (ecoff_data_type);
+  size_t amt = sizeof (ecoff_data_type);
 
   abfd->tdata.ecoff_obj_data = (struct ecoff_tdata *) bfd_zalloc (abfd, amt);
   if (abfd->tdata.ecoff_obj_data == NULL)
@@ -650,7 +650,7 @@ asymbol *
 _bfd_ecoff_make_empty_symbol (bfd *abfd)
 {
   ecoff_symbol_type *new_symbol;
-  bfd_size_type amt = sizeof (ecoff_symbol_type);
+  size_t amt = sizeof (ecoff_symbol_type);
 
   new_symbol = (ecoff_symbol_type *) bfd_zalloc (abfd, amt);
   if (new_symbol == NULL)
@@ -1762,7 +1762,7 @@ _bfd_ecoff_find_nearest_line (bfd *abfd,
 
   if (ecoff_data (abfd)->find_line_info == NULL)
     {
-      bfd_size_type amt = sizeof (struct ecoff_find_line);
+      size_t amt = sizeof (struct ecoff_find_line);
 
       ecoff_data (abfd)->find_line_info =
 	  (struct ecoff_find_line *) bfd_zalloc (abfd, amt);
@@ -3230,7 +3230,7 @@ struct bfd_link_hash_table *
 _bfd_ecoff_bfd_link_hash_table_create (bfd *abfd)
 {
   struct ecoff_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct ecoff_link_hash_table);
+  size_t amt = sizeof (struct ecoff_link_hash_table);
 
   ret = (struct ecoff_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)

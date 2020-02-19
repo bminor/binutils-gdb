@@ -60,7 +60,7 @@ netbsd_core_file_p (bfd *abfd)
   asection *asect;
   struct core core;
   struct coreseg coreseg;
-  bfd_size_type amt = sizeof core;
+  size_t amt = sizeof core;
 
   val = bfd_bread (&core, amt, abfd);
   if (val != sizeof core)

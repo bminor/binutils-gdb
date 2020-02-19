@@ -4551,7 +4551,7 @@ make_mapping (bfd *abfd,
   struct elf_segment_map *m;
   unsigned int i;
   asection **hdrpp;
-  bfd_size_type amt;
+  size_t amt;
 
   amt = sizeof (struct elf_segment_map) - sizeof (asection *);
   amt += (to - from) * sizeof (asection *);
@@ -7485,7 +7485,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
     {
       asection *section;
       unsigned int section_count;
-      bfd_size_type amt;
+      size_t amt;
       Elf_Internal_Shdr *this_hdr;
       asection *first_section = NULL;
       asection *lowest_section;
@@ -7507,7 +7507,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       /* Allocate a segment map big enough to contain
 	 all of the sections we have selected.  */
       amt = sizeof (struct elf_segment_map) - sizeof (asection *);
-      amt += (bfd_size_type) section_count * sizeof (asection *);
+      amt += section_count * sizeof (asection *);
       map = (struct elf_segment_map *) bfd_zalloc (obfd, amt);
       if (map == NULL)
 	return FALSE;

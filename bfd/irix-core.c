@@ -172,7 +172,7 @@ irix_core_core_file_p (bfd *abfd)
   int val;
   struct coreout coreout;
   struct idesc *idg, *idf, *ids;
-  bfd_size_type amt;
+  size_t amt;
 
   val = bfd_bread (&coreout, (bfd_size_type) sizeof coreout, abfd);
   if (val != sizeof coreout)

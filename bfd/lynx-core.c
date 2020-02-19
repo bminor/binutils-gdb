@@ -94,7 +94,7 @@ lynx_core_file_p (bfd *abfd)
   core_st_t *threadp;
   int pagesize;
   asection *newsect;
-  bfd_size_type amt;
+  size_t amt;
 
   pagesize = getpagesize ();	/* Serious cross-target issue here...  This
 				   really needs to come from a system-specific

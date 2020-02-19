@@ -2656,7 +2656,7 @@ _bfd_vms_slurp_object_records (bfd * abfd)
 static bfd_boolean
 vms_initialize (bfd * abfd)
 {
-  bfd_size_type amt;
+  size_t amt;
 
   amt = sizeof (struct vms_private_data_struct);
   abfd->tdata.any = bfd_zalloc (abfd, amt);
@@ -8457,7 +8457,7 @@ static struct bfd_link_hash_table *
 alpha_vms_bfd_link_hash_table_create (bfd *abfd)
 {
   struct alpha_vms_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct alpha_vms_link_hash_table);
+  size_t amt = sizeof (struct alpha_vms_link_hash_table);
 
   ret = (struct alpha_vms_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
@@ -9424,7 +9424,7 @@ vms_close_and_cleanup (bfd * abfd)
 static bfd_boolean
 vms_new_section_hook (bfd * abfd, asection *section)
 {
-  bfd_size_type amt;
+  size_t amt;
 
   vms_debug2 ((1, "vms_new_section_hook (%p, [%u]%s)\n",
 	       abfd, section->index, section->name));

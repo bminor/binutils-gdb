@@ -688,7 +688,7 @@ wasm_canonicalize_symtab (bfd *abfd, asymbol **alocation)
 static asymbol *
 wasm_make_empty_symbol (bfd *abfd)
 {
-  bfd_size_type amt = sizeof (asymbol);
+  size_t amt = sizeof (asymbol);
   asymbol *new_symbol = (asymbol *) bfd_zalloc (abfd, amt);
 
   if (! new_symbol)

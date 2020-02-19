@@ -2228,7 +2228,7 @@ nios2_elf32_setup_section_lists (bfd *output_bfd, struct bfd_link_info *info)
   unsigned int top_id, top_index;
   asection *section;
   asection **input_list, **list;
-  bfd_size_type amt;
+  size_t amt;
   struct elf32_nios2_link_hash_table *htab = elf32_nios2_hash_table (info);
 
   /* Count the number of input BFDs and find the top input section id.  */
@@ -2560,7 +2560,7 @@ get_local_syms (bfd *output_bfd ATTRIBUTE_UNUSED, bfd *input_bfd,
   /* We want to read in symbol extension records only once.  To do this
      we need to read in the local symbols in parallel and save them for
      later use; so hold pointers to the local symbols in an array.  */
-  bfd_size_type amt = sizeof (Elf_Internal_Sym *) * htab->bfd_count;
+  size_t amt = sizeof (Elf_Internal_Sym *) * htab->bfd_count;
   all_local_syms = bfd_zmalloc (amt);
   htab->all_local_syms = all_local_syms;
   if (all_local_syms == NULL)
@@ -4943,7 +4943,7 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      p = *head;
 	      if (p == NULL || p->sec != sec)
 		{
-		  bfd_size_type amt = sizeof *p;
+		  size_t amt = sizeof *p;
 		  p = ((struct elf_dyn_relocs *)
 		       bfd_alloc (htab->root.dynobj, amt));
 		  if (p == NULL)
@@ -5961,7 +5961,7 @@ static struct bfd_link_hash_table *
 nios2_elf32_link_hash_table_create (bfd *abfd)
 {
   struct elf32_nios2_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct elf32_nios2_link_hash_table);
+  size_t amt = sizeof (struct elf32_nios2_link_hash_table);
 
   ret = bfd_zmalloc (amt);
   if (ret == NULL)

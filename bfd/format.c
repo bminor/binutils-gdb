@@ -236,7 +236,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 
   if (matching != NULL || *bfd_associated_vector != NULL)
     {
-      bfd_size_type amt;
+      size_t amt;
 
       amt = sizeof (*matching_vector) * 2 * _bfd_target_vector_entries;
       matching_vector = (const bfd_target **) bfd_malloc (amt);

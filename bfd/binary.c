@@ -151,7 +151,7 @@ binary_canonicalize_symtab (bfd *abfd, asymbol **alocation)
   asection *sec = (asection *) abfd->tdata.any;
   asymbol *syms;
   unsigned int i;
-  bfd_size_type amt = BIN_SYMS * sizeof (asymbol);
+  size_t amt = BIN_SYMS * sizeof (asymbol);
 
   syms = (asymbol *) bfd_alloc (abfd, amt);
   if (syms == NULL)

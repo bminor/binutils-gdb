@@ -109,7 +109,7 @@ struct bfd_link_hash_table *
 _bfd_coff_link_hash_table_create (bfd *abfd)
 {
   struct coff_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct coff_link_hash_table);
+  size_t amt = sizeof (struct coff_link_hash_table);
 
   ret = (struct coff_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
@@ -1647,7 +1647,7 @@ _bfd_coff_link_input_bfd (struct coff_final_link_info *flaginfo, bfd *input_bfd)
 	  struct coff_debug_merge_element **epp;
 	  bfd_byte *esl, *eslend;
 	  struct internal_syment *islp;
-	  bfd_size_type amt;
+	  size_t amt;
 
 	  name = _bfd_coff_internal_syment_name (input_bfd, &isym, buf);
 	  if (name == NULL)

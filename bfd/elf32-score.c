@@ -1410,7 +1410,7 @@ score_elf_create_got_section (bfd *abfd,
   struct elf_link_hash_entry *h;
   struct bfd_link_hash_entry *bh;
   struct score_got_info *g;
-  bfd_size_type amt;
+  size_t amt;
 
   /* This function may be called more than once.  */
   s = score_elf_got_section (abfd, TRUE);
@@ -4057,7 +4057,7 @@ static bfd_boolean
 s3_elf32_score_new_section_hook (bfd *abfd, asection *sec)
 {
   struct _score_elf_section_data *sdata;
-  bfd_size_type amt = sizeof (*sdata);
+  size_t amt = sizeof (*sdata);
 
   sdata = bfd_zalloc (abfd, amt);
   if (sdata == NULL)
@@ -4359,7 +4359,7 @@ static struct bfd_link_hash_table *
 elf32_score_link_hash_table_create (bfd *abfd)
 {
   struct elf_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct elf_link_hash_table);
+  size_t amt = sizeof (struct elf_link_hash_table);
 
   ret = (struct elf_link_hash_table *) bfd_zmalloc (amt);
   if (ret == NULL)

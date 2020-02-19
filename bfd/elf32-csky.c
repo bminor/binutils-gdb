@@ -1500,7 +1500,7 @@ static struct bfd_link_hash_table *
 csky_elf_link_hash_table_create (bfd *abfd)
 {
   struct csky_elf_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct csky_elf_link_hash_table);
+  size_t amt = sizeof (struct csky_elf_link_hash_table);
 
   ret = (struct csky_elf_link_hash_table*) bfd_zmalloc (amt);
   if (ret == NULL)
@@ -2712,7 +2712,7 @@ csky_elf_check_relocs (bfd * abfd,
 	      p = *head;
 	      if (p == NULL || p->sec != sec)
 		{
-		  bfd_size_type amt = sizeof *p;
+		  size_t amt = sizeof *p;
 		  p = ((struct elf_dyn_relocs *)
 		       bfd_alloc (htab->elf.dynobj, amt));
 		  if (p == NULL)
@@ -3770,7 +3770,7 @@ elf32_csky_setup_section_lists (bfd *output_bfd,
   unsigned int top_id, top_index;
   asection *section;
   asection **input_list, **list;
-  bfd_size_type amt;
+  size_t amt;
   struct csky_elf_link_hash_table *htab = csky_elf_hash_table (info);
 
   if (!htab)

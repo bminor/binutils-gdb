@@ -71,7 +71,7 @@ static struct user *
 read_uarea (bfd *abfd, int filepos)
 {
   struct sco5_core_struct *rawptr;
-  bfd_size_type amt = sizeof (struct sco5_core_struct);
+  size_t amt = sizeof (struct sco5_core_struct);
 
   rawptr = (struct sco5_core_struct *) bfd_zmalloc (amt);
   if (rawptr == NULL)

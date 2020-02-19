@@ -686,7 +686,7 @@ elf_xtensa_link_hash_table_create (bfd *abfd)
 {
   struct elf_link_hash_entry *tlsbase;
   struct elf_xtensa_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct elf_xtensa_link_hash_table);
+  size_t amt = sizeof (struct elf_xtensa_link_hash_table);
 
   ret = bfd_zmalloc (amt);
   if (ret == NULL)
@@ -6039,7 +6039,7 @@ elf_xtensa_new_section_hook (bfd *abfd, asection *sec)
   if (!sec->used_by_bfd)
     {
       struct elf_xtensa_section_data *sdata;
-      bfd_size_type amt = sizeof (*sdata);
+      size_t amt = sizeof (*sdata);
 
       sdata = bfd_zalloc (abfd, amt);
       if (sdata == NULL)

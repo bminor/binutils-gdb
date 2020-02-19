@@ -2000,7 +2000,7 @@ xcoff64_archive_p (bfd *abfd)
   char magic[SXCOFFARMAG];
   /* This is the new format.  */
   struct xcoff_ar_file_hdr_big hdr;
-  bfd_size_type amt = SXCOFFARMAG;
+  size_t amt = SXCOFFARMAG;
 
   if (bfd_bread (magic, amt, abfd) != amt)
     {

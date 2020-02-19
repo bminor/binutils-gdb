@@ -1,5 +1,172 @@
 2020-02-19  Alan Modra  <amodra@gmail.com>
 
+	* aix386-core.c (aix386_core_file_p): Use size_t for "amt".
+	* aout-target.h (object_p): Likewise.
+	* aout-tic30.c (tic30_aout_object_p): Likewise.
+	* aoutx.h (some_aout_object_p, mkobject, make_empty_symbol),
+	(emit_stringtab, write_syms, link_hash_table_create),
+	(aout_link_write_other_symbol): Likewise.
+	* archive.c (_bfd_generic_mkarchive, bfd_generic_archive_p),
+	(bfd_ar_hdr_from_filesystem, _bfd_write_archive_contents),
+	(_bfd_compute_and_write_armap): Likewise.
+	* archures.c (bfd_arch_list): Likewise.
+	* bfd.c (bfd_record_phdr): Likewise.
+	* binary.c (binary_canonicalize_symtab): Likewise.
+	* cisco-core.c (cisco_core_file_validate): Likewise.
+	* coff-arm.c (coff_arm_link_hash_table_create, find_thumb_glue),
+	(find_arm_glue, record_arm_to_thumb_glue),
+	(record_thumb_to_arm_glue): Likewise.
+	* coff-ppc.c (ppc_coff_link_hash_table_create, record_toc),
+	(ppc_allocate_toc_section): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_mkobject, _bfd_xcoff_archive_p): Likewise.
+	* coff-sh.c (sh_relax_section): Likewise.
+	* coff64-rs6000.c (xcoff64_archive_p): Likewise.
+	* coffcode.h (handle_COMDAT, coff_new_section_hook),
+	(coff_set_alignment_hook, coff_mkobject),
+	(coff_compute_section_file_positions): Likewise.
+	* coffgen.c (coff_make_empty_symbol, coff_bfd_make_debug_symbol),
+	(coff_find_nearest_line_with_names),
+	( bfd_coff_set_symbol_class): Likewise.
+	* cofflink.c (_bfd_coff_link_hash_table_create),
+	(_bfd_coff_link_input_bfd): Likewise.
+	* dwarf1.c (alloc_dwarf1_unit, alloc_dwarf1_func): Likewise.
+	* dwarf2.c (read_abbrevs, read_attribute_value, add_line_info),
+	(build_line_info_table, sort_line_sequences),
+	(line_info_add_include_dir, line_info_add_file_name),
+	(decode_line_info, scan_unit_for_symbols, parse_comp_unit),
+	(place_sections, _bfd_dwarf2_slurp_debug_info): Likewise.
+	* ecoff.c (_bfd_ecoff_mkobject, _bfd_ecoff_make_empty_symbol),
+	(_bfd_ecoff_find_nearest_line),
+	(_bfd_ecoff_bfd_link_hash_table_create): Likewise.
+	* ecofflink.c (bfd_ecoff_debug_init): Likewise.
+	* elf-hppa.h (_bfd_elf_hppa_gen_reloc_type): Likewise.
+	* elf-m10300.c (mn10300_elf_relax_section),
+	(elf32_mn10300_link_hash_table_create): Likewise.
+	* elf-strtab.c (_bfd_elf_strtab_init): Likewise.
+	* elf.c (make_mapping, copy_elf_program_header): Likewise.
+	* elf32-arm.c (elf32_arm_link_hash_table_create),
+	(elf32_arm_setup_section_lists, elf32_arm_check_relocs),
+	(elf32_arm_new_section_hook): Likewise.
+	* elf32-avr.c (elf_avr_new_section_hook),
+	(elf32_avr_link_hash_table_create, get_local_syms),
+	(elf32_avr_setup_section_lists): Likewise.
+	* elf32-bfin.c (bfinfdpic_elf_link_hash_table_create),
+	(bfin_link_hash_table_create): Likewise.
+	* elf32-cr16.c (elf32_cr16_link_hash_table_create): Likewise.
+	* elf32-cris.c (elf_cris_link_hash_table_create): Likewise.
+	* elf32-csky.c (csky_elf_link_hash_table_create),
+	(csky_elf_check_relocs, elf32_csky_setup_section_lists): Likewise.
+	* elf32-frv.c (frvfdpic_elf_link_hash_table_create): Likewise.
+	* elf32-hppa.c (elf32_hppa_link_hash_table_create),
+	(elf32_hppa_setup_section_lists, get_local_syms): Likewise.
+	* elf32-i386.c (elf_i386_check_relocs): Likewise.
+	* elf32-lm32.c (lm32_elf_link_hash_table_create): Likewise.
+	* elf32-m32r.c (m32r_elf_link_hash_table_create),
+	(m32r_elf_check_relocs): Likewise.
+	* elf32-m68hc1x.c (m68hc11_elf_hash_table_create),
+	(elf32_m68hc11_setup_section_lists),
+	(elf32_m68hc11_size_stubs): Likewise.
+	* elf32-m68k.c (elf_m68k_link_hash_table_create): Likewise.
+	* elf32-metag.c (elf_metag_link_hash_table_create),
+	(elf_metag_setup_section_lists): Likewise.
+	* elf32-microblaze.c (microblaze_elf_link_hash_table_create),
+	(microblaze_elf_check_relocs): Likewise.
+	* elf32-nds32.c (nds32_elf_link_hash_table_create),
+	(nds32_elf_check_relocs): Likewise.
+	* elf32-nios2.c (nios2_elf32_setup_section_lists),
+	(get_local_syms, nios2_elf32_check_relocs),
+	(nios2_elf32_link_hash_table_create): Likewise.
+	* elf32-or1k.c (or1k_elf_link_hash_table_create),
+	(or1k_elf_check_relocs): Likewise.
+	* elf32-ppc.c (ppc_elf_modify_segment_map, update_plt_info): Likewise.
+	* elf32-pru.c (pru_elf32_link_hash_table_create): Likewise.
+	* elf32-s390.c (elf_s390_link_hash_table_create),
+	(elf_s390_check_relocs): Likewise.
+	* elf32-score.c (score_elf_create_got_section),
+	(s3_elf32_score_new_section_hook),
+	(elf32_score_link_hash_table_create): Likewise.
+	* elf32-score7.c (score_elf_create_got_section),
+	(s7_elf32_score_new_section_hook): Likewise.
+	* elf32-sh.c (sh_elf_link_hash_table_create),
+	(sh_elf_check_relocs): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_link_hash_table_create),
+	(elf32_tic6x_new_section_hook, elf32_tic6x_check_relocs): Likewise.
+	* elf32-tilepro.c (tilepro_elf_link_hash_table_create),
+	(tilepro_elf_check_relocs): Likewise.
+	* elf32-v850.c (remember_hi16s_reloc): Likewise.
+	* elf32-vax.c (elf_vax_link_hash_table_create): Likewise.
+	* elf32-xtensa.c (elf_xtensa_link_hash_table_create),
+	(elf_xtensa_new_section_hook): Likewise.
+	* elf64-alpha.c (elf64_alpha_bfd_link_hash_table_create),
+	(get_got_entry, elf64_alpha_check_relocs): Likewise.
+	* elf64-hppa.c (elf64_hppa_hash_table_create): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_object_p): Likewise.
+	* elf64-mmix.c (mmix_elf_new_section_hook): Likewise.
+	* elf64-ppc.c (ppc64_elf_new_section_hook),
+	(ppc64_elf_link_hash_table_create, update_local_sym_info),
+	(update_plt_info, ppc64_elf_check_relocs): Likewise.
+	* elf64-s390.c (elf_s390_link_hash_table_create),
+	(elf_s390_check_relocs): Likewise.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+	* elflink.c (bfd_elf_link_record_local_dynamic_symbol),
+	(_bfd_elf_link_find_version_dependencies, elf_link_add_object_symbols),
+	(elf_link_add_archive_symbols, compute_bucket_count),
+	(bfd_elf_size_dynsym_hash_dynstr, _bfd_elf_link_hash_table_create),
+	(bfd_elf_get_bfd_needed_list, elf_link_swap_symbols_out),
+	(bfd_elf_final_link): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_link_hash_table_create),
+	(elfNN_aarch64_setup_section_lists, elfNN_aarch64_check_relocs),
+	(elfNN_aarch64_new_section_hook): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_object_p): Likewise.
+	* elfnn-riscv.c (riscv_elf_link_hash_table_create),
+	(riscv_elf_check_relocs): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_new_section_hook),
+	(_bfd_mips_elf_add_symbol_hook, _bfd_mips_elf_check_relocs),
+	(_bfd_mips_elf_modify_segment_map, _bfd_mips_elf_set_section_contents),
+	(_bfd_mips_elf_link_hash_table_create): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_link_hash_table_create),
+	(_bfd_sparc_elf_check_relocs),
+	(_bfd_sparc_elf_new_section_hook): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_link_hash_table_create),
+	(tilegx_elf_check_relocs): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Likewise.
+	* format.c (bfd_check_format_matches): Likewise.
+	* hash.c (_bfd_stringtab_init): Likewise.
+	* ihex.c (ihex_scan): Likewise.
+	* irix-core.c (irix_core_core_file_p): Likewise.
+	* linker.c (bfd_wrapped_link_hash_lookup),
+	(_bfd_generic_link_hash_table_create),
+	(_bfd_generic_reloc_link_order): Likewise.
+	* lynx-core.c (lynx_core_file_p): Likewise.
+	* netbsd-core.c (netbsd_core_file_p): Likewise.
+	* osf-core.c (osf_core_core_file_p): Likewise.
+	* pdp11.c (some_aout_object_p, mkobject, make_empty_symbol),
+	(link_hash_table_create, aout_link_write_other_symbol): Likewise.
+	* peXXigen.c (_bfd_XX_bfd_copy_private_section_data): Likewise.
+	* peicode.h (pe_mkobject): Likewise.
+	* ppcboot.c (ppcboot_mkobject, ppcboot_canonicalize_symtab): Likewise.
+	* ptrace-core.c (ptrace_unix_core_file_p): Likewise.
+	* sco5-core.c (read_uarea): Likewise.
+	* som.c (hppa_som_gen_reloc_type, som_object_p, som_prep_headers),
+	(som_write_fixups, som_write_space_strings, som_write_symbol_strings),
+	(som_finish_writing, som_canonicalize_symtab, som_new_section_hook),
+	(som_bfd_copy_private_section_data, bfd_som_set_section_attributes),
+	(bfd_som_attach_aux_hdr, som_write_armap): Likewise.
+	* srec.c (srec_scan): Likewise.
+	* syms.c (_bfd_generic_make_empty_symbol): Likewise.
+	* targets.c (bfd_target_list): Likewise.
+	* tekhex.c (first_phase, tekhex_sizeof_headers): Likewise.
+	* trad-core.c (trad_unix_core_file_p): Likewise.
+	* vms-alpha.c (vms_initialize, alpha_vms_bfd_link_hash_table_create),
+	(vms_new_section_hook): Likewise.
+	* wasm-module.c (wasm_make_empty_symbol): Likewise.
+	* xcofflink.c (xcoff_get_section_contents),
+	(_bfd_xcoff_bfd_link_hash_table_create, xcoff_set_import_path),
+	(xcoff_find_function, bfd_xcoff_link_record_set, xcoff_build_ldsym),
+	(bfd_xcoff_size_dynamic_sections, xcoff_link_input_bfd): Likewise.
+
+2020-02-19  Alan Modra  <amodra@gmail.com>
+
 	* elfxx-riscv.c (riscv_multi_letter_ext_valid_p): Don't use C99.
 
 2020-02-13  H.J. Lu  <hongjiu.lu@intel.com>

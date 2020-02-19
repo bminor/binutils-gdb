@@ -77,7 +77,7 @@ struct m68hc11_elf_link_hash_table*
 m68hc11_elf_hash_table_create (bfd *abfd)
 {
   struct m68hc11_elf_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct m68hc11_elf_link_hash_table);
+  size_t amt = sizeof (struct m68hc11_elf_link_hash_table);
 
   ret = (struct m68hc11_elf_link_hash_table *) bfd_zmalloc (amt);
   if (ret == (struct m68hc11_elf_link_hash_table *) NULL)
@@ -241,7 +241,7 @@ elf32_m68hc11_setup_section_lists (bfd *output_bfd, struct bfd_link_info *info)
   unsigned int top_id, top_index;
   asection *section;
   asection **input_list, **list;
-  bfd_size_type amt;
+  size_t amt;
   asection *text_section;
   struct m68hc11_elf_link_hash_table *htab;
 
@@ -334,7 +334,7 @@ elf32_m68hc11_size_stubs (bfd *output_bfd, bfd *stub_bfd,
   asection *section;
   Elf_Internal_Sym *local_syms, **all_local_syms;
   unsigned int bfd_indx, bfd_count;
-  bfd_size_type amt;
+  size_t amt;
   asection *stub_sec;
   struct m68hc11_elf_link_hash_table *htab = m68hc11_elf_hash_table (info);
 

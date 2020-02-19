@@ -924,7 +924,7 @@ static struct bfd_link_hash_table *
 coff_arm_link_hash_table_create (bfd * abfd)
 {
   struct coff_arm_link_hash_table * ret;
-  bfd_size_type amt = sizeof (struct coff_arm_link_hash_table);
+  size_t amt = sizeof (struct coff_arm_link_hash_table);
 
   ret = bfd_zmalloc (amt);
   if (ret == NULL)
@@ -1026,7 +1026,7 @@ find_thumb_glue (struct bfd_link_info *info,
 {
   char *tmp_name;
   struct coff_link_hash_entry *myh;
-  bfd_size_type amt = strlen (name) + strlen (THUMB2ARM_GLUE_ENTRY_NAME) + 1;
+  size_t amt = strlen (name) + strlen (THUMB2ARM_GLUE_ENTRY_NAME) + 1;
 
   tmp_name = bfd_malloc (amt);
 
@@ -1055,7 +1055,7 @@ find_arm_glue (struct bfd_link_info *info,
 {
   char *tmp_name;
   struct coff_link_hash_entry * myh;
-  bfd_size_type amt = strlen (name) + strlen (ARM2THUMB_GLUE_ENTRY_NAME) + 1;
+  size_t amt = strlen (name) + strlen (ARM2THUMB_GLUE_ENTRY_NAME) + 1;
 
   tmp_name = bfd_malloc (amt);
 
@@ -1840,7 +1840,7 @@ record_arm_to_thumb_glue (struct bfd_link_info *	info,
   struct bfd_link_hash_entry *	    bh;
   struct coff_arm_link_hash_table * globals;
   bfd_vma val;
-  bfd_size_type amt;
+  size_t amt;
 
   globals = coff_arm_hash_table (info);
 
@@ -1896,7 +1896,7 @@ record_thumb_to_arm_glue (struct bfd_link_info *	info,
   struct bfd_link_hash_entry *	     bh;
   struct coff_arm_link_hash_table *  globals;
   bfd_vma val;
-  bfd_size_type amt;
+  size_t amt;
 
   globals = coff_arm_hash_table (info);
 

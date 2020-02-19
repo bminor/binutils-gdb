@@ -77,7 +77,7 @@ osf_core_core_file_p (bfd *abfd)
   int i;
   char *secname;
   struct core_filehdr core_header;
-  bfd_size_type amt;
+  size_t amt;
 
   amt = sizeof core_header;
   val = bfd_bread (& core_header, amt, abfd);

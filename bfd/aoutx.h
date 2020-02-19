@@ -459,7 +459,7 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
 {
   struct aout_data_struct *rawptr, *oldrawptr;
   const bfd_target *result;
-  bfd_size_type amt = sizeof (* rawptr);
+  size_t amt = sizeof (* rawptr);
 
   rawptr = (struct aout_data_struct *) bfd_zalloc (abfd, amt);
   if (rawptr == NULL)
@@ -671,7 +671,7 @@ bfd_boolean
 NAME (aout, mkobject) (bfd *abfd)
 {
   struct aout_data_struct *rawptr;
-  bfd_size_type amt = sizeof (* rawptr);
+  size_t amt = sizeof (* rawptr);
 
   bfd_set_error (bfd_error_system_call);
 
@@ -1675,7 +1675,7 @@ translate_to_native_sym_flags (bfd *abfd,
 asymbol *
 NAME (aout, make_empty_symbol) (bfd *abfd)
 {
-  bfd_size_type amt = sizeof (aout_symbol_type);
+  size_t amt = sizeof (aout_symbol_type);
 
   aout_symbol_type *new_symbol = (aout_symbol_type *) bfd_zalloc (abfd, amt);
   if (!new_symbol)
@@ -1852,7 +1852,7 @@ static bfd_boolean
 emit_stringtab (bfd *abfd, struct bfd_strtab_hash *tab)
 {
   bfd_byte buffer[BYTES_IN_WORD];
-  bfd_size_type amt = BYTES_IN_WORD;
+  size_t amt = BYTES_IN_WORD;
 
   /* The string table starts with the size.  */
   PUT_WORD (abfd, _bfd_stringtab_size (tab) + BYTES_IN_WORD, buffer);
@@ -1878,7 +1878,7 @@ NAME (aout, write_syms) (bfd *abfd)
       asymbol *g = generic[count];
       bfd_size_type indx;
       struct external_nlist nsp;
-      bfd_size_type amt;
+      size_t amt;
 
       indx = add_to_stringtab (abfd, strtab, g->name, FALSE);
       if (indx == (bfd_size_type) -1)
@@ -2980,7 +2980,7 @@ struct bfd_link_hash_table *
 NAME (aout, link_hash_table_create) (bfd *abfd)
 {
   struct aout_link_hash_table *ret;
-  bfd_size_type amt = sizeof (* ret);
+  size_t amt = sizeof (* ret);
 
   ret = (struct aout_link_hash_table *) bfd_malloc (amt);
   if (ret == NULL)
@@ -3634,7 +3634,7 @@ aout_link_write_other_symbol (struct bfd_hash_entry *bh, void *data)
   bfd_vma val;
   struct external_nlist outsym;
   bfd_size_type indx;
-  bfd_size_type amt;
+  size_t amt;
 
   if (h->root.type == bfd_link_hash_warning)
     {
@@ -3759,7 +3759,7 @@ aout_link_reloc_link_order (struct aout_final_link_info *flaginfo,
   struct reloc_std_external srel;
   struct reloc_ext_external erel;
   void * rel_ptr;
-  bfd_size_type amt;
+  size_t amt;
 
   pr = p->u.reloc.p;
 

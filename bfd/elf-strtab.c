@@ -95,7 +95,7 @@ struct elf_strtab_hash *
 _bfd_elf_strtab_init (void)
 {
   struct elf_strtab_hash *table;
-  bfd_size_type amt = sizeof (struct elf_strtab_hash);
+  size_t amt = sizeof (struct elf_strtab_hash);
 
   table = (struct elf_strtab_hash *) bfd_malloc (amt);
   if (table == NULL)

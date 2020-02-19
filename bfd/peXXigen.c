@@ -3138,7 +3138,7 @@ _bfd_XX_bfd_copy_private_section_data (bfd *ibfd,
     {
       if (coff_section_data (obfd, osec) == NULL)
 	{
-	  bfd_size_type amt = sizeof (struct coff_section_tdata);
+	  size_t amt = sizeof (struct coff_section_tdata);
 	  osec->used_by_bfd = bfd_zalloc (obfd, amt);
 	  if (osec->used_by_bfd == NULL)
 	    return FALSE;
@@ -3146,7 +3146,7 @@ _bfd_XX_bfd_copy_private_section_data (bfd *ibfd,
 
       if (pei_section_data (obfd, osec) == NULL)
 	{
-	  bfd_size_type amt = sizeof (struct pei_section_tdata);
+	  size_t amt = sizeof (struct pei_section_tdata);
 	  coff_section_data (obfd, osec)->tdata = bfd_zalloc (obfd, amt);
 	  if (coff_section_data (obfd, osec)->tdata == NULL)
 	    return FALSE;

@@ -853,7 +853,7 @@ bfd_arch_list (void)
   const char **name_ptr;
   const char **name_list;
   const bfd_arch_info_type * const *app;
-  bfd_size_type amt;
+  size_t amt;
 
   /* Determine the number of architectures.  */
   vec_length = 0;

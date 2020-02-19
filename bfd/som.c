@@ -1425,7 +1425,7 @@ hppa_som_gen_reloc_type (bfd *abfd,
       /* The difference of two symbols needs *very* special handling.  */
       if (sym_diff)
 	{
-	  bfd_size_type amt = sizeof (int);
+	  size_t amt = sizeof (int);
 
 	  final_types[0] = bfd_alloc (abfd, amt);
 	  final_types[1] = bfd_alloc (abfd, amt);
@@ -1509,7 +1509,7 @@ hppa_som_gen_reloc_type (bfd *abfd,
       /* The difference of two symbols needs *very* special handling.  */
       if (sym_diff)
 	{
-	  bfd_size_type amt = sizeof (int);
+	  size_t amt = sizeof (int);
 
 	  final_types[0] = bfd_alloc (abfd, amt);
 	  final_types[1] = bfd_alloc (abfd, amt);
@@ -1548,7 +1548,7 @@ hppa_som_gen_reloc_type (bfd *abfd,
 	/* If we have short and long pcrel modes, then generate the proper
 	   mode selector, then the pcrel relocation.  Redundant selectors
 	   will be eliminated as the relocs are sized and emitted.  */
-	bfd_size_type amt = sizeof (int);
+	size_t amt = sizeof (int);
 
 	final_types[0] = bfd_alloc (abfd, amt);
 	if (!final_types[0])
@@ -2393,7 +2393,7 @@ som_object_p (bfd *abfd)
   unsigned long current_offset = 0;
   struct som_external_lst_header ext_lst_header;
   struct som_external_som_entry ext_som_entry;
-  bfd_size_type amt;
+  size_t amt;
   unsigned int loc;
 #define ENTRY_SIZE sizeof (struct som_external_som_entry)
 
@@ -2548,7 +2548,7 @@ som_prep_headers (bfd *abfd)
 {
   struct som_header *file_hdr;
   asection *section;
-  bfd_size_type amt = sizeof (struct som_header);
+  size_t amt = sizeof (struct som_header);
 
   /* Make and attach a file header to the BFD.  */
   file_hdr = bfd_zalloc (abfd, amt);
@@ -2907,7 +2907,7 @@ som_write_fixups (bfd *abfd,
   unsigned int subspace_reloc_size = 0;
   unsigned int num_spaces = obj_som_file_hdr (abfd)->space_total;
   asection *section = abfd->sections;
-  bfd_size_type amt;
+  size_t amt;
 
   memset (tmp_space, 0, SOM_TMP_BUFSIZE);
   p = tmp_space;
@@ -3313,7 +3313,7 @@ som_write_space_strings (bfd *abfd,
   char *p = tmp_space;
   unsigned int strings_size = 0;
   asection *section;
-  bfd_size_type amt;
+  size_t amt;
   bfd_size_type res;
 
   if (tmp_space == NULL)
@@ -3425,7 +3425,7 @@ som_write_symbol_strings (bfd *abfd,
   char *tmp_space = bfd_malloc (tmp_space_size);
   char *p = tmp_space;
   unsigned int strings_size = 0;
-  bfd_size_type amt;
+  size_t amt;
   bfd_size_type res;
 
   if (tmp_space == NULL)
@@ -3955,7 +3955,7 @@ som_finish_writing (bfd *abfd)
   asection *section;
   unsigned long current_offset;
   unsigned int strings_size, total_reloc_size;
-  bfd_size_type amt;
+  size_t amt;
   struct som_external_header ext_header;
 
   /* We must set up the version identifier here as objcopy/strip copy
@@ -4841,7 +4841,7 @@ som_canonicalize_symtab (bfd *abfd, asymbol **location)
 static asymbol *
 som_make_empty_symbol (bfd *abfd)
 {
-  bfd_size_type amt = sizeof (som_symbol_type);
+  size_t amt = sizeof (som_symbol_type);
   som_symbol_type *new_symbol_type = bfd_zalloc (abfd, amt);
 
   if (new_symbol_type == NULL)
@@ -5371,7 +5371,7 @@ som_new_section_hook (bfd *abfd, asection *newsect)
 {
   if (!newsect->used_by_bfd)
     {
-      bfd_size_type amt = sizeof (struct som_section_data_struct);
+      size_t amt = sizeof (struct som_section_data_struct);
 
       newsect->used_by_bfd = bfd_zalloc (abfd, amt);
       if (!newsect->used_by_bfd)
@@ -5417,7 +5417,7 @@ som_bfd_copy_private_section_data (bfd *ibfd,
 				   bfd *obfd,
 				   asection *osection)
 {
-  bfd_size_type amt;
+  size_t amt;
 
   /* One day we may try to grok other private data.  */
   if (ibfd->xvec->flavour != bfd_target_som_flavour
@@ -5525,7 +5525,7 @@ bfd_som_set_section_attributes (asection *section,
   /* Allocate memory to hold the magic information.  */
   if (som_section_data (section)->copy_data == NULL)
     {
-      bfd_size_type amt = sizeof (struct som_copyable_section_data_struct);
+      size_t amt = sizeof (struct som_copyable_section_data_struct);
 
       som_section_data (section)->copy_data = bfd_zalloc (section->owner, amt);
       if (som_section_data (section)->copy_data == NULL)
@@ -5555,7 +5555,7 @@ bfd_som_set_subsection_attributes (asection *section,
   /* Allocate memory to hold the magic information.  */
   if (som_section_data (section)->copy_data == NULL)
     {
-      bfd_size_type amt = sizeof (struct som_copyable_section_data_struct);
+      size_t amt = sizeof (struct som_copyable_section_data_struct);
 
       som_section_data (section)->copy_data = bfd_zalloc (section->owner, amt);
       if (som_section_data (section)->copy_data == NULL)
@@ -5589,7 +5589,7 @@ bfd_som_set_symbol_type (asymbol *symbol, unsigned int type)
 bfd_boolean
 bfd_som_attach_aux_hdr (bfd *abfd, int type, char *string)
 {
-  bfd_size_type amt;
+  size_t amt;
 
   if (type == VERSION_AUX_ID)
     {
@@ -6602,7 +6602,7 @@ som_write_armap (bfd *abfd,
   struct ar_hdr hdr;
   struct som_external_lst_header lst;
   unsigned char *p;
-  bfd_size_type amt;
+  size_t amt;
   unsigned int csum;
   unsigned int module_count;
 
