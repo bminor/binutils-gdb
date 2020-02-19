@@ -126,7 +126,6 @@ message (int level ATTRIBUTE_UNUSED,
 struct plugin_list_entry
 {
   /* These must be initialized for each IR object with LTO wrapper.  */
-  void *handle;
   ld_plugin_claim_file_handler claim_file;
   ld_plugin_all_symbols_read_handler all_symbols_read;
   ld_plugin_all_symbols_read_handler cleanup_handler;
@@ -596,22 +595,18 @@ try_load_plugin (const char *pname,
 		 struct plugin_list_entry *plugin_list_iter,
 		 bfd *abfd, bfd_boolean build_list_p)
 {
-  void *plugin_handle = NULL;
+  void *plugin_handle;
   struct ld_plugin_tv tv[12];
   int i;
   ld_plugin_onload onload;
   enum ld_plugin_status status;
+  int result = 0;
 
   /* NB: Each object is independent.  Reuse the previous plugin from
      the last run will lead to wrong result.  */
   if (current_plugin)
-    {
-      if (current_plugin->handle)
-	dlclose (current_plugin->handle);
-      memset (current_plugin, 0,
-	      offsetof (struct plugin_list_entry, next));
-      current_plugin = NULL;
-    }
+    memset (current_plugin, 0,
+	    offsetof (struct plugin_list_entry, next));
 
   if (plugin_list_iter)
     pname = plugin_list_iter->plugin_name;
@@ -628,12 +623,12 @@ try_load_plugin (const char *pname,
       size_t length_plugin_name = strlen (pname) + 1;
       char *plugin_name = bfd_malloc (length_plugin_name);
       if (plugin_name == NULL)
-	return 0;
+	goto short_circuit;
       plugin_list_iter = bfd_malloc (sizeof *plugin_list_iter);
       if (plugin_list_iter == NULL)
 	{
 	  free (plugin_name);
-	  return 0;
+	  goto short_circuit;
 	}
       /* Make a copy of PNAME since PNAME from load_plugin () will be
 	 freed.  */
@@ -644,13 +639,13 @@ try_load_plugin (const char *pname,
       plugin_list = plugin_list_iter;
     }
 
-  plugin_list_iter->handle = plugin_handle;
+  current_plugin = plugin_list_iter;
   if (build_list_p)
-    return 0;
+    goto short_circuit;
 
   onload = dlsym (plugin_handle, "onload");
   if (!onload)
-    return 0;
+    goto short_circuit;
 
   i = 0;
   tv[i].tv_tag = LDPT_MESSAGE;
@@ -703,28 +698,30 @@ try_load_plugin (const char *pname,
   tv[i].tv_tag = LDPT_NULL;
   tv[i].tv_u.tv_val = 0;
 
-  current_plugin = plugin_list_iter;
-
   /* LTO plugin will call handler hooks to set up plugin handlers.  */
   status = (*onload)(tv);
 
   if (status != LDPS_OK)
-    return 0;
+    goto short_circuit;
 
   if (current_plugin->lto_wrapper
       && setup_lto_wrapper_env (current_plugin))
-    return 0;
+    goto short_circuit;
 
   abfd->plugin_format = bfd_plugin_no;
 
   if (!current_plugin->claim_file)
-    return 0;
+    goto short_circuit;
 
   if (!try_claim (abfd))
-    return 0;
+    goto short_circuit;
 
   abfd->plugin_format = bfd_plugin_yes;
-  return 1;
+  result = 1;
+
+short_circuit:
+  dlclose (plugin_handle);
+  return result;
 }
 
 /* There may be plugin libraries in lib/bfd-plugins.  */
