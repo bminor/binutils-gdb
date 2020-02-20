@@ -1,3 +1,10 @@
+2020-02-21  Alan Modra  <amodra@gmail.com>
+
+	PR 25569
+	* config/obj-aout.c (obj_aout_frob_file_before_fix): Don't loop
+	on section size adjustment, instead perform another write if
+	exec header size is larger than section size.
+
 2020-02-19  Nelson Chu  <nelson.chu@sifive.com>
 
 	* doc/c-riscv.texi: Add the doc entries for -march-attr/

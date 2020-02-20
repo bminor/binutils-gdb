@@ -789,57 +789,56 @@ adjust_o_magic (bfd *abfd, struct internal_exec *execp)
   file_ptr pos = adata (abfd).exec_bytes_size;
   bfd_vma vma = 0;
   int pad = 0;
+  asection *text = obj_textsec (abfd);
+  asection *data = obj_datasec (abfd);
+  asection *bss = obj_bsssec (abfd);
 
   /* Text.  */
-  obj_textsec (abfd)->filepos = pos;
-  if (! obj_textsec (abfd)->user_set_vma)
-    obj_textsec (abfd)->vma = vma;
+  text->filepos = pos;
+  if (!text->user_set_vma)
+    text->vma = vma;
   else
-    vma = obj_textsec (abfd)->vma;
+    vma = text->vma;
 
-  pos += obj_textsec (abfd)->size;
-  vma += obj_textsec (abfd)->size;
+  pos += execp->a_text;
+  vma += execp->a_text;
 
   /* Data.  */
-  if (!obj_datasec (abfd)->user_set_vma)
+  if (!data->user_set_vma)
     {
-      obj_textsec (abfd)->size += pad;
       pos += pad;
       vma += pad;
-      obj_datasec (abfd)->vma = vma;
+      data->vma = vma;
     }
   else
-    vma = obj_datasec (abfd)->vma;
-  obj_datasec (abfd)->filepos = pos;
-  pos += obj_datasec (abfd)->size;
-  vma += obj_datasec (abfd)->size;
+    vma = data->vma;
+  execp->a_text += pad;
+
+  data->filepos = pos;
+  pos += data->size;
+  vma += data->size;
 
   /* BSS.  */
-  if (! obj_bsssec (abfd)->user_set_vma)
+  if (!bss->user_set_vma)
     {
-      obj_datasec (abfd)->size += pad;
       pos += pad;
       vma += pad;
-      obj_bsssec (abfd)->vma = vma;
+      bss->vma = vma;
     }
   else
     {
       /* The VMA of the .bss section is set by the VMA of the
 	 .data section plus the size of the .data section.  We may
 	 need to add padding bytes to make this true.  */
-      pad = obj_bsssec (abfd)->vma - vma;
-      if (pad > 0)
-	{
-	  obj_datasec (abfd)->size += pad;
-	  pos += pad;
-	}
+      pad = bss->vma - vma;
+      if (pad < 0)
+	pad = 0;
+      pos += pad;
     }
-  obj_bsssec (abfd)->filepos = pos;
+  execp->a_data = data->size + pad;
+  bss->filepos = pos;
+  execp->a_bss = bss->size;
 
-  /* Fix up the exec header.  */
-  execp->a_text = obj_textsec (abfd)->size;
-  execp->a_data = obj_datasec (abfd)->size;
-  execp->a_bss  = obj_bsssec (abfd)->size;
   N_SET_MAGIC (execp, OMAGIC);
 }
 
@@ -849,7 +848,11 @@ adjust_z_magic (bfd *abfd, struct internal_exec *execp)
   bfd_size_type data_pad, text_pad;
   file_ptr text_end;
   const struct aout_backend_data *abdp;
-  int ztih;			/* Nonzero if text includes exec header.  */
+  /* TRUE if text includes exec header.  */
+  bfd_boolean ztih;
+  asection *text = obj_textsec (abfd);
+  asection *data = obj_datasec (abfd);
+  asection *bss = obj_bsssec (abfd);
 
   abdp = aout_backend_info (abfd);
 
@@ -857,18 +860,17 @@ adjust_z_magic (bfd *abfd, struct internal_exec *execp)
   ztih = (abdp != NULL
 	  && (abdp->text_includes_header
 	      || obj_aout_subformat (abfd) == q_magic_format));
-  obj_textsec(abfd)->filepos = (ztih
-				? adata(abfd).exec_bytes_size
-				: adata(abfd).zmagic_disk_block_size);
-  if (! obj_textsec(abfd)->user_set_vma)
+  text->filepos = (ztih
+		   ? adata (abfd).exec_bytes_size
+		   : adata (abfd).zmagic_disk_block_size);
+  if (!text->user_set_vma)
     {
       /* ?? Do we really need to check for relocs here?  */
-      obj_textsec(abfd)->vma = ((abfd->flags & HAS_RELOC)
-				? 0
-				: (ztih
-				   ? (abdp->default_text_vma
-				      + adata (abfd).exec_bytes_size)
-				   : abdp->default_text_vma));
+      text->vma = ((abfd->flags & HAS_RELOC)
+		   ? 0
+		   : (ztih
+		      ? abdp->default_text_vma + adata (abfd).exec_bytes_size
+		      : abdp->default_text_vma));
       text_pad = 0;
     }
   else
@@ -877,17 +879,17 @@ adjust_z_magic (bfd *abfd, struct internal_exec *execp)
 	 may need to pad it such that the .data section starts at a page
 	 boundary.  */
       if (ztih)
-	text_pad = ((obj_textsec (abfd)->filepos - obj_textsec (abfd)->vma)
+	text_pad = ((text->filepos - text->vma)
 		    & (adata (abfd).page_size - 1));
       else
-	text_pad = ((- obj_textsec (abfd)->vma)
+	text_pad = (-text->vma
 		    & (adata (abfd).page_size - 1));
     }
 
   /* Find start of data.  */
   if (ztih)
     {
-      text_end = obj_textsec (abfd)->filepos + obj_textsec (abfd)->size;
+      text_end = text->filepos + execp->a_text;
       text_pad += BFD_ALIGN (text_end, adata (abfd).page_size) - text_end;
     }
   else
@@ -895,49 +897,42 @@ adjust_z_magic (bfd *abfd, struct internal_exec *execp)
       /* Note that if page_size == zmagic_disk_block_size, then
 	 filepos == page_size, and this case is the same as the ztih
 	 case.  */
-      text_end = obj_textsec (abfd)->size;
+      text_end = execp->a_text;
       text_pad += BFD_ALIGN (text_end, adata (abfd).page_size) - text_end;
-      text_end += obj_textsec (abfd)->filepos;
+      text_end += text->filepos;
     }
-
-  obj_textsec (abfd)->size += text_pad;
-  text_end += text_pad;
+  execp->a_text += text_pad;
 
   /* Data.  */
-  if (!obj_datasec(abfd)->user_set_vma)
+  if (!data->user_set_vma)
     {
       bfd_vma vma;
-      vma = obj_textsec(abfd)->vma + obj_textsec(abfd)->size;
-      obj_datasec(abfd)->vma = BFD_ALIGN (vma, adata(abfd).segment_size);
+      vma = text->vma + execp->a_text;
+      data->vma = BFD_ALIGN (vma, adata (abfd).segment_size);
     }
   if (abdp && abdp->zmagic_mapped_contiguous)
     {
-      text_pad = (obj_datasec(abfd)->vma
-		  - obj_textsec(abfd)->vma
-		  - obj_textsec(abfd)->size);
-      obj_textsec(abfd)->size += text_pad;
+      text_pad = data->vma - (text->vma + execp->a_text);
+      /* Only pad the text section if the data
+	 section is going to be placed after it.  */
+      if (text_pad > 0)
+	execp->a_text += text_pad;
     }
-  obj_datasec (abfd)->filepos = (obj_textsec (abfd)->filepos
-				+ obj_textsec (abfd)->size);
+  data->filepos = text->filepos + execp->a_text;
 
   /* Fix up exec header while we're at it.  */
-  execp->a_text = obj_textsec(abfd)->size;
   if (ztih && (!abdp || (abdp && !abdp->exec_header_not_counted)))
-    execp->a_text += adata(abfd).exec_bytes_size;
+    execp->a_text += adata (abfd).exec_bytes_size;
   N_SET_MAGIC (execp, ZMAGIC);
 
   /* Spec says data section should be rounded up to page boundary.  */
-  obj_datasec(abfd)->size
-    = align_power (obj_datasec(abfd)->size,
-		   obj_bsssec(abfd)->alignment_power);
-  execp->a_data = BFD_ALIGN (obj_datasec(abfd)->size,
-			     adata(abfd).page_size);
-  data_pad = execp->a_data - obj_datasec(abfd)->size;
+  execp->a_data = align_power (data->size, bss->alignment_power);
+  execp->a_data = BFD_ALIGN (execp->a_data, adata (abfd).page_size);
+  data_pad = execp->a_data - data->size;
 
   /* BSS.  */
-  if (!obj_bsssec(abfd)->user_set_vma)
-    obj_bsssec(abfd)->vma = (obj_datasec(abfd)->vma
-			     + obj_datasec(abfd)->size);
+  if (!bss->user_set_vma)
+    bss->vma = data->vma + execp->a_data;
   /* If the BSS immediately follows the data section and extra space
      in the page is left after the data section, fudge data
      in the header so that the bss section looks smaller by that
@@ -945,52 +940,51 @@ adjust_z_magic (bfd *abfd, struct internal_exec *execp)
      (Note that a linker script, as well as the above assignment,
      could have explicitly set the BSS vma to immediately follow
      the data section.)  */
-  if (align_power (obj_bsssec(abfd)->vma, obj_bsssec(abfd)->alignment_power)
-      == obj_datasec(abfd)->vma + obj_datasec(abfd)->size)
-    execp->a_bss = (data_pad > obj_bsssec(abfd)->size) ? 0 :
-      obj_bsssec(abfd)->size - data_pad;
+  if (align_power (bss->vma, bss->alignment_power) == data->vma + execp->a_data)
+    execp->a_bss = data_pad > bss->size ? 0 : bss->size - data_pad;
   else
-    execp->a_bss = obj_bsssec(abfd)->size;
+    execp->a_bss = bss->size;
 }
 
 static void
 adjust_n_magic (bfd *abfd, struct internal_exec *execp)
 {
-  file_ptr pos = adata(abfd).exec_bytes_size;
+  file_ptr pos = adata (abfd).exec_bytes_size;
   bfd_vma vma = 0;
   int pad;
+  asection *text = obj_textsec (abfd);
+  asection *data = obj_datasec (abfd);
+  asection *bss = obj_bsssec (abfd);
 
   /* Text.  */
-  obj_textsec(abfd)->filepos = pos;
-  if (!obj_textsec(abfd)->user_set_vma)
-    obj_textsec(abfd)->vma = vma;
+  text->filepos = pos;
+  if (!text->user_set_vma)
+    text->vma = vma;
   else
-    vma = obj_textsec(abfd)->vma;
-  pos += obj_textsec(abfd)->size;
-  vma += obj_textsec(abfd)->size;
+    vma = text->vma;
+  pos += execp->a_text;
+  vma += execp->a_text;
 
   /* Data.  */
-  obj_datasec(abfd)->filepos = pos;
-  if (!obj_datasec(abfd)->user_set_vma)
-    obj_datasec(abfd)->vma = BFD_ALIGN (vma, adata(abfd).segment_size);
-  vma = obj_datasec(abfd)->vma;
+  data->filepos = pos;
+  if (!data->user_set_vma)
+    data->vma = BFD_ALIGN (vma, adata (abfd).segment_size);
+  vma = data->vma;
 
   /* Since BSS follows data immediately, see if it needs alignment.  */
-  vma += obj_datasec(abfd)->size;
-  pad = align_power (vma, obj_bsssec(abfd)->alignment_power) - vma;
-  obj_datasec(abfd)->size += pad;
-  pos += obj_datasec(abfd)->size;
+  vma += data->size;
+  pad = align_power (vma, bss->alignment_power) - vma;
+  execp->a_data = data->size + pad;
+  pos += execp->a_data;
 
   /* BSS.  */
-  if (!obj_bsssec(abfd)->user_set_vma)
-    obj_bsssec(abfd)->vma = vma;
+  if (!bss->user_set_vma)
+    bss->vma = vma;
   else
-    vma = obj_bsssec(abfd)->vma;
+    vma = bss->vma;
 
   /* Fix up exec header.  */
-  execp->a_text = obj_textsec(abfd)->size;
-  execp->a_data = obj_datasec(abfd)->size;
-  execp->a_bss = obj_bsssec(abfd)->size;
+  execp->a_bss = bss->size;
   N_SET_MAGIC (execp, NMAGIC);
 }
 
@@ -1002,12 +996,11 @@ NAME (aout, adjust_sizes_and_vmas) (bfd *abfd)
   if (! NAME (aout, make_sections) (abfd))
     return FALSE;
 
-  if (adata(abfd).magic != undecided_magic)
+  if (adata (abfd).magic != undecided_magic)
     return TRUE;
 
-  obj_textsec(abfd)->size =
-    align_power(obj_textsec(abfd)->size,
-		obj_textsec(abfd)->alignment_power);
+  execp->a_text = align_power (obj_textsec (abfd)->size,
+			       obj_textsec (abfd)->alignment_power);
 
   /* Rule (heuristic) for when to pad to a new page.  Note that there
      are (at least) two ways demand-paged (ZMAGIC) files have been
@@ -1015,7 +1008,7 @@ NAME (aout, adjust_sizes_and_vmas) (bfd *abfd)
      (TARGET_PAGE_SIZE).  However, newer versions of SUNOS start the text
      segment right after the exec header; the latter is counted in the
      text segment size, and is paged in by the kernel with the rest of
-     the text. */
+     the text.  */
 
   /* This perhaps isn't the right way to do this, but made it simpler for me
      to understand enough to implement it.  Better would probably be to go
@@ -1026,32 +1019,33 @@ NAME (aout, adjust_sizes_and_vmas) (bfd *abfd)
      minute.  */
 
   if (abfd->flags & WP_TEXT)
-    adata(abfd).magic = n_magic;
+    adata (abfd).magic = n_magic;
   else
-    adata(abfd).magic = o_magic;
+    adata (abfd).magic = o_magic;
 
 #ifdef BFD_AOUT_DEBUG /* requires gcc2 */
 #if __GNUC__ >= 2
   fprintf (stderr, "%s text=<%x,%x,%x> data=<%x,%x,%x> bss=<%x,%x,%x>\n",
 	   ({ char *str;
-	      switch (adata(abfd).magic) {
-	      case n_magic: str = "NMAGIC"; break;
-	      case o_magic: str = "OMAGIC"; break;
-	      case z_magic: str = "ZMAGIC"; break;
-	      default: abort ();
-	      }
+	      switch (adata (abfd).magic)
+		{
+		case n_magic: str = "NMAGIC"; break;
+		case o_magic: str = "OMAGIC"; break;
+		case z_magic: str = "ZMAGIC"; break;
+		default: abort ();
+		}
 	      str;
 	    }),
-	   obj_textsec(abfd)->vma, obj_textsec(abfd)->size,
-		obj_textsec(abfd)->alignment_power,
-	   obj_datasec(abfd)->vma, obj_datasec(abfd)->size,
-		obj_datasec(abfd)->alignment_power,
-	   obj_bsssec(abfd)->vma, obj_bsssec(abfd)->size,
-		obj_bsssec(abfd)->alignment_power);
+	   obj_textsec (abfd)->vma, obj_textsec (abfd)->size,
+		obj_textsec (abfd)->alignment_power,
+	   obj_datasec (abfd)->vma, obj_datasec (abfd)->size,
+		obj_datasec (abfd)->alignment_power,
+	   obj_bsssec (abfd)->vma, obj_bsssec (abfd)->size,
+		obj_bsssec (abfd)->alignment_power);
 #endif
 #endif
 
-  switch (adata(abfd).magic)
+  switch (adata (abfd).magic)
     {
     case o_magic:
       adjust_o_magic (abfd, execp);
@@ -1068,11 +1062,11 @@ NAME (aout, adjust_sizes_and_vmas) (bfd *abfd)
 
 #ifdef BFD_AOUT_DEBUG
   fprintf (stderr, "       text=<%x,%x,%x> data=<%x,%x,%x> bss=<%x,%x>\n",
-	   obj_textsec(abfd)->vma, obj_textsec(abfd)->size,
-		obj_textsec(abfd)->filepos,
-	   obj_datasec(abfd)->vma, obj_datasec(abfd)->size,
-		obj_datasec(abfd)->filepos,
-	   obj_bsssec(abfd)->vma, obj_bsssec(abfd)->size);
+	   obj_textsec (abfd)->vma, execp->a_text,
+		obj_textsec (abfd)->filepos,
+	   obj_datasec (abfd)->vma, execp->a_data,
+		obj_datasec (abfd)->filepos,
+	   obj_bsssec (abfd)->vma, execp->a_bss);
 #endif
 
   return TRUE;
@@ -3914,16 +3908,28 @@ NAME (aout, final_link) (bfd *abfd,
   else if (obj_textsec (abfd)->reloc_count == 0
 	   && obj_datasec (abfd)->reloc_count == 0)
     {
-      bfd_byte b;
+      /* The layout of a typical a.out file is header, text, data,
+	 relocs, symbols, string table.  When there are no relocs,
+	 symbols or string table, the last thing in the file is data
+	 and a_data may be rounded up.  However we may have a smaller
+	 sized .data section and thus not written final padding.  The
+	 same thing can happen with text if there is no data.  Write
+	 final padding here to extend the file.  */
+      file_ptr pos = 0;
 
-      b = 0;
-      if (bfd_seek (abfd,
-		    (file_ptr) (obj_datasec (abfd)->filepos
-				+ exec_hdr (abfd)->a_data
-				- 1),
-		    SEEK_SET) != 0
-	  || bfd_bwrite (&b, (bfd_size_type) 1, abfd) != 1)
-	goto error_return;
+      if (exec_hdr (abfd)->a_data > obj_datasec (abfd)->size)
+	pos = obj_datasec (abfd)->filepos + exec_hdr (abfd)->a_data;
+      else if (obj_datasec (abfd)->size == 0
+	       && exec_hdr (abfd)->a_text > obj_textsec (abfd)->size)
+	pos = obj_textsec (abfd)->filepos + exec_hdr (abfd)->a_text;
+      if (pos != 0)
+	{
+	  bfd_byte b = 0;
+
+	  if (bfd_seek (abfd, pos - 1, SEEK_SET) != 0
+	      || bfd_bwrite (&b, (bfd_size_type) 1, abfd) != 1)
+	    goto error_return;
+	}
     }
 
   return TRUE;

@@ -1,3 +1,15 @@
+2020-02-21  Alan Modra  <amodra@gmail.com>
+
+	PR 25569
+	* aoutx.h (adjust_o_magic, adjust_z_magic, adjust_n_magic): Use
+	"text", "data" and "bss" section pointer vars.  Don't update
+	section size, just exec header sizes.
+	(adjust_sizes_and_vmas): Don't update text section size.  Set
+	initial exec header a_text.  Print exec headers sizes.
+	* pdp11.c (adjust_o_magic, adjust_z_magic, adjust_n_magic),
+	(adjust_sizes_and_vmas): Similarly.  Formatting.
+	(final_link): Correct final file extension.
+
 2020-02-20  Nick Clifton  <nickc@redhat.com>
 
 	* elf-bfd.h (struct elf_backend_data): Add symbol_section_index
