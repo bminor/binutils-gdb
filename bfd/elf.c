@@ -8194,8 +8194,25 @@ swap_out_syms (bfd *abfd,
 		  if (elf_symtab_shndx_list (abfd))
 		    shndx = elf_symtab_shndx_list (abfd)->ndx;
 		  break;
-		default:
+		case SHN_COMMON:
+		case SHN_ABS:
 		  shndx = SHN_ABS;
+		  break;
+		default:
+		  if (shndx >= SHN_LOPROC && shndx <= SHN_HIOS)
+		    {
+		      if (bed->symbol_section_index)
+			shndx = bed->symbol_section_index (abfd, type_ptr);
+		      /* Otherwise just leave the index alone.  */
+		    }
+		  else
+		    {
+		      if (shndx > SHN_HIOS && shndx < SHN_HIRESERVE)
+			_bfd_error_handler (_("%pB: \
+Unable to handle section index %x in ELF symbol.  Using ABS instead."),
+					  abfd, shndx);
+		      shndx = SHN_ABS;
+		    }
 		  break;
 		}
 	    }

@@ -1,3 +1,14 @@
+2020-02-20  Nick Clifton  <nickc@redhat.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add symbol_section_index
+	callback.
+	* elfxx-target.h (elf_backend_symbol_section_index): Provide
+	default definition.
+	(elfNN_bed): Initialise the symbol_section_index field.
+	* elf.c (swap_out_syms): Call symbol_section_index, if defined, on
+	OS and PROC specific section indicies.  Warn if converting other
+	reserved incidies to SHN_ABS.
+
 2020-02-19  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25537
