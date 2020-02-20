@@ -35,6 +35,18 @@ if { [go_runto_main] < 0 } {
     return -1
 }
 
+gdb_test_multiple "print st" "print global var st" {
+    -re -wrap " = $hex \"We shall\"" {
+       pass $gdb_test_name
+    }
+    -re -wrap " = $hex .*" {
+       # GCC PR 93844 (Same problem with google go compiler go1.11.13).
+       # Due to the PR, gdb prints an uninitialized value, which can manifest
+       # as '$3 = 0x0 ""', but also as printing a wild pointer.
+       xfail $gdb_test_name
+    }
+}
+
 if { [gdb_breakpoint ${srcfile}:${bp_location1}] } {
     pass "setting breakpoint 1"
 }

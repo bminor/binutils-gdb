@@ -1,5 +1,18 @@
 2020-02-20  Tom de Vries  <tdevries@suse.de>
 
+	PR go/17018
+	* gdb.go/hello.exp: Copy ...
+	* gdb.go/global-local-var-shadow.exp: ... here.  New file.  Expect
+	print of st to print value of global definition. Add xfail for GCC
+	PR93844.
+	* gdb.go/hello.exp: Remove printing of st before definition.
+	* gdb.go/hello.go: Copy ...
+	* gdb.go/global-local-var-shadow.go: ... here. New test.  Rename myst
+	to st.
+	* gdb.go/hello.go: Remove myst.  Remove comment about shadowing.
+
+2020-02-20  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (support_go_compile): New gdb_caching_proc.
 	(gdb_simple_compile): Handle compile_flags go by using .go extension
 	for source file.
