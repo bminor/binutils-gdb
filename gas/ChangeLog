@@ -1,5 +1,10 @@
 2020-02-21  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-pdp11.c (md_apply_fix): Handle BFD_RELOC_32.
+	(tc_gen_reloc): Only give a BAD_CASE assertion on pcrel relocs.
+
+2020-02-21  Alan Modra  <amodra@gmail.com>
+
 	PR 25569
 	* config/obj-aout.c (obj_aout_frob_file_before_fix): Don't loop
 	on section size adjustment, instead perform another write if
