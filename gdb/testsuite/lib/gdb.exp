@@ -2490,6 +2490,18 @@ gdb_caching_proc support_complex_tests {
     } executable]
 }
 
+# Return 1 if compiling go is supported.
+gdb_caching_proc support_go_compile {
+
+    return [gdb_can_simple_compile go-hello {
+	package main
+	import "fmt"
+	func main() {
+	    fmt.Println("hello world")
+	}
+    } executable go]
+}
+
 # Return 1 if GDB can get a type for siginfo from the target, otherwise
 # return 0.
 
@@ -3631,7 +3643,14 @@ proc gdb_simple_compile {name code {type object} {compile_flags {}} {object obj}
             set postfix "s"
         }
     }
-    set src [standard_temp_file $name-[pid].c]
+    set ext "c"
+    foreach flag $compile_flags {
+	if { "$flag" == "go" } {
+	    set ext "go"
+	    break
+	}
+    }
+    set src [standard_temp_file $name-[pid].$ext]
     set obj [standard_temp_file $name-[pid].$postfix]
     set compile_flags [concat $compile_flags {debug nowarnings quiet}]
 

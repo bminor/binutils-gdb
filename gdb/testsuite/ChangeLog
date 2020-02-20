@@ -1,3 +1,19 @@
+2020-02-20  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (support_go_compile): New gdb_caching_proc.
+	(gdb_simple_compile): Handle compile_flags go by using .go extension
+	for source file.
+	* gdb.go/chan.exp: Use support_go_compile.
+	* gdb.go/handcall.exp: Same.
+	* gdb.go/hello.exp: Same.
+	* gdb.go/integers.exp: Same.
+	* gdb.go/max-depth.exp: Same.
+	* gdb.go/methods.exp: Same.
+	* gdb.go/package.exp: Same.
+	* gdb.go/strings.exp: Same.
+	* gdb.go/types.exp: Same.
+	* gdb.go/unsafe.exp: Same.
+
 2020-02-19  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.python/lib-types.exp: Make xfail more strict.
