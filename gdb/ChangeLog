@@ -1,3 +1,8 @@
+2020-02-19  Tom Tromey  <tom@tromey.com>
+
+	* symtab.c (general_symbol_info::compute_and_set_names): Use
+	obstack_strndup.  Simplify call to symbol_set_demangled_name.
+
 2020-02-19  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2/read.c (allocate_signatured_type_table,
