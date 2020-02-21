@@ -1,3 +1,11 @@
+2020-02-20  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.c (dwarf2_find_containing_comp_unit): Use ">", not
+	">=", in binary search.
+	(dwarf2_find_containing_comp_unit): New overload.
+	(run_test): New self-test.
+	(_initialize_dwarf2_read): Register new test.
+
 2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
 
 	* riscv-tdep.c: Updated since the DECLARE_CSR is changed.

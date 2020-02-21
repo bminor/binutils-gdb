@@ -24136,6 +24136,39 @@ dwarf2_per_cu_data::addr_type () const
   return addr_type;
 }
 
+/* A helper function for dwarf2_find_containing_comp_unit that returns
+   the index of the result, and that searches a vector.  It will
+   return a result even if the offset in question does not actually
+   occur in any CU.  This is separate so that it can be unit
+   tested.  */
+
+static int
+dwarf2_find_containing_comp_unit
+  (sect_offset sect_off,
+   unsigned int offset_in_dwz,
+   const std::vector<dwarf2_per_cu_data *> &all_comp_units)
+{
+  int low, high;
+
+  low = 0;
+  high = all_comp_units.size () - 1;
+  while (high > low)
+    {
+      struct dwarf2_per_cu_data *mid_cu;
+      int mid = low + (high - low) / 2;
+
+      mid_cu = all_comp_units[mid];
+      if (mid_cu->is_dwz > offset_in_dwz
+	  || (mid_cu->is_dwz == offset_in_dwz
+	      && mid_cu->sect_off + mid_cu->length > sect_off))
+	high = mid;
+      else
+	low = mid + 1;
+    }
+  gdb_assert (low == high);
+  return low;
+}
+
 /* Locate the .debug_info compilation unit from CU's objfile which contains
    the DIE at OFFSET.  Raises an error on failure.  */
 
@@ -24144,26 +24177,12 @@ dwarf2_find_containing_comp_unit (sect_offset sect_off,
 				  unsigned int offset_in_dwz,
 				  struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
-  struct dwarf2_per_cu_data *this_cu;
-  int low, high;
+  int low
+    = dwarf2_find_containing_comp_unit (sect_off, offset_in_dwz,
+					dwarf2_per_objfile->all_comp_units);
+  struct dwarf2_per_cu_data *this_cu
+    = dwarf2_per_objfile->all_comp_units[low];
 
-  low = 0;
-  high = dwarf2_per_objfile->all_comp_units.size () - 1;
-  while (high > low)
-    {
-      struct dwarf2_per_cu_data *mid_cu;
-      int mid = low + (high - low) / 2;
-
-      mid_cu = dwarf2_per_objfile->all_comp_units[mid];
-      if (mid_cu->is_dwz > offset_in_dwz
-	  || (mid_cu->is_dwz == offset_in_dwz
-	      && mid_cu->sect_off + mid_cu->length >= sect_off))
-	high = mid;
-      else
-	low = mid + 1;
-    }
-  gdb_assert (low == high);
-  this_cu = dwarf2_per_objfile->all_comp_units[low];
   if (this_cu->is_dwz != offset_in_dwz || this_cu->sect_off > sect_off)
     {
       if (low == 0 || this_cu->is_dwz != offset_in_dwz)
@@ -24185,6 +24204,57 @@ dwarf2_find_containing_comp_unit (sect_offset sect_off,
       return this_cu;
     }
 }
+
+#if GDB_SELF_TEST
+
+namespace selftests {
+namespace find_containing_comp_unit {
+
+static void
+run_test ()
+{
+  struct dwarf2_per_cu_data one {};
+  struct dwarf2_per_cu_data two {};
+  struct dwarf2_per_cu_data three {};
+  struct dwarf2_per_cu_data four {};
+
+  one.length = 5;
+  two.sect_off = sect_offset (one.length);
+  two.length = 7;
+
+  three.length = 5;
+  three.is_dwz = 1;
+  four.sect_off = sect_offset (three.length);
+  four.length = 7;
+  four.is_dwz = 1;
+
+  std::vector<dwarf2_per_cu_data *> units;
+  units.push_back (&one);
+  units.push_back (&two);
+  units.push_back (&three);
+  units.push_back (&four);
+
+  int result;
+
+  result = dwarf2_find_containing_comp_unit (sect_offset (0), 0, units);
+  SELF_CHECK (units[result] == &one);
+  result = dwarf2_find_containing_comp_unit (sect_offset (3), 0, units);
+  SELF_CHECK (units[result] == &one);
+  result = dwarf2_find_containing_comp_unit (sect_offset (5), 0, units);
+  SELF_CHECK (units[result] == &two);
+
+  result = dwarf2_find_containing_comp_unit (sect_offset (0), 1, units);
+  SELF_CHECK (units[result] == &three);
+  result = dwarf2_find_containing_comp_unit (sect_offset (3), 1, units);
+  SELF_CHECK (units[result] == &three);
+  result = dwarf2_find_containing_comp_unit (sect_offset (5), 1, units);
+  SELF_CHECK (units[result] == &four);
+}
+
+}
+}
+
+#endif /* GDB_SELF_TEST */
 
 /* Initialize dwarf2_cu CU, owned by PER_CU.  */
 
@@ -24690,5 +24760,7 @@ Warning: This option must be enabled before gdb reads the file."),
 #if GDB_SELF_TEST
   selftests::register_test ("dw2_expand_symtabs_matching",
 			    selftests::dw2_expand_symtabs_matching::run_test);
+  selftests::register_test ("dwarf2_find_containing_comp_unit",
+			    selftests::find_containing_comp_unit::run_test);
 #endif
 }
