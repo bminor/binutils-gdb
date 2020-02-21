@@ -40,4 +40,9 @@ gdb_breakpoint [ gdb_get_line_number "break here" ]
 gdb_continue_to_breakpoint "break here" ".*break here.*"
 
 # Ensure we can get a full backtrace, despite the address signing.
-gdb_test "bt" "^bt\r\n#0 +bar *\\(b=9\\) +at.*\r\n#1 +0x\[0-9a-f\]* +in +foo \\(a=5\\).*\r\n#2 +0x\[0-9a-f\]* +in +main \\(\\).*" "backtrace"
+gdb_test "bt" \
+    [multi_line \
+	"#0\[ \t\]+bar \\(b=9\\) at \[^\r\n\]+" \
+	"#1\[ \t\]+$hex (\\\[PAC\\\] )?in foo \\(a=5\\) at \[^\r\n\]+" \
+	"#2\[ \t\]+$hex (\\\[PAC\\\] )?in main \\(\\) at \[^\r\n\]+" ] \
+    "backtrace"

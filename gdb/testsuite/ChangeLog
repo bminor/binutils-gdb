@@ -1,3 +1,7 @@
+2020-02-28  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.arch/aarch64-pauth.exp: Recognize optional PAC output.
+
 2020-02-27  Tom de Vries  <tdevries@suse.de>
 
 	* config/sid.exp: Remove unused globals.
