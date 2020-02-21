@@ -211,4 +211,4 @@ gdb_test "l" ".*This program is distributed in the hope.*"
 
 # gdb should now find the debugaltlink file
 clean_restart
-gdb_test "file ${binfile}_alt.o" ".*Reading symbols from ${binfile}_alt.o\.\.\.\[\r\n\]"
+gdb_test "file ${binfile}_alt.o" ".*Reading symbols from ${binfile}_alt.o\.\.\.*"

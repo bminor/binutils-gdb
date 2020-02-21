@@ -2750,8 +2750,11 @@ dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
   if (dwz_bfd == nullptr)
     {
       gdb::unique_xmalloc_ptr<char> alt_filename;
+      const char *origname = dwarf2_per_objfile->objfile->original_name;
+
       scoped_fd fd (debuginfod_debuginfo_query (buildid,
                                                 buildid_len,
+                                                origname,
                                                 &alt_filename));
 
       if (fd.get () >= 0)

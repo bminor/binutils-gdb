@@ -18,40 +18,43 @@
 
 #include <errno.h>
 #include "defs.h"
+#include "gdbsupport/scoped_fd.h"
 #include "debuginfod-support.h"
 
 #ifndef HAVE_LIBDEBUGINFOD
-int
+scoped_fd
 debuginfod_source_query (const unsigned char *build_id __attribute__((unused)),
                          int build_id_len __attribute__((unused)),
                          const char *srcpath __attribute__((unused)),
                          gdb::unique_xmalloc_ptr<char> *filename __attribute__((unused)))
 {
-  return -ENOSYS;
+  return scoped_fd (-ENOSYS);
 }
 
-int
+scoped_fd
 debuginfod_debuginfo_query (const unsigned char *build_id __attribute__((unused)),
                             int build_id_len __attribute__((unused)),
                             gdb::unique_xmalloc_ptr<char> *filename __attribute__((unused)))
 {
-  return -ENOSYS;
+  return scoped_fd (-ENOSYS);
 }
 #else
 #include <elfutils/debuginfod.h>
 
 static int
-progressfn (debuginfod_client *c,
-             long a __attribute__((unused)),
-             long b __attribute__((unused)))
+progressfn (debuginfod_client *c, long cur, long total)
 {
-  int quit_flag = check_quit_flag ();
+  if (check_quit_flag ())
+    {
+      printf_unfiltered ("Cancelling download...\n");
+      return 1;
+    }
 
-  /* Avoid swallowing quit_flag's current value.  */
-  if (quit_flag)
-    set_quit_flag ();
-
-  return quit_flag;
+  printf_unfiltered ("Downloading... %.0f%% (%ld/%ld)%s",
+                     (cur * 100.0f) / total,
+                     cur, total,
+                     (cur == total) ? "\n" : "\r");
+  return 0;
 }
 
 static debuginfod_client *
@@ -67,45 +70,65 @@ debuginfod_init ()
 
 /* See debuginfod-support.h  */
 
-int
+scoped_fd
 debuginfod_source_query (const unsigned char *build_id,
                          int build_id_len,
                          const char *srcpath,
-                         gdb::unique_xmalloc_ptr<char> *filename)
+                         gdb::unique_xmalloc_ptr<char> *destname)
 {
   debuginfod_client *c = debuginfod_init ();
 
   if (c == nullptr)
-    return -ENOMEM;
+    return scoped_fd (-ENOMEM);
 
-  char *fname = NULL;
-  int fd = debuginfod_find_source (c,
-                                   build_id,
-                                   build_id_len,
-                                   srcpath,
-                                   &fname);
+  char *dname = nullptr;
+
+  printf_unfiltered ("Attempting to download source file %s\n", srcpath);
+  scoped_fd fd (debuginfod_find_source (c,
+                                        build_id,
+                                        build_id_len,
+                                        srcpath,
+                                        &dname));
+
+  if (fd.get () < 0)
+    printf_unfiltered ("Download unsuccessful. Continuing without source file %s.\n",
+                       srcpath);
+  else
+    printf_unfiltered ("Download successful.\n");
+
+
+  destname->reset (dname);
   debuginfod_end (c);
-  filename->reset (fname);
 
   return fd;
 }
 
 /* See debuginfod-support.h  */
 
-int
+scoped_fd
 debuginfod_debuginfo_query (const unsigned char *build_id,
                             int build_id_len,
-                            gdb::unique_xmalloc_ptr<char> *filename)
+                            const char *filename,
+                            gdb::unique_xmalloc_ptr<char> *destname)
 {
   debuginfod_client *c = debuginfod_init ();
 
   if (c == nullptr)
-    return -ENOMEM;
+    return scoped_fd (-ENOMEM);
 
-  char *fname = NULL;
-  int fd = debuginfod_find_debuginfo (c, build_id, build_id_len, &fname);
+  char *dname = nullptr;
+
+  printf_filtered ("Attempting to download debug info for %s\n", filename);
+  scoped_fd fd (debuginfod_find_debuginfo (c, build_id, build_id_len, &dname));
+
+  if (fd.get () < 0)
+    printf_unfiltered ("Download unsuccessful. Continuing without debug info for %s.\n",
+                       filename);
+  else
+    printf_unfiltered ("Download successful.\n");
+
   debuginfod_end (c);
-  filename->reset (fname);
+  destname->reset (dname);
 
   return fd;
 }

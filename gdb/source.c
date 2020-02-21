@@ -1163,7 +1163,7 @@ open_source_file (struct symtab *s)
           const objfile *ofp = COMPUNIT_OBJFILE (SYMTAB_COMPUNIT (s));
 
           std::string srcpath;
-          if (IS_DIR_SEPARATOR (s->filename[0]))
+          if (IS_ABSOLUTE_PATH (s->filename))
             srcpath = s->filename;
           else
             {
@@ -1174,17 +1174,12 @@ open_source_file (struct symtab *s)
 
           const struct bfd_build_id *build_id = build_id_bfd_get (ofp->obfd);
 
+          /* Query debuginfod for the source file.  */
           if (build_id != nullptr)
-            {
-              /* Query debuginfod for the source file.  */
-              scoped_fd src_fd (debuginfod_source_query (build_id->data,
-                                                         build_id->size,
-                                                         srcpath.c_str (),
-                                                         &fullname));
-
-              s->fullname = fullname.release ();
-              return src_fd;
-            }
+            fd = debuginfod_source_query (build_id->data,
+                                          build_id->size,
+                                          srcpath.c_str (),
+                                          &fullname);
         }
     }
 

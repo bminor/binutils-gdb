@@ -1328,6 +1328,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
               gdb::unique_xmalloc_ptr<char> symfile_path;
               scoped_fd fd (debuginfod_debuginfo_query (build_id->data,
                                                         build_id->size,
+                                                        objfile->original_name,
                                                         &symfile_path));
 
               if (fd.get () >= 0)
@@ -1335,9 +1336,13 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
                   /* File successfully retrieved from server.  */
                   gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (symfile_path.get ()));
 
-                  symbol_file_add_separate (debug_bfd.get (), symfile_path.get (),
-                                            symfile_flags, objfile);
-                  has_dwarf2 = true;
+                  if (debug_bfd != nullptr
+                      && build_id_verify (debug_bfd.get (), build_id->size, build_id->data))
+                    {
+                      symbol_file_add_separate (debug_bfd.get (), symfile_path.get (),
+                                                symfile_flags, objfile);
+                      has_dwarf2 = true;
+                    }
                 }
             }
         }
