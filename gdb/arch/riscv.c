@@ -25,6 +25,8 @@
 #include "../features/riscv/32bit-fpu.c"
 #include "../features/riscv/64bit-fpu.c"
 #include "../features/riscv/rv32e-xregs.c"
+#include "../features/riscv/32bit-cheri64.c"
+#include "../features/riscv/64bit-cheri128.c"
 
 #ifndef GDBSERVER
 #define STATIC_IN_GDB static
@@ -62,6 +64,9 @@ riscv_create_target_description (const struct riscv_gdbarch_features features)
   else if (features.flen == 16)
     arch_name.append ("q");
 
+  if (features.clen != 0)
+    arch_name.append ("xcheri");
+
   set_tdesc_architecture (tdesc.get (), arch_name.c_str ());
 #endif
 
@@ -77,6 +82,11 @@ riscv_create_target_description (const struct riscv_gdbarch_features features)
     }
   else if (features.xlen == 8)
     regnum = create_feature_riscv_64bit_cpu (tdesc.get (), regnum);
+
+  if (features.clen == 8)
+    regnum = create_feature_riscv_32bit_cheri64 (tdesc.get (), regnum);
+  else if (features.clen == 16)
+    regnum = create_feature_riscv_64bit_cheri128 (tdesc.get (), regnum);
 
   /* For now we only support creating 32-bit or 64-bit f-registers.  */
   if (features.flen == 4)

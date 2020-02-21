@@ -97,6 +97,7 @@ static unsigned int riscv_debug_gdbarch = 0;
 /* The names of the RISC-V target description features.  */
 const char *riscv_feature_name_csr = "org.gnu.gdb.riscv.csr";
 static const char *riscv_feature_name_cpu = "org.gnu.gdb.riscv.cpu";
+static const char *riscv_feature_name_cheri = "org.gnu.gdb.riscv.cheri";
 static const char *riscv_feature_name_fpu = "org.gnu.gdb.riscv.fpu";
 static const char *riscv_feature_name_virtual = "org.gnu.gdb.riscv.virtual";
 static const char *riscv_feature_name_vector = "org.gnu.gdb.riscv.vector";
@@ -358,6 +359,105 @@ struct riscv_xreg_feature : public riscv_register_feature
 /* An instance of the x-register feature set.  */
 
 static const struct riscv_xreg_feature riscv_xreg_feature;
+
+/* Class representing the Xcheri-registers feature set.  */
+
+struct riscv_creg_feature : public riscv_register_feature
+{
+  riscv_creg_feature ()
+    : riscv_register_feature (riscv_feature_name_cheri)
+  {
+    m_registers =  {
+      { RISCV_CNULL_REGNUM + 0, { "cnull", "c0" } },
+      { RISCV_CNULL_REGNUM + 1, { "cra", "c1" } },
+      { RISCV_CNULL_REGNUM + 2, { "csp", "c2" } },
+      { RISCV_CNULL_REGNUM + 3, { "cgp", "c3" } },
+      { RISCV_CNULL_REGNUM + 4, { "ctp", "c4" } },
+      { RISCV_CNULL_REGNUM + 5, { "ct0", "c5" } },
+      { RISCV_CNULL_REGNUM + 6, { "ct1", "c6" } },
+      { RISCV_CNULL_REGNUM + 7, { "ct2", "c7" } },
+      { RISCV_CNULL_REGNUM + 8, { "cfp", "c8", "cs0" } },
+      { RISCV_CNULL_REGNUM + 9, { "cs1", "c9" } },
+      { RISCV_CNULL_REGNUM + 10, { "ca0", "c10" } },
+      { RISCV_CNULL_REGNUM + 11, { "ca1", "c11" } },
+      { RISCV_CNULL_REGNUM + 12, { "ca2", "c12" } },
+      { RISCV_CNULL_REGNUM + 13, { "ca3", "c13" } },
+      { RISCV_CNULL_REGNUM + 14, { "ca4", "c14" } },
+      { RISCV_CNULL_REGNUM + 15, { "ca5", "c15" } },
+      { RISCV_CNULL_REGNUM + 16, { "ca6", "c16" } },
+      { RISCV_CNULL_REGNUM + 17, { "ca7", "c17" } },
+      { RISCV_CNULL_REGNUM + 18, { "cs2", "c18" } },
+      { RISCV_CNULL_REGNUM + 19, { "cs3", "c19" } },
+      { RISCV_CNULL_REGNUM + 20, { "cs4", "c20" } },
+      { RISCV_CNULL_REGNUM + 21, { "cs5", "c21" } },
+      { RISCV_CNULL_REGNUM + 22, { "cs6", "c22" } },
+      { RISCV_CNULL_REGNUM + 23, { "cs7", "c23" } },
+      { RISCV_CNULL_REGNUM + 24, { "cs8", "c24" } },
+      { RISCV_CNULL_REGNUM + 25, { "cs9", "c25" } },
+      { RISCV_CNULL_REGNUM + 26, { "cs10", "c26" } },
+      { RISCV_CNULL_REGNUM + 27, { "cs11", "c27" } },
+      { RISCV_CNULL_REGNUM + 28, { "ct3", "c28" } },
+      { RISCV_CNULL_REGNUM + 29, { "ct4", "c29" } },
+      { RISCV_CNULL_REGNUM + 30, { "ct5", "c30" } },
+      { RISCV_CNULL_REGNUM + 31, { "ct6", "c31" } },
+      { RISCV_CNULL_REGNUM + 32, { "pcc" } },
+      { RISCV_CNULL_REGNUM + 33, { "ddc" } },
+    };
+  }
+
+  /* Return the preferred name for the register with gdb register number
+     REGNUM, which must be in the inclusive range RISCV_CNULL_REGNUM to
+     RISCV_LAST_CHERI_REGNUM.  */
+  const char *register_name (int regnum) const
+  {
+    gdb_assert (regnum >= RISCV_CNULL_REGNUM
+		&& regnum <= RISCV_LAST_CHERI_REGNUM);
+    regnum -= RISCV_CNULL_REGNUM;
+    return m_registers[regnum].names[0];
+  }
+
+  /* Check this feature within TDESC, record the registers from this
+     feature into TDESC_DATA and update ALIASES and FEATURES.  */
+  bool check (const struct target_desc *tdesc,
+	      struct tdesc_arch_data *tdesc_data,
+	      std::vector<riscv_pending_register_alias> *aliases,
+	      struct riscv_gdbarch_features *features) const
+  {
+    const struct tdesc_feature *feature_xcheri = tdesc_feature (tdesc);
+
+    /* It's fine if this feature is missing.  Update the architecture
+       feature set and return.  */
+    if (feature_xcheri == nullptr)
+      {
+	features->clen = 0;
+	return true;
+      }
+
+    for (const auto &reg : m_registers)
+      {
+	bool found = reg.check (tdesc_data, feature_xcheri, true, aliases);
+
+	if (!found)
+	  return false;
+      }
+
+    /* Check that all of the CHERI capability registers have the same
+       bitsize.  */
+    int clen_bitsize = tdesc_register_bitsize (feature_xcheri, "pcc");
+
+    bool valid_p = true;
+    for (auto &tdesc_reg : feature_xcheri->registers)
+      valid_p &= (tdesc_reg->bitsize == clen_bitsize);
+
+    features->clen = (clen_bitsize / 8);
+
+    return valid_p;
+  }
+};
+
+/* An instance of the Xcheri-register feature set.  */
+
+static const struct riscv_creg_feature riscv_creg_feature;
 
 /* Class representing the f-registers feature set.  */
 
@@ -773,6 +873,24 @@ riscv_abi_embedded (struct gdbarch *gdbarch)
   return tdep->abi_features.embedded;
 }
 
+/* See riscv-tdep.h.  */
+
+int
+riscv_isa_clen (struct gdbarch *gdbarch)
+{
+  riscv_gdbarch_tdep *tdep = (riscv_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  return tdep->isa_features.clen;
+}
+
+/* See riscv-tdep.h.  */
+
+int
+riscv_abi_clen (struct gdbarch *gdbarch)
+{
+  riscv_gdbarch_tdep *tdep = (riscv_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  return tdep->abi_features.clen;
+}
+
 /* Return true if the target for GDBARCH has floating point hardware.  */
 
 static bool
@@ -797,6 +915,22 @@ riscv_is_fp_regno_p (int regno)
 {
   return (regno >= RISCV_FIRST_FP_REGNUM
 	  && regno <= RISCV_LAST_FP_REGNUM);
+}
+
+/* Return true if the target for GDBARCH has capability registers.  */
+
+static bool
+riscv_has_cheri (struct gdbarch *gdbarch)
+{
+  return (riscv_isa_clen (gdbarch) > 0);
+}
+
+/* Return true if the target for GDBARCH is using CheriABI.  */
+
+static bool
+riscv_has_cheriabi (struct gdbarch *gdbarch)
+{
+  return (riscv_abi_clen (gdbarch) > 0);
 }
 
 /* Implement the breakpoint_kind_from_pc gdbarch method.  */
@@ -996,6 +1130,10 @@ riscv_register_type (struct gdbarch *gdbarch, int regnum)
 	      || strcmp (type->name (), "double") == 0))
 	type = riscv_fpreg_d_type (gdbarch);
     }
+
+  /* Force plain long types for GPRs when using CheriABI.  */
+  if (riscv_has_cheriabi (gdbarch) && regnum <= RISCV_PC_REGNUM)
+    return builtin_type (gdbarch)->builtin_long;
 
   if ((regnum == gdbarch_pc_regnum (gdbarch)
        || regnum == RISCV_RA_REGNUM
@@ -1323,7 +1461,9 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
 	    || regnum == RISCV_CSR_FFLAGS_REGNUM
 	    || regnum == RISCV_CSR_FRM_REGNUM);
   else if (reggroup == general_reggroup)
-    return regnum < RISCV_FIRST_FP_REGNUM;
+    return (regnum < RISCV_FIRST_FP_REGNUM
+	    || (regnum >= RISCV_CNULL_REGNUM
+		&& regnum <= RISCV_LAST_CHERI_REGNUM));
   else if (reggroup == restore_reggroup || reggroup == save_reggroup)
     {
       if (riscv_has_fp_regs (gdbarch))
@@ -3462,6 +3602,9 @@ riscv_features_from_bfd (const bfd *abfd)
       else if (e_flags & EF_RISCV_FLOAT_ABI_SINGLE)
 	features.flen = 4;
 
+      if (e_flags & EF_RISCV_CHERIABI)
+	features.clen = features.xlen * 2;
+
       if (e_flags & EF_RISCV_RVE)
 	{
 	  if (features.xlen == 8)
@@ -3522,7 +3665,12 @@ static int
 riscv_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
   if (reg < RISCV_DWARF_REGNUM_X31)
-    return RISCV_ZERO_REGNUM + (reg - RISCV_DWARF_REGNUM_X0);
+    {
+      if (riscv_has_cheriabi (gdbarch))
+	return RISCV_CNULL_REGNUM + (reg - RISCV_DWARF_REGNUM_X0);
+      else
+	return RISCV_ZERO_REGNUM + (reg - RISCV_DWARF_REGNUM_X0);
+    }
 
   else if (reg < RISCV_DWARF_REGNUM_F31)
     return RISCV_FIRST_FP_REGNUM + (reg - RISCV_DWARF_REGNUM_F0);
@@ -3546,8 +3694,10 @@ riscv_gcc_target_options (struct gdbarch *gdbarch)
 {
   int isa_xlen = riscv_isa_xlen (gdbarch);
   int isa_flen = riscv_isa_flen (gdbarch);
+  int isa_clen = riscv_isa_clen (gdbarch);
   int abi_xlen = riscv_abi_xlen (gdbarch);
   int abi_flen = riscv_abi_flen (gdbarch);
+  int abi_clen = riscv_abi_clen (gdbarch);
   std::string target_options;
 
   target_options = "-march=rv";
@@ -3561,9 +3711,15 @@ riscv_gcc_target_options (struct gdbarch *gdbarch)
     target_options += "imafc";
   else
     target_options += "imac";
+  if (isa_clen != 0)
+    target_options += "xcheri";
 
   target_options += " -mabi=";
-  if (abi_xlen == 8)
+  if (abi_clen == 128)
+    target_options = "l64pc128";
+  else if (abi_clen == 64)
+    target_options = "l32pc64";
+  else if (abi_xlen == 8)
     target_options += "lp64";
   else
     target_options += "ilp32";
@@ -3695,6 +3851,8 @@ riscv_gdbarch_init (struct gdbarch_info info,
 
   bool valid_p = (riscv_xreg_feature.check (tdesc, tdesc_data.get (),
 					    &pending_aliases, &features)
+		  && riscv_creg_feature.check (tdesc, tdesc_data.get (),
+					       &pending_aliases, &features)
 		  && riscv_freg_feature.check (tdesc, tdesc_data.get (),
 					       &pending_aliases, &features)
 		  && riscv_virtual_feature.check (tdesc, tdesc_data.get (),
