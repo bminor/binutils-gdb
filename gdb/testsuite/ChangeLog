@@ -1,4 +1,4 @@
-2020-02-06  Shahab Vahedi  <shahab@synopsys.com>
+2020-02-21  Shahab Vahedi  <shahab@synopsys.com>
 
 	* lib/gdb.exp (gdb_wrapper_init): Reset
 	"gdb_wrapper_initialized" to 0 if "wrapper_file" does
