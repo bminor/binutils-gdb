@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!-- Copyright (C) 2018-2019 Free Software Foundation, Inc.
+
+     Copying and distribution of this file, with or without modification,
+     are permitted in any medium without royalty provided the copyright
+     notice and this notice are preserved.  -->
+
+<!DOCTYPE feature SYSTEM "gdb-target.dtd">
+<feature name="org.gnu.gdb.riscv.cheri">
+  <reg name="cnull" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cra" bitsize="64" type="code_capability" group="general"/>
+  <reg name="csp" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cgp" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ctp" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ct0" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ct1" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ct2" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cfp" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cs1" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ca0" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ca1" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ca2" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ca3" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ca4" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ca5" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ca6" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ca7" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cs2" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cs3" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cs4" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cs5" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cs6" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cs7" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cs8" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cs9" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cs10" bitsize="64" type="data_capability" group="general"/>
+  <reg name="cs11" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ct3" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ct4" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ct5" bitsize="64" type="data_capability" group="general"/>
+  <reg name="ct6" bitsize="64" type="data_capability" group="general"/>
+
+  <reg name="pcc" bitsize="64" type="code_capability" group="general"/>
+  <reg name="ddc" bitsize="64" type="data_capability" group="general"/>
+</feature>
