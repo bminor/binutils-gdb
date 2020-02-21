@@ -1688,7 +1688,8 @@ partial_symtab::read_dependencies (struct objfile *objfile)
 {
   for (int i = 0; i < number_of_dependencies; ++i)
     {
-      if (!dependencies[i]->readin_p ())
+      if (!dependencies[i]->readin_p ()
+	  && dependencies[i]->user == NULL)
 	{
 	  /* Inform about additional files to be read in.  */
 	  if (info_verbose)

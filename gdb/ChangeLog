@@ -1,3 +1,9 @@
+2020-02-21  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25534
+	* psymtab.c (partial_symtab::read_dependencies): Don't read dependency
+	if dependencies[i]->user != NULL.
+
 2020-02-21  Ali Tamur  <tamur@google.com>
 
 	* dwarf2/read.c (dwarf2_name): Add null check.
