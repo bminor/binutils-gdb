@@ -1159,28 +1159,28 @@ open_source_file (struct symtab *s)
   if (fd.get () < 0)
     {
       if (SYMTAB_COMPUNIT (s) != nullptr)
-        {
-          const objfile *ofp = COMPUNIT_OBJFILE (SYMTAB_COMPUNIT (s));
+	{
+	  const objfile *ofp = COMPUNIT_OBJFILE (SYMTAB_COMPUNIT (s));
 
-          std::string srcpath;
-          if (IS_ABSOLUTE_PATH (s->filename))
-            srcpath = s->filename;
-          else
-            {
-              srcpath = SYMTAB_DIRNAME (s);
-              srcpath += SLASH_STRING;
-              srcpath += s->filename;
-            }
+	  std::string srcpath;
+	  if (IS_ABSOLUTE_PATH (s->filename))
+	    srcpath = s->filename;
+	  else
+	    {
+	      srcpath = SYMTAB_DIRNAME (s);
+	      srcpath += SLASH_STRING;
+	      srcpath += s->filename;
+	    }
 
-          const struct bfd_build_id *build_id = build_id_bfd_get (ofp->obfd);
+	  const struct bfd_build_id *build_id = build_id_bfd_get (ofp->obfd);
 
-          /* Query debuginfod for the source file.  */
-          if (build_id != nullptr)
-            fd = debuginfod_source_query (build_id->data,
-                                          build_id->size,
-                                          srcpath.c_str (),
-                                          &fullname);
-        }
+	  /* Query debuginfod for the source file.  */
+	  if (build_id != nullptr)
+	    fd = debuginfod_source_query (build_id->data,
+					  build_id->size,
+					  srcpath.c_str (),
+					  &fullname);
+	}
     }
 
   s->fullname = fullname.release ();

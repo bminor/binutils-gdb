@@ -37,9 +37,9 @@
 
 extern scoped_fd
 debuginfod_source_query (const unsigned char *build_id,
-                         int build_id_len,
-                         const char *src_path,
-                         gdb::unique_xmalloc_ptr<char> *destname);
+			 int build_id_len,
+			  const char *src_path,
+			  gdb::unique_xmalloc_ptr<char> *destname);
 
 /* Query debuginfod servers for a debuginfo file with BUILD_ID.
    BUILD_ID can be given as a binary blob or a null-terminated string.
@@ -52,8 +52,8 @@ debuginfod_source_query (const unsigned char *build_id,
 
 extern scoped_fd
 debuginfod_debuginfo_query (const unsigned char *build_id,
-                            int build_id_len,
-                            const char *filename,
-                            gdb::unique_xmalloc_ptr<char> *destname);
+			    int build_id_len,
+			    const char *filename,
+			    gdb::unique_xmalloc_ptr<char> *destname);
 
 #endif /* DEBUGINFOD_SUPPORT_H */

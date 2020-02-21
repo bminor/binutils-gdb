@@ -24,17 +24,17 @@
 #ifndef HAVE_LIBDEBUGINFOD
 scoped_fd
 debuginfod_source_query (const unsigned char *build_id __attribute__((unused)),
-                         int build_id_len __attribute__((unused)),
-                         const char *srcpath __attribute__((unused)),
-                         gdb::unique_xmalloc_ptr<char> *filename __attribute__((unused)))
+			 int build_id_len __attribute__((unused)),
+			 const char *srcpath __attribute__((unused)),
+			 gdb::unique_xmalloc_ptr<char> *filename __attribute__((unused)))
 {
   return scoped_fd (-ENOSYS);
 }
 
 scoped_fd
 debuginfod_debuginfo_query (const unsigned char *build_id __attribute__((unused)),
-                            int build_id_len __attribute__((unused)),
-                            gdb::unique_xmalloc_ptr<char> *filename __attribute__((unused)))
+			    int build_id_len __attribute__((unused)),
+			    gdb::unique_xmalloc_ptr<char> *filename __attribute__((unused)))
 {
   return scoped_fd (-ENOSYS);
 }
@@ -51,9 +51,9 @@ progressfn (debuginfod_client *c, long cur, long total)
     }
 
   printf_unfiltered ("Downloading... %.0f%% (%ld/%ld)%s",
-                     (cur * 100.0f) / total,
-                     cur, total,
-                     (cur == total) ? "\n" : "\r");
+		     (cur * 100.0f) / total,
+		     cur, total,
+		     (cur == total) ? "\n" : "\r");
   return 0;
 }
 
@@ -72,9 +72,9 @@ debuginfod_init ()
 
 scoped_fd
 debuginfod_source_query (const unsigned char *build_id,
-                         int build_id_len,
-                         const char *srcpath,
-                         gdb::unique_xmalloc_ptr<char> *destname)
+			 int build_id_len,
+			 const char *srcpath,
+			  gdb::unique_xmalloc_ptr<char> *destname)
 {
   debuginfod_client *c = debuginfod_init ();
 
@@ -85,17 +85,16 @@ debuginfod_source_query (const unsigned char *build_id,
 
   printf_unfiltered ("Attempting to download source file %s\n", srcpath);
   scoped_fd fd (debuginfod_find_source (c,
-                                        build_id,
-                                        build_id_len,
-                                        srcpath,
-                                        &dname));
+					build_id,
+					build_id_len,
+					srcpath,
+					&dname));
 
   if (fd.get () < 0)
     printf_unfiltered ("Download unsuccessful. Continuing without source file %s.\n",
-                       srcpath);
+		       srcpath);
   else
     printf_unfiltered ("Download successful.\n");
-
 
   destname->reset (dname);
   debuginfod_end (c);
@@ -107,9 +106,9 @@ debuginfod_source_query (const unsigned char *build_id,
 
 scoped_fd
 debuginfod_debuginfo_query (const unsigned char *build_id,
-                            int build_id_len,
-                            const char *filename,
-                            gdb::unique_xmalloc_ptr<char> *destname)
+			    int build_id_len,
+			    const char *filename,
+			    gdb::unique_xmalloc_ptr<char> *destname)
 {
   debuginfod_client *c = debuginfod_init ();
 
@@ -123,7 +122,7 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 
   if (fd.get () < 0)
     printf_unfiltered ("Download unsuccessful. Continuing without debug info for %s.\n",
-                       filename);
+		       filename);
   else
     printf_unfiltered ("Download successful.\n");
 

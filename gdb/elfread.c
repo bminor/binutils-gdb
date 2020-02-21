@@ -1319,33 +1319,33 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 				    symfile_flags, objfile);
 	}
       else
-        {
-          has_dwarf2 = false;
-          const struct bfd_build_id *build_id = build_id_bfd_get (objfile->obfd);
+	{
+	  has_dwarf2 = false;
+	  const struct bfd_build_id *build_id = build_id_bfd_get (objfile->obfd);
 
-          if (build_id != nullptr)
-            {
-              gdb::unique_xmalloc_ptr<char> symfile_path;
-              scoped_fd fd (debuginfod_debuginfo_query (build_id->data,
-                                                        build_id->size,
-                                                        objfile->original_name,
-                                                        &symfile_path));
+	  if (build_id != nullptr)
+	    {
+	      gdb::unique_xmalloc_ptr<char> symfile_path;
+	      scoped_fd fd (debuginfod_debuginfo_query (build_id->data,
+							build_id->size,
+							objfile->original_name,
+							&symfile_path));
 
-              if (fd.get () >= 0)
-                {
-                  /* File successfully retrieved from server.  */
-                  gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (symfile_path.get ()));
+	      if (fd.get () >= 0)
+		{
+		  /* File successfully retrieved from server.  */
+		  gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (symfile_path.get ()));
 
-                  if (debug_bfd != nullptr
-                      && build_id_verify (debug_bfd.get (), build_id->size, build_id->data))
-                    {
-                      symbol_file_add_separate (debug_bfd.get (), symfile_path.get (),
-                                                symfile_flags, objfile);
-                      has_dwarf2 = true;
-                    }
-                }
-            }
-        }
+		  if (debug_bfd != nullptr
+		      && build_id_verify (debug_bfd.get (), build_id->size, build_id->data))
+		    {
+		      symbol_file_add_separate (debug_bfd.get (), symfile_path.get (),
+						symfile_flags, objfile);
+		       has_dwarf2 = true;
+		    }
+		}
+	    }
+	}
     }
 
   /* Read the CTF section only if there is no DWARF info.  */

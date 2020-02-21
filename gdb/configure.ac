@@ -340,9 +340,9 @@ if test "x$with_debuginfod" != xno; then
       AC_DEFINE([HAVE_LIBDEBUGINFOD], [1], [Define to 1 if debuginfod is enabled.])
     else
       if test "x$with_debuginfod" = xyes; then
-        AC_MSG_ERROR(["--with-debuginfod was given, but libdebuginfod is missing or unusable."])
+	AC_MSG_ERROR(["--with-debuginfod was given, but libdebuginfod is missing or unusable."])
       else
-        AC_MSG_WARN([libdebuginfod is missing or unusable; some features may be unavailable.])
+	AC_MSG_WARN([libdebuginfod is missing or unusable; some features may be unavailable.])
       fi
     fi
   else

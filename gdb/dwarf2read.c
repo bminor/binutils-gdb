@@ -2753,19 +2753,19 @@ dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
       const char *origname = dwarf2_per_objfile->objfile->original_name;
 
       scoped_fd fd (debuginfod_debuginfo_query (buildid,
-                                                buildid_len,
-                                                origname,
-                                                &alt_filename));
+						buildid_len,
+						origname,
+						&alt_filename));
 
       if (fd.get () >= 0)
-        {
-          /* File successfully retrieved from server.  */
-          dwz_bfd = gdb_bfd_open (alt_filename.get (), gnutarget, -1);
+	{
+	   /* File successfully retrieved from server.  */
+	   dwz_bfd = gdb_bfd_open (alt_filename.get (), gnutarget, -1);
 
-          if (dwz_bfd != nullptr
-              && !build_id_verify (dwz_bfd.get (), buildid_len, buildid))
-            dwz_bfd.reset (nullptr);
-        }
+	  if (dwz_bfd != nullptr
+	      && !build_id_verify (dwz_bfd.get (), buildid_len, buildid))
+	    dwz_bfd.reset (nullptr);
+	}
     }
 
   if (dwz_bfd == NULL)
