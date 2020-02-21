@@ -1,5 +1,22 @@
 2020-02-21  Alan Modra  <amodra@gmail.com>
 
+	* mach-o.c (bfd_mach_o_canonicalize_relocs): Fix ineffective
+	overflow check.
+	(bfd_mach_o_canonicalize_reloc): Likewise.
+	(bfd_mach_o_canonicalize_dynamic_reloc): Likewise.  Sanity check
+	counts and offsets against file size.
+	(bfd_mach_o_build_dysymtab): Fix ineffective overflow check.
+	(bfd_mach_o_mangle_sections): Remove unnecessary overflow check.
+	(bfd_mach_o_read_symtab_symbols): Sanity check count and offset
+	against file size.  Delete symbol table error message.
+	(bfd_mach_o_read_dysymtab): Sanity check counts and offsets
+	against file size.
+	(bfd_mach_o_read_symtab): Likewise.
+	(bfd_mach_o_read_command): Pass file size.
+	(bfd_mach_o_scan): Sanity check command count against file size.
+
+2020-02-21  Alan Modra  <amodra@gmail.com>
+
 	PR 25569
 	* aoutx.h (adjust_o_magic, adjust_z_magic, adjust_n_magic): Use
 	"text", "data" and "bss" section pointer vars.  Don't update
