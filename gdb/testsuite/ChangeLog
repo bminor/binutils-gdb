@@ -1,3 +1,12 @@
+2020-02-21  Tom de Vries  <tdevries@suse.de>
+
+	PR go/18926
+	* lib/gdb.exp (bp_location2/bp_location2_regexp): Fix.
+	Remove blanket xfails.  Use message argument for gdb_breakpoint.
+	Make continuing to breakpoint test conditional on setting breakpoint.
+	Fix continuing to breakpoint regexp.  Add xfails for gccgo-6/7
+	DW_AT_name attribute.  Add xfail for GCC PR93866.
+
 2020-02-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.dwarf2/cpp-linkage-name.c: New file.
