@@ -166,11 +166,11 @@ extern int mips_pc_is_mips (CORE_ADDR memaddr);
 
 /* Tell if the program counter value in MEMADDR is in a MIPS16
    function.  */
-extern int mips_pc_is_mips16 (struct gdbarch *gdbarch, bfd_vma memaddr);
+extern int mips_pc_is_mips16 (struct gdbarch *gdbarch, CORE_ADDR memaddr);
 
 /* Tell if the program counter value in MEMADDR is in a microMIPS
    function.  */
-extern int mips_pc_is_micromips (struct gdbarch *gdbarch, bfd_vma memaddr);
+extern int mips_pc_is_micromips (struct gdbarch *gdbarch, CORE_ADDR memaddr);
 
 /* Return the currently configured (or set) saved register size.  */
 extern unsigned int mips_abi_regsize (struct gdbarch *gdbarch);
