@@ -21756,6 +21756,8 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	    {
 	      gdb::unique_xmalloc_ptr<char> demangled
 		(gdb_demangle (DW_STRING (attr), DMGL_TYPES));
+	      if (demangled == nullptr)
+		return nullptr;
 
 	      const char *base;
 
