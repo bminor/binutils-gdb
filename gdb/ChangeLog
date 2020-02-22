@@ -1,5 +1,9 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.c (tui_next_win, tui_prev_win): Reimplement.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-winsource.h (struct tui_source_window_iterator)
 	<inner_iterator>: New etytypedef.
 	<tui_source_window_iterator>: Take "end" parameter.

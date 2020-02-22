@@ -26,6 +26,7 @@
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-winsource.h"
 #include "gdb_curses.h"
+#include <algorithm>
 
 struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
@@ -103,28 +104,13 @@ tui_set_term_width_to (int w)
 struct tui_win_info *
 tui_next_win (struct tui_win_info *cur_win)
 {
-  int type = cur_win->type;
-  struct tui_win_info *next_win = NULL;
+  auto iter = std::find (tui_windows.begin (), tui_windows.end (), cur_win);
+  gdb_assert (iter != tui_windows.end ());
 
-  if (cur_win->type == CMD_WIN)
-    type = SRC_WIN;
-  else
-    type = cur_win->type + 1;
-  while (type != cur_win->type && (next_win == NULL))
-    {
-      if (tui_win_list[type]
-	  && tui_win_list[type]->is_visible ())
-	next_win = tui_win_list[type];
-      else
-	{
-	  if (type == CMD_WIN)
-	    type = SRC_WIN;
-	  else
-	    type++;
-	}
-    }
-
-  return next_win;
+  ++iter;
+  if (iter == tui_windows.end ())
+    return tui_windows[0];
+  return *iter;
 }
 
 
@@ -133,28 +119,13 @@ tui_next_win (struct tui_win_info *cur_win)
 struct tui_win_info *
 tui_prev_win (struct tui_win_info *cur_win)
 {
-  int type = cur_win->type;
-  struct tui_win_info *prev = NULL;
+  auto iter = std::find (tui_windows.begin (), tui_windows.end (), cur_win);
+  gdb_assert (iter != tui_windows.end ());
 
-  if (cur_win->type == SRC_WIN)
-    type = CMD_WIN;
-  else
-    type = cur_win->type - 1;
-  while (type != cur_win->type && (prev == NULL))
-    {
-      if (tui_win_list[type]
-	  && tui_win_list[type]->is_visible ())
-	prev = tui_win_list[type];
-      else
-	{
-	  if (type == SRC_WIN)
-	    type = CMD_WIN;
-	  else
-	    type--;
-	}
-    }
-
-  return prev;
+  if (iter == tui_windows.begin ())
+    return tui_windows.back ();
+  --iter;
+  return *iter;
 }
 
 
