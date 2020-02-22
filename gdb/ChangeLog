@@ -1,5 +1,10 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-disasm.c (tui_get_low_disassembly_address): Use
+	TUI_DISASM_WIN, not tui_win_list.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* valprint.c (generic_val_print_enum_1)
 	(val_print_type_code_flags): Style member names.
 	* rust-lang.c (val_print_struct, rust_print_enum)

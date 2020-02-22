@@ -429,8 +429,8 @@ tui_get_low_disassembly_address (struct gdbarch *gdbarch,
 
   /* Determine where to start the disassembly so that the pc is about
      in the middle of the viewport.  */
-  if (tui_win_list[DISASSEM_WIN] != NULL)
-    pos = tui_win_list[DISASSEM_WIN]->height;
+  if (TUI_DISASM_WIN != NULL)
+    pos = TUI_DISASM_WIN->height;
   else if (TUI_CMD_WIN == NULL)
     pos = tui_term_height () / 2 - 2;
   else
