@@ -400,20 +400,19 @@ tui_layout_window::replace_window (const char *name, const char *new_window)
 /* See tui-layout.h.  */
 
 void
-tui_layout_window::specification (ui_file *output)
+tui_layout_window::specification (ui_file *output, int depth)
 {
   fputs_unfiltered (get_name (), output);
 }
 
 /* See tui-layout.h.  */
 
-tui_layout_split *
-tui_layout_split::add_split (int weight)
+void
+tui_layout_split::add_split (std::unique_ptr<tui_layout_split> &&layout,
+			     int weight)
 {
-  tui_layout_split *result = new tui_layout_split ();
-  split s = {weight, std::unique_ptr<tui_layout_base> (result)};
+  split s = {weight, std::move (layout)};
   m_splits.push_back (std::move (s));
-  return result;
 }
 
 /* See tui-layout.h.  */
@@ -711,17 +710,23 @@ tui_layout_split::replace_window (const char *name, const char *new_window)
 /* See tui-layout.h.  */
 
 void
-tui_layout_split::specification (ui_file *output)
+tui_layout_split::specification (ui_file *output, int depth)
 {
+  if (depth > 0)
+    fputs_unfiltered ("{", output);
+
   bool first = true;
   for (auto &item : m_splits)
     {
       if (!first)
 	fputs_unfiltered (" ", output);
       first = false;
-      item.layout->specification (output);
+      item.layout->specification (output, depth + 1);
       fprintf_unfiltered (output, " %d", item.weight);
     }
+
+  if (depth > 0)
+    fputs_unfiltered ("}", output);
 }
 
 /* Destroy the layout associated with SELF.  */
@@ -746,7 +751,7 @@ add_layout_command (const char *name, tui_layout_split *layout)
   struct cmd_list_element *cmd;
 
   string_file spec;
-  layout->specification (&spec);
+  layout->specification (&spec, 0);
 
   gdb::unique_xmalloc_ptr<char> doc
     (xstrprintf (_("Apply the \"%s\" layout.\n\
@@ -833,23 +838,60 @@ tui_new_layout_command (const char *spec, int from_tty)
   if (new_name[0] == '-')
     error (_("Layout name cannot start with '-'"));
 
-  std::unique_ptr<tui_layout_split> new_layout (new tui_layout_split);
+  std::vector<std::unique_ptr<tui_layout_split>> splits;
+  splits.emplace_back (new tui_layout_split);
   std::unordered_set<std::string> seen_windows;
   while (true)
     {
-      std::string name = extract_arg (&spec);
-      if (name.empty ())
+      spec = skip_spaces (spec);
+      if (spec[0] == '\0')
 	break;
-      if (!validate_window_name (name))
-	error (_("Unknown window \"%s\""), name.c_str ());
-      if (seen_windows.find (name) != seen_windows.end ())
-	error (_("Window \"%s\" seen twice in layout"), name.c_str ());
-      ULONGEST weight = get_ulongest (&spec);
+
+      if (spec[0] == '{')
+	{
+	  splits.emplace_back (new tui_layout_split);
+	  ++spec;
+	  continue;
+	}
+
+      bool is_close = false;
+      std::string name;
+      if (spec[0] == '}')
+	{
+	  is_close = true;
+	  ++spec;
+	  if (splits.size () == 1)
+	    error (_("Extra '}' in layout specification"));
+	}
+      else
+	{
+	  name = extract_arg (&spec);
+	  if (name.empty ())
+	    break;
+	  if (!validate_window_name (name))
+	    error (_("Unknown window \"%s\""), name.c_str ());
+	  if (seen_windows.find (name) != seen_windows.end ())
+	    error (_("Window \"%s\" seen twice in layout"), name.c_str ());
+	}
+
+      ULONGEST weight = get_ulongest (&spec, '}');
       if ((int) weight != weight)
 	error (_("Weight out of range: %s"), pulongest (weight));
-      new_layout->add_window (name.c_str (), weight);
-      seen_windows.insert (name);
+      if (is_close)
+	{
+	  std::unique_ptr<tui_layout_split> last_split
+	    = std::move (splits.back ());
+	  splits.pop_back ();
+	  splits.back ()->add_split (std::move (last_split), weight);
+	}
+      else
+	{
+	  splits.back ()->add_window (name.c_str (), weight);
+	  seen_windows.insert (name);
+	}
     }
+  if (splits.size () > 1)
+    error (_("Missing '}' in layout specification"));
   if (seen_windows.empty ())
     error (_("New layout does not contain any windows"));
   if (seen_windows.find ("cmd") == seen_windows.end ())
@@ -857,6 +899,7 @@ tui_new_layout_command (const char *spec, int from_tty)
 
   gdb::unique_xmalloc_ptr<char> cmd_name
     = make_unique_xstrdup (new_name.c_str ());
+  std::unique_ptr<tui_layout_split> new_layout = std::move (splits.back ());
   struct cmd_list_element *cmd
     = add_layout_command (cmd_name.get (), new_layout.get ());
   cmd->name_allocated = 1;
@@ -900,6 +943,9 @@ Usage: tui new-layout NAME WINDOW WEIGHT [WINDOW WEIGHT]...\n\
 Create a new TUI layout.  The new layout will be named NAME,\n\
 and can be accessed using \"layout NAME\".\n\
 The windows will be displayed in the specified order.\n\
+A WINDOW can also be of the form:\n\
+  { NAME WEIGHT [NAME WEIGHT]... }\n\
+This form indicates a sub-frame.\n\
 Each WEIGHT is an integer, which holds the relative size\n\
 to be allocated to the window."),
 	   tui_get_cmd_list ());

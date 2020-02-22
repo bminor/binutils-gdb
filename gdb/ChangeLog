@@ -1,5 +1,19 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.h (class tui_layout_split) <add_split>: Change
+	parameter and return types.
+	(class tui_layout_base) <specification>: Add "depth".
+	(class tui_layout_window) <specification>: Add "depth".
+	(class tui_layout_split) <specification>: Add "depth".
+	* tui/tui-layout.c (tui_layout_split::add_split): Change parameter
+	and return types.
+	(tui_new_layout_command): Parse sub-layouts.
+	(_initialize_tui_layout): Update help string.
+	(tui_layout_window::specification): Add "depth".
+	(add_layout_command): Update.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* NEWS: Add "tui new-layout" item.
 	* tui/tui-layout.c (add_layout_command): Return cmd_list_element.
 	Add new-layout command to help text.

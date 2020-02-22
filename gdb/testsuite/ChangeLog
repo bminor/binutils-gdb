@@ -1,5 +1,9 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* gdb.tui/new-layout.exp: Add sub-layout tests.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* gdb.tui/new-layout.exp: New file.
 
 2020-02-22  Tom Tromey  <tom@tromey.com>

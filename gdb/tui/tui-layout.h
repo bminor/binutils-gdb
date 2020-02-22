@@ -74,8 +74,9 @@ public:
      NEW_WINDOW.  */
   virtual void replace_window (const char *name, const char *new_window) = 0;
 
-  /* Append the specification to this window to OUTPUT.  */
-  virtual void specification (ui_file *output) = 0;
+  /* Append the specification to this window to OUTPUT.  DEPTH is the
+     depth of this layout in the hierarchy (zero-based).  */
+  virtual void specification (ui_file *output, int depth) = 0;
 
   /* The most recent space allocation.  */
   int x = 0;
@@ -125,7 +126,7 @@ public:
 
   void replace_window (const char *name, const char *new_window) override;
 
-  void specification (ui_file *output) override;
+  void specification (ui_file *output, int depth) override;
 
 protected:
 
@@ -153,7 +154,7 @@ public:
   /* Add a new split layout to this layout.  WEIGHT is the desired
      size, which is relative to the other weights given in this
      layout.  */
-  tui_layout_split *add_split (int weight);
+  void add_split (std::unique_ptr<tui_layout_split> &&layout, int weight);
 
   /* Add a new window to this layout.  NAME is the name of the window
      to add.  WEIGHT is the desired size, which is relative to the
@@ -174,7 +175,7 @@ public:
 
   void replace_window (const char *name, const char *new_window) override;
 
-  void specification (ui_file *output) override;
+  void specification (ui_file *output, int depth) override;
 
 protected:
 
