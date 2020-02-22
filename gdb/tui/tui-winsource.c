@@ -286,10 +286,8 @@ tui_source_window_base::show_source_content ()
   refresh_window ();
 }
 
-tui_source_window_base::tui_source_window_base (enum tui_win_type type)
-  : tui_win_info (type)
+tui_source_window_base::tui_source_window_base ()
 {
-  gdb_assert (type == SRC_WIN || type == DISASSEM_WIN);
   start_line_or_addr.loa = LOA_ADDRESS;
   start_line_or_addr.u.addr = 0;
 
@@ -334,7 +332,7 @@ tui_source_window_base::rerender ()
       struct gdbarch *gdbarch = get_frame_arch (frame);
 
       struct symtab *s = find_pc_line_symtab (get_frame_pc (frame));
-      if (type != SRC_WIN)
+      if (this != TUI_SRC_WIN)
 	find_line_pc (s, cursal.line, &cursal.pc);
       update_source_window (gdbarch, cursal);
     }
@@ -349,7 +347,7 @@ tui_source_window_base::refill ()
 {
   symtab_and_line sal {};
 
-  if (type == SRC_WIN)
+  if (this == TUI_SRC_WIN)
     {
       sal = get_current_source_symtab_and_line ();
       if (sal.symtab == NULL)

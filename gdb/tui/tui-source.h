@@ -31,10 +31,7 @@ struct symtab;
 
 struct tui_source_window : public tui_source_window_base
 {
-  tui_source_window ()
-    : tui_source_window_base (SRC_WIN)
-  {
-  }
+  tui_source_window () = default;
 
   DISABLE_COPY_AND_ASSIGN (tui_source_window);
 

@@ -1,5 +1,32 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.h (enum tui_win_type) <LOCATOR_WIN, DATA_ITEM_WIN>:
+	Remove constants.
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<tui_source_window_base>: Remove parameter.
+	* tui/tui-winsource.c
+	(tui_source_window_base::tui_source_window_base): Remove
+	parameter.
+	(tui_source_window_base::refill): Update.
+	* tui/tui-stack.h (struct tui_locator_window)
+	<tui_locator_window>: Update.
+	* tui/tui-source.h (struct tui_source_window) <tui_source_window>:
+	Default the constructor.
+	* tui/tui-regs.h (struct tui_data_item_window)
+	<tui_data_item_window>: Default the constructor.
+	(struct tui_data_window) <tui_data_window>: Likewise.
+	* tui/tui-disasm.h (struct tui_disasm_window) <tui_disasm_window>:
+	Default the constructor.
+	* tui/tui-data.h (struct tui_gen_win_info) <tui_gen_win_info>:
+	Default the constructor.
+	<type>: Remove.
+	(struct tui_win_info) <tui_win_info>: Default the constructor.
+	* tui/tui-data.c (tui_win_info::tui_win_info): Remove.
+	* tui/tui-command.h (struct tui_cmd_window) <tui_cmd_window>:
+	Default the constructor.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.h (tui_make_all_invisible): Don't declare.
 	* tui/tui-wingeneral.c (tui_make_all_invisible): Remove.
 	* tui/tui-win.c (tui_resize_all): Don't call

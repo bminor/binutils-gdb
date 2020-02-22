@@ -30,10 +30,7 @@
 
 struct tui_disasm_window : public tui_source_window_base
 {
-  tui_disasm_window ()
-    : tui_source_window_base (DISASSEM_WIN)
-  {
-  }
+  tui_disasm_window () = default;
 
   DISABLE_COPY_AND_ASSIGN (tui_disasm_window);
 

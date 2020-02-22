@@ -22,7 +22,7 @@
 #ifndef TUI_TUI_DATA_H
 #define TUI_TUI_DATA_H
 
-#include "tui/tui.h"	/* For enum tui_win_type.  */
+#include "tui/tui.h"
 #include "gdb_curses.h"	/* For WINDOW.  */
 #include "observable.h"
 
@@ -44,10 +44,7 @@ struct tui_gen_win_info
 {
 protected:
 
-  explicit tui_gen_win_info (enum tui_win_type t)
-    : type (t)
-  {
-  }
+  tui_gen_win_info () = default;
 
   /* This is called after the window is resized, and should update the
      window's contents.  */
@@ -117,8 +114,6 @@ public:
 
   /* Window handle.  */
   std::unique_ptr<WINDOW, curses_deleter> handle;
-  /* Type of window.  */
-  enum tui_win_type type;
   /* Window width.  */
   int width = 0;
   /* Window height.  */
@@ -162,7 +157,7 @@ struct tui_win_info : public tui_gen_win_info
 {
 protected:
 
-  explicit tui_win_info (enum tui_win_type type);
+  tui_win_info () = default;
   DISABLE_COPY_AND_ASSIGN (tui_win_info);
 
   /* Scroll the contents vertically.  This is only called via

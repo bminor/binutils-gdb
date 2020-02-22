@@ -129,11 +129,6 @@ tui_prev_win (struct tui_win_info *cur_win)
 }
 
 
-tui_win_info::tui_win_info (enum tui_win_type type)
-  : tui_gen_win_info (type)
-{
-}
-
 void
 tui_win_info::rerender ()
 {
