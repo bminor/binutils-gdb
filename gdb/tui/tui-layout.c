@@ -487,7 +487,7 @@ tui_layout_split::set_weights_from_heights ()
 
 /* See tui-layout.h.  */
 
-bool
+tui_adjust_result
 tui_layout_split::adjust_size (const char *name, int new_height)
 {
   /* Look through the children.  If one is a layout holding the named
@@ -496,10 +496,11 @@ tui_layout_split::adjust_size (const char *name, int new_height)
   int found_index = -1;
   for (int i = 0; i < m_splits.size (); ++i)
     {
-      if (m_splits[i].layout->adjust_size (name, new_height))
-	return true;
-      const char *win_name = m_splits[i].layout->get_name ();
-      if (win_name != nullptr && strcmp (name, win_name) == 0)
+      tui_adjust_result adjusted
+	= m_splits[i].layout->adjust_size (name, new_height);
+      if (adjusted == HANDLED)
+	return HANDLED;
+      if (adjusted == FOUND)
 	{
 	  found_index = i;
 	  break;
@@ -507,9 +508,9 @@ tui_layout_split::adjust_size (const char *name, int new_height)
     }
 
   if (found_index == -1)
-    return false;
+    return NOT_FOUND;
   if (m_splits[found_index].layout->height == new_height)
-    return true;
+    return HANDLED;
 
   set_weights_from_heights ();
   int delta = m_splits[found_index].weight - new_height;
@@ -557,7 +558,7 @@ tui_layout_split::adjust_size (const char *name, int new_height)
       apply (x, y, width, height);
     }
 
-  return true;
+  return HANDLED;
 }
 
 /* See tui-layout.h.  */

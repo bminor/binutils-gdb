@@ -1,5 +1,14 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.h (enum tui_adjust_result): New.
+	(class tui_layout_base) <adjust_size>: Return tui_adjust_result.
+	(class tui_layout_window) <adjust_size>: Return
+	tui_adjust_result.  Rewrite.
+	(class tui_layout_split) <adjust_size>: Return tui_adjust_result.
+	* tui/tui-layout.c (tui_layout_split::adjust_size): Update.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.h (class tui_layout_split) <add_split>: Change
 	parameter and return types.
 	(class tui_layout_base) <specification>: Add "depth".

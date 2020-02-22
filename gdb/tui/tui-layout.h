@@ -27,6 +27,18 @@
 #include "tui/tui.h"
 #include "tui/tui-data.h"
 
+/* Values that can be returned when handling a request to adjust a
+   window's size.  */
+enum tui_adjust_result
+{
+  /* Requested window was not found here.  */
+  NOT_FOUND,
+  /* Window was found but not handled.  */
+  FOUND,
+  /* Window was found and handled.  */
+  HANDLED
+};
+
 /* The basic object in a TUI layout.  This represents a single piece
    of screen real estate.  Subclasses determine the exact
    behavior.  */
@@ -64,7 +76,7 @@ public:
 
   /* Adjust the size of the window named NAME to NEW_HEIGHT, updating
      the sizes of the other windows around it.  */
-  virtual bool adjust_size (const char *name, int new_height) = 0;
+  virtual tui_adjust_result adjust_size (const char *name, int new_height) = 0;
 
   /* Remove some windows from the layout, leaving the command window
      and the window being passed in here.  */
@@ -111,9 +123,9 @@ public:
     return m_contents.c_str ();
   }
 
-  bool adjust_size (const char *name, int new_height) override
+  tui_adjust_result adjust_size (const char *name, int new_height) override
   {
-    return false;
+    return m_contents == name ? FOUND : NOT_FOUND;
   }
 
   bool top_boxed_p () const override;
@@ -165,7 +177,7 @@ public:
 
   void apply (int x, int y, int width, int height) override;
 
-  bool adjust_size (const char *name, int new_height) override;
+  tui_adjust_result adjust_size (const char *name, int new_height) override;
 
   bool top_boxed_p () const override;
 
