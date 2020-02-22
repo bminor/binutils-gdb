@@ -1,5 +1,12 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_set_focus_command)
+	(tui_set_win_height_command): Use error_no_arg.
+	(_initialize_tui_win): Update help text.
+	(FOCUS_USAGE, WIN_HEIGHT_USAGE): Don't define.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (extract_display_start_addr): Rewrite.
 	* tui/tui-disasm.h (struct tui_disasm_window)
 	<display_start_addr>: Declare.
