@@ -694,18 +694,27 @@ tui_scroll_right_command (const char *arg, int from_tty)
 static struct tui_win_info *
 tui_partial_win_by_name (gdb::string_view name)
 {
+  struct tui_win_info *best = nullptr;
+
   if (name != NULL)
     {
       for (tui_win_info *item : all_tui_windows ())
 	{
 	  const char *cur_name = item->name ();
 
-	  if (startswith (cur_name, name))
+	  if (name == cur_name)
 	    return item;
+	  if (startswith (cur_name, name))
+	    {
+	      if (best != nullptr)
+		error (_("Window name \"%*s\" is ambiguous"),
+		       (int) name.size (), name.data ());
+	      best = item;
+	    }
 	}
     }
 
-  return NULL;
+  return best;
 }
 
 /* Set focus to the window named by 'arg'.  */
