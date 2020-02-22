@@ -263,11 +263,6 @@ extern void tui_set_win_resized_to (bool);
 extern struct tui_win_info *tui_next_win (struct tui_win_info *);
 extern struct tui_win_info *tui_prev_win (struct tui_win_info *);
 
-/* Delete all the invisible windows.  Note that it is an error to call
-   this when the command window is invisible -- we don't allow the
-   command window to be removed from the layout.  */
-extern void tui_delete_invisible_windows ();
-
 extern unsigned int tui_tab_width;
 
 #endif /* TUI_TUI_DATA_H */

@@ -550,7 +550,6 @@ tui_resize_all (void)
       erase ();
       clearok (curscr, TRUE);
       tui_apply_current_layout ();
-      tui_delete_invisible_windows ();
       /* Turn keypad back on, unless focus is in the command
 	 window.  */
       if (win_with_focus != TUI_CMD_WIN)

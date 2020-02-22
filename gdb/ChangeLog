@@ -1,5 +1,18 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.h (tui_make_all_invisible): Don't declare.
+	* tui/tui-wingeneral.c (tui_make_all_invisible): Remove.
+	* tui/tui-win.c (tui_resize_all): Don't call
+	tui_delete_invisible_windows.
+	* tui/tui-layout.c (tui_apply_current_layout): Delete windows when
+	done.
+	(tui_set_layout): Update.
+	(tui_add_win_to_layout): Don't call tui_delete_invisible_windows.
+	* tui/tui-data.h (tui_delete_invisible_windows): Don't declare.
+	* tui/tui-data.c (tui_delete_invisible_windows): Remove.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (tui_partial_win_by_name): Handle ambiguity
 	correctly.
 

@@ -69,8 +69,43 @@ std::vector<tui_win_info *> tui_windows;
 void
 tui_apply_current_layout ()
 {
+  struct gdbarch *gdbarch;
+  CORE_ADDR addr;
+
+  extract_display_start_addr (&gdbarch, &addr);
+
+  std::vector<tui_win_info *> saved_windows = std::move (tui_windows);
   tui_windows.clear ();
+
+  for (tui_win_info *win_info : saved_windows)
+    win_info->make_visible (false);
+
   applied_layout->apply (0, 0, tui_term_width (), tui_term_height ());
+
+  /* Keep the list of internal windows up-to-date.  */
+  for (int win_type = SRC_WIN; (win_type < MAX_MAJOR_WINDOWS); win_type++)
+    if (tui_win_list[win_type] != nullptr
+	&& !tui_win_list[win_type]->is_visible ())
+      tui_win_list[win_type] = nullptr;
+
+  /* This should always be made visible by a layout.  */
+  gdb_assert (TUI_CMD_WIN->is_visible ());
+
+  /* Now delete any window that was not re-applied.  */
+  tui_win_info *focus = tui_win_with_focus ();
+  for (tui_win_info *win_info : saved_windows)
+    {
+      if (!win_info->is_visible ())
+	{
+	  if (focus == win_info)
+	    tui_set_win_focus_to (tui_windows[0]);
+	  delete win_info;
+	}
+    }
+
+  if (gdbarch == nullptr && TUI_DISASM_WIN != nullptr)
+    tui_get_begin_asm_address (&gdbarch, &addr);
+  tui_update_source_windows_with_addr (gdbarch, addr);
 }
 
 /* See tui-layout.  */
@@ -86,19 +121,9 @@ tui_adjust_window_height (struct tui_win_info *win, int new_height)
 static void
 tui_set_layout (tui_layout_split *layout)
 {
-  struct gdbarch *gdbarch;
-  CORE_ADDR addr;
-
-  extract_display_start_addr (&gdbarch, &addr);
-  tui_make_all_invisible ();
   applied_skeleton = layout;
   applied_layout = layout->clone ();
   tui_apply_current_layout ();
-  tui_delete_invisible_windows ();
-
-  if (gdbarch == nullptr && TUI_DISASM_WIN != nullptr)
-    tui_get_begin_asm_address (&gdbarch, &addr);
-  tui_update_source_windows_with_addr (gdbarch, addr);
 }
 
 /* See tui-layout.h.  */
@@ -121,7 +146,6 @@ tui_add_win_to_layout (enum tui_win_type type)
   const char *name = type == SRC_WIN ? SRC_NAME : DISASSEM_NAME;
   applied_layout->replace_window (tui_win_list[other]->name (), name);
   tui_apply_current_layout ();
-  tui_delete_invisible_windows ();
 }
 
 /* Find LAYOUT in the "layouts" global and return its index.  */

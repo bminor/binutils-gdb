@@ -202,15 +202,6 @@ tui_gen_win_info::make_visible (bool visible)
     handle.reset (nullptr);
 }
 
-/* See tui-wingeneral.h.  */
-
-void
-tui_make_all_invisible (void)
-{
-  for (tui_win_info *win_info : all_tui_windows ())
-    win_info->make_visible (false);
-}
-
 /* Function to refresh all the windows currently displayed.  */
 
 void

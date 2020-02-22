@@ -26,9 +26,6 @@
 
 struct tui_win_info;
 
-/* Makes all windows invisible.  */
-extern void tui_make_all_invisible (void);
-
 extern void tui_unhighlight_win (struct tui_win_info *);
 extern void tui_highlight_win (struct tui_win_info *);
 extern void tui_refresh_all ();
