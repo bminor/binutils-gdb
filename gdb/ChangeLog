@@ -1,5 +1,10 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/loc.h (dwarf2_compile_expr_to_ax): Don't declare.
+	* dwarf2/loc.c (dwarf2_compile_expr_to_ax): Now static.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-data.h (TUI_DISASM_WIN): Cast to tui_disasm_window.
 
 2020-02-22  Tom Tromey  <tom@tromey.com>

@@ -2881,7 +2881,7 @@ get_ax_pc (void *baton)
    example, if the expression cannot be compiled, or if the expression
    is invalid.  */
 
-void
+static void
 dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 			   unsigned int addr_size, const gdb_byte *op_ptr,
 			   const gdb_byte *op_end,
