@@ -138,35 +138,21 @@ static int tui_readline_pipe[2];
 static void
 do_tui_putc (WINDOW *w, char c)
 {
-  static int tui_skip_line = -1;
+  /* Expand TABs, since ncurses on MS-Windows doesn't.  */
+  if (c == '\t')
+    {
+      int col;
 
-  /* Catch annotation and discard them.  We need two \032 and discard
-     until a \n is seen.  */
-  if (c == '\032')
-    {
-      tui_skip_line++;
-    }
-  else if (tui_skip_line != 1)
-    {
-      tui_skip_line = -1;
-      /* Expand TABs, since ncurses on MS-Windows doesn't.  */
-      if (c == '\t')
+      col = getcurx (w);
+      do
 	{
-	  int col;
-
-	  col = getcurx (w);
-	  do
-	    {
-	      waddch (w, ' ');
-	      col++;
-	    }
-	  while ((col % 8) != 0);
+	  waddch (w, ' ');
+	  col++;
 	}
-      else
-	waddch (w, c);
+      while ((col % 8) != 0);
     }
-  else if (c == '\n')
-    tui_skip_line = -1;
+  else
+    waddch (w, c);
 }
 
 /* Update the cached value of the command window's start line based on

@@ -1,5 +1,9 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-io.c (do_tui_putc): Don't omit annotations.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (tui_set_win_focus_to): Move to tui-data.c.
 	* tui/tui-data.h (tui_set_win_with_focus): Don't declare.
 	* tui/tui-data.c (tui_set_win_with_focus): Remove.
