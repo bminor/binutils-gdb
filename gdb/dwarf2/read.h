@@ -126,6 +126,11 @@ private:
 			const dwarf2_debug_sections &names);
 
 public:
+  /* Objects that can be shared across objfiles are stored in this
+     obstack or on the psymtab obstack, while objects that are
+     objfile-specific are stored on the objfile obstack.  */
+  auto_obstack obstack;
+
   dwarf2_section_info info {};
   dwarf2_section_info abbrev {};
   dwarf2_section_info line {};
