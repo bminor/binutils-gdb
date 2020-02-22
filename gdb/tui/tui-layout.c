@@ -27,7 +27,9 @@
 #include "source.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
+#include "cli/cli-utils.h"
 #include <ctype.h>
+#include <unordered_set>
 
 #include "tui/tui.h"
 #include "tui/tui-command.h"
@@ -397,6 +399,14 @@ tui_layout_window::replace_window (const char *name, const char *new_window)
 
 /* See tui-layout.h.  */
 
+void
+tui_layout_window::specification (ui_file *output)
+{
+  fputs_unfiltered (get_name (), output);
+}
+
+/* See tui-layout.h.  */
+
 tui_layout_split *
 tui_layout_split::add_split (int weight)
 {
@@ -698,6 +708,22 @@ tui_layout_split::replace_window (const char *name, const char *new_window)
     item.layout->replace_window (name, new_window);
 }
 
+/* See tui-layout.h.  */
+
+void
+tui_layout_split::specification (ui_file *output)
+{
+  bool first = true;
+  for (auto &item : m_splits)
+    {
+      if (!first)
+	fputs_unfiltered (" ", output);
+      first = false;
+      item.layout->specification (output);
+      fprintf_unfiltered (output, " %d", item.weight);
+    }
+}
+
 /* Destroy the layout associated with SELF.  */
 
 static void
@@ -714,13 +740,19 @@ static struct cmd_list_element *layout_list;
 
 /* Add a "layout" command with name NAME that switches to LAYOUT.  */
 
-static void
+static struct cmd_list_element *
 add_layout_command (const char *name, tui_layout_split *layout)
 {
   struct cmd_list_element *cmd;
 
-  gdb::unique_xmalloc_ptr<char> doc (xstrprintf (_("Apply the \"%s\" layout"),
-						 name));
+  string_file spec;
+  layout->specification (&spec);
+
+  gdb::unique_xmalloc_ptr<char> doc
+    (xstrprintf (_("Apply the \"%s\" layout.\n\
+This layout was created using:\n\
+  tui new-layout %s %s"),
+		 name, name, spec.c_str ()));
 
   cmd = add_cmd (name, class_tui, nullptr, doc.get (), &layout_list);
   set_cmd_context (cmd, layout);
@@ -730,6 +762,8 @@ add_layout_command (const char *name, tui_layout_split *layout)
   cmd->doc_allocated = 1;
   doc.release ();
   layouts.emplace_back (layout);
+
+  return cmd;
 }
 
 /* Initialize the standard layouts.  */
@@ -777,6 +811,59 @@ initialize_layouts ()
 
 
 
+/* A helper function that returns true if NAME is the name of an
+   available window.  */
+
+static bool
+validate_window_name (const std::string &name)
+{
+  return (name == "src" || name == "cmd"
+	  || name == "regs" || name == "asm"
+	  || name == "status");
+}
+
+/* Implementation of the "tui new-layout" command.  */
+
+static void
+tui_new_layout_command (const char *spec, int from_tty)
+{
+  std::string new_name = extract_arg (&spec);
+  if (new_name.empty ())
+    error (_("No layout name specified"));
+  if (new_name[0] == '-')
+    error (_("Layout name cannot start with '-'"));
+
+  std::unique_ptr<tui_layout_split> new_layout (new tui_layout_split);
+  std::unordered_set<std::string> seen_windows;
+  while (true)
+    {
+      std::string name = extract_arg (&spec);
+      if (name.empty ())
+	break;
+      if (!validate_window_name (name))
+	error (_("Unknown window \"%s\""), name.c_str ());
+      if (seen_windows.find (name) != seen_windows.end ())
+	error (_("Window \"%s\" seen twice in layout"), name.c_str ());
+      ULONGEST weight = get_ulongest (&spec);
+      if ((int) weight != weight)
+	error (_("Weight out of range: %s"), pulongest (weight));
+      new_layout->add_window (name.c_str (), weight);
+      seen_windows.insert (name);
+    }
+  if (seen_windows.empty ())
+    error (_("New layout does not contain any windows"));
+  if (seen_windows.find ("cmd") == seen_windows.end ())
+    error (_("New layout does not contain the \"cmd\" window"));
+
+  gdb::unique_xmalloc_ptr<char> cmd_name
+    = make_unique_xstrdup (new_name.c_str ());
+  struct cmd_list_element *cmd
+    = add_layout_command (cmd_name.get (), new_layout.get ());
+  cmd->name_allocated = 1;
+  cmd_name.release ();
+  new_layout.release ();
+}
+
 /* Base command for "layout".  */
 
 static void
@@ -806,6 +893,16 @@ Usage: layout prev | next | LAYOUT-NAME"),
   add_cmd ("regs", class_tui, tui_regs_layout_command,
 	   _("Apply the TUI register layout"),
 	   &layout_list);
+
+  add_cmd ("new-layout", class_tui, tui_new_layout_command,
+	   _("Create a new TUI layout.\n\
+Usage: tui new-layout NAME WINDOW WEIGHT [WINDOW WEIGHT]...\n\
+Create a new TUI layout.  The new layout will be named NAME,\n\
+and can be accessed using \"layout NAME\".\n\
+The windows will be displayed in the specified order.\n\
+Each WEIGHT is an integer, which holds the relative size\n\
+to be allocated to the window."),
+	   tui_get_cmd_list ());
 
   initialize_layouts ();
 }

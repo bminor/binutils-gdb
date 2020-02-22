@@ -1,3 +1,8 @@
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* gdb.texinfo (TUI Overview): Mention user layouts.
+	(TUI Commands): Document "tui new-layout".
+
 2020-01-26  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.texinfo (M68K Features): Document floating-point feature

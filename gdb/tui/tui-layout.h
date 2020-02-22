@@ -22,6 +22,8 @@
 #ifndef TUI_TUI_LAYOUT_H
 #define TUI_TUI_LAYOUT_H
 
+#include "ui-file.h"
+
 #include "tui/tui.h"
 #include "tui/tui-data.h"
 
@@ -72,6 +74,9 @@ public:
      NEW_WINDOW.  */
   virtual void replace_window (const char *name, const char *new_window) = 0;
 
+  /* Append the specification to this window to OUTPUT.  */
+  virtual void specification (ui_file *output) = 0;
+
   /* The most recent space allocation.  */
   int x = 0;
   int y = 0;
@@ -120,6 +125,8 @@ public:
 
   void replace_window (const char *name, const char *new_window) override;
 
+  void specification (ui_file *output) override;
+
 protected:
 
   void get_sizes (int *min_height, int *max_height) override;
@@ -166,6 +173,8 @@ public:
   void remove_windows (const char *name) override;
 
   void replace_window (const char *name, const char *new_window) override;
+
+  void specification (ui_file *output) override;
 
 protected:
 

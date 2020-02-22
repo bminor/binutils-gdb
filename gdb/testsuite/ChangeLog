@@ -1,5 +1,9 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* gdb.tui/new-layout.exp: New file.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* gdb.rust/rust-style.rs: New file.
 	* gdb.rust/rust-style.exp: New file.
 	* gdb.base/style.exp: Test structure printing.

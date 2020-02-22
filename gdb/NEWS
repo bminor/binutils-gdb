@@ -30,6 +30,10 @@ show exec-file-mismatch -- Show exec-file-mismatch handling (ask|warn|off).
   whether to load the process executable file; if 'warn', just display
   a warning; if 'off', don't attempt to detect a mismatch.
 
+tui new-layout NAME WINDOW WEIGHT [WINDOW WEIGHT]...
+  Define a new TUI layout, specifying its name and the windows that
+  will be displayed.
+
 * New targets
 
 GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*

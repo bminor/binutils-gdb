@@ -1,5 +1,20 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* NEWS: Add "tui new-layout" item.
+	* tui/tui-layout.c (add_layout_command): Return cmd_list_element.
+	Add new-layout command to help text.
+	(validate_window_name): New function.
+	(tui_new_layout_command): New function.
+	(_initialize_tui_layout): Register "new-layout".
+	(tui_layout_window::specification): New method.
+	(tui_layout_window::specification): New method.
+	* tui/tui-layout.h (class tui_layout_base) <specification>: New
+	method.
+	(class tui_layout_window) <specification>: New method.
+	(class tui_layout_split) <specification>: New method.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_enable): Call tui_set_initial_layout.
 	* tui/tui-win.c (window_name_completer): Update comment.
 	* tui/tui-layout.h (class tui_layout_base) <replace_window>:

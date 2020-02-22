@@ -27755,6 +27755,8 @@ source and registers, or
 assembly and registers.
 @end itemize
 
+These are the standard layouts, but other layouts can be defined.
+
 A status line above the command window shows the following information:
 
 @table @emph
@@ -27991,11 +27993,40 @@ Disable TUI mode, returning to the console interpreter.
 @kindex info win
 List and give the size of all displayed windows.
 
+@item tui new-layout @var{name} @var{window} @var{weight} @r{[}@var{window} @var{weight}@dots{}@r{]}
+@kindex tui new-layout
+Create a new TUI layout.  The new layout will be named @var{name}, and
+can be accessed using the @code{layout} command (see below).
+
+Each @var{window} parameter is the name of a window to display.  The
+windows will be displayed from top to bottom in the order listed.  The
+names of the windows are the same as the ones given to the
+@code{focus} command (see below); additional, the @code{status}
+window can be specified.
+
+Each @var{weight} is an integer.  It is the weight of this window
+relative to all the other windows in the layout.  These numbers are
+used to calculate how much of the screen is given to each window.
+
+For example:
+
+@example
+(gdb) tui new-layout example src 1 regs 1 status 0 cmd 1
+@end example
+
+Here, the new layout is called @samp{example}.  It shows the source
+and register windows, followed by the status window, and then finally
+the command window.  The non-status windows all have the same weight,
+so the terminal will be split into three roughly equal sections.
+
 @item layout @var{name}
 @kindex layout
-Changes which TUI windows are displayed.  In each layout the command
-window is always displayed, the @var{name} parameter controls which
-additional windows are displayed, and can be any of the following:
+Changes which TUI windows are displayed.  The @var{name} parameter
+controls which layout is shown.  It can be either one of the built-in
+layout names, or the name of a layout defined by the user using
+@code{tui new-layout}.
+
+The built-in layouts are as follows:
 
 @table @code
 @item next
