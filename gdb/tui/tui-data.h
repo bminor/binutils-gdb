@@ -238,74 +238,16 @@ extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 #define TUI_DATA_WIN    ((tui_data_window *) tui_win_list[DATA_WIN])
 #define TUI_CMD_WIN     ((tui_cmd_window *) tui_win_list[CMD_WIN])
 
-/* An iterator that iterates over all windows.  */
+/* All the windows that are currently instantiated, in layout
+   order.  */
+extern std::vector<tui_win_info *> tui_windows;
 
-class tui_window_iterator
+/* Return a range adapter for iterating over TUI windows.  */
+static inline std::vector<tui_win_info *> &
+all_tui_windows ()
 {
-public:
-
-  typedef tui_window_iterator self_type;
-  typedef struct tui_win_info *value_type;
-  typedef struct tui_win_info *&reference;
-  typedef struct tui_win_info **pointer;
-  typedef std::forward_iterator_tag iterator_category;
-  typedef int difference_type;
-
-  explicit tui_window_iterator (enum tui_win_type type)
-    : m_type (type)
-  {
-    advance ();
-  }
-
-  tui_window_iterator ()
-    : m_type (MAX_MAJOR_WINDOWS)
-  {
-  }
-
-  bool operator!= (const self_type &other) const
-  {
-    return m_type != other.m_type;
-  }
-
-  value_type operator* () const
-  {
-    gdb_assert (m_type < MAX_MAJOR_WINDOWS);
-    return tui_win_list[m_type];
-  }
-
-  self_type &operator++ ()
-  {
-    ++m_type;
-    advance ();
-    return *this;
-  }
-
-private:
-
-  void advance ()
-  {
-    while (m_type < MAX_MAJOR_WINDOWS && tui_win_list[m_type] == nullptr)
-      ++m_type;
-  }
-
-  int m_type;
-};
-
-/* A range adapter for iterating over TUI windows.  */
-
-struct all_tui_windows
-{
-  tui_window_iterator begin () const
-  {
-    return tui_window_iterator (SRC_WIN);
-  }
-
-  tui_window_iterator end () const
-  {
-    return tui_window_iterator ();
-  }
-};
-
+  return tui_windows;
+}
 
 /* Data Manipulation Functions.  */
 extern int tui_term_height (void);

@@ -1,5 +1,22 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-winsource.h (struct tui_source_window_iterator)
+	<inner_iterator>: New etytypedef.
+	<tui_source_window_iterator>: Take "end" parameter.
+	<tui_source_window_iterator>: Take iterator.
+	<operator*, advance>: Update.
+	<m_iter>: Change type.
+	<m_end>: New field.
+	(struct tui_source_windows) <begin, end>: Update.
+	* tui/tui-layout.c (tui_windows): New global.
+	(tui_apply_current_layout): Clear tui_windows.
+	(tui_layout_window::apply): Update tui_windows.
+	* tui/tui-data.h (tui_windows): Declare.
+	(all_tui_windows): Now inline function.
+	(class tui_window_iterator, struct all_tui_windows): Remove.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	PR tui/17850:
 	* tui/tui-win.c (tui_gen_win_info::max_width): New method.
 	* tui/tui-layout.h (class tui_layout_base) <get_sizes>: Add

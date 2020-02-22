@@ -153,6 +153,8 @@ struct tui_source_window_iterator
 {
 public:
 
+  typedef std::vector<tui_win_info *>::iterator inner_iterator;
+
   typedef tui_source_window_iterator self_type;
   typedef struct tui_source_window_base *value_type;
   typedef struct tui_source_window_base *&reference;
@@ -160,14 +162,16 @@ public:
   typedef std::forward_iterator_tag iterator_category;
   typedef int difference_type;
 
-  explicit tui_source_window_iterator (bool dummy)
-    : m_iter (SRC_WIN)
+  explicit tui_source_window_iterator (const inner_iterator &it,
+				       const inner_iterator &end)
+    : m_iter (it),
+      m_end (end)
   {
     advance ();
   }
 
-  tui_source_window_iterator ()
-    : m_iter (tui_win_type (DISASSEM_WIN + 1))
+  explicit tui_source_window_iterator (const inner_iterator &it)
+    : m_iter (it)
   {
   }
 
@@ -178,7 +182,7 @@ public:
 
   value_type operator* () const
   {
-    return (value_type) *m_iter;
+    return dynamic_cast<tui_source_window_base *> (*m_iter);
   }
 
   self_type &operator++ ()
@@ -192,12 +196,13 @@ private:
 
   void advance ()
   {
-    tui_window_iterator end;
-    while (m_iter != end && *m_iter == nullptr)
+    while (m_iter != m_end
+	   && dynamic_cast<tui_source_window_base *> (*m_iter) == nullptr)
       ++m_iter;
   }
 
-  tui_window_iterator m_iter;
+  inner_iterator m_iter;
+  inner_iterator m_end;
 };
 
 /* A range adapter for source windows.  */
@@ -206,12 +211,13 @@ struct tui_source_windows
 {
   tui_source_window_iterator begin () const
   {
-    return tui_source_window_iterator (true);
+    return tui_source_window_iterator (tui_windows.begin (),
+				       tui_windows.end ());
   }
 
   tui_source_window_iterator end () const
   {
-    return tui_source_window_iterator ();
+    return tui_source_window_iterator (tui_windows.end ());
   }
 };
 

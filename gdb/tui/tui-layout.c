@@ -61,11 +61,15 @@ static tui_layout_split *applied_skeleton;
 static tui_layout_split *src_regs_layout;
 static tui_layout_split *asm_regs_layout;
 
+/* See tui-data.h.  */
+std::vector<tui_win_info *> tui_windows;
+
 /* See tui-layout.h.  */
 
 void
 tui_apply_current_layout ()
 {
+  tui_windows.clear ();
   applied_layout->apply (0, 0, tui_term_width (), tui_term_height ());
 }
 
@@ -350,6 +354,8 @@ tui_layout_window::apply (int x_, int y_, int width_, int height_)
   height = height_;
   gdb_assert (m_window != nullptr);
   m_window->resize (height, width, x, y);
+  if (dynamic_cast<tui_win_info *> (m_window) != nullptr)
+    tui_windows.push_back ((tui_win_info *) m_window);
 }
 
 /* See tui-layout.h.  */
