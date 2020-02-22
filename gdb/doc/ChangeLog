@@ -1,5 +1,10 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* python.texi (Python API): Add menu item.
+	(TUI Windows In Python): New node.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	PR tui/17850:
 	* gdb.texinfo (TUI Commands): Document horizontal layouts.
 

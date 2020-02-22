@@ -405,6 +405,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-symbol.c \
 	python/py-symtab.c \
 	python/py-threadevent.c \
+	python/py-tui.c \
 	python/py-type.c \
 	python/py-unwind.c \
 	python/py-utils.c \

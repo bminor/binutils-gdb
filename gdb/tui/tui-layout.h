@@ -249,4 +249,14 @@ extern void tui_apply_current_layout ();
 extern void tui_adjust_window_height (struct tui_win_info *win,
 				      int new_height);
 
+/* The type of a function that is used to create a TUI window.  */
+
+typedef std::function<tui_gen_win_info * (const char *name)> window_factory;
+
+/* Register a new TUI window type.  NAME is the name of the window
+   type.  FACTORY is a function that can be called to instantiate the
+   window.  */
+
+extern void tui_register_window (const char *name, window_factory &&factory);
+
 #endif /* TUI_TUI_LAYOUT_H */

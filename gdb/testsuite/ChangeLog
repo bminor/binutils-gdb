@@ -1,5 +1,10 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* gdb.python/tui-window.exp: New file.
+	* gdb.python/tui-window.py: New file.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	PR tui/17850:
 	* gdb.tui/new-layout.exp: Add horizontal layout and winheight
 	tests.

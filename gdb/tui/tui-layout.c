@@ -65,6 +65,11 @@ static tui_layout_split *asm_regs_layout;
 /* See tui-data.h.  */
 std::vector<tui_win_info *> tui_windows;
 
+/* When applying a layout, this is the list of all windows that were
+   in the previous layout.  This is used to re-use windows when
+   changing a layout.  */
+static std::vector<tui_win_info *> saved_tui_windows;
+
 /* See tui-layout.h.  */
 
 void
@@ -75,10 +80,10 @@ tui_apply_current_layout ()
 
   extract_display_start_addr (&gdbarch, &addr);
 
-  std::vector<tui_win_info *> saved_windows = std::move (tui_windows);
+  saved_tui_windows = std::move (tui_windows);
   tui_windows.clear ();
 
-  for (tui_win_info *win_info : saved_windows)
+  for (tui_win_info *win_info : saved_tui_windows)
     win_info->make_visible (false);
 
   applied_layout->apply (0, 0, tui_term_width (), tui_term_height ());
@@ -94,7 +99,7 @@ tui_apply_current_layout ()
 
   /* Now delete any window that was not re-applied.  */
   tui_win_info *focus = tui_win_with_focus ();
-  for (tui_win_info *win_info : saved_windows)
+  for (tui_win_info *win_info : saved_tui_windows)
     {
       if (!win_info->is_visible ())
 	{
@@ -107,6 +112,8 @@ tui_apply_current_layout ()
   if (gdbarch == nullptr && TUI_DISASM_WIN != nullptr)
     tui_get_begin_asm_address (&gdbarch, &addr);
   tui_update_source_windows_with_addr (gdbarch, addr);
+
+  saved_tui_windows.clear ();
 }
 
 /* See tui-layout.  */
@@ -391,6 +398,21 @@ initialize_known_windows ()
 			       make_standard_window<DISASSEM_WIN,
 						    tui_disasm_window>);
   known_window_types->emplace ("status", get_locator_window);
+}
+
+/* See tui-layout.h.  */
+
+void
+tui_register_window (const char *name, window_factory &&factory)
+{
+  std::string name_copy = name;
+
+  if (name_copy == "src" || name_copy == "cmd" || name_copy == "regs"
+      || name_copy == "asm" || name_copy == "status")
+    error (_("Window type \"%s\" is built-in"), name);
+
+  known_window_types->emplace (std::move (name_copy),
+			       std::move (factory));
 }
 
 /* See tui-layout.h.  */

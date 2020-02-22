@@ -1769,7 +1769,8 @@ do_start_initialization ()
       || gdbpy_initialize_event () < 0
       || gdbpy_initialize_arch () < 0
       || gdbpy_initialize_xmethods () < 0
-      || gdbpy_initialize_unwind () < 0)
+      || gdbpy_initialize_unwind () < 0
+      || gdbpy_initialize_tui () < 0)
     return false;
 
 #define GDB_PY_DEFINE_EVENT_TYPE(name, py_name, doc, base)	\
@@ -2121,6 +2122,13 @@ or None if not set." },
   { "set_convenience_variable", gdbpy_set_convenience_variable, METH_VARARGS,
     "convenience_variable (NAME, VALUE) -> None.\n\
 Set the value of the convenience variable $NAME." },
+
+#ifdef TUI
+  { "register_window_type", (PyCFunction) gdbpy_register_tui_window,
+    METH_VARARGS | METH_KEYWORDS,
+    "register_window_type (NAME, CONSTRUCSTOR) -> None\n\
+Register a TUI window constructor." },
+#endif	/* TUI */
 
   {NULL, NULL, 0, NULL}
 };

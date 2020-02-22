@@ -1,5 +1,21 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* NEWS: Add entry for gdb.register_window_type.
+	* tui/tui-layout.h (window_factory): New typedef.
+	(tui_register_window): Declare.
+	* tui/tui-layout.c (saved_tui_windows): New global.
+	(tui_apply_current_layout): Use it.
+	(tui_register_window): New function.
+	* python/python.c (do_start_initialization): Call
+	gdbpy_initialize_tui.
+	(python_GdbMethods): Add "register_window_type" function.
+	* python/python-internal.h (gdbpy_register_tui_window)
+	(gdbpy_initialize_tui): Declare.
+	* python/py-tui.c: New file.
+	* Makefile.in (SUBDIR_PYTHON_SRCS): Add py-tui.c.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-io.c (do_tui_putc): Don't omit annotations.
 
 2020-02-22  Tom Tromey  <tom@tromey.com>
