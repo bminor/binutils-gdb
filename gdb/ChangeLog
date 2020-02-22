@@ -1,5 +1,27 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	PR tui/17850:
+	* tui/tui-win.c (tui_gen_win_info::max_width): New method.
+	* tui/tui-layout.h (class tui_layout_base) <get_sizes>: Add
+	"height" argument.
+	(class tui_layout_window) <get_sizes>: Likewise.
+	(class tui_layout_split) <tui_layout_split>: Add "vertical"
+	argument.
+	<get_sizes>: Add "height" argument.
+	<m_vertical>: New field.
+	* tui/tui-layout.c (tui_layout_split::clone): Update.
+	(tui_layout_split::get_sizes): Add "height" argument.
+	(tui_layout_split::adjust_size, tui_layout_split::apply): Update.
+	(tui_new_layout_command): Parse "-horizontal".
+	(_initialize_tui_layout): Update help string.
+	(tui_layout_split::specification): Add "-horizontal" when needed.
+	* tui/tui-layout.c (tui_layout_window::get_sizes): Add "height"
+	argument.
+	* tui/tui-data.h (struct tui_gen_win_info) <max_width, min_width>:
+	New methods.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.h (enum tui_adjust_result): New.
 	(class tui_layout_base) <adjust_size>: Return tui_adjust_result.
 	(class tui_layout_window) <adjust_size>: Return

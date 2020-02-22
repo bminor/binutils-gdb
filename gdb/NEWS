@@ -17,6 +17,8 @@
 * The $_siginfo convenience variable now also works on Windows targets,
   and will display the EXCEPTION_RECORD of the last handled exception.
 
+* TUI windows can now be arranged horizontally.
+
 * New commands
 
 set exec-file-mismatch -- Set exec-file-mismatch handling (ask|warn|off).

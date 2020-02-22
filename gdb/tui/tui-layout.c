@@ -355,12 +355,20 @@ tui_layout_window::apply (int x_, int y_, int width_, int height_)
 /* See tui-layout.h.  */
 
 void
-tui_layout_window::get_sizes (int *min_height, int *max_height)
+tui_layout_window::get_sizes (bool height, int *min_value, int *max_value)
 {
   if (m_window == nullptr)
     m_window = tui_get_window_by_name (m_contents);
-  *min_height = m_window->min_height ();
-  *max_height = m_window->max_height ();
+  if (height)
+    {
+      *min_value = m_window->min_height ();
+      *max_value = m_window->max_height ();
+    }
+  else
+    {
+      *min_value = m_window->min_width ();
+      *max_value = m_window->max_width ();
+    }
 }
 
 /* See tui-layout.h.  */
@@ -430,7 +438,7 @@ tui_layout_split::add_window (const char *name, int weight)
 std::unique_ptr<tui_layout_base>
 tui_layout_split::clone () const
 {
-  tui_layout_split *result = new tui_layout_split ();
+  tui_layout_split *result = new tui_layout_split (m_vertical);
   for (const split &item : m_splits)
     {
       std::unique_ptr<tui_layout_base> next = item.layout->clone ();
@@ -443,16 +451,29 @@ tui_layout_split::clone () const
 /* See tui-layout.h.  */
 
 void
-tui_layout_split::get_sizes (int *min_height, int *max_height)
+tui_layout_split::get_sizes (bool height, int *min_value, int *max_value)
 {
-  *min_height = 0;
-  *max_height = 0;
+  *min_value = 0;
+  *max_value = 0;
+  bool first_time = true;
   for (const split &item : m_splits)
     {
       int new_min, new_max;
-      item.layout->get_sizes (&new_min, &new_max);
-      *min_height += new_min;
-      *max_height += new_max;
+      item.layout->get_sizes (height, &new_min, &new_max);
+      /* For the mismatch case, the first time through we want to set
+	 the min and max to the computed values -- the "first_time"
+	 check here is just a funny way of doing that.  */
+      if (height == m_vertical || first_time)
+	{
+	  *min_value += new_min;
+	  *max_value += new_max;
+	}
+      else
+	{
+	  *min_value = std::max (*min_value, new_min);
+	  *max_value = std::min (*max_value, new_max);
+	}
+      first_time = false;
     }
 }
 
@@ -502,6 +523,8 @@ tui_layout_split::adjust_size (const char *name, int new_height)
 	return HANDLED;
       if (adjusted == FOUND)
 	{
+	  if (!m_vertical)
+	    return FOUND;
 	  found_index = i;
 	  break;
 	}
@@ -524,7 +547,7 @@ tui_layout_split::adjust_size (const char *name, int new_height)
       int index = (found_index + 1 + i) % m_splits.size ();
 
       int new_min, new_max;
-      m_splits[index].layout->get_sizes (&new_min, &new_max);
+      m_splits[index].layout->get_sizes (m_vertical, &new_min, &new_max);
 
       if (delta < 0)
 	{
@@ -571,23 +594,23 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
   width = width_;
   height = height_;
 
-  struct height_info
+  struct size_info
   {
-    int height;
-    int min_height;
-    int max_height;
+    int size;
+    int min_size;
+    int max_size;
     /* True if this window will share a box border with the previous
        window in the list.  */
     bool share_box;
   };
 
-  std::vector<height_info> info (m_splits.size ());
+  std::vector<size_info> info (m_splits.size ());
 
-  /* Step 1: Find the min and max height of each sub-layout.
-     Fixed-sized layouts are given their desired height, and then the
+  /* Step 1: Find the min and max size of each sub-layout.
+     Fixed-sized layouts are given their desired size, and then the
      remaining space is distributed among the remaining windows
      according to the weights given.  */
-  int available_height = height;
+  int available_size = m_vertical ? height : width;
   int last_index = -1;
   int total_weight = 0;
   for (int i = 0; i < m_splits.size (); ++i)
@@ -597,7 +620,8 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
       /* Always call get_sizes, to ensure that the window is
 	 instantiated.  This is a bit gross but less gross than adding
 	 special cases for this in other places.  */
-      m_splits[i].layout->get_sizes (&info[i].min_height, &info[i].max_height);
+      m_splits[i].layout->get_sizes (m_vertical, &info[i].min_size,
+				     &info[i].max_size);
 
       if (!m_applied
 	  && cmd_win_already_exists
@@ -607,15 +631,17 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
 	  /* If this layout has never been applied, then it means the
 	     user just changed the layout.  In this situation, it's
 	     desirable to keep the size of the command window the
-	     same.  Setting the min and max heights this way ensures
+	     same.  Setting the min and max sizes this way ensures
 	     that the resizing step, below, does the right thing with
 	     this window.  */
-	  info[i].min_height = TUI_CMD_WIN->height;
-	  info[i].max_height = TUI_CMD_WIN->height;
+	  info[i].min_size = (m_vertical
+			      ? TUI_CMD_WIN->height
+			      : TUI_CMD_WIN->width);
+	  info[i].max_size = info[i].min_size;
 	}
 
-      if (info[i].min_height == info[i].max_height)
-	available_height -= info[i].min_height;
+      if (info[i].min_size == info[i].max_size)
+	available_size -= info[i].min_size;
       else
 	{
 	  last_index = i;
@@ -623,54 +649,58 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
 	}
 
       /* Two adjacent boxed windows will share a border, making a bit
-	 more height available.  */
+	 more size available.  */
       if (i > 0
 	  && m_splits[i - 1].layout->bottom_boxed_p ()
 	  && m_splits[i].layout->top_boxed_p ())
 	info[i].share_box = true;
     }
 
-  /* Step 2: Compute the height of each sub-layout.  Fixed-sized items
+  /* Step 2: Compute the size of each sub-layout.  Fixed-sized items
      are given their fixed size, while others are resized according to
      their weight.  */
-  int used_height = 0;
+  int used_size = 0;
   for (int i = 0; i < m_splits.size (); ++i)
     {
       /* Compute the height and clamp to the allowable range.  */
-      info[i].height = available_height * m_splits[i].weight / total_weight;
-      if (info[i].height > info[i].max_height)
-	info[i].height = info[i].max_height;
-      if (info[i].height < info[i].min_height)
-	info[i].height = info[i].min_height;
-      /* If there is any leftover height, just redistribute it to the
+      info[i].size = available_size * m_splits[i].weight / total_weight;
+      if (info[i].size > info[i].max_size)
+	info[i].size = info[i].max_size;
+      if (info[i].size < info[i].min_size)
+	info[i].size = info[i].min_size;
+      /* If there is any leftover size, just redistribute it to the
 	 last resizeable window, by dropping it from the allocated
-	 height.  We could try to be fancier here perhaps, by
-	 redistributing this height among all windows, not just the
+	 size.  We could try to be fancier here perhaps, by
+	 redistributing this size among all windows, not just the
 	 last window.  */
-      if (info[i].min_height != info[i].max_height)
+      if (info[i].min_size != info[i].max_size)
 	{
-	  used_height += info[i].height;
+	  used_size += info[i].size;
 	  if (info[i].share_box)
-	    --used_height;
+	    --used_size;
 	}
     }
 
-  /* Allocate any leftover height.  */
-  if (available_height >= used_height && last_index != -1)
-    info[last_index].height += available_height - used_height;
+  /* Allocate any leftover size.  */
+  if (available_size >= used_size && last_index != -1)
+    info[last_index].size += available_size - used_size;
 
   /* Step 3: Resize.  */
-  int height_accum = 0;
+  int size_accum = 0;
+  const int maximum = m_vertical ? height : width;
   for (int i = 0; i < m_splits.size (); ++i)
     {
       /* If we fall off the bottom, just make allocations overlap.
 	 GIGO.  */
-      if (height_accum + info[i].height > height)
-	height_accum = height - info[i].height;
+      if (size_accum + info[i].size > maximum)
+	size_accum = maximum - info[i].size;
       else if (info[i].share_box)
-	--height_accum;
-      m_splits[i].layout->apply (x, y + height_accum, width, info[i].height);
-      height_accum += info[i].height;
+	--size_accum;
+      if (m_vertical)
+	m_splits[i].layout->apply (x, y + size_accum, width, info[i].size);
+      else
+	m_splits[i].layout->apply (x + size_accum, y, info[i].size, height);
+      size_accum += info[i].size;
     }
 
   m_applied = true;
@@ -715,6 +745,9 @@ tui_layout_split::specification (ui_file *output, int depth)
 {
   if (depth > 0)
     fputs_unfiltered ("{", output);
+
+  if (!m_vertical)
+    fputs_unfiltered ("-horizontal ", output);
 
   bool first = true;
   for (auto &item : m_splits)
@@ -839,8 +872,13 @@ tui_new_layout_command (const char *spec, int from_tty)
   if (new_name[0] == '-')
     error (_("Layout name cannot start with '-'"));
 
+  bool is_vertical = true;
+  spec = skip_spaces (spec);
+  if (check_for_argument (&spec, "-horizontal"))
+    is_vertical = false;
+
   std::vector<std::unique_ptr<tui_layout_split>> splits;
-  splits.emplace_back (new tui_layout_split);
+  splits.emplace_back (new tui_layout_split (is_vertical));
   std::unordered_set<std::string> seen_windows;
   while (true)
     {
@@ -850,8 +888,11 @@ tui_new_layout_command (const char *spec, int from_tty)
 
       if (spec[0] == '{')
 	{
-	  splits.emplace_back (new tui_layout_split);
-	  ++spec;
+	  is_vertical = true;
+	  spec = skip_spaces (spec + 1);
+	  if (check_for_argument (&spec, "-horizontal"))
+	    is_vertical = false;
+	  splits.emplace_back (new tui_layout_split (is_vertical));
 	  continue;
 	}
 
@@ -940,12 +981,12 @@ Usage: layout prev | next | LAYOUT-NAME"),
 
   add_cmd ("new-layout", class_tui, tui_new_layout_command,
 	   _("Create a new TUI layout.\n\
-Usage: tui new-layout NAME WINDOW WEIGHT [WINDOW WEIGHT]...\n\
+Usage: tui new-layout [-horizontal] NAME WINDOW WEIGHT [WINDOW WEIGHT]...\n\
 Create a new TUI layout.  The new layout will be named NAME,\n\
 and can be accessed using \"layout NAME\".\n\
 The windows will be displayed in the specified order.\n\
 A WINDOW can also be of the form:\n\
-  { NAME WEIGHT [NAME WEIGHT]... }\n\
+  { [-horizontal] NAME WEIGHT [NAME WEIGHT]... }\n\
 This form indicates a sub-frame.\n\
 Each WEIGHT is an integer, which holds the relative size\n\
 to be allocated to the window."),

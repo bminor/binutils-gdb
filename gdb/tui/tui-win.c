@@ -952,6 +952,14 @@ tui_win_info::max_height () const
   return tui_term_height () - 2;
 }
 
+/* See tui-data.h.  */
+
+int
+tui_gen_win_info::max_width () const
+{
+  return tui_term_width () - 2;
+}
+
 static void
 parse_scrolling_args (const char *arg, 
 		      struct tui_win_info **win_to_scroll,

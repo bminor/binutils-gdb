@@ -1,5 +1,11 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	PR tui/17850:
+	* gdb.tui/new-layout.exp: Add horizontal layout and winheight
+	tests.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* gdb.tui/new-layout.exp: Add sub-layout tests.
 
 2020-02-22  Tom Tromey  <tom@tromey.com>

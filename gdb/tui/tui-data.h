@@ -82,6 +82,15 @@ public:
   /* Compute the minimum height of this window.  */
   virtual int min_height () const = 0;
 
+  /* Compute the maximum width of this window.  */
+  int max_width () const;
+
+  /* Compute the minimum width of this window.  */
+  int min_width () const
+  {
+    return 3;
+  }
+
   /* Return true if this window can be boxed.  */
   virtual bool can_box () const
   {

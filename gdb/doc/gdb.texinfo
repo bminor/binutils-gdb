@@ -27998,11 +27998,23 @@ List and give the size of all displayed windows.
 Create a new TUI layout.  The new layout will be named @var{name}, and
 can be accessed using the @code{layout} command (see below).
 
-Each @var{window} parameter is the name of a window to display.  The
-windows will be displayed from top to bottom in the order listed.  The
-names of the windows are the same as the ones given to the
+Each @var{window} parameter is either the name of a window to display,
+or a window description.  The windows will be displayed from top to
+bottom in the order listed.
+
+The names of the windows are the same as the ones given to the
 @code{focus} command (see below); additional, the @code{status}
-window can be specified.
+window can be specified.  Note that, because it is of fixed height,
+the weight assigned to the status window is of no importance.  It is
+conventional to use @samp{0} here.
+
+A window description looks a bit like an invocation of @code{tui
+new-layout}, and is of the form
+@{@r{[}@code{-horizontal}@r{]}@var{window} @var{weight} @r{[}@var{window} @var{weight}@dots{}@r{]}@}.
+
+This specifies a sub-layout.  If @code{-horizontal} is given, the
+windows in this description will be arranged side-by-side, rather than
+top-to-bottom.
 
 Each @var{weight} is an integer.  It is the weight of this window
 relative to all the other windows in the layout.  These numbers are
@@ -28018,6 +28030,17 @@ Here, the new layout is called @samp{example}.  It shows the source
 and register windows, followed by the status window, and then finally
 the command window.  The non-status windows all have the same weight,
 so the terminal will be split into three roughly equal sections.
+
+Here is a more complex example, showing a horizontal layout:
+
+@example
+(gdb) tui new-layout example @{-horizontal src 1 asm 1@} 2 status 0 cmd 1
+@end example
+
+This will result in side-by-side source and assembly windows; with the
+status and command window being beneath these, filling the entire
+width of the terminal.  Because they have weight 2, the source and
+assembly windows will be twice the height of the command window.
 
 @item layout @var{name}
 @kindex layout

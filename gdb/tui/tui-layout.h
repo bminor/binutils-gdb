@@ -58,8 +58,9 @@ public:
   /* Change the size and location of this layout.  */
   virtual void apply (int x, int y, int width, int height) = 0;
 
-  /* Return the minimum and maximum height of this layout.  */
-  virtual void get_sizes (int *min_height, int *max_height) = 0;
+  /* Return the minimum and maximum height or width of this layout.
+     HEIGHT is true to fetch height, false to fetch width.  */
+  virtual void get_sizes (bool height, int *min_value, int *max_value) = 0;
 
   /* True if the topmost item in this layout is boxed.  */
   virtual bool top_boxed_p () const = 0;
@@ -142,7 +143,7 @@ public:
 
 protected:
 
-  void get_sizes (int *min_height, int *max_height) override;
+  void get_sizes (bool height, int *min_value, int *max_value) override;
 
 private:
 
@@ -159,7 +160,12 @@ class tui_layout_split : public tui_layout_base
 {
 public:
 
-  tui_layout_split () = default;
+  /* Create a new layout.  If VERTICAL is true, then windows in this
+     layout will be arranged vertically.  */
+  explicit tui_layout_split (bool vertical = true)
+    : m_vertical (vertical)
+  {
+  }
 
   DISABLE_COPY_AND_ASSIGN (tui_layout_split);
 
@@ -191,7 +197,7 @@ public:
 
 protected:
 
-  void get_sizes (int *min_height, int *max_height) override;
+  void get_sizes (bool height, int *min_value, int *max_value) override;
 
 private:
 
@@ -208,6 +214,9 @@ private:
 
   /* The splits.  */
   std::vector<split> m_splits;
+
+  /* True if the windows in this split are arranged vertically.  */
+  bool m_vertical;
 
   /* True if this layout has already been applied at least once.  */
   bool m_applied = false;
