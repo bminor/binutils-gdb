@@ -68,6 +68,10 @@ public:
      and the window being passed in here.  */
   virtual void remove_windows (const char *name) = 0;
 
+  /* Replace the window named NAME in the layout with the window named
+     NEW_WINDOW.  */
+  virtual void replace_window (const char *name, const char *new_window) = 0;
+
   /* The most recent space allocation.  */
   int x = 0;
   int y = 0;
@@ -114,6 +118,8 @@ public:
   {
   }
 
+  void replace_window (const char *name, const char *new_window) override;
+
 protected:
 
   void get_sizes (int *min_height, int *max_height) override;
@@ -159,6 +165,8 @@ public:
 
   void remove_windows (const char *name) override;
 
+  void replace_window (const char *name, const char *new_window) override;
+
 protected:
 
   void get_sizes (int *min_height, int *max_height) override;
@@ -189,7 +197,8 @@ private:
    way.  */
 extern void tui_add_win_to_layout (enum tui_win_type);
 
-extern void tui_set_layout (enum tui_layout_type);
+/* Set the initial layout.  */
+extern void tui_set_initial_layout ();
 
 /* Switch to the next layout.  */
 extern void tui_next_layout ();

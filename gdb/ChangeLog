@@ -1,5 +1,39 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_enable): Call tui_set_initial_layout.
+	* tui/tui-win.c (window_name_completer): Update comment.
+	* tui/tui-layout.h (class tui_layout_base) <replace_window>:
+	Declare method.
+	(class tui_layout_window) <replace_window>: Likewise.
+	(class tui_layout_split) <replace_window>: Likewise.
+	(tui_set_layout): Don't declare.
+	(tui_set_initial_layout): Declare function.
+	* tui/tui-layout.c (layouts, applied_skeleton, src_regs_layout)
+	(asm_regs_layout): New globals.
+	(tui_current_layout, show_layout): Remove.
+	(tui_set_layout, tui_add_win_to_layout): Rewrite.
+	(find_layout, tui_apply_layout): New function.
+	(layout_completer): Remove.
+	(tui_next_layout): Reimplement.
+	(tui_next_layout_command): New function.
+	(tui_set_initial_layout, tui_prev_layout_command): New functions.
+	(tui_regs_layout): Reimplement.
+	(tui_regs_layout_command): New function.
+	(extract_display_start_addr): Rewrite.
+	(next_layout, prev_layout): Remove.
+	(tui_layout_window::replace_window): New method.
+	(tui_layout_split::replace_window): New method.
+	(destroy_layout): New function.
+	(layout_list): New global.
+	(add_layout_command): New function.
+	(initialize_layouts): Update.
+	(tui_layout_command): New function.
+	(_initialize_tui_layout): Install "layout" commands.
+	* tui/tui-data.h (enum tui_layout_type): Remove.
+	(tui_current_layout): Don't declare.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_reg_layout): Remove.
 	(tui_reg_command): Use tui_regs_layout.
 	* tui/tui-layout.h (tui_reg_command): Declare.

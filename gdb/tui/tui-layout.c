@@ -25,6 +25,8 @@
 #include "symtab.h"
 #include "frame.h"
 #include "source.h"
+#include "cli/cli-cmds.h"
+#include "cli/cli-decode.h"
 #include <ctype.h>
 
 #include "tui/tui.h"
@@ -40,27 +42,22 @@
 #include "tui/tui-source.h"
 #include "gdb_curses.h"
 
-static void show_layout (enum tui_layout_type);
-static enum tui_layout_type next_layout (void);
-static enum tui_layout_type prev_layout (void);
 static void tui_layout_command (const char *, int);
 static void extract_display_start_addr (struct gdbarch **, CORE_ADDR *);
 
-
-/* The pre-defined layouts.  */
-static tui_layout_split *standard_layouts[UNDEFINED_LAYOUT];
+/* The layouts.  */
+static std::vector<std::unique_ptr<tui_layout_split>> layouts;
 
 /* The layout that is currently applied.  */
 static std::unique_ptr<tui_layout_base> applied_layout;
 
-static enum tui_layout_type current_layout = UNDEFINED_LAYOUT;
+/* The "skeleton" version of the layout that is currently applied.  */
+static tui_layout_split *applied_skeleton;
 
-/* Accessor for the current layout.  */
-enum tui_layout_type
-tui_current_layout (void)
-{
-  return current_layout;
-}
+/* The two special "regs" layouts.  Note that these aren't registered
+   as commands and so can never be deleted.  */
+static tui_layout_split *src_regs_layout;
+static tui_layout_split *asm_regs_layout;
 
 /* See tui-layout.h.  */
 
@@ -78,113 +75,24 @@ tui_adjust_window_height (struct tui_win_info *win, int new_height)
   applied_layout->adjust_size (win->name (), new_height);
 }
 
-/* Show the screen layout defined.  */
+/* Set the current layout to LAYOUT.  */
+
 static void
-show_layout (enum tui_layout_type layout)
+tui_set_layout (tui_layout_split *layout)
 {
-  enum tui_layout_type cur_layout = tui_current_layout ();
-
-  if (layout != cur_layout)
-    {
-      tui_make_all_invisible ();
-      applied_layout = standard_layouts[layout]->clone ();
-      tui_apply_current_layout ();
-      current_layout = layout;
-      tui_delete_invisible_windows ();
-    }
-}
-
-
-/* Function to set the layout to SRC_COMMAND, DISASSEM_COMMAND,
-   SRC_DISASSEM_COMMAND, SRC_DATA_COMMAND, or DISASSEM_DATA_COMMAND.  */
-void
-tui_set_layout (enum tui_layout_type layout_type)
-{
-  gdb_assert (layout_type != UNDEFINED_LAYOUT);
-
-  enum tui_layout_type cur_layout = tui_current_layout ();
   struct gdbarch *gdbarch;
   CORE_ADDR addr;
-  struct tui_win_info *win_with_focus = tui_win_with_focus ();
 
   extract_display_start_addr (&gdbarch, &addr);
+  tui_make_all_invisible ();
+  applied_skeleton = layout;
+  applied_layout = layout->clone ();
+  tui_apply_current_layout ();
+  tui_delete_invisible_windows ();
 
-  enum tui_layout_type new_layout = layout_type;
-
-  if (new_layout != cur_layout)
-    {
-      tui_suppress_output suppress;
-
-      show_layout (new_layout);
-
-      /* Now determine where focus should be.  */
-      if (win_with_focus != TUI_CMD_WIN)
-	{
-	  switch (new_layout)
-	    {
-	    case SRC_COMMAND:
-	      tui_set_win_focus_to (TUI_SRC_WIN);
-	      break;
-	    case DISASSEM_COMMAND:
-	      /* The previous layout was not showing code.
-		 This can happen if there is no source
-		 available:
-
-		 1. if the source file is in another dir OR
-		 2. if target was compiled without -g
-		 We still want to show the assembly though!  */
-
-	      tui_get_begin_asm_address (&gdbarch, &addr);
-	      tui_set_win_focus_to (TUI_DISASM_WIN);
-	      break;
-	    case SRC_DISASSEM_COMMAND:
-	      /* The previous layout was not showing code.
-		 This can happen if there is no source
-		 available:
-
-		 1. if the source file is in another dir OR
-		 2. if target was compiled without -g
-		 We still want to show the assembly though!  */
-
-	      tui_get_begin_asm_address (&gdbarch, &addr);
-	      if (win_with_focus == TUI_SRC_WIN)
-		tui_set_win_focus_to (TUI_SRC_WIN);
-	      else
-		tui_set_win_focus_to (TUI_DISASM_WIN);
-	      break;
-	    case SRC_DATA_COMMAND:
-	      if (win_with_focus != TUI_DATA_WIN)
-		tui_set_win_focus_to (TUI_SRC_WIN);
-	      else
-		tui_set_win_focus_to (TUI_DATA_WIN);
-	      break;
-	    case DISASSEM_DATA_COMMAND:
-	      /* The previous layout was not showing code.
-		 This can happen if there is no source
-		 available:
-
-		 1. if the source file is in another dir OR
-		 2. if target was compiled without -g
-		 We still want to show the assembly though!  */
-
-	      tui_get_begin_asm_address (&gdbarch, &addr);
-	      if (win_with_focus != TUI_DATA_WIN)
-		tui_set_win_focus_to (TUI_DISASM_WIN);
-	      else
-		tui_set_win_focus_to (TUI_DATA_WIN);
-	      break;
-	    default:
-	      break;
-	    }
-	}
-      /*
-       * Now update the window content.
-       */
-      tui_update_source_windows_with_addr (gdbarch, addr);
-      if (new_layout == SRC_DATA_COMMAND
-	  || new_layout == DISASSEM_DATA_COMMAND)
-	TUI_DATA_WIN->show_registers (TUI_DATA_WIN->get_current_group ());
-    }
+  if (gdbarch == nullptr && TUI_DISASM_WIN != nullptr)
+    tui_get_begin_asm_address (&gdbarch, &addr);
+  tui_update_source_windows_with_addr (gdbarch, addr);
 }
 
 /* See tui-layout.h.  */
@@ -194,88 +102,47 @@ tui_add_win_to_layout (enum tui_win_type type)
 {
   gdb_assert (type == SRC_WIN || type == DISASSEM_WIN);
 
-  enum tui_layout_type cur_layout = tui_current_layout ();
+  /* If the window already exists, no need to add it.  */
+  if (tui_win_list[type] != nullptr)
+    return;
 
-  switch (type)
-    {
-    case SRC_WIN:
-      if (cur_layout != SRC_COMMAND
-	  && cur_layout != SRC_DISASSEM_COMMAND
-	  && cur_layout != SRC_DATA_COMMAND)
-	{
-	  if (cur_layout == DISASSEM_DATA_COMMAND)
-	    tui_set_layout (SRC_DATA_COMMAND);
-	  else
-	    tui_set_layout (SRC_COMMAND);
-	}
-      break;
-    case DISASSEM_WIN:
-      if (cur_layout != DISASSEM_COMMAND
-	  && cur_layout != SRC_DISASSEM_COMMAND
-	  && cur_layout != DISASSEM_DATA_COMMAND)
-	{
-	  if (cur_layout == SRC_DATA_COMMAND)
-	    tui_set_layout (DISASSEM_DATA_COMMAND);
-	  else
-	    tui_set_layout (DISASSEM_COMMAND);
-	}
-      break;
-    }
+  /* If the window we are trying to replace doesn't exist, we're
+     done.  */
+  enum tui_win_type other = type == SRC_WIN ? DISASSEM_WIN : SRC_WIN;
+  if (tui_win_list[other] == nullptr)
+    return;
+
+  const char *name = type == SRC_WIN ? SRC_NAME : DISASSEM_NAME;
+  applied_layout->replace_window (tui_win_list[other]->name (), name);
+  tui_apply_current_layout ();
+  tui_delete_invisible_windows ();
 }
 
-/* Complete possible layout names.  TEXT is the complete text entered so
-   far, WORD is the word currently being completed.  */
+/* Find LAYOUT in the "layouts" global and return its index.  */
 
-static void
-layout_completer (struct cmd_list_element *ignore,
-		  completion_tracker &tracker,
-		  const char *text, const char *word)
+static size_t
+find_layout (tui_layout_split *layout)
 {
-  static const char *layout_names [] =
-    { "src", "asm", "split", "regs", "next", "prev", NULL };
-
-  complete_on_enum (tracker, layout_names, text, word);
+  for (size_t i = 0; i < layouts.size (); ++i)
+    {
+      if (layout == layouts[i].get ())
+	return i;
+    }
+  gdb_assert_not_reached (_("layout not found!?"));
 }
 
-/* Function to set the layout to SRC, ASM, SPLIT, NEXT, PREV, DATA, or
-   REGS. */
+/* Function to set the layout. */
+
 static void
-tui_layout_command (const char *layout_name, int from_tty)
+tui_apply_layout (struct cmd_list_element *command,
+		  const char *args, int from_tty)
 {
-  enum tui_layout_type new_layout = UNDEFINED_LAYOUT;
-  enum tui_layout_type cur_layout = tui_current_layout ();
-
-  if (layout_name == NULL || *layout_name == '\0')
-    error (_("Usage: layout prev | next | LAYOUT-NAME"));
-
-  /* First check for ambiguous input.  */
-  if (strcmp (layout_name, "s") == 0)
-    error (_("Ambiguous command input."));
-
-  if (subset_compare (layout_name, "src"))
-    new_layout = SRC_COMMAND;
-  else if (subset_compare (layout_name, "asm"))
-    new_layout = DISASSEM_COMMAND;
-  else if (subset_compare (layout_name, "split"))
-    new_layout = SRC_DISASSEM_COMMAND;
-  else if (subset_compare (layout_name, "regs"))
-    {
-      if (cur_layout == SRC_COMMAND
-	  || cur_layout == SRC_DATA_COMMAND)
-	new_layout = SRC_DATA_COMMAND;
-      else
-	new_layout = DISASSEM_DATA_COMMAND;
-    }
-  else if (subset_compare (layout_name, "next"))
-    new_layout = next_layout ();
-  else if (subset_compare (layout_name, "prev"))
-    new_layout = prev_layout ();
-  else
-    error (_("Unrecognized layout: %s"), layout_name);
+  tui_layout_split *layout
+    = (tui_layout_split *) get_cmd_context (command);
 
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
-  tui_set_layout (new_layout);
+  tui_set_layout (layout);
 }
 
 /* See tui-layout.h.  */
@@ -283,15 +150,65 @@ tui_layout_command (const char *layout_name, int from_tty)
 void
 tui_next_layout ()
 {
-  tui_layout_command ("next", 0);
+  size_t index = find_layout (applied_skeleton);
+  ++index;
+  if (index == layouts.size ())
+    index = 0;
+  tui_set_layout (layouts[index].get ());
 }
+
+/* Implement the "layout next" command.  */
+
+static void
+tui_next_layout_command (const char *arg, int from_tty)
+{
+  tui_enable ();
+  tui_next_layout ();
+}
+
+/* See tui-layout.h.  */
+
+void
+tui_set_initial_layout ()
+{
+  tui_set_layout (layouts[0].get ());
+}
+
+/* Implement the "layout prev" command.  */
+
+static void
+tui_prev_layout_command (const char *arg, int from_tty)
+{
+  tui_enable ();
+  size_t index = find_layout (applied_skeleton);
+  if (index == 0)
+    index = layouts.size ();
+  --index;
+  tui_set_layout (layouts[index].get ());
+}
+
 
 /* See tui-layout.h.  */
 
 void
 tui_regs_layout ()
 {
-  tui_layout_command ("regs", 0);
+  /* If there's already a register window, we're done.  */
+  if (TUI_DATA_WIN != nullptr)
+    return;
+
+  tui_set_layout (TUI_DISASM_WIN != nullptr
+		  ? asm_regs_layout
+		  : src_regs_layout);
+}
+
+/* Implement the "layout regs" command.  */
+
+static void
+tui_regs_layout_command (const char *arg, int from_tty)
+{
+  tui_enable ();
+  tui_regs_layout ();
 }
 
 /* See tui-layout.h.  */
@@ -319,75 +236,27 @@ tui_remove_some_windows ()
 static void
 extract_display_start_addr (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 {
-  enum tui_layout_type cur_layout = tui_current_layout ();
-  struct gdbarch *gdbarch = get_current_arch ();
-  CORE_ADDR addr;
+  struct gdbarch *gdbarch = nullptr;
+  CORE_ADDR addr = 0;
   CORE_ADDR pc;
   struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
-  switch (cur_layout)
+  if (TUI_SRC_WIN != nullptr)
     {
-    case SRC_COMMAND:
-    case SRC_DATA_COMMAND:
       gdbarch = TUI_SRC_WIN->gdbarch;
       find_line_pc (cursal.symtab,
 		    TUI_SRC_WIN->start_line_or_addr.u.line_no,
 		    &pc);
       addr = pc;
-      break;
-    case DISASSEM_COMMAND:
-    case SRC_DISASSEM_COMMAND:
-    case DISASSEM_DATA_COMMAND:
+    }
+  else if (TUI_DISASM_WIN != nullptr)
+    {
       gdbarch = TUI_DISASM_WIN->gdbarch;
       addr = TUI_DISASM_WIN->start_line_or_addr.u.addr;
-      break;
-    default:
-      addr = 0;
-      break;
     }
 
   *gdbarch_p = gdbarch;
   *addr_p = addr;
-}
-
-
-/* Answer the previous layout to cycle to.  */
-static enum tui_layout_type
-next_layout (void)
-{
-  int new_layout;
-
-  new_layout = tui_current_layout ();
-  if (new_layout == UNDEFINED_LAYOUT)
-    new_layout = SRC_COMMAND;
-  else
-    {
-      new_layout++;
-      if (new_layout == UNDEFINED_LAYOUT)
-	new_layout = SRC_COMMAND;
-    }
-
-  return (enum tui_layout_type) new_layout;
-}
-
-
-/* Answer the next layout to cycle to.  */
-static enum tui_layout_type
-prev_layout (void)
-{
-  int new_layout;
-
-  new_layout = tui_current_layout ();
-  if (new_layout == SRC_COMMAND)
-    new_layout = DISASSEM_DATA_COMMAND;
-  else
-    {
-      new_layout--;
-      if (new_layout == UNDEFINED_LAYOUT)
-	new_layout = DISASSEM_DATA_COMMAND;
-    }
-
-  return (enum tui_layout_type) new_layout;
 }
 
 void
@@ -454,7 +323,7 @@ tui_get_window_by_name (const std::string &name)
     }
   else
     {
-      gdb_assert (name == "locator");
+      gdb_assert (name == "status");
       return tui_locator_win_info_ptr ();
     }
 }
@@ -508,6 +377,22 @@ tui_layout_window::bottom_boxed_p () const
 {
   gdb_assert (m_window != nullptr);
   return m_window->can_box ();
+}
+
+/* See tui-layout.h.  */
+
+void
+tui_layout_window::replace_window (const char *name, const char *new_window)
+{
+  if (m_contents == name)
+    {
+      m_contents = new_window;
+      if (m_window != nullptr)
+	{
+	  m_window->make_visible (false);
+	  m_window = tui_get_window_by_name (m_contents);
+	}
+    }
 }
 
 /* See tui-layout.h.  */
@@ -804,39 +689,101 @@ tui_layout_split::remove_windows (const char *name)
     }
 }
 
+/* See tui-layout.h.  */
+
+void
+tui_layout_split::replace_window (const char *name, const char *new_window)
+{
+  for (auto &item : m_splits)
+    item.layout->replace_window (name, new_window);
+}
+
+/* Destroy the layout associated with SELF.  */
+
+static void
+destroy_layout (struct cmd_list_element *self, void *context)
+{
+  tui_layout_split *layout = (tui_layout_split *) context;
+  size_t index = find_layout (layout);
+  layouts.erase (layouts.begin () + index);
+}
+
+/* List holding the sub-commands of "layout".  */
+
+static struct cmd_list_element *layout_list;
+
+/* Add a "layout" command with name NAME that switches to LAYOUT.  */
+
+static void
+add_layout_command (const char *name, tui_layout_split *layout)
+{
+  struct cmd_list_element *cmd;
+
+  gdb::unique_xmalloc_ptr<char> doc (xstrprintf (_("Apply the \"%s\" layout"),
+						 name));
+
+  cmd = add_cmd (name, class_tui, nullptr, doc.get (), &layout_list);
+  set_cmd_context (cmd, layout);
+  /* There is no API to set this.  */
+  cmd->func = tui_apply_layout;
+  cmd->destroyer = destroy_layout;
+  cmd->doc_allocated = 1;
+  doc.release ();
+  layouts.emplace_back (layout);
+}
+
+/* Initialize the standard layouts.  */
+
 static void
 initialize_layouts ()
 {
-  standard_layouts[SRC_COMMAND] = new tui_layout_split ();
-  standard_layouts[SRC_COMMAND]->add_window ("src", 2);
-  standard_layouts[SRC_COMMAND]->add_window ("locator", 0);
-  standard_layouts[SRC_COMMAND]->add_window ("cmd", 1);
+  tui_layout_split *layout;
 
-  standard_layouts[DISASSEM_COMMAND] = new tui_layout_split ();
-  standard_layouts[DISASSEM_COMMAND]->add_window ("asm", 2);
-  standard_layouts[DISASSEM_COMMAND]->add_window ("locator", 0);
-  standard_layouts[DISASSEM_COMMAND]->add_window ("cmd", 1);
+  layout = new tui_layout_split ();
+  layout->add_window ("src", 2);
+  layout->add_window ("status", 0);
+  layout->add_window ("cmd", 1);
+  add_layout_command ("src", layout);
 
-  standard_layouts[SRC_DATA_COMMAND] = new tui_layout_split ();
-  standard_layouts[SRC_DATA_COMMAND]->add_window ("regs", 1);
-  standard_layouts[SRC_DATA_COMMAND]->add_window ("src", 1);
-  standard_layouts[SRC_DATA_COMMAND]->add_window ("locator", 0);
-  standard_layouts[SRC_DATA_COMMAND]->add_window ("cmd", 1);
+  layout = new tui_layout_split ();
+  layout->add_window ("asm", 2);
+  layout->add_window ("status", 0);
+  layout->add_window ("cmd", 1);
+  add_layout_command ("asm", layout);
 
-  standard_layouts[DISASSEM_DATA_COMMAND] = new tui_layout_split ();
-  standard_layouts[DISASSEM_DATA_COMMAND]->add_window ("regs", 1);
-  standard_layouts[DISASSEM_DATA_COMMAND]->add_window ("asm", 1);
-  standard_layouts[DISASSEM_DATA_COMMAND]->add_window ("locator", 0);
-  standard_layouts[DISASSEM_DATA_COMMAND]->add_window ("cmd", 1);
+  layout = new tui_layout_split ();
+  layout->add_window ("src", 1);
+  layout->add_window ("asm", 1);
+  layout->add_window ("status", 0);
+  layout->add_window ("cmd", 1);
+  add_layout_command ("split", layout);
 
-  standard_layouts[SRC_DISASSEM_COMMAND] = new tui_layout_split ();
-  standard_layouts[SRC_DISASSEM_COMMAND]->add_window ("src", 1);
-  standard_layouts[SRC_DISASSEM_COMMAND]->add_window ("asm", 1);
-  standard_layouts[SRC_DISASSEM_COMMAND]->add_window ("locator", 0);
-  standard_layouts[SRC_DISASSEM_COMMAND]->add_window ("cmd", 1);
+  layout = new tui_layout_split ();
+  layout->add_window ("regs", 1);
+  layout->add_window ("src", 1);
+  layout->add_window ("status", 0);
+  layout->add_window ("cmd", 1);
+  layouts.emplace_back (layout);
+  src_regs_layout = layout;
+
+  layout = new tui_layout_split ();
+  layout->add_window ("regs", 1);
+  layout->add_window ("asm", 1);
+  layout->add_window ("status", 0);
+  layout->add_window ("cmd", 1);
+  layouts.emplace_back (layout);
+  asm_regs_layout = layout;
 }
 
 
+
+/* Base command for "layout".  */
+
+static void
+tui_layout_command (const char *layout_name, int from_tty)
+{
+  help_list (layout_list, "layout ", all_commands, gdb_stdout);
+}
 
 /* Function to initialize gdb commands, for tui window layout
    manipulation.  */
@@ -845,22 +792,20 @@ void _initialize_tui_layout ();
 void
 _initialize_tui_layout ()
 {
-  struct cmd_list_element *cmd;
-
-  cmd = add_com ("layout", class_tui, tui_layout_command, _("\
+  add_prefix_cmd ("layout", class_tui, tui_layout_command, _("\
 Change the layout of windows.\n\
-Usage: layout prev | next | LAYOUT-NAME\n\
-Layout names are:\n\
-   src   : Displays source and command windows.\n\
-   asm   : Displays disassembly and command windows.\n\
-   split : Displays source, disassembly and command windows.\n\
-   regs  : Displays register window. If existing layout\n\
-           is source/command or assembly/command, the \n\
-           register window is displayed. If the\n\
-           source/assembly/command (split) is displayed, \n\
-           the register window is displayed with \n\
-           the window that has current logical focus."));
-  set_cmd_completer (cmd, layout_completer);
+Usage: layout prev | next | LAYOUT-NAME"),
+		  &layout_list, "layout ", 0, &cmdlist);
+
+  add_cmd ("next", class_tui, tui_next_layout_command,
+	   _("Apply the next TUI layout"),
+	   &layout_list);
+  add_cmd ("prev", class_tui, tui_prev_layout_command,
+	   _("Apply the previous TUI layout"),
+	   &layout_list);
+  add_cmd ("regs", class_tui, tui_regs_layout_command,
+	   _("Apply the TUI register layout"),
+	   &layout_list);
 
   initialize_layouts ();
 }

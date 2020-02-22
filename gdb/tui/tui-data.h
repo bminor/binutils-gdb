@@ -131,17 +131,6 @@ public:
 /* Strings to display in the TUI status line.  */
 #define SINGLE_KEY              "(SingleKey)"
 
-/* The kinds of layouts available.  */
-enum tui_layout_type
-{
-  SRC_COMMAND,
-  DISASSEM_COMMAND,
-  SRC_DISASSEM_COMMAND,
-  SRC_DATA_COMMAND,
-  DISASSEM_DATA_COMMAND,
-  UNDEFINED_LAYOUT
-};
-
 enum tui_line_or_address_kind
 {
   LOA_LINE,
@@ -310,7 +299,6 @@ struct all_tui_windows
 
 
 /* Data Manipulation Functions.  */
-extern enum tui_layout_type tui_current_layout (void);
 extern int tui_term_height (void);
 extern void tui_set_term_height_to (int);
 extern int tui_term_width (void);

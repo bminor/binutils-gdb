@@ -385,7 +385,7 @@ window_name_completer (completion_tracker &tracker,
   /* If no windows are considered visible then the TUI has not yet been
      initialized.  But still "focus src" and "focus cmd" will work because
      invoking the focus command will entail initializing the TUI which sets the
-     default layout to SRC_COMMAND.  */
+     default layout to "src".  */
   if (completion_name_vec.empty ())
     {
       completion_name_vec.push_back (SRC_NAME);
