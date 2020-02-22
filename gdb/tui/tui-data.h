@@ -29,6 +29,7 @@
 struct tui_cmd_window;
 struct tui_source_window_base;
 struct tui_source_window;
+struct tui_disasm_window;
 
 /* A deleter that calls delwin.  */
 struct curses_deleter
@@ -229,7 +230,7 @@ public:
 extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];
 
 #define TUI_SRC_WIN     ((tui_source_window *) tui_win_list[SRC_WIN])
-#define TUI_DISASM_WIN	((tui_source_window_base *) tui_win_list[DISASSEM_WIN])
+#define TUI_DISASM_WIN	((tui_disasm_window *) tui_win_list[DISASSEM_WIN])
 #define TUI_DATA_WIN    ((tui_data_window *) tui_win_list[DATA_WIN])
 #define TUI_CMD_WIN     ((tui_cmd_window *) tui_win_list[CMD_WIN])
 

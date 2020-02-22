@@ -1,5 +1,9 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (TUI_DISASM_WIN): Cast to tui_disasm_window.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (_initialize_tui_win): Add usage text.
 	* tui/tui-stack.c (_initialize_tui_stack): Add usage text.
 	* tui/tui-regs.c (_initialize_tui_regs): Add usage text.
