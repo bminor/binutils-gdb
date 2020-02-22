@@ -9592,6 +9592,25 @@ dwarf2_per_objfile::get_type_unit_group_unshareable (type_unit_group *tu_group)
   return result;
 }
 
+struct type *
+dwarf2_per_objfile::get_type_for_signatured_type
+  (signatured_type *sig_type) const
+{
+  auto iter = this->m_type_map.find (sig_type);
+  if (iter == this->m_type_map.end ())
+    return nullptr;
+
+  return iter->second;
+}
+
+void dwarf2_per_objfile::set_type_for_signatured_type
+  (signatured_type *sig_type, struct type *type)
+{
+  gdb_assert (this->m_type_map.find (sig_type) == this->m_type_map.end ());
+
+  this->m_type_map[sig_type] = type;
+}
+
 /* A helper function for computing the list of all symbol tables
    included by PER_CU.  */
 
@@ -22680,8 +22699,9 @@ get_signatured_type (struct die_info *die, ULONGEST signature,
     }
 
   /* If we already know the type we're done.  */
-  if (sig_type->type != NULL)
-    return sig_type->type;
+  type = dwarf2_per_objfile->get_type_for_signatured_type (sig_type);
+  if (type != nullptr)
+    return type;
 
   type_cu = cu;
   type_die = follow_die_sig_1 (die, sig_type, &type_cu);
@@ -22708,7 +22728,8 @@ get_signatured_type (struct die_info *die, ULONGEST signature,
 		 objfile_name (dwarf2_per_objfile->objfile));
       type = build_error_marker_type (cu, die);
     }
-  sig_type->type = type;
+
+  dwarf2_per_objfile->set_type_for_signatured_type (sig_type, type);
 
   return type;
 }

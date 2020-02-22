@@ -329,10 +329,15 @@ struct dwarf2_per_objfile
   /* Set the compunit_symtab associated to PER_CU.  */
   void set_symtab (const dwarf2_per_cu_data *per_cu, compunit_symtab *symtab);
 
-/* Get the type_unit_group_unshareable corresponding to TU_GROUP.  If one
-   does not exist, create it.  */
+  /* Get the type_unit_group_unshareable corresponding to TU_GROUP.  If one
+     does not exist, create it.  */
   type_unit_group_unshareable *get_type_unit_group_unshareable
     (type_unit_group *tu_group);
+
+  struct type *get_type_for_signatured_type (signatured_type *sig_type) const;
+
+  void set_type_for_signatured_type (signatured_type *sig_type,
+				     struct type *type);
 
   /* Find an integer type SIZE_IN_BYTES bytes in size and return it.
      UNSIGNED_P controls if the integer is unsigned or not.  */
@@ -363,6 +368,9 @@ private:
 
   std::unordered_map<type_unit_group *, type_unit_group_unshareable_up>
     m_type_units;
+
+  /* Map from signatured types to the corresponding struct type.  */
+  std::unordered_map<signatured_type *, struct type *> m_type_map;
 };
 
 /* Get the dwarf2_per_objfile associated to OBJFILE.  */
@@ -583,11 +591,6 @@ struct signatured_type
   /* Type units are grouped by their DW_AT_stmt_list entry so that they
      can share them.  This points to the containing symtab.  */
   struct type_unit_group *type_unit_group;
-
-  /* The type.
-     The first time we encounter this type we fully read it in and install it
-     in the symbol tables.  Subsequent times we only need the type.  */
-  struct type *type;
 
   /* Containing DWO unit.
      This field is valid iff per_cu.reading_dwo_directly.  */
