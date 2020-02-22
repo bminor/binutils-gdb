@@ -278,6 +278,13 @@ tui_layout_command (const char *layout_name, int from_tty)
   tui_set_layout (new_layout);
 }
 
+/* See tui-layout.h.  */
+
+void
+tui_next_layout ()
+{
+  tui_layout_command ("next", 0);
+}
 
 static void
 extract_display_start_addr (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)

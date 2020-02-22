@@ -181,6 +181,9 @@ extern void tui_add_win_to_layout (enum tui_win_type);
 
 extern void tui_set_layout (enum tui_layout_type);
 
+/* Switch to the next layout.  */
+extern void tui_next_layout ();
+
 /* Apply the current layout.  */
 extern void tui_apply_current_layout ();
 

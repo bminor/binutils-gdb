@@ -1,5 +1,11 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_rl_change_windows): Call tui_next_layout.
+	* tui/tui-layout.h (tui_next_layout): Declare.
+	* tui/tui-layout.c (tui_next_layout): New function.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_data_window::display_registers_from): Use
 	correct coordinates.
 
