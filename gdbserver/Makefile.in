@@ -455,7 +455,7 @@ TAGS:	${TAGFILES}
 	  ${TAGFILES}
 tags: TAGS
 
-clean:
+mostlyclean clean:
 	rm -f *.o ${ADD_FILES} *~
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
 	rm -f $(IPA_LIB)

@@ -1,3 +1,7 @@
+2020-02-21  Tom Tromey  <tom@tromey.com>
+
+	* Makefile.in (mostlyclean): New target.
+
 2020-02-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* target.h (struct process_stratum_target): Remove.
