@@ -187,12 +187,13 @@ tui_set_layout (enum tui_layout_type layout_type)
     }
 }
 
-/* Add the specified window to the layout in a logical way.  This
-   means setting up the most logical layout given the window to be
-   added.  */
+/* See tui-layout.h.  */
+
 void
 tui_add_win_to_layout (enum tui_win_type type)
 {
+  gdb_assert (type == SRC_WIN || type == DISASSEM_WIN);
+
   enum tui_layout_type cur_layout = tui_current_layout ();
 
   switch (type)
@@ -218,18 +219,6 @@ tui_add_win_to_layout (enum tui_win_type type)
 	  else
 	    tui_set_layout (DISASSEM_COMMAND);
 	}
-      break;
-    case DATA_WIN:
-      if (cur_layout != SRC_DATA_COMMAND
-	  && cur_layout != DISASSEM_DATA_COMMAND)
-	{
-	  if (cur_layout == DISASSEM_COMMAND)
-	    tui_set_layout (DISASSEM_DATA_COMMAND);
-	  else
-	    tui_set_layout (SRC_DATA_COMMAND);
-	}
-      break;
-    default:
       break;
     }
 }

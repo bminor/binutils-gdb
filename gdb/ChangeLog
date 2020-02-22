@@ -1,5 +1,11 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.h (tui_add_win_to_layout): Add comment.
+	* tui/tui-layout.c (tui_add_win_to_layout): Add assert.  Remove
+	DATA_WIN case.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-disasm.c (tui_get_low_disassembly_address): Use
 	TUI_DISASM_WIN, not tui_win_list.
 

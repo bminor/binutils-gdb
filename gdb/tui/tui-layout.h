@@ -173,7 +173,12 @@ private:
   bool m_applied = false;
 };
 
+/* Add the specified window to the layout in a logical way.  This
+   means setting up the most logical layout given the window to be
+   added.  Only the source or disassembly window can be added this
+   way.  */
 extern void tui_add_win_to_layout (enum tui_win_type);
+
 extern void tui_set_layout (enum tui_layout_type);
 
 /* Apply the current layout.  */
