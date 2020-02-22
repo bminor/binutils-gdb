@@ -1,5 +1,12 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_reg_layout): Remove.
+	(tui_reg_command): Use tui_regs_layout.
+	* tui/tui-layout.h (tui_reg_command): Declare.
+	* tui/tui-layout.c (tui_reg_command): New function.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_rl_delete_other_windows): Call
 	tui_remove_some_windows.
 	* tui/tui-layout.h (class tui_layout_base) <remove_windows>:

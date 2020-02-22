@@ -194,6 +194,9 @@ extern void tui_set_layout (enum tui_layout_type);
 /* Switch to the next layout.  */
 extern void tui_next_layout ();
 
+/* Show the register window.  Like "layout regs".  */
+extern void tui_regs_layout ();
+
 /* Remove some windows from the layout, leaving only the focused
    window and the command window; if no window has the focus, then
    some other window is chosen to remain.  */

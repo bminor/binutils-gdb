@@ -289,6 +289,14 @@ tui_next_layout ()
 /* See tui-layout.h.  */
 
 void
+tui_regs_layout ()
+{
+  tui_layout_command ("regs", 0);
+}
+
+/* See tui-layout.h.  */
+
+void
 tui_remove_some_windows ()
 {
   tui_win_info *focus = tui_win_with_focus ();
