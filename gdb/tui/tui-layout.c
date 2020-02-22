@@ -274,27 +274,15 @@ tui_remove_some_windows ()
 static void
 extract_display_start_addr (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 {
-  struct gdbarch *gdbarch = nullptr;
-  CORE_ADDR addr = 0;
-  CORE_ADDR pc;
-  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
-
   if (TUI_SRC_WIN != nullptr)
-    {
-      gdbarch = TUI_SRC_WIN->gdbarch;
-      find_line_pc (cursal.symtab,
-		    TUI_SRC_WIN->start_line_or_addr.u.line_no,
-		    &pc);
-      addr = pc;
-    }
+    TUI_SRC_WIN->display_start_addr (gdbarch_p, addr_p);
   else if (TUI_DISASM_WIN != nullptr)
+    TUI_DISASM_WIN->display_start_addr (gdbarch_p, addr_p);
+  else
     {
-      gdbarch = TUI_DISASM_WIN->gdbarch;
-      addr = TUI_DISASM_WIN->start_line_or_addr.u.addr;
+      *gdbarch_p = nullptr;
+      *addr_p = 0;
     }
-
-  *gdbarch_p = gdbarch;
-  *addr_p = addr;
 }
 
 void

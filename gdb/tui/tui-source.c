@@ -74,9 +74,9 @@ tui_source_window::set_contents (struct gdbarch *arch,
   m_fullname = make_unique_xstrdup (symtab_to_fullname (s));
 
   cur_line = 0;
-  gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
-  start_line_or_addr.loa = LOA_LINE;
-  cur_line_no = start_line_or_addr.u.line_no = line_no;
+  m_gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
+  m_start_line_or_addr.loa = LOA_LINE;
+  cur_line_no = m_start_line_or_addr.u.line_no = line_no;
 
   int digits = 0;
   if (compact_source)
@@ -88,16 +88,15 @@ tui_source_window::set_contents (struct gdbarch *arch,
     }
 
   const char *iter = srclines.c_str ();
-  content.resize (nlines);
+  m_content.resize (nlines);
   while (cur_line < nlines)
     {
-      struct tui_source_element *element
-	= &content[cur_line];
+      struct tui_source_element *element = &m_content[cur_line];
 
       std::string text;
       if (*iter != '\0')
 	text = tui_copy_source_line (&iter, cur_line_no,
-				     horizontal_offset,
+				     m_horizontal_offset,
 				     line_width, digits);
 
       /* Set whether element is the execution point
@@ -109,7 +108,7 @@ tui_source_window::set_contents (struct gdbarch *arch,
 			 symtab_to_fullname (s)) == 0
 	   && cur_line_no == locator->line_no);
 
-      content[cur_line].line = std::move (text);
+      m_content[cur_line].line = std::move (text);
 
       cur_line++;
       cur_line_no++;
@@ -124,7 +123,7 @@ tui_source_window::set_contents (struct gdbarch *arch,
 bool
 tui_source_window::showing_source_p (const char *fullname) const
 {
-  return (!content.empty ()
+  return (!m_content.empty ()
 	  && (filename_cmp (tui_locator_win_info_ptr ()->full_name.c_str (),
 			    fullname) == 0));
 }
@@ -134,11 +133,11 @@ tui_source_window::showing_source_p (const char *fullname) const
 void
 tui_source_window::do_scroll_vertical (int num_to_scroll)
 {
-  if (!content.empty ())
+  if (!m_content.empty ())
     {
       struct symtab *s;
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
-      struct gdbarch *arch = gdbarch;
+      struct gdbarch *arch = m_gdbarch;
 
       if (cursal.symtab == NULL)
 	{
@@ -149,11 +148,11 @@ tui_source_window::do_scroll_vertical (int num_to_scroll)
       else
 	s = cursal.symtab;
 
-      int line_no = start_line_or_addr.u.line_no + num_to_scroll;
+      int line_no = m_start_line_or_addr.u.line_no + num_to_scroll;
       const std::vector<off_t> *offsets;
       if (g_source_cache.get_line_charpos (s, &offsets)
 	  && line_no > offsets->size ())
-	line_no = start_line_or_addr.u.line_no;
+	line_no = m_start_line_or_addr.u.line_no;
       if (line_no <= 0)
 	line_no = 1;
 
@@ -167,8 +166,8 @@ tui_source_window::do_scroll_vertical (int num_to_scroll)
 bool
 tui_source_window::location_matches_p (struct bp_location *loc, int line_no)
 {
-  return (content[line_no].line_or_addr.loa == LOA_LINE
-	  && content[line_no].line_or_addr.u.line_no == loc->line_number
+  return (m_content[line_no].line_or_addr.loa == LOA_LINE
+	  && m_content[line_no].line_or_addr.u.line_no == loc->line_number
 	  && loc->symtab != NULL
 	  && filename_cmp (m_fullname.get (),
 			   symtab_to_fullname (loc->symtab)) == 0);
@@ -179,13 +178,13 @@ tui_source_window::location_matches_p (struct bp_location *loc, int line_no)
 bool
 tui_source_window::line_is_displayed (int line) const
 {
-  if (content.size () < SCROLL_THRESHOLD)
+  if (m_content.size () < SCROLL_THRESHOLD)
     return false;
 
-  for (size_t i = 0; i < content.size () - SCROLL_THRESHOLD; ++i)
+  for (size_t i = 0; i < m_content.size () - SCROLL_THRESHOLD; ++i)
     {
-      if (content[i].line_or_addr.loa == LOA_LINE
-	  && content[i].line_or_addr.u.line_no == line)
+      if (m_content[i].line_or_addr.loa == LOA_LINE
+	  && m_content[i].line_or_addr.u.line_no == line)
 	return true;
     }
 
@@ -215,4 +214,14 @@ tui_source_window::maybe_update (struct frame_info *fi, symtab_and_line sal)
       l.u.line_no = sal.line;
       set_is_exec_point_at (l);
     }
+}
+
+void
+tui_source_window::display_start_addr (struct gdbarch **gdbarch_p,
+				       CORE_ADDR *addr_p)
+{
+  struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+
+  *gdbarch_p = m_gdbarch;
+  find_line_pc (cursal.symtab, m_start_line_or_addr.u.line_no, addr_p);
 }

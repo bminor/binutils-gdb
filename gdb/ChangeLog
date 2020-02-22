@@ -1,5 +1,38 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (extract_display_start_addr): Rewrite.
+	* tui/tui-disasm.h (struct tui_disasm_window)
+	<display_start_addr>: Declare.
+	* tui/tui-source.h (struct tui_source_window)
+	<display_start_addr>: Declare.
+	* tui/tui-winsource.h (struct tui_source_window_base)
+	<show_source_line, display_start_addr>: New methods.
+	<m_horizontal_offset, m_start_line_or_addr, m_gdbarch, m_content>:
+	Rename and move to protected section.
+	* tui/tui-winsource.c (tui_source_window_base::update_source_window)
+	(tui_source_window_base::do_erase_source_content): Update.
+	(tui_source_window_base::show_source_line): Now a method.
+	(tui_source_window_base::show_source_content)
+	(tui_source_window_base::tui_source_window_base)
+	(tui_source_window_base::rerender)
+	(tui_source_window_base::refill)
+	(tui_source_window_base::do_scroll_horizontal)
+	(tui_source_window_base::set_is_exec_point_at)
+	(tui_source_window_base::update_breakpoint_info)
+	(tui_source_window_base::update_exec_info): Update.
+	* tui/tui-source.c (tui_source_window::set_contents)
+	(tui_source_window::showing_source_p)
+	(tui_source_window::do_scroll_vertical)
+	(tui_source_window::location_matches_p)
+	(tui_source_window::line_is_displayed): Update.
+	(tui_source_window::display_start_addr): New method.
+	* tui/tui-disasm.c (tui_disasm_window::set_contents)
+	(tui_disasm_window::do_scroll_vertical)
+	(tui_disasm_window::location_matches_p): Update.
+	(tui_disasm_window::display_start_addr): New method.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* NEWS: Add entry for gdb.register_window_type.
 	* tui/tui-layout.h (window_factory): New typedef.
 	(tui_register_window): Declare.

@@ -90,6 +90,18 @@ protected:
   virtual bool set_contents (struct gdbarch *gdbarch,
 			     const struct symtab_and_line &sal) = 0;
 
+  /* Redraw the complete line of a source or disassembly window.  */
+  void show_source_line (int lineno);
+
+  /* Used for horizontal scroll.  */
+  int m_horizontal_offset = 0;
+  struct tui_line_or_address m_start_line_or_addr;
+
+  /* Architecture associated with code at this location.  */
+  struct gdbarch *m_gdbarch = nullptr;
+
+  std::vector<tui_source_element> m_content;
+
 public:
 
   /* Refill the source window's source cache and update it.  If this
@@ -125,14 +137,9 @@ public:
   /* Erase the source content.  */
   virtual void erase_source_content () = 0;
 
-  /* Used for horizontal scroll.  */
-  int horizontal_offset = 0;
-  struct tui_line_or_address start_line_or_addr;
-
-  /* Architecture associated with code at this location.  */
-  struct gdbarch *gdbarch = nullptr;
-
-  std::vector<tui_source_element> content;
+  /* Return the start address and gdbarch.  */
+  virtual void display_start_addr (struct gdbarch **gdbarch_p,
+				   CORE_ADDR *addr_p) = 0;
 
 private:
 

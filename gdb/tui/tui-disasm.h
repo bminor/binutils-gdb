@@ -48,6 +48,9 @@ struct tui_disasm_window : public tui_source_window_base
     do_erase_source_content (_("[ No Assembly Available ]"));
   }
 
+  void display_start_addr (struct gdbarch **gdbarch_p,
+			   CORE_ADDR *addr_p) override;
+
 protected:
 
   void do_scroll_vertical (int num_to_scroll) override;
