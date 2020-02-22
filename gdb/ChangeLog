@@ -1,3 +1,13 @@
+2020-02-22  Eli Zaretskii  <eliz@gnu.org>
+
+	PRE gdb/25586:
+	* tui/tui-win.c (new_height_ok, tui_adjust_win_heights): Rename
+	'locator' to 'status_line', to better match terminology in the
+	manual.
+	(tui_adjust_win_heights): Resize the status_line window to match
+	the new dimensions of the command and source/disassembly windows.
+	Reported by Aleksey Midenkov <midenok@gmail.com>.
+
 2020-02-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set GDB version number to 9.1.90.DATE-git.

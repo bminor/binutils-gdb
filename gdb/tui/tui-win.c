@@ -1067,31 +1067,40 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	{
 	  int diff;
 	  struct tui_win_info *win_info;
-	  struct tui_locator_window *locator = tui_locator_win_info_ptr ();
+	  struct tui_locator_window *status_line = tui_locator_win_info_ptr ();
 	  enum tui_layout_type cur_layout = tui_current_layout ();
 	  int width = tui_term_width ();
 
 	  diff = (new_height - primary_win_info->height) * (-1);
-	  if (cur_layout == SRC_COMMAND 
+	  if (cur_layout == SRC_COMMAND
 	      || cur_layout == DISASSEM_COMMAND)
 	    {
 	      struct tui_win_info *src_win_info;
 
-	      primary_win_info->resize (new_height, width,
-					0, primary_win_info->origin.y);
 	      if (primary_win_info->type == CMD_WIN)
 		{
 		  win_info = *(tui_source_windows ().begin ());
 		  src_win_info = win_info;
+		  primary_win_info->resize (new_height, width,
+					    0,
+					    primary_win_info->origin.y + diff);
+		  win_info->resize (win_info->height + diff, width,
+				    0, win_info->origin.y);
+		  status_line->resize (1, width, 0,
+				       win_info->origin.y + win_info->height);
 		}
 	      else
 		{
 		  win_info = tui_win_list[CMD_WIN];
 		  src_win_info = primary_win_info;
+		  primary_win_info->resize (new_height, width,
+					    0, primary_win_info->origin.y);
+		  win_info->resize (win_info->height + diff, width,
+				    0, win_info->origin.y - diff);
+		  status_line->resize (1, width, 0,
+				       primary_win_info->origin.y
+				       + primary_win_info->height);
 		}
-	      win_info->resize (win_info->height + diff, width,
-				0, win_info->origin.y);
-	      TUI_CMD_WIN->origin.y = locator->origin.y + 1;
 	      if ((src_win_info->type == SRC_WIN
 		   || src_win_info->type == DISASSEM_WIN))
 		{
@@ -1122,7 +1131,7 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 	      if (primary_win_info == TUI_CMD_WIN)
 		{ /* Split the change in height across the 1st & 2nd
 		     windows, adjusting them as well.  */
-		  /* Subtract the locator.  */
+		  /* Subtract the status line.  */
 		  int first_split_diff = diff / 2;
 		  int second_split_diff = first_split_diff;
 
@@ -1160,12 +1169,12 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		  second_win->resize (second_win->height + second_split_diff,
 				      width,
 				      0, first_win->height - 1);
-		  locator->resize (1, width,
+		  status_line->resize (1, width,
 				   0, (second_win->origin.y
 				       + second_win->height + 1));
 
 		  TUI_CMD_WIN->resize (new_height, width,
-				       0, locator->origin.y + 1);
+				       0, status_line->origin.y + 1);
 		}
 	      else
 		{
@@ -1196,15 +1205,16 @@ tui_adjust_win_heights (struct tui_win_info *primary_win_info,
 		  else
 		    second_win->resize (second_win->height, width,
 					0, first_win->height - 1);
-		  locator->resize (1, width,
+		  status_line->resize (1, width,
 				   0, (second_win->origin.y
 				       + second_win->height + 1));
-		  TUI_CMD_WIN->origin.y = locator->origin.y + 1;
+		  TUI_CMD_WIN->origin.y = status_line->origin.y + 1;
 		  if ((TUI_CMD_WIN->height + diff) < 1)
-		    TUI_CMD_WIN->resize (1, width, 0, locator->origin.y + 1);
+		    TUI_CMD_WIN->resize (1, width, 0,
+					 status_line->origin.y + 1);
 		  else
 		    TUI_CMD_WIN->resize (TUI_CMD_WIN->height + diff, width,
-					 0, locator->origin.y + 1);
+					 0, status_line->origin.y + 1);
 		}
 	      if (src1 != nullptr && src1->content.empty ())
 		src1->erase_source_content ();
@@ -1226,7 +1236,7 @@ tui_win_info::max_height () const
 }
 
 static int
-new_height_ok (struct tui_win_info *primary_win_info, 
+new_height_ok (struct tui_win_info *primary_win_info,
 	       int new_height)
 {
   int ok = (new_height < tui_term_height ());
@@ -1272,20 +1282,21 @@ new_height_ok (struct tui_win_info *primary_win_info,
 	  /* We could simply add all the heights to obtain the same
 	     result but below is more explicit since we subtract 1 for
 	     the line that the first and second windows share, and add
-	     one for the locator.  */
+	     one for the status line.  */
 	  total_height = cur_total_height =
 	    (first_win->height + second_win->height - 1)
-	    + TUI_CMD_WIN->height + 1;	/* Locator. */
+	    + TUI_CMD_WIN->height + 1;	/* Status_line. */
 	  if (primary_win_info == TUI_CMD_WIN)
 	    {
-	      /* Locator included since first & second win share a line.  */
+	      /* Status line included since first and second window
+		 share a line.  */
 	      ok = ((first_win->height +
 		     second_win->height + diff) >=
-		    (MIN_WIN_HEIGHT * 2) 
+		    (MIN_WIN_HEIGHT * 2)
 		    && new_height >= MIN_CMD_WIN_HEIGHT);
 	      if (ok)
 		{
-		  total_height = new_height + 
+		  total_height = new_height +
 		    (first_win->height +
 		     second_win->height + diff);
 		  min_height = MIN_CMD_WIN_HEIGHT;
@@ -1322,7 +1333,7 @@ new_height_ok (struct tui_win_info *primary_win_info,
 	  /* Now make sure that the proposed total height doesn't
 	     exceed the old total height.  */
 	  if (ok)
-	    ok = (new_height >= min_height 
+	    ok = (new_height >= min_height
 		  && total_height <= cur_total_height);
 	}
     }
