@@ -1,5 +1,12 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (tui_set_win_focus_to): Move to tui-data.c.
+	* tui/tui-data.h (tui_set_win_with_focus): Don't declare.
+	* tui/tui-data.c (tui_set_win_with_focus): Remove.
+	(tui_set_win_focus_to): Move from tui-win.c.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (make_standard_window, get_locator_window): New
 	functions.
 	(known_window_types): New global.

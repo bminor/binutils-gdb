@@ -23,6 +23,7 @@
 #include "symtab.h"
 #include "tui/tui.h"
 #include "tui/tui-data.h"
+#include "tui/tui-win.h"
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-winsource.h"
 #include "gdb_curses.h"
@@ -59,11 +60,16 @@ tui_win_with_focus (void)
 }
 
 
-/* Set the window that has the logical focus.  */
+/* Set the logical focus to win_info.  */
 void
-tui_set_win_with_focus (struct tui_win_info *win_info)
+tui_set_win_focus_to (struct tui_win_info *win_info)
 {
-  win_with_focus = win_info;
+  if (win_info != NULL)
+    {
+      tui_unhighlight_win (win_with_focus);
+      win_with_focus = win_info;
+      tui_highlight_win (win_info);
+    }
 }
 
 

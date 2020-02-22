@@ -452,21 +452,6 @@ tui_update_gdb_sizes (void)
 }
 
 
-/* Set the logical focus to win_info.  */
-void
-tui_set_win_focus_to (struct tui_win_info *win_info)
-{
-  if (win_info != NULL)
-    {
-      struct tui_win_info *win_with_focus = tui_win_with_focus ();
-
-      tui_unhighlight_win (win_with_focus);
-      tui_set_win_with_focus (win_info);
-      tui_highlight_win (win_info);
-    }
-}
-
-
 void
 tui_win_info::forward_scroll (int num_to_scroll)
 {
