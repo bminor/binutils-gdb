@@ -274,7 +274,7 @@ tui_data_window::display_registers_from (int start_element_no)
 	{
 	  /* Create the window if necessary.  */
 	  m_regs_content[i].resize (1, item_win_width,
-				    (item_win_width * j) + 1, cur_y);
+				    x + (item_win_width * j) + 1, y + cur_y);
 	  i++;		/* Next register.  */
 	}
       cur_y++;		/* Next row.  */

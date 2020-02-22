@@ -1,5 +1,10 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_data_window::display_registers_from): Use
+	correct coordinates.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.h (tui_add_win_to_layout): Add comment.
 	* tui/tui-layout.c (tui_add_win_to_layout): Add assert.  Remove
 	DATA_WIN case.
