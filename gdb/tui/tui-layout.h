@@ -64,6 +64,10 @@ public:
      the sizes of the other windows around it.  */
   virtual bool adjust_size (const char *name, int new_height) = 0;
 
+  /* Remove some windows from the layout, leaving the command window
+     and the window being passed in here.  */
+  virtual void remove_windows (const char *name) = 0;
+
   /* The most recent space allocation.  */
   int x = 0;
   int y = 0;
@@ -105,6 +109,10 @@ public:
   bool top_boxed_p () const override;
 
   bool bottom_boxed_p () const override;
+
+  void remove_windows (const char *name) override
+  {
+  }
 
 protected:
 
@@ -149,6 +157,8 @@ public:
 
   bool bottom_boxed_p () const override;
 
+  void remove_windows (const char *name) override;
+
 protected:
 
   void get_sizes (int *min_height, int *max_height) override;
@@ -183,6 +193,11 @@ extern void tui_set_layout (enum tui_layout_type);
 
 /* Switch to the next layout.  */
 extern void tui_next_layout ();
+
+/* Remove some windows from the layout, leaving only the focused
+   window and the command window; if no window has the focus, then
+   some other window is chosen to remain.  */
+extern void tui_remove_some_windows ();
 
 /* Apply the current layout.  */
 extern void tui_apply_current_layout ();

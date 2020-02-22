@@ -162,28 +162,8 @@ tui_rl_delete_other_windows (int notused1, int notused2)
     tui_rl_switch_mode (0 /* notused */, 0 /* notused */);
 
   if (tui_active)
-    {
-      enum tui_layout_type new_layout;
+    tui_remove_some_windows ();
 
-      new_layout = tui_current_layout ();
-
-      /* Kill one window.  */
-      switch (new_layout)
-	{
-	case SRC_COMMAND:
-	case SRC_DATA_COMMAND:
-	case SRC_DISASSEM_COMMAND:
-	default:
-	  new_layout = SRC_COMMAND;
-	  break;
-
-	case DISASSEM_COMMAND:
-	case DISASSEM_DATA_COMMAND:
-	  new_layout = DISASSEM_COMMAND;
-	  break;
-	}
-      tui_set_layout (new_layout);
-    }
   return 0;
 }
 

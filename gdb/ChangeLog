@@ -1,5 +1,17 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui.c (tui_rl_delete_other_windows): Call
+	tui_remove_some_windows.
+	* tui/tui-layout.h (class tui_layout_base) <remove_windows>:
+	Declare method.
+	(class tui_layout_window) <remove_windows>: New method.
+	(class tui_layout_split) <remove_windows>: Declare.
+	(tui_remove_some_windows): Declare.
+	* tui/tui-layout.c (tui_remove_some_windows): New function.
+	(tui_layout_split::remove_windows): New method.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.c (tui_rl_change_windows): Call tui_next_layout.
 	* tui/tui-layout.h (tui_next_layout): Declare.
 	* tui/tui-layout.c (tui_next_layout): New function.

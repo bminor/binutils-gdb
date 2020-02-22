@@ -286,6 +286,28 @@ tui_next_layout ()
   tui_layout_command ("next", 0);
 }
 
+/* See tui-layout.h.  */
+
+void
+tui_remove_some_windows ()
+{
+  tui_win_info *focus = tui_win_with_focus ();
+
+  if (strcmp (focus->name (), "cmd") == 0)
+    {
+      /* Try leaving the source or disassembly window.  If neither
+	 exists, just do nothing.  */
+      focus = TUI_SRC_WIN;
+      if (focus == nullptr)
+	focus = TUI_DISASM_WIN;
+      if (focus == nullptr)
+	return;
+    }
+
+  applied_layout->remove_windows (focus->name ());
+  tui_apply_current_layout ();
+}
+
 static void
 extract_display_start_addr (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 {
@@ -749,6 +771,29 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
     }
 
   m_applied = true;
+}
+
+/* See tui-layout.h.  */
+
+void
+tui_layout_split::remove_windows (const char *name)
+{
+  for (int i = 0; i < m_splits.size (); ++i)
+    {
+      const char *this_name = m_splits[i].layout->get_name ();
+      if (this_name == nullptr)
+	m_splits[i].layout->remove_windows (name);
+      else
+	{
+	  if (strcmp (this_name, name) == 0
+	      || strcmp (this_name, "cmd") == 0)
+	    {
+	      /* Keep.  */
+	    }
+	  m_splits.erase (m_splits.begin () + i);
+	  --i;
+	}
+    }
 }
 
 static void
