@@ -326,7 +326,8 @@ print_enum_type (struct type *type, struct ui_file *stream)
       if (i)
 	fprintf_filtered (stream, ", ");
       wrap_here ("    ");
-      fputs_filtered (ada_enum_name (TYPE_FIELD_NAME (type, i)), stream);
+      fputs_styled (ada_enum_name (TYPE_FIELD_NAME (type, i)),
+		    variable_name_style.style (), stream);
       if (lastval != TYPE_FIELD_ENUMVAL (type, i))
 	{
 	  fprintf_filtered (stream, " => %s",

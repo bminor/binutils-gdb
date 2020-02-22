@@ -625,7 +625,8 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
     }
   if (i < len)
     {
-      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+      fputs_styled (TYPE_FIELD_NAME (type, i), variable_name_style.style (),
+		    stream);
     }
   else if (TYPE_FLAG_ENUM (type))
     {
@@ -655,7 +656,8 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
 		fputs_filtered (" | ", stream);
 
 	      val &= ~TYPE_FIELD_ENUMVAL (type, i);
-	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	      fputs_styled (TYPE_FIELD_NAME (type, i),
+			    variable_name_style.style (), stream);
 	    }
 	}
 
@@ -1268,8 +1270,10 @@ val_print_type_code_flags (struct type *type, const gdb_byte *valaddr,
 	      && TYPE_FIELD_BITSIZE (type, field) == 1)
 	    {
 	      if (val & ((ULONGEST)1 << TYPE_FIELD_BITPOS (type, field)))
-		fprintf_filtered (stream, " %s",
-				  TYPE_FIELD_NAME (type, field));
+		fprintf_filtered
+		  (stream, " %ps",
+		   styled_string (variable_name_style.style (),
+				  TYPE_FIELD_NAME (type, field)));
 	    }
 	  else
 	    {
@@ -1279,8 +1283,9 @@ val_print_type_code_flags (struct type *type, const gdb_byte *valaddr,
 
 	      if (field_len < sizeof (ULONGEST) * TARGET_CHAR_BIT)
 		field_val &= ((ULONGEST) 1 << field_len) - 1;
-	      fprintf_filtered (stream, " %s=",
-				TYPE_FIELD_NAME (type, field));
+	      fprintf_filtered (stream, " %ps=",
+				styled_string (variable_name_style.style (),
+					       TYPE_FIELD_NAME (type, field)));
 	      if (TYPE_CODE (field_type) == TYPE_CODE_ENUM)
 		generic_val_print_enum_1 (field_type, field_val, stream);
 	      else

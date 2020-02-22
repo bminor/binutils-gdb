@@ -436,7 +436,8 @@ val_print_struct (struct type *type, int embedded_offset,
 
       if (!is_tuple && !is_tuple_struct)
         {
-	  fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	  fputs_styled (TYPE_FIELD_NAME (type, i),
+			variable_name_style.style (), stream);
 	  fputs_filtered (": ", stream);
         }
 
@@ -515,8 +516,9 @@ rust_print_enum (struct type *type, int embedded_offset,
       first_field = false;
 
       if (!is_tuple)
-	fprintf_filtered (stream, "%s: ",
-			  TYPE_FIELD_NAME (variant_type, j));
+	fprintf_filtered (stream, "%ps: ",
+			  styled_string (variable_name_style.style (),
+					 TYPE_FIELD_NAME (variant_type, j)));
 
       val_print (TYPE_FIELD_TYPE (variant_type, j),
 		 (embedded_offset
@@ -792,9 +794,12 @@ rust_print_struct_def (struct type *type, const char *varstring,
       if (!for_rust_enum || flags->print_offsets)
 	print_spaces_filtered (level + 2, stream);
       if (is_enum)
-	fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	fputs_styled (TYPE_FIELD_NAME (type, i), variable_name_style.style (),
+		      stream);
       else if (!is_tuple_struct)
-	fprintf_filtered (stream, "%s: ", TYPE_FIELD_NAME (type, i));
+	fprintf_filtered (stream, "%ps: ",
+			  styled_string (variable_name_style.style (),
+					 TYPE_FIELD_NAME (type, i)));
 
       rust_internal_print_type (TYPE_FIELD_TYPE (type, i), NULL,
 				stream, (is_enum ? show : show - 1),
@@ -943,7 +948,9 @@ rust_internal_print_type (struct type *type, const char *varstring,
 		&& name[len] == ':'
 		&& name[len + 1] == ':')
 	      name += len + 2;
-	    fprintfi_filtered (level + 2, stream, "%s,\n", name);
+	    fprintfi_filtered (level + 2, stream, "%ps,\n",
+			       styled_string (variable_name_style.style (),
+					      name));
 	  }
 
 	fputs_filtered ("}", stream);

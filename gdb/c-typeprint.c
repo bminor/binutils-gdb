@@ -148,7 +148,7 @@ c_print_type_1 (struct type *type,
       if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
 	fputs_styled (varstring, function_name_style.style (), stream);
       else
-	fputs_filtered (varstring, stream);
+	fputs_styled (varstring, variable_name_style.style (), stream);
 
       /* For demangled function names, we have the arglist as part of
          the name, so don't print an additional pair of ()'s.  */
@@ -1595,7 +1595,8 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	      if (i)
 		fprintf_filtered (stream, ", ");
 	      wrap_here ("    ");
-	      fputs_filtered (TYPE_FIELD_NAME (type, i), stream);
+	      fputs_styled (TYPE_FIELD_NAME (type, i),
+			    variable_name_style.style (), stream);
 	      if (lastval != TYPE_FIELD_ENUMVAL (type, i))
 		{
 		  fprintf_filtered (stream, " = %s",

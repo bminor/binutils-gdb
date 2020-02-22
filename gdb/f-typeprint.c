@@ -435,7 +435,8 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      f_type_print_base (TYPE_FIELD_TYPE (type, index), stream,
 				 show - 1, level + 4);
 	      fputs_filtered (" :: ", stream);
-	      fputs_filtered (TYPE_FIELD_NAME (type, index), stream);
+	      fputs_styled (TYPE_FIELD_NAME (type, index),
+			    variable_name_style.style (), stream);
 	      f_type_print_varspec_suffix (TYPE_FIELD_TYPE (type, index),
 					   stream, show - 1, 0, 0, 0, false);
 	      fputs_filtered ("\n", stream);

@@ -1,3 +1,12 @@
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* gdb.rust/rust-style.rs: New file.
+	* gdb.rust/rust-style.exp: New file.
+	* gdb.base/style.exp: Test structure printing.
+	* gdb.base/style.c (struct some_struct): New type.
+	(enum etype): New type.
+	(struct_value): New global.
+
 2020-02-21  Tom de Vries  <tdevries@suse.de>
 
 	PR go/18926

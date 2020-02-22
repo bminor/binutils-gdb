@@ -1,3 +1,24 @@
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_val_print_enum_1)
+	(val_print_type_code_flags): Style member names.
+	* rust-lang.c (val_print_struct, rust_print_enum)
+	(rust_print_struct_def, rust_internal_print_type): Style member
+	names.
+	* p-valprint.c (pascal_object_print_value_fields): Style member
+	names.  Only call fprintf_symbol_filtered for static members.
+	* m2-typeprint.c (m2_record_fields, m2_enum): Style member names.
+	* f-valprint.c (f_val_print): Style member names.
+	* f-typeprint.c (f_type_print_base): Style member names.
+	* cp-valprint.c (cp_print_value_fields): Style member names.  Only
+	call fprintf_symbol_filtered for static members.
+	(cp_print_class_member): Style member names.
+	* c-typeprint.c (c_print_type_1, c_type_print_base_1): Style
+	member names.
+	* ada-valprint.c (ada_print_scalar): Style enum names.
+	(ada_val_print_enum): Likewise.
+	* ada-typeprint.c (print_enum_type): Style enum names.
+
 2020-02-21  Tom Tromey  <tom@tromey.com>
 
 	* psympriv.h (struct partial_symtab): Update comment.

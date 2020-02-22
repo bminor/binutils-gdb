@@ -418,7 +418,8 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 	}
       if (i < len)
 	{
-	  fputs_filtered (ada_enum_name (TYPE_FIELD_NAME (type, i)), stream);
+	  fputs_styled (ada_enum_name (TYPE_FIELD_NAME (type, i)),
+			variable_name_style.style (), stream);
 	}
       else
 	{
@@ -956,9 +957,11 @@ ada_val_print_enum (struct type *type, const gdb_byte *valaddr,
       const char *name = ada_enum_name (TYPE_FIELD_NAME (type, i));
 
       if (name[0] == '\'')
-	fprintf_filtered (stream, "%ld %s", (long) val, name);
+	fprintf_filtered (stream, "%ld %ps", (long) val,
+			  styled_string (variable_name_style.style (),
+					 name));
       else
-	fputs_filtered (name, stream);
+	fputs_styled (name, variable_name_style.style (), stream);
     }
   else
     print_longest (stream, 'd', 0, val);
