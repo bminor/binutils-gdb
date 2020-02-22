@@ -2,6 +2,12 @@
 
 Changes in 2.34:
 
+* The ld check for "PHDR segment not covered by LOAD segment" is more
+  effective, catching cases that were wrongly allowed by previous versions of
+  ld.  If you see this error it is likely you are linking with a bad linker
+  script or the binary you are building is not intended to be loaded by a
+  dynamic loader.  In the latter case --no-dynamic-linker is appropriate.
+
 * cr16c support removed.
 
 * Add support for z80-elf.
