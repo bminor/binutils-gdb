@@ -654,6 +654,8 @@ _initialize_tui_regs ()
   tuicmd = tui_get_cmd_list ();
 
   cmd = add_cmd ("reg", class_tui, tui_reg_command, _("\
-TUI command to control the register window."), tuicmd);
+TUI command to control the register window.\n\
+Usage: tui reg NAME\n\
+NAME is the name of the register group to display"), tuicmd);
   set_cmd_completer (cmd, tui_reggroup_completer);
 }

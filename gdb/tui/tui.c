@@ -562,9 +562,11 @@ _initialize_tui ()
   tuicmd = tui_get_cmd_list ();
 
   add_cmd ("enable", class_tui, tui_enable_command,
-	   _("Enable TUI display mode."),
+	   _("Enable TUI display mode.\n\
+Usage: tui enable"),
 	   tuicmd);
   add_cmd ("disable", class_tui, tui_disable_command,
-	   _("Disable TUI display mode."),
+	   _("Disable TUI display mode.\n\
+Usage: tui disable"),
 	   tuicmd);
 }

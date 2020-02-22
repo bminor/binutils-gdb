@@ -1,5 +1,12 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c (_initialize_tui_win): Add usage text.
+	* tui/tui-stack.c (_initialize_tui_stack): Add usage text.
+	* tui/tui-regs.c (_initialize_tui_regs): Add usage text.
+	* tui/tui.c (_initialize_tui): Add usage text.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c (tui_set_focus_command)
 	(tui_set_win_height_command): Use error_no_arg.
 	(_initialize_tui_win): Update help text.

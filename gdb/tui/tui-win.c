@@ -1035,7 +1035,8 @@ Use \"info win\" to see the names of the windows currently being displayed."));
   add_com_alias ("wh", "winheight", class_tui, 0);
   set_cmd_completer (cmd, winheight_completer);
   add_info ("win", tui_all_windows_info,
-	    _("List of all displayed windows."));
+	    _("List of all displayed windows.\n\
+Usage: info win"));
   cmd = add_com ("focus", class_tui, tui_set_focus_command, _("\
 Set focus to named window or next/prev window.\n\
 Usage: focus [WINDOW-NAME | next | prev]\n\
