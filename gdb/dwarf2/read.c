@@ -13199,7 +13199,8 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
 static void
 read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
+  dwarf2_per_objfile *per_objfile = cu->per_cu->dwarf2_per_objfile;
+  struct objfile *objfile = per_objfile->objfile;
   struct gdbarch *gdbarch = objfile->arch ();
   CORE_ADDR pc, baseaddr;
   struct attribute *attr;
@@ -13339,6 +13340,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       dlbaton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
       dlbaton->data = DW_BLOCK (attr)->data;
       dlbaton->size = DW_BLOCK (attr)->size;
+      dlbaton->per_objfile = per_objfile;
       dlbaton->per_cu = cu->per_cu;
 
       SET_FIELD_DWARF_BLOCK (call_site->target, dlbaton);
@@ -16274,9 +16276,8 @@ mark_common_block_symbol_computed (struct symbol *sym,
 				   struct attribute *member_loc,
 				   struct dwarf2_cu *cu)
 {
-  struct dwarf2_per_objfile *dwarf2_per_objfile
-    = cu->per_cu->dwarf2_per_objfile;
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  dwarf2_per_objfile *per_objfile = cu->per_cu->dwarf2_per_objfile;
+  struct objfile *objfile = per_objfile->objfile;
   struct dwarf2_locexpr_baton *baton;
   gdb_byte *ptr;
   unsigned int cu_off;
@@ -16289,6 +16290,7 @@ mark_common_block_symbol_computed (struct symbol *sym,
 	      || member_loc->form_is_constant ());
 
   baton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
+  baton->per_objfile = per_objfile;
   baton->per_cu = cu->per_cu;
   gdb_assert (baton->per_cu);
 
@@ -17412,8 +17414,9 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 		      struct type *default_type)
 {
   struct dwarf2_property_baton *baton;
-  struct obstack *obstack
-    = &cu->per_cu->dwarf2_per_objfile->objfile->objfile_obstack;
+  dwarf2_per_objfile *per_objfile = cu->per_cu->dwarf2_per_objfile;
+  struct objfile *objfile = per_objfile->objfile;
+  struct obstack *obstack = &objfile->objfile_obstack;
 
   gdb_assert (default_type != NULL);
 
@@ -17425,6 +17428,7 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
       baton = XOBNEW (obstack, struct dwarf2_property_baton);
       baton->property_type = default_type;
       baton->locexpr.per_cu = cu->per_cu;
+      baton->locexpr.per_objfile = per_objfile;
       baton->locexpr.size = DW_BLOCK (attr)->size;
       baton->locexpr.data = DW_BLOCK (attr)->data;
       switch (attr->name)
@@ -17471,6 +17475,7 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 		baton = XOBNEW (obstack, struct dwarf2_property_baton);
 		baton->property_type = die_type (target_die, target_cu);
 		baton->locexpr.per_cu = cu->per_cu;
+		baton->locexpr.per_objfile = per_objfile;
 		baton->locexpr.size = DW_BLOCK (target_attr)->size;
 		baton->locexpr.data = DW_BLOCK (target_attr)->data;
 		baton->locexpr.is_reference = true;
@@ -21028,7 +21033,8 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
 			 LONGEST *value, const gdb_byte **bytes,
 			 struct dwarf2_locexpr_baton **baton)
 {
-  struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
+  dwarf2_per_objfile *per_objfile = cu->per_cu->dwarf2_per_objfile;
+  struct objfile *objfile = per_objfile->objfile;
   struct comp_unit_head *cu_header = &cu->header;
   struct dwarf_block *blk;
   enum bfd_endian byte_order = (bfd_big_endian (objfile->obfd) ?
@@ -21054,6 +21060,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
 	   piggyback on the existing location code rather than writing
 	   a new implementation of symbol_computed_ops.  */
 	*baton = XOBNEW (obstack, struct dwarf2_locexpr_baton);
+	(*baton)->per_objfile = per_objfile;
 	(*baton)->per_cu = cu->per_cu;
 	gdb_assert ((*baton)->per_cu);
 
@@ -22291,6 +22298,7 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
       retval.data = DW_BLOCK (attr)->data;
       retval.size = DW_BLOCK (attr)->size;
     }
+  retval.per_objfile = dwarf2_per_objfile;
   retval.per_cu = cu->per_cu;
 
   age_cached_comp_units (dwarf2_per_objfile);
@@ -23140,6 +23148,7 @@ fill_in_loclist_baton (struct dwarf2_cu *cu,
 
   section->read (dwarf2_per_objfile->objfile);
 
+  baton->per_objfile = dwarf2_per_objfile;
   baton->per_cu = cu->per_cu;
   gdb_assert (baton->per_cu);
   /* We don't know how long the location list is, but make sure we
@@ -23188,6 +23197,7 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
       struct dwarf2_locexpr_baton *baton;
 
       baton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
+      baton->per_objfile = dwarf2_per_objfile;
       baton->per_cu = cu->per_cu;
       gdb_assert (baton->per_cu);
 
