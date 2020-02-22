@@ -29,6 +29,7 @@
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"
 #include <ctype.h>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "tui/tui.h"
@@ -322,40 +323,74 @@ tui_gen_win_info::resize (int height_, int width_,
 
 
 
+/* Helper function to create one of the built-in (non-locator)
+   windows.  */
+
+template<enum tui_win_type V, class T>
+static tui_gen_win_info *
+make_standard_window (const char *)
+{
+  if (tui_win_list[V] == nullptr)
+    tui_win_list[V] = new T ();
+  return tui_win_list[V];
+}
+
+/* Helper function to wrap tui_locator_win_info_ptr for
+   tui_get_window_by_name.  */
+
+static tui_gen_win_info *
+get_locator_window (const char *)
+{
+  return tui_locator_win_info_ptr ();
+}
+
+/* A map holding all the known window types, keyed by name.  Note that
+   this is heap-allocated and "leaked" at gdb exit.  This avoids
+   ordering issues with destroying elements in the map at shutdown.
+   In particular, destroying this map can occur after Python has been
+   shut down, causing crashes if any window destruction requires
+   running Python code.  */
+
+static std::unordered_map<std::string, window_factory> *known_window_types;
+
 /* Helper function that returns a TUI window, given its name.  */
 
 static tui_gen_win_info *
 tui_get_window_by_name (const std::string &name)
 {
-  if (name == "src")
-    {
-      if (tui_win_list[SRC_WIN] == nullptr)
-	tui_win_list[SRC_WIN] = new tui_source_window ();
-      return tui_win_list[SRC_WIN];
-    }
-  else if (name == "cmd")
-    {
-      if (tui_win_list[CMD_WIN] == nullptr)
-	tui_win_list[CMD_WIN] = new tui_cmd_window ();
-      return tui_win_list[CMD_WIN];
-    }
-  else if (name == "regs")
-    {
-      if (tui_win_list[DATA_WIN] == nullptr)
-	tui_win_list[DATA_WIN] = new tui_data_window ();
-      return tui_win_list[DATA_WIN];
-    }
-  else if (name == "asm")
-    {
-      if (tui_win_list[DISASSEM_WIN] == nullptr)
-	tui_win_list[DISASSEM_WIN] = new tui_disasm_window ();
-      return tui_win_list[DISASSEM_WIN];
-    }
-  else
-    {
-      gdb_assert (name == "status");
-      return tui_locator_win_info_ptr ();
-    }
+  for (tui_win_info *window : saved_tui_windows)
+    if (name == window->name ())
+      return window;
+
+  auto iter = known_window_types->find (name);
+  if (iter == known_window_types->end ())
+    error (_("Unknown window type \"%s\""), name.c_str ());
+
+  tui_gen_win_info *result = iter->second (name.c_str ());
+  if (result == nullptr)
+    error (_("Could not create window \"%s\""), name.c_str ());
+  return result;
+}
+
+/* Initialize the known window types.  */
+
+static void
+initialize_known_windows ()
+{
+  known_window_types = new std::unordered_map<std::string, window_factory>;
+
+  known_window_types->emplace ("src",
+			       make_standard_window<SRC_WIN,
+						    tui_source_window>);
+  known_window_types->emplace ("cmd",
+			       make_standard_window<CMD_WIN, tui_cmd_window>);
+  known_window_types->emplace ("regs",
+			       make_standard_window<DATA_WIN,
+						    tui_data_window>);
+  known_window_types->emplace ("asm",
+			       make_standard_window<DISASSEM_WIN,
+						    tui_disasm_window>);
+  known_window_types->emplace ("status", get_locator_window);
 }
 
 /* See tui-layout.h.  */
@@ -886,9 +921,8 @@ initialize_layouts ()
 static bool
 validate_window_name (const std::string &name)
 {
-  return (name == "src" || name == "cmd"
-	  || name == "regs" || name == "asm"
-	  || name == "status");
+  auto iter = known_window_types->find (name);
+  return iter != known_window_types->end ();
 }
 
 /* Implementation of the "tui new-layout" command.  */
@@ -1023,4 +1057,5 @@ to be allocated to the window."),
 	   tui_get_cmd_list ());
 
   initialize_layouts ();
+  initialize_known_windows ();
 }

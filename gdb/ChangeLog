@@ -1,5 +1,15 @@
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (make_standard_window, get_locator_window): New
+	functions.
+	(known_window_types): New global.
+	(tui_get_window_by_name): Reimplement.
+	(initialize_known_windows): New function.
+	(validate_window_name): Rewrite.
+	(_initialize_tui_layout): Call initialize_known_windows.
+
+2020-02-22  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui.h (enum tui_win_type) <LOCATOR_WIN, DATA_ITEM_WIN>:
 	Remove constants.
 	* tui/tui-winsource.h (struct tui_source_window_base)
