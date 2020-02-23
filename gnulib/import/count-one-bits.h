@@ -1,5 +1,5 @@
 /* count-one-bits.h -- counts the number of 1-bits in a word.
-   Copyright (C) 2007-2019 Free Software Foundation, Inc.
+   Copyright (C) 2007-2020 Free Software Foundation, Inc.
 
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -28,6 +28,10 @@
 _GL_INLINE_HEADER_BEGIN
 #ifndef COUNT_ONE_BITS_INLINE
 # define COUNT_ONE_BITS_INLINE _GL_INLINE
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /* Expand to code that computes the number of 1-bits of the local
@@ -122,12 +126,14 @@ count_one_bits_l (unsigned long int x)
   COUNT_ONE_BITS (__builtin_popcountl, __popcnt, unsigned long int);
 }
 
-#if HAVE_UNSIGNED_LONG_LONG_INT
 /* Compute and return the number of 1-bits set in X. */
 COUNT_ONE_BITS_INLINE int
 count_one_bits_ll (unsigned long long int x)
 {
   COUNT_ONE_BITS (__builtin_popcountll, __popcnt64, unsigned long long int);
+}
+
+#ifdef __cplusplus
 }
 #endif
 

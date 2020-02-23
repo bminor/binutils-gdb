@@ -1,5 +1,5 @@
 # DO NOT EDIT! GENERATED AUTOMATICALLY!
-# Copyright (C) 2002-2019 Free Software Foundation, Inc.
+# Copyright (C) 2002-2020 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -103,7 +103,6 @@ AC_DEFUN([gl_EARLY],
   # Code from module glob:
   # Code from module glob-h:
   # Code from module hard-locale:
-  # Code from module havelib:
   # Code from module include_next:
   # Code from module inet_ntop:
   # Code from module intprops:
@@ -116,6 +115,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module libc-config:
   # Code from module limits-h:
   # Code from module localcharset:
+  # Code from module locale:
   # Code from module localtime-buffer:
   # Code from module lock:
   # Code from module lstat:
@@ -155,6 +155,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module save-cwd:
   # Code from module scratch_buffer:
   # Code from module setenv:
+  # Code from module setlocale-null:
   # Code from module signal-h:
   # Code from module snippet/_Noreturn:
   # Code from module snippet/arg-nonnull:
@@ -225,7 +226,6 @@ AC_DEFUN([gl_INIT],
   gl_FUNC_ALLOCA
   gl_HEADER_ARPA_INET
   AC_PROG_MKDIR_P
-  AC_LIBOBJ([openat-proc])
   gl___BUILTIN_EXPECT
   gl_CANONICALIZE_LGPL
   if test $HAVE_CANONICALIZE_FILE_NAME = 0 || test $REPLACE_CANONICALIZE_FILE_NAME = 1; then
@@ -251,7 +251,6 @@ AC_DEFUN([gl_INIT],
     AC_LIBOBJ([closedir])
   fi
   gl_DIRENT_MODULE_INDICATOR([closedir])
-  gl_COUNT_ONE_BITS
   gl_CHECK_TYPE_STRUCT_DIRENT_D_INO
   gl_CHECK_TYPE_STRUCT_DIRENT_D_TYPE
   gl_DIRENT_H
@@ -396,6 +395,9 @@ AC_DEFUN([gl_INIT],
   fi
   gl_GLOB_MODULE_INDICATOR([glob])
   gl_GLOB_H
+  AC_REQUIRE([gl_FUNC_SETLOCALE_NULL])
+  LIB_HARD_LOCALE="$LIB_SETLOCALE_NULL"
+  AC_SUBST([LIB_HARD_LOCALE])
   gl_FUNC_INET_NTOP
   if test $HAVE_INET_NTOP = 0 || test $REPLACE_INET_NTOP = 1; then
     AC_LIBOBJ([inet_ntop])
@@ -421,6 +423,7 @@ AC_DEFUN([gl_INIT],
   dnl For backward compatibility. Some packages still use this.
   LOCALCHARSET_TESTS_ENVIRONMENT=
   AC_SUBST([LOCALCHARSET_TESTS_ENVIRONMENT])
+  gl_LOCALE_H
   AC_REQUIRE([gl_LOCALTIME_BUFFER_DEFAULTS])
   AC_LIBOBJ([localtime-buffer])
   gl_LOCK
@@ -441,6 +444,11 @@ AC_DEFUN([gl_INIT],
   gl_FUNC_MBRTOWC
   if test $HAVE_MBRTOWC = 0 || test $REPLACE_MBRTOWC = 1; then
     AC_LIBOBJ([mbrtowc])
+    if test $REPLACE_MBSTATE_T = 1; then
+      AC_LIBOBJ([lc-charset-dispatch])
+      AC_LIBOBJ([mbtowc-lock])
+      gl_PREREQ_MBTOWC_LOCK
+    fi
     gl_PREREQ_MBRTOWC
   fi
   gl_WCHAR_MODULE_INDICATOR([mbrtowc])
@@ -575,6 +583,12 @@ AC_DEFUN([gl_INIT],
     AC_LIBOBJ([setenv])
   fi
   gl_STDLIB_MODULE_INDICATOR([setenv])
+  gl_FUNC_SETLOCALE_NULL
+  if test $SETLOCALE_NULL_ALL_MTSAFE = 0 || test $SETLOCALE_NULL_ONE_MTSAFE = 0; then
+    AC_LIBOBJ([setlocale-lock])
+    gl_PREREQ_SETLOCALE_LOCK
+  fi
+  gl_LOCALE_MODULE_INDICATOR([setlocale_null])
   gl_SIGNAL_H
   gl_TYPE_SOCKLEN_T
   gt_TYPE_SSIZE_T
@@ -838,7 +852,6 @@ AC_DEFUN([gltests_LIBSOURCES], [
 # This macro records the list of files which have been installed by
 # gnulib-tool and may be removed by future gnulib-tool invocations.
 AC_DEFUN([gl_FILE_LIST], [
-  build-aux/config.rpath
   build-aux/update-copyright
   lib/_Noreturn.h
   lib/alloca.c
@@ -925,10 +938,13 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/isnanl-nolibm.h
   lib/isnanl.c
   lib/itold.c
+  lib/lc-charset-dispatch.c
+  lib/lc-charset-dispatch.h
   lib/libc-config.h
   lib/limits.in.h
   lib/localcharset.c
   lib/localcharset.h
+  lib/locale.in.h
   lib/localtime-buffer.c
   lib/localtime-buffer.h
   lib/lstat.c
@@ -941,11 +957,15 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/malloca.h
   lib/math.c
   lib/math.in.h
+  lib/mbrtowc-impl-utf8.h
+  lib/mbrtowc-impl.h
   lib/mbrtowc.c
   lib/mbsinit.c
   lib/mbsrtowcs-impl.h
   lib/mbsrtowcs-state.c
   lib/mbsrtowcs.c
+  lib/mbtowc-lock.c
+  lib/mbtowc-lock.h
   lib/memchr.c
   lib/memchr.valgrind
   lib/memmem.c
@@ -981,6 +1001,9 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/save-cwd.h
   lib/scratch_buffer.h
   lib/setenv.c
+  lib/setlocale-lock.c
+  lib/setlocale_null.c
+  lib/setlocale_null.h
   lib/signal.in.h
   lib/stat-time.c
   lib/stat-time.h
@@ -1049,7 +1072,6 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/close.m4
   m4/closedir.m4
   m4/codeset.m4
-  m4/count-one-bits.m4
   m4/d-ino.m4
   m4/d-type.m4
   m4/dirent_h.m4
@@ -1093,7 +1115,6 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/glob.m4
   m4/glob_h.m4
   m4/gnulib-common.m4
-  m4/host-cpu-c-abi.m4
   m4/include_next.m4
   m4/inet_ntop.m4
   m4/inttypes-pri.m4
@@ -1101,17 +1122,14 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/isnand.m4
   m4/isnanl.m4
   m4/largefile.m4
-  m4/lib-ld.m4
-  m4/lib-link.m4
-  m4/lib-prefix.m4
   m4/limits-h.m4
   m4/localcharset.m4
   m4/locale-fr.m4
   m4/locale-ja.m4
   m4/locale-zh.m4
+  m4/locale_h.m4
   m4/localtime-buffer.m4
   m4/lock.m4
-  m4/longlong.m4
   m4/lstat.m4
   m4/malloc.m4
   m4/malloca.m4
@@ -1151,6 +1169,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/rmdir.m4
   m4/save-cwd.m4
   m4/setenv.m4
+  m4/setlocale_null.m4
   m4/signal_h.m4
   m4/socklen.m4
   m4/sockpfaf.m4
@@ -1182,9 +1201,11 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/time_r.m4
   m4/unistd-safer.m4
   m4/unistd_h.m4
+  m4/visibility.m4
   m4/warn-on-use.m4
   m4/wchar_h.m4
   m4/wchar_t.m4
   m4/wctype_h.m4
   m4/wint_t.m4
+  m4/zzgnulib.m4
 ])

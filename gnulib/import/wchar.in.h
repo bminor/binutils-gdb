@@ -1,6 +1,6 @@
 /* A substitute for ISO C99 <wchar.h>, for platforms that have issues.
 
-   Copyright (C) 2007-2019 Free Software Foundation, Inc.
+   Copyright (C) 2007-2020 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -33,7 +33,8 @@
 #if (((defined __need_mbstate_t || defined __need_wint_t)               \
       && !defined __MINGW32__)                                          \
      || (defined __hpux                                                 \
-         && ((defined _INTTYPES_INCLUDED && !defined strtoimax)         \
+         && ((defined _INTTYPES_INCLUDED                                \
+              && !defined _GL_FINISHED_INCLUDING_SYSTEM_INTTYPES_H)     \
              || defined _GL_JUST_INCLUDE_SYSTEM_WCHAR_H))               \
      || (defined __MINGW32__ && defined __STRING_H_SOURCED__)           \
      || defined _GL_ALREADY_INCLUDING_WCHAR_H)
@@ -140,12 +141,13 @@ typedef unsigned int rpl_wint_t;
    implementing mbrtowc for encodings like UTF-8.
    On AIX and MSVC, mbrtowc needs to be overridden, but mbstate_t exists and is
    large enough and overriding it would cause problems in C++ mode.  */
-#if (!(@HAVE_MBSINIT@ && @HAVE_MBRTOWC@) || @REPLACE_MBSTATE_T@) \
-    && !(defined _AIX || defined _MSC_VER)
+#if !(((defined _WIN32 && !defined __CYGWIN__) || @HAVE_MBSINIT@) && @HAVE_MBRTOWC@) || @REPLACE_MBSTATE_T@
 # if !GNULIB_defined_mbstate_t
+#  if !(defined _AIX || defined _MSC_VER)
 typedef int rpl_mbstate_t;
-#  undef mbstate_t
-#  define mbstate_t rpl_mbstate_t
+#   undef mbstate_t
+#   define mbstate_t rpl_mbstate_t
+#  endif
 #  define GNULIB_defined_mbstate_t 1
 # endif
 #endif
