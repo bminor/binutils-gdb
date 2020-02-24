@@ -589,10 +589,6 @@ struct type_unit_group
   /* The data used to construct the hash key.  */
   struct stmt_list_hash hash;
 
-  /* The number of symtabs from the line header.
-     The value here must match line_header.num_file_names.  */
-  unsigned int num_symtabs;
-
   /* The symbol tables for this TU (obtained from the files listed in
      DW_AT_stmt_list).
      WARNING: The order of entries here must match the order of entries
@@ -10854,9 +10850,9 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 	 process_full_type_unit still needs to know if this is the first
 	 time.  */
 
-      tu_group->num_symtabs = line_header->file_names_size ();
-      tu_group->symtabs = XNEWVEC (struct symtab *,
-				   line_header->file_names_size ());
+      tu_group->symtabs
+	= XOBNEWVEC (&COMPUNIT_OBJFILE (cust)->objfile_obstack,
+		     struct symtab *, line_header->file_names_size ());
 
       auto &file_names = line_header->file_names ();
       for (i = 0; i < file_names.size (); ++i)
