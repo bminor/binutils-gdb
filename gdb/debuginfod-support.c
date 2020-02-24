@@ -24,18 +24,19 @@
 
 #ifndef HAVE_LIBDEBUGINFOD
 scoped_fd
-debuginfod_source_query (const unsigned char *build_id __attribute__((unused)),
-			 int build_id_len __attribute__((unused)),
-			 const char *srcpath __attribute__((unused)),
-			 gdb::unique_xmalloc_ptr<char> *filename __attribute__((unused)))
+debuginfod_source_query (const unsigned char *build_id,
+			 int build_id_len,
+			 const char *srcpath,
+			 gdb::unique_xmalloc_ptr<char> *destname)
 {
   return scoped_fd (-ENOSYS);
 }
 
 scoped_fd
-debuginfod_debuginfo_query (const unsigned char *build_id __attribute__((unused)),
-			    int build_id_len __attribute__((unused)),
-			    gdb::unique_xmalloc_ptr<char> *filename __attribute__((unused)))
+debuginfod_debuginfo_query (const unsigned char *build_id,
+			    int build_id_len,
+			    const char *filename,
+			    gdb::unique_xmalloc_ptr<char> *destname)
 {
   return scoped_fd (-ENOSYS);
 }
