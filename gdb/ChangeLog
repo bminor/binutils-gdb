@@ -1,3 +1,8 @@
+2020-02-24  Tom de Vries  <tdevries@suse.de>
+
+	* tui/tui-layout.c (_initialize_tui_layout): Fix help messages for
+	commands layout next/prev/regs.
+
 2020-02-22  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/loc.h (dwarf2_compile_expr_to_ax): Don't declare.

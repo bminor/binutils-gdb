@@ -1044,13 +1044,13 @@ Usage: layout prev | next | LAYOUT-NAME"),
 		  &layout_list, "layout ", 0, &cmdlist);
 
   add_cmd ("next", class_tui, tui_next_layout_command,
-	   _("Apply the next TUI layout"),
+	   _("Apply the next TUI layout."),
 	   &layout_list);
   add_cmd ("prev", class_tui, tui_prev_layout_command,
-	   _("Apply the previous TUI layout"),
+	   _("Apply the previous TUI layout."),
 	   &layout_list);
   add_cmd ("regs", class_tui, tui_regs_layout_command,
-	   _("Apply the TUI register layout"),
+	   _("Apply the TUI register layout."),
 	   &layout_list);
 
   add_cmd ("new-layout", class_tui, tui_new_layout_command,
