@@ -2262,7 +2262,7 @@ possible and any bug reports about such an event will be rejected.
 @itemx --debugging
 Display debugging information.  This attempts to parse STABS
 debugging format information stored in the file and print it out using
-a C like syntax.  If no STABS debuging was found this option
+a C like syntax.  If no STABS debugging was found this option
 falls back on the @option{-W} option to print any DWARF information in
 the file.
 
