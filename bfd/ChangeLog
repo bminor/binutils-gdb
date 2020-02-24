@@ -1,5 +1,9 @@
 2020-02-24  Alan Modra  <amodra@gmail.com>
 
+	* vms-lib.c (_bfd_vms_lib_archive_p): Correct overflow checks.
+
+2020-02-24  Alan Modra  <amodra@gmail.com>
+
 	* vms-lib.c (struct carsym_mem): Add limit.
 	(vms_add_index): Heed limit.
 	(vms_traverse_index): Catch buffer overflows.  Remove outdated fixme.
