@@ -573,9 +573,7 @@ struct type_unit_group
   /* dwarf2read.c's main "handle" on a TU symtab.
      To simplify things we create an artificial CU that "includes" all the
      type units using this stmt_list so that the rest of the code still has
-     a "per_cu" handle on the symtab.
-     This PER_CU is recognized by having no section.  */
-#define IS_TYPE_UNIT_GROUP(per_cu) ((per_cu)->section == NULL)
+     a "per_cu" handle on the symtab.  */
   struct dwarf2_per_cu_data per_cu;
 
   /* The TUs that share this DW_AT_stmt_list entry.
@@ -2322,7 +2320,7 @@ dw2_do_instantiate_symtab (struct dwarf2_per_cu_data *per_cu, bool skip_partial)
 
   /* Skip type_unit_groups, reading the type units they contain
      is handled elsewhere.  */
-  if (IS_TYPE_UNIT_GROUP (per_cu))
+  if (per_cu->type_unit_group_p ())
     return;
 
   /* The destructor of dwarf2_queue_guard frees any entries left on
@@ -3178,7 +3176,7 @@ dw2_get_file_names (struct dwarf2_per_cu_data *this_cu)
   /* This should never be called for TUs.  */
   gdb_assert (! this_cu->is_debug_types);
   /* Nor type unit groups.  */
-  gdb_assert (! IS_TYPE_UNIT_GROUP (this_cu));
+  gdb_assert (! this_cu->type_unit_group_p ());
 
   if (this_cu->v.quick->file_names != NULL)
     return this_cu->v.quick->file_names;
@@ -7583,7 +7581,7 @@ build_type_psymtab_dependencies (void **slot, void *info)
   int i;
 
   gdb_assert (len > 0);
-  gdb_assert (IS_TYPE_UNIT_GROUP (per_cu));
+  gdb_assert (per_cu->type_unit_group_p ());
 
   pst->number_of_dependencies = len;
   pst->dependencies = objfile->partial_symtabs->allocate_dependencies (len);
@@ -22718,7 +22716,7 @@ load_full_type_unit (struct dwarf2_per_cu_data *per_cu)
   struct signatured_type *sig_type;
 
   /* Caller is responsible for ensuring type_unit_groups don't get here.  */
-  gdb_assert (! IS_TYPE_UNIT_GROUP (per_cu));
+  gdb_assert (! per_cu->type_unit_group_p ());
 
   /* We have the per_cu, but we need the signatured_type.
      Fortunately this is an easy translation.  */

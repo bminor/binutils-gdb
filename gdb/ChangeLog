@@ -1,5 +1,13 @@
 2020-02-24  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <type_unit_group_p>:
+	New method.
+	* dwarf2/read.c (IS_TYPE_UNIT_GROUP): Remove.
+	(dw2_do_instantiate_symtab, dw2_get_file_names)
+	(build_type_psymtab_dependencies, load_full_type_unit): Update.
+
+2020-02-24  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2read.c (dwarf2_build_psymtabs_hard): Use
 	make_scoped_restore.
 	(dwarf2_psymtab::read_symtab): Don't clear
