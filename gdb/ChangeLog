@@ -1,5 +1,10 @@
 2020-02-24  Tom de Vries  <tdevries@suse.de>
 
+	PR gdb/25592
+	* stack.c (iterate_over_block_locals): Handle LOC_CONST.
+
+2020-02-24  Tom de Vries  <tdevries@suse.de>
+
 	* tui/tui-layout.c (_initialize_tui_layout): Fix help messages for
 	commands layout next/prev/regs.
 

@@ -2237,6 +2237,7 @@ iterate_over_block_locals (const struct block *b,
     {
       switch (SYMBOL_CLASS (sym))
 	{
+	case LOC_CONST:
 	case LOC_LOCAL:
 	case LOC_REGISTER:
 	case LOC_STATIC:
