@@ -18,6 +18,7 @@
 
 #include <errno.h>
 #include "defs.h"
+#include "cli/cli-style.h"
 #include "gdbsupport/scoped_fd.h"
 #include "debuginfod-support.h"
 
@@ -46,14 +47,10 @@ progressfn (debuginfod_client *c, long cur, long total)
 {
   if (check_quit_flag ())
     {
-      printf_unfiltered ("Cancelling download...\n");
+      printf_filtered ("Cancelling download...\n");
       return 1;
     }
 
-  printf_unfiltered ("Downloading... %.0f%% (%ld/%ld)%s",
-		     (cur * 100.0f) / total,
-		     cur, total,
-		     (cur == total) ? "\n" : "\r");
   return 0;
 }
 
@@ -74,31 +71,31 @@ scoped_fd
 debuginfod_source_query (const unsigned char *build_id,
 			 int build_id_len,
 			 const char *srcpath,
-			  gdb::unique_xmalloc_ptr<char> *destname)
+			 gdb::unique_xmalloc_ptr<char> *destname)
 {
   debuginfod_client *c = debuginfod_init ();
 
   if (c == nullptr)
     return scoped_fd (-ENOMEM);
 
-  char *dname = nullptr;
+  printf_filtered (_("Debuginfod fetching source file %ps...\n"),
+		   styled_string (file_name_style.style (), srcpath));
 
-  printf_unfiltered ("Attempting to download source file %s\n", srcpath);
   scoped_fd fd (debuginfod_find_source (c,
 					build_id,
 					build_id_len,
 					srcpath,
-					&dname));
+					nullptr));
 
   if (fd.get () < 0)
-    printf_unfiltered ("Download unsuccessful. Continuing without source file %s.\n",
-		       srcpath);
+    {
+      printf_filtered (_("Download failed. Continuing without source file %ps.\n"),
+		       styled_string (file_name_style.style (), srcpath));
+    }
   else
-    printf_unfiltered ("Download successful.\n");
+    destname->reset (xstrdup (srcpath));
 
-  destname->reset (dname);
   debuginfod_end (c);
-
   return fd;
 }
 
@@ -115,20 +112,18 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
   if (c == nullptr)
     return scoped_fd (-ENOMEM);
 
-  char *dname = nullptr;
+  printf_filtered (_("Debuginfod fetching debug info for %ps...\n"),
+		   styled_string (file_name_style.style (), filename));
 
-  printf_filtered ("Attempting to download debug info for %s\n", filename);
+  char *dname = nullptr;
   scoped_fd fd (debuginfod_find_debuginfo (c, build_id, build_id_len, &dname));
 
   if (fd.get () < 0)
-    printf_unfiltered ("Download unsuccessful. Continuing without debug info for %s.\n",
-		       filename);
-  else
-    printf_unfiltered ("Download successful.\n");
+    printf_filtered (_("Download failed. Continuing without debug info for %ps.\n"),
+		     styled_string (file_name_style.style (),  filename));
 
-  debuginfod_end (c);
   destname->reset (dname);
-
+  debuginfod_end (c);
   return fd;
 }
 #endif

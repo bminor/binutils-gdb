@@ -1336,12 +1336,14 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 		  /* File successfully retrieved from server.  */
 		  gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (symfile_path.get ()));
 
-		  if (debug_bfd != nullptr
-		      && build_id_verify (debug_bfd.get (), build_id->size, build_id->data))
+		  if (debug_bfd == nullptr)
+		    warning (_("File \"%s\" from debuginfod cannot be opened as bfd"),
+			     objfile->original_name);
+		  else if (build_id_verify (debug_bfd.get (), build_id->size, build_id->data))
 		    {
 		      symbol_file_add_separate (debug_bfd.get (), symfile_path.get (),
 						symfile_flags, objfile);
-		       has_dwarf2 = true;
+		      has_dwarf2 = true;
 		    }
 		}
 	    }
