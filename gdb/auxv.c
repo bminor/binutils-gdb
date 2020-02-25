@@ -458,9 +458,21 @@ default_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
 	   AUXV_FORMAT_HEX);
       TAG (AT_L1I_CACHESHAPE, _("L1 Instruction cache information"),
 	   AUXV_FORMAT_HEX);
+      TAG (AT_L1I_CACHESIZE, _("L1 Instruction cache size"), AUXV_FORMAT_HEX);
+      TAG (AT_L1I_CACHEGEOMETRY, _("L1 Instruction cache geometry"),
+	   AUXV_FORMAT_HEX);
       TAG (AT_L1D_CACHESHAPE, _("L1 Data cache information"), AUXV_FORMAT_HEX);
+      TAG (AT_L1D_CACHESIZE, _("L1 Data cache size"), AUXV_FORMAT_HEX);
+      TAG (AT_L1D_CACHEGEOMETRY, _("L1 Data cache geometry"),
+	   AUXV_FORMAT_HEX);
       TAG (AT_L2_CACHESHAPE, _("L2 cache information"), AUXV_FORMAT_HEX);
+      TAG (AT_L2_CACHESIZE, _("L2 cache size"), AUXV_FORMAT_HEX);
+      TAG (AT_L2_CACHEGEOMETRY, _("L2 cache geometry"), AUXV_FORMAT_HEX);
       TAG (AT_L3_CACHESHAPE, _("L3 cache information"), AUXV_FORMAT_HEX);
+      TAG (AT_L3_CACHESIZE, _("L3 cache size"), AUXV_FORMAT_HEX);
+      TAG (AT_L3_CACHEGEOMETRY, _("L3 cache geometry"), AUXV_FORMAT_HEX);
+      TAG (AT_MINSIGSTKSZ, _("Minimum stack size for signal delivery"),
+	   AUXV_FORMAT_HEX);
       TAG (AT_SUN_UID, _("Effective user ID"), AUXV_FORMAT_DEC);
       TAG (AT_SUN_RUID, _("Real user ID"), AUXV_FORMAT_DEC);
       TAG (AT_SUN_GID, _("Effective group ID"), AUXV_FORMAT_DEC);
