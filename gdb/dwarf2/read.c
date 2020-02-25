@@ -399,7 +399,8 @@ struct delayed_method_info
 /* Internal state when decoding a particular compilation unit.  */
 struct dwarf2_cu
 {
-  explicit dwarf2_cu (struct dwarf2_per_cu_data *per_cu);
+  explicit dwarf2_cu (dwarf2_per_cu_data *per_cu,
+		      dwarf2_per_objfile *per_objfile);
   ~dwarf2_cu ();
 
   DISABLE_COPY_AND_ASSIGN (dwarf2_cu);
@@ -465,6 +466,9 @@ public:
 
   /* Backlink to our per_cu entry.  */
   struct dwarf2_per_cu_data *per_cu;
+
+  /* The dwarf2_per_objfile that owns this.  */
+  struct dwarf2_per_objfile *per_objfile;
 
   /* How many compilation units ago was this CU last referenced?  */
   int last_used = 0;
@@ -928,7 +932,8 @@ public:
   void keep ();
 
 private:
-  void init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
+  void init_tu_and_read_dwo_dies (dwarf2_per_cu_data *this_cu,
+				  dwarf2_per_objfile *per_objfile,
 				  int use_existing_cu);
 
   struct dwarf2_per_cu_data *m_this_cu;
@@ -6852,7 +6857,8 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
    Read a TU directly from a DWO file, bypassing the stub.  */
 
 void
-cutu_reader::init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
+cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu_data *this_cu,
+					dwarf2_per_objfile *per_objfile,
 					int use_existing_cu)
 {
   struct signatured_type *sig_type;
@@ -6873,7 +6879,7 @@ cutu_reader::init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
     {
       /* If !use_existing_cu, this_cu->cu must be NULL.  */
       gdb_assert (this_cu->cu == NULL);
-      m_new_cu.reset (new dwarf2_cu (this_cu));
+      m_new_cu.reset (new dwarf2_cu (this_cu, per_objfile));
     }
 
   /* A future optimization, if needed, would be to use an existing
@@ -6934,7 +6940,7 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
       /* Narrow down the scope of possibilities to have to understand.  */
       gdb_assert (this_cu->is_debug_types);
       gdb_assert (abbrev_table == NULL);
-      init_tu_and_read_dwo_dies (this_cu, use_existing_cu);
+      init_tu_and_read_dwo_dies (this_cu, dwarf2_per_objfile, use_existing_cu);
       return;
     }
 
@@ -6961,7 +6967,7 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
     {
       /* If !use_existing_cu, this_cu->cu must be NULL.  */
       gdb_assert (this_cu->cu == NULL);
-      m_new_cu.reset (new dwarf2_cu (this_cu));
+      m_new_cu.reset (new dwarf2_cu (this_cu, dwarf2_per_objfile));
       cu = m_new_cu.get ();
     }
 
@@ -7153,7 +7159,7 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
   /* This is cheap if the section is already read in.  */
   section->read (objfile);
 
-  m_new_cu.reset (new dwarf2_cu (this_cu));
+  m_new_cu.reset (new dwarf2_cu (this_cu, dwarf2_per_objfile));
 
   begin_info_ptr = info_ptr = section->buffer + to_underlying (this_cu->sect_off);
   info_ptr = read_and_check_comp_unit_head (dwarf2_per_objfile,
@@ -23477,10 +23483,12 @@ run_test ()
 
 #endif /* GDB_SELF_TEST */
 
-/* Initialize dwarf2_cu CU, owned by PER_CU.  */
+/* Initialize dwarf2_cu to read PER_CU, in the context of PER_OBJFILE.  */
 
-dwarf2_cu::dwarf2_cu (struct dwarf2_per_cu_data *per_cu_)
-  : per_cu (per_cu_),
+dwarf2_cu::dwarf2_cu (dwarf2_per_cu_data *per_cu,
+		      dwarf2_per_objfile *per_objfile)
+  : per_cu (per_cu),
+    per_objfile (per_objfile),
     mark (false),
     has_loclist (false),
     checked_producer (false),
