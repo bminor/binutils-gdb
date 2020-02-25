@@ -43,7 +43,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
 set bp_line [gdb_get_line_number "break-here" $srcfile]
 
 gdb_assert { [runto "$srcfile:$bp_line"] } \
-    "run to $srcfile:$bp_line"
+    "run to break-here marker"
 
 # Do a "list" and check that the printed line matches the line of the
 # original source file.

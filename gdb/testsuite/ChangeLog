@@ -1,3 +1,8 @@
+2020-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/cached-source-file.exp: Avoid source file paths in test
+	names.
+
 2020-02-25  Tom de Vries  <tdevries@suse.de>
 
 	PR go/18926
