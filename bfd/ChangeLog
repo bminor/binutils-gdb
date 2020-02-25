@@ -1,3 +1,7 @@
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	* bfdio.c (bfd_get_file_size): Ignore bogus archive element sizes.
+
 2020-02-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25584

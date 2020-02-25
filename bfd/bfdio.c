@@ -25,6 +25,7 @@
 #include <limits.h>
 #include "bfd.h"
 #include "libbfd.h"
+#include "aout/ar.h"
 
 #ifndef S_IXUSR
 #define S_IXUSR 0100    /* Execute by owner.  */
@@ -460,11 +461,24 @@ DESCRIPTION
 ufile_ptr
 bfd_get_file_size (bfd *abfd)
 {
+  ufile_ptr file_size, archive_size = (ufile_ptr) -1;
+
   if (abfd->my_archive != NULL
       && !bfd_is_thin_archive (abfd->my_archive))
-    return arelt_size (abfd);
+    {
+      struct areltdata *adata = (struct areltdata *) abfd->arelt_data;
+      archive_size = adata->parsed_size;
+      /* If the archive is compressed we can't compare against file size.  */
+      if (memcmp (((struct ar_hdr *) adata->arch_header)->ar_fmag,
+		  "Z\012", 2) == 0)
+	return archive_size;
+      abfd = abfd->my_archive;
+    }
 
-  return bfd_get_size (abfd);
+  file_size = bfd_get_size (abfd);
+  if (archive_size < file_size)
+    return archive_size;
+  return file_size;
 }
 
 /*
