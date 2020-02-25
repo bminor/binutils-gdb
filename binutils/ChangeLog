@@ -1,3 +1,9 @@
+2020-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25584
+	* ar.c (main): Pass 0 to bfd_plugin_set_program_name.
+	* nm.c (main): Pass 1 to bfd_plugin_set_program_name.
+
 2020-02-01  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.

@@ -1,3 +1,13 @@
+2020-02-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25584
+	* plugin.c (need_lto_wrapper_p): New.
+	(bfd_plugin_set_program_name): Add an int argument to set
+	need_lto_wrapper_p.
+	(get_lto_wrapper): Return FALSE if need_lto_wrapper_p isn't
+	set.
+	* plugin.h (bfd_plugin_set_program_name): Add an int argument.
+
 2020-02-22  Alan Modra  <amodra@gmail.com>
 
 	PR 25585
