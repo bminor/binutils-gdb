@@ -22510,8 +22510,7 @@ dwarf2_fetch_die_type_sect_off (sect_offset sect_off,
   return die_type (die, cu);
 }
 
-/* Return the type of the DIE at DIE_OFFSET in the CU named by
-   PER_CU.  */
+/* See read.h.  */
 
 struct type *
 dwarf2_get_die_type (cu_offset die_offset,

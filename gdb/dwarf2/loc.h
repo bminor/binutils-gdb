@@ -59,9 +59,6 @@ extern const gdb_byte *dwarf2_fetch_constant_bytes (sect_offset,
 struct type *dwarf2_fetch_die_type_sect_off (sect_offset,
 					     struct dwarf2_per_cu_data *);
 
-struct type *dwarf2_get_die_type (cu_offset die_offset,
-				  struct dwarf2_per_cu_data *per_cu);
-
 /* Find the frame base information for FRAMEFUNC at PC.  START is an
    out parameter which is set to point to the DWARF expression to
    compute.  LENGTH is an out parameter which is set to the length of

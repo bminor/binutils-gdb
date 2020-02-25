@@ -1,3 +1,9 @@
+2020-02-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* loc.h (dwarf2_get_die_type): Move to...
+	* read.h (dwarf2_get_die_type): ... here.
+	* read.c (dwarf2_get_die_type): Move doc to header.
+
 2020-02-25  Joel Brobecker  <brobecker@adacore.com>
 
 	* copypright.py (EXCLUDE_LIST): Add 'gnulib/config.in' and

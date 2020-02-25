@@ -523,6 +523,12 @@ struct dwz_file
 extern struct dwz_file *dwarf2_get_dwz_file
     (struct dwarf2_per_objfile *dwarf2_per_objfile);
 
+/* Return the type of the DIE at DIE_OFFSET in the CU named by
+   PER_CU.  */
+
+struct type *dwarf2_get_die_type (cu_offset die_offset,
+				  struct dwarf2_per_cu_data *per_cu);
+
 /* When non-zero, dump line number entries as they are read in.  */
 extern unsigned int dwarf_line_debug;
 
