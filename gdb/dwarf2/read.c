@@ -1572,11 +1572,13 @@ static void load_full_comp_unit (dwarf2_per_cu_data *per_cu,
 				 bool skip_partial,
 				 enum language pretend_language);
 
-static void process_full_comp_unit (struct dwarf2_per_cu_data *,
-				    enum language);
+static void process_full_comp_unit (dwarf2_per_cu_data *per_cu,
+				    dwarf2_per_objfile *per_objfile,
+				    enum language pretend_language);
 
-static void process_full_type_unit (struct dwarf2_per_cu_data *,
-				    enum language);
+static void process_full_type_unit (dwarf2_per_cu_data *per_cu,
+				    dwarf2_per_objfile *per_objfile,
+				    enum language pretend_language);
 
 static void dwarf2_add_dependence (struct dwarf2_cu *,
 				   struct dwarf2_per_cu_data *);
@@ -8997,9 +8999,11 @@ process_queue (struct dwarf2_per_objfile *dwarf2_per_objfile)
 	    fprintf_unfiltered (gdb_stdlog, "Expanding symtab of %s\n", buf);
 
 	  if (per_cu->is_debug_types)
-	    process_full_type_unit (per_cu, item.pretend_language);
+	    process_full_type_unit (per_cu, dwarf2_per_objfile,
+				    item.pretend_language);
 	  else
-	    process_full_comp_unit (per_cu, item.pretend_language);
+	    process_full_comp_unit (per_cu, dwarf2_per_objfile,
+				    item.pretend_language);
 
 	  if (dwarf_read_debug >= debug_print_threshold)
 	    fprintf_unfiltered (gdb_stdlog, "Done expanding %s\n", buf);
@@ -9703,11 +9707,11 @@ process_cu_includes (struct dwarf2_per_objfile *dwarf2_per_objfile)
    already been loaded into memory.  */
 
 static void
-process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
+process_full_comp_unit (dwarf2_per_cu_data *per_cu,
+			dwarf2_per_objfile *dwarf2_per_objfile,
 			enum language pretend_language)
 {
   struct dwarf2_cu *cu = per_cu->cu;
-  struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct gdbarch *gdbarch = objfile->arch ();
   CORE_ADDR lowpc, highpc;
@@ -9803,11 +9807,11 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
    already been loaded into memory.  */
 
 static void
-process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
+process_full_type_unit (dwarf2_per_cu_data *per_cu,
+			dwarf2_per_objfile *dwarf2_per_objfile,
 			enum language pretend_language)
 {
   struct dwarf2_cu *cu = per_cu->cu;
-  struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct compunit_symtab *cust;
   struct signatured_type *sig_type;
