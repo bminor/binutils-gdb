@@ -1,5 +1,25 @@
 2020-02-26  Alan Modra  <amodra@gmail.com>
 
+	PR 25593
+	* elf-bfd.h (struct elf_link_hash_table): Rename "loaded" to
+	"dyn_loaded".
+	(bfd_elf_add_dt_needed_tag): Declare.
+	* elf-strtab.c (_bfd_elf_strtab_restore): Handle NULL buf.
+	* elflink.c (bfd_elf_add_dt_needed_tag): Make global and rename
+	from elf_add_dt_needed_tag.  Remove soname and doit param.
+	(elf_link_add_object_symbols): Don't use elf_add_dt_needed_tag
+	to see whether as-needed lib is already loaded, use dyn_loaded
+	list instead.  When saving and restoring around as-needed lib
+	handle possibility that dynstr has not been initialised.  Don't
+	add DT_NEEDED tags here.  Limit dyn_loaded list to dynamic libs.
+	Mark libs loaded via DT_NEEDED entries of other libs with
+	DYN_NO_NEEDED if they should not be mentioned in DT_NEEDED of
+	the output.
+	(elf_link_check_versioned_symbol): Remove now unneccesary
+	DYNAMIC check when traversing dyn_loaded list.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
 	* bfdio.c (bfd_get_file_size): Ignore bogus archive element sizes.
 
 2020-02-25  H.J. Lu  <hongjiu.lu@intel.com>

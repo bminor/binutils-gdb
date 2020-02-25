@@ -1,3 +1,12 @@
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	PR 25593
+	* ldelf.c (ldelf_try_needed): Add DT_NEEDED lib to input_bfds.
+	(ldelf_after_open): Save state of input_bfds list before loading
+	DT_NEEDED libs.  Traverse input_bfds list adding DT_NEEDED tags.
+	Restore input_bfds list.
+	* testsuite/ld-cris/gotplt1.d: Adjust for changed .dynstr order.
+
 2020-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Update French translation.

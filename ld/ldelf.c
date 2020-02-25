@@ -375,6 +375,9 @@ ldelf_try_needed (struct dt_needed *needed, int force, int is_linux)
 
   bfd_elf_set_dyn_lib_class (abfd, (enum dynamic_lib_link_class) link_class);
 
+  *link_info.input_bfds_tail = abfd;
+  link_info.input_bfds_tail = &abfd->link.next;
+
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
     einfo (_("%F%P: %pB: error adding symbols: %E\n"), abfd);
@@ -992,6 +995,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
   struct elf_link_hash_table *htab;
   asection *s;
   bfd *abfd;
+  bfd **save_input_bfd_tail;
 
   after_open_default ();
 
@@ -1134,6 +1138,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
      special action by the person doing the link.  Note that the
      needed list can actually grow while we are stepping through this
      loop.  */
+  save_input_bfd_tail = link_info.input_bfds_tail;
   needed = bfd_elf_get_needed_list (link_info.output_bfd, &link_info);
   for (l = needed; l != NULL; l = l->next)
     {
@@ -1289,6 +1294,20 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 	       "(try using -rpath or -rpath-link)\n"),
 	     l->name, l->by);
     }
+
+  for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
+    if (bfd_get_format (abfd) == bfd_object
+	&& ((abfd->flags) & DYNAMIC) != 0
+	&& bfd_get_flavour (abfd) == bfd_target_elf_flavour
+	&& (elf_dyn_lib_class (abfd) & (DYN_AS_NEEDED | DYN_NO_NEEDED)) == 0
+	&& elf_dt_name (abfd) != NULL)
+      {
+	if (bfd_elf_add_dt_needed_tag (abfd, &link_info) < 0)
+	  einfo (_("%F%P: failed to add DT_NEEDED dynamic tag\n"));
+      }
+
+  link_info.input_bfds_tail = save_input_bfd_tail;
+  *save_input_bfd_tail = NULL;
 
   if (link_info.eh_frame_hdr_type == COMPACT_EH_HDR)
     if (!bfd_elf_parse_eh_frame_entries (NULL, &link_info))

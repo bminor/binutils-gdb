@@ -637,8 +637,8 @@ struct elf_link_hash_table
   asection *tls_sec;
   bfd_size_type tls_size;
 
-  /* A linked list of BFD's loaded in the link.  */
-  struct elf_link_loaded_list *loaded;
+  /* A linked list of dynamic BFD's loaded in the link.  */
+  struct elf_link_loaded_list *dyn_loaded;
 
   /* Short-cuts to get to dynamic linker sections.  */
   asection *sgot;
@@ -2510,6 +2510,8 @@ extern bfd_boolean bfd_elf_link_add_symbols
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_add_dynamic_entry
   (struct bfd_link_info *, bfd_vma, bfd_vma);
+extern int bfd_elf_add_dt_needed_tag
+  (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_link_check_relocs
   (bfd *, struct bfd_link_info *);
 
