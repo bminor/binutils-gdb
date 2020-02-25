@@ -1,5 +1,12 @@
 2020-02-26  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/cskyelf.em: Indent labels correctly.
+	* ldfile.c: Likewise.
+	* ldlang.c: Likewise.
+	* plugin.c: Likewise.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
 	PR 25593
 	* ldelf.c (ldelf_try_needed): Add DT_NEEDED lib to input_bfds.
 	(ldelf_after_open): Save state of input_bfds list before loading

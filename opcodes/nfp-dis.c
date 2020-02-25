@@ -2958,7 +2958,7 @@ print_insn_nfp (bfd_vma addr, struct disassemble_info *dinfo)
 
   err = _print_instrs (addr, dinfo, &opts);
 
-end:
+ end:
   if (err != 8)
     dinfo->fprintf_func (dinfo->stream, "\t # ERROR");
   if (err == _NFP_ERR_CONT)

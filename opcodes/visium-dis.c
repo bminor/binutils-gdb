@@ -166,7 +166,7 @@ disassem_class0 (disassemble_info *info, unsigned int ins)
     }
   return 0;
 
-illegal_opcode:
+ illegal_opcode:
   return -1;
 }
 
@@ -421,7 +421,7 @@ disassem_class1 (disassemble_info *info, unsigned int ins)
 
   return 0;
 
-illegal_opcode:
+ illegal_opcode:
   return -1;
 }
 
@@ -518,7 +518,7 @@ disassem_class2 (disassemble_info *info, unsigned int ins)
 
   return 0;
 
-illegal_opcode:
+ illegal_opcode:
   return -1;
 }
 
@@ -747,7 +747,7 @@ disassem_class3 (disassemble_info *info, unsigned int ins)
 
   return 0;
 
-illegal_opcode:
+ illegal_opcode:
   return -1;
 
 }

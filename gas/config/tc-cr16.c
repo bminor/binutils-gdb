@@ -2329,8 +2329,8 @@ assemble_insn (const char *mnemonic, ins *insn)
       match = 1;
       break;
 
-/* Try again with next instruction.  */
-next_insn:
+      /* Try again with next instruction.  */
+    next_insn:
       instruction++;
     }
 

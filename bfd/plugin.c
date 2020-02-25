@@ -725,7 +725,7 @@ try_load_plugin (const char *pname,
   abfd->plugin_format = bfd_plugin_yes;
   result = 1;
 
-short_circuit:
+ short_circuit:
   dlclose (plugin_handle);
   return result;
 }

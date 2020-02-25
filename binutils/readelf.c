@@ -18061,7 +18061,7 @@ print_gnu_property_note (Filedata * filedata, Elf_Internal_Note * pnote)
 	printf ("%02x ", ptr[j] & 0xff);
       printf (">");
 
-next:
+    next:
       ptr += ((datasz + (size - 1)) & ~ (size - 1));
       if (ptr == ptr_end)
 	break;

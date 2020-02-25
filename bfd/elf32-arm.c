@@ -6415,7 +6415,7 @@ set_cmse_veneer_addr_from_implib (struct bfd_link_info *info,
       ret = FALSE;
     }
 
-free_sym_buf:
+ free_sym_buf:
   free (sympp);
   return ret;
 }
@@ -7991,7 +7991,7 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 
   return TRUE;
 
-error_return:
+ error_return:
   if (contents != NULL
       && elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
@@ -8607,7 +8607,7 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
 
   return TRUE;
 
-error_return:
+ error_return:
   if (contents != NULL
       && elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
@@ -9044,7 +9044,7 @@ bfd_elf32_arm_stm32l4xx_erratum_scan (bfd *abfd,
 
   return TRUE;
 
-error_return:
+ error_return:
   if (contents != NULL
       && elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);

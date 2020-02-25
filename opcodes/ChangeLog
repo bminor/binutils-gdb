@@ -1,3 +1,15 @@
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	* aarch64-asm.c: Indent labels correctly.
+	* aarch64-dis.c: Likewise.
+	* aarch64-gen.c: Likewise.
+	* aarch64-opc.c: Likewise.
+	* alpha-dis.c: Likewise.
+	* i386-dis.c: Likewise.
+	* nds32-asm.c: Likewise.
+	* nfp-dis.c: Likewise.
+	* visium-dis.c: Likewise.
+
 2020-02-25  Claudiu Zissulescu <claziss@gmail.com>
 
 	* arc-regs.h (int_vector_base): Make it available for all ARC

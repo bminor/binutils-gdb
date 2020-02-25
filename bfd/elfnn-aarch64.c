@@ -4615,7 +4615,7 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 
   return TRUE;
 
-error_ret_free_local:
+ error_ret_free_local:
   return FALSE;
 }
 
@@ -5507,7 +5507,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       switch (bfd_r_type)
 	{
 	default:
-bad_ifunc_reloc:
+	bad_ifunc_reloc:
 	  if (h->root.root.string)
 	    name = h->root.root.string;
 	  else
@@ -9482,7 +9482,7 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	}
       else
 	{
-do_glob_dat:
+	do_glob_dat:
 	  BFD_ASSERT ((h->got.offset & 1) == 0);
 	  bfd_put_NN (output_bfd, (bfd_vma) 0,
 		      htab->root.sgot->contents + h->got.offset);

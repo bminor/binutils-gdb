@@ -2039,7 +2039,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   /* We also need to define an indirection from the nondefault version
      of the symbol.  */
 
-nondefault:
+ nondefault:
   len = strlen (name);
   shortname = (char *) bfd_hash_allocate (&info->hash->table, len);
   if (shortname == NULL)
@@ -4089,7 +4089,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
 	  if (!bfd_malloc_and_get_section (abfd, s, &dynbuf))
 	    {
-error_free_dyn:
+	    error_free_dyn:
 	      free (dynbuf);
 	      goto error_return;
 	    }
@@ -8209,7 +8209,7 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
 
   result = TRUE;
 
-done:
+ done:
   if (symtable1)
     free (symtable1);
   if (symtable2)
@@ -11745,7 +11745,7 @@ elf_output_implib (bfd *abfd, struct bfd_link_info *info)
 
   ret = TRUE;
 
-free_sym_buf:
+ free_sym_buf:
   free (sympp);
   return ret;
 }

@@ -1,3 +1,27 @@
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-elf.c: Indent labels correctly.
+	* config/obj-macho.c: Likewise.
+	* config/tc-aarch64.c: Likewise.
+	* config/tc-alpha.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-cr16.c: Likewise.
+	* config/tc-crx.c: Likewise.
+	* config/tc-frv.c: Likewise.
+	* config/tc-i386-intel.c: Likewise.
+	* config/tc-i386.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-mn10200.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-nds32.c: Likewise.
+	* config/tc-riscv.c: Likewise.
+	* config/tc-s12z.c: Likewise.
+	* config/tc-xtensa.c: Likewise.
+	* config/tc-z80.c: Likewise.
+	* read.c: Likewise.
+	* symbols.c: Likewise.
+	* write.c: Likewise.
+
 2020-02-20  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c (riscv_ip): New boolean insn_with_csr to indicate

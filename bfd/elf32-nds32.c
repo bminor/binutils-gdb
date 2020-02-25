@@ -4281,7 +4281,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       eh->dyn_relocs = NULL;
 
-keep:;
+    keep:;
     }
 
   /* Finally, allocate space.  */
@@ -5827,7 +5827,7 @@ nds32_elf_relocate_section (bfd *		   output_bfd ATTRIBUTE_UNUSED,
 	case R_NDS32_SDA15S0_RELA:
 	case R_NDS32_SDA15S0:
 	  align = 0x0;
-handle_sda:
+	handle_sda:
 	  BFD_ASSERT (sec != NULL);
 
 	  /* If the symbol is in the abs section, the out_bfd will be null.
@@ -6155,7 +6155,7 @@ handle_sda:
 	  break;
 	}
 
-check_reloc:
+    check_reloc:
 
       if (r != bfd_reloc_ok)
 	{
@@ -6204,7 +6204,7 @@ check_reloc:
 	      errmsg = _("internal error: unknown error");
 	      /* Fall through.  */
 
-common_error:
+	    common_error:
 	      (*info->callbacks->warning) (info, errmsg, name, input_bfd,
 					   input_section, offset);
 	      break;
@@ -6488,7 +6488,7 @@ nds32_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	      goto get_vma;
 	    case DT_JMPREL:
 	      s = ehtab->srelplt->output_section;
-get_vma:
+	    get_vma:
 	      BFD_ASSERT (s != NULL);
 	      dyn.d_un.d_ptr = s->vma;
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
@@ -8281,7 +8281,7 @@ nds32_convert_32_to_16 (bfd *abfd, uint32_t insn, uint16_t *pinsn16,
       goto done;
     }
 
-done:
+ done:
   /* Bit-15 of insn16 should be set for a valid instruction.  */
   if ((insn16 & 0x8000) == 0)
     return 0;
@@ -8603,7 +8603,7 @@ nds32_convert_16_to_32 (bfd *abfd, uint16_t insn16, uint32_t *pinsn)
       goto done;
     }
 
-done:
+ done:
   if (insn & 0x80000000)
     return 0;
 
@@ -9448,7 +9448,7 @@ nds32_elf_relax_delete_blanks (bfd *abfd, asection *sec,
 	      if (p < endp)
 		*p |= 0x80;
 	    }
-done_adjust_diff:
+	done_adjust_diff:
 
 	  if (sec == sect)
 	    {
@@ -12567,7 +12567,7 @@ nds32_elf_relax_section (bfd *abfd, asection *sec,
       clean_nds32_elf_blank ();
     }
 
-finish:
+ finish:
   if (internal_relocs != NULL
       && elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
@@ -12581,7 +12581,7 @@ finish:
 
   return result;
 
-error_return:
+ error_return:
   result = FALSE;
   goto finish;
 }
@@ -13152,7 +13152,7 @@ nds32_fag_remove_unused_fpbase (bfd *abfd, asection *sec,
 	goto error_return;
     }
 
-finish:
+ finish:
   if (relax_blank_list)
     {
       nds32_elf_relax_delete_blanks (abfd, sec, relax_blank_list);
@@ -13160,7 +13160,7 @@ finish:
     }
   return result;
 
-error_return:
+ error_return:
   result = FALSE;
   goto finish;
 }
@@ -13291,7 +13291,7 @@ nds32_elf_get_relocated_section_contents (bfd *abfd,
   free (reloc_vector);
   return data;
 
-error_return:
+ error_return:
   free (reloc_vector);
   return NULL;
 }
@@ -14018,7 +14018,7 @@ nds32_elf_unify_tls_model (bfd *inbfd, asection *insec, bfd_byte *incontents,
 #endif
     }
 
-finish:
+ finish:
   if (incontents)
     contents = NULL;
 
@@ -14047,7 +14047,7 @@ finish:
 
   return result;
 
-error_return:
+ error_return:
   result = FALSE;
   goto finish;
 }

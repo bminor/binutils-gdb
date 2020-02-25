@@ -12791,7 +12791,7 @@ putop (const char *in_template, int sizeflag)
 	case 'B':
 	  if (l == 0 && len == 1)
 	    {
-case_B:
+	    case_B:
 	      if (intel_syntax)
 		break;
 	      if (sizeflag & SUFFIX_ALWAYS)
@@ -12956,7 +12956,7 @@ case_B:
 	      SAVE_LAST (*p);
 	      break;
 	    }
-case_L:
+	case_L:
 	  if (intel_syntax)
 	    break;
 	  if (sizeflag & SUFFIX_ALWAYS)
@@ -13005,7 +13005,7 @@ case_L:
 	case 'P':
 	  if (l == 0 && len == 1)
 	    {
-case_P:
+	    case_P:
 	      if (intel_syntax)
 		{
 		  if ((rex & REX_W) == 0
@@ -13075,7 +13075,7 @@ case_P:
 	case 'Q':
 	  if (l == 0 && len == 1)
 	    {
-case_Q:
+	    case_Q:
 	      if (intel_syntax && !alt)
 		break;
 	      USED_REX (REX_W);
@@ -13166,7 +13166,7 @@ case_Q:
 	case 'S':
 	  if (l == 0 && len == 1)
 	    {
-case_S:
+	    case_S:
 	      if (intel_syntax)
 		break;
 	      if (sizeflag & SUFFIX_ALWAYS)
@@ -15864,7 +15864,7 @@ CRC32_Fixup (int bytemode, int sizeflag)
   mnemonicendp = p;
   *p = '\0';
 
-skip:
+ skip:
   if (modrm.mod == 3)
     {
       int add;
@@ -16587,7 +16587,7 @@ MOVBE_Fixup (int bytemode, int sizeflag)
   mnemonicendp = p;
   *p = '\0';
 
-skip:
+ skip:
   OP_M (bytemode, sizeflag);
 }
 
@@ -16624,7 +16624,7 @@ MOVSXD_Fixup (int bytemode, int sizeflag)
       break;
     }
 
-skip:
+ skip:
   mnemonicendp = p;
   *p = '\0';
   OP_E (bytemode, sizeflag);

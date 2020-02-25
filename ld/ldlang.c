@@ -489,7 +489,7 @@ compare_section (sort_type sort, asection *asec, asection *bsec)
       /* Fall through.  */
 
     case by_name:
-sort_by_name:
+    sort_by_name:
       ret = strcmp (bfd_section_name (asec), bfd_section_name (bsec));
       break;
 

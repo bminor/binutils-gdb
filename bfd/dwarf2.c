@@ -2599,7 +2599,7 @@ lookup_address_in_line_info_table (struct line_info_table *table,
       return seq->last_line->address - seq->low_pc;
     }
 
-fail:
+ fail:
   *filename_ptr = NULL;
   return 0;
 }

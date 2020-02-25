@@ -2189,7 +2189,7 @@ operand_size_match (const insn_template *t)
 
   if (!t->opcode_modifier.d)
     {
-mismatch:
+    mismatch:
       if (!match)
 	i.error = operand_size_mismatch;
       return match;
@@ -2244,7 +2244,7 @@ operand_type_match (i386_operand_type overlap,
   if (given.bitfield.baseindex == overlap.bitfield.baseindex)
     return 1;
 
-mismatch:
+ mismatch:
   i.error = operand_type_mismatch;
   return 0;
 }
@@ -4792,7 +4792,7 @@ parse_insn (char *line, char *mnemonic)
 
   if (!current_templates)
     {
-check_suffix:
+    check_suffix:
       if (mnem_p > mnemonic)
 	{
 	  /* See if we can get a match by trimming off a suffix.  */
@@ -6030,7 +6030,7 @@ match_template (char mnem_suffix)
 	      if (!t->opcode_modifier.d)
 		continue;
 
-check_reverse:
+	    check_reverse:
 	      if (!(size_match & MATCH_REVERSE))
 		continue;
 	      /* Try reversing direction of operands.  */
@@ -7075,7 +7075,7 @@ process_operands (void)
 	}
       else
 	{
-duplicate:
+	duplicate:
 	  i.operands++;
 	  i.reg_operands++;
 	  i.tm.operands++;
@@ -10404,7 +10404,7 @@ i386_index_check (const char *operand_string)
       else
 	return 1;
 
-bad_address:
+    bad_address:
       as_bad (_("`%s' is not a valid %s expression"),
 	      operand_string, kind);
       return 0;

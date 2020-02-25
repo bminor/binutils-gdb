@@ -4648,7 +4648,7 @@ s_arm_unwind_save_mmxwr (void)
     }
 
   return;
-error:
+ error:
   ignore_rest_of_line ();
 }
 
@@ -4716,7 +4716,7 @@ s_arm_unwind_save_mmxwcg (void)
   op = 0xc700 | mask;
   add_unwind_opcode (op, 2);
   return;
-error:
+ error:
   ignore_rest_of_line ();
 }
 
@@ -5091,7 +5091,7 @@ set_fp16_format (int dummy ATTRIBUTE_UNUSED)
 	as_warn (_("float16 format cannot be set more than once, ignoring."));
     }
 
-cleanup:
+ cleanup:
   *input_line_pointer = saved_char;
   ignore_rest_of_line ();
 }
@@ -6368,7 +6368,7 @@ parse_psr (char **str, bfd_boolean lhs)
     goto unsupported_psr;
 
   p += 4;
-check_suffix:
+ check_suffix:
   if (*p == '_')
     {
       /* A suffix follows.  */
@@ -18307,7 +18307,7 @@ do_mve_vmull (void)
 
   return;
 
-neon_vmul:
+ neon_vmul:
   inst.instruction = N_MNEM_vmul;
   inst.cond = 0xb;
   if (thumb_mode)
@@ -19707,7 +19707,7 @@ neon_scalar_for_fmac_fp16_long (unsigned scalar, unsigned quad_p)
 	      | ((elno & 0x1) << 3));
     }
 
-bad_scalar:
+ bad_scalar:
   first_error (_("scalar out of range for multiply instruction"));
   return 0;
 }
@@ -32888,7 +32888,7 @@ get_aeabi_cpu_arch_from_fset (const arm_feature_set *arch_ext_fset,
   if (p_ver_ret == NULL)
     return -1;
 
-found:
+ found:
   /* Tag_CPU_arch_profile.  */
   if (ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v7a)
       || ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v8)

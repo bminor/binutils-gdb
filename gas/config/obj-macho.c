@@ -587,7 +587,7 @@ obj_mach_o_zerofill (int ignore ATTRIBUTE_UNUSED)
 	S_CLEAR_EXTERNAL (sym);
     }
 
-done:
+ done:
   /* switch back to the section that was current before the .zerofill.  */
   subseg_set (old_seg, 0);
 }

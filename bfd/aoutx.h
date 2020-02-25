@@ -1901,7 +1901,7 @@ NAME (aout, write_syms) (bfd *abfd)
 
   return TRUE;
 
-error_return:
+ error_return:
   _bfd_stringtab_free (strtab);
   return FALSE;
 }
@@ -2381,8 +2381,8 @@ NAME (aout, squirt_out_relocs) (bfd *abfd, asection *section)
 	      || (*generic)->sym_ptr_ptr == NULL)
 	    {
 	      bfd_set_error (bfd_error_invalid_operation);
-	      _bfd_error_handler (_("\
-%pB: attempt to write out unknown reloc type"), abfd);
+	      _bfd_error_handler (_("%pB: attempt to write out "
+				    "unknown reloc type"), abfd);
 	      return FALSE;
 	    }
 	  MY_swap_ext_reloc_out (abfd, *generic,
@@ -2399,8 +2399,8 @@ NAME (aout, squirt_out_relocs) (bfd *abfd, asection *section)
 	      || (*generic)->sym_ptr_ptr == NULL)
 	    {
 	      bfd_set_error (bfd_error_invalid_operation);
-	      _bfd_error_handler (_("\
-%pB: attempt to write out unknown reloc type"), abfd);
+	      _bfd_error_handler (_("%pB: attempt to write out "
+				    "unknown reloc type"), abfd);
 	      return FALSE;
 	    }
 	  MY_swap_std_reloc_out (abfd, *generic,

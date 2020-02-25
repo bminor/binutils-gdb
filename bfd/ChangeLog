@@ -1,5 +1,48 @@
 2020-02-26  Alan Modra  <amodra@gmail.com>
 
+	* aoutx.h: Indent labels correctly.  Format error strings.
+	* archive.c: Likewise.
+	* archive64.c: Likewise.
+	* coff-arm.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* coff-stgo32.c: Likewise.
+	* cpu-arm.c: Likewise.
+	* dwarf2.c: Likewise.
+	* elf-ifunc.c: Likewise.
+	* elf-properties.c: Likewise.
+	* elf-s390-common.c: Likewise.
+	* elf-strtab.c: Likewise.
+	* elf.c: Likewise.
+	* elf32-arm.c: Likewise.
+	* elf32-bfin.c: Likewise.
+	* elf32-cr16.c: Likewise.
+	* elf32-csky.c: Likewise.
+	* elf32-i386.c: Likewise.
+	* elf32-m68k.c: Likewise.
+	* elf32-msp430.c: Likewise.
+	* elf32-nds32.c: Likewise.
+	* elf32-nios2.c: Likewise.
+	* elf32-pru.c: Likewise.
+	* elf32-xtensa.c: Likewise.
+	* elf64-ia64-vms.c: Likewise.
+	* elf64-x86-64.c: Likewise.
+	* elfcode.h: Likewise.
+	* elfcore.h: Likewise.
+	* elflink.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+	* elfnn-ia64.c: Likewise.
+	* elfnn-riscv.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* elfxx-sparc.c: Likewise.
+	* elfxx-x86.c: Likewise.
+	* i386lynx.c: Likewise.
+	* merge.c: Likewise.
+	* pdp11.c: Likewise.
+	* plugin.c: Likewise.
+	* reloc.c: Likewise.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
 	PR 25593
 	* elf-bfd.h (struct elf_link_hash_table): Rename "loaded" to
 	"dyn_loaded".

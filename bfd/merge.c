@@ -549,7 +549,7 @@ record_section (struct sec_merge_info *sinfo,
 
   return TRUE;
 
-error_return:
+ error_return:
   for (secinfo = sinfo->chain; secinfo; secinfo = secinfo->next)
     *secinfo->psecinfo = NULL;
   return FALSE;

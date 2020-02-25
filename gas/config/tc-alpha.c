@@ -1021,7 +1021,7 @@ tokenize_arguments (char *str,
 	}
     }
 
-fini:
+ fini:
   if (saw_comma)
     goto err;
   input_line_pointer = old_input_line_pointer;
@@ -1035,7 +1035,7 @@ fini:
 
   return ntok - (end_tok - tok);
 
-err:
+ err:
 #ifdef RELOC_OP_P
   is_end_of_line[(unsigned char) '!'] = 0;
 #endif
@@ -1043,7 +1043,7 @@ err:
   return TOKENIZE_ERROR;
 
 #ifdef RELOC_OP_P
-err_report:
+ err_report:
   is_end_of_line[(unsigned char) '!'] = 0;
 #endif
   input_line_pointer = old_input_line_pointer;
@@ -5136,7 +5136,7 @@ s_alpha_arch (int ignored ATTRIBUTE_UNUSED)
       }
   as_warn (_("Unknown CPU identifier `%s'"), name);
 
-found:
+ found:
   (void) restore_line_pointer (ch);
   demand_empty_rest_of_line ();
 }
@@ -5976,10 +5976,10 @@ md_apply_fix (fixS *fixP, valueT * valP, segT seg)
       goto done;
     }
 
-write_done:
+ write_done:
   md_number_to_chars (fixpos, image, 4);
 
-done:
+ done:
   fixP->fx_done = 1;
 }
 
@@ -6343,7 +6343,7 @@ tc_get_register (int frame ATTRIBUTE_UNUSED)
     }
   as_warn (_("frame reg expected, using $%d."), framereg);
 
-found:
+ found:
   note_gpreg (framereg);
   return framereg;
 }

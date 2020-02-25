@@ -3062,7 +3062,7 @@ nios2_elf_assign_gp (bfd *output_bfd, bfd_vma *pgp, struct bfd_link_info *info)
 
   h = bfd_hash_lookup (&info->hash->table, "_gp", FALSE, FALSE);
   lh = (struct bfd_link_hash_entry *) h;
-lookup:
+ lookup:
   if (lh)
     {
       switch (lh->type)

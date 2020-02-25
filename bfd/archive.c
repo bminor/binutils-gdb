@@ -1131,7 +1131,7 @@ do_slurp_coff_armap (bfd *abfd)
 
   return TRUE;
 
-release_symdefs:
+ release_symdefs:
   bfd_release (abfd, (ardata)->symdefs);
   return FALSE;
 }

@@ -7704,7 +7704,7 @@ copy_private_bfd_data (bfd *ibfd, bfd *obfd)
       return copy_elf_program_header (ibfd, obfd);
     }
 
-rewrite:
+ rewrite:
   if (ibfd->xvec == obfd->xvec)
     {
       /* When rewriting program header, set the output maxpagesize to
@@ -8596,11 +8596,11 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bfd_boolean default_imported_symver)
       if (hdr->sh_info == 0
 	  || hdr->sh_info > hdr->sh_size / sizeof (Elf_External_Verneed))
 	{
-error_return_bad_verref:
+	error_return_bad_verref:
 	  _bfd_error_handler
 	    (_("%pB: .gnu.version_r invalid entry"), abfd);
 	  bfd_set_error (bfd_error_bad_value);
-error_return_verref:
+	error_return_verref:
 	  elf_tdata (abfd)->verref = NULL;
 	  elf_tdata (abfd)->cverrefs = 0;
 	  goto error_return;

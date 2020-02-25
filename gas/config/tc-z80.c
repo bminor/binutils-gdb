@@ -3622,7 +3622,7 @@ md_assemble (char *str)
 		      "first unrecognized character is `%c'"), *p);
 	}
     }
-end:
+ end:
   input_line_pointer = old_ptr;
 }
 

@@ -1674,7 +1674,7 @@ get_dyn_sym_info (struct elf64_ia64_link_hash_table *ia64_info,
       *size_p = size;
       *info_p = info;
 
-has_space:
+    has_space:
       /* Append the new one to the array.  */
       dyn_i = info + count;
       memset (dyn_i, 0, sizeof (*dyn_i));
@@ -3284,7 +3284,7 @@ elf64_ia64_choose_gp (bfd *abfd, struct bfd_link_info *info, bfd_boolean final)
     {
       if (max_short_vma - min_short_vma >= 0x400000)
 	{
-overflow:
+	overflow:
 	  _bfd_error_handler
 	    /* xgettext:c-format */
 	    (_("%pB: short data segment overflowed (%#" PRIx64 " >= 0x400000)"),
@@ -4848,7 +4848,7 @@ elf64_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       /* Extract IDENT.  */
       if (!bfd_malloc_and_get_section (abfd, s, &dynbuf))
 	{
-error_free_dyn:
+	error_free_dyn:
 	  free (dynbuf);
 	  goto error_return;
 	}

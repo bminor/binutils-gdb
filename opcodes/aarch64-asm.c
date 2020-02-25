@@ -1967,7 +1967,7 @@ convert_to_real (aarch64_inst *inst, const aarch64_opcode *real)
       break;
     }
 
-convert_to_real_return:
+ convert_to_real_return:
   aarch64_replace_opcode (inst, real);
 }
 
@@ -2099,7 +2099,7 @@ aarch64_opcode_encode (const aarch64_opcode *opcode,
     }
 
 
-encoding_exit:
+ encoding_exit:
   DEBUG_TRACE ("exit with %s", opcode->name);
 
   *code = inst->value;

@@ -442,7 +442,7 @@ _bfd_elf_strtab_finalize (struct elf_strtab_hash *tab)
 	}
     }
 
-alloc_failure:
+ alloc_failure:
   if (array)
     free (array);
 

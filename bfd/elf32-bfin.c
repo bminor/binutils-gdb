@@ -5398,7 +5398,7 @@ bfd_bfin_elf32_create_embedded_relocs (bfd *abfd,
     free (internal_relocs);
   return TRUE;
 
-error_return:
+ error_return:
   if (isymbuf != NULL && symtab_hdr->contents != (unsigned char *) isymbuf)
     free (isymbuf);
   if (internal_relocs != NULL

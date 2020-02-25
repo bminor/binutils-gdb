@@ -316,9 +316,9 @@ elf_core_file_p (bfd *abfd)
   abfd->start_address = i_ehdrp->e_entry;
   return abfd->xvec;
 
-wrong:
+ wrong:
   bfd_set_error (bfd_error_wrong_format);
-fail:
+ fail:
   return NULL;
 }
 
@@ -419,8 +419,8 @@ NAME(_bfd_elf, core_find_build_id)
      build-id was found.  */
   goto fail;
 
-wrong:
+ wrong:
   bfd_set_error (bfd_error_wrong_format);
-fail:
+ fail:
   return FALSE;
 }

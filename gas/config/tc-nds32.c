@@ -3501,7 +3501,7 @@ nds32_pseudo_opcode_wrapper (char *line, struct nds32_pseudo_opcode *opcode)
 	}
       ++s;
     } while (s[0] != '\0');
-end:
+ end:
   /* Put the origin line for debugging.  */
   argv[argc] = line;
   opcode->proc (argc, argv, opcode->pseudo_val);
@@ -4287,7 +4287,7 @@ nds32_relax_hint (int mode ATTRIBUTE_UNUSED)
     relax_hint_begin = 0;
   name = nds_itoa (relax_hint_id_current);
 
-reordered_id:
+ reordered_id:
 
   /* Find relax hint entry for next instruction, and all member will be
      initialized at that time.  */
@@ -6267,7 +6267,7 @@ nds32_elf_append_relax_relocs (const char *key, void *value)
       pattern_now = pattern_now->next;
     }
 
-restore:
+ restore:
   now_seg = seg_bak;
   frchain_now = frchain_bak;
 }

@@ -3413,7 +3413,7 @@ elf32_csky_size_stubs (bfd *output_bfd,
 		  if (r_type >= (unsigned int) R_CKCORE_MAX)
 		    {
 		      bfd_set_error (bfd_error_bad_value);
-error_ret_free_internal:
+		    error_ret_free_internal:
 		      if (elf_section_data (section)->relocs == NULL)
 			free (internal_relocs);
 		      goto error_ret_free_local;
@@ -3592,7 +3592,7 @@ error_ret_free_internal:
     }
 
   return TRUE;
-error_ret_free_local:
+ error_ret_free_local:
   return FALSE;
 }
 

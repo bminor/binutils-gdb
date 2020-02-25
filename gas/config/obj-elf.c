@@ -1340,7 +1340,7 @@ obj_elf_section (int push)
 	}
     }
 
-done:
+ done:
   demand_empty_rest_of_line ();
 
   obj_elf_change_section (name, type, attr, entsize, &match, linkonce,
@@ -1879,11 +1879,11 @@ obj_elf_vendor_attribute (int vendor)
 
   demand_empty_rest_of_line ();
   return tag;
-bad_string:
+ bad_string:
   as_bad (_("bad string constant"));
   ignore_rest_of_line ();
   return 0;
-bad:
+ bad:
   as_bad (_("expected <tag> , <value>"));
   ignore_rest_of_line ();
   return 0;

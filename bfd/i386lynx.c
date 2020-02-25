@@ -399,7 +399,7 @@ NAME(lynx,slurp_reloc_table) (bfd *abfd,
   bfd_set_error (bfd_error_invalid_operation);
   return FALSE;
 
-doit:
+ doit:
   if (bfd_seek (abfd, asect->rel_filepos, SEEK_SET) != 0)
     return FALSE;
   each_size = obj_reloc_entry_size (abfd);

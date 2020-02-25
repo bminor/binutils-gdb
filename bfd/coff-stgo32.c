@@ -362,7 +362,7 @@ create_go32_stub (bfd *abfd)
 	}
       close (f);
     }
-stub_end:
+ stub_end:
   /* There was something wrong above, so use now the standard builtin
      stub.  */
   if (coff_data (abfd)->go32stub == NULL)

@@ -238,7 +238,7 @@ update_gnu_property (const char *file_name, FILE *file)
 	  }
       }
 
-out:
+ out:
   if (ret != 0)
     error (_("%s: Invalid PT_NOTE segment\n"), file_name);
 

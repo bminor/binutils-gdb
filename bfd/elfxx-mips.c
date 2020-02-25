@@ -13385,7 +13385,7 @@ _bfd_elf_mips_get_relocated_section_contents
     free (reloc_vector);
   return data;
 
-error_return:
+ error_return:
   if (reloc_vector != NULL)
     free (reloc_vector);
   return NULL;

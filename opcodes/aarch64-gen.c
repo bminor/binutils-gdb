@@ -249,7 +249,7 @@ divide_table_1 (struct bittree *bittree, opcode_node *opcode)
       goto divide_table_1_finish;
     }
 
-divide_table_1_try_again:
+ divide_table_1_try_again:
   mask_and = -1;
   ent = opcode;
   while (ent)
@@ -339,7 +339,7 @@ divide_table_1_try_again:
   divide_table_1 (bittree->bits[0], list0.next);
   divide_table_1 (bittree->bits[1], list1.next);
 
-divide_table_1_finish:
+ divide_table_1_finish:
   if (debug)
     printf ("Leave from depth %d\n", depth);
   --depth;

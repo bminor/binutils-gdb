@@ -1398,7 +1398,7 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
     free (isymbuf);
   return symcount;
 
-error_return:
+ error_return:
   if (xverbuf != NULL)
     free (xverbuf);
   if (isymbuf != NULL && hdr->contents != (unsigned char *) isymbuf)

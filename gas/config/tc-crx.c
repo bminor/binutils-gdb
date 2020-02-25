@@ -900,8 +900,8 @@ parse_operand (char *operand, ins * crx_ins)
     cur_arg->type = arg_c;
   goto set_params;
 
-/* Parse an operand according to its type.  */
-set_params:
+  /* Parse an operand according to its type.  */
+ set_params:
   cur_arg->constant = 0;
   set_operand (operand, crx_ins);
 }
@@ -1570,8 +1570,8 @@ assemble_insn (char *mnemonic, ins *insn)
       match = 1;
       break;
 
-/* Try again with next instruction.  */
-next_insn:
+      /* Try again with next instruction.  */
+    next_insn:
       instruction++;
     }
 
@@ -1845,7 +1845,7 @@ preprocess_reglist (char *param, int *allocated)
 	as_bad (_("Maximum %d bits may be set in `mask16' operand"),
 		MAX_REGS_IN_MASK16);
 
-next_inst:
+    next_inst:
       while (!ISALNUM (*paramP) && *paramP != '}')
 	  paramP++;
     }

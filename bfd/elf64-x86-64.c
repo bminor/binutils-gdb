@@ -1662,7 +1662,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   if (no_overflow)
     return TRUE;
 
-convert:
+ convert:
   if (opcode == 0xff)
     {
       /* We have "call/jmp *foo@GOTPCREL(%rip)".  */
@@ -1787,7 +1787,7 @@ convert:
 	     overflow when sign-extending imm32 to imm64.  */
 	  r_type = (rex & REX_W) != 0 ? R_X86_64_32S : R_X86_64_32;
 
-rewrite_modrm_rex:
+	rewrite_modrm_rex:
 	  bfd_put_8 (abfd, modrm, contents + roff - 1);
 
 	  if (rex)
@@ -2179,7 +2179,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_X86_64_PC32_BND:
 	case R_X86_64_PC64:
 	case R_X86_64_64:
-pointer:
+	pointer:
 	  if (eh != NULL && (sec->flags & SEC_CODE) != 0)
 	    eh->zero_undefweak |= 0x2;
 	  /* We are called after all symbols have been resolved.  Only
@@ -2244,7 +2244,7 @@ pointer:
 	    }
 
 	  size_reloc = FALSE;
-do_size:
+	do_size:
 	  if (NEED_DYNAMIC_RELOCATION_P (info, TRUE, h, sec, r_type,
 					 htab->pointer_r_type))
 	    {
@@ -2351,7 +2351,7 @@ do_size:
 
   return TRUE;
 
-error_return:
+ error_return:
   if (elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
   sec->check_relocs_failed = 1;
@@ -2678,7 +2678,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	  switch (r_type)
 	    {
 	    default:
-bad_ifunc_reloc:
+	    bad_ifunc_reloc:
 	      if (h->root.root.string)
 		name = h->root.root.string;
 	      else
@@ -2702,7 +2702,7 @@ bad_ifunc_reloc:
 		goto do_relocation;
 	      /* FALLTHROUGH */
 	    case R_X86_64_64:
-do_ifunc_pointer:
+	    do_ifunc_pointer:
 	      if (rel->r_addend != 0)
 		{
 		  if (h->root.root.string)
@@ -2788,7 +2788,7 @@ do_ifunc_pointer:
 	    }
 	}
 
-skip_ifunc:
+    skip_ifunc:
       resolved_to_zero = (eh != NULL
 			  && UNDEFINED_WEAK_RESOLVED_TO_ZERO (info, eh));
 
@@ -3047,7 +3047,7 @@ skip_ifunc:
 	      break;
 	    }
 
-use_plt:
+	use_plt:
 	  if (h->plt.offset != (bfd_vma) -1)
 	    {
 	      if (htab->plt_second != NULL)
@@ -3162,7 +3162,7 @@ use_plt:
 	  /* FIXME: The ABI says the linker should make sure the value is
 	     the same when it's zeroextended to 64 bit.	 */
 
-direct:
+	direct:
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
 
@@ -3373,7 +3373,7 @@ direct:
 			  if (roff < 3
 			      || (roff - 3 + 22) > input_section->size)
 			    {
-corrupt_input:
+			    corrupt_input:
 			      info->callbacks->einfo
 				(_("%F%P: corrupt input: %pB\n"),
 				 input_bfd);
@@ -4031,12 +4031,12 @@ corrupt_input:
 	    }
 	}
 
-do_relocation:
+    do_relocation:
       r = _bfd_final_link_relocate (howto, input_bfd, input_section,
 				    contents, rel->r_offset,
 				    relocation, rel->r_addend);
 
-check_relocation_error:
+    check_relocation_error:
       if (r != bfd_reloc_ok)
 	{
 	  const char *name;
@@ -4459,7 +4459,7 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
       else
 	{
 	  BFD_ASSERT((h->got.offset & 1) == 0);
-do_glob_dat:
+	do_glob_dat:
 	  bfd_put_64 (output_bfd, (bfd_vma) 0,
 		      htab->elf.sgot->contents + h->got.offset);
 	  rela.r_info = htab->r_info (h->dynindx, R_X86_64_GLOB_DAT);

@@ -336,7 +336,7 @@ plugin_get_ir_dummy_bfd (const char *name, bfd *srctemplate)
 	    return abfd;
 	}
     }
-report_error:
+ report_error:
   einfo (_("%F%P: could not create dummy IR bfd: %E\n"));
   return NULL;
 }

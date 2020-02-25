@@ -1632,7 +1632,7 @@ NAME (aout, write_syms) (bfd *abfd)
 
   return TRUE;
 
-error_return:
+ error_return:
   _bfd_stringtab_free (strtab);
   return FALSE;
 }

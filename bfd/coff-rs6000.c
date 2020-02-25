@@ -652,7 +652,7 @@ _bfd_xcoff_swap_aux_out (bfd *abfd, void * inp, int type, int in_class,
 		ext->x_sym.x_misc.x_lnsz.x_size);
     }
 
-end:
+ end:
   return bfd_coff_auxesz (abfd);
 }
 
