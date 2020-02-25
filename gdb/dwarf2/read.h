@@ -229,11 +229,6 @@ public:
      symbols.  */
   bool reading_partial_symbols = false;
 
-  /* Table mapping type DIEs to their struct type *.
-     This is NULL if not allocated yet.
-     The mapping is done via (CU/TU + DIE offset) -> type.  */
-  htab_up die_type_hash;
-
   /* The CUs we recently read.  */
   std::vector<dwarf2_per_cu_data *> just_read_cus;
 
@@ -309,6 +304,11 @@ struct dwarf2_per_objfile
   /* Pointer to the data that is (possibly) shared between this objfile and
      other objfiles backed by the same BFD.  */
   struct dwarf2_per_bfd *per_bfd;
+
+  /* Table mapping type DIEs to their struct type *.
+     This is nullptr if not allocated yet.
+     The mapping is done via (CU/TU + DIE offset) -> type.  */
+  htab_up die_type_hash;
 
 private:
   /* Hold the corresponding compunit_symtab for each CU or TU.  This
