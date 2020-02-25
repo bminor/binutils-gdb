@@ -1,3 +1,7 @@
+2020-02-25  Luis Machado  <luis.machado@linaro.org>
+
+	* aarch64-tdep.c (aarch64_vnv_type): Fix comment typo.
+
 2020-02-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* loc.h (dwarf2_get_die_type): Move to...

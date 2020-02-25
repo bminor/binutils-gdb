@@ -1967,7 +1967,7 @@ aarch64_vnv_type (struct gdbarch *gdbarch)
 
   if (tdep->vnv_type == NULL)
     {
-      /* The other AArch64 psuedo registers (Q,D,H,S,B) refer to a single value
+      /* The other AArch64 pseudo registers (Q,D,H,S,B) refer to a single value
 	 slice from the non-pseudo vector registers.  However NEON V registers
 	 are always vector registers, and need constructing as such.  */
       const struct builtin_type *bt = builtin_type (gdbarch);
