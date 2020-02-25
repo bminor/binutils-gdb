@@ -1,3 +1,8 @@
+2020-02-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* copypright.py (EXCLUDE_LIST): Add 'gnulib/config.in' and
+	'gnulib/Makefile.in' to the list.
+
 2020-02-24  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.h (struct type_unit_unshareable) <num_symtabs>:

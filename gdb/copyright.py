@@ -190,7 +190,9 @@ def main ():
 EXCLUDE_LIST = (
     'gdb/nat/glibc_thread_db.h',
     'gdb/CONTRIBUTE',
-    'gnulib/import'
+    'gnulib/import',
+    'gnulib/config.in',
+    'gnulib/Makefile.in',
 )
 
 # Files which should not be modified, either because they are
