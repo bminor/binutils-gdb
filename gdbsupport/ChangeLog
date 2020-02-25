@@ -1,3 +1,7 @@
+2020-02-28  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb-dlfcn.h (gdb_dlopen): Update comment.
+
 2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* configure: Regenerate.
