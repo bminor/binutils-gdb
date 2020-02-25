@@ -18,6 +18,8 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dnl Process this file with autoconf to produce a configure script.
 
+m4_include(../config/debuginfod.m4)
+
 AC_INIT(main.c)
 AC_CONFIG_HEADERS(config.h:config.in, [echo > stamp-h])
 AM_MAINTAINER_MODE
@@ -324,37 +326,7 @@ case $host_os in
 esac
 
 # Handle optional debuginfod support
-AC_ARG_WITH([debuginfod],
-  AC_HELP_STRING([--with-debuginfod], [Enable debuginfo lookups with debuginfod (auto/yes/no)]),
-  [], [with_debuginfod=auto])
-AC_MSG_CHECKING([whether to use debuginfod])
-AC_MSG_RESULT([$with_debuginfod])
-
-if test "x$with_debuginfod" != xno; then
-  AC_PATH_PROG(pkg_config_prog_path, pkg-config, missing)
-  if test "${pkg_config_prog_path}" != "missing"; then
-    ${pkg_config_prog_path} --exists --atleast-version=0.178 libdebuginfod
-    if test $? = 0; then
-      AC_SUBST([DEBUGINFOD_LIBS], [`${pkg_config_prog_path} --libs libdebuginfod`])
-      AC_SUBST([DEBUGINFOD_CFLAGS], [`${pkg_config_prog_path} --cflags libdebuginfod`])
-      AC_DEFINE([HAVE_LIBDEBUGINFOD], [1], [Define to 1 if debuginfod is enabled.])
-    else
-      if test "x$with_debuginfod" = xyes; then
-	AC_MSG_ERROR(["--with-debuginfod was given, but libdebuginfod is missing or unusable."])
-      else
-	AC_MSG_WARN([libdebuginfod is missing or unusable; some features may be unavailable.])
-      fi
-    fi
-  else
-    if test "x$with_debuginfod" = xyes; then
-      AC_MSG_ERROR([--with-debuginfod was given, but pkg-config missing or unusable; cannot find libdebuginfod])
-    else
-      AC_MSG_WARN([pkg-config missing or unusable; debuginfod support disabled.])
-    fi
-  fi
-else
-  AC_MSG_WARN([debuginfod support disabled; some features may be unavailable.])
-fi
+AC_DEBUGINFOD
 
 # Libunwind support for ia64.
 AC_ARG_WITH(libunwind-ia64,

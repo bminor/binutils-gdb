@@ -43,13 +43,26 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 #else
 #include <elfutils/debuginfod.h>
 
+/* TODO: Use debuginfod API extensions to print filename from progressfn.  */
+static const char *fname;
+static bool has_printed;
+
 static int
 progressfn (debuginfod_client *c, long cur, long total)
 {
   if (check_quit_flag ())
     {
-      printf_filtered ("Cancelling download...\n");
+      printf_filtered ("Cancelling download of %ps...\n",
+		       styled_string (file_name_style.style (), fname));
       return 1;
+    }
+
+  if (!has_printed)
+    {
+      /* Print this message only once.  */
+      has_printed = true;
+      printf_unfiltered ("Debuginfod downloading %ps...\n",
+		       styled_string (file_name_style.style (), fname));
     }
 
   return 0;
@@ -74,13 +87,16 @@ debuginfod_source_query (const unsigned char *build_id,
 			 const char *srcpath,
 			 gdb::unique_xmalloc_ptr<char> *destname)
 {
+  if (getenv (DEBUGINFOD_URLS_ENV_VAR) == NULL)
+    return scoped_fd (-ENOSYS);
+
   debuginfod_client *c = debuginfod_init ();
 
   if (c == nullptr)
     return scoped_fd (-ENOMEM);
 
-  printf_filtered (_("Debuginfod fetching source file %ps...\n"),
-		   styled_string (file_name_style.style (), srcpath));
+  fname = srcpath;
+  has_printed = false;
 
   scoped_fd fd (debuginfod_find_source (c,
 					build_id,
@@ -88,10 +104,12 @@ debuginfod_source_query (const unsigned char *build_id,
 					srcpath,
 					nullptr));
 
-  if (fd.get () < 0)
+  /* TODO: Add 'set debug debuginfod' command to control when error messages are shown.  */
+  if (fd.get () < 0 && fd.get () != -ENOENT)
     {
-      printf_filtered (_("Download failed. Continuing without source file %ps.\n"),
-		       styled_string (file_name_style.style (), srcpath));
+      printf_filtered (_("Download failed: %s. Continuing without source file %ps.\n"),
+		       strerror (-fd.get ()),
+		       styled_string (file_name_style.style (),  srcpath));
     }
   else
     destname->reset (xstrdup (srcpath));
@@ -108,19 +126,23 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 			    const char *filename,
 			    gdb::unique_xmalloc_ptr<char> *destname)
 {
+  if (getenv (DEBUGINFOD_URLS_ENV_VAR) == NULL)
+    return scoped_fd (-ENOSYS);
+
   debuginfod_client *c = debuginfod_init ();
 
   if (c == nullptr)
     return scoped_fd (-ENOMEM);
 
-  printf_filtered (_("Debuginfod fetching debug info for %ps...\n"),
-		   styled_string (file_name_style.style (), filename));
-
+  fname = filename;
+  has_printed = false;
   char *dname = nullptr;
+
   scoped_fd fd (debuginfod_find_debuginfo (c, build_id, build_id_len, &dname));
 
-  if (fd.get () < 0)
-    printf_filtered (_("Download failed. Continuing without debug info for %ps.\n"),
+  if (fd.get () < 0 && fd.get () != -ENOENT)
+    printf_filtered (_("Download failed: %s. Continuing without debug info for %ps.\n"),
+		     strerror (-fd.get ()),
 		     styled_string (file_name_style.style (),  filename));
 
   destname->reset (dname);
