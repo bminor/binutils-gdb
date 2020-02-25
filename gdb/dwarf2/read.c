@@ -9591,7 +9591,8 @@ rust_union_quirks (struct dwarf2_cu *cu)
 static void
 recursively_compute_inclusions (std::vector<compunit_symtab *> *result,
 				htab_t all_children, htab_t all_type_symtabs,
-				struct dwarf2_per_cu_data *per_cu,
+				dwarf2_per_cu_data *per_cu,
+				dwarf2_per_objfile *per_objfile,
 				struct compunit_symtab *immediate_parent)
 {
   void **slot = htab_find_slot (all_children, per_cu, INSERT);
@@ -9604,7 +9605,7 @@ recursively_compute_inclusions (std::vector<compunit_symtab *> *result,
   *slot = per_cu;
 
   /* Only add a CU if it has a symbol table.  */
-  compunit_symtab *cust = per_cu->dwarf2_per_objfile->get_symtab (per_cu);
+  compunit_symtab *cust = per_objfile->get_symtab (per_cu);
   if (cust != NULL)
     {
       /* If this is a type unit only add its symbol table if we haven't
@@ -9632,7 +9633,8 @@ recursively_compute_inclusions (std::vector<compunit_symtab *> *result,
     for (dwarf2_per_cu_data *ptr : *per_cu->imported_symtabs)
       {
 	recursively_compute_inclusions (result, all_children,
-					all_type_symtabs, ptr, cust);
+					all_type_symtabs, ptr, per_objfile,
+					cust);
       }
 }
 
@@ -9640,7 +9642,8 @@ recursively_compute_inclusions (std::vector<compunit_symtab *> *result,
    PER_CU.  */
 
 static void
-compute_compunit_symtab_includes (struct dwarf2_per_cu_data *per_cu)
+compute_compunit_symtab_includes (dwarf2_per_cu_data *per_cu,
+				  dwarf2_per_objfile *per_objfile)
 {
   gdb_assert (! per_cu->is_debug_types);
 
@@ -9649,7 +9652,7 @@ compute_compunit_symtab_includes (struct dwarf2_per_cu_data *per_cu)
       int len;
       std::vector<compunit_symtab *> result_symtabs;
       htab_t all_children, all_type_symtabs;
-      compunit_symtab *cust = per_cu->dwarf2_per_objfile->get_symtab (per_cu);
+      compunit_symtab *cust = per_objfile->get_symtab (per_cu);
 
       /* If we don't have a symtab, we can just skip this case.  */
       if (cust == NULL)
@@ -9663,7 +9666,8 @@ compute_compunit_symtab_includes (struct dwarf2_per_cu_data *per_cu)
       for (dwarf2_per_cu_data *ptr : *per_cu->imported_symtabs)
 	{
 	  recursively_compute_inclusions (&result_symtabs, all_children,
-					  all_type_symtabs, ptr, cust);
+					  all_type_symtabs, ptr, per_objfile,
+					  cust);
 	}
 
       /* Now we have a transitive closure of all the included symtabs.  */
@@ -9689,7 +9693,7 @@ process_cu_includes (struct dwarf2_per_objfile *dwarf2_per_objfile)
   for (dwarf2_per_cu_data *iter : dwarf2_per_objfile->per_bfd->just_read_cus)
     {
       if (! iter->is_debug_types)
-	compute_compunit_symtab_includes (iter);
+	compute_compunit_symtab_includes (iter, dwarf2_per_objfile);
     }
 
   dwarf2_per_objfile->per_bfd->just_read_cus.clear ();
