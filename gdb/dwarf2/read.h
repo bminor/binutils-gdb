@@ -419,9 +419,6 @@ struct dwarf2_per_cu_data
   /* The language of this CU.  */
   enum language lang;
 
-  /* The corresponding dwarf2_per_objfile.  */
-  struct dwarf2_per_objfile *dwarf2_per_objfile;
-
   /* Backlink to the owner of this.  */
   dwarf2_per_bfd *per_bfd;
 
