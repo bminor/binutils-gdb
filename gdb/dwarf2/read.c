@@ -6850,7 +6850,7 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
       if (!signature.has_value ())
 	error (_("Dwarf Error: missing dwo_id for dwo_name %s"
 		 " [in module %s]"),
-	       dwo_name, objfile_name (this_cu->dwarf2_per_objfile->objfile));
+	       dwo_name, bfd_get_filename (this_cu->per_bfd->obfd));
       dwo_unit = lookup_dwo_comp_unit (this_cu, dwo_name, comp_dir,
 				       *signature);
     }
