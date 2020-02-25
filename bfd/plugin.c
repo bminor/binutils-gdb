@@ -147,6 +147,17 @@ struct plugin_list_entry
   bfd_boolean initialized;
 };
 
+static const char *plugin_program_name;
+static int need_lto_wrapper_p;
+
+void
+bfd_plugin_set_program_name (const char *program_name,
+			     int need_lto_wrapper)
+{
+  plugin_program_name = program_name;
+  need_lto_wrapper_p = need_lto_wrapper;
+}
+
 /* Use GCC LTO wrapper to covert LTO IR object to the real object.  */
 
 static bfd_boolean
@@ -164,6 +175,9 @@ get_lto_wrapper (struct plugin_list_entry *plugin)
   char *p;
   char dir_seperator = '\0';
   char *resolution_file;
+
+  if (!need_lto_wrapper_p)
+    return FALSE;
 
   if (plugin->initialized)
     {
@@ -487,14 +501,6 @@ add_symbols (void * handle,
     abfd->flags |= HAS_SYMS;
 
   return LDPS_OK;
-}
-
-static const char *plugin_program_name;
-
-void
-bfd_plugin_set_program_name (const char *program_name)
-{
-  plugin_program_name = program_name;
 }
 
 int
