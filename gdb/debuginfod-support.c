@@ -43,7 +43,7 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 #else
 #include <elfutils/debuginfod.h>
 
-/* TODO: Use debuginfod API extensions to print filename from progressfn.  */
+/* TODO: Use debuginfod API extensions instead of these globals.  */
 static const char *fname;
 static bool has_printed;
 
@@ -52,17 +52,17 @@ progressfn (debuginfod_client *c, long cur, long total)
 {
   if (check_quit_flag ())
     {
-      printf_filtered ("Cancelling download of %ps...\n",
-		       styled_string (file_name_style.style (), fname));
+      printf_unfiltered ("Cancelling download of %ps...\n",
+			 styled_string (file_name_style.style (), fname));
       return 1;
     }
 
-  if (!has_printed)
+  if (!has_printed && total != 0)
     {
       /* Print this message only once.  */
       has_printed = true;
       printf_unfiltered ("Debuginfod downloading %ps...\n",
-		       styled_string (file_name_style.style (), fname));
+			 styled_string (file_name_style.style (), fname));
     }
 
   return 0;
@@ -106,11 +106,9 @@ debuginfod_source_query (const unsigned char *build_id,
 
   /* TODO: Add 'set debug debuginfod' command to control when error messages are shown.  */
   if (fd.get () < 0 && fd.get () != -ENOENT)
-    {
-      printf_filtered (_("Download failed: %s. Continuing without source file %ps.\n"),
-		       strerror (-fd.get ()),
-		       styled_string (file_name_style.style (),  srcpath));
-    }
+    printf_filtered (_("Download failed: %s. Continuing without source file %ps.\n"),
+		     strerror (-fd.get ()),
+		     styled_string (file_name_style.style (),  srcpath));
   else
     destname->reset (xstrdup (srcpath));
 
