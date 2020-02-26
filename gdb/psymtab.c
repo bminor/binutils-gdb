@@ -36,6 +36,7 @@
 #include "gdbcmd.h"
 #include <algorithm>
 #include <set>
+#include "gdbsupport/buildargv.h"
 
 static struct partial_symbol *lookup_partial_symbol (struct objfile *,
 						     struct partial_symtab *,

@@ -44,6 +44,7 @@
 #include "gdbsupport/gdb_unlinker.h"
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/scoped_ignore_signal.h"
+#include "gdbsupport/buildargv.h"
 
 
 

@@ -76,6 +76,7 @@
 #include "cli-out.h"
 #include "gdbsupport/gdb-safe-ctype.h"
 #include "bt-utils.h"
+#include "gdbsupport/buildargv.h"
 
 void (*deprecated_error_begin_hook) (void);
 
@@ -2888,17 +2889,6 @@ ldirname (const char *filename)
     dirname[base++ - filename] = '.';
 
   return dirname;
-}
-
-/* See utils.h.  */
-
-void
-gdb_argv::reset (const char *s)
-{
-  char **argv = buildargv (s);
-
-  freeargv (m_argv);
-  m_argv = argv;
 }
 
 /* Return ARGS parsed as a valid pid, or throw an error.  */

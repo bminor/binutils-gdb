@@ -58,6 +58,7 @@
 #include <algorithm>
 #include "cli/cli-style.h"
 #include "expop.h"
+#include "gdbsupport/buildargv.h"
 
 #include <unistd.h>
 

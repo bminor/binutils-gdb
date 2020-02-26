@@ -38,6 +38,7 @@
 #include "completer.h"
 #include "top.h"		/* For command_loop.  */
 #include "main.h"
+#include "gdbsupport/buildargv.h"
 
 /* Each UI has its own independent set of interpreters.  */
 

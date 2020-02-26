@@ -24,6 +24,7 @@
 #include "regcache.h"
 #include "gdbsupport/byte-vector.h"
 #include "gdbarch.h"
+#include "gdbsupport/buildargv.h"
 
 /* Helper macros.  */
 

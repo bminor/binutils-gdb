@@ -72,6 +72,7 @@
 #include "scoped-mock-context.h"
 #include "test-target.h"
 #include "gdbsupport/common-debug.h"
+#include "gdbsupport/buildargv.h"
 
 /* Prototypes for local functions */
 

@@ -49,6 +49,7 @@
 #include <algorithm>
 #include "gdbsupport/pathstuff.h"
 #include "cli/cli-style.h"
+#include "gdbsupport/buildargv.h"
 
 void (*deprecated_file_changed_hook) (const char *);
 

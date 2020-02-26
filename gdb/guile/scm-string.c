@@ -23,6 +23,7 @@
 #include "defs.h"
 #include "charset.h"
 #include "guile-internal.h"
+#include "gdbsupport/buildargv.h"
 
 /* Convert STRING to an int.
    STRING must be a valid integer.  */

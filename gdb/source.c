@@ -50,6 +50,7 @@
 #include "observable.h"
 #include "build-id.h"
 #include "debuginfod-support.h"
+#include "gdbsupport/buildargv.h"
 
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB

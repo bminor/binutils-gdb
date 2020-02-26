@@ -27,6 +27,7 @@
 #include "cli-script.h"
 #include "completer.h"
 #include "gdbsupport/intrusive_list.h"
+#include "gdbsupport/buildargv.h"
 
 /* Not a set/show command.  Note that some commands which begin with
    "set" or "show" might be in this category, if their syntax does

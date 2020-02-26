@@ -61,6 +61,7 @@
 #include "gdbsupport/selftest.h"
 #include "cli/cli-style.h"
 #include "gdbsupport/forward-scope-exit.h"
+#include "gdbsupport/buildargv.h"
 
 #include <sys/types.h>
 #include <fcntl.h>

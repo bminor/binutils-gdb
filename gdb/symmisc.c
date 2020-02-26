@@ -38,6 +38,7 @@
 #include "source.h"
 #include "readline/tilde.h"
 #include <cli/cli-style.h>
+#include "gdbsupport/buildargv.h"
 
 /* Prototypes for local functions */
 

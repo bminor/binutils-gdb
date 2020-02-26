@@ -37,6 +37,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include <list>
 #include "cli/cli-style.h"
+#include "gdbsupport/buildargv.h"
 
 /* True if we want to print debug printouts related to file/function
    skipping. */
