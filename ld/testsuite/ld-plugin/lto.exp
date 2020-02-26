@@ -342,6 +342,32 @@ set lto_link_elf_tests [list \
   [list "PR ld/24486" \
    "-O2 -flto tmpdir/pr24486a.o tmpdir/pr24486c.so -Wl,--as-needed tmpdir/pr24486b.so" "" \
    {dummy.c} {} "pr24486.exe"] \
+  [list "Build pr25593a-1.o" \
+   "$plug_opt" "-flto -O2" \
+   {pr25593a-1.c} {} "" "c"] \
+  [list "Build pr25593a-2.o" \
+   "" "-O2" \
+   {pr25593a-2.c} {} "" "c"] \
+  [list "Build pr25593b.o" \
+   "" "-O2" \
+   {pr25593b.c} {} "" "c"] \
+  [list "Build pr25593c.so" \
+   "-shared" "-O2 -fpic" \
+   {pr25593c.c} {} "pr25593c.so" "c"] \
+  [list "Build pr25593d.so" \
+   "-shared" "-O2 -fpic" \
+   {pr25593d.c} {} "pr25593d.so" "c"] \
+  [list "Build pr25593e.so" \
+   "-shared" "-O2 -fpic" \
+   {pr25593e.c} {} "pr25593e.so" "c"] \
+  [list "PR ld/r25593 (LTO)" \
+   "-O2 -flto -Wl,--as-needed tmpdir/pr25593a-1.o tmpdir/pr25593b.o \
+    tmpdir/pr25593c.so tmpdir/pr25593d.so tmpdir/pr25593e.so" "" \
+   {dummy.c} {{readelf {-d --wide} pr25593.d}} "pr25593a.exe"] \
+  [list "PR ld/r25593" \
+   "-O2 -flto -Wl,--as-needed tmpdir/pr25593a-2.o tmpdir/pr25593b.o \
+    tmpdir/pr25593c.so tmpdir/pr25593d.so tmpdir/pr25593e.so" "" \
+   {dummy.c} {{readelf {-d --wide} pr25593.d}} "pr25593b.exe"] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of

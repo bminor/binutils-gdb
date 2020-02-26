@@ -1,3 +1,15 @@
+2020-02-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/25593
+	* testsuite/ld-plugin/lto.exp: Run PR ld/25593 tests.
+	* testsuite/ld-plugin/pr25593.d: New file.
+	* testsuite/ld-plugin/pr25593a-1.c: Likewise.
+	* testsuite/ld-plugin/pr25593a-2.c: Likewise.
+	* testsuite/ld-plugin/pr25593b.c: Likewise.
+	* testsuite/ld-plugin/pr25593c.c: Likewise.
+	* testsuite/ld-plugin/pr25593d.c: Likewise.
+	* testsuite/ld-plugin/pr25593e.c: Likewise.
+
 2020-02-26  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/cskyelf.em: Indent labels correctly.
