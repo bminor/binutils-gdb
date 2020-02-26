@@ -1,5 +1,9 @@
 2020-02-26  Alan Modra  <amodra@gmail.com>
 
+	* vms-lib.c (vms_lib_read_index): Release correct buffer.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
 	* elf32-rx.c (rx_elf_relocate_section): Use bfd_malloc rather than
 	malloc.  Check for NULL return from bfd_malloc.
 	(rx_table_find, rx_table_map): Likewise.

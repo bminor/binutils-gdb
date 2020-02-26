@@ -416,6 +416,7 @@ vms_lib_read_index (bfd *abfd, int idx, unsigned int *nbrel)
   unsigned int vbn;
   ufile_ptr filesize;
   size_t amt;
+  struct carsym *csbuf;
   struct carsym_mem csm;
 
   /* Read index desription.  */
@@ -447,7 +448,7 @@ vms_lib_read_index (bfd *abfd, int idx, unsigned int *nbrel)
     csm.max = csm.limit;
   if (_bfd_mul_overflow (csm.max, sizeof (struct carsym), &amt))
     return NULL;
-  csm.idx = bfd_alloc (abfd, amt);
+  csm.idx = csbuf = bfd_alloc (abfd, amt);
   if (csm.idx == NULL)
     return NULL;
 
@@ -455,12 +456,12 @@ vms_lib_read_index (bfd *abfd, int idx, unsigned int *nbrel)
   vbn = bfd_getl32 (idd.vbn);
   if (vbn != 0 && !vms_traverse_index (abfd, vbn, &csm))
     {
-      if (csm.realloced && csm.idx != NULL)
+      if (csm.realloced)
 	free (csm.idx);
 
       /* Note: in case of error, we can free what was allocated on the
 	 BFD's objalloc.  */
-      bfd_release (abfd, csm.idx);
+      bfd_release (abfd, csbuf);
       return NULL;
     }
 
@@ -468,7 +469,6 @@ vms_lib_read_index (bfd *abfd, int idx, unsigned int *nbrel)
     {
       /* There are more entries than the first estimate.  Allocate on
 	 the BFD's objalloc.  */
-      struct carsym *csbuf;
       csbuf = bfd_alloc (abfd, csm.nbr * sizeof (struct carsym));
       if (csbuf == NULL)
 	return NULL;
