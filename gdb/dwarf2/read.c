@@ -19365,9 +19365,10 @@ read_addr_index_from_leb128 (struct dwarf2_cu *cu, const gdb_byte *info_ptr,
 /* See read.h.  */
 
 CORE_ADDR
-dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu, unsigned int addr_index)
+dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu,
+			dwarf2_per_objfile *dwarf2_per_objfile,
+			unsigned int addr_index)
 {
-  struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
   struct dwarf2_cu *cu = per_cu->cu;
   gdb::optional<ULONGEST> addr_base;
   int addr_size;
