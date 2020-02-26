@@ -1,5 +1,13 @@
 2020-02-26  Alan Modra  <amodra@gmail.com>
 
+	* elf32-rx.c (rx_elf_relocate_section): Use bfd_malloc rather than
+	malloc.  Check for NULL return from bfd_malloc.
+	(rx_table_find, rx_table_map): Likewise.
+	(rx_set_section_contents): Check bfd_alloc return.
+	(rx_dump_symtab): Don't alloc internal_syms or external_syms.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
 	* aoutx.h: Indent labels correctly.  Format error strings.
 	* archive.c: Likewise.
 	* archive64.c: Likewise.

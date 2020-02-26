@@ -576,7 +576,9 @@ rx_elf_relocate_section
 
 	      /* We have already done error checking in rx_table_find().  */
 
-	      buf = (char *) malloc (13 + strlen (name + 20));
+	      buf = (char *) bfd_malloc (13 + strlen (name + 20));
+	      if (buf == NULL)
+		return FALSE;
 
 	      sprintf (buf, "$tablestart$%s", name + 20);
 	      table_start_cache = get_symbol_value (buf,
@@ -618,7 +620,10 @@ rx_elf_relocate_section
 	      idx = (int) (entry_vma - table_start_cache) / 4;
 
 	      /* This will look like $tableentry$<N>$<name> */
-	      buf = (char *) malloc (12 + 20 + strlen (name + 20));
+	      buf = (char *) bfd_malloc (12 + 20 + strlen (name + 20));
+	      if (buf == NULL)
+		return FALSE;
+
 	      sprintf (buf, "$tableentry$%d$%s", idx, name + 20);
 
 	      h = (struct elf_link_hash_entry *) bfd_link_hash_lookup (info->hash, buf, FALSE, FALSE, TRUE);
@@ -3335,26 +3340,14 @@ rx_dump_symtab (bfd * abfd, void * internal_syms, void * external_syms)
   Elf_Internal_Sym * isymend;
   Elf_Internal_Sym * isym;
   Elf_Internal_Shdr * symtab_hdr;
-  bfd_boolean free_internal = FALSE, free_external = FALSE;
   char * st_info_str;
   char * st_info_stb_str;
   char * st_other_str;
   char * st_shndx_str;
 
-  if (! internal_syms)
-    {
-      internal_syms = bfd_malloc (1000);
-      free_internal = 1;
-    }
-  if (! external_syms)
-    {
-      external_syms = bfd_malloc (1000);
-      free_external = 1;
-    }
-
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   locsymcount = symtab_hdr->sh_size / get_elf_backend_data (abfd)->s->sizeof_sym;
-  if (free_internal)
+  if (!internal_syms)
     isymbuf = bfd_elf_get_elf_syms (abfd, symtab_hdr,
 				    symtab_hdr->sh_info, 0,
 				    internal_syms, external_syms, NULL);
@@ -3406,10 +3399,6 @@ rx_dump_symtab (bfd * abfd, void * internal_syms, void * external_syms)
 	      isym->st_other, st_other_str,
 	      isym->st_shndx, st_shndx_str);
     }
-  if (free_internal)
-    free (internal_syms);
-  if (free_external)
-    free (external_syms);
 }
 
 char *
@@ -3618,6 +3607,8 @@ rx_set_section_contents (bfd *	       abfd,
       char * cloc = (char *) location;
 
       swapped_data = (char *) bfd_alloc (abfd, count);
+      if (swapped_data == NULL)
+	return FALSE;
 
       for (i = 0; i < count; i += 4)
 	{
@@ -3782,7 +3773,9 @@ rx_table_find (struct bfd_hash_entry *vent, void *vinfo)
      find all the related symbols and mark their sections as SEC_KEEP
      so we don't garbage collect them.  */
 
-  buf = (char *) malloc (12 + 10 + strlen (tname));
+  buf = (char *) bfd_malloc (12 + 10 + strlen (tname));
+  if (buf == NULL)
+    return FALSE;
 
   sprintf (buf, "$tableend$%s", tname);
   h = bfd_link_hash_lookup (info->info->hash, buf, FALSE, FALSE, TRUE);
@@ -3911,7 +3904,9 @@ rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
 		+ ent->u.def.section->output_section->vma
 		+ ent->u.def.section->output_offset);
 
-  buf = (char *) malloc (12 + 10 + strlen (tname));
+  buf = (char *) bfd_malloc (12 + 10 + strlen (tname));
+  if (buf == NULL)
+    return FALSE;
 
   sprintf (buf, "$tableend$%s", tname);
   end_addr = get_symbol_value_maybe (buf, info->info);
@@ -3931,8 +3926,21 @@ rx_table_map (struct bfd_hash_entry *vent, void *vinfo)
 
   info->table_start = start_addr;
   info->table_size = (int) (end_addr - start_addr) / 4;
-  info->table_handlers = (bfd_vma *) malloc (info->table_size * sizeof (bfd_vma));
-  info->table_entries = (struct bfd_link_hash_entry **) malloc (info->table_size * sizeof (struct bfd_link_hash_entry));
+  info->table_handlers = (bfd_vma *)
+    bfd_malloc (info->table_size * sizeof (bfd_vma));
+  if (info->table_handlers == NULL)
+    {
+      free (buf);
+      return FALSE;
+    }
+  info->table_entries = (struct bfd_link_hash_entry **)
+    bfd_malloc (info->table_size * sizeof (struct bfd_link_hash_entry));
+  if (info->table_entries == NULL)
+    {
+      free (info->table_handlers);
+      free (buf);
+      return FALSE;
+    }
 
   for (idx = 0; idx < (int) (end_addr - start_addr) / 4; idx ++)
     {
