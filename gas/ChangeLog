@@ -1,5 +1,10 @@
 2020-02-26  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-arm.c (reg_expected_msgs[REG_TYPE_RNB]): Don't use
+	N_() on empty string.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
 	* read.c (read_a_source_file): Call strncpy with length one
 	less than size of original_case_string.
 
