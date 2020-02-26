@@ -1,3 +1,9 @@
+2020-02-25  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/loc.h (dwarf2_read_addr_index): Move...
+	* dwarf2/read.h (dwarf2_read_addr_index): ... here.
+	* dwarf2/read.c (dwarf2_read_addr_index): Move doc to header.
+
 2020-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdbtypes.c (create_array_type_with_stride): Handle negative

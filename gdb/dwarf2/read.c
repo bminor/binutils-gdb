@@ -18867,14 +18867,10 @@ read_addr_index_from_leb128 (struct dwarf2_cu *cu, const gdb_byte *info_ptr,
   return read_addr_index (cu, addr_index);
 }
 
-/* Given an index in .debug_addr, fetch the value.
-   NOTE: This can be called during dwarf expression evaluation,
-   long after the debug information has been read, and thus per_cu->cu
-   may no longer exist.  */
+/* See read.h.  */
 
 CORE_ADDR
-dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
-			unsigned int addr_index)
+dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu, unsigned int addr_index)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
   struct dwarf2_cu *cu = per_cu->cu;
