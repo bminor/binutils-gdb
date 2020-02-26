@@ -1,3 +1,8 @@
+2020-03-05  Vyacheslav Petrishchev  <vyachemail@gmail.com>
+
+	* configure.ac: Added call development.sh.
+	* configure: Regenerate.
+
 2020-03-05  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* .gitattributes: New file.

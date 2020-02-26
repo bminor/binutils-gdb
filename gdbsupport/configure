@@ -6569,6 +6569,9 @@ fi
 am_cv_prog_cc_stdc=$ac_cv_prog_cc_stdc
 
 
+# Set the 'development' global.
+. $srcdir/../bfd/development.sh
+
 # We require a C++11 compiler.  Check if one is available, and if
 # necessary, set CXX_DIALECT to some -std=xxx switch.
 
