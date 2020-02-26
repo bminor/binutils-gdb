@@ -1,5 +1,13 @@
 2020-02-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (struct dwarf2_include_psymtab): New.
+	(dwarf2_create_include_psymtab): Use dwarf2_include_psymtab.
+	(dwarf2_psymtab::expand_psymtab, dwarf2_psymtab::readin_p)
+	(dwarf2_psymtab::get_compunit_symtab): Remove null checks for
+	per_cu_data.
+
+2020-02-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/index-write.c (psym_index_map): Change type.
 	(add_address_entry_worker, write_one_signatured_type)
 	(recursively_count_psymbols, recursively_write_psymbols)

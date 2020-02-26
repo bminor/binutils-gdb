@@ -5918,6 +5918,44 @@ read_abbrev_offset (struct dwarf2_per_objfile *dwarf2_per_objfile,
   return (sect_offset) read_offset (abfd, info_ptr, offset_size);
 }
 
+/* A partial symtab that is used only for include files.  */
+struct dwarf2_include_psymtab : public partial_symtab
+{
+  dwarf2_include_psymtab (const char *filename, struct objfile *objfile)
+    : partial_symtab (filename, objfile)
+  {
+  }
+
+  void read_symtab (struct objfile *objfile) override
+  {
+    expand_psymtab (objfile);
+  }
+
+  void expand_psymtab (struct objfile *objfile) override
+  {
+    if (m_readin)
+      return;
+    /* It's an include file, no symbols to read for it.
+       Everything is in the parent symtab.  */
+    read_dependencies (objfile);
+    m_readin = true;
+  }
+
+  bool readin_p () const override
+  {
+    return m_readin;
+  }
+
+  struct compunit_symtab *get_compunit_symtab () const override
+  {
+    return nullptr;
+  }
+
+private:
+
+  bool m_readin = false;
+};
+
 /* Allocate a new partial symtab for file named NAME and mark this new
    partial symtab as being an include of PST.  */
 
@@ -5925,7 +5963,7 @@ static void
 dwarf2_create_include_psymtab (const char *name, dwarf2_psymtab *pst,
                                struct objfile *objfile)
 {
-  dwarf2_psymtab *subpst = new dwarf2_psymtab (name, objfile);
+  dwarf2_include_psymtab *subpst = new dwarf2_include_psymtab (name, objfile);
 
   if (!IS_ABSOLUTE_PATH (subpst->filename))
     {
@@ -5936,11 +5974,6 @@ dwarf2_create_include_psymtab (const char *name, dwarf2_psymtab *pst,
   subpst->dependencies = objfile->partial_symtabs->allocate_dependencies (1);
   subpst->dependencies[0] = pst;
   subpst->number_of_dependencies = 1;
-
-  /* No private part is necessary for include psymtabs.  This property
-     can be used to differentiate between such include psymtabs and
-     the regular ones.  */
-  subpst->per_cu_data = nullptr;
 }
 
 /* Read the Line Number Program data and extract the list of files
@@ -8851,24 +8884,13 @@ process_queue (struct dwarf2_per_objfile *dwarf2_per_objfile)
 void
 dwarf2_psymtab::expand_psymtab (struct objfile *objfile)
 {
-  struct dwarf2_per_cu_data *per_cu;
-
   if (readin)
     return;
 
   read_dependencies (objfile);
 
-  per_cu = per_cu_data;
-
-  if (per_cu == NULL)
-    {
-      /* It's an include file, no symbols to read for it.
-         Everything is in the parent symtab.  */
-      readin = true;
-      return;
-    }
-
-  dw2_do_instantiate_symtab (per_cu, false);
+  dw2_do_instantiate_symtab (per_cu_data, false);
+  gdb_assert (get_compunit_symtab () != nullptr);
 }
 
 /* Trivial hash function for die_info: the hash value of a DIE
