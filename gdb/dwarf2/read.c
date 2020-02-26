@@ -421,6 +421,16 @@ struct dwarf2_cu
   /* Reset the builder.  */
   void reset_builder () { m_builder.reset (); }
 
+  /* Return a type that is a generic pointer type, the size of which
+     matches the address size given in the compilation unit header for
+     this CU.  */
+  struct type *addr_type () const;
+
+  /* Find an integer type the same size as the address size given in
+     the compilation unit header for this CU.  UNSIGNED_P controls if
+     the integer is unsigned or not.  */
+  struct type *addr_sized_int_type (bool unsigned_p) const;
+
   /* The header of the compilation unit.  */
   struct comp_unit_head header {};
 
@@ -13069,7 +13079,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
       newobj->static_link
 	= XOBNEW (&objfile->objfile_obstack, struct dynamic_prop);
       attr_to_dynamic_prop (attr, die, cu, newobj->static_link,
-			    cu->per_cu->addr_type ());
+			    cu->addr_type ());
     }
 
   cu->list_in_scope = cu->get_builder ()->get_local_symbols ();
@@ -15461,8 +15471,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
       else
 	{
 	  struct dynamic_prop prop;
-	  if (attr_to_dynamic_prop (attr, die, cu, &prop,
-				    cu->per_cu->addr_type ()))
+	  if (attr_to_dynamic_prop (attr, die, cu, &prop, cu->addr_type ()))
 	    type->add_dyn_prop (DYN_PROP_BYTE_SIZE, prop);
           TYPE_LENGTH (type) = 0;
 	}
@@ -16147,7 +16156,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   if (attr != NULL)
     {
       int stride_ok;
-      struct type *prop_type = cu->per_cu->addr_sized_int_type (false);
+      struct type *prop_type = cu->addr_sized_int_type (false);
 
       byte_stride_prop
 	= (struct dynamic_prop *) alloca (sizeof (struct dynamic_prop));
@@ -16947,13 +16956,13 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
 	  /* Pass 0 as the default as we know this attribute is constant
 	     and the default value will not be returned.  */
 	  LONGEST sz = len->constant_value (0);
-	  prop_type = cu->per_cu->int_type (sz, true);
+	  prop_type = cu->per_objfile->int_type (sz, true);
 	}
       else
 	{
 	  /* If the size is not specified then we assume it is the size of
 	     an address on this target.  */
-	  prop_type = cu->per_cu->addr_sized_int_type (true);
+	  prop_type = cu->addr_sized_int_type (true);
 	}
 
       /* Convert the attribute into a dynamic property.  */
@@ -17583,9 +17592,8 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 /* See read.h.  */
 
 struct type *
-dwarf2_per_cu_data::int_type (int size_in_bytes, bool unsigned_p) const
+dwarf2_per_objfile::int_type (int size_in_bytes, bool unsigned_p) const
 {
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct type *int_type;
 
   /* Helper macro to examine the various builtin types.  */
@@ -17610,10 +17618,10 @@ dwarf2_per_cu_data::int_type (int size_in_bytes, bool unsigned_p) const
 /* See read.h.  */
 
 struct type *
-dwarf2_per_cu_data::addr_sized_int_type (bool unsigned_p) const
+dwarf2_cu::addr_sized_int_type (bool unsigned_p) const
 {
-  int addr_size = this->addr_size ();
-  return int_type (addr_size, unsigned_p);
+  int addr_size = this->per_cu->addr_size ();
+  return this->per_objfile->int_type (addr_size, unsigned_p);
 }
 
 /* Read the DW_AT_type attribute for a sub-range.  If this attribute is not
@@ -17638,7 +17646,7 @@ read_subrange_index_type (struct die_info *die, struct dwarf2_cu *cu)
      FIXME: muller/2010-05-28: Possible references to object for low bound,
      high bound or count are not yet handled by this code.  */
   if (TYPE_CODE (index_type) == TYPE_CODE_VOID)
-    index_type = cu->per_cu->addr_sized_int_type (false);
+    index_type = cu->addr_sized_int_type (false);
 
   return index_type;
 }
@@ -17768,7 +17776,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   attribute *attr_byte_stride = dwarf2_attr (die, DW_AT_byte_stride, cu);
   if (attr_byte_stride != nullptr)
     {
-      struct type *prop_type = cu->per_cu->addr_sized_int_type (false);
+      struct type *prop_type = cu->addr_sized_int_type (false);
       attr_to_dynamic_prop (attr_byte_stride, die, cu, &byte_stride_prop,
 			    prop_type);
     }
@@ -17788,7 +17796,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
       else
 	{
-	  struct type *prop_type = cu->per_cu->addr_sized_int_type (false);
+	  struct type *prop_type = cu->addr_sized_int_type (false);
 	  attr_to_dynamic_prop (attr_bit_stride, die, cu, &bit_stride_prop,
 				prop_type);
 	}
@@ -23356,12 +23364,12 @@ dwarf2_per_cu_data::text_offset () const
 /* See read.h.  */
 
 struct type *
-dwarf2_per_cu_data::addr_type () const
+dwarf2_cu::addr_type () const
 {
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  struct objfile *objfile = this->per_objfile->objfile;
   struct type *void_type = objfile_type (objfile)->builtin_void;
   struct type *addr_type = lookup_pointer_type (void_type);
-  int addr_size = this->addr_size ();
+  int addr_size = this->per_cu->addr_size ();
 
   if (TYPE_LENGTH (addr_type) == addr_size)
     return addr_type;
@@ -23699,7 +23707,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_allocated, cu);
   if (attr != NULL && attr->form_is_block ())
     {
-      struct type *prop_type = cu->per_cu->addr_sized_int_type (false);
+      struct type *prop_type = cu->addr_sized_int_type (false);
       if (attr_to_dynamic_prop (attr, die, cu, &prop, prop_type))
         type->add_dyn_prop (DYN_PROP_ALLOCATED, prop);
     }
@@ -23714,7 +23722,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_associated, cu);
   if (attr != NULL && attr->form_is_block ())
     {
-      struct type *prop_type = cu->per_cu->addr_sized_int_type (false);
+      struct type *prop_type = cu->addr_sized_int_type (false);
       if (attr_to_dynamic_prop (attr, die, cu, &prop, prop_type))
         type->add_dyn_prop (DYN_PROP_ASSOCIATED, prop);
     }
@@ -23727,8 +23735,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 
   /* Read DW_AT_data_location and set in type.  */
   attr = dwarf2_attr (die, DW_AT_data_location, cu);
-  if (attr_to_dynamic_prop (attr, die, cu, &prop,
-			    cu->per_cu->addr_type ()))
+  if (attr_to_dynamic_prop (attr, die, cu, &prop, cu->addr_type ()))
     type->add_dyn_prop (DYN_PROP_DATA_LOCATION, prop);
 
   if (dwarf2_per_objfile->die_type_hash == NULL)
