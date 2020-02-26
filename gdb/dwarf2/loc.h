@@ -61,7 +61,8 @@ struct value *dwarf2_evaluate_loc_desc (struct type *type,
 					struct frame_info *frame,
 					const gdb_byte *data,
 					size_t size,
-					struct dwarf2_per_cu_data *per_cu);
+					dwarf2_per_cu_data *per_cu,
+					dwarf2_per_objfile *per_objfile);
 
 /* A chain of addresses that might be needed to resolve a dynamic
    property.  */

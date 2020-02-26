@@ -10316,7 +10316,8 @@ dwarf2_compute_name (const char *name,
 			v = dwarf2_evaluate_loc_desc (type, NULL,
 						      baton->data,
 						      baton->size,
-						      baton->per_cu);
+						      baton->per_cu,
+						      baton->per_objfile);
 		      else if (bytes != NULL)
 			{
 			  v = allocate_value (type);
@@ -13460,6 +13461,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	       sect_offset_str (die->sect_off), objfile_name (objfile));
 
   call_site->per_cu = cu->per_cu;
+  call_site->per_objfile = per_objfile;
 
   for (child_die = die->child;
        child_die && child_die->tag;
@@ -23275,21 +23277,6 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
 				   : dwarf2_locexpr_index);
       SYMBOL_LOCATION_BATON (sym) = baton;
     }
-}
-
-/* See read.h.  */
-
-struct objfile *
-dwarf2_per_cu_data::objfile () const
-{
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
-
-  /* Return the master objfile, so that we can report and look up the
-     correct file containing this variable.  */
-  if (objfile->separate_debug_objfile_backlink)
-    objfile = objfile->separate_debug_objfile_backlink;
-
-  return objfile;
 }
 
 /* Return comp_unit_head for PER_CU, either already available in PER_CU->CU
