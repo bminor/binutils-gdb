@@ -1576,7 +1576,8 @@ struct piece_closure
    PIECES.  */
 
 static struct piece_closure *
-allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
+allocate_piece_closure (dwarf2_per_cu_data *per_cu,
+			dwarf2_per_objfile *per_objfile,
 			std::vector<dwarf_expr_piece> &&pieces,
 			struct frame_info *frame)
 {
@@ -1584,7 +1585,7 @@ allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
 
   c->refc = 1;
   /* We must capture this here due to sharing of DWARF state.  */
-  c->per_objfile = per_cu->dwarf2_per_objfile;
+  c->per_objfile = per_objfile;
   c->per_cu = per_cu;
   c->pieces = std::move (pieces);
   if (frame == NULL)
@@ -2245,7 +2246,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
       if (bit_size > 8 * TYPE_LENGTH (type))
 	invalid_synthetic_pointer ();
 
-      c = allocate_piece_closure (per_cu, std::move (ctx.pieces), frame);
+      c = allocate_piece_closure (per_cu, per_objfile, std::move (ctx.pieces),
+				  frame);
       /* We must clean up the value chain after creating the piece
 	 closure but before allocating the result.  */
       free_values.free_to_mark ();
