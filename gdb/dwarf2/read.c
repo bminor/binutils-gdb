@@ -22260,6 +22260,7 @@ follow_die_ref (struct die_info *src_die, const struct attribute *attr,
 struct dwarf2_locexpr_baton
 dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
 			       dwarf2_per_cu_data *per_cu,
+			       dwarf2_per_objfile *dwarf2_per_objfile,
 			       CORE_ADDR (*get_frame_pc) (void *baton),
 			       void *baton, bool resolve_abstract_p)
 {
@@ -22267,7 +22268,6 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
   struct die_info *die;
   struct attribute *attr;
   struct dwarf2_locexpr_baton retval;
-  struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
 
   if (per_cu->cu == NULL)
@@ -22364,12 +22364,14 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
 struct dwarf2_locexpr_baton
 dwarf2_fetch_die_loc_cu_off (cu_offset offset_in_cu,
 			     dwarf2_per_cu_data *per_cu,
+			     dwarf2_per_objfile *per_objfile,
 			     CORE_ADDR (*get_frame_pc) (void *baton),
 			     void *baton)
 {
   sect_offset sect_off = per_cu->sect_off + to_underlying (offset_in_cu);
 
-  return dwarf2_fetch_die_loc_sect_off (sect_off, per_cu, get_frame_pc, baton);
+  return dwarf2_fetch_die_loc_sect_off (sect_off, per_cu, per_objfile,
+					get_frame_pc, baton);
 }
 
 /* Write a constant of a given type as target-ordered bytes into
@@ -22396,6 +22398,7 @@ write_constant_as_bytes (struct obstack *obstack,
 const gdb_byte *
 dwarf2_fetch_constant_bytes (sect_offset sect_off,
 			     dwarf2_per_cu_data *per_cu,
+			     dwarf2_per_objfile *per_objfile,
 			     obstack *obstack,
 			     LONGEST *len)
 {
@@ -22406,10 +22409,10 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
   struct type *type;
   LONGEST value;
   enum bfd_endian byte_order;
-  struct objfile *objfile = per_cu->dwarf2_per_objfile->objfile;
+  struct objfile *objfile = per_objfile->objfile;
 
   if (per_cu->cu == NULL)
-    load_cu (per_cu, per_cu->dwarf2_per_objfile, false);
+    load_cu (per_cu, per_objfile, false);
   cu = per_cu->cu;
   if (cu == NULL)
     {
@@ -22525,13 +22528,14 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
 
 struct type *
 dwarf2_fetch_die_type_sect_off (sect_offset sect_off,
-				dwarf2_per_cu_data *per_cu)
+				dwarf2_per_cu_data *per_cu,
+				dwarf2_per_objfile *per_objfile)
 {
   struct dwarf2_cu *cu;
   struct die_info *die;
 
   if (per_cu->cu == NULL)
-    load_cu (per_cu, per_cu->dwarf2_per_objfile, false);
+    load_cu (per_cu, per_objfile, false);
   cu = per_cu->cu;
   if (!cu)
     return NULL;
