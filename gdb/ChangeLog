@@ -1,3 +1,9 @@
+2020-02-26  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25603
+	* symfile.c (set_initial_language): Exit-early if
+	language_mode == language_mode_manual.
+
 2020-02-25  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2/loc.h (dwarf2_read_addr_index): Move...

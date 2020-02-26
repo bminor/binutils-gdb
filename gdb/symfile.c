@@ -1681,6 +1681,8 @@ symbol_file_command (const char *args, int from_tty)
 void
 set_initial_language (void)
 {
+  if (language_mode == language_mode_manual)
+    return;
   enum language lang = main_language ();
 
   if (lang == language_unknown)

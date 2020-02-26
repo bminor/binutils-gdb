@@ -1,3 +1,9 @@
+2020-02-26  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25603
+	* gdb.base/persistent-lang.cc: New test.
+	* gdb.base/persistent-lang.exp: New file.
+
 2020-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/derived-type-striding.exp: Add a new test.
