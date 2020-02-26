@@ -508,12 +508,6 @@ struct dwarf2_per_cu_data
      header for this CU.  */
   int ref_addr_size () const;
 
-  /* Return the text offset of the CU.  The returned offset comes from
-     this CU's objfile.  If this objfile came from a separate
-     debuginfo file, then the offset may be different from the
-     corresponding offset in the parent objfile.  */
-  CORE_ADDR text_offset () const;
-
   /* Return DWARF version number of this CU.  */
   short version () const
   {
