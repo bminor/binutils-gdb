@@ -1,5 +1,10 @@
 2020-02-28  Luis Machado  <luis.machado@linaro.org>
 
+	* gdb.arch/aarch64-fp.exp: Switch from "info registers" command
+	to "p/x".
+
+2020-02-28  Luis Machado  <luis.machado@linaro.org>
+
 	* gdb.arch/aarch64-dbreg-contents.c: Include stdlib.h, unistd.h,
 	asm/ptrace.h and error.h.
 
