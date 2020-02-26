@@ -1,3 +1,11 @@
+2020-02-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/index-write.c (psym_index_map): Change type.
+	(add_address_entry_worker, write_one_signatured_type)
+	(recursively_count_psymbols, recursively_write_psymbols)
+	(class debug_names, psyms_seen_size, write_gdbindex)
+	(write_debug_names): Use partial_symtab, not dwarf2_psymtab.
+
 2020-02-26  Aaron Merey  <amerey@redhat.com>
 
 	* Makefile.in: Handle optional debuginfod support.
