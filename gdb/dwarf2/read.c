@@ -22211,14 +22211,11 @@ follow_die_ref (struct die_info *src_die, const struct attribute *attr,
   return die;
 }
 
-/* Return DWARF block referenced by DW_AT_location of DIE at SECT_OFF at PER_CU.
-   Returned value is intended for DW_OP_call*.  Returned
-   dwarf2_locexpr_baton->data has lifetime of
-   PER_CU->DWARF2_PER_OBJFILE->OBJFILE.  */
+/* See read.h.  */
 
 struct dwarf2_locexpr_baton
 dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
-			       struct dwarf2_per_cu_data *per_cu,
+			       dwarf2_per_cu_data *per_cu,
 			       CORE_ADDR (*get_frame_pc) (void *baton),
 			       void *baton, bool resolve_abstract_p)
 {
@@ -22317,12 +22314,11 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
   return retval;
 }
 
-/* Like dwarf2_fetch_die_loc_sect_off, but take a CU
-   offset.  */
+/* See read.h.  */
 
 struct dwarf2_locexpr_baton
 dwarf2_fetch_die_loc_cu_off (cu_offset offset_in_cu,
-			     struct dwarf2_per_cu_data *per_cu,
+			     dwarf2_per_cu_data *per_cu,
 			     CORE_ADDR (*get_frame_pc) (void *baton),
 			     void *baton)
 {
@@ -22350,15 +22346,12 @@ write_constant_as_bytes (struct obstack *obstack,
   return result;
 }
 
-/* If the DIE at OFFSET in PER_CU has a DW_AT_const_value, return a
-   pointer to the constant bytes and set LEN to the length of the
-   data.  If memory is needed, allocate it on OBSTACK.  If the DIE
-   does not have a DW_AT_const_value, return NULL.  */
+/* See read.h.  */
 
 const gdb_byte *
 dwarf2_fetch_constant_bytes (sect_offset sect_off,
-			     struct dwarf2_per_cu_data *per_cu,
-			     struct obstack *obstack,
+			     dwarf2_per_cu_data *per_cu,
+			     obstack *obstack,
 			     LONGEST *len)
 {
   struct dwarf2_cu *cu;
@@ -22483,12 +22476,11 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
   return result;
 }
 
-/* Return the type of the die at OFFSET in PER_CU.  Return NULL if no
-   valid type for this die is found.  */
+/* See read.h.  */
 
 struct type *
 dwarf2_fetch_die_type_sect_off (sect_offset sect_off,
-				struct dwarf2_per_cu_data *per_cu)
+				dwarf2_per_cu_data *per_cu)
 {
   struct dwarf2_cu *cu;
   struct die_info *die;

@@ -1,3 +1,15 @@
+2020-02-26  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/loc.h (dwarf2_fetch_die_loc_sect_off,
+	dwarf2_fetch_die_loc_cu_off, dwarf2_fetch_constant_bytes,
+	dwarf2_fetch_die_type_sect_off): Move to...
+	* dwarf2/read.h (dwarf2_fetch_die_loc_sect_off,
+	dwarf2_fetch_die_loc_cu_off, dwarf2_fetch_constant_bytes,
+	dwarf2_fetch_die_type_sect_off): ... here.
+	* dwarf2/read.c (dwarf2_fetch_die_loc_sect_off,
+	dwarf2_fetch_die_loc_cu_off, dwarf2_fetch_constant_bytes,
+	dwarf2_fetch_die_type_sect_off): Move doc to header file.
+
 2020-02-26  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/25603

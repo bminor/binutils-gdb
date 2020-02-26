@@ -537,6 +537,39 @@ struct type *dwarf2_get_die_type (cu_offset die_offset,
 CORE_ADDR dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu,
 				  unsigned int addr_index);
 
+/* Return DWARF block referenced by DW_AT_location of DIE at SECT_OFF at PER_CU.
+   Returned value is intended for DW_OP_call*.  Returned
+   dwarf2_locexpr_baton->data has lifetime of
+   PER_CU->DWARF2_PER_OBJFILE->OBJFILE.  */
+
+struct dwarf2_locexpr_baton dwarf2_fetch_die_loc_sect_off
+  (sect_offset sect_off, dwarf2_per_cu_data *per_cu,
+   CORE_ADDR (*get_frame_pc) (void *baton),
+   void *baton, bool resolve_abstract_p = false);
+
+/* Like dwarf2_fetch_die_loc_sect_off, but take a CU
+   offset.  */
+
+struct dwarf2_locexpr_baton dwarf2_fetch_die_loc_cu_off
+  (cu_offset offset_in_cu, dwarf2_per_cu_data *per_cu,
+   CORE_ADDR (*get_frame_pc) (void *baton),
+   void *baton);
+
+/* If the DIE at SECT_OFF in PER_CU has a DW_AT_const_value, return a
+   pointer to the constant bytes and set LEN to the length of the
+   data.  If memory is needed, allocate it on OBSTACK.  If the DIE
+   does not have a DW_AT_const_value, return NULL.  */
+
+extern const gdb_byte *dwarf2_fetch_constant_bytes
+  (sect_offset sect_off, dwarf2_per_cu_data *per_cu, obstack *obstack,
+   LONGEST *len);
+
+/* Return the type of the die at SECT_OFF in PER_CU.  Return NULL if no
+   valid type for this die is found.  */
+
+struct type *dwarf2_fetch_die_type_sect_off
+  (sect_offset sect_off, dwarf2_per_cu_data *per_cu);
+
 /* When non-zero, dump line number entries as they are read in.  */
 extern unsigned int dwarf_line_debug;
 
