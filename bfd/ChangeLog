@@ -1,5 +1,20 @@
 2020-02-26  Alan Modra  <amodra@gmail.com>
 
+	* archive.c (do_slurp_bsd_armap): Increase minimum parsed_size, and
+	bfd_set_error on failing test.  Don't bother changing bfd_error on
+	file read error.  Check symdef_count is multiple of BSD_SYMDEF_SIZE.
+	Check sym name is within string buffer.  Use size_t for some vars.
+	(do_slurp_coff_armap): Use size_t for some variables, fix size of
+	int_buf.  Don't change bfd_error on file read error.  Use
+	_bfd_mul_overflow when calculating carsym buffer size.  Reorder
+	calculations to catch overflows before they occur.  malloc and
+	free raw armap rather than using bfd_alloc.  Read raw armap before
+	allocating carsym+strings buffer.
+	(_bfd_slurp_extended_name_table): Localize variables.  Check
+	name size against file size.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
 	* vms-lib.c (vms_lib_read_index): Release correct buffer.
 
 2020-02-26  Alan Modra  <amodra@gmail.com>
