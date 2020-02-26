@@ -1052,7 +1052,8 @@ read_a_source_file (const char *name)
 		  {
 		    char *s2 = s;
 
-		    strncpy (original_case_string, s2, sizeof (original_case_string));
+		    strncpy (original_case_string, s2,
+			     sizeof (original_case_string) - 1);
 		    original_case_string[sizeof (original_case_string) - 1] = 0;
 
 		    while (*s2)

@@ -1,5 +1,10 @@
 2020-02-26  Alan Modra  <amodra@gmail.com>
 
+	* read.c (read_a_source_file): Call strncpy with length one
+	less than size of original_case_string.
+
+2020-02-26  Alan Modra  <amodra@gmail.com>
+
 	* config/obj-elf.c: Indent labels correctly.
 	* config/obj-macho.c: Likewise.
 	* config/tc-aarch64.c: Likewise.
