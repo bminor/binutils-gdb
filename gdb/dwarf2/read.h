@@ -52,8 +52,10 @@ struct signatured_type;
    for.  */
 struct dwarf2_queue_item
 {
-  dwarf2_queue_item (dwarf2_per_cu_data *cu, enum language lang)
+  dwarf2_queue_item (dwarf2_per_cu_data *cu, dwarf2_per_objfile *per_objfile,
+		     enum language lang)
     : per_cu (cu),
+      per_objfile (per_objfile),
       pretend_language (lang)
   {
   }
@@ -62,7 +64,8 @@ struct dwarf2_queue_item
 
   DISABLE_COPY_AND_ASSIGN (dwarf2_queue_item);
 
-  struct dwarf2_per_cu_data *per_cu;
+  dwarf2_per_cu_data *per_cu;
+  dwarf2_per_objfile *per_objfile;
   enum language pretend_language;
 };
 
