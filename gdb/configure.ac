@@ -18,6 +18,8 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 dnl Process this file with autoconf to produce a configure script.
 
+m4_include(../config/debuginfod.m4)
+
 AC_INIT(main.c)
 AC_CONFIG_HEADERS(config.h:config.in, [echo > stamp-h])
 AM_MAINTAINER_MODE
@@ -322,8 +324,10 @@ case $host_os in
     enable_gdbtk=no ;;
 esac
 
-# Libunwind support for ia64.
+# Handle optional debuginfod support
+AC_DEBUGINFOD
 
+# Libunwind support for ia64.
 AC_ARG_WITH(libunwind-ia64,
 AS_HELP_STRING([--with-libunwind-ia64],
 	       [use libunwind frame unwinding for ia64 targets]),,

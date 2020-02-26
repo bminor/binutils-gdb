@@ -1,3 +1,24 @@
+2020-02-26  Aaron Merey  <amerey@redhat.com>
+
+	* Makefile.in: Handle optional debuginfod support.
+	* NEWS: Update.
+	* README: Add --with-debuginfod summary.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* configure.ac: Handle optional debuginfod support.
+	* debuginfod-support.c: debuginfod helper functions.
+	* debuginfod-support.h: Ditto.
+	* doc/gdb.texinfo: Add --with-debuginfod to configure options
+	summary.
+	* dwarf2/read.c (dwarf2_get_dwz_file): Query debuginfod servers
+	when a dwz file cannot be found.
+	* elfread.c (elf_symfile_read): Query debuginfod servers when a
+	debuginfo file cannot be found.
+	* source.c (open_source_file): Query debuginfod servers when a
+	source file cannot be found.
+	* top.c (print_gdb_configuration): Include
+	--{with,without}-debuginfod in the output.
+
 2020-02-26  Jérémie Galarneau  <jeremie.galarneau@efficios.com>
 
 	* thread.c (thr_try_catch_cmd): Print thread name.

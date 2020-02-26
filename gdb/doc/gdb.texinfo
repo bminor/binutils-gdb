@@ -37848,6 +37848,14 @@ supported).
 Use the curses library instead of the termcap library, for text-mode
 terminal operations.
 
+@item --with-debuginfod
+Build @value{GDBN} with libdebuginfod, the debuginfod client library.
+Used to automatically fetch source files and separate debug files from
+debuginfod servers using the associated executable's build ID. Enabled
+by default if libdebuginfod is installed and found at configure time.
+debuginfod is packaged with elfutils, starting with version 0.178. You
+can get the latest version from `https://sourceware.org/elfutils/'.
+
 @item --with-libunwind-ia64
 Use the libunwind library for unwinding function call stack on ia64
 target platforms.  See http://www.nongnu.org/libunwind/index.html for

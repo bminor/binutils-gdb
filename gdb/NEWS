@@ -3,6 +3,20 @@
 
 *** Changes since GDB 9
 
+* GDB now supports debuginfod, an HTTP server for distributing ELF/DWARF
+  debugging information as well as source code.
+
+  When built with debuginfod, GDB can automatically query debuginfod
+  servers for the separate debug files and source code of the executable
+  being debugged.
+
+  To build GDB with debuginfod, pass --with-debuginfod to configure (this
+  requires libdebuginfod, the debuginfod client library).
+
+  debuginfod is distributed with elfutils, starting with version 0.178.
+
+  You can get the latest version from https://sourceware.org/elfutils.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on RISC-V GNU/Linux.

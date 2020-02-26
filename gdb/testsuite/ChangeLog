@@ -1,3 +1,9 @@
+2020-02-26  Aaron Merey  <amerey@redhat.com>
+
+	* gdb.debuginfod: New directory for debuginfod tests.
+	* gdb.debuginfod/main.c: New test file.
+	* gdb.debuginfod/fetch_src_and_symbols.exp: New tests.
+
 2020-02-26  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/25603
