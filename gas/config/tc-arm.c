@@ -506,8 +506,6 @@ enum pred_instruction_type
    MVE_OUTSIDE_PRED_INSN , /* Instruction to indicate a MVE instruction without
 			      a predication code.  */
    MVE_UNPREDICABLE_INSN,  /* MVE instruction that is non-predicable.  */
-   NEUTRAL_IT_NO_VPT_INSN, /* Instruction that can be either inside or outside
-			      an IT block, but must not be in a VPT block.  */
 };
 
 /* The maximum number of operands we need.  */
@@ -21674,15 +21672,13 @@ cde_handle_coproc (void)
 static void
 cxn_handle_predication (bfd_boolean is_accum)
 {
-  /* This function essentially checks for a suffix, not whether the instruction
-     is inside an IT block or not.
-     The CX* instructions should never have a conditional suffix -- this is not
-     mentioned in the syntax.  */
-  if (conditional_insn ())
+  if (is_accum && conditional_insn ())
+    set_pred_insn_type (INSIDE_IT_INSN);
+  else if (conditional_insn ())
+  /* conditional_insn essentially checks for a suffix, not whether the
+     instruction is inside an IT block or not.
+     The non-accumulator versions should not have suffixes.  */
     inst.error = BAD_SYNTAX;
-  /* Here we ensure that if the current element  */
-  else if (is_accum)
-    set_pred_insn_type (NEUTRAL_IT_NO_VPT_INSN);
   else
     set_pred_insn_type (OUTSIDE_PRED_INSN);
 }
@@ -22980,7 +22976,6 @@ handle_pred_state (void)
 	    gas_assert (0);
 	case IF_INSIDE_IT_LAST_INSN:
 	case NEUTRAL_IT_INSN:
-	case NEUTRAL_IT_NO_VPT_INSN:
 	  break;
 
 	case VPT_INSN:
@@ -23044,12 +23039,6 @@ handle_pred_state (void)
 	    close_automatic_it_block ();
 	  break;
 
-	case NEUTRAL_IT_NO_VPT_INSN:
-	  if (now_pred.type == VECTOR_PRED)
-	    {
-	      inst.error = BAD_NO_VPT;
-	      break;
-	    }
 	  /* Fallthrough.  */
 	case NEUTRAL_IT_INSN:
 	  now_pred.block_length++;
@@ -23234,13 +23223,6 @@ handle_pred_state (void)
 	      }
 	    break;
 
-	  case NEUTRAL_IT_NO_VPT_INSN:
-	    if (now_pred.type == VECTOR_PRED)
-	      {
-		inst.error = BAD_NO_VPT;
-		break;
-	      }
-	    /* Fallthrough.  */
 	  case NEUTRAL_IT_INSN:
 	    /* The BKPT instruction is unconditional even in a IT or VPT
 	       block.  */
