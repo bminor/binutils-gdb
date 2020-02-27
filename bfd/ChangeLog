@@ -1,3 +1,9 @@
+2020-02-27  Alan Modra  <amodra@gmail.com>
+
+	* bfd.c (bfd_stat_arch_elt): Use vector of containing archive,
+	if file is an archive element.
+	* bfd-in2.h: Regenerate.
+
 2020-02-26  Alan Modra  <amodra@gmail.com>
 
 	* archive.c (do_slurp_bsd_armap): Increase minimum parsed_size, and

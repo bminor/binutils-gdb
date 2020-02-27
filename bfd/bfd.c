@@ -2063,7 +2063,8 @@ DESCRIPTION
 .	BFD_SEND (abfd, _bfd_debug_info_accumulate, (abfd, section))
 .
 .#define bfd_stat_arch_elt(abfd, stat) \
-.	BFD_SEND (abfd, _bfd_stat_arch_elt,(abfd, stat))
+.	BFD_SEND (abfd->my_archive ? abfd->my_archive : abfd, \
+.		  _bfd_stat_arch_elt, (abfd, stat))
 .
 .#define bfd_update_armap_timestamp(abfd) \
 .	BFD_SEND (abfd, _bfd_update_armap_timestamp, (abfd))
