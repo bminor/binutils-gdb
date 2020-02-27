@@ -7104,6 +7104,7 @@ dump_ia64_vms_dynamic_fixups (Filedata *                  filedata,
             (unsigned long) fixup->needed);
       lib_name = "???";
     }
+
   printf (_("\nImage fixups for needed library #%d: %s - ident: %lx\n"),
 	  (int) fixup->fixup_needed, lib_name, (long) fixup->needed_ident);
   printf
@@ -7203,6 +7204,8 @@ process_ia64_vms_dynamic_relocs (Filedata * filedata)
           if (strtab == NULL)
             strtab = get_data (NULL, filedata, dynamic_addr + strtab_off,
                                1, strtab_sz, _("dynamic string section"));
+	  if (strtab == NULL)
+	    strtab_sz = 0;
           break;
 
         case DT_IA_64_VMS_NEEDED_IDENT:

@@ -1,3 +1,9 @@
+2020-02-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 25526
+	* readelf.c (process_ia64_vms_dynamic_relocs): Check to see if
+	get_data is unable to load the string table.
+
 2020-02-26  Alan Modra  <amodra@gmail.com>
 
 	* elfedit.c: Indent labels correctly.
