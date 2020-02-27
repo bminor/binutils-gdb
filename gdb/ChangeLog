@@ -1,3 +1,10 @@
+2020-02-27  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (struct field_info) <nfields>: Now a method, not a
+	member.
+	(dwarf2_add_field): Don't update nfields.
+	(dwarf2_attach_fields_to_type, process_structure_scope): Update.
+
 2020-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdbtypes.c (create_array_type_with_stride): Use std::abs not

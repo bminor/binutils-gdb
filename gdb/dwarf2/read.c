@@ -1129,9 +1129,6 @@ struct field_info
     std::vector<struct nextfield> fields;
     std::vector<struct nextfield> baseclasses;
 
-    /* Number of fields (including baseclasses).  */
-    int nfields = 0;
-
     /* Set if the accessibility of one of the fields is not public.  */
     int non_public_fields = 0;
 
@@ -1147,6 +1144,12 @@ struct field_info
     /* Nested types defined by this class and the number of elements in this
        list.  */
     std::vector<struct decl_field> nested_types_list;
+
+    /* Return the total number of fields (including baseclasses).  */
+    int nfields () const
+    {
+      return fields.size () + baseclasses.size ();
+    }
   };
 
 /* Loaded secondary compilation units are kept in memory until they
@@ -14207,8 +14210,6 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       new_field = &fip->fields.back ();
     }
 
-  fip->nfields++;
-
   attr = dwarf2_attr (die, DW_AT_accessibility, cu);
   if (attr != nullptr)
     new_field->accessibility = DW_UNSND (attr);
@@ -14468,7 +14469,7 @@ static void
 dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 			      struct dwarf2_cu *cu)
 {
-  int nfields = fip->nfields;
+  int nfields = fip->nfields ();
 
   /* Record the field count, allocate space for the array of fields,
      and create blank accessibility bitfields if necessary.  */
@@ -15336,7 +15337,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	}
 
       /* Attach fields and member functions to the type.  */
-      if (fi.nfields)
+      if (fi.nfields () > 0)
 	dwarf2_attach_fields_to_type (&fi, type, cu);
       if (!fi.fnfieldlists.empty ())
 	{
