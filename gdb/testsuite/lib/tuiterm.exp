@@ -24,7 +24,11 @@ proc spawn {args} {
     set result [uplevel builtin_spawn $args]
     global gdb_spawn_name
     upvar spawn_out spawn_out
-    set gdb_spawn_name $spawn_out(slave,name)
+    if { [info exists spawn_out] } {
+	set gdb_spawn_name $spawn_out(slave,name)
+    } else {
+	unset gdb_spawn_name
+    }
     return $result
 }
 
