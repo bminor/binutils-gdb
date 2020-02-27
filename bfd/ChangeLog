@@ -1,5 +1,15 @@
 2020-02-27  Alan Modra  <amodra@gmail.com>
 
+	PR 24511
+	* syms.c (stt): Trim off all but 'e', 'i' and 'p' entries.
+	(coff_section_type): Adjust comment.
+	(decode_section_type): Likewise.  Call coff_section_type before
+	decode_section_type.
+	(bfd_decode_symclass): Use 'c' for common sections other than
+	the standard one.
+
+2020-02-27  Alan Modra  <amodra@gmail.com>
+
 	* coff-rs6000.c (_bfd_xcoff_read_ar_hdr): Put all data in one
 	malloc'd block.
 

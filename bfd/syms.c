@@ -565,30 +565,15 @@ struct section_to_type
   char type;
 };
 
-/* Map section names to POSIX/BSD single-character symbol types.
+/* Map special section names to POSIX/BSD single-character symbol types.
    This table is probably incomplete.  It is sorted for convenience of
    adding entries.  Since it is so short, a linear search is used.  */
 static const struct section_to_type stt[] =
 {
-  {".bss", 'b'},
-  {"code", 't'},		/* MRI .text */
-  {".data", 'd'},
-  {"*DEBUG*", 'N'},
-  {".debug", 'N'},		/* MSVC's .debug (non-standard debug syms) */
   {".drectve", 'i'},		/* MSVC's .drective section */
   {".edata", 'e'},		/* MSVC's .edata (export) section */
-  {".fini", 't'},		/* ELF fini section */
   {".idata", 'i'},		/* MSVC's .idata (import) section */
-  {".init", 't'},		/* ELF init section */
   {".pdata", 'p'},		/* MSVC's .pdata (stack unwind) section */
-  {".rdata", 'r'},		/* Read only data.  */
-  {".rodata", 'r'},		/* Read only data.  */
-  {".sbss", 's'},		/* Small BSS (uninitialized data).  */
-  {".scommon", 'c'},		/* Small common.  */
-  {".sdata", 'g'},		/* Small initialized data.  */
-  {".text", 't'},
-  {"vars", 'd'},		/* MRI .data */
-  {"zerovars", 'b'},		/* MRI .bss */
   {0, 0}
 };
 
@@ -596,8 +581,7 @@ static const struct section_to_type stt[] =
    section S, or '?' for an unknown COFF section.
 
    Check for leading strings which match, followed by a number, '.',
-   or '$' so .text5 matches the .text entry, but .init_array doesn't
-   match the .init entry.  */
+   or '$' so .idata5 matches the .idata entry.  */
 
 static char
 coff_section_type (const char *s)
@@ -619,7 +603,7 @@ coff_section_type (const char *s)
    SECTION, or '?' for an unknown section.  This uses section flags to
    identify sections.
 
-   FIXME These types are unhandled: c, i, e, p.  If we handled these also,
+   FIXME These types are unhandled: e, i, p.  If we handled these also,
    we could perhaps obsolete coff_section_type.  */
 
 static char
@@ -668,7 +652,12 @@ bfd_decode_symclass (asymbol *symbol)
   char c;
 
   if (symbol->section && bfd_is_com_section (symbol->section))
-    return 'C';
+    {
+      if (symbol->section == bfd_com_section_ptr)
+	return 'C';
+      else
+	return 'c';
+    }
   if (bfd_is_und_section (symbol->section))
     {
       if (symbol->flags & BSF_WEAK)
@@ -705,9 +694,9 @@ bfd_decode_symclass (asymbol *symbol)
     c = 'a';
   else if (symbol->section)
     {
-      c = decode_section_type (symbol->section);
+      c = coff_section_type (symbol->section->name);
       if (c == '?')
-	c = coff_section_type (symbol->section->name);
+	c = decode_section_type (symbol->section);
     }
   else
     return '?';
