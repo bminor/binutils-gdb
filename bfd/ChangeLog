@@ -1,3 +1,9 @@
+2020-02-27  Alan Modra  <amodra@gmail.com>
+
+	PR 24511
+	* syms.c (bfd_decode_symclass): Reverse order of coff_section_type
+	and decode_section_type calls.
+
 2020-02-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25584

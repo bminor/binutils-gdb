@@ -705,9 +705,9 @@ bfd_decode_symclass (asymbol *symbol)
     c = 'a';
   else if (symbol->section)
     {
-      c = decode_section_type (symbol->section);
+      c = coff_section_type (symbol->section->name);
       if (c == '?')
-	c = coff_section_type (symbol->section->name);
+	c = decode_section_type (symbol->section);
     }
   else
     return '?';
