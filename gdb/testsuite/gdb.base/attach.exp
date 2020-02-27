@@ -53,10 +53,6 @@ proc_with_prefix do_attach_failure_tests {} {
     global binfile
     global escapedbinfile
     global srcfile
-    global testfile
-    global subdir
-    global timeout
-    global decimal
 
     clean_restart $binfile
 
@@ -205,8 +201,6 @@ proc_with_prefix do_attach_tests {} {
     global binfile
     global escapedbinfile
     global srcfile
-    global testfile
-    global subdir
     global timeout
     global decimal
 
@@ -439,10 +433,6 @@ proc_with_prefix do_call_attach_tests {} {
 proc_with_prefix do_command_attach_tests {} {
     global gdb_prompt
     global binfile
-    global verbose
-    global GDB
-    global INTERNAL_GDBFLAGS
-    global GDBFLAGS
 
     if ![isnative] then {
 	unsupported "command attach test"

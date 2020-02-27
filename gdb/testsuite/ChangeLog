@@ -1,5 +1,15 @@
 2020-02-27  Tom de Vries  <tdevries@suse.de>
 
+	* config/sid.exp: Remove unused globals.
+	* gdb.base/attach.exp: Same.
+	* gdb.base/catch-load.exp: Same.
+	* gdb.base/dbx.exp: Same.
+	* lib/gdb.exp: Same.
+	* lib/mi-support.exp: Same.
+	* lib/prompt.exp: Same.
+
+2020-02-27  Tom de Vries  <tdevries@suse.de>
+
 	* lib/tuiterm.exp (spawn): Handle case that spawn_out(slave,name) is
 	not set.
 

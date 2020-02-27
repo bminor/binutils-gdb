@@ -24,7 +24,6 @@
 # uses pass if it sees $gdb_prompt, and fail if it sees $gdb_prompt_fail.
 #
 proc default_prompt_gdb_start { } {
-    global verbose
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
     global gdb_prompt

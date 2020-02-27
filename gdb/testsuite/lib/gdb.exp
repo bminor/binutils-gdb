@@ -159,7 +159,6 @@ proc gdb_version { } {
 #
 
 proc gdb_unload {} {
-    global verbose
     global GDB
     global gdb_prompt
     send_gdb "file\n"
@@ -1617,7 +1616,6 @@ proc gdb_reinitialize_dir { subdir } {
 proc default_gdb_exit {} {
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
-    global verbose
     global gdb_spawn_id inferior_spawn_id
     global inotify_log_file
 
@@ -1683,7 +1681,6 @@ proc default_gdb_exit {} {
 
 proc gdb_file_cmd { arg } {
     global gdb_prompt
-    global verbose
     global GDB
     global last_loaded_file
 
@@ -5131,7 +5128,6 @@ set debug_format "unknown"
 
 proc get_debug_format { } {
     global gdb_prompt
-    global verbose
     global expect_out
     global debug_format
 
