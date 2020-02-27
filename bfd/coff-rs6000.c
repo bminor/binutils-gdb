@@ -1491,32 +1491,23 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
 {
   bfd_size_type namlen;
   struct areltdata *ret;
-  bfd_size_type amt = sizeof (struct areltdata);
-
-  ret = (struct areltdata *) bfd_zmalloc (amt);
-  if (ret == NULL)
-    return NULL;
+  bfd_size_type amt;
 
   if (! xcoff_big_format_p (abfd))
     {
       struct xcoff_ar_hdr hdr;
       struct xcoff_ar_hdr *hdrp;
 
-      if (bfd_bread (&hdr, (bfd_size_type) SIZEOF_AR_HDR, abfd)
-	  != SIZEOF_AR_HDR)
-	{
-	  free (ret);
-	  return NULL;
-	}
+      if (bfd_bread (&hdr, SIZEOF_AR_HDR, abfd) != SIZEOF_AR_HDR)
+	return NULL;
 
       GET_VALUE_IN_FIELD (namlen, hdr.namlen, 10);
-      amt = SIZEOF_AR_HDR + namlen + 1;
-      hdrp = (struct xcoff_ar_hdr *) bfd_alloc (abfd, amt);
-      if (hdrp == NULL)
-	{
-	  free (ret);
-	  return NULL;
-	}
+      amt = sizeof (struct areltdata) + SIZEOF_AR_HDR + namlen + 1;
+      ret = (struct areltdata *) bfd_malloc (amt);
+      if (ret == NULL)
+	return ret;
+
+      hdrp = (struct xcoff_ar_hdr *) (ret + 1);
       memcpy (hdrp, &hdr, SIZEOF_AR_HDR);
       if (bfd_bread ((char *) hdrp + SIZEOF_AR_HDR, namlen, abfd) != namlen)
 	{
@@ -1534,21 +1525,16 @@ _bfd_xcoff_read_ar_hdr (bfd *abfd)
       struct xcoff_ar_hdr_big hdr;
       struct xcoff_ar_hdr_big *hdrp;
 
-      if (bfd_bread (&hdr, (bfd_size_type) SIZEOF_AR_HDR_BIG, abfd)
-	  != SIZEOF_AR_HDR_BIG)
-	{
-	  free (ret);
-	  return NULL;
-	}
+      if (bfd_bread (&hdr, SIZEOF_AR_HDR_BIG, abfd) != SIZEOF_AR_HDR_BIG)
+	return NULL;
 
       GET_VALUE_IN_FIELD (namlen, hdr.namlen, 10);
-      amt = SIZEOF_AR_HDR_BIG + namlen + 1;
-      hdrp = (struct xcoff_ar_hdr_big *) bfd_alloc (abfd, amt);
-      if (hdrp == NULL)
-	{
-	  free (ret);
-	  return NULL;
-	}
+      amt = sizeof (struct areltdata) + SIZEOF_AR_HDR_BIG + namlen + 1;
+      ret = (struct areltdata *) bfd_malloc (amt);
+      if (ret == NULL)
+	return ret;
+
+      hdrp = (struct xcoff_ar_hdr_big *) (ret + 1);
       memcpy (hdrp, &hdr, SIZEOF_AR_HDR_BIG);
       if (bfd_bread ((char *) hdrp + SIZEOF_AR_HDR_BIG, namlen, abfd) != namlen)
 	{
