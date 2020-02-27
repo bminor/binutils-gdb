@@ -2074,7 +2074,7 @@ mmo_scan (bfd *abfd)
   if (sec != NULL
       && (bfd_section_flags (sec) & SEC_HAS_CONTENTS)
       && !bfd_set_section_flags (sec, (bfd_section_flags (sec)
-				       | SEC_ALLOC | SEC_LOAD)))
+				       | SEC_ALLOC | SEC_LOAD | SEC_DATA)))
     error = TRUE;
 
   /* Free whatever resources we took.  */

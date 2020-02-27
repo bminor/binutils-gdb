@@ -1,6 +1,11 @@
 2020-02-27  Alan Modra  <amodra@gmail.com>
 
 	PR 24511
+	* mmo.c (mmo_scan): Set SEC_DATA for .data.
+
+2020-02-27  Alan Modra  <amodra@gmail.com>
+
+	PR 24511
 	* syms.c (stt): Trim off all but 'e', 'i' and 'p' entries.
 	(coff_section_type): Adjust comment.
 	(decode_section_type): Likewise.  Call coff_section_type before

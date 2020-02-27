@@ -1,3 +1,18 @@
+2020-02-27  Alan Modra  <amodra@gmail.com>
+
+	PR 24511
+	* testsuite/ld-mmix/b-fixo2.d: Adjust for .data change.
+	* testsuite/ld-mmix/sec-2.d: Likewise.
+	* testsuite/ld-mmix/sec-3.d: Likewise.
+	* testsuite/ld-mmix/sec-4.d: Likewise.
+	* testsuite/ld-mmix/spec802.d: Likewise.
+	* testsuite/ld-mmix/spec803.d: Likewise.
+	* testsuite/ld-mmix/spec804.d: Likewise.
+	* testsuite/ld-mmix/spec805.d: Likewise.
+	* testsuite/ld-mmix/spec806.d: Likewise.
+	* testsuite/ld-mmix/spec807.d: Likewise.
+	* testsuite/ld-mmix/spec808.d: Likewise.
+
 2020-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/25593
