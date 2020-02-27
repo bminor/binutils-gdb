@@ -1,3 +1,8 @@
+2020-02-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbtypes.c (create_array_type_with_stride): Use std::abs not
+	abs.
+
 2020-02-26  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (struct dwarf2_include_psymtab): New.

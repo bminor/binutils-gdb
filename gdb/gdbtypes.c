@@ -1249,9 +1249,9 @@ create_array_type_with_stride (struct type *result_type,
 	     negative stride in Fortran (this doesn't mean anything
 	     special, it's still just a single element array) so do
 	     consider that case when touching this code.  */
-	  LONGEST element_count = abs (high_bound - low_bound + 1);
+	  LONGEST element_count = std::abs (high_bound - low_bound + 1);
 	  TYPE_LENGTH (result_type)
-	    = ((abs (stride) * element_count) + 7) / 8;
+	    = ((std::abs (stride) * element_count) + 7) / 8;
 	}
       else
 	TYPE_LENGTH (result_type) =
