@@ -1684,11 +1684,15 @@ set_initial_language (void)
   if (language_mode == language_mode_manual)
     return;
   enum language lang = main_language ();
+  /* Make C the default language.  */
+  enum language default_lang = language_c;
 
   if (lang == language_unknown)
     {
       const char *name = main_name ();
-      struct symbol *sym = lookup_symbol (name, NULL, VAR_DOMAIN, NULL).symbol;
+      struct symbol *sym
+	= lookup_symbol_in_language (name, NULL, VAR_DOMAIN, default_lang,
+				     NULL).symbol;
 
       if (sym != NULL)
 	lang = sym->language ();
@@ -1696,8 +1700,7 @@ set_initial_language (void)
 
   if (lang == language_unknown)
     {
-      /* Make C the default language */
-      lang = language_c;
+      lang = default_lang;
     }
 
   set_language (lang);
