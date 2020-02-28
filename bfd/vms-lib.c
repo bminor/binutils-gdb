@@ -623,12 +623,16 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
 
 	  if (sbm_off > reclen
 	      || reclen - sbm_off < sizeof (struct vms_dcxsbm))
-	    goto err;
+	    {
+	    err_free_buf:
+	      free (buf);
+	      goto err;
+	    }
 	  sbm = (struct vms_dcxsbm *) (buf + sbm_off);
 	  sbm_sz = bfd_getl16 (sbm->size);
 	  sbm_off += sbm_sz;
 	  if (sbm_off > reclen)
-	    goto err;
+	    goto err_free_buf;
 
 	  sbmdesc->min_char = sbm->min_char;
 	  BFD_ASSERT (sbmdesc->min_char == 0);
@@ -638,25 +642,25 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
 	  if (sbm_sz < sizeof (struct vms_dcxsbm) + l + sbm_len
 	      || (tdata->nbr_dcxsbm > 1
 		  && sbm_sz < sizeof (struct vms_dcxsbm) + l + 3 * sbm_len))
-	    goto err;
+	    goto err_free_buf;
 	  sbmdesc->flags = (unsigned char *)bfd_alloc (abfd, l);
 	  off = bfd_getl16 (sbm->flags);
 	  if (off > sbm_sz
 	      || sbm_sz - off < l)
-	    goto err;
+	    goto err_free_buf;
 	  memcpy (sbmdesc->flags, (bfd_byte *) sbm + off, l);
 	  sbmdesc->nodes = (unsigned char *)bfd_alloc (abfd, 2 * sbm_len);
 	  off = bfd_getl16 (sbm->nodes);
 	  if (off > sbm_sz
 	      || sbm_sz - off < 2 * sbm_len)
-	    goto err;
+	    goto err_free_buf;
 	  memcpy (sbmdesc->nodes, (bfd_byte *) sbm + off, 2 * sbm_len);
 	  off = bfd_getl16 (sbm->next);
 	  if (off != 0)
 	    {
 	      if (off > sbm_sz
 		  || sbm_sz - off < 2 * sbm_len)
-		goto err;
+		goto err_free_buf;
 	      /* Read the 'next' array.  */
 	      sbmdesc->next = (unsigned short *) bfd_alloc (abfd, 2 * sbm_len);
 	      buf1 = (bfd_byte *) sbm + off;

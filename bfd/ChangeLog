@@ -1,5 +1,9 @@
 2020-02-28  Alan Modra  <amodra@gmail.com>
 
+	* vms-lib.c (_bfd_vms_lib_archive_p): Free memory on error paths.
+
+2020-02-28  Alan Modra  <amodra@gmail.com>
+
 	* vms-alpha.c (alpha_vms_object_p): Use _bfd_malloc_and_read.
 	Remove duplicate undersize check.
 
