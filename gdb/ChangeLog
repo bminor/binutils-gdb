@@ -1,3 +1,8 @@
+2020-02-27  Aaron Merey  <amerey@redhat.com>
+
+	* source.c (open_source_file): Check for nullptr when computing
+	srcpath.
+
 2020-02-27  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2/read.c (struct field_info) <nfields>: Now a method, not a

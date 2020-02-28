@@ -1160,7 +1160,7 @@ open_source_file (struct symtab *s)
 	  std::string srcpath;
 	  if (IS_ABSOLUTE_PATH (s->filename))
 	    srcpath = s->filename;
-	  else
+	  else if (SYMTAB_DIRNAME (s) != nullptr)
 	    {
 	      srcpath = SYMTAB_DIRNAME (s);
 	      srcpath += SLASH_STRING;
@@ -1170,7 +1170,7 @@ open_source_file (struct symtab *s)
 	  const struct bfd_build_id *build_id = build_id_bfd_get (ofp->obfd);
 
 	  /* Query debuginfod for the source file.  */
-	  if (build_id != nullptr)
+	  if (build_id != nullptr && !srcpath.empty ())
 	    fd = debuginfod_source_query (build_id->data,
 					  build_id->size,
 					  srcpath.c_str (),
