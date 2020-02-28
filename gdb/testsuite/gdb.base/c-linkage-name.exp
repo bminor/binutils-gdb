@@ -17,27 +17,55 @@
 # gdb can correctly print arrays with indexes for each element of the
 # array.
 
-standard_testfile .c
+standard_testfile c-linkage-name.c c-linkage-name-2.c
 
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+set sources "${srcdir}/${subdir}/${srcfile} ${srcdir}/${subdir}/${srcfile2}"
+if { [gdb_compile "${sources}" "${binfile}" executable {debug}] != "" } {
     untested "failed to compile"
     return -1
 }
 
 clean_restart ${binfile}
 
+# Verify that partial symtab expansion for $filename has state $readin
+
+proc verify_psymtab_expanded { filename readin } {
+    set cmd "maint info psymtab"
+    set test "$cmd: $filename: $readin"
+    set re [multi_line \
+		"  \{ psymtab \[^\r\n\]*$filename\[^\r\n\]*" \
+		"    readin $readin" \
+		".*"]
+
+    gdb_test $cmd $re $test
+}
+
+# Verify that partial symtab expansion has not taken place for
+# c-linkage-name-2.c.
+
+verify_psymtab_expanded c-linkage-name-2.c no
+
 # Try to print MUNDANE, but using its linkage name.
 
 gdb_test "print symada__cS" \
-         " = {a = 100829103}" \
+         "'symada__cS' has unknown type; cast it to its declared type" \
          "print symada__cS before partial symtab expansion"
 
 # Force the symbols to be expanded for the unit that contains
 # our symada__cS symbol by, e.g. inserting a breakpoint on one
 # of the founction also provided by the same using.
 
-gdb_test "break main" \
-         "Breakpoint $decimal at $hex: file .*$srcfile, line $decimal\\."
+gdb_test "break do_something_other_cu" \
+         "Breakpoint $decimal at $hex: file .*$srcfile2, line $decimal\\."
+
+# Verify that partial symtab expansion has taken place for
+# c-linkage-name-2.c.
+
+verify_psymtab_expanded c-linkage-name-2.c yes
+
+# Flush the symbol cache to prevent the lookup to return the same as before.
+
+gdb_test "maint flush-symbol-cache"
 
 # Try to print MUNDANE using its linkage name again, after partial
 # symtab expansion.

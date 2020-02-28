@@ -1,3 +1,12 @@
+2020-02-28  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/c-linkage-name.c (main): Call do_something_other_cu.
+	(struct wrapper, do_something, mundane/symada__cS): Move ...
+	* gdb.base/c-linkage-name-2.c: ... here.  New source file.
+	* gdb.base/c-linkage-name.exp: Add verification of psymtab expansion.
+	Update "print symada__cS before partial symtab expansion" regexp.
+	Update breakpoint location.  Flush symbol cache after expansion.
+
 2020-02-28  Luis Machado  <luis.machado@linaro.org>
 
 	* gdb.arch/aarch64-pauth.exp: Recognize optional PAC output.
