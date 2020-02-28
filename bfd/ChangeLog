@@ -1,3 +1,8 @@
+2020-02-28  Alan Modra  <amodra@gmail.com>
+
+	* vms-alpha.c (alpha_vms_object_p): Use _bfd_malloc_and_read.
+	Remove duplicate undersize check.
+
 2020-02-27  Alan Modra  <amodra@gmail.com>
 
 	PR 24511

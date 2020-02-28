@@ -2719,7 +2719,7 @@ alpha_vms_object_p (bfd *abfd)
     }
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET))
-    goto err_wrong_format;
+    goto error_ret;
 
   /* The first challenge with VMS is to discover the kind of the file.
 
@@ -2738,27 +2738,17 @@ alpha_vms_object_p (bfd *abfd)
      2 bytes size repeated) and 12 bytes for images (4 bytes major id,
      4 bytes minor id, 4 bytes length).  */
   test_len = 12;
-
-  /* Size the main buffer.  */
-  buf = (unsigned char *) bfd_malloc (test_len);
+  buf = _bfd_malloc_and_read (abfd, test_len, test_len);
   if (buf == NULL)
     goto error_ret;
   PRIV (recrd.buf) = buf;
   PRIV (recrd.buf_size) = test_len;
-
-  /* Initialize the record pointer.  */
   PRIV (recrd.rec) = buf;
-
-  if (bfd_bread (buf, test_len, abfd) != test_len)
-    goto err_wrong_format;
 
   /* Is it an image?  */
   if ((bfd_getl32 (buf) == EIHD__K_MAJORID)
       && (bfd_getl32 (buf + 4) == EIHD__K_MINORID))
     {
-      unsigned int to_read;
-      unsigned int read_so_far;
-      unsigned int remaining;
       unsigned int eisd_offset, eihs_offset;
 
       /* Extract the header size.  */
@@ -2768,44 +2758,25 @@ alpha_vms_object_p (bfd *abfd)
       if (PRIV (recrd.rec_size) == 0)
 	PRIV (recrd.rec_size) = sizeof (struct vms_eihd);
 
-      if (PRIV (recrd.rec_size) > PRIV (recrd.buf_size))
-	{
-	  buf = bfd_realloc_or_free (buf, PRIV (recrd.rec_size));
-
-	  if (buf == NULL)
-	    {
-	      PRIV (recrd.buf) = NULL;
-	      goto error_ret;
-	    }
-	  PRIV (recrd.buf) = buf;
-	  PRIV (recrd.buf_size) = PRIV (recrd.rec_size);
-	}
-
       /* PR 21813: Check for a truncated record.  */
-      if (PRIV (recrd.rec_size < test_len))
-	goto error_ret;
-      /* Read the remaining record.  */
-      remaining = PRIV (recrd.rec_size) - test_len;
-      to_read = MIN (VMS_BLOCK_SIZE - test_len, remaining);
-      read_so_far = test_len;
-
-      while (remaining > 0)
-	{
-	  if (bfd_bread (buf + read_so_far, to_read, abfd) != to_read)
-	    goto err_wrong_format;
-
-	  read_so_far += to_read;
-	  remaining -= to_read;
-
-	  to_read = MIN (VMS_BLOCK_SIZE, remaining);
-	}
-
-      /* Reset the record pointer.  */
-      PRIV (recrd.rec) = buf;
-
       /* PR 17512: file: 7d7c57c2.  */
       if (PRIV (recrd.rec_size) < sizeof (struct vms_eihd))
+	goto err_wrong_format;
+
+      if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET))
 	goto error_ret;
+
+      free (PRIV (recrd.buf));
+      PRIV (recrd.buf) = NULL;
+      buf = _bfd_malloc_and_read (abfd, PRIV (recrd.rec_size),
+				  PRIV (recrd.rec_size));
+      if (buf == NULL)
+	goto error_ret;
+
+      PRIV (recrd.buf) = buf;
+      PRIV (recrd.buf_size) = PRIV (recrd.rec_size);
+      PRIV (recrd.rec) = buf;
+
       vms_debug2 ((2, "file type is image\n"));
 
       if (!_bfd_vms_slurp_eihd (abfd, &eisd_offset, &eihs_offset))
