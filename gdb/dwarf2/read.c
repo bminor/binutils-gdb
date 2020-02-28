@@ -6774,7 +6774,6 @@ cutu_reader::init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
 					int use_existing_cu)
 {
   struct signatured_type *sig_type;
-  struct die_reader_specs reader;
 
   /* Verify we can do the following downcast, and that we have the
      data we need.  */
@@ -6802,7 +6801,7 @@ cutu_reader::init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu,
   if (read_cutu_die_from_dwo (this_cu, sig_type->dwo_unit,
 			      NULL /* stub_comp_unit_die */,
 			      sig_type->dwo_unit->dwo_file->comp_dir,
-			      &reader, &info_ptr,
+			      this, &info_ptr,
 			      &comp_unit_die,
 			      &m_dwo_abbrev_table) == 0)
     {

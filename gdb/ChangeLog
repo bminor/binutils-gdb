@@ -1,3 +1,8 @@
+2020-02-28  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (cutu_reader::init_tu_and_read_dwo_dies): Remove
+	reader variable, pass `this` to read_cutu_die_from_dwo.
+
 2020-02-27  Aaron Merey  <amerey@redhat.com>
 
 	* source.c (open_source_file): Check for nullptr when computing
