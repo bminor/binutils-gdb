@@ -1,3 +1,10 @@
+2020-02-28  YunQiang Su  <syq@debian.org>
+
+	PR gas/25539
+	* config/tc-mips.c (fix_loongson3_llsc): Compare label value
+	to handle multi-labels.
+	(has_label_name): New.
+
 2020-02-26  Matthew Malcomson  <matthew.malcomson@arm.com>
 
 	* config/tc-arm.c (enum pred_instruction_type): Remove

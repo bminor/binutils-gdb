@@ -812,6 +812,9 @@ static int mips_debug = 0;
    fill a branch delay slot.  */
 static struct mips_cl_insn history[1 + MAX_NOPS + MAX_LLSC_RANGE];
 
+/* The maximum number of LABELS detect for the same address.  */
+#define MAX_LABELS_SAME 10
+
 /* Arrays of operands for each instruction.  */
 #define MAX_OPERANDS 6
 struct mips_operand_array
@@ -6901,7 +6904,21 @@ fix_loongson2f (struct mips_cl_insn * ip)
     fix_loongson2f_jump (ip);
 }
 
-/* Fix loongson3 llsc errata: Insert sync before ll/lld. */
+static bfd_boolean
+has_label_name (const char *arr[], size_t len ,const char *s)
+{
+  unsigned long i;
+  for (i = 0; i < len; i++)
+    {
+      if (!arr[i])
+	return FALSE;
+      if (streq (arr[i], s))
+	return TRUE;
+    }
+  return FALSE;
+}
+
+/* Fix loongson3 llsc errata: Insert sync before ll/lld.  */
 
 static void
 fix_loongson3_llsc (struct mips_cl_insn * ip)
@@ -6915,10 +6932,30 @@ fix_loongson3_llsc (struct mips_cl_insn * ip)
       && S_IS_LOCAL (seg_info (now_seg)->label_list->label)
       && (strcmp (ip->insn_mo->name, "sync") != 0))
     {
-      const char *label_name = S_GET_NAME (seg_info (now_seg)->label_list->label);
-      unsigned long lookback = ARRAY_SIZE (history);
       unsigned long i;
+      valueT label_value;
+      const char *label_names[MAX_LABELS_SAME];
+      const char *label_name;
 
+      label_name = S_GET_NAME (seg_info (now_seg)->label_list->label);
+      label_names[0] = label_name;
+      struct insn_label_list *llist = seg_info (now_seg)->label_list;
+      label_value = S_GET_VALUE (llist->label);
+
+      for (i = 1; i < MAX_LABELS_SAME; i++)
+	{
+	  llist = llist->next;
+	  if (!llist)
+	    break;
+	  if (S_GET_VALUE (llist->label) == label_value)
+	    label_names[i] = S_GET_NAME (llist->label);
+	  else
+	    break;
+	}
+      for (; i < MAX_LABELS_SAME; i++)
+	label_names[i] = NULL;
+
+      unsigned long lookback = ARRAY_SIZE (history);
       for (i = 0; i < lookback; i++)
 	{
 	  if (streq (history[i].insn_mo->name, "ll")
@@ -6938,7 +6975,9 @@ fix_loongson3_llsc (struct mips_cl_insn * ip)
 
 		  if (delayed_branch_p (&history[j]))
 		    {
-		      if (streq (history[j].target, label_name))
+		      if (has_label_name (label_names,
+					  MAX_LABELS_SAME,
+					  history[j].target))
 			{
 			  add_fixed_insn (&sync_insn);
 			  insert_into_history (0, 1, &sync_insn);
@@ -6952,7 +6991,7 @@ fix_loongson3_llsc (struct mips_cl_insn * ip)
     }
   /* If we find a sc, we look forward to look for an branch insn,
      and see whether it jump back and out of ll/sc.  */
-  else if (streq(ip->insn_mo->name, "sc") || streq(ip->insn_mo->name, "scd"))
+  else if (streq (ip->insn_mo->name, "sc") || streq (ip->insn_mo->name, "scd"))
     {
       unsigned long lookback = ARRAY_SIZE (history) - 1;
       unsigned long i;
