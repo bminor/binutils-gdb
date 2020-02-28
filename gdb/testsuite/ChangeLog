@@ -1,3 +1,8 @@
+2020-02-28  Simon Marchi  <simon.marchi@efficios.com>
+
+	* lib/trace-support.exp (get_in_proc_agent): Adjust path to
+	libinproctrace.so.
+
 2020-02-28  Luis Machado  <luis.machado@linaro.org>
 
 	* gdb.arch/aarch64-fp.exp: Switch from "info registers" command

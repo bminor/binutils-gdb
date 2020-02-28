@@ -374,7 +374,7 @@ proc get_in_proc_agent {} {
     if [target_info exists in_proc_agent] {
 	return [target_info in_proc_agent]
     } else {
-	return $objdir/../gdbserver/libinproctrace.so
+	return $objdir/../../gdbserver/libinproctrace.so
     }
 }
 
