@@ -1,3 +1,8 @@
+2020-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* .dir-locals.el: Add a comment referencing the other copies of
+	this file.
+
 2020-03-05  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-tdep.c (fbsd_make_corefile_notes): Use std::string for

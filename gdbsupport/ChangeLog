@@ -1,3 +1,7 @@
+2020-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* .dir-locals.el: New file.
+
 2020-03-05  Vyacheslav Petrishchev  <vyachemail@gmail.com>
 
 	* configure.ac: Added call development.sh.
