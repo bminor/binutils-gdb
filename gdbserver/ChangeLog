@@ -1,3 +1,11 @@
+2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* remote-utils.cc (prepare_resume_reply): Add ability to convert T
+	reply into an S reply.
+	* server.cc (disable_packet_T): New global.
+	(captured_main): Set new global when appropriate.
+	* server.h (disable_packet_T): Declare.
+
 2020-02-21  Tom Tromey  <tom@tromey.com>
 
 	* Makefile.in (mostlyclean): New target.

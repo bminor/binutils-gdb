@@ -1204,6 +1204,26 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	else
 	  sprintf (buf, "T%02x", status->value.sig);
 
+	if (disable_packet_T)
+	  {
+	    /* This is a bit (OK, a lot) of a kludge, however, this isn't
+	       really a user feature, but exists only so GDB can use the
+	       gdbserver to test handling of the 'S' stop reply packet, so
+	       we would rather this code be as simple as possible.
+
+	       By this point we've started to build the 'T' stop packet,
+	       and it should look like 'Txx....' where 'x' is a hex digit.
+	       An 'S' stop packet always looks like 'Sxx', so all we do
+	       here is convert the buffer from a T packet to an S packet
+	       and the avoid adding any extra content by breaking out.  */
+	    gdb_assert (*buf == 'T');
+	    gdb_assert (isxdigit (*(buf + 1)));
+	    gdb_assert (isxdigit (*(buf + 2)));
+	    *buf = 'S';
+	    *(buf + 3) = '\0';
+	    break;
+	  }
+
 	buf += strlen (buf);
 
 	saved_thread = current_thread;

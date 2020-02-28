@@ -76,6 +76,7 @@ extern bool disable_packet_vCont;
 extern bool disable_packet_Tthread;
 extern bool disable_packet_qC;
 extern bool disable_packet_qfThreadInfo;
+extern bool disable_packet_T;
 
 extern bool run_once;
 extern bool non_stop;
