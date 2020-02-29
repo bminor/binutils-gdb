@@ -1,3 +1,7 @@
+2020-02-29  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* debuginfod-support.c: Include defs.h first.
+
 2020-02-28  Tom de Vries  <tdevries@suse.de>
 
 	* symfile.c (set_initial_language): Use default language for lookup.
