@@ -863,7 +863,7 @@ vms_get_remaining_object_record (bfd *abfd, unsigned int read_so_far)
   if (to_read > PRIV (recrd.buf_size))
     {
       PRIV (recrd.buf)
-	= (unsigned char *) bfd_realloc (PRIV (recrd.buf), to_read);
+	= (unsigned char *) bfd_realloc_or_free (PRIV (recrd.buf), to_read);
       if (PRIV (recrd.buf) == NULL)
 	return 0;
       PRIV (recrd.buf_size) = to_read;
@@ -1126,7 +1126,7 @@ add_symbol_entry (bfd *abfd, struct vms_symbol_entry *sym)
       else
 	{
 	  PRIV (max_sym_count) *= 2;
-	  PRIV (syms) = bfd_realloc
+	  PRIV (syms) = bfd_realloc_or_free
 	    (PRIV (syms),
 	     (PRIV (max_sym_count) * sizeof (struct vms_symbol_entry *)));
 	}
@@ -1548,7 +1548,7 @@ image_inc_ptr (bfd *abfd, bfd_vma offset)
 
 /* Save current DST location counter under specified index.  */
 
-static void
+static bfd_boolean
 dst_define_location (bfd *abfd, unsigned int loc)
 {
   vms_debug2 ((4, "dst_define_location (%d)\n", (int)loc));
@@ -1556,12 +1556,16 @@ dst_define_location (bfd *abfd, unsigned int loc)
   /* Grow the ptr offset table if necessary.  */
   if (loc + 1 > PRIV (dst_ptr_offsets_count))
     {
-      PRIV (dst_ptr_offsets) = bfd_realloc (PRIV (dst_ptr_offsets),
-					   (loc + 1) * sizeof (unsigned int));
+      PRIV (dst_ptr_offsets)
+	= bfd_realloc_or_free (PRIV (dst_ptr_offsets),
+			       (loc + 1) * sizeof (unsigned int));
+      if (PRIV (dst_ptr_offsets) == NULL)
+	return FALSE;
       PRIV (dst_ptr_offsets_count) = loc + 1;
     }
 
   PRIV (dst_ptr_offsets)[loc] = PRIV (image_offset);
+  return TRUE;
 }
 
 /* Restore saved DST location counter from specified index.  */
@@ -2311,7 +2315,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
-	  dst_define_location (abfd, op1);
+	  if (!dst_define_location (abfd, op1))
+	    return FALSE;
 	  break;
 
 	  /* Set location: pop index, restore location counter from index
@@ -2950,7 +2955,7 @@ vector_grow1 (struct vector_type *vec, size_t elsz)
 	      bfd_set_error (bfd_error_file_too_big);
 	      return NULL;
 	    }
-	  vec->els = bfd_realloc (vec->els, amt);
+	  vec->els = bfd_realloc_or_free (vec->els, amt);
 	}
     }
   if (vec->els == NULL)
@@ -4255,7 +4260,7 @@ new_module (bfd *abfd)
 
 /* Parse debug info for a module and internalize it.  */
 
-static void
+static bfd_boolean
 parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 	      int length)
 {
@@ -4367,9 +4372,11 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 		      {
 			module->file_table_count *= 2;
 			module->file_table
-			  = bfd_realloc (module->file_table,
-					 module->file_table_count
-					   * sizeof (struct fileinfo));
+			  = bfd_realloc_or_free (module->file_table,
+						 module->file_table_count
+						 * sizeof (struct fileinfo));
+			if (module->file_table == NULL)
+			  return FALSE;
 		      }
 
 		    module->file_table [fileid].name = filename;
@@ -4691,6 +4698,7 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
      because parsing can be either performed at module creation
      or deferred until debug info is consumed.  */
   SET_MODULE_PARSED (module);
+  return TRUE;
 }
 
 /* Build the list of modules for the specified BFD.  */
@@ -4768,7 +4776,8 @@ build_module_list (bfd *abfd)
 	return NULL;
 
       module = new_module (abfd);
-      parse_module (abfd, module, PRIV (dst_section)->contents, -1);
+      if (!parse_module (abfd, module, PRIV (dst_section)->contents, -1))
+	return NULL;
       list = module;
     }
 
@@ -4802,8 +4811,10 @@ module_find_nearest_line (bfd *abfd, struct module *module, bfd_vma addr,
 	  return FALSE;
 	}
 
-      parse_module (abfd, module, buffer, size);
+      ret = parse_module (abfd, module, buffer, size);
       free (buffer);
+      if (!ret)
+	return ret;
     }
 
   /* Find out the function (if any) that contains the address.  */
@@ -5277,8 +5288,10 @@ alpha_vms_slurp_relocs (bfd *abfd)
 		else
 		  {
 		    vms_sec->reloc_max *= 2;
-		    sec->relocation = bfd_realloc
+		    sec->relocation = bfd_realloc_or_free
 		      (sec->relocation, vms_sec->reloc_max * sizeof (arelent));
+		    if (sec->relocation == NULL)
+		      return FALSE;
 		  }
 	      }
 	    reloc = &sec->relocation[sec->reloc_count];

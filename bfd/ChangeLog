@@ -1,3 +1,12 @@
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* vms-alpha.c (vms_get_remaining_object_record): Use
+	bfd_realloc_or_free rather than bfd_realloc.
+	(add_symbol_entry, vector_grow1, alpha_vms_slurp_relocs): Likewise.
+	(dst_define_location, parse_module): Likewise, and check realloc
+	return status before using memory.  Return status from function
+	adjusting all callers.
+
 2020-02-28  Alan Modra  <amodra@gmail.com>
 
 	* vms-lib.c (_bfd_vms_lib_archive_p): Free memory on error paths.
