@@ -1,5 +1,25 @@
 2020-03-02  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (elf_backend_section_flags): Remove flagword* param.
+	* elf.c (_bfd_elf_make_section_from_shdr): Set section flags before
+	calling elf_backend_section_flags with adjusted params.  Use
+	newsect->flags past that point.
+	(_bfd_elf_new_section_hook): Always set sh_type and sh_flags for
+	special sections.
+	(_bfd_elf_init_private_section_data): Allow normal sh_type sections
+	to have their type overridden, and all sh_flags but processor and
+	os specific.
+	* elf32-arm.c (elf32_arm_section_flags): Adjust for changed params.
+	* elf32-mep.c (mep_elf_section_flags): Likewise.
+	* elf32-nios2.c (nios2_elf32_section_flags): Likewise.
+	* elf64-alpha.c (elf64_alpha_section_flags): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_section_flags): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_section_flags): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_size_stubs): Exclude the linker
+	stub BFD and non-aarch64 input files when scanning for stubs.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
 	* coff-alpha.c (alpha_ecoff_get_elt_at_filepos): Provide an upper
 	limit to decompressed element size.
 

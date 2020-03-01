@@ -4313,9 +4313,15 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 
       for (input_bfd = info->input_bfds;
 	   input_bfd != NULL; input_bfd = input_bfd->link.next)
-	if (!_bfd_aarch64_erratum_835769_scan (input_bfd, info,
-					       &num_erratum_835769_fixes))
-	  return FALSE;
+	{
+	  if (!is_aarch64_elf (input_bfd)
+	      || (input_bfd->flags & BFD_LINKER_CREATED) != 0)
+	    continue;
+
+	  if (!_bfd_aarch64_erratum_835769_scan (input_bfd, info,
+						 &num_erratum_835769_fixes))
+	    return FALSE;
+	}
 
       _bfd_aarch64_resize_stubs (htab);
       (*htab->layout_sections_again) ();
@@ -4330,6 +4336,10 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 	   input_bfd = input_bfd->link.next)
 	{
 	  asection *section;
+
+	  if (!is_aarch64_elf (input_bfd)
+	      || (input_bfd->flags & BFD_LINKER_CREATED) != 0)
+	    continue;
 
 	  for (section = input_bfd->sections;
 	       section != NULL;
@@ -4352,6 +4362,10 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 	  Elf_Internal_Shdr *symtab_hdr;
 	  asection *section;
 	  Elf_Internal_Sym *local_syms = NULL;
+
+	  if (!is_aarch64_elf (input_bfd)
+	      || (input_bfd->flags & BFD_LINKER_CREATED) != 0)
+	    continue;
 
 	  /* We'll need the symbol table in a second.  */
 	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;

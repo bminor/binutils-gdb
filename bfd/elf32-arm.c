@@ -20230,10 +20230,10 @@ elf32_arm_get_synthetic_symtab (bfd *abfd,
 }
 
 static bfd_boolean
-elf32_arm_section_flags (flagword *flags, const Elf_Internal_Shdr * hdr)
+elf32_arm_section_flags (const Elf_Internal_Shdr *hdr)
 {
   if (hdr->sh_flags & SHF_ARM_PURECODE)
-    *flags |= SEC_ELF_PURECODE;
+    hdr->bfd_section->flags |= SEC_ELF_PURECODE;
   return TRUE;
 }
 

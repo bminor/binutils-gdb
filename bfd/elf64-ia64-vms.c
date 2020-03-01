@@ -822,11 +822,10 @@ is_unwind_section_name (bfd *abfd ATTRIBUTE_UNUSED, const char *name)
    flag.  */
 
 static bfd_boolean
-elf64_ia64_section_flags (flagword *flags,
-			  const Elf_Internal_Shdr *hdr)
+elf64_ia64_section_flags (const Elf_Internal_Shdr *hdr)
 {
   if (hdr->sh_flags & SHF_IA_64_SHORT)
-    *flags |= SEC_SMALL_DATA;
+    hdr->bfd_section->flags |= SEC_SMALL_DATA;
 
   return TRUE;
 }

@@ -4539,10 +4539,10 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 /* Implement elf-backend_section_flags:
    Convert NIOS2 specific section flags to bfd internal section flags.  */
 static bfd_boolean
-nios2_elf32_section_flags (flagword *flags, const Elf_Internal_Shdr *hdr)
+nios2_elf32_section_flags (const Elf_Internal_Shdr *hdr)
 {
   if (hdr->sh_flags & SHF_NIOS2_GPREL)
-    *flags |= SEC_SMALL_DATA;
+    hdr->bfd_section->flags |= SEC_SMALL_DATA;
 
   return TRUE;
 }

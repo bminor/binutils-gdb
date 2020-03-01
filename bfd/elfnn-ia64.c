@@ -942,11 +942,10 @@ elfNN_ia64_section_from_shdr (bfd *abfd,
    flag.  */
 
 static bfd_boolean
-elfNN_ia64_section_flags (flagword *flags,
-			  const Elf_Internal_Shdr *hdr)
+elfNN_ia64_section_flags (const Elf_Internal_Shdr *hdr)
 {
   if (hdr->sh_flags & SHF_IA_64_SHORT)
-    *flags |= SEC_SMALL_DATA;
+    hdr->bfd_section->flags |= SEC_SMALL_DATA;
 
   return TRUE;
 }

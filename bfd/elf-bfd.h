@@ -955,7 +955,7 @@ struct elf_backend_data
   /* A function to convert machine dependent ELF section header flags to
      BFD internal section header flags.  */
   bfd_boolean (*elf_backend_section_flags)
-    (flagword *, const Elf_Internal_Shdr *);
+    (const Elf_Internal_Shdr *);
 
   /* A function that returns a struct containing ELF section flags and
      type for the given BFD section.   */

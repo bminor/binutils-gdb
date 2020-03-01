@@ -1114,13 +1114,13 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       && elf_next_in_group (newsect) == NULL)
     flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_DISCARD;
 
-  bed = get_elf_backend_data (abfd);
-  if (bed->elf_backend_section_flags)
-    if (! bed->elf_backend_section_flags (&flags, hdr))
-      return FALSE;
-
   if (!bfd_set_section_flags (newsect, flags))
     return FALSE;
+
+  bed = get_elf_backend_data (abfd);
+  if (bed->elf_backend_section_flags)
+    if (!bed->elf_backend_section_flags (hdr))
+      return FALSE;
 
   /* We do not parse the PT_NOTE segments as we are interested even in the
      separate debug info files which may have the segments offsets corrupted.
@@ -1137,7 +1137,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       free (contents);
     }
 
-  if ((flags & SEC_ALLOC) != 0)
+  if ((newsect->flags & SEC_ALLOC) != 0)
     {
       Elf_Internal_Phdr *phdr;
       unsigned int i, nload;
@@ -1163,7 +1163,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	       || phdr->p_type == PT_TLS)
 	      && ELF_SECTION_IN_SEGMENT (hdr, phdr))
 	    {
-	      if ((flags & SEC_LOAD) == 0)
+	      if ((newsect->flags & SEC_LOAD) == 0)
 		newsect->lma = (phdr->p_paddr
 				+ hdr->sh_addr - phdr->p_vaddr);
 	      else
@@ -1191,7 +1191,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 
   /* Compress/decompress DWARF debug sections with names: .debug_* and
      .zdebug_*, after the section flags is set.  */
-  if ((flags & SEC_DEBUGGING)
+  if ((newsect->flags & SEC_DEBUGGING)
       && ((name[1] == 'd' && name[6] == '_')
 	  || (name[1] == 'z' && name[7] == '_')))
     {
@@ -2900,28 +2900,13 @@ _bfd_elf_new_section_hook (bfd *abfd, asection *sec)
   bed = get_elf_backend_data (abfd);
   sec->use_rela_p = bed->default_use_rela_p;
 
-  /* When we read a file, we don't need to set ELF section type and
-     flags.  They will be overridden in _bfd_elf_make_section_from_shdr
-     anyway.  We will set ELF section type and flags for all linker
-     created sections.  If user specifies BFD section flags, we will
-     set ELF section type and flags based on BFD section flags in
-     elf_fake_sections.  Special handling for .init_array/.fini_array
-     output sections since they may contain .ctors/.dtors input
-     sections.  We don't want _bfd_elf_init_private_section_data to
-     copy ELF section type from .ctors/.dtors input sections.  */
-  if (abfd->direction != read_direction
-      || (sec->flags & SEC_LINKER_CREATED) != 0)
+  /* Set up ELF section type and flags for newly created sections, if
+     there is an ABI mandated section.  */
+  ssect = (*bed->get_sec_type_attr) (abfd, sec);
+  if (ssect != NULL)
     {
-      ssect = (*bed->get_sec_type_attr) (abfd, sec);
-      if (ssect != NULL
-	  && (!sec->flags
-	      || (sec->flags & SEC_LINKER_CREATED) != 0
-	      || ssect->type == SHT_INIT_ARRAY
-	      || ssect->type == SHT_FINI_ARRAY))
-	{
-	  elf_section_type (sec) = ssect->type;
-	  elf_section_flags (sec) = ssect->attr;
-	}
+      elf_section_type (sec) = ssect->type;
+      elf_section_flags (sec) = ssect->attr;
     }
 
   return _bfd_generic_new_section_hook (abfd, sec);
@@ -7757,10 +7742,19 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
 
   BFD_ASSERT (elf_section_data (osec) != NULL);
 
-  /* For objcopy and relocatable link, don't copy the output ELF
-     section type from input if the output BFD section flags have been
-     set to something different.  For a final link allow some flags
-     that the linker clears to differ.  */
+  /* If this is a known ABI section, ELF section type and flags may
+     have been set up when OSEC was created.  For normal sections we
+     allow the user to override the type and flags other than
+     SHF_MASKOS and SHF_MASKPROC.  */
+  if (elf_section_type (osec) == SHT_PROGBITS
+      || elf_section_type (osec) == SHT_NOTE
+      || elf_section_type (osec) == SHT_NOBITS)
+    elf_section_type (osec) = SHT_NULL;
+  /* For objcopy and relocatable link, copy the ELF section type from
+     the input file if the BFD section flags are the same.  (If they
+     are different the user may be doing something like
+     "objcopy --set-section-flags .text=alloc,data".)  For a final
+     link allow some flags that the linker clears to differ.  */
   if (elf_section_type (osec) == SHT_NULL
       && (osec->flags == isec->flags
 	  || (final_link
@@ -7769,8 +7763,8 @@ _bfd_elf_init_private_section_data (bfd *ibfd,
     elf_section_type (osec) = elf_section_type (isec);
 
   /* FIXME: Is this correct for all OS/PROC specific flags?  */
-  elf_section_flags (osec) |= (elf_section_flags (isec)
-			       & (SHF_MASKOS | SHF_MASKPROC));
+  elf_section_flags (osec) = (elf_section_flags (isec)
+			      & (SHF_MASKOS | SHF_MASKPROC));
 
   /* Copy sh_info from input for mbind section.  */
   if ((elf_tdata (ibfd)->has_gnu_osabi & elf_gnu_osabi_mbind) != 0
