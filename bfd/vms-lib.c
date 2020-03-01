@@ -242,13 +242,20 @@ vms_write_block (bfd *abfd, unsigned int vbn, void *blk)
    If the entry is indirect, recurse.  */
 
 static bfd_boolean
-vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs)
+vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs,
+		    unsigned int recur_count)
 {
   struct vms_indexdef indexdef;
   file_ptr off;
   unsigned char *p;
   unsigned char *endp;
   unsigned int n;
+
+  if (recur_count == 100)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
   /* Read the index block.  */
   BFD_ASSERT (sizeof (indexdef) == VMS_BLOCK_SIZE);
@@ -307,7 +314,7 @@ vms_traverse_index (bfd *abfd, unsigned int vbn, struct carsym_mem *cs)
       if (idx_off == RFADEF__C_INDEX)
 	{
 	  /* Indirect entry.  Recurse.  */
-	  if (!vms_traverse_index (abfd, idx_vbn, cs))
+	  if (!vms_traverse_index (abfd, idx_vbn, cs, recur_count + 1))
 	    return FALSE;
 	}
       else
@@ -454,7 +461,7 @@ vms_lib_read_index (bfd *abfd, int idx, unsigned int *nbrel)
 
   /* Note: if the index is empty, there is no block to traverse.  */
   vbn = bfd_getl32 (idd.vbn);
-  if (vbn != 0 && !vms_traverse_index (abfd, vbn, &csm))
+  if (vbn != 0 && !vms_traverse_index (abfd, vbn, &csm, 0))
     {
       if (csm.realloced)
 	free (csm.idx);
