@@ -3151,6 +3151,8 @@ v850_elf_section_from_shdr (bfd *abfd,
 			    const char *name,
 			    int shindex)
 {
+  flagword flags;
+
   /* There ought to be a place to keep ELF backend specific flags, but
      at the moment there isn't one.  We just keep track of the
      sections by their name, instead.  */
@@ -3158,18 +3160,21 @@ v850_elf_section_from_shdr (bfd *abfd,
   if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
 
+  flags = 0;
   switch (hdr->sh_type)
     {
     case SHT_V850_SCOMMON:
     case SHT_V850_TCOMMON:
     case SHT_V850_ZCOMMON:
-      if (!bfd_set_section_flags (hdr->bfd_section,
-				  (bfd_section_flags (hdr->bfd_section)
-				   | SEC_IS_COMMON)))
-	return FALSE;
+      flags = SEC_IS_COMMON;
     }
 
-  return TRUE;
+  if ((hdr->sh_flags & SHF_V850_GPREL) != 0)
+    flags |= SEC_SMALL_DATA;
+
+  return (flags == 0
+	  || bfd_set_section_flags (hdr->bfd_section,
+				    hdr->bfd_section->flags | flags));
 }
 
 /* Set the correct type for a V850 ELF section.  We do this

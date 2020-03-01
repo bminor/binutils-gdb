@@ -1,5 +1,24 @@
 2020-03-02  Alan Modra  <amodra@gmail.com>
 
+	* elf32-m32r.c (m32r_elf_section_flags): New function.
+	(elf_backend_section_flags): Define.
+	* elf32-nds32.c (nds32_elf_section_flags): New function.
+	(elf_backend_section_flags): Define.
+	* elf32-ppc.c (ppc_elf_section_from_shdr): Set SEC_SMALL_DATA for
+	.sbss and .sdata sections.
+	* elf32-v850.c (v850_elf_section_from_shdr): Set SEC_SMALL_DATA
+	for SHF_V850_GPREL sections.
+	* elf64-alpha.c (elf64_alpha_section_from_shdr): Delete outdated
+	FIXME.
+	* elf64-hppa.c (elf64_hppa_section_from_shdr): Set SEC_SMALL_DATA
+	for SHF_PARISC_SHORT sections.
+	* elf64-ppc.c (ppc64_elf_section_flags): New function.
+	(elf_backend_section_flags): Define.
+	* elfxx-mips.c (_bfd_mips_elf_section_from_shdr): Set SEC_SMALL_DATA
+	for SHF_MIPS_GPREL sections.  Delete FIXME.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (elf_backend_section_flags): Remove flagword* param.
 	* elf.c (_bfd_elf_make_section_from_shdr): Set section flags before
 	calling elf_backend_section_flags with adjusted params.  Use

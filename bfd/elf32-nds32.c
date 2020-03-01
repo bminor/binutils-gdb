@@ -12594,6 +12594,18 @@ static struct bfd_elf_special_section const nds32_elf_special_sections[] =
 };
 
 static bfd_boolean
+nds32_elf_section_flags (const Elf_Internal_Shdr *hdr)
+{
+  const char *name = hdr->bfd_section->name;
+
+  if (strncmp (name, ".sbss", 5) == 0
+      || strncmp (name, ".sdata", 6) == 0)
+    hdr->bfd_section->flags |= SEC_SMALL_DATA;
+
+  return TRUE;
+}
+
+static bfd_boolean
 nds32_elf_output_arch_syms (bfd *output_bfd ATTRIBUTE_UNUSED,
 			    struct bfd_link_info *info,
 			    void *finfo ATTRIBUTE_UNUSED,
@@ -14093,6 +14105,7 @@ nds32_elf_unify_tls_model (bfd *inbfd, asection *insec, bfd_byte *incontents,
 #define elf_backend_object_p			nds32_elf_object_p
 #define elf_backend_final_write_processing	nds32_elf_final_write_processing
 #define elf_backend_special_sections		nds32_elf_special_sections
+#define elf_backend_section_flags		nds32_elf_section_flags
 #define bfd_elf32_bfd_get_relocated_section_contents \
 				nds32_elf_get_relocated_section_contents
 #define bfd_elf32_bfd_is_target_special_symbol	nds32_elf_is_target_special_symbol

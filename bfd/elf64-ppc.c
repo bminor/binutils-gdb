@@ -125,6 +125,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_finish_dynamic_sections   ppc64_elf_finish_dynamic_sections
 #define elf_backend_link_output_symbol_hook   ppc64_elf_output_symbol_hook
 #define elf_backend_special_sections	      ppc64_elf_special_sections
+#define elf_backend_section_flags	      ppc64_elf_section_flags
 #define elf_backend_merge_symbol_attribute    ppc64_elf_merge_symbol_attribute
 #define elf_backend_merge_symbol	      ppc64_elf_merge_symbol
 #define elf_backend_get_reloc_section	      bfd_get_section_by_name
@@ -2009,6 +2010,18 @@ ppc64_elf_new_section_hook (bfd *abfd, asection *sec)
     }
 
   return _bfd_elf_new_section_hook (abfd, sec);
+}
+
+static bfd_boolean
+ppc64_elf_section_flags (const Elf_Internal_Shdr *hdr)
+{
+  const char *name = hdr->bfd_section->name;
+
+  if (strncmp (name, ".sbss", 5) == 0
+      || strncmp (name, ".sdata", 6) == 0)
+    hdr->bfd_section->flags |= SEC_SMALL_DATA;
+
+  return TRUE;
 }
 
 static struct _opd_sec_data *

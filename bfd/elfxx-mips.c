@@ -7425,10 +7425,7 @@ _bfd_mips_elf_section_processing (bfd *abfd, Elf_Internal_Shdr *hdr)
 
 /* Handle a MIPS specific section when reading an object file.  This
    is called when elfcode.h finds a section with an unknown type.
-   This routine supports both the 32-bit and 64-bit ELF ABI.
-
-   FIXME: We need to handle the SHF_MIPS_GPREL flag, but I'm not sure
-   how to.  */
+   This routine supports both the 32-bit and 64-bit ELF ABI.  */
 
 bfd_boolean
 _bfd_mips_elf_section_from_shdr (bfd *abfd,
@@ -7516,6 +7513,9 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 
   if (! _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex))
     return FALSE;
+
+  if (hdr->sh_flags & SHF_MIPS_GPREL)
+    flags |= SEC_SMALL_DATA;
 
   if (flags)
     {
