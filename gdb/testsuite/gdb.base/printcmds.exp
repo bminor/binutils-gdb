@@ -1039,6 +1039,14 @@ gdb_test_no_output "set may-call-functions off"
 test_printf_convenience_var "with target, may-call-functions off"
 gdb_test_no_output "set may-call-functions on"
 
+# Test printf of a variable that holds the address to a substring in
+# the inferior.  This test will not work without a target.
+gdb_test_no_output "set var \$test_substr = \(char \*\) \(&teststring\[0\] + 4\)" \
+    "set \$test_substr var"
+gdb_test "printf \"test_substr val = %s\\n\", \$test_substr" \
+    "test_substr val = string contents" \
+    "print \$test_substr"
+
 test_integer_literals_accepted
 test_integer_literals_rejected
 test_float_accepted

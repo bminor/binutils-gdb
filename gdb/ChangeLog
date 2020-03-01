@@ -1,3 +1,8 @@
+2020-03-03  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* printcmd.c (print_c_string): Check also for TYPE_CODE_PTR
+	when verifying if dealing with a convenience variable.
+
 2020-03-03  Luis Machado  <luis.machado@linaro.org>
 
 	* auxv.c (default_print_auxv_entry): Add new AUXV entries.

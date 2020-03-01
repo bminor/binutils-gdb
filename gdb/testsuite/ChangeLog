@@ -1,3 +1,8 @@
+2020-03-03  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/printcmds.exp: Add test to verify printf of a
+	variable holding an address.
+
 2020-03-03  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.mi/gdb2549.exp: Fix "register values t" check-read1 timeout.
