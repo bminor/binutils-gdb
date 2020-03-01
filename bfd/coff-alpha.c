@@ -2050,6 +2050,7 @@ alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos)
   bfd_size_type size;
   bfd_byte *buf, *p;
   struct bfd_in_memory *bim;
+  ufile_ptr filesize;
 
   buf = NULL;
   nbfd = _bfd_get_elt_at_filepos (archive, filepos);
@@ -2082,6 +2083,14 @@ alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos)
   if (bfd_bread (ab, (bfd_size_type) 8, nbfd) != 8)
     goto error_return;
   size = H_GET_64 (nbfd, ab);
+
+  /* The decompression algorithm will at most expand by eight times.  */
+  filesize = bfd_get_file_size (archive);
+  if (filesize != 0 && size / 8 > filesize)
+    {
+      bfd_set_error (bfd_error_malformed_archive);
+      goto error_return;
+    }
 
   if (size != 0)
     {

@@ -1,5 +1,10 @@
 2020-03-02  Alan Modra  <amodra@gmail.com>
 
+	* coff-alpha.c (alpha_ecoff_get_elt_at_filepos): Provide an upper
+	limit to decompressed element size.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
 	* vms-lib.c (vms_traverse_index): Add recur_count param and
 	update calls.  Fail on excessive recursion.
 
