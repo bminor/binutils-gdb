@@ -2465,7 +2465,7 @@ bss_alloc (symbolS *symbolP, addressT size, unsigned int align)
 	{
 	  bss_seg = subseg_new (".sbss", 1);
 	  seg_info (bss_seg)->bss = 1;
-	  if (!bfd_set_section_flags (bss_seg, SEC_ALLOC))
+	  if (!bfd_set_section_flags (bss_seg, SEC_ALLOC | SEC_SMALL_DATA))
 	    as_warn (_("error setting flags for \".sbss\": %s"),
 		     bfd_errmsg (bfd_get_error ()));
 	}

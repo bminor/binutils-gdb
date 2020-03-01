@@ -717,7 +717,7 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
 #ifndef COFF_WITH_PE
 
 static bfd_boolean
-styp_to_sec_flags (bfd *abfd ATTRIBUTE_UNUSED,
+styp_to_sec_flags (bfd *abfd,
 		   void * hdr,
 		   const char *name,
 		   asection *section ATTRIBUTE_UNUSED,
@@ -849,6 +849,11 @@ styp_to_sec_flags (bfd *abfd ATTRIBUTE_UNUSED,
   if (styp_flags & STYP_OTHER_LOAD)
     sec_flags = (SEC_LOAD | SEC_ALLOC);
 #endif /* STYP_SDATA */
+
+  if ((bfd_applicable_section_flags (abfd) & SEC_SMALL_DATA) != 0
+      && (CONST_STRNEQ (name, ".sbss")
+	  || CONST_STRNEQ (name, ".sdata")))
+    sec_flags |= SEC_SMALL_DATA;
 
 #if defined (COFF_LONG_SECTION_NAMES) && defined (COFF_SUPPORT_GNU_LINKONCE)
   /* As a GNU extension, if the name begins with .gnu.linkonce, we
@@ -1311,6 +1316,11 @@ styp_to_sec_flags (bfd *abfd,
 	  result = FALSE;
 	}
     }
+
+  if ((bfd_applicable_section_flags (abfd) & SEC_SMALL_DATA) != 0
+      && (CONST_STRNEQ (name, ".sbss")
+	  || CONST_STRNEQ (name, ".sdata")))
+    sec_flags |= SEC_SMALL_DATA;
 
 #if defined (COFF_LONG_SECTION_NAMES) && defined (COFF_SUPPORT_GNU_LINKONCE)
   /* As a GNU extension, if the name begins with .gnu.linkonce, we

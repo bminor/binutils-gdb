@@ -1,3 +1,14 @@
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-m32r.c (md_begin): Set SEC_SMALL_DATA on .scommon section.
+	* config/tc-mips.c (s_change_sec): Set SEC_SMALL_DATA for .sdata
+	and .sbss sections.
+	* config/tc-score.c: Delete !BFD_ASSEMBLER code throughout.
+	(s3_s_change_sec): Set SEC_SMALL_DATA for .sbss section.
+	(s3_s_score_lcomm): Likewise.
+	* config/tc-score7.c: Similarly.
+	* read.c (bss_alloc): Set SEC_SMALL_DATA for .sbss section.
+
 2020-02-28  YunQiang Su  <syq@debian.org>
 
 	PR gas/25539

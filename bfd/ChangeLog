@@ -1,5 +1,16 @@
 2020-03-02  Alan Modra  <amodra@gmail.com>
 
+	* coff-alpha.c (alpha_ecoff_le_vec): Add SEC_SMALL_DATA to
+	applicable section flags.
+	* coff-mips.c (mips_ecoff_le_vec, mips_ecoff_be_vec): Likewise.
+	(mips_ecoff_bele_vec): Likewise.
+	* coffcode.h (sec_to_styp_flags): Set SEC_SMALL_DATA for .sdata
+	and .sbss sections.
+	* ecoff.c (_bfd_ecoff_new_section_hook): Likewise.
+	(_bfd_ecoff_styp_to_sec_flags): Likewise.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
 	* elf32-m32r.c (m32r_elf_section_flags): New function.
 	(elf_backend_section_flags): Define.
 	* elf32-nds32.c (nds32_elf_section_flags): New function.

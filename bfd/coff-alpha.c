@@ -2424,7 +2424,8 @@ const bfd_target alpha_ecoff_le_vec =
    | HAS_LINENO | HAS_DEBUG
    | HAS_SYMS | HAS_LOCALS | DYNAMIC | WP_TEXT | D_PAGED),
 
-  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE | SEC_DATA),
+  (SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_CODE
+   | SEC_DATA | SEC_SMALL_DATA),
   0,				/* leading underscore */
   ' ',				/* ar_pad_char */
   15,				/* ar_max_namelen */

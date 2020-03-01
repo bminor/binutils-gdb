@@ -156,14 +156,14 @@ _bfd_ecoff_new_section_hook (bfd *abfd, asection *section)
     { _INIT,   SEC_ALLOC | SEC_CODE | SEC_LOAD },
     { _FINI,   SEC_ALLOC | SEC_CODE | SEC_LOAD },
     { _DATA,   SEC_ALLOC | SEC_DATA | SEC_LOAD },
-    { _SDATA,  SEC_ALLOC | SEC_DATA | SEC_LOAD },
+    { _SDATA,  SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_SMALL_DATA },
     { _RDATA,  SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY},
-    { _LIT8,   SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY},
-    { _LIT4,   SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY},
+    { _LIT8,   SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY | SEC_SMALL_DATA},
+    { _LIT4,   SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY | SEC_SMALL_DATA},
     { _RCONST, SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY},
     { _PDATA,  SEC_ALLOC | SEC_DATA | SEC_LOAD | SEC_READONLY},
     { _BSS,    SEC_ALLOC},
-    { _SBSS,   SEC_ALLOC},
+    { _SBSS,   SEC_ALLOC | SEC_SMALL_DATA},
     /* An Irix 4 shared libary.  */
     { _LIB,    SEC_COFF_SHARED_LIBRARY}
   };
@@ -412,16 +412,19 @@ _bfd_ecoff_styp_to_sec_flags (bfd *abfd ATTRIBUTE_UNUSED,
 	  || styp_flags == STYP_PDATA
 	  || styp_flags == STYP_RCONST)
 	sec_flags |= SEC_READONLY;
+      if (styp_flags & STYP_SDATA)
+	sec_flags |= SEC_SMALL_DATA;
     }
-  else if ((styp_flags & STYP_BSS)
-	   || (styp_flags & STYP_SBSS))
+  else if (styp_flags & STYP_SBSS)
+    sec_flags |= SEC_ALLOC | SEC_SMALL_DATA;
+  else if (styp_flags & STYP_BSS)
     sec_flags |= SEC_ALLOC;
   else if ((styp_flags & STYP_INFO) || styp_flags == STYP_COMMENT)
     sec_flags |= SEC_NEVER_LOAD;
   else if ((styp_flags & STYP_LITA)
 	   || (styp_flags & STYP_LIT8)
 	   || (styp_flags & STYP_LIT4))
-    sec_flags |= SEC_DATA | SEC_LOAD | SEC_ALLOC | SEC_READONLY;
+    sec_flags |= SEC_DATA |SEC_SMALL_DATA | SEC_LOAD | SEC_ALLOC | SEC_READONLY;
   else if (styp_flags & STYP_ECOFF_LIB)
     sec_flags |= SEC_COFF_SHARED_LIBRARY;
   else

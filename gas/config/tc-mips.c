@@ -16365,8 +16365,8 @@ s_change_sec (int sec)
 
     case 's':
       seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
-      bfd_set_section_flags (seg,
-			     SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
+      bfd_set_section_flags (seg, (SEC_ALLOC | SEC_LOAD | SEC_RELOC
+				   | SEC_DATA | SEC_SMALL_DATA));
       if (strncmp (TARGET_OS, "elf", 3) != 0)
 	record_alignment (seg, 4);
       demand_empty_rest_of_line ();
@@ -16374,7 +16374,7 @@ s_change_sec (int sec)
 
     case 'B':
       seg = subseg_new (".sbss", (subsegT) get_absolute_expression ());
-      bfd_set_section_flags (seg, SEC_ALLOC);
+      bfd_set_section_flags (seg, SEC_ALLOC | SEC_SMALL_DATA);
       if (strncmp (TARGET_OS, "elf", 3) != 0)
 	record_alignment (seg, 4);
       demand_empty_rest_of_line ();
