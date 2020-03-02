@@ -1,3 +1,26 @@
+2020-03-13  Christian Eggers  <ceggers@gmx.de>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Introduce new temp
+	opb.  Divide Elf_Internal_Shdr::sh_addr by opb when setting
+	section LMA/VMA.
+	(_bfd_elf_make_section_from_phdr): Similarly.
+	(elf_fake_sections): Fix calculation of
+	Elf_Internal_shdr::sh_addr from section VMA.
+	(_bfd_elf_map_sections_to_segments): Fix mixup between octets
+	and bytes.
+	(assign_file_positions_for_load_sections): Fix calculations of
+	Elf_Internal_shdr::p_vaddr and p_paddr from section LMA/VMA.  Fix
+	comparison between program header address and section LMA.
+	(assign_file_positions_for_non_load_sections): Likewise.
+	(rewrite_elf_program_header): Likewise.  Introduce new temp opb.
+	(IS_CONTAINED_BY_VMA): Add parameter opb.
+	(IS_CONTAINED_BY_LMA,IS_SECTION_IN_INPUT_SEGMENT,
+	INCLUDE_SECTION_IN_SEGMENT): Likewise.
+	(copy_elf_program_header): Update call to ELF_SECTION_IN_SEGMENT.
+	Fix calculations of p_addr_valid and p_vaddr_offset.
+	* elflink.c (elf_link_add_object_symbols): Multiply section VMA
+	with octets per byte when comparing against p_vaddr.
+
 2020-03-11  Alan Modra  <amodra@gmail.com>
 
 	* som.c (setup_sections): Sanity check subspace.name.

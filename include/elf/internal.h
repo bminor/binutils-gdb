@@ -84,14 +84,14 @@ typedef struct elf_internal_ehdr {
 /* Program header */
 
 struct elf_internal_phdr {
-  unsigned long	p_type;			/* Identifies program segment type */
-  unsigned long	p_flags;		/* Segment flags */
-  bfd_vma	p_offset;		/* Segment file offset */
-  bfd_vma	p_vaddr;		/* Segment virtual address */
-  bfd_vma	p_paddr;		/* Segment physical address */
-  bfd_vma	p_filesz;		/* Segment size in file */
-  bfd_vma	p_memsz;		/* Segment size in memory */
-  bfd_vma	p_align;		/* Segment alignment, file & memory */
+  unsigned long	p_type;		     /* Identifies program segment type.  */
+  unsigned long	p_flags;	     /* Segment flags.  */
+  bfd_vma	p_offset;	     /* Segment file offset in octets.  */
+  bfd_vma	p_vaddr;	     /* Segment virtual address in octets.  */
+  bfd_vma	p_paddr;	     /* Segment physical address in octets.  */
+  bfd_vma	p_filesz;	     /* Segment size in file in octets.  */
+  bfd_vma	p_memsz;	     /* Segment size in memory in octets.  */
+  bfd_vma	p_align;	     /* Segment alignment, file & memory.  */
 };
 
 typedef struct elf_internal_phdr Elf_Internal_Phdr;
@@ -102,9 +102,10 @@ typedef struct elf_internal_shdr {
   unsigned int	sh_name;		/* Section name, index in string tbl */
   unsigned int	sh_type;		/* Type of section */
   bfd_vma	sh_flags;		/* Miscellaneous section attributes */
-  bfd_vma	sh_addr;		/* Section virtual addr at execution */
-  file_ptr	sh_offset;		/* Section file offset */
-  bfd_size_type	sh_size;		/* Size of section in bytes */
+  bfd_vma	sh_addr;		/* Section virtual addr at execution in
+					   octets.  */
+  file_ptr	sh_offset;		/* Section file offset in octets.  */
+  bfd_size_type	sh_size;		/* Size of section in octets.  */
   unsigned int	sh_link;		/* Index of another section */
   unsigned int	sh_info;		/* Additional section information */
   bfd_vma	sh_addralign;		/* Section alignment */
@@ -267,7 +268,7 @@ struct elf_segment_map
   unsigned long p_flags;
   /* Program segment physical address.  */
   bfd_vma p_paddr;
-  /* Program segment virtual address offset from section vma.  */
+  /* Program segment virtual address offset from section vma in bytes.  */
   bfd_vma p_vaddr_offset;
   /* Program segment alignment.  */
   bfd_vma p_align;

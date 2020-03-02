@@ -1,3 +1,9 @@
+2020-03-13  Christian Eggers  <ceggers@gmx.de>
+
+	* elf/internal.h (struct elf_internal_phdr): Add unit (octets)
+	to several member field comments.
+	(Elf_Internal_Shdr): likewise.
+
 2020-03-10  Alan Modra  <amodra@gmail.com>
 
 	* som/aout.h (SOM_AUX_ID_MANDATORY, SOM_SPACE_IS_LOADABLE),

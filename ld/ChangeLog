@@ -1,3 +1,7 @@
+2020-03-13  Christian Eggers  <ceggers@gmx.de>
+
+	* ldexp.c (fold_name): Return SIZEOF_HEADERS in bytes.
+
 2020-03-11  Alan Modra  <amodra@gmail.com>
 
 	* ldelf.c (elf_orphan_compatible): Return false when two sections
