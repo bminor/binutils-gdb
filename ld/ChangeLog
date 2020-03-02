@@ -1,3 +1,16 @@
+2020-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/25618
+	* plugin.c (plugin_object_p): Copy the no_export field to the IR
+	dummy object.
+	* testsuite/ld-plugin/lto.exp (lto_link_elf_tests): Add
+	PR ld/25618 tests.
+	* testsuite/ld-plugin/pr25618.d: New file.
+	* testsuite/ld-plugin/pr25618a.cc: Likewise.
+	* testsuite/ld-plugin/pr25618a.h: Likewise.
+	* testsuite/ld-plugin/pr25618b.cc: Likewise.
+	* testsuite/ld-plugin/pr25618b.h: Likewise.
+
 2020-02-27  Alan Modra  <amodra@gmail.com>
 
 	PR 24511

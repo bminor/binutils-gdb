@@ -368,6 +368,16 @@ set lto_link_elf_tests [list \
    "-O2 -flto -Wl,--as-needed tmpdir/pr25593a-2.o tmpdir/pr25593b.o \
     tmpdir/pr25593c.so tmpdir/pr25593d.so tmpdir/pr25593e.so" "" \
    {dummy.c} {{readelf {-d --wide} pr25593.d}} "pr25593b.exe"] \
+  [list "Build pr25618a.o" \
+   "$plug_opt" "-O2 -flto -fpic" \
+   {pr25618a.cc} {} "" "c++"] \
+  [list "Build pr25618.a" \
+   "$plug_opt" "-O2 -flto -fpic" \
+   {pr25618b.cc} {} "pr25618.a" "c++"] \
+  [list "Build pr25618.so" \
+   "-shared -Wl,--exclude-libs,ALL tmpdir/pr25618a.o tmpdir/pr25618.a" \
+   "-fpic" \
+   {dummy.c} {{readelf {--dyn-syms --wide} pr25618.d}} "pr25618.so" "c++"] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of

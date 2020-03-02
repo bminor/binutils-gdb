@@ -1239,6 +1239,7 @@ plugin_object_p (bfd *ibfd)
       ibfd->plugin_format = bfd_plugin_yes;
       ibfd->plugin_dummy_bfd = abfd;
       bfd_make_readable (abfd);
+      abfd->no_export = ibfd->no_export;
       return abfd->xvec;
     }
   else
