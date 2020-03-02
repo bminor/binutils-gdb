@@ -3044,7 +3044,7 @@ CREATE_LITTLE_COFF_TARGET_VEC (TARGET_SYM, TARGET_SHL_NAME, BFD_IS_RELAXABLE,
 /* Only recognize the small versions if the target was not defaulted.
    Otherwise we won't recognize the non default endianness.  */
 
-static const bfd_target *
+static bfd_cleanup
 coff_small_object_p (bfd *abfd)
 {
   if (abfd->target_defaulted)

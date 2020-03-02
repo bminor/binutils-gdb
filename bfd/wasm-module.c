@@ -731,7 +731,7 @@ wasm_get_symbol_info (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Check whether ABFD is a WebAssembly module; if so, scan it.  */
 
-static const bfd_target *
+static bfd_cleanup
 wasm_object_p (bfd *abfd)
 {
   bfd_boolean error;
@@ -761,7 +761,7 @@ wasm_object_p (bfd *abfd)
   if (s != NULL && wasm_scan_name_function_section (abfd, s))
     abfd->flags |= HAS_SYMS;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 /* BFD_JUMP_TABLE_WRITE */

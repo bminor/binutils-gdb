@@ -277,7 +277,7 @@ typedef union
 /* Define prototypes for certain functions, to avoid a compiler warning
    saying that they are missing.  */
 
-const bfd_target * rs6000coff_core_p (bfd *abfd);
+const bfd_cleanup rs6000coff_core_p (bfd *abfd);
 bfd_boolean rs6000coff_core_file_matches_executable_p (bfd *core_bfd,
 						       bfd *exec_bfd);
 char * rs6000coff_core_file_failing_command (bfd *abfd);
@@ -332,7 +332,7 @@ make_bfd_asection (bfd *abfd, const char *name, flagword flags,
 /* Decide if a given bfd represents a `core' file or not. There really is no
    magic number or anything like, in rs6000coff.  */
 
-const bfd_target *
+bfd_cleanup
 rs6000coff_core_p (bfd *abfd)
 {
   CoreHdr core;
@@ -686,7 +686,7 @@ rs6000coff_core_p (bfd *abfd)
   }
 #endif
 
-  return abfd->xvec;		/* This is garbage for now.  */
+  return _bfd_no_cleanup;
 
  fail:
   bfd_release (abfd, abfd->tdata.any);

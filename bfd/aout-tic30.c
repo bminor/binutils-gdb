@@ -331,7 +331,7 @@ tic30_aout_reloc_howto (bfd *abfd,
 /* Set parameters about this a.out file that are machine-dependent.
    This routine is called from some_aout_object_p just before it returns.  */
 
-static const bfd_target *
+static bfd_cleanup
 tic30_aout_callback (bfd *abfd)
 {
   struct internal_exec *execp = exec_hdr (abfd);
@@ -388,7 +388,7 @@ tic30_aout_callback (bfd *abfd)
       obj_datasec (abfd)->alignment_power = arch_align_power;
       obj_bsssec (abfd)->alignment_power = arch_align_power;
     }
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 static bfd_reloc_status_type
@@ -547,12 +547,12 @@ tic30_aout_final_link_relocate (reloc_howto_type *howto,
 
 /* Finish up the reading of an a.out file header.  */
 
-static const bfd_target *
+static bfd_cleanup
 tic30_aout_object_p (bfd *abfd)
 {
   struct external_exec exec_bytes;	/* Raw exec header from file.  */
   struct internal_exec exec;		/* Cleaned-up exec header.  */
-  const bfd_target *target;
+  bfd_cleanup cleanup;
   size_t amt = EXEC_BYTES_SIZE;
 
   if (bfd_bread (& exec_bytes, amt, abfd) != amt)
@@ -582,7 +582,7 @@ tic30_aout_object_p (bfd *abfd)
   exec.a_info = SWAP_MAGIC (exec_bytes.e_info);
 #endif
 
-  target = NAME (aout, some_aout_object_p) (abfd, &exec, tic30_aout_callback);
+  cleanup = NAME (aout, some_aout_object_p) (abfd, &exec, tic30_aout_callback);
 
 #ifdef ENTRY_CAN_BE_ZERO
   /* The NEWSOS3 entry-point is/was 0, which (amongst other lossage)
@@ -603,7 +603,7 @@ tic30_aout_object_p (bfd *abfd)
     }
 #endif
 
-  return target;
+  return cleanup;
 }
 
 /* Copy private section data.  This actually does nothing with the

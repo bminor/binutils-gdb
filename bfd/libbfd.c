@@ -245,7 +245,7 @@ _bfd_nocore_core_file_pid (bfd *ignore_abfd ATTRIBUTE_UNUSED)
   return 0;
 }
 
-const bfd_target *
+bfd_cleanup
 _bfd_dummy_target (bfd *ignore_abfd ATTRIBUTE_UNUSED)
 {
   bfd_set_error (bfd_error_wrong_format);

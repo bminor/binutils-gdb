@@ -7295,6 +7295,8 @@ typedef struct bfd_link_info _bfd_link_info;
 /* Forward declaration.  */
 typedef struct flag_info flag_info;
 
+typedef void (*bfd_cleanup) (bfd *);
+
 typedef struct bfd_target
 {
   /* Identifies the kind of target, e.g., SunOS4, Ultrix, etc.  */
@@ -7359,9 +7361,9 @@ typedef struct bfd_target
   /* Format dependent routines: these are vectors of entry points
      within the target vector structure, one for each format to check.  */
 
-  /* Check the format of a file being read.  Return a <<bfd_target *>> or zero.  */
-  const struct bfd_target *
-              (*_bfd_check_format[bfd_type_end]) (bfd *);
+  /* Check the format of a file being read.  Return a <<bfd_cleanup>> on
+     success or zero on failure.  */
+  bfd_cleanup (*_bfd_check_format[bfd_type_end]) (bfd *);
 
   /* Set the format of a file being written.  */
   bfd_boolean (*_bfd_set_format[bfd_type_end]) (bfd *);

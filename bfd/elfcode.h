@@ -497,7 +497,7 @@ elf_file_p (Elf_External_Ehdr *x_ehdrp)
    any side effects in ABFD, or any data it points to (like tdata), if the
    file does not match the target vector.  */
 
-const bfd_target *
+bfd_cleanup
 elf_object_p (bfd *abfd)
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
@@ -853,7 +853,7 @@ elf_object_p (bfd *abfd)
 	    s->flags |= SEC_DEBUGGING;
 	}
     }
-  return target;
+  return _bfd_no_cleanup;
 
  got_wrong_format_error:
   bfd_set_error (bfd_error_wrong_format);

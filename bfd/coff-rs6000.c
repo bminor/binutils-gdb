@@ -38,7 +38,7 @@ extern bfd_boolean _bfd_xcoff_is_local_label_name (bfd *, const char *);
 extern reloc_howto_type *_bfd_xcoff_reloc_type_lookup
   (bfd *, bfd_reloc_code_real_type);
 extern bfd_boolean _bfd_xcoff_slurp_armap (bfd *);
-extern const bfd_target *_bfd_xcoff_archive_p (bfd *);
+extern bfd_cleanup _bfd_xcoff_archive_p (bfd *);
 extern void * _bfd_xcoff_read_ar_hdr (bfd *);
 extern bfd *_bfd_xcoff_openr_next_archived_file (bfd *, bfd *);
 extern int _bfd_xcoff_stat_arch_elt (bfd *, struct stat *);
@@ -77,7 +77,7 @@ void xcoff_rtype2howto (arelent *, struct internal_reloc *);
 #define coff_mkobject _bfd_xcoff_mkobject
 #define coff_bfd_is_local_label_name _bfd_xcoff_is_local_label_name
 #ifdef AIX_CORE
-extern const bfd_target * rs6000coff_core_p (bfd *abfd);
+extern bfd_cleanup rs6000coff_core_p (bfd *abfd);
 extern bfd_boolean rs6000coff_core_file_matches_executable_p
   (bfd *cbfd, bfd *ebfd);
 extern char *rs6000coff_core_file_failing_command (bfd *abfd);
@@ -1380,7 +1380,7 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 
 /* See if this is an XCOFF archive.  */
 
-const bfd_target *
+bfd_cleanup
 _bfd_xcoff_archive_p (bfd *abfd)
 {
   struct artdata *tdata_hold;
@@ -1481,7 +1481,7 @@ _bfd_xcoff_archive_p (bfd *abfd)
       return NULL;
     }
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 /* Read the archive header in an XCOFF archive.  */

@@ -489,7 +489,7 @@ vms_lib_read_index (bfd *abfd, int idx, unsigned int *nbrel)
 
 /* Standard function.  */
 
-static const bfd_target *
+static bfd_cleanup
 _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
 {
   struct vms_lhd lhd;
@@ -693,7 +693,7 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
   if (tdata->type == LBR__C_TYP_ESHSTB || tdata->type == LBR__C_TYP_ISHSTB)
     abfd->is_thin_archive = TRUE;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
  err:
   bfd_release (abfd, tdata);
@@ -703,7 +703,7 @@ _bfd_vms_lib_archive_p (bfd *abfd, enum vms_lib_kind kind)
 
 /* Standard function for alpha libraries.  */
 
-const bfd_target *
+bfd_cleanup
 _bfd_vms_lib_alpha_archive_p (bfd *abfd)
 {
   return _bfd_vms_lib_archive_p (abfd, vms_lib_alpha);
@@ -711,7 +711,7 @@ _bfd_vms_lib_alpha_archive_p (bfd *abfd)
 
 /* Standard function for ia64 libraries.  */
 
-const bfd_target *
+bfd_cleanup
 _bfd_vms_lib_ia64_archive_p (bfd *abfd)
 {
   return _bfd_vms_lib_archive_p (abfd, vms_lib_ia64);
@@ -719,7 +719,7 @@ _bfd_vms_lib_ia64_archive_p (bfd *abfd)
 
 /* Standard function for text libraries.  */
 
-static const bfd_target *
+static bfd_cleanup
 _bfd_vms_lib_txt_archive_p (bfd *abfd)
 {
   return _bfd_vms_lib_archive_p (abfd, vms_lib_txt);

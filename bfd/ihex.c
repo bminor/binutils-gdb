@@ -487,7 +487,7 @@ ihex_scan (bfd *abfd)
 
 /* Try to recognize an Intel Hex file.  */
 
-static const bfd_target *
+static bfd_cleanup
 ihex_object_p (bfd *abfd)
 {
   void * tdata_save;
@@ -538,7 +538,7 @@ ihex_object_p (bfd *abfd)
       return NULL;
     }
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 /* Read the contents of a section in an Intel Hex file.  */

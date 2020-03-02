@@ -1,5 +1,74 @@
 2020-03-02  Alan Modra  <amodra@gmail.com>
 
+	* targets.c (bfd_cleanup): New typedef.
+	(struct bfd <_bfd_check_format>): Return a bfd_cleanup.
+	* libbfd-in.h (_bfd_no_cleanup): Define.
+	* format.c (bfd_reinit): Add cleanup parameter, call it.
+	(bfd_check_format_matches): Set cleanup from _bfd_check_format
+	call and pass to bfd_reinit.  Delete temp, use abfd->xvec instead.
+	* aout-target.h (callback, object_p): Return bfd_cleanup.
+	* aout-tic30.c (tic30_aout_callback, tic30_aout_object_p): Likewise.
+	* archive.c (bfd_generic_archive_p): Likewise.
+	* binary.c (binary_object_p): Likewise.
+	* coff-alpha.c (alpha_ecoff_object_p): Likewise.
+	* coff-ia64.c (ia64coff_object_p): Likewise.
+	* coff-rs6000.c (_bfd_xcoff_archive_p, rs6000coff_core_p): Likewise.
+	* coff-sh.c (coff_small_object_p): Likewise.
+	* coff-stgo32.c (go32_check_format): Likewise.
+	* coff64-rs6000.c (xcoff64_archive_p, rs6000coff_core_p),
+	(xcoff64_core_p): Likewise.
+	* coffgen.c (coff_real_object_p, coff_object_p): Likewise.
+	* elf-bfd.h (bfd_elf32_object_p, bfd_elf32_core_file_p),
+	(bfd_elf64_object_p, bfd_elf64_core_file_p): Likewise.
+	* elfcode.h (elf_object_p): Likewise.
+	* elfcore.h (elf_core_file_p): Likewise.
+	* i386msdos.c (msdos_object_p): Likewise.
+	* ihex.c (ihex_object_p): Likewise.
+	* libaout.h (some_aout_object_p): Likewise.
+	* libbfd-in.h (bfd_generic_archive_p, _bfd_dummy_target),
+	(_bfd_vms_lib_alpha_archive_p, _bfd_vms_lib_ia64_archive_p): Likewise.
+	* libbfd.c (_bfd_dummy_target): Likewise.
+	* libcoff-in.h (coff_object_p): Likewise.
+	* mach-o-aarch64.c (bfd_mach_o_arm64_object_p),
+	(bfd_mach_o_arm64_core_p): Likewise.
+	* mach-o-arm.c (bfd_mach_o_arm_object_p),
+	(bfd_mach_o_arm_core_p): Likewise.
+	* mach-o-i386.c (bfd_mach_o_i386_object_p),
+	(bfd_mach_o_i386_core_p): Likewise.
+	* mach-o-x86-64.c (bfd_mach_o_x86_64_object_p),
+	(bfd_mach_o_x86_64_core_p): Likewise.
+	* mach-o.c (bfd_mach_o_header_p, bfd_mach_o_gen_object_p),
+	(bfd_mach_o_gen_core_p, bfd_mach_o_fat_archive_p): Likewise.
+	* mach-o.h (bfd_mach_o_object_p, bfd_mach_o_core_p),
+	(bfd_mach_o_fat_archive_p, bfd_mach_o_header_p): Likewise.
+	* mmo.c (mmo_object_p): Likewise.
+	* pef.c (bfd_pef_object_p, bfd_pef_xlib_object_p): Likewise.
+	* peicode.h (coff_real_object_p, pe_ILF_object_p),
+	(pe_bfd_object_p): Likewise.
+	* plugin.c (ld_plugin_object_p, bfd_plugin_object_p): Likewise.
+	* ppcboot.c (ppcboot_object_p): Likewise.
+	* rs6000-core.c (rs6000coff_core_p): Likewise.
+	* som.c (som_object_setup, som_object_p): Likewise.
+	* srec.c (srec_object_p, symbolsrec_object_p): Likewise.
+	* tekhex.c (tekhex_object_p): Likewise.
+	* vms-alpha.c (alpha_vms_object_p): Likewise.
+	* vms-lib.c (_bfd_vms_lib_archive_p, _bfd_vms_lib_alpha_archive_p),
+	(_bfd_vms_lib_ia64_archive_p, _bfd_vms_lib_txt_archive_p): Likewise.
+	* wasm-module.c (wasm_object_p): Likewise.
+	* xsym.c (bfd_sym_object_p): Likewise.
+	* xsym.h (bfd_sym_object_p): Likewise.
+	* aoutx.h (some_aout_object_p): Likewise, and callback parameter
+	return type.
+	* pdp11.c (some_aout_object_p): Likewise.
+	* plugin.c (register_ld_plugin_object_p): Update object_p
+	parameter type.
+	* plugin.h (register_ld_plugin_object_p): Likewise.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* libcoff.h: Regenerate.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
 	* coff-alpha.c (alpha_ecoff_le_vec): Add SEC_SMALL_DATA to
 	applicable section flags.
 	* coff-mips.c (mips_ecoff_le_vec, mips_ecoff_be_vec): Likewise.

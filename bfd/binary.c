@@ -53,7 +53,7 @@ binary_mkobject (bfd *abfd ATTRIBUTE_UNUSED)
    was not defaulted.  That is, it must be explicitly specified as
    being binary.  */
 
-static const bfd_target *
+static bfd_cleanup
 binary_object_p (bfd *abfd)
 {
   struct stat statbuf;
@@ -86,7 +86,7 @@ binary_object_p (bfd *abfd)
 
   abfd->tdata.any = (void *) sec;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 #define binary_close_and_cleanup     _bfd_generic_close_and_cleanup

@@ -452,13 +452,13 @@ NAME (aout, make_sections) (bfd *abfd)
    environment's "finish up" function just before returning, to
    handle any last-minute setup.  */
 
-const bfd_target *
+bfd_cleanup
 NAME (aout, some_aout_object_p) (bfd *abfd,
 				 struct internal_exec *execp,
-				 const bfd_target *(*callback_to_real_object_p) (bfd *))
+				 bfd_cleanup (*callback_to_real_object_p) (bfd *))
 {
   struct aout_data_struct *rawptr, *oldrawptr;
-  const bfd_target *result;
+  bfd_cleanup cleanup;
   size_t amt = sizeof (struct aout_data_struct);
 
   rawptr = bfd_zalloc (abfd, amt);
@@ -580,7 +580,7 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
   adata(abfd)->segment_size = SEGMENT_SIZE;
   adata(abfd)->exec_bytes_size = EXEC_BYTES_SIZE;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
   /* The architecture is encoded in various ways in various a.out variants,
      or is not encoded at all in some of them.  The relocation size depends
@@ -592,7 +592,7 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
      header, should cope with them in this callback as well.  */
 #endif	/* DOCUMENTATION */
 
-  result = (*callback_to_real_object_p)(abfd);
+  cleanup = (*callback_to_real_object_p)(abfd);
 
   /* Now that the segment addresses have been worked out, take a better
      guess at whether the file is executable.  If the entry point
@@ -633,12 +633,12 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
     }
 #endif /* STAT_FOR_EXEC */
 
-  if (!result)
+  if (!cleanup)
     {
       free (rawptr);
       abfd->tdata.aout_data = oldrawptr;
     }
-  return result;
+  return cleanup;
 }
 
 /* Initialize ABFD for use with a.out files.  */

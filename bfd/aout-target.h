@@ -34,7 +34,7 @@ extern reloc_howto_type * NAME (aout, reloc_name_lookup) (bfd *, const char *);
    This routine is called from some_aout_object_p just before it returns.  */
 #ifndef MY_callback
 
-static const bfd_target *
+static bfd_cleanup
 MY (callback) (bfd *abfd)
 {
   struct internal_exec *execp = exec_hdr (abfd);
@@ -121,19 +121,19 @@ MY (callback) (bfd *abfd)
   /* Don't set sizes now -- can't be sure until we know arch & mach.
      Sizes get set in set_sizes callback, later.  */
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 #endif
 
 #ifndef MY_object_p
 /* Finish up the reading of an a.out file header.  */
 
-static const bfd_target *
+static bfd_cleanup
 MY (object_p) (bfd *abfd)
 {
   struct external_exec exec_bytes;	/* Raw exec header from file.  */
   struct internal_exec exec;		/* Cleaned-up exec header.  */
-  const bfd_target *target;
+  bfd_cleanup cleanup;
   size_t amt = EXEC_BYTES_SIZE;
 
   if (bfd_bread ((void *) &exec_bytes, amt, abfd) != amt)
@@ -164,7 +164,7 @@ MY (object_p) (bfd *abfd)
   exec.a_info = SWAP_MAGIC (exec_bytes.e_info);
 #endif
 
-  target = NAME (aout, some_aout_object_p) (abfd, &exec, MY (callback));
+  cleanup = NAME (aout, some_aout_object_p) (abfd, &exec, MY (callback));
 
 #ifdef ENTRY_CAN_BE_ZERO
   /* The NEWSOS3 entry-point is/was 0, which (amongst other lossage)
@@ -185,7 +185,7 @@ MY (object_p) (bfd *abfd)
     }
 #endif /* ENTRY_CAN_BE_ZERO */
 
-  return target;
+  return cleanup;
 }
 #define MY_object_p MY (object_p)
 #endif

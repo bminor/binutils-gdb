@@ -386,7 +386,7 @@ static INLINE bfd_byte *mmo_get_loc (asection *, bfd_vma, int);
 static void mmo_xore_64 (asection *, bfd_vma vma, bfd_vma value);
 static void mmo_xore_32 (asection *, bfd_vma vma, unsigned int);
 static void mmo_xore_16 (asection *, bfd_vma vma, unsigned int);
-static const bfd_target *mmo_object_p (bfd *);
+static bfd_cleanup mmo_object_p (bfd *);
 static void mmo_map_set_sizes (bfd *, asection *, void *);
 static bfd_boolean mmo_get_symbols (bfd *);
 static bfd_boolean mmo_create_symbol (bfd *, const char *, bfd_vma,
@@ -500,7 +500,7 @@ mmo_init (void)
 
 /* Check whether an existing file is an mmo file.  */
 
-static const bfd_target *
+static bfd_cleanup
 mmo_object_p (bfd *abfd)
 {
   struct stat statbuf;
@@ -556,7 +556,7 @@ mmo_object_p (bfd *abfd)
   if (! bfd_default_set_arch_mach (abfd, bfd_arch_mmix, 0))
     goto bad_format_free;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
  bad_format_free:
   free (abfd->tdata.mmo_data->lop_stab_symbol);

@@ -1,3 +1,8 @@
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* plugin.c (plugin_object_p): Return a bfd_cleanup.
+	(plugin_cleanup): New function.
+
 2020-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/25618

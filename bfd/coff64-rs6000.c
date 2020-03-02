@@ -155,7 +155,7 @@ static bfd_boolean xcoff64_ppc_relocate_section
    asection **);
 static bfd_boolean xcoff64_slurp_armap
   (bfd *);
-static const bfd_target *xcoff64_archive_p
+static bfd_cleanup xcoff64_archive_p
   (bfd *);
 static bfd *xcoff64_openr_next_archived_file
   (bfd *, bfd *);
@@ -238,7 +238,7 @@ bfd_boolean (*xcoff64_calculate_relocation[XCOFF_MAX_CALCULATE_RELOCATION])
 #define coff_bfd_reloc_type_lookup xcoff64_reloc_type_lookup
 #define coff_bfd_reloc_name_lookup xcoff64_reloc_name_lookup
 #ifdef AIX_CORE
-extern const bfd_target * rs6000coff_core_p
+extern bfd_cleanup rs6000coff_core_p
   (bfd *abfd);
 extern bfd_boolean rs6000coff_core_file_matches_executable_p
   (bfd *cbfd, bfd *ebfd);
@@ -1991,7 +1991,7 @@ xcoff64_slurp_armap (bfd *abfd)
 
 /* See if this is an NEW XCOFF archive.  */
 
-static const bfd_target *
+static bfd_cleanup
 xcoff64_archive_p (bfd *abfd)
 {
   struct artdata *tdata_hold;
@@ -2058,7 +2058,7 @@ xcoff64_archive_p (bfd *abfd)
       return NULL;
     }
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 
@@ -2805,7 +2805,7 @@ const bfd_target rs6000_xcoff64_vec =
     &bfd_xcoff_backend_data,
   };
 
-extern const bfd_target *xcoff64_core_p
+extern bfd_cleanup xcoff64_core_p
   (bfd *);
 extern bfd_boolean xcoff64_core_file_matches_executable_p
   (bfd *, bfd *);

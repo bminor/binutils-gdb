@@ -38,13 +38,13 @@
 #define bfd_mach_o_tgt_seg_table NULL
 #define bfd_mach_o_section_type_valid_for_tgt NULL
 
-static const bfd_target *
+static bfd_cleanup
 bfd_mach_o_arm_object_p (bfd *abfd)
 {
   return bfd_mach_o_header_p (abfd, 0, 0, BFD_MACH_O_CPU_TYPE_ARM);
 }
 
-static const bfd_target *
+static bfd_cleanup
 bfd_mach_o_arm_core_p (bfd *abfd)
 {
   return bfd_mach_o_header_p (abfd, 0,

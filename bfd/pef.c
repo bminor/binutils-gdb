@@ -589,7 +589,7 @@ bfd_pef_read_header (bfd *abfd, bfd_pef_header *header)
   return 0;
 }
 
-static const bfd_target *
+static bfd_cleanup
 bfd_pef_object_p (bfd *abfd)
 {
   bfd_pef_header header;
@@ -608,7 +608,7 @@ bfd_pef_object_p (bfd *abfd)
   if (bfd_pef_scan (abfd, &header, mdata))
     goto wrong;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
  wrong:
   bfd_set_error (bfd_error_wrong_format);
@@ -1126,7 +1126,7 @@ bfd_pef_xlib_scan (bfd *abfd, bfd_pef_xlib_header *header)
   return 0;
 }
 
-static const bfd_target *
+static bfd_cleanup
 bfd_pef_xlib_object_p (bfd *abfd)
 {
   bfd_pef_xlib_header header;
@@ -1151,7 +1151,7 @@ bfd_pef_xlib_object_p (bfd *abfd)
       return NULL;
     }
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 const bfd_target pef_xlib_vec =

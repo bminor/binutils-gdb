@@ -225,12 +225,12 @@ make_a_section_from_file (bfd *abfd,
 
 /* Read in a COFF object and make it into a BFD.  This is used by
    ECOFF as well.  */
-const bfd_target *
+bfd_cleanup
 coff_real_object_p (bfd *,
 		    unsigned,
 		    struct internal_filehdr *,
 		    struct internal_aouthdr *);
-const bfd_target *
+bfd_cleanup
 coff_real_object_p (bfd *abfd,
 		    unsigned nscns,
 		    struct internal_filehdr *internal_f,
@@ -300,7 +300,7 @@ coff_real_object_p (bfd *abfd,
     }
 
   _bfd_coff_free_symbols (abfd);
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
  fail:
   _bfd_coff_free_symbols (abfd);
@@ -309,13 +309,13 @@ coff_real_object_p (bfd *abfd,
   abfd->tdata.any = tdata_save;
   abfd->flags = oflags;
   abfd->start_address = ostart;
-  return (const bfd_target *) NULL;
+  return NULL;
 }
 
 /* Turn a COFF file into a BFD, but fail with bfd_error_wrong_format if it is
    not a COFF file.  This is also used by ECOFF.  */
 
-const bfd_target *
+bfd_cleanup
 coff_object_p (bfd *abfd)
 {
   bfd_size_type filhsz;

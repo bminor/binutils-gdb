@@ -5365,7 +5365,7 @@ bfd_mach_o_gen_mkobject (bfd *abfd)
   return TRUE;
 }
 
-const bfd_target *
+bfd_cleanup
 bfd_mach_o_header_p (bfd *abfd,
 		     file_ptr hdr_off,
 		     bfd_mach_o_filetype file_type,
@@ -5436,7 +5436,7 @@ bfd_mach_o_header_p (bfd *abfd,
   if (!bfd_mach_o_scan (abfd, &header, mdata))
     goto wrong;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
  wrong:
   bfd_set_error (bfd_error_wrong_format);
@@ -5445,13 +5445,13 @@ bfd_mach_o_header_p (bfd *abfd,
   return NULL;
 }
 
-static const bfd_target *
+static bfd_cleanup
 bfd_mach_o_gen_object_p (bfd *abfd)
 {
   return bfd_mach_o_header_p (abfd, 0, 0, 0);
 }
 
-static const bfd_target *
+static bfd_cleanup
 bfd_mach_o_gen_core_p (bfd *abfd)
 {
   return bfd_mach_o_header_p (abfd, 0, BFD_MACH_O_MH_CORE, 0);
@@ -5501,7 +5501,7 @@ typedef struct mach_o_fat_data_struct
   mach_o_fat_archentry *archentries;
 } mach_o_fat_data_struct;
 
-const bfd_target *
+bfd_cleanup
 bfd_mach_o_fat_archive_p (bfd *abfd)
 {
   mach_o_fat_data_struct *adata = NULL;
@@ -5551,7 +5551,7 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
 
   abfd->tdata.mach_o_fat_data = adata;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
  error:
   if (adata != NULL)

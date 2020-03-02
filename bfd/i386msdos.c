@@ -41,7 +41,7 @@ msdos_mkobject (bfd *abfd)
   return aout_32_mkobject (abfd);
 }
 
-static const bfd_target *
+static bfd_cleanup
 msdos_object_p (bfd *abfd)
 {
   struct external_DOS_hdr hdr;
@@ -112,7 +112,7 @@ msdos_object_p (bfd *abfd)
   bfd_set_section_size (section, size);
   section->alignment_power = 4;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 static int

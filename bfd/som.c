@@ -1945,7 +1945,7 @@ som_swap_lst_header_in (struct som_external_lst_header *src,
 /* Perform some initialization for an object.  Save results of this
    initialization in the BFD.  */
 
-static const bfd_target *
+static bfd_cleanup
 som_object_setup (bfd *abfd,
 		  struct som_header *file_hdrp,
 		  struct som_exec_auxhdr *aux_hdrp,
@@ -2060,7 +2060,7 @@ som_object_setup (bfd *abfd,
 				  + current_offset);
   obj_som_exec_data (abfd)->system_id = file_hdrp->system_id;
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 /* Convert all of the space and subspace info into BFD sections.  Each space
@@ -2386,7 +2386,7 @@ setup_sections (bfd *abfd,
 
 /* Read in a SOM object and make it into a BFD.  */
 
-static const bfd_target *
+static bfd_cleanup
 som_object_p (bfd *abfd)
 {
   struct som_external_header ext_file_hdr;

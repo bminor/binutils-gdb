@@ -733,7 +733,7 @@ try_load_plugin (const char *pname,
 /* There may be plugin libraries in lib/bfd-plugins.  */
 static int has_plugin_list = -1;
 
-static const bfd_target *(*ld_plugin_object_p) (bfd *);
+static bfd_cleanup (*ld_plugin_object_p) (bfd *);
 
 static const char *plugin_name;
 
@@ -774,7 +774,7 @@ bfd_plugin_target_p (const bfd_target *target)
 /* Register OBJECT_P to be used by bfd_plugin_object_p.  */
 
 void
-register_ld_plugin_object_p (const bfd_target *(*object_p) (bfd *))
+register_ld_plugin_object_p (bfd_cleanup (*object_p) (bfd *))
 {
   ld_plugin_object_p = object_p;
 }
@@ -862,7 +862,7 @@ load_plugin (bfd *abfd)
 }
 
 
-static const bfd_target *
+static bfd_cleanup
 bfd_plugin_object_p (bfd *abfd)
 {
   if (ld_plugin_object_p)
@@ -871,7 +871,7 @@ bfd_plugin_object_p (bfd *abfd)
   if (abfd->plugin_format == bfd_plugin_unknown && !load_plugin (abfd))
     return NULL;
 
-  return abfd->plugin_format == bfd_plugin_yes ? abfd->xvec : NULL;
+  return abfd->plugin_format == bfd_plugin_yes ? _bfd_no_cleanup : NULL;
 }
 
 /* Copy any private info we understand from the input bfd

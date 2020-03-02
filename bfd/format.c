@@ -140,13 +140,15 @@ bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve)
 /* Clear out a subset of BFD state.  */
 
 static void
-bfd_reinit (bfd *abfd, unsigned int section_id)
+bfd_reinit (bfd *abfd, unsigned int section_id, bfd_cleanup cleanup)
 {
+  _bfd_section_id = section_id;
+  if (cleanup)
+    cleanup (abfd);
   abfd->tdata.any = NULL;
   abfd->arch_info = &bfd_default_arch_struct;
   abfd->flags &= BFD_FLAGS_SAVED;
   bfd_section_list_clear (abfd);
-  _bfd_section_id = section_id;
 }
 
 /* Restores bfd state saved by bfd_preserve_save.  */
@@ -220,6 +222,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   int ar_match_index;
   unsigned int initial_section_id = _bfd_section_id;
   struct bfd_preserve preserve, preserve_match;
+  bfd_cleanup cleanup = NULL;
 
   if (matching != NULL)
     *matching = NULL;
@@ -258,9 +261,9 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)	/* rewind! */
 	goto err_ret;
 
-      right_targ = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
+      cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
 
-      if (right_targ)
+      if (cleanup)
 	goto ok_ret;
 
       /* For a long time the code has dropped through to check all
@@ -291,7 +294,6 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 
   for (target = bfd_target_vector; *target != NULL; target++)
     {
-      const bfd_target *temp;
       void **high_water;
 
       /* The binary target matches anything, so don't return it when
@@ -309,7 +311,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       /* If we already tried a match, the bfd is modified and may
 	 have sections attached, which will confuse the next
 	 _bfd_check_format call.  */
-      bfd_reinit (abfd, initial_section_id);
+      bfd_reinit (abfd, initial_section_id, cleanup);
       /* Free bfd_alloc memory too.  If we have matched and preserved
 	 a target then the high water mark is that much higher.  */
       if (preserve_match.marker)
@@ -325,10 +327,10 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
       if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
 	goto err_ret;
 
-      temp = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
-      if (temp)
+      cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
+      if (cleanup)
 	{
-	  int match_priority = temp->match_priority;
+	  int match_priority = abfd->xvec->match_priority;
 #if BFD_SUPPORTS_PLUGINS
 	  /* If this object can be handled by a plugin, give that the
 	     lowest priority; objects both handled by a plugin and
@@ -345,11 +347,11 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	      /* If this is the default target, accept it, even if
 		 other targets might match.  People who want those
 		 other targets have to set the GNUTARGET variable.  */
-	      if (temp == bfd_default_vector[0])
+	      if (abfd->xvec == bfd_default_vector[0])
 		goto ok_ret;
 
 	      if (matching_vector)
-		matching_vector[match_count] = temp;
+		matching_vector[match_count] = abfd->xvec;
 	      match_count++;
 
 	      if (match_priority < best_match)
@@ -360,7 +362,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	      if (match_priority <= best_match)
 		{
 		  /* This format checks out as ok!  */
-		  right_targ = temp;
+		  right_targ = abfd->xvec;
 		  best_count++;
 		}
 	    }
@@ -378,7 +380,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 
 	  if (preserve_match.marker == NULL)
 	    {
-	      match_targ = temp;
+	      match_targ = abfd->xvec;
 	      if (!bfd_preserve_save (abfd, &preserve_match))
 		goto err_ret;
 	    }
@@ -467,12 +469,12 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	 RIGHT_TARG again.  */
       if (match_targ != right_targ)
 	{
-	  bfd_reinit (abfd, initial_section_id);
+	  bfd_reinit (abfd, initial_section_id, cleanup);
 	  bfd_release (abfd, preserve.marker);
 	  if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0)
 	    goto err_ret;
-	  match_targ = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
-	  BFD_ASSERT (match_targ != NULL);
+	  cleanup = BFD_SEND_FMT (abfd, _bfd_check_format, (abfd));
+	  BFD_ASSERT (cleanup != NULL);
 	}
 
     ok_ret:

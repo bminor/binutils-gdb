@@ -398,10 +398,10 @@ static reloc_howto_type alpha_howto_table[] =
 
 /* Recognize an Alpha ECOFF file.  */
 
-static const bfd_target *
+static bfd_cleanup
 alpha_ecoff_object_p (bfd *abfd)
 {
-  static const bfd_target *ret;
+  bfd_cleanup ret;
 
   ret = coff_object_p (abfd);
 

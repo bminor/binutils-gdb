@@ -303,7 +303,7 @@ struct coff_reloc_cookie
 #define coff_hash_table(p) ((struct coff_link_hash_table *) ((p)->hash))
 
 /* Functions in coffgen.c.  */
-extern const bfd_target *coff_object_p
+extern bfd_cleanup coff_object_p
   (bfd *);
 extern struct bfd_section *coff_section_from_bfd_index
   (bfd *, int);

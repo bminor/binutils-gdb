@@ -2707,7 +2707,7 @@ alpha_vms_free_private (bfd *abfd)
 /* Check the format for a file being read.
    Return a (bfd_target *) if it's an object file or zero if not.  */
 
-static const struct bfd_target *
+static bfd_cleanup
 alpha_vms_object_p (bfd *abfd)
 {
   void *tdata_save = abfd->tdata.any;
@@ -2826,7 +2826,7 @@ alpha_vms_object_p (bfd *abfd)
   if (! bfd_default_set_arch_mach (abfd, bfd_arch_alpha, 0))
     goto err_wrong_format;
 
-  return abfd->xvec;
+  return alpha_vms_free_private;
 
  err_wrong_format:
   bfd_set_error (bfd_error_wrong_format);

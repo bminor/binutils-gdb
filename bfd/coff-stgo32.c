@@ -93,7 +93,7 @@ create_go32_stub (bfd *);
 #define COFF_ADJUST_AUX_OUT_PRE adjust_aux_out_pre
 #define COFF_ADJUST_AUX_OUT_POST adjust_aux_out_post
 
-static const bfd_target *go32_check_format (bfd *);
+static bfd_cleanup go32_check_format (bfd *);
 
 #define COFF_CHECK_FORMAT go32_check_format
 
@@ -406,7 +406,7 @@ go32_stubbed_coff_bfd_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 /* coff_object_p only checks 2 bytes F_MAGIC at GO32_STUBSIZE inside the file
    which is too fragile.  */
 
-static const bfd_target *
+static bfd_cleanup
 go32_check_format (bfd *abfd)
 {
   char mz[2];

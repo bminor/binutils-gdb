@@ -842,7 +842,7 @@ _bfd_noarchive_openr_next_archived_file (bfd *archive,
   return (bfd *) _bfd_ptr_bfd_null_error (archive);
 }
 
-const bfd_target *
+bfd_cleanup
 bfd_generic_archive_p (bfd *abfd)
 {
   struct artdata *tdata_hold;
@@ -924,7 +924,7 @@ bfd_generic_archive_p (bfd *abfd)
 	}
     }
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 /* Some constants for a 32 bit BSD archive structure.  We do not

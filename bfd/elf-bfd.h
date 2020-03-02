@@ -2400,9 +2400,9 @@ extern bfd_boolean _bfd_elf_init_file_header (bfd *, struct bfd_link_info *);
 
 extern bfd_boolean _bfd_elf_final_write_processing (bfd *);
 
-extern const bfd_target *bfd_elf32_object_p
+extern bfd_cleanup bfd_elf32_object_p
   (bfd *);
-extern const bfd_target *bfd_elf32_core_file_p
+extern bfd_cleanup bfd_elf32_core_file_p
   (bfd *);
 extern char *bfd_elf32_core_file_failing_command
   (bfd *);
@@ -2448,9 +2448,9 @@ extern void bfd_elf32_write_relocs
 extern bfd_boolean bfd_elf32_slurp_reloc_table
   (bfd *, asection *, asymbol **, bfd_boolean);
 
-extern const bfd_target *bfd_elf64_object_p
+extern bfd_cleanup bfd_elf64_object_p
   (bfd *);
-extern const bfd_target *bfd_elf64_core_file_p
+extern bfd_cleanup bfd_elf64_core_file_p
   (bfd *);
 extern char *bfd_elf64_core_file_failing_command
   (bfd *);
