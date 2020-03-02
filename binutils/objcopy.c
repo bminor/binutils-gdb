@@ -3101,8 +3101,10 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	  for (i = 0; i < c - 1; i++)
 	    {
 	      flagword flags;
-	      bfd_size_type size;
-	      bfd_vma gap_start, gap_stop;
+	      bfd_size_type size;           /* Octets.  */
+	      bfd_vma gap_start, gap_stop;  /* Octets.  */
+	      unsigned int opb1 = bfd_octets_per_byte (obfd, osections[i]);
+	      unsigned int opb2 = bfd_octets_per_byte (obfd, osections[i+1]);
 
 	      flags = bfd_section_flags (osections[i]);
 	      if ((flags & SEC_HAS_CONTENTS) == 0
@@ -3110,8 +3112,8 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 		continue;
 
 	      size = bfd_section_size (osections[i]);
-	      gap_start = bfd_section_lma (osections[i]) + size;
-	      gap_stop = bfd_section_lma (osections[i + 1]);
+	      gap_start = bfd_section_lma (osections[i]) * opb1 + size;
+	      gap_stop = bfd_section_lma (osections[i + 1]) * opb2;
 	      if (gap_start < gap_stop)
 		{
 		  if (!bfd_set_section_size (osections[i],
@@ -3131,14 +3133,16 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
       if (pad_to_set)
 	{
-	  bfd_vma lma;
-	  bfd_size_type size;
+	  bfd_vma lma;         /* Octets.  */
+	  bfd_size_type size;  /* Octets.  */
+	  unsigned int opb = bfd_octets_per_byte (obfd, osections[c - 1]);
+	  bfd_vma _pad_to = pad_to * opb;
 
-	  lma = bfd_section_lma (osections[c - 1]);
+	  lma = bfd_section_lma (osections[c - 1]) * opb;
 	  size = bfd_section_size (osections[c - 1]);
-	  if (lma + size < pad_to)
+	  if (lma + size < _pad_to)
 	    {
-	      if (!bfd_set_section_size (osections[c - 1], pad_to - lma))
+	      if (!bfd_set_section_size (osections[c - 1], _pad_to - lma))
 		{
 		  bfd_nonfatal_message (NULL, obfd, osections[c - 1],
 					_("can't add padding"));
@@ -3146,9 +3150,9 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 		}
 	      else
 		{
-		  gaps[c - 1] = pad_to - (lma + size);
-		  if (max_gap < pad_to - (lma + size))
-		    max_gap = pad_to - (lma + size);
+		  gaps[c - 1] = _pad_to - (lma + size);
+		  if (max_gap < _pad_to - (lma + size))
+		    max_gap = _pad_to - (lma + size);
 		}
 	    }
 	}
