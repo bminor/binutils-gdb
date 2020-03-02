@@ -1,3 +1,14 @@
+2020-03-02  Pedro Alves  <palves@redhat.com>
+	      Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (gdb_test_multiple): Handle prompt_regexp option using
+	-prompt prefix, before user_code argument.  Add -lbl option likewise.
+	(skip_python_tests_prompt, skip_libstdcxx_probe_tests_prompt)
+	(gdb_is_target_1): Add -prompt prefix and move to before user_code
+	argument.
+	* gdb.base/corefile-buildid.exp: Use -lbl option.  Rewrite regexps to
+	have "\r\n" at start-of-line, instead of at end-of-line.
+
 2020-02-28  Simon Marchi  <simon.marchi@efficios.com>
 
 	* lib/trace-support.exp (get_in_proc_agent): Adjust path to

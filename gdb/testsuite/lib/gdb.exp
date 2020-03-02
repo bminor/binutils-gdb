@@ -698,20 +698,22 @@ proc gdb_internal_error_resync {} {
 }
 
 
-# gdb_test_multiple COMMAND MESSAGE EXPECT_ARGUMENTS PROMPT_REGEXP
+# gdb_test_multiple COMMAND MESSAGE [ -promp PROMPT_REGEXP] [ -lbl ]
+#                   EXPECT_ARGUMENTS
 # Send a command to gdb; test the result.
 #
 # COMMAND is the command to execute, send to GDB with send_gdb.  If
 #   this is the null string no command is sent.
 # MESSAGE is a message to be printed with the built-in failure patterns
 #   if one of them matches.  If MESSAGE is empty COMMAND will be used.
+# -prompt PROMPT_REGEXP specifies a regexp matching the expected prompt
+#   after the command output.  If empty, defaults to "$gdb_prompt $".
+# -lbl specifies that line-by-line matching will be used.
 # EXPECT_ARGUMENTS will be fed to expect in addition to the standard
 #   patterns.  Pattern elements will be evaluated in the caller's
 #   context; action elements will be executed in the caller's context.
 #   Unlike patterns for gdb_test, these patterns should generally include
 #   the final newline and prompt.
-# PROMPT_REGEXP is a regexp matching the expected prompt after the command
-#   output.  If empty, defaults to "$gdb_prompt $"
 #
 # Returns:
 #    1 if the test failed, according to a built-in failure pattern
@@ -791,7 +793,7 @@ proc gdb_internal_error_resync {} {
 #	}
 #    }
 #
-proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
+proc gdb_test_multiple { command message args } {
     global verbose use_gdb_stub
     global gdb_prompt pagination_prompt
     global GDB
@@ -800,6 +802,26 @@ proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
     upvar timeout timeout
     upvar expect_out expect_out
     global any_spawn_id
+
+    set line_by_line 0
+    set prompt_regexp ""
+    for {set i 0} {$i < [llength $args]} {incr i} {
+	set arg [lindex $args $i]
+	if { $arg  == "-prompt" } {
+	    incr i
+	    set prompt_regexp [lindex $args $i]
+	} elseif { $arg == "-lbl" } {
+	    set line_by_line 1
+	} else {
+	    set user_code $arg
+	    break
+	}
+    }
+    if { [expr $i + 1] < [llength $args] } {
+	error "Too many arguments to gdb_test_multiple"
+    } elseif { ![info exists user_code] } {
+	error "Too few arguments to gdb_test_multiple"
+    }
 
     if { "$prompt_regexp" == "" } {
 	set prompt_regexp "$gdb_prompt $"
@@ -1067,6 +1089,14 @@ proc gdb_test_multiple { command message user_code { prompt_regexp "" } } {
 	    }
 	    return -1
 	}
+    }
+
+    if {$line_by_line} {
+       append code {
+           -re "\r\n\[^\r\n\]*(?=\r\n)" {
+               exp_continue
+           }
+       }
     }
 
     # Now patterns that apply to any spawn id specified.
@@ -1996,22 +2026,24 @@ proc skip_rust_tests {} {
 proc skip_python_tests_prompt { prompt_regexp } {
     global gdb_py_is_py3k
 
-    gdb_test_multiple "python print ('test')" "verify python support" {
-	-re "not supported.*$prompt_regexp" {
-	    unsupported "Python support is disabled."
-	    return 1
+    gdb_test_multiple "python print ('test')" "verify python support" \
+	-prompt "$prompt_regexp" {
+	    -re "not supported.*$prompt_regexp" {
+		unsupported "Python support is disabled."
+		return 1
+	    }
+	    -re "$prompt_regexp" {}
 	}
-	-re "$prompt_regexp" {}
-    } "$prompt_regexp"
 
-    gdb_test_multiple "python print (sys.version_info\[0\])" "check if python 3" {
-	-re "3.*$prompt_regexp" {
-            set gdb_py_is_py3k 1
-        }
-	-re ".*$prompt_regexp" {
-            set gdb_py_is_py3k 0
-        }
-    } "$prompt_regexp"
+    gdb_test_multiple "python print (sys.version_info\[0\])" "check if python 3" \
+	-prompt "$prompt_regexp" {
+	    -re "3.*$prompt_regexp" {
+		set gdb_py_is_py3k 1
+	    }
+	    -re ".*$prompt_regexp" {
+		set gdb_py_is_py3k 0
+	    }
+	}
 
     return 0
 }
@@ -3265,13 +3297,14 @@ proc skip_unwinder_tests {} {
 
 proc skip_libstdcxx_probe_tests_prompt { prompt_regexp } {
     set supported 0
-    gdb_test_multiple "info probe" "check for stap probe in libstdc++" {
-	-re ".*libstdcxx.*catch.*\r\n$prompt_regexp" {
-	    set supported 1
+    gdb_test_multiple "info probe" "check for stap probe in libstdc++" \
+	-prompt "$prompt_regexp" {
+	    -re ".*libstdcxx.*catch.*\r\n$prompt_regexp" {
+		set supported 1
+	    }
+	    -re "\r\n$prompt_regexp" {
+	    }
 	}
-	-re "\r\n$prompt_regexp" {
-	}
-    } "$prompt_regexp"
     set skip [expr !$supported]
     return $skip
 }
@@ -3311,15 +3344,16 @@ proc skip_compile_feature_tests {} {
 
 proc gdb_is_target_1 { target_name target_stack_regexp prompt_regexp } {
     set test "probe for target ${target_name}"
-    gdb_test_multiple "maint print target-stack" $test {
-	-re "${target_stack_regexp}${prompt_regexp}" {
-	    pass $test
-	    return 1
+    gdb_test_multiple "maint print target-stack" $test \
+	-prompt "$prompt_regexp" {
+	    -re "${target_stack_regexp}${prompt_regexp}" {
+		pass $test
+		return 1
+	    }
+	    -re "$prompt_regexp" {
+		pass $test
+	    }
 	}
-	-re "$prompt_regexp" {
-	    pass $test
-	}
-    } "$prompt_regexp"
     return 0
 }
 
