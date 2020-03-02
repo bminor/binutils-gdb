@@ -33,3 +33,21 @@ gdb_test "p l1" " = \\.TRUE\\."
 gdb_test "p l2" " = \\.TRUE\\."
 gdb_test "p l4" " = \\.TRUE\\."
 gdb_test "p l8" " = \\.TRUE\\."
+
+# Different Fortran compilers use different values for logical true.
+# Check how GDB handles this by modifying the underlying value for our
+# logical variables and check they still print as true.
+foreach_with_prefix var { l l1 l2 l4 l8 } {
+    set len [get_integer_valueof "sizeof (${var})" "get sizeof ${var}"]
+    set addr [get_hexadecimal_valueof "&l" "get address of ${var}"]
+
+    for { set i 0 } { $i < $len } { incr i } {
+	with_test_prefix "byte $i" {
+	    gdb_test_no_output "set *((uint8_t *) ${addr}) = 0xff" \
+		"set contents of byte at offset $i"
+	    gdb_test "p l" " = \\.TRUE\\."
+	    incr addr
+	    set addr [format "0x%x" $addr]
+	}
+    }
+}

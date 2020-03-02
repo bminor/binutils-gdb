@@ -1,3 +1,8 @@
+2020-03-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/logical.exp: Add tests that any non-zero value is
+	printed as true.
+
 2020-03-03  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/printcmds.exp: Add test to verify printf of a

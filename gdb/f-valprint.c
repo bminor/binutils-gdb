@@ -357,6 +357,30 @@ f_val_print (struct type *type, int embedded_offset,
       fprintf_filtered (stream, " )");
       break;     
 
+    case TYPE_CODE_BOOL:
+      if (options->format || options->output_format)
+	{
+	  struct value_print_options opts = *options;
+	  opts.format = (options->format ? options->format
+			 : options->output_format);
+	  val_print_scalar_formatted (type, embedded_offset,
+				      original_value, &opts, 0, stream);
+	}
+      else
+	{
+	  int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
+	  LONGEST val
+	    = unpack_long (type, valaddr + embedded_offset * unit_size);
+	  /* The Fortran standard doesn't specify how logical types are
+	     represented.  Different compilers use different non zero
+	     values to represent logical true.  */
+	  if (val == 0)
+	    fputs_filtered (f_decorations.false_name, stream);
+	  else
+	    fputs_filtered (f_decorations.true_name, stream);
+	}
+      break;
+
     case TYPE_CODE_REF:
     case TYPE_CODE_FUNC:
     case TYPE_CODE_FLAGS:
@@ -366,7 +390,6 @@ f_val_print (struct type *type, int embedded_offset,
     case TYPE_CODE_RANGE:
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_COMPLEX:
-    case TYPE_CODE_BOOL:
     case TYPE_CODE_CHAR:
     default:
       generic_val_print (type, embedded_offset, address,

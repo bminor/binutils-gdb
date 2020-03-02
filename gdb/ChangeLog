@@ -1,3 +1,9 @@
+2020-03-03  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* f-valprint.c (f_val_print): Handle TYPE_CODE_BOOL, any non-zero
+	value should be printed as true.
+
 2020-03-03  Hannes Domani  <ssbssa@yahoo.de>
 
 	* windows-tdep.c (windows_solib_create_inferior_hook): New function.
