@@ -1,3 +1,14 @@
+2020-03-02  Christian Biesinger  <cbiesinger@google.com>
+
+	* arm-nbsd-nat.c (arm_supply_fparegset): Rename to...
+	(arm_supply_vfpregset): ...this, and update to use VFP registers.
+	(fetch_fp_register): Update.
+	(fetch_fp_regs): Update.
+	(store_fp_register): Update.
+	(store_fp_regs): Update.
+	(arm_netbsd_nat_target::read_description): New function.
+	(fetch_elfcore_registers): Update.
+
 2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* remote.c (remote_target::remote_parse_stop_reply): Don't use the
