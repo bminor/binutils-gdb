@@ -1,5 +1,12 @@
 2020-03-02  Alan Modra  <amodra@gmail.com>
 
+	* cisco-core.c (cisco_core_file_p): Return bfd_cleanup.
+	* hpux-core.c (hpux_core_core_file_p): Update prototype.
+	* sco5-core.c (sco5_core_file_p): Return bfd_cleanup.
+	(core_sco5_vec): Correct initialisers.
+
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
 	* aix386-core.c (aix386_core_file_p): Return bfd_cleanup.
 	* aix5ppc-core.c (xcoff64_core_p): Likewise.
 	* cisco-core.c (cisco_core_file_validate): Likewise.

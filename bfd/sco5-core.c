@@ -101,7 +101,7 @@ read_uarea (bfd *abfd, int filepos)
   return &rawptr->u;
 }
 
-const bfd_cleanup
+bfd_cleanup
 sco5_core_file_p (bfd *abfd)
 {
   int coffset_siz, val, nsecs, cheadoffs;
@@ -172,7 +172,7 @@ sco5_core_file_p (bfd *abfd)
 			      (file_ptr) coffsets.u_stack))
 	goto fail;
 
-      return abfd->xvec;		/* Done for version 1 */
+      return _bfd_no_cleanup;		/* Done for version 1 */
     }
 
   /* Immediately before coreoffsets region is a long with offset in core
@@ -372,12 +372,16 @@ const bfd_target core_sco5_vec =
       sco5_core_file_p			/* a core file */
     },
     {				/* bfd_set_format */
-      _bfd_bool_bfd_false_error, bfd_false,
-      _bfd_bool_bfd_false_error, bfd_false
+      _bfd_bool_bfd_false_error,
+      _bfd_bool_bfd_false_error,
+      _bfd_bool_bfd_false_error,
+      _bfd_bool_bfd_false_error
     },
     {				/* bfd_write_contents */
-      _bfd_bool_bfd_false_error, bfd_false,
-      _bfd_bool_bfd_false_error, bfd_false
+      _bfd_bool_bfd_false_error,
+      _bfd_bool_bfd_false_error,
+      _bfd_bool_bfd_false_error,
+      _bfd_bool_bfd_false_error
     },
 
     BFD_JUMP_TABLE_GENERIC (_bfd_generic),

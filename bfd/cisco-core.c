@@ -286,19 +286,19 @@ cisco_core_file_validate (bfd *abfd, int crash_info_loc)
   return NULL;
 }
 
-static const bfd_target *
+static bfd_cleanup
 cisco_core_file_p (bfd *abfd)
 {
   int *crash_info_locp;
-  const bfd_target *target = NULL;
+  bfd_cleanup cleanup = NULL;
 
   for (crash_info_locp = crash_info_locs;
-       *crash_info_locp != -1  &&  target == NULL;
+       *crash_info_locp != -1 && cleanup == NULL;
        crash_info_locp++)
     {
-      target = cisco_core_file_validate (abfd, *crash_info_locp);
+      cleanup = cisco_core_file_validate (abfd, *crash_info_locp);
     }
-  return (target);
+  return cleanup;
 }
 
 static char *

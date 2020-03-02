@@ -106,7 +106,7 @@ struct hpux_core_struct
 
 static asection *make_bfd_asection (bfd *, const char *, flagword,
 				    bfd_size_type, bfd_vma, unsigned int);
-static const bfd_target *hpux_core_core_file_p (bfd *);
+static bfd_cleanup hpux_core_core_file_p (bfd *);
 static char *hpux_core_core_file_failing_command (bfd *);
 static int hpux_core_core_file_failing_signal (bfd *);
 static void swap_abort (void);
