@@ -1,3 +1,17 @@
+2020-03-02  Alan Modra  <amodra@gmail.com>
+
+	* aix386-core.c (aix386_core_file_p): Return bfd_cleanup.
+	* aix5ppc-core.c (xcoff64_core_p): Likewise.
+	* cisco-core.c (cisco_core_file_validate): Likewise.
+	* hppabsd-core.c (hppabsd_core_core_file_p): Likewise.
+	* hpux-core.c (hpux_core_core_file_p): Likewise.
+	* irix-core.c (irix_core_core_file_p): Likewise.
+	* lynx-core.c (lynx_core_file_p): Likewise.
+	* netbsd-core.c (netbsd_core_file_p): Likewise.
+	* osf-core.c (osf_core_core_file_p): Likewise.
+	* ptrace-core.c (ptrace_unix_core_file_p): Likewise.
+	* sco5-core.c (sco5_core_file_p): Likewise.
+
 2020-03-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* trad-core.c (trad_unix_core_file_p): Return bfd_cleanup.

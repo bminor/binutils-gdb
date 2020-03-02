@@ -101,7 +101,7 @@ read_uarea (bfd *abfd, int filepos)
   return &rawptr->u;
 }
 
-const bfd_target *
+const bfd_cleanup
 sco5_core_file_p (bfd *abfd)
 {
   int coffset_siz, val, nsecs, cheadoffs;
@@ -300,7 +300,7 @@ sco5_core_file_p (bfd *abfd)
 
     }
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 
  fail:
   if (abfd->tdata.any)

@@ -65,7 +65,7 @@ struct trad_core_struct
   asection *sections[MAX_CORE_SEGS];
 };
 
-static const bfd_target *
+static bfd_cleanup
 aix386_core_file_p (bfd *abfd)
 {
   int i, n;
@@ -189,7 +189,7 @@ aix386_core_file_p (bfd *abfd)
       n++;
     }
 
-  return abfd->xvec;
+  return _bfd_no_cleanup;
 }
 
 static char *
