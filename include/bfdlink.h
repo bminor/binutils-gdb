@@ -801,9 +801,9 @@ struct bfd_link_order
   struct bfd_link_order *next;
   /* Type of link_order.  */
   enum bfd_link_order_type type;
-  /* Offset within output section.  */
+  /* Offset within output section in bytes.  */
   bfd_vma offset;
-  /* Size within output section.  */
+  /* Size within output section in octets.  */
   bfd_size_type size;
   /* Type specific information.  */
   union

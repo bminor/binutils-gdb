@@ -2168,7 +2168,7 @@ bfd_record_phdr (bfd *abfd,
 		 bfd_boolean flags_valid,
 		 flagword flags,
 		 bfd_boolean at_valid,
-		 bfd_vma at,
+		 bfd_vma at,  /* Bytes.  */
 		 bfd_boolean includes_filehdr,
 		 bfd_boolean includes_phdrs,
 		 unsigned int count,
@@ -2176,6 +2176,7 @@ bfd_record_phdr (bfd *abfd,
 {
   struct elf_segment_map *m, **pm;
   size_t amt;
+  unsigned int opb = bfd_octets_per_byte (abfd, NULL);
 
   if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
     return TRUE;
@@ -2188,7 +2189,7 @@ bfd_record_phdr (bfd *abfd,
 
   m->p_type = type;
   m->p_flags = flags;
-  m->p_paddr = at;
+  m->p_paddr = at * opb;
   m->p_flags_valid = flags_valid;
   m->p_paddr_valid = at_valid;
   m->includes_filehdr = includes_filehdr;

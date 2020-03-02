@@ -1,5 +1,45 @@
 2020-03-13  Christian Eggers  <ceggers@gmx.de>
 
+	* bfd.c (bfd_record_phdr): New local "opb".  Fix assignment of
+	"p_paddr" from "at".
+	* elfcode.h (bfd_from_remote_memory): Add units to several
+	parameters.  New local "opb".  Fix usage of p_align.  Fix
+	calculation of "localbase" from "ehdr_vma" and "p_vaddr".  Fix
+	call of target_read_memory.
+	* elflink.c (elf_fixup_link_order): Fix scope of "s" local.  Fix
+	calculation of "offset" and "output_offset".
+	(bfd_elf_final_link): New local "opb".  Fix calculation of "size"
+	from "offset" and fix calculation of "end" from "vma+size".  Fix
+	comparison between "sh_addr" and "vma"/"output_offset".
+	(bfd_elf_discard_info): Fix calculation of "eh_alignment".
+	* elf-bfd.h (struct elf_link_hash_table): Add unit to tls_size
+	member.
+	* elf.c (_bfd_elf_map_sections_to_segments): Add unit (bytes/
+	octets) to "wrap_to2 and "phdr_size" locals.  Fix calculation of
+	"wrap_to" value.  Add unit (bytes) to phdr_lma variable.  Fix
+	assignment of p_paddr from phdr_lma.  Fix comparison between
+	"lma+size" and "next->lma".
+	(elf_sort_segments): Fix assignment from p_paddr to lma.
+	(assign_file_positions_for_load_sections): Add unit (bytes) to
+	local "align".  Fix calculation of local "off_adjust".  Fix
+	calculation of local "filehdr_vaddr".
+	(assign_file_positions_for_non_load_sections): New local "opb".
+	Fix calculation of "end" from "p_size". Fix comparison between
+	"vma+SECTION_SIZE" and "start".  Fix calculation of "p_memsz"
+	from "end" and "p_vaddr".
+	(rewrite_elf_program_header): Fix comparison between p_vaddr and
+	vma.  Fix assignment to p_paddr from lma.  Fix comparison between
+	p_paddr and lma.  Fix assignment to p_paddr from lma.
+	* merge.c (sec_merge_emit): New local "opb". Convert
+	"alignment_power" to octets.
+	(_bfd_add_merge_section): New locals "alignment_power" and
+	"opb".  Fix comparison between "alignment_power" and
+	"sizeof(align)".
+	(_bfd_merge_sections): New local "opb".  Divide size by opb
+	before checking align mask.
+
+2020-03-13  Christian Eggers  <ceggers@gmx.de>
+
 	* elf.c (_bfd_elf_make_section_from_shdr): Introduce new temp
 	opb.  Divide Elf_Internal_Shdr::sh_addr by opb when setting
 	section LMA/VMA.

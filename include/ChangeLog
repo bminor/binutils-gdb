@@ -1,5 +1,14 @@
 2020-03-13  Christian Eggers  <ceggers@gmx.de>
 
+	* bfdlink.h (struct bfd_link_order): Add unit (bytes/octets) to
+	offset and size members.
+	* elf/internal.h (struct elf_internal_phdr): Likewise for
+	p_align member.
+	(struct elf_segment_map): Likewise for p_paddr and p_size
+	members
+
+2020-03-13  Christian Eggers  <ceggers@gmx.de>
+
 	* elf/internal.h (struct elf_internal_phdr): Add unit (octets)
 	to several member field comments.
 	(Elf_Internal_Shdr): likewise.

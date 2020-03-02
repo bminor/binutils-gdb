@@ -292,8 +292,9 @@ sec_merge_emit (bfd *abfd, struct sec_merge_hash_entry *entry,
   asection *sec = secinfo->sec;
   char *pad = NULL;
   bfd_size_type off = 0;
-  int alignment_power = sec->output_section->alignment_power;
-  bfd_size_type pad_len;
+  unsigned int opb = bfd_octets_per_byte (abfd, sec);
+  int alignment_power = sec->output_section->alignment_power * opb;
+  bfd_size_type pad_len;  /* Octets.  */
 
   /* FIXME: If alignment_power is 0 then really we should scan the
      entry list for the largest required alignment and use that.  */
@@ -364,9 +365,11 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
 {
   struct sec_merge_info *sinfo;
   struct sec_merge_sec_info *secinfo;
-  unsigned int align;
+  unsigned int alignment_power;  /* Octets.  */
+  unsigned int align;            /* Octets.  */
   bfd_size_type amt;
   bfd_byte *contents;
+  unsigned int opb = bfd_octets_per_byte (abfd, sec);
 
   if ((abfd->flags & DYNAMIC) != 0
       || (sec->flags & SEC_MERGE) == 0)
@@ -389,10 +392,11 @@ _bfd_add_merge_section (bfd *abfd, void **psinfo, asection *sec,
 #ifndef CHAR_BIT
 #define CHAR_BIT 8
 #endif
-  if (sec->alignment_power >= sizeof (align) * CHAR_BIT)
+  alignment_power = sec->alignment_power * opb;
+  if (alignment_power >= sizeof (align) * CHAR_BIT)
     return TRUE;
 
-  align = 1u << sec->alignment_power;
+  align = 1u << alignment_power;
   if ((sec->entsize < align
        && ((sec->entsize & (sec->entsize - 1))
 	   || !(sec->flags & SEC_STRINGS)))
@@ -739,7 +743,7 @@ _bfd_merge_sections (bfd *abfd,
   for (sinfo = (struct sec_merge_info *) xsinfo; sinfo; sinfo = sinfo->next)
     {
       struct sec_merge_sec_info *secinfo;
-      bfd_size_type align;
+      bfd_size_type align;  /* Bytes.  */
 
       if (! sinfo->chain)
 	continue;
@@ -764,8 +768,10 @@ _bfd_merge_sections (bfd *abfd,
 	      return FALSE;
 	    if (align)
 	      {
+		unsigned int opb = bfd_octets_per_byte (abfd, secinfo->sec);
+
 		align = (bfd_size_type) 1 << secinfo->sec->alignment_power;
-		if ((secinfo->sec->size & (align - 1)) != 0)
+		if (((secinfo->sec->size / opb) & (align - 1)) != 0)
 		  align = 0;
 	      }
 	  }
@@ -782,7 +788,7 @@ _bfd_merge_sections (bfd *abfd,
       else
 	{
 	  struct sec_merge_hash_entry *e;
-	  bfd_size_type size = 0;
+	  bfd_size_type size = 0;  /* Octets.  */
 
 	  /* Things are much simpler for non-strings.
 	     Just assign them slots in the section.  */

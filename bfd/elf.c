@@ -4672,8 +4672,8 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
       asection *first_mbind = NULL;
       asection *dynsec, *eh_frame_hdr;
       size_t amt;
-      bfd_vma addr_mask, wrap_to = 0;
-      bfd_size_type phdr_size;
+      bfd_vma addr_mask, wrap_to = 0;  /* Bytes.  */
+      bfd_size_type phdr_size;  /* Octets/bytes.  */
       unsigned int opb = bfd_octets_per_byte (abfd, NULL);
 
       /* Select the allocated sections, and sort them.  */
@@ -4701,8 +4701,8 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	      sections[i] = s;
 	      ++i;
 	      /* A wrapping section potentially clashes with header.  */
-	      if (((s->lma + s->size) & addr_mask) < (s->lma & addr_mask))
-		wrap_to = (s->lma + s->size) & addr_mask;
+	      if (((s->lma + s->size / opb) & addr_mask) < (s->lma & addr_mask))
+		wrap_to = (s->lma + s->size / opb) & addr_mask;
 	    }
 	}
       BFD_ASSERT (i <= bfd_count_sections (abfd));
@@ -4786,7 +4786,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	 program headers we will need.  */
       if (phdr_in_segment && count > 0)
 	{
-	  bfd_vma phdr_lma;
+	  bfd_vma phdr_lma;  /* Bytes.  */
 	  bfd_boolean separate_phdr = FALSE;
 
 	  phdr_lma = (sections[0]->lma - phdr_size) & addr_mask & -maxpagesize;
@@ -4826,7 +4826,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	      m = make_mapping (abfd, sections, 0, 0, phdr_in_segment);
 	      if (m == NULL)
 		goto error_return;
-	      m->p_paddr = phdr_lma;
+	      m->p_paddr = phdr_lma * opb;
 	      m->p_vaddr_offset
 		= (sections[0]->vma - phdr_size) & addr_mask & -maxpagesize;
 	      m->p_paddr_valid = 1;
@@ -5014,7 +5014,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 		  if (s2->next->alignment_power == alignment_power
 		      && (s2->next->flags & SEC_LOAD) != 0
 		      && elf_section_type (s2->next) == SHT_NOTE
-		      && align_power (s2->lma + s2->size,
+		      && align_power (s2->lma + s2->size / opb,
 				      alignment_power)
 		      == s2->next->lma)
 		    count++;
@@ -5312,15 +5312,17 @@ elf_sort_segments (const void *arg1, const void *arg2)
     return m1->no_sort_lma ? -1 : 1;
   if (m1->p_type == PT_LOAD && !m1->no_sort_lma)
     {
-      bfd_vma lma1, lma2;
+      unsigned int opb = bfd_octets_per_byte (m1->sections[0]->owner,
+					      m1->sections[0]);
+      bfd_vma lma1, lma2;  /* Bytes.  */
       lma1 = 0;
       if (m1->p_paddr_valid)
-	lma1 = m1->p_paddr;
+	lma1 = m1->p_paddr / opb;
       else if (m1->count != 0)
 	lma1 = m1->sections[0]->lma + m1->p_vaddr_offset;
       lma2 = 0;
       if (m2->p_paddr_valid)
-	lma2 = m2->p_paddr;
+	lma2 = m2->p_paddr / opb;
       else if (m2->count != 0)
 	lma2 = m2->sections[0]->lma + m2->p_vaddr_offset;
       if (lma1 != lma2)
@@ -5591,7 +5593,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
       if (p->p_type == PT_LOAD
 	  && m->count > 0)
 	{
-	  bfd_size_type align;
+	  bfd_size_type align;  /* Bytes.  */
 	  unsigned int align_power = 0;
 
 	  if (m->p_align_valid)
@@ -5628,7 +5630,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		break;
 	      }
 
-	  off_adjust = vma_page_aligned_bias (p->p_vaddr, off, align);
+	  off_adjust = vma_page_aligned_bias (p->p_vaddr, off, align * opb);
 
 	  /* Broken hardware and/or kernel require that files do not
 	     map the same page with different permissions on some hppa
@@ -5995,7 +5997,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	      || hash->root.type == bfd_link_hash_common))
 	{
 	  asection *s = NULL;
-	  bfd_vma filehdr_vaddr = phdrs[phdr_load_seg->idx].p_vaddr;
+	  bfd_vma filehdr_vaddr = phdrs[phdr_load_seg->idx].p_vaddr / opb;
 
 	  if (phdr_load_seg->count != 0)
 	    /* The segment contains sections, so use the first one.  */
@@ -6072,6 +6074,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
   Elf_Internal_Phdr *p;
   struct elf_segment_map *m;
   file_ptr off;
+  unsigned int opb = bfd_octets_per_byte (abfd, NULL);
 
   i_shdrpp = elf_elfsections (abfd);
   end_hdrpp = i_shdrpp + elf_numsections (abfd);
@@ -6138,7 +6141,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
     {
       if (p->p_type == PT_GNU_RELRO)
 	{
-	  bfd_vma start, end;
+	  bfd_vma start, end;  /* Bytes.  */
 	  bfd_boolean ok;
 
 	  if (link_info != NULL)
@@ -6154,7 +6157,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	      if (!m->p_size_valid)
 		abort ();
 	      start = m->sections[0]->vma;
-	      end = start + m->p_size;
+	      end = start + m->p_size / opb;
 	    }
 	  else
 	    {
@@ -6179,7 +6182,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		      && lm->count != 0
 		      && (lm->sections[lm->count - 1]->vma
 			  + (!IS_TBSS (lm->sections[lm->count - 1])
-			     ? lm->sections[lm->count - 1]->size
+			     ? lm->sections[lm->count - 1]->size / opb
 			     : 0)) > start
 		      && lm->sections[0]->vma < end)
 		    break;
@@ -6199,13 +6202,10 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 
 		  if (i < lm->count)
 		    {
-		      unsigned int opb = bfd_octets_per_byte (abfd,
-							      lm->sections[i]);
-
 		      p->p_vaddr = lm->sections[i]->vma * opb;
 		      p->p_paddr = lm->sections[i]->lma * opb;
 		      p->p_offset = lm->sections[i]->filepos;
-		      p->p_memsz = end - p->p_vaddr;
+		      p->p_memsz = end * opb - p->p_vaddr;
 		      p->p_filesz = p->p_memsz;
 
 		      /* The RELRO segment typically ends a few bytes
@@ -7188,8 +7188,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 				   + (map->includes_phdrs
 				      ? iehdr->e_phnum * iehdr->e_phentsize
 				      : 0),
-				   output_section->alignment_power)
-		      == output_section->vma))
+				   output_section->alignment_power * opb)
+		      == (output_section->vma * opb)))
 		map->p_paddr = segment->p_vaddr;
 
 	      /* Match up the physical address of the segment with the
@@ -7257,7 +7257,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	  if (matching_lma == NULL)
 	    matching_lma = suggested_lma;
 
-	  map->p_paddr = matching_lma->lma;
+	  map->p_paddr = matching_lma->lma * opb;
 
 	  /* Offset the segment physical address from the lma
 	     to allow for space taken up by elf headers.  */
@@ -7285,7 +7285,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 		 the same alignment.  */
 	      if (segment->p_align != 0 && segment->p_align < align)
 		align = segment->p_align;
-	      map->p_paddr &= -align;
+	      map->p_paddr &= -(align * opb);
 	    }
 	}
 
@@ -7329,8 +7329,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 				       + (map->includes_phdrs
 					  ? iehdr->e_phnum * iehdr->e_phentsize
 					  : 0),
-				       output_section->alignment_power)
-			  != output_section->lma)
+				       output_section->alignment_power * opb)
+			  != output_section->lma * opb)
 			goto sorry;
 		    }
 		  else
@@ -7396,7 +7396,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	      map->p_type = segment->p_type;
 	      map->p_flags = segment->p_flags;
 	      map->p_flags_valid = 1;
-	      map->p_paddr = suggested_lma->lma;
+	      map->p_paddr = suggested_lma->lma * opb;
 	      map->p_paddr_valid = p_paddr_valid;
 	      map->includes_filehdr = 0;
 	      map->includes_phdrs = 0;

@@ -11566,8 +11566,8 @@ elf_fixup_link_order (bfd *abfd, asection *o)
   struct bfd_link_order *p;
   bfd *sub;
   struct bfd_link_order **sections;
-  asection *s, *other_sec, *linkorder_sec;
-  bfd_vma offset;
+  asection *other_sec, *linkorder_sec;
+  bfd_vma offset;  /* Octets.  */
 
   other_sec = NULL;
   linkorder_sec = NULL;
@@ -11577,7 +11577,7 @@ elf_fixup_link_order (bfd *abfd, asection *o)
     {
       if (p->type == bfd_indirect_link_order)
 	{
-	  s = p->u.indirect.section;
+	  asection *s = p->u.indirect.section;
 	  sub = s->owner;
 	  if ((s->flags & SEC_LINKER_CREATED) == 0
 	      && bfd_get_flavour (sub) == bfd_target_elf_flavour
@@ -11632,11 +11632,12 @@ elf_fixup_link_order (bfd *abfd, asection *o)
   for (n = 0; n < seen_linkorder; n++)
     {
       bfd_vma mask;
-      s = sections[n]->u.indirect.section;
-      mask = ~(bfd_vma) 0 << s->alignment_power;
+      asection *s = sections[n]->u.indirect.section;
+      unsigned int opb = bfd_octets_per_byte (abfd, s);
+
+      mask = ~(bfd_vma) 0 << s->alignment_power * opb;
       offset = (offset + ~mask) & mask;
-      s->output_offset = offset / bfd_octets_per_byte (abfd, s);
-      sections[n]->offset = offset;
+      sections[n]->offset = s->output_offset = offset / opb;
       offset += sections[n]->size;
     }
 
@@ -12247,7 +12248,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
   if (htab->tls_sec)
     {
-      bfd_vma base, end = 0;
+      bfd_vma base, end = 0;  /* Both bytes.  */
       asection *sec;
 
       for (sec = htab->tls_sec;
@@ -12255,6 +12256,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	   sec = sec->next)
 	{
 	  bfd_size_type size = sec->size;
+	  unsigned int opb = bfd_octets_per_byte (abfd, sec);
 
 	  if (size == 0
 	      && (sec->flags & SEC_HAS_CONTENTS) == 0)
@@ -12262,9 +12264,9 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      struct bfd_link_order *ord = sec->map_tail.link_order;
 
 	      if (ord != NULL)
-		size = ord->offset + ord->size;
+		size = ord->offset * opb + ord->size;
 	    }
-	  end = sec->vma + size;
+	  end = sec->vma + size / opb;
 	}
       base = htab->tls_sec->vma;
       /* Only align end of TLS section if static TLS doesn't have special
@@ -12777,6 +12779,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 
 	      if (bed->dtrel_excludes_plt && htab->srelplt != NULL)
 		{
+		  unsigned int opb = bfd_octets_per_byte (abfd, o);
+
 		  /* Don't count procedure linkage table relocs in the
 		     overall reloc count.  */
 		  sh_size -= htab->srelplt->size;
@@ -12796,7 +12800,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		  /* If .rela.plt is the first .rela section, exclude
 		     it from DT_RELA.  */
 		  else if (sh_addr == (htab->srelplt->output_section->vma
-				       + htab->srelplt->output_offset))
+				       + htab->srelplt->output_offset) * opb)
 		    sh_addr += htab->srelplt->size;
 		}
 
@@ -14251,7 +14255,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
     {
       asection *i;
       int eh_changed = 0;
-      unsigned int eh_alignment;
+      unsigned int eh_alignment;  /* Octets.  */
 
       for (i = o->map_head.s; i != NULL; i = i->map_head.s)
 	{
@@ -14278,7 +14282,8 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 	  fini_reloc_cookie_for_section (&cookie, i);
 	}
 
-      eh_alignment = 1 << o->alignment_power;
+      eh_alignment = ((1 << o->alignment_power)
+		      * bfd_octets_per_byte (output_bfd, o));
       /* Skip over zero terminator, and prevent empty sections from
 	 adding alignment padding at the end.  */
       for (i = o->map_tail.s; i != NULL; i = i->map_tail.s)

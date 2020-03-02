@@ -1664,10 +1664,11 @@ elf_debug_file (Elf_Internal_Ehdr *ehdrp)
 bfd *
 NAME(_bfd_elf,bfd_from_remote_memory)
   (bfd *templ,
-   bfd_vma ehdr_vma,
-   bfd_size_type size,
-   bfd_vma *loadbasep,
+   bfd_vma ehdr_vma    /* Bytes.  */,
+   bfd_size_type size  /* Octets.  */,
+   bfd_vma *loadbasep  /* Bytes.  */,
    int (*target_read_memory) (bfd_vma, bfd_byte *, bfd_size_type))
+                          /* (Bytes  ,           , octets       ).  */
 {
   Elf_External_Ehdr x_ehdr;	/* Elf file header, external form */
   Elf_Internal_Ehdr i_ehdr;	/* Elf file header, internal form */
@@ -1680,9 +1681,10 @@ NAME(_bfd_elf,bfd_from_remote_memory)
   unsigned int i;
   bfd_vma high_offset;
   bfd_vma shdr_end;
-  bfd_vma loadbase;
+  bfd_vma loadbase;  /* Bytes.  */
   char *filename;
   size_t amt;
+  unsigned int opb = bfd_octets_per_byte (templ, NULL);
 
   /* Read in the ELF header in external format.  */
   err = target_read_memory (ehdr_vma, (bfd_byte *) &x_ehdr, sizeof x_ehdr);
@@ -1780,17 +1782,17 @@ NAME(_bfd_elf,bfd_from_remote_memory)
 	     header sits, then we can figure out the loadbase.  */
 	  if (first_phdr == NULL)
 	    {
-	      bfd_vma p_offset = i_phdrs[i].p_offset;
-	      bfd_vma p_vaddr = i_phdrs[i].p_vaddr;
+	      bfd_vma p_offset = i_phdrs[i].p_offset;  /* Octets.  */
+	      bfd_vma p_vaddr = i_phdrs[i].p_vaddr;    /* Octets.  */
 
 	      if (i_phdrs[i].p_align > 1)
 		{
-		  p_offset &= -i_phdrs[i].p_align;
-		  p_vaddr &= -i_phdrs[i].p_align;
+		  p_offset &= -(i_phdrs[i].p_align * opb);
+		  p_vaddr &= -(i_phdrs[i].p_align * opb);
 		}
 	      if (p_offset == 0)
 		{
-		  loadbase = ehdr_vma - p_vaddr;
+		  loadbase = ehdr_vma - p_vaddr / opb;
 		  first_phdr = &i_phdrs[i];
 		}
 	    }
@@ -1846,9 +1848,9 @@ NAME(_bfd_elf,bfd_from_remote_memory)
   for (i = 0; i < i_ehdr.e_phnum; ++i)
     if (i_phdrs[i].p_type == PT_LOAD)
       {
-	bfd_vma start = i_phdrs[i].p_offset;
-	bfd_vma end = start + i_phdrs[i].p_filesz;
-	bfd_vma vaddr = i_phdrs[i].p_vaddr;
+	bfd_vma start = i_phdrs[i].p_offset;         /* Octets.  */
+	bfd_vma end = start + i_phdrs[i].p_filesz;   /* Octets.  */
+	bfd_vma vaddr = i_phdrs[i].p_vaddr;          /* Octets.  */
 
 	/* Extend the beginning of the first pt_load to cover file
 	   header and program headers, if we proved earlier that its
@@ -1861,7 +1863,7 @@ NAME(_bfd_elf,bfd_from_remote_memory)
 	/* Extend the end of the last pt_load to cover section headers.  */
 	if (last_phdr == &i_phdrs[i])
 	  end = high_offset;
-	err = target_read_memory (loadbase + vaddr,
+	err = target_read_memory (loadbase + vaddr / opb,
 				  contents + start, end - start);
 	if (err)
 	  {

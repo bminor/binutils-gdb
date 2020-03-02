@@ -635,7 +635,7 @@ struct elf_link_hash_table
 
   /* Cached first output tls section and size of PT_TLS segment.  */
   asection *tls_sec;
-  bfd_size_type tls_size;
+  bfd_size_type tls_size;  /* Bytes.  */
 
   /* A linked list of dynamic BFD's loaded in the link.  */
   struct elf_link_loaded_list *dyn_loaded;

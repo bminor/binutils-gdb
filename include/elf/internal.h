@@ -91,7 +91,8 @@ struct elf_internal_phdr {
   bfd_vma	p_paddr;	     /* Segment physical address in octets.  */
   bfd_vma	p_filesz;	     /* Segment size in file in octets.  */
   bfd_vma	p_memsz;	     /* Segment size in memory in octets.  */
-  bfd_vma	p_align;	     /* Segment alignment, file & memory.  */
+  bfd_vma	p_align;	     /* Segment alignment in bytes, file
+					& memory */
 };
 
 typedef struct elf_internal_phdr Elf_Internal_Phdr;
@@ -266,13 +267,13 @@ struct elf_segment_map
   unsigned long p_type;
   /* Program segment flags.  */
   unsigned long p_flags;
-  /* Program segment physical address.  */
+  /* Program segment physical address in octets.  */
   bfd_vma p_paddr;
   /* Program segment virtual address offset from section vma in bytes.  */
   bfd_vma p_vaddr_offset;
   /* Program segment alignment.  */
   bfd_vma p_align;
-  /* Segment size in file and memory */
+  /* Segment size in file and memory in octets.  */
   bfd_vma p_size;
   /* Whether the p_flags field is valid; if not, the flags are based
      on the section flags.  */
