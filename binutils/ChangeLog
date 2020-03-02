@@ -1,3 +1,8 @@
+2020-03-02  Aaron Merey  <amerey@redhat.com>
+
+	* binutils/testsuite/binutils-all/debuginfod.exp: Improve port
+	selection.
+
 2020-03-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 25543

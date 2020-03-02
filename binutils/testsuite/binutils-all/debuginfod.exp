@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 Free Software Foundation, Inc.
+# Copyright (C) 2002-2020 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -72,9 +72,6 @@ if { ![binutils_assemble $srcdir/$subdir/linkdebug.s tmpdir/linkdebug.debug] } {
     fail "$test (assemble linkdebug)"
 }
 
-# Find an unused port
-set port [exec sh -c "while true; do PORT=`expr '(' \$RANDOM % 1000 ')' + 9000`; ss -atn | fgrep \":\$PORT\" || break; done; echo \$PORT"]
-
 set cache [file join [pwd] "tmpdir/.debuginfod_cache"]
 set db [file join [pwd] "tmpdir/.debuginfod.db"]
 
@@ -99,34 +96,36 @@ file delete -force $db
 set conf_objdump [binutils_run $OBJDUMP "-WK tmpdir/testprog"]
 set conf_readelf [binutils_run $READELF "-wK tmpdir/testprog"]
 
-set debuginfod_pid 0
-
-# Kill the server if we abort early
-proc sigint_handler {} {
-    global debuginfod_pid
-
-    if { $debuginfod_pid != 0 } {
-        catch {exec kill -INT $debuginfod_pid}
-    }
-
-    exit
-}
-
-trap sigint_handler INT
-
-# Start a debuginfod server.
-set debuginfod_pid [exec debuginfod -d $db -p $port -F tmpdir/dbg 2>/dev/null &]
-
-if { !$debuginfod_pid } {
-    fail "$test (server init)"
+# Find an unused port
+set port 7999
+set found 0
+while { ! $found } {
+  incr port
+  if { $port == 65536 } {
+    untested "$test (no available ports)"
     return
+  }
+
+  spawn debuginfod -vvvv -d $db -p $port -F tmpdir/dbg
+  expect {
+    "started http server on IPv4 IPv6 port=$port" {
+      set found 1
+    }
+    "Failed to bind to port" {
+      exec kill -INT -[exp_pid]
+      catch {close}; catch {wait -i $spawn_id}
+    }
+    timeout {
+      fail "$test (find port timeout)"
+      return
+    }
+  }
 }
 
 set metrics [list "ready 1" \
              "thread_work_total{role=\"traverse\"} 1" \
              "thread_work_pending{role=\"scan\"} 0" \
-             "thread_busy{role=\"scan\"} 0" \
-             "groom{statistic=\"buildids\"} 2"]
+             "thread_busy{role=\"scan\"} 0"]
 
 # Check server metrics to confirm init has completed.
 foreach m $metrics {
@@ -145,7 +144,8 @@ foreach m $metrics {
 
   if { $timelim == 0 } {
     fail "$test (server init timeout)"
-    catch {exec kill -INT $debuginfod_pid}
+    exec kill -INT -[exp_pid]
+    catch {close}; catch {wait -i $spawn_id}
     return
   }
 }
@@ -196,5 +196,3 @@ if { [regexp ".*DEBUGINFOD.*" $conf_readelf] } {
 } else {
     untested "$test (readelf not configured with debuginfod)"
 }
-
-catch {exec kill -INT $debuginfod_pid}
