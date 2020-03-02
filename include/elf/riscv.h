@@ -114,6 +114,12 @@ END_RELOC_NUMBERS (R_RISCV_max)
 /* File uses the 32E base integer instruction.  */
 #define EF_RISCV_RVE 0x0008
 
+/* File uses CheriABI.  */
+#define EF_RISCV_CHERIABI 0x00010000
+
+/* File uses capability mode encodings.  */
+#define EF_RISCV_CAPMODE 0x00020000
+
 /* The name of the global pointer symbol.  */
 #define RISCV_GP_SYMBOL "__global_pointer$"
 

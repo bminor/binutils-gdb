@@ -4153,6 +4153,12 @@ get_machine_flags (Filedata * filedata, unsigned e_flags, unsigned e_machine)
 	      strcat (buf, ", quad-float ABI");
 	      break;
 	    }
+
+	  if (e_flags & EF_RISCV_CHERIABI)
+	    strcat (buf, ", CheriABI");
+
+	  if (e_flags & EF_RISCV_CAPMODE)
+	    strcat (buf, ", capmode");
 	  break;
 
 	case EM_SH:
