@@ -1,3 +1,8 @@
+2020-03-03  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-coff.h: Remove vestiges of coff-m68k and pe-mips
+	support.
+
 2020-03-02  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-m32r.c (md_begin): Set SEC_SMALL_DATA on .scommon section.
