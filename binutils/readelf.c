@@ -13732,6 +13732,14 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
   end  = start + num_bytes;
   some_strings_shown = FALSE;
 
+#ifdef HAVE_MBSTATE_T
+  mbstate_t state;
+  /* Initialise the multibyte conversion state.  */
+  memset (& state, 0, sizeof (state));
+#endif
+
+  bfd_boolean continuing = FALSE;
+
   while (data < end)
     {
       while (!ISPRINT (* data))
@@ -13742,18 +13750,76 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 	{
 	  size_t maxlen = end - data;
 
+	  if (continuing)
+	    {
+	      printf ("            ");
+	      continuing = FALSE;
+	    }
+	  else
+	    {
 #ifndef __MSVCRT__
-	  /* PR 11128: Use two separate invocations in order to work
-             around bugs in the Solaris 8 implementation of printf.  */
-	  printf ("  [%6tx]  ", data - start);
+	      /* PR 11128: Use two separate invocations in order to work
+		 around bugs in the Solaris 8 implementation of printf.  */
+	      printf ("  [%6tx]  ", data - start);
 #else
-	  printf ("  [%6Ix]  ", (size_t) (data - start));
+	      printf ("  [%6Ix]  ", (size_t) (data - start));
 #endif
+	    }
+
 	  if (maxlen > 0)
 	    {
-	      print_symbol ((int) maxlen, (const char *) data);
-	      putchar ('\n');
-	      data += strnlen ((const char *) data, maxlen);
+	      char c;
+
+	      while (maxlen)
+		{
+		  c = *data++;
+
+		  if (c == 0)
+		    break;
+
+		  /* PR 25543: Treat new-lines as string-ending characters.  */
+		  if (c == '\n')
+		    {
+		      printf ("\\n\n");
+		      if (*data != 0)
+			continuing = TRUE;
+		      break;
+		    }
+
+		  /* Do not print control characters directly as they can affect terminal
+		     settings.  Such characters usually appear in the names generated
+		     by the assembler for local labels.  */
+		  if (ISCNTRL (c))
+		    {
+		      printf ("^%c", c + 0x40);
+		    }
+		  else if (ISPRINT (c))
+		    {
+		      putchar (c);
+		    }
+		  else
+		    {
+		      size_t  n;
+#ifdef HAVE_MBSTATE_T
+		      wchar_t w;
+#endif
+		      /* Let printf do the hard work of displaying multibyte characters.  */
+		      printf ("%.1s", data - 1);
+#ifdef HAVE_MBSTATE_T
+		      /* Try to find out how many bytes made up the character that was
+			 just printed.  Advance the symbol pointer past the bytes that
+			 were displayed.  */
+		      n = mbrtowc (& w, (char *)(data - 1), MB_CUR_MAX, & state);
+#else
+		      n = 1;
+#endif
+		      if (n != (size_t) -1 && n != (size_t) -2 && n > 0)
+			data += (n - 1);
+		    }
+		}
+
+	      if (c != '\n')
+		putchar ('\n');
 	    }
 	  else
 	    {

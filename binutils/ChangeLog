@@ -1,3 +1,12 @@
+2020-03-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 25543
+	* readelf.c (dump_section_as_strings): Display new-line characters
+	as \n and then insert a line break.
+	* testsuite/binutils-all/pr25543.s: New test.
+	* testsuite/binutils-all/pr25543.d: Test driver.
+	* testsuite/binutils-all/readelf.exp: Run the new test.
+
 2020-02-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 25526
