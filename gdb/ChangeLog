@@ -1,3 +1,11 @@
+2020-03-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* infrun.c (gdbarch_supports_displaced_stepping): New.
+	(use_displaced_stepping): Break up conditions in smaller pieces.
+	Use gdbarch_supports_displaced_stepping.
+	(displaced_step_prepare_throw): Use
+	gdbarch_supports_displaced_stepping.
+
 2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* NEWS: Mention new behaviour of the history filename.
