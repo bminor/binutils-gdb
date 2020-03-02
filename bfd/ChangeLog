@@ -1,3 +1,7 @@
+2020-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* trad-core.c (trad_unix_core_file_p): Return bfd_cleanup.
+
 2020-03-02  Alan Modra  <amodra@gmail.com>
 
 	* targets.c (bfd_cleanup): New typedef.
