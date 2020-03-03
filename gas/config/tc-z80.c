@@ -825,19 +825,35 @@ is_indir (const char *s)
 }
 
 /* Check whether a symbol involves a register.  */
-static int
+static bfd_boolean
 contains_register (symbolS *sym)
 {
   if (sym)
     {
-      expressionS * ex = symbol_get_value_expression(sym);
+      expressionS * ex = symbol_get_value_expression (sym);
 
-      return (O_register == ex->X_op)
-	|| (ex->X_add_symbol && contains_register(ex->X_add_symbol))
-	|| (ex->X_op_symbol && contains_register(ex->X_op_symbol));
+      switch (ex->X_op)
+	{
+	case O_register:
+	  return TRUE;
+
+	case O_add:
+	case O_subtract:
+	  if (ex->X_op_symbol && contains_register (ex->X_op_symbol))
+	    return TRUE;
+	  /* Fall through.  */
+	case O_uminus:
+	case O_symbol:
+	  if (ex->X_add_symbol && contains_register (ex->X_add_symbol))
+	    return TRUE;
+	  break;
+
+	default:
+	  break;
+	}
     }
 
-  return 0;
+  return FALSE;
 }
 
 /* Parse general expression, not looking for indexed addressing.  */
@@ -1168,7 +1184,7 @@ emit_byte (expressionS * val, bfd_reloc_code_real_type r_type)
     }
   p = frag_more (1);
   *p = val->X_add_number;
-  if ( contains_register (val->X_add_symbol) || contains_register (val->X_op_symbol) )
+  if (contains_register (val->X_add_symbol) || contains_register (val->X_op_symbol))
     {
       ill_op ();
     }
@@ -1188,7 +1204,7 @@ emit_byte (expressionS * val, bfd_reloc_code_real_type r_type)
     }
   else
     {
-      /* For symbols only, constants are stored at begin of function */
+      /* For symbols only, constants are stored at begin of function.  */
       fix_new_exp (frag_now, p - frag_now->fr_literal, 1, val,
 		   (r_type == BFD_RELOC_8_PCREL) ? TRUE : FALSE, r_type);
     }

@@ -1,3 +1,9 @@
+2020-03-03  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25604
+	* config/tc-z80.c (contains_register): Prevent an illegal memory
+	access when checking an expression for a register name.
+
 2020-03-03  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-coff.h: Remove vestiges of coff-m68k and pe-mips
