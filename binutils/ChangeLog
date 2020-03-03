@@ -1,3 +1,8 @@
+2020-03-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 25625
+	* prdbg.c (pr_tag_type): Remove call to abort.
+
 2020-03-02  Aaron Merey  <amerey@redhat.com>
 
 	* binutils/testsuite/binutils-all/debuginfod.exp: Improve port

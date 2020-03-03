@@ -1624,7 +1624,7 @@ pr_tag_type (void *p, const char *name, unsigned int id,
       t = "union class ";
       break;
     default:
-      abort ();
+      /* PR 25625: Corrupt input can trigger this case.  */
       return FALSE;
     }
 
