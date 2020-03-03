@@ -1222,6 +1222,21 @@
 #define AT_L2_CACHESHAPE  36
 #define AT_L3_CACHESHAPE  37
 
+/* Shapes of the caches, with more room to describe them.
+   *GEOMETRY are comprised of cache line size in bytes in the bottom 16 bits
+   and the cache associativity in the next 16 bits.  */
+#define AT_L1I_CACHESIZE	40
+#define AT_L1I_CACHEGEOMETRY	41
+#define AT_L1D_CACHESIZE	42
+#define AT_L1D_CACHEGEOMETRY	43
+#define AT_L2_CACHESIZE		44
+#define AT_L2_CACHEGEOMETRY	45
+#define AT_L3_CACHESIZE		46
+#define AT_L3_CACHEGEOMETRY	47
+
+#define AT_MINSIGSTKSZ		51 /* Stack needed for signal delivery
+				      (AArch64).  */
+
 #define AT_FREEBSD_EXECPATH     15      /* Path to the executable. */
 #define AT_FREEBSD_CANARY       16      /* Canary for SSP. */
 #define AT_FREEBSD_CANARYLEN    17      /* Length of the canary. */

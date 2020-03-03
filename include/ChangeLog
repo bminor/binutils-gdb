@@ -1,3 +1,10 @@
+2020-03-03  Luis Machado  <luis.machado@linaro.org>
+
+	* elf/common.h (AT_L1I_CACHESIZE, AT_L1I_CACHEGEOMETRY)
+	(AT_L1D_CACHESIZE, AT_L1D_CACHEGEOMETRY, AT_L2_CACHESIZE)
+	(AT_L2_CACHEGEOMETRY, AT_L3_CACHESIZE, AT_L3_CACHEGEOMETRY)
+	(AT_MINSIGSTKSZ): New defines, imported from glibc.
+
 2020-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	Import from gcc mainline:
