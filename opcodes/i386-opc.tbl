@@ -66,6 +66,9 @@
 #define Size32 Size=SIZE32
 #define Size64 Size=SIZE64
 
+#define IgnoreSize	MnemonicSize=IGNORESIZE
+#define DefaultSize	MnemonicSize=DEFAULTSIZE
+
 // RegMem implies a ModR/M byte
 #define RegMem Modrm|RegMem
 

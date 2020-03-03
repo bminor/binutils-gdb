@@ -5876,7 +5876,7 @@ match_template (char mnem_suffix)
       if (i.suffix == QWORD_MNEM_SUFFIX
 	  && flag_code != CODE_64BIT
 	  && (intel_syntax
-	      ? (!t->opcode_modifier.ignoresize
+	      ? (t->opcode_modifier.mnemonicsize != IGNORESIZE
 	         && !t->opcode_modifier.broadcast
 		 && !intel_float_operand (t->name))
 	      : intel_float_operand (t->name) != 2)
@@ -5892,7 +5892,7 @@ match_template (char mnem_suffix)
       else if (i.suffix == LONG_MNEM_SUFFIX
 	       && !cpu_arch_flags.bitfield.cpui386
 	       && (intel_syntax
-		   ? (!t->opcode_modifier.ignoresize
+		   ? (t->opcode_modifier.mnemonicsize != IGNORESIZE
 		      && !intel_float_operand (t->name))
 		   : intel_float_operand (t->name) != 2)
 	       && ((operand_types[0].bitfield.class != RegMMX
@@ -6247,7 +6247,7 @@ match_template (char mnem_suffix)
 	as_warn (_("indirect %s without `*'"), t->name);
 
       if (t->opcode_modifier.isprefix
-	  && t->opcode_modifier.ignoresize)
+	  && t->opcode_modifier.mnemonicsize == IGNORESIZE)
 	{
 	  /* Warn them that a data or address size prefix doesn't
 	     affect assembly of the next line of code.  */
@@ -6371,7 +6371,7 @@ process_suffix (void)
       else if (i.suffix == BYTE_MNEM_SUFFIX)
 	{
 	  if (intel_syntax
-	      && i.tm.opcode_modifier.ignoresize
+	      && i.tm.opcode_modifier.mnemonicsize == IGNORESIZE
 	      && i.tm.opcode_modifier.no_bsuf)
 	    i.suffix = 0;
 	  else if (!check_byte_reg ())
@@ -6380,7 +6380,7 @@ process_suffix (void)
       else if (i.suffix == LONG_MNEM_SUFFIX)
 	{
 	  if (intel_syntax
-	      && i.tm.opcode_modifier.ignoresize
+	      && i.tm.opcode_modifier.mnemonicsize == IGNORESIZE
 	      && i.tm.opcode_modifier.no_lsuf
 	      && !i.tm.opcode_modifier.todword
 	      && !i.tm.opcode_modifier.toqword)
@@ -6391,7 +6391,7 @@ process_suffix (void)
       else if (i.suffix == QWORD_MNEM_SUFFIX)
 	{
 	  if (intel_syntax
-	      && i.tm.opcode_modifier.ignoresize
+	      && i.tm.opcode_modifier.mnemonicsize == IGNORESIZE
 	      && i.tm.opcode_modifier.no_qsuf
 	      && !i.tm.opcode_modifier.todword
 	      && !i.tm.opcode_modifier.toqword)
@@ -6402,13 +6402,14 @@ process_suffix (void)
       else if (i.suffix == WORD_MNEM_SUFFIX)
 	{
 	  if (intel_syntax
-	      && i.tm.opcode_modifier.ignoresize
+	      && i.tm.opcode_modifier.mnemonicsize == IGNORESIZE
 	      && i.tm.opcode_modifier.no_wsuf)
 	    i.suffix = 0;
 	  else if (!check_word_reg ())
 	    return 0;
 	}
-      else if (intel_syntax && i.tm.opcode_modifier.ignoresize)
+      else if (intel_syntax
+	       && i.tm.opcode_modifier.mnemonicsize == IGNORESIZE)
 	/* Do nothing if the instruction is going to ignore the prefix.  */
 	;
       else
@@ -6417,7 +6418,8 @@ process_suffix (void)
       /* Undo the movsx/movzx change done above.  */
       i.operands = numop;
     }
-  else if (i.tm.opcode_modifier.defaultsize && !i.suffix)
+  else if (i.tm.opcode_modifier.mnemonicsize == DEFAULTSIZE
+	   && !i.suffix)
     {
       i.suffix = stackop_size;
       if (stackop_size == LONG_MNEM_SUFFIX)
@@ -6466,12 +6468,12 @@ process_suffix (void)
     }
 
   if (!i.suffix
-      && (!i.tm.opcode_modifier.defaultsize
+      && (i.tm.opcode_modifier.mnemonicsize != DEFAULTSIZE
 	  /* Also cover lret/retf/iret in 64-bit mode.  */
 	  || (flag_code == CODE_64BIT
 	      && !i.tm.opcode_modifier.no_lsuf
 	      && !i.tm.opcode_modifier.no_qsuf))
-      && !i.tm.opcode_modifier.ignoresize
+      && i.tm.opcode_modifier.mnemonicsize != IGNORESIZE
       /* Accept FLDENV et al without suffix.  */
       && (i.tm.opcode_modifier.no_ssuf || i.tm.opcode_modifier.floatmf))
     {
@@ -6544,7 +6546,7 @@ process_suffix (void)
       if (suffixes & (suffixes - 1))
 	{
 	  if (intel_syntax
-	      && (!i.tm.opcode_modifier.defaultsize
+	      && (i.tm.opcode_modifier.mnemonicsize != DEFAULTSIZE
 		  || operand_check == check_error))
 	    {
 	      as_bad (_("ambiguous operand size for `%s'"), i.tm.name);
@@ -6638,7 +6640,7 @@ process_suffix (void)
 	 size prefix, except for instructions that will ignore this
 	 prefix anyway.  */
       if (i.suffix != QWORD_MNEM_SUFFIX
-	  && !i.tm.opcode_modifier.ignoresize
+	  && i.tm.opcode_modifier.mnemonicsize != IGNORESIZE
 	  && !i.tm.opcode_modifier.floatmf
 	  && !is_any_vex_encoding (&i.tm)
 	  && ((i.suffix == LONG_MNEM_SUFFIX) == (flag_code == CODE_16BIT)

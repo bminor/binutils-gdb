@@ -427,9 +427,10 @@ enum
   CheckRegSize,
   /* instruction ignores operand size prefix and in Intel mode ignores
      mnemonic size suffix check.  */
-  IgnoreSize,
+#define IGNORESIZE	1
   /* default insn size depends on mode */
-  DefaultSize,
+#define DEFAULTSIZE	2
+  MnemonicSize,
   /* any memory size */
   Anysize,
   /* b suffix on instruction illegal */
@@ -661,8 +662,7 @@ typedef struct i386_opcode_modifier
   unsigned int floatr:1;
   unsigned int size:2;
   unsigned int checkregsize:1;
-  unsigned int ignoresize:1;
-  unsigned int defaultsize:1;
+  unsigned int mnemonicsize:2;
   unsigned int anysize:1;
   unsigned int no_bsuf:1;
   unsigned int no_wsuf:1;

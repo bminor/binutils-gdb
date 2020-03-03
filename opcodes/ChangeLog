@@ -1,3 +1,18 @@
+2020-03-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Replace IgnoreSize/DefaultSize
+	with MnemonicSize.
+	* i386-opc.h (IGNORESIZE): New.
+	(DEFAULTSIZE): Likewise.
+	(IgnoreSize): Removed.
+	(DefaultSize): Likewise.
+	(MnemonicSize): New.
+	(i386_opcode_modifier): Replace ignoresize/defaultsize with
+	mnemonicsize.
+	* i386-opc.tbl (IgnoreSize): New.
+	(DefaultSize): Likewise.
+	* i386-tbl.h: Regenerated.
+
 2020-03-03  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25627

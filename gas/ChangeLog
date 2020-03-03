@@ -1,3 +1,9 @@
+2020-03-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (match_template): Replace ignoresize and
+	defaultsize with mnemonicsize.
+	(process_suffix): Likewise.
+
 2020-03-03  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25627
