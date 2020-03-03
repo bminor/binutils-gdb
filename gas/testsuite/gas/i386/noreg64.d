@@ -32,8 +32,6 @@ Disassembly of section .text:
  *[a-f0-9]+:	a7                   	cmpsl  %es:\(%rdi\),%ds:\(%rsi\)
  *[a-f0-9]+:	f2 0f 38 f1 00       	crc32l \(%rax\),%eax
  *[a-f0-9]+:	f2 48 0f 38 f1 00    	crc32q \(%rax\),%rax
- *[a-f0-9]+:	f2 0f 2a 00          	cvtsi2sdl \(%rax\),%xmm0
- *[a-f0-9]+:	f3 0f 2a 00          	cvtsi2ssl \(%rax\),%xmm0
  *[a-f0-9]+:	ff 08                	decl   \(%rax\)
  *[a-f0-9]+:	f7 30                	divl   \(%rax\)
  *[a-f0-9]+:	d8 00                	fadds  \(%rax\)
@@ -155,12 +153,6 @@ Disassembly of section .text:
  *[a-f0-9]+:	f7 00 89 00 00 00    	testl  \$0x89,\(%rax\)
  *[a-f0-9]+:	f7 00 34 12 00 00    	testl  \$0x1234,\(%rax\)
  *[a-f0-9]+:	f7 00 78 56 34 12    	testl  \$0x12345678,\(%rax\)
- *[a-f0-9]+:	c5 fb 2a 00          	vcvtsi2sdl \(%rax\),%xmm0,%xmm0
- *[a-f0-9]+:	62 61 7f 08 2a 38    	vcvtsi2sdl \(%rax\),%xmm0,%xmm31
- *[a-f0-9]+:	c5 fa 2a 00          	vcvtsi2ssl \(%rax\),%xmm0,%xmm0
- *[a-f0-9]+:	62 61 7e 08 2a 38    	vcvtsi2ssl \(%rax\),%xmm0,%xmm31
- *[a-f0-9]+:	62 f1 7f 08 7b 00    	vcvtusi2sdl \(%rax\),%xmm0,%xmm0
- *[a-f0-9]+:	62 f1 7e 08 7b 00    	vcvtusi2ssl \(%rax\),%xmm0,%xmm0
  *[a-f0-9]+:	83 30 01             	xorl   \$0x1,\(%rax\)
  *[a-f0-9]+:	81 30 89 00 00 00    	xorl   \$0x89,\(%rax\)
  *[a-f0-9]+:	81 30 34 12 00 00    	xorl   \$0x1234,\(%rax\)

@@ -1,3 +1,10 @@
+2020-03-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25622
+	* i386-opc.tbl: Add IgnoreSize to cvtsi2sd, cvtsi2ss, vcvtsi2sd,
+	vcvtsi2ss, vcvtusi2sd and vcvtusi2ss for AT&T syntax.
+	* i386-tbl.h: Regenerated.
+
 2020-02-26  Alan Modra  <amodra@gmail.com>
 
 	* aarch64-asm.c: Indent labels correctly.
