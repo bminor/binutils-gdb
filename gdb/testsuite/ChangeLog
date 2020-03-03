@@ -1,3 +1,8 @@
+2020-03-03  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.mi/mi-sym-info.exp: Add missing -prompt "$mi_gdb_prompt$" to
+	gdb_test_multiple calls.
+
 2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/default.exp: Remove test of 'set history filename'.

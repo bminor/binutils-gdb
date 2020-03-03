@@ -68,7 +68,8 @@ mi_gdb_test "113-symbol-info-types" \
 # this command that we overflow expect's buffers, avoid this by
 # fetching the output piece by piece.
 set testname "List all functions"
-gdb_test_multiple "114-symbol-info-functions --include-nondebug" ${testname} {
+set cmd "114-symbol-info-functions --include-nondebug"
+gdb_test_multiple $cmd ${testname} -prompt "${mi_gdb_prompt}$" {
     -re "114\\^done,symbols=\{debug=\\\[${symtab_re}(?:,${symtab_re})*\\\],nondebug=\\\[" {
 	exp_continue
     }
@@ -83,7 +84,8 @@ gdb_test_multiple "114-symbol-info-functions --include-nondebug" ${testname} {
 }
 
 set testname "List all variables"
-gdb_test_multiple "115-symbol-info-variables --include-nondebug" ${testname} {
+set cmd "115-symbol-info-variables --include-nondebug"
+gdb_test_multiple $cmd ${testname} -prompt "${mi_gdb_prompt}$" {
     -re "115\\^done,symbols=\{debug=\\\[${symtab_re}(?:,${symtab_re})*\\\],nondebug=\\\[" {
 	verbose -log "Got the first part of the input"
 	exp_continue
