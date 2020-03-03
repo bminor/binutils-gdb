@@ -56,7 +56,9 @@ set process_entry_re "{${id_re},${type_re}(,$description_re)?(,$user_re)?(,$core
 
 # The list can be long, so read entries one by one to avoid hitting the
 # timeout (especially when running with check-read1).
-gdb_test_multiple "-list-thread-groups --available" "list available thread groups" {
+set cmd "-list-thread-groups --available"
+set test "list available thread groups"
+gdb_test_multiple $cmd $test -prompt "$mi_gdb_prompt" {
     -re "\\^done,groups=\\\[" {
 	# The beginning of the response.
 	exp_continue
@@ -71,7 +73,7 @@ gdb_test_multiple "-list-thread-groups --available" "list available thread group
 	# The last entry.
 	pass $gdb_test_name
     }
-} $mi_gdb_prompt
+}
 
 # List specific processes, make sure there are two entries.
 set spawn_id_1 [remote_spawn target $binfile]
