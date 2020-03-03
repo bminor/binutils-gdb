@@ -1,3 +1,7 @@
+2020-03-03  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.in: Re-generate.
+
 2020-02-28  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb-dlfcn.h (gdb_dlopen): Update comment.

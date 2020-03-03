@@ -354,7 +354,7 @@ AM_CPPFLAGS = -I$(srcdir)/../include -I$(srcdir)/../gdb \
     -I../gnulib/import -I$(srcdir)/../gnulib/import \
     -I.. -I$(srcdir)/.. $(INCINTL) -I../bfd -I$(srcdir)/../bfd
 
-AM_CXXFLAGS = $(CXX_DIALECT) $(WARN_CFLAGS) $(WERROR_CFLAGS)
+AM_CXXFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS)
 noinst_LIBRARIES = libgdbsupport.a
 @SELFTEST_TRUE@selftest = selftest.cc
 libgdbsupport_a_SOURCES = \
@@ -692,6 +692,8 @@ uninstall-am:
 
 .PRECIOUS: Makefile
 
+
+override CXX += $(CXX_DIALECT)
 
 # Double-check that no defines are missing from our configury.
 check-defines:
