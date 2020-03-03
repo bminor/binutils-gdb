@@ -106,6 +106,7 @@ struct bfd_preserve
   unsigned int section_id;
   struct bfd_hash_table section_htab;
   const struct bfd_build_id *build_id;
+  bfd_cleanup cleanup;
 };
 
 /* When testing an object for compatibility with a particular target
@@ -118,7 +119,8 @@ struct bfd_preserve
    the subset.  */
 
 static bfd_boolean
-bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve)
+bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve,
+		   bfd_cleanup cleanup)
 {
   preserve->tdata = abfd->tdata.any;
   preserve->arch_info = abfd->arch_info;
@@ -130,6 +132,7 @@ bfd_preserve_save (bfd *abfd, struct bfd_preserve *preserve)
   preserve->section_htab = abfd->section_htab;
   preserve->marker = bfd_alloc (abfd, 1);
   preserve->build_id = abfd->build_id;
+  preserve->cleanup = cleanup;
   if (preserve->marker == NULL)
     return FALSE;
 
@@ -153,7 +156,7 @@ bfd_reinit (bfd *abfd, unsigned int section_id, bfd_cleanup cleanup)
 
 /* Restores bfd state saved by bfd_preserve_save.  */
 
-static void
+static bfd_cleanup
 bfd_preserve_restore (bfd *abfd, struct bfd_preserve *preserve)
 {
   bfd_hash_table_free (&abfd->section_htab);
@@ -172,6 +175,7 @@ bfd_preserve_restore (bfd *abfd, struct bfd_preserve *preserve)
      its arg, as well as its arg.  */
   bfd_release (abfd, preserve->marker);
   preserve->marker = NULL;
+  return preserve->cleanup;
 }
 
 /* Called when the bfd state saved by bfd_preserve_save is no longer
@@ -180,6 +184,15 @@ bfd_preserve_restore (bfd *abfd, struct bfd_preserve *preserve)
 static void
 bfd_preserve_finish (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_preserve *preserve)
 {
+  if (preserve->cleanup)
+    {
+      /* Run the cleanup, assuming that all it will need is the
+	 tdata at the time the cleanup was returned.  */
+      void *tdata = abfd->tdata.any;
+      abfd->tdata.any = preserve->tdata;
+      preserve->cleanup (abfd);
+      abfd->tdata.any = tdata;
+    }
   /* It would be nice to be able to free more memory here, eg. old
      tdata, but that's not possible since these blocks are sitting
      inside bfd_alloc'd memory.  The section hash is on a separate
@@ -252,7 +265,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
   save_targ = abfd->xvec;
 
   preserve_match.marker = NULL;
-  if (!bfd_preserve_save (abfd, &preserve))
+  if (!bfd_preserve_save (abfd, &preserve, NULL))
     goto err_ret;
 
   /* If the target type was explicitly specified, just check that target.  */
@@ -381,8 +394,9 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
 	  if (preserve_match.marker == NULL)
 	    {
 	      match_targ = abfd->xvec;
-	      if (!bfd_preserve_save (abfd, &preserve_match))
+	      if (!bfd_preserve_save (abfd, &preserve_match, cleanup))
 		goto err_ret;
+	      cleanup = NULL;
 	    }
 	}
     }
@@ -455,7 +469,7 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
      whole bfd and restoring it would be even worse; the first thing
      you notice is that the cached bfd file position gets out of sync.  */
   if (preserve_match.marker != NULL)
-    bfd_preserve_restore (abfd, &preserve_match);
+    cleanup = bfd_preserve_restore (abfd, &preserve_match);
 
   if (match_count == 1)
     {

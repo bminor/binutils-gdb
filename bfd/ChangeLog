@@ -1,3 +1,13 @@
+2020-03-03  Alan Modra  <amodra@gmail.com>
+
+	* format.c (struct bfd_preserve): Add cleanup field.
+	(bfd_preserve_save): Add cleanup param and save.
+	(bfd_preserve_restore): Return cleanup.
+	(bfd_preserve_finish): Call the cleanup for the discarded match.
+	(bfd_check_format_matches): Pass cleanup to bfd_preserve_save,
+	and clear when preserving a match.  Restore cleanup too when
+	restoring that match.
+
 2020-03-02  Alan Modra  <amodra@gmail.com>
 
 	* cisco-core.c (cisco_core_file_p): Return bfd_cleanup.
