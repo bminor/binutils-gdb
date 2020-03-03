@@ -955,3 +955,13 @@ Disassembly of section .text:
 \s+793:\s+ab\s+xor a,e
 \s+794:\s+ac\s+xor a,h
 \s+795:\s+ad\s+xor a,l
+\s+796:\s+ed 07\s+ld bc,\(hl\)
+\s+798:\s+ed 17\s+ld de,\(hl\)
+\s+79a:\s+ed 27\s+ld hl,\(hl\)
+\s+79c:\s+ed 37\s+ld ix,\(hl\)
+\s+79e:\s+ed 31\s+ld iy,\(hl\)
+\s+7a0:\s+ed 0f\s+ld \(hl\),bc
+\s+7a2:\s+ed 1f\s+ld \(hl\),de
+\s+7a4:\s+ed 2f\s+ld \(hl\),hl
+\s+7a6:\s+ed 3f\s+ld \(hl\),ix
+\s+7a8:\s+ed 3e\s+ld \(hl\),iy

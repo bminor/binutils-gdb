@@ -1,3 +1,9 @@
+2020-03-03  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25627
+	* z80-dis.c: Fix disassembly of LD IY,(HL) and D (HL),IX
+	instructions.
+
 2020-03-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25622

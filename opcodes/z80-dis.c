@@ -436,6 +436,7 @@ struct tab_elt opc_ed[] =
 {
   { 0x30, 0xFF, prt, "mul d,e", INSS_Z80N },
   { 0x31, 0xFF, prt, "add hl,a", INSS_Z80N },
+  { 0x31, 0xFF, prt, "ld iy,(hl)", INSS_EZ80 },
   { 0x30, 0xFE, dump, "xx", INSS_ALL }, /* do not move this line */
   { 0x00, 0xC7, prt_r_n, "in0 %s,(0x%%02x)", INSS_Z180|INSS_EZ80 },
   { 0x01, 0xC7, prt_r_n, "out0 (0x%%02x),%s", INSS_Z180|INSS_EZ80 },
@@ -446,6 +447,7 @@ struct tab_elt opc_ed[] =
   { 0x04, 0xC7, prt_r, "tst %s", INSS_Z180},
   { 0x04, 0xC7, prt_r, "tst a,%s", INSS_EZ80 },
   { 0x07, 0xFF, prt, "ld bc,(hl)", INSS_EZ80 },
+  { 0x3F, 0xFF, prt, "ld (hl),ix", INSS_EZ80 },
   { 0x0F, 0xCF, prt_rr, "ld (hl),", INSS_EZ80 },
   { 0x17, 0xFF, prt, "ld de,(hl)", INSS_EZ80 },
   { 0x23, 0xFF, prt, "swapnib", INSS_Z80N },
@@ -462,10 +464,8 @@ struct tab_elt opc_ed[] =
   { 0x34, 0xFF, prt_nn, "add hl,0x%04x", INSS_Z80N },
   { 0x35, 0xFF, prt_nn, "add de,0x%04x", INSS_Z80N },
   { 0x36, 0xFF, prt_nn, "add bc,0x%04x", INSS_Z80N },
-  { 0x36, 0xFF, prt, "ld iy,(hl)", INSS_EZ80 },
   { 0x37, 0xFF, prt, "ld ix,(hl)", INSS_EZ80 },
   { 0x3E, 0xFF, prt, "ld (hl),iy", INSS_EZ80 },
-  { 0x3F, 0xFF, prt, "ld (hl),ix", INSS_EZ80 },
   { 0x70, 0xFF, prt, "in f,(c)", INSS_Z80 | INSS_R800 | INSS_Z80N },
   { 0x70, 0xFF, dump, "xx", INSS_ALL },
   { 0x40, 0xC7, prt_r, "in %s,(bc)", INSS_EZ80 },

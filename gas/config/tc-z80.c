@@ -2601,8 +2601,8 @@ emit_ld_rr_m (expressionS *dst, expressionS *src)
         case REG_BC: opcode = 0x07; break;
         case REG_DE: opcode = 0x17; break;
         case REG_HL: opcode = 0x27; break;
-	case REG_IX: opcode = (!prefix || prefix == 0xDD) ? 0x37 : 0x31; break;
-	case REG_IY: opcode = prefix ? ((prefix == 0xDD) ? 0x31 : 0x37) : 0x36; break;
+	case REG_IX: opcode = (prefix == 0xED || prefix == 0xDD) ? 0x37 : 0x31; break;
+	case REG_IY: opcode = (prefix == 0xED || prefix == 0xDD) ? 0x31 : 0x37; break;
         default:
           ill_op ();
         }

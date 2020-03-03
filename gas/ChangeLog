@@ -1,3 +1,13 @@
+2020-03-03  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25627
+	* config/tc-z80.c (emit_ld_rr_m): Fix invalid compilation of
+	instruction LD IY,(HL).
+	* testsuite/gas/z80/ez80_adl_all.d: Update expected disassembly.
+	* testsuite/gas/z80/ez80_adl_all.s: Add tests of the instruction.
+	* testsuite/gas/z80/ez80_z80_all.d: Update expected disassembly.
+	* testsuite/gas/z80/ez80_z80_all.s: Add tests of the instruction.
+
 2020-03-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25622

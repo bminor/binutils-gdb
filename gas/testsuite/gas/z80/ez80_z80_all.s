@@ -474,7 +474,7 @@
 	ex (sp),hl
 	ex (sp),ix
 	ex (sp),iy
-	ex af,af'
+	ex af,af'	;'
 	ex de,hl
 	exx
 	halt
@@ -992,3 +992,13 @@
 	xor e
 	xor h
 	xor l
+	ld	bc,(hl)
+	ld	de,(hl)
+	ld	hl,(hl)
+	ld	ix,(hl)
+	ld	iy,(hl)
+	ld	(hl),bc
+	ld	(hl),de
+	ld	(hl),hl
+	ld	(hl),ix
+	ld	(hl),iy
