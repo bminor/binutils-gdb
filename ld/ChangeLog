@@ -1,3 +1,9 @@
+2020-03-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 25588
+	* ld.texi (Options): Update the description of the --rpath-link
+	option.
+
 2020-03-02  Alan Modra  <amodra@gmail.com>
 
 	* plugin.c (plugin_object_p): Return a bfd_cleanup.

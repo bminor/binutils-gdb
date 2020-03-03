@@ -2011,6 +2011,7 @@ runtime linker would do.
 
 The linker uses the following search paths to locate required shared
 libraries:
+
 @enumerate
 @item
 Any directories specified by @option{-rpath-link} options.
@@ -2040,8 +2041,18 @@ libraries needed by it. The @code{DT_RPATH} entries are ignored if
 @item
 The default directories, normally @file{/lib} and @file{/usr/lib}.
 @item
-For a native linker on an ELF system, if the file @file{/etc/ld.so.conf}
-exists, the list of directories found in that file.
+For a linker for a Linux system, if the file @file{/etc/ld.so.conf}
+exists, the list of directories found in that file.  Note: the path
+to this file is prefixed with the @code{sysroot} value, if that is
+defined, and then any @code{prefix} string if the linker was
+configured with the @command{--prefix=<path>} option.
+@item
+For a native linker on a FreeBSD system, any directories specified by
+the @code{_PATH_ELF_HINTS} macro defined in the @file{elf-hints.h}
+header file.
+@item
+Any directories specifed by a @code{SEARCH_DIR} command in the
+linker script being used.
 @end enumerate
 
 If the required shared library is not found, the linker will issue a
