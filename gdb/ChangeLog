@@ -1,3 +1,15 @@
+2020-03-03  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/frame.c (struct dwarf2_frame_cache)
+	<checked_tailcall_bottom, entry_cfa_sp_offset,
+	entry_cfa_sp_offset_p>: Remove members.
+	(dwarf2_frame_cache): Call dwarf2_tailcall_sniffer_first.
+	(dwarf2_frame_prev_register): Don't call
+	dwarf2_tailcall_sniffer_first.
+	(dwarf2_append_unwinders): Don't append tailcall unwinder.
+	* frame-unwind.c (add_unwinder): New fuction.
+	(frame_unwind_init): Use it.  Add tailcall unwinder.
+
 2020-03-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
 

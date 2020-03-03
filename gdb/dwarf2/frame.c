@@ -959,22 +959,12 @@ struct dwarf2_frame_cache
   /* The .text offset.  */
   CORE_ADDR text_offset;
 
-  /* True if we already checked whether this frame is the bottom frame
-     of a virtual tail call frame chain.  */
-  int checked_tailcall_bottom;
-
   /* If not NULL then this frame is the bottom frame of a TAILCALL_FRAME
      sequence.  If NULL then it is a normal case with no TAILCALL_FRAME
      involved.  Non-bottom frames of a virtual tail call frames chain use
      dwarf2_tailcall_frame_unwind unwinder so this field does not apply for
      them.  */
   void *tailcall_cache;
-
-  /* The number of bytes to subtract from TAILCALL_FRAME frames frame
-     base to get the SP, to simulate the return address pushed on the
-     stack.  */
-  LONGEST entry_cfa_sp_offset;
-  int entry_cfa_sp_offset_p;
 };
 
 static struct dwarf2_frame_cache *
@@ -1037,6 +1027,8 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
      in an address that's within the range of FDE locations.  This
      is due to the possibility of the function occupying non-contiguous
      ranges.  */
+  LONGEST entry_cfa_sp_offset;
+  int entry_cfa_sp_offset_p = 0;
   if (get_frame_func_if_available (this_frame, &entry_pc)
       && fde->initial_location <= entry_pc
       && entry_pc < fde->initial_location + fde->address_range)
@@ -1049,8 +1041,8 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 	  && (dwarf_reg_to_regnum (gdbarch, fs.regs.cfa_reg)
 	      == gdbarch_sp_regnum (gdbarch)))
 	{
-	  cache->entry_cfa_sp_offset = fs.regs.cfa_offset;
-	  cache->entry_cfa_sp_offset_p = 1;
+	  entry_cfa_sp_offset = fs.regs.cfa_offset;
+	  entry_cfa_sp_offset_p = 1;
 	}
     }
   else
@@ -1195,6 +1187,10 @@ incomplete CFI data; unspecified registers (e.g., %s) at %s"),
       && fs.regs.reg[fs.retaddr_column].how == DWARF2_FRAME_REG_UNDEFINED)
     cache->undefined_retaddr = 1;
 
+  dwarf2_tailcall_sniffer_first (this_frame, &cache->tailcall_cache,
+				 (entry_cfa_sp_offset_p
+				  ? &entry_cfa_sp_offset : NULL));
+
   return cache;
 }
 
@@ -1238,16 +1234,6 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
     dwarf2_frame_cache (this_frame, this_cache);
   CORE_ADDR addr;
   int realnum;
-
-  /* Check whether THIS_FRAME is the bottom frame of a virtual tail
-     call frame chain.  */
-  if (!cache->checked_tailcall_bottom)
-    {
-      cache->checked_tailcall_bottom = 1;
-      dwarf2_tailcall_sniffer_first (this_frame, &cache->tailcall_cache,
-				     (cache->entry_cfa_sp_offset_p
-				      ? &cache->entry_cfa_sp_offset : NULL));
-    }
 
   /* Non-bottom frames of a virtual tail call frames chain use
      dwarf2_tailcall_frame_unwind unwinder so this code does not apply for
@@ -1410,10 +1396,6 @@ static const struct frame_unwind dwarf2_signal_frame_unwind =
 void
 dwarf2_append_unwinders (struct gdbarch *gdbarch)
 {
-  /* TAILCALL_FRAME must be first to find the record by
-     dwarf2_tailcall_sniffer_first.  */
-  frame_unwind_append_unwinder (gdbarch, &dwarf2_tailcall_frame_unwind);
-
   frame_unwind_append_unwinder (gdbarch, &dwarf2_frame_unwind);
   frame_unwind_append_unwinder (gdbarch, &dwarf2_signal_frame_unwind);
 }
