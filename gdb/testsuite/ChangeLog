@@ -1,5 +1,9 @@
 2020-03-03  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.mi/gdb2549.exp: Fix "register values t" check-read1 timeout.
+
+2020-03-03  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.mi/list-thread-groups-available.exp: Use -prompt syntax for
 	gdb_test_multiple call.
 
