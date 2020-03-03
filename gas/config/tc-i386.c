@@ -687,6 +687,27 @@ static unsigned int align_branch = (align_branch_jcc_bit
 				    | align_branch_fused_bit
 				    | align_branch_jmp_bit);
 
+/* Types of condition jump used by macro-fusion.  */
+enum mf_jcc_kind
+  {
+    mf_jcc_jo = 0,  /* base opcode 0x70  */
+    mf_jcc_jc,      /* base opcode 0x72  */
+    mf_jcc_je,      /* base opcode 0x74  */
+    mf_jcc_jna,     /* base opcode 0x76  */
+    mf_jcc_js,      /* base opcode 0x78  */
+    mf_jcc_jp,      /* base opcode 0x7a  */
+    mf_jcc_jl,      /* base opcode 0x7c  */
+    mf_jcc_jle,     /* base opcode 0x7e  */
+  };
+
+/* Types of compare flag-modifying insntructions used by macro-fusion.  */
+enum mf_cmp_kind
+  {
+    mf_cmp_test_and,  /* test/cmp */
+    mf_cmp_alu_cmp,  /* add/sub/cmp */
+    mf_cmp_incdec  /* inc/dec */
+  };
+
 /* The maximum padding size for fused jcc.  CMP like instruction can
    be 9 bytes and jcc can be 6 bytes.  Leave room just in case for
    prefixes.   */
@@ -8374,10 +8395,22 @@ encoding_length (const fragS *start_frag, offsetT start_off,
 }
 
 /* Return 1 for test, and, cmp, add, sub, inc and dec which may
-   be macro-fused with conditional jumps.  */
+   be macro-fused with conditional jumps.
+   NB: If TEST/AND/CMP/ADD/SUB/INC/DEC is of RIP relative address,
+   or is one of the following format:
+
+    cmp m, imm
+    add m, imm
+    sub m, imm
+   test m, imm
+    and m, imm
+    inc m
+    dec m
+
+   it is unfusible.  */
 
 static int
-maybe_fused_with_jcc_p (void)
+maybe_fused_with_jcc_p (enum mf_cmp_kind* mf_cmp_p)
 {
   /* No RIP address.  */
   if (i.base_reg && i.base_reg->reg_num == RegIP)
@@ -8387,36 +8420,54 @@ maybe_fused_with_jcc_p (void)
   if (is_any_vex_encoding (&i.tm))
     return 0;
 
-  /* and, add, sub with destination register.  */
-  if ((i.tm.base_opcode >= 0x20 && i.tm.base_opcode <= 0x25)
-      || i.tm.base_opcode <= 5
+  /* add, sub without add/sub m, imm.  */
+  if (i.tm.base_opcode <= 5
       || (i.tm.base_opcode >= 0x28 && i.tm.base_opcode <= 0x2d)
       || ((i.tm.base_opcode | 3) == 0x83
-	  && ((i.tm.extension_opcode | 1) == 0x5
+	  && (i.tm.extension_opcode == 0x5
 	      || i.tm.extension_opcode == 0x0)))
-    return (i.types[1].bitfield.class == Reg
-	    || i.types[1].bitfield.instance == Accum);
+    {
+      *mf_cmp_p = mf_cmp_alu_cmp;
+      return !(i.mem_operands && i.imm_operands);
+    }
 
-  /* test, cmp with any register.  */
+  /* and without and m, imm.  */
+  if ((i.tm.base_opcode >= 0x20 && i.tm.base_opcode <= 0x25)
+      || ((i.tm.base_opcode | 3) == 0x83
+	  && i.tm.extension_opcode == 0x4))
+    {
+      *mf_cmp_p = mf_cmp_test_and;
+      return !(i.mem_operands && i.imm_operands);
+    }
+
+  /* test without test m imm.  */
   if ((i.tm.base_opcode | 1) == 0x85
       || (i.tm.base_opcode | 1) == 0xa9
       || ((i.tm.base_opcode | 1) == 0xf7
-	  && i.tm.extension_opcode == 0)
-      || (i.tm.base_opcode >= 0x38 && i.tm.base_opcode <= 0x3d)
+	  && i.tm.extension_opcode == 0))
+    {
+      *mf_cmp_p = mf_cmp_test_and;
+      return !(i.mem_operands && i.imm_operands);
+    }
+
+  /* cmp without cmp m, imm.  */
+  if ((i.tm.base_opcode >= 0x38 && i.tm.base_opcode <= 0x3d)
       || ((i.tm.base_opcode | 3) == 0x83
 	  && (i.tm.extension_opcode == 0x7)))
-    return (i.types[0].bitfield.class == Reg
-	    || i.types[0].bitfield.instance == Accum
-	    || i.types[1].bitfield.class == Reg
-	    || i.types[1].bitfield.instance == Accum);
+    {
+      *mf_cmp_p = mf_cmp_alu_cmp;
+      return !(i.mem_operands && i.imm_operands);
+    }
 
-  /* inc, dec with any register.   */
+  /* inc, dec without inc/dec m.   */
   if ((i.tm.cpu_flags.bitfield.cpuno64
        && (i.tm.base_opcode | 0xf) == 0x4f)
       || ((i.tm.base_opcode | 1) == 0xff
 	  && i.tm.extension_opcode <= 0x1))
-    return (i.types[0].bitfield.class == Reg
-	    || i.types[0].bitfield.instance == Accum);
+    {
+      *mf_cmp_p = mf_cmp_incdec;
+      return !i.mem_operands;
+    }
 
   return 0;
 }
@@ -8424,7 +8475,7 @@ maybe_fused_with_jcc_p (void)
 /* Return 1 if a FUSED_JCC_PADDING frag should be generated.  */
 
 static int
-add_fused_jcc_padding_frag_p (void)
+add_fused_jcc_padding_frag_p (enum mf_cmp_kind* mf_cmp_p)
 {
   /* NB: Don't work with COND_JUMP86 without i386.  */
   if (!align_branch_power
@@ -8433,7 +8484,7 @@ add_fused_jcc_padding_frag_p (void)
       || !(align_branch & align_branch_fused_bit))
     return 0;
 
-  if (maybe_fused_with_jcc_p ())
+  if (maybe_fused_with_jcc_p (mf_cmp_p))
     {
       if (last_insn.kind == last_insn_other
 	  || last_insn.seg != now_seg)
@@ -8481,7 +8532,8 @@ add_branch_prefix_frag_p (void)
 /* Return 1 if a BRANCH_PADDING frag should be generated.  */
 
 static int
-add_branch_padding_frag_p (enum align_branch_kind *branch_p)
+add_branch_padding_frag_p (enum align_branch_kind *branch_p,
+			   enum mf_jcc_kind *mf_jcc_p)
 {
   int add_padding;
 
@@ -8503,6 +8555,9 @@ add_branch_padding_frag_p (enum align_branch_kind *branch_p)
 	}
       else
 	{
+	  /* Because J<cc> and JN<cc> share same group in macro-fusible table,
+	     igore the lowest bit.  */
+	  *mf_jcc_p = (i.tm.base_opcode & 0x0e) >> 1;
 	  *branch_p = align_branch_jcc;
 	  if ((align_branch & align_branch_jcc_bit))
 	    add_padding = 1;
@@ -8573,6 +8628,10 @@ output_insn (void)
   offsetT insn_start_off;
   fragS *fragP = NULL;
   enum align_branch_kind branch = align_branch_none;
+  /* The initializer is arbitrary just to avoid uninitialized error.
+     it's actually either assigned in add_branch_padding_frag_p
+     or never be used.  */
+  enum mf_jcc_kind mf_jcc = mf_jcc_jo;
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   if (IS_ELF && x86_used_note)
@@ -8665,7 +8724,7 @@ output_insn (void)
   insn_start_frag = frag_now;
   insn_start_off = frag_now_fix ();
 
-  if (add_branch_padding_frag_p (&branch))
+  if (add_branch_padding_frag_p (&branch, &mf_jcc))
     {
       char *p;
       /* Branch can be 8 bytes.  Leave some room for prefixes.  */
@@ -8686,6 +8745,7 @@ output_insn (void)
 		ENCODE_RELAX_STATE (BRANCH_PADDING, 0),
 		NULL, 0, p);
 
+      fragP->tc_frag_data.mf_type = mf_jcc;
       fragP->tc_frag_data.branch_type = branch;
       fragP->tc_frag_data.max_bytes = max_branch_padding_size;
     }
@@ -8705,6 +8765,7 @@ output_insn (void)
       unsigned char *q;
       unsigned int j;
       unsigned int prefix;
+      enum mf_cmp_kind mf_cmp;
 
       if (avoid_fence
 	  && (i.tm.base_opcode == 0xfaee8
@@ -8731,7 +8792,7 @@ output_insn (void)
       if (branch)
 	/* Skip if this is a branch.  */
 	;
-      else if (add_fused_jcc_padding_frag_p ())
+      else if (add_fused_jcc_padding_frag_p (&mf_cmp))
 	{
 	  /* Make room for padding.  */
 	  frag_grow (MAX_FUSED_JCC_PADDING_SIZE);
@@ -8743,6 +8804,7 @@ output_insn (void)
 		    ENCODE_RELAX_STATE (FUSED_JCC_PADDING, 0),
 		    NULL, 0, p);
 
+	  fragP->tc_frag_data.mf_type = mf_cmp;
 	  fragP->tc_frag_data.branch_type = align_branch_fused;
 	  fragP->tc_frag_data.max_bytes = MAX_FUSED_JCC_PADDING_SIZE;
 	}
@@ -10948,6 +11010,42 @@ elf_symbol_resolved_in_segment_p (symbolS *fr_symbol, offsetT fr_var)
 }
 #endif
 
+/* Table 3-2. Macro-Fusible Instructions in Haswell Microarchitecture
+   Note also work for Skylake and Cascadelake.
+---------------------------------------------------------------------
+|   JCC   | ADD/SUB/CMP | INC/DEC | TEST/AND |
+| ------  | ----------- | ------- | -------- |
+|   Jo    |      N      |    N    |     Y    |
+|   Jno   |      N      |    N    |     Y    |
+|  Jc/Jb  |      Y      |    N    |     Y    |
+| Jae/Jnb |      Y      |    N    |     Y    |
+|  Je/Jz  |      Y      |    Y    |     Y    |
+| Jne/Jnz |      Y      |    Y    |     Y    |
+| Jna/Jbe |      Y      |    N    |     Y    |
+| Ja/Jnbe |      Y      |    N    |     Y    |
+|   Js    |      N      |    N    |     Y    |
+|   Jns   |      N      |    N    |     Y    |
+|  Jp/Jpe |      N      |    N    |     Y    |
+| Jnp/Jpo |      N      |    N    |     Y    |
+| Jl/Jnge |      Y      |    Y    |     Y    |
+| Jge/Jnl |      Y      |    Y    |     Y    |
+| Jle/Jng |      Y      |    Y    |     Y    |
+| Jg/Jnle |      Y      |    Y    |     Y    |
+---------------------------------------------------------------------  */
+static int
+i386_macro_fusible_p (enum mf_cmp_kind mf_cmp, enum mf_jcc_kind mf_jcc)
+{
+  if (mf_cmp == mf_cmp_alu_cmp)
+    return ((mf_jcc >= mf_jcc_jc && mf_jcc <= mf_jcc_jna)
+	    || mf_jcc == mf_jcc_jl || mf_jcc == mf_jcc_jle);
+  if (mf_cmp == mf_cmp_incdec)
+    return (mf_jcc == mf_jcc_je || mf_jcc == mf_jcc_jl
+	    || mf_jcc == mf_jcc_jle);
+  if (mf_cmp == mf_cmp_test_and)
+    return 1;
+  return 0;
+}
+
 /* Return the next non-empty frag.  */
 
 static fragS *
@@ -10967,20 +11065,23 @@ i386_next_non_empty_frag (fragS *fragP)
 /* Return the next jcc frag after BRANCH_PADDING.  */
 
 static fragS *
-i386_next_jcc_frag (fragS *fragP)
+i386_next_fusible_jcc_frag (fragS *maybe_cmp_fragP, fragS *pad_fragP)
 {
-  if (!fragP)
+  fragS *branch_fragP;
+  if (!pad_fragP)
     return NULL;
 
-  if (fragP->fr_type == rs_machine_dependent
-      && (TYPE_FROM_RELAX_STATE (fragP->fr_subtype)
+  if (pad_fragP->fr_type == rs_machine_dependent
+      && (TYPE_FROM_RELAX_STATE (pad_fragP->fr_subtype)
 	  == BRANCH_PADDING))
     {
-      fragP = i386_next_non_empty_frag (fragP);
-      if (fragP->fr_type != rs_machine_dependent)
+      branch_fragP = i386_next_non_empty_frag (pad_fragP);
+      if (branch_fragP->fr_type != rs_machine_dependent)
 	return NULL;
-      if (TYPE_FROM_RELAX_STATE (fragP->fr_subtype) == COND_JUMP)
-	return fragP;
+      if (TYPE_FROM_RELAX_STATE (branch_fragP->fr_subtype) == COND_JUMP
+	  && i386_macro_fusible_p (maybe_cmp_fragP->tc_frag_data.mf_type,
+				   pad_fragP->tc_frag_data.mf_type))
+	return branch_fragP;
     }
 
   return NULL;
@@ -11025,7 +11126,7 @@ i386_classify_machine_dependent_frag (fragS *fragP)
 	       */
 	    cmp_fragP = i386_next_non_empty_frag (next_fragP);
 	    pad_fragP = i386_next_non_empty_frag (cmp_fragP);
-	    branch_fragP = i386_next_jcc_frag (pad_fragP);
+	    branch_fragP = i386_next_fusible_jcc_frag (next_fragP, pad_fragP);
 	    if (branch_fragP)
 	      {
 		/* The BRANCH_PADDING frag is merged with the

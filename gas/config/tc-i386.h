@@ -273,6 +273,7 @@ struct i386_tc_frag_data
   unsigned char prefix_length;
   unsigned char default_prefix;
   unsigned char cmp_size;
+  unsigned int mf_type : 3;
   unsigned int classified : 1;
   unsigned int branch_type : 3;
 };
@@ -299,6 +300,7 @@ struct i386_tc_frag_data
      (FRAGP)->tc_frag_data.cmp_size = 0;			\
      (FRAGP)->tc_frag_data.classified = 0;			\
      (FRAGP)->tc_frag_data.branch_type = 0;			\
+     (FRAGP)->tc_frag_data.mf_type = 0;			\
    }								\
  while (0)
 
