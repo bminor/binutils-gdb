@@ -1,3 +1,9 @@
+2020-03-04  Nelson Chu  <nelson.chu@sifive.com>
+
+	* doc/c-riscv.texi (relocation modifiers): Add documentation.
+	(RISC-V-Formats): Update the section name from "Instruction Formats"
+	to "RISC-V Instruction Formats".
+
 2020-03-04  Alexandre Oliva  <oliva@adacore.com>
 
 	* config/tc-arm.c (md_apply_fix): Warn if a PC-relative load is
