@@ -697,12 +697,16 @@ static gdb::unique_xmalloc_ptr<char>
 fbsd_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
 {
   gdb::unique_xmalloc_ptr<char> note_data;
-  Elf_Internal_Ehdr *i_ehdrp;
+  Elf_Internal_Ehdr *c_ehdrp, *e_ehdrp;
   struct thread_info *curr_thr, *signalled_thr;
 
   /* Put a "FreeBSD" label in the ELF header.  */
-  i_ehdrp = elf_elfheader (obfd);
-  i_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
+  c_ehdrp = elf_elfheader (obfd);
+  c_ehdrp->e_ident[EI_OSABI] = ELFOSABI_FREEBSD;
+
+  bfd *exec_bfd = current_program_space->exec_bfd ();
+  if (exec_bfd != NULL && (e_ehdrp = elf_elfheader (exec_bfd)) != NULL)
+    c_ehdrp->e_flags = e_ehdrp->e_flags;
 
   gdb_assert (gdbarch_iterate_over_regset_sections_p (gdbarch));
 
