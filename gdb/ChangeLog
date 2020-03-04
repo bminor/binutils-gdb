@@ -1,3 +1,9 @@
+2020-03-04  Tom Tromey  <tom@tromey.com>
+
+	* jit.c (bfd_open_from_target_memory): Make "target" const.
+	* corefile.c (gnutarget): Now const.
+	* gdbcore.h (gnutarget): Now const.
+
 2020-03-04  Hannes Domani  <ssbssa@yahoo.de>
 
 	* NEWS: Mention support for WOW64 processes.

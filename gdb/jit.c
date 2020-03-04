@@ -136,7 +136,8 @@ mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 /* Open a BFD from the target's memory.  */
 
 static gdb_bfd_ref_ptr
-bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size, char *target)
+bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
+			     const char *target)
 {
   struct target_buffer *buffer = XNEW (struct target_buffer);
 

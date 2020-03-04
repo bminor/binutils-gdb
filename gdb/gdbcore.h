@@ -164,7 +164,7 @@ extern void validate_exec_file (int from_tty);
 
 /* The current default bfd target.  */
 
-extern char *gnutarget;
+extern const char *gnutarget;
 
 extern void set_gnutarget (const char *);
 
