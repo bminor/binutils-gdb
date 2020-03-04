@@ -47,6 +47,7 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
   bfd_byte *raw_armap = NULL;
   carsym *carsyms;
   bfd_size_type amt;
+  ufile_ptr filesize;
 
   ardata->symdefs = NULL;
 
@@ -76,6 +77,13 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
   parsed_size = mapdata->parsed_size;
   free (mapdata);
 
+  filesize = bfd_get_file_size (abfd);
+  if (filesize != 0 && parsed_size > filesize)
+    {
+      bfd_set_error (bfd_error_malformed_archive);
+      return FALSE;
+    }
+
   if (bfd_bread (int_buf, 8, abfd) != 8)
     {
       if (bfd_get_error () != bfd_error_system_call)
@@ -102,7 +110,7 @@ _bfd_archive_64_bit_slurp_armap (bfd *abfd)
       bfd_set_error (bfd_error_malformed_archive);
       return FALSE;
     }
-  ardata->symdefs = (struct carsym *) bfd_zalloc (abfd, amt);
+  ardata->symdefs = (struct carsym *) bfd_alloc (abfd, amt);
   if (ardata->symdefs == NULL)
     return FALSE;
   carsyms = ardata->symdefs;

@@ -1,3 +1,9 @@
+2020-03-05  Alan Modra  <amodra@gmail.com>
+
+	* archive64.c (_bfd_archive_64_bit_slurp_armap): Check parsed_size
+	against file size before allocating memory.  Use bfd_alloc rather
+	than bfd_zalloc for carsym/strings memory.
+
 2020-03-04  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (elf_fake_sections): Ensure sh_addralign is such that
