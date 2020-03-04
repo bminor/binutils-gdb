@@ -1,3 +1,13 @@
+2020-03-05  Alan Modra  <amodra@gmail.com>
+
+	PR 25570
+	* ldlang.c (lang_sizing_iteration): New static var.
+	(lang_size_sections_1): Warn about no memory region only on first
+	iteration.  Warn about changing start address on first iteration
+	then any delta from that on subsequent iterations.  Report a signed
+	delta.
+	(one_lang_size_sections_pass): Increment lang_sizing_iteration.
+
 2020-03-03  Nick Clifton  <nickc@redhat.com>
 
 	PR 25588

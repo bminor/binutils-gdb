@@ -131,9 +131,12 @@ struct lang_nocrossrefs *nocrossref_list;
 struct asneeded_minfo **asneeded_list_tail;
 static ctf_file_t *ctf_output;
 
- /* Functions that traverse the linker script and might evaluate
-    DEFINED() need to increment this at the start of the traversal.  */
+/* Functions that traverse the linker script and might evaluate
+   DEFINED() need to increment this at the start of the traversal.  */
 int lang_statement_iteration = 0;
+
+/* Count times through one_lang_size_sections_pass after mark phase.  */
+static int lang_sizing_iteration = 0;
 
 /* Return TRUE if the PATTERN argument is a wildcard pattern.
    Although backslashes are treated specially if a pattern contains
@@ -5554,7 +5557,7 @@ lang_size_sections_1
 			&& (strcmp (lang_memory_region_list->name_list.name,
 				    DEFAULT_MEMORY_REGION) != 0
 			    || lang_memory_region_list->next != NULL)
-			&& expld.phase != lang_mark_phase_enum)
+			&& lang_sizing_iteration == 1)
 		      {
 			/* By default this is an error rather than just a
 			   warning because if we allocate the section to the
@@ -5586,19 +5589,21 @@ lang_size_sections_1
 		if (section_alignment > 0)
 		  {
 		    bfd_vma savedot = newdot;
-		    newdot = align_power (newdot, section_alignment);
+		    bfd_vma diff = 0;
 
+		    newdot = align_power (newdot, section_alignment);
 		    dotdelta = newdot - savedot;
-		    if (dotdelta != 0
+
+		    if (lang_sizing_iteration == 1)
+		      diff = dotdelta;
+		    else if (lang_sizing_iteration > 1)
+		      diff = newdot - os->bfd_section->vma;
+		    if (diff != 0
 			&& (config.warn_section_align
-			    || os->addr_tree != NULL)
-			&& expld.phase != lang_mark_phase_enum)
-		      einfo (ngettext ("%P: warning: changing start of "
-				       "section %s by %lu byte\n",
-				       "%P: warning: changing start of "
-				       "section %s by %lu bytes\n",
-				       (unsigned long) dotdelta),
-			     os->name, (unsigned long) dotdelta);
+			    || os->addr_tree != NULL))
+		      einfo (_("%P: warning: "
+			       "start of section %s changed by %ld\n"),
+			     os->name, (long) diff);
 		  }
 
 		bfd_set_section_vma (os->bfd_section, newdot);
@@ -6036,6 +6041,8 @@ void
 one_lang_size_sections_pass (bfd_boolean *relax, bfd_boolean check_regions)
 {
   lang_statement_iteration++;
+  if (expld.phase != lang_mark_phase_enum)
+    lang_sizing_iteration++;
   lang_size_sections_1 (&statement_list.head, abs_output_section,
 			0, 0, relax, check_regions);
 }
