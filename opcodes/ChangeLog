@@ -1,3 +1,15 @@
+2020-03-04  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (PREFIX_0F01_REG_3_RM_1): New.
+	(prefix_table): Move vmmcall here. Add vmgexit.
+	(rm_table): Replace vmmcall entry by prefix_table[] escape.
+	* i386-gen.c (cpu_flag_init): Add CPU_SEV_ES_FLAGS entry.
+	(cpu_flags): Add CpuSEV_ES entry.
+	* i386-opc.h (CpuSEV_ES): New.
+	(union i386_cpu_flags): Add cpusev_es field.
+	* i386-opc.tbl (vmgexit): New.
+	* i386-init.h, i386-tbl.h: Re-generate.
+
 2020-03-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (opcode_modifiers): Replace IgnoreSize/DefaultSize

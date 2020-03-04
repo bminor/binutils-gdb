@@ -309,6 +309,8 @@ static initializer cpu_flag_init[] =
     "CpuRDPRU" },
   { "CPU_MCOMMIT_FLAGS",
     "CpuMCOMMIT" },
+  { "CPU_SEV_ES_FLAGS",
+    "CpuSEV_ES" },
   { "CPU_ANY_X87_FLAGS",
     "CPU_ANY_287_FLAGS|Cpu8087" },
   { "CPU_ANY_287_FLAGS",
@@ -606,6 +608,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuENQCMD),
   BITFIELD (CpuRDPRU),
   BITFIELD (CpuMCOMMIT),
+  BITFIELD (CpuSEV_ES),
 #ifdef CpuUnused
   BITFIELD (CpuUnused),
 #endif

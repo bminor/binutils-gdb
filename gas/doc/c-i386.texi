@@ -251,6 +251,7 @@ accept various extension mnemonics.  For example,
 @code{cldemote},
 @code{rdpru},
 @code{mcommit},
+@code{sev_es},
 @code{lwp},
 @code{fma4},
 @code{xop},
@@ -1454,7 +1455,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
 @item @samp{.padlock} @tab @samp{.clzero} @tab @samp{.mwaitx} @tab @samp{.rdpru}
-@item @samp{.mcommit}
+@item @samp{.mcommit} @tab @samp{.sev_es}
 @end multitable
 
 Apart from the warning, there are only two other effects on

@@ -38,5 +38,8 @@
 # rdpru instruction
 	rdpru
 
+# vmgexit instruction
+	vmgexit
+
 # wbnoinvd instruction
 	wbnoinvd

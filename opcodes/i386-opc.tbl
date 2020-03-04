@@ -2835,6 +2835,7 @@ invlpga, 2, 0xf01df, None, 3, CpuSVME, AddrPrefixOpReg, { Acc|Word|Dword|Qword, 
 skinit, 0, 0xf01de, None, 3, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 skinit, 1, 0xf01de, None, 3, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Acc|Dword }
 stgi, 0, 0xf01dc, None, 3, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+vmgexit, 0, 0xf30f01d9, None, 3, CpuSEV_ES, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 vmload, 0, 0xf01da, None, 3, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 vmload, 1, 0xf01da, None, 3, CpuSVME, AddrPrefixOpReg, { Acc|Word|Dword|Qword }
 vmmcall, 0, 0xf01d9, None, 3, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }

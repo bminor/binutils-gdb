@@ -1188,6 +1188,8 @@ static const arch_entry cpu_arch[] =
     CPU_RDPRU_FLAGS, 0 },
   { STRING_COMMA_LEN (".mcommit"), PROCESSOR_UNKNOWN,
     CPU_MCOMMIT_FLAGS, 0 },
+  { STRING_COMMA_LEN (".sev_es"), PROCESSOR_UNKNOWN,
+    CPU_SEV_ES_FLAGS, 0 },
 };
 
 static const noarch_entry cpu_noarch[] =
