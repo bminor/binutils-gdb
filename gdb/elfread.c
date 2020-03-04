@@ -355,11 +355,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
       if (type == ST_DYNAMIC && !stripped)
 	continue;
       if (sym->flags & BSF_FILE)
-	{
-	  filesymname
-	    = ((const char *) objfile->per_bfd->filename_cache.insert
-	       (sym->name, strlen (sym->name) + 1));
-	}
+	filesymname = objfile->intern (sym->name);
       else if (sym->flags & BSF_SECTION_SYM)
 	continue;
       else if (sym->flags & (BSF_GLOBAL | BSF_LOCAL | BSF_WEAK

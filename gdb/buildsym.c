@@ -120,7 +120,7 @@ buildsym_compunit::get_macro_table ()
 {
   if (m_pending_macros == nullptr)
     m_pending_macros = new_macro_table (&m_objfile->per_bfd->storage_obstack,
-					&m_objfile->per_bfd->macro_cache,
+					&m_objfile->per_bfd->string_cache,
 					m_compunit_symtab);
   return m_pending_macros;
 }

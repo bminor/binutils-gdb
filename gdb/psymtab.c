@@ -1656,9 +1656,7 @@ partial_symtab::partial_symtab (const char *filename_, struct objfile *objfile)
 {
   objfile->partial_symtabs->install_psymtab (this);
 
-  filename
-    = ((const char *) objfile->per_bfd->filename_cache.insert
-       (filename_, strlen (filename_) + 1));
+  filename = objfile->intern (filename_);
 
   if (symtab_create_debug)
     {

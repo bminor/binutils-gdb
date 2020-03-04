@@ -275,13 +275,9 @@ struct objfile_per_bfd_storage
 
   auto_obstack storage_obstack;
 
-  /* Byte cache for file names.  */
+  /* String cache.  */
 
-  gdb::bcache filename_cache;
-
-  /* Byte cache for macros.  */
-
-  gdb::bcache macro_cache;
+  gdb::bcache string_cache;
 
   /* The gdbarch associated with the BFD.  Note that this gdbarch is
      determined solely from BFD information, without looking at target
@@ -532,6 +528,22 @@ public:
   {
     return section_offsets[SECT_OFF_DATA (this)];
   }
+
+  /* Intern STRING and return the unique copy.  The copy has the same
+     lifetime as the per-BFD object.  */
+  const char *intern (const char *str)
+  {
+    return (const char *) per_bfd->string_cache.insert (str, strlen (str) + 1);
+  }
+
+  /* Intern STRING and return the unique copy.  The copy has the same
+     lifetime as the per-BFD object.  */
+  const char *intern (const std::string &str)
+  {
+    return (const char *) per_bfd->string_cache.insert (str.c_str (),
+							str.size () + 1);
+  }
+
 
   /* The object file's original name as specified by the user,
      made absolute, and tilde-expanded.  However, it is not canonicalized

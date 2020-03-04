@@ -1447,7 +1447,7 @@ static const gdb_byte *read_full_die (const struct die_reader_specs *,
 static void process_die (struct die_info *, struct dwarf2_cu *);
 
 static const char *dwarf2_canonicalize_name (const char *, struct dwarf2_cu *,
-					     struct obstack *);
+					     struct objfile *);
 
 static const char *dwarf2_name (struct die_info *die, struct dwarf2_cu *);
 
@@ -9098,8 +9098,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
   if (package_name != NULL)
     {
       struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
-      const char *saved_package_name
-	= obstack_strdup (&objfile->per_bfd->storage_obstack, package_name.get ());
+      const char *saved_package_name = objfile->intern (package_name.get ());
       struct type *type = init_type (objfile, TYPE_CODE_MODULE, 0,
 				     saved_package_name);
       struct symbol *sym;
@@ -10225,14 +10224,13 @@ dwarf2_compute_name (const char *name,
 	  if (cu->language == language_cplus)
 	    canonical_name
 	      = dwarf2_canonicalize_name (intermediate_name.c_str (), cu,
-					  &objfile->per_bfd->storage_obstack);
+					  objfile);
 
 	  /* If we only computed INTERMEDIATE_NAME, or if
 	     INTERMEDIATE_NAME is already canonical, then we need to
-	     copy it to the appropriate obstack.  */
+	     intern it.  */
 	  if (canonical_name == NULL || canonical_name == intermediate_name.c_str ())
-	    name = obstack_strdup (&objfile->per_bfd->storage_obstack,
-				   intermediate_name);
+	    name = objfile->intern (intermediate_name);
 	  else
 	    name = canonical_name;
 	}
@@ -10352,7 +10350,7 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
     retval = canon;
 
   if (need_copy)
-    retval = obstack_strdup (&objfile->per_bfd->storage_obstack, retval);
+    retval = objfile->intern (retval);
 
   return retval;
 }
@@ -11678,8 +11676,7 @@ create_dwo_unit_in_dwp_v1 (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			      virtual_dwo_name.c_str ());
 	}
       dwo_file = new struct dwo_file;
-      dwo_file->dwo_name = obstack_strdup (&objfile->objfile_obstack,
-					   virtual_dwo_name);
+      dwo_file->dwo_name = objfile->intern (virtual_dwo_name);
       dwo_file->comp_dir = comp_dir;
       dwo_file->sections.abbrev = sections.abbrev;
       dwo_file->sections.line = sections.line;
@@ -11874,8 +11871,7 @@ create_dwo_unit_in_dwp_v2 (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			      virtual_dwo_name.c_str ());
 	}
       dwo_file = new struct dwo_file;
-      dwo_file->dwo_name = obstack_strdup (&objfile->objfile_obstack,
-					   virtual_dwo_name);
+      dwo_file->dwo_name = objfile->intern (virtual_dwo_name);
       dwo_file->comp_dir = comp_dir;
       dwo_file->sections.abbrev =
 	create_dwp_v2_section (dwarf2_per_objfile, &dwp_file->sections.abbrev,
@@ -17993,8 +17989,7 @@ partial_die_info::read (const struct die_reader_specs *reader,
 		struct objfile *objfile = dwarf2_per_objfile->objfile;
 
 		name
-		  = dwarf2_canonicalize_name (DW_STRING (&attr), cu,
-					      &objfile->per_bfd->storage_obstack);
+		  = dwarf2_canonicalize_name (DW_STRING (&attr), cu, objfile);
 	      }
 	      break;
 	    }
@@ -18319,9 +18314,7 @@ guess_partial_die_structure_name (struct partial_die_info *struct_pdi,
 	  if (actual_class_name != NULL)
 	    {
 	      struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
-	      struct_pdi->name
-		= obstack_strdup (&objfile->per_bfd->storage_obstack,
-				  actual_class_name.get ());
+	      struct_pdi->name = objfile->intern (actual_class_name.get ());
 	    }
 	  break;
 	}
@@ -18401,7 +18394,7 @@ partial_die_info::fixup (struct dwarf2_cu *cu)
 	    base = demangled.get ();
 
 	  struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
-	  name = obstack_strdup (&objfile->per_bfd->storage_obstack, base);
+	  name = objfile->intern (base);
 	}
     }
 
@@ -21714,7 +21707,7 @@ sibling_die (struct die_info *die)
 
 static const char *
 dwarf2_canonicalize_name (const char *name, struct dwarf2_cu *cu,
-			  struct obstack *obstack)
+			  struct objfile *objfile)
 {
   if (name && cu->language == language_cplus)
     {
@@ -21723,7 +21716,7 @@ dwarf2_canonicalize_name (const char *name, struct dwarf2_cu *cu,
       if (!canon_name.empty ())
 	{
 	  if (canon_name != name)
-	    name = obstack_strdup (obstack, canon_name);
+	    name = objfile->intern (canon_name);
 	}
     }
 
@@ -21797,10 +21790,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 
 	      const char *base;
 
-	      /* FIXME: we already did this for the partial symbol... */
-	      DW_STRING (attr)
-		= obstack_strdup (&objfile->per_bfd->storage_obstack,
-				  demangled.get ());
+	      DW_STRING (attr) = objfile->intern (demangled.get ());
 	      DW_STRING_IS_CANONICAL (attr) = 1;
 
 	      /* Strip any leading namespaces/classes, keep only the base name.
@@ -21820,9 +21810,8 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 
   if (!DW_STRING_IS_CANONICAL (attr))
     {
-      DW_STRING (attr)
-	= dwarf2_canonicalize_name (DW_STRING (attr), cu,
-				    &objfile->per_bfd->storage_obstack);
+      DW_STRING (attr) = dwarf2_canonicalize_name (DW_STRING (attr), cu,
+						   objfile);
       DW_STRING_IS_CANONICAL (attr) = 1;
     }
   return DW_STRING (attr);

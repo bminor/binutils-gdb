@@ -71,9 +71,7 @@ print_symbol_bcache_statistics (void)
 			 objfile_name (objfile));
 	objfile->partial_symtabs->psymbol_cache.print_statistics
 	  ("partial symbol cache");
-	objfile->per_bfd->macro_cache.print_statistics
-	  ("preprocessor macro cache");
-	objfile->per_bfd->filename_cache.print_statistics ("file name cache");
+	objfile->per_bfd->string_cache.print_statistics ("string cache");
       }
 }
 
@@ -135,10 +133,8 @@ print_objfile_statistics (void)
       printf_filtered
 	(_("  Total memory used for psymbol cache: %d\n"),
 	 objfile->partial_symtabs->psymbol_cache.memory_used ());
-      printf_filtered (_("  Total memory used for macro cache: %d\n"),
-		       objfile->per_bfd->macro_cache.memory_used ());
-      printf_filtered (_("  Total memory used for file name cache: %d\n"),
-		       objfile->per_bfd->filename_cache.memory_used ());
+      printf_filtered (_("  Total memory used for string cache: %d\n"),
+		       objfile->per_bfd->string_cache.memory_used ());
     }
 }
 

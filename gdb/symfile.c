@@ -2783,9 +2783,7 @@ allocate_symtab (struct compunit_symtab *cust, const char *filename)
   struct symtab *symtab
     = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symtab);
 
-  symtab->filename
-    = ((const char *) objfile->per_bfd->filename_cache.insert
-       (filename, strlen (filename) + 1));
+  symtab->filename = objfile->intern (filename);
   symtab->fullname = NULL;
   symtab->language = deduce_language_from_filename (filename);
 

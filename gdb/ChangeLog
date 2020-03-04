@@ -1,5 +1,28 @@
 2020-03-04  Tom Tromey  <tom@tromey.com>
 
+	* symmisc.c (print_symbol_bcache_statistics)
+	(print_objfile_statistics): Update.
+	* symfile.c (allocate_symtab): Use intern.
+	* psymtab.c (partial_symtab::partial_symtab): Use intern.
+	* objfiles.h (struct objfile_per_bfd_storage) <filename_cache,
+	macro_cache>: Remove.
+	<string_cache>: New member.
+	(struct objfile) <intern>: New methods.
+	* elfread.c (elf_symtab_read): Use intern.
+	* dwarf2/read.c (fixup_go_packaging): Intern package name.
+	(dwarf2_compute_name, dwarf2_physname)
+	(create_dwo_unit_in_dwp_v1, create_dwo_unit_in_dwp_v2): Intern
+	names.
+	(guess_partial_die_structure_name): Update.
+	(partial_die_info::fixup): Intern name.
+	(dwarf2_canonicalize_name): Change parameter to objfile.  Intern
+	name.
+	(dwarf2_name): Intern name.  Update.
+	* buildsym.c (buildsym_compunit::get_macro_table): Use
+	string_cache.
+
+2020-03-04  Tom Tromey  <tom@tromey.com>
+
 	* jit.c (bfd_open_from_target_memory): Make "target" const.
 	* corefile.c (gnutarget): Now const.
 	* gdbcore.h (gnutarget): Now const.
