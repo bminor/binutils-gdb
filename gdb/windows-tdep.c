@@ -843,7 +843,8 @@ windows_solib_create_inferior_hook (int from_tty)
     }
   CORE_ADDR tlb;
   gdb_byte buf[8];
-  if (target_get_tib_address (inferior_ptid, &tlb)
+  if (target_has_execution
+      && target_get_tib_address (inferior_ptid, &tlb)
       && !target_read_memory (tlb + peb_offset, buf, ptr_bytes))
     {
       CORE_ADDR peb = extract_unsigned_integer (buf, ptr_bytes, byte_order);

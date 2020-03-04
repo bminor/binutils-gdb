@@ -1,3 +1,8 @@
+2020-03-06  Hannes Domani  <ssbssa@yahoo.de>
+
+	* windows-tdep.c (windows_solib_create_inferior_hook):
+	Check if inferior is running.
+
 2020-03-06  Tom de Vries  <tdevries@suse.de>
 
 	* NEWS: Fix "the the".
