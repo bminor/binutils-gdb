@@ -1,3 +1,17 @@
+2020-03-04  Luis Machado  <luis.machado@linaro.org>
+
+	Revert aa66aac47b4dd38f9524ddb5546c08cc09930d37 due to regressions
+	in "info registers" for AArch64/ARM.
+
+	The change caused "info registers" to not print GPR's.
+
+	gdb/ChangeLog:
+
+	2020-02-01  Shahab Vahedi  <shahab@synopsys.com>
+
+	* target-descriptions.c (tdesc_register_in_reggroup_p): Return 0
+	when reg->group is empty and reggroup is not.
+
 2020-03-03  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2/frame.c (struct dwarf2_frame_cache)

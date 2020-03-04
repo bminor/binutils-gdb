@@ -977,16 +977,13 @@ tdesc_register_in_reggroup_p (struct gdbarch *gdbarch, int regno,
 {
   struct tdesc_reg *reg = tdesc_find_register (gdbarch, regno);
 
-  if (reg != NULL)
-    {
-      if (reggroup == all_reggroup)
+  if (reg != NULL && !reg->group.empty ()
+      && (reg->group == reggroup_name (reggroup)))
 	return 1;
 
-      else if (reggroup == save_reggroup || reggroup == restore_reggroup)
-	return reg->save_restore;
-      else
-	return (int) (reg->group == reggroup_name (reggroup));
-    }
+  if (reg != NULL
+      && (reggroup == save_reggroup || reggroup == restore_reggroup))
+    return reg->save_restore;
 
   return -1;
 }
