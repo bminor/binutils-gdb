@@ -14,6 +14,9 @@
   sframe_get_funcdesc_with_addr API, change in the behavior of
   sframe_fre_get_ra_offset and sframe_fre_get_fp_offset APIs.
   
+* Add command-line option, --strip-section-headers, to objcopy and strip to
+  remove ELF section header from ELF file.
+
 Changes in 2.40:
 
 * Objdump has a new command line option --show-all-symbols which will make it

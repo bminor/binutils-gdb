@@ -280,6 +280,9 @@ typedef struct
   /* If set, code and non-code sections should never be in one segment.  */
   bool separate_code;
 
+  /* If set, generation of ELF section header should be suppressed.  */
+  bool no_section_header;
+
   /* The rpath separation character.  Usually ':'.  */
   char rpath_separator;
 

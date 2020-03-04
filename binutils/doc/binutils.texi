@@ -1278,6 +1278,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{-R} @var{sectionpattern}|@option{--remove-section=}@var{sectionpattern}]
         [@option{--keep-section=}@var{sectionpattern}]
         [@option{--remove-relocations=}@var{sectionpattern}]
+        [@option{--strip-section-headers}]
         [@option{-p}|@option{--preserve-dates}]
         [@option{-D}|@option{--enable-deterministic-archives}]
         [@option{-U}|@option{--disable-deterministic-archives}]
@@ -1493,6 +1494,10 @@ For example:
 will remove all relocations for sections matching the pattern
 '.text.*', but will not remove relocations for the section
 '.text.foo'.
+
+@item --strip-section-headers
+Strip section header   This option is specific to ELF files.
+Implies @option{--strip-all} and @option{--merge-notes}.
 
 @item -S
 @itemx --strip-all
@@ -3484,6 +3489,7 @@ strip [@option{-F} @var{bfdname} |@option{--target=}@var{bfdname}]
       [@option{-R} @var{sectionname} |@option{--remove-section=}@var{sectionname}]
       [@option{--keep-section=}@var{sectionpattern}]
       [@option{--remove-relocations=}@var{sectionpattern}]
+      [@option{--strip-section-headers}]
       [@option{-o} @var{file}] [@option{-p}|@option{--preserve-dates}]
       [@option{-D}|@option{--enable-deterministic-archives}]
       [@option{-U}|@option{--disable-deterministic-archives}]
@@ -3585,6 +3591,10 @@ For example:
 will remove all relocations for sections matching the pattern
 '.text.*', but will not remove relocations for the section
 '.text.foo'.
+
+@item --strip-section-headers
+Strip section headers.  This option is specific to ELF files.  Implies
+@option{--strip-all} and @option{--merge-notes}.
 
 @item -s
 @itemx --strip-all

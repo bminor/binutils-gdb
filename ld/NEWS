@@ -15,6 +15,9 @@
 * The linker script syntax has a new command for output sections: ASCIZ "string"
   This will insert a zero-terminated string at the current location.
 
+* Add command-line option, -z nosectionheader, to omit ELF section
+  header.
+
 Changes in 2.40:
 
 * The linker has a new command line option to suppress the generation of any

@@ -192,11 +192,15 @@ CODE_FRAGMENT
 .  {* Compress sections in this BFD with SHF_COMPRESSED zstd.  *}
 .#define BFD_COMPRESS_ZSTD      0x400000
 .
+.  {* Don't generate ELF section header.  *}
+.#define BFD_NO_SECTION_HEADER	0x800000
+.
 .  {* Flags bits which are for BFD use only.  *}
 .#define BFD_FLAGS_FOR_BFD_USE_MASK \
 .  (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_LINKER_CREATED \
 .   | BFD_PLUGIN | BFD_TRADITIONAL_FORMAT | BFD_DETERMINISTIC_OUTPUT \
-.   | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON)
+.   | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON | BFD_USE_ELF_STT_COMMON \
+.   | BFD_NO_SECTION_HEADER)
 .
 .  {* The format which belongs to the BFD. (object, core, etc.)  *}
 .  ENUM_BITFIELD (bfd_format) format : 3;

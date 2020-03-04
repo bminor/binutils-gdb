@@ -1998,6 +1998,15 @@ parse_args (unsigned argc, char **argv)
 	break;
       }
 
+  /* -z nosectionheader implies --strip-all.  */
+  if (config.no_section_header)
+    {
+      if (bfd_link_relocatable (&link_info))
+	einfo (_("%F%P: -r and -z nosectionheader may not be used together\n"));
+
+      link_info.strip = strip_all;
+    }
+
   if (!bfd_link_dll (&link_info))
     {
       if (command_line.filter_shlib)
@@ -2272,6 +2281,10 @@ elf_static_list_options (FILE *file)
   fprintf (file, _("\
   -z start-stop-visibility=V  Set visibility of built-in __start/__stop symbols\n\
                                 to DEFAULT, PROTECTED, HIDDEN or INTERNAL\n"));
+  fprintf (file, _("\
+  -z sectionheader            Generate section header (default)\n"));
+  fprintf (file, _("\
+  -z nosectionheader          Do not generate section header\n"));
 }
 
 static void

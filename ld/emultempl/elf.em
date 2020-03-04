@@ -807,6 +807,10 @@ fragment <<EOF
 		     "must be default, internal, hidden, or protected"),
 		   optarg);
 	}
+      else if (strcmp (optarg, "sectionheader") == 0)
+	config.no_section_header = false;
+      else if (strcmp (optarg, "nosectionheader") == 0)
+	config.no_section_header = true;
 EOF
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then

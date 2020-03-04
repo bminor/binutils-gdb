@@ -266,6 +266,7 @@ elf_swap_ehdr_out (bfd *abfd,
 {
   unsigned int tmp;
   int signed_vma = get_elf_backend_data (abfd)->sign_extend_vma;
+  bool no_section_header = (abfd->flags & BFD_NO_SECTION_HEADER) != 0;
   memcpy (dst->e_ident, src->e_ident, EI_NIDENT);
   /* note that all elements of dst are *arrays of unsigned char* already...  */
   H_PUT_16 (abfd, src->e_type, dst->e_type);
@@ -276,7 +277,10 @@ elf_swap_ehdr_out (bfd *abfd,
   else
     H_PUT_WORD (abfd, src->e_entry, dst->e_entry);
   H_PUT_WORD (abfd, src->e_phoff, dst->e_phoff);
-  H_PUT_WORD (abfd, src->e_shoff, dst->e_shoff);
+  if (no_section_header)
+    H_PUT_WORD (abfd, 0, dst->e_shoff);
+  else
+    H_PUT_WORD (abfd, src->e_shoff, dst->e_shoff);
   H_PUT_32 (abfd, src->e_flags, dst->e_flags);
   H_PUT_16 (abfd, src->e_ehsize, dst->e_ehsize);
   H_PUT_16 (abfd, src->e_phentsize, dst->e_phentsize);
@@ -284,15 +288,24 @@ elf_swap_ehdr_out (bfd *abfd,
   if (tmp > PN_XNUM)
     tmp = PN_XNUM;
   H_PUT_16 (abfd, tmp, dst->e_phnum);
-  H_PUT_16 (abfd, src->e_shentsize, dst->e_shentsize);
-  tmp = src->e_shnum;
-  if (tmp >= (SHN_LORESERVE & 0xffff))
-    tmp = SHN_UNDEF;
-  H_PUT_16 (abfd, tmp, dst->e_shnum);
-  tmp = src->e_shstrndx;
-  if (tmp >= (SHN_LORESERVE & 0xffff))
-    tmp = SHN_XINDEX & 0xffff;
-  H_PUT_16 (abfd, tmp, dst->e_shstrndx);
+  if (no_section_header)
+    {
+      H_PUT_16 (abfd, 0, dst->e_shentsize);
+      H_PUT_16 (abfd, 0, dst->e_shnum);
+      H_PUT_16 (abfd, 0, dst->e_shstrndx);
+    }
+  else
+    {
+      H_PUT_16 (abfd, src->e_shentsize, dst->e_shentsize);
+      tmp = src->e_shnum;
+      if (tmp >= (SHN_LORESERVE & 0xffff))
+	tmp = SHN_UNDEF;
+      H_PUT_16 (abfd, tmp, dst->e_shnum);
+      tmp = src->e_shstrndx;
+      if (tmp >= (SHN_LORESERVE & 0xffff))
+	tmp = SHN_XINDEX & 0xffff;
+      H_PUT_16 (abfd, tmp, dst->e_shstrndx);
+    }
 }
 
 /* Translate an ELF section header table entry in external format into an
@@ -1076,6 +1089,9 @@ elf_write_shdrs_and_ehdr (bfd *abfd)
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
       || bfd_bwrite (&x_ehdr, amt, abfd) != amt)
     return false;
+
+  if ((abfd->flags & BFD_NO_SECTION_HEADER) != 0)
+    return true;
 
   /* Some fields in the first section header handle overflow of ehdr
      fields.  */
