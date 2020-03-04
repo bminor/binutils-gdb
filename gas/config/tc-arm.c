@@ -29290,6 +29290,9 @@ md_apply_fix (fixS *	fixP,
 			  (((unsigned long) fixP->fx_frag->fr_address
 			    + (unsigned long) fixP->fx_where) & ~3)
 			  + (unsigned long) value);
+	  else if (get_recorded_alignment (seg) < 2)
+	    as_warn_where (fixP->fx_file, fixP->fx_line,
+			   _("section does not have enough alignment to ensure safe PC-relative loads"));
 
 	  if (value & ~0x3fc)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
