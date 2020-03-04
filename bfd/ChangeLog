@@ -1,5 +1,10 @@
 2020-03-04  Alan Modra  <amodra@gmail.com>
 
+	* elf.c (elf_fake_sections): Ensure sh_addralign is such that
+	sh_addr mod sh_addalign is zero.
+
+2020-03-04  Alan Modra  <amodra@gmail.com>
+
 	* format.c (bfd_check_format_matches): Call cleanup on error exit.
 
 2020-03-03  Alan Modra  <amodra@gmail.com>

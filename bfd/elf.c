@@ -3192,6 +3192,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
   unsigned int sh_type;
   const char *name = asect->name;
   bfd_boolean delay_st_name_p = FALSE;
+  bfd_vma mask;
 
   if (arg->failed)
     {
@@ -3291,7 +3292,10 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
       arg->failed = TRUE;
       return;
     }
-  this_hdr->sh_addralign = (bfd_vma) 1 << asect->alignment_power;
+  /* Set sh_addralign to the highest power of two given by alignment
+     consistent with the section VMA.  Linker scripts can force VMA.  */
+  mask = ((bfd_vma) 1 << asect->alignment_power) | this_hdr->sh_addr;
+  this_hdr->sh_addralign = mask & -mask;
   /* The sh_entsize and sh_info fields may have been set already by
      copy_private_section_data.  */
 
