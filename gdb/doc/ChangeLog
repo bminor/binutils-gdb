@@ -1,3 +1,8 @@
+2020-03-04  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.texinfo: Remove trailing "done." in "Reading symbols from" lines.
+	* python.texi: Same.
+
 2020-03-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Command History): Extend description for

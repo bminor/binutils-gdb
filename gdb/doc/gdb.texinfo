@@ -20360,7 +20360,7 @@ that lies within the boundaries of this symbol file in memory.  Example:
 add symbol table from file "/home/user/gdb/mylib.so" at
     .text_addr = 0x7ffff7ff9480
 (y or n) y
-Reading symbols from /home/user/gdb/mylib.so...done.
+Reading symbols from /home/user/gdb/mylib.so...
 (gdb) remove-symbol-file -a 0x7ffff7ff9480
 Remove symbol table from file "/home/user/gdb/mylib.so"? (y or n) y
 (gdb)
@@ -25980,7 +25980,7 @@ get loaded:
 
 @smallexample
 $ ./gdb -q ./gdb
-Reading symbols from /home/user/gdb/gdb...done.
+Reading symbols from /home/user/gdb/gdb...
 warning: File "/home/user/gdb/gdb-gdb.gdb" auto-loading has been
          declined by your `auto-load safe-path' set
          to "$debugdir:$datadir/auto-load".
