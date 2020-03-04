@@ -742,7 +742,7 @@ fold_name (etree_type *tree)
 	      output_section = h->u.def.section->output_section;
 	      if (output_section == NULL)
 		{
-		  if (expld.phase != lang_final_phase_enum)
+		  if (expld.phase <= lang_mark_phase_enum)
 		    new_rel (h->u.def.value, h->u.def.section);
 		  else
 		    einfo (_("%X%P:%pS: unresolvable symbol `%s'"

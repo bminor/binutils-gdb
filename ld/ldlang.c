@@ -5554,7 +5554,7 @@ lang_size_sections_1
 			&& (strcmp (lang_memory_region_list->name_list.name,
 				    DEFAULT_MEMORY_REGION) != 0
 			    || lang_memory_region_list->next != NULL)
-			&& expld.phase == lang_final_phase_enum)
+			&& expld.phase != lang_mark_phase_enum)
 		      {
 			/* By default this is an error rather than just a
 			   warning because if we allocate the section to the
@@ -5592,7 +5592,7 @@ lang_size_sections_1
 		    if (dotdelta != 0
 			&& (config.warn_section_align
 			    || os->addr_tree != NULL)
-			&& expld.phase == lang_final_phase_enum)
+			&& expld.phase != lang_mark_phase_enum)
 		      einfo (ngettext ("%P: warning: changing start of "
 				       "section %s by %lu byte\n",
 				       "%P: warning: changing start of "
