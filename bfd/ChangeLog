@@ -1,3 +1,8 @@
+2020-03-05  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (shrink_dynamic_reloc_sections): Shrink dynamic
+	relocation sections for any removed reference to a dynamic symbol.
+
 2020-03-05  Nick Clifton  <nickc@redhat.com>
 
 	* elf-bfd.h (struct elf_backend_data): Add new fields:
