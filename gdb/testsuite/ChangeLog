@@ -1,3 +1,13 @@
+2020-03-04  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* lib/fortran.exp (fortran_int4): Handle flang kind printing.
+	(fortran_int8): Likewise.
+	(fortran_real4): Likewise.
+	(fortran_real8): Likewise.
+	(fortran_complex4): Likewise.
+	(fortran_logical4): Likewise.
+	(fortran_character1): Likewise.
+
 2020-03-03  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/logical.exp: Add tests that any non-zero value is
