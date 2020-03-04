@@ -1,5 +1,14 @@
 2020-03-04  Nelson Chu  <nelson.chu@sifive.com>
 
+	* config/tc-riscv.c (percent_op_utype): Support the modifier
+	%got_pcrel_hi.
+	* doc/c-riscv.texi: Add documentation.
+	* testsuite/gas/riscv/no-relax-reloc.d: Add test case for the new
+	modifier %got_pcrel_hi.
+	* testsuite/gas/riscv/no-relax-reloc.s: Likewise.
+	* testsuite/gas/riscv/relax-reloc.d: Likewise.
+	* testsuite/gas/riscv/relax-reloc.s: Likewise.
+
 	* doc/c-riscv.texi (relocation modifiers): Add documentation.
 	(RISC-V-Formats): Update the section name from "Instruction Formats"
 	to "RISC-V Instruction Formats".

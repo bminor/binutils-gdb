@@ -257,6 +257,23 @@ Or you can use the pseudo lla/lw/sw/... instruction to do this.
 	lla  a0, @var{symbol}
 @end smallexample
 
+@item %got_pcrel_hi(@var{symbol})
+The high 20 bits of relative address between pc and the GOT entry of
+@var{symbol}.  This is usually used with the %pcrel_lo modifier to access
+the GOT entry.
+
+@smallexample
+@var{label}:
+	auipc      a0, %got_pcrel_hi(@var{symbol}) // R_RISCV_GOT_HI20
+	addi       a0, a0, %pcrel_lo(@var{label})  // R_RISCV_PCREL_LO12_I
+
+@var{label}:
+	auipc      a0, %got_pcrel_hi(@var{symbol}) // R_RISCV_GOT_HI20
+	load/store a0, %pcrel_lo(@var{label})(a0)  // R_RISCV_PCREL_LO12_I/S
+@end smallexample
+
+Also, the pseudo la instruction with PIC has similar behavior.
+
 @item %tprel_add(@var{symbol})
 This is used purely to associate the R_RISCV_TPREL_ADD relocation for
 TLS relaxation.  This one is only valid as the fourth operand to the normally
