@@ -1,3 +1,7 @@
+2020-03-04  Alan Modra  <amodra@gmail.com>
+
+	* format.c (bfd_check_format_matches): Call cleanup on error exit.
+
 2020-03-03  Alan Modra  <amodra@gmail.com>
 
 	* format.c (struct bfd_preserve): Add cleanup field.

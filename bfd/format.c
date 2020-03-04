@@ -515,6 +515,8 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
     err_unrecog:
       bfd_set_error (bfd_error_file_not_recognized);
     err_ret:
+      if (cleanup)
+	cleanup (abfd);
       abfd->xvec = save_targ;
       abfd->format = bfd_unknown;
       if (matching_vector)
@@ -544,6 +546,8 @@ bfd_check_format_matches (bfd *abfd, bfd_format format, char ***matching)
     }
   else if (matching_vector)
     free (matching_vector);
+  if (cleanup)
+    cleanup (abfd);
   if (preserve_match.marker != NULL)
     bfd_preserve_finish (abfd, &preserve_match);
   bfd_preserve_restore (abfd, &preserve);
