@@ -2255,6 +2255,7 @@ get_type_signedness (abbrev_entry *entry,
 	    case DW_ATE_unsigned:
 	    case DW_ATE_unsigned_char:
 	    case DW_ATE_unsigned_fixed:
+	    case DW_ATE_CHERI_unsigned_intcap:
 	      * is_signed = false;
 	      break;
 
@@ -2266,6 +2267,7 @@ get_type_signedness (abbrev_entry *entry,
 	    case DW_ATE_imaginary_float:
 	    case DW_ATE_decimal_float:
 	    case DW_ATE_signed_fixed:
+	    case DW_ATE_CHERI_signed_intcap:
 	      * is_signed = true;
 	      break;
 	    }
@@ -3096,6 +3098,13 @@ read_and_display_attr_value (unsigned long           attribute,
 	case DW_ATE_HP_floathpintel:	printf ("(HP_floathpintel)"); break;
 	case DW_ATE_HP_imaginary_float80:	printf ("(HP_imaginary_float80)"); break;
 	case DW_ATE_HP_imaginary_float128:	printf ("(HP_imaginary_float128)"); break;
+
+	case DW_ATE_CHERI_signed_intcap:
+	  printf ("(CHERI intcap_t)");
+	  break;
+	case DW_ATE_CHERI_unsigned_intcap:
+	  printf ("(CHERI uintcap_t)");
+	  break;
 
 	default:
 	  if (uvalue >= DW_ATE_lo_user

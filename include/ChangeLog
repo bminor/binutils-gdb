@@ -1,3 +1,9 @@
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
+	* dwarf2.def (DW_ATE_CHERI_signed_intcap)
+	(DW_ATE_CHERI_unsigned_intcap): New defines.
+	* dwarf2.h (DW_ADDR_capability): New define.
+
 2020-10-20  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
 	* elf/aarch64.h: New Morello TLSDESC relocations.
