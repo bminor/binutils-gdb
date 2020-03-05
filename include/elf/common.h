@@ -660,6 +660,9 @@
 					/*   note name must be "LINUX".  */
 #define NT_ARM_PAC_MASK	0x406		/* AArch pointer authentication code masks */
 					/*   note name must be "LINUX".  */
+#define NT_ARM_MORELLO	0x410		/* AArch capability registers */
+					/* Note name must be "LINUX".  */
+
 #define NT_ARC_V2	0x600		/* ARC HS accumulator/extra registers.  */
 					/*   note name must be "LINUX".  */
 #define NT_SIGINFO	0x53494749	/* Fields of siginfo_t.  */

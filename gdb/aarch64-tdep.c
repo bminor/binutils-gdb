@@ -3354,12 +3354,20 @@ aarch64_cannot_store_register (struct gdbarch *gdbarch, int regnum)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (!tdep->has_pauth ())
-    return 0;
+  if (tdep->has_pauth ())
+    {
+      /* Pointer authentication registers are read-only.  */
+      return (regnum == AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base)
+	      || regnum == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base));
+    }
 
-  /* Pointer authentication registers are read-only.  */
-  return (regnum == AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base)
-	  || regnum == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base));
+  if (tdep->has_capability ())
+    {
+      /* Capability register set is read-only for now.  */
+      return (regnum >= tdep->cap_reg_base && regnum < tdep->cap_reg_last);
+    }
+
+  return 0;
 }
 
 /* Initialize the current architecture based on INFO.  If possible,
@@ -3492,6 +3500,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   const struct tdesc_feature *feature_capability
       = tdesc_find_feature (tdesc,"org.gnu.gdb.aarch64.capability");
   int first_cap_regnum = -1;
+  int last_cap_regnum = -1;
 
   if (feature_capability != nullptr)
     {
@@ -3500,10 +3509,11 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       for (i = 0; i < ARRAY_SIZE (aarch64_c_register_names); i++)
 	valid_p &= tdesc_numbered_register (feature_capability,
 					    tdesc_data.get (),
-					    AARCH64_C0_REGNUM + i,
+					    first_cap_regnum + i,
 					    aarch64_c_register_names[i]);
 
-      num_regs = AARCH64_C0_REGNUM + i;
+      last_cap_regnum = first_cap_regnum + i - 1;
+      num_regs += i;
     }
 
   if (!valid_p)
@@ -3525,6 +3535,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				: pauth_ra_state_offset + num_regs;
 
   tdep->cap_reg_base = first_cap_regnum;
+  tdep->cap_reg_last = last_cap_regnum;
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);

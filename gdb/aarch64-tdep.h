@@ -108,7 +108,10 @@ struct gdbarch_tdep
     return pauth_reg_base != -1;
   }
 
+  /* First register from the capability set.  */
   int cap_reg_base;
+  /* Last register from the capability set.  */
+  int cap_reg_last;
 
   /* Returns true if the target supports capabilities.  */
   bool has_capability () const

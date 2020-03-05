@@ -1,5 +1,12 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* linux-aarch64-low.c: arch/aarch64-cap-linux.h.
+	(aarch64_store_cregset): New function.
+	(aarch64_regsets): Add capability register set.
+	(aarch64_sve_regsets): Likewise.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* linux-aarch64-ipa.cc (get_ipa_tdesc): Update.
 	* linux-aarch64-low.cc (aarch64_target::low_arch_setup): Check for
 	HWCAP2_MORELLO and use it.
