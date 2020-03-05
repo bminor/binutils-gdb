@@ -1491,6 +1491,7 @@ HFILES_NO_SRCDIR = \
 	xtensa-tdep.h \
 	arch/aarch32.h \
 	arch/aarch64.h \
+	arch/aarch64-cap-linux.h \
 	arch/aarch64-insn.h \
 	arch/aarch64-mte-linux.h \
 	arch/arc.h \
