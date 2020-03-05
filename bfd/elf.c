@@ -1607,7 +1607,7 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 	  /* Final attempt.  Call the backend copy function
 	     with a NULL input section.  */
 	  if (bed->elf_backend_copy_special_section_fields != NULL)
-	    bed->elf_backend_copy_special_section_fields (ibfd, obfd, NULL, oheader);
+	    (void) bed->elf_backend_copy_special_section_fields (ibfd, obfd, NULL, oheader);
 	}
     }
 
@@ -2458,13 +2458,17 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	   sections.  */
 	if (*p_hdr != NULL)
 	  {
-	    _bfd_error_handler
-	      /* xgettext:c-format */
-	      (_("%pB: warning: multiple relocation sections for section %pA \
-found - ignoring all but the first"),
-	       abfd, target_sect);
+	    if (bed->init_secondary_reloc_section == NULL
+		|| ! bed->init_secondary_reloc_section (abfd, hdr, name, shindex))
+	      {
+		_bfd_error_handler
+		  /* xgettext:c-format */
+		  (_("%pB: warning: secondary relocation section '%s' for section %pA found - ignoring"),
+		   abfd, name, target_sect);
+	      }
 	    goto success;
 	  }
+
 	hdr2 = (Elf_Internal_Shdr *) bfd_alloc (abfd, sizeof (*hdr2));
 	if (hdr2 == NULL)
 	  goto fail;
@@ -12307,4 +12311,365 @@ _bfd_elf_maybe_function_sym (const asymbol *sym, asection *sec,
   if (size == 0)
     size = 1;
   return size;
+}
+
+/* Set to non-zero to enable some debug messages.  */
+#define DEBUG_SECONDARY_RELOCS	 0
+
+/* An internal-to-the-bfd-library only section type
+   used to indicate a cached secondary reloc section.  */
+#define SHT_SECONDARY_RELOC	 (SHT_LOOS + SHT_RELA)
+
+/* Create a BFD section to hold a secondary reloc section.  */
+
+bfd_boolean
+_bfd_elf_init_secondary_reloc_section (bfd * abfd,
+				       Elf_Internal_Shdr *hdr,
+				       const char * name,
+				       unsigned int shindex)
+{
+  /* We only support RELA secondary relocs.  */
+  if (hdr->sh_type != SHT_RELA)
+    return FALSE;
+
+#if DEBUG_SECONDARY_RELOCS
+  fprintf (stderr, "secondary reloc section %s encountered\n", name);
+#endif
+  hdr->sh_type = SHT_SECONDARY_RELOC;
+  return _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
+}
+
+/* Read in any secondary relocs associated with SEC.  */
+
+bfd_boolean
+_bfd_elf_slurp_secondary_reloc_section (bfd *      abfd,
+					asection * sec,
+					asymbol ** symbols)
+{
+  const struct elf_backend_data * const ebd = get_elf_backend_data (abfd);
+  asection * relsec;
+  bfd_boolean result = TRUE;
+  bfd_vma (*r_sym) (bfd_vma);
+
+#if BFD_DEFAULT_TARGET_SIZE > 32
+  if (bfd_arch_bits_per_address (abfd) != 32)
+    r_sym = elf64_r_sym;
+  else
+#endif
+    r_sym = elf32_r_sym;
+  
+  /* Discover if there are any secondary reloc sections
+     associated with SEC.  */
+  for (relsec = abfd->sections; relsec != NULL; relsec = relsec->next)
+    {
+      Elf_Internal_Shdr * hdr = & elf_section_data (relsec)->this_hdr;
+
+      if (hdr->sh_type == SHT_SECONDARY_RELOC
+	  && hdr->sh_info == (unsigned) elf_section_data (sec)->this_idx)
+	{
+	  bfd_byte * native_relocs;
+	  bfd_byte * native_reloc;
+	  arelent * internal_relocs;
+	  arelent * internal_reloc;
+	  unsigned int i;
+	  unsigned int entsize;
+	  unsigned int symcount;
+	  unsigned int reloc_count;
+	  size_t amt;
+
+	  if (ebd->elf_info_to_howto == NULL)
+	    return FALSE;
+
+#if DEBUG_SECONDARY_RELOCS
+	  fprintf (stderr, "read secondary relocs for %s from %s\n",
+		   sec->name, relsec->name);
+#endif
+	  entsize = hdr->sh_entsize;
+
+	  native_relocs = bfd_malloc (hdr->sh_size);
+	  if (native_relocs == NULL)
+	    {
+	      result = FALSE;
+	      continue;
+	    }
+
+	  reloc_count = NUM_SHDR_ENTRIES (hdr);
+	  if (_bfd_mul_overflow (reloc_count, sizeof (arelent), & amt))
+	    {
+	      bfd_set_error (bfd_error_file_too_big);
+	      result = FALSE;
+	      continue;
+	    }
+
+	  internal_relocs = (arelent *) bfd_alloc (abfd, amt);
+	  if (internal_relocs == NULL)
+	    {
+	      free (native_relocs);
+	      result = FALSE;
+	      continue;
+	    }
+
+	  if (bfd_seek (abfd, hdr->sh_offset, SEEK_SET) != 0
+	      || (bfd_bread (native_relocs, hdr->sh_size, abfd)
+		  != hdr->sh_size))
+	    {
+	      free (native_relocs);
+	      free (internal_relocs);
+	      result = FALSE;
+	      continue;
+	    }
+
+	  symcount = bfd_get_symcount (abfd);
+
+	  for (i = 0, internal_reloc = internal_relocs,
+		 native_reloc = native_relocs;
+	       i < reloc_count;
+	       i++, internal_reloc++, native_reloc += entsize)
+	    {
+	      bfd_boolean res;
+	      Elf_Internal_Rela rela;
+
+	      ebd->s->swap_reloca_in (abfd, native_reloc, & rela);
+
+	      /* The address of an ELF reloc is section relative for an object
+		 file, and absolute for an executable file or shared library.
+		 The address of a normal BFD reloc is always section relative,
+		 and the address of a dynamic reloc is absolute..  */
+	      if ((abfd->flags & (EXEC_P | DYNAMIC)) == 0)
+		internal_reloc->address = rela.r_offset;
+	      else
+		internal_reloc->address = rela.r_offset - sec->vma;
+
+	      if (r_sym (rela.r_info) == STN_UNDEF)
+		{
+		  /* FIXME: This and the error case below mean that we
+		     have a symbol on relocs that is not elf_symbol_type.  */
+		  internal_reloc->sym_ptr_ptr =
+		    bfd_abs_section_ptr->symbol_ptr_ptr;
+		}
+	      else if (r_sym (rela.r_info) > symcount)
+		{
+		  _bfd_error_handler
+		    /* xgettext:c-format */
+		    (_("%pB(%pA): relocation %d has invalid symbol index %ld"),
+		     abfd, sec, i, (long) r_sym (rela.r_info));
+		  bfd_set_error (bfd_error_bad_value);
+		  internal_reloc->sym_ptr_ptr =
+		    bfd_abs_section_ptr->symbol_ptr_ptr;
+		  result = FALSE;
+		}
+	      else
+		{
+		  asymbol **ps;
+
+		  ps = symbols + r_sym (rela.r_info) - 1;
+
+		  internal_reloc->sym_ptr_ptr = ps;
+		  /* Make sure that this symbol is not removed by strip.  */
+		  (*ps)->flags |= BSF_KEEP;
+		}
+
+	      internal_reloc->addend = rela.r_addend;
+
+	      res = ebd->elf_info_to_howto (abfd, internal_reloc, & rela);
+	      if (! res || internal_reloc->howto == NULL)
+		{
+#if DEBUG_SECONDARY_RELOCS
+		  fprintf (stderr, "there is no howto associated with reloc %lx\n",
+			   rela.r_info);
+#endif
+		  result = FALSE;
+		}
+	    }
+
+	  free (native_relocs);
+	  /* Store the internal relocs.  */
+	  elf_section_data (relsec)->sec_info = internal_relocs;
+	}
+    }
+
+  return result;
+}
+
+/* Set the ELF section header fields of an output secondary reloc section.  */
+
+bfd_boolean
+_bfd_elf_copy_special_section_fields (const bfd *   ibfd ATTRIBUTE_UNUSED,
+				      bfd *         obfd ATTRIBUTE_UNUSED,
+				      const Elf_Internal_Shdr * isection,
+				      Elf_Internal_Shdr *       osection)
+{
+  asection * isec;
+  asection * osec;
+
+  if (isection == NULL)
+    return FALSE;
+
+  if (isection->sh_type != SHT_SECONDARY_RELOC)
+    return TRUE;
+
+  isec = isection->bfd_section;
+  if (isec == NULL)
+    return FALSE;
+
+  osec = osection->bfd_section;
+  if (osec == NULL)
+    return FALSE;
+
+  BFD_ASSERT (elf_section_data (osec)->sec_info == NULL);
+  elf_section_data (osec)->sec_info = elf_section_data (isec)->sec_info;
+  osection->sh_type = SHT_RELA;
+  osection->sh_link = elf_onesymtab (obfd);
+  if (osection->sh_link == 0)
+    {
+      /* There is no symbol table - we are hosed...  */
+      _bfd_error_handler
+	/* xgettext:c-format */
+	(_("%pB(%pA): link section cannot be set because the output file does not have a symbol table"),
+	obfd, osec);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  /* Find the output section that corresponds to the isection's sh_info link.  */
+  BFD_ASSERT (isection->sh_info > 0
+	      && isection->sh_info < elf_numsections (ibfd));
+  isection = elf_elfsections (ibfd)[isection->sh_info];
+
+  BFD_ASSERT (isection != NULL);
+  BFD_ASSERT (isection->bfd_section != NULL);
+  BFD_ASSERT (isection->bfd_section->output_section != NULL);
+  osection->sh_info =
+    elf_section_data (isection->bfd_section->output_section)->this_idx;
+
+#if DEBUG_SECONDARY_RELOCS
+  fprintf (stderr, "update header of %s, sh_link = %u, sh_info = %u\n",
+	   osec->name, osection->sh_link, osection->sh_info);
+#endif
+
+  return TRUE;
+}
+
+/* Write out a secondary reloc section.  */
+
+bfd_boolean
+_bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
+{
+  const struct elf_backend_data * const ebd = get_elf_backend_data (abfd);
+  bfd_vma addr_offset;
+  asection * relsec;
+  bfd_vma (*r_info) (bfd_vma, bfd_vma);
+
+#if BFD_DEFAULT_TARGET_SIZE > 32
+  if (bfd_arch_bits_per_address (abfd) != 32)
+    r_info = elf64_r_info;
+  else
+#endif
+    r_info = elf32_r_info;
+
+  if (sec == NULL)
+    return FALSE;
+
+  /* The address of an ELF reloc is section relative for an object
+     file, and absolute for an executable file or shared library.
+     The address of a BFD reloc is always section relative.  */
+  addr_offset = 0;
+  if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
+    addr_offset = sec->vma;
+
+  /* Discover if there are any secondary reloc sections
+     associated with SEC.  */
+  for (relsec = abfd->sections; relsec != NULL; relsec = relsec->next)
+    {
+      const struct bfd_elf_section_data * const esd = elf_section_data (relsec);
+      Elf_Internal_Shdr * const hdr = (Elf_Internal_Shdr *) & esd->this_hdr;
+
+      if (hdr->sh_type == SHT_RELA
+	  && hdr->sh_info == (unsigned) elf_section_data (sec)->this_idx)
+	{
+	  asymbol *    last_sym;
+	  int          last_sym_idx;
+	  unsigned int reloc_count;
+	  unsigned int idx;
+	  arelent *    src_irel;
+	  bfd_byte *   dst_rela;
+
+	  BFD_ASSERT (hdr->contents == NULL);
+
+	  reloc_count = hdr->sh_size / hdr->sh_entsize;
+	  BFD_ASSERT (reloc_count > 0);
+
+	  hdr->contents = bfd_alloc (abfd, hdr->sh_size);
+	  if (hdr->contents == NULL)
+	    continue;
+
+#if DEBUG_SECONDARY_RELOCS
+	  fprintf (stderr, "write %u secondary relocs for %s from %s\n",
+		   reloc_count, sec->name, relsec->name);
+#endif
+	  last_sym = NULL;
+	  last_sym_idx = 0;
+	  dst_rela = hdr->contents;
+	  src_irel = (arelent *) esd->sec_info;
+	  BFD_ASSERT (src_irel != NULL);
+
+	  for (idx = 0; idx < reloc_count; idx++, dst_rela += hdr->sh_entsize)
+	    {
+	      Elf_Internal_Rela src_rela;
+	      arelent *ptr;
+	      asymbol *sym;
+	      int n;
+
+	      ptr = src_irel + idx;
+	      sym = *ptr->sym_ptr_ptr;
+
+	      if (sym == last_sym)
+		n = last_sym_idx;
+	      else
+		{
+		  last_sym = sym;
+		  n = _bfd_elf_symbol_from_bfd_symbol (abfd, & sym);
+		  if (n < 0)
+		    {
+#if DEBUG_SECONDARY_RELOCS
+		      fprintf (stderr, "failed to find symbol %s whilst rewriting relocs\n",
+			       sym->name);
+#endif
+		      /* FIXME: Signal failure somehow.  */
+		      n = 0;
+		    }
+		  last_sym_idx = n;
+		}
+
+	      if ((*ptr->sym_ptr_ptr)->the_bfd != NULL
+		  && (*ptr->sym_ptr_ptr)->the_bfd->xvec != abfd->xvec
+		  && ! _bfd_elf_validate_reloc (abfd, ptr))
+		{
+#if DEBUG_SECONDARY_RELOCS
+		  fprintf (stderr, "symbol %s is not in the output bfd\n",
+			   sym->name);
+#endif
+		  /* FIXME: Signal failure somehow.  */
+		  n = 0;
+		}
+
+	      if (ptr->howto == NULL)
+		{
+#if DEBUG_SECONDARY_RELOCS
+		  fprintf (stderr, "reloc for symbol %s does not have a howto associated with it\n",
+			   sym->name);
+#endif
+		  /* FIXME: Signal failure somehow.  */
+		  n = 0;
+		}
+
+	      src_rela.r_offset = ptr->address + addr_offset;
+	      src_rela.r_info = r_info (n, ptr->howto->type);
+	      src_rela.r_addend = ptr->addend;
+	      ebd->s->swap_reloca_out (abfd, &src_rela, dst_rela);
+	    }
+	}
+    }
+
+  return TRUE;
 }

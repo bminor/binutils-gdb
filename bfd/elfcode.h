@@ -869,6 +869,7 @@ elf_object_p (bfd *abfd)
 void
 elf_write_relocs (bfd *abfd, asection *sec, void *data)
 {
+  const struct elf_backend_data * const bed = get_elf_backend_data (abfd);
   bfd_boolean *failedp = (bfd_boolean *) data;
   Elf_Internal_Shdr *rela_hdr;
   bfd_vma addr_offset;
@@ -985,6 +986,13 @@ elf_write_relocs (bfd *abfd, asection *sec, void *data)
       src_rela.r_addend = ptr->addend;
       (*swap_out) (abfd, &src_rela, dst_rela);
     }
+
+  if (bed->write_secondary_relocs != NULL)
+    if (! bed->write_secondary_relocs (abfd, sec))
+      {
+	*failedp = TRUE;
+	return;
+      }
 }
 
 /* Write out the program headers.  */
@@ -1292,7 +1300,10 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 		{
 		  /* This symbol is in a section for which we did not
 		     create a BFD section.  Just use bfd_abs_section,
-		     although it is wrong.  FIXME.  */
+		     although it is wrong.  FIXME.  Note - there is
+		     code in elf.c:swap_out_syms that calls
+		     symbol_section_index() in the elf backend for
+		     cases like this.  */
 		  sym->symbol.section = bfd_abs_section_ptr;
 		}
 	    }
@@ -1517,6 +1528,7 @@ elf_slurp_reloc_table (bfd *abfd,
 		       asymbol **symbols,
 		       bfd_boolean dynamic)
 {
+  const struct elf_backend_data * const bed = get_elf_backend_data (abfd);
   struct bfd_elf_section_data * const d = elf_section_data (asect);
   Elf_Internal_Shdr *rel_hdr;
   Elf_Internal_Shdr *rel_hdr2;
@@ -1582,6 +1594,10 @@ elf_slurp_reloc_table (bfd *abfd,
 					      rel_hdr2, reloc_count2,
 					      relents + reloc_count,
 					      symbols, dynamic))
+    return FALSE;
+
+  if (bed->slurp_secondary_relocs != NULL
+      && ! bed->slurp_secondary_relocs (abfd, asect, symbols))
     return FALSE;
 
   asect->relocation = relents;

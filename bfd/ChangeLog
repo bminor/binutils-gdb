@@ -1,3 +1,36 @@
+2020-03-05  Nick Clifton  <nickc@redhat.com>
+
+	* elf-bfd.h (struct elf_backend_data): Add new fields:
+	init_secondary_reloc_section, slurp_secondary_reloc_section,
+	write_secondary_reloc_section.
+	(_bfd_elf_init_secondary_reloc_section): Prototype.
+	(_bfd_elf_slurp_secondary_reloc_section): Prototype.
+	(_bfd_elf_write_secondary_reloc_section): Prototype.
+	* elf.c ( bfd_section_from_shdr): Invoke the new
+	init_secondary_reloc_section backend function, if defined, when a
+	second reloc section is encountered.
+	(swap_out_syms): Invoke the new symbol_section_index function, if
+	defined, when computing the section index of an OS/PROC specific
+	symbol.
+	(_bfd_elf_init_secondary_reloc_section): New function.
+	(_bfd_elf_slurp_secondary_reloc_section): New function.
+	(_bfd_elf_write_secondary_reloc_section): New function.
+	(_bfd_elf_copy_special_section_fields): New function.
+	* elfcode.h (elf_write_relocs): Invoke the new
+	write_secondary_relocs function, if defined, in order to emit
+	secondary relocs.
+	(elf_slurp_reloc_table): Invoke the new slurp_secondary_relocs
+	function, if defined, in order to read in secondary relocs.
+	* elfxx-target.h (elf_backend_copy_special_section_fields):
+	Provide a non-NULL default definition.
+	(elf_backend_init_secondary_reloc_section): Likewise.
+	(elf_backend_slurp_secondary_reloc_section): Likewise.
+	(elf_backend_write_secondary_reloc_section): Likewise.
+	(struct elf_backend_data elfNN_bed): Add initialisers for the new
+	fields.
+        * configure.ac (score_elf32_[bl]e_vec): Add elf64.lo
+        * configure: Regenerate.
+
 2020-03-05  Alan Modra  <amodra@gmail.com>
 
 	* archive64.c (_bfd_archive_64_bit_slurp_armap): Check parsed_size
