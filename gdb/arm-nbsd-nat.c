@@ -31,6 +31,7 @@
 #include <machine/frame.h>
 
 #include "arm-tdep.h"
+#include "arm-nbsd-tdep.h"
 #include "aarch32-tdep.h"
 #include "inf-ptrace.h"
 
@@ -44,28 +45,6 @@ public:
 };
 
 static arm_netbsd_nat_target the_arm_netbsd_nat_target;
-
-static void
-arm_supply_gregset (struct regcache *regcache, struct reg *gregset)
-{
-  int regno;
-  CORE_ADDR r_pc;
-
-  /* Integer registers.  */
-  for (regno = ARM_A1_REGNUM; regno < ARM_SP_REGNUM; regno++)
-    regcache->raw_supply (regno, (char *) &gregset->r[regno]);
-
-  regcache->raw_supply (ARM_SP_REGNUM, (char *) &gregset->r_sp);
-  regcache->raw_supply (ARM_LR_REGNUM, (char *) &gregset->r_lr);
-  /* This is ok: we're running native...  */
-  r_pc = gdbarch_addr_bits_remove (regcache->arch (), gregset->r_pc);
-  regcache->raw_supply (ARM_PC_REGNUM, (char *) &r_pc);
-
-  if (arm_apcs_32)
-    regcache->raw_supply (ARM_PS_REGNUM, (char *) &gregset->r_cpsr);
-  else
-    regcache->raw_supply (ARM_PS_REGNUM, (char *) &gregset->r_pc);
-}
 
 static void
 arm_supply_vfpregset (struct regcache *regcache, struct fpreg *fpregset)
@@ -95,57 +74,8 @@ fetch_register (struct regcache *regcache, int regno)
       warning (_("unable to fetch general register"));
       return;
     }
-
-  switch (regno)
-    {
-    case ARM_SP_REGNUM:
-      regcache->raw_supply (ARM_SP_REGNUM, (char *) &inferior_registers.r_sp);
-      break;
-
-    case ARM_LR_REGNUM:
-      regcache->raw_supply (ARM_LR_REGNUM, (char *) &inferior_registers.r_lr);
-      break;
-
-    case ARM_PC_REGNUM:
-      /* This is ok: we're running native...  */
-      inferior_registers.r_pc = gdbarch_addr_bits_remove
-				  (regcache->arch (),
-				   inferior_registers.r_pc);
-      regcache->raw_supply (ARM_PC_REGNUM, (char *) &inferior_registers.r_pc);
-      break;
-
-    case ARM_PS_REGNUM:
-      if (arm_apcs_32)
-	regcache->raw_supply (ARM_PS_REGNUM,
-			      (char *) &inferior_registers.r_cpsr);
-      else
-	regcache->raw_supply (ARM_PS_REGNUM,
-			      (char *) &inferior_registers.r_pc);
-      break;
-
-    default:
-      regcache->raw_supply (regno, (char *) &inferior_registers.r[regno]);
-      break;
-    }
-}
-
-static void
-fetch_regs (struct regcache *regcache)
-{
-  struct reg inferior_registers;
-  int ret;
-  int regno;
-
-  ret = ptrace (PT_GETREGS, regcache->ptid ().pid (),
-		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
-
-  if (ret < 0)
-    {
-      warning (_("unable to fetch general registers"));
-      return;
-    }
-
-  arm_supply_gregset (regcache, &inferior_registers);
+  arm_nbsd_supply_gregset (nullptr, regcache, regno, &inferior_registers,
+			   sizeof (inferior_registers));
 }
 
 static void
@@ -207,7 +137,7 @@ arm_netbsd_nat_target::fetch_registers (struct regcache *regcache, int regno)
     }
   else
     {
-      fetch_regs (regcache);
+      fetch_register (regcache, -1);
       fetch_fp_regs (regcache);
     }
 }
@@ -416,56 +346,9 @@ arm_netbsd_nat_target::read_description ()
   return arm_read_description (ARM_FP_TYPE_VFPV3);
 }
 
-static void
-fetch_elfcore_registers (struct regcache *regcache,
-			 gdb_byte *core_reg_sect, unsigned core_reg_size,
-			 int which, CORE_ADDR ignore)
-{
-  struct reg gregset;
-  struct fpreg fparegset;
-
-  switch (which)
-    {
-    case 0:	/* Integer registers.  */
-      if (core_reg_size != sizeof (struct reg))
-	warning (_("wrong size of register set in core file"));
-      else
-	{
-	  /* The memcpy may be unnecessary, but we can't really be sure
-	     of the alignment of the data in the core file.  */
-	  memcpy (&gregset, core_reg_sect, sizeof (gregset));
-	  arm_supply_gregset (regcache, &gregset);
-	}
-      break;
-
-    case 2:
-      /* cbiesinger/2020-02-12 -- as far as I can tell, ARM/NetBSD does
-         not write any floating point registers into the core file (tested
-	 with NetBSD 9.1_RC1).  When it does, this block will need to read them,
-	 and the arm-netbsd gdbarch will need a core_read_description function
-	 to return the right description for them.  */
-      break;
-
-    default:
-      /* Don't know what kind of register request this is; just ignore it.  */
-      break;
-    }
-}
-
-static struct core_fns arm_netbsd_elfcore_fns =
-{
-  bfd_target_elf_flavour,		/* core_flavour.  */
-  default_check_format,			/* check_format.  */
-  default_core_sniffer,			/* core_sniffer.  */
-  fetch_elfcore_registers,		/* core_read_registers.  */
-  NULL
-};
-
 void _initialize_arm_netbsd_nat ();
 void
 _initialize_arm_netbsd_nat ()
 {
   add_inf_child_target (&the_arm_netbsd_nat_target);
-
-  deprecated_add_core_fns (&arm_netbsd_elfcore_fns);
 }

@@ -1,3 +1,22 @@
+2020-03-12  Christian Biesinger  <cbiesinger@google.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add new arm-nbsd-tdep.h file.
+	* arm-nbsd-nat.c (arm_supply_gregset): Moved to arm-nbsd-tdep and
+	renamed to arm_nbsd_supply_gregset.
+	(fetch_register): Update to call arm_nbsd_supply_gregset.
+	(fetch_regs): Remove in favor of fetch_register with a -1 regno.
+	(arm_netbsd_nat_target::fetch_registers): Update.
+	(fetch_elfcore_registers): Removed.
+	(_initialize_arm_netbsd_nat): Removed call to deprecated_add_core_fns.
+	* arm-nbsd-tdep.c (struct arm_nbsd_reg): New struct.
+	(arm_nbsd_supply_gregset): Moved from arm-nbsd-nat.c and updated to
+	not require NetBSD system headers.
+	(arm_nbsd_regset): New struct.
+	(arm_nbsd_iterate_over_regset_sections): New function.
+	(arm_netbsd_init_abi_common): Updated to call
+	set_gdbarch_iterate_over_regset_sections.
+	* arm-nbsd-tdep.h: New file.
+
 2020-03-11  Kevin Buettner  <kevinb@redhat.com>
 
 	* symtab.c (find_pc_sect_line): Add check which prevents infinite

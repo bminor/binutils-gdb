@@ -1205,6 +1205,7 @@ HFILES_NO_SRCDIR = \
 	arc-tdep.h \
 	arch-utils.h \
 	arm-linux-tdep.h \
+	arm-nbsd-tdep.h \
 	arm-tdep.h \
 	auto-load.h \
 	auxv.h \
