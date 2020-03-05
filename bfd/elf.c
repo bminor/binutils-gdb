@@ -3026,14 +3026,6 @@ _bfd_elf_make_section_from_phdr (bfd *abfd,
       newsect->alignment_power = bfd_log2 (align);
       if (hdr->p_type == PT_LOAD)
 	{
-	  /* Hack for gdb.  Segments that have not been modified do
-	     not have their contents written to a core file, on the
-	     assumption that a debugger can find the contents in the
-	     executable.  We flag this case by setting the fake
-	     section size to zero.  Note that "real" bss sections will
-	     always have their contents dumped to the core file.  */
-	  if (bfd_get_format (abfd) == bfd_core)
-	    newsect->size = 0;
 	  newsect->flags |= SEC_ALLOC;
 	  if (hdr->p_flags & PF_X)
 	    newsect->flags |= SEC_CODE;
