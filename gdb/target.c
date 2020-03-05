@@ -925,8 +925,11 @@ raw_memory_xfer_partial (struct target_ops *ops, gdb_byte *readbuf,
       if (res == TARGET_XFER_UNAVAILABLE)
 	break;
 
-      /* We want to continue past core files to executables, but not
-	 past a running target's memory.  */
+      /* Don't continue past targets which have all the memory.
+         At one time, this code was necessary to read data from
+	 executables / shared libraries when data for the requested
+	 addresses weren't available in the core file.  But now the
+	 core target handles this case itself.  */
       if (ops->has_all_memory ())
 	break;
 

@@ -87,7 +87,7 @@ public:
 
   const char *thread_name (struct thread_info *) override;
 
-  bool has_all_memory () override { return false; }
+  bool has_all_memory () override { return true; }
   bool has_memory () override;
   bool has_stack () override;
   bool has_registers () override;
@@ -614,12 +614,47 @@ core_target::xfer_partial (enum target_object object, const char *annex,
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
-      return (section_table_xfer_memory_partial
-	      (readbuf, writebuf,
-	       offset, len, xfered_len,
-	       m_core_section_table.sections,
-	       m_core_section_table.sections_end));
+      {
+	enum target_xfer_status xfer_status;
 
+	/* Try accessing memory contents from core file data,
+	   restricting consideration to those sections for which
+	   the BFD section flag SEC_HAS_CONTENTS is set.  */
+	auto has_contents_cb = [] (const struct target_section *s)
+	  {
+	    return ((s->the_bfd_section->flags & SEC_HAS_CONTENTS) != 0);
+	  };
+	xfer_status = section_table_xfer_memory_partial
+			(readbuf, writebuf,
+			 offset, len, xfered_len,
+			 m_core_section_table.sections,
+			 m_core_section_table.sections_end,
+			 has_contents_cb);
+	if (xfer_status == TARGET_XFER_OK)
+	  return TARGET_XFER_OK;
+
+	/* Now check the stratum beneath us; this should be file_stratum.  */
+	xfer_status = this->beneath ()->xfer_partial (object, annex, readbuf,
+						      writebuf, offset, len,
+						      xfered_len);
+	if (xfer_status == TARGET_XFER_OK)
+	  return TARGET_XFER_OK;
+
+	/* Finally, attempt to access data in core file sections with
+	   no contents.  These will typically read as all zero.  */
+	auto no_contents_cb = [&] (const struct target_section *s)
+	  {
+	    return !has_contents_cb (s);
+	  };
+	xfer_status = section_table_xfer_memory_partial
+			(readbuf, writebuf,
+			 offset, len, xfered_len,
+			 m_core_section_table.sections,
+			 m_core_section_table.sections_end,
+			 no_contents_cb);
+
+	return xfer_status;
+      }
     case TARGET_OBJECT_AUXV:
       if (readbuf)
 	{

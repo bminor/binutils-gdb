@@ -1,5 +1,16 @@
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
 
+	PR corefiles/25631
+	* corelow.c (core_target:xfer_partial):  Revise
+	TARGET_OBJECT_MEMORY case to consider non-SEC_HAS_CONTENTS
+	case after first checking the stratum beneath the core
+	target.
+	(has_all_memory): Return true.
+	* target.c (raw_memory_xfer_partial): Revise comment
+	regarding use of has_all_memory.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
 	* exec.h (section_table_xfer_memory): Revise declaration,
 	replacing section name parameter with an optional callback
 	predicate.
