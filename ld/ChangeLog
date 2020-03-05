@@ -1,6 +1,13 @@
 2020-03-05  Alan Modra  <amodra@gmail.com>
 
 	PR 25570
+	* ldlang.c (lang_size_sections_1): Don't report changes on
+	second and subsequent iterations that make no change in
+	alignment from that already reported.
+
+2020-03-05  Alan Modra  <amodra@gmail.com>
+
+	PR 25570
 	* ldlang.c (lang_sizing_iteration): New static var.
 	(lang_size_sections_1): Warn about no memory region only on first
 	iteration.  Warn about changing start address on first iteration

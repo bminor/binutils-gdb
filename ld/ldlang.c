@@ -5597,7 +5597,13 @@ lang_size_sections_1
 		    if (lang_sizing_iteration == 1)
 		      diff = dotdelta;
 		    else if (lang_sizing_iteration > 1)
-		      diff = newdot - os->bfd_section->vma;
+		      {
+			/* Only report adjustments that would change
+			   alignment from what we have already reported.  */
+			diff = newdot - os->bfd_section->vma;
+			if (!(diff & (((bfd_vma) 1 << section_alignment) - 1)))
+			  diff = 0;
+		      }
 		    if (diff != 0
 			&& (config.warn_section_align
 			    || os->addr_tree != NULL))
