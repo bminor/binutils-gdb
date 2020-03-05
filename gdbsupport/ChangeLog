@@ -1,3 +1,7 @@
+2020-03-05  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* .gitattributes: New file.
+
 2020-03-03  Simon Marchi  <simon.marchi@efficios.com>
 
 	* Makefile.in: Re-generate.
