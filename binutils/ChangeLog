@@ -1,3 +1,9 @@
+2020-03-05  Alan Modra  <amodra@gmail.com>
+
+	PR 25629
+	* objcopy.c (filter_symbols): Don't segfault on NULL
+	prefix_symbols_string.
+
 2020-03-04  Christian Eggers  <ceggers@gmx.de>
 
 	* objcopy.c (copy_object): Convert from bytes to octets for

@@ -1580,9 +1580,14 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
       if (add_leading_char || prefix_symbols_string)
 	{
 	  char *n, *ptr;
+	  size_t len = strlen (name) + 1;
 
-	  ptr = n = (char *) xmalloc (1 + strlen (prefix_symbols_string)
-				      + strlen (name) + 1);
+	  if (add_leading_char)
+	    len++;
+	  if (prefix_symbols_string)
+	    len += strlen (prefix_symbols_string);
+
+	  ptr = n = (char *) xmalloc (len);
 	  if (add_leading_char)
 	    *ptr++ = bfd_get_symbol_leading_char (obfd);
 
