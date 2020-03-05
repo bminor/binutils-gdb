@@ -331,6 +331,9 @@ enum dwarf_location_list_entry_type
 
 #define DW_ADDR_none		0
 
+/* The type is an address capability and can be dereferenced as such.  */
+#define DW_ADDR_capability  0x1
+
 /* Source language names and codes.  */
 enum dwarf_source_language
   {

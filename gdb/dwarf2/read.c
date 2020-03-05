@@ -18024,6 +18024,15 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
 	break;
 
+      case DW_ATE_CHERI_signed_intcap:
+      case DW_ATE_CHERI_unsigned_intcap:
+	{
+	  /* Turn DW_ATE_CHERI_*_intcap into a void * pointer.  */
+	  type = init_type (objfile, TYPE_CODE_VOID, TARGET_CHAR_BIT, NULL);
+	  type = init_pointer_type (objfile, bits, name, type);
+	  break;
+	}
+
       default:
 	complaint (_("unsupported DW_AT_encoding: '%s'"),
 		   dwarf_type_encoding_name (encoding));

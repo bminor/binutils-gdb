@@ -1,5 +1,13 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-tdep.h (AARCH64_DWARF_C0, AARCH64_DWARF_CSP)
+	(AARCH64_DWARF_PCC, AARCH64_DWARF_DDC)
+	(AARCH64_DWARF_RESERVED_1, AARCH64_DWARF_RESERVED_2)
+	(C_REGISTER_SIZE): New defines.
+	* dwarf2/read.c (read_base_type): Handle capabilities.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* target-descriptions.c (make_gdb_type): Handle new capability
 	types.
 

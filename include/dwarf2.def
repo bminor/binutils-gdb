@@ -750,6 +750,11 @@ DW_ATE (DW_ATE_HP_unsigned_fixed, 0x8e) /* Cobol.  */
 DW_ATE (DW_ATE_HP_VAX_complex_float, 0x8f) /* F or G floating complex.  */
 DW_ATE (DW_ATE_HP_VAX_complex_float_d, 0x90) /* D floating complex.  */
 
+/* Describes a signed integer/capability type __intcap_t.  */
+DW_ATE (DW_ATE_CHERI_signed_intcap, 0xa0)
+/* Describes an unsigned integer/capability type __uintcap_t.  */
+DW_ATE (DW_ATE_CHERI_unsigned_intcap, 0xa1)
+
 DW_END_ATE
 
 DW_FIRST_CFA (DW_CFA_advance_loc, 0x40)
