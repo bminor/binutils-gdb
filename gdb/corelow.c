@@ -618,8 +618,7 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	      (readbuf, writebuf,
 	       offset, len, xfered_len,
 	       m_core_section_table.sections,
-	       m_core_section_table.sections_end,
-	       NULL));
+	       m_core_section_table.sections_end));
 
     case TARGET_OBJECT_AUXV:
       if (readbuf)

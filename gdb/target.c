@@ -980,11 +980,17 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 	  const char *section_name = section->the_bfd_section->name;
 
 	  memaddr = overlay_mapped_address (memaddr, section);
+
+	  auto match_cb = [=] (const struct target_section *s)
+	    {
+	      return (strcmp (section_name, s->the_bfd_section->name) == 0);
+	    };
+
 	  return section_table_xfer_memory_partial (readbuf, writebuf,
 						    memaddr, len, xfered_len,
 						    table->sections,
 						    table->sections_end,
-						    section_name);
+						    match_cb);
 	}
     }
 
@@ -1002,8 +1008,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 	  return section_table_xfer_memory_partial (readbuf, writebuf,
 						    memaddr, len, xfered_len,
 						    table->sections,
-						    table->sections_end,
-						    NULL);
+						    table->sections_end);
 	}
     }
 

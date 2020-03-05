@@ -77,8 +77,7 @@ target_bfd::xfer_partial (target_object object,
 	return section_table_xfer_memory_partial (readbuf, writebuf,
 						  offset, len, xfered_len,
 						  m_table.sections,
-						  m_table.sections_end,
-						  NULL);
+						  m_table.sections_end);
       }
     default:
       return TARGET_XFER_E_IO;

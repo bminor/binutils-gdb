@@ -1,3 +1,12 @@
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* exec.h (section_table_xfer_memory): Revise declaration,
+	replacing section name parameter with an optional callback
+	predicate.
+	* exec.c (section_table_xfer_memory): Likewise.
+	* bfd-target.c, exec.c, target.c, corelow.c: Adjust all callers
+	of section_table_xfer_memory.
+
 2020-07-22  Tom Tromey  <tromey@adacore.com>
 
 	* mi/mi-cmd-stack.c (list_args_or_locals): Use

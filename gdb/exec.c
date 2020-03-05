@@ -956,7 +956,8 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 				   ULONGEST *xfered_len,
 				   struct target_section *sections,
 				   struct target_section *sections_end,
-				   const char *section_name)
+				   gdb::function_view<bool
+				     (const struct target_section *)> match_cb)
 {
   int res;
   struct target_section *p;
@@ -970,7 +971,7 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
       struct bfd_section *asect = p->the_bfd_section;
       bfd *abfd = asect->owner;
 
-      if (section_name && strcmp (section_name, asect->name) != 0)
+      if (match_cb != nullptr && !match_cb (p))
 	continue;		/* not the section we need.  */
       if (memaddr >= p->addr)
         {
@@ -1043,8 +1044,7 @@ exec_target::xfer_partial (enum target_object object,
     return section_table_xfer_memory_partial (readbuf, writebuf,
 					      offset, len, xfered_len,
 					      table->sections,
-					      table->sections_end,
-					      NULL);
+					      table->sections_end);
   else
     return TARGET_XFER_E_IO;
 }
