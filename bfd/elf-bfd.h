@@ -2031,6 +2031,14 @@ struct elf_obj_tdata
   Elf_Internal_Shdr dynversym_hdr;
   Elf_Internal_Shdr dynverref_hdr;
   Elf_Internal_Shdr dynverdef_hdr;
+  Elf_Internal_Sym *dt_symtab;
+  bfd_byte *dt_versym;
+  bfd_byte *dt_verdef;
+  bfd_byte *dt_verneed;
+  size_t dt_symtab_count;
+  size_t dt_verdef_count;
+  size_t dt_verneed_count;
+  char *dt_strtab;
   elf_section_list * symtab_shndx_list;
   bfd_vma gp;				/* The gp value */
   unsigned int gp_size;			/* The gp size */
@@ -2194,6 +2202,7 @@ struct elf_obj_tdata
 #define elf_dyn_lib_class(bfd)	(elf_tdata(bfd) -> dyn_lib_class)
 #define elf_bad_symtab(bfd)	(elf_tdata(bfd) -> bad_symtab)
 #define elf_flags_init(bfd)	(elf_tdata(bfd) -> o->flags_init)
+#define elf_use_dt_symtab_p(bfd) (elf_tdata(bfd) -> dt_symtab_count != 0)
 #define elf_known_obj_attributes(bfd) (elf_tdata (bfd) -> known_obj_attributes)
 #define elf_other_obj_attributes(bfd) (elf_tdata (bfd) -> other_obj_attributes)
 #define elf_known_obj_attributes_proc(bfd) \
@@ -2586,6 +2595,12 @@ extern bfd_reloc_status_type bfd_elf_perform_complex_relocation
 
 extern bool _bfd_elf_setup_sections
   (bfd *);
+
+extern bool _bfd_elf_get_dynamic_symbols
+  (bfd *, Elf_Internal_Phdr *, Elf_Internal_Phdr *, size_t,
+   bfd_size_type);
+extern asection *_bfd_elf_get_section_from_dynamic_symbol
+  (bfd *, Elf_Internal_Sym *);
 
 extern struct bfd_link_hash_entry *bfd_elf_define_start_stop
   (struct bfd_link_info *, const char *, asection *);

@@ -3571,6 +3571,12 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
   if (! bfd_check_format (abfd, bfd_object))
     return false;
 
+  if (elf_use_dt_symtab_p (abfd))
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return false;
+    }
+
   /* Select the appropriate symbol table.  If we don't know if the
      object file is an IR object, give linker LTO plugin a chance to
      get the correct symbol table.  */
@@ -4232,6 +4238,12 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
   htab = elf_hash_table (info);
   bed = get_elf_backend_data (abfd);
+
+  if (elf_use_dt_symtab_p (abfd))
+    {
+      bfd_set_error (bfd_error_wrong_format);
+      return false;
+    }
 
   if ((abfd->flags & DYNAMIC) == 0)
     dynamic = false;

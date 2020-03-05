@@ -839,6 +839,21 @@ elf_object_p (bfd *abfd)
 		  abfd->read_only = 1;
 		}
 	    }
+	  if (i_phdr->p_filesz != 0)
+	    {
+	      if ((i_phdr->p_offset + i_phdr->p_filesz) > filesize)
+		goto got_no_match;
+	      /* Try to reconstruct dynamic symbol table from PT_DYNAMIC
+		 segment if there is no section header.  */
+	      if (i_phdr->p_type == PT_DYNAMIC
+		  && i_ehdrp->e_shstrndx == 0
+		  && i_ehdrp->e_shoff == 0
+		  && !_bfd_elf_get_dynamic_symbols (abfd, i_phdr,
+						    elf_tdata (abfd)->phdr,
+						    i_ehdrp->e_phnum,
+						    filesize))
+		goto got_no_match;
+	    }
 	}
     }
 
@@ -1245,7 +1260,9 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bool dynamic)
       if ((elf_dynverdef (abfd) != 0
 	   && elf_tdata (abfd)->verdef == NULL)
 	  || (elf_dynverref (abfd) != 0
-	      && elf_tdata (abfd)->verref == NULL))
+	      && elf_tdata (abfd)->verref == NULL)
+	  || elf_tdata (abfd)->dt_verdef != NULL
+	  || elf_tdata (abfd)->dt_verneed != NULL)
 	{
 	  if (!_bfd_elf_slurp_version_tables (abfd, false))
 	    return -1;
@@ -1253,11 +1270,15 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bool dynamic)
     }
 
   ebd = get_elf_backend_data (abfd);
-  symcount = hdr->sh_size / sizeof (Elf_External_Sym);
+  symcount = elf_tdata (abfd)->dt_symtab_count;
+  if (symcount == 0)
+    symcount = hdr->sh_size / sizeof (Elf_External_Sym);
   if (symcount == 0)
     sym = symbase = NULL;
   else
     {
+      size_t i;
+
       isymbuf = bfd_elf_get_elf_syms (abfd, hdr, symcount, 0,
 				      NULL, NULL, NULL);
       if (isymbuf == NULL)
@@ -1304,12 +1325,18 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bool dynamic)
       if (xver != NULL)
 	++xver;
       isymend = isymbuf + symcount;
-      for (isym = isymbuf + 1, sym = symbase; isym < isymend; isym++, sym++)
+      for (isym = isymbuf + 1, sym = symbase, i = 1;
+	   isym < isymend;
+	   isym++, sym++, i++)
 	{
 	  memcpy (&sym->internal_elf_sym, isym, sizeof (Elf_Internal_Sym));
 
 	  sym->symbol.the_bfd = abfd;
-	  sym->symbol.name = bfd_elf_sym_name (abfd, hdr, isym, NULL);
+	  if (elf_use_dt_symtab_p (abfd))
+	    sym->symbol.name = (elf_tdata (abfd)->dt_strtab
+				+ isym->st_name);
+	  else
+	    sym->symbol.name = bfd_elf_sym_name (abfd, hdr, isym, NULL);
 	  sym->symbol.value = isym->st_value;
 
 	  if (isym->st_shndx == SHN_UNDEF)
@@ -1342,6 +1369,15 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bool dynamic)
 		 size in the value field, and doesn't care (at the
 		 moment) about the alignment.  */
 	      sym->symbol.value = isym->st_size;
+	    }
+	  else if (elf_use_dt_symtab_p (abfd))
+	    {
+	      asection *sec;
+	      sec = _bfd_elf_get_section_from_dynamic_symbol (abfd,
+							      isym);
+	      if (sec == NULL)
+		goto error_return;
+	      sym->symbol.section = sec;
 	    }
 	  else
 	    {
@@ -1423,7 +1459,10 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bool dynamic)
 	  if (dynamic)
 	    sym->symbol.flags |= BSF_DYNAMIC;
 
-	  if (xver != NULL)
+	  if (elf_tdata (abfd)->dt_versym)
+	    sym->version = bfd_get_16 (abfd,
+				       elf_tdata (abfd)->dt_versym + 2 * i);
+	  else if (xver != NULL)
 	    {
 	      Elf_Internal_Versym iversym;
 
@@ -1461,13 +1500,15 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bool dynamic)
     }
 
   free (xverbuf);
-  if (hdr->contents != (unsigned char *) isymbuf)
+  if (hdr->contents != (unsigned char *) isymbuf
+      && !elf_use_dt_symtab_p (abfd))
     free (isymbuf);
   return symcount;
 
  error_return:
   free (xverbuf);
-  if (hdr->contents != (unsigned char *) isymbuf)
+  if (hdr->contents != (unsigned char *) isymbuf
+      && !elf_use_dt_symtab_p (abfd))
     free (isymbuf);
   return -1;
 }
