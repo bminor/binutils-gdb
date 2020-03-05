@@ -24,6 +24,30 @@
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
 
+/* Struct defining the layout of the capability register set.  */
+struct user_morello_state {
+	/* General capability registers.  */
+	unsigned __int128 cregs[31];
+	/* Capability program counter.  */
+	unsigned __int128 pcc;
+	/* Capability stack pointer.  */
+	unsigned __int128 csp;
+	/* Default data capability.  */
+	unsigned __int128 ddc;
+	unsigned __int128 ctpidr;
+	unsigned __int128 rcsp;
+	unsigned __int128 rddc;
+	unsigned __int128 rctpidr;
+	/* Compartment ID register.  */
+	unsigned __int128 cid;
+	/* Bitmap storing the tags of all the capability registers.
+	   The tag for register <reg> is stored at bit index
+	   MORELLO_PT_TAG_MAP_REG_BIT(<reg>) in tag_map.  */
+       uint64_t	tag_map;
+	/* Capability control register.  */
+       uint64_t	cctlr;
+};
+
 typedef int compat_int_t;
 typedef unsigned int compat_uptr_t;
 

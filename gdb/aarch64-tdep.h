@@ -127,7 +127,10 @@ struct aarch64_gdbarch_tdep : gdbarch_tdep
     return tls_regnum != -1;
   }
 
+  /* First register from the capability set.  */
   int cap_reg_base;
+  /* Last register from the capability set.  */
+  int cap_reg_last;
 
   /* Returns true if the target supports capabilities.  */
   bool has_capability () const

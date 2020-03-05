@@ -17,10 +17,17 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ARCH_AARCH64_LINUX_H
-#define ARCH_AARCH64_LINUX_H
+#ifndef ARCH_AARCH64_CAP_LINUX_H
+#define ARCH_AARCH64_CAP_LINUX_H
 
 /* Morello HWCAP bit.  */
 #define HWCAP2_MORELLO (1 << 19)
 
-#endif /*ARCH_AARCH64_LINUX_H */
+/* Size of the Capability register set.  */
+#define AARCH64_LINUX_CREGS_SIZE ((39 * 16) + (2 * 8))
+
+/* 39 128-bit C registers plus 2 64-bit registers.  */
+#define AARCH64_MORELLO_REGS_NUM 41
+#define AARCH64_C_REGS_NUM 31
+
+#endif /*ARCH_AARCH64_CAP_LINUX_H */

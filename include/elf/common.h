@@ -691,6 +691,9 @@
 #define NT_ARM_PAC_ENABLED_KEYS	0x40a	/* AArch64 pointer authentication
 					   enabled keys (prctl()) */
 					/*   note name must be "LINUX".  */
+#define NT_ARM_MORELLO	0x410		/* AArch capability registers */
+					/* Note name must be "LINUX".  */
+
 #define NT_ARC_V2	0x600		/* ARC HS accumulator/extra registers.  */
 					/*   note name must be "LINUX".  */
 #define NT_LARCH_CPUCFG 0xa00		/* LoongArch CPU config registers */

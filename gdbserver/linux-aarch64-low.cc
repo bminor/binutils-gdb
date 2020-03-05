@@ -23,6 +23,7 @@
 #include "linux-low.h"
 #include "nat/aarch64-linux.h"
 #include "nat/aarch64-linux-hw-point.h"
+#include "arch/aarch64-cap-linux.h"
 #include "arch/aarch64-insn.h"
 #include "linux-aarch32-low.h"
 #include "elf/common.h"
@@ -307,13 +308,43 @@ aarch64_store_tlsregset (struct regcache *regcache, const void *buf)
   supply_register (regcache, tls_regnum, buf);
 }
 
+/* Capability registers store hook implementation.  */
+
+static void
+aarch64_store_cregset (struct regcache *regcache, const void *buf)
+{
+  const struct user_morello_state *cregset
+      = (const struct user_morello_state *) buf;
+
+  int cregs_base = find_regno (regcache->tdesc, "c0");
+
+  /* Fetch the C registers.  */
+  int i, regno;
+  for (regno = cregs_base, i = 0;
+       regno < cregs_base + AARCH64_C_REGS_NUM;
+       regno++, i++)
+    supply_register (regcache, regno, &cregset->cregs[i]);
+
+  /* Fetch the other registers.  */
+  supply_register (regcache, regno++, &cregset->pcc);
+  supply_register (regcache, regno++, &cregset->csp);
+  supply_register (regcache, regno++, &cregset->ddc);
+  supply_register (regcache, regno++, &cregset->ctpidr);
+  supply_register (regcache, regno++, &cregset->rcsp);
+  supply_register (regcache, regno++, &cregset->rddc);
+  supply_register (regcache, regno++, &cregset->rctpidr);
+  supply_register (regcache, regno++, &cregset->cid);
+  supply_register (regcache, regno++, &cregset->tag_map);
+  supply_register (regcache, regno++, &cregset->cctlr);
+}
+
 bool
 aarch64_target::low_supports_breakpoints ()
 {
   return true;
 }
 
-/* Implementation of linux target ops method "low_get_pc".  */
+/* Implementation of linux_target_ops method "get_pc".  */
 
 CORE_ADDR
 aarch64_target::low_get_pc (regcache *regcache)
@@ -743,6 +774,10 @@ static struct regset_info aarch64_regsets[] =
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_TLS,
     0, OPTIONAL_REGS,
     aarch64_fill_tlsregset, aarch64_store_tlsregset },
+  /* FIXME-Morello: Fixup the register set size.  */
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_MORELLO,
+    0, OPTIONAL_REGS,
+    nullptr, aarch64_store_cregset },
   NULL_REGSET
 };
 
@@ -797,6 +832,10 @@ aarch64_adjust_register_sets (const struct aarch64_features &features)
 	case NT_ARM_TLS:
 	  if (features.tls)
 	    regset->size = AARCH64_TLS_REGS_SIZE;
+	  break;
+	case NT_ARM_MORELLO:
+	  if (features.capability)
+	    regset->size = AARCH64_LINUX_CREGS_SIZE;
 	  break;
 	default:
 	  gdb_assert_not_reached ("Unknown register set found.");
