@@ -1,5 +1,10 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Add arch/aarch64-cap-linux.h.
+	* arch/aarch64-cap-linux.h: New header file.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.h (AARCH64_DWARF_C0, AARCH64_DWARF_CSP)
 	(AARCH64_DWARF_PCC, AARCH64_DWARF_DDC)
 	(AARCH64_DWARF_RESERVED_1, AARCH64_DWARF_RESERVED_2)
