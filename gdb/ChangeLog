@@ -1,3 +1,8 @@
+2020-03-05  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_make_corefile_notes): Use std::string for
+	psargs.
+
 2020-03-05  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* .gitattributes: New file.
