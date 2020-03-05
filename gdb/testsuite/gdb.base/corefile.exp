@@ -175,6 +175,15 @@ gdb_test_multiple "x/8bd buf2" "$test" {
     }
 }
 
+# Test ability to read anonymous and, more importantly, unwritten-to
+# mmap'd data.
+
+if { ![istarget *-linux*] } {
+    setup_xfail "*-*-*"
+}
+gdb_test "x/wx buf3" "$hex:\[ \t\]+0x00000000" \
+	 "accessing anonymous, unwritten-to mmap data"
+
 # test reinit_frame_cache
 
 gdb_load ${binfile}

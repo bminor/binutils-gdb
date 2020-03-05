@@ -38,6 +38,7 @@
 
 char *buf1;
 char *buf2;
+char *buf3;
 
 int coremaker_data = 1;	/* In Data section */
 int coremaker_bss;	/* In BSS section */
@@ -104,6 +105,15 @@ mmapdata ()
     }
   /* Touch buf2 so kernel writes it out into 'core'. */
   buf2[0] = buf1[0];
+
+  /* Create yet another region which is allocated, but not written to.  */
+  buf3 = mmap (NULL, MAPSIZE, PROT_READ | PROT_WRITE,
+               MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+  if (buf3 == (char *) -1)
+    {
+      perror ("mmap failed");
+      return;
+    }
 }
 
 void

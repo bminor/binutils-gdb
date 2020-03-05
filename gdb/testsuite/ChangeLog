@@ -1,4 +1,13 @@
-2020-07-20  Kevin Buettner  <kevinb@redhat.com>
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	PR corefiles/25631
+	* gdb.base/corefile.exp (accessing anonymous, unwritten-to mmap data):
+	New test.
+	* gdb.base/coremaker.c (buf3): New global.
+	(mmapdata): Add mmap call which uses MAP_ANONYMOUS and MAP_PRIVATE
+	flags.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/coremaker.c (filler_ro): New global constant.
 
