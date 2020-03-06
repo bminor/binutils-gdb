@@ -4929,6 +4929,48 @@ proc standard_temp_file {basename} {
     return [file join $dir $basename]
 }
 
+# Rename file A to file B, if B does not already exists.  Otherwise, leave B
+# as is and delete A.  Return 1 if rename happened.
+
+proc tentative_rename { a b } {
+    global errorInfo errorCode
+    set code [catch {file rename -- $a $b} result]
+    if { $code == 1 && [lindex $errorCode 0] == "POSIX" \
+	     && [lindex $errorCode 1] == "EEXIST" } {
+	file delete $a
+	return 0
+    }
+    if {$code == 1} {
+	return -code error -errorinfo $errorInfo -errorcode $errorCode $result
+    } elseif {$code > 1} {
+	return -code $code $result
+    }
+    return 1
+}
+
+# Create a file with name FILENAME and contents TXT in the cache directory.
+# If EXECUTABLE, mark the new file for execution.
+
+proc cached_file { filename txt {executable 0}} {
+    set filename [make_gdb_parallel_path cache $filename]
+
+    if { [file exists $filename] } {
+	return $filename
+    }
+
+    set tmp_filename $filename.[pid]
+    set fd [open $tmp_filename w]
+    puts $fd $txt
+    close $fd
+
+    if { $executable } {
+	exec chmod +x $tmp_filename
+    }
+    tentative_rename $tmp_filename $filename
+
+    return $filename
+}
+
 # Set 'testfile', 'srcfile', and 'binfile'.
 #
 # ARGS is a list of source file specifications.

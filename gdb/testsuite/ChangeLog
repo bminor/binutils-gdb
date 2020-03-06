@@ -1,5 +1,10 @@
 2020-03-06  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (tentative_rename, cached_file): New proc.
+	* boards/cc-with-tweaks.exp: Use cached_file to create gdb.sh.
+
+2020-03-06  Tom de Vries  <tdevries@suse.de>
+
 	* README: Fix "the the".
 	* gdb.base/dprintf.exp: Same.
 
