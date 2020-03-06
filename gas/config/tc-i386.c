@@ -4567,9 +4567,6 @@ md_assemble (char *line)
       i.op[0].disps->X_op = O_symbol;
     }
 
-  if (i.tm.opcode_modifier.rex64)
-    i.rex |= REX_W;
-
   /* For 8 bit registers we need an empty rex prefix.  Also if the
      instruction already has a prefix, we need to convert old
      registers to new ones.  */
@@ -6337,6 +6334,11 @@ process_suffix (void)
       if (((i.tm.base_opcode | 8) == 0xfbe && i.tm.opcode_modifier.w)
 	  || (i.tm.base_opcode == 0x63 && i.tm.cpu_flags.bitfield.cpu64))
 	--i.operands;
+
+      /* crc32 needs REX.W set regardless of suffix / source operand size.  */
+      if (i.tm.base_opcode == 0xf20f38f0
+          && i.tm.operand_types[1].bitfield.qword)
+        i.rex |= REX_W;
 
       /* If there's no instruction mnemonic suffix we try to invent one
 	 based on GPR operands.  */

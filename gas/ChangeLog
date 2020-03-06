@@ -1,5 +1,10 @@
 2020-03-06  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (md_assemble): Drop use of rex64.
+	(process_suffix): For REX.W for 64-bit CRC32.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (i386_addressing_mode): For 32-bit
 	addressing for MPX insns without base/index.
 	* testsuite/gas/i386/mpx-16bit.s,

@@ -496,8 +496,6 @@ enum
   ImmExt,
   /* instruction don't need Rex64 prefix.  */
   NoRex64,
-  /* instruction require Rex64 prefix.  */
-  Rex64,
   /* deprecated fp insn, gets a warning */
   Ugh,
   /* insn has VEX prefix:
@@ -689,7 +687,6 @@ typedef struct i386_opcode_modifier
   unsigned int isprefix:1;
   unsigned int immext:1;
   unsigned int norex64:1;
-  unsigned int rex64:1;
   unsigned int ugh:1;
   unsigned int vex:2;
   unsigned int vexvvvv:2;

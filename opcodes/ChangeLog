@@ -1,5 +1,14 @@
 2020-03-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (opcode_modifiers): Remove Rex64 field.
+	* i386-opc.h (Rex64): Delete.
+	(struct i386_opcode_modifier): Remove rex64 field.
+	* i386-opc.tbl (crc32): Drop Rex64.
+	Replace Rex64 with Size64 everywhere else.
+	* i386-tbl.h: Re-generate.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (OP_E_memory): Exclude recording of used address
 	prefix for "bnd" modes only in 64-bit mode. Don't decode 16-bit
 	addressed memory operands for MPX insns.

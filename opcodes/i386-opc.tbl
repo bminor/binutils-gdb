@@ -134,9 +134,9 @@ movbe, 2, 0x0f38f1, None, 3, CpuMovbe, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|R
 movsbl, 2, 0xfbe, None, 2, Cpu386, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg8|Byte|Unspecified|BaseIndex, Reg32 }
 movsbw, 2, 0xfbe, None, 2, Cpu386, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg8|Byte|Unspecified|BaseIndex, Reg16 }
 movswl, 2, 0xfbf, None, 2, Cpu386, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Word|Unspecified|BaseIndex, Reg32 }
-movsbq, 2, 0xfbe, None, 2, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg8|Byte|Unspecified|BaseIndex, Reg64 }
-movswq, 2, 0xfbf, None, 2, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg16|Word|Unspecified|BaseIndex, Reg64 }
-movslq, 2, 0x63, None, 1, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg32|Dword|Unspecified|BaseIndex, Reg64 }
+movsbq, 2, 0xfbe, None, 2, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Reg8|Byte|Unspecified|BaseIndex, Reg64 }
+movswq, 2, 0xfbf, None, 2, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Reg16|Word|Unspecified|BaseIndex, Reg64 }
+movslq, 2, 0x63, None, 1, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Reg32|Dword|Unspecified|BaseIndex, Reg64 }
 movsx, 2, 0xfbe, None, 2, Cpu386, W|Modrm|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg8|Reg16|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 movsx, 2, 0x63, None, 1, Cpu64, Modrm|No_bSuf|No_wSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Unspecified|BaseIndex, Reg32|Reg64 }
 movsxd, 2, 0x63, None, 1, Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Unspecified|BaseIndex, Reg32|Reg64 }
@@ -919,9 +919,9 @@ sysenter, 0, 0xf34, None, 2, Cpu686|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_
 sysexit, 0, 0xf35, None, 2, Cpu64, Intel64Only|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 sysexit, 0, 0xf35, None, 2, Cpu686|CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 fxsave, 1, 0xfae, 0x0, 2, CpuFXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex }
-fxsave64, 1, 0xfae, 0x0, 2, CpuFXSR|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex }
+fxsave64, 1, 0xfae, 0x0, 2, CpuFXSR|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Unspecified|BaseIndex }
 fxrstor, 1, 0xfae, 0x1, 2, CpuFXSR, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex }
-fxrstor64, 1, 0xfae, 0x1, 2, CpuFXSR|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex }
+fxrstor64, 1, 0xfae, 0x1, 2, CpuFXSR|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Unspecified|BaseIndex }
 rdpmc, 0, 0xf33, None, 2, Cpu686, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 // official undefined instr.
 ud2, 0, 0xf0b, None, 2, Cpu186, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
@@ -1014,11 +1014,11 @@ emms, 0, 0xf77, None, 2, CpuMMX, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSu
 // spec). AMD's spec, having been in existence for much longer, failed to
 // recognize that and specified movd for 32- and 64-bit operations.
 movd, 2, 0x666e, None, 1, CpuAVX, D|Modrm|Vex=1|VexOpcode=0|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Reg32|Unspecified|BaseIndex, RegXMM }
-movd, 2, 0x666e, None, 1, CpuAVX|Cpu64, D|Modrm|Vex=1|VexOpcode=0|VexW=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64|SSE2AVX, { Reg64|BaseIndex, RegXMM }
+movd, 2, 0x666e, None, 1, CpuAVX|Cpu64, D|Modrm|Vex=1|VexOpcode=0|VexW=2|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64|SSE2AVX, { Reg64|BaseIndex, RegXMM }
 movd, 2, 0x660f6e, None, 2, CpuSSE2, D|Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Unspecified|BaseIndex, RegXMM }
-movd, 2, 0x660f6e, None, 2, CpuSSE2|Cpu64, D|Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg64|BaseIndex, RegXMM }
+movd, 2, 0x660f6e, None, 2, CpuSSE2|Cpu64, D|Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Reg64|BaseIndex, RegXMM }
 movd, 2, 0xf6e, None, 2, CpuMMX, D|Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Unspecified|BaseIndex, RegMMX }
-movd, 2, 0xf6e, None, 2, CpuMMX|Cpu64, D|Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg64|BaseIndex, RegMMX }
+movd, 2, 0xf6e, None, 2, CpuMMX|Cpu64, D|Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Reg64|BaseIndex, RegMMX }
 // In the 64bit mode the short form mov immediate is redefined to have
 // 64bit displacement value.  We put the 64bit displacement first and
 // we only mark constants larger than 32bit as Disp64.
@@ -1558,7 +1558,7 @@ addsubpd, 2, 0x66d0, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexVVVV=1|VexW=1|No_
 addsubpd, 2, 0x660fd0, None, 2, CpuSSE3, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
 addsubps, 2, 0xf2d0, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { RegXMM|Unspecified|BaseIndex, RegXMM }
 addsubps, 2, 0xf20fd0, None, 2, CpuSSE3, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Unspecified|BaseIndex, RegXMM }
-cmpxchg16b, 1, 0xfc7, 0x1, 2, CpuCX16|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64|IsLockable, { Oword|Unspecified|BaseIndex }
+cmpxchg16b, 1, 0xfc7, 0x1, 2, CpuCX16|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64|IsLockable, { Oword|Unspecified|BaseIndex }
 fisttp, 1, 0xdf, 0x1, 1, CpuFISTTP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex }
 fisttp, 1, 0xdd, 0x1, 1, CpuFISTTP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Qword|Unspecified|BaseIndex }
 fisttpll, 1, 0xdd, 0x1, 1, CpuFISTTP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Qword|Unspecified|BaseIndex }
@@ -1804,20 +1804,20 @@ pcmpistri, 3, 0x660f3a63, None, 3, CpuSSE4_2, Modrm|No_bSuf|No_wSuf|No_lSuf|No_s
 pcmpistrm, 3, 0x6662, None, 1, CpuAVX, Modrm|Vex|VexOpcode=2|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 pcmpistrm, 3, 0x660f3a62, None, 3, CpuSSE4_2, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
 crc32, 2, 0xf20f38f0, None, 3, CpuSSE4_2, W|Modrm|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Reg8|Reg16|Reg32|Unspecified|BaseIndex, Reg32 }
-crc32, 2, 0xf20f38f0, None, 3, CpuSSE4_2|Cpu64, W|Modrm|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|Rex64|NoAVX, { Reg8|Reg64|Unspecified|BaseIndex, Reg64 }
+crc32, 2, 0xf20f38f0, None, 3, CpuSSE4_2|Cpu64, W|Modrm|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoAVX, { Reg8|Reg64|Unspecified|BaseIndex, Reg64 }
 
 // xsave/xrstor New Instructions.
 
 xsave, 1, 0xfae, 0x4, 2, CpuXsave, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex }
-xsave64, 1, 0xfae, 0x4, 2, CpuXsave|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex }
+xsave64, 1, 0xfae, 0x4, 2, CpuXsave|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Unspecified|BaseIndex }
 xrstor, 1, 0xfae, 0x5, 2, CpuXsave, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex }
-xrstor64, 1, 0xfae, 0x5, 2, CpuXsave|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex }
+xrstor64, 1, 0xfae, 0x5, 2, CpuXsave|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Unspecified|BaseIndex }
 xgetbv, 0, 0xf01d0, None, 3, CpuXsave, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 xsetbv, 0, 0xf01d1, None, 3, CpuXsave, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
 // xsaveopt
 xsaveopt, 1, 0xfae, 0x6, 2, CpuXsaveopt, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex }
-xsaveopt64, 1, 0xfae, 0x6, 2, CpuXsaveopt|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex }
+xsaveopt64, 1, 0xfae, 0x6, 2, CpuXsaveopt|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Unspecified|BaseIndex }
 
 // AES instructions.
 
@@ -4052,16 +4052,16 @@ clflushopt, 1, 0x660fae, 0x7, 2, CpuClflushOpt, Modrm|Anysize|IgnoreSize|No_bSuf
 // XSAVES/XRSTORS instructions.
 
 xrstors, 1, 0xfc7, 0x3, 2, CpuXSAVES, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
-xrstors64, 1, 0xfc7, 0x3, 2, CpuXSAVES|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex }
+xrstors64, 1, 0xfc7, 0x3, 2, CpuXSAVES|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Unspecified|BaseIndex }
 xsaves, 1, 0xfc7, 0x5, 2, CpuXSAVES, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
-xsaves64, 1, 0xfc7, 0x5, 2, CpuXSAVES|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex }
+xsaves64, 1, 0xfc7, 0x5, 2, CpuXSAVES|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Unspecified|BaseIndex }
 
 // XSAVES instructions end.
 
 // XSAVEC instructions.
 
 xsavec, 1, 0xfc7, 0x4, 2, CpuXSAVEC, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
-xsavec64, 1, 0xfc7, 0x4, 2, CpuXSAVEC|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Unspecified|BaseIndex }
+xsavec64, 1, 0xfc7, 0x4, 2, CpuXSAVEC|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Unspecified|BaseIndex }
 
 // XSAVEC instructions end.
 
@@ -4736,9 +4736,9 @@ rdsspq, 1, 0xf30f1e, 0x1, 2, CpuSHSTK|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sS
 saveprevssp, 0, 0xf30f01ea, None, 3, CpuSHSTK, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 rstorssp, 1, 0xf30f01, 0x5, 2, CpuSHSTK, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Qword|Unspecified|BaseIndex }
 wrssd, 2, 0x0f38f6, None, 3, CpuSHSTK, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32, Dword|Unspecified|BaseIndex }
-wrssq, 2, 0x0f38f6, None, 3, CpuSHSTK|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg64, Qword|Unspecified|BaseIndex }
+wrssq, 2, 0x0f38f6, None, 3, CpuSHSTK|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Reg64, Qword|Unspecified|BaseIndex }
 wrussd, 2, 0x660f38f5, None, 3, CpuSHSTK, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32, Dword|Unspecified|BaseIndex }
-wrussq, 2, 0x660f38f5, None, 3, CpuSHSTK|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg64, Qword|Unspecified|BaseIndex }
+wrussq, 2, 0x660f38f5, None, 3, CpuSHSTK|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Size64, { Reg64, Qword|Unspecified|BaseIndex }
 setssbsy, 0, 0xf30f01e8, None, 3, CpuSHSTK, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 clrssbsy, 1, 0xf30fae, 0x6, 2, CpuSHSTK, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Qword|Unspecified|BaseIndex }
 endbr64, 0, 0xf30f1efa, None, 3, CpuIBT, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
