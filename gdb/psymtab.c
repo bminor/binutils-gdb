@@ -760,16 +760,12 @@ psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
 
       if (info_verbose)
 	{
-	  printf_filtered (_("Reading in symbols for %s..."),
+	  printf_filtered (_("Reading in symbols for %s...\n"),
 			   pst->filename);
 	  gdb_flush (gdb_stdout);
 	}
 
       pst->read_symtab (objfile);
-
-      /* Finish up the debug error message.  */
-      if (info_verbose)
-	printf_filtered (_("done.\n"));
     }
 
   return pst->get_compunit_symtab ();
