@@ -1,5 +1,18 @@
 2020-03-06  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (process_suffix): Exlucde !vexw insns
+	alongside !norex64 ones.
+	* testsuite/gas/i386/x86-64-avx512bw.s: Test VPEXTR* and VPINSR*
+	with both 32- and 64-bit GPR operands.
+	* testsuite/gas/i386/x86-64-avx512f.s: Test VEXTRACTPS with both
+	32- and 64-bit GPR operands.
+	* testsuite/gas/i386/x86-64-avx512bw-intel.d,
+	testsuite/gas/i386/x86-64-avx512bw.d,
+	testsuite/gas/i386/x86-64-avx512f-intel.d,
+	testsuite/gas/i386/x86-64-avx512f.d: Adjust expectations.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (md_assemble): Drop use of rex64.
 	(process_suffix): For REX.W for 64-bit CRC32.
 

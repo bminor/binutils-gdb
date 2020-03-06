@@ -2708,9 +2708,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 03 fd 4f 3b ee ab 	vextracti64x4 \$0xab,%zmm29,%ymm30\{%k7\}
 [ 	]*[a-f0-9]+:	62 03 fd cf 3b ee ab 	vextracti64x4 \$0xab,%zmm29,%ymm30\{%k7\}\{z\}
 [ 	]*[a-f0-9]+:	62 03 fd 4f 3b ee 7b 	vextracti64x4 \$0x7b,%zmm29,%ymm30\{%k7\}
-[ 	]*[a-f0-9]+:	62 63 fd 08 17 e8 ab 	vextractps \$0xab,%xmm29,%rax
-[ 	]*[a-f0-9]+:	62 63 fd 08 17 e8 7b 	vextractps \$0x7b,%xmm29,%rax
-[ 	]*[a-f0-9]+:	62 43 fd 08 17 e8 7b 	vextractps \$0x7b,%xmm29,%r8
+[ 	]*[a-f0-9]+:	62 63 7d 08 17 e8 ab 	vextractps \$0xab,%xmm29,%eax
+[ 	]*[a-f0-9]+:	62 63 7d 08 17 e8 7b 	vextractps \$0x7b,%xmm29,%eax
+[ 	]*[a-f0-9]+:	62 43 7d 08 17 e8 7b 	vextractps \$0x7b,%xmm29,%r8d
 [ 	]*[a-f0-9]+:	62 63 7d 08 17 29 7b 	vextractps \$0x7b,%xmm29,\(%rcx\)
 [ 	]*[a-f0-9]+:	62 23 7d 08 17 ac f0 23 01 00 00 7b 	vextractps \$0x7b,%xmm29,0x123\(%rax,%r14,8\)
 [ 	]*[a-f0-9]+:	62 63 7d 08 17 6a 7f 7b 	vextractps \$0x7b,%xmm29,0x1fc\(%rdx\)
@@ -9729,9 +9729,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 03 fd 4f 3b ee ab 	vextracti64x4 \$0xab,%zmm29,%ymm30\{%k7\}
 [ 	]*[a-f0-9]+:	62 03 fd cf 3b ee ab 	vextracti64x4 \$0xab,%zmm29,%ymm30\{%k7\}\{z\}
 [ 	]*[a-f0-9]+:	62 03 fd 4f 3b ee 7b 	vextracti64x4 \$0x7b,%zmm29,%ymm30\{%k7\}
-[ 	]*[a-f0-9]+:	62 63 fd 08 17 e8 ab 	vextractps \$0xab,%xmm29,%rax
-[ 	]*[a-f0-9]+:	62 63 fd 08 17 e8 7b 	vextractps \$0x7b,%xmm29,%rax
-[ 	]*[a-f0-9]+:	62 43 fd 08 17 e8 7b 	vextractps \$0x7b,%xmm29,%r8
+[ 	]*[a-f0-9]+:	62 63 7d 08 17 e8 ab 	vextractps \$0xab,%xmm29,%eax
+[ 	]*[a-f0-9]+:	62 63 7d 08 17 e8 7b 	vextractps \$0x7b,%xmm29,%eax
+[ 	]*[a-f0-9]+:	62 43 7d 08 17 e8 7b 	vextractps \$0x7b,%xmm29,%r8d
 [ 	]*[a-f0-9]+:	62 63 7d 08 17 29 7b 	vextractps \$0x7b,%xmm29,\(%rcx\)
 [ 	]*[a-f0-9]+:	62 23 7d 08 17 ac f0 34 12 00 00 7b 	vextractps \$0x7b,%xmm29,0x1234\(%rax,%r14,8\)
 [ 	]*[a-f0-9]+:	62 63 7d 08 17 6a 7f 7b 	vextractps \$0x7b,%xmm29,0x1fc\(%rdx\)

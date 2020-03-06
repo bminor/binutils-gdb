@@ -1,5 +1,17 @@
 2020-03-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (movq): Drop NoRex64 from XMM/XMM SSE2AVX variants.
+	(movmskps, pextrw, pinsrw, pmovmskb, movmskpd, extractps,
+	pextrb, pinsrb, roundsd): Drop NoRex64 and where applicable use
+	VexW0 on SSE2AVX variants.
+	(vmovq): Drop NoRex64 from XMM/XMM variants.
+	(vextractps, vmovmskpd, vmovmskps, vpextrb, vpextrw, vpinsrb,
+	vpinsrw, vpmovmskb, vroundsd, vpmovmskb): Drop NoRex64 and where
+	applicable use VexW0.
+	* i386-tbl.h: Re-generate.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (opcode_modifiers): Remove Rex64 field.
 	* i386-opc.h (Rex64): Delete.
 	(struct i386_opcode_modifier): Remove rex64 field.
