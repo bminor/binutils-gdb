@@ -1549,12 +1549,13 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 
       /* Check if we will remove the current leading character.  */
       rem_leading_char =
-	(name[0] == bfd_get_symbol_leading_char (abfd))
-	&& (change_leading_char
-	    || (remove_leading_char
-		&& ((flags & (BSF_GLOBAL | BSF_WEAK)) != 0
-		    || undefined
-		    || bfd_is_com_section (bfd_asymbol_section (sym)))));
+	(name[0] != '\0'
+	 && name[0] == bfd_get_symbol_leading_char (abfd)
+	 && (change_leading_char
+	     || (remove_leading_char
+		 && ((flags & (BSF_GLOBAL | BSF_WEAK)) != 0
+		     || undefined
+		     || bfd_is_com_section (bfd_asymbol_section (sym))))));
 
       /* Check if we will add a new leading character.  */
       add_leading_char =

@@ -1,3 +1,8 @@
+2020-03-06  Alan Modra  <amodra@gmail.com>
+
+	PR 25637
+	* objcopy.c (filter_symbols): Correct rem_leading_char logic.
+
 2020-03-05  Alan Modra  <amodra@gmail.com>
 
 	PR 25629
