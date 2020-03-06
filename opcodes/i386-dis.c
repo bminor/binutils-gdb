@@ -14272,10 +14272,11 @@ OP_E_memory (int bytemode, int sizeflag)
 	  }
 
       if ((havebase || haveindex || needindex || needaddr32 || riprel)
-	  && (bytemode != v_bnd_mode)
-	  && (bytemode != v_bndmk_mode)
-	  && (bytemode != bnd_mode)
-	  && (bytemode != bnd_swap_mode))
+	  && (address_mode != mode_64bit
+	      || ((bytemode != v_bnd_mode)
+		  && (bytemode != v_bndmk_mode)
+		  && (bytemode != bnd_mode)
+		  && (bytemode != bnd_swap_mode))))
 	used_prefixes |= PREFIX_ADDR;
 
       if (havedisp || (intel_syntax && riprel))
@@ -14355,6 +14356,14 @@ OP_E_memory (int bytemode, int sizeflag)
 	      oappend (scratchbuf);
 	    }
 	}
+    }
+  else if (bytemode == v_bnd_mode
+	   || bytemode == v_bndmk_mode
+	   || bytemode == bnd_mode
+	   || bytemode == bnd_swap_mode)
+    {
+      oappend ("(bad)");
+      return;
     }
   else
     {
