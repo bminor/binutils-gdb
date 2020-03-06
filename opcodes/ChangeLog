@@ -1,3 +1,9 @@
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-opc.tbl (tpause, umwait): Add IgnoreSize. Add 3-operand
+	template.
+	* i386-tbl.h: Re-generate.
+
 2020-03-04  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (PREFIX_0F01_REG_3_RM_1): New.

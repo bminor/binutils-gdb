@@ -4349,16 +4349,19 @@ md_assemble (char *line)
   /* Now we've parsed the mnemonic into a set of templates, and have the
      operands at hand.  */
 
-  /* All Intel opcodes have reversed operands except for "bound", "enter"
-     "monitor*", and "mwait*".  We also don't reverse intersegment "jmp"
-     and "call" instructions with 2 immediate operands so that the immediate
-     segment precedes the offset, as it does when in AT&T mode. */
+  /* All Intel opcodes have reversed operands except for "bound", "enter",
+     "monitor*", "mwait*", "tpause", and "umwait".  We also don't reverse
+     intersegment "jmp" and "call" instructions with 2 immediate operands so
+     that the immediate segment precedes the offset, as it does when in AT&T
+     mode.  */
   if (intel_syntax
       && i.operands > 1
       && (strcmp (mnemonic, "bound") != 0)
       && (strcmp (mnemonic, "invlpga") != 0)
       && (strncmp (mnemonic, "monitor", 7) != 0)
       && (strncmp (mnemonic, "mwait", 5) != 0)
+      && (strcmp (mnemonic, "tpause") != 0)
+      && (strcmp (mnemonic, "umwait") != 0)
       && !(operand_type_check (i.types[0], imm)
 	   && operand_type_check (i.types[1], imm)))
     swap_operands ();

@@ -4763,10 +4763,10 @@ pconfig, 0, 0x0f01c5, None, 3, CpuPCONFIG, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qS
 // WAITPKG instructions.
 
 umonitor, 1, 0xf30fae, 0x6, 2, CpuWAITPKG, Modrm|AddrPrefixOpReg, { Reg16|Reg32|Reg64 }
-
-tpause, 1, 0x660fae, 0x6, 2, CpuWAITPKG, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg32|Reg64 }
-
-umwait, 1, 0xf20fae, 0x6, 2, CpuWAITPKG, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg32|Reg64 }
+tpause, 1, 0x660fae, 0x6, 2, CpuWAITPKG, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32 }
+tpause, 3, 0x660fae, 0x6, 2, CpuWAITPKG, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32, RegD|Dword, Acc|Dword }
+umwait, 1, 0xf20fae, 0x6, 2, CpuWAITPKG, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32 }
+umwait, 3, 0xf20fae, 0x6, 2, CpuWAITPKG, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32, RegD|Dword, Acc|Dword }
 
 // WAITPKG instructions end.
 

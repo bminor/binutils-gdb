@@ -1,3 +1,15 @@
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (md_assemble): Also exclude tpause and umwait
+	from having their operands swapped.
+	* testsuite/gas/i386/waitpkg.s,
+	testsuite/gas/i386/x86-64-waitpkg.s: Add tpause and umwait
+	3-operand cases as well as testing of 16-bit code generation.
+	* testsuite/gas/i386/waitpkg.d,
+	testsuite/gas/i386/waitpkg-intel.d,
+	testsuite/gas/i386/x86-64-waitpkg.d,
+	testsuite/gas/i386/x86-64-waitpkg-intel.d: Adjust expectations.
+
 2020-03-04  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c (percent_op_utype): Support the modifier
