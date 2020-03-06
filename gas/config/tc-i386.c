@@ -5874,43 +5874,30 @@ match_template (char mnem_suffix)
       for (j = 0; j < MAX_OPERANDS; j++)
 	operand_types[j] = t->operand_types[j];
 
-      /* In general, don't allow 64-bit operands in 32-bit mode.  */
-      if (i.suffix == QWORD_MNEM_SUFFIX
-	  && flag_code != CODE_64BIT
+      /* In general, don't allow
+	 - 64-bit operands outside of 64-bit mode,
+	 - 32-bit operands on pre-386.  */
+      if (((i.suffix == QWORD_MNEM_SUFFIX
+	    && flag_code != CODE_64BIT
+	    && (t->base_opcode != 0x0fc7
+		|| t->extension_opcode != 1 /* cmpxchg8b */))
+	   || (i.suffix == LONG_MNEM_SUFFIX
+	       && !cpu_arch_flags.bitfield.cpui386))
 	  && (intel_syntax
 	      ? (t->opcode_modifier.mnemonicsize != IGNORESIZE
-	         && !t->opcode_modifier.broadcast
+		 && !t->opcode_modifier.broadcast
 		 && !intel_float_operand (t->name))
 	      : intel_float_operand (t->name) != 2)
 	  && ((operand_types[0].bitfield.class != RegMMX
 	       && operand_types[0].bitfield.class != RegSIMD)
 	      || (operand_types[t->operands > 1].bitfield.class != RegMMX
-		  && operand_types[t->operands > 1].bitfield.class != RegSIMD))
-	  && (t->base_opcode != 0x0fc7
-	      || t->extension_opcode != 1 /* cmpxchg8b */))
-	continue;
-
-      /* In general, don't allow 32-bit operands on pre-386.  */
-      else if (i.suffix == LONG_MNEM_SUFFIX
-	       && !cpu_arch_flags.bitfield.cpui386
-	       && (intel_syntax
-		   ? (t->opcode_modifier.mnemonicsize != IGNORESIZE
-		      && !intel_float_operand (t->name))
-		   : intel_float_operand (t->name) != 2)
-	       && ((operand_types[0].bitfield.class != RegMMX
-		    && operand_types[0].bitfield.class != RegSIMD)
-		   || (operand_types[t->operands > 1].bitfield.class != RegMMX
-		       && operand_types[t->operands > 1].bitfield.class
-			  != RegSIMD)))
+		  && operand_types[t->operands > 1].bitfield.class != RegSIMD)))
 	continue;
 
       /* Do not verify operands when there are none.  */
-      else
-	{
-	  if (!t->operands)
-	    /* We've found a match; break out of loop.  */
-	    break;
-	}
+      if (!t->operands)
+	/* We've found a match; break out of loop.  */
+	break;
 
       if (!t->opcode_modifier.jump
 	  || t->opcode_modifier.jump == JUMP_ABSOLUTE)
