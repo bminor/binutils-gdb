@@ -4102,11 +4102,15 @@ fetch_inferior_event (void *client_data)
     printf_unfiltered (_("completed.\n"));
 }
 
-/* Record the frame and location we're currently stepping through.  */
+/* See infrun.h.  */
+
 void
-set_step_info (struct frame_info *frame, struct symtab_and_line sal)
+set_step_info (thread_info *tp, struct frame_info *frame,
+	       struct symtab_and_line sal)
 {
-  struct thread_info *tp = inferior_thread ();
+  /* This can be removed once this function no longer implicitly relies on the
+     inferior_ptid value.  */
+  gdb_assert (inferior_ptid == tp->ptid);
 
   tp->control.step_frame_id = get_frame_id (frame);
   tp->control.step_stack_frame_id = get_stack_frame_id (frame);
@@ -7200,7 +7204,7 @@ process_event_stop_test (struct execution_control_state *ecs)
   ecs->event_thread->control.step_range_start = stop_pc_sal.pc;
   ecs->event_thread->control.step_range_end = stop_pc_sal.end;
   ecs->event_thread->control.may_range_step = 1;
-  set_step_info (frame, stop_pc_sal);
+  set_step_info (ecs->event_thread, frame, stop_pc_sal);
 
   if (debug_infrun)
      fprintf_unfiltered (gdb_stdlog, "infrun: keep going\n");

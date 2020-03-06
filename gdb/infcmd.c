@@ -914,18 +914,21 @@ continue_command (const char *args, int from_tty)
   continue_1 (all_threads_p);
 }
 
-/* Record the starting point of a "step" or "next" command.  */
+/* Record in TP the starting point of a "step" or "next" command.  */
 
 static void
-set_step_frame (void)
+set_step_frame (thread_info *tp)
 {
+  /* This can be removed once this function no longer implicitly relies on the
+     inferior_ptid value.  */
+  gdb_assert (inferior_ptid == tp->ptid);
+
   frame_info *frame = get_current_frame ();
 
   symtab_and_line sal = find_frame_sal (frame);
-  set_step_info (frame, sal);
+  set_step_info (tp, frame, sal);
 
   CORE_ADDR pc = get_frame_pc (frame);
-  thread_info *tp = inferior_thread ();
   tp->control.step_start_function = find_pc_function (pc);
 }
 
@@ -1002,7 +1005,7 @@ step_command_fsm_prepare (struct step_command_fsm *sm,
   thread->control.stepping_command = 1;
 }
 
-static int prepare_one_step (struct step_command_fsm *sm);
+static int prepare_one_step (thread_info *, struct step_command_fsm *sm);
 
 static void
 step_1 (int skip_subroutines, int single_inst, const char *count_string)
@@ -1040,7 +1043,7 @@ step_1 (int skip_subroutines, int single_inst, const char *count_string)
      loop.  Let the continuation figure out how many other steps we
      need to do, and handle them one at the time, through
      step_once.  */
-  if (!prepare_one_step (step_sm))
+  if (!prepare_one_step (thr, step_sm))
     proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
   else
     {
@@ -1070,7 +1073,7 @@ step_command_fsm::should_stop (struct thread_info *tp)
       /* There are more steps to make, and we did stop due to
 	 ending a stepping range.  Do another step.  */
       if (--count > 0)
-	return prepare_one_step (this);
+	return prepare_one_step (tp, this);
 
       set_finished ();
     }
@@ -1102,19 +1105,17 @@ step_command_fsm::do_async_reply_reason ()
    resumed.  */
 
 static int
-prepare_one_step (struct step_command_fsm *sm)
+prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 {
+  /* This can be removed once this function no longer implicitly relies on the
+     inferior_ptid value.  */
+  gdb_assert (inferior_ptid == tp->ptid);
+
   if (sm->count > 0)
     {
       struct frame_info *frame = get_current_frame ();
 
-      /* Don't assume THREAD is a valid thread id.  It is set to -1 if
-	 the longjmp breakpoint was not required.  Use the
-	 INFERIOR_PTID thread instead, which is the same thread when
-	 THREAD is set.  */
-      struct thread_info *tp = inferior_thread ();
-
-      set_step_frame ();
+      set_step_frame (tp);
 
       if (!sm->single_inst)
 	{
@@ -1146,7 +1147,7 @@ prepare_one_step (struct step_command_fsm *sm)
 		  || !function_name_is_marked_for_skip (fn, sal))
 		{
 		  sm->count--;
-		  return prepare_one_step (sm);
+		  return prepare_one_step (tp, sm);
 		}
 	    }
 
@@ -1488,7 +1489,7 @@ until_next_command (int from_tty)
   struct until_next_fsm *sm;
 
   clear_proceed_status (0);
-  set_step_frame ();
+  set_step_frame (tp);
 
   frame = get_current_frame ();
 
@@ -1945,7 +1946,7 @@ finish_command (const char *arg, int from_tty)
 	 called by that frame.  We don't use the magic "1" value for
 	 step_range_end, because then infrun will think this is nexti,
 	 and not step over the rest of this inlined function call.  */
-      set_step_info (frame, {});
+      set_step_info (tp, frame, {});
       tp->control.step_range_start = get_frame_pc (frame);
       tp->control.step_range_end = tp->control.step_range_start;
       tp->control.step_over_calls = STEP_OVER_ALL;

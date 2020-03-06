@@ -26,6 +26,7 @@ struct frame_info;
 struct address_space;
 struct return_value_info;
 struct process_stratum_target;
+struct thread_info;
 
 /* True if we are debugging run control.  */
 extern unsigned int debug_infrun;
@@ -150,7 +151,9 @@ extern int thread_is_stepping_over_breakpoint (int thread);
    triggers a non-steppable watchpoint.  */
 extern int stepping_past_nonsteppable_watchpoint (void);
 
-extern void set_step_info (struct frame_info *frame,
+/* Record in TP the frame and location we're currently stepping through.  */
+extern void set_step_info (thread_info *tp,
+			   struct frame_info *frame,
 			   struct symtab_and_line sal);
 
 /* Several print_*_reason helper functions to print why the inferior

@@ -1,3 +1,21 @@
+2020-03-06  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* infrun.h: Forward-declare thread_info.
+	(set_step_info): Add thread_info parameter, add doc.
+	* infrun.c (set_step_info): Add thread_info parameter, move doc
+	to header.
+	* infrun.c (process_event_stop_test): Pass thread to
+	set_step_info call.
+	* infcmd.c (set_step_frame): Add thread_info pointer, pass it to
+	set_step_info.
+	(prepare_one_step): Add thread_info parameter, pass it to
+	set_step_frame and prepare_one_step (recursive) call.
+	(step_1): Pass thread to prepare_one_step call.
+	(step_command_fsm::should_stop): Pass thread to
+	prepare_one_step.
+	(until_next_fsm): Pass thread to set_step_frame call.
+	(finish_command): Pass thread to set_step_info call.
+
 2020-03-06  Hannes Domani  <ssbssa@yahoo.de>
 
 	* windows-tdep.c (windows_solib_create_inferior_hook):
