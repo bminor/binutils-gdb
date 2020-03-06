@@ -89,7 +89,7 @@
 #endif
 
 #ifndef DWARF2_VERSION
-#define DWARF2_VERSION 2
+#define DWARF2_VERSION dwarf_level
 #endif
 
 /* The .debug_aranges version has been 2 in DWARF version 2, 3 and 4. */

@@ -325,6 +325,5 @@ typedef struct unwind_record
 
 /* VMS backtraces expect dwarf version 3.  */
 #ifdef TE_VMS
-#define DWARF2_VERSION 3
-#define DWARF2_LINE_VERSION 3
+#define DWARF2_VERSION      (dwarf_level < 3 ? 3  : debug_level)
 #endif

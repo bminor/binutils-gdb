@@ -413,6 +413,7 @@ extern enum debug_info_type debug_type;
 extern int use_gnu_debug_info_extensions;
 COMMON bfd_boolean flag_dwarf_sections;
 extern int flag_dwarf_cie_version;
+extern unsigned int dwarf_level;
 
 /* Maximum level of macro nesting.  */
 extern int max_macro_nest;

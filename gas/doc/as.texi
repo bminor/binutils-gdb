@@ -230,7 +230,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--compress-debug-sections}]  [@b{--nocompress-debug-sections}]
  [@b{--debug-prefix-map} @var{old}=@var{new}]
  [@b{--defsym} @var{sym}=@var{val}] [@b{-f}] [@b{-g}] [@b{--gstabs}]
- [@b{--gstabs+}] [@b{--gdwarf-2}] [@b{--gdwarf-sections}]
+ [@b{--gstabs+}] [@b{--gdwarf-<N>}] [@b{--gdwarf-sections}]
  [@b{--gdwarf-cie-version}=@var{VERSION}]
  [@b{--help}] [@b{-I} @var{dir}] [@b{-J}]
  [@b{-K}] [@b{-L}] [@b{--listing-lhs-width}=@var{NUM}]
@@ -762,6 +762,27 @@ the location of the current working directory at assembling time.
 Generate DWARF2 debugging information for each assembler line.  This
 may help debugging assembler code, if the debugger can handle it.  Note---this
 option is only supported by some targets, not all of them.
+
+@item --gdwarf-3
+This option is the same as the @option{--gdwarf-2} option, except that it
+allows for the possibility of the generation of extra debug information as per
+version 3 of the DWARF specification.  Note - enabling this option does not
+guarantee the generation of any extra infortmation, the choice to do so is on a
+per target basis.
+
+@item --gdwarf-4
+This option is the same as the @option{--gdwarf-2} option, except that it
+allows for the possibility of the generation of extra debug information as per
+version 4 of the DWARF specification.  Note - enabling this option does not
+guarantee the generation of any extra infortmation, the choice to do so is on a
+per target basis.
+
+@item --gdwarf-5
+This option is the same as the @option{--gdwarf-2} option, except that it
+allows for the possibility of the generation of extra debug information as per
+version 4 of the DWARF specification.  Note - enabling this option does not
+guarantee the generation of any extra infortmation, the choice to do so is on a
+per target basis.
 
 @item --gdwarf-sections
 Instead of creating a .debug_line section, create a series of

@@ -102,6 +102,9 @@ int verbose = 0;
    MD_AFTER_PARSE_ARGS.  */
 int flag_dwarf_cie_version = -1;
 
+/* The maximum level of DWARF DEBUG information we should manufacture.  */
+unsigned int dwarf_level = 0;
+
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
 int flag_use_elf_stt_common = DEFAULT_GENERATE_ELF_STT_COMMON;
 bfd_boolean flag_generate_build_notes = DEFAULT_GENERATE_BUILD_NOTES;
@@ -338,7 +341,7 @@ Options:\n\
   fprintf (stream, _("\
   --gstabs+               generate STABS debug info with GNU extensions\n"));
   fprintf (stream, _("\
-  --gdwarf-2              generate DWARF2 debugging information\n"));
+  --gdwarf-<N>            generate DWARF<N> debugging information. 2 <= <N> <= 5\n"));
   fprintf (stream, _("\
   --gdwarf-sections       generate per-function section names for DWARF line information\n"));
   fprintf (stream, _("\
@@ -484,7 +487,10 @@ parse_args (int * pargc, char *** pargv)
       OPTION_DEPFILE,
       OPTION_GSTABS,
       OPTION_GSTABS_PLUS,
-      OPTION_GDWARF2,
+      OPTION_GDWARF_2,
+      OPTION_GDWARF_3,
+      OPTION_GDWARF_4,
+      OPTION_GDWARF_5,
       OPTION_GDWARF_SECTIONS,
       OPTION_GDWARF_CIE_VERSION,
       OPTION_STRIP_LOCAL_ABSOLUTE,
@@ -537,10 +543,13 @@ parse_args (int * pargc, char *** pargv)
     ,{"generate-missing-build-notes", required_argument, NULL, OPTION_ELF_BUILD_NOTES}
 #endif
     ,{"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL}
-    ,{"gdwarf-2", no_argument, NULL, OPTION_GDWARF2}
-    /* GCC uses --gdwarf-2 but GAS uses to use --gdwarf2,
+    ,{"gdwarf-2", no_argument, NULL, OPTION_GDWARF_2}
+    ,{"gdwarf-3", no_argument, NULL, OPTION_GDWARF_3}
+    ,{"gdwarf-4", no_argument, NULL, OPTION_GDWARF_4}
+    ,{"gdwarf-5", no_argument, NULL, OPTION_GDWARF_5}
+    /* GCC uses --gdwarf-2 but GAS used to to use --gdwarf2,
        so we keep it here for backwards compatibility.  */
-    ,{"gdwarf2", no_argument, NULL, OPTION_GDWARF2}
+    ,{"gdwarf2", no_argument, NULL, OPTION_GDWARF_2}
     ,{"gdwarf-sections", no_argument, NULL, OPTION_GDWARF_SECTIONS}
     ,{"gdwarf-cie-version", required_argument, NULL, OPTION_GDWARF_CIE_VERSION}
     ,{"gen-debug", no_argument, NULL, 'g'}
@@ -817,7 +826,10 @@ This program has absolutely no warranty.\n"));
 	  if (md_debug_format_selector)
 	    debug_type = md_debug_format_selector (& use_gnu_debug_info_extensions);
 	  else if (IS_ELF)
-	    debug_type = DEBUG_DWARF2;
+	    {
+	      debug_type = DEBUG_DWARF2;
+	      dwarf_level = 2;
+	    }
 	  else
 	    debug_type = DEBUG_STABS;
 	  break;
@@ -829,8 +841,24 @@ This program has absolutely no warranty.\n"));
 	  debug_type = DEBUG_STABS;
 	  break;
 
-	case OPTION_GDWARF2:
+	case OPTION_GDWARF_2:
 	  debug_type = DEBUG_DWARF2;
+	  dwarf_level = 2;
+	  break;
+
+	case OPTION_GDWARF_3:
+	  debug_type = DEBUG_DWARF2;
+	  dwarf_level = 3;
+	  break;
+
+	case OPTION_GDWARF_4:
+	  debug_type = DEBUG_DWARF2;
+	  dwarf_level = 4;
+	  break;
+
+	case OPTION_GDWARF_5:
+	  debug_type = DEBUG_DWARF2;
+	  dwarf_level = 5;
 	  break;
 
 	case OPTION_GDWARF_SECTIONS:
@@ -845,6 +873,21 @@ This program has absolutely no warranty.\n"));
               || flag_dwarf_cie_version == 2
               || flag_dwarf_cie_version > 4)
             as_fatal (_("Invalid --gdwarf-cie-version `%s'"), optarg);
+	  switch (flag_dwarf_cie_version)
+	    {
+	    case 1:
+	      if (dwarf_level < 2)
+		dwarf_level = 2;
+	      break;
+	    case 3:
+	      if (dwarf_level < 3)
+		dwarf_level = 3;
+	      break;
+	    default:
+	      if (dwarf_level < 4)
+		dwarf_level = 4;
+	      break;
+	    }
 	  break;
 
 	case 'J':

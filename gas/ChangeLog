@@ -1,5 +1,18 @@
 2020-03-06  Nick Clifton  <nickc@redhat.com>
 
+	PR 25612
+	* as.c (dwarf_level): Define.
+	(show_usage): Add --gdwarf-3, --gdwarf-4 and --gdwarf-5.
+	(parse_args): Add support for the new options.
+	as.h (dwarf_level): Prototype.
+	* dwarf2dbg.c (DWARF2_VERSION): Use dwarf_level as default version
+	value.
+	* config/tc-ia64.h (DWARF2_VERISION): Update definition.
+	(DWARF2_LINE_VERSION): Remove definition.
+	* doc/as.texi: Document the new options.
+
+2020-03-06  Nick Clifton  <nickc@redhat.com>
+
 	PR 25572
 	* as.c (main): Allow matching input and outputs when they are
 	not regular files.
