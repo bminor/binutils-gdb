@@ -1,5 +1,26 @@
 2020-03-06  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/adx.s, testsuite/gas/i386/cet.s,
+	testsuite/gas/i386/ept.s, testsuite/gas/i386/fsgs.s,
+	testsuite/gas/i386/invpcid.s, testsuite/gas/i386/movdir.s,
+	testsuite/gas/i386/ptwrite.s, testsuite/gas/i386/vmx.s,
+	* testsuite/gas/i386/code16.s: Add CR, DR, and TR access cases
+	as well as a BSWAP one.
+	* testsuite/gas/i386/rdpid.s: Add 16-bit case.
+	* testsuite/gas/i386/sse2-16bit.s: Cover more insns.
+	* testsuite/gas/i386/adx-intel.d, testsuite/gas/i386/adx.d,
+	testsuite/gas/i386/cet-intel.d, testsuite/gas/i386/cet.d,
+	testsuite/gas/i386/code16.d, testsuite/gas/i386/ept-intel.d,
+	testsuite/gas/i386/ept.d, testsuite/gas/i386/fsgs-intel.d,
+	testsuite/gas/i386/fsgs.d, testsuite/gas/i386/invpcid-intel.d,
+	testsuite/gas/i386/invpcid.d, testsuite/gas/i386/movdir-intel.d,
+	testsuite/gas/i386/movdir.d, testsuite/gas/i386/ptwrite-intel.d,
+	testsuite/gas/i386/ptwrite.d, testsuite/gas/i386/rdpid-intel.d,
+	testsuite/gas/i386/rdpid.d, testsuite/gas/i386/sse2-16bit.d,
+	testsuite/gas/i386/vmx.d: Adjust expectations.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (md_assemble): Also exclude tpause and umwait
 	from having their operands swapped.
 	* testsuite/gas/i386/waitpkg.s,

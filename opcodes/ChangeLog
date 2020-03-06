@@ -1,5 +1,13 @@
 2020-03-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (movmskps, mwait, vmread, vmwrite, invept,
+	invvpid, invpcid, rdfsbase, rdgsbase, wrfsbase, wrgsbase, adcx,
+	adox, mwaitx, rdpid, movdiri): Add IgnoreSize.
+	(ptwrite): Split into non-64-bit and 64-bit forms.
+	* i386-tbl.h: Re-generate.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (tpause, umwait): Add IgnoreSize. Add 3-operand
 	template.
 	* i386-tbl.h: Re-generate.
