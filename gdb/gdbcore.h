@@ -168,69 +168,6 @@ extern const char *gnutarget;
 
 extern void set_gnutarget (const char *);
 
-/* Structure to keep track of core register reading functions for
-   various core file types.  */
-
-struct core_fns
-  {
-
-    /* BFD flavour that a core file handler is prepared to read.  This
-       can be used by the handler's core tasting function as a first
-       level filter to reject BFD's that don't have the right
-       flavour.  */
-
-    enum bfd_flavour core_flavour;
-
-    /* Core file handler function to call to recognize corefile
-       formats that BFD rejects.  Some core file format just don't fit
-       into the BFD model, or may require other resources to identify
-       them, that simply aren't available to BFD (such as symbols from
-       another file).  Returns nonzero if the handler recognizes the
-       format, zero otherwise.  */
-
-    int (*check_format) (bfd *);
-
-    /* Core file handler function to call to ask if it can handle a
-       given core file format or not.  Returns zero if it can't,
-       nonzero otherwise.  */
-
-    int (*core_sniffer) (struct core_fns *, bfd *);
-
-    /* Extract the register values out of the core file and supply them
-       into REGCACHE.
-
-       CORE_REG_SECT points to the register values themselves, read into
-       memory.
-
-       CORE_REG_SIZE is the size of that area.
-
-       WHICH says which set of registers we are handling:
-         0 --- integer registers
-         2 --- floating-point registers, on machines where they are
-               discontiguous
-         3 --- extended floating-point registers, on machines where
-               these are present in yet a third area.  (GNU/Linux uses
-               this to get at the SSE registers.)
-
-       REG_ADDR is the offset from u.u_ar0 to the register values relative to
-       core_reg_sect.  This is used with old-fashioned core files to locate the
-       registers in a large upage-plus-stack ".reg" section.  Original upage
-       address X is at location core_reg_sect+x+reg_addr.  */
-
-    void (*core_read_registers) (struct regcache *regcache,
-				 gdb_byte *core_reg_sect,
-				 unsigned core_reg_size,
-				 int which, CORE_ADDR reg_addr);
-
-    /* Finds the next struct core_fns.  They are allocated and
-       initialized in whatever module implements the functions pointed
-       to; an initializer calls deprecated_add_core_fns to add them to
-       the global chain.  */
-
-    struct core_fns *next;
-
-  };
-
 /* Build either a single-thread or multi-threaded section name for
    PTID.
 
@@ -273,10 +210,5 @@ private:
      it.  */
   std::string m_storage;
 };
-
-/* Replaced by the "iterate_over_regset_sections" gdbarch method.  */
-extern void deprecated_add_core_fns (struct core_fns *cf);
-extern int default_core_sniffer (struct core_fns *cf, bfd * abfd);
-extern int default_check_format (bfd * abfd);
 
 #endif /* !defined (GDBCORE_H) */

@@ -1,3 +1,23 @@
+2020-03-12  Christian Biesinger  <cbiesinger@google.com>
+
+	* corelow.c (sniff_core_bfd): Remove.
+	(class core_target) <m_core_vec>: Remove.
+	(core_target::core_target): Update.
+	(core_file_fns): Remove.
+	(deprecated_add_core_fns): Remove.
+	(default_core_sniffer): Remove.
+	(sniff_core_bfd): Remove.
+	(default_check_format): Remove.
+	(gdb_check_format): Remove.
+	(core_target_open): Update.
+	(core_target::get_core_register_section): Update.
+	(get_core_registers_cb): Update.
+	(core_target::fetch_registers): Update.
+	* gdbcore.h (struct core_fns): Remove.
+	(deprecated_add_core_fns): Remove.
+	(default_core_sniffer): Remove.
+	(default_check_format): Remove.
+
 2020-03-12  Tom Tromey  <tom@tromey.com>
 
 	* arm-tdep.c (struct arm_mapping_symbol) <value>: Now a
