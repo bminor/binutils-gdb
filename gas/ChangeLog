@@ -1,5 +1,12 @@
 2020-03-06  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (match_template): Extend code in logic
+	rejecting certain suffixes in certain modes to also cover mask
+	register use and VecSIB. Drop special casing of broadcast. Skip
+	immediates in the check.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (match_template): Fold duplicate code in
 	logic rejecting certain suffixes in certain modes. Drop
 	pointless "else".

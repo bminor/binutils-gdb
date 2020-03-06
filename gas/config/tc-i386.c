@@ -5877,6 +5877,7 @@ match_template (char mnem_suffix)
       /* In general, don't allow
 	 - 64-bit operands outside of 64-bit mode,
 	 - 32-bit operands on pre-386.  */
+      j = i.imm_operands + (t->operands > i.imm_operands + 1);
       if (((i.suffix == QWORD_MNEM_SUFFIX
 	    && flag_code != CODE_64BIT
 	    && (t->base_opcode != 0x0fc7
@@ -5885,13 +5886,16 @@ match_template (char mnem_suffix)
 	       && !cpu_arch_flags.bitfield.cpui386))
 	  && (intel_syntax
 	      ? (t->opcode_modifier.mnemonicsize != IGNORESIZE
-		 && !t->opcode_modifier.broadcast
 		 && !intel_float_operand (t->name))
 	      : intel_float_operand (t->name) != 2)
-	  && ((operand_types[0].bitfield.class != RegMMX
-	       && operand_types[0].bitfield.class != RegSIMD)
-	      || (operand_types[t->operands > 1].bitfield.class != RegMMX
-		  && operand_types[t->operands > 1].bitfield.class != RegSIMD)))
+	  && (t->operands == i.imm_operands
+	      || (operand_types[i.imm_operands].bitfield.class != RegMMX
+	       && operand_types[i.imm_operands].bitfield.class != RegSIMD
+	       && operand_types[i.imm_operands].bitfield.class != RegMask)
+	      || (operand_types[j].bitfield.class != RegMMX
+		  && operand_types[j].bitfield.class != RegSIMD
+		  && operand_types[j].bitfield.class != RegMask))
+	  && !t->opcode_modifier.vecsib)
 	continue;
 
       /* Do not verify operands when there are none.  */
