@@ -2419,7 +2419,7 @@ show code-cache
 * Newly installed $prefix/bin/gcore acts as a shell interface for the
   GDB command gcore.
 
-* GDB now implements the the C++ 'typeid' operator.
+* GDB now implements the C++ 'typeid' operator.
 
 * The new convenience variable $_exception holds the exception being
   thrown or caught at an exception-related catchpoint.
@@ -5203,7 +5203,7 @@ The new infrastructure making possible the implementation of key new
 features including 32x64 (e.g., 64-bit amd64 GDB debugging a 32-bit
 i386 application).
 
-GDB 6.3 will be the last release to include the the registers[]
+GDB 6.3 will be the last release to include the registers[]
 compatibility module that allowed out-of-date configurations to
 continue to work.  This change directly impacts the following
 configurations:
@@ -6634,7 +6634,7 @@ Remote targets now use a data cache to speed up communication with the
 remote side.  The data cache could lead to incorrect results because
 it doesn't know about volatile variables, thus making it impossible to
 debug targets which use memory mapped I/O devices. `set remotecache
-off' turns the the data cache off.
+off' turns the data cache off.
 
 * Remote targets may have threads
 

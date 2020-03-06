@@ -1,5 +1,10 @@
 2020-03-06  Tom de Vries  <tdevries@suse.de>
 
+	* NEWS: Fix "the the".
+	* ctfread.c: Same.
+
+2020-03-06  Tom de Vries  <tdevries@suse.de>
+
 	* psymtab.c (psymtab_to_symtab): Don't print "done.".
 
 2020-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>

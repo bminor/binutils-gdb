@@ -45,7 +45,7 @@
    The file header stores a magic number and version information, encoding
    flags, and the byte offset of each of the sections relative to the end of the
    header itself.  If the CTF data has been uniquified against another set of
-   CTF data, a reference to that data also appears in the the header.  This
+   CTF data, a reference to that data also appears in the header.  This
    reference is the name of the label corresponding to the types uniquified
    against.
 

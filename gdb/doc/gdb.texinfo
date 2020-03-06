@@ -20568,7 +20568,7 @@ when any of shared library events happen.  The best way to do this is
 to use @code{catch load} and @code{catch unload} (@pxref{Set
 Catchpoints}).
 
-@value{GDBN} also supports the the @code{set stop-on-solib-events}
+@value{GDBN} also supports the @code{set stop-on-solib-events}
 command for this.  This command exists for historical reasons.  It is
 less useful than setting a catchpoint, because it does not allow for
 conditions or commands as a catchpoint does.
@@ -28980,7 +28980,7 @@ recommended that front ends request a specific version of MI when launching
 @value{GDBN} (e.g. @code{--interpreter=mi2}) to make sure they get an
 interpreter with the MI version they expect.
 
-The following table gives a summary of the the released versions of the MI
+The following table gives a summary of the released versions of the MI
 interface: the version number, the version of GDB in which it first appeared
 and the breaking changes compared to the previous version.
 
@@ -29158,7 +29158,7 @@ The following is the list of possible async records:
 
 @item *running,thread-id="@var{thread}"
 The target is now running.  The @var{thread} field can be the global
-thread ID of the the thread that is now running, and it can be
+thread ID of the thread that is now running, and it can be
 @samp{all} if all threads are running.  The frontend should assume
 that no interaction with a running thread is possible after this
 notification is produced.  The frontend should not assume that this
