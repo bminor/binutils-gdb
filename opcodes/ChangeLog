@@ -1,5 +1,13 @@
 2020-03-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (vcvtdq2pd, vcvtps2pd, vcvtudq2pd, vcvtps2ph,
+	vcvtps2qq, vcvtps2uqq, vcvttps2qq, vcvttps2uqq): Fold separate
+	register and memory source templates. Replace VexW= by VexW*
+	where applicable.
+	* i386-tbl.h: Re-generate.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl: Drop IgnoreSize from various SIMD insns. Replace
 	VexW= by VexW* and VexVVVV=1 by just VexVVVV where applicable.
 	* i386-tbl.h: Re-generate.

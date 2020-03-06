@@ -2145,11 +2145,11 @@ match_mem_size (const insn_template *t, unsigned int wanted,
 		  here.  Also for v{,p}broadcast*, {,v}pmov{s,z}*, and
 		  down-conversion vpmov*.  */
 	       || ((t->operand_types[wanted].bitfield.class == RegSIMD
-		    && !t->opcode_modifier.broadcast
-		    && (t->operand_types[wanted].bitfield.byte
-			|| t->operand_types[wanted].bitfield.word
-			|| t->operand_types[wanted].bitfield.dword
-			|| t->operand_types[wanted].bitfield.qword))
+		    && t->operand_types[wanted].bitfield.byte
+		       + t->operand_types[wanted].bitfield.word
+		       + t->operand_types[wanted].bitfield.dword
+		       + t->operand_types[wanted].bitfield.qword
+		       > !!t->opcode_modifier.broadcast)
 		   ? (i.types[given].bitfield.xmmword
 		      || i.types[given].bitfield.ymmword
 		      || i.types[given].bitfield.zmmword)
@@ -5533,6 +5533,16 @@ check_VecOperands (const insn_template *t)
 	}
 
       overlap = operand_type_and (type, t->operand_types[op]);
+      if (t->operand_types[op].bitfield.class == RegSIMD
+	  && t->operand_types[op].bitfield.byte
+	     + t->operand_types[op].bitfield.word
+	     + t->operand_types[op].bitfield.dword
+	     + t->operand_types[op].bitfield.qword > 1)
+	{
+	  overlap.bitfield.xmmword = 0;
+	  overlap.bitfield.ymmword = 0;
+	  overlap.bitfield.zmmword = 0;
+	}
       if (operand_type_all_zero (&overlap))
 	  goto bad_broadcast;
 
