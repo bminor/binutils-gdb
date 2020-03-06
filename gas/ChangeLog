@@ -1,3 +1,13 @@
+2020-04-02  Lili Cui  <lili.cui@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .serialize.
+	(cpu_noarch): Likewise.
+	* doc/c-i386.texi: Document serialize.
+	* testsuite/gas/i386/i386.exp: Run serialize tests
+	* testsuite/gas/i386/serialize.d: Likewise.
+	* testsuite/gas/i386/x86-64-serialize.d: Likewise.
+	* testsuite/gas/i386/serialize.s: Likewise.
+
 2020-04-02  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* testsuite/gas/elf/section12a.d: Use notarget instead of xfail.

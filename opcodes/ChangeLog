@@ -1,3 +1,15 @@
+2020-04-02  Lili Cui  <lili.cui@intel.com>
+
+	* i386-dis.c (prefix_table): New instructions serialize.
+	* i386-gen.c (cpu_flag_init): Add CPU_SERIALIZE_FLAGS,
+	CPU_ANY_SERIALIZE_FLAGS.
+	(cpu_flags): Add CpuSERIALIZE.
+	* i386-opc.h (enum): Add CpuSERIALIZE.
+	(i386_cpu_flags): Add cpuserialize.
+	* i386-opc.tbl: Add SERIALIZE insns.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
+
 2020-03-26  Alan Modra  <amodra@gmail.com>
 
 	* disassemble.h (opcodes_assert): Declare.
