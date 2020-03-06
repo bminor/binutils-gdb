@@ -1290,7 +1290,13 @@ main (int argc, char ** argv)
 	      /* Different files may have the same inode number if they
 		 reside on different devices, so check the st_dev field as
 		 well.  */
-	      && sib.st_dev == sob.st_dev)
+	      && sib.st_dev == sob.st_dev
+	      /* PR 25572: Only check regular files.  Devices, sockets and so
+		 on might actually work as both input and output.  Plus there
+		 is a use case for using /dev/null as both input and output
+		 when checking for command line option support in a script:
+		   as --foo /dev/null -o /dev/null; if $? then ...  */
+	      && S_ISREG (sib.st_mode))
 	    {
 	      const char *saved_out_file_name = out_file_name;
 

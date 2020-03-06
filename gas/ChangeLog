@@ -1,3 +1,9 @@
+2020-03-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 25572
+	* as.c (main): Allow matching input and outputs when they are
+	not regular files.
+
 2020-03-06  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (match_mem_size): Generalize broadcast special
