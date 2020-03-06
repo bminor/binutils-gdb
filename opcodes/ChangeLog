@@ -1,5 +1,10 @@
 2020-03-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (fildll, fistpll, fisttpll): Add ATTSyntax.
+	* i386-tbl.h: Re-generate.
+
+2020-03-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (movq): Drop NoRex64 from XMM/XMM SSE2AVX variants.
 	(movmskps, pextrw, pinsrw, pmovmskb, movmskpd, extractps,
 	pextrb, pinsrb, roundsd): Drop NoRex64 and where applicable use
