@@ -1,5 +1,19 @@
 2020-03-06  Nick Clifton  <nickc@redhat.com>
 
+	PR 25614
+	* dwarf2dbg.c (dwarf2_directive_filename): Allow a file number of
+	0 if the dwarf_level is 5 or more.  Complain if a filename follows
+	a file 0.
+	* testsuite/gas/elf/dwarf-5-file0.s: New test.
+	* testsuite/gas/elf/dwarf-5-file0.d: New test driver.
+	* testsuite/gas/elf/elf.exp: Run the new test.
+
+	PR 25612
+	* config/tc-ia64.h (DWARF2_VERISION): Fix typo.
+	* doc/as.texi: Fix another typo.
+
+2020-03-06  Nick Clifton  <nickc@redhat.com>
+
 	PR 25612
 	* as.c (dwarf_level): Define.
 	(show_usage): Add --gdwarf-3, --gdwarf-4 and --gdwarf-5.

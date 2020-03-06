@@ -794,16 +794,26 @@ dwarf2_directive_filename (void)
     }
 
   num = get_absolute_expression ();
-  filename = demand_copy_C_string (&filename_len);
-  if (filename == NULL)
-    return NULL;
-  demand_empty_rest_of_line ();
 
-  if ((offsetT) num < 1)
+  if ((offsetT) num < 1 && dwarf_level < 5)
     {
       as_bad (_("file number less than one"));
+      ignore_rest_of_line ();
       return NULL;
     }
+
+  if (num == 0)
+    {
+      demand_empty_rest_of_line ();
+      return NULL;
+    }
+
+  filename = demand_copy_C_string (&filename_len);
+  if (filename == NULL)
+    /* demand_copy_C_string will have already generated an error message.  */
+    return NULL;
+
+  demand_empty_rest_of_line ();
 
   /* A .file directive implies compiler generated debug information is
      being supplied.  Turn off gas generated debug info.  */
@@ -821,7 +831,7 @@ dwarf2_directive_filename (void)
       return NULL;
     }
 
-  get_filenum (filename, (unsigned int) num);
+  (void) get_filenum (filename, (unsigned int) num);
 
   return filename;
 }
