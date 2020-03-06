@@ -2562,6 +2562,23 @@ merge_gnu_build_notes (bfd *          abfd,
   return size;
 }
 
+static flagword
+check_new_section_flags (flagword flags, bfd * abfd, const char * secname)
+{
+  /* Only set the SEC_COFF_SHARED flag on COFF files.
+     The same bit value is used by ELF targets to indicate
+     compressed sections, and setting that flag here breaks
+     things.  */
+  if ((flags & SEC_COFF_SHARED)
+      && bfd_get_flavour (abfd) != bfd_target_coff_flavour)
+    {
+      non_fatal (_("%s[%s]: Note - dropping 'share' flag as output format is not COFF"),
+		 bfd_get_filename (abfd), secname);
+      flags &= ~ SEC_COFF_SHARED;
+    }
+  return flags;
+}
+
 /* Copy object file IBFD onto OBFD.
    Returns TRUE upon success, FALSE otherwise.  */
 
@@ -2810,7 +2827,10 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	  pset = find_section_list (padd->name, FALSE,
 				    SECTION_CONTEXT_SET_FLAGS);
 	  if (pset != NULL)
-	    flags = pset->flags | SEC_HAS_CONTENTS;
+	    {	      
+	      flags = pset->flags | SEC_HAS_CONTENTS;
+	      flags = check_new_section_flags (flags, obfd, padd->name);
+	    }
 	  else
 	    flags = SEC_HAS_CONTENTS | SEC_READONLY | SEC_DATA;
 
@@ -3950,6 +3970,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   flagword flags;
   const char *err;
   const char * name;
+  const char * new_name;
   char *prefix = NULL;
   bfd_boolean make_nobits;
   unsigned int alignment;
@@ -3965,7 +3986,12 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       flags &= bfd_applicable_section_flags (ibfd);
       flags &= bfd_applicable_section_flags (obfd);
     }
-  name = find_section_rename (name, &flags);
+  new_name = find_section_rename (name, &flags);
+  if (new_name != name)
+    {
+      name = new_name;
+      flags = check_new_section_flags (flags, obfd, name);
+    }
 
   /* Prefix sections.  */
   if (prefix_alloc_sections_string
@@ -3989,7 +4015,10 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   p = find_section_list (bfd_section_name (isection), FALSE,
 			 SECTION_CONTEXT_SET_FLAGS);
   if (p != NULL)
-    flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
+    {
+      flags = p->flags | (flags & (SEC_HAS_CONTENTS | SEC_RELOC));
+      flags = check_new_section_flags (flags, obfd, bfd_section_name (isection));
+    }
   else if (strip_symbols == STRIP_NONDEBUG
 	   && (flags & (SEC_ALLOC | SEC_GROUP)) != 0
 	   && !is_nondebug_keep_contents_section (ibfd, isection))

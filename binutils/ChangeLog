@@ -1,3 +1,12 @@
+2020-03-06  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (check_new_section_flags): New function.  Reject the
+	SEC_COFF_SHARED flag if the target is not a COFF binary.
+	(copy_object): Call check_new_section_flags.
+	(setup_section): Likewise.
+	* doc/binutils.texi (objcopy): Add a note that the 'share' section
+	flag cannot be applied to ELF binaries.
+
 2020-03-06  Alan Modra  <amodra@gmail.com>
 
 	PR 25637

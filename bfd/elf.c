@@ -3218,7 +3218,6 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 	  /* Set SEC_ELF_COMPRESS to indicate this section should be
 	     compressed.  */
 	  asect->flags |= SEC_ELF_COMPRESS;
-
 	  /* If this section will be compressed, delay adding section
 	     name to section name section after it is compressed in
 	     _bfd_elf_assign_file_positions_for_non_load.  */
@@ -9181,20 +9180,47 @@ _bfd_elf_set_section_contents (bfd *abfd,
   hdr = &elf_section_data (section)->this_hdr;
   if (hdr->sh_offset == (file_ptr) -1)
     {
+      unsigned char *contents;
+
       if (bfd_section_is_ctf (section))
 	/* Nothing to do with this section: the contents are generated
 	   later.  */
 	return TRUE;
 
-      /* We must compress this section.  Write output to the buffer.  */
-      unsigned char *contents = hdr->contents;
-      if ((offset + count) > hdr->sh_size
-	  || (section->flags & SEC_ELF_COMPRESS) == 0
-	  || contents == NULL)
-	abort ();
+      if ((section->flags & SEC_ELF_COMPRESS) == 0)
+	{
+	  _bfd_error_handler
+	    (_("%pB:%pA: error: attempting to write into an unallocated compressed section"),
+	     abfd, section);
+	  bfd_set_error (bfd_error_invalid_operation);
+	  return FALSE;
+	}
+      
+      if ((offset + count) > hdr->sh_size)
+	{
+	  _bfd_error_handler
+	    (_("%pB:%pA: error: attempting to write over the end of the section"),
+	     abfd, section);
+
+	  bfd_set_error (bfd_error_invalid_operation);
+	  return FALSE;
+	}
+
+      contents = hdr->contents;
+      if (contents == NULL)
+	{
+	  _bfd_error_handler
+	    (_("%pB:%pA: error: attempting to write section into an empty buffer"),
+	     abfd, section);
+
+	  bfd_set_error (bfd_error_invalid_operation);
+	  return FALSE;
+	}
+
       memcpy (contents + offset, location, count);
       return TRUE;
     }
+
   pos = hdr->sh_offset + offset;
   if (bfd_seek (abfd, pos, SEEK_SET) != 0
       || bfd_bwrite (location, count, abfd) != count)

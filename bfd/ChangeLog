@@ -1,3 +1,8 @@
+2020-03-06  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (_bfd_elf_set_section_contents): Replace call to abort
+	with error messages and failure return values.
+
 2020-03-05  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf32-xtensa.c (shrink_dynamic_reloc_sections): Shrink dynamic
