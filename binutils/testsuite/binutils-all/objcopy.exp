@@ -1357,6 +1357,11 @@ if [is_elf_format] {
         verbose [file rootname $t]
         run_dump_test [file rootname $t]
     }
+
+    # Test --strip-section-headers
+    run_dump_test "strip-section-headers-1" [list \
+			  [list source strip-15${reloc_format}.s] \
+			  [list as "${elf64} --defsym RELOC=${reloc}"]]
 }
 run_dump_test "localize-hidden-2"
 
