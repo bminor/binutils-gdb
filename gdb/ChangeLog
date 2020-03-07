@@ -1,3 +1,9 @@
+2020-03-07  Tom Tromey  <tom@tromey.com>
+
+	* valops.c (value_literal_complex): Remove obsolete comment.
+	* gdbtypes.h (enum type_code) <TYPE_CODE_FLT>: Remove obsolete
+	comment.
+
 2020-03-06  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* infrun.h: Forward-declare thread_info.
