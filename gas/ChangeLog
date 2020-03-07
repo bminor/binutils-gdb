@@ -1,3 +1,8 @@
+2020-03-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/elf/dwarf-5-file0.s: Don't start directives in
+	first column.
+
 2020-03-06  Nick Clifton  <nickc@redhat.com>
 
 	PR 25614
