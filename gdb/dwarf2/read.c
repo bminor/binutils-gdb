@@ -16816,6 +16816,16 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
 		 sect_offset_str (die->sect_off), objfile_name (objfile));
       TYPE_TARGET_TYPE (this_type) = NULL;
     }
+  if (name == NULL)
+    {
+      /* Gcc-7 and before supports -feliminate-dwarf2-dups, which generates
+	 anonymous typedefs, which is, strictly speaking, invalid DWARF.
+	 Handle these by just returning the target type, rather than
+	 constructing an anonymous typedef type and trying to handle this
+	 elsewhere.  */
+      set_die_type (die, target_type, cu);
+      return target_type;
+    }
   return this_type;
 }
 

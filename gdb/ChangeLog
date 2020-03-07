@@ -1,3 +1,8 @@
+2020-03-07  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c (read_typedef): Treat anonymous typedef as forwarder
+	DIE.
+
 2020-03-07  Tom Tromey  <tom@tromey.com>
 
 	* valops.c (value_literal_complex): Remove obsolete comment.
