@@ -164,7 +164,8 @@ struct mapped_index_base
   virtual size_t symbol_name_count () const = 0;
 
   /* Get the name of the symbol at IDX in the symbol table.  */
-  virtual const char *symbol_name_at (offset_type idx) const = 0;
+  virtual const char *symbol_name_at
+    (offset_type idx, dwarf2_per_objfile *per_objfile) const = 0;
 
   /* Return whether the name at IDX in the symbol table should be
      ignored.  */
@@ -175,7 +176,7 @@ struct mapped_index_base
 
   /* Build the symbol name component sorted vector, if we haven't
      yet.  */
-  void build_name_components ();
+  void build_name_components (dwarf2_per_objfile *per_objfile);
 
   /* Returns the lower (inclusive) and upper (exclusive) bounds of the
      possible matches for LN_NO_PARAMS in the name component
@@ -183,7 +184,8 @@ struct mapped_index_base
   std::pair<std::vector<name_component>::const_iterator,
 	    std::vector<name_component>::const_iterator>
     find_name_components_bounds (const lookup_name_info &ln_no_params,
-				 enum language lang) const;
+				 enum language lang,
+				 dwarf2_per_objfile *per_objfile) const;
 
   /* Prevent deleting/destroying via a base class pointer.  */
 protected:
@@ -221,7 +223,8 @@ struct mapped_index final : public mapped_index_base
 
   /* Convenience method to get at the name of the symbol at IDX in the
      symbol table.  */
-  const char *symbol_name_at (offset_type idx) const override
+  const char *symbol_name_at
+    (offset_type idx, dwarf2_per_objfile *per_objfile) const override
   { return this->constant_pool + MAYBE_SWAP (this->symbol_table[idx].name); }
 
   size_t symbol_name_count () const override
@@ -232,11 +235,6 @@ struct mapped_index final : public mapped_index_base
    Uninitialized map has CU_COUNT 0.  */
 struct mapped_debug_names final : public mapped_index_base
 {
-  mapped_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile_)
-  : dwarf2_per_objfile (dwarf2_per_objfile_)
-  {}
-
-  struct dwarf2_per_objfile *dwarf2_per_objfile;
   bfd_endian dwarf5_byte_order;
   bool dwarf5_is_dwarf64;
   bool augmentation_is_gdb;
@@ -268,13 +266,15 @@ struct mapped_debug_names final : public mapped_index_base
 
   std::unordered_map<ULONGEST, index_val> abbrev_map;
 
-  const char *namei_to_name (uint32_t namei) const;
+  const char *namei_to_name
+    (uint32_t namei, dwarf2_per_objfile *per_objfile) const;
 
   /* Implementation of the mapped_index_base virtual interface, for
      the name_components cache.  */
 
-  const char *symbol_name_at (offset_type idx) const override
-  { return namei_to_name (idx); }
+  const char *symbol_name_at
+    (offset_type idx, dwarf2_per_objfile *per_objfile) const override
+  { return namei_to_name (idx, per_objfile); }
 
   size_t symbol_name_count () const override
   { return this->name_count; }
@@ -3802,7 +3802,8 @@ make_sort_after_prefix_name (const char *search_name)
 std::pair<std::vector<name_component>::const_iterator,
 	  std::vector<name_component>::const_iterator>
 mapped_index_base::find_name_components_bounds
-  (const lookup_name_info &lookup_name_without_params, language lang) const
+  (const lookup_name_info &lookup_name_without_params, language lang,
+   dwarf2_per_objfile *per_objfile) const
 {
   auto *name_cmp
     = this->name_components_casing == case_sensitive_on ? strcmp : strcasecmp;
@@ -3815,7 +3816,7 @@ mapped_index_base::find_name_components_bounds
   auto lookup_compare_lower = [&] (const name_component &elem,
 				   const char *name)
     {
-      const char *elem_qualified = this->symbol_name_at (elem.idx);
+      const char *elem_qualified = this->symbol_name_at (elem.idx, per_objfile);
       const char *elem_name = elem_qualified + elem.name_offset;
       return name_cmp (elem_name, name) < 0;
     };
@@ -3825,7 +3826,7 @@ mapped_index_base::find_name_components_bounds
   auto lookup_compare_upper = [&] (const char *name,
 				   const name_component &elem)
     {
-      const char *elem_qualified = this->symbol_name_at (elem.idx);
+      const char *elem_qualified = this->symbol_name_at (elem.idx, per_objfile);
       const char *elem_name = elem_qualified + elem.name_offset;
       return name_cmp (name, elem_name) < 0;
     };
@@ -3874,7 +3875,7 @@ mapped_index_base::find_name_components_bounds
 /* See declaration.  */
 
 void
-mapped_index_base::build_name_components ()
+mapped_index_base::build_name_components (dwarf2_per_objfile *per_objfile)
 {
   if (!this->name_components.empty ())
     return;
@@ -3892,7 +3893,7 @@ mapped_index_base::build_name_components ()
       if (this->symbol_name_slot_invalid (idx))
 	continue;
 
-      const char *name = this->symbol_name_at (idx);
+      const char *name = this->symbol_name_at (idx, per_objfile);
 
       /* Add each name component to the name component table.  */
       unsigned int previous_len = 0;
@@ -3930,8 +3931,10 @@ mapped_index_base::build_name_components ()
   auto name_comp_compare = [&] (const name_component &left,
 				const name_component &right)
     {
-      const char *left_qualified = this->symbol_name_at (left.idx);
-      const char *right_qualified = this->symbol_name_at (right.idx);
+      const char *left_qualified
+	= this->symbol_name_at (left.idx, per_objfile);
+      const char *right_qualified
+	= this->symbol_name_at (right.idx, per_objfile);
 
       const char *left_name = left_qualified + left.name_offset;
       const char *right_name = right_qualified + right.name_offset;
@@ -3957,14 +3960,15 @@ dw2_expand_symtabs_matching_symbol
    const lookup_name_info &lookup_name_in,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    enum search_domain kind,
-   gdb::function_view<bool (offset_type)> match_callback)
+   gdb::function_view<bool (offset_type)> match_callback,
+   dwarf2_per_objfile *per_objfile)
 {
   lookup_name_info lookup_name_without_params
     = lookup_name_in.make_ignore_params ();
 
   /* Build the symbol name component sorted vector, if we haven't
      yet.  */
-  index.build_name_components ();
+  index.build_name_components (per_objfile);
 
   /* The same symbol may appear more than once in the range though.
      E.g., if we're looking for symbols that complete "w", and we have
@@ -4014,14 +4018,15 @@ dw2_expand_symtabs_matching_symbol
 
       auto bounds
 	= index.find_name_components_bounds (lookup_name_without_params,
-					     lang_e);
+					     lang_e, per_objfile);
 
       /* Now for each symbol name in range, check to see if we have a name
 	 match, and if so, call the MATCH_CALLBACK callback.  */
 
       for (; bounds.first != bounds.second; ++bounds.first)
 	{
-	  const char *qualified = index.symbol_name_at (bounds.first->idx);
+	  const char *qualified
+	    = index.symbol_name_at (bounds.first->idx, per_objfile);
 
 	  if (!name_matcher (qualified, lookup_name_without_params, NULL)
 	      || (symbol_matcher != NULL && !symbol_matcher (qualified)))
@@ -4074,7 +4079,8 @@ public:
   }
 
   /* Get the name of the symbol at IDX in the symbol table.  */
-  const char *symbol_name_at (offset_type idx) const override
+  const char *symbol_name_at
+    (offset_type idx, dwarf2_per_objfile *per_objfile) const override
   {
     return m_symbol_table[idx];
   }
@@ -4104,7 +4110,8 @@ check_match (const char *file, int line,
 	     mock_mapped_index &mock_index,
 	     const char *name, symbol_name_match_type match_type,
 	     bool completion_mode,
-	     std::initializer_list<const char *> expected_list)
+	     std::initializer_list<const char *> expected_list,
+	     dwarf2_per_objfile *per_objfile)
 {
   lookup_name_info lookup_name (name, match_type, completion_mode);
 
@@ -4129,14 +4136,14 @@ check_match (const char *file, int line,
 				      NULL, ALL_DOMAIN,
 				      [&] (offset_type idx)
   {
-    const char *matched_name = mock_index.symbol_name_at (idx);
+    const char *matched_name = mock_index.symbol_name_at (idx, per_objfile);
     const char *expected_str
       = expected_it == expected_end ? NULL : *expected_it++;
 
     if (expected_str == NULL || strcmp (expected_str, matched_name) != 0)
       mismatch (expected_str, matched_name);
     return true;
-  });
+  }, per_objfile);
 
   const char *expected_str
   = expected_it == expected_end ? NULL : *expected_it++;
@@ -4197,13 +4204,15 @@ static const char *test_symbols[] = {
 static bool
 check_find_bounds_finds (mapped_index_base &index,
 			 const char *search_name,
-			 gdb::array_view<const char *> expected_syms)
+			 gdb::array_view<const char *> expected_syms,
+			 dwarf2_per_objfile *per_objfile)
 {
   lookup_name_info lookup_name (search_name,
 				symbol_name_match_type::FULL, true);
 
   auto bounds = index.find_name_components_bounds (lookup_name,
-						   language_cplus);
+						   language_cplus,
+						   per_objfile);
 
   size_t distance = std::distance (bounds.first, bounds.second);
   if (distance != expected_syms.size ())
@@ -4212,7 +4221,7 @@ check_find_bounds_finds (mapped_index_base &index,
   for (size_t exp_elem = 0; exp_elem < distance; exp_elem++)
     {
       auto nc_elem = bounds.first + exp_elem;
-      const char *qualified = index.symbol_name_at (nc_elem->idx);
+      const char *qualified = index.symbol_name_at (nc_elem->idx, per_objfile);
       if (strcmp (qualified, expected_syms[exp_elem]) != 0)
 	return false;
     }
@@ -4228,7 +4237,7 @@ test_mapped_index_find_name_component_bounds ()
 {
   mock_mapped_index mock_index (test_symbols);
 
-  mock_index.build_name_components ();
+  mock_index.build_name_components (NULL /* per_objfile */);
 
   /* Test the lower-level mapped_index::find_name_component_bounds
      method in completion mode.  */
@@ -4238,8 +4247,9 @@ test_mapped_index_find_name_component_bounds ()
       "t1_func1",
     };
 
-    SELF_CHECK (check_find_bounds_finds (mock_index,
-					 "t1_func", expected_syms));
+    SELF_CHECK (check_find_bounds_finds
+		  (mock_index, "t1_func", expected_syms,
+		   NULL /* per_objfile */));
   }
 
   /* Check that the increment-last-char in the name matching algorithm
@@ -4249,14 +4259,15 @@ test_mapped_index_find_name_component_bounds ()
       "\377",
       "\377\377123",
     };
-    SELF_CHECK (check_find_bounds_finds (mock_index,
-					 "\377", expected_syms1));
+    SELF_CHECK (check_find_bounds_finds
+		  (mock_index, "\377", expected_syms1, NULL /* per_objfile */));
 
     static const char *expected_syms2[] = {
       "\377\377123",
     };
-    SELF_CHECK (check_find_bounds_finds (mock_index,
-					 "\377\377", expected_syms2));
+    SELF_CHECK (check_find_bounds_finds
+		  (mock_index, "\377\377", expected_syms2,
+		   NULL /* per_objfile */));
   }
 }
 
@@ -4282,7 +4293,7 @@ test_dw2_expand_symtabs_matching_symbol ()
   any_mismatch |= !check_match (__FILE__, __LINE__,			\
 				mock_index,				\
 				NAME, MATCH_TYPE, COMPLETION_MODE,	\
-				EXPECTED_LIST)
+				EXPECTED_LIST, NULL)
 
   /* Identity checks.  */
   for (const char *sym : test_symbols)
@@ -4705,7 +4716,7 @@ dw2_expand_symtabs_matching
       dw2_expand_marked_cus (dwarf2_per_objfile, idx, file_matcher,
 			     expansion_notify, kind);
       return true;
-    });
+    }, dwarf2_per_objfile);
 }
 
 /* A helper for dw2_find_pc_sect_compunit_symtab which finds the most specific
@@ -5132,9 +5143,8 @@ create_cus_from_debug_names (dwarf2_per_bfd *per_bfd,
 static bool
 dwarf2_read_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile)
 {
-  std::unique_ptr<mapped_debug_names> map
-    (new mapped_debug_names (dwarf2_per_objfile));
-  mapped_debug_names dwz_map (dwarf2_per_objfile);
+  std::unique_ptr<mapped_debug_names> map (new mapped_debug_names);
+  mapped_debug_names dwz_map;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
 
   if (!read_debug_names_from_section (objfile, objfile_name (objfile),
@@ -5196,23 +5206,26 @@ public:
   dw2_debug_names_iterator (const mapped_debug_names &map,
 			    gdb::optional<block_enum> block_index,
 			    domain_enum domain,
-			    const char *name)
+			    const char *name, dwarf2_per_objfile *per_objfile)
     : m_map (map), m_block_index (block_index), m_domain (domain),
-      m_addr (find_vec_in_debug_names (map, name))
+      m_addr (find_vec_in_debug_names (map, name, per_objfile)),
+      m_per_objfile (per_objfile)
   {}
 
   dw2_debug_names_iterator (const mapped_debug_names &map,
-			    search_domain search, uint32_t namei)
+			    search_domain search, uint32_t namei, dwarf2_per_objfile *per_objfile)
     : m_map (map),
       m_search (search),
-      m_addr (find_vec_in_debug_names (map, namei))
+      m_addr (find_vec_in_debug_names (map, namei, per_objfile)),
+      m_per_objfile (per_objfile)
   {}
 
   dw2_debug_names_iterator (const mapped_debug_names &map,
 			    block_enum block_index, domain_enum domain,
-			    uint32_t namei)
+			    uint32_t namei, dwarf2_per_objfile *per_objfile)
     : m_map (map), m_block_index (block_index), m_domain (domain),
-      m_addr (find_vec_in_debug_names (map, namei))
+      m_addr (find_vec_in_debug_names (map, namei, per_objfile)),
+      m_per_objfile (per_objfile)
   {}
 
   /* Return the next matching CU or NULL if there are no more.  */
@@ -5220,9 +5233,9 @@ public:
 
 private:
   static const gdb_byte *find_vec_in_debug_names (const mapped_debug_names &map,
-						  const char *name);
+						  const char *name, dwarf2_per_objfile *per_objfile);
   static const gdb_byte *find_vec_in_debug_names (const mapped_debug_names &map,
-						  uint32_t namei);
+						  uint32_t namei, dwarf2_per_objfile *per_objfile);
 
   /* The internalized form of .debug_names.  */
   const mapped_debug_names &m_map;
@@ -5238,10 +5251,13 @@ private:
   /* The list of CUs from the index entry of the symbol, or NULL if
      not found.  */
   const gdb_byte *m_addr;
+
+  dwarf2_per_objfile *m_per_objfile;
 };
 
 const char *
-mapped_debug_names::namei_to_name (uint32_t namei) const
+mapped_debug_names::namei_to_name
+  (uint32_t namei, dwarf2_per_objfile *dwarf2_per_objfile) const
 {
   const ULONGEST namei_string_offs
     = extract_unsigned_integer ((name_table_string_offs_reordered
@@ -5258,7 +5274,7 @@ mapped_debug_names::namei_to_name (uint32_t namei) const
 
 const gdb_byte *
 dw2_debug_names_iterator::find_vec_in_debug_names
-  (const mapped_debug_names &map, const char *name)
+  (const mapped_debug_names &map, const char *name, dwarf2_per_objfile *per_objfile)
 {
   int (*cmp) (const char *, const char *);
 
@@ -5294,7 +5310,7 @@ dw2_debug_names_iterator::find_vec_in_debug_names
       complaint (_("Wrong .debug_names with name index %u but name_count=%u "
 		   "[in module %s]"),
 		 namei, map.name_count,
-		 objfile_name (map.dwarf2_per_objfile->objfile));
+		 objfile_name (per_objfile->objfile));
       return NULL;
     }
 
@@ -5309,7 +5325,7 @@ dw2_debug_names_iterator::find_vec_in_debug_names
 
       if (full_hash == namei_full_hash)
 	{
-	  const char *const namei_string = map.namei_to_name (namei);
+	  const char *const namei_string = map.namei_to_name (namei, per_objfile);
 
 #if 0 /* An expensive sanity check.  */
 	  if (namei_full_hash != dwarf5_djb_hash (namei_string))
@@ -5339,14 +5355,14 @@ dw2_debug_names_iterator::find_vec_in_debug_names
 
 const gdb_byte *
 dw2_debug_names_iterator::find_vec_in_debug_names
-  (const mapped_debug_names &map, uint32_t namei)
+  (const mapped_debug_names &map, uint32_t namei, dwarf2_per_objfile *per_objfile)
 {
   if (namei >= map.name_count)
     {
       complaint (_("Wrong .debug_names with name index %u but name_count=%u "
 		   "[in module %s]"),
 		 namei, map.name_count,
-		 objfile_name (map.dwarf2_per_objfile->objfile));
+		 objfile_name (per_objfile->objfile));
       return NULL;
     }
 
@@ -5365,8 +5381,8 @@ dw2_debug_names_iterator::next ()
   if (m_addr == NULL)
     return NULL;
 
-  struct dwarf2_per_objfile *dwarf2_per_objfile = m_map.dwarf2_per_objfile;
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
+  struct objfile *objfile = m_per_objfile->objfile;
   bfd *const abfd = objfile->obfd;
 
  again:
@@ -5429,33 +5445,33 @@ dw2_debug_names_iterator::next ()
 	{
 	case DW_IDX_compile_unit:
 	  /* Don't crash on bad data.  */
-	  if (ull >= dwarf2_per_objfile->per_bfd->all_comp_units.size ())
+	  if (ull >= m_per_objfile->per_bfd->all_comp_units.size ())
 	    {
 	      complaint (_(".debug_names entry has bad CU index %s"
 			   " [in module %s]"),
 			 pulongest (ull),
-			 objfile_name (dwarf2_per_objfile->objfile));
+			 objfile_name (objfile));
 	      continue;
 	    }
-	  per_cu = dwarf2_per_objfile->per_bfd->get_cutu (ull);
+	  per_cu = per_bfd->get_cutu (ull);
 	  break;
 	case DW_IDX_type_unit:
 	  /* Don't crash on bad data.  */
-	  if (ull >= dwarf2_per_objfile->per_bfd->all_type_units.size ())
+	  if (ull >= per_bfd->all_type_units.size ())
 	    {
 	      complaint (_(".debug_names entry has bad TU index %s"
 			   " [in module %s]"),
 			 pulongest (ull),
-			 objfile_name (dwarf2_per_objfile->objfile));
+			 objfile_name (objfile));
 	      continue;
 	    }
-	  per_cu = &dwarf2_per_objfile->per_bfd->get_tu (ull)->per_cu;
+	  per_cu = &per_bfd->get_tu (ull)->per_cu;
 	  break;
 	case DW_IDX_die_offset:
 	  /* In a per-CU index (as opposed to a per-module index), index
 	     entries without CU attribute implicitly refer to the single CU.  */
 	  if (per_cu == NULL)
-	    per_cu = dwarf2_per_objfile->per_bfd->get_cu (0);
+	    per_cu = per_bfd->get_cu (0);
 	  break;
 	case DW_IDX_GNU_internal:
 	  if (!m_map.augmentation_is_gdb)
@@ -5471,7 +5487,7 @@ dw2_debug_names_iterator::next ()
     }
 
   /* Skip if already read in.  */
-  if (dwarf2_per_objfile->symtab_set_p (per_cu))
+  if (m_per_objfile->symtab_set_p (per_cu))
     goto again;
 
   /* Check static vs global.  */
@@ -5596,7 +5612,8 @@ dw2_debug_names_lookup_symbol (struct objfile *objfile, block_enum block_index,
     }
   const auto &map = *mapp;
 
-  dw2_debug_names_iterator iter (map, block_index, domain, name);
+  dw2_debug_names_iterator iter (map, block_index, domain, name,
+				 dwarf2_per_objfile);
 
   struct compunit_symtab *stab_best = NULL;
   struct dwarf2_per_cu_data *per_cu;
@@ -5660,7 +5677,8 @@ dw2_debug_names_expand_symtabs_for_function (struct objfile *objfile,
     {
       const mapped_debug_names &map = *dwarf2_per_objfile->per_bfd->debug_names_table;
 
-      dw2_debug_names_iterator iter (map, {}, VAR_DOMAIN, func_name);
+      dw2_debug_names_iterator iter (map, {}, VAR_DOMAIN, func_name,
+				     dwarf2_per_objfile);
 
       struct dwarf2_per_cu_data *per_cu;
       while ((per_cu = iter.next ()) != NULL)
@@ -5699,14 +5717,15 @@ dw2_debug_names_map_matching_symbols
     {
       /* The name was matched, now expand corresponding CUs that were
 	 marked.  */
-      dw2_debug_names_iterator iter (map, block_kind, domain, namei);
+      dw2_debug_names_iterator iter (map, block_kind, domain, namei,
+				     dwarf2_per_objfile);
 
       struct dwarf2_per_cu_data *per_cu;
       while ((per_cu = iter.next ()) != NULL)
 	dw2_expand_symtabs_matching_one (per_cu, dwarf2_per_objfile, nullptr,
 					 nullptr);
       return true;
-    });
+    }, dwarf2_per_objfile);
 
   /* It's a shame we couldn't do this inside the
      dw2_expand_symtabs_matching_symbol callback, but that skips CUs
@@ -5764,14 +5783,14 @@ dw2_debug_names_expand_symtabs_matching
     {
       /* The name was matched, now expand corresponding CUs that were
 	 marked.  */
-      dw2_debug_names_iterator iter (map, kind, namei);
+      dw2_debug_names_iterator iter (map, kind, namei, dwarf2_per_objfile);
 
       struct dwarf2_per_cu_data *per_cu;
       while ((per_cu = iter.next ()) != NULL)
 	dw2_expand_symtabs_matching_one (per_cu, dwarf2_per_objfile,
 					 file_matcher, expansion_notify);
       return true;
-    });
+    }, dwarf2_per_objfile);
 }
 
 const struct quick_symbol_functions dwarf2_debug_names_functions =
