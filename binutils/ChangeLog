@@ -1,3 +1,9 @@
+2020-03-06  Simon Marchi  <simon.marchi@efficios.com>
+
+	PR 25491
+	* doc/Makefile.am: Rename MOSTLYCLEANFILES to MAINTAINERCLEANFILES.
+	* doc/Makefile.in: Re-generate.
+
 2020-03-06  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (check_new_section_flags): New function.  Reject the
