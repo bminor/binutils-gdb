@@ -26,9 +26,9 @@
 namespace gdb {
 
 /* Implements a binary search using C++ iterators.
-   This differs from std::binary_search in that it returns an interator for
+   This differs from std::binary_search in that it returns an iterator for
    the found element and in that the type of EL can be different from the
-   type of the elements in the countainer.
+   type of the elements in the container.
 
    COMP is a C-style comparison function with signature:
    int comp(const value_type& a, const T& b);
