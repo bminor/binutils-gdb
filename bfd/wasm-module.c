@@ -406,30 +406,33 @@ wasm_scan (bfd *abfd)
 	  if (bfdsec == NULL)
 	    goto error_return;
 
-	  bfdsec->vma = vma;
-	  bfdsec->lma = vma;
 	  bfdsec->size = wasm_read_leb128 (abfd, &error, &bytes_read, FALSE);
 	  if (error)
 	    goto error_return;
-	  bfdsec->filepos = bfd_tell (abfd);
-	  bfdsec->alignment_power = 0;
 	}
       else
 	{
 	  bfd_vma payload_len;
-	  file_ptr section_start;
 	  bfd_vma namelen;
 	  char *name;
 	  char *prefix = WASM_SECTION_PREFIX;
 	  size_t prefixlen = strlen (prefix);
+	  ufile_ptr filesize;
 
 	  payload_len = wasm_read_leb128 (abfd, &error, &bytes_read, FALSE);
 	  if (error)
 	    goto error_return;
-	  section_start = bfd_tell (abfd);
 	  namelen = wasm_read_leb128 (abfd, &error, &bytes_read, FALSE);
-	  if (error || namelen > payload_len)
+	  if (error || bytes_read > payload_len
+	      || namelen > payload_len - bytes_read)
 	    goto error_return;
+	  payload_len -= namelen + bytes_read;
+	  filesize = bfd_get_file_size (abfd);
+	  if (filesize != 0 && namelen > filesize)
+	    {
+	      bfd_set_error (bfd_error_file_truncated);
+	      return FALSE;
+	    }
 	  name = bfd_alloc (abfd, namelen + prefixlen + 1);
 	  if (!name)
 	    goto error_return;
@@ -443,13 +446,13 @@ wasm_scan (bfd *abfd)
 	  if (bfdsec == NULL)
 	    goto error_return;
 
-	  bfdsec->vma = vma;
-	  bfdsec->lma = vma;
-	  bfdsec->filepos = bfd_tell (abfd);
-	  bfdsec->size = section_start + payload_len - bfdsec->filepos;
-	  bfdsec->alignment_power = 0;
+	  bfdsec->size = payload_len;
 	}
 
+      bfdsec->vma = vma;
+      bfdsec->lma = vma;
+      bfdsec->alignment_power = 0;
+      bfdsec->filepos = bfd_tell (abfd);
       if (bfdsec->size != 0)
 	{
 	  bfdsec->contents = _bfd_alloc_and_read (abfd, bfdsec->size,
