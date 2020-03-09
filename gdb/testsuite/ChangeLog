@@ -1,3 +1,7 @@
+2020-03-09  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (cached_file): Create cache dir.
+
 2020-03-07  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.cp/ref-params.exp: Compare build_executable result with -1.

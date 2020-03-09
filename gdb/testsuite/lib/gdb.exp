@@ -4958,6 +4958,9 @@ proc cached_file { filename txt {executable 0}} {
 	return $filename
     }
 
+    set dir [file dirname $filename]
+    file mkdir $dir
+
     set tmp_filename $filename.[pid]
     set fd [open $tmp_filename w]
     puts $fd $txt
