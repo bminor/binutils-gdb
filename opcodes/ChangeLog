@@ -1,5 +1,11 @@
 2020-03-09  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-opc.tbl (xop_elem, xop_irel, xop_sign): New. Use them for XOP vpcom*,
+	vprot*, vpsha*, and vpshl*.
+	* i386-tbl.h: Re-generate.
+
+2020-03-09  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-opc.tbl (avx_frel): New. Use it for AVX/AVX512 vcmpps,
 	vcmpss, vcmppd, and vcmpsd 3-operand pseudo-ops.
 	* i386-tbl.h: Re-generate.
