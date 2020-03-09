@@ -66,6 +66,9 @@ set test_flags {"" "strip" "--static" "-Wl,--traditional-format"
 if { [istarget "powerpc-*-*"] } {
     lappend test_flags "-Wl,--ppc476-workaround"
 }
+if { [is_elf_format] && ![is_bad_symtab] } {
+    lappend test_flags "-Wl,-z,nosectionheader"
+}
 
 set gcc_B_opt_save $gcc_B_opt
 
@@ -94,9 +97,12 @@ foreach flags $test_flags {
 	set testname "bootstrap"
     }}
 
-    # --static is meaningless and --relax is incompatible with -r.
+    # --static is meaningless.  --relax and -z nosectionheader are
+    # incompatible with -r.
     regsub -- "-Wl," $flags "" partial_flags
-    if { "$partial_flags" == "--static" || "$partial_flags" == "--relax" } {
+    if { "$partial_flags" == "--static" \
+	 || "$partial_flags" == "--relax" \
+	 || [string match "*nosectionheader*" "$partial_flags"] } {
 	set partial_flags ""
     }
 
