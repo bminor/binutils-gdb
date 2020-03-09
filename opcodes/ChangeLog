@@ -1,3 +1,13 @@
+2020-03-09  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-gen.c (struct template_arg, struct template_instance,
+	struct template_param, struct template, templates,
+	parse_template, expand_templates): New.
+	(process_i386_opcodes): Various local variables moved to
+	expand_templates. Call parse_template and expand_templates.
+	* i386-opc.tbl (cc): New. Use it for Jcc, SETcc, and CMOVcc.
+	* i386-tbl.h: Re-generate.
+
 2020-03-06  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (vcvtdq2pd, vcvtps2pd, vcvtudq2pd, vcvtps2ph,

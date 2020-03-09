@@ -740,6 +740,31 @@ static const char *filename;
 static i386_cpu_flags active_cpu_flags;
 static int active_isstring;
 
+struct template_arg {
+  const struct template_arg *next;
+  const char *val;
+};
+
+struct template_instance {
+  const struct template_instance *next;
+  const char *name;
+  const struct template_arg *args;
+};
+
+struct template_param {
+  const struct template_param *next;
+  const char *name;
+};
+
+struct template {
+  const struct template *next;
+  const char *name;
+  const struct template_instance *instances;
+  const struct template_param *params;
+};
+
+static const struct template *templates;
+
 static int
 compare (const void *x, const void *y)
 {
@@ -1374,25 +1399,254 @@ opcode_hash_eq (const void *p, const void *q)
 }
 
 static void
+parse_template (char *buf, int lineno)
+{
+  char sep, *end, *name;
+  struct template *tmpl = xmalloc (sizeof (*tmpl));
+  struct template_instance *last_inst = NULL;
+
+  buf = remove_leading_whitespaces (buf + 1);
+  end = strchr (buf, ':');
+  if (end == NULL)
+    fail ("%s: %d: missing ':'\n", filename, lineno);
+  *end++ = '\0';
+  remove_trailing_whitespaces (buf);
+
+  if (*buf == '\0')
+    fail ("%s: %d: missing template identifier\n", filename, lineno);
+  tmpl->name = xstrdup (buf);
+
+  tmpl->params = NULL;
+  do {
+      struct template_param *param;
+
+      buf = remove_leading_whitespaces (end);
+      end = strpbrk (buf, ":,");
+      if (end == NULL)
+        fail ("%s: %d: missing ':' or ','\n", filename, lineno);
+
+      sep = *end;
+      *end++ = '\0';
+      remove_trailing_whitespaces (buf);
+
+      param = xmalloc (sizeof (*param));
+      param->name = xstrdup (buf);
+      param->next = tmpl->params;
+      tmpl->params = param;
+  } while (sep == ':');
+
+  tmpl->instances = NULL;
+  do {
+      struct template_instance *inst;
+      char *cur, *next;
+      const struct template_param *param;
+
+      buf = remove_leading_whitespaces (end);
+      end = strpbrk (buf, ",>");
+      if (end == NULL)
+        fail ("%s: %d: missing ',' or '>'\n", filename, lineno);
+
+      sep = *end;
+      *end++ = '\0';
+
+      inst = xmalloc (sizeof (*inst));
+
+      cur = next_field (buf, ':', &next, end);
+      inst->name = xstrdup (cur);
+
+      for (param = tmpl->params; param; param = param->next)
+	{
+	  struct template_arg *arg = xmalloc (sizeof (*arg));
+
+	  cur = next_field (next, ':', &next, end);
+	  if (next > end)
+	    fail ("%s: %d: missing argument for '%s'\n", filename, lineno, param->name);
+	  arg->val = xstrdup (cur);
+	  arg->next = inst->args;
+	  inst->args = arg;
+	}
+
+      if (tmpl->instances)
+	last_inst->next = inst;
+      else
+	tmpl->instances = inst;
+      last_inst = inst;
+  } while (sep == ',');
+
+  buf = remove_leading_whitespaces (end);
+  if (*buf)
+    fprintf(stderr, "%s: %d: excess characters '%s'\n",
+	    filename, lineno, buf);
+
+  tmpl->next = templates;
+  templates = tmpl;
+}
+
+static unsigned int
+expand_templates (char *name, const char *str, htab_t opcode_hash_table,
+		  struct opcode_hash_entry ***opcode_array_p, int lineno)
+{
+  static unsigned int idx, opcode_array_size;
+  struct opcode_hash_entry **opcode_array = *opcode_array_p;
+  struct opcode_hash_entry **hash_slot, **entry;
+  char *ptr1 = strchr(name, '<'), *ptr2;
+
+  if (ptr1 == NULL)
+    {
+      /* Get the slot in hash table.  */
+      hash_slot = (struct opcode_hash_entry **)
+	htab_find_slot_with_hash (opcode_hash_table, name,
+				  htab_hash_string (name),
+				  INSERT);
+
+      if (*hash_slot == NULL)
+	{
+	  /* It is the new one.  Put it on opcode array.  */
+	  if (idx >= opcode_array_size)
+	    {
+	      /* Grow the opcode array when needed.  */
+	      opcode_array_size += 1024;
+	      opcode_array = (struct opcode_hash_entry **)
+		xrealloc (opcode_array,
+			  sizeof (*opcode_array) * opcode_array_size);
+		*opcode_array_p = opcode_array;
+	    }
+
+	  opcode_array[idx] = (struct opcode_hash_entry *)
+	    xmalloc (sizeof (struct opcode_hash_entry));
+	  opcode_array[idx]->next = NULL;
+	  opcode_array[idx]->name = xstrdup (name);
+	  opcode_array[idx]->opcode = xstrdup (str);
+	  opcode_array[idx]->lineno = lineno;
+	  *hash_slot = opcode_array[idx];
+	  idx++;
+	}
+      else
+	{
+	  /* Append it to the existing one.  */
+	  entry = hash_slot;
+	  while ((*entry) != NULL)
+	    entry = &(*entry)->next;
+	  *entry = (struct opcode_hash_entry *)
+	    xmalloc (sizeof (struct opcode_hash_entry));
+	  (*entry)->next = NULL;
+	  (*entry)->name = (*hash_slot)->name;
+	  (*entry)->opcode = xstrdup (str);
+	  (*entry)->lineno = lineno;
+	}
+    }
+  else if ((ptr2 = strchr(ptr1 + 1, '>')) == NULL)
+    fail ("%s: %d: missing '>'\n", filename, lineno);
+  else
+    {
+      const struct template *tmpl;
+      const struct template_instance *inst;
+
+      *ptr1 = '\0';
+      ptr1 = remove_leading_whitespaces (ptr1 + 1);
+      remove_trailing_whitespaces (ptr1);
+
+      *ptr2++ = '\0';
+
+      for ( tmpl = templates; tmpl; tmpl = tmpl->next )
+	if (!strcmp(ptr1, tmpl->name))
+	  break;
+      if (!tmpl)
+	fail ("reference to unknown template '%s'\n", ptr1);
+
+      for (inst = tmpl->instances; inst; inst = inst->next)
+	{
+	  char *name2 = xmalloc(strlen(name) + strlen(inst->name) + strlen(ptr2) + 1);
+	  char *str2 = xmalloc(2 * strlen(str));
+	  const char *src;
+
+	  strcpy (name2, name);
+	  strcat (name2, inst->name);
+	  strcat (name2, ptr2);
+
+	  for (ptr1 = str2, src = str; *src; )
+	    {
+	      const char *ident = tmpl->name, *end;
+	      const struct template_param *param;
+	      const struct template_arg *arg;
+
+	      if ((*ptr1 = *src++) != '<')
+		{
+		  ++ptr1;
+		  continue;
+		}
+	      while (ISSPACE(*src))
+		++src;
+	      while (*ident && *src == *ident)
+		++src, ++ident;
+	      while (ISSPACE(*src))
+		++src;
+	      if (*src != ':' || *ident != '\0')
+		{
+		  memcpy (++ptr1, tmpl->name, ident - tmpl->name);
+		  ptr1 += ident - tmpl->name;
+		  continue;
+		}
+	      while (ISSPACE(*++src))
+		;
+
+	      end = src;
+	      while (*end != '\0' && !ISSPACE(*end) && *end != '>')
+		++end;
+
+	      for (param = tmpl->params, arg = inst->args; param;
+		   param = param->next, arg = arg->next)
+		{
+		  if (end - src == strlen (param->name)
+		      && !memcmp (src, param->name, end - src))
+		    {
+		      src = end;
+		      break;
+		    }
+		}
+
+	      if (param == NULL)
+		fail ("template '%s' has no parameter '%.*s'\n",
+		      tmpl->name, (int)(end - src), src);
+
+	      while (ISSPACE(*src))
+		++src;
+	      if (*src != '>')
+		fail ("%s: %d: missing '>'\n", filename, lineno);
+
+	      memcpy(ptr1, arg->val, strlen(arg->val));
+	      ptr1 += strlen(arg->val);
+	      ++src;
+	    }
+
+	  *ptr1 = '\0';
+
+	  expand_templates (name2, str2, opcode_hash_table, opcode_array_p,
+			    lineno);
+
+	  free (str2);
+	  free (name2);
+	}
+    }
+
+  return idx;
+}
+
+static void
 process_i386_opcodes (FILE *table)
 {
   FILE *fp;
   char buf[2048];
   unsigned int i, j;
   char *str, *p, *last, *name;
-  struct opcode_hash_entry **hash_slot, **entry, *next;
   htab_t opcode_hash_table;
-  struct opcode_hash_entry **opcode_array;
-  unsigned int opcode_array_size = 1024;
+  struct opcode_hash_entry **opcode_array = NULL;
   int lineno = 0, marker = 0;
 
   filename = "i386-opc.tbl";
   fp = stdin;
 
   i = 0;
-  opcode_array = (struct opcode_hash_entry **)
-    xmalloc (sizeof (*opcode_array) * opcode_array_size);
-
   opcode_hash_table = htab_create_alloc (16, opcode_hash_hash,
 					 opcode_hash_eq, NULL,
 					 xcalloc, free);
@@ -1444,6 +1698,9 @@ process_i386_opcodes (FILE *table)
 	case '\0':
 	  continue;
 	  break;
+	case '<':
+	  parse_template (p, lineno);
+	  continue;
 	default:
 	  if (!marker)
 	    continue;
@@ -1455,51 +1712,15 @@ process_i386_opcodes (FILE *table)
       /* Find name.  */
       name = next_field (p, ',', &str, last);
 
-      /* Get the slot in hash table.  */
-      hash_slot = (struct opcode_hash_entry **)
-	htab_find_slot_with_hash (opcode_hash_table, name,
-				  htab_hash_string (name),
-				  INSERT);
-
-      if (*hash_slot == NULL)
-	{
-	  /* It is the new one.  Put it on opcode array.  */
-	  if (i >= opcode_array_size)
-	    {
-	      /* Grow the opcode array when needed.  */
-	      opcode_array_size += 1024;
-	      opcode_array = (struct opcode_hash_entry **)
-		xrealloc (opcode_array,
-			  sizeof (*opcode_array) * opcode_array_size);
-	    }
-
-	  opcode_array[i] = (struct opcode_hash_entry *)
-	    xmalloc (sizeof (struct opcode_hash_entry));
-	  opcode_array[i]->next = NULL;
-	  opcode_array[i]->name = xstrdup (name);
-	  opcode_array[i]->opcode = xstrdup (str);
-	  opcode_array[i]->lineno = lineno;
-	  *hash_slot = opcode_array[i];
-	  i++;
-	}
-      else
-	{
-	  /* Append it to the existing one.  */
-	  entry = hash_slot;
-	  while ((*entry) != NULL)
-	    entry = &(*entry)->next;
-	  *entry = (struct opcode_hash_entry *)
-	    xmalloc (sizeof (struct opcode_hash_entry));
-	  (*entry)->next = NULL;
-	  (*entry)->name = (*hash_slot)->name;
-	  (*entry)->opcode = xstrdup (str);
-	  (*entry)->lineno = lineno;
-	}
+      i = expand_templates (name, str, opcode_hash_table, &opcode_array,
+			    lineno);
     }
 
   /* Process opcode array.  */
   for (j = 0; j < i; j++)
     {
+      struct opcode_hash_entry *next;
+
       for (next = opcode_array[j]; next; next = next->next)
 	{
 	  name = next->name;
