@@ -11428,7 +11428,7 @@ get_dynamic_data (Filedata * filedata, bfd_size_type number, unsigned int ent_si
       return NULL;
     }
 
-  /* Be kind to memory chekers (eg valgrind, address sanitizer) by not
+  /* Be kind to memory checkers (eg valgrind, address sanitizer) by not
      attempting to allocate memory when the read is bound to fail.  */
   if (ent_size * number > filedata->file_size)
     {

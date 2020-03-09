@@ -1,3 +1,8 @@
+2020-03-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (get_dynamic_data): Replace "memory chekers" with
+	"memory checkers" in comments.
+
 2020-03-06  Simon Marchi  <simon.marchi@efficios.com>
 
 	PR 25491
