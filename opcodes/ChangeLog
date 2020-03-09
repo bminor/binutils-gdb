@@ -1,5 +1,12 @@
 2020-03-09  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-gen.c (set_bitfield): Ignore zero-length field names.
+	* i386-opc.tbl (sse_frel): New. Use it for SSE/SSE2 cmpps,
+	cmpss, cmppd, and cmpsd 2-operand pseudo-ops.
+	* i386-tbl.h: Re-generate.
+
+2020-03-09  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-gen.c (struct template_arg, struct template_instance,
 	struct template_param, struct template, templates,
 	parse_template, expand_templates): New.

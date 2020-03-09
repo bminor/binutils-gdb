@@ -896,6 +896,10 @@ set_bitfield (char *f, bitfield *array, int value,
 {
   unsigned int i;
 
+  /* Ignore empty fields; they may result from template expansions.  */
+  if (*f == '\0')
+    return;
+
   if (strcmp (f, "CpuFP") == 0)
     {
       set_bitfield("Cpu387", array, value, size, lineno);
