@@ -1,3 +1,9 @@
+2020-03-09  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/avx.s: Add long-form VCMP[PS][SD] pseudos.
+	* testsuite/gas/i386/avx.d, testsuite/gas/i386/avx-16bit.d,
+	testsuite/gas/i386/avx-intel.d: Adjust expectations.
+
 2020-03-07  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/elf/dwarf-5-file0.s: Don't start directives in
