@@ -1,3 +1,8 @@
+2020-03-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am ($(srcdir)/i386-init.h): Also pass -P to $(CPP).
+	* Makefile.in: Regenerated.
+
 2020-03-09  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.tbl (avx_irel): New. Use is for AVX512 vpcmp*
