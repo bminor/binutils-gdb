@@ -1,3 +1,9 @@
+2020-03-03  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/25650
+	* gdb.base/printcmds.exp: Add test to verify printf of a
+	variable holding an address.
+
 2020-02-07  Tom Tromey  <tromey@adacore.com>
 
 	PR breakpoints/24915:

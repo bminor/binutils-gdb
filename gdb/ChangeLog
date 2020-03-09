@@ -1,3 +1,9 @@
+2020-03-03  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/25650
+	* printcmd.c (print_c_string): Check also for TYPE_CODE_PTR
+	when verifying if dealing with a convenience variable.
+
 2020-02-22  Eli Zaretskii  <eliz@gnu.org>
 
 	PRE gdb/25586:

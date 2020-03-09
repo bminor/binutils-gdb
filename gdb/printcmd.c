@@ -2260,7 +2260,8 @@ printf_c_string (struct ui_file *stream, const char *format,
 {
   const gdb_byte *str;
 
-  if (VALUE_LVAL (value) == lval_internalvar
+  if (TYPE_CODE (value_type (value)) != TYPE_CODE_PTR
+      && VALUE_LVAL (value) == lval_internalvar
       && c_is_string_type_p (value_type (value)))
     {
       size_t len = TYPE_LENGTH (value_type (value));
