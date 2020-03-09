@@ -7091,7 +7091,7 @@ dump_ia64_vms_dynamic_fixups (Filedata *                  filedata,
   const char * lib_name;
 
   imfs = get_data (NULL, filedata, dynamic_addr + fixup->fixup_rela_off,
-		   1, fixup->fixup_rela_cnt * sizeof (*imfs),
+		   sizeof (*imfs), fixup->fixup_rela_cnt,
 		   _("dynamic section image fixups"));
   if (!imfs)
     return FALSE;
@@ -7140,7 +7140,7 @@ dump_ia64_vms_dynamic_relocs (Filedata * filedata, struct ia64_vms_dynimgrela *i
   long i;
 
   imrs = get_data (NULL, filedata, dynamic_addr + imgrela->img_rela_off,
-		   1, imgrela->img_rela_cnt * sizeof (*imrs),
+		   sizeof (*imrs), imgrela->img_rela_cnt,
 		   _("dynamic section image relocations"));
   if (!imrs)
     return FALSE;
@@ -10898,9 +10898,9 @@ process_version_sections (Filedata * filedata)
 	    off = offset_from_vma (filedata,
 				   version_info[DT_VERSIONTAGIDX (DT_VERSYM)],
 				   total * sizeof (short));
-	    edata = (unsigned char *) get_data (NULL, filedata, off, total,
-                                                sizeof (short),
-                                                _("version symbol data"));
+	    edata = (unsigned char *) get_data (NULL, filedata, off,
+						sizeof (short), total,
+						_("version symbol data"));
 	    if (!edata)
 	      {
 		free (strtab);
@@ -16639,9 +16639,9 @@ process_mips_specific (Filedata * filedata)
       size_t cnt;
 
       elib = (Elf32_External_Lib *) get_data (NULL, filedata, liblist_offset,
-                                              liblistno,
-                                              sizeof (Elf32_External_Lib),
-                                              _("liblist section data"));
+					      sizeof (Elf32_External_Lib),
+					      liblistno,
+					      _("liblist section data"));
       if (elib)
 	{
 	  printf (ngettext ("\nSection '.liblist' contains %lu entry:\n",
@@ -17008,8 +17008,8 @@ process_mips_specific (Filedata * filedata)
 	  Elf32_External_Conflict * econf32;
 
 	  econf32 = (Elf32_External_Conflict *)
-              get_data (NULL, filedata, conflicts_offset, conflictsno,
-                        sizeof (* econf32), _("conflict"));
+	    get_data (NULL, filedata, conflicts_offset,
+		      sizeof (*econf32), conflictsno, _("conflict"));
 	  if (!econf32)
 	    return FALSE;
 
@@ -17023,8 +17023,8 @@ process_mips_specific (Filedata * filedata)
 	  Elf64_External_Conflict * econf64;
 
 	  econf64 = (Elf64_External_Conflict *)
-              get_data (NULL, filedata, conflicts_offset, conflictsno,
-                        sizeof (* econf64), _("conflict"));
+	    get_data (NULL, filedata, conflicts_offset,
+		      sizeof (*econf64), conflictsno, _("conflict"));
 	  if (!econf64)
 	    return FALSE;
 

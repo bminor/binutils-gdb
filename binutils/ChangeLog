@@ -1,3 +1,13 @@
+2020-03-09  Alan Modra  <amodra@gmail.com>
+
+	PR 25645
+	* readelf.c (dump_ia64_vms_dynamic_fixups): Pass size and nmemb
+	to get_data rather than multiplying.
+	(dump_ia64_vms_dynamic_relocs): Likewise.
+	(process_version_sections): Correct order of size and nmemb args
+	in get_data call.
+	(process_mips_specific): Likewise.
+
 2020-03-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (get_dynamic_data): Replace "memory chekers" with
