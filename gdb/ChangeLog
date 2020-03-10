@@ -1,3 +1,8 @@
+2020-03-11  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/loc.c (dwarf2_evaluate_property): Handle NULL frame in
+	PROP_LOCLIST handling code.
+
 2020-03-10  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* buildsym-legacy.c (record_line): Pass extra parameter to

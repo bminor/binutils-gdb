@@ -2511,10 +2511,14 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
       {
 	struct dwarf2_property_baton *baton
 	  = (struct dwarf2_property_baton *) prop->data.baton;
-	CORE_ADDR pc = get_frame_address_in_block (frame);
+	CORE_ADDR pc;
 	const gdb_byte *data;
 	struct value *val;
 	size_t size;
+
+	if (frame == NULL
+	    || !get_frame_address_in_block_if_available (frame, &pc))
+	  return false;
 
 	data = dwarf2_find_location_expression (&baton->loclist, &size, pc);
 	if (data != NULL)
