@@ -1865,13 +1865,13 @@ elf_orphan_compatible (asection *in, asection *out)
   if (elf_section_data (out)->this_hdr.sh_info
       != elf_section_data (in)->this_hdr.sh_info)
     return FALSE;
-  /* We can't merge with member of output section group nor merge two
-     sections with differing SHF_EXCLUDE when doing a relocatable link.
-   */
+  /* We can't merge with a member of an output section group or merge
+     two sections with differing SHF_EXCLUDE or other processor and OS
+     specific flags when doing a relocatable link.  */
   if (bfd_link_relocatable (&link_info)
       && (elf_next_in_group (out) != NULL
 	  || ((elf_section_flags (out) ^ elf_section_flags (in))
-	      & SHF_EXCLUDE) != 0))
+	      & (SHF_MASKPROC | SHF_MASKOS)) != 0))
     return FALSE;
   return _bfd_elf_match_sections_by_type (link_info.output_bfd, out,
 					  in->owner, in);

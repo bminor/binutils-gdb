@@ -1,3 +1,8 @@
+2020-03-11  Alan Modra  <amodra@gmail.com>
+
+	* ldelf.c (elf_orphan_compatible): Return false when two sections
+	have differing SHF_MASKPROC or SHF_MASKOS flags.
+
 2020-03-05  Alan Modra  <amodra@gmail.com>
 
 	PR 25570
