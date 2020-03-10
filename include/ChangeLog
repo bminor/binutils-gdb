@@ -1,3 +1,9 @@
+2020-03-10  Alan Modra  <amodra@gmail.com>
+
+	* som/aout.h (SOM_AUX_ID_MANDATORY, SOM_SPACE_IS_LOADABLE),
+	(SOM_SYMBOL_HIDDEN, SOM_SYMBOL_HAS_LONG_RETURN): Use 1u << 31.
+	* som/lst.h (LST_SYMBOL_HIDDEN): Likewise.
+
 2020-03-03  Luis Machado  <luis.machado@linaro.org>
 
 	* elf/common.h (AT_L1I_CACHESIZE, AT_L1I_CACHEGEOMETRY)
