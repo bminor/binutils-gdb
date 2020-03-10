@@ -3166,7 +3166,7 @@ get_operand_value (struct csky_opcode_info *op,
     case OPRND_TYPE_IMM5b_1_31:
       return is_imm_over_range (oper, 1, 31, -1);
     case OPRND_TYPE_IMM5b_POWER:
-      if (is_imm_over_range (oper, 1, ~(1 << 31), 1 << 31))
+      if (is_imm_over_range (oper, 1, (1u << 31) - 1, 1u << 31))
 	{
 	  int log;
 	  int val = csky_insn.val[csky_insn.idx - 1];
@@ -3179,7 +3179,7 @@ get_operand_value (struct csky_opcode_info *op,
 
       /* This type for "mgeni" in csky v1 ISA.  */
       case OPRND_TYPE_IMM5b_7_31_POWER:
-	if (is_imm_over_range (oper, 1, ~(1 << 31), 1 << 31))
+	if (is_imm_over_range (oper, 1, (1u << 31) - 1, 1u << 31))
 	  {
 	    int log;
 	    int val = csky_insn.val[csky_insn.idx - 1];

@@ -5278,8 +5278,8 @@ nds32_elf_sethi_range (struct nds32_relocs_pattern *pattern)
    not, optimize option, 16 bit instruction is enable.  */
 
 #define SET_ADDEND(size, convertible, optimize, insn16_on) \
-  (((size) & 0xff) | ((convertible) ? 1 << 31 : 0) \
-   | ((optimize) ? 1<< 30 : 0) | (insn16_on ? 1 << 29 : 0))
+  (((size) & 0xff) | ((convertible) ? 1u << 31 : 0) \
+   | ((optimize) ? 1 << 30 : 0) | (insn16_on ? 1 << 29 : 0))
 #define MAC_COMBO (E_NDS32_HAS_FPU_MAC_INST|E_NDS32_HAS_MAC_DX_INST)
 
 static void

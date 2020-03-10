@@ -4778,7 +4778,7 @@ gpr_read_mask (const struct mips_cl_insn *ip)
   if (pinfo2 & INSN2_READ_SP)
     mask |= 1 << SP;
   if (pinfo2 & INSN2_READ_GPR_31)
-    mask |= 1 << 31;
+    mask |= 1u << 31;
   /* Don't include register 0.  */
   return mask & ~1;
 }
@@ -4797,7 +4797,7 @@ gpr_write_mask (const struct mips_cl_insn *ip)
   if (pinfo & INSN_WRITE_GPR_24)
     mask |= 1 << 24;
   if (pinfo & INSN_WRITE_GPR_31)
-    mask |= 1 << 31;
+    mask |= 1u << 31;
   if (pinfo & INSN_UDI)
     /* UDI instructions have traditionally been assumed to write to RD.  */
     mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RD, *ip);

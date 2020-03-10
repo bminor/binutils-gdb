@@ -2710,7 +2710,7 @@ nios2_assemble_arg_R (const char *token, nios2_insn_infoS *insn)
 	  mask = (reglist & 0x00ffc000) >> 14;
 	  if (reglist & (1 << 28))
 	    mask |= 1 << 10;
-	  if (reglist & (1 << 31))
+	  if (reglist & (1u << 31))
 	    mask |= 1 << 11;
 	}
       insn->insn_code |= SET_IW_F1X4L17_REGMASK (mask);
