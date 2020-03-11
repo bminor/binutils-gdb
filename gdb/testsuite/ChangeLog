@@ -1,3 +1,7 @@
+2020-03-11  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.btrace/reconnect.exp: Allow source line pattern after stepi.
+
 2020-03-11  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.dwarf2/variant.exp: Mark discriminants as artificial.
