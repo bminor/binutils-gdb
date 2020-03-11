@@ -73,5 +73,6 @@ foreach_with_prefix sysroot { "local" "remote" } {
 
     # Test that we can stop inside a library.
     gdb_breakpoint printf
-    gdb_test "continue" "Breakpoint $decimal.* printf .*" "continue to printf"
+    gdb_test "continue" "Breakpoint $decimal.* (__)?printf .*" \
+	"continue to printf"
 }
