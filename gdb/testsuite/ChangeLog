@@ -1,3 +1,7 @@
+2020-03-11  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.dwarf2/variant.exp: Mark discriminants as artificial.
+
 2020-03-11  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/foll-fork.exp: Allow "Reading in symbols" messages.
