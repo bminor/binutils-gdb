@@ -584,7 +584,7 @@ ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
 	    }
 
 	  /* Already present?  Nothing to do.  */
-	  if (dvd && dvd->dvd_type == type)
+	  if (dvd && dvd->dvd_type == dst_type)
 	    return 0;
 	}
     }

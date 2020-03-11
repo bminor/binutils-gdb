@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-link.c (ctf_link_one_variable): Check the dst_type for
+	conflicts, not the source type.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_file_t): Improve comments.
 	<ctf_link_cu_mapping>: Split into...
 	<ctf_link_in_cu_mapping>: ... this...
