@@ -1,3 +1,12 @@
+2020-03-11  Alan Modra  <amodra@gmail.com>
+
+	PR 25651
+	* objcopy.c (copy_object): Test "gaps" not gap_fill_set or
+	pad_to_set on second block of code dealing with padding.
+	Replace "c" with "num_sec" and don't recalculate number of
+	sections on second block.  Size arrays using sizeof (element)
+	rather than sizeof (element type).
+
 2020-03-10  Alan Modra  <amodra@gmail.com>
 
 	* objdump.c (disassemble_section): Don't call qsort unless

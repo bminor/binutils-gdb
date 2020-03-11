@@ -2596,7 +2596,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
   void *dhandle;
   enum bfd_architecture iarch;
   unsigned int imach;
-  unsigned int c, i;
+  unsigned int num_sec, i;
 
   if (ibfd->xvec->byteorder != obfd->xvec->byteorder
       && ibfd->xvec->byteorder != BFD_ENDIAN_UNKNOWN
@@ -3101,8 +3101,8 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	}
     }
 
-  c = bfd_count_sections (obfd);
-  if (c != 0
+  num_sec = bfd_count_sections (obfd);
+  if (num_sec != 0
       && (gap_fill_set || pad_to_set))
     {
       asection **set;
@@ -3113,18 +3113,18 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	 increasing the section sizes as required to fill the gaps.
 	 We write out the gap contents below.  */
 
-      osections = (asection **) xmalloc (c * sizeof (asection *));
+      osections = xmalloc (num_sec * sizeof (*osections));
       set = osections;
       bfd_map_over_sections (obfd, get_sections, &set);
 
-      qsort (osections, c, sizeof (asection *), compare_section_lma);
+      qsort (osections, num_sec, sizeof (*osections), compare_section_lma);
 
-      gaps = (bfd_size_type *) xmalloc (c * sizeof (bfd_size_type));
-      memset (gaps, 0, c * sizeof (bfd_size_type));
+      gaps = xmalloc (num_sec * sizeof (*gaps));
+      memset (gaps, 0, num_sec * sizeof (*gaps));
 
       if (gap_fill_set)
 	{
-	  for (i = 0; i < c - 1; i++)
+	  for (i = 0; i < num_sec - 1; i++)
 	    {
 	      flagword flags;
 	      bfd_size_type size;           /* Octets.  */
@@ -3161,22 +3161,22 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	{
 	  bfd_vma lma;         /* Octets.  */
 	  bfd_size_type size;  /* Octets.  */
-	  unsigned int opb = bfd_octets_per_byte (obfd, osections[c - 1]);
+	  unsigned int opb = bfd_octets_per_byte (obfd, osections[num_sec - 1]);
 	  bfd_vma _pad_to = pad_to * opb;
 
-	  lma = bfd_section_lma (osections[c - 1]) * opb;
-	  size = bfd_section_size (osections[c - 1]);
+	  lma = bfd_section_lma (osections[num_sec - 1]) * opb;
+	  size = bfd_section_size (osections[num_sec - 1]);
 	  if (lma + size < _pad_to)
 	    {
-	      if (!bfd_set_section_size (osections[c - 1], _pad_to - lma))
+	      if (!bfd_set_section_size (osections[num_sec - 1], _pad_to - lma))
 		{
-		  bfd_nonfatal_message (NULL, obfd, osections[c - 1],
+		  bfd_nonfatal_message (NULL, obfd, osections[num_sec - 1],
 					_("can't add padding"));
 		  status = 1;
 		}
 	      else
 		{
-		  gaps[c - 1] = _pad_to - (lma + size);
+		  gaps[num_sec - 1] = _pad_to - (lma + size);
 		  if (max_gap < _pad_to - (lma + size))
 		    max_gap = _pad_to - (lma + size);
 		}
@@ -3376,7 +3376,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	}
     }
 
-  if (gap_fill_set || pad_to_set)
+  if (gaps != NULL)
     {
       bfd_byte *buf;
 
@@ -3386,8 +3386,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       buf = (bfd_byte *) xmalloc (max_gap);
       memset (buf, gap_fill, max_gap);
 
-      c = bfd_count_sections (obfd);
-      for (i = 0; i < c; i++)
+      for (i = 0; i < num_sec; i++)
 	{
 	  if (gaps[i] != 0)
 	    {
