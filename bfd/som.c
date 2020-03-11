@@ -2197,6 +2197,9 @@ setup_sections (bfd *abfd,
 	  som_swap_subspace_dictionary_in (&ext_subspace, &subspace);
 
 	  /* Setup the subspace name string.  */
+	  if (subspace.name >= file_hdr->space_strings_size)
+	    goto error_return;
+
 	  subspace_name = subspace.name + space_strings;
 
 	  amt = strlen (subspace_name) + 1;

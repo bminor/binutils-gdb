@@ -1,5 +1,9 @@
 2020-03-11  Alan Modra  <amodra@gmail.com>
 
+	* som.c (setup_sections): Sanity check subspace.name.
+
+2020-03-11  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_inline_plt): Do increment rel in for loop.
 
 2020-03-10  Alan Modra  <amodra@gmail.com>
