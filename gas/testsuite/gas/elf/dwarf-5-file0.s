@@ -1,17 +1,23 @@
+	.section	.debug_info,"",%progbits
+	.4byte	0x8a
+	.2byte  0x2
+	.4byte	.Ldebug_abbrev0
+	.byte	0x4
+	.uleb128 0x1
+
+	.file 0 "master directory/master source file"
+	.line 1
 	.text
+	.word 0
 
- .file 0
- .line 1
-	.long 3
+	.file 1 "secondary directory/secondary source file"
+	.line 2
+	.word 2
 
- .file 1 "asdf"
- .line 2
-	.long 5
+	.file "master source file"
+	.line 4
+	.word 4
 
- .file 0
- .line 4
-	.long 3
-
- .file 2 "def"
- .line 5
-	.long 3
+	.file 2 "/tmp" "foo.c" md5 0x95828e8bc4f7404dbf7526fb7bd0f192
+	.line 5
+	.word 6

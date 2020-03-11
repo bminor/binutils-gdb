@@ -30,6 +30,7 @@
 
 #include "as.h"
 #include "safe-ctype.h"
+#include "bignum.h"
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
@@ -81,11 +82,11 @@
 #endif
 
 #ifndef DWARF2_FILE_TIME_NAME
-#define DWARF2_FILE_TIME_NAME(FILENAME,DIRNAME) 0
+#define DWARF2_FILE_TIME_NAME(FILENAME,DIRNAME) -1
 #endif
 
 #ifndef DWARF2_FILE_SIZE_NAME
-#define DWARF2_FILE_SIZE_NAME(FILENAME,DIRNAME) 0
+#define DWARF2_FILE_SIZE_NAME(FILENAME,DIRNAME) -1
 #endif
 
 #ifndef DWARF2_VERSION
@@ -99,7 +100,7 @@
 
 /* This implementation outputs version 3 .debug_line information.  */
 #ifndef DWARF2_LINE_VERSION
-#define DWARF2_LINE_VERSION 3
+#define DWARF2_LINE_VERSION (dwarf_level > 3 ? dwarf_level : 3)
 #endif
 
 #include "subsegs.h"
@@ -146,6 +147,10 @@
 
 /* Flag that indicates the initial value of the is_stmt_start flag.  */
 #define	DWARF2_LINE_DEFAULT_IS_STMT	1
+
+#ifndef DWARF2_LINE_MAX_OPS_PER_INSN
+#define DWARF2_LINE_MAX_OPS_PER_INSN	1
+#endif
 
 /* Given a special op, return the line skip amount.  */
 #define SPECIAL_LINE(op) \
@@ -196,10 +201,13 @@ struct line_seg
 static struct line_seg *all_segs;
 static struct line_seg **last_seg_ptr;
 
+#define NUM_MD5_BYTES       16
+
 struct file_entry
 {
-  const char *filename;
-  unsigned int dir;
+  const char *   filename;
+  unsigned int   dir;
+  unsigned char  md5[NUM_MD5_BYTES];
 };
 
 /* Table of files used by .debug_line.  */
@@ -208,9 +216,9 @@ static unsigned int files_in_use;
 static unsigned int files_allocated;
 
 /* Table of directories used by .debug_line.  */
-static char **dirs;
-static unsigned int dirs_in_use;
-static unsigned int dirs_allocated;
+static char **       dirs = NULL;
+static unsigned int  dirs_in_use = 0;
+static unsigned int  dirs_allocated = 0;
 
 /* TRUE when we've seen a .loc directive recently.  Used to avoid
    doing work when there's nothing to do.  */
@@ -239,8 +247,6 @@ static symbolS *view_assert_failed;
 /* The size of an address on the target.  */
 static unsigned int sizeof_address;
 
-static unsigned int get_filenum (const char *, unsigned int);
-
 #ifndef TC_DWARF2_EMIT_OFFSET
 #define TC_DWARF2_EMIT_OFFSET  generic_dwarf2_emit_offset
 
@@ -280,6 +286,7 @@ get_line_subseg (segT seg, subsegT subseg, bfd_boolean create_p)
       last_seg_ptr = &s->next;
       seg_info (seg)->dwarf2_line_seg = s;
     }
+
   gas_assert (seg == s->seg);
 
   for (pss = &s->head; (lss = *pss) != NULL ; pss = &lss->next)
@@ -516,7 +523,9 @@ dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
   symbolS *sym;
 
   /* Early out for as-yet incomplete location information.  */
-  if (loc->filenum == 0 || loc->line == 0)
+  if (loc->line == 0)
+    return;
+  if (loc->filenum == 0 && DWARF2_LINE_VERSION < 5)
     return;
 
   /* Don't emit sequences of line symbols for the same line when the
@@ -544,6 +553,323 @@ dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
   dwarf2_gen_line_info_1 (sym, loc);
 }
 
+static const char *
+get_basename (const char * pathname)
+{
+  const char * file;
+
+  file = lbasename (pathname);
+  /* Don't make empty string from / or A: from A:/ .  */
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+  if (file <= pathname + 3)
+    file = pathname;
+#else
+  if (file == pathname + 1)
+    file = pathname;
+#endif
+  return file;
+}
+
+static unsigned int
+get_directory_table_entry (const char *  dirname,
+			   size_t        dirlen,
+			   bfd_boolean   can_use_zero)
+{
+  unsigned int d;
+
+  if (dirlen == 0)
+    return 0;
+
+#ifndef DWARF2_DIR_SHOULD_END_WITH_SEPARATOR
+  if (IS_DIR_SEPARATOR (dirname[dirlen - 1]))
+    {
+      -- dirlen;
+      if (dirlen == 0)
+	return 0;
+    }
+#endif
+
+  for (d = 0; d < dirs_in_use; ++d)
+    {
+      if (dirs[d] != NULL
+	  && filename_ncmp (dirname, dirs[d], dirlen) == 0
+	  && dirs[d][dirlen] == '\0')
+	return d;
+    }
+
+  if (can_use_zero)
+    {
+      if (dirs == NULL || dirs[0] == NULL)
+	d = 0;
+    }
+  else if (d == 0)
+    d = 1;
+
+  if (d >= dirs_allocated)
+    {
+      unsigned int old = dirs_allocated;
+
+      dirs_allocated = d + 32;
+      dirs = XRESIZEVEC (char *, dirs, dirs_allocated);
+      memset (dirs + old, 0, (dirs_allocated - old) * sizeof (char *));
+    }
+
+  dirs[d] = xmemdup0 (dirname, dirlen);
+  if (dirs_in_use <= d)
+    dirs_in_use = d + 1;
+
+  return d;  
+}
+
+/* Get a .debug_line file number for PATHNAME.  If there is a
+   directory component to PATHNAME, then this will be stored
+   in the directory table, if it is not already present.
+   Returns the slot number allocated to that filename or -1
+   if there was a problem.  */
+
+static signed int
+allocate_filenum (const char * pathname)
+{
+  static signed int last_used = -1, last_used_dir_len = 0;
+  const char *file;
+  size_t dir_len;
+  unsigned int i, dir;
+
+  /* Short circuit the common case of adding the same pathname
+     as last time.  */
+  if (last_used != -1)
+    {
+      const char * dirname = NULL;
+
+      if (dirs != NULL)
+	dirname = dirs[files[last_used].dir];
+
+      if (dirname == NULL)
+	{
+	  if (filename_cmp (pathname, files[last_used].filename) == 0)
+	    return last_used;
+	}
+      else
+	{
+	  if (filename_ncmp (pathname, dirname, last_used_dir_len) == 0
+	      && IS_DIR_SEPARATOR (pathname [last_used_dir_len])
+	      && filename_cmp (pathname + last_used_dir_len + 1,
+			       files[last_used].filename) == 0)
+	    return last_used;
+	}
+    }
+
+  file = get_basename (pathname);
+  dir_len = file - pathname;
+
+  dir = get_directory_table_entry (pathname, dir_len, FALSE);
+
+  /* Do not use slot-0.  That is specificailly reserved for use by
+     the '.file 0 "name"' directive.  */
+  for (i = 1; i < files_in_use; ++i)
+    if (files[i].dir == dir
+	&& files[i].filename
+	&& filename_cmp (file, files[i].filename) == 0)
+      {
+	last_used = i;
+	last_used_dir_len = dir_len;
+	return i;
+      }
+
+  if (i >= files_allocated)
+    {
+      unsigned int old = files_allocated;
+
+      files_allocated = i + 32;
+      /* Catch wraparound.  */
+      if (files_allocated <= old)
+	{
+	  as_bad (_("file number %lu is too big"), (unsigned long) i);
+	  return -1;
+	}
+
+      files = XRESIZEVEC (struct file_entry, files, files_allocated);
+      memset (files + old, 0, (i + 32 - old) * sizeof (struct file_entry));
+    }
+
+  files[i].filename = file;
+  files[i].dir = dir;
+  memset (files[i].md5, 0, NUM_MD5_BYTES);
+
+  if (files_in_use < i + 1)
+    files_in_use = i + 1;  
+  last_used = i;
+  last_used_dir_len = dir_len;
+
+  return i;
+}
+
+/* Allocate slot NUM in the .debug_line file table to FILENAME.
+   If DIRNAME is not NULL or there is a directory component to FILENAME
+   then this will be stored in the directory table, if not already present.
+   if WITH_MD5 is TRUE then there is a md5 value in generic_bignum.
+   Returns TRUE if allocation succeeded, FALSE otherwise.  */
+
+static bfd_boolean
+allocate_filename_to_slot (const char *  dirname,
+			   const char *  filename,
+			   unsigned int  num,
+			   bfd_boolean   with_md5)
+{
+  const char *file;
+  size_t dirlen;
+  unsigned int i, d;
+
+  /* Short circuit the common case of adding the same pathname
+     as last time.  */
+  if (num < files_allocated && files[num].filename != NULL)
+    {
+      const char * dir = NULL;
+
+      if (dirs)
+	dir = dirs[files[num].dir];
+
+      if (with_md5
+	  && memcmp (generic_bignum, files[num].md5, NUM_MD5_BYTES) != 0)
+	goto fail;
+
+      if (dirname != NULL)
+	{
+	  if (dir != NULL && filename_cmp (dir, dirname) != 0)
+	    goto fail;
+      
+	  if (filename_cmp (filename, files[num].filename) != 0)
+	    goto fail;
+
+	  /* If the filenames match, but the directory table entry was
+	     empty, then fill it with the provided directory name.  */
+	  if (dir == NULL)
+	    dirs[files[num].dir] = xmemdup0 (dirname, strlen (dirname));
+	    
+	  return TRUE;
+	}
+      else if (dir != NULL) 
+	{
+	  dirlen = strlen (dir);
+	  if (filename_ncmp (filename, dir, dirlen) == 0
+	      && IS_DIR_SEPARATOR (filename [dirlen])
+	      && filename_cmp (filename + dirlen + 1, files[num].filename) == 0)
+	    return TRUE;
+	}
+      else /* dir == NULL  */
+	{
+	  file = get_basename (filename);
+	  if (filename_cmp (file, files[num].filename) == 0)
+	    {
+	      if (file > filename)
+		/* The filenames match, but the directory table entry is empty.
+		   Fill it with the provided directory name.  */
+		dirs[files[num].dir] = xmemdup0 (filename, file - filename);
+	      return TRUE;
+	    }
+	}
+
+    fail:
+      as_bad (_("file table slot %u is already occupied by a different file (%s%s%s vs %s%s%s)"),
+	      num,
+	      dir == NULL ? "" : dir,
+	      dir == NULL ? "" : "/",
+	      files[num].filename,
+	      dirname == NULL ? "" : dirname,
+	      dirname == NULL ? "" : "/",
+	      filename);
+      return FALSE;
+    }
+
+  if (dirname == NULL)
+    {
+      dirname = filename;
+      file = get_basename (filename);
+      dirlen = file - filename;
+    }
+  else
+    {
+      dirlen = strlen (dirname);
+      file = filename;
+    }
+  
+  d = get_directory_table_entry (dirname, dirlen, num == 0);
+  i = num;
+
+  if (i >= files_allocated)
+    {
+      unsigned int old = files_allocated;
+
+      files_allocated = i + 32;
+      /* Catch wraparound.  */
+      if (files_allocated <= old)
+	{
+	  as_bad (_("file number %lu is too big"), (unsigned long) i);
+	  return FALSE;
+	}
+
+      files = XRESIZEVEC (struct file_entry, files, files_allocated);
+      memset (files + old, 0, (i + 32 - old) * sizeof (struct file_entry));
+    }
+
+  files[i].filename = file;
+  files[i].dir = d;
+  if (with_md5)
+    {
+      if (target_big_endian)
+	{
+	  /* md5's are stored in litte endian format.  */
+	  unsigned int     bits_remaining = NUM_MD5_BYTES * BITS_PER_CHAR;
+	  unsigned int     byte = NUM_MD5_BYTES;
+	  unsigned int     bignum_index = 0;
+
+	  while (bits_remaining)
+	    {
+	      unsigned int bignum_bits_remaining = LITTLENUM_NUMBER_OF_BITS;
+	      valueT       bignum_value = generic_bignum [bignum_index];
+	      bignum_index ++;
+
+	      while (bignum_bits_remaining)
+		{
+		  files[i].md5[--byte] = bignum_value & 0xff;
+		  bignum_value >>= 8;
+		  bignum_bits_remaining -= 8;
+		  bits_remaining -= 8;
+		}
+	    }
+	}
+      else
+	{
+	  unsigned int     bits_remaining = NUM_MD5_BYTES * BITS_PER_CHAR;
+	  unsigned int     byte = 0;
+	  unsigned int     bignum_index = 0;
+
+	  while (bits_remaining)
+	    {
+	      unsigned int bignum_bits_remaining = LITTLENUM_NUMBER_OF_BITS;
+	      valueT       bignum_value = generic_bignum [bignum_index];
+
+	      bignum_index ++;
+
+	      while (bignum_bits_remaining)
+		{
+		  files[i].md5[byte++] = bignum_value & 0xff;
+		  bignum_value >>= 8;
+		  bignum_bits_remaining -= 8;
+		  bits_remaining -= 8;
+		}
+	    }
+	}
+    }
+  else
+    memset (files[i].md5, 0, NUM_MD5_BYTES);
+
+  if (files_in_use < i + 1)
+    files_in_use = i + 1;
+
+  return TRUE;
+}
+
 /* Returns the current source information.  If .file directives have
    been encountered, the info for the corresponding source file is
    returned.  Otherwise, the info for the assembly source file is
@@ -558,7 +884,8 @@ dwarf2_where (struct dwarf2_line_info *line)
 
       memset (line, 0, sizeof (*line));
       filename = as_where (&line->line);
-      line->filenum = get_filenum (filename, 0);
+      line->filenum = allocate_filenum (filename);
+      /* FIXME: We should check the return value from allocate_filenum.  */
       line->column = 0;
       line->flags = DWARF2_FLAG_IS_STMT;
       line->isa = current.isa;
@@ -670,108 +997,6 @@ dwarf2_emit_label (symbolS *label)
   dwarf2_consume_line_info ();
 }
 
-/* Get a .debug_line file number for FILENAME.  If NUM is nonzero,
-   allocate it on that file table slot, otherwise return the first
-   empty one.  */
-
-static unsigned int
-get_filenum (const char *filename, unsigned int num)
-{
-  static unsigned int last_used, last_used_dir_len;
-  const char *file;
-  size_t dir_len;
-  unsigned int i, dir;
-
-  if (num == 0 && last_used)
-    {
-      if (! files[last_used].dir
-	  && filename_cmp (filename, files[last_used].filename) == 0)
-	return last_used;
-      if (files[last_used].dir
-	  && filename_ncmp (filename, dirs[files[last_used].dir],
-			    last_used_dir_len) == 0
-	  && IS_DIR_SEPARATOR (filename [last_used_dir_len])
-	  && filename_cmp (filename + last_used_dir_len + 1,
-			   files[last_used].filename) == 0)
-	return last_used;
-    }
-
-  file = lbasename (filename);
-  /* Don't make empty string from / or A: from A:/ .  */
-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
-  if (file <= filename + 3)
-    file = filename;
-#else
-  if (file == filename + 1)
-    file = filename;
-#endif
-  dir_len = file - filename;
-
-  dir = 0;
-  if (dir_len)
-    {
-#ifndef DWARF2_DIR_SHOULD_END_WITH_SEPARATOR
-      --dir_len;
-#endif
-      for (dir = 1; dir < dirs_in_use; ++dir)
-	if (filename_ncmp (filename, dirs[dir], dir_len) == 0
-	    && dirs[dir][dir_len] == '\0')
-	  break;
-
-      if (dir >= dirs_in_use)
-	{
-	  if (dir >= dirs_allocated)
-	    {
-	      dirs_allocated = dir + 32;
-	      dirs = XRESIZEVEC (char *, dirs, dirs_allocated);
-	    }
-
-	  dirs[dir] = xmemdup0 (filename, dir_len);
-	  dirs_in_use = dir + 1;
-	}
-    }
-
-  if (num == 0)
-    {
-      for (i = 1; i < files_in_use; ++i)
-	if (files[i].dir == dir
-	    && files[i].filename
-	    && filename_cmp (file, files[i].filename) == 0)
-	  {
-	    last_used = i;
-	    last_used_dir_len = dir_len;
-	    return i;
-	  }
-    }
-  else
-    i = num;
-
-  if (i >= files_allocated)
-    {
-      unsigned int old = files_allocated;
-
-      files_allocated = i + 32;
-      /* Catch wraparound.  */
-      if (files_allocated <= old)
-	{
-	  as_bad (_("file number %lu is too big"), (unsigned long) i);
-	  return 0;
-	}
-
-      files = XRESIZEVEC (struct file_entry, files, files_allocated);
-      memset (files + old, 0, (i + 32 - old) * sizeof (struct file_entry));
-    }
-
-  files[i].filename = file;
-  files[i].dir = dir;
-  if (files_in_use < i + 1)
-    files_in_use = i + 1;
-  last_used = i;
-  last_used_dir_len = dir_len;
-
-  return i;
-}
-
 /* Handle two forms of .file directive:
    - Pass .file "source.c" to s_app_file
    - Handle .file 1 "source.c" by adding an entry to the DWARF-2 file table
@@ -781,8 +1006,10 @@ get_filenum (const char *filename, unsigned int num)
 char *
 dwarf2_directive_filename (void)
 {
+  bfd_boolean with_md5 = TRUE;
   valueT num;
   char *filename;
+  const char * dirname = NULL;
   int filename_len;
 
   /* Continue to accept a bare string and pass it off.  */
@@ -795,23 +1022,47 @@ dwarf2_directive_filename (void)
 
   num = get_absolute_expression ();
 
-  if ((offsetT) num < 1 && dwarf_level < 5)
+  if ((offsetT) num < 1 && DWARF2_LINE_VERSION < 5)
     {
       as_bad (_("file number less than one"));
       ignore_rest_of_line ();
       return NULL;
     }
 
-  if (num == 0)
-    {
-      demand_empty_rest_of_line ();
-      return NULL;
-    }
+  /* FIXME: Should we allow ".file <N>\n" as an expression meaning
+     "switch back to the already allocated file <N> as the current
+     file" ?  */
 
   filename = demand_copy_C_string (&filename_len);
   if (filename == NULL)
     /* demand_copy_C_string will have already generated an error message.  */
     return NULL;
+
+  /* For DWARF-5 support we also accept:
+     .file <NUM> ["<dir>"] "<file>" [md5 <NUM>]  */
+  if (DWARF2_LINE_VERSION > 4)
+    {
+      SKIP_WHITESPACE ();
+      if (*input_line_pointer == '"')
+	{
+	  dirname = filename;
+	  filename = demand_copy_C_string (&filename_len);
+	  SKIP_WHITESPACE ();
+	}
+
+      if (strncmp (input_line_pointer, "md5", 3) == 0)
+	{
+	  input_line_pointer += 3;
+	  SKIP_WHITESPACE ();
+
+	  expressionS exp;
+	  expression_and_evaluate (& exp);
+	  if (exp.X_op != O_big)
+	    as_bad (_("md5 value too small or not a constant"));
+	  else
+	    with_md5 = TRUE;
+	}
+    }
 
   demand_empty_rest_of_line ();
 
@@ -825,13 +1076,10 @@ dwarf2_directive_filename (void)
       as_bad (_("file number %lu is too big"), (unsigned long) num);
       return NULL;
     }
-  if (num < files_in_use && files[num].filename != 0)
-    {
-      as_bad (_("file number %u already allocated"), (unsigned int) num);
-      return NULL;
-    }
 
-  (void) get_filenum (filename, (unsigned int) num);
+  if (! allocate_filename_to_slot (dirname, filename, (unsigned int) num,
+				   with_md5))
+    return NULL;
 
   return filename;
 }
@@ -861,10 +1109,14 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 
   if (filenum < 1)
     {
-      as_bad (_("file number less than one"));
-      return;
+      if (filenum != 0 || DWARF2_LINE_VERSION < 5)
+	{
+	  as_bad (_("file number less than one"));
+	  return;
+	}
     }
-  if (filenum >= (int) files_in_use || files[filenum].filename == 0)
+
+  if (filenum >= (int) files_in_use || files[filenum].filename == NULL)
     {
       as_bad (_("unassigned file number %ld"), (long) filenum);
       return;
@@ -1710,14 +1962,40 @@ process_entries (segT seg, struct line_entry *e)
 /* Emit the directory and file tables for .debug_line.  */
 
 static void
-out_file_list (void)
+out_dir_and_file_list (void)
 {
   size_t size;
   const char *dir;
   char *cp;
   unsigned int i;
+  bfd_boolean emit_md5 = FALSE;
+  bfd_boolean emit_timestamps = TRUE;
+  bfd_boolean emit_filesize = TRUE;
 
+  /* Output the Directory Table.  */
+
+  if (DWARF2_LINE_VERSION >= 5)
+    {
+      out_byte (1);
+      out_uleb128 (DW_LNCT_path);
+      /* FIXME: it would be better to store these strings in
+	 the .debug_line_str section and reference them here.  */
+      out_uleb128 (DW_FORM_string);
+      out_uleb128 (dirs_in_use);
+    }
+      
   /* Emit directory list.  */
+  if (DWARF2_LINE_VERSION >= 5)
+    {
+      if (dirs[0] == NULL)
+	dir = remap_debug_filename (".");
+      else
+	dir = remap_debug_filename (dirs[0]);
+	
+      size = strlen (dir) + 1;
+      cp = frag_more (size);
+      memcpy (cp, dir, size);
+    }
   for (i = 1; i < dirs_in_use; ++i)
     {
       dir = remap_debug_filename (dirs[i]);
@@ -1725,19 +2003,89 @@ out_file_list (void)
       cp = frag_more (size);
       memcpy (cp, dir, size);
     }
-  /* Terminate it.  */
-  out_byte ('\0');
 
-  for (i = 1; i < files_in_use; ++i)
+  if (DWARF2_LINE_VERSION < 5)
+    /* Terminate it.  */
+    out_byte ('\0');
+
+  /* Output the File Name Table.  */
+
+  if (DWARF2_LINE_VERSION >= 5)
+    {
+      unsigned int columns = 4;
+
+      if (((unsigned long) DWARF2_FILE_TIME_NAME ("", "")) == -1UL)
+	{
+	  emit_timestamps = FALSE;
+	  -- columns;
+	}
+
+      if (DWARF2_FILE_SIZE_NAME ("", "") == -1)
+	{
+	  emit_filesize = FALSE;
+	  -- columns;
+	}
+
+      for (i = 0; i < files_in_use; ++i)
+	if (files[i].md5[0] != 0)
+	  break;
+      if (i < files_in_use)
+	{
+	  emit_md5 = TRUE;
+	  ++ columns;
+	}
+      
+      /* The number of format entries to follow.  */
+      out_byte (columns);
+
+      /* The format of the file name.  */
+      out_uleb128 (DW_LNCT_path);
+      /* FIXME: it would be better to store these strings in
+	 the .debug_line_str section and reference them here.  */
+      out_uleb128 (DW_FORM_string);
+
+      /* The format of the directory index.  */
+      out_uleb128 (DW_LNCT_directory_index);
+      out_uleb128 (DW_FORM_udata);
+
+      if (emit_timestamps)
+	{
+	  /* The format of the timestamp.  */
+	  out_uleb128 (DW_LNCT_timestamp);
+	  out_uleb128 (DW_FORM_udata);
+	}
+
+      if (emit_filesize)
+	{
+	  /* The format of the file size.  */
+	  out_uleb128 (DW_LNCT_size);
+	  out_uleb128 (DW_FORM_udata);
+	}
+
+      if (emit_md5)
+	{
+	  /* The format of the MD5 sum.  */
+	  out_uleb128 (DW_LNCT_MD5);
+	  out_uleb128 (DW_FORM_data16);
+	}
+
+      /* The number of entries in the table.  */
+      out_uleb128 (files_in_use);
+   }
+      
+  for (i = DWARF2_LINE_VERSION > 4 ? 0 : 1; i < files_in_use; ++i)
     {
       const char *fullfilename;
 
       if (files[i].filename == NULL)
 	{
-	  as_bad (_("unassigned file number %ld"), (long) i);
 	  /* Prevent a crash later, particularly for file 1.  */
 	  files[i].filename = "";
-	  continue;
+	  if (DWARF2_LINE_VERSION < 5 || i != 0)
+	    {
+	      as_bad (_("unassigned file number %ld"), (long) i);
+	      continue;
+	    }
 	}
 
       fullfilename = DWARF2_FILE_NAME (files[i].filename,
@@ -1746,17 +2094,45 @@ out_file_list (void)
       cp = frag_more (size);
       memcpy (cp, fullfilename, size);
 
-      out_uleb128 (files[i].dir);	/* directory number */
+      /* Directory number.  */
+      out_uleb128 (files[i].dir);
+
       /* Output the last modification timestamp.  */
-      out_uleb128 (DWARF2_FILE_TIME_NAME (files[i].filename,
-					  files[i].dir ? dirs [files [i].dir] : ""));
+      if (emit_timestamps)
+	{
+	  offsetT timestamp;
+
+	  timestamp = DWARF2_FILE_TIME_NAME (files[i].filename,
+					     files[i].dir ? dirs [files [i].dir] : "");
+	  if (timestamp == -1)
+	    timestamp = 0;
+	  out_uleb128 (timestamp);
+	}
+
       /* Output the filesize.  */
-      out_uleb128 (DWARF2_FILE_SIZE_NAME (files[i].filename,
-					  files[i].dir ? dirs [files [i].dir] : ""));
+      if (emit_filesize)
+	{
+	  offsetT filesize;
+	  filesize = DWARF2_FILE_SIZE_NAME (files[i].filename,
+					    files[i].dir ? dirs [files [i].dir] : "");
+	  if (filesize == -1)
+	    filesize = 0;
+	  out_uleb128 (filesize);
+	}
+
+      /* Output the md5 sum.  */
+      if (emit_md5)
+	{
+	  int b;
+
+	  for (b = 0; b < NUM_MD5_BYTES; b++)
+	    out_byte (files[i].md5[b]);
+	}
     }
 
-  /* Terminate filename list.  */
-  out_byte (0);
+  if (DWARF2_LINE_VERSION < 5)
+    /* Terminate filename list.  */
+    out_byte (0);
 }
 
 /* Switch to SEC and output a header length field.  Return the size of
@@ -1833,6 +2209,11 @@ out_debug_line (segT line_seg)
   /* Version.  */
   out_two (DWARF2_LINE_VERSION);
 
+  if (DWARF2_LINE_VERSION >= 5)
+    {
+      out_byte (sizeof_address);
+      out_byte (0); /* Segment Selector size.  */
+    }
   /* Length of the prologue following this length.  */
   prologue_start = symbol_temp_make ();
   prologue_end = symbol_temp_make ();
@@ -1845,6 +2226,8 @@ out_debug_line (segT line_seg)
 
   /* Parameters of the state machine.  */
   out_byte (DWARF2_LINE_MIN_INSN_LENGTH);
+  if (DWARF2_LINE_VERSION >= 4)
+    out_byte (DWARF2_LINE_MAX_OPS_PER_INSN);
   out_byte (DWARF2_LINE_DEFAULT_IS_STMT);
   out_byte (DWARF2_LINE_BASE);
   out_byte (DWARF2_LINE_RANGE);
@@ -1863,8 +2246,11 @@ out_debug_line (segT line_seg)
   out_byte (0);			/* DW_LNS_set_prologue_end */
   out_byte (0);			/* DW_LNS_set_epilogue_begin */
   out_byte (1);			/* DW_LNS_set_isa */
+  /* We have emitted 12 opcode lengths, so make that this
+     matches up to the opcode base value we have been using.  */
+  gas_assert (DWARF2_LINE_OPCODE_BASE == 13);
 
-  out_file_list ();
+  out_dir_and_file_list ();
 
   symbol_set_value_now (prologue_end);
 
@@ -2134,19 +2520,20 @@ out_debug_str (segT str_seg, symbolS **name_sym, symbolS **comp_dir_sym,
   const char *dirname;
   char *p;
   int len;
+  int first_file = DWARF2_LINE_VERSION > 4 ? 0 : 1;
 
   subseg_set (str_seg, 0);
 
   /* DW_AT_name.  We don't have the actual file name that was present
-     on the command line, so assume files[1] is the main input file.
+     on the command line, so assume files[first_file] is the main input file.
      We're not supposed to get called unless at least one line number
      entry was emitted, so this should always be defined.  */
   *name_sym = symbol_temp_new_now_octets ();
   if (files_in_use == 0)
     abort ();
-  if (files[1].dir)
+  if (files[first_file].dir)
     {
-      dirname = remap_debug_filename (dirs[files[1].dir]);
+      dirname = remap_debug_filename (dirs[files[first_file].dir]);
       len = strlen (dirname);
 #ifdef TE_VMS
       /* Already has trailing slash.  */
@@ -2158,9 +2545,9 @@ out_debug_str (segT str_seg, symbolS **name_sym, symbolS **comp_dir_sym,
       INSERT_DIR_SEPARATOR (p, len);
 #endif
     }
-  len = strlen (files[1].filename) + 1;
+  len = strlen (files[first_file].filename) + 1;
   p = frag_more (len);
-  memcpy (p, files[1].filename, len);
+  memcpy (p, files[first_file].filename, len);
 
   /* DW_AT_comp_dir */
   *comp_dir_sym = symbol_temp_new_now_octets ();

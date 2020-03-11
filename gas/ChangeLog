@@ -1,3 +1,35 @@
+2020-03-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 25611
+	PR 25614
+	* dwarf2dbg.c (DWARF2_FILE_TIME_NAME): Default to -1.
+	(DWARF2_FILE_SIZE_NAME): Default to -1.
+	(DWARF2_LINE_VERSION): Default to the current dwarf level or 3,
+	whichever is higher.
+	(DWARF2_LINE_MAX_OPS_PER_INSN): Provide a default value of 1.
+	(NUM_MD5_BYTES): Define.
+	(struct file entry): Add md5 field.
+	(get_filenum): Delete and replace with...
+	(get_basename): New function.
+	(get_directory_table_entry): New function.
+	(allocate_filenum): New function.
+	(allocate_filename_to_slot): New function.
+	(dwarf2_where): Use new functions.
+	(dwarf2_directive_filename): Add support for extended .file
+	pseudo-op.
+	(dwarf2_directive_loc): Allow the use of file number zero with
+	DWARF 5 or higher.
+	(out_file_list): Rename to...
+	(out_dir_and_file_list): Add DWARF 5 support.
+	(out_debug_line): Emit extra values into the section header for
+	DWARF 5.
+	(out_debug_str): Allow for file 0 to be used with DWARF 5.
+	* doc/as.texi (.file): Update the description of this pseudo-op.
+	* testsuite/gas/elf-dwarf-5-file0.s: Add more lines.
+	* testsuite/gas/elf-dwarf-5-file0.d: Update expected dump output.
+	* testsuite/gas/lns/lns-diag-1.l: Update expected error message.
+	* NEWS: Mention the new feature.
+
 2020-03-10  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-csky.c (get_operand_value): Rewrite 1 << 31 expressions

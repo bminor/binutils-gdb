@@ -1,3 +1,20 @@
+2020-03-11  Nick Clifton  <nickc@redhat.com>
+
+	PR 25611
+	PR 25614
+	* dwarf.h (DWARF2_Internal_LineInfo): Add li_address_size and
+	li_segment_size fields.
+	* dwarf.c (read_debug_line_header): Record the address size and
+	segment selector size values (if present) in the lineinfo
+	structure.
+	(display_formatted_table): Warn if the format count is empty but
+	the table itself is not empty.
+	Display the format count and entry count at the start of the table
+	dump.
+	(display_debug_lines_raw): Display the address size and segement
+	selector size fields, if present.
+	* testsuite/binutils-all/dw5.W: Update expected output.
+
 2020-03-11  Alan Modra  <amodra@gmail.com>
 
 	PR 25651

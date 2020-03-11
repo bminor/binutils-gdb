@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Add --gdwarf-5 option to the assembler to generate DWARF 5 debug output
+  (if such output is being generated).  Added the ability to generate
+  version 5 .debug_line sections.
+
 Changes in 2.34:
 
 * Add -malign-branch-boundary=NUM, -malign-branch=TYPE[+TYPE...],
