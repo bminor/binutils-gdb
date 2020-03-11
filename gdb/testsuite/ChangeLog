@@ -1,5 +1,9 @@
 2020-03-11  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/list-ambiguous.exp: Set EDITOR to true.
+
+2020-03-11  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.ada/access_to_packed_array.exp: Test printing of expanded
 	symtabs.
 
