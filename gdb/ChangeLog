@@ -1,3 +1,7 @@
+2020-03-11  Tom Tromey  <tromey@adacore.com>
+
+	* ada-typeprint.c (print_choices): Fix comment.
+
 2020-03-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* buildsyms.c (buildsym_compunit::record_line): Avoid accessing
