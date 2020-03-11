@@ -1,3 +1,7 @@
+2020-03-11  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_inline_plt): Do increment rel in for loop.
+
 2020-02-27  Alan Modra  <amodra@gmail.com>
 
 	PR 24511
