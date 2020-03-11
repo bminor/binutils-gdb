@@ -1,5 +1,34 @@
 2020-03-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/gas/i386/i386.exp: Run new tests.
+	* testsuite/gas/i386/lfence-byte.d: New file.
+	* testsuite/gas/i386/lfence-byte.e: Likewise.
+	* testsuite/gas/i386/lfence-byte.s: Likewise.
+	* testsuite/gas/i386/lfence-indbr-a.d: Likewise.
+	* testsuite/gas/i386/lfence-indbr-b.d: Likewise.
+	* testsuite/gas/i386/lfence-indbr-c.d: Likewise.
+	* testsuite/gas/i386/lfence-indbr.e: Likewise.
+	* testsuite/gas/i386/lfence-indbr.s: Likewise.
+	* testsuite/gas/i386/lfence-load.d: Likewise.
+	* testsuite/gas/i386/lfence-load.s: Likewise.
+	* testsuite/gas/i386/lfence-ret-a.d: Likewise.
+	* testsuite/gas/i386/lfence-ret-b.d: Likewise.
+	* testsuite/gas/i386/lfence-ret.s: Likewise.
+	* testsuite/gas/i386/x86-64-lfence-byte.d: Likewise.
+	* testsuite/gas/i386/x86-64-lfence-byte.e: Likewise.
+	* testsuite/gas/i386/x86-64-lfence-byte.s: Likewise.
+	* testsuite/gas/i386/x86-64-lfence-indbr-a.d: Likewise.
+	* testsuite/gas/i386/x86-64-lfence-indbr-b.d: Likewise.
+	* testsuite/gas/i386/x86-64-lfence-indbr-c.d: Likewise.
+	* testsuite/gas/i386/x86-64-lfence-indbr.e: Likewise.
+	* testsuite/gas/i386/x86-64-lfence-indbr.s: Likewise.
+	* testsuite/gas/i386/x86-64-lfence-load.d: Likewise.
+	* testsuite/gas/i386/x86-64-lfence-load.s: Likewise.
+	* testsuite/gas/i386/x86-64-lfence-ret-a.d: Likewise.
+	* testsuite/gas/i386/x86-64-lfence-ret-b.d: Likewise.
+
+2020-03-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (lfence_after_load): New.
 	(lfence_before_indirect_branch_kind): New.
 	(lfence_before_indirect_branch): New.
