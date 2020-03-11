@@ -7668,28 +7668,54 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
      non-exited thread in the current target.  */
   if (ptid == null_ptid)
     {
+      /* Some stop events apply to all threads in an inferior, while others
+	 only apply to a single thread.  */
+      bool is_stop_for_all_threads
+	= (status->kind == TARGET_WAITKIND_EXITED
+	   || status->kind == TARGET_WAITKIND_SIGNALLED);
+
       for (thread_info *thr : all_non_exited_threads (this))
 	{
-	  if (ptid != null_ptid)
+	  if (ptid != null_ptid
+	      && (!is_stop_for_all_threads
+		  || ptid.pid () != thr->ptid.pid ()))
 	    {
 	      static bool warned = false;
 
 	      if (!warned)
 		{
 		  /* If you are seeing this warning then the remote target
-		     has multiple threads and either sent an 'S' stop
-		     packet, or a 'T' stop packet without a thread-id.  In
-		     both of these cases GDB is unable to know which thread
-		     just stopped and is now having to guess.  The correct
-		     action is to fix the remote target to send the correct
-		     packet (a 'T' packet and include a thread-id).  */
-		  warning (_("multi-threaded target stopped without sending "
-			     "a thread-id, using first non-exited thread"));
+		     has stopped without specifying a thread-id, but the
+		     target does have multiple threads (or inferiors), and
+		     so GDB is having to guess which thread stopped.
+
+		     Examples of what might cause this are the target
+		     sending and 'S' stop packet, or a 'T' stop packet and
+		     not including a thread-id.
+
+		     Additionally, the target might send a 'W' or 'X
+		     packet without including a process-id, when the target
+		     has multiple running inferiors.  */
+		  if (is_stop_for_all_threads)
+		    warning (_("multi-inferior target stopped without "
+			       "sending a process-id, using first "
+			       "non-exited inferior"));
+		  else
+		    warning (_("multi-threaded target stopped without "
+			       "sending a thread-id, using first "
+			       "non-exited thread"));
 		  warned = true;
 		}
 	      break;
 	    }
-	  ptid = thr->ptid;
+
+	  /* If this is a stop for all threads then don't use a particular
+	     threads ptid, instead create a new ptid where only the pid
+	     field is set.  */
+	  if (is_stop_for_all_threads)
+	    ptid = ptid_t (thr->ptid.pid ());
+	  else
+	    ptid = thr->ptid;
 	}
       gdb_assert (ptid != null_ptid);
     }

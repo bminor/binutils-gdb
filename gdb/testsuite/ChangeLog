@@ -1,5 +1,10 @@
 2020-03-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.server/exit-multiple-threads.c: New file.
+	* gdb.server/exit-multiple-threads.exp: New file.
+
+2020-03-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.fortran/mixed-lang-stack.c: New file.
 	* gdb.fortran/mixed-lang-stack.cpp: New file.
 	* gdb.fortran/mixed-lang-stack.exp: New file.
