@@ -51,6 +51,7 @@ build_warnings="-Wall -Wpointer-arith \
 -Wdeprecated-copy-dtor \
 -Wredundant-move \
 -Wmissing-declarations \
+-Wmissing-prototypes \
 -Wstrict-null-sentinel \
 "
 

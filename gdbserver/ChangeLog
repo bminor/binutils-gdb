@@ -1,3 +1,7 @@
+2020-03-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure: Re-generate.
+
 2020-03-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* .dir-locals.el: New file.
