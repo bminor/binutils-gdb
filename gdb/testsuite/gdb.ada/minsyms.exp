@@ -28,6 +28,8 @@ if ![runto "_ada_foo_qb07_057" ] then {
   return
 }
 
+gdb_test_no_output "set language ada"
+
 gdb_test "print some_minsym" \
          "'some_minsym' has unknown type; cast it to its declared type"
 

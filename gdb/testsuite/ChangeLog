@@ -1,5 +1,9 @@
 2020-03-11  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.ada/minsyms.exp: Set language to ada.
+
+2020-03-11  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.server/sysroot.exp: Allow GLIBC's printf alias __printf.
 
 2020-03-11  Tom de Vries  <tdevries@suse.de>
