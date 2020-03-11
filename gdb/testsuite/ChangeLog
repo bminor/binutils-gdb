@@ -1,5 +1,9 @@
 2020-03-11  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/break-interp.exp: Limit verbose scope.
+
+2020-03-11  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.fortran/logical.f90: Define variable with character type.
 	* gdb.fortran/logical.exp: Use character type instead of uint8_t.
 

@@ -251,6 +251,7 @@ proc test_core {file displacement} {
 	if ![regexp {^(NONE|FOUND-.*)$} $displacement] {
 	    fail $test_displacement
 	}
+	gdb_test_no_output "set verbose off"
 
 	gdb_test "bt" "#\[0-9\]+ +\[^\r\n\]*\\mlibfunc\\M\[^\r\n\]*\r\n#\[0-9\]+ +\[^\r\n\]*\\mmain\\M.*" "core main bt"
     }
@@ -301,6 +302,7 @@ proc test_attach_gdb {file pid displacement prefix} {
 	if ![regexp {^(NONE|FOUND-.*)$} $displacement] {
 	    fail $test_displacement
 	}
+	gdb_test_no_output "set verbose off"
 
 	gdb_test "bt" "#\[0-9\]+ +\[^\r\n\]*\\mlibfunc\\M\[^\r\n\]*\r\n#\[0-9\]+ +\[^\r\n\]*\\mmain\\M.*" "attach main bt"
 	gdb_exit
@@ -409,19 +411,24 @@ proc test_ld {file ifmain trynosym displacement} {
 
     reach $solib_bp "run" $displacement 1
 
+    gdb_test_no_output "set verbose off"
     gdb_test "bt" "#0 +\[^\r\n\]*\\m(__GI_)?$solib_bp\\M.*" "dl bt"
+    gdb_test_no_output "set verbose on"
 
     if $ifmain {
 	reach "main" continue "NONE"
 
 	reach "libfunc" continue "NONE"
 
+	gdb_test_no_output "set verbose off"
 	gdb_test "bt" "#0 +\[^\r\n\]*\\mlibfunc\\M\[^\r\n\]*\r\n#1 +\[^\r\n\]*\\mmain\\M.*" "main bt"
+	gdb_test_no_output "set verbose on"
     }
 
     # Try re-run if the new PIE displacement takes effect.
     gdb_test "kill" "" "kill" {Kill the program being debugged\? \(y or n\) } "y"
     reach $solib_bp "run" $displacement 2
+    gdb_test_no_output "set verbose off"
 
     if $ifmain {
 	test_core $file $displacement
@@ -524,6 +531,7 @@ proc test_ld {file ifmain trynosym displacement} {
 		fail $test_displacement
 	    }
 	}
+	gdb_test_no_output "set verbose off"
     }
 }
 
