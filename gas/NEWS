@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Add -mlfence-after-load=, -mlfence-before-indirect-branch= and
+  -mlfence-before-ret= options to x86 assembler to help mitigate
+  CVE-2020-0551.
+
 * Add --gdwarf-5 option to the assembler to generate DWARF 5 debug output
   (if such output is being generated).  Added the ability to generate
   version 5 .debug_line sections.
