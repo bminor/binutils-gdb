@@ -4899,7 +4899,7 @@ proc standard_output_file {basename} {
     file mkdir $dir
     # If running on MinGW, replace /c/foo with c:/foo
     if { [ishost *-*-mingw*] } {
-        set dir [regsub {^/([a-z])/} $dir {\1:/}]
+        set dir [exec sh -c "cd ${dir} && pwd -W"]
     }
     return [file join $dir $basename]
 }

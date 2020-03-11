@@ -1,3 +1,8 @@
+2020-03-11  Simon Marchi  <simon.marchi@efficios.com>
+
+	* lib/gdb.exp (standard_output_file): Use `pwd -W` to convert
+	from Unix to Windows path.
+
 2020-03-11  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.ada/minsyms.exp: Set language to ada.
