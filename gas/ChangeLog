@@ -1,3 +1,31 @@
+2020-03-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (lfence_after_load): New.
+	(lfence_before_indirect_branch_kind): New.
+	(lfence_before_indirect_branch): New.
+	(lfence_before_ret_kind): New.
+	(lfence_before_ret): New.
+	(last_insn): New.
+	(load_insn_p): New.
+	(insert_lfence_after): New.
+	(insert_lfence_before): New.
+	(md_assemble): Call insert_lfence_before and insert_lfence_after.
+	Set last_insn.
+	(OPTION_MLFENCE_AFTER_LOAD): New.
+	(OPTION_MLFENCE_BEFORE_INDIRECT_BRANCH): New.
+	(OPTION_MLFENCE_BEFORE_RET): New.
+	(md_longopts): Add -mlfence-after-load=,
+	-mlfence-before-indirect-branch= and -mlfence-before-ret=.
+	(md_parse_option): Handle -mlfence-after-load=,
+	-mlfence-before-indirect-branch= and -mlfence-before-ret=.
+	(md_show_usage): Display -mlfence-after-load=,
+	-mlfence-before-indirect-branch= and -mlfence-before-ret=.
+	(i386_cons_align): New.
+	* config/tc-i386.h (i386_cons_align): New.
+	(md_cons_align): New.
+	* doc/c-i386.texi: Document -mlfence-after-load=,
+	-mlfence-before-indirect-branch= and -mlfence-before-ret=.
+
 2020-03-11  Nick Clifton  <nickc@redhat.com>
 
 	PR 25611
