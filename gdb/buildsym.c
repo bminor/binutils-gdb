@@ -681,15 +681,18 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
       m_have_line_numbers = true;
     }
 
-  /* If we have a duplicate for the previous entry then ignore the new
-     entry, except, if the new entry is setting the is_stmt flag, then
-     ensure the previous entry respects the new setting.  */
-  e = subfile->line_vector->item + subfile->line_vector->nitems - 1;
-  if (e->line == line && e->pc == pc)
+  if (subfile->line_vector->nitems > 0)
     {
-      if (is_stmt && !e->is_stmt)
-	e->is_stmt = 1;
-      return;
+      /* If we have a duplicate for the previous entry then ignore the new
+	 entry, except, if the new entry is setting the is_stmt flag, then
+	 ensure the previous entry respects the new setting.  */
+      e = subfile->line_vector->item + subfile->line_vector->nitems - 1;
+      if (e->line == line && e->pc == pc)
+	{
+	  if (is_stmt && !e->is_stmt)
+	    e->is_stmt = 1;
+	  return;
+	}
     }
 
   if (subfile->line_vector->nitems + 1 >= subfile->line_vector_length)

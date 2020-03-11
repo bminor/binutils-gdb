@@ -1,3 +1,8 @@
+2020-03-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* buildsyms.c (buildsym_compunit::record_line): Avoid accessing
+	previous item in the list, when the list has no items.
+
 2020-03-11  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2/loc.c (dwarf2_evaluate_property): Handle NULL frame in
