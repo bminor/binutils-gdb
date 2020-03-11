@@ -43,7 +43,7 @@ foreach_with_prefix var { l l1 l2 l4 l8 } {
 
     for { set i 0 } { $i < $len } { incr i } {
 	with_test_prefix "byte $i" {
-	    gdb_test_no_output "set *((uint8_t *) ${addr}) = 0xff" \
+	    gdb_test_no_output "set *((character *) ${addr}) = 0xff" \
 		"set contents of byte at offset $i"
 	    gdb_test "p l" " = \\.TRUE\\."
 	    incr addr
