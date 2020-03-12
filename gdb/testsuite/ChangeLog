@@ -1,3 +1,12 @@
+2020-03-13  Tom de Vries  <tdevries@suse.de>
+
+	* lib/tuiterm.exp (Term::command_no_prompt_prefix): New proc.
+	(Term::command): Use prompt prefix.
+	(Term::enter_tui): Use command_no_prompt_prefix instead of prefix.
+	* gdb.tui/tui-layout-asm-short-prog.exp: Use
+	command_no_prompt_prefix instead of prefix.
+	* gdb.tui/tui-layout-asm.exp: Same.
+
 2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.base/break-interp.exp: Use foreach_with_prefix.

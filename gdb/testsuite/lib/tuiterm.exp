@@ -489,7 +489,7 @@ namespace eval Term {
 	    return 0
 	}
 
-	command "tui enable"
+	command_no_prompt_prefix "tui enable"
 	return 1
     }
 
@@ -497,8 +497,19 @@ namespace eval Term {
     # seen in the TUI.  CMD should not end with a newline -- that will
     # be supplied by this function.
     proc command {cmd} {
+	global gdb_prompt
 	send_gdb "$cmd\n"
-	wait_for [string_to_regexp $cmd]
+	set str [string_to_regexp $cmd]
+	set str "^$gdb_prompt $str"
+	wait_for $str
+    }
+
+    # As proc command, but don't wait for a initial prompt.  This is used for
+    # inital terminal commands, where there's no prompt yet.
+    proc command_no_prompt_prefix {cmd} {
+	send_gdb "$cmd\n"
+	set str [string_to_regexp $cmd]
+	wait_for "^$str"
     }
 
     # Return the text of screen line N, without attributes.  Lines are
