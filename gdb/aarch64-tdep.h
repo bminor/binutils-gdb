@@ -107,6 +107,14 @@ struct gdbarch_tdep
   {
     return pauth_reg_base != -1;
   }
+
+  int cap_reg_base;
+
+  /* Returns true if the target supports capabilities.  */
+  bool has_capability () const
+  {
+    return cap_reg_base != -1;
+  }
 };
 
 const target_desc *aarch64_read_description (uint64_t vq, bool pauth_p);

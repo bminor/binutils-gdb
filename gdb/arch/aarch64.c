@@ -23,6 +23,7 @@
 #include "../features/aarch64-fpu.c"
 #include "../features/aarch64-sve.c"
 #include "../features/aarch64-pauth.c"
+#include "../features/aarch64-capability.c"
 
 /* See arch/aarch64.h.  */
 
@@ -46,6 +47,12 @@ aarch64_create_target_description (uint64_t vq, bool pauth_p)
 
   if (pauth_p)
     regnum = create_feature_aarch64_pauth (tdesc.get (), regnum);
+
+  /* FIXME-Morello: We need to append the capability registers to
+     the existing target description.  Figure out how to do that.
+     Maybe replace the general purpose register description with
+     the capability registers.  */
+  regnum = create_feature_aarch64_capability (tdesc.get (), regnum);
 
   return tdesc.release ();
 }
