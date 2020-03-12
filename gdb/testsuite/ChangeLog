@@ -1,5 +1,10 @@
 2020-03-12  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.dwarf2/dw2-ranges-base.exp: Limit "maint info line-table" to
+	gdb.dwarf2/dw2-ranges-base.c.
+
+2020-03-12  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.linespec/explicit.exp: Fix "complete non-unique file name" test
 	in presence of GLIBC debuginfo.
 
