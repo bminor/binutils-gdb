@@ -51977,6 +51977,7 @@ all-gdb: maybe-all-build-bison
 all-gdb: maybe-all-sim
 all-gdb: maybe-all-libtermcap
 configure-gdbserver: maybe-all-gnulib
+all-gdbserver: maybe-all-gdbsupport
 all-gdbserver: maybe-all-gnulib
 configure-libgui: maybe-configure-tcl
 configure-libgui: maybe-configure-tk
