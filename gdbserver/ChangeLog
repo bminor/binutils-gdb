@@ -1,3 +1,13 @@
+2020-03-12  Tom Tromey  <tom@tromey.com>
+
+	* config.in, configure: Rebuild.
+	* configure.ac: Call ZW_GNU_GETTEXT_SISTER_DIR.
+	* acinclude.m4: Include gettext-sister.m4.
+	* Makefile.in (top_builddir, INTL, INTL_DEPS, INTL_CFLAGS): New
+	variables.
+	(INCLUDE_CFLAGS): Add INTL_CFLAGS.
+	(gdbserver$(EXEEXT), gdbreplay$(EXEEXT)): Use INTL_DEPS, INTL.
+
 2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
 
 	* acinclude.m4: Update path to selftest.m4.

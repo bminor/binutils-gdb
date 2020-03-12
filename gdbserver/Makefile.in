@@ -75,6 +75,8 @@ abs_top_srcdir = @abs_top_srcdir@
 abs_srcdir = @abs_srcdir@
 VPATH = @srcdir@
 
+top_builddir = .
+
 include $(srcdir)/../gdb/silent-rules.mk
 
 # Note that these are overridden by GNU make-specific code below if
@@ -109,6 +111,11 @@ GNULIB_BUILDDIR = ../gnulib
 LIBGNU = $(GNULIB_BUILDDIR)/import/libgnu.a
 INCGNU = -I$(srcdir)/../gnulib/import -I$(GNULIB_BUILDDIR)/import
 
+# Where is the INTL library?  Typically in ../intl.
+INTL = @LIBINTL@
+INTL_DEPS = @LIBINTL_DEP@
+INTL_CFLAGS = @INCINTL@
+
 INCSUPPORT = -I$(srcdir)/.. -I..
 
 # All the includes used for CFLAGS and for lint.
@@ -122,7 +129,8 @@ INCSUPPORT = -I$(srcdir)/.. -I..
 #
 INCLUDE_CFLAGS = -I. -I${srcdir} \
 	-I$(srcdir)/../gdb/regformats -I$(srcdir)/.. -I$(INCLUDE_DIR) \
-	-I$(srcdir)/../gdb $(INCGNU) $(INCSUPPORT)
+	-I$(srcdir)/../gdb $(INCGNU) $(INCSUPPORT) \
+	$(INTL_CFLAGS)
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
 # from the config/ directory.
@@ -403,17 +411,19 @@ html:
 install-html:
 clean-info:
 
-gdbserver$(EXEEXT): $(sort $(OBS)) ${CDEPS} $(LIBGNU) $(LIBIBERTY)
+gdbserver$(EXEEXT): $(sort $(OBS)) ${CDEPS} $(LIBGNU) $(LIBIBERTY) \
+		$(INTL_DEPS)
 	$(SILENCE) rm -f gdbserver$(EXEEXT)
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
 		-o gdbserver$(EXEEXT) $(OBS) $(LIBGNU) $(LIBIBERTY) \
-		$(GDBSERVER_LIBS) $(XM_CLIBS)
+		$(INTL) $(GDBSERVER_LIBS) $(XM_CLIBS)
 
-gdbreplay$(EXEEXT): $(sort $(GDBREPLAY_OBS)) $(LIBGNU) $(LIBIBERTY)
+gdbreplay$(EXEEXT): $(sort $(GDBREPLAY_OBS)) $(LIBGNU) $(LIBIBERTY) \
+		$(INTL_DEPS)
 	$(SILENCE) rm -f gdbreplay$(EXEEXT)
 	$(ECHO_CXXLD) $(CC_LD) $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
 		-o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) $(XM_CLIBS) $(LIBGNU) \
-		$(LIBIBERTY)
+		$(LIBIBERTY) $(INTL)
 
 IPA_OBJS = \
 	alloc-ipa.o \

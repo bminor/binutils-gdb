@@ -55,6 +55,9 @@ ACX_NONCANONICAL_HOST
 # Dependency checking.
 ZW_CREATE_DEPDIR
 
+dnl Set up for gettext.
+ZW_GNU_GETTEXT_SISTER_DIR
+
 # Create sub-directories for objects and dependencies.
 CONFIG_SRC_SUBDIR="arch gdbsupport nat target"
 AC_SUBST(CONFIG_SRC_SUBDIR)
