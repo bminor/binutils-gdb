@@ -19187,6 +19187,11 @@ $as_echo "#define GDB_DEFAULT_HOST_CHARSET \"UTF-8\"" >>confdefs.h
 # The default value of this option changes depending whether we're on
 # development mode (in which case it's "true") or not (in which case
 # it's "false").
+
+if test "x$development" != xtrue && test "x$development" != xfalse; then :
+  as_fn_error $? "Invalid value for \$development, got \"$development\", expecting \"true\" or \"false\"." "$LINENO" 5
+fi
+
 # Check whether --enable-unit-tests was given.
 if test "${enable_unit_tests+set}" = set; then :
   enableval=$enable_unit_tests; case "${enableval}" in

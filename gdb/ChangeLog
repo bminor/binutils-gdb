@@ -1,3 +1,9 @@
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* selftest.m4 (GDB_AC_SELFTEST): Error out if $development is
+	not "true" or "false".
+	* configure: Re-generate.
+
 2020-03-12  Christian Biesinger  <cbiesinger@google.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Add new arm-nbsd-tdep.h file.
