@@ -113,6 +113,19 @@ static const struct
   {"ip1", AARCH64_X0_REGNUM + 17}
 };
 
+/* The required capability 'C' registers.  */
+static const char *const aarch64_c_register_names[] =
+{
+  /* These registers must appear in consecutive RAW register number
+     order and they must begin with AARCH64_C0_REGNUM! */
+  "c0", "c1", "c2", "c3", "c4", "c5", "c6", "c7",
+  "c8", "c9", "c10", "c11", "c12", "c13", "c14", "c15",
+  "c16", "c17", "c18", "c19", "c20", "c21", "c22", "c23",
+  "c24", "c25", "c26", "c27", "c28", "c29", "c30", "pcc",
+  "csp", "ddc", "ctpidr", "rcsp", "rddc", "rctpidr", "cid",
+  "tag_map", "cctlr"
+};
+
 /* The required core 'R' registers.  */
 static const char *const aarch64_r_register_names[] =
 {
@@ -3578,6 +3591,24 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       num_regs += i;
     }
 
+  /* Add the capability registers.  */
+  const struct tdesc_feature *feature_capability
+      = tdesc_find_feature (tdesc,"org.gnu.gdb.aarch64.capability");
+  int first_cap_regnum = -1;
+
+  if (feature_capability != nullptr)
+    {
+      first_cap_regnum = num_regs;
+
+      for (i = 0; i < ARRAY_SIZE (aarch64_c_register_names); i++)
+	valid_p &= tdesc_numbered_register (feature_capability,
+					    tdesc_data.get (),
+					    AARCH64_C0_REGNUM + i,
+					    aarch64_c_register_names[i]);
+
+      num_regs = AARCH64_C0_REGNUM + i;
+    }
+
   if (!valid_p)
     return nullptr;
 
@@ -3597,6 +3628,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 				: pauth_ra_state_offset + num_regs;
   tdep->mte_reg_base = first_mte_regnum;
   tdep->tls_regnum = tls_regnum;
+
+  tdep->cap_reg_base = first_cap_regnum;
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);
