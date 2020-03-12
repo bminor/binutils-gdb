@@ -1,5 +1,10 @@
 2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* selftest.m4: Move to gdbsupport/.
+	* acinclude.m4: Update path to selftest.m4.
+
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Rename to...
 	(SELFTESTS_SRCS): ... this.  Add disasm-selftests.c,
 	gdbarch-selfselftests.c and selftest-arch.c.

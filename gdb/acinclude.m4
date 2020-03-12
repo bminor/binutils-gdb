@@ -16,7 +16,7 @@ m4_include(../gdbsupport/warning.m4)
 m4_include(sanitize.m4)
 
 # This gets GDB_AC_SELFTEST.
-m4_include(selftest.m4)
+m4_include(../gdbsupport/selftest.m4)
 
 dnl gdb/configure.in uses BFD_NEED_DECLARATION, so get its definition.
 m4_include(../bfd/bfd.m4)
