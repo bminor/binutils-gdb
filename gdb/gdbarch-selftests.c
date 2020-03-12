@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#if GDB_SELF_TEST
 #include "gdbsupport/selftest.h"
 #include "selftest-arch.h"
 #include "inferior.h"
@@ -158,14 +157,11 @@ register_to_value_test (struct gdbarch *gdbarch)
 }
 
 } // namespace selftests
-#endif /* GDB_SELF_TEST */
 
 void _initialize_gdbarch_selftests ();
 void
 _initialize_gdbarch_selftests ()
 {
-#if GDB_SELF_TEST
   selftests::register_test_foreach_arch ("register_to_value",
 					 selftests::register_to_value_test);
-#endif
 }

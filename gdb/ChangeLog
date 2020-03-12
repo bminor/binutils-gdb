@@ -1,5 +1,19 @@
 2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* Makefile.in (SUBDIR_UNITTESTS_SRCS): Rename to...
+	(SELFTESTS_SRCS): ... this.  Add disasm-selftests.c,
+	gdbarch-selfselftests.c and selftest-arch.c.
+	(SUBDIR_UNITTESTS_OBS): Rename to...
+	(SELFTESTS_OBS): ... this.
+	(COMMON_SFILES): Remove disasm-selftests.c and
+	gdbarch-selftests.c.
+	* configure.ac: Don't add selftest-arch.{c,o} to
+	CONFIG_{SRCS,OBS}.
+	* disasm-selftests.c, gdbarch-selftests.c: Remove GDB_SELF_TEST
+	preprocessor conditions.
+
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* configure.ac: Don't source bfd/development.sh.
 	* selftest.m4: Modify comment.
 	* configure: Re-generate.

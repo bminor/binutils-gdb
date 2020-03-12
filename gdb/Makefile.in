@@ -420,7 +420,10 @@ SUBDIR_PYTHON_DEPS =
 SUBDIR_PYTHON_LDFLAGS =
 SUBDIR_PYTHON_CFLAGS =
 
-SUBDIR_UNITTESTS_SRCS = \
+SELFTESTS_SRCS = \
+	disasm-selftests.c \
+	gdbarch-selftests.c \
+	selftest-arch.c \
 	unittests/array-view-selftests.c \
 	unittests/child-path-selftests.c \
 	unittests/cli-utils-selftests.c \
@@ -454,7 +457,7 @@ SUBDIR_UNITTESTS_SRCS = \
 	unittests/vec-utils-selftests.c \
 	unittests/xml-utils-selftests.c
 
-SUBDIR_UNITTESTS_OBS = $(patsubst %.c,%.o,$(SUBDIR_UNITTESTS_SRCS))
+SELFTESTS_OBS = $(patsubst %.c,%.o,$(SELFTESTS_SRCS))
 
 SUBDIR_TARGET_SRCS = target/waitstatus.c
 SUBDIR_TARGET_OBS = $(patsubst %.c,%.o,$(SUBDIR_TARGET_SRCS))
@@ -995,7 +998,6 @@ COMMON_SFILES = \
 	debuginfod-support.c \
 	dictionary.c \
 	disasm.c \
-	disasm-selftests.c \
 	dummy-frame.c \
 	dwarf2/abbrev.c \
 	dwarf2/attribute.c \
@@ -1034,7 +1036,6 @@ COMMON_SFILES = \
 	gdb_obstack.c \
 	gdb_regex.c \
 	gdbarch.c \
-	gdbarch-selftests.c \
 	gdbtypes.c \
 	gnu-v2-abi.c \
 	gnu-v3-abi.c \
