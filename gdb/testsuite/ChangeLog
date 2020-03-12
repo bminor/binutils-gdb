@@ -1,5 +1,12 @@
 2020-03-13  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.mi/mi-sym-info-2.c (another_char_t, another_short_t): New typedef.
+	(var1, var2): New variable.
+	* gdb.mi/mi-sym-info.exp: Add --name to various commands to restrict
+	matching symbols.
+
+2020-03-13  Tom de Vries  <tdevries@suse.de>
+
 	* lib/tuiterm.exp (Term::command_no_prompt_prefix): New proc.
 	(Term::command): Use prompt prefix.
 	(Term::enter_tui): Use command_no_prompt_prefix instead of prefix.
