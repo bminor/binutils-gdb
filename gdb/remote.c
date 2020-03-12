@@ -12835,7 +12835,7 @@ remote_target::download_tracepoint (struct bp_location *loc)
   encode_actions_rsp (loc, &tdp_actions, &stepping_actions);
 
   tpaddr = loc->address;
-  sprintf_vma (addrbuf, tpaddr);
+  strcpy (addrbuf, phex (tpaddr, sizeof (CORE_ADDR)));
   ret = snprintf (buf.data (), buf.size (), "QTDP:%x:%s:%c:%lx:%x",
 		  b->number, addrbuf, /* address */
 		  (b->enable_state == bp_enabled ? 'E' : 'D'),
@@ -13097,11 +13097,10 @@ void
 remote_target::enable_tracepoint (struct bp_location *location)
 {
   struct remote_state *rs = get_remote_state ();
-  char addr_buf[40];
 
-  sprintf_vma (addr_buf, location->address);
   xsnprintf (rs->buf.data (), get_remote_packet_size (), "QTEnable:%x:%s",
-	     location->owner->number, addr_buf);
+	     location->owner->number,
+	     phex (location->address, sizeof (CORE_ADDR)));
   putpkt (rs->buf);
   remote_get_noisy_reply ();
   if (rs->buf[0] == '\0')
@@ -13114,11 +13113,10 @@ void
 remote_target::disable_tracepoint (struct bp_location *location)
 {
   struct remote_state *rs = get_remote_state ();
-  char addr_buf[40];
 
-  sprintf_vma (addr_buf, location->address);
   xsnprintf (rs->buf.data (), get_remote_packet_size (), "QTDisable:%x:%s",
-	     location->owner->number, addr_buf);
+	     location->owner->number,
+	     phex (location->address, sizeof (CORE_ADDR)));
   putpkt (rs->buf);
   remote_get_noisy_reply ();
   if (rs->buf[0] == '\0')

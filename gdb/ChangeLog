@@ -1,5 +1,13 @@
 2020-03-12  Tom Tromey  <tom@tromey.com>
 
+	* remote.c (remote_target::download_tracepoint)
+	(remote_target::enable_tracepoint)
+	(remote_target::disable_tracepoint): Use phex, not sprintf_vma.
+	* breakpoint.c (print_recreate_masked_watchpoint): Use phex, not
+	sprintf_vma.
+
+2020-03-12  Tom Tromey  <tom@tromey.com>
+
 	* symfile-mem.c: Update CORE_ADDR size assert.
 
 2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
