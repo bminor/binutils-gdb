@@ -695,7 +695,7 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
 	}
     }
 
-  if (subfile->line_vector->nitems + 1 >= subfile->line_vector_length)
+  if (subfile->line_vector->nitems >= subfile->line_vector_length)
     {
       subfile->line_vector_length *= 2;
       subfile->line_vector = (struct linetable *)

@@ -1,3 +1,7 @@
+2020-04-01  Bernd Edlinger  <bernd.edlinger@hotmail.de>
+
+	* buildsym.c (record_line): Fix the resizing condition.
+
 2020-04-01  Tom Tromey  <tom@tromey.com>
 
 	* value.h (value_literal_complex): Add comment.
