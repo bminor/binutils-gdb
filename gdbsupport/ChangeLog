@@ -1,3 +1,9 @@
+2020-03-12  Tom Tromey  <tom@tromey.com>
+
+	* common-types.h: Remove GDBSERVER code.
+	(gdb_byte, CORE_ADDR, LONGEST, ULONGEST): Redefine.
+	* common-defs.h: Remove GDBSERVER code.
+
 2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
 
 	* selftest.m4: Moved from gdb/.

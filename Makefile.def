@@ -421,10 +421,8 @@ dependencies = { module=all-libgui; on=all-tcl; };
 dependencies = { module=all-libgui; on=all-tk; };
 dependencies = { module=all-libgui; on=all-itcl; };
 
-dependencies = { module=configure-gdbsupport; on=configure-bfd; };
 dependencies = { module=configure-gdbsupport; on=configure-gnulib; };
 dependencies = { module=configure-gdbsupport; on=configure-intl; };
-dependencies = { module=all-gdbsupport; on=all-bfd; };
 dependencies = { module=all-gdbsupport; on=all-gnulib; };
 dependencies = { module=all-gdbsupport; on=all-intl; };
 

@@ -20,40 +20,18 @@
 #ifndef COMMON_COMMON_TYPES_H
 #define COMMON_COMMON_TYPES_H
 
-#ifdef GDBSERVER
+#include <inttypes.h>
 
 /* * A byte from the program being debugged.  */
 typedef unsigned char gdb_byte;
 
-typedef unsigned long long CORE_ADDR;
-
-typedef long long LONGEST;
-typedef unsigned long long ULONGEST;
-
-#else /* GDBSERVER */
-
-#include "bfd.h"
-
-/* * A byte from the program being debugged.  */
-typedef bfd_byte gdb_byte;
-
 /* * An address in the program being debugged.  Host byte order.  */
-typedef bfd_vma CORE_ADDR;
+typedef uint64_t CORE_ADDR;
 
-/* This is to make sure that LONGEST is at least as big as CORE_ADDR.  */
+/* LONGEST must be at least as big as CORE_ADDR.  */
 
-#ifdef BFD64
-
-typedef BFD_HOST_64_BIT LONGEST;
-typedef BFD_HOST_U_64_BIT ULONGEST;
-
-#else /* No BFD64 */
-
-typedef long long LONGEST;
-typedef unsigned long long ULONGEST;
-
-#endif /* No BFD64 */
-#endif /* GDBSERVER */
+typedef int64_t LONGEST;
+typedef uint64_t ULONGEST;
 
 /* * The largest CORE_ADDR value.  */
 #define CORE_ADDR_MAX (~(CORE_ADDR) 0)
