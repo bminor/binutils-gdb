@@ -1,5 +1,10 @@
 2020-03-12  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (gdb_core_cmd): Use string_to_regexp for regexp-matching
+	$core.
+
+2020-03-12  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (gdb_core_cmd): Make "No such file or directory" regexp
 	more precise.
 
