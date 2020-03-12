@@ -33,9 +33,6 @@ AC_USE_SYSTEM_EXTENSIONS
 ACX_LARGEFILE
 AM_PROG_CC_STDC
 
-# Set the 'development' global.
-. $srcdir/../bfd/development.sh
-
 # We require a C++11 compiler.  Check if one is available, and if
 # necessary, set CXX_DIALECT to some -std=xxx switch.
 AX_CXX_COMPILE_STDCXX(11, , mandatory)

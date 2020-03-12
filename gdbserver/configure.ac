@@ -43,8 +43,7 @@ AX_CXX_COMPILE_STDCXX(11, , mandatory)
 
 AC_HEADER_STDC
 
-# Set the 'development' global.
-. $srcdir/../bfd/development.sh
+GDB_AC_COMMON
 
 GDB_AC_SELFTEST([
   srv_selftest_objs="gdbsupport/selftest.o"
@@ -76,8 +75,6 @@ AC_CHECK_HEADERS(termios.h sys/reg.h string.h dnl
 		 netinet/tcp.h arpa/inet.h)
 AC_FUNC_FORK
 AC_CHECK_FUNCS(pread pwrite pread64)
-
-GDB_AC_COMMON
 
 # Check the return and argument types of ptrace.
 GDB_AC_PTRACE

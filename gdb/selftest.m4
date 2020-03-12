@@ -26,7 +26,8 @@ AC_DEFUN([GDB_AC_SELFTEST],[
 #
 # The default value of this option changes depending whether we're on
 # development mode (in which case it's "true") or not (in which case
-# it's "false").
+# it's "false").  The $development variable is set by the GDB_AC_COMMON
+# macro, which must therefore be used before GDB_AC_SELFTEST.
 
 AS_IF([test "x$development" != xtrue && test "x$development" != xfalse],
   [AC_MSG_ERROR([Invalid value for \$development, got "$development", expecting "true" or "false".])])

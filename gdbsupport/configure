@@ -6569,9 +6569,6 @@ fi
 am_cv_prog_cc_stdc=$ac_cv_prog_cc_stdc
 
 
-# Set the 'development' global.
-. $srcdir/../bfd/development.sh
-
 # We require a C++11 compiler.  Check if one is available, and if
 # necessary, set CXX_DIALECT to some -std=xxx switch.
 
@@ -8059,6 +8056,9 @@ else
 fi
 
 
+
+  # Set the 'development' global.
+  . $srcdir/../bfd/development.sh
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
 $as_echo_n "checking for ANSI C header files... " >&6; }
@@ -10605,7 +10605,8 @@ $as_echo "$bfd_cv_have_sys_procfs_type_elf_fpregset_t" >&6; }
 #
 # The default value of this option changes depending whether we're on
 # development mode (in which case it's "true") or not (in which case
-# it's "false").
+# it's "false").  The $development variable is set by the GDB_AC_COMMON
+# macro, which must therefore be used before GDB_AC_SELFTEST.
 
 if test "x$development" != xtrue && test "x$development" != xfalse; then :
   as_fn_error $? "Invalid value for \$development, got \"$development\", expecting \"true\" or \"false\"." "$LINENO" 5

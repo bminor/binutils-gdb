@@ -1,5 +1,11 @@
 2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* configure.ac: Don't source bfd/development.sh, move
+	GDB_AC_COMMON higher.
+	* configure: Re-generate.
+
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* configure: Re-generate.
 
 2020-03-11  Simon Marchi  <simon.marchi@efficios.com>

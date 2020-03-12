@@ -2988,9 +2988,6 @@ fi
 
 
 
-# Set the 'development' global.
-. $srcdir/../bfd/development.sh
-
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -12434,6 +12431,9 @@ $as_echo "$ac_cv_path_SED" >&6; }
   rm -f conftest.sed
 
 
+  # Set the 'development' global.
+  . $srcdir/../bfd/development.sh
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
 $as_echo_n "checking for ANSI C header files... " >&6; }
 if ${ac_cv_header_stdc+:} false; then :
@@ -19186,7 +19186,8 @@ $as_echo "#define GDB_DEFAULT_HOST_CHARSET \"UTF-8\"" >>confdefs.h
 #
 # The default value of this option changes depending whether we're on
 # development mode (in which case it's "true") or not (in which case
-# it's "false").
+# it's "false").  The $development variable is set by the GDB_AC_COMMON
+# macro, which must therefore be used before GDB_AC_SELFTEST.
 
 if test "x$development" != xtrue && test "x$development" != xfalse; then :
   as_fn_error $? "Invalid value for \$development, got \"$development\", expecting \"true\" or \"false\"." "$LINENO" 5
