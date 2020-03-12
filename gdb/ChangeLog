@@ -1,3 +1,8 @@
+2020-03-30  Nelson Chu  <nelson.chu@sifive.com>
+
+	* features/riscv/32bit-csr.xml: Regenerated.
+	* features/riscv/64bit-csr.xml: Regenerated.
+
 2020-03-30  Tom Tromey  <tromey@adacore.com>
 
 	* ada-valprint.c (print_variant_part): Update.

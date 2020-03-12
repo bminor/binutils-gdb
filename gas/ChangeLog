@@ -1,3 +1,28 @@
+2020-03-30  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/gas/riscv/alias-csr.d: Move this to priv-reg-pseudo.
+	* testsuite/gas/riscv/alias-csr.s: Likewise.
+	* testsuite/gas/riscv/no-aliases-csr.d: Move this
+	to priv-reg-pseudo-noalias.
+	* testsuite/gas/riscv/bad-csr.d: Rename to priv-reg-fail-nonexistent.
+	* testsuite/gas/riscv/bad-csr.l: Likewise.
+	* testsuite/gas/riscv/bad-csr.s: Likewise.
+	* testsuite/gas/riscv/satp.d: Removed.  Already included in priv-reg.
+	* testsuite/gas/riscv/satp.s: Likewise.
+	* testsuite/gas/riscv/priv-reg-pseudo.d: New testcase for all pseudo
+	csr instruction, including alias-csr testcase.
+	* testsuite/gas/riscv/priv-reg-pseudo.s: Likewise.
+	* testsuite/gas/riscv/priv-reg-pseudo-noalias.d: New testcase for all
+	pseudo instruction with objdump -Mno-aliases.
+	* testsuite/gas/riscv/priv-reg-fail-nonexistent.d: New testcase.
+	* testsuite/gas/riscv/priv-reg-fail-nonexistent.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-nonexistent.s: Likewise.
+	* testsuite/gas/riscv/priv-reg.d: Update CSR to 1.11.
+	* testsuite/gas/riscv/priv-reg.s: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-rv32-only.l: Likewise.
+	* testsuite/gas/riscv/csr-dw-regnums.d: Likewise.
+	* testsuite/gas/riscv/csr-dw-regnums.s: Likewise.
+
 2020-03-25  J.W. Jagersma  <jwjagersma@gmail.com>
 
 	* config/obj-coff.c (obj_coff_section): Set the bss flag on

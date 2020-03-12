@@ -127,6 +127,7 @@
   <reg name="mhpmcounter29" bitsize="64"/>
   <reg name="mhpmcounter30" bitsize="64"/>
   <reg name="mhpmcounter31" bitsize="64"/>
+  <reg name="mcountinhibit" bitsize="64"/>
   <reg name="mhpmevent3" bitsize="64"/>
   <reg name="mhpmevent4" bitsize="64"/>
   <reg name="mhpmevent5" bitsize="64"/>
@@ -162,7 +163,8 @@
   <reg name="tdata3" bitsize="64"/>
   <reg name="dcsr" bitsize="64"/>
   <reg name="dpc" bitsize="64"/>
-  <reg name="dscratch" bitsize="64"/>
+  <reg name="dscratch0" bitsize="64"/>
+  <reg name="dscratch1" bitsize="64"/>
   <reg name="hstatus" bitsize="64"/>
   <reg name="hedeleg" bitsize="64"/>
   <reg name="hideleg" bitsize="64"/>
@@ -179,7 +181,6 @@
   <reg name="mibound" bitsize="64"/>
   <reg name="mdbase" bitsize="64"/>
   <reg name="mdbound" bitsize="64"/>
-  <reg name="mucounteren" bitsize="64"/>
   <reg name="mscounteren" bitsize="64"/>
   <reg name="mhcounteren" bitsize="64"/>
 </feature>

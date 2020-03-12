@@ -31,6 +31,8 @@
 .*Warning: Invalid CSR `hpmcounter29h' for the current ISA
 .*Warning: Invalid CSR `hpmcounter30h' for the current ISA
 .*Warning: Invalid CSR `hpmcounter31h' for the current ISA
+.*Warning: Invalid CSR `pmpcfg1' for the current ISA
+.*Warning: Invalid CSR `pmpcfg3' for the current ISA
 .*Warning: Invalid CSR `mcycleh' for the current ISA
 .*Warning: Invalid CSR `minstreth' for the current ISA
 .*Warning: Invalid CSR `mhpmcounter3h' for the current ISA
@@ -62,5 +64,3 @@
 .*Warning: Invalid CSR `mhpmcounter29h' for the current ISA
 .*Warning: Invalid CSR `mhpmcounter30h' for the current ISA
 .*Warning: Invalid CSR `mhpmcounter31h' for the current ISA
-.*Warning: Invalid CSR `pmpcfg1' for the current ISA
-.*Warning: Invalid CSR `pmpcfg3' for the current ISA
