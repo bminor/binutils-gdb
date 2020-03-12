@@ -1,3 +1,12 @@
+2020-03-12  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_section_headers): Don't just set
+	filedata->section_headers NULL, free it first.  Similarly for
+	dynamic_symbols, dynamic_strings, dynamic_syminfo and
+	symtab_shndx_list.  Zero associated counts too.
+	(process_object): Free symtab_shndx_list.
+	(process_file): Free various allocated filedata tables.
+
 2020-03-11  Nick Clifton  <nickc@redhat.com>
 
 	PR 25611

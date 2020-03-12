@@ -6117,6 +6117,7 @@ process_section_headers (Filedata * filedata)
   Elf_Internal_Shdr * section;
   unsigned int i;
 
+  free (filedata->section_headers);
   filedata->section_headers = NULL;
 
   if (filedata->file_header.e_shnum == 0)
@@ -6172,10 +6173,20 @@ process_section_headers (Filedata * filedata)
 
   /* Scan the sections for the dynamic symbol table
      and dynamic string table and debug sections.  */
+  free (dynamic_symbols);
   dynamic_symbols = NULL;
+  num_dynamic_syms = 0;
+  free (dynamic_strings);
   dynamic_strings = NULL;
+  dynamic_strings_length = 0;
+  free (dynamic_syminfo);
   dynamic_syminfo = NULL;
-  symtab_shndx_list = NULL;
+  while (symtab_shndx_list != NULL)
+    {
+      elf_section_list *next = symtab_shndx_list->next;
+      free (symtab_shndx_list);
+      symtab_shndx_list = next;
+    }
 
   eh_addr_size = is_32bit_elf ? 4 : 8;
   switch (filedata->file_header.e_machine)
@@ -20121,6 +20132,13 @@ process_object (Filedata * filedata)
       dynamic_section = NULL;
     }
 
+  while (symtab_shndx_list != NULL)
+    {
+      elf_section_list *next = symtab_shndx_list->next;
+      free (symtab_shndx_list);
+      symtab_shndx_list = next;
+    }
+
   if (section_headers_groups)
     {
       free (section_headers_groups);
@@ -20486,6 +20504,10 @@ process_file (char * file_name)
     }
 
   fclose (filedata->handle);
+  free (filedata->section_headers);
+  free (filedata->program_headers);
+  free (filedata->string_table);
+  free (filedata->dump_sects);
   free (filedata);
 
   return ret;
