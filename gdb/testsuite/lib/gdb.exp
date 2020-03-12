@@ -4648,7 +4648,7 @@ proc gdb_core_cmd { core test } {
 	    fail "$test (bad file format)"
 	    return -1
 	}
-	-re ": No such file or directory.*\r\n$gdb_prompt $" {
+	-re "$core: No such file or directory.*\r\n$gdb_prompt $" {
 	    fail "$test (file not found)"
 	    return -1
 	}
