@@ -22,7 +22,12 @@
 
 	.global _start,main
 _start:
+	# The area at _start is used as the displaced stepping buffer.  Put
+	# more than enough nop instructions so that the instructions under test
+	# below don't conflict with it.
+	.rept 200
 	nop
+	.endr
 main:
         nop
 

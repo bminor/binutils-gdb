@@ -1,3 +1,10 @@
+2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.arch/amd64-disp-step-avx.S: Add nops after _start.
+	* gdb.arch/amd64-disp-step-avx.exp: Enable "set debug displaced
+	on" while stepping over the test instruction, match printed
+	message.
+
 2020-03-12  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/info-types.exp: Use exp_continue during matching of output
