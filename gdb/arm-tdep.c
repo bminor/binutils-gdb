@@ -81,7 +81,7 @@ static bool arm_debug;
 
 struct arm_mapping_symbol
 {
-  bfd_vma value;
+  CORE_ADDR value;
   char type;
 
   bool operator< (const arm_mapping_symbol &other) const
@@ -1986,7 +1986,7 @@ struct frame_unwind arm_prologue_unwind = {
 
 struct arm_exidx_entry
 {
-  bfd_vma addr;
+  CORE_ADDR addr;
   gdb_byte *entry;
 
   bool operator< (const arm_exidx_entry &other) const

@@ -1,5 +1,11 @@
 2020-03-12  Tom Tromey  <tom@tromey.com>
 
+	* arm-tdep.c (struct arm_mapping_symbol) <value>: Now a
+	CORE_ADDR.
+	(struct arm_exidx_entry) <addr>: Now a CORE_ADDR.
+
+2020-03-12  Tom Tromey  <tom@tromey.com>
+
 	* remote.c (remote_target::download_tracepoint)
 	(remote_target::enable_tracepoint)
 	(remote_target::disable_tracepoint): Use phex, not sprintf_vma.
