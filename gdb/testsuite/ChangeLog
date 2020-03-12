@@ -1,5 +1,10 @@
 2020-03-12  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.fortran/module.exp: Use exp_continue during matching of output
+	of "info variable -n".
+
+2020-03-12  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.dwarf2/dw2-ranges-base.exp: Limit "maint info line-table" to
 	gdb.dwarf2/dw2-ranges-base.c.
 
