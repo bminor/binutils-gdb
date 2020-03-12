@@ -239,8 +239,26 @@ namespace eval $testfile {
 
 	set tst "complete non-unique file name"
 	send_gdb "break -source exp\t"
+	# We're matching two cases here:
+	# - without GLIBC debuginfo
+	#   (gdb) break -source exp^Glicit^G^M
+	#   explicit.c  explicit2.c  ^M
+	#   (gdb) break -source explicit^M
+	#   Source filename requires function, label, or line offset.^M
+	#   (gdb) PASS: gdb.linespec/explicit.exp: complete non-unique file name
+	# - with GLIBC debuginfo:
+	#   (gdb) break -source exp^Gl^G^M
+	#   explicit.c  explicit2.c  explicit_bzero.c  explicit_bzero_chk.c \
+	#     explodename.c  ^M
+	#   (gdb) break -source expl^M
+	#   Source filename requires function, label, or line offset.^M
+	#   (gdb) PASS: gdb.linespec/explicit.exp: complete non-unique file name
 	gdb_test_multiple "" $tst {
-	    -re "break -source exp\\\x07licit" {
+	    -re "break -source exp\\\x07l" {
+		# At this point, either output is done (first case), or a
+		# further "icit" is emitted (second case).  We have no reliable
+		# way to decide one way or another, so just send the tabs, even
+		# though that may be a little early in the second case.
 		send_gdb "\t\t"
 		gdb_test_multiple "" $tst {
 		    -re "\\\x07\r\nexplicit.c\[ \t\]+explicit2.c\[ \t\]+\(expl.*\)?\r\n$gdb_prompt" {

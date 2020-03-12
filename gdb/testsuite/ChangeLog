@@ -1,5 +1,10 @@
 2020-03-12  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.linespec/explicit.exp: Fix "complete non-unique file name" test
+	in presence of GLIBC debuginfo.
+
+2020-03-12  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (gdb_core_cmd): Use string_to_regexp for regexp-matching
 	$core.
 
