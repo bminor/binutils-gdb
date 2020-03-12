@@ -1,5 +1,10 @@
 2020-03-12  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/info-types.exp: Use exp_continue during matching of output
+	of "info types".
+
+2020-03-12  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.threads/execl.exp: Delete breakpoint after hitting it.
 
 2020-03-12  Tom de Vries  <tdevries@suse.de>
