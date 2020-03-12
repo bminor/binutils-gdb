@@ -189,7 +189,10 @@ enum type_code
     TYPE_CODE_INTERNAL_FUNCTION,
 
     /* * Methods implemented in extension languages.  */
-    TYPE_CODE_XMETHOD
+    TYPE_CODE_XMETHOD,
+
+    /* Capability type.  */
+    TYPE_CODE_CAPABILITY
   };
 
 /* * Some bits for the type's instance_flags word.  See the macros
@@ -2053,6 +2056,12 @@ struct builtin_type
      The final void return type is not significant for it.  */
 
   struct type *builtin_func_func;
+
+  /* Data address capability.  */
+  struct type *builtin_data_addr_capability;
+
+  /* Code address capability.  */
+  struct type *builtin_code_addr_capability;
 
   /* Special-purpose types.  */
 

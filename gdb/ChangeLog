@@ -1,5 +1,11 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* gdbtypes.h (enum type_code) <TYPE_CODE_CAPABILITY>: New enum.
+	(struct builtin_type) <builtin_data_addr_capability>
+	<builtin_code_addr_capability>: New fields.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* gdb/aarch64-tdep.c: Include gdbsupport/capability.h.
 	(aarch64_capability_decoding_test): New function.
 	(_initialize_aarch64_tdep): Register capability tests.
