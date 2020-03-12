@@ -1,3 +1,7 @@
+2020-03-12  Tom Tromey  <tom@tromey.com>
+
+	* symfile-mem.c: Update CORE_ADDR size assert.
+
 2020-03-12  Simon Marchi  <simon.marchi@efficios.com>
 
 	* selftest.m4: Move to gdbsupport/.

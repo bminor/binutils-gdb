@@ -57,7 +57,7 @@
 /* Verify parameters of target_read_memory_bfd and target_read_memory are
    compatible.  */
 
-gdb_static_assert (sizeof (CORE_ADDR) == sizeof (bfd_vma));
+gdb_static_assert (sizeof (CORE_ADDR) >= sizeof (bfd_vma));
 gdb_static_assert (sizeof (gdb_byte) == sizeof (bfd_byte));
 gdb_static_assert (sizeof (ssize_t) <= sizeof (bfd_size_type));
 
