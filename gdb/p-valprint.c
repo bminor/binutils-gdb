@@ -50,6 +50,11 @@ static void pascal_object_print_value_fields (struct type *, const gdb_byte *,
 					      const struct value_print_options *,
 					      struct type **, int);
 
+static void pascal_object_print_value_fields (struct value *, struct ui_file *,
+					      int,
+					      const struct value_print_options *,
+					      struct type **, int);
+
 /* Decorations for Pascal.  */
 
 static const struct generic_val_print_decorations p_decorations =
@@ -833,6 +838,10 @@ static void pascal_object_print_value (struct type *, const gdb_byte *,
 				       const struct value_print_options *,
 				       struct type **);
 
+static void pascal_object_print_value (struct value *, struct ui_file *, int,
+				       const struct value_print_options *,
+				       struct type **);
+
 /* It was changed to this after 2.4.5.  */
 const char pascal_vtbl_ptr_name[] =
 {'_', '_', 'v', 't', 'b', 'l', '_', 'p', 't', 'r', '_', 't', 'y', 'p', 'e', 0};
@@ -1062,6 +1071,188 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
   fprintf_filtered (stream, "}");
 }
 
+/* Mutually recursive subroutines of pascal_object_print_value and
+   pascal_value_print to print out a structure's fields:
+   pascal_object_print_value_fields and pascal_object_print_value.
+
+   VAL, STREAM, RECURSE, and OPTIONS have the same meanings as in
+   pascal_object_print_value and c_value_print.
+
+   DONT_PRINT is an array of baseclass types that we
+   should not print, or zero if called from top level.  */
+
+static void
+pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
+				  int recurse,
+				  const struct value_print_options *options,
+				  struct type **dont_print_vb,
+				  int dont_print_statmem)
+{
+  int i, len, n_baseclasses;
+  char *last_dont_print
+    = (char *) obstack_next_free (&dont_print_statmem_obstack);
+
+  struct type *type = check_typedef (value_type (val));
+
+  fprintf_filtered (stream, "{");
+  len = TYPE_NFIELDS (type);
+  n_baseclasses = TYPE_N_BASECLASSES (type);
+
+  /* Print out baseclasses such that we don't print
+     duplicates of virtual baseclasses.  */
+  if (n_baseclasses > 0)
+    pascal_object_print_value (val, stream, recurse + 1,
+			       options, dont_print_vb);
+
+  if (!len && n_baseclasses == 1)
+    fprintf_styled (stream, metadata_style.style (), "<No data fields>");
+  else
+    {
+      struct obstack tmp_obstack = dont_print_statmem_obstack;
+      int fields_seen = 0;
+      const gdb_byte *valaddr = value_contents_for_printing (val);
+
+      if (dont_print_statmem == 0)
+	{
+	  /* If we're at top level, carve out a completely fresh
+	     chunk of the obstack and use that until this particular
+	     invocation returns.  */
+	  obstack_finish (&dont_print_statmem_obstack);
+	}
+
+      for (i = n_baseclasses; i < len; i++)
+	{
+	  /* If requested, skip printing of static fields.  */
+	  if (!options->pascal_static_field_print
+	      && field_is_static (&TYPE_FIELD (type, i)))
+	    continue;
+	  if (fields_seen)
+	    fprintf_filtered (stream, ", ");
+	  else if (n_baseclasses > 0)
+	    {
+	      if (options->prettyformat)
+		{
+		  fprintf_filtered (stream, "\n");
+		  print_spaces_filtered (2 + 2 * recurse, stream);
+		  fputs_filtered ("members of ", stream);
+		  fputs_filtered (TYPE_NAME (type), stream);
+		  fputs_filtered (": ", stream);
+		}
+	    }
+	  fields_seen = 1;
+
+	  if (options->prettyformat)
+	    {
+	      fprintf_filtered (stream, "\n");
+	      print_spaces_filtered (2 + 2 * recurse, stream);
+	    }
+	  else
+	    {
+	      wrap_here (n_spaces (2 + 2 * recurse));
+	    }
+
+	  annotate_field_begin (TYPE_FIELD_TYPE (type, i));
+
+	  if (field_is_static (&TYPE_FIELD (type, i)))
+	    {
+	      fputs_filtered ("static ", stream);
+	      fprintf_symbol_filtered (stream,
+				       TYPE_FIELD_NAME (type, i),
+				       current_language->la_language,
+				       DMGL_PARAMS | DMGL_ANSI);
+	    }
+	  else
+	    fputs_styled (TYPE_FIELD_NAME (type, i),
+			  variable_name_style.style (), stream);
+	  annotate_field_name_end ();
+	  fputs_filtered (" = ", stream);
+	  annotate_field_value ();
+
+	  if (!field_is_static (&TYPE_FIELD (type, i))
+	      && TYPE_FIELD_PACKED (type, i))
+	    {
+	      struct value *v;
+
+	      /* Bitfields require special handling, especially due to byte
+	         order problems.  */
+	      if (TYPE_FIELD_IGNORE (type, i))
+		{
+		  fputs_styled ("<optimized out or zero length>",
+				metadata_style.style (), stream);
+		}
+	      else if (value_bits_synthetic_pointer (val,
+						     TYPE_FIELD_BITPOS (type,
+									i),
+						     TYPE_FIELD_BITSIZE (type,
+									 i)))
+		{
+		  fputs_styled (_("<synthetic pointer>"),
+				metadata_style.style (), stream);
+		}
+	      else
+		{
+		  struct value_print_options opts = *options;
+
+		  v = value_field_bitfield (type, i, valaddr, 0, val);
+
+		  opts.deref_ref = 0;
+		  common_val_print (v, stream, recurse + 1, &opts,
+				    current_language);
+		}
+	    }
+	  else
+	    {
+	      if (TYPE_FIELD_IGNORE (type, i))
+		{
+		  fputs_styled ("<optimized out or zero length>",
+				metadata_style.style (), stream);
+		}
+	      else if (field_is_static (&TYPE_FIELD (type, i)))
+		{
+		  /* struct value *v = value_static_field (type, i);
+		     v4.17 specific.  */
+		  struct value *v;
+
+		  v = value_field_bitfield (type, i, valaddr, 0, val);
+
+		  if (v == NULL)
+		    val_print_optimized_out (NULL, stream);
+		  else
+		    pascal_object_print_static_field (v, stream, recurse + 1,
+						      options);
+		}
+	      else
+		{
+		  struct value_print_options opts = *options;
+
+		  opts.deref_ref = 0;
+
+		  struct value *v = value_primitive_field (val, 0, i,
+							   value_type (val));
+		  common_val_print (v, stream, recurse + 1, &opts,
+				    current_language);
+		}
+	    }
+	  annotate_field_end ();
+	}
+
+      if (dont_print_statmem == 0)
+	{
+	  /* Free the space used to deal with the printing
+	     of the members from top level.  */
+	  obstack_free (&dont_print_statmem_obstack, last_dont_print);
+	  dont_print_statmem_obstack = tmp_obstack;
+	}
+
+      if (options->prettyformat)
+	{
+	  fprintf_filtered (stream, "\n");
+	  print_spaces_filtered (2 * recurse, stream);
+	}
+    }
+  fprintf_filtered (stream, "}");
+}
+
 /* Special val_print routine to avoid printing multiple copies of virtual
    baseclasses.  */
 
@@ -1171,6 +1362,125 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
 					  stream, recurse, val, options,
 		     (struct type **) obstack_base (&dont_print_vb_obstack),
 					  0);
+      fputs_filtered (", ", stream);
+
+    flush_it:
+      ;
+    }
+
+  if (dont_print_vb == 0)
+    {
+      /* Free the space used to deal with the printing
+         of this type from top level.  */
+      obstack_free (&dont_print_vb_obstack, last_dont_print);
+      /* Reset watermark so that we can continue protecting
+         ourselves from whatever we were protecting ourselves.  */
+      dont_print_vb_obstack = tmp_obstack;
+    }
+}
+
+/* Special val_print routine to avoid printing multiple copies of virtual
+   baseclasses.  */
+
+static void
+pascal_object_print_value (struct value *val, struct ui_file *stream,
+			   int recurse,
+			   const struct value_print_options *options,
+			   struct type **dont_print_vb)
+{
+  struct type **last_dont_print
+    = (struct type **) obstack_next_free (&dont_print_vb_obstack);
+  struct obstack tmp_obstack = dont_print_vb_obstack;
+  struct type *type = check_typedef (value_type (val));
+  int i, n_baseclasses = TYPE_N_BASECLASSES (type);
+
+  if (dont_print_vb == 0)
+    {
+      /* If we're at top level, carve out a completely fresh
+         chunk of the obstack and use that until this particular
+         invocation returns.  */
+      /* Bump up the high-water mark.  Now alpha is omega.  */
+      obstack_finish (&dont_print_vb_obstack);
+    }
+
+  for (i = 0; i < n_baseclasses; i++)
+    {
+      LONGEST boffset = 0;
+      struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
+      const char *basename = TYPE_NAME (baseclass);
+      int skip = 0;
+
+      if (BASETYPE_VIA_VIRTUAL (type, i))
+	{
+	  struct type **first_dont_print
+	    = (struct type **) obstack_base (&dont_print_vb_obstack);
+
+	  int j = (struct type **) obstack_next_free (&dont_print_vb_obstack)
+	    - first_dont_print;
+
+	  while (--j >= 0)
+	    if (baseclass == first_dont_print[j])
+	      goto flush_it;
+
+	  obstack_ptr_grow (&dont_print_vb_obstack, baseclass);
+	}
+
+      struct value *base_value;
+      try
+	{
+	  base_value = value_primitive_field (val, 0, i, type);
+	}
+      catch (const gdb_exception_error &ex)
+	{
+	  if (ex.error == NOT_AVAILABLE_ERROR)
+	    skip = -1;
+	  else
+	    skip = 1;
+	}
+
+      if (skip == 0)
+	{
+	  /* The virtual base class pointer might have been clobbered by the
+	     user program. Make sure that it still points to a valid memory
+	     location.  */
+
+	  if (boffset < 0 || boffset >= TYPE_LENGTH (type))
+	    {
+	      CORE_ADDR address= value_address (val);
+	      gdb::byte_vector buf (TYPE_LENGTH (baseclass));
+
+	      if (target_read_memory (address + boffset, buf.data (),
+				      TYPE_LENGTH (baseclass)) != 0)
+		skip = 1;
+	      base_value = value_from_contents_and_address (baseclass,
+							    buf.data (),
+							    address + boffset);
+	      baseclass = value_type (base_value);
+	      boffset = 0;
+	    }
+	}
+
+      if (options->prettyformat)
+	{
+	  fprintf_filtered (stream, "\n");
+	  print_spaces_filtered (2 * recurse, stream);
+	}
+      fputs_filtered ("<", stream);
+      /* Not sure what the best notation is in the case where there is no
+         baseclass name.  */
+
+      fputs_filtered (basename ? basename : "", stream);
+      fputs_filtered ("> = ", stream);
+
+      if (skip < 0)
+	val_print_unavailable (stream);
+      else if (skip > 0)
+	val_print_invalid_address (stream);
+      else
+	pascal_object_print_value_fields
+	  (base_value, stream, recurse, options,
+	   (struct type **) obstack_base (&dont_print_vb_obstack),
+	   0);
       fputs_filtered (", ", stream);
 
     flush_it:
