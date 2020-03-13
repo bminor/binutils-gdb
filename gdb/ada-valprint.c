@@ -274,12 +274,6 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
   value_free_to_mark (mark);
 }
 
-static struct type *
-printable_val_type (struct type *type, const gdb_byte *valaddr)
-{
-  return ada_to_fixed_type (ada_aligned_type (type), valaddr, 0, NULL, 1);
-}
-
 /* Print the character C on STREAM as part of the contents of a literal
    string whose delimiter is QUOTER.  TYPE_LEN is the length in bytes
    of the character.  */
@@ -782,32 +776,6 @@ ada_val_print_gnat_array (struct value *val,
 		      language_def (language_ada));
 }
 
-/* Implement Ada val_print'ing for the case where TYPE is
-   a TYPE_CODE_PTR.  */
-
-static void
-ada_val_print_ptr (struct type *type, const gdb_byte *valaddr,
-		   int offset, int offset_aligned, CORE_ADDR address,
-		   struct ui_file *stream, int recurse,
-		   struct value *original_value,
-		   const struct value_print_options *options)
-{
-  val_print (type, offset, address, stream, recurse,
-	     original_value, options, language_def (language_c));
-
-  if (ada_is_tag_type (type))
-    {
-      struct value *val =
-	value_from_contents_and_address (type,
-					 valaddr + offset_aligned,
-					 address + offset_aligned);
-      const char *name = ada_tag_name (val);
-
-      if (name != NULL)
-	fprintf_filtered (stream, " (%s)", name);
-    }
-}
-
 /* Implement Ada value_print'ing for the case where TYPE is a
    TYPE_CODE_PTR.  */
 
@@ -825,109 +793,6 @@ ada_value_print_ptr (struct value *val,
 
       if (name != NULL)
 	fprintf_filtered (stream, " (%s)", name);
-    }
-}
-
-/* Implement Ada val_print'ing for the case where TYPE is
-   a TYPE_CODE_INT or TYPE_CODE_RANGE.  */
-
-static void
-ada_val_print_num (struct type *type, const gdb_byte *valaddr,
-		   int offset, int offset_aligned, CORE_ADDR address,
-		   struct ui_file *stream, int recurse,
-		   struct value *original_value,
-		   const struct value_print_options *options)
-{
-  if (ada_is_fixed_point_type (type))
-    {
-      struct value *scale = ada_scaling_factor (type);
-      struct value *v = value_from_contents (type, valaddr + offset_aligned);
-      v = value_cast (value_type (scale), v);
-      v = value_binop (v, scale, BINOP_MUL);
-
-      const char *fmt = TYPE_LENGTH (type) < 4 ? "%.11g" : "%.17g";
-      std::string str
-	= target_float_to_string (value_contents (v), value_type (v), fmt);
-      fputs_filtered (str.c_str (), stream);
-      return;
-    }
-  else if (TYPE_CODE (type) == TYPE_CODE_RANGE
-	   && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ENUM
-	       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_BOOL
-	       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CHAR))
-    {
-      /* For enum-valued ranges, we want to recurse, because we'll end
-	 up printing the constant's name rather than its numeric
-	 value.  Character and fixed-point types are also printed
-	 differently, so recuse for those as well.  */
-      struct type *target_type = TYPE_TARGET_TYPE (type);
-
-      if (TYPE_LENGTH (type) != TYPE_LENGTH (target_type))
-	{
-	  /* Obscure case of range type that has different length from
-	     its base type.  Perform a conversion, or we will get a
-	     nonsense value.  Actually, we could use the same
-	     code regardless of lengths; I'm just avoiding a cast.  */
-	  struct value *v1
-	    = value_from_contents_and_address (type, valaddr + offset, 0);
-	  struct value *v = value_cast (target_type, v1);
-
-	  val_print (target_type,
-		     value_embedded_offset (v), 0, stream,
-		     recurse + 1, v, options,
-		     language_def (language_ada));
-	}
-      else
-	val_print (TYPE_TARGET_TYPE (type), offset,
-		   address, stream, recurse, original_value,
-		   options, language_def (language_ada));
-      return;
-    }
-  else
-    {
-      int format = (options->format ? options->format
-		    : options->output_format);
-
-      if (format)
-	{
-	  struct value_print_options opts = *options;
-
-	  opts.format = format;
-	  val_print_scalar_formatted (type, offset_aligned,
-				      original_value, &opts, 0, stream);
-	}
-      else if (ada_is_system_address_type (type))
-	{
-	  /* FIXME: We want to print System.Address variables using
-	     the same format as for any access type.  But for some
-	     reason GNAT encodes the System.Address type as an int,
-	     so we have to work-around this deficiency by handling
-	     System.Address values as a special case.  */
-
-	  struct gdbarch *gdbarch = get_type_arch (type);
-	  struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-	  CORE_ADDR addr = extract_typed_address (valaddr + offset_aligned,
-						  ptr_type);
-
-	  fprintf_filtered (stream, "(");
-	  type_print (type, "", stream, -1);
-	  fprintf_filtered (stream, ") ");
-	  fputs_filtered (paddress (gdbarch, addr), stream);
-	}
-      else
-	{
-	  val_print_scalar_formatted (type, offset_aligned,
-				      original_value, options, 0, stream);
-	  if (ada_is_character_type (type))
-	    {
-	      LONGEST c;
-
-	      fputs_filtered (" ", stream);
-	      c = unpack_long (type, valaddr + offset_aligned);
-	      ada_printchar (c, type, stream);
-	    }
-	}
-      return;
     }
 }
 
@@ -1017,10 +882,7 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
    a TYPE_CODE_ENUM.  */
 
 static void
-ada_val_print_enum (struct type *type, const gdb_byte *valaddr,
-		    int offset, int offset_aligned, CORE_ADDR address,
-		    struct ui_file *stream, int recurse,
-		    struct value *original_value,
+ada_val_print_enum (struct value *value, struct ui_file *stream, int recurse,
 		    const struct value_print_options *options)
 {
   int i;
@@ -1029,10 +891,13 @@ ada_val_print_enum (struct type *type, const gdb_byte *valaddr,
 
   if (options->format)
     {
-      val_print_scalar_formatted (type, offset_aligned,
-				  original_value, options, 0, stream);
+      value_print_scalar_formatted (value, options, 0, stream);
       return;
     }
+
+  struct type *type = ada_check_typedef (value_type (value));
+  const gdb_byte *valaddr = value_contents_for_printing (value);
+  int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;
 
   len = TYPE_NFIELDS (type);
   val = unpack_long (type, valaddr + offset_aligned);
@@ -1056,26 +921,6 @@ ada_val_print_enum (struct type *type, const gdb_byte *valaddr,
     }
   else
     print_longest (stream, 'd', 0, val);
-}
-
-/* Implement Ada val_print'ing for the case where TYPE is
-   a TYPE_CODE_FLT.  */
-
-static void
-ada_val_print_flt (struct type *type, const gdb_byte *valaddr,
-		   int offset, int offset_aligned, CORE_ADDR address,
-		   struct ui_file *stream, int recurse,
-		   struct value *original_value,
-		   const struct value_print_options *options)
-{
-  if (options->format)
-    {
-      val_print (type, offset, address, stream, recurse,
-		 original_value, options, language_def (language_c));
-      return;
-    }
-
-  ada_print_floating (valaddr + offset, type, stream);
 }
 
 /* Implement Ada val_print'ing for the case where TYPE is
@@ -1106,37 +951,6 @@ ada_val_print_struct_union
       print_spaces_filtered (2 * recurse, stream);
     }
 
-  fprintf_filtered (stream, ")");
-}
-
-/* Implement Ada val_print'ing for the case where TYPE is
-   a TYPE_CODE_ARRAY.  */
-
-static void
-ada_val_print_array (struct type *type, const gdb_byte *valaddr,
-		     int offset, int offset_aligned, CORE_ADDR address,
-		     struct ui_file *stream, int recurse,
-		     struct value *original_value,
-		     const struct value_print_options *options)
-{
-  /* For an array of characters, print with string syntax.  */
-  if (ada_is_string_type (type)
-      && (options->format == 0 || options->format == 's'))
-    {
-      ada_val_print_string (type, valaddr, offset_aligned,
-			    stream, recurse, options);
-      return;
-    }
-
-  fprintf_filtered (stream, "(");
-  print_optional_low_bound (stream, type, options);
-  if (TYPE_FIELD_BITSIZE (type, 0) > 0)
-    val_print_packed_array_elements (type, valaddr, offset_aligned,
-				     stream, recurse, options);
-  else
-    val_print_array_elements (type, offset_aligned, address,
-			      stream, recurse, original_value,
-			      options, 0);
   fprintf_filtered (stream, ")");
 }
 
@@ -1238,113 +1052,6 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
 		    options, language_def (language_ada));
 }
 
-/* See the comment on ada_val_print.  This function differs in that it
-   does not catch evaluation errors (leaving that to ada_val_print).  */
-
-static void
-ada_val_print_1 (struct type *type,
-		 int offset, CORE_ADDR address,
-		 struct ui_file *stream, int recurse,
-		 struct value *original_value,
-		 const struct value_print_options *options)
-{
-  int offset_aligned;
-  const gdb_byte *valaddr = value_contents_for_printing (original_value);
-
-  type = ada_check_typedef (type);
-
-  if (ada_is_array_descriptor_type (type)
-      || (ada_is_constrained_packed_array_type (type)
-	  && TYPE_CODE (type) != TYPE_CODE_PTR))
-    {
-      struct value *val = value_from_contents_and_address (type,
-							   valaddr + offset,
-							   address);
-      ada_val_print_gnat_array (val, stream, recurse, options);
-      return;
-    }
-
-  offset_aligned = offset + ada_aligned_value_addr (type, valaddr) - valaddr;
-  type = printable_val_type (type, valaddr + offset_aligned);
-  type = resolve_dynamic_type (type, valaddr + offset_aligned,
-			       address + offset_aligned);
-
-  switch (TYPE_CODE (type))
-    {
-    default:
-      val_print (type, offset, address, stream, recurse,
-		 original_value, options, language_def (language_c));
-      break;
-
-    case TYPE_CODE_PTR:
-      ada_val_print_ptr (type, valaddr, offset, offset_aligned,
-			 address, stream, recurse, original_value,
-			 options);
-      break;
-
-    case TYPE_CODE_INT:
-    case TYPE_CODE_RANGE:
-      ada_val_print_num (type, valaddr, offset, offset_aligned,
-			 address, stream, recurse, original_value,
-			 options);
-      break;
-
-    case TYPE_CODE_ENUM:
-      ada_val_print_enum (type, valaddr, offset, offset_aligned,
-			  address, stream, recurse, original_value,
-			  options);
-      break;
-
-    case TYPE_CODE_FLT:
-      ada_val_print_flt (type, valaddr, offset, offset_aligned,
-			 address, stream, recurse, original_value,
-			 options);
-      break;
-
-    case TYPE_CODE_UNION:
-    case TYPE_CODE_STRUCT:
-      ada_val_print_struct_union (type, valaddr, offset, offset_aligned,
-				  address, stream, recurse,
-				  original_value, options);
-      break;
-
-    case TYPE_CODE_ARRAY:
-      ada_val_print_array (type, valaddr, offset, offset_aligned,
-			   address, stream, recurse, original_value,
-			   options);
-      return;
-
-    case TYPE_CODE_REF:
-      ada_val_print_ref (type, valaddr, offset, offset_aligned,
-			 address, stream, recurse, original_value,
-			 options);
-      break;
-    }
-}
-
-/* See val_print for a description of the various parameters of this
-   function; they are identical.  */
-
-void
-ada_val_print (struct type *type,
-	       int embedded_offset, CORE_ADDR address,
-	       struct ui_file *stream, int recurse,
-	       struct value *val,
-	       const struct value_print_options *options)
-{
-  try
-    {
-      ada_val_print_1 (type, embedded_offset, address,
-		       stream, recurse, val, options);
-    }
-  catch (const gdb_exception_error &except)
-    {
-      fprintf_styled (stream, metadata_style.style (),
-		      _("<error reading variable: %s>"),
-		      except.what ());
-    }
-}
-
 /* See the comment on ada_value_print.  This function differs in that
    it does not catch evaluation errors (leaving that to
    ada_value_print).  */
@@ -1393,9 +1100,7 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_ENUM:
-      ada_val_print_enum (type, valaddr, 0, 0,
-			  address, stream, recurse, val,
-			  options);
+      ada_val_print_enum (val, stream, recurse, options);
       break;
 
     case TYPE_CODE_FLT:

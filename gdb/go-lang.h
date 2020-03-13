@@ -80,14 +80,6 @@ extern void go_print_type (struct type *type, const char *varstring,
 			   struct ui_file *stream, int show, int level,
 			   const struct type_print_options *flags);
 
-/* Defined in go-valprint.c.  */
-
-extern void go_val_print (struct type *type,
-			  int embedded_offset, CORE_ADDR address,
-			  struct ui_file *stream, int recurse,
-			  struct value *val,
-			  const struct value_print_options *options);
-
 /* Implement la_value_print_inner for Go.  */
 
 extern void go_value_print_inner (struct value *value,

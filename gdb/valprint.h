@@ -128,24 +128,12 @@ extern void maybe_print_array_index (struct type *index_type, LONGEST index,
                                      struct ui_file *stream,
 				     const struct value_print_options *);
 
-extern void val_print_array_elements (struct type *, LONGEST,
-				      CORE_ADDR, struct ui_file *, int,
-				      struct value *,
-				      const struct value_print_options *,
-				      unsigned int);
 
 /* Print elements of an array.  */
 
 extern void value_print_array_elements (struct value *, struct ui_file *, int,
 					const struct value_print_options *,
 					unsigned int);
-
-extern void val_print_scalar_formatted (struct type *,
-					LONGEST,
-					struct value *,
-					const struct value_print_options *,
-					int,
-					struct ui_file *);
 
 /* Print a scalar according to OPTIONS and SIZE on STREAM.  Format 'i'
    is not supported at this level.
@@ -219,13 +207,6 @@ struct generic_val_print_decorations
   const char *array_end;
 };
 
-
-extern void generic_val_print (struct type *type,
-			       int embedded_offset, CORE_ADDR address,
-			       struct ui_file *stream, int recurse,
-			       struct value *original_value,
-			       const struct value_print_options *options,
-			       const struct generic_val_print_decorations *);
 
 /* Print a value in a generic way.  VAL is the value, STREAM is where
    to print it, RECURSE is the recursion depth, OPTIONS describe how

@@ -228,113 +228,6 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
     }
 }
 
-/* c_val_print helper for TYPE_CODE_ARRAY.  */
-
-static void
-c_val_print_array (struct type *type, const gdb_byte *valaddr,
-		   int embedded_offset, CORE_ADDR address,
-		   struct ui_file *stream, int recurse,
-		   struct value *original_value,
-		   const struct value_print_options *options)
-{
-  struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
-  struct type *elttype = check_typedef (unresolved_elttype);
-  struct gdbarch *arch = get_type_arch (type);
-  int unit_size = gdbarch_addressable_memory_unit_size (arch);
-
-  if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (unresolved_elttype) > 0)
-    {
-      LONGEST low_bound, high_bound;
-      int eltlen, len;
-      enum bfd_endian byte_order = type_byte_order (type);
-
-      if (!get_array_bounds (type, &low_bound, &high_bound))
-	error (_("Could not determine the array high bound"));
-
-      eltlen = TYPE_LENGTH (elttype);
-      len = high_bound - low_bound + 1;
-      if (options->prettyformat_arrays)
-	{
-	  print_spaces_filtered (2 + 2 * recurse, stream);
-	}
-
-      /* Print arrays of textual chars with a string syntax, as
-	 long as the entire array is valid.  */
-      if (c_textual_element_type (unresolved_elttype,
-				  options->format)
-	  && value_bytes_available (original_value, embedded_offset,
-				    TYPE_LENGTH (type))
-	  && !value_bits_any_optimized_out (original_value,
-					    TARGET_CHAR_BIT * embedded_offset,
-					    TARGET_CHAR_BIT * TYPE_LENGTH (type)))
-	{
-	  int force_ellipses = 0;
-
-	  /* If requested, look for the first null char and only
-	     print elements up to it.  */
-	  if (options->stop_print_at_null)
-	    {
-	      unsigned int temp_len;
-
-	      for (temp_len = 0;
-		   (temp_len < len
-		    && temp_len < options->print_max
-		    && extract_unsigned_integer (valaddr
-						 + embedded_offset * unit_size
-						 + temp_len * eltlen,
-						 eltlen, byte_order) != 0);
-		   ++temp_len)
-		;
-
-	      /* Force LA_PRINT_STRING to print ellipses if
-		 we've printed the maximum characters and
-		 the next character is not \000.  */
-	      if (temp_len == options->print_max && temp_len < len)
-		{
-		  ULONGEST val
-		    = extract_unsigned_integer (valaddr
-						+ embedded_offset * unit_size
-						+ temp_len * eltlen,
-						eltlen, byte_order);
-		  if (val != 0)
-		    force_ellipses = 1;
-		}
-
-	      len = temp_len;
-	    }
-
-	  LA_PRINT_STRING (stream, unresolved_elttype,
-			   valaddr + embedded_offset * unit_size, len,
-			   NULL, force_ellipses, options);
-	}
-      else
-	{
-	  unsigned int i = 0;
-	  fprintf_filtered (stream, "{");
-	  /* If this is a virtual function table, print the 0th
-	     entry specially, and the rest of the members
-	     normally.  */
-	  if (cp_is_vtbl_ptr_type (elttype))
-	    {
-	      i = 1;
-	      fprintf_filtered (stream, _("%d vtable entries"),
-				len - 1);
-	    }
-	  val_print_array_elements (type, embedded_offset,
-				    address, stream,
-				    recurse, original_value, options, i);
-	  fprintf_filtered (stream, "}");
-	}
-    }
-  else
-    {
-      /* Array of unspecified length: treat like pointer to first elt.  */
-      print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
-			      embedded_offset, address + embedded_offset,
-			      stream, recurse, options);
-    }
-}
-
 /* c_value_print helper for TYPE_CODE_ARRAY.  */
 
 static void
@@ -431,46 +324,6 @@ c_value_print_array (struct value *val,
     }
 }
 
-/* c_val_print helper for TYPE_CODE_PTR.  */
-
-static void
-c_val_print_ptr (struct type *type, const gdb_byte *valaddr,
-		 int embedded_offset, struct ui_file *stream, int recurse,
-		 struct value *original_value,
-		 const struct value_print_options *options)
-{
-  struct gdbarch *arch = get_type_arch (type);
-  int unit_size = gdbarch_addressable_memory_unit_size (arch);
-
-  if (options->format && options->format != 's')
-    {
-      val_print_scalar_formatted (type, embedded_offset,
-				  original_value, options, 0, stream);
-    }
-  else if (options->vtblprint && cp_is_vtbl_ptr_type (type))
-    {
-      /* Print the unmangled name if desired.  */
-      /* Print vtable entry - we only get here if we ARE using
-	 -fvtable_thunks.  (Otherwise, look under
-	 TYPE_CODE_STRUCT.)  */
-      CORE_ADDR addr
-	= extract_typed_address (valaddr + embedded_offset, type);
-      struct gdbarch *gdbarch = get_type_arch (type);
-
-      print_function_pointer_address (options, gdbarch, addr, stream);
-    }
-  else
-    {
-      struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
-      struct type *elttype = check_typedef (unresolved_elttype);
-      CORE_ADDR addr = unpack_pointer (type,
-				       valaddr + embedded_offset * unit_size);
-
-      print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
-			      embedded_offset, addr, stream, recurse, options);
-    }
-}
-
 /* c_value_print_inner helper for TYPE_CODE_PTR.  */
 
 static void
@@ -508,38 +361,6 @@ c_value_print_ptr (struct value *val, struct ui_file *stream, int recurse,
     }
 }
 
-/* c_val_print helper for TYPE_CODE_STRUCT.  */
-
-static void
-c_val_print_struct (struct type *type, const gdb_byte *valaddr,
-		    int embedded_offset, CORE_ADDR address,
-		    struct ui_file *stream, int recurse,
-		    struct value *original_value,
-		    const struct value_print_options *options)
-{
-  if (options->vtblprint && cp_is_vtbl_ptr_type (type))
-    {
-      /* Print the unmangled name if desired.  */
-      /* Print vtable entry - we only get here if NOT using
-	 -fvtable_thunks.  (Otherwise, look under
-	 TYPE_CODE_PTR.)  */
-      struct gdbarch *gdbarch = get_type_arch (type);
-      int offset = (embedded_offset
-		    + TYPE_FIELD_BITPOS (type,
-					 VTBL_FNADDR_OFFSET) / 8);
-      struct type *field_type = TYPE_FIELD_TYPE (type, VTBL_FNADDR_OFFSET);
-      CORE_ADDR addr = extract_typed_address (valaddr + offset, field_type);
-
-      print_function_pointer_address (options, gdbarch, addr, stream);
-    }
-  else
-    cp_print_value_fields_rtti (type, valaddr,
-				embedded_offset, address,
-				stream, recurse,
-				original_value, options,
-				NULL, 0);
-}
-
 /* c_value_print helper for TYPE_CODE_STRUCT and TYPE_CODE_UNION.  */
 
 static void
@@ -566,64 +387,6 @@ c_value_print_struct (struct value *val, struct ui_file *stream, int recurse,
     }
   else
     cp_print_value_fields (val, stream, recurse, options, NULL, 0);
-}
-
-/* c_val_print helper for TYPE_CODE_UNION.  */
-
-static void
-c_val_print_union (struct type *type, const gdb_byte *valaddr,
-		   int embedded_offset, CORE_ADDR address,
-		   struct ui_file *stream, int recurse,
-		   struct value *original_value,
-		   const struct value_print_options *options)
-{
-  if (recurse && !options->unionprint)
-    {
-      fprintf_filtered (stream, "{...}");
-     }
-  else
-    {
-      c_val_print_struct (type, valaddr, embedded_offset, address, stream,
-			  recurse, original_value, options);
-    }
-}
-
-/* c_val_print helper for TYPE_CODE_INT.  */
-
-static void
-c_val_print_int (struct type *type, struct type *unresolved_type,
-		 const gdb_byte *valaddr, int embedded_offset,
-		 struct ui_file *stream, struct value *original_value,
-		 const struct value_print_options *options)
-{
-  struct gdbarch *arch = get_type_arch (type);
-  int unit_size = gdbarch_addressable_memory_unit_size (arch);
-
-  if (options->format || options->output_format)
-    {
-      struct value_print_options opts = *options;
-
-      opts.format = (options->format ? options->format
-		     : options->output_format);
-      val_print_scalar_formatted (type, embedded_offset,
-				  original_value, &opts, 0, stream);
-    }
-  else
-    {
-      val_print_scalar_formatted (type, embedded_offset,
-				  original_value, options, 0, stream);
-      /* C and C++ has no single byte int type, char is used
-	 instead.  Since we don't know whether the value is really
-	 intended to be used as an integer or a character, print
-	 the character equivalent as well.  */
-      if (c_textual_element_type (unresolved_type, options->format))
-	{
-	  fputs_filtered (" ", stream);
-	  LA_PRINT_CHAR (unpack_long (type,
-				      valaddr + embedded_offset * unit_size),
-			 unresolved_type, stream);
-	}
-    }
 }
 
 /* c_value_print helper for TYPE_CODE_INT.  */
@@ -657,26 +420,6 @@ c_value_print_int (struct value *val, struct ui_file *stream,
     }
 }
 
-/* c_val_print helper for TYPE_CODE_MEMBERPTR.  */
-
-static void
-c_val_print_memberptr (struct type *type, const gdb_byte *valaddr,
-		       int embedded_offset, CORE_ADDR address,
-		       struct ui_file *stream, int recurse,
-		       struct value *original_value,
-		       const struct value_print_options *options)
-{
-  if (!options->format)
-    {
-      cp_print_class_member (valaddr + embedded_offset, type, stream, "&");
-    }
-  else
-    {
-      generic_val_print (type, embedded_offset, address, stream,
-			 recurse, original_value, options, &c_decorations);
-    }
-}
-
 /* c_value_print helper for TYPE_CODE_MEMBERPTR.  */
 
 static void
@@ -692,79 +435,6 @@ c_value_print_memberptr (struct value *val, struct ui_file *stream,
     }
   else
     generic_value_print (val, stream, recurse, options, &c_decorations);
-}
-
-/* See val_print for a description of the various parameters of this
-   function; they are identical.  */
-
-void
-c_val_print (struct type *type,
-	     int embedded_offset, CORE_ADDR address,
-	     struct ui_file *stream, int recurse,
-	     struct value *original_value,
-	     const struct value_print_options *options)
-{
-  struct type *unresolved_type = type;
-  const gdb_byte *valaddr = value_contents_for_printing (original_value);
-
-  type = check_typedef (type);
-  switch (TYPE_CODE (type))
-    {
-    case TYPE_CODE_ARRAY:
-      c_val_print_array (type, valaddr, embedded_offset, address, stream,
-			 recurse, original_value, options);
-      break;
-
-    case TYPE_CODE_METHODPTR:
-      cplus_print_method_ptr (valaddr + embedded_offset, type, stream);
-      break;
-
-    case TYPE_CODE_PTR:
-      c_val_print_ptr (type, valaddr, embedded_offset, stream, recurse,
-		       original_value, options);
-      break;
-
-    case TYPE_CODE_UNION:
-      c_val_print_union (type, valaddr, embedded_offset, address, stream,
-			 recurse, original_value, options);
-      break;
-
-    case TYPE_CODE_STRUCT:
-      c_val_print_struct (type, valaddr, embedded_offset, address, stream,
-			  recurse, original_value, options);
-      break;
-
-    case TYPE_CODE_INT:
-      c_val_print_int (type, unresolved_type, valaddr, embedded_offset, stream,
-		       original_value, options);
-      break;
-
-    case TYPE_CODE_MEMBERPTR:
-      c_val_print_memberptr (type, valaddr, embedded_offset, address, stream,
-			     recurse, original_value, options);
-      break;
-
-    case TYPE_CODE_REF:
-    case TYPE_CODE_RVALUE_REF:
-    case TYPE_CODE_ENUM:
-    case TYPE_CODE_FLAGS:
-    case TYPE_CODE_FUNC:
-    case TYPE_CODE_METHOD:
-    case TYPE_CODE_BOOL:
-    case TYPE_CODE_RANGE:
-    case TYPE_CODE_FLT:
-    case TYPE_CODE_DECFLOAT:
-    case TYPE_CODE_VOID:
-    case TYPE_CODE_ERROR:
-    case TYPE_CODE_UNDEF:
-    case TYPE_CODE_COMPLEX:
-    case TYPE_CODE_CHAR:
-    default:
-      generic_val_print (type, embedded_offset, address,
-			 stream, recurse, original_value, options,
-			 &c_decorations);
-      break;
-    }
 }
 
 /* See c-lang.h.  */

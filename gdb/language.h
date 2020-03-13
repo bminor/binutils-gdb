@@ -249,30 +249,6 @@ struct language_defn
 			      struct ui_file *stream);
 
     /* Print a value using syntax appropriate for this language.
-       
-       TYPE is the type of the sub-object to be printed.
-
-       EMBEDDED_OFFSET is the offset into the outermost object of the
-       sub-object represented by TYPE.  This is the object which this
-       call should print.  Note that the enclosing type is not
-       available.
-
-       ADDRESS is the address in the inferior of the enclosing object.
-
-       STREAM is the stream on which the value is to be printed.
-
-       RECURSE is the recursion depth.  It is zero-based.
-
-       OPTIONS are the formatting options to be used when
-       printing.  */
-
-    void (*la_val_print) (struct type *type,
-			  int embedded_offset, CORE_ADDR address,
-			  struct ui_file *stream, int recurse,
-			  struct value *val,
-			  const struct value_print_options *options);
-
-    /* Print a value using syntax appropriate for this language.
        RECURSE is the recursion depth.  It is zero-based.  */
 
     void (*la_value_print_inner) (struct value *, struct ui_file *,

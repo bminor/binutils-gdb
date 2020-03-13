@@ -1097,13 +1097,6 @@ extern void value_print_array_elements (struct value *val,
 extern std::vector<value_ref_ptr> value_release_to_mark
     (const struct value *mark);
 
-extern void val_print (struct type *type,
-		       LONGEST embedded_offset, CORE_ADDR address,
-		       struct ui_file *stream, int recurse,
-		       struct value *val,
-		       const struct value_print_options *options,
-		       const struct language_defn *language);
-
 extern void common_val_print (struct value *val,
 			      struct ui_file *stream, int recurse,
 			      const struct value_print_options *options,

@@ -76,14 +76,6 @@ extern struct block_symbol d_lookup_symbol_nonlocal (const struct language_defn 
 extern struct block_symbol d_lookup_nested_symbol (struct type *, const char *,
 						   const struct block *);
 
-/* Defined in d-valprint.c  */
-
-extern void d_val_print (struct type *type,
-			 int embedded_offset, CORE_ADDR address,
-			 struct ui_file *stream, int recurse,
-			 struct value *val,
-			 const struct value_print_options *options);
-
 /* Implement la_value_print_inner for D.  */
 
 extern void d_value_print_inner (struct value *val,

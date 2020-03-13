@@ -69,30 +69,6 @@ dynamic_array_type (struct type *type,
   return 1;
 }
 
-/* Implements the la_val_print routine for language D.  */
-void
-d_val_print (struct type *type, int embedded_offset,
-             CORE_ADDR address, struct ui_file *stream, int recurse,
-	     struct value *val,
-             const struct value_print_options *options)
-{
-  int ret;
-
-  type = check_typedef (type);
-  switch (TYPE_CODE (type))
-    {
-      case TYPE_CODE_STRUCT:
-	ret = dynamic_array_type (type, embedded_offset, address,
-				  stream, recurse, val, options);
-	if (ret == 0)
-	  break;
-	/* Fall through.  */
-      default:
-	c_val_print (type, embedded_offset, address, stream,
-		     recurse, val, options);
-    }
-}
-
 /* See d-lang.h.  */
 
 void

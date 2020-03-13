@@ -545,18 +545,6 @@ static const struct generic_val_print_decorations rust_decorations =
   "]"
 };
 
-/* la_val_print implementation for Rust.  */
-
-static void
-rust_val_print (struct type *type, int embedded_offset,
-		CORE_ADDR address, struct ui_file *stream, int recurse,
-		struct value *val,
-		const struct value_print_options *options)
-{
-  generic_val_print (type, embedded_offset, address, stream,
-		     recurse, val, options, &rust_decorations);
-}
-
 /* la_value_print_inner implementation for Rust.  */
 static void
 rust_value_print_inner (struct value *val, struct ui_file *stream,
@@ -2157,7 +2145,6 @@ extern const struct language_defn rust_language_defn =
   rust_emitchar,		/* Print a single char */
   rust_print_type,		/* Print a type using appropriate syntax */
   rust_print_typedef,		/* Print a typedef using appropriate syntax */
-  rust_val_print,		/* Print a value using appropriate syntax */
   rust_value_print_inner,	/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
   default_read_var_value,	/* la_read_var_value */

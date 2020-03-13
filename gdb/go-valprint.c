@@ -84,45 +84,6 @@ print_go_string (struct type *type,
   val_print_string (elt_type, NULL, addr, length, stream, options);
 }
 
-/* Implements the la_val_print routine for language Go.  */
-
-void
-go_val_print (struct type *type, int embedded_offset,
-	      CORE_ADDR address, struct ui_file *stream, int recurse,
-	      struct value *val,
-	      const struct value_print_options *options)
-{
-  type = check_typedef (type);
-
-  switch (TYPE_CODE (type))
-    {
-      case TYPE_CODE_STRUCT:
-	{
-	  enum go_type go_type = go_classify_struct_type (type);
-
-	  switch (go_type)
-	    {
-	    case GO_TYPE_STRING:
-	      if (! options->raw)
-		{
-		  print_go_string (type, embedded_offset, address,
-				   stream, recurse, val, options);
-		  return;
-		}
-	      break;
-	    default:
-	      break;
-	    }
-	}
-	/* Fall through.  */
-
-      default:
-	c_val_print (type, embedded_offset, address, stream,
-		     recurse, val, options);
-	break;
-    }
-}
-
 /* See go-lang.h.  */
 
 void

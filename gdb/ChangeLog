@@ -1,5 +1,67 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* value.h (val_print): Don't declare.
+	* valprint.h (val_print_array_elements)
+	(val_print_scalar_formatted, generic_val_print): Don't declare.
+	* valprint.c (generic_val_print_array): Take a struct value.
+	(generic_val_print_ptr, generic_val_print_memberptr)
+	(generic_val_print_bool, generic_val_print_int)
+	(generic_val_print_char, generic_val_print_complex)
+	(generic_val_print): Remove.
+	(generic_value_print): Update.
+	(do_val_print): Remove unused parameters.  Don't call
+	la_val_print.
+	(val_print): Remove.
+	(common_val_print): Update.  Don't call value_check_printable.
+	(val_print_scalar_formatted, val_print_array_elements): Remove.
+	* rust-lang.c (rust_val_print): Remove.
+	(rust_language_defn): Update.
+	* p-valprint.c (pascal_val_print): Remove.
+	(pascal_value_print_inner): Update.
+	(pascal_object_print_val_fields, pascal_object_print_val):
+	Remove.
+	(pascal_object_print_static_field): Update.
+	* p-lang.h (pascal_val_print): Don't declare.
+	* p-lang.c (pascal_language_defn): Update.
+	* opencl-lang.c (opencl_language_defn): Update.
+	* objc-lang.c (objc_language_defn): Update.
+	* m2-valprint.c (m2_print_unbounded_array, m2_val_print): Remove.
+	* m2-lang.h (m2_val_print): Don't declare.
+	* m2-lang.c (m2_language_defn): Update.
+	* language.h (struct language_defn) <la_val_print>: Remove.
+	* language.c (unk_lang_value_print_inner): Rename.  Change
+	argument types.
+	(unknown_language_defn, auto_language_defn): Update.
+	* go-valprint.c (go_val_print): Remove.
+	* go-lang.h (go_val_print): Don't declare.
+	* go-lang.c (go_language_defn): Update.
+	* f-valprint.c (f_val_print): Remove.
+	* f-lang.h (f_value_print): Don't declare.
+	* f-lang.c (f_language_defn): Update.
+	* d-valprint.c (d_val_print): Remove.
+	* d-lang.h (d_value_print): Don't declare.
+	* d-lang.c (d_language_defn): Update.
+	* cp-valprint.c (cp_print_value_fields)
+	(cp_print_value_fields_rtti, cp_print_value): Remove.
+	(cp_print_static_field): Update.
+	* c-valprint.c (c_val_print_array, c_val_print_ptr)
+	(c_val_print_struct, c_val_print_union, c_val_print_int)
+	(c_val_print_memberptr, c_val_print): Remove.
+	* c-lang.h (c_val_print_array, cp_print_value_fields)
+	(cp_print_value_fields_rtti): Don't declare.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Update.
+	* ada-valprint.c (ada_val_print_ptr, ada_val_print_num): Remove.
+	(ada_val_print_enum): Take a struct value.
+	(ada_val_print_flt, ada_val_print_array, ada_val_print_1)
+	(ada_val_print): Remove.
+	(ada_value_print_1): Update.
+	(printable_val_type): Remove.
+	* ada-lang.h (ada_val_print): Don't declare.
+	* ada-lang.c (ada_language_defn): Update.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* valprint.c (do_val_print): Update.
 	* python/python-internal.h (gdbpy_apply_val_pretty_printer): Take
 	a struct value.
