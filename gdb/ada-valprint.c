@@ -1222,6 +1222,17 @@ ada_val_print (struct type *type,
     }
 }
 
+/* See ada-lang.h.  */
+
+void
+ada_value_print_inner (struct value *val, struct ui_file *stream,
+		       int recurse,
+		       const struct value_print_options *options)
+{
+  ada_val_print (value_type (val), value_embedded_offset (val),
+		 value_address (val), stream, recurse, val, options);
+}
+
 void
 ada_value_print (struct value *val0, struct ui_file *stream,
 		 const struct value_print_options *options)

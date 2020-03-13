@@ -1,5 +1,11 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* ada-valprint.c (ada_value_print_inner): New function.
+	* ada-lang.h (ada_value_print_inner): Declare.
+	* ada-lang.c (ada_language_defn): Use ada_value_print_inner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* f-valprint.c (f_value_print_innner): New function.
 	* f-lang.h (f_value_print_innner): Declare.
 	* f-lang.c (f_language_defn): Use f_value_print_innner.
