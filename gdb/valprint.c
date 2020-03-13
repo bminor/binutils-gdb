@@ -1040,9 +1040,108 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
 		     const struct value_print_options *options,
 		     const struct generic_val_print_decorations *decorations)
 {
-  generic_val_print (value_type (val), value_embedded_offset (val),
-		     value_address (val), stream, recurse, val, options,
-		     decorations);
+  struct type *type = value_type (val);
+  struct type *unresolved_type = type;
+
+  type = check_typedef (type);
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_ARRAY:
+      generic_val_print_array (type, 0, value_address (val), stream,
+			       recurse, val, options, decorations);
+      break;
+
+    case TYPE_CODE_MEMBERPTR:
+      generic_val_print_memberptr (type, 0, stream,
+				   val, options);
+      break;
+
+    case TYPE_CODE_PTR:
+      generic_val_print_ptr (type, 0, stream,
+			     val, options);
+      break;
+
+    case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
+      generic_val_print_ref (type, 0, stream, recurse,
+			     val, options);
+      break;
+
+    case TYPE_CODE_ENUM:
+      generic_val_print_enum (type, 0, stream,
+			      val, options);
+      break;
+
+    case TYPE_CODE_FLAGS:
+      generic_val_print_flags (type, 0, stream,
+			       val, options);
+      break;
+
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_METHOD:
+      generic_val_print_func (type, 0, value_address (val), stream,
+			      val, options);
+      break;
+
+    case TYPE_CODE_BOOL:
+      generic_val_print_bool (type, 0, stream,
+			      val, options, decorations);
+      break;
+
+    case TYPE_CODE_RANGE:
+      /* FIXME: create_static_range_type does not set the unsigned bit in a
+         range type (I think it probably should copy it from the
+         target type), so we won't print values which are too large to
+         fit in a signed integer correctly.  */
+      /* FIXME: Doesn't handle ranges of enums correctly.  (Can't just
+         print with the target type, though, because the size of our
+         type and the target type might differ).  */
+
+      /* FALLTHROUGH */
+
+    case TYPE_CODE_INT:
+      generic_val_print_int (type, 0, stream,
+			     val, options);
+      break;
+
+    case TYPE_CODE_CHAR:
+      generic_val_print_char (type, unresolved_type, 0,
+			      stream, val, options);
+      break;
+
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_DECFLOAT:
+      generic_val_print_float (type, 0, stream,
+			       val, options);
+      break;
+
+    case TYPE_CODE_VOID:
+      fputs_filtered (decorations->void_name, stream);
+      break;
+
+    case TYPE_CODE_ERROR:
+      fprintf_filtered (stream, "%s", TYPE_ERROR_NAME (type));
+      break;
+
+    case TYPE_CODE_UNDEF:
+      /* This happens (without TYPE_STUB set) on systems which don't use
+         dbx xrefs (NO_DBX_XREFS in gcc) if a file has a "struct foo *bar"
+         and no complete type for struct foo in that file.  */
+      fprintf_styled (stream, metadata_style.style (), _("<incomplete type>"));
+      break;
+
+    case TYPE_CODE_COMPLEX:
+      generic_val_print_complex (type, 0, stream,
+				 val, options, decorations);
+      break;
+
+    case TYPE_CODE_UNION:
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_METHODPTR:
+    default:
+      error (_("Unhandled type code %d in symbol table."),
+	     TYPE_CODE (type));
+    }
 }
 
 /* Helper function for val_print and common_val_print that does the

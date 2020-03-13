@@ -1,5 +1,9 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* valprint.c (generic_value_print): Rewrite.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* p-valprint.c (pascal_object_print_value_fields)
 	(pascal_object_print_value): New functions.
 
