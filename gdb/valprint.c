@@ -88,7 +88,8 @@ static void set_input_radix_1 (int, unsigned);
 static void set_output_radix_1 (int, unsigned);
 
 static void val_print_type_code_flags (struct type *type,
-				       const gdb_byte *valaddr,
+				       struct value *original_value,
+				       int embedded_offset,
 				       struct ui_file *stream);
 
 #define PRINT_MAX_DEFAULT 200	/* Start print_max off at this value.  */
@@ -730,26 +731,6 @@ generic_val_print_enum (struct type *type,
   generic_val_print_enum_1 (type, val, stream);
 }
 
-/* generic_val_print helper for TYPE_CODE_FLAGS.  */
-
-static void
-generic_val_print_flags (struct type *type,
-			 int embedded_offset, struct ui_file *stream,
-			 struct value *original_value,
-			 const struct value_print_options *options)
-
-{
-  if (options->format)
-    val_print_scalar_formatted (type, embedded_offset, original_value,
-				options, 0, stream);
-  else
-    {
-      const gdb_byte *valaddr = value_contents_for_printing (original_value);
-
-      val_print_type_code_flags (type, valaddr + embedded_offset, stream);
-    }
-}
-
 /* generic_val_print helper for TYPE_CODE_FUNC and TYPE_CODE_METHOD.  */
 
 static void
@@ -980,8 +961,12 @@ generic_val_print (struct type *type,
       break;
 
     case TYPE_CODE_FLAGS:
-      generic_val_print_flags (type, embedded_offset, stream,
-			       original_value, options);
+      if (options->format)
+	val_print_scalar_formatted (type, embedded_offset,
+				    original_value, options, 0, stream);
+      else
+	val_print_type_code_flags (type, original_value, embedded_offset,
+				   stream);
       break;
 
     case TYPE_CODE_FUNC:
@@ -1091,8 +1076,10 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_FLAGS:
-      generic_val_print_flags (type, 0, stream,
-			       val, options);
+      if (options->format)
+	value_print_scalar_formatted (val, options, 0, stream);
+      else
+	val_print_type_code_flags (type, val, 0, stream);
       break;
 
     case TYPE_CODE_FUNC:
@@ -1411,9 +1398,11 @@ value_print (struct value *val, struct ui_file *stream,
 }
 
 static void
-val_print_type_code_flags (struct type *type, const gdb_byte *valaddr,
-			   struct ui_file *stream)
+val_print_type_code_flags (struct type *type, struct value *original_value,
+			   int embedded_offset, struct ui_file *stream)
 {
+  const gdb_byte *valaddr = (value_contents_for_printing (original_value)
+			     + embedded_offset);
   ULONGEST val = unpack_long (type, valaddr);
   int field, nfields = TYPE_NFIELDS (type);
   struct gdbarch *gdbarch = get_type_arch (type);
