@@ -141,6 +141,16 @@ extern void val_print_scalar_formatted (struct type *,
 					int,
 					struct ui_file *);
 
+/* Print a scalar according to OPTIONS and SIZE on STREAM.  Format 'i'
+   is not supported at this level.
+
+   This is how the elements of an array or structure are printed
+   with a format.  */
+
+extern void value_print_scalar_formatted
+  (struct value *val, const struct value_print_options *options,
+   int size, struct ui_file *stream);
+
 extern void print_binary_chars (struct ui_file *, const gdb_byte *,
 				unsigned int, enum bfd_endian, bool);
 

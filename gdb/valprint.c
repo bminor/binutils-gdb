@@ -1394,6 +1394,46 @@ val_print_scalar_formatted (struct type *type,
 			    options, size, stream);
 }
 
+/* See valprint.h.  */
+
+void
+value_print_scalar_formatted (struct value *val,
+			      const struct value_print_options *options,
+			      int size,
+			      struct ui_file *stream)
+{
+  struct type *type = check_typedef (value_type (val));
+
+  gdb_assert (val != NULL);
+
+  /* If we get here with a string format, try again without it.  Go
+     all the way back to the language printers, which may call us
+     again.  */
+  if (options->format == 's')
+    {
+      struct value_print_options opts = *options;
+      opts.format = 0;
+      opts.deref_ref = 0;
+      common_val_print (val, stream, 0, &opts, current_language);
+      return;
+    }
+
+  /* value_contents_for_printing fetches all VAL's contents.  They are
+     needed to check whether VAL is optimized-out or unavailable
+     below.  */
+  const gdb_byte *valaddr = value_contents_for_printing (val);
+
+  /* A scalar object that does not have all bits available can't be
+     printed, because all bits contribute to its representation.  */
+  if (value_bits_any_optimized_out (val, 0,
+				    TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+    val_print_optimized_out (val, stream);
+  else if (!value_bytes_available (val, 0, TYPE_LENGTH (type)))
+    val_print_unavailable (stream);
+  else
+    print_scalar_formatted (valaddr, type, options, size, stream);
+}
+
 /* Print a number according to FORMAT which is one of d,u,x,o,b,h,w,g.
    The raison d'etre of this function is to consolidate printing of 
    LONG_LONG's into this one function.  The format chars b,h,w,g are 

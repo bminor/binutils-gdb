@@ -1,5 +1,10 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* valprint.h (value_print_scalar_formatted): Declare.
+	* valprint.c (value_print_scalar_formatted): New function.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* valprint.h (generic_value_print): Declare.
 	* valprint.c (generic_value_print): New function.
 
