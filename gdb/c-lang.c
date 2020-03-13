@@ -904,7 +904,7 @@ extern const struct language_defn c_language_defn =
   c_print_type,			/* Print a type using appropriate syntax */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
-  nullptr,			/* la_value_print_inner */
+  c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */
@@ -1050,7 +1050,7 @@ extern const struct language_defn cplus_language_defn =
   c_print_type,			/* Print a type using appropriate syntax */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
-  nullptr,			/* la_value_print_inner */
+  c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
   default_read_var_value,	/* la_read_var_value */
   cplus_skip_trampoline,	/* Language specific skip_trampoline */
@@ -1105,7 +1105,7 @@ extern const struct language_defn asm_language_defn =
   c_print_type,			/* Print a type using appropriate syntax */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
-  nullptr,			/* la_value_print_inner */
+  c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */
@@ -1160,7 +1160,7 @@ extern const struct language_defn minimal_language_defn =
   c_print_type,			/* Print a type using appropriate syntax */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
-  nullptr,			/* la_value_print_inner */
+  c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
   default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */

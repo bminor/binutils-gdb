@@ -1,5 +1,15 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* opencl-lang.c (opencl_language_defn): Use c_value_print_inner.
+	* objc-lang.c (objc_language_defn): Use c_value_print_inner.
+	* c-valprint.c (c_value_print_inner): New function.
+	* c-lang.h (c_value_print_inner): Declare.
+	* c-lang.c (c_language_defn, cplus_language_defn)
+	(asm_language_defn, minimal_language_defn): Use
+	c_value_print_inner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* p-valprint.c (pascal_object_print_value_fields): Now static.
 	* p-lang.h (pascal_object_print_value_fields): Don't declare.
 

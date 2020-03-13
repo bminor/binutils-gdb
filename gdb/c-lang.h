@@ -87,6 +87,11 @@ extern void c_val_print (struct type *,
 			 struct value *,
 			 const struct value_print_options *);
 
+/* Implement la_value_print_inner for the C family of languages.  */
+
+extern void c_value_print_inner (struct value *, struct ui_file *, int,
+				 const struct value_print_options *);
+
 extern void c_value_print (struct value *, struct ui_file *,
 			   const struct value_print_options *);
 
