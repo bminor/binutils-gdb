@@ -375,6 +375,43 @@ c_val_print_ptr (struct type *type, const gdb_byte *valaddr,
     }
 }
 
+/* c_value_print_inner helper for TYPE_CODE_PTR.  */
+
+static void
+c_value_print_ptr (struct value *val, struct ui_file *stream, int recurse,
+		   const struct value_print_options *options)
+{
+  if (options->format && options->format != 's')
+    {
+      value_print_scalar_formatted (val, options, 0, stream);
+      return;
+    }
+
+  struct type *type = check_typedef (value_type (val));
+  struct gdbarch *arch = get_type_arch (type);
+  const gdb_byte *valaddr = value_contents_for_printing (val);
+
+  if (options->vtblprint && cp_is_vtbl_ptr_type (type))
+    {
+      /* Print the unmangled name if desired.  */
+      /* Print vtable entry - we only get here if we ARE using
+	 -fvtable_thunks.  (Otherwise, look under
+	 TYPE_CODE_STRUCT.)  */
+      CORE_ADDR addr = extract_typed_address (valaddr, type);
+
+      print_function_pointer_address (options, arch, addr, stream);
+    }
+  else
+    {
+      struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
+      struct type *elttype = check_typedef (unresolved_elttype);
+      CORE_ADDR addr = unpack_pointer (type, valaddr);
+
+      print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
+			      0, addr, stream, recurse, options);
+    }
+}
+
 /* c_val_print helper for TYPE_CODE_STRUCT.  */
 
 static void
@@ -582,8 +619,7 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_PTR:
-      c_val_print_ptr (type, valaddr, 0, stream, recurse,
-		       val, options);
+      c_value_print_ptr (val, stream, recurse, options);
       break;
 
     case TYPE_CODE_UNION:
