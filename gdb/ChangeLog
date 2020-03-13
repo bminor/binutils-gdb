@@ -1,5 +1,10 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* f-valprint.c (f77_print_array_1, f_val_print): Use
+	common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* riscv-tdep.c (riscv_print_one_register_info): Use
 	common_val_print.
 

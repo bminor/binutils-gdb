@@ -156,10 +156,7 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
 	{
 	  struct value *elt = value_subscript ((struct value *)val, i);
 
-	  val_print (value_type (elt),
-		     value_embedded_offset (elt),
-		     value_address (elt), stream, recurse,
-		     elt, options, current_language);
+	  common_val_print (elt, stream, recurse, options, current_language);
 
 	  if (i != upperbound)
 	    fprintf_filtered (stream, ", ");
@@ -346,10 +343,8 @@ f_val_print (struct type *type, int embedded_offset,
 		  fputs_filtered (" = ", stream);
 		}
 
-	      val_print (value_type (field),
-			 value_embedded_offset (field),
-			 value_address (field), stream, recurse + 1,
-			 field, options, current_language);
+	      common_val_print (field, stream, recurse + 1,
+				options, current_language);
 
 	      ++printed_field;
 	    }
