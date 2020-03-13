@@ -814,6 +814,26 @@ ada_val_print_ptr (struct type *type, const gdb_byte *valaddr,
     }
 }
 
+/* Implement Ada value_print'ing for the case where TYPE is a
+   TYPE_CODE_PTR.  */
+
+static void
+ada_value_print_ptr (struct value *val,
+		     struct ui_file *stream, int recurse,
+		     const struct value_print_options *options)
+{
+  common_val_print (val, stream, recurse, options, language_def (language_c));
+
+  struct type *type = ada_check_typedef (value_type (val));
+  if (ada_is_tag_type (type))
+    {
+      const char *name = ada_tag_name (val);
+
+      if (name != NULL)
+	fprintf_filtered (stream, " (%s)", name);
+    }
+}
+
 /* Implement Ada val_print'ing for the case where TYPE is
    a TYPE_CODE_INT or TYPE_CODE_RANGE.  */
 
@@ -1257,9 +1277,7 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_PTR:
-      ada_val_print_ptr (type, valaddr, 0, 0,
-			 address, stream, recurse, val,
-			 options);
+      ada_value_print_ptr (val, stream, recurse, options);
       break;
 
     case TYPE_CODE_INT:

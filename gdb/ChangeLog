@@ -1,5 +1,10 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* ada-valprint.c (ada_value_print_ptr): New function.
+	(ada_value_print_1): Use it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* ada-valprint.c (ada_val_print_gnat_array): Take a struct value;
 	call common_val_print.
 	(ada_val_print_1): Update.
