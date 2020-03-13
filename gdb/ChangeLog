@@ -1,5 +1,12 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* m2-valprint.c (m2_print_unbounded_array): New overload.
+	(m2_print_unbounded_array): Update.
+	(m2_print_array_contents): Take a struct value.
+	(m2_value_print_inner): Rewrite.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* d-valprint.c (dynamic_array_type): Call d_value_print_inner.
 	(d_value_print_inner): New function.
 	* d-lang.h (d_value_print_inner): Declare.
