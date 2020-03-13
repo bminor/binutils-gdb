@@ -502,6 +502,37 @@ c_val_print_int (struct type *type, struct type *unresolved_type,
     }
 }
 
+/* c_value_print helper for TYPE_CODE_INT.  */
+
+static void
+c_value_print_int (struct value *val, struct ui_file *stream,
+		   const struct value_print_options *options)
+{
+  if (options->format || options->output_format)
+    {
+      struct value_print_options opts = *options;
+
+      opts.format = (options->format ? options->format
+		     : options->output_format);
+      value_print_scalar_formatted (val, &opts, 0, stream);
+    }
+  else
+    {
+      value_print_scalar_formatted (val, options, 0, stream);
+      /* C and C++ has no single byte int type, char is used
+	 instead.  Since we don't know whether the value is really
+	 intended to be used as an integer or a character, print
+	 the character equivalent as well.  */
+      struct type *type = value_type (val);
+      const gdb_byte *valaddr = value_contents_for_printing (val);
+      if (c_textual_element_type (type, options->format))
+	{
+	  fputs_filtered (" ", stream);
+	  LA_PRINT_CHAR (unpack_long (type, valaddr), type, stream);
+	}
+    }
+}
+
 /* c_val_print helper for TYPE_CODE_MEMBERPTR.  */
 
 static void
@@ -602,7 +633,6 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 		     const struct value_print_options *options)
 {
   struct type *type = value_type (val);
-  struct type *unresolved_type = type;
   CORE_ADDR address = value_address (val);
   const gdb_byte *valaddr = value_contents_for_printing (val);
 
@@ -633,8 +663,7 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_INT:
-      c_val_print_int (type, unresolved_type, valaddr, 0, stream,
-		       val, options);
+      c_value_print_int (val, stream, options);
       break;
 
     case TYPE_CODE_MEMBERPTR:
