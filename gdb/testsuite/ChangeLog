@@ -1,3 +1,10 @@
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/printcmds.exp (test_print_strings): Add regression
+	test.
+	* gdb.base/printcmds.c (charptr): New typedef.
+	(teststring2): New global.
+
 2020-03-13  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/break-interp.exp: Use the tail of the filename, not the

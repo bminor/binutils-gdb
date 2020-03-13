@@ -1,5 +1,9 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* c-valprint.c (c_value_print): Use common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* cp-valprint.c (cp_print_static_field): Use common_val_print.
 
 2020-03-13  Tom Tromey  <tom@tromey.com>

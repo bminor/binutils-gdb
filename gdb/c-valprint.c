@@ -567,7 +567,7 @@ void
 c_value_print (struct value *val, struct ui_file *stream, 
 	       const struct value_print_options *options)
 {
-  struct type *type, *real_type, *val_type;
+  struct type *type, *real_type;
   int full, using_enc;
   LONGEST top;
   struct value_print_options opts = *options;
@@ -581,24 +581,22 @@ c_value_print (struct value *val, struct ui_file *stream,
      C++: if it is a member pointer, we will take care
      of that when we print it.  */
 
-  /* Preserve the original type before stripping typedefs.  We prefer
-     to pass down the original type when possible, but for local
-     checks it is better to look past the typedefs.  */
-  val_type = value_type (val);
-  type = check_typedef (val_type);
+  type = check_typedef (value_type (val));
 
   if (TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type))
     {
+      struct type *original_type = value_type (val);
+
       /* Hack:  remove (char *) for char strings.  Their
          type is indicated by the quoted string anyway.
          (Don't use c_textual_element_type here; quoted strings
          are always exactly (char *), (wchar_t *), or the like.  */
-      if (TYPE_CODE (val_type) == TYPE_CODE_PTR
-	  && TYPE_NAME (val_type) == NULL
-	  && TYPE_NAME (TYPE_TARGET_TYPE (val_type)) != NULL
-	  && (strcmp (TYPE_NAME (TYPE_TARGET_TYPE (val_type)),
+      if (TYPE_CODE (original_type) == TYPE_CODE_PTR
+	  && TYPE_NAME (original_type) == NULL
+	  && TYPE_NAME (TYPE_TARGET_TYPE (original_type)) != NULL
+	  && (strcmp (TYPE_NAME (TYPE_TARGET_TYPE (original_type)),
 		      "char") == 0
-	      || textual_name (TYPE_NAME (TYPE_TARGET_TYPE (val_type)))))
+	      || textual_name (TYPE_NAME (TYPE_TARGET_TYPE (original_type)))))
 	{
 	  /* Print nothing.  */
 	}
@@ -624,7 +622,6 @@ c_value_print (struct value *val, struct ui_file *stream,
 	      if (real_type)
 		{
 		  /* RTTI entry found.  */
-		  type = real_type;
 
 		  /* Need to adjust pointer value.  */
 		  val = value_from_pointer (real_type,
@@ -637,14 +634,11 @@ c_value_print (struct value *val, struct ui_file *stream,
 	    }
 
 	  if (is_ref)
-	    {
-	      val = value_ref (value_ind (val), refcode);
-	      type = value_type (val);
-	    }
+	    val = value_ref (value_ind (val), refcode);
 
+	  type = value_type (val);
 	  type_print (type, "", stream, -1);
 	  fprintf_filtered (stream, ") ");
-	  val_type = type;
 	}
       else
 	{
@@ -667,36 +661,25 @@ c_value_print (struct value *val, struct ui_file *stream,
 	  /* We have RTTI information, so use it.  */
 	  val = value_full_object (val, real_type, 
 				   full, top, using_enc);
+	  /* In a destructor we might see a real type that is a
+	     superclass of the object's type.  In this case it is
+	     better to leave the object as-is.  */
+	  if (!(full
+		&& (TYPE_LENGTH (real_type)
+		    < TYPE_LENGTH (value_enclosing_type (val)))))
+	    val = value_cast (real_type, val);
 	  fprintf_filtered (stream, "(%s%s) ",
 			    TYPE_NAME (real_type),
 			    full ? "" : _(" [incomplete object]"));
-	  /* Print out object: enclosing type is same as real_type if
-	     full.  */
-	  val_print (value_enclosing_type (val),
-		     0,
-		     value_address (val), stream, 0,
-		     val, &opts, current_language);
-	  return;
-          /* Note: When we look up RTTI entries, we don't get any
-             information on const or volatile attributes.  */
 	}
       else if (type != check_typedef (value_enclosing_type (val)))
 	{
 	  /* No RTTI information, so let's do our best.  */
 	  fprintf_filtered (stream, "(%s ?) ",
 			    TYPE_NAME (value_enclosing_type (val)));
-	  val_print (value_enclosing_type (val),
-		     0,
-		     value_address (val), stream, 0,
-		     val, &opts, current_language);
-	  return;
+	  val = value_cast (value_enclosing_type (val), val);
 	}
-      /* Otherwise, we end up at the return outside this "if".  */
     }
 
-  val_print (val_type,
-	     value_embedded_offset (val),
-	     value_address (val),
-	     stream, 0,
-	     val, &opts, current_language);
+  common_val_print (val, stream, 0, &opts, current_language);
 }
