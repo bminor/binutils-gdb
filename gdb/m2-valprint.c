@@ -503,3 +503,13 @@ m2_val_print (struct type *type, int embedded_offset,
       break;
     }
 }
+
+/* See m2-lang.h.  */
+
+void
+m2_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
+		      const struct value_print_options *options)
+{
+  m2_val_print (value_type (val), value_embedded_offset (val),
+		value_address (val), stream, recurse, val, options);
+}

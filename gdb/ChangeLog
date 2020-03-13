@@ -1,5 +1,11 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* m2-valprint.c (m2_value_print_inner): New function.
+	* m2-lang.h (m2_value_print_inner): Declare.
+	* m2-lang.c (m2_language_defn): Use m2_value_print_inner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* opencl-lang.c (opencl_language_defn): Use c_value_print_inner.
 	* objc-lang.c (objc_language_defn): Use c_value_print_inner.
 	* c-valprint.c (c_value_print_inner): New function.

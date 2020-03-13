@@ -40,6 +40,11 @@ extern void m2_val_print (struct type *, int, CORE_ADDR,
 			  struct value *,
 			  const struct value_print_options *);
 
+/* Implement la_value_print_inner for Modula-2.  */
+
+extern void m2_value_print_inner (struct value *, struct ui_file *, int,
+				  const struct value_print_options *);
+
 extern int get_long_set_bounds (struct type *type, LONGEST *low,
 				LONGEST *high);
 
