@@ -1207,10 +1207,8 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
   if (value_lazy (deref_val))
     value_fetch_lazy (deref_val);
 
-  val_print (value_type (deref_val),
-	     value_embedded_offset (deref_val),
-	     value_address (deref_val), stream, recurse + 1,
-	     deref_val, options, language_def (language_ada));
+  common_val_print (deref_val, stream, recurse + 1,
+		    options, language_def (language_ada));
 }
 
 /* See the comment on ada_val_print.  This function differs in that it

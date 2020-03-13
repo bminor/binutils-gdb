@@ -1,5 +1,9 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* ada-valprint.c (ada_val_print_ref): Use common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* ada-valprint.c (ada_value_print_num): New function.
 	(ada_value_print_1): Use it.
 
