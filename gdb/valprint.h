@@ -134,6 +134,12 @@ extern void val_print_array_elements (struct type *, LONGEST,
 				      const struct value_print_options *,
 				      unsigned int);
 
+/* Print elements of an array.  */
+
+extern void value_print_array_elements (struct value *, struct ui_file *, int,
+					const struct value_print_options *,
+					unsigned int);
+
 extern void val_print_scalar_formatted (struct type *,
 					LONGEST,
 					struct value *,

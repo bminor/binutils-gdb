@@ -2213,6 +2213,130 @@ val_print_array_elements (struct type *type,
     }
 }
 
+/* See valprint.h.  */
+
+void
+value_print_array_elements (struct value *val, struct ui_file *stream,
+			    int recurse,
+			    const struct value_print_options *options,
+			    unsigned int i)
+{
+  unsigned int things_printed = 0;
+  unsigned len;
+  struct type *elttype, *index_type, *base_index_type;
+  unsigned eltlen;
+  /* Position of the array element we are examining to see
+     whether it is repeated.  */
+  unsigned int rep1;
+  /* Number of repetitions we have detected so far.  */
+  unsigned int reps;
+  LONGEST low_bound, high_bound;
+  LONGEST low_pos, high_pos;
+
+  struct type *type = check_typedef (value_type (val));
+
+  elttype = TYPE_TARGET_TYPE (type);
+  eltlen = type_length_units (check_typedef (elttype));
+  index_type = TYPE_INDEX_TYPE (type);
+
+  if (get_array_bounds (type, &low_bound, &high_bound))
+    {
+      if (TYPE_CODE (index_type) == TYPE_CODE_RANGE)
+	base_index_type = TYPE_TARGET_TYPE (index_type);
+      else
+	base_index_type = index_type;
+
+      /* Non-contiguous enumerations types can by used as index types
+	 in some languages (e.g. Ada).  In this case, the array length
+	 shall be computed from the positions of the first and last
+	 literal in the enumeration type, and not from the values
+	 of these literals.  */
+      if (!discrete_position (base_index_type, low_bound, &low_pos)
+	  || !discrete_position (base_index_type, high_bound, &high_pos))
+	{
+	  warning (_("unable to get positions in array, use bounds instead"));
+	  low_pos = low_bound;
+	  high_pos = high_bound;
+	}
+
+      /* The array length should normally be HIGH_POS - LOW_POS + 1.
+         But we have to be a little extra careful, because some languages
+	 such as Ada allow LOW_POS to be greater than HIGH_POS for
+	 empty arrays.  In that situation, the array length is just zero,
+	 not negative!  */
+      if (low_pos > high_pos)
+	len = 0;
+      else
+	len = high_pos - low_pos + 1;
+    }
+  else
+    {
+      warning (_("unable to get bounds of array, assuming null array"));
+      low_bound = 0;
+      len = 0;
+    }
+
+  annotate_array_section_begin (i, elttype);
+
+  for (; i < len && things_printed < options->print_max; i++)
+    {
+      scoped_value_mark free_values;
+
+      if (i != 0)
+	{
+	  if (options->prettyformat_arrays)
+	    {
+	      fprintf_filtered (stream, ",\n");
+	      print_spaces_filtered (2 + 2 * recurse, stream);
+	    }
+	  else
+	    fprintf_filtered (stream, ", ");
+	}
+      wrap_here (n_spaces (2 + 2 * recurse));
+      maybe_print_array_index (index_type, i + low_bound,
+                               stream, options);
+
+      rep1 = i + 1;
+      reps = 1;
+      /* Only check for reps if repeat_count_threshold is not set to
+	 UINT_MAX (unlimited).  */
+      if (options->repeat_count_threshold < UINT_MAX)
+	{
+	  while (rep1 < len
+		 && value_contents_eq (val, i * eltlen,
+				       val, rep1 * eltlen,
+				       eltlen))
+	    {
+	      ++reps;
+	      ++rep1;
+	    }
+	}
+
+      struct value *element = value_from_component (val, elttype, eltlen * i);
+      common_val_print (element, stream, recurse + 1, options,
+			current_language);
+
+      if (reps > options->repeat_count_threshold)
+	{
+	  annotate_elt_rep (reps);
+	  fprintf_filtered (stream, " %p[<repeats %u times>%p]",
+			    metadata_style.style ().ptr (), reps, nullptr);
+	  annotate_elt_rep_end ();
+
+	  i = rep1 - 1;
+	  things_printed += options->repeat_count_threshold;
+	}
+      else
+	{
+	  annotate_elt ();
+	  things_printed++;
+	}
+    }
+  annotate_array_section_end ();
+  if (i < len)
+    fprintf_filtered (stream, "...");
+}
+
 /* Read LEN bytes of target memory at address MEMADDR, placing the
    results in GDB's memory at MYADDR.  Returns a count of the bytes
    actually read, and optionally a target_xfer_status value in the
