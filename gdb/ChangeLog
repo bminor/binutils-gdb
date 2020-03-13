@@ -1,3 +1,11 @@
+2020-03-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR gdb/25534
+	* riscv-tdep.c (riscv_arg_info::c_offset): Update comment.
+	(riscv_regcache_cooked_write): New function.
+	(riscv_push_dummy_call): Use new function.
+	(riscv_return_value): Likewise.
+
 2020-03-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* fbsd-nat.c (fbsd_nat_target::follow_fork): Change bool to int.
