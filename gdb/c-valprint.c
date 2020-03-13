@@ -247,7 +247,6 @@ c_val_print_array (struct type *type, const gdb_byte *valaddr,
       LONGEST low_bound, high_bound;
       int eltlen, len;
       enum bfd_endian byte_order = type_byte_order (type);
-      unsigned int i = 0;	/* Number of characters printed.  */
 
       if (!get_array_bounds (type, &low_bound, &high_bound))
 	error (_("Could not determine the array high bound"));
@@ -307,10 +306,10 @@ c_val_print_array (struct type *type, const gdb_byte *valaddr,
 	  LA_PRINT_STRING (stream, unresolved_elttype,
 			   valaddr + embedded_offset * unit_size, len,
 			   NULL, force_ellipses, options);
-	  i = len;
 	}
       else
 	{
+	  unsigned int i = 0;
 	  fprintf_filtered (stream, "{");
 	  /* If this is a virtual function table, print the 0th
 	     entry specially, and the rest of the members
@@ -320,10 +319,6 @@ c_val_print_array (struct type *type, const gdb_byte *valaddr,
 	      i = 1;
 	      fprintf_filtered (stream, _("%d vtable entries"),
 				len - 1);
-	    }
-	  else
-	    {
-	      i = 0;
 	    }
 	  val_print_array_elements (type, embedded_offset,
 				    address, stream,

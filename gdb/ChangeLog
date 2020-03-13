@@ -1,5 +1,9 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* c-valprint.c (c_val_print_array): Simplify.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* valprint.c (value_print_array_elements): New function.
 	* valprint.h (value_print_array_elements): Declare.
 
