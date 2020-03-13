@@ -1,5 +1,15 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* ada-valprint.c (val_print_packed_array_elements): Remove
+	bitoffset and val parameters.  Call common_val_print.
+	(ada_val_print_string): Remove offset, address, and original_value
+	parameters.
+	(ada_val_print_array): Update.
+	(ada_value_print_array): New function.
+	(ada_value_print_1): Call it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* ada-valprint.c (ada_value_print): Use common_val_print.
 
 2020-03-13  Tom Tromey  <tom@tromey.com>

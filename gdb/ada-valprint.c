@@ -112,17 +112,15 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
 }
 
 /*  Version of val_print_array_elements for GNAT-style packed arrays.
-    Prints elements of packed array of type TYPE at bit offset
-    BITOFFSET from VALADDR on STREAM.  Formats according to OPTIONS and
-    separates with commas.  RECURSE is the recursion (nesting) level.
-    TYPE must have been decoded (as by ada_coerce_to_simple_array).  */
+    Prints elements of packed array of type TYPE from VALADDR on
+    STREAM.  Formats according to OPTIONS and separates with commas.
+    RECURSE is the recursion (nesting) level.  TYPE must have been
+    decoded (as by ada_coerce_to_simple_array).  */
 
 static void
 val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
-				 int offset,
-				 int bitoffset, struct ui_file *stream,
+				 int offset, struct ui_file *stream,
 				 int recurse,
-				 struct value *val,
 				 const struct value_print_options *options)
 {
   unsigned int i;
@@ -230,9 +228,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	  struct value_print_options opts = *options;
 
 	  opts.deref_ref = 0;
-	  val_print (elttype,
-		     value_embedded_offset (v0), 0, stream,
-		     recurse + 1, v0, &opts, current_language);
+	  common_val_print (v0, stream, recurse + 1, &opts, current_language);
 	  annotate_elt_rep (i - i0);
 	  fprintf_filtered (stream, _(" %p[<repeats %u times>%p]"),
 			    metadata_style.style ().ptr (), i - i0, nullptr);
@@ -262,9 +258,8 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 		  maybe_print_array_index (index_type, j + low,
 					   stream, options);
 		}
-	      val_print (elttype,
-			 value_embedded_offset (v0), 0, stream,
-			 recurse + 1, v0, &opts, current_language);
+	      common_val_print (v0, stream, recurse + 1, &opts,
+				current_language);
 	      annotate_elt ();
 	    }
 	}
@@ -715,9 +710,8 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
 
 static void
 ada_val_print_string (struct type *type, const gdb_byte *valaddr,
-		      int offset, int offset_aligned, CORE_ADDR address,
+		      int offset_aligned,
 		      struct ui_file *stream, int recurse,
-		      struct value *original_value,
 		      const struct value_print_options *options)
 {
   enum bfd_endian byte_order = type_byte_order (type);
@@ -1129,9 +1123,8 @@ ada_val_print_array (struct type *type, const gdb_byte *valaddr,
   if (ada_is_string_type (type)
       && (options->format == 0 || options->format == 's'))
     {
-      ada_val_print_string (type, valaddr, offset, offset_aligned,
-			    address, stream, recurse, original_value,
-			    options);
+      ada_val_print_string (type, valaddr, offset_aligned,
+			    stream, recurse, options);
       return;
     }
 
@@ -1139,12 +1132,46 @@ ada_val_print_array (struct type *type, const gdb_byte *valaddr,
   print_optional_low_bound (stream, type, options);
   if (TYPE_FIELD_BITSIZE (type, 0) > 0)
     val_print_packed_array_elements (type, valaddr, offset_aligned,
-				     0, stream, recurse,
-				     original_value, options);
+				     stream, recurse, options);
   else
     val_print_array_elements (type, offset_aligned, address,
 			      stream, recurse, original_value,
 			      options, 0);
+  fprintf_filtered (stream, ")");
+}
+
+/* Implement Ada value_print'ing for the case where TYPE is a
+   TYPE_CODE_ARRAY.  */
+
+static void
+ada_value_print_array (struct value *val, struct ui_file *stream, int recurse,
+		       const struct value_print_options *options)
+{
+  struct type *type = ada_check_typedef (value_type (val));
+
+  /* For an array of characters, print with string syntax.  */
+  if (ada_is_string_type (type)
+      && (options->format == 0 || options->format == 's'))
+    {
+      const gdb_byte *valaddr = value_contents_for_printing (val);
+      int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;
+
+      ada_val_print_string (type, valaddr, offset_aligned, stream, recurse,
+			    options);
+      return;
+    }
+
+  fprintf_filtered (stream, "(");
+  print_optional_low_bound (stream, type, options);
+  if (TYPE_FIELD_BITSIZE (type, 0) > 0)
+    {
+      const gdb_byte *valaddr = value_contents_for_printing (val);
+      int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;
+      val_print_packed_array_elements (type, valaddr, offset_aligned,
+				       stream, recurse, options);
+    }
+  else
+    value_print_array_elements (val, stream, recurse, options, 0);
   fprintf_filtered (stream, ")");
 }
 
@@ -1390,9 +1417,7 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_ARRAY:
-      ada_val_print_array (type, valaddr, 0, 0,
-			   address, stream, recurse, val,
-			   options);
+      ada_value_print_array (val, stream, recurse, options);
       return;
 
     case TYPE_CODE_REF:
