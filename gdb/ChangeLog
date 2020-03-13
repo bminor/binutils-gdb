@@ -1,5 +1,17 @@
 2020-04-21  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (record_btrace_enable_warn): Ignore thread if
+	its inferior is not recorded by us.
+	(record_btrace_target_open): Replace call to
+	all_non_exited_threads () with call to current_inferior
+	()->non_exited_threads ().
+	(record_btrace_target::stop_recording): Likewise.
+	(record_btrace_target::close): Likewise.
+	(record_btrace_target::wait): Likewise.
+	(record_btrace_target::record_stop_replaying): Likewise.
+
+2020-04-21  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c (btrace_enable): Throw an error on double enables and
 	when enabling recording fails.
 	(btrace_disable): Throw an error if the thread is not recorded.
