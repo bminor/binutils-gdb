@@ -834,6 +834,19 @@ generic_val_print_int (struct type *type,
 			      original_value, &opts, 0, stream);
 }
 
+/* generic_value_print helper for TYPE_CODE_INT.  */
+
+static void
+generic_value_print_int (struct value *val, struct ui_file *stream,
+			 const struct value_print_options *options)
+{
+  struct value_print_options opts = *options;
+
+  opts.format = (options->format ? options->format
+		 : options->output_format);
+  value_print_scalar_formatted (val, &opts, 0, stream);
+}
+
 /* generic_val_print helper for TYPE_CODE_CHAR.  */
 
 static void
@@ -1134,8 +1147,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       /* FALLTHROUGH */
 
     case TYPE_CODE_INT:
-      generic_val_print_int (type, 0, stream,
-			     val, options);
+      generic_value_print_int (val, stream, options);
       break;
 
     case TYPE_CODE_CHAR:
