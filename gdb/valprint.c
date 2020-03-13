@@ -883,6 +883,36 @@ generic_val_print_char (struct type *type, struct type *unresolved_type,
     }
 }
 
+/* generic_value_print helper for TYPE_CODE_CHAR.  */
+
+static void
+generic_value_print_char (struct value *value, struct ui_file *stream,
+			  const struct value_print_options *options)
+{
+  if (options->format || options->output_format)
+    {
+      struct value_print_options opts = *options;
+
+      opts.format = (options->format ? options->format
+		     : options->output_format);
+      value_print_scalar_formatted (value, &opts, 0, stream);
+    }
+  else
+    {
+      struct type *unresolved_type = value_type (value);
+      struct type *type = check_typedef (unresolved_type);
+      const gdb_byte *valaddr = value_contents_for_printing (value);
+
+      LONGEST val = unpack_long (type, valaddr);
+      if (TYPE_UNSIGNED (type))
+	fprintf_filtered (stream, "%u", (unsigned int) val);
+      else
+	fprintf_filtered (stream, "%d", (int) val);
+      fputs_filtered (" ", stream);
+      LA_PRINT_CHAR (val, unresolved_type, stream);
+    }
+}
+
 /* generic_val_print helper for TYPE_CODE_FLT and TYPE_CODE_DECFLOAT.  */
 
 static void
@@ -1084,7 +1114,6 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
 		     const struct generic_val_print_decorations *decorations)
 {
   struct type *type = value_type (val);
-  struct type *unresolved_type = type;
 
   type = check_typedef (type);
   switch (TYPE_CODE (type))
@@ -1151,8 +1180,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_CHAR:
-      generic_val_print_char (type, unresolved_type, 0,
-			      stream, val, options);
+      generic_value_print_char (val, stream, options);
       break;
 
     case TYPE_CODE_FLT:
