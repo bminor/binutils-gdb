@@ -11766,17 +11766,17 @@ process_symbol_table (Filedata * filedata)
       buckets = get_dynamic_data (filedata, nbuckets, hash_ent_size);
       chains  = get_dynamic_data (filedata, nchains, hash_ent_size);
 
-    no_hash:
       if (buckets == NULL || chains == NULL)
 	{
-	  if (do_using_dynamic)
-	    return FALSE;
+	no_hash:
 	  free (buckets);
 	  free (chains);
 	  buckets = NULL;
 	  chains = NULL;
 	  nbuckets = 0;
 	  nchains = 0;
+	  if (do_using_dynamic)
+	    goto err_out;
 	}
     }
 
@@ -11833,7 +11833,7 @@ process_symbol_table (Filedata * filedata)
 	if (gnubuckets[i] != 0)
 	  {
 	    if (gnubuckets[i] < gnusymidx)
-	      return FALSE;
+	      goto err_out;
 
 	    if (maxchain == 0xffffffff || gnubuckets[i] > maxchain)
 	      maxchain = gnubuckets[i];
@@ -11898,21 +11898,17 @@ process_symbol_table (Filedata * filedata)
 	    }
 
 	  mipsxlat = get_dynamic_data (filedata, maxchain, 4);
-	}
-
-    no_gnu_hash:
-      if (dynamic_info_DT_MIPS_XHASH && mipsxlat == NULL)
-	{
-	  free (gnuchains);
-	  gnuchains = NULL;
-	}
-      if (gnuchains == NULL)
-	{
-	  free (gnubuckets);
-	  gnubuckets = NULL;
-	  ngnubuckets = 0;
-	  if (do_using_dynamic)
-	    return FALSE;
+	  if (mipsxlat == NULL)
+	    {
+	    no_gnu_hash:
+	      free (gnuchains);
+	      gnuchains = NULL;
+	      free (gnubuckets);
+	      gnubuckets = NULL;
+	      ngnubuckets = 0;
+	      if (do_using_dynamic)
+		goto err_out;
+	    }
 	}
     }
 
@@ -12129,7 +12125,7 @@ process_symbol_table (Filedata * filedata)
       if (lengths == NULL)
 	{
 	  error (_("Out of memory allocating space for histogram buckets\n"));
-	  return FALSE;
+	  goto err_out;
 	}
       visited = xcmalloc (nchains, 1);
       memset (visited, 0, nchains);
@@ -12157,7 +12153,7 @@ process_symbol_table (Filedata * filedata)
 	{
 	  free (lengths);
 	  error (_("Out of memory allocating space for histogram counts\n"));
-	  return FALSE;
+	  goto err_out;
 	}
 
       for (hn = 0; hn < nbuckets; ++hn)
@@ -12181,11 +12177,10 @@ process_symbol_table (Filedata * filedata)
       free (lengths);
     }
 
-  if (buckets != NULL)
-    {
-      free (buckets);
-      free (chains);
-    }
+  free (buckets);
+  buckets = NULL;
+  free (chains);
+  chains = NULL;
 
   if (do_histogram && gnubuckets != NULL)
     {
@@ -12208,7 +12203,7 @@ process_symbol_table (Filedata * filedata)
       if (lengths == NULL)
 	{
 	  error (_("Out of memory allocating space for gnu histogram buckets\n"));
-	  return FALSE;
+	  goto err_out;
 	}
 
       printf (_(" Length  Number     %% of total  Coverage\n"));
@@ -12234,7 +12229,7 @@ process_symbol_table (Filedata * filedata)
 	{
 	  free (lengths);
 	  error (_("Out of memory allocating space for gnu histogram counts\n"));
-	  return FALSE;
+	  goto err_out;
 	}
 
       for (hn = 0; hn < ngnubuckets; ++hn)
@@ -12256,12 +12251,19 @@ process_symbol_table (Filedata * filedata)
 
       free (counts);
       free (lengths);
-      free (gnubuckets);
-      free (gnuchains);
-      free (mipsxlat);
     }
-
+  free (gnubuckets);
+  free (gnuchains);
+  free (mipsxlat);
   return TRUE;
+
+ err_out:
+  free (gnubuckets);
+  free (gnuchains);
+  free (mipsxlat);
+  free (buckets);
+  free (chains);
+  return FALSE;
 }
 
 static bfd_boolean
@@ -18773,6 +18775,14 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
   return FALSE;
 }
 
+struct build_attr_cache {
+  Filedata *filedata;
+  char *strtab;
+  unsigned long strtablen;
+  Elf_Internal_Sym *symtab;
+  unsigned long nsyms;
+} ba_cache;
+
 /* Find the symbol associated with a build attribute that is attached
    to address OFFSET.  If PNAME is non-NULL then store the name of
    the symbol (if found) in the provided pointer,  Returns NULL if a
@@ -18784,18 +18794,18 @@ get_symbol_for_build_attribute (Filedata *       filedata,
 				bfd_boolean      is_open_attr,
 				const char **    pname)
 {
-  static Filedata *         saved_filedata = NULL;
-  static char *             strtab;
-  static unsigned long      strtablen;
-  static Elf_Internal_Sym * symtab;
-  static unsigned long      nsyms;
-  Elf_Internal_Sym *        saved_sym = NULL;
-  Elf_Internal_Sym *        sym;
+  Elf_Internal_Sym *saved_sym = NULL;
+  Elf_Internal_Sym *sym;
 
   if (filedata->section_headers != NULL
-      && (saved_filedata == NULL || filedata != saved_filedata))
+      && (ba_cache.filedata == NULL || filedata != ba_cache.filedata))
     {
       Elf_Internal_Shdr * symsec;
+
+      free (ba_cache.strtab);
+      ba_cache.strtab = NULL;
+      free (ba_cache.symtab);
+      ba_cache.symtab = NULL;
 
       /* Load the symbol and string sections.  */
       for (symsec = filedata->section_headers;
@@ -18804,41 +18814,52 @@ get_symbol_for_build_attribute (Filedata *       filedata,
 	{
 	  if (symsec->sh_type == SHT_SYMTAB)
 	    {
-	      symtab = GET_ELF_SYMBOLS (filedata, symsec, & nsyms);
+	      ba_cache.symtab = GET_ELF_SYMBOLS (filedata, symsec,
+						 &ba_cache.nsyms);
 
-	      if (symsec->sh_link < filedata->file_header.e_shnum)
+	      if (ba_cache.symtab != NULL
+		  && symsec->sh_link < filedata->file_header.e_shnum)
 		{
-		  Elf_Internal_Shdr * strtab_sec = filedata->section_headers + symsec->sh_link;
+		  Elf_Internal_Shdr *strtab_sec
+		    = filedata->section_headers + symsec->sh_link;
 
-		  strtab = (char *) get_data (NULL, filedata, strtab_sec->sh_offset,
-					      1, strtab_sec->sh_size,
-					      _("string table"));
-		  strtablen = strtab != NULL ? strtab_sec->sh_size : 0;
+		  ba_cache.strtab
+		    = (char *) get_data (NULL, filedata, strtab_sec->sh_offset,
+					 1, strtab_sec->sh_size,
+					 _("string table"));
+		  ba_cache.strtablen = strtab_sec->sh_size;
 		}
+	      if (ba_cache.strtab == NULL)
+		{
+		  free (ba_cache.symtab);
+		  ba_cache.symtab = NULL;
+		}
+	      if (ba_cache.symtab != NULL)
+		break;
 	    }
 	}
-      saved_filedata = filedata;
+      ba_cache.filedata = filedata;
     }
 
-  if (symtab == NULL || strtab == NULL)
+  if (ba_cache.symtab == NULL)
     return NULL;
 
   /* Find a symbol whose value matches offset.  */
-  for (sym = symtab; sym < symtab + nsyms; sym ++)
+  for (sym = ba_cache.symtab; sym < ba_cache.symtab + ba_cache.nsyms; sym ++)
     if (sym->st_value == offset)
       {
-	if (sym->st_name >= strtablen)
+	if (sym->st_name >= ba_cache.strtablen)
 	  /* Huh ?  This should not happen.  */
 	  continue;
 
-	if (strtab[sym->st_name] == 0)
+	if (ba_cache.strtab[sym->st_name] == 0)
 	  continue;
 
 	/* The AArch64 and ARM architectures define mapping symbols
 	   (eg $d, $x, $t) which we want to ignore.  */
-	if (strtab[sym->st_name] == '$'
-	    && strtab[sym->st_name + 1] != 0
-	    && strtab[sym->st_name + 2] == 0)
+	if (ba_cache.strtab[sym->st_name] == '$'
+	    && ba_cache.strtab[sym->st_name + 1] != 0
+	    && ba_cache.strtab[sym->st_name + 2] == 0)
 	  continue;
 
 	if (is_open_attr)
@@ -18855,7 +18876,7 @@ get_symbol_for_build_attribute (Filedata *       filedata,
 		  {
 		    /* If the symbol has a size associated
 		       with it then we can stop searching.  */
-		    sym = symtab + nsyms;
+		    sym = ba_cache.symtab + ba_cache.nsyms;
 		  }
 		continue;
 
@@ -18895,7 +18916,7 @@ get_symbol_for_build_attribute (Filedata *       filedata,
       }
 
   if (saved_sym && pname)
-    * pname = strtab + saved_sym->st_name;
+    * pname = ba_cache.strtab + saved_sym->st_name;
 
   return saved_sym;
 }
@@ -20238,6 +20259,7 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
 			  putchar ('\n');
 		          free (qualified_name);
 		        }
+		      free (member_name);
 		    }
 		}
 
@@ -20340,6 +20362,7 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
       if (qualified_name == NULL)
 	{
 	  error (_("%s: bad archive file name\n"), arch.file_name);
+	  free (name);
 	  ret = FALSE;
 	  break;
 	}
@@ -20351,8 +20374,10 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
           char * member_file_name = adjust_relative_path
 	    (filedata->file_name, name, namelen);
 
+	  free (name);
           if (member_file_name == NULL)
             {
+	      free (qualified_name);
               ret = FALSE;
               break;
             }
@@ -20362,6 +20387,7 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
             {
               error (_("Input file '%s' is not readable.\n"), member_file_name);
               free (member_file_name);
+	      free (qualified_name);
               ret = FALSE;
               break;
             }
@@ -20374,6 +20400,7 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
 
           close_file (member_filedata);
           free (member_file_name);
+	  free (qualified_name);
         }
       else if (is_thin_archive)
         {
@@ -20386,9 +20413,12 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
 	    {
 	      error (_("%s: contains corrupt thin archive: %s\n"),
 		     qualified_name, name);
+	      free (qualified_name);
+	      free (name);
 	      ret = FALSE;
 	      break;
 	    }
+	  free (name);
 
           /* This is a proxy for a member of a nested archive.  */
           archive_file_offset = arch.nested_member_origin + sizeof arch.arhdr;
@@ -20398,6 +20428,7 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
           if (fseek (nested_arch.file, archive_file_offset, SEEK_SET) != 0)
             {
               error (_("%s: failed to seek to archive member.\n"), nested_arch.file_name);
+	      free (qualified_name);
               ret = FALSE;
               break;
             }
@@ -20410,6 +20441,7 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
         }
       else
         {
+	  free (name);
           archive_file_offset = arch.next_arhdr_offset;
           arch.next_arhdr_offset += archive_file_size;
 
@@ -20509,6 +20541,10 @@ process_file (char * file_name)
   free (filedata->string_table);
   free (filedata->dump_sects);
   free (filedata);
+
+  free (ba_cache.strtab);
+  free (ba_cache.symtab);
+  ba_cache.filedata = NULL;
 
   return ret;
 }

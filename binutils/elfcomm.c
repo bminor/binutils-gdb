@@ -797,7 +797,7 @@ get_archive_member_name (struct archive_info *arch,
       arch->longnames[j] = '\0';
 
       if (!arch->is_thin_archive || arch->nested_member_origin == 0)
-        return arch->longnames + k;
+	return xstrdup (arch->longnames + k);
 
       /* PR 17531: file: 2896dc8b.  */
       if (k >= j)
@@ -813,7 +813,7 @@ get_archive_member_name (struct archive_info *arch,
       if (member_file_name != NULL
           && setup_nested_archive (nested_arch, member_file_name) == 0)
 	{
-          member_name = get_archive_member_name_at (nested_arch,
+	  member_name = get_archive_member_name_at (nested_arch,
 						    arch->nested_member_origin,
 						    NULL);
 	  if (member_name != NULL)
@@ -825,7 +825,7 @@ get_archive_member_name (struct archive_info *arch,
       free (member_file_name);
 
       /* Last resort: just return the name of the nested archive.  */
-      return arch->longnames + k;
+      return xstrdup (arch->longnames + k);
     }
 
   /* We have a normal (short) name.  */
@@ -833,7 +833,7 @@ get_archive_member_name (struct archive_info *arch,
     if (arch->arhdr.ar_name[j] == '/')
       {
 	arch->arhdr.ar_name[j] = '\0';
-	return arch->arhdr.ar_name;
+	return xstrdup (arch->arhdr.ar_name);
       }
 
   /* The full ar_name field is used.  Don't rely on ar_date starting

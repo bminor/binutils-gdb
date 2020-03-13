@@ -1,3 +1,17 @@
+2020-03-13  Alan Modra  <amodra@gmail.com>
+
+	* elfcomm.c (get_archive_member_name): Always return malloc'd
+	string or NULL.
+	* elfedit.c (process_archive): Tidy memory on all return paths.
+	* readelf.c (process_archive): Likewise.
+	(process_symbol_table): Likewise.
+	(ba_cache): New, replacing ..
+	(get_symbol_for_build_attribute): ..static vars here.  Free
+	strtab and symtab before loading new ones.  Reject symtab without
+	valid strtab in loop, breaking out of loop on valid symtab.
+	(process_file): Free ba_cache symtab and strtab here, resetting
+	ba_cache.
+
 2020-03-12  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_section_headers): Don't just set
