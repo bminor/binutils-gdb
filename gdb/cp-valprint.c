@@ -689,11 +689,7 @@ cp_print_static_field (struct type *type,
 
   opts = *options;
   opts.deref_ref = 0;
-  val_print (type,
-	     value_embedded_offset (val),
-	     value_address (val),
-	     stream, recurse, val,
-	     &opts, current_language);
+  common_val_print (val, stream, recurse, &opts, current_language);
 }
 
 /* Find the field in *SELF, or its non-virtual base classes, with
