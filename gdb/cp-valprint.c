@@ -329,6 +329,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		    {
 		      CORE_ADDR addr;
 		      
+		      i_offset += value_embedded_offset (val);
 		      addr = extract_typed_address (valaddr + i_offset, i_type);
 		      print_function_pointer_address (opts,
 						      get_type_arch (type),
@@ -366,6 +367,282 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	      obstack_final_size =
 		obstack_object_size (&dont_print_stat_array_obstack);
 	      
+	      if (obstack_final_size > stat_array_obstack_initial_size)
+		{
+		  void *free_to_ptr =
+		    (char *) obstack_next_free (&dont_print_stat_array_obstack)
+		    - (obstack_final_size
+		       - stat_array_obstack_initial_size);
+
+		  obstack_free (&dont_print_stat_array_obstack,
+				free_to_ptr);
+		}
+	      last_set_recurse = -1;
+	    }
+	}
+
+      if (options->prettyformat)
+	{
+	  fprintf_filtered (stream, "\n");
+	  print_spaces_filtered (2 * recurse, stream);
+	}
+    }				/* if there are data fields */
+
+  fprintf_filtered (stream, "}");
+}
+
+/* Mutually recursive subroutines of cp_print_value and c_value_print
+   to print out a structure's fields: cp_print_value_fields and
+   cp_print_value.
+
+   VAL, ADDRESS, STREAM, RECURSE, and OPTIONS have the same meanings
+   as in cp_print_value and c_value_print.
+
+   DONT_PRINT is an array of baseclass types that we should not print,
+   or zero if called from top level.  */
+
+void
+cp_print_value_fields (struct value *val, struct ui_file *stream,
+		       int recurse, const struct value_print_options *options,
+		       struct type **dont_print_vb,
+		       int dont_print_statmem)
+{
+  int i, len, n_baseclasses;
+  int fields_seen = 0;
+  static int last_set_recurse = -1;
+
+  struct type *type = check_typedef (value_type (val));
+  CORE_ADDR address = value_address (val);
+
+  if (recurse == 0)
+    {
+      /* Any object can be left on obstacks only during an unexpected
+	 error.  */
+
+      if (obstack_object_size (&dont_print_statmem_obstack) > 0)
+	{
+	  obstack_free (&dont_print_statmem_obstack, NULL);
+	  obstack_begin (&dont_print_statmem_obstack,
+			 32 * sizeof (CORE_ADDR));
+	}
+      if (obstack_object_size (&dont_print_stat_array_obstack) > 0)
+	{
+	  obstack_free (&dont_print_stat_array_obstack, NULL);
+	  obstack_begin (&dont_print_stat_array_obstack,
+			 32 * sizeof (struct type *));
+	}
+    }
+
+  fprintf_filtered (stream, "{");
+  len = TYPE_NFIELDS (type);
+  n_baseclasses = TYPE_N_BASECLASSES (type);
+
+  /* First, print out baseclasses such that we don't print
+     duplicates of virtual baseclasses.  */
+
+  if (n_baseclasses > 0)
+    cp_print_value (type, type, 0, address, stream,
+		    recurse + 1, val, options,
+		    dont_print_vb);
+
+  /* Second, print out data fields */
+
+  /* If there are no data fields, skip this part */
+  if (len == n_baseclasses || !len)
+    fprintf_styled (stream, metadata_style.style (), "<No data fields>");
+  else
+    {
+      size_t statmem_obstack_initial_size = 0;
+      size_t stat_array_obstack_initial_size = 0;
+      struct type *vptr_basetype = NULL;
+      int vptr_fieldno;
+
+      if (dont_print_statmem == 0)
+	{
+	  statmem_obstack_initial_size =
+	    obstack_object_size (&dont_print_statmem_obstack);
+
+	  if (last_set_recurse != recurse)
+	    {
+	      stat_array_obstack_initial_size =
+		obstack_object_size (&dont_print_stat_array_obstack);
+
+	      last_set_recurse = recurse;
+	    }
+	}
+
+      vptr_fieldno = get_vptr_fieldno (type, &vptr_basetype);
+      for (i = n_baseclasses; i < len; i++)
+	{
+	  const gdb_byte *valaddr = value_contents_for_printing (val);
+
+	  /* If requested, skip printing of static fields.  */
+	  if (!options->static_field_print
+	      && field_is_static (&TYPE_FIELD (type, i)))
+	    continue;
+
+	  if (fields_seen)
+	    {
+	      fputs_filtered (",", stream);
+	      if (!options->prettyformat)
+		fputs_filtered (" ", stream);
+	    }
+	  else if (n_baseclasses > 0)
+	    {
+	      if (options->prettyformat)
+		{
+		  fprintf_filtered (stream, "\n");
+		  print_spaces_filtered (2 + 2 * recurse, stream);
+		  fputs_filtered ("members of ", stream);
+		  fputs_filtered (TYPE_NAME (type), stream);
+		  fputs_filtered (":", stream);
+		}
+	    }
+	  fields_seen = 1;
+
+	  if (options->prettyformat)
+	    {
+	      fprintf_filtered (stream, "\n");
+	      print_spaces_filtered (2 + 2 * recurse, stream);
+	    }
+	  else
+	    {
+	      wrap_here (n_spaces (2 + 2 * recurse));
+	    }
+
+	  annotate_field_begin (TYPE_FIELD_TYPE (type, i));
+
+	  if (field_is_static (&TYPE_FIELD (type, i)))
+	    {
+	      fputs_filtered ("static ", stream);
+	      fprintf_symbol_filtered (stream,
+				       TYPE_FIELD_NAME (type, i),
+				       current_language->la_language,
+				       DMGL_PARAMS | DMGL_ANSI);
+	    }
+	  else
+	    fputs_styled (TYPE_FIELD_NAME (type, i),
+			  variable_name_style.style (), stream);
+	  annotate_field_name_end ();
+
+	  /* We tweak various options in a few cases below.  */
+	  value_print_options options_copy = *options;
+	  value_print_options *opts = &options_copy;
+
+	  /* Do not print leading '=' in case of anonymous
+	     unions.  */
+	  if (strcmp (TYPE_FIELD_NAME (type, i), ""))
+	    fputs_filtered (" = ", stream);
+	  else
+	    {
+	      /* If this is an anonymous field then we want to consider it
+		 as though it is at its parent's depth when it comes to the
+		 max print depth.  */
+	      if (opts->max_depth != -1 && opts->max_depth < INT_MAX)
+		++opts->max_depth;
+	    }
+	  annotate_field_value ();
+
+	  if (!field_is_static (&TYPE_FIELD (type, i))
+	      && TYPE_FIELD_PACKED (type, i))
+	    {
+	      struct value *v;
+
+	      /* Bitfields require special handling, especially due to
+	         byte order problems.  */
+	      if (TYPE_FIELD_IGNORE (type, i))
+		{
+		  fputs_styled ("<optimized out or zero length>",
+				metadata_style.style (), stream);
+		}
+	      else if (value_bits_synthetic_pointer (val,
+						     TYPE_FIELD_BITPOS (type,
+									i),
+						     TYPE_FIELD_BITSIZE (type,
+									 i)))
+		{
+		  fputs_styled (_("<synthetic pointer>"),
+				metadata_style.style (), stream);
+		}
+	      else
+		{
+		  opts->deref_ref = 0;
+
+		  v = value_field_bitfield (type, i, valaddr,
+					    value_embedded_offset (val), val);
+
+		  common_val_print (v, stream, recurse + 1,
+				    opts, current_language);
+		}
+	    }
+	  else
+	    {
+	      if (TYPE_FIELD_IGNORE (type, i))
+		{
+		  fputs_styled ("<optimized out or zero length>",
+				metadata_style.style (), stream);
+		}
+	      else if (field_is_static (&TYPE_FIELD (type, i)))
+		{
+		  try
+		    {
+		      struct value *v = value_static_field (type, i);
+
+		      cp_print_static_field (TYPE_FIELD_TYPE (type, i),
+					     v, stream, recurse + 1,
+					     opts);
+		    }
+		  catch (const gdb_exception_error &ex)
+		    {
+		      fprintf_styled (stream, metadata_style.style (),
+				      _("<error reading variable: %s>"),
+				      ex.what ());
+		    }
+		}
+	      else if (i == vptr_fieldno && type == vptr_basetype)
+		{
+		  int i_offset = TYPE_FIELD_BITPOS (type, i) / 8;
+		  struct type *i_type = TYPE_FIELD_TYPE (type, i);
+
+		  if (valprint_check_validity (stream, i_type, i_offset, val))
+		    {
+		      CORE_ADDR addr;
+
+		      addr = extract_typed_address (valaddr + i_offset, i_type);
+		      print_function_pointer_address (opts,
+						      get_type_arch (type),
+						      addr, stream);
+		    }
+		}
+	      else
+		{
+		  struct value *v = value_primitive_field (val, 0, i, type);
+		  opts->deref_ref = 0;
+		  common_val_print (v, stream, recurse + 1, opts,
+				    current_language);
+		}
+	    }
+	  annotate_field_end ();
+	}
+
+      if (dont_print_statmem == 0)
+	{
+	  size_t obstack_final_size =
+           obstack_object_size (&dont_print_statmem_obstack);
+
+	  if (obstack_final_size > statmem_obstack_initial_size)
+	    {
+	      /* In effect, a pop of the printed-statics stack.  */
+	      size_t shrink_bytes
+		= statmem_obstack_initial_size - obstack_final_size;
+	      obstack_blank_fast (&dont_print_statmem_obstack, shrink_bytes);
+	    }
+
+	  if (last_set_recurse != recurse)
+	    {
+	      obstack_final_size =
+		obstack_object_size (&dont_print_stat_array_obstack);
+
 	      if (obstack_final_size > stat_array_obstack_initial_size)
 		{
 		  void *free_to_ptr =
@@ -436,7 +713,7 @@ cp_print_value_fields_rtti (struct type *type,
 			 dont_print_vb, dont_print_statmem);
 }
 
-/* Special val_print routine to avoid printing multiple copies of
+/* Special value_print routine to avoid printing multiple copies of
    virtual baseclasses.  */
 
 static void

@@ -135,6 +135,11 @@ extern void c_type_print_base (struct type *, struct ui_file *,
 extern void cp_print_class_member (const gdb_byte *, struct type *,
 				   struct ui_file *, const char *);
 
+extern void cp_print_value_fields (struct value *,
+				   struct ui_file *, int,
+				   const struct value_print_options *,
+				   struct type **, int);
+
 extern void cp_print_value_fields (struct type *, struct type *,
 				   LONGEST, CORE_ADDR,
 				   struct ui_file *, int,

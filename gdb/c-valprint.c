@@ -540,6 +540,34 @@ c_val_print_struct (struct type *type, const gdb_byte *valaddr,
 				NULL, 0);
 }
 
+/* c_value_print helper for TYPE_CODE_STRUCT and TYPE_CODE_UNION.  */
+
+static void
+c_value_print_struct (struct value *val, struct ui_file *stream, int recurse,
+		      const struct value_print_options *options)
+{
+  struct type *type = check_typedef (value_type (val));
+
+  if (TYPE_CODE (type) == TYPE_CODE_UNION && recurse && !options->unionprint)
+    fprintf_filtered (stream, "{...}");
+  else if (options->vtblprint && cp_is_vtbl_ptr_type (type))
+    {
+      /* Print the unmangled name if desired.  */
+      /* Print vtable entry - we only get here if NOT using
+	 -fvtable_thunks.  (Otherwise, look under
+	 TYPE_CODE_PTR.)  */
+      struct gdbarch *gdbarch = get_type_arch (type);
+      int offset = TYPE_FIELD_BITPOS (type, VTBL_FNADDR_OFFSET) / 8;
+      struct type *field_type = TYPE_FIELD_TYPE (type, VTBL_FNADDR_OFFSET);
+      const gdb_byte *valaddr = value_contents_for_printing (val);
+      CORE_ADDR addr = extract_typed_address (valaddr + offset, field_type);
+
+      print_function_pointer_address (options, gdbarch, addr, stream);
+    }
+  else
+    cp_print_value_fields (val, stream, recurse, options, NULL, 0);
+}
+
 /* c_val_print helper for TYPE_CODE_UNION.  */
 
 static void
@@ -746,7 +774,6 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 		     const struct value_print_options *options)
 {
   struct type *type = value_type (val);
-  CORE_ADDR address = value_address (val);
   const gdb_byte *valaddr = value_contents_for_printing (val);
 
   type = check_typedef (type);
@@ -765,13 +792,8 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_UNION:
-      c_val_print_union (type, valaddr, 0, address, stream,
-			 recurse, val, options);
-      break;
-
     case TYPE_CODE_STRUCT:
-      c_val_print_struct (type, valaddr, 0, address, stream,
-			  recurse, val, options);
+      c_value_print_struct (val, stream, recurse, options);
       break;
 
     case TYPE_CODE_INT:

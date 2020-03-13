@@ -605,9 +605,7 @@ m2_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
       else if (m2_is_unbounded_array (type))
 	m2_print_unbounded_array (val, stream, recurse, options);
       else
-	cp_print_value_fields (type, type, 0,
-			       address, stream, recurse, val,
-			       options, NULL, 0);
+	cp_print_value_fields (val, stream, recurse, options, NULL, 0);
       break;
 
     case TYPE_CODE_SET:
