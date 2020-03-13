@@ -1,3 +1,7 @@
+2020-03-13  Kamil Rytarowski  <n54@gmx.com>
+
+	* elf.c (elfcore_grok_netbsd_note): Add support for aarch64.
+
 2020-03-13  Christian Eggers  <ceggers@gmx.de>
 
 	* bfd.c (bfd_record_phdr): New local "opb".  Fix assignment of
