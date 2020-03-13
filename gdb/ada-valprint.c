@@ -1427,7 +1427,6 @@ ada_value_print (struct value *val0, struct ui_file *stream,
 		 const struct value_print_options *options)
 {
   struct value *val = ada_to_fixed_value (val0);
-  CORE_ADDR address = value_address (val);
   struct type *type = ada_check_typedef (value_type (val));
   struct value_print_options opts;
 
@@ -1467,7 +1466,5 @@ ada_value_print (struct value *val0, struct ui_file *stream,
 
   opts = *options;
   opts.deref_ref = 1;
-  val_print (type,
-	     value_embedded_offset (val), address,
-	     stream, 0, val, &opts, current_language);
+  common_val_print (val, stream, 0, &opts, current_language);
 }
