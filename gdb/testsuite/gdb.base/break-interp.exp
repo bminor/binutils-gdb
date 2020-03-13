@@ -411,18 +411,22 @@ proc test_ld {file ifmain trynosym displacement} {
 
     reach $solib_bp "run" $displacement 1
 
-    gdb_test_no_output "set verbose off"
-    gdb_test "bt" "#0 +\[^\r\n\]*\\m(__GI_)?$solib_bp\\M.*" "dl bt"
-    gdb_test_no_output "set verbose on"
+    with_test_prefix "first backtrace" {
+	gdb_test_no_output "set verbose off"
+	gdb_test "bt" "#0 +\[^\r\n\]*\\m(__GI_)?$solib_bp\\M.*" "dl bt"
+	gdb_test_no_output "set verbose on"
+    }
 
     if $ifmain {
 	reach "main" continue "NONE"
 
 	reach "libfunc" continue "NONE"
 
-	gdb_test_no_output "set verbose off"
-	gdb_test "bt" "#0 +\[^\r\n\]*\\mlibfunc\\M\[^\r\n\]*\r\n#1 +\[^\r\n\]*\\mmain\\M.*" "main bt"
-	gdb_test_no_output "set verbose on"
+	with_test_prefix "second backtrace" {
+	    gdb_test_no_output "set verbose off"
+	    gdb_test "bt" "#0 +\[^\r\n\]*\\mlibfunc\\M\[^\r\n\]*\r\n#1 +\[^\r\n\]*\\mmain\\M.*" "main bt"
+	    gdb_test_no_output "set verbose on"
+	}
     }
 
     # Try re-run if the new PIE displacement takes effect.
@@ -609,7 +613,7 @@ foreach_with_prefix ldprelink {NO YES} {
 	    file delete "${interp}.debug"
 	}
 
-	if ![prelink$ldprelink $interp "$interp, second time"] {
+	if ![prelink$ldprelink $interp "[file tail $interp], second time"] {
 	    continue
 	}
 

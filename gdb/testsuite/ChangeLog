@@ -1,3 +1,10 @@
+2020-03-13  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/break-interp.exp: Use the tail of the filename, not the
+	full path in the test name.
+	(test_ld): Add some with_test_prefix blocks to make test names
+	unique.
+
 2020-03-13  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.mi/mi-sym-info.exp: Fix buffer full errors, and timeouts.
