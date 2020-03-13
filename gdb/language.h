@@ -272,6 +272,13 @@ struct language_defn
 			  struct value *val,
 			  const struct value_print_options *options);
 
+    /* Print a value using syntax appropriate for this language.
+       RECURSE is the recursion depth.  It is zero-based.  */
+
+    void (*la_value_print_inner) (struct value *, struct ui_file *,
+				  int recurse,
+				  const struct value_print_options *);
+
     /* Print a top-level value using syntax appropriate for this language.  */
 
     void (*la_value_print) (struct value *, struct ui_file *,

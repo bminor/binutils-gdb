@@ -1092,9 +1092,13 @@ do_val_print (struct value *full_value,
 
   try
     {
-      language->la_val_print (type, embedded_offset, address,
-			      stream, recurse, val,
-			      &local_opts);
+      if (full_value != nullptr && language->la_value_print_inner != nullptr)
+	language->la_value_print_inner (full_value, stream, recurse,
+					&local_opts);
+      else
+	language->la_val_print (type, embedded_offset, address,
+				stream, recurse, val,
+				&local_opts);
     }
   catch (const gdb_exception_error &except)
     {

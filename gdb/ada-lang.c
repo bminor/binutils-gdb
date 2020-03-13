@@ -14110,6 +14110,7 @@ extern const struct language_defn ada_language_defn = {
   ada_print_type,               /* Print a type using appropriate syntax */
   ada_print_typedef,            /* Print a typedef using appropriate syntax */
   ada_val_print,                /* Print a value using appropriate syntax */
+  nullptr,			/* la_value_print_inner */
   ada_value_print,              /* Print a top-level value */
   ada_read_var_value,		/* la_read_var_value */
   NULL,                         /* Language specific skip_trampoline */
