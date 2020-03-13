@@ -938,6 +938,88 @@ ada_val_print_num (struct type *type, const gdb_byte *valaddr,
 }
 
 /* Implement Ada val_print'ing for the case where TYPE is
+   a TYPE_CODE_INT or TYPE_CODE_RANGE.  */
+
+static void
+ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
+		     const struct value_print_options *options)
+{
+  struct type *type = ada_check_typedef (value_type (val));
+  const gdb_byte *valaddr = value_contents_for_printing (val);
+
+  if (ada_is_fixed_point_type (type))
+    {
+      struct value *scale = ada_scaling_factor (type);
+      val = value_cast (value_type (scale), val);
+      val = value_binop (val, scale, BINOP_MUL);
+
+      const char *fmt = TYPE_LENGTH (type) < 4 ? "%.11g" : "%.17g";
+      std::string str
+	= target_float_to_string (value_contents (val), value_type (val), fmt);
+      fputs_filtered (str.c_str (), stream);
+      return;
+    }
+  else if (TYPE_CODE (type) == TYPE_CODE_RANGE
+	   && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ENUM
+	       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_BOOL
+	       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CHAR))
+    {
+      /* For enum-valued ranges, we want to recurse, because we'll end
+	 up printing the constant's name rather than its numeric
+	 value.  Character and fixed-point types are also printed
+	 differently, so recuse for those as well.  */
+      struct type *target_type = TYPE_TARGET_TYPE (type);
+      val = value_cast (target_type, val);
+      common_val_print (val, stream, recurse + 1, options,
+			language_def (language_ada));
+      return;
+    }
+  else
+    {
+      int format = (options->format ? options->format
+		    : options->output_format);
+
+      if (format)
+	{
+	  struct value_print_options opts = *options;
+
+	  opts.format = format;
+	  value_print_scalar_formatted (val, &opts, 0, stream);
+	}
+      else if (ada_is_system_address_type (type))
+	{
+	  /* FIXME: We want to print System.Address variables using
+	     the same format as for any access type.  But for some
+	     reason GNAT encodes the System.Address type as an int,
+	     so we have to work-around this deficiency by handling
+	     System.Address values as a special case.  */
+
+	  struct gdbarch *gdbarch = get_type_arch (type);
+	  struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
+	  CORE_ADDR addr = extract_typed_address (valaddr, ptr_type);
+
+	  fprintf_filtered (stream, "(");
+	  type_print (type, "", stream, -1);
+	  fprintf_filtered (stream, ") ");
+	  fputs_filtered (paddress (gdbarch, addr), stream);
+	}
+      else
+	{
+	  value_print_scalar_formatted (val, options, 0, stream);
+	  if (ada_is_character_type (type))
+	    {
+	      LONGEST c;
+
+	      fputs_filtered (" ", stream);
+	      c = unpack_long (type, valaddr);
+	      ada_printchar (c, type, stream);
+	    }
+	}
+      return;
+    }
+}
+
+/* Implement Ada val_print'ing for the case where TYPE is
    a TYPE_CODE_ENUM.  */
 
 static void
@@ -1282,9 +1364,7 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
 
     case TYPE_CODE_INT:
     case TYPE_CODE_RANGE:
-      ada_val_print_num (type, valaddr, 0, 0,
-			 address, stream, recurse, val,
-			 options);
+      ada_value_print_num (val, stream, recurse, options);
       break;
 
     case TYPE_CODE_ENUM:
