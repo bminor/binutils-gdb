@@ -1294,9 +1294,14 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_FLT:
-      ada_val_print_flt (type, valaddr, 0, 0,
-			 address, stream, recurse, val,
-			 options);
+      if (options->format)
+	{
+	  common_val_print (val, stream, recurse, options,
+			    language_def (language_c));
+	  break;
+	}
+
+      ada_print_floating (valaddr, type, stream);
       break;
 
     case TYPE_CODE_UNION:

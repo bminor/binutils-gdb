@@ -1,5 +1,9 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* ada-valprint.c (ada_value_print_1) <TYPE_CODE_FLT>: Rewrite.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* ada-valprint.c (ada_value_print_ptr): New function.
 	(ada_value_print_1): Use it.
 
