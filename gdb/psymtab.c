@@ -1490,8 +1490,20 @@ partial_symtab::partial_symtab (const char *filename,
 {
   set_text_low (textlow);
   set_text_high (raw_text_low ()); /* default */
-  globals_offset = objfile->partial_symtabs->global_psymbols.size ();
-  statics_offset = objfile->partial_symtabs->static_psymbols.size ();
+
+  auto *v1 = new std::vector<partial_symbol *>;
+  objfile->partial_symtabs->current_global_psymbols.push_back (v1);
+  auto *v2 = new std::vector<partial_symbol *>;
+  objfile->partial_symtabs->current_static_psymbols.push_back (v2);
+}
+
+/* Concat vectors V1 and V2.  */
+
+static void
+concat (std::vector<partial_symbol *> *v1, std::vector<partial_symbol *> *v2)
+{
+  v1->insert (v1->end (), v2->begin (), v2->end ());
+  v2->clear ();
 }
 
 /* Perform "finishing up" operations of a partial symtab.  */
@@ -1499,10 +1511,26 @@ partial_symtab::partial_symtab (const char *filename,
 void
 end_psymtab_common (struct objfile *objfile, struct partial_symtab *pst)
 {
-  pst->n_global_syms = (objfile->partial_symtabs->global_psymbols.size ()
-			- pst->globals_offset);
-  pst->n_static_syms = (objfile->partial_symtabs->static_psymbols.size ()
-			- pst->statics_offset);
+  pst->globals_offset = objfile->partial_symtabs->global_psymbols.size ();
+  pst->statics_offset = objfile->partial_symtabs->static_psymbols.size ();
+
+  auto *current_global_psymbols
+    = objfile->partial_symtabs->current_global_psymbols.back ();
+  auto *current_static_psymbols
+    = objfile->partial_symtabs->current_static_psymbols.back ();
+  objfile->partial_symtabs->current_global_psymbols.pop_back ();
+  objfile->partial_symtabs->current_static_psymbols.pop_back ();
+
+  pst->n_global_syms
+    = current_global_psymbols->size ();
+  pst->n_static_syms
+    = current_static_psymbols->size ();
+
+  concat (&objfile->partial_symtabs->global_psymbols, current_global_psymbols);
+  concat (&objfile->partial_symtabs->static_psymbols, current_static_psymbols);
+
+  delete current_global_psymbols;
+  delete current_static_psymbols;
 
   sort_pst_symbols (objfile, pst);
 }
@@ -1621,8 +1649,8 @@ add_psymbol_to_list (gdb::string_view name, bool copy_name,
   /* Save pointer to partial symbol in psymtab, growing symtab if needed.  */
   std::vector<partial_symbol *> *list
     = (where == psymbol_placement::STATIC
-       ? &objfile->partial_symtabs->static_psymbols
-       : &objfile->partial_symtabs->global_psymbols);
+       ? objfile->partial_symtabs->current_static_psymbols.back ()
+       : objfile->partial_symtabs->current_global_psymbols.back ());
   append_psymbol_to_list (list, psym, objfile);
 }
 

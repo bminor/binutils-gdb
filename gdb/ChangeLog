@@ -1,3 +1,19 @@
+2020-03-13  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25646
+	* psymtab.c (partial_symtab::partial_symtab): Don't set
+	globals_offset and statics_offset.  Push element onto
+	current_global_psymbols and current_static_psymbols stacks.
+	(concat): New function.
+	(end_psymtab_common): Set globals_offset and statics_offset.  Pop
+	element from current_global_psymbols and current_static_psymbols
+	stacks.  Concat popped elements to global_psymbols and
+	static_symbols.
+	(add_psymbol_to_list): Use current_global_psymbols and
+	current_static_psymbols stacks.
+	* psymtab.h (class psymtab_storage): Add current_global_psymbols and
+	current_static_psymbols fields.
+
 2020-03-12  Christian Biesinger  <cbiesinger@google.com>
 
 	* corelow.c (sniff_core_bfd): Remove.
