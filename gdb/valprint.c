@@ -1227,6 +1227,8 @@ void
 value_print (struct value *val, struct ui_file *stream,
 	     const struct value_print_options *options)
 {
+  scoped_value_mark free_values;
+
   if (!value_check_printable (val, stream, options))
     return;
 
