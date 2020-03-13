@@ -400,8 +400,171 @@ void
 f_value_print_innner (struct value *val, struct ui_file *stream, int recurse,
 		      const struct value_print_options *options)
 {
-  f_val_print (value_type (val), value_embedded_offset (val),
-	       value_address (val), stream, recurse, val, options);
+  struct type *type = check_typedef (value_type (val));
+  struct gdbarch *gdbarch = get_type_arch (type);
+  int printed_field = 0; /* Number of fields printed.  */
+  struct type *elttype;
+  CORE_ADDR addr;
+  int index;
+  const gdb_byte *valaddr = value_contents_for_printing (val);
+  const CORE_ADDR address = value_address (val);
+
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_STRING:
+      f77_get_dynamic_length_of_aggregate (type);
+      LA_PRINT_STRING (stream, builtin_type (gdbarch)->builtin_char,
+		       valaddr, TYPE_LENGTH (type), NULL, 0, options);
+      break;
+
+    case TYPE_CODE_ARRAY:
+      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_CHAR)
+	{
+	  fprintf_filtered (stream, "(");
+	  f77_print_array (type, valaddr, 0,
+			   address, stream, recurse, val, options);
+	  fprintf_filtered (stream, ")");
+	}
+      else
+	{
+	  struct type *ch_type = TYPE_TARGET_TYPE (type);
+
+	  f77_get_dynamic_length_of_aggregate (type);
+	  LA_PRINT_STRING (stream, ch_type, valaddr,
+			   TYPE_LENGTH (type) / TYPE_LENGTH (ch_type),
+			   NULL, 0, options);
+	}
+      break;
+
+    case TYPE_CODE_PTR:
+      if (options->format && options->format != 's')
+	{
+	  value_print_scalar_formatted (val, options, 0, stream);
+	  break;
+	}
+      else
+	{
+	  int want_space = 0;
+
+	  addr = unpack_pointer (type, valaddr);
+	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
+
+	  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
+	    {
+	      /* Try to print what function it points to.  */
+	      print_function_pointer_address (options, gdbarch, addr, stream);
+	      return;
+	    }
+
+	  if (options->symbol_print)
+	    want_space = print_address_demangle (options, gdbarch, addr,
+						 stream, demangle);
+	  else if (options->addressprint && options->format != 's')
+	    {
+	      fputs_filtered (paddress (gdbarch, addr), stream);
+	      want_space = 1;
+	    }
+
+	  /* For a pointer to char or unsigned char, also print the string
+	     pointed to, unless pointer is null.  */
+	  if (TYPE_LENGTH (elttype) == 1
+	      && TYPE_CODE (elttype) == TYPE_CODE_INT
+	      && (options->format == 0 || options->format == 's')
+	      && addr != 0)
+	    {
+	      if (want_space)
+		fputs_filtered (" ", stream);
+	      val_print_string (TYPE_TARGET_TYPE (type), NULL, addr, -1,
+				stream, options);
+	    }
+	  return;
+	}
+      break;
+
+    case TYPE_CODE_INT:
+      if (options->format || options->output_format)
+	{
+	  struct value_print_options opts = *options;
+
+	  opts.format = (options->format ? options->format
+			 : options->output_format);
+	  value_print_scalar_formatted (val, &opts, 0, stream);
+	}
+      else
+	value_print_scalar_formatted (val, options, 0, stream);
+      break;
+
+    case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
+      /* Starting from the Fortran 90 standard, Fortran supports derived
+         types.  */
+      fprintf_filtered (stream, "( ");
+      for (index = 0; index < TYPE_NFIELDS (type); index++)
+        {
+	  struct value *field = value_field (val, index);
+
+	  struct type *field_type = check_typedef (TYPE_FIELD_TYPE (type, index));
+
+
+	  if (TYPE_CODE (field_type) != TYPE_CODE_FUNC)
+	    {
+	      const char *field_name;
+
+	      if (printed_field > 0)
+		fputs_filtered (", ", stream);
+
+	      field_name = TYPE_FIELD_NAME (type, index);
+	      if (field_name != NULL)
+		{
+		  fputs_styled (field_name, variable_name_style.style (),
+				stream);
+		  fputs_filtered (" = ", stream);
+		}
+
+	      common_val_print (field, stream, recurse + 1,
+				options, current_language);
+
+	      ++printed_field;
+	    }
+	 }
+      fprintf_filtered (stream, " )");
+      break;     
+
+    case TYPE_CODE_BOOL:
+      if (options->format || options->output_format)
+	{
+	  struct value_print_options opts = *options;
+	  opts.format = (options->format ? options->format
+			 : options->output_format);
+	  value_print_scalar_formatted (val, &opts, 0, stream);
+	}
+      else
+	{
+	  LONGEST longval = value_as_long (val);
+	  /* The Fortran standard doesn't specify how logical types are
+	     represented.  Different compilers use different non zero
+	     values to represent logical true.  */
+	  if (longval == 0)
+	    fputs_filtered (f_decorations.false_name, stream);
+	  else
+	    fputs_filtered (f_decorations.true_name, stream);
+	}
+      break;
+
+    case TYPE_CODE_REF:
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_FLAGS:
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_VOID:
+    case TYPE_CODE_ERROR:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_UNDEF:
+    case TYPE_CODE_COMPLEX:
+    case TYPE_CODE_CHAR:
+    default:
+      generic_value_print (val, stream, recurse, options, &f_decorations);
+      break;
+    }
 }
 
 static void
