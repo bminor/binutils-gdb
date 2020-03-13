@@ -122,3 +122,40 @@ go_val_print (struct type *type, int embedded_offset,
 	break;
     }
 }
+
+/* See go-lang.h.  */
+
+void
+go_value_print_inner (struct value *val, struct ui_file *stream,
+		      int recurse, const struct value_print_options *options)
+{
+  struct type *type = check_typedef (value_type (val));
+
+  switch (TYPE_CODE (type))
+    {
+      case TYPE_CODE_STRUCT:
+	{
+	  enum go_type go_type = go_classify_struct_type (type);
+
+	  switch (go_type)
+	    {
+	    case GO_TYPE_STRING:
+	      if (! options->raw)
+		{
+		  print_go_string (type, value_embedded_offset (val),
+				   value_address (val),
+				   stream, recurse, val, options);
+		  return;
+		}
+	      break;
+	    default:
+	      break;
+	    }
+	}
+	/* Fall through.  */
+
+      default:
+	c_value_print_inner (val, stream, recurse, options);
+	break;
+    }
+}

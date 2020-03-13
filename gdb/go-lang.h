@@ -88,4 +88,10 @@ extern void go_val_print (struct type *type,
 			  struct value *val,
 			  const struct value_print_options *options);
 
+/* Implement la_value_print_inner for Go.  */
+
+extern void go_value_print_inner (struct value *value,
+				  struct ui_file *stream, int recurse,
+				  const struct value_print_options *options);
+
 #endif /* !defined (GO_LANG_H) */

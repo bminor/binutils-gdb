@@ -1,5 +1,11 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* go-valprint.c (go_value_print_inner): New function.
+	* go-lang.h (go_value_print_inner): Declare.
+	* go-lang.c (go_language_defn): Use go_value_print_inner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* rust-lang.c (val_print_struct, rust_print_enum): Use the value
 	API.
 	(rust_val_print): Rewrite.
