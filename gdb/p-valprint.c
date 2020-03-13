@@ -42,6 +42,14 @@
 #include "cli/cli-style.h"
 
 
+static void pascal_object_print_value_fields (struct type *, const gdb_byte *,
+					      LONGEST,
+					      CORE_ADDR, struct ui_file *,
+					      int,
+					      struct value *,
+					      const struct value_print_options *,
+					      struct type **, int);
+
 /* Decorations for Pascal.  */
 
 static const struct generic_val_print_decorations p_decorations =
@@ -529,7 +537,7 @@ pascal_object_is_vtbl_member (struct type *type)
    DONT_PRINT is an array of baseclass types that we
    should not print, or zero if called from top level.  */
 
-void
+static void
 pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 				  LONGEST offset,
 				  CORE_ADDR address, struct ui_file *stream,

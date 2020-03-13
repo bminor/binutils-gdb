@@ -72,14 +72,6 @@ extern void
   pascal_type_print_varspec_prefix (struct type *, struct ui_file *, int, int,
 				    const struct type_print_options *);
 
-extern void pascal_object_print_value_fields (struct type *, const gdb_byte *,
-					      LONGEST,
-					      CORE_ADDR, struct ui_file *,
-					      int,
-					      struct value *,
-					      const struct value_print_options *,
-					      struct type **, int);
-
 extern int pascal_object_is_vtbl_ptr_type (struct type *);
 
 extern int pascal_object_is_vtbl_member (struct type *);

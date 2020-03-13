@@ -1,5 +1,10 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* p-valprint.c (pascal_object_print_value_fields): Now static.
+	* p-lang.h (pascal_object_print_value_fields): Don't declare.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* c-valprint.c (c_val_print_array): Simplify.
 
 2020-03-13  Tom Tromey  <tom@tromey.com>
