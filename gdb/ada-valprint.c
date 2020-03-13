@@ -762,16 +762,14 @@ ada_val_print_string (struct type *type, const gdb_byte *valaddr,
    thin pointers, etc).  */
 
 static void
-ada_val_print_gnat_array (struct type *type, const gdb_byte *valaddr,
-			  int offset, CORE_ADDR address,
+ada_val_print_gnat_array (struct value *val,
 			  struct ui_file *stream, int recurse,
-			  struct value *original_value,
 			  const struct value_print_options *options)
 {
-  struct value *mark = value_mark ();
-  struct value *val;
+  scoped_value_mark free_values;
 
-  val = value_from_contents_and_address (type, valaddr + offset, address);
+  struct type *type = ada_check_typedef (value_type (val));
+
   /* If this is a reference, coerce it now.  This helps taking care
      of the case where ADDRESS is meaningless because original_value
      was not an lval.  */
@@ -786,11 +784,8 @@ ada_val_print_gnat_array (struct type *type, const gdb_byte *valaddr,
       fprintf_filtered (stream, "0x0");
     }
   else
-    val_print (value_type (val),
-	       value_embedded_offset (val), value_address (val),
-	       stream, recurse, val, options,
-	       language_def (language_ada));
-  value_free_to_mark (mark);
+    common_val_print (val, stream, recurse, options,
+		      language_def (language_ada));
 }
 
 /* Implement Ada val_print'ing for the case where TYPE is
@@ -1135,9 +1130,10 @@ ada_val_print_1 (struct type *type,
       || (ada_is_constrained_packed_array_type (type)
 	  && TYPE_CODE (type) != TYPE_CODE_PTR))
     {
-      ada_val_print_gnat_array (type, valaddr, offset, address,
-				stream, recurse, original_value,
-				options);
+      struct value *val = value_from_contents_and_address (type,
+							   valaddr + offset,
+							   address);
+      ada_val_print_gnat_array (val, stream, recurse, options);
       return;
     }
 
@@ -1222,6 +1218,90 @@ ada_val_print (struct type *type,
     }
 }
 
+/* See the comment on ada_value_print.  This function differs in that
+   it does not catch evaluation errors (leaving that to
+   ada_value_print).  */
+
+static void
+ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
+		   const struct value_print_options *options)
+{
+  struct type *type = ada_check_typedef (value_type (val));
+
+  if (ada_is_array_descriptor_type (type)
+      || (ada_is_constrained_packed_array_type (type)
+	  && TYPE_CODE (type) != TYPE_CODE_PTR))
+    {
+      ada_val_print_gnat_array (val, stream, recurse, options);
+      return;
+    }
+
+  val = ada_to_fixed_value (val);
+  type = value_type (val);
+  struct type *saved_type = type;
+
+  const gdb_byte *valaddr = value_contents_for_printing (val);
+  CORE_ADDR address = value_address (val);
+  type = ada_check_typedef (resolve_dynamic_type (type, valaddr, address));
+  if (type != saved_type)
+    {
+      val = value_copy (val);
+      deprecated_set_value_type (val, type);
+    }
+
+  switch (TYPE_CODE (type))
+    {
+    default:
+      common_val_print (val, stream, recurse, options,
+			language_def (language_c));
+      break;
+
+    case TYPE_CODE_PTR:
+      ada_val_print_ptr (type, valaddr, 0, 0,
+			 address, stream, recurse, val,
+			 options);
+      break;
+
+    case TYPE_CODE_INT:
+    case TYPE_CODE_RANGE:
+      ada_val_print_num (type, valaddr, 0, 0,
+			 address, stream, recurse, val,
+			 options);
+      break;
+
+    case TYPE_CODE_ENUM:
+      ada_val_print_enum (type, valaddr, 0, 0,
+			  address, stream, recurse, val,
+			  options);
+      break;
+
+    case TYPE_CODE_FLT:
+      ada_val_print_flt (type, valaddr, 0, 0,
+			 address, stream, recurse, val,
+			 options);
+      break;
+
+    case TYPE_CODE_UNION:
+    case TYPE_CODE_STRUCT:
+      ada_val_print_struct_union (type, valaddr, 0, 0,
+				  address, stream, recurse,
+				  val, options);
+      break;
+
+    case TYPE_CODE_ARRAY:
+      ada_val_print_array (type, valaddr, 0, 0,
+			   address, stream, recurse, val,
+			   options);
+      return;
+
+    case TYPE_CODE_REF:
+      ada_val_print_ref (type, valaddr, 0, 0,
+			 address, stream, recurse, val,
+			 options);
+      break;
+    }
+}
+
 /* See ada-lang.h.  */
 
 void
@@ -1229,8 +1309,16 @@ ada_value_print_inner (struct value *val, struct ui_file *stream,
 		       int recurse,
 		       const struct value_print_options *options)
 {
-  ada_val_print (value_type (val), value_embedded_offset (val),
-		 value_address (val), stream, recurse, val, options);
+  try
+    {
+      ada_value_print_1 (val, stream, recurse, options);
+    }
+  catch (const gdb_exception_error &except)
+    {
+      fprintf_styled (stream, metadata_style.style (),
+		      _("<error reading variable: %s>"),
+		      except.what ());
+    }
 }
 
 void
