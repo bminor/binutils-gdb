@@ -489,6 +489,26 @@ generic_val_print_ptr (struct type *type,
     }
 }
 
+/* generic_value_print helper for TYPE_CODE_PTR.  */
+
+static void
+generic_value_print_ptr (struct value *val, struct ui_file *stream,
+			 const struct value_print_options *options)
+{
+
+  if (options->format && options->format != 's')
+    value_print_scalar_formatted (val, options, 0, stream);
+  else
+    {
+      struct type *type = check_typedef (value_type (val));
+      struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      const gdb_byte *valaddr = value_contents_for_printing (val);
+      CORE_ADDR addr = unpack_pointer (type, valaddr);
+
+      print_unpacked_pointer (type, elttype, addr, stream, options);
+    }
+}
+
 
 /* generic_val_print helper for TYPE_CODE_MEMBERPTR.  */
 
@@ -1052,13 +1072,11 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_MEMBERPTR:
-      generic_val_print_memberptr (type, 0, stream,
-				   val, options);
+      value_print_scalar_formatted (val, options, 0, stream);
       break;
 
     case TYPE_CODE_PTR:
-      generic_val_print_ptr (type, 0, stream,
-			     val, options);
+      generic_value_print_ptr (val, stream, options);
       break;
 
     case TYPE_CODE_REF:

@@ -1,5 +1,10 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* valprint.c (generic_value_print): Call generic_value_print_ptr.
+	* valprint.c (generic_value_print_ptr): New function.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* valprint.c (generic_value_print): Rewrite.
 
 2020-03-13  Tom Tromey  <tom@tromey.com>
