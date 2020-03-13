@@ -63,9 +63,7 @@ dynamic_array_type (struct type *type,
       ival = value_at (true_type, addr);
       true_type = value_type (ival);
 
-      d_val_print (true_type,
-		   value_embedded_offset (ival), addr,
-		   stream, recurse + 1, ival, options);
+      d_value_print_inner (ival, stream, recurse + 1, options);
       return 0;
     }
   return 1;
@@ -92,5 +90,29 @@ d_val_print (struct type *type, int embedded_offset,
       default:
 	c_val_print (type, embedded_offset, address, stream,
 		     recurse, val, options);
+    }
+}
+
+/* See d-lang.h.  */
+
+void
+d_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
+		     const struct value_print_options *options)
+{
+  int ret;
+
+  struct type *type = check_typedef (value_type (val));
+  switch (TYPE_CODE (type))
+    {
+      case TYPE_CODE_STRUCT:
+	ret = dynamic_array_type (type, value_embedded_offset (val),
+				  value_address (val),
+				  stream, recurse, val, options);
+	if (ret == 0)
+	  break;
+	/* Fall through.  */
+      default:
+	c_value_print_inner (val, stream, recurse, options);
+	break;
     }
 }

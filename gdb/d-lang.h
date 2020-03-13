@@ -84,4 +84,10 @@ extern void d_val_print (struct type *type,
 			 struct value *val,
 			 const struct value_print_options *options);
 
+/* Implement la_value_print_inner for D.  */
+
+extern void d_value_print_inner (struct value *val,
+				 struct ui_file *stream, int recurse,
+				 const struct value_print_options *options);
+
 #endif /* !defined (D_LANG_H) */

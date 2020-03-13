@@ -1,5 +1,12 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* d-valprint.c (dynamic_array_type): Call d_value_print_inner.
+	(d_value_print_inner): New function.
+	* d-lang.h (d_value_print_inner): Declare.
+	* d-lang.c (d_language_defn): Use d_value_print_inner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* go-valprint.c (go_value_print_inner): New function.
 	* go-lang.h (go_value_print_inner): Declare.
 	* go-lang.c (go_language_defn): Use go_value_print_inner.
