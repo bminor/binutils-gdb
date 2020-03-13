@@ -41,6 +41,12 @@ extern void f_val_print (struct type *, int, CORE_ADDR,
 			 struct value *,
 			 const struct value_print_options *);
 
+/* Implement la_value_print_inner for Fortran.  */
+
+extern void f_value_print_innner (struct value *val, struct ui_file *stream,
+				  int recurse,
+				  const struct value_print_options *options);
+
 /* Language-specific data structures */
 
 /* A common block.  */

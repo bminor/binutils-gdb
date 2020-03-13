@@ -394,6 +394,16 @@ f_val_print (struct type *type, int embedded_offset,
     }
 }
 
+/* See f-lang.h.  */
+
+void
+f_value_print_innner (struct value *val, struct ui_file *stream, int recurse,
+		      const struct value_print_options *options)
+{
+  f_val_print (value_type (val), value_embedded_offset (val),
+	       value_address (val), stream, recurse, val, options);
+}
+
 static void
 info_common_command_for_block (const struct block *block, const char *comname,
 			       int *any_printed)

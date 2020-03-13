@@ -1,5 +1,11 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* f-valprint.c (f_value_print_innner): New function.
+	* f-lang.h (f_value_print_innner): Declare.
+	* f-lang.c (f_language_defn): Use f_value_print_innner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* p-valprint.c (pascal_value_print_inner): New function.
 	* p-lang.h (pascal_value_print_inner): Declare.
 	* p-lang.c (pascal_language_defn): Use pascal_value_print_inner.
