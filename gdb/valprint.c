@@ -924,17 +924,11 @@ generic_val_print_float (struct type *type,
   struct gdbarch *gdbarch = get_type_arch (type);
   int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
 
-  if (options->format)
-    {
-      val_print_scalar_formatted (type, embedded_offset,
-				  original_value, options, 0, stream);
-    }
-  else
-    {
-      const gdb_byte *valaddr = value_contents_for_printing (original_value);
+  gdb_assert (!options->format);
 
-      print_floating (valaddr + embedded_offset * unit_size, type, stream);
-    }
+  const gdb_byte *valaddr = value_contents_for_printing (original_value);
+
+  print_floating (valaddr + embedded_offset * unit_size, type, stream);
 }
 
 /* generic_val_print helper for TYPE_CODE_COMPLEX.  */
@@ -1073,8 +1067,12 @@ generic_val_print (struct type *type,
 
     case TYPE_CODE_FLT:
     case TYPE_CODE_DECFLOAT:
-      generic_val_print_float (type, embedded_offset, stream,
-			       original_value, options);
+      if (options->format)
+	val_print_scalar_formatted (type, embedded_offset,
+				    original_value, options, 0, stream);
+      else
+	generic_val_print_float (type, embedded_offset, stream,
+				 original_value, options);
       break;
 
     case TYPE_CODE_VOID:
@@ -1185,8 +1183,11 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
 
     case TYPE_CODE_FLT:
     case TYPE_CODE_DECFLOAT:
-      generic_val_print_float (type, 0, stream,
-			       val, options);
+      if (options->format)
+	value_print_scalar_formatted (val, options, 0, stream);
+      else
+	generic_val_print_float (type, 0, stream,
+				 val, options);
       break;
 
     case TYPE_CODE_VOID:
