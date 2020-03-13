@@ -1,3 +1,14 @@
+2020-03-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/24920
+	* emulparams/elf32_x86_64.sh: Use static.sh.
+	* emulparams/elf_i386.sh: Likewise.
+	* emulparams/elf_x86_64.sh: Likewise.
+	* emulparams/static.sh: New file.
+	* emultempl/elf-x86.em: Include "ldlex.h".
+	* testsuite/ld-elf/pr24920.err: New file.
+	* testsuite/ld-elf/linux-x86.exp: Run ld/24920 tests.
+
 2020-03-13  Christian Eggers  <ceggers@gmx.de>
 
 	* ldexp.c (fold_name): Return SIZEOF_HEADERS in bytes.

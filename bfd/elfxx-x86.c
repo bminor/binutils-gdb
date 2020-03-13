@@ -2998,6 +2998,23 @@ _bfd_x86_elf_link_setup_gnu_properties
 				  : bed->plt_alignment);
     }
 
+  if (bfd_link_executable (info)
+      && !info->nointerp
+      && !htab->params->has_dynamic_linker
+      && htab->params->static_before_all_inputs)
+    {
+      /* Report error for dynamic input objects if -static is passed at
+	 command-line before all input files without --dynamic-linker
+	 unless --no-dynamic-linker is used.  */
+      bfd *abfd;
+
+      for (abfd = info->input_bfds; abfd != NULL; abfd = abfd->link.next)
+	if ((abfd->flags & DYNAMIC))
+	  info->callbacks->einfo
+	    (_("%X%P: attempted static link of dynamic object `%pB'\n"),
+	     abfd);
+    }
+
   return pbfd;
 }
 
