@@ -1,4 +1,8 @@
-2020-03-13  Kamil Rytarowski  <n54@gmx.de>
+2020-03-13  Kamil Rytarowski  <n54@gmx.com>
+
+	* elf/common.h (NT_NETBSDCORE_LWPSTATUS): New define.
+
+2020-03-13  Kamil Rytarowski  <n54@gmx.com>
 
 	* elf/common.h (NT_NETBSDCORE_AUXV): New define.
 

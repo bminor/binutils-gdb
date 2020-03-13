@@ -687,6 +687,7 @@
 
 #define NT_NETBSDCORE_PROCINFO	1	/* Has a struct procinfo */
 #define NT_NETBSDCORE_AUXV	2	/* Has auxv data */
+#define NT_NETBSDCORE_LWPSTATUS	24	/* Has LWPSTATUS data */
 #define NT_NETBSDCORE_FIRSTMACH	32	/* start of machdep note types */
 
 

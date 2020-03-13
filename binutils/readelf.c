@@ -18451,8 +18451,13 @@ get_netbsd_elfcore_note_type (Filedata * filedata, unsigned e_type)
       return _("NetBSD ELF auxiliary vector data");
 #endif
 
+#ifdef NT_NETBSDCORE_LWPSTATUS
+    case NT_NETBSDCORE_LWPSTATUS:
+      return _("PT_LWPSTATUS (ptrace_lwpstatus structure)");
+#endif
+
     default:
-      /* As of Jan 2002 there are no other machine-independent notes
+      /* As of Jan 2020 there are no other machine-independent notes
 	 defined for NetBSD core files.  If the note type is less
 	 than the start of the machine-dependent note types, we don't
 	 understand it.  */

@@ -10750,11 +10750,17 @@ elfcore_grok_netbsd_note (bfd *abfd, Elf_Internal_Note *note)
       /* NetBSD-specific Elf Auxiliary Vector data. */
       return elfcore_make_auxv_note_section (abfd, note, 4);
 #endif
+#ifdef NT_NETBSDCORE_LWPSTATUS
+    case NT_NETBSDCORE_LWPSTATUS:
+      return elfcore_make_note_pseudosection (abfd,
+					      ".note.netbsdcore.lwpstatus",
+					      note);
+#endif
     default:
       break;
     }
 
-  /* As of March 2017 there are no other machine-independent notes
+  /* As of March 2020 there are no other machine-independent notes
      defined for NetBSD core files.  If the note type is less
      than the start of the machine-dependent note types, we don't
      understand it.  */
