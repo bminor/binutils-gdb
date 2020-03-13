@@ -7046,6 +7046,8 @@ enum operand_parse_code
   OP_RNDMQ,     /* Neon double precision (0..31) or MVE vector register.  */
   OP_RNDMQR,    /* Neon double precision (0..31), MVE vector or ARM register.
 		 */
+  OP_RNSDMQR,    /* Neon single or double precision, MVE vector or ARM register.
+		 */
   OP_RNQ,	/* Neon quad precision register */
   OP_RNQMQ,	/* Neon quad or MVE vector register.  */
   OP_RVSD,	/* VFP single or double precision register */
@@ -7194,6 +7196,8 @@ enum operand_parse_code
   OP_oRNDQ,      /* Optional Neon double or quad precision register */
   OP_oRNSDQ,	 /* Optional single, double or quad precision vector register */
   OP_oRNSDQMQ,	 /* Optional single, double or quad register or MVE vector
+		    register.  */
+  OP_oRNSDMQ,	 /* Optional single, double register or MVE vector
 		    register.  */
   OP_oSHll,	 /* LSL immediate */
   OP_oSHar,	 /* ASR immediate */
@@ -7391,6 +7395,10 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_RVS:   po_reg_or_fail (REG_TYPE_VFS);	  break;
 	case OP_RVD:   po_reg_or_fail (REG_TYPE_VFD);	  break;
 	case OP_oRND:
+	case OP_RNSDMQR:
+	  po_reg_or_goto (REG_TYPE_VFS, try_rndmqr);
+	  break;
+	try_rndmqr:
 	case OP_RNDMQR:
 	  po_reg_or_goto (REG_TYPE_RN, try_rndmq);
 	  break;
@@ -7455,6 +7463,13 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	case OP_RVSD:  po_reg_or_fail (REG_TYPE_VFSD);    break;
 	case OP_RVSD_COND:
 	  po_reg_or_goto (REG_TYPE_VFSD, try_cond);
+	  break;
+	case OP_oRNSDMQ:
+	case OP_RNSDMQ:
+	  po_reg_or_goto (REG_TYPE_NSD, try_mq2);
+	  break;
+	  try_mq2:
+	  po_reg_or_fail (REG_TYPE_MQ);
 	  break;
 	case OP_oRNSDQ:
 	case OP_RNSDQ: po_reg_or_fail (REG_TYPE_NSDQ);    break;
@@ -19542,7 +19557,7 @@ neon_mixed_length (struct neon_type_el et, unsigned size)
 static void
 do_neon_dyadic_long (void)
 {
-  enum neon_shape rs = neon_select_shape (NS_QDD, NS_QQQ, NS_QQR, NS_NULL);
+  enum neon_shape rs = neon_select_shape (NS_QDD, NS_HHH, NS_FFF, NS_DDD, NS_NULL);
   if (rs == NS_QDD)
     {
       if (vfp_or_neon_is_neon (NEON_CHECK_ARCH | NEON_CHECK_CC) == FAIL)
@@ -26039,8 +26054,8 @@ static const struct asm_opcode insns[] =
 #define ARM_VARIANT & fpu_neon_ext_v1
  mnUF(vabd,      _vabd,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ), neon_dyadic_if_su),
  mnUF(vabdl,     _vabdl,	  3, (RNQMQ, RNDMQ, RNDMQ),   neon_dyadic_long),
- mnUF(vaddl,     _vaddl,	  3, (RNQMQ, RNDMQ, RNDMQR),  neon_dyadic_long),
- mnUF(vsubl,     _vsubl,	  3, (RNQMQ, RNDMQ, RNDMQR),  neon_dyadic_long),
+ mnUF(vaddl,     _vaddl,	  3, (RNSDQMQ, oRNSDMQ, RNSDMQR),  neon_dyadic_long),
+ mnUF(vsubl,     _vsubl,	  3, (RNSDQMQ, oRNSDMQ, RNSDMQR),  neon_dyadic_long),
  mnUF(vand,      _vand,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),
  mnUF(vbic,      _vbic,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),
  mnUF(vorr,      _vorr,		  3, (RNDQMQ, oRNDQMQ, RNDQMQ_Ibig), neon_logic),

@@ -1,3 +1,20 @@
+2020-03-13  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	Backport from mainline.
+	2020-03-13  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	PR 25660
+	*  config/tc-arm.c (operand_parse_code): Add OP_RNSDMQR and OP_oRNSDMQ.
+	(parse_operands): Handle new operand codes.
+	(do_neon_dyadic_long): Make shape check accept the scalar variants.
+	(asm_opcode_insns): Fix operand codes for vaddl and vsubl.
+	* testsuite/gas/arm/mve-vaddsub-it.s: New test.
+	* testsuite/gas/arm/mve-vaddsub-it.d: New test.
+	* testsuite/gas/arm/mve-vaddsub-it-bad.s: New test.
+	* testsuite/gas/arm/mve-vaddsub-it-bad.l: New test.
+	* testsuite/gas/arm/mve-vaddsub-it-bad.d: New test.
+	* testsuite/gas/arm/nomve-vaddsub-it.d: New test.
+
 2020-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25516
