@@ -1592,7 +1592,8 @@ void
 btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
 {
   if (tp->btrace.target != NULL)
-    return;
+    error (_("Recording already enabled on thread %s (%s)."),
+	   print_thread_id (tp), target_pid_to_str (tp->ptid).c_str ());
 
 #if !defined (HAVE_LIBIPT)
   if (conf->format == BTRACE_FORMAT_PT)
@@ -1604,9 +1605,9 @@ btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
 
   tp->btrace.target = target_enable_btrace (tp->ptid, conf);
 
-  /* We're done if we failed to enable tracing.  */
   if (tp->btrace.target == NULL)
-    return;
+    error (_("Failed to enable recording on thread %s (%s)."),
+	   print_thread_id (tp), target_pid_to_str (tp->ptid).c_str ());
 
   /* We need to undo the enable in case of errors.  */
   try
@@ -1651,7 +1652,8 @@ btrace_disable (struct thread_info *tp)
   struct btrace_thread_info *btp = &tp->btrace;
 
   if (btp->target == NULL)
-    return;
+    error (_("Recording not enabled on thread %s (%s)."),
+	   print_thread_id (tp), target_pid_to_str (tp->ptid).c_str ());
 
   DEBUG ("disable thread %s (%s)", print_thread_id (tp),
 	 target_pid_to_str (tp->ptid).c_str ());
