@@ -54,6 +54,10 @@ static void cp_print_value (struct type *, struct type *,
 			    const struct value_print_options *,
 			    struct type **);
 
+static void cp_print_value (struct value *, struct ui_file *,
+			    int, const struct value_print_options *,
+			    struct type **);
+
 
 /* GCC versions after 2.4.5 use this.  */
 const char vtbl_ptr_name[] = "__vtbl_ptr_type";
@@ -412,7 +416,6 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
   static int last_set_recurse = -1;
 
   struct type *type = check_typedef (value_type (val));
-  CORE_ADDR address = value_address (val);
 
   if (recurse == 0)
     {
@@ -441,9 +444,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
      duplicates of virtual baseclasses.  */
 
   if (n_baseclasses > 0)
-    cp_print_value (type, type, 0, address, stream,
-		    recurse + 1, val, options,
-		    dont_print_vb);
+    cp_print_value (val, stream, recurse + 1, options, dont_print_vb);
 
   /* Second, print out data fields */
 
@@ -608,6 +609,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 		    {
 		      CORE_ADDR addr;
 
+		      i_offset += value_embedded_offset (val);
 		      addr = extract_typed_address (valaddr + i_offset, i_type);
 		      print_function_pointer_address (opts,
 						      get_type_arch (type),
@@ -859,6 +861,164 @@ cp_print_value (struct type *type, struct type *real_type,
 				       thisoffset + boffset,
 				       value_address (base_val),
 				       stream, recurse, base_val, options,
+				       ((struct type **)
+					obstack_base (&dont_print_vb_obstack)),
+				       0);
+	    }
+	}
+      fputs_filtered (", ", stream);
+
+    flush_it:
+      ;
+    }
+
+  if (dont_print_vb == 0)
+    {
+      /* Free the space used to deal with the printing
+         of this type from top level.  */
+      obstack_free (&dont_print_vb_obstack, last_dont_print);
+      /* Reset watermark so that we can continue protecting
+         ourselves from whatever we were protecting ourselves.  */
+      dont_print_vb_obstack = tmp_obstack;
+    }
+}
+
+/* Special val_print routine to avoid printing multiple copies of
+   virtual baseclasses.  */
+
+static void
+cp_print_value (struct value *val, struct ui_file *stream,
+		int recurse, const struct value_print_options *options,
+		struct type **dont_print_vb)
+{
+  struct type *type = check_typedef (value_type (val));
+  CORE_ADDR address = value_address (val);
+  struct type **last_dont_print
+    = (struct type **) obstack_next_free (&dont_print_vb_obstack);
+  struct obstack tmp_obstack = dont_print_vb_obstack;
+  int i, n_baseclasses = TYPE_N_BASECLASSES (type);
+  const gdb_byte *valaddr = value_contents_for_printing (val);
+
+  if (dont_print_vb == 0)
+    {
+      /* If we're at top level, carve out a completely fresh chunk of
+         the obstack and use that until this particular invocation
+         returns.  */
+      /* Bump up the high-water mark.  Now alpha is omega.  */
+      obstack_finish (&dont_print_vb_obstack);
+    }
+
+  for (i = 0; i < n_baseclasses; i++)
+    {
+      LONGEST boffset = 0;
+      int skip = 0;
+      struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
+      const char *basename = TYPE_NAME (baseclass);
+      struct value *base_val = NULL;
+
+      if (BASETYPE_VIA_VIRTUAL (type, i))
+	{
+	  struct type **first_dont_print
+	    = (struct type **) obstack_base (&dont_print_vb_obstack);
+
+	  int j = (struct type **)
+	    obstack_next_free (&dont_print_vb_obstack) - first_dont_print;
+
+	  while (--j >= 0)
+	    if (baseclass == first_dont_print[j])
+	      goto flush_it;
+
+	  obstack_ptr_grow (&dont_print_vb_obstack, baseclass);
+	}
+
+      try
+	{
+	  boffset = baseclass_offset (type, i, valaddr,
+				      value_embedded_offset (val),
+				      address, val);
+	}
+      catch (const gdb_exception_error &ex)
+	{
+	  if (ex.error == NOT_AVAILABLE_ERROR)
+	    skip = -1;
+	  else
+	    skip = 1;
+	}
+
+      if (skip == 0)
+	{
+	  if (BASETYPE_VIA_VIRTUAL (type, i))
+	    {
+	      /* The virtual base class pointer might have been
+		 clobbered by the user program. Make sure that it
+		 still points to a valid memory location.  */
+
+	      if (boffset < 0 || boffset >= TYPE_LENGTH (type))
+		{
+		  gdb::byte_vector buf (TYPE_LENGTH (baseclass));
+
+		  if (target_read_memory (address + boffset, buf.data (),
+					  TYPE_LENGTH (baseclass)) != 0)
+		    skip = 1;
+		  base_val = value_from_contents_and_address (baseclass,
+							      buf.data (),
+							      address + boffset);
+		  baseclass = value_type (base_val);
+		  boffset = 0;
+		}
+	      else
+		{
+		  base_val = val;
+		}
+	    }
+	  else
+	    {
+	      base_val = val;
+	    }
+	}
+
+      /* Now do the printing.  */
+      if (options->prettyformat)
+	{
+	  fprintf_filtered (stream, "\n");
+	  print_spaces_filtered (2 * recurse, stream);
+	}
+      fputs_filtered ("<", stream);
+      /* Not sure what the best notation is in the case where there is
+         no baseclass name.  */
+      fputs_filtered (basename ? basename : "", stream);
+      fputs_filtered ("> = ", stream);
+
+      if (skip < 0)
+	val_print_unavailable (stream);
+      else if (skip > 0)
+	val_print_invalid_address (stream);
+      else
+	{
+	  int result = 0;
+
+	  if (options->max_depth > -1
+	      && recurse >= options->max_depth)
+	    {
+	      const struct language_defn *language = current_language;
+	      gdb_assert (language->la_struct_too_deep_ellipsis != NULL);
+	      fputs_filtered (language->la_struct_too_deep_ellipsis, stream);
+	    }
+	  else
+	    {
+	      /* Attempt to run an extension language pretty-printer on the
+		 baseclass if possible.  */
+	      if (!options->raw)
+		result
+		  = apply_ext_lang_val_pretty_printer (baseclass, boffset,
+						       value_address (base_val),
+						       stream, recurse,
+						       base_val, options,
+						       current_language);
+
+	      if (!result)
+		cp_print_value_fields (value_primitive_field (val, 0, i, type),
+				       stream, recurse, options,
 				       ((struct type **)
 					obstack_base (&dont_print_vb_obstack)),
 				       0);

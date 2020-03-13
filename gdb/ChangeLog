@@ -1,5 +1,10 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* cp-valprint.c (cp_print_value_fields): Update.
+	(cp_print_value): New function.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* m2-valprint.c (m2_value_print_inner): Use
 	cp_print_value_fields.
 	* cp-valprint.c	(cp_print_value_fields): New function.
