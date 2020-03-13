@@ -1741,7 +1741,7 @@ enum
 {
   X86_64_06 = 0,
   X86_64_07,
-  X86_64_0D,
+  X86_64_0E,
   X86_64_16,
   X86_64_17,
   X86_64_1E,
@@ -2379,7 +2379,7 @@ static const struct dis386 dis386[] = {
   { "orS",		{ Gv, EvS }, 0 },
   { "orB",		{ AL, Ib }, 0 },
   { "orS",		{ eAX, Iv }, 0 },
-  { X86_64_TABLE (X86_64_0D) },
+  { X86_64_TABLE (X86_64_0E) },
   { Bad_Opcode },	/* 0x0f extended opcode escape */
   /* 10 */
   { "adcB",		{ Ebh1, Gb }, 0 },
@@ -6815,7 +6815,7 @@ static const struct dis386 x86_64_table[][2] = {
     { "popP", { es }, 0 },
   },
 
-  /* X86_64_0D */
+  /* X86_64_0E */
   {
     { "pushP", { cs }, 0 },
   },

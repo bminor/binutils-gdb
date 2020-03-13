@@ -1,3 +1,8 @@
+2020-03-13  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (X86_64_0D): Rename to ...
+	(X86_64_0E): ... this.
+
 2020-03-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am ($(srcdir)/i386-init.h): Also pass -P to $(CPP).
