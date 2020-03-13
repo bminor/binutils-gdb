@@ -789,6 +789,35 @@ generic_val_print_bool (struct type *type,
     }
 }
 
+/* generic_value_print helper for TYPE_CODE_BOOL.  */
+
+static void
+generic_value_print_bool
+  (struct value *value, struct ui_file *stream,
+   const struct value_print_options *options,
+   const struct generic_val_print_decorations *decorations)
+{
+  if (options->format || options->output_format)
+    {
+      struct value_print_options opts = *options;
+      opts.format = (options->format ? options->format
+		     : options->output_format);
+      value_print_scalar_formatted (value, &opts, 0, stream);
+    }
+  else
+    {
+      const gdb_byte *valaddr = value_contents_for_printing (value);
+      struct type *type = check_typedef (value_type (value));
+      LONGEST val = unpack_long (type, valaddr);
+      if (val == 0)
+	fputs_filtered (decorations->false_name, stream);
+      else if (val == 1)
+	fputs_filtered (decorations->true_name, stream);
+      else
+	print_longest (stream, 'd', 0, val);
+    }
+}
+
 /* generic_val_print helper for TYPE_CODE_INT.  */
 
 static void
@@ -1090,8 +1119,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_BOOL:
-      generic_val_print_bool (type, 0, stream,
-			      val, options, decorations);
+      generic_value_print_bool (val, stream, options, decorations);
       break;
 
     case TYPE_CODE_RANGE:

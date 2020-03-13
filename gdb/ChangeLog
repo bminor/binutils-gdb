@@ -1,5 +1,10 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* valprint.c (generic_value_print_bool): New function.
+	(generic_value_print): Use it.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* valprint.c (generic_val_print_func): Simplify.
 	(generic_val_print, generic_value_print): Update.
 
