@@ -553,6 +553,23 @@ c_val_print_memberptr (struct type *type, const gdb_byte *valaddr,
     }
 }
 
+/* c_value_print helper for TYPE_CODE_MEMBERPTR.  */
+
+static void
+c_value_print_memberptr (struct value *val, struct ui_file *stream,
+			 int recurse,
+			 const struct value_print_options *options)
+{
+  if (!options->format)
+    {
+      struct type *type = check_typedef (value_type (val));
+      const gdb_byte *valaddr = value_contents_for_printing (val);
+      cp_print_class_member (valaddr, type, stream, "&");
+    }
+  else
+    generic_value_print (val, stream, recurse, options, &c_decorations);
+}
+
 /* See val_print for a description of the various parameters of this
    function; they are identical.  */
 
@@ -667,8 +684,7 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_MEMBERPTR:
-      c_val_print_memberptr (type, valaddr, 0, address, stream,
-			     recurse, val, options);
+      c_value_print_memberptr (val, stream, recurse, options);
       break;
 
     case TYPE_CODE_REF:
