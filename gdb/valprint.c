@@ -1033,31 +1033,17 @@ generic_val_print (struct type *type,
     }
 }
 
-/* Print using the given LANGUAGE the data of type TYPE located at
-   VAL's contents buffer + EMBEDDED_OFFSET (within GDB), which came
-   from the inferior at address ADDRESS + EMBEDDED_OFFSET, onto
-   stdio stream STREAM according to OPTIONS.  VAL is the whole object
-   that came from ADDRESS.
+/* Helper function for val_print and common_val_print that does the
+   work.  Arguments are as to val_print, but FULL_VALUE, if given, is
+   the value to be printed.  */
 
-   The language printers will pass down an adjusted EMBEDDED_OFFSET to
-   further helper subroutines as subfields of TYPE are printed.  In
-   such cases, VAL is passed down unadjusted, so
-   that VAL can be queried for metadata about the contents data being
-   printed, using EMBEDDED_OFFSET as an offset into VAL's contents
-   buffer.  For example: "has this field been optimized out", or "I'm
-   printing an object while inspecting a traceframe; has this
-   particular piece of data been collected?".
-
-   RECURSE indicates the amount of indentation to supply before
-   continuation lines; this amount is roughly twice the value of
-   RECURSE.  */
-
-void
-val_print (struct type *type, LONGEST embedded_offset,
-	   CORE_ADDR address, struct ui_file *stream, int recurse,
-	   struct value *val,
-	   const struct value_print_options *options,
-	   const struct language_defn *language)
+static void
+do_val_print (struct value *full_value,
+	      struct type *type, LONGEST embedded_offset,
+	      CORE_ADDR address, struct ui_file *stream, int recurse,
+	      struct value *val,
+	      const struct value_print_options *options,
+	      const struct language_defn *language)
 {
   int ret = 0;
   struct value_print_options local_opts = *options;
@@ -1115,6 +1101,36 @@ val_print (struct type *type, LONGEST embedded_offset,
       fprintf_styled (stream, metadata_style.style (),
 		      _("<error reading variable>"));
     }
+}
+
+/* Print using the given LANGUAGE the data of type TYPE located at
+   VAL's contents buffer + EMBEDDED_OFFSET (within GDB), which came
+   from the inferior at address ADDRESS + EMBEDDED_OFFSET, onto
+   stdio stream STREAM according to OPTIONS.  VAL is the whole object
+   that came from ADDRESS.
+
+   The language printers will pass down an adjusted EMBEDDED_OFFSET to
+   further helper subroutines as subfields of TYPE are printed.  In
+   such cases, VAL is passed down unadjusted, so
+   that VAL can be queried for metadata about the contents data being
+   printed, using EMBEDDED_OFFSET as an offset into VAL's contents
+   buffer.  For example: "has this field been optimized out", or "I'm
+   printing an object while inspecting a traceframe; has this
+   particular piece of data been collected?".
+
+   RECURSE indicates the amount of indentation to supply before
+   continuation lines; this amount is roughly twice the value of
+   RECURSE.  */
+
+void
+val_print (struct type *type, LONGEST embedded_offset,
+	   CORE_ADDR address, struct ui_file *stream, int recurse,
+	   struct value *val,
+	   const struct value_print_options *options,
+	   const struct language_defn *language)
+{
+  do_val_print (nullptr, type, embedded_offset, address, stream,
+		recurse, val, options, language);
 }
 
 /* See valprint.h.  */
@@ -1214,10 +1230,10 @@ common_val_print (struct value *val, struct ui_file *stream, int recurse,
   if (value_lazy (val))
     value_fetch_lazy (val);
 
-  val_print (value_type (val),
-	     value_embedded_offset (val), value_address (val),
-	     stream, recurse,
-	     val, options, language);
+  do_val_print (val, value_type (val),
+		value_embedded_offset (val), value_address (val),
+		stream, recurse,
+		val, options, language);
 }
 
 /* Print on stream STREAM the value VAL according to OPTIONS.  The value

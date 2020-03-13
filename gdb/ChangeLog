@@ -1,5 +1,11 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* valprint.c (do_val_print): New function, from val_print.
+	(val_print): Use do_val_print.
+	(common_val_print): Use do_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* valprint.c (value_print): Use scoped_value_mark.
 
 2020-03-13  Tom de Vries  <tdevries@suse.de>
