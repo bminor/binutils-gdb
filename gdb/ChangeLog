@@ -1,5 +1,10 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* valprint.h (generic_value_print): Declare.
+	* valprint.c (generic_value_print): New function.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* valprint.c (do_val_print): Call la_value_print_inner, if
 	available.
 	* rust-lang.c (rust_language_defn): Update.

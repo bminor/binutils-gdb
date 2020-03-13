@@ -211,6 +211,17 @@ extern void generic_val_print (struct type *type,
 			       const struct value_print_options *options,
 			       const struct generic_val_print_decorations *);
 
+/* Print a value in a generic way.  VAL is the value, STREAM is where
+   to print it, RECURSE is the recursion depth, OPTIONS describe how
+   the printing should be done, and D is the language-specific
+   decorations object.  Note that structs and unions cannot be printed
+   by this function.  */
+
+extern void generic_value_print (struct value *val, struct ui_file *stream,
+				 int recurse,
+				 const struct value_print_options *options,
+				 const struct generic_val_print_decorations *d);
+
 extern void generic_emit_char (int c, struct type *type, struct ui_file *stream,
 			       int quoter, const char *encoding);
 

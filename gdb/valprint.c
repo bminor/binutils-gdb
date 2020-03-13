@@ -1033,6 +1033,18 @@ generic_val_print (struct type *type,
     }
 }
 
+/* See valprint.h.  */
+
+void
+generic_value_print (struct value *val, struct ui_file *stream, int recurse,
+		     const struct value_print_options *options,
+		     const struct generic_val_print_decorations *decorations)
+{
+  generic_val_print (value_type (val), value_embedded_offset (val),
+		     value_address (val), stream, recurse, val, options,
+		     decorations);
+}
+
 /* Helper function for val_print and common_val_print that does the
    work.  Arguments are as to val_print, but FULL_VALUE, if given, is
    the value to be printed.  */
