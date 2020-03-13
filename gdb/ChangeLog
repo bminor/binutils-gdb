@@ -1,5 +1,10 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* infcmd.c (default_print_one_register_info): Use
+	common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* valprint.h (common_val_print_checked): Declare.
 	* valprint.c (common_val_print_checked): New function.
 	* stack.c (print_frame_arg): Use common_val_print_checked.
