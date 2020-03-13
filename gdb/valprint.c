@@ -721,19 +721,13 @@ generic_val_print_enum (struct type *type,
   struct gdbarch *gdbarch = get_type_arch (type);
   int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
 
-  if (options->format)
-    {
-      val_print_scalar_formatted (type, embedded_offset,
-				  original_value, options, 0, stream);
-    }
-  else
-    {
-      const gdb_byte *valaddr = value_contents_for_printing (original_value);
+  gdb_assert (!options->format);
 
-      val = unpack_long (type, valaddr + embedded_offset * unit_size);
+  const gdb_byte *valaddr = value_contents_for_printing (original_value);
 
-      generic_val_print_enum_1 (type, val, stream);
-    }
+  val = unpack_long (type, valaddr + embedded_offset * unit_size);
+
+  generic_val_print_enum_1 (type, val, stream);
 }
 
 /* generic_val_print helper for TYPE_CODE_FLAGS.  */
@@ -977,8 +971,12 @@ generic_val_print (struct type *type,
       break;
 
     case TYPE_CODE_ENUM:
-      generic_val_print_enum (type, embedded_offset, stream,
-			      original_value, options);
+      if (options->format)
+	val_print_scalar_formatted (type, embedded_offset,
+				    original_value, options, 0, stream);
+      else
+	generic_val_print_enum (type, embedded_offset, stream,
+				original_value, options);
       break;
 
     case TYPE_CODE_FLAGS:
@@ -1086,8 +1084,10 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_ENUM:
-      generic_val_print_enum (type, 0, stream,
-			      val, options);
+      if (options->format)
+	value_print_scalar_formatted (val, options, 0, stream);
+      else
+	generic_val_print_enum (type, 0, stream, val, options);
       break;
 
     case TYPE_CODE_FLAGS:
