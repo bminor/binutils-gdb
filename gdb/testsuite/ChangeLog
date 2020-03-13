@@ -1,5 +1,9 @@
 2020-03-13  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.mi/mi-sym-info.exp: Make matching more precise.
+
+2020-03-13  Tom de Vries  <tdevries@suse.de>
+
 	PR symtab/25646
 	* gdb.dwarf2/imported-unit.exp: Add test.
 
