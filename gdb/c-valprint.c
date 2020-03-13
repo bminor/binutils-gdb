@@ -564,8 +564,67 @@ void
 c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 		     const struct value_print_options *options)
 {
-  c_val_print (value_type (val), value_embedded_offset (val),
-	       value_address (val), stream, recurse, val, options);
+  struct type *type = value_type (val);
+  struct type *unresolved_type = type;
+  CORE_ADDR address = value_address (val);
+  const gdb_byte *valaddr = value_contents_for_printing (val);
+
+  type = check_typedef (type);
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_ARRAY:
+      c_val_print_array (type, valaddr, 0, address, stream,
+			 recurse, val, options);
+      break;
+
+    case TYPE_CODE_METHODPTR:
+      cplus_print_method_ptr (valaddr, type, stream);
+      break;
+
+    case TYPE_CODE_PTR:
+      c_val_print_ptr (type, valaddr, 0, stream, recurse,
+		       val, options);
+      break;
+
+    case TYPE_CODE_UNION:
+      c_val_print_union (type, valaddr, 0, address, stream,
+			 recurse, val, options);
+      break;
+
+    case TYPE_CODE_STRUCT:
+      c_val_print_struct (type, valaddr, 0, address, stream,
+			  recurse, val, options);
+      break;
+
+    case TYPE_CODE_INT:
+      c_val_print_int (type, unresolved_type, valaddr, 0, stream,
+		       val, options);
+      break;
+
+    case TYPE_CODE_MEMBERPTR:
+      c_val_print_memberptr (type, valaddr, 0, address, stream,
+			     recurse, val, options);
+      break;
+
+    case TYPE_CODE_REF:
+    case TYPE_CODE_RVALUE_REF:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_FLAGS:
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_METHOD:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_FLT:
+    case TYPE_CODE_DECFLOAT:
+    case TYPE_CODE_VOID:
+    case TYPE_CODE_ERROR:
+    case TYPE_CODE_UNDEF:
+    case TYPE_CODE_COMPLEX:
+    case TYPE_CODE_CHAR:
+    default:
+      generic_value_print (val, stream, recurse, options, &c_decorations);
+      break;
+    }
 }
 
 
