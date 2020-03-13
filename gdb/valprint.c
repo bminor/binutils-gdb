@@ -966,6 +966,30 @@ generic_val_print_complex (struct type *type,
   fprintf_filtered (stream, "%s", decorations->complex_suffix);
 }
 
+/* generic_value_print helper for TYPE_CODE_COMPLEX.  */
+
+static void
+generic_value_print_complex (struct value *val, struct ui_file *stream,
+			     const struct value_print_options *options,
+			     const struct generic_val_print_decorations
+			       *decorations)
+{
+  fprintf_filtered (stream, "%s", decorations->complex_prefix);
+
+  struct type *type = check_typedef (value_type (val));
+  struct value *real_part
+    = value_from_component (val, TYPE_TARGET_TYPE (type), 0);
+  value_print_scalar_formatted (real_part, options, 0, stream);
+  fprintf_filtered (stream, "%s", decorations->complex_infix);
+
+  struct value *imag_part
+    = value_from_component (val, TYPE_TARGET_TYPE (type),
+			    TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
+
+  value_print_scalar_formatted (imag_part, options, 0, stream);
+  fprintf_filtered (stream, "%s", decorations->complex_suffix);
+}
+
 /* A generic val_print that is suitable for use by language
    implementations of the la_val_print method.  This function can
    handle most type codes, though not all, notably exception
@@ -1206,8 +1230,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_COMPLEX:
-      generic_val_print_complex (type, 0, stream,
-				 val, options, decorations);
+      generic_value_print_complex (val, stream, options, decorations);
       break;
 
     case TYPE_CODE_UNION:
