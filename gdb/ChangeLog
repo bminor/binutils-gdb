@@ -1,5 +1,10 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* riscv-tdep.c (riscv_print_one_register_info): Use
+	common_val_print.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-main.c (output_register): Use common_val_print.
 
 2020-03-13  Tom Tromey  <tom@tromey.com>
