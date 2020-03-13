@@ -579,6 +579,7 @@ extern struct value *vlscm_scm_to_value (SCM scm);
 extern int vlscm_is_value (SCM scm);
 
 extern SCM vlscm_scm_from_value (struct value *value);
+extern SCM vlscm_scm_from_value_no_release (struct value *value);
 
 extern struct value *vlscm_convert_typed_value_from_scheme
   (const char *func_name, int obj_arg_pos, SCM obj,
@@ -602,10 +603,8 @@ extern void gdbscm_preserve_values
 
 extern enum ext_lang_rc gdbscm_apply_val_pretty_printer
   (const struct extension_language_defn *,
-   struct type *type,
-   LONGEST embedded_offset, CORE_ADDR address,
-   struct ui_file *stream, int recurse,
    struct value *val,
+   struct ui_file *stream, int recurse,
    const struct value_print_options *options,
    const struct language_defn *language);
 

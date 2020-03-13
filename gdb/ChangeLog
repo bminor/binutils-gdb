@@ -1,5 +1,31 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* valprint.c (do_val_print): Update.
+	* python/python-internal.h (gdbpy_apply_val_pretty_printer): Take
+	a struct value.
+	(value_to_value_object_no_release): Declare.
+	* python/py-value.c (value_to_value_object_no_release): New
+	function.
+	* python/py-prettyprint.c (gdbpy_apply_val_pretty_printer): Take a
+	struct value.
+	* guile/scm-value.c (vlscm_scm_from_value_no_release): New
+	function.
+	* guile/scm-pretty-print.c (gdbscm_apply_val_pretty_printer): Take
+	a struct value.
+	* guile/guile-internal.h (vlscm_scm_from_value_no_release):
+	Declare.
+	(gdbscm_apply_val_pretty_printer): Take a struct value.
+	* extension.h (apply_ext_lang_val_pretty_printer): Take a struct
+	value.
+	* extension.c (apply_ext_lang_val_pretty_printer): Take a struct
+	value.
+	* extension-priv.h (struct extension_language_ops)
+	<apply_val_pretty_printer>: Take a struct value.
+	* cp-valprint.c (cp_print_value): Create a struct value.
+	(cp_print_value): Update.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* ada-valprint.c (print_field_values): Call common_val_print.
 
 2020-03-13  Tom Tromey  <tom@tromey.com>

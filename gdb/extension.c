@@ -470,12 +470,9 @@ ext_lang_type_printers::~ext_lang_type_printers ()
     }
 }
 
-/* Try to pretty-print a value of type TYPE located at VAL's contents
-   buffer + EMBEDDED_OFFSET, which came from the inferior at address
-   ADDRESS + EMBEDDED_OFFSET, onto stdio stream STREAM according to
-   OPTIONS.
-   VAL is the whole object that came from ADDRESS.
-   Returns non-zero if the value was successfully pretty-printed.
+/* Try to pretty-print a value onto stdio stream STREAM according to
+   OPTIONS.  VAL is the object to print.  Returns non-zero if the
+   value was successfully pretty-printed.
 
    Extension languages are tried in the order specified by
    extension_languages.  The first one to provide a pretty-printed
@@ -488,10 +485,8 @@ ext_lang_type_printers::~ext_lang_type_printers ()
    errors that trigger an exception in the extension language.  */
 
 int
-apply_ext_lang_val_pretty_printer (struct type *type,
-				   LONGEST embedded_offset, CORE_ADDR address,
+apply_ext_lang_val_pretty_printer (struct value *val,
 				   struct ui_file *stream, int recurse,
-				   struct value *val,
 				   const struct value_print_options *options,
 				   const struct language_defn *language)
 {
@@ -504,10 +499,8 @@ apply_ext_lang_val_pretty_printer (struct type *type,
 
       if (extlang->ops->apply_val_pretty_printer == NULL)
 	continue;
-      rc = extlang->ops->apply_val_pretty_printer (extlang, type,
-						   embedded_offset, address,
-						   stream, recurse, val,
-						   options, language);
+      rc = extlang->ops->apply_val_pretty_printer (extlang, val, stream,
+						   recurse, options, language);
       switch (rc)
 	{
 	case EXT_LANG_RC_OK:

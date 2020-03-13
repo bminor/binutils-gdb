@@ -848,13 +848,15 @@ cp_print_value (struct type *type, struct type *real_type,
 	      /* Attempt to run an extension language pretty-printer on the
 		 baseclass if possible.  */
 	      if (!options->raw)
-		result
-		  = apply_ext_lang_val_pretty_printer (baseclass,
-						       thisoffset + boffset,
-						       value_address (base_val),
-						       stream, recurse,
-						       base_val, options,
-						       current_language);
+		{
+		  struct value *v
+		    = value_from_component (base_val, baseclass,
+					    thisoffset + boffset);
+		  result
+		    = apply_ext_lang_val_pretty_printer (v, stream, recurse,
+							 options,
+							 current_language);
+		}
 
 	      if (!result)
 		cp_print_value_fields (baseclass, thistype,
@@ -1006,19 +1008,19 @@ cp_print_value (struct value *val, struct ui_file *stream,
 	    }
 	  else
 	    {
+	      struct value *baseclass_val = value_primitive_field (val, 0,
+								   i, type);
+
 	      /* Attempt to run an extension language pretty-printer on the
 		 baseclass if possible.  */
 	      if (!options->raw)
 		result
-		  = apply_ext_lang_val_pretty_printer (baseclass, boffset,
-						       value_address (base_val),
-						       stream, recurse,
-						       base_val, options,
+		  = apply_ext_lang_val_pretty_printer (baseclass_val, stream,
+						       recurse, options,
 						       current_language);
 
 	      if (!result)
-		cp_print_value_fields (value_primitive_field (val, 0, i, type),
-				       stream, recurse, options,
+		cp_print_value_fields (baseclass_val, stream, recurse, options,
 				       ((struct type **)
 					obstack_base (&dont_print_vb_obstack)),
 				       0);

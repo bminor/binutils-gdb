@@ -1279,9 +1279,13 @@ do_val_print (struct value *full_value,
 
   if (!options->raw)
     {
-      ret = apply_ext_lang_val_pretty_printer (type, embedded_offset,
-					       address, stream, recurse,
-					       val, options, language);
+      struct value *v = full_value;
+
+      if (v == nullptr)
+	v = value_from_component (val, type, embedded_offset);
+
+      ret = apply_ext_lang_val_pretty_printer (v, stream, recurse, options,
+					       language);
       if (ret)
 	return;
     }
@@ -1477,11 +1481,8 @@ value_print (struct value *val, struct ui_file *stream,
   if (!options->raw)
     {
       int r
-	= apply_ext_lang_val_pretty_printer (value_type (val),
-					     value_embedded_offset (val),
-					     value_address (val),
-					     stream, 0,
-					     val, options, current_language);
+	= apply_ext_lang_val_pretty_printer (val, stream, 0, options,
+					     current_language);
 
       if (r)
 	return;
