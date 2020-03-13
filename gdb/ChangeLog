@@ -1,5 +1,10 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* valprint.c (generic_val_print_func): Simplify.
+	(generic_val_print, generic_value_print): Update.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* valprint.c (generic_val_print_flags): Remove.
 	(generic_val_print, generic_value_print): Update.
 	(val_print_type_code_flags): Add original_value parameter.

@@ -742,22 +742,16 @@ generic_val_print_func (struct type *type,
 {
   struct gdbarch *gdbarch = get_type_arch (type);
 
-  if (options->format)
-    {
-      val_print_scalar_formatted (type, embedded_offset,
-				  original_value, options, 0, stream);
-    }
-  else
-    {
-      /* FIXME, we should consider, at least for ANSI C language,
-         eliminating the distinction made between FUNCs and POINTERs
-         to FUNCs.  */
-      fprintf_filtered (stream, "{");
-      type_print (type, "", stream, -1);
-      fprintf_filtered (stream, "} ");
-      /* Try to print what function it points to, and its address.  */
-      print_address_demangle (options, gdbarch, address, stream, demangle);
-    }
+  gdb_assert (!options->format);
+
+  /* FIXME, we should consider, at least for ANSI C language,
+     eliminating the distinction made between FUNCs and POINTERs to
+     FUNCs.  */
+  fprintf_filtered (stream, "{");
+  type_print (type, "", stream, -1);
+  fprintf_filtered (stream, "} ");
+  /* Try to print what function it points to, and its address.  */
+  print_address_demangle (options, gdbarch, address, stream, demangle);
 }
 
 /* generic_val_print helper for TYPE_CODE_BOOL.  */
@@ -971,8 +965,12 @@ generic_val_print (struct type *type,
 
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
-      generic_val_print_func (type, embedded_offset, address, stream,
-			      original_value, options);
+      if (options->format)
+	val_print_scalar_formatted (type, embedded_offset,
+				    original_value, options, 0, stream);
+      else
+	generic_val_print_func (type, embedded_offset, address, stream,
+				original_value, options);
       break;
 
     case TYPE_CODE_BOOL:
@@ -1084,8 +1082,11 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
 
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
-      generic_val_print_func (type, 0, value_address (val), stream,
-			      val, options);
+      if (options->format)
+	value_print_scalar_formatted (val, options, 0, stream);
+      else
+	generic_val_print_func (type, 0, value_address (val), stream,
+				val, options);
       break;
 
     case TYPE_CODE_BOOL:
