@@ -1,5 +1,13 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* rust-lang.c (val_print_struct, rust_print_enum): Use the value
+	API.
+	(rust_val_print): Rewrite.
+	(rust_value_print_inner): New function, from rust_val_print.
+	(rust_language_defn): Use rust_value_print_inner.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* ada-valprint.c (ada_value_print_inner): New function.
 	* ada-lang.h (ada_value_print_inner): Declare.
 	* ada-lang.c (ada_language_defn): Use ada_value_print_inner.
