@@ -1,5 +1,11 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* printcmd.c (print_formatted): Use value_print_scalar_formatted.
+	* mips-tdep.c (mips_print_register): Use
+	value_print_scalar_formatted.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* valprint.h (value_print_scalar_formatted): Declare.
 	* valprint.c (value_print_scalar_formatted): New function.
 
