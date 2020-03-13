@@ -1236,6 +1236,19 @@ common_val_print (struct value *val, struct ui_file *stream, int recurse,
 		val, options, language);
 }
 
+/* See valprint.h.  */
+
+void
+common_val_print_checked (struct value *val, struct ui_file *stream,
+			  int recurse,
+			  const struct value_print_options *options,
+			  const struct language_defn *language)
+{
+  if (!value_check_printable (val, stream, options))
+    return;
+  common_val_print (val, stream, recurse, options, language);
+}
+
 /* Print on stream STREAM the value VAL according to OPTIONS.  The value
    is printed using the current_language syntax.  */
 

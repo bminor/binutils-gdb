@@ -282,4 +282,12 @@ extern bool val_print_check_max_depth (struct ui_file *stream, int recurse,
 				       const struct value_print_options *opts,
 				       const struct language_defn *language);
 
+/* Like common_val_print, but call value_check_printable first.  */
+
+extern void common_val_print_checked
+  (struct value *val,
+   struct ui_file *stream, int recurse,
+   const struct value_print_options *options,
+   const struct language_defn *language);
+
 #endif

@@ -1,5 +1,11 @@
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
+	* valprint.h (common_val_print_checked): Declare.
+	* valprint.c (common_val_print_checked): New function.
+	* stack.c (print_frame_arg): Use common_val_print_checked.
+
+2020-03-13  Tom Tromey  <tom@tromey.com>
+
 	* valprint.c (do_val_print): New function, from val_print.
 	(val_print): Use do_val_print.
 	(common_val_print): Use do_val_print.
