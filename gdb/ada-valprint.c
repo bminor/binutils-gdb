@@ -684,10 +684,7 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
 		     bit_size, TYPE_FIELD_TYPE (type, i));
 	      opts = *options;
 	      opts.deref_ref = 0;
-	      val_print (TYPE_FIELD_TYPE (type, i),
-			 value_embedded_offset (v), 0,
-			 stream, recurse + 1, v,
-			 &opts, language);
+	      common_val_print (v, stream, recurse + 1, &opts, language);
 	    }
 	}
       else
@@ -695,9 +692,12 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
 	  struct value_print_options opts = *options;
 
 	  opts.deref_ref = 0;
-	  val_print (TYPE_FIELD_TYPE (type, i),
-		     (offset + TYPE_FIELD_BITPOS (type, i) / HOST_CHAR_BIT),
-		     0, stream, recurse + 1, val, &opts, language);
+
+	  LONGEST local_off = (offset + TYPE_FIELD_BITPOS (type, i)
+			       / HOST_CHAR_BIT);
+	  struct value *v = value_from_contents (TYPE_FIELD_TYPE (type, i),
+						 valaddr + local_off);
+	  common_val_print (v, stream, recurse + 1, &opts, language);
 	}
       annotate_field_end ();
     }
