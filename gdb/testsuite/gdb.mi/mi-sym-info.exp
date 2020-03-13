@@ -15,6 +15,13 @@
 
 # Test -symbol-info-functions, -symbol-info-variables, and
 # -symbol-info-types.
+#
+# These tests can generate large amounts of output, which can cause gdb to be
+# slow in two different ways:
+# - it takes long before the command starts producing output
+# - it takes long to print all the output
+# We can prevent timeouts due to the latter using exp_continue, but for
+# the former that doesn't work.  There we use with_timeout_factor instead.
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
@@ -51,17 +58,65 @@ set type_syms \
 
 # Fetch all functions, variables and types without any non-debug
 # symbols.
-mi_gdb_test "111-symbol-info-functions" \
-    "111\\^done,${debug_only_syms}" \
-    "List all functions from debug information only"
+set testname "List all functions from debug information only"
+set cmd "111-symbol-info-functions"
+set state 0
+gdb_test_multiple $cmd $testname -prompt "${mi_gdb_prompt}$" {
+    -re "111\\^done,symbols=\{debug=\\\[${symtab_re}" {
+	if { $state == 0 } { incr state }
+	exp_continue
+    }
+    -re ",${symtab_re}" {
+	exp_continue
+    }
+    -re "\\\]\}\r\n${mi_gdb_prompt}$" {
+	if { $state == 1 } {
+	    pass $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
+    }
+}
 
-mi_gdb_test "112-symbol-info-variables" \
-    "112\\^done,${debug_only_syms}" \
-    "List all variables from debug information only"
+set testname "List all variables from debug information only"
+set cmd "112-symbol-info-variables"
+set state 0
+gdb_test_multiple $cmd $testname -prompt "${mi_gdb_prompt}$" {
+    -re "112\\^done,symbols=\{debug=\\\[${symtab_re}" {
+	if { $state == 0 } { incr state }
+	exp_continue
+    }
+    -re ",${symtab_re}" {
+	exp_continue
+    }
+    -re "\\\]\}\r\n${mi_gdb_prompt}$" {
+	if { $state == 1 } {
+	    pass $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
+    }
+}
 
-mi_gdb_test "113-symbol-info-types" \
-    "113\\^done,${type_syms}" \
-    "List all types"
+set testname "List all types"
+set cmd "113-symbol-info-types"
+set state 0
+gdb_test_multiple $cmd $testname -prompt "${mi_gdb_prompt}$" {
+    -re "113\\^done,symbols=\{debug=\\\[${symtab_type_re}" {
+	if { $state == 0 } { incr state }
+	exp_continue
+    }
+    -re ",${symtab_type_re}" {
+	exp_continue
+    }
+    -re "\\\]\}\r\n${mi_gdb_prompt}$" {
+	if { $state == 1 } {
+	    pass $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
+    }
+}
 
 # Fetch functions and variables but also grab the non-debug symbols
 # (from the symbol table).  There's often so much output output from
@@ -69,34 +124,98 @@ mi_gdb_test "113-symbol-info-types" \
 # fetching the output piece by piece.
 set testname "List all functions"
 set cmd "114-symbol-info-functions --include-nondebug"
+set state 0
 gdb_test_multiple $cmd ${testname} -prompt "${mi_gdb_prompt}$" {
-    -re "114\\^done,symbols=\{debug=\\\[${symtab_re}(?:,${symtab_re})*\\\],nondebug=\\\[" {
+    -re "114\\^done,symbols=\{" {
+	if { $state == 0 } { set state 1 }
 	exp_continue
     }
-
+    -re "debug=\\\[${symtab_re}" {
+	if { $state == 1 } { set state 2 }
+	exp_continue
+    }
+    -re ",${symtab_re}" {
+	exp_continue
+    }
+    -re "\\\],nondebug=\\\[" {
+	if { $state == 2 } { set state 3 }
+	exp_continue
+    }
     -re "\{address=${qstr},name=${qstr}\}," {
 	exp_continue
     }
-
     -re "\{address=${qstr},name=${qstr}\}\\\]\}\r\n${mi_gdb_prompt}$" {
-	pass ${testname}
+	if { $state == 3 } {
+	    pass $gdb_test_name
+	} else {
+	    fail $gdb_test_name
+	}
     }
 }
 
-set testname "List all variables"
-set cmd "115-symbol-info-variables --include-nondebug"
-gdb_test_multiple $cmd ${testname} -prompt "${mi_gdb_prompt}$" {
-    -re "115\\^done,symbols=\{debug=\\\[${symtab_re}(?:,${symtab_re})*\\\],nondebug=\\\[" {
-	verbose -log "Got the first part of the input"
-	exp_continue
+with_timeout_factor 2 {
+    set testname "List all variables"
+    set cmd "115-symbol-info-variables --include-nondebug"
+    set state 0
+    gdb_test_multiple $cmd ${testname} -prompt "${mi_gdb_prompt}$" {
+	-re "115\\^done,symbols=\{" {
+	    if { $state == 0 } { set state 1 }
+	    exp_continue
+	}
+	-re "debug=\\\[${symtab_re}" {
+	    if { $state == 1 } { set state 2 }
+	    exp_continue
+	}
+	-re ",${symtab_re}" {
+	    exp_continue
+	}
+	-re "\\\],nondebug=\\\[" {
+	    if { $state == 2 } { set state 3 }
+	    exp_continue
+	}
+	-re "\{address=${qstr},name=${qstr}\}," {
+	    exp_continue
+	}
+	-re "\{address=${qstr},name=${qstr}\}\\\]\}\r\n${mi_gdb_prompt}$" {
+	    if { $state == 3 } {
+		pass $gdb_test_name
+	    } else {
+		fail $gdb_test_name
+	    }
+	}
     }
+}
 
-    -re "\{address=${qstr},name=${qstr}\}," {
-	exp_continue
-    }
-
-    -re "\{address=${qstr},name=${qstr}\}\\\]\}\r\n${mi_gdb_prompt}$" {
-	pass ${testname}
+with_timeout_factor 2 {
+    set testname "List all variables"
+    set cmd "115-symbol-info-variables --include-nondebug"
+    set state 0
+    gdb_test_multiple $cmd ${testname} -prompt "${mi_gdb_prompt}$" {
+	-re "115\\^done,symbols=\{" {
+	    if { $state == 0 } { incr state }
+	    exp_continue
+	}
+	-re "debug=\\\[${symtab_re}" {
+	    if { $state == 1 } { incr state }
+	    exp_continue
+	}
+	-re ",${symtab_re}" {
+	    exp_continue
+	}
+	-re "\\\],nondebug=\\\[" {
+	    if { $state == 2 } { incr state }
+	    exp_continue
+	}
+	-re "\{address=${qstr},name=${qstr}\}," {
+	    exp_continue
+	}
+	-re "\{address=${qstr},name=${qstr}\}\\\]\}\r\n${mi_gdb_prompt}$" {
+	    if { $state == 3 } {
+		pass $gdb_test_name
+	    } else {
+		fail $gdb_test_name
+	    }
+	}
     }
 }
 
