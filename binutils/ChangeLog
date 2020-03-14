@@ -1,5 +1,9 @@
 2020-03-14  Alan Modra  <amodra@gmail.com>
 
+	* readelf.c (process_file): Clean ba_cache.
+
+2020-03-14  Alan Modra  <amodra@gmail.com>
+
 	* elfcomm.h (setup_archive): Update prototype.
 	* elfcomm.c (setup_archive): Add file_size parameter and sanity
 	check longnames_size.

@@ -20571,7 +20571,9 @@ process_file (char * file_name)
   free (filedata);
 
   free (ba_cache.strtab);
+  ba_cache.strtab = NULL;
   free (ba_cache.symtab);
+  ba_cache.symtab = NULL;
   ba_cache.filedata = NULL;
 
   return ret;
