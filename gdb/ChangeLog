@@ -1,3 +1,9 @@
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c: Include <sys/types.h>, <sys/ptrace.h> and
+	<sys/sysctl.h>.
+	* nbsd-nat.c (nbsd_nat_target::pid_to_exec_file): Rewrite.
+
 2020-03-17  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/23710

@@ -21,23 +21,21 @@
 
 #include "nbsd-nat.h"
 
+#include <sys/types.h>
+#include <sys/ptrace.h>
+#include <sys/sysctl.h>
+
 /* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */
 
 char *
 nbsd_nat_target::pid_to_exec_file (int pid)
 {
-  ssize_t len;
   static char buf[PATH_MAX];
-  char name[PATH_MAX];
-
-  xsnprintf (name, PATH_MAX, "/proc/%d/exe", pid);
-  len = readlink (name, buf, PATH_MAX - 1);
-  if (len != -1)
-    {
-      buf[len] = '\0';
-      return buf;
-    }
-
-  return NULL;
+  size_t buflen;
+  int mib[4] = {CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_PATHNAME};
+  buflen = sizeof (buf);
+  if (sysctl (mib, ARRAY_SIZE (mib), buf, &buflen, NULL, 0))
+    return NULL;
+  return buf;
 }
