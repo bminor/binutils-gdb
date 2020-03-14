@@ -1,5 +1,11 @@
 2020-03-14  Kamil Rytarowski  <n54@gmx.com>
 
+	* x86-bsd-nat.c (x86bsd_dr_get): New variable lwp and pass
+	it to the ptrace call.
+	* x86-bsd-nat.c (x86bsd_dr_set): Likewise.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
 	* vax-bsd-nat.c (vaxbsd_supply_gregset): New variable lwp and pass
 	it to the ptrace call.
 	* vax-bsd-nat.c (vaxbsd_collect_gregset): Likewise.

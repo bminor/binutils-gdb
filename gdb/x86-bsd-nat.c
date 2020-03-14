@@ -56,9 +56,14 @@ static unsigned long
 x86bsd_dr_get (ptid_t ptid, int regnum)
 {
   struct dbreg dbregs;
+#ifdef __NetBSD__
+  int lwp = inferior_ptid.lwp ();
+#else
+  int lwp = 0;
+#endif
 
   if (ptrace (PT_GETDBREGS, get_ptrace_pid (inferior_ptid),
-	      (PTRACE_TYPE_ARG3) &dbregs, 0) == -1)
+	      (PTRACE_TYPE_ARG3) &dbregs, lwp) == -1)
     perror_with_name (_("Couldn't read debug registers"));
 
   return DBREG_DRX ((&dbregs), regnum);
@@ -68,9 +73,14 @@ static void
 x86bsd_dr_set (int regnum, unsigned long value)
 {
   struct dbreg dbregs;
+#ifdef __NetBSD__
+  int lwp = inferior_ptid.lwp ();
+#else
+  int lwp = 0;
+#endif
 
   if (ptrace (PT_GETDBREGS, get_ptrace_pid (inferior_ptid),
-              (PTRACE_TYPE_ARG3) &dbregs, 0) == -1)
+              (PTRACE_TYPE_ARG3) &dbregs, lwp) == -1)
     perror_with_name (_("Couldn't get debug registers"));
 
   /* For some mysterious reason, some of the reserved bits in the
@@ -82,8 +92,12 @@ x86bsd_dr_set (int regnum, unsigned long value)
 
   for (thread_info *thread : current_inferior ()->non_exited_threads ())
     {
+#ifdef __NetBSD__
+      lwp = thread->ptid.lwp ();
+#endif
+
       if (ptrace (PT_SETDBREGS, get_ptrace_pid (thread->ptid),
-		  (PTRACE_TYPE_ARG3) &dbregs, 0) == -1)
+		  (PTRACE_TYPE_ARG3) &dbregs, lwp) == -1)
 	perror_with_name (_("Couldn't write debug registers"));
     }
 }
