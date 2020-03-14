@@ -237,6 +237,7 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
 %token SIGNED_KEYWORD LONG SHORT INT_KEYWORD CONST_KEYWORD VOLATILE_KEYWORD DOUBLE_KEYWORD
+%token RESTRICT ATOMIC
 
 %token <sval> DOLLAR_VARIABLE
 
@@ -1169,36 +1170,43 @@ variable:	name_not_typename
 			}
 	;
 
-space_identifier : '@' NAME
+const_or_volatile: const_or_volatile_noopt
+	|
+	;
+
+single_qualifier:
+		CONST_KEYWORD
+			{ cpstate->type_stack.insert (tp_const); }
+	| 	VOLATILE_KEYWORD
+			{ cpstate->type_stack.insert (tp_volatile); }
+	| 	ATOMIC
+			{ cpstate->type_stack.insert (tp_atomic); }
+	| 	RESTRICT
+			{ cpstate->type_stack.insert (tp_restrict); }
+	|	'@' NAME
 		{
 		  cpstate->type_stack.insert (pstate,
 					      copy_name ($2.stoken).c_str ());
 		}
 	;
 
-const_or_volatile: const_or_volatile_noopt
-	|
+qualifier_seq_noopt:
+		single_qualifier
+	| 	qualifier_seq single_qualifier
 	;
 
-cv_with_space_id : const_or_volatile space_identifier const_or_volatile
-	;
-
-const_or_volatile_or_space_identifier_noopt: cv_with_space_id
-	| const_or_volatile_noopt
-	;
-
-const_or_volatile_or_space_identifier:
-		const_or_volatile_or_space_identifier_noopt
+qualifier_seq:
+		qualifier_seq_noopt
 	|
 	;
 
 ptr_operator:
 		ptr_operator '*'
 			{ cpstate->type_stack.insert (tp_pointer); }
-		const_or_volatile_or_space_identifier
+		qualifier_seq
 	|	'*'
 			{ cpstate->type_stack.insert (tp_pointer); }
-		const_or_volatile_or_space_identifier
+		qualifier_seq
 	|	'&'
 			{ cpstate->type_stack.insert (tp_reference); }
 	|	'&' ptr_operator
@@ -1472,9 +1480,9 @@ typebase
 			    (copy_name($2).c_str (), $4,
 			     pstate->expression_context_block);
 			}
-	| const_or_volatile_or_space_identifier_noopt typebase
+	|	qualifier_seq_noopt typebase
 			{ $$ = cpstate->type_stack.follow_types ($2); }
-	| typebase const_or_volatile_or_space_identifier_noopt
+	|	typebase qualifier_seq_noopt
 			{ $$ = cpstate->type_stack.follow_types ($1); }
 	;
 
@@ -2345,11 +2353,15 @@ enum token_flag
 
   FLAG_CXX = 1,
 
+  /* If this bit is set, the token is C-only.  */
+
+  FLAG_C = 2,
+
   /* If this bit is set, the token is conditional: if there is a
      symbol of the same name, then the token is a symbol; otherwise,
      the token is a keyword.  */
 
-  FLAG_SHADOW = 2
+  FLAG_SHADOW = 4
 };
 DEF_ENUM_FLAGS_TYPE (enum token_flag, token_flags);
 
@@ -2416,6 +2428,10 @@ static const struct token ident_tokens[] =
     {"union", UNION, OP_NULL, 0},
     {"short", SHORT, OP_NULL, 0},
     {"const", CONST_KEYWORD, OP_NULL, 0},
+    {"restrict", RESTRICT, OP_NULL, FLAG_C | FLAG_SHADOW},
+    {"__restrict__", RESTRICT, OP_NULL, 0},
+    {"__restrict", RESTRICT, OP_NULL, 0},
+    {"_Atomic", ATOMIC, OP_NULL, 0},
     {"enum", ENUM, OP_NULL, 0},
     {"long", LONG, OP_NULL, 0},
     {"true", TRUEKEYWORD, OP_NULL, FLAG_CXX},
@@ -2550,6 +2566,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	if ((tokentab3[i].flags & FLAG_CXX) != 0
 	    && par_state->language ()->la_language != language_cplus)
 	  break;
+	gdb_assert ((tokentab3[i].flags & FLAG_C) == 0);
 
 	pstate->lexptr += 3;
 	yylval.opcode = tokentab3[i].opcode;
@@ -2563,6 +2580,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	if ((tokentab2[i].flags & FLAG_CXX) != 0
 	    && par_state->language ()->la_language != language_cplus)
 	  break;
+	gdb_assert ((tokentab3[i].flags & FLAG_C) == 0);
 
 	pstate->lexptr += 2;
 	yylval.opcode = tokentab2[i].opcode;
@@ -2856,6 +2874,10 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
       {
 	if ((ident_tokens[i].flags & FLAG_CXX) != 0
 	    && par_state->language ()->la_language != language_cplus)
+	  break;
+	if ((ident_tokens[i].flags & FLAG_C) != 0
+	    && par_state->language ()->la_language != language_c
+	    && par_state->language ()->la_language != language_objc)
 	  break;
 
 	if ((ident_tokens[i].flags & FLAG_SHADOW) != 0)

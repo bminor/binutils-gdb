@@ -40,6 +40,8 @@ enum type_pieces
     tp_const, 
     tp_volatile, 
     tp_space_identifier,
+    tp_atomic,
+    tp_restrict,
     tp_type_stack,
     tp_kind
   };

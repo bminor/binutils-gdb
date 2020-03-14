@@ -1,3 +1,28 @@
+2020-03-14  Tom Tromey  <tom@tromey.com>
+
+	* c-typeprint.c (cp_type_print_method_args): Print "__restrict__"
+	for C++.
+	(c_type_print_modifier): Likewise.  Add "language" parameter.
+	(c_type_print_varspec_prefix, c_type_print_base_struct_union)
+	(c_type_print_base_1): Update.
+	* type-stack.h (enum type_pieces) <tp_atomic, tp_restrict>: New
+	constants.
+	* type-stack.c (type_stack::insert): Handle tp_atomic and
+	tp_restrict.
+	(type_stack::follow_type_instance_flags): Likewise.
+	(type_stack::follow_types): Likewise.  Merge type-following code.
+	* c-exp.y (RESTRICT, ATOMIC): New tokens.
+	(space_identifier, cv_with_space_id)
+	(const_or_volatile_or_space_identifier_noopt)
+	(const_or_volatile_or_space_identifier): Remove.
+	(single_qualifier, qualifier_seq_noopt, qualifier_seq): New
+	rules.
+	(ptr_operator, typebase): Update.
+	(enum token_flag) <FLAG_C>: New constant.
+	(ident_tokens): Add "restrict", "__restrict__", "__restrict", and
+	"_Atomic".
+	(lex_one_token): Handle FLAG_C.
+
 2020-03-14  Kamil Rytarowski  <n54@gmx.com>
 
 	* m68k-bsd-nat.c (fetch_registers): New variable lwp and pass

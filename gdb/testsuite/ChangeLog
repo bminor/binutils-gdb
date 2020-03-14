@@ -1,3 +1,7 @@
+2020-03-14  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/cvexpr.exp: Add test for _Atomic and restrict.
+
 2020-03-14  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.mi/mi-fortran-modules.exp: Use exp_continue.
