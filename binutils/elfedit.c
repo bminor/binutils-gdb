@@ -541,6 +541,7 @@ process_archive (const char * file_name, FILE * file,
   struct archive_info nested_arch;
   size_t got;
   int ret;
+  struct stat statbuf;
 
   /* The ARCH structure is used to hold information about this archive.  */
   arch.file_name = NULL;
@@ -558,7 +559,9 @@ process_archive (const char * file_name, FILE * file,
   nested_arch.sym_table = NULL;
   nested_arch.longnames = NULL;
 
-  if (setup_archive (&arch, file_name, file, is_thin_archive, FALSE) != 0)
+  if (fstat (fileno (file), &statbuf) < 0
+      || setup_archive (&arch, file_name, file, statbuf.st_size,
+			is_thin_archive, FALSE) != 0)
     {
       ret = 1;
       goto out;

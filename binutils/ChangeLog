@@ -1,5 +1,15 @@
 2020-03-14  Alan Modra  <amodra@gmail.com>
 
+	* elfcomm.h (setup_archive): Update prototype.
+	* elfcomm.c (setup_archive): Add file_size parameter and sanity
+	check longnames_size.
+	(setup_nested_archive): Get file size and pass to setup_archive.
+	* elfedit.c (process_archive): Likewise.
+	* readelf.c (process_archive): Pass filedata->file_size to
+	setup_archive.
+
+2020-03-14  Alan Modra  <amodra@gmail.com>
+
 	* readelf.c (dump_section_as_strings): Free memory on error exit.
 	(dump_section_as_bytes, process_notes_at): Likewise.
 	(get_build_id): Free enote.

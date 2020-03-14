@@ -607,8 +607,8 @@ process_archive_index_and_symbols (struct archive_info *  arch,
 
 int
 setup_archive (struct archive_info *arch, const char *file_name,
-	       FILE *file, bfd_boolean is_thin_archive,
-	       bfd_boolean read_symbols)
+	       FILE *file, bfd_size_type file_size,
+	       bfd_boolean is_thin_archive, bfd_boolean read_symbols)
 {
   size_t got;
 
@@ -671,7 +671,8 @@ setup_archive (struct archive_info *arch, const char *file_name,
 	  return 1;
 	}
       /* PR 17531: file: 639d6a26.  */
-      if ((signed long) arch->longnames_size < 0)
+      if (arch->longnames_size > file_size
+	  || (signed long) arch->longnames_size < 0)
 	{
 	  error (_("%s: long name table is too big, (size = 0x%lx)\n"),
 		 file_name, arch->longnames_size);
@@ -713,6 +714,7 @@ setup_nested_archive (struct archive_info *nested_arch,
 		      const char *member_file_name)
 {
   FILE * member_file;
+  struct stat statbuf;
 
   /* Have we already setup this archive?  */
   if (nested_arch->file_name != NULL
@@ -727,8 +729,10 @@ setup_nested_archive (struct archive_info *nested_arch,
   member_file = fopen (member_file_name, "rb");
   if (member_file == NULL)
     return 1;
+  if (fstat (fileno (member_file), &statbuf) < 0)
+    return 1;
   return setup_archive (nested_arch, member_file_name, member_file,
-			FALSE, FALSE);
+			statbuf.st_size, FALSE, FALSE);
 }
 
 /* Release the memory used for the archive information.  */

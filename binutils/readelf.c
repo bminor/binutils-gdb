@@ -20247,7 +20247,8 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
   nested_arch.longnames = NULL;
 
   if (setup_archive (&arch, filedata->file_name, filedata->handle,
-		     is_thin_archive, do_archive_index) != 0)
+		     filedata->file_size, is_thin_archive,
+		     do_archive_index) != 0)
     {
       ret = FALSE;
       goto out;
