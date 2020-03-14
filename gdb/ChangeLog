@@ -1,5 +1,13 @@
 2020-03-17  Kamil Rytarowski  <n54@gmx.com>
 
+	* i386-bsd-nat.c (gdb_ptrace): New.
+	* (i386bsd_fetch_inferior_registers,
+	i386bsd_store_inferior_registers) Switch from pid_t to ptid_t.
+	* (i386bsd_fetch_inferior_registers,
+	i386bsd_store_inferior_registers) Use gdb_ptrace.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
 	* amd64-bsd-nat.c (gdb_ptrace): New.
 	* (amd64bsd_fetch_inferior_registers,
 	amd64bsd_store_inferior_registers) Switch from pid_t to ptid_t.
