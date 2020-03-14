@@ -1,5 +1,13 @@
 2020-03-14  Kamil Rytarowski  <n54@gmx.com>
 
+	* m68k-bsd-nat.c (m68kbsd_supply_gregset): Change type of regs to
+	gdb_byte *.
+	* m68k-bsd-nat.c (m68kbsd_supply_fpregset): Likewise.
+	* m68k-bsd-nat.c (m68kbsd_collect_gregset): Likewise.
+	* m68k-bsd-nat.c (m68kbsd_supply_pcb): Cast &tmp to gdb_byte *.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
 	* m68k-bsd-nat.c (m68k_bsd_nat_target): Inherit from
 	nbsd_nat_target instead of inf_ptrace_target.
 	* m68k-bsd-nat.c: Include "nbsd-nat.h", as we are now using
