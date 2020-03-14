@@ -705,41 +705,39 @@ CODE_FRAGMENT
 .  {* name, id,  section_id, index, next, prev, flags, user_set_vma, *}	\
 .  {  NAME, IDX, 0,          0,     NULL, NULL, FLAGS, 0,		\
 .									\
-.  {* linker_mark, linker_has_input, gc_mark, decompress_status,    *}	\
+.  {* linker_mark, linker_has_input, gc_mark, decompress_status,     *}	\
 .     0,           0,                1,       0,			\
 .									\
-.  {* segment_mark, sec_info_type, use_rela_p,                      *}	\
+.  {* segment_mark, sec_info_type, use_rela_p,                       *}	\
 .     0,            0,             0,					\
 .									\
-.  {* sec_flg0, sec_flg1, sec_flg2, sec_flg3, sec_flg4, sec_flg5,   *}	\
+.  {* sec_flg0, sec_flg1, sec_flg2, sec_flg3, sec_flg4, sec_flg5,    *}	\
 .     0,        0,        0,        0,        0,        0,		\
 .									\
-.  {* vma, lma, size, rawsize, compressed_size, relax, relax_count, *}	\
+.  {* vma, lma, size, rawsize, compressed_size, relax, relax_count,  *}	\
 .     0,   0,   0,    0,       0,               0,     0,		\
 .									\
-.  {* output_offset, output_section, alignment_power,               *}	\
+.  {* output_offset, output_section, alignment_power,                *}	\
 .     0,             &SEC,           0,					\
 .									\
-.  {* relocation, orelocation, reloc_count, filepos, rel_filepos,   *}	\
+.  {* relocation, orelocation, reloc_count, filepos, rel_filepos,    *}	\
 .     NULL,       NULL,        0,           0,       0,			\
 .									\
-.  {* line_filepos, userdata, contents, lineno, lineno_count,       *}	\
+.  {* line_filepos, userdata, contents, lineno, lineno_count,        *}	\
 .     0,            NULL,     NULL,     NULL,   0,			\
 .									\
-.  {* entsize, kept_section, moving_line_filepos,		     *}	\
-.     0,       NULL,	      0,					\
+.  {* entsize, kept_section, moving_line_filepos,                    *}	\
+.     0,       NULL,         0,						\
 .									\
-.  {* target_index, used_by_bfd, constructor_chain, owner,          *}	\
+.  {* target_index, used_by_bfd, constructor_chain, owner,           *}	\
 .     0,            NULL,        NULL,              NULL,		\
 .									\
-.  {* symbol,                    symbol_ptr_ptr,                    *}	\
+.  {* symbol,                    symbol_ptr_ptr,                     *}	\
 .     (struct bfd_symbol *) SYM, &SEC.symbol,				\
 .									\
-.  {* map_head, map_tail                                            *}	\
-.     { NULL }, { NULL },						\
+.  {* map_head, map_tail, already_assigned                           *}	\
+.     { NULL }, { NULL }, NULL						\
 .									\
-.  {* already_assigned                                             *}	\
-.     NULL								\
 .    }
 .
 .{* We use a macro to initialize the static asymbol structures because

@@ -1,3 +1,8 @@
+2020-03-14  Alan Modra  <amodra@gmail.com>
+
+	* section.c (BFD_FAKE_SECTIONS): Formatting.
+	* bfd-in2.h: Regenerate.
+
 2020-03-13  Kamil Rytarowski  <n54@gmx.com>
 
 	* elf.c (elfcore_grok_netbsd_note): Add support for
