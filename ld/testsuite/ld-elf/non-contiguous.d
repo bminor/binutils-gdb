@@ -2,8 +2,7 @@
 #source: non-contiguous.s
 #ld: --enable-non-contiguous-regions -T non-contiguous.ld
 #objdump: -rdsh
-#xfail: [is_generic]
-#skip: xtensa*
+#xfail: xtensa*
 
 .*:     file format .*
 

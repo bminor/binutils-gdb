@@ -1,3 +1,8 @@
+2020-03-14  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/non-contiguous.d: Don't xfail generic ELF
+	targets.  Don't skip xtensa, xfail instead.
+
 2020-03-13  Christophe Lyon  <christophe.lyon@linaro.org>
 
 	* ldlang.c (lang_add_section): Add support for
