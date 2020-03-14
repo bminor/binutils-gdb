@@ -45,7 +45,7 @@ static vax_bsd_nat_target the_vax_bsd_nat_target;
 static void
 vaxbsd_supply_gregset (struct regcache *regcache, const void *gregs)
 {
-  const gdb_byte *regs = gregs;
+  const gdb_byte *regs = (const gdb_byte *)gregs;
   int regnum;
 
   for (regnum = 0; regnum < VAX_NUM_REGS; regnum++)
@@ -59,7 +59,7 @@ static void
 vaxbsd_collect_gregset (const struct regcache *regcache,
 			void *gregs, int regnum)
 {
-  gdb_byte *regs = gregs;
+  gdb_byte *regs = (void *)gregs;
   int i;
 
   for (i = 0; i <= VAX_NUM_REGS; i++)

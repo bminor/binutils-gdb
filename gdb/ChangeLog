@@ -1,5 +1,10 @@
 2020-03-14  Kamil Rytarowski  <n54@gmx.com>
 
+	* vax-bsd-nat.c (vaxbsd_supply_gregset): Cast gregs to const gdb_byte *.
+	* vax-bsd-nat.c (vaxbsd_collect_gregset): Cast gregs to void *.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
 	* vax-bsd-nat.c (vax_bsd_nat_target): Inherit from nbsd_nat_target
 	instead of inf_ptrace_target.
 	* vax-bsd-nat.c: Include "nbsd-nat.h", as we are now using
