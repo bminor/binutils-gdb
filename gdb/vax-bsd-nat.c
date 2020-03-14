@@ -78,8 +78,9 @@ vax_bsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct reg regs;
   pid_t pid = regcache->ptid ().pid ();
+  int lwp = regcache->ptid ().lwp ();
 
-  if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+  if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, lwp) == -1)
     perror_with_name (_("Couldn't get registers"));
 
   vaxbsd_supply_gregset (regcache, &regs);
@@ -93,13 +94,14 @@ vax_bsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   struct reg regs;
   pid_t pid = regcache->ptid ().pid ();
+  int lwp = regcache->ptid ().lwp ();
 
-  if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+  if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, lwp) == -1)
     perror_with_name (_("Couldn't get registers"));
 
   vaxbsd_collect_gregset (regcache, &regs, regnum);
 
-  if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+  if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, lwp) == -1)
     perror_with_name (_("Couldn't write registers"));
 }
 
