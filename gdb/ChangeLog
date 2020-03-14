@@ -1,5 +1,11 @@
 2020-03-14  Kamil Rytarowski  <n54@gmx.com>
 
+	* alpha-bsd-nat.c (fetch_registers): New variable lwp and pass
+	it to the ptrace call.
+	* alpha-bsd-nat.c (store_registers): Likewise.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
 	* alpha-bsd-nat.c: Remove <sys/procfs.h> and "gregset.h" from
 	includes.
 	* alpha-bsd-nat.c (gregset_t, fpregset_t): Remove.
