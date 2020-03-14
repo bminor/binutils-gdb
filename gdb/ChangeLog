@@ -1,5 +1,15 @@
 2020-03-17  Kamil Rytarowski  <n54@gmx.com>
 
+	* sparc-nat.c (gdb_ptrace): New.
+	* sparc-nat.c (sparc_fetch_inferior_registers)
+	(sparc_store_inferior_registers) Remove obsolete comment.
+	* sparc-nat.c (sparc_fetch_inferior_registers)
+	(sparc_store_inferior_registers) Switch from pid_t to ptid_t.
+	* sparc-nat.c (sparc_fetch_inferior_registers)
+	(sparc_store_inferior_registers) Use gdb_ptrace.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
 	* sh-nbsd-nat.c (fetch_registers): New variable lwp and pass
 	it to the ptrace call.
 	* sh-nbsd-nat.c (store_registers): Likewise.
