@@ -1,5 +1,13 @@
 2020-03-14  Kamil Rytarowski  <n54@gmx.com>
 
+	* alpha-bsd-nat.c: Remove <sys/procfs.h> and "gregset.h" from
+	includes.
+	* alpha-bsd-nat.c (gregset_t, fpregset_t): Remove.
+	* alpha-bsd-nat.c (supply_gregset, fill_gregset, supply_fpregset,
+	fill_fpregset): Likewise.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
 	* alpha-bsd-nat.c (alpha_netbsd_nat_target): Inherit from
 	nbsd_nat_target instead of inf_ptrace_target.
 	* alpha-bsd-nat.c: Include "nbsd-nat.h", as we are now using

@@ -32,20 +32,6 @@
 #include <sys/ptrace.h>
 #include <machine/reg.h>
 
-#ifdef HAVE_SYS_PROCFS_H
-#include <sys/procfs.h>
-#endif
-
-#ifndef HAVE_GREGSET_T
-typedef struct reg gregset_t;
-#endif
-
-#ifndef HAVE_FPREGSET_T 
-typedef struct fpreg fpregset_t; 
-#endif 
-
-#include "gregset.h"
-
 struct alpha_bsd_nat_target final : public nbsd_nat_target
 {
   void fetch_registers (struct regcache *, int) override;
@@ -54,34 +40,6 @@ struct alpha_bsd_nat_target final : public nbsd_nat_target
 
 static alpha_bsd_nat_target the_alpha_bsd_nat_target;
 
-/* Provide *regset() wrappers around the generic Alpha BSD register
-   supply/fill routines.  */
-
-void
-supply_gregset (struct regcache *regcache, const gregset_t *gregsetp)
-{
-  alphabsd_supply_reg (regcache, (const char *) gregsetp, -1);
-}
-
-void
-fill_gregset (const struct regcache *regcache, gregset_t *gregsetp, int regno)
-{
-  alphabsd_fill_reg (regcache, (char *) gregsetp, regno);
-}
-
-void
-supply_fpregset (struct regcache *regcache, const fpregset_t *fpregsetp)
-{
-  alphabsd_supply_fpreg (regcache, (const char *) fpregsetp, -1);
-}
-
-void
-fill_fpregset (const struct regcache *regcache,
-	       fpregset_t *fpregsetp, int regno)
-{
-  alphabsd_fill_fpreg (regcache, (char *) fpregsetp, regno);
-}
-
 /* Determine if PT_GETREGS fetches this register.  */
 
 static int
