@@ -520,7 +520,7 @@ proc test_print_strings {} {
 	" = (.unsigned char .. )?\"teststring contents\"" "p teststring with elements set to 20"
 
     gdb_test "print teststring2" \
-	" = (charptr) \"more contents\""
+	" = \\(charptr\\) \"more contents\""
 
     gdb_test_no_output "set print elements 8"
 

@@ -1,3 +1,8 @@
+2020-03-14  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/printcmds.exp: Add missing quoting for "print
+	teststring2".
+
 2020-03-13  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/printcmds.exp (test_print_strings): Add regression
