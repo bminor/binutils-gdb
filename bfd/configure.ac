@@ -842,7 +842,7 @@ if test "${target}" = "${host}"; then
 	;;
   arm-*-freebsd* | arm-*-kfreebsd*-gnu)
 	COREFILE='' ;;
-  arm-*-netbsd* | arm-*-openbsd*)
+  arm*-*-netbsd* | arm-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
   arm-*-riscix)		COREFILE=trad-core.lo ;;
@@ -927,7 +927,7 @@ changequote(,)dnl
   i[3-7]86-*-isc*)	COREFILE=trad-core.lo ;;
   i[3-7]86-*-aix*)	COREFILE=aix386-core.lo ;;
 changequote([,])dnl
-  mips-*-netbsd* | mips*-*-openbsd*)
+  mips*-*-netbsd* | mips*-*-openbsd*)
 	COREFILE=netbsd-core.lo
 	;;
   mips-sgi-irix4*)	COREFILE=irix-core.lo ;;

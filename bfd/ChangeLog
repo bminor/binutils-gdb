@@ -1,3 +1,9 @@
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
+	* configure.ac: Include netbsd-core.lo for all NetBSD arm and mips
+	targets.
+	* configure: Regenerated.
+
 2020-03-14  Alan Modra  <amodra@gmail.com>
 
 	* section.c (BFD_FAKE_SECTIONS): Formatting.
