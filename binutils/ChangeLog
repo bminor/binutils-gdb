@@ -1,3 +1,9 @@
+2020-03-14  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (dump_section_as_strings): Free memory on error exit.
+	(dump_section_as_bytes, process_notes_at): Likewise.
+	(get_build_id): Free enote.
+
 2020-03-13  Kamil Rytarowski  <n54@gmx.com>
 
 	* readelf.c (get_netbsd_elfcore_note_type): Add support for
