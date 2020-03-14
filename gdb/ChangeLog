@@ -1,5 +1,10 @@
 2020-03-14  Kamil Rytarowski  <n54@gmx.com>
 
+	* alpha-bsd-nat.c: Define _KERNTYPES to get the declaration of
+	register_t.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
 	* arm-nbsd-nat.c (fetch_register): New variable lwp and pass
 	it to the ptrace call.
 	* arm-nbsd-nat.c (fetch_fp_register): Likewise.
