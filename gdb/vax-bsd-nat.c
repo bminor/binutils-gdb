@@ -30,8 +30,9 @@
 
 #include "vax-tdep.h"
 #include "inf-ptrace.h"
+#include "nbsd-nat.h"
 
-struct vax_bsd_nat_target final : public inf_ptrace_target
+struct vax_bsd_nat_target final : public nbsd_nat_target
 {
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;

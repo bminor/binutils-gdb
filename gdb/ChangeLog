@@ -1,5 +1,12 @@
 2020-03-14  Kamil Rytarowski  <n54@gmx.com>
 
+	* vax-bsd-nat.c (vax_bsd_nat_target): Inherit from nbsd_nat_target
+	instead of inf_ptrace_target.
+	* vax-bsd-nat.c: Include "nbsd-nat.h", as we are now using
+	nbsd_nat_target.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
 	* mips-nbsd-nat.c: Define _KERNTYPES to get the declaration of
 	register_t.
 
