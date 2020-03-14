@@ -1,5 +1,13 @@
 2020-03-17  Kamil Rytarowski  <n54@gmx.com>
 
+	* amd64-bsd-nat.c (gdb_ptrace): New.
+	* (amd64bsd_fetch_inferior_registers,
+	amd64bsd_store_inferior_registers) Switch from pid_t to ptid_t.
+	* (amd64bsd_fetch_inferior_registers,
+	amd64bsd_store_inferior_registers) Use gdb_ptrace.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
 	* user-regs.c (user_reg::read): Rename to...
 	(user_reg::xread): ...this.
 	* (append_user_reg): Rename argument `read' to `xread'.
