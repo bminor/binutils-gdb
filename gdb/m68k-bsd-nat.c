@@ -121,12 +121,13 @@ void
 m68k_bsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   pid_t pid = regcache->ptid ().pid ();
+  int lwp = regcache->ptid ().lwp ();
 
   if (regnum == -1 || m68kbsd_gregset_supplies_p (regnum))
     {
       struct reg regs;
 
-      if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+      if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, lwp) == -1)
 	perror_with_name (_("Couldn't get registers"));
 
       m68kbsd_supply_gregset (regcache, &regs);
@@ -136,7 +137,7 @@ m68k_bsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
     {
       struct fpreg fpregs;
 
-      if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
+      if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, lwp) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
       m68kbsd_supply_fpregset (regcache, &fpregs);
@@ -150,17 +151,18 @@ void
 m68k_bsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   pid_t pid = regcache->ptid ().pid ();
+  int lwp = regcache->ptid ().lwp ();
 
   if (regnum == -1 || m68kbsd_gregset_supplies_p (regnum))
     {
       struct reg regs;
 
-      if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+      if (ptrace (PT_GETREGS, pid, (PTRACE_TYPE_ARG3) &regs, lwp) == -1)
         perror_with_name (_("Couldn't get registers"));
 
       m68kbsd_collect_gregset (regcache, &regs, regnum);
 
-      if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, 0) == -1)
+      if (ptrace (PT_SETREGS, pid, (PTRACE_TYPE_ARG3) &regs, lwp) == -1)
         perror_with_name (_("Couldn't write registers"));
     }
 
@@ -168,12 +170,12 @@ m68k_bsd_nat_target::store_registers (struct regcache *regcache, int regnum)
     {
       struct fpreg fpregs;
 
-      if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
+      if (ptrace (PT_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, lwp) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
       m68kbsd_collect_fpregset (regcache, &fpregs, regnum);
 
-      if (ptrace (PT_SETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
+      if (ptrace (PT_SETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, lwp) == -1)
 	perror_with_name (_("Couldn't write floating point status"));
     }
 }
