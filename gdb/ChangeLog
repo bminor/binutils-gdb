@@ -1,5 +1,12 @@
 2020-03-14  Kamil Rytarowski  <n54@gmx.com>
 
+	* arm-nbsd-nat.c (arm_netbsd_nat_target): Inherit from
+	nbsd_nat_target instead of inf_ptrace_target.
+	* arm-nbsd-nat.c: Include "nbsd-nat.h", as we are now using
+	nbsd_nat_target.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
 	* x86-bsd-nat.c (x86bsd_dr_get): New variable lwp and pass
 	it to the ptrace call.
 	* x86-bsd-nat.c (x86bsd_dr_set): Likewise.
