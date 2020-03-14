@@ -26,6 +26,7 @@
 #include "alpha-tdep.h"
 #include "alpha-bsd-tdep.h"
 #include "inf-ptrace.h"
+#include "nbsd-nat.h"
 
 #include <sys/types.h>
 #include <sys/ptrace.h>
@@ -45,7 +46,7 @@ typedef struct fpreg fpregset_t;
 
 #include "gregset.h"
 
-struct alpha_bsd_nat_target final : public inf_ptrace_target
+struct alpha_bsd_nat_target final : public nbsd_nat_target
 {
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;

@@ -1,5 +1,12 @@
 2020-03-14  Kamil Rytarowski  <n54@gmx.com>
 
+	* alpha-bsd-nat.c (alpha_netbsd_nat_target): Inherit from
+	nbsd_nat_target instead of inf_ptrace_target.
+	* alpha-bsd-nat.c: Include "nbsd-nat.h", as we are now using
+	nbsd_nat_target.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
 	* alpha-bsd-nat.c: Define _KERNTYPES to get the declaration of
 	register_t.
 
