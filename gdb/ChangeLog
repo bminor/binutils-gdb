@@ -1,5 +1,16 @@
 2020-03-14  Kamil Rytarowski  <n54@gmx.com>
 
+	* arm-nbsd-nat.c (fetch_register): New variable lwp and pass
+	it to the ptrace call.
+	* arm-nbsd-nat.c (fetch_fp_register): Likewise.
+	* arm-nbsd-nat.c (fetch_fp_regs): Likewise.
+	* arm-nbsd-nat.c (store_register): Likewise.
+	* arm-nbsd-nat.c (store_regs): Likewise.
+	* arm-nbsd-nat.c (store_fp_register): Likewise.
+	* arm-nbsd-nat.c (store_fp_regs): Likewise.
+
+2020-03-14  Kamil Rytarowski  <n54@gmx.com>
+
 	* arm-nbsd-nat.c (arm_netbsd_nat_target): Inherit from
 	nbsd_nat_target instead of inf_ptrace_target.
 	* arm-nbsd-nat.c: Include "nbsd-nat.h", as we are now using

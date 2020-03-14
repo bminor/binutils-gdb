@@ -66,9 +66,10 @@ fetch_register (struct regcache *regcache, int regno)
 {
   struct reg inferior_registers;
   int ret;
+  int lwp = regcache->ptid ().lwp ();
 
   ret = ptrace (PT_GETREGS, regcache->ptid ().pid (),
-		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
+		(PTRACE_TYPE_ARG3) &inferior_registers, lwp);
 
   if (ret < 0)
     {
@@ -83,8 +84,10 @@ static void
 fetch_fp_register (struct regcache *regcache, int regno)
 {
   struct fpreg inferior_fp_registers;
+  int lwp = regcache->ptid ().lwp ();
+
   int ret = ptrace (PT_GETFPREGS, regcache->ptid ().pid (),
-		    (PTRACE_TYPE_ARG3) &inferior_fp_registers, 0);
+		    (PTRACE_TYPE_ARG3) &inferior_fp_registers, lwp);
 
   struct vfpreg &vfp = inferior_fp_registers.fpr_vfp;
 
@@ -111,11 +114,12 @@ static void
 fetch_fp_regs (struct regcache *regcache)
 {
   struct fpreg inferior_fp_registers;
+  int lwp = regcache->ptid ().lwp ();
   int ret;
   int regno;
 
   ret = ptrace (PT_GETFPREGS, regcache->ptid ().pid (),
-		(PTRACE_TYPE_ARG3) &inferior_fp_registers, 0);
+		(PTRACE_TYPE_ARG3) &inferior_fp_registers, lwp);
 
   if (ret < 0)
     {
@@ -149,10 +153,11 @@ store_register (const struct regcache *regcache, int regno)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct reg inferior_registers;
+  int lwp = regcache->ptid ().lwp ();
   int ret;
 
   ret = ptrace (PT_GETREGS, regcache->ptid ().pid (),
-		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
+		(PTRACE_TYPE_ARG3) &inferior_registers, lwp);
 
   if (ret < 0)
     {
@@ -210,7 +215,7 @@ store_register (const struct regcache *regcache, int regno)
     }
 
   ret = ptrace (PT_SETREGS, regcache->ptid ().pid (),
-		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
+		(PTRACE_TYPE_ARG3) &inferior_registers, lwp);
 
   if (ret < 0)
     warning (_("unable to write register %d to inferior"), regno);
@@ -221,6 +226,7 @@ store_regs (const struct regcache *regcache)
 {
   struct gdbarch *gdbarch = regcache->arch ();
   struct reg inferior_registers;
+  int lwp = regcache->ptid ().lwp ();
   int ret;
   int regno;
 
@@ -252,7 +258,7 @@ store_regs (const struct regcache *regcache)
     }
 
   ret = ptrace (PT_SETREGS, regcache->ptid ().pid (),
-		(PTRACE_TYPE_ARG3) &inferior_registers, 0);
+		(PTRACE_TYPE_ARG3) &inferior_registers, lwp);
 
   if (ret < 0)
     warning (_("unable to store general registers"));
@@ -262,8 +268,9 @@ static void
 store_fp_register (const struct regcache *regcache, int regno)
 {
   struct fpreg inferior_fp_registers;
+  int lwp = regcache->ptid ().lwp ();
   int ret = ptrace (PT_GETFPREGS, regcache->ptid ().pid (),
-		    (PTRACE_TYPE_ARG3) &inferior_fp_registers, 0);
+		    (PTRACE_TYPE_ARG3) &inferior_fp_registers, lwp);
   struct vfpreg &vfp = inferior_fp_registers.fpr_vfp;
 
   if (ret < 0)
@@ -285,7 +292,7 @@ store_fp_register (const struct regcache *regcache, int regno)
     warning (_("Invalid register number."));
 
   ret = ptrace (PT_SETFPREGS, regcache->ptid ().pid (),
-		(PTRACE_TYPE_ARG3) &inferior_fp_registers, 0);
+		(PTRACE_TYPE_ARG3) &inferior_fp_registers, lwp);
 
   if (ret < 0)
     warning (_("unable to write register %d to inferior"), regno);
@@ -295,6 +302,7 @@ static void
 store_fp_regs (const struct regcache *regcache)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  int lwp = regcache->ptid ().lwp ();
   if (tdep->vfp_register_count == 0)
     return;
 
@@ -307,7 +315,7 @@ store_fp_regs (const struct regcache *regcache)
 			 (char *) &fpregs.fpr_vfp.vfp_fpscr);
 
   int ret = ptrace (PT_SETFPREGS, regcache->ptid ().pid (),
-		    (PTRACE_TYPE_ARG3) &fpregs, 0);
+		    (PTRACE_TYPE_ARG3) &fpregs, lwp);
 
   if (ret < 0)
     warning (_("unable to store floating-point registers"));
