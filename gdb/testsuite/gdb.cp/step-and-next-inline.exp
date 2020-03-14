@@ -15,6 +15,10 @@
 
 standard_testfile .cc
 
+if { ![supports_statement_frontiers] } {
+    return -1
+}
+
 # Compile the test source with USE_NEXT_INLINE_H defined (when
 # use_header is true), or not defined.
 proc do_test { use_header } {

@@ -1,5 +1,10 @@
 2020-03-14  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (supports_statement_frontiers): New proc.
+	* gdb.cp/step-and-next-inline.exp: Use supports_statement_frontiers.
+
+2020-03-14  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/printcmds.exp: Add missing quoting for "print
 	teststring2".
 

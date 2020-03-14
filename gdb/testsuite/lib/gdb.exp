@@ -6947,5 +6947,16 @@ gdb_caching_proc skip_ctf_tests {
     } executable "additional_flags=-gt"]
 }
 
+# Return 1 if compiler supports -gstatement-frontiers.  Otherwise,
+# return 0.
+
+gdb_caching_proc supports_statement_frontiers {
+    return [gdb_can_simple_compile supports_statement_frontiers {
+	int main () {
+	    return 0;
+	}
+    } executable "additional_flags=-gstatement-frontiers"]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
