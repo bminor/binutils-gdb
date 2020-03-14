@@ -1,5 +1,9 @@
 2020-03-14  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.mi/mi-fortran-modules.exp: Use exp_continue.
+
+2020-03-14  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.threads/attach-many-short-lived-threads.exp: Read "info threads"
 	result in line-by-line fashion.
 
