@@ -1,3 +1,8 @@
+2020-03-15  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/maint.exp: Use exp_continue in long lines for "maint print
+	objfiles".
+
 2020-03-14  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/cvexpr.exp: Add test for _Atomic and restrict.

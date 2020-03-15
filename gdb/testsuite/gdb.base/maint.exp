@@ -215,7 +215,7 @@ gdb_expect  {
 # There aren't any ...
 gdb_test_no_output "maint print dummy-frames"
 
-send_gdb "maint print objfiles\n"
+
 
 # To avoid timeouts, we avoid expects with many .* patterns that match
 # many lines.  Instead, we keep track of which milestones we've seen
@@ -224,31 +224,24 @@ send_gdb "maint print objfiles\n"
 set header 0
 set psymtabs 0
 set symtabs 0
-set keep_looking 1
-
-while {$keep_looking} {
-    gdb_expect  {
-
-	-re "\r\n" {
-	    set output $expect_out(buffer)
-	    if {[regexp ".*Object file.*maint($EXEEXT)?:  Objfile at ${hex}" $output]} {
-		set header 1
-	    }
-	    if {[regexp ".*Psymtabs:\[\r\t \]+\n" $output]} {
-		set psymtabs 1
-	    }
-	    if {[regexp ".*Symtabs:\[\r\t \]+\n" $output]} {
-		set symtabs 1
-	    }
-	}
-
-	-re ".*$gdb_prompt $" { 
-	    set keep_looking 0
-	}
-	timeout { 
-	    fail "(timeout) maint print objfiles" 
-	    set keep_looking 0
-	}
+gdb_test_multiple "maint print objfiles" "" -lbl {
+    -re "\r\nObject file.*maint($EXEEXT)?:  Objfile at ${hex}" {
+	set header 1
+	exp_continue
+    }
+    -re "\r\nPsymtabs:\[\r\t \]+" {
+	set psymtabs 1
+	exp_continue
+    }
+    -re "\r\nSymtabs:\[\r\t \]+\n" {
+	set symtabs 1
+	exp_continue
+    }
+    -re " at $hex," {
+	exp_continue
+    }
+    -re -wrap "" {
+	pass $gdb_test_name
     }
 }
 
