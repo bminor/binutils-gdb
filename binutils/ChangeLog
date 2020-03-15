@@ -1,3 +1,9 @@
+2020-03-16  Alan Modra  <amodra@gmail.com>
+
+	* unwind-ia64.c (unw_decode_uleb128): Prevent overlarge shifts.
+	Detect shift overflows and check that terminating byte is found.
+	Print an error on a bad uleb128.
+
 2020-03-14  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_file): Clean ba_cache.
