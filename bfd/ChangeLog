@@ -1,3 +1,11 @@
+2020-03-16  Alan Modra  <amodra@gmail.com>
+
+	* vms-alpha.c (dst_restore_location): Validate index into
+	dst_ptr_offsets array before accessing.  Return status.
+	(dst_retrieve_location): Similarly, making "loc" parameter a
+	pointer to return value.
+	(_bfd_vms_slurp_etir): Update calls to above functions.
+
 2020-03-14  Kamil Rytarowski  <n54@gmx.com>
 
 	* configure.ac: Include netbsd-core.lo for all NetBSD arm and mips

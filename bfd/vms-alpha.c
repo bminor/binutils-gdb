@@ -1570,22 +1570,32 @@ dst_define_location (bfd *abfd, unsigned int loc)
 
 /* Restore saved DST location counter from specified index.  */
 
-static void
+static bfd_boolean
 dst_restore_location (bfd *abfd, unsigned int loc)
 {
   vms_debug2 ((4, "dst_restore_location (%d)\n", (int)loc));
 
-  PRIV (image_offset) = PRIV (dst_ptr_offsets)[loc];
+  if (loc < PRIV (dst_ptr_offsets_count))
+    {
+      PRIV (image_offset) = PRIV (dst_ptr_offsets)[loc];
+      return TRUE;
+    }
+  return FALSE;
 }
 
 /* Retrieve saved DST location counter from specified index.  */
 
-static unsigned int
-dst_retrieve_location (bfd *abfd, unsigned int loc)
+static bfd_boolean
+dst_retrieve_location (bfd *abfd, bfd_vma *loc)
 {
-  vms_debug2 ((4, "dst_retrieve_location (%d)\n", (int)loc));
+  vms_debug2 ((4, "dst_retrieve_location (%d)\n", (int) *loc));
 
-  return PRIV (dst_ptr_offsets)[loc];
+  if (*loc < PRIV (dst_ptr_offsets_count))
+    {
+      *loc = PRIV (dst_ptr_offsets)[*loc];
+      return TRUE;
+    }
+  return FALSE;
 }
 
 /* Write multiple bytes to section image.  */
@@ -2326,7 +2336,12 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
-	  dst_restore_location (abfd, op1);
+	  if (!dst_restore_location (abfd, op1))
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      _bfd_error_handler (_("invalid %s"), "ETIR__C_CTL_STLOC");
+	      return FALSE;
+	    }
 	  break;
 
 	  /* Stack defined location: pop index, push location counter from index
@@ -2336,8 +2351,13 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
-	  if (!_bfd_vms_push (abfd, dst_retrieve_location (abfd, op1),
-			      RELC_NONE))
+	  if (!dst_retrieve_location (abfd, &op1))
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      _bfd_error_handler (_("invalid %s"), "ETIR__C_CTL_STKDL");
+	      return FALSE;
+	    }
+	  if (!_bfd_vms_push (abfd, op1, RELC_NONE))
 	    return FALSE;
 	  break;
 
