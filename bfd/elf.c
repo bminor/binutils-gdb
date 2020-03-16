@@ -5312,19 +5312,25 @@ elf_sort_segments (const void *arg1, const void *arg2)
     return m1->no_sort_lma ? -1 : 1;
   if (m1->p_type == PT_LOAD && !m1->no_sort_lma)
     {
-      unsigned int opb = bfd_octets_per_byte (m1->sections[0]->owner,
-					      m1->sections[0]);
-      bfd_vma lma1, lma2;  /* Bytes.  */
+      bfd_vma lma1, lma2;  /* Octets.  */
       lma1 = 0;
       if (m1->p_paddr_valid)
-	lma1 = m1->p_paddr / opb;
+	lma1 = m1->p_paddr;
       else if (m1->count != 0)
-	lma1 = m1->sections[0]->lma + m1->p_vaddr_offset;
+	{
+	  unsigned int opb = bfd_octets_per_byte (m1->sections[0]->owner,
+						  m1->sections[0]);
+	  lma1 = (m1->sections[0]->lma + m1->p_vaddr_offset) * opb;
+	}
       lma2 = 0;
       if (m2->p_paddr_valid)
-	lma2 = m2->p_paddr / opb;
+	lma2 = m2->p_paddr;
       else if (m2->count != 0)
-	lma2 = m2->sections[0]->lma + m2->p_vaddr_offset;
+	{
+	  unsigned int opb = bfd_octets_per_byte (m2->sections[0]->owner,
+						  m2->sections[0]);
+	  lma2 = (m2->sections[0]->lma + m2->p_vaddr_offset) * opb;
+	}
       if (lma1 != lma2)
 	return lma1 < lma2 ? -1 : 1;
     }

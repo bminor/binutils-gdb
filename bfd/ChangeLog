@@ -1,5 +1,11 @@
 2020-03-16  Alan Modra  <amodra@gmail.com>
 
+	PR 25675
+	* elf.c (elf_sort_segments): Don't call bfd_octets_per_byte unless
+	we have a non-zero section count.  Do lma comparison in octets.
+
+2020-03-16  Alan Modra  <amodra@gmail.com>
+
 	* vms-alpha.c (dst_restore_location): Validate index into
 	dst_ptr_offsets array before accessing.  Return status.
 	(dst_retrieve_location): Similarly, making "loc" parameter a
