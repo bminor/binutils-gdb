@@ -1,5 +1,10 @@
 2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	* i386-windows-tdep.c: Mass-rename "cygwin" to "windows", except
+	i386_cygwin_core_osabi_sniffer.
+
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* i386-cygwin-tdep.c: Rename to...
 	* i386-windows-tdep.c: ... this.
 	* Makefile.in (ALL_TARGET_OBS): Rename i386-cygwin-tdep.c to
