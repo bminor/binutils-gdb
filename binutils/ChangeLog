@@ -1,5 +1,11 @@
 2020-03-16  Alan Modra  <amodra@gmail.com>
 
+	* readelf.c (get_symbols): New function.
+	(process_relocs, ia64_process_unwind, hppa_process_unwind),
+	(arm_process_unwind, get_symbol_for_build_attribute): Use it.
+
+2020-03-16  Alan Modra  <amodra@gmail.com>
+
 	* unwind-ia64.c (unw_decode_uleb128): Prevent overlarge shifts.
 	Detect shift overflows and check that terminating byte is found.
 	Print an error on a bad uleb128.
