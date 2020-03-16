@@ -1,8 +1,7 @@
 #source: x86-64-lfence-ret.s
-#as: -mlfence-before-ret=or
+#as: -mlfence-before-ret=or -mlfence-before-indirect-branch=all
 #warning_output: x86-64-lfence-ret.e
 #objdump: -dw -Mintel64
-#name: x86-64 -mlfence-before-ret=or
 
 .*: +file format .*
 

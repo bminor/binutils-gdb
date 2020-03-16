@@ -1,3 +1,39 @@
+2020-04-26  Hongtao Liu  <hongtao.liu@intel.com
+
+	* config/tc-i386.c (lfence_before_ret_shl): New member.
+	(load_insn_p): implict load for POP/POPA/POPF/XLATB, no load
+	for Anysize insns.
+	(insert_after_load): Issue warning for REP CMPS/SCAS.
+	(insert_before_before): Handle iret, Handle
+	-mlfence-before-ret=shl, Adjust operand size of or/not/shl to ret's,
+	(md_parse_option): Change -mlfence-before-ret=[none|not|or] to
+	-mlfence-before-ret=[none/not/or/shl/yes].
+	Enable -mlfence-before-ret=shl when
+	-mlfence-beofre-indirect-branch=all and no explict -mlfence-before-ret option.
+	(md_show_usage): Ditto.
+	* doc/c-i386.texi: Ditto.
+	* testsuite/gas/i386/i386.exp: Add new testcases.
+	* testsuite/gas/i386/lfence-load-b.d: New.
+	* testsuite/gas/i386/lfence-load-b.e: New.
+	* testsuite/gas/i386/lfence-load.d: Modified.
+	* testsuite/gas/i386/lfence-load.e: New.
+	* testsuite/gas/i386/lfence-load.s: Modified.
+	* testsuite/gas/i386/lfence-ret-a.d: Modified.
+	* testsuite/gas/i386/lfence-ret-b.d: Modified.
+	* testsuite/gas/i386/lfence-ret-c.d: New.
+	* testsuite/gas/i386/lfence-ret-d.d: New.
+	* testsuite/gas/i386/lfence-ret.s: Modified.
+	* testsuite/gas/i386/x86-64-lfence-load-b.d: New.
+	* testsuite/gas/i386/x86-64-lfence-load.d: Modified.
+	* testsuite/gas/i386/x86-64-lfence-load.s: Modified.
+	* testsuite/gas/i386/x86-64-lfence-ret-a.d: Modified.
+	* testsuite/gas/i386/x86-64-lfence-ret-b.d: Modified.
+	* testsuite/gas/i386/x86-64-lfence-ret-c.d: New.
+	* testsuite/gas/i386/x86-64-lfence-ret-d.d: New
+	* testsuite/gas/i386/x86-64-lfence-ret-e.d: New.
+	* testsuite/gas/i386/x86-64-lfence-ret.e: New.
+	* testsuite/gas/i386/x86-64-lfence-ret.s: New.
+
 2020-04-22  Max Filippov  <jcmvbkbc@gmail.com>
 
 	PR ld/25861

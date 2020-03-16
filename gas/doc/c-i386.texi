@@ -488,6 +488,8 @@ before indirect near branch instructions.
 @option{-mlfence-before-indirect-branch=@var{all}} will generate lfence
 before indirect near branch via register and issue a warning before
 indirect near branch via memory.
+It also implicitly sets @option{-mlfence-before-ret=@var{shl}} when
+there's no explict @option{-mlfence-before-ret=}.
 @option{-mlfence-before-indirect-branch=@var{register}} will generate
 lfence before indirect near branch via register.
 @option{-mlfence-before-indirect-branch=@var{memory}} will issue a
@@ -501,15 +503,17 @@ after loading branch target register.
 @cindex @samp{-mlfence-before-ret=} option, i386
 @cindex @samp{-mlfence-before-ret=} option, x86-64
 @item -mlfence-before-ret=@var{none}
+@item -mlfence-before-ret=@var{shl}
 @item -mlfence-before-ret=@var{or}
+@item -mlfence-before-ret=@var{yes}
 @itemx -mlfence-before-ret=@var{not}
 These options control whether the assembler should generate lfence
 before ret.  @option{-mlfence-before-ret=@var{or}} will generate
 generate or instruction with lfence.
-@option{-mlfence-before-ret=@var{not}} will generate not instruction
-with lfence.
-@option{-mlfence-before-ret=@var{none}} will not generate lfence,
-which is the default.
+@option{-mlfence-before-ret=@var{shl/yes}} will generate shl instruction
+with lfence. @option{-mlfence-before-ret=@var{not}} will generate not
+instruction with lfence. @option{-mlfence-before-ret=@var{none}} will not
+generate lfence, which is the default.
 
 @cindex @samp{-mx86-used-note=} option, i386
 @cindex @samp{-mx86-used-note=} option, x86-64

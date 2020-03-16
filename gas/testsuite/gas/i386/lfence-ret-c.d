@@ -1,7 +1,6 @@
 #source: lfence-ret.s
-#as: -mlfence-before-ret=or
+#as: -mlfence-before-ret=or -mlfence-before-indirect-branch=all
 #objdump: -dw
-#name: -mlfence-before-ret=or
 
 .*: +file format .*
 

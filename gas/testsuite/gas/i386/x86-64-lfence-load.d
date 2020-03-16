@@ -1,5 +1,6 @@
 #as: -mlfence-after-load=yes
 #objdump: -dw
+#warning_output: lfence-load.e
 #name: x86-64 -mlfence-after-load=yes
 
 .*: +file format .*
@@ -15,6 +16,29 @@ Disassembly of section .text:
  +[a-f0-9]+:	0f c7 75 00          	vmptrld 0x0\(%rbp\)
  +[a-f0-9]+:	0f ae e8             	lfence 
  +[a-f0-9]+:	66 0f c7 75 00       	vmclear 0x0\(%rbp\)
+ +[a-f0-9]+:	66 0f 38 82 55 00    	invpcid 0x0\(%rbp\),%rdx
+ +[a-f0-9]+:	0f ae e8             	lfence 
+ +[a-f0-9]+:	67 0f 01 38          	invlpg \(%eax\)
+ +[a-f0-9]+:	0f ae 7d 00          	clflush 0x0\(%rbp\)
+ +[a-f0-9]+:	66 0f ae 7d 00       	clflushopt 0x0\(%rbp\)
+ +[a-f0-9]+:	66 0f ae 75 00       	clwb   0x0\(%rbp\)
+ +[a-f0-9]+:	0f 1c 45 00          	cldemote 0x0\(%rbp\)
+ +[a-f0-9]+:	f3 0f 1b 4d 00       	bndmk  0x0\(%rbp\),%bnd1
+ +[a-f0-9]+:	f3 0f 1a 4d 00       	bndcl  0x0\(%rbp\),%bnd1
+ +[a-f0-9]+:	f2 0f 1a 4d 00       	bndcu  0x0\(%rbp\),%bnd1
+ +[a-f0-9]+:	f2 0f 1b 4d 00       	bndcn  0x0\(%rbp\),%bnd1
+ +[a-f0-9]+:	0f 1b 4d 00          	bndstx %bnd1,0x0\(%rbp\)
+ +[a-f0-9]+:	0f 1a 4d 00          	bndldx 0x0\(%rbp\),%bnd1
+ +[a-f0-9]+:	0f 18 4d 00          	prefetcht0 0x0\(%rbp\)
+ +[a-f0-9]+:	0f 18 55 00          	prefetcht1 0x0\(%rbp\)
+ +[a-f0-9]+:	0f 18 5d 00          	prefetcht2 0x0\(%rbp\)
+ +[a-f0-9]+:	0f 0d 4d 00          	prefetchw 0x0\(%rbp\)
+ +[a-f0-9]+:	0f a1                	popq   %fs
+ +[a-f0-9]+:	0f ae e8             	lfence 
+ +[a-f0-9]+:	9d                   	popfq  
+ +[a-f0-9]+:	0f ae e8             	lfence 
+ +[a-f0-9]+:	d7                   	xlat   %ds:\(%rbx\)
+ +[a-f0-9]+:	0f ae e8             	lfence 
  +[a-f0-9]+:	d9 55 00             	fsts   0x0\(%rbp\)
  +[a-f0-9]+:	d9 45 00             	flds   0x0\(%rbp\)
  +[a-f0-9]+:	0f ae e8             	lfence 

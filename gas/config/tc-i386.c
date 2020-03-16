@@ -647,7 +647,8 @@ static enum lfence_before_ret_kind
   {
     lfence_before_ret_none = 0,
     lfence_before_ret_not,
-    lfence_before_ret_or
+    lfence_before_ret_or,
+    lfence_before_ret_shl
   }
 lfence_before_ret;
 
@@ -4350,22 +4351,28 @@ load_insn_p (void)
 
   if (!any_vex_p)
     {
-      /* lea  */
-      if (i.tm.base_opcode == 0x8d)
+      /* Anysize insns: lea, invlpg, clflush, prefetchnta, prefetcht0,
+	 prefetcht1, prefetcht2, prefetchtw, bndmk, bndcl, bndcu, bndcn,
+	 bndstx, bndldx, prefetchwt1, clflushopt, clwb, cldemote.  */
+      if (i.tm.opcode_modifier.anysize)
 	return 0;
 
-      /* pop  */
-      if ((i.tm.base_opcode & ~7) == 0x58
-	  || (i.tm.base_opcode == 0x8f && i.tm.extension_opcode == 0))
+      /* pop, popf, popa.   */
+      if (strcmp (i.tm.name, "pop") == 0
+	  || i.tm.base_opcode == 0x9d
+	  || i.tm.base_opcode == 0x61)
 	return 1;
 
       /* movs, cmps, lods, scas.  */
       if ((i.tm.base_opcode | 0xb) == 0xaf)
 	return 1;
 
-      /* outs */
-      if (base_opcode == 0x6f)
+      /* outs, xlatb.  */
+      if (base_opcode == 0x6f
+	  || i.tm.base_opcode == 0xd7)
 	return 1;
+      /* NB: For AMD-specific insns with implicit memory operands,
+	 they're intentionally not covered.  */
     }
 
   /* No memory operand.  */
@@ -4506,6 +4513,22 @@ insert_lfence_after (void)
 {
   if (lfence_after_load && load_insn_p ())
     {
+      /* There are also two REP string instructions that require
+	 special treatment. Specifically, the compare string (CMPS)
+	 and scan string (SCAS) instructions set EFLAGS in a manner
+	 that depends on the data being compared/scanned. When used
+	 with a REP prefix, the number of iterations may therefore
+	 vary depending on this data. If the data is a program secret
+	 chosen by the adversary using an LVI method,
+	 then this data-dependent behavior may leak some aspect
+	 of the secret.  */
+      if (((i.tm.base_opcode | 0x1) == 0xa7
+	   || (i.tm.base_opcode | 0x1) == 0xaf)
+	  && i.prefix[REP_PREFIX])
+	{
+	    as_warn (_("`%s` changes flags which would affect control flow behavior"),
+		     i.tm.name);
+	}
       char *p = frag_more (3);
       *p++ = 0xf;
       *p++ = 0xae;
@@ -4568,12 +4591,13 @@ insert_lfence_before (void)
       return;
     }
 
-  /* Output or/not and lfence before ret.  */
+  /* Output or/not/shl and lfence before ret/lret/iret.  */
   if (lfence_before_ret != lfence_before_ret_none
       && (i.tm.base_opcode == 0xc2
 	  || i.tm.base_opcode == 0xc3
 	  || i.tm.base_opcode == 0xca
-	  || i.tm.base_opcode == 0xcb))
+	  || i.tm.base_opcode == 0xcb
+	  || i.tm.base_opcode == 0xcf))
     {
       if (last_insn.kind != last_insn_other
 	  && last_insn.seg == now_seg)
@@ -4583,33 +4607,59 @@ insert_lfence_before (void)
 			 last_insn.name, i.tm.name);
 	  return;
 	}
-      if (lfence_before_ret == lfence_before_ret_or)
+
+      /* lret or iret.  */
+      bfd_boolean lret = (i.tm.base_opcode | 0x5) == 0xcf;
+      bfd_boolean has_rexw = i.prefix[REX_PREFIX] & REX_W;
+      char prefix = 0x0;
+      /* Default operand size for far return is 32 bits,
+	 64 bits for near return.  */
+      /* Near ret ingore operand size override under CPU64.  */
+      if ((!lret && flag_code == CODE_64BIT) || has_rexw)
+	prefix = 0x48;
+      else if (i.prefix[DATA_PREFIX])
+	prefix = 0x66;
+
+      if (lfence_before_ret == lfence_before_ret_not)
 	{
-	  /* orl: 0x830c2400.  */
-	  p = frag_more ((flag_code == CODE_64BIT ? 1 : 0) + 4 + 3);
-	  if (flag_code == CODE_64BIT)
-	    *p++ = 0x48;
-	  *p++ = 0x83;
-	  *p++ = 0xc;
+	  /* not: 0xf71424, may add prefix
+	     for operand size override or 64-bit code.  */
+	  p = frag_more ((prefix ? 2 : 0) + 6 + 3);
+	  if (prefix)
+	    *p++ = prefix;
+	  *p++ = 0xf7;
+	  *p++ = 0x14;
 	  *p++ = 0x24;
-	  *p++ = 0x0;
+	  if (prefix)
+	    *p++ = prefix;
+	  *p++ = 0xf7;
+	  *p++ = 0x14;
+	  *p++ = 0x24;
 	}
       else
 	{
-	  p = frag_more ((flag_code == CODE_64BIT ? 2 : 0) + 6 + 3);
-	  /* notl: 0xf71424.  */
-	  if (flag_code == CODE_64BIT)
-	    *p++ = 0x48;
-	  *p++ = 0xf7;
-	  *p++ = 0x14;
+	  p = frag_more ((prefix ? 1 : 0) + 4 + 3);
+	  if (prefix)
+	    *p++ = prefix;
+	  if (lfence_before_ret == lfence_before_ret_or)
+	    {
+	      /* or: 0x830c2400, may add prefix
+		 for operand size override or 64-bit code.  */
+	      *p++ = 0x83;
+	      *p++ = 0x0c;
+	    }
+	  else
+	    {
+	      /* shl: 0xc1242400, may add prefix
+		 for operand size override or 64-bit code.  */
+	      *p++ = 0xc1;
+	      *p++ = 0x24;
+	    }
+
 	  *p++ = 0x24;
-	  /* notl: 0xf71424.  */
-	  if (flag_code == CODE_64BIT)
-	    *p++ = 0x48;
-	  *p++ = 0xf7;
-	  *p++ = 0x14;
-	  *p++ = 0x24;
+	  *p++ = 0x0;
 	}
+
       *p++ = 0xf;
       *p++ = 0xae;
       *p = 0xe8;
@@ -12995,7 +13045,11 @@ md_parse_option (int c, const char *arg)
 
     case OPTION_MLFENCE_BEFORE_INDIRECT_BRANCH:
       if (strcasecmp (arg, "all") == 0)
-	lfence_before_indirect_branch = lfence_branch_all;
+	{
+	  lfence_before_indirect_branch = lfence_branch_all;
+	  if (lfence_before_ret == lfence_before_ret_none)
+	    lfence_before_ret = lfence_before_ret_shl;
+	}
       else if (strcasecmp (arg, "memory") == 0)
 	lfence_before_indirect_branch = lfence_branch_memory;
       else if (strcasecmp (arg, "register") == 0)
@@ -13012,6 +13066,8 @@ md_parse_option (int c, const char *arg)
 	lfence_before_ret = lfence_before_ret_or;
       else if (strcasecmp (arg, "not") == 0)
 	lfence_before_ret = lfence_before_ret_not;
+      else if (strcasecmp (arg, "shl") == 0 || strcasecmp (arg, "yes") == 0)
+	lfence_before_ret = lfence_before_ret_shl;
       else if (strcasecmp (arg, "none") == 0)
 	lfence_before_ret = lfence_before_ret_none;
       else
@@ -13382,7 +13438,7 @@ md_show_usage (FILE *stream)
   -mlfence-before-indirect-branch=[none|all|register|memory] (default: none)\n\
                           generate lfence before indirect near branch\n"));
   fprintf (stream, _("\
-  -mlfence-before-ret=[none|or|not] (default: none)\n\
+  -mlfence-before-ret=[none|or|not|shl|yes] (default: none)\n\
                           generate lfence before ret\n"));
   fprintf (stream, _("\
   -mamd64                 accept only AMD64 ISA [default]\n"));
