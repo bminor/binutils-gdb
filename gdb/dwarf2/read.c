@@ -21799,19 +21799,17 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	      if (demangled == nullptr)
 		return nullptr;
 
-	      const char *base;
-
 	      DW_STRING (attr) = objfile->intern (demangled.get ());
 	      DW_STRING_IS_CANONICAL (attr) = 1;
-
-	      /* Strip any leading namespaces/classes, keep only the base name.
-		 DW_AT_name for named DIEs does not contain the prefixes.  */
-	      base = strrchr (DW_STRING (attr), ':');
-	      if (base && base > DW_STRING (attr) && base[-1] == ':')
-		return &base[1];
-	      else
-		return DW_STRING (attr);
 	    }
+
+	  /* Strip any leading namespaces/classes, keep only the base name.
+	     DW_AT_name for named DIEs does not contain the prefixes.  */
+	  const char *base = strrchr (DW_STRING (attr), ':');
+	  if (base && base > DW_STRING (attr) && base[-1] == ':')
+	    return &base[1];
+	  else
+	    return DW_STRING (attr);
 	}
       break;
 

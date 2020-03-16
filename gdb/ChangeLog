@@ -1,3 +1,9 @@
+2020-03-16  Tom Tromey  <tromey@adacore.com>
+
+	PR gdb/25663:
+	* dwarf2/read.c (dwarf2_name): Strip leading namespaces after
+	putting value into bcache.
+
 2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
 	PR gdb/21500
