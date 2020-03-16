@@ -1,5 +1,13 @@
 2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	* i386-cygwin-tdep.c: Rename to...
+	* i386-windows-tdep.c: ... this.
+	* Makefile.in (ALL_TARGET_OBS): Rename i386-cygwin-tdep.c to
+	i386-windows-tdep.c.
+	* configure.tgt: Likewise.
+
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* osabi.h (enum gdb_osabi): Add GDB_OSABI_WINDOWS.
 	* osabi.c (gdb_osabi_names): Add "Windows".
 	* i386-cygwin-tdep.c (i386_cygwin_osabi_sniffer): Return

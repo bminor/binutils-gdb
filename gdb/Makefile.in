@@ -733,7 +733,6 @@ ALL_TARGET_OBS = \
 	hppa-obsd-tdep.o \
 	hppa-tdep.o \
 	i386-bsd-tdep.o \
-	i386-cygwin-tdep.o \
 	i386-darwin-tdep.o \
 	i386-dicos-tdep.o \
 	i386-fbsd-tdep.o \
@@ -745,6 +744,7 @@ ALL_TARGET_OBS = \
 	i386-obsd-tdep.o \
 	i386-sol2-tdep.o \
 	i386-tdep.o \
+	i386-windows-tdep.o \
 	i387-tdep.o \
 	iq2000-tdep.o \
 	linux-record.o \
@@ -2161,7 +2161,6 @@ ALLDEPFILES = \
 	hppa-tdep.c \
 	i386-bsd-nat.c \
 	i386-bsd-tdep.c \
-	i386-cygwin-tdep.c \
 	i386-darwin-nat.c \
 	i386-darwin-tdep.c \
 	i386-dicos-tdep.c \
@@ -2178,6 +2177,7 @@ ALLDEPFILES = \
 	i386-sol2-nat.c \
 	i386-sol2-tdep.c \
 	i386-tdep.c \
+	i386-windows-tdep.c \
 	i387-tdep.c \
 	ia64-libunwind-tdep.c \
 	ia64-linux-nat.c \
