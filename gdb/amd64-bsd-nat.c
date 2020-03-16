@@ -33,6 +33,7 @@
 #include "amd64-nat.h"
 #include "x86-bsd-nat.h"
 #include "inf-ptrace.h"
+#include "amd64-bsd-nat.h"
 
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
