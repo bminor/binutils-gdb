@@ -1,5 +1,19 @@
 2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	PR gdb/21500
+	* amd64-windows-tdep.c (amd64_windows_init_abi): Rename
+	to...
+	(amd64_windows_init_abi_common): ... this.  Don't set size of
+	long type.
+	(amd64_windows_init_abi): New function.
+	(amd64_cygwin_init_abi): New function.
+	(_initialize_amd64_windows_tdep): Use amd64_cygwin_init_abi for
+	the Cygwin OS ABI.
+	* i386-windows-tdep.c (_initialize_i386_windows_tdep): Clarify
+	comment.
+
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* windows-tdep.h (is_linked_with_cygwin_dll): New declaration.
 	* windows-tdep.c (CYGWIN_DLL_NAME): New.
 	(pe_import_directory_entry): New struct type.
