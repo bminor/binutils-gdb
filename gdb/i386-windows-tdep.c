@@ -232,10 +232,13 @@ i386_windows_osabi_sniffer (bfd *abfd)
 {
   const char *target_name = bfd_get_target (abfd);
 
-  if (strcmp (target_name, "pei-i386") == 0)
-    return GDB_OSABI_WINDOWS;
+  if (!streq (target_name, "pei-i386"))
+    return GDB_OSABI_UNKNOWN;
 
-  return GDB_OSABI_UNKNOWN;
+  if (is_linked_with_cygwin_dll (abfd))
+    return GDB_OSABI_CYGWIN;
+
+  return GDB_OSABI_WINDOWS;
 }
 
 static enum gdb_osabi

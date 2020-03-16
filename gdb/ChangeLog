@@ -1,5 +1,15 @@
 2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	* windows-tdep.h (is_linked_with_cygwin_dll): New declaration.
+	* windows-tdep.c (CYGWIN_DLL_NAME): New.
+	(pe_import_directory_entry): New struct type.
+	(is_linked_with_cygwin_dll): New function.
+	* amd64-windows-tdep.c (amd64_windows_osabi_sniffer): Select
+	GDB_OSABI_CYGWIN if the BFD is linked with the Cygwin DLL.
+	* i386-windows-tdep.c (i386_windows_osabi_sniffer): Likewise.
+
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* i386-windows-tdep.c: Mass-rename "cygwin" to "windows", except
 	i386_cygwin_core_osabi_sniffer.
 

@@ -1249,10 +1249,13 @@ amd64_windows_osabi_sniffer (bfd *abfd)
 {
   const char *target_name = bfd_get_target (abfd);
 
-  if (strcmp (target_name, "pei-x86-64") == 0)
-    return GDB_OSABI_WINDOWS;
+  if (!streq (target_name, "pei-x86-64"))
+    return GDB_OSABI_UNKNOWN;
 
-  return GDB_OSABI_UNKNOWN;
+  if (is_linked_with_cygwin_dll (abfd))
+    return GDB_OSABI_CYGWIN;
+
+  return GDB_OSABI_WINDOWS;
 }
 
 void _initialize_amd64_windows_tdep ();

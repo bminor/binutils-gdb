@@ -38,6 +38,8 @@
 #include "libcoff.h"
 #include "solist.h"
 
+#define CYGWIN_DLL_NAME "cygwin1.dll"
+
 /* Windows signal numbers differ between MinGW flavors and between
    those and Cygwin.  The below enumeration was gleaned from the
    respective headers; the ones marked with MinGW64/Cygwin are defined
@@ -897,6 +899,103 @@ static const struct internalvar_funcs tlb_funcs =
   NULL,
   NULL
 };
+
+/* Layout of an element of a PE's Import Directory Table.  Based on:
+
+     https://docs.microsoft.com/en-us/windows/win32/debug/pe-format#import-directory-table
+ */
+
+struct pe_import_directory_entry
+{
+  uint32_t import_lookup_table_rva;
+  uint32_t timestamp;
+  uint32_t forwarder_chain;
+  uint32_t name_rva;
+  uint32_t import_address_table_rva;
+};
+
+gdb_static_assert (sizeof (pe_import_directory_entry) == 20);
+
+/* See windows-tdep.h.  */
+
+bool
+is_linked_with_cygwin_dll (bfd *abfd)
+{
+  /* The list of DLLs a PE is linked to is in the .idata section.  See:
+
+     https://docs.microsoft.com/en-us/windows/win32/debug/pe-format#the-idata-section
+   */
+  asection *idata_section = bfd_get_section_by_name (abfd, ".idata");
+  if (idata_section == nullptr)
+    return false;
+
+  /* Find the virtual address of the .idata section.  We must subtract this
+     from the RVAs (relative virtual addresses) to obtain an offset in the
+     section. */
+  bfd_vma idata_addr =
+    pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
+
+  /* Map the section's data.  */
+  bfd_size_type idata_size;
+  const gdb_byte *const idata_contents
+    = gdb_bfd_map_section (idata_section, &idata_size);
+  if (idata_contents == nullptr)
+    {
+      warning (_("Failed to get content of .idata section."));
+      return false;
+    }
+
+  const gdb_byte *iter = idata_contents;
+  const gdb_byte *end = idata_contents + idata_size;
+  const pe_import_directory_entry null_dir_entry = { 0 };
+
+  /* Iterate through all directory entries.  */
+  while (true)
+    {
+      /* Is there enough space left in the section for another entry?  */
+      if (iter + sizeof (pe_import_directory_entry) > end)
+	{
+	  warning (_("Failed to parse .idata section: unexpected end of "
+		     ".idata section."));
+	  break;
+	}
+
+      pe_import_directory_entry *dir_entry = (pe_import_directory_entry *) iter;
+
+      /* Is it the end of list marker?  */
+      if (memcmp (dir_entry, &null_dir_entry,
+		  sizeof (pe_import_directory_entry)) == 0)
+	break;
+
+      bfd_vma name_addr = dir_entry->name_rva;
+
+      /* If the name's virtual address is smaller than the section's virtual
+         address, there's a problem.  */
+      if (name_addr < idata_addr
+	  || name_addr >= (idata_addr + idata_size))
+	{
+	  warning (_("\
+Failed to parse .idata section: name's virtual address (0x%" BFD_VMA_FMT "x) \
+is outside .idata section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
+		   name_addr, idata_addr, idata_addr + idata_size);
+	  break;
+	}
+
+      const gdb_byte *name = &idata_contents[name_addr - idata_addr];
+
+      /* Make sure we don't overshoot the end of the section with the streq.  */
+      if (name + sizeof(CYGWIN_DLL_NAME) > end)
+	continue;
+
+      /* Finally, check if this is the dll name we are looking for.  */
+      if (streq ((const char *) name, CYGWIN_DLL_NAME))
+	return true;
+
+      iter += sizeof(pe_import_directory_entry);
+    }
+
+    return false;
+}
 
 void _initialize_windows_tdep ();
 void
