@@ -1,3 +1,8 @@
+2020-03-16  Tom de Vries  <tdevries@suse.de>
+
+	* lib/cache.exp (gdb_do_cache): Add and handle local variables
+	cache_verify and cache_verify_proc.
+
 2020-03-15  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.server/solib-list.exp: Handle
