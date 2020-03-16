@@ -7465,7 +7465,6 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
 	  po_reg_or_goto (REG_TYPE_VFSD, try_cond);
 	  break;
 	case OP_oRNSDMQ:
-	case OP_RNSDMQ:
 	  po_reg_or_goto (REG_TYPE_NSD, try_mq2);
 	  break;
 	  try_mq2:
