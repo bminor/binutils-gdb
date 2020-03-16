@@ -1,5 +1,12 @@
 2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	* defs.h (enum gdb_osabi): Move to...
+	* osabi.h (enum gdb_osabi): ... here.
+	* gdbarch.sh: Include osabi.h in gdbarch.h.
+	* gdbarch.h: Re-generate.
+
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* amd64-windows-tdep.c (amd64_windows_osabi_sniffer): New
 	function.
 	(_initialize_amd64_windows_tdep): Register osabi sniffer.

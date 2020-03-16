@@ -478,37 +478,6 @@ enum val_prettyformat
 
 extern int longest_to_int (LONGEST);
 
-/* * List of known OS ABIs.  If you change this, make sure to update the
-   table in osabi.c.  */
-enum gdb_osabi
-{
-  GDB_OSABI_UNKNOWN = 0,	/* keep this zero */
-  GDB_OSABI_NONE,
-
-  GDB_OSABI_SVR4,
-  GDB_OSABI_HURD,
-  GDB_OSABI_SOLARIS,
-  GDB_OSABI_LINUX,
-  GDB_OSABI_FREEBSD,
-  GDB_OSABI_NETBSD,
-  GDB_OSABI_OPENBSD,
-  GDB_OSABI_WINCE,
-  GDB_OSABI_GO32,
-  GDB_OSABI_QNXNTO,
-  GDB_OSABI_CYGWIN,
-  GDB_OSABI_AIX,
-  GDB_OSABI_DICOS,
-  GDB_OSABI_DARWIN,
-  GDB_OSABI_SYMBIAN,
-  GDB_OSABI_OPENVMS,
-  GDB_OSABI_LYNXOS178,
-  GDB_OSABI_NEWLIB,
-  GDB_OSABI_SDE,
-  GDB_OSABI_PIKEOS,
-
-  GDB_OSABI_INVALID		/* keep this last */
-};
-
 /* Enumerate the requirements a symbol has in order to be evaluated.
    These are listed in order of "strength" -- a later entry subsumes
    earlier ones.  This fine-grained distinction is important because
