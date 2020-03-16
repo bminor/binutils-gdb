@@ -1244,10 +1244,24 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_auto_wide_charset (gdbarch, amd64_windows_auto_wide_charset);
 }
 
+static gdb_osabi
+amd64_windows_osabi_sniffer (bfd *abfd)
+{
+  const char *target_name = bfd_get_target (abfd);
+
+  if (strcmp (target_name, "pei-x86-64") == 0)
+    return GDB_OSABI_CYGWIN;
+
+  return GDB_OSABI_UNKNOWN;
+}
+
 void _initialize_amd64_windows_tdep ();
 void
 _initialize_amd64_windows_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_CYGWIN,
                           amd64_windows_init_abi);
+
+  gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
+				  amd64_windows_osabi_sniffer);
 }

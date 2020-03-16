@@ -1,3 +1,9 @@
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* amd64-windows-tdep.c (amd64_windows_osabi_sniffer): New
+	function.
+	(_initialize_amd64_windows_tdep): Register osabi sniffer.
+
 2020-03-14  Tom Tromey  <tom@tromey.com>
 
 	* c-typeprint.c (cp_type_print_method_args): Print "__restrict__"
