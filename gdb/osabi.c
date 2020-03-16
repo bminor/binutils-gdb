@@ -72,6 +72,7 @@ static const struct osabi_names gdb_osabi_names[] =
   { "DJGPP", NULL },
   { "QNX-Neutrino", NULL },
   { "Cygwin", NULL },
+  { "Windows", NULL },
   { "AIX", NULL },
   { "DICOS", NULL },
   { "Darwin", NULL },

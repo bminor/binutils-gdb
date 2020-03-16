@@ -771,8 +771,8 @@ m68*-*-openbsd* | m88*-*-openbsd* | vax-*-openbsd*) ;;
 *-*-*-gnu*)	;; # prevent non-GNU kernels to match the Hurd rule below
 *-*-gnu*)	gdb_osabi=GDB_OSABI_HURD ;;
 *-*-mingw32ce*)	gdb_osabi=GDB_OSABI_WINCE ;;
-*-*-mingw* | *-*-cygwin*)
-		gdb_osabi=GDB_OSABI_CYGWIN ;;
+*-*-mingw*)	gdb_osabi=GDB_OSABI_WINDOWS ;;
+*-*-cygwin*)	gdb_osabi=GDB_OSABI_CYGWIN ;;
 *-*-dicos*)	gdb_osabi=GDB_OSABI_DICOS ;;
 *-*-symbianelf*)
 		gdb_osabi=GDB_OSABI_SYMBIAN ;;

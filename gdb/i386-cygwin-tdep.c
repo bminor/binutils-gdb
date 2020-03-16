@@ -232,14 +232,22 @@ i386_cygwin_osabi_sniffer (bfd *abfd)
   const char *target_name = bfd_get_target (abfd);
 
   if (strcmp (target_name, "pei-i386") == 0)
-    return GDB_OSABI_CYGWIN;
+    return GDB_OSABI_WINDOWS;
+
+  return GDB_OSABI_UNKNOWN;
+}
+
+static enum gdb_osabi
+i386_cygwin_core_osabi_sniffer (bfd *abfd)
+{
+  const char *target_name = bfd_get_target (abfd);
 
   /* Cygwin uses elf core dumps.  Do not claim all ELF executables,
      check whether there is a .reg section of proper size.  */
   if (strcmp (target_name, "elf32-i386") == 0)
     {
       asection *section = bfd_get_section_by_name (abfd, ".reg");
-      if (section
+      if (section != nullptr
 	  && bfd_section_size (section) == I386_WINDOWS_SIZEOF_GREGSET)
 	return GDB_OSABI_CYGWIN;
     }
@@ -256,8 +264,11 @@ _initialize_i386_cygwin_tdep ()
 
   /* Cygwin uses elf core dumps.  */
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_elf_flavour,
-                                  i386_cygwin_osabi_sniffer);
+                                  i386_cygwin_core_osabi_sniffer);
 
+  /* The Cygwin and Windows OS ABIs are currently equivalent.  */
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_CYGWIN,
+                          i386_cygwin_init_abi);
+  gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_WINDOWS,
                           i386_cygwin_init_abi);
 }

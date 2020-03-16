@@ -1,5 +1,22 @@
 2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	* osabi.h (enum gdb_osabi): Add GDB_OSABI_WINDOWS.
+	* osabi.c (gdb_osabi_names): Add "Windows".
+	* i386-cygwin-tdep.c (i386_cygwin_osabi_sniffer): Return
+	GDB_OSABI_WINDOWS when the binary's target is "pei-i386".
+	(i386_cygwin_core_osabi_sniffer): New function, extracted from
+	i386_cygwin_osabi_sniffer.
+	(_initialize_i386_cygwin_tdep): Register OS ABI
+	GDB_OSABI_WINDOWS for i386.
+	* amd64-windows-tdep.c (amd64_windows_osabi_sniffer): Return
+	GDB_OSABI_WINDOWS when the binary's target is "pei-x86-64".
+	(_initialize_amd64_windows_tdep): Register OS ABI GDB_OSABI_WINDOWS
+	for x86-64.
+	* configure.tgt: Use GDB_OSABI_WINDOWS as the default OS ABI
+	when the target matches '*-*-mingw*'.
+
+2020-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* defs.h (enum gdb_osabi): Move to...
 	* osabi.h (enum gdb_osabi): ... here.
 	* gdbarch.sh: Include osabi.h in gdbarch.h.

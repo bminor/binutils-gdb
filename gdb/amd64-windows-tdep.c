@@ -1250,7 +1250,7 @@ amd64_windows_osabi_sniffer (bfd *abfd)
   const char *target_name = bfd_get_target (abfd);
 
   if (strcmp (target_name, "pei-x86-64") == 0)
-    return GDB_OSABI_CYGWIN;
+    return GDB_OSABI_WINDOWS;
 
   return GDB_OSABI_UNKNOWN;
 }
@@ -1259,6 +1259,9 @@ void _initialize_amd64_windows_tdep ();
 void
 _initialize_amd64_windows_tdep ()
 {
+  /* The Cygwin and Windows OS ABIs are currently equivalent.  */
+  gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_WINDOWS,
+                          amd64_windows_init_abi);
   gdbarch_register_osabi (bfd_arch_i386, bfd_mach_x86_64, GDB_OSABI_CYGWIN,
                           amd64_windows_init_abi);
 
