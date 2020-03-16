@@ -296,6 +296,8 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  nbsd_init_abi (info, gdbarch);
+
   /* NetBSD doesn't support the 128-bit `long double' from the psABI.  */
   set_gdbarch_long_double_bit (gdbarch, 64);
   set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
