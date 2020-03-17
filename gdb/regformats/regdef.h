@@ -19,6 +19,8 @@
 #ifndef REGFORMATS_REGDEF_H
 #define REGFORMATS_REGDEF_H
 
+namespace gdb {
+
 struct reg
 {
   reg (int _offset)
@@ -59,5 +61,7 @@ struct reg
     return !(*this == other);
   }
 };
+
+} /* namespace gdb */
 
 #endif /* REGFORMATS_REGDEF_H */

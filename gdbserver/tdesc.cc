@@ -75,7 +75,7 @@ init_target_desc (struct target_desc *tdesc,
 	gdb_assert (regnum == 0 || regnum >= tdesc->reg_defs.size ());
 
 	if (regnum != 0)
-	  tdesc->reg_defs.resize (regnum, reg (offset));
+	  tdesc->reg_defs.resize (regnum, gdb::reg (offset));
 
 	tdesc->reg_defs.emplace_back (treg->name.c_str (), offset,
 				      treg->bitsize);

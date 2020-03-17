@@ -1,3 +1,9 @@
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* regcache.cc (find_register_by_number): Update.
+	* tdesc.cc (init_target_desc): Likewise.
+	* tdesc.h (target_desc::reg_defs): Likewise.
+
 2020-03-12  Tom Tromey  <tom@tromey.com>
 
 	* configure: Rebuild.
