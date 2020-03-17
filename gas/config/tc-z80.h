@@ -96,6 +96,9 @@ extern void z80_cons_fix_new (fragS *, int, int, expressionS *);
    well, but it is cleaner to handle that in tc-z80.c.  */
 #define SINGLE_QUOTE_STRINGS
 
+#define LABELS_WITHOUT_COLONS (z80_tc_labels_without_colon())
+extern int z80_tc_labels_without_colon (void);
+
 /* An `.lcomm' directive with no explicit alignment parameter will
    use this macro to set P2VAR to the alignment that a request for
    SIZE bytes will have.  The alignment is expressed as a power of

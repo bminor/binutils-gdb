@@ -147,12 +147,12 @@ Disassembly of section .text:
 \s+124:\s+ed 8c\s+ind2
 \s+126:\s+ed 92\s+inimr
 \s+128:\s+ed 93\s+otimr
-\s+12a:\s+ed 94\s+oti2r
+\s+12a:\s+ed 94\s+ini2r
 \s+12c:\s+ed 9a\s+indmr
 \s+12e:\s+ed 9b\s+otdmr
-\s+130:\s+ed 9c\s+otd2r
-\s+132:\s+ed a4\s+ini2
-\s+134:\s+ed ac\s+ind2
+\s+130:\s+ed 9c\s+ind2r
+\s+132:\s+ed a4\s+outi2
+\s+134:\s+ed ac\s+outd2
 \s+136:\s+ed b4\s+oti2r
 \s+138:\s+ed bc\s+otd2r
 \s+13a:\s+ed c2\s+inirx

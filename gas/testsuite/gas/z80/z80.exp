@@ -17,93 +17,10 @@
 # run tests for target Z80.
 
 if [istarget z80-*-*] then {
-# test redefinitions
-    run_dump_test "redef"
-# test .set redefinitions
-    run_dump_test "set"
-# test parsing of equ definitions
-    run_dump_test "equ"
-# test parsing of " and '
-    run_dump_test "quotes"
-# test data definition directives
-    run_dump_test "data"
-# test suffixes
-    run_dump_test "suffix"
-# test assembling and disassembling instructions involving offsets
-    run_dump_test "offset"
+    run_dump_tests [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
+
     gas_test_error "jr-forwf.s" "" "relative jump out of range (jr)"
     gas_test_error "jr-backf.s" "" "relative jump out of range (jr)"
     gas_test_error "djnz-backf.s" "" "relative jump out of range (djnz)"
- 
-# test assembling instruction with offset that is a label defined later
-    run_dump_test "atend"
-# test for data transfer instructions
-    run_dump_test "ld-group"
-# test for block instructions
-    run_dump_test "block"
-# test for arithmetic and logic
-    run_dump_test "arith"
-# test for rotate and shift
-    run_dump_test "rotate"
-# test for bit manipulations
-    run_dump_test "bit"
-# test for branch instructions
-    run_dump_test "branch"
-# test for input and output instructions
-    run_dump_test "inout"
-# test for strings
-    run_dump_test "strings"
-# test for dollar labels
-    run_dump_test "dollar"
-# test for relocations
-    run_dump_test "z80_reloc"
-# test for absolutely all documented instructions of Z80
-    run_dump_test "z80_doc"
-# test for undocumented instructions like RLC (IX+3),A
-    run_dump_test "z80_op_ii_ld"
-# test for undocumented instructions SLI/SLL
-    run_dump_test "z80_sli"
-# test for undocumented instruction IN F,(C)
-    run_dump_test "z80_in_f_c"
-# test for undocumented instruction OUT (C),0
-    run_dump_test "z80_out_c_0"
-# test for instructions with index register halves
-    run_dump_test "z80_ii8"
-#test for other instructions
-    run_dump_test "misc"
     gas_test_error "ill_op.s" "" "Illegal operand: ld hl,(sp+0)"
-# test for all Z80 documented instructions for R800
-    run_dump_test "r800_z80_doc"
-# test for R800 instructions with index register halves
-    run_dump_test "r800_ii8"
-# test for R800 extra instructions
-    run_dump_test "r800_extra"
-#test for Z180 instructions
-    run_dump_test "z180"
-#test for Z80 instructions while compiling for Z180
-    run_dump_test "z180_z80_doc"
-#test for eZ80 instructions in Z80 mode
-    run_dump_test "ez80_z80_all"
-#test for eZ80 instructions with sufficies in Z80 mode
-    run_dump_test "ez80_z80_suf"
-#test for eZ80 instructions in ADL mode
-    run_dump_test "ez80_adl_all"
-#test for eZ80 instructions with sufficies in ADL mode
-    run_dump_test "ez80_adl_suf"
-#test for eZ80 opcode prefixes as multiple bytes before instruction
-    run_dump_test "ez80_pref_dis"
-#test for GBZ80 instruction set
-    run_dump_test "gbz80_all"
-#test for Z80N instruction set
-    run_dump_test "z80n_all"
-#test for Z80N push nn relocation test
-    run_dump_test "z80n_reloc"
-# test for SDCC compatibility mode
-    run_dump_test "sdcc"
-# test for colonless labels
-    run_dump_test "colonless"
-# test for FP math48
-    run_dump_test "fp_math48"
-# test for FP zeda32
-    run_dump_test "fp_zeda32"
 }

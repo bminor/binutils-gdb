@@ -401,24 +401,6 @@ cism (struct buffer *buf, disassemble_info * info, const char *txt ATTRIBUTE_UNU
 }
 
 static int
-cis2 (struct buffer *buf, disassemble_info * info, const char *txt ATTRIBUTE_UNUSED)
-{
-  static char * opar[] = { "in", "out" };
-  char * op;
-  char c;
-
-  c = buf->data[1];
-  op = ((0x14 & c) == 0x14) ? "ot" : (opar[c & 1]);
-  info->fprintf_func (info->stream,
-                      "%s%c2%s",
-                      op,
-                      (c & 0x08) ? 'd' : 'i',
-                      (c & 0x10) ? "r" : "");
-  buf->n_used = 2;
-  return buf->n_used;
-}
-
-static int
 dump (struct buffer *buf, disassemble_info * info, const char *txt)
 {
   int i;
@@ -504,21 +486,28 @@ struct tab_elt opc_ed[] =
   { 0x7D, 0xFF, prt, "stmix", INSS_EZ80 },
   { 0x7E, 0xFF, prt, "rsmix", INSS_EZ80 },
   { 0x82, 0xE6, cism, "", INSS_Z180|INSS_EZ80 },
-  { 0x84, 0xC7, cis2, "", INSS_EZ80 },
+  { 0x84, 0xFF, prt, "ini2", INSS_EZ80 },
   { 0x8A, 0xFF, prt_n_n, "push 0x%02x%%02x", INSS_Z80N },
+  { 0x8C, 0xFF, prt, "ind2", INSS_EZ80 },
   { 0x90, 0xFF, prt, "outinb", INSS_Z80N },
   { 0x91, 0xFF, prt_n_n, "nextreg 0x%02x,0x%%02x", INSS_Z80N },
   { 0x92, 0xFF, prt_n, "nextreg 0x%02x,a", INSS_Z80N },
   { 0x93, 0xFF, prt, "pixeldn", INSS_Z80N },
+  { 0x94, 0xFF, prt, "ini2r", INSS_EZ80 },
   { 0x94, 0xFF, prt, "pixelad", INSS_Z80N },
   { 0x95, 0xFF, prt, "setae", INSS_Z80N },
   { 0x98, 0xFF, prt, "jp (c)", INSS_Z80N },
+  { 0x9c, 0xFF, prt, "ind2r", INSS_EZ80 },
   { 0xA0, 0xE4, cis, "", INSS_ALL },
+  { 0xA4, 0xFF, prt, "outi2", INSS_EZ80 },
   { 0xA4, 0xFF, prt, "ldix", INSS_Z80N },
+  { 0xAC, 0xFF, prt, "outd2", INSS_EZ80 },
   { 0xAC, 0xFF, prt, "lddx", INSS_Z80N },
   { 0xA5, 0xFF, prt, "ldws", INSS_Z80N },
+  { 0xB4, 0xFF, prt, "oti2r", INSS_EZ80 },
   { 0xB4, 0xFF, prt, "ldirx", INSS_Z80N },
   { 0xB7, 0xFF, prt, "ldpirx", INSS_Z80N },
+  { 0xBC, 0xFF, prt, "otd2r", INSS_EZ80 },
   { 0xBC, 0xFF, prt, "lddrx", INSS_Z80N },
   { 0xC2, 0xFF, prt, "inirx", INSS_EZ80 },
   { 0xC3, 0xFF, prt, "otirx", INSS_EZ80 },

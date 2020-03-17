@@ -10,5 +10,9 @@ start
 	jr	start
 	jr	.L_next
 	jr	.L_xx
+label	jp	(hl)
 finish	ret
+temp	=	1234
+temp	.defl	4321
+temp1	equ	4247
 	.end
