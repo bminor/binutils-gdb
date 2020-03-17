@@ -1,3 +1,12 @@
+2020-03-17  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/23710
+	* dwarf2/read.h (struct dwarf2_per_cu_data): Add unit_type and lang
+	fields.
+	* dwarf2/read.c (process_psymtab_comp_unit): Initialize unit_type and lang
+	fields.
+	(process_imported_unit_die): Skip import of c++ CUs.
+
 2020-03-16  Tom Tromey  <tom@tromey.com>
 
 	* p-valprint.c (pascal_object_print_value): Initialize

@@ -323,6 +323,12 @@ struct dwarf2_per_cu_data
      dummy CUs (a CU header, but nothing else).  */
   struct dwarf2_cu *cu;
 
+  /* The unit type of this CU.  */
+  enum dwarf_unit_type unit_type;
+
+  /* The language of this CU.  */
+  enum language lang;
+
   /* The corresponding dwarf2_per_objfile.  */
   struct dwarf2_per_objfile *dwarf2_per_objfile;
 
