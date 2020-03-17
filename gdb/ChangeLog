@@ -4,6 +4,15 @@
 	valid, fetch vg value from ptrace.
 
 2020-03-19  Kamil Rytarowski  <n54@gmx.com>
+	* inf-ptrace.h: Disable get_ptrace_pid on NetBSD.
+	* inf-ptrace.c: Likewise.
+	* (gdb_ptrace): Add.
+	* (inf_ptrace_target::resume): Update.
+	* (inf_ptrace_target::xfer_partial): Likewise.
+	* (inf_ptrace_peek_poke): Change argument `pid' to `ptid'.
+	* (inf_ptrace_peek_poke): Update.
+
+2020-03-19  Kamil Rytarowski  <n54@gmx.com>
 
 	* x86-bsd-nat.c (gdb_ptrace): New.
 	* (x86bsd_dr_set): Add new argument `ptid'.

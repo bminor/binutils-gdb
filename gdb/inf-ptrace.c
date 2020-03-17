@@ -37,6 +37,18 @@
 
 
 
+static PTRACE_TYPE_RET
+gdb_ptrace (PTRACE_TYPE_ARG1 request, ptid_t ptid, PTRACE_TYPE_ARG3 addr,
+	    PTRACE_TYPE_ARG4 data)
+{
+#ifdef __NetBSD__
+  return ptrace (request, ptid.pid (), addr, data);
+#else
+  pid_t pid = get_ptrace_pid (ptid);
+  return ptrace (request, pid, addr, data);
+#endif
+}
+
 /* A unique_ptr helper to unpush a target.  */
 
 struct target_unpusher
@@ -313,8 +325,9 @@ inf_ptrace_target::kill ()
   target_mourn_inferior (inferior_ptid);
 }
 
-/* Return which PID to pass to ptrace in order to observe/control the
-   tracee identified by PTID.  */
+#ifndef __NetBSD__
+
+/* See inf-ptrace.h.  */
 
 pid_t
 get_ptrace_pid (ptid_t ptid)
@@ -328,6 +341,7 @@ get_ptrace_pid (ptid_t ptid)
     pid = ptid.pid ();
   return pid;
 }
+#endif
 
 /* Resume execution of thread PTID, or all threads if PTID is -1.  If
    STEP is nonzero, single-step it.  If SIGNAL is nonzero, give it
@@ -336,15 +350,12 @@ get_ptrace_pid (ptid_t ptid)
 void
 inf_ptrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
-  pid_t pid;
-  int request;
+  PTRACE_TYPE_ARG1 request;
 
   if (minus_one_ptid == ptid)
     /* Resume all threads.  Traditionally ptrace() only supports
        single-threaded processes, so simply resume the inferior.  */
-    pid = inferior_ptid.pid ();
-  else
-    pid = get_ptrace_pid (ptid);
+    ptid = ptid_t (inferior_ptid.pid ());
 
   if (catch_syscall_enabled () > 0)
     request = PT_SYSCALL;
@@ -365,7 +376,7 @@ inf_ptrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
      where it was.  If GDB wanted it to start some other way, we have
      already written a new program counter value to the child.  */
   errno = 0;
-  ptrace (request, pid, (PTRACE_TYPE_ARG3)1, gdb_signal_to_host (signal));
+  gdb_ptrace (request, ptid, (PTRACE_TYPE_ARG3)1, gdb_signal_to_host (signal));
   if (errno != 0)
     perror_with_name (("ptrace"));
 }
@@ -460,7 +471,7 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
    be non-null.  Return the number of transferred bytes.  */
 
 static ULONGEST
-inf_ptrace_peek_poke (pid_t pid, gdb_byte *readbuf,
+inf_ptrace_peek_poke (ptid_t ptid, gdb_byte *readbuf,
 		      const gdb_byte *writebuf,
 		      ULONGEST addr, ULONGEST len)
 {
@@ -491,8 +502,8 @@ inf_ptrace_peek_poke (pid_t pid, gdb_byte *readbuf,
       if (readbuf != NULL || chunk < sizeof (PTRACE_TYPE_RET))
 	{
 	  errno = 0;
-	  buf.word = ptrace (PT_READ_I, pid,
-			     (PTRACE_TYPE_ARG3)(uintptr_t) addr, 0);
+	  buf.word = gdb_ptrace (PT_READ_I, ptid,
+				 (PTRACE_TYPE_ARG3)(uintptr_t) addr, 0);
 	  if (errno != 0)
 	    break;
 	  if (readbuf != NULL)
@@ -502,15 +513,15 @@ inf_ptrace_peek_poke (pid_t pid, gdb_byte *readbuf,
 	{
 	  memcpy (buf.byte + skip, writebuf + n, chunk);
 	  errno = 0;
-	  ptrace (PT_WRITE_D, pid, (PTRACE_TYPE_ARG3)(uintptr_t) addr,
+	  gdb_ptrace (PT_WRITE_D, ptid, (PTRACE_TYPE_ARG3)(uintptr_t) addr,
 		  buf.word);
 	  if (errno != 0)
 	    {
 	      /* Using the appropriate one (I or D) is necessary for
 		 Gould NP1, at least.  */
 	      errno = 0;
-	      ptrace (PT_WRITE_I, pid, (PTRACE_TYPE_ARG3)(uintptr_t) addr,
-		      buf.word);
+	      gdb_ptrace (PT_WRITE_I, ptid, (PTRACE_TYPE_ARG3)(uintptr_t) addr,
+			  buf.word);
 	      if (errno != 0)
 		break;
 	    }
@@ -528,7 +539,7 @@ inf_ptrace_target::xfer_partial (enum target_object object,
 				 const gdb_byte *writebuf,
 				 ULONGEST offset, ULONGEST len, ULONGEST *xfered_len)
 {
-  pid_t pid = get_ptrace_pid (inferior_ptid);
+  ptid_t ptid = inferior_ptid;
 
   switch (object)
     {
@@ -552,7 +563,7 @@ inf_ptrace_target::xfer_partial (enum target_object object,
 	piod.piod_len = len;
 
 	errno = 0;
-	if (ptrace (PT_IO, pid, (caddr_t)&piod, 0) == 0)
+	if (gdb_ptrace (PT_IO, ptid, (caddr_t)&piod, 0) == 0)
 	  {
 	    /* Return the actual number of bytes read or written.  */
 	    *xfered_len = piod.piod_len;
@@ -565,7 +576,7 @@ inf_ptrace_target::xfer_partial (enum target_object object,
 	  return TARGET_XFER_EOF;
       }
 #endif
-      *xfered_len = inf_ptrace_peek_poke (pid, readbuf, writebuf,
+      *xfered_len = inf_ptrace_peek_poke (ptid, readbuf, writebuf,
 					  offset, len);
       return *xfered_len != 0 ? TARGET_XFER_OK : TARGET_XFER_EOF;
 
@@ -588,7 +599,7 @@ inf_ptrace_target::xfer_partial (enum target_object object,
 	piod.piod_len = len;
 
 	errno = 0;
-	if (ptrace (PT_IO, pid, (caddr_t)&piod, 0) == 0)
+	if (gdb_ptrace (PT_IO, ptid, (caddr_t)&piod, 0) == 0)
 	  {
 	    /* Return the actual number of bytes read or written.  */
 	    *xfered_len = piod.piod_len;

@@ -78,9 +78,14 @@ protected:
   void detach_success (inferior *inf);
 };
 
+#ifndef __NetBSD__
 /* Return which PID to pass to ptrace in order to observe/control the
-   tracee identified by PTID.  */
+   tracee identified by PTID.
+
+   Unlike most other Operating Systems, NetBSD tracks both pid and lwp
+   and avoids this function.  */
 
 extern pid_t get_ptrace_pid (ptid_t);
+#endif
 
 #endif
