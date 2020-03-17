@@ -739,6 +739,7 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
 	}
       catch (const gdb_exception_error &ex)
 	{
+	  base_value = nullptr;
 	  if (ex.error == NOT_AVAILABLE_ERROR)
 	    skip = -1;
 	  else

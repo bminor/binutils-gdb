@@ -1,3 +1,8 @@
+2020-03-16  Tom Tromey  <tom@tromey.com>
+
+	* p-valprint.c (pascal_object_print_value): Initialize
+	base_value.
+
 2020-03-16  Anton Kolesov  <anton.kolesov@synopsys.com>
 	    Shahab Vahedi  <shahab@synopsys.com>
 
