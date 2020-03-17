@@ -108,13 +108,19 @@ proc test_gdb_complete_tab_unique { input_line complete_line_re append_char_re }
 
     set test "tab complete \"$input_line\""
     send_gdb "$input_line\t"
+    set res 1
     gdb_test_multiple "" "$test" {
 	-re "^$complete_line_re$append_char_re$" {
 	    pass "$test"
 	}
+	timeout {
+	    fail "$test (timeout)"
+	    set res -1
+	}
     }
 
     clear_input_line $test
+    return $res
 }
 
 # Test that completing INPUT_LINE with TAB completes to "INPUT_LINE +
@@ -242,7 +248,10 @@ proc test_gdb_complete_none { input_line } {
 proc test_gdb_complete_unique_re { input_line complete_line_re {append_char " "} {max_completions 0}} {
     set append_char_re [string_to_regexp $append_char]
     if { [readline_is_used] } {
-	test_gdb_complete_tab_unique $input_line $complete_line_re $append_char_re
+	if { [test_gdb_complete_tab_unique $input_line $complete_line_re \
+		  $append_char_re] == -1 } {
+	    return -1
+	}
     }
 
     # Trim INPUT_LINE and COMPLETE LINE, for the case we're completing
@@ -266,6 +275,7 @@ proc test_gdb_complete_unique_re { input_line complete_line_re {append_char " "}
     }
 
     test_gdb_complete_cmd_unique $input_line $expected_output_re
+    return 1
 }
 
 # Like TEST_GDB_COMPLETE_UNIQUE_RE, but COMPLETE_LINE is a string, not
@@ -301,9 +311,22 @@ proc test_complete_prefix_range_re {input completion_re start {end -1}} {
 	set end [string length $input]
     }
 
+    set timeouts 0
+    set max_timeouts 3
     for {set i $start} {$i < $end} {incr i} {
 	set line [string range $input 0 $i]
-	test_gdb_complete_unique_re "$line" $completion_re
+	set res [test_gdb_complete_unique_re "$line" $completion_re]
+	if { $res == -1 } {
+	    incr timeouts
+	} else {
+	    if { $timeouts > 0 } {
+		set timeouts 0
+	    }
+	}
+	if { $timeouts == $max_timeouts } {
+	    verbose -log "Consecutive timeouts in test_complete_prefix_range_re, giving up"
+	    break
+	}
     }
 }
 
