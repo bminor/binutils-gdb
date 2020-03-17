@@ -28,9 +28,10 @@
 
 #include "sh-tdep.h"
 #include "inf-ptrace.h"
+#include "nbsd-nat.h"
 #include "regcache.h"
 
-struct sh_nbsd_nat_target final : public inf_ptrace_target
+struct sh_nbsd_nat_target final : public nbsd_nat_target
 {
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
