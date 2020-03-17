@@ -1,5 +1,11 @@
 2020-03-17  Kamil Rytarowski  <n54@gmx.com>
 
+	* sh-nbsd-nat.c (fetch_registers): New variable lwp and pass
+	it to the ptrace call.
+	* sh-nbsd-nat.c (store_registers): Likewise.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
 	* sh-nbsd-nat.c (sh_nbsd_nat_target): Inherit from
 	nbsd_nat_target instead of inf_ptrace_target.
 	* sh-nbsd-nat.c: Include "nbsd-nat.h", as we are now using
