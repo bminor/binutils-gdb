@@ -5015,6 +5015,11 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
       break;
     }
 }
+
+static void
+ignore_errors (const char *fmt ATTRIBUTE_UNUSED, ...)
+{
+}
 
 #define TARGET_LITTLE_SYM		ia64_elfNN_le_vec
 #define TARGET_LITTLE_NAME		"elfNN-ia64-little"
@@ -5112,7 +5117,7 @@ elfNN_hpux_backend_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
    We don't want to flood users with so many error messages. We turn
    off the warning for now. It will be turned on later when the Intel
    compiler is fixed.   */
-#define elf_backend_link_order_error_handler NULL
+#define elf_backend_link_order_error_handler ignore_errors
 
 #include "elfNN-target.h"
 

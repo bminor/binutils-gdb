@@ -1,3 +1,13 @@
+2020-03-20  Alan Modra  <amodra@gmail.com>
+
+	* elf.c (_bfd_elf_setup_sections): Don't test known non-NULL
+	backend functions for NULL before calling.
+	(copy_special_section_fields, _bfd_elf_copy_private_bfd_data),
+	(bfd_section_from_shdr, assign_section_numbers): Likewise.
+	* elfcode.h (elf_write_relocs, elf_slurp_reloc_table): Likewise.
+	* elfnn-ia64.c (ignore_errors): New function.
+	(elf_backend_link_order_error_handler): Redefine as ignore_errors.
+
 2020-03-19  Nick Clifton  <nickc@redhat.com>
 
 	PR 25676

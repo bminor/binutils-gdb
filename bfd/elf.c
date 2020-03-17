@@ -857,11 +857,10 @@ _bfd_elf_setup_sections (bfd *abfd)
 	  if (elfsec == 0)
 	    {
 	      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-	      if (bed->link_order_error_handler)
-		bed->link_order_error_handler
-		  /* xgettext:c-format */
-		  (_("%pB: warning: sh_link not set for section `%pA'"),
-		   abfd, s);
+	      bed->link_order_error_handler
+		/* xgettext:c-format */
+		(_("%pB: warning: sh_link not set for section `%pA'"),
+		 abfd, s);
 	    }
 	  else
 	    {
@@ -1424,9 +1423,8 @@ copy_special_section_fields (const bfd *ibfd,
     }
 
   /* Allow the target a chance to decide how these fields should be set.  */
-  if (bed->elf_backend_copy_special_section_fields != NULL
-      && bed->elf_backend_copy_special_section_fields
-      (ibfd, obfd, iheader, oheader))
+  if (bed->elf_backend_copy_special_section_fields (ibfd, obfd,
+						    iheader, oheader))
     return TRUE;
 
   /* We have an iheader which might match oheader, and which has non-zero
@@ -1610,8 +1608,8 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 	{
 	  /* Final attempt.  Call the backend copy function
 	     with a NULL input section.  */
-	  if (bed->elf_backend_copy_special_section_fields != NULL)
-	    (void) bed->elf_backend_copy_special_section_fields (ibfd, obfd, NULL, oheader);
+	  (void) bed->elf_backend_copy_special_section_fields (ibfd, obfd,
+							       NULL, oheader);
 	}
     }
 
@@ -2462,12 +2460,12 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	   sections.  */
 	if (*p_hdr != NULL)
 	  {
-	    if (bed->init_secondary_reloc_section == NULL
-		|| ! bed->init_secondary_reloc_section (abfd, hdr, name, shindex))
+	    if (!bed->init_secondary_reloc_section (abfd, hdr, name, shindex))
 	      {
 		_bfd_error_handler
 		  /* xgettext:c-format */
-		  (_("%pB: warning: secondary relocation section '%s' for section %pA found - ignoring"),
+		  (_("%pB: warning: secondary relocation section '%s' "
+		     "for section %pA found - ignoring"),
 		   abfd, name, target_sect);
 	      }
 	    goto success;
@@ -3940,11 +3938,10 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 		 where s is NULL.  */
 	      const struct elf_backend_data *bed
 		= get_elf_backend_data (abfd);
-	      if (bed->link_order_error_handler)
-		bed->link_order_error_handler
-		  /* xgettext:c-format */
-		  (_("%pB: warning: sh_link not set for section `%pA'"),
-		   abfd, sec);
+	      bed->link_order_error_handler
+		/* xgettext:c-format */
+		(_("%pB: warning: sh_link not set for section `%pA'"),
+		 abfd, sec);
 	    }
 	}
 

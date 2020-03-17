@@ -987,12 +987,11 @@ elf_write_relocs (bfd *abfd, asection *sec, void *data)
       (*swap_out) (abfd, &src_rela, dst_rela);
     }
 
-  if (bed->write_secondary_relocs != NULL)
-    if (! bed->write_secondary_relocs (abfd, sec))
-      {
-	*failedp = TRUE;
-	return;
-      }
+  if (!bed->write_secondary_relocs (abfd, sec))
+    {
+      *failedp = TRUE;
+      return;
+    }
 }
 
 /* Write out the program headers.  */
@@ -1596,8 +1595,7 @@ elf_slurp_reloc_table (bfd *abfd,
 					      symbols, dynamic))
     return FALSE;
 
-  if (bed->slurp_secondary_relocs != NULL
-      && ! bed->slurp_secondary_relocs (abfd, asect, symbols))
+  if (!bed->slurp_secondary_relocs (abfd, asect, symbols))
     return FALSE;
 
   asect->relocation = relents;
