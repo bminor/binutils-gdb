@@ -1,3 +1,9 @@
+2020-03-17  Nick Clifton  <nickc@redhat.com>
+
+	PR 25687
+	* elf.c (_bfd_elf_slurp_secondary_reloc_section): Remove redundant
+	free.  Add free on another failure path.
+
 2020-03-16  Alan Modra  <amodra@gmail.com>
 
 	PR 25675

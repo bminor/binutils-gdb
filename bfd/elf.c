@@ -12454,6 +12454,7 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *      abfd,
 	  reloc_count = NUM_SHDR_ENTRIES (hdr);
 	  if (_bfd_mul_overflow (reloc_count, sizeof (arelent), & amt))
 	    {
+	      free (native_relocs);
 	      bfd_set_error (bfd_error_file_too_big);
 	      result = FALSE;
 	      continue;
@@ -12472,7 +12473,8 @@ _bfd_elf_slurp_secondary_reloc_section (bfd *      abfd,
 		  != hdr->sh_size))
 	    {
 	      free (native_relocs);
-	      free (internal_relocs);
+	      /* The internal_relocs will be freed when
+		 the memory for the bfd is released.  */
 	      result = FALSE;
 	      continue;
 	    }
