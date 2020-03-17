@@ -1,5 +1,14 @@
 2020-03-17  Kamil Rytarowski  <n54@gmx.com>
 
+	* user-regs.c (user_reg::read): Rename to...
+	(user_reg::xread): ...this.
+	* (append_user_reg): Rename argument `read' to `xread'.
+	* (user_reg_add_builtin): Likewise.
+	* (user_reg_add): Likewise.
+	* (value_of_user_reg): Likewise.
+
+2020-03-17  Kamil Rytarowski  <n54@gmx.com>
+
 	* sparc-nat.c (gdb_ptrace): New.
 	* sparc-nat.c (sparc_fetch_inferior_registers)
 	(sparc_store_inferior_registers) Remove obsolete comment.
