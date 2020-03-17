@@ -1,3 +1,9 @@
+2020-03-18  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* emultempl/xtensaelf.em: Emit a fatal error message
+	instead of calling abort.
+	* ldlang.c: Likewise.
+
 2020-03-14  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/non-contiguous.d: Don't xfail generic ELF

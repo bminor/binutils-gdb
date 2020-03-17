@@ -735,12 +735,10 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	 section.  The user should fix his linker script.  */
       if (hsh->target_section->output_section == NULL
 	  && info->non_contiguous_regions)
-	{
-	  _bfd_error_handler (_("Could not assign '%pA' to an output section. "
-				"Retry without --enable-non-contiguous-regions.\n"),
-			      hsh->target_section);
-	  abort();
-    }
+	info->callbacks->einfo (_("%F%P: Could not assign '%pA' to an output "
+				  "section. Retry without "
+				  "--enable-non-contiguous-regions.\n"),
+				hsh->target_section);
 
       /* Create the long branch.  A long branch is formed with "ldil"
 	 loading the upper bits of the target address into a register,
@@ -766,12 +764,11 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	 section.  The user should fix his linker script.  */
       if (hsh->target_section->output_section == NULL
 	  && info->non_contiguous_regions)
-	{
-	  _bfd_error_handler (_("Could not assign %pA to an output section. "
-				"Retry without --enable-non-contiguous-regions.\n"),
-			      hsh->target_section);
-	  abort();
-    }
+	info->callbacks->einfo (_("%F%P: Could not assign %pA to an output "
+				  "section. Retry without "
+				  "--enable-non-contiguous-regions.\n"),
+				hsh->target_section);
+
       /* Branches are relative.  This is where we are going to.  */
       sym_value = (hsh->target_value
 		   + hsh->target_section->output_offset
@@ -848,12 +845,11 @@ hppa_build_one_stub (struct bfd_hash_entry *bh, void *in_arg)
 	 section.  The user should fix his linker script.  */
       if (hsh->target_section->output_section == NULL
 	  && info->non_contiguous_regions)
-	{
-	  _bfd_error_handler (_("Could not assign %pA to an output section. "
-				"Retry without --enable-non-contiguous-regions.\n"),
-			      hsh->target_section);
-	  abort();
-    }
+	info->callbacks->einfo (_("%F%P: Could not assign %pA to an output "
+				  "section. Retry without "
+				  "--enable-non-contiguous-regions.\n"),
+				hsh->target_section);
+
       /* Branches are relative.  This is where we are going to.  */
       sym_value = (hsh->target_value
 		   + hsh->target_section->output_offset

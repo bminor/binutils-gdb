@@ -1,3 +1,17 @@
+2020-03-18  Christophe Lyon  <christophe.lyon@linaro.org>
+
+	* elf32-arm.c (arm_build_one_stub): Emit a fatal error message
+	instead of calling abort.
+	* elf32-csky.c (csky_build_one_stub): Likewise.
+	* elf32-hppa.c (hppa_build_one_stub): Likewise.
+	* elf32-m68hc11.c (m68hc11_elf_build_one_stub): Likewise.
+	* elf32-m68hc12.c (m68hc12_elf_build_one_stub): Likewise.
+	* elf32-metag.c (metag_build_one_stub): Likewise.
+	* elf32-nios2.c (nios2_build_one_stub): Likewise.
+	* elf64-ppc.c (ppc_build_one_stub): Likewise.
+	(ppc_size_one_stub): Likewise.
+	* elfnn-aarch64.c (aarch64_build_one_stub): Likewise.
+
 2020-03-17  Nick Clifton  <nickc@redhat.com>
 
 	PR 25688

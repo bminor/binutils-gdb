@@ -11367,25 +11367,19 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   if (stub_entry->target_section != NULL
       && stub_entry->target_section->output_section == NULL
       && info->non_contiguous_regions)
-    {
-      _bfd_error_handler (_("Could not assign '%pA' to an output section. "
-			    "Retry without --enable-non-contiguous-regions.\n"),
-			  stub_entry->target_section);
-      abort();
-    }
+    info->callbacks->einfo (_("%F%P: Could not assign '%pA' to an output section. "
+			      "Retry without --enable-non-contiguous-regions.\n"),
+			    stub_entry->target_section);
 
   /* Same for the group.  */
   if (stub_entry->group->stub_sec != NULL
       && stub_entry->group->stub_sec->output_section == NULL
       && info->non_contiguous_regions)
-    {
-      _bfd_error_handler (_("Could not assign group %pA target %pA to an "
-			    "output section. Retry without "
-			    "--enable-non-contiguous-regions.\n"),
-			  stub_entry->group->stub_sec,
-			  stub_entry->target_section);
-      abort();
-    }
+    info->callbacks->einfo (_("%F%P: Could not assign group %pA target %pA to an "
+			      "output section. Retry without "
+			      "--enable-non-contiguous-regions.\n"),
+			    stub_entry->group->stub_sec,
+			    stub_entry->target_section);
 
   htab = ppc_hash_table (info);
   if (htab == NULL)
@@ -11917,25 +11911,19 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   if (stub_entry->target_section != NULL
       && stub_entry->target_section->output_section == NULL
       && info->non_contiguous_regions)
-    {
-      _bfd_error_handler (_("Could not assign %pA to an output section. "
-			    "Retry without --enable-non-contiguous-regions.\n"),
-			  stub_entry->target_section);
-      abort();
-    }
+    info->callbacks->einfo (_("%F%P: Could not assign %pA to an output section. "
+			      "Retry without --enable-non-contiguous-regions.\n"),
+			    stub_entry->target_section);
 
   /* Same for the group.  */
   if (stub_entry->group->stub_sec != NULL
       && stub_entry->group->stub_sec->output_section == NULL
       && info->non_contiguous_regions)
-    {
-      _bfd_error_handler (_("Could not assign group %pA target %pA to an "
-			    "output section. Retry without "
-			    "--enable-non-contiguous-regions.\n"),
-			  stub_entry->group->stub_sec,
-			  stub_entry->target_section);
-      abort();
-    }
+    info->callbacks->einfo (_("%F%P: Could not assign group %pA target %pA to an "
+			      "output section. Retry without "
+			      "--enable-non-contiguous-regions.\n"),
+			    stub_entry->group->stub_sec,
+			    stub_entry->target_section);
 
   /* Make a note of the offset within the stubs for this entry.  */
   stub_entry->stub_offset = stub_entry->group->stub_sec->size;

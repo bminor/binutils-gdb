@@ -5220,21 +5220,15 @@ size_input_section
 	      if (dot + TO_ADDR (i->size) > end)
 		{
 		  if (i->flags & SEC_LINKER_CREATED)
-		    {
-		      einfo (_("Output section '%s' not large enough for the "
-			       "linker-created stubs section '%s'.\n"),
-			     i->output_section->name, i->name);
-		      abort();
-		    }
+		    einfo (_("%F%P: Output section '%s' not large enough for the "
+			     "linker-created stubs section '%s'.\n"),
+			   i->output_section->name, i->name);
 
 		  if (i->rawsize && i->rawsize != i->size)
-		    {
-		      einfo (_("Relaxation not supported with "
-			       "--enable-non-contiguous-regions (section '%s' "
-			       "would overflow '%s' after it changed size).\n"),
-			     i->name, i->output_section->name);
-		      abort();
-		    }
+		    einfo (_("%F%P: Relaxation not supported with "
+			     "--enable-non-contiguous-regions (section '%s' "
+			     "would overflow '%s' after it changed size).\n"),
+			   i->name, i->output_section->name);
 
 		  *removed = 1;
 		  dot = end;

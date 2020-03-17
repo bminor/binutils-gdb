@@ -2498,12 +2498,10 @@ nios2_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg ATTRIBUTE_U
      section.  The user should fix his linker script.  */
   if (hsh->target_section->output_section == NULL
       && info->non_contiguous_regions)
-    {
-      _bfd_error_handler (_("Could not assign '%pA' to an output section. "
-			    "Retry without --enable-non-contiguous-regions.\n"),
-			  hsh->target_section);
-      abort();
-    }
+    info->callbacks->einfo (_("%F%P: Could not assign '%pA' to an output section. "
+			      "Retry without --enable-non-contiguous-regions.\n"),
+			    hsh->target_section);
+
   /* Make a note of the offset within the stubs for this entry.  */
   hsh->stub_offset = stub_sec->size;
 

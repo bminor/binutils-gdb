@@ -5068,12 +5068,9 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
      section.  The user should fix his linker script.  */
   if (stub_entry->target_section->output_section == NULL
       && info->non_contiguous_regions)
-    {
-      _bfd_error_handler (_("Could not assign '%pA' to an output section. "
-			    "Retry without --enable-non-contiguous-regions.\n"),
-			  stub_entry->target_section);
-      abort();
-    }
+    info->callbacks->einfo (_("%F%P: Could not assign '%pA' to an output section. "
+			      "Retry without --enable-non-contiguous-regions.\n"),
+			    stub_entry->target_section);
 
   globals = elf32_arm_hash_table (info);
   if (globals == NULL)
