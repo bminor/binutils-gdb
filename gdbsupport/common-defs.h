@@ -92,7 +92,9 @@
 #include <strings.h>	/* for strcasecmp and strncasecmp */
 #endif
 #include <errno.h>
+#if HAVE_ALLOCA_H
 #include <alloca.h>
+#endif
 
 #include "ansidecl.h"
 /* This is defined by ansidecl.h, but we prefer gnulib's version.  On
