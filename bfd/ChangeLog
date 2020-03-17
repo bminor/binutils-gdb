@@ -1,6 +1,6 @@
 2020-03-17  Nick Clifton  <nickc@redhat.com>
 
-	PR 25633
+	PR 25688
 	* elf.c (_bfd_elf_copy_special_section_fields): Replace assertions
 	with error messages.
 
