@@ -1,3 +1,28 @@
+2020-03-17  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25641
+	PR 25668
+	PR 25633
+	Fix disassembling ED+A4/AC/B4/BC opcodes.
+	Fix assembling lines containing colonless label and instruction
+	with first operand inside parentheses.
+	Fix registration of unsupported by target CPU registers.
+	* config/tc-z80.c: See above.
+	* config/tc-z80.h: See above.
+	* testsuite/gas/z80/colonless.d: Update test.
+	* testsuite/gas/z80/colonless.s: Likewise.
+	* testsuite/gas/z80/ez80_adl_all.d: Likewise.
+	* testsuite/gas/z80/ez80_unsup_regs.d: Likewise.
+	* testsuite/gas/z80/ez80_z80_all.d: Likewise.
+	* testsuite/gas/z80/gbz80_unsup_regs.d: Likewise.
+	* testsuite/gas/z80/r800_unsup_regs.d: Likewise.
+	* testsuite/gas/z80/unsup_regs.s: Likewise.
+	* testsuite/gas/z80/z180_unsup_regs.d: Likewise.
+	* testsuite/gas/z80/z80.exp: Likewise.
+	* testsuite/gas/z80/z80_strict_unsup_regs.d: Likewise.
+	* testsuite/gas/z80/z80_unsup_regs.d: Likewise.
+	* testsuite/gas/z80/z80n_unsup_regs.d: Likewise.
+
 2020-03-13  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	PR 25660

@@ -12592,13 +12592,31 @@ _bfd_elf_copy_special_section_fields (const bfd *   ibfd ATTRIBUTE_UNUSED,
     }
 
   /* Find the output section that corresponds to the isection's sh_info link.  */
-  BFD_ASSERT (isection->sh_info > 0
-	      && isection->sh_info < elf_numsections (ibfd));
+  if (isection->sh_info == 0
+      || isection->sh_info >= elf_numsections (ibfd))
+    {
+      _bfd_error_handler
+	/* xgettext:c-format */
+	(_("%pB(%pA): info section index is invalid"),
+	obfd, osec);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
   isection = elf_elfsections (ibfd)[isection->sh_info];
 
-  BFD_ASSERT (isection != NULL);
-  BFD_ASSERT (isection->bfd_section != NULL);
-  BFD_ASSERT (isection->bfd_section->output_section != NULL);
+  if (isection == NULL
+      || isection->bfd_section == NULL
+      || isection->bfd_section->output_section == NULL)
+    {
+      _bfd_error_handler
+	/* xgettext:c-format */
+	(_("%pB(%pA): info section index cannot be set because the section is not in the output"),
+	obfd, osec);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
   osection->sh_info =
     elf_section_data (isection->bfd_section->output_section)->this_idx;
 

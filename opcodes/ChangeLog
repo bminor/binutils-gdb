@@ -1,3 +1,8 @@
+2020-03-17  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
+	PR 25641
+	* z80-dis.c: Fix disassembling ED+A4/AC/B4/BC opcodes.
+
 2020-03-13  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (X86_64_0D): Rename to ...
