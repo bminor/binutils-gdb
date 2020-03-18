@@ -1,3 +1,9 @@
+2020-03-18  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/break-inline-psymtab-2.c: New test.
+	* gdb.dwarf2/break-inline-psymtab.c: New test.
+	* gdb.dwarf2/break-inline-psymtab.exp: New file.
+
 2020-03-16  Tom de Vries  <tdevries@suse.de>
 
 	* lib/cache.exp (gdb_do_cache): Add and handle local variables
