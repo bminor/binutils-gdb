@@ -1,3 +1,7 @@
+2020-03-19  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* elfxx-riscv.c (riscv_parse_subset): Don't use C99.
+
 2020-03-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 25673

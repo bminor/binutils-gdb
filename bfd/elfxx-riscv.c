@@ -1464,6 +1464,7 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
 		    const char *arch)
 {
   const char *p = arch;
+  size_t i;
 
   if (strncmp (p, "rv32", 4) == 0)
     {
@@ -1490,7 +1491,7 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
 
   /* Parse the different classes of extensions in the specified order.  */
 
-  for (size_t i = 0; i < ARRAY_SIZE (parse_config); ++i) {
+  for (i = 0; i < ARRAY_SIZE (parse_config); ++i) {
     p = riscv_parse_prefixed_ext (rps, arch, p, &parse_config[i]);
 
     if (p == NULL)
