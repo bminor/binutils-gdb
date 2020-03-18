@@ -1,5 +1,10 @@
 2020-03-19  Alan Modra  <amodra@gmail.com>
 
+	* readelf.c (process_archive): Always return via path freeing
+	memory.  Formatting.
+
+2020-03-19  Alan Modra  <amodra@gmail.com>
+
 	* readelf.c (process_netbsd_elf_note): Validate descsz before
 	accessing descdata.  Formatting.
 
