@@ -52,6 +52,12 @@ void trad_frame_set_reg_regmap (struct trad_frame_cache *this_trad_cache,
 void trad_frame_set_reg_value (struct trad_frame_cache *this_cache,
 			       int regnum, LONGEST val);
 
+/* Given the cache in THIS_TRAD_CACHE, set the value of REGNUM to the bytes
+   contained in BYTES with size SIZE.  */
+void trad_frame_set_reg_value_bytes (struct trad_frame_cache *this_trad_cache,
+				     int regnum, const gdb_byte *bytes,
+				     size_t size);
+
 struct value *trad_frame_get_register (struct trad_frame_cache *this_trad_cache,
 				       struct frame_info *this_frame,
 				       int regnum);
@@ -86,6 +92,8 @@ struct trad_frame_saved_reg
 {
   LONGEST addr; /* A CORE_ADDR fits in a longest.  */
   int realreg;
+  /* Register data (for values that don't fit in ADDR).  */
+  gdb_byte *data;
 };
 
 /* Encode REGNUM value in the trad-frame.  */
@@ -104,6 +112,12 @@ void trad_frame_set_addr (struct trad_frame_saved_reg this_trad_cache[],
 void trad_frame_set_unknown (struct trad_frame_saved_reg this_saved_regs[],
 			     int regnum);
 
+/* Encode REGNUM value in the trad-frame as a sequence of bytes.  This is
+   useful when the value is larger than what primitive types can hold.  */
+void trad_frame_set_value_bytes (struct trad_frame_saved_reg this_saved_regs[],
+				 int regnum, const gdb_byte *bytes,
+				 size_t size);
+
 /* Convenience functions, return non-zero if the register has been
    encoded as specified.  */
 int trad_frame_value_p (struct trad_frame_saved_reg this_saved_regs[],
@@ -112,6 +126,11 @@ int trad_frame_addr_p (struct trad_frame_saved_reg this_saved_regs[],
 		       int regnum);
 int trad_frame_realreg_p (struct trad_frame_saved_reg this_saved_regs[],
 			  int regnum);
+
+/* Return TRUE if REGNUM is stored as a sequence of bytes, and FALSE
+   otherwise.  */
+bool trad_frame_value_bytes_p (struct trad_frame_saved_reg this_saved_regs[],
+			      int regnum);
 
 /* Reset the save regs cache, setting register values to -1.  */
 void trad_frame_reset_saved_regs (struct gdbarch *gdbarch,

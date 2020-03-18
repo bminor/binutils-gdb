@@ -58,6 +58,8 @@ enum aarch64_regnum
   AARCH64_LAST_V_ARG_REGNUM = AARCH64_V0_REGNUM + 7
 };
 
+#define V_REGISTER_SIZE 16
+
 /* Pseudo register base numbers.  */
 #define AARCH64_Q0_REGNUM 0
 #define AARCH64_D0_REGNUM (AARCH64_Q0_REGNUM + AARCH64_D_REGISTER_COUNT)

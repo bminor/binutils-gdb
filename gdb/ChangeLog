@@ -1,3 +1,25 @@
+2020-12-10  Luis Machado  <luis.machado@linaro.org>
+
+	* aarch64-linux-tdep.c (aarch64_linux_restore_vreg) New function.
+	(aarch64_linux_sigframe_init): Call aarch64_linux_restore_vreg.
+	* aarch64-tdep.h (V_REGISTER_SIZE): Move to ...
+	* arch/aarch64.h: ... here.
+	* nat/aarch64-sve-linux-ptrace.c: Include endian.h.
+	(aarch64_maybe_swab128): New function.
+	(aarch64_sve_regs_copy_to_reg_buf)
+	(aarch64_sve_regs_copy_from_reg_buf): Adjust FPSIMD entries.
+	* trad-frame.c (trad_frame_reset_saved_regs): Initialize
+	the data field.
+	(TF_REG_VALUE_BYTES): New enum value.
+	(trad_frame_value_bytes_p): New function.
+	(trad_frame_set_value_bytes): New function.
+	(trad_frame_set_reg_value_bytes): New function.
+	(trad_frame_get_prev_register): Handle register values saved as bytes.
+	* trad-frame.h (trad_frame_set_reg_value_bytes): New prototype.
+	(struct trad_frame_saved_reg) <data>: New field.
+	(trad_frame_set_value_bytes): New prototype.
+	(trad_frame_value_bytes_p): New prototype.
+
 2020-12-07  Mihails Strasuns  <mihails.strasuns@intel.com>
 
 	* jit.c (mem_bfd*, bfd_open_from_target_memory): Removed.

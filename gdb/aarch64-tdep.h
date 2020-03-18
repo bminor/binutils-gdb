@@ -48,7 +48,6 @@ struct regset;
 #define H_REGISTER_SIZE  2
 #define S_REGISTER_SIZE  4
 #define D_REGISTER_SIZE  8
-#define V_REGISTER_SIZE 16
 #define Q_REGISTER_SIZE 16
 
 /* Total number of general (X) registers.  */
