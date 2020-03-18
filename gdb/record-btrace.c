@@ -1532,11 +1532,16 @@ record_btrace_target::remove_breakpoint (struct gdbarch *gdbarch,
 void
 record_btrace_target::fetch_registers (struct regcache *regcache, int regno)
 {
-  thread_info *tp = find_thread_ptid (regcache->target (), regcache->ptid ());
-  gdb_assert (tp != NULL);
+  btrace_insn_iterator *replay = nullptr;
 
-  btrace_insn_iterator *replay = tp->btrace.replay;
-  if (replay != NULL && !record_btrace_generating_corefile)
+  /* Thread-db may ask for a thread's registers before GDB knows about the
+     thread.  We forward the request to the target beneath in this
+     case.  */
+  thread_info *tp = find_thread_ptid (regcache->target (), regcache->ptid ());
+  if (tp != nullptr)
+    replay =  tp->btrace.replay;
+
+  if (replay != nullptr && !record_btrace_generating_corefile)
     {
       const struct btrace_insn *insn;
       struct gdbarch *gdbarch;

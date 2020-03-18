@@ -1,3 +1,8 @@
+2020-04-21  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/enable-new-thread.c: New test.
+	* gdb.btrace/enable-new-thread.exp: New file.
+
 2020-04-21  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/25471

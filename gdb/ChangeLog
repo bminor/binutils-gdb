@@ -1,3 +1,8 @@
+2020-04-21  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_target::fetch_registers): Forward
+	request if we do not have a thread_info.
+
 2020-04-21  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/25471
