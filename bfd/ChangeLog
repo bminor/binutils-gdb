@@ -1,3 +1,9 @@
+2020-03-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 25673
+	* elf.c (_bfd_elf_write_secondary_reloc_section): Fix illegal
+	memory access when processing a corrupt secondary reloc section.
+
 2020-03-18  Christophe Lyon  <christophe.lyon@linaro.org>
 
 	* elf32-arm.c (arm_build_one_stub): Emit a fatal error message
