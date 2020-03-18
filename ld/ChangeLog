@@ -1,5 +1,10 @@
 2020-03-18  Christophe Lyon  <christophe.lyon@linaro.org>
 
+	* testsuite/ld-arm/non-contiguous-arm4.d: Fix expected output.
+	* testsuite/ld-powerpc/non-contiguous-powerpc.d: Likewise.
+
+2020-03-18  Christophe Lyon  <christophe.lyon@linaro.org>
+
 	* emultempl/xtensaelf.em: Emit a fatal error message
 	instead of calling abort.
 	* ldlang.c: Likewise.
