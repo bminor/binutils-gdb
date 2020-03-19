@@ -21,6 +21,11 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
+/* Do not use BFD types in this file that differ in size depending on
+   whether BFD64 is defined.  Functions in this file are used by
+   readelf.c and elfedit.c which define BFD64, and by objdump.c which
+   doesn't.  */
+
 #include "sysdep.h"
 #include "libiberty.h"
 #include "filenames.h"
@@ -607,7 +612,7 @@ process_archive_index_and_symbols (struct archive_info *  arch,
 
 int
 setup_archive (struct archive_info *arch, const char *file_name,
-	       FILE *file, bfd_size_type file_size,
+	       FILE *file, off_t file_size,
 	       bfd_boolean is_thin_archive, bfd_boolean read_symbols)
 {
   size_t got;
@@ -671,7 +676,7 @@ setup_archive (struct archive_info *arch, const char *file_name,
 	  return 1;
 	}
       /* PR 17531: file: 639d6a26.  */
-      if (arch->longnames_size > file_size
+      if ((off_t) arch->longnames_size > file_size
 	  || (signed long) arch->longnames_size < 0)
 	{
 	  error (_("%s: long name table is too big, (size = 0x%lx)\n"),

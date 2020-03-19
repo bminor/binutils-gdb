@@ -74,7 +74,7 @@ extern char *adjust_relative_path (const char *, const char *, unsigned long);
 
 /* Read the symbol table and long-name table from an archive.  */
 extern int setup_archive (struct archive_info *, const char *, FILE *,
-			  bfd_size_type, bfd_boolean, bfd_boolean);
+			  off_t, bfd_boolean, bfd_boolean);
 
 /* Open and setup a nested archive, if not already open.  */
 extern int setup_nested_archive (struct archive_info *, const char *);

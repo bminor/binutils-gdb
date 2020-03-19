@@ -1,3 +1,8 @@
+2020-03-19  Alan Modra  <amodra@gmail.com>
+
+	* elfcomm.c (setup_archive): Make file_size an off_t.  Comment.
+	* elfcomm.h (setup_archive): Update prototype.
+
 2020-03-16  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (get_symbols): New function.
