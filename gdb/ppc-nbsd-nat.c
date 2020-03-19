@@ -37,8 +37,9 @@
 #include "ppc-nbsd-tdep.h"
 #include "bsd-kvm.h"
 #include "inf-ptrace.h"
+#include "nbsd-nat.h"
 
-struct ppc_nbsd_nat_target final : public inf_ptrace_target
+struct ppc_nbsd_nat_target final : public nbsd_nat_target
 {
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
