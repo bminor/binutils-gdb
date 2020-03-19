@@ -1,4 +1,10 @@
-2020-03-12  Kamil Rytarowski  <n54@gmx.com>
+2020-03-20  Kamil Rytarowski  <n54@gmx.com>
+
+	* hppa-nbsd-nat.c (fetch_registers): New variable lwp and pass
+	it to the ptrace call.
+	* (store_registers): Likewise.
+
+2020-03-20  Kamil Rytarowski  <n54@gmx.com>
 
 	* ppc-nbsd-nat.c (fetch_registers): New variable lwp and pass
 	it to the ptrace call.
