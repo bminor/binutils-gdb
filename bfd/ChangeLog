@@ -1,3 +1,9 @@
+2020-03-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 25699
+	* elf.c (bfd_elf_set_group_contents): Replace assertion with an
+	error return.
+
 2020-03-19  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* elfxx-riscv.c (riscv_parse_subset): Don't use C99.
