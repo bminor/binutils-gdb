@@ -18402,15 +18402,17 @@ process_netbsd_elf_note (Elf_Internal_Note * pnote)
   switch (pnote->type)
     {
     case NT_NETBSD_IDENT:
+      if (pnote->descsz < 1)
+	break;
       version = byte_get ((unsigned char *) pnote->descdata, sizeof (version));
       if ((version / 10000) % 100)
-        printf ("  NetBSD\t\t0x%08lx\tIDENT %u (%u.%u%s%c)\n", pnote->descsz,
+	printf ("  NetBSD\t\t0x%08lx\tIDENT %u (%u.%u%s%c)\n", pnote->descsz,
 		version, version / 100000000, (version / 1000000) % 100,
 		(version / 10000) % 100 > 26 ? "Z" : "",
 		'A' + (version / 10000) % 26);
       else
 	printf ("  NetBSD\t\t0x%08lx\tIDENT %u (%u.%u.%u)\n", pnote->descsz,
-	        version, version / 100000000, (version / 1000000) % 100,
+		version, version / 100000000, (version / 1000000) % 100,
 		(version / 100) % 100);
       return TRUE;
 
@@ -18421,6 +18423,8 @@ process_netbsd_elf_note (Elf_Internal_Note * pnote)
 
 #ifdef   NT_NETBSD_PAX
     case NT_NETBSD_PAX:
+      if (pnote->descsz < 1)
+	break;
       version = byte_get ((unsigned char *) pnote->descdata, sizeof (version));
       printf ("  NetBSD\t\t0x%08lx\tPaX <%s%s%s%s%s%s>\n", pnote->descsz,
 	      ((version & NT_NETBSD_PAX_MPROTECT) ? "+mprotect" : ""),
@@ -18431,12 +18435,11 @@ process_netbsd_elf_note (Elf_Internal_Note * pnote)
 	      ((version & NT_NETBSD_PAX_NOASLR) ? "-ASLR" : ""));
       return TRUE;
 #endif
-
-    default:
-      printf ("  NetBSD\t0x%08lx\tUnknown note type: (0x%08lx)\n", pnote->descsz,
-	      pnote->type);
-      return FALSE;
     }
+
+  printf ("  NetBSD\t0x%08lx\tUnknown note type: (0x%08lx)\n",
+	  pnote->descsz, pnote->type);
+  return FALSE;
 }
 
 static const char *
