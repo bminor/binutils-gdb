@@ -1,3 +1,10 @@
+2020-03-19  Kamil Rytarowski  <n54@gmx.com>
+
+	* x86-bsd-nat.c (gdb_ptrace): New.
+	* (x86bsd_dr_set): Add new argument `ptid'.
+	* (x86bsd_dr_get, x86bsd_dr_set, x86bsd_dr_set_control,
+	x86bsd_dr_set_addr): Update.
+
 2020-03-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* remote.c (remote_target::process_stop_reply): Handle events for
