@@ -1,3 +1,8 @@
+2020-03-19  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.opt/inline-locals.exp: Add kfail PR number.  Make kfail matching
+	more precise.
+
 2020-03-18  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/break-inline-psymtab-2.c: New test.
