@@ -750,8 +750,9 @@ print_insn_powerpc (bfd_vma memaddr,
   if (status != 0 && (dialect & PPC_OPCODE_VLE) != 0)
     {
       /* Clear buffer so unused bytes will not have garbage in them.  */
-      buffer[0] = buffer[1] = buffer[2] = buffer[3] = 0;
+      buffer[2] = buffer[3] = 0;
       status = (*info->read_memory_func) (memaddr, buffer, 2, info);
+      insn_length = 2;
     }
 
   if (status != 0)
@@ -801,12 +802,15 @@ print_insn_powerpc (bfd_vma memaddr,
 	  insn_length = 2;
 	}
     }
-  if (opcode == NULL && (dialect & PPC_OPCODE_SPE2) != 0)
-    opcode = lookup_spe2 (insn);
-  if (opcode == NULL)
-    opcode = lookup_powerpc (insn, dialect & ~PPC_OPCODE_ANY);
-  if (opcode == NULL && (dialect & PPC_OPCODE_ANY) != 0)
-    opcode = lookup_powerpc (insn, dialect);
+  if (opcode == NULL && insn_length == 4)
+    {
+      if ((dialect & PPC_OPCODE_SPE2) != 0)
+	opcode = lookup_spe2 (insn);
+      if (opcode == NULL)
+	opcode = lookup_powerpc (insn, dialect & ~PPC_OPCODE_ANY);
+      if (opcode == NULL && (dialect & PPC_OPCODE_ANY) != 0)
+	opcode = lookup_powerpc (insn, dialect);
+    }
 
   if (opcode != NULL)
     {
@@ -918,9 +922,13 @@ print_insn_powerpc (bfd_vma memaddr,
     }
 
   /* We could not find a match.  */
-  (*info->fprintf_func) (info->stream, ".long 0x%" PRIx64, insn);
-
-  return 4;
+  if (insn_length == 4)
+    (*info->fprintf_func) (info->stream, ".long 0x%x",
+			   (unsigned int) insn);
+  else
+    (*info->fprintf_func) (info->stream, ".word 0x%x",
+			   (unsigned int) insn >> 16);
+  return insn_length;
 }
 
 const disasm_options_and_args_t *

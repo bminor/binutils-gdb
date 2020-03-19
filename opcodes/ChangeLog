@@ -1,3 +1,10 @@
+2020-03-20  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (print_insn_powerpc): Only clear needed bytes of
+	partially filled buffer.  Prevent lookup of 4-byte insns when
+	only VLE 2-byte insns are possible due to section size.  Print
+	".word" rather than ".long" for 2-byte leftovers.
+
 2020-03-17  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
 	PR 25641
