@@ -1,3 +1,7 @@
+2020-03-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (process_symbol_table): Use unsigned long for si.
+
 2020-03-19  Alan Modra  <amodra@gmail.com>
 
 	* elfcomm.c: Don't include bfd.h or bucomm.h.

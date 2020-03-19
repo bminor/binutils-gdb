@@ -12001,12 +12001,11 @@ process_symbol_table (Filedata * filedata)
 	   i < filedata->file_header.e_shnum;
 	   i++, section++)
 	{
-	  unsigned int si;
 	  char * strtab = NULL;
 	  unsigned long int strtab_size = 0;
 	  Elf_Internal_Sym * symtab;
 	  Elf_Internal_Sym * psym;
-	  unsigned long num_syms;
+	  unsigned long si, num_syms;
 
 	  if ((section->sh_type != SHT_SYMTAB
 	       && section->sh_type != SHT_DYNSYM)
@@ -12060,7 +12059,7 @@ process_symbol_table (Filedata * filedata)
 	      enum versioned_symbol_info sym_info;
 	      unsigned short vna_other;
 
-	      printf ("%6d: ", si);
+	      printf ("%6ld: ", si);
 	      print_vma (psym->st_value, LONG_HEX);
 	      putchar (' ');
 	      print_vma (psym->st_size, DEC_5);
@@ -12106,7 +12105,7 @@ process_symbol_table (Filedata * filedata)
 		  /* Solaris binaries have been found to violate this requirement as
 		     well.  Not sure if this is a bug or an ABI requirement.  */
 		  && filedata->file_header.e_ident[EI_OSABI] != ELFOSABI_SOLARIS)
-		warn (_("local symbol %u found at index >= %s's sh_info value of %u\n"),
+		warn (_("local symbol %lu found at index >= %s's sh_info value of %u\n"),
 		      si, printable_section_name (filedata, section), section->sh_info);
 	    }
 
