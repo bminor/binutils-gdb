@@ -1,5 +1,14 @@
 2020-03-19  Alan Modra  <amodra@gmail.com>
 
+	* elfcomm.c: Don't include bfd.h or bucomm.h.
+	(program_name): Declare.
+	(process_archive_index_and_symbols): Replace bfd_boolean with int,
+	and substitute FALSE and TRUE.
+	(setup_archive, setup_nested_archive): Likewise.
+	* elfcomm.h: Likewise.
+
+2020-03-19  Alan Modra  <amodra@gmail.com>
+
 	* readelf.c (process_archive): Always return via path freeing
 	memory.  Formatting.
 

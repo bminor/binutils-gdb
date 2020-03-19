@@ -21,19 +21,18 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-/* Do not use BFD types in this file that differ in size depending on
-   whether BFD64 is defined.  Functions in this file are used by
-   readelf.c and elfedit.c which define BFD64, and by objdump.c which
-   doesn't.  */
+/* Do not include bfd.h in this file.  Functions in this file are used
+   by readelf.c and elfedit.c which define BFD64, and by objdump.c
+   which doesn't.  */
 
 #include "sysdep.h"
 #include "libiberty.h"
 #include "filenames.h"
-#include "bfd.h"
 #include "aout/ar.h"
-#include "bucomm.h"
 #include "elfcomm.h"
 #include <assert.h>
+
+extern char *program_name;
 
 void
 error (const char *message, ...)
@@ -461,13 +460,13 @@ adjust_relative_path (const char *file_name, const char *name,
     ARCH->sym_size and ARCH->sym_table.
    It is the caller's responsibility to free ARCH->index_array and
     ARCH->sym_table.
-   Returns TRUE upon success, FALSE otherwise.
+   Returns 1 upon success, 0 otherwise.
    If failure occurs an error message is printed.  */
 
-static bfd_boolean
-process_archive_index_and_symbols (struct archive_info *  arch,
-				   unsigned int           sizeof_ar_index,
-				   bfd_boolean            read_symbols)
+static int
+process_archive_index_and_symbols (struct archive_info *arch,
+				   unsigned int sizeof_ar_index,
+				   int read_symbols)
 {
   size_t got;
   unsigned long size;
@@ -482,7 +481,7 @@ process_archive_index_and_symbols (struct archive_info *  arch,
     {
       error (_("%s: invalid archive header size: %ld\n"),
 	     arch->file_name, size);
-      return FALSE;
+      return 0;
     }
 
   size = size + (size & 1);
@@ -495,7 +494,7 @@ process_archive_index_and_symbols (struct archive_info *  arch,
 	{
 	  error (_("%s: failed to skip archive symbol table\n"),
 		 arch->file_name);
-	  return FALSE;
+	  return 0;
 	}
     }
   else
@@ -513,7 +512,7 @@ process_archive_index_and_symbols (struct archive_info *  arch,
       if (size < sizeof_ar_index)
 	{
 	  error (_("%s: the archive index is empty\n"), arch->file_name);
-	  return FALSE;
+	  return 0;
 	}
 
       /* Read the number of entries in the archive index.  */
@@ -521,7 +520,7 @@ process_archive_index_and_symbols (struct archive_info *  arch,
       if (got != sizeof_ar_index)
 	{
 	  error (_("%s: failed to read archive index\n"), arch->file_name);
-	  return FALSE;
+	  return 0;
 	}
 
       arch->index_num = byte_get_big_endian (integer_buffer, sizeof_ar_index);
@@ -533,7 +532,7 @@ process_archive_index_and_symbols (struct archive_info *  arch,
 	{
 	  error (_("%s: the archive index is supposed to have 0x%lx entries of %d bytes, but the size is only 0x%lx\n"),
 		 arch->file_name, (long) arch->index_num, sizeof_ar_index, size);
-	  return FALSE;
+	  return 0;
 	}
 
       /* Read in the archive index.  */
@@ -542,7 +541,7 @@ process_archive_index_and_symbols (struct archive_info *  arch,
       if (index_buffer == NULL)
 	{
 	  error (_("Out of memory whilst trying to read archive symbol index\n"));
-	  return FALSE;
+	  return 0;
 	}
 
       got = fread (index_buffer, sizeof_ar_index, arch->index_num, arch->file);
@@ -550,7 +549,7 @@ process_archive_index_and_symbols (struct archive_info *  arch,
 	{
 	  free (index_buffer);
 	  error (_("%s: failed to read archive index\n"), arch->file_name);
-	  return FALSE;
+	  return 0;
 	}
 
       size -= arch->index_num * sizeof_ar_index;
@@ -562,7 +561,7 @@ process_archive_index_and_symbols (struct archive_info *  arch,
 	{
 	  free (index_buffer);
 	  error (_("Out of memory whilst trying to convert the archive symbol index\n"));
-	  return FALSE;
+	  return 0;
 	}
 
       for (i = 0; i < arch->index_num; i++)
@@ -576,14 +575,14 @@ process_archive_index_and_symbols (struct archive_info *  arch,
 	{
 	  error (_("%s: the archive has an index but no symbols\n"),
 		 arch->file_name);
-	  return FALSE;
+	  return 0;
 	}
 
       arch->sym_table = (char *) malloc (size);
       if (arch->sym_table == NULL)
 	{
 	  error (_("Out of memory whilst trying to read archive index symbol table\n"));
-	  return FALSE;
+	  return 0;
 	}
 
       arch->sym_size = size;
@@ -592,7 +591,7 @@ process_archive_index_and_symbols (struct archive_info *  arch,
 	{
 	  error (_("%s: failed to read archive index symbol table\n"),
 		 arch->file_name);
-	  return FALSE;
+	  return 0;
 	}
     }
 
@@ -602,10 +601,10 @@ process_archive_index_and_symbols (struct archive_info *  arch,
     {
       error (_("%s: failed to read archive header following archive index\n"),
 	     arch->file_name);
-      return FALSE;
+      return 0;
     }
 
-  return TRUE;
+  return 1;
 }
 
 /* Read the symbol table and long-name table from an archive.  */
@@ -613,7 +612,7 @@ process_archive_index_and_symbols (struct archive_info *  arch,
 int
 setup_archive (struct archive_info *arch, const char *file_name,
 	       FILE *file, off_t file_size,
-	       bfd_boolean is_thin_archive, bfd_boolean read_symbols)
+	       int is_thin_archive, int read_symbols)
 {
   size_t got;
 
@@ -627,7 +626,7 @@ setup_archive (struct archive_info *arch, const char *file_name,
   arch->longnames_size = 0;
   arch->nested_member_origin = 0;
   arch->is_thin_archive = is_thin_archive;
-  arch->uses_64bit_indices = FALSE;
+  arch->uses_64bit_indices = 0;
   arch->next_arhdr_offset = SARMAG;
 
   /* Read the first archive member header.  */
@@ -654,7 +653,7 @@ setup_archive (struct archive_info *arch, const char *file_name,
     }
   else if (const_strneq (arch->arhdr.ar_name, "/SYM64/         "))
     {
-      arch->uses_64bit_indices = TRUE;
+      arch->uses_64bit_indices = 1;
       if (! process_archive_index_and_symbols (arch, 8, read_symbols))
 	return 1;
     }
@@ -737,7 +736,7 @@ setup_nested_archive (struct archive_info *nested_arch,
   if (fstat (fileno (member_file), &statbuf) < 0)
     return 1;
   return setup_archive (nested_arch, member_file_name, member_file,
-			statbuf.st_size, FALSE, FALSE);
+			statbuf.st_size, 0, 0);
 }
 
 /* Release the memory used for the archive information.  */
