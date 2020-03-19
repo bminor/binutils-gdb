@@ -247,6 +247,53 @@ if [is_elf_format] {
 	    remote_file host delete "tmpdir/nm-ver.o"
 	}
     }
+
+    # PR binutils/25676
+    # Test nm --line-numbers on DWARF-4 debug info.    
+    set testname "nm --line-numbers on DWARF-4 debug info"
+
+    # The RISCV target does not (currently) support .uleb128.
+    setup_xfail "riscv*-*-*"
+    # The SH targets complain that the pseudo-ops used to construct
+    # the DWARF data are misaligned.
+    setup_xfail "sh*-*-*"
+    # The pre-compiled dwarf info in dw4.s is not compatible with the
+    # ALPHA, HPPA, IA64 and MIPS targets.
+    setup_xfail "alpha*-*-*" "hppa*-*-*" "ia64*-*-*" "mips*-*-*"
+    # Assembling the source file triggers an ICE in the FT32 assembler.
+    # FIXME: Fix the ICE...
+    setup_xfail "ft32-*-*"
+    # The AVR, MSP430, NDS32, PRU and XTENSA targets do not assemble the
+    # (64-bit) source file.
+    setup_xfail "avr-*-*" "msp430-*-*" "nds32*-*-*" "pru-*-*" "xtensa-*-*"
+    
+    if {![binutils_assemble $srcdir/$subdir/dw4.s tmpdir/dw4.o]} then {
+	fail "$testname (assembly)"
+    } else {
+	# The test source is only intended for 64-bit targets.
+	# FIXME: Create a 32-bit version of this test.
+	if {! [is_elf64 tmpdir/dw4.o]} {
+	    unsupported "$testname (needs a 64-bit target)"
+	} else {
+	    if [is_remote host] {
+		set tmpfile [remote_download host tmpdir/dw4r.o]
+	    } else {
+		set tmpfile tmpdir/dw4.o
+	    }
+
+	    set got [binutils_run $NM "$NMFLAGS --line-numbers $tmpfile"]
+
+	    if {! [regexp "g_my_externd_global.*tests/main.c:3" $got]} then {
+		fail "$testname (grep for externd global file/line)"
+	    } else {
+		pass $testname
+	    }
+	}
+
+	if { $verbose < 1 } {
+	    remote_file host delete $tmpfile
+	}
+    }
 }
 
 # There are certainly other tests that could be run.

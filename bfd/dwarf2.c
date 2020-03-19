@@ -295,12 +295,12 @@ struct comp_unit
 /* This data structure holds the information of an abbrev.  */
 struct abbrev_info
 {
-  unsigned int number;		/* Number identifying abbrev.  */
-  enum dwarf_tag tag;		/* DWARF tag.  */
-  int has_children;		/* Boolean.  */
-  unsigned int num_attrs;	/* Number of attributes.  */
-  struct attr_abbrev *attrs;	/* An array of attribute descriptions.  */
-  struct abbrev_info *next;	/* Next in chain.  */
+  unsigned int         number;		/* Number identifying abbrev.  */
+  enum dwarf_tag       tag;		/* DWARF tag.  */
+  bfd_boolean          has_children;	/* TRUE if the abbrev has children.  */
+  unsigned int         num_attrs;	/* Number of attributes.  */
+  struct attr_abbrev * attrs;		/* An array of attribute descriptions.  */
+  struct abbrev_info * next;		/* Next in chain.  */
 };
 
 struct attr_abbrev
@@ -1472,19 +1472,24 @@ struct lookup_funcinfo
 
 struct varinfo
 {
-  /* Pointer to previous variable in list of all variables */
+  /* Pointer to previous variable in list of all variables.  */
   struct varinfo *prev_var;
-  /* Source location file name */
+  /* The offset of the varinfo from the start of the unit.  */
+  bfd_uint64_t unit_offset;
+  /* Source location file name.  */
   char *file;
-  /* Source location line number */
+  /* Source location line number.  */
   int line;
+  /* The type of this variable.  */
   int tag;
+  /* The name of the variable, if it has one.  */
   char *name;
+  /* The address of the variable.  */
   bfd_vma addr;
-  /* Where the symbol is defined */
+  /* Where the symbol is defined.  */
   asection *sec;
-  /* Is this a stack variable? */
-  unsigned int stack: 1;
+  /* Is this a stack variable?  */
+  bfd_boolean stack;
 };
 
 /* Return TRUE if NEW_LINE should sort after LINE.  */
@@ -2858,7 +2863,7 @@ lookup_symbol_in_variable_table (struct comp_unit *unit,
   struct varinfo* each;
 
   for (each = unit->variable_table; each; each = each->prev_var)
-    if (each->stack == 0
+    if (! each->stack
 	&& each->file != NULL
 	&& each->name != NULL
 	&& each->addr == addr
@@ -3153,6 +3158,20 @@ read_rangelist (struct comp_unit *unit, struct arange *arange,
   return TRUE;
 }
 
+static struct varinfo *
+lookup_var_by_offset (bfd_uint64_t offset, struct varinfo * table)
+{
+  while (table)
+    {
+      if (table->unit_offset == offset)
+	return table;
+      table = table->prev_var;
+    }
+
+  return NULL;
+}
+
+
 /* DWARF2 Compilation unit functions.  */
 
 /* Scan over each die in a comp. unit looking for functions to add
@@ -3189,11 +3208,13 @@ scan_unit_for_symbols (struct comp_unit *unit)
       bfd_vma low_pc = 0;
       bfd_vma high_pc = 0;
       bfd_boolean high_pc_relative = FALSE;
+      bfd_uint64_t current_offset;
 
       /* PR 17512: file: 9f405d9d.  */
       if (info_ptr >= info_ptr_end)
 	goto fail;
 
+      current_offset = info_ptr - unit->info_ptr_unit;
       abbrev_number = _bfd_safe_read_leb128 (abfd, info_ptr, &bytes_read,
 					     FALSE, info_ptr_end);
       info_ptr += bytes_read;
@@ -3221,12 +3242,13 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  goto fail;
 	}
 
-      var = NULL;
       if (abbrev->tag == DW_TAG_subprogram
 	  || abbrev->tag == DW_TAG_entry_point
 	  || abbrev->tag == DW_TAG_inlined_subroutine)
 	{
 	  size_t amt = sizeof (struct funcinfo);
+
+	  var = NULL;
 	  func = (struct funcinfo *) bfd_zalloc (abfd, amt);
 	  if (func == NULL)
 	    goto fail;
@@ -3255,12 +3277,15 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	      if (var == NULL)
 		goto fail;
 	      var->tag = abbrev->tag;
-	      var->stack = 1;
+	      var->stack = TRUE;
 	      var->prev_var = unit->variable_table;
 	      unit->variable_table = var;
+	      var->unit_offset = current_offset;
 	      /* PR 18205: Missing debug information can cause this
 		 var to be attached to an already cached unit.  */
 	    }
+	  else
+	    var = NULL;
 
 	  /* No inline function in scope at this nesting level.  */
 	  nested_funcs[nesting_level].func = 0;
@@ -3349,6 +3374,31 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	    {
 	      switch (attr.name)
 		{
+		case DW_AT_specification:
+		  if (attr.u.val)
+		    {
+		      struct varinfo * spec_var;
+
+		      spec_var = lookup_var_by_offset (attr.u.val, unit->variable_table);
+		      if (spec_var == NULL)
+			{	
+			  _bfd_error_handler
+			    (_("DWARF error: could not find variable specification at offset %lx"),
+			     (unsigned long) attr.u.val);
+			  break;
+			}
+
+		      if (var->name == NULL)
+			var->name = spec_var->name;
+		      if (var->file == NULL)
+			var->file = strdup (spec_var->file);
+		      if (var->line == 0)
+			var->line = spec_var->line;
+		      if (var->sec == NULL)
+			var->sec = spec_var->sec;
+		    }
+		  break;
+
 		case DW_AT_name:
 		  if (is_str_attr (attr.form))
 		    var->name = attr.u.str;
@@ -3365,7 +3415,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 
 		case DW_AT_external:
 		  if (attr.u.val != 0)
-		    var->stack = 0;
+		    var->stack = FALSE;
 		  break;
 
 		case DW_AT_location:
@@ -3379,7 +3429,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		      if (attr.u.blk->data != NULL
 			  && *attr.u.blk->data == DW_OP_addr)
 			{
-			  var->stack = 0;
+			  var->stack = FALSE;
 
 			  /* Verify that DW_OP_addr is the only opcode in the
 			     location, in which case the block size will be 1
@@ -3875,7 +3925,7 @@ comp_unit_hash_info (struct dwarf2_debug *stash,
        each_var = each_var->prev_var)
     {
       /* Skip stack vars and vars with no files or names.  */
-      if (each_var->stack == 0
+      if (! each_var->stack
 	  && each_var->file != NULL
 	  && each_var->name != NULL)
 	/* There is no need to copy name string into hash table as

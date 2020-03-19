@@ -1,3 +1,9 @@
+2020-03-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 25676
+	* testsuite/binutils-all/dw4.s: New test source file.
+	* testsuite/binutils-all/nm.exp: Run the new test.
+
 2020-03-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (process_symbol_table): Use unsigned long for si.

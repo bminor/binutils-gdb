@@ -1,5 +1,17 @@
 2020-03-19  Nick Clifton  <nickc@redhat.com>
 
+	PR 25676
+	* dwarf2.c (struct varinfo): Add unit_offset field to record the
+	location of the varinfo in the unit's debug info data.  Change the
+	type of the stack field to a boolean.
+	(lookup_var_by_offset): New function.  Returns the varinfo
+	structure for the variable described at the given offset in the
+	unit's debug info.
+	(scan_unit_for_symbols): Add support for variables which have the
+	DW_AT_specification attribute.
+
+2020-03-19  Nick Clifton  <nickc@redhat.com>
+
 	PR 25699
 	* elf.c (bfd_elf_set_group_contents): Replace assertion with an
 	error return.
