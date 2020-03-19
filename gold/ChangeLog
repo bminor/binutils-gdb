@@ -1,3 +1,7 @@
+2020-03-19  Fangrui Song  <maskray@google.com>
+
+    * options.h (General_options): Add --no-rosegment option.
+
 2020-02-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Update French translation.

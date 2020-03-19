@@ -1182,7 +1182,7 @@ class General_options
 
   DEFINE_bool(rosegment, options::TWO_DASHES, '\0', false,
 	      N_("Put read-only non-executable sections in their own segment"),
-	      NULL);
+	      N_("Do not put read-only non-executable sections in their own segment"));
 
   DEFINE_uint64(rosegment_gap, options::TWO_DASHES, '\0', -1U,
 		N_("Set offset between executable and read-only segments"),
