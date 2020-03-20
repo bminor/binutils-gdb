@@ -2453,7 +2453,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 bool
 dwarf2_evaluate_property (const struct dynamic_prop *prop,
 			  struct frame_info *frame,
-			  struct property_addr_info *addr_stack,
+			  const struct property_addr_info *addr_stack,
 			  CORE_ADDR *value)
 {
   if (prop == NULL)
@@ -2542,7 +2542,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
       {
 	struct dwarf2_property_baton *baton
 	  = (struct dwarf2_property_baton *) prop->data.baton;
-	struct property_addr_info *pinfo;
+	const struct property_addr_info *pinfo;
 	struct value *val;
 
 	for (pinfo = addr_stack; pinfo != NULL; pinfo = pinfo->next)

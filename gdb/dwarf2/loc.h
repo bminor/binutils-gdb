@@ -96,7 +96,7 @@ struct property_addr_info
 
 bool dwarf2_evaluate_property (const struct dynamic_prop *prop,
 			       struct frame_info *frame,
-			       struct property_addr_info *addr_stack,
+			       const struct property_addr_info *addr_stack,
 			       CORE_ADDR *value);
 
 /* A helper for the compiler interface that compiles a single dynamic

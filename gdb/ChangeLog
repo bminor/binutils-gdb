@@ -1,3 +1,10 @@
+2020-03-20  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/loc.h (dwarf2_evaluate_property): Make "addr_stack"
+	const.
+	* dwarf2/loc.c (dwarf2_evaluate_property): Make "addr_stack"
+	const.
+
 2020-03-20  Simon Marchi  <simon.marchi@efficios.com>
 
 	* ptrace.m4: Don't check for ptrace declaration.
