@@ -1,3 +1,9 @@
+2020-03-20  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.threads/step-over-lands-on-breakpoint.exp (do_test): Bail out if
+	first break fails.
+	* gdb.threads/step-over-trips-on-watchpoint.exp: (do_test): Same.
+
 2020-03-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.server/exit-multiple-threads.c: New file.
