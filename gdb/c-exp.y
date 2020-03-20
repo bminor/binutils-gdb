@@ -2580,7 +2580,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
 	if ((tokentab2[i].flags & FLAG_CXX) != 0
 	    && par_state->language ()->la_language != language_cplus)
 	  break;
-	gdb_assert ((tokentab3[i].flags & FLAG_C) == 0);
+	gdb_assert ((tokentab2[i].flags & FLAG_C) == 0);
 
 	pstate->lexptr += 2;
 	yylval.opcode = tokentab2[i].opcode;

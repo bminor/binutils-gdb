@@ -1,5 +1,9 @@
 2020-03-20  Tom Tromey  <tromey@adacore.com>
 
+	* c-exp.y (lex_one_token): Fix assert.
+
+2020-03-20  Tom Tromey  <tromey@adacore.com>
+
 	* ada-tasks.c (read_atcb): Use smaller length in strncpy call.
 	* linux-tdep.c (linux_fill_prpsinfo): Use smaller length in
 	strncpy call.
