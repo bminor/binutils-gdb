@@ -1729,7 +1729,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
 
   /* Copying the program name.  Only the basename matters.  */
   basename = lbasename (fname.get ());
-  strncpy (p->pr_fname, basename, sizeof (p->pr_fname));
+  strncpy (p->pr_fname, basename, sizeof (p->pr_fname) - 1);
   p->pr_fname[sizeof (p->pr_fname) - 1] = '\0';
 
   infargs = get_inferior_args ();
@@ -1739,7 +1739,7 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   if (infargs != NULL)
     psargs = psargs + " " + infargs;
 
-  strncpy (p->pr_psargs, psargs.c_str (), sizeof (p->pr_psargs));
+  strncpy (p->pr_psargs, psargs.c_str (), sizeof (p->pr_psargs) - 1);
   p->pr_psargs[sizeof (p->pr_psargs) - 1] = '\0';
 
   xsnprintf (filename, sizeof (filename), "/proc/%d/stat", (int) pid);

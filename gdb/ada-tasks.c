@@ -679,7 +679,8 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
 		  task_name = p + 2;
 
 	      /* Copy the task name.  */
-	      strncpy (task_info->name, task_name, sizeof (task_info->name));
+	      strncpy (task_info->name, task_name,
+		       sizeof (task_info->name) - 1);
 	      task_info->name[sizeof (task_info->name) - 1] = 0;
 	    }
 	  else
