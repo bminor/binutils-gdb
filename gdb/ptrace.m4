@@ -31,11 +31,7 @@ gdb_ptrace_headers='
 # include <unistd.h>
 #endif
 '
-# There is no point in checking if we don't have a prototype.
-AC_CHECK_DECLS(ptrace, [], [
-  : ${gdb_cv_func_ptrace_ret='int'}
-  : ${gdb_cv_func_ptrace_args='int,int,long,long'}
-], $gdb_ptrace_headers)
+
 # Check return type.  Varargs (used on GNU/Linux) conflict with the
 # empty argument list, so check for that explicitly.
 AC_CACHE_CHECK([return type of ptrace], gdb_cv_func_ptrace_ret,

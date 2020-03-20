@@ -15000,26 +15000,6 @@ gdb_ptrace_headers='
 # include <unistd.h>
 #endif
 '
-# There is no point in checking if we don't have a prototype.
-ac_fn_c_check_decl "$LINENO" "ptrace" "ac_cv_have_decl_ptrace" "$gdb_ptrace_headers
-"
-if test "x$ac_cv_have_decl_ptrace" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_PTRACE $ac_have_decl
-_ACEOF
-if test $ac_have_decl = 1; then :
-
-else
-
-  : ${gdb_cv_func_ptrace_ret='int'}
-  : ${gdb_cv_func_ptrace_args='int,int,long,long'}
-
-fi
 
 # Check return type.  Varargs (used on GNU/Linux) conflict with the
 # empty argument list, so check for that explicitly.

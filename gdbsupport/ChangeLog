@@ -1,3 +1,8 @@
+2020-03-20  Simon Marchi  <simon.marchi@efficios.com>
+
+	* config.in: Re-generate.
+	* configure: Re-generate.
+
 2020-03-17  Kamil Rytarowski  <n54@gmx.com>
 
 	* common-defs.h: Include alloca.h if HAVE_ALLOCA_H is defined.

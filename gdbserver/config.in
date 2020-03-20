@@ -50,10 +50,6 @@
    */
 #undef HAVE_DECL_PERROR
 
-/* Define to 1 if you have the declaration of `ptrace', and to 0 if you don't.
-   */
-#undef HAVE_DECL_PTRACE
-
 /* Define to 1 if you have the declaration of `snprintf', and to 0 if you
    don't. */
 #undef HAVE_DECL_SNPRINTF

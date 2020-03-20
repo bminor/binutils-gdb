@@ -1,3 +1,11 @@
+2020-03-20  Simon Marchi  <simon.marchi@efficios.com>
+
+	* ptrace.m4: Don't check for ptrace declaration.
+	* config.in: Re-generate.
+	* configure: Re-generate.
+	* nat/gdb_ptrace.h: Don't declare ptrace if HAVE_DECL_PTRACE is
+	not defined.
+
 2020-03-20  Kamil Rytarowski  <n54@gmx.com>
 
 	* amd64-bsd-nat.c (gdb_ptrace): Change return type from `int' to
