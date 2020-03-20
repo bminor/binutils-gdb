@@ -1,3 +1,11 @@
+2020-03-20  Kamil Rytarowski  <n54@gmx.com>
+
+	* amd64-bsd-nat.c (gdb_ptrace): Change return type from `int' to
+	`PTRACE_TYPE_RET'.
+	* i386-bsd-nat.c (gdb_ptrace): Likewise.
+	* sparc-nat.c (gdb_ptrace): Likewise.
+	* x86-bsd-nat.c (gdb_ptrace): Likewise.
+
 2020-03-20  Tom Tromey  <tromey@adacore.com>
 
 	* c-exp.y (lex_one_token): Fix assert.

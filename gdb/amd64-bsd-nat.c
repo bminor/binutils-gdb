@@ -36,7 +36,7 @@
 #include "amd64-bsd-nat.h"
 
 
-static int
+static PTRACE_TYPE_RET
 gdb_ptrace (PTRACE_TYPE_ARG1 request, ptid_t ptid, PTRACE_TYPE_ARG3 addr,
 	    PTRACE_TYPE_ARG4 data)
 {

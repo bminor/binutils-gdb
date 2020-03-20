@@ -78,7 +78,7 @@ typedef struct fp_status fpregset_t;
 #define PTRACE_SETFPREGS PT_SETFPREGS
 #endif
 
-static int
+static PTRACE_TYPE_RET
 gdb_ptrace (PTRACE_TYPE_ARG1 request, ptid_t ptid, PTRACE_TYPE_ARG3 addr)
 {
 #ifdef __NetBSD__

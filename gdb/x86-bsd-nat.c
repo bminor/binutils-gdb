@@ -33,7 +33,7 @@
 #include "inf-ptrace.h"
 
 
-static int
+static PTRACE_TYPE_RET
 gdb_ptrace (PTRACE_TYPE_ARG1 request, ptid_t ptid, PTRACE_TYPE_ARG3 addr)
 {
 #ifdef __NetBSD__
