@@ -1,5 +1,9 @@
 2020-03-20  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.dwarf2/dw2-ranges-base.exp: Update regular expressions.
+
+2020-03-20  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/sub_variant/subv.adb: New file.
 	* gdb.ada/sub_variant.exp: New file.
 

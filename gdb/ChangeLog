@@ -1,5 +1,9 @@
 2020-03-20  Tom Tromey  <tromey@adacore.com>
 
+	* symmisc.c (maintenance_print_one_line_table): Use ui_out.
+
+2020-03-20  Tom Tromey  <tromey@adacore.com>
+
 	* ada-valprint.c (print_variant_part): Remove parameters; switch
 	to value-based API.
 	(print_field_values): Likewise.
