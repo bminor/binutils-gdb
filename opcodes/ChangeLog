@@ -1,5 +1,10 @@
 2020-03-20  Alan Modra  <amodra@gmail.com>
 
+	* metag-dis.c (print_insn_metag): Don't ignore status from
+	read_memory_func.
+
+2020-03-20  Alan Modra  <amodra@gmail.com>
+
 	* nds32-dis.c (print_insn_nds32): Remove unnecessary casts.
 	Initialize parts of buffer not written when handling a possible
 	2-byte insn at end of section.  Don't attempt decoding of such
