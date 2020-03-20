@@ -1260,9 +1260,9 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 	return FALSE;
 
       GET_VALUE_IN_FIELD (sz, hdr.size, 10);
-      if (sz == (bfd_size_type) -1)
+      if (sz + 1 < 5)
 	{
-	  bfd_set_error (bfd_error_no_memory);
+	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
 
@@ -1322,9 +1322,9 @@ _bfd_xcoff_slurp_armap (bfd *abfd)
 	return FALSE;
 
       GET_VALUE_IN_FIELD (sz, hdr.size, 10);
-      if (sz == (bfd_size_type) -1)
+      if (sz + 1 < 9)
 	{
-	  bfd_set_error (bfd_error_no_memory);
+	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
 

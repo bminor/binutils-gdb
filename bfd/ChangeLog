@@ -1,5 +1,10 @@
 2020-03-20  Alan Modra  <amodra@gmail.com>
 
+	* coff-rs6000.c (_bfd_xcoff_slurp_armap): Ensure size is large
+	enough to read number of symbols.
+
+2020-03-20  Alan Modra  <amodra@gmail.com>
+
 	* elf.c (_bfd_elf_setup_sections): Don't test known non-NULL
 	backend functions for NULL before calling.
 	(copy_special_section_fields, _bfd_elf_copy_private_bfd_data),
