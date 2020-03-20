@@ -1,3 +1,8 @@
+2020-03-20  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/sub_variant/subv.adb: New file.
+	* gdb.ada/sub_variant.exp: New file.
+
 2020-03-20  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.threads/step-over-lands-on-breakpoint.exp (do_test): Bail out if
