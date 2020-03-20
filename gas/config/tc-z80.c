@@ -3460,6 +3460,8 @@ const pseudo_typeS md_pseudo_table[] =
   { "dw", z80_cons, 2},
   { "psect", psect, 0}, /* TODO: Translate attributes.  */
   { "set", 0, 0}, 		/* Real instruction on z80.  */
+  { "xdef", s_globl, 0},	/* Synonym for .GLOBAL */
+  { "xref", s_ignore, 0},	/* Synonym for .EXTERN */
   { NULL, 0, 0 }
 } ;
 

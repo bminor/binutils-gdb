@@ -30,7 +30,7 @@
 @c man begin OPTIONS
 @table @gcctabopt
 
-@cindex @samp{-march=} option, Z80
+@cindex @code{-march=} command-line option, Z80
 @item -march=@var{CPU}[-@var{EXT}@dots{}][+@var{EXT}@dots{}]
 This option specifies the target processor. The assembler will issue
 an error message if an attempt is made to assemble an instruction which
@@ -45,9 +45,9 @@ are recognized:
 In addition to the basic instruction set, the assembler can be told to
 accept some extention mnemonics. For example,
 @code{-march=z180+sli+infc} extends @var{z180} with @var{SLI} instructions and
-@var{IN F,(C)}. The following instructions are currently supported:
+@var{IN F,(C)}. The following extentions are currently supported:
 @code{full} (all known instructions),
-@code{adl} (ADL CPU mode by default),
+@code{adl} (ADL CPU mode by default, eZ80 only),
 @code{sli} (instruction known as @var{SLI}, @var{SLL} or @var{SL1}),
 @code{xyhl} (instructions with halves of index registers: @var{IXL}, @var{IXH},
 @var{IYL}, @var{IYH}),
@@ -59,6 +59,8 @@ mnemonics starting with @code{-} revoke the respective functionality:
 @code{-march=z80-full+xyhl} first removes all default extentions and adds
 support for index registers halves only.
 
+If this option is not specified then @code{-march=z80+xyhl+infc} is assumed.
+
 @cindex @code{-local-prefix} command-line option, Z80
 @item  -local-prefix=@var{prefix}
 Mark all labels with specified prefix as local. But such label can be
@@ -67,7 +69,7 @@ local label prefix @code{.L}, it is just adds new one.
 
 @cindex @code{-colonless} command-line option, Z80
 @item  -colonless
-Accept colonless labels. All names at line begin are treated as labels.
+Accept colonless labels. All symbols at line begin are treated as labels.
 
 @cindex @code{-sdcc} command-line option, Z80
 @item  -sdcc
@@ -215,59 +217,86 @@ Supported half, single and double precision IEEE754 compatible numbers.
 
 @node Z80 Directives
 @section Z80 Assembler Directives
+@cindex Z80-only directives
 
 @command{@value{AS}} for the Z80 supports some additional directives for
 compatibility with other assemblers.
 
-@cindex Z80-only directives
 These are the additional directives in @code{@value{AS}} for the Z80:
 
 @table @code
-@item assume @var{ADL}@samp{=}@var{expression}
+@item @code{.assume ADL = @var{expression}}
+@cindex @code{.assume} directive, Z80
 Set ADL status for eZ80. Non-zero value enable compilation in ADL mode else
 used Z80 mode. ADL and Z80 mode produces incompatible object code. Mixing
 both of them within one binary may lead problems with disassembler.
 
-@item db @var{expression}|@var{string}[,@var{expression}|@var{string}...]
-@itemx defb @var{expression}|@var{string}[,@var{expression}|@var{string}...]
-@itemx defm @var{string}...]
+@item @code{db @var{expression}|@var{string}[,@var{expression}|@var{string}...]}
+@cindex @code{db} directive, Z80
+@itemx @code{defb @var{expression}|@var{string}[,@var{expression}|@var{string}...]}
+@cindex @code{defb} directive, Z80
+@itemx @code{defm @var{string}[,@var{string}...]}
+@cindex @code{defm} directive, Z80
 For each @var{string} the characters are copied to the object file, for
 each other @var{expression} the value is stored in one byte.
 A warning is issued in case of an overflow.
 Backslash symbol in the strings is generic symbol, it cannot be used as
-escape character (for this purpose use @code{.ascii} or @code{.asciiz}
-directives).
+escape character (@xref{Ascii,,@code{.ascii}}).
 
-@item dw @var{expression}[,@var{expression}...]
-@itemx defw @var{expression}[,@var{expression}...]
+@item @code{dw @var{expression}[,@var{expression}...]}
+@cindex @code{dw} directive, Z80
+@itemx @code{defw @var{expression}[,@var{expression}...]}
+@cindex @code{defw} directive, Z80
 For each @var{expression} the value is stored in two bytes, ignoring
 overflow.
 
-@item d24 @var{expression}[,@var{expression}...]
-@itemx def24 @var{expression}[,@var{expression}...]
+@item @code{d24 @var{expression}[,@var{expression}...]}
+@cindex @code{d24} directive, Z80
+@itemx @code{def24 @var{expression}[,@var{expression}...]}
+@cindex @code{def24} directive, Z80
 For each @var{expression} the value is stored in three bytes, ignoring
 overflow.
 
-@item d32 @var{expression}[,@var{expression}...]
-@itemx def32 @var{expression}[,@var{expression}...]
+@item @code{d32 @var{expression}[,@var{expression}...]}
+@cindex @code{d32} directive, Z80
+@itemx @code{def32 @var{expression}[,@var{expression}...]}
+@cindex @code{def32} directive, Z80
 For each @var{expression} the value is stored in four bytes, ignoring
 overflow.
 
-@item ds @var{count}[, @var{value}]
-@itemx defs @var{count}[, @var{value}]
+@item @code{ds @var{count}[, @var{value}]}
+@cindex @code{ds} directive, Z80
+@itemx @code{defs @var{count}[, @var{value}]}
+@cindex @code{defs} directive, Z80
 @c Synonyms for @code{ds.b},
 @c which should have been described elsewhere
 Fill @var{count} bytes in the object file with @var{value}, if
 @var{value} is omitted it defaults to zero.
 
-@item @var{symbol} equ @var{expression}
-@itemx @var{symbol} defl @var{expression}
-These directives set the value of @var{symbol} to @var{expression}. If
-@code{equ} is used, it is an error if @var{symbol} is already defined.
-Symbols defined with @code{equ} are not protected from redefinition.
+@item @code{@var{symbol} defl @var{expression}}
+@cindex @code{defl} directive, Z80
+The @code{defl} directive is like @code{.set} but with different syntax (@xref{Set,,@code{.set}}).
+It set the value of @var{symbol} to @var{expression}. Symbols defined
+with @code{defl} are not protected from redefinition.
 
-@item psect @var{name}
-A synonym for @xref{Section}, no second argument should be given.
+@item @code{@var{symbol} equ @var{expression}}
+@cindex @code{equ} directive, Z80
+The @code{equ} directive is like @code{.equiv} but with different syntax (@xref{Equiv,,@code{.equiv}}).
+It set the value of @var{symbol} to @var{expression}. It is an error
+if @var{symbol} is already defined. Symbols defined with @code{equ}
+are not protected from redefinition.
+
+@item @code{psect @var{name}}
+@cindex @code{psect} directive, Z80
+A synonym for @code{.section}, no second argument should be given (@xref{Section,,@code{.section}}).
+
+@item @code{xdef @var{symbol}}
+@cindex @code{xdef} directive, Z80
+A synonym for @code{.global}, make @var{symbol} is visible to linker (@xref{Global,,@code{.global}}).
+
+@item @code{xref @var{name}}
+@cindex @code{xref} directive, Z80
+A synonym for @code{.extern} (@ref{Extern,,@code{.extern}}).
 @ignore
 
 The following attributes will possibly be recognized in the future

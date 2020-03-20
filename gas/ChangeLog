@@ -1,5 +1,11 @@
 2020-03-17  Sergey Belyashov  <sergey.belyashov@gmail.com>
 
+	PR 25690
+	* config/tc-z80.c (md_pseudo_table): Add xdef anf xref pseudo ops.
+	* doc/c-z80.texi: Update documentation.
+
+2020-03-17  Sergey Belyashov  <sergey.belyashov@gmail.com>
+
 	PR 25641
 	PR 25668
 	PR 25633
