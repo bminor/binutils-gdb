@@ -1,5 +1,12 @@
 2020-03-20  Alan Modra  <amodra@gmail.com>
 
+	* nds32-dis.c (print_insn_nds32): Remove unnecessary casts.
+	Initialize parts of buffer not written when handling a possible
+	2-byte insn at end of section.  Don't attempt decoding of such
+	an insn by the 4-byte machinery.
+
+2020-03-20  Alan Modra  <amodra@gmail.com>
+
 	* ppc-dis.c (print_insn_powerpc): Only clear needed bytes of
 	partially filled buffer.  Prevent lookup of 4-byte insns when
 	only VLE 2-byte insns are possible due to section size.  Print
