@@ -136,6 +136,7 @@ struct plugin_list_entry
   asymbol **real_syms;
   int lto_nsyms;
   const struct ld_plugin_symbol *lto_syms;
+  bfd_boolean has_symbol_type;
 
   struct plugin_list_entry *next;
 
@@ -503,6 +504,14 @@ add_symbols (void * handle,
   return LDPS_OK;
 }
 
+static enum ld_plugin_status
+add_symbols_v2 (void *handle, int nsyms,
+		const struct ld_plugin_symbol *syms)
+{
+  current_plugin->has_symbol_type = TRUE;
+  return add_symbols (handle, nsyms, syms);
+}
+
 int
 bfd_plugin_open_input (bfd *ibfd, struct ld_plugin_input_file *file)
 {
@@ -560,7 +569,8 @@ try_claim (bfd *abfd)
       current_plugin->claim_file (&file, &claimed);
       if (claimed)
 	{
-	  if (current_plugin->all_symbols_read)
+	  if (current_plugin->all_symbols_read
+	      && !current_plugin->has_symbol_type)
 	    {
 	      struct plugin_data_struct *plugin_data
 		= abfd->tdata.plugin_data;
@@ -602,7 +612,7 @@ try_load_plugin (const char *pname,
 		 bfd *abfd, bfd_boolean build_list_p)
 {
   void *plugin_handle;
-  struct ld_plugin_tv tv[12];
+  struct ld_plugin_tv tv[13];
   int i;
   ld_plugin_onload onload;
   enum ld_plugin_status status;
@@ -664,6 +674,10 @@ try_load_plugin (const char *pname,
   ++i;
   tv[i].tv_tag = LDPT_ADD_SYMBOLS;
   tv[i].tv_u.tv_add_symbols = add_symbols;
+
+  ++i;
+  tv[i].tv_tag = LDPT_ADD_SYMBOLS_V2;
+  tv[i].tv_u.tv_add_symbols = add_symbols_v2;
 
   if (get_lto_wrapper (plugin_list_iter))
     {
@@ -977,9 +991,15 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
   struct plugin_data_struct *plugin_data = abfd->tdata.plugin_data;
   long nsyms = plugin_data->nsyms;
   const struct ld_plugin_symbol *syms = plugin_data->syms;
-  static asection fake_section
-    = BFD_FAKE_SECTION (fake_section, NULL, "plug", 0,
+  static asection fake_text_section
+    = BFD_FAKE_SECTION (fake_text_section, NULL, "plug", 0,
 			SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS);
+  static asection fake_data_section
+    = BFD_FAKE_SECTION (fake_data_section, NULL, "plug", 0,
+			SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_HAS_CONTENTS);
+  static asection fake_bss_section
+    = BFD_FAKE_SECTION (fake_bss_section, NULL, "plug", 0,
+			SEC_ALLOC);
   static asection fake_common_section
     = BFD_FAKE_SECTION (fake_common_section, NULL, "plug", 0, SEC_IS_COMMON);
   int i, j;
@@ -1014,16 +1034,34 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
 	  break;
 	case LDPK_DEF:
 	case LDPK_WEAKDEF:
-	  s->section = &fake_section;
-	  if (real_nsyms)
-	    /* Use real LTO symbols if possible.  */
-	    for (j = 0; j < real_nsyms; j++)
-	      if (real_syms[j]->name
-		  && strcmp (syms[i].name, real_syms[j]->name) == 0)
-		{
-		  s->section = real_syms[j]->section;
-		  break;
-		}
+	  if (current_plugin->has_symbol_type)
+	    switch (syms[i].symbol_type)
+	      {
+	      case LDST_UNKNOWN:
+		/* What is the best fake section for LDST_UNKNOWN?  */
+	      case LDST_FUNCTION:
+		s->section = &fake_text_section;
+		break;
+	      case LDST_VARIABLE:
+		if (syms[i].section_kind == LDSSK_BSS)
+		  s->section = &fake_bss_section;
+		else
+		  s->section = &fake_data_section;
+		break;
+	      }
+	  else
+	    {
+	      s->section = &fake_text_section;
+	      if (real_nsyms)
+		/* Use real LTO symbols if possible.  */
+		for (j = 0; j < real_nsyms; j++)
+		  if (real_syms[j]->name
+		      && strcmp (syms[i].name, real_syms[j]->name) == 0)
+		    {
+		      s->section = real_syms[j]->section;
+		      break;
+		    }
+	    }
 	  break;
 	default:
 	  BFD_ASSERT (0);
