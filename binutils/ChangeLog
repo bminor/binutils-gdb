@@ -1,3 +1,8 @@
+2020-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ar.c (main): Update bfd_plugin_set_program_name call.
+	* nm.c (main): Likewise.
+
 2020-03-19  Nick Clifton  <nickc@redhat.com>
 
 	PR 25676

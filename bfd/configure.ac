@@ -157,12 +157,6 @@ AM_MAINTAINER_MODE
 AM_CONDITIONAL(GENINSRC_NEVER, false)
 AM_INSTALL_LIBBFD
 AC_EXEEXT
-if test -n "$EXEEXT"; then
-  AC_DEFINE(HAVE_EXECUTABLE_SUFFIX, 1,
-	    [Does the platform use an executable suffix?])
-fi
-AC_DEFINE_UNQUOTED(EXECUTABLE_SUFFIX, "${EXEEXT}",
-		   [Suffix used for executables, if any.])
 
 host64=false
 target64=false
