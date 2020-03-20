@@ -1,3 +1,12 @@
+2020-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_compression_header): Add ATTRIBUTE_WARN_UNUSED_RESULT.
+	(process_section_headers): Check the return value from
+	get_compression_header.
+	(dump_section_as_strings): Likewise.
+	(dump_section_as_bytes): Likewise.
+	(load_specific_debug_section): Likewise.
+
 2020-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ar.c (main): Update bfd_plugin_set_program_name call.

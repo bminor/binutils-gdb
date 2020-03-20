@@ -6076,7 +6076,7 @@ get_elf_section_flags (Filedata * filedata, bfd_vma sh_flags)
   return buff;
 }
 
-static unsigned int
+static unsigned int ATTRIBUTE_WARN_UNUSED_RESULT
 get_compression_header (Elf_Internal_Chdr *chdr, unsigned char *buf, bfd_size_type size)
 {
   if (is_32bit_elf)
@@ -6728,15 +6728,18 @@ process_section_headers (Filedata * filedata)
 		{
 		  Elf_Internal_Chdr chdr;
 
-		  (void) get_compression_header (&chdr, buf, sizeof (buf));
-
-		  if (chdr.ch_type == ELFCOMPRESS_ZLIB)
-		    printf ("       ZLIB, ");
+		  if (get_compression_header (&chdr, buf, sizeof (buf)) == 0)
+		    printf (_("       [<corrupt>]\n"));
 		  else
-		    printf (_("       [<unknown>: 0x%x], "),
-			    chdr.ch_type);
-		  print_vma (chdr.ch_size, LONG_HEX);
-		  printf (", %lu\n", (unsigned long) chdr.ch_addralign);
+		    {
+		      if (chdr.ch_type == ELFCOMPRESS_ZLIB)
+			printf ("       ZLIB, ");
+		      else
+			printf (_("       [<unknown>: 0x%x], "),
+				chdr.ch_type);
+		      print_vma (chdr.ch_size, LONG_HEX);
+		      printf (", %lu\n", (unsigned long) chdr.ch_addralign);
+		    }
 		}
 	    }
 	}
@@ -13692,6 +13695,10 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 	  unsigned int compression_header_size
 	    = get_compression_header (& chdr, (unsigned char *) start,
 				      num_bytes);
+	  if (compression_header_size == 0)
+	    /* An error message will have already been generated
+	       by get_compression_header.  */
+	    goto error_out;
 
 	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
 	    {
@@ -13903,6 +13910,11 @@ dump_section_as_bytes (Elf_Internal_Shdr *  section,
 	  Elf_Internal_Chdr chdr;
 	  unsigned int compression_header_size
 	    = get_compression_header (& chdr, start, section_size);
+
+	  if (compression_header_size == 0)
+	    /* An error message will have already been generated
+	       by get_compression_header.  */
+	    goto error_out;
 
 	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
 	    {
@@ -14237,6 +14249,10 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
 	    }
 
 	  compression_header_size = get_compression_header (&chdr, start, size);
+	  if (compression_header_size == 0)
+	    /* An error message will have already been generated
+	       by get_compression_header.  */
+	    return FALSE;
 
 	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
 	    {
