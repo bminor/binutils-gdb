@@ -6173,6 +6173,30 @@ proc get_valueof { fmt exp default {test ""} } {
     return ${val}
 }
 
+# Retrieve the value of local var EXP in the inferior.  DEFAULT is used as
+# fallback if print fails.  TEST is the test message to use.  It can be
+# omitted, in which case a test message is built from EXP.
+
+proc get_local_valueof { exp default {test ""} } {
+    global gdb_prompt
+
+    if {$test == "" } {
+	set test "get local valueof \"${exp}\""
+    }
+
+    set val ${default}
+    gdb_test_multiple "info locals ${exp}" "$test" {
+	-re "$exp = (\[^\r\n\]*)\[\r\n\]*$gdb_prompt $" {
+	    set val $expect_out(1,string)
+	    pass "$test"
+	}
+	timeout {
+	    fail "$test (timeout)"
+	}
+    }
+    return ${val}
+}
+
 # Retrieve the value of EXP in the inferior, as a signed decimal value
 # (using "print /d").  DEFAULT is used as fallback if print fails.
 # TEST is the test message to use.  It can be omitted, in which case
