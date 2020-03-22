@@ -1,5 +1,11 @@
 2020-03-22  Alan Modra  <amodra@gmail.com>
 
+	* arc-dis.c (find_format): Use ISO C string concatenation rather
+	than line continuation within a string.  Don't access needs_limm
+	before testing opcode != NULL.
+
+2020-03-22  Alan Modra  <amodra@gmail.com>
+
 	* ns32k-dis.c (print_insn_arg): Update comment.
 	(print_insn_ns32k): Reduce size of index_offset array, and
 	initialize, passing -1 to print_insn_arg for args that are not

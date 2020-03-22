@@ -436,8 +436,9 @@ find_format (bfd_vma                       memaddr,
 	  opcode = arcExtMap_genOpcode (i, isa_mask, &errmsg);
 	  if (opcode == NULL)
 	    {
-	      (*info->fprintf_func) (info->stream, "\
-An error occured while generating the extension instruction operations");
+	      (*info->fprintf_func) (info->stream,
+				     _("An error occured while generating the "
+				       "extension instruction operations"));
 	      *opcode_result = NULL;
 	      return FALSE;
 	    }
@@ -452,7 +453,7 @@ An error occured while generating the extension instruction operations");
     opcode = find_format_from_table (info, arc_opcodes, insn, *insn_len,
 				     isa_mask, &needs_limm, TRUE);
 
-  if (needs_limm && opcode != NULL)
+  if (opcode != NULL && needs_limm)
     {
       bfd_byte buffer[4];
       int status;
