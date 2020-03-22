@@ -59,16 +59,9 @@ abstract_read_memory (struct mem_read_abstraction_base *b,
 {
   struct mem_read_abstraction *mra = (struct mem_read_abstraction *) b;
 
-  int status =
-    (*mra->info->read_memory_func) (mra->memaddr + offset,
-				    bytes, n, mra->info);
-
-  if (status != 0)
-    {
-      (*mra->info->memory_error_func) (status, mra->memaddr, mra->info);
-      return -1;
-    }
-  return 0;
+  int status = (*mra->info->read_memory_func) (mra->memaddr + offset,
+					       bytes, n, mra->info);
+  return status != 0 ? -1 : 0;
 }
 
 /* Start of disassembly file.  */
@@ -390,7 +383,6 @@ print_insn_s12z (bfd_vma memaddr, struct disassemble_info* info)
 	      else
 		(*mra.info->fprintf_func) (mra.info->stream, "%c",
 					   shift_size_table[osize]);
-		
 	    }
 	}
     }

@@ -1,3 +1,34 @@
+2020-03-22  Alan Modra  <amodra@gmail.com>
+
+	* s12z-dis.c (abstract_read_memory): Don't print error on EOI.
+	* s12z-opc.c: Formatting.
+	(operands_f): Return an int.
+	(opr_n_bytes_p1): Return -1 on reaching buffer memory limit.
+	(opr_n_bytes2, bfextins_n_bytes, mul_n_bytes, bm_n_bytes),
+	(shift_n_bytes, mov_imm_opr_n_bytes, loop_prim_n_bytes),
+	(exg_sex_discrim): Likewise.
+	(create_immediate_operand, create_bitfield_operand),
+	(create_register_operand_with_size, create_register_all_operand),
+	(create_register_all16_operand, create_simple_memory_operand),
+	(create_memory_operand, create_memory_auto_operand): Don't
+	segfault on malloc failure.
+	(z_ext24_decode): Return an int status, negative on fail, zero
+	on success.
+	(x_imm1, imm1_decode, trap_decode, z_opr_decode, z_opr_decode2),
+	(imm1234, reg_s_imm, reg_s_opr, z_imm1234_8base, z_imm1234_0base),
+	(z_tfr, z_reg, reg_xy, lea_reg_xys_opr, lea_reg_xys, rel_15_7),
+	(decode_rel_15_7, cmp_xy, sub_d6_x_y, sub_d6_y_x),
+	(ld_18bit_decode, mul_decode, bm_decode, bm_rel_decode),
+	(mov_imm_opr, ld_18bit_decode, exg_sex_decode),
+	(loop_primitive_decode, shift_decode, psh_pul_decode),
+	(bit_field_decode): Similarly.
+	(z_decode_signed_value, decode_signed_value): Similarly.  Add arg
+	to return value, update callers.
+	(x_opr_decode_with_size): Check all reads, returning NULL on fail.
+	Don't segfault on NULL operand.
+	(decode_operation): Return OP_INVALID on first fail.
+	(decode_s12z): Check all reads, returning -1 on fail.
+
 2020-03-20  Alan Modra  <amodra@gmail.com>
 
 	* metag-dis.c (print_insn_metag): Don't ignore status from
