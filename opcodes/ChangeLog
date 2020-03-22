@@ -1,5 +1,12 @@
 2020-03-22  Alan Modra  <amodra@gmail.com>
 
+	* ns32k-dis.c (print_insn_arg): Update comment.
+	(print_insn_ns32k): Reduce size of index_offset array, and
+	initialize, passing -1 to print_insn_arg for args that are not
+	an index.  Don't exit arg loop early.  Abort on bad arg number.
+
+2020-03-22  Alan Modra  <amodra@gmail.com>
+
 	* s12z-dis.c (abstract_read_memory): Don't print error on EOI.
 	* s12z-opc.c: Formatting.
 	(operands_f): Return an int.
