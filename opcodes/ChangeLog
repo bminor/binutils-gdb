@@ -1,5 +1,10 @@
 2020-03-22  Alan Modra  <amodra@gmail.com>
 
+	* h8300-dis.c (bfd_h8_disassemble): Limit data[] access to that
+	successflly read from section.
+
+2020-03-22  Alan Modra  <amodra@gmail.com>
+
 	* arc-dis.c (find_format): Use ISO C string concatenation rather
 	than line continuation within a string.  Don't access needs_limm
 	before testing opcode != NULL.

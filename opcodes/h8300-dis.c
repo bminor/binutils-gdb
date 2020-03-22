@@ -327,7 +327,7 @@ bfd_h8_disassemble (bfd_vma addr, disassemble_info *info, int mach)
   const struct h8_instruction *qi;
   char const **pregnames = mach != 0 ? lregnames : wregnames;
   int status;
-  unsigned int l;
+  unsigned int maxlen;
   unsigned char data[MAX_CODE_NIBBLES];
   void *stream = info->stream;
   fprintf_ftype outfn = info->fprintf_func;
@@ -345,8 +345,8 @@ bfd_h8_disassemble (bfd_vma addr, disassemble_info *info, int mach)
       return -1;
     }
 
-  for (l = 2; status == 0 && l < sizeof (data) / 2; l += 2)
-    status = info->read_memory_func (addr + l, data + l, 2, info);
+  for (maxlen = 2; status == 0 && maxlen < sizeof (data) / 2; maxlen += 2)
+    status = info->read_memory_func (addr + maxlen, data + maxlen, 2, info);
 
   /* Find the exact opcode/arg combo.  */
   for (qi = h8_instructions; qi->opcode->name; qi++)
@@ -355,7 +355,7 @@ bfd_h8_disassemble (bfd_vma addr, disassemble_info *info, int mach)
       const op_type *nib = q->data.nib;
       unsigned int len = 0;
 
-      while (1)
+      while (len / 2 < maxlen)
 	{
 	  op_type looking_for = *nib;
 	  int thisnib = data[len / 2];
@@ -462,6 +462,22 @@ bfd_h8_disassemble (bfd_vma addr, disassemble_info *info, int mach)
 		       || (looking_for & MODE) == INDEXW
 		       || (looking_for & MODE) == INDEXL)
 		{
+		  int extra;
+		  switch (looking_for & SIZE)
+		    {
+		    case L_16:
+		    case L_16U:
+		      extra = 1;
+		      break;
+		    case L_32:
+		      extra = 3;
+		      break;
+		    default:
+		      extra = 0;
+		      break;
+		    }
+		  if (len / 2 + extra >= maxlen)
+		    break;
 		  extract_immediate (stream, looking_for, thisnib,
 				     data + len / 2, cst + opnr,
 				     cstlen + opnr, q);
@@ -516,6 +532,8 @@ bfd_h8_disassemble (bfd_vma addr, disassemble_info *info, int mach)
 	      else if ((looking_for & SIZE) == L_16
 		       || (looking_for & SIZE) == L_16U)
 		{
+		  if (len / 2 + 1 >= maxlen)
+		    break;
 		  cst[opnr] = (data[len / 2]) * 256 + data[(len + 2) / 2];
 		  cstlen[opnr] = 16;
 		}
@@ -529,8 +547,10 @@ bfd_h8_disassemble (bfd_vma addr, disassemble_info *info, int mach)
 		}
 	      else if ((looking_for & SIZE) == L_32)
 		{
-		  int i = len / 2;
+		  unsigned int i = len / 2;
 
+		  if (i + 3 >= maxlen)
+		    break;
 		  cst[opnr] = (((unsigned) data[i] << 24)
 			       | (data[i + 1] << 16)
 			       | (data[i + 2] << 8)
@@ -540,8 +560,10 @@ bfd_h8_disassemble (bfd_vma addr, disassemble_info *info, int mach)
 		}
 	      else if ((looking_for & SIZE) == L_24)
 		{
-		  int i = len / 2;
+		  unsigned int i = len / 2;
 
+		  if (i + 2 >= maxlen)
+		    break;
 		  cst[opnr] =
 		    (data[i] << 16) | (data[i + 1] << 8) | (data[i + 2]);
 		  cstlen[opnr] = 24;
