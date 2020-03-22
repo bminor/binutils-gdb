@@ -1,3 +1,8 @@
+2020-03-22  Alan Modra  <amodra@gmail.com>
+
+	* coff64-rs6000.c (xcoff64_slurp_armap): Ensure size is large
+	enough to read number of symbols.
+
 2020-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.ac (HAVE_EXECUTABLE_SUFFIX): Removed.
