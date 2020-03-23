@@ -1,3 +1,8 @@
+2020-03-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/mixed-lang-stack.exp: Replace two hard coded address
+	with $hex.
+
 2020-03-20  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.dwarf2/dw2-ranges-base.exp: Update regular expressions.
