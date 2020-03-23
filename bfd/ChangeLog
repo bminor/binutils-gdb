@@ -1,3 +1,7 @@
+2020-03-23  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* elflink.c (_bfd_elf_tls_setup): Mention .tdata in comment.
+
 2020-03-23  Alan Modra  <amodra@gmail.com>
 
 	* ecoff.c (_bfd_ecoff_slurp_armap): Sanity check parsed_size and
