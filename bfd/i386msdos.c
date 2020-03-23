@@ -47,10 +47,10 @@ msdos_object_p (bfd *abfd)
   struct external_DOS_hdr hdr;
   bfd_byte buffer[2];
   asection *section;
-  unsigned int size;
+  bfd_size_type size;
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
-      || bfd_bread (&hdr, (bfd_size_type) sizeof (hdr), abfd) < DOS_HDR_SIZE)
+      || (size = bfd_bread (&hdr, sizeof (hdr), abfd)) < DOS_HDR_SIZE)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
@@ -67,9 +67,11 @@ msdos_object_p (bfd *abfd)
      e_lfanew field will be valid and point to a header beginning with one of
      the relevant signatures.  If not, e_lfanew might point to anything, so
      don't bail if we can't read there.  */
-  if (H_GET_16 (abfd, hdr.e_cparhdr) < 4
-      || bfd_seek (abfd, (file_ptr) H_GET_32 (abfd, hdr.e_lfanew), SEEK_SET) != 0
-      || bfd_bread (buffer, (bfd_size_type) 2, abfd) != 2)
+  if (size < offsetof (struct external_DOS_hdr, e_lfanew) + 4
+      || H_GET_16 (abfd, hdr.e_cparhdr) < 4)
+    ;
+  else if (bfd_seek (abfd, H_GET_32 (abfd, hdr.e_lfanew), SEEK_SET) != 0
+	   || bfd_bread (buffer, (bfd_size_type) 2, abfd) != 2)
     {
       if (bfd_get_error () == bfd_error_system_call)
 	return NULL;
@@ -102,7 +104,7 @@ msdos_object_p (bfd *abfd)
   size += H_GET_16 (abfd, hdr.e_cblp);
 
   /* Check that the size is valid.  */
-  if (bfd_seek (abfd, (file_ptr) (section->filepos + size), SEEK_SET) != 0)
+  if (bfd_seek (abfd, section->filepos + size, SEEK_SET) != 0)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);

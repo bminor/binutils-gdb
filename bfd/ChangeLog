@@ -1,3 +1,8 @@
+2020-03-23  Alan Modra  <amodra@gmail.com>
+
+	* i386msdos.c (msdos_object_p): Don't access e_lfanew when that
+	field hasn't been read.  Remove unnecessary casts.
+
 2020-03-22  Alan Modra  <amodra@gmail.com>
 
 	* coff64-rs6000.c (xcoff64_slurp_armap): Ensure size is large

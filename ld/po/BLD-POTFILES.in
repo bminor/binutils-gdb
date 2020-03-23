@@ -222,6 +222,7 @@ ehppaelf.c
 ehppalinux.c
 ehppanbsd.c
 ehppaobsd.c
+ei386aout.c
 ei386beos.c
 ei386bsd.c
 ei386go32.c

@@ -1,3 +1,10 @@
+2020-03-23  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Reinstate ei386aout.c.
+	Include ei386aout dep file.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+
 2020-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-plugin/lto.exp (lto_link_tests): Run PR ld/25355
