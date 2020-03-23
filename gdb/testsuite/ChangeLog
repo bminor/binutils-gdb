@@ -1,5 +1,15 @@
 2020-04-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.dwarf2/dw2-inline-small-func-lbls.c: New file.
+	* gdb.dwarf2/dw2-inline-small-func.c: New file.
+	* gdb.dwarf2/dw2-inline-small-func.exp: New file.
+	* gdb.dwarf2/dw2-inline-small-func.h: New file.
+	* gdb.opt/inline-small-func.c: New file.
+	* gdb.opt/inline-small-func.exp: New file.
+	* gdb.opt/inline-small-func.h: New file.
+
+2020-04-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* lib/dwarf.exp (Dwarf::lines::program::DW_LNS_set_file): New
 	function.
 
