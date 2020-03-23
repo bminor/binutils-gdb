@@ -1,3 +1,24 @@
+2020-03-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 25714
+	* wrstabs.c (stab_pop_type): Replace assertion with error return.
+	* write_stabs_in_sections_debugging_info: Likewise.
+	* stab_enum_type: Likewise.
+	* stab_modify_type: Likewise.
+	* stab_struct_field: Likewise.
+	* stab_end_struct_type: Likewise.
+	* stab_start_class_type: Likewise.
+	* stab_class_static_member: Likewise.
+	* stab_class_baseclass: Likewise.
+	* stab_class_start_method: Likewise.
+	* stab_class_method_var: Likewise.
+	* stab_class_end_method: Likewise.
+	* stab_end_class_type: Likewise.
+	* stab_typedef_type: Likewise.
+	* stab_start_function: Likewise.
+	* stab_end_block: Likewise.
+	* stab_lineno: Likewise.
+
 2020-03-20  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_compression_header): Add ATTRIBUTE_WARN_UNUSED_RESULT.
