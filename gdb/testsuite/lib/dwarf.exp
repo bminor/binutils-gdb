@@ -1454,6 +1454,11 @@ namespace eval Dwarf {
 		_op .sleb128 ${offset}
 	    }
 
+	    proc DW_LNS_set_file {num} {
+		_op .byte 4
+		_op .sleb128 ${num}
+	    }
+
 	    foreach statement $statements {
 		uplevel 1 $statement
 	    }

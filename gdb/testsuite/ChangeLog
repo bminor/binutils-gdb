@@ -1,5 +1,10 @@
 2020-04-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* lib/dwarf.exp (Dwarf::lines::program::DW_LNS_set_file): New
+	function.
+
+2020-04-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* lib/dwarf.exp (function_range): Allow compiler options to be
 	specified.
 
