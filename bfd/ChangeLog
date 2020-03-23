@@ -1,5 +1,12 @@
 2020-03-23  Alan Modra  <amodra@gmail.com>
 
+	* ecoff.c (_bfd_ecoff_slurp_armap): Sanity check parsed_size and
+	symbol count.  Allocate an extra byte to ensure name strings
+	are terminated.  Sanity check name offsets.  Release memory on
+	error return.
+
+2020-03-23  Alan Modra  <amodra@gmail.com>
+
 	* i386msdos.c (msdos_object_p): Don't access e_lfanew when that
 	field hasn't been read.  Remove unnecessary casts.
 
