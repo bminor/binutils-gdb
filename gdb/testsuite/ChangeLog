@@ -1,3 +1,8 @@
+2020-04-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/dwarf.exp (function_range): Allow compiler options to be
+	specified.
+
 2020-04-02  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/break-inline-psymtab-2.c (bar): Add
