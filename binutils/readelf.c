@@ -17074,7 +17074,10 @@ process_mips_specific (Filedata * filedata)
 	    get_data (NULL, filedata, conflicts_offset,
 		      sizeof (*econf32), conflictsno, _("conflict"));
 	  if (!econf32)
-	    return FALSE;
+	    {
+	      free (iconf);
+	      return FALSE;
+	    }
 
 	  for (cnt = 0; cnt < conflictsno; ++cnt)
 	    iconf[cnt] = BYTE_GET (econf32[cnt]);
@@ -17089,7 +17092,10 @@ process_mips_specific (Filedata * filedata)
 	    get_data (NULL, filedata, conflicts_offset,
 		      sizeof (*econf64), conflictsno, _("conflict"));
 	  if (!econf64)
-	    return FALSE;
+	    {
+	      free (iconf);
+	      return FALSE;
+	    }
 
 	  for (cnt = 0; cnt < conflictsno; ++cnt)
 	    iconf[cnt] = BYTE_GET (econf64[cnt]);
