@@ -5833,10 +5833,11 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		}
 	      p->p_memsz += adjust;
 
-	      if (this_hdr->sh_type != SHT_NOBITS)
+	      if (p->p_type == PT_LOAD)
 		{
-		  if (p->p_type == PT_LOAD)
+		  if (this_hdr->sh_type != SHT_NOBITS)
 		    {
+		      off_adjust = 0;
 		      if (p->p_filesz + adjust < p->p_memsz)
 			{
 			  /* We have a PROGBITS section following NOBITS ones.
@@ -5846,10 +5847,25 @@ assign_file_positions_for_load_sections (bfd *abfd,
 			  if (!write_zeros (abfd, off, adjust))
 			    return FALSE;
 			}
-		      off += adjust;
 		    }
-		  p->p_filesz += adjust;
+		  /* We only adjust sh_offset in SHT_NOBITS sections
+		     as would seem proper for their address when the
+		     section is first in the segment.  sh_offset
+		     doesn't really have any significance for
+		     SHT_NOBITS anyway, apart from a notional position
+		     relative to other sections.  Historically we
+		     didn't bother with adjusting sh_offset and some
+		     programs depend on it not being adjusted.  See
+		     pr12921 and pr25662.  */
+		  if (this_hdr->sh_type != SHT_NOBITS || i == 0)
+		    {
+		      off += adjust;
+		      if (this_hdr->sh_type == SHT_NOBITS)
+			off_adjust += adjust;
+		    }
 		}
+	      if (this_hdr->sh_type != SHT_NOBITS)
+		p->p_filesz += adjust;
 	    }
 
 	  if (p->p_type == PT_NOTE && bfd_get_format (abfd) == bfd_core)

@@ -1,3 +1,9 @@
+2020-03-25  Alan Modra  <amodra@gmail.com>
+
+	PR 25662
+	* elf.c (assign_file_positions_for_load_sections): Adjust offset
+	for SHT_NOBITS section if first in segment.
+
 2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25708
