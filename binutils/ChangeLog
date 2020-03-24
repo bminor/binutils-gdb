@@ -1,3 +1,15 @@
+2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25708
+	* nm.c (SYM_NAME): Removed.
+	(print_symname): Add a pointer to struct extended_symbol_info
+	argument.  Call _bfd_elf_get_symbol_version_name to get symbol
+	version.
+	(print_symdef_entry): Pass NULL to print_symname.
+	(print_symbol_info_bsd): Update call to print_symname.
+	(print_symbol_info_sysv): Likewise.
+	(print_symbol_info_posix): Likewise.
+
 2020-03-24  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_mips_specific): Free iconf on error path.

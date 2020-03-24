@@ -1883,11 +1883,13 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
   return FALSE;
 }
 
-/* Get version string.  */
+/* Get version name.  If BASE_P is TRUE, return "Base" for VER_FLG_BASE
+   and return symbol version for symbol version itself.   */
 
 const char *
-_bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
-				    bfd_boolean *hidden)
+_bfd_elf_get_symbol_version_name (bfd *abfd, asymbol *symbol,
+				  bfd_boolean base_p,
+				  bfd_boolean *hidden)
 {
   const char *version_string = NULL;
   if (elf_dynversym (abfd) != 0
@@ -1904,10 +1906,14 @@ _bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
 	       && (vernum > elf_tdata (abfd)->cverdefs
 		   || (elf_tdata (abfd)->verdef[0].vd_flags
 		       == VER_FLG_BASE)))
-	version_string = "Base";
+	version_string = base_p ? "Base" : "";
       else if (vernum <= elf_tdata (abfd)->cverdefs)
-	version_string =
-	  elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
+	{
+	  const char *nodename
+	    = elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
+	  version_string = ((base_p || strcmp (symbol->name, nodename))
+			    ? nodename : "");
+	}
       else
 	{
 	  Elf_Internal_Verneed *t;
@@ -1931,6 +1937,15 @@ _bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
 	}
     }
   return version_string;
+}
+
+/* Get version string.  */
+
+const char *
+_bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
+				    bfd_boolean *hidden)
+{
+  return _bfd_elf_get_symbol_version_name (abfd, symbol, TRUE, hidden);
 }
 
 /* Display ELF-specific fields of a symbol.  */

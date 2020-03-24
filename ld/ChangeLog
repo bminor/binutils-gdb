@@ -1,3 +1,8 @@
+2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25708
+	* testsuite/ld-elf/pr25708.d: New file.
+
 2020-03-23  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Reinstate ei386aout.c.

@@ -1,3 +1,11 @@
+2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25708
+	* elf-bfd.h (_bfd_elf_get_symbol_version_name): New.
+	* elf.c (_bfd_elf_get_symbol_version_name): New function.  Based
+	on the previous _bfd_elf_get_symbol_version_string.
+	(_bfd_elf_get_symbol_version_string): Use it.
+
 2020-03-24  Alan Modra  <amodra@gmail.com>
 
 	* archive.c (_bfd_generic_read_ar_hdr_mag): Sanity check extended

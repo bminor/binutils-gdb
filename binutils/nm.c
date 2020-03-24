@@ -67,7 +67,6 @@ struct extended_symbol_info
   coff_symbol_type *coffinfo;
   /* FIXME: We should add more fields for Type, Line, Section.  */
 };
-#define SYM_NAME(sym)        (sym->sinfo->name)
 #define SYM_VALUE(sym)       (sym->sinfo->value)
 #define SYM_TYPE(sym)        (sym->sinfo->type)
 #define SYM_STAB_NAME(sym)   (sym->sinfo->stab_name)
@@ -394,8 +393,11 @@ get_coff_symbol_type (const struct internal_syment *sym)
    demangling it if requested.  */
 
 static void
-print_symname (const char *form, const char *name, bfd *abfd)
+print_symname (const char *form, struct extended_symbol_info *info,
+	       const char *name, bfd *abfd)
 {
+  if (name == NULL)
+    name = info->sinfo->name;
   if (do_demangle && *name)
     {
       char *res = bfd_demangle (abfd, name, demangle_flags);
@@ -409,6 +411,18 @@ print_symname (const char *form, const char *name, bfd *abfd)
     }
 
   printf (form, name);
+  if (info != NULL && info->elfinfo)
+    {
+      const char *version_string;
+      bfd_boolean hidden;
+
+      version_string
+	= _bfd_elf_get_symbol_version_name (abfd,
+					    &info->elfinfo->symbol,
+					    FALSE, &hidden);
+      if (version_string && version_string[0])
+	printf ("%s%s", hidden ? "@" : "@@", version_string);
+    }
 }
 
 static void
@@ -433,7 +447,7 @@ print_symdef_entry (bfd *abfd)
 	bfd_fatal ("bfd_get_elt_at_index");
       if (thesym->name != (char *) NULL)
 	{
-	  print_symname ("%s", thesym->name, abfd);
+	  print_symname ("%s", NULL, thesym->name, abfd);
 	  printf (" in %s\n", bfd_get_filename (elt));
 	}
     }
@@ -1606,13 +1620,13 @@ print_symbol_info_bsd (struct extended_symbol_info *info, bfd *abfd)
       printf (desc_format, SYM_STAB_DESC (info));
       printf (" %5s", SYM_STAB_NAME (info));
     }
-  print_symname (" %s", SYM_NAME (info), abfd);
+  print_symname (" %s", info, NULL, abfd);
 }
 
 static void
 print_symbol_info_sysv (struct extended_symbol_info *info, bfd *abfd)
 {
-  print_symname ("%-20s|", SYM_NAME (info), abfd);
+  print_symname ("%-20s|", info, NULL, abfd);
 
   if (bfd_is_undefined_symclass (SYM_TYPE (info)))
     {
@@ -1667,7 +1681,7 @@ print_symbol_info_sysv (struct extended_symbol_info *info, bfd *abfd)
 static void
 print_symbol_info_posix (struct extended_symbol_info *info, bfd *abfd)
 {
-  print_symname ("%s ", SYM_NAME (info), abfd);
+  print_symname ("%s ", info, NULL, abfd);
   printf ("%c ", SYM_TYPE (info));
 
   if (bfd_is_undefined_symclass (SYM_TYPE (info)))
