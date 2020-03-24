@@ -1937,7 +1937,7 @@ struct elf_obj_tdata
   struct sdt_note *sdt_note_head;
 
   Elf_Internal_Shdr **group_sect_ptr;
-  int num_group;
+  unsigned int num_group;
 
   /* Index into group_sect_ptr, updated by setup_group when finding a
      section's group.  Used to optimize subsequent group searches.  */
