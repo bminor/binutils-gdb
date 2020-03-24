@@ -1468,6 +1468,7 @@ _bfd_nosymbols_get_symbol_info (bfd *abfd ATTRIBUTE_UNUSED,
 const char *
 _bfd_nosymbols_get_symbol_version_string (bfd *abfd,
 					  asymbol *symbol ATTRIBUTE_UNUSED,
+					  bfd_boolean base_p ATTRIBUTE_UNUSED,
 					  bfd_boolean *hidden ATTRIBUTE_UNUSED)
 {
   return (const char *) _bfd_ptr_bfd_null_error (abfd);

@@ -392,9 +392,10 @@ BFD_JUMP_TABLE macros.
 .#define bfd_get_symbol_info(b,p,e) \
 .	BFD_SEND (b, _bfd_get_symbol_info, (b,p,e))
 .  const char *(*_bfd_get_symbol_version_string) (bfd *, struct bfd_symbol *,
+.						  bfd_boolean,
 .						  bfd_boolean *);
-.#define bfd_get_symbol_version_string(b,s,h) \
-.	BFD_SEND (b, _bfd_get_symbol_version_string, (b,s,h))
+.#define bfd_get_symbol_version_string(b,s,p,h) \
+.	BFD_SEND (b, _bfd_get_symbol_version_string, (b,s,p,h))
 .  bfd_boolean (*_bfd_is_local_label_name) (bfd *, const char *);
 .  bfd_boolean (*_bfd_is_target_special_symbol) (bfd *, asymbol *);
 .  alent *     (*_get_lineno) (bfd *, struct bfd_symbol *);

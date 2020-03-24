@@ -1887,9 +1887,9 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
    and return symbol version for symbol version itself.   */
 
 const char *
-_bfd_elf_get_symbol_version_name (bfd *abfd, asymbol *symbol,
-				  bfd_boolean base_p,
-				  bfd_boolean *hidden)
+_bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
+				    bfd_boolean base_p,
+				    bfd_boolean *hidden)
 {
   const char *version_string = NULL;
   if (elf_dynversym (abfd) != 0
@@ -1937,15 +1937,6 @@ _bfd_elf_get_symbol_version_name (bfd *abfd, asymbol *symbol,
 	}
     }
   return version_string;
-}
-
-/* Get version string.  */
-
-const char *
-_bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
-				    bfd_boolean *hidden)
-{
-  return _bfd_elf_get_symbol_version_name (abfd, symbol, TRUE, hidden);
 }
 
 /* Display ELF-specific fields of a symbol.  */
@@ -2003,6 +1994,7 @@ bfd_elf_print_symbol (bfd *abfd,
 	/* If we have version information, print it.  */
 	version_string = _bfd_elf_get_symbol_version_string (abfd,
 							     symbol,
+							     TRUE,
 							     &hidden);
 	if (version_string)
 	  {

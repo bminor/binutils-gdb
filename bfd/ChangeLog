@@ -1,3 +1,19 @@
+2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25708
+	* elf-bfd.h (_bfd_elf_get_symbol_version_name): Renamed to ...
+	(_bfd_elf_get_symbol_version_string): This.
+	* elf.c (_bfd_elf_get_symbol_version_name): Renamed to ...
+	(_bfd_elf_get_symbol_version_string): This.
+	(bfd_elf_print_symbol): Pass TRUE to
+	_bfd_elf_get_symbol_version_string.
+	* libbfd-in.h (_bfd_nosymbols_get_symbol_version_string): Add a
+	bfd_boolean argument.
+	* syms.c (_bfd_nosymbols_get_symbol_version_string): Likewise.
+	* targets.c  (_bfd_get_symbol_version_string): Likewise.
+	(bfd_get_symbol_version_string): Likewise.
+	* bfd-in2.h: Regenerated.
+
 2020-03-24  Nick Clifton  <nickc@redhat.com>
 	    Jaydeep Chauhan  <jaydeepchauhan1494@gmail.com>
 

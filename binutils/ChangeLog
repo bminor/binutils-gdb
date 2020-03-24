@@ -1,6 +1,14 @@
 2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25708
+	* nm.c (print_symname): Replace _bfd_elf_get_symbol_version_name
+	with bfd_get_symbol_version_string.
+	(print_symbo): Pass TRUE to bfd_get_symbol_version_string.
+	* objdump.c (objdump_print_symname): Likewise.
+
+2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25708
 	* nm.c (SYM_NAME): Removed.
 	(print_symname): Add a pointer to struct extended_symbol_info
 	argument.  Call _bfd_elf_get_symbol_version_name to get symbol

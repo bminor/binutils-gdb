@@ -417,9 +417,8 @@ print_symname (const char *form, struct extended_symbol_info *info,
       bfd_boolean hidden;
 
       version_string
-	= _bfd_elf_get_symbol_version_name (abfd,
-					    &info->elfinfo->symbol,
-					    FALSE, &hidden);
+	= bfd_get_symbol_version_string (abfd, &info->elfinfo->symbol,
+					 FALSE, &hidden);
       if (version_string && version_string[0])
 	printf ("%s%s", hidden ? "@" : "@@", version_string);
     }
@@ -908,7 +907,8 @@ print_symbol (bfd *        abfd,
       bfd_boolean   hidden = FALSE;
 
       if ((sym->flags & (BSF_SECTION_SYM | BSF_SYNTHETIC)) == 0)
-	version_string = bfd_get_symbol_version_string (abfd, sym, &hidden);
+	version_string = bfd_get_symbol_version_string (abfd, sym,
+							TRUE, &hidden);
 
       if (bfd_is_und_section (bfd_asymbol_section (sym)))
 	hidden = TRUE;
