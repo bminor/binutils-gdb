@@ -2065,6 +2065,11 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
 		  }
 		else
 		  printf_filtered ("(none)\n");
+		if (psymtab->user)
+		  printf_filtered ("    user %s "
+				   "((struct partial_symtab *) %s)\n",
+				   psymtab->user->filename,
+				   host_address_to_string (psymtab->user));
 		printf_filtered ("    dependencies ");
 		if (psymtab->number_of_dependencies)
 		  {

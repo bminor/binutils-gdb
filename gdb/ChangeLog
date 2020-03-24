@@ -1,3 +1,7 @@
+2020-03-24  Tom de Vries  <tdevries@suse.de>
+
+	* psymtab.c (maintenance_info_psymtabs): Print user field.
+
 2020-03-20  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2/loc.h (dwarf2_evaluate_property): Make "addr_stack"
