@@ -73,8 +73,8 @@ inf_ptrace_target::~inf_ptrace_target ()
 /* Target hook for follow_fork.  On entry and at return inferior_ptid is
    the ptid of the followed inferior.  */
 
-int
-inf_ptrace_target::follow_fork (int follow_child, int detach_fork)
+bool
+inf_ptrace_target::follow_fork (bool follow_child, bool detach_fork)
 {
   if (!follow_child)
     {
@@ -88,7 +88,7 @@ inf_ptrace_target::follow_fork (int follow_child, int detach_fork)
 	perror_with_name (("ptrace"));
     }
 
-  return 0;
+  return false;
 }
 
 int

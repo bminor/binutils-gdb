@@ -44,7 +44,7 @@ struct inf_ptrace_target : public inf_child_target
   void create_inferior (const char *, const std::string &,
 			char **, int) override;
 #ifdef PT_GET_PROCESS_STATE
-  int follow_fork (int, int) override;
+  bool follow_fork (bool, bool) override;
 
   int insert_fork_catchpoint (int) override;
 

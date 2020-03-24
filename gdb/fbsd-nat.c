@@ -1548,8 +1548,8 @@ fbsd_nat_target::supports_stopped_by_sw_breakpoint ()
 /* Target hook for follow_fork.  On entry and at return inferior_ptid is
    the ptid of the followed inferior.  */
 
-int
-fbsd_nat_target::follow_fork (int follow_child, int detach_fork)
+bool
+fbsd_nat_target::follow_fork (bool follow_child, bool detach_fork)
 {
   if (!follow_child && detach_fork)
     {
@@ -1592,7 +1592,7 @@ fbsd_nat_target::follow_fork (int follow_child, int detach_fork)
 #endif
     }
 
-  return 0;
+  return false;
 }
 
 int

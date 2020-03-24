@@ -1,3 +1,21 @@
+2020-03-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* fbsd-nat.c (fbsd_nat_target::follow_fork): Change bool to int.
+	* fbsd-nat.h (class fbsd_nat_target) <follow_fork>: Likewise.
+	* inf-ptrace.c (inf_ptrace_target::follow_fork): Likewise.
+	* inf-ptrace.h (struct inf_ptrace_target) <follow_fork>: Likewise.
+	* infrun.c (follow_fork): Likewise.
+	(follow_fork_inferior): Likewise.
+	* linux-nat.c (linux_nat_target::follow_fork): Likewise.
+	* linux-nat.h (class linux_nat_target): Likewise.
+	* remote.c (class remote_target) <follow_fork>: Likewise.
+	(remote_target::follow_fork): Likewise.
+	* target-delegates.c: Re-generate.
+	* target.c (default_follow_fork): Likewise.
+	(target_follow_fork): Likewise.
+	* target.h (struct target_ops) <follow_fork>: Likewise.
+	(target_follow_fork): Likewise.
+
 2020-03-24  Tom de Vries  <tdevries@suse.de>
 
 	* psymtab.c (maintenance_info_psymtabs): Print user field.

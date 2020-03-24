@@ -73,10 +73,6 @@ static void sig_print_info (enum gdb_signal);
 
 static void sig_print_header (void);
 
-static int follow_fork (void);
-
-static int follow_fork_inferior (int follow_child, int detach_fork);
-
 static void follow_inferior_reset_breakpoints (void);
 
 static int currently_stepping (struct thread_info *tp);
@@ -411,8 +407,8 @@ show_follow_fork_mode_string (struct ui_file *file, int from_tty,
    the fork parent.  At return inferior_ptid is the ptid of the
    followed inferior.  */
 
-static int
-follow_fork_inferior (int follow_child, int detach_fork)
+static bool
+follow_fork_inferior (bool follow_child, bool detach_fork)
 {
   int has_vforked;
   ptid_t parent_ptid, child_ptid;
@@ -669,11 +665,11 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
    if the inferior should be resumed; false, if the target for some
    reason decided it's best not to resume.  */
 
-static int
-follow_fork (void)
+static bool
+follow_fork ()
 {
-  int follow_child = (follow_fork_mode_string == follow_fork_mode_child);
-  int should_resume = 1;
+  bool follow_child = (follow_fork_mode_string == follow_fork_mode_child);
+  bool should_resume = true;
   struct thread_info *tp;
 
   /* Copy user stepping state to the new inferior thread.  FIXME: the
@@ -714,7 +710,7 @@ follow_fork (void)
 	     happened.  */
 	  thread_info *wait_thread = find_thread_ptid (wait_target, wait_ptid);
 	  switch_to_thread (wait_thread);
-	  should_resume = 0;
+	  should_resume = false;
 	}
     }
 
@@ -5428,8 +5424,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	 watchpoints, for example, always appear in the bpstat.  */
       if (!bpstat_causes_stop (ecs->event_thread->control.stop_bpstat))
 	{
-	  int should_resume;
-	  int follow_child
+	  bool follow_child
 	    = (follow_fork_mode_string == follow_fork_mode_child);
 
 	  ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
@@ -5437,7 +5432,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	  process_stratum_target *targ
 	    = ecs->event_thread->inf->process_target ();
 
-	  should_resume = follow_fork ();
+	  bool should_resume = follow_fork ();
 
 	  /* Note that one of these may be an invalid pointer,
 	     depending on detach_fork.  */

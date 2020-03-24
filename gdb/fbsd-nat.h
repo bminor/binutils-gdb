@@ -75,7 +75,7 @@ public:
 #endif
 
 #ifdef TDP_RFPPWAIT
-  int follow_fork (int, int) override;
+  bool follow_fork (bool, bool) override;
 
   int insert_fork_catchpoint (int) override;
   int remove_fork_catchpoint (int) override;
