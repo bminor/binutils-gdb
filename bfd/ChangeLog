@@ -1,5 +1,10 @@
 2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/25717
+	* elf-bfd.h (elf_obj_tdata): Change num_group to unsigned int.
+
+2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/25708
 	* elf-bfd.h (_bfd_elf_get_symbol_version_name): New.
 	* elf.c (_bfd_elf_get_symbol_version_name): New function.  Based
