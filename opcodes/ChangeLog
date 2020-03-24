@@ -1,3 +1,7 @@
+2020-03-25  Alan Modra  <amodra@gmail.com>
+
+	* z80-dis.c (suffix): Init mybuf.
+
 2020-03-22  Alan Modra  <amodra@gmail.com>
 
 	* h8300-dis.c (bfd_h8_disassemble): Limit data[] access to that

@@ -804,6 +804,7 @@ suffix (struct buffer *buf, disassemble_info *info, const char *txt)
   old_stream = info->stream;
   info->fprintf_func = (fprintf_ftype) &sprintf;
   info->stream = mybuf;
+  mybuf[0] = 0;
   buf->base++;
   if (print_insn_z80_buf (buf, info) >= 0)
     buf->n_used++;
