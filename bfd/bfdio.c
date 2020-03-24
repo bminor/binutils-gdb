@@ -26,6 +26,9 @@
 #include "bfd.h"
 #include "libbfd.h"
 #include "aout/ar.h"
+#if defined (_WIN32)
+#include <windows.h>
+#endif
 
 #ifndef S_IXUSR
 #define S_IXUSR 0100    /* Execute by owner.  */
@@ -93,12 +96,7 @@ _bfd_real_fopen (const char *filename, const char *modes)
      In fopen-vms.h, they are separated from the mode with a comma.
      Split here.  */
   vms_attr = strchr (modes, ',');
-  if (vms_attr == NULL)
-    {
-      /* No attributes.  */
-      return close_on_exec (fopen (filename, modes));
-    }
-  else
+  if (vms_attr != NULL)
     {
       /* Attributes found.  Split.  */
       size_t modes_len = strlen (modes) + 1;
@@ -116,13 +114,29 @@ _bfd_real_fopen (const char *filename, const char *modes)
 	}
       return close_on_exec (fopen (filename, at[0], at[1], at[2]));
     }
-#else /* !VMS */
-#if defined (HAVE_FOPEN64)
+
+#elif defined (_WIN32)
+  size_t filelen = strlen (filename) + 1;
+
+  if (filelen > MAX_PATH - 1)
+    {
+      FILE *file;
+      char* fullpath = (char *) malloc (filelen + 8);
+
+      /* Add a Microsoft recommended prefix that
+	 will allow the extra-long path to work.  */
+      strcpy (fullpath, "\\\\?\\");
+      strcat (fullpath, filename);
+      file = close_on_exec (fopen (fullpath, modes));
+      free (fullpath);
+      return file;
+    }
+
+#elif defined (HAVE_FOPEN64)
   return close_on_exec (fopen64 (filename, modes));
-#else
-  return close_on_exec (fopen (filename, modes));
 #endif
-#endif /* !VMS */
+
+  return close_on_exec (fopen (filename, modes));
 }
 
 /*
