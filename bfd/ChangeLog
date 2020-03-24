@@ -1,3 +1,10 @@
+2020-03-24  Nick Clifton  <nickc@redhat.com>
+
+	PR 25681
+	* elf.c (_bfd_elf_map_sections_to_segments): When looking for a
+	segment to use for PT_GNU_RELRO, ignore empty sections in a
+	segment's current list.
+
 2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25717

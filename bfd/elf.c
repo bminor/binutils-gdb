@@ -5213,9 +5213,12 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 		{
 		  i = m->count;
 		  while (--i != (unsigned) -1)
-		    if ((m->sections[i]->flags & (SEC_LOAD | SEC_HAS_CONTENTS))
-			== (SEC_LOAD | SEC_HAS_CONTENTS))
-		      break;
+		    {
+		      if (m->sections[i]->size > 0
+			  && (m->sections[i]->flags & (SEC_LOAD | SEC_HAS_CONTENTS))
+			  == (SEC_LOAD | SEC_HAS_CONTENTS))
+			break;
+		    }
 
 		  if (i != (unsigned) -1)
 		    break;
