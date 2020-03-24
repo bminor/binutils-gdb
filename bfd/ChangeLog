@@ -1,3 +1,8 @@
+2020-03-25  Shahab Vahedi  <shahab@synopsys.com>
+
+	* elf32-arc.c (PRINT_DEBUG_RELOC_INFO_BEFORE): Use the
+	correct field name in the output string.
+
 2020-03-25  Alan Modra  <amodra@gmail.com>
 
 	PR 25662
