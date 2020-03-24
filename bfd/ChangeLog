@@ -1,4 +1,5 @@
 2020-03-24  Nick Clifton  <nickc@redhat.com>
+	    Jaydeep Chauhan  <jaydeepchauhan1494@gmail.com>
 
 	PR 25713
 	* bfdio.c (_bfd_real_fopen): Add code to handle long filenames on
