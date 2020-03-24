@@ -488,6 +488,7 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
   bfd_size_type parsed_size;
   struct areltdata *ared;
   char *filename = NULL;
+  ufile_ptr filesize;
   bfd_size_type namelen = 0;
   bfd_size_type allocsize = sizeof (struct areltdata) + sizeof (struct ar_hdr);
   char *allocptr = 0;
@@ -538,11 +539,19 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
     {
       /* BSD-4.4 extended name */
       namelen = atoi (&hdr.ar_name[3]);
+      filesize = bfd_get_file_size (abfd);
+      if (namelen > parsed_size
+	  || namelen > -allocsize - 2
+	  || (filesize != 0 && namelen > filesize))
+	{
+	  bfd_set_error (bfd_error_malformed_archive);
+	  return NULL;
+	}
       allocsize += namelen + 1;
       parsed_size -= namelen;
       extra_size = namelen;
 
-      allocptr = (char *) bfd_zmalloc (allocsize);
+      allocptr = (char *) bfd_malloc (allocsize);
       if (allocptr == NULL)
 	return NULL;
       filename = (allocptr
@@ -586,13 +595,13 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
 
   if (!allocptr)
     {
-      allocptr = (char *) bfd_zmalloc (allocsize);
+      allocptr = (char *) bfd_malloc (allocsize);
       if (allocptr == NULL)
 	return NULL;
     }
 
+  memset (allocptr, 0, sizeof (struct areltdata));
   ared = (struct areltdata *) allocptr;
-
   ared->arch_header = allocptr + sizeof (struct areltdata);
   memcpy (ared->arch_header, &hdr, sizeof (struct ar_hdr));
   ared->parsed_size = parsed_size;

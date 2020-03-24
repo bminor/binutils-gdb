@@ -1,3 +1,9 @@
+2020-03-24  Alan Modra  <amodra@gmail.com>
+
+	* archive.c (_bfd_generic_read_ar_hdr_mag): Sanity check extended
+	name size.  Use bfd_malloc rather than bfd_zmalloc, clearing just
+	struct areltdata.
+
 2020-03-23  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* elflink.c (_bfd_elf_tls_setup): Mention .tdata in comment.
