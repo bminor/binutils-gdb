@@ -1,3 +1,10 @@
+2020-03-25  Nick Clifton  <nickc@redhat.com>
+
+	* cofflink.c (bfd_coff_get_internal_extra_pe_aouthdr): New
+	function.
+	* libbfd-in.h (bfd_coff_get_internal_extra_pe_aouthdr): Prototype.
+	* libbfd.h: Regenerate.
+
 2020-03-25  Shahab Vahedi  <shahab@synopsys.com>
 
 	* elf32-arc.c (PRINT_DEBUG_RELOC_INFO_BEFORE): Use the

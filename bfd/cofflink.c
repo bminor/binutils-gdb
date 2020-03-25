@@ -3157,3 +3157,12 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
     }
   return TRUE;
 }
+
+
+struct internal_extra_pe_aouthdr *
+bfd_coff_get_internal_extra_pe_aouthdr (bfd* abfd)
+{
+  if (abfd == NULL || bfd_get_flavour (abfd) != bfd_target_coff_flavour)
+    return NULL;
+  return & pe_data (abfd)->pe_opthdr;
+}

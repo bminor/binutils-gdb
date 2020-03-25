@@ -854,6 +854,11 @@ extern bfd_vma _bfd_get_gp_value
 extern void _bfd_set_gp_value
   (bfd *, bfd_vma) ATTRIBUTE_HIDDEN;
 
+/* Provide access to the internal_extra_pe_aouthdr structure which
+   contains interesting information for PE format binaries.  */
+extern struct internal_extra_pe_aouthdr *
+  bfd_coff_get_internal_extra_pe_aouthdr (bfd *);
+
 /* Function shared by the COFF and ELF SH backends, which have no
    other common header files.  */
 
