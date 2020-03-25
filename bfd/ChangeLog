@@ -1,3 +1,14 @@
+2020-03-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25640
+	* plugin.c (plugin_list_entry): Add has_symbol_type.
+	(add_symbols_v2): New function.
+	(bfd_plugin_open_input): Don't invoke LTO wrapper if LTO plugin
+	provides symbol type.
+	(try_load_plugin): Add LDPT_ADD_SYMBOLS_V2.
+	(bfd_plugin_canonicalize_symtab): Use LTO plugin symbol type if
+	available.
+
 2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25717
