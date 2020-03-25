@@ -1532,6 +1532,7 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
   unsigned int exp;
   flagword flags, oldflags;
   asection *sec;
+  bfd_boolean is_bss = FALSE;
 
   if (flag_mri)
     {
@@ -1581,6 +1582,7 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
 		  /* Uninitialised data section.  */
 		  flags |= SEC_ALLOC;
 		  flags &=~ SEC_LOAD;
+		  is_bss = TRUE;
 		  break;
 
 		case 'n':
@@ -1651,6 +1653,9 @@ obj_coff_section (int ignore ATTRIBUTE_UNUSED)
     }
 
   sec = subseg_new (name, (subsegT) exp);
+
+  if (is_bss)
+    seg_info (sec)->bss = 1;
 
   if (alignment >= 0)
     sec->alignment_power = alignment;

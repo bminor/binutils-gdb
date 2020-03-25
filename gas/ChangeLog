@@ -1,3 +1,8 @@
+2020-03-25  J.W. Jagersma  <jwjagersma@gmail.com>
+
+	* config/obj-coff.c (obj_coff_section): Set the bss flag on
+	sections with the "b" attribute.
+
 2020-03-22  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/s12z/truncated.d: Update expected output.
