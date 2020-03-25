@@ -1,3 +1,20 @@
+2020-04-06  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.h (struct thread_info): Add forward declaration.
+	(nbsd_nat_target::thread_alive): Add.
+	(nbsd_nat_target::thread_name): Likewise.
+	(nbsd_nat_target::update_thread_list): Likewise.
+	(update_thread_list::post_attach): Likewise.
+	(post_attach::pid_to_str): Likewise.
+	* nbsd-nat.c: Include "gdbthread.h" and "inferior.h".
+	(nbsd_thread_lister): Add.
+	(nbsd_nat_target::thread_alive): Likewise.
+	(nbsd_nat_target::thread_name): Likewise.
+	(nbsd_add_threads): Likewise.
+	(update_thread_list::post_attach): Likewise.
+	(nbsd_nat_target::update_thread_list): Likewise.
+	(post_attach::pid_to_str): Likewise.
+
 2020-04-06  Tom Tromey  <tromey@adacore.com>
 
 	* ada-valprint.c (print_variant_part): Extract the variant field.
