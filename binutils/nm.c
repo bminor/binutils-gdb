@@ -1701,7 +1701,7 @@ main (int argc, char **argv)
   xmalloc_set_program_name (program_name);
   bfd_set_error_program_name (program_name);
 #if BFD_SUPPORTS_PLUGINS
-  bfd_plugin_set_program_name (program_name, 1);
+  bfd_plugin_set_program_name (program_name);
 #endif
 
   START_PROGRESS (program_name, 0);

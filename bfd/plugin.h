@@ -21,7 +21,7 @@
 #ifndef _PLUGIN_H_
 #define _PLUGIN_H_
 
-void bfd_plugin_set_program_name (const char *, int);
+void bfd_plugin_set_program_name (const char *);
 int bfd_plugin_open_input (bfd *, struct ld_plugin_input_file *);
 void bfd_plugin_set_plugin (const char *);
 bfd_boolean bfd_plugin_target_p (const bfd_target *);
@@ -33,9 +33,6 @@ typedef struct plugin_data_struct
 {
   int nsyms;
   const struct ld_plugin_symbol *syms;
-  bfd *real_bfd;
-  long real_nsyms;
-  asymbol **real_syms;
 }
 plugin_data_struct;
 

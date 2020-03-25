@@ -12813,16 +12813,6 @@ fi
 
 
 
-if test -n "$EXEEXT"; then
-
-$as_echo "#define HAVE_EXECUTABLE_SUFFIX 1" >>confdefs.h
-
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define EXECUTABLE_SUFFIX "${EXEEXT}"
-_ACEOF
-
 
 host64=false
 target64=false

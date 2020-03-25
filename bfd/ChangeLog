@@ -1,5 +1,32 @@
 2020-03-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* configure.ac (HAVE_EXECUTABLE_SUFFIX): Removed.
+	(EXECUTABLE_SUFFIX): Likewise.
+	* config.in: Regenerated.
+	* configure: Likewise.
+	* plugin.c (bfd_plugin_close_and_cleanup): Defined as
+	_bfd_generic_close_and_cleanup.
+	(plugin_list_entry): Remove resolution_file, resolution_option,
+	real_bfd, real_nsyms, real_syms, lto_nsyms, lto_syms, gcc,
+	lto_wrapper, gcc_env and initialized,
+	(need_lto_wrapper_p): Removed.
+	(get_lto_wrapper): Likewise.
+	(setup_lto_wrapper_env): Likewise.
+	(register_all_symbols_read): Likewise.
+	(egister_cleanup): Likewise.
+	(get_symbols): Likewise.
+	(add_input_file): Likewise.
+	(bfd_plugin_set_program_name): Remove need_lto_wrapper.
+	(add_symbols): Updated.
+	(try_claim): Likewise.
+	(try_load_plugin): Likewise.
+	(bfd_plugin_canonicalize_symtab): Likewise.
+	* plugin.h (bfd_plugin_set_program_name): Remove int argument.
+	(plugin_data_struct): Remove real_bfd, real_nsyms and
+	real_syms.
+
+2020-03-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/25640
 	* plugin.c (plugin_list_entry): Add has_symbol_type.
 	(add_symbols_v2): New function.

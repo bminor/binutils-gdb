@@ -234,12 +234,17 @@ set lto_link_tests [list \
   [list "Build pr24406-2b.o" \
    "" "-O2 -fno-lto" \
    {pr24406-2b.c}] \
-  [list "pr25355.o" \
-   "" \
-   "-flto -fno-common $lto_no_fat" \
-   {pr25355.c} \
-   [list [list "nm" "$plug_opt" "pr25355.d"]]] \
 ]
+
+if { [at_least_gcc_version 10 0] } {
+    set lto_link_tests [concat $lto_link_tests [list \
+	[list "pr25355.o" \
+	 "" \
+	 "-flto -fno-common $lto_no_fat" \
+	 {pr25355.c} \
+	 [list [list "nm" "$plug_opt" "pr25355.d"]]] \
+    ]]
+}
 
 if { [at_least_gcc_version 4 7] } {
     set lto_link_tests [concat $lto_link_tests [list \

@@ -1,3 +1,8 @@
+2020-03-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-plugin/lto.exp (lto_link_tests): Run PR ld/25355
+	test only for GCC 10 or newer.
+
 2020-03-25  Alan Modra  <amodra@gmail.com>
 
 	* testplug.c (parse_symdefstr): Use %hhi to read sym->def, and

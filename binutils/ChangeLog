@@ -1,3 +1,8 @@
+2020-03-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ar.c (main): Update bfd_plugin_set_program_name call.
+	* nm.c (main): Likewise.
+
 2020-03-24  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (display_debug_lines_decoded): Force a NUL termination
