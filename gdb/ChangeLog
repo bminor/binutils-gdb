@@ -1,3 +1,8 @@
+2020-03-25  Tom Tromey  <tom@tromey.com>
+
+	* compile/compile-object-load.c (get_out_value_type): Mention
+	correct symbol name in error message.
+
 2020-03-25  Hannes Domani  <ssbssa@yahoo.de>
 
 	* windows-nat.c (windows_add_all_dlls): Fix system dll paths.

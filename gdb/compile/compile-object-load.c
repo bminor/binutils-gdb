@@ -439,7 +439,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 	break;
     }
   if (block_loop == nblocks)
-    error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
+    error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_VAL);
 
   gdb_type = SYMBOL_TYPE (gdb_val_sym);
   gdb_type = check_typedef (gdb_type);
