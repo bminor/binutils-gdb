@@ -279,8 +279,10 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
   const struct block *b;
   int depth;
 
-  fprintf_filtered (outfile, "\nSymtab for file %s\n",
-		    symtab_to_filename_for_display (symtab));
+  fprintf_filtered (outfile, "\nSymtab for file %s at %s\n",
+		    symtab_to_filename_for_display (symtab),
+		    host_address_to_string (symtab));
+
   if (SYMTAB_DIRNAME (symtab) != NULL)
     fprintf_filtered (outfile, "Compilation directory is %s\n",
 		      SYMTAB_DIRNAME (symtab));
@@ -308,7 +310,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
     }
   /* Now print the block info, but only for compunit symtabs since we will
      print lots of duplicate info otherwise.  */
-  if (symtab == COMPUNIT_FILETABS (SYMTAB_COMPUNIT (symtab)))
+  if (is_main_symtab_of_compunit_symtab (symtab))
     {
       fprintf_filtered (outfile, "\nBlockvector:\n\n");
       bv = SYMTAB_BLOCKVECTOR (symtab);
@@ -370,6 +372,30 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
       fprintf_filtered (outfile,
 			"\nBlockvector same as owning compunit: %s\n\n",
 			compunit_filename);
+    }
+
+  /* Print info about the user of this compunit_symtab, and the
+     compunit_symtabs included by this one. */
+  if (is_main_symtab_of_compunit_symtab (symtab))
+    {
+      struct compunit_symtab *cust = SYMTAB_COMPUNIT (symtab);
+
+      if (cust->user != nullptr)
+	{
+	  const char *addr
+	    = host_address_to_string (COMPUNIT_FILETABS (cust->user));
+	  fprintf_filtered (outfile, "Compunit user: %s\n", addr);
+	}
+      if (cust->includes != nullptr)
+	for (i = 0; ; ++i)
+	  {
+	    struct compunit_symtab *include = cust->includes[i];
+	    if (include == nullptr)
+	      break;
+	    const char *addr
+	      = host_address_to_string (COMPUNIT_FILETABS (include));
+	    fprintf_filtered (outfile, "Compunit include: %s\n", addr);
+	  }
     }
 }
 
@@ -809,6 +835,28 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 					 " ((struct blockvector *) %s)\n",
 					 host_address_to_string
 				         (COMPUNIT_BLOCKVECTOR (cust)));
+			printf_filtered ("    user"
+					 " ((struct compunit_symtab *) %s)\n",
+					 cust->user != nullptr
+					 ? host_address_to_string (cust->user)
+					 : "(null)");
+			if (cust->includes != nullptr)
+			  {
+			    printf_filtered ("    ( includes\n");
+			    for (int i = 0; ; ++i)
+			      {
+				struct compunit_symtab *include
+				  = cust->includes[i];
+				if (include == nullptr)
+				  break;
+				const char *addr
+				  = host_address_to_string (include);
+				printf_filtered ("      (%s %s)\n",
+						 "(struct compunit_symtab *)",
+						 addr);
+			      }
+			    printf_filtered ("    )\n");
+			  }
 			printed_compunit_symtab_start = 1;
 		      }
 

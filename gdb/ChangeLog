@@ -1,3 +1,9 @@
+2020-03-25  Tom de Vries  <tdevries@suse.de>
+
+	* symtab.h (is_main_symtab_of_compunit_symtab): New function.
+	* symmisc.c (dump_symtab_1): Print user and includes fields.
+	(maintenance_info_symtabs): Same.
+
 2020-03-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR gdb/25534

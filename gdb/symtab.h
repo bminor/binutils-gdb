@@ -1513,6 +1513,13 @@ extern struct symtab *
 
 extern enum language compunit_language (const struct compunit_symtab *cust);
 
+/* Return true if this symtab is the "main" symtab of its compunit_symtab.  */
+
+static inline bool
+is_main_symtab_of_compunit_symtab (struct symtab *symtab)
+{
+  return symtab == COMPUNIT_FILETABS (SYMTAB_COMPUNIT (symtab));
+}
 
 
 /* The virtual function table is now an array of structures which have the
