@@ -1,3 +1,7 @@
+2020-03-25  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_archive): Prevent endless loop.
+
 2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25708

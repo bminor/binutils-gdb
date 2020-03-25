@@ -20505,11 +20505,13 @@ process_archive (Filedata * filedata, bfd_boolean is_thin_archive)
 	{
 	  free (name);
 	  archive_file_offset = arch.next_arhdr_offset;
-	  arch.next_arhdr_offset += archive_file_size;
-
 	  filedata->file_name = qualified_name;
 	  if (! process_object (filedata))
 	    ret = FALSE;
+	  arch.next_arhdr_offset += archive_file_size;
+	  /* Stop looping with "negative" archive_file_size.  */
+	  if (arch.next_arhdr_offset < archive_file_size)
+	    break;
 	}
 
       free (qualified_name);
