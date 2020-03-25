@@ -1,3 +1,11 @@
+2020-03-25  Alan Modra  <amodra@gmail.com>
+
+	* testplug.c (parse_symdefstr): Use %hhi to read sym->def, and
+	clear new fields.
+	* testplug2.c (parse_symdefstr): Likewise.
+	* testplug3.c (parse_symdefstr): Likewise.
+	* testplug4.c (parse_symdefstr): Likewise.
+
 2020-02-28  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
