@@ -1,3 +1,97 @@
+2020-03-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-elf/compress1c.d: xfail h8300.
+	* testsuite/ld-elf/compressed1c.d: Likewise.
+	* testsuite/ld-elf/compressed1e.d: Likewise.
+	* testsuite/ld-elf/dynamic1.d: Likewise.
+	* testsuite/ld-elf/dynsym1.d: Likewise.
+	* testsuite/ld-elf/ehdr_start-shared.d: Likewise.
+	* testsuite/ld-elf/exclude3b.d: Likewise.
+	* testsuite/ld-elf/export-class.exp: Don't run without -shared support.
+	* testsuite/ld-elf/global1.d: xfail h8300.
+	* testsuite/ld-elf/hash.d: Likewise.
+	* testsuite/ld-elf/loadaddr1.d: Likewise.
+	* testsuite/ld-elf/loadaddr2.d: Likewise.
+	* testsuite/ld-elf/local1.d: Likewise.
+	* testsuite/ld-elf/mbind1b.d: Likewise.
+	* testsuite/ld-elf/mbind1c.d: Likewise.
+	* testsuite/ld-elf/now-1.d: Likewise.
+	* testsuite/ld-elf/now-2.d: Likewise.
+	* testsuite/ld-elf/now-3.d: Likewise.
+	* testsuite/ld-elf/now-4.d: Likewise.
+	* testsuite/ld-elf/pie.d: Likewise.
+	* testsuite/ld-elf/pr12975.d: Likewise.
+	* testsuite/ld-elf/pr13177.d: Likewise.
+	* testsuite/ld-elf/pr13195.d: Likewise.
+	* testsuite/ld-elf/pr16322.d: Likewise.
+	* testsuite/ld-elf/pr16498a.d: Likewise.
+	* testsuite/ld-elf/pr16498b.d: Likewise.
+	* testsuite/ld-elf/pr17615.d: Likewise.
+	* testsuite/ld-elf/pr19162.d: Likewise.
+	* testsuite/ld-elf/pr19539.d: Likewise.
+	* testsuite/ld-elf/pr19617a.d: Likewise.
+	* testsuite/ld-elf/pr19698.d: Likewise.
+	* testsuite/ld-elf/pr20513c.d: Likewise.
+	* testsuite/ld-elf/pr20513d.d: Likewise.
+	* testsuite/ld-elf/pr21389a.d: Likewise.
+	* testsuite/ld-elf/pr21389b.d: Likewise.
+	* testsuite/ld-elf/pr21389c.d: Likewise.
+	* testsuite/ld-elf/pr21562a.d: Likewise.
+	* testsuite/ld-elf/pr21562b.d: Likewise.
+	* testsuite/ld-elf/pr21562c.d: Likewise.
+	* testsuite/ld-elf/pr21562d.d: Likewise.
+	* testsuite/ld-elf/pr21562e.d: Likewise.
+	* testsuite/ld-elf/pr21562f.d: Likewise.
+	* testsuite/ld-elf/pr21562g.d: Likewise.
+	* testsuite/ld-elf/pr21562h.d: Likewise.
+	* testsuite/ld-elf/pr21562i.d: Likewise.
+	* testsuite/ld-elf/pr21562j.d: Likewise.
+	* testsuite/ld-elf/pr21562k.d: Likewise.
+	* testsuite/ld-elf/pr21562l.d: Likewise.
+	* testsuite/ld-elf/pr21562m.d: Likewise.
+	* testsuite/ld-elf/pr21562n.d: Likewise.
+	* testsuite/ld-elf/pr21903a.d: Likewise.
+	* testsuite/ld-elf/pr21903b.d: Likewise.
+	* testsuite/ld-elf/pr21903d.d: Likewise.
+	* testsuite/ld-elf/pr22269a.d: Likewise.
+	* testsuite/ld-elf/pr22269b.d: Likewise.
+	* testsuite/ld-elf/pr22393-1a.d: Likewise.
+	* testsuite/ld-elf/pr22393-1b.d: Likewise.
+	* testsuite/ld-elf/pr22393-1c.d: Likewise.
+	* testsuite/ld-elf/pr22393-1d.d: Likewise.
+	* testsuite/ld-elf/pr22393-1e.d: Likewise.
+	* testsuite/ld-elf/pr22393-1f.d: Likewise.
+	* testsuite/ld-elf/pr22423.d: Likewise.
+	* testsuite/ld-elf/pr22450.d: xfail avr, crx, h8300, ip2k, m68hc11,
+	and xc16x.
+	* testsuite/ld-elf/pr23658-1c.d: xfail h8300.
+	* testsuite/ld-elf/pr25708.d: xfail h8300 and hppa64.
+	* testsuite/ld-elf/rpath-1.d: xfail h8300.
+	* testsuite/ld-elf/rpath-2.d: Likewise.
+	* testsuite/ld-elf/runpath-1.d: Likewise.
+	* testsuite/ld-elf/runpath-2.d: Likewise.
+	* testsuite/ld-elf/sizeofb.d: Likewise.
+	* testsuite/ld-elf/startofb.d: Likewise.
+	* testsuite/ld-elf/strtab.d: Likewise.
+	* testsuite/ld-elf/textaddr1.d: Likewise.
+	* testsuite/ld-elf/textaddr2.d: Likewise.
+	* testsuite/ld-elf/textaddr4.d: Likewise.
+	* testsuite/ld-elf/textaddr5.d: Likewise.
+	* testsuite/ld-elf/textaddr6.d: Likewise.
+	* testsuite/ld-elf/unknown2.d: Likewise.
+	* testsuite/ld-undefined/entry-3.d: Likewise.
+	* testsuite/ld-undefined/entry-4.d: Likewise.
+	* testsuite/ld-h8300/h8300.exp: Pass appropriate ld -m option.
+	* testsuite/ld-h8300/gcsection.d: Remove ld -m option and relax
+	file format match.
+	* testsuite/ld-h8300/relax-2.d: Likewise.
+	* testsuite/ld-h8300/relax-3.d: Likewise.
+	* testsuite/ld-h8300/relax-4.d: Likewise.
+	* testsuite/ld-h8300/relax-5.d: Likewise.
+	* testsuite/ld-h8300/relax-6.d: Likewise.
+	* testsuite/ld-h8300/relax-7.d: Likewise.
+	* testsuite/ld-h8300/relax.d: Relax file format match.
+
 2020-03-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25708

@@ -3,6 +3,7 @@
 #ld: -shared --compress-debug-sections=none
 #readelf: -t
 #target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
+#xfail: h8300-*-*
 
 #failif
 #...

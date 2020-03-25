@@ -2,6 +2,7 @@
 #ld: -shared
 #readelf: -sW
 #target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
+#xfail: h8300-*-*
 
 Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
