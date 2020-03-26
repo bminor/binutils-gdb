@@ -1,5 +1,24 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (handle_data_member_location, dwarf2_add_field)
+	(mark_common_block_symbol_computed, read_tag_string_type)
+	(attr_to_dynamic_prop, read_subrange_type): Update.
+	(dwarf2_get_ref_die_offset, dwarf2_get_attr_constant_value): Move
+	to be methods on struct attribute.
+	(skip_one_die, process_imported_unit_die, read_namespace_alias)
+	(read_call_site_scope, partial_die_info::read)
+	(partial_die_info::read, lookup_die_type, follow_die_ref):
+	Update.
+	* dwarf2/attribute.c (attribute::get_ref_die_offset): New method,
+	from dwarf2_get_ref_die_offset.
+	(attribute::constant_value): New method, from
+	dwarf2_get_attr_constant_value.
+	* dwarf2/attribute.h (struct attribute) <get_ref_die_offset>:
+	Declare method.
+	<constant_value>: New method.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dwarf_unit_type_name, dwarf_tag_name)
 	(dwarf_attr_name, dwarf_form_name, dwarf_bool_name)
 	(dwarf_type_encoding_name): Move to stringify.c.

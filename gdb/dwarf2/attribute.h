@@ -28,6 +28,7 @@
 #define GDB_DWARF2_ATTRIBUTE_H
 
 #include "dwarf2.h"
+#include "gdbtypes.h"
 
 /* Blocks are a bunch of untyped bytes.  */
 struct dwarf_block
@@ -83,6 +84,17 @@ struct attribute
      if so return true else false.  */
 
   bool form_is_block () const;
+
+  /* Return DIE offset of this attribute.  Return 0 with complaint if
+     the attribute is not of the required kind.  */
+
+  sect_offset get_ref_die_offset () const;
+
+  /* Return the constant value held by this attribute.  Return
+     DEFAULT_VALUE if the value held by the attribute is not
+     constant.  */
+
+  LONGEST constant_value (int default_value) const;
 
 
   ENUM_BITFIELD(dwarf_attribute) name : 16;

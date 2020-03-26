@@ -26,6 +26,8 @@
 
 #include "defs.h"
 #include "dwarf2/attribute.h"
+#include "dwarf2/stringify.h"
+#include "complaints.h"
 
 /* See attribute.h.  */
 
@@ -117,5 +119,40 @@ attribute::form_is_ref () const
       return true;
     default:
       return false;
+    }
+}
+
+/* See attribute.h.  */
+
+sect_offset
+attribute::get_ref_die_offset () const
+{
+  if (form_is_ref ())
+    return (sect_offset) DW_UNSND (this);
+
+  complaint (_("unsupported die ref attribute form: '%s'"),
+	     dwarf_form_name (form));
+  return {};
+}
+
+/* See attribute.h.  */
+
+LONGEST
+attribute::constant_value (int default_value) const
+{
+  if (form == DW_FORM_sdata || form == DW_FORM_implicit_const)
+    return DW_SND (this);
+  else if (form == DW_FORM_udata
+	   || form == DW_FORM_data1
+	   || form == DW_FORM_data2
+	   || form == DW_FORM_data4
+	   || form == DW_FORM_data8)
+    return DW_UNSND (this);
+  else
+    {
+      /* For DW_FORM_data16 see attribute::form_is_constant.  */
+      complaint (_("Attribute value is not a constant (%s)"),
+		 dwarf_form_name (form));
+      return default_value;
     }
 }
