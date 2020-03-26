@@ -23045,7 +23045,7 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = cu->per_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  struct line_header *lh = cu->line_header;
+  const struct line_header *lh = cu->line_header;
   unsigned int offset_size = cu->header.offset_size;
   struct dwarf2_section_info *section;
   const char *section_name;

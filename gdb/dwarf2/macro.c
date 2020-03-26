@@ -48,7 +48,7 @@ static struct macro_source_file *
 macro_start_file (buildsym_compunit *builder,
 		  int file, int line,
                   struct macro_source_file *current_file,
-                  struct line_header *lh)
+                  const struct line_header *lh)
 {
   /* File name relative to the compilation directory of this source file.  */
   gdb::unique_xmalloc_ptr<char> file_name = lh->file_file_name (file);
@@ -423,7 +423,7 @@ dwarf_decode_macro_bytes (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			  bfd *abfd,
 			  const gdb_byte *mac_ptr, const gdb_byte *mac_end,
 			  struct macro_source_file *current_file,
-			  struct line_header *lh,
+			  const struct line_header *lh,
 			  struct dwarf2_section_info *section,
 			  int section_is_gnu, int section_is_dwz,
 			  unsigned int offset_size,
@@ -711,7 +711,7 @@ dwarf_decode_macro_bytes (struct dwarf2_per_objfile *dwarf2_per_objfile,
 void
 dwarf_decode_macros (struct dwarf2_per_objfile *dwarf2_per_objfile,
 		     buildsym_compunit *builder, dwarf2_section_info *section,
-		     struct line_header *lh, unsigned int offset_size,
+		     const struct line_header *lh, unsigned int offset_size,
 		     unsigned int offset, int section_is_gnu)
 {
   bfd *abfd;
