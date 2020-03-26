@@ -1,5 +1,9 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (dwarf_decode_macros): Split into two overloads.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (macro_start_file): Change "cu" parameter to
 	"builder".
 	(dwarf_decode_macro_bytes): Likewise.  Add dwarf2_per_objfile

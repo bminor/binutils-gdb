@@ -23753,56 +23753,18 @@ dwarf_decode_macro_bytes (struct dwarf2_per_objfile *dwarf2_per_objfile,
 }
 
 static void
-dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
-                     int section_is_gnu)
+dwarf_decode_macros (struct dwarf2_per_objfile *dwarf2_per_objfile,
+		     buildsym_compunit *builder, dwarf2_section_info *section,
+		     struct line_header *lh, unsigned int offset_size,
+		     unsigned int offset, int section_is_gnu)
 {
-  struct dwarf2_per_objfile *dwarf2_per_objfile
-    = cu->per_cu->dwarf2_per_objfile;
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
-  struct line_header *lh = cu->line_header;
   bfd *abfd;
   const gdb_byte *mac_ptr, *mac_end;
   struct macro_source_file *current_file = 0;
   enum dwarf_macro_record_type macinfo_type;
-  unsigned int offset_size = cu->header.offset_size;
   const gdb_byte *opcode_definitions[256];
   void **slot;
-  struct dwarf2_section_info *section;
-  const char *section_name;
 
-  if (cu->dwo_unit != NULL)
-    {
-      if (section_is_gnu)
-	{
-	  section = &cu->dwo_unit->dwo_file->sections.macro;
-	  section_name = ".debug_macro.dwo";
-	}
-      else
-	{
-	  section = &cu->dwo_unit->dwo_file->sections.macinfo;
-	  section_name = ".debug_macinfo.dwo";
-	}
-    }
-  else
-    {
-      if (section_is_gnu)
-	{
-	  section = &dwarf2_per_objfile->macro;
-	  section_name = ".debug_macro";
-	}
-      else
-	{
-	  section = &dwarf2_per_objfile->macinfo;
-	  section_name = ".debug_macinfo";
-	}
-    }
-
-  section->read (objfile);
-  if (section->buffer == NULL)
-    {
-      complaint (_("missing %s section"), section_name);
-      return;
-    }
   abfd = section->get_bfd_owner ();
 
   /* First pass: Find the name of the base filename.
@@ -23827,7 +23789,6 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
       return;
     }
 
-  buildsym_compunit *builder = cu->get_builder ();
   do
     {
       /* Do we at least have room for a macinfo type byte?  */
@@ -23947,6 +23908,61 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 			    current_file, lh, section,
 			    section_is_gnu, 0, offset_size,
 			    include_hash.get ());
+}
+
+/* An overload of dwarf_decode_macros that finds the correct section
+   and ensures it is read in before calling the other overload.  */
+
+static void
+dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
+		     int section_is_gnu)
+{
+  struct dwarf2_per_objfile *dwarf2_per_objfile
+    = cu->per_cu->dwarf2_per_objfile;
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  struct line_header *lh = cu->line_header;
+  unsigned int offset_size = cu->header.offset_size;
+  struct dwarf2_section_info *section;
+  const char *section_name;
+
+  if (cu->dwo_unit != nullptr)
+    {
+      if (section_is_gnu)
+	{
+	  section = &cu->dwo_unit->dwo_file->sections.macro;
+	  section_name = ".debug_macro.dwo";
+	}
+      else
+	{
+	  section = &cu->dwo_unit->dwo_file->sections.macinfo;
+	  section_name = ".debug_macinfo.dwo";
+	}
+    }
+  else
+    {
+      if (section_is_gnu)
+	{
+	  section = &dwarf2_per_objfile->macro;
+	  section_name = ".debug_macro";
+	}
+      else
+	{
+	  section = &dwarf2_per_objfile->macinfo;
+	  section_name = ".debug_macinfo";
+	}
+    }
+
+  section->read (objfile);
+  if (section->buffer == nullptr)
+    {
+      complaint (_("missing %s section"), section_name);
+      return;
+    }
+
+  buildsym_compunit *builder = cu->get_builder ();
+
+  dwarf_decode_macros (dwarf2_per_objfile, builder, section, lh,
+		       offset_size, offset, section_is_gnu);
 }
 
 /* Return the .debug_loc section to use for CU.
