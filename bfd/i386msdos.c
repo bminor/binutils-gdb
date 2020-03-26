@@ -50,7 +50,7 @@ msdos_object_p (bfd *abfd)
   bfd_size_type size;
 
   if (bfd_seek (abfd, (file_ptr) 0, SEEK_SET) != 0
-      || (size = bfd_bread (&hdr, sizeof (hdr), abfd)) < DOS_HDR_SIZE)
+      || (size = bfd_bread (&hdr, sizeof (hdr), abfd)) + 1 < DOS_HDR_SIZE + 1)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);

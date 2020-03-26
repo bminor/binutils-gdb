@@ -1,5 +1,9 @@
 2020-03-26  Alan Modra  <amodra@gmail.com>
 
+	* i386msdos.c (msdos_object_p): Catch -1 return from bfd_bread.
+
+2020-03-26  Alan Modra  <amodra@gmail.com>
+
 	* vms-alpha.c (dst_define_location): Limit size of dst_ptr_offsets
 	array.
 	(_bfd_vms_slurp_object_records): Rename "err" to "ok".
