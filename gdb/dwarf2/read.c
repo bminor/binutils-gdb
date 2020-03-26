@@ -18302,8 +18302,9 @@ partial_die_info::fixup (struct dwarf2_cu *cu)
    attributes are the ones that need str_offsets_base or addr_base attributes.
    They could not have been processed in the first round, because at the time
    the values of str_offsets_base or addr_base may not have been known.  */
-void read_attribute_reprocess (const struct die_reader_specs *reader,
-			       struct attribute *attr)
+static void
+read_attribute_reprocess (const struct die_reader_specs *reader,
+			  struct attribute *attr)
 {
   struct dwarf2_cu *cu = reader->cu;
   switch (attr->form)
