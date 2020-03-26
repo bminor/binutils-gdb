@@ -393,10 +393,7 @@ struct dwarf2_cu
   struct comp_unit_head header {};
 
   /* Base address of this compilation unit.  */
-  CORE_ADDR base_address = 0;
-
-  /* Non-zero if base_address has been set.  */
-  int base_known = 0;
+  gdb::optional<CORE_ADDR> base_address;
 
   /* The language we are debugging.  */
   enum language language = language_unknown;
@@ -5783,23 +5780,16 @@ dwarf2_find_base_address (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct attribute *attr;
 
-  cu->base_known = 0;
-  cu->base_address = 0;
+  cu->base_address.reset ();
 
   attr = dwarf2_attr (die, DW_AT_entry_pc, cu);
   if (attr != nullptr)
-    {
-      cu->base_address = attr->value_as_address ();
-      cu->base_known = 1;
-    }
+    cu->base_address = attr->value_as_address ();
   else
     {
       attr = dwarf2_attr (die, DW_AT_low_pc, cu);
       if (attr != nullptr)
-	{
-	  cu->base_address = attr->value_as_address ();
-	  cu->base_known = 1;
-	}
+	cu->base_address = attr->value_as_address ();
     }
 }
 
@@ -13441,13 +13431,11 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   bfd *obfd = objfile->obfd;
   /* Base address selection entry.  */
-  CORE_ADDR base;
-  int found_base;
+  gdb::optional<CORE_ADDR> base;
   const gdb_byte *buffer;
   CORE_ADDR baseaddr;
   bool overflow = false;
 
-  found_base = cu->base_known;
   base = cu->base_address;
 
   dwarf2_per_objfile->rnglists.read (objfile);
@@ -13486,7 +13474,6 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 	      break;
 	    }
 	  base = cu->header.read_address (obfd, buffer, &bytes_read);
-	  found_base = 1;
 	  buffer += bytes_read;
 	  break;
 	case DW_RLE_start_length:
@@ -13544,7 +13531,7 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
       if (rlet == DW_RLE_base_address)
 	continue;
 
-      if (!found_base)
+      if (!base.has_value ())
 	{
 	  /* We have no valid base address for the ranges
 	     data.  */
@@ -13563,8 +13550,8 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
       if (range_beginning == range_end)
 	continue;
 
-      range_beginning += base;
-      range_end += base;
+      range_beginning += *base;
+      range_end += *base;
 
       /* A not-uncommon case of bad debug info.
 	 Don't pollute the addrmap with bad data.  */
@@ -13608,8 +13595,7 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu,
   unsigned int addr_size = cu_header->addr_size;
   CORE_ADDR mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Base address selection entry.  */
-  CORE_ADDR base;
-  int found_base;
+  gdb::optional<CORE_ADDR> base;
   unsigned int dummy;
   const gdb_byte *buffer;
   CORE_ADDR baseaddr;
@@ -13617,7 +13603,6 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu,
   if (cu_header->version >= 5)
     return dwarf2_rnglists_process (offset, cu, callback);
 
-  found_base = cu->base_known;
   base = cu->base_address;
 
   dwarf2_per_objfile->ranges.read (objfile);
@@ -13654,11 +13639,10 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu,
 	  /* If we found the largest possible address, then we already
 	     have the base address in range_end.  */
 	  base = range_end;
-	  found_base = 1;
 	  continue;
 	}
 
-      if (!found_base)
+      if (!base.has_value ())
 	{
 	  /* We have no valid base address for the ranges
 	     data.  */
@@ -13677,8 +13661,8 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu,
       if (range_beginning == range_end)
 	continue;
 
-      range_beginning += base;
-      range_end += base;
+      range_beginning += *base;
+      range_end += *base;
 
       /* A not-uncommon case of bad debug info.
 	 Don't pollute the addrmap with bad data.  */
@@ -22756,7 +22740,10 @@ fill_in_loclist_baton (struct dwarf2_cu *cu,
      don't run off the edge of the section.  */
   baton->size = section->size - DW_UNSND (attr);
   baton->data = section->buffer + DW_UNSND (attr);
-  baton->base_address = cu->base_address;
+  if (cu->base_address.has_value ())
+    baton->base_address = *cu->base_address;
+  else
+    baton->base_address = 0;
   baton->from_dwo = cu->dwo_unit != NULL;
 }
 
@@ -22781,7 +22768,7 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
 
       fill_in_loclist_baton (cu, baton, attr);
 
-      if (cu->base_known == 0)
+      if (!cu->base_address.has_value ())
 	complaint (_("Location list used without "
 		     "specifying the CU base address."));
 

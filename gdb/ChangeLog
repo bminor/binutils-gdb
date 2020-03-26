@@ -1,5 +1,13 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (struct dwarf2_cu) <base_known>: Remove.
+	<base_address>: Now an optional.
+	(dwarf2_find_base_address, dwarf2_rnglists_process)
+	(dwarf2_ranges_process, fill_in_loclist_baton)
+	(dwarf2_symbol_mark_computed): Update.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (struct die_info): Move to die.h.
 	* dwarf2/die.h: New file.
 
