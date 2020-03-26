@@ -1,5 +1,18 @@
 2020-03-26  Alan Modra  <amodra@gmail.com>
 
+	* disassemble.h (opcodes_assert): Declare.
+	(OPCODES_ASSERT): Define.
+	* disassemble.c: Don't include assert.h.  Include opintl.h.
+	(opcodes_assert): New function.
+	* h8300-dis.c (bfd_h8_disassemble_init): Use OPCODES_ASSERT.
+	(bfd_h8_disassemble): Reduce size of data array.  Correctly
+	calculate maxlen.  Omit insn decoding when insn length exceeds
+	maxlen.  Exit from nibble loop when looking for E, before
+	accessing next data byte.  Move processing of E outside loop.
+	Replace tests of maxlen in loop with assertions.
+
+2020-03-26  Alan Modra  <amodra@gmail.com>
+
 	* arc-dis.c (find_format): Init needs_limm.  Simplify use of limm.
 
 2020-03-25  Alan Modra  <amodra@gmail.com>
