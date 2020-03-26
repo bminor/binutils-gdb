@@ -1256,8 +1256,7 @@ static const char *read_indirect_line_string
    const struct comp_unit_head *, unsigned int *);
 
 static const char *read_indirect_string_at_offset
-  (struct dwarf2_per_objfile *dwarf2_per_objfile, bfd *abfd,
-   LONGEST str_offset);
+  (struct dwarf2_per_objfile *dwarf2_per_objfile, LONGEST str_offset);
 
 static CORE_ADDR read_addr_index_from_leb128 (struct dwarf2_cu *,
 					      const gdb_byte *,
@@ -5171,8 +5170,8 @@ mapped_debug_names::namei_to_name (uint32_t namei) const
 				 + namei * offset_size),
 				offset_size,
 				dwarf5_byte_order);
-  return read_indirect_string_at_offset
-    (dwarf2_per_objfile, dwarf2_per_objfile->objfile->obfd, namei_string_offs);
+  return read_indirect_string_at_offset (dwarf2_per_objfile,
+					 namei_string_offs);
 }
 
 /* Find a slot in .debug_names for the object named NAME.  If NAME is
@@ -18770,52 +18769,14 @@ read_checked_initial_length_and_offset (bfd *abfd, const gdb_byte *buf,
   return length;
 }
 
-/* Return pointer to string at section SECT offset STR_OFFSET with error
-   reporting strings FORM_NAME and SECT_NAME.  */
-
-static const char *
-read_indirect_string_at_offset_from (struct objfile *objfile,
-				     bfd *abfd, LONGEST str_offset,
-				     struct dwarf2_section_info *sect,
-				     const char *form_name,
-				     const char *sect_name)
-{
-  sect->read (objfile);
-  if (sect->buffer == NULL)
-    error (_("%s used without %s section [in module %s]"),
-	   form_name, sect_name, bfd_get_filename (abfd));
-  if (str_offset >= sect->size)
-    error (_("%s pointing outside of %s section [in module %s]"),
-	   form_name, sect_name, bfd_get_filename (abfd));
-  gdb_assert (HOST_CHAR_BIT == 8);
-  if (sect->buffer[str_offset] == '\0')
-    return NULL;
-  return (const char *) (sect->buffer + str_offset);
-}
-
 /* Return pointer to string at .debug_str offset STR_OFFSET.  */
 
 static const char *
 read_indirect_string_at_offset (struct dwarf2_per_objfile *dwarf2_per_objfile,
-				bfd *abfd, LONGEST str_offset)
+				LONGEST str_offset)
 {
-  return read_indirect_string_at_offset_from (dwarf2_per_objfile->objfile,
-					      abfd, str_offset,
-					      &dwarf2_per_objfile->str,
-					      "DW_FORM_strp", ".debug_str");
-}
-
-/* Return pointer to string at .debug_line_str offset STR_OFFSET.  */
-
-static const char *
-read_indirect_line_string_at_offset (struct dwarf2_per_objfile *dwarf2_per_objfile,
-				     bfd *abfd, LONGEST str_offset)
-{
-  return read_indirect_string_at_offset_from (dwarf2_per_objfile->objfile,
-					      abfd, str_offset,
-					      &dwarf2_per_objfile->line_str,
-					      "DW_FORM_line_strp",
-					      ".debug_line_str");
+  return dwarf2_per_objfile->str.read_string (dwarf2_per_objfile->objfile,
+					      str_offset, "DW_FORM_strp");
 }
 
 /* Return pointer to string at .debug_str offset as read from BUF.
@@ -18830,7 +18791,7 @@ read_indirect_string (struct dwarf2_per_objfile *dwarf2_per_objfile, bfd *abfd,
 {
   LONGEST str_offset = cu_header->read_offset (abfd, buf, bytes_read_ptr);
 
-  return read_indirect_string_at_offset (dwarf2_per_objfile, abfd, str_offset);
+  return read_indirect_string_at_offset (dwarf2_per_objfile, str_offset);
 }
 
 /* Return pointer to string at .debug_line_str offset as read from BUF.
@@ -18845,8 +18806,9 @@ read_indirect_line_string (struct dwarf2_per_objfile *dwarf2_per_objfile,
 {
   LONGEST str_offset = cu_header->read_offset (abfd, buf, bytes_read_ptr);
 
-  return read_indirect_line_string_at_offset (dwarf2_per_objfile, abfd,
-					      str_offset);
+  return dwarf2_per_objfile->line_str.read_string (dwarf2_per_objfile->objfile,
+						   str_offset,
+						   "DW_FORM_line_strp");
 }
 
 /* Given index ADDR_INDEX in .debug_addr, fetch the value.
@@ -23549,7 +23511,7 @@ dwarf_decode_macro_bytes (struct dwarf2_per_objfile *dwarf2_per_objfile,
 		  }
 		else
 		  body = read_indirect_string_at_offset (dwarf2_per_objfile,
-							 abfd, str_offset);
+							 str_offset);
 	      }
 
 	    is_define = (macinfo_type == DW_MACRO_define

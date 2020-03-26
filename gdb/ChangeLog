@@ -1,5 +1,18 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/section.h (struct dwarf2_section_info) <read_string>: New
+	method.
+	* dwarf2/section.c: New method.  From
+	read_indirect_string_at_offset_from.
+	* dwarf2/read.c (mapped_debug_names::namei_to_name): Update.
+	(read_indirect_string_at_offset_from): Move to section.c.
+	(read_indirect_string_at_offset): Rewrite.
+	(read_indirect_line_string_at_offset): Remove.
+	(read_indirect_string, read_indirect_line_string)
+	(dwarf_decode_macro_bytes): Update.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/section.h (struct dwarf2_section_info)
 	<overload_complaint>: Declare.
 	(dwarf2_section_buffer_overflow_complaint): Don't declare.
