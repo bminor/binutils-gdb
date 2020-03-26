@@ -1,5 +1,12 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* tdesc.cc (tdesc_predefined_types): Add new capability types.
+	* tdesc.h (tdesc_type_kind) <TDESC_TYPE_CODE_CAPABILITY>
+	<TDESC_TYPE_DATA_CAPABILITY, TDESC_TYPE_INTCAP>
+	<TDESC_TYPE_UINTCAP>: New fields.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* gdbsupport/Makefile.am: Regenerate.
 	* gdbsupport/Makefile.in: Adjust to include gdbsupport/capability.*.
 	* gdbsupport/capability.cc: New file.

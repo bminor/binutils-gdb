@@ -1,5 +1,10 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* target-descriptions.c (make_gdb_type): Handle new capability
+	types.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* gdb/gdbarch.c: Regenerate.
 	* gdb/gdbarch.h: Regenerate.
 	* gdb/gdbarch.sh (code_capability_bit)

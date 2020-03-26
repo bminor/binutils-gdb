@@ -110,6 +110,20 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
 	case TDESC_TYPE_DATA_PTR:
 	  m_type = builtin_type (m_gdbarch)->builtin_data_ptr;
 	  return;
+	/* FIXME-Morello: Fix naming of the type according to what the final
+	   code will look like.  */
+	case TDESC_TYPE_CODE_CAPABILITY:
+	  m_type = builtin_type (m_gdbarch)->builtin_code_addr_capability;
+	  return;
+	case TDESC_TYPE_DATA_CAPABILITY:
+	  m_type = builtin_type (m_gdbarch)->builtin_data_addr_capability;
+	  return;
+	case TDESC_TYPE_INTCAP:
+	  m_type = builtin_type (m_gdbarch)->builtin_intcap_t;
+	  return;
+	case TDESC_TYPE_UINTCAP:
+	  m_type = builtin_type (m_gdbarch)->builtin_uintcap_t;
+	  return;
 	}
 
       m_type = tdesc_find_type (m_gdbarch, e->name.c_str ());
