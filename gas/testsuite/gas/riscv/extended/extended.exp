@@ -31,6 +31,7 @@ if [istarget riscv*-*-*] {
     run_dump_tests "vector-insns-fail-mask"
     run_dump_tests "vector-insns-fail-permutation"
     run_dump_tests "vector-insns-fail-zvamo"
+    run_dump_tests "fp-zfh-insns"
 
     run_dump_tests "extended-csr"
 }

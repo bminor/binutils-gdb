@@ -281,6 +281,13 @@ riscv_extended_subset_supports (int insn_class)
     case INSN_CLASS_V_OR_ZVLSSEG:
       return (riscv_subset_supports ("v")
 	      || riscv_subset_supports ("zvlsseg"));
+
+    case INSN_CLASS_ZFH:
+      return riscv_subset_supports ("zfh");
+    case INSN_CLASS_D_AND_ZFH:
+      return riscv_subset_supports ("d") && riscv_subset_supports ("zfh");
+    case INSN_CLASS_Q_AND_ZFH:
+      return riscv_subset_supports ("q") && riscv_subset_supports ("zfh");
     default:
       as_fatal ("internal: unknown INSN_CLASS (0x%x)", insn_class);
       return false;
@@ -1935,11 +1942,24 @@ extended_macro (struct riscv_cl_insn *ip,
 		expressionS *imm_expr ATTRIBUTE_UNUSED,
 		bfd_reloc_code_real_type *imm_reloc ATTRIBUTE_UNUSED)
 {
+  int rd = (ip->insn_opcode >> OP_SH_RD) & OP_MASK_RD;
+  int rs1 = (ip->insn_opcode >> OP_SH_RS1) & OP_MASK_RS1;
+  int rs2 = (ip->insn_opcode >> OP_SH_RS2) & OP_MASK_RS2;
+
   switch (mask)
     {
     case M_VMSGE:
     case M_VMSGEU:
       vector_macro (ip);
+      break;
+
+    case M_FLH:
+      pcrel_load (rd, rs1, imm_expr, "flh",
+		  BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_I);
+      break;
+    case M_FSH:
+      pcrel_store (rs2, rs1, imm_expr, "fsh",
+		   BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_S);
       break;
 
     default:
