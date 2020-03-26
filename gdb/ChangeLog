@@ -1,5 +1,14 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.h (struct dwarf2_per_objfile) <read_line_string>:
+	Declare method.
+	* dwarf2/read.c (read_attribute_value): Update.
+	(dwarf2_per_objfile::read_line_string): Rename from
+	read_indirect_line_string.
+	(read_formatted_entries): Update.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/macro.c (dwarf_decode_macro_bytes): Use objfile local
 	variable.
 

@@ -1251,10 +1251,6 @@ static const char *read_indirect_string
   (struct dwarf2_per_objfile *dwarf2_per_objfile, bfd *, const gdb_byte *,
    const struct comp_unit_head *, unsigned int *);
 
-static const char *read_indirect_line_string
-  (struct dwarf2_per_objfile *dwarf2_per_objfile, bfd *, const gdb_byte *,
-   const struct comp_unit_head *, unsigned int *);
-
 static const char *read_indirect_string_at_offset
   (struct dwarf2_per_objfile *dwarf2_per_objfile, LONGEST str_offset);
 
@@ -18550,9 +18546,9 @@ read_attribute_value (const struct die_reader_specs *reader,
     case DW_FORM_line_strp:
       if (!cu->per_cu->is_dwz)
 	{
-	  DW_STRING (attr) = read_indirect_line_string (dwarf2_per_objfile,
-							abfd, info_ptr,
-							cu_header, &bytes_read);
+	  DW_STRING (attr)
+	    = dwarf2_per_objfile->read_line_string (info_ptr, cu_header,
+						    &bytes_read);
 	  DW_STRING_IS_CANONICAL (attr) = 0;
 	  info_ptr += bytes_read;
 	  break;
@@ -18786,21 +18782,17 @@ read_indirect_string (struct dwarf2_per_objfile *dwarf2_per_objfile, bfd *abfd,
   return read_indirect_string_at_offset (dwarf2_per_objfile, str_offset);
 }
 
-/* Return pointer to string at .debug_line_str offset as read from BUF.
-   BUF is assumed to be in a compilation unit described by CU_HEADER.
-   Return *BYTES_READ_PTR count of bytes read from BUF.  */
+/* See read.h.  */
 
-static const char *
-read_indirect_line_string (struct dwarf2_per_objfile *dwarf2_per_objfile,
-			   bfd *abfd, const gdb_byte *buf,
+const char *
+dwarf2_per_objfile::read_line_string (const gdb_byte *buf,
 			   const struct comp_unit_head *cu_header,
 			   unsigned int *bytes_read_ptr)
 {
+  bfd *abfd = objfile->obfd;
   LONGEST str_offset = cu_header->read_offset (abfd, buf, bytes_read_ptr);
 
-  return dwarf2_per_objfile->line_str.read_string (dwarf2_per_objfile->objfile,
-						   str_offset,
-						   "DW_FORM_line_strp");
+  return line_str.read_string (objfile, str_offset, "DW_FORM_line_strp");
 }
 
 /* Given index ADDR_INDEX in .debug_addr, fetch the value.
@@ -19284,10 +19276,10 @@ read_formatted_entries (struct dwarf2_per_objfile *dwarf2_per_objfile,
 	      break;
 
 	    case DW_FORM_line_strp:
-	      string.emplace (read_indirect_line_string (dwarf2_per_objfile,
-							 abfd, buf,
-							 cu_header,
-							 &bytes_read));
+	      string.emplace
+		(dwarf2_per_objfile->read_line_string (buf,
+						       cu_header,
+						       &bytes_read));
 	      buf += bytes_read;
 	      break;
 

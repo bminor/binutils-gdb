@@ -110,6 +110,14 @@ struct dwarf2_per_objfile
 
   /* Free all cached compilation units.  */
   void free_cached_comp_units ();
+
+  /* Return pointer to string at .debug_line_str offset as read from BUF.
+     BUF is assumed to be in a compilation unit described by CU_HEADER.
+     Return *BYTES_READ_PTR count of bytes read from BUF.  */
+  const char *read_line_string (const gdb_byte *buf,
+				const struct comp_unit_head *cu_header,
+				unsigned int *bytes_read_ptr);
+
 private:
   /* This function is mapped across the sections and remembers the
      offset and size of each of the debugging sections we are
