@@ -1,3 +1,7 @@
+2020-03-26  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf/common.h (AT_FREEBSD_BSDFLAGS): Define.
+
 2020-03-24  Martin Liska  <mliska@suse.cz>
 
 	PR lto/94249

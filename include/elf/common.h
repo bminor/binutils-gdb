@@ -1251,6 +1251,7 @@
 #define AT_FREEBSD_EHDRFLAGS    24      /* e_flags field from ELF header. */
 #define AT_FREEBSD_HWCAP        25      /* CPU feature flags. */
 #define AT_FREEBSD_HWCAP2       26      /* CPU feature flags 2. */
+#define AT_FREEBSD_BSDFLAGS     27      /* ELF BSD Flags. */
 
 #define AT_SUN_UID      2000    /* Effective user ID.  */
 #define AT_SUN_RUID     2001    /* Real user ID.  */

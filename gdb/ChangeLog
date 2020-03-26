@@ -1,3 +1,7 @@
+2020-03-26  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_print_auxv_entry): Handle AT_FREEBSD_BSDFLAGS.
+
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.c (handle_data_member_location, dwarf2_add_field)
