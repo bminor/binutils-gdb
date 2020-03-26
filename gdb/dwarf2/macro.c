@@ -231,7 +231,7 @@ static const gdb_byte *
 skip_form_bytes (bfd *abfd, const gdb_byte *bytes, const gdb_byte *buffer_end,
 		 enum dwarf_form form,
 		 unsigned int offset_size,
-		 struct dwarf2_section_info *section)
+		 const struct dwarf2_section_info *section)
 {
   unsigned int bytes_read;
 
@@ -322,7 +322,7 @@ skip_unknown_opcode (unsigned int opcode,
 		     const gdb_byte *mac_ptr, const gdb_byte *mac_end,
 		     bfd *abfd,
 		     unsigned int offset_size,
-		     struct dwarf2_section_info *section)
+		     const struct dwarf2_section_info *section)
 {
   unsigned int bytes_read, i;
   unsigned long arg;
@@ -424,7 +424,7 @@ dwarf_decode_macro_bytes (struct dwarf2_per_objfile *dwarf2_per_objfile,
 			  const gdb_byte *mac_ptr, const gdb_byte *mac_end,
 			  struct macro_source_file *current_file,
 			  const struct line_header *lh,
-			  struct dwarf2_section_info *section,
+			  const struct dwarf2_section_info *section,
 			  int section_is_gnu, int section_is_dwz,
 			  unsigned int offset_size,
 			  htab_t include_hash)
@@ -634,7 +634,7 @@ dwarf_decode_macro_bytes (struct dwarf2_per_objfile *dwarf2_per_objfile,
 	    LONGEST offset;
 	    void **slot;
 	    bfd *include_bfd = abfd;
-	    struct dwarf2_section_info *include_section = section;
+	    const struct dwarf2_section_info *include_section = section;
 	    const gdb_byte *include_mac_end = mac_end;
 	    int is_dwz = section_is_dwz;
 	    const gdb_byte *new_mac_ptr;
@@ -710,7 +710,8 @@ dwarf_decode_macro_bytes (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
 void
 dwarf_decode_macros (struct dwarf2_per_objfile *dwarf2_per_objfile,
-		     buildsym_compunit *builder, dwarf2_section_info *section,
+		     buildsym_compunit *builder,
+		     const dwarf2_section_info *section,
 		     const struct line_header *lh, unsigned int offset_size,
 		     unsigned int offset, int section_is_gnu)
 {

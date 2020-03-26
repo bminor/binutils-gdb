@@ -24,7 +24,7 @@ struct buildsym_compunit;
 
 extern void dwarf_decode_macros (struct dwarf2_per_objfile *dwarf2_per_objfile,
 				 buildsym_compunit *builder,
-				 dwarf2_section_info *section,
+				 const dwarf2_section_info *section,
 				 const struct line_header *lh,
 				 unsigned int offset_size,
 				 unsigned int offset,
