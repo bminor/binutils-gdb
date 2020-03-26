@@ -195,4 +195,18 @@ file_entry::include_dir (const line_header *lh) const
   return lh->include_dir_at (d_index);
 }
 
+/* Read the statement program header starting at SECT_OFF in SECTION.
+   Return line_header.  Returns nullptr if there is a problem reading
+   the header, e.g., if it has a version we don't understand.
+
+   NOTE: the strings in the include directory and file name tables of
+   the returned object point into the dwarf line section buffer,
+   and must not be freed.  */
+
+extern line_header_up dwarf_decode_line_header
+  (sect_offset sect_off, bool is_dwz,
+   struct dwarf2_per_objfile *dwarf2_per_objfile,
+   struct dwarf2_section_info *section,
+   const struct comp_unit_head *cu_header);
+
 #endif /* DWARF2_LINE_HEADER_H */
