@@ -8595,7 +8595,7 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
 	      if (sibling_ptr < info_ptr)
 		complaint (_("DW_AT_sibling points backwards"));
 	      else if (sibling_ptr > reader->buffer_end)
-		dwarf2_section_buffer_overflow_complaint (reader->die_section);
+		reader->die_section->overflow_complaint ();
 	      else
 		return sibling_ptr;
 	    }
@@ -18079,7 +18079,7 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	      if (sibling_ptr < info_ptr)
 		complaint (_("DW_AT_sibling points backwards"));
 	      else if (sibling_ptr > reader->buffer_end)
-		dwarf2_section_buffer_overflow_complaint (reader->die_section);
+		reader->die_section->overflow_complaint ();
 	      else
 		sibling = sibling_ptr;
 	    }
@@ -23329,7 +23329,7 @@ skip_form_bytes (bfd *abfd, const gdb_byte *bytes, const gdb_byte *buffer_end,
       bytes = gdb_skip_leb128 (bytes, buffer_end);
       if (bytes == NULL)
 	{
-	  dwarf2_section_buffer_overflow_complaint (section);
+	  section->overflow_complaint ();
 	  return NULL;
 	}
       break;
@@ -23492,7 +23492,7 @@ dwarf_decode_macro_bytes (struct dwarf2_per_objfile *dwarf2_per_objfile,
       /* Do we at least have room for a macinfo type byte?  */
       if (mac_ptr >= mac_end)
 	{
-	  dwarf2_section_buffer_overflow_complaint (section);
+	  section->overflow_complaint ();
 	  break;
 	}
 
@@ -23645,7 +23645,7 @@ dwarf_decode_macro_bytes (struct dwarf2_per_objfile *dwarf2_per_objfile,
                   /* Do we at least have room for a macinfo type byte?  */
                   if (mac_ptr >= mac_end)
                     {
-		      dwarf2_section_buffer_overflow_complaint (section);
+		      section->overflow_complaint ();
                       return;
                     }
 

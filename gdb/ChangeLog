@@ -1,5 +1,15 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/section.h (struct dwarf2_section_info)
+	<overload_complaint>: Declare.
+	(dwarf2_section_buffer_overflow_complaint): Don't declare.
+	* dwarf2/section.c (dwarf2_section_info::overflow_complaint):
+	Rename from dwarf2_section_buffer_overflow_complaint.
+	* dwarf2/read.c (skip_one_die, partial_die_info::read)
+	(skip_form_bytes, dwarf_decode_macro_bytes): Update.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/section.h (dwarf2_section_buffer_overflow_complaint):
 	Declare.
 	* dwarf2/section.c (dwarf2_section_buffer_overflow_complaint):

@@ -94,6 +94,10 @@ struct dwarf2_section_info
     return size;
   }
 
+  /* Issue a complaint that something was outside the bounds of this
+     buffer.  */
+  void overflow_complaint () const;
+
   union
   {
     /* If this is a real section, the bfd section.  */
@@ -115,8 +119,5 @@ struct dwarf2_section_info
      This specifies which of s.section and s.containing_section to use.  */
   bool is_virtual;
 };
-
-extern void dwarf2_section_buffer_overflow_complaint
-  (struct dwarf2_section_info *section);
 
 #endif /* GDB_DWARF2_SECTION_H */
