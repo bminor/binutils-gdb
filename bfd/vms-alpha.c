@@ -1553,6 +1553,14 @@ dst_define_location (bfd *abfd, unsigned int loc)
 {
   vms_debug2 ((4, "dst_define_location (%d)\n", (int)loc));
 
+  if (loc > 1 << 24)
+    {
+      /* 16M entries ought to be plenty.  */
+      bfd_set_error (bfd_error_bad_value);
+      _bfd_error_handler (_("dst_define_location %u too large"), loc);
+      return FALSE;
+    }
+
   /* Grow the ptr offset table if necessary.  */
   if (loc + 1 > PRIV (dst_ptr_offsets_count))
     {
@@ -2634,7 +2642,7 @@ _bfd_vms_slurp_eeom (bfd *abfd)
 static bfd_boolean
 _bfd_vms_slurp_object_records (bfd * abfd)
 {
-  bfd_boolean err;
+  bfd_boolean ok;
   int type;
 
   do
@@ -2651,27 +2659,27 @@ _bfd_vms_slurp_object_records (bfd * abfd)
       switch (type)
 	{
 	case EOBJ__C_EMH:
-	  err = _bfd_vms_slurp_ehdr (abfd);
+	  ok = _bfd_vms_slurp_ehdr (abfd);
 	  break;
 	case EOBJ__C_EEOM:
-	  err = _bfd_vms_slurp_eeom (abfd);
+	  ok = _bfd_vms_slurp_eeom (abfd);
 	  break;
 	case EOBJ__C_EGSD:
-	  err = _bfd_vms_slurp_egsd (abfd);
+	  ok = _bfd_vms_slurp_egsd (abfd);
 	  break;
 	case EOBJ__C_ETIR:
-	  err = TRUE; /* _bfd_vms_slurp_etir (abfd); */
+	  ok = TRUE; /* _bfd_vms_slurp_etir (abfd); */
 	  break;
 	case EOBJ__C_EDBG:
-	  err = _bfd_vms_slurp_edbg (abfd);
+	  ok = _bfd_vms_slurp_edbg (abfd);
 	  break;
 	case EOBJ__C_ETBT:
-	  err = _bfd_vms_slurp_etbt (abfd);
+	  ok = _bfd_vms_slurp_etbt (abfd);
 	  break;
 	default:
-	  err = FALSE;
+	  ok = FALSE;
 	}
-      if (!err)
+      if (!ok)
 	{
 	  vms_debug2 ((2, "slurp type %d failed\n", type));
 	  return FALSE;

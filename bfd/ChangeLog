@@ -1,3 +1,9 @@
+2020-03-26  Alan Modra  <amodra@gmail.com>
+
+	* vms-alpha.c (dst_define_location): Limit size of dst_ptr_offsets
+	array.
+	(_bfd_vms_slurp_object_records): Rename "err" to "ok".
+
 2020-03-25  Nick Clifton  <nickc@redhat.com>
 
 	* cofflink.c (bfd_coff_get_internal_extra_pe_aouthdr): New
