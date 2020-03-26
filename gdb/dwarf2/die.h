@@ -38,12 +38,14 @@ struct die_info
      DW_AT_addr_base.  */
   gdb::optional<ULONGEST> addr_base ()
   {
-    struct attribute *attr = this->attr (DW_AT_addr_base);
-    if (attr == nullptr)
-      attr = this->attr (DW_AT_GNU_addr_base);
-    if (attr == nullptr)
-      return gdb::optional<ULONGEST> ();
-    return DW_UNSND (attr);
+    for (unsigned i = 0; i < num_attrs; ++i)
+      if (attrs[i].name == DW_AT_addr_base
+	  || attrs[i].name == DW_AT_GNU_addr_base)
+	{
+	  /* If both exist, just use the first one.  */
+	  return DW_UNSND (&attrs[i]);
+	}
+    return gdb::optional<ULONGEST> ();
   }
 
   /* Return range lists base of the compile unit, which, if exists, is
@@ -51,12 +53,14 @@ struct die_info
      DW_AT_GNU_ranges_base.  */
   ULONGEST ranges_base ()
   {
-    struct attribute *attr = this->attr (DW_AT_rnglists_base);
-    if (attr == nullptr)
-      attr = this->attr (DW_AT_GNU_ranges_base);
-    if (attr == nullptr)
-      return 0;
-    return DW_UNSND (attr);
+    for (unsigned i = 0; i < num_attrs; ++i)
+      if (attrs[i].name == DW_AT_rnglists_base
+	  || attrs[i].name == DW_AT_GNU_ranges_base)
+	{
+	  /* If both exist, just use the first one.  */
+	  return DW_UNSND (&attrs[i]);
+	}
+    return 0;
   }
 
 
