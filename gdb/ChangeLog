@@ -1,5 +1,10 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/macro.c (dwarf_decode_macro_bytes): Use objfile local
+	variable.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/macro.h (dwarf_decode_macros): Make section parameter
 	const.
 	* dwarf2/macro.c (skip_form_bytes, skip_unknown_opcode)
