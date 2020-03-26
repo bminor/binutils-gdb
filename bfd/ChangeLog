@@ -1,3 +1,10 @@
+2020-03-26  Nick Clifton  <nickc@redhat.com>
+
+	* cofflink.c (bfd_coff_get_internal_extra_pe_aouthdr): Delete.
+	* libbfd-in.h (bfd_coff_get_internal_extra_pe_aouthdr): Remove
+	prototype.
+	* libbfd.h: Regenerate.
+
 2020-03-26  Alan Modra  <amodra@gmail.com>
 
 	* i386msdos.c (msdos_object_p): Catch -1 return from bfd_bread.
