@@ -34,6 +34,7 @@ struct aarch64_features
   bool pauth = false;
   bool mte = false;
   bool tls = false;
+  bool capability = false;
 };
 
 inline bool operator==(const aarch64_features &lhs, const aarch64_features &rhs)
@@ -41,7 +42,8 @@ inline bool operator==(const aarch64_features &lhs, const aarch64_features &rhs)
   return lhs.vq == rhs.vq
     && lhs.pauth == rhs.pauth
     && lhs.mte == rhs.mte
-    && lhs.tls == rhs.tls;
+    && lhs.tls == rhs.tls
+    && lhs.capability == rhs.capability;
 }
 
 namespace std
@@ -57,6 +59,7 @@ namespace std
       h = h << 1 | features.pauth;
       h = h << 1 | features.mte;
       h = h << 1 | features.tls;
+      h = h << 1 | features.capability;
       return h;
     }
   };

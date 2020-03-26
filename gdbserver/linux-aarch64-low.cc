@@ -830,6 +830,8 @@ aarch64_target::low_arch_setup ()
       /* A-profile MTE is 64-bit only.  */
       features.mte = linux_get_hwcap2 (8) & HWCAP2_MTE;
       features.tls = true;
+      /* Morello is 64-bit only.  */
+      features.capability = linux_get_hwcap2 (8) & HWCAP2_MORELLO;
 
       current_process ()->tdesc = aarch64_linux_read_description (features);
 

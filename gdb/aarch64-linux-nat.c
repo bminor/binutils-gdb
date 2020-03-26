@@ -714,6 +714,7 @@ aarch64_linux_nat_target::read_description ()
   features.pauth = hwcap & AARCH64_HWCAP_PACA;
   features.mte = hwcap2 & HWCAP2_MTE;
   features.tls = true;
+  features.capacity = hwcap2 & HWCAP2_MORELLO;
 
   return aarch64_read_description (features);
 }

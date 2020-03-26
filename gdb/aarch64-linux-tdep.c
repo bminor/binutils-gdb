@@ -787,6 +787,7 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
   features.pauth = hwcap & AARCH64_HWCAP_PACA;
   features.mte = hwcap2 & HWCAP2_MTE;
   features.tls = tls != nullptr;
+  features.capability = hwcap2 & HWCAP2_MORELLO;
 
   return aarch64_read_description (features);
 }
