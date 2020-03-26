@@ -1224,9 +1224,6 @@ static void set_cu_language (unsigned int, struct dwarf2_cu *);
 static struct attribute *dwarf2_attr (struct die_info *, unsigned int,
 				      struct dwarf2_cu *);
 
-static struct attribute *dwarf2_attr_no_follow (struct die_info *,
-						unsigned int);
-
 static const char *dwarf2_string_attr (struct die_info *die, unsigned int name,
                                        struct dwarf2_cu *cu);
 
@@ -6397,9 +6394,9 @@ static gdb::optional<ULONGEST>
 lookup_addr_base (struct die_info *comp_unit_die)
 {
   struct attribute *attr;
-  attr = dwarf2_attr_no_follow (comp_unit_die, DW_AT_addr_base);
+  attr = comp_unit_die->attr (DW_AT_addr_base);
   if (attr == nullptr)
-    attr = dwarf2_attr_no_follow (comp_unit_die, DW_AT_GNU_addr_base);
+    attr = comp_unit_die->attr (DW_AT_GNU_addr_base);
   if (attr == nullptr)
     return gdb::optional<ULONGEST> ();
   return DW_UNSND (attr);
@@ -6411,9 +6408,9 @@ static ULONGEST
 lookup_ranges_base (struct die_info *comp_unit_die)
 {
   struct attribute *attr;
-  attr = dwarf2_attr_no_follow (comp_unit_die, DW_AT_rnglists_base);
+  attr = comp_unit_die->attr (DW_AT_rnglists_base);
   if (attr == nullptr)
-    attr = dwarf2_attr_no_follow (comp_unit_die, DW_AT_GNU_ranges_base);
+    attr = comp_unit_die->attr (DW_AT_GNU_ranges_base);
   if (attr == nullptr)
     return 0;
   return DW_UNSND (attr);
@@ -7399,7 +7396,7 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
   if (! type_unit_die->has_children)
     return;
 
-  attr = dwarf2_attr_no_follow (type_unit_die, DW_AT_stmt_list);
+  attr = type_unit_die->attr (DW_AT_stmt_list);
   tu_group = get_type_unit_group (cu, attr);
 
   if (tu_group->tus == nullptr)
@@ -14977,7 +14974,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   /* If the definition of this type lives in .debug_types, read that type.
      Don't follow DW_AT_specification though, that will take us back up
      the chain and we want to go down.  */
-  attr = dwarf2_attr_no_follow (die, DW_AT_signature);
+  attr = die->attr (DW_AT_signature);
   if (attr != nullptr)
     {
       type = get_DW_AT_signature_type (die, attr, cu);
@@ -15513,7 +15510,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   /* If the definition of this type lives in .debug_types, read that type.
      Don't follow DW_AT_specification though, that will take us back up
      the chain and we want to go down.  */
-  attr = dwarf2_attr_no_follow (die, DW_AT_signature);
+  attr = die->attr (DW_AT_signature);
   if (attr != nullptr)
     {
       type = get_DW_AT_signature_type (die, attr, cu);
@@ -17539,7 +17536,7 @@ read_full_die_1 (const struct die_reader_specs *reader,
         indexes_that_need_reprocess.push_back (i);
     }
 
-  struct attribute *attr = dwarf2_attr_no_follow (die, DW_AT_str_offsets_base);
+  struct attribute *attr = die->attr (DW_AT_str_offsets_base);
   if (attr != nullptr)
     cu->str_offsets_base = DW_UNSND (attr);
 
@@ -18978,24 +18975,6 @@ dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
 
       die = follow_die_ref (die, spec, &cu);
     }
-
-  return NULL;
-}
-
-/* Return the named attribute or NULL if not there,
-   but do not follow DW_AT_specification, etc.
-   This is for use in contexts where we're reading .debug_types dies.
-   Following DW_AT_specification, DW_AT_abstract_origin will take us
-   back up the chain, and we want to go down.  */
-
-static struct attribute *
-dwarf2_attr_no_follow (struct die_info *die, unsigned int name)
-{
-  unsigned int i;
-
-  for (i = 0; i < die->num_attrs; ++i)
-    if (die->attrs[i].name == name)
-      return &die->attrs[i];
 
   return NULL;
 }

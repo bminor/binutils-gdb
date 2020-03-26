@@ -1,5 +1,13 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (lookup_addr_base, lookup_ranges_base)
+	(build_type_psymtabs_reader, read_structure_type)
+	(read_enumeration_type, read_full_die_1): Update.
+	(dwarf2_attr_no_follow): Move to die.h.
+	* dwarf2/die.h (struct die_info) <attr>: New method.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (struct dwarf2_cu) <base_known>: Remove.
 	<base_address>: Now an optional.
 	(dwarf2_find_base_address, dwarf2_rnglists_process)
