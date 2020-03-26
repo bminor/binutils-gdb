@@ -1,5 +1,13 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/die.h (struct die_info) <addr_base, ranges_base>: New
+	methods.
+	* dwarf2/read.c (lookup_addr_base): Move to die.h.
+	(lookup_ranges_base): Likewise.
+	(read_cutu_die_from_dwo, read_full_die_1): Update.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_import_statement, read_file_scope)
 	(read_type_unit_scope, inherit_abstract_dies, read_func_scope)
 	(read_lexical_block_scope, read_call_site_scope)

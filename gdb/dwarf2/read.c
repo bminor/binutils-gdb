@@ -6386,34 +6386,6 @@ lookup_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
     }
 }
 
-/* Return the address base of the compile unit, which, if exists, is stored
-   either at the attribute DW_AT_GNU_addr_base, or DW_AT_addr_base.  */
-static gdb::optional<ULONGEST>
-lookup_addr_base (struct die_info *comp_unit_die)
-{
-  struct attribute *attr;
-  attr = comp_unit_die->attr (DW_AT_addr_base);
-  if (attr == nullptr)
-    attr = comp_unit_die->attr (DW_AT_GNU_addr_base);
-  if (attr == nullptr)
-    return gdb::optional<ULONGEST> ();
-  return DW_UNSND (attr);
-}
-
-/* Return range lists base of the compile unit, which, if exists, is stored
-   either at the attribute DW_AT_rnglists_base or DW_AT_GNU_ranges_base.  */
-static ULONGEST
-lookup_ranges_base (struct die_info *comp_unit_die)
-{
-  struct attribute *attr;
-  attr = comp_unit_die->attr (DW_AT_rnglists_base);
-  if (attr == nullptr)
-    attr = comp_unit_die->attr (DW_AT_GNU_ranges_base);
-  if (attr == nullptr)
-    return 0;
-  return DW_UNSND (attr);
-}
-
 /* Low level DIE reading support.  */
 
 /* Initialize a die_reader_specs struct from a dwarf2_cu struct.  */
@@ -6502,12 +6474,12 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
       ranges = dwarf2_attr (stub_comp_unit_die, DW_AT_ranges, cu);
       comp_dir = dwarf2_attr (stub_comp_unit_die, DW_AT_comp_dir, cu);
 
-      cu->addr_base = lookup_addr_base (stub_comp_unit_die);
+      cu->addr_base = stub_comp_unit_die->addr_base ();
 
       /* There should be a DW_AT_rnglists_base (DW_AT_GNU_ranges_base) attribute
 	 here (if needed). We need the value before we can process
 	 DW_AT_ranges.  */
-      cu->ranges_base = lookup_ranges_base (stub_comp_unit_die);
+      cu->ranges_base = stub_comp_unit_die->ranges_base ();
     }
   else if (stub_comp_dir != NULL)
     {
@@ -17538,7 +17510,7 @@ read_full_die_1 (const struct die_reader_specs *reader,
   if (attr != nullptr)
     cu->str_offsets_base = DW_UNSND (attr);
 
-  auto maybe_addr_base = lookup_addr_base(die);
+  auto maybe_addr_base = die->addr_base ();
   if (maybe_addr_base.has_value ())
     cu->addr_base = *maybe_addr_base;
   for (int index : indexes_that_need_reprocess)
