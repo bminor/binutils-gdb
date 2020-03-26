@@ -389,7 +389,7 @@ const char EXP_CHARS[] = "eE";
 
 /* Chars that mean this number is a floating point constant.
    As in 0f12.456 or 0d1.2345e12.  */
-const char FLT_CHARS[] = "rRsSfFdDxXpP";
+const char FLT_CHARS[] = "rRsSfFdDxXpPhH";
 
 /* Indicate we are already assemble any instructions or not.  */
 static bool start_assemble = false;
@@ -1906,6 +1906,15 @@ macro (struct riscv_cl_insn *ip, expressionS *imm_expr,
     case M_VMSGE:
     case M_VMSGEU:
       vector_macro (ip);
+      break;
+
+    case M_FLH:
+      pcrel_load (rd, rs1, imm_expr, "flh",
+		  BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_I);
+      break;
+    case M_FSH:
+      pcrel_store (rs2, rs1, imm_expr, "fsh",
+		   BFD_RELOC_RISCV_PCREL_HI20, BFD_RELOC_RISCV_PCREL_LO12_S);
       break;
 
     default:
@@ -4569,6 +4578,7 @@ static const pseudo_typeS riscv_pseudo_table[] =
   {"insn", s_riscv_insn, 0},
   {"attribute", s_riscv_attribute, 0},
   {"variant_cc", s_variant_cc, 0},
+  {"float16", float_cons, 'h'},
 
   { NULL, NULL, 0 },
 };
