@@ -1,5 +1,14 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (dwarf_unit_type_name, dwarf_tag_name)
+	(dwarf_attr_name, dwarf_form_name, dwarf_bool_name)
+	(dwarf_type_encoding_name): Move to stringify.c.
+	* Makefile.in (COMMON_SFILES): Add dwarf2/stringify.c.
+	* dwarf2/stringify.c: New file.
+	* dwarf2/stringify.h: New file.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/die.h (struct die_info) <addr_base, ranges_base>:
 	Rewrite.
 

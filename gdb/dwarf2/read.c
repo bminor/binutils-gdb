@@ -40,6 +40,7 @@
 #include "dwarf2/dwz.h"
 #include "dwarf2/macro.h"
 #include "dwarf2/die.h"
+#include "dwarf2/stringify.h"
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "symtab.h"
@@ -1405,16 +1406,6 @@ static const char *dwarf2_physname (const char *name, struct die_info *die,
 
 static struct die_info *dwarf2_extension (struct die_info *die,
 					  struct dwarf2_cu **);
-
-static const char *dwarf_tag_name (unsigned int);
-
-static const char *dwarf_attr_name (unsigned int);
-
-static const char *dwarf_form_name (unsigned int);
-
-static const char *dwarf_bool_name (unsigned int);
-
-static const char *dwarf_type_encoding_name (unsigned int);
 
 static void dump_die_shallow (struct ui_file *, int indent, struct die_info *);
 
@@ -21332,89 +21323,6 @@ dwarf2_extension (struct die_info *die, struct dwarf2_cu **ext_cu)
     return NULL;
 
   return follow_die_ref (die, attr, ext_cu);
-}
-
-/* A convenience function that returns an "unknown" DWARF name,
-   including the value of V.  STR is the name of the entity being
-   printed, e.g., "TAG".  */
-
-static const char *
-dwarf_unknown (const char *str, unsigned v)
-{
-  char *cell = get_print_cell ();
-  xsnprintf (cell, PRINT_CELL_SIZE, "DW_%s_<unknown: %u>", str, v);
-  return cell;
-}
-
-/* Convert a DIE tag into its string name.  */
-
-static const char *
-dwarf_tag_name (unsigned tag)
-{
-  const char *name = get_DW_TAG_name (tag);
-
-  if (name == NULL)
-    return dwarf_unknown ("TAG", tag);
-
-  return name;
-}
-
-/* Convert a DWARF attribute code into its string name.  */
-
-static const char *
-dwarf_attr_name (unsigned attr)
-{
-  const char *name;
-
-#ifdef MIPS /* collides with DW_AT_HP_block_index */
-  if (attr == DW_AT_MIPS_fde)
-    return "DW_AT_MIPS_fde";
-#else
-  if (attr == DW_AT_HP_block_index)
-    return "DW_AT_HP_block_index";
-#endif
-
-  name = get_DW_AT_name (attr);
-
-  if (name == NULL)
-    return dwarf_unknown ("AT", attr);
-
-  return name;
-}
-
-/* Convert a DWARF value form code into its string name.  */
-
-static const char *
-dwarf_form_name (unsigned form)
-{
-  const char *name = get_DW_FORM_name (form);
-
-  if (name == NULL)
-    return dwarf_unknown ("FORM", form);
-
-  return name;
-}
-
-static const char *
-dwarf_bool_name (unsigned mybool)
-{
-  if (mybool)
-    return "TRUE";
-  else
-    return "FALSE";
-}
-
-/* Convert a DWARF type code into its string name.  */
-
-static const char *
-dwarf_type_encoding_name (unsigned enc)
-{
-  const char *name = get_DW_ATE_name (enc);
-
-  if (name == NULL)
-    return dwarf_unknown ("ATE", enc);
-
-  return name;
 }
 
 static void
