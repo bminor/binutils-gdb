@@ -1,5 +1,13 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/line-header.h (struct line_header) <is_valid_file_index,
+	file_names_size, file_full_name, file_file_name>: Use const.
+	<file_name_at, file_names>: Add const overload.
+	* dwarf2/line-header.c (line_header::file_file_name)
+	(line_header::file_full_name): Update.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dwarf2_macro_malformed_definition_complaint)
 	(macro_start_file, consume_improper_spaces)
 	(parse_macro_definition, skip_form_bytes, skip_unknown_opcode)

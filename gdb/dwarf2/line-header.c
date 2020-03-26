@@ -59,7 +59,7 @@ line_header::add_file_name (const char *name,
 }
 
 gdb::unique_xmalloc_ptr<char>
-line_header::file_file_name (int file)
+line_header::file_file_name (int file) const
 {
   /* Is the file number a valid index into the line header's file name
      table?  Remember that file numbers start with one, not zero.  */
@@ -95,7 +95,7 @@ line_header::file_file_name (int file)
 }
 
 gdb::unique_xmalloc_ptr<char>
-line_header::file_full_name (int file, const char *comp_dir)
+line_header::file_full_name (int file, const char *comp_dir) const
 {
   /* Is the file number a valid index into the line header's file name
      table?  Remember that file numbers start with one, not zero.  */

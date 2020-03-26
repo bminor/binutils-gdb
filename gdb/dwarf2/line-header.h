@@ -96,7 +96,7 @@ struct line_header
     return m_include_dirs[vec_index];
   }
 
-  bool is_valid_file_index (int file_index)
+  bool is_valid_file_index (int file_index) const
   {
     if (version >= 5)
       return 0 <= file_index && file_index < file_names_size ();
@@ -117,10 +117,20 @@ struct line_header
     return &m_file_names[vec_index];
   }
 
+  /* A const overload of the same.  */
+  const file_entry *file_name_at (file_name_index index) const
+  {
+    line_header *lh = const_cast<line_header *> (this);
+    return lh->file_name_at (index);
+  }
+
   /* The indexes are 0-based in DWARF 5 and 1-based in DWARF 4. Therefore,
      this method should only be used to iterate through all file entries in an
      index-agnostic manner.  */
   std::vector<file_entry> &file_names ()
+  { return m_file_names; }
+  /* A const overload of the same.  */
+  const std::vector<file_entry> &file_names () const
   { return m_file_names; }
 
   /* Offset of line number information in .debug_line section.  */
@@ -145,7 +155,7 @@ struct line_header
      element is standard_opcode_lengths[opcode_base - 1].  */
   std::unique_ptr<unsigned char[]> standard_opcode_lengths;
 
-  int file_names_size ()
+  int file_names_size () const
   { return m_file_names.size(); }
 
   /* The start and end of the statement program following this
@@ -157,13 +167,13 @@ struct line_header
      compilation.  The result is allocated using xmalloc; the caller
      is responsible for freeing it.  */
   gdb::unique_xmalloc_ptr<char> file_full_name (int file,
-						const char *comp_dir);
+						const char *comp_dir) const;
 
   /* Return file name relative to the compilation directory of file
      number I in this object's file name table.  The result is
      allocated using xmalloc; the caller is responsible for freeing
      it.  */
-  gdb::unique_xmalloc_ptr<char> file_file_name (int file);
+  gdb::unique_xmalloc_ptr<char> file_file_name (int file) const;
 
  private:
   /* The include_directories table.  Note these are observing
