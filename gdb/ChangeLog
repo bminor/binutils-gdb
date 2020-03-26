@@ -1,5 +1,15 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (read_attribute_value): Update.
+	(read_indirect_string_from_dwz): Move to dwz.c; change into
+	method.
+	(dwarf_decode_macro_bytes): Update.
+	* dwarf2/dwz.h (struct dwz_file) <read_string>: Declare method.
+	* dwarf2/dwz.c: New file.
+	* Makefile.in (COMMON_SFILES): Add dwz.c.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.h (struct dwz_file): Move to dwz.h.
 	* dwarf2/read.c: Add include.
 	* dwarf2/index-write.c: Add include.

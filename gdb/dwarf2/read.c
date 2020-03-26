@@ -1259,9 +1259,6 @@ static const char *read_indirect_string_at_offset
   (struct dwarf2_per_objfile *dwarf2_per_objfile, bfd *abfd,
    LONGEST str_offset);
 
-static const char *read_indirect_string_from_dwz
-  (struct objfile *objfile, struct dwz_file *, LONGEST);
-
 static CORE_ADDR read_addr_index_from_leb128 (struct dwarf2_cu *,
 					      const gdb_byte *,
 					      unsigned int *);
@@ -18585,8 +18582,7 @@ read_attribute_value (const struct die_reader_specs *reader,
 	LONGEST str_offset = cu_header->read_offset (abfd, info_ptr,
 						     &bytes_read);
 
-	DW_STRING (attr) = read_indirect_string_from_dwz (objfile,
-							  dwz, str_offset);
+	DW_STRING (attr) = dwz->read_string (objfile, str_offset);
 	DW_STRING_IS_CANONICAL (attr) = 0;
 	info_ptr += bytes_read;
       }
@@ -18829,31 +18825,6 @@ read_indirect_line_string_at_offset (struct dwarf2_per_objfile *dwarf2_per_objfi
 					      &dwarf2_per_objfile->line_str,
 					      "DW_FORM_line_strp",
 					      ".debug_line_str");
-}
-
-/* Read a string at offset STR_OFFSET in the .debug_str section from
-   the .dwz file DWZ.  Throw an error if the offset is too large.  If
-   the string consists of a single NUL byte, return NULL; otherwise
-   return a pointer to the string.  */
-
-static const char *
-read_indirect_string_from_dwz (struct objfile *objfile, struct dwz_file *dwz,
-			       LONGEST str_offset)
-{
-  dwz->str.read (objfile);
-
-  if (dwz->str.buffer == NULL)
-    error (_("DW_FORM_GNU_strp_alt used without .debug_str "
-	     "section [in module %s]"),
-	   bfd_get_filename (dwz->dwz_bfd.get ()));
-  if (str_offset >= dwz->str.size)
-    error (_("DW_FORM_GNU_strp_alt pointing outside of "
-	     ".debug_str section [in module %s]"),
-	   bfd_get_filename (dwz->dwz_bfd.get ()));
-  gdb_assert (HOST_CHAR_BIT == 8);
-  if (dwz->str.buffer[str_offset] == '\0')
-    return NULL;
-  return (const char *) (dwz->str.buffer + str_offset);
 }
 
 /* Return pointer to string at .debug_str offset as read from BUF.
@@ -23584,8 +23555,7 @@ dwarf_decode_macro_bytes (struct dwarf2_cu *cu,
 		    struct dwz_file *dwz
 		      = dwarf2_get_dwz_file (dwarf2_per_objfile);
 
-		    body = read_indirect_string_from_dwz (objfile,
-							  dwz, str_offset);
+		    body = dwz->read_string (objfile, str_offset);
 		  }
 		else
 		  body = read_indirect_string_at_offset (dwarf2_per_objfile,
