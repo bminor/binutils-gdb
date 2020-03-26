@@ -420,7 +420,7 @@ find_format (bfd_vma                       memaddr,
              struct arc_operand_iterator * iter)
 {
   const struct arc_opcode *opcode = NULL;
-  bfd_boolean needs_limm;
+  bfd_boolean needs_limm = FALSE;
   const extInstruction_t *einsn, *i;
   unsigned limm = 0;
   struct arc_disassemble_info *arc_infop = info->private_data;
@@ -483,7 +483,7 @@ find_format (bfd_vma                       memaddr,
 
   /* Update private data.  */
   arc_infop->opcode = opcode;
-  arc_infop->limm = (needs_limm) ? limm : 0;
+  arc_infop->limm = limm;
   arc_infop->limm_p = needs_limm;
 
   return TRUE;

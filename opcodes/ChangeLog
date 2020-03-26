@@ -1,3 +1,7 @@
+2020-03-26  Alan Modra  <amodra@gmail.com>
+
+	* arc-dis.c (find_format): Init needs_limm.  Simplify use of limm.
+
 2020-03-25  Alan Modra  <amodra@gmail.com>
 
 	* z80-dis.c (suffix): Init mybuf.
