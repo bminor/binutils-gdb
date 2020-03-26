@@ -1064,6 +1064,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"q", "d",		check_implicit_always},
   {"d", "f",		check_implicit_always},
   {"f", "zicsr",	check_implicit_always},
+  {"zfh", "f",		check_implicit_always},
+  {"zfh", "zicsr",	check_implicit_always},
   {NULL, NULL, NULL}
 };
 
@@ -1097,7 +1099,7 @@ static const char * const riscv_std_zxm_ext_strtab[] =
 
 static const char * const riscv_std_draft_ext_strtab[] =
 {
-  "zvamo", "zvlsseg", NULL
+  "zfh", "zvamo", "zvlsseg", NULL
 };
 
 /* ISA extension prefixed name class.  Must define them in parsing order.  */
