@@ -1,5 +1,10 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (struct die_info): Move to die.h.
+	* dwarf2/die.h: New file.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/line-header.h (dwarf_decode_line_header): Declare.
 	* dwarf2/read.c
 	(dwarf2_statement_list_fits_in_line_number_section_complaint):

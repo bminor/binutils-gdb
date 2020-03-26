@@ -39,6 +39,7 @@
 #include "dwarf2/line-header.h"
 #include "dwarf2/dwz.h"
 #include "dwarf2/macro.h"
+#include "dwarf2/die.h"
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "symtab.h"
@@ -1043,45 +1044,6 @@ struct partial_die_info : public allocate_on_obstack
       is_dwz = 0;
       spec_is_dwz = 0;
     }
-  };
-
-/* This data structure holds a complete die structure.  */
-struct die_info
-  {
-    /* DWARF-2 tag for this DIE.  */
-    ENUM_BITFIELD(dwarf_tag) tag : 16;
-
-    /* Number of attributes */
-    unsigned char num_attrs;
-
-    /* True if we're presently building the full type name for the
-       type derived from this DIE.  */
-    unsigned char building_fullname : 1;
-
-    /* True if this die is in process.  PR 16581.  */
-    unsigned char in_process : 1;
-
-    /* True if this DIE has children.  */
-    unsigned char has_children : 1;
-
-    /* Abbrev number */
-    unsigned int abbrev;
-
-    /* Offset in .debug_info or .debug_types section.  */
-    sect_offset sect_off;
-
-    /* The dies in a compilation unit form an n-ary tree.  PARENT
-       points to this die's parent; CHILD points to the first child of
-       this node; and all the children of a given node are chained
-       together via their SIBLING fields.  */
-    struct die_info *child;	/* Its first child, if any.  */
-    struct die_info *sibling;	/* Its next sibling, if any.  */
-    struct die_info *parent;	/* Its parent, if any.  */
-
-    /* An array of attributes, with NUM_ATTRS elements.  There may be
-       zero, but it's not common and zero-sized arrays are not
-       sufficiently portable C.  */
-    struct attribute attrs[1];
   };
 
 /* FIXME: We might want to set this from BFD via bfd_arch_bits_per_byte,
