@@ -641,9 +641,12 @@ aarch64_target::low_arch_setup ()
     {
       uint64_t vq = aarch64_sve_get_vq (tid);
       unsigned long hwcap = linux_get_hwcap (8);
+      unsigned long hwcap2 = linux_get_hwcap2 (8);
       bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
+      bool capability_p = hwcap2 & HWCAP2_MORELLO;
 
-      current_process ()->tdesc = aarch64_linux_read_description (vq, pauth_p);
+      current_process ()->tdesc = aarch64_linux_read_description (vq, pauth_p,
+								  capability_p);
     }
   else
     current_process ()->tdesc = aarch32_linux_read_description ();

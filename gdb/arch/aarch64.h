@@ -27,7 +27,8 @@
    an SVE Z register.  HAS_PAUTH_P indicates the presence of the PAUTH
    feature.  */
 
-target_desc *aarch64_create_target_description (uint64_t vq, bool has_pauth_p);
+target_desc *aarch64_create_target_description (uint64_t vq, bool has_pauth_p,
+						bool capability_p);
 
 /* Register numbers of various important registers.
    Note that on SVE, the Z registers reuse the V register numbers and the V
