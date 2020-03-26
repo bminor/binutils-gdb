@@ -37,6 +37,7 @@
 #include "dwarf2/index-common.h"
 #include "dwarf2/leb.h"
 #include "dwarf2/line-header.h"
+#include "dwarf2/dwz.h"
 #include "bfd.h"
 #include "elf-bfd.h"
 #include "symtab.h"

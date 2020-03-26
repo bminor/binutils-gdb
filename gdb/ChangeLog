@@ -1,3 +1,11 @@
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct dwz_file): Move to dwz.h.
+	* dwarf2/read.c: Add include.
+	* dwarf2/index-write.c: Add include.
+	* dwarf2/index-cache.c: Add include.
+	* dwarf2/dwz.h: New file.
+
 2020-03-25  Tom Tromey  <tom@tromey.com>
 
 	* compile/compile-object-load.c (get_out_value_type): Mention

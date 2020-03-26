@@ -32,6 +32,7 @@
 #include "dwarf2/index-common.h"
 #include "dwarf2.h"
 #include "dwarf2/read.h"
+#include "dwarf2/dwz.h"
 #include "gdb/gdb-index.h"
 #include "gdbcmd.h"
 #include "objfiles.h"
