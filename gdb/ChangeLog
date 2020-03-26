@@ -1,5 +1,16 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (dwarf2_macro_malformed_definition_complaint)
+	(macro_start_file, consume_improper_spaces)
+	(parse_macro_definition, skip_form_bytes, skip_unknown_opcode)
+	(dwarf_parse_macro_header, dwarf_decode_macro_bytes)
+	(dwarf_decode_macros): Move to macro.c.
+	* dwarf2/macro.c: New file.
+	* dwarf2/macro.h: New file.
+	* Makefile.in (COMMON_SFILES): Add dwarf2/macro.c.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/section.h (struct dwarf2_section_info) <read_string>: New
 	method.
 	* dwarf2/section.c: New method.  From
