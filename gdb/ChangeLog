@@ -1,5 +1,13 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.c (macro_start_file): Change "cu" parameter to
+	"builder".
+	(dwarf_decode_macro_bytes): Likewise.  Add dwarf2_per_objfile
+	parameter.
+	(dwarf_decode_macros): Update.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_attribute_value): Update.
 	(read_indirect_string_from_dwz): Move to dwz.c; change into
 	method.

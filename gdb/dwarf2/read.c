@@ -23090,7 +23090,7 @@ dwarf_alloc_die (struct dwarf2_cu *cu, int num_attrs)
 /* Macro support.  */
 
 static struct macro_source_file *
-macro_start_file (struct dwarf2_cu *cu,
+macro_start_file (buildsym_compunit *builder,
 		  int file, int line,
                   struct macro_source_file *current_file,
                   struct line_header *lh)
@@ -23102,7 +23102,7 @@ macro_start_file (struct dwarf2_cu *cu,
     {
       /* Note: We don't create a macro table for this compilation unit
 	 at all until we actually get a filename.  */
-      struct macro_table *macro_table = cu->get_builder ()->get_macro_table ();
+      struct macro_table *macro_table = builder->get_macro_table ();
 
       /* If we have no current file, then this must be the start_file
 	 directive for the compilation unit's main source file.  */
@@ -23463,7 +23463,8 @@ dwarf_parse_macro_header (const gdb_byte **opcode_definitions,
    including DW_MACRO_import.  */
 
 static void
-dwarf_decode_macro_bytes (struct dwarf2_cu *cu,
+dwarf_decode_macro_bytes (struct dwarf2_per_objfile *dwarf2_per_objfile,
+			  buildsym_compunit *builder,
 			  bfd *abfd,
 			  const gdb_byte *mac_ptr, const gdb_byte *mac_end,
 			  struct macro_source_file *current_file,
@@ -23473,8 +23474,6 @@ dwarf_decode_macro_bytes (struct dwarf2_cu *cu,
 			  unsigned int offset_size,
 			  htab_t include_hash)
 {
-  struct dwarf2_per_objfile *dwarf2_per_objfile
-    = cu->per_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   enum dwarf_macro_record_type macinfo_type;
   int at_commandline;
@@ -23631,8 +23630,8 @@ dwarf_decode_macro_bytes (struct dwarf2_cu *cu,
 		at_commandline = 0;
 	      }
 	    else
-	      current_file = macro_start_file (cu, file, line, current_file,
-					       lh);
+	      current_file = macro_start_file (builder, file, line,
+					       current_file, lh);
           }
           break;
 
@@ -23713,7 +23712,8 @@ dwarf_decode_macro_bytes (struct dwarf2_cu *cu,
 	      {
 		*slot = (void *) new_mac_ptr;
 
-		dwarf_decode_macro_bytes (cu, include_bfd, new_mac_ptr,
+		dwarf_decode_macro_bytes (dwarf2_per_objfile, builder,
+					  include_bfd, new_mac_ptr,
 					  include_mac_end, current_file, lh,
 					  section, section_is_gnu, is_dwz,
 					  offset_size, include_hash);
@@ -23827,6 +23827,7 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
       return;
     }
 
+  buildsym_compunit *builder = cu->get_builder ();
   do
     {
       /* Do we at least have room for a macinfo type byte?  */
@@ -23875,7 +23876,8 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 	    file = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
 	    mac_ptr += bytes_read;
 
-	    current_file = macro_start_file (cu, file, line, current_file, lh);
+	    current_file = macro_start_file (builder, file, line,
+					     current_file, lh);
 	  }
 	  break;
 
@@ -23940,7 +23942,8 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
   mac_ptr = section->buffer + offset;
   slot = htab_find_slot (include_hash.get (), mac_ptr, INSERT);
   *slot = (void *) mac_ptr;
-  dwarf_decode_macro_bytes (cu, abfd, mac_ptr, mac_end,
+  dwarf_decode_macro_bytes (dwarf2_per_objfile, builder,
+			    abfd, mac_ptr, mac_end,
 			    current_file, lh, section,
 			    section_is_gnu, 0, offset_size,
 			    include_hash.get ());
