@@ -28,6 +28,16 @@
 #include "dwarf2/section.h"
 #include "gdb_bfd.h"
 #include "objfiles.h"
+#include "complaints.h"
+
+void
+dwarf2_section_buffer_overflow_complaint (struct dwarf2_section_info *section)
+{
+  complaint (_("debug info runs off end of %s section"
+	       " [in module %s]"),
+	     section->get_name (),
+	     section->get_file_name ());
+}
 
 struct dwarf2_section_info *
 dwarf2_section_info::get_containing_section () const

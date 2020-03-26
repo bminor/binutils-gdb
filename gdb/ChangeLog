@@ -1,5 +1,14 @@
 2020-03-26  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/section.h (dwarf2_section_buffer_overflow_complaint):
+	Declare.
+	* dwarf2/section.c (dwarf2_section_buffer_overflow_complaint):
+	Move from read.c.
+	* dwarf2/read.c (dwarf2_section_buffer_overflow_complaint): Move
+	to section.c.
+
+2020-03-26  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dwarf_decode_macros): Split into two overloads.
 
 2020-03-26  Tom Tromey  <tom@tromey.com>

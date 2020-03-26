@@ -1712,15 +1712,6 @@ dwarf2_const_value_length_mismatch_complaint (const char *arg1, int arg2,
 }
 
 static void
-dwarf2_section_buffer_overflow_complaint (struct dwarf2_section_info *section)
-{
-  complaint (_("debug info runs off end of %s section"
-	       " [in module %s]"),
-	     section->get_name (),
-	     section->get_file_name ());
-}
-
-static void
 dwarf2_macro_malformed_definition_complaint (const char *arg1)
 {
   complaint (_("macro debug info contains a "

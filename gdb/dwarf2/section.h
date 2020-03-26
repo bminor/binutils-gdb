@@ -116,4 +116,7 @@ struct dwarf2_section_info
   bool is_virtual;
 };
 
+extern void dwarf2_section_buffer_overflow_complaint
+  (struct dwarf2_section_info *section);
+
 #endif /* GDB_DWARF2_SECTION_H */
