@@ -1,3 +1,13 @@
+2020-03-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	PR binutils/25662
+	* testsuite/binutils-all/objcopy.exp (objcopy_test): Add argument to
+	specify whether an object file or executable should be built and tested.
+	Change test names to report whether an object file or executable is
+	being tested.
+	* testsuite/binutils-all/pr25662.ld: New test.
+	* testsuite/binutils-all/pr25662.s: New test.
+
 2020-03-27  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_archive): Don't double free qualified_name.

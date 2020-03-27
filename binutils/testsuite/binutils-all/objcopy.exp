@@ -37,36 +37,60 @@ if ![is_remote host] {
 }
 
 # Test that objcopy does not modify a file when copying it.
+# "object" or "executable" values for type are supported.
 
-proc objcopy_test {testname srcfile} {
+proc objcopy_test {testname srcfile type asflags ldflags} {
     global OBJCOPY
     global OBJCOPYFLAGS
     global srcdir
     global subdir
     global tempfile
     global copyfile
+    set t_tempfile $tempfile
+    set t_copyfile ${copyfile}.o
 
-    if {![binutils_assemble $srcdir/$subdir/${srcfile} $tempfile]} then {
-	unresolved "objcopy ($testname)"
-	remote_file host delete $tempfile
+    if { $type != "object" && $type != "executable" } {
+	error "objcopy_test accepts only \"object\" or \"executable\" values for type"
+    }
+
+    if {![binutils_assemble_flags $srcdir/$subdir/${srcfile} $t_tempfile "$asflags"]} then {
+	unresolved "objcopy $type ($testname)"
+	remote_file host delete $t_tempfile
 	return
     }
 
-    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS $tempfile ${copyfile}.o"]
+    if { $type == "executable" } {
+	global LD
+	# Check that LD exists
+	if {[which $LD] == 0} then {
+	    untested "objcopy $type ($testname)"
+	    return
+	}
+	# Use tempfile and copyfile without the .o extension for executable files
+	set t_tempfile [string range $tempfile 0 end-2]
+	set t_copyfile $copyfile
+	set got [binutils_run $LD "$tempfile -o $t_tempfile $ldflags"]
+	if { ![string equal "" $got] } then {
+	    unresolved "objcopy $type ($testname)"
+	    return
+	}
+    }
+
+    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS $t_tempfile $t_copyfile"]
 
     if ![string equal "" $got] then {
-	fail "objcopy ($testname)"
+	fail "objcopy $type ($testname)"
     } else {
-	send_log "cmp $tempfile ${copyfile}.o\n"
-	verbose "cmp $tempfile ${copyfile}.o"
+	send_log "cmp $t_tempfile $t_copyfile\n"
+	verbose "cmp $t_tempfile $t_copyfile"
 	if [is_remote host] {
-	    set src1 tmpdir/bintest.o
-	    set src2 tmpdir/copy.o
-	    remote_upload host $tempfile $src1
-	    remote_upload host ${copyfile}.o $src2
+	    set src1 tmpdir/bintest
+	    set src2 tmpdir/copy
+	    remote_upload host $t_tempfile $src1
+	    remote_upload host $t_copyfile $src2
 	} else {
-	    set src1 ${tempfile}
-	    set src2 ${copyfile}.o
+	    set src1 $t_tempfile
+	    set src2 $t_copyfile
 	}
 	set status [remote_exec build cmp "${src1} ${src2}"]
 	set exec_output [lindex $status 1]
@@ -86,7 +110,7 @@ proc objcopy_test {testname srcfile} {
 	clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*"
 
 	if [string equal "" $exec_output] then {
-	    pass "objcopy ($testname)"
+	    pass "objcopy $type ($testname)"
 	} else {
 	    send_log "$exec_output\n"
 	    verbose "$exec_output" 1
@@ -94,12 +118,12 @@ proc objcopy_test {testname srcfile} {
 	    # On OSF/1, this succeeds with gas and fails with /bin/as.
 	    setup_xfail "alpha*-*-osf*"
 
-	    fail "objcopy ($testname)"
+	    fail "objcopy $type ($testname)"
 	}
     }
 }
 
-objcopy_test "simple copy" bintest.s
+objcopy_test "simple copy" bintest.s object "" ""
 
 # Test verilog data width
 proc objcopy_test_verilog {testname} {
@@ -1080,7 +1104,7 @@ proc objcopy_test_elf_common_symbols {} {
 # ia64 specific tests
 if { ([istarget "ia64-*-elf*"]
        || [istarget "ia64-*-linux*"]) } {
-    objcopy_test "ia64 link order" link-order.s
+    objcopy_test "ia64 link order" link-order.s object "" ""
 }
 
 # ELF specific tests
@@ -1088,7 +1112,7 @@ set elf64 ""
 if [is_elf_format] {
     objcopy_test_symbol_manipulation
     objcopy_test_elf_common_symbols
-    objcopy_test "ELF unknown section type" unknown.s
+    objcopy_test "ELF unknown section type" unknown.s object "" ""
     objcopy_test_readelf "ELF group 1" group.s
     objcopy_test_readelf "ELF group 2" group-2.s
     objcopy_test_readelf "ELF group 3" group-3.s
@@ -1316,3 +1340,5 @@ objcopy_remove_relocations_from_executable
 run_dump_test "pr23633"
 
 run_dump_test "set-section-alignment"
+
+objcopy_test "pr25662" pr25662.s executable "" "-T$srcdir/$subdir/pr25662.ld"
