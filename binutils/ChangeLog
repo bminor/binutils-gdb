@@ -1,3 +1,9 @@
+2020-03-27  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_archive): Don't double free qualified_name.
+	Don't break out of loop with "negative" archive_file_size, just
+	set file offset to max.
+
 2020-03-25  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_archive): Prevent endless loop.
