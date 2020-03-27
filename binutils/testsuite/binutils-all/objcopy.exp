@@ -59,6 +59,7 @@ proc objcopy_test {testname srcfile type asflags ldflags} {
 	return
     }
 
+    set xflags ""
     if { $type == "executable" } {
 	global LD
 	# Check that LD exists
@@ -66,6 +67,7 @@ proc objcopy_test {testname srcfile type asflags ldflags} {
 	    untested "objcopy $type ($testname)"
 	    return
 	}
+
 	# Use tempfile and copyfile without the .o extension for executable files
 	set t_tempfile [string range $tempfile 0 end-2]
 	set t_copyfile $copyfile
@@ -74,9 +76,10 @@ proc objcopy_test {testname srcfile type asflags ldflags} {
 	    unresolved "objcopy $type ($testname)"
 	    return
 	}
+	set xflags "-p"
     }
 
-    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS $t_tempfile $t_copyfile"]
+    set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS $xflags $t_tempfile $t_copyfile"]
 
     if ![string equal "" $got] then {
 	fail "objcopy $type ($testname)"
@@ -96,19 +99,6 @@ proc objcopy_test {testname srcfile type asflags ldflags} {
 	set exec_output [lindex $status 1]
 	set exec_output [prune_warnings $exec_output]
 
-	# On some systems the result of objcopy will not be identical.
-	# Usually this is just because gas isn't using bfd to write the
-	# files in the first place, and may order things a little
-	# differently. Those systems should use setup_xfail here.
-
-	setup_xfail "hppa*-*-*"
-	setup_xfail "m8*-*"
-	setup_xfail "sh-*-coff*"
-	setup_xfail "tic54x-*-*"
-
-	clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
-	clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*"
-
 	if [string equal "" $exec_output] then {
 	    pass "objcopy $type ($testname)"
 	} else {
@@ -123,6 +113,11 @@ proc objcopy_test {testname srcfile type asflags ldflags} {
     }
 }
 
+setup_xfail "hppa*-*-*"
+setup_xfail "sh-*-coff*"
+setup_xfail "tic54x-*-*"
+clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
+clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*"
 objcopy_test "simple copy" bintest.s object "" ""
 
 # Test verilog data width
@@ -1112,7 +1107,14 @@ set elf64 ""
 if [is_elf_format] {
     objcopy_test_symbol_manipulation
     objcopy_test_elf_common_symbols
+
+    setup_xfail "hppa*-*-*"
+    setup_xfail "sh-*-coff*"
+    setup_xfail "tic54x-*-*"
+    clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
+    clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*"
     objcopy_test "ELF unknown section type" unknown.s object "" ""
+
     objcopy_test_readelf "ELF group 1" group.s
     objcopy_test_readelf "ELF group 2" group-2.s
     objcopy_test_readelf "ELF group 3" group-3.s
@@ -1341,4 +1343,9 @@ run_dump_test "pr23633"
 
 run_dump_test "set-section-alignment"
 
+setup_xfail "hppa*-*-*"
+setup_xfail "sh-*-coff*"
+setup_xfail "mips-*-irix" "mipstx39-*-*" "spu-*-*"
+clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
+clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*"
 objcopy_test "pr25662" pr25662.s executable "" "-T$srcdir/$subdir/pr25662.ld"
