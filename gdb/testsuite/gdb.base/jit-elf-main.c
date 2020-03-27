@@ -51,35 +51,6 @@ usage (void)
   exit (1);
 }
 
-/* Rename jit_function_XXXX to match idx  */
-
-static void
-update_name (const void *const addr, int idx)
-{
-  const ElfW (Ehdr) *const ehdr = (ElfW (Ehdr) *)addr;
-  ElfW (Shdr) *const shdr = (ElfW (Shdr) *)((char *)addr + ehdr->e_shoff);
-  ElfW (Phdr) *const phdr = (ElfW (Phdr) *)((char *)addr + ehdr->e_phoff);
-  int i;
-
-  for (i = 0; i < ehdr->e_shnum; ++i)
-    {
-      if (shdr[i].sh_type == SHT_STRTAB)
-        {
-          /* Note: we update both .strtab and .dynstr.  The latter would
-             not be correct if this were a regular shared library (.hash
-             would be wrong), but this is a simulation -- the library is
-             never exposed to the dynamic loader, so it all ends up ok.  */
-          char *const strtab = (char *)((ElfW (Addr))addr + shdr[i].sh_offset);
-          char *const strtab_end = strtab + shdr[i].sh_size;
-          char *p;
-
-          for (p = strtab; p < strtab_end; p += strlen (p) + 1)
-            if (strcmp (p, "jit_function_XXXX") == 0)
-              sprintf (p, "jit_function_%04d", idx);
-        }
-    }
-}
-
 /* Defined by the .exp file if testing attach.  */
 #ifndef ATTACH
 #define ATTACH 0
@@ -151,8 +122,6 @@ MAIN (int argc, char *argv[])
 	  fprintf (stderr, "mmap: %s\n", strerror (errno));
 	  exit (1);
 	}
-
-      update_name (addr, i);
 
       /* Link entry at the end of the list.  */
       entry->symfile_addr = (const char *)addr;

@@ -91,6 +91,7 @@ proc compile_and_download_n_jit_so {jit_solib_basename jit_solib_srcfile count} 
 	# with mapping the resulting binary to the same fixed base it allows
 	# to dynamically execute functions from it without any further adjustments.
 	set options [list \
+	    additional_flags=-DFUNCTION_NAME=[format "jit_function_%04d" $i] \
 	    additional_flags=-Xlinker \
 	    additional_flags=-Ttext-segment=$addr]
 	if { [gdb_compile_shlib ${jit_solib_srcfile} ${binfile} $options] != "" } {
