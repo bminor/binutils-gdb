@@ -1,3 +1,10 @@
+2020-03-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 25732
+	* testsuite/ld-ifunc/ifunc-23a-x86.d: Add notarget for Solaris.
+	* testsuite/ld-ifunc/ifunc-24a-x86.d: Likewise.
+	* testsuite/ld-ifunc/ifunc-25a-x86.d: Likewise.
+
 2020-03-25  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/compress1c.d: xfail h8300.
