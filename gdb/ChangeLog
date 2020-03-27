@@ -1,5 +1,15 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* gdb/gdbarch.c: Regenerate.
+	* gdb/gdbarch.h: Regenerate.
+	* gdb/gdbarch.sh (code_capability_bit)
+	(data_capability_bit, capability_bit, dwarf2_capability_size): New
+	methods.
+	* gdb/gdbtypes.c (gdbtypes_post_init): Initialize data address
+	capability to a pointer to intcap_t.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* gdb/c-exp.y (CAPABILITY, INTCAP_KEYWORD, UINTCAP_KEYWORD): New
 	tokens.
 	Handle new tokens.
