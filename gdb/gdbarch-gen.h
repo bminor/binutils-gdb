@@ -158,6 +158,32 @@ extern void set_gdbarch_addr_bit (struct gdbarch *gdbarch, int addr_bit);
 extern int gdbarch_dwarf2_addr_size (struct gdbarch *gdbarch);
 extern void set_gdbarch_dwarf2_addr_size (struct gdbarch *gdbarch, int dwarf2_addr_size);
 
+/* For capability-based targets, the capability representation will likely
+   differ from regular pointers. We can have a code capability and a data
+   capability.
+
+   code_capability is the size of a capability on the target */
+
+extern int gdbarch_code_capability_bit (struct gdbarch *gdbarch);
+extern void set_gdbarch_code_capability_bit (struct gdbarch *gdbarch, int code_capability_bit);
+
+/* data_capability is the size of a target capability as represented in gdb */
+
+extern int gdbarch_data_capability_bit (struct gdbarch *gdbarch);
+extern void set_gdbarch_data_capability_bit (struct gdbarch *gdbarch, int data_capability_bit);
+
+/* capability_bit is the size of a target capability as represented in gdb */
+
+extern int gdbarch_capability_bit (struct gdbarch *gdbarch);
+extern void set_gdbarch_capability_bit (struct gdbarch *gdbarch, int capability_bit);
+
+/* Note that dwarf2_capability_size only needs to be redefined by a target if the
+   GCC back-end defines a DWARF2_CAPABILITY_SIZE other than the target pointer
+   size, and if Dwarf versions < 4 need to be supported. */
+
+extern int gdbarch_dwarf2_capability_size (struct gdbarch *gdbarch);
+extern void set_gdbarch_dwarf2_capability_size (struct gdbarch *gdbarch, int dwarf2_capability_size);
+
 /* One if `char' acts like `signed char', zero if `unsigned char'. */
 
 extern int gdbarch_char_signed (struct gdbarch *gdbarch);

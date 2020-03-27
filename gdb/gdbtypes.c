@@ -6210,7 +6210,7 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 
   /* Capability pointer types.  */
   builtin_type->builtin_data_addr_capability
-    = lookup_pointer_type (builtin_type->builtin_intcap_t);
+    = lookup_pointer_type (builtin_type->builtin_void);
   builtin_type->builtin_code_addr_capability
     = lookup_pointer_type (lookup_function_type (builtin_type->builtin_void));
 

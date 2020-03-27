@@ -340,6 +340,55 @@ and if Dwarf versions < 4 need to be supported.
 
 Value(
     comment="""
+For capability-based targets, the capability representation will likely
+differ from regular pointers. We can have a code capability and a data
+capability.
+
+code_capability is the size of a capability on the target
+""",
+    type="int",
+    name="code_capability_bit",
+    predefault="gdbarch->int_bit",
+    invalid=False,
+)
+
+Value(
+    comment="""
+data_capability is the size of a target capability as represented in gdb
+""",
+    type="int",
+    name="data_capability_bit",
+    predefault="0",
+    postdefault="gdbarch_ptr_bit (gdbarch)",
+    invalid=True
+)
+
+Value(
+    comment="""
+capability_bit is the size of a target capability as represented in gdb
+""",
+    type="int",
+    name="capability_bit",
+    predefault="0",
+    postdefault="gdbarch_ptr_bit (gdbarch)",
+    invalid=True
+)
+
+Value(
+    comment="""
+Note that dwarf2_capability_size only needs to be redefined by a target if the
+GCC back-end defines a DWARF2_CAPABILITY_SIZE other than the target pointer
+size, and if Dwarf versions < 4 need to be supported.
+""",
+    type="int",
+    name="dwarf2_capability_size",
+    predefault="0",
+    postdefault="gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT",
+    invalid=True,
+)
+
+Value(
+    comment="""
 One if `char' acts like `signed char', zero if `unsigned char'.
 """,
     type="int",

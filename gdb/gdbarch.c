@@ -70,6 +70,10 @@ struct gdbarch
   int ptr_bit;
   int addr_bit;
   int dwarf2_addr_size;
+  int code_capability_bit;
+  int data_capability_bit;
+  int capability_bit;
+  int dwarf2_capability_size;
   int char_signed;
   gdbarch_read_pc_ftype *read_pc;
   gdbarch_write_pc_ftype *write_pc;
@@ -294,6 +298,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->wchar_signed = -1;
   gdbarch->floatformat_for_type = default_floatformat_for_type;
   gdbarch->ptr_bit = gdbarch->int_bit;
+  gdbarch->code_capability_bit = gdbarch->int_bit;
   gdbarch->char_signed = -1;
   gdbarch->virtual_frame_pointer = legacy_virtual_frame_pointer;
   gdbarch->num_regs = -1;
@@ -422,6 +427,13 @@ verify_gdbarch (struct gdbarch *gdbarch)
     gdbarch->addr_bit = gdbarch_ptr_bit (gdbarch);
   if (gdbarch->dwarf2_addr_size == 0)
     gdbarch->dwarf2_addr_size = gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
+  /* Skip verify of code_capability_bit, invalid_p == 0 */
+  if (gdbarch->data_capability_bit == 0)
+    gdbarch->data_capability_bit = gdbarch_ptr_bit (gdbarch);
+  if (gdbarch->capability_bit == 0)
+    gdbarch->capability_bit = gdbarch_ptr_bit (gdbarch);
+  if (gdbarch->dwarf2_capability_size == 0)
+    gdbarch->dwarf2_capability_size = gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
   if (gdbarch->char_signed == -1)
     gdbarch->char_signed = 1;
   /* Skip verify of read_pc, has predicate.  */
@@ -706,6 +718,18 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_filtered (file,
                       "gdbarch_dump: dwarf2_addr_size = %s\n",
                       plongest (gdbarch->dwarf2_addr_size));
+  fprintf_filtered (file,
+                      "gdbarch_dump: code_capability_bit = %s\n",
+                      plongest (gdbarch->code_capability_bit));
+  fprintf_filtered (file,
+                      "gdbarch_dump: data_capability_bit = %s\n",
+                      plongest (gdbarch->data_capability_bit));
+  fprintf_filtered (file,
+                      "gdbarch_dump: capability_bit = %s\n",
+                      plongest (gdbarch->capability_bit));
+  fprintf_filtered (file,
+                      "gdbarch_dump: dwarf2_capability_size = %s\n",
+                      plongest (gdbarch->dwarf2_capability_size));
   fprintf_filtered (file,
                       "gdbarch_dump: char_signed = %s\n",
                       plongest (gdbarch->char_signed));
@@ -1830,6 +1854,77 @@ set_gdbarch_dwarf2_addr_size (struct gdbarch *gdbarch,
                               int dwarf2_addr_size)
 {
   gdbarch->dwarf2_addr_size = dwarf2_addr_size;
+}
+
+int
+gdbarch_code_capability_bit (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of code_capability_bit, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_code_capability_bit called\n");
+  return gdbarch->code_capability_bit;
+}
+
+void
+set_gdbarch_code_capability_bit (struct gdbarch *gdbarch,
+                                 int code_capability_bit)
+{
+  gdbarch->code_capability_bit = code_capability_bit;
+}
+
+int
+gdbarch_data_capability_bit (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Check variable changed from pre-default.  */
+  gdb_assert (gdbarch->data_capability_bit != 0);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_data_capability_bit called\n");
+  return gdbarch->data_capability_bit;
+}
+
+void
+set_gdbarch_data_capability_bit (struct gdbarch *gdbarch,
+                                 int data_capability_bit)
+{
+  gdbarch->data_capability_bit = data_capability_bit;
+}
+
+int
+gdbarch_capability_bit (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Check variable changed from pre-default.  */
+  gdb_assert (gdbarch->capability_bit != 0);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_capability_bit called\n");
+  return gdbarch->capability_bit;
+}
+
+void
+set_gdbarch_capability_bit (struct gdbarch *gdbarch,
+                            int capability_bit)
+{
+  gdbarch->capability_bit = capability_bit;
+}
+
+int
+gdbarch_dwarf2_capability_size (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Check variable changed from pre-default.  */
+  gdb_assert (gdbarch->dwarf2_capability_size != 0);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_dwarf2_capability_size called\n");
+  return gdbarch->dwarf2_capability_size;
+}
+
+void
+set_gdbarch_dwarf2_capability_size (struct gdbarch *gdbarch,
+                                    int dwarf2_capability_size)
+{
+  gdbarch->dwarf2_capability_size = dwarf2_capability_size;
 }
 
 int
