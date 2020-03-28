@@ -59,7 +59,7 @@ struct attribute
 
   /* Return non-zero if ATTR's value falls in the 'constant' class, or
      zero otherwise.  When this function returns true, you can apply
-     dwarf2_get_attr_constant_value to it.
+     the constant_value method to it.
 
      However, note that for some attributes you must check
      attr_form_is_section_offset before using this test.  DW_FORM_data4
@@ -70,8 +70,8 @@ struct attribute
      section offset classes, DW_FORM_data4 and DW_FORM_data8 should be
      taken as section offsets, not constants.
 
-     DW_FORM_data16 is not considered as dwarf2_get_attr_constant_value
-     cannot handle that.  */
+     DW_FORM_data16 is not considered as constant_value cannot handle
+     that.  */
 
   bool form_is_constant () const;
 

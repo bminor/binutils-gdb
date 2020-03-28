@@ -1,5 +1,10 @@
 2020-03-28  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/attribute.h (struct attribute) <form_is_constant>: Update
+	comment.
+
+2020-03-28  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (read_attribute_reprocess): Fix formatting.
 
 2020-03-27  Hannes Domani  <ssbssa@yahoo.de>
