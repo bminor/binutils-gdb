@@ -465,7 +465,7 @@ run_ld_link_tests [list \
 	"-shared -z relro" "" "$AFLAGS_PIC" \
 	{pr20995c.s} {{readelf {-l --wide} pr20995-2so.r}} "pr20995-2.so"] \
 ] "tic6x-*-*" "arm*-*-eabi*" "hppa*64*-*-hpux*" "aarch64*-*-elf*" \
-  "*-*-lynxos*" "arm*-*-nto*" "i?86-*-nto*" "sh*-*-nto*" "*-*-solaris*"
+  "*-*-lynxos*" "arm*-*-nto*" "i?86-*-nto*" "sh*-*-nto*"
 
 # These targets don't copy dynamic variables into .bss.
 setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*"
@@ -486,7 +486,7 @@ run_ld_link_tests [list \
 	"pr20995-2" \
 	"$LFLAGS" "tmpdir/pr20995-2.so" "$AFLAGS_NONPIC" \
 	{pr20995a.s} {{readelf {-S --wide} pr20995.r}} "pr20995-2"]
-] "*-*-lynxos*" "arm*-*-nto*" "i?86-*-nto*" "sh*-*-nto*" "*-*-solaris*"
+] "*-*-lynxos*" "arm*-*-nto*" "i?86-*-nto*" "sh*-*-nto*"
 
 run_ld_link_tests [list \
     [list "Build pr22374 shared library" \

@@ -1,3 +1,10 @@
+2020-03-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 25732
+	* emulparams/elf_i386_ldso.sh (COMMONPAGESIZE): New.
+	* testsuite/ld-elf/shared.exp:Don't xfail pr20995-2 tests for
+	Solaris.
+
 2020-03-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 25732
