@@ -117,7 +117,7 @@ setup_xfail "hppa*-*-*"
 setup_xfail "sh-*-coff*"
 setup_xfail "tic54x-*-*"
 clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
-clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*"
+clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "hppa*-*-*elf*"
 objcopy_test "simple copy" bintest.s object "" ""
 
 # Test verilog data width
@@ -1112,7 +1112,7 @@ if [is_elf_format] {
     setup_xfail "sh-*-coff*"
     setup_xfail "tic54x-*-*"
     clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
-    clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*"
+    clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "hppa*-*-*elf*"
     objcopy_test "ELF unknown section type" unknown.s object "" ""
 
     objcopy_test_readelf "ELF group 1" group.s
@@ -1345,7 +1345,7 @@ run_dump_test "set-section-alignment"
 
 setup_xfail "hppa*-*-*"
 setup_xfail "sh-*-coff*"
-setup_xfail "mips-*-irix" "mipstx39-*-*" "spu-*-*"
+setup_xfail "spu-*-*"
 clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
-clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "*-*-*elf*"
+clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "hppa*-*-*elf*"
 objcopy_test "pr25662" pr25662.s executable "" "-T$srcdir/$subdir/pr25662.ld"

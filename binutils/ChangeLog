@@ -1,5 +1,10 @@
 2020-03-28  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/binutils-all/objcopy.exp (objcopy_test): Only
+	clear_xfail hppa*-*-*elf*.  Revert mips xfails.
+
+2020-03-28  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/binutils-all/objcopy.exp (objcopy_test): Move xfails
 	from here to calls.  Remove "m8*-*-*" entry.  Don't xfail tic54x
 	but do xfail spu, mipstx39 and mips-sgi-irix for the executable
