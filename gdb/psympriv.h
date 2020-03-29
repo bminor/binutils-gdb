@@ -422,12 +422,6 @@ extern void init_psymbol_list (struct objfile *objfile, int total_symbols);
 
 extern void end_psymtab_common (struct objfile *, struct partial_symtab *);
 
-static inline void
-discard_psymtab (struct objfile *objfile, struct partial_symtab *pst)
-{
-  objfile->partial_symtabs->discard_psymtab (pst);
-}
-
 /* Used when recording partial symbol tables.  On destruction,
    discards any partial symbol tables that have been built.  However,
    the tables can be kept by calling the "keep" method.  */

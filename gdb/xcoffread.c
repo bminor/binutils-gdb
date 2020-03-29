@@ -2050,7 +2050,7 @@ xcoff_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
       /* Empty psymtabs happen as a result of header files which don't have
          any symbols in them.  There can be a lot of them.  */
 
-      discard_psymtab (objfile, pst);
+      objfile->partial_symtabs->discard_psymtab (pst);
 
       /* Indicate that psymtab was thrown away.  */
       pst = NULL;

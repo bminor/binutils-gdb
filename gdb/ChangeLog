@@ -1,3 +1,9 @@
+2020-03-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* psympriv.h (discard_psymtab): Remove.
+	* dbxread.c (dbx_end_psymtab): Update.
+	* xcoffread.c (xcoff_end_psymtab): Update.
+
 2020-03-28  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/attribute.h (struct attribute) <form_is_constant>: Update

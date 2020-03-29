@@ -2057,7 +2057,7 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
          is not empty, but we don't realize that.  Fixing that without slowing
          things down might be tricky.  */
 
-      discard_psymtab (objfile, pst);
+      objfile->partial_symtabs->discard_psymtab (pst);
 
       /* Indicate that psymtab was thrown away.  */
       pst = NULL;
