@@ -1,5 +1,18 @@
 2020-03-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dbxread.c (dbx_psymtab_to_symtab_1): Rename to...
+	(dbx_expand_psymtab): ... this.
+	(start_psymtab): Update.
+	* mdebugread.c (psymtab_to_symtab_1): Rename to...
+	(mdebug_expand_psymtab): ... this.
+	(parse_partial_symbols): Update.
+	(new_psymtab): Update.
+	* xcoffread.c (xcoff_psymtab_to_symtab_1): Rename to...
+	(xcoff_expand_psymtab): ... this.
+	(xcoff_start_psymtab): Update.
+
+2020-03-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* psympriv.h (partial_symtab) <read_dependencies>: Rename to...
 	<expand_dependencies>: ... this.
 	* psymtab.c (partial_symtab::read_dependencies): Rename to...

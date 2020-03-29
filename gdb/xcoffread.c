@@ -1821,7 +1821,7 @@ find_linenos (struct bfd *abfd, struct bfd_section *asect, void *vpinfo)
 }
 
 static void
-xcoff_psymtab_to_symtab_1 (legacy_psymtab *pst, struct objfile *objfile)
+xcoff_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 {
   gdb_assert (!pst->readin);
 
@@ -1974,7 +1974,7 @@ xcoff_start_psymtab (struct objfile *objfile,
     XOBNEW (&objfile->objfile_obstack, struct symloc);
   ((struct symloc *) result->read_symtab_private)->first_symnum = first_symnum;
   result->legacy_read_symtab = xcoff_read_symtab;
-  result->legacy_expand_psymtab = xcoff_psymtab_to_symtab_1;
+  result->legacy_expand_psymtab = xcoff_expand_psymtab;
 
   /* Deduce the source language from the filename for this psymtab.  */
   psymtab_language = deduce_language_from_filename (filename);
