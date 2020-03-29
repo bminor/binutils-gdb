@@ -1,3 +1,9 @@
+2020-03-30  Alan Modra  <amodra@gmail.com>
+
+	PR 25745
+	* elf64-ppc.c (ppc64_elf_build_stubs): Use asprintf to form
+	statistics message.
+
 2020-03-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.ac (HAVE_EXECUTABLE_SUFFIX): Removed.

@@ -14116,42 +14116,46 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
 
   if (stats != NULL)
     {
-      size_t len;
-      *stats = bfd_malloc (500);
-      if (*stats == NULL)
-	return FALSE;
-
-      len = sprintf (*stats,
-		     ngettext ("linker stubs in %u group\n",
-			       "linker stubs in %u groups\n",
-			       stub_sec_count),
-		     stub_sec_count);
-      sprintf (*stats + len, _("  branch         %lu\n"
-			       "  branch toc adj %lu\n"
-			       "  branch notoc   %lu\n"
-			       "  branch both    %lu\n"
-			       "  long branch    %lu\n"
-			       "  long toc adj   %lu\n"
-			       "  long notoc     %lu\n"
-			       "  long both      %lu\n"
-			       "  plt call       %lu\n"
-			       "  plt call save  %lu\n"
-			       "  plt call notoc %lu\n"
-			       "  plt call both  %lu\n"
-			       "  global entry   %lu"),
-	       htab->stub_count[ppc_stub_long_branch - 1],
-	       htab->stub_count[ppc_stub_long_branch_r2off - 1],
-	       htab->stub_count[ppc_stub_long_branch_notoc - 1],
-	       htab->stub_count[ppc_stub_long_branch_both - 1],
-	       htab->stub_count[ppc_stub_plt_branch - 1],
-	       htab->stub_count[ppc_stub_plt_branch_r2off - 1],
-	       htab->stub_count[ppc_stub_plt_branch_notoc - 1],
-	       htab->stub_count[ppc_stub_plt_branch_both - 1],
-	       htab->stub_count[ppc_stub_plt_call - 1],
-	       htab->stub_count[ppc_stub_plt_call_r2save - 1],
-	       htab->stub_count[ppc_stub_plt_call_notoc - 1],
-	       htab->stub_count[ppc_stub_plt_call_both - 1],
-	       htab->stub_count[ppc_stub_global_entry - 1]);
+      char *groupmsg;
+      if (asprintf (&groupmsg,
+		    ngettext ("linker stubs in %u group\n",
+			      "linker stubs in %u groups\n",
+			      stub_sec_count),
+		    stub_sec_count) < 0)
+	*stats = NULL;
+      else
+	{
+	  if (asprintf (stats, _("%s"
+				 "  branch         %lu\n"
+				 "  branch toc adj %lu\n"
+				 "  branch notoc   %lu\n"
+				 "  branch both    %lu\n"
+				 "  long branch    %lu\n"
+				 "  long toc adj   %lu\n"
+				 "  long notoc     %lu\n"
+				 "  long both      %lu\n"
+				 "  plt call       %lu\n"
+				 "  plt call save  %lu\n"
+				 "  plt call notoc %lu\n"
+				 "  plt call both  %lu\n"
+				 "  global entry   %lu"),
+			groupmsg,
+			htab->stub_count[ppc_stub_long_branch - 1],
+			htab->stub_count[ppc_stub_long_branch_r2off - 1],
+			htab->stub_count[ppc_stub_long_branch_notoc - 1],
+			htab->stub_count[ppc_stub_long_branch_both - 1],
+			htab->stub_count[ppc_stub_plt_branch - 1],
+			htab->stub_count[ppc_stub_plt_branch_r2off - 1],
+			htab->stub_count[ppc_stub_plt_branch_notoc - 1],
+			htab->stub_count[ppc_stub_plt_branch_both - 1],
+			htab->stub_count[ppc_stub_plt_call - 1],
+			htab->stub_count[ppc_stub_plt_call_r2save - 1],
+			htab->stub_count[ppc_stub_plt_call_notoc - 1],
+			htab->stub_count[ppc_stub_plt_call_both - 1],
+			htab->stub_count[ppc_stub_global_entry - 1]) < 0)
+	    *stats = NULL;
+	  free (groupmsg);
+	}
     }
   return TRUE;
 }
