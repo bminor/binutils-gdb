@@ -1706,7 +1706,7 @@ partial_symtab::partial_symtab (const char *filename_, struct objfile *objfile)
 /* See psympriv.h.  */
 
 void
-partial_symtab::read_dependencies (struct objfile *objfile)
+partial_symtab::expand_dependencies (struct objfile *objfile)
 {
   for (int i = 0; i < number_of_dependencies; ++i)
     {

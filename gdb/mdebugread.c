@@ -3856,7 +3856,7 @@ psymtab_to_symtab_1 (legacy_psymtab *pst, struct objfile *objfile)
   /* Read in all partial symtabs on which this one is dependent.
      NOTE that we do have circular dependencies, sigh.  We solved
      that by setting pst->readin before this point.  */
-  pst->read_dependencies (objfile);
+  pst->expand_dependencies (objfile);
 
   /* Do nothing if this is a dummy psymtab.  */
 

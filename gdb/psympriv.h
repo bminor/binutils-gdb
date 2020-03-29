@@ -134,7 +134,7 @@ struct partial_symtab
   virtual void expand_psymtab (struct objfile *) = 0;
 
   /* Ensure that all the dependencies are read in.  */
-  void read_dependencies (struct objfile *);
+  void expand_dependencies (struct objfile *);
 
   /* Return true if the symtab corresponding to this psymtab has been
      readin.  */

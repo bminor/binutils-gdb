@@ -2071,7 +2071,7 @@ dbx_psymtab_to_symtab_1 (legacy_psymtab *pst, struct objfile *objfile)
   gdb_assert (!pst->readin);
 
   /* Read in all partial symtabs on which this one is dependent.  */
-  pst->read_dependencies (objfile);
+  pst->expand_dependencies (objfile);
 
   if (LDSYMLEN (pst))		/* Otherwise it's a dummy.  */
     {

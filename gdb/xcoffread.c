@@ -1826,7 +1826,7 @@ xcoff_psymtab_to_symtab_1 (legacy_psymtab *pst, struct objfile *objfile)
   gdb_assert (!pst->readin);
 
   /* Read in all partial symtabs on which this one is dependent.  */
-  pst->read_dependencies (objfile);
+  pst->expand_dependencies (objfile);
 
   if (((struct symloc *) pst->read_symtab_private)->numsyms != 0)
     {

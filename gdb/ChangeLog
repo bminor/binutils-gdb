@@ -1,5 +1,18 @@
 2020-03-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* psympriv.h (partial_symtab) <read_dependencies>: Rename to...
+	<expand_dependencies>: ... this.
+	* psymtab.c (partial_symtab::read_dependencies): Rename to...
+	(partial_symtab::expand_dependencies): ... this.
+	* dwarf2/read.c (dwarf2_include_psymtab) <expand_psymtab>:
+	Update.
+	(dwarf2_psymtab::expand_psymtab): Update.
+	* dbxread.c (dbx_psymtab_to_symtab_1): Update.
+	* mdebugread.c (psymtab_to_symtab_1): Update.
+	* xcoffread.c (xcoff_psymtab_to_symtab_1): Update.
+
+2020-03-29  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* psympriv.h (discard_psymtab): Remove.
 	* dbxread.c (dbx_end_psymtab): Update.
 	* xcoffread.c (xcoff_end_psymtab): Update.

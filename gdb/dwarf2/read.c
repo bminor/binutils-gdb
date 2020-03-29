@@ -5840,7 +5840,7 @@ struct dwarf2_include_psymtab : public partial_symtab
       return;
     /* It's an include file, no symbols to read for it.
        Everything is in the parent symtab.  */
-    read_dependencies (objfile);
+    expand_dependencies (objfile);
     m_readin = true;
   }
 
@@ -8775,7 +8775,7 @@ dwarf2_psymtab::expand_psymtab (struct objfile *objfile)
   if (readin)
     return;
 
-  read_dependencies (objfile);
+  expand_dependencies (objfile);
 
   dw2_do_instantiate_symtab (per_cu_data, false);
   gdb_assert (get_compunit_symtab () != nullptr);
