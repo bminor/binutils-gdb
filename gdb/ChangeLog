@@ -1,3 +1,8 @@
+2020-03-30  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* linux-nat.h (low_new_clone): New method.
+	* linux-nat.c (linux_handle_extended_wait): Call low_new_clone.
+
 2020-03-29  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dbxread.c (dbx_psymtab_to_symtab_1): Rename to...
