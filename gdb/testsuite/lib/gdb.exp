@@ -6982,5 +6982,43 @@ gdb_caching_proc supports_statement_frontiers {
     } executable "additional_flags=-gstatement-frontiers"]
 }
 
+# Return 1 if symbols were read in using -readnow.  Otherwise, return 0.
+
+proc readnow { } {
+    set cmd "maint print objfiles"
+    gdb_test_multiple $cmd "" {
+	-re -wrap "\r\n.gdb_index: faked for \"readnow\"\r\n.*" {
+	    return 1
+	}
+	-re -wrap "" {
+	    return 0
+	}
+    }
+
+    return 0
+}
+
+# Verify that partial symtab expansion for $filename has state $readin.
+
+proc verify_psymtab_expanded { filename readin } {
+    global gdb_prompt
+
+    set cmd "maint info psymtab"
+    set test "$cmd: $filename: $readin"
+    set re [multi_line \
+		"  \{ psymtab \[^\r\n\]*$filename\[^\r\n\]*" \
+		"    readin $readin" \
+		".*"]
+
+    gdb_test_multiple $cmd $test {
+	-re "$cmd\r\n$gdb_prompt $" {
+	    unsupported $gdb_test_name
+	}
+	-re -wrap $re {
+	    pass $gdb_test_name
+	}
+    }
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

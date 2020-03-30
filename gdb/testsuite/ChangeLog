@@ -1,3 +1,12 @@
+2020-03-30  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/c-linkage-name.exp: Use readnow call to mark a test
+	unsupported.
+	(verify_psymtab_expanded): Move ...
+	* lib/gdb.exp (verify_psymtab_expanded): ... here.  Add unsupported
+	test.
+	(readnow): New proc.
+
 2020-03-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/mixed-lang-stack.exp: Replace two hard coded address

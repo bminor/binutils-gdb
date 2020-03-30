@@ -26,30 +26,23 @@ if { [gdb_compile "${sources}" "${binfile}" executable {debug}] != "" } {
 }
 
 clean_restart ${binfile}
-
-# Verify that partial symtab expansion for $filename has state $readin
-
-proc verify_psymtab_expanded { filename readin } {
-    set cmd "maint info psymtab"
-    set test "$cmd: $filename: $readin"
-    set re [multi_line \
-		"  \{ psymtab \[^\r\n\]*$filename\[^\r\n\]*" \
-		"    readin $readin" \
-		".*"]
-
-    gdb_test $cmd $re $test
-}
+set readnow [readnow]
 
 # Verify that partial symtab expansion has not taken place for
 # c-linkage-name-2.c.
 
 verify_psymtab_expanded c-linkage-name-2.c no
 
-# Try to print MUNDANE, but using its linkage name.
+set test "print symada__cS before partial symtab expansion"
+if { $readnow } {
+    unsupported $test
+} else {
+    # Try to print MUNDANE, but using its linkage name.
 
-gdb_test "print symada__cS" \
-         "'symada__cS' has unknown type; cast it to its declared type" \
-         "print symada__cS before partial symtab expansion"
+    gdb_test "print symada__cS" \
+	"'symada__cS' has unknown type; cast it to its declared type" \
+	$test
+}
 
 # Force the symbols to be expanded for the unit that contains
 # our symada__cS symbol by, e.g. inserting a breakpoint on one
