@@ -1555,6 +1555,170 @@ store_ppc_registers (const struct regcache *regcache, int tid)
      function to fail most of the time, so we ignore them.  */
 }
 
+void
+ppc_linux_nat_target::store_registers (struct regcache *regcache, int regno)
+{
+  pid_t tid = get_ptrace_pid (regcache->ptid ());
+
+  if (regno >= 0)
+    store_register (regcache, tid, regno);
+  else
+    store_ppc_registers (regcache, tid);
+}
+
+/* Functions for transferring registers between a gregset_t or fpregset_t
+   (see sys/ucontext.h) and gdb's regcache.  The word size is that used
+   by the ptrace interface, not the current program's ABI.  Eg. if a
+   powerpc64-linux gdb is being used to debug a powerpc32-linux app, we
+   read or write 64-bit gregsets.  This is to suit the host libthread_db.  */
+
+void
+supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
+{
+  const struct regset *regset = ppc_linux_gregset (sizeof (long));
+
+  ppc_supply_gregset (regset, regcache, -1, gregsetp, sizeof (*gregsetp));
+}
+
+void
+fill_gregset (const struct regcache *regcache,
+	      gdb_gregset_t *gregsetp, int regno)
+{
+  const struct regset *regset = ppc_linux_gregset (sizeof (long));
+
+  if (regno == -1)
+    memset (gregsetp, 0, sizeof (*gregsetp));
+  ppc_collect_gregset (regset, regcache, regno, gregsetp, sizeof (*gregsetp));
+}
+
+void
+supply_fpregset (struct regcache *regcache, const gdb_fpregset_t * fpregsetp)
+{
+  const struct regset *regset = ppc_linux_fpregset ();
+
+  ppc_supply_fpregset (regset, regcache, -1,
+		       fpregsetp, sizeof (*fpregsetp));
+}
+
+void
+fill_fpregset (const struct regcache *regcache,
+	       gdb_fpregset_t *fpregsetp, int regno)
+{
+  const struct regset *regset = ppc_linux_fpregset ();
+
+  ppc_collect_fpregset (regset, regcache, regno,
+			fpregsetp, sizeof (*fpregsetp));
+}
+
+int
+ppc_linux_nat_target::auxv_parse (gdb_byte **readptr,
+				  gdb_byte *endptr, CORE_ADDR *typep,
+				  CORE_ADDR *valp)
+{
+  int tid = inferior_ptid.lwp ();
+  if (tid == 0)
+    tid = inferior_ptid.pid ();
+
+  int sizeof_auxv_field = ppc_linux_target_wordsize (tid);
+
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  gdb_byte *ptr = *readptr;
+
+  if (endptr == ptr)
+    return 0;
+
+  if (endptr - ptr < sizeof_auxv_field * 2)
+    return -1;
+
+  *typep = extract_unsigned_integer (ptr, sizeof_auxv_field, byte_order);
+  ptr += sizeof_auxv_field;
+  *valp = extract_unsigned_integer (ptr, sizeof_auxv_field, byte_order);
+  ptr += sizeof_auxv_field;
+
+  *readptr = ptr;
+  return 1;
+}
+
+const struct target_desc *
+ppc_linux_nat_target::read_description ()
+{
+  int tid = inferior_ptid.lwp ();
+  if (tid == 0)
+    tid = inferior_ptid.pid ();
+
+  if (have_ptrace_getsetevrregs)
+    {
+      struct gdb_evrregset_t evrregset;
+
+      if (ptrace (PTRACE_GETEVRREGS, tid, 0, &evrregset) >= 0)
+        return tdesc_powerpc_e500l;
+
+      /* EIO means that the PTRACE_GETEVRREGS request isn't supported.
+	 Anything else needs to be reported.  */
+      else if (errno != EIO)
+	perror_with_name (_("Unable to fetch SPE registers"));
+    }
+
+  struct ppc_linux_features features = ppc_linux_no_features;
+
+  features.wordsize = ppc_linux_target_wordsize (tid);
+
+  CORE_ADDR hwcap = linux_get_hwcap (current_top_target ());
+  CORE_ADDR hwcap2 = linux_get_hwcap2 (current_top_target ());
+
+  if (have_ptrace_getsetvsxregs
+      && (hwcap & PPC_FEATURE_HAS_VSX))
+    {
+      gdb_vsxregset_t vsxregset;
+
+      if (ptrace (PTRACE_GETVSXREGS, tid, 0, &vsxregset) >= 0)
+	features.vsx = true;
+
+      /* EIO means that the PTRACE_GETVSXREGS request isn't supported.
+	 Anything else needs to be reported.  */
+      else if (errno != EIO)
+	perror_with_name (_("Unable to fetch VSX registers"));
+    }
+
+  if (have_ptrace_getvrregs
+      && (hwcap & PPC_FEATURE_HAS_ALTIVEC))
+    {
+      gdb_vrregset_t vrregset;
+
+      if (ptrace (PTRACE_GETVRREGS, tid, 0, &vrregset) >= 0)
+        features.altivec = true;
+
+      /* EIO means that the PTRACE_GETVRREGS request isn't supported.
+	 Anything else needs to be reported.  */
+      else if (errno != EIO)
+	perror_with_name (_("Unable to fetch AltiVec registers"));
+    }
+
+  features.isa205 = ppc_linux_has_isa205 (hwcap);
+
+  if ((hwcap2 & PPC_FEATURE2_DSCR)
+      && check_regset (tid, NT_PPC_PPR, PPC_LINUX_SIZEOF_PPRREGSET)
+      && check_regset (tid, NT_PPC_DSCR, PPC_LINUX_SIZEOF_DSCRREGSET))
+    {
+      features.ppr_dscr = true;
+      if ((hwcap2 & PPC_FEATURE2_ARCH_2_07)
+	  && (hwcap2 & PPC_FEATURE2_TAR)
+	  && (hwcap2 & PPC_FEATURE2_EBB)
+	  && check_regset (tid, NT_PPC_TAR, PPC_LINUX_SIZEOF_TARREGSET)
+	  && check_regset (tid, NT_PPC_EBB, PPC_LINUX_SIZEOF_EBBREGSET)
+	  && check_regset (tid, NT_PPC_PMU, PPC_LINUX_SIZEOF_PMUREGSET))
+	{
+	  features.isa207 = true;
+	  if ((hwcap2 & PPC_FEATURE2_HTM)
+	      && check_regset (tid, NT_PPC_TM_SPR,
+			       PPC_LINUX_SIZEOF_TM_SPRREGSET))
+	    features.htm = true;
+	}
+    }
+
+  return ppc_linux_match_description (features);
+}
+
 /* The cached DABR value, to install in new threads.
    This variable is used when the PowerPC HWDEBUG ptrace
    interface is not available.  */
@@ -2505,170 +2669,6 @@ ppc_linux_nat_target::masked_watch_num_registers (CORE_ADDR addr, CORE_ADDR mask
     }
   else
     return 2;
-}
-
-void
-ppc_linux_nat_target::store_registers (struct regcache *regcache, int regno)
-{
-  pid_t tid = get_ptrace_pid (regcache->ptid ());
-
-  if (regno >= 0)
-    store_register (regcache, tid, regno);
-  else
-    store_ppc_registers (regcache, tid);
-}
-
-/* Functions for transferring registers between a gregset_t or fpregset_t
-   (see sys/ucontext.h) and gdb's regcache.  The word size is that used
-   by the ptrace interface, not the current program's ABI.  Eg. if a
-   powerpc64-linux gdb is being used to debug a powerpc32-linux app, we
-   read or write 64-bit gregsets.  This is to suit the host libthread_db.  */
-
-void
-supply_gregset (struct regcache *regcache, const gdb_gregset_t *gregsetp)
-{
-  const struct regset *regset = ppc_linux_gregset (sizeof (long));
-
-  ppc_supply_gregset (regset, regcache, -1, gregsetp, sizeof (*gregsetp));
-}
-
-void
-fill_gregset (const struct regcache *regcache,
-	      gdb_gregset_t *gregsetp, int regno)
-{
-  const struct regset *regset = ppc_linux_gregset (sizeof (long));
-
-  if (regno == -1)
-    memset (gregsetp, 0, sizeof (*gregsetp));
-  ppc_collect_gregset (regset, regcache, regno, gregsetp, sizeof (*gregsetp));
-}
-
-void
-supply_fpregset (struct regcache *regcache, const gdb_fpregset_t * fpregsetp)
-{
-  const struct regset *regset = ppc_linux_fpregset ();
-
-  ppc_supply_fpregset (regset, regcache, -1,
-		       fpregsetp, sizeof (*fpregsetp));
-}
-
-void
-fill_fpregset (const struct regcache *regcache,
-	       gdb_fpregset_t *fpregsetp, int regno)
-{
-  const struct regset *regset = ppc_linux_fpregset ();
-
-  ppc_collect_fpregset (regset, regcache, regno,
-			fpregsetp, sizeof (*fpregsetp));
-}
-
-int
-ppc_linux_nat_target::auxv_parse (gdb_byte **readptr,
-				  gdb_byte *endptr, CORE_ADDR *typep,
-				  CORE_ADDR *valp)
-{
-  int tid = inferior_ptid.lwp ();
-  if (tid == 0)
-    tid = inferior_ptid.pid ();
-
-  int sizeof_auxv_field = ppc_linux_target_wordsize (tid);
-
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  gdb_byte *ptr = *readptr;
-
-  if (endptr == ptr)
-    return 0;
-
-  if (endptr - ptr < sizeof_auxv_field * 2)
-    return -1;
-
-  *typep = extract_unsigned_integer (ptr, sizeof_auxv_field, byte_order);
-  ptr += sizeof_auxv_field;
-  *valp = extract_unsigned_integer (ptr, sizeof_auxv_field, byte_order);
-  ptr += sizeof_auxv_field;
-
-  *readptr = ptr;
-  return 1;
-}
-
-const struct target_desc *
-ppc_linux_nat_target::read_description ()
-{
-  int tid = inferior_ptid.lwp ();
-  if (tid == 0)
-    tid = inferior_ptid.pid ();
-
-  if (have_ptrace_getsetevrregs)
-    {
-      struct gdb_evrregset_t evrregset;
-
-      if (ptrace (PTRACE_GETEVRREGS, tid, 0, &evrregset) >= 0)
-        return tdesc_powerpc_e500l;
-
-      /* EIO means that the PTRACE_GETEVRREGS request isn't supported.
-	 Anything else needs to be reported.  */
-      else if (errno != EIO)
-	perror_with_name (_("Unable to fetch SPE registers"));
-    }
-
-  struct ppc_linux_features features = ppc_linux_no_features;
-
-  features.wordsize = ppc_linux_target_wordsize (tid);
-
-  CORE_ADDR hwcap = linux_get_hwcap (current_top_target ());
-  CORE_ADDR hwcap2 = linux_get_hwcap2 (current_top_target ());
-
-  if (have_ptrace_getsetvsxregs
-      && (hwcap & PPC_FEATURE_HAS_VSX))
-    {
-      gdb_vsxregset_t vsxregset;
-
-      if (ptrace (PTRACE_GETVSXREGS, tid, 0, &vsxregset) >= 0)
-	features.vsx = true;
-
-      /* EIO means that the PTRACE_GETVSXREGS request isn't supported.
-	 Anything else needs to be reported.  */
-      else if (errno != EIO)
-	perror_with_name (_("Unable to fetch VSX registers"));
-    }
-
-  if (have_ptrace_getvrregs
-      && (hwcap & PPC_FEATURE_HAS_ALTIVEC))
-    {
-      gdb_vrregset_t vrregset;
-
-      if (ptrace (PTRACE_GETVRREGS, tid, 0, &vrregset) >= 0)
-        features.altivec = true;
-
-      /* EIO means that the PTRACE_GETVRREGS request isn't supported.
-	 Anything else needs to be reported.  */
-      else if (errno != EIO)
-	perror_with_name (_("Unable to fetch AltiVec registers"));
-    }
-
-  features.isa205 = ppc_linux_has_isa205 (hwcap);
-
-  if ((hwcap2 & PPC_FEATURE2_DSCR)
-      && check_regset (tid, NT_PPC_PPR, PPC_LINUX_SIZEOF_PPRREGSET)
-      && check_regset (tid, NT_PPC_DSCR, PPC_LINUX_SIZEOF_DSCRREGSET))
-    {
-      features.ppr_dscr = true;
-      if ((hwcap2 & PPC_FEATURE2_ARCH_2_07)
-	  && (hwcap2 & PPC_FEATURE2_TAR)
-	  && (hwcap2 & PPC_FEATURE2_EBB)
-	  && check_regset (tid, NT_PPC_TAR, PPC_LINUX_SIZEOF_TARREGSET)
-	  && check_regset (tid, NT_PPC_EBB, PPC_LINUX_SIZEOF_EBBREGSET)
-	  && check_regset (tid, NT_PPC_PMU, PPC_LINUX_SIZEOF_PMUREGSET))
-	{
-	  features.isa207 = true;
-	  if ((hwcap2 & PPC_FEATURE2_HTM)
-	      && check_regset (tid, NT_PPC_TM_SPR,
-			       PPC_LINUX_SIZEOF_TM_SPRREGSET))
-	    features.htm = true;
-	}
-    }
-
-  return ppc_linux_match_description (features);
 }
 
 void _initialize_ppc_linux_nat ();

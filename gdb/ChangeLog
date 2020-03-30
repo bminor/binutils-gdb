@@ -1,5 +1,13 @@
 2020-03-30  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* ppc-linux-nat.c (ppc_linux_nat_target::store_registers)
+	(ppc_linux_nat_target::auxv_parse)
+	(ppc_linux_nat_target::read_description)
+	(supply_gregset, fill_gregset, supply_fpregset, fill_fpregset):
+	Move up.
+
+2020-03-30  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* linux-nat.h (low_new_clone): New method.
 	* linux-nat.c (linux_handle_extended_wait): Call low_new_clone.
 
