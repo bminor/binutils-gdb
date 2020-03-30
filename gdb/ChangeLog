@@ -1,3 +1,11 @@
+2020-03-30  Tom Tromey  <tromey@adacore.com>
+
+	* ada-valprint.c (print_variant_part): Update.
+	* ada-lang.h (ada_which_variant_applies): Update.
+	* ada-lang.c (ada_which_variant_applies): Remove outer_type and
+	outer_valaddr parameters; replace with "outer" value parameter.
+	(to_fixed_variant_branch_type): Update.
+
 2020-03-30  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	* ppc-linux-nat.c: Include <algorithm>, <unordered_map>, and

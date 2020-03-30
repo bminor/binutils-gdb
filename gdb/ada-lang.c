@@ -7661,26 +7661,21 @@ is_unchecked_variant (struct type *var_type, struct type *outer_type)
 
 
 /* Assuming that VAR_TYPE is the type of a variant part of a record (a union),
-   within a value of type OUTER_TYPE that is stored in GDB at
-   OUTER_VALADDR, determine which variant clause (field number in VAR_TYPE,
+   within OUTER, determine which variant clause (field number in VAR_TYPE,
    numbering from 0) is applicable.  Returns -1 if none are.  */
 
 int
-ada_which_variant_applies (struct type *var_type, struct type *outer_type,
-                           const gdb_byte *outer_valaddr)
+ada_which_variant_applies (struct type *var_type, struct value *outer)
 {
   int others_clause;
   int i;
   const char *discrim_name = ada_variant_discrim_name (var_type);
-  struct value *outer;
   struct value *discrim;
   LONGEST discrim_val;
 
   /* Using plain value_from_contents_and_address here causes problems
      because we will end up trying to resolve a type that is currently
      being constructed.  */
-  outer = value_from_contents_and_address_unresolved (outer_type,
-						      outer_valaddr, 0);
   discrim = ada_value_struct_elt (outer, discrim_name, 1);
   if (discrim == NULL)
     return -1;
@@ -8555,9 +8550,7 @@ to_fixed_variant_branch_type (struct type *var_type0, const gdb_byte *valaddr,
 
   if (is_unchecked_variant (var_type, value_type (dval)))
       return var_type0;
-  which =
-    ada_which_variant_applies (var_type,
-                               value_type (dval), value_contents (dval));
+  which = ada_which_variant_applies (var_type, dval);
 
   if (which < 0)
     return empty_record (var_type);
