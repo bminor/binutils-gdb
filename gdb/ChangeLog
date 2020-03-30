@@ -1,5 +1,101 @@
 2020-03-30  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	* ppc-linux-nat.c: Include <algorithm>, <unordered_map>, and
+	<list>.  Remove inclusion of observable.h.
+	(PPC_DEBUG_CURRENT_VERSION): Move up define.
+	(struct arch_lwp_info): New struct.
+	(class ppc_linux_dreg_interface): New class.
+	(struct ppc_linux_process_info): New struct.
+	(struct ppc_linux_nat_target) <low_delete_thread, low_new_fork>
+	<low_new_clone, low_forget_process, low_prepare_to_resume>
+	<copy_thread_dreg_state, mark_thread_stale>
+	<mark_debug_registers_changed, register_hw_breakpoint>
+	<clear_hw_breakpoint, register_wp, clear_wp>
+	<can_use_watchpoint_cond_accel, calculate_dvc, check_condition>
+	<num_memory_accesses, get_trigger_type>
+	<create_watchpoint_request, hwdebug_point_cmp>
+	<init_arch_lwp_info, get_arch_lwp_info>
+	<low_stopped_by_watchpoint, low_stopped_data_address>: Declare as
+	methods.
+	<struct ptid_hash>: New inner struct.
+	<m_dreg_interface, m_process_info, m_installed_hw_bps>: Declare
+	members.
+	(saved_dabr_value, hwdebug_info, max_slots_number)
+	(struct hw_break_tuple, struct thread_points, ppc_threads)
+	(have_ptrace_hwdebug_interface)
+	(hwdebug_find_thread_points_by_tid)
+	(hwdebug_insert_point, hwdebug_remove_point): Remove.
+	(ppc_linux_nat_target::can_use_hw_breakpoint): Use
+	m_dreg_interface, remove call to PTRACE_SET_DEBUGREG.
+	(ppc_linux_nat_target::region_ok_for_hw_watchpoint): Add comment,
+	use m_dreg_interface.
+	(hwdebug_point_cmp): Change to...
+	(ppc_linux_nat_target::hwdebug_point_cmp): ...this method.  Use
+	reference arguments instead of pointers.
+	(ppc_linux_nat_target::ranged_break_num_registers): Use
+	m_dreg_interface.
+	(ppc_linux_nat_target::insert_hw_breakpoint): Add comment, use
+	m_dreg_interface.  Call register_hw_breakpoint.
+	(ppc_linux_nat_target::remove_hw_breakpoint): Add comment, use
+	m_dreg_interface.  Call clear_hw_breakpoint.
+	(get_trigger_type): Change to...
+	(ppc_linux_nat_target::get_trigger_type): ...this method.  Add
+	comment.
+	(ppc_linux_nat_target::insert_mask_watchpoint): Update comment,
+	use m_dreg_interface.  Call register_hw_breakpoint.
+	(ppc_linux_nat_target::remove_mask_watchpoint): Update comment,
+	use m_dreg_interface.  Call clear_hw_breakpoint.
+	(can_use_watchpoint_cond_accel): Change to...
+	(ppc_linux_nat_target::can_use_watchpoint_cond_accel): ...this
+	method.  Update comment, use m_dreg_interface and
+	m_process_info.
+	(calculate_dvc): Change to...
+	(ppc_linux_nat_target::calculate_dvc): ...this method.  Use
+	m_dreg_interface.
+	(num_memory_accesses): Change to...
+	(ppc_linux_nat_target::num_memory_accesses): ...this method.
+	(check_condition): Change to...
+	(ppc_linux_nat_target::check_condition): ...this method.
+	(ppc_linux_nat_target::can_accel_watchpoint_condition): Update
+	comment, use m_dreg_interface.
+	(create_watchpoint_request): Change to...
+	(ppc_linux_nat_target::create_watchpoint_request): ...this
+	method.  Use m_dreg_interface.
+	(ppc_linux_nat_target::insert_watchpoint): Add comment, use
+	m_dreg_interface.  Call register_hw_breakpoint or register_wp.
+	(ppc_linux_nat_target::remove_watchpoint): Add comment, use
+	m_dreg_interface.  Call clear_hw_breakpoint or clear_wp.
+	(ppc_linux_nat_target::low_forget_process)
+	(ppc_linux_nat_target::low_new_fork)
+	(ppc_linux_nat_target::low_new_clone)
+	(ppc_linux_nat_target::low_delete_thread)
+	(ppc_linux_nat_target::low_prepare_to_resume): New methods.
+	(ppc_linux_nat_target::low_new_thread): Remove previous logic,
+	only call mark_thread_stale.
+	(ppc_linux_thread_exit): Remove.
+	(ppc_linux_nat_target::stopped_data_address): Change to...
+	(ppc_linux_nat_target::low_stopped_data_address): This. Add
+	comment, use m_dreg_interface and m_thread_hw_breakpoints.
+	(ppc_linux_nat_target::stopped_by_watchpoint): Change to...
+	(ppc_linux_nat_target::stopped_by_watchpoint): This.  Add
+	comment.  Call low_stopped_data_address.
+	(ppc_linux_nat_target::watchpoint_addr_within_range): Use
+	m_dreg_interface.
+	(ppc_linux_nat_target::masked_watch_num_registers): Use
+	m_dreg_interface.
+	(ppc_linux_nat_target::copy_thread_dreg_state)
+	(ppc_linux_nat_target::mark_thread_stale)
+	(ppc_linux_nat_target::mark_debug_registers_changed)
+	(ppc_linux_nat_target::register_hw_breakpoint)
+	(ppc_linux_nat_target::clear_hw_breakpoint)
+	(ppc_linux_nat_target::register_wp)
+	(ppc_linux_nat_target::clear_wp)
+	(ppc_linux_nat_target::init_arch_lwp_info)
+	(ppc_linux_nat_target::get_arch_lwp_info): New methods.
+	(_initialize_ppc_linux_nat): Remove observer callback.
+
+2020-03-30  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* ppc-linux-nat.c (ppc_linux_nat_target::store_registers)
 	(ppc_linux_nat_target::auxv_parse)
 	(ppc_linux_nat_target::read_description)

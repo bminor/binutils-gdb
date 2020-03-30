@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "observable.h"
 #include "frame.h"
 #include "inferior.h"
 #include "gdbthread.h"
@@ -38,6 +37,9 @@
 #include "nat/gdb_ptrace.h"
 #include "nat/linux-ptrace.h"
 #include "inf-ptrace.h"
+#include <algorithm>
+#include <unordered_map>
+#include <list>
 
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
@@ -135,6 +137,10 @@ struct ppc_hw_breakpoint
 #ifndef PPC_DEBUG_FEATURE_DATA_BP_DAWR
 #define PPC_DEBUG_FEATURE_DATA_BP_DAWR	0x10
 #endif /* PPC_DEBUG_FEATURE_DATA_BP_DAWR */
+
+/* The version of the PowerPC HWDEBUG kernel interface that we will use, if
+   available.  */
+#define PPC_DEBUG_CURRENT_VERSION 1
 
 /* Similarly for the general-purpose (gp0 -- gp31)
    and floating-point registers (fp0 -- fp31).  */
@@ -270,6 +276,214 @@ int have_ptrace_getsetregs = 1;
    them and gotten an error.  */
 int have_ptrace_getsetfpregs = 1;
 
+/* Private arch info associated with each thread lwp_info object, used
+   for debug register handling.  */
+
+struct arch_lwp_info
+{
+  /* When true, indicates that the debug registers installed in the
+     thread no longer correspond to the watchpoints and breakpoints
+     requested by GDB.  */
+  bool debug_regs_stale;
+
+  /* We need a back-reference to the PTID of the thread so that we can
+     cleanup the debug register state of the thread in
+     low_delete_thread.  */
+  ptid_t lwp_ptid;
+};
+
+/* Class used to detect which set of ptrace requests that
+   ppc_linux_nat_target will use to install and remove hardware
+   breakpoints and watchpoints.
+
+   The interface is only detected once, testing the ptrace calls.  The
+   result can indicate that no interface is available.
+
+   The Linux kernel provides two different sets of ptrace requests to
+   handle hardware watchpoints and breakpoints for Power:
+
+   - PPC_PTRACE_GETHWDBGINFO, PPC_PTRACE_SETHWDEBUG, and
+     PPC_PTRACE_DELHWDEBUG.
+
+   Or
+
+   - PTRACE_SET_DEBUGREG and PTRACE_GET_DEBUGREG
+
+   The first set is the more flexible one and allows setting watchpoints
+   with a variable watched region length and, for BookE processors,
+   multiple types of debug registers (e.g. hardware breakpoints and
+   hardware-assisted conditions for watchpoints).  The second one only
+   allows setting one debug register, a watchpoint, so we only use it if
+   the first one is not available.  */
+
+class ppc_linux_dreg_interface
+{
+public:
+
+  ppc_linux_dreg_interface ()
+    : m_interface (), m_hwdebug_info ()
+  {
+  };
+
+  DISABLE_COPY_AND_ASSIGN (ppc_linux_dreg_interface);
+
+  /* One and only one of these three functions returns true, indicating
+     whether the corresponding interface is the one we detected.  The
+     interface must already have been detected as a precontidion.  */
+
+  bool hwdebug_p ()
+  {
+    gdb_assert (detected_p ());
+    return *m_interface == HWDEBUG;
+  }
+
+  bool debugreg_p ()
+  {
+    gdb_assert (detected_p ());
+    return *m_interface == DEBUGREG;
+  }
+
+  bool unavailable_p ()
+  {
+    gdb_assert (detected_p ());
+    return *m_interface == UNAVAILABLE;
+  }
+
+  /* Returns the debug register capabilities of the target.  Should only
+     be called if the interface is HWDEBUG.  */
+  const struct ppc_debug_info &hwdebug_info ()
+  {
+    gdb_assert (hwdebug_p ());
+
+    return m_hwdebug_info;
+  }
+
+  /* Returns true if the interface has already been detected.  This is
+     useful for cases when we know there is no work to be done if the
+     interface hasn't been detected yet.  */
+  bool detected_p ()
+  {
+    return m_interface.has_value ();
+  }
+
+  /* Detect the available interface, if any, if it hasn't been detected
+     before, using PTID for the necessary ptrace calls.  */
+
+  void detect (const ptid_t &ptid)
+  {
+    if (m_interface.has_value ())
+      return;
+
+    gdb_assert (ptid.lwp_p ());
+
+    bool no_features = false;
+
+    if (ptrace (PPC_PTRACE_GETHWDBGINFO, ptid.lwp (), 0, &m_hwdebug_info)
+	!= -1)
+      {
+	/* If there are no advertised features, we don't use the
+	   HWDEBUG interface and try the DEBUGREG interface instead.
+	   It shouldn't be necessary to do this, however, when the
+	   kernel is configured without CONFIG_HW_BREAKPOINTS (selected
+	   by CONFIG_PERF_EVENTS), there is a bug that causes
+	   watchpoints installed with the HWDEBUG interface not to
+	   trigger.  When this is the case, features will be zero,
+	   which we use as an indicator to fall back to the DEBUGREG
+	   interface.  */
+	if (m_hwdebug_info.features != 0)
+	  {
+	    m_interface.emplace (HWDEBUG);
+	    return;
+	  }
+	else
+	  no_features = true;
+      }
+
+    /* EIO indicates that the request is invalid, so we try DEBUGREG
+       next.  Technically, it can also indicate other failures, but we
+       can't differentiate those.
+
+       Other errors could happen for various reasons.  We could get an
+       ESRCH if the traced thread was killed by a signal.  Trying to
+       detect the interface with another thread in the future would be
+       complicated, as callers would have to handle an "unknown
+       interface" case.  It's also unclear if raising an exception
+       here would be safe.
+
+       Other errors, such as ENODEV, could be more permanent and cause
+       a failure for any thread.
+
+       For simplicity, with all errors other than EIO, we set the
+       interface to UNAVAILABLE and don't try DEBUGREG.  If DEBUGREG
+       fails too, we'll also set the interface to UNAVAILABLE.  It's
+       unlikely that trying the DEBUGREG interface with this same thread
+       would work, for errors other than EIO.  This means that these
+       errors will cause hardware watchpoints and breakpoints to become
+       unavailable throughout a GDB session.  */
+
+    if (no_features || errno == EIO)
+      {
+	unsigned long wp;
+
+	if (ptrace (PTRACE_GET_DEBUGREG, ptid.lwp (), 0, &wp) != -1)
+	  {
+	    m_interface.emplace (DEBUGREG);
+	    return;
+	  }
+      }
+
+    if (errno != EIO)
+      warning (_("Error when detecting the debug register interface. "
+		 "Debug registers will be unavailable."));
+
+    m_interface.emplace (UNAVAILABLE);
+    return;
+  }
+
+private:
+
+  /* HWDEBUG represents the set of calls PPC_PTRACE_GETHWDBGINFO,
+     PPC_PTRACE_SETHWDEBUG and PPC_PTRACE_DELHWDEBUG.
+
+     DEBUGREG represents the set of calls PTRACE_SET_DEBUGREG and
+     PTRACE_GET_DEBUGREG.
+
+     UNAVAILABLE can indicate that the kernel doesn't support any of the
+     two sets of requests or that there was an error when we tried to
+     detect wich interface is available.  */
+
+  enum debug_reg_interface
+    {
+     UNAVAILABLE,
+     HWDEBUG,
+     DEBUGREG
+    };
+
+  /* The interface option.  Initialized if has_value () returns true.  */
+  gdb::optional<enum debug_reg_interface> m_interface;
+
+  /* The info returned by the kernel with PPC_PTRACE_GETHWDBGINFO.  Only
+     valid if we determined that the interface is HWDEBUG.  */
+  struct ppc_debug_info m_hwdebug_info;
+};
+
+/* Per-process information.  This includes the hardware watchpoints and
+   breakpoints that GDB requested to this target.  */
+
+struct ppc_linux_process_info
+{
+  /* The list of hardware watchpoints and breakpoints that GDB requested
+     for this process.
+
+     Only used when the interface is HWDEBUG.  */
+  std::list<struct ppc_hw_breakpoint> requested_hw_bps;
+
+  /* The watchpoint value that GDB requested for this process.
+
+     Only used when the interface is DEBUGREG.  */
+  gdb::optional<long> requested_wp_val;
+};
+
 struct ppc_linux_nat_target final : public linux_nat_target
 {
   /* Add our register access methods.  */
@@ -299,10 +513,6 @@ struct ppc_linux_nat_target final : public linux_nat_target
   int remove_mask_watchpoint (CORE_ADDR, CORE_ADDR, enum target_hw_bp_type)
     override;
 
-  bool stopped_by_watchpoint () override;
-
-  bool stopped_data_address (CORE_ADDR *) override;
-
   bool watchpoint_addr_within_range (CORE_ADDR, CORE_ADDR, int) override;
 
   bool can_accel_watchpoint_condition (CORE_ADDR, int, int, struct expression *)
@@ -319,7 +529,95 @@ struct ppc_linux_nat_target final : public linux_nat_target
     override;
 
   /* Override linux_nat_target low methods.  */
+  bool low_stopped_by_watchpoint () override;
+
+  bool low_stopped_data_address (CORE_ADDR *) override;
+
   void low_new_thread (struct lwp_info *lp) override;
+
+  void low_delete_thread (arch_lwp_info *) override;
+
+  void low_new_fork (struct lwp_info *, pid_t) override;
+
+  void low_new_clone (struct lwp_info *, pid_t) override;
+
+  void low_forget_process (pid_t pid) override;
+
+  void low_prepare_to_resume (struct lwp_info *) override;
+
+private:
+
+  void copy_thread_dreg_state (const ptid_t &parent_ptid,
+			       const ptid_t &child_ptid);
+
+  void mark_thread_stale (struct lwp_info *lp);
+
+  void mark_debug_registers_changed (pid_t pid);
+
+  void register_hw_breakpoint (pid_t pid,
+			       const struct ppc_hw_breakpoint &bp);
+
+  void clear_hw_breakpoint (pid_t pid,
+			    const struct ppc_hw_breakpoint &a);
+
+  void register_wp (pid_t pid, long wp_value);
+
+  void clear_wp (pid_t pid);
+
+  bool can_use_watchpoint_cond_accel (void);
+
+  void calculate_dvc (CORE_ADDR addr, int len,
+		      CORE_ADDR data_value,
+		      uint32_t *condition_mode,
+		      uint64_t *condition_value);
+
+  int check_condition (CORE_ADDR watch_addr,
+		       struct expression *cond,
+		       CORE_ADDR *data_value, int *len);
+
+  int num_memory_accesses (const std::vector<value_ref_ptr> &chain);
+
+  int get_trigger_type (enum target_hw_bp_type type);
+
+  void create_watchpoint_request (struct ppc_hw_breakpoint *p,
+				  CORE_ADDR addr,
+				  int len,
+				  enum target_hw_bp_type type,
+				  struct expression *cond,
+				  int insert);
+
+  bool hwdebug_point_cmp (const struct ppc_hw_breakpoint &a,
+			  const struct ppc_hw_breakpoint &b);
+
+  void init_arch_lwp_info (struct lwp_info *lp);
+
+  arch_lwp_info *get_arch_lwp_info (struct lwp_info *lp);
+
+  /* The ptrace interface we'll use to install hardware watchpoints and
+     breakpoints (debug registers).  */
+  ppc_linux_dreg_interface m_dreg_interface;
+
+  /* A map from pids to structs containing info specific to each
+     process.  */
+  std::unordered_map<pid_t, ppc_linux_process_info> m_process_info;
+
+  /* Callable object to hash ptids by their lwp number.  */
+  struct ptid_hash
+  {
+    std::size_t operator() (const ptid_t &ptid) const
+    {
+      return std::hash<long>{} (ptid.lwp ());
+    }
+  };
+
+  /* A map from ptid_t objects to a list of pairs of slots and hardware
+     breakpoint objects.  This keeps track of which hardware breakpoints
+     and watchpoints were last installed in each slot of each thread.
+
+     Only used when the interface is HWDEBUG.  */
+  std::unordered_map <ptid_t,
+		      std::list<std::pair<long, ppc_hw_breakpoint>>,
+		      ptid_hash> m_installed_hw_bps;
 };
 
 static ppc_linux_nat_target the_ppc_linux_nat_target;
@@ -1719,101 +2017,50 @@ ppc_linux_nat_target::read_description ()
   return ppc_linux_match_description (features);
 }
 
-/* The cached DABR value, to install in new threads.
-   This variable is used when the PowerPC HWDEBUG ptrace
-   interface is not available.  */
-static long saved_dabr_value;
+/* Routines for installing hardware watchpoints and breakpoints.  When
+   GDB requests a hardware watchpoint or breakpoint to be installed, we
+   register the request for the pid of inferior_ptid in a map with one
+   entry per process.  We then issue a stop request to all the threads of
+   this process, and mark a per-thread flag indicating that their debug
+   registers should be updated.  Right before they are next resumed, we
+   remove all previously installed debug registers and install all the
+   ones GDB requested.  We then update a map with one entry per thread
+   that keeps track of what debug registers were last installed in each
+   thread.
 
-/* Global structure that will store information about the available
-   features provided by the PowerPC HWDEBUG ptrace interface.  */
-static struct ppc_debug_info hwdebug_info;
+   We use this second map to remove installed registers before installing
+   the ones requested by GDB, and to copy the debug register state after
+   a thread clones or forks, since depending on the kernel configuration,
+   debug registers can be inherited.  */
 
-/* Global variable that holds the maximum number of slots that the
-   kernel will use.  This is only used when PowerPC HWDEBUG ptrace interface
-   is available.  */
-static size_t max_slots_number = 0;
-
-struct hw_break_tuple
-{
-  long slot;
-  struct ppc_hw_breakpoint *hw_break;
-};
-
-/* This is an internal vector created to store information about *points
-   inserted for each thread.  This is used when PowerPC HWDEBUG ptrace
-   interface is available.  */
-struct thread_points
-  {
-    /* The TID to which this *point relates.  */
-    int tid;
-    /* Information about the *point, such as its address, type, etc.
-
-       Each element inside this vector corresponds to a hardware
-       breakpoint or watchpoint in the thread represented by TID.  The maximum
-       size of these vector is MAX_SLOTS_NUMBER.  If the hw_break element of
-       the tuple is NULL, then the position in the vector is free.  */
-    struct hw_break_tuple *hw_breaks;
-  };
-
-static std::vector<thread_points *> ppc_threads;
-
-/* The version of the PowerPC HWDEBUG kernel interface that we will use, if
-   available.  */
-#define PPC_DEBUG_CURRENT_VERSION 1
-
-/* Returns non-zero if we support the PowerPC HWDEBUG ptrace interface.  */
-static int
-have_ptrace_hwdebug_interface (void)
-{
-  static int have_ptrace_hwdebug_interface = -1;
-
-  if (have_ptrace_hwdebug_interface == -1)
-    {
-      int tid;
-
-      tid = inferior_ptid.lwp ();
-      if (tid == 0)
-	tid = inferior_ptid.pid ();
-
-      /* Check for kernel support for PowerPC HWDEBUG ptrace interface.  */
-      if (ptrace (PPC_PTRACE_GETHWDBGINFO, tid, 0, &hwdebug_info) >= 0)
-	{
-	  /* Check whether PowerPC HWDEBUG ptrace interface is functional and
-	     provides any supported feature.  */
-	  if (hwdebug_info.features != 0)
-	    {
-	      have_ptrace_hwdebug_interface = 1;
-	      max_slots_number = hwdebug_info.num_instruction_bps
-	        + hwdebug_info.num_data_bps
-	        + hwdebug_info.num_condition_regs;
-	      return have_ptrace_hwdebug_interface;
-	    }
-	}
-      /* Old school interface and no PowerPC HWDEBUG ptrace support.  */
-      have_ptrace_hwdebug_interface = 0;
-      memset (&hwdebug_info, 0, sizeof (struct ppc_debug_info));
-    }
-
-  return have_ptrace_hwdebug_interface;
-}
+/* Check if we support and have enough resources to install a hardware
+   watchpoint or breakpoint.  See the description in target.h.  */
 
 int
-ppc_linux_nat_target::can_use_hw_breakpoint (enum bptype type, int cnt, int ot)
+ppc_linux_nat_target::can_use_hw_breakpoint (enum bptype type, int cnt,
+					     int ot)
 {
   int total_hw_wp, total_hw_bp;
 
-  if (have_ptrace_hwdebug_interface ())
+  m_dreg_interface.detect (inferior_ptid);
+
+  if (m_dreg_interface.unavailable_p ())
+    return 0;
+
+  if (m_dreg_interface.hwdebug_p ())
     {
       /* When PowerPC HWDEBUG ptrace interface is available, the number of
 	 available hardware watchpoints and breakpoints is stored at the
 	 hwdebug_info struct.  */
-      total_hw_bp = hwdebug_info.num_instruction_bps;
-      total_hw_wp = hwdebug_info.num_data_bps;
+      total_hw_bp = m_dreg_interface.hwdebug_info ().num_instruction_bps;
+      total_hw_wp = m_dreg_interface.hwdebug_info ().num_data_bps;
     }
   else
     {
-      /* When we do not have PowerPC HWDEBUG ptrace interface, we should
-	 consider having 1 hardware watchpoint and no hardware breakpoints.  */
+      gdb_assert (m_dreg_interface.debugreg_p ());
+
+      /* With the DEBUGREG ptrace interface, we should consider having 1
+	 hardware watchpoint and no hardware breakpoints.  */
       total_hw_bp = 0;
       total_hw_wp = 1;
     }
@@ -1821,38 +2068,27 @@ ppc_linux_nat_target::can_use_hw_breakpoint (enum bptype type, int cnt, int ot)
   if (type == bp_hardware_watchpoint || type == bp_read_watchpoint
       || type == bp_access_watchpoint || type == bp_watchpoint)
     {
-      if (cnt + ot > total_hw_wp)
+      if (total_hw_wp == 0)
+	return 0;
+      else if (cnt + ot > total_hw_wp)
 	return -1;
+      else
+	return 1;
     }
   else if (type == bp_hardware_breakpoint)
     {
       if (total_hw_bp == 0)
-	{
-	  /* No hardware breakpoint support. */
-	  return 0;
-	}
-      if (cnt > total_hw_bp)
-	return -1;
-    }
-
-  if (!have_ptrace_hwdebug_interface ())
-    {
-      int tid;
-      ptid_t ptid = inferior_ptid;
-
-      /* We need to know whether ptrace supports PTRACE_SET_DEBUGREG
-	 and whether the target has DABR.  If either answer is no, the
-	 ptrace call will return -1.  Fail in that case.  */
-      tid = ptid.lwp ();
-      if (tid == 0)
-	tid = ptid.pid ();
-
-      if (ptrace (PTRACE_SET_DEBUGREG, tid, 0, 0) == -1)
 	return 0;
+      else if (cnt > total_hw_bp)
+	return -1;
+      else
+	return 1;
     }
 
-  return 1;
+  return 0;
 }
+
+/* Returns 1 if we can watch LEN bytes at address ADDR, 0 otherwise.  */
 
 int
 ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
@@ -1861,13 +2097,21 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
   if (len <= 0)
     return 0;
 
+  m_dreg_interface.detect (inferior_ptid);
+
+  if (m_dreg_interface.unavailable_p ())
+    return 0;
+
   /* The PowerPC HWDEBUG ptrace interface tells if there are alignment
      restrictions for watchpoints in the processors.  In that case, we use that
      information to determine the hardcoded watchable region for
      watchpoints.  */
-  if (have_ptrace_hwdebug_interface ())
+  if (m_dreg_interface.hwdebug_p ())
     {
       int region_size;
+      const struct ppc_debug_info &hwdebug_info = (m_dreg_interface
+						   .hwdebug_info ());
+
       /* Embedded DAC-based processors, like the PowerPC 440 have ranged
 	 watchpoints and can watch any access within an arbitrary memory
 	 region. This is useful to watch arrays and structs, for instance.  It
@@ -1894,121 +2138,32 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
      ptrace interface, DAC-based processors (i.e., embedded processors) will
      use addresses aligned to 4-bytes due to the way the read/write flags are
      passed in the old ptrace interface.  */
-  else if (((linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
+  else
+    {
+      gdb_assert (m_dreg_interface.debugreg_p ());
+
+      if (((linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
 	   && (addr + len) > (addr & ~3) + 4)
-	   || (addr + len) > (addr & ~7) + 8)
-    return 0;
+	  || (addr + len) > (addr & ~7) + 8)
+	return 0;
+    }
 
   return 1;
 }
 
-/* This function compares two ppc_hw_breakpoint structs field-by-field.  */
-static int
-hwdebug_point_cmp (struct ppc_hw_breakpoint *a, struct ppc_hw_breakpoint *b)
+/* This function compares two ppc_hw_breakpoint structs
+   field-by-field.  */
+
+bool
+ppc_linux_nat_target::hwdebug_point_cmp (const struct ppc_hw_breakpoint &a,
+					 const struct ppc_hw_breakpoint &b)
 {
-  return (a->trigger_type == b->trigger_type
-	  && a->addr_mode == b->addr_mode
-	  && a->condition_mode == b->condition_mode
-	  && a->addr == b->addr
-	  && a->addr2 == b->addr2
-	  && a->condition_value == b->condition_value);
-}
-
-/* This function can be used to retrieve a thread_points by the TID of the
-   related process/thread.  If nothing has been found, and ALLOC_NEW is 0,
-   it returns NULL.  If ALLOC_NEW is non-zero, a new thread_points for the
-   provided TID will be created and returned.  */
-static struct thread_points *
-hwdebug_find_thread_points_by_tid (int tid, int alloc_new)
-{
-  for (thread_points *t : ppc_threads)
-    {
-      if (t->tid == tid)
-	return t;
-    }
-
-  struct thread_points *t = NULL;
-
-  /* Do we need to allocate a new point_item
-     if the wanted one does not exist?  */
-  if (alloc_new)
-    {
-      t = XNEW (struct thread_points);
-      t->hw_breaks = XCNEWVEC (struct hw_break_tuple, max_slots_number);
-      t->tid = tid;
-      ppc_threads.push_back (t);
-    }
-
-  return t;
-}
-
-/* This function is a generic wrapper that is responsible for inserting a
-   *point (i.e., calling `ptrace' in order to issue the request to the
-   kernel) and registering it internally in GDB.  */
-static void
-hwdebug_insert_point (struct ppc_hw_breakpoint *b, int tid)
-{
-  int i;
-  long slot;
-  gdb::unique_xmalloc_ptr<ppc_hw_breakpoint> p (XDUP (ppc_hw_breakpoint, b));
-  struct hw_break_tuple *hw_breaks;
-  struct thread_points *t;
-
-  errno = 0;
-  slot = ptrace (PPC_PTRACE_SETHWDEBUG, tid, 0, p.get ());
-  if (slot < 0)
-    perror_with_name (_("Unexpected error setting breakpoint or watchpoint"));
-
-  /* Everything went fine, so we have to register this *point.  */
-  t = hwdebug_find_thread_points_by_tid (tid, 1);
-  gdb_assert (t != NULL);
-  hw_breaks = t->hw_breaks;
-
-  /* Find a free element in the hw_breaks vector.  */
-  for (i = 0; i < max_slots_number; i++)
-    {
-      if (hw_breaks[i].hw_break == NULL)
-	{
-	  hw_breaks[i].slot = slot;
-	  hw_breaks[i].hw_break = p.release ();
-	  break;
-	}
-    }
-
-  gdb_assert (i != max_slots_number);
-}
-
-/* This function is a generic wrapper that is responsible for removing a
-   *point (i.e., calling `ptrace' in order to issue the request to the
-   kernel), and unregistering it internally at GDB.  */
-static void
-hwdebug_remove_point (struct ppc_hw_breakpoint *b, int tid)
-{
-  int i;
-  struct hw_break_tuple *hw_breaks;
-  struct thread_points *t;
-
-  t = hwdebug_find_thread_points_by_tid (tid, 0);
-  gdb_assert (t != NULL);
-  hw_breaks = t->hw_breaks;
-
-  for (i = 0; i < max_slots_number; i++)
-    if (hw_breaks[i].hw_break && hwdebug_point_cmp (hw_breaks[i].hw_break, b))
-      break;
-
-  gdb_assert (i != max_slots_number);
-
-  /* We have to ignore ENOENT errors because the kernel implements hardware
-     breakpoints/watchpoints as "one-shot", that is, they are automatically
-     deleted when hit.  */
-  errno = 0;
-  if (ptrace (PPC_PTRACE_DELHWDEBUG, tid, 0, hw_breaks[i].slot) < 0)
-    if (errno != ENOENT)
-      perror_with_name (_("Unexpected error deleting "
-			  "breakpoint or watchpoint"));
-
-  xfree (hw_breaks[i].hw_break);
-  hw_breaks[i].hw_break = NULL;
+  return (a.trigger_type == b.trigger_type
+	  && a.addr_mode == b.addr_mode
+	  && a.condition_mode == b.condition_mode
+	  && a.addr == b.addr
+	  && a.addr2 == b.addr2
+	  && a.condition_value == b.condition_value);
 }
 
 /* Return the number of registers needed for a ranged breakpoint.  */
@@ -2016,22 +2171,28 @@ hwdebug_remove_point (struct ppc_hw_breakpoint *b, int tid)
 int
 ppc_linux_nat_target::ranged_break_num_registers ()
 {
-  return ((have_ptrace_hwdebug_interface ()
-	   && hwdebug_info.features & PPC_DEBUG_FEATURE_INSN_BP_RANGE)?
+  m_dreg_interface.detect (inferior_ptid);
+
+  return ((m_dreg_interface.hwdebug_p ()
+	   && (m_dreg_interface.hwdebug_info ().features
+	       & PPC_DEBUG_FEATURE_INSN_BP_RANGE))?
 	  2 : -1);
 }
 
-/* Insert the hardware breakpoint described by BP_TGT.  Returns 0 for
-   success, 1 if hardware breakpoints are not supported or -1 for failure.  */
+/* Register the hardware breakpoint described by BP_TGT, to be inserted
+   when the threads of inferior_ptid are resumed.  Returns 0 for success,
+   or -1 if the HWDEBUG interface that we need for hardware breakpoints
+   is not available.  */
 
 int
 ppc_linux_nat_target::insert_hw_breakpoint (struct gdbarch *gdbarch,
 					    struct bp_target_info *bp_tgt)
 {
-  struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
 
-  if (!have_ptrace_hwdebug_interface ())
+  m_dreg_interface.detect (inferior_ptid);
+
+  if (!m_dreg_interface.hwdebug_p ())
     return -1;
 
   p.version = PPC_DEBUG_CURRENT_VERSION;
@@ -2054,20 +2215,25 @@ ppc_linux_nat_target::insert_hw_breakpoint (struct gdbarch *gdbarch,
       p.addr2 = 0;
     }
 
-  ALL_LWPS (lp)
-    hwdebug_insert_point (&p, lp->ptid.lwp ());
+  register_hw_breakpoint (inferior_ptid.pid (), p);
 
   return 0;
 }
+
+/* Clear a registration for the hardware breakpoint given by type BP_TGT.
+   It will be removed from the threads of inferior_ptid when they are
+   next resumed.  Returns 0 for success, or -1 if the HWDEBUG interface
+   that we need for hardware breakpoints is not available.  */
 
 int
 ppc_linux_nat_target::remove_hw_breakpoint (struct gdbarch *gdbarch,
 					    struct bp_target_info *bp_tgt)
 {
-  struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
 
-  if (!have_ptrace_hwdebug_interface ())
+  m_dreg_interface.detect (inferior_ptid);
+
+  if (!m_dreg_interface.hwdebug_p ())
     return -1;
 
   p.version = PPC_DEBUG_CURRENT_VERSION;
@@ -2090,14 +2256,16 @@ ppc_linux_nat_target::remove_hw_breakpoint (struct gdbarch *gdbarch,
       p.addr2 = 0;
     }
 
-  ALL_LWPS (lp)
-    hwdebug_remove_point (&p, lp->ptid.lwp ());
+  clear_hw_breakpoint (inferior_ptid.pid (), p);
 
   return 0;
 }
 
-static int
-get_trigger_type (enum target_hw_bp_type type)
+/* Return the trigger value to set in a ppc_hw_breakpoint object for a
+   given hardware watchpoint TYPE.  We assume type is not hw_execute.  */
+
+int
+ppc_linux_nat_target::get_trigger_type (enum target_hw_bp_type type)
 {
   int t;
 
@@ -2111,19 +2279,18 @@ get_trigger_type (enum target_hw_bp_type type)
   return t;
 }
 
-/* Insert a new masked watchpoint at ADDR using the mask MASK.
-   RW may be hw_read for a read watchpoint, hw_write for a write watchpoint
-   or hw_access for an access watchpoint.  Returns 0 on success and throws
-   an error on failure.  */
+/* Register a new masked watchpoint at ADDR using the mask MASK, to be
+   inserted when the threads of inferior_ptid are resumed.  RW may be
+   hw_read for a read watchpoint, hw_write for a write watchpoint or
+   hw_access for an access watchpoint.  */
 
 int
 ppc_linux_nat_target::insert_mask_watchpoint (CORE_ADDR addr,  CORE_ADDR mask,
 					      target_hw_bp_type rw)
 {
-  struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
 
-  gdb_assert (have_ptrace_hwdebug_interface ());
+  gdb_assert (m_dreg_interface.hwdebug_p ());
 
   p.version = PPC_DEBUG_CURRENT_VERSION;
   p.trigger_type = get_trigger_type (rw);
@@ -2133,25 +2300,23 @@ ppc_linux_nat_target::insert_mask_watchpoint (CORE_ADDR addr,  CORE_ADDR mask,
   p.addr2 = mask;
   p.condition_value = 0;
 
-  ALL_LWPS (lp)
-    hwdebug_insert_point (&p, lp->ptid.lwp ());
+  register_hw_breakpoint (inferior_ptid.pid (), p);
 
   return 0;
 }
 
-/* Remove a masked watchpoint at ADDR with the mask MASK.
-   RW may be hw_read for a read watchpoint, hw_write for a write watchpoint
-   or hw_access for an access watchpoint.  Returns 0 on success and throws
-   an error on failure.  */
+/* Clear a registration for a masked watchpoint at ADDR with the mask
+   MASK.  It will be removed from the threads of inferior_ptid when they
+   are next resumed.  RW may be hw_read for a read watchpoint, hw_write
+   for a write watchpoint or hw_access for an access watchpoint.  */
 
 int
 ppc_linux_nat_target::remove_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask,
 					      target_hw_bp_type rw)
 {
-  struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
 
-  gdb_assert (have_ptrace_hwdebug_interface ());
+  gdb_assert (m_dreg_interface.hwdebug_p ());
 
   p.version = PPC_DEBUG_CURRENT_VERSION;
   p.trigger_type = get_trigger_type (rw);
@@ -2161,39 +2326,42 @@ ppc_linux_nat_target::remove_mask_watchpoint (CORE_ADDR addr, CORE_ADDR mask,
   p.addr2 = mask;
   p.condition_value = 0;
 
-  ALL_LWPS (lp)
-    hwdebug_remove_point (&p, lp->ptid.lwp ());
+  clear_hw_breakpoint (inferior_ptid.pid (), p);
 
   return 0;
 }
 
-/* Check whether we have at least one free DVC register.  */
-static int
-can_use_watchpoint_cond_accel (void)
+/* Check whether we have at least one free DVC register for the threads
+   of the pid of inferior_ptid.  */
+
+bool
+ppc_linux_nat_target::can_use_watchpoint_cond_accel (void)
 {
-  struct thread_points *p;
-  int tid = inferior_ptid.lwp ();
-  int cnt = hwdebug_info.num_condition_regs, i;
+  m_dreg_interface.detect (inferior_ptid);
 
-  if (!have_ptrace_hwdebug_interface () || cnt == 0)
-    return 0;
+  if (!m_dreg_interface.hwdebug_p ())
+    return false;
 
-  p = hwdebug_find_thread_points_by_tid (tid, 0);
+  int cnt = m_dreg_interface.hwdebug_info ().num_condition_regs;
 
-  if (p)
-    {
-      for (i = 0; i < max_slots_number; i++)
-	if (p->hw_breaks[i].hw_break != NULL
-	    && (p->hw_breaks[i].hw_break->condition_mode
-		!= PPC_BREAKPOINT_CONDITION_NONE))
-	  cnt--;
+  if (cnt == 0)
+    return false;
 
-      /* There are no available slots now.  */
-      if (cnt <= 0)
-	return 0;
-    }
+  auto process_it = m_process_info.find (inferior_ptid.pid ());
 
-  return 1;
+  /* No breakpoints or watchpoints have been requested for this process,
+     we have at least one free DVC register.  */
+  if (process_it == m_process_info.end ())
+    return true;
+
+  for (const ppc_hw_breakpoint &bp : process_it->second.requested_hw_bps)
+    if (bp.condition_mode != PPC_BREAKPOINT_CONDITION_NONE)
+      cnt--;
+
+  if (cnt <= 0)
+    return false;
+
+  return true;
 }
 
 /* Calculate the enable bits and the contents of the Data Value Compare
@@ -2204,10 +2372,16 @@ can_use_watchpoint_cond_accel (void)
    On exit, CONDITION_MODE will hold the enable bits for the DVC, and
    CONDITION_VALUE will hold the value which should be put in the
    DVC register.  */
-static void
-calculate_dvc (CORE_ADDR addr, int len, CORE_ADDR data_value,
-	       uint32_t *condition_mode, uint64_t *condition_value)
+
+void
+ppc_linux_nat_target::calculate_dvc (CORE_ADDR addr, int len,
+				     CORE_ADDR data_value,
+				     uint32_t *condition_mode,
+				     uint64_t *condition_value)
 {
+  const struct ppc_debug_info &hwdebug_info = (m_dreg_interface.
+					       hwdebug_info ());
+
   int i, num_byte_enable, align_offset, num_bytes_off_dvc,
       rightmost_enabled_byte;
   CORE_ADDR addr_end_data, addr_end_dvc;
@@ -2246,8 +2420,10 @@ calculate_dvc (CORE_ADDR addr, int len, CORE_ADDR data_value,
    Returns -1 if there's any register access involved, or if there are
    other kinds of values which are not acceptable in a condition
    expression (e.g., lval_computed or lval_internalvar).  */
-static int
-num_memory_accesses (const std::vector<value_ref_ptr> &chain)
+
+int
+ppc_linux_nat_target::num_memory_accesses (const std::vector<value_ref_ptr>
+					   &chain)
 {
   int found_memory_cnt = 0;
 
@@ -2295,9 +2471,11 @@ num_memory_accesses (const std::vector<value_ref_ptr> &chain)
    If the function returns 1, DATA_VALUE will contain the constant against
    which the watch value should be compared and LEN will contain the size
    of the constant.  */
-static int
-check_condition (CORE_ADDR watch_addr, struct expression *cond,
-		 CORE_ADDR *data_value, int *len)
+
+int
+ppc_linux_nat_target::check_condition (CORE_ADDR watch_addr,
+				       struct expression *cond,
+				       CORE_ADDR *data_value, int *len)
 {
   int pc = 1, num_accesses_left, num_accesses_right;
   struct value *left_val, *right_val;
@@ -2344,18 +2522,21 @@ check_condition (CORE_ADDR watch_addr, struct expression *cond,
   return 1;
 }
 
-/* Return non-zero if the target is capable of using hardware to evaluate
-   the condition expression, thus only triggering the watchpoint when it is
+/* Return true if the target is capable of using hardware to evaluate the
+   condition expression, thus only triggering the watchpoint when it is
    true.  */
+
 bool
-ppc_linux_nat_target::can_accel_watchpoint_condition (CORE_ADDR addr, int len,
-						      int rw,
+ppc_linux_nat_target::can_accel_watchpoint_condition (CORE_ADDR addr,
+						      int len, int rw,
 						      struct expression *cond)
 {
   CORE_ADDR data_value;
 
-  return (have_ptrace_hwdebug_interface ()
-	  && hwdebug_info.num_condition_regs > 0
+  m_dreg_interface.detect (inferior_ptid);
+
+  return (m_dreg_interface.hwdebug_p ()
+	  && (m_dreg_interface.hwdebug_info ().num_condition_regs > 0)
 	  && check_condition (addr, cond, &data_value, &len));
 }
 
@@ -2364,11 +2545,16 @@ ppc_linux_nat_target::can_accel_watchpoint_condition (CORE_ADDR addr, int len,
    evaluated by hardware.  INSERT tells if we are creating a request for
    inserting or removing the watchpoint.  */
 
-static void
-create_watchpoint_request (struct ppc_hw_breakpoint *p, CORE_ADDR addr,
-			   int len, enum target_hw_bp_type type,
-			   struct expression *cond, int insert)
+void
+ppc_linux_nat_target::create_watchpoint_request (struct ppc_hw_breakpoint *p,
+						 CORE_ADDR addr, int len,
+						 enum target_hw_bp_type type,
+						 struct expression *cond,
+						 int insert)
 {
+  const struct ppc_debug_info &hwdebug_info = (m_dreg_interface
+					       .hwdebug_info ());
+
   if (len == 1
       || !(hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE))
     {
@@ -2410,28 +2596,33 @@ create_watchpoint_request (struct ppc_hw_breakpoint *p, CORE_ADDR addr,
   p->addr = (uint64_t) addr;
 }
 
+/* Register a watchpoint, to be inserted when the threads of the group of
+   inferior_ptid are next resumed.  Returns 0 on success, and -1 if there
+   is no ptrace interface available to install the watchpoint.  */
+
 int
 ppc_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
 					 enum target_hw_bp_type type,
 					 struct expression *cond)
 {
-  struct lwp_info *lp;
-  int ret = -1;
+  m_dreg_interface.detect (inferior_ptid);
 
-  if (have_ptrace_hwdebug_interface ())
+  if (m_dreg_interface.unavailable_p ())
+    return -1;
+
+  if (m_dreg_interface.hwdebug_p ())
     {
       struct ppc_hw_breakpoint p;
 
       create_watchpoint_request (&p, addr, len, type, cond, 1);
 
-      ALL_LWPS (lp)
-	hwdebug_insert_point (&p, lp->ptid.lwp ());
-
-      ret = 0;
+      register_hw_breakpoint (inferior_ptid.pid (), p);
     }
   else
     {
-      long dabr_value;
+      gdb_assert (m_dreg_interface.debugreg_p ());
+
+      long wp_value;
       long read_mode, write_mode;
 
       if (linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
@@ -2449,144 +2640,300 @@ ppc_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
 	  write_mode = 6;
 	}
 
-      dabr_value = addr & ~(read_mode | write_mode);
+      wp_value = addr & ~(read_mode | write_mode);
       switch (type)
 	{
 	  case hw_read:
 	    /* Set read and translate bits.  */
-	    dabr_value |= read_mode;
+	    wp_value |= read_mode;
 	    break;
 	  case hw_write:
 	    /* Set write and translate bits.  */
-	    dabr_value |= write_mode;
+	    wp_value |= write_mode;
 	    break;
 	  case hw_access:
 	    /* Set read, write and translate bits.  */
-	    dabr_value |= read_mode | write_mode;
+	    wp_value |= read_mode | write_mode;
 	    break;
 	}
 
-      saved_dabr_value = dabr_value;
-
-      ALL_LWPS (lp)
-	if (ptrace (PTRACE_SET_DEBUGREG, lp->ptid.lwp (), 0,
-		    saved_dabr_value) < 0)
-	  return -1;
-
-      ret = 0;
+      register_wp (inferior_ptid.pid (), wp_value);
     }
 
-  return ret;
+  return 0;
 }
+
+/* Clear a registration for a hardware watchpoint.  It will be removed
+   from the threads of the group of inferior_ptid when they are next
+   resumed.  */
 
 int
 ppc_linux_nat_target::remove_watchpoint (CORE_ADDR addr, int len,
 					 enum target_hw_bp_type type,
 					 struct expression *cond)
 {
-  struct lwp_info *lp;
-  int ret = -1;
+  gdb_assert (!m_dreg_interface.unavailable_p ());
 
-  if (have_ptrace_hwdebug_interface ())
+  if (m_dreg_interface.hwdebug_p ())
     {
       struct ppc_hw_breakpoint p;
 
       create_watchpoint_request (&p, addr, len, type, cond, 0);
 
-      ALL_LWPS (lp)
-	hwdebug_remove_point (&p, lp->ptid.lwp ());
-
-      ret = 0;
+      clear_hw_breakpoint (inferior_ptid.pid (), p);
     }
   else
     {
-      saved_dabr_value = 0;
-      ALL_LWPS (lp)
-	if (ptrace (PTRACE_SET_DEBUGREG, lp->ptid.lwp (), 0,
-		    saved_dabr_value) < 0)
-	  return -1;
+      gdb_assert (m_dreg_interface.debugreg_p ());
 
-      ret = 0;
+      clear_wp (inferior_ptid.pid ());
     }
 
-  return ret;
+  return 0;
 }
+
+/* Clean up the per-process info associated with PID.  When using the
+   HWDEBUG interface, we also erase the per-thread state of installed
+   debug registers for all the threads that belong to the group of PID.
+
+   Usually the thread state is cleaned up by low_delete_thread.  We also
+   do it here because low_new_thread is not called for the initial LWP,
+   so low_delete_thread won't be able to clean up this state.  */
+
+void
+ppc_linux_nat_target::low_forget_process (pid_t pid)
+{
+  if ((!m_dreg_interface.detected_p ())
+      || (m_dreg_interface.unavailable_p ()))
+    return;
+
+  ptid_t pid_ptid (pid, 0, 0);
+
+  m_process_info.erase (pid);
+
+  if (m_dreg_interface.hwdebug_p ())
+    {
+      for (auto it = m_installed_hw_bps.begin ();
+	   it != m_installed_hw_bps.end ();)
+	{
+	  if (it->first.matches (pid_ptid))
+	    it = m_installed_hw_bps.erase (it);
+	  else
+	    it++;
+	}
+    }
+}
+
+/* Copy the per-process state associated with the pid of PARENT to the
+   sate of CHILD_PID.  GDB expects that a forked process will have the
+   same hardware breakpoints and watchpoints as the parent.
+
+   If we're using the HWDEBUG interface, also copy the thread debug
+   register state for the ptid of PARENT to the state for CHILD_PID.
+
+   Like for clone events, we assume the kernel will copy the debug
+   registers from the parent thread to the child. The
+   low_prepare_to_resume function is made to work even if it doesn't.
+
+   We copy the thread state here and not in low_new_thread since we don't
+   have the pid of the parent in low_new_thread.  Even if we did,
+   low_new_thread might not be called immediately after the fork event is
+   detected.  For instance, with the checkpointing system (see
+   linux-fork.c), the thread won't be added until GDB decides to switch
+   to a new checkpointed process.  At that point, the debug register
+   state of the parent thread is unlikely to correspond to the state it
+   had at the point when it forked.  */
+
+void
+ppc_linux_nat_target::low_new_fork (struct lwp_info *parent,
+				    pid_t child_pid)
+{
+  if ((!m_dreg_interface.detected_p ())
+      || (m_dreg_interface.unavailable_p ()))
+    return;
+
+  auto process_it = m_process_info.find (parent->ptid.pid ());
+
+  if (process_it != m_process_info.end ())
+    m_process_info[child_pid] = m_process_info[parent->ptid.pid ()];
+
+  if (m_dreg_interface.hwdebug_p ())
+    {
+      ptid_t child_ptid (child_pid, child_pid, 0);
+
+      copy_thread_dreg_state (parent->ptid, child_ptid);
+    }
+}
+
+/* Copy the thread debug register state from the PARENT thread to the the
+   state for CHILD_LWP, if we're using the HWDEBUG interface.  We assume
+   the kernel copies the debug registers from one thread to another after
+   a clone event.  The low_prepare_to_resume function is made to work
+   even if it doesn't.  */
+
+void
+ppc_linux_nat_target::low_new_clone (struct lwp_info *parent,
+				     pid_t child_lwp)
+{
+  if ((!m_dreg_interface.detected_p ())
+      || (m_dreg_interface.unavailable_p ()))
+    return;
+
+  if (m_dreg_interface.hwdebug_p ())
+    {
+      ptid_t child_ptid (parent->ptid.pid (), child_lwp, 0);
+
+      copy_thread_dreg_state (parent->ptid, child_ptid);
+    }
+}
+
+/* Initialize the arch-specific thread state for LP so that it contains
+   the ptid for lp, so that we can use it in low_delete_thread.  Mark the
+   new thread LP as stale so that we update its debug registers before
+   resuming it.  This is not called for the initial thread.  */
 
 void
 ppc_linux_nat_target::low_new_thread (struct lwp_info *lp)
 {
-  int tid = lp->ptid.lwp ();
+  init_arch_lwp_info (lp);
 
-  if (have_ptrace_hwdebug_interface ())
-    {
-      int i;
-      struct thread_points *p;
-      struct hw_break_tuple *hw_breaks;
-
-      if (ppc_threads.empty ())
-	return;
-
-      /* Get a list of breakpoints from any thread.  */
-      p = ppc_threads.back ();
-      hw_breaks = p->hw_breaks;
-
-      /* Copy that thread's breakpoints and watchpoints to the new thread.  */
-      for (i = 0; i < max_slots_number; i++)
-	if (hw_breaks[i].hw_break)
-	  {
-	    /* Older kernels did not make new threads inherit their parent
-	       thread's debug state, so we always clear the slot and replicate
-	       the debug state ourselves, ensuring compatibility with all
-	       kernels.  */
-
-	    /* The ppc debug resource accounting is done through "slots".
-	       Ask the kernel the deallocate this specific *point's slot.  */
-	    ptrace (PPC_PTRACE_DELHWDEBUG, tid, 0, hw_breaks[i].slot);
-
-	    hwdebug_insert_point (hw_breaks[i].hw_break, tid);
-	  }
-    }
-  else
-    ptrace (PTRACE_SET_DEBUGREG, tid, 0, saved_dabr_value);
+  mark_thread_stale (lp);
 }
 
-static void
-ppc_linux_thread_exit (struct thread_info *tp, int silent)
-{
-  int i;
-  int tid = tp->ptid.lwp ();
-  struct hw_break_tuple *hw_breaks;
-  struct thread_points *t = NULL;
+/* Delete the per-thread debug register stale flag.  */
 
-  if (!have_ptrace_hwdebug_interface ())
+void
+ppc_linux_nat_target::low_delete_thread (struct arch_lwp_info
+					 *lp_arch_info)
+{
+  if (lp_arch_info != NULL)
+    {
+      if (m_dreg_interface.detected_p ()
+	  && m_dreg_interface.hwdebug_p ())
+	m_installed_hw_bps.erase (lp_arch_info->lwp_ptid);
+
+      xfree (lp_arch_info);
+    }
+}
+
+/* Install or delete debug registers in thread LP so that it matches what
+   GDB requested before it is resumed.  */
+
+void
+ppc_linux_nat_target::low_prepare_to_resume (struct lwp_info *lp)
+{
+  if ((!m_dreg_interface.detected_p ())
+      || (m_dreg_interface.unavailable_p ()))
     return;
 
-  for (i = 0; i < ppc_threads.size (); i++)
+  /* We have to re-install or clear the debug registers if we set the
+     stale flag.
+
+     In addition, some kernels configurations can disable a hardware
+     watchpoint after it is hit.  Usually, GDB will remove and re-install
+     a hardware watchpoint when the thread stops if "breakpoint
+     always-inserted" is off, or to single-step a watchpoint.  But so
+     that we don't rely on this behavior, if we stop due to a hardware
+     breakpoint or watchpoint, we also refresh our debug registers.  */
+
+  arch_lwp_info *lp_arch_info = get_arch_lwp_info (lp);
+
+  bool stale_dregs = (lp->stop_reason == TARGET_STOPPED_BY_WATCHPOINT
+		      || lp->stop_reason == TARGET_STOPPED_BY_HW_BREAKPOINT
+		      || lp_arch_info->debug_regs_stale);
+
+  if (!stale_dregs)
+    return;
+
+  gdb_assert (lp->ptid.lwp_p ());
+
+  auto process_it = m_process_info.find (lp->ptid.pid ());
+
+  if (m_dreg_interface.hwdebug_p ())
     {
-      if (ppc_threads[i]->tid == tid)
+      /* First, delete any hardware watchpoint or breakpoint installed in
+	 the inferior and update the thread state.  */
+      auto installed_it = m_installed_hw_bps.find (lp->ptid);
+
+      if (installed_it != m_installed_hw_bps.end ())
 	{
-	  t = ppc_threads[i];
-	  break;
+	  auto &bp_list = installed_it->second;
+
+	  for (auto bp_it = bp_list.begin (); bp_it != bp_list.end ();)
+	    {
+	      /* We ignore ENOENT to account for various possible kernel
+		 behaviors, e.g. the kernel might or might not copy debug
+		 registers across forks and clones, and we always copy
+		 the debug register state when fork and clone events are
+		 detected.  */
+	      if (ptrace (PPC_PTRACE_DELHWDEBUG, lp->ptid.lwp (), 0,
+			  bp_it->first) == -1)
+		if (errno != ENOENT)
+		  perror_with_name (_("Error deleting hardware "
+				      "breakpoint or watchpoint"));
+
+	      /* We erase the entries one at a time after successfuly
+		 removing the corresponding slot form the thread so that
+		 if we throw an exception above in a future iteration the
+		 map remains consistent.  */
+	      bp_it = bp_list.erase (bp_it);
+	    }
+
+	  gdb_assert (bp_list.empty ());
+	}
+
+      /* Now we install all the requested hardware breakpoints and
+	 watchpoints and update the thread state.  */
+
+      if (process_it != m_process_info.end ())
+	{
+	  auto &bp_list = m_installed_hw_bps[lp->ptid];
+
+	  for (ppc_hw_breakpoint bp
+		 : process_it->second.requested_hw_bps)
+	    {
+	      long slot = ptrace (PPC_PTRACE_SETHWDEBUG, lp->ptid.lwp (),
+				  0, &bp);
+
+	      if (slot < 0)
+		perror_with_name (_("Error setting hardware "
+				    "breakpoint or watchpoint"));
+
+	      /* Keep track of which slots we installed in this
+		 thread.  */
+	      bp_list.emplace (bp_list.begin (), slot, bp);
+	    }
 	}
     }
+  else
+    {
+      gdb_assert (m_dreg_interface.debugreg_p ());
 
-  if (t == NULL)
-    return;
+      /* Passing 0 to PTRACE_SET_DEBUGREG will clear the
+	 watchpoint.  */
+      long wp = 0;
 
-  unordered_remove (ppc_threads, i);
+      /* GDB requested a watchpoint to be installed.  */
+      if (process_it != m_process_info.end ()
+	  && process_it->second.requested_wp_val.has_value ())
+	wp = *(process_it->second.requested_wp_val);
 
-  hw_breaks = t->hw_breaks;
+      long ret = ptrace (PTRACE_SET_DEBUGREG, lp->ptid.lwp (),
+			 0, wp);
 
-  for (i = 0; i < max_slots_number; i++)
-    if (hw_breaks[i].hw_break)
-      xfree (hw_breaks[i].hw_break);
+      if (ret == -1)
+	perror_with_name (_("Error setting hardware watchpoint"));
+    }
 
-  xfree (t->hw_breaks);
-  xfree (t);
+  lp_arch_info->debug_regs_stale = false;
 }
 
+/* Return true if INFERIOR_PTID is known to have been stopped by a
+   hardware watchpoint, false otherwise.  If true is returned, write the
+   address that the kernel reported as causing the SIGTRAP in ADDR_P.  */
+
 bool
-ppc_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
+ppc_linux_nat_target::low_stopped_data_address (CORE_ADDR *addr_p)
 {
   siginfo_t siginfo;
 
@@ -2597,38 +2944,45 @@ ppc_linux_nat_target::stopped_data_address (CORE_ADDR *addr_p)
       || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
     return false;
 
-  if (have_ptrace_hwdebug_interface ())
+  gdb_assert (!m_dreg_interface.unavailable_p ());
+
+  /* Check if this signal corresponds to a hardware breakpoint.  We only
+     need to check this if we're using the HWDEBUG interface, since the
+     DEBUGREG interface only allows setting one hardware watchpoint.  */
+  if (m_dreg_interface.hwdebug_p ())
     {
-      int i;
-      struct thread_points *t;
-      struct hw_break_tuple *hw_breaks;
-      /* The index (or slot) of the *point is passed in the si_errno field.  */
+      /* The index (or slot) of the *point is passed in the si_errno
+	 field.  Currently, this is only the case if the kernel was
+	 configured with CONFIG_PPC_ADV_DEBUG_REGS.  If not, we assume
+	 the kernel will set si_errno to a value that doesn't correspond
+	 to any real slot.  */
       int slot = siginfo.si_errno;
 
-      t = hwdebug_find_thread_points_by_tid (inferior_ptid.lwp (), 0);
+      auto installed_it = m_installed_hw_bps.find (inferior_ptid);
 
-      /* Find out if this *point is a hardware breakpoint.
-	 If so, we should return 0.  */
-      if (t)
-	{
-	  hw_breaks = t->hw_breaks;
-	  for (i = 0; i < max_slots_number; i++)
-	   if (hw_breaks[i].hw_break && hw_breaks[i].slot == slot
-	       && hw_breaks[i].hw_break->trigger_type
-		    == PPC_BREAKPOINT_TRIGGER_EXECUTE)
-	     return false;
-	}
+      /* We must have installed slots for the thread if it got a
+	 TRAP_HWBKPT signal.  */
+      gdb_assert (installed_it != m_installed_hw_bps.end ());
+
+      for (const auto & slot_bp_pair : installed_it->second)
+	if (slot_bp_pair.first == slot
+	    && (slot_bp_pair.second.trigger_type
+		== PPC_BREAKPOINT_TRIGGER_EXECUTE))
+	  return false;
     }
 
   *addr_p = (CORE_ADDR) (uintptr_t) siginfo.si_addr;
   return true;
 }
 
+/* Return true if INFERIOR_PTID is known to have been stopped by a
+   hardware watchpoint, false otherwise.  */
+
 bool
-ppc_linux_nat_target::stopped_by_watchpoint ()
+ppc_linux_nat_target::low_stopped_by_watchpoint ()
 {
   CORE_ADDR addr;
-  return stopped_data_address (&addr);
+  return low_stopped_data_address (&addr);
 }
 
 bool
@@ -2636,9 +2990,11 @@ ppc_linux_nat_target::watchpoint_addr_within_range (CORE_ADDR addr,
 						    CORE_ADDR start,
 						    int length)
 {
+  gdb_assert (!m_dreg_interface.unavailable_p ());
+
   int mask;
 
-  if (have_ptrace_hwdebug_interface ()
+  if (m_dreg_interface.hwdebug_p ()
       && linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
     return start <= addr && start + length >= addr;
   else if (linux_get_hwcap (current_top_target ()) & PPC_FEATURE_BOOKE)
@@ -2655,10 +3011,14 @@ ppc_linux_nat_target::watchpoint_addr_within_range (CORE_ADDR addr,
 /* Return the number of registers needed for a masked hardware watchpoint.  */
 
 int
-ppc_linux_nat_target::masked_watch_num_registers (CORE_ADDR addr, CORE_ADDR mask)
+ppc_linux_nat_target::masked_watch_num_registers (CORE_ADDR addr,
+						  CORE_ADDR mask)
 {
-  if (!have_ptrace_hwdebug_interface ()
-	   || (hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_MASK) == 0)
+  m_dreg_interface.detect (inferior_ptid);
+
+  if (!m_dreg_interface.hwdebug_p ()
+      || (m_dreg_interface.hwdebug_info ().features
+	  & PPC_DEBUG_FEATURE_DATA_BP_MASK) == 0)
     return -1;
   else if ((mask & 0xC0000000) != 0xC0000000)
     {
@@ -2671,13 +3031,181 @@ ppc_linux_nat_target::masked_watch_num_registers (CORE_ADDR addr, CORE_ADDR mask
     return 2;
 }
 
+/* Copy the per-thread debug register state, if any, from thread
+   PARENT_PTID to thread CHILD_PTID, if the debug register being used is
+   HWDEBUG.  */
+
+void
+ppc_linux_nat_target::copy_thread_dreg_state (const ptid_t &parent_ptid,
+					      const ptid_t &child_ptid)
+{
+  gdb_assert (m_dreg_interface.hwdebug_p ());
+
+  auto installed_it = m_installed_hw_bps.find (parent_ptid);
+
+  if (installed_it != m_installed_hw_bps.end ())
+    m_installed_hw_bps[child_ptid] = m_installed_hw_bps[parent_ptid];
+}
+
+/* Mark the debug register stale flag for the new thread, if we have
+   already detected which debug register interface we use.  */
+
+void
+ppc_linux_nat_target::mark_thread_stale (struct lwp_info *lp)
+{
+  if ((!m_dreg_interface.detected_p ())
+      || (m_dreg_interface.unavailable_p ()))
+    return;
+
+  arch_lwp_info *lp_arch_info = get_arch_lwp_info (lp);
+
+  lp_arch_info->debug_regs_stale = true;
+}
+
+/* Mark all the threads of the group of PID as stale with respect to
+   debug registers and issue a stop request to each such thread that
+   isn't already stopped.  */
+
+void
+ppc_linux_nat_target::mark_debug_registers_changed (pid_t pid)
+{
+  /* We do this in two passes to make sure all threads are marked even if
+     we get an exception when stopping one of them.  */
+
+  iterate_over_lwps (ptid_t (pid),
+		     [this] (struct lwp_info *lp) -> int {
+		       this->mark_thread_stale (lp);
+		       return 0;
+		     });
+
+  iterate_over_lwps (ptid_t (pid),
+		     [] (struct lwp_info *lp) -> int {
+		       if (!lwp_is_stopped (lp))
+			 linux_stop_lwp (lp);
+		       return 0;
+		     });
+}
+
+/* Register a hardware breakpoint or watchpoint BP for the pid PID, then
+   mark the stale flag for all threads of the group of PID, and issue a
+   stop request for them.  The breakpoint or watchpoint will be installed
+   the next time each thread is resumed.  Should only be used if the
+   debug register interface is HWDEBUG.  */
+
+void
+ppc_linux_nat_target::register_hw_breakpoint (pid_t pid,
+					      const struct
+					      ppc_hw_breakpoint &bp)
+{
+  gdb_assert (m_dreg_interface.hwdebug_p ());
+
+  m_process_info[pid].requested_hw_bps.push_back (bp);
+
+  mark_debug_registers_changed (pid);
+}
+
+/* Clear a registration for a hardware breakpoint or watchpoint BP for
+   the pid PID, then mark the stale flag for all threads of the group of
+   PID, and issue a stop request for them.  The breakpoint or watchpoint
+   will be removed the next time each thread is resumed.  Should only be
+   used if the debug register interface is HWDEBUG.  */
+
+void
+ppc_linux_nat_target::clear_hw_breakpoint (pid_t pid,
+					   const struct ppc_hw_breakpoint &bp)
+{
+  gdb_assert (m_dreg_interface.hwdebug_p ());
+
+  auto process_it = m_process_info.find (pid);
+
+  gdb_assert (process_it != m_process_info.end ());
+
+  auto bp_it = std::find_if (process_it->second.requested_hw_bps.begin (),
+			     process_it->second.requested_hw_bps.end (),
+			     [&bp, this]
+			     (const struct ppc_hw_breakpoint &curr)
+			     { return hwdebug_point_cmp (bp, curr); }
+			     );
+
+  /* If GDB is removing a watchpoint, it must have been inserted.  */
+  gdb_assert (bp_it != process_it->second.requested_hw_bps.end ());
+
+  process_it->second.requested_hw_bps.erase (bp_it);
+
+  mark_debug_registers_changed (pid);
+}
+
+/* Register the hardware watchpoint value WP_VALUE for the pid PID,
+   then mark the stale flag for all threads of the group of PID, and
+   issue a stop request for them.  The breakpoint or watchpoint will be
+   installed the next time each thread is resumed.  Should only be used
+   if the debug register interface is DEBUGREG.  */
+
+void
+ppc_linux_nat_target::register_wp (pid_t pid, long wp_value)
+{
+  gdb_assert (m_dreg_interface.debugreg_p ());
+
+  /* Our other functions should have told GDB that we only have one
+     hardware watchpoint with this interface.  */
+  gdb_assert (!m_process_info[pid].requested_wp_val.has_value ());
+
+  m_process_info[pid].requested_wp_val.emplace (wp_value);
+
+  mark_debug_registers_changed (pid);
+}
+
+/* Clear the hardware watchpoint registration for the pid PID, then mark
+   the stale flag for all threads of the group of PID, and issue a stop
+   request for them.  The breakpoint or watchpoint will be installed the
+   next time each thread is resumed.  Should only be used if the debug
+   register interface is DEBUGREG.  */
+
+void
+ppc_linux_nat_target::clear_wp (pid_t pid)
+{
+  gdb_assert (m_dreg_interface.debugreg_p ());
+
+  auto process_it = m_process_info.find (pid);
+
+  gdb_assert (process_it != m_process_info.end ());
+  gdb_assert (process_it->second.requested_wp_val.has_value ());
+
+  process_it->second.requested_wp_val.reset ();
+
+  mark_debug_registers_changed (pid);
+}
+
+/* Initialize the arch-specific thread state for LWP, if it not already
+   created.  */
+
+void
+ppc_linux_nat_target::init_arch_lwp_info (struct lwp_info *lp)
+{
+  if (lwp_arch_private_info (lp) == NULL)
+    {
+      lwp_set_arch_private_info (lp, XCNEW (struct arch_lwp_info));
+      lwp_arch_private_info (lp)->debug_regs_stale = false;
+      lwp_arch_private_info (lp)->lwp_ptid = lp->ptid;
+    }
+}
+
+/* Get the arch-specific thread state for LWP, creating it if
+   necessary.  */
+
+arch_lwp_info *
+ppc_linux_nat_target::get_arch_lwp_info (struct lwp_info *lp)
+{
+  init_arch_lwp_info (lp);
+
+  return lwp_arch_private_info (lp);
+}
+
 void _initialize_ppc_linux_nat ();
 void
 _initialize_ppc_linux_nat ()
 {
   linux_target = &the_ppc_linux_nat_target;
-
-  gdb::observers::thread_exit.attach (ppc_linux_thread_exit);
 
   /* Register the target.  */
   add_inf_child_target (linux_target);
