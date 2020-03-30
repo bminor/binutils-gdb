@@ -1,3 +1,13 @@
+2020-03-30  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/25662
+	* emultempl/pe.em (after_open): Replace initialisation of the
+	insert_timestamp field in the pe_data structure with an
+	initialisation of the timestamp field.
+	* emultemp/pep.em: Likewise.
+	* pe-dll.c (fill_edata): Use the timestamp field in the pe_data
+	structure instead of the insert_timestamp field.
+
 2020-03-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 25732

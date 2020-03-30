@@ -1,3 +1,13 @@
+2020-03-30  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/25662
+	* objcopy.c (copy_object): When copying PE format files set the
+	timestamp field in the pe_data structure if the preserve_dates
+	flag is set.
+	* testsuite/binutils-all/objcopy.exp (objcopy_test) Use
+	--preserve-dates in place of the -p option, in order to make its
+	effect more obvious.
+
 2020-03-28  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/objcopy.exp (objcopy_test): Only

@@ -128,7 +128,9 @@ typedef struct pe_tdata
   int has_reloc_section;
   int dont_strip_reloc;
   int dos_message[16];
-  bfd_boolean insert_timestamp;
+  /* The timestamp to insert into the output file.
+     If the timestamp is -1 then the current time is used.  */
+  int timestamp;
   bfd_boolean (*in_reloc_p) (bfd *, reloc_howto_type *);
   flagword real_flags;
 

@@ -76,7 +76,7 @@ proc objcopy_test {testname srcfile type asflags ldflags} {
 	    unresolved "objcopy $type ($testname)"
 	    return
 	}
-	set xflags "-p"
+	set xflags "--preserve-dates"
     }
 
     set got [binutils_run $OBJCOPY "$OBJCOPYFLAGS $xflags $t_tempfile $t_copyfile"]

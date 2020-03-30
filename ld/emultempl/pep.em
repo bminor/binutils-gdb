@@ -1364,7 +1364,10 @@ gld_${EMULATION_NAME}_after_open (void)
   pe_data (link_info.output_bfd)->pe_opthdr = pep;
   pe_data (link_info.output_bfd)->dll = init[DLLOFF].value;
   pe_data (link_info.output_bfd)->real_flags |= real_flags;
-  pe_data (link_info.output_bfd)->insert_timestamp = insert_timestamp;
+  if (insert_timestamp)
+    pe_data (link_info.output_bfd)->timestamp = -1;
+  else
+    pe_data (link_info.output_bfd)->timestamp = 0;
 
   /* At this point we must decide whether to use long section names
      in the output or not.  If the user hasn't explicitly specified

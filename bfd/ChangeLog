@@ -1,3 +1,13 @@
+2020-03-30  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/pr25662
+	* libcoff-in.h (struct pe_tdata): Rename the insert_timestamp
+	field to timestamp and make it an integer.
+	* libcoff.h: Regenerate.
+	* peXXigen.c (_bfd_XXi_only_swap_filehdr_out): Test the timestamp
+	field in the pe_data structure rather than the insert_timestamp
+	field.
+
 2020-03-30  Alan Modra  <amodra@gmail.com>
 
 	PR 25745

@@ -876,10 +876,10 @@ _bfd_XXi_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
 
   /* Use a real timestamp by default, unless the no-insert-timestamp
      option was chosen.  */
-  if ((pe_data (abfd)->insert_timestamp))
+  if ((pe_data (abfd)->timestamp) == -1)
     H_PUT_32 (abfd, time (0), filehdr_out->f_timdat);
   else
-    H_PUT_32 (abfd, 0, filehdr_out->f_timdat);
+    H_PUT_32 (abfd, pe_data (abfd)->timestamp, filehdr_out->f_timdat);
 
   PUT_FILEHDR_SYMPTR (abfd, filehdr_in->f_symptr,
 		      filehdr_out->f_symptr);
