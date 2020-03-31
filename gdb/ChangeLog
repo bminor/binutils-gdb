@@ -1,3 +1,10 @@
+2020-04-01  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/24789
+	* eval.c (is_integral_or_integral_reference): New function.
+	(evaluate_subexp_standard): Allow integer references in
+	pointer arithmetic.
+
 2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* remote.c (remote_target::remote_parse_stop_reply): Remove the

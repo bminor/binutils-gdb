@@ -1,3 +1,9 @@
+2020-04-01  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/24789
+	* gdb.cp/misc.cc: Add integer reference variable.
+	* gdb.cp/misc.exp: Add test.
+
 2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.server/stop-reply-no-thread.exp: Enhance the test

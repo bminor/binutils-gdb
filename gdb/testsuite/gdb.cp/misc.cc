@@ -24,6 +24,9 @@ bool            v_bool_array[2];
 typedef struct fleep fleep;
 struct fleep { int a; } s;
 
+int number;
+int &number_ref = number;
+
 // ====================== simple class structures  =======================
 
 struct default_public_struct {
