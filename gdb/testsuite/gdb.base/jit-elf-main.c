@@ -45,9 +45,9 @@
 #endif /* !ElfW  */
 
 static void
-usage (const char *const argv0)
+usage (void)
 {
-  fprintf (stderr, "Usage: %s library [count]\n", argv0);
+  fprintf (stderr, "Usage: jit-elf-main libraries...\n");
   exit (1);
 }
 
@@ -106,49 +106,39 @@ int mypid;
 int
 MAIN (int argc, char *argv[])
 {
-  /* These variables are here so they can easily be set from jit.exp.  */
-  const char *libname = NULL;
-  int count = 0, i, fd;
-  struct stat st;
-
+  int i;
   alarm (300);
+  /* Used as backing storage for GDB to populate argv.  */
+  char *fake_argv[10];
 
   mypid = getpid ();
-
-  count = count;  /* gdb break here 0  */
+  /* gdb break here 0  */
 
   if (argc < 2)
     {
-      usage (argv[0]);
+      usage ();
       exit (1);
     }
 
-  if (libname == NULL)
-    /* Only set if not already set from GDB.  */
-    libname = argv[1];
-
-  if (argc > 2 && count == 0)
-    /* Only set if not already set from GDB.  */
-    count = atoi (argv[2]);
-
-  printf ("%s:%d: libname = %s, count = %d\n", __FILE__, __LINE__,
-	  libname, count);
-
-  if ((fd = open (libname, O_RDONLY)) == -1)
+  for (i = 1; i < argc; ++i)
     {
-      fprintf (stderr, "open (\"%s\", O_RDONLY): %s\n", libname,
-	       strerror (errno));
-      exit (1);
-    }
+      struct stat st;
+      int fd;
 
-  if (fstat (fd, &st) != 0)
-    {
-      fprintf (stderr, "fstat (\"%d\"): %s\n", fd, strerror (errno));
-      exit (1);
-    }
+      printf ("%s:%d: libname = %s, i = %d\n", __FILE__, __LINE__, argv[i], i);
+      if ((fd = open (argv[i], O_RDONLY)) == -1)
+	{
+	  fprintf (stderr, "open (\"%s\", O_RDONLY): %s\n", argv[i],
+		   strerror (errno));
+	  exit (1);
+	}
 
-  for (i = 0; i < count; ++i)
-    {
+      if (fstat (fd, &st) != 0)
+	{
+	  fprintf (stderr, "fstat (\"%d\"): %s\n", fd, strerror (errno));
+	  exit (1);
+	}
+
       const void *const addr = mmap (0, st.st_size, PROT_READ|PROT_WRITE,
 				     MAP_PRIVATE, fd, 0);
       struct jit_code_entry *const entry = calloc (1, sizeof (*entry));
