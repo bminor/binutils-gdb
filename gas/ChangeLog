@@ -1,3 +1,9 @@
+2020-03-31  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	PR 25611
+	PR 25614
+	* dwarf2dbg.c: Do not include "bignum.h".
+
 2020-03-30  Nelson Chu  <nelson.chu@sifive.com>
 
 	* testsuite/gas/riscv/alias-csr.d: Move this to priv-reg-pseudo.
