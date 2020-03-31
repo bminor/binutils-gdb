@@ -1,5 +1,10 @@
 2020-03-31  Alan Modra  <amodra@gmail.com>
 
+	* coff-alpha.c (alpha_ecoff_get_elt_at_filepos): Correct bfd_bread
+	return value check.
+
+2020-03-31  Alan Modra  <amodra@gmail.com>
+
 	* vms-alpha.c (image_write): Check bounds for sections without
 	contents too.  Error on non-zero write to section without
 	contents.

@@ -2130,7 +2130,7 @@ alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 		n = dict[h];
 	      else
 		{
-		  if (! bfd_bread (&n, (bfd_size_type) 1, nbfd))
+		  if (bfd_bread (&n, 1, nbfd) != 1)
 		    goto error_return;
 		  dict[h] = n;
 		}
