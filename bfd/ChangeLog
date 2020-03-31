@@ -1,5 +1,12 @@
 2020-03-31  Alan Modra  <amodra@gmail.com>
 
+	* vms-alpha.c (image_write): Check bounds for sections without
+	contents too.  Error on non-zero write to section without
+	contents.
+	(_bfd_vms_slurp_etir): Check return of image_write* functions.
+
+2020-03-31  Alan Modra  <amodra@gmail.com>
+
 	* tekhex.c (pass_over): Check is_eof before reading buffer.
 
 2020-03-30  Nick Clifton  <nickc@redhat.com>

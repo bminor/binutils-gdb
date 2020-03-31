@@ -1611,26 +1611,35 @@ dst_retrieve_location (bfd *abfd, bfd_vma *loc)
 static bfd_boolean
 image_write (bfd *abfd, unsigned char *ptr, unsigned int size)
 {
+  asection *sec = PRIV (image_section);
+  size_t off = PRIV (image_offset);
+
+  /* Check bounds.  */
+  if (off > sec->size
+      || size > sec->size - off)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
 #if VMS_DEBUG
   _bfd_vms_debug (8, "image_write from (%p, %d) to (%ld)\n", ptr, size,
-		  (long)PRIV (image_offset));
+		  (long) off));
 #endif
 
   if (PRIV (image_section)->contents != NULL)
+    memcpy (sec->contents + off, ptr, size);
+  else
     {
-      asection *sec = PRIV (image_section);
-      size_t off = PRIV (image_offset);
-
-      /* Check bounds.  */
-      if (off > sec->size
-	  || size > sec->size - off)
-	{
-	  bfd_set_error (bfd_error_bad_value);
-	  return FALSE;
-	}
-
-      memcpy (sec->contents + off, ptr, size);
+      unsigned int i;
+      for (i = 0; i < size; i++)
+	if (ptr[i] != 0)
+	  {
+	    bfd_set_error (bfd_error_bad_value);
+	    return FALSE;
+	  }
     }
+
 #if VMS_DEBUG
   _bfd_hexdump (9, ptr, size, 0);
 #endif
@@ -1998,7 +2007,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
-	  image_write_b (abfd, (unsigned int) op1 & 0xff);
+	  if (!image_write_b (abfd, (unsigned int) op1 & 0xff))
+	    return FALSE;
 	  break;
 
 	  /* Store word: pop stack, write word
@@ -2008,7 +2018,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    return FALSE;
 	  if (rel1 != RELC_NONE)
 	    goto bad_context;
-	  image_write_w (abfd, (unsigned int) op1 & 0xffff);
+	  if (!image_write_w (abfd, (unsigned int) op1 & 0xffff))
+	    return FALSE;
 	  break;
 
 	  /* Store longword: pop stack, write longword
@@ -2034,7 +2045,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	      if (!alpha_vms_add_lw_reloc (info))
 		return FALSE;
 	    }
-	  image_write_l (abfd, op1);
+	  if (!image_write_l (abfd, op1))
+	    return FALSE;
 	  break;
 
 	  /* Store quadword: pop stack, write quadword
@@ -2056,7 +2068,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	      if (!alpha_vms_add_qw_reloc (info))
 		return FALSE;
 	    }
-	  image_write_q (abfd, op1);
+	  if (!image_write_q (abfd, op1))
+	    return FALSE;
 	  break;
 
 	  /* Store immediate repeated: pop stack for repeat count
@@ -2074,7 +2087,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    if (rel1 != RELC_NONE)
 	      goto bad_context;
 	    while (op1-- > 0)
-	      image_write (abfd, ptr + 4, size);
+	      if (!image_write (abfd, ptr + 4, size))
+		return FALSE;
 	  }
 	  break;
 
@@ -2099,7 +2113,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 		    return FALSE;
 		}
 	    }
-	  image_write_q (abfd, op1);
+	  if (!image_write_q (abfd, op1))
+	    return FALSE;
 	  break;
 
 	  /* Store code address: write address of entry point
@@ -2131,7 +2146,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 		  abort ();
 		}
 	    }
-	  image_write_q (abfd, op1);
+	  if (!image_write_q (abfd, op1))
+	    return FALSE;
 	  break;
 
 	  /* Store offset to psect: pop stack, add low 32 bits to base of psect
@@ -2145,7 +2161,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 
 	  op1 = alpha_vms_fix_sec_rel (abfd, info, rel1, op1);
 	  rel1 = RELC_REL;
-	  image_write_q (abfd, op1);
+	  if (!image_write_q (abfd, op1))
+	    return FALSE;
 	  break;
 
 	  /* Store immediate
@@ -2158,7 +2175,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    if (ptr + 4 > maxptr)
 	      goto corrupt_etir;
 	    size = bfd_getl32 (ptr);
-	    image_write (abfd, ptr + 4, size);
+	    if (!image_write (abfd, ptr + 4, size))
+	      return FALSE;
 	  }
 	  break;
 
@@ -2173,7 +2191,8 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 #if 0
 	  abort ();
 #endif
-	  image_write_l (abfd, op1);
+	  if (!image_write_l (abfd, op1))
+	    return FALSE;
 	  break;
 
 	case ETIR__C_STO_RB:
@@ -2246,8 +2265,9 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	      op1 = 0;
 	      op2 = 0;
 	    }
-	  image_write_q (abfd, op1);
-	  image_write_q (abfd, op2);
+	  if (!image_write_q (abfd, op1)
+	      || !image_write_q (abfd, op2))
+	    return FALSE;
 	  break;
 
 	  /* 205 Store-conditional NOP at address of global
