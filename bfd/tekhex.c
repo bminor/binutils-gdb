@@ -525,7 +525,7 @@ pass_over (bfd *abfd, bfd_boolean (*func) (bfd *, int, char *, char *))
 
       /* Find first '%'.  */
       is_eof = (bfd_boolean) (bfd_bread (src, (bfd_size_type) 1, abfd) != 1);
-      while (*src != '%' && !is_eof)
+      while (!is_eof && *src != '%')
 	is_eof = (bfd_boolean) (bfd_bread (src, (bfd_size_type) 1, abfd) != 1);
 
       if (is_eof)
