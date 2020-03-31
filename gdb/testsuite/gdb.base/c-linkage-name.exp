@@ -14,8 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This file is part of the gdb testsuite.  It is intended to test that
-# gdb can correctly print arrays with indexes for each element of the
-# array.
+# gdb can correctly print an ada symbol with linkage name before and after
+# symtab expansion.
 
 standard_testfile c-linkage-name.c c-linkage-name-2.c
 
@@ -25,13 +25,19 @@ if { [gdb_compile "${sources}" "${binfile}" executable {debug}] != "" } {
     return -1
 }
 
-clean_restart ${binfile}
+clean_restart
+gdb_test_no_output "set language c"
+gdb_load ${binfile}
 set readnow [readnow]
 
-# Verify that partial symtab expansion has not taken place for
-# c-linkage-name-2.c.
+set test "verify no symtab expansion"
+if { $readnow } {
+    unsupported $test
+} else {
+    # Verify that symtab expansion has not taken place.
 
-verify_psymtab_expanded c-linkage-name-2.c no
+    gdb_test_no_output "maint info symtabs" $test
+}
 
 set test "print symada__cS before partial symtab expansion"
 if { $readnow } {
@@ -54,7 +60,7 @@ gdb_test "break do_something_other_cu" \
 # Verify that partial symtab expansion has taken place for
 # c-linkage-name-2.c.
 
-verify_psymtab_expanded c-linkage-name-2.c yes
+gdb_test "maint info symtabs" "\{ symtab \[^\r\n\]*c-linkage-name-2.c.*"
 
 # Flush the symbol cache to prevent the lookup to return the same as before.
 

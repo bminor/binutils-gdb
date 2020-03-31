@@ -1,3 +1,8 @@
+2020-03-31  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/c-linkage-name.exp: Fix test-case comment.  Set language to
+	c.  Use "maint info symtabs" to check symtab expansion.
+
 2020-03-30  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/c-linkage-name.exp: Use readnow call to mark a test
