@@ -1,3 +1,8 @@
+2020-03-31  Tom Tromey  <tromey@adacore.com>
+
+	* btrace-common.cc (btrace_data_append): Conditionally call
+	memcpy.
+
 2020-03-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* create-version.sh: Resolve issues highlighted by shellcheck.

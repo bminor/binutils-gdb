@@ -168,8 +168,9 @@ abbrev_table::read (struct objfile *objfile,
       cur_abbrev->attrs =
 	XOBNEWVEC (&abbrev_table->m_abbrev_obstack, struct attr_abbrev,
 		   cur_abbrev->num_attrs);
-      memcpy (cur_abbrev->attrs, cur_attrs.data (),
-	      cur_abbrev->num_attrs * sizeof (struct attr_abbrev));
+      if (!cur_attrs.empty ())
+	memcpy (cur_abbrev->attrs, cur_attrs.data (),
+		cur_abbrev->num_attrs * sizeof (struct attr_abbrev));
 
       abbrev_table->add_abbrev (abbrev_number, cur_abbrev);
 

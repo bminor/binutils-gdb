@@ -1,3 +1,8 @@
+2020-03-31  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/abbrev.c (abbrev_table::read): Conditionally call
+	memcpy.
+
 2020-03-30  Nelson Chu  <nelson.chu@sifive.com>
 
 	* features/riscv/32bit-csr.xml: Regenerated.
