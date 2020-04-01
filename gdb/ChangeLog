@@ -1,3 +1,11 @@
+2020-04-01  Tom Tromey  <tromey@adacore.com>
+
+	* psymtab.c (psymtab_search_name): Remove function.
+	(psym_lookup_symbol): Create search name and lookup name here.
+	(lookup_partial_symbol): Remove "name" parameter; add
+	lookup_name.
+	(psym_expand_symtabs_for_function): Update.
+
 2020-03-31  Joel Jones  <joelkevinjones@gmail.com>
 
 	PR tui/25597:

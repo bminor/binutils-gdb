@@ -39,7 +39,8 @@
 
 static struct partial_symbol *lookup_partial_symbol (struct objfile *,
 						     struct partial_symtab *,
-						     const char *, int,
+						     const lookup_name_info &,
+						     int,
 						     domain_enum);
 
 static const char *psymtab_to_fullname (struct partial_symtab *ps);
@@ -482,9 +483,12 @@ psym_lookup_symbol (struct objfile *objfile,
 
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
+  lookup_name_info psym_lookup_name = lookup_name.make_ignore_params ();
+
   for (partial_symtab *ps : require_partial_symbols (objfile, true))
     {
-      if (!ps->readin_p () && lookup_partial_symbol (objfile, ps, name,
+      if (!ps->readin_p () && lookup_partial_symbol (objfile, ps,
+						     psym_lookup_name,
 						     psymtab_index, domain))
 	{
 	  struct symbol *sym, *with_opaque = NULL;
@@ -612,42 +616,14 @@ match_partial_symbol (struct objfile *objfile,
   return NULL;
 }
 
-/* Returns the name used to search psymtabs.  Unlike symtabs, psymtabs do
-   not contain any method/function instance information (since this would
-   force reading type information while reading psymtabs).  Therefore,
-   if NAME contains overload information, it must be stripped before searching
-   psymtabs.  */
-
-static gdb::unique_xmalloc_ptr<char>
-psymtab_search_name (const char *name)
-{
-  switch (current_language->la_language)
-    {
-    case language_cplus:
-      {
-	if (strchr (name, '('))
-	  {
-	    gdb::unique_xmalloc_ptr<char> ret = cp_remove_params (name);
-
-	    if (ret)
-	      return ret;
-	  }
-      }
-      break;
-
-    default:
-      break;
-    }
-
-  return make_unique_xstrdup (name);
-}
-
-/* Look, in partial_symtab PST, for symbol whose natural name is NAME.
-   Check the global symbols if GLOBAL, the static symbols if not.  */
+/* Look, in partial_symtab PST, for symbol whose natural name is
+   LOOKUP_NAME.  Check the global symbols if GLOBAL, the static
+   symbols if not.  */
 
 static struct partial_symbol *
 lookup_partial_symbol (struct objfile *objfile,
-		       struct partial_symtab *pst, const char *name,
+		       struct partial_symtab *pst,
+		       const lookup_name_info &lookup_name,
 		       int global, domain_enum domain)
 {
   struct partial_symbol **start, **psym;
@@ -657,10 +633,6 @@ lookup_partial_symbol (struct objfile *objfile,
 
   if (length == 0)
     return NULL;
-
-  gdb::unique_xmalloc_ptr<char> search_name = psymtab_search_name (name);
-
-  lookup_name_info lookup_name (search_name.get (), symbol_name_match_type::FULL);
 
   start = (global ?
 	   &objfile->partial_symtabs->global_psymbols[pst->globals_offset] :
@@ -686,7 +658,7 @@ lookup_partial_symbol (struct objfile *objfile,
 	    internal_error (__FILE__, __LINE__,
 			    _("failed internal consistency check"));
 	  if (strcmp_iw_ordered ((*center)->ginfo.search_name (),
-				 search_name.get ()) >= 0)
+				 lookup_name.name ().c_str ()) >= 0)
 	    {
 	      top = center;
 	    }
@@ -1044,14 +1016,17 @@ static void
 psym_expand_symtabs_for_function (struct objfile *objfile,
 				  const char *func_name)
 {
+  lookup_name_info base_lookup (func_name, symbol_name_match_type::FULL);
+  lookup_name_info lookup_name = base_lookup.make_ignore_params ();
+
   for (partial_symtab *ps : require_partial_symbols (objfile, true))
     {
       if (ps->readin_p ())
 	continue;
 
-      if ((lookup_partial_symbol (objfile, ps, func_name, 1, VAR_DOMAIN)
+      if ((lookup_partial_symbol (objfile, ps, lookup_name, 1, VAR_DOMAIN)
 	   != NULL)
-	  || (lookup_partial_symbol (objfile, ps, func_name, 0, VAR_DOMAIN)
+	  || (lookup_partial_symbol (objfile, ps, lookup_name, 0, VAR_DOMAIN)
 	      != NULL))
 	psymtab_to_symtab (objfile, ps);
     }
