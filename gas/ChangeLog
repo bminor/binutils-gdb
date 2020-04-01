@@ -1,3 +1,14 @@
+2020-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/25756
+	* config/tc-i386.h (TC_FORCE_RELOCATION_ABS): New.
+	* testsuite/gas/i386/localpic.s: Add a test for relocation
+	against local absolute symbol.
+	* testsuite/gas/i386/x86-64-localpic.s: Likewise.
+	* testsuite/gas/i386/localpic.d: Updated.
+	* testsuite/gas/i386/x86-64-localpic.d: Likewise.
+	* testsuite/gas/i386/ilp32/x86-64-localpic.d: Likewise.
+
 2020-04-01  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR gas/25732
