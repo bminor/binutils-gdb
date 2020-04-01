@@ -1,3 +1,7 @@
+2020-04-01  Tamar Christina  <tamar.christina@arm.com>
+
+	* elf32-arm.c (elf32_thumb2_plt_entry): Fix PC-rel offset.
+
 2020-04-01  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmo.c (mmo_scan): Create .text section only when needed, not

@@ -1,3 +1,9 @@
+2020-04-01  Tamar Christina  <tamar.christina@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp (thumb-plt): New.
+	* testsuite/ld-arm/thumb-plt.d: New test.
+	* testsuite/ld-arm/thumb-plt.s: New test.
+
 2020-04-01  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* testsuite/ld-scripts/defined4.d: Don't xfail mmix-*-*.

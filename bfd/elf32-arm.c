@@ -2453,8 +2453,8 @@ static const bfd_vma elf32_thumb2_plt_entry [] =
   0x0c00f240,		/* movw	   ip, #0xNNNN	  */
   0x0c00f2c0,		/* movt	   ip, #0xNNNN	  */
   0xf8dc44fc,		/* add	   ip, pc	  */
-  0xe7fdf000		/* ldr.w   pc, [ip]	  */
-			/* b      .-2		  */
+  0xe7fcf000		/* ldr.w   pc, [ip]	  */
+			/* b      .-4		  */
 };
 
 /* The format of the first entry in the procedure linkage table
