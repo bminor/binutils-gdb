@@ -119,11 +119,15 @@
    Copy dynamic function pointer relocations.  Don't generate dynamic
    relocations against resolved undefined weak symbols in PIE, except
    when PC32_RELOC is TRUE.  Undefined weak symbol is bound locally
-   when PIC is false.  */
-#define GENERATE_DYNAMIC_RELOCATION_P(INFO, EH, R_TYPE, \
+   when PIC is false.  Don't generate dynamic relocations against
+   non-preemptible absolute symbol.  */
+#define GENERATE_DYNAMIC_RELOCATION_P(INFO, EH, R_TYPE, SEC, \
 				      NEED_COPY_RELOC_IN_PIE, \
 				      RESOLVED_TO_ZERO, PC32_RELOC) \
   ((bfd_link_pic (INFO) \
+    && !(bfd_is_abs_section (SEC) \
+	 && ((EH) == NULL \
+	     || SYMBOL_REFERENCES_LOCAL (INFO, &(EH)->elf))) \
     && !(NEED_COPY_RELOC_IN_PIE) \
     && ((EH) == NULL \
 	|| ((ELF_ST_VISIBILITY ((EH)->elf.other) == STV_DEFAULT \
@@ -170,17 +174,25 @@
    || ((struct elf_x86_link_hash_entry *) (H))->linker_def \
    || ELF_COMMON_DEF_P (H))
 
+/* Return TRUE if the symbol described by a linker hash entry H is
+   going to be absolute.  Similar to bfd_is_abs_symbol, but excluding
+   all linker-script defined symbols.  */
+#define ABS_SYMBOL_P(H) \
+  (bfd_is_abs_symbol (&(H)->root) && !(H)->root.ldscript_def)
+
 /* TRUE if relative relocation should be generated.  GOT reference to
    global symbol in PIC will lead to dynamic symbol.  It becomes a
    problem when "time" or "times" is defined as a variable in an
    executable, clashing with functions of the same name in libc.  If a
    symbol isn't undefined weak symbol, don't make it dynamic in PIC and
-   generate relative relocation.  */
+   generate relative relocation.   Don't generate relative relocation
+   against non-preemptible absolute symbol.  */
 #define GENERATE_RELATIVE_RELOC_P(INFO, H) \
   ((H)->dynindx == -1 \
    && !(H)->forced_local \
    && (H)->root.type != bfd_link_hash_undefweak \
-   && bfd_link_pic (INFO))
+   && bfd_link_pic (INFO) \
+   && !ABS_SYMBOL_P (H))
 
 /* TRUE if this is a pointer reference to a local IFUNC.  */
 #define POINTER_LOCAL_IFUNC_P(INFO, H) \
@@ -414,6 +426,7 @@ struct elf_x86_plt_layout
 #define GOT_TLS_IE_NEG	6
 #define GOT_TLS_IE_BOTH 7
 #define GOT_TLS_GDESC	8
+#define GOT_ABS		9
 #define GOT_TLS_GD_BOTH_P(type)	\
   ((type) == (GOT_TLS_GD | GOT_TLS_GDESC))
 #define GOT_TLS_GD_P(type) \
@@ -601,6 +614,9 @@ struct elf_x86_plt
   long count;
 };
 
+/* Set if a relocation is converted from a GOTPCREL relocation.  */
+#define R_X86_64_converted_reloc_bit (1 << 7)
+
 #define elf_x86_tdata(abfd) \
   ((struct elf_x86_obj_tdata *) (abfd)->tdata.any)
 
@@ -651,6 +667,11 @@ extern int _bfd_x86_elf_compare_relocs
 
 extern bfd_boolean _bfd_x86_elf_link_check_relocs
   (bfd *, struct bfd_link_info *);
+
+extern bfd_boolean _bfd_elf_x86_valid_reloc_p
+  (asection *, struct bfd_link_info *, struct elf_x86_link_hash_table *,
+   const Elf_Internal_Rela *, struct elf_link_hash_entry *,
+   Elf_Internal_Sym *, Elf_Internal_Shdr *, bfd_boolean *);
 
 extern bfd_boolean _bfd_x86_elf_size_dynamic_sections
   (bfd *, struct bfd_link_info *);

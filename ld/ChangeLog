@@ -1,3 +1,35 @@
+2020-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/25749
+	PR ld/25754
+	* testsuite/ld-elf/linux-x86.exp: Run ld/25749 tests.
+	* testsuite/ld-elf/pr25749-1.c: New file.
+	* testsuite/ld-elf/pr25749-1a.c: Likewise.
+	* testsuite/ld-elf/pr25749-1b.c: Likewise.
+	* testsuite/ld-elf/pr25749-1b.err: Likewise.
+	* testsuite/ld-elf/pr25749-1c.c: Likewise.
+	* testsuite/ld-elf/pr25749-1d.c: Likewise.
+	* testsuite/ld-elf/pr25749-2.c: Likewise.
+	* testsuite/ld-elf/pr25749-2a.s: Likewise.
+	* testsuite/ld-elf/pr25749-2b.s: Likewise.
+	* testsuite/ld-elf/pr25749.rd: Likewise.
+	* testsuite/ld-elf/pr25754-1a.c: Likewise.
+	* testsuite/ld-elf/pr25754-1b.s: Likewise.
+	* testsuite/ld-elf/pr25754-2a.c: Likewise.
+	* testsuite/ld-elf/pr25754-2b.err: Likewise.
+	* testsuite/ld-elf/pr25754-2b.s: Likewise.
+	* testsuite/ld-elf/pr25754-3a.c: Likewise.
+	* testsuite/ld-elf/pr25754-3b.s: Likewise.
+	* testsuite/ld-elf/pr25754-4a.c: Likewise.
+	* testsuite/ld-elf/pr25754-4b.s: Likewise.
+	* testsuite/ld-elf/pr25754-4c.s: Likewise.
+	* testsuite/ld-elf/pr25754-5a.c: Likewise.
+	* testsuite/ld-elf/pr25754-5b.s: Likewise.
+	* testsuite/ld-elf/pr25754-5c.s: Likewise.
+	* testsuite/ld-elf/pr25754-6a.c: Likewise.
+	* testsuite/ld-elf/pr25754-6b.s: Likewise.
+	* testsuite/ld-x86-64/pr19609-6a.d: Don't expect linker error.
+
 2020-04-01  Tamar Christina  <tamar.christina@arm.com>
 
 	PR ld/16017

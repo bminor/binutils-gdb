@@ -1,3 +1,41 @@
+2020-04-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/25749
+	PR ld/25754
+	* elf32-i386.c (elf_i386_convert_load_reloc): Convert load
+	relocation to R_386_32 for relocation against non-preemptible
+	absolute symbol.
+	(elf_i386_check_relocs): Call _bfd_elf_x86_valid_reloc_p.  Don't
+	allocate dynamic relocation for non-preemptible absolute symbol.
+	(elf_i386_relocate_section): Pass sec to
+	GENERATE_DYNAMIC_RELOCATION_P.
+	* elf64-x86-64.c (R_X86_64_converted_reloc_bit): Moved.
+	(elf_x86_64_convert_load_reloc): Covert load relocation to
+	R_X86_64_32S or R_X86_64_32 for relocation against non-preemptible
+	absolute symbol.  Don't convert to R_X86_64_32S nor R_X86_64_32
+	for non-preemptible absolute symbol if they overflow.
+	(elf_x86_64_check_relocs): Call _bfd_elf_x86_valid_reloc_p.  Set
+	tls_type for GOT slot to GOT_ABS for non-preemptible absolute
+	symbol.  Don't allocate dynamic relocation for non-preemptible
+	absolute symbol.
+	(elf_x86_64_relocate_section): Don't generate relative relocation
+	for GOTPCREL relocations aganst local absolute symbol.  Pass sec
+	to GENERATE_DYNAMIC_RELOCATION_P.
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): No dynamic relocation
+	against non-preemptible absolute symbol.
+	(_bfd_elf_x86_valid_reloc_p): New function.
+	(_bfd_x86_elf_size_dynamic_sections): No dynamic relocation for
+	GOT_ABS GOT slot.
+	* elfxx-x86.h (GENERATE_DYNAMIC_RELOCATION_P): Add an SEC
+	argument.  Don't generate dynamic relocation against
+	non-preemptible absolute symbol.
+	(ABS_SYMBOL_P): New.
+	(GENERATE_RELATIVE_RELOC_P): Don't generate relative relocation
+	against non-preemptible absolute symbol.
+	(GOT_ABS): New.
+	(R_X86_64_converted_reloc_bit): New.  Moved from elf64-x86-64.c.
+	(_bfd_elf_x86_valid_reloc_p): New.
+
 2020-04-01  Tamar Christina  <tamar.christina@arm.com>
 
 	PR ld/16017

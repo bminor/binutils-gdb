@@ -347,7 +347,8 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	 (but if both R_386_TLS_IE_32 and R_386_TLS_IE is present, we
 	 need two), R_386_TLS_GD and R_X86_64_TLSGD need one if local
 	 symbol and two if global.  No dynamic relocation against
-	 resolved undefined weak symbol in executable.  */
+	 resolved undefined weak symbol in executable.  No dynamic
+	 relocation against non-preemptible absolute symbol.  */
       if (tls_type == GOT_TLS_IE_BOTH)
 	htab->elf.srelgot->size += 2 * htab->sizeof_reloc;
       else if ((GOT_TLS_GD_P (tls_type) && h->dynindx == -1)
@@ -359,7 +360,9 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	       && ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		    && !resolved_to_zero)
 		   || h->root.type != bfd_link_hash_undefweak)
-	       && (bfd_link_pic (info)
+	       && ((bfd_link_pic (info)
+		    && !(h->dynindx == -1
+			 && ABS_SYMBOL_P (h)))
 		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
 	htab->elf.srelgot->size += htab->sizeof_reloc;
       if (GOT_TLS_GDESC_P (tls_type))
@@ -952,6 +955,100 @@ _bfd_x86_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
   return _bfd_elf_link_check_relocs (abfd, info);
 }
 
+bfd_boolean
+_bfd_elf_x86_valid_reloc_p (asection *input_section,
+			    struct bfd_link_info *info,
+			    struct elf_x86_link_hash_table *htab,
+			    const Elf_Internal_Rela *rel,
+			    struct elf_link_hash_entry *h,
+			    Elf_Internal_Sym *sym,
+			    Elf_Internal_Shdr *symtab_hdr,
+			    bfd_boolean *no_dynreloc_p)
+{
+  bfd_boolean valid_p = TRUE;
+
+  *no_dynreloc_p = FALSE;
+
+  /* Check If relocation against non-preemptible absolute symbol is
+     valid in PIC.  FIXME: Can't use SYMBOL_REFERENCES_LOCAL_P since
+     it may call _bfd_elf_link_hide_sym_by_version and result in
+     ld-elfvers/ vers21 test failure.  */
+  if (bfd_link_pic (info)
+      && (h == NULL || SYMBOL_REFERENCES_LOCAL (info, h)))
+    {
+      const struct elf_backend_data *bed;
+      unsigned int r_type;
+      Elf_Internal_Rela irel;
+
+      /* Skip non-absolute symbol.  */
+      if (h)
+	{
+	  if (!ABS_SYMBOL_P (h))
+	    return valid_p;
+	}
+      else if (sym->st_shndx != SHN_ABS)
+	return valid_p;
+
+      bed = get_elf_backend_data (input_section->owner);
+      r_type = ELF32_R_TYPE (rel->r_info);
+      irel = *rel;
+
+      /* Only allow relocations against absolute symbol, which can be
+	 resolved as absolute value + addend.  GOTPCREL relocations
+	 are allowed since absolute value + addend is stored in the
+	 GOT slot.  */
+      if (bed->target_id == X86_64_ELF_DATA)
+	{
+	  r_type &= ~R_X86_64_converted_reloc_bit;
+	  valid_p = (r_type == R_X86_64_64
+		     || r_type == R_X86_64_32
+		     || r_type == R_X86_64_32S
+		     || r_type == R_X86_64_16
+		     || r_type == R_X86_64_8
+		     || r_type == R_X86_64_GOTPCREL
+		     || r_type == R_X86_64_GOTPCRELX
+		     || r_type == R_X86_64_REX_GOTPCRELX);
+	  if (!valid_p)
+	    {
+	      unsigned int r_symndx = htab->r_sym (rel->r_info);
+	      irel.r_info = htab->r_info (r_symndx, r_type);
+	    }
+	}
+      else
+	valid_p = (r_type == R_386_32
+		   || r_type == R_386_16
+		   || r_type == R_386_8);
+
+      if (valid_p)
+	*no_dynreloc_p = TRUE;
+      else
+	{
+	  const char *name;
+	  arelent internal_reloc;
+
+	  if (!bed->elf_info_to_howto (input_section->owner,
+				       &internal_reloc, &irel)
+	      || internal_reloc.howto == NULL)
+	    abort ();
+
+	  if (h)
+	    name = h->root.root.string;
+	  else
+	    name = bfd_elf_sym_name (input_section->owner, symtab_hdr,
+				     sym, NULL);
+	  info->callbacks->einfo
+	    /* xgettext:c-format */
+	    (_("%F%P: %pB: relocation %s against absolute symbol "
+	       "`%s' in section `%pA' is disallowed\n"),
+	     input_section->owner, internal_reloc.howto->name, name,
+	     input_section);
+	  bfd_set_error (bfd_error_bad_value);
+	}
+    }
+
+  return valid_p;
+}
+
 /* Set the sizes of the dynamic sections.  */
 
 bfd_boolean
@@ -1065,7 +1162,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 		      || *local_tls_type == GOT_TLS_IE_BOTH)
 		    s->size += htab->got_entry_size;
 		}
-	      if (bfd_link_pic (info)
+	      if ((bfd_link_pic (info) && *local_tls_type != GOT_ABS)
 		  || GOT_TLS_GD_ANY_P (*local_tls_type)
 		  || (*local_tls_type & GOT_TLS_IE))
 		{

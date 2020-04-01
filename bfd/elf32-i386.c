@@ -1226,6 +1226,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
   bfd_vma nop_offset;
   bfd_boolean is_pic;
   bfd_boolean to_reloc_32;
+  bfd_boolean abs_symbol;
   unsigned int r_type;
   unsigned int r_symndx;
   bfd_vma roff = irel->r_offset;
@@ -1249,6 +1250,21 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
   modrm = bfd_get_8 (abfd, contents + roff - 1);
   baseless = (modrm & 0xc7) == 0x5;
 
+  if (h)
+    {
+      /* NB: Also set linker_def via SYMBOL_REFERENCES_LOCAL_P.  */
+      local_ref = SYMBOL_REFERENCES_LOCAL_P (link_info, h);
+      isym = NULL;
+      abs_symbol = ABS_SYMBOL_P (h);
+    }
+  else
+    {
+      local_ref = TRUE;
+      isym = bfd_sym_from_r_symndx (&htab->sym_cache, abfd,
+				    r_symndx);
+      abs_symbol = isym->st_shndx == SHN_ABS;
+    }
+
   if (baseless && is_pic)
     {
       /* For PIC, disallow R_386_GOT32X without a base register
@@ -1256,11 +1272,7 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
       const char *name;
 
       if (h == NULL)
-	{
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache, abfd,
-					r_symndx);
-	  name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
-	}
+	name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
       else
 	name = h->root.root.string;
 
@@ -1293,9 +1305,6 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 	   "binop foo@GOT[(%reg1)], %reg2". */
 	goto convert_load;
     }
-
-  /* NB: Also set linker_def via SYMBOL_REFERENCES_LOCAL_P.  */
-  local_ref = SYMBOL_REFERENCES_LOCAL_P (link_info, h);
 
   /* Undefined weak symbol is only bound locally in executable
      and its reference is resolved as 0.  */
@@ -1396,6 +1405,9 @@ elf_i386_convert_load_reloc (bfd *abfd, Elf_Internal_Shdr *symtab_hdr,
 	convert_load:
 	  if (opcode == 0x8b)
 	    {
+	      if (abs_symbol && local_ref)
+		to_reloc_32 = TRUE;
+
 	      if (to_reloc_32)
 		{
 		  /* Convert "mov foo@GOT[(%reg1)], %reg2" to
@@ -1519,6 +1531,7 @@ elf_i386_check_relocs (bfd *abfd,
       Elf_Internal_Sym *isym;
       const char *name;
       bfd_boolean size_reloc;
+      bfd_boolean no_dynreloc;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -1586,6 +1599,10 @@ elf_i386_check_relocs (bfd *abfd,
 					    &converted, info))
 	    goto error_return;
 	}
+
+      if (!_bfd_elf_x86_valid_reloc_p (sec, info, htab, rel, h, isym,
+				       symtab_hdr, &no_dynreloc))
+	return FALSE;
 
       if (! elf_i386_tls_transition (info, abfd, sec, contents,
 				     symtab_hdr, sym_hashes,
@@ -1827,8 +1844,9 @@ elf_i386_check_relocs (bfd *abfd,
 
 	  size_reloc = FALSE;
 	do_size:
-	  if (NEED_DYNAMIC_RELOCATION_P (info, FALSE, h, sec, r_type,
-					 R_386_32))
+	  if (!no_dynreloc
+	      && NEED_DYNAMIC_RELOCATION_P (info, FALSE, h, sec, r_type,
+					    R_386_32))
 	    {
 	      struct elf_dyn_relocs *p;
 	      struct elf_dyn_relocs **head;
@@ -2704,7 +2722,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      || is_vxworks_tls)
 	    break;
 
-	  if (GENERATE_DYNAMIC_RELOCATION_P (info, eh, r_type,
+	  if (GENERATE_DYNAMIC_RELOCATION_P (info, eh, r_type, sec,
 					     FALSE, resolved_to_zero,
 					     (r_type == R_386_PC32)))
 	    {
