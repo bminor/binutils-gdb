@@ -29,12 +29,12 @@ if [runto f2] then {
     if { [test_compiler_info gcc-2-*] && [test_debug_format "DWARF 2"] } then {
 	setup_xfail "*-*-*"
     }
-    gdb_test "p *y" "\\\$\[0-9\]* = \{c = 42 '\\*', f = 1 \\+ 0 \\* I\}" \
+    gdb_test "p *y" "\\\$\[0-9\]* = \{c = 42 '\\*', f = 1 \\+ 0i\}" \
 	    "print complex packed value in C"
 }
 
 if [runto f4] then {
-    gdb_test "p *y" "\\\$\[0-9\]* = \{c = 42 '\\*', f = 1 \\+ 0 \\* I\}" \
+    gdb_test "p *y" "\\\$\[0-9\]* = \{c = 42 '\\*', f = 1 \\+ 0i\}" \
 	    "print complex value in C"
 }
 

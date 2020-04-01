@@ -27,9 +27,9 @@ if { ![runto_main] } then {
 gdb_breakpoint [gdb_get_line_number "Break Here"]
 gdb_continue_to_breakpoint "breakpt" ".* Break Here\\. .*"
 
-gdb_test "p z1" " = 1.5 \\+ 4.5 \\* I"
-gdb_test "p z2" " = 2.5 \\+ -5.5 \\* I"
-gdb_test "p z3" " = 3.5 \\+ 6.5 \\* I"
+gdb_test "p z1" " = 1.5 \\+ 4.5i"
+gdb_test "p z2" " = 2.5 \\+ -5.5i"
+gdb_test "p z3" " = 3.5 \\+ 6.5i"
 
 gdb_test "ptype z1" " = complex double"
 gdb_test "ptype z2" " = complex float"

@@ -224,13 +224,13 @@ proc do_function_calls {prototypes} {
 
     if [support_complex_tests] {
 
-	gdb_test "p t_structs_fc(struct_val1)" ".*= 3 \\+ 3 \\* I" \
+	gdb_test "p t_structs_fc(struct_val1)" ".*= 3 \\+ 3i" \
 	    "call inferior func with struct - returns float _Complex"
 
-	gdb_test "p t_structs_dc(struct_val1)" ".*= 4 \\+ 4 \\* I" \
+	gdb_test "p t_structs_dc(struct_val1)" ".*= 4 \\+ 4i" \
 	    "call inferior func with struct - returns double _Complex"
 
-	gdb_test "p t_structs_ldc(struct_val1)" "= 5 \\+ 5 \\* I" \
+	gdb_test "p t_structs_ldc(struct_val1)" "= 5 \\+ 5i" \
 	    "call inferior func with struct - returns long double _Complex"
     }
 
