@@ -1,3 +1,8 @@
+2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* remote.c (remote_target::remote_parse_stop_reply): Remove the
+	check for no ptid in the stop reply when the target is non-stop.
+
 2020-04-01  Tom Tromey  <tromey@adacore.com>
 
 	* symtab.h (class lookup_name_info) <lookup_name_info>: Change

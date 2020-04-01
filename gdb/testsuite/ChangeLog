@@ -1,3 +1,8 @@
+2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.server/stop-reply-no-thread.exp: Enhance the test
+	scenario to cover execution until the end and also the case
+
 2020-03-31  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/c-linkage-name.exp: Fix test-case comment.  Set language to

@@ -7561,9 +7561,6 @@ Packet: '%s'\n"),
       event->ptid = minus_one_ptid;
       break;
     }
-
-  if (target_is_non_stop_p () && event->ptid == null_ptid)
-    error (_("No process or thread specified in stop reply: %s"), buf);
 }
 
 /* When the stub wants to tell GDB about a new notification reply, it
