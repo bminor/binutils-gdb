@@ -1,5 +1,12 @@
 2020-04-01  Tom Tromey  <tom@tromey.com>
 
+	PR exp/25299:
+	* valarith.c (promotion_type, complex_binop): New functions.
+	(scalar_binop): Handle complex numbers.  Use promotion_type.
+	(value_pos, value_neg, value_complement): Handle complex numbers.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
 	* c-exp.y (COMPLEX_INT, COMPLEX_FLOAT): New tokens.
 	(exp) <COMPLEX_INT, COMPLEX_FLOAT>: New rules.
 	(parse_number): Handle complex numbers.

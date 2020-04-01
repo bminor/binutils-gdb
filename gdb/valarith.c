@@ -911,6 +911,157 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
 	     TYPE_NAME (type2));
 }
 
+/* A helper function that finds the type to use for a binary operation
+   involving TYPE1 and TYPE2.  */
+
+static struct type *
+promotion_type (struct type *type1, struct type *type2)
+{
+  struct type *result_type;
+
+  if (is_floating_type (type1) || is_floating_type (type2))
+    {
+      /* If only one type is floating-point, use its type.
+	 Otherwise use the bigger type.  */
+      if (!is_floating_type (type1))
+	result_type = type2;
+      else if (!is_floating_type (type2))
+	result_type = type1;
+      else if (TYPE_LENGTH (type2) > TYPE_LENGTH (type1))
+	result_type = type2;
+      else
+	result_type = type1;
+    }
+  else
+    {
+      /* Integer types.  */
+      if (TYPE_LENGTH (type1) > TYPE_LENGTH (type2))
+	result_type = type1;
+      else if (TYPE_LENGTH (type2) > TYPE_LENGTH (type1))
+	result_type = type2;
+      else if (TYPE_UNSIGNED (type1))
+	result_type = type1;
+      else if (TYPE_UNSIGNED (type2))
+	result_type = type2;
+      else
+	result_type = type1;
+    }
+
+  return result_type;
+}
+
+static struct value *scalar_binop (struct value *arg1, struct value *arg2,
+				   enum exp_opcode op);
+
+/* Perform a binary operation on complex operands.  */
+
+static struct value *
+complex_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
+{
+  struct type *arg1_type = check_typedef (value_type (arg1));
+  struct type *arg2_type = check_typedef (value_type (arg2));
+
+  struct value *arg1_real, *arg1_imag, *arg2_real, *arg2_imag;
+  if (TYPE_CODE (arg1_type) == TYPE_CODE_COMPLEX)
+    {
+      arg1_real = value_real_part (arg1);
+      arg1_imag = value_imaginary_part (arg1);
+    }
+  else
+    {
+      arg1_real = arg1;
+      arg1_imag = value_zero (arg1_type, not_lval);
+    }
+  if (TYPE_CODE (arg2_type) == TYPE_CODE_COMPLEX)
+    {
+      arg2_real = value_real_part (arg2);
+      arg2_imag = value_imaginary_part (arg2);
+    }
+  else
+    {
+      arg2_real = arg2;
+      arg2_imag = value_zero (arg2_type, not_lval);
+    }
+
+  struct type *comp_type = promotion_type (value_type (arg1_real),
+					   value_type (arg2_real));
+  arg1_real = value_cast (comp_type, arg1_real);
+  arg1_imag = value_cast (comp_type, arg1_imag);
+  arg2_real = value_cast (comp_type, arg2_real);
+  arg2_imag = value_cast (comp_type, arg2_imag);
+
+  struct type *result_type = init_complex_type (nullptr, comp_type);
+
+  struct value *result_real, *result_imag;
+  switch (op)
+    {
+    case BINOP_ADD:
+    case BINOP_SUB:
+      result_real = scalar_binop (arg1_real, arg2_real, op);
+      result_imag = scalar_binop (arg1_imag, arg2_imag, op);
+      break;
+
+    case BINOP_MUL:
+      {
+	struct value *x1 = scalar_binop (arg1_real, arg2_real, op);
+	struct value *x2 = scalar_binop (arg1_imag, arg2_imag, op);
+	result_real = scalar_binop (x1, x2, BINOP_SUB);
+
+	x1 = scalar_binop (arg1_real, arg2_imag, op);
+	x2 = scalar_binop (arg1_imag, arg2_real, op);
+	result_imag = scalar_binop (x1, x2, BINOP_ADD);
+      }
+      break;
+
+    case BINOP_DIV:
+      {
+	if (TYPE_CODE (arg2_type) == TYPE_CODE_COMPLEX)
+	  {
+	    struct value *conjugate = value_complement (arg2);
+	    /* We have to reconstruct ARG1, in case the type was
+	       promoted.  */
+	    arg1 = value_literal_complex (arg1_real, arg1_imag, result_type);
+
+	    struct value *numerator = scalar_binop (arg1, conjugate,
+						    BINOP_MUL);
+	    arg1_real = value_real_part (numerator);
+	    arg1_imag = value_imaginary_part (numerator);
+
+	    struct value *x1 = scalar_binop (arg2_real, arg2_real, BINOP_MUL);
+	    struct value *x2 = scalar_binop (arg2_imag, arg2_imag, BINOP_MUL);
+	    arg2_real = scalar_binop (x1, x2, BINOP_ADD);
+	  }
+
+	result_real = scalar_binop (arg1_real, arg2_real, op);
+	result_imag = scalar_binop (arg1_imag, arg2_real, op);
+      }
+      break;
+
+    case BINOP_EQUAL:
+    case BINOP_NOTEQUAL:
+      {
+	struct value *x1 = scalar_binop (arg1_real, arg2_real, op);
+	struct value *x2 = scalar_binop (arg1_imag, arg2_imag, op);
+
+	LONGEST v1 = value_as_long (x1);
+	LONGEST v2 = value_as_long (x2);
+
+	if (op == BINOP_EQUAL)
+	  v1 = v1 && v2;
+	else
+	  v1 = v1 || v2;
+
+	return value_from_longest (value_type (x1), v1);
+      }
+      break;
+
+    default:
+      error (_("Invalid binary operation on numbers."));
+    }
+
+  return value_literal_complex (result_real, result_imag, result_type);
+}
+
 /* Perform a binary operation on two operands which have reasonable
    representations as integers or floats.  This includes booleans,
    characters, integers, or floats.
@@ -929,23 +1080,17 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   type1 = check_typedef (value_type (arg1));
   type2 = check_typedef (value_type (arg2));
 
+  if (TYPE_CODE (type1) == TYPE_CODE_COMPLEX
+      || TYPE_CODE (type2) == TYPE_CODE_COMPLEX)
+    return complex_binop (arg1, arg2, op);
+
   if ((!is_floating_value (arg1) && !is_integral_type (type1))
       || (!is_floating_value (arg2) && !is_integral_type (type2)))
     error (_("Argument to arithmetic operation not a number or boolean."));
 
   if (is_floating_type (type1) || is_floating_type (type2))
     {
-      /* If only one type is floating-point, use its type.
-	 Otherwise use the bigger type.  */
-      if (!is_floating_type (type1))
-	result_type = type2;
-      else if (!is_floating_type (type2))
-	result_type = type1;
-      else if (TYPE_LENGTH (type2) > TYPE_LENGTH (type1))
-	result_type = type2;
-      else
-	result_type = type1;
-
+      result_type = promotion_type (type1, type2);
       val = allocate_value (result_type);
 
       struct type *eff_type_v1, *eff_type_v2;
@@ -1013,16 +1158,8 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	 if one of the operands is unsigned.  */
       if (op == BINOP_RSH || op == BINOP_LSH || op == BINOP_EXP)
 	result_type = type1;
-      else if (TYPE_LENGTH (type1) > TYPE_LENGTH (type2))
-	result_type = type1;
-      else if (TYPE_LENGTH (type2) > TYPE_LENGTH (type1))
-	result_type = type2;
-      else if (TYPE_UNSIGNED (type1))
-	result_type = type1;
-      else if (TYPE_UNSIGNED (type2))
-	result_type = type2;
       else
-	result_type = type1;
+	result_type = promotion_type (type1, type2);
 
       if (TYPE_UNSIGNED (result_type))
 	{
@@ -1629,7 +1766,8 @@ value_pos (struct value *arg1)
   type = check_typedef (value_type (arg1));
 
   if (is_integral_type (type) || is_floating_value (arg1)
-      || (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type)))
+      || (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+      || TYPE_CODE (type) == TYPE_CODE_COMPLEX)
     return value_from_contents (type, value_contents (arg1));
   else
     error (_("Argument to positive operation not a number."));
@@ -1663,6 +1801,15 @@ value_neg (struct value *arg1)
 	}
       return val;
     }
+  else if (TYPE_CODE (type) == TYPE_CODE_COMPLEX)
+    {
+      struct value *real = value_real_part (arg1);
+      struct value *imag = value_imaginary_part (arg1);
+
+      real = value_neg (real);
+      imag = value_neg (imag);
+      return value_literal_complex (real, imag, type);
+    }
   else
     error (_("Argument to negate operation not a number."));
 }
@@ -1695,6 +1842,16 @@ value_complement (struct value *arg1)
           memcpy (value_contents_writeable (val) + i * TYPE_LENGTH (eltype),
                   value_contents_all (tmp), TYPE_LENGTH (eltype));
         }
+    }
+  else if (TYPE_CODE (type) == TYPE_CODE_COMPLEX)
+    {
+      /* GCC has an extension that treats ~complex as the complex
+	 conjugate.  */
+      struct value *real = value_real_part (arg1);
+      struct value *imag = value_imaginary_part (arg1);
+
+      imag = value_neg (imag);
+      return value_literal_complex (real, imag, type);
     }
   else
     error (_("Argument to complement operation not an integer, boolean."));
