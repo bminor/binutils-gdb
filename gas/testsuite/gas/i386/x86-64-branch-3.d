@@ -1,6 +1,7 @@
 #as: -J -mintel64
 #objdump: -dwr -Mintel64
 #name: x86-64 branch 3
+#notarget: *-*-solaris*
 
 .*: +file format .*
 

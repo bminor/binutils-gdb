@@ -1,3 +1,18 @@
+2020-04-01  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR gas/25732
+	* testsuite/gas/i386/solaris/x86-64-branch-2.d: New file.
+	* testsuite/gas/i386/solaris/x86-64-branch-3.d: New file.
+	* testsuite/gas/i386/solaris/x86-64-jump.d: Incorporate changes to
+	testsuite/gas/i386/x86-64-jump.d.
+	* gas/testsuite/gas/i386/solaris/x86-64-mpx-branch-1.d:
+	Incorporate changes to
+	gas/testsuite/gas/i386/x86-64-mpx-branch-1.d.
+	* testsuite/gas/i386/solaris/x86-64-mpx-branch-2.d : Incorporate
+	changes to testsuite/gas/i386/x86-64-mpx-branch-2.d.
+	* testsuite/gas/i386/x86-64-branch-2.d: Skip on *-*-solaris*.
+	* testsuite/gas/i386/x86-64-branch-3.d: Likewise.
+
 2020-03-31  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	PR 25611
