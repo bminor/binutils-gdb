@@ -43,6 +43,7 @@ libgdbsupport_a_SOURCES = \
     agent.cc \
     btrace-common.cc \
     buffer.cc \
+    capability.cc \
     cleanups.cc \
     common-debug.cc \
     common-exceptions.cc \

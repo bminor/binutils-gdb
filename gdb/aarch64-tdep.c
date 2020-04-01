@@ -54,6 +54,8 @@
 #include <algorithm>
 #include <unordered_map>
 
+#include "gdbsupport/capability.h"
+
 /* A Homogeneous Floating-Point or Short-Vector Aggregate may have at most
    four members.  */
 #define HA_MAX_NUM_FLDS		4
@@ -3721,6 +3723,30 @@ aarch64_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 namespace selftests
 {
 static void aarch64_process_record_test (void);
+
+
+
+static void aarch64_capability_decoding_test (void);
+
+static void aarch64_capability_decoding_test (void)
+{
+  capability c;
+
+  test_bit_functions ();
+  c.test_is_internal_exponent ();
+  c.test_get_exponent ();
+  c.test_get_effective_exponent ();
+  c.test_get_bottom ();
+  c.test_get_top ();
+  c.test_bounds_address ();
+  c.test_get_bounds ();
+  c.test_set_bounds ();
+  c.test_is_in_bounds ();
+  c.test_flags ();
+  c.test_object_types ();
+  c.test_permissions ();
+}
+
 }
 #endif
 
@@ -3745,6 +3771,9 @@ When on, AArch64 specific debugging is enabled."),
 			    selftests::aarch64_analyze_prologue_test);
   selftests::register_test ("aarch64-process-record",
 			    selftests::aarch64_process_record_test);
+
+  selftests::register_test ("capability_decoding",
+			    selftests::aarch64_capability_decoding_test);
 #endif
 }
 
