@@ -1,5 +1,10 @@
 2020-04-01  Tom Tromey  <tom@tromey.com>
 
+	* value.h (value_literal_complex): Add comment.
+	* valops.c (value_literal_complex): Refer to value.h.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
 	* c-exp.y (FLOAT_KEYWORD, COMPLEX): New tokens.
 	(scalar_type): New rule, from typebase.
 	(typebase): Use scalar_type.  Recognize complex types.

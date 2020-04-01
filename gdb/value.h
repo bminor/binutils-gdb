@@ -1138,6 +1138,10 @@ extern struct value *varying_to_slice (struct value *);
 
 extern struct value *value_slice (struct value *, int, int);
 
+/* Create a complex number.  The type is the complex type; the values
+   are cast to the underlying scalar type before the complex number is
+   created.  */
+
 extern struct value *value_literal_complex (struct value *, struct value *,
 					    struct type *);
 

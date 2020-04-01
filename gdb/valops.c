@@ -3854,12 +3854,10 @@ value_slice (struct value *array, int lowbound, int length)
   return slice;
 }
 
-/* Create a value for a FORTRAN complex number.  Currently most of the
-   time values are coerced to COMPLEX*16 (i.e. a complex number
-   composed of 2 doubles.  */
+/* See value.h.  */
 
 struct value *
-value_literal_complex (struct value *arg1, 
+value_literal_complex (struct value *arg1,
 		       struct value *arg2,
 		       struct type *type)
 {
