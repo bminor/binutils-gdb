@@ -86,3 +86,8 @@ gdb_test "print (5 + 7i) != (8 + 7i)" " = 1"
 gdb_test "print (5 + 7i) != (5 + 92i)" " = 1"
 
 gdb_test "print (20 - 4i) / (3 + 2i)" " = 4 \\+ -4i"
+
+gdb_test "print (_Complex int) 4" " = 4 \\+ 0i"
+gdb_test "print (_Complex float) 4.5" " = 4.5 \\+ 0i"
+gdb_test "ptype __complex__ short" " = _Complex short"
+gdb_test "print (_Complex int) (23.75 + 8.88i)" " = 23 \\+ 8i"

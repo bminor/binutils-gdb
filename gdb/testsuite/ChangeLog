@@ -1,5 +1,9 @@
 2020-04-01  Tom Tromey  <tom@tromey.com>
 
+	* gdb.base/complex-parts.exp: Add type tests.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
 	* gdb.base/complex-parts.exp: Add arithmetic tests.
 
 2020-04-01  Tom Tromey  <tom@tromey.com>

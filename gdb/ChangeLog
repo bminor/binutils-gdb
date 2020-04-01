@@ -1,5 +1,13 @@
 2020-04-01  Tom Tromey  <tom@tromey.com>
 
+	* c-exp.y (FLOAT_KEYWORD, COMPLEX): New tokens.
+	(scalar_type): New rule, from typebase.
+	(typebase): Use scalar_type.  Recognize complex types.
+	(field_name): Handle FLOAT_KEYWORD.
+	(ident_tokens): Add _Complex and __complex__.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
 	PR exp/25299:
 	* valarith.c (promotion_type, complex_binop): New functions.
 	(scalar_binop): Handle complex numbers.  Use promotion_type.
