@@ -146,7 +146,7 @@ libgdbsupport_a_AR = $(AR) $(ARFLAGS)
 libgdbsupport_a_LIBADD =
 @SELFTEST_TRUE@am__objects_1 = selftest.$(OBJEXT)
 am_libgdbsupport_a_OBJECTS = agent.$(OBJEXT) btrace-common.$(OBJEXT) \
-	buffer.$(OBJEXT) cleanups.$(OBJEXT) common-debug.$(OBJEXT) \
+	buffer.$(OBJEXT) capability.$(OBJEXT) cleanups.$(OBJEXT) common-debug.$(OBJEXT) \
 	common-exceptions.$(OBJEXT) common-inferior.$(OBJEXT) \
 	common-regcache.$(OBJEXT) common-utils.$(OBJEXT) \
 	environ.$(OBJEXT) errors.$(OBJEXT) event-loop.$(OBJEXT) \
@@ -362,6 +362,7 @@ libgdbsupport_a_SOURCES = \
     agent.cc \
     btrace-common.cc \
     buffer.cc \
+    capability.cc \
     cleanups.cc \
     common-debug.cc \
     common-exceptions.cc \
@@ -467,6 +468,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/agent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/btrace-common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/buffer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/capability.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cleanups.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common-debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common-exceptions.Po@am__quote@

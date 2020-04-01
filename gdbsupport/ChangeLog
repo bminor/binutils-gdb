@@ -1,3 +1,10 @@
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
+	* gdbsupport/Makefile.am: Regenerate.
+	* gdbsupport/Makefile.in: Adjust to include gdbsupport/capability.*.
+	* gdbsupport/capability.cc: New file.
+	* gdbsupport/capability.h: New file.
+
 2020-10-08  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tdesc.h (allocate_target_description): Update return type.
