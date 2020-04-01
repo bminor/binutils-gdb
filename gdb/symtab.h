@@ -185,29 +185,58 @@ private:
 class lookup_name_info final
 {
  public:
-  /* Create a new object.  */
-  lookup_name_info (std::string name,
+  /* We delete this overload so that the callers are required to
+     explicitly handle the lifetime of the name.  */
+  lookup_name_info (std::string &&name,
+		    symbol_name_match_type match_type,
+		    bool completion_mode = false,
+		    bool ignore_parameters = false) = delete;
+
+  /* This overload requires that NAME have a lifetime at least as long
+     as the lifetime of this object.  */
+  lookup_name_info (const std::string &name,
 		    symbol_name_match_type match_type,
 		    bool completion_mode = false,
 		    bool ignore_parameters = false)
     : m_match_type (match_type),
       m_completion_mode (completion_mode),
       m_ignore_parameters (ignore_parameters),
-      m_name (std::move (name))
+      m_name (name)
+  {}
+
+  /* This overload requires that NAME have a lifetime at least as long
+     as the lifetime of this object.  */
+  lookup_name_info (const char *name,
+		    symbol_name_match_type match_type,
+		    bool completion_mode = false,
+		    bool ignore_parameters = false)
+    : m_match_type (match_type),
+      m_completion_mode (completion_mode),
+      m_ignore_parameters (ignore_parameters),
+      m_name (name)
   {}
 
   /* Getters.  See description of each corresponding field.  */
   symbol_name_match_type match_type () const { return m_match_type; }
   bool completion_mode () const { return m_completion_mode; }
-  const std::string &name () const { return m_name; }
+  gdb::string_view name () const { return m_name; }
   const bool ignore_parameters () const { return m_ignore_parameters; }
+
+  /* Like the "name" method but guarantees that the returned string is
+     \0-terminated.  */
+  const char *c_str () const
+  {
+    /* Actually this is always guaranteed due to how the class is
+       constructed.  */
+    return m_name.data ();
+  }
 
   /* Return a version of this lookup name that is usable with
      comparisons against symbols have no parameter info, such as
      psymbols and GDB index symbols.  */
   lookup_name_info make_ignore_params () const
   {
-    return lookup_name_info (m_name, m_match_type, m_completion_mode,
+    return lookup_name_info (c_str (), m_match_type, m_completion_mode,
 			     true /* ignore params */);
   }
 
@@ -218,27 +247,27 @@ class lookup_name_info final
     if (!m_demangled_hashes_p[lang])
       {
 	m_demangled_hashes[lang]
-	  = ::search_name_hash (lang, language_lookup_name (lang).c_str ());
+	  = ::search_name_hash (lang, language_lookup_name (lang));
 	m_demangled_hashes_p[lang] = true;
       }
     return m_demangled_hashes[lang];
   }
 
   /* Get the search name for searches in language LANG.  */
-  const std::string &language_lookup_name (language lang) const
+  const char *language_lookup_name (language lang) const
   {
     switch (lang)
       {
       case language_ada:
-	return ada ().lookup_name ();
+	return ada ().lookup_name ().c_str ();
       case language_cplus:
-	return cplus ().lookup_name ();
+	return cplus ().lookup_name ().c_str ();
       case language_d:
-	return d ().lookup_name ();
+	return d ().lookup_name ().c_str ();
       case language_go:
-	return go ().lookup_name ();
+	return go ().lookup_name ().c_str ();
       default:
-	return m_name;
+	return m_name.data ();
       }
   }
 
@@ -287,7 +316,7 @@ private:
   symbol_name_match_type m_match_type;
   bool m_completion_mode;
   bool m_ignore_parameters;
-  std::string m_name;
+  gdb::string_view m_name;
 
   /* Language-specific info.  These fields are filled lazily the first
      time a lookup is done in the corresponding language.  They're

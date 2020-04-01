@@ -1,5 +1,29 @@
 2020-04-01  Tom Tromey  <tromey@adacore.com>
 
+	* symtab.h (class lookup_name_info) <lookup_name_info>: Change
+	"name" parameter to rvalue reference.  Initialize m_name_holder.
+	<lookup_name_info>: New overloads.
+	<name>: Return gdb::string_view.
+	<c_str>: New method.
+	<make_ignore_params>: Update.
+	<search_name_hash>: Update.
+	<language_lookup_name>: Return const char *.
+	<m_name>: Change type.
+	* symtab.c (demangle_for_lookup_info::demangle_for_lookup_info)
+	(demangle_for_lookup_info::demangle_for_lookup_info): Update.
+	(lookup_name_info::match_any): Update.
+	* psymtab.c (match_partial_symbol, lookup_partial_symbol):
+	Update.
+	* minsyms.c (linkage_name_str): Update.
+	* language.c (default_symbol_name_matcher): Update.
+	* dwarf2/read.c (mapped_index_base::find_name_components_bounds):
+	Update.
+	* ada-lang.c (ada_fold_name): Change parameter to string_view.
+	(ada_lookup_name_info::ada_lookup_name_info): Update.
+	(literal_symbol_name_matcher): Update.
+
+2020-04-01  Tom Tromey  <tromey@adacore.com>
+
 	* psymtab.c (psymtab_search_name): Remove function.
 	(psym_lookup_symbol): Create search name and lookup name here.
 	(lookup_partial_symbol): Remove "name" parameter; add

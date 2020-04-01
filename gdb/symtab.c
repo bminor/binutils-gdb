@@ -1790,7 +1790,7 @@ demangle_for_lookup_info::demangle_for_lookup_info
   if (lookup_name.ignore_parameters () && lang == language_cplus)
     {
       gdb::unique_xmalloc_ptr<char> without_params
-	= cp_remove_params_if_any (lookup_name.name ().c_str (),
+	= cp_remove_params_if_any (lookup_name.c_str (),
 				   lookup_name.completion_mode ());
 
       if (without_params != NULL)
@@ -1803,9 +1803,9 @@ demangle_for_lookup_info::demangle_for_lookup_info
     }
 
   if (lookup_name.match_type () == symbol_name_match_type::SEARCH_NAME)
-    m_demangled_name = lookup_name.name ();
+    m_demangled_name = lookup_name.c_str ();
   else
-    m_demangled_name = demangle_for_lookup (lookup_name.name ().c_str (),
+    m_demangled_name = demangle_for_lookup (lookup_name.c_str (),
 					    lang, storage);
 }
 
@@ -1816,7 +1816,7 @@ lookup_name_info::match_any ()
 {
   /* Lookup any symbol that "" would complete.  I.e., this matches all
      symbol names.  */
-  static const lookup_name_info lookup_name ({}, symbol_name_match_type::FULL,
+  static const lookup_name_info lookup_name ("", symbol_name_match_type::FULL,
 					     true);
 
   return lookup_name;

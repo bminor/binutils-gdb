@@ -3681,7 +3681,7 @@ mapped_index_base::find_name_components_bounds
     = this->name_components_casing == case_sensitive_on ? strcmp : strcasecmp;
 
   const char *lang_name
-    = lookup_name_without_params.language_lookup_name (lang).c_str ();
+    = lookup_name_without_params.language_lookup_name (lang);
 
   /* Comparison function object for lower_bound that matches against a
      given symbol name.  */

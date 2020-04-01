@@ -1016,17 +1016,17 @@ ada_encode (const char *decoded)
    to next call.  */
 
 static char *
-ada_fold_name (const char *name)
+ada_fold_name (gdb::string_view name)
 {
   static char *fold_buffer = NULL;
   static size_t fold_buffer_size = 0;
 
-  int len = strlen (name);
+  int len = name.size ();
   GROW_VECT (fold_buffer, fold_buffer_size, len + 1);
 
   if (name[0] == '\'')
     {
-      strncpy (fold_buffer, name + 1, len - 2);
+      strncpy (fold_buffer, name.data () + 1, len - 2);
       fold_buffer[len - 2] = '\000';
     }
   else
@@ -5657,8 +5657,8 @@ add_nonlocal_symbols (struct obstack *obstackp,
   if (num_defns_collected (obstackp) == 0 && global && !is_wild_match)
     {
       const char *name = ada_lookup_name (lookup_name);
-      lookup_name_info name1 (std::string ("<_ada_") + name + '>',
-			      symbol_name_match_type::FULL);
+      std::string bracket_name = std::string ("<_ada_") + name + '>';
+      lookup_name_info name1 (bracket_name, symbol_name_match_type::FULL);
 
       for (objfile *objfile : current_program_space->objfiles ())
         {
@@ -13946,14 +13946,16 @@ do_exact_match (const char *symbol_search_name,
 
 ada_lookup_name_info::ada_lookup_name_info (const lookup_name_info &lookup_name)
 {
-  const std::string &user_name = lookup_name.name ();
+  gdb::string_view user_name = lookup_name.name ();
 
   if (user_name[0] == '<')
     {
       if (user_name.back () == '>')
-	m_encoded_name = user_name.substr (1, user_name.size () - 2);
+	m_encoded_name
+	  = user_name.substr (1, user_name.size () - 2).to_string ();
       else
-	m_encoded_name = user_name.substr (1, user_name.size () - 1);
+	m_encoded_name
+	  = user_name.substr (1, user_name.size () - 1).to_string ();
       m_encoded_p = true;
       m_verbatim_p = true;
       m_wild_match_p = false;
@@ -13963,19 +13965,19 @@ ada_lookup_name_info::ada_lookup_name_info (const lookup_name_info &lookup_name)
     {
       m_verbatim_p = false;
 
-      m_encoded_p = user_name.find ("__") != std::string::npos;
+      m_encoded_p = user_name.find ("__") != gdb::string_view::npos;
 
       if (!m_encoded_p)
 	{
-	  const char *folded = ada_fold_name (user_name.c_str ());
+	  const char *folded = ada_fold_name (user_name);
 	  const char *encoded = ada_encode_1 (folded, false);
 	  if (encoded != NULL)
 	    m_encoded_name = encoded;
 	  else
-	    m_encoded_name = user_name;
+	    m_encoded_name = user_name.to_string ();
 	}
       else
-	m_encoded_name = user_name;
+	m_encoded_name = user_name.to_string ();
 
       /* Handle the 'package Standard' special case.  See description
 	 of m_standard_p.  */
@@ -14022,12 +14024,12 @@ literal_symbol_name_matcher (const char *symbol_search_name,
 			     const lookup_name_info &lookup_name,
 			     completion_match_result *comp_match_res)
 {
-  const std::string &name = lookup_name.name ();
+  gdb::string_view name_view = lookup_name.name ();
 
-  int cmp = (lookup_name.completion_mode ()
-	     ? strncmp (symbol_search_name, name.c_str (), name.size ())
-	     : strcmp (symbol_search_name, name.c_str ()));
-  if (cmp == 0)
+  if (lookup_name.completion_mode ()
+      ? (strncmp (symbol_search_name, name_view.data (),
+		  name_view.size ()) == 0)
+      : symbol_search_name == name_view)
     {
       if (comp_match_res != NULL)
 	comp_match_res->set_match (symbol_search_name);

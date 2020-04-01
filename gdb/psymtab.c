@@ -578,8 +578,7 @@ match_partial_symbol (struct objfile *objfile,
 	  gdb_assert (center < top);
 
 	  enum language lang = (*center)->ginfo.language ();
-	  const char *lang_ln
-	    = name.language_lookup_name (lang).c_str ();
+	  const char *lang_ln = name.language_lookup_name (lang);
 
 	  if (ordered_compare ((*center)->ginfo.search_name (),
 			       lang_ln) >= 0)
@@ -658,7 +657,7 @@ lookup_partial_symbol (struct objfile *objfile,
 	    internal_error (__FILE__, __LINE__,
 			    _("failed internal consistency check"));
 	  if (strcmp_iw_ordered ((*center)->ginfo.search_name (),
-				 lookup_name.name ().c_str ()) >= 0)
+				 lookup_name.c_str ()) >= 0)
 	    {
 	      top = center;
 	    }
