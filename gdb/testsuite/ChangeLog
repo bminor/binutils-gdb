@@ -1,3 +1,8 @@
+2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.multi/stop-all-on-exit.c: New test.
+	* gdb.multi/stop-all-on-exit.exp: New file.
+
 2020-04-01  Hannes Domani  <ssbssa@yahoo.de>
 
 	PR gdb/24789

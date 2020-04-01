@@ -1,5 +1,13 @@
 2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* infrun.c (stop_all_threads): Update assertion, plus when
+	stopping threads, take into account that we might be trying
+	to stop an all-stop target.
+	(stop_waiting): Call 'stop_all_threads' if there exists a
+	non-stop target.
+
+2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* target.h (exists_non_stop_target): New function declaration.
 	* target.c (exists_non_stop_target): New function.
 
