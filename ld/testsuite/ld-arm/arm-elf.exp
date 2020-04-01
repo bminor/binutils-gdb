@@ -1264,4 +1264,6 @@ run_ld_link_tests $arm_unwind_tests
 
 if { ![istarget "arm*-*-nacl*"] } {
     run_dump_test "thumb-plt"
+    run_dump_test "thumb-plt-got"
 }
+

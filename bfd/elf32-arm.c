@@ -9993,6 +9993,12 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 	      rel.r_info = ELF32_R_INFO (dynindx, R_ARM_JUMP_SLOT);
 	      initial_got_entry = (splt->output_section->vma
 				   + splt->output_offset);
+
+	      /* PR ld/16017
+		 When thumb only we need to set the LSB for any address that
+		 will be used with an interworking branch instruction.  */
+	      if (using_thumb_only (htab))
+		initial_got_entry |= 1;
 	    }
 	}
 

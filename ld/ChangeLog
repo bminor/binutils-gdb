@@ -3,6 +3,15 @@
 	Backport from mainline.
 	2020-04-01  Tamar Christina  <tamar.christina@arm.com>
 
+	PR ld/16017
+	* testsuite/ld-arm/arm-elf.exp (thumb-plt-got): New.
+	* testsuite/ld-arm/thumb-plt-got.d: New test.
+
+2020-04-08  Tamar Christina  <tamar.christina@arm.com>
+
+	Backport from mainline.
+	2020-04-01  Tamar Christina  <tamar.christina@arm.com>
+
 	* testsuite/ld-arm/arm-elf.exp (thumb-plt): New.
 	* testsuite/ld-arm/thumb-plt.d: New test.
 	* testsuite/ld-arm/thumb-plt.s: New test.
