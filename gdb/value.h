@@ -1141,6 +1141,14 @@ extern struct value *value_slice (struct value *, int, int);
 extern struct value *value_literal_complex (struct value *, struct value *,
 					    struct type *);
 
+/* Return the real part of a complex value.  */
+
+extern struct value *value_real_part (struct value *value);
+
+/* Return the imaginary part of a complex value.  */
+
+extern struct value *value_imaginary_part (struct value *value);
+
 extern struct value *find_function_in_inferior (const char *,
 						struct objfile **);
 

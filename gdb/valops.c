@@ -3877,6 +3877,31 @@ value_literal_complex (struct value *arg1,
   return val;
 }
 
+/* See value.h.  */
+
+struct value *
+value_real_part (struct value *value)
+{
+  struct type *type = check_typedef (value_type (value));
+  struct type *ttype = TYPE_TARGET_TYPE (type);
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_COMPLEX);
+  return value_from_component (value, ttype, 0);
+}
+
+/* See value.h.  */
+
+struct value *
+value_imaginary_part (struct value *value)
+{
+  struct type *type = check_typedef (value_type (value));
+  struct type *ttype = TYPE_TARGET_TYPE (type);
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_COMPLEX);
+  return value_from_component (value, ttype,
+			       TYPE_LENGTH (check_typedef (ttype)));
+}
+
 /* Cast a value into the appropriate complex data type.  */
 
 static struct value *

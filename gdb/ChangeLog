@@ -1,5 +1,13 @@
 2020-04-01  Tom Tromey  <tom@tromey.com>
 
+	* valprint.c (generic_value_print_complex): Use accessors.
+	* value.h (value_real_part, value_imaginary_part): Declare.
+	* valops.c (value_real_part, value_imaginary_part): New
+	functions.
+	* value.c (creal_internal_fn, cimag_internal_fn): Use accessors.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
 	* stabsread.c (rs6000_builtin_type, read_sun_floating_type)
 	(read_range_type): Update.
 	* mdebugread.c (basic_type): Update.
