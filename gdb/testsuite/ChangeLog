@@ -1,5 +1,13 @@
 2020-04-01  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.rust/union.rs: New file.
+	* gdb.rust/union.exp: New file.
+	* gdb.rust/simple.rs (Union, Union2): Move to union.rs.
+	(main): Update.
+	* gdb.rust/simple.exp: Move union tests to union.exp.
+
+2020-04-01  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.rust/simple.rs (main): Remove "y0".
 
 2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>

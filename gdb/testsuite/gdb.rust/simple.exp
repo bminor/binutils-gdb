@@ -335,17 +335,6 @@ gdb_test "print parametrized.next.val" \
 gdb_test "print parametrized" \
     " = simple::ParametrizedStruct<i32> \\{next: simple::ParametrizedEnum<\[a-z:\]*Box<simple::ParametrizedStruct<i32>>>::Val\\{val: $hex\\}, value: 0\\}"
 
-gdb_test "print u" " = simple::Union {f1: -1, f2: 255}"
-
-gdb_test_sequence "ptype/o Union" "" {
-    "/\\* offset    |  size \\*/  type = union simple::Union {"
-    "/\\*                 1 \\*/    f1: i8,"
-    "/\\*                 1 \\*/    f2: u8,"
-    ""
-    "                           /\\* total size \\(bytes\\):    1 \\*/"
-    "                         }"
-}
-
 gdb_test_sequence "ptype/o SimpleLayout" "" {
     "/\\* offset    |  size \\*/  type = struct simple::SimpleLayout {"
     "/\\*    0      |     2 \\*/    f1: u16,"
@@ -354,8 +343,6 @@ gdb_test_sequence "ptype/o SimpleLayout" "" {
     "                           /\\* total size \\(bytes\\):    4 \\*/"
     "                         }"
 }
-
-gdb_test "print u2" " = simple::Union2 {name: \\\[1\\\]}"
 
 gdb_test "print nonzero_offset" " = simple::EnumWithNonzeroOffset {a: core::option::Option<u8>::Some\\(1\\), b: core::option::Option<u8>::None}"
 
