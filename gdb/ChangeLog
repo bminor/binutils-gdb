@@ -1,3 +1,8 @@
+2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* target.h (exists_non_stop_target): New function declaration.
+	* target.c (exists_non_stop_target): New function.
+
 2020-04-01  Hannes Domani  <ssbssa@yahoo.de>
 
 	PR gdb/24789

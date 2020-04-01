@@ -1857,6 +1857,9 @@ extern enum auto_boolean target_non_stop_enabled;
    non-stop" is on.  */
 extern int target_is_non_stop_p (void);
 
+/* Return true if at least one inferior has a non-stop target.  */
+extern bool exists_non_stop_target ();
+
 #define target_execution_direction() \
   (current_top_target ()->execution_direction ())
 
