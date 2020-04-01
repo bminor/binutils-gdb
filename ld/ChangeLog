@@ -1,3 +1,12 @@
+2020-04-08  Tamar Christina  <tamar.christina@arm.com>
+
+	Backport from mainline.
+	2020-04-01  Tamar Christina  <tamar.christina@arm.com>
+
+	* testsuite/ld-arm/arm-elf.exp (thumb-plt): New.
+	* testsuite/ld-arm/thumb-plt.d: New test.
+	* testsuite/ld-arm/thumb-plt.s: New test.
+
 2020-03-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-plugin/lto.exp (lto_link_tests): Run PR ld/25355

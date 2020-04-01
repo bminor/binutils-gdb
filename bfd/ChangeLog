@@ -1,3 +1,10 @@
+2020-04-08  Tamar Christina  <tamar.christina@arm.com>
+
+	Backport from mainline.
+	2020-04-01  Tamar Christina  <tamar.christina@arm.com>
+
+	* elf32-arm.c (elf32_thumb2_plt_entry): Fix PC-rel offset.
+
 2020-03-30  Alan Modra  <amodra@gmail.com>
 
 	PR 25745
