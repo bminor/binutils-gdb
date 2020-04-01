@@ -1,3 +1,8 @@
+2020-04-01  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c (mmo_scan): Create .text section only when needed, not
+	from the start.
+
 2020-03-31  Alan Modra  <amodra@gmail.com>
 
 	* coff-alpha.c (alpha_ecoff_get_elt_at_filepos): Correct bfd_bread
