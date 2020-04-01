@@ -144,7 +144,6 @@ fn main () {
 
     let field1 = 77;
     let field2 = 88;
-    let y0 = HiBob { field1, field2 };
 
     let univariant = Univariant::Foo {a : 1};
     let univariant_anon = UnivariantAnon::Foo(1);
