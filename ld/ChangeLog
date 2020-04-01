@@ -1,3 +1,7 @@
+2020-04-01  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* testsuite/ld-scripts/defined4.d: Don't xfail mmix-*-*.
+
 2020-03-30  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/25662
