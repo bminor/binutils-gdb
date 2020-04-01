@@ -1,3 +1,22 @@
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
+	* stabsread.c (rs6000_builtin_type, read_sun_floating_type)
+	(read_range_type): Update.
+	* mdebugread.c (basic_type): Update.
+	* go-lang.c (build_go_types): Use init_complex_type.
+	* gdbtypes.h (struct main_type) <complex_type>: New member.
+	(init_complex_type): Update.
+	(arch_complex_type): Don't declare.
+	* gdbtypes.c (init_complex_type): Remove "objfile" parameter.
+	Make name if none given.  Use alloc_type_copy.  Look for cached
+	complex type.
+	(arch_complex_type): Remove.
+	(gdbtypes_post_init): Use init_complex_type.
+	* f-lang.c (build_fortran_types): Use init_complex_type.
+	* dwarf2/read.c (read_base_type): Update.
+	* d-lang.c (build_d_types): Use init_complex_type.
+	* ctfread.c (read_base_type): Update.
+
 2020-04-01  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* infrun.c (stop_all_threads): Update assertion, plus when

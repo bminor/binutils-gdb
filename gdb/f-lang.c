@@ -741,14 +741,11 @@ build_fortran_types (struct gdbarch *gdbarch)
       = arch_type (gdbarch, TYPE_CODE_ERROR, 128, "real*16");
 
   builtin_f_type->builtin_complex_s8
-    = arch_complex_type (gdbarch, "complex*8",
-			 builtin_f_type->builtin_real);
+    = init_complex_type ("complex*8", builtin_f_type->builtin_real);
   builtin_f_type->builtin_complex_s16
-    = arch_complex_type (gdbarch, "complex*16",
-			 builtin_f_type->builtin_real_s8);
+    = init_complex_type ("complex*16", builtin_f_type->builtin_real_s8);
   builtin_f_type->builtin_complex_s32
-    = arch_complex_type (gdbarch, "complex*32",
-			 builtin_f_type->builtin_real_s16);
+    = init_complex_type ("complex*32", builtin_f_type->builtin_real_s16);
 
   return builtin_f_type;
 }

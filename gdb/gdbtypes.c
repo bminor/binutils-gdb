@@ -3025,19 +3025,40 @@ init_decfloat_type (struct objfile *objfile, int bit, const char *name)
   return t;
 }
 
-/* Allocate a TYPE_CODE_COMPLEX type structure associated with OBJFILE.
-   NAME is the type name.  TARGET_TYPE is the component float type.  */
+/* Allocate a TYPE_CODE_COMPLEX type structure.  NAME is the type
+   name.  TARGET_TYPE is the component type.  */
 
 struct type *
-init_complex_type (struct objfile *objfile,
-		   const char *name, struct type *target_type)
+init_complex_type (const char *name, struct type *target_type)
 {
   struct type *t;
 
-  t = init_type (objfile, TYPE_CODE_COMPLEX,
-		 2 * TYPE_LENGTH (target_type) * TARGET_CHAR_BIT, name);
-  TYPE_TARGET_TYPE (t) = target_type;
-  return t;
+  gdb_assert (TYPE_CODE (target_type) == TYPE_CODE_INT
+	      || TYPE_CODE (target_type) == TYPE_CODE_FLT);
+
+  if (TYPE_MAIN_TYPE (target_type)->flds_bnds.complex_type == nullptr)
+    {
+      if (name == nullptr)
+	{
+	  char *new_name
+	    = (char *) TYPE_ALLOC (target_type,
+				   strlen (TYPE_NAME (target_type))
+				   + strlen ("_Complex ") + 1);
+	  strcpy (new_name, "_Complex ");
+	  strcat (new_name, TYPE_NAME (target_type));
+	  name = new_name;
+	}
+
+      t = alloc_type_copy (target_type);
+      set_type_code (t, TYPE_CODE_COMPLEX);
+      TYPE_LENGTH (t) = 2 * TYPE_LENGTH (target_type);
+      TYPE_NAME (t) = name;
+
+      TYPE_TARGET_TYPE (t) = target_type;
+      TYPE_MAIN_TYPE (target_type)->flds_bnds.complex_type = t;
+    }
+
+  return TYPE_MAIN_TYPE (target_type)->flds_bnds.complex_type;
 }
 
 /* Allocate a TYPE_CODE_PTR type structure associated with OBJFILE.
@@ -5259,21 +5280,6 @@ arch_decfloat_type (struct gdbarch *gdbarch, int bit, const char *name)
   return t;
 }
 
-/* Allocate a TYPE_CODE_COMPLEX type structure associated with GDBARCH.
-   NAME is the type name.  TARGET_TYPE is the component float type.  */
-
-struct type *
-arch_complex_type (struct gdbarch *gdbarch,
-		   const char *name, struct type *target_type)
-{
-  struct type *t;
-
-  t = arch_type (gdbarch, TYPE_CODE_COMPLEX,
-		 2 * TYPE_LENGTH (target_type) * TARGET_CHAR_BIT, name);
-  TYPE_TARGET_TYPE (t) = target_type;
-  return t;
-}
-
 /* Allocate a TYPE_CODE_PTR type structure associated with GDBARCH.
    BIT is the pointer type size in bits.  NAME is the type name.
    TARGET_TYPE is the pointer target type.  Always sets the pointer type's
@@ -5497,11 +5503,9 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
     = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
 		       "long double", gdbarch_long_double_format (gdbarch));
   builtin_type->builtin_complex
-    = arch_complex_type (gdbarch, "complex",
-			 builtin_type->builtin_float);
+    = init_complex_type ("complex", builtin_type->builtin_float);
   builtin_type->builtin_double_complex
-    = arch_complex_type (gdbarch, "double complex",
-			 builtin_type->builtin_double);
+    = init_complex_type ("double complex", builtin_type->builtin_double);
   builtin_type->builtin_string
     = arch_type (gdbarch, TYPE_CODE_STRING, TARGET_CHAR_BIT, "string");
   builtin_type->builtin_bool

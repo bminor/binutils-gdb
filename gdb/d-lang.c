@@ -314,14 +314,11 @@ build_d_types (struct gdbarch *gdbarch)
     = arch_float_type (gdbarch, gdbarch_long_double_bit (gdbarch),
 		       "ireal", gdbarch_long_double_format (gdbarch));
   builtin_d_type->builtin_cfloat
-    = arch_complex_type (gdbarch, "cfloat",
-			 builtin_d_type->builtin_float);
+    = init_complex_type ("cfloat", builtin_d_type->builtin_float);
   builtin_d_type->builtin_cdouble
-    = arch_complex_type (gdbarch, "cdouble",
-			 builtin_d_type->builtin_double);
+    = init_complex_type ("cdouble", builtin_d_type->builtin_double);
   builtin_d_type->builtin_creal
-    = arch_complex_type (gdbarch, "creal",
-			 builtin_d_type->builtin_real);
+    = init_complex_type ("creal", builtin_d_type->builtin_real);
 
   /* Character types.  */
   builtin_d_type->builtin_char

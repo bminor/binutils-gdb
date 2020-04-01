@@ -1429,13 +1429,11 @@ basic_type (int bt, struct objfile *objfile)
       break;
 
     case btComplex:
-      tp = init_complex_type (objfile, "complex",
-			      basic_type (btFloat, objfile));
+      tp = init_complex_type ("complex", basic_type (btFloat, objfile));
       break;
 
     case btDComplex:
-      tp = init_complex_type (objfile, "double complex",
-			      basic_type (btFloat, objfile));
+      tp = init_complex_type ("double complex", basic_type (btFloat, objfile));
       break;
 
     case btFixedDec:

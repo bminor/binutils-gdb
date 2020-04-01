@@ -2186,12 +2186,12 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
       break;
     case 25:
       /* Complex type consisting of two IEEE single precision values.  */
-      rettype = init_complex_type (objfile, "complex",
+      rettype = init_complex_type ("complex",
 				   rs6000_builtin_type (12, objfile));
       break;
     case 26:
       /* Complex type consisting of two IEEE double precision values.  */
-      rettype = init_complex_type (objfile, "double complex",
+      rettype = init_complex_type ("double complex",
 				   rs6000_builtin_type (13, objfile));
       break;
     case 27:
@@ -3805,7 +3805,7 @@ read_sun_floating_type (const char **pp, int typenums[2],
       || details == NF_COMPLEX32)
     {
       rettype = dbx_init_float_type (objfile, nbits / 2);
-      return init_complex_type (objfile, NULL, rettype);
+      return init_complex_type (NULL, rettype);
     }
 
   return dbx_init_float_type (objfile, nbits);
@@ -4099,7 +4099,7 @@ read_range_type (const char **pp, int typenums[2], int type_size,
 	= dbx_init_float_type (objfile, n2 * TARGET_CHAR_BIT);
 
       if (self_subrange)
-	return init_complex_type (objfile, NULL, float_type);
+	return init_complex_type (NULL, float_type);
       else
 	return float_type;
     }
