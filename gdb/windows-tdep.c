@@ -932,8 +932,8 @@ is_linked_with_cygwin_dll (bfd *abfd)
   /* Find the virtual address of the .idata section.  We must subtract this
      from the RVAs (relative virtual addresses) to obtain an offset in the
      section. */
-  bfd_vma idata_addr =
-    pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
+  bfd_vma idata_addr
+    = pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
 
   /* Map the section's data.  */
   bfd_size_type idata_size;
@@ -984,14 +984,14 @@ is outside .idata section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
       const gdb_byte *name = &idata_contents[name_addr - idata_addr];
 
       /* Make sure we don't overshoot the end of the section with the streq.  */
-      if (name + sizeof(CYGWIN_DLL_NAME) > end)
+      if (name + sizeof (CYGWIN_DLL_NAME) > end)
 	continue;
 
       /* Finally, check if this is the dll name we are looking for.  */
       if (streq ((const char *) name, CYGWIN_DLL_NAME))
 	return true;
 
-      iter += sizeof(pe_import_directory_entry);
+      iter += sizeof (pe_import_directory_entry);
     }
 
     return false;
