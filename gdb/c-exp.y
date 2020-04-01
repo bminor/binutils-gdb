@@ -54,6 +54,7 @@
 #include "typeprint.h"
 #include "cp-abi.h"
 #include "type-stack.h"
+#include "target-float.h"
 
 #define parse_type(ps) builtin_type (ps->gdbarch ())
 
@@ -185,8 +186,8 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 
 %type <type_stack> ptr_operator_ts abs_decl direct_abs_decl
 
-%token <typed_val_int> INT
-%token <typed_val_float> FLOAT
+%token <typed_val_int> INT COMPLEX_INT
+%token <typed_val_float> FLOAT COMPLEX_FLOAT
 
 /* Both NAME and TYPENAME tokens represent symbols in the input,
    and both convey their data as strings.
@@ -775,6 +776,22 @@ exp	:	INT
 			  write_exp_elt_opcode (pstate, OP_LONG); }
 	;
 
+exp	:	COMPLEX_INT
+			{
+			  write_exp_elt_opcode (pstate, OP_LONG);
+			  write_exp_elt_type (pstate, TYPE_TARGET_TYPE ($1.type));
+			  write_exp_elt_longcst (pstate, 0);
+			  write_exp_elt_opcode (pstate, OP_LONG);
+			  write_exp_elt_opcode (pstate, OP_LONG);
+			  write_exp_elt_type (pstate, TYPE_TARGET_TYPE ($1.type));
+			  write_exp_elt_longcst (pstate, (LONGEST) ($1.val));
+			  write_exp_elt_opcode (pstate, OP_LONG);
+			  write_exp_elt_opcode (pstate, OP_COMPLEX);
+			  write_exp_elt_type (pstate, $1.type);
+			  write_exp_elt_opcode (pstate, OP_COMPLEX);
+			}
+	;
+
 exp	:	CHAR
 			{
 			  struct stoken_vector vec;
@@ -802,6 +819,27 @@ exp	:	FLOAT
 			  write_exp_elt_type (pstate, $1.type);
 			  write_exp_elt_floatcst (pstate, $1.val);
 			  write_exp_elt_opcode (pstate, OP_FLOAT); }
+	;
+
+exp	:	COMPLEX_FLOAT
+			{
+			  struct type *underlying
+			    = TYPE_TARGET_TYPE ($1.type);
+
+			  write_exp_elt_opcode (pstate, OP_FLOAT);
+			  write_exp_elt_type (pstate, underlying);
+			  gdb_byte val[16];
+			  target_float_from_host_double (val, underlying, 0);
+			  write_exp_elt_floatcst (pstate, val);
+			  write_exp_elt_opcode (pstate, OP_FLOAT);
+			  write_exp_elt_opcode (pstate, OP_FLOAT);
+			  write_exp_elt_type (pstate, underlying);
+			  write_exp_elt_floatcst (pstate, $1.val);
+			  write_exp_elt_opcode (pstate, OP_FLOAT);
+			  write_exp_elt_opcode (pstate, OP_COMPLEX);
+			  write_exp_elt_type (pstate, $1.type);
+			  write_exp_elt_opcode (pstate, OP_COMPLEX);
+			}
 	;
 
 exp	:	variable
@@ -1853,7 +1891,10 @@ parse_number (struct parser_state *par_state,
   /* Number of "L" suffixes encountered.  */
   int long_p = 0;
 
-  /* We have found a "L" or "U" suffix.  */
+  /* Imaginary number.  */
+  bool imaginary_p = false;
+
+  /* We have found a "L" or "U" (or "i") suffix.  */
   int found_suffix = 0;
 
   ULONGEST high_bit;
@@ -1866,6 +1907,12 @@ parse_number (struct parser_state *par_state,
 
   if (parsed_float)
     {
+      if (len >= 1 && p[len - 1] == 'i')
+	{
+	  imaginary_p = true;
+	  --len;
+	}
+
       /* Handle suffixes for decimal floating-point: "df", "dd" or "dl".  */
       if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'f')
 	{
@@ -1909,7 +1956,12 @@ parse_number (struct parser_state *par_state,
 			putithere->typed_val_float.type,
 			putithere->typed_val_float.val))
         return ERROR;
-      return FLOAT;
+
+      if (imaginary_p)
+	putithere->typed_val_float.type
+	  = init_complex_type (nullptr, putithere->typed_val_float.type);
+
+      return imaginary_p ? COMPLEX_FLOAT : FLOAT;
     }
 
   /* Handle base-switching prefixes 0x, 0t, 0d, 0 */
@@ -1958,7 +2010,7 @@ parse_number (struct parser_state *par_state,
       c = *p++;
       if (c >= 'A' && c <= 'Z')
 	c += 'a' - 'A';
-      if (c != 'l' && c != 'u')
+      if (c != 'l' && c != 'u' && c != 'i')
 	n *= base;
       if (c >= '0' && c <= '9')
 	{
@@ -1984,6 +2036,11 @@ parse_number (struct parser_state *par_state,
 	      unsigned_p = 1;
 	      found_suffix = 1;
 	    }
+	  else if (c == 'i')
+	    {
+	      imaginary_p = true;
+	      found_suffix = 1;
+	    }
 	  else
 	    return ERROR;	/* Char not a digit */
 	}
@@ -1993,13 +2050,13 @@ parse_number (struct parser_state *par_state,
       /* Portably test for overflow (only works for nonzero values, so make
 	 a second check for zero).  FIXME: Can't we just make n and prevn
 	 unsigned and avoid this?  */
-      if (c != 'l' && c != 'u' && (prevn >= n) && n != 0)
+      if (c != 'l' && c != 'u' && c != 'i' && (prevn >= n) && n != 0)
 	unsigned_p = 1;		/* Try something unsigned */
 
       /* Portably test for unsigned overflow.
 	 FIXME: This check is wrong; for example it doesn't find overflow
 	 on 0x123456789 when LONGEST is 32 bits.  */
-      if (c != 'l' && c != 'u' && n != 0)
+      if (c != 'l' && c != 'u' && c != 'i' && n != 0)
 	{	
 	  if (unsigned_p && prevn >= n)
 	    error (_("Numeric constant too large."));
@@ -2071,7 +2128,11 @@ parse_number (struct parser_state *par_state,
        putithere->typed_val_int.type = signed_type;
      }
 
-   return INT;
+   if (imaginary_p)
+     putithere->typed_val_int.type
+       = init_complex_type (nullptr, putithere->typed_val_int.type);
+
+   return imaginary_p ? COMPLEX_INT : INT;
 }
 
 /* Temporary obstack used for holding strings.  */

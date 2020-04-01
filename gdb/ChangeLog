@@ -1,5 +1,11 @@
 2020-04-01  Tom Tromey  <tom@tromey.com>
 
+	* c-exp.y (COMPLEX_INT, COMPLEX_FLOAT): New tokens.
+	(exp) <COMPLEX_INT, COMPLEX_FLOAT>: New rules.
+	(parse_number): Handle complex numbers.
+
+2020-04-01  Tom Tromey  <tom@tromey.com>
+
 	* c-valprint.c (c_decorations): Change complex suffix to "i".
 
 2020-04-01  Tom Tromey  <tom@tromey.com>
