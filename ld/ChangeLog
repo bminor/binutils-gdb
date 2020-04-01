@@ -1,3 +1,8 @@
+2020-04-01  Tamar Christina  <tamar.christina@arm.com>
+
+	PR ld/16017
+	* testsuite/ld-arm/arm-elf.exp (thumb-plt, thumb-plt-got): Skip for NaCL.
+
 2020-04-01  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/25747
