@@ -1,3 +1,10 @@
+2020-04-01  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/25747
+	* ldfile.c (ldfile_open_file): If a search for a library fails,
+	but there is a file that would match if it had a "lib" prefix to
+	its name, then tell the user.
+
 2020-04-01  Tamar Christina  <tamar.christina@arm.com>
 
 	PR ld/16017

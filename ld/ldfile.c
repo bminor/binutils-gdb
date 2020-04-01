@@ -445,6 +445,22 @@ ldfile_open_file (lang_input_statement_type *entry)
 		   entry->local_sym_name, ld_sysroot);
 	  else
 	    einfo (_("%P: cannot find %s\n"), entry->local_sym_name);
+
+	  /* PR 25747: Be kind to users who forgot to add the
+	     "lib" prefix to their library when it was created.  */
+	  for (arch = search_arch_head; arch != NULL; arch = arch->next)
+	    {
+	      if (ldfile_open_file_search (arch->name, entry, "", ".a"))
+		{
+		  const char * base = lbasename (entry->filename);
+
+		  einfo (_("%P: note to link with %s use use -l:%s or rename it to lib%s\n"),
+			 entry->filename, base, base);
+		  bfd_close (entry->the_bfd);
+		  entry->the_bfd = NULL;
+		  break;
+		}
+	    }
 	  entry->flags.missing_file = TRUE;
 	  input_flags.missing_file = TRUE;
 	}
