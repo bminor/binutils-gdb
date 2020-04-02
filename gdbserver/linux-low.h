@@ -131,8 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* See target.h.  */
-  int (*get_ipa_tdesc_idx) (void);
 };
 
 extern struct linux_target_ops the_low_target;
@@ -318,8 +316,6 @@ public:
 #endif
 
   bool supports_catch_syscall () override;
-
-  int get_ipa_tdesc_idx () override;
 
   /* Return the information to access registers.  This has public
      visibility because proc-service uses it.  */

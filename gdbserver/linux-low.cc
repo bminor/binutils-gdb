@@ -6407,15 +6407,6 @@ linux_process_target::low_supports_catch_syscall ()
   return false;
 }
 
-int
-linux_process_target::get_ipa_tdesc_idx ()
-{
-  if (the_low_target.get_ipa_tdesc_idx == NULL)
-    return 0;
-
-  return (*the_low_target.get_ipa_tdesc_idx) ();
-}
-
 CORE_ADDR
 linux_process_target::read_pc (regcache *regcache)
 {

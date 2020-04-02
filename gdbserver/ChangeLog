@@ -1,5 +1,27 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Remove the 'get_ipa_tdesc_idx' linux target op and let a concrete
+	linux target define the op by overriding the declaration in
+	process_stratum_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <get_ipa_tdesc_idx>: Remove.
+	* linux-low.cc (linux_process_target::get_ipa_tdesc_idx): Remove.
+	* linux-x86-low.cc (class x86_target) <get_ipa_tdesc_idx>: Declare.
+	(x86_get_ipa_tdesc_idx): Turn into...
+	(x86_target::get_ipa_tdesc_idx): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target) <get_ipa_tdesc_idx>: Declare.
+	(ppc_get_ipa_tdesc_idx): Turn into...
+	(ppc_target::get_ipa_tdesc_idx): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target) <get_ipa_tdesc_idx>: Declare.
+	(s390_get_ipa_tdesc_idx): Turn into...
+	(s390_target::get_ipa_tdesc_idx): ...this.
+	(the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn the 'get_syscall_trapinfo' linux target op into a method
 	of process_stratum_target.
 

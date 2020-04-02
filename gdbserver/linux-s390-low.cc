@@ -85,6 +85,8 @@ public:
 
   struct emit_ops *emit_ops () override;
 
+  int get_ipa_tdesc_idx () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -1445,10 +1447,10 @@ s390_target::get_min_fast_tracepoint_insn_len ()
   return 6;
 }
 
-/* Implementation of linux_target_ops method "get_ipa_tdesc_idx".  */
+/* Implementation of target ops method "get_ipa_tdesc_idx".  */
 
-static int
-s390_get_ipa_tdesc_idx (void)
+int
+s390_target::get_ipa_tdesc_idx ()
 {
   struct regcache *regcache = get_thread_regcache (current_thread, 0);
   const struct target_desc *tdesc = regcache->tdesc;
@@ -2855,7 +2857,6 @@ s390_target::emit_ops ()
 }
 
 struct linux_target_ops the_low_target = {
-  s390_get_ipa_tdesc_idx,
 };
 
 /* The linux target ops object.  */

@@ -79,6 +79,8 @@ public:
 
   struct emit_ops *emit_ops () override;
 
+  int get_ipa_tdesc_idx () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -3392,10 +3394,10 @@ ppc_target::emit_ops ()
   return &ppc_emit_ops_impl;
 }
 
-/* Implementation of linux_target_ops method "get_ipa_tdesc_idx".  */
+/* Implementation of target ops method "get_ipa_tdesc_idx".  */
 
-static int
-ppc_get_ipa_tdesc_idx (void)
+int
+ppc_target::get_ipa_tdesc_idx ()
 {
   struct regcache *regcache = get_thread_regcache (current_thread, 0);
   const struct target_desc *tdesc = regcache->tdesc;
@@ -3446,7 +3448,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  ppc_get_ipa_tdesc_idx,
 };
 
 /* The linux target ops object.  */
