@@ -68,6 +68,8 @@ public:
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
+  bool supports_software_single_step () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -81,6 +83,8 @@ protected:
   CORE_ADDR low_get_pc (regcache *regcache) override;
 
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  std::vector<CORE_ADDR> low_get_next_pcs (regcache *regcache) override;
 };
 
 /* The singleton target ops object.  */
@@ -968,10 +972,16 @@ arm_target::low_arch_setup ()
     have_ptrace_getregset = 0;
 }
 
+bool
+arm_target::supports_software_single_step ()
+{
+  return true;
+}
+
 /* Fetch the next possible PCs after the current instruction executes.  */
 
-static std::vector<CORE_ADDR>
-arm_gdbserver_get_next_pcs (struct regcache *regcache)
+std::vector<CORE_ADDR>
+arm_target::low_get_next_pcs (regcache *regcache)
 {
   struct arm_get_next_pcs next_pcs_ctx;
 
@@ -1075,7 +1085,6 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  arm_gdbserver_get_next_pcs,
   0,
   arm_breakpoint_at,
   arm_supports_z_point_type,

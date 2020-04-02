@@ -255,7 +255,6 @@ m68k_supports_hardware_single_step (void)
 }
 
 struct linux_target_ops the_low_target = {
-  NULL,
   2,
   m68k_breakpoint_at,
   NULL, /* supports_z_point_type */

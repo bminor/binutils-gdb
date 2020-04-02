@@ -309,7 +309,6 @@ riscv_breakpoint_at (CORE_ADDR pc)
 /* RISC-V/Linux target operations.  */
 struct linux_target_ops the_low_target =
 {
-  NULL, /* get_next_pcs */
   0,    /* decr_pc_after_break */
   riscv_breakpoint_at,
 };

@@ -2826,7 +2826,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  NULL,
   s390_breakpoint_len,
   s390_breakpoint_at,
   s390_supports_z_point_type,

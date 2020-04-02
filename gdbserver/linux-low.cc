@@ -292,15 +292,6 @@ can_hardware_single_step (void)
     return 0;
 }
 
-/* True if the low target can software single-step.  Such targets
-   implement the GET_NEXT_PCS callback.  */
-
-static int
-can_software_single_step (void)
-{
-  return (the_low_target.get_next_pcs != NULL);
-}
-
 bool
 linux_process_target::low_supports_breakpoints ()
 {
@@ -317,6 +308,13 @@ void
 linux_process_target::low_set_pc (regcache *regcache, CORE_ADDR newpc)
 {
   gdb_assert_not_reached ("linux target op low_set_pc is not implemented");
+}
+
+std::vector<CORE_ADDR>
+linux_process_target::low_get_next_pcs (regcache *regcache)
+{
+  gdb_assert_not_reached ("linux target op low_get_next_pcs is not "
+			  "implemented");
 }
 
 /* Returns true if this target can support fast tracepoints.  This
@@ -551,7 +549,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 	  child_proc->attached = parent_proc->attached;
 
 	  if (event_lwp->bp_reinsert != 0
-	      && can_software_single_step ()
+	      && supports_software_single_step ()
 	      && event == PTRACE_EVENT_VFORK)
 	    {
 	      /* If we leave single-step breakpoints there, child will
@@ -596,7 +594,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 	     In case of vfork, we'll reinsert them back once vforked
 	     child is done.  */
 	  if (event_lwp->bp_reinsert != 0
-	      && can_software_single_step ())
+	      && supports_software_single_step ())
 	    {
 	      /* The child process is forked and stopped, so it is safe
 		 to access its memory without stopping all other threads
@@ -660,7 +658,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
     {
       event_lwp->waitstatus.kind = TARGET_WAITKIND_VFORK_DONE;
 
-      if (event_lwp->bp_reinsert != 0 && can_software_single_step ())
+      if (event_lwp->bp_reinsert != 0 && supports_software_single_step ())
 	{
 	  reinsert_single_step_breakpoints (event_thr);
 
@@ -3508,7 +3506,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	  /* Remove the single-step breakpoints if any.  Note that
 	     there isn't single-step breakpoint if we finished stepping
 	     over.  */
-	  if (can_software_single_step ()
+	  if (supports_software_single_step ()
 	      && has_single_step_breakpoints (current_thread))
 	    {
 	      stop_all_lwps (0, event_child);
@@ -3555,7 +3553,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
   /* Alright, we're going to report a stop.  */
 
   /* Remove single-step breakpoints.  */
-  if (can_software_single_step ())
+  if (supports_software_single_step ())
     {
       /* Remove single-step breakpoints or not.  It it is true, stop all
 	 lwps, so that other threads won't hit the breakpoint in the
@@ -4116,7 +4114,7 @@ linux_process_target::install_software_single_step_breakpoints (lwp_info *lwp)
   scoped_restore save_current_thread = make_scoped_restore (&current_thread);
 
   current_thread = thread;
-  std::vector<CORE_ADDR> next_pcs = the_low_target.get_next_pcs (regcache);
+  std::vector<CORE_ADDR> next_pcs = low_get_next_pcs (regcache);
 
   for (CORE_ADDR pc : next_pcs)
     set_single_step_breakpoint (pc, current_ptid);
@@ -4131,7 +4129,7 @@ linux_process_target::single_step (lwp_info* lwp)
     {
       step = 1;
     }
-  else if (can_software_single_step ())
+  else if (supports_software_single_step ())
     {
       install_software_single_step_breakpoints (lwp);
       step = 0;
@@ -4610,7 +4608,7 @@ linux_process_target::thread_needs_step_over (thread_info *thread)
 
   /* On software single step target, resume the inferior with signal
      rather than stepping over.  */
-  if (can_software_single_step ()
+  if (supports_software_single_step ()
       && lwp->pending_signals != NULL
       && lwp_signal_can_be_delivered (lwp))
     {
@@ -5042,7 +5040,7 @@ linux_process_target::proceed_one_lwp (thread_info *thread, lwp_info *except)
       /* If resume_step is requested by GDB, install single-step
 	 breakpoints when the thread is about to be actually resumed if
 	 the single-step breakpoints weren't removed.  */
-      if (can_software_single_step ()
+      if (supports_software_single_step ()
 	  && !has_single_step_breakpoints (thread))
 	install_software_single_step_breakpoints (lwp);
 
@@ -5911,12 +5909,6 @@ linux_process_target::supports_hardware_single_step ()
 }
 
 bool
-linux_process_target::supports_software_single_step ()
-{
-  return can_software_single_step ();
-}
-
-bool
 linux_process_target::stopped_by_watchpoint ()
 {
   struct lwp_info *lwp = get_thread_lwp (current_thread);
@@ -6299,7 +6291,7 @@ linux_process_target::supports_agent ()
 bool
 linux_process_target::supports_range_stepping ()
 {
-  if (can_software_single_step ())
+  if (supports_software_single_step ())
     return true;
   if (*the_low_target.supports_range_stepping == NULL)
     return false;

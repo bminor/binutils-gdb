@@ -131,9 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Find the next possible PCs after the current instruction executes.  */
-  std::vector<CORE_ADDR> (*get_next_pcs) (struct regcache *regcache);
-
   int decr_pc_after_break;
   int (*breakpoint_at) (CORE_ADDR pc);
 
@@ -440,8 +437,6 @@ public:
 		      int *handle_len) override;
 #endif
 
-  bool supports_software_single_step () override;
-
   bool supports_catch_syscall () override;
 
   int get_ipa_tdesc_idx () override;
@@ -666,6 +661,11 @@ protected:
   virtual CORE_ADDR low_get_pc (regcache *regcache);
 
   virtual void low_set_pc (regcache *regcache, CORE_ADDR newpc);
+
+  /* Find the next possible PCs after the current instruction executes.
+     Targets that override this method should also override
+     'supports_software_single_step' to return true.  */
+  virtual std::vector<CORE_ADDR> low_get_next_pcs (regcache *regcache);
 };
 
 extern linux_process_target *the_linux_target;

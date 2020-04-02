@@ -328,7 +328,6 @@ xtensa_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL,
   0,
   xtensa_breakpoint_at,
   NULL, /* supports_z_point_type */

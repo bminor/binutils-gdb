@@ -277,7 +277,6 @@ nios2_target::get_regs_info ()
 
 struct linux_target_ops the_low_target =
 {
-  NULL, /* get_next_pcs */
   0,
   nios2_breakpoint_at,
 };
