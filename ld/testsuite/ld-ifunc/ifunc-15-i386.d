@@ -3,7 +3,7 @@
 #as: --32
 #readelf: -r --wide
 #target: x86_64-*-* i?86-*-*
-#notarget: *-*-lynxos *-*-nacl* *-*-nto* *-*-solaris2*
+#notarget: *-*-lynxos *-*-nacl* *-*-nto*
 
 Relocation section '.rel.got' at offset 0x[0-9a-f]+ contains 1 entry:
 [ ]+Offset[ ]+Info[ ]+Type[ ]+.*

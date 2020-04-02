@@ -1,3 +1,10 @@
+2020-04-02  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/gas/elf/section12a.d: Use notarget instead of xfail.
+	* testsuite/gas/elf/section12b.d: Likewise.
+	* testsuite/gas/elf/section16a.d: Likewise.
+	* testsuite/gas/elf/section16b.d: Likewise.
+
 2020-04-02  Gunther Nikl  <gnikl@justmail.de>
 
 	* config/tc-m68k.c (m68k_ip): Fix range check for index register

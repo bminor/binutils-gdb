@@ -1,3 +1,8 @@
+2020-04-02  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/lib/binutils-common.exp (supports_gnu_osabi): Don't
+	enable on *-*-solaris*.
+
 2020-03-30  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/25662

@@ -6,7 +6,7 @@
 # expected below.
 #xfail: rx-*-*
 # A number of targets do not support SHF_GNU_MBIND
-#xfail: ![supports_gnu_osabi]
+#notarget: ![supports_gnu_osabi]
 
 #...
 Contents of section .mbind.data:

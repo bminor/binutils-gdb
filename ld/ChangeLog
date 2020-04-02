@@ -1,3 +1,50 @@
+2020-04-02  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/ld-ifunc/ifunc-10-i386.d: Remove *-*-solaris2* from
+	notarget.
+	* ifunc-11-i386.d: Likewise.
+	* ifunc-12-i386.d: Likewise.
+	* ifunc-13-i386.d: Likewise.
+	* ifunc-14a-i386.d: Likewise.
+	* ifunc-14b-i386.d: Likewise.
+	* ifunc-14c-i386.d: Likewise.
+	* ifunc-14d-i386.d: Likewise.
+	* ifunc-14e-i386.d: Likewise.
+	* ifunc-14f-i386.d: Likewise.
+	* ifunc-15-i386.d: Likewise.
+	* ifunc-16-i386-now.d: Likewise.
+	* ifunc-16-i386.d: Likewise.
+	* ifunc-17a-i386.d: Likewise.
+	* ifunc-17b-i386.d: Likewise.
+	* ifunc-18a-i386.d: Likewise.
+	* ifunc-18b-i386.d: Likewise.
+	* ifunc-19a-i386.d: Likewise.
+	* ifunc-19b-i386.d: Likewise.
+	* ifunc-2-i386-now.d: Likewise.
+	* ifunc-2-i386.d: Likewise.
+	* ifunc-2-local-i386-now.d: Likewise.
+	* ifunc-2-local-i386.d: Likewise.
+	* ifunc-20-i386.d: Likewise.
+	* ifunc-21-i386.d: Likewise.
+	* ifunc-22-i386.d: Likewise.
+	* ifunc-5a-i386.d: Likewise.
+	* ifunc-5a-local-i386.d: Likewise.
+	* ifunc-5b-i386.d: Likewise.
+	* ifunc-5b-local-i386.d: Likewise.
+	* ifunc-5r-local-i386.d: Likewise.
+	* ifunc-6a-i386.d: Likewise.
+	* ifunc-6b-i386.d: Likewise.
+	* ifunc-7a-i386.d: Likewise.
+	* ifunc-7b-i386.d: Likewise.
+	* ifunc-8-i386.d: Likewise.
+	* ifunc-9-i386.d: Likewise.
+	* pr17154-i386-now.d: Likewise.
+	* pr17154-i386.d: Likewise.
+
+	* ifunc-23a-x86.d: Remove notarget.
+	* ifunc-24a-x86.d: Likewise.
+	* ifunc-25a-x86.d: Likewise.
+
 2020-04-02  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/25747

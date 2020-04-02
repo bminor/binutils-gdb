@@ -201,8 +201,7 @@ proc supports_gnu_osabi {} {
 	 || ( [istarget *-*-nto*] && ![istarget arm*-*-*] )
 	 || [istarget *-*-irix*]
 	 || [istarget *-*-*eabi*]
-	 || [istarget *-*-rtems*]
-	 || [istarget *-*-solaris*] } {
+	 || [istarget *-*-rtems*] } {
 	return 1
     }
     if { [istarget "wasm32*-*-*"] } {
