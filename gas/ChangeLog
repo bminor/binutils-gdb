@@ -1,3 +1,8 @@
+2020-04-02  Gunther Nikl  <gnikl@justmail.de>
+
+	* config/tc-m68k.c (m68k_ip): Fix range check for index register
+	with a suppressed address register.
+
 2020-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25756
