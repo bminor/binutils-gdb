@@ -1,5 +1,62 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn the 'collect_ptrace_register' and 'supply_ptrace_register'
+	linux target ops into methods of linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the ops.
+	(class linux_process_target) <low_collect_ptrace_register>
+	<low_store_ptrace_register>: Declare.
+	* linux-low.cc (linux_process_target::low_collect_ptrace_register)
+	(linux_process_target::low_supply_ptrace_register): Define.
+
+	Update the callers below.
+
+	(linux_process_target::fetch_register)
+	(linux_process_target::store_register)
+
+	* linux-x86-low.cc (the_low_target): Remove the op fields.
+	* linux-aarch64-low.cc (the_low_target): Ditto.
+	* linux-arm-low.cc (the_low_target): Ditto.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-sparc-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+	* linux-mips-low.cc (class mips_target)
+	<low_collect_ptrace_register>
+	<low_supply_ptrace_register>: Declare.
+	(mips_collect_ptrace_register): Turn into ...
+	(mips_target::low_collect_ptrace_register): ...this.
+	(mips_supply_ptrace_register): Turn into...
+	(mips_target::low_supply_ptrace_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-ppc-low.cc (class ppc_target)
+	<low_collect_ptrace_register>
+	<low_supply_ptrace_register>: Declare.
+	(ppc_collect_ptrace_register): Turn into ...
+	(ppc_target::low_collect_ptrace_register): ...this.
+	(ppc_supply_ptrace_register): Turn into ...
+	(ppc_target::low_supply_ptrace_register): ...this.
+	(ppc_fill_gregset): Update for the calls to
+	low_collect_ptrace_register.
+	(the_low_target): Remove the op fields.
+	* linux-s390-low.cc (class s390_target)
+	<low_collect_ptrace_register>
+	<low_supply_ptrace_register>: Declare.
+	(s390_collect_ptrace_register): Turn into ...
+	(s390_target::low_collect_ptrace_register): ...this.
+	(s390_supply_ptrace_register): Turn into ...
+	(s390_target::low_supply_ptrace_register): ...this.
+	(s390_fill_gregset): Update for the calls to
+	low_collect_ptrace_register.
+	(the_low_target): Remove the op fields.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn the 'stopped_by_watchpoint' and 'stopped_data_address' linux
 	target ops into methods of linux_process_target.
 

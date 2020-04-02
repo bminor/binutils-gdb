@@ -64,6 +64,12 @@ protected:
   bool low_stopped_by_watchpoint () override;
 
   CORE_ADDR low_stopped_data_address () override;
+
+  void low_collect_ptrace_register (regcache *regcache, int regno,
+				    char *buf) override;
+
+  void low_supply_ptrace_register (regcache *regcache, int regno,
+				   const char *buf) override;
 };
 
 /* The singleton target ops object.  */
@@ -891,9 +897,9 @@ mips_store_fpregset (struct regcache *regcache, const void *buf)
 
 /* Take care of 32-bit registers with 64-bit ptrace, POKEUSER side.  */
 
-static void
-mips_collect_ptrace_register (struct regcache *regcache,
-			      int regno, char *buf)
+void
+mips_target::low_collect_ptrace_register (regcache *regcache, int regno,
+					  char *buf)
 {
   int use_64bit = sizeof (PTRACE_XFER_TYPE) == 8;
 
@@ -910,9 +916,9 @@ mips_collect_ptrace_register (struct regcache *regcache,
 
 /* Take care of 32-bit registers with 64-bit ptrace, PEEKUSER side.  */
 
-static void
-mips_supply_ptrace_register (struct regcache *regcache,
-			     int regno, const char *buf)
+void
+mips_target::low_supply_ptrace_register (regcache *regcache, int regno,
+					 const char *buf)
 {
   int use_64bit = sizeof (PTRACE_XFER_TYPE) == 8;
 
@@ -980,8 +986,6 @@ mips_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  mips_collect_ptrace_register,
-  mips_supply_ptrace_register,
   NULL, /* siginfo_fixup */
   mips_linux_new_process,
   mips_linux_delete_process,

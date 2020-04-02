@@ -5408,10 +5408,7 @@ linux_process_target::fetch_register (const usrregs_info *usrregs,
 	}
     }
 
-  if (the_low_target.supply_ptrace_register)
-    the_low_target.supply_ptrace_register (regcache, regno, buf);
-  else
-    supply_register (regcache, regno, buf);
+  low_supply_ptrace_register (regcache, regno, buf);
 }
 
 void
@@ -5438,10 +5435,7 @@ linux_process_target::store_register (const usrregs_info *usrregs,
   buf = (char *) alloca (size);
   memset (buf, 0, size);
 
-  if (the_low_target.collect_ptrace_register)
-    the_low_target.collect_ptrace_register (regcache, regno, buf);
-  else
-    collect_register (regcache, regno, buf);
+  low_collect_ptrace_register (regcache, regno, buf);
 
   pid = lwpid_of (current_thread);
   for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
@@ -5469,6 +5463,20 @@ linux_process_target::store_register (const usrregs_info *usrregs,
     }
 }
 #endif /* HAVE_LINUX_USRREGS */
+
+void
+linux_process_target::low_collect_ptrace_register (regcache *regcache,
+						   int regno, char *buf)
+{
+  collect_register (regcache, regno, buf);
+}
+
+void
+linux_process_target::low_supply_ptrace_register (regcache *regcache,
+						  int regno, const char *buf)
+{
+  supply_register (regcache, regno, buf);
+}
 
 void
 linux_process_target::usr_fetch_inferior_registers (const regs_info *regs_info,

@@ -131,13 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Hooks to reformat register data for PEEKUSR/POKEUSR (in particular
-     for registers smaller than an xfer unit).  */
-  void (*collect_ptrace_register) (struct regcache *regcache,
-				   int regno, char *buf);
-  void (*supply_ptrace_register) (struct regcache *regcache,
-				  int regno, const char *buf);
-
   /* Hook to convert from target format to ptrace format and back.
      Returns true if any conversion was done; false otherwise.
      If DIRECTION is 1, then copy from INF to NATIVE.
@@ -681,6 +674,14 @@ protected:
   virtual bool low_stopped_by_watchpoint ();
 
   virtual CORE_ADDR low_stopped_data_address ();
+
+  /* Hooks to reformat register data for PEEKUSR/POKEUSR (in particular
+     for registers smaller than an xfer unit).  */
+  virtual void low_collect_ptrace_register (regcache *regcache, int regno,
+					    char *buf);
+
+  virtual void low_supply_ptrace_register (regcache *regcache, int regno,
+					   const char *buf);
 
   /* How many bytes the PC should be decremented after a break.  */
   virtual int low_decr_pc_after_break ();

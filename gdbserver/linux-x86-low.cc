@@ -137,6 +137,10 @@ protected:
   bool low_stopped_by_watchpoint () override;
 
   CORE_ADDR low_stopped_data_address () override;
+
+  /* collect_ptrace_register/supply_ptrace_register are not needed in the
+     native i386 case (no registers smaller than an xfer unit), and are not
+     used in the biarch case (HAVE_LINUX_USRREGS is not defined).  */
 };
 
 /* The singleton target ops object.  */
@@ -2922,11 +2926,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  /* collect_ptrace_register/supply_ptrace_register are not needed in the
-     native i386 case (no registers smaller than an xfer unit), and are not
-     used in the biarch case (HAVE_LINUX_USRREGS is not defined).  */
-  NULL,
-  NULL,
   /* need to fix up i386 siginfo if host is amd64 */
   x86_siginfo_fixup,
   x86_linux_new_process,

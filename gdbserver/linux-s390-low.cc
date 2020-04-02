@@ -63,6 +63,12 @@ public:
 
   bool supports_z_point_type (char z_type) override;
 
+  void low_collect_ptrace_register (regcache *regcache, int regno,
+				    char *buf) override;
+
+  void low_supply_ptrace_register (regcache *regcache, int regno,
+				   const char *buf) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -187,11 +193,12 @@ s390_target::low_cannot_store_register (int regno)
   return false;
 }
 
-static void
-s390_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
+void
+s390_target::low_collect_ptrace_register (regcache *regcache, int regno,
+					  char *buf)
 {
   int size = register_size (regcache->tdesc, regno);
-  const struct regs_info *regs_info = the_linux_target->get_regs_info ();
+  const struct regs_info *regs_info = get_regs_info ();
   struct usrregs_info *usr = regs_info->usrregs;
   int regaddr = usr->regmap[regno];
 
@@ -233,12 +240,12 @@ s390_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
     collect_register (regcache, regno, buf);
 }
 
-static void
-s390_supply_ptrace_register (struct regcache *regcache,
-			     int regno, const char *buf)
+void
+s390_target::low_supply_ptrace_register (regcache *regcache, int regno,
+					 const char *buf)
 {
   int size = register_size (regcache->tdesc, regno);
-  const struct regs_info *regs_info = the_linux_target->get_regs_info ();
+  const struct regs_info *regs_info = get_regs_info ();
   struct usrregs_info *usr = regs_info->usrregs;
   int regaddr = usr->regmap[regno];
 
@@ -305,8 +312,8 @@ s390_fill_gregset (struct regcache *regcache, void *buf)
 	  || usr->regmap[i] > PT_ACR15)
 	continue;
 
-      s390_collect_ptrace_register (regcache, i,
-				    (char *) buf + usr->regmap[i]);
+      ((s390_target *) the_linux_target)->low_collect_ptrace_register
+	(regcache, i, (char *) buf + usr->regmap[i]);
     }
 }
 
@@ -2838,8 +2845,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  s390_collect_ptrace_register,
-  s390_supply_ptrace_register,
   NULL, /* siginfo_fixup */
   NULL, /* new_process */
   NULL, /* delete_process */

@@ -56,6 +56,12 @@ public:
 
   bool supports_z_point_type (char z_type) override;
 
+
+  void low_collect_ptrace_register (regcache *regcache, int regno,
+				    char *buf) override;
+
+  void low_supply_ptrace_register (regcache *regcache, int regno,
+				   const char *buf) override;
 protected:
 
   void low_arch_setup () override;
@@ -208,8 +214,9 @@ ppc_target::low_cannot_fetch_register (int regno)
   return false;
 }
 
-static void
-ppc_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
+void
+ppc_target::low_collect_ptrace_register (regcache *regcache, int regno,
+					 char *buf)
 {
   memset (buf, 0, sizeof (long));
 
@@ -234,9 +241,9 @@ ppc_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
     perror_with_name ("Unexpected byte order");
 }
 
-static void
-ppc_supply_ptrace_register (struct regcache *regcache,
-			    int regno, const char *buf)
+void
+ppc_target::low_supply_ptrace_register (regcache *regcache, int regno,
+					const char *buf)
 {
   if (__BYTE_ORDER == __LITTLE_ENDIAN)
     {
@@ -401,14 +408,19 @@ static void ppc_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
 
+  ppc_target *my_ppc_target = (ppc_target *) the_linux_target;
+
   for (i = 0; i < 32; i++)
-    ppc_collect_ptrace_register (regcache, i, (char *) buf + ppc_regmap[i]);
+    my_ppc_target->low_collect_ptrace_register (regcache, i,
+						(char *) buf + ppc_regmap[i]);
 
   for (i = 64; i < 70; i++)
-    ppc_collect_ptrace_register (regcache, i, (char *) buf + ppc_regmap[i]);
+    my_ppc_target->low_collect_ptrace_register (regcache, i,
+						(char *) buf + ppc_regmap[i]);
 
   for (i = 71; i < 73; i++)
-    ppc_collect_ptrace_register (regcache, i, (char *) buf + ppc_regmap[i]);
+    my_ppc_target->low_collect_ptrace_register (regcache, i,
+						(char *) buf + ppc_regmap[i]);
 }
 
 /* Program Priority Register regset fill function.  */
@@ -3416,8 +3428,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  ppc_collect_ptrace_register,
-  ppc_supply_ptrace_register,
   NULL, /* siginfo_fixup */
   NULL, /* new_process */
   NULL, /* delete_process */

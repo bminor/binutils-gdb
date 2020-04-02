@@ -468,8 +468,6 @@ crisv32_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* collect_ptrace_register */
-  NULL, /* supply_ptrace_register */
   NULL, /* siginfo_fixup */
   NULL, /* new_process */
   NULL, /* delete_process */
