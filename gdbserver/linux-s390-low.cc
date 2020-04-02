@@ -66,6 +66,12 @@ protected:
   bool low_cannot_fetch_register (int regno) override;
 
   bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 };
 
 /* The singleton target ops object.  */
@@ -454,8 +460,14 @@ s390_sw_breakpoint_from_kind (int kind, int *size)
   return s390_breakpoint;
 }
 
-static CORE_ADDR
-s390_get_pc (struct regcache *regcache)
+bool
+s390_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+s390_target::low_get_pc (regcache *regcache)
 {
   if (register_size (regcache->tdesc, 0) == 4)
     {
@@ -471,8 +483,8 @@ s390_get_pc (struct regcache *regcache)
     }
 }
 
-static void
-s390_set_pc (struct regcache *regcache, CORE_ADDR newpc)
+void
+s390_target::low_set_pc (regcache *regcache, CORE_ADDR newpc)
 {
   if (register_size (regcache->tdesc, 0) == 4)
     {
@@ -2812,8 +2824,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  s390_get_pc,
-  s390_set_pc,
   NULL, /* breakpoint_kind_from_pc */
   s390_sw_breakpoint_from_kind,
   NULL,

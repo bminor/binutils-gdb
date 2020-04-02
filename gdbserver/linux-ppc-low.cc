@@ -59,6 +59,12 @@ protected:
   bool low_cannot_fetch_register (int regno) override;
 
   bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 };
 
 /* The singleton target ops object.  */
@@ -241,8 +247,14 @@ ppc_supply_ptrace_register (struct regcache *regcache,
     perror_with_name ("Unexpected byte order");
 }
 
-static CORE_ADDR
-ppc_get_pc (struct regcache *regcache)
+bool
+ppc_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+ppc_target::low_get_pc (regcache *regcache)
 {
   if (register_size (regcache->tdesc, 0) == 4)
     {
@@ -258,8 +270,8 @@ ppc_get_pc (struct regcache *regcache)
     }
 }
 
-static void
-ppc_set_pc (struct regcache *regcache, CORE_ADDR pc)
+void
+ppc_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
 {
   if (register_size (regcache->tdesc, 0) == 4)
     {
@@ -3392,8 +3404,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  ppc_get_pc,
-  ppc_set_pc,
   NULL, /* breakpoint_kind_from_pc */
   ppc_sw_breakpoint_from_kind,
   NULL,

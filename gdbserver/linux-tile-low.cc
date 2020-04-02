@@ -38,11 +38,35 @@ protected:
   bool low_cannot_fetch_register (int regno) override;
 
   bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 };
 
 /* The singleton target ops object.  */
 
 static tile_target the_tile_target;
+
+bool
+tile_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+tile_target::low_get_pc (regcache *regcache)
+{
+  return linux_get_pc_64bit (regcache);
+}
+
+void
+tile_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
+{
+  linux_set_pc_64bit (regcache, pc);
+}
 
 /* Defined in auto-generated file reg-tilegx.c.  */
 void init_registers_tilegx (void);
@@ -196,8 +220,6 @@ tile_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  linux_get_pc_64bit,
-  linux_set_pc_64bit,
   NULL, /* breakpoint_kind_from_pc */
   tile_sw_breakpoint_from_kind,
   NULL,

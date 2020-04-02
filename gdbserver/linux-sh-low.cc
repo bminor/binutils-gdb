@@ -34,11 +34,35 @@ protected:
   bool low_cannot_fetch_register (int regno) override;
 
   bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 };
 
 /* The singleton target ops object.  */
 
 static sh_target the_sh_target;
+
+bool
+sh_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+sh_target::low_get_pc (regcache *regcache)
+{
+  return linux_get_pc_32bit (regcache);
+}
+
+void
+sh_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
+{
+  linux_set_pc_32bit (regcache, pc);
+}
 
 /* Defined in auto-generated file reg-sh.c.  */
 void init_registers_sh (void);
@@ -164,8 +188,6 @@ sh_target::low_arch_setup ()
 }
 
 struct linux_target_ops the_low_target = {
-  linux_get_pc_32bit,
-  linux_set_pc_32bit,
   NULL, /* breakpoint_kind_from_pc */
   sh_sw_breakpoint_from_kind,
   NULL,

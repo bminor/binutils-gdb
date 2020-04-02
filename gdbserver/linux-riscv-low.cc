@@ -47,6 +47,12 @@ protected:
   bool low_cannot_store_register (int regno) override;
 
   bool low_fetch_register (regcache *regcache, int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 };
 
 /* The singleton target ops object.  */
@@ -203,10 +209,16 @@ riscv_target::low_fetch_register (regcache *regcache, int regno)
   return true;
 }
 
-/* Implementation of linux_target_ops method "get_pc".  */
+bool
+riscv_target::low_supports_breakpoints ()
+{
+  return true;
+}
 
-static CORE_ADDR
-riscv_get_pc (struct regcache *regcache)
+/* Implementation of linux target ops method "low_get_pc".  */
+
+CORE_ADDR
+riscv_target::low_get_pc (regcache *regcache)
 {
   elf_gregset_t regset;
 
@@ -216,10 +228,10 @@ riscv_get_pc (struct regcache *regcache)
     return linux_get_pc_32bit (regcache);
 }
 
-/* Implementation of linux_target_ops method "set_pc".  */
+/* Implementation of linux target ops method "low_set_pc".  */
 
-static void
-riscv_set_pc (struct regcache *regcache, CORE_ADDR newpc)
+void
+riscv_target::low_set_pc (regcache *regcache, CORE_ADDR newpc)
 {
   elf_gregset_t regset;
 
@@ -293,8 +305,6 @@ riscv_breakpoint_at (CORE_ADDR pc)
 /* RISC-V/Linux target operations.  */
 struct linux_target_ops the_low_target =
 {
-  riscv_get_pc,
-  riscv_set_pc,
   riscv_breakpoint_kind_from_pc,
   riscv_sw_breakpoint_from_kind,
   NULL, /* get_next_pcs */

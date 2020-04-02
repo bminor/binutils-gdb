@@ -53,6 +53,12 @@ protected:
   bool low_cannot_fetch_register (int regno) override;
 
   bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 };
 
 /* The singleton target ops object.  */
@@ -239,8 +245,14 @@ tic6x_target::low_cannot_store_register (int regno)
   return (tic6x_regmap[regno] == -1);
 }
 
-static CORE_ADDR
-tic6x_get_pc (struct regcache *regcache)
+bool
+tic6x_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+tic6x_target::low_get_pc (regcache *regcache)
 {
   union tic6x_register pc;
 
@@ -248,8 +260,8 @@ tic6x_get_pc (struct regcache *regcache)
   return pc.reg32;
 }
 
-static void
-tic6x_set_pc (struct regcache *regcache, CORE_ADDR pc)
+void
+tic6x_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
 {
   union tic6x_register newpc;
 
@@ -407,8 +419,6 @@ tic6x_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  tic6x_get_pc,
-  tic6x_set_pc,
   NULL, /* breakpoint_kind_from_pc */
   tic6x_sw_breakpoint_from_kind,
   NULL,

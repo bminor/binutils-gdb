@@ -64,6 +64,12 @@ protected:
   bool low_cannot_fetch_register (int regno) override;
 
   bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 };
 
 /* The singleton target ops object.  */
@@ -189,10 +195,16 @@ aarch64_store_pauthregset (struct regcache *regcache, const void *buf)
 		   &pauth_regset[1]);
 }
 
-/* Implementation of linux_target_ops method "get_pc".  */
+bool
+aarch64_target::low_supports_breakpoints ()
+{
+  return true;
+}
 
-static CORE_ADDR
-aarch64_get_pc (struct regcache *regcache)
+/* Implementation of linux target ops method "low_get_pc".  */
+
+CORE_ADDR
+aarch64_target::low_get_pc (regcache *regcache)
 {
   if (register_size (regcache->tdesc, 0) == 8)
     return linux_get_pc_64bit (regcache);
@@ -200,10 +212,10 @@ aarch64_get_pc (struct regcache *regcache)
     return linux_get_pc_32bit (regcache);
 }
 
-/* Implementation of linux_target_ops method "set_pc".  */
+/* Implementation of linux target ops method "low_set_pc".  */
 
-static void
-aarch64_set_pc (struct regcache *regcache, CORE_ADDR pc)
+void
+aarch64_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
 {
   if (register_size (regcache->tdesc, 0) == 8)
     linux_set_pc_64bit (regcache, pc);
@@ -3085,8 +3097,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_get_pc,
-  aarch64_set_pc,
   aarch64_breakpoint_kind_from_pc,
   aarch64_sw_breakpoint_from_kind,
   NULL, /* get_next_pcs */

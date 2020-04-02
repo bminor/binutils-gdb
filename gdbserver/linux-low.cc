@@ -301,13 +301,22 @@ can_software_single_step (void)
   return (the_low_target.get_next_pcs != NULL);
 }
 
-/* True if the low target supports memory breakpoints.  If so, we'll
-   have a GET_PC implementation.  */
-
-static int
-supports_breakpoints (void)
+bool
+linux_process_target::low_supports_breakpoints ()
 {
-  return (the_low_target.get_pc != NULL);
+  return false;
+}
+
+CORE_ADDR
+linux_process_target::low_get_pc (regcache *regcache)
+{
+  return 0;
+}
+
+void
+linux_process_target::low_set_pc (regcache *regcache, CORE_ADDR newpc)
+{
+  gdb_assert_not_reached ("linux target op low_set_pc is not implemented");
 }
 
 /* Returns true if this target can support fast tracepoints.  This
@@ -728,14 +737,14 @@ linux_process_target::get_pc (lwp_info *lwp)
   struct regcache *regcache;
   CORE_ADDR pc;
 
-  if (the_low_target.get_pc == NULL)
+  if (!low_supports_breakpoints ())
     return 0;
 
   saved_thread = current_thread;
   current_thread = get_lwp_thread (lwp);
 
   regcache = get_thread_regcache (current_thread, 1);
-  pc = (*the_low_target.get_pc) (regcache);
+  pc = low_get_pc (regcache);
 
   if (debug_threads)
     debug_printf ("pc is 0x%lx\n", (long) pc);
@@ -785,7 +794,7 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
   siginfo_t siginfo;
 #endif
 
-  if (the_low_target.get_pc == NULL)
+  if (!low_supports_breakpoints ())
     return false;
 
   pc = get_pc (lwp);
@@ -868,7 +877,7 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
 	{
 	  struct regcache *regcache
 	    = get_thread_regcache (current_thread, 1);
-	  (*the_low_target.set_pc) (regcache, sw_breakpoint_pc);
+	  low_set_pc (regcache, sw_breakpoint_pc);
 	}
 
       /* Update this so we record the correct stop PC below.  */
@@ -2092,7 +2101,7 @@ linux_process_target::maybe_move_out_of_jump_pad (lwp_info *lwp, int *wstat)
 		}
 
 	      regcache = get_thread_regcache (current_thread, 1);
-	      (*the_low_target.set_pc) (regcache, status.tpoint_addr);
+	      low_set_pc (regcache, status.tpoint_addr);
 	      lwp->stop_pc = status.tpoint_addr;
 
 	      /* Cancel any fast tracepoint lock this thread was
@@ -3170,7 +3179,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	    = get_thread_regcache (current_thread, 1);
 
 	  event_child->stop_pc += increment_pc;
-	  (*the_low_target.set_pc) (regcache, event_child->stop_pc);
+	  low_set_pc (regcache, event_child->stop_pc);
 
 	  if (!(*the_low_target.breakpoint_at) (event_child->stop_pc))
 	    event_child->stop_reason = TARGET_STOPPED_BY_NO_REASON;
@@ -3183,7 +3192,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
      not support internal breakpoints at all, we also report the
      SIGTRAP without further processing; it's of no concern to us.  */
   maybe_internal_trap
-    = (supports_breakpoints ()
+    = (low_supports_breakpoints ()
        && (WSTOPSIG (w) == SIGTRAP
 	   || ((WSTOPSIG (w) == SIGILL
 		|| WSTOPSIG (w) == SIGSEGV)
@@ -3478,11 +3487,11 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	 decr_pc_after_break adjustment to the inferior's regcache
 	 ourselves.  */
 
-      if (the_low_target.set_pc != NULL)
+      if (low_supports_breakpoints ())
 	{
 	  struct regcache *regcache
 	    = get_thread_regcache (current_thread, 1);
-	  (*the_low_target.set_pc) (regcache, event_child->stop_pc);
+	  low_set_pc (regcache, event_child->stop_pc);
 	}
 
       if (step_over_finished)
@@ -3693,7 +3702,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	{
 	  struct regcache *regcache
 	    = get_thread_regcache (current_thread, 1);
-	  (*the_low_target.set_pc) (regcache, event_child->stop_pc + decr_pc);
+	  low_set_pc (regcache, event_child->stop_pc + decr_pc);
 	}
     }
 
@@ -4285,11 +4294,11 @@ linux_process_target::resume_one_lwp_throw (lwp_info *lwp, int step,
       step = single_step (lwp);
     }
 
-  if (proc->tdesc != NULL && the_low_target.get_pc != NULL)
+  if (proc->tdesc != NULL && low_supports_breakpoints ())
     {
       struct regcache *regcache = get_thread_regcache (current_thread, 1);
 
-      lwp->stop_pc = (*the_low_target.get_pc) (regcache);
+      lwp->stop_pc = low_get_pc (regcache);
 
       if (debug_threads)
 	{
@@ -4915,7 +4924,7 @@ linux_process_target::resume (thread_resume *resume_info, size_t n)
      other threads stopped, then resume all threads again.  Make sure
      to queue any signals that would otherwise be delivered or
      queued.  */
-  if (!any_pending && supports_breakpoints ())
+  if (!any_pending && low_supports_breakpoints ())
     need_step_over = find_thread ([this] (thread_info *thread)
 		       {
 			 return thread_needs_step_over (thread);
@@ -5077,7 +5086,7 @@ linux_process_target::proceed_all_lwps ()
      resume any threads - have it step over the breakpoint with all
      other threads stopped, then resume all threads again.  */
 
-  if (supports_breakpoints ())
+  if (low_supports_breakpoints ())
     {
       need_step_over = find_thread ([this] (thread_info *thread)
 			 {
@@ -6453,18 +6462,18 @@ linux_process_target::supports_tracepoints ()
 CORE_ADDR
 linux_process_target::read_pc (regcache *regcache)
 {
-  if (the_low_target.get_pc == NULL)
+  if (!low_supports_breakpoints ())
     return 0;
 
-  return (*the_low_target.get_pc) (regcache);
+  return low_get_pc (regcache);
 }
 
 void
 linux_process_target::write_pc (regcache *regcache, CORE_ADDR pc)
 {
-  gdb_assert (the_low_target.set_pc != NULL);
+  gdb_assert (low_supports_breakpoints ());
 
-  (*the_low_target.set_pc) (regcache, pc);
+  low_set_pc (regcache, pc);
 }
 
 bool

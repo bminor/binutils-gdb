@@ -57,11 +57,29 @@ protected:
   bool low_cannot_fetch_register (int regno) override;
 
   bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  /* No low_set_pc is needed.  */
 };
 
 /* The singleton target ops object.  */
 
 static sparc_target the_sparc_target;
+
+bool
+sparc_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+sparc_target::low_get_pc (regcache *regcache)
+{
+  return linux_get_pc_64bit (regcache);
+}
 
 /* Each offset is multiplied by 8, because of the register size.
    These offsets apply to the buffer sent/filled by ptrace.
@@ -319,9 +337,6 @@ sparc_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  linux_get_pc_64bit,
-  /* No sparc_set_pc is needed.  */
-  NULL,
   NULL, /* breakpoint_kind_from_pc */
   sparc_sw_breakpoint_from_kind,
   NULL, /* get_next_pcs */

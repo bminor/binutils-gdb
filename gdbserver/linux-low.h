@@ -131,9 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  CORE_ADDR (*get_pc) (struct regcache *regcache);
-  void (*set_pc) (struct regcache *regcache, CORE_ADDR newpc);
-
   /* See target.h for details.  */
   int (*breakpoint_kind_from_pc) (CORE_ADDR *pcptr);
 
@@ -676,6 +673,14 @@ protected:
      REGNO was supplied, false if not, and we should fallback to the
      standard ptrace methods.  */
   virtual bool low_fetch_register (regcache *regcache, int regno);
+
+  /* Return true if breakpoints are supported.  Such targets must
+     implement the GET_PC and SET_PC methods.  */
+  virtual bool low_supports_breakpoints ();
+
+  virtual CORE_ADDR low_get_pc (regcache *regcache);
+
+  virtual void low_set_pc (regcache *regcache, CORE_ADDR newpc);
 };
 
 extern linux_process_target *the_linux_target;

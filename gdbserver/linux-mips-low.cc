@@ -42,6 +42,12 @@ protected:
   bool low_cannot_store_register (int regno) override;
 
   bool low_fetch_register (regcache *regcache, int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 };
 
 /* The singleton target ops object.  */
@@ -279,16 +285,22 @@ mips_target::low_fetch_register (regcache *regcache, int regno)
   return false;
 }
 
-static CORE_ADDR
-mips_get_pc (struct regcache *regcache)
+bool
+mips_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+mips_target::low_get_pc (regcache *regcache)
 {
   union mips_register pc;
   collect_register_by_name (regcache, "pc", pc.buf);
   return register_size (regcache->tdesc, 0) == 4 ? pc.reg32 : pc.reg64;
 }
 
-static void
-mips_set_pc (struct regcache *regcache, CORE_ADDR pc)
+void
+mips_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
 {
   union mips_register newpc;
   if (register_size (regcache->tdesc, 0) == 4)
@@ -952,8 +964,6 @@ mips_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  mips_get_pc,
-  mips_set_pc,
   NULL, /* breakpoint_kind_from_pc */
   mips_sw_breakpoint_from_kind,
   NULL, /* get_next_pcs */

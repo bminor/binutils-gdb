@@ -113,6 +113,12 @@ protected:
   bool low_cannot_fetch_register (int regno) override;
 
   bool low_cannot_store_register (int regno) override;
+
+  bool low_supports_breakpoints () override;
+
+  CORE_ADDR low_get_pc (regcache *regcache) override;
+
+  void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 };
 
 /* The singleton target ops object.  */
@@ -494,8 +500,14 @@ static struct regset_info x86_regsets[] =
   NULL_REGSET
 };
 
-static CORE_ADDR
-x86_get_pc (struct regcache *regcache)
+bool
+x86_target::low_supports_breakpoints ()
+{
+  return true;
+}
+
+CORE_ADDR
+x86_target::low_get_pc (regcache *regcache)
 {
   int use_64bit = register_size (regcache->tdesc, 0) == 8;
 
@@ -515,8 +527,8 @@ x86_get_pc (struct regcache *regcache)
     }
 }
 
-static void
-x86_set_pc (struct regcache *regcache, CORE_ADDR pc)
+void
+x86_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
 {
   int use_64bit = register_size (regcache->tdesc, 0) == 8;
 
@@ -2885,8 +2897,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_get_pc,
-  x86_set_pc,
   NULL, /* breakpoint_kind_from_pc */
   x86_sw_breakpoint_from_kind,
   NULL,
