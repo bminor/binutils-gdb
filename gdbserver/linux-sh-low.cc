@@ -134,14 +134,6 @@ sh_target::low_breakpoint_at (CORE_ADDR where)
   return false;
 }
 
-/* Support for hardware single step.  */
-
-static int
-sh_supports_hardware_single_step (void)
-{
-  return 1;
-}
-
 /* Provide only a fill function for the general register set.  ps_lgetregs
    will use this for NPTL support.  */
 
@@ -192,7 +184,6 @@ sh_target::low_arch_setup ()
 }
 
 struct linux_target_ops the_low_target = {
-  sh_supports_hardware_single_step,
 };
 
 /* The linux target ops object.  */

@@ -131,9 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* See target.h.  */
-  int (*supports_hardware_single_step) (void);
-
   /* Fill *SYSNO with the syscall nr trapped.  Only to be called when
      inferior is stopped due to SYSCALL_SIGTRAP.  */
   void (*get_syscall_trapinfo) (struct regcache *regcache, int *sysno);
@@ -401,6 +398,12 @@ private:
      events.  */
   void complete_ongoing_step_over ();
 
+  /* Finish a step-over.  Reinsert the breakpoint we had uninserted in
+     start_step_over, if still there, and delete any single-step
+     breakpoints we've set, on non hardware single-step targets.
+     Return true if step over finished.  */
+  bool finish_step_over (lwp_info *lwp);
+
   /* When we finish a step-over, set threads running again.  If there's
      another thread that may need a step-over, now's the time to start
      it.  Eventually, we'll move all threads past their breakpoints.  */
@@ -518,6 +521,9 @@ private:
      Return 1 if hardware single stepping, 0 if software single stepping
      or can't single step.  */
   int single_step (lwp_info* lwp);
+
+  /* Return true if THREAD is doing hardware single step.  */
+  bool maybe_hw_step (thread_info *thread);
 
   /* Install breakpoints for software single stepping.  */
   void install_software_single_step_breakpoints (lwp_info *lwp);

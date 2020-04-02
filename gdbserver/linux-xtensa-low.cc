@@ -314,14 +314,6 @@ xtensa_target::low_arch_setup ()
   current_process ()->tdesc = tdesc_xtensa;
 }
 
-/* Support for hardware single step.  */
-
-static int
-xtensa_supports_hardware_single_step (void)
-{
-  return 1;
-}
-
 const regs_info *
 xtensa_target::get_regs_info ()
 {
@@ -329,7 +321,6 @@ xtensa_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  xtensa_supports_hardware_single_step,
 };
 
 /* The linux target ops object.  */

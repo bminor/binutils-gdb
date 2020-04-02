@@ -394,14 +394,6 @@ tic6x_target::low_arch_setup ()
   current_process ()->tdesc = tic6x_read_description (feature);
 }
 
-/* Support for hardware single step.  */
-
-static int
-tic6x_supports_hardware_single_step (void)
-{
-  return 1;
-}
-
 static struct regsets_info tic6x_regsets_info =
   {
     tic6x_regsets, /* regsets */
@@ -423,7 +415,6 @@ tic6x_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  tic6x_supports_hardware_single_step,
 };
 
 #if GDB_SELF_TEST

@@ -1,5 +1,59 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Remove the 'supports_hardware_single_step' linux target op and
+	override the process_stratum_target's op definition in
+	linux_process_target to return true.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <finish_step_over>
+	<maybe_hw_step>: Declare.
+	* linux-low.cc (can_hardware_single_step): Remove.
+	(maybe_hw_step): Turn into...
+	(linux_process_target::maybe_hw_step): ...this.
+	(finish_step_over): Turn into...
+	(linux_process_target::finish_step_over): ...this.
+	(linux_process_target::supports_hardware_single_step): Update
+	to return true.
+
+	Update the callers below.
+
+	(linux_process_target::single_step)
+	(linux_process_target::resume_one_lwp_throw)
+
+	* linux-arm-low.cc (class arm_target)
+	<supports_hardware_single_step>: Declare.
+	(arm_supports_hardware_single_step): Turn into...
+	(arm_target::supports_hardware_single_step): ...this.
+	(the_low_target): Remove the op field.
+	* linux-x86-low.cc (x86_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (aarch64_supports_hardware_single_step):
+	Remove.
+	(the_low_target): Remove the op field.
+	* linux-bfin-low.cc (bfin_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-crisv32-low.cc (cris_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-m32r-low.cc (m32r_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-m68k-low.cc (m68k_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (ppc_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (s390_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-sh-low.cc (sh_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-tic6x-low.cc (tic6x_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-tile-low.cc (tile_supports_hardware_single_step): Remove.
+	(the_low_target): Remove the op field.
+	* linux-xtensa-low.cc (xtensa_supports_hardware_single_step):
+	Remove.
+	(the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn the 'supports_range_stepping' linux target op into a method
 	of linux_process_target.
 

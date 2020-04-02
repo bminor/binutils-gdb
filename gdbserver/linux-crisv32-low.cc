@@ -426,14 +426,6 @@ crisv32_target::low_arch_setup ()
   current_process ()->tdesc = tdesc_crisv32;
 }
 
-/* Support for hardware single step.  */
-
-static int
-cris_supports_hardware_single_step (void)
-{
-  return 1;
-}
-
 static struct regset_info cris_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, cris_num_regs * 4,
     GENERAL_REGS, cris_fill_gregset, cris_store_gregset },
@@ -468,7 +460,6 @@ crisv32_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  cris_supports_hardware_single_step,
 };
 
 /* The linux target ops object.  */

@@ -723,14 +723,6 @@ s390_target::supports_z_point_type (char z_type)
     }
 }
 
-/* Support for hardware single step.  */
-
-static int
-s390_supports_hardware_single_step (void)
-{
-  return 1;
-}
-
 static struct usrregs_info s390_usrregs_info =
   {
     s390_num_regs,
@@ -2863,7 +2855,6 @@ s390_target::emit_ops ()
 }
 
 struct linux_target_ops the_low_target = {
-  s390_supports_hardware_single_step,
   NULL, /* get_syscall_trapinfo */
   s390_get_ipa_tdesc_idx,
 };

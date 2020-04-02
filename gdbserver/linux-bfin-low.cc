@@ -144,14 +144,6 @@ bfin_target::low_arch_setup ()
   current_process ()->tdesc = tdesc_bfin;
 }
 
-/* Support for hardware single step.  */
-
-static int
-bfin_supports_hardware_single_step (void)
-{
-  return 1;
-}
-
 static struct usrregs_info bfin_usrregs_info =
   {
     bfin_num_regs,
@@ -171,7 +163,6 @@ bfin_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  bfin_supports_hardware_single_step,
 };
 
 /* The linux target ops object.  */

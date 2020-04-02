@@ -3157,17 +3157,8 @@ aarch64_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
     return arm_breakpoint_kind_from_current_state (pcptr);
 }
 
-/* Support for hardware single step.  */
-
-static int
-aarch64_supports_hardware_single_step (void)
-{
-  return 1;
-}
-
 struct linux_target_ops the_low_target =
 {
-  aarch64_supports_hardware_single_step,
   aarch64_get_syscall_trapinfo,
 };
 

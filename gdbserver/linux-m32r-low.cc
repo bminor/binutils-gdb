@@ -134,14 +134,6 @@ m32r_target::low_arch_setup ()
   current_process ()->tdesc = tdesc_m32r;
 }
 
-/* Support for hardware single step.  */
-
-static int
-m32r_supports_hardware_single_step (void)
-{
-  return 1;
-}
-
 static struct usrregs_info m32r_usrregs_info =
   {
     m32r_num_regs,
@@ -161,7 +153,6 @@ m32r_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  m32r_supports_hardware_single_step,
 };
 
 /* The linux target ops object.  */

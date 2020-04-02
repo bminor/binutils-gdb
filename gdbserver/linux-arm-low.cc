@@ -72,6 +72,8 @@ public:
 
   bool supports_z_point_type (char z_type) override;
 
+  bool supports_hardware_single_step () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -1030,10 +1032,10 @@ arm_target::low_get_next_pcs (regcache *regcache)
 
 /* Support for hardware single step.  */
 
-static int
-arm_supports_hardware_single_step (void)
+bool
+arm_target::supports_hardware_single_step ()
 {
-  return 0;
+  return false;
 }
 
 /* Implementation of linux_target_ops method "get_syscall_trapinfo".  */
@@ -1117,7 +1119,6 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  arm_supports_hardware_single_step,
   arm_get_syscall_trapinfo,
 };
 

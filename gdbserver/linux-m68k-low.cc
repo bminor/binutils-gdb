@@ -256,16 +256,7 @@ m68k_target::low_arch_setup ()
   current_process ()->tdesc = tdesc_m68k;
 }
 
-/* Support for hardware single step.  */
-
-static int
-m68k_supports_hardware_single_step (void)
-{
-  return 1;
-}
-
 struct linux_target_ops the_low_target = {
-  m68k_supports_hardware_single_step,
 };
 
 /* The linux target ops object.  */

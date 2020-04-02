@@ -270,7 +270,6 @@ static int stabilizing_threads;
 static void unsuspend_all_lwps (struct lwp_info *except);
 static void mark_lwp_dead (struct lwp_info *lwp, int wstat);
 static int lwp_is_marked_dead (struct lwp_info *lwp);
-static int finish_step_over (struct lwp_info *lwp);
 static int kill_lwp (unsigned long lwpid, int signo);
 static void enqueue_pending_signal (struct lwp_info *lwp, int signal, siginfo_t *info);
 static int linux_low_ptrace_options (int attached);
@@ -279,17 +278,6 @@ static int check_ptrace_stopped_lwp_gone (struct lwp_info *lp);
 /* When the event-loop is doing a step-over, this points at the thread
    being stepped.  */
 ptid_t step_over_bkpt;
-
-/* True if the low target can hardware single-step.  */
-
-static int
-can_hardware_single_step (void)
-{
-  if (the_low_target.supports_hardware_single_step != NULL)
-    return the_low_target.supports_hardware_single_step ();
-  else
-    return 0;
-}
 
 bool
 linux_process_target::low_supports_breakpoints ()
@@ -2503,19 +2491,17 @@ linux_process_target::filter_event (int lwpid, int wstat)
   return child;
 }
 
-/* Return true if THREAD is doing hardware single step.  */
-
-static int
-maybe_hw_step (struct thread_info *thread)
+bool
+linux_process_target::maybe_hw_step (thread_info *thread)
 {
-  if (can_hardware_single_step ())
-    return 1;
+  if (supports_hardware_single_step ())
+    return true;
   else
     {
       /* GDBserver must insert single-step breakpoint for software
 	 single step.  */
       gdb_assert (has_single_step_breakpoints (thread));
-      return 0;
+      return false;
     }
 }
 
@@ -4107,7 +4093,7 @@ linux_process_target::single_step (lwp_info* lwp)
 {
   int step = 0;
 
-  if (can_hardware_single_step ())
+  if (supports_hardware_single_step ())
     {
       step = 1;
     }
@@ -4218,7 +4204,7 @@ linux_process_target::resume_one_lwp_throw (lwp_info *lwp, int step,
 	debug_printf ("  pending reinsert at 0x%s\n",
 		      paddress (lwp->bp_reinsert));
 
-      if (can_hardware_single_step ())
+      if (supports_hardware_single_step ())
 	{
 	  if (fast_tp_collecting == fast_tpoint_collect_result::not_collecting)
 	    {
@@ -4247,7 +4233,7 @@ linux_process_target::resume_one_lwp_throw (lwp_info *lwp, int step,
 		      " single-stepping\n",
 		      lwpid_of (thread));
 
-      if (can_hardware_single_step ())
+      if (supports_hardware_single_step ())
 	step = 1;
       else
 	{
@@ -4700,12 +4686,8 @@ linux_process_target::start_step_over (lwp_info *lwp)
   step_over_bkpt = thread->id;
 }
 
-/* Finish a step-over.  Reinsert the breakpoint we had uninserted in
-   start_step_over, if still there, and delete any single-step
-   breakpoints we've set, on non hardware single-step targets.  */
-
-static int
-finish_step_over (struct lwp_info *lwp)
+bool
+linux_process_target::finish_step_over (lwp_info *lwp)
 {
   if (lwp->bp_reinsert != 0)
     {
@@ -4728,7 +4710,7 @@ finish_step_over (struct lwp_info *lwp)
 	 and later not being able to explain it, because we were
 	 stepping over a breakpoint, and we hold all threads but
 	 LWP stopped while doing that.  */
-      if (!can_hardware_single_step ())
+      if (!supports_hardware_single_step ())
 	{
 	  gdb_assert (has_single_step_breakpoints (current_thread));
 	  delete_single_step_breakpoints (current_thread);
@@ -4736,10 +4718,10 @@ finish_step_over (struct lwp_info *lwp)
 
       step_over_bkpt = null_ptid;
       current_thread = saved_thread;
-      return 1;
+      return true;
     }
   else
-    return 0;
+    return false;
 }
 
 void
@@ -5899,7 +5881,7 @@ linux_process_target::supports_stopped_by_hw_breakpoint ()
 bool
 linux_process_target::supports_hardware_single_step ()
 {
-  return can_hardware_single_step ();
+  return true;
 }
 
 bool
