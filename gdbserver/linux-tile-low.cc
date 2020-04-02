@@ -29,6 +29,8 @@ class tile_target : public linux_process_target
 {
 public:
 
+  const regs_info *get_regs_info () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -149,17 +151,17 @@ static struct usrregs_info tile_usrregs_info =
     tile_regmap,
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &tile_usrregs_info,
     &tile_regsets_info,
   };
 
-static const struct regs_info *
-tile_regs_info (void)
+const regs_info *
+tile_target::get_regs_info ()
 {
-  return &regs_info;
+  return &myregs_info;
 }
 
 void
@@ -190,7 +192,6 @@ tile_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  tile_regs_info,
   tile_cannot_fetch_register,
   tile_cannot_store_register,
   NULL,

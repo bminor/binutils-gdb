@@ -25,6 +25,8 @@ class sh_target : public linux_process_target
 {
 public:
 
+  const regs_info *get_regs_info () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -138,17 +140,17 @@ static struct usrregs_info sh_usrregs_info =
     sh_regmap,
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &sh_usrregs_info,
     &sh_regsets_info
   };
 
-static const struct regs_info *
-sh_regs_info (void)
+const regs_info *
+sh_target::get_regs_info ()
 {
-  return &regs_info;
+  return &myregs_info;
 }
 
 void
@@ -158,7 +160,6 @@ sh_target::low_arch_setup ()
 }
 
 struct linux_target_ops the_low_target = {
-  sh_regs_info,
   sh_cannot_fetch_register,
   sh_cannot_store_register,
   NULL, /* fetch_register */

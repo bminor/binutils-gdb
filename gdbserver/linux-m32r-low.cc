@@ -29,6 +29,8 @@ class m32r_target : public linux_process_target
 {
 public:
 
+  const regs_info *get_regs_info () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -115,20 +117,19 @@ static struct usrregs_info m32r_usrregs_info =
     m32r_regmap,
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &m32r_usrregs_info,
   };
 
-static const struct regs_info *
-m32r_regs_info (void)
+const regs_info *
+m32r_target::get_regs_info ()
 {
-  return &regs_info;
+  return &myregs_info;
 }
 
 struct linux_target_ops the_low_target = {
-  m32r_regs_info,
   m32r_cannot_fetch_register,
   m32r_cannot_store_register,
   NULL, /* fetch_register */

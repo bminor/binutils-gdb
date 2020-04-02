@@ -57,6 +57,8 @@ class s390_target : public linux_process_target
 {
 public:
 
+  const regs_info *get_regs_info () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -171,7 +173,7 @@ static void
 s390_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
 {
   int size = register_size (regcache->tdesc, regno);
-  const struct regs_info *regs_info = (*the_low_target.regs_info) ();
+  const struct regs_info *regs_info = the_linux_target->get_regs_info ();
   struct usrregs_info *usr = regs_info->usrregs;
   int regaddr = usr->regmap[regno];
 
@@ -218,7 +220,7 @@ s390_supply_ptrace_register (struct regcache *regcache,
 			     int regno, const char *buf)
 {
   int size = register_size (regcache->tdesc, regno);
-  const struct regs_info *regs_info = (*the_low_target.regs_info) ();
+  const struct regs_info *regs_info = the_linux_target->get_regs_info ();
   struct usrregs_info *usr = regs_info->usrregs;
   int regaddr = usr->regmap[regno];
 
@@ -276,7 +278,7 @@ static void
 s390_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
-  const struct regs_info *regs_info = (*the_low_target.regs_info) ();
+  const struct regs_info *regs_info = the_linux_target->get_regs_info ();
   struct usrregs_info *usr = regs_info->usrregs;
 
   for (i = 0; i < usr->num_regs; i++)
@@ -687,7 +689,7 @@ static struct regsets_info s390_regsets_info =
     NULL, /* disabled_regsets */
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &s390_usrregs_info,
@@ -714,8 +716,8 @@ static struct regs_info regs_info_3264 =
     &s390_regsets_info_3264
   };
 
-static const struct regs_info *
-s390_regs_info (void)
+const regs_info *
+s390_target::get_regs_info ()
 {
   if (have_hwcap_s390_high_gprs)
     {
@@ -728,7 +730,7 @@ s390_regs_info (void)
       return &regs_info_3264;
 #endif
     }
-  return &regs_info;
+  return &myregs_info;
 }
 
 /* The "supports_tracepoints" linux_target_ops method.  */
@@ -2806,7 +2808,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  s390_regs_info,
   s390_cannot_fetch_register,
   s390_cannot_store_register,
   NULL, /* fetch_register */

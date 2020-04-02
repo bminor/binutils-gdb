@@ -104,6 +104,8 @@ public:
      connected, and it may or not support xml target descriptions.  */
   void update_xmltarget ();
 
+  const regs_info *get_regs_info () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -982,8 +984,8 @@ static struct regs_info i386_linux_regs_info =
     &x86_regsets_info
   };
 
-static const struct regs_info *
-x86_linux_regs_info (void)
+const regs_info *
+x86_target::get_regs_info ()
 {
 #ifdef __x86_64__
   if (is_64bit_tdesc ())
@@ -2879,7 +2881,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_linux_regs_info,
   x86_cannot_fetch_register,
   x86_cannot_store_register,
   NULL, /* fetch_register */

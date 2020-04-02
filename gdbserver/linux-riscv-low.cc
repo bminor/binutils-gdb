@@ -36,6 +36,8 @@ class riscv_target : public linux_process_target
 {
 public:
 
+  const regs_info *get_regs_info () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -160,10 +162,10 @@ static struct regs_info riscv_regs =
     &riscv_regsets_info,
   };
 
-/* Implementation of linux_target_ops method "regs_info".  */
+/* Implementation of linux target ops method "get_regs_info".  */
 
-static const struct regs_info *
-riscv_regs_info ()
+const regs_info *
+riscv_target::get_regs_info ()
 {
   return &riscv_regs;
 }
@@ -271,7 +273,6 @@ riscv_breakpoint_at (CORE_ADDR pc)
 /* RISC-V/Linux target operations.  */
 struct linux_target_ops the_low_target =
 {
-  riscv_regs_info,
   NULL, /* cannot_fetch_register */
   NULL, /* cannot_store_register */
   riscv_fetch_register,

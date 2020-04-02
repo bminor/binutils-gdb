@@ -55,6 +55,8 @@ class aarch64_target : public linux_process_target
 {
 public:
 
+  const regs_info *get_regs_info () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -619,10 +621,10 @@ static struct regs_info regs_info_aarch64_sve =
     &aarch64_sve_regsets_info,
   };
 
-/* Implementation of linux_target_ops method "regs_info".  */
+/* Implementation of linux target ops method "get_regs_info".  */
 
-static const struct regs_info *
-aarch64_regs_info (void)
+const regs_info *
+aarch64_target::get_regs_info ()
 {
   if (!is_64bit_tdesc ())
     return &regs_info_aarch32;
@@ -3065,7 +3067,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_regs_info,
   NULL, /* cannot_fetch_register */
   NULL, /* cannot_store_register */
   NULL, /* fetch_register */

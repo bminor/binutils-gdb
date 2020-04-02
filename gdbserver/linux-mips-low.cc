@@ -31,6 +31,8 @@ class mips_target : public linux_process_target
 {
 public:
 
+  const regs_info *get_regs_info () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -171,7 +173,7 @@ mips_target::low_arch_setup ()
 static struct usrregs_info *
 get_usrregs_info (void)
 {
-  const struct regs_info *regs_info = the_low_target.regs_info ();
+  const struct regs_info *regs_info = the_linux_target->get_regs_info ();
 
   return regs_info->usrregs;
 }
@@ -935,24 +937,23 @@ static struct regs_info dsp_regs_info =
     &mips_regsets_info
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &mips_usrregs_info,
     &mips_regsets_info
   };
 
-static const struct regs_info *
-mips_regs_info (void)
+const regs_info *
+mips_target::get_regs_info ()
 {
   if (have_dsp)
     return &dsp_regs_info;
   else
-    return &regs_info;
+    return &myregs_info;
 }
 
 struct linux_target_ops the_low_target = {
-  mips_regs_info,
   mips_cannot_fetch_register,
   mips_cannot_store_register,
   mips_fetch_register,

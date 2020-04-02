@@ -1,5 +1,103 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn the 'regs_info' linux target op into a method of
+	linux_process_target.
+
+	* linux-low.h (struct linux_target_ops) <regs_info>: Remove.
+	(class linux_process_target) <get_regs_info>: Define.
+
+	Update the callers below.
+
+	* linux-low.cc (linux_process_target::fetch_registers)
+	(linux_process_target::store_registers)
+	* proc-service.cc (gregset_info)
+
+	* linux-x86-low.cc (class x86_target) <get_regs_info>: Declare.
+	(x86_linux_regs_info): Turn into ...
+	(x86_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target) <get_regs_info>:
+	Declare.
+	(aarch64_regs_info): Turn into ...
+	(aarch64_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (class arm_target) <get_regs_info>: Declare.
+	(arm_regs_info): Turn into ...
+	(arm_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-bfin-low.cc (class bfin_target) <get_regs_info>: Declare.
+	(bfin_regs_info): Turn into ...
+	(bfin_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-cris-low.cc (class cris_target) <get_regs_info>: Declare.
+	(cris_regs_info): Turn into ...
+	(cris_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-crisv32-low.cc (class crisv32_target) <get_regs_info>:
+	Declare.
+	(crisv32_regs_info): Turn into ...
+	(crisv32_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ia64-low.cc (class ia64_target) <get_regs_info>: Declare.
+	(ia64_regs_info): Turn into ...
+	(ia64_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-m32r-low.cc (class m32r_target) <get_regs_info>: Declare.
+	(m32r_regs_info): Turn into ...
+	(m32r_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-m68k-low.cc (class m68k_target) <get_regs_info>: Declare.
+	(m68k_regs_info): Turn into ...
+	(m68k_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-mips-low.cc (class mips_target) <get_regs_info>: Declare.
+	(mips_regs_info): Turn into ...
+	(mips_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	(get_usrregs_info): Update the call to the op.
+	* linux-nios2-low.cc (class nios2_target) <get_regs_info>: Declare.
+	(nios2_regs_info): Turn into ...
+	(nios2_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target) <get_regs_info>: Declare.
+	(ppc_regs_info): Turn into ...
+	(ppc_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-riscv-low.cc (class riscv_target) <get_regs_info>: Declare.
+	(riscv_regs_info): Turn into ...
+	(riscv_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target) <get_regs_info>: Declare.
+	(s390_regs_info): Turn into ...
+	(s390_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	(s390_collect_ptrace_register)
+	(s390_supply_ptrace_register)
+	(s390_fill_gregset): Update the call to the op.
+	* linux-sh-low.cc (class sh_target) <get_regs_info>: Declare.
+	(sh_regs_info): Turn into ...
+	(sh_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sparc-low.cc (class sparc_target) <get_regs_info>: Declare.
+	(sparc_regs_info): Turn into ...
+	(sparc_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tic6x-low.cc (class tic6x_target) <get_regs_info>: Declare.
+	(tic6x_regs_info): Turn into ...
+	(tic6x_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tile-low.cc (class tile_target) <get_regs_info>: Declare.
+	(tile_regs_info): Turn into ...
+	(tile_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+	* linux-xtensa-low.cc (class xtensa_target) <get_regs_info>:
+	Declare.
+	(xtensa_regs_info): Turn into ...
+	(xtensa_target::get_regs_info): ...this.
+	(the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn the 'arch_setup' linux target op into a method of
 	linux_process_target.
 

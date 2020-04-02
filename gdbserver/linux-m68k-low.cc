@@ -25,6 +25,8 @@ class m68k_target : public linux_process_target
 {
 public:
 
+  const regs_info *get_regs_info () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -195,17 +197,17 @@ static struct usrregs_info m68k_usrregs_info =
     m68k_regmap,
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     &m68k_usrregs_info,
     &m68k_regsets_info
   };
 
-static const struct regs_info *
-m68k_regs_info (void)
+const regs_info *
+m68k_target::get_regs_info ()
 {
-  return &regs_info;
+  return &myregs_info;
 }
 
 void
@@ -223,7 +225,6 @@ m68k_supports_hardware_single_step (void)
 }
 
 struct linux_target_ops the_low_target = {
-  m68k_regs_info,
   m68k_cannot_fetch_register,
   m68k_cannot_store_register,
   NULL, /* fetch_register */

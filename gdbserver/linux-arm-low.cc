@@ -60,6 +60,8 @@ class arm_target : public linux_process_target
 {
 public:
 
+  const regs_info *get_regs_info () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -1007,8 +1009,8 @@ static struct regs_info regs_info_arm =
     &arm_regsets_info
   };
 
-static const struct regs_info *
-arm_regs_info (void)
+const regs_info *
+arm_target::get_regs_info ()
 {
   const struct target_desc *tdesc = current_process ()->tdesc;
 
@@ -1021,7 +1023,6 @@ arm_regs_info (void)
 }
 
 struct linux_target_ops the_low_target = {
-  arm_regs_info,
   arm_cannot_fetch_register,
   arm_cannot_store_register,
   NULL, /* fetch_register */

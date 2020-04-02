@@ -26,6 +26,8 @@ class xtensa_target : public linux_process_target
 {
 public:
 
+  const regs_info *get_regs_info () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -254,7 +256,7 @@ static struct regsets_info xtensa_regsets_info =
     NULL, /* disabled_regsets */
   };
 
-static struct regs_info regs_info =
+static struct regs_info myregs_info =
   {
     NULL, /* regset_bitmap */
     NULL, /* usrregs */
@@ -275,14 +277,13 @@ xtensa_supports_hardware_single_step (void)
   return 1;
 }
 
-static const struct regs_info *
-xtensa_regs_info (void)
+const regs_info *
+xtensa_target::get_regs_info ()
 {
-  return &regs_info;
+  return &myregs_info;
 }
 
 struct linux_target_ops the_low_target = {
-  xtensa_regs_info,
   0,
   0,
   NULL, /* fetch_register */

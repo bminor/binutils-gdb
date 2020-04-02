@@ -131,8 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  const struct regs_info *(*regs_info) (void);
-
   /* Return 0 if we can fetch/store the register, 1 if we cannot
      fetch/store the register.  */
   int (*cannot_fetch_register) (int);
@@ -477,6 +475,10 @@ public:
   bool supports_catch_syscall () override;
 
   int get_ipa_tdesc_idx () override;
+
+  /* Return the information to access registers.  This has public
+     visibility because proc-service uses it.  */
+  virtual const regs_info *get_regs_info () = 0;
 
 private:
 

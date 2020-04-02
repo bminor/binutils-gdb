@@ -5576,7 +5576,7 @@ linux_process_target::fetch_registers (regcache *regcache, int regno)
 {
   int use_regsets;
   int all = 0;
-  const struct regs_info *regs_info = (*the_low_target.regs_info) ();
+  const regs_info *regs_info = get_regs_info ();
 
   if (regno == -1)
     {
@@ -5609,7 +5609,7 @@ linux_process_target::store_registers (regcache *regcache, int regno)
 {
   int use_regsets;
   int all = 0;
-  const struct regs_info *regs_info = (*the_low_target.regs_info) ();
+  const regs_info *regs_info = get_regs_info ();
 
   if (regno == -1)
     {
