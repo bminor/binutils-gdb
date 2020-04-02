@@ -106,7 +106,7 @@ proc run_tests { lang } {
 	    set d_pattern "\\(4,5\\)"
 	    set f_pattern "$hex 'abcdef\\\\000'"
 	} else {
-	    set d_pattern "4 \\+ 5 \\* I"
+	    set d_pattern "4 \\+ 5i"
 	    set f_pattern "$hex \"abcdef\""
 	}
 
@@ -134,7 +134,7 @@ proc run_tests { lang } {
 	    "info frame in frame #7"
 
 	if { $lang == "c" || $lang == "c++" } {
-	    set d_pattern "4 \\+ 5 \\* I"
+	    set d_pattern "4 \\+ 5i"
 	    set e_pattern "\"abcdef\""
 	    set g_pattern "\{a = 1.5, b = 2.5\}"
 	} else {

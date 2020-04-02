@@ -1,3 +1,7 @@
+2020-04-02  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.fortran/mixed-lang-stack.exp: Accept new complex printing style.
+
 2020-04-01  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/complex-parts.exp: Add type tests.
