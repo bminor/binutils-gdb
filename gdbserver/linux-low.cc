@@ -322,16 +322,6 @@ linux_process_target::low_decr_pc_after_break ()
   return 0;
 }
 
-/* Returns true if this target can support fast tracepoints.  This
-   does not mean that the in-process agent has been loaded in the
-   inferior.  */
-
-static int
-supports_fast_tracepoints (void)
-{
-  return the_low_target.install_fast_tracepoint_jump_pad != NULL;
-}
-
 /* True if LWP is stopped in its stepping range.  */
 
 static int
@@ -1997,27 +1987,27 @@ handle_tracepoints (struct lwp_info *lwp)
   return 0;
 }
 
-/* Convenience wrapper.  Returns information about LWP's fast tracepoint
-   collection status.  */
-
-static fast_tpoint_collect_result
-linux_fast_tracepoint_collecting (struct lwp_info *lwp,
-				  struct fast_tpoint_collect_status *status)
+fast_tpoint_collect_result
+linux_process_target::linux_fast_tracepoint_collecting
+  (lwp_info *lwp, fast_tpoint_collect_status *status)
 {
   CORE_ADDR thread_area;
   struct thread_info *thread = get_lwp_thread (lwp);
-
-  if (the_low_target.get_thread_area == NULL)
-    return fast_tpoint_collect_result::not_collecting;
 
   /* Get the thread area address.  This is used to recognize which
      thread is which when tracing with the in-process agent library.
      We don't read anything from the address, and treat it as opaque;
      it's the address itself that we assume is unique per-thread.  */
-  if ((*the_low_target.get_thread_area) (lwpid_of (thread), &thread_area) == -1)
+  if (low_get_thread_area (lwpid_of (thread), &thread_area) == -1)
     return fast_tpoint_collect_result::not_collecting;
 
   return fast_tracepoint_collecting (thread_area, lwp->stop_pc, status);
+}
+
+int
+linux_process_target::low_get_thread_area (int lwpid, CORE_ADDR *addrp)
+{
+  return -1;
 }
 
 bool
@@ -2834,7 +2824,6 @@ unsuspend_all_lwps (struct lwp_info *except)
     });
 }
 
-static bool stuck_in_jump_pad_callback (thread_info *thread);
 static bool lwp_running (thread_info *thread);
 
 /* Stabilize threads (move out of jump pads).
@@ -2870,7 +2859,10 @@ static bool lwp_running (thread_info *thread);
 void
 linux_process_target::stabilize_threads ()
 {
-  thread_info *thread_stuck = find_thread (stuck_in_jump_pad_callback);
+  thread_info *thread_stuck = find_thread ([this] (thread_info *thread)
+				{
+				  return stuck_in_jump_pad (thread);
+				});
 
   if (thread_stuck != NULL)
     {
@@ -2926,7 +2918,10 @@ linux_process_target::stabilize_threads ()
 
   if (debug_threads)
     {
-      thread_stuck = find_thread (stuck_in_jump_pad_callback);
+      thread_stuck = find_thread ([this] (thread_info *thread)
+		       {
+			 return stuck_in_jump_pad (thread);
+		       });
 
       if (thread_stuck != NULL)
 	debug_printf ("couldn't stabilize, LWP %ld got stuck in jump pad\n",
@@ -3949,13 +3944,8 @@ linux_process_target::wait_for_sigstop ()
     }
 }
 
-/* Returns true if THREAD is stopped in a jump pad, and we can't
-   move it out, because we need to report the stop event to GDB.  For
-   example, if the user puts a breakpoint in the jump pad, it's
-   because she wants to debug it.  */
-
-static bool
-stuck_in_jump_pad_callback (thread_info *thread)
+bool
+linux_process_target::stuck_in_jump_pad (thread_info *thread)
 {
   struct lwp_info *lwp = get_thread_lwp (thread);
 

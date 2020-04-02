@@ -1,5 +1,55 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn the 'get_thread_area' linux target op into a method of
+	process_stratum_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <stuck_in_jump_pad>
+	<linux_fast_tracepoint_collecting>
+	<low_get_thread_area>: Declare.
+	* linux-low.cc (supports_fast_tracepoints): Remove.
+	(linux_fast_tracepoint_collecting): Turn into...
+	(linux_process_target::linux_fast_tracepoint_collecting): ...this.
+	(linux_process_target::low_get_thread_area): Define.
+	(stuck_in_jump_pad_callback): Turn into...
+	(linux_process_target::stuck_in_jump_pad): ...this.
+
+	Update the caller below.
+
+	(linux_process_target::stabilize_threads)
+
+	* linux-x86-low.cc (class x86_target) <low_get_thread_area>:
+	Declare.
+	(x86_get_thread_area): Turn into...
+	(x86_target::low_get_thread_area): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target) <low_get_thread_area>:
+	Declare.
+	(aarch64_get_thread_area): Turn into...
+	(aarch64_target::low_get_thread_area): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target) <low_get_thread_area>:
+	Declare.
+	(ppc_get_thread_area): Turn into...
+	(ppc_target::low_get_thread_area): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target) <low_get_thread_area>:
+	Declare.
+	(s390_get_thread_area): Turn into...
+	(s390_target::low_get_thread_area): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (the_low_target): Remove the op field.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Remote the 'supports_tracepoints' linux target op and let the
 	concrete linux target define it by overriding the op declared in
 	process_stratum_target.

@@ -107,6 +107,8 @@ protected:
   void low_new_fork (process_info *parent, process_info *child) override;
 
   void low_prepare_to_resume (lwp_info *lwp) override;
+
+  int low_get_thread_area (int lwpid, CORE_ADDR *addrp) override;
 };
 
 /* The singleton target ops object.  */
@@ -731,10 +733,10 @@ aarch64_target::supports_tracepoints ()
     }
 }
 
-/* Implementation of linux_target_ops method "get_thread_area".  */
+/* Implementation of linux target ops method "low_get_thread_area".  */
 
-static int
-aarch64_get_thread_area (int lwpid, CORE_ADDR *addrp)
+int
+aarch64_target::low_get_thread_area (int lwpid, CORE_ADDR *addrp)
 {
   struct iovec iovec;
   uint64_t reg;
@@ -3149,7 +3151,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_get_thread_area,
   aarch64_install_fast_tracepoint_jump_pad,
   aarch64_emit_ops,
   aarch64_get_min_fast_tracepoint_insn_len,

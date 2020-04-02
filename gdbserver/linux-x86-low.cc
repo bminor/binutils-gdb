@@ -158,6 +158,8 @@ protected:
 
   void low_prepare_to_resume (lwp_info *lwp) override;
 
+  int low_get_thread_area (int lwpid, CORE_ADDR *addrp) override;
+
 private:
 
   /* Update all the target description of all processes; a new GDB
@@ -311,8 +313,8 @@ ps_get_thread_area (struct ps_prochandle *ph,
    don't read anything from the address, and treat it as opaque; it's
    the address itself that we assume is unique per-thread.  */
 
-static int
-x86_get_thread_area (int lwpid, CORE_ADDR *addr)
+int
+x86_target::low_get_thread_area (int lwpid, CORE_ADDR *addr)
 {
 #ifdef __x86_64__
   int use_64bit = is_64bit_tdesc ();
@@ -2969,7 +2971,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_get_thread_area,
   x86_install_fast_tracepoint_jump_pad,
   x86_emit_ops,
   x86_get_min_fast_tracepoint_insn_len,

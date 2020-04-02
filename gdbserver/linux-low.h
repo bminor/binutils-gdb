@@ -131,10 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Fill ADDRP with the thread area address of LWPID.  Returns 0 on
-     success, -1 on failure.  */
-  int (*get_thread_area) (int lwpid, CORE_ADDR *addrp);
-
   /* Install a fast tracepoint jump pad.  See target.h for
      comments.  */
   int (*install_fast_tracepoint_jump_pad) (CORE_ADDR tpoint, CORE_ADDR tpaddr,
@@ -624,6 +620,17 @@ private: /* Back to private.  */
   ptid_t filter_exit_event (lwp_info *event_child,
 			    target_waitstatus *ourstatus);
 
+  /* Returns true if THREAD is stopped in a jump pad, and we can't
+     move it out, because we need to report the stop event to GDB.  For
+     example, if the user puts a breakpoint in the jump pad, it's
+     because she wants to debug it.  */
+  bool stuck_in_jump_pad (thread_info *thread);
+
+  /* Convenience wrapper.  Returns information about LWP's fast tracepoint
+     collection status.  */
+  fast_tpoint_collect_result linux_fast_tracepoint_collecting
+    (lwp_info *lwp, fast_tpoint_collect_status *status);
+
 protected:
   /* The architecture-specific "low" methods are listed below.  */
 
@@ -709,6 +716,10 @@ protected:
 
   /* Hook to call prior to resuming a thread.  */
   virtual void low_prepare_to_resume (lwp_info *lwp);
+
+  /* Fill ADDRP with the thread area address of LWPID.  Returns 0 on
+     success, -1 on failure.  */
+  virtual int low_get_thread_area (int lwpid, CORE_ADDR *addrp);
 
   /* How many bytes the PC should be decremented after a break.  */
   virtual int low_decr_pc_after_break ();

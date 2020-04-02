@@ -86,6 +86,8 @@ protected:
 
   int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 			int size, raw_breakpoint *bp) override;
+
+  int low_get_thread_area (int lwpid, CORE_ADDR *addrp) override;
 };
 
 /* The singleton target ops object.  */
@@ -1040,8 +1042,8 @@ ppc_target::supports_tracepoints ()
    don't read anything from the address, and treat it as opaque; it's
    the address itself that we assume is unique per-thread.  */
 
-static int
-ppc_get_thread_area (int lwpid, CORE_ADDR *addr)
+int
+ppc_target::low_get_thread_area (int lwpid, CORE_ADDR *addr)
 {
   struct lwp_info *lwp = find_lwp_pid (ptid_t (lwpid));
   struct thread_info *thr = get_lwp_thread (lwp);
@@ -3431,7 +3433,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  ppc_get_thread_area,
   ppc_install_fast_tracepoint_jump_pad,
   ppc_emit_ops,
   ppc_get_min_fast_tracepoint_insn_len,
