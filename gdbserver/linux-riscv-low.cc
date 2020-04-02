@@ -40,6 +40,8 @@ public:
 
   int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -266,10 +268,10 @@ riscv_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
     return sizeof (riscv_cbreakpoint);
 }
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-riscv_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+riscv_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = kind;
   switch (kind)
@@ -307,7 +309,6 @@ riscv_breakpoint_at (CORE_ADDR pc)
 /* RISC-V/Linux target operations.  */
 struct linux_target_ops the_low_target =
 {
-  riscv_sw_breakpoint_from_kind,
   NULL, /* get_next_pcs */
   0,    /* decr_pc_after_break */
   riscv_breakpoint_at,

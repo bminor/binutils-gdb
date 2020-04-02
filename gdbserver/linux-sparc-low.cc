@@ -50,6 +50,8 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -267,10 +269,10 @@ static const gdb_byte sparc_breakpoint[INSN_SIZE] = {
 };
 #define sparc_breakpoint_len INSN_SIZE
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const unsigned char *
-sparc_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+sparc_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = sparc_breakpoint_len;
   return sparc_breakpoint;
@@ -337,7 +339,6 @@ sparc_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  sparc_sw_breakpoint_from_kind,
   NULL, /* get_next_pcs */
   0,
   sparc_breakpoint_at,

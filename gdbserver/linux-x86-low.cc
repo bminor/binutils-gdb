@@ -106,6 +106,8 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -2852,10 +2854,10 @@ x86_emit_ops (void)
     return &i386_emit_ops;
 }
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-x86_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+x86_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = x86_breakpoint_len;
   return x86_breakpoint;
@@ -2897,7 +2899,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_sw_breakpoint_from_kind,
   NULL,
   1,
   x86_breakpoint_at,

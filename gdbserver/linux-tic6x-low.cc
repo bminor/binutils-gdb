@@ -46,6 +46,8 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -202,10 +204,10 @@ static int *tic6x_regmap;
 static unsigned int tic6x_breakpoint;
 #define tic6x_breakpoint_len 4
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-tic6x_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+tic6x_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = tic6x_breakpoint_len;
   return (const gdb_byte *) &tic6x_breakpoint;
@@ -419,7 +421,6 @@ tic6x_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  tic6x_sw_breakpoint_from_kind,
   NULL,
   0,
   tic6x_breakpoint_at,

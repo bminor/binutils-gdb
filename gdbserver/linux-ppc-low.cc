@@ -52,6 +52,8 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -296,10 +298,10 @@ static int ppc_regmap_adjusted;
 static const unsigned int ppc_breakpoint = 0x7d821008;
 #define ppc_breakpoint_len 4
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-ppc_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+ppc_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = ppc_breakpoint_len;
   return (const gdb_byte *) &ppc_breakpoint;
@@ -3404,7 +3406,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  ppc_sw_breakpoint_from_kind,
   NULL,
   0,
   ppc_breakpoint_at,

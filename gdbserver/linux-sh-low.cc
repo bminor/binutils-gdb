@@ -27,6 +27,8 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -107,10 +109,10 @@ sh_target::low_cannot_fetch_register (int regno)
 static const unsigned short sh_breakpoint = 0xc3c3;
 #define sh_breakpoint_len 2
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-sh_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+sh_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = sh_breakpoint_len;
   return (const gdb_byte *) &sh_breakpoint;
@@ -188,7 +190,6 @@ sh_target::low_arch_setup ()
 }
 
 struct linux_target_ops the_low_target = {
-  sh_sw_breakpoint_from_kind,
   NULL,
   0,
   sh_breakpoint_at,

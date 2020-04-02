@@ -59,6 +59,8 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -451,10 +453,10 @@ static struct regset_info s390_regsets[] = {
 static const gdb_byte s390_breakpoint[] = { 0, 1 };
 #define s390_breakpoint_len 2
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-s390_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+s390_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = s390_breakpoint_len;
   return s390_breakpoint;
@@ -2824,7 +2826,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  s390_sw_breakpoint_from_kind,
   NULL,
   s390_breakpoint_len,
   s390_breakpoint_at,

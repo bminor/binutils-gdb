@@ -31,6 +31,8 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -101,10 +103,10 @@ m32r_target::low_cannot_fetch_register (int regno)
 static const unsigned short m32r_breakpoint = 0x10f1;
 #define m32r_breakpoint_len 2
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-m32r_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+m32r_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = m32r_breakpoint_len;
   return (const gdb_byte *) &m32r_breakpoint;
@@ -158,7 +160,6 @@ m32r_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  m32r_sw_breakpoint_from_kind,
   NULL,
   0,
   m32r_breakpoint_at,

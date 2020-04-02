@@ -7230,16 +7230,6 @@ current_lwp_ptid (void)
   return ptid_of (current_thread);
 }
 
-/* Implementation of the target_ops method "sw_breakpoint_from_kind".  */
-
-const gdb_byte *
-linux_process_target::sw_breakpoint_from_kind (int kind, int *size)
-{
-  gdb_assert (the_low_target.sw_breakpoint_from_kind != NULL);
-
-  return (*the_low_target.sw_breakpoint_from_kind) (kind, size);
-}
-
 const char *
 linux_process_target::thread_name (ptid_t thread)
 {

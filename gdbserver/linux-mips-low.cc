@@ -33,6 +33,8 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -315,10 +317,10 @@ mips_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
 static const unsigned int mips_breakpoint = 0x0005000d;
 #define mips_breakpoint_len 4
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-mips_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+mips_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = mips_breakpoint_len;
   return (const gdb_byte *) &mips_breakpoint;
@@ -964,7 +966,6 @@ mips_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  mips_sw_breakpoint_from_kind,
   NULL, /* get_next_pcs */
   0,
   mips_breakpoint_at,

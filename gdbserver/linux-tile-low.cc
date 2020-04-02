@@ -31,6 +31,8 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -116,10 +118,10 @@ tile_target::low_cannot_store_register (int regno)
 static uint64_t tile_breakpoint = 0x400b3cae70166000ULL;
 #define tile_breakpoint_len 8
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-tile_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+tile_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = tile_breakpoint_len;
   return (const gdb_byte *) &tile_breakpoint;
@@ -220,7 +222,6 @@ tile_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  tile_sw_breakpoint_from_kind,
   NULL,
   0,
   tile_breakpoint_at,

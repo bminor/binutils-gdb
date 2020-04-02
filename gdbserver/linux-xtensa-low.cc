@@ -28,6 +28,8 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -252,10 +254,10 @@ static struct regset_info xtensa_regsets[] = {
 static const gdb_byte xtensa_breakpoint[] = XTENSA_BREAKPOINT;
 #define xtensa_breakpoint_len 2
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-xtensa_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+xtensa_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = xtensa_breakpoint_len;
   return xtensa_breakpoint;
@@ -326,7 +328,6 @@ xtensa_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  xtensa_sw_breakpoint_from_kind,
   NULL,
   0,
   xtensa_breakpoint_at,

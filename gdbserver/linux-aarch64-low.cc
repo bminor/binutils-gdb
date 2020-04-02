@@ -61,6 +61,8 @@ public:
 
   int breakpoint_kind_from_current_state (CORE_ADDR *pcptr) override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -3054,10 +3056,10 @@ aarch64_supports_range_stepping (void)
   return 1;
 }
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-aarch64_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+aarch64_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   if (is_64bit_tdesc ())
     {
@@ -3101,7 +3103,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_sw_breakpoint_from_kind,
   NULL, /* get_next_pcs */
   0,    /* decr_pc_after_break */
   aarch64_breakpoint_at,

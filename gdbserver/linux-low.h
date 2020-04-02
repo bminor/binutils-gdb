@@ -131,9 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* See target.h for details.  */
-  const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
-
   /* Find the next possible PCs after the current instruction executes.  */
   std::vector<CORE_ADDR> (*get_next_pcs) (struct regcache *regcache);
 
@@ -435,8 +432,6 @@ public:
 
   ssize_t multifs_readlink (int pid, const char *filename, char *buf,
 			    size_t bufsiz) override;
-
-  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
   const char *thread_name (ptid_t thread) override;
 

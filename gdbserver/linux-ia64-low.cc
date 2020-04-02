@@ -31,6 +31,8 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -45,6 +47,13 @@ protected:
 /* The singleton target ops object.  */
 
 static ia64_target the_ia64_target;
+
+const gdb_byte *
+ia64_target::sw_breakpoint_from_kind (int kind, int *size)
+{
+  gdb_assert_no_reached ("target op sw_breakpoint_from_kind is not "
+			 "implemented by this target");
+}
 
 /* Defined in auto-generated file reg-ia64.c.  */
 void init_registers_ia64 (void);

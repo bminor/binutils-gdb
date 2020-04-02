@@ -66,6 +66,8 @@ public:
 
   int breakpoint_kind_from_current_state (CORE_ADDR *pcptr) override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -113,6 +115,12 @@ int
 arm_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
 {
   return arm_breakpoint_kind_from_current_state (pcptr);
+}
+
+const gdb_byte *
+arm_target::sw_breakpoint_from_kind (int kind, int *size)
+{
+  return arm_sw_breakpoint_from_kind (kind, size);
 }
 
 /* Information describing the hardware breakpoint capabilities.  */
@@ -1067,7 +1075,6 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  arm_sw_breakpoint_from_kind,
   arm_gdbserver_get_next_pcs,
   0,
   arm_breakpoint_at,

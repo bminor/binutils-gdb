@@ -27,6 +27,8 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -170,10 +172,10 @@ static struct regset_info m68k_regsets[] = {
 static const gdb_byte m68k_breakpoint[] = { 0x4E, 0x4F };
 #define m68k_breakpoint_len 2
 
-/* Implementation of linux_target_ops method "sw_breakpoint_from_kind".  */
+/* Implementation of target ops method "sw_breakpoint_from_kind".  */
 
-static const gdb_byte *
-m68k_sw_breakpoint_from_kind (int kind, int *size)
+const gdb_byte *
+m68k_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = m68k_breakpoint_len;
   return m68k_breakpoint;
@@ -253,7 +255,6 @@ m68k_supports_hardware_single_step (void)
 }
 
 struct linux_target_ops the_low_target = {
-  m68k_sw_breakpoint_from_kind,
   NULL,
   2,
   m68k_breakpoint_at,

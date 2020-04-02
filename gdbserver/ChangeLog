@@ -1,5 +1,108 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Remove the 'sw_breakpoint_from_kind' linux target op, and let
+	the concrete linux target define it by overriding the op
+	in process_stratum_target.
+
+	* linux-low.cc (linux_process_target::sw_breakpoint_from_kind):
+	Remove.
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <sw_breakpoint_from_kind>: Remove.
+	* linux-x86-low.cc (class x86_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(x86_sw_breakpoint_from_kind): Turn into...
+	(x86_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<sw_breakpoint_from_kind>: Declare.
+	(aarch64_sw_breakpoint_from_kind): Turn into...
+	(aarch64_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (class arm_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(arm_target::sw_breakpoint_from_kind): Define.
+	(the_low_target): Remove the op field.
+	* linux-bfin-low.cc (class bfin_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(bfin_sw_breakpoint_from_kind): Turn into...
+	(bfin_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-cris-low.cc (class cris_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(cris_sw_breakpoint_from_kind): Turn into...
+	(cris_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-crisv32-low.cc (class crisv32_target)
+	<sw_breakpoint_from_kind>: Declare.
+	(cris_sw_breakpoint_from_kind): Turn into...
+	(crisv32_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ia64-low.cc (class ia64_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(ia64_target::sw_breakpoint_from_kind): Define.
+	* linux-m32r-low.cc (class m32r_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(m32r_sw_breakpoint_from_kind): Turn into...
+	(m32r_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-m68k-low.cc (class m68k_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(m68k_sw_breakpoint_from_kind): Turn into...
+	(m68k_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-mips-low.cc (class mips_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(mips_sw_breakpoint_from_kind): Turn into...
+	(mips_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-nios2-low.cc (class nios2_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(nios2_sw_breakpoint_from_kind): Turn into...
+	(nios2_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(ppc_sw_breakpoint_from_kind): Turn into...
+	(ppc_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-riscv-low.cc (class riscv_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(riscv_sw_breakpoint_from_kind): Turn into...
+	(riscv_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(s390_sw_breakpoint_from_kind): Turn into...
+	(s390_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sh-low.cc (class sh_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(sh_sw_breakpoint_from_kind): Turn into...
+	(sh_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sparc-low.cc (class sparc_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(sparc_sw_breakpoint_from_kind): Turn into...
+	(sparc_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tic6x-low.cc (class tic6x_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(tic6x_sw_breakpoint_from_kind): Turn into...
+	(tic6x_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tile-low.cc (class tile_target) <sw_breakpoint_from_kind>:
+	Declare.
+	(tile_sw_breakpoint_from_kind): Turn into...
+	(tile_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+	* linux-xtensa-low.cc (class xtensa_target)
+	<sw_breakpoint_from_kind>: Declare.
+	(xtensa_sw_breakpoint_from_kind): Turn into...
+	(xtensa_target::sw_breakpoint_from_kind): ...this.
+	(the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Remove the 'breakpoint_kind_from_pc' and
 	'breakpoint_kind_from_current_state' linux target ops, and let the
 	concrete linux target define them by overriding the ops of
