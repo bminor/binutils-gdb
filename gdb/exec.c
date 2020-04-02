@@ -619,9 +619,9 @@ build_section_table (struct bfd *some_bfd, struct target_section **start,
   *start = XNEWVEC (struct target_section, count);
   *end = *start;
   bfd_map_over_sections (some_bfd, add_to_section_table, (char *) end);
-  if (*end > *start + count)
-    internal_error (__FILE__, __LINE__,
-		    _("failed internal consistency check"));
+
+  gdb_assert (*end <= *start + count);
+
   /* We could realloc the table, but it probably loses for most files.  */
   return 0;
 }
@@ -916,9 +916,7 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
   ULONGEST memaddr = offset;
   ULONGEST memend = memaddr + len;
 
-  if (len == 0)
-    internal_error (__FILE__, __LINE__,
-		    _("failed internal consistency check"));
+  gdb_assert (len != 0);
 
   for (p = sections; p < sections_end; p++)
     {

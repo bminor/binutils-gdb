@@ -3576,9 +3576,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	      CORE_ADDR svalue;
 	      short section;
 
-	      if (ext_ptr->ifd != f_idx)
-		internal_error (__FILE__, __LINE__,
-				_("failed internal consistency check"));
+	      gdb_assert (ext_ptr->ifd == f_idx);
+
 	      psh = &ext_ptr->asym;
 
 	      /* Do not add undefined symbols to the partial symbol table.  */

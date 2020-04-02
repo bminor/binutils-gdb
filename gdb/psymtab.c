@@ -683,9 +683,9 @@ lookup_partial_symbol (struct objfile *objfile,
       while (top > bottom)
 	{
 	  center = bottom + (top - bottom) / 2;
-	  if (!(center < top))
-	    internal_error (__FILE__, __LINE__,
-			    _("failed internal consistency check"));
+
+	  gdb_assert (center < top);
+
 	  if (strcmp_iw_ordered ((*center)->ginfo.search_name (),
 				 lookup_name.c_str ()) >= 0)
 	    {
@@ -696,9 +696,8 @@ lookup_partial_symbol (struct objfile *objfile,
 	      bottom = center + 1;
 	    }
 	}
-      if (!(top == bottom))
-	internal_error (__FILE__, __LINE__,
-			_("failed internal consistency check"));
+
+      gdb_assert (top == bottom);
 
       /* For `case_sensitivity == case_sensitive_off' strcmp_iw_ordered will
 	 search more exactly than what matches SYMBOL_MATCHES_SEARCH_NAME.  */
