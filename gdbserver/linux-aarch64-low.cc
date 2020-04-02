@@ -80,6 +80,12 @@ protected:
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 
   bool low_breakpoint_at (CORE_ADDR pc) override;
+
+  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
 };
 
 /* The singleton target ops object.  */
@@ -308,14 +314,14 @@ aarch64_target::supports_z_point_type (char z_type)
     }
 }
 
-/* Implementation of linux_target_ops method "insert_point".
+/* Implementation of linux target ops method "low_insert_point".
 
    It actually only records the info of the to-be-inserted bp/wp;
    the actual insertion will happen when threads are resumed.  */
 
-static int
-aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		      int len, struct raw_breakpoint *bp)
+int
+aarch64_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+				  int len, raw_breakpoint *bp)
 {
   int ret;
   enum target_hw_bp_type targ_type;
@@ -357,14 +363,14 @@ aarch64_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
   return ret;
 }
 
-/* Implementation of linux_target_ops method "remove_point".
+/* Implementation of linux target ops method "low_remove_point".
 
    It actually only records the info of the to-be-removed bp/wp,
    the actual removal will be done when threads are resumed.  */
 
-static int
-aarch64_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		      int len, struct raw_breakpoint *bp)
+int
+aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+				  int len, raw_breakpoint *bp)
 {
   int ret;
   enum target_hw_bp_type targ_type;
@@ -3106,8 +3112,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_insert_point,
-  aarch64_remove_point,
   aarch64_stopped_by_watchpoint,
   aarch64_stopped_data_address,
   NULL, /* collect_ptrace_register */

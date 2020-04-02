@@ -127,6 +127,12 @@ protected:
   int low_decr_pc_after_break () override;
 
   bool low_breakpoint_at (CORE_ADDR pc) override;
+
+  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
 };
 
 /* The singleton target ops object.  */
@@ -604,9 +610,9 @@ x86_target::supports_z_point_type (char z_type)
     }
 }
 
-static int
-x86_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		  int size, struct raw_breakpoint *bp)
+int
+x86_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			      int size, raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
 
@@ -630,9 +636,9 @@ x86_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
     }
 }
 
-static int
-x86_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		  int size, struct raw_breakpoint *bp)
+int
+x86_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			      int size, raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
 
@@ -2912,8 +2918,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_insert_point,
-  x86_remove_point,
   x86_stopped_by_watchpoint,
   x86_stopped_data_address,
   /* collect_ptrace_register/supply_ptrace_register are not needed in the

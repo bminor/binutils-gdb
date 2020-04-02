@@ -54,6 +54,12 @@ protected:
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 
   bool low_breakpoint_at (CORE_ADDR pc) override;
+
+  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
 };
 
 /* The singleton target ops object.  */
@@ -508,12 +514,12 @@ mips_target::supports_z_point_type (char z_type)
     }
 }
 
-/* This is the implementation of linux_target_ops method
-   insert_point.  */
+/* This is the implementation of linux target ops method
+   low_insert_point.  */
 
-static int
-mips_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		   int len, struct raw_breakpoint *bp)
+int
+mips_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			       int len, raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
   struct arch_process_info *priv = proc->priv->arch_private;
@@ -553,12 +559,12 @@ mips_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
   return 0;
 }
 
-/* This is the implementation of linux_target_ops method
-   remove_point.  */
+/* This is the implementation of linux target ops method
+   low_remove_point.  */
 
-static int
-mips_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		   int len, struct raw_breakpoint *bp)
+int
+mips_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			       int len, raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
   struct arch_process_info *priv = proc->priv->arch_private;
@@ -970,8 +976,6 @@ mips_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  mips_insert_point,
-  mips_remove_point,
   mips_stopped_by_watchpoint,
   mips_stopped_data_address,
   mips_collect_ptrace_register,

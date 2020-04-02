@@ -329,8 +329,6 @@ xtensa_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* insert_point */
-  NULL, /* remove_point */
   NULL, /* stopped_by_watchpoint */
   NULL, /* stopped_data_address */
   NULL, /* collect_ptrace_register */

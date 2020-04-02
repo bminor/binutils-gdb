@@ -5835,11 +5835,16 @@ linux_process_target::insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   if (type == raw_bkpt_type_sw)
     return insert_memory_breakpoint (bp);
-  else if (the_low_target.insert_point != NULL)
-    return the_low_target.insert_point (type, addr, size, bp);
   else
-    /* Unsupported (see target.h).  */
-    return 1;
+    return low_insert_point (type, addr, size, bp);
+}
+
+int
+linux_process_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+					int size, raw_breakpoint *bp)
+{
+  /* Unsupported (see target.h).  */
+  return 1;
 }
 
 int
@@ -5848,11 +5853,16 @@ linux_process_target::remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   if (type == raw_bkpt_type_sw)
     return remove_memory_breakpoint (bp);
-  else if (the_low_target.remove_point != NULL)
-    return the_low_target.remove_point (type, addr, size, bp);
   else
-    /* Unsupported (see target.h).  */
-    return 1;
+    return low_remove_point (type, addr, size, bp);
+}
+
+int
+linux_process_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+					int size, raw_breakpoint *bp)
+{
+  /* Unsupported (see target.h).  */
+  return 1;
 }
 
 /* Implement the stopped_by_sw_breakpoint target_ops

@@ -89,6 +89,12 @@ protected:
   std::vector<CORE_ADDR> low_get_next_pcs (regcache *regcache) override;
 
   bool low_breakpoint_at (CORE_ADDR pc) override;
+
+  int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
+
+  int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			int size, raw_breakpoint *bp) override;
 };
 
 /* The singleton target ops object.  */
@@ -576,9 +582,9 @@ arm_target::supports_z_point_type (char z_type)
 }
 
 /* Insert hardware break-/watchpoint.  */
-static int
-arm_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		  int len, struct raw_breakpoint *bp)
+int
+arm_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+			      int len, raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
   struct arm_linux_hw_breakpoint p, *pts;
@@ -621,9 +627,9 @@ arm_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 }
 
 /* Remove hardware break-/watchpoint.  */
-static int
-arm_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
-		  int len, struct raw_breakpoint *bp)
+int
+arm_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+			      int len, raw_breakpoint *bp)
 {
   struct process_info *proc = current_process ();
   struct arm_linux_hw_breakpoint p, *pts;
@@ -1095,8 +1101,6 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  arm_insert_point,
-  arm_remove_point,
   arm_stopped_by_watchpoint,
   arm_stopped_data_address,
   NULL, /* collect_ptrace_register */

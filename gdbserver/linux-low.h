@@ -131,13 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Breakpoint and watchpoint related functions.  See target.h for
-     comments.  */
-  int (*insert_point) (enum raw_bkpt_type type, CORE_ADDR addr,
-		       int size, struct raw_breakpoint *bp);
-  int (*remove_point) (enum raw_bkpt_type type, CORE_ADDR addr,
-		       int size, struct raw_breakpoint *bp);
-
   int (*stopped_by_watchpoint) (void);
   CORE_ADDR (*stopped_data_address) (void);
 
@@ -663,6 +656,14 @@ protected:
 
   /* Return true if there is a breakpoint at PC.  */
   virtual bool low_breakpoint_at (CORE_ADDR pc) = 0;
+
+  /* Breakpoint and watchpoint related functions.  See target.h for
+     comments.  */
+  virtual int low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
+				int size, raw_breakpoint *bp);
+
+  virtual int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
+				int size, raw_breakpoint *bp);
 
   /* How many bytes the PC should be decremented after a break.  */
   virtual int low_decr_pc_after_break ();
