@@ -74,6 +74,8 @@ protected:
   CORE_ADDR low_get_pc (regcache *regcache) override;
 
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  int low_decr_pc_after_break () override;
 };
 
 /* The singleton target ops object.  */
@@ -500,6 +502,12 @@ s390_target::low_set_pc (regcache *regcache, CORE_ADDR newpc)
       unsigned long pc = newpc;
       supply_register_by_name (regcache, "pswa", &pc);
     }
+}
+
+int
+s390_target::low_decr_pc_after_break ()
+{
+  return s390_breakpoint_len;
 }
 
 /* Determine the word size for the given PID, in bytes.  */
@@ -2826,7 +2834,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  s390_breakpoint_len,
   s390_breakpoint_at,
   s390_supports_z_point_type,
   NULL,

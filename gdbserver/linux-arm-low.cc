@@ -1085,7 +1085,6 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  0,
   arm_breakpoint_at,
   arm_supports_z_point_type,
   arm_insert_point,

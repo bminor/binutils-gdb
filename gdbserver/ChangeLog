@@ -1,5 +1,52 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn the 'decr_pc_after_break' linux_target_ops field into
+	a method of linux_process_target.
+
+	* linux-low.h (struct linux_target_ops)
+	<decr_pc_after_break>: Remove.
+	(class linux_process_target) <low_decr_pc_after_break>: New method
+	declaration.
+	* linux-low.cc (linux_process_target::low_decr_pc_after_break):
+	New method implementation.
+
+	Update the users below.
+
+	(linux_process_target::save_stop_reason)
+	(linux_process_target::wait_1)
+	* linux-x86-low.cc (class x86_target) <low_decr_pc_after_break>:
+	New declaration.
+	(x86_target::low_decr_pc_after_break): New method implementation.
+	(the_low_target): Remove the field.
+	* linux-bfin-low.cc (class bfin_target) <low_decr_pc_after_break>:
+	New declaration.
+	(bfin_target::low_decr_pc_after_break): New method implementation.
+	(the_low_target): Remove the field.
+	* linux-m68k-low.cc (class m68k_target) <low_decr_pc_after_break>:
+	New declaration.
+	(m68k_target::low_decr_pc_after_break): New method implementation.
+	(the_low_target): Remove the field.
+	* linux-s390-low.cc (class s390_target) <low_decr_pc_after_break>:
+	New declaration.
+	(s390_target::low_decr_pc_after_break): New method implementation.
+	(the_low_target): Remove the field.
+	* linux-aarch64-low.cc (the_low_target): Remove the field.
+	* linux-arm-low.cc (the_low_target): Remove the field.
+	* linux-cris-low.cc (the_low_target): Remove the field.
+	* linux-crisv32-low.cc (the_low_target): Remove the field.
+	* linux-m32r-low.cc (the_low_target): Remove the field.
+	* linux-mips-low.cc (the_low_target): Remove the field.
+	* linux-nios2-low.cc (the_low_target): Remove the field.
+	* linux-ppc-low.cc (the_low_target): Remove the field.
+	* linux-riscv-low.cc (the_low_target): Remove the field.
+	* linux-sh-low.cc (the_low_target): Remove the field.
+	* linux-sparc-low.cc (the_low_target): Remove the field.
+	* linux-tic6x-low.cc (the_low_target): Remove the field.
+	* linux-tile-low.cc (the_low_target): Remove the field.
+	* linux-xtensa-low.cc (the_low_target): Remove the field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Remove the 'supports_software_single_step' linux target op and let
 	the concrete linux target define it by overriding the op in
 	process_stratum_target.

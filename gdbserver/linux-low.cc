@@ -317,6 +317,12 @@ linux_process_target::low_get_next_pcs (regcache *regcache)
 			  "implemented");
 }
 
+int
+linux_process_target::low_decr_pc_after_break ()
+{
+  return 0;
+}
+
 /* Returns true if this target can support fast tracepoints.  This
    does not mean that the in-process agent has been loaded in the
    inferior.  */
@@ -796,7 +802,7 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
     return false;
 
   pc = get_pc (lwp);
-  sw_breakpoint_pc = pc - the_low_target.decr_pc_after_break;
+  sw_breakpoint_pc = pc - low_decr_pc_after_break ();
 
   /* breakpoint_at reads from the current thread.  */
   saved_thread = current_thread;
@@ -3694,7 +3700,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
   if (event_child->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT
       && !cs.swbreak_feature)
     {
-      int decr_pc = the_low_target.decr_pc_after_break;
+      int decr_pc = low_decr_pc_after_break ();
 
       if (decr_pc != 0)
 	{

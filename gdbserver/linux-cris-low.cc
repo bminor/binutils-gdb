@@ -158,7 +158,6 @@ cris_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  0,
   cris_breakpoint_at,
 };
 

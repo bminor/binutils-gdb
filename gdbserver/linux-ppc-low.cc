@@ -3406,7 +3406,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  0,
   ppc_breakpoint_at,
   ppc_supports_z_point_type,
   ppc_insert_point,

@@ -46,6 +46,8 @@ protected:
   CORE_ADDR low_get_pc (regcache *regcache) override;
 
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  int low_decr_pc_after_break () override;
 };
 
 /* The singleton target ops object.  */
@@ -68,6 +70,12 @@ void
 bfin_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
 {
   linux_set_pc_32bit (regcache, pc);
+}
+
+int
+bfin_target::low_decr_pc_after_break ()
+{
+  return 2;
 }
 
 /* Defined in auto-generated file reg-bfin.c.  */
@@ -161,7 +169,6 @@ bfin_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  2,
   bfin_breakpoint_at,
   NULL, /* supports_z_point_type */
   NULL, /* insert_point */

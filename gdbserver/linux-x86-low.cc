@@ -121,6 +121,8 @@ protected:
   CORE_ADDR low_get_pc (regcache *regcache) override;
 
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  int low_decr_pc_after_break () override;
 };
 
 /* The singleton target ops object.  */
@@ -547,6 +549,13 @@ x86_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
       supply_register_by_name (regcache, "eip", &newpc);
     }
 }
+
+int
+x86_target::low_decr_pc_after_break ()
+{
+  return 1;
+}
+
 
 static const gdb_byte x86_breakpoint[] = { 0xCC };
 #define x86_breakpoint_len 1
@@ -2899,7 +2908,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  1,
   x86_breakpoint_at,
   x86_supports_z_point_type,
   x86_insert_point,

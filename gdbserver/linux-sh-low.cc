@@ -190,7 +190,6 @@ sh_target::low_arch_setup ()
 }
 
 struct linux_target_ops the_low_target = {
-  0,
   sh_breakpoint_at,
   NULL, /* supports_z_point_type */
   NULL, /* insert_point */

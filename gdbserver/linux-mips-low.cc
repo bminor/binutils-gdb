@@ -966,7 +966,6 @@ mips_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  0,
   mips_breakpoint_at,
   mips_supports_z_point_type,
   mips_insert_point,
