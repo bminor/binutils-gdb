@@ -1,5 +1,11 @@
 2020-04-02  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.dwarf2/break-inline-psymtab-2.c (bar): Add
+	__attribute__((always_inline)).
+	* gdb.dwarf2/break-inline-psymtab.exp: Don't use -O2.
+
+2020-04-02  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdbserver-support.exp (gdbserver_exit): Factor out of ...
 	(gdbserver_gdb_exit): ... here.  Add timeout warning.
 	* gdb.multi/multi-target.exp (server_spawn_ids): New global var.

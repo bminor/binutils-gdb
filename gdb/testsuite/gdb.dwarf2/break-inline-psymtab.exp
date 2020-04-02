@@ -16,8 +16,7 @@
 standard_testfile break-inline-psymtab.c break-inline-psymtab-2.c
 
 set sources [list $srcfile $srcfile2]
-set opts {debug optimize=-O2}
-if { [prepare_for_testing "failed to prepare" ${testfile} $sources $opts] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} $sources] } {
     return -1
 }
 
