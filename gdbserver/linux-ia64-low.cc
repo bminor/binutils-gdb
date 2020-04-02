@@ -38,6 +38,8 @@ protected:
   bool low_cannot_fetch_register (int regno) override;
 
   bool low_cannot_store_register (int regno) override;
+
+  bool low_fetch_register (regcache *regcache, int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -304,8 +306,8 @@ ia64_target::low_cannot_fetch_register (int regno)
 #define IA64_FR0_REGNUM		128
 #define IA64_FR1_REGNUM		129
 
-static int
-ia64_fetch_register (struct regcache *regcache, int regnum)
+bool
+ia64_target::low_fetch_register (regcache *regcache, int regnum)
 {
   /* r0 cannot be fetched but is always zero.  */
   if (regnum == IA64_GR0_REGNUM)
@@ -314,7 +316,7 @@ ia64_fetch_register (struct regcache *regcache, int regnum)
 
       gdb_assert (sizeof (zero) == register_size (regcache->tdesc, regnum));
       supply_register (regcache, regnum, zero);
-      return 1;
+      return true;
     }
 
   /* fr0 cannot be fetched but is always zero.  */
@@ -324,7 +326,7 @@ ia64_fetch_register (struct regcache *regcache, int regnum)
 
       gdb_assert (sizeof (f_zero) == register_size (regcache->tdesc, regnum));
       supply_register (regcache, regnum, f_zero);
-      return 1;
+      return true;
     }
 
   /* fr1 cannot be fetched but is always one (1.0).  */
@@ -335,10 +337,10 @@ ia64_fetch_register (struct regcache *regcache, int regnum)
 
       gdb_assert (sizeof (f_one) == register_size (regcache->tdesc, regnum));
       supply_register (regcache, regnum, f_one);
-      return 1;
+      return true;
     }
 
-  return 0;
+  return false;
 }
 
 static struct usrregs_info ia64_usrregs_info =
@@ -367,7 +369,6 @@ ia64_target::low_arch_setup ()
 
 
 struct linux_target_ops the_low_target = {
-  ia64_fetch_register,
 };
 
 /* The linux target ops object.  */

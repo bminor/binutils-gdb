@@ -40,6 +40,8 @@ protected:
   bool low_cannot_fetch_register (int regno) override;
 
   bool low_cannot_store_register (int regno) override;
+
+  bool low_fetch_register (regcache *regcache, int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -263,18 +265,18 @@ mips_target::low_cannot_store_register (int regno)
   return false;
 }
 
-static int
-mips_fetch_register (struct regcache *regcache, int regno)
+bool
+mips_target::low_fetch_register (regcache *regcache, int regno)
 {
   const struct target_desc *tdesc = current_process ()->tdesc;
 
   if (find_regno (tdesc, "r0") == regno)
     {
       supply_register_zeroed (regcache, regno);
-      return 1;
+      return true;
     }
 
-  return 0;
+  return false;
 }
 
 static CORE_ADDR
@@ -950,7 +952,6 @@ mips_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  mips_fetch_register,
   mips_get_pc,
   mips_set_pc,
   NULL, /* breakpoint_kind_from_pc */

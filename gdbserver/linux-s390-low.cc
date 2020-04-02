@@ -2812,7 +2812,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* fetch_register */
   s390_get_pc,
   s390_set_pc,
   NULL, /* breakpoint_kind_from_pc */

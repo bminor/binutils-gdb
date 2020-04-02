@@ -45,6 +45,8 @@ protected:
   bool low_cannot_fetch_register (int regno) override;
 
   bool low_cannot_store_register (int regno) override;
+
+  bool low_fetch_register (regcache *regcache, int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -188,17 +190,17 @@ riscv_target::get_regs_info ()
   return &riscv_regs;
 }
 
-/* Implementation of linux_target_ops method "fetch_register".  */
+/* Implementation of linux target ops method "low_fetch_register".  */
 
-static int
-riscv_fetch_register (struct regcache *regcache, int regno)
+bool
+riscv_target::low_fetch_register (regcache *regcache, int regno)
 {
   const struct target_desc *tdesc = regcache->tdesc;
 
   if (regno != find_regno (tdesc, "zero"))
-    return 0;
+    return false;
   supply_register_zeroed (regcache, regno);
-  return 1;
+  return true;
 }
 
 /* Implementation of linux_target_ops method "get_pc".  */
@@ -291,7 +293,6 @@ riscv_breakpoint_at (CORE_ADDR pc)
 /* RISC-V/Linux target operations.  */
 struct linux_target_ops the_low_target =
 {
-  riscv_fetch_register,
   riscv_get_pc,
   riscv_set_pc,
   riscv_breakpoint_kind_from_pc,

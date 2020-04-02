@@ -5569,10 +5569,9 @@ linux_process_target::fetch_registers (regcache *regcache, int regno)
 
   if (regno == -1)
     {
-      if (the_low_target.fetch_register != NULL
-	  && regs_info->usrregs != NULL)
+      if (regs_info->usrregs != NULL)
 	for (regno = 0; regno < regs_info->usrregs->num_regs; regno++)
-	  (*the_low_target.fetch_register) (regcache, regno);
+	  low_fetch_register (regcache, regno);
 
       all = regsets_fetch_inferior_registers (regs_info->regsets_info, regcache);
       if (regs_info->usrregs != NULL)
@@ -5580,8 +5579,7 @@ linux_process_target::fetch_registers (regcache *regcache, int regno)
     }
   else
     {
-      if (the_low_target.fetch_register != NULL
-	  && (*the_low_target.fetch_register) (regcache, regno))
+      if (low_fetch_register (regcache, regno))
 	return;
 
       use_regsets = linux_register_in_regsets (regs_info, regno);
@@ -5618,6 +5616,11 @@ linux_process_target::store_registers (regcache *regcache, int regno)
     }
 }
 
+bool
+linux_process_target::low_fetch_register (regcache *regcache, int regno)
+{
+  return false;
+}
 
 /* A wrapper for the read_memory target op.  */
 

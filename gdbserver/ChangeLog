@@ -1,5 +1,49 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn the 'fetch_register' linux target op into a method of
+	linux_process_target.
+
+	* linux-low.h (struct linux_target_ops) <fetch_register>: Remove.
+	(class linux_process_target) <low_fetch_register>: Declare.
+	* linux-x86-low.cc (the_low_target)
+	* linux-aarch64-low.cc (the_low_target)
+	* linux-arm-low.cc (the_low_target)
+	* linux-bfin-low.cc (the_low_target)
+	* linux-cris-low.cc (the_low_target)
+	* linux-crisv32-low.cc (the_low_target)
+	* linux-m32r-low.cc (the_low_target)
+	* linux-m68k-low.cc (the_low_target)
+	* linux-nios2-low.cc (the_low_target)
+	* linux-ppc-low.cc (the_low_target)
+	* linux-s390-low.cc (the_low_target)
+	* linux-sh-low.cc (the_low_target)
+	* linux-sparc-low.cc (the_low_target)
+	* linux-tic6x-low.cc (the_low_target)
+	* linux-tile-low.cc (the_low_target)
+	* linux-xtensa-low.cc (the_low_target): Remove the op field.
+	* linux-ia64-low.cc (class ia64_target) <low_fetch_register>:
+	Declare.
+	(ia64_fetch_register): Turn into...
+	(ia64_target::low_fetch_register): ...this.
+	(the_low_target): Remove the op field.
+	* linux-mips-low.cc (class mips_target) <low_fetch_register>:
+	Declare.
+	(mips_fetch_register): Turn into...
+	(mips_target::low_fetch_register): ...this.
+	(the_low_target): Remove the op field.
+	* linux-riscv-low.cc (class riscv_target) <low_fetch_register>:
+	Declare.
+	(riscv_fetch_register): Turn into...
+	(riscv_target::low_fetch_register): ...this.
+	(the_low_target): Remove the op field.
+
+	Update the callers below.
+
+	* linux-low.cc (linux_process_target::fetch_registers)
+	(linux_process_target::low_fetch_register)
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn the 'cannot_fetch_register' and 'cannot_store_register'
 	linux target ops into methods of linux_process_target.
 

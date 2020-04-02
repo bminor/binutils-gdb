@@ -3085,7 +3085,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  NULL, /* fetch_register */
   aarch64_get_pc,
   aarch64_set_pc,
   aarch64_breakpoint_kind_from_pc,

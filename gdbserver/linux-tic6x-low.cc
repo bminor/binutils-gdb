@@ -407,7 +407,6 @@ tic6x_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* fetch_register */
   tic6x_get_pc,
   tic6x_set_pc,
   NULL, /* breakpoint_kind_from_pc */

@@ -2885,7 +2885,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  NULL, /* fetch_register */
   x86_get_pc,
   x86_set_pc,
   NULL, /* breakpoint_kind_from_pc */

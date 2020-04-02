@@ -131,13 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Hook to fetch a register in some non-standard way.  Used for
-     example by backends that have read-only registers with hardcoded
-     values (e.g., IA64's gr0/fr0/fr1).  Returns true if register
-     REGNO was supplied, false if not, and we should fallback to the
-     standard ptrace methods.  */
-  int (*fetch_register) (struct regcache *regcache, int regno);
-
   CORE_ADDR (*get_pc) (struct regcache *regcache);
   void (*set_pc) (struct regcache *regcache, CORE_ADDR newpc);
 
@@ -598,6 +591,13 @@ protected:
   virtual bool low_cannot_fetch_register (int regno) = 0;
 
   virtual bool low_cannot_store_register (int regno) = 0;
+
+  /* Hook to fetch a register in some non-standard way.  Used for
+     example by backends that have read-only registers with hardcoded
+     values (e.g., IA64's gr0/fr0/fr1).  Returns true if register
+     REGNO was supplied, false if not, and we should fallback to the
+     standard ptrace methods.  */
+  virtual bool low_fetch_register (regcache *regcache, int regno);
 };
 
 extern linux_process_target *the_linux_target;

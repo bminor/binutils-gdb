@@ -196,7 +196,6 @@ tile_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  NULL,
   linux_get_pc_64bit,
   linux_set_pc_64bit,
   NULL, /* breakpoint_kind_from_pc */

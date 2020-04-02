@@ -302,7 +302,6 @@ xtensa_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* fetch_register */
   linux_get_pc_32bit,
   linux_set_pc_32bit,
   NULL, /* breakpoint_kind_from_pc */
