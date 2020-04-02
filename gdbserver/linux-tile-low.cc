@@ -34,6 +34,10 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -63,26 +67,26 @@ static int tile_regmap[] =
   56
 };
 
-static int
-tile_cannot_fetch_register (int regno)
+bool
+tile_target::low_cannot_fetch_register (int regno)
 {
   if (regno >= 0 && regno < 56)
-    return 0;
+    return false;
   else if (regno == 64)
-    return 0;
+    return false;
   else
-    return 1;
+    return true;
 }
 
-static int
-tile_cannot_store_register (int regno)
+bool
+tile_target::low_cannot_store_register (int regno)
 {
   if (regno >= 0 && regno < 56)
-    return 0;
+    return false;
   else if (regno == 64)
-    return 0;
+    return false;
   else
-    return 1;
+    return true;
 }
 
 static uint64_t tile_breakpoint = 0x400b3cae70166000ULL;
@@ -192,8 +196,6 @@ tile_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  tile_cannot_fetch_register,
-  tile_cannot_store_register,
   NULL,
   linux_get_pc_64bit,
   linux_set_pc_64bit,

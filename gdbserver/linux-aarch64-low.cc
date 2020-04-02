@@ -60,11 +60,29 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
 
 static aarch64_target the_aarch64_target;
+
+bool
+aarch64_target::low_cannot_fetch_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_fetch_register "
+			  "is not implemented by the target");
+}
+
+bool
+aarch64_target::low_cannot_store_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_store_register "
+			  "is not implemented by the target");
+}
 
 /* Per-process arch-specific data we want to keep.  */
 
@@ -3067,8 +3085,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  NULL, /* cannot_fetch_register */
-  NULL, /* cannot_store_register */
   NULL, /* fetch_register */
   aarch64_get_pc,
   aarch64_set_pc,

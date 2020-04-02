@@ -5418,10 +5418,10 @@ register_addr (const struct usrregs_info *usrregs, int regnum)
   return addr;
 }
 
-/* Fetch one register.  */
-static void
-fetch_register (const struct usrregs_info *usrregs,
-		struct regcache *regcache, int regno)
+
+void
+linux_process_target::fetch_register (const usrregs_info *usrregs,
+				      regcache *regcache, int regno)
 {
   CORE_ADDR regaddr;
   int i, size;
@@ -5430,7 +5430,7 @@ fetch_register (const struct usrregs_info *usrregs,
 
   if (regno >= usrregs->num_regs)
     return;
-  if ((*the_low_target.cannot_fetch_register) (regno))
+  if (low_cannot_fetch_register (regno))
     return;
 
   regaddr = register_addr (usrregs, regno);
@@ -5466,10 +5466,9 @@ fetch_register (const struct usrregs_info *usrregs,
     supply_register (regcache, regno, buf);
 }
 
-/* Store one register.  */
-static void
-store_register (const struct usrregs_info *usrregs,
-		struct regcache *regcache, int regno)
+void
+linux_process_target::store_register (const usrregs_info *usrregs,
+				      regcache *regcache, int regno)
 {
   CORE_ADDR regaddr;
   int i, size;
@@ -5478,7 +5477,7 @@ store_register (const struct usrregs_info *usrregs,
 
   if (regno >= usrregs->num_regs)
     return;
-  if ((*the_low_target.cannot_store_register) (regno))
+  if (low_cannot_store_register (regno))
     return;
 
   regaddr = register_addr (usrregs, regno);
@@ -5514,22 +5513,21 @@ store_register (const struct usrregs_info *usrregs,
 	  if (errno == ESRCH)
 	    return;
 
-	  if ((*the_low_target.cannot_store_register) (regno) == 0)
+
+	  if (!low_cannot_store_register (regno))
 	    error ("writing register %d: %s", regno, safe_strerror (errno));
 	}
       regaddr += sizeof (PTRACE_XFER_TYPE);
     }
 }
+#endif /* HAVE_LINUX_USRREGS */
 
-/* Fetch all registers, or just one, from the child process.
-   If REGNO is -1, do this for all registers, skipping any that are
-   assumed to have been retrieved by regsets_fetch_inferior_registers,
-   unless ALL is non-zero.
-   Otherwise, REGNO specifies which register (so we can save time).  */
-static void
-usr_fetch_inferior_registers (const struct regs_info *regs_info,
-			      struct regcache *regcache, int regno, int all)
+void
+linux_process_target::usr_fetch_inferior_registers (const regs_info *regs_info,
+						    regcache *regcache,
+						    int regno, int all)
 {
+#ifdef HAVE_LINUX_USRREGS
   struct usrregs_info *usr = regs_info->usrregs;
 
   if (regno == -1)
@@ -5540,17 +5538,15 @@ usr_fetch_inferior_registers (const struct regs_info *regs_info,
     }
   else
     fetch_register (usr, regcache, regno);
+#endif
 }
 
-/* Store our register values back into the inferior.
-   If REGNO is -1, do this for all registers, skipping any that are
-   assumed to have been saved by regsets_store_inferior_registers,
-   unless ALL is non-zero.
-   Otherwise, REGNO specifies which register (so we can save time).  */
-static void
-usr_store_inferior_registers (const struct regs_info *regs_info,
-			      struct regcache *regcache, int regno, int all)
+void
+linux_process_target::usr_store_inferior_registers (const regs_info *regs_info,
+						    regcache *regcache,
+						    int regno, int all)
 {
+#ifdef HAVE_LINUX_USRREGS
   struct usrregs_info *usr = regs_info->usrregs;
 
   if (regno == -1)
@@ -5561,15 +5557,8 @@ usr_store_inferior_registers (const struct regs_info *regs_info,
     }
   else
     store_register (usr, regcache, regno);
-}
-
-#else /* !HAVE_LINUX_USRREGS */
-
-#define usr_fetch_inferior_registers(regs_info, regcache, regno, all) do {} while (0)
-#define usr_store_inferior_registers(regs_info, regcache, regno, all) do {} while (0)
-
 #endif
-
+}
 
 void
 linux_process_target::fetch_registers (regcache *regcache, int regno)

@@ -131,11 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Return 0 if we can fetch/store the register, 1 if we cannot
-     fetch/store the register.  */
-  int (*cannot_fetch_register) (int);
-  int (*cannot_store_register) (int);
-
   /* Hook to fetch a register in some non-standard way.  Used for
      example by backends that have read-only registers with hardcoded
      values (e.g., IA64's gr0/fr0/fr1).  Returns true if register
@@ -566,11 +561,43 @@ private:
   /* Call low_arch_setup on THREAD.  */
   void arch_setup_thread (thread_info *thread);
 
+#ifdef HAVE_LINUX_USRREGS
+  /* Fetch one register.  */
+  void fetch_register (const usrregs_info *usrregs, regcache *regcache,
+		       int regno);
+
+  /* Store one register.  */
+  void store_register (const usrregs_info *usrregs, regcache *regcache,
+		       int regno);
+#endif
+
+  /* Fetch all registers, or just one, from the child process.
+     If REGNO is -1, do this for all registers, skipping any that are
+     assumed to have been retrieved by regsets_fetch_inferior_registers,
+     unless ALL is non-zero.
+     Otherwise, REGNO specifies which register (so we can save time).  */
+  void usr_fetch_inferior_registers (const regs_info *regs_info,
+				     regcache *regcache, int regno, int all);
+
+  /* Store our register values back into the inferior.
+     If REGNO is -1, do this for all registers, skipping any that are
+     assumed to have been saved by regsets_store_inferior_registers,
+     unless ALL is non-zero.
+     Otherwise, REGNO specifies which register (so we can save time).  */
+  void usr_store_inferior_registers (const regs_info *regs_info,
+				     regcache *regcache, int regno, int all);
+
 protected:
   /* The architecture-specific "low" methods are listed below.  */
 
   /* Architecture-specific setup for the current thread.  */
   virtual void low_arch_setup () = 0;
+
+  /* Return false if we can fetch/store the register, true if we cannot
+     fetch/store the register.  */
+  virtual bool low_cannot_fetch_register (int regno) = 0;
+
+  virtual bool low_cannot_store_register (int regno) = 0;
 };
 
 extern linux_process_target *the_linux_target;

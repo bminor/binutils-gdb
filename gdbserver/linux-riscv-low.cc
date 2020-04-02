@@ -41,11 +41,29 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
 
 static riscv_target the_riscv_target;
+
+bool
+riscv_target::low_cannot_fetch_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_fetch_register "
+			  "is not implemented by the target");
+}
+
+bool
+riscv_target::low_cannot_store_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_store_register "
+			  "is not implemented by the target");
+}
 
 /* Implementation of linux target ops method "low_arch_setup".  */
 
@@ -273,8 +291,6 @@ riscv_breakpoint_at (CORE_ADDR pc)
 /* RISC-V/Linux target operations.  */
 struct linux_target_ops the_low_target =
 {
-  NULL, /* cannot_fetch_register */
-  NULL, /* cannot_store_register */
   riscv_fetch_register,
   riscv_get_pc,
   riscv_set_pc,

@@ -55,6 +55,10 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -160,8 +164,8 @@ ppc_check_regset (int tid, int regset_id, int regsetsize)
   return 0;
 }
 
-static int
-ppc_cannot_store_register (int regno)
+bool
+ppc_target::low_cannot_store_register (int regno)
 {
   const struct target_desc *tdesc = current_process ()->tdesc;
 
@@ -169,21 +173,21 @@ ppc_cannot_store_register (int regno)
   /* Some kernels do not allow us to store fpscr.  */
   if (!(ppc_hwcap & PPC_FEATURE_HAS_SPE)
       && regno == find_regno (tdesc, "fpscr"))
-    return 1;
+    return true;
 #endif
 
   /* Some kernels do not allow us to store orig_r3 or trap.  */
   if (regno == find_regno (tdesc, "orig_r3")
       || regno == find_regno (tdesc, "trap"))
-    return 1;
+    return true;
 
-  return 0;
+  return false;
 }
 
-static int
-ppc_cannot_fetch_register (int regno)
+bool
+ppc_target::low_cannot_fetch_register (int regno)
 {
-  return 0;
+  return false;
 }
 
 static void
@@ -3388,8 +3392,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  ppc_cannot_fetch_register,
-  ppc_cannot_store_register,
   NULL, /* fetch_register */
   ppc_get_pc,
   ppc_set_pc,

@@ -42,6 +42,10 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -90,26 +94,20 @@ nios2_target::low_arch_setup ()
   current_process ()->tdesc = tdesc_nios2_linux;
 }
 
-/* Implement the cannot_fetch_register linux_target_ops method.  */
+/* Implement the low_cannot_fetch_register linux target ops method.  */
 
-static int
-nios2_cannot_fetch_register (int regno)
+bool
+nios2_target::low_cannot_fetch_register (int regno)
 {
-  if (nios2_regmap[regno] == -1)
-    return 1;
-
-  return 0;
+  return (nios2_regmap[regno] == -1);
 }
 
-/* Implement the cannot_store_register linux_target_ops method.  */
+/* Implement the low_cannot_store_register linux target ops method.  */
 
-static int
-nios2_cannot_store_register (int regno)
+bool
+nios2_target::low_cannot_store_register (int regno)
 {
-  if (nios2_regmap[regno] == -1)
-    return 1;
-
-  return 0;
+  return (nios2_regmap[regno] == -1);
 }
 
 /* Breakpoint support.  Also see comments on nios2_breakpoint_from_pc
@@ -253,8 +251,6 @@ nios2_target::get_regs_info ()
 
 struct linux_target_ops the_low_target =
 {
-  nios2_cannot_fetch_register,
-  nios2_cannot_store_register,
   NULL,
   linux_get_pc_32bit,
   linux_set_pc_32bit,

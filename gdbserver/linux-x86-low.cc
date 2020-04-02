@@ -109,6 +109,10 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -301,23 +305,23 @@ x86_get_thread_area (int lwpid, CORE_ADDR *addr)
 
 
 
-static int
-x86_cannot_store_register (int regno)
+bool
+x86_target::low_cannot_store_register (int regno)
 {
 #ifdef __x86_64__
   if (is_64bit_tdesc ())
-    return 0;
+    return false;
 #endif
 
   return regno >= I386_NUM_REGS;
 }
 
-static int
-x86_cannot_fetch_register (int regno)
+bool
+x86_target::low_cannot_fetch_register (int regno)
 {
 #ifdef __x86_64__
   if (is_64bit_tdesc ())
-    return 0;
+    return false;
 #endif
 
   return regno >= I386_NUM_REGS;
@@ -2881,8 +2885,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_cannot_fetch_register,
-  x86_cannot_store_register,
   NULL, /* fetch_register */
   x86_get_pc,
   x86_set_pc,

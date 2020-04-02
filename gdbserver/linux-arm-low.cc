@@ -65,6 +65,10 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -166,14 +170,14 @@ static struct arm_get_next_pcs_ops get_next_pcs_ops = {
   arm_linux_get_next_pcs_fixup,
 };
 
-static int
-arm_cannot_store_register (int regno)
+bool
+arm_target::low_cannot_store_register (int regno)
 {
   return (regno >= arm_num_regs);
 }
 
-static int
-arm_cannot_fetch_register (int regno)
+bool
+arm_target::low_cannot_fetch_register (int regno)
 {
   return (regno >= arm_num_regs);
 }
@@ -1023,8 +1027,6 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  arm_cannot_fetch_register,
-  arm_cannot_store_register,
   NULL, /* fetch_register */
   linux_get_pc_32bit,
   linux_set_pc_32bit,

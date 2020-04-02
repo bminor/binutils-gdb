@@ -36,6 +36,10 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -170,14 +174,6 @@ mips_target::low_arch_setup ()
   current_process ()->tdesc = mips_read_description ();
 }
 
-static struct usrregs_info *
-get_usrregs_info (void)
-{
-  const struct regs_info *regs_info = the_linux_target->get_regs_info ();
-
-  return regs_info->usrregs;
-}
-
 /* Per-process arch-specific data we want to keep.  */
 
 struct arch_process_info
@@ -218,53 +214,53 @@ struct arch_lwp_info
    ZERO_REGNUM, it's always 0.  We also can not set BADVADDR, CAUSE,
    or FCRIR via ptrace().  */
 
-static int
-mips_cannot_fetch_register (int regno)
+bool
+mips_target::low_cannot_fetch_register (int regno)
 {
   const struct target_desc *tdesc;
 
-  if (get_usrregs_info ()->regmap[regno] == -1)
-    return 1;
+  if (get_regs_info ()->usrregs->regmap[regno] == -1)
+    return true;
 
   tdesc = current_process ()->tdesc;
 
   /* On n32 we can't access 64-bit registers via PTRACE_PEEKUSR.  */
   if (register_size (tdesc, regno) > sizeof (PTRACE_XFER_TYPE))
-    return 1;
+    return true;
 
   if (find_regno (tdesc, "r0") == regno)
-    return 1;
+    return true;
 
-  return 0;
+  return false;
 }
 
-static int
-mips_cannot_store_register (int regno)
+bool
+mips_target::low_cannot_store_register (int regno)
 {
   const struct target_desc *tdesc;
 
-  if (get_usrregs_info ()->regmap[regno] == -1)
-    return 1;
+  if (get_regs_info ()->usrregs->regmap[regno] == -1)
+    return true;
 
   tdesc = current_process ()->tdesc;
 
   /* On n32 we can't access 64-bit registers via PTRACE_POKEUSR.  */
   if (register_size (tdesc, regno) > sizeof (PTRACE_XFER_TYPE))
-    return 1;
+    return true;
 
   if (find_regno (tdesc, "r0") == regno)
-    return 1;
+    return true;
 
   if (find_regno (tdesc, "cause") == regno)
-    return 1;
+    return true;
 
   if (find_regno (tdesc, "badvaddr") == regno)
-    return 1;
+    return true;
 
   if (find_regno (tdesc, "fir") == regno)
-    return 1;
+    return true;
 
-  return 0;
+  return false;
 }
 
 static int
@@ -954,8 +950,6 @@ mips_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  mips_cannot_fetch_register,
-  mips_cannot_store_register,
   mips_fetch_register,
   mips_get_pc,
   mips_set_pc,

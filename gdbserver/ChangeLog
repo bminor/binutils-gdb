@@ -1,5 +1,173 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn the 'cannot_fetch_register' and 'cannot_store_register'
+	linux target ops into methods of linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the low target ops.
+	(class linux_process_target) <fetch_register>
+	<store_register>
+	<usr_fetch_inferior_registers>
+	<usr_store_inferior_registers>
+	<low_cannot_fetch_register>
+	<low_cannot_fetch_register> Declare.
+	* linux-low.cc (fetch_register): Turn into...
+	(linux_process_target::fetch_register): ...this.
+	(store_register): Turn into ...
+	(linux_process_target::store_register): ...this.
+	(usr_fetch_inferior_registers): Turn into...
+	(linux_process_target::usr_fetch_inferior_registers): ...this.
+	(usr_store_inferior_registers): Turn into...
+	(linux_process_target::usr_store_inferior_registers): ...this.
+	* linux-x86-low.cc (class x86_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(x86_cannot_store_register): Turn into...
+	(x86_target::low_cannot_store_register): ...this.
+	(x86_cannot_fetch_register): Turn into...
+	(x86_target::low_cannot_fetch_register): ...this.
+	(the_low_target): Remove the target op fields.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(aarch64_target::low_cannot_fetch_register)
+	(aarch64_target::low_cannot_store_register): Define.
+	(the_low_target): Remove the op fields.
+	* linux-arm-low.cc (class arm_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(arm_cannot_fetch_register): Turn into...
+	(arm_target::low_cannot_fetch_register): ...this.
+	(arm_cannot_store_register): Turn into...
+	(arm_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-bfin-low.cc (class bfin_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(bfin_cannot_fetch_register): Turn into...
+	(bfin_target::low_cannot_fetch_register): ...this.
+	(bfin_cannot_store_register): Turn into...
+	(bfin_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-cris-low.cc (class cris_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(cris_cannot_fetch_register): Turn into...
+	(cris_target::low_cannot_fetch_register): ...this.
+	(cris_cannot_store_register): Turn into...
+	(cris_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-crisv32-low.cc (class crisv32_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(crisv32_target::low_cannot_fetch_register)
+	(crisv32_target::low_cannot_store_register): Define.
+	(the_low_target): Remove the op fields.
+	* linux-ia64-low.cc (class ia64_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(ia64_cannot_fetch_register): Turn into...
+	(ia64_target::low_cannot_fetch_register): ...this.
+	(ia64_cannot_store_register): Turn into...
+	(ia64_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-m32r-low.cc (class m32r_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(m32r_cannot_fetch_register): Turn into...
+	(m32r_target::low_cannot_fetch_register): ...this.
+	(m32r_cannot_store_register): Turn into...
+	(m32r_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-m68k-low.cc (class m68k_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(m68k_cannot_fetch_register): Turn into...
+	(m68k_target::low_cannot_fetch_register): ...this.
+	(m68k_cannot_store_register): Turn into...
+	(m68k_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-mips-low.cc (class mips_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(mips_cannot_fetch_register): Turn into...
+	(mips_target::low_cannot_fetch_register): ...this.
+	(mips_cannot_store_register): Turn into...
+	(mips_target::low_cannot_store_register): ...this.
+	(get_usrregs_info): Inline at the call sites in
+	low_cannot_fetch_register and low_cannot_store_register,
+	and remove.
+	(the_low_target): Remove the op fields.
+	* linux-nios2-low.cc (class nios2_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(nios2_cannot_fetch_register): Turn into...
+	(nios2_target::low_cannot_fetch_register): ...this.
+	(nios2_cannot_store_register): Turn into...
+	(nios2_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-ppc-low.cc (class ppc_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(ppc_cannot_fetch_register): Turn into...
+	(ppc_target::low_cannot_fetch_register): ...this.
+	(ppc_cannot_store_register): Turn into...
+	(ppc_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-riscv-low.cc (class riscv_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(riscv_target::low_cannot_fetch_register)
+	(riscv_target::low_cannot_store_register): Define.
+	(the_low_target): Remove the op fields.
+	* linux-s390-low.cc (class s390_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(s390_cannot_fetch_register): Turn into...
+	(s390_target::low_cannot_fetch_register): ...this.
+	(s390_cannot_store_register): Turn into...
+	(s390_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-sh-low.cc (class sh_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(sh_cannot_fetch_register): Turn into...
+	(sh_target::low_cannot_fetch_register): ...this.
+	(sh_cannot_store_register): Turn into...
+	(sh_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-sparc-low.cc (class sparc_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(sparc_cannot_fetch_register): Turn into...
+	(sparc_target::low_cannot_fetch_register): ...this.
+	(sparc_cannot_store_register): Turn into...
+	(sparc_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-tic6x-low.cc (class tic6x_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(tic6x_cannot_fetch_register): Turn into...
+	(tic6x_target::low_cannot_fetch_register): ...this.
+	(tic6x_cannot_store_register): Turn into...
+	(tic6x_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-tile-low.cc (class tile_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(tile_cannot_fetch_register): Turn into...
+	(tile_target::low_cannot_fetch_register): ...this.
+	(tile_cannot_store_register): Turn into...
+	(tile_target::low_cannot_store_register): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-xtensa-low.cc (class xtensa_target)
+	<low_cannot_fetch_register>
+	<low_cannot_store_register>: Declare.
+	(xtensa_target::low_cannot_fetch_register)
+	(xtensa_target::low_cannot_store_register): Define.
+	(the_low_target): Remove the op fields.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn the 'regs_info' linux target op into a method of
 	linux_process_target.
 

@@ -30,6 +30,10 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -63,16 +67,16 @@ static int sh_regmap[] = {
  REG_FPREG0*4+48,  REG_FPREG0*4+52,  REG_FPREG0*4+56,  REG_FPREG0*4+60,
 };
 
-static int
-sh_cannot_store_register (int regno)
+bool
+sh_target::low_cannot_store_register (int regno)
 {
-  return 0;
+  return false;
 }
 
-static int
-sh_cannot_fetch_register (int regno)
+bool
+sh_target::low_cannot_fetch_register (int regno)
 {
-  return 0;
+  return false;
 }
 
 /* Correct in either endianness, obviously.  */
@@ -160,8 +164,6 @@ sh_target::low_arch_setup ()
 }
 
 struct linux_target_ops the_low_target = {
-  sh_cannot_fetch_register,
-  sh_cannot_store_register,
   NULL, /* fetch_register */
   linux_get_pc_32bit,
   linux_set_pc_32bit,

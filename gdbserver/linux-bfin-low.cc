@@ -34,6 +34,10 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -59,14 +63,14 @@ static int bfin_regmap[] =
 
 #define bfin_num_regs ARRAY_SIZE (bfin_regmap)
 
-static int
-bfin_cannot_store_register (int regno)
+bool
+bfin_target::low_cannot_store_register (int regno)
 {
   return (regno >= bfin_num_regs);
 }
 
-static int
-bfin_cannot_fetch_register (int regno)
+bool
+bfin_target::low_cannot_fetch_register (int regno)
 {
   return (regno >= bfin_num_regs);
 }
@@ -131,8 +135,6 @@ bfin_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  bfin_cannot_fetch_register,
-  bfin_cannot_store_register,
   NULL, /* fetch_register */
   linux_get_pc_32bit,
   linux_set_pc_32bit,

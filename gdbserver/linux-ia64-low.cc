@@ -34,6 +34,10 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -283,16 +287,16 @@ static int ia64_regmap[] =
     -1,
   };
 
-static int
-ia64_cannot_store_register (int regno)
+bool
+ia64_target::low_cannot_store_register (int regno)
 {
-  return 0;
+  return false;
 }
 
-static int
-ia64_cannot_fetch_register (int regno)
+bool
+ia64_target::low_cannot_fetch_register (int regno)
 {
-  return 0;
+  return false;
 }
 
 /* GDB register numbers.  */
@@ -363,8 +367,6 @@ ia64_target::low_arch_setup ()
 
 
 struct linux_target_ops the_low_target = {
-  ia64_cannot_fetch_register,
-  ia64_cannot_store_register,
   ia64_fetch_register,
 };
 

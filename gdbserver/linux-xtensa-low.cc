@@ -31,11 +31,29 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
 
 static xtensa_target the_xtensa_target;
+
+bool
+xtensa_target::low_cannot_fetch_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_fetch_register "
+			  "is not implemented by the target");
+}
+
+bool
+xtensa_target::low_cannot_store_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_store_register "
+			  "is not implemented by the target");
+}
 
 /* Defined in auto-generated file reg-xtensa.c.  */
 void init_registers_xtensa (void);
@@ -284,8 +302,6 @@ xtensa_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  0,
-  0,
   NULL, /* fetch_register */
   linux_get_pc_32bit,
   linux_set_pc_32bit,

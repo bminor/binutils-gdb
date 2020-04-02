@@ -49,6 +49,10 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -223,14 +227,14 @@ tic6x_read_description (enum c6x_feature feature)
   return *tdesc;
 }
 
-static int
-tic6x_cannot_fetch_register (int regno)
+bool
+tic6x_target::low_cannot_fetch_register (int regno)
 {
   return (tic6x_regmap[regno] == -1);
 }
 
-static int
-tic6x_cannot_store_register (int regno)
+bool
+tic6x_target::low_cannot_store_register (int regno)
 {
   return (tic6x_regmap[regno] == -1);
 }
@@ -403,8 +407,6 @@ tic6x_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  tic6x_cannot_fetch_register,
-  tic6x_cannot_store_register,
   NULL, /* fetch_register */
   tic6x_get_pc,
   tic6x_set_pc,

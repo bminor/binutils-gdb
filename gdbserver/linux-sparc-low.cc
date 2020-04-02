@@ -53,6 +53,10 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -119,14 +123,14 @@ static const struct regs_range_t fpregs_ranges[] = {
 void init_registers_sparc64 (void);
 extern const struct target_desc *tdesc_sparc64;
 
-static int
-sparc_cannot_store_register (int regno)
+bool
+sparc_target::low_cannot_store_register (int regno)
 {
   return (regno >= sparc_num_regs || sparc_regmap[regno] == -1);
 }
 
-static int
-sparc_cannot_fetch_register (int regno)
+bool
+sparc_target::low_cannot_fetch_register (int regno)
 {
   return (regno >= sparc_num_regs || sparc_regmap[regno] == -1);
 }
@@ -315,8 +319,6 @@ sparc_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  sparc_cannot_fetch_register,
-  sparc_cannot_store_register,
   NULL, /* fetch_register */
   linux_get_pc_64bit,
   /* No sparc_set_pc is needed.  */

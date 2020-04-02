@@ -31,11 +31,29 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
 
 static crisv32_target the_crisv32_target;
+
+bool
+crisv32_target::low_cannot_fetch_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_fetch_register "
+			  "is not implemented by the target");
+}
+
+bool
+crisv32_target::low_cannot_store_register (int regno)
+{
+  gdb_assert_not_reached ("linux target op low_cannot_store_register "
+			  "is not implemented by the target");
+}
 
 /* Defined in auto-generated file reg-crisv32.c.  */
 void init_registers_crisv32 (void);
@@ -411,8 +429,6 @@ crisv32_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL,
-  NULL,
   NULL, /* fetch_register */
   linux_get_pc_32bit,
   linux_set_pc_32bit,

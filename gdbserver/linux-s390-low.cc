@@ -62,6 +62,10 @@ public:
 protected:
 
   void low_arch_setup () override;
+
+  bool low_cannot_fetch_register (int regno) override;
+
+  bool low_cannot_store_register (int regno) override;
 };
 
 /* The singleton target ops object.  */
@@ -157,16 +161,16 @@ static int s390_regmap_3264[] = {
 #endif
 
 
-static int
-s390_cannot_fetch_register (int regno)
+bool
+s390_target::low_cannot_fetch_register (int regno)
 {
-  return 0;
+  return false;
 }
 
-static int
-s390_cannot_store_register (int regno)
+bool
+s390_target::low_cannot_store_register (int regno)
 {
-  return 0;
+  return false;
 }
 
 static void
@@ -2808,8 +2812,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  s390_cannot_fetch_register,
-  s390_cannot_store_register,
   NULL, /* fetch_register */
   s390_get_pc,
   s390_set_pc,
