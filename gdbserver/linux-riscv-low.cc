@@ -38,6 +38,8 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -245,10 +247,10 @@ riscv_target::low_set_pc (regcache *regcache, CORE_ADDR newpc)
 static const uint16_t riscv_ibreakpoint[] = { 0x0073, 0x0010 };
 static const uint16_t riscv_cbreakpoint = 0x9002;
 
-/* Implementation of linux_target_ops method "breakpoint_kind_from_pc".  */
+/* Implementation of target ops method "breakpoint_kind_from_pc".  */
 
-static int
-riscv_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+int
+riscv_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
 {
   union
     {
@@ -305,7 +307,6 @@ riscv_breakpoint_at (CORE_ADDR pc)
 /* RISC-V/Linux target operations.  */
 struct linux_target_ops the_low_target =
 {
-  riscv_breakpoint_kind_from_pc,
   riscv_sw_breakpoint_from_kind,
   NULL, /* get_next_pcs */
   0,    /* decr_pc_after_break */

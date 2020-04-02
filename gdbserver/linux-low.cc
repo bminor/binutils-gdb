@@ -7230,17 +7230,6 @@ current_lwp_ptid (void)
   return ptid_of (current_thread);
 }
 
-/* Implementation of the target_ops method "breakpoint_kind_from_pc".  */
-
-int
-linux_process_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
-{
-  if (the_low_target.breakpoint_kind_from_pc != NULL)
-    return (*the_low_target.breakpoint_kind_from_pc) (pcptr);
-  else
-    return process_stratum_target::breakpoint_kind_from_pc (pcptr);
-}
-
 /* Implementation of the target_ops method "sw_breakpoint_from_kind".  */
 
 const gdb_byte *
@@ -7249,18 +7238,6 @@ linux_process_target::sw_breakpoint_from_kind (int kind, int *size)
   gdb_assert (the_low_target.sw_breakpoint_from_kind != NULL);
 
   return (*the_low_target.sw_breakpoint_from_kind) (kind, size);
-}
-
-/* Implementation of the target_ops method
-   "breakpoint_kind_from_current_state".  */
-
-int
-linux_process_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
-{
-  if (the_low_target.breakpoint_kind_from_current_state != NULL)
-    return (*the_low_target.breakpoint_kind_from_current_state) (pcptr);
-  else
-    return breakpoint_kind_from_pc (pcptr);
 }
 
 const char *

@@ -62,6 +62,10 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
+
+  int breakpoint_kind_from_current_state (CORE_ADDR *pcptr) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -97,6 +101,18 @@ void
 arm_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
 {
   linux_set_pc_32bit (regcache, pc);
+}
+
+int
+arm_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+{
+  return arm_breakpoint_kind_from_pc (pcptr);
+}
+
+int
+arm_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
+{
+  return arm_breakpoint_kind_from_current_state (pcptr);
 }
 
 /* Information describing the hardware breakpoint capabilities.  */
@@ -1051,7 +1067,6 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  arm_breakpoint_kind_from_pc,
   arm_sw_breakpoint_from_kind,
   arm_gdbserver_get_next_pcs,
   0,
@@ -1077,7 +1092,6 @@ struct linux_target_ops the_low_target = {
   NULL, /* emit_ops */
   NULL, /* get_min_fast_tracepoint_insn_len */
   NULL, /* supports_range_stepping */
-  arm_breakpoint_kind_from_current_state,
   arm_supports_hardware_single_step,
   arm_get_syscall_trapinfo,
 };

@@ -253,7 +253,6 @@ m68k_supports_hardware_single_step (void)
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* breakpoint_kind_from_pc */
   m68k_sw_breakpoint_from_kind,
   NULL,
   2,
@@ -279,7 +278,6 @@ struct linux_target_ops the_low_target = {
   NULL, /* emit_ops */
   NULL, /* get_min_fast_tracepoint_insn_len */
   NULL, /* supports_range_stepping */
-  NULL, /* breakpoint_kind_from_current_state */
   m68k_supports_hardware_single_step,
 };
 

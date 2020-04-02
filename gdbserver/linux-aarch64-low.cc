@@ -57,6 +57,10 @@ public:
 
   const regs_info *get_regs_info () override;
 
+  int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
+
+  int breakpoint_kind_from_current_state (CORE_ADDR *pcptr) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -3064,10 +3068,10 @@ aarch64_sw_breakpoint_from_kind (int kind, int *size)
     return arm_sw_breakpoint_from_kind (kind, size);
 }
 
-/* Implementation of linux_target_ops method "breakpoint_kind_from_pc".  */
+/* Implementation of target ops method "breakpoint_kind_from_pc".  */
 
-static int
-aarch64_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
+int
+aarch64_target::breakpoint_kind_from_pc (CORE_ADDR *pcptr)
 {
   if (is_64bit_tdesc ())
     return aarch64_breakpoint_len;
@@ -3075,11 +3079,11 @@ aarch64_breakpoint_kind_from_pc (CORE_ADDR *pcptr)
     return arm_breakpoint_kind_from_pc (pcptr);
 }
 
-/* Implementation of the linux_target_ops method
+/* Implementation of the target ops method
    "breakpoint_kind_from_current_state".  */
 
-static int
-aarch64_breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
+int
+aarch64_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
 {
   if (is_64bit_tdesc ())
     return aarch64_breakpoint_len;
@@ -3097,7 +3101,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_breakpoint_kind_from_pc,
   aarch64_sw_breakpoint_from_kind,
   NULL, /* get_next_pcs */
   0,    /* decr_pc_after_break */
@@ -3123,7 +3126,6 @@ struct linux_target_ops the_low_target =
   aarch64_emit_ops,
   aarch64_get_min_fast_tracepoint_insn_len,
   aarch64_supports_range_stepping,
-  aarch64_breakpoint_kind_from_current_state,
   aarch64_supports_hardware_single_step,
   aarch64_get_syscall_trapinfo,
 };

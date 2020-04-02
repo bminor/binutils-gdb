@@ -2824,7 +2824,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* breakpoint_kind_from_pc */
   s390_sw_breakpoint_from_kind,
   NULL,
   s390_breakpoint_len,
@@ -2850,7 +2849,6 @@ struct linux_target_ops the_low_target = {
   s390_emit_ops,
   s390_get_min_fast_tracepoint_insn_len,
   NULL, /* supports_range_stepping */
-  NULL, /* breakpoint_kind_from_current_state */
   s390_supports_hardware_single_step,
   NULL, /* get_syscall_trapinfo */
   s390_get_ipa_tdesc_idx,

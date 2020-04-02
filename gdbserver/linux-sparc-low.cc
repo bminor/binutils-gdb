@@ -337,7 +337,6 @@ sparc_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* breakpoint_kind_from_pc */
   sparc_sw_breakpoint_from_kind,
   NULL, /* get_next_pcs */
   0,

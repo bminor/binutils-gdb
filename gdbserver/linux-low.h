@@ -132,9 +132,6 @@ struct lwp_info;
 struct linux_target_ops
 {
   /* See target.h for details.  */
-  int (*breakpoint_kind_from_pc) (CORE_ADDR *pcptr);
-
-  /* See target.h for details.  */
   const gdb_byte *(*sw_breakpoint_from_kind) (int kind, int *size);
 
   /* Find the next possible PCs after the current instruction executes.  */
@@ -226,9 +223,6 @@ struct linux_target_ops
 
   /* Returns true if the low target supports range stepping.  */
   int (*supports_range_stepping) (void);
-
-  /* See target.h.  */
-  int (*breakpoint_kind_from_current_state) (CORE_ADDR *pcptr);
 
   /* See target.h.  */
   int (*supports_hardware_single_step) (void);
@@ -442,11 +436,7 @@ public:
   ssize_t multifs_readlink (int pid, const char *filename, char *buf,
 			    size_t bufsiz) override;
 
-  int breakpoint_kind_from_pc (CORE_ADDR *pcptr) override;
-
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
-
-  int breakpoint_kind_from_current_state (CORE_ADDR *pcptr) override;
 
   const char *thread_name (ptid_t thread) override;
 

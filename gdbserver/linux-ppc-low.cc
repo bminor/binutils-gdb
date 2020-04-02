@@ -3404,7 +3404,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* breakpoint_kind_from_pc */
   ppc_sw_breakpoint_from_kind,
   NULL,
   0,
@@ -3430,7 +3429,6 @@ struct linux_target_ops the_low_target = {
   ppc_emit_ops,
   ppc_get_min_fast_tracepoint_insn_len,
   NULL, /* supports_range_stepping */
-  NULL, /* breakpoint_kind_from_current_state */
   ppc_supports_hardware_single_step,
   NULL, /* get_syscall_trapinfo */
   ppc_get_ipa_tdesc_idx,
