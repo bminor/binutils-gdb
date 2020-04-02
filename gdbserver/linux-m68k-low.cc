@@ -265,7 +265,6 @@ m68k_supports_hardware_single_step (void)
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* emit_ops */
   NULL, /* supports_range_stepping */
   m68k_supports_hardware_single_step,
 };

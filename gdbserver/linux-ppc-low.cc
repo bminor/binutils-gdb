@@ -77,6 +77,8 @@ public:
 
   int get_min_fast_tracepoint_insn_len () override;
 
+  struct emit_ops *emit_ops () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -3379,10 +3381,10 @@ static struct emit_ops ppc64v2_emit_ops_impl =
 
 #endif
 
-/* Implementation of linux_target_ops method "emit_ops".  */
+/* Implementation of target ops method "emit_ops".  */
 
-static struct emit_ops *
-ppc_emit_ops (void)
+emit_ops *
+ppc_target::emit_ops ()
 {
 #ifdef __powerpc64__
   struct regcache *regcache = get_thread_regcache (current_thread, 0);
@@ -3452,7 +3454,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  ppc_emit_ops,
   NULL, /* supports_range_stepping */
   ppc_supports_hardware_single_step,
   NULL, /* get_syscall_trapinfo */

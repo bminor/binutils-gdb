@@ -6496,15 +6496,6 @@ linux_process_target::done_accessing_memory ()
     target_unpause_all (true);
 }
 
-emit_ops *
-linux_process_target::emit_ops ()
-{
-  if (the_low_target.emit_ops != NULL)
-    return (*the_low_target.emit_ops) ();
-  else
-    return NULL;
-}
-
 /* Extract &phdr and num_phdr in the inferior.  Return 0 on success.  */
 
 static int

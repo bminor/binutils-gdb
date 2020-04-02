@@ -131,10 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Return the bytecode operations vector for the current inferior.
-     Returns NULL if bytecode compilation is not supported.  */
-  struct emit_ops *(*emit_ops) (void);
-
   /* Returns true if the low target supports range stepping.  */
   int (*supports_range_stepping) (void);
 
@@ -283,8 +279,6 @@ public:
   void unpause_all (bool unfreeze) override;
 
   void stabilize_threads () override;
-
-  struct emit_ops *emit_ops () override;
 
   bool supports_disable_randomization () override;
 

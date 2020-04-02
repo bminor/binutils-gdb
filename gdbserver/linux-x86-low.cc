@@ -122,6 +122,8 @@ public:
 
   int get_min_fast_tracepoint_insn_len () override;
 
+  struct emit_ops *emit_ops () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -2934,8 +2936,8 @@ struct emit_ops i386_emit_ops =
   };
 
 
-static struct emit_ops *
-x86_emit_ops (void)
+emit_ops *
+x86_target::emit_ops ()
 {
 #ifdef __x86_64__
   if (is_64bit_tdesc ())
@@ -2990,7 +2992,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_emit_ops,
   x86_supports_range_stepping,
   x86_supports_hardware_single_step,
   x86_get_syscall_trapinfo,

@@ -161,7 +161,6 @@ m32r_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* emit_ops */
   NULL, /* supports_range_stepping */
   m32r_supports_hardware_single_step,
 };

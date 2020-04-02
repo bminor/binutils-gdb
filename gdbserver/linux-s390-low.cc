@@ -83,6 +83,8 @@ public:
   void low_supply_ptrace_register (regcache *regcache, int regno,
 				   const char *buf) override;
 
+  struct emit_ops *emit_ops () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -2845,10 +2847,10 @@ static struct emit_ops s390x_emit_ops =
   };
 #endif
 
-/* The "emit_ops" linux_target_ops method.  */
+/* The "emit_ops" target ops method.  */
 
-static struct emit_ops *
-s390_emit_ops (void)
+emit_ops *
+s390_target::emit_ops ()
 {
 #ifdef __s390x__
   struct regcache *regcache = get_thread_regcache (current_thread, 0);
@@ -2861,7 +2863,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  s390_emit_ops,
   NULL, /* supports_range_stepping */
   s390_supports_hardware_single_step,
   NULL, /* get_syscall_trapinfo */
