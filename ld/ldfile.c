@@ -454,7 +454,7 @@ ldfile_open_file (lang_input_statement_type *entry)
 		{
 		  const char * base = lbasename (entry->filename);
 
-		  einfo (_("%P: note to link with %s use use -l:%s or rename it to lib%s\n"),
+		  einfo (_("%P: note to link with %s use -l:%s or rename it to lib%s\n"),
 			 entry->filename, base, base);
 		  bfd_close (entry->the_bfd);
 		  entry->the_bfd = NULL;
