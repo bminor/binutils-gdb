@@ -100,15 +100,13 @@ class x86_target : public linux_process_target
 {
 public:
 
-  /* Update all the target description of all processes; a new GDB
-     connected, and it may or not support xml target descriptions.  */
-  void update_xmltarget ();
-
   const regs_info *get_regs_info () override;
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
   bool supports_z_point_type (char z_type) override;
+
+  void process_qsupported (char **features, int count) override;
 
 protected:
 
@@ -157,6 +155,12 @@ protected:
   void low_new_fork (process_info *parent, process_info *child) override;
 
   void low_prepare_to_resume (lwp_info *lwp) override;
+
+private:
+
+  /* Update all the target description of all processes; a new GDB
+     connected, and it may or not support xml target descriptions.  */
+  void update_xmltarget ();
 };
 
 /* The singleton target ops object.  */
@@ -1001,8 +1005,8 @@ x86_target::update_xmltarget ()
 /* Process qSupported query, "xmlRegisters=".  Update the buffer size for
    PTRACE_GETREGSET.  */
 
-static void
-x86_linux_process_qsupported (char **features, int count)
+void
+x86_target::process_qsupported (char **features, int count)
 {
   int i;
 
@@ -1033,7 +1037,7 @@ x86_linux_process_qsupported (char **features, int count)
 	  free (copy);
 	}
     }
-  the_x86_target.update_xmltarget ();
+  update_xmltarget ();
 }
 
 /* Common for x86/x86-64.  */
@@ -2963,7 +2967,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_linux_process_qsupported,
   x86_supports_tracepoints,
   x86_get_thread_area,
   x86_install_fast_tracepoint_jump_pad,

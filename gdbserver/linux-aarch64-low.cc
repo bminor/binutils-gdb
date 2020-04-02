@@ -3147,7 +3147,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  NULL, /* process_qsupported */
   aarch64_supports_tracepoints,
   aarch64_get_thread_area,
   aarch64_install_fast_tracepoint_jump_pad,

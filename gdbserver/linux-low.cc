@@ -6425,13 +6425,6 @@ linux_process_target::read_loadmap (const char *annex, CORE_ADDR offset,
 }
 #endif /* defined PT_GETDSBT || defined PTRACE_GETFDPIC */
 
-void
-linux_process_target::process_qsupported (char **features, int count)
-{
-  if (the_low_target.process_qsupported != NULL)
-    the_low_target.process_qsupported (features, count);
-}
-
 bool
 linux_process_target::supports_catch_syscall ()
 {

@@ -161,7 +161,6 @@ m32r_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* process_qsupported */
   NULL, /* supports_tracepoints */
   NULL, /* get_thread_area */
   NULL, /* install_fast_tracepoint_jump_pad */

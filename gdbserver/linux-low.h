@@ -131,9 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Hook to support target specific qSupported.  */
-  void (*process_qsupported) (char **, int count);
-
   /* Returns true if the low target supports tracepoints.  */
   int (*supports_tracepoints) (void);
 
@@ -298,8 +295,6 @@ public:
   int read_loadmap (const char *annex, CORE_ADDR offset,
 		    unsigned char *myaddr, unsigned int len) override;
 #endif
-
-  void process_qsupported (char **features, int count) override;
 
   bool supports_tracepoints () override;
 

@@ -2845,7 +2845,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* process_qsupported */
   s390_supports_tracepoints,
   s390_get_thread_area,
   s390_install_fast_tracepoint_jump_pad,
