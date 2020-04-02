@@ -754,33 +754,29 @@ linux_process_target::get_pc (lwp_info *lwp)
   return pc;
 }
 
-/* This function should only be called if LWP got a SYSCALL_SIGTRAP.
-   Fill *SYSNO with the syscall nr trapped.  */
-
-static void
-get_syscall_trapinfo (struct lwp_info *lwp, int *sysno)
+void
+linux_process_target::get_syscall_trapinfo (lwp_info *lwp, int *sysno)
 {
   struct thread_info *saved_thread;
   struct regcache *regcache;
-
-  if (the_low_target.get_syscall_trapinfo == NULL)
-    {
-      /* If we cannot get the syscall trapinfo, report an unknown
-	 system call number.  */
-      *sysno = UNKNOWN_SYSCALL;
-      return;
-    }
 
   saved_thread = current_thread;
   current_thread = get_lwp_thread (lwp);
 
   regcache = get_thread_regcache (current_thread, 1);
-  (*the_low_target.get_syscall_trapinfo) (regcache, sysno);
+  low_get_syscall_trapinfo (regcache, sysno);
 
   if (debug_threads)
     debug_printf ("get_syscall_trapinfo sysno %d\n", *sysno);
 
   current_thread = saved_thread;
+}
+
+void
+linux_process_target::low_get_syscall_trapinfo (regcache *regcache, int *sysno)
+{
+  /* By default, report an unknown system call number.  */
+  *sysno = UNKNOWN_SYSCALL;
 }
 
 bool
@@ -2961,29 +2957,26 @@ gdb_catching_syscalls_p (struct lwp_info *event_child)
   return !proc->syscalls_to_catch.empty ();
 }
 
-/* Returns 1 if GDB is interested in the event_child syscall.
-   Only to be called when stopped reason is SYSCALL_SIGTRAP.  */
-
-static int
-gdb_catch_this_syscall_p (struct lwp_info *event_child)
+bool
+linux_process_target::gdb_catch_this_syscall (lwp_info *event_child)
 {
   int sysno;
   struct thread_info *thread = get_lwp_thread (event_child);
   struct process_info *proc = get_thread_process (thread);
 
   if (proc->syscalls_to_catch.empty ())
-    return 0;
+    return false;
 
   if (proc->syscalls_to_catch[0] == ANY_SYSCALL)
-    return 1;
+    return true;
 
   get_syscall_trapinfo (event_child, &sysno);
 
   for (int iter : proc->syscalls_to_catch)
     if (iter == sysno)
-      return 1;
+      return true;
 
-  return 0;
+  return false;
 }
 
 ptid_t
@@ -3326,7 +3319,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
   /* Check if GDB is interested in this syscall.  */
   if (WIFSTOPPED (w)
       && WSTOPSIG (w) == SYSCALL_SIGTRAP
-      && !gdb_catch_this_syscall_p (event_child))
+      && !gdb_catch_this_syscall (event_child))
     {
       if (debug_threads)
 	{
@@ -6404,8 +6397,14 @@ linux_process_target::read_loadmap (const char *annex, CORE_ADDR offset,
 bool
 linux_process_target::supports_catch_syscall ()
 {
-  return (the_low_target.get_syscall_trapinfo != NULL
+  return (low_supports_catch_syscall ()
 	  && linux_supports_tracesysgood ());
+}
+
+bool
+linux_process_target::low_supports_catch_syscall ()
+{
+  return false;
 }
 
 int

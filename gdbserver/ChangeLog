@@ -1,5 +1,49 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn the 'get_syscall_trapinfo' linux target op into a method
+	of process_stratum_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <get_syscall_trapinfo>
+	<gdb_catch_this_syscall>
+	<low_supports_catch_syscall>
+	<low_get_syscall_trapinfo>: Declare.
+	* linux-low.cc (get_syscall_trapinfo): Turn into...
+	(linux_process_target::get_syscall_trapinfo): ...this.
+	(linux_process_target::low_get_syscall_trapinfo): Define.
+	(gdb_catch_this_syscall_p): Turn into...
+	(linux_process_target::gdb_catch_this_syscall): ...this.
+	(linux_process_target::low_supports_catch_syscall): Define.
+
+	Update the callers below.
+
+	(linux_process_target::wait_1)
+	(linux_process_target::supports_catch_syscall)
+
+	* linux-x86-low.cc (class x86_target) <low_supports_catch_syscall>
+	<low_get_syscall_trapinfo>: Declare.
+	(x86_target::low_supports_catch_syscall): Define.
+	(x86_get_syscall_trapinfo): Turn into...
+	(x86_target::low_get_syscall_trapinfo): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<low_supports_catch_syscall>
+	<low_get_syscall_trapinfo>: Declare.
+	(aarch64_target::low_supports_catch_syscall): Define.
+	(aarch64_get_syscall_trapinfo): Turn into...
+	(aarch64_target::low_get_syscall_trapinfo): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (class arm_target) <low_supports_catch_syscall>
+	<low_get_syscall_trapinfo>: Declare.
+	(arm_target::low_supports_catch_syscall): Define.
+	(arm_get_syscall_trapinfo): Turn into...
+	(arm_target::low_get_syscall_trapinfo): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (the_low_target): Remove the op field.
+	* linux-s390-low.cc (the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Remove the 'supports_hardware_single_step' linux target op and
 	override the process_stratum_target's op definition in
 	linux_process_target to return true.

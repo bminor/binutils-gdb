@@ -131,10 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Fill *SYSNO with the syscall nr trapped.  Only to be called when
-     inferior is stopped due to SYSCALL_SIGTRAP.  */
-  void (*get_syscall_trapinfo) (struct regcache *regcache, int *sysno);
-
   /* See target.h.  */
   int (*get_ipa_tdesc_idx) (void);
 };
@@ -591,6 +587,14 @@ private: /* Back to private.  */
   fast_tpoint_collect_result linux_fast_tracepoint_collecting
     (lwp_info *lwp, fast_tpoint_collect_status *status);
 
+  /* This function should only be called if LWP got a SYSCALL_SIGTRAP.
+     Fill *SYSNO with the syscall nr trapped.  */
+  void get_syscall_trapinfo (lwp_info *lwp, int *sysno);
+
+  /* Returns true if GDB is interested in the event_child syscall.
+     Only to be called when stopped reason is SYSCALL_SIGTRAP.  */
+  bool gdb_catch_this_syscall (lwp_info *event_child);
+
 protected:
   /* The architecture-specific "low" methods are listed below.  */
 
@@ -683,6 +687,14 @@ protected:
 
   /* Returns true if the low target supports range stepping.  */
   virtual bool low_supports_range_stepping ();
+
+  /* Return true if the target supports catch syscall.  Such targets
+     override the low_get_syscall_trapinfo method below.  */
+  virtual bool low_supports_catch_syscall ();
+
+  /* Fill *SYSNO with the syscall nr trapped.  Only to be called when
+     inferior is stopped due to SYSCALL_SIGTRAP.  */
+  virtual void low_get_syscall_trapinfo (regcache *regcache, int *sysno);
 
   /* How many bytes the PC should be decremented after a break.  */
   virtual int low_decr_pc_after_break ();

@@ -176,6 +176,10 @@ protected:
 
   bool low_supports_range_stepping () override;
 
+  bool low_supports_catch_syscall () override;
+
+  void low_get_syscall_trapinfo (regcache *regcache, int *sysno) override;
+
 private:
 
   /* Update all the target description of all processes; a new GDB
@@ -1110,11 +1114,17 @@ x86_target::low_arch_setup ()
   current_process ()->tdesc = x86_linux_read_description ();
 }
 
+bool
+x86_target::low_supports_catch_syscall ()
+{
+  return true;
+}
+
 /* Fill *SYSNO and *SYSRET with the syscall nr trapped and the syscall return
    code.  This should only be called if LWP got a SYSCALL_SIGTRAP.  */
 
-static void
-x86_get_syscall_trapinfo (struct regcache *regcache, int *sysno)
+void
+x86_target::low_get_syscall_trapinfo (regcache *regcache, int *sysno)
 {
   int use_64bit = register_size (regcache->tdesc, 0) == 8;
 
@@ -2985,7 +2995,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_get_syscall_trapinfo,
   x86_get_ipa_tdesc_idx,
 };
 

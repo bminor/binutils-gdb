@@ -125,6 +125,10 @@ protected:
   int low_get_thread_area (int lwpid, CORE_ADDR *addrp) override;
 
   bool low_supports_range_stepping () override;
+
+  bool low_supports_catch_syscall () override;
+
+  void low_get_syscall_trapinfo (regcache *regcache, int *sysno) override;
 };
 
 /* The singleton target ops object.  */
@@ -768,10 +772,16 @@ aarch64_target::low_get_thread_area (int lwpid, CORE_ADDR *addrp)
   return 0;
 }
 
-/* Implementation of linux_target_ops method "get_syscall_trapinfo".  */
+bool
+aarch64_target::low_supports_catch_syscall ()
+{
+  return true;
+}
 
-static void
-aarch64_get_syscall_trapinfo (struct regcache *regcache, int *sysno)
+/* Implementation of linux target ops method "low_get_syscall_trapinfo".  */
+
+void
+aarch64_target::low_get_syscall_trapinfo (regcache *regcache, int *sysno)
 {
   int use_64bit = register_size (regcache->tdesc, 0) == 8;
 
@@ -3159,7 +3169,6 @@ aarch64_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_get_syscall_trapinfo,
 };
 
 /* The linux target ops object.  */

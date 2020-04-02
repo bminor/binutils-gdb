@@ -3446,7 +3446,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* get_syscall_trapinfo */
   ppc_get_ipa_tdesc_idx,
 };
 
