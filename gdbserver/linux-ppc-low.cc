@@ -3428,7 +3428,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* prepare_to_resume */
   NULL, /* process_qsupported */
   ppc_supports_tracepoints,
   ppc_get_thread_area,

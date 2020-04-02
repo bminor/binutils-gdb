@@ -80,6 +80,8 @@ protected:
   void low_delete_thread (arch_lwp_info *) override;
 
   void low_new_fork (process_info *parent, process_info *child) override;
+
+  void low_prepare_to_resume (lwp_info *lwp) override;
 };
 
 /* The singleton target ops object.  */
@@ -491,12 +493,12 @@ mips_target::low_new_fork (process_info *parent,
 
   child_private->watch_mirror = parent_private->watch_mirror;
 }
-/* This is the implementation of linux_target_ops method
-   prepare_to_resume.  If the watch regs have changed, update the
+/* This is the implementation of linux target ops method
+   low_prepare_to_resume.  If the watch regs have changed, update the
    thread's copies.  */
 
-static void
-mips_linux_prepare_to_resume (struct lwp_info *lwp)
+void
+mips_target::low_prepare_to_resume (lwp_info *lwp)
 {
   ptid_t ptid = ptid_of (get_lwp_thread (lwp));
   struct process_info *proc = find_process_pid (ptid.pid ());
@@ -996,7 +998,6 @@ mips_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  mips_linux_prepare_to_resume
 };
 
 /* The linux target ops object.  */

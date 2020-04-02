@@ -1530,8 +1530,7 @@ linux_process_target::detach_one_lwp (lwp_info *lwp)
       regcache_invalidate_thread (thread);
 
       /* Finally, let it resume.  */
-      if (the_low_target.prepare_to_resume != NULL)
-	the_low_target.prepare_to_resume (lwp);
+      low_prepare_to_resume (lwp);
     }
   catch (const gdb_exception_error &ex)
     {
@@ -4322,8 +4321,7 @@ linux_process_target::resume_one_lwp_throw (lwp_info *lwp, int step,
 		  lwpid_of (thread), step ? "step" : "continue", signal,
 		  lwp->stop_expected ? "expected" : "not expected");
 
-  if (the_low_target.prepare_to_resume != NULL)
-    the_low_target.prepare_to_resume (lwp);
+  low_prepare_to_resume (lwp);
 
   regcache_invalidate_thread (thread);
   errno = 0;
@@ -4353,6 +4351,12 @@ linux_process_target::resume_one_lwp_throw (lwp_info *lwp, int step,
      otherwise handle_zombie_lwp_error would get confused.  */
   lwp->stopped = 0;
   lwp->stop_reason = TARGET_STOPPED_BY_NO_REASON;
+}
+
+void
+linux_process_target::low_prepare_to_resume (lwp_info *lwp)
+{
+  /* Nop.  */
 }
 
 /* Called when we try to resume a stopped LWP and that errors out.  If

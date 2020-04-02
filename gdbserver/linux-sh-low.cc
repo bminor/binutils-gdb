@@ -192,7 +192,6 @@ sh_target::low_arch_setup ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* prepare_to_resume */
   NULL, /* process_qsupported */
   NULL, /* supports_tracepoints */
   NULL, /* get_thread_area */

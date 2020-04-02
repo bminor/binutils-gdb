@@ -103,6 +103,8 @@ protected:
   void low_delete_thread (arch_lwp_info *) override;
 
   void low_new_fork (process_info *parent, process_info *child) override;
+
+  void low_prepare_to_resume (lwp_info *lwp) override;
 };
 
 /* The singleton target ops object.  */
@@ -121,6 +123,12 @@ aarch64_target::low_cannot_store_register (int regno)
 {
   gdb_assert_not_reached ("linux target op low_cannot_store_register "
 			  "is not implemented by the target");
+}
+
+void
+aarch64_target::low_prepare_to_resume (lwp_info *lwp)
+{
+  aarch64_linux_prepare_to_resume (lwp);
 }
 
 /* Per-process arch-specific data we want to keep.  */
@@ -3139,7 +3147,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_linux_prepare_to_resume,
   NULL, /* process_qsupported */
   aarch64_supports_tracepoints,
   aarch64_get_thread_area,

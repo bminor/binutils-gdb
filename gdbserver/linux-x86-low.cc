@@ -155,6 +155,8 @@ protected:
   void low_delete_thread (arch_lwp_info *) override;
 
   void low_new_fork (process_info *parent, process_info *child) override;
+
+  void low_prepare_to_resume (lwp_info *lwp) override;
 };
 
 /* The singleton target ops object.  */
@@ -761,6 +763,13 @@ x86_target::low_new_fork (process_info *parent, process_info *child)
      this compatible with older Linux kernels too.  */
 
   *child->priv->arch_private = *parent->priv->arch_private;
+}
+
+void
+x86_target::low_prepare_to_resume (lwp_info *lwp)
+{
+  /* This comes from nat/.  */
+  x86_linux_prepare_to_resume (lwp);
 }
 
 /* See nat/x86-dregs.h.  */
@@ -2954,7 +2963,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_linux_prepare_to_resume,
   x86_linux_process_qsupported,
   x86_supports_tracepoints,
   x86_get_thread_area,
