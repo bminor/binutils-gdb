@@ -3592,9 +3592,35 @@ dw2_map_matching_symbols
    gdb::function_view<symbol_found_callback_ftype> callback,
    symbol_compare_ftype *ordered_compare)
 {
-  /* Currently unimplemented; used for Ada.  The function can be called if the
-     current language is Ada for a non-Ada objfile using GNU index.  As Ada
-     does not look for non-Ada symbols this function should just return.  */
+  /* Used for Ada.  */
+  struct dwarf2_per_objfile *dwarf2_per_objfile
+    = get_dwarf2_per_objfile (objfile);
+
+  if (dwarf2_per_objfile->index_table != nullptr)
+    {
+      /* Ada currently doesn't support .gdb_index (see PR24713).  We can get
+	 here though if the current language is Ada for a non-Ada objfile
+	 using GNU index.  As Ada does not look for non-Ada symbols this
+	 function should just return.  */
+      return;
+    }
+
+  /* We have -readnow: no .gdb_index, but no partial symtabs either.  So,
+     inline psym_map_matching_symbols here, assuming all partial symtabs have
+     been read in.  */
+  const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
+
+  for (compunit_symtab *cust : objfile->compunits ())
+    {
+      const struct block *block;
+
+      if (cust == NULL)
+	continue;
+      block = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cust), block_kind);
+      if (!iterate_over_symbols_terminated (block, name,
+					    domain, callback))
+	return;
+    }
 }
 
 /* Starting from a search name, return the string that finds the upper

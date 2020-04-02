@@ -1,5 +1,10 @@
 2020-04-02  Tom de Vries  <tdevries@suse.de>
 
+	PR ada/24671
+	* dwarf2/read.c (dw2_map_matching_symbols): Handle -readnow.
+
+2020-04-02  Tom de Vries  <tdevries@suse.de>
+
 	* dwarf2/read.c (dwarf2_gdb_index_functions,
 	dwarf2_debug_names_functions): Init lookup_global_symbol_language with
 	NULL.
