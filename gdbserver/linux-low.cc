@@ -269,20 +269,13 @@ static int stabilizing_threads;
 
 static void linux_resume_one_lwp (struct lwp_info *lwp,
 				  int step, int signal, siginfo_t *info);
-static void stop_all_lwps (int suspend, struct lwp_info *except);
-static void unstop_all_lwps (int unsuspend, struct lwp_info *except);
 static void unsuspend_all_lwps (struct lwp_info *except);
-static int linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
-					  int *wstat, int options);
-static int linux_wait_for_event (ptid_t ptid, int *wstat, int options);
 static struct lwp_info *add_lwp (ptid_t ptid);
 static void mark_lwp_dead (struct lwp_info *lwp, int wstat);
 static int lwp_is_marked_dead (struct lwp_info *lwp);
-static void proceed_all_lwps (void);
 static int finish_step_over (struct lwp_info *lwp);
 static int kill_lwp (unsigned long lwpid, int signo);
 static void enqueue_pending_signal (struct lwp_info *lwp, int signal, siginfo_t *info);
-static void complete_ongoing_step_over (void);
 static int linux_low_ptrace_options (int attached);
 static int check_ptrace_stopped_lwp_gone (struct lwp_info *lp);
 static void proceed_one_lwp (thread_info *thread, lwp_info *except);
@@ -355,7 +348,6 @@ static int linux_event_pipe[2] = { -1, -1 };
 #define target_is_async_p() (linux_event_pipe[0] != -1)
 
 static void send_sigstop (struct lwp_info *lwp);
-static void wait_for_sigstop (void);
 
 /* Return non-zero if HEADER is a 64-bit ELF file.  */
 
@@ -471,14 +463,9 @@ linux_arch_setup_thread (struct thread_info *thread)
   current_thread = saved_thread;
 }
 
-/* Handle a GNU/Linux extended wait response.  If we see a clone,
-   fork, or vfork event, we need to add the new LWP to our list
-   (and return 0 so as not to report the trap to higher layers).
-   If we see an exec event, we will modify ORIG_EVENT_LWP to point
-   to a new LWP representing the new program.  */
-
-static int
-handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
+int
+linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
+					    int wstat)
 {
   client_state &cs = get_client_state ();
   struct lwp_info *event_lwp = *orig_event_lwp;
@@ -711,7 +698,7 @@ handle_extended_wait (struct lwp_info **orig_event_lwp, int wstat)
       syscalls_to_catch = std::move (proc->syscalls_to_catch);
 
       /* Delete the execing process and all its threads.  */
-      the_target->mourn (proc);
+      mourn (proc);
       current_thread = NULL;
 
       /* Create a new process/lwp/thread.  */
@@ -1234,8 +1221,7 @@ linux_process_target::attach (unsigned long pid)
       int wstat, lwpid;
       ptid_t pid_ptid = ptid_t (pid);
 
-      lwpid = linux_wait_for_event_filtered (pid_ptid, pid_ptid,
-					     &wstat, __WALL);
+      lwpid = wait_for_event_filtered (pid_ptid, pid_ptid, &wstat, __WALL);
       gdb_assert (lwpid > 0);
 
       lwp = find_lwp_pid (ptid_t (lwpid));
@@ -1345,7 +1331,7 @@ kill_wait_lwp (struct lwp_info *lwp)
 
 	 - The loop is most likely unnecessary.
 
-	 - We don't use linux_wait_for_event as that could delete lwps
+	 - We don't use wait_for_event as that could delete lwps
 	   while we're iterating over them.  We're not interested in
 	   any pending status at this point, only in making sure all
 	   wait status on the kernel side are collected until the
@@ -2045,13 +2031,8 @@ linux_fast_tracepoint_collecting (struct lwp_info *lwp,
   return fast_tracepoint_collecting (thread_area, lwp->stop_pc, status);
 }
 
-/* The reason we resume in the caller, is because we want to be able
-   to pass lwp->status_pending as WSTAT, and we need to clear
-   status_pending_p before resuming, otherwise, linux_resume_one_lwp
-   refuses to resume.  */
-
-static int
-maybe_move_out_of_jump_pad (struct lwp_info *lwp, int *wstat)
+bool
+linux_process_target::maybe_move_out_of_jump_pad (lwp_info *lwp, int *wstat)
 {
   struct thread_info *saved_thread;
 
@@ -2099,7 +2080,7 @@ maybe_move_out_of_jump_pad (struct lwp_info *lwp, int *wstat)
 			      lwpid_of (current_thread));
 	      current_thread = saved_thread;
 
-	      return 1;
+	      return true;
 	    }
 	}
       else
@@ -2171,7 +2152,7 @@ maybe_move_out_of_jump_pad (struct lwp_info *lwp, int *wstat)
 		  lwpid_of (current_thread));
 
   current_thread = saved_thread;
-  return 0;
+  return false;
 }
 
 /* Enqueue one signal in the "signals to report later when out of the
@@ -2346,12 +2327,8 @@ linux_low_ptrace_options (int attached)
   return options;
 }
 
-/* Do low-level handling of the event, and check if we should go on
-   and pass it to caller code.  Return the affected lwp if we are, or
-   NULL otherwise.  */
-
-static struct lwp_info *
-linux_low_filter_event (int lwpid, int wstat)
+lwp_info *
+linux_process_target::filter_event (int lwpid, int wstat)
 {
   client_state &cs = get_client_state ();
   struct lwp_info *child;
@@ -2604,18 +2581,10 @@ resume_stopped_resumed_lwps (thread_info *thread)
     }
 }
 
-/* Wait for an event from child(ren) WAIT_PTID, and return any that
-   match FILTER_PTID (leaving others pending).  The PTIDs can be:
-   minus_one_ptid, to specify any child; a pid PTID, specifying all
-   lwps of a thread group; or a PTID representing a single lwp.  Store
-   the stop status through the status pointer WSTAT.  OPTIONS is
-   passed to the waitpid call.  Return 0 if no event was found and
-   OPTIONS contains WNOHANG.  Return -1 if no unwaited-for children
-   was found.  Return the PID of the stopped child otherwise.  */
-
-static int
-linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
-			       int *wstatp, int options)
+int
+linux_process_target::wait_for_event_filtered (ptid_t wait_ptid,
+					       ptid_t filter_ptid,
+					       int *wstatp, int options)
 {
   struct thread_info *event_thread;
   struct lwp_info *event_child, *requested_child;
@@ -2734,7 +2703,7 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
 	  /* Filter all events.  IOW, leave all events pending.  We'll
 	     randomly select an event LWP out of all that have events
 	     below.  */
-	  linux_low_filter_event (ret, *wstatp);
+	  filter_event (ret, *wstatp);
 	  /* Retry until nothing comes out of waitpid.  A single
 	     SIGCHLD can indicate more than one child stopped.  */
 	  continue;
@@ -2811,18 +2780,10 @@ linux_wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
   return lwpid_of (event_thread);
 }
 
-/* Wait for an event from child(ren) PTID.  PTIDs can be:
-   minus_one_ptid, to specify any child; a pid PTID, specifying all
-   lwps of a thread group; or a PTID representing a single lwp.  Store
-   the stop status through the status pointer WSTAT.  OPTIONS is
-   passed to the waitpid call.  Return 0 if no event was found and
-   OPTIONS contains WNOHANG.  Return -1 if no unwaited-for children
-   was found.  Return the PID of the stopped child otherwise.  */
-
-static int
-linux_wait_for_event (ptid_t ptid, int *wstatp, int options)
+int
+linux_process_target::wait_for_event (ptid_t ptid, int *wstatp, int options)
 {
-  return linux_wait_for_event_filtered (ptid, ptid, wstatp, options);
+  return wait_for_event_filtered (ptid, ptid, wstatp, options);
 }
 
 /* Select one LWP out of those that have events pending.  */
@@ -2897,12 +2858,8 @@ unsuspend_all_lwps (struct lwp_info *except)
     });
 }
 
-static void move_out_of_jump_pad_callback (thread_info *thread);
 static bool stuck_in_jump_pad_callback (thread_info *thread);
 static bool lwp_running (thread_info *thread);
-static ptid_t linux_wait_1 (ptid_t ptid,
-			    struct target_waitstatus *ourstatus,
-			    int target_options);
 
 /* Stabilize threads (move out of jump pads).
 
@@ -2952,7 +2909,10 @@ linux_process_target::stabilize_threads ()
   stabilizing_threads = 1;
 
   /* Kick 'em all.  */
-  for_each_thread (move_out_of_jump_pad_callback);
+  for_each_thread ([this] (thread_info *thread)
+    {
+      move_out_of_jump_pad (thread);
+    });
 
   /* Loop until all are stopped out of the jump pads.  */
   while (find_thread (lwp_running) != NULL)
@@ -2964,7 +2924,7 @@ linux_process_target::stabilize_threads ()
       /* Note that we go through the full wait even loop.  While
 	 moving threads out of jump pad, we need to be able to step
 	 over internal breakpoints and such.  */
-      linux_wait_1 (minus_one_ptid, &ourstatus, 0);
+      wait_1 (minus_one_ptid, &ourstatus, 0);
 
       if (ourstatus.kind == TARGET_WAITKIND_STOPPED)
 	{
@@ -3074,11 +3034,9 @@ gdb_catch_this_syscall_p (struct lwp_info *event_child)
   return 0;
 }
 
-/* Wait for process, returns status.  */
-
-static ptid_t
-linux_wait_1 (ptid_t ptid,
-	      struct target_waitstatus *ourstatus, int target_options)
+ptid_t
+linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
+			      int target_options)
 {
   client_state &cs = get_client_state ();
   int w;
@@ -3096,7 +3054,7 @@ linux_wait_1 (ptid_t ptid,
   if (debug_threads)
     {
       debug_enter ();
-      debug_printf ("linux_wait_1: [%s]\n", target_pid_to_str (ptid));
+      debug_printf ("wait_1: [%s]\n", target_pid_to_str (ptid));
     }
 
   /* Translate generic target options into linux options.  */
@@ -3128,13 +3086,13 @@ linux_wait_1 (ptid_t ptid,
     any_resumed = 0;
 
   if (step_over_bkpt == null_ptid)
-    pid = linux_wait_for_event (ptid, &w, options);
+    pid = wait_for_event (ptid, &w, options);
   else
     {
       if (debug_threads)
 	debug_printf ("step_over_bkpt set [%s], doing a blocking wait\n",
 		      target_pid_to_str (step_over_bkpt));
-      pid = linux_wait_for_event (step_over_bkpt, &w, options & ~WNOHANG);
+      pid = wait_for_event (step_over_bkpt, &w, options & ~WNOHANG);
     }
 
   if (pid == 0 || (pid == -1 && !any_resumed))
@@ -3143,7 +3101,7 @@ linux_wait_1 (ptid_t ptid,
 
       if (debug_threads)
 	{
-	  debug_printf ("linux_wait_1 ret = null_ptid, "
+	  debug_printf ("wait_1 ret = null_ptid, "
 			"TARGET_WAITKIND_IGNORE\n");
 	  debug_exit ();
 	}
@@ -3155,7 +3113,7 @@ linux_wait_1 (ptid_t ptid,
     {
       if (debug_threads)
 	{
-	  debug_printf ("linux_wait_1 ret = null_ptid, "
+	  debug_printf ("wait_1 ret = null_ptid, "
 			"TARGET_WAITKIND_NO_RESUMED\n");
 	  debug_exit ();
 	}
@@ -3166,7 +3124,7 @@ linux_wait_1 (ptid_t ptid,
 
   event_child = get_thread_lwp (current_thread);
 
-  /* linux_wait_for_event only returns an exit status for the last
+  /* wait_for_event only returns an exit status for the last
      child of a process.  Report it.  */
   if (WIFEXITED (w) || WIFSIGNALED (w))
     {
@@ -3177,7 +3135,7 @@ linux_wait_1 (ptid_t ptid,
 
 	  if (debug_threads)
 	    {
-	      debug_printf ("linux_wait_1 ret = %s, exited with "
+	      debug_printf ("wait_1 ret = %s, exited with "
 			    "retcode %d\n",
 			    target_pid_to_str (ptid_of (current_thread)),
 			    WEXITSTATUS (w));
@@ -3191,7 +3149,7 @@ linux_wait_1 (ptid_t ptid,
 
 	  if (debug_threads)
 	    {
-	      debug_printf ("linux_wait_1 ret = %s, terminated with "
+	      debug_printf ("wait_1 ret = %s, terminated with "
 			    "signal %d\n",
 			    target_pid_to_str (ptid_of (current_thread)),
 			    WTERMSIG (w));
@@ -3225,9 +3183,8 @@ linux_wait_1 (ptid_t ptid,
       int breakpoint_kind = 0;
       CORE_ADDR stop_pc = event_child->stop_pc;
 
-      breakpoint_kind =
-	the_target->breakpoint_kind_from_current_state (&stop_pc);
-      the_target->sw_breakpoint_from_kind (breakpoint_kind, &increment_pc);
+      breakpoint_kind = breakpoint_kind_from_current_state (&stop_pc);
+      sw_breakpoint_from_kind (breakpoint_kind, &increment_pc);
 
       if (debug_threads)
 	{
@@ -3400,7 +3357,7 @@ linux_wait_1 (ptid_t ptid,
 
 		  if (debug_threads)
 		    {
-		      debug_printf ("linux_wait_1 ret = %s, stopped "
+		      debug_printf ("wait_1 ret = %s, stopped "
 				    "while stabilizing threads\n",
 				    target_pid_to_str (ptid_of (current_thread)));
 		      debug_exit ();
@@ -3799,7 +3756,7 @@ linux_wait_1 (ptid_t ptid,
 
   if (debug_threads)
     {
-      debug_printf ("linux_wait_1 ret = %s, %d, %d\n",
+      debug_printf ("wait_1 ret = %s, %d, %d\n",
 		    target_pid_to_str (ptid_of (current_thread)),
 		    ourstatus->kind, ourstatus->value.sig);
       debug_exit ();
@@ -3852,7 +3809,7 @@ linux_process_target::wait (ptid_t ptid,
 
   do
     {
-      event_ptid = linux_wait_1 (ptid, ourstatus, target_options);
+      event_ptid = wait_1 (ptid, ourstatus, target_options);
     }
   while ((target_options & TARGET_WNOHANG) == 0
 	 && event_ptid == null_ptid
@@ -3985,10 +3942,8 @@ lwp_is_marked_dead (struct lwp_info *lwp)
 	      || WIFSIGNALED (lwp->status_pending)));
 }
 
-/* Wait for all children to stop for the SIGSTOPs we just queued.  */
-
-static void
-wait_for_sigstop (void)
+void
+linux_process_target::wait_for_sigstop ()
 {
   struct thread_info *saved_thread;
   ptid_t saved_tid;
@@ -4007,8 +3962,7 @@ wait_for_sigstop (void)
   /* Passing NULL_PTID as filter indicates we want all events to be
      left pending.  Eventually this returns when there are no
      unwaited-for children left.  */
-  ret = linux_wait_for_event_filtered (minus_one_ptid, null_ptid,
-				       &wstat, __WALL);
+  ret = wait_for_event_filtered (minus_one_ptid, null_ptid, &wstat, __WALL);
   gdb_assert (ret == -1);
 
   if (saved_thread == NULL || mythread_alive (saved_tid))
@@ -4053,8 +4007,8 @@ stuck_in_jump_pad_callback (thread_info *thread)
 	      != fast_tpoint_collect_result::not_collecting));
 }
 
-static void
-move_out_of_jump_pad_callback (thread_info *thread)
+void
+linux_process_target::move_out_of_jump_pad (thread_info *thread)
 {
   struct thread_info *saved_thread;
   struct lwp_info *lwp = get_thread_lwp (thread);
@@ -4114,12 +4068,8 @@ lwp_running (thread_info *thread)
   return !lwp->stopped;
 }
 
-/* Stop all lwps that aren't stopped yet, except EXCEPT, if not NULL.
-   If SUSPEND, then also increase the suspend count of every LWP,
-   except EXCEPT.  */
-
-static void
-stop_all_lwps (int suspend, struct lwp_info *except)
+void
+linux_process_target::stop_all_lwps (int suspend, lwp_info *except)
 {
   /* Should not be called recursively.  */
   gdb_assert (stopping_threads == NOT_STOPPING_THREADS);
@@ -4758,18 +4708,8 @@ need_step_over_p (thread_info *thread)
   return false;
 }
 
-/* Start a step-over operation on LWP.  When LWP stopped at a
-   breakpoint, to make progress, we need to remove the breakpoint out
-   of the way.  If we let other threads run while we do that, they may
-   pass by the breakpoint location and miss hitting it.  To avoid
-   that, a step-over momentarily stops all threads while LWP is
-   single-stepped by either hardware or software while the breakpoint
-   is temporarily uninserted from the inferior.  When the single-step
-   finishes, we reinsert the breakpoint, and let all threads that are
-   supposed to be running, run again.  */
-
-static int
-start_step_over (struct lwp_info *lwp)
+void
+linux_process_target::start_step_over (lwp_info *lwp)
 {
   struct thread_info *thread = get_lwp_thread (lwp);
   struct thread_info *saved_thread;
@@ -4813,7 +4753,6 @@ start_step_over (struct lwp_info *lwp)
 
   /* Require next event from this LWP.  */
   step_over_bkpt = thread->id;
-  return 1;
 }
 
 /* Finish a step-over.  Reinsert the breakpoint we had uninserted in
@@ -4858,14 +4797,8 @@ finish_step_over (struct lwp_info *lwp)
     return 0;
 }
 
-/* If there's a step over in progress, wait until all threads stop
-   (that is, until the stepping thread finishes its step), and
-   unsuspend all lwps.  The stepping thread ends with its status
-   pending, which is processed later when we get back to processing
-   events.  */
-
-static void
-complete_ongoing_step_over (void)
+void
+linux_process_target::complete_ongoing_step_over ()
 {
   if (step_over_bkpt != null_ptid)
     {
@@ -4879,8 +4812,8 @@ complete_ongoing_step_over (void)
       /* Passing NULL_PTID as filter indicates we want all events to
 	 be left pending.  Eventually this returns when there are no
 	 unwaited-for children left.  */
-      ret = linux_wait_for_event_filtered (minus_one_ptid, null_ptid,
-					   &wstat, __WALL);
+      ret = wait_for_event_filtered (minus_one_ptid, null_ptid, &wstat,
+				     __WALL);
       gdb_assert (ret == -1);
 
       lwp = find_lwp_pid (step_over_bkpt);
@@ -5197,12 +5130,8 @@ unsuspend_and_proceed_one_lwp (thread_info *thread, lwp_info *except)
   proceed_one_lwp (thread, except);
 }
 
-/* When we finish a step-over, set threads running again.  If there's
-   another thread that may need a step-over, now's the time to start
-   it.  Eventually, we'll move all threads past their breakpoints.  */
-
-static void
-proceed_all_lwps (void)
+void
+linux_process_target::proceed_all_lwps ()
 {
   struct thread_info *need_step_over;
 
@@ -5236,12 +5165,8 @@ proceed_all_lwps (void)
     });
 }
 
-/* Stopped LWPs that the client wanted to be running, that don't have
-   pending statuses, are set to run again, except for EXCEPT, if not
-   NULL.  This undoes a stop_all_lwps call.  */
-
-static void
-unstop_all_lwps (int unsuspend, struct lwp_info *except)
+void
+linux_process_target::unstop_all_lwps (int unsuspend, lwp_info *except)
 {
   if (debug_threads)
     {

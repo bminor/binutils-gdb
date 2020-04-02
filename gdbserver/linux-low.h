@@ -480,6 +480,89 @@ public:
   bool supports_catch_syscall () override;
 
   int get_ipa_tdesc_idx () override;
+
+private:
+
+  /* Handle a GNU/Linux extended wait response.  If we see a clone,
+     fork, or vfork event, we need to add the new LWP to our list
+     (and return 0 so as not to report the trap to higher layers).
+     If we see an exec event, we will modify ORIG_EVENT_LWP to point
+     to a new LWP representing the new program.  */
+  int handle_extended_wait (lwp_info **orig_event_lwp, int wstat);
+
+  /* Do low-level handling of the event, and check if we should go on
+     and pass it to caller code.  Return the affected lwp if we are, or
+     NULL otherwise.  */
+  lwp_info *filter_event (int lwpid, int wstat);
+
+  /* Wait for an event from child(ren) WAIT_PTID, and return any that
+     match FILTER_PTID (leaving others pending).  The PTIDs can be:
+     minus_one_ptid, to specify any child; a pid PTID, specifying all
+     lwps of a thread group; or a PTID representing a single lwp.  Store
+     the stop status through the status pointer WSTAT.  OPTIONS is
+     passed to the waitpid call.  Return 0 if no event was found and
+     OPTIONS contains WNOHANG.  Return -1 if no unwaited-for children
+     was found.  Return the PID of the stopped child otherwise.  */
+  int wait_for_event_filtered (ptid_t wait_ptid, ptid_t filter_ptid,
+			       int *wstatp, int options);
+
+  /* Wait for an event from child(ren) PTID.  PTIDs can be:
+     minus_one_ptid, to specify any child; a pid PTID, specifying all
+     lwps of a thread group; or a PTID representing a single lwp.  Store
+     the stop status through the status pointer WSTAT.  OPTIONS is
+     passed to the waitpid call.  Return 0 if no event was found and
+     OPTIONS contains WNOHANG.  Return -1 if no unwaited-for children
+     was found.  Return the PID of the stopped child otherwise.  */
+  int wait_for_event (ptid_t ptid, int *wstatp, int options);
+
+  /* Wait for all children to stop for the SIGSTOPs we just queued.  */
+  void wait_for_sigstop ();
+
+  /* Wait for process, returns status.  */
+  ptid_t wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
+		 int target_options);
+
+  /* Stop all lwps that aren't stopped yet, except EXCEPT, if not NULL.
+     If SUSPEND, then also increase the suspend count of every LWP,
+     except EXCEPT.  */
+  void stop_all_lwps (int suspend, lwp_info *except);
+
+  /* Stopped LWPs that the client wanted to be running, that don't have
+     pending statuses, are set to run again, except for EXCEPT, if not
+     NULL.  This undoes a stop_all_lwps call.  */
+  void unstop_all_lwps (int unsuspend, lwp_info *except);
+
+  /* Start a step-over operation on LWP.  When LWP stopped at a
+     breakpoint, to make progress, we need to remove the breakpoint out
+     of the way.  If we let other threads run while we do that, they may
+     pass by the breakpoint location and miss hitting it.  To avoid
+     that, a step-over momentarily stops all threads while LWP is
+     single-stepped by either hardware or software while the breakpoint
+     is temporarily uninserted from the inferior.  When the single-step
+     finishes, we reinsert the breakpoint, and let all threads that are
+     supposed to be running, run again.  */
+  void start_step_over (lwp_info *lwp);
+
+  /* If there's a step over in progress, wait until all threads stop
+     (that is, until the stepping thread finishes its step), and
+     unsuspend all lwps.  The stepping thread ends with its status
+     pending, which is processed later when we get back to processing
+     events.  */
+  void complete_ongoing_step_over ();
+
+  /* When we finish a step-over, set threads running again.  If there's
+     another thread that may need a step-over, now's the time to start
+     it.  Eventually, we'll move all threads past their breakpoints.  */
+  void proceed_all_lwps ();
+
+  /* The reason we resume in the caller, is because we want to be able
+     to pass lwp->status_pending as WSTAT, and we need to clear
+     status_pending_p before resuming, otherwise, resume_one_lwp
+     refuses to resume.  */
+  bool maybe_move_out_of_jump_pad (lwp_info *lwp, int *wstat);
+
+  /* Move THREAD out of the jump pad.  */
+  void move_out_of_jump_pad (thread_info *thread);
 };
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))

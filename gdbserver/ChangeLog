@@ -1,5 +1,59 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn some static functions in linux-low.cc into private methods of
+	linux_process_target.
+
+	* linux-low.cc (handle_extended_wait): Turn into ...
+	(linux_process_target::handle_extended_wait): ...this.  Call
+	'mourn' on 'this' object instead of 'the_target'.
+	(maybe_move_out_of_jump_pad): Turn into...
+	(linux_process_target::maybe_move_out_of_jump_pad): ...this.
+	(linux_low_filter_event): Turn into...
+	(linux_process_target::filter_event): ...this.
+	(linux_wait_for_event_filtered): Turn into...
+	(linux_process_target::wait_for_event_filtered): ...this.
+	(linux_wait_for_event): Turn into...
+	(linux_process_target::wait_for_event): ...this.
+	(linux_wait_1): Turn into...
+	(linux_process_target::wait_1): ...this.
+	(wait_for_sigstop): Turn into...
+	(linux_process_target::wait_for_sigstop): ...this.
+	(move_out_of_jump_pad_callback): Turn into...
+	(linux_process_target::move_out_of_jump_pad): ...this.
+	(stop_all_lwps): Turn into...
+	(linux_process_target::stop_all_lwps): ...this.
+	(start_step_over): Turn into...
+	(linux_process_target::start_step_over): ...this.
+	(complete_ongoing_step_over): Turn into...
+	(linux_process_target::complete_ongoing_step_over): ...this.
+	(proceed_all_lwps): Turn into...
+	(linux_process_target::proceed_all_lwps): ...this.
+	(unstop_all_lwps): Turn into...
+	(linux_process_target::unstop_all_lwps): ...this.
+
+	* linux-low.h (class linux_process_target)
+	<handle_extended_wait>
+	<maybe_move_out_of_jump_pad>
+	filter_event>
+	<wait_for_event_filtered>
+	<wait_for_event>
+	<wait_1>
+	<wait_for_sigstop>
+	<move_out_of_jump_pad>
+	<stop_all_lwps>
+	<start_step_over>
+	<complete_ongoing_step_over>
+	<proceed_all_lwps>
+	<unstop_all_lwps>: Declare.
+
+	Update the callers below.
+
+	* linux-low.cc (linux_process_target::attach): Update.
+	(linux_process_target::stabilize_threads): Ditto.
+	(linux_process_target::wait): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* linux-low.h (struct linux_target_ops): Update the comment for
 	'cannot_store_register' to return 0 or 1.
 	* linux-ppc-low.cc (ppc_cannot_store_register): Return 1 instead
