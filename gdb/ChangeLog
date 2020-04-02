@@ -1,5 +1,13 @@
 2020-04-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdb_bfd.h: Include gdbsupport/byte-vector.h.
+	(gdb_bfd_get_full_section_contents): New declaration.
+	* gdb_bfd.c (gdb_bfd_get_full_section_contents): New function.
+	* windows-tdep.c (is_linked_with_cygwin_dll): Use
+	gdb_bfd_get_full_section_contents.
+
+2020-04-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* exec.c (build_section_table): Replace internal_error with
 	gdb_assert.
 	(section_table_xfer_memory_partial): Likewise.

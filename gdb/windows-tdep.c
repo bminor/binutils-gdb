@@ -935,18 +935,17 @@ is_linked_with_cygwin_dll (bfd *abfd)
   bfd_vma idata_addr
     = pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
 
-  /* Map the section's data.  */
-  bfd_size_type idata_size;
-  const gdb_byte *const idata_contents
-    = gdb_bfd_map_section (idata_section, &idata_size);
-  if (idata_contents == nullptr)
+  /* Get the section's data.  */
+  gdb::byte_vector idata_contents;
+  if (!gdb_bfd_get_full_section_contents (abfd, idata_section, &idata_contents))
     {
       warning (_("Failed to get content of .idata section."));
       return false;
     }
 
-  const gdb_byte *iter = idata_contents;
-  const gdb_byte *end = idata_contents + idata_size;
+  size_t idata_size = idata_contents.size ();
+  const gdb_byte *iter = idata_contents.data ();
+  const gdb_byte *end = idata_contents.data () + idata_size;
   const pe_import_directory_entry null_dir_entry = { 0 };
 
   /* Iterate through all directory entries.  */
