@@ -25,6 +25,9 @@ class m68k_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -205,8 +208,8 @@ m68k_regs_info (void)
   return &regs_info;
 }
 
-static void
-m68k_arch_setup (void)
+void
+m68k_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_m68k;
 }
@@ -220,7 +223,6 @@ m68k_supports_hardware_single_step (void)
 }
 
 struct linux_target_ops the_low_target = {
-  m68k_arch_setup,
   m68k_regs_info,
   m68k_cannot_fetch_register,
   m68k_cannot_store_register,

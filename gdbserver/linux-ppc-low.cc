@@ -50,6 +50,9 @@ class ppc_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -816,8 +819,8 @@ ppc_regs_info (void)
   return &regs_info;
 }
 
-static void
-ppc_arch_setup (void)
+void
+ppc_target::low_arch_setup ()
 {
   const struct target_desc *tdesc;
   struct regset_info *regset;
@@ -3383,7 +3386,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  ppc_arch_setup,
   ppc_regs_info,
   ppc_cannot_fetch_register,
   ppc_cannot_store_register,

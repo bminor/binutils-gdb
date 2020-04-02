@@ -25,6 +25,9 @@ class sh_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -148,14 +151,13 @@ sh_regs_info (void)
   return &regs_info;
 }
 
-static void
-sh_arch_setup (void)
+void
+sh_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_sh;
 }
 
 struct linux_target_ops the_low_target = {
-  sh_arch_setup,
   sh_regs_info,
   sh_cannot_fetch_register,
   sh_cannot_store_register,

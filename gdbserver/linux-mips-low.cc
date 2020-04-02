@@ -31,6 +31,9 @@ class mips_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -159,8 +162,8 @@ mips_read_description (void)
   return have_dsp ? tdesc_mips_dsp_linux : tdesc_mips_linux;
 }
 
-static void
-mips_arch_setup (void)
+void
+mips_target::low_arch_setup ()
 {
   current_process ()->tdesc = mips_read_description ();
 }
@@ -949,7 +952,6 @@ mips_regs_info (void)
 }
 
 struct linux_target_ops the_low_target = {
-  mips_arch_setup,
   mips_regs_info,
   mips_cannot_fetch_register,
   mips_cannot_store_register,

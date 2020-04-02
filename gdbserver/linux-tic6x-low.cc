@@ -44,6 +44,9 @@ class tic6x_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -326,8 +329,8 @@ static struct regset_info tic6x_regsets[] = {
   NULL_REGSET
 };
 
-static void
-tic6x_arch_setup (void)
+void
+tic6x_target::low_arch_setup ()
 {
   register unsigned int csr asm ("B2");
   unsigned int cpuid;
@@ -398,7 +401,6 @@ tic6x_regs_info (void)
 }
 
 struct linux_target_ops the_low_target = {
-  tic6x_arch_setup,
   tic6x_regs_info,
   tic6x_cannot_fetch_register,
   tic6x_cannot_store_register,

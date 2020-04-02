@@ -48,6 +48,9 @@ class sparc_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -265,8 +268,8 @@ sparc_breakpoint_at (CORE_ADDR where)
   return 0;
 }
 
-static void
-sparc_arch_setup (void)
+void
+sparc_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_sparc64;
 }
@@ -310,7 +313,6 @@ sparc_regs_info (void)
 }
 
 struct linux_target_ops the_low_target = {
-  sparc_arch_setup,
   sparc_regs_info,
   sparc_cannot_fetch_register,
   sparc_cannot_store_register,

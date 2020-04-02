@@ -1,5 +1,123 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn the 'arch_setup' linux target op into a method of
+	linux_process_target.
+
+	* linux-low.h (struct linux_target_ops) <arch_setup>: Delete.
+	(class linux_process_target) <arch_setup_thread>
+	<low_arch_setup>: New declarations.
+	* linux-low.cc (linux_arch_setup): Delete.
+	(linux_arch_setup_thread): Turn into...
+	(linux_process_target::arch_setup_thread): ... this.
+
+	Update the callers below.
+
+	(linux_process_target::handle_extended_wait)
+	(linux_process_target::post_create_inferior)
+	(linux_process_target::filter_event)
+
+	* linux-x86-low.cc (class x86_target) <low_arch_setup>: New
+	declaration.
+	(x86_linux_update_xmltarget): Turn into...
+	(x86_target::update_xmltarget): ...this.
+	(x86_linux_process_qsupported): Update the call to
+	x86_linux_update_xmltarget.
+	(x86_arch_setup): Turn into ...
+	(x86_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target) <low_arch_setup>: New
+	declaration.
+	(aarch64_arch_setup): Turn into ...
+	(aarch64_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (class arm_target) <low_arch_setup>: New
+	declaration.
+	(arm_arch_setup): Turn into ...
+	(arm_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-bfin-low.cc (class bfin_target) <low_arch_setup>: New
+	declaration.
+	(bfin_arch_setup): Turn into ...
+	(bfin_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-cris-low.cc (class cris_target) <low_arch_setup>: New
+	declaration.
+	(cris_arch_setup): Turn into ...
+	(cris_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-crisv32-low.cc (class crisv32_target) <low_arch_setup>: New
+	declaration.
+	(crisv32_arch_setup): Turn into ...
+	(crisv32_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ia64-low.cc (class ia64_target) <low_arch_setup>: New
+	declaration.
+	(ia64_arch_setup): Turn into ...
+	(ia64_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-m32r-low.cc (class m32r_target) <low_arch_setup>: New
+	declaration.
+	(m32r_arch_setup): Turn into ...
+	(m32r_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-m68k-low.cc (class m68k_target) <low_arch_setup>: New
+	declaration.
+	(m68k_arch_setup): Turn into ...
+	(m68k_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-mips-low.cc (class mips_target) <low_arch_setup>: New
+	declaration.
+	(mips_arch_setup): Turn into ...
+	(mips_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-nios2-low.cc (class nios2_target) <low_arch_setup>: New
+	declaration.
+	(nios2_arch_setup): Turn into ...
+	(nios2_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target) <low_arch_setup>: New
+	declaration.
+	(ppc_arch_setup): Turn into ...
+	(ppc_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-riscv-low.cc (class riscv_target) <low_arch_setup>: New
+	declaration.
+	(riscv_arch_setup): Turn into ...
+	(riscv_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target) <low_arch_setup>: New
+	declaration.
+	(s390_arch_setup): Turn into ...
+	(s390_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sh-low.cc (class sh_target) <low_arch_setup>: New
+	declaration.
+	(sh_arch_setup): Turn into ...
+	(sh_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sparc-low.cc (class sparc_target) <low_arch_setup>: New
+	declaration.
+	(sparc_arch_setup): Turn into ...
+	(sparc_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tic6x-low.cc (class tic6x_target) <low_arch_setup>: New
+	declaration.
+	(tic6x_arch_setup): Turn into ...
+	(tic6x_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tile-low.cc (class tile_target) <low_arch_setup>: New
+	declaration.
+	(tile_arch_setup): Turn into ...
+	(tile_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+	* linux-xtensa-low.cc (class xtensa_target) <low_arch_setup>: New
+	declaration.
+	(xtensa_arch_setup): Turn into ...
+	(xtensa_target::low_arch_setup): ...this.
+	(the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* linux-low.h (the_linux_target): New extern declaration.
 	* linux-low.cc (initialize_low): Use 'the_linux_target' to set
 	'the_target'.

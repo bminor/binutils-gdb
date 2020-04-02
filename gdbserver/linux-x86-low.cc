@@ -100,6 +100,13 @@ class x86_target : public linux_process_target
 {
 public:
 
+  /* Update all the target description of all processes; a new GDB
+     connected, and it may or not support xml target descriptions.  */
+  void update_xmltarget ();
+
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -885,8 +892,8 @@ x86_linux_read_description (void)
 /* Update all the target description of all processes; a new GDB
    connected, and it may or not support xml target descriptions.  */
 
-static void
-x86_linux_update_xmltarget (void)
+void
+x86_target::update_xmltarget ()
 {
   struct thread_info *saved_thread = current_thread;
 
@@ -895,13 +902,13 @@ x86_linux_update_xmltarget (void)
      release the current regcache objects.  */
   regcache_release ();
 
-  for_each_process ([] (process_info *proc) {
+  for_each_process ([this] (process_info *proc) {
     int pid = proc->pid;
 
     /* Look up any thread of this process.  */
     current_thread = find_any_thread_of_pid (pid);
 
-    the_low_target.arch_setup ();
+    low_arch_setup ();
   });
 
   current_thread = saved_thread;
@@ -942,7 +949,7 @@ x86_linux_process_qsupported (char **features, int count)
 	  free (copy);
 	}
     }
-  x86_linux_update_xmltarget ();
+  the_x86_target.update_xmltarget ();
 }
 
 /* Common for x86/x86-64.  */
@@ -989,8 +996,8 @@ x86_linux_regs_info (void)
 /* Initialize the target description for the architecture of the
    inferior.  */
 
-static void
-x86_arch_setup (void)
+void
+x86_target::low_arch_setup ()
 {
   current_process ()->tdesc = x86_linux_read_description ();
 }
@@ -2872,7 +2879,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_arch_setup,
   x86_linux_regs_info,
   x86_cannot_fetch_register,
   x86_cannot_store_register,

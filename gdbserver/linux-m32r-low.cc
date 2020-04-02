@@ -29,6 +29,9 @@ class m32r_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -92,8 +95,8 @@ m32r_breakpoint_at (CORE_ADDR where)
   return 0;
 }
 
-static void
-m32r_arch_setup (void)
+void
+m32r_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_m32r;
 }
@@ -125,7 +128,6 @@ m32r_regs_info (void)
 }
 
 struct linux_target_ops the_low_target = {
-  m32r_arch_setup,
   m32r_regs_info,
   m32r_cannot_fetch_register,
   m32r_cannot_store_register,

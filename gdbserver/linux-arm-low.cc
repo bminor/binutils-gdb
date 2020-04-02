@@ -60,6 +60,9 @@ class arm_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -889,8 +892,8 @@ arm_read_description (void)
   return arm_linux_read_description (ARM_FP_TYPE_NONE);
 }
 
-static void
-arm_arch_setup (void)
+void
+arm_target::low_arch_setup ()
 {
   int tid = lwpid_of (current_thread);
   int gpregs[18];
@@ -1018,7 +1021,6 @@ arm_regs_info (void)
 }
 
 struct linux_target_ops the_low_target = {
-  arm_arch_setup,
   arm_regs_info,
   arm_cannot_fetch_register,
   arm_cannot_store_register,

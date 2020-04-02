@@ -57,6 +57,9 @@ class s390_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -521,8 +524,8 @@ s390_check_regset (int pid, int regset, int regsize)
 static int have_hwcap_s390_high_gprs = 0;
 static int have_hwcap_s390_vx = 0;
 
-static void
-s390_arch_setup (void)
+void
+s390_target::low_arch_setup ()
 {
   const struct target_desc *tdesc;
   struct regset_info *regset;
@@ -2803,7 +2806,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  s390_arch_setup,
   s390_regs_info,
   s390_cannot_fetch_register,
   s390_cannot_store_register,

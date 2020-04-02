@@ -36,16 +36,19 @@ class riscv_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
 
 static riscv_target the_riscv_target;
 
-/* Implementation of linux_target_ops method "arch_setup".  */
+/* Implementation of linux target ops method "low_arch_setup".  */
 
-static void
-riscv_arch_setup ()
+void
+riscv_target::low_arch_setup ()
 {
   static const char *expedite_regs[] = { "sp", "pc", NULL };
 
@@ -268,7 +271,6 @@ riscv_breakpoint_at (CORE_ADDR pc)
 /* RISC-V/Linux target operations.  */
 struct linux_target_ops the_low_target =
 {
-  riscv_arch_setup,
   riscv_regs_info,
   NULL, /* cannot_fetch_register */
   NULL, /* cannot_store_register */

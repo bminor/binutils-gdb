@@ -29,6 +29,9 @@ class ia64_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -350,15 +353,14 @@ ia64_regs_info (void)
   return &regs_info;
 }
 
-static void
-ia64_arch_setup (void)
+void
+ia64_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_ia64;
 }
 
 
 struct linux_target_ops the_low_target = {
-  ia64_arch_setup,
   ia64_regs_info,
   ia64_cannot_fetch_register,
   ia64_cannot_store_register,

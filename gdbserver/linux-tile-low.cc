@@ -29,6 +29,9 @@ class tile_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -159,8 +162,8 @@ tile_regs_info (void)
   return &regs_info;
 }
 
-static void
-tile_arch_setup (void)
+void
+tile_target::low_arch_setup ()
 {
   int pid = pid_of (current_thread);
   unsigned int machine;
@@ -187,7 +190,6 @@ tile_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  tile_arch_setup,
   tile_regs_info,
   tile_cannot_fetch_register,
   tile_cannot_store_register,

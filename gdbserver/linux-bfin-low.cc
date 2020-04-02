@@ -29,6 +29,9 @@ class bfin_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -93,8 +96,8 @@ bfin_breakpoint_at (CORE_ADDR where)
   return 0;
 }
 
-static void
-bfin_arch_setup (void)
+void
+bfin_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_bfin;
 }
@@ -126,7 +129,6 @@ bfin_regs_info (void)
 }
 
 struct linux_target_ops the_low_target = {
-  bfin_arch_setup,
   bfin_regs_info,
   bfin_cannot_fetch_register,
   bfin_cannot_store_register,

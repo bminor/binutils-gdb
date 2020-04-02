@@ -26,6 +26,9 @@ class crisv32_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -358,8 +361,8 @@ cris_store_gregset (struct regcache *regcache, const void *buf)
     }
 }
 
-static void
-cris_arch_setup (void)
+void
+crisv32_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_crisv32;
 }
@@ -406,7 +409,6 @@ cris_regs_info (void)
 }
 
 struct linux_target_ops the_low_target = {
-  cris_arch_setup,
   cris_regs_info,
   NULL,
   NULL,

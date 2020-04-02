@@ -55,6 +55,9 @@ class aarch64_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -515,10 +518,10 @@ aarch64_linux_new_fork (struct process_info *parent,
 /* Matches HWCAP_PACA in kernel header arch/arm64/include/uapi/asm/hwcap.h.  */
 #define AARCH64_HWCAP_PACA (1 << 30)
 
-/* Implementation of linux_target_ops method "arch_setup".  */
+/* Implementation of linux target ops method "low_arch_setup".  */
 
-static void
-aarch64_arch_setup (void)
+void
+aarch64_target::low_arch_setup ()
 {
   unsigned int machine;
   int is_elf64;
@@ -3062,7 +3065,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_arch_setup,
   aarch64_regs_info,
   NULL, /* cannot_fetch_register */
   NULL, /* cannot_store_register */

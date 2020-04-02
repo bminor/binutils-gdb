@@ -131,9 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Architecture-specific setup.  */
-  void (*arch_setup) (void);
-
   const struct regs_info *(*regs_info) (void);
 
   /* Return 0 if we can fetch/store the register, 1 if we cannot
@@ -564,8 +561,14 @@ private:
   /* Move THREAD out of the jump pad.  */
   void move_out_of_jump_pad (thread_info *thread);
 
+  /* Call low_arch_setup on THREAD.  */
+  void arch_setup_thread (thread_info *thread);
+
 protected:
   /* The architecture-specific "low" methods are listed below.  */
+
+  /* Architecture-specific setup for the current thread.  */
+  virtual void low_arch_setup () = 0;
 };
 
 extern linux_process_target *the_linux_target;

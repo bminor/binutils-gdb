@@ -37,6 +37,9 @@ class nios2_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -77,10 +80,10 @@ static int nios2_regmap[] = {
   0
 };
 
-/* Implement the arch_setup linux_target_ops method.  */
+/* Implement the low_arch_setup linux target ops method.  */
 
-static void
-nios2_arch_setup (void)
+void
+nios2_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_nios2_linux;
 }
@@ -248,7 +251,6 @@ nios2_regs_info (void)
 
 struct linux_target_ops the_low_target =
 {
-  nios2_arch_setup,
   nios2_regs_info,
   nios2_cannot_fetch_register,
   nios2_cannot_store_register,

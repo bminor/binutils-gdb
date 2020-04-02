@@ -440,25 +440,15 @@ linux_add_process (int pid, int attached)
 
 static CORE_ADDR get_pc (struct lwp_info *lwp);
 
-/* Call the target arch_setup function on the current thread.  */
-
-static void
-linux_arch_setup (void)
-{
-  the_low_target.arch_setup ();
-}
-
-/* Call the target arch_setup function on THREAD.  */
-
-static void
-linux_arch_setup_thread (struct thread_info *thread)
+void
+linux_process_target::arch_setup_thread (thread_info *thread)
 {
   struct thread_info *saved_thread;
 
   saved_thread = current_thread;
   current_thread = thread;
 
-  linux_arch_setup ();
+  low_arch_setup ();
 
   current_thread = saved_thread;
 }
@@ -706,7 +696,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
       event_lwp = add_lwp (event_ptid);
       event_thr = get_lwp_thread (event_lwp);
       gdb_assert (current_thread == event_thr);
-      linux_arch_setup_thread (event_thr);
+      arch_setup_thread (event_thr);
 
       /* Set the event status.  */
       event_lwp->waitstatus.kind = TARGET_WAITKIND_EXECD;
@@ -1025,7 +1015,7 @@ linux_process_target::post_create_inferior ()
 {
   struct lwp_info *lwp = get_thread_lwp (current_thread);
 
-  linux_arch_setup ();
+  low_arch_setup ();
 
   if (lwp->must_set_ptrace_flags)
     {
@@ -2433,7 +2423,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
 	      /* This needs to happen after we have attached to the
 		 inferior and it is stopped for the first time, but
 		 before we access any inferior registers.  */
-	      linux_arch_setup_thread (thread);
+	      arch_setup_thread (thread);
 	    }
 	  else
 	    {

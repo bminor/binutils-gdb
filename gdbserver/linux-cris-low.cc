@@ -26,6 +26,9 @@ class cris_target : public linux_process_target
 {
 public:
 
+protected:
+
+  void low_arch_setup () override;
 };
 
 /* The singleton target ops object.  */
@@ -98,8 +101,8 @@ cris_breakpoint_at (CORE_ADDR where)
   return 0;
 }
 
-static void
-cris_arch_setup (void)
+void
+cris_target::low_arch_setup ()
 {
   current_process ()->tdesc = tdesc_cris;
 }
@@ -123,7 +126,6 @@ cris_regs_info (void)
 }
 
 struct linux_target_ops the_low_target = {
-  cris_arch_setup,
   cris_regs_info,
   cris_cannot_fetch_register,
   cris_cannot_store_register,
