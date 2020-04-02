@@ -1,5 +1,15 @@
 2020-04-02  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdbserver-support.exp (gdbserver_exit): Factor out of ...
+	(gdbserver_gdb_exit): ... here.  Add timeout warning.
+	* gdb.multi/multi-target.exp (server_spawn_ids): New global var.
+	(connect_target_extended_remote): Append new server_spawn_id to
+	server_spawn_ids.
+	(cleanup): New proc.
+	(setup, <toplevel>): Call cleanup.
+
+2020-04-02  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/main-psymtab.exp: New file.
 
 2020-04-02  Tom de Vries  <tdevries@suse.de>
