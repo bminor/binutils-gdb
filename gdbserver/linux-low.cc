@@ -786,8 +786,6 @@ get_syscall_trapinfo (struct lwp_info *lwp, int *sysno)
   current_thread = saved_thread;
 }
 
-static int check_stopped_by_watchpoint (struct lwp_info *child);
-
 bool
 linux_process_target::save_stop_reason (lwp_info *lwp)
 {
@@ -2245,46 +2243,33 @@ dequeue_one_deferred_signal (struct lwp_info *lwp, int *wstat)
   return 0;
 }
 
-/* Fetch the possibly triggered data watchpoint info and store it in
-   CHILD.
-
-   On some archs, like x86, that use debug registers to set
-   watchpoints, it's possible that the way to know which watched
-   address trapped, is to check the register that is used to select
-   which address to watch.  Problem is, between setting the watchpoint
-   and reading back which data address trapped, the user may change
-   the set of watchpoints, and, as a consequence, GDB changes the
-   debug registers in the inferior.  To avoid reading back a stale
-   stopped-data-address when that happens, we cache in LP the fact
-   that a watchpoint trapped, and the corresponding data address, as
-   soon as we see CHILD stop with a SIGTRAP.  If GDB changes the debug
-   registers meanwhile, we have the cached data we can rely on.  */
-
-static int
-check_stopped_by_watchpoint (struct lwp_info *child)
+bool
+linux_process_target::check_stopped_by_watchpoint (lwp_info *child)
 {
-  if (the_low_target.stopped_by_watchpoint != NULL)
+  struct thread_info *saved_thread = current_thread;
+  current_thread = get_lwp_thread (child);
+
+  if (low_stopped_by_watchpoint ())
     {
-      struct thread_info *saved_thread;
-
-      saved_thread = current_thread;
-      current_thread = get_lwp_thread (child);
-
-      if (the_low_target.stopped_by_watchpoint ())
-	{
-	  child->stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
-
-	  if (the_low_target.stopped_data_address != NULL)
-	    child->stopped_data_address
-	      = the_low_target.stopped_data_address ();
-	  else
-	    child->stopped_data_address = 0;
-	}
-
-      current_thread = saved_thread;
+      child->stop_reason = TARGET_STOPPED_BY_WATCHPOINT;
+      child->stopped_data_address = low_stopped_data_address ();
     }
 
+  current_thread = saved_thread;
+
   return child->stop_reason == TARGET_STOPPED_BY_WATCHPOINT;
+}
+
+bool
+linux_process_target::low_stopped_by_watchpoint ()
+{
+  return false;
+}
+
+CORE_ADDR
+linux_process_target::low_stopped_data_address ()
+{
+  return 0;
 }
 
 /* Return the ptrace options that we want to try to enable.  */

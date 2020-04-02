@@ -171,8 +171,6 @@ bfin_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* stopped_by_watchpoint */
-  NULL, /* stopped_data_address */
   NULL, /* collect_ptrace_register */
   NULL, /* supply_ptrace_register */
   NULL, /* siginfo_fixup */

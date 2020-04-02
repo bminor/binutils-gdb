@@ -2838,8 +2838,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  NULL,
-  NULL,
   s390_collect_ptrace_register,
   s390_supply_ptrace_register,
   NULL, /* siginfo_fixup */

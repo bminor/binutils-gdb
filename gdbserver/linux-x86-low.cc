@@ -133,6 +133,10 @@ protected:
 
   int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 			int size, raw_breakpoint *bp) override;
+
+  bool low_stopped_by_watchpoint () override;
+
+  CORE_ADDR low_stopped_data_address () override;
 };
 
 /* The singleton target ops object.  */
@@ -661,15 +665,15 @@ x86_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
     }
 }
 
-static int
-x86_stopped_by_watchpoint (void)
+bool
+x86_target::low_stopped_by_watchpoint ()
 {
   struct process_info *proc = current_process ();
   return x86_dr_stopped_by_watchpoint (&proc->priv->arch_private->debug_reg_state);
 }
 
-static CORE_ADDR
-x86_stopped_data_address (void)
+CORE_ADDR
+x86_target::low_stopped_data_address ()
 {
   struct process_info *proc = current_process ();
   CORE_ADDR addr;
@@ -2918,8 +2922,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_stopped_by_watchpoint,
-  x86_stopped_data_address,
   /* collect_ptrace_register/supply_ptrace_register are not needed in the
      native i386 case (no registers smaller than an xfer unit), and are not
      used in the biarch case (HAVE_LINUX_USRREGS is not defined).  */

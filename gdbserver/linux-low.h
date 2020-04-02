@@ -131,9 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  int (*stopped_by_watchpoint) (void);
-  CORE_ADDR (*stopped_data_address) (void);
-
   /* Hooks to reformat register data for PEEKUSR/POKEUSR (in particular
      for registers smaller than an xfer unit).  */
   void (*collect_ptrace_register) (struct regcache *regcache,
@@ -622,6 +619,22 @@ private:
   /* Install breakpoints for software single stepping.  */
   void install_software_single_step_breakpoints (lwp_info *lwp);
 
+  /* Fetch the possibly triggered data watchpoint info and store it in
+     CHILD.
+
+     On some archs, like x86, that use debug registers to set
+     watchpoints, it's possible that the way to know which watched
+     address trapped, is to check the register that is used to select
+     which address to watch.  Problem is, between setting the watchpoint
+     and reading back which data address trapped, the user may change
+     the set of watchpoints, and, as a consequence, GDB changes the
+     debug registers in the inferior.  To avoid reading back a stale
+     stopped-data-address when that happens, we cache in LP the fact
+     that a watchpoint trapped, and the corresponding data address, as
+     soon as we see CHILD stop with a SIGTRAP.  If GDB changes the debug
+     registers meanwhile, we have the cached data we can rely on.  */
+  bool check_stopped_by_watchpoint (lwp_info *child);
+
 protected:
   /* The architecture-specific "low" methods are listed below.  */
 
@@ -664,6 +677,10 @@ protected:
 
   virtual int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 				int size, raw_breakpoint *bp);
+
+  virtual bool low_stopped_by_watchpoint ();
+
+  virtual CORE_ADDR low_stopped_data_address ();
 
   /* How many bytes the PC should be decremented after a break.  */
   virtual int low_decr_pc_after_break ();

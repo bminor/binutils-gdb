@@ -95,6 +95,10 @@ protected:
 
   int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 			int size, raw_breakpoint *bp) override;
+
+  bool low_stopped_by_watchpoint () override;
+
+  CORE_ADDR low_stopped_data_address () override;
 };
 
 /* The singleton target ops object.  */
@@ -672,43 +676,43 @@ arm_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 }
 
 /* Return whether current thread is stopped due to a watchpoint.  */
-static int
-arm_stopped_by_watchpoint (void)
+bool
+arm_target::low_stopped_by_watchpoint ()
 {
   struct lwp_info *lwp = get_thread_lwp (current_thread);
   siginfo_t siginfo;
 
   /* We must be able to set hardware watchpoints.  */
   if (arm_linux_get_hw_watchpoint_count () == 0)
-    return 0;
+    return false;
 
   /* Retrieve siginfo.  */
   errno = 0;
   ptrace (PTRACE_GETSIGINFO, lwpid_of (current_thread), 0, &siginfo);
   if (errno != 0)
-    return 0;
+    return false;
 
   /* This must be a hardware breakpoint.  */
   if (siginfo.si_signo != SIGTRAP
       || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
-    return 0;
+    return false;
 
   /* If we are in a positive slot then we're looking at a breakpoint and not
      a watchpoint.  */
   if (siginfo.si_errno >= 0)
-    return 0;
+    return false;
 
   /* Cache stopped data address for use by arm_stopped_data_address.  */
   lwp->arch_private->stopped_data_address
     = (CORE_ADDR) (uintptr_t) siginfo.si_addr;
 
-  return 1;
+  return true;
 }
 
 /* Return data address that triggered watchpoint.  Called only if
-   arm_stopped_by_watchpoint returned true.  */
-static CORE_ADDR
-arm_stopped_data_address (void)
+   low_stopped_by_watchpoint returned true.  */
+CORE_ADDR
+arm_target::low_stopped_data_address ()
 {
   struct lwp_info *lwp = get_thread_lwp (current_thread);
   return lwp->arch_private->stopped_data_address;
@@ -1101,8 +1105,6 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  arm_stopped_by_watchpoint,
-  arm_stopped_data_address,
   NULL, /* collect_ptrace_register */
   NULL, /* supply_ptrace_register */
   NULL, /* siginfo_fixup */

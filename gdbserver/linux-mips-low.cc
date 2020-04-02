@@ -60,6 +60,10 @@ protected:
 
   int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 			int size, raw_breakpoint *bp) override;
+
+  bool low_stopped_by_watchpoint () override;
+
+  CORE_ADDR low_stopped_data_address () override;
 };
 
 /* The singleton target ops object.  */
@@ -608,12 +612,12 @@ mips_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
   return 0;
 }
 
-/* This is the implementation of linux_target_ops method
-   stopped_by_watchpoint.  The watchhi R and W bits indicate
+/* This is the implementation of linux target ops method
+   low_stopped_by_watchpoint.  The watchhi R and W bits indicate
    the watch register triggered. */
 
-static int
-mips_stopped_by_watchpoint (void)
+bool
+mips_target::low_stopped_by_watchpoint ()
 {
   struct process_info *proc = current_process ();
   struct arch_process_info *priv = proc->priv->arch_private;
@@ -632,16 +636,16 @@ mips_stopped_by_watchpoint (void)
   for (n = 0; n < MAX_DEBUG_REGISTER && n < num_valid; n++)
     if (mips_linux_watch_get_watchhi (&priv->watch_readback, n)
 	& (R_MASK | W_MASK))
-      return 1;
+      return true;
 
-  return 0;
+  return false;
 }
 
-/* This is the implementation of linux_target_ops method
-   stopped_data_address.  */
+/* This is the implementation of linux target ops method
+   low_stopped_data_address.  */
 
-static CORE_ADDR
-mips_stopped_data_address (void)
+CORE_ADDR
+mips_target::low_stopped_data_address ()
 {
   struct process_info *proc = current_process ();
   struct arch_process_info *priv = proc->priv->arch_private;
@@ -976,8 +980,6 @@ mips_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  mips_stopped_by_watchpoint,
-  mips_stopped_data_address,
   mips_collect_ptrace_register,
   mips_supply_ptrace_register,
   NULL, /* siginfo_fixup */

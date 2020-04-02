@@ -53,6 +53,10 @@ protected:
 
   int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 			int size, raw_breakpoint *bp) override;
+
+  bool low_stopped_by_watchpoint () override;
+
+  CORE_ADDR low_stopped_data_address () override;
 };
 
 /* The singleton target ops object.  */
@@ -355,8 +359,8 @@ crisv32_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
   return 0;
 }
 
-static int
-cris_stopped_by_watchpoint (void)
+bool
+crisv32_target::low_stopped_by_watchpoint ()
 {
   unsigned long exs;
   struct regcache *regcache = get_thread_regcache (current_thread, 1);
@@ -366,8 +370,8 @@ cris_stopped_by_watchpoint (void)
   return (((exs & 0xff00) >> 8) == 0xc);
 }
 
-static CORE_ADDR
-cris_stopped_data_address (void)
+CORE_ADDR
+crisv32_target::low_stopped_data_address ()
 {
   unsigned long eda;
   struct regcache *regcache = get_thread_regcache (current_thread, 1);
@@ -464,8 +468,6 @@ crisv32_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  cris_stopped_by_watchpoint,
-  cris_stopped_data_address,
   NULL, /* collect_ptrace_register */
   NULL, /* supply_ptrace_register */
   NULL, /* siginfo_fixup */

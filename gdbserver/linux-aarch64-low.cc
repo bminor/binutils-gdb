@@ -86,6 +86,10 @@ protected:
 
   int low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 			int size, raw_breakpoint *bp) override;
+
+  bool low_stopped_by_watchpoint () override;
+
+  CORE_ADDR low_stopped_data_address () override;
 };
 
 /* The singleton target ops object.  */
@@ -409,10 +413,10 @@ aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
   return ret;
 }
 
-/* Implementation of linux_target_ops method "stopped_data_address".  */
+/* Implementation of linux target ops method "low_stopped_data_address".  */
 
-static CORE_ADDR
-aarch64_stopped_data_address (void)
+CORE_ADDR
+aarch64_target::low_stopped_data_address ()
 {
   siginfo_t siginfo;
   int pid, i;
@@ -471,15 +475,12 @@ aarch64_stopped_data_address (void)
   return (CORE_ADDR) 0;
 }
 
-/* Implementation of linux_target_ops method "stopped_by_watchpoint".  */
+/* Implementation of linux target ops method "low_stopped_by_watchpoint".  */
 
-static int
-aarch64_stopped_by_watchpoint (void)
+bool
+aarch64_target::low_stopped_by_watchpoint ()
 {
-  if (aarch64_stopped_data_address () != 0)
-    return 1;
-  else
-    return 0;
+  return (low_stopped_data_address () != 0);
 }
 
 /* Fetch the thread-local storage pointer for libthread_db.  */
@@ -3112,8 +3113,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_stopped_by_watchpoint,
-  aarch64_stopped_data_address,
   NULL, /* collect_ptrace_register */
   NULL, /* supply_ptrace_register */
   aarch64_linux_siginfo_fixup,
