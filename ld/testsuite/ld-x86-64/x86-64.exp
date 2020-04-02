@@ -740,6 +740,8 @@ proc undefined_weak {cflags ldflags} {
 global PLT_CFLAGS
 # Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
 global NOPIE_CFLAGS NOPIE_LDFLAGS
+# Add $NOCF_PROTECTION_CFLAGS if -fcf-protection=none is required.
+global NOCF_PROTECTION_CFLAGS
 
 # Must be native with the C compiler
 if { [isnative] && [check_compiler_available] } {
@@ -1819,7 +1821,7 @@ if { [isnative] && [check_compiler_available] } {
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
 		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt \
 		 -z noseparate-code -z max-page-size=0x200000" \
-		"-Wa,-mx86-used-note=yes" \
+		"-Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
 		{ plt-main5.c } \
 		{{objdump {-drw} plt-main-bnd.dd}} \
 		"plt-main-bnd" \
@@ -1829,7 +1831,7 @@ if { [isnative] && [check_compiler_available] } {
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
 		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -pie \
 		 -z noseparate-code -z max-page-size=0x200000" \
-		"-fPIC -Wa,-mx86-used-note=yes" \
+		"-fPIC -Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
 		{ plt-main5.c } \
 		{{objdump {-drw} plt-main-bnd.dd}} \
 		"plt-main-pie-bnd" \
@@ -1839,7 +1841,7 @@ if { [isnative] && [check_compiler_available] } {
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
 		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -z now \
 		 -z noseparate-code -z max-page-size=0x200000" \
-		"-Wa,-mx86-used-note=yes" \
+		"-Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
 		{ plt-main5.c } \
 		{{readelf {-SW} plt-main-bnd-now.rd} {objdump {-drw} plt-main-bnd.dd}} \
 		"plt-main-bnd-now" \
@@ -1849,7 +1851,7 @@ if { [isnative] && [check_compiler_available] } {
 		"tmpdir/plt-main1.o tmpdir/plt-main2.o tmpdir/plt-main3.o \
 		 tmpdir/plt-main4.o tmpdir/libplt-lib.so -z bndplt -z now -pie \
 		 -z noseparate-code -z max-page-size=0x200000" \
-		"-fPIC -Wa,-mx86-used-note=yes" \
+		"-fPIC -Wa,-mx86-used-note=yes $NOCF_PROTECTION_CFLAGS" \
 		{ plt-main5.c } \
 		{{readelf {-SW} plt-main-bnd-now.rd} {objdump {-drw} plt-main-bnd.dd}} \
 		"plt-main-pie-bnd-now" \

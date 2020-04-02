@@ -1,5 +1,14 @@
 2020-04-02  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/config/default.exp (NOCF_PROTECTION_CFLAGS): New.
+	Set to "-fcf-protection=none" if target compiler supports it.
+	* testsuite/ld-srec/srec.exp: Add $NOCF_PROTECTION_CFLAGS to
+	CC and CXX.
+	* testsuite/ld-x86-64/x86-64.exp: Add $NOCF_PROTECTION_CFLAGS
+	to PLT BND tests.
+
+2020-04-02  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/linux-x86.exp (check_pr25749a): Compile with
 	-I../bfd.
 	(check_pr25749b): Likewise.
