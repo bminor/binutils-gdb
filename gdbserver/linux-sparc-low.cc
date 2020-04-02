@@ -42,6 +42,18 @@
 #define sparc_num_regs \
   (SPARC_R_REGS_NUM + SPARC_F_REGS_NUM + SPARC_CONTROL_REGS_NUM)
 
+/* Linux target op definitions for the SPARC architecture.  */
+
+class sparc_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static sparc_target the_sparc_target;
+
 /* Each offset is multiplied by 8, because of the register size.
    These offsets apply to the buffer sent/filled by ptrace.
    Additionally, the array elements order corresponds to the .dat file, and the
@@ -315,6 +327,10 @@ struct linux_target_ops the_low_target = {
   NULL, NULL, NULL, NULL,
   NULL, NULL
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_sparc_target;
 
 void
 initialize_low_arch (void)

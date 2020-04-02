@@ -19,6 +19,18 @@
 #include "server.h"
 #include "linux-low.h"
 
+/* Linux target op definitions for the m68k architecture.  */
+
+class m68k_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static m68k_target the_m68k_target;
+
 /* Defined in auto-generated file reg-m68k.c.  */
 void init_registers_m68k (void);
 extern const struct target_desc *tdesc_m68k;
@@ -244,6 +256,10 @@ struct linux_target_ops the_low_target = {
   NULL, /* breakpoint_kind_from_current_state */
   m68k_supports_hardware_single_step,
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_m68k_target;
 
 void
 initialize_low_arch (void)

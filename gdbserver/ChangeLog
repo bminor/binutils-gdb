@@ -1,5 +1,69 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* linux-low.h (the_linux_target): New extern declaration.
+	* linux-low.cc (initialize_low): Use 'the_linux_target' to set
+	'the_target'.
+	(the_linux_target): Remove.
+	* linux-x86-low.cc (class x86_target): New class.
+	(the_x86_target): New static object.
+	(the_linux_target): Define as pointer to the_x86_target.
+	* linux-aarch64-low.cc (class aarch64_target): New class.
+	(the_aarch64_target): New static object.
+	(the_linux_target): Define as pointer to the_aarch64_target.
+	* linux-arm-low.cc (class arm_target): New class.
+	(the_arm_target): New static object.
+	(the_linux_target): Define as pointer to the_arm_target.
+	* linux-bfin-low.cc (class bfin_target): New class.
+	(the_bfin_target): New static object.
+	(the_linux_target): Define as pointer to the_bfin_target.
+	* linux-cris-low.cc (class cris_target): New class.
+	(the_cris_target): New static object.
+	(the_linux_target): Define as pointer to the_cris_target.
+	* linux-crisv32-low.cc (class crisv32_target): New class.
+	(the_crisv32_target): New static object.
+	(the_linux_target): Define as pointer to the_crisv32_target.
+	* linux-ia64-low.cc (class ia64_target): New class.
+	(the_ia64_target): New static object.
+	(the_linux_target): Define as pointer to the_ia64_target.
+	* linux-m32r-low.cc (class m32r_target): New class.
+	(the_m32r_target): New static object.
+	(the_linux_target): Define as pointer to the_m32r_target.
+	* linux-m68k-low.cc (class m68k_target): New class.
+	(the_m68k_target): New static object.
+	(the_linux_target): Define as pointer to the_m68k_target.
+	* linux-mips-low.cc (class mips_target): New class.
+	(the_mips_target): New static object.
+	(the_linux_target): Define as pointer to the_mips_target.
+	* linux-nios2-low.cc (class nios2_target): New class.
+	(the_nios2_target): New static object.
+	(the_linux_target): Define as pointer to the_nios2_target.
+	* linux-ppc-low.cc (class ppc_target): New class.
+	(the_ppc_target): New static object.
+	(the_linux_target): Define as pointer to the_ppc_target.
+	* linux-riscv-low.cc (class riscv_target): New class.
+	(the_riscv_target): New static object.
+	(the_linux_target): Define as pointer to the_riscv_target.
+	* linux-s390-low.cc (class s390_target): New class.
+	(the_s390_target): New static object.
+	(the_linux_target): Define as pointer to the_s390_target.
+	* linux-sh-low.cc (class sh_target): New class.
+	(the_sh_target): New static object.
+	(the_linux_target): Define as pointer to the_sh_target.
+	* linux-sparc-low.cc (class sparc_target): New class.
+	(the_sparc_target): New static object.
+	(the_linux_target): Define as pointer to the_sparc_target.
+	* linux-tic6x-low.cc (class tic6x_target): New class.
+	(the_tic6x_target): New static object.
+	(the_linux_target): Define as pointer to the_tic6x_target.
+	* linux-tile-low.cc (class tile_target): New class.
+	(the_tile_target): New static object.
+	(the_linux_target): Define as pointer to the_tile_target.
+	* linux-xtensa-low.cc (class xtensa_target): New class.
+	(the_xtensa_target): New static object.
+	(the_linux_target): Define as pointer to the_xtensa_target.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn some static functions in linux-low.cc into private methods of
 	linux_process_target.
 

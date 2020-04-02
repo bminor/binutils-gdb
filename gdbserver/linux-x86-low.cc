@@ -92,6 +92,20 @@ static const char *xmltarget_amd64_linux_no_xml = "@<target>\
 #define ARCH_GET_GS 0x1004
 #endif
 
+/* Linux target op definitions for the x86 architecture.
+   This is initialized assuming an amd64 target.
+   'low_arch_setup' will correct it for i386 or amd64 targets.  */
+
+class x86_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static x86_target the_x86_target;
+
 /* Per-process arch-specific data we want to keep.  */
 
 struct arch_process_info
@@ -2900,6 +2914,10 @@ struct linux_target_ops the_low_target =
   x86_get_syscall_trapinfo,
   x86_get_ipa_tdesc_idx,
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_x86_target;
 
 void
 initialize_low_arch (void)

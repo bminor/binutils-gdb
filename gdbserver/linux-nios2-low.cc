@@ -31,6 +31,18 @@
 #define PTRACE_GET_THREAD_AREA 25
 #endif
 
+/* Linux target op definitions for the NIOS II architecture.  */
+
+class nios2_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static nios2_target the_nios2_target;
+
 /* The following definition must agree with the number of registers
    defined in "struct user_regs" in GLIBC
    (sysdeps/unix/sysv/linux/nios2/sys/user.h), and also with
@@ -249,6 +261,10 @@ struct linux_target_ops the_low_target =
   0,
   nios2_breakpoint_at,
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_nios2_target;
 
 void
 initialize_low_arch (void)

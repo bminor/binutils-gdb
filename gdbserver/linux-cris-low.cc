@@ -20,6 +20,18 @@
 #include "linux-low.h"
 #include "nat/gdb_ptrace.h"
 
+/* Linux target op definitions for the CRIS architecture.  */
+
+class cris_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static cris_target the_cris_target;
+
 /* Defined in auto-generated file reg-cris.c.  */
 void init_registers_cris (void);
 extern const struct target_desc *tdesc_cris;
@@ -124,6 +136,10 @@ struct linux_target_ops the_low_target = {
   0,
   cris_breakpoint_at,
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_cris_target;
 
 void
 initialize_low_arch (void)

@@ -23,6 +23,18 @@
 #include <arch/abi.h>
 #include "nat/gdb_ptrace.h"
 
+/* Linux target op definitions for the TILE-Gx architecture.  */
+
+class tile_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static tile_target the_tile_target;
+
 /* Defined in auto-generated file reg-tilegx.c.  */
 void init_registers_tilegx (void);
 extern const struct target_desc *tdesc_tilegx;
@@ -211,6 +223,10 @@ struct linux_target_ops the_low_target =
   NULL, /* breakpoint_kind_from_current_state */
   tile_supports_hardware_single_step,
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_tile_target;
 
 void
 initialize_low_arch (void)

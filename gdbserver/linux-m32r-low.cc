@@ -23,6 +23,18 @@
 #include <sys/reg.h>
 #endif
 
+/* Linux target op definitions for the m32r architecture.  */
+
+class m32r_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static m32r_target the_m32r_target;
+
 /* Defined in auto-generated file reg-m32r.c.  */
 void init_registers_m32r (void);
 extern const struct target_desc *tdesc_m32r;
@@ -149,6 +161,10 @@ struct linux_target_ops the_low_target = {
   NULL, /* breakpoint_kind_from_current_state */
   m32r_supports_hardware_single_step,
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_m32r_target;
 
 void
 initialize_low_arch (void)

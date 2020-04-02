@@ -25,6 +25,18 @@
 #include "nat/mips-linux-watch.h"
 #include "gdb_proc_service.h"
 
+/* Linux target op definitions for the MIPS architecture.  */
+
+class mips_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static mips_target the_mips_target;
+
 /* Defined in auto-generated file mips-linux.c.  */
 void init_registers_mips_linux (void);
 extern const struct target_desc *tdesc_mips_linux;
@@ -964,6 +976,10 @@ struct linux_target_ops the_low_target = {
   mips_linux_new_fork,
   mips_linux_prepare_to_resume
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_mips_target;
 
 void
 initialize_low_arch (void)

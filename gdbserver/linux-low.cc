@@ -7444,10 +7444,6 @@ linux_get_hwcap2 (int wordsize)
   return hwcap2;
 }
 
-/* The linux target ops object.  */
-
-static linux_process_target the_linux_target;
-
 #ifdef HAVE_LINUX_REGSETS
 void
 initialize_regsets_info (struct regsets_info *info)
@@ -7465,7 +7461,7 @@ initialize_low (void)
   struct sigaction sigchld_action;
 
   memset (&sigchld_action, 0, sizeof (sigchld_action));
-  set_target_ops (&the_linux_target);
+  set_target_ops (the_linux_target);
 
   linux_ptrace_init_warnings ();
   linux_proc_init_warnings ();

@@ -20,6 +20,18 @@
 #include "linux-low.h"
 #include "nat/gdb_ptrace.h"
 
+/* Linux target op definitions for the CRIS architecture.  */
+
+class crisv32_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static crisv32_target the_crisv32_target;
+
 /* Defined in auto-generated file reg-crisv32.c.  */
 void init_registers_crisv32 (void);
 extern const struct target_desc *tdesc_crisv32;
@@ -430,6 +442,10 @@ struct linux_target_ops the_low_target = {
   NULL, /* breakpoint_kind_from_current_state */
   cris_supports_hardware_single_step,
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_crisv32_target;
 
 void
 initialize_low_arch (void)

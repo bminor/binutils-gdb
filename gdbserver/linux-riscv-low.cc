@@ -30,6 +30,18 @@
 # define NFPREG 33
 #endif
 
+/* Linux target op definitions for the RISC-V architecture.  */
+
+class riscv_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static riscv_target the_riscv_target;
+
 /* Implementation of linux_target_ops method "arch_setup".  */
 
 static void
@@ -269,6 +281,10 @@ struct linux_target_ops the_low_target =
   0,    /* decr_pc_after_break */
   riscv_breakpoint_at,
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_riscv_target;
 
 /* Initialize the RISC-V/Linux target.  */
 

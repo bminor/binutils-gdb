@@ -20,6 +20,18 @@
 #include "server.h"
 #include "linux-low.h"
 
+/* Linux target op definitions for the Xtensa architecture.  */
+
+class xtensa_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static xtensa_target the_xtensa_target;
+
 /* Defined in auto-generated file reg-xtensa.c.  */
 void init_registers_xtensa (void);
 extern const struct target_desc *tdesc_xtensa;
@@ -304,6 +316,9 @@ struct linux_target_ops the_low_target = {
   xtensa_supports_hardware_single_step,
 };
 
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_xtensa_target;
 
 void
 initialize_low_arch (void)

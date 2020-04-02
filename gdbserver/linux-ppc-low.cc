@@ -44,6 +44,18 @@
 #define PPC_LI(insn)	(PPC_SEXT (PPC_FIELD (insn, 6, 24), 24) << 2)
 #define PPC_BD(insn)	(PPC_SEXT (PPC_FIELD (insn, 16, 14), 14) << 2)
 
+/* Linux target op definitions for the PowerPC architecture.  */
+
+class ppc_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static ppc_target the_ppc_target;
+
 /* Holds the AT_HWCAP auxv entry.  */
 
 static unsigned long ppc_hwcap;
@@ -3409,6 +3421,10 @@ struct linux_target_ops the_low_target = {
   NULL, /* get_syscall_trapinfo */
   ppc_get_ipa_tdesc_idx,
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_ppc_target;
 
 void
 initialize_low_arch (void)

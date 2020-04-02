@@ -23,6 +23,18 @@
 #include <sys/reg.h>
 #endif
 
+/* Linux target op definitions for the IA64 architecture.  */
+
+class ia64_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static ia64_target the_ia64_target;
+
 /* Defined in auto-generated file reg-ia64.c.  */
 void init_registers_ia64 (void);
 extern const struct target_desc *tdesc_ia64;
@@ -352,6 +364,10 @@ struct linux_target_ops the_low_target = {
   ia64_cannot_store_register,
   ia64_fetch_register,
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_ia64_target;
 
 void
 initialize_low_arch (void)

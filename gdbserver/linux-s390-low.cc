@@ -51,6 +51,18 @@
 
 #define s390_num_regs 52
 
+/* Linux target op definitions for the S/390 architecture.  */
+
+class s390_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static s390_target the_s390_target;
+
 static int s390_regmap[] = {
   PT_PSWMASK, PT_PSWADDR,
 
@@ -2829,6 +2841,10 @@ struct linux_target_ops the_low_target = {
   NULL, /* get_syscall_trapinfo */
   s390_get_ipa_tdesc_idx,
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_s390_target;
 
 void
 initialize_low_arch (void)

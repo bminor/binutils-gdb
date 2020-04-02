@@ -563,7 +563,12 @@ private:
 
   /* Move THREAD out of the jump pad.  */
   void move_out_of_jump_pad (thread_info *thread);
+
+protected:
+  /* The architecture-specific "low" methods are listed below.  */
 };
+
+extern linux_process_target *the_linux_target;
 
 #define get_thread_lwp(thr) ((struct lwp_info *) (thread_target_data (thr)))
 #define get_lwp_thread(lwp) ((lwp)->thread)

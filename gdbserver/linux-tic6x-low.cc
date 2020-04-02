@@ -38,6 +38,18 @@
 
 #include <asm/ptrace.h>
 
+/* Linux target op definitions for the TI C6x architecture.  */
+
+class tic6x_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static tic6x_target the_tic6x_target;
+
 /* Defined in auto-generated file tic6x-c64xp-linux.c.  */
 void init_registers_tic6x_c64xp_linux (void);
 extern const struct target_desc *tdesc_tic6x_c64xp_linux;
@@ -438,6 +450,10 @@ tic6x_tdesc_test ()
 }
 }
 #endif
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_tic6x_target;
 
 void
 initialize_low_arch (void)

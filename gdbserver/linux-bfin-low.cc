@@ -23,6 +23,18 @@
 #include "linux-low.h"
 #include <asm/ptrace.h>
 
+/* Linux target op definitions for the BFIN architecture.  */
+
+class bfin_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static bfin_target the_bfin_target;
+
 /* Defined in auto-generated file reg-bfin.c.  */
 void init_registers_bfin (void);
 extern const struct target_desc *tdesc_bfin;
@@ -151,6 +163,9 @@ struct linux_target_ops the_low_target = {
   bfin_supports_hardware_single_step,
 };
 
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_bfin_target;
 
 void
 initialize_low_arch (void)

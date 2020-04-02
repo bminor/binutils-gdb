@@ -54,6 +54,18 @@
 #define PTRACE_SETHBPREGS 30
 #endif
 
+/* Linux target op definitions for the ARM architecture.  */
+
+class arm_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static arm_target the_arm_target;
+
 /* Information describing the hardware breakpoint capabilities.  */
 static struct
 {
@@ -1043,6 +1055,10 @@ struct linux_target_ops the_low_target = {
   arm_supports_hardware_single_step,
   arm_get_syscall_trapinfo,
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_arm_target;
 
 void
 initialize_low_arch (void)

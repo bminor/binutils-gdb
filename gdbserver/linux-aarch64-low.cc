@@ -49,6 +49,18 @@
 #include <sys/reg.h>
 #endif
 
+/* Linux target op definitions for the AArch64 architecture.  */
+
+class aarch64_target : public linux_process_target
+{
+public:
+
+};
+
+/* The singleton target ops object.  */
+
+static aarch64_target the_aarch64_target;
+
 /* Per-process arch-specific data we want to keep.  */
 
 struct arch_process_info
@@ -3087,6 +3099,10 @@ struct linux_target_ops the_low_target =
   aarch64_supports_hardware_single_step,
   aarch64_get_syscall_trapinfo,
 };
+
+/* The linux target ops object.  */
+
+linux_process_target *the_linux_target = &the_aarch64_target;
 
 void
 initialize_low_arch (void)
