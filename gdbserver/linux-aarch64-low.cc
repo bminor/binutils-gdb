@@ -123,6 +123,8 @@ protected:
   void low_prepare_to_resume (lwp_info *lwp) override;
 
   int low_get_thread_area (int lwpid, CORE_ADDR *addrp) override;
+
+  bool low_supports_range_stepping () override;
 };
 
 /* The singleton target ops object.  */
@@ -3110,12 +3112,12 @@ aarch64_target::get_min_fast_tracepoint_insn_len ()
   return 4;
 }
 
-/* Implementation of linux_target_ops method "supports_range_stepping".  */
+/* Implementation of linux target ops method "low_supports_range_stepping".  */
 
-static int
-aarch64_supports_range_stepping (void)
+bool
+aarch64_target::low_supports_range_stepping ()
 {
-  return 1;
+  return true;
 }
 
 /* Implementation of target ops method "sw_breakpoint_from_kind".  */
@@ -3165,7 +3167,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_supports_range_stepping,
   aarch64_supports_hardware_single_step,
   aarch64_get_syscall_trapinfo,
 };

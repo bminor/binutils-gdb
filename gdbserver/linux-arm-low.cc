@@ -1117,7 +1117,6 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* supports_range_stepping */
   arm_supports_hardware_single_step,
   arm_get_syscall_trapinfo,
 };

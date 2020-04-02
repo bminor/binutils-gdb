@@ -192,7 +192,6 @@ sh_target::low_arch_setup ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* supports_range_stepping */
   sh_supports_hardware_single_step,
 };
 

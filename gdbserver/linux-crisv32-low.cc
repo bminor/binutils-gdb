@@ -468,7 +468,6 @@ crisv32_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* supports_range_stepping */
   cris_supports_hardware_single_step,
 };
 

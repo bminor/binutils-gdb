@@ -174,6 +174,8 @@ protected:
 
   int low_get_thread_area (int lwpid, CORE_ADDR *addrp) override;
 
+  bool low_supports_range_stepping () override;
+
 private:
 
   /* Update all the target description of all processes; a new GDB
@@ -2956,10 +2958,10 @@ x86_target::sw_breakpoint_from_kind (int kind, int *size)
   return x86_breakpoint;
 }
 
-static int
-x86_supports_range_stepping (void)
+bool
+x86_target::low_supports_range_stepping ()
 {
-  return 1;
+  return true;
 }
 
 /* Implementation of linux_target_ops method "supports_hardware_single_step".
@@ -2992,7 +2994,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_supports_range_stepping,
   x86_supports_hardware_single_step,
   x86_get_syscall_trapinfo,
   x86_get_ipa_tdesc_idx,

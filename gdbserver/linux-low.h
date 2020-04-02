@@ -131,9 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Returns true if the low target supports range stepping.  */
-  int (*supports_range_stepping) (void);
-
   /* See target.h.  */
   int (*supports_hardware_single_step) (void);
 
@@ -677,6 +674,9 @@ protected:
   /* Fill ADDRP with the thread area address of LWPID.  Returns 0 on
      success, -1 on failure.  */
   virtual int low_get_thread_area (int lwpid, CORE_ADDR *addrp);
+
+  /* Returns true if the low target supports range stepping.  */
+  virtual bool low_supports_range_stepping ();
 
   /* How many bytes the PC should be decremented after a break.  */
   virtual int low_decr_pc_after_break ();

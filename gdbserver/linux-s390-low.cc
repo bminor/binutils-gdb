@@ -2863,7 +2863,6 @@ s390_target::emit_ops ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* supports_range_stepping */
   s390_supports_hardware_single_step,
   NULL, /* get_syscall_trapinfo */
   s390_get_ipa_tdesc_idx,

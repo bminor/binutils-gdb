@@ -6289,10 +6289,14 @@ linux_process_target::supports_range_stepping ()
 {
   if (supports_software_single_step ())
     return true;
-  if (*the_low_target.supports_range_stepping == NULL)
-    return false;
 
-  return (*the_low_target.supports_range_stepping) ();
+  return low_supports_range_stepping ();
+}
+
+bool
+linux_process_target::low_supports_range_stepping ()
+{
+  return false;
 }
 
 bool
