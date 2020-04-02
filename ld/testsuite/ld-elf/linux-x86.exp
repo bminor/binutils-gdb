@@ -148,7 +148,7 @@ proc check_pr25749a {testname srcfilea srcfileb cflags ldflags lderror} {
 	    [list \
 		"Build $testname ($ldflags $cflags)" \
 		"$ldflags tmpdir/pr25749-bin.o" \
-		"$cflags" \
+		"$cflags -I../bfd" \
 		[list $srcfilea $srcfileb]\
 		{{readelf {-Wr} pr25749.rd}}  \
 		"${testname}a" \
@@ -162,7 +162,7 @@ proc check_pr25749a {testname srcfilea srcfileb cflags ldflags lderror} {
 		[list $srcfilea $srcfileb]\
 		"${testname}a" \
 		"pass.out" \
-		"$cflags" \
+		"$cflags -I../bfd" \
 	    ] \
 	]
     } else {
@@ -170,7 +170,7 @@ proc check_pr25749a {testname srcfilea srcfileb cflags ldflags lderror} {
 	    [list \
 		"Build $testname ($ldflags $cflags)" \
 		"$ldflags tmpdir/pr25749-bin.o" \
-		"$cflags" \
+		"$cflags -I../bfd" \
 		[list $srcfilea $srcfileb]\
 		[list [list error_output $lderror]] \
 		"$testname" \
@@ -250,7 +250,7 @@ proc check_pr25749b {testname srcfilea srcfileb cflags ldflags dsoldflags} {
 	[list \
 	    "Build lib${testname}.so ($dsoldflags)" \
 	    "-shared $dsoldflags tmpdir/pr25749-bin.o" \
-	    "-fPIC" \
+	    "-fPIC -I../bfd" \
 	    [list $srcfileb] \
 	    {{readelf {-Wr} pr25749.rd}}  \
 	    "lib${testname}.so" \
@@ -264,7 +264,7 @@ proc check_pr25749b {testname srcfilea srcfileb cflags ldflags dsoldflags} {
 	    [list $srcfilea]\
 	    "${testname}b" \
 	    "pass.out" \
-	    "$cflags" \
+	    "$cflags -I../bfd" \
 	] \
     ]
 }

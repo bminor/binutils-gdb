@@ -1,3 +1,9 @@
+2020-04-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/linux-x86.exp (check_pr25749a): Compile with
+	-I../bfd.
+	(check_pr25749b): Likewise.
+
 2020-04-02  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* testsuite/ld-ifunc/ifunc-10-i386.d: Remove *-*-solaris2* from
