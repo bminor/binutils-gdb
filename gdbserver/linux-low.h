@@ -131,27 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Hook to call when a new process is created or attached to.
-     If extra per-process architecture-specific data is needed,
-     allocate it here.  */
-  struct arch_process_info * (*new_process) (void);
-
-  /* Hook to call when a process is being deleted.  If extra per-process
-     architecture-specific data is needed, delete it here.  */
-  void (*delete_process) (struct arch_process_info *info);
-
-  /* Hook to call when a new thread is detected.
-     If extra per-thread architecture-specific data is needed,
-     allocate it here.  */
-  void (*new_thread) (struct lwp_info *);
-
-  /* Hook to call when a thread is being deleted.  If extra per-thread
-     architecture-specific data is needed, delete it here.  */
-  void (*delete_thread) (struct arch_lwp_info *);
-
-  /* Hook to call, if any, when a new fork is attached.  */
-  void (*new_fork) (struct process_info *parent, struct process_info *child);
-
   /* Hook to call prior to resuming a thread.  */
   void (*prepare_to_resume) (struct lwp_info *);
 
@@ -627,6 +606,37 @@ private:
   void siginfo_fixup (siginfo_t *siginfo, gdb_byte *inf_siginfo,
 		      int direction);
 
+  /* Add a process to the common process list, and set its private
+     data.  */
+  process_info *add_linux_process (int pid, int attached);
+
+  /* Add a new thread.  */
+  lwp_info *add_lwp (ptid_t ptid);
+
+  /* Delete a thread.  */
+  void delete_lwp (lwp_info *lwp);
+
+public: /* Make this public because it's used from outside.  */
+  /* Attach to an inferior process.  Returns 0 on success, ERRNO on
+     error.  */
+  int attach_lwp (ptid_t ptid);
+
+private: /* Back to private.  */
+  /* Detach from LWP.  */
+  void detach_one_lwp (lwp_info *lwp);
+
+  /* Detect zombie thread group leaders, and "exit" them.  We can't
+     reap their exits until all other threads in the group have
+     exited.  */
+  void check_zombie_leaders ();
+
+  /* Convenience function that is called when the kernel reports an exit
+     event.  This decides whether to report the event to GDB as a
+     process exit event, a thread exit event, or to suppress the
+     event.  */
+  ptid_t filter_exit_event (lwp_info *event_child,
+			    target_waitstatus *ourstatus);
+
 protected:
   /* The architecture-specific "low" methods are listed below.  */
 
@@ -688,6 +698,27 @@ protected:
      If DIRECTION is 0, copy from NATIVE to INF.  */
   virtual bool low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
 				  int direction);
+
+  /* Hook to call when a new process is created or attached to.
+     If extra per-process architecture-specific data is needed,
+     allocate it here.  */
+  virtual arch_process_info *low_new_process ();
+
+  /* Hook to call when a process is being deleted.  If extra per-process
+     architecture-specific data is needed, delete it here.  */
+  virtual void low_delete_process (arch_process_info *info);
+
+  /* Hook to call when a new thread is detected.
+     If extra per-thread architecture-specific data is needed,
+     allocate it here.  */
+  virtual void low_new_thread (lwp_info *);
+
+  /* Hook to call when a thread is being deleted.  If extra per-thread
+     architecture-specific data is needed, delete it here.  */
+  virtual void low_delete_thread (arch_lwp_info *);
+
+  /* Hook to call, if any, when a new fork is attached.  */
+  virtual void low_new_fork (process_info *parent, process_info *child);
 
   /* How many bytes the PC should be decremented after a break.  */
   virtual int low_decr_pc_after_break ();

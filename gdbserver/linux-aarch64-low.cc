@@ -93,6 +93,16 @@ protected:
 
   bool low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
 			  int direction) override;
+
+  arch_process_info *low_new_process () override;
+
+  void low_delete_process (arch_process_info *info) override;
+
+  void low_new_thread (lwp_info *) override;
+
+  void low_delete_thread (arch_lwp_info *) override;
+
+  void low_new_fork (process_info *parent, process_info *child) override;
 };
 
 /* The singleton target ops object.  */
@@ -518,10 +528,10 @@ aarch64_target::low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
   return false;
 }
 
-/* Implementation of linux_target_ops method "new_process".  */
+/* Implementation of linux target ops method "low_new_process".  */
 
-static struct arch_process_info *
-aarch64_linux_new_process (void)
+arch_process_info *
+aarch64_target::low_new_process ()
 {
   struct arch_process_info *info = XCNEW (struct arch_process_info);
 
@@ -530,19 +540,31 @@ aarch64_linux_new_process (void)
   return info;
 }
 
-/* Implementation of linux_target_ops method "delete_process".  */
+/* Implementation of linux target ops method "low_delete_process".  */
 
-static void
-aarch64_linux_delete_process (struct arch_process_info *info)
+void
+aarch64_target::low_delete_process (arch_process_info *info)
 {
   xfree (info);
 }
 
-/* Implementation of linux_target_ops method "linux_new_fork".  */
+void
+aarch64_target::low_new_thread (lwp_info *lwp)
+{
+  aarch64_linux_new_thread (lwp);
+}
 
-static void
-aarch64_linux_new_fork (struct process_info *parent,
-			struct process_info *child)
+void
+aarch64_target::low_delete_thread (arch_lwp_info *arch_lwp)
+{
+  aarch64_linux_delete_thread (arch_lwp);
+}
+
+/* Implementation of linux target ops method "low_new_fork".  */
+
+void
+aarch64_target::low_new_fork (process_info *parent,
+			      process_info *child)
 {
   /* These are allocated by linux_add_process.  */
   gdb_assert (parent->priv != NULL
@@ -3117,11 +3139,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_linux_new_process,
-  aarch64_linux_delete_process,
-  aarch64_linux_new_thread,
-  aarch64_linux_delete_thread,
-  aarch64_linux_new_fork,
   aarch64_linux_prepare_to_resume,
   NULL, /* process_qsupported */
   aarch64_supports_tracepoints,

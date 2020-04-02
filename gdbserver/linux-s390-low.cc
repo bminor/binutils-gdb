@@ -2845,11 +2845,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* new_process */
-  NULL, /* delete_process */
-  NULL, /* new_thread */
-  NULL, /* delete_thread */
-  NULL, /* new_fork */
   NULL, /* prepare_to_resume */
   NULL, /* process_qsupported */
   s390_supports_tracepoints,

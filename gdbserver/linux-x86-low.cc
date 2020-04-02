@@ -145,6 +145,16 @@ protected:
   /* Need to fix up i386 siginfo if host is amd64.  */
   bool low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
 			  int direction) override;
+
+  arch_process_info *low_new_process () override;
+
+  void low_delete_process (arch_process_info *info) override;
+
+  void low_new_thread (lwp_info *) override;
+
+  void low_delete_thread (arch_lwp_info *) override;
+
+  void low_new_fork (process_info *parent, process_info *child) override;
 };
 
 /* The singleton target ops object.  */
@@ -693,8 +703,8 @@ x86_target::low_stopped_data_address ()
 
 /* Called when a new process is created.  */
 
-static struct arch_process_info *
-x86_linux_new_process (void)
+arch_process_info *
+x86_target::low_new_process ()
 {
   struct arch_process_info *info = XCNEW (struct arch_process_info);
 
@@ -705,16 +715,30 @@ x86_linux_new_process (void)
 
 /* Called when a process is being deleted.  */
 
-static void
-x86_linux_delete_process (struct arch_process_info *info)
+void
+x86_target::low_delete_process (arch_process_info *info)
 {
   xfree (info);
 }
 
-/* Target routine for linux_new_fork.  */
+void
+x86_target::low_new_thread (lwp_info *lwp)
+{
+  /* This comes from nat/.  */
+  x86_linux_new_thread (lwp);
+}
 
-static void
-x86_linux_new_fork (struct process_info *parent, struct process_info *child)
+void
+x86_target::low_delete_thread (arch_lwp_info *alwp)
+{
+  /* This comes from nat/.  */
+  x86_linux_delete_thread (alwp);
+}
+
+/* Target routine for new_fork.  */
+
+void
+x86_target::low_new_fork (process_info *parent, process_info *child)
 {
   /* These are allocated by linux_add_process.  */
   gdb_assert (parent->priv != NULL
@@ -2930,11 +2954,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_linux_new_process,
-  x86_linux_delete_process,
-  x86_linux_new_thread,
-  x86_linux_delete_thread,
-  x86_linux_new_fork,
   x86_linux_prepare_to_resume,
   x86_linux_process_qsupported,
   x86_supports_tracepoints,

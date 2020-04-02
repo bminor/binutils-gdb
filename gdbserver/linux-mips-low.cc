@@ -70,6 +70,16 @@ protected:
 
   void low_supply_ptrace_register (regcache *regcache, int regno,
 				   const char *buf) override;
+
+  arch_process_info *low_new_process () override;
+
+  void low_delete_process (arch_process_info *info) override;
+
+  void low_new_thread (lwp_info *) override;
+
+  void low_delete_thread (arch_lwp_info *) override;
+
+  void low_new_fork (process_info *parent, process_info *child) override;
 };
 
 /* The singleton target ops object.  */
@@ -377,32 +387,32 @@ update_watch_registers_callback (thread_info *thread)
     linux_stop_lwp (lwp);
 }
 
-/* This is the implementation of linux_target_ops method
-   new_process.  */
+/* This is the implementation of linux target ops method
+   low_new_process.  */
 
-static struct arch_process_info *
-mips_linux_new_process (void)
+arch_process_info *
+mips_target::low_new_process ()
 {
   struct arch_process_info *info = XCNEW (struct arch_process_info);
 
   return info;
 }
 
-/* This is the implementation of linux_target_ops method
-   delete_process.  */
+/* This is the implementation of linux target ops method
+   low_delete_process.  */
 
-static void
-mips_linux_delete_process (struct arch_process_info *info)
+void
+mips_target::low_delete_process (arch_process_info *info)
 {
   xfree (info);
 }
 
-/* This is the implementation of linux_target_ops method new_thread.
+/* This is the implementation of linux target ops method low_new_thread.
    Mark the watch registers as changed, so the threads' copies will
    be updated.  */
 
-static void
-mips_linux_new_thread (struct lwp_info *lwp)
+void
+mips_target::low_new_thread (lwp_info *lwp)
 {
   struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
 
@@ -413,8 +423,8 @@ mips_linux_new_thread (struct lwp_info *lwp)
 
 /* Function to call when a thread is being deleted.  */
 
-static void
-mips_linux_delete_thread (struct arch_lwp_info *arch_lwp)
+void
+mips_target::low_delete_thread (arch_lwp_info *arch_lwp)
 {
   xfree (arch_lwp);
 }
@@ -442,9 +452,9 @@ mips_add_watchpoint (struct arch_process_info *priv, CORE_ADDR addr, int len,
 
 /* Hook to call when a new fork is attached.  */
 
-static void
-mips_linux_new_fork (struct process_info *parent,
-			struct process_info *child)
+void
+mips_target::low_new_fork (process_info *parent,
+			   process_info *child)
 {
   struct arch_process_info *parent_private;
   struct arch_process_info *child_private;
@@ -986,11 +996,6 @@ mips_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  mips_linux_new_process,
-  mips_linux_delete_process,
-  mips_linux_new_thread,
-  mips_linux_delete_thread,
-  mips_linux_new_fork,
   mips_linux_prepare_to_resume
 };
 

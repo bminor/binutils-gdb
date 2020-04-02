@@ -268,7 +268,6 @@ int using_threads = 1;
 static int stabilizing_threads;
 
 static void unsuspend_all_lwps (struct lwp_info *except);
-static struct lwp_info *add_lwp (ptid_t ptid);
 static void mark_lwp_dead (struct lwp_info *lwp, int wstat);
 static int lwp_is_marked_dead (struct lwp_info *lwp);
 static int finish_step_over (struct lwp_info *lwp);
@@ -413,8 +412,8 @@ linux_pid_exe_is_elf_64_file (int pid, unsigned int *machine)
   return elf_64_file_p (file, machine);
 }
 
-static void
-delete_lwp (struct lwp_info *lwp)
+void
+linux_process_target::delete_lwp (lwp_info *lwp)
 {
   struct thread_info *thr = get_lwp_thread (lwp);
 
@@ -423,29 +422,50 @@ delete_lwp (struct lwp_info *lwp)
 
   remove_thread (thr);
 
-  if (the_low_target.delete_thread != NULL)
-    the_low_target.delete_thread (lwp->arch_private);
-  else
-    gdb_assert (lwp->arch_private == NULL);
+  low_delete_thread (lwp->arch_private);
 
   free (lwp);
 }
 
-/* Add a process to the common process list, and set its private
-   data.  */
+void
+linux_process_target::low_delete_thread (arch_lwp_info *info)
+{
+  /* Default implementation should be overridden if architecture-specific
+     info is being used.  */
+  gdb_assert (info == nullptr);
+}
 
-static struct process_info *
-linux_add_process (int pid, int attached)
+process_info *
+linux_process_target::add_linux_process (int pid, int attached)
 {
   struct process_info *proc;
 
   proc = add_process (pid, attached);
   proc->priv = XCNEW (struct process_info_private);
 
-  if (the_low_target.new_process != NULL)
-    proc->priv->arch_private = the_low_target.new_process ();
+  proc->priv->arch_private = low_new_process ();
 
   return proc;
+}
+
+arch_process_info *
+linux_process_target::low_new_process ()
+{
+  return nullptr;
+}
+
+void
+linux_process_target::low_delete_process (arch_process_info *info)
+{
+  /* Default implementation must be overridden if architecture-specific
+     info exists.  */
+  gdb_assert (info == nullptr);
+}
+
+void
+linux_process_target::low_new_fork (process_info *parent, process_info *child)
+{
+  /* Nop.  */
 }
 
 void
@@ -528,7 +548,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 	     will be detached, since we will need the process object and the
 	     breakpoints to remove any breakpoints from memory when we
 	     detach, and the client side will access registers.  */
-	  child_proc = linux_add_process (new_pid, 0);
+	  child_proc = add_linux_process (new_pid, 0);
 	  gdb_assert (child_proc != NULL);
 	  child_lwp = add_lwp (ptid);
 	  gdb_assert (child_lwp != NULL);
@@ -572,8 +592,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 	  child_proc->tdesc = tdesc;
 
 	  /* Clone arch-specific process data.  */
-	  if (the_low_target.new_fork != NULL)
-	    the_low_target.new_fork (parent_proc, child_proc);
+	  low_new_fork (parent_proc, child_proc);
 
 	  /* Save fork info in the parent thread.  */
 	  if (event == PTRACE_EVENT_FORK)
@@ -700,7 +719,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
       current_thread = NULL;
 
       /* Create a new process/lwp/thread.  */
-      proc = linux_add_process (event_pid, 0);
+      proc = add_linux_process (event_pid, 0);
       event_lwp = add_lwp (event_ptid);
       event_thr = get_lwp_thread (event_lwp);
       gdb_assert (current_thread == event_thr);
@@ -921,8 +940,8 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
   return true;
 }
 
-static struct lwp_info *
-add_lwp (ptid_t ptid)
+lwp_info *
+linux_process_target::add_lwp (ptid_t ptid)
 {
   struct lwp_info *lwp;
 
@@ -932,10 +951,15 @@ add_lwp (ptid_t ptid)
 
   lwp->thread = add_thread (ptid, lwp);
 
-  if (the_low_target.new_thread != NULL)
-    the_low_target.new_thread (lwp);
+  low_new_thread (lwp);
 
   return lwp;
+}
+
+void
+linux_process_target::low_new_thread (lwp_info *info)
+{
+  /* Nop.  */
 }
 
 /* Callback to be used when calling fork_inferior, responsible for
@@ -994,7 +1018,7 @@ linux_process_target::create_inferior (const char *program,
 			 NULL, NULL, NULL, NULL);
   }
 
-  linux_add_process (pid, 0);
+  add_linux_process (pid, 0);
 
   ptid = ptid_t (pid, pid, 0);
   new_lwp = add_lwp (ptid);
@@ -1024,11 +1048,8 @@ linux_process_target::post_create_inferior ()
     }
 }
 
-/* Attach to an inferior process.  Returns 0 on success, ERRNO on
-   error.  */
-
 int
-linux_attach_lwp (ptid_t ptid)
+linux_process_target::attach_lwp (ptid_t ptid)
 {
   struct lwp_info *new_lwp;
   int lwpid = ptid.lwp ();
@@ -1125,7 +1146,7 @@ attach_proc_task_lwp_callback (ptid_t ptid)
       if (debug_threads)
 	debug_printf ("Found new lwp %d\n", lwpid);
 
-      err = linux_attach_lwp (ptid);
+      err = the_linux_target->attach_lwp (ptid);
 
       /* Be quiet if we simply raced with the thread exiting.  EPERM
 	 is returned if the thread's task still exists, and is marked
@@ -1167,11 +1188,11 @@ linux_process_target::attach (unsigned long pid)
   ptid_t ptid = ptid_t (pid, pid, 0);
   int err;
 
-  proc = linux_add_process (pid, 1);
+  proc = add_linux_process (pid, 1);
 
   /* Attach to PID.  We will check for other threads
      soon.  */
-  err = linux_attach_lwp (ptid);
+  err = attach_lwp (ptid);
   if (err != 0)
     {
       remove_process (proc);
@@ -1479,10 +1500,8 @@ get_detach_signal (struct thread_info *thread)
     }
 }
 
-/* Detach from LWP.  */
-
-static void
-linux_detach_one_lwp (struct lwp_info *lwp)
+void
+linux_process_target::detach_one_lwp (lwp_info *lwp)
 {
   struct thread_info *thread = get_lwp_thread (lwp);
   int sig;
@@ -1564,22 +1583,6 @@ linux_detach_one_lwp (struct lwp_info *lwp)
   delete_lwp (lwp);
 }
 
-/* Callback for for_each_thread.  Detaches from non-leader threads of a
-   given process.  */
-
-static void
-linux_detach_lwp_callback (thread_info *thread)
-{
-  /* We don't actually detach from the thread group leader just yet.
-     If the thread group exits, we must reap the zombie clone lwps
-     before we're able to reap the leader.  */
-  if (thread->id.pid () == thread->id.lwp ())
-    return;
-
-  lwp_info *lwp = get_thread_lwp (thread);
-  linux_detach_one_lwp (lwp);
-}
-
 int
 linux_process_target::detach (process_info *process)
 {
@@ -1606,10 +1609,20 @@ linux_process_target::detach (process_info *process)
   /* Detach from the clone lwps first.  If the thread group exits just
      while we're detaching, we must reap the clone lwps before we're
      able to reap the leader.  */
-  for_each_thread (process->pid, linux_detach_lwp_callback);
+  for_each_thread (process->pid, [this] (thread_info *thread)
+    {
+      /* We don't actually detach from the thread group leader just yet.
+	 If the thread group exits, we must reap the zombie clone lwps
+	 before we're able to reap the leader.  */
+      if (thread->id.pid () == thread->id.lwp ())
+	return;
+
+      lwp_info *lwp = get_thread_lwp (thread);
+      detach_one_lwp (lwp);
+    });
 
   main_lwp = find_lwp_pid (ptid_t (process->pid));
-  linux_detach_one_lwp (main_lwp);
+  detach_one_lwp (main_lwp);
 
   mourn (process);
 
@@ -1630,17 +1643,14 @@ linux_process_target::mourn (process_info *process)
   thread_db_mourn (process);
 #endif
 
-  for_each_thread (process->pid, [] (thread_info *thread)
+  for_each_thread (process->pid, [this] (thread_info *thread)
     {
       delete_lwp (get_thread_lwp (thread));
     });
 
   /* Freeing all private data.  */
   priv = process->priv;
-  if (the_low_target.delete_process != NULL)
-    the_low_target.delete_process (priv->arch_private);
-  else
-    gdb_assert (priv->arch_private == NULL);
+  low_delete_process (priv->arch_private);
   free (priv);
   process->priv = NULL;
 
@@ -1832,13 +1842,10 @@ iterate_over_lwps (ptid_t filter,
   return get_thread_lwp (thread);
 }
 
-/* Detect zombie thread group leaders, and "exit" them.  We can't reap
-   their exits until all other threads in the group have exited.  */
-
-static void
-check_zombie_leaders (void)
+void
+linux_process_target::check_zombie_leaders ()
 {
-  for_each_process ([] (process_info *proc) {
+  for_each_process ([this] (process_info *proc) {
     pid_t leader_pid = pid_of (proc);
     struct lwp_info *leader_lp;
 
@@ -2943,14 +2950,9 @@ ignore_event (struct target_waitstatus *ourstatus)
   return null_ptid;
 }
 
-/* Convenience function that is called when the kernel reports an exit
-   event.  This decides whether to report the event to GDB as a
-   process exit event, a thread exit event, or to suppress the
-   event.  */
-
-static ptid_t
-filter_exit_event (struct lwp_info *event_child,
-		   struct target_waitstatus *ourstatus)
+ptid_t
+linux_process_target::filter_exit_event (lwp_info *event_child,
+					 target_waitstatus *ourstatus)
 {
   client_state &cs = get_client_state ();
   struct thread_info *thread = get_lwp_thread (event_child);

@@ -99,6 +99,16 @@ protected:
   bool low_stopped_by_watchpoint () override;
 
   CORE_ADDR low_stopped_data_address () override;
+
+  arch_process_info *low_new_process () override;
+
+  void low_delete_process (arch_process_info *info) override;
+
+  void low_new_thread (lwp_info *) override;
+
+  void low_delete_thread (arch_lwp_info *) override;
+
+  void low_new_fork (process_info *parent, process_info *child) override;
 };
 
 /* The singleton target ops object.  */
@@ -719,8 +729,8 @@ arm_target::low_stopped_data_address ()
 }
 
 /* Called when a new process is created.  */
-static struct arch_process_info *
-arm_new_process (void)
+arch_process_info *
+arm_target::low_new_process ()
 {
   struct arch_process_info *info = XCNEW (struct arch_process_info);
   return info;
@@ -728,15 +738,15 @@ arm_new_process (void)
 
 /* Called when a process is being deleted.  */
 
-static void
-arm_delete_process (struct arch_process_info *info)
+void
+arm_target::low_delete_process (arch_process_info *info)
 {
   xfree (info);
 }
 
 /* Called when a new thread is detected.  */
-static void
-arm_new_thread (struct lwp_info *lwp)
+void
+arm_target::low_new_thread (lwp_info *lwp)
 {
   struct arch_lwp_info *info = XCNEW (struct arch_lwp_info);
   int i;
@@ -751,14 +761,14 @@ arm_new_thread (struct lwp_info *lwp)
 
 /* Function to call when a thread is being deleted.  */
 
-static void
-arm_delete_thread (struct arch_lwp_info *arch_lwp)
+void
+arm_target::low_delete_thread (arch_lwp_info *arch_lwp)
 {
   xfree (arch_lwp);
 }
 
-static void
-arm_new_fork (struct process_info *parent, struct process_info *child)
+void
+arm_target::low_new_fork (process_info *parent, process_info *child)
 {
   struct arch_process_info *parent_proc_info;
   struct arch_process_info *child_proc_info;
@@ -1105,11 +1115,6 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  arm_new_process,
-  arm_delete_process,
-  arm_new_thread,
-  arm_delete_thread,
-  arm_new_fork,
   arm_prepare_to_resume,
   NULL, /* process_qsupported */
   NULL, /* supports_tracepoints */

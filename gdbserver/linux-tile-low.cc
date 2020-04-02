@@ -224,11 +224,6 @@ tile_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  NULL, /* new_process */
-  NULL, /* delete_process */
-  NULL, /* new_thread */
-  NULL, /* delete_thread */
-  NULL, /* new_fork */
   NULL, /* prepare_to_resume */
   NULL, /* process_qsupported */
   NULL, /* supports_tracepoints */

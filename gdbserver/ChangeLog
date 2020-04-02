@@ -1,5 +1,127 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn the 'new_process', 'delete_process', 'new_thread',
+	'delete_thread', and 'new_fork' linux target ops into methods
+	of linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the ops.
+	(class linux_process_target) <add_linux_process>
+	<add_lwp>
+	<delete_lwp>
+	<attach_lwp>
+	<detach_one_lwp>
+	<check_zombie_leaders>
+	<filter_exit_event>
+	<low_new_process>
+	<low_delete_process>
+	<low_new_thread>
+	<low_delete_thread>
+	<low_new_fork>: Declare.
+	* linux-low.cc (delete_lwp): Turn into...
+	(linux_process_target::delete_lwp): ...this.
+	(linux_process_target::low_delete_thread): Define.
+	(linux_add_process): Turn into...
+	(linux_process_target::add_linux_process): ...this.
+	(linux_process_target::low_new_process): Define.
+	(linux_process_target::low_delete_process): Define.
+	(linux_process_target::low_new_fork): Define.
+	(add_lwp): Turn into...
+	(linux_process_target::add_lwp): ...this.
+	(linux_process_target::low_new_thread): Define.
+	(linux_attach_lwp): Turn into...
+	(linux_process_target::attach_lwp): ...this.
+	(linux_detach_one_lwp): Turn into...
+	(linux_process_target::detach_one_lwp): ...this.
+	(linux_detach_lwp_callback): Remove and inline...
+	(linux_process_target::detach): ...here.
+	(check_zombie_leaders): Turn into...
+	(linux_process_target::check_zombie_leaders): ...this.
+	(filter_exit_event): Turn into...
+	(linux_process_target::filter_exit_event): ...this.
+
+	Update the callers below.
+
+	(linux_process_target::handle_extended_wait)
+	(linux_process_target::create_inferior)
+	(attach_proc_task_lwp_callback)
+	(linux_process_target::attach)
+	(linux_process_target::detach)
+	(linux_process_target::mourn)
+	* thread-db.cc (attach_thread)
+
+	* linux-x86-low.cc (class x86_target) <low_new_process>
+	<low_delete_process>
+	<low_new_thread>
+	<low_delete_thread>
+	<low_new_fork>: Declare.
+	(x86_linux_new_process): Turn into...
+	(x86_target::low_new_process): ...this.
+	(x86_linux_delete_process): Turn into...
+	(x86_target::low_delete_process): ...this.
+	(x86_target::low_new_thread): Define.
+	(x86_target::low_delete_thread): Define.
+	(x86_linux_new_fork): Turn into...
+	(x86_target::low_new_fork): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-aarch64-low.cc (class aarch64_target) <low_new_process>
+	<low_delete_process>
+	<low_new_thread>
+	<low_delete_thread>
+	<low_new_fork>: Declare.
+	(aarch64_linux_new_process): Turn into...
+	(aarch64_target::low_new_process): ...this.
+	(aarch64_linux_delete_process): Turn into...
+	(aarch64_target::low_delete_process): ...this.
+	(aarch64_target::low_new_thread): Define.
+	(aarch64_target::low_delete_thread): Define.
+	(aarch64_linux_new_fork): Turn into...
+	(aarch64_target::low_new_fork): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-arm-low.cc (class arm_target) <low_new_process>
+	<low_delete_process>
+	<low_new_thread>
+	<low_delete_thread>
+	<low_new_fork>: Declare.
+	(arm_new_process): Turn into...
+	(arm_target::low_new_process): ...this.
+	(arm_delete_process): Turn into...
+	(arm_target::low_delete_process): ...this.
+	(arm_new_thread): Turn into...
+	(arm_target::low_new_thread): ...this.
+	(arm_delete_thread): Turn into...
+	(arm_target::low_delete_thread): ...this.
+	(arm_new_fork): Turn into...
+	(arm_target::low_new_fork): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-mips-low.cc (class mips_target) <low_new_process>
+	<low_delete_process>
+	<low_new_thread>
+	<low_delete_thread>
+	<low_new_fork>: Declare.
+	(mips_linux_new_process): Turn into...
+	(mips_target::low_new_process): ...this.
+	(mips_linux_delete_process): Turn into...
+	(mips_target::low_delete_process): ...this.
+	(mips_linux_new_thread): Turn into...
+	(mips_target::low_new_thread): ...this.
+	(mips_linux_delete_thread): Turn into...
+	(mips_target::low_delete_thread): ...this.
+	(mips_linux_new_fork): Turn into...
+	(mips_target::low_new_fork): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-bfin-low.cc (the_low_target): Remove the op fields.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-ppc-low.cc (the_low_target): Ditto.
+	* linux-s390-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn the 'siginfo_fixup' linux target op into a method of
 	linux_process_target.
 
