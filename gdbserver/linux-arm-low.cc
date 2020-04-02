@@ -1117,9 +1117,7 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* install_fast_tracepoint_jump_pad */
   NULL, /* emit_ops */
-  NULL, /* get_min_fast_tracepoint_insn_len */
   NULL, /* supports_range_stepping */
   arm_supports_hardware_single_step,
   arm_get_syscall_trapinfo,

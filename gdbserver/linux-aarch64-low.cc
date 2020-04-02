@@ -67,6 +67,18 @@ public:
 
   bool supports_tracepoints () override;
 
+  bool supports_fast_tracepoints () override;
+
+  int install_fast_tracepoint_jump_pad
+    (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+     CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+     CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+     unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+     CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+     char *err) override;
+
+  int get_min_fast_tracepoint_insn_len () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -1962,23 +1974,23 @@ static const struct aarch64_insn_visitor visitor =
   aarch64_ftrace_insn_reloc_others,
 };
 
-/* Implementation of linux_target_ops method
+bool
+aarch64_target::supports_fast_tracepoints ()
+{
+  return true;
+}
+
+/* Implementation of target ops method
    "install_fast_tracepoint_jump_pad".  */
 
-static int
-aarch64_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
-					  CORE_ADDR tpaddr,
-					  CORE_ADDR collector,
-					  CORE_ADDR lockaddr,
-					  ULONGEST orig_size,
-					  CORE_ADDR *jump_entry,
-					  CORE_ADDR *trampoline,
-					  ULONGEST *trampoline_size,
-					  unsigned char *jjump_pad_insn,
-					  ULONGEST *jjump_pad_insn_size,
-					  CORE_ADDR *adjusted_insn_addr,
-					  CORE_ADDR *adjusted_insn_addr_end,
-					  char *err)
+int
+aarch64_target::install_fast_tracepoint_jump_pad
+  (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+   CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+   CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+   unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+   CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+   char *err)
 {
   uint32_t buf[256];
   uint32_t *p = buf;
@@ -3087,11 +3099,11 @@ aarch64_emit_ops (void)
   return &aarch64_emit_ops_impl;
 }
 
-/* Implementation of linux_target_ops method
+/* Implementation of target ops method
    "get_min_fast_tracepoint_insn_len".  */
 
-static int
-aarch64_get_min_fast_tracepoint_insn_len (void)
+int
+aarch64_target::get_min_fast_tracepoint_insn_len ()
 {
   return 4;
 }
@@ -3151,9 +3163,7 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_install_fast_tracepoint_jump_pad,
   aarch64_emit_ops,
-  aarch64_get_min_fast_tracepoint_insn_len,
   aarch64_supports_range_stepping,
   aarch64_supports_hardware_single_step,
   aarch64_get_syscall_trapinfo,

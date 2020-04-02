@@ -110,6 +110,18 @@ public:
 
   bool supports_tracepoints () override;
 
+  bool supports_fast_tracepoints () override;
+
+  int install_fast_tracepoint_jump_pad
+    (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+     CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+     CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+     unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+     CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+     char *err) override;
+
+  int get_min_fast_tracepoint_insn_len () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -1525,19 +1537,26 @@ i386_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
   return 0;
 }
 
-static int
-x86_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
-				      CORE_ADDR collector,
-				      CORE_ADDR lockaddr,
-				      ULONGEST orig_size,
-				      CORE_ADDR *jump_entry,
-				      CORE_ADDR *trampoline,
-				      ULONGEST *trampoline_size,
-				      unsigned char *jjump_pad_insn,
-				      ULONGEST *jjump_pad_insn_size,
-				      CORE_ADDR *adjusted_insn_addr,
-				      CORE_ADDR *adjusted_insn_addr_end,
-				      char *err)
+bool
+x86_target::supports_fast_tracepoints ()
+{
+  return true;
+}
+
+int
+x86_target::install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
+					      CORE_ADDR tpaddr,
+					      CORE_ADDR collector,
+					      CORE_ADDR lockaddr,
+					      ULONGEST orig_size,
+					      CORE_ADDR *jump_entry,
+					      CORE_ADDR *trampoline,
+					      ULONGEST *trampoline_size,
+					      unsigned char *jjump_pad_insn,
+					      ULONGEST *jjump_pad_insn_size,
+					      CORE_ADDR *adjusted_insn_addr,
+					      CORE_ADDR *adjusted_insn_addr_end,
+					      char *err)
 {
 #ifdef __x86_64__
   if (is_64bit_tdesc ())
@@ -1566,8 +1585,8 @@ x86_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
 /* Return the minimum instruction length for fast tracepoints on x86/x86-64
    architectures.  */
 
-static int
-x86_get_min_fast_tracepoint_insn_len (void)
+int
+x86_target::get_min_fast_tracepoint_insn_len ()
 {
   static int warned_about_fast_tracepoints = 0;
 
@@ -2971,9 +2990,7 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_install_fast_tracepoint_jump_pad,
   x86_emit_ops,
-  x86_get_min_fast_tracepoint_insn_len,
   x86_supports_range_stepping,
   x86_supports_hardware_single_step,
   x86_get_syscall_trapinfo,

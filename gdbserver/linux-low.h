@@ -131,28 +131,9 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Install a fast tracepoint jump pad.  See target.h for
-     comments.  */
-  int (*install_fast_tracepoint_jump_pad) (CORE_ADDR tpoint, CORE_ADDR tpaddr,
-					   CORE_ADDR collector,
-					   CORE_ADDR lockaddr,
-					   ULONGEST orig_size,
-					   CORE_ADDR *jump_entry,
-					   CORE_ADDR *trampoline,
-					   ULONGEST *trampoline_size,
-					   unsigned char *jjump_pad_insn,
-					   ULONGEST *jjump_pad_insn_size,
-					   CORE_ADDR *adjusted_insn_addr,
-					   CORE_ADDR *adjusted_insn_addr_end,
-					   char *err);
-
   /* Return the bytecode operations vector for the current inferior.
      Returns NULL if bytecode compilation is not supported.  */
   struct emit_ops *(*emit_ops) (void);
-
-  /* Return the minimum length of an instruction that can be safely overwritten
-     for use as a fast tracepoint.  */
-  int (*get_min_fast_tracepoint_insn_len) (void);
 
   /* Returns true if the low target supports range stepping.  */
   int (*supports_range_stepping) (void);
@@ -302,24 +283,6 @@ public:
   void unpause_all (bool unfreeze) override;
 
   void stabilize_threads () override;
-
-  bool supports_fast_tracepoints () override;
-
-  int install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
-					CORE_ADDR tpaddr,
-					CORE_ADDR collector,
-					CORE_ADDR lockaddr,
-					ULONGEST orig_size,
-					CORE_ADDR *jump_entry,
-					CORE_ADDR *trampoline,
-					ULONGEST *trampoline_size,
-					unsigned char *jjump_pad_insn,
-					ULONGEST *jjump_pad_insn_size,
-					CORE_ADDR *adjusted_insn_addr,
-					CORE_ADDR *adjusted_insn_addr_end,
-					char *err) override;
-
-  int get_min_fast_tracepoint_insn_len () override;
 
   struct emit_ops *emit_ops () override;
 

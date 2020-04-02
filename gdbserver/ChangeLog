@@ -1,5 +1,66 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Remove the 'install_fast_tracepoint_jump_pad' and
+	'get_min_fast_tracepoint_insn_len' linux target ops to let the
+	concrete linux target define the ops by overriding the declarations
+	of process_stratum_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the ops.
+	(class linux_process_target) <supports_fast_tracepoints>
+	<install_fast_tracepoint_jump_pad>
+	<get_min_fast_tracepoint_insn_len>: Remove.
+	* linux-low.cc (linux_process_target::supports_fast_tracepoints)
+	(linux_process_target::install_fast_tracepoint_jump_pad)
+	(linux_process_target::get_min_fast_tracepoint_insn_len): Remove.
+	* linux-x86-low.cc (class x86_target) <supports_fast_tracepoints>
+	<install_fast_tracepoint_jump_pad>
+	<get_min_fast_tracepoint_insn_len>: Declare.
+	(x86_target::supports_fast_tracepoints): Define.
+	(x86_install_fast_tracepoint_jump_pad): Turn into...
+	(x86_target::install_fast_tracepoint_jump_pad): ...this.
+	(x86_get_min_fast_tracepoint_insn_len): Turn into...
+	(x86_target::get_min_fast_tracepoint_insn_len): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<supports_fast_tracepoints>
+	<install_fast_tracepoint_jump_pad>
+	<get_min_fast_tracepoint_insn_len>: Declare.
+	(aarch64_target::supports_fast_tracepoints): Define.
+	(aarch64_install_fast_tracepoint_jump_pad): Turn into...
+	(aarch64_target::install_fast_tracepoint_jump_pad): ...this.
+	(aarch64_get_min_fast_tracepoint_insn_len): Turn into...
+	(aarch64_target::get_min_fast_tracepoint_insn_len): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-ppc-low.cc (class ppc_target) <supports_fast_tracepoints>
+	<install_fast_tracepoint_jump_pad>
+	<get_min_fast_tracepoint_insn_len>: Declare.
+	(ppc_target::supports_fast_tracepoints): Define.
+	(ppc_install_fast_tracepoint_jump_pad): Turn into...
+	(ppc_target::install_fast_tracepoint_jump_pad): ...this.
+	(ppc_get_min_fast_tracepoint_insn_len): Turn into...
+	(ppc_target::get_min_fast_tracepoint_insn_len): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-s390-low.cc (class s390_target) <supports_fast_tracepoints>
+	<install_fast_tracepoint_jump_pad>
+	<get_min_fast_tracepoint_insn_len>: Declare.
+	(s390_target::supports_fast_tracepoints): Define.
+	(s390_install_fast_tracepoint_jump_pad): Turn into...
+	(s390_target::install_fast_tracepoint_jump_pad): ...this.
+	(s390_get_min_fast_tracepoint_insn_len): Turn into...
+	(s390_target::get_min_fast_tracepoint_insn_len): ...this.
+	(the_low_target): Remove the op fields.
+	* linux-arm-low.cc (the_low_target): Remove the op fields.
+	* linux-bfin-low.cc (the_low_target): Ditto.
+	* linux-crisv32-low.cc (the_low_target): Ditto.
+	* linux-m32r-low.cc (the_low_target): Ditto.
+	* linux-m68k-low.cc (the_low_target): Ditto.
+	* linux-sh-low.cc (the_low_target): Ditto.
+	* linux-tic6x-low.cc (the_low_target): Ditto.
+	* linux-tile-low.cc (the_low_target): Ditto.
+	* linux-xtensa-low.cc (the_low_target): Ditto.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn the 'get_thread_area' linux target op into a method of
 	process_stratum_target.
 

@@ -65,6 +65,18 @@ public:
 
   bool supports_tracepoints () override;
 
+  bool supports_fast_tracepoints () override;
+
+  int install_fast_tracepoint_jump_pad
+    (CORE_ADDR tpoint, CORE_ADDR tpaddr, CORE_ADDR collector,
+     CORE_ADDR lockaddr, ULONGEST orig_size, CORE_ADDR *jump_entry,
+     CORE_ADDR *trampoline, ULONGEST *trampoline_size,
+     unsigned char *jjump_pad_insn, ULONGEST *jjump_pad_insn_size,
+     CORE_ADDR *adjusted_insn_addr, CORE_ADDR *adjusted_insn_addr_end,
+     char *err) override;
+
+  int get_min_fast_tracepoint_insn_len () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -1570,22 +1582,29 @@ ppc_relocate_instruction (CORE_ADDR *to, CORE_ADDR oldloc)
   *to += 4;
 }
 
+bool
+ppc_target::supports_fast_tracepoints ()
+{
+  return true;
+}
+
 /* Implement install_fast_tracepoint_jump_pad of target_ops.
    See target.h for details.  */
 
-static int
-ppc_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
-				      CORE_ADDR collector,
-				      CORE_ADDR lockaddr,
-				      ULONGEST orig_size,
-				      CORE_ADDR *jump_entry,
-				      CORE_ADDR *trampoline,
-				      ULONGEST *trampoline_size,
-				      unsigned char *jjump_pad_insn,
-				      ULONGEST *jjump_pad_insn_size,
-				      CORE_ADDR *adjusted_insn_addr,
-				      CORE_ADDR *adjusted_insn_addr_end,
-				      char *err)
+int
+ppc_target::install_fast_tracepoint_jump_pad (CORE_ADDR tpoint,
+					      CORE_ADDR tpaddr,
+					      CORE_ADDR collector,
+					      CORE_ADDR lockaddr,
+					      ULONGEST orig_size,
+					      CORE_ADDR *jump_entry,
+					      CORE_ADDR *trampoline,
+					      ULONGEST *trampoline_size,
+					      unsigned char *jjump_pad_insn,
+					      ULONGEST *jjump_pad_insn_size,
+					      CORE_ADDR *adjusted_insn_addr,
+					      CORE_ADDR *adjusted_insn_addr_end,
+					      char *err)
 {
   uint32_t buf[256];
   uint32_t *p = buf;
@@ -1779,8 +1798,8 @@ ppc_install_fast_tracepoint_jump_pad (CORE_ADDR tpoint, CORE_ADDR tpaddr,
 
 /* Returns the minimum instruction length for installing a tracepoint.  */
 
-static int
-ppc_get_min_fast_tracepoint_insn_len (void)
+int
+ppc_target::get_min_fast_tracepoint_insn_len ()
 {
   return 4;
 }
@@ -3433,9 +3452,7 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  ppc_install_fast_tracepoint_jump_pad,
   ppc_emit_ops,
-  ppc_get_min_fast_tracepoint_insn_len,
   NULL, /* supports_range_stepping */
   ppc_supports_hardware_single_step,
   NULL, /* get_syscall_trapinfo */
