@@ -1,5 +1,10 @@
 2020-04-02  Tom Tromey  <tromey@adacore.com>
 
+	* f-lang.c (build_fortran_types): Use arch_type to initialize
+	builtin_complex_s32 in the TYPE_CODE_ERROR case.
+
+2020-04-02  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/read.c (partial_die_info::read): Do not create a vector
 	of attributes.
 
