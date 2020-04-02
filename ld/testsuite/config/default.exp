@@ -358,7 +358,7 @@ if { ![info exists NOCF_PROTECTION_CFLAGS] } then {
 	    append flags " [board_info [target_info name] ldflags]"
 	}
 
-	set basename "tmpdir/nopie[pid]"
+	set basename "tmpdir/available[pid]"
 	set src ${basename}.c
 	set output ${basename}
 	set f [open $src "w"]
@@ -367,12 +367,12 @@ if { ![info exists NOCF_PROTECTION_CFLAGS] } then {
 	if [is_remote host] {
 	    set src [remote_download host $src]
 	}
-	set nopie_available [run_host_cmd_yesno "$CC" "$flags -fcf-protection=none $src -o $output"]
+	set available [run_host_cmd_yesno "$CC" "$flags -fcf-protection=none $src -o $output"]
 	remote_file host delete $src
 	remote_file host delete $output
 	file delete $src
 
-	if { $nopie_available == 1 } then {
+	if { $available == 1 } then {
 	    set NOCF_PROTECTION_CFLAGS "-fcf-protection=none"
 	} else {
 	    set NOCF_PROTECTION_CFLAGS ""
