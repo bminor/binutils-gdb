@@ -385,10 +385,6 @@ ia64_target::low_arch_setup ()
   current_process ()->tdesc = tdesc_ia64;
 }
 
-
-struct linux_target_ops the_low_target = {
-};
-
 /* The linux target ops object.  */
 
 linux_process_target *the_linux_target = &the_ia64_target;

@@ -2992,13 +2992,6 @@ x86_target::get_ipa_tdesc_idx ()
   return i386_get_ipa_tdesc_idx (tdesc);
 }
 
-/* This is initialized assuming an amd64 target.
-   x86_arch_setup will correct it for i386 or amd64 targets.  */
-
-struct linux_target_ops the_low_target =
-{
-};
-
 /* The linux target ops object.  */
 
 linux_process_target *the_linux_target = &the_x86_target;

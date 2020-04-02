@@ -308,11 +308,6 @@ riscv_target::low_breakpoint_at (CORE_ADDR pc)
     return false;
 }
 
-/* RISC-V/Linux target operations.  */
-struct linux_target_ops the_low_target =
-{
-};
-
 /* The linux target ops object.  */
 
 linux_process_target *the_linux_target = &the_riscv_target;

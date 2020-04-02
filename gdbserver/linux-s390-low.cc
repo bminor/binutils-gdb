@@ -2856,9 +2856,6 @@ s390_target::emit_ops ()
     return &s390_emit_ops_impl;
 }
 
-struct linux_target_ops the_low_target = {
-};
-
 /* The linux target ops object.  */
 
 linux_process_target *the_linux_target = &the_s390_target;

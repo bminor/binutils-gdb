@@ -162,9 +162,6 @@ bfin_target::get_regs_info ()
   return &myregs_info;
 }
 
-struct linux_target_ops the_low_target = {
-};
-
 /* The linux target ops object.  */
 
 linux_process_target *the_linux_target = &the_bfin_target;

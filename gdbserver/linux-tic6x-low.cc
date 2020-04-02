@@ -200,8 +200,6 @@ static int tic6x_regmap_c62x[] = {
 
 #endif
 
-extern struct linux_target_ops the_low_target;
-
 static int *tic6x_regmap;
 static unsigned int tic6x_breakpoint;
 #define tic6x_breakpoint_len 4
@@ -413,9 +411,6 @@ tic6x_target::get_regs_info ()
 {
   return &myregs_info;
 }
-
-struct linux_target_ops the_low_target = {
-};
 
 #if GDB_SELF_TEST
 #include "gdbsupport/selftest.h"

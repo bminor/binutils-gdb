@@ -129,12 +129,6 @@ struct process_info_private
 
 struct lwp_info;
 
-struct linux_target_ops
-{
-};
-
-extern struct linux_target_ops the_low_target;
-
 /* Target ops definitions for a Linux target.  */
 
 class linux_process_target : public process_stratum_target

@@ -3167,10 +3167,6 @@ aarch64_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
     return arm_breakpoint_kind_from_current_state (pcptr);
 }
 
-struct linux_target_ops the_low_target =
-{
-};
-
 /* The linux target ops object.  */
 
 linux_process_target *the_linux_target = &the_aarch64_target;
