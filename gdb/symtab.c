@@ -2560,6 +2560,33 @@ lookup_symbol_in_objfile (struct objfile *objfile, enum block_enum block_index,
   return result;
 }
 
+/* Find the language for partial symbol with NAME.  */
+
+static enum language
+find_quick_global_symbol_language (const char *name, const domain_enum domain)
+{
+  for (objfile *objfile : current_program_space->objfiles ())
+    {
+      if (objfile->sf && objfile->sf->qf
+	  && objfile->sf->qf->lookup_global_symbol_language)
+	continue;
+      return language_unknown;
+    }
+
+  for (objfile *objfile : current_program_space->objfiles ())
+    {
+      bool symbol_found_p;
+      enum language lang
+	= objfile->sf->qf->lookup_global_symbol_language (objfile, name, domain,
+							  &symbol_found_p);
+      if (!symbol_found_p)
+	continue;
+      return lang;
+    }
+
+  return language_unknown;
+}
+
 /* Private data to be used with lookup_symbol_global_iterator_cb.  */
 
 struct global_or_static_sym_lookup_data
@@ -6144,6 +6171,16 @@ find_main_name (void)
 
   /* The languages above didn't identify the name of the main procedure.
      Fallback to "main".  */
+
+  /* Try to find language for main in psymtabs.  */
+  enum language lang
+    = find_quick_global_symbol_language ("main", VAR_DOMAIN);
+  if (lang != language_unknown)
+    {
+      set_main_name ("main", lang);
+      return;
+    }
+
   set_main_name ("main", language_unknown);
 }
 

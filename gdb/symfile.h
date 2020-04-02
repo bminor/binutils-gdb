@@ -183,6 +183,17 @@ struct quick_symbol_functions
 					    const char *name,
 					    domain_enum domain);
 
+  /* Check to see if the global symbol is defined in a "partial" symbol table
+     of OBJFILE. NAME is the name of the symbol to look for.  DOMAIN
+     indicates what sort of symbol to search for.
+
+     If found, sets *symbol_found_p to true and returns the symbol language.
+     defined, or NULL if no such symbol table exists.  */
+  enum language (*lookup_global_symbol_language) (struct objfile *objfile,
+						  const char *name,
+						  domain_enum domain,
+						  bool *symbol_found_p);
+
   /* Print statistics about any indices loaded for OBJFILE.  The
      statistics should be printed to gdb_stdout.  This is used for
      "maint print statistics".  */

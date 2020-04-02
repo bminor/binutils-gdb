@@ -1,3 +1,19 @@
+2020-04-02  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c (dwarf2_gdb_index_functions,
+	dwarf2_debug_names_functions): Init lookup_global_symbol_language with
+	NULL.
+	* psymtab.c (psym_lookup_global_symbol_language): New function.
+	(psym_functions): Init psym_lookup_global_symbol_language with
+	psym_lookup_global_symbol_language.
+	* symfile-debug.c (debug_sym_quick_functions): Init
+	lookup_global_symbol_language with NULL.
+	* symfile.c (set_initial_language): Remove fixme comment.
+	* symfile.h (struct quick_symbol_functions): Add
+	lookup_global_symbol_language.
+	* symtab.c (find_quick_global_symbol_language): New function.
+	(find_main_name): Use find_quick_global_symbol_language.
+
 2020-04-01  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* windows-tdep.c (is_linked_with_cygwin_dll): Fix style.

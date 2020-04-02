@@ -1,5 +1,9 @@
 2020-04-02  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/main-psymtab.exp: New file.
+
+2020-04-02  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.fortran/mixed-lang-stack.exp: Accept new complex printing style.
 
 2020-04-01  Tom Tromey  <tom@tromey.com>

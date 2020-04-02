@@ -362,6 +362,7 @@ static const struct quick_symbol_functions debug_sym_quick_functions =
   debug_qf_forget_cached_source_info,
   debug_qf_map_symtabs_matching_filename,
   debug_qf_lookup_symbol,
+  NULL,
   debug_qf_print_stats,
   debug_qf_dump,
   debug_qf_expand_symtabs_for_function,

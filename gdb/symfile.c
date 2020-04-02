@@ -1667,16 +1667,7 @@ symbol_file_command (const char *args, int from_tty)
     }
 }
 
-/* Set the initial language.
-
-   FIXME: A better solution would be to record the language in the
-   psymtab when reading partial symbols, and then use it (if known) to
-   set the language.  This would be a win for formats that encode the
-   language in an easily discoverable place, such as DWARF.  For
-   stabs, we can jump through hoops looking for specially named
-   symbols or try to intuit the language from the specific type of
-   stabs we find, but we can't do that until later when we read in
-   full symbols.  */
+/* Set the initial language.  */
 
 void
 set_initial_language (void)

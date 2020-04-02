@@ -521,6 +521,36 @@ psym_lookup_symbol (struct objfile *objfile,
   return stab_best;
 }
 
+/* Psymtab version of lookup_global_symbol_language.  See its definition in
+   the definition of quick_symbol_functions in symfile.h.  */
+
+static enum language
+psym_lookup_global_symbol_language (struct objfile *objfile, const char *name,
+				    domain_enum domain, bool *symbol_found_p)
+{
+  *symbol_found_p = false;
+  if (objfile->sf == NULL)
+    return language_unknown;
+
+  lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
+
+  for (partial_symtab *ps : require_partial_symbols (objfile, true))
+    {
+      struct partial_symbol *psym;
+      if (ps->readin_p ())
+	continue;
+
+      psym = lookup_partial_symbol (objfile, ps, lookup_name, 1, domain);
+      if (psym)
+	{
+	  *symbol_found_p = true;
+	  return psym->ginfo.language ();
+	}
+    }
+
+  return language_unknown;
+}
+
 /* Returns true if PSYM matches LOOKUP_NAME.  */
 
 static bool
@@ -1422,6 +1452,7 @@ const struct quick_symbol_functions psym_functions =
   psym_forget_cached_source_info,
   psym_map_symtabs_matching_filename,
   psym_lookup_symbol,
+  psym_lookup_global_symbol_language,
   psym_print_stats,
   psym_dump,
   psym_expand_symtabs_for_function,
