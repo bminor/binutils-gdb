@@ -61,6 +61,8 @@ public:
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
+  bool supports_z_point_type (char z_type) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -682,17 +684,17 @@ s390_target::low_breakpoint_at (CORE_ADDR pc)
 
 /* Breakpoint/Watchpoint support.  */
 
-/* The "supports_z_point_type" linux_target_ops method.  */
+/* The "supports_z_point_type" target ops method.  */
 
-static int
-s390_supports_z_point_type (char z_type)
+bool
+s390_target::supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
     case Z_PACKET_SW_BP:
-      return 1;
+      return true;
     default:
-      return 0;
+      return false;
     }
 }
 
@@ -2836,7 +2838,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  s390_supports_z_point_type,
   NULL,
   NULL,
   NULL,

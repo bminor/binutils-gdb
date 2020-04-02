@@ -108,6 +108,8 @@ public:
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
+  bool supports_z_point_type (char z_type) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -587,8 +589,8 @@ struct x86_dr_low_type x86_dr_low =
 
 /* Breakpoint/Watchpoint support.  */
 
-static int
-x86_supports_z_point_type (char z_type)
+bool
+x86_target::supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
@@ -596,9 +598,9 @@ x86_supports_z_point_type (char z_type)
     case Z_PACKET_HW_BP:
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_ACCESS_WP:
-      return 1;
+      return true;
     default:
-      return 0;
+      return false;
     }
 }
 
@@ -2910,7 +2912,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_supports_z_point_type,
   x86_insert_point,
   x86_remove_point,
   x86_stopped_by_watchpoint,

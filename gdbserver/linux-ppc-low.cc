@@ -54,6 +54,8 @@ public:
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
+  bool supports_z_point_type (char z_type) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -329,18 +331,18 @@ ppc_target::low_breakpoint_at (CORE_ADDR where)
    Handling software breakpoint at server side, so tracepoints
    and breakpoints can be inserted at the same location.  */
 
-static int
-ppc_supports_z_point_type (char z_type)
+bool
+ppc_target::supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
     case Z_PACKET_SW_BP:
-      return 1;
+      return true;
     case Z_PACKET_HW_BP:
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_ACCESS_WP:
     default:
-      return 0;
+      return false;
     }
 }
 
@@ -3408,7 +3410,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  ppc_supports_z_point_type,
   ppc_insert_point,
   ppc_remove_point,
   NULL,

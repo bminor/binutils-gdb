@@ -5829,17 +5829,6 @@ linux_process_target::read_auxv (CORE_ADDR offset, unsigned char *myaddr,
   return n;
 }
 
-/* These breakpoint and watchpoint related wrapper functions simply
-   pass on the function call if the target has registered a
-   corresponding function.  */
-
-bool
-linux_process_target::supports_z_point_type (char z_type)
-{
-  return (the_low_target.supports_z_point_type != NULL
-	  && the_low_target.supports_z_point_type (z_type));
-}
-
 int
 linux_process_target::insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 				    int size, raw_breakpoint *bp)

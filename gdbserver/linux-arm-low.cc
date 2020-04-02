@@ -70,6 +70,8 @@ public:
 
   bool supports_software_single_step () override;
 
+  bool supports_z_point_type (char z_type) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -556,8 +558,8 @@ update_registers_callback (thread_info *thread, int watch, int i)
     linux_stop_lwp (lwp);
 }
 
-static int
-arm_supports_z_point_type (char z_type)
+bool
+arm_target::supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
@@ -566,10 +568,10 @@ arm_supports_z_point_type (char z_type)
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_READ_WP:
     case Z_PACKET_ACCESS_WP:
-      return 1;
+      return true;
     default:
       /* Leave the handling of sw breakpoints with the gdb client.  */
-      return 0;
+      return false;
     }
 }
 
@@ -1093,7 +1095,6 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  arm_supports_z_point_type,
   arm_insert_point,
   arm_remove_point,
   arm_stopped_by_watchpoint,

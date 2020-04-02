@@ -63,6 +63,8 @@ public:
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
+  bool supports_z_point_type (char z_type) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -288,10 +290,10 @@ aarch64_get_debug_reg_state (pid_t pid)
   return &proc->priv->arch_private->debug_reg_state;
 }
 
-/* Implementation of linux_target_ops method "supports_z_point_type".  */
+/* Implementation of target ops method "supports_z_point_type".  */
 
-static int
-aarch64_supports_z_point_type (char z_type)
+bool
+aarch64_target::supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
@@ -300,9 +302,9 @@ aarch64_supports_z_point_type (char z_type)
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_READ_WP:
     case Z_PACKET_ACCESS_WP:
-      return 1;
+      return true;
     default:
-      return 0;
+      return false;
     }
 }
 
@@ -3104,7 +3106,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_supports_z_point_type,
   aarch64_insert_point,
   aarch64_remove_point,
   aarch64_stopped_by_watchpoint,

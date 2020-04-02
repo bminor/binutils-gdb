@@ -133,7 +133,6 @@ struct linux_target_ops
 {
   /* Breakpoint and watchpoint related functions.  See target.h for
      comments.  */
-  int (*supports_z_point_type) (char z_type);
   int (*insert_point) (enum raw_bkpt_type type, CORE_ADDR addr,
 		       int size, struct raw_breakpoint *bp);
   int (*remove_point) (enum raw_bkpt_type type, CORE_ADDR addr,
@@ -278,8 +277,6 @@ public:
 
   int read_auxv (CORE_ADDR offset, unsigned char *myaddr,
 		 unsigned int len) override;
-
-  bool supports_z_point_type (char z_type) override;
 
   int insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 		    int size, raw_breakpoint *bp) override;

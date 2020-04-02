@@ -161,7 +161,6 @@ m32r_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* supports_z_point_type */
   NULL, /* insert_point */
   NULL, /* remove_point */
   NULL, /* stopped_by_watchpoint */

@@ -35,6 +35,8 @@ public:
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
 
+  bool supports_z_point_type (char z_type) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -492,17 +494,17 @@ mips_linux_prepare_to_resume (struct lwp_info *lwp)
     }
 }
 
-static int
-mips_supports_z_point_type (char z_type)
+bool
+mips_target::supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_READ_WP:
     case Z_PACKET_ACCESS_WP:
-      return 1;
+      return true;
     default:
-      return 0;
+      return false;
     }
 }
 
@@ -968,7 +970,6 @@ mips_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  mips_supports_z_point_type,
   mips_insert_point,
   mips_remove_point,
   mips_stopped_by_watchpoint,
