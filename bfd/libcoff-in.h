@@ -114,9 +114,11 @@ typedef struct coff_tdata
      used by ARM code.  */
   flagword flags;
 
-  /* coff-stgo32 EXE stub header after BFD tdata has been allocated.  Its data
-     is kept in internal_filehdr.go32stub beforehand.  */
-  char *go32stub;
+  /* A stub (extra data prepended before the COFF image) and its size.
+     Used by coff-go32-exe, it contains executable data that loads the
+     COFF object into memory.  */
+  char * stub;
+  bfd_size_type stub_size;
 } coff_data_type;
 
 /* Tdata for pe image files.  */

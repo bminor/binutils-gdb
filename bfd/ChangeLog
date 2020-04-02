@@ -1,3 +1,42 @@
+2020-04-02  Jan W. Jagersma  <jwjagersma@gmail.com>
+
+	* bfdio.c (bfd_bread, bfd_tell, bfd_seek, bfd_mmap): Always add
+	bfd->origin to file offset.
+	* bfdwin.c (bfd_get_file_window): Likewise.
+	* bfd.c: Clarify the use of the bfd->origin field.
+	* bfd-in2.h: Regenerate.
+	* coff-i386.c: Don't include go32exe.h. Allow overriding
+	coff_write_object_contents via COFF_WRITE_CONTENTS.
+	* coff-stgo32.c (go32exe_cleanup, go32exe_mkobject)
+	(go32exe_write_object_contents): New functions.
+	(go32exe_temp_stub, go32exe_temp_stub_size): New static globals.
+	(COFF_WRITE_CONTENTS, GO32EXE_DEFAULT_STUB_SIZE): Define.
+	(create_go32_stub): Remove check for 2k size limit.  Read stub
+	from go32exe_temp_stub if present.
+	(go32_stubbed_coff_bfd_copy_private_bfd_data): Allocate and
+	copy variable-length stub.
+	(go32_check_format): Read stub to go32exe_temp_stub, set
+	origin, return go32exe_cleanup.
+	(adjust_filehdr_in_post, adjust_filehdr_out_pre)
+	(adjust_filehdr_out_post, adjust_scnhdr_in_post)
+	(adjust_scnhdr_out_pre, adjust_scnhdr_out_post)
+	(adjust_aux_in_post, adjust_aux_out_pre, adjust_aux_out_post):
+	Remove functions and their associated #defines.
+	* coffcode.h (coff_mkobject_hook): Remove stub copying code.
+	* libcoff-in.h: (struct coff_tdata): New field stub_size.
+	Rename field go32stub to stub.
+	* libcoff.h: Regenerate.
+	* coff-stgo32.c (go32_check_format): Rename to...
+	(go32exe_check_format): ...this.
+	(go32_stubbed_coff_bfd_copy_private_bfd_data): Rename to...
+	(go32exe_copy_private_bfd_data): ...this.
+	(stub_bytes): Rename to...
+	(go32exe_default_stub): ...this.
+	(create_go32_stub): Rename to...
+	(go32exe_create_stub): ...this.
+	* coff-stgo32.c (go32exe_copy_private_bfd_data): Avoid realloc
+	when possible.
+
 2020-04-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/25749
