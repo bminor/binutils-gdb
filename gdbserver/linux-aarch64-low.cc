@@ -65,6 +65,8 @@ public:
 
   bool supports_z_point_type (char z_type) override;
 
+  bool supports_tracepoints () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -715,13 +717,13 @@ aarch64_target::get_regs_info ()
   return &regs_info_aarch64;
 }
 
-/* Implementation of linux_target_ops method "supports_tracepoints".  */
+/* Implementation of target ops method "supports_tracepoints".  */
 
-static int
-aarch64_supports_tracepoints (void)
+bool
+aarch64_target::supports_tracepoints ()
 {
   if (current_thread == NULL)
-    return 1;
+    return true;
   else
     {
       /* We don't support tracepoints on aarch32 now.  */
@@ -3147,7 +3149,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_supports_tracepoints,
   aarch64_get_thread_area,
   aarch64_install_fast_tracepoint_jump_pad,
   aarch64_emit_ops,

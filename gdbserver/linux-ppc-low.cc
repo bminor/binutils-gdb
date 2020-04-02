@@ -62,6 +62,9 @@ public:
 
   void low_supply_ptrace_register (regcache *regcache, int regno,
 				   const char *buf) override;
+
+  bool supports_tracepoints () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -1024,12 +1027,12 @@ ppc_target::low_arch_setup ()
       }
 }
 
-/* Implementation of linux_target_ops method "supports_tracepoints".  */
+/* Implementation of target ops method "supports_tracepoints".  */
 
-static int
-ppc_supports_tracepoints (void)
+bool
+ppc_target::supports_tracepoints ()
 {
-  return 1;
+  return true;
 }
 
 /* Get the thread area address.  This is used to recognize which
@@ -3428,7 +3431,6 @@ ppc_get_ipa_tdesc_idx (void)
 }
 
 struct linux_target_ops the_low_target = {
-  ppc_supports_tracepoints,
   ppc_get_thread_area,
   ppc_install_fast_tracepoint_jump_pad,
   ppc_emit_ops,

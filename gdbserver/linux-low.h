@@ -131,9 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Returns true if the low target supports tracepoints.  */
-  int (*supports_tracepoints) (void);
-
   /* Fill ADDRP with the thread area address of LWPID.  Returns 0 on
      success, -1 on failure.  */
   int (*get_thread_area) (int lwpid, CORE_ADDR *addrp);
@@ -295,8 +292,6 @@ public:
   int read_loadmap (const char *annex, CORE_ADDR offset,
 		    unsigned char *myaddr, unsigned int len) override;
 #endif
-
-  bool supports_tracepoints () override;
 
   CORE_ADDR read_pc (regcache *regcache) override;
 

@@ -6441,15 +6441,6 @@ linux_process_target::get_ipa_tdesc_idx ()
   return (*the_low_target.get_ipa_tdesc_idx) ();
 }
 
-bool
-linux_process_target::supports_tracepoints ()
-{
-  if (*the_low_target.supports_tracepoints == NULL)
-    return false;
-
-  return (*the_low_target.supports_tracepoints) ();
-}
-
 CORE_ADDR
 linux_process_target::read_pc (regcache *regcache)
 {

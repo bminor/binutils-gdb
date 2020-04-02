@@ -63,6 +63,8 @@ public:
 
   bool supports_z_point_type (char z_type) override;
 
+  bool supports_tracepoints () override;
+
   void low_collect_ptrace_register (regcache *regcache, int regno,
 				    char *buf) override;
 
@@ -770,12 +772,12 @@ s390_target::get_regs_info ()
   return &myregs_info;
 }
 
-/* The "supports_tracepoints" linux_target_ops method.  */
+/* The "supports_tracepoints" target ops method.  */
 
-static int
-s390_supports_tracepoints (void)
+bool
+s390_target::supports_tracepoints ()
 {
-  return 1;
+  return true;
 }
 
 /* Implementation of linux_target_ops method "get_thread_area".  */
@@ -2845,7 +2847,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  s390_supports_tracepoints,
   s390_get_thread_area,
   s390_install_fast_tracepoint_jump_pad,
   s390_emit_ops,

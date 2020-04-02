@@ -108,6 +108,8 @@ public:
 
   void process_qsupported (char **features, int count) override;
 
+  bool supports_tracepoints () override;
+
 protected:
 
   void low_arch_setup () override;
@@ -1109,10 +1111,10 @@ x86_get_syscall_trapinfo (struct regcache *regcache, int *sysno)
     collect_register_by_name (regcache, "orig_eax", sysno);
 }
 
-static int
-x86_supports_tracepoints (void)
+bool
+x86_target::supports_tracepoints ()
 {
-  return 1;
+  return true;
 }
 
 static void
@@ -2967,7 +2969,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_supports_tracepoints,
   x86_get_thread_area,
   x86_install_fast_tracepoint_jump_pad,
   x86_emit_ops,

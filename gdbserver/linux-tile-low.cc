@@ -224,7 +224,6 @@ tile_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  NULL, /* supports_tracepoints */
   NULL, /* get_thread_area */
   NULL, /* install_fast_tracepoint_jump_pad */
   NULL, /* emit_ops */
