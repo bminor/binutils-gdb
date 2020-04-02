@@ -1,3 +1,10 @@
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* linux-low.h (struct linux_target_ops): Update the comment for
+	'cannot_store_register' to return 0 or 1.
+	* linux-ppc-low.cc (ppc_cannot_store_register): Return 1 instead
+	of 2.
+
 2020-03-20  Simon Marchi  <simon.marchi@efficios.com>
 
 	* config.in: Re-generate.

@@ -152,13 +152,13 @@ ppc_cannot_store_register (int regno)
   /* Some kernels do not allow us to store fpscr.  */
   if (!(ppc_hwcap & PPC_FEATURE_HAS_SPE)
       && regno == find_regno (tdesc, "fpscr"))
-    return 2;
+    return 1;
 #endif
 
   /* Some kernels do not allow us to store orig_r3 or trap.  */
   if (regno == find_regno (tdesc, "orig_r3")
       || regno == find_regno (tdesc, "trap"))
-    return 2;
+    return 1;
 
   return 0;
 }

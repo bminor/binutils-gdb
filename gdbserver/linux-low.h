@@ -135,11 +135,10 @@ struct linux_target_ops
   void (*arch_setup) (void);
 
   const struct regs_info *(*regs_info) (void);
-  int (*cannot_fetch_register) (int);
 
-  /* Returns 0 if we can store the register, 1 if we can not
-     store the register, and 2 if failure to store the register
-     is acceptable.  */
+  /* Return 0 if we can fetch/store the register, 1 if we cannot
+     fetch/store the register.  */
+  int (*cannot_fetch_register) (int);
   int (*cannot_store_register) (int);
 
   /* Hook to fetch a register in some non-standard way.  Used for
