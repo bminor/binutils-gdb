@@ -856,7 +856,7 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
      then the user inserts a breakpoint inside the range.  In that
      case we need to report the breakpoint PC.  */
   if ((!lwp->stepping || lwp->stop_pc == sw_breakpoint_pc)
-      && (*the_low_target.breakpoint_at) (sw_breakpoint_pc))
+      && low_breakpoint_at (sw_breakpoint_pc))
     lwp->stop_reason = TARGET_STOPPED_BY_SW_BREAKPOINT;
 
   if (hardware_breakpoint_inserted_here (pc))
@@ -1710,7 +1710,7 @@ linux_process_target::thread_still_has_status_pending (thread_info *thread)
 
 #if !USE_SIGTRAP_SIGINFO
       else if (lp->stop_reason == TARGET_STOPPED_BY_SW_BREAKPOINT
-	       && !(*the_low_target.breakpoint_at) (pc))
+	       && !low_breakpoint_at (pc))
 	{
 	  if (debug_threads)
 	    debug_printf ("previous SW breakpoint of %ld gone\n",
@@ -3185,7 +3185,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	  event_child->stop_pc += increment_pc;
 	  low_set_pc (regcache, event_child->stop_pc);
 
-	  if (!(*the_low_target.breakpoint_at) (event_child->stop_pc))
+	  if (!low_breakpoint_at (event_child->stop_pc))
 	    event_child->stop_reason = TARGET_STOPPED_BY_NO_REASON;
 	}
     }
@@ -3200,7 +3200,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
        && (WSTOPSIG (w) == SIGTRAP
 	   || ((WSTOPSIG (w) == SIGILL
 		|| WSTOPSIG (w) == SIGSEGV)
-	       && (*the_low_target.breakpoint_at) (event_child->stop_pc))));
+	       && low_breakpoint_at (event_child->stop_pc))));
 
   if (maybe_internal_trap)
     {

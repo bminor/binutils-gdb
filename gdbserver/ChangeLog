@@ -1,5 +1,112 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn the 'breakpoint_at' linux target op into a method of
+	linux_process_target.
+
+	* linux-low.h (struct linux_target_ops): Remove the op.
+	(class linux_process_target) <low_breakpoint_at>: Declare.
+
+	Update the callers below:
+
+	* linux-low.cc (linux_process_target::save_stop_reason)
+	(linux_process_target::thread_still_has_status_pending)
+	(linux_process_target::wait_1)
+
+	* linux-x86-low.cc (class x86_target)
+	<low_breakpoint_at>: Declare.
+	(x86_breakpoint_at): Turn into...
+	(x86_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-aarch64-low.cc (class aarch64_target)
+	<low_breakpoint_at>: Declare.
+	(aarch64_breakpoint_at): Turn into...
+	(aarch64_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-arm-low.cc (class arm_target)
+	<low_breakpoint_at>: Declare.
+	(arm_target::low_breakpoint_at): Define.
+	(the_low_target): Remove the op field.
+	* linux-bfin-low.cc (class bfin_target)
+	<low_breakpoint_at>: Declare.
+	(bfin_breakpoint_at): Turn into...
+	(bfin_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-cris-low.cc (class cris_target)
+	<low_breakpoint_at>: Declare.
+	(cris_breakpoint_at): Turn into...
+	(cris_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-crisv32-low.cc (class crisv32_target)
+	<low_breakpoint_at>: Declare.
+	(crisv32_breakpoint_at): Turn into...
+	(crisv32_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ia64-low.cc (class ia64_target)
+	<low_breakpoint_at>: Declare.
+	(ia64_target::low_breakpoint_at): Define.
+	* linux-m32r-low.cc (class m32r_target)
+	<low_breakpoint_at>: Declare.
+	(m32r_breakpoint_at): Turn into...
+	(m32r_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-m68k-low.cc (class m68k_target)
+	<low_breakpoint_at>: Declare.
+	(m68k_breakpoint_at): Turn into...
+	(m68k_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-mips-low.cc (class mips_target)
+	<low_breakpoint_at>: Declare.
+	(mips_breakpoint_at): Turn into...
+	(mips_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-nios2-low.cc (class nios2_target)
+	<low_breakpoint_at>: Declare.
+	(nios2_breakpoint_at): Turn into...
+	(nios2_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-ppc-low.cc (class ppc_target)
+	<low_breakpoint_at>: Declare.
+	(ppc_breakpoint_at): Turn into...
+	(ppc_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-riscv-low.cc (class riscv_target)
+	<low_breakpoint_at>: Declare.
+	(riscv_breakpoint_at): Turn into...
+	(riscv_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-s390-low.cc (class s390_target)
+	<low_breakpoint_at>: Declare.
+	(s390_breakpoint_at): Turn into...
+	(s390_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sh-low.cc (class sh_target)
+	<low_breakpoint_at>: Declare.
+	(sh_breakpoint_at): Turn into...
+	(sh_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-sparc-low.cc (class sparc_target)
+	<low_breakpoint_at>: Declare.
+	(sparc_breakpoint_at): Turn into...
+	(sparc_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tic6x-low.cc (class tic6x_target)
+	<low_breakpoint_at>: Declare.
+	(tic6x_breakpoint_at): Turn into...
+	(tic6x_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-tile-low.cc (class tile_target)
+	<low_breakpoint_at>: Declare.
+	(tile_breakpoint_at): Turn into...
+	(tile_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+	* linux-xtensa-low.cc (class xtensa_target)
+	<low_breakpoint_at>: Declare.
+	(xtensa_breakpoint_at): Turn into...
+	(xtensa_target::low_breakpoint_at): ...this.
+	(the_low_target): Remove the op field.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn the 'decr_pc_after_break' linux_target_ops field into
 	a method of linux_process_target.
 

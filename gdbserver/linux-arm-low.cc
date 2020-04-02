@@ -85,6 +85,8 @@ protected:
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 
   std::vector<CORE_ADDR> low_get_next_pcs (regcache *regcache) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
 };
 
 /* The singleton target ops object.  */
@@ -125,6 +127,12 @@ const gdb_byte *
 arm_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   return arm_sw_breakpoint_from_kind (kind, size);
+}
+
+bool
+arm_target::low_breakpoint_at (CORE_ADDR pc)
+{
+  return arm_breakpoint_at (pc);
 }
 
 /* Information describing the hardware breakpoint capabilities.  */
@@ -1085,7 +1093,6 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  arm_breakpoint_at,
   arm_supports_z_point_type,
   arm_insert_point,
   arm_remove_point,

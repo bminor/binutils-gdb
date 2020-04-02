@@ -61,6 +61,8 @@ protected:
   CORE_ADDR low_get_pc (regcache *regcache) override;
 
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
 };
 
 /* The singleton target ops object.  */
@@ -271,18 +273,18 @@ tic6x_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
   supply_register_by_name (regcache, "PC", newpc.buf);
 }
 
-static int
-tic6x_breakpoint_at (CORE_ADDR where)
+bool
+tic6x_target::low_breakpoint_at (CORE_ADDR where)
 {
   unsigned int insn;
 
-  the_target->read_memory (where, (unsigned char *) &insn, 4);
+  read_memory (where, (unsigned char *) &insn, 4);
   if (insn == tic6x_breakpoint)
-    return 1;
+    return true;
 
   /* If necessary, recognize more trap instructions here.  GDB only uses the
      one.  */
-  return 0;
+  return false;
 }
 
 /* Fetch the thread-local storage pointer for libthread_db.  */
@@ -421,7 +423,6 @@ tic6x_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  tic6x_breakpoint_at,
   NULL, /* supports_z_point_type */
   NULL, /* insert_point */
   NULL, /* remove_point */

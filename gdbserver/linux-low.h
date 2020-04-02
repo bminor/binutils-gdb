@@ -131,8 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  int (*breakpoint_at) (CORE_ADDR pc);
-
   /* Breakpoint and watchpoint related functions.  See target.h for
      comments.  */
   int (*supports_z_point_type) (char z_type);
@@ -665,6 +663,9 @@ protected:
      Targets that override this method should also override
      'supports_software_single_step' to return true.  */
   virtual std::vector<CORE_ADDR> low_get_next_pcs (regcache *regcache);
+
+  /* Return true if there is a breakpoint at PC.  */
+  virtual bool low_breakpoint_at (CORE_ADDR pc) = 0;
 
   /* How many bytes the PC should be decremented after a break.  */
   virtual int low_decr_pc_after_break ();

@@ -76,6 +76,8 @@ protected:
   CORE_ADDR low_get_pc (regcache *regcache) override;
 
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
 };
 
 /* The singleton target ops object.  */
@@ -236,21 +238,20 @@ aarch64_target::low_set_pc (regcache *regcache, CORE_ADDR pc)
    (aarch64_default_breakpoint).  */
 static const gdb_byte aarch64_breakpoint[] = {0x00, 0x00, 0x20, 0xd4};
 
-/* Implementation of linux_target_ops method "breakpoint_at".  */
+/* Implementation of linux target ops method "low_breakpoint_at".  */
 
-static int
-aarch64_breakpoint_at (CORE_ADDR where)
+bool
+aarch64_target::low_breakpoint_at (CORE_ADDR where)
 {
   if (is_64bit_tdesc ())
     {
       gdb_byte insn[aarch64_breakpoint_len];
 
-      the_target->read_memory (where, (unsigned char *) &insn,
-			       aarch64_breakpoint_len);
+      read_memory (where, (unsigned char *) &insn, aarch64_breakpoint_len);
       if (memcmp (insn, aarch64_breakpoint, aarch64_breakpoint_len) == 0)
-	return 1;
+	return true;
 
-      return 0;
+      return false;
     }
   else
     return arm_breakpoint_at (where);
@@ -3103,7 +3104,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_breakpoint_at,
   aarch64_supports_z_point_type,
   aarch64_insert_point,
   aarch64_remove_point,

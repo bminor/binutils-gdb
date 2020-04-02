@@ -42,6 +42,8 @@ protected:
   bool low_cannot_store_register (int regno) override;
 
   bool low_fetch_register (regcache *regcache, int regno) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
 };
 
 /* The singleton target ops object.  */
@@ -52,6 +54,13 @@ const gdb_byte *
 ia64_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   gdb_assert_no_reached ("target op sw_breakpoint_from_kind is not "
+			 "implemented by this target");
+}
+
+bool
+ia64_target::low_breakpoint_at (CORE_ADDR pc)
+{
+  gdb_assert_no_reached ("linux target op low_breakpoint_at is not "
 			 "implemented by this target");
 }
 

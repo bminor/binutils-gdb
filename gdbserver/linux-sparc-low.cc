@@ -65,6 +65,8 @@ protected:
   CORE_ADDR low_get_pc (regcache *regcache) override;
 
   /* No low_set_pc is needed.  */
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
 };
 
 /* The singleton target ops object.  */
@@ -278,20 +280,20 @@ sparc_target::sw_breakpoint_from_kind (int kind, int *size)
   return sparc_breakpoint;
 }
 
-static int
-sparc_breakpoint_at (CORE_ADDR where)
+bool
+sparc_target::low_breakpoint_at (CORE_ADDR where)
 {
   unsigned char insn[INSN_SIZE];
 
-  the_target->read_memory (where, (unsigned char *) insn, sizeof (insn));
+  read_memory (where, (unsigned char *) insn, sizeof (insn));
 
   if (memcmp (sparc_breakpoint, insn, sizeof (insn)) == 0)
-    return 1;
+    return true;
 
   /* If necessary, recognize more trap instructions here.  GDB only
      uses TRAP Always.  */
 
-  return 0;
+  return false;
 }
 
 void
@@ -339,7 +341,6 @@ sparc_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  sparc_breakpoint_at,
   NULL,  /* supports_z_point_type */
   NULL, NULL, NULL, NULL,
   NULL, NULL

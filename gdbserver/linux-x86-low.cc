@@ -123,6 +123,8 @@ protected:
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 
   int low_decr_pc_after_break () override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
 };
 
 /* The singleton target ops object.  */
@@ -560,16 +562,16 @@ x86_target::low_decr_pc_after_break ()
 static const gdb_byte x86_breakpoint[] = { 0xCC };
 #define x86_breakpoint_len 1
 
-static int
-x86_breakpoint_at (CORE_ADDR pc)
+bool
+x86_target::low_breakpoint_at (CORE_ADDR pc)
 {
   unsigned char c;
 
-  the_target->read_memory (pc, &c, 1);
+  read_memory (pc, &c, 1);
   if (c == 0xCC)
-    return 1;
+    return true;
 
-  return 0;
+  return false;
 }
 
 /* Low-level function vector.  */
@@ -2908,7 +2910,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  x86_breakpoint_at,
   x86_supports_z_point_type,
   x86_insert_point,
   x86_remove_point,

@@ -48,6 +48,8 @@ protected:
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 
   int low_decr_pc_after_break () override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
 };
 
 /* The singleton target ops object.  */
@@ -121,19 +123,19 @@ bfin_target::sw_breakpoint_from_kind (int kind, int *size)
   return bfin_breakpoint;
 }
 
-static int
-bfin_breakpoint_at (CORE_ADDR where)
+bool
+bfin_target::low_breakpoint_at (CORE_ADDR where)
 {
   unsigned char insn[bfin_breakpoint_len];
 
   read_inferior_memory(where, insn, bfin_breakpoint_len);
   if (insn[0] == bfin_breakpoint[0]
       && insn[1] == bfin_breakpoint[1])
-    return 1;
+    return true;
 
   /* If necessary, recognize more trap instructions here.  GDB only uses the
      one.  */
-  return 0;
+  return false;
 }
 
 void
@@ -169,7 +171,6 @@ bfin_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  bfin_breakpoint_at,
   NULL, /* supports_z_point_type */
   NULL, /* insert_point */
   NULL, /* remove_point */

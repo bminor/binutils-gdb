@@ -76,6 +76,8 @@ protected:
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
 
   int low_decr_pc_after_break () override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
 };
 
 /* The singleton target ops object.  */
@@ -670,8 +672,8 @@ s390_target::low_arch_setup ()
 }
 
 
-static int
-s390_breakpoint_at (CORE_ADDR pc)
+bool
+s390_target::low_breakpoint_at (CORE_ADDR pc)
 {
   unsigned char c[s390_breakpoint_len];
   read_inferior_memory (pc, c, s390_breakpoint_len);
@@ -2834,7 +2836,6 @@ s390_emit_ops (void)
 }
 
 struct linux_target_ops the_low_target = {
-  s390_breakpoint_at,
   s390_supports_z_point_type,
   NULL,
   NULL,

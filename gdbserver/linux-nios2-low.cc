@@ -54,6 +54,8 @@ protected:
   CORE_ADDR low_get_pc (regcache *regcache) override;
 
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
 };
 
 /* The singleton target ops object.  */
@@ -163,24 +165,24 @@ nios2_target::sw_breakpoint_from_kind (int kind, int *size)
   return (const gdb_byte *) &nios2_breakpoint;
 }
 
-/* Implement the breakpoint_at linux_target_ops method.  */
+/* Implement the low_breakpoint_at linux target ops method.  */
 
-static int
-nios2_breakpoint_at (CORE_ADDR where)
+bool
+nios2_target::low_breakpoint_at (CORE_ADDR where)
 {
   unsigned int insn;
 
   /* For R2, first check for the 2-byte CDX trap.n breakpoint encoding.  */
 #if defined(__nios2_arch__) && __nios2_arch__ == 2
-  the_target->read_memory (where, (unsigned char *) &insn, 2);
+  read_memory (where, (unsigned char *) &insn, 2);
   if (insn == CDX_BREAKPOINT)
-    return 1;
+    return true;
 #endif
 
-  the_target->read_memory (where, (unsigned char *) &insn, 4);
+  read_memory (where, (unsigned char *) &insn, 4);
   if (insn == nios2_breakpoint)
-    return 1;
-  return 0;
+    return true;
+  return false;
 }
 
 /* Fetch the thread-local storage pointer for libthread_db.  */
@@ -277,7 +279,6 @@ nios2_target::get_regs_info ()
 
 struct linux_target_ops the_low_target =
 {
-  nios2_breakpoint_at,
 };
 
 /* The linux target ops object.  */

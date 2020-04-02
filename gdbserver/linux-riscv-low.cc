@@ -57,6 +57,8 @@ protected:
   CORE_ADDR low_get_pc (regcache *regcache) override;
 
   void low_set_pc (regcache *regcache, CORE_ADDR newpc) override;
+
+  bool low_breakpoint_at (CORE_ADDR pc) override;
 };
 
 /* The singleton target ops object.  */
@@ -283,10 +285,10 @@ riscv_target::sw_breakpoint_from_kind (int kind, int *size)
     }
 }
 
-/* Implementation of linux_target_ops method "breakpoint_at".  */
+/* Implementation of linux target ops method "low_breakpoint_at".  */
 
-static int
-riscv_breakpoint_at (CORE_ADDR pc)
+bool
+riscv_target::low_breakpoint_at (CORE_ADDR pc)
 {
   union
     {
@@ -301,15 +303,14 @@ riscv_breakpoint_at (CORE_ADDR pc)
 	      && target_read_memory (pc + sizeof (buf.insn), buf.bytes,
 				     sizeof (buf.insn)) == 0
 	      && buf.insn == riscv_ibreakpoint[1])))
-    return 1;
+    return true;
   else
-    return 0;
+    return false;
 }
 
 /* RISC-V/Linux target operations.  */
 struct linux_target_ops the_low_target =
 {
-  riscv_breakpoint_at,
 };
 
 /* The linux target ops object.  */
