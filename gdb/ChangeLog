@@ -1,3 +1,8 @@
+2020-04-02  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (partial_die_info::read): Do not create a vector
+	of attributes.
+
 2020-04-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Bernd Edlinger <bernd.edlinger@hotmail.de>
 	    Tom Tromey  <tromey@adacore.com>

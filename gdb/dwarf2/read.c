@@ -17879,18 +17879,17 @@ partial_die_info::read (const struct die_reader_specs *reader,
   int has_high_pc_attr = 0;
   int high_pc_relative = 0;
 
-  std::vector<struct attribute> attr_vec (abbrev.num_attrs);
   for (i = 0; i < abbrev.num_attrs; ++i)
     {
+      attribute attr;
       bool need_reprocess;
-      info_ptr = read_attribute (reader, &attr_vec[i], &abbrev.attrs[i],
+      info_ptr = read_attribute (reader, &attr, &abbrev.attrs[i],
 				 info_ptr, &need_reprocess);
       /* String and address offsets that need to do the reprocessing have
          already been read at this point, so there is no need to wait until
 	 the loop terminates to do the reprocessing.  */
       if (need_reprocess)
-	read_attribute_reprocess (reader, &attr_vec[i]);
-      attribute &attr = attr_vec[i];
+	read_attribute_reprocess (reader, &attr);
       /* Store the data if it is of an attribute we want to keep in a
          partial symbol table.  */
       switch (attr.name)
