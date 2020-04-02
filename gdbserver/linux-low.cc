@@ -6016,16 +6016,11 @@ linux_process_target::qxfer_osdata (const char *annex,
   return linux_common_xfer_osdata (annex, readbuf, offset, len);
 }
 
-/* Convert a native/host siginfo object, into/from the siginfo in the
-   layout of the inferiors' architecture.  */
-
-static void
-siginfo_fixup (siginfo_t *siginfo, gdb_byte *inf_siginfo, int direction)
+void
+linux_process_target::siginfo_fixup (siginfo_t *siginfo,
+				     gdb_byte *inf_siginfo, int direction)
 {
-  int done = 0;
-
-  if (the_low_target.siginfo_fixup != NULL)
-    done = the_low_target.siginfo_fixup (siginfo, inf_siginfo, direction);
+  bool done = low_siginfo_fixup (siginfo, inf_siginfo, direction);
 
   /* If there was no callback, or the callback didn't do anything,
      then just do a straight memcpy.  */
@@ -6036,6 +6031,13 @@ siginfo_fixup (siginfo_t *siginfo, gdb_byte *inf_siginfo, int direction)
       else
 	memcpy (inf_siginfo, siginfo, sizeof (siginfo_t));
     }
+}
+
+bool
+linux_process_target::low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
+					 int direction)
+{
+  return false;
 }
 
 bool

@@ -131,12 +131,6 @@ struct lwp_info;
 
 struct linux_target_ops
 {
-  /* Hook to convert from target format to ptrace format and back.
-     Returns true if any conversion was done; false otherwise.
-     If DIRECTION is 1, then copy from INF to NATIVE.
-     If DIRECTION is 0, copy from NATIVE to INF.  */
-  int (*siginfo_fixup) (siginfo_t *native, gdb_byte *inf, int direction);
-
   /* Hook to call when a new process is created or attached to.
      If extra per-process architecture-specific data is needed,
      allocate it here.  */
@@ -628,6 +622,11 @@ private:
      registers meanwhile, we have the cached data we can rely on.  */
   bool check_stopped_by_watchpoint (lwp_info *child);
 
+  /* Convert a native/host siginfo object, into/from the siginfo in the
+     layout of the inferiors' architecture.  */
+  void siginfo_fixup (siginfo_t *siginfo, gdb_byte *inf_siginfo,
+		      int direction);
+
 protected:
   /* The architecture-specific "low" methods are listed below.  */
 
@@ -682,6 +681,13 @@ protected:
 
   virtual void low_supply_ptrace_register (regcache *regcache, int regno,
 					   const char *buf);
+
+  /* Hook to convert from target format to ptrace format and back.
+     Returns true if any conversion was done; false otherwise.
+     If DIRECTION is 1, then copy from INF to NATIVE.
+     If DIRECTION is 0, copy from NATIVE to INF.  */
+  virtual bool low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
+				  int direction);
 
   /* How many bytes the PC should be decremented after a break.  */
   virtual int low_decr_pc_after_break ();

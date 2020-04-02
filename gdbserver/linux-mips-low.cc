@@ -986,7 +986,6 @@ mips_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* siginfo_fixup */
   mips_linux_new_process,
   mips_linux_delete_process,
   mips_linux_new_thread,

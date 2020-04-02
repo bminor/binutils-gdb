@@ -265,7 +265,6 @@ m68k_supports_hardware_single_step (void)
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* siginfo_fixup */
   NULL, /* new_process */
   NULL, /* delete_process */
   NULL, /* new_thread */

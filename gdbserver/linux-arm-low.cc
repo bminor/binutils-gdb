@@ -1105,7 +1105,6 @@ arm_target::get_regs_info ()
 }
 
 struct linux_target_ops the_low_target = {
-  NULL, /* siginfo_fixup */
   arm_new_process,
   arm_delete_process,
   arm_new_thread,

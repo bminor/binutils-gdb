@@ -141,6 +141,10 @@ protected:
   /* collect_ptrace_register/supply_ptrace_register are not needed in the
      native i386 case (no registers smaller than an xfer unit), and are not
      used in the biarch case (HAVE_LINUX_USRREGS is not defined).  */
+
+  /* Need to fix up i386 siginfo if host is amd64.  */
+  bool low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
+			  int direction) override;
 };
 
 /* The singleton target ops object.  */
@@ -757,8 +761,8 @@ x86_debug_reg_state (pid_t pid)
    from INF to PTRACE.  If DIRECTION is 0, copy from PTRACE to
    INF.  */
 
-static int
-x86_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
+bool
+x86_target::low_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
 {
 #ifdef __x86_64__
   unsigned int machine;
@@ -775,7 +779,7 @@ x86_siginfo_fixup (siginfo_t *ptrace, gdb_byte *inf, int direction)
 					     FIXUP_X32);
 #endif
 
-  return 0;
+  return false;
 }
 
 static int use_xml;
@@ -2926,8 +2930,6 @@ x86_get_ipa_tdesc_idx (void)
 
 struct linux_target_ops the_low_target =
 {
-  /* need to fix up i386 siginfo if host is amd64 */
-  x86_siginfo_fixup,
   x86_linux_new_process,
   x86_linux_delete_process,
   x86_linux_new_thread,

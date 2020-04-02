@@ -90,6 +90,9 @@ protected:
   bool low_stopped_by_watchpoint () override;
 
   CORE_ADDR low_stopped_data_address () override;
+
+  bool low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
+			  int direction) override;
 };
 
 /* The singleton target ops object.  */
@@ -493,10 +496,11 @@ ps_get_thread_area (struct ps_prochandle *ph,
 				     is_64bit_tdesc ());
 }
 
-/* Implementation of linux_target_ops method "siginfo_fixup".  */
+/* Implementation of linux target ops method "low_siginfo_fixup".  */
 
-static int
-aarch64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
+bool
+aarch64_target::low_siginfo_fixup (siginfo_t *native, gdb_byte *inf,
+				   int direction)
 {
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
   if (!is_64bit_tdesc ())
@@ -508,10 +512,10 @@ aarch64_linux_siginfo_fixup (siginfo_t *native, gdb_byte *inf, int direction)
 	aarch64_siginfo_from_compat_siginfo (native,
 					     (struct compat_siginfo *) inf);
 
-      return 1;
+      return true;
     }
 
-  return 0;
+  return false;
 }
 
 /* Implementation of linux_target_ops method "new_process".  */
@@ -3113,7 +3117,6 @@ aarch64_supports_hardware_single_step (void)
 
 struct linux_target_ops the_low_target =
 {
-  aarch64_linux_siginfo_fixup,
   aarch64_linux_new_process,
   aarch64_linux_delete_process,
   aarch64_linux_new_thread,
