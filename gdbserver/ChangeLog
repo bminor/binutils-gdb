@@ -1,5 +1,69 @@
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	Turn some more static methods in linux-low into private methods
+	of linux_process_target.
+
+	* linux-low.cc (get_pc): Turn into...
+	(linux_process_target::get_pc): ...this.
+	(save_stop_reason): Turn into...
+	(linux_process_target::save_stop_reason): ...this.
+	(thread_still_has_status_pending_p): Turn into...
+	(linux_process_target::thread_still_has_status_pending): ...this.
+	(status_pending_p_callback): Turn into...
+	(linux_process_target::status_pending_p_callback): ...this.
+	(resume_stopped_resumed_lwps): Turn into...
+	(linux_process_target::resume_stopped_resumed_lwps): ...this.
+	(install_software_single_step_breakpoints): Turn into...
+	(linux_process_target::install_software_single_step_breakpoints):
+	...this.
+	(single_step): Turn into...
+	(linux_process_target::single_step): ...this.
+	(linux_resume_one_lwp_throw): Turn into...
+	(linux_process_target::resume_one_lwp_throw): ...this.
+	(linux_resume_one_lwp): Turn into...
+	(linux_process_target::resume_one_lwp): ...this.
+	(resume_status_pending_p): Turn into...
+	(linux_process_target::resume_status_pending): ...this.
+	(need_step_over_p): Turn into...
+	(linux_process_target::thread_needs_step_over): ...this.
+	(linux_resume_one_thread): Turn into...
+	(linux_process_target::resume_one_thread): ...this.
+	(proceed_one_lwp): Turn into...
+	(linux_process_target::proceed_one_lwp): ...this.
+	(unsuspend_and_proceed_one_lwp): Turn into...
+	(linux_process_target::unsuspend_and_proceed_one_lwp): ...this.
+
+	Update the calls/references to the above functions below.
+
+	(linux_process_target::handle_extended_wait)
+	(linux_process_target::filter_event)
+	(linux_process_target::wait_for_event_filtered)
+	(linux_process_target::wait_1)
+	(linux_process_target::move_out_of_jump_pad)
+	(linux_process_target::start_step_over)
+	(linux_process_target::resume)
+	(linux_process_target::proceed_all_lwps)
+	(regsets_store_inferior_registers)
+	(linux_process_target::store_register)
+
+	* linux-low.h (class linux_process_target)
+	<get_pc>
+	<save_stop_reason>
+	<thread_still_has_status_pending>
+	<status_pending_p_callback>
+	<resume_stopped_resumed_lwps>
+	<install_software_single_step_breakpoints>
+	<single_step>
+	<resume_one_lwp_throw>
+	<resume_one_lwp>
+	<resume_status_pending>
+	<thread_needs_step_over>
+	<resume_one_thread>
+	<proceed_one_lwp>
+	<unsuspend_and_proceed_one_lwp>: Declare.
+
+2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	Turn the 'fetch_register' linux target op into a method of
 	linux_process_target.
 

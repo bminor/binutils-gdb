@@ -580,6 +580,84 @@ private:
   void usr_store_inferior_registers (const regs_info *regs_info,
 				     regcache *regcache, int regno, int all);
 
+  /* Return the PC as read from the regcache of LWP, without any
+     adjustment.  */
+  CORE_ADDR get_pc (lwp_info *lwp);
+
+  /* Called when the LWP stopped for a signal/trap.  If it stopped for a
+     trap check what caused it (breakpoint, watchpoint, trace, etc.),
+     and save the result in the LWP's stop_reason field.  If it stopped
+     for a breakpoint, decrement the PC if necessary on the lwp's
+     architecture.  Returns true if we now have the LWP's stop PC.  */
+  bool save_stop_reason (lwp_info *lwp);
+
+  /* Resume execution of LWP.  If STEP is nonzero, single-step it.  If
+     SIGNAL is nonzero, give it that signal.  */
+  void resume_one_lwp_throw (lwp_info *lwp, int step, int signal,
+			     siginfo_t *info);
+
+  /* Like resume_one_lwp_throw, but no error is thrown if the LWP
+     disappears while we try to resume it.  */
+  void resume_one_lwp (lwp_info *lwp, int step, int signal, siginfo_t *info);
+
+  /* This function is called once per thread.  We check the thread's
+     last resume request, which will tell us whether to resume, step, or
+     leave the thread stopped.  Any signal the client requested to be
+     delivered has already been enqueued at this point.
+
+     If any thread that GDB wants running is stopped at an internal
+     breakpoint that needs stepping over, we start a step-over operation
+     on that particular thread, and leave all others stopped.  */
+  void proceed_one_lwp (thread_info *thread, lwp_info *except);
+
+  /* This function is called once per thread.  We check the thread's
+     resume request, which will tell us whether to resume, step, or
+     leave the thread stopped; and what signal, if any, it should be
+     sent.
+
+     For threads which we aren't explicitly told otherwise, we preserve
+     the stepping flag; this is used for stepping over gdbserver-placed
+     breakpoints.
+
+     If pending_flags was set in any thread, we queue any needed
+     signals, since we won't actually resume.  We already have a pending
+     event to report, so we don't need to preserve any step requests;
+     they should be re-issued if necessary.  */
+  void resume_one_thread (thread_info *thread, bool leave_all_stopped);
+
+  /* Return true if this lwp has an interesting status pending.  */
+  bool status_pending_p_callback (thread_info *thread, ptid_t ptid);
+
+  /* Resume LWPs that are currently stopped without any pending status
+     to report, but are resumed from the core's perspective.  */
+  void resume_stopped_resumed_lwps (thread_info *thread);
+
+  /* Unsuspend THREAD, except EXCEPT, and proceed.  */
+  void unsuspend_and_proceed_one_lwp (thread_info *thread, lwp_info *except);
+
+  /* Return true if this lwp still has an interesting status pending.
+     If not (e.g., it had stopped for a breakpoint that is gone), return
+     false.  */
+  bool thread_still_has_status_pending (thread_info *thread);
+
+  /* Return true if this lwp is to-be-resumed and has an interesting
+     status pending.  */
+  bool resume_status_pending (thread_info *thread);
+
+  /* Return true if this lwp that GDB wants running is stopped at an
+     internal breakpoint that we need to step over.  It assumes that
+     any required STOP_PC adjustment has already been propagated to
+     the inferior's regcache.  */
+  bool thread_needs_step_over (thread_info *thread);
+
+  /* Single step via hardware or software single step.
+     Return 1 if hardware single stepping, 0 if software single stepping
+     or can't single step.  */
+  int single_step (lwp_info* lwp);
+
+  /* Install breakpoints for software single stepping.  */
+  void install_software_single_step_breakpoints (lwp_info *lwp);
+
 protected:
   /* The architecture-specific "low" methods are listed below.  */
 
