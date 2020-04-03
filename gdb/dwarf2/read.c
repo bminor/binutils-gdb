@@ -15553,12 +15553,14 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
      the underlying type if needed.  */
   if (TYPE_TARGET_TYPE (type) != NULL && !TYPE_STUB (TYPE_TARGET_TYPE (type)))
     {
-      TYPE_UNSIGNED (type) = TYPE_UNSIGNED (TYPE_TARGET_TYPE (type));
+      struct type *underlying_type = TYPE_TARGET_TYPE (type);
+      underlying_type = check_typedef (underlying_type);
+      TYPE_UNSIGNED (type) = TYPE_UNSIGNED (underlying_type);
       if (TYPE_LENGTH (type) == 0)
-	TYPE_LENGTH (type) = TYPE_LENGTH (TYPE_TARGET_TYPE (type));
+	TYPE_LENGTH (type) = TYPE_LENGTH (underlying_type);
       if (TYPE_RAW_ALIGN (type) == 0
-	  && TYPE_RAW_ALIGN (TYPE_TARGET_TYPE (type)) != 0)
-	set_type_align (type, TYPE_RAW_ALIGN (TYPE_TARGET_TYPE (type)));
+	  && TYPE_RAW_ALIGN (underlying_type) != 0)
+	set_type_align (type, TYPE_RAW_ALIGN (underlying_type));
     }
 
   TYPE_DECLARED_CLASS (type) = dwarf2_flag_true_p (die, DW_AT_enum_class, cu);

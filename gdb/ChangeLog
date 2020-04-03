@@ -1,3 +1,8 @@
+2020-04-03  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/25325
+	* dwarf2/read.c (read_enumeration_type): Fix typed enum attributes.
+
 2020-04-03  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2/loc.c (disassemble_dwarf_expression) <DW_OP_const_type>:

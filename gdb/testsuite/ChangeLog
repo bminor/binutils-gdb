@@ -1,3 +1,9 @@
+2020-04-03  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/25325
+	* gdb.cp/typed-enum.cc: New test.
+	* gdb.cp/typed-enum.exp: New file.
+
 2020-04-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.dwarf2/dw2-inline-small-func-lbls.c: New file.
