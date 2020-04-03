@@ -1,3 +1,13 @@
+2020-04-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.dwarf2/dw2-inline-many-frames.exp (get_func_info): Delete.
+	* gdb.dwarf2/dw2-inline-small-func.exp: Pass options to
+	get_func_info.
+	(get_func_info): Delete.
+	* gdb.dwarf2/dw2-is-stmt-2.exp (get_func_info): Delete.
+	* gdb.dwarf2/dw2-is-stmt.exp (get_func_info): Delete.
+	* lib/dwarf.exp (get_func_info): New function.
+
 2020-04-13  Tom de Vries  <tdevries@suse.de>
 
 	* lib/ada.exp (find_ada_tool): Pass --GCC and -B to gnatlink, similar

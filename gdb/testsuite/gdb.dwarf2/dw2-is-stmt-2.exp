@@ -40,20 +40,6 @@ if !$gcc_compiled {
 
 standard_testfile dw2-is-stmt-2.c dw2-is-stmt-2.S
 
-# Extract the start, length, and end for function called NAME and
-# create suitable variables in the callers scope.
-proc get_func_info { name } {
-    global srcdir subdir srcfile
-
-    upvar 1 "${name}_start" func_start
-    upvar 1 "${name}_len" func_len
-    upvar 1 "${name}_end" func_end
-
-    lassign [function_range ${name} [list ${srcdir}/${subdir}/$srcfile]] \
-	func_start func_len
-    set func_end "$func_start + $func_len"
-}
-
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     global srcdir subdir srcfile

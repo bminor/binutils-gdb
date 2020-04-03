@@ -164,6 +164,22 @@ proc function_range { func src {options {debug}} } {
     return [list "${func}_label - $func_label_offset" $func_length]
 }
 
+# Extract the start, length, and end for function called NAME and
+# create suitable variables in the callers scope.
+proc get_func_info { name {options {debug}} } {
+    global srcdir subdir srcfile
+
+    upvar 1 "${name}_start" func_start
+    upvar 1 "${name}_len" func_len
+    upvar 1 "${name}_end" func_end
+
+    lassign [function_range ${name} \
+		 [list ${srcdir}/${subdir}/$srcfile] \
+		 ${options}]  \
+	func_start func_len
+    set func_end "$func_start + $func_len"
+}
+
 # A DWARF assembler.
 #
 # All the variables in this namespace are private to the
