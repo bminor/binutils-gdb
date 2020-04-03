@@ -1,3 +1,14 @@
+2020-06-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.cp/step-and-next-inline.exp (do_test): Skip all tests in the
+	use_header case.
+	* gdb.dwarf2/dw2-inline-header-1.exp: New file.
+	* gdb.dwarf2/dw2-inline-header-2.exp: New file.
+	* gdb.dwarf2/dw2-inline-header-3.exp: New file.
+	* gdb.dwarf2/dw2-inline-header-lbls.c: New file.
+	* gdb.dwarf2/dw2-inline-header.c: New file.
+	* gdb.dwarf2/dw2-inline-header.h: New file.
+
 2020-05-30  Pedro Alves  <palves@redhat.com>
 
 	* gdb.linespec/cp-replace-typedefs-ns-template.cc: New.

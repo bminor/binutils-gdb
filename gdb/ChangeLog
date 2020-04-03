@@ -1,3 +1,13 @@
+2020-06-01  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dwarf2/read.c (class lnp_state_machine) <m_last_address>: New
+	member variable.
+	<m_stmt_at_address>: New member variable.
+	(lnp_state_machine::record_line): Don't record some lines, update
+	tracking of is_stmt at the same address.
+	(lnp_state_machine::lnp_state_machine): Initialise new member
+	variables.
+
 2020-06-01  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
 	* config/i386/i386gnu.mn [%_S.o %_U.o] (COMPILE.post): Add
