@@ -1,3 +1,8 @@
+2020-04-03  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/loc.c (disassemble_dwarf_expression) <DW_OP_const_type>:
+	Read constant block.
+
 2020-04-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb_bfd.h: Include gdbsupport/byte-vector.h.
