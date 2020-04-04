@@ -12792,10 +12792,9 @@ static int
 queue_and_load_dwo_tu (void **slot, void *info)
 {
   struct dwo_unit *dwo_unit = (struct dwo_unit *) *slot;
-  struct dwarf2_per_cu_data *per_cu = (struct dwarf2_per_cu_data *) info;
+  dwarf2_cu *cu = (dwarf2_cu *) info;
   ULONGEST signature = dwo_unit->signature;
-  struct signatured_type *sig_type =
-    lookup_dwo_signatured_type (per_cu->cu, signature);
+  signatured_type *sig_type = lookup_dwo_signatured_type (cu, signature);
 
   if (sig_type != NULL)
     {
@@ -12804,9 +12803,9 @@ queue_and_load_dwo_tu (void **slot, void *info)
       /* We pass NULL for DEPENDENT_CU because we don't yet know if there's
 	 a real dependency of PER_CU on SIG_TYPE.  That is detected later
 	 while processing PER_CU.  */
-      if (maybe_queue_comp_unit (NULL, sig_cu, per_cu->cu->language))
-	load_full_type_unit (sig_cu, per_cu->cu->per_objfile);
-      per_cu->imported_symtabs_push (sig_cu);
+      if (maybe_queue_comp_unit (NULL, sig_cu, cu->language))
+	load_full_type_unit (sig_cu, cu->per_objfile);
+      cu->per_cu->imported_symtabs_push (sig_cu);
     }
 
   return 1;
@@ -12833,7 +12832,7 @@ queue_and_load_all_dwo_tus (struct dwarf2_per_cu_data *per_cu)
   dwo_file = dwo_unit->dwo_file;
   if (dwo_file->tus != NULL)
     htab_traverse_noresize (dwo_file->tus.get (), queue_and_load_dwo_tu,
-			    per_cu);
+			    per_cu->cu);
 }
 
 /* Read in various DIEs.  */
