@@ -82,6 +82,12 @@ public:
     return strcmp (m_name.get (), str) == 0;
   }
 
+  /* Return the hash value based on the name of the entry.  */
+  hashval_t hash_name () const
+  {
+    return htab_hash_string (m_name.get ());
+  }
+
   /* A static function that can be passed to the htab hash system to be
      used as a callback that deletes an item from the hash.  */
   static void deleter (void *arg)
@@ -1602,8 +1608,18 @@ completion_tracker::discard_completions ()
 	return entry->is_name_eq (name_str);
       };
 
+  /* Callback used by the hash table to compute the hash value for an
+     existing entry.  This is needed when expanding the hash table.  */
+  static auto entry_hash_func
+    = [] (const void *arg) -> hashval_t
+      {
+	const completion_hash_entry *entry
+	  = (const completion_hash_entry *) arg;
+	return entry->hash_name ();
+      };
+
   m_entries_hash = htab_create_alloc (INITIAL_COMPLETION_HTAB_SIZE,
-				      htab_hash_string, entry_eq_func,
+				      entry_hash_func, entry_eq_func,
 				      completion_hash_entry::deleter,
 				      xcalloc, xfree);
 }

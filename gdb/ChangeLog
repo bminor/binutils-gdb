@@ -1,3 +1,10 @@
+2020-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* completer.c (class completion_tracker::completion_hash_entry)
+	<hash_name>: New member function.
+	(completion_tracker::discard_completions): New callback to hash a
+	completion_hash_entry, pass this to htab_create_alloc.
+
 2016-01-20  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* windows-nat.c (windows_make_so): Warn rather than stopping with
