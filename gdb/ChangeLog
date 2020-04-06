@@ -1,3 +1,8 @@
+2020-04-06  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (read_base_type) <DW_ATE_complex_float>: Handle
+	TYPE_CODE_ERROR.
+
 2020-04-06  Kamil Rytarowski  <n54@gmx.com>
 
 	* nbsd-tdep.c: Include "gdbarch.h".

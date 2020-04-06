@@ -16910,7 +16910,19 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
       case DW_ATE_complex_float:
 	type = dwarf2_init_complex_target_type (cu, objfile, bits / 2, name,
 						byte_order);
-	type = init_complex_type (name, type);
+	if (TYPE_CODE (type) == TYPE_CODE_ERROR)
+	  {
+	    if (name == nullptr)
+	      {
+		struct obstack *obstack
+		  = &cu->per_cu->dwarf2_per_objfile->objfile->objfile_obstack;
+		name = obconcat (obstack, "_Complex ", TYPE_NAME (type),
+				 nullptr);
+	      }
+	    type = init_type (objfile, TYPE_CODE_ERROR, bits, name);
+	  }
+	else
+	  type = init_complex_type (name, type);
 	break;
       case DW_ATE_decimal_float:
 	type = init_decfloat_type (objfile, bits, name);
