@@ -1,3 +1,10 @@
+2020-04-06  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/variant-record/proc.adb: New file.
+	* gdb.ada/variant-record/value.adb: New file.
+	* gdb.ada/variant-record/value.s: New file.
+	* gdb.ada/variant-record.exp: New file.
+
 2020-04-03  Hannes Domani  <ssbssa@yahoo.de>
 
 	PR gdb/25325

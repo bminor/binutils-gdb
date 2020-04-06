@@ -1,5 +1,11 @@
 2020-04-06  Tom Tromey  <tromey@adacore.com>
 
+	* ada-valprint.c (print_variant_part): Extract the variant field.
+	(print_field_values): Use the field as the outer value when
+	recursing.
+
+2020-04-06  Tom Tromey  <tromey@adacore.com>
+
 	* sh-nbsd-tdep.c: Include nbsd-tdep.h.
 	* ppc-nbsd-tdep.c: Include nbsd-tdep.h.
 	* mips-nbsd-tdep.c (mipsnbsd_init_abi): Add missing ";".
