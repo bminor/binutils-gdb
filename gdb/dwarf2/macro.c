@@ -512,9 +512,9 @@ dwarf_decode_macro_bytes (struct dwarf2_per_objfile *dwarf2_per_objfile,
 		    body = dwz->read_string (objfile, str_offset);
 		  }
 		else
-		  body = dwarf2_per_objfile->str.read_string (objfile,
-							      str_offset,
-							      "DW_FORM_strp");
+		  body = dwarf2_per_objfile->per_bfd->str.read_string (objfile,
+								       str_offset,
+								       "DW_FORM_strp");
 	      }
 
 	    is_define = (macinfo_type == DW_MACRO_define
