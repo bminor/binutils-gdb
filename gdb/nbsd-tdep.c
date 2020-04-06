@@ -23,6 +23,7 @@
 #include "solib-svr4.h"
 #include "nbsd-tdep.h"
 #include "gdbarch.h"
+#include "objfiles.h"
 
 /* FIXME: kettenis/20060115: We should really eliminate the next two
    functions completely.  */
@@ -339,6 +340,20 @@ nbsd_gdb_signal_to_target (struct gdbarch *gdbarch,
   return -1;
 }
 
+/* Shared library resolver handling.  */
+
+static CORE_ADDR
+nbsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  struct bound_minimal_symbol msym;
+
+  msym = lookup_minimal_symbol ("_rtld_bind_start", NULL, NULL);
+  if (msym.minsym && BMSYMBOL_VALUE_ADDRESS (msym) == pc)
+    return frame_unwind_caller_pc (get_current_frame ());
+  else
+    return find_solib_trampoline_target (get_current_frame (), pc);
+}
+
 /* See nbsd-tdep.h.  */
 
 void
@@ -346,4 +361,5 @@ nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   set_gdbarch_gdb_signal_from_target (gdbarch, nbsd_gdb_signal_from_target);
   set_gdbarch_gdb_signal_to_target (gdbarch, nbsd_gdb_signal_to_target);
+  set_gdbarch_skip_solib_resolver (gdbarch, nbsd_skip_solib_resolver);
 }

@@ -1,3 +1,9 @@
+2020-04-07  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-tdep.c: Include "objfiles.h".
+	(nbsd_skip_solib_resolver): New.
+	(nbsd_init_abi): Call set_gdbarch_skip_solib_resolver().
+
 2020-04-07  Nitika Achra  <Nitika.Achra@amd.com>
 
 	* dwarf2/loc.c (loclist_describe_location): Call the function decode_debug_loclists_
