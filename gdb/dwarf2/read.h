@@ -136,6 +136,9 @@ private:
 			const dwarf2_debug_sections &names);
 
 public:
+  /* The corresponding BFD.  */
+  bfd *obfd;
+
   /* Objects that can be shared across objfiles are stored in this
      obstack or on the psymtab obstack, while objects that are
      objfile-specific are stored on the objfile obstack.  */
@@ -578,8 +581,7 @@ struct signatured_type
    there is no .gnu_debugaltlink section in the file.  Error if there
    is such a section but the file cannot be found.  */
 
-extern struct dwz_file *dwarf2_get_dwz_file
-    (struct dwarf2_per_objfile *dwarf2_per_objfile);
+extern dwz_file *dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd);
 
 /* Return the type of the DIE at DIE_OFFSET in the CU named by
    PER_CU.  */

@@ -1761,7 +1761,8 @@ save_gdb_index_command (const char *arg, int from_tty)
 	  try
 	    {
 	      const char *basename = lbasename (objfile_name (objfile));
-	      const dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
+	      const dwz_file *dwz
+		= dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
 	      const char *dwz_basename = NULL;
 
 	      if (dwz != NULL)
