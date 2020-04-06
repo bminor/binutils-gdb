@@ -1599,7 +1599,8 @@ static void dwarf2_mark (struct dwarf2_cu *);
 static void dwarf2_clear_marks (struct dwarf2_per_cu_data *);
 
 static struct type *get_die_type_at_offset (sect_offset,
-					    struct dwarf2_per_cu_data *);
+					    dwarf2_per_cu_data *per_cu,
+					    dwarf2_per_objfile *per_objfile);
 
 static struct type *get_die_type (struct die_info *die, struct dwarf2_cu *cu);
 
@@ -10556,7 +10557,7 @@ read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu)
 	  struct type *type;
 	  sect_offset sect_off = attr->get_ref_die_offset ();
 
-	  type = get_die_type_at_offset (sect_off, cu->per_cu);
+	  type = get_die_type_at_offset (sect_off, cu->per_cu, cu->per_objfile);
 	  if (type != NULL && TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
 	    {
 	      /* This declaration is a global namespace alias.  Add
@@ -21351,13 +21352,14 @@ lookup_die_type (struct die_info *die, const struct attribute *attr,
 
       per_cu = dwarf2_find_containing_comp_unit (sect_off, 1,
 						 dwarf2_per_objfile);
-      this_type = get_die_type_at_offset (sect_off, per_cu);
+      this_type = get_die_type_at_offset (sect_off, per_cu, dwarf2_per_objfile);
     }
   else if (attr->form_is_ref ())
     {
       sect_offset sect_off = attr->get_ref_die_offset ();
 
-      this_type = get_die_type_at_offset (sect_off, cu->per_cu);
+      this_type = get_die_type_at_offset (sect_off, cu->per_cu,
+					  dwarf2_per_objfile);
     }
   else if (attr->form == DW_FORM_ref_sig8)
     {
@@ -22557,10 +22559,11 @@ dwarf2_fetch_die_type_sect_off (sect_offset sect_off,
 
 struct type *
 dwarf2_get_die_type (cu_offset die_offset,
-		     struct dwarf2_per_cu_data *per_cu)
+		     dwarf2_per_cu_data *per_cu,
+		     dwarf2_per_objfile *per_objfile)
 {
   sect_offset die_offset_sect = per_cu->sect_off + to_underlying (die_offset);
-  return get_die_type_at_offset (die_offset_sect, per_cu);
+  return get_die_type_at_offset (die_offset_sect, per_cu, per_objfile);
 }
 
 /* Follow type unit SIG_TYPE referenced by SRC_DIE.
@@ -23750,10 +23753,10 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 
 static struct type *
 get_die_type_at_offset (sect_offset sect_off,
-			struct dwarf2_per_cu_data *per_cu)
+			dwarf2_per_cu_data *per_cu,
+			dwarf2_per_objfile *dwarf2_per_objfile)
 {
   struct dwarf2_per_cu_offset_and_type *slot, ofs;
-  struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
 
   if (dwarf2_per_objfile->die_type_hash == NULL)
     return NULL;
@@ -23774,7 +23777,7 @@ get_die_type_at_offset (sect_offset sect_off,
 static struct type *
 get_die_type (struct die_info *die, struct dwarf2_cu *cu)
 {
-  return get_die_type_at_offset (die->sect_off, cu->per_cu);
+  return get_die_type_at_offset (die->sect_off, cu->per_cu, cu->per_objfile);
 }
 
 /* Add a dependence relationship from CU to REF_PER_CU.  */

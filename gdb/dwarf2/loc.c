@@ -673,7 +673,7 @@ public:
 
   struct type *get_base_type (cu_offset die_offset, int size) override
   {
-    struct type *result = dwarf2_get_die_type (die_offset, per_cu);
+    struct type *result = dwarf2_get_die_type (die_offset, per_cu, per_objfile);
     if (result == NULL)
       error (_("Could not find type for DW_OP_const_type"));
     if (size != 0 && TYPE_LENGTH (result) != size)
@@ -4162,7 +4162,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 
 	    data = safe_read_uleb128 (data, end, &ul);
 	    cu_offset offset = (cu_offset) ul;
-	    type = dwarf2_get_die_type (offset, per_cu);
+	    type = dwarf2_get_die_type (offset, per_cu, per_objfile);
 	    fprintf_filtered (stream, "<");
 	    type_print (type, "", stream, -1);
 	    fprintf_filtered (stream, " [0x%s]> %d",
@@ -4178,7 +4178,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 
 	    data = safe_read_uleb128 (data, end, &ul);
 	    cu_offset type_die = (cu_offset) ul;
-	    type = dwarf2_get_die_type (type_die, per_cu);
+	    type = dwarf2_get_die_type (type_die, per_cu, per_objfile);
 	    fprintf_filtered (stream, "<");
 	    type_print (type, "", stream, -1);
 	    fprintf_filtered (stream, " [0x%s]>",
@@ -4202,7 +4202,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	    data = safe_read_uleb128 (data, end, &ul);
 	    cu_offset type_die = (cu_offset) ul;
 
-	    type = dwarf2_get_die_type (type_die, per_cu);
+	    type = dwarf2_get_die_type (type_die, per_cu, per_objfile);
 	    fprintf_filtered (stream, "<");
 	    type_print (type, "", stream, -1);
 	    fprintf_filtered (stream, " [0x%s]> [$%s]",
@@ -4225,7 +4225,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	      {
 		struct type *type;
 
-		type = dwarf2_get_die_type (type_die, per_cu);
+		type = dwarf2_get_die_type (type_die, per_cu, per_objfile);
 		fprintf_filtered (stream, "<");
 		type_print (type, "", stream, -1);
 		fprintf_filtered (stream, " [0x%s]>",

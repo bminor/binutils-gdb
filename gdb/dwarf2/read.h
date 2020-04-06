@@ -569,7 +569,8 @@ extern dwz_file *dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd);
    PER_CU.  */
 
 struct type *dwarf2_get_die_type (cu_offset die_offset,
-				  struct dwarf2_per_cu_data *per_cu);
+				  dwarf2_per_cu_data *per_cu,
+				  dwarf2_per_objfile *per_objfile);
 
 /* Given an index in .debug_addr, fetch the value.
    NOTE: This can be called during dwarf expression evaluation,
