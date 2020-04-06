@@ -22,6 +22,7 @@
 #include "osabi.h"
 
 #include "vax-tdep.h"
+#include "nbsd-tdep.h"
 #include "solib-svr4.h"
 
 /* NetBSD ELF.  */

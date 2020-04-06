@@ -27,6 +27,7 @@
 
 #include "hppa-tdep.h"
 #include "hppa-bsd-tdep.h"
+#include "nbsd-tdep.h"
 #include "gdbarch.h"
 
 /* From <machine/mcontext.h>.  */

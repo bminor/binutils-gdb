@@ -1,5 +1,13 @@
 2020-04-06  Tom Tromey  <tromey@adacore.com>
 
+	* sh-nbsd-tdep.c: Include nbsd-tdep.h.
+	* ppc-nbsd-tdep.c: Include nbsd-tdep.h.
+	* mips-nbsd-tdep.c (mipsnbsd_init_abi): Add missing ";".
+	* arm-nbsd-tdep.c: Include nbsd-tdep.h.
+	* hppa-nbsd-tdep.c: Include nbsd-tdep.h.
+
+2020-04-06  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/read.c (read_base_type) <DW_ATE_complex_float>: Handle
 	TYPE_CODE_ERROR.
 
