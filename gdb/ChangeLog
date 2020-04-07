@@ -1,5 +1,16 @@
 2020-04-07  Nitika Achra  <Nitika.Achra@amd.com>
 
+	* dwarf2/loc.c (enum debug_loc_kind): Add a new kind DEBUG_LOC_OFFSET_PAIR.
+	(dwarf2_find_location_expression): Call the function decode_debug_loclists_
+	addresses if DWARF version is 5 or more. DW_LLE_start* or DW_LLE_offset_pair
+	with DW_LLE_base_addressx are being emitted in DWARFv5 instead of DW_LLE_GNU*.
+	Add applicable base address if the entry is DW_LLE_offset_pair from DWO.
+	(decode_debug_loclists_addresses): Return DEBUG_LOC_OFFSET_PAIR instead of
+	DEBUG_LOC_START_END in case of DW_LLE_offset_pair.
+
+
+2020-04-07  Nitika Achra  <Nitika.Achra@amd.com>
+
 	* dwarf2/read.c (cu_debug_loc_section): Added the declaration for the function.
 	(read_loclist_index): New function definition.
 	(lookup_loclist_base): New function definition.

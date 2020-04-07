@@ -92,6 +92,11 @@ enum debug_loc_kind
      as in .debug_loc.  */
   DEBUG_LOC_START_LENGTH = 3,
 
+  /* This is followed by two unsigned LEB128 operands. The values of these
+     operands are the starting and ending offsets, respectively, relative to
+     the applicable base address.  */
+  DEBUG_LOC_OFFSET_PAIR = 4,
+
   /* An internal value indicating there is insufficient data.  */
   DEBUG_LOC_BUFFER_OVERFLOW = -1,
 
@@ -232,7 +237,7 @@ decode_debug_loclists_addresses (struct dwarf2_per_cu_data *per_cu,
 	return DEBUG_LOC_BUFFER_OVERFLOW;
       *high = u64;
       *new_ptr = loc_ptr;
-      return DEBUG_LOC_START_END;
+      return DEBUG_LOC_OFFSET_PAIR;
     /* Following cases are not supported yet.  */
     case DW_LLE_startx_endx:
     case DW_LLE_start_end:
@@ -332,7 +337,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
       enum debug_loc_kind kind;
       const gdb_byte *new_ptr = NULL; /* init for gcc -Wall */
 
-      if (baton->from_dwo)
+      if (baton->per_cu->version () < 5 && baton->from_dwo)
 	kind = decode_debug_loc_dwo_addresses (baton->per_cu,
 					       loc_ptr, buf_end, &new_ptr,
 					       &low, &high, byte_order);
@@ -358,6 +363,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	  continue;
 	case DEBUG_LOC_START_END:
 	case DEBUG_LOC_START_LENGTH:
+	case DEBUG_LOC_OFFSET_PAIR:
 	  break;
 	case DEBUG_LOC_BUFFER_OVERFLOW:
 	case DEBUG_LOC_INVALID_ENTRY:
@@ -369,9 +375,11 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 
       /* Otherwise, a location expression entry.
 	 If the entry is from a DWO, don't add base address: the entry is from
-	 .debug_addr which already has the DWARF "base address".  We still add
-	 base_offset in case we're debugging a PIE executable.  */
-      if (baton->from_dwo)
+	 .debug_addr which already has the DWARF "base address". We still add
+	 base_offset in case we're debugging a PIE executable. However, if the
+	 entry is DW_LLE_offset_pair from a DWO, add the base address as the
+	 operands are offsets relative to the applicable base address.  */
+      if (baton->from_dwo && kind != DEBUG_LOC_OFFSET_PAIR)
 	{
 	  low += base_offset;
 	  high += base_offset;
