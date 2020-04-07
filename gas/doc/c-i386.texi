@@ -188,6 +188,7 @@ accept various extension mnemonics.  For example,
 @code{movdir64b},
 @code{enqcmd},
 @code{serialize},
+@code{tsxldtrk},
 @code{avx512f},
 @code{avx512cd},
 @code{avx512er},
@@ -223,6 +224,7 @@ accept various extension mnemonics.  For example,
 @code{noavx512_bf16},
 @code{noenqcmd},
 @code{noserialize},
+@code{notsxldtrk},
 @code{vmx},
 @code{vmfunc},
 @code{smx},
@@ -1495,7 +1497,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.clwb} @tab @samp{.rdpid} @tab @samp{.ptwrite} @tab @item @samp{.ibt}
 @item @samp{.wbnoinvd} @tab @samp{.pconfig} @tab @samp{.waitpkg} @tab @samp{.cldemote}
 @item @samp{.shstk} @tab @samp{.gfni} @tab @samp{.vaes} @tab @samp{.vpclmulqdq}
-@item @samp{.movdiri} @tab @samp{.movdir64b} @tab @samp{.enqcmd}
+@item @samp{.movdiri} @tab @samp{.movdir64b} @tab @samp{.enqcmd} @tab @samp{.tsxldtrk}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}

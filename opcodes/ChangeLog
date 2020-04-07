@@ -1,3 +1,17 @@
+2020-04-07  Lili Cui  <lili.cui@intel.com>
+
+	* i386-dis.c (enum): Add PREFIX_0F01_REG_5_MOD_3_RM_1,
+	(prefix_table): New instructions (see prefixes above).
+	(rm_table): Likewise
+	* i386-gen.c (cpu_flag_init): Add CPU_TSXLDTRK_FLAGS,
+	CPU_ANY_TSXLDTRK_FLAGS.
+	(cpu_flags): Add CpuTSXLDTRK.
+	* i386-opc.h (enum): Add CpuTSXLDTRK.
+	(i386_cpu_flags): Add cputsxldtrk.
+	* i386-opc.tbl: Add XSUSPLDTRK insns.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
+
 2020-04-02  Lili Cui  <lili.cui@intel.com>
 
 	* i386-dis.c (prefix_table): New instructions serialize.

@@ -1214,6 +1214,8 @@ static const arch_entry cpu_arch[] =
     CPU_MCOMMIT_FLAGS, 0 },
   { STRING_COMMA_LEN (".sev_es"), PROCESSOR_UNKNOWN,
     CPU_SEV_ES_FLAGS, 0 },
+  { STRING_COMMA_LEN (".tsxldtrk"), PROCESSOR_UNKNOWN,
+    CPU_TSXLDTRK_FLAGS, 0 },
 };
 
 static const noarch_entry cpu_noarch[] =
@@ -1258,6 +1260,7 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("noavx512_vp2intersect"), CPU_ANY_SHSTK_FLAGS },
   { STRING_COMMA_LEN ("noenqcmd"), CPU_ANY_ENQCMD_FLAGS },
   { STRING_COMMA_LEN ("noserialize"), CPU_ANY_SERIALIZE_FLAGS },
+  { STRING_COMMA_LEN ("notsxldtrk"), CPU_ANY_TSXLDTRK_FLAGS },
 };
 
 #ifdef I386COFF

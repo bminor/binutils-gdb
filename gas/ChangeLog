@@ -1,3 +1,13 @@
+2020-04-07  Lili Cui  <lili.cui@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .TSXLDTRK.
+	(cpu_noarch): Likewise.
+	* doc/c-i386.texi: Document TSXLDTRK.
+	* testsuite/gas/i386/i386.exp: Run TSXLDTRK tests.
+	* testsuite/gas/i386/tsxldtrk.d: Likewise.
+	* testsuite/gas/i386/tsxldtrk.s: Likewise.
+	* testsuite/gas/i386/x86-64-tsxldtrk.d: Likewise.
+
 2020-04-02  Lili Cui  <lili.cui@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .serialize.

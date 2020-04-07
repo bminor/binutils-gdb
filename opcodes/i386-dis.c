@@ -962,6 +962,7 @@ enum
   PREFIX_0F01_REG_3_RM_1,
   PREFIX_0F01_REG_5_MOD_0,
   PREFIX_0F01_REG_5_MOD_3_RM_0,
+  PREFIX_0F01_REG_5_MOD_3_RM_1,
   PREFIX_0F01_REG_5_MOD_3_RM_2,
   PREFIX_0F01_REG_7_MOD_3_RM_2,
   PREFIX_0F01_REG_7_MOD_3_RM_3,
@@ -3646,6 +3647,16 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "serialize",	{ Skip_MODRM }, PREFIX_OPCODE },
     { "setssbsy",	{ Skip_MODRM }, PREFIX_OPCODE },
+    { Bad_Opcode },
+    { "xsuspldtrk",     { Skip_MODRM }, PREFIX_OPCODE },
+  },
+
+  /* PREFIX_0F01_REG_5_MOD_3_RM_1 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "xresldtrk",     { Skip_MODRM }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F01_REG_5_MOD_3_RM_2 */
@@ -11038,7 +11049,7 @@ static const struct dis386 rm_table[][8] = {
   {
     /* RM_0F01_REG_5_MOD_3 */
     { PREFIX_TABLE (PREFIX_0F01_REG_5_MOD_3_RM_0) },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_0F01_REG_5_MOD_3_RM_1) },
     { PREFIX_TABLE (PREFIX_0F01_REG_5_MOD_3_RM_2) },
     { Bad_Opcode },
     { Bad_Opcode },
