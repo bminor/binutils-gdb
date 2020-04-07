@@ -4459,15 +4459,20 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
       enum debug_loc_kind kind;
       const gdb_byte *new_ptr = NULL; /* init for gcc -Wall */
 
-      if (dlbaton->from_dwo)
+      if (dlbaton->per_cu->version () < 5 && dlbaton->from_dwo)
 	kind = decode_debug_loc_dwo_addresses (dlbaton->per_cu,
 					       loc_ptr, buf_end, &new_ptr,
 					       &low, &high, byte_order);
-      else
+      else if (dlbaton->per_cu->version () < 5)
 	kind = decode_debug_loc_addresses (loc_ptr, buf_end, &new_ptr,
 					   &low, &high,
 					   byte_order, addr_size,
 					   signed_addr_p);
+      else
+	kind = decode_debug_loclists_addresses (dlbaton->per_cu,
+						loc_ptr, buf_end, &new_ptr,
+						&low, &high, byte_order,
+						addr_size, signed_addr_p);
       loc_ptr = new_ptr;
       switch (kind)
 	{
@@ -4481,6 +4486,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 	  continue;
 	case DEBUG_LOC_START_END:
 	case DEBUG_LOC_START_LENGTH:
+	case DEBUG_LOC_OFFSET_PAIR:
 	  break;
 	case DEBUG_LOC_BUFFER_OVERFLOW:
 	case DEBUG_LOC_INVALID_ENTRY:
@@ -4497,8 +4503,17 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
       low = gdbarch_adjust_dwarf2_addr (gdbarch, low);
       high = gdbarch_adjust_dwarf2_addr (gdbarch, high);
 
-      length = extract_unsigned_integer (loc_ptr, 2, byte_order);
-      loc_ptr += 2;
+      if (dlbaton->per_cu->version () < 5)
+	 {
+	   length = extract_unsigned_integer (loc_ptr, 2, byte_order);
+	   loc_ptr += 2;
+	 }
+      else
+	 {
+	   unsigned int bytes_read;
+	   length = read_unsigned_leb128 (NULL, loc_ptr, &bytes_read);
+	   loc_ptr += bytes_read;
+	 }
 
       /* (It would improve readability to print only the minimum
 	 necessary digits of the second number of the range.)  */

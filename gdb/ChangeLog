@@ -1,5 +1,14 @@
 2020-04-07  Nitika Achra  <Nitika.Achra@amd.com>
 
+	* dwarf2/loc.c (loclist_describe_location): Call the function decode_debug_loclists_
+	addresses if DWARF version is 5 or more because DW_LLE_start* or DW_LLE_offset_pair
+	with DW_LLE_base_addressx are being emitted in DWARFv5.
+	Add the newly added kind DW_LOC_OFFSET_PAIR also.
+	The length of location description is an unsigned ULEB integer in DWARFv5 instead of
+	unsigned integer.
+
+2020-04-07  Nitika Achra  <Nitika.Achra@amd.com>
+
 	* dwarf2/loc.c (enum debug_loc_kind): Add a new kind DEBUG_LOC_OFFSET_PAIR.
 	(dwarf2_find_location_expression): Call the function decode_debug_loclists_
 	addresses if DWARF version is 5 or more. DW_LLE_start* or DW_LLE_offset_pair
