@@ -2113,7 +2113,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
   struct compunit_symtab *cust = NULL;
   const struct blockvector *bv;
   const struct block *b;
-  int length;
+  int i;
 
   for (objfile *objfile : current_program_space->objfiles ())
     for (partial_symtab *ps : require_partial_symbols (objfile, true))
@@ -2147,9 +2147,14 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	partial_symbol **psym
 	  = &objfile->partial_symtabs->static_psymbols[ps->statics_offset];
-	length = ps->n_static_syms;
-	while (length--)
+	for (i = 0; i < ps->n_static_syms; psym++, i++)
 	  {
+	    /* Skip symbols for inlined functions without address.  These may
+	       or may not have a match in the full symtab.  */
+	    if ((*psym)->aclass == LOC_BLOCK
+		&& (*psym)->ginfo.value.address == 0)
+	      continue;
+
 	    sym = block_lookup_symbol (b, (*psym)->ginfo.search_name (),
 				       symbol_name_match_type::SEARCH_NAME,
 				       (*psym)->domain);
@@ -2161,12 +2166,10 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		puts_filtered (ps->filename);
 		printf_filtered (" psymtab\n");
 	      }
-	    psym++;
 	  }
 	b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	psym = &objfile->partial_symtabs->global_psymbols[ps->globals_offset];
-	length = ps->n_global_syms;
-	while (length--)
+	for (i = 0; i < ps->n_global_syms; psym++, i++)
 	  {
 	    sym = block_lookup_symbol (b, (*psym)->ginfo.search_name (),
 				       symbol_name_match_type::SEARCH_NAME,
@@ -2179,7 +2182,6 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		puts_filtered (ps->filename);
 		printf_filtered (" psymtab\n");
 	      }
-	    psym++;
 	  }
 	if (ps->raw_text_high () != 0
 	    && (ps->text_low (objfile) < BLOCK_START (b)

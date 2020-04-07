@@ -1,3 +1,8 @@
+2020-04-07  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/check-psymtab.c: New test.
+	* gdb.base/check-psymtab.exp: New file.
+
 2020-04-06  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/variant-record/proc.adb: New file.

@@ -1,3 +1,8 @@
+2020-04-07  Tom de Vries  <tdevries@suse.de>
+
+	* psymtab.c (maintenance_check_psymtabs): Skip static LOC_BLOCK
+	symbols without address.
+
 2020-04-06  Kamil Rytarowski  <n54@gmx.com>
 
 	* nbsd-nat.h (struct thread_info): Add forward declaration.
