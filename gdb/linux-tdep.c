@@ -380,6 +380,13 @@ linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
   append_composite_type_field (type, "si_fd", int_type);
   append_composite_type_field (sifields_type, "_sigpoll", type);
 
+  /* _sigsys */
+  type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+  append_composite_type_field (type, "_call_addr", void_ptr_type);
+  append_composite_type_field (type, "_syscall", int_type);
+  append_composite_type_field (type, "_arch", uint_type);
+  append_composite_type_field (sifields_type, "_sigsys", type);
+
   /* struct siginfo */
   siginfo_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
   siginfo_type->set_name (xstrdup ("siginfo"));
