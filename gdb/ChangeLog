@@ -1,3 +1,18 @@
+2020-04-07  Nitika Achra  <Nitika.Achra@amd.com>
+
+	* dwarf2/read.c (cu_debug_loc_section): Added the declaration for the function.
+	(read_loclist_index): New function definition.
+	(lookup_loclist_base): New function definition.
+	(read_loclist_header): New function definition.
+	(dwarf2_cu): Add loclist_base and loclist_header field.
+	(dwarf2_locate_dwo_sections): Handle .debug_loclists.dwo section.
+	(read_full_die_1): Read the value of DW_AT_loclists_base.
+	(read_attribute_reprocess): Handle DW_FORM_loclistx.
+	(read_attribute_value): Handle DW_FORM_loclistx.
+	(skip_one_die): Handle DW_FORM_loclistx.
+	(loclist_header): New structure declaration.
+	* dwarf2/attribute.c (form_is_section_offset): Handle DW_FORM_loclistx.
+
 2020-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2/read.h (struct dwarf2_psymtab): Remove two-parameters
