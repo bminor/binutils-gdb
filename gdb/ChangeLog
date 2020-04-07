@@ -1,3 +1,10 @@
+2020-04-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.h (struct dwarf2_psymtab): Remove two-parameters
+	constructor.  Remove `addr` parameter from other constructor and
+	add `per_cu` parameter.
+	* dwarf2/read.c (create_partial_symtab): Update.
+
 2020-04-07  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/25796

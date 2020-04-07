@@ -7161,12 +7161,11 @@ create_partial_symtab (struct dwarf2_per_cu_data *per_cu, const char *name)
   struct objfile *objfile = per_cu->dwarf2_per_objfile->objfile;
   dwarf2_psymtab *pst;
 
-  pst = new dwarf2_psymtab (name, objfile, 0);
+  pst = new dwarf2_psymtab (name, objfile, per_cu);
 
   pst->psymtabs_addrmap_supported = true;
 
   /* This is the glue that links PST into GDB's symbol API.  */
-  pst->per_cu_data = per_cu;
   per_cu->v.psymtab = pst;
 
   return pst;
