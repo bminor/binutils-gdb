@@ -123,6 +123,11 @@ struct dwarf2_per_bfd
      is allocated on the dwarf2_per_bfd obstack.  */
   signatured_type *allocate_signatured_type ();
 
+  /* Return the number of partial symtabs allocated with allocate_per_cu
+     and allocate_signatured_type so far.  */
+  int num_psymtabs () const
+  { return m_num_psymtabs; }
+
 private:
   /* This function is mapped across the sections and remembers the
      offset and size of each of the debugging sections we are
@@ -278,12 +283,38 @@ struct dwarf2_per_objfile
 				const struct comp_unit_head *cu_header,
 				unsigned int *bytes_read_ptr);
 
+  /* Resize the M_SYMTABS vector to the needed size (the number of partial
+     symtabs allocated by the per-bfd).  */
+  void resize_symtabs ()
+  {
+    /* The symtabs vector should only grow, not shrink.  */
+    gdb_assert (per_bfd->num_psymtabs () >= m_symtabs.size ());
+
+    m_symtabs.resize (per_bfd->num_psymtabs ());
+  }
+
+  /* Return true if the symtab corresponding to PER_CU has been set,
+     false otherwise.  */
+  bool symtab_set_p (const dwarf2_per_cu_data *per_cu) const;
+
+  /* Return the compunit_symtab associated to PER_CU, if it has been created.  */
+  compunit_symtab *get_symtab (const dwarf2_per_cu_data *per_cu) const;
+
+  /* Set the compunit_symtab associated to PER_CU.  */
+  void set_symtab (const dwarf2_per_cu_data *per_cu, compunit_symtab *symtab);
+
   /* Back link.  */
   struct objfile *objfile;
 
   /* Pointer to the data that is (possibly) shared between this objfile and
      other objfiles backed by the same BFD.  */
   struct dwarf2_per_bfd *per_bfd;
+
+private:
+  /* Hold the corresponding compunit_symtab for each CU or TU.  This
+     is indexed by dwarf2_per_cu_data::index.  A NULL value means
+     that the CU/TU has not been expanded yet.  */
+  std::vector<compunit_symtab *> m_symtabs;
 };
 
 /* Get the dwarf2_per_objfile associated to OBJFILE.  */
@@ -291,17 +322,19 @@ struct dwarf2_per_objfile
 dwarf2_per_objfile *get_dwarf2_per_objfile (struct objfile *objfile);
 
 /* A partial symtab specialized for DWARF.  */
-struct dwarf2_psymtab : public standard_psymtab
+struct dwarf2_psymtab : public partial_symtab
 {
   dwarf2_psymtab (const char *filename, struct objfile *objfile,
 		  dwarf2_per_cu_data *per_cu)
-    : standard_psymtab (filename, objfile, 0),
+    : partial_symtab (filename, objfile, 0),
       per_cu_data (per_cu)
   {
   }
 
   void read_symtab (struct objfile *) override;
   void expand_psymtab (struct objfile *) override;
+  bool readin_p (struct objfile *) const override;
+  compunit_symtab *get_compunit_symtab (struct objfile *) const override;
 
   struct dwarf2_per_cu_data *per_cu_data;
 };
