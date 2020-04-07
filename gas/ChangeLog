@@ -1,5 +1,10 @@
 2020-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* NEWS: Mention support for Intel SERIALIZE and TSXLDTRK
+	instructions.
+
+2020-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* doc/c-z80.texi: Fix @xref warnings.
 
 2020-04-07  Lili Cui  <lili.cui@intel.com>

@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Intel SERIALIZE and TSXLDTRK instructions.
+
 * Add -mlfence-after-load=, -mlfence-before-indirect-branch= and
   -mlfence-before-ret= options to x86 assembler to help mitigate
   CVE-2020-0551.
