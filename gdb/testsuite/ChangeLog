@@ -1,5 +1,10 @@
 2020-04-07  Tom de Vries  <tdevries@suse.de>
 
+	PR symtab/25796
+	* gdb.dwarf2/imported-unit-abstract-const-value.exp: New file.
+
+2020-04-07  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/check-psymtab.c: New test.
 	* gdb.base/check-psymtab.exp: New file.
 

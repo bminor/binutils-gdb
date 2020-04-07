@@ -18259,6 +18259,25 @@ guess_partial_die_structure_name (struct partial_die_info *struct_pdi,
     }
 }
 
+/* Return true if a DIE with TAG may have the DW_AT_const_value
+   attribute.  */
+
+static bool
+can_have_DW_AT_const_value_p (enum dwarf_tag tag)
+{
+  switch (tag)
+    {
+    case DW_TAG_constant:
+    case DW_TAG_enumerator:
+    case DW_TAG_formal_parameter:
+    case DW_TAG_template_value_param:
+    case DW_TAG_variable:
+      return true;
+    }
+
+  return false;
+}
+
 void
 partial_die_info::fixup (struct dwarf2_cu *cu)
 {
@@ -18288,6 +18307,24 @@ partial_die_info::fixup (struct dwarf2_cu *cu)
 	  /* Copy DW_AT_external attribute if it is set.  */
 	  if (spec_die->is_external)
 	    is_external = spec_die->is_external;
+	}
+    }
+
+  if (!has_const_value && has_specification
+      && can_have_DW_AT_const_value_p (tag))
+    {
+      struct partial_die_info *spec_die;
+
+      auto res = find_partial_die (spec_offset, spec_is_dwz, cu);
+      spec_die = res.pdi;
+      cu = res.cu;
+
+      spec_die->fixup (cu);
+
+      if (spec_die->has_const_value)
+	{
+	  /* Copy DW_AT_const_value attribute if it is set.  */
+	  has_const_value = spec_die->has_const_value;
 	}
     }
 

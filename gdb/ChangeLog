@@ -1,5 +1,11 @@
 2020-04-07  Tom de Vries  <tdevries@suse.de>
 
+	PR symtab/25796
+	* dwarf2/read.c (can_have_DW_AT_const_value_p): New function.
+	(partial_die_info::fixup): Inherit has_const_value.
+
+2020-04-07  Tom de Vries  <tdevries@suse.de>
+
 	* psymtab.c (maintenance_check_psymtabs): Skip static LOC_BLOCK
 	symbols without address.
 
