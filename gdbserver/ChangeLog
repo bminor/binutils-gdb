@@ -1,3 +1,24 @@
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.h (struct windows_thread_info): Rename from
+	win32_thread_info.  Remove typedef.
+	(struct win32_target_ops, win32_require_context): Update.
+	* win32-low.c (win32_get_thread_context)
+	(win32_set_thread_context, win32_prepare_to_resume)
+	(win32_require_context, thread_rec, child_add_thread)
+	(delete_thread_info, continue_one_thread)
+	(child_fetch_inferior_registers, child_store_inferior_registers)
+	(win32_resume, suspend_one_thread, win32_get_tib_address):
+	Update.
+	* win32-i386-low.c (update_debug_registers)
+	(win32_get_current_dr, i386_get_thread_context)
+	(i386_prepare_to_resume, i386_thread_added, i386_single_step)
+	(i386_fetch_inferior_register, i386_store_inferior_register):
+	Update.
+	* win32-arm-low.c (arm_get_thread_context)
+	(arm_fetch_inferior_register, arm_store_inferior_register):
+	Update.
+
 2020-04-02  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* linux-low.h (struct linux_target_ops): Remove.

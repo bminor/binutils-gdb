@@ -27,7 +27,7 @@ void init_registers_arm (void);
 extern const struct target_desc *tdesc_arm;
 
 static void
-arm_get_thread_context (win32_thread_info *th)
+arm_get_thread_context (windows_thread_info *th)
 {
   th->context.ContextFlags = \
     CONTEXT_FULL | \
@@ -88,7 +88,7 @@ regptr (CONTEXT* c, int r)
 /* Fetch register from gdbserver regcache data.  */
 static void
 arm_fetch_inferior_register (struct regcache *regcache,
-			     win32_thread_info *th, int r)
+			     windows_thread_info *th, int r)
 {
   char *context_offset = regptr (&th->context, r);
   supply_register (regcache, r, context_offset);
@@ -97,7 +97,7 @@ arm_fetch_inferior_register (struct regcache *regcache,
 /* Store a new register value into the thread context of TH.  */
 static void
 arm_store_inferior_register (struct regcache *regcache,
-			     win32_thread_info *th, int r)
+			     windows_thread_info *th, int r)
 {
   collect_register (regcache, r, regptr (&th->context, r));
 }

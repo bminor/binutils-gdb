@@ -29,7 +29,7 @@ extern const struct target_desc *win32_tdesc;
 
 /* Thread information structure used to track extra information about
    each thread.  */
-typedef struct win32_thread_info
+struct windows_thread_info
 {
   /* The Win32 thread identifier.  */
   DWORD tid;
@@ -54,7 +54,7 @@ typedef struct win32_thread_info
   /* Whether debug registers changed since we last set CONTEXT back to
      the thread.  */
   int debug_registers_changed;
-} win32_thread_info;
+};
 
 struct win32_target_ops
 {
@@ -68,23 +68,23 @@ struct win32_target_ops
   void (*initial_stuff) (void);
 
   /* Fetch the context from the inferior.  */
-  void (*get_thread_context) (win32_thread_info *th);
+  void (*get_thread_context) (windows_thread_info *th);
 
   /* Called just before resuming the thread.  */
-  void (*prepare_to_resume) (win32_thread_info *th);
+  void (*prepare_to_resume) (windows_thread_info *th);
 
   /* Called when a thread was added.  */
-  void (*thread_added) (win32_thread_info *th);
+  void (*thread_added) (windows_thread_info *th);
 
   /* Fetch register from gdbserver regcache data.  */
   void (*fetch_inferior_register) (struct regcache *regcache,
-				   win32_thread_info *th, int r);
+				   windows_thread_info *th, int r);
 
   /* Store a new register value into the thread context of TH.  */
   void (*store_inferior_register) (struct regcache *regcache,
-				   win32_thread_info *th, int r);
+				   windows_thread_info *th, int r);
 
-  void (*single_step) (win32_thread_info *th);
+  void (*single_step) (windows_thread_info *th);
 
   const unsigned char *breakpoint;
   int breakpoint_len;
@@ -171,7 +171,7 @@ public:
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */
-extern void win32_require_context (win32_thread_info *th);
+extern void win32_require_context (windows_thread_info *th);
 
 /* Map the Windows error number in ERROR to a locale-dependent error
    message string and return a pointer to it.  Typically, the values

@@ -125,7 +125,7 @@ debug_event_ptid (DEBUG_EVENT *event)
 /* Get the thread context of the thread associated with TH.  */
 
 static void
-win32_get_thread_context (win32_thread_info *th)
+win32_get_thread_context (windows_thread_info *th)
 {
   memset (&th->context, 0, sizeof (CONTEXT));
   (*the_low_target.get_thread_context) (th);
@@ -137,7 +137,7 @@ win32_get_thread_context (win32_thread_info *th)
 /* Set the thread context of the thread associated with TH.  */
 
 static void
-win32_set_thread_context (win32_thread_info *th)
+win32_set_thread_context (windows_thread_info *th)
 {
 #ifdef _WIN32_WCE
   /* Calling SuspendThread on a thread that is running kernel code
@@ -158,7 +158,7 @@ win32_set_thread_context (win32_thread_info *th)
 /* Set the thread context of the thread associated with TH.  */
 
 static void
-win32_prepare_to_resume (win32_thread_info *th)
+win32_prepare_to_resume (windows_thread_info *th)
 {
   if (the_low_target.prepare_to_resume != NULL)
     (*the_low_target.prepare_to_resume) (th);
@@ -167,7 +167,7 @@ win32_prepare_to_resume (win32_thread_info *th)
 /* See win32-low.h.  */
 
 void
-win32_require_context (win32_thread_info *th)
+win32_require_context (windows_thread_info *th)
 {
   if (th->context.ContextFlags == 0)
     {
@@ -189,30 +189,30 @@ win32_require_context (win32_thread_info *th)
 
 /* Find a thread record given a thread id.  If GET_CONTEXT is set then
    also retrieve the context for this thread.  */
-static win32_thread_info *
+static windows_thread_info *
 thread_rec (ptid_t ptid, int get_context)
 {
   thread_info *thread = find_thread_ptid (ptid);
   if (thread == NULL)
     return NULL;
 
-  win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
+  windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
   if (get_context)
     win32_require_context (th);
   return th;
 }
 
 /* Add a thread to the thread list.  */
-static win32_thread_info *
+static windows_thread_info *
 child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
 {
-  win32_thread_info *th;
+  windows_thread_info *th;
   ptid_t ptid = ptid_t (pid, tid, 0);
 
   if ((th = thread_rec (ptid, FALSE)))
     return th;
 
-  th = XCNEW (win32_thread_info);
+  th = XCNEW (windows_thread_info);
   th->tid = tid;
   th->h = h;
   th->thread_local_base = (CORE_ADDR) (uintptr_t) tlb;
@@ -229,7 +229,7 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
 static void
 delete_thread_info (thread_info *thread)
 {
-  win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
+  windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
 
   remove_thread (thread);
   CloseHandle (th->h);
@@ -424,7 +424,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 static void
 continue_one_thread (thread_info *thread, int thread_id)
 {
-  win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
+  windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
 
   if (thread_id == -1 || thread_id == th->tid)
     {
@@ -473,7 +473,7 @@ static void
 child_fetch_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
-  win32_thread_info *th = thread_rec (current_thread_ptid (), TRUE);
+  windows_thread_info *th = thread_rec (current_thread_ptid (), TRUE);
   if (r == -1 || r > NUM_REGS)
     child_fetch_inferior_registers (regcache, NUM_REGS);
   else
@@ -487,7 +487,7 @@ static void
 child_store_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
-  win32_thread_info *th = thread_rec (current_thread_ptid (), TRUE);
+  windows_thread_info *th = thread_rec (current_thread_ptid (), TRUE);
   if (r == -1 || r == 0 || r > NUM_REGS)
     child_store_inferior_registers (regcache, NUM_REGS);
   else
@@ -911,7 +911,7 @@ win32_process_target::resume (thread_resume *resume_info, size_t n)
   DWORD tid;
   enum gdb_signal sig;
   int step;
-  win32_thread_info *th;
+  windows_thread_info *th;
   DWORD continue_status = DBG_CONTINUE;
   ptid_t ptid;
 
@@ -1349,7 +1349,7 @@ handle_exception (struct target_waitstatus *ourstatus)
 static void
 suspend_one_thread (thread_info *thread)
 {
-  win32_thread_info *th = (win32_thread_info *) thread_target_data (thread);
+  windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
 
   if (!th->suspended)
     {
@@ -1835,7 +1835,7 @@ win32_process_target::supports_get_tib_address ()
 int
 win32_process_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 {
-  win32_thread_info *th;
+  windows_thread_info *th;
   th = thread_rec (ptid, 0);
   if (th == NULL)
     return 0;
