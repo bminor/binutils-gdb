@@ -1,5 +1,10 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* complaints.h (stop_whining): Declare at top-level.
+	(complaint): Don't declare stop_whining.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (windows_nat::handle_output_debug_string):
 	Rename.  No longer static.
 	* nat/windows-nat.h (handle_output_debug_string): Declare.

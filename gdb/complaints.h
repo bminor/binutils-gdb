@@ -25,6 +25,10 @@
 extern void complaint_internal (const char *fmt, ...)
   ATTRIBUTE_PRINTF (1, 2);
 
+/* This controls whether complaints are emitted.  */
+
+extern int stop_whining;
+
 /* Register a complaint.  This is a macro around complaint_internal to
    avoid computing complaint's arguments when complaints are disabled.
    Running FMT via gettext [i.e., _(FMT)] can be quite expensive, for
@@ -32,8 +36,6 @@ extern void complaint_internal (const char *fmt, ...)
 #define complaint(FMT, ...)					\
   do								\
     {								\
-      extern int stop_whining;					\
-								\
       if (stop_whining > 0)					\
 	complaint_internal (FMT, ##__VA_ARGS__);		\
     }								\
