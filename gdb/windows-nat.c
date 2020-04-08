@@ -1495,17 +1495,6 @@ ctrl_c_handler (DWORD event_type)
   return TRUE;
 }
 
-/* A wrapper for WaitForDebugEvent that sets "last_wait_event"
-   appropriately.  */
-static BOOL
-wait_for_debug_event (DEBUG_EVENT *event, DWORD timeout)
-{
-  BOOL result = WaitForDebugEvent (event, timeout);
-  if (result)
-    last_wait_event = *event;
-  return result;
-}
-
 /* Get the next event from the child.  Returns a non-zero thread id if the event
    requires handling by WFI (or whatever).  */
 

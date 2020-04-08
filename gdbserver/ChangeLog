@@ -1,5 +1,10 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.c (win32_kill, get_child_debug_event): Use
+	wait_for_debug_event.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.c (child_continue): Call continue_last_debug_event.
 
 2020-04-08  Tom Tromey  <tromey@adacore.com>

@@ -797,7 +797,7 @@ win32_process_target::kill (process_info *process)
     {
       if (!child_continue (DBG_CONTINUE, -1))
 	break;
-      if (!WaitForDebugEvent (&current_event, INFINITE))
+      if (!wait_for_debug_event (&current_event, INFINITE))
 	break;
       if (current_event.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT)
 	break;
@@ -1231,7 +1231,7 @@ get_child_debug_event (DWORD *continue_status,
 	 happen is the user will see a spurious breakpoint.  */
 
       current_event.dwDebugEventCode = 0;
-      if (!WaitForDebugEvent (&current_event, 0))
+      if (!wait_for_debug_event (&current_event, 0))
 	{
 	  OUTMSG2(("no attach events left\n"));
 	  fake_breakpoint_event ();
@@ -1246,7 +1246,7 @@ get_child_debug_event (DWORD *continue_status,
       /* Keep the wait time low enough for comfortable remote
 	 interruption, but high enough so gdbserver doesn't become a
 	 bottleneck.  */
-      if (!WaitForDebugEvent (&current_event, 250))
+      if (!wait_for_debug_event (&current_event, 250))
         {
 	  DWORD e  = GetLastError();
 

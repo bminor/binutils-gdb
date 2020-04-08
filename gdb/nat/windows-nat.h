@@ -245,6 +245,11 @@ extern gdb::optional<pending_stop> fetch_pending_stop (bool debug_events);
 extern BOOL continue_last_debug_event (DWORD continue_status,
 				       bool debug_events);
 
+/* A simple wrapper for WaitForDebugEvent that also sets
+   'last_wait_event' on success.  */
+
+extern BOOL wait_for_debug_event (DEBUG_EVENT *event, DWORD timeout);
+
 }
 
 #endif

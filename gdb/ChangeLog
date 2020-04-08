@@ -1,5 +1,13 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (wait_for_debug_event): Move to
+	nat/windows-nat.c.
+	* nat/windows-nat.h (wait_for_debug_event): Declare.
+	* nat/windows-nat.c (wait_for_debug_event): Move from
+	windows-nat.c.  No longer static.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (get_windows_debug_event): Use
 	fetch_pending_stop.
 	* nat/windows-nat.h (fetch_pending_stop): Declare.

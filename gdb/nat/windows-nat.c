@@ -385,5 +385,15 @@ continue_last_debug_event (DWORD continue_status, bool debug_events)
 			     continue_status);
 }
 
+/* See nat/windows-nat.h.  */
+
+BOOL
+wait_for_debug_event (DEBUG_EVENT *event, DWORD timeout)
+{
+  BOOL result = WaitForDebugEvent (event, timeout);
+  if (result)
+    last_wait_event = *event;
+  return result;
+}
 
 }
