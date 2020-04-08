@@ -1,5 +1,12 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.h (struct win32_target_ops) <decr_pc_after_break>: New
+	field.
+	* win32-i386-low.c (the_low_target): Update.
+	* win32-arm-low.c (the_low_target): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.h (win32_process_target::read_pc)
 	(win32_process_target::write_pc): Declare.
 	* win32-low.c (win32_process_target::read_pc)

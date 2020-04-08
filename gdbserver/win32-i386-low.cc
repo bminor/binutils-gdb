@@ -506,6 +506,7 @@ struct win32_target_ops the_low_target = {
   i386_single_step,
   &i386_win32_breakpoint,
   i386_win32_breakpoint_len,
+  1,
   i386_win32_get_pc,
   i386_win32_set_pc,
   i386_supports_z_point_type,

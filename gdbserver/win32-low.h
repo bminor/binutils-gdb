@@ -63,6 +63,10 @@ struct win32_target_ops
   const unsigned char *breakpoint;
   int breakpoint_len;
 
+  /* Amount by which to decrement the PC after a breakpoint is
+     hit.  */
+  int decr_pc_after_break;
+
   /* Get the PC register from REGCACHE.  */
   CORE_ADDR (*get_pc) (struct regcache *regcache);
   /* Set the PC register in REGCACHE.  */
