@@ -1,5 +1,10 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-i386-low.c (update_debug_registers)
+	(i386_prepare_to_resume, i386_thread_added): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.c (child_add_thread): Use new.
 	(delete_thread_info): Use delete.
 

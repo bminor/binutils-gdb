@@ -1,5 +1,13 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (thread_rec)
+	(windows_nat_target::fetch_registers): Update.
+	* nat/windows-nat.h (struct windows_thread_info) <suspended>:
+	Update comment.
+	<debug_registers_changed, reload_context>: Now bool.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (windows_add_thread): Use new.
 	(windows_init_thread_list, windows_delete_thread): Use delete.
 	(get_windows_debug_event): Update.

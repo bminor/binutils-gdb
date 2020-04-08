@@ -439,7 +439,7 @@ thread_rec (DWORD id, int get_context)
 	      }
 	    else if (get_context < 0)
 	      th->suspended = -1;
-	    th->reload_context = 1;
+	    th->reload_context = true;
 	  }
 	return th;
       }
@@ -695,7 +695,7 @@ windows_nat_target::fetch_registers (struct regcache *regcache, int r)
 	      dr[7] = th->context.Dr7;
 	    }
 	}
-      th->reload_context = 0;
+      th->reload_context = false;
     }
 
   if (r < 0)

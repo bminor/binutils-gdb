@@ -44,7 +44,7 @@ update_debug_registers (thread_info *thread)
 
   /* The actual update is done later just before resuming the lwp,
      we just mark that the registers need updating.  */
-  th->debug_registers_changed = 1;
+  th->debug_registers_changed = true;
 }
 
 /* Update the inferior's debug register REGNUM from STATE.  */
@@ -253,14 +253,14 @@ i386_prepare_to_resume (windows_thread_info *th)
 	 FIXME: should we set dr6 also ?? */
       th->context.Dr7 = dr->dr_control_mirror;
 
-      th->debug_registers_changed = 0;
+      th->debug_registers_changed = false;
     }
 }
 
 static void
 i386_thread_added (windows_thread_info *th)
 {
-  th->debug_registers_changed = 1;
+  th->debug_registers_changed = true;
 }
 
 static void

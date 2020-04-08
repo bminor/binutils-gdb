@@ -48,7 +48,10 @@ struct windows_thread_info
   /* Thread Information Block address.  */
   CORE_ADDR thread_local_base;
 
-  /* Non zero if SuspendThread was called on this thread.  */
+  /* This keeps track of whether SuspendThread was called on this
+     thread.  -1 means there was a failure or that the thread was
+     explicitly not suspended, 1 means it was called, and 0 means it
+     was not.  */
   int suspended = 0;
 
 #ifdef _WIN32_WCE
@@ -67,11 +70,11 @@ struct windows_thread_info
 
   /* Whether debug registers changed since we last set CONTEXT back to
      the thread.  */
-  int debug_registers_changed = 0;
+  bool debug_registers_changed = false;
 
   /* Nonzero if CONTEXT is invalidated and must be re-read from the
      inferior thread.  */
-  int reload_context = 0;
+  bool reload_context = false;
 
   /* The name of the thread, allocated by xmalloc.  */
   char *name = nullptr;
