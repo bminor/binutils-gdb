@@ -1,5 +1,13 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.c (handle_exception): Remove.
+	(windows_nat::handle_ms_vc_exception): New function.
+	(get_child_debug_event): Add "continue_status" parameter.
+	Update.
+	(win32_wait): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.c (windows_nat::handle_load_dll): Rename from
 	handle_load_dll.  No longer static.
 	(windows_nat::handle_unload_dll): Rename from handle_unload_dll.

@@ -1,5 +1,22 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (MS_VC_EXCEPTION): Move to nat/windows-nat.c.
+	(handle_exception_result): Move to nat/windows-nat.h.
+	(DEBUG_EXCEPTION_SIMPLE): Remove.
+	(windows_nat::handle_ms_vc_exception): New function.
+	(handle_exception): Move to nat/windows-nat.c.
+	(get_windows_debug_event): Update.
+	(STATUS_WX86_BREAKPOINT, STATUS_WX86_SINGLE_STEP): Move to
+	nat/windows-nat.c.
+	* nat/windows-nat.h (handle_ms_vc_exception): Declare.
+	(handle_exception_result): Move from windows-nat.c.
+	(handle_exception): Declare.
+	* nat/windows-nat.c (MS_VC_EXCEPTION, handle_exception)
+	(STATUS_WX86_SINGLE_STEP, STATUS_WX86_BREAKPOINT): Move from
+	windows-nat.c.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (exception_count, event_count): Remove.
 	(handle_exception, get_windows_debug_event)
 	(do_initial_windows_stuff): Update.

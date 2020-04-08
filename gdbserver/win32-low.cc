@@ -1155,117 +1155,6 @@ windows_nat::handle_unload_dll ()
 }
 
 static void
-handle_exception (struct target_waitstatus *ourstatus)
-{
-  DWORD code = current_event.u.Exception.ExceptionRecord.ExceptionCode;
-
-  memcpy (&siginfo_er, &current_event.u.Exception.ExceptionRecord,
-	  sizeof siginfo_er);
-
-  ourstatus->kind = TARGET_WAITKIND_STOPPED;
-
-  switch (code)
-    {
-    case EXCEPTION_ACCESS_VIOLATION:
-      OUTMSG2 (("EXCEPTION_ACCESS_VIOLATION"));
-      ourstatus->value.sig = GDB_SIGNAL_SEGV;
-      break;
-    case STATUS_STACK_OVERFLOW:
-      OUTMSG2 (("STATUS_STACK_OVERFLOW"));
-      ourstatus->value.sig = GDB_SIGNAL_SEGV;
-      break;
-    case STATUS_FLOAT_DENORMAL_OPERAND:
-      OUTMSG2 (("STATUS_FLOAT_DENORMAL_OPERAND"));
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
-      OUTMSG2 (("EXCEPTION_ARRAY_BOUNDS_EXCEEDED"));
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_FLOAT_INEXACT_RESULT:
-      OUTMSG2 (("STATUS_FLOAT_INEXACT_RESULT"));
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_FLOAT_INVALID_OPERATION:
-      OUTMSG2 (("STATUS_FLOAT_INVALID_OPERATION"));
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_FLOAT_OVERFLOW:
-      OUTMSG2 (("STATUS_FLOAT_OVERFLOW"));
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_FLOAT_STACK_CHECK:
-      OUTMSG2 (("STATUS_FLOAT_STACK_CHECK"));
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_FLOAT_UNDERFLOW:
-      OUTMSG2 (("STATUS_FLOAT_UNDERFLOW"));
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_FLOAT_DIVIDE_BY_ZERO:
-      OUTMSG2 (("STATUS_FLOAT_DIVIDE_BY_ZERO"));
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_INTEGER_DIVIDE_BY_ZERO:
-      OUTMSG2 (("STATUS_INTEGER_DIVIDE_BY_ZERO"));
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_INTEGER_OVERFLOW:
-      OUTMSG2 (("STATUS_INTEGER_OVERFLOW"));
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case EXCEPTION_BREAKPOINT:
-      OUTMSG2 (("EXCEPTION_BREAKPOINT"));
-      ourstatus->value.sig = GDB_SIGNAL_TRAP;
-#ifdef _WIN32_WCE
-      /* Remove the initial breakpoint.  */
-      check_breakpoints ((CORE_ADDR) (long) current_event
-			 .u.Exception.ExceptionRecord.ExceptionAddress);
-#endif
-      break;
-    case DBG_CONTROL_C:
-      OUTMSG2 (("DBG_CONTROL_C"));
-      ourstatus->value.sig = GDB_SIGNAL_INT;
-      break;
-    case DBG_CONTROL_BREAK:
-      OUTMSG2 (("DBG_CONTROL_BREAK"));
-      ourstatus->value.sig = GDB_SIGNAL_INT;
-      break;
-    case EXCEPTION_SINGLE_STEP:
-      OUTMSG2 (("EXCEPTION_SINGLE_STEP"));
-      ourstatus->value.sig = GDB_SIGNAL_TRAP;
-      break;
-    case EXCEPTION_ILLEGAL_INSTRUCTION:
-      OUTMSG2 (("EXCEPTION_ILLEGAL_INSTRUCTION"));
-      ourstatus->value.sig = GDB_SIGNAL_ILL;
-      break;
-    case EXCEPTION_PRIV_INSTRUCTION:
-      OUTMSG2 (("EXCEPTION_PRIV_INSTRUCTION"));
-      ourstatus->value.sig = GDB_SIGNAL_ILL;
-      break;
-    case EXCEPTION_NONCONTINUABLE_EXCEPTION:
-      OUTMSG2 (("EXCEPTION_NONCONTINUABLE_EXCEPTION"));
-      ourstatus->value.sig = GDB_SIGNAL_ILL;
-      break;
-    default:
-      if (current_event.u.Exception.dwFirstChance)
-	{
-	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
-	  return;
-	}
-      OUTMSG2 (("gdbserver: unknown target exception 0x%08x at 0x%s",
-	    (unsigned) current_event.u.Exception.ExceptionRecord.ExceptionCode,
-	    phex_nz ((uintptr_t) current_event.u.Exception.ExceptionRecord.
-	    ExceptionAddress, sizeof (uintptr_t))));
-      ourstatus->value.sig = GDB_SIGNAL_UNKNOWN;
-      break;
-    }
-  OUTMSG2 (("\n"));
-  last_sig = ourstatus->value.sig;
-}
-
-
-static void
 suspend_one_thread (thread_info *thread)
 {
   windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
@@ -1297,15 +1186,25 @@ auto_delete_breakpoint (CORE_ADDR stop_pc)
 }
 #endif
 
+/* See nat/windows-nat.h.  */
+
+bool
+windows_nat::handle_ms_vc_exception (const EXCEPTION_RECORD *rec)
+{
+  return false;
+}
+
 /* Get the next event from the child.  */
 
 static int
-get_child_debug_event (struct target_waitstatus *ourstatus)
+get_child_debug_event (DWORD *continue_status,
+		       struct target_waitstatus *ourstatus)
 {
   ptid_t ptid;
 
   last_sig = GDB_SIGNAL_0;
   ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+  *continue_status = DBG_CONTINUE;
 
   /* Check if GDB sent us an interrupt request.  */
   check_remote_input_interrupt_request ();
@@ -1488,7 +1387,9 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 		"for pid=%u tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
-      handle_exception (ourstatus);
+      if (handle_exception (ourstatus, debug_threads)
+	  == HANDLE_EXCEPTION_UNHANDLED)
+	*continue_status = DBG_EXCEPTION_NOT_HANDLED;
       break;
 
     case OUTPUT_DEBUG_STRING_EVENT:
@@ -1536,7 +1437,8 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 
   while (1)
     {
-      if (!get_child_debug_event (ourstatus))
+      DWORD continue_status;
+      if (!get_child_debug_event (&continue_status, ourstatus))
 	continue;
 
       switch (ourstatus->kind)
@@ -1560,7 +1462,7 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 	  /* fall-through */
 	case TARGET_WAITKIND_SPURIOUS:
 	  /* do nothing, just continue */
-	  child_continue (DBG_CONTINUE, -1);
+	  child_continue (continue_status, -1);
 	  break;
 	}
     }

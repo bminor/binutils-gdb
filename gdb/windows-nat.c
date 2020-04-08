@@ -72,9 +72,6 @@
 #include "gdbsupport/gdb_wait.h"
 #include "nat/windows-nat.h"
 
-#define STATUS_WX86_BREAKPOINT 0x4000001F
-#define STATUS_WX86_SINGLE_STEP 0x4000001E
-
 using namespace windows_nat;
 
 #define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
@@ -212,19 +209,6 @@ static int debug_registers_used;
 
 static int windows_initialization_done;
 #define DR6_CLEAR_VALUE 0xffff0ff0
-
-/* The exception thrown by a program to tell the debugger the name of
-   a thread.  The exception record contains an ID of a thread and a
-   name to give it.  This exception has no documented name, but MSDN
-   dubs it "MS_VC_EXCEPTION" in one code example.  */
-#define MS_VC_EXCEPTION 0x406d1388
-
-typedef enum
-{
-  HANDLE_EXCEPTION_UNHANDLED = 0,
-  HANDLE_EXCEPTION_HANDLED,
-  HANDLE_EXCEPTION_IGNORED
-} handle_exception_result;
 
 /* The string sent by cygwin when it processes a signal.
    FIXME: This should be in a cygwin include file.  */
@@ -1203,189 +1187,45 @@ display_selectors (const char * args, int from_tty)
     }
 }
 
-#define DEBUG_EXCEPTION_SIMPLE(x)       if (debug_exceptions) \
-  printf_unfiltered ("gdb: Target exception %s at %s\n", x, \
-    host_address_to_string (\
-      current_event.u.Exception.ExceptionRecord.ExceptionAddress))
+/* See nat/windows-nat.h.  */
 
-static handle_exception_result
-handle_exception (struct target_waitstatus *ourstatus)
+bool
+windows_nat::handle_ms_vc_exception (const EXCEPTION_RECORD *rec)
 {
-  EXCEPTION_RECORD *rec = &current_event.u.Exception.ExceptionRecord;
-  DWORD code = rec->ExceptionCode;
-  handle_exception_result result = HANDLE_EXCEPTION_HANDLED;
-
-  memcpy (&siginfo_er, rec, sizeof siginfo_er);
-
-  ourstatus->kind = TARGET_WAITKIND_STOPPED;
-
-  /* Record the context of the current thread.  */
-  thread_rec (ptid_t (current_event.dwProcessId, current_event.dwThreadId, 0),
-	      DONT_SUSPEND);
-
-  switch (code)
+  if (rec->NumberParameters >= 3
+      && (rec->ExceptionInformation[0] & 0xffffffff) == 0x1000)
     {
-    case EXCEPTION_ACCESS_VIOLATION:
-      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_ACCESS_VIOLATION");
-      ourstatus->value.sig = GDB_SIGNAL_SEGV;
-#ifdef __CYGWIN__
-      {
-	/* See if the access violation happened within the cygwin DLL
-	   itself.  Cygwin uses a kind of exception handling to deal
-	   with passed-in invalid addresses.  gdb should not treat
-	   these as real SEGVs since they will be silently handled by
-	   cygwin.  A real SEGV will (theoretically) be caught by
-	   cygwin later in the process and will be sent as a
-	   cygwin-specific-signal.  So, ignore SEGVs if they show up
-	   within the text segment of the DLL itself.  */
-	const char *fn;
-	CORE_ADDR addr = (CORE_ADDR) (uintptr_t) rec->ExceptionAddress;
+      DWORD named_thread_id;
+      windows_thread_info *named_thread;
+      CORE_ADDR thread_name_target;
 
-	if ((!cygwin_exceptions && (addr >= cygwin_load_start
-				    && addr < cygwin_load_end))
-	    || (find_pc_partial_function (addr, &fn, NULL, NULL)
-		&& startswith (fn, "KERNEL32!IsBad")))
-	  return HANDLE_EXCEPTION_UNHANDLED;
-      }
-#endif
-      break;
-    case STATUS_STACK_OVERFLOW:
-      DEBUG_EXCEPTION_SIMPLE ("STATUS_STACK_OVERFLOW");
-      ourstatus->value.sig = GDB_SIGNAL_SEGV;
-      break;
-    case STATUS_FLOAT_DENORMAL_OPERAND:
-      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_DENORMAL_OPERAND");
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
-      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_ARRAY_BOUNDS_EXCEEDED");
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_FLOAT_INEXACT_RESULT:
-      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_INEXACT_RESULT");
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_FLOAT_INVALID_OPERATION:
-      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_INVALID_OPERATION");
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_FLOAT_OVERFLOW:
-      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_OVERFLOW");
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_FLOAT_STACK_CHECK:
-      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_STACK_CHECK");
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_FLOAT_UNDERFLOW:
-      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_UNDERFLOW");
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_FLOAT_DIVIDE_BY_ZERO:
-      DEBUG_EXCEPTION_SIMPLE ("STATUS_FLOAT_DIVIDE_BY_ZERO");
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_INTEGER_DIVIDE_BY_ZERO:
-      DEBUG_EXCEPTION_SIMPLE ("STATUS_INTEGER_DIVIDE_BY_ZERO");
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case STATUS_INTEGER_OVERFLOW:
-      DEBUG_EXCEPTION_SIMPLE ("STATUS_INTEGER_OVERFLOW");
-      ourstatus->value.sig = GDB_SIGNAL_FPE;
-      break;
-    case EXCEPTION_BREAKPOINT:
-#ifdef __x86_64__
-      if (ignore_first_breakpoint)
+      thread_name_target = rec->ExceptionInformation[1];
+      named_thread_id = (DWORD) (0xffffffff & rec->ExceptionInformation[2]);
+
+      if (named_thread_id == (DWORD) -1)
+	named_thread_id = current_event.dwThreadId;
+
+      named_thread = thread_rec (ptid_t (current_event.dwProcessId,
+					 named_thread_id, 0),
+				 DONT_INVALIDATE_CONTEXT);
+      if (named_thread != NULL)
 	{
-	  /* For WOW64 processes, there are always 2 breakpoint exceptions
-	     on startup, first a BREAKPOINT for the 64bit ntdll.dll,
-	     then a WX86_BREAKPOINT for the 32bit ntdll.dll.
-	     Here we only care about the WX86_BREAKPOINT's.  */
-	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
-	  ignore_first_breakpoint = false;
-	}
-#endif
-      /* FALLTHROUGH */
-    case STATUS_WX86_BREAKPOINT:
-      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_BREAKPOINT");
-      ourstatus->value.sig = GDB_SIGNAL_TRAP;
-      break;
-    case DBG_CONTROL_C:
-      DEBUG_EXCEPTION_SIMPLE ("DBG_CONTROL_C");
-      ourstatus->value.sig = GDB_SIGNAL_INT;
-      break;
-    case DBG_CONTROL_BREAK:
-      DEBUG_EXCEPTION_SIMPLE ("DBG_CONTROL_BREAK");
-      ourstatus->value.sig = GDB_SIGNAL_INT;
-      break;
-    case EXCEPTION_SINGLE_STEP:
-    case STATUS_WX86_SINGLE_STEP:
-      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_SINGLE_STEP");
-      ourstatus->value.sig = GDB_SIGNAL_TRAP;
-      break;
-    case EXCEPTION_ILLEGAL_INSTRUCTION:
-      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_ILLEGAL_INSTRUCTION");
-      ourstatus->value.sig = GDB_SIGNAL_ILL;
-      break;
-    case EXCEPTION_PRIV_INSTRUCTION:
-      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_PRIV_INSTRUCTION");
-      ourstatus->value.sig = GDB_SIGNAL_ILL;
-      break;
-    case EXCEPTION_NONCONTINUABLE_EXCEPTION:
-      DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_NONCONTINUABLE_EXCEPTION");
-      ourstatus->value.sig = GDB_SIGNAL_ILL;
-      break;
-    case MS_VC_EXCEPTION:
-      if (rec->NumberParameters >= 3
-	  && (rec->ExceptionInformation[0] & 0xffffffff) == 0x1000)
-	{
-	  DWORD named_thread_id;
-	  windows_thread_info *named_thread;
-	  CORE_ADDR thread_name_target;
+	  int thread_name_len;
+	  gdb::unique_xmalloc_ptr<char> thread_name;
 
-	  DEBUG_EXCEPTION_SIMPLE ("MS_VC_EXCEPTION");
-
-	  thread_name_target = rec->ExceptionInformation[1];
-	  named_thread_id = (DWORD) (0xffffffff & rec->ExceptionInformation[2]);
-
-	  if (named_thread_id == (DWORD) -1)
-	    named_thread_id = current_event.dwThreadId;
-
-	  named_thread = thread_rec (ptid_t (current_event.dwProcessId,
-					     named_thread_id, 0),
-				     DONT_INVALIDATE_CONTEXT);
-	  if (named_thread != NULL)
+	  thread_name_len = target_read_string (thread_name_target,
+						&thread_name, 1025, NULL);
+	  if (thread_name_len > 0)
 	    {
-	      int thread_name_len;
-	      gdb::unique_xmalloc_ptr<char> thread_name;
-
-	      thread_name_len = target_read_string (thread_name_target,
-						    &thread_name, 1025, NULL);
-	      if (thread_name_len > 0)
-		{
-		  thread_name.get ()[thread_name_len - 1] = '\0';
-		  named_thread->name = std::move (thread_name);
-		}
+	      thread_name.get ()[thread_name_len - 1] = '\0';
+	      named_thread->name = std::move (thread_name);
 	    }
-	  ourstatus->value.sig = GDB_SIGNAL_TRAP;
-	  result = HANDLE_EXCEPTION_IGNORED;
-	  break;
 	}
-	/* treat improperly formed exception as unknown */
-	/* FALLTHROUGH */
-    default:
-      /* Treat unhandled first chance exceptions specially.  */
-      if (current_event.u.Exception.dwFirstChance)
-	return HANDLE_EXCEPTION_UNHANDLED;
-      printf_unfiltered ("gdb: unknown target exception 0x%08x at %s\n",
-	(unsigned) current_event.u.Exception.ExceptionRecord.ExceptionCode,
-	host_address_to_string (
-	  current_event.u.Exception.ExceptionRecord.ExceptionAddress));
-      ourstatus->value.sig = GDB_SIGNAL_UNKNOWN;
-      break;
+
+      return true;
     }
-  last_sig = ourstatus->value.sig;
-  return result;
+
+  return false;
 }
 
 /* Resume thread specified by ID, or all artificially suspended
@@ -1876,7 +1716,7 @@ windows_nat_target::get_windows_debug_event (int pid,
 		     "EXCEPTION_DEBUG_EVENT"));
       if (saw_create != 1)
 	break;
-      switch (handle_exception (ourstatus))
+      switch (handle_exception (ourstatus, debug_exceptions))
 	{
 	case HANDLE_EXCEPTION_UNHANDLED:
 	default:

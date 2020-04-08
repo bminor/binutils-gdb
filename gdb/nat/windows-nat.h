@@ -143,6 +143,16 @@ extern void handle_load_dll ();
 
 extern void handle_unload_dll ();
 
+/* Handle MS_VC_EXCEPTION when processing a stop.  MS_VC_EXCEPTION is
+   somewhat undocumented but is used to tell the debugger the name of
+   a thread.
+
+   Return true if the exception was handled; return false otherwise.
+
+   This function must be supplied by the embedding application.  */
+
+extern bool handle_ms_vc_exception (const EXCEPTION_RECORD *rec);
+
 
 /* Currently executing process */
 extern HANDLE current_process_handle;
@@ -204,6 +214,16 @@ extern EXCEPTION_RECORD siginfo_er;
    is stored in a static buffer which is valid until the next call to
    get_image_name.  */
 extern const char *get_image_name (HANDLE h, void *address, int unicode);
+
+typedef enum
+{
+  HANDLE_EXCEPTION_UNHANDLED = 0,
+  HANDLE_EXCEPTION_HANDLED,
+  HANDLE_EXCEPTION_IGNORED
+} handle_exception_result;
+
+extern handle_exception_result handle_exception
+  (struct target_waitstatus *ourstatus, bool debug_exceptions);
 
 }
 
