@@ -1659,6 +1659,18 @@ win32_process_target::sw_breakpoint_from_kind (int kind, int *size)
   return the_low_target.breakpoint;
 }
 
+CORE_ADDR
+win32_process_target::read_pc (struct regcache *regcache)
+{
+  return (*the_low_target.get_pc) (regcache);
+}
+
+void
+win32_process_target::write_pc (struct regcache *regcache, CORE_ADDR pc)
+{
+  return (*the_low_target.set_pc) (regcache, pc);
+}
+
 /* The win32 target ops object.  */
 
 static win32_process_target the_win32_target;

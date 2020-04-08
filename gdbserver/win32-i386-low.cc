@@ -450,6 +450,50 @@ i386_arch_setup (void)
   win32_tdesc = tdesc;
 }
 
+/* Implement win32_target_ops "get_pc" method.  */
+
+static CORE_ADDR
+i386_win32_get_pc (struct regcache *regcache)
+{
+  bool use_64bit = register_size (regcache->tdesc, 0) == 8;
+
+  if (use_64bit)
+    {
+      uint64_t pc;
+
+      collect_register_by_name (regcache, "rip", &pc);
+      return (CORE_ADDR) pc;
+    }
+  else
+    {
+      uint32_t pc;
+
+      collect_register_by_name (regcache, "eip", &pc);
+      return (CORE_ADDR) pc;
+    }
+}
+
+/* Implement win32_target_ops "set_pc" method.  */
+
+static void
+i386_win32_set_pc (struct regcache *regcache, CORE_ADDR pc)
+{
+  bool use_64bit = register_size (regcache->tdesc, 0) == 8;
+
+  if (use_64bit)
+    {
+      uint64_t newpc = pc;
+
+      supply_register_by_name (regcache, "rip", &newpc);
+    }
+  else
+    {
+      uint32_t newpc = pc;
+
+      supply_register_by_name (regcache, "eip", &newpc);
+    }
+}
+
 struct win32_target_ops the_low_target = {
   i386_arch_setup,
   sizeof (mappings) / sizeof (mappings[0]),
@@ -462,6 +506,8 @@ struct win32_target_ops the_low_target = {
   i386_single_step,
   &i386_win32_breakpoint,
   i386_win32_breakpoint_len,
+  i386_win32_get_pc,
+  i386_win32_set_pc,
   i386_supports_z_point_type,
   i386_insert_point,
   i386_remove_point,

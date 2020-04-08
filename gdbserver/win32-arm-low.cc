@@ -115,6 +115,27 @@ arm_arch_setup (void)
 static const unsigned long arm_wince_breakpoint = 0xe6000010;
 #define arm_wince_breakpoint_len 4
 
+/* Implement win32_target_ops "get_pc" method.  */
+
+static CORE_ADDR
+arm_win32_get_pc (struct regcache *regcache)
+{
+  uint32_t pc;
+
+  collect_register_by_name (regcache, "pc", &pc);
+  return (CORE_ADDR) pc;
+}
+
+/* Implement win32_target_ops "set_pc" method.  */
+
+static void
+arm_win32_set_pc (struct regcache *regcache, CORE_ADDR pc)
+{
+  uint32_t newpc = pc;
+
+  supply_register_by_name (regcache, "pc", &newpc);
+}
+
 struct win32_target_ops the_low_target = {
   arm_arch_setup,
   sizeof (mappings) / sizeof (mappings[0]),
@@ -127,6 +148,8 @@ struct win32_target_ops the_low_target = {
   NULL, /* single_step */
   (const unsigned char *) &arm_wince_breakpoint,
   arm_wince_breakpoint_len,
+  arm_win32_get_pc,
+  arm_win32_set_pc,
   /* Watchpoint related functions.  See target.h for comments.  */
   NULL, /* supports_z_point_type */
   NULL, /* insert_point */

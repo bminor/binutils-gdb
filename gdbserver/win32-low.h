@@ -63,6 +63,11 @@ struct win32_target_ops
   const unsigned char *breakpoint;
   int breakpoint_len;
 
+  /* Get the PC register from REGCACHE.  */
+  CORE_ADDR (*get_pc) (struct regcache *regcache);
+  /* Set the PC register in REGCACHE.  */
+  void (*set_pc) (struct regcache *regcache, CORE_ADDR newpc);
+
   /* Breakpoint/Watchpoint related functions.  See target.h for comments.  */
   int (*supports_z_point_type) (char z_type);
   int (*insert_point) (enum raw_bkpt_type type, CORE_ADDR addr,
@@ -142,6 +147,10 @@ public:
   int get_tib_address (ptid_t ptid, CORE_ADDR *addr) override;
 
   const gdb_byte *sw_breakpoint_from_kind (int kind, int *size) override;
+
+  CORE_ADDR read_pc (regcache *regcache) override;
+
+  void write_pc (regcache *regcache, CORE_ADDR pc) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */

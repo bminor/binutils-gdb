@@ -1,5 +1,18 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.h (win32_process_target::read_pc)
+	(win32_process_target::write_pc): Declare.
+	* win32-low.c (win32_process_target::read_pc)
+	(win32_process_target::write_pc): New methods.
+	* win32-i386-low.c (i386_win32_get_pc, i386_win32_set_pc): New
+	functions.
+	(the_low_target): Update.
+	* win32-arm-low.c (arm_win32_get_pc, arm_win32_set_pc): New
+	functions.
+	(the_low_target): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.c (win32_kill, get_child_debug_event): Use
 	wait_for_debug_event.
 
