@@ -1,5 +1,11 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c: Add "using namespace".
+	* nat/windows-nat.h: Wrap contents in windows_nat namespace.
+	* nat/windows-nat.c: Wrap contents in windows_nat namespace.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* nat/windows-nat.h (struct windows_thread_info): Declare
 	destructor.
 	* nat/windows-nat.c (~windows_thread_info): New.

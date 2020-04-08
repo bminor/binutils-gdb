@@ -26,6 +26,8 @@
 #include "tdesc.h"
 #include "x86-tdesc.h"
 
+using namespace windows_nat;
+
 #ifndef CONTEXT_EXTENDED_REGISTERS
 #define CONTEXT_EXTENDED_REGISTERS 0
 #endif

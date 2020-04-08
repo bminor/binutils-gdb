@@ -75,6 +75,8 @@
 #define STATUS_WX86_BREAKPOINT 0x4000001F
 #define STATUS_WX86_SINGLE_STEP 0x4000001E
 
+using namespace windows_nat;
+
 #define AdjustTokenPrivileges		dyn_AdjustTokenPrivileges
 #define DebugActiveProcessStop		dyn_DebugActiveProcessStop
 #define DebugBreakProcess		dyn_DebugBreakProcess

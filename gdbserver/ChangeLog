@@ -1,5 +1,13 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.h (struct win32_target_ops): Use qualified names where
+	needed.
+	* win32-i386-low.c: Add "using namespace".
+	* win32-low.c: Add "using namespace".
+	* win32-arm-low.c: Add "using namespace".
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.c (delete_thread_info): Don't call CloseHandle.
 
 2020-04-08  Tom Tromey  <tromey@adacore.com>

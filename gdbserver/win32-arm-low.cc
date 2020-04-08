@@ -18,6 +18,8 @@
 #include "server.h"
 #include "win32-low.h"
 
+using namespace windows_nat;
+
 #ifndef CONTEXT_FLOATING_POINT
 #define CONTEXT_FLOATING_POINT 0
 #endif

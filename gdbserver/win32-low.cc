@@ -36,6 +36,8 @@
 #include "gdbsupport/common-inferior.h"
 #include "gdbsupport/gdb_wait.h"
 
+using namespace windows_nat;
+
 #ifndef USE_WIN32API
 #include <sys/cygwin.h>
 #endif

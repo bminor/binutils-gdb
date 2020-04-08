@@ -21,6 +21,9 @@
 
 #include <windows.h>
 
+namespace windows_nat
+{
+
 /* Thread information structure used to track extra information about
    each thread.  */
 struct windows_thread_info
@@ -86,5 +89,7 @@ struct windows_thread_info
   /* The name of the thread, allocated by xmalloc.  */
   gdb::unique_xmalloc_ptr<char> name;
 };
+
+}
 
 #endif
