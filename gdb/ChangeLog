@@ -1,5 +1,13 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (windows_add_thread): Use new.
+	(windows_init_thread_list, windows_delete_thread): Use delete.
+	(get_windows_debug_event): Update.
+	* nat/windows-nat.h (struct windows_thread_info): Add constructor,
+	destructor, and initializers.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (struct windows_thread_info): Remove.
 	* nat/windows-nat.h: New file.
 

@@ -468,16 +468,14 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
   if ((th = thread_rec (id, FALSE)))
     return th;
 
-  th = XCNEW (windows_thread_info);
-  th->tid = id;
-  th->h = h;
-  th->thread_local_base = (CORE_ADDR) (uintptr_t) tlb;
+  CORE_ADDR base = (CORE_ADDR) (uintptr_t) tlb;
 #ifdef __x86_64__
   /* For WOW64 processes, this is actually the pointer to the 64bit TIB,
      and the 32bit TIB is exactly 2 pages after it.  */
   if (wow64_process)
-    th->thread_local_base += 0x2000;
+    base += 0x2000;
 #endif
+  th = new windows_thread_info (id, h, base);
   thread_list.push_back (th);
 
   /* Add this new thread to the list of threads.
@@ -536,7 +534,7 @@ windows_init_thread_list (void)
   init_thread_list ();
 
   for (windows_thread_info *here : thread_list)
-    xfree (here);
+    delete here;
 
   thread_list.clear ();
 }
@@ -581,8 +579,7 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p)
 
   if (iter != thread_list.end ())
     {
-      xfree ((*iter)->name);
-      xfree (*iter);
+      delete *iter;
       thread_list.erase (iter);
     }
 }
@@ -1718,7 +1715,7 @@ windows_nat_target::get_windows_debug_event (int pid,
   BOOL debug_event;
   DWORD continue_status, event_code;
   windows_thread_info *th;
-  static windows_thread_info dummy_thread_info;
+  static windows_thread_info dummy_thread_info (0, 0, 0);
   DWORD thread_id = 0;
 
   last_sig = GDB_SIGNAL_0;

@@ -25,6 +25,20 @@
    each thread.  */
 struct windows_thread_info
 {
+  windows_thread_info (DWORD tid_, HANDLE h_, CORE_ADDR tlb)
+    : tid (tid_),
+      h (h_),
+      thread_local_base (tlb)
+  {
+  }
+
+  ~windows_thread_info ()
+  {
+    xfree (name);
+  }
+
+  DISABLE_COPY_AND_ASSIGN (windows_thread_info);
+
   /* The Win32 thread identifier.  */
   DWORD tid;
 
@@ -35,17 +49,17 @@ struct windows_thread_info
   CORE_ADDR thread_local_base;
 
   /* Non zero if SuspendThread was called on this thread.  */
-  int suspended;
+  int suspended = 0;
 
 #ifdef _WIN32_WCE
   /* The context as retrieved right after suspending the thread. */
-  CONTEXT base_context;
+  CONTEXT base_context {};
 #endif
 
   /* The context of the thread, including any manipulations.  */
   union
   {
-    CONTEXT context;
+    CONTEXT context {};
 #ifdef __x86_64__
     WOW64_CONTEXT wow64_context;
 #endif
@@ -53,14 +67,14 @@ struct windows_thread_info
 
   /* Whether debug registers changed since we last set CONTEXT back to
      the thread.  */
-  int debug_registers_changed;
+  int debug_registers_changed = 0;
 
   /* Nonzero if CONTEXT is invalidated and must be re-read from the
      inferior thread.  */
-  int reload_context;
+  int reload_context = 0;
 
   /* The name of the thread, allocated by xmalloc.  */
-  char *name;
+  char *name = nullptr;
 };
 
 #endif

@@ -212,10 +212,7 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
   if ((th = thread_rec (ptid, FALSE)))
     return th;
 
-  th = XCNEW (windows_thread_info);
-  th->tid = tid;
-  th->h = h;
-  th->thread_local_base = (CORE_ADDR) (uintptr_t) tlb;
+  th = new windows_thread_info (tid, h, (CORE_ADDR) (uintptr_t) tlb);
 
   add_thread (ptid, th);
 
@@ -233,7 +230,7 @@ delete_thread_info (thread_info *thread)
 
   remove_thread (thread);
   CloseHandle (th->h);
-  free (th);
+  delete th;
 }
 
 /* Delete a thread from the list of threads.  */
