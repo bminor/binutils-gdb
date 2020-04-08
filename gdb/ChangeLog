@@ -1,5 +1,12 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (windows_nat::handle_load_dll)
+	(windows_nat::handle_unload_dll): Rename.  No longer static.
+	* nat/windows-nat.h (handle_load_dll, handle_unload_dll):
+	Declare.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* complaints.h (stop_whining): Declare at top-level.
 	(complaint): Don't declare stop_whining.
 

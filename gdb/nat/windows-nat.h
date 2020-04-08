@@ -125,6 +125,25 @@ extern windows_thread_info *thread_rec (ptid_t ptid,
    This function must be supplied by the embedding application.  */
 extern int handle_output_debug_string (struct target_waitstatus *ourstatus);
 
+/* Handle a DLL load event.
+
+   This function assumes that the current event did not occur during
+   inferior initialization.
+
+   This function must be supplied by the embedding application.  */
+
+extern void handle_load_dll ();
+
+/* Handle a DLL unload event.
+
+   This function assumes that this event did not occur during inferior
+   initialization.
+
+   This function must be supplied by the embedding application.  */
+
+extern void handle_unload_dll ();
+
+
 /* Currently executing process */
 extern HANDLE current_process_handle;
 extern DWORD current_process_id;

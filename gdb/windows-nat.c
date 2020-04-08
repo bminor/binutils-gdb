@@ -870,15 +870,10 @@ windows_make_so (const char *name, LPVOID load_addr)
   return so;
 }
 
-/* Handle a DLL load event, and return 1.
+/* See nat/windows-nat.h.  */
 
-   This function assumes that this event did not occur during inferior
-   initialization, where their event info may be incomplete (see
-   do_initial_windows_stuff and windows_add_all_dlls for more info
-   on how we handle DLL loading during that phase).  */
-
-static void
-handle_load_dll ()
+void
+windows_nat::handle_load_dll ()
 {
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
   const char *dll_name;
@@ -911,16 +906,10 @@ windows_free_so (struct so_list *so)
   xfree (so);
 }
 
-/* Handle a DLL unload event.
-   Return 1 if successful, or zero otherwise.
+/* See nat/windows-nat.h.  */
 
-   This function assumes that this event did not occur during inferior
-   initialization, where their event info may be incomplete (see
-   do_initial_windows_stuff and windows_add_all_dlls for more info
-   on how we handle DLL loading during that phase).  */
-
-static void
-handle_unload_dll ()
+void
+windows_nat::handle_unload_dll ()
 {
   LPVOID lpBaseOfDll = current_event.u.UnloadDll.lpBaseOfDll;
   struct so_list *so;

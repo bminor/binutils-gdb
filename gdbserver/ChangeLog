@@ -1,5 +1,12 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.c (windows_nat::handle_load_dll): Rename from
+	handle_load_dll.  No longer static.
+	(windows_nat::handle_unload_dll): Rename from handle_unload_dll.
+	No longer static.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.c (handle_output_debug_string): Add parameter.  Change
 	return type.
 	(win32_kill, get_child_debug_event): Update.

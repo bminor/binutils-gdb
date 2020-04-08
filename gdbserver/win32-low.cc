@@ -1123,15 +1123,10 @@ typedef HANDLE (WINAPI *winapi_CreateToolhelp32Snapshot) (DWORD, DWORD);
 typedef BOOL (WINAPI *winapi_Module32First) (HANDLE, LPMODULEENTRY32);
 typedef BOOL (WINAPI *winapi_Module32Next) (HANDLE, LPMODULEENTRY32);
 
-/* Handle a DLL load event.
+/* See nat/windows-nat.h.  */
 
-   This function assumes that this event did not occur during inferior
-   initialization, where their event info may be incomplete (see
-   do_initial_child_stuff and win32_add_all_dlls for more info on
-   how we handle DLL loading during that phase).  */
-
-static void
-handle_load_dll (void)
+void
+windows_nat::handle_load_dll ()
 {
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
   const char *dll_name;
@@ -1144,15 +1139,10 @@ handle_load_dll (void)
   win32_add_one_solib (dll_name, (CORE_ADDR) (uintptr_t) event->lpBaseOfDll);
 }
 
-/* Handle a DLL unload event.
+/* See nat/windows-nat.h.  */
 
-   This function assumes that this event did not occur during inferior
-   initialization, where their event info may be incomplete (see
-   do_initial_child_stuff and win32_add_one_solib for more info
-   on how we handle DLL loading during that phase).  */
-
-static void
-handle_unload_dll (void)
+void
+windows_nat::handle_unload_dll ()
 {
   CORE_ADDR load_addr =
 	  (CORE_ADDR) (uintptr_t) current_event.u.UnloadDll.lpBaseOfDll;
