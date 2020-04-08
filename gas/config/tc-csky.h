@@ -91,7 +91,6 @@ struct tls_addend
 extern const relax_typeS csky_relax_table [];
 
 extern void md_csky_end (void);
-extern long md_pcrel_from_section (fixS *, segT);
 extern void csky_cons_fix_new (fragS *,
 			       unsigned int off,
 			       unsigned int len,

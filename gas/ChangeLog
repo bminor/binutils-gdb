@@ -5,6 +5,39 @@
 	* config/tc-m32c.h (MD_PCREL_FROM_SECTION): Delete duplicate
 	define.
 	(md_pcrel_from_section): Remove duplicate prototype.
+	* tc.h (md_pcrel_from_section): Add prototype.
+	* config/tc-aarch64.h (md_pcrel_from_section): Remove prototype.
+	* config/tc-arc.h (md_pcrel_from_section): Likewise.
+	* config/tc-arm.h (md_pcrel_from_section): Likewise.
+	* config/tc-avr.h (md_pcrel_from_section): Likewise.
+	* config/tc-bfin.h (md_pcrel_from_section): Likewise.
+	* config/tc-bpf.h (md_pcrel_from_section): Likewise.
+	* config/tc-csky.h (md_pcrel_from_section): Likewise.
+	* config/tc-d10v.h (md_pcrel_from_section): Likewise.
+	* config/tc-d30v.h (md_pcrel_from_section): Likewise.
+	* config/tc-epiphany.h (md_pcrel_from_section): Likewise.
+	* config/tc-fr30.h (md_pcrel_from_section): Likewise.
+	* config/tc-frv.h (md_pcrel_from_section): Likewise.
+	* config/tc-iq2000.h (md_pcrel_from_section): Likewise.
+	* config/tc-lm32.h (md_pcrel_from_section): Likewise.
+	* config/tc-m32c.h (md_pcrel_from_section): Likewise.
+	* config/tc-m32r.h (md_pcrel_from_section): Likewise.
+	* config/tc-mcore.h (md_pcrel_from_section): Likewise.
+	* config/tc-mep.h (md_pcrel_from_section): Likewise.
+	* config/tc-metag.h (md_pcrel_from_section): Likewise.
+	* config/tc-microblaze.h (md_pcrel_from_section): Likewise.
+	* config/tc-mmix.h (md_pcrel_from_section): Likewise.
+	* config/tc-moxie.h (md_pcrel_from_section): Likewise.
+	* config/tc-msp430.h (md_pcrel_from_section): Likewise.
+	* config/tc-mt.h (md_pcrel_from_section): Likewise.
+	* config/tc-or1k.h (md_pcrel_from_section): Likewise.
+	* config/tc-ppc.h (md_pcrel_from_section): Likewise.
+	* config/tc-rl78.h (md_pcrel_from_section): Likewise.
+	* config/tc-rx.h (md_pcrel_from_section): Likewise.
+	* config/tc-s390.h (md_pcrel_from_section): Likewise.
+	* config/tc-sh.h (md_pcrel_from_section): Likewise.
+	* config/tc-xc16x.h (md_pcrel_from_section): Likewise.
+	* config/tc-xstormy16.h (md_pcrel_from_section): Likewise.
 
 2020-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 

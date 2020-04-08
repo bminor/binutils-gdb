@@ -70,7 +70,6 @@ extern void rx_frag_init (fragS *);
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
-extern long md_pcrel_from_section (struct fix *, segT);
 
 /* RX doesn't have a 32 bit PCREL relocations.  */
 #define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG) 1

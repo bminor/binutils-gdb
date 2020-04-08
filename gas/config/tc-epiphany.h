@@ -48,7 +48,6 @@
 #define tc_fix_adjustable(FIX) epiphany_fix_adjustable (FIX)
 extern bfd_boolean epiphany_fix_adjustable (struct fix *);
 
-extern long md_pcrel_from_section (struct fix *, segT);
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP,SEC)
 
 #define TC_HANDLES_FX_DONE

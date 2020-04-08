@@ -101,7 +101,6 @@ extern const char *arc_target_format;
    instruction, plus the address of the PC relative fixup.  The latter
    can be calculated as fixp->fx_where +
    fixp->fx_frag->fr_address.  */
-extern long md_pcrel_from_section (struct fix *, segT);
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
 
 /* [ ] is index operator.  */

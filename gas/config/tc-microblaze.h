@@ -94,7 +94,7 @@ extern const struct relax_type md_relax_table[];
 # error No target format specified.
 #endif
 
-#include "write.h"        /* For definition of fixS */
+#include "write.h"        /* For definition of fixS.  */
 
 extern void      md_begin            (void);
 extern void      md_assemble         (char *);
