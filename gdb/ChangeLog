@@ -1,5 +1,18 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (windows_add_thread, windows_delete_thread)
+	(windows_nat_target::fetch_registers)
+	(windows_nat_target::store_registers, fake_create_process)
+	(windows_nat_target::resume, windows_nat_target::resume)
+	(get_windows_debug_event, windows_nat_target::wait)
+	(windows_nat_target::pid_to_str)
+	(windows_nat_target::get_tib_address)
+	(windows_nat_target::get_ada_task_ptid)
+	(windows_nat_target::thread_name)
+	(windows_nat_target::thread_alive): Use lwp, not tid.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (handle_exception)
 	(windows_nat_target::thread_name): Update.
 	* nat/windows-nat.h (windows_thread_info): Remove destructor.
