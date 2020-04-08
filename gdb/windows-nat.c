@@ -248,7 +248,7 @@ static enum gdb_signal last_sig = GDB_SIGNAL_0;
    not available in gdb's thread structure.  */
 struct windows_thread_info
   {
-    DWORD id;
+    DWORD tid;
     HANDLE h;
     CORE_ADDR thread_local_base;
     char *name;
@@ -429,7 +429,7 @@ static windows_thread_info *
 thread_rec (DWORD id, int get_context)
 {
   for (windows_thread_info *th : thread_list)
-    if (th->id == id)
+    if (th->tid == id)
       {
 	if (!th->suspended && get_context)
 	  {
@@ -487,7 +487,7 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
     return th;
 
   th = XCNEW (windows_thread_info);
-  th->id = id;
+  th->tid = id;
   th->h = h;
   th->thread_local_base = (CORE_ADDR) (uintptr_t) tlb;
 #ifdef __x86_64__
@@ -594,7 +594,7 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p)
   auto iter = std::find_if (thread_list.begin (), thread_list.end (),
 			    [=] (windows_thread_info *th)
 			    {
-			      return th->id == id;
+			      return th->tid == id;
 			    });
 
   if (iter != thread_list.end ())
@@ -1477,7 +1477,7 @@ windows_continue (DWORD continue_status, int id, int killed)
 		  "DBG_CONTINUE" : "DBG_EXCEPTION_NOT_HANDLED"));
 
   for (windows_thread_info *th : thread_list)
-    if ((id == -1 || id == (int) th->id)
+    if ((id == -1 || id == (int) th->tid)
 	&& th->suspended)
       {
 #ifdef __x86_64__
