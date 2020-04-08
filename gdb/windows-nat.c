@@ -1522,29 +1522,18 @@ windows_nat_target::get_windows_debug_event (int pid,
   /* If there is a relevant pending stop, report it now.  See the
      comment by the definition of "pending_stops" for details on why
      this is needed.  */
-  for (auto iter = pending_stops.begin ();
-       iter != pending_stops.end ();
-       ++iter)
+  gdb::optional<pending_stop> stop = fetch_pending_stop (debug_events);
+  if (stop.has_value ())
     {
-      if (desired_stop_thread_id == -1
-	  || desired_stop_thread_id == iter->thread_id)
-	{
-	  thread_id = iter->thread_id;
-	  *ourstatus = iter->status;
-	  current_event = iter->event;
+      thread_id = stop->thread_id;
+      *ourstatus = stop->status;
 
-	  inferior_ptid = ptid_t (current_event.dwProcessId, thread_id, 0);
-	  current_windows_thread = thread_rec (inferior_ptid,
-					       INVALIDATE_CONTEXT);
-	  current_windows_thread->reload_context = 1;
+      inferior_ptid = ptid_t (current_event.dwProcessId, thread_id, 0);
+      current_windows_thread = thread_rec (inferior_ptid,
+					   INVALIDATE_CONTEXT);
+      current_windows_thread->reload_context = 1;
 
-	  DEBUG_EVENTS (("get_windows_debug_event - "
-			 "pending stop found in 0x%x (desired=0x%x)\n",
-			 thread_id, desired_stop_thread_id));
-
-	  pending_stops.erase (iter);
-	  return thread_id;
-	}
+      return thread_id;
     }
 
   last_sig = GDB_SIGNAL_0;

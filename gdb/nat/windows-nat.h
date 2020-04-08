@@ -22,6 +22,7 @@
 #include <windows.h>
 #include <vector>
 
+#include "gdbsupport/gdb_optional.h"
 #include "target/waitstatus.h"
 
 namespace windows_nat
@@ -230,6 +231,12 @@ extern handle_exception_result handle_exception
    enabled.  */
 
 extern bool matching_pending_stop (bool debug_events);
+
+/* See if a pending stop matches DESIRED_STOP_THREAD_ID.  If so,
+   remove it from the list of pending stops, set 'current_event', and
+   return it.  Otherwise, return an empty optional.  */
+
+extern gdb::optional<pending_stop> fetch_pending_stop (bool debug_events);
 
 /* A simple wrapper for ContinueDebugEvent that continues the last
    waited-for event.  If DEBUG_EVENTS is true, logging will be

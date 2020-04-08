@@ -343,6 +343,34 @@ matching_pending_stop (bool debug_events)
 
 /* See nat/windows-nat.h.  */
 
+gdb::optional<pending_stop>
+fetch_pending_stop (bool debug_events)
+{
+  gdb::optional<pending_stop> result;
+  for (auto iter = pending_stops.begin ();
+       iter != pending_stops.end ();
+       ++iter)
+    {
+      if (desired_stop_thread_id == -1
+	  || desired_stop_thread_id == iter->thread_id)
+	{
+	  result = *iter;
+	  current_event = iter->event;
+
+	  DEBUG_EVENTS (("get_windows_debug_event - "
+			 "pending stop found in 0x%x (desired=0x%x)\n",
+			 iter->thread_id, desired_stop_thread_id));
+
+	  pending_stops.erase (iter);
+	  break;
+	}
+    }
+
+  return result;
+}
+
+/* See nat/windows-nat.h.  */
+
 BOOL
 continue_last_debug_event (DWORD continue_status, bool debug_events)
 {

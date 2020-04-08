@@ -1,5 +1,12 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (get_windows_debug_event): Use
+	fetch_pending_stop.
+	* nat/windows-nat.h (fetch_pending_stop): Declare.
+	* nat/windows-nat.c (fetch_pending_stop): New function.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (windows_continue): Use matching_pending_stop and
 	continue_last_debug_event.
 	* nat/windows-nat.h (matching_pending_stop)
