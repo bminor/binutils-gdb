@@ -912,12 +912,14 @@ class cutu_reader : public die_reader_specs
 {
 public:
 
-  cutu_reader (struct dwarf2_per_cu_data *this_cu,
+  cutu_reader (dwarf2_per_cu_data *this_cu,
+	       dwarf2_per_objfile *per_objfile,
 	       struct abbrev_table *abbrev_table,
 	       int use_existing_cu,
 	       bool skip_partial);
 
   explicit cutu_reader (struct dwarf2_per_cu_data *this_cu,
+			dwarf2_per_objfile *per_objfile,
 			struct dwarf2_cu *parent_cu = nullptr,
 			struct dwo_file *dwo_file = nullptr);
 
@@ -1510,9 +1512,11 @@ static struct type *get_DW_AT_signature_type (struct die_info *,
 					      const struct attribute *,
 					      struct dwarf2_cu *);
 
-static void load_full_type_unit (struct dwarf2_per_cu_data *per_cu);
+static void load_full_type_unit (dwarf2_per_cu_data *per_cu,
+				 dwarf2_per_objfile *per_objfile);
 
-static void read_signatured_type (struct signatured_type *);
+static void read_signatured_type (signatured_type *sig_type,
+				  dwarf2_per_objfile *per_objfile);
 
 static int attr_to_dynamic_prop (const struct attribute *attr,
 				 struct die_info *die, struct dwarf2_cu *cu,
@@ -1562,8 +1566,10 @@ static void create_all_comp_units (struct dwarf2_per_objfile *dwarf2_per_objfile
 
 static int create_all_type_units (struct dwarf2_per_objfile *dwarf2_per_objfile);
 
-static void load_full_comp_unit (struct dwarf2_per_cu_data *, bool,
-				 enum language);
+static void load_full_comp_unit (dwarf2_per_cu_data *per_cu,
+				 dwarf2_per_objfile *per_objfile,
+				 bool skip_partial,
+				 enum language pretend_language);
 
 static void process_full_comp_unit (struct dwarf2_per_cu_data *,
 				    enum language);
@@ -2323,17 +2329,18 @@ create_quick_file_names_table (unsigned int nr_initial_entries)
 				     delete_file_name_entry, xcalloc, xfree));
 }
 
-/* Read in PER_CU->CU.  This function is unrelated to symtabs, symtab would
-   have to be created afterwards.  You should call age_cached_comp_units after
-   processing PER_CU->CU.  dw2_setup must have been already called.  */
+/* Read in CU (dwarf2_cu object) for PER_CU in the context of PER_OBJFILE.  This
+   function is unrelated to symtabs, symtab would have to be created afterwards.
+   You should call age_cached_comp_units after processing the CU.  */
 
 static void
-load_cu (struct dwarf2_per_cu_data *per_cu, bool skip_partial)
+load_cu (dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile,
+	 bool skip_partial)
 {
   if (per_cu->is_debug_types)
-    load_full_type_unit (per_cu);
+    load_full_type_unit (per_cu, per_objfile);
   else
-    load_full_comp_unit (per_cu, skip_partial, language_minimal);
+    load_full_comp_unit (per_cu, per_objfile, skip_partial, language_minimal);
 
   if (per_cu->cu == NULL)
     return;  /* Dummy CU.  */
@@ -2361,7 +2368,7 @@ dw2_do_instantiate_symtab (dwarf2_per_cu_data *per_cu,
   if (!dwarf2_per_objfile->symtab_set_p (per_cu))
     {
       queue_comp_unit (per_cu, language_minimal);
-      load_cu (per_cu, skip_partial);
+      load_cu (per_cu, dwarf2_per_objfile, skip_partial);
 
       /* If we just loaded a CU from a DWO, and we're working with an index
 	 that may badly handle TUs, load all the TUs in that DWO as well.
@@ -3212,7 +3219,8 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
    table for THIS_CU.  */
 
 static struct quick_file_names *
-dw2_get_file_names (struct dwarf2_per_cu_data *this_cu)
+dw2_get_file_names (dwarf2_per_cu_data *this_cu,
+		    dwarf2_per_objfile *per_objfile)
 {
   /* This should never be called for TUs.  */
   gdb_assert (! this_cu->is_debug_types);
@@ -3225,7 +3233,7 @@ dw2_get_file_names (struct dwarf2_per_cu_data *this_cu)
   if (this_cu->v.quick->no_file_data)
     return NULL;
 
-  cutu_reader reader (this_cu);
+  cutu_reader reader (this_cu, per_objfile);
   if (!reader.dummy_p)
     dw2_get_file_names_reader (&reader, reader.info_ptr, reader.comp_unit_die);
 
@@ -3341,7 +3349,8 @@ dw2_map_symtabs_matching_filename
       if (dwarf2_per_objfile->symtab_set_p (per_cu))
 	continue;
 
-      quick_file_names *file_data = dw2_get_file_names (per_cu);
+      quick_file_names *file_data
+	= dw2_get_file_names (per_cu, dwarf2_per_objfile);
       if (file_data == NULL)
 	continue;
 
@@ -3682,7 +3691,8 @@ dw2_expand_symtabs_with_fullname (struct objfile *objfile,
       if (dwarf2_per_objfile->symtab_set_p (per_cu))
 	continue;
 
-      quick_file_names *file_data = dw2_get_file_names (per_cu);
+      quick_file_names *file_data
+	= dw2_get_file_names (per_cu, dwarf2_per_objfile);
       if (file_data == NULL)
 	continue;
 
@@ -4633,7 +4643,8 @@ dw_expand_symtabs_matching_file_matcher
       if (dwarf2_per_objfile->symtab_set_p (per_cu))
 	continue;
 
-      quick_file_names *file_data = dw2_get_file_names (per_cu);
+      quick_file_names *file_data
+	= dw2_get_file_names (per_cu, dwarf2_per_objfile);
       if (file_data == NULL)
 	continue;
 
@@ -4817,7 +4828,8 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
 	  if (dwarf2_per_objfile->symtab_set_p (per_cu))
 	    continue;
 
-	  quick_file_names *file_data = dw2_get_file_names (per_cu);
+	  quick_file_names *file_data
+	    = dw2_get_file_names (per_cu, dwarf2_per_objfile);
 	  if (file_data == NULL)
 	    continue;
 
@@ -6914,14 +6926,14 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu_data *this_cu,
    If USE_EXISTING_CU is non-zero, and THIS_CU->cu is non-NULL, then use it.
    Otherwise, a new CU is allocated with xmalloc.  */
 
-cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
+cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
+			  dwarf2_per_objfile *dwarf2_per_objfile,
 			  struct abbrev_table *abbrev_table,
 			  int use_existing_cu,
 			  bool skip_partial)
   : die_reader_specs {},
     m_this_cu (this_cu)
 {
-  struct dwarf2_per_objfile *dwarf2_per_objfile = this_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_section_info *section = this_cu->section;
   bfd *abfd = section->get_bfd_owner ();
@@ -7138,13 +7150,13 @@ cutu_reader::keep ()
    When parent_cu is passed, it is used to provide a default value for
    str_offsets_base and addr_base from the parent.  */
 
-cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
+cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
+			  dwarf2_per_objfile *dwarf2_per_objfile,
 			  struct dwarf2_cu *parent_cu,
 			  struct dwo_file *dwo_file)
   : die_reader_specs {},
     m_this_cu (this_cu)
 {
-  struct dwarf2_per_objfile *dwarf2_per_objfile = this_cu->dwarf2_per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_section_info *section = this_cu->section;
   bfd *abfd = section->get_bfd_owner ();
@@ -7506,7 +7518,8 @@ process_psymtab_comp_unit_reader (const struct die_reader_specs *reader,
    Process compilation unit THIS_CU for a psymtab.  */
 
 static void
-process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
+process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
+			   dwarf2_per_objfile *per_objfile,
 			   bool want_partial_unit,
 			   enum language pretend_language)
 {
@@ -7518,7 +7531,7 @@ process_psymtab_comp_unit (struct dwarf2_per_cu_data *this_cu,
   if (this_cu->cu != NULL)
     free_one_cached_comp_unit (this_cu);
 
-  cutu_reader reader (this_cu, NULL, 0, false);
+  cutu_reader reader (this_cu, per_objfile, NULL, 0, false);
 
   switch (reader.comp_unit_die->tag)
     {
@@ -7699,8 +7712,8 @@ build_type_psymtabs_1 (struct dwarf2_per_objfile *dwarf2_per_objfile)
 	  ++tu_stats->nr_uniq_abbrev_tables;
 	}
 
-      cutu_reader reader (&tu.sig_type->per_cu, abbrev_table.get (),
-			  0, false);
+      cutu_reader reader (&tu.sig_type->per_cu, dwarf2_per_objfile,
+			  abbrev_table.get (), 0, false);
       if (!reader.dummy_p)
 	build_type_psymtabs_reader (&reader, reader.info_ptr,
 				    reader.comp_unit_die);
@@ -7805,7 +7818,7 @@ process_skeletonless_type_unit (void **slot, void *info)
   *slot = entry;
 
   /* This does the job that build_type_psymtabs_1 would have done.  */
-  cutu_reader reader (&entry->per_cu, NULL, 0, false);
+  cutu_reader reader (&entry->per_cu, dwarf2_per_objfile, NULL, 0, false);
   if (!reader.dummy_p)
     build_type_psymtabs_reader (&reader, reader.info_ptr,
 				reader.comp_unit_die);
@@ -7906,7 +7919,8 @@ dwarf2_build_psymtabs_hard (struct dwarf2_per_objfile *dwarf2_per_objfile)
       if (per_cu->v.psymtab != NULL)
 	/* In case a forward DW_TAG_imported_unit has read the CU already.  */
 	continue;
-      process_psymtab_comp_unit (per_cu, false, language_minimal);
+      process_psymtab_comp_unit (per_cu, dwarf2_per_objfile, false,
+				 language_minimal);
     }
 
   /* This has to wait until we read the CUs, we need the list of DWOs.  */
@@ -7939,9 +7953,10 @@ dwarf2_build_psymtabs_hard (struct dwarf2_per_objfile *dwarf2_per_objfile)
    This is also used when rereading a primary CU with load_all_dies.  */
 
 static void
-load_partial_comp_unit (struct dwarf2_per_cu_data *this_cu)
+load_partial_comp_unit (dwarf2_per_cu_data *this_cu,
+			dwarf2_per_objfile *per_objfile)
 {
-  cutu_reader reader (this_cu, NULL, 1, false);
+  cutu_reader reader (this_cu, per_objfile, NULL, 1, false);
 
   if (!reader.dummy_p)
     {
@@ -8120,7 +8135,8 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 
 		/* Go read the partial unit, if needed.  */
 		if (per_cu->v.psymtab == NULL)
-		  process_psymtab_comp_unit (per_cu, true, cu->language);
+		  process_psymtab_comp_unit (per_cu, cu->per_objfile, true,
+					     cu->language);
 
 		cu->per_cu->imported_symtabs_push (per_cu);
 	      }
@@ -9051,13 +9067,14 @@ die_eq (const void *item_lhs, const void *item_rhs)
 /* Load the DIEs associated with PER_CU into memory.  */
 
 static void
-load_full_comp_unit (struct dwarf2_per_cu_data *this_cu,
+load_full_comp_unit (dwarf2_per_cu_data *this_cu,
+		     dwarf2_per_objfile *per_objfile,
 		     bool skip_partial,
 		     enum language pretend_language)
 {
   gdb_assert (! this_cu->is_debug_types);
 
-  cutu_reader reader (this_cu, NULL, 1, skip_partial);
+  cutu_reader reader (this_cu, per_objfile, NULL, 1, skip_partial);
   if (reader.dummy_p)
     return;
 
@@ -9861,8 +9878,9 @@ process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
     {
       sect_offset sect_off = attr->get_ref_die_offset ();
       bool is_dwz = (attr->form == DW_FORM_GNU_ref_alt || cu->per_cu->is_dwz);
+      dwarf2_per_objfile *per_objfile = cu->per_objfile;
       dwarf2_per_cu_data *per_cu
-	= dwarf2_find_containing_comp_unit (sect_off, is_dwz, cu->per_objfile);
+	= dwarf2_find_containing_comp_unit (sect_off, is_dwz, per_objfile);
 
       /* We're importing a C++ compilation unit with tag DW_TAG_compile_unit
 	 into another compilation unit, at root level.  Regard this as a hint,
@@ -9874,7 +9892,7 @@ process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
 
       /* If necessary, add it to the queue and load its DIEs.  */
       if (maybe_queue_comp_unit (cu, per_cu, cu->language))
-	load_full_comp_unit (per_cu, false, cu->language);
+	load_full_comp_unit (per_cu, per_objfile, false, cu->language);
 
       cu->per_cu->imported_symtabs_push (per_cu);
     }
@@ -11275,7 +11293,7 @@ create_cus_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
       per_cu.sect_off = sect_offset (info_ptr - section.buffer);
       per_cu.section = &section;
 
-      cutu_reader reader (&per_cu, cu, &dwo_file);
+      cutu_reader reader (&per_cu, dwarf2_per_objfile, cu, &dwo_file);
       if (!reader.dummy_p)
 	create_dwo_cu_reader (&reader, reader.info_ptr, reader.comp_unit_die,
 			      &dwo_file, &read_unit);
@@ -12787,7 +12805,7 @@ queue_and_load_dwo_tu (void **slot, void *info)
 	 a real dependency of PER_CU on SIG_TYPE.  That is detected later
 	 while processing PER_CU.  */
       if (maybe_queue_comp_unit (NULL, sig_cu, per_cu->cu->language))
-	load_full_type_unit (sig_cu);
+	load_full_type_unit (sig_cu, per_cu->cu->per_objfile);
       per_cu->imported_symtabs_push (sig_cu);
     }
 
@@ -18626,7 +18644,7 @@ find_partial_die (sect_offset sect_off, int offset_in_dwz, struct dwarf2_cu *cu)
 						 dwarf2_per_objfile);
 
       if (per_cu->cu == NULL || per_cu->cu->partial_dies == NULL)
-	load_partial_comp_unit (per_cu);
+	load_partial_comp_unit (per_cu, cu->per_objfile);
 
       per_cu->cu->last_used = 0;
       pd = per_cu->cu->find_partial_die (sect_off);
@@ -18645,7 +18663,7 @@ find_partial_die (sect_offset sect_off, int offset_in_dwz, struct dwarf2_cu *cu)
 	 DIEs alone (which can still be in use, e.g. in scan_partial_symbols),
 	 and clobber THIS_CU->cu->partial_dies with the hash table for the new
 	 set.  */
-      load_partial_comp_unit (per_cu);
+      load_partial_comp_unit (per_cu, cu->per_objfile);
 
       pd = per_cu->cu->find_partial_die (sect_off);
     }
@@ -19361,7 +19379,7 @@ dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu, unsigned int addr_index)
     }
   else
     {
-      cutu_reader reader (per_cu, NULL, 0, false);
+      cutu_reader reader (per_cu, dwarf2_per_objfile, NULL, 0, false);
       addr_base = reader.cu->addr_base;
       addr_size = reader.cu->header.addr_size;
     }
@@ -22172,7 +22190,7 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 
       /* If necessary, add it to the queue and load its DIEs.  */
       if (maybe_queue_comp_unit (cu, per_cu, cu->language))
-	load_full_comp_unit (per_cu, false, cu->language);
+	load_full_comp_unit (per_cu, dwarf2_per_objfile, false, cu->language);
 
       target_cu = per_cu->cu;
     }
@@ -22180,7 +22198,8 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
     {
       /* We're loading full DIEs during partial symbol reading.  */
       gdb_assert (dwarf2_per_objfile->per_bfd->reading_partial_symbols);
-      load_full_comp_unit (cu->per_cu, false, language_minimal);
+      load_full_comp_unit (cu->per_cu, dwarf2_per_objfile, false,
+			   language_minimal);
     }
 
   *ref_cu = target_cu;
@@ -22235,7 +22254,7 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
   struct objfile *objfile = dwarf2_per_objfile->objfile;
 
   if (per_cu->cu == NULL)
-    load_cu (per_cu, false);
+    load_cu (per_cu, dwarf2_per_objfile, false);
   cu = per_cu->cu;
   if (cu == NULL)
     {
@@ -22373,7 +22392,7 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
   struct objfile *objfile = per_cu->dwarf2_per_objfile->objfile;
 
   if (per_cu->cu == NULL)
-    load_cu (per_cu, false);
+    load_cu (per_cu, per_cu->dwarf2_per_objfile, false);
   cu = per_cu->cu;
   if (cu == NULL)
     {
@@ -22495,7 +22514,7 @@ dwarf2_fetch_die_type_sect_off (sect_offset sect_off,
   struct die_info *die;
 
   if (per_cu->cu == NULL)
-    load_cu (per_cu, false);
+    load_cu (per_cu, per_cu->dwarf2_per_objfile, false);
   cu = per_cu->cu;
   if (!cu)
     return NULL;
@@ -22537,7 +22556,7 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
   /* If necessary, add it to the queue and load its DIEs.  */
 
   if (maybe_queue_comp_unit (*ref_cu, &sig_type->per_cu, language_minimal))
-    read_signatured_type (sig_type);
+    read_signatured_type (sig_type, (*ref_cu)->per_objfile);
 
   sig_cu = sig_type->per_cu.cu;
   gdb_assert (sig_cu != NULL);
@@ -22700,7 +22719,8 @@ get_DW_AT_signature_type (struct die_info *die, const struct attribute *attr,
 /* Load the DIEs associated with type unit PER_CU into memory.  */
 
 static void
-load_full_type_unit (struct dwarf2_per_cu_data *per_cu)
+load_full_type_unit (dwarf2_per_cu_data *per_cu,
+		     dwarf2_per_objfile *per_objfile)
 {
   struct signatured_type *sig_type;
 
@@ -22714,7 +22734,7 @@ load_full_type_unit (struct dwarf2_per_cu_data *per_cu)
 
   gdb_assert (per_cu->cu == NULL);
 
-  read_signatured_type (sig_type);
+  read_signatured_type (sig_type, per_objfile);
 
   gdb_assert (per_cu->cu != NULL);
 }
@@ -22724,14 +22744,15 @@ load_full_type_unit (struct dwarf2_per_cu_data *per_cu)
    read in the real type from the DWO file as well.  */
 
 static void
-read_signatured_type (struct signatured_type *sig_type)
+read_signatured_type (signatured_type *sig_type,
+		      dwarf2_per_objfile *per_objfile)
 {
   struct dwarf2_per_cu_data *per_cu = &sig_type->per_cu;
 
   gdb_assert (per_cu->is_debug_types);
   gdb_assert (per_cu->cu == NULL);
 
-  cutu_reader reader (per_cu, NULL, 0, false);
+  cutu_reader reader (per_cu, per_objfile, NULL, 0, false);
 
   if (!reader.dummy_p)
     {
