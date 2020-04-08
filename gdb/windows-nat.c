@@ -456,26 +456,13 @@ check (BOOL ok, const char *file, int line)
 		     (unsigned) GetLastError ());
 }
 
-/* Possible values to pass to 'thread_rec'.  */
-enum thread_disposition_type
-{
-  /* Do not invalidate the thread's context, and do not suspend the
-     thread.  */
-  DONT_INVALIDATE_CONTEXT,
-  /* Invalidate the context, but do not suspend the thread.  */
-  DONT_SUSPEND,
-  /* Invalidate the context and suspend the thread.  */
-  INVALIDATE_CONTEXT
-};
+/* See nat/windows-nat.h.  */
 
-/* Find a thread record given a thread id.  THREAD_DISPOSITION
-   controls whether the thread is suspended, and whether the context
-   is invalidated.  */
-static windows_thread_info *
-thread_rec (DWORD id, enum thread_disposition_type disposition)
+windows_thread_info *
+windows_nat::thread_rec (ptid_t ptid, thread_disposition_type disposition)
 {
   for (windows_thread_info *th : thread_list)
-    if (th->tid == id)
+    if (th->tid == ptid.lwp ())
       {
 	if (!th->suspended)
 	  {
@@ -485,7 +472,7 @@ thread_rec (DWORD id, enum thread_disposition_type disposition)
 		/* Nothing.  */
 		break;
 	      case INVALIDATE_CONTEXT:
-		if (id != current_event.dwThreadId)
+		if (ptid.lwp () != current_event.dwThreadId)
 		  th->suspend ();
 		th->reload_context = true;
 		break;
@@ -513,13 +500,10 @@ static windows_thread_info *
 windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
 {
   windows_thread_info *th;
-  DWORD id;
 
   gdb_assert (ptid.lwp () != 0);
 
-  id = ptid.lwp ();
-
-  if ((th = thread_rec (id, DONT_INVALIDATE_CONTEXT)))
+  if ((th = thread_rec (ptid, DONT_INVALIDATE_CONTEXT)))
     return th;
 
   CORE_ADDR base = (CORE_ADDR) (uintptr_t) tlb;
@@ -529,7 +513,7 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
   if (wow64_process)
     base += 0x2000;
 #endif
-  th = new windows_thread_info (id, h, base);
+  th = new windows_thread_info (ptid.lwp (), h, base);
   thread_list.push_back (th);
 
   /* Add this new thread to the list of threads.
@@ -716,8 +700,7 @@ windows_fetch_one_register (struct regcache *regcache,
 void
 windows_nat_target::fetch_registers (struct regcache *regcache, int r)
 {
-  DWORD tid = regcache->ptid ().lwp ();
-  windows_thread_info *th = thread_rec (tid, INVALIDATE_CONTEXT);
+  windows_thread_info *th = thread_rec (regcache->ptid (), INVALIDATE_CONTEXT);
 
   /* Check if TH exists.  Windows sometimes uses a non-existent
      thread id in its events.  */
@@ -812,8 +795,7 @@ windows_store_one_register (const struct regcache *regcache,
 void
 windows_nat_target::store_registers (struct regcache *regcache, int r)
 {
-  DWORD tid = regcache->ptid ().lwp ();
-  windows_thread_info *th = thread_rec (tid, INVALIDATE_CONTEXT);
+  windows_thread_info *th = thread_rec (regcache->ptid (), INVALIDATE_CONTEXT);
 
   /* Check if TH exists.  Windows sometimes uses a non-existent
      thread id in its events.  */
@@ -1353,7 +1335,8 @@ handle_exception (struct target_waitstatus *ourstatus)
   ourstatus->kind = TARGET_WAITKIND_STOPPED;
 
   /* Record the context of the current thread.  */
-  thread_rec (current_event.dwThreadId, DONT_SUSPEND);
+  thread_rec (ptid_t (current_event.dwProcessId, current_event.dwThreadId, 0),
+	      DONT_SUSPEND);
 
   switch (code)
     {
@@ -1483,7 +1466,9 @@ handle_exception (struct target_waitstatus *ourstatus)
 	  if (named_thread_id == (DWORD) -1)
 	    named_thread_id = current_event.dwThreadId;
 
-	  named_thread = thread_rec (named_thread_id, DONT_INVALIDATE_CONTEXT);
+	  named_thread = thread_rec (ptid_t (current_event.dwProcessId,
+					     named_thread_id, 0),
+				     DONT_INVALIDATE_CONTEXT);
 	  if (named_thread != NULL)
 	    {
 	      int thread_name_len;
@@ -1714,7 +1699,7 @@ windows_nat_target::resume (ptid_t ptid, int step, enum gdb_signal sig)
 	       ptid.pid (), (unsigned) ptid.lwp (), step, sig));
 
   /* Get context for currently selected thread.  */
-  th = thread_rec (inferior_ptid.lwp (), DONT_INVALIDATE_CONTEXT);
+  th = thread_rec (inferior_ptid, DONT_INVALIDATE_CONTEXT);
   if (th)
     {
 #ifdef __x86_64__
@@ -1847,7 +1832,7 @@ windows_nat_target::get_windows_debug_event (int pid,
 	  current_event = iter->event;
 
 	  inferior_ptid = ptid_t (current_event.dwProcessId, thread_id, 0);
-	  current_thread = thread_rec (thread_id, INVALIDATE_CONTEXT);
+	  current_thread = thread_rec (inferior_ptid, INVALIDATE_CONTEXT);
 	  current_thread->reload_context = 1;
 
 	  DEBUG_EVENTS (("get_windows_debug_event - "
@@ -2060,7 +2045,8 @@ windows_nat_target::get_windows_debug_event (int pid,
 	      == EXCEPTION_BREAKPOINT)
 	  && windows_initialization_done)
 	{
-	  th = thread_rec (thread_id, INVALIDATE_CONTEXT);
+	  ptid_t ptid = ptid_t (current_event.dwProcessId, thread_id, 0);
+	  th = thread_rec (ptid, INVALIDATE_CONTEXT);
 	  th->stopped_at_software_breakpoint = true;
 	}
       pending_stops.push_back ({thread_id, *ourstatus, current_event});
@@ -2072,7 +2058,7 @@ windows_nat_target::get_windows_debug_event (int pid,
       inferior_ptid = ptid_t (current_event.dwProcessId, thread_id, 0);
       current_thread = th;
       if (!current_thread)
-	current_thread = thread_rec (thread_id, INVALIDATE_CONTEXT);
+	current_thread = thread_rec (inferior_ptid, INVALIDATE_CONTEXT);
     }
 
 out:
@@ -3548,7 +3534,7 @@ windows_nat_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 {
   windows_thread_info *th;
 
-  th = thread_rec (ptid.lwp (), DONT_INVALIDATE_CONTEXT);
+  th = thread_rec (ptid, DONT_INVALIDATE_CONTEXT);
   if (th == NULL)
     return false;
 
@@ -3569,7 +3555,7 @@ windows_nat_target::get_ada_task_ptid (long lwp, long thread)
 const char *
 windows_nat_target::thread_name (struct thread_info *thr)
 {
-  return thread_rec (thr->ptid.lwp (), DONT_INVALIDATE_CONTEXT)->name.get ();
+  return thread_rec (thr->ptid, DONT_INVALIDATE_CONTEXT)->name.get ();
 }
 
 
@@ -3728,12 +3714,9 @@ cygwin_get_dr7 (void)
 bool
 windows_nat_target::thread_alive (ptid_t ptid)
 {
-  int tid;
-
   gdb_assert (ptid.lwp () != 0);
-  tid = ptid.lwp ();
 
-  return (WaitForSingleObject (thread_rec (tid, DONT_INVALIDATE_CONTEXT)->h, 0)
+  return (WaitForSingleObject (thread_rec (ptid, DONT_INVALIDATE_CONTEXT)->h, 0)
 	  != WAIT_OBJECT_0);
 }
 

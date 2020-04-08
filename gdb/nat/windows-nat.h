@@ -90,6 +90,27 @@ struct windows_thread_info
   gdb::unique_xmalloc_ptr<char> name;
 };
 
+
+/* Possible values to pass to 'thread_rec'.  */
+enum thread_disposition_type
+{
+  /* Do not invalidate the thread's context, and do not suspend the
+     thread.  */
+  DONT_INVALIDATE_CONTEXT,
+  /* Invalidate the context, but do not suspend the thread.  */
+  DONT_SUSPEND,
+  /* Invalidate the context and suspend the thread.  */
+  INVALIDATE_CONTEXT
+};
+
+/* Find a thread record given a thread id.  THREAD_DISPOSITION
+   controls whether the thread is suspended, and whether the context
+   is invalidated.
+
+   This function must be supplied by the embedding application.  */
+extern windows_thread_info *thread_rec (ptid_t ptid,
+					thread_disposition_type disposition);
+
 }
 
 #endif

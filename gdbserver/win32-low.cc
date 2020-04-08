@@ -178,17 +178,17 @@ win32_require_context (windows_thread_info *th)
     }
 }
 
-/* Find a thread record given a thread id.  If GET_CONTEXT is set then
-   also retrieve the context for this thread.  */
-static windows_thread_info *
-thread_rec (ptid_t ptid, int get_context)
+/* See nat/windows-nat.h.  */
+
+windows_thread_info *
+windows_nat::thread_rec (ptid_t ptid, thread_disposition_type disposition)
 {
   thread_info *thread = find_thread_ptid (ptid);
   if (thread == NULL)
     return NULL;
 
   windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
-  if (get_context)
+  if (disposition != DONT_INVALIDATE_CONTEXT)
     win32_require_context (th);
   return th;
 }
@@ -200,7 +200,7 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
   windows_thread_info *th;
   ptid_t ptid = ptid_t (pid, tid, 0);
 
-  if ((th = thread_rec (ptid, FALSE)))
+  if ((th = thread_rec (ptid, DONT_INVALIDATE_CONTEXT)))
     return th;
 
   th = new windows_thread_info (tid, h, (CORE_ADDR) (uintptr_t) tlb);
@@ -454,7 +454,8 @@ static void
 child_fetch_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
-  windows_thread_info *th = thread_rec (current_thread_ptid (), TRUE);
+  windows_thread_info *th = thread_rec (current_thread_ptid (),
+					INVALIDATE_CONTEXT);
   if (r == -1 || r > NUM_REGS)
     child_fetch_inferior_registers (regcache, NUM_REGS);
   else
@@ -468,7 +469,8 @@ static void
 child_store_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
-  windows_thread_info *th = thread_rec (current_thread_ptid (), TRUE);
+  windows_thread_info *th = thread_rec (current_thread_ptid (),
+					INVALIDATE_CONTEXT);
   if (r == -1 || r == 0 || r > NUM_REGS)
     child_store_inferior_registers (regcache, NUM_REGS);
   else
@@ -937,7 +939,7 @@ win32_process_target::resume (thread_resume *resume_info, size_t n)
 
   /* Get context for the currently selected thread.  */
   ptid = debug_event_ptid (&current_event);
-  th = thread_rec (ptid, FALSE);
+  th = thread_rec (ptid, DONT_INVALIDATE_CONTEXT);
   if (th)
     {
       win32_prepare_to_resume (th);
@@ -1807,7 +1809,7 @@ int
 win32_process_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 {
   windows_thread_info *th;
-  th = thread_rec (ptid, 0);
+  th = thread_rec (ptid, DONT_INVALIDATE_CONTEXT);
   if (th == NULL)
     return 0;
   if (addr != NULL)

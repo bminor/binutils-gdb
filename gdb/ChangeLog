@@ -1,5 +1,21 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (enum thread_disposition_type): Move to
+	nat/windows-nat.h.
+	(windows_nat::thread_rec): Rename from thread_rec.  No longer
+	static.
+	(windows_add_thread, windows_nat_target::fetch_registers)
+	(windows_nat_target::store_registers, handle_exception)
+	(windows_nat_target::resume, get_windows_debug_event)
+	(windows_nat_target::get_tib_address)
+	(windows_nat_target::thread_name)
+	(windows_nat_target::thread_alive): Update.
+	* nat/windows-nat.h (enum thread_disposition_type): Move from
+	windows-nat.c.
+	(thread_rec): Declare.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c: Add "using namespace".
 	* nat/windows-nat.h: Wrap contents in windows_nat namespace.
 	* nat/windows-nat.c: Wrap contents in windows_nat namespace.
