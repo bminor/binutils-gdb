@@ -111,6 +111,13 @@ enum thread_disposition_type
 extern windows_thread_info *thread_rec (ptid_t ptid,
 					thread_disposition_type disposition);
 
+/* Return the name of the DLL referenced by H at ADDRESS.  UNICODE
+   determines what sort of string is read from the inferior.  Returns
+   the name of the DLL, or NULL on error.  If a name is returned, it
+   is stored in a static buffer which is valid until the next call to
+   get_image_name.  */
+extern const char *get_image_name (HANDLE h, void *address, int unicode);
+
 }
 
 #endif

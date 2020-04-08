@@ -69,4 +69,61 @@ windows_thread_info::resume ()
   suspended = 0;
 }
 
+const char *
+get_image_name (HANDLE h, void *address, int unicode)
+{
+#ifdef __CYGWIN__
+  static char buf[MAX_PATH];
+#else
+  static char buf[(2 * MAX_PATH) + 1];
+#endif
+  DWORD size = unicode ? sizeof (WCHAR) : sizeof (char);
+  char *address_ptr;
+  int len = 0;
+  char b[2];
+  SIZE_T done;
+
+  /* Attempt to read the name of the dll that was detected.
+     This is documented to work only when actively debugging
+     a program.  It will not work for attached processes.  */
+  if (address == NULL)
+    return NULL;
+
+#ifdef _WIN32_WCE
+  /* Windows CE reports the address of the image name,
+     instead of an address of a pointer into the image name.  */
+  address_ptr = address;
+#else
+  /* See if we could read the address of a string, and that the
+     address isn't null.  */
+  if (!ReadProcessMemory (h, address,  &address_ptr,
+			  sizeof (address_ptr), &done)
+      || done != sizeof (address_ptr)
+      || !address_ptr)
+    return NULL;
+#endif
+
+  /* Find the length of the string.  */
+  while (ReadProcessMemory (h, address_ptr + len++ * size, &b, size, &done)
+	 && (b[0] != 0 || b[size - 1] != 0) && done == size)
+    continue;
+
+  if (!unicode)
+    ReadProcessMemory (h, address_ptr, buf, len, &done);
+  else
+    {
+      WCHAR *unicode_address = (WCHAR *) alloca (len * sizeof (WCHAR));
+      ReadProcessMemory (h, address_ptr, unicode_address, len * sizeof (WCHAR),
+			 &done);
+#ifdef __CYGWIN__
+      wcstombs (buf, unicode_address, MAX_PATH);
+#else
+      WideCharToMultiByte (CP_ACP, 0, unicode_address, len, buf, sizeof buf,
+			   0, 0);
+#endif
+    }
+
+  return buf;
+}
+
 }

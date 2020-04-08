@@ -1031,55 +1031,6 @@ win32_add_one_solib (const char *name, CORE_ADDR load_addr)
   loaded_dll (buf2, load_addr);
 }
 
-static char *
-get_image_name (HANDLE h, void *address, int unicode)
-{
-  static char buf[(2 * MAX_PATH) + 1];
-  DWORD size = unicode ? sizeof (WCHAR) : sizeof (char);
-  char *address_ptr;
-  int len = 0;
-  char b[2];
-  SIZE_T done;
-
-  /* Attempt to read the name of the dll that was detected.
-     This is documented to work only when actively debugging
-     a program.  It will not work for attached processes. */
-  if (address == NULL)
-    return NULL;
-
-#ifdef _WIN32_WCE
-  /* Windows CE reports the address of the image name,
-     instead of an address of a pointer into the image name.  */
-  address_ptr = address;
-#else
-  /* See if we could read the address of a string, and that the
-     address isn't null. */
-  if (!ReadProcessMemory (h, address,  &address_ptr,
-			  sizeof (address_ptr), &done)
-      || done != sizeof (address_ptr)
-      || !address_ptr)
-    return NULL;
-#endif
-
-  /* Find the length of the string */
-  while (ReadProcessMemory (h, address_ptr + len++ * size, &b, size, &done)
-	 && (b[0] != 0 || b[size - 1] != 0) && done == size)
-    continue;
-
-  if (!unicode)
-    ReadProcessMemory (h, address_ptr, buf, len, &done);
-  else
-    {
-      WCHAR *unicode_address = XALLOCAVEC (WCHAR, len);
-      ReadProcessMemory (h, address_ptr, unicode_address, len * sizeof (WCHAR),
-			 &done);
-
-      WideCharToMultiByte (CP_ACP, 0, unicode_address, len, buf, len, 0, 0);
-    }
-
-  return buf;
-}
-
 typedef BOOL (WINAPI *winapi_EnumProcessModules) (HANDLE, HMODULE *,
 						  DWORD, LPDWORD);
 typedef BOOL (WINAPI *winapi_GetModuleInformation) (HANDLE, HMODULE,
@@ -1188,7 +1139,7 @@ static void
 handle_load_dll (void)
 {
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
-  char *dll_name;
+  const char *dll_name;
 
   dll_name = get_image_name (current_process_handle,
 			     event->lpImageName, event->fUnicode);

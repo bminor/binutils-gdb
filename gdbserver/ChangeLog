@@ -1,5 +1,10 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.c (get_image_name): Remove.
+	(handle_load_dll): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.c (windows_nat::thread_rec): Rename from thread_rec.
 	No longer static.  Change parameters.
 	(child_add_thread, child_fetch_inferior_registers)

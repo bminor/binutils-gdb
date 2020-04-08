@@ -921,56 +921,6 @@ windows_make_so (const char *name, LPVOID load_addr)
   return so;
 }
 
-static char *
-get_image_name (HANDLE h, void *address, int unicode)
-{
-#ifdef __CYGWIN__
-  static char buf[__PMAX];
-#else
-  static char buf[(2 * __PMAX) + 1];
-#endif
-  DWORD size = unicode ? sizeof (WCHAR) : sizeof (char);
-  char *address_ptr;
-  int len = 0;
-  char b[2];
-  SIZE_T done;
-
-  /* Attempt to read the name of the dll that was detected.
-     This is documented to work only when actively debugging
-     a program.  It will not work for attached processes.  */
-  if (address == NULL)
-    return NULL;
-
-  /* See if we could read the address of a string, and that the
-     address isn't null.  */
-  if (!ReadProcessMemory (h, address,  &address_ptr,
-			  sizeof (address_ptr), &done)
-      || done != sizeof (address_ptr) || !address_ptr)
-    return NULL;
-
-  /* Find the length of the string.  */
-  while (ReadProcessMemory (h, address_ptr + len++ * size, &b, size, &done)
-	 && (b[0] != 0 || b[size - 1] != 0) && done == size)
-    continue;
-
-  if (!unicode)
-    ReadProcessMemory (h, address_ptr, buf, len, &done);
-  else
-    {
-      WCHAR *unicode_address = (WCHAR *) alloca (len * sizeof (WCHAR));
-      ReadProcessMemory (h, address_ptr, unicode_address, len * sizeof (WCHAR),
-			 &done);
-#ifdef __CYGWIN__
-      wcstombs (buf, unicode_address, __PMAX);
-#else
-      WideCharToMultiByte (CP_ACP, 0, unicode_address, len, buf, sizeof buf,
-			   0, 0);
-#endif
-    }
-
-  return buf;
-}
-
 /* Handle a DLL load event, and return 1.
 
    This function assumes that this event did not occur during inferior
@@ -982,7 +932,7 @@ static void
 handle_load_dll ()
 {
   LOAD_DLL_DEBUG_INFO *event = &current_event.u.LoadDll;
-  char *dll_name;
+  const char *dll_name;
 
   /* Try getting the DLL name via the lpImageName field of the event.
      Note that Microsoft documents this fields as strictly optional,

@@ -1,5 +1,11 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (get_image_name): Move to nat/windows-nat.c.
+	(handle_load_dll): Update.
+	* nat/windows-nat.c (get_image_name): Move from windows-nat.c.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (enum thread_disposition_type): Move to
 	nat/windows-nat.h.
 	(windows_nat::thread_rec): Rename from thread_rec.  No longer
