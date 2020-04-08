@@ -416,27 +416,7 @@ thread_rec (DWORD id, int get_context)
 	if (!th->suspended && get_context)
 	  {
 	    if (get_context > 0 && id != current_event.dwThreadId)
-	      {
-		if (SuspendThread (th->h) == (DWORD) -1)
-		  {
-		    DWORD err = GetLastError ();
-
-		    /* We get Access Denied (5) when trying to suspend
-		       threads that Windows started on behalf of the
-		       debuggee, usually when those threads are just
-		       about to exit.
-		       We can get Invalid Handle (6) if the main thread
-		       has exited.  */
-		    if (err != ERROR_INVALID_HANDLE
-			&& err != ERROR_ACCESS_DENIED)
-		      warning (_("SuspendThread (tid=0x%x) failed."
-				 " (winerr %u)"),
-			       (unsigned) id, (unsigned) err);
-		    th->suspended = -1;
-		  }
-		else
-		  th->suspended = 1;
-	      }
+	      th->suspend ();
 	    else if (get_context < 0)
 	      th->suspended = -1;
 	    th->reload_context = true;
@@ -1515,9 +1495,7 @@ windows_continue (DWORD continue_status, int id, int killed)
 		th->context.ContextFlags = 0;
 	      }
 	  }
-	if (th->suspended > 0)
-	  (void) ResumeThread (th->h);
-	th->suspended = 0;
+	th->resume ();
       }
 
   res = ContinueDebugEvent (current_event.dwProcessId,

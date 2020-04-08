@@ -171,18 +171,7 @@ win32_require_context (windows_thread_info *th)
 {
   if (th->context.ContextFlags == 0)
     {
-      if (!th->suspended)
-	{
-	  if (SuspendThread (th->h) == (DWORD) -1)
-	    {
-	      DWORD err = GetLastError ();
-	      OUTMSG (("warning: SuspendThread failed in thread_rec, "
-		       "(error %d): %s\n", (int) err, strwinerror (err)));
-	    }
-	  else
-	    th->suspended = 1;
-	}
-
+      th->suspend ();
       win32_get_thread_context (th);
     }
 }
@@ -435,13 +424,7 @@ continue_one_thread (thread_info *thread, int thread_id)
 	      th->context.ContextFlags = 0;
 	    }
 
-	  if (ResumeThread (th->h) == (DWORD) -1)
-	    {
-	      DWORD err = GetLastError ();
-	      OUTMSG (("warning: ResumeThread failed in continue_one_thread, "
-		       "(error %d): %s\n", (int) err, strwinerror (err)));
-	    }
-	  th->suspended = 0;
+	  th->resume ();
 	}
     }
 }
@@ -1348,17 +1331,7 @@ suspend_one_thread (thread_info *thread)
 {
   windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
 
-  if (!th->suspended)
-    {
-      if (SuspendThread (th->h) == (DWORD) -1)
-	{
-	  DWORD err = GetLastError ();
-	  OUTMSG (("warning: SuspendThread failed in suspend_one_thread, "
-		   "(error %d): %s\n", (int) err, strwinerror (err)));
-	}
-      else
-	th->suspended = 1;
-    }
+  th->suspend ();
 }
 
 static void

@@ -1,5 +1,12 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.c (win32_require_context, suspend_one_thread): Use
+	windows_thread_info::suspend.
+	(continue_one_thread): Use windows_thread_info::resume.
+	* configure.srv (srv_tgtobj): Add windows-nat.o when needed.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-i386-low.c (update_debug_registers)
 	(i386_prepare_to_resume, i386_thread_added): Update.
 

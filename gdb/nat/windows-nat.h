@@ -34,6 +34,12 @@ struct windows_thread_info
 
   DISABLE_COPY_AND_ASSIGN (windows_thread_info);
 
+  /* Ensure that this thread has been suspended.  */
+  void suspend ();
+
+  /* Resume the thread if it has been suspended.  */
+  void resume ();
+
   /* The Win32 thread identifier.  */
   DWORD tid;
 

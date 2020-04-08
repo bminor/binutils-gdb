@@ -1,5 +1,14 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (thread_rec): Use windows_thread_info::suspend.
+	(windows_continue): Use windows_continue::resume.
+	* nat/windows-nat.h (struct windows_thread_info) <suspend,
+	resume>: Declare new methods.
+	* nat/windows-nat.c: New file.
+	* configure.nat (NATDEPFILES): Add nat/windows-nat.o when needed.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (windows_add_thread, windows_delete_thread)
 	(windows_nat_target::fetch_registers)
 	(windows_nat_target::store_registers, fake_create_process)

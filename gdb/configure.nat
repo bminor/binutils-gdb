@@ -75,10 +75,10 @@ case ${gdb_host} in
 	NATDEPFILES='fork-child.o nat/fork-inferior.o inf-ptrace.o'
 	;;
     cygwin*)
-	NATDEPFILES='x86-nat.o nat/x86-dregs.o windows-nat.o'
+	NATDEPFILES='x86-nat.o nat/x86-dregs.o windows-nat.o nat/windows-nat.o'
 	;;
     mingw*)
-	NATDEPFILES='x86-nat.o nat/x86-dregs.o windows-nat.o'
+	NATDEPFILES='x86-nat.o nat/x86-dregs.o windows-nat.o nat/windows-nat.o'
 	;;
     aix)
 	NATDEPFILES='nat/fork-inferior.o fork-child.o inf-ptrace.o'
