@@ -244,27 +244,7 @@ static CORE_ADDR cygwin_get_dr (int i);
 static unsigned long cygwin_get_dr6 (void);
 static unsigned long cygwin_get_dr7 (void);
 
-static enum gdb_signal last_sig = GDB_SIGNAL_0;
-/* Set if a signal was received from the debugged process.  */
-
 static std::vector<windows_thread_info *> thread_list;
-
-/* The process and thread handles for the above context.  */
-
-/* The current debug event from WaitForDebugEvent or from a pending
-   stop.  */
-static DEBUG_EVENT current_event;
-
-/* The most recent event from WaitForDebugEvent.  Unlike
-   current_event, this is guaranteed never to come from a pending
-   stop.  This is important because only data from the most recent
-   event from WaitForDebugEvent can be used when calling
-   ContinueDebugEvent.  */
-static DEBUG_EVENT last_wait_event;
-
-static HANDLE current_process_handle;	/* Currently executing process */
-static windows_thread_info *current_thread;	/* Info on currently selected thread */
-static EXCEPTION_RECORD siginfo_er;	/* Contents of $_siginfo */
 
 /* Counts of things.  */
 static int exception_count = 0;
@@ -336,37 +316,6 @@ static const struct xlate_exception xlate[] =
 
 #endif /* 0 */
 
-/* The ID of the thread for which we anticipate a stop event.
-   Normally this is -1, meaning we'll accept an event in any
-   thread.  */
-static DWORD desired_stop_thread_id = -1;
-
-/* A single pending stop.  See "pending_stops" for more
-   information.  */
-struct pending_stop
-{
-  /* The thread id.  */
-  DWORD thread_id;
-
-  /* The target waitstatus we computed.  */
-  target_waitstatus status;
-
-  /* The event.  A few fields of this can be referenced after a stop,
-     and it seemed simplest to store the entire event.  */
-  DEBUG_EVENT event;
-};
-
-/* A vector of pending stops.  Sometimes, Windows will report a stop
-   on a thread that has been ostensibly suspended.  We believe what
-   happens here is that two threads hit a breakpoint simultaneously,
-   and the Windows kernel queues the stop events.  However, this can
-   result in the strange effect of trying to single step thread A --
-   leaving all other threads suspended -- and then seeing a stop in
-   thread B.  To handle this scenario, we queue all such "pending"
-   stops here, and then process them once the step has completed.  See
-   PR gdb/22992.  */
-static std::vector<pending_stop> pending_stops;
-
 struct windows_nat_target final : public x86_nat_target<inf_child_target>
 {
   void close () override;
@@ -387,7 +336,7 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
 
   bool stopped_by_sw_breakpoint () override
   {
-    return current_thread->stopped_at_software_breakpoint;
+    return current_windows_thread->stopped_at_software_breakpoint;
   }
 
   bool supports_stopped_by_sw_breakpoint () override
@@ -1207,7 +1156,7 @@ display_selector (HANDLE thread, DWORD sel)
 static void
 display_selectors (const char * args, int from_tty)
 {
-  if (!current_thread)
+  if (!current_windows_thread)
     {
       puts_filtered ("Impossible to display selectors now.\n");
       return;
@@ -1218,45 +1167,45 @@ display_selectors (const char * args, int from_tty)
       if (wow64_process)
 	{
 	  puts_filtered ("Selector $cs\n");
-	  display_selector (current_thread->h,
-			    current_thread->wow64_context.SegCs);
+	  display_selector (current_windows_thread->h,
+			    current_windows_thread->wow64_context.SegCs);
 	  puts_filtered ("Selector $ds\n");
-	  display_selector (current_thread->h,
-			    current_thread->wow64_context.SegDs);
+	  display_selector (current_windows_thread->h,
+			    current_windows_thread->wow64_context.SegDs);
 	  puts_filtered ("Selector $es\n");
-	  display_selector (current_thread->h,
-			    current_thread->wow64_context.SegEs);
+	  display_selector (current_windows_thread->h,
+			    current_windows_thread->wow64_context.SegEs);
 	  puts_filtered ("Selector $ss\n");
-	  display_selector (current_thread->h,
-			    current_thread->wow64_context.SegSs);
+	  display_selector (current_windows_thread->h,
+			    current_windows_thread->wow64_context.SegSs);
 	  puts_filtered ("Selector $fs\n");
-	  display_selector (current_thread->h,
-			    current_thread->wow64_context.SegFs);
+	  display_selector (current_windows_thread->h,
+			    current_windows_thread->wow64_context.SegFs);
 	  puts_filtered ("Selector $gs\n");
-	  display_selector (current_thread->h,
-			    current_thread->wow64_context.SegGs);
+	  display_selector (current_windows_thread->h,
+			    current_windows_thread->wow64_context.SegGs);
 	}
       else
 #endif
 	{
 	  puts_filtered ("Selector $cs\n");
-	  display_selector (current_thread->h,
-			    current_thread->context.SegCs);
+	  display_selector (current_windows_thread->h,
+			    current_windows_thread->context.SegCs);
 	  puts_filtered ("Selector $ds\n");
-	  display_selector (current_thread->h,
-			    current_thread->context.SegDs);
+	  display_selector (current_windows_thread->h,
+			    current_windows_thread->context.SegDs);
 	  puts_filtered ("Selector $es\n");
-	  display_selector (current_thread->h,
-			    current_thread->context.SegEs);
+	  display_selector (current_windows_thread->h,
+			    current_windows_thread->context.SegEs);
 	  puts_filtered ("Selector $ss\n");
-	  display_selector (current_thread->h,
-			    current_thread->context.SegSs);
+	  display_selector (current_windows_thread->h,
+			    current_windows_thread->context.SegSs);
 	  puts_filtered ("Selector $fs\n");
-	  display_selector (current_thread->h,
-			    current_thread->context.SegFs);
+	  display_selector (current_windows_thread->h,
+			    current_windows_thread->context.SegFs);
 	  puts_filtered ("Selector $gs\n");
-	  display_selector (current_thread->h,
-			    current_thread->context.SegGs);
+	  display_selector (current_windows_thread->h,
+			    current_windows_thread->context.SegGs);
 	}
     }
   else
@@ -1264,7 +1213,7 @@ display_selectors (const char * args, int from_tty)
       int sel;
       sel = parse_and_eval_long (args);
       printf_filtered ("Selector \"%s\"\n",args);
-      display_selector (current_thread->h, sel);
+      display_selector (current_windows_thread->h, sel);
     }
 }
 
@@ -1587,7 +1536,7 @@ fake_create_process (void)
        (unsigned) GetLastError ());
       /*  We can not debug anything in that case.  */
     }
-  current_thread
+  current_windows_thread
     = windows_add_thread (ptid_t (current_event.dwProcessId,
 				  current_event.dwThreadId, 0),
 			  current_event.u.CreateThread.hThread,
@@ -1782,8 +1731,9 @@ windows_nat_target::get_windows_debug_event (int pid,
 	  current_event = iter->event;
 
 	  inferior_ptid = ptid_t (current_event.dwProcessId, thread_id, 0);
-	  current_thread = thread_rec (inferior_ptid, INVALIDATE_CONTEXT);
-	  current_thread->reload_context = 1;
+	  current_windows_thread = thread_rec (inferior_ptid,
+					       INVALIDATE_CONTEXT);
+	  current_windows_thread->reload_context = 1;
 
 	  DEBUG_EVENTS (("get_windows_debug_event - "
 			 "pending stop found in 0x%x (desired=0x%x)\n",
@@ -2006,9 +1956,10 @@ windows_nat_target::get_windows_debug_event (int pid,
   else
     {
       inferior_ptid = ptid_t (current_event.dwProcessId, thread_id, 0);
-      current_thread = th;
-      if (!current_thread)
-	current_thread = thread_rec (inferior_ptid, INVALIDATE_CONTEXT);
+      current_windows_thread = th;
+      if (!current_windows_thread)
+	current_windows_thread = thread_rec (inferior_ptid,
+					     INVALIDATE_CONTEXT);
     }
 
 out:
@@ -2066,14 +2017,14 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	{
 	  ptid_t result = ptid_t (current_event.dwProcessId, retval, 0);
 
-	  if (current_thread != nullptr)
+	  if (current_windows_thread != nullptr)
 	    {
-	      current_thread->stopped_at_software_breakpoint = false;
+	      current_windows_thread->stopped_at_software_breakpoint = false;
 	      if (current_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT
 		  && (current_event.u.Exception.ExceptionRecord.ExceptionCode
 		      == EXCEPTION_BREAKPOINT)
 		  && windows_initialization_done)
-		current_thread->stopped_at_software_breakpoint = true;
+		current_windows_thread->stopped_at_software_breakpoint = true;
 	    }
 
 	  return result;

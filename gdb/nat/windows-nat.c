@@ -1,5 +1,5 @@
 /* Internal interfaces for the Windows code
-   Copyright (C) 1995-2019 Free Software Foundation, Inc.
+   Copyright (C) 1995-2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,6 +21,17 @@
 
 namespace windows_nat
 {
+
+HANDLE current_process_handle;
+DWORD current_process_id;
+DWORD main_thread_id;
+enum gdb_signal last_sig = GDB_SIGNAL_0;
+DEBUG_EVENT current_event;
+DEBUG_EVENT last_wait_event;
+windows_thread_info *current_windows_thread;
+DWORD desired_stop_thread_id = -1;
+std::vector<pending_stop> pending_stops;
+EXCEPTION_RECORD siginfo_er;
 
 windows_thread_info::~windows_thread_info ()
 {

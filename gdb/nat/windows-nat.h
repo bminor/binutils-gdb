@@ -20,6 +20,9 @@
 #define NAT_WINDOWS_NAT_H
 
 #include <windows.h>
+#include <vector>
+
+#include "target/waitstatus.h"
 
 namespace windows_nat
 {
@@ -110,6 +113,60 @@ enum thread_disposition_type
    This function must be supplied by the embedding application.  */
 extern windows_thread_info *thread_rec (ptid_t ptid,
 					thread_disposition_type disposition);
+
+/* Currently executing process */
+extern HANDLE current_process_handle;
+extern DWORD current_process_id;
+extern DWORD main_thread_id;
+extern enum gdb_signal last_sig;
+
+/* The current debug event from WaitForDebugEvent or from a pending
+   stop.  */
+extern DEBUG_EVENT current_event;
+
+/* The most recent event from WaitForDebugEvent.  Unlike
+   current_event, this is guaranteed never to come from a pending
+   stop.  This is important because only data from the most recent
+   event from WaitForDebugEvent can be used when calling
+   ContinueDebugEvent.  */
+extern DEBUG_EVENT last_wait_event;
+
+/* Info on currently selected thread */
+extern windows_thread_info *current_windows_thread;
+
+/* The ID of the thread for which we anticipate a stop event.
+   Normally this is -1, meaning we'll accept an event in any
+   thread.  */
+extern DWORD desired_stop_thread_id;
+
+/* A single pending stop.  See "pending_stops" for more
+   information.  */
+struct pending_stop
+{
+  /* The thread id.  */
+  DWORD thread_id;
+
+  /* The target waitstatus we computed.  */
+  target_waitstatus status;
+
+  /* The event.  A few fields of this can be referenced after a stop,
+     and it seemed simplest to store the entire event.  */
+  DEBUG_EVENT event;
+};
+
+/* A vector of pending stops.  Sometimes, Windows will report a stop
+   on a thread that has been ostensibly suspended.  We believe what
+   happens here is that two threads hit a breakpoint simultaneously,
+   and the Windows kernel queues the stop events.  However, this can
+   result in the strange effect of trying to single step thread A --
+   leaving all other threads suspended -- and then seeing a stop in
+   thread B.  To handle this scenario, we queue all such "pending"
+   stops here, and then process them once the step has completed.  See
+   PR gdb/22992.  */
+extern std::vector<pending_stop> pending_stops;
+
+/* Contents of $_siginfo */
+extern EXCEPTION_RECORD siginfo_er;
 
 /* Return the name of the DLL referenced by H at ADDRESS.  UNICODE
    determines what sort of string is read from the inferior.  Returns

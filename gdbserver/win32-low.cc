@@ -74,14 +74,6 @@ int using_threads = 1;
 
 /* Globals.  */
 static int attaching = 0;
-static HANDLE current_process_handle = NULL;
-static DWORD current_process_id = 0;
-static DWORD main_thread_id = 0;
-static EXCEPTION_RECORD siginfo_er;	/* Contents of $_siginfo */
-static enum gdb_signal last_sig = GDB_SIGNAL_0;
-
-/* The current debug event from WaitForDebugEvent.  */
-static DEBUG_EVENT current_event;
 
 /* A status that hasn't been reported to the core yet, and so
    win32_wait should return it next, instead of fetching the next
