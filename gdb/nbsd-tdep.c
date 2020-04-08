@@ -20,6 +20,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "auxv.h"
 #include "solib-svr4.h"
 #include "nbsd-tdep.h"
 #include "gdbarch.h"
@@ -362,4 +363,5 @@ nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_gdb_signal_from_target (gdbarch, nbsd_gdb_signal_from_target);
   set_gdbarch_gdb_signal_to_target (gdbarch, nbsd_gdb_signal_to_target);
   set_gdbarch_skip_solib_resolver (gdbarch, nbsd_skip_solib_resolver);
+  set_gdbarch_auxv_parse (gdbarch, svr4_auxv_parse);
 }
