@@ -6998,6 +6998,24 @@ proc readnow { } {
     return 0
 }
 
+# Return 1 if partial symbols are available.  Otherwise, return 0.
+
+proc psymtabs_p {  } {
+    global gdb_prompt
+
+    set cmd "maint info psymtab"
+    gdb_test_multiple $cmd "" {
+	-re "$cmd\r\n$gdb_prompt $" {
+	    return 0
+	}
+	-re -wrap "" {
+	    return 1
+	}
+    }
+
+    return 0
+}
+
 # Verify that partial symtab expansion for $filename has state $readin.
 
 proc verify_psymtab_expanded { filename readin } {

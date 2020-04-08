@@ -1,5 +1,11 @@
 2020-04-08  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (psymtabs_p): New proc.
+	* gdb.dwarf2/imported-unit.exp: Mark "no static partial symbols in
+	importing unit" unsupported if there are no partial symbols.
+
+2020-04-08  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/25760
 	* gdb.ada/call_pn.exp: Call "maint expand-symtabs".  Add xfails.
 
