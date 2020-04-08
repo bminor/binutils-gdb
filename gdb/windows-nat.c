@@ -247,8 +247,6 @@ static unsigned long cygwin_get_dr7 (void);
 static std::vector<windows_thread_info *> thread_list;
 
 /* Counts of things.  */
-static int exception_count = 0;
-static int event_count = 0;
 static int saw_create;
 static int open_process_used = 0;
 #ifdef __x86_64__
@@ -1386,7 +1384,6 @@ handle_exception (struct target_waitstatus *ourstatus)
       ourstatus->value.sig = GDB_SIGNAL_UNKNOWN;
       break;
     }
-  exception_count++;
   last_sig = ourstatus->value.sig;
   return result;
 }
@@ -1737,7 +1734,6 @@ windows_nat_target::get_windows_debug_event (int pid,
   if (!(debug_event = wait_for_debug_event (&current_event, 1000)))
     goto out;
 
-  event_count++;
   continue_status = DBG_CONTINUE;
 
   event_code = current_event.dwDebugEventCode;
@@ -2154,8 +2150,6 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
   struct inferior *inf;
 
   last_sig = GDB_SIGNAL_0;
-  event_count = 0;
-  exception_count = 0;
   open_process_used = 0;
   debug_registers_changed = 0;
   debug_registers_used = 0;
