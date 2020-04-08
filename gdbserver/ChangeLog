@@ -1,5 +1,9 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.c (delete_thread_info): Don't call CloseHandle.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.c (win32_require_context, suspend_one_thread): Use
 	windows_thread_info::suspend.
 	(continue_one_thread): Use windows_thread_info::resume.

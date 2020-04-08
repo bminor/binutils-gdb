@@ -218,7 +218,6 @@ delete_thread_info (thread_info *thread)
   windows_thread_info *th = (windows_thread_info *) thread_target_data (thread);
 
   remove_thread (thread);
-  CloseHandle (th->h);
   delete th;
 }
 

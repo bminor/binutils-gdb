@@ -1,5 +1,11 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* nat/windows-nat.h (struct windows_thread_info): Declare
+	destructor.
+	* nat/windows-nat.c (~windows_thread_info): New.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	PR gdb/22992
 	* windows-nat.c (current_event): Update comment.
 	(last_wait_event, desired_stop_thread_id): New globals.

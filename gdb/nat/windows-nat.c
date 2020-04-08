@@ -19,6 +19,11 @@
 #include "gdbsupport/common-defs.h"
 #include "nat/windows-nat.h"
 
+windows_thread_info::~windows_thread_info ()
+{
+  CloseHandle (h);
+}
+
 void
 windows_thread_info::suspend ()
 {
