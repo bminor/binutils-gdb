@@ -1,5 +1,11 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* nat/windows-nat.h (last_wait_event): Don't declare.
+	(wait_for_debug_event): Update comment.
+	* nat/windows-nat.c (last_wait_event): Now static.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (wait_for_debug_event): Move to
 	nat/windows-nat.c.
 	* nat/windows-nat.h (wait_for_debug_event): Declare.

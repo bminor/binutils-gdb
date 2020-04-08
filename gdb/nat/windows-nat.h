@@ -165,13 +165,6 @@ extern enum gdb_signal last_sig;
    stop.  */
 extern DEBUG_EVENT current_event;
 
-/* The most recent event from WaitForDebugEvent.  Unlike
-   current_event, this is guaranteed never to come from a pending
-   stop.  This is important because only data from the most recent
-   event from WaitForDebugEvent can be used when calling
-   ContinueDebugEvent.  */
-extern DEBUG_EVENT last_wait_event;
-
 /* Info on currently selected thread */
 extern windows_thread_info *current_windows_thread;
 
@@ -245,7 +238,7 @@ extern gdb::optional<pending_stop> fetch_pending_stop (bool debug_events);
 extern BOOL continue_last_debug_event (DWORD continue_status,
 				       bool debug_events);
 
-/* A simple wrapper for WaitForDebugEvent that also sets
+/* A simple wrapper for WaitForDebugEvent that also sets the internal
    'last_wait_event' on success.  */
 
 extern BOOL wait_for_debug_event (DEBUG_EVENT *event, DWORD timeout);

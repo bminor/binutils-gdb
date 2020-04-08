@@ -31,7 +31,14 @@ DWORD current_process_id;
 DWORD main_thread_id;
 enum gdb_signal last_sig = GDB_SIGNAL_0;
 DEBUG_EVENT current_event;
-DEBUG_EVENT last_wait_event;
+
+/* The most recent event from WaitForDebugEvent.  Unlike
+   current_event, this is guaranteed never to come from a pending
+   stop.  This is important because only data from the most recent
+   event from WaitForDebugEvent can be used when calling
+   ContinueDebugEvent.  */
+static DEBUG_EVENT last_wait_event;
+
 windows_thread_info *current_windows_thread;
 DWORD desired_stop_thread_id = -1;
 std::vector<pending_stop> pending_stops;
