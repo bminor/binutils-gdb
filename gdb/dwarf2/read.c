@@ -2854,8 +2854,7 @@ find_slot_in_mapped_hash (struct mapped_index *index, const char *name,
    Returns true if all went well, false otherwise.  */
 
 static bool
-read_gdb_index_from_buffer (struct objfile *objfile,
-			    const char *filename,
+read_gdb_index_from_buffer (const char *filename,
 			    bool deprecated_ok,
 			    gdb::array_view<const gdb_byte> buffer,
 			    struct mapped_index *map,
@@ -2983,7 +2982,7 @@ dwarf2_read_gdb_index
     return 0;
 
   std::unique_ptr<struct mapped_index> map (new struct mapped_index);
-  if (!read_gdb_index_from_buffer (objfile, objfile_name (objfile),
+  if (!read_gdb_index_from_buffer (objfile_name (objfile),
 				   use_deprecated_index_sections,
 				   main_index_contents, map.get (), &cu_list,
 				   &cu_list_elements, &types_list,
@@ -3009,8 +3008,7 @@ dwarf2_read_gdb_index
       if (dwz_index_content.empty ())
 	return 0;
 
-      if (!read_gdb_index_from_buffer (objfile,
-				       bfd_get_filename (dwz->dwz_bfd.get ()),
+      if (!read_gdb_index_from_buffer (bfd_get_filename (dwz->dwz_bfd.get ()),
 				       1, dwz_index_content, &dwz_map,
 				       &dwz_list, &dwz_list_elements,
 				       &dwz_types_ignore,
