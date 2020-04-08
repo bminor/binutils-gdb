@@ -43,6 +43,7 @@
 #include <cygwin/version.h>
 #endif
 #include <algorithm>
+#include <vector>
 
 #include "filenames.h"
 #include "symfile.h"
@@ -245,9 +246,8 @@ static enum gdb_signal last_sig = GDB_SIGNAL_0;
 
 /* Thread information structure used to track information that is
    not available in gdb's thread structure.  */
-typedef struct windows_thread_info_struct
+struct windows_thread_info
   {
-    struct windows_thread_info_struct *next;
     DWORD id;
     HANDLE h;
     CORE_ADDR thread_local_base;
@@ -261,10 +261,9 @@ typedef struct windows_thread_info_struct
 	WOW64_CONTEXT wow64_context;
 #endif
       };
-  }
-windows_thread_info;
+  };
 
-static windows_thread_info thread_head;
+static std::vector<windows_thread_info *> thread_list;
 
 /* The process and thread handles for the above context.  */
 
@@ -429,9 +428,7 @@ check (BOOL ok, const char *file, int line)
 static windows_thread_info *
 thread_rec (DWORD id, int get_context)
 {
-  windows_thread_info *th;
-
-  for (th = &thread_head; (th = th->next) != NULL;)
+  for (windows_thread_info *th : thread_list)
     if (th->id == id)
       {
 	if (!th->suspended && get_context)
@@ -499,8 +496,7 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
   if (wow64_process)
     th->thread_local_base += 0x2000;
 #endif
-  th->next = thread_head.next;
-  thread_head.next = th;
+  thread_list.push_back (th);
 
   /* Add this new thread to the list of threads.
 
@@ -554,17 +550,13 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
 static void
 windows_init_thread_list (void)
 {
-  windows_thread_info *th = &thread_head;
-
   DEBUG_EVENTS (("gdb: windows_init_thread_list\n"));
   init_thread_list ();
-  while (th->next != NULL)
-    {
-      windows_thread_info *here = th->next;
-      th->next = here->next;
-      xfree (here);
-    }
-  thread_head.next = NULL;
+
+  for (windows_thread_info *here : thread_list)
+    xfree (here);
+
+  thread_list.clear ();
 }
 
 /* Delete a thread from the list of threads.
@@ -577,7 +569,6 @@ windows_init_thread_list (void)
 static void
 windows_delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p)
 {
-  windows_thread_info *th;
   DWORD id;
 
   gdb_assert (ptid.tid () != 0);
@@ -600,17 +591,17 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p)
 
   delete_thread (find_thread_ptid (&the_windows_nat_target, ptid));
 
-  for (th = &thread_head;
-       th->next != NULL && th->next->id != id;
-       th = th->next)
-    continue;
+  auto iter = std::find_if (thread_list.begin (), thread_list.end (),
+			    [=] (windows_thread_info *th)
+			    {
+			      return th->id == id;
+			    });
 
-  if (th->next != NULL)
+  if (iter != thread_list.end ())
     {
-      windows_thread_info *here = th->next;
-      th->next = here->next;
-      xfree (here->name);
-      xfree (here);
+      xfree ((*iter)->name);
+      xfree (*iter);
+      thread_list.erase (iter);
     }
 }
 
@@ -1477,7 +1468,6 @@ handle_exception (struct target_waitstatus *ourstatus)
 static BOOL
 windows_continue (DWORD continue_status, int id, int killed)
 {
-  windows_thread_info *th;
   BOOL res;
 
   DEBUG_EVENTS (("ContinueDebugEvent (cpid=%d, ctid=0x%x, %s);\n",
@@ -1486,7 +1476,7 @@ windows_continue (DWORD continue_status, int id, int killed)
 		  continue_status == DBG_CONTINUE ?
 		  "DBG_CONTINUE" : "DBG_EXCEPTION_NOT_HANDLED"));
 
-  for (th = &thread_head; (th = th->next) != NULL;)
+  for (windows_thread_info *th : thread_list)
     if ((id == -1 || id == (int) th->id)
 	&& th->suspended)
       {

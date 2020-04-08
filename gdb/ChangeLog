@@ -1,3 +1,11 @@
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (struct windows_thread_info): Remove typedef.
+	(thread_head): Remove.
+	(thread_list): New global.
+	(thread_rec, windows_add_thread, windows_init_thread_list)
+	(windows_delete_thread, windows_continue): Update.
+
 2020-04-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* windows-tdep.h (windows_init_abi): Add comment.
