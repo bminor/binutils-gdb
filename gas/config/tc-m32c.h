@@ -32,10 +32,6 @@
 #define md_start_line_hook m32c_start_line_hook
 extern void m32c_start_line_hook (void);
 
-/* call md_pcrel_from_section, not md_pcrel_from */
-long md_pcrel_from_section (struct fix *, segT);
-#define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
-
 /* Permit temporary numeric labels.  */
 #define LOCAL_LABELS_FB 1
 

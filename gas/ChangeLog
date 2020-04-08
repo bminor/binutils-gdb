@@ -2,6 +2,9 @@
 
 	* config/tc-moxie.h (MD_PCREL_FROM_SECTION): Delete define.
 	(md_pcrel_from): Remove prototytpe.
+	* config/tc-m32c.h (MD_PCREL_FROM_SECTION): Delete duplicate
+	define.
+	(md_pcrel_from_section): Remove duplicate prototype.
 
 2020-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
