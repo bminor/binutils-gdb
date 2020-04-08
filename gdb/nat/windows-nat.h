@@ -77,6 +77,10 @@ struct windows_thread_info
      inferior thread.  */
   bool reload_context = false;
 
+  /* True if this thread is currently stopped at a software
+     breakpoint.  This is used to offset the PC when needed.  */
+  bool stopped_at_software_breakpoint = false;
+
   /* The name of the thread, allocated by xmalloc.  */
   gdb::unique_xmalloc_ptr<char> name;
 };

@@ -249,8 +249,17 @@ static std::vector<windows_thread_info *> thread_list;
 
 /* The process and thread handles for the above context.  */
 
-static DEBUG_EVENT current_event;	/* The current debug event from
-					   WaitForDebugEvent */
+/* The current debug event from WaitForDebugEvent or from a pending
+   stop.  */
+static DEBUG_EVENT current_event;
+
+/* The most recent event from WaitForDebugEvent.  Unlike
+   current_event, this is guaranteed never to come from a pending
+   stop.  This is important because only data from the most recent
+   event from WaitForDebugEvent can be used when calling
+   ContinueDebugEvent.  */
+static DEBUG_EVENT last_wait_event;
+
 static HANDLE current_process_handle;	/* Currently executing process */
 static windows_thread_info *current_thread;	/* Info on currently selected thread */
 static EXCEPTION_RECORD siginfo_er;	/* Contents of $_siginfo */
@@ -325,6 +334,37 @@ static const struct xlate_exception xlate[] =
 
 #endif /* 0 */
 
+/* The ID of the thread for which we anticipate a stop event.
+   Normally this is -1, meaning we'll accept an event in any
+   thread.  */
+static DWORD desired_stop_thread_id = -1;
+
+/* A single pending stop.  See "pending_stops" for more
+   information.  */
+struct pending_stop
+{
+  /* The thread id.  */
+  DWORD thread_id;
+
+  /* The target waitstatus we computed.  */
+  target_waitstatus status;
+
+  /* The event.  A few fields of this can be referenced after a stop,
+     and it seemed simplest to store the entire event.  */
+  DEBUG_EVENT event;
+};
+
+/* A vector of pending stops.  Sometimes, Windows will report a stop
+   on a thread that has been ostensibly suspended.  We believe what
+   happens here is that two threads hit a breakpoint simultaneously,
+   and the Windows kernel queues the stop events.  However, this can
+   result in the strange effect of trying to single step thread A --
+   leaving all other threads suspended -- and then seeing a stop in
+   thread B.  To handle this scenario, we queue all such "pending"
+   stops here, and then process them once the step has completed.  See
+   PR gdb/22992.  */
+static std::vector<pending_stop> pending_stops;
+
 struct windows_nat_target final : public x86_nat_target<inf_child_target>
 {
   void close () override;
@@ -342,6 +382,16 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
+
+  bool stopped_by_sw_breakpoint () override
+  {
+    return current_thread->stopped_at_software_breakpoint;
+  }
+
+  bool supports_stopped_by_sw_breakpoint () override
+  {
+    return true;
+  }
 
   enum target_xfer_status xfer_partial (enum target_object object,
 					const char *annex,
@@ -613,6 +663,10 @@ windows_fetch_one_register (struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  gdb_assert (!gdbarch_read_pc_p (gdbarch));
+  gdb_assert (gdbarch_pc_regnum (gdbarch) >= 0);
+  gdb_assert (!gdbarch_write_pc_p (gdbarch));
+
   if (r == I387_FISEG_REGNUM (tdep))
     {
       long l = *((long *) context_offset) & 0xffff;
@@ -632,7 +686,29 @@ windows_fetch_one_register (struct regcache *regcache,
       regcache->raw_supply (r, (char *) &l);
     }
   else
-    regcache->raw_supply (r, context_offset);
+    {
+      if (th->stopped_at_software_breakpoint
+	  && r == gdbarch_pc_regnum (gdbarch))
+	{
+	  int size = register_size (gdbarch, r);
+	  if (size == 4)
+	    {
+	      uint32_t value;
+	      memcpy (&value, context_offset, size);
+	      value -= gdbarch_decr_pc_after_break (gdbarch);
+	      memcpy (context_offset, &value, size);
+	    }
+	  else
+	    {
+	      gdb_assert (size == 8);
+	      uint64_t value;
+	      memcpy (&value, context_offset, size);
+	      value -= gdbarch_decr_pc_after_break (gdbarch);
+	      memcpy (context_offset, &value, size);
+	    }
+	}
+      regcache->raw_supply (r, context_offset);
+    }
 }
 
 void
@@ -1450,16 +1526,36 @@ windows_continue (DWORD continue_status, int id, int killed)
 {
   BOOL res;
 
+  desired_stop_thread_id = id;
+
+  /* If there are pending stops, and we might plausibly hit one of
+     them, we don't want to actually continue the inferior -- we just
+     want to report the stop.  In this case, we just pretend to
+     continue.  See the comment by the definition of "pending_stops"
+     for details on why this is needed.  */
+  for (const auto &item : pending_stops)
+    {
+      if (desired_stop_thread_id == -1
+	  || desired_stop_thread_id == item.thread_id)
+	{
+	  DEBUG_EVENTS (("windows_continue - pending stop anticipated, "
+			 "desired=0x%x, item=0x%x\n",
+			 desired_stop_thread_id, item.thread_id));
+	  return TRUE;
+	}
+    }
+
   DEBUG_EVENTS (("ContinueDebugEvent (cpid=%d, ctid=0x%x, %s);\n",
-		  (unsigned) current_event.dwProcessId,
-		  (unsigned) current_event.dwThreadId,
+		  (unsigned) last_wait_event.dwProcessId,
+		  (unsigned) last_wait_event.dwThreadId,
 		  continue_status == DBG_CONTINUE ?
 		  "DBG_CONTINUE" : "DBG_EXCEPTION_NOT_HANDLED"));
 
   for (windows_thread_info *th : thread_list)
-    if ((id == -1 || id == (int) th->tid)
-	&& th->suspended)
+    if (id == -1 || id == (int) th->tid)
       {
+	if (!th->suspended)
+	  continue;
 #ifdef __x86_64__
 	if (wow64_process)
 	  {
@@ -1519,9 +1615,15 @@ windows_continue (DWORD continue_status, int id, int killed)
 	  }
 	th->resume ();
       }
+    else
+      {
+	/* When single-stepping a specific thread, other threads must
+	   be suspended.  */
+	th->suspend ();
+      }
 
-  res = ContinueDebugEvent (current_event.dwProcessId,
-			    current_event.dwThreadId,
+  res = ContinueDebugEvent (last_wait_event.dwProcessId,
+			    last_wait_event.dwThreadId,
 			    continue_status);
 
   if (!res)
@@ -1704,6 +1806,17 @@ ctrl_c_handler (DWORD event_type)
   return TRUE;
 }
 
+/* A wrapper for WaitForDebugEvent that sets "last_wait_event"
+   appropriately.  */
+static BOOL
+wait_for_debug_event (DEBUG_EVENT *event, DWORD timeout)
+{
+  BOOL result = WaitForDebugEvent (event, timeout);
+  if (result)
+    last_wait_event = *event;
+  return result;
+}
+
 /* Get the next event from the child.  Returns a non-zero thread id if the event
    requires handling by WFI (or whatever).  */
 
@@ -1717,9 +1830,36 @@ windows_nat_target::get_windows_debug_event (int pid,
   static windows_thread_info dummy_thread_info (0, 0, 0);
   DWORD thread_id = 0;
 
+  /* If there is a relevant pending stop, report it now.  See the
+     comment by the definition of "pending_stops" for details on why
+     this is needed.  */
+  for (auto iter = pending_stops.begin ();
+       iter != pending_stops.end ();
+       ++iter)
+    {
+      if (desired_stop_thread_id == -1
+	  || desired_stop_thread_id == iter->thread_id)
+	{
+	  thread_id = iter->thread_id;
+	  *ourstatus = iter->status;
+	  current_event = iter->event;
+
+	  inferior_ptid = ptid_t (current_event.dwProcessId, thread_id, 0);
+	  current_thread = thread_rec (thread_id, INVALIDATE_CONTEXT);
+	  current_thread->reload_context = 1;
+
+	  DEBUG_EVENTS (("get_windows_debug_event - "
+			 "pending stop found in 0x%x (desired=0x%x)\n",
+			 thread_id, desired_stop_thread_id));
+
+	  pending_stops.erase (iter);
+	  return thread_id;
+	}
+    }
+
   last_sig = GDB_SIGNAL_0;
 
-  if (!(debug_event = WaitForDebugEvent (&current_event, 1000)))
+  if (!(debug_event = wait_for_debug_event (&current_event, 1000)))
     goto out;
 
   event_count++;
@@ -1903,7 +2043,27 @@ windows_nat_target::get_windows_debug_event (int pid,
 
   if (!thread_id || saw_create != 1)
     {
-      CHECK (windows_continue (continue_status, -1, 0));
+      CHECK (windows_continue (continue_status, desired_stop_thread_id, 0));
+    }
+  else if (desired_stop_thread_id != -1 && desired_stop_thread_id != thread_id)
+    {
+      /* Pending stop.  See the comment by the definition of
+	 "pending_stops" for details on why this is needed.  */
+      DEBUG_EVENTS (("get_windows_debug_event - "
+		     "unexpected stop in 0x%x (expecting 0x%x)\n",
+		     thread_id, desired_stop_thread_id));
+
+      if (current_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT
+	  && (current_event.u.Exception.ExceptionRecord.ExceptionCode
+	      == EXCEPTION_BREAKPOINT)
+	  && windows_initialization_done)
+	{
+	  th = thread_rec (thread_id, INVALIDATE_CONTEXT);
+	  th->stopped_at_software_breakpoint = true;
+	}
+      pending_stops.push_back ({thread_id, *ourstatus, current_event});
+      thread_id = 0;
+      CHECK (windows_continue (continue_status, desired_stop_thread_id, 0));
     }
   else
     {
@@ -1965,7 +2125,21 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       SetConsoleCtrlHandler (&ctrl_c_handler, FALSE);
 
       if (retval)
-	return ptid_t (current_event.dwProcessId, retval, 0);
+	{
+	  ptid_t result = ptid_t (current_event.dwProcessId, retval, 0);
+
+	  if (current_thread != nullptr)
+	    {
+	      current_thread->stopped_at_software_breakpoint = false;
+	      if (current_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT
+		  && (current_event.u.Exception.ExceptionRecord.ExceptionCode
+		      == EXCEPTION_BREAKPOINT)
+		  && windows_initialization_done)
+		current_thread->stopped_at_software_breakpoint = true;
+	    }
+
+	  return result;
+	}
       else
 	{
 	  int detach = 0;
@@ -3217,7 +3391,7 @@ windows_nat_target::kill ()
     {
       if (!windows_continue (DBG_CONTINUE, -1, 1))
 	break;
-      if (!WaitForDebugEvent (&current_event, INFINITE))
+      if (!wait_for_debug_event (&current_event, INFINITE))
 	break;
       if (current_event.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT)
 	break;

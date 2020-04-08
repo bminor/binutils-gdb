@@ -49,6 +49,8 @@ windows_thread_info::resume ()
 {
   if (suspended > 0)
     {
+      stopped_at_software_breakpoint = false;
+
       if (ResumeThread (h) == (DWORD) -1)
 	{
 	  DWORD err = GetLastError ();

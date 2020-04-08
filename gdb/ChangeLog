@@ -1,5 +1,27 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	PR gdb/22992
+	* windows-nat.c (current_event): Update comment.
+	(last_wait_event, desired_stop_thread_id): New globals.
+	(struct pending_stop): New.
+	(pending_stops): New global.
+	(windows_nat_target) <stopped_by_sw_breakpoint>
+	<supports_stopped_by_sw_breakpoint>: New methods.
+	(windows_fetch_one_register): Add assertions.  Adjust PC.
+	(windows_continue): Handle pending stops.  Suspend other threads
+	when stepping.  Use last_wait_event
+	(wait_for_debug_event): New function.
+	(get_windows_debug_event): Use wait_for_debug_event.  Handle
+	pending stops.  Queue spurious stops.
+	(windows_nat_target::wait): Set stopped_at_software_breakpoint.
+	(windows_nat_target::kill): Use wait_for_debug_event.
+	* nat/windows-nat.h (struct windows_thread_info)
+	<stopped_at_software_breakpoint>: New field.
+	* nat/windows-nat.c (windows_thread_info::resume): Clear
+	stopped_at_software_breakpoint.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (enum thread_disposition_type): New.
 	(thread_rec): Replace "get_context" parameter with "disposition";
 	change type.
