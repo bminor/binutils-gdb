@@ -1,5 +1,12 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	PR gdb/22992
+	* win32-low.c (child_continue): Call matching_pending_stop.
+	(get_child_debug_event): Call fetch_pending_stop.  Push pending
+	stop when needed.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.h  (win32_process_target::stopped_by_sw_breakpoint)
 	(win32_process_target::supports_stopped_by_sw_breakpoint):
 	Declare.

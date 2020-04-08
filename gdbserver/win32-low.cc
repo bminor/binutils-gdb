@@ -430,6 +430,10 @@ continue_one_thread (thread_info *thread, int thread_id)
 static BOOL
 child_continue (DWORD continue_status, int thread_id)
 {
+  desired_stop_thread_id = thread_id;
+  if (matching_pending_stop (debug_threads))
+    return TRUE;
+
   /* The inferior will only continue after the ContinueDebugEvent
      call.  */
   for_each_thread ([&] (thread_info *thread)
@@ -1274,6 +1278,16 @@ get_child_debug_event (DWORD *continue_status,
   else
 #endif
     {
+      gdb::optional<pending_stop> stop = fetch_pending_stop (debug_threads);
+      if (stop.has_value ())
+	{
+	  *ourstatus = stop->status;
+	  current_event = stop->event;
+	  ptid = debug_event_ptid (&current_event);
+	  current_thread = find_thread_ptid (ptid);
+	  return 1;
+	}
+
       /* Keep the wait time low enough for comfortable remote
 	 interruption, but high enough so gdbserver doesn't become a
 	 bottleneck.  */
@@ -1377,7 +1391,7 @@ get_child_debug_event (DWORD *continue_status,
 	    ourstatus->value.sig = gdb_signal_from_host (exit_signal);
 	  }
       }
-      child_continue (DBG_CONTINUE, -1);
+      child_continue (DBG_CONTINUE, desired_stop_thread_id);
       CloseHandle (current_process_handle);
       current_process_handle = NULL;
       break;
@@ -1437,7 +1451,21 @@ get_child_debug_event (DWORD *continue_status,
     }
 
   ptid = debug_event_ptid (&current_event);
-  current_thread = find_thread_ptid (ptid);
+
+  if (desired_stop_thread_id != -1 && desired_stop_thread_id != ptid.lwp ())
+    {
+      /* Pending stop.  See the comment by the definition of
+	 "pending_stops" for details on why this is needed.  */
+      OUTMSG2 (("get_windows_debug_event - "
+		"unexpected stop in 0x%x (expecting 0x%x)\n",
+		ptid.lwp (), desired_stop_thread_id));
+      maybe_adjust_pc ();
+      pending_stops.push_back ({(DWORD) ptid.lwp (), *ourstatus, current_event});
+      ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+    }
+  else
+    current_thread = find_thread_ptid (ptid);
+
   return 1;
 }
 
@@ -1486,7 +1514,7 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 	  /* fall-through */
 	case TARGET_WAITKIND_SPURIOUS:
 	  /* do nothing, just continue */
-	  child_continue (continue_status, -1);
+	  child_continue (continue_status, desired_stop_thread_id);
 	  break;
 	}
     }
