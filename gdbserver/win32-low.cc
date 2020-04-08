@@ -236,15 +236,18 @@ child_delete_thread (DWORD pid, DWORD tid)
 bool
 win32_process_target::supports_z_point_type (char z_type)
 {
-  return (the_low_target.supports_z_point_type != NULL
-	  && the_low_target.supports_z_point_type (z_type));
+  return (z_type == Z_PACKET_SW_BP
+	  || (the_low_target.supports_z_point_type != NULL
+	      && the_low_target.supports_z_point_type (z_type)));
 }
 
 int
 win32_process_target::insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 				    int size, raw_breakpoint *bp)
 {
-  if (the_low_target.insert_point != NULL)
+  if (type == raw_bkpt_type_sw)
+    return insert_memory_breakpoint (bp);
+  else if (the_low_target.insert_point != NULL)
     return the_low_target.insert_point (type, addr, size, bp);
   else
     /* Unsupported (see target.h).  */
@@ -255,7 +258,9 @@ int
 win32_process_target::remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 				    int size, raw_breakpoint *bp)
 {
-  if (the_low_target.remove_point != NULL)
+  if (type == raw_bkpt_type_sw)
+    return remove_memory_breakpoint (bp);
+  else if (the_low_target.remove_point != NULL)
     return the_low_target.remove_point (type, addr, size, bp);
   else
     /* Unsupported (see target.h).  */
@@ -1189,6 +1194,32 @@ windows_nat::handle_ms_vc_exception (const EXCEPTION_RECORD *rec)
   return false;
 }
 
+/* A helper function that will, if needed, set
+   'stopped_at_software_breakpoint' on the thread and adjust the
+   PC.  */
+
+static void
+maybe_adjust_pc ()
+{
+  struct regcache *regcache = get_thread_regcache (current_thread, 1);
+  child_fetch_inferior_registers (regcache, -1);
+
+  windows_thread_info *th = thread_rec (current_thread_ptid (),
+					DONT_INVALIDATE_CONTEXT);
+  th->stopped_at_software_breakpoint = false;
+
+  if (current_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT
+      && (current_event.u.Exception.ExceptionRecord.ExceptionCode
+	  == EXCEPTION_BREAKPOINT)
+      && child_initialization_done)
+    {
+      th->stopped_at_software_breakpoint = true;
+      CORE_ADDR pc = regcache_read_pc (regcache);
+      CORE_ADDR sw_breakpoint_pc = pc - the_low_target.decr_pc_after_break;
+      regcache_write_pc (regcache, sw_breakpoint_pc);
+    }
+}
+
 /* Get the next event from the child.  */
 
 static int
@@ -1417,8 +1448,6 @@ ptid_t
 win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 			    int options)
 {
-  struct regcache *regcache;
-
   if (cached_status.kind != TARGET_WAITKIND_IGNORE)
     {
       /* The core always does a wait after creating the inferior, and
@@ -1446,12 +1475,12 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 	case TARGET_WAITKIND_STOPPED:
 	case TARGET_WAITKIND_SIGNALLED:
 	case TARGET_WAITKIND_LOADED:
-	  OUTMSG2 (("Child Stopped with signal = %d \n",
-		    ourstatus->value.sig));
-
-	  regcache = get_thread_regcache (current_thread, 1);
-	  child_fetch_inferior_registers (regcache, -1);
-	  return debug_event_ptid (&current_event);
+	  {
+	    OUTMSG2 (("Child Stopped with signal = %d \n",
+		      ourstatus->value.sig));
+	    maybe_adjust_pc ();
+	    return debug_event_ptid (&current_event);
+	  }
 	default:
 	  OUTMSG (("Ignoring unknown internal event, %d\n", ourstatus->kind));
 	  /* fall-through */
@@ -1657,6 +1686,20 @@ win32_process_target::sw_breakpoint_from_kind (int kind, int *size)
 {
   *size = the_low_target.breakpoint_len;
   return the_low_target.breakpoint;
+}
+
+bool
+win32_process_target::stopped_by_sw_breakpoint ()
+{
+  windows_thread_info *th = thread_rec (current_thread_ptid (),
+					DONT_INVALIDATE_CONTEXT);
+  return th == nullptr ? false : th->stopped_at_software_breakpoint;
+}
+
+bool
+win32_process_target::supports_stopped_by_sw_breakpoint ()
+{
+  return true;
 }
 
 CORE_ADDR

@@ -1,5 +1,21 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.h  (win32_process_target::stopped_by_sw_breakpoint)
+	(win32_process_target::supports_stopped_by_sw_breakpoint):
+	Declare.
+	* win32-low.c (win32_supports_z_point_type): Always handle
+	Z_PACKET_SW_BP.
+	(win32_insert_point): Call insert_memory_breakpoint when needed.
+	(win32_remove_point): Call remove_memory_breakpoint when needed.
+	(win32_process_target::stopped_by_sw_breakpoint)
+	(win32_process_target::supports_stopped_by_sw_breakpoint): New
+	methods.
+	(win32_target_ops): Update.
+	(maybe_adjust_pc): New function.
+	(win32_wait): Call maybe_adjust_pc.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.h (struct win32_target_ops) <decr_pc_after_break>: New
 	field.
 	* win32-i386-low.c (the_low_target): Update.

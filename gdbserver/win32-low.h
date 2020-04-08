@@ -155,6 +155,10 @@ public:
   CORE_ADDR read_pc (regcache *regcache) override;
 
   void write_pc (regcache *regcache, CORE_ADDR pc) override;
+
+  bool stopped_by_sw_breakpoint () override;
+
+  bool supports_stopped_by_sw_breakpoint () override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */
