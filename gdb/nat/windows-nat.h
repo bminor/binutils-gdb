@@ -225,6 +225,19 @@ typedef enum
 extern handle_exception_result handle_exception
   (struct target_waitstatus *ourstatus, bool debug_exceptions);
 
+/* Return true if there is a pending stop matching
+   desired_stop_thread_id.  If DEBUG_EVENTS is true, logging will be
+   enabled.  */
+
+extern bool matching_pending_stop (bool debug_events);
+
+/* A simple wrapper for ContinueDebugEvent that continues the last
+   waited-for event.  If DEBUG_EVENTS is true, logging will be
+   enabled.  */
+
+extern BOOL continue_last_debug_event (DWORD continue_status,
+				       bool debug_events);
+
 }
 
 #endif

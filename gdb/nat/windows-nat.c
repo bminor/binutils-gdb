@@ -37,6 +37,10 @@ DWORD desired_stop_thread_id = -1;
 std::vector<pending_stop> pending_stops;
 EXCEPTION_RECORD siginfo_er;
 
+/* Note that 'debug_events' must be locally defined in the relevant
+   functions.  */
+#define DEBUG_EVENTS(x)	if (debug_events) debug_printf x
+
 windows_thread_info::~windows_thread_info ()
 {
   CloseHandle (h);
@@ -311,5 +315,47 @@ handle_exception (struct target_waitstatus *ourstatus, bool debug_exceptions)
 
 #undef DEBUG_EXCEPTION_SIMPLE
 }
+
+/* See nat/windows-nat.h.  */
+
+bool
+matching_pending_stop (bool debug_events)
+{
+  /* If there are pending stops, and we might plausibly hit one of
+     them, we don't want to actually continue the inferior -- we just
+     want to report the stop.  In this case, we just pretend to
+     continue.  See the comment by the definition of "pending_stops"
+     for details on why this is needed.  */
+  for (const auto &item : pending_stops)
+    {
+      if (desired_stop_thread_id == -1
+	  || desired_stop_thread_id == item.thread_id)
+	{
+	  DEBUG_EVENTS (("windows_continue - pending stop anticipated, "
+			 "desired=0x%x, item=0x%x\n",
+			 desired_stop_thread_id, item.thread_id));
+	  return true;
+	}
+    }
+
+  return false;
+}
+
+/* See nat/windows-nat.h.  */
+
+BOOL
+continue_last_debug_event (DWORD continue_status, bool debug_events)
+{
+  DEBUG_EVENTS (("ContinueDebugEvent (cpid=%d, ctid=0x%x, %s);\n",
+		  (unsigned) last_wait_event.dwProcessId,
+		  (unsigned) last_wait_event.dwThreadId,
+		  continue_status == DBG_CONTINUE ?
+		  "DBG_CONTINUE" : "DBG_EXCEPTION_NOT_HANDLED"));
+
+  return ContinueDebugEvent (last_wait_event.dwProcessId,
+			     last_wait_event.dwThreadId,
+			     continue_status);
+}
+
 
 }

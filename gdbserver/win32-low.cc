@@ -433,12 +433,7 @@ child_continue (DWORD continue_status, int thread_id)
     });
   faked_breakpoint = 0;
 
-  if (!ContinueDebugEvent (current_event.dwProcessId,
-			   current_event.dwThreadId,
-			   continue_status))
-    return FALSE;
-
-  return TRUE;
+  return continue_last_debug_event (continue_status, debug_threads);
 }
 
 /* Fetch register(s) from the current thread context.  */

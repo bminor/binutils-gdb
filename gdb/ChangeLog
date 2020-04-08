@@ -1,5 +1,15 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (windows_continue): Use matching_pending_stop and
+	continue_last_debug_event.
+	* nat/windows-nat.h (matching_pending_stop)
+	(continue_last_debug_event): Declare.
+	* nat/windows-nat.c (DEBUG_EVENTS): New define.
+	(matching_pending_stop, continue_last_debug_event): New
+	functions.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (MS_VC_EXCEPTION): Move to nat/windows-nat.c.
 	(handle_exception_result): Move to nat/windows-nat.h.
 	(DEBUG_EXCEPTION_SIMPLE): Remove.

@@ -1,5 +1,9 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.c (child_continue): Call continue_last_debug_event.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.c (handle_exception): Remove.
 	(windows_nat::handle_ms_vc_exception): New function.
 	(get_child_debug_event): Add "continue_status" parameter.

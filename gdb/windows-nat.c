@@ -1239,28 +1239,8 @@ windows_continue (DWORD continue_status, int id, int killed)
 
   desired_stop_thread_id = id;
 
-  /* If there are pending stops, and we might plausibly hit one of
-     them, we don't want to actually continue the inferior -- we just
-     want to report the stop.  In this case, we just pretend to
-     continue.  See the comment by the definition of "pending_stops"
-     for details on why this is needed.  */
-  for (const auto &item : pending_stops)
-    {
-      if (desired_stop_thread_id == -1
-	  || desired_stop_thread_id == item.thread_id)
-	{
-	  DEBUG_EVENTS (("windows_continue - pending stop anticipated, "
-			 "desired=0x%x, item=0x%x\n",
-			 desired_stop_thread_id, item.thread_id));
-	  return TRUE;
-	}
-    }
-
-  DEBUG_EVENTS (("ContinueDebugEvent (cpid=%d, ctid=0x%x, %s);\n",
-		  (unsigned) last_wait_event.dwProcessId,
-		  (unsigned) last_wait_event.dwThreadId,
-		  continue_status == DBG_CONTINUE ?
-		  "DBG_CONTINUE" : "DBG_EXCEPTION_NOT_HANDLED"));
+  if (matching_pending_stop (debug_events))
+    return TRUE;
 
   for (windows_thread_info *th : thread_list)
     if (id == -1 || id == (int) th->tid)
@@ -1333,9 +1313,7 @@ windows_continue (DWORD continue_status, int id, int killed)
 	th->suspend ();
       }
 
-  res = ContinueDebugEvent (last_wait_event.dwProcessId,
-			    last_wait_event.dwThreadId,
-			    continue_status);
+  res = continue_last_debug_event (continue_status, debug_events);
 
   if (!res)
     error (_("Failed to resume program execution"
