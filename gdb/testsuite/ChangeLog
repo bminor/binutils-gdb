@@ -1,3 +1,8 @@
+2020-04-08  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/25760
+	* gdb.ada/call_pn.exp: Call "maint expand-symtabs".  Add xfails.
+
 2020-04-07  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/25796
