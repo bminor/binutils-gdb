@@ -114,6 +114,17 @@ enum thread_disposition_type
 extern windows_thread_info *thread_rec (ptid_t ptid,
 					thread_disposition_type disposition);
 
+
+/* Handle OUTPUT_DEBUG_STRING_EVENT from child process.  Updates
+   OURSTATUS and returns the thread id if this represents a thread
+   change (this is specific to Cygwin), otherwise 0.
+
+   Cygwin prepends its messages with a "cygwin:".  Interpret this as
+   a Cygwin signal.  Otherwise just print the string as a warning.
+
+   This function must be supplied by the embedding application.  */
+extern int handle_output_debug_string (struct target_waitstatus *ourstatus);
+
 /* Currently executing process */
 extern HANDLE current_process_handle;
 extern DWORD current_process_id;

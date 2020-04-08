@@ -1,5 +1,11 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.c (handle_output_debug_string): Add parameter.  Change
+	return type.
+	(win32_kill, get_child_debug_event): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.c (current_process_handle, current_process_id)
 	(main_thread_id, last_sig, current_event, siginfo_er): Move to
 	nat/windows-nat.c.

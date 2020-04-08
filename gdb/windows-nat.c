@@ -1004,11 +1004,10 @@ signal_event_command (const char *args, int from_tty)
   CloseHandle ((HANDLE) event_id);
 }
 
-/* Handle DEBUG_STRING output from child process.
-   Cygwin prepends its messages with a "cygwin:".  Interpret this as
-   a Cygwin signal.  Otherwise just print the string as a warning.  */
-static int
-handle_output_debug_string (struct target_waitstatus *ourstatus)
+/* See nat/windows-nat.h.  */
+
+int
+windows_nat::handle_output_debug_string (struct target_waitstatus *ourstatus)
 {
   gdb::unique_xmalloc_ptr<char> s;
   int retval = 0;

@@ -1,5 +1,11 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (windows_nat::handle_output_debug_string):
+	Rename.  No longer static.
+	* nat/windows-nat.h (handle_output_debug_string): Declare.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (current_process_handle, current_process_id)
 	(main_thread_id, last_sig, current_event, last_wait_event)
 	(current_windows_thread, desired_stop_thread_id, pending_stops)

@@ -733,9 +733,10 @@ win32_process_target::attach (unsigned long pid)
 	 (int) err, strwinerror (err));
 }
 
-/* Handle OUTPUT_DEBUG_STRING_EVENT from child process.  */
-static void
-handle_output_debug_string (void)
+/* See nat/windows-nat.h.  */
+
+int
+windows_nat::handle_output_debug_string (struct target_waitstatus *ourstatus)
 {
 #define READ_BUFFER_LEN 1024
   CORE_ADDR addr;
@@ -743,7 +744,7 @@ handle_output_debug_string (void)
   DWORD nbytes = current_event.u.DebugString.nDebugStringLength;
 
   if (nbytes == 0)
-    return;
+    return 0;
 
   if (nbytes > READ_BUFFER_LEN)
     nbytes = READ_BUFFER_LEN;
@@ -756,13 +757,13 @@ handle_output_debug_string (void)
 	 in Unicode.  */
       WCHAR buffer[(READ_BUFFER_LEN + 1) / sizeof (WCHAR)] = { 0 };
       if (read_inferior_memory (addr, (unsigned char *) buffer, nbytes) != 0)
-	return;
+	return 0;
       wcstombs (s, buffer, (nbytes + 1) / sizeof (WCHAR));
     }
   else
     {
       if (read_inferior_memory (addr, (unsigned char *) s, nbytes) != 0)
-	return;
+	return 0;
     }
 
   if (!startswith (s, "cYg"))
@@ -770,12 +771,14 @@ handle_output_debug_string (void)
       if (!server_waiting)
 	{
 	  OUTMSG2(("%s", s));
-	  return;
+	  return 0;
 	}
 
       monitor_output (s);
     }
 #undef READ_BUFFER_LEN
+
+  return 0;
 }
 
 static void
@@ -804,7 +807,7 @@ win32_process_target::kill (process_info *process)
       if (current_event.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT)
 	break;
       else if (current_event.dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT)
-	handle_output_debug_string ();
+	handle_output_debug_string (nullptr);
     }
 
   win32_clear_inferiors ();
@@ -1504,7 +1507,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 		"for pid=%u tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
-      handle_output_debug_string ();
+      handle_output_debug_string (nullptr);
       break;
 
     default:
