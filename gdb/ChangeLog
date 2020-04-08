@@ -1,5 +1,10 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (struct windows_thread_info): Remove.
+	* nat/windows-nat.h: New file.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (struct windows_thread_info) <tid>: Rename from "id".
 	(thread_rec, windows_add_thread, windows_delete_thread)
 	(windows_continue): Update.

@@ -20,41 +20,13 @@
 #define GDBSERVER_WIN32_LOW_H
 
 #include <windows.h>
+#include "nat/windows-nat.h"
 
 struct target_desc;
 
 /* The inferior's target description.  This is a global because the
    Windows ports support neither bi-arch nor multi-process.  */
 extern const struct target_desc *win32_tdesc;
-
-/* Thread information structure used to track extra information about
-   each thread.  */
-struct windows_thread_info
-{
-  /* The Win32 thread identifier.  */
-  DWORD tid;
-
-  /* The handle to the thread.  */
-  HANDLE h;
-
-  /* Thread Information Block address.  */
-  CORE_ADDR thread_local_base;
-
-  /* Non zero if SuspendThread was called on this thread.  */
-  int suspended;
-
-#ifdef _WIN32_WCE
-  /* The context as retrieved right after suspending the thread. */
-  CONTEXT base_context;
-#endif
-
-  /* The context of the thread, including any manipulations.  */
-  CONTEXT context;
-
-  /* Whether debug registers changed since we last set CONTEXT back to
-     the thread.  */
-  int debug_registers_changed;
-};
 
 struct win32_target_ops
 {

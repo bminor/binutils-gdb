@@ -70,6 +70,7 @@
 #include "gdbsupport/gdb_tilde_expand.h"
 #include "gdbsupport/pathstuff.h"
 #include "gdbsupport/gdb_wait.h"
+#include "nat/windows-nat.h"
 
 #define STATUS_WX86_BREAKPOINT 0x4000001F
 #define STATUS_WX86_SINGLE_STEP 0x4000001E
@@ -243,25 +244,6 @@ static unsigned long cygwin_get_dr7 (void);
 
 static enum gdb_signal last_sig = GDB_SIGNAL_0;
 /* Set if a signal was received from the debugged process.  */
-
-/* Thread information structure used to track information that is
-   not available in gdb's thread structure.  */
-struct windows_thread_info
-  {
-    DWORD tid;
-    HANDLE h;
-    CORE_ADDR thread_local_base;
-    char *name;
-    int suspended;
-    int reload_context;
-    union
-      {
-	CONTEXT context;
-#ifdef __x86_64__
-	WOW64_CONTEXT wow64_context;
-#endif
-      };
-  };
 
 static std::vector<windows_thread_info *> thread_list;
 

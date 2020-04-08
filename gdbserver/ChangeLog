@@ -1,5 +1,9 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* win32-low.h (struct windows_thread_info): Remove.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* win32-low.h (struct windows_thread_info): Rename from
 	win32_thread_info.  Remove typedef.
 	(struct win32_target_ops, win32_require_context): Update.
