@@ -38,6 +38,10 @@
 	* config/tc-sh.h (md_pcrel_from_section): Likewise.
 	* config/tc-xc16x.h (md_pcrel_from_section): Likewise.
 	* config/tc-xstormy16.h (md_pcrel_from_section): Likewise.
+	* config/tc-microblaze.h (md_begin, md_assemble, md_undefined_symbol,
+	md_show_usage, md_convert_frag, md_operand, md_number_to_chars,
+	md_estimate_size_before_relax, md_section_align, tc_gen_reloc,
+	md_apply_fix3): Delete prototypes.
 
 2020-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
