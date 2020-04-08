@@ -31,8 +31,17 @@ extern void windows_xfer_shared_library (const char* so_name,
 					 struct gdbarch *gdbarch,
 					 struct obstack *obstack);
 
+/* To be called from the various GDB_OSABI_WINDOWS handlers for the
+   various Windows architectures and machine types.  */
+
 extern void windows_init_abi (struct gdbarch_info info,
 			      struct gdbarch *gdbarch);
+
+/* To be called from the various GDB_OSABI_CYGWIN handlers for the
+   various Windows architectures and machine types.  */
+
+extern void cygwin_init_abi (struct gdbarch_info info,
+			     struct gdbarch *gdbarch);
 
 /* Return true if the Portable Executable behind ABFD uses the Cygwin dll
    (cygwin1.dll).  */

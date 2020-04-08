@@ -1,5 +1,29 @@
 2020-04-08  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* windows-tdep.h (windows_init_abi): Add comment.
+	(cygwin_init_abi): New declaration.
+	* windows-tdep.c: Split signal enumeration in two, one for
+	Windows and one for Cygwin.
+	(windows_gdb_signal_to_target): Only deal with signal of the
+	Windows OS ABI.
+	(cygwin_gdb_signal_to_target): New function.
+	(windows_init_abi): Rename to windows_init_abi_common, don't set
+	gdb_signal_to_target gdbarch method.  Add new new function with
+	this name.
+	(cygwin_init_abi): New function.
+	* amd64-windows-tdep.c (amd64_windows_init_abi_common): Add
+	comment.  Don't call windows_init_abi.
+	(amd64_windows_init_abi): Add comment, call windows_init_abi.
+	(amd64_cygwin_init_abi): Add comment, call cygwin_init_abi.
+	* i386-windows-tdep.c (i386_windows_init_abi): Rename to
+	i386_windows_init_abi_common, don't call windows_init_abi.  Add
+	a new function of this name.
+	(i386_cygwin_init_abi): New function.
+	(_initialize_i386_windows_tdep): Bind i386_cygwin_init_abi to
+	OS ABI Cygwin.
+
+2020-04-08  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2/read.c (read_gdb_index_from_buffer): Remove objfile
 	parameter.c.
 	(dwarf2_read_gdb_index): Update.
