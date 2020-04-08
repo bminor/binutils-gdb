@@ -1414,8 +1414,7 @@ handle_exception (struct target_waitstatus *ourstatus)
 	      if (thread_name_len > 0)
 		{
 		  thread_name.get ()[thread_name_len - 1] = '\0';
-		  xfree (named_thread->name);
-		  named_thread->name = thread_name.release ();
+		  named_thread->name = std::move (thread_name);
 		}
 	    }
 	  ourstatus->value.sig = GDB_SIGNAL_TRAP;
@@ -3394,7 +3393,7 @@ windows_nat_target::get_ada_task_ptid (long lwp, long thread)
 const char *
 windows_nat_target::thread_name (struct thread_info *thr)
 {
-  return thread_rec (thr->ptid.tid (), 0)->name;
+  return thread_rec (thr->ptid.tid (), 0)->name.get ();
 }
 
 

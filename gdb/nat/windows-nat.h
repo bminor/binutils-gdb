@@ -32,11 +32,6 @@ struct windows_thread_info
   {
   }
 
-  ~windows_thread_info ()
-  {
-    xfree (name);
-  }
-
   DISABLE_COPY_AND_ASSIGN (windows_thread_info);
 
   /* The Win32 thread identifier.  */
@@ -77,7 +72,7 @@ struct windows_thread_info
   bool reload_context = false;
 
   /* The name of the thread, allocated by xmalloc.  */
-  char *name = nullptr;
+  gdb::unique_xmalloc_ptr<char> name;
 };
 
 #endif
