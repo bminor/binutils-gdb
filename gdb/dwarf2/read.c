@@ -1676,7 +1676,7 @@ static struct dwo_unit *lookup_dwo_comp_unit
 static struct dwo_unit *lookup_dwo_type_unit
   (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir);
 
-static void queue_and_load_all_dwo_tus (struct dwarf2_per_cu_data *);
+static void queue_and_load_all_dwo_tus (dwarf2_cu *cu);
 
 /* A unique pointer to a dwo_file.  */
 
@@ -2335,7 +2335,7 @@ create_quick_file_names_table (unsigned int nr_initial_entries)
    function is unrelated to symtabs, symtab would have to be created afterwards.
    You should call age_cached_comp_units after processing the CU.  */
 
-static void
+static dwarf2_cu *
 load_cu (dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile,
 	 bool skip_partial)
 {
@@ -2344,10 +2344,12 @@ load_cu (dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile,
   else
     load_full_comp_unit (per_cu, per_objfile, skip_partial, language_minimal);
 
-  if (per_cu->cu == NULL)
-    return;  /* Dummy CU.  */
+  if (per_cu->cu == nullptr)
+    return nullptr;  /* Dummy CU.  */
 
   dwarf2_find_base_address (per_cu->cu->dies, per_cu->cu);
+
+  return per_cu->cu;
 }
 
 /* Read in the symbols for PER_CU in the context of DWARF"_PER_OBJFILE.  */
@@ -2370,19 +2372,19 @@ dw2_do_instantiate_symtab (dwarf2_per_cu_data *per_cu,
   if (!dwarf2_per_objfile->symtab_set_p (per_cu))
     {
       queue_comp_unit (per_cu, dwarf2_per_objfile, language_minimal);
-      load_cu (per_cu, dwarf2_per_objfile, skip_partial);
+      dwarf2_cu *cu = load_cu (per_cu, dwarf2_per_objfile, skip_partial);
 
       /* If we just loaded a CU from a DWO, and we're working with an index
 	 that may badly handle TUs, load all the TUs in that DWO as well.
 	 http://sourceware.org/bugzilla/show_bug.cgi?id=15021  */
       if (!per_cu->is_debug_types
-	  && per_cu->cu != NULL
-	  && per_cu->cu->dwo_unit != NULL
+	  && cu != NULL
+	  && cu->dwo_unit != NULL
 	  && dwarf2_per_objfile->per_bfd->index_table != NULL
 	  && dwarf2_per_objfile->per_bfd->index_table->version <= 7
 	  /* DWP files aren't supported yet.  */
 	  && get_dwp_file (dwarf2_per_objfile) == NULL)
-	queue_and_load_all_dwo_tus (per_cu);
+	queue_and_load_all_dwo_tus (cu);
     }
 
   process_queue (dwarf2_per_objfile);
@@ -12842,28 +12844,27 @@ queue_and_load_dwo_tu (void **slot, void *info)
   return 1;
 }
 
-/* Queue all TUs contained in the DWO of PER_CU to be read in.
+/* Queue all TUs contained in the DWO of CU to be read in.
    The DWO may have the only definition of the type, though it may not be
    referenced anywhere in PER_CU.  Thus we have to load *all* its TUs.
    http://sourceware.org/bugzilla/show_bug.cgi?id=15021  */
 
 static void
-queue_and_load_all_dwo_tus (struct dwarf2_per_cu_data *per_cu)
+queue_and_load_all_dwo_tus (dwarf2_cu *cu)
 {
   struct dwo_unit *dwo_unit;
   struct dwo_file *dwo_file;
 
-  gdb_assert (!per_cu->is_debug_types);
-  gdb_assert (per_cu->cu != NULL);
-  gdb_assert (get_dwp_file (per_cu->cu->per_objfile) == NULL);
+  gdb_assert (cu != nullptr);
+  gdb_assert (!cu->per_cu->is_debug_types);
+  gdb_assert (get_dwp_file (cu->per_objfile) == nullptr);
 
-  dwo_unit = per_cu->cu->dwo_unit;
+  dwo_unit = cu->dwo_unit;
   gdb_assert (dwo_unit != NULL);
 
   dwo_file = dwo_unit->dwo_file;
   if (dwo_file->tus != NULL)
-    htab_traverse_noresize (dwo_file->tus.get (), queue_and_load_dwo_tu,
-			    per_cu->cu);
+    htab_traverse_noresize (dwo_file->tus.get (), queue_and_load_dwo_tu, cu);
 }
 
 /* Read in various DIEs.  */
@@ -22277,16 +22278,16 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
 			       CORE_ADDR (*get_frame_pc) (void *baton),
 			       void *baton, bool resolve_abstract_p)
 {
-  struct dwarf2_cu *cu;
   struct die_info *die;
   struct attribute *attr;
   struct dwarf2_locexpr_baton retval;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
 
-  if (per_cu->cu == NULL)
-    load_cu (per_cu, dwarf2_per_objfile, false);
-  cu = per_cu->cu;
-  if (cu == NULL)
+  dwarf2_cu *cu = per_cu->cu;
+  if (cu == nullptr)
+    cu = load_cu (per_cu, dwarf2_per_objfile, false);
+
+  if (cu == nullptr)
     {
       /* We shouldn't get here for a dummy CU, but don't crash on the user.
 	 Instead just throw an error, not much else we can do.  */
@@ -22415,7 +22416,6 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
 			     obstack *obstack,
 			     LONGEST *len)
 {
-  struct dwarf2_cu *cu;
   struct die_info *die;
   struct attribute *attr;
   const gdb_byte *result = NULL;
@@ -22424,10 +22424,11 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
   enum bfd_endian byte_order;
   struct objfile *objfile = per_objfile->objfile;
 
-  if (per_cu->cu == NULL)
-    load_cu (per_cu, per_objfile, false);
-  cu = per_cu->cu;
-  if (cu == NULL)
+  dwarf2_cu *cu = per_cu->cu;
+  if (cu == nullptr)
+    cu = load_cu (per_cu, per_objfile, false);
+
+  if (cu == nullptr)
     {
       /* We shouldn't get here for a dummy CU, but don't crash on the user.
 	 Instead just throw an error, not much else we can do.  */
@@ -22544,14 +22545,14 @@ dwarf2_fetch_die_type_sect_off (sect_offset sect_off,
 				dwarf2_per_cu_data *per_cu,
 				dwarf2_per_objfile *per_objfile)
 {
-  struct dwarf2_cu *cu;
   struct die_info *die;
 
-  if (per_cu->cu == NULL)
-    load_cu (per_cu, per_objfile, false);
-  cu = per_cu->cu;
-  if (!cu)
-    return NULL;
+  dwarf2_cu *cu = per_cu->cu;
+  if (cu == nullptr)
+    cu = load_cu (per_cu, per_objfile, false);
+
+  if (cu == nullptr)
+    return nullptr;
 
   die = follow_die_offset (sect_off, per_cu->is_dwz, &cu);
   if (!die)
