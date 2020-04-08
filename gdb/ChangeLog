@@ -1,5 +1,17 @@
 2020-04-08  Tom Tromey  <tromey@adacore.com>
 
+	* windows-nat.c (enum thread_disposition_type): New.
+	(thread_rec): Replace "get_context" parameter with "disposition";
+	change type.
+	(windows_add_thread, windows_nat_target::fetch_registers)
+	(windows_nat_target::store_registers, handle_exception)
+	(windows_nat_target::resume, get_windows_debug_event)
+	(windows_nat_target::get_tib_address)
+	(windows_nat_target::thread_name)
+	(windows_nat_target::thread_alive): Update.
+
+2020-04-08  Tom Tromey  <tromey@adacore.com>
+
 	* windows-nat.c (thread_rec): Use windows_thread_info::suspend.
 	(windows_continue): Use windows_continue::resume.
 	* nat/windows-nat.h (struct windows_thread_info) <suspend,
