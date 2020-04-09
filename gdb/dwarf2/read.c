@@ -912,7 +912,7 @@ public:
   cutu_reader (dwarf2_per_cu_data *this_cu,
 	       dwarf2_per_objfile *per_objfile,
 	       struct abbrev_table *abbrev_table,
-	       int use_existing_cu,
+	       dwarf2_cu *existing_cu,
 	       bool skip_partial);
 
   explicit cutu_reader (struct dwarf2_per_cu_data *this_cu,
@@ -933,7 +933,7 @@ public:
 private:
   void init_tu_and_read_dwo_dies (dwarf2_per_cu_data *this_cu,
 				  dwarf2_per_objfile *per_objfile,
-				  int use_existing_cu);
+				  dwarf2_cu *existing_cu);
 
   struct dwarf2_per_cu_data *m_this_cu;
   std::unique_ptr<dwarf2_cu> m_new_cu;
@@ -6864,7 +6864,7 @@ lookup_dwo_unit (dwarf2_cu *cu, die_info *comp_unit_die, const char *dwo_name)
 void
 cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu_data *this_cu,
 					dwarf2_per_objfile *per_objfile,
-					int use_existing_cu)
+					dwarf2_cu *existing_cu)
 {
   struct signatured_type *sig_type;
 
@@ -6874,24 +6874,28 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu_data *this_cu,
   sig_type = (struct signatured_type *) this_cu;
   gdb_assert (sig_type->dwo_unit != NULL);
 
-  if (use_existing_cu && this_cu->cu != NULL)
+  dwarf2_cu *cu;
+
+  if (existing_cu != nullptr)
     {
-      gdb_assert (this_cu->cu->dwo_unit == sig_type->dwo_unit);
+      cu = existing_cu;
+      gdb_assert (cu->dwo_unit == sig_type->dwo_unit);
       /* There's no need to do the rereading_dwo_cu handling that
 	 cutu_reader does since we don't read the stub.  */
     }
   else
     {
-      /* If !use_existing_cu, this_cu->cu must be NULL.  */
+      /* If and existing_cu is provided, this_cu->cu must be NULL.  */
       gdb_assert (this_cu->cu == NULL);
       m_new_cu.reset (new dwarf2_cu (this_cu, per_objfile));
+      cu = m_new_cu.get ();
     }
 
   /* A future optimization, if needed, would be to use an existing
      abbrev table.  When reading DWOs with skeletonless TUs, all the TUs
      could share abbrev tables.  */
 
-  if (read_cutu_die_from_dwo (this_cu->cu, sig_type->dwo_unit,
+  if (read_cutu_die_from_dwo (cu, sig_type->dwo_unit,
 			      NULL /* stub_comp_unit_die */,
 			      sig_type->dwo_unit->dwo_file->comp_dir,
 			      this, &info_ptr,
@@ -6916,7 +6920,7 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu_data *this_cu,
 cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
 			  dwarf2_per_objfile *dwarf2_per_objfile,
 			  struct abbrev_table *abbrev_table,
-			  int use_existing_cu,
+			  dwarf2_cu *existing_cu,
 			  bool skip_partial)
   : die_reader_specs {},
     m_this_cu (this_cu)
@@ -6924,7 +6928,6 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_section_info *section = this_cu->section;
   bfd *abfd = section->get_bfd_owner ();
-  struct dwarf2_cu *cu;
   const gdb_byte *begin_info_ptr;
   struct signatured_type *sig_type = NULL;
   struct dwarf2_section_info *abbrev_section;
@@ -6945,7 +6948,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
       /* Narrow down the scope of possibilities to have to understand.  */
       gdb_assert (this_cu->is_debug_types);
       gdb_assert (abbrev_table == NULL);
-      init_tu_and_read_dwo_dies (this_cu, dwarf2_per_objfile, use_existing_cu);
+      init_tu_and_read_dwo_dies (this_cu, dwarf2_per_objfile, existing_cu);
       return;
     }
 
@@ -6956,9 +6959,11 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
 
   abbrev_section = get_abbrev_section_for_cu (this_cu);
 
-  if (use_existing_cu && this_cu->cu != NULL)
+  dwarf2_cu *cu;
+
+  if (existing_cu != nullptr)
     {
-      cu = this_cu->cu;
+      cu = existing_cu;
       /* If this CU is from a DWO file we need to start over, we need to
 	 refetch the attributes from the skeleton CU.
 	 This could be optimized by retrieving those attributes from when we
@@ -6970,7 +6975,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
     }
   else
     {
-      /* If !use_existing_cu, this_cu->cu must be NULL.  */
+      /* If an existing_cu is provided, this_cu->cu must be NULL.  */
       gdb_assert (this_cu->cu == NULL);
       m_new_cu.reset (new dwarf2_cu (this_cu, dwarf2_per_objfile));
       cu = m_new_cu.get ();
@@ -7523,7 +7528,7 @@ process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
   if (this_cu->cu != NULL)
     free_one_cached_comp_unit (this_cu, per_objfile);
 
-  cutu_reader reader (this_cu, per_objfile, NULL, 0, false);
+  cutu_reader reader (this_cu, per_objfile, nullptr, nullptr, false);
 
   switch (reader.comp_unit_die->tag)
     {
@@ -7705,7 +7710,7 @@ build_type_psymtabs_1 (struct dwarf2_per_objfile *dwarf2_per_objfile)
 	}
 
       cutu_reader reader (&tu.sig_type->per_cu, dwarf2_per_objfile,
-			  abbrev_table.get (), 0, false);
+			  abbrev_table.get (), nullptr, false);
       if (!reader.dummy_p)
 	build_type_psymtabs_reader (&reader, reader.info_ptr,
 				    reader.comp_unit_die);
@@ -7810,7 +7815,8 @@ process_skeletonless_type_unit (void **slot, void *info)
   *slot = entry;
 
   /* This does the job that build_type_psymtabs_1 would have done.  */
-  cutu_reader reader (&entry->per_cu, dwarf2_per_objfile, NULL, 0, false);
+  cutu_reader reader (&entry->per_cu, dwarf2_per_objfile, nullptr, nullptr,
+		      false);
   if (!reader.dummy_p)
     build_type_psymtabs_reader (&reader, reader.info_ptr,
 				reader.comp_unit_die);
@@ -7946,9 +7952,10 @@ dwarf2_build_psymtabs_hard (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
 static void
 load_partial_comp_unit (dwarf2_per_cu_data *this_cu,
-			dwarf2_per_objfile *per_objfile)
+			dwarf2_per_objfile *per_objfile,
+			dwarf2_cu *existing_cu)
 {
-  cutu_reader reader (this_cu, per_objfile, NULL, 1, false);
+  cutu_reader reader (this_cu, per_objfile, nullptr, existing_cu, false);
 
   if (!reader.dummy_p)
     {
@@ -9067,7 +9074,7 @@ load_full_comp_unit (dwarf2_per_cu_data *this_cu,
 {
   gdb_assert (! this_cu->is_debug_types);
 
-  cutu_reader reader (this_cu, per_objfile, NULL, 1, skip_partial);
+  cutu_reader reader (this_cu, per_objfile, NULL, this_cu->cu, skip_partial);
   if (reader.dummy_p)
     return;
 
@@ -18673,7 +18680,7 @@ find_partial_die (sect_offset sect_off, int offset_in_dwz, struct dwarf2_cu *cu)
 						 dwarf2_per_objfile);
 
       if (per_cu->cu == NULL || per_cu->cu->partial_dies == NULL)
-	load_partial_comp_unit (per_cu, cu->per_objfile);
+	load_partial_comp_unit (per_cu, cu->per_objfile, nullptr);
 
       per_cu->cu->last_used = 0;
       pd = per_cu->cu->find_partial_die (sect_off);
@@ -18692,7 +18699,7 @@ find_partial_die (sect_offset sect_off, int offset_in_dwz, struct dwarf2_cu *cu)
 	 DIEs alone (which can still be in use, e.g. in scan_partial_symbols),
 	 and clobber THIS_CU->cu->partial_dies with the hash table for the new
 	 set.  */
-      load_partial_comp_unit (per_cu, cu->per_objfile);
+      load_partial_comp_unit (per_cu, cu->per_objfile, cu);
 
       pd = per_cu->cu->find_partial_die (sect_off);
     }
@@ -19409,7 +19416,7 @@ dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu,
     }
   else
     {
-      cutu_reader reader (per_cu, dwarf2_per_objfile, NULL, 0, false);
+      cutu_reader reader (per_cu, dwarf2_per_objfile, nullptr, nullptr, false);
       addr_base = reader.cu->addr_base;
       addr_size = reader.cu->header.addr_size;
     }
@@ -22791,7 +22798,7 @@ read_signatured_type (signatured_type *sig_type,
   gdb_assert (per_cu->is_debug_types);
   gdb_assert (per_cu->cu == NULL);
 
-  cutu_reader reader (per_cu, per_objfile, NULL, 0, false);
+  cutu_reader reader (per_cu, per_objfile, nullptr, nullptr, false);
 
   if (!reader.dummy_p)
     {
