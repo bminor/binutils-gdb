@@ -1,3 +1,13 @@
+2020-04-10  Hannes Domani  <ssbssa@yahoo.de>
+
+	* nat/windows-nat.c (STATUS_WX86_BREAKPOINT, STATUS_WX86_SINGLE_STEP):
+	Move to...
+	* nat/windows-nat.h (STATUS_WX86_BREAKPOINT, STATUS_WX86_SINGLE_STEP):
+	... here.
+	* windows-nat.c (windows_nat_target::get_windows_debug_event):
+	Check for STATUS_WX86_BREAKPOINT.
+	(windows_nat_target::wait): Same.
+
 2020-04-10  Tom de Vries  <tdevries@suse.de>
 
 	PR cli/25808

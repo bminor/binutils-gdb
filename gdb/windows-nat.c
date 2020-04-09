@@ -235,7 +235,6 @@ static int saw_create;
 static int open_process_used = 0;
 #ifdef __x86_64__
 static bool wow64_process = false;
-static bool ignore_first_breakpoint = false;
 #endif
 
 /* User options.  */
@@ -1721,8 +1720,10 @@ windows_nat_target::get_windows_debug_event (int pid,
 		     thread_id, desired_stop_thread_id));
 
       if (current_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT
-	  && (current_event.u.Exception.ExceptionRecord.ExceptionCode
-	      == EXCEPTION_BREAKPOINT)
+	  && ((current_event.u.Exception.ExceptionRecord.ExceptionCode
+	       == EXCEPTION_BREAKPOINT)
+	      || (current_event.u.Exception.ExceptionRecord.ExceptionCode
+		  == STATUS_WX86_BREAKPOINT))
 	  && windows_initialization_done)
 	{
 	  ptid_t ptid = ptid_t (current_event.dwProcessId, thread_id, 0);
@@ -1801,8 +1802,10 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	    {
 	      current_windows_thread->stopped_at_software_breakpoint = false;
 	      if (current_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT
-		  && (current_event.u.Exception.ExceptionRecord.ExceptionCode
-		      == EXCEPTION_BREAKPOINT)
+		  && ((current_event.u.Exception.ExceptionRecord.ExceptionCode
+		       == EXCEPTION_BREAKPOINT)
+		      || (current_event.u.Exception.ExceptionRecord.ExceptionCode
+			  == STATUS_WX86_BREAKPOINT))
 		  && windows_initialization_done)
 		current_windows_thread->stopped_at_software_breakpoint = true;
 	    }

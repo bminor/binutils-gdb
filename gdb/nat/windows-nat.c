@@ -20,9 +20,6 @@
 #include "nat/windows-nat.h"
 #include "gdbsupport/common-debug.h"
 
-#define STATUS_WX86_BREAKPOINT 0x4000001F
-#define STATUS_WX86_SINGLE_STEP 0x4000001E
-
 namespace windows_nat
 {
 
@@ -43,6 +40,10 @@ windows_thread_info *current_windows_thread;
 DWORD desired_stop_thread_id = -1;
 std::vector<pending_stop> pending_stops;
 EXCEPTION_RECORD siginfo_er;
+
+#ifdef __x86_64__
+bool ignore_first_breakpoint = false;
+#endif
 
 /* Note that 'debug_events' must be locally defined in the relevant
    functions.  */

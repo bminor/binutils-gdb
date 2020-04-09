@@ -25,6 +25,9 @@
 #include "gdbsupport/gdb_optional.h"
 #include "target/waitstatus.h"
 
+#define STATUS_WX86_BREAKPOINT 0x4000001F
+#define STATUS_WX86_SINGLE_STEP 0x4000001E
+
 namespace windows_nat
 {
 
@@ -201,6 +204,11 @@ extern std::vector<pending_stop> pending_stops;
 
 /* Contents of $_siginfo */
 extern EXCEPTION_RECORD siginfo_er;
+
+#ifdef __x86_64__
+/* Ignore first breakpoint exception of WOW64 process */
+extern bool ignore_first_breakpoint;
+#endif
 
 /* Return the name of the DLL referenced by H at ADDRESS.  UNICODE
    determines what sort of string is read from the inferior.  Returns
