@@ -43,6 +43,7 @@ struct tu_stats
   int nr_all_type_units_reallocs;
 };
 
+struct dwarf2_cu;
 struct dwarf2_debug_sections;
 struct dwarf2_per_cu_data;
 struct mapped_index;
@@ -115,9 +116,6 @@ struct dwarf2_per_bfd
      TU.  */
   signatured_type *get_tu (int index);
 
-  /* Free all cached compilation units.  */
-  void free_cached_comp_units ();
-
   /* A convenience function to allocate a dwarf2_per_cu_data.  The
      returned object has its "index" field set properly.  The object
      is allocated on the dwarf2_per_bfd obstack.  */
@@ -188,10 +186,6 @@ public:
   /* Type unit statistics, to see how well the scaling improvements
      are doing.  */
   struct tu_stats tu_stats {};
-
-  /* A chain of compilation units that are currently read in, so that
-     they can be freed later.  */
-  dwarf2_per_cu_data *read_in_chain = NULL;
 
   /* A table mapping DW_AT_dwo_name values to struct dwo_file objects.
      This is NULL if the table hasn't been allocated yet.  */
@@ -303,6 +297,8 @@ struct dwarf2_per_objfile
     : objfile (objfile), per_bfd (per_bfd)
   {}
 
+  ~dwarf2_per_objfile ();
+
   /* Return pointer to string at .debug_line_str offset as read from BUF.
      BUF is assumed to be in a compilation unit described by CU_HEADER.
      Return *BYTES_READ_PTR count of bytes read from BUF.  */
@@ -344,6 +340,22 @@ struct dwarf2_per_objfile
      UNSIGNED_P controls if the integer is unsigned or not.  */
   struct type *int_type (int size_in_bytes, bool unsigned_p) const;
 
+  /* Get the dwarf2_cu matching PER_CU for this objfile.  */
+  dwarf2_cu *get_cu (dwarf2_per_cu_data *per_cu);
+
+  /* Set the dwarf2_cu matching PER_CU for this objfile.  */
+  void set_cu (dwarf2_per_cu_data *per_cu, dwarf2_cu *cu);
+
+  /* Remove/free the dwarf2_cu matching PER_CU for this objfile.  */
+  void remove_cu (dwarf2_per_cu_data *per_cu);
+
+  /* Free all cached compilation units.  */
+  void remove_all_cus ();
+
+  /* Increase the age counter on each CU compilation unit and free
+     any that are too old.  */
+  void age_comp_units ();
+
   /* Back link.  */
   struct objfile *objfile;
 
@@ -372,6 +384,10 @@ private:
 
   /* Map from signatured types to the corresponding struct type.  */
   std::unordered_map<signatured_type *, struct type *> m_type_map;
+
+  /* Map from the objfile-independent dwarf2_per_cu_data instances to the
+     corresponding objfile-dependent dwarf2_cu instances.  */
+  std::unordered_map<dwarf2_per_cu_data *, dwarf2_cu *> m_dwarf2_cus;
 };
 
 /* Get the dwarf2_per_objfile associated to OBJFILE.  */
@@ -454,11 +470,6 @@ struct dwarf2_per_cu_data
      If the DIE refers to a DWO file, this is always the original die,
      not the DWO file.  */
   struct dwarf2_section_info *section;
-
-  /* Set to non-NULL iff this CU is currently loaded.  When it gets freed out
-     of the CU cache it gets reset to NULL again.  This is left as NULL for
-     dummy CUs (a CU header, but nothing else).  */
-  struct dwarf2_cu *cu;
 
   /* The unit type of this CU.  */
   enum dwarf_unit_type unit_type;
