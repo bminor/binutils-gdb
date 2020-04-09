@@ -1,3 +1,7 @@
+2020-04-09  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/ld-elf/shared.exp: Add -Av9 to AFLAGS_PIC on sparc*-*-*.
+
 2020-04-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/config/default.exp (NOCF_PROTECTION_CFLAGS): Replace
