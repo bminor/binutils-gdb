@@ -691,29 +691,28 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
 		      * sizeof (struct linetable_entry))));
     }
 
-  /* The end of sequence marker is special.  We need to reset the
-     is_stmt flag on previous lines at the same PC, otherwise these
-     lines may cause problems since they might be at the same address
-     as the following function.  For instance suppose a function calls
-     abort there is no reason to emit a ret after that point (no joke).
-     So the label may be at the same address where the following
-     function begins.  A similar problem appears if a label is at the
-     same address where an inline function ends we cannot reliably tell
-     if this is considered part of the inline function or the calling
-     program or even the next inline function, so stack traces may
-     give surprising results.  Expect gdb.cp/step-and-next-inline.exp
-     to fail if these lines are not modified here.  */
-  if (line == 0 && subfile->line_vector->nitems > 0)
+  /* Normally, we treat lines as unsorted.  But the end of sequence
+     marker is special.  We sort line markers at the same PC by line
+     number, so end of sequence markers (which have line == 0) appear
+     first.  This is right if the marker ends the previous function,
+     and there is no padding before the next function.  But it is
+     wrong if the previous line was empty and we are now marking a
+     switch to a different subfile.  We must leave the end of sequence
+     marker at the end of this group of lines, not sort the empty line
+     to after the marker.  The easiest way to accomplish this is to
+     delete any empty lines from our table, if they are followed by
+     end of sequence markers.  All we lose is the ability to set
+     breakpoints at some lines which contain no instructions
+     anyway.  */
+  if (line == 0)
     {
-      e = subfile->line_vector->item + subfile->line_vector->nitems;
-      do
+      while (subfile->line_vector->nitems > 0)
 	{
-	  e--;
-	  if (e->pc != pc || e->line == 0)
+	  e = subfile->line_vector->item + subfile->line_vector->nitems - 1;
+	  if (e->pc != pc)
 	    break;
-	  e->is_stmt = 0;
+	  subfile->line_vector->nitems--;
 	}
-      while (e > subfile->line_vector->item);
     }
 
   e = subfile->line_vector->item + subfile->line_vector->nitems++;
