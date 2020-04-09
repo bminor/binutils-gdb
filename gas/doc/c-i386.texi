@@ -484,12 +484,12 @@ lfence, which is the default.
 @item -mlfence-before-indirect-branch=@var{register}
 @itemx -mlfence-before-indirect-branch=@var{memory}
 These options control whether the assembler should generate lfence
-after indirect near branch instructions.
+before indirect near branch instructions.
 @option{-mlfence-before-indirect-branch=@var{all}} will generate lfence
-after indirect near branch via register and issue a warning before
+before indirect near branch via register and issue a warning before
 indirect near branch via memory.
 @option{-mlfence-before-indirect-branch=@var{register}} will generate
-lfence after indirect near branch via register.
+lfence before indirect near branch via register.
 @option{-mlfence-before-indirect-branch=@var{memory}} will issue a
 warning before indirect near branch via memory.
 @option{-mlfence-before-indirect-branch=@var{none}} will not generate

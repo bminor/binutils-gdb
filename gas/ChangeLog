@@ -1,3 +1,8 @@
+2020-04-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/c-i386.texi: Correct -mlfence-before-indirect-branch=
+	documentation.
+
 2020-04-08  Gunther Nikl  <gnikl@justmail.de>
 
 	* config/tc-moxie.h (MD_PCREL_FROM_SECTION): Delete define.
