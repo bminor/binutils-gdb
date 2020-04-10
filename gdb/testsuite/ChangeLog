@@ -1,5 +1,10 @@
 2020-04-10  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/style.exp: Expect "Expanding full symbols" message for
+	-readnow.
+
+2020-04-10  Tom de Vries  <tdevries@suse.de>
+
 	PR cli/25808
 	* gdb.base/style.c: Add leading newlines.
 	* gdb.base/style.exp: Use gdb_get_line_number to get specific lines.

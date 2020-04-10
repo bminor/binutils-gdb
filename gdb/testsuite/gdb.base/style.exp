@@ -34,6 +34,8 @@ save_vars { env(TERM) } {
 	return -1
     }
 
+    set readnow [readnow]
+
     if {![runto_main]} {
 	fail "style tests failed"
 	return
@@ -140,8 +142,15 @@ save_vars { env(TERM) } {
 	    ]
 
     set quoted [string_to_regexp $binfile]
+    set pass_re "Reading symbols from [style $quoted file]\.\.\."
+    if { $readnow } {
+	set pass_re \
+	    [multi_line \
+		 $pass_re \
+		 "Expanding full symbols from [style $quoted file]\.\.\."]
+    }
     gdb_test "file $binfile" \
-	"Reading symbols from [style $quoted file]..." \
+	$pass_re \
 	"filename is styled when loading symbol file"
 
     gdb_test "pwd" "Working directory [style .*? file].*"
