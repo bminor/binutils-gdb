@@ -1,3 +1,8 @@
+2020-04-10  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/ld-shared/shared.exp: Remove dangling comments.
+	xfail shared non PIC tests on Solaris.
+
 2020-04-09  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* testsuite/ld-elf/shared.exp: Add -Av9 to AFLAGS_PIC on sparc*-*-*.
