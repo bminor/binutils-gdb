@@ -1,5 +1,9 @@
 2020-04-10  Tom Tromey  <tromey@adacore.com>
 
+	* symfile.c (symbol_file_add_separate): Preserve OBJF_MAINLINE.
+
+2020-04-10  Tom Tromey  <tromey@adacore.com>
+
 	* symtab.c (get_symbol_address, get_msymbol_address): Skip
 	separate debug files.
 

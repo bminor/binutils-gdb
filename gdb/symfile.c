@@ -1163,7 +1163,7 @@ symbol_file_add_separate (bfd *bfd, const char *name,
   symbol_file_add_with_addrs
     (bfd, name, symfile_flags, &sap,
      objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
-		       | OBJF_USERLOADED),
+		       | OBJF_USERLOADED | OBJF_MAINLINE),
      objfile);
 }
 
