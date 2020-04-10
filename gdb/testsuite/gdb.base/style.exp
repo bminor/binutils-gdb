@@ -39,6 +39,11 @@ save_vars { env(TERM) } {
 	return
     }
 
+    # Check that the source highlighter has not stripped away the leading
+    # newlines.
+    set main_line [gdb_get_line_number "break here"]
+    gdb_test "list $main_line,$main_line" "return.*some_called_function.*"
+
     gdb_test_no_output "set style enabled on"
 
     set main_expr [style main function]
@@ -79,8 +84,9 @@ save_vars { env(TERM) } {
     }
 
     if {$test_macros} {
+	set macro_line [gdb_get_line_number "\#define SOME_MACRO"]
 	gdb_test "info macro SOME_MACRO" \
-	    "Defined at $base_file_expr:16\r\n#define SOME_MACRO 23"
+	    "Defined at $base_file_expr:$macro_line\r\n#define SOME_MACRO 23"
     }
 
     set func [style some_called_function function]

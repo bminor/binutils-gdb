@@ -1,3 +1,8 @@
+2020-04-10  Tom de Vries  <tdevries@suse.de>
+
+	PR cli/25808
+	* python/lib/gdb/__init__.py: Initialize lexer with stripnl=False.
+
 2020-04-09  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* MAINTAINERS (Global Maintainers): Add Tom de Vries.

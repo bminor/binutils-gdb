@@ -1,3 +1,7 @@
+
+
+/* The leading newlines here are intentional, do not remove.  They are used to
+   test that the source highlighter doesn't strip them.  */
 /* Copyright 2018-2020 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
