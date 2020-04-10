@@ -3433,7 +3433,7 @@ copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
 	buf |= *source << avail;
 
       buf &= (1 << nbits) - 1;
-      *dest = (*dest & (~0 << nbits)) | buf;
+      *dest = (*dest & (~0U << nbits)) | buf;
     }
 }
 
