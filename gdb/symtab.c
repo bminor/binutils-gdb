@@ -6438,6 +6438,9 @@ get_symbol_address (const struct symbol *sym)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
+      if (objfile->separate_debug_objfile_backlink != nullptr)
+	continue;
+
       bound_minimal_symbol minsym
 	= lookup_minimal_symbol_linkage (linkage_name, objfile);
       if (minsym.minsym != nullptr)
@@ -6458,7 +6461,8 @@ get_msymbol_address (struct objfile *objf, const struct minimal_symbol *minsym)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      if ((objfile->flags & OBJF_MAINLINE) != 0)
+      if (objfile->separate_debug_objfile_backlink == nullptr
+	  && (objfile->flags & OBJF_MAINLINE) != 0)
 	{
 	  bound_minimal_symbol found
 	    = lookup_minimal_symbol_linkage (linkage_name, objfile);
