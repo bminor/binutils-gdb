@@ -1,3 +1,7 @@
+2020-04-12  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c (nbsd_nat_target::info_proc): Add do_exe.
+
 2020-04-11  Kamil Rytarowski  <n54@gmx.com>
 
 	* nbsd-nat.c; Include "nbsd-tdep.h" and "gdbarch.h".

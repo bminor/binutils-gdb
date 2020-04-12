@@ -299,12 +299,16 @@ bool
 nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 {
   pid_t pid;
+  bool do_exe = false;
   bool do_mappings = false;
 
   switch (what)
     {
     case IP_MAPPINGS:
       do_mappings = true;
+      break;
+    case IP_EXE:
+      do_exe = true;
       break;
     default:
       error (_("Not supported on this target."));
@@ -324,6 +328,14 @@ nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 
   printf_filtered (_("process %d\n"), pid);
 
+  if (do_exe)
+    {
+      const char *exe = pid_to_exec_file (pid);
+      if (exe != nullptr)
+	printf_filtered ("exe = '%s'\n", exe);
+      else
+	warning (_("unable to fetch executable path name"));
+    }
   if (do_mappings)
     {
       size_t nvment;
