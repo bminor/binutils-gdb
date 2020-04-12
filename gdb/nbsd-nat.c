@@ -58,6 +58,33 @@ nbsd_pid_to_cwd (int pid)
   return buf;
 }
 
+/* Return the command line for the process identified by PID.  */
+
+static gdb::unique_xmalloc_ptr<char[]>
+nbsd_pid_to_cmdline (int pid)
+{
+  int mib[4] = {CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_ARGV};
+
+  size_t size = 0;
+  if (sysctl (mib, ARRAY_SIZE (mib), NULL, &size, NULL, 0) == -1 || size == 0)
+    return nullptr;
+
+  gdb::unique_xmalloc_ptr<char[]> args (XNEWVAR (char, size));
+
+  if (sysctl (mib, ARRAY_SIZE (mib), args.get (), &size, NULL, 0) == -1
+      || size == 0)
+    return nullptr;
+
+  /* Arguments are returned as a flattened string with NUL separators.
+     Join the arguments with spaces to form a single string.  */
+  for (size_t i = 0; i < size - 1; i++)
+    if (args[i] == '\0')
+      args[i] = ' ';
+  args[size - 1] = '\0';
+
+  return args;
+}
+
 /* Generic thread (LWP) lister within a specified process.  The callback
    parameters is a C++ function that is called for each detected thread.  */
 
@@ -313,6 +340,7 @@ bool
 nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 {
   pid_t pid;
+  bool do_cmdline = false;
   bool do_cwd = false;
   bool do_exe = false;
   bool do_mappings = false;
@@ -321,6 +349,9 @@ nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
     {
     case IP_MAPPINGS:
       do_mappings = true;
+      break;
+    case IP_CMDLINE:
+      do_cmdline = true;
       break;
     case IP_EXE:
       do_exe = true;
@@ -346,6 +377,14 @@ nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 
   printf_filtered (_("process %d\n"), pid);
 
+  if (do_cmdline)
+    {
+      gdb::unique_xmalloc_ptr<char[]> cmdline = nbsd_pid_to_cmdline (pid);
+      if (cmdline != nullptr)
+	printf_filtered ("cmdline = '%s'\n", cmdline.get ());
+      else
+	warning (_("unable to fetch command line"));
+    }
   if (do_cwd)
     {
       std::string cwd = nbsd_pid_to_cwd (pid);
