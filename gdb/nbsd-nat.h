@@ -35,6 +35,9 @@ struct nbsd_nat_target : public inf_ptrace_target
   void post_attach (int pid) override;
   void update_thread_list () override;
   std::string pid_to_str (ptid_t ptid) override;
+
+  int find_memory_regions (find_memory_region_ftype func, void *data) override;
+  bool info_proc (const char *, enum info_proc_what) override;
 };
 
 #endif /* nbsd-nat.h */

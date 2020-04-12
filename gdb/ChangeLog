@@ -1,3 +1,20 @@
+2020-04-11  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c; Include "nbsd-tdep.h" and "gdbarch.h".
+	* nbsd-nat.c (nbsd_nat_target::find_memory_regions)
+	(nbsd_nat_target::info_proc): New functions.
+	* nbsd-nat.c (kinfo_get_vmmap): New function.
+	* nbsd-nat.c (nbsd_nat_target::info_proc) Use
+	nbsd_info_proc_mappings_header and nbsd_info_proc_mappings_entry.
+	* nbsd-tdep.c (nbsd_info_proc_mappings_header)
+	(nbsd_info_proc_mappings_entry, nbsd_vm_map_entry_flags): New
+	functions.
+	* nbsd-tdep.c (KINFO_VME_PROT_READ, KINFO_VME_PROT_WRITE)
+	(KINFO_VME_PROT_EXEC, KINFO_VME_FLAG_COW)
+	(KINFO_VME_FLAG_NEEDS_COPY, KINFO_VME_FLAG_NOCOREDUMP)
+	(KINFO_VME_FLAG_PAGEABLE, KINFO_VME_FLAG_GROWS_UP)
+	(KINFO_VME_FLAG_GROWS_DOWN): New.
+
 2020-04-10  Artur Shepilko  <nomadbyte@gmail.com>
 
 	* utils.c (copy_bitwise): Use unsigned 0 constant as operand of
