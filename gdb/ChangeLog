@@ -1,5 +1,10 @@
 2020-04-12  Kamil Rytarowski  <n54@gmx.com>
 
+	* nbsd-nat.c (nbsd_nat_target::info_proc): Add IP_MINIMAL and
+	IP_ALL.
+
+2020-04-12  Kamil Rytarowski  <n54@gmx.com>
+
 	* nbsd-nat.c (nbsd_pid_to_cmdline): Add.
         (nbsd_nat_target::info_proc): Add do_cmdline.
 

@@ -347,6 +347,11 @@ nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 
   switch (what)
     {
+    case IP_MINIMAL:
+      do_cmdline = true;
+      do_cwd = true;
+      do_exe = true;
+      break;
     case IP_MAPPINGS:
       do_mappings = true;
       break;
@@ -358,6 +363,12 @@ nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
       break;
     case IP_CWD:
       do_cwd = true;
+      break;
+    case IP_ALL:
+      do_cmdline = true;
+      do_cwd = true;
+      do_exe = true;
+      do_mappings = true;
       break;
     default:
       error (_("Not supported on this target."));
