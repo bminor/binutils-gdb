@@ -44,6 +44,20 @@ nbsd_nat_target::pid_to_exec_file (int pid)
   return buf;
 }
 
+/* Return the current directory for the process identified by PID.  */
+
+static std::string
+nbsd_pid_to_cwd (int pid)
+{
+  char buf[PATH_MAX];
+  size_t buflen;
+  int mib[4] = {CTL_KERN, KERN_PROC_ARGS, pid, KERN_PROC_CWD};
+  buflen = sizeof (buf);
+  if (sysctl (mib, ARRAY_SIZE (mib), buf, &buflen, NULL, 0))
+    return "";
+  return buf;
+}
+
 /* Generic thread (LWP) lister within a specified process.  The callback
    parameters is a C++ function that is called for each detected thread.  */
 
@@ -299,6 +313,7 @@ bool
 nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 {
   pid_t pid;
+  bool do_cwd = false;
   bool do_exe = false;
   bool do_mappings = false;
 
@@ -309,6 +324,9 @@ nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
       break;
     case IP_EXE:
       do_exe = true;
+      break;
+    case IP_CWD:
+      do_cwd = true;
       break;
     default:
       error (_("Not supported on this target."));
@@ -328,6 +346,14 @@ nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 
   printf_filtered (_("process %d\n"), pid);
 
+  if (do_cwd)
+    {
+      std::string cwd = nbsd_pid_to_cwd (pid);
+      if (cwd != "")
+	printf_filtered ("cwd = '%s'\n", cwd.c_str ());
+      else
+	warning (_("unable to fetch current working directory"));
+    }
   if (do_exe)
     {
       const char *exe = pid_to_exec_file (pid);
