@@ -47,6 +47,7 @@
 
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/scope-exit.h"
+#include "gdbsupport/gdb_select.h"
 
 #define require_running_or_return(BUF)		\
   if (!target_running ())			\
@@ -4475,6 +4476,40 @@ handle_target_event (int err, gdb_client_data client_data)
   set_desired_thread ();
 
   return 0;
+}
+
+/* See gdbsupport/event-loop.h.  */
+
+int
+invoke_async_signal_handlers ()
+{
+  return 0;
+}
+
+/* See gdbsupport/event-loop.h.  */
+
+int
+check_async_event_handlers ()
+{
+  return 0;
+}
+
+/* See gdbsupport/errors.h  */
+
+void
+flush_streams ()
+{
+  fflush (stdout);
+  fflush (stderr);
+}
+
+/* See gdbsupport/gdb_select.h.  */
+
+int
+gdb_select (int n, fd_set *readfds, fd_set *writefds,
+	    fd_set *exceptfds, struct timeval *timeout)
+{
+  return select (n, readfds, writefds, exceptfds, timeout);
 }
 
 #if GDB_SELF_TEST

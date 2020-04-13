@@ -1,5 +1,11 @@
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
+	* server.c (invoke_async_signal_handlers)
+	(check_async_event_handlers, flush_streams, gdb_select): New
+	functions.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
 	* configure: Rebuild.
 	* config.in: Rebuild.
 
