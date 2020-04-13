@@ -19,8 +19,6 @@
 
 #include "defs.h"
 #include "event-loop.h"
-#include "event-top.h"
-#include "ser-event.h"
 
 #include <chrono>
 
@@ -35,7 +33,6 @@
 #include <sys/types.h>
 #include "gdbsupport/gdb_sys_time.h"
 #include "gdbsupport/gdb_select.h"
-#include "top.h"
 
 /* Tell create_file_handler what events we are interested in.
    This is used by the select version of the event loop.  */
@@ -59,50 +56,6 @@ typedef struct file_handler
     struct file_handler *next_file;	/* Next registered file descriptor.  */
   }
 file_handler;
-
-/* PROC is a function to be invoked when the READY flag is set.  This
-   happens when there has been a signal and the corresponding signal
-   handler has 'triggered' this async_signal_handler for execution.
-   The actual work to be done in response to a signal will be carried
-   out by PROC at a later time, within process_event.  This provides a
-   deferred execution of signal handlers.
-
-   Async_init_signals takes care of setting up such an
-   async_signal_handler for each interesting signal.  */
-
-typedef struct async_signal_handler
-  {
-    int ready;			    /* If ready, call this handler
-				       from the main event loop, using
-				       invoke_async_handler.  */
-    struct async_signal_handler *next_handler;	/* Ptr to next handler.  */
-    sig_handler_func *proc;	    /* Function to call to do the work.  */
-    gdb_client_data client_data;    /* Argument to async_handler_func.  */
-  }
-async_signal_handler;
-
-/* PROC is a function to be invoked when the READY flag is set.  This
-   happens when the event has been marked with
-   MARK_ASYNC_EVENT_HANDLER.  The actual work to be done in response
-   to an event will be carried out by PROC at a later time, within
-   process_event.  This provides a deferred execution of event
-   handlers.  */
-typedef struct async_event_handler
-  {
-    /* If ready, call this handler from the main event loop, using
-       invoke_event_handler.  */
-    int ready;
-
-    /* Point to next handler.  */
-    struct async_event_handler *next_handler;
-
-    /* Function to call to do the work.  */
-    async_event_handler_func *proc;
-
-    /* Argument to PROC.  */
-    gdb_client_data client_data;
-  }
-async_event_handler;
 
 /* Gdb_notifier is just a list of file descriptors gdb is interested in.
    These are the input file descriptor, and the target file
@@ -198,61 +151,12 @@ static struct
   }
 timer_list;
 
-/* All the async_signal_handlers gdb is interested in are kept onto
-   this list.  */
-static struct
-  {
-    /* Pointer to first in handler list.  */
-    async_signal_handler *first_handler;
-
-    /* Pointer to last in handler list.  */
-    async_signal_handler *last_handler;
-  }
-sighandler_list;
-
-/* All the async_event_handlers gdb is interested in are kept onto
-   this list.  */
-static struct
-  {
-    /* Pointer to first in handler list.  */
-    async_event_handler *first_handler;
-
-    /* Pointer to last in handler list.  */
-    async_event_handler *last_handler;
-  }
-async_event_handler_list;
-
-static int invoke_async_signal_handlers (void);
 static void create_file_handler (int fd, int mask, handler_func *proc,
 				 gdb_client_data client_data);
-static int check_async_event_handlers (void);
 static int gdb_wait_for_event (int);
 static int update_wait_timeout (void);
 static int poll_timers (void);
 
-
-/* This event is signalled whenever an asynchronous handler needs to
-   defer an action to the event loop.  */
-static struct serial_event *async_signal_handlers_serial_event;
-
-/* Callback registered with ASYNC_SIGNAL_HANDLERS_SERIAL_EVENT.  */
-
-static void
-async_signals_handler (int error, gdb_client_data client_data)
-{
-  /* Do nothing.  Handlers are run by invoke_async_signal_handlers
-     from instead.  */
-}
-
-void
-initialize_async_signal_handlers (void)
-{
-  async_signal_handlers_serial_event = make_serial_event ();
-
-  add_file_handler (serial_event_fd (async_signal_handlers_serial_event),
-		    async_signals_handler, NULL);
-}
-
 /* Process one high level event.  If nothing is ready at this time,
    wait for something to happen (via gdb_wait_for_event), then process
    it.  Returns >0 if something was done otherwise returns <0 (this
@@ -800,216 +704,6 @@ gdb_wait_for_event (int block)
   return 0;
 }
 
-
-/* Create an asynchronous handler, allocating memory for it.
-   Return a pointer to the newly created handler.
-   This pointer will be used to invoke the handler by 
-   invoke_async_signal_handler.
-   PROC is the function to call with CLIENT_DATA argument 
-   whenever the handler is invoked.  */
-async_signal_handler *
-create_async_signal_handler (sig_handler_func * proc,
-			     gdb_client_data client_data)
-{
-  async_signal_handler *async_handler_ptr;
-
-  async_handler_ptr = XNEW (async_signal_handler);
-  async_handler_ptr->ready = 0;
-  async_handler_ptr->next_handler = NULL;
-  async_handler_ptr->proc = proc;
-  async_handler_ptr->client_data = client_data;
-  if (sighandler_list.first_handler == NULL)
-    sighandler_list.first_handler = async_handler_ptr;
-  else
-    sighandler_list.last_handler->next_handler = async_handler_ptr;
-  sighandler_list.last_handler = async_handler_ptr;
-  return async_handler_ptr;
-}
-
-/* Mark the handler (ASYNC_HANDLER_PTR) as ready.  This information
-   will be used when the handlers are invoked, after we have waited
-   for some event.  The caller of this function is the interrupt
-   handler associated with a signal.  */
-void
-mark_async_signal_handler (async_signal_handler * async_handler_ptr)
-{
-  async_handler_ptr->ready = 1;
-  serial_event_set (async_signal_handlers_serial_event);
-}
-
-/* See event-loop.h.  */
-
-void
-clear_async_signal_handler (async_signal_handler *async_handler_ptr)
-{
-  async_handler_ptr->ready = 0;
-}
-
-/* See event-loop.h.  */
-
-int
-async_signal_handler_is_marked (async_signal_handler *async_handler_ptr)
-{
-  return async_handler_ptr->ready;
-}
-
-/* Call all the handlers that are ready.  Returns true if any was
-   indeed ready.  */
-
-static int
-invoke_async_signal_handlers (void)
-{
-  async_signal_handler *async_handler_ptr;
-  int any_ready = 0;
-
-  /* We're going to handle all pending signals, so no need to wake up
-     the event loop again the next time around.  Note this must be
-     cleared _before_ calling the callbacks, to avoid races.  */
-  serial_event_clear (async_signal_handlers_serial_event);
-
-  /* Invoke all ready handlers.  */
-
-  while (1)
-    {
-      for (async_handler_ptr = sighandler_list.first_handler;
-	   async_handler_ptr != NULL;
-	   async_handler_ptr = async_handler_ptr->next_handler)
-	{
-	  if (async_handler_ptr->ready)
-	    break;
-	}
-      if (async_handler_ptr == NULL)
-	break;
-      any_ready = 1;
-      async_handler_ptr->ready = 0;
-      /* Async signal handlers have no connection to whichever was the
-	 current UI, and thus always run on the main one.  */
-      current_ui = main_ui;
-      (*async_handler_ptr->proc) (async_handler_ptr->client_data);
-    }
-
-  return any_ready;
-}
-
-/* Delete an asynchronous handler (ASYNC_HANDLER_PTR).
-   Free the space allocated for it.  */
-void
-delete_async_signal_handler (async_signal_handler ** async_handler_ptr)
-{
-  async_signal_handler *prev_ptr;
-
-  if (sighandler_list.first_handler == (*async_handler_ptr))
-    {
-      sighandler_list.first_handler = (*async_handler_ptr)->next_handler;
-      if (sighandler_list.first_handler == NULL)
-	sighandler_list.last_handler = NULL;
-    }
-  else
-    {
-      prev_ptr = sighandler_list.first_handler;
-      while (prev_ptr && prev_ptr->next_handler != (*async_handler_ptr))
-	prev_ptr = prev_ptr->next_handler;
-      gdb_assert (prev_ptr);
-      prev_ptr->next_handler = (*async_handler_ptr)->next_handler;
-      if (sighandler_list.last_handler == (*async_handler_ptr))
-	sighandler_list.last_handler = prev_ptr;
-    }
-  xfree ((*async_handler_ptr));
-  (*async_handler_ptr) = NULL;
-}
-
-/* Create an asynchronous event handler, allocating memory for it.
-   Return a pointer to the newly created handler.  PROC is the
-   function to call with CLIENT_DATA argument whenever the handler is
-   invoked.  */
-async_event_handler *
-create_async_event_handler (async_event_handler_func *proc,
-			    gdb_client_data client_data)
-{
-  async_event_handler *h;
-
-  h = XNEW (struct async_event_handler);
-  h->ready = 0;
-  h->next_handler = NULL;
-  h->proc = proc;
-  h->client_data = client_data;
-  if (async_event_handler_list.first_handler == NULL)
-    async_event_handler_list.first_handler = h;
-  else
-    async_event_handler_list.last_handler->next_handler = h;
-  async_event_handler_list.last_handler = h;
-  return h;
-}
-
-/* Mark the handler (ASYNC_HANDLER_PTR) as ready.  This information
-   will be used by gdb_do_one_event.  The caller will be whoever
-   created the event source, and wants to signal that the event is
-   ready to be handled.  */
-void
-mark_async_event_handler (async_event_handler *async_handler_ptr)
-{
-  async_handler_ptr->ready = 1;
-}
-
-/* See event-loop.h.  */
-
-void
-clear_async_event_handler (async_event_handler *async_handler_ptr)
-{
-  async_handler_ptr->ready = 0;
-}
-
-/* Check if asynchronous event handlers are ready, and call the
-   handler function for one that is.  */
-
-static int
-check_async_event_handlers (void)
-{
-  async_event_handler *async_handler_ptr;
-
-  for (async_handler_ptr = async_event_handler_list.first_handler;
-       async_handler_ptr != NULL;
-       async_handler_ptr = async_handler_ptr->next_handler)
-    {
-      if (async_handler_ptr->ready)
-	{
-	  async_handler_ptr->ready = 0;
-	  (*async_handler_ptr->proc) (async_handler_ptr->client_data);
-	  return 1;
-	}
-    }
-
-  return 0;
-}
-
-/* Delete an asynchronous handler (ASYNC_HANDLER_PTR).
-   Free the space allocated for it.  */
-void
-delete_async_event_handler (async_event_handler **async_handler_ptr)
-{
-  async_event_handler *prev_ptr;
-
-  if (async_event_handler_list.first_handler == *async_handler_ptr)
-    {
-      async_event_handler_list.first_handler
-	= (*async_handler_ptr)->next_handler;
-      if (async_event_handler_list.first_handler == NULL)
-	async_event_handler_list.last_handler = NULL;
-    }
-  else
-    {
-      prev_ptr = async_event_handler_list.first_handler;
-      while (prev_ptr && prev_ptr->next_handler != *async_handler_ptr)
-	prev_ptr = prev_ptr->next_handler;
-      gdb_assert (prev_ptr);
-      prev_ptr->next_handler = (*async_handler_ptr)->next_handler;
-      if (async_event_handler_list.last_handler == (*async_handler_ptr))
-	async_event_handler_list.last_handler = prev_ptr;
-    }
-  xfree (*async_handler_ptr);
-  *async_handler_ptr = NULL;
-}
-
 /* Create a timer that will expire in MS milliseconds from now.  When
    the timer is ready, PROC will be executed.  At creation, the timer
    is added to the timers queue.  This queue is kept sorted in order

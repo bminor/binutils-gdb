@@ -66,6 +66,7 @@
 #include "gdbsupport/forward-scope-exit.h"
 #include "gdbsupport/gdb_select.h"
 #include <unordered_map>
+#include "async-event.h"
 
 /* Prototypes for local functions */
 

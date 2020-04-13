@@ -38,6 +38,7 @@
 #include "infrun.h"
 #include "gdbsupport/gdb_unlinker.h"
 #include "gdbsupport/byte-vector.h"
+#include "async-event.h"
 
 #include <signal.h>
 

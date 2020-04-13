@@ -955,6 +955,7 @@ COMMON_SFILES = \
 	alloc.c \
 	annotate.c \
 	arch-utils.c \
+	async-event.c \
 	auto-load.c \
 	auxv.c \
 	ax-gdb.c \
@@ -1212,6 +1213,7 @@ HFILES_NO_SRCDIR = \
 	arm-linux-tdep.h \
 	arm-nbsd-tdep.h \
 	arm-tdep.h \
+	async-event.h \
 	auto-load.h \
 	auxv.h \
 	ax.h \

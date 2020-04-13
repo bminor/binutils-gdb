@@ -71,11 +71,7 @@
    Corollary tasks are the creation and deletion of event sources.  */
 
 typedef void *gdb_client_data;
-struct async_signal_handler;
-struct async_event_handler;
 typedef void (handler_func) (int, gdb_client_data);
-typedef void (sig_handler_func) (gdb_client_data);
-typedef void (async_event_handler_func) (gdb_client_data);
 typedef void (timer_handler_func) (gdb_client_data);
 
 /* Exported functions from event-loop.c */
@@ -84,50 +80,23 @@ extern int gdb_do_one_event (void);
 extern void delete_file_handler (int fd);
 extern void add_file_handler (int fd, handler_func *proc, 
 			      gdb_client_data client_data);
-extern struct async_signal_handler *
-  create_async_signal_handler (sig_handler_func *proc, 
-			       gdb_client_data client_data);
-extern void delete_async_signal_handler (struct async_signal_handler **);
 extern int create_timer (int milliseconds, 
 			 timer_handler_func *proc, 
 			 gdb_client_data client_data);
 extern void delete_timer (int id);
 
-/* Call the handler from HANDLER the next time through the event
-   loop.  */
-extern void mark_async_signal_handler (struct async_signal_handler *handler);
+/* Must be defined by client.  */
 
-/* Returns true if HANDLER is marked ready.  */
+extern void handle_event_loop_exception (const gdb_exception &);
 
-extern int
-  async_signal_handler_is_marked (struct async_signal_handler *handler);
+/* Must be defined by client.  Returns true if any signal handler was
+   ready.  */
 
-/* Mark HANDLER as NOT ready.  */
+extern int invoke_async_signal_handlers ();
 
-extern void clear_async_signal_handler (struct async_signal_handler *handler);
+/* Must be defined by client.  Returns true if any event handler was
+   ready.  */
 
-/* Create and register an asynchronous event source in the event loop,
-   and set PROC as its callback.  CLIENT_DATA is passed as argument to
-   PROC upon its invocation.  Returns a pointer to an opaque structure
-   used to mark as ready and to later delete this event source from
-   the event loop.  */
-extern struct async_event_handler *
-  create_async_event_handler (async_event_handler_func *proc,
-			      gdb_client_data client_data);
-
-/* Remove the event source pointed by HANDLER_PTR created by
-   CREATE_ASYNC_EVENT_HANDLER from the event loop, and release it.  */
-extern void
-  delete_async_event_handler (struct async_event_handler **handler_ptr);
-
-/* Call the handler from HANDLER the next time through the event
-   loop.  */
-extern void mark_async_event_handler (struct async_event_handler *handler);
-
-/* Mark the handler (ASYNC_HANDLER_PTR) as NOT ready.  */
-
-extern void clear_async_event_handler (struct async_event_handler *handler);
-
-extern void initialize_async_signal_handlers (void);
+extern int check_async_event_handlers ();
 
 #endif /* EVENT_LOOP_H */

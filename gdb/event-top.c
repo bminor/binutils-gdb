@@ -41,6 +41,7 @@
 #include "ser-event.h"
 #include "gdbsupport/gdb_select.h"
 #include "gdbsupport/gdb-sigmask.h"
+#include "async-event.h"
 
 /* readline include files.  */
 #include "readline/readline.h"

@@ -40,6 +40,7 @@
 #include "inferior.h"
 #include "infrun.h"
 #include "gdbcmd.h"
+#include "async-event.h"
 
 bool notif_debug = false;
 

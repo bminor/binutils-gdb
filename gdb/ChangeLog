@@ -1,5 +1,22 @@
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-win.c: Include async-event.h.
+	* remote.c: Include async-event.h.
+	* remote-notif.c: Include async-event.h.
+	* record-full.c: Include async-event.h.
+	* record-btrace.c: Include async-event.h.
+	* infrun.c: Include async-event.h.
+	* event-top.c: Include async-event.h.
+	* event-loop.h: Move some declarations to async-event.h.
+	* event-loop.c: Don't include ser-event.h or top.h.  Move some
+	code to async-event.c.
+	* async-event.h: New file.
+	* async-event.c: New file.
+	* Makefile.in (COMMON_SFILES): Add async-event.c.
+	(HFILES_NO_SRCDIR): Add async-event.h.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
 	* utils.c (flush_streams): New function.
 	* event-loop.c (gdb_wait_for_event): Call flush_streams.
 

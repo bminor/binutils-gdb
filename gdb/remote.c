@@ -77,6 +77,7 @@
 #include "gdbsupport/byte-vector.h"
 #include <algorithm>
 #include <unordered_map>
+#include "async-event.h"
 
 /* The remote target.  */
 
