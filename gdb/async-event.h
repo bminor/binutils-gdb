@@ -19,7 +19,7 @@
 #ifndef ASYNC_EVENT_H
 #define ASYNC_EVENT_H
 
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 
 struct async_signal_handler;
 struct async_event_handler;

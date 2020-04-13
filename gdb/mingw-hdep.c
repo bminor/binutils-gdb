@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "main.h"
 #include "serial.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 
 #include "gdbsupport/gdb_select.h"
 

@@ -1019,7 +1019,6 @@ COMMON_SFILES = \
 	dwarf2/section.c \
 	dwarf2/stringify.c \
 	eval.c \
-	event-loop.c \
 	event-top.c \
 	exceptions.c \
 	exec.c \
@@ -1254,7 +1253,6 @@ HFILES_NO_SRCDIR = \
 	dwarf2/index-common.h \
 	dwarf2/loc.h \
 	dwarf2/read.h \
-	event-loop.h \
 	event-top.h \
 	exceptions.h \
 	exec.h \

@@ -56,7 +56,7 @@
 #include "target-dcache.h"
 #include "terminal.h"
 #include "solist.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "thread-fsm.h"
 #include "gdbsupport/enum-flags.h"
 #include "progspace-and-thread.h"

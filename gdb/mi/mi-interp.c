@@ -23,7 +23,7 @@
 
 #include "interps.h"
 #include "event-top.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "inferior.h"
 #include "infrun.h"
 #include "ui-out.h"

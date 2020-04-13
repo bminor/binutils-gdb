@@ -36,7 +36,7 @@
 #include "frame-unwind.h"
 #include "hashtab.h"
 #include "infrun.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "inf-loop.h"
 #include "inferior.h"
 #include <algorithm>

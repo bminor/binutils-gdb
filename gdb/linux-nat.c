@@ -47,7 +47,7 @@
 #include <sys/stat.h>		/* for struct stat */
 #include <fcntl.h>		/* for O_RDONLY */
 #include "inf-loop.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "event-top.h"
 #include <pwd.h>
 #include <sys/types.h>

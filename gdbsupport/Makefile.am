@@ -46,6 +46,7 @@ libgdbsupport_a_SOURCES = \
     common-utils.cc \
     environ.cc \
     errors.cc \
+    event-loop.cc \
     fileio.cc \
     filestuff.cc \
     format.cc \

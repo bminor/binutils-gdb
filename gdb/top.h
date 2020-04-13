@@ -21,7 +21,7 @@
 #define TOP_H
 
 #include "gdbsupport/buffer.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "value.h"
 
 struct tl_interp_info;

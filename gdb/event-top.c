@@ -25,7 +25,7 @@
 #include "infrun.h"
 #include "target.h"
 #include "terminal.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "event-top.h"
 #include "interps.h"
 #include <signal.h>

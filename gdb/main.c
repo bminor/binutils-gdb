@@ -28,7 +28,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "ui-out.h"
 
 #include "interps.h"

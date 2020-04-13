@@ -1,5 +1,37 @@
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
+	* run-on-main-thread.c: Update include.
+	* unittests/main-thread-selftests.c: Update include.
+	* tui/tui-win.c: Update include.
+	* tui/tui-io.c: Update include.
+	* tui/tui-interp.c: Update include.
+	* tui/tui-hooks.c: Update include.
+	* top.h: Update include.
+	* top.c: Update include.
+	* ser-base.c: Update include.
+	* remote.c: Update include.
+	* remote-notif.c: Update include.
+	* remote-fileio.c: Update include.
+	* record-full.c: Update include.
+	* record-btrace.c: Update include.
+	* python/python.c: Update include.
+	* posix-hdep.c: Update include.
+	* mingw-hdep.c: Update include.
+	* mi/mi-main.c: Update include.
+	* mi/mi-interp.c: Update include.
+	* main.c: Update include.
+	* linux-nat.c: Update include.
+	* interps.c: Update include.
+	* infrun.c: Update include.
+	* inf-loop.c: Update include.
+	* event-top.c: Update include.
+	* event-loop.c: Move to ../gdbsupport/.
+	* event-loop.h: Move to ../gdbsupport/.
+	* async-event.h: Update include.
+	* Makefile.in (COMMON_SFILES, HFILES_NO_SRCDIR): Update.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-win.c: Include async-event.h.
 	* remote.c: Include async-event.h.
 	* remote-notif.c: Include async-event.h.

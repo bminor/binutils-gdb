@@ -42,7 +42,7 @@
 #include "gdbsupport/version.h"
 #include "serial.h"
 #include "main.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "gdbthread.h"
 #include "extension.h"
 #include "interps.h"

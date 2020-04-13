@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "defs.h"
-#include "event-loop.h"
+#include "gdbsupport/common-defs.h"
+#include "gdbsupport/event-loop.h"
 
 #include <chrono>
 

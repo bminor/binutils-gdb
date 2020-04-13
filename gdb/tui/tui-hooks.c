@@ -26,7 +26,7 @@
 #include "objfiles.h"
 #include "target.h"
 #include "gdbcore.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "event-top.h"
 #include "frame.h"
 #include "breakpoint.h"

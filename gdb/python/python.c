@@ -27,7 +27,7 @@
 #include "objfiles.h"
 #include "value.h"
 #include "language.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "readline/tilde.h"
 #include "python.h"
 #include "extension-priv.h"

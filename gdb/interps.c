@@ -32,7 +32,7 @@
 #include "defs.h"
 #include "gdbcmd.h"
 #include "ui-out.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "event-top.h"
 #include "interps.h"
 #include "completer.h"

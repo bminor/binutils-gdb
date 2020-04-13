@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 
 #include "gdbsupport/gdb_select.h"
 

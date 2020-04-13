@@ -31,7 +31,7 @@
 #include "record-full.h"
 #include "elf-bfd.h"
 #include "gcore.h"
-#include "event-loop.h"
+#include "gdbsupport/event-loop.h"
 #include "inf-loop.h"
 #include "gdb_bfd.h"
 #include "observable.h"
