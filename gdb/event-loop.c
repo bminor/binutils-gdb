@@ -22,6 +22,8 @@
 #include "event-top.h"
 #include "ser-event.h"
 
+#include <chrono>
+
 #ifdef HAVE_POLL
 #if defined (HAVE_POLL_H)
 #include <poll.h>
