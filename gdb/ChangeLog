@@ -1,3 +1,9 @@
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* event-loop.h (start_event_loop): Don't declare.
+	* event-loop.c (start_event_loop): Move...
+	* main.c (start_event_loop): ...here.  Now static.
+
 2020-04-13  Sergio Durigan Junior  <sergiodj@sergiodj.net>
 
 	* MAINTAINERS: Update my email address.
