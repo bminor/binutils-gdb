@@ -372,7 +372,7 @@ documentation		Eli Zaretskii		eliz@gnu.org
 testsuite
   gdbtk (gdb.gdbtk)     Keith Seitz             keiths@redhat.com
 
-SystemTap		Sergio Durigan Junior	sergiodj@redhat.com
+SystemTap		Sergio Durigan Junior	sergiodj@sergiodj.net
 
 
 
@@ -491,7 +491,7 @@ Markus Deuling					deuling@de.ibm.com
 Klee Dienes					kdienes@apple.com
 Hannes Domani					ssbssa@yahoo.de
 Gabriel Dos Reis                                gdr@integrable-solutions.net
-Sergio Durigan Junior				sergiodj@redhat.com
+Sergio Durigan Junior				sergiodj@sergiodj.net
 Michael Eager					eager@eagercon.com
 Richard Earnshaw				rearnsha@arm.com
 Bernd Edlinger					bernd.edlinger@hotmail.de
