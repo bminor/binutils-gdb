@@ -133,6 +133,9 @@ proc find_ada_tool {tool} {
 
     if {![is_remote host]} {
         set result [lookfor_file $root $tool]
+	if { $result != "" && $tool == "gnatlink" } {
+	    set result "$result --GCC=$root/xgcc -B$root"
+	}
     }
 
     if {$result == ""} {

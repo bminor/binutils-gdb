@@ -1,3 +1,8 @@
+2020-04-13  Tom de Vries  <tdevries@suse.de>
+
+	* lib/ada.exp (find_ada_tool): Pass --GCC and -B to gnatlink, similar
+	to what find_gnatmake does.
+
 2020-04-10  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/style.exp: Expect "Expanding full symbols" message for
