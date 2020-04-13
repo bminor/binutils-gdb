@@ -27,7 +27,7 @@
 #include "observable.h"
 #include <signal.h>
 #include <fcntl.h>
-#include "gdb_select.h"
+#include "gdbsupport/gdb_select.h"
 
 #include "inflow.h"
 #include "gdbcmd.h"

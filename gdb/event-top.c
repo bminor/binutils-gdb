@@ -39,7 +39,7 @@
 #include "maint.h"
 #include "gdbsupport/buffer.h"
 #include "ser-event.h"
-#include "gdb_select.h"
+#include "gdbsupport/gdb_select.h"
 #include "gdbsupport/gdb-sigmask.h"
 
 /* readline include files.  */

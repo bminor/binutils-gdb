@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "event-loop.h"
 
-#include "gdb_select.h"
+#include "gdbsupport/gdb_select.h"
 
 /* Wrapper for select.  Nothing special needed on POSIX platforms.  */
 

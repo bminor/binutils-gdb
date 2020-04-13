@@ -22,7 +22,7 @@
    conventions, et.al.  */
 
 #include "defs.h"
-#include "gdb_select.h"
+#include "gdbsupport/gdb_select.h"
 #include "top.h"
 #include "target.h"
 #include "guile-internal.h"

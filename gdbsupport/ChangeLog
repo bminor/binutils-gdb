@@ -1,5 +1,9 @@
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
+	* gdb_select.h: Move from ../gdb/.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
 	* config.in, configure: Rebuild.
 	* common.m4 (GDB_AC_COMMON): Check for poll.h, sys/poll.h,
 	sys/select.h, and poll.

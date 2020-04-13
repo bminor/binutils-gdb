@@ -32,8 +32,7 @@
 
 #include <sys/types.h>
 #include "gdbsupport/gdb_sys_time.h"
-#include "gdb_select.h"
-#include "observable.h"
+#include "gdbsupport/gdb_select.h"
 #include "top.h"
 
 /* Tell create_file_handler what events we are interested in.

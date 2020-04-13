@@ -64,7 +64,7 @@
 #include "arch-utils.h"
 #include "gdbsupport/scope-exit.h"
 #include "gdbsupport/forward-scope-exit.h"
-#include "gdb_select.h"
+#include "gdbsupport/gdb_select.h"
 #include <unordered_map>
 
 /* Prototypes for local functions */

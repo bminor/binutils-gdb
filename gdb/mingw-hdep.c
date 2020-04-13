@@ -22,7 +22,7 @@
 #include "serial.h"
 #include "event-loop.h"
 
-#include "gdb_select.h"
+#include "gdbsupport/gdb_select.h"
 
 #include <windows.h>
 

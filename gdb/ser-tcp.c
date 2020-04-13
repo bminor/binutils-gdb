@@ -58,7 +58,7 @@
 #endif
 
 #include <signal.h>
-#include "gdb_select.h"
+#include "gdbsupport/gdb_select.h"
 #include <algorithm>
 
 #ifndef HAVE_SOCKLEN_T

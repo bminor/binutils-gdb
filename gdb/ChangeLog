@@ -1,5 +1,22 @@
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
+	* gdb_select.h: Move to ../gdbsupport/.
+	* event-loop.c: Update include path.
+	* top.c: Update include path.
+	* ser-base.c: Update include path.
+	* ui-file.c: Update include path.
+	* ser-tcp.c: Update include path.
+	* guile/scm-ports.c: Update include path.
+	* posix-hdep.c: Update include path.
+	* ser-unix.c: Update include path.
+	* gdb_usleep.c: Update include path.
+	* mingw-hdep.c: Update include path.
+	* inflow.c: Update include path.
+	* infrun.c: Update include path.
+	* event-top.c: Update include path.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
 	* configure: Rebuild.
 	* configure.ac: Remove checks that are now in GDB_AC_COMMON.
 

@@ -51,7 +51,7 @@
 #include "filenames.h"
 #include "frame.h"
 #include "gdbsupport/buffer.h"
-#include "gdb_select.h"
+#include "gdbsupport/gdb_select.h"
 #include "gdbsupport/scope-exit.h"
 #include "gdbarch.h"
 #include "gdbsupport/pathstuff.h"
