@@ -616,11 +616,10 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 		  /* Work in progress.  We may need to tell somebody
 		     what kind of error we had.  */
 		  if (mask & POLLERR)
-		    printf_unfiltered (_("Error detected on fd %d\n"),
-				       file_ptr->fd);
+		    warning (_("Error detected on fd %d"), file_ptr->fd);
 		  if (mask & POLLNVAL)
-		    printf_unfiltered (_("Invalid or non-`poll'able fd %d\n"),
-				       file_ptr->fd);
+		    warning (_("Invalid or non-`poll'able fd %d"),
+			     file_ptr->fd);
 		  file_ptr->error = 1;
 		}
 	      else
@@ -634,8 +633,8 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 	    {
 	      if (ready_mask & GDB_EXCEPTION)
 		{
-		  printf_unfiltered (_("Exception condition detected "
-				       "on fd %d\n"), file_ptr->fd);
+		  warning (_("Exception condition detected on fd %d"),
+			   file_ptr->fd);
 		  file_ptr->error = 1;
 		}
 	      else

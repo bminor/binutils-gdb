@@ -1,5 +1,10 @@
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
+	* event-loop.c (handle_file_event): Use warning, not
+	printf_unfiltered.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
 	* event-loop.c: Include <chrono>.
 
 2020-04-13  Tom Tromey  <tom@tromey.com>
