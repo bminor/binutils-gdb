@@ -1,5 +1,9 @@
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
+	* errors.h (flush_streams): Declare.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
 	* gdb_select.h: Move from ../gdb/.
 
 2020-04-13  Tom Tromey  <tom@tromey.com>

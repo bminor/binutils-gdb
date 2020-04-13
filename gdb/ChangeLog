@@ -1,5 +1,10 @@
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
+	* utils.c (flush_streams): New function.
+	* event-loop.c (gdb_wait_for_event): Call flush_streams.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
 	* event-loop.c (handle_file_event): Use warning, not
 	printf_unfiltered.
 

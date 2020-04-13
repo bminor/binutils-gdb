@@ -87,4 +87,8 @@ extern void perror_with_name (const char *string) ATTRIBUTE_NORETURN;
 
 extern void malloc_failure (long size) ATTRIBUTE_NORETURN;
 
+/* Flush stdout and stderr.  Must be provided by the client.  */
+
+extern void flush_streams ();
+
 #endif /* COMMON_ERRORS_H */
