@@ -144,7 +144,7 @@ enable_async_notification (int fd)
 #endif
 }
 
-static int
+static void
 handle_accept_event (int err, gdb_client_data client_data)
 {
   struct sockaddr_storage sockaddr;
@@ -213,8 +213,6 @@ handle_accept_event (int err, gdb_client_data client_data)
      until GDB as selected all-stop/non-stop, and has queried the
      threads' status ('?').  */
   target_async (0);
-
-  return 0;
 }
 
 /* Prepare for a later connection to a remote debugger.
@@ -930,27 +928,21 @@ reset_readchar (void)
   readchar_bufcnt = 0;
   if (readchar_callback != NOT_SCHEDULED)
     {
-      delete_callback_event (readchar_callback);
+      delete_timer (readchar_callback);
       readchar_callback = NOT_SCHEDULED;
     }
 }
 
 /* Process remaining data in readchar_buf.  */
 
-static int
+static void
 process_remaining (void *context)
 {
-  int res;
-
   /* This is a one-shot event.  */
   readchar_callback = NOT_SCHEDULED;
 
   if (readchar_bufcnt > 0)
-    res = handle_serial_event (0, NULL);
-  else
-    res = 0;
-
-  return res;
+    handle_serial_event (0, NULL);
 }
 
 /* If there is still data in the buffer, queue another event to process it,
@@ -960,7 +952,7 @@ static void
 reschedule (void)
 {
   if (readchar_bufcnt > 0 && readchar_callback == NOT_SCHEDULED)
-    readchar_callback = append_callback_event (process_remaining, NULL);
+    readchar_callback = create_timer (0, process_remaining, NULL);
 }
 
 /* Read a packet from the remote machine, with error checking,

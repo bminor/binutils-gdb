@@ -1,5 +1,21 @@
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
+	* server.h (handle_serial_event, handle_target_event): Update.
+	* server.c: Don't call initialize_event_loop.
+	(keep_processing_events): New global.
+	(handle_serial_event): Return void.  Set keep_processing_events.
+	(handle_target_event): Return void.
+	(start_event_loop): Move from event-loop.c.  Rewrite.
+	* remote-utils.c (handle_accept_event): Return void.
+	(reset_readchar): Use delete_timer.
+	(process_remaining): Return void.
+	(reschedule): Use create_timer.
+	* event-loop.h: Remove.
+	* event-loop.cc: Remove.
+	* Makefile.in (OBS): Use gdbsupport/event-loop.o, not event-loop.o.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
 	* server.c (invoke_async_signal_handlers)
 	(check_async_event_handlers, flush_streams, gdb_select): New
 	functions.

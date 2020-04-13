@@ -83,6 +83,10 @@ bool run_once;
 /* Whether to report TARGET_WAITKIND_NO_RESUMED events.  */
 static bool report_no_resumed;
 
+/* The event loop checks this to decide whether to continue accepting
+   events.  */
+static bool keep_processing_events = true;
+
 bool non_stop;
 
 static struct {
@@ -3463,6 +3467,32 @@ gdbserver_show_disableable (FILE *stream)
 	   "  threads     \tAll of the above\n");
 }
 
+/* Start up the event loop.  This is the entry point to the event
+   loop.  */
+
+static void
+start_event_loop ()
+{
+  /* Loop until there is nothing to do.  This is the entry point to
+     the event loop engine.  If nothing is ready at this time, wait
+     for something to happen (via wait_for_event), then process it.
+     Return when there are no longer event sources to wait for.  */
+
+  keep_processing_events = true;
+  while (keep_processing_events)
+    {
+      /* Any events already waiting in the queue?  */
+      int res = gdb_do_one_event ();
+
+      /* Was there an error?  */
+      if (res == -1)
+	break;
+    }
+
+  /* We are done with the event loop.  There are no more event sources
+     to listen to.  So we exit gdbserver.  */
+}
+
 static void
 kill_inferior_callback (process_info *process)
 {
@@ -3762,7 +3792,6 @@ captured_main (int argc, char *argv[])
   initialize_async_io ();
   initialize_low ();
   have_job_control ();
-  initialize_event_loop ();
   if (target_supports_tracepoints ())
     initialize_tracepoint ();
 
@@ -4365,7 +4394,7 @@ process_serial_event (void)
 
 /* Event-loop callback for serial events.  */
 
-int
+void
 handle_serial_event (int err, gdb_client_data client_data)
 {
   if (debug_threads)
@@ -4373,13 +4402,14 @@ handle_serial_event (int err, gdb_client_data client_data)
 
   /* Really handle it.  */
   if (process_serial_event () < 0)
-    return -1;
+    {
+      keep_processing_events = false;
+      return;
+    }
 
   /* Be sure to not change the selected thread behind GDB's back.
      Important in the non-stop mode asynchronous protocol.  */
   set_desired_thread ();
-
-  return 0;
 }
 
 /* Push a stop notification on the notification queue.  */
@@ -4397,7 +4427,7 @@ push_stop_notification (ptid_t ptid, struct target_waitstatus *status)
 
 /* Event-loop callback for target events.  */
 
-int
+void
 handle_target_event (int err, gdb_client_data client_data)
 {
   client_state &cs = get_client_state ();
@@ -4474,8 +4504,6 @@ handle_target_event (int err, gdb_client_data client_data)
   /* Be sure to not change the selected thread behind GDB's back.
      Important in the non-stop mode asynchronous protocol.  */
   set_desired_thread ();
-
-  return 0;
 }
 
 /* See gdbsupport/event-loop.h.  */
