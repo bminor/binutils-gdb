@@ -1,3 +1,9 @@
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
+	* config.in, configure: Rebuild.
+	* common.m4 (GDB_AC_COMMON): Check for poll.h, sys/poll.h,
+	sys/select.h, and poll.
+
 2020-03-31  Tom Tromey  <tromey@adacore.com>
 
 	* btrace-common.cc (btrace_data_append): Conditionally call

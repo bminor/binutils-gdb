@@ -151,6 +151,12 @@
 /* Define to 1 if you have the `pipe2' function. */
 #undef HAVE_PIPE2
 
+/* Define to 1 if you have the `poll' function. */
+#undef HAVE_POLL
+
+/* Define to 1 if you have the <poll.h> header file. */
+#undef HAVE_POLL_H
+
 /* Define if <sys/procfs.h> has prfpregset_t. */
 #undef HAVE_PRFPREGSET_T
 
@@ -241,6 +247,9 @@
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
 
+/* Define to 1 if you have the <sys/poll.h> header file. */
+#undef HAVE_SYS_POLL_H
+
 /* Define to 1 if you have the <sys/procfs.h> header file. */
 #undef HAVE_SYS_PROCFS_H
 
@@ -249,6 +258,9 @@
 
 /* Define to 1 if you have the <sys/resource.h> header file. */
 #undef HAVE_SYS_RESOURCE_H
+
+/* Define to 1 if you have the <sys/select.h> header file. */
+#undef HAVE_SYS_SELECT_H
 
 /* Define to 1 if you have the <sys/socket.h> header file. */
 #undef HAVE_SYS_SOCKET_H

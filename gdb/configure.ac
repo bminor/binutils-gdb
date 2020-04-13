@@ -1229,11 +1229,11 @@ AC_SUBST(SRCHIGH_CFLAGS)
 
 AC_HEADER_STDC
 # elf_hp.h is for HP/UX 64-bit shared library support.
-AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h \
+AC_CHECK_HEADERS([nlist.h machine/reg.h \
                   thread_db.h \
 		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
 		  sys/resource.h sys/ptrace.h ptrace.h \
-		  sys/reg.h sys/debugreg.h sys/select.h \
+		  sys/reg.h sys/debugreg.h \
 		  termios.h elf_hp.h])
 AC_CHECK_HEADERS(sys/user.h, [], [],
 [#if HAVE_SYS_PARAM_H
@@ -1279,7 +1279,7 @@ AC_C_BIGENDIAN
 # ------------------------------ #
 
 AC_CHECK_FUNCS([getuid getgid \
-		pipe poll pread pread64 pwrite resize_term \
+		pipe pread pread64 pwrite resize_term \
 		getpgid setsid \
 		sigaction sigsetmask socketpair \
 		ttrace wborder wresize setlocale iconvlist libiconvlist btowc \

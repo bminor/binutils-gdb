@@ -1,5 +1,10 @@
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
+	* configure: Rebuild.
+	* configure.ac: Remove checks that are now in GDB_AC_COMMON.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
 	* event-loop.h (start_event_loop): Don't declare.
 	* event-loop.c (start_event_loop): Move...
 	* main.c (start_event_loop): ...here.  Now static.
