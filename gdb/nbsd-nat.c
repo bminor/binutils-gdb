@@ -58,6 +58,19 @@ nbsd_pid_to_cwd (int pid)
   return buf;
 }
 
+/* Return the kinfo_proc2 structure for the process identified by PID.  */
+
+static bool
+nbsd_pid_to_kinfo_proc2 (pid_t pid, struct kinfo_proc2 *kp)
+{
+  gdb_assert (kp != nullptr);
+
+  size_t size = sizeof (*kp);
+  int mib[6] = {CTL_KERN, KERN_PROC2, KERN_PROC_PID, pid,
+		static_cast<int> (size), 1};
+  return !sysctl (mib, ARRAY_SIZE (mib), kp, &size, NULL, 0);
+}
+
 /* Return the command line for the process identified by PID.  */
 
 static gdb::unique_xmalloc_ptr<char[]>
@@ -344,6 +357,7 @@ nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
   bool do_cwd = false;
   bool do_exe = false;
   bool do_mappings = false;
+  bool do_status = false;
 
   switch (what)
     {
@@ -351,6 +365,10 @@ nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
       do_cmdline = true;
       do_cwd = true;
       do_exe = true;
+      break;
+    case IP_STAT:
+    case IP_STATUS:
+      do_status = true;
       break;
     case IP_MAPPINGS:
       do_mappings = true;
@@ -369,6 +387,7 @@ nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
       do_cwd = true;
       do_exe = true;
       do_mappings = true;
+      do_status = true;
       break;
     default:
       error (_("Not supported on this target."));
@@ -432,6 +451,90 @@ nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
 	}
       else
 	warning (_("unable to fetch virtual memory map"));
+    }
+  if (do_status)
+    {
+      struct kinfo_proc2 kp;
+      if (!nbsd_pid_to_kinfo_proc2 (pid, &kp))
+	warning (_("Failed to fetch process information"));
+      else
+	{
+	  auto process_status
+	    = [] (int8_t stat)
+	      {
+		switch (stat)
+		  {
+		  case SIDL:
+		    return "IDL";
+		  case SACTIVE:
+		    return "ACTIVE";
+		  case SDYING:
+		    return "DYING";
+		  case SSTOP:
+		    return "STOP";
+		  case SZOMB:
+		    return "ZOMB";
+		  case SDEAD:
+		    return "DEAD";
+		  default:
+		    return "? (unknown)";
+		  }
+	      };
+
+	  printf_filtered ("Name: %s\n", kp.p_comm);
+	  printf_filtered ("State: %s\n", process_status(kp.p_realstat));
+	  printf_filtered ("Parent process: %" PRId32 "\n", kp.p_ppid);
+	  printf_filtered ("Process group: %" PRId32 "\n", kp.p__pgid);
+	  printf_filtered ("Session id: %" PRId32 "\n", kp.p_sid);
+	  printf_filtered ("TTY: %" PRId32 "\n", kp.p_tdev);
+	  printf_filtered ("TTY owner process group: %" PRId32 "\n", kp.p_tpgid);
+	  printf_filtered ("User IDs (real, effective, saved): "
+			   "%" PRIu32 " %" PRIu32 " %" PRIu32 "\n",
+			   kp.p_ruid, kp.p_uid, kp.p_svuid);
+	  printf_filtered ("Group IDs (real, effective, saved): "
+			   "%" PRIu32 " %" PRIu32 " %" PRIu32 "\n",
+			   kp.p_rgid, kp.p_gid, kp.p_svgid);
+
+	  printf_filtered ("Groups:");
+	  for (int i = 0; i < kp.p_ngroups; i++)
+	    printf_filtered (" %" PRIu32, kp.p_groups[i]);
+	  printf_filtered ("\n");
+	  printf_filtered ("Minor faults (no memory page): %" PRIu64 "\n",
+			   kp.p_uru_minflt);
+	  printf_filtered ("Major faults (memory page faults): %" PRIu64 "\n",
+			   kp.p_uru_majflt);
+	  printf_filtered ("utime: %" PRIu32 ".%06" PRIu32 "\n",
+			   kp.p_uutime_sec, kp.p_uutime_usec);
+	  printf_filtered ("stime: %" PRIu32 ".%06" PRIu32 "\n",
+			   kp.p_ustime_sec, kp.p_ustime_usec);
+	  printf_filtered ("utime+stime, children: %" PRIu32 ".%06" PRIu32 "\n",
+			   kp.p_uctime_sec, kp.p_uctime_usec);
+	  printf_filtered ("'nice' value: %" PRIu8 "\n", kp.p_nice);
+	  printf_filtered ("Start time: %" PRIu32 ".%06" PRIu32 "\n",
+			   kp.p_ustart_sec, kp.p_ustart_usec);
+	  int pgtok = getpagesize () / 1024;
+	  printf_filtered ("Data size: %" PRIuMAX " kB\n",
+			   (uintmax_t) kp.p_vm_dsize * pgtok);
+	  printf_filtered ("Stack size: %" PRIuMAX " kB\n",
+			   (uintmax_t) kp.p_vm_ssize * pgtok);
+	  printf_filtered ("Text size: %" PRIuMAX " kB\n",
+			   (uintmax_t) kp.p_vm_tsize * pgtok);
+	  printf_filtered ("Resident set size: %" PRIuMAX " kB\n",
+			   (uintmax_t) kp.p_vm_rssize * pgtok);
+	  printf_filtered ("Maximum RSS: %" PRIu64 " kB\n", kp.p_uru_maxrss);
+	  printf_filtered ("Pending Signals:");
+	  for (size_t i = 0; i < ARRAY_SIZE (kp.p_siglist.__bits); i++)
+	    printf_filtered (" %08" PRIx32, kp.p_siglist.__bits[i]);
+	  printf_filtered ("\n");
+	  printf_filtered ("Ignored Signals:");
+	  for (size_t i = 0; i < ARRAY_SIZE (kp.p_sigignore.__bits); i++)
+	    printf_filtered (" %08" PRIx32, kp.p_sigignore.__bits[i]);
+	  printf_filtered ("\n");
+	  printf_filtered ("Caught Signals:");
+	  for (size_t i = 0; i < ARRAY_SIZE (kp.p_sigcatch.__bits); i++)
+	    printf_filtered (" %08" PRIx32, kp.p_sigcatch.__bits[i]);
+	  printf_filtered ("\n");
+	}
     }
 
   return true;
