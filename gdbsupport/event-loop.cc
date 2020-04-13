@@ -57,17 +57,6 @@ typedef struct file_handler
   }
 file_handler;
 
-/* Gdb_notifier is just a list of file descriptors gdb is interested in.
-   These are the input file descriptor, and the target file
-   descriptor.  We have two flavors of the notifier, one for platforms
-   that have the POLL function, the other for those that don't, and
-   only support SELECT.  Each of the elements in the gdb_notifier list is
-   basically a description of what kind of events gdb is interested
-   in, for each fd.  */
-
-/* As of 1999-04-30 only the input file descriptor is registered with the
-   event loop.  */
-
 /* Do we use poll or select ? */
 #ifdef HAVE_POLL
 #define USE_POLL 1
@@ -81,6 +70,14 @@ static unsigned char use_poll = USE_POLL;
 #include <windows.h>
 #include <io.h>
 #endif
+
+/* Gdb_notifier is just a list of file descriptors gdb is interested in.
+   These are the input file descriptor, and the target file
+   descriptor.  We have two flavors of the notifier, one for platforms
+   that have the POLL function, the other for those that don't, and
+   only support SELECT.  Each of the elements in the gdb_notifier list is
+   basically a description of what kind of events gdb is interested
+   in, for each fd.  */
 
 static struct
   {

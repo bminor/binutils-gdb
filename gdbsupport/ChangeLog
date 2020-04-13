@@ -1,5 +1,9 @@
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
+	* event-loop.c: Move comment.  Remove obsolete 	comment.
+
+2020-04-13  Tom Tromey  <tom@tromey.com>
+
 	* event-loop.h: Move from ../gdb/.
 	* event-loop.cc: Move from ../gdb/.
 
