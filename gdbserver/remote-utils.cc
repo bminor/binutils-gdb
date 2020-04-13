@@ -78,12 +78,6 @@ typedef int socklen_t;
 
 #ifndef IN_PROCESS_AGENT
 
-#if USE_WIN32API
-# define INVALID_DESCRIPTOR INVALID_SOCKET
-#else
-# define INVALID_DESCRIPTOR -1
-#endif
-
 /* Extra value for readchar_callback.  */
 enum {
   /* The callback is currently not scheduled.  */
@@ -108,8 +102,8 @@ struct sym_cache
 
 static int remote_is_stdio = 0;
 
-static gdb_fildes_t remote_desc = INVALID_DESCRIPTOR;
-static gdb_fildes_t listen_desc = INVALID_DESCRIPTOR;
+static int remote_desc = -1;
+static int listen_desc = -1;
 
 #ifdef USE_WIN32API
 # define read(fd, buf, len) recv (fd, (char *) buf, len, 0)
@@ -119,7 +113,7 @@ static gdb_fildes_t listen_desc = INVALID_DESCRIPTOR;
 int
 gdb_connected (void)
 {
-  return remote_desc != INVALID_DESCRIPTOR;
+  return remote_desc != -1;
 }
 
 /* Return true if the remote connection is over stdio.  */
@@ -425,7 +419,7 @@ remote_close (void)
   if (! remote_connection_is_stdio ())
     close (remote_desc);
 #endif
-  remote_desc = INVALID_DESCRIPTOR;
+  remote_desc = -1;
 
   reset_readchar ();
 }
@@ -788,7 +782,7 @@ check_remote_input_interrupt_request (void)
   /* This function may be called before establishing communications,
      therefore we need to validate the remote descriptor.  */
 
-  if (remote_desc == INVALID_DESCRIPTOR)
+  if (remote_desc == -1)
     return;
 
   input_interrupt (0);

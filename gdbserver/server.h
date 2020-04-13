@@ -81,13 +81,6 @@ extern bool disable_packet_T;
 extern bool run_once;
 extern bool non_stop;
 
-#if USE_WIN32API
-#include <winsock2.h>
-typedef SOCKET gdb_fildes_t;
-#else
-typedef int gdb_fildes_t;
-#endif
-
 #include "gdbsupport/event-loop.h"
 
 /* Functions from server.c.  */
