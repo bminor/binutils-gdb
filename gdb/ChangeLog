@@ -1,3 +1,8 @@
+2020-04-23  Luis Machado  <luis.machado@linaro.org>
+
+	* dwarf2/frame-tailcall.c (dwarf2_tailcall_sniffer_first): Use
+	get_frame_register instead of gdbarch_unwind_pc.
+
 2020-04-23  Tom de Vries  <tdevries@suse.de>
 
 	* symtab.c (lookup_global_symbol): Prefer def over decl.
