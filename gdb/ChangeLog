@@ -1,3 +1,20 @@
+2020-04-14  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25720
+	* symmisc.c (maintenance_expand_symtabs): Call expand_symtabs_matching
+	with NULL symbol_matcher and lookup_name.
+	* psymtab.c (psym_expand_symtabs_matching): Handle NULL symbol_matcher
+	and lookup_name.
+	* dwarf2/read.c (dw2_expand_symtabs_matching)
+	(dw2_debug_names_expand_symtabs_matching): Same.
+	* symfile.h (struct quick_symbol_functions::expand_symtabs_matching):
+	Make lookup_name a pointer.  Update comment.
+	* symtab.c (global_symbol_searcher::expand_symtabs): Handle
+	lookup_name being a pointer.
+	* symfile.c (expand_symtabs_matching): Same.
+	* symfile-debug.c (debug_qf_expand_symtabs_matching): Same.
+	* linespec.c (iterate_over_all_matching_symtabs): Same.
+
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
 	* run-on-main-thread.c: Update include.

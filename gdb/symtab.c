@@ -4540,7 +4540,7 @@ global_symbol_searcher::expand_symtabs
        {
 	 return file_matches (filename, filenames, basenames);
        },
-       lookup_name_info::match_any (),
+       &lookup_name_info::match_any (),
        [&] (const char *symname)
        {
 	 return (!preg.has_value ()

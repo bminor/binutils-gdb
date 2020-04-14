@@ -1304,13 +1304,11 @@ static void
 psym_expand_symtabs_matching
   (struct objfile *objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   const lookup_name_info &lookup_name_in,
+   const lookup_name_info *lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain domain)
 {
-  lookup_name_info lookup_name = lookup_name_in.make_ignore_params ();
-
   /* Clear the search flags.  */
   for (partial_symtab *ps : require_partial_symbols (objfile, true))
     ps->searched_flag = PST_NOT_SEARCHED;
@@ -1347,8 +1345,10 @@ psym_expand_symtabs_matching
 	    continue;
 	}
 
-      if (recursively_search_psymtabs (ps, objfile, domain,
-				       lookup_name, symbol_matcher))
+      if ((symbol_matcher == NULL && lookup_name == NULL)
+	  || recursively_search_psymtabs (ps, objfile, domain,
+					  lookup_name->make_ignore_params (),
+					  symbol_matcher))
 	{
 	  struct compunit_symtab *symtab =
 	    psymtab_to_symtab (objfile, ps);

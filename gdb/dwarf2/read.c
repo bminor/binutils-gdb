@@ -4603,7 +4603,7 @@ static void
 dw2_expand_symtabs_matching
   (struct objfile *objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   const lookup_name_info &lookup_name,
+   const lookup_name_info *lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain kind)
@@ -4617,9 +4617,21 @@ dw2_expand_symtabs_matching
 
   dw_expand_symtabs_matching_file_matcher (dwarf2_per_objfile, file_matcher);
 
+  if (symbol_matcher == NULL && lookup_name == NULL)
+    {
+      for (dwarf2_per_cu_data *per_cu : dwarf2_per_objfile->all_comp_units)
+	{
+	  QUIT;
+
+	  dw2_expand_symtabs_matching_one (per_cu, file_matcher,
+					   expansion_notify);
+	}
+      return;
+    }
+
   mapped_index &index = *dwarf2_per_objfile->index_table;
 
-  dw2_expand_symtabs_matching_symbol (index, lookup_name,
+  dw2_expand_symtabs_matching_symbol (index, *lookup_name,
 				      symbol_matcher,
 				      kind, [&] (offset_type idx)
     {
@@ -5612,7 +5624,7 @@ static void
 dw2_debug_names_expand_symtabs_matching
   (struct objfile *objfile,
    gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-   const lookup_name_info &lookup_name,
+   const lookup_name_info *lookup_name,
    gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
    gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
    enum search_domain kind)
@@ -5626,9 +5638,21 @@ dw2_debug_names_expand_symtabs_matching
 
   dw_expand_symtabs_matching_file_matcher (dwarf2_per_objfile, file_matcher);
 
+  if (symbol_matcher == NULL && lookup_name == NULL)
+    {
+      for (dwarf2_per_cu_data *per_cu : dwarf2_per_objfile->all_comp_units)
+	{
+	  QUIT;
+
+	  dw2_expand_symtabs_matching_one (per_cu, file_matcher,
+					   expansion_notify);
+	}
+      return;
+    }
+
   mapped_debug_names &map = *dwarf2_per_objfile->debug_names_table;
 
-  dw2_expand_symtabs_matching_symbol (map, lookup_name,
+  dw2_expand_symtabs_matching_symbol (map, *lookup_name,
 				      symbol_matcher,
 				      kind, [&] (offset_type namei)
     {

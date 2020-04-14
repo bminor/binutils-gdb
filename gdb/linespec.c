@@ -1149,7 +1149,7 @@ iterate_over_all_matching_symtabs
 	if (objfile->sf)
 	  objfile->sf->qf->expand_symtabs_matching (objfile,
 						    NULL,
-						    lookup_name,
+						    &lookup_name,
 						    NULL, NULL,
 						    search_domain);
 

@@ -3777,7 +3777,7 @@ expand_symtabs_matching
     {
       if (objfile->sf)
 	objfile->sf->qf->expand_symtabs_matching (objfile, file_matcher,
-						  lookup_name,
+						  &lookup_name,
 						  symbol_matcher,
 						  expansion_notify, kind);
     }

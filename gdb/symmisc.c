@@ -977,12 +977,8 @@ maintenance_expand_symtabs (const char *args, int from_tty)
 		 return (!basenames
 			 && (regexp == NULL || re_exec (filename)));
 	       },
-	       lookup_name_info::match_any (),
-	       [] (const char *symname)
-	       {
-		 /* Since we're not searching on symbols, just return true.  */
-		 return true;
-	       },
+	       NULL,
+	       NULL,
 	       NULL,
 	       ALL_DOMAIN);
 	  }

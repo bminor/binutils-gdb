@@ -253,11 +253,14 @@ struct quick_symbol_functions
      names (the passed file name is already only the lbasename'd
      part).
 
-     Otherwise, if KIND does not match, this symbol is skipped.
+     If the file is not skipped, and SYMBOL_MATCHER and LOOKUP_NAME are NULL,
+     the symbol table is expanded.
 
-     If even KIND matches, SYMBOL_MATCHER is called for each symbol
-     defined in the file.  The symbol "search" name is passed to
-     SYMBOL_MATCHER.
+     Otherwise, individual symbols are considered.
+
+     If KIND does not match, the symbol is skipped.
+
+     If the symbol name does not match LOOKUP_NAME, the symbol is skipped.
 
      If SYMBOL_MATCHER returns false, then the symbol is skipped.
 
@@ -265,7 +268,7 @@ struct quick_symbol_functions
   void (*expand_symtabs_matching)
     (struct objfile *objfile,
      gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
-     const lookup_name_info &lookup_name,
+     const lookup_name_info *lookup_name,
      gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
      gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify,
      enum search_domain kind);
