@@ -226,6 +226,16 @@ static size_t dynamic_nent;
 static char * dynamic_strings;
 static unsigned long dynamic_strings_length;
 static unsigned long num_dynamic_syms;
+static bfd_size_type nbuckets;
+static bfd_size_type nchains;
+static bfd_vma *buckets;
+static bfd_vma *chains;
+static bfd_vma ngnubuckets;
+static bfd_vma *gnubuckets;
+static bfd_vma *gnuchains;
+static bfd_vma *mipsxlat;
+static bfd_size_type ngnuchains;
+static bfd_vma gnusymidx;
 static Elf_Internal_Sym * dynamic_symbols;
 static Elf_Internal_Syminfo * dynamic_syminfo;
 static unsigned long dynamic_syminfo_offset;
@@ -325,7 +335,10 @@ static const char * get_symbol_version_string
   (is_32bit_elf ? get_32bit_elf_symbols (file, section, sym_count)	\
    : get_64bit_elf_symbols (file, section, sym_count))
 
-#define VALID_DYNAMIC_NAME(offset)	((dynamic_strings != NULL) && (offset < dynamic_strings_length))
+#define VALID_SYMBOL_NAME(strtab, strtab_size, offset) \
+   (strtab != NULL && offset < strtab_size)
+#define VALID_DYNAMIC_NAME(offset) \
+  VALID_SYMBOL_NAME (dynamic_strings, dynamic_strings_length, offset)
 /* GET_DYNAMIC_NAME asssumes that VALID_DYNAMIC_NAME has
    already been called and verified that the string exists.  */
 #define GET_DYNAMIC_NAME(offset)	(dynamic_strings + offset)
@@ -9865,6 +9878,320 @@ print_dynamic_flags (bfd_vma flags)
   puts ("");
 }
 
+static bfd_vma *
+get_dynamic_data (Filedata * filedata, bfd_size_type number, unsigned int ent_size)
+{
+  unsigned char * e_data;
+  bfd_vma * i_data;
+
+  /* If the size_t type is smaller than the bfd_size_type, eg because
+     you are building a 32-bit tool on a 64-bit host, then make sure
+     that when (number) is cast to (size_t) no information is lost.  */
+  if (sizeof (size_t) < sizeof (bfd_size_type)
+      && (bfd_size_type) ((size_t) number) != number)
+    {
+      error (_("Size truncation prevents reading %s elements of size %u\n"),
+	     bfd_vmatoa ("u", number), ent_size);
+      return NULL;
+    }
+
+  /* Be kind to memory checkers (eg valgrind, address sanitizer) by not
+     attempting to allocate memory when the read is bound to fail.  */
+  if (ent_size * number > filedata->file_size)
+    {
+      error (_("Invalid number of dynamic entries: %s\n"),
+	     bfd_vmatoa ("u", number));
+      return NULL;
+    }
+
+  e_data = (unsigned char *) cmalloc ((size_t) number, ent_size);
+  if (e_data == NULL)
+    {
+      error (_("Out of memory reading %s dynamic entries\n"),
+	     bfd_vmatoa ("u", number));
+      return NULL;
+    }
+
+  if (fread (e_data, ent_size, (size_t) number, filedata->handle) != number)
+    {
+      error (_("Unable to read in %s bytes of dynamic data\n"),
+	     bfd_vmatoa ("u", number * ent_size));
+      free (e_data);
+      return NULL;
+    }
+
+  i_data = (bfd_vma *) cmalloc ((size_t) number, sizeof (*i_data));
+  if (i_data == NULL)
+    {
+      error (_("Out of memory allocating space for %s dynamic entries\n"),
+	     bfd_vmatoa ("u", number));
+      free (e_data);
+      return NULL;
+    }
+
+  while (number--)
+    i_data[number] = byte_get (e_data + number * ent_size, ent_size);
+
+  free (e_data);
+
+  return i_data;
+}
+
+static unsigned long
+get_num_dynamic_syms (Filedata * filedata)
+{
+  unsigned long num_of_syms = 0;
+
+  if (!do_histogram && (!do_using_dynamic || do_dyn_syms))
+    return num_of_syms;
+
+  if (dynamic_info[DT_HASH])
+    {
+      unsigned char nb[8];
+      unsigned char nc[8];
+      unsigned int hash_ent_size = 4;
+
+      if ((filedata->file_header.e_machine == EM_ALPHA
+	   || filedata->file_header.e_machine == EM_S390
+	   || filedata->file_header.e_machine == EM_S390_OLD)
+	  && filedata->file_header.e_ident[EI_CLASS] == ELFCLASS64)
+	hash_ent_size = 8;
+
+      if (fseek (filedata->handle,
+		 (archive_file_offset
+		  + offset_from_vma (filedata, dynamic_info[DT_HASH],
+				     sizeof nb + sizeof nc)),
+		 SEEK_SET))
+	{
+	  error (_("Unable to seek to start of dynamic information\n"));
+	  goto no_hash;
+	}
+
+      if (fread (nb, hash_ent_size, 1, filedata->handle) != 1)
+	{
+	  error (_("Failed to read in number of buckets\n"));
+	  goto no_hash;
+	}
+
+      if (fread (nc, hash_ent_size, 1, filedata->handle) != 1)
+	{
+	  error (_("Failed to read in number of chains\n"));
+	  goto no_hash;
+	}
+
+      nbuckets = byte_get (nb, hash_ent_size);
+      nchains = byte_get (nc, hash_ent_size);
+      num_of_syms = nchains;
+
+      buckets = get_dynamic_data (filedata, nbuckets, hash_ent_size);
+      chains  = get_dynamic_data (filedata, nchains, hash_ent_size);
+
+  no_hash:
+      if (num_of_syms == 0)
+	{
+	  if (buckets)
+	    {
+	      free (buckets);
+	      buckets = NULL;
+	    }
+	  if (chains)
+	    {
+	      free (chains);
+	      buckets = NULL;
+	    }
+	  nbuckets = 0;
+	}
+    }
+
+  if (dynamic_info_DT_GNU_HASH)
+    {
+      unsigned char nb[16];
+      bfd_vma i, maxchain = 0xffffffff, bitmaskwords;
+      bfd_vma buckets_vma;
+      unsigned long hn;
+      bfd_boolean gnu_hash_error = FALSE;
+
+      if (fseek (filedata->handle,
+		 (archive_file_offset
+		  + offset_from_vma (filedata, dynamic_info_DT_GNU_HASH,
+				     sizeof nb)),
+		 SEEK_SET))
+	{
+	  error (_("Unable to seek to start of dynamic information\n"));
+	  gnu_hash_error = TRUE;
+	  goto no_gnu_hash;
+	}
+
+      if (fread (nb, 16, 1, filedata->handle) != 1)
+	{
+	  error (_("Failed to read in number of buckets\n"));
+	  gnu_hash_error = TRUE;
+	  goto no_gnu_hash;
+	}
+
+      ngnubuckets = byte_get (nb, 4);
+      gnusymidx = byte_get (nb + 4, 4);
+      bitmaskwords = byte_get (nb + 8, 4);
+      buckets_vma = dynamic_info_DT_GNU_HASH + 16;
+      if (is_32bit_elf)
+	buckets_vma += bitmaskwords * 4;
+      else
+	buckets_vma += bitmaskwords * 8;
+
+      if (fseek (filedata->handle,
+		 (archive_file_offset
+		  + offset_from_vma (filedata, buckets_vma, 4)),
+		 SEEK_SET))
+	{
+	  error (_("Unable to seek to start of dynamic information\n"));
+	  gnu_hash_error = TRUE;
+	  goto no_gnu_hash;
+	}
+
+      gnubuckets = get_dynamic_data (filedata, ngnubuckets, 4);
+
+      if (gnubuckets == NULL)
+	{
+	  gnu_hash_error = TRUE;
+	  goto no_gnu_hash;
+	}
+
+      for (i = 0; i < ngnubuckets; i++)
+	if (gnubuckets[i] != 0)
+	  {
+	    if (gnubuckets[i] < gnusymidx)
+	      {
+		gnu_hash_error = TRUE;
+		return FALSE;
+	      }
+
+	    if (maxchain == 0xffffffff || gnubuckets[i] > maxchain)
+	      maxchain = gnubuckets[i];
+	  }
+
+      if (maxchain == 0xffffffff)
+	{
+	  gnu_hash_error = TRUE;
+	  goto no_gnu_hash;
+	}
+
+      maxchain -= gnusymidx;
+
+      if (fseek (filedata->handle,
+		 (archive_file_offset
+		  + offset_from_vma (filedata, buckets_vma
+					   + 4 * (ngnubuckets + maxchain), 4)),
+		 SEEK_SET))
+	{
+	  error (_("Unable to seek to start of dynamic information\n"));
+	  gnu_hash_error = TRUE;
+	  goto no_gnu_hash;
+	}
+
+      do
+	{
+	  if (fread (nb, 4, 1, filedata->handle) != 1)
+	    {
+	      error (_("Failed to determine last chain length\n"));
+	  gnu_hash_error = TRUE;
+	      goto no_gnu_hash;
+	    }
+
+	  if (maxchain + 1 == 0)
+	    {
+	      gnu_hash_error = TRUE;
+	      goto no_gnu_hash;
+	    }
+
+	  ++maxchain;
+	}
+      while ((byte_get (nb, 4) & 1) == 0);
+
+      if (fseek (filedata->handle,
+		 (archive_file_offset
+		  + offset_from_vma (filedata, buckets_vma + 4 * ngnubuckets, 4)),
+		 SEEK_SET))
+	{
+	  error (_("Unable to seek to start of dynamic information\n"));
+	  gnu_hash_error = TRUE;
+	  goto no_gnu_hash;
+	}
+
+      gnuchains = get_dynamic_data (filedata, maxchain, 4);
+      ngnuchains = maxchain;
+
+      if (gnuchains == NULL)
+	{
+	  gnu_hash_error = TRUE;
+	  goto no_gnu_hash;
+	}
+
+      if (dynamic_info_DT_MIPS_XHASH)
+	{
+	  if (fseek (filedata->handle,
+		     (archive_file_offset
+		      + offset_from_vma (filedata, (buckets_vma
+						    + 4 * (ngnubuckets
+							   + maxchain)), 4)),
+		     SEEK_SET))
+	    {
+	      error (_("Unable to seek to start of dynamic information\n"));
+	      gnu_hash_error = TRUE;
+	      goto no_gnu_hash;
+	    }
+
+	  mipsxlat = get_dynamic_data (filedata, maxchain, 4);
+	}
+
+      for (hn = 0; hn < ngnubuckets; ++hn)
+	if (gnubuckets[hn] != 0)
+	  {
+	    bfd_vma si = gnubuckets[hn];
+	    bfd_vma off = si - gnusymidx;
+
+	    do
+	      {
+		if (dynamic_info_DT_MIPS_XHASH)
+		  {
+		    if (mipsxlat[off] >= num_of_syms)
+		      num_of_syms = mipsxlat[off] + 1;
+		  }
+		else
+		  {
+		    if (si >= num_of_syms)
+		      num_of_syms = si + 1;
+		  }
+		si++;
+	      }
+	    while (off < ngnuchains && (gnuchains[off++] & 1) == 0);
+	  }
+
+  no_gnu_hash:
+      if (gnu_hash_error)
+	{
+	  if (mipsxlat)
+	    {
+	      free (mipsxlat);
+	      mipsxlat = NULL;
+	    }
+	  if (gnuchains)
+	    {
+	      free (gnuchains);
+	      gnuchains = NULL;
+	    }
+	  if (gnubuckets)
+	    {
+	      free (gnubuckets);
+	      gnubuckets = NULL;
+	    }
+	  ngnubuckets = 0;
+	  ngnuchains = 0;
+	}
+    }
+
+  return num_of_syms;
+}
+
 /* Parse and display the contents of the dynamic section.  */
 
 static bfd_boolean
@@ -9892,103 +10219,117 @@ process_dynamic_section (Filedata * filedata)
     }
 
   /* Find the appropriate symbol table.  */
-  if (dynamic_symbols == NULL)
+  if (dynamic_symbols == NULL || do_histogram)
     {
       for (entry = dynamic_section;
 	   entry < dynamic_section + dynamic_nent;
 	   ++entry)
-	{
-	  Elf_Internal_Shdr section;
-
-	  if (entry->d_tag != DT_SYMTAB)
-	    continue;
-
+	if (entry->d_tag == DT_SYMTAB)
 	  dynamic_info[DT_SYMTAB] = entry->d_un.d_val;
+	else if (entry->d_tag == DT_SYMENT)
+	  dynamic_info[DT_SYMENT] = entry->d_un.d_val;
+	else if (entry->d_tag == DT_HASH)
+	  dynamic_info[DT_HASH] = entry->d_un.d_val;
+	else if (entry->d_tag == DT_GNU_HASH)
+	  dynamic_info_DT_GNU_HASH = entry->d_un.d_val;
+	else if ((filedata->file_header.e_machine == EM_MIPS
+		  || filedata->file_header.e_machine == EM_MIPS_RS3_LE)
+		 && entry->d_tag == DT_MIPS_XHASH)
+	  {
+	    dynamic_info_DT_MIPS_XHASH = entry->d_un.d_val;
+	    dynamic_info_DT_GNU_HASH = entry->d_un.d_val;
+	  }
 
-	  /* Since we do not know how big the symbol table is,
-	     we default to reading in the entire file (!) and
-	     processing that.  This is overkill, I know, but it
-	     should work.  */
-	  section.sh_offset = offset_from_vma (filedata, entry->d_un.d_val, 0);
-	  if ((bfd_size_type) section.sh_offset > filedata->file_size)
-	    {
-	      /* See PR 21379 for a reproducer.  */
-	      error (_("Invalid DT_SYMTAB entry: %lx\n"),
-		     (long) section.sh_offset);
-	      return FALSE;
-	    }
+      if (dynamic_info[DT_SYMTAB] && dynamic_info[DT_SYMENT])
+	{
+	  Elf_Internal_Phdr *seg;
+	    bfd_vma vma = dynamic_info[DT_SYMTAB];
 
-	  if (archive_file_offset != 0)
-	    section.sh_size = archive_file_size - section.sh_offset;
-	  else
-	    section.sh_size = filedata->file_size - section.sh_offset;
+	    if (! get_program_headers (filedata))
+	      {
+		error (_("Cannot interpret virtual addresses without program headers.\n"));
+		return FALSE;
+	      }
 
-	  if (is_32bit_elf)
-	    section.sh_entsize = sizeof (Elf32_External_Sym);
-	  else
-	    section.sh_entsize = sizeof (Elf64_External_Sym);
-	  section.sh_name = filedata->string_table_length;
+	    for (seg = filedata->program_headers;
+		 seg < filedata->program_headers + filedata->file_header.e_phnum;
+		 ++seg)
+	      {
+		unsigned long num_of_syms;
 
-	  if (dynamic_symbols != NULL)
-	    {
-	      error (_("Multiple dynamic symbol table sections found\n"));
-	      free (dynamic_symbols);
-	    }
-	  dynamic_symbols = GET_ELF_SYMBOLS (filedata, &section, & num_dynamic_syms);
-	  if (num_dynamic_syms < 1)
-	    {
-	      error (_("Unable to determine the number of symbols to load\n"));
-	      continue;
-	    }
-	}
-    }
+		if (seg->p_type != PT_LOAD)
+		  continue;
+
+		if ((seg->p_offset + seg->p_filesz)
+		    > filedata->file_size)
+		  {
+		    /* See PR 21379 for a reproducer.  */
+		    error (_("Invalid PT_LOAD entry\n"));
+		    return FALSE;
+		  }
+
+		if (vma >= (seg->p_vaddr & -seg->p_align)
+		    && vma <= seg->p_vaddr + seg->p_filesz
+		    && (num_of_syms = get_num_dynamic_syms (filedata)))
+		  {
+		    /* Since we do not know how big the symbol table is,
+		       we default to reading in up to the end of PT_LOAD
+		       segment and processing that.  This is overkill, I
+		       know, but it should work.  */
+		    Elf_Internal_Shdr section;
+		    section.sh_offset = (vma - seg->p_vaddr
+					 + seg->p_offset);
+		    section.sh_size = (num_of_syms
+				       * dynamic_info[DT_SYMENT]);
+		    section.sh_entsize = dynamic_info[DT_SYMENT];
+		    section.sh_name = filedata->string_table_length;
+		    dynamic_symbols = GET_ELF_SYMBOLS (filedata,
+						       &section,
+						       & num_dynamic_syms);
+		    if (dynamic_symbols == NULL
+			|| num_dynamic_syms != num_of_syms)
+		      {
+			error (_("Corrupt DT_SYMTAB dynamic entry\n"));
+			return FALSE;
+		      }
+		  }
+	      }
+	  }
+      }
 
   /* Similarly find a string table.  */
   if (dynamic_strings == NULL)
-    {
-      for (entry = dynamic_section;
-	   entry < dynamic_section + dynamic_nent;
-	   ++entry)
-	{
-	  unsigned long offset;
-	  long str_tab_len;
-
-	  if (entry->d_tag != DT_STRTAB)
-	    continue;
-
+    for (entry = dynamic_section;
+	 entry < dynamic_section + dynamic_nent;
+	 ++entry)
+      {
+	if (entry->d_tag == DT_STRTAB)
 	  dynamic_info[DT_STRTAB] = entry->d_un.d_val;
 
-	  /* Since we do not know how big the string table is,
-	     we default to reading in the entire file (!) and
-	     processing that.  This is overkill, I know, but it
-	     should work.  */
+	if (entry->d_tag == DT_STRSZ)
+	  dynamic_info[DT_STRSZ] = entry->d_un.d_val;
 
-	  offset = offset_from_vma (filedata, entry->d_un.d_val, 0);
+	if (dynamic_info[DT_STRTAB] && dynamic_info[DT_STRSZ])
+	  {
+	    unsigned long offset;
+	    bfd_size_type str_tab_len = dynamic_info[DT_STRSZ];
 
-	  if (archive_file_offset != 0)
-	    str_tab_len = archive_file_size - offset;
-	  else
-	    str_tab_len = filedata->file_size - offset;
+	    offset = offset_from_vma (filedata,
+				      dynamic_info[DT_STRTAB],
+				      str_tab_len);
+	    dynamic_strings = (char *) get_data (NULL, filedata, offset, 1,
+						 str_tab_len,
+						 _("dynamic string table"));
+	    if (dynamic_strings == NULL)
+	      {
+		error (_("Corrupt DT_STRTAB dynamic entry\n"));
+		break;
+	      }
 
-	  if (str_tab_len < 1)
-	    {
-	      error
-		(_("Unable to determine the length of the dynamic string table\n"));
-	      continue;
-	    }
-
-	  if (dynamic_strings != NULL)
-	    {
-	      error (_("Multiple dynamic string tables found\n"));
-	      free (dynamic_strings);
-	    }
-
-	  dynamic_strings = (char *) get_data (NULL, filedata, offset, 1,
-                                               str_tab_len,
-                                               _("dynamic string table"));
-	  dynamic_strings_length = dynamic_strings == NULL ? 0 : str_tab_len;
-	}
-    }
+	    dynamic_strings_length = str_tab_len;
+	    break;
+	  }
+      }
 
   /* And find the syminfo section if available.  */
   if (dynamic_syminfo == NULL)
@@ -11431,7 +11772,8 @@ get_symbol_index_type (Filedata * filedata, unsigned int type)
 	sprintf (buff, "OS [0x%04x]", type & 0xffff);
       else if (type >= SHN_LORESERVE)
 	sprintf (buff, "RSV[0x%04x]", type & 0xffff);
-      else if (type >= filedata->file_header.e_shnum)
+      else if (filedata->file_header.e_shnum != 0
+	       && type >= filedata->file_header.e_shnum)
 	sprintf (buff, _("bad section index[%3d]"), type);
       else
 	sprintf (buff, "%3d", type);
@@ -11439,114 +11781,6 @@ get_symbol_index_type (Filedata * filedata, unsigned int type)
     }
 
   return buff;
-}
-
-static bfd_vma *
-get_dynamic_data (Filedata * filedata, bfd_size_type number, unsigned int ent_size)
-{
-  unsigned char * e_data;
-  bfd_vma * i_data;
-
-  /* If the size_t type is smaller than the bfd_size_type, eg because
-     you are building a 32-bit tool on a 64-bit host, then make sure
-     that when (number) is cast to (size_t) no information is lost.  */
-  if (sizeof (size_t) < sizeof (bfd_size_type)
-      && (bfd_size_type) ((size_t) number) != number)
-    {
-      error (_("Size truncation prevents reading %s elements of size %u\n"),
-	     bfd_vmatoa ("u", number), ent_size);
-      return NULL;
-    }
-
-  /* Be kind to memory checkers (eg valgrind, address sanitizer) by not
-     attempting to allocate memory when the read is bound to fail.  */
-  if (ent_size * number > filedata->file_size)
-    {
-      error (_("Invalid number of dynamic entries: %s\n"),
-	     bfd_vmatoa ("u", number));
-      return NULL;
-    }
-
-  e_data = (unsigned char *) cmalloc ((size_t) number, ent_size);
-  if (e_data == NULL)
-    {
-      error (_("Out of memory reading %s dynamic entries\n"),
-	     bfd_vmatoa ("u", number));
-      return NULL;
-    }
-
-  if (fread (e_data, ent_size, (size_t) number, filedata->handle) != number)
-    {
-      error (_("Unable to read in %s bytes of dynamic data\n"),
-	     bfd_vmatoa ("u", number * ent_size));
-      free (e_data);
-      return NULL;
-    }
-
-  i_data = (bfd_vma *) cmalloc ((size_t) number, sizeof (*i_data));
-  if (i_data == NULL)
-    {
-      error (_("Out of memory allocating space for %s dynamic entries\n"),
-	     bfd_vmatoa ("u", number));
-      free (e_data);
-      return NULL;
-    }
-
-  while (number--)
-    i_data[number] = byte_get (e_data + number * ent_size, ent_size);
-
-  free (e_data);
-
-  return i_data;
-}
-
-static void
-print_dynamic_symbol (Filedata * filedata, bfd_vma si, unsigned long hn)
-{
-  Elf_Internal_Sym * psym;
-  int n;
-
-  n = print_vma (si, DEC_5);
-  if (n < 5)
-    fputs (&"     "[n], stdout);
-  printf (" %3lu: ", hn);
-
-  if (dynamic_symbols == NULL || si >= num_dynamic_syms)
-    {
-      printf (_("<No info available for dynamic symbol number %lu>\n"),
-	      (unsigned long) si);
-      return;
-    }
-
-  psym = dynamic_symbols + si;
-  print_vma (psym->st_value, LONG_HEX);
-  putchar (' ');
-  print_vma (psym->st_size, DEC_5);
-
-  printf (" %-7s", get_symbol_type (filedata, ELF_ST_TYPE (psym->st_info)));
-  printf (" %-6s",  get_symbol_binding (filedata, ELF_ST_BIND (psym->st_info)));
-
-  if (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
-    printf (" %-7s",  get_solaris_symbol_visibility (psym->st_other));
-  else
-    {
-      unsigned int vis = ELF_ST_VISIBILITY (psym->st_other);
-
-      printf (" %-7s",  get_symbol_visibility (vis));
-      /* Check to see if any other bits in the st_other field are set.
-	 Note - displaying this information disrupts the layout of the
-	 table being generated, but for the moment this case is very
-	 rare.  */
-      if (psym->st_other ^ vis)
-	printf (" [%s] ", get_symbol_other (filedata, psym->st_other ^ vis));
-    }
-
-  printf (" %3.3s ", get_symbol_index_type (filedata, psym->st_shndx));
-  if (VALID_DYNAMIC_NAME (psym->st_name))
-    print_symbol (25, GET_DYNAMIC_NAME (psym->st_name));
-  else
-    printf (_(" <corrupt: %14ld>"), psym->st_name);
-  putchar ('\n');
 }
 
 static const char *
@@ -11722,214 +11956,78 @@ get_symbol_version_string (Filedata *                   filedata,
   return NULL;
 }
 
+static void
+print_dynamic_symbol (Filedata *filedata, unsigned long si,
+		      Elf_Internal_Sym *symtab,
+		      Elf_Internal_Shdr *section,
+		      char *strtab, size_t strtab_size)
+{
+  const char *version_string;
+  enum versioned_symbol_info sym_info;
+  unsigned short vna_other;
+  Elf_Internal_Sym *psym = symtab + si;
+
+  printf ("%6ld: ", si);
+  print_vma (psym->st_value, LONG_HEX);
+  putchar (' ');
+  print_vma (psym->st_size, DEC_5);
+  printf (" %-7s", get_symbol_type (filedata, ELF_ST_TYPE (psym->st_info)));
+  printf (" %-6s", get_symbol_binding (filedata, ELF_ST_BIND (psym->st_info)));
+  if (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
+    printf (" %-7s",  get_solaris_symbol_visibility (psym->st_other));
+  else
+    {
+      unsigned int vis = ELF_ST_VISIBILITY (psym->st_other);
+
+      printf (" %-7s", get_symbol_visibility (vis));
+      /* Check to see if any other bits in the st_other field are set.
+	 Note - displaying this information disrupts the layout of the
+	 table being generated, but for the moment this case is very rare.  */
+      if (psym->st_other ^ vis)
+	printf (" [%s] ", get_symbol_other (filedata, psym->st_other ^ vis));
+    }
+  printf (" %4s ", get_symbol_index_type (filedata, psym->st_shndx));
+  print_symbol (25, VALID_SYMBOL_NAME (strtab, strtab_size,
+				       psym->st_name)
+		? strtab + psym->st_name : _("<corrupt>"));
+
+  version_string
+    = get_symbol_version_string (filedata,
+				 (section == NULL
+				  || section->sh_type == SHT_DYNSYM),
+				 strtab, strtab_size, si,
+				 psym, &sym_info, &vna_other);
+  if (version_string)
+    {
+      if (sym_info == symbol_undefined)
+	printf ("@%s (%d)", version_string, vna_other);
+      else
+	printf (sym_info == symbol_hidden ? "@%s" : "@@%s",
+		version_string);
+    }
+
+  putchar ('\n');
+
+  if (ELF_ST_BIND (psym->st_info) == STB_LOCAL
+      && section != NULL
+      && si >= section->sh_info
+      /* Irix 5 and 6 MIPS binaries are known to ignore this requirement.  */
+      && filedata->file_header.e_machine != EM_MIPS
+      /* Solaris binaries have been found to violate this requirement as
+	 well.  Not sure if this is a bug or an ABI requirement.  */
+      && filedata->file_header.e_ident[EI_OSABI] != ELFOSABI_SOLARIS)
+    warn (_("local symbol %lu found at index >= %s's sh_info value of %u\n"),
+	  si, printable_section_name (filedata, section), section->sh_info);
+}
+
 /* Dump the symbol table.  */
 static bfd_boolean
 process_symbol_table (Filedata * filedata)
 {
   Elf_Internal_Shdr * section;
-  bfd_size_type nbuckets = 0;
-  bfd_size_type nchains = 0;
-  bfd_vma * buckets = NULL;
-  bfd_vma * chains = NULL;
-  bfd_vma ngnubuckets = 0;
-  bfd_vma * gnubuckets = NULL;
-  bfd_vma * gnuchains = NULL;
-  bfd_vma * mipsxlat = NULL;
-  bfd_vma gnusymidx = 0;
-  bfd_size_type ngnuchains = 0;
 
   if (!do_syms && !do_dyn_syms && !do_histogram)
     return TRUE;
-
-  if (dynamic_info[DT_HASH]
-      && (do_histogram
-	  || (do_using_dynamic
-	      && !do_dyn_syms
-	      && dynamic_strings != NULL)))
-    {
-      unsigned char nb[8];
-      unsigned char nc[8];
-      unsigned int hash_ent_size = 4;
-
-      if ((filedata->file_header.e_machine == EM_ALPHA
-	   || filedata->file_header.e_machine == EM_S390
-	   || filedata->file_header.e_machine == EM_S390_OLD)
-	  && filedata->file_header.e_ident[EI_CLASS] == ELFCLASS64)
-	hash_ent_size = 8;
-
-      if (fseek (filedata->handle,
-		 (archive_file_offset
-		  + offset_from_vma (filedata, dynamic_info[DT_HASH],
-				     sizeof nb + sizeof nc)),
-		 SEEK_SET))
-	{
-	  error (_("Unable to seek to start of dynamic information\n"));
-	  goto no_hash;
-	}
-
-      if (fread (nb, hash_ent_size, 1, filedata->handle) != 1)
-	{
-	  error (_("Failed to read in number of buckets\n"));
-	  goto no_hash;
-	}
-
-      if (fread (nc, hash_ent_size, 1, filedata->handle) != 1)
-	{
-	  error (_("Failed to read in number of chains\n"));
-	  goto no_hash;
-	}
-
-      nbuckets = byte_get (nb, hash_ent_size);
-      nchains  = byte_get (nc, hash_ent_size);
-
-      buckets = get_dynamic_data (filedata, nbuckets, hash_ent_size);
-      chains  = get_dynamic_data (filedata, nchains, hash_ent_size);
-
-      if (buckets == NULL || chains == NULL)
-	{
-	no_hash:
-	  free (buckets);
-	  free (chains);
-	  buckets = NULL;
-	  chains = NULL;
-	  nbuckets = 0;
-	  nchains = 0;
-	  if (do_using_dynamic)
-	    goto err_out;
-	}
-    }
-
-  if (dynamic_info_DT_GNU_HASH
-      && (do_histogram
-	  || (do_using_dynamic
-	      && !do_dyn_syms
-	      && dynamic_strings != NULL)))
-    {
-      unsigned char nb[16];
-      bfd_vma i, maxchain = 0xffffffff, bitmaskwords;
-      bfd_vma buckets_vma;
-
-      if (fseek (filedata->handle,
-		 (archive_file_offset
-		  + offset_from_vma (filedata, dynamic_info_DT_GNU_HASH,
-				     sizeof nb)),
-		 SEEK_SET))
-	{
-	  error (_("Unable to seek to start of dynamic information\n"));
-	  goto no_gnu_hash;
-	}
-
-      if (fread (nb, 16, 1, filedata->handle) != 1)
-	{
-	  error (_("Failed to read in number of buckets\n"));
-	  goto no_gnu_hash;
-	}
-
-      ngnubuckets = byte_get (nb, 4);
-      gnusymidx = byte_get (nb + 4, 4);
-      bitmaskwords = byte_get (nb + 8, 4);
-      buckets_vma = dynamic_info_DT_GNU_HASH + 16;
-      if (is_32bit_elf)
-	buckets_vma += bitmaskwords * 4;
-      else
-	buckets_vma += bitmaskwords * 8;
-
-      if (fseek (filedata->handle,
-		 (archive_file_offset
-		  + offset_from_vma (filedata, buckets_vma, 4)),
-		 SEEK_SET))
-	{
-	  error (_("Unable to seek to start of dynamic information\n"));
-	  goto no_gnu_hash;
-	}
-
-      gnubuckets = get_dynamic_data (filedata, ngnubuckets, 4);
-
-      if (gnubuckets == NULL)
-	goto no_gnu_hash;
-
-      for (i = 0; i < ngnubuckets; i++)
-	if (gnubuckets[i] != 0)
-	  {
-	    if (gnubuckets[i] < gnusymidx)
-	      goto err_out;
-
-	    if (maxchain == 0xffffffff || gnubuckets[i] > maxchain)
-	      maxchain = gnubuckets[i];
-	  }
-
-      if (maxchain == 0xffffffff)
-	goto no_gnu_hash;
-
-      maxchain -= gnusymidx;
-
-      if (fseek (filedata->handle,
-		 (archive_file_offset
-		  + offset_from_vma (filedata, buckets_vma
-					   + 4 * (ngnubuckets + maxchain), 4)),
-		 SEEK_SET))
-	{
-	  error (_("Unable to seek to start of dynamic information\n"));
-	  goto no_gnu_hash;
-	}
-
-      do
-	{
-	  if (fread (nb, 4, 1, filedata->handle) != 1)
-	    {
-	      error (_("Failed to determine last chain length\n"));
-	      goto no_gnu_hash;
-	    }
-
-	  if (maxchain + 1 == 0)
-	    goto no_gnu_hash;
-
-	  ++maxchain;
-	}
-      while ((byte_get (nb, 4) & 1) == 0);
-
-      if (fseek (filedata->handle,
-		 (archive_file_offset
-		  + offset_from_vma (filedata, buckets_vma + 4 * ngnubuckets, 4)),
-		 SEEK_SET))
-	{
-	  error (_("Unable to seek to start of dynamic information\n"));
-	  goto no_gnu_hash;
-	}
-
-      gnuchains = get_dynamic_data (filedata, maxchain, 4);
-      ngnuchains = maxchain;
-
-      if (gnuchains == NULL)
-	goto no_gnu_hash;
-
-      if (dynamic_info_DT_MIPS_XHASH)
-	{
-	  if (fseek (filedata->handle,
-		     (archive_file_offset
-		      + offset_from_vma (filedata, (buckets_vma
-						    + 4 * (ngnubuckets
-							   + maxchain)), 4)),
-		     SEEK_SET))
-	    {
-	      error (_("Unable to seek to start of dynamic information\n"));
-	      goto no_gnu_hash;
-	    }
-
-	  mipsxlat = get_dynamic_data (filedata, maxchain, 4);
-	  if (mipsxlat == NULL)
-	    {
-	    no_gnu_hash:
-	      free (gnuchains);
-	      gnuchains = NULL;
-	      free (gnubuckets);
-	      gnubuckets = NULL;
-	      ngnubuckets = 0;
-	      if (do_using_dynamic)
-		goto err_out;
-	    }
-	}
-    }
 
   if ((dynamic_info[DT_HASH] || dynamic_info_DT_GNU_HASH)
       && do_syms
@@ -11937,63 +12035,19 @@ process_symbol_table (Filedata * filedata)
       && dynamic_strings != NULL
       && dynamic_symbols != NULL)
     {
-      unsigned long hn;
+      unsigned long si;
 
-      if (dynamic_info[DT_HASH])
-	{
-	  bfd_vma si;
-	  char *visited;
+      printf (ngettext ("\nSymbol table for image contains %lu entry:\n",
+			"\nSymbol table for image contains %lu entries:\n",
+			num_dynamic_syms), num_dynamic_syms);
+      if (is_32bit_elf)
+	printf (_("   Num:    Value  Size Type    Bind   Vis      Ndx Name\n"));
+      else
+	printf (_("   Num:    Value          Size Type    Bind   Vis      Ndx Name\n"));
 
-	  printf (_("\nSymbol table for image:\n"));
-	  if (is_32bit_elf)
-	    printf (_("  Num Buc:    Value  Size   Type   Bind Vis      Ndx Name\n"));
-	  else
-	    printf (_("  Num Buc:    Value          Size   Type   Bind Vis      Ndx Name\n"));
-
-	  visited = xcmalloc (nchains, 1);
-	  memset (visited, 0, nchains);
-	  for (hn = 0; hn < nbuckets; hn++)
-	    {
-	      for (si = buckets[hn]; si > 0; si = chains[si])
-		{
-		  print_dynamic_symbol (filedata, si, hn);
-		  if (si >= nchains || visited[si])
-		    {
-		      error (_("histogram chain is corrupt\n"));
-		      break;
-		    }
-		  visited[si] = 1;
-		}
-	    }
-	  free (visited);
-	}
-
-      if (dynamic_info_DT_GNU_HASH)
-	{
-	  printf (_("\nSymbol table of `%s' for image:\n"),
-		  GNU_HASH_SECTION_NAME);
-	  if (is_32bit_elf)
-	    printf (_("  Num Buc:    Value  Size   Type   Bind Vis      Ndx Name\n"));
-	  else
-	    printf (_("  Num Buc:    Value          Size   Type   Bind Vis      Ndx Name\n"));
-
-	  for (hn = 0; hn < ngnubuckets; ++hn)
-	    if (gnubuckets[hn] != 0)
-	      {
-		bfd_vma si = gnubuckets[hn];
-		bfd_vma off = si - gnusymidx;
-
-		do
-		  {
-		    if (dynamic_info_DT_MIPS_XHASH)
-		      print_dynamic_symbol (filedata, mipsxlat[off], hn);
-		    else
-		      print_dynamic_symbol (filedata, si, hn);
-		    si++;
-		  }
-		while (off < ngnuchains && (gnuchains[off++] & 1) == 0);
-	      }
-	}
+      for (si = 0; si < num_dynamic_syms; si++)
+	print_dynamic_symbol (filedata, si, dynamic_symbols, NULL,
+			      dynamic_strings, dynamic_strings_length);
     }
   else if ((do_dyn_syms || (do_syms && !do_using_dynamic))
 	   && filedata->section_headers != NULL)
@@ -12007,7 +12061,6 @@ process_symbol_table (Filedata * filedata)
 	  char * strtab = NULL;
 	  unsigned long int strtab_size = 0;
 	  Elf_Internal_Sym * symtab;
-	  Elf_Internal_Sym * psym;
 	  unsigned long si, num_syms;
 
 	  if ((section->sh_type != SHT_SYMTAB
@@ -12056,61 +12109,9 @@ process_symbol_table (Filedata * filedata)
 	      strtab_size = strtab != NULL ? string_sec->sh_size : 0;
 	    }
 
-	  for (si = 0, psym = symtab; si < num_syms; si++, psym++)
-	    {
-	      const char *version_string;
-	      enum versioned_symbol_info sym_info;
-	      unsigned short vna_other;
-
-	      printf ("%6ld: ", si);
-	      print_vma (psym->st_value, LONG_HEX);
-	      putchar (' ');
-	      print_vma (psym->st_size, DEC_5);
-	      printf (" %-7s", get_symbol_type (filedata, ELF_ST_TYPE (psym->st_info)));
-	      printf (" %-6s", get_symbol_binding (filedata, ELF_ST_BIND (psym->st_info)));
-	      if (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
-		printf (" %-7s",  get_solaris_symbol_visibility (psym->st_other));
-	      else
-		{
-		  unsigned int vis = ELF_ST_VISIBILITY (psym->st_other);
-
-		  printf (" %-7s", get_symbol_visibility (vis));
-		  /* Check to see if any other bits in the st_other field are set.
-		     Note - displaying this information disrupts the layout of the
-		     table being generated, but for the moment this case is very rare.  */
-		  if (psym->st_other ^ vis)
-		    printf (" [%s] ", get_symbol_other (filedata, psym->st_other ^ vis));
-		}
-	      printf (" %4s ", get_symbol_index_type (filedata, psym->st_shndx));
-	      print_symbol (25, psym->st_name < strtab_size
-			    ? strtab + psym->st_name : _("<corrupt>"));
-
-	      version_string
-		= get_symbol_version_string (filedata,
-					     section->sh_type == SHT_DYNSYM,
-					     strtab, strtab_size, si,
-					     psym, &sym_info, &vna_other);
-	      if (version_string)
-		{
-		  if (sym_info == symbol_undefined)
-		    printf ("@%s (%d)", version_string, vna_other);
-		  else
-		    printf (sym_info == symbol_hidden ? "@%s" : "@@%s",
-			    version_string);
-		}
-
-	      putchar ('\n');
-
-	      if (ELF_ST_BIND (psym->st_info) == STB_LOCAL
-		  && si >= section->sh_info
-		  /* Irix 5 and 6 MIPS binaries are known to ignore this requirement.  */
-		  && filedata->file_header.e_machine != EM_MIPS
-		  /* Solaris binaries have been found to violate this requirement as
-		     well.  Not sure if this is a bug or an ABI requirement.  */
-		  && filedata->file_header.e_ident[EI_OSABI] != ELFOSABI_SOLARIS)
-		warn (_("local symbol %lu found at index >= %s's sh_info value of %u\n"),
-		      si, printable_section_name (filedata, section), section->sh_info);
-	    }
+	  for (si = 0; si < num_syms; si++)
+	    print_dynamic_symbol (filedata, si, symtab, section,
+				  strtab, strtab_size);
 
 	  free (symtab);
 	  if (strtab != filedata->string_table)

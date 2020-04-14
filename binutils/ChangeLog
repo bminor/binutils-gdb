@@ -1,3 +1,30 @@
+2020-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25707
+	* readelf.c (nbuckets): New.
+	(nchains): Likewise.
+	(buckets): Likewise.
+	(chains): Likewise.
+	(ngnubuckets): Likewise.
+	(gnubuckets): Likewise.
+	(gnuchains): Likewise.
+	(mipsxlat): Likewise.
+	(ngnuchains): Likewise.
+	(gnusymidx): Likewise.
+	(VALID_SYMBOL_NAME): Likewise.
+	(VALID_DYNAMIC_NAME): Use it.
+	(get_dynamic_data): Moved before process_dynamic_section.
+	(get_num_dynamic_syms): New function.
+	(process_dynamic_section): Use DT_SYMTAB, DT_SYMENT, DT_HASH,
+	DT_GNU_HASH and DT_MIPS_XHASH to reconstruct dynamic symbol
+	table.  Use DT_STRTAB and DT_STRSZ to reconstruct dynamic string
+	table.
+	(get_symbol_index_type): Don't print "bad section index" when
+	there is no section header.
+	(print_dynamic_symbol): Rewrite.
+	(process_symbol_table): Call print_dynamic_symbol to dump dynamic
+	symbol table.
+
 2020-04-02  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* testsuite/lib/binutils-common.exp (supports_gnu_osabi): Don't

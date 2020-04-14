@@ -5,5 +5,5 @@
 # generic linker targets don't support --gc-sections, nor do a bunch of others
 
 #...
- +[0-9]+ +[0-9]+: +[0-9a-f]+ +[0-9]+ +FUNC +GLOBAL +DEFAULT +[1-9]+ foo
+ +[0-9]+: +[0-9a-f]+ +[0-9]+ +FUNC +GLOBAL +DEFAULT +[1-9]+ foo@@VERS_2.0
 #pass

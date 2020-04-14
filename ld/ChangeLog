@@ -1,3 +1,21 @@
+2020-04-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/25707
+	* testsuite/ld-arm/armthumb-lib.sym: Updated.
+	* testsuite/ld-arm/farcall-mixed-app.sym: Likewise.
+	* testsuite/ld-arm/farcall-mixed-app2.sym: Likewise.
+	* testsuite/ld-arm/fdpic-main-m.sym: Likewise.
+	* testsuite/ld-arm/fdpic-main.sym: Likewise.
+	* testsuite/ld-arm/fdpic-shared-m.sym: Likewise.
+	* testsuite/ld-arm/fdpic-shared.sym: Likewise.
+	* testsuite/ld-arm/mixed-app.sym: Likewise.
+	* testsuite/ld-arm/mixed-lib.sym: Likewise.
+	* testsuite/ld-arm/preempt-app.sym: Likewise.
+	* testsuite/ld-elf/hash.d: Likewise.
+	* testsuite/ld-elf/pr13195.d: Likewise.
+	* testsuite/ld-elfvsb/hidden2.d: Likewise.
+	* testsuite/ld-mips-elf/hash2.d: Likewise.
+
 2020-04-10  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* testsuite/ld-shared/shared.exp: Remove dangling comments.
