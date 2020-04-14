@@ -364,6 +364,10 @@ CODE_FRAGMENT
 #define GNU_LINKONCE_WT ".gnu.linkonce.wt."
 #define DOT_RELOC	".reloc"
 
+#if defined(COFF_WITH_PE) || defined(COFF_GO32_EXE) || defined(COFF_GO32)
+# define COFF_WITH_EXTENDED_RELOC_COUNTER
+#endif
+
 #if defined (COFF_LONG_SECTION_NAMES)
 /* Needed to expand the inputs to BLANKOR1TOODD.  */
 #define COFFLONGSECTIONCATHELPER(x,y)    x ## y
@@ -1964,6 +1968,39 @@ coff_set_alignment_hook (bfd *abfd, asection *section, void * scnhdr)
 }
 
 #else /* ! RS6000COFF_C */
+#if defined (COFF_GO32_EXE) || defined (COFF_GO32)
+
+static void
+coff_set_alignment_hook (bfd * abfd, asection * section, void * scnhdr)
+{
+  struct internal_scnhdr *hdr = (struct internal_scnhdr *) scnhdr;
+
+  /* Check for extended relocs.  */
+  if (hdr->s_flags & IMAGE_SCN_LNK_NRELOC_OVFL)
+    {
+      struct external_reloc dst;
+      struct internal_reloc n;
+      const file_ptr oldpos = bfd_tell (abfd);
+      const bfd_size_type relsz = bfd_coff_relsz (abfd);
+
+      if (bfd_seek (abfd, (file_ptr) hdr->s_relptr, 0) != 0)
+	return;
+      if (bfd_bread (& dst, relsz, abfd) != relsz)
+	return;
+
+      coff_swap_reloc_in (abfd, &dst, &n);
+      if (bfd_seek (abfd, oldpos, 0) != 0)
+	return;
+      section->reloc_count = hdr->s_nreloc = n.r_vaddr - 1;
+      section->rel_filepos += relsz;
+    }
+  else if (hdr->s_nreloc == 0xffff)
+    _bfd_error_handler
+      (_("%pB: warning: claims to have 0xffff relocs, without overflow"),
+       abfd);
+}
+
+#else /* ! COFF_GO32_EXE && ! COFF_GO32 */
 
 static void
 coff_set_alignment_hook (bfd *abfd ATTRIBUTE_UNUSED,
@@ -1972,6 +2009,7 @@ coff_set_alignment_hook (bfd *abfd ATTRIBUTE_UNUSED,
 {
 }
 
+#endif /* ! COFF_GO32_EXE && ! COFF_GO32 */
 #endif /* ! RS6000COFF_C */
 #endif /* ! COFF_WITH_PE */
 #endif /* ! COFF_ALIGN_IN_SECTION_HEADER */
@@ -2521,8 +2559,8 @@ coff_write_relocs (bfd * abfd, int first_undef)
       if (bfd_seek (abfd, s->rel_filepos, SEEK_SET) != 0)
 	return FALSE;
 
-#ifdef COFF_WITH_PE
-      if (obj_pe (abfd) && s->reloc_count >= 0xffff)
+#ifdef COFF_WITH_EXTENDED_RELOC_COUNTER
+      if ((obj_pe (abfd) || obj_go32 (abfd)) && s->reloc_count >= 0xffff)
 	{
 	  /* Encode real count here as first reloc.  */
 	  struct internal_reloc n;
@@ -3382,9 +3420,9 @@ coff_write_object_contents (bfd * abfd)
   for (current = abfd->sections; current != NULL; current =
        current->next)
     {
-#ifdef COFF_WITH_PE
+#ifdef COFF_WITH_EXTENDED_RELOC_COUNTER
       /* We store the actual reloc count in the first reloc's addr.  */
-      if (obj_pe (abfd) && current->reloc_count >= 0xffff)
+      if ((obj_pe (abfd) || obj_go32 (abfd)) && current->reloc_count >= 0xffff)
 	reloc_count ++;
 #endif
       reloc_count += current->reloc_count;
@@ -3412,9 +3450,9 @@ coff_write_object_contents (bfd * abfd)
 	{
 	  current->rel_filepos = reloc_base;
 	  reloc_base += current->reloc_count * bfd_coff_relsz (abfd);
-#ifdef COFF_WITH_PE
+#ifdef COFF_WITH_EXTENDED_RELOC_COUNTER
 	  /* Extra reloc to hold real count.  */
-	  if (obj_pe (abfd) && current->reloc_count >= 0xffff)
+	  if ((obj_pe (abfd) || obj_go32 (abfd)) && current->reloc_count >= 0xffff)
 	    reloc_base += bfd_coff_relsz (abfd);
 #endif
 	}
@@ -3615,7 +3653,7 @@ coff_write_object_contents (bfd * abfd)
 	  SCNHDR buff;
 	  bfd_size_type amt = bfd_coff_scnhsz (abfd);
 
-	  if (coff_swap_scnhdr_out (abfd, &section, &buff) == 0
+	  if (bfd_coff_swap_scnhdr_out (abfd, &section, &buff) == 0
 	      || bfd_bwrite (& buff, amt, abfd) != amt)
 	    return FALSE;
 	}
@@ -3741,12 +3779,28 @@ coff_write_object_contents (bfd * abfd)
 	  scnhdr.s_nlnno = current->target_index;
 	  scnhdr.s_flags = STYP_OVRFLO;
 	  amt = bfd_coff_scnhsz (abfd);
-	  if (coff_swap_scnhdr_out (abfd, &scnhdr, &buff) == 0
+	  if (bfd_coff_swap_scnhdr_out (abfd, &scnhdr, &buff) == 0
 	      || bfd_bwrite (& buff, amt, abfd) != amt)
 	    return FALSE;
 	}
     }
 #endif
+#endif
+
+#if defined (COFF_GO32_EXE) || defined (COFF_GO32)
+  /* Pad section headers.  */
+  if ((abfd->flags & EXEC_P) && abfd->sections != NULL)
+    {
+      file_ptr cur_ptr = scn_base
+			 + abfd->section_count * bfd_coff_scnhsz (abfd);
+      long fill_size = (abfd->sections->filepos - cur_ptr);
+      bfd_byte *b = bfd_zmalloc (fill_size);
+      if (b)
+	{
+	  bfd_bwrite ((PTR)b, fill_size, abfd);
+	  free (b);
+	}
+    }
 #endif
 
   /* OK, now set up the filehdr...  */

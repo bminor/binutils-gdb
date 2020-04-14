@@ -46,6 +46,9 @@
 { COFF_SECTION_NAME_PARTIAL_MATCH (".gnu.linkonce.wi"), \
   COFF_ALIGNMENT_FIELD_EMPTY, COFF_ALIGNMENT_FIELD_EMPTY, 0 }
 
+/* Section contains extended relocations. */
+#define IMAGE_SCN_LNK_NRELOC_OVFL (0x01000000)
+
 #include "sysdep.h"
 #include "bfd.h"
 #include "coff/msdos.h"
@@ -55,10 +58,17 @@ static bfd_boolean go32exe_write_object_contents (bfd *);
 static bfd_boolean go32exe_mkobject (bfd *);
 static bfd_boolean go32exe_copy_private_bfd_data (bfd *, bfd *);
 
+/* Defined in coff-go32.c.  */
+bfd_boolean _bfd_go32_mkobject (bfd *);
+void _bfd_go32_swap_scnhdr_in (bfd *, void *, void *);
+unsigned int _bfd_go32_swap_scnhdr_out (bfd *, void *, void *);
+
 #define COFF_CHECK_FORMAT go32exe_check_format
 #define COFF_WRITE_CONTENTS go32exe_write_object_contents
 #define coff_mkobject go32exe_mkobject
 #define coff_bfd_copy_private_bfd_data go32exe_copy_private_bfd_data
+#define coff_SWAP_scnhdr_in _bfd_go32_swap_scnhdr_in
+#define coff_SWAP_scnhdr_out _bfd_go32_swap_scnhdr_out
 
 #include "coff-i386.c"
 
@@ -352,32 +362,20 @@ go32exe_write_object_contents (bfd *abfd)
 static bfd_boolean
 go32exe_mkobject (bfd *abfd)
 {
-  coff_data_type *coff = NULL;
-  const bfd_size_type amt = sizeof (coff_data_type);
-
   /* Don't output to an archive.  */
   if (abfd->my_archive != NULL)
     return FALSE;
 
-  abfd->tdata.coff_obj_data = bfd_zalloc (abfd, amt);
-  if (abfd->tdata.coff_obj_data == NULL)
+  if (!_bfd_go32_mkobject (abfd))
     return FALSE;
-  coff = coff_data (abfd);
-  coff->symbols = NULL;
-  coff->conversion_table = NULL;
-  coff->raw_syments = NULL;
-  coff->relocbase = 0;
-  coff->local_toc_sym_map = 0;
 
   go32exe_create_stub (abfd);
-  if (coff->stub == NULL)
+  if (coff_data (abfd)->stub == NULL)
     {
-      bfd_release (abfd, coff);
+      bfd_release (abfd, coff_data (abfd));
       return FALSE;
     }
-  abfd->origin = coff->stub_size;
-
-/*  make_abs_section(abfd);*/ /* ??? */
+  abfd->origin = coff_data (abfd)->stub_size;
 
   return TRUE;
 }

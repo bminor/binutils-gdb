@@ -1,3 +1,29 @@
+2020-04-14  Juan Manuel Guerrero  <juan.guerrero@gmx.de>
+            Jan W. Jagersma  <jwjagersma@gmail.com>
+
+	* coff-go32.c (COFF_GO32, IMAGE_SCN_LNK_NRELOC_OVFL)
+	(coff_SWAP_scnhdr_in, coff_SWAP_scnhdr_out): Define.
+	(_bfd_go32_swap_scnhdr_in, _bfd_go32_swap_scnhdr_out)
+	(_bfd_go32_mkobject): New functions.
+	* coff-stgo32.c (IMAGE_SCN_LNK_NRELOC_OVFL)
+	(coff_SWAP_scnhdr_in, coff_SWAP_scnhdr_out): Define.
+	(go32exe_mkobject): Call _bfd_go32_mkobject.
+	* coffcode.h (COFF_WITH_EXTENDED_RELOC_COUNTER): Define.
+	(coff_set_alignment_hook): Define function for COFF_GO32_EXE
+	and COFF_GO32.
+	(coff_write_relocs): Enable extended reloc counter code if
+	COFF_WITH_EXTENDED_RELOC_COUNTER is defined.  Test for obj_go32.
+	(coff_write_object_contents): Likewise.  Pad section headers
+	for COFF_GO32 and COFF_GO32EXE.  Use bfd_coff_swap_scnhdr_out
+	instead of coff_swap_scnhdr_out.
+	* cofflink.c (_bfd_coff_final_link): Test also for obj_go32 to
+	enable extended reloc counter.
+	* coffswap.h: (coff_swap_scnhdr_in, coff_swap_scnhdr_out):
+	Declare with ATTRIBUTE_UNUSED.
+	* libcoff-in.h: (struct coff_tdata): New field go32.
+	(obj_go32): Define.
+	* libcoff.h: Regenerate.
+
 2020-04-14  Fangrui Song  <maskray@google.com>
 
 	PR gas/25768

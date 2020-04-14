@@ -33,8 +33,9 @@ extern "C" {
 
 #define coff_data(bfd)		      ((bfd)->tdata.coff_obj_data)
 #define obj_pe(bfd)		      (coff_data (bfd)->pe)
+#define obj_go32(bfd)		      (coff_data (bfd)->go32)
 #define obj_symbols(bfd)	      (coff_data (bfd)->symbols)
-#define	obj_sym_filepos(bfd)	      (coff_data (bfd)->sym_filepos)
+#define obj_sym_filepos(bfd)	      (coff_data (bfd)->sym_filepos)
 #define obj_relocbase(bfd)	      (coff_data (bfd)->relocbase)
 #define obj_raw_syments(bfd)	      (coff_data (bfd)->raw_syments)
 #define obj_raw_syment_count(bfd)     (coff_data (bfd)->raw_syment_count)
@@ -113,6 +114,9 @@ typedef struct coff_tdata
   /* Copy of some of the f_flags bits in the COFF filehdr structure,
      used by ARM code.  */
   flagword flags;
+
+  /* Is this a GO32 coff file?  */
+  bfd_boolean go32;
 
   /* A stub (extra data prepended before the COFF image) and its size.
      Used by coff-go32-exe, it contains executable data that loads the
