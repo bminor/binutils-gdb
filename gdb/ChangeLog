@@ -1,3 +1,18 @@
+2020-04-14  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25718
+	* psympriv.h (struct partial_symtab::read_symtab)
+	(struct partial_symtab::expand_psymtab)
+	(struct partial_symtab::read_dependencies): Update comments.
+	* dwarf2/read.c (struct dwarf2_include_psymtab::read_symtab): Call
+	read_symtab for includer.
+	(struct dwarf2_include_psymtab::expand_psymtab): Assert false.
+	(struct dwarf2_include_psymtab::readin_p): Call readin_p () for includer.
+	(struct dwarf2_include_psymtab::m_readin): Remove.
+	(struct dwarf2_include_psymtab::includer): New member function.
+	(dwarf2_psymtab::expand_psymtab): Assert !readin.
+
 2020-04-14  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/25720
