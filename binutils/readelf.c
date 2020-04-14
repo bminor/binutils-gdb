@@ -16817,6 +16817,7 @@ process_mips_specific (Filedata * filedata)
 	  if (iopt == NULL)
 	    {
 	      error (_("Out of memory allocating space for MIPS options\n"));
+	      free (eopt);
 	      return FALSE;
 	    }
 
@@ -16839,7 +16840,10 @@ process_mips_specific (Filedata * filedata)
 	      if (option->size < sizeof (* eopt)
 		  || offset + option->size > sect->sh_size)
 		{
-		  error (_("Invalid size (%u) for MIPS option\n"), option->size);
+		  error (_("Invalid size (%u) for MIPS option\n"),
+			 option->size);
+		  free (iopt);
+		  free (eopt);
 		  return FALSE;
 		}
 	      offset += option->size;
@@ -17033,7 +17037,7 @@ process_mips_specific (Filedata * filedata)
 	      offset += option->size;
 	      ++option;
 	    }
-
+	  free (iopt);
 	  free (eopt);
 	}
       else
@@ -17053,7 +17057,7 @@ process_mips_specific (Filedata * filedata)
 
       /* PR 21345 - print a slightly more helpful error message
 	 if we are sure that the cmalloc will fail.  */
-      if (conflictsno * sizeof (* iconf) > filedata->file_size)
+      if (conflictsno > filedata->file_size / sizeof (* iconf))
 	{
 	  error (_("Overlarge number of conflicts detected: %lx\n"),
 		 (long) conflictsno);

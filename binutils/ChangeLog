@@ -1,3 +1,8 @@
+2020-04-14  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_mips_specific): Free eopt and iopt.  Avoid
+	possibility of overflow when checking number of conflicts.
+
 2020-04-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25707
