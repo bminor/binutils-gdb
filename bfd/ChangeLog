@@ -1,3 +1,9 @@
+2020-04-14  Fangrui Song  <maskray@google.com>
+
+	PR gas/25768
+	* elf.c (assign_section_numbers): Always set .stab sh_entsize to
+	12.
+
 2020-04-14  Stephen Casner  <casner@acm.org>
 
 	PR ld/25677

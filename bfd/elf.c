@@ -3998,9 +3998,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 		  elf_section_data (s)->this_hdr.sh_link = d->this_idx;
 
 		  /* This is a .stab section.  */
-		  if (elf_section_data (s)->this_hdr.sh_entsize == 0)
-		    elf_section_data (s)->this_hdr.sh_entsize
-		      = 4 + 2 * bfd_get_arch_size (abfd) / 8;
+		  elf_section_data (s)->this_hdr.sh_entsize = 12;
 		}
 	    }
 	  break;
