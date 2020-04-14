@@ -1,3 +1,10 @@
+2020-04-14  Stephen Casner  <casner@acm.org>
+
+	PR ld/25677
+	* pdp11.c: Add implementation of --imagic option.
+	(adjust_o_magic): Fix objcopy --extract-symbol test.
+	* libaout.h (enum aout_magic): Add i_magic.
+
 2020-04-07  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 	    Nick Clifton  <nickc@redhat.com>
 

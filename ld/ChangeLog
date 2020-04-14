@@ -1,3 +1,25 @@
+2020-04-14  Stephen Casner  <casner@acm.org>
+
+	PR ld/25677
+	* emulparams/pdp11.sh (SCRIPT_NAME): Change to pdp11.
+	(EXTRA_EM_FILE): New, add emulation file pdp11.
+	* scripttempl/pdp11.sc: New, derived from aout.sc without
+	irrelevant input sections.
+	* emultempl/pdp11.em (_add_options, _handle_option)
+	(_list_options): New. Add options -z, --imagic for pdp11-aout.
+	(_before_parse): Make --omagic be default instead of --nmagic.
+	(_get_script): Modify special-case linker script for --imagic.
+	* lexsup.c (parse_args): Explictly set config.text_read_only for -n.
+	* ld.texi (Options): Add documentation of PDP11-specific options.
+	(Options): Fix unrelated typo to --no-compact-branches.
+	* gen-doc.texi: @set PDP11.
+	* testsuite/ld-pdp11/pdp11.exp: New, start pdp11 testing.
+	* testsuite/ld-pdp11/sections.s: New, source for options tests.
+	* testsuite/ld-pdp11/imagic.d: New, test --imagic format.
+	* testsuite/ld-pdp11/imagicz.d: New, test -z (imagic) format.
+	* testsuite/ld-pdp11/nmagic.d: New, test --nmagic format.
+	* testsuite/ld-pdp11/omagic.d: New, test --omagic format.
+
 2020-04-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/25707

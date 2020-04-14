@@ -938,6 +938,7 @@ parse_args (unsigned argc, char **argv)
 	     Use --call-shared or -Bdynamic for this.  */
 	  break;
 	case 'n':
+	  config.text_read_only = TRUE;
 	  config.magic_demand_paged = FALSE;
 	  input_flags.dynamic = FALSE;
 	  break;

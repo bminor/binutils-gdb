@@ -359,7 +359,8 @@ enum aout_magic {
   undecided_magic = 0,
   z_magic,
   o_magic,
-  n_magic
+  n_magic,
+  i_magic
 };
 
 struct aoutdata

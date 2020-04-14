@@ -1,3 +1,8 @@
+2020-04-14  Stephen Casner  <casner@acm.org>
+
+	PR ld/25677
+	* aout/aout64.h (N_DATADDR): Add IMAGIC case.
+
 2020-04-02  Jan W. Jagersma  <jwjagersma@gmail.com>
 
 	* coff/go32exe.h: Remove file.

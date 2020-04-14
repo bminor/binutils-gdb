@@ -3,6 +3,10 @@
 * Add command-line options --enable-non-contiguous-regions and
   --enable-non-contiguous-regions-warnings.
 
+* Add command-line option --imagic for the pdp11-aout target to output format
+  IMAGIC (0411) for separate instruction and data spaces, and change the
+  default format option for pdp11-aout to be --omagic.
+
 Changes in 2.34:
 
 * The ld check for "PHDR segment not covered by LOAD segment" is more

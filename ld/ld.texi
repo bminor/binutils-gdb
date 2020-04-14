@@ -31,6 +31,7 @@
 @set MSP430
 @set NDS32
 @set NIOSII
+@set PDP11
 @set POWERPC
 @set POWERPC64
 @set Renesas
@@ -3260,9 +3261,76 @@ an error.
 @kindex --compact-branches
 @item --compact-branches
 @kindex --no-compact-branches
-@item --compact-branches
+@itemx --no-compact-branches
 These options control the generation of compact instructions by the linker
 in the PLT entries for MIPS R6.
+
+@end table
+
+@c man end
+@end ifset
+
+
+@ifset PDP11
+@subsection Options specific to PDP11 targets
+
+@c man begin OPTIONS
+
+For the pdp11-aout target, three variants of the output format can be
+produced as selected by the following options.  The default variant
+for pdp11-aout is the @samp{--omagic} option, whereas for other
+targets @samp{--nmagic} is the default.  The @samp{--imagic} option is
+defined only for the pdp11-aout target, while the others are described
+here as they apply to the pdp11-aout target.
+
+@table @gcctabopt
+
+@kindex -N
+@item -N
+@kindex --omagic
+@itemx --omagic
+
+Mark the output as @code{OMAGIC} (0407) in the @file{a.out} header to
+indicate that the text segment is not to be write-protected and
+shared.  Since the text and data sections are both readable and
+writable, the data section is allocated immediately contiguous after
+the text segment.  This is the oldest format for PDP11 executable
+programs and is the default for @command{ld} on PDP11 Unix systems
+from the beginning through 2.11BSD.
+
+@kindex -n
+@item -n
+@kindex --nmagic
+@itemx --nmagic
+
+Mark the output as @code{NMAGIC} (0410) in the @file{a.out} header to
+indicate that when the output file is executed, the text portion will
+be read-only and shareable among all processes executing the same
+file.  This involves moving the data areas up to the first possible 8K
+byte page boundary following the end of the text.  This option creates
+a @emph{pure executable} format.
+
+@kindex -z
+@item -z
+@kindex --imagic
+@itemx --imagic
+
+Mark the output as @code{IMAGIC} (0411) in the @file{a.out} header to
+indicate that when the output file is executed, the program text and
+data areas will be loaded into separate address spaces using the split
+instruction and data space feature of the memory management unit in
+larger models of the PDP11.  This doubles the address space available
+to the program.  The text segment is again pure, write-protected, and
+shareable.  The only difference in the output format between this
+option and the others, besides the magic number, is that both the text
+and data sections start at location 0.  The @samp{-z} option selected
+this format in 2.11BSD.  This option creates a @emph{separate
+executable} format.
+
+@kindex --no-omagic
+@item --no-omagic
+
+Equivalent to @samp{--nmagic} for pdp11-aout.
 
 @end table
 
