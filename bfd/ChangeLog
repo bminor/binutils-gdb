@@ -1,3 +1,10 @@
+2020-04-15  Alan Modra  <amodra@gmail.com>
+
+	PR 25823
+	* peXXigen.c (_bfd_XXi_swap_sym_in <C_SECTION>): Don't use a
+	pointer into strings that may be freed for section name, always
+	allocate a new string.
+
 2020-04-14  Juan Manuel Guerrero  <juan.guerrero@gmx.de>
             Jan W. Jagersma  <jwjagersma@gmail.com>
 
