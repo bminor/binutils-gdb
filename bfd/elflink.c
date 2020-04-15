@@ -9886,11 +9886,13 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 	  && (!h->ref_regular || flinfo->info->gc_sections)
 	  && !elf_link_check_versioned_symbol (flinfo->info, bed, h)
 	  && flinfo->info->unresolved_syms_in_shared_libs != RM_IGNORE)
-	(*flinfo->info->callbacks->undefined_symbol)
-	  (flinfo->info, h->root.root.string,
-	   h->ref_regular ? NULL : h->root.u.undef.abfd,
-	   NULL, 0,
-	   flinfo->info->unresolved_syms_in_shared_libs == RM_GENERATE_ERROR);
+	{
+	  flinfo->info->callbacks->undefined_symbol
+	    (flinfo->info, h->root.root.string,
+	     h->ref_regular ? NULL : h->root.u.undef.abfd, NULL, 0,
+	     flinfo->info->unresolved_syms_in_shared_libs == RM_DIAGNOSE
+	     && !flinfo->info->warn_unresolved_syms);
+	}
 
       /* Strip a global symbol defined in a discarded section.  */
       if (h->indx == -3)

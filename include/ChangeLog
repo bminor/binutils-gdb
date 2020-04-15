@@ -1,3 +1,10 @@
+2020-04-10  Fangrui Song <maskray@google.com>
+
+	PR binutils/24613
+	* bfdlink.h (enum report_method): Delete RM_GENERATE_WARNING and
+	RM_GENERATE_ERROR. Add RM_DIAGNOSE.
+	(struct bfd_link_info): Add warn_unresolved_syms.
+
 2020-04-14  Stephen Casner  <casner@acm.org>
 
 	PR ld/25677

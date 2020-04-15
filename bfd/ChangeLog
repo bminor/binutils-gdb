@@ -1,3 +1,19 @@
+2020-04-15  Fangrui Song <maskray@google.com>
+
+	PR binutils/24613
+	* coff-rs6000.c (xcoff_ppc_relocate_section): Change RM_GENERATE_ERROR
+	to RM_DIAGNOSE plus a check of warn_unresolved_syms.
+	* coff64-rs6000.c (xcoff_ppc_relocate_section): Likewise.
+	* elf-bfd.h (_bfd_elf_large_com_section): Likewise.
+	* elf32-m32r.c (m32r_elf_relocate_section): Likewise.
+	* elf32-score.c (s3_bfd_score_elf_relocate_section): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_relocate_section): Likewise.
+	* elf32-sh.c (sh_elf_relocate_section): Likewise.
+	* elf32-spu.c (spu_elf_relocate_section): Likewise.
+	* elf64-hppa.c (elf64_hppa_relocate_section): Likewise.
+	* elflink.c (elf_link_output_extsym): Likewise.
+	* elfxx-mips.c (mips_elf_calculate_relocation): Likewise.
+
 2020-04-15  Alan Modra  <amodra@gmail.com>
 
 	PR 25823

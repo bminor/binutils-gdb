@@ -4927,13 +4927,14 @@ spu_elf_relocate_section (bfd *output_bfd,
 		   && !(r_type == R_SPU_PPU32 || r_type == R_SPU_PPU64))
 	    {
 	      bfd_boolean err;
-	      err = (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
-		     || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT);
-	      (*info->callbacks->undefined_symbol) (info,
-						    h->root.root.string,
-						    input_bfd,
-						    input_section,
-						    rel->r_offset, err);
+
+	      err = (info->unresolved_syms_in_objects == RM_DIAGNOSE
+		     && !info->warn_unresolved_syms)
+		|| ELF_ST_VISIBILITY (h->other) != STV_DEFAULT;
+
+	      info->callbacks->undefined_symbol
+		(info, h->root.root.string, input_bfd,
+		 input_section, rel->r_offset, err);
 	    }
 	  sym_name = h->root.root.string;
 	}

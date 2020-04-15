@@ -1,3 +1,12 @@
+2020-04-15  Fangrui Song <maskray@google.com>
+
+	PR binutils/24613
+	* lexsup.c (parse_args): Change RM_GENERATE_WARNING and
+	RM_GENERATE_ERROR to RM_DIAGNOSE.
+	* emultempl/aix.em (ld_${EMULATION_NAME}_emulation): Change
+	RM_GENERATE_ERROR to RM_DIAGNOSE.
+	* emultempl/elf.em (ld_${EMULATION_NAME}_emulation): Likewise.
+
 2020-04-14  Stephen Casner  <casner@acm.org>
 
 	PR ld/25677

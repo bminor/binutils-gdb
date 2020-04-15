@@ -1249,10 +1249,11 @@ xcoff64_ppc_relocate_section (bfd *output_bfd,
 	    {
 	      if (info->unresolved_syms_in_objects != RM_IGNORE
 		  && (h->flags & XCOFF_WAS_UNDEFINED) != 0)
-		(*info->callbacks->undefined_symbol)
+                info->callbacks->undefined_symbol
 		  (info, h->root.root.string, input_bfd, input_section,
 		   rel->r_vaddr - input_section->vma,
-		   info->unresolved_syms_in_objects == RM_GENERATE_ERROR);
+		   info->unresolved_syms_in_objects == RM_DIAGNOSE
+		   && !info->warn_unresolved_syms);
 
 	      if (h->root.type == bfd_link_hash_defined
 		  || h->root.type == bfd_link_hash_defweak)

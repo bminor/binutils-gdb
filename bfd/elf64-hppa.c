@@ -3882,13 +3882,14 @@ elf64_hppa_relocate_section (bfd *output_bfd,
 	  else if (!bfd_link_relocatable (info))
 	    {
 	      bfd_boolean err;
-	      err = (info->unresolved_syms_in_objects == RM_GENERATE_ERROR
-		     || ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT);
-	      (*info->callbacks->undefined_symbol) (info,
-						    eh->root.root.string,
-						    input_bfd,
-						    input_section,
-						    rel->r_offset, err);
+
+	      err = (info->unresolved_syms_in_objects == RM_DIAGNOSE
+		     && !info->warn_unresolved_syms)
+		|| ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT;
+
+	      info->callbacks->undefined_symbol
+		(info, eh->root.root.string, input_bfd,
+		 input_section, rel->r_offset, err);
 	    }
 
 	  if (!bfd_link_relocatable (info)
@@ -3900,7 +3901,7 @@ elf64_hppa_relocate_section (bfd *output_bfd,
 	      if (info->unresolved_syms_in_objects == RM_IGNORE
 		  && ELF_ST_VISIBILITY (eh->other) == STV_DEFAULT
 		  && eh->type == STT_PARISC_MILLI)
-		(*info->callbacks->undefined_symbol)
+		info->callbacks->undefined_symbol
 		  (info, eh_name (eh), input_bfd,
 		   input_section, rel->r_offset, FALSE);
 	    }

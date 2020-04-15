@@ -569,7 +569,6 @@ parse_args (unsigned argc, char **argv)
   struct option *longopts;
   struct option *really_longopts;
   int last_optind;
-  enum report_method how_to_report_unresolved_symbols = RM_GENERATE_ERROR;
   enum symbolic_enum
   {
     symbolic_unset = 0,
@@ -958,15 +957,13 @@ parse_args (unsigned argc, char **argv)
 	  link_info.keep_memory = FALSE;
 	  break;
 	case OPTION_NO_UNDEFINED:
-	  link_info.unresolved_syms_in_objects
-	    = how_to_report_unresolved_symbols;
+	  link_info.unresolved_syms_in_objects = RM_DIAGNOSE;
 	  break;
 	case OPTION_ALLOW_SHLIB_UNDEFINED:
 	  link_info.unresolved_syms_in_shared_libs = RM_IGNORE;
 	  break;
 	case OPTION_NO_ALLOW_SHLIB_UNDEFINED:
-	  link_info.unresolved_syms_in_shared_libs
-	    = how_to_report_unresolved_symbols;
+	  link_info.unresolved_syms_in_shared_libs = RM_DIAGNOSE;
 	  break;
 	case OPTION_UNRESOLVED_SYMBOLS:
 	  if (strcmp (optarg, "ignore-all") == 0)
@@ -976,40 +973,27 @@ parse_args (unsigned argc, char **argv)
 	    }
 	  else if (strcmp (optarg, "report-all") == 0)
 	    {
-	      link_info.unresolved_syms_in_objects
-		= how_to_report_unresolved_symbols;
-	      link_info.unresolved_syms_in_shared_libs
-		= how_to_report_unresolved_symbols;
+	      link_info.unresolved_syms_in_objects = RM_DIAGNOSE;
+	      link_info.unresolved_syms_in_shared_libs = RM_DIAGNOSE;
 	    }
 	  else if (strcmp (optarg, "ignore-in-object-files") == 0)
 	    {
 	      link_info.unresolved_syms_in_objects = RM_IGNORE;
-	      link_info.unresolved_syms_in_shared_libs
-		= how_to_report_unresolved_symbols;
+	      link_info.unresolved_syms_in_shared_libs = RM_DIAGNOSE;
 	    }
 	  else if (strcmp (optarg, "ignore-in-shared-libs") == 0)
 	    {
-	      link_info.unresolved_syms_in_objects
-		= how_to_report_unresolved_symbols;
+	      link_info.unresolved_syms_in_objects = RM_DIAGNOSE;
 	      link_info.unresolved_syms_in_shared_libs = RM_IGNORE;
 	    }
 	  else
 	    einfo (_("%F%P: bad --unresolved-symbols option: %s\n"), optarg);
 	  break;
 	case OPTION_WARN_UNRESOLVED_SYMBOLS:
-	  how_to_report_unresolved_symbols = RM_GENERATE_WARNING;
-	  if (link_info.unresolved_syms_in_objects == RM_GENERATE_ERROR)
-	    link_info.unresolved_syms_in_objects = RM_GENERATE_WARNING;
-	  if (link_info.unresolved_syms_in_shared_libs == RM_GENERATE_ERROR)
-	    link_info.unresolved_syms_in_shared_libs = RM_GENERATE_WARNING;
+	  link_info.warn_unresolved_syms = TRUE;
 	  break;
-
 	case OPTION_ERROR_UNRESOLVED_SYMBOLS:
-	  how_to_report_unresolved_symbols = RM_GENERATE_ERROR;
-	  if (link_info.unresolved_syms_in_objects == RM_GENERATE_WARNING)
-	    link_info.unresolved_syms_in_objects = RM_GENERATE_ERROR;
-	  if (link_info.unresolved_syms_in_shared_libs == RM_GENERATE_WARNING)
-	    link_info.unresolved_syms_in_shared_libs = RM_GENERATE_ERROR;
+	  link_info.warn_unresolved_syms = FALSE;
 	  break;
 	case OPTION_ALLOW_MULTIPLE_DEFINITION:
 	  link_info.allow_multiple_definition = TRUE;
@@ -1639,11 +1623,11 @@ parse_args (unsigned argc, char **argv)
 
   if (link_info.unresolved_syms_in_objects == RM_NOT_YET_SET)
     /* FIXME: Should we allow emulations a chance to set this ?  */
-    link_info.unresolved_syms_in_objects = how_to_report_unresolved_symbols;
+    link_info.unresolved_syms_in_objects = RM_DIAGNOSE;
 
   if (link_info.unresolved_syms_in_shared_libs == RM_NOT_YET_SET)
     /* FIXME: Should we allow emulations a chance to set this ?  */
-    link_info.unresolved_syms_in_shared_libs = how_to_report_unresolved_symbols;
+    link_info.unresolved_syms_in_shared_libs = RM_DIAGNOSE;
 
   if (bfd_link_relocatable (&link_info)
       && command_line.check_section_addresses < 0)

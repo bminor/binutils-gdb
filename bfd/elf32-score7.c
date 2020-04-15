@@ -2443,12 +2443,13 @@ s7_bfd_score_elf_relocate_section (bfd *output_bfd,
 	    }
 	  else if (!bfd_link_relocatable (info))
 	    {
-	      (*info->callbacks->undefined_symbol)
-		(info, h->root.root.root.string, input_bfd,
-		 input_section, rel->r_offset,
-		 (info->unresolved_syms_in_objects == RM_GENERATE_ERROR)
+              info->callbacks->undefined_symbol
+		(info, h->root.root.root.string, input_bfd, input_section,
+		 rel->r_offset,
+		 (info->unresolved_syms_in_objects == RM_DIAGNOSE
+		  && !info->warn_unresolved_syms)
 		 || ELF_ST_VISIBILITY (h->root.other));
-	      relocation = 0;
+              relocation = 0;
 	    }
 	}
 
