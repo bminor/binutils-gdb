@@ -1,5 +1,11 @@
 2020-04-15  Alan Modra  <amodra@gmail.com>
 
+	PR 25822
+	* readelf.c (get_num_dynamic_syms): Don't set num_of_syms when
+	reading buckets or chains fails.
+
+2020-04-15  Alan Modra  <amodra@gmail.com>
+
 	* readelf.c (process_symbol_table): Zero gnubuckets, gnuchains
 	etc. after freeing.
 

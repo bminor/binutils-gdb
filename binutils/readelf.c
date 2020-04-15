@@ -9969,10 +9969,12 @@ get_num_dynamic_syms (Filedata * filedata)
 
       nbuckets = byte_get (nb, hash_ent_size);
       nchains = byte_get (nc, hash_ent_size);
-      num_of_syms = nchains;
 
       buckets = get_dynamic_data (filedata, nbuckets, hash_ent_size);
       chains  = get_dynamic_data (filedata, nchains, hash_ent_size);
+
+      if (buckets != NULL && chains != NULL)
+	num_of_syms = nchains;
 
   no_hash:
       if (num_of_syms == 0)
