@@ -1,3 +1,9 @@
+2020-04-15  Kamil Rytarowski  <n54@gmx.com>
+
+	* obsd-nat.c (obsd_nat_target::update_thread_list): Pass "this" to
+	thread functions.
+	(obsd_nat_target::wait): Likewise.
+
 2020-04-15  Tom Tromey  <tromey@adacore.com>
 
 	* windows-nat.c (DEBUG_EXEC, DEBUG_EVENTS, DEBUG_MEM)
