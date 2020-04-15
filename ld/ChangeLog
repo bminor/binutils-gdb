@@ -1,3 +1,10 @@
+2020-07-22  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
+
+	* ldlang.c (lang_merge_ctf): Turn errors into warnings.
+	Fix a comment typo.
+	(lang_write_ctf): Turn an error into a warning.
+	(ldlang_open_ctf): Reformat warnings. Fix printing file names.
+
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ldlang.c (lang_ctf_errs_warnings): New, print CTF errors

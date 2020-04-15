@@ -3693,8 +3693,8 @@ ldlang_open_ctf (void)
       if ((file->the_ctf = ctf_bfdopen (file->the_bfd, &err)) == NULL)
 	{
 	  if (err != ECTF_NOCTFDATA)
-	    einfo (_("%P: warning: CTF section in `%pI' not loaded: "
-		     "its types will be discarded: `%s'\n"), file,
+	    einfo (_("%P: warning: CTF section in %pB not loaded; "
+		     "its types will be discarded: `%s'\n"), file->the_bfd,
 		     ctf_errmsg (err));
 	  continue;
 	}
@@ -3780,11 +3780,11 @@ lang_merge_ctf (void)
       if (!file->the_ctf)
 	continue;
 
-      /* Takes ownership of file->u.the_ctfa.  */
+      /* Takes ownership of file->the_ctf.  */
       if (ctf_link_add_ctf (ctf_output, file->the_ctf, file->filename) < 0)
 	{
-	  einfo (_("%F%P: cannot link with CTF in %pB: %s\n"), file->the_bfd,
-		 ctf_errmsg (ctf_errno (ctf_output)));
+	  einfo (_("%P: warning: CTF section in %pB cannot be linked: `%s'\n"),
+		 file->the_bfd, ctf_errmsg (ctf_errno (ctf_output)));
 	  ctf_close (file->the_ctf);
 	  file->the_ctf = NULL;
 	  continue;
@@ -3793,7 +3793,8 @@ lang_merge_ctf (void)
 
   if (ctf_link (ctf_output, CTF_LINK_SHARE_UNCONFLICTED) < 0)
     {
-      einfo (_("%F%P: CTF linking failed; output will have no CTF section: %s\n"),
+      einfo (_("%P: warning: CTF linking failed; "
+	       "output will have no CTF section: `%s'\n"),
 	     ctf_errmsg (ctf_errno (ctf_output)));
       if (output_sect)
 	{
@@ -3850,8 +3851,9 @@ lang_write_ctf (int late)
 
       if (!output_sect->contents)
 	{
-	  einfo (_("%F%P: CTF section emission failed; output will have no "
-		   "CTF section: %s\n"), ctf_errmsg (ctf_errno (ctf_output)));
+	  einfo (_("%P: warning: CTF section emission failed; "
+		   "output will have no CTF section: `%s'\n"),
+		 ctf_errmsg (ctf_errno (ctf_output)));
 	  output_sect->size = 0;
 	  output_sect->flags |= SEC_EXCLUDE;
 	}
@@ -3890,8 +3892,8 @@ ldlang_open_ctf (void)
 
       if ((sect = bfd_get_section_by_name (file->the_bfd, ".ctf")) != NULL)
 	{
-	    einfo (_("%P: warning: CTF section in `%pI' not linkable: "
-		     "%P was built without support for CTF\n"), file);
+	    einfo (_("%P: warning: CTF section in %pB not linkable: "
+		     "%P was built without support for CTF\n"), file->the_bfd);
 	    sect->size = 0;
 	    sect->flags |= SEC_EXCLUDE;
 	}
