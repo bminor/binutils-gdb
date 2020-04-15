@@ -1,3 +1,8 @@
+2020-04-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* python/python.c (do_start_initialization): Don't call
+	PyEval_InitThreads for Python 3.9 and beyond.
+
 2020-04-15  Kamil Rytarowski  <n54@gmx.com>
 
 	* obsd-nat.c (obsd_nat_target::update_thread_list): Pass "this" to

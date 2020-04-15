@@ -1701,7 +1701,12 @@ do_start_initialization ()
 #endif
 
   Py_Initialize ();
+#if PY_VERSION_HEX < 0x03090000
+  /* PyEval_InitThreads became deprecated in Python 3.9 and will
+     be removed in Python 3.11.  Prior to Python 3.7, this call was
+     required to initialize the GIL.  */
   PyEval_InitThreads ();
+#endif
 
 #ifdef IS_PY3K
   gdb_module = PyImport_ImportModule ("_gdb");
