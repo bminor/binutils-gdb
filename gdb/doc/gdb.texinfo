@@ -21952,19 +21952,19 @@ This feature is not available if the host system does not support
 Unix domain sockets.
 
 @item target remote @code{@var{host}:@var{port}}
-@itemx target remote @code{@var{[host]}:@var{port}}
+@itemx target remote @code{[@var{host}]:@var{port}}
 @itemx target remote @code{tcp:@var{host}:@var{port}}
-@itemx target remote @code{tcp:@var{[host]}:@var{port}}
+@itemx target remote @code{tcp:[@var{host}]:@var{port}}
 @itemx target remote @code{tcp4:@var{host}:@var{port}}
 @itemx target remote @code{tcp6:@var{host}:@var{port}}
-@itemx target remote @code{tcp6:@var{[host]}:@var{port}}
+@itemx target remote @code{tcp6:[@var{host}]:@var{port}}
 @itemx target extended-remote @code{@var{host}:@var{port}}
-@itemx target extended-remote @code{@var{[host]}:@var{port}}
+@itemx target extended-remote @code{[@var{host}]:@var{port}}
 @itemx target extended-remote @code{tcp:@var{host}:@var{port}}
-@itemx target extended-remote @code{tcp:@var{[host]}:@var{port}}
+@itemx target extended-remote @code{tcp:[@var{host}]:@var{port}}
 @itemx target extended-remote @code{tcp4:@var{host}:@var{port}}
 @itemx target extended-remote @code{tcp6:@var{host}:@var{port}}
-@itemx target extended-remote @code{tcp6:@var{[host]}:@var{port}}
+@itemx target extended-remote @code{tcp6:[@var{host}]:@var{port}}
 @cindex @acronym{TCP} port, @code{target remote}
 Debug using a @acronym{TCP} connection to @var{port} on @var{host}.
 The @var{host} may be either a host name, a numeric @acronym{IPv4}
@@ -22016,15 +22016,15 @@ target remote :1234
 Note that the colon is still required here.
 
 @item target remote @code{udp:@var{host}:@var{port}}
-@itemx target remote @code{udp:@var{[host]}:@var{port}}
+@itemx target remote @code{udp:[@var{host}]:@var{port}}
 @itemx target remote @code{udp4:@var{host}:@var{port}}
-@itemx target remote @code{udp6:@var{[host]}:@var{port}}
+@itemx target remote @code{udp6:[@var{host}]:@var{port}}
 @itemx target extended-remote @code{udp:@var{host}:@var{port}}
 @itemx target extended-remote @code{udp:@var{host}:@var{port}}
-@itemx target extended-remote @code{udp:@var{[host]}:@var{port}}
+@itemx target extended-remote @code{udp:[@var{host}]:@var{port}}
 @itemx target extended-remote @code{udp4:@var{host}:@var{port}}
 @itemx target extended-remote @code{udp6:@var{host}:@var{port}}
-@itemx target extended-remote @code{udp6:@var{[host]}:@var{port}}
+@itemx target extended-remote @code{udp6:[@var{host}]:@var{port}}
 @cindex @acronym{UDP} port, @code{target remote}
 Debug using @acronym{UDP} packets to @var{port} on @var{host}.  For example, to
 connect to @acronym{UDP} port 2828 on a terminal server named @code{manyfarms}:

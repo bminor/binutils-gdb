@@ -1,3 +1,10 @@
+2020-04-15  Artur Shepilko  <nomadbyte@gmail.com>
+
+	* gdb.texinfo: Transform @var{[host]} to [@var{host}]; this
+	clears makeinfo warnings.
+	* python.texi: Add a missing period trailing an @xref{} clause;
+	this clears a makeinfo warning.
+
 2020-03-06  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.texinfo: Fix "the the".

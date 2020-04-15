@@ -3295,7 +3295,7 @@ is no selected thread, this will return @code{None}.
 @end defun
 
 To get the list of threads for an inferior, use the @code{Inferior.threads()}
-method.  @xref{Inferiors In Python}
+method.  @xref{Inferiors In Python}.
 
 A @code{gdb.InferiorThread} object has the following attributes:
 
