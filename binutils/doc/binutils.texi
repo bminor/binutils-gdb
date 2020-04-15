@@ -2161,6 +2161,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-w}|@option{--wide}]
         [@option{--start-address=}@var{address}]
         [@option{--stop-address=}@var{address}]
+        [@option{--no-addresses}]
         [@option{--prefix-addresses}]
         [@option{--[no-]show-raw-insn}]
         [@option{--adjust-vma=}@var{offset}]
@@ -2313,6 +2314,10 @@ sections as if they were instructions.
 Note if the @option{--dwarf=follow-links} option has also been enabled
 then any symbol tables in linked debug info files will be read in and
 used when disassembling.
+
+@item --no-addresses
+When disassembling, don't print addresses on each line or for symbols
+and relocation offsets.
 
 @item --prefix-addresses
 When disassembling, print the complete address on each line.  This is

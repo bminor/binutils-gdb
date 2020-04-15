@@ -1,5 +1,15 @@
 2020-04-15  Alan Modra  <amodra@gmail.com>
 
+	* objdump.c (no_addresses): New static var.
+	(usage): Print help for --no-addresses.
+	(long_options): Add --no-addresses entry.
+	(objdump_print_addr_with_sym, objdump_print_addr): Omit symbol address.
+	(disassemble_bytes): Don't print current line address, or reloc
+	address.
+	* doc/binutils.texi: Document objdump --no-addresses.
+
+2020-04-15  Alan Modra  <amodra@gmail.com>
+
 	PR 25822
 	* readelf.c (get_num_dynamic_syms): Don't set num_of_syms when
 	reading buckets or chains fails.

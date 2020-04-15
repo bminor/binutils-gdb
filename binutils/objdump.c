@@ -93,6 +93,7 @@ static int dump_dynamic_reloc_info;	/* -R */
 static int dump_ar_hdrs;		/* -a */
 static int dump_private_headers;	/* -p */
 static char *dump_private_options;	/* -P */
+static int no_addresses;		/* --no-addresses */
 static int prefix_addresses;		/* --prefix-addresses */
 static int with_line_numbers;		/* -l */
 static bfd_boolean with_source_code;	/* -S */
@@ -270,6 +271,7 @@ usage (FILE *stream, int status)
   -z, --disassemble-zeroes       Do not skip blocks of zeroes when disassembling\n\
       --start-address=ADDR       Only process data whose address is >= ADDR\n\
       --stop-address=ADDR        Only process data whose address is < ADDR\n\
+      --no-addresses             Do not print address alongside disassembly\n\
       --prefix-addresses         Print complete address alongside disassembly\n\
       --[no-]show-raw-insn       Display hex alongside symbolic disassembly\n\
       --insn-width=WIDTH         Display WIDTH bytes on a single line for -d\n\
@@ -358,6 +360,7 @@ static struct option long_options[]=
   {"info", no_argument, NULL, 'i'},
   {"line-numbers", no_argument, NULL, 'l'},
   {"no-show-raw-insn", no_argument, &show_raw_insn, -1},
+  {"no-addresses", no_argument, &no_addresses, 1},
   {"prefix-addresses", no_argument, &prefix_addresses, 1},
   {"recurse-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
   {"recursion-limit", no_argument, NULL, OPTION_RECURSE_LIMIT},
@@ -1303,13 +1306,17 @@ objdump_print_addr_with_sym (bfd *abfd, asection *sec, asymbol *sym,
 			     bfd_vma vma, struct disassemble_info *inf,
 			     bfd_boolean skip_zeroes)
 {
-  objdump_print_value (vma, inf, skip_zeroes);
+  if (!no_addresses)
+    {
+      objdump_print_value (vma, inf, skip_zeroes);
+      (*inf->fprintf_func) (inf->stream, " ");
+    }
 
   if (sym == NULL)
     {
       bfd_vma secaddr;
 
-      (*inf->fprintf_func) (inf->stream, " <%s",
+      (*inf->fprintf_func) (inf->stream, "<%s",
 			    sanitize_string (bfd_section_name (sec)));
       secaddr = bfd_section_vma (sec);
       if (vma < secaddr)
@@ -1326,7 +1333,7 @@ objdump_print_addr_with_sym (bfd *abfd, asection *sec, asymbol *sym,
     }
   else
     {
-      (*inf->fprintf_func) (inf->stream, " <");
+      (*inf->fprintf_func) (inf->stream, "<");
 
       objdump_print_symname (abfd, inf, sym);
 
@@ -1376,8 +1383,11 @@ objdump_print_addr (bfd_vma vma,
 
   if (sorted_symcount < 1)
     {
-      (*inf->fprintf_func) (inf->stream, "0x");
-      objdump_print_value (vma, inf, skip_zeroes);
+      if (!no_addresses)
+	{
+	  (*inf->fprintf_func) (inf->stream, "0x");
+	  objdump_print_value (vma, inf, skip_zeroes);
+	}
 
       if (display_file_offsets)
 	inf->fprintf_func (inf->stream, _(" (File Offset: 0x%lx)"),
@@ -2573,7 +2583,7 @@ disassemble_bytes (struct disassemble_info * inf,
      zeroes in chunks of 4, ensuring that there is always a leading
      zero remaining.  */
   skip_addr_chars = 0;
-  if (! prefix_addresses)
+  if (!no_addresses && !prefix_addresses)
     {
       char buf[30];
 
@@ -2669,7 +2679,9 @@ disassemble_bytes (struct disassemble_info * inf,
 	  if (with_line_numbers || with_source_code)
 	    show_line (aux->abfd, section, addr_offset);
 
-	  if (! prefix_addresses)
+	  if (no_addresses)
+	    printf ("\t");
+	  else if (!prefix_addresses)
 	    {
 	      char *s;
 
@@ -2875,12 +2887,17 @@ disassemble_bytes (struct disassemble_info * inf,
 		  putchar ('\n');
 		  j = addr_offset * opb + pb;
 
-		  bfd_sprintf_vma (aux->abfd, buf, section->vma + j / opb);
-		  for (s = buf + skip_addr_chars; *s == '0'; s++)
-		    *s = ' ';
-		  if (*s == '\0')
-		    *--s = '0';
-		  printf ("%s:\t", buf + skip_addr_chars);
+		  if (no_addresses)
+		    printf ("\t");
+		  else
+		    {
+		      bfd_sprintf_vma (aux->abfd, buf, section->vma + j / opb);
+		      for (s = buf + skip_addr_chars; *s == '0'; s++)
+			*s = ' ';
+		      if (*s == '\0')
+			*--s = '0';
+		      printf ("%s:\t", buf + skip_addr_chars);
+		    }
 
 		  print_jump_visualisation (section->vma + j / opb,
 					    max_level, line_buffer,
@@ -2932,15 +2949,19 @@ disassemble_bytes (struct disassemble_info * inf,
 	      else
 		printf ("\t\t\t");
 
-	      objdump_print_value (section->vma - rel_offset + q->address,
-				   inf, TRUE);
+	      if (!no_addresses)
+		{
+		  objdump_print_value (section->vma - rel_offset + q->address,
+				       inf, TRUE);
+		  printf (": ");
+		}
 
 	      if (q->howto == NULL)
-		printf (": *unknown*\t");
+		printf ("*unknown*\t");
 	      else if (q->howto->name)
-		printf (": %s\t", q->howto->name);
+		printf ("%s\t", q->howto->name);
 	      else
-		printf (": %d\t", q->howto->type);
+		printf ("%d\t", q->howto->type);
 
 	      if (q->sym_ptr_ptr == NULL || *q->sym_ptr_ptr == NULL)
 		printf ("*unknown*");
