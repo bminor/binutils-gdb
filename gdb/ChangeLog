@@ -1,3 +1,8 @@
+2020-04-15  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (DEBUG_EXEC, DEBUG_EVENTS, DEBUG_MEM)
+	(DEBUG_EXCEPT): Use debug_printf.
+
 2020-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* completer.c (class completion_tracker::completion_hash_entry)

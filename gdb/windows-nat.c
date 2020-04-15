@@ -217,10 +217,10 @@ static int windows_initialization_done;
 #endif
 
 #define CHECK(x)	check (x, __FILE__,__LINE__)
-#define DEBUG_EXEC(x)	if (debug_exec)		printf_unfiltered x
-#define DEBUG_EVENTS(x)	if (debug_events)	printf_unfiltered x
-#define DEBUG_MEM(x)	if (debug_memory)	printf_unfiltered x
-#define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf_unfiltered x
+#define DEBUG_EXEC(x)	if (debug_exec)		debug_printf x
+#define DEBUG_EVENTS(x)	if (debug_events)	debug_printf x
+#define DEBUG_MEM(x)	if (debug_memory)	debug_printf x
+#define DEBUG_EXCEPT(x)	if (debug_exceptions)	debug_printf x
 
 static void cygwin_set_dr (int i, CORE_ADDR addr);
 static void cygwin_set_dr7 (unsigned long val);
