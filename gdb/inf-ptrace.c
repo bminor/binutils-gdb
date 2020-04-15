@@ -643,39 +643,3 @@ inf_ptrace_target::pid_to_str (ptid_t ptid)
 {
   return normal_pid_to_str (ptid);
 }
-
-#if defined (PT_IO) && defined (PIOD_READ_AUXV)
-
-/* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
-   Return 0 if *READPTR is already at the end of the buffer.
-   Return -1 if there is insufficient buffer for a whole entry.
-   Return 1 if an entry was read into *TYPEP and *VALP.  */
-
-int
-inf_ptrace_target::auxv_parse (gdb_byte **readptr, gdb_byte *endptr,
-			       CORE_ADDR *typep, CORE_ADDR *valp)
-{
-  struct type *int_type = builtin_type (target_gdbarch ())->builtin_int;
-  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
-  const int sizeof_auxv_type = TYPE_LENGTH (int_type);
-  const int sizeof_auxv_val = TYPE_LENGTH (ptr_type);
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  gdb_byte *ptr = *readptr;
-
-  if (endptr == ptr)
-    return 0;
-
-  if (endptr - ptr < 2 * sizeof_auxv_val)
-    return -1;
-
-  *typep = extract_unsigned_integer (ptr, sizeof_auxv_type, byte_order);
-  ptr += sizeof_auxv_val;	/* Alignment.  */
-  *valp = extract_unsigned_integer (ptr, sizeof_auxv_val, byte_order);
-  ptr += sizeof_auxv_val;
-
-  *readptr = ptr;
-  return 1;
-}
-
-#endif
-

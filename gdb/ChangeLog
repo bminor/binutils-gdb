@@ -1,3 +1,8 @@
+2020-04-16  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c (inf_ptrace_target::auxv_parse): Remove.
+	* nbsd-nat.h (inf_ptrace_target::auxv_parse): Likewise.
+
 2020-04-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* windows-tdep.c (is_linked_with_cygwin_dll): Add filename to

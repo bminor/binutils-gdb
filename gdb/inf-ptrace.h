@@ -68,11 +68,6 @@ struct inf_ptrace_target : public inf_child_target
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
 
-#if defined (PT_IO) && defined (PIOD_READ_AUXV)
-  int auxv_parse (gdb_byte **readptr,
-		  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp) override;
-#endif
-
 protected:
   /* Cleanup the inferior after a successful ptrace detach.  */
   void detach_success (inferior *inf);
