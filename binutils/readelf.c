@@ -12260,16 +12260,24 @@ process_symbol_table (Filedata * filedata)
       free (lengths);
     }
   free (gnubuckets);
+  gnubuckets = NULL;
   free (gnuchains);
+  gnuchains = NULL;
   free (mipsxlat);
+  mipsxlat = NULL;
   return TRUE;
 
  err_out:
   free (gnubuckets);
+  gnubuckets = NULL;
   free (gnuchains);
+  gnuchains = NULL;
   free (mipsxlat);
+  mipsxlat = NULL;
   free (buckets);
+  buckets = NULL;
   free (chains);
+  chains = NULL;
   return FALSE;
 }
 

@@ -1,5 +1,10 @@
 2020-04-15  Alan Modra  <amodra@gmail.com>
 
+	* readelf.c (process_symbol_table): Zero gnubuckets, gnuchains
+	etc. after freeing.
+
+2020-04-15  Alan Modra  <amodra@gmail.com>
+
 	* readelf.c (get_group_flags): Translate text.
 	(get_file_type, get_symbol_binding, get_symbol_type),
 	(get_ppc64_symbol_other, get_symbol_other): Increase size of buffer.
