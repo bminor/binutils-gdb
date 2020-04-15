@@ -2291,7 +2291,7 @@ get_dynamic_type (Filedata * filedata, unsigned long type)
 static char *
 get_file_type (unsigned e_type)
 {
-  static char buff[32];
+  static char buff[64];
 
   switch (e_type)
     {
@@ -6832,25 +6832,13 @@ get_group_flags (unsigned int flags)
   else if (flags == GRP_COMDAT)
     return "COMDAT ";
 
-  snprintf (buff, 14, _("[0x%x: "), flags);
+  snprintf (buff, sizeof buff, "[0x%x: %s%s%s]",
+	    flags,
+	    flags & GRP_MASKOS ? _("<OS specific>") : "",
+	    flags & GRP_MASKPROC ? _("<PROC specific>") : "",
+	    (flags & ~(GRP_COMDAT | GRP_MASKOS | GRP_MASKPROC)
+	     ? _("<unknown>") : ""));
 
-  flags &= ~ GRP_COMDAT;
-  if (flags & GRP_MASKOS)
-    {
-      strcat (buff, "<OS specific>");
-      flags &= ~ GRP_MASKOS;
-    }
-
-  if (flags & GRP_MASKPROC)
-    {
-      strcat (buff, "<PROC specific>");
-      flags &= ~ GRP_MASKPROC;
-    }
-
-  if (flags)
-    strcat (buff, "<unknown>");
-
-  strcat (buff, "]");
   return buff;
 }
 
@@ -11467,7 +11455,7 @@ process_version_sections (Filedata * filedata)
 static const char *
 get_symbol_binding (Filedata * filedata, unsigned int binding)
 {
-  static char buff[32];
+  static char buff[64];
 
   switch (binding)
     {
@@ -11494,7 +11482,7 @@ get_symbol_binding (Filedata * filedata, unsigned int binding)
 static const char *
 get_symbol_type (Filedata * filedata, unsigned int type)
 {
-  static char buff[32];
+  static char buff[64];
 
   switch (type)
     {
@@ -11691,7 +11679,7 @@ get_ppc64_symbol_other (unsigned int other)
   other >>= STO_PPC64_LOCAL_BIT;
   if (other <= 6)
     {
-      static char buf[32];
+      static char buf[64];
       if (other >= 2)
 	other = ppc64_decode_local_entry (other);
       snprintf (buf, sizeof buf, _("<localentry>: %d"), other);
@@ -11704,7 +11692,7 @@ static const char *
 get_symbol_other (Filedata * filedata, unsigned int other)
 {
   const char * result = NULL;
-  static char buff [32];
+  static char buff [64];
 
   if (other == 0)
     return "";

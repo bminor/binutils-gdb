@@ -1,5 +1,11 @@
 2020-04-15  Alan Modra  <amodra@gmail.com>
 
+	* readelf.c (get_group_flags): Translate text.
+	(get_file_type, get_symbol_binding, get_symbol_type),
+	(get_ppc64_symbol_other, get_symbol_other): Increase size of buffer.
+
+2020-04-15  Alan Modra  <amodra@gmail.com>
+
 	PR 25821
 	* readelf.c (get_num_dynamic_syms): Typo fix.
 
