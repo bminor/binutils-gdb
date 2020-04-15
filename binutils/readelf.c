@@ -9997,7 +9997,7 @@ get_num_dynamic_syms (Filedata * filedata)
 	  if (chains)
 	    {
 	      free (chains);
-	      buckets = NULL;
+	      chains = NULL;
 	    }
 	  nbuckets = 0;
 	}
