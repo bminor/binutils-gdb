@@ -4774,14 +4774,6 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    if (!update_local_sym_info (abfd, symtab_hdr, r_symndx,
 					rel->r_addend, tls_type))
 	      return FALSE;
-
-	  /* We may also need a plt entry if the symbol turns out to be
-	     an ifunc.  */
-	  if (h != NULL && !bfd_link_pic (info) && abiversion (abfd) != 1)
-	    {
-	      if (!update_plt_info (abfd, &h->plt.plist, rel->r_addend))
-		return FALSE;
-	    }
 	  break;
 
 	case R_PPC64_PLT16_HA:
