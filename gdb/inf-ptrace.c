@@ -68,42 +68,6 @@ typedef std::unique_ptr<struct target_ops, target_unpusher> target_unpush_up;
 inf_ptrace_target::~inf_ptrace_target ()
 {}
 
-#ifdef PT_GET_PROCESS_STATE
-
-/* Target hook for follow_fork.  On entry and at return inferior_ptid is
-   the ptid of the followed inferior.  */
-
-bool
-inf_ptrace_target::follow_fork (bool follow_child, bool detach_fork)
-{
-  if (!follow_child)
-    {
-      struct thread_info *tp = inferior_thread ();
-      pid_t child_pid = tp->pending_follow.value.related_pid.pid ();
-
-      /* Breakpoints have already been detached from the child by
-	 infrun.c.  */
-
-      if (ptrace (PT_DETACH, child_pid, (PTRACE_TYPE_ARG3)1, 0) == -1)
-	perror_with_name (("ptrace"));
-    }
-
-  return false;
-}
-
-int
-inf_ptrace_target::insert_fork_catchpoint (int pid)
-{
-  return 0;
-}
-
-int
-inf_ptrace_target::remove_fork_catchpoint (int pid)
-{
-  return 0;
-}
-
-#endif /* PT_GET_PROCESS_STATE */
 
 
 /* Prepare to be traced.  */
@@ -158,23 +122,6 @@ inf_ptrace_target::create_inferior (const char *exec_file,
      the inferior has been started up.  */
   target_post_startup_inferior (ptid);
 }
-
-#ifdef PT_GET_PROCESS_STATE
-
-void
-inf_ptrace_target::post_startup_inferior (ptid_t pid)
-{
-  ptrace_event_t pe;
-
-  /* Set the initial event mask.  */
-  memset (&pe, 0, sizeof pe);
-  pe.pe_set_event |= PTRACE_FORK;
-  if (ptrace (PT_SET_EVENT_MASK, pid.pid (),
-	      (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
-    perror_with_name (("ptrace"));
-}
-
-#endif
 
 /* Clean up a rotting corpse of an inferior after it died.  */
 
@@ -254,23 +201,6 @@ inf_ptrace_target::attach (const char *args, int from_tty)
 
   unpusher.release ();
 }
-
-#ifdef PT_GET_PROCESS_STATE
-
-void
-inf_ptrace_target::post_attach (int pid)
-{
-  ptrace_event_t pe;
-
-  /* Set the initial event mask.  */
-  memset (&pe, 0, sizeof pe);
-  pe.pe_set_event |= PTRACE_FORK;
-  if (ptrace (PT_SET_EVENT_MASK, pid,
-	      (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
-    perror_with_name (("ptrace"));
-}
-
-#endif
 
 /* Detach from the inferior.  If FROM_TTY is non-zero, be chatty about it.  */
 

@@ -1,3 +1,18 @@
+2020-04-24  Kamil Rytarowski  <n54@gmx.com>
+
+	* inf-ptrace.h (follow_fork, insert_fork_catchpoint)
+	(remove_fork_catchpoint, post_startup_inferior)
+	(post_attach): Move...
+	* obsd-nat.h (follow_fork, insert_fork_catchpoint)
+	(remove_fork_catchpoint, post_startup_inferior)
+	(post_attach): ...here.
+	* inf-ptrace.c (follow_fork, insert_fork_catchpoint)
+	(remove_fork_catchpoint, post_startup_inferior)
+	(post_attach): Move...
+	* obsd-nat.c (follow_fork, insert_fork_catchpoint)
+	(remove_fork_catchpoint, post_startup_inferior)
+	(post_attach): ...here.
+
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
 	* nat/windows-nat.h (struct windows_thread_info)

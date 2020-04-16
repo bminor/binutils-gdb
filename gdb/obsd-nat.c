@@ -161,3 +161,66 @@ obsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 }
 
 #endif /* PT_GET_THREAD_FIRST */
+
+#ifdef PT_GET_PROCESS_STATE
+
+void
+obsd_nat_target::post_attach (int pid)
+{
+  ptrace_event_t pe;
+
+  /* Set the initial event mask.  */
+  memset (&pe, 0, sizeof pe);
+  pe.pe_set_event |= PTRACE_FORK;
+  if (ptrace (PT_SET_EVENT_MASK, pid,
+	      (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
+    perror_with_name (("ptrace"));
+}
+
+void
+obsd_nat_target::post_startup_inferior (ptid_t pid)
+{
+  ptrace_event_t pe;
+
+  /* Set the initial event mask.  */
+  memset (&pe, 0, sizeof pe);
+  pe.pe_set_event |= PTRACE_FORK;
+  if (ptrace (PT_SET_EVENT_MASK, pid.pid (),
+	      (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
+    perror_with_name (("ptrace"));
+}
+
+/* Target hook for follow_fork.  On entry and at return inferior_ptid is
+   the ptid of the followed inferior.  */
+
+bool
+obsd_nat_target::follow_fork (bool follow_child, bool detach_fork)
+{
+  if (!follow_child)
+    {
+      struct thread_info *tp = inferior_thread ();
+      pid_t child_pid = tp->pending_follow.value.related_pid.pid ();
+
+      /* Breakpoints have already been detached from the child by
+	 infrun.c.  */
+
+      if (ptrace (PT_DETACH, child_pid, (PTRACE_TYPE_ARG3)1, 0) == -1)
+	perror_with_name (("ptrace"));
+    }
+
+  return false;
+}
+
+int
+obsd_nat_target::insert_fork_catchpoint (int pid)
+{
+  return 0;
+}
+
+int
+obsd_nat_target::remove_fork_catchpoint (int pid)
+{
+  return 0;
+}
+
+#endif /* PT_GET_PROCESS_STATE */
