@@ -1,3 +1,8 @@
+2020-04-16  Alan Modra  <amodra@gmail.com>
+
+	* doc/binutils.texi: Mention --no-show-raw-insn in objdump
+	--no-addresses description.
+
 2020-04-15  Alan Modra  <amodra@gmail.com>
 
 	* objdump.c (no_addresses): New static var.

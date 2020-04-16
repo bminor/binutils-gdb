@@ -2317,7 +2317,8 @@ used when disassembling.
 
 @item --no-addresses
 When disassembling, don't print addresses on each line or for symbols
-and relocation offsets.
+and relocation offsets.  In combination with @option{--no-show-raw-insn}
+this may be useful for comparing compiler output.
 
 @item --prefix-addresses
 When disassembling, print the complete address on each line.  This is
