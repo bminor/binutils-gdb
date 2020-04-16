@@ -1457,7 +1457,7 @@ get_child_debug_event (DWORD *continue_status,
       /* Pending stop.  See the comment by the definition of
 	 "pending_stops" for details on why this is needed.  */
       OUTMSG2 (("get_windows_debug_event - "
-		"unexpected stop in 0x%x (expecting 0x%x)\n",
+		"unexpected stop in 0x%lx (expecting 0x%x)\n",
 		ptid.lwp (), desired_stop_thread_id));
       maybe_adjust_pc ();
       pending_stops.push_back ({(DWORD) ptid.lwp (), *ourstatus, current_event});

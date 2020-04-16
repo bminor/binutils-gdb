@@ -1,3 +1,7 @@
+2020-04-15  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* win32-low.cc (get_child_debug_event): Fix format string warning.
+
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
 	* server.h (gdb_fildes_t): Remove typedef.
