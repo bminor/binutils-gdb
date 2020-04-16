@@ -209,7 +209,15 @@ private:
 
 struct program_space
 {
-  program_space (address_space *aspace_);
+  /* Constructs a new empty program space, binds it to ASPACE, and
+     adds it to the program space list.  */
+  explicit program_space (address_space *aspace);
+
+  /* Releases a program space, and all its contents (shared libraries,
+     objfiles, and any other references to the program space in other
+     modules).  It is an internal error to call this when the program
+     space is the current program space, since there should always be
+     a program space.  */
   ~program_space ();
 
   typedef unwrapping_objfile_range objfiles_range;
@@ -361,10 +369,6 @@ extern struct program_space *current_program_space;
 
 #define ALL_PSPACES(pspace) \
   for ((pspace) = program_spaces; (pspace) != NULL; (pspace) = (pspace)->next)
-
-/* Remove a program space from the program spaces list and release it.  It is
-   an error to call this function while PSPACE is the current program space. */
-extern void delete_program_space (struct program_space *pspace);
 
 /* Returns the number of program spaces listed.  */
 extern int number_of_program_spaces (void);

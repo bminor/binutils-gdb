@@ -1,3 +1,21 @@
+2020-04-16  Pedro Alves  <palves@redhat.com>
+
+	* inferior.c (delete_inferior): Use delete operator directly
+	instead of delete_program_space.
+	* progspace.c (add_program_space): New, factored out from
+	program_space::program_space.
+	(remove_program_space): New, factored out from
+	delete_program_space.
+	(program_space::program_space): Remove intro comment.  Rewrite.
+	(program_space::~program_space): Remove intro comment.  Call
+	remove_program_space.
+	(delete_program_space): Delete.
+	* progspace.h (program_space::program_space): Make explicit.  Move
+	intro comment here, adjusted.
+	(program_space::~program_space): Move intro comment here,
+	adjusted.
+	(delete_program_space): Remove.
+
 2020-04-16  Tom Tromey  <tromey@adacore.com>
 
 	* windows-nat.c (windows_nat::handle_access_violation): New

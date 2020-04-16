@@ -109,35 +109,64 @@ init_address_spaces (void)
 
 
 
-/* Adds a new empty program space to the program space list, and binds
-   it to ASPACE.  Returns the pointer to the new object.  */
+/* Add a program space from the program spaces list.  */
 
-program_space::program_space (address_space *aspace_)
-: num (++last_program_space_num), aspace (aspace_)
+static void
+add_program_space (program_space *pspace)
 {
-  program_space_alloc_data (this);
-
   if (program_spaces == NULL)
-    program_spaces = this;
+    program_spaces = pspace;
   else
     {
-      struct program_space *last;
+      program_space *last;
 
       for (last = program_spaces; last->next != NULL; last = last->next)
 	;
-      last->next = this;
+      last->next = pspace;
     }
 }
 
-/* Releases program space PSPACE, and all its contents (shared
-   libraries, objfiles, and any other references to the PSPACE in
-   other modules).  It is an internal error to call this when PSPACE
-   is the current program space, since there should always be a
-   program space.  */
+/* Remove a program space from the program spaces list.  */
+
+static void
+remove_program_space (program_space *pspace)
+{
+  program_space *ss, **ss_link;
+  gdb_assert (pspace != NULL);
+
+  ss = program_spaces;
+  ss_link = &program_spaces;
+  while (ss != NULL)
+    {
+      if (ss == pspace)
+	{
+	  *ss_link = ss->next;
+	  return;
+	}
+
+      ss_link = &ss->next;
+      ss = *ss_link;
+    }
+}
+
+/* See progspace.h.  */
+
+program_space::program_space (address_space *aspace_)
+  : num (++last_program_space_num),
+    aspace (aspace_)
+{
+  program_space_alloc_data (this);
+
+  add_program_space (this);
+}
+
+/* See progspace.h.  */
 
 program_space::~program_space ()
 {
   gdb_assert (this != current_program_space);
+
+  remove_program_space (this);
 
   scoped_restore_current_program_space restore_pspace;
 
@@ -257,33 +286,6 @@ program_space_empty_p (struct program_space *pspace)
       return 0;
 
   return 1;
-}
-
-/* Remove a program space from the program spaces list and release it.  It is
-   an error to call this function while PSPACE is the current program space. */
-
-void
-delete_program_space (struct program_space *pspace)
-{
-  struct program_space *ss, **ss_link;
-  gdb_assert (pspace != NULL);
-  gdb_assert (pspace != current_program_space);
-
-  ss = program_spaces;
-  ss_link = &program_spaces;
-  while (ss != NULL)
-    {
-      if (ss == pspace)
-	{
-	  *ss_link = ss->next;
-	  break;
-	}
-
-      ss_link = &ss->next;
-      ss = *ss_link;
-    }
-
-  delete pspace;
 }
 
 /* Prints the list of program spaces and their details on UIOUT.  If

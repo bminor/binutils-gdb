@@ -162,7 +162,7 @@ delete_inferior (struct inferior *todel)
 
   /* If this program space is rendered useless, remove it. */
   if (program_space_empty_p (inf->pspace))
-    delete_program_space (inf->pspace);
+    delete inf->pspace;
 
   delete inf;
 }
