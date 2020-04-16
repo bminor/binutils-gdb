@@ -3379,18 +3379,20 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		    {
 		      struct varinfo * spec_var;
 
-		      spec_var = lookup_var_by_offset (attr.u.val, unit->variable_table);
+		      spec_var = lookup_var_by_offset (attr.u.val,
+						       unit->variable_table);
 		      if (spec_var == NULL)
 			{	
-			  _bfd_error_handler
-			    (_("DWARF error: could not find variable specification at offset %lx"),
-			     (unsigned long) attr.u.val);
+			  _bfd_error_handler (_("DWARF error: could not find "
+						"variable specification "
+						"at offset %lx"),
+					      (unsigned long) attr.u.val);
 			  break;
 			}
 
 		      if (var->name == NULL)
 			var->name = spec_var->name;
-		      if (var->file == NULL)
+		      if (var->file == NULL && spec_var->file != NULL)
 			var->file = strdup (spec_var->file);
 		      if (var->line == 0)
 			var->line = spec_var->line;

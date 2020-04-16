@@ -1,3 +1,9 @@
+2020-04-16  Alan Modra  <amodra@gmail.com>
+
+	PR 25827
+	* dwarf2.c (scan_unit_for_symbols): Wrap overlong lines.  Don't
+	strdup(0).
+
 2020-04-15  Fangrui Song <maskray@google.com>
 
 	PR binutils/24613
