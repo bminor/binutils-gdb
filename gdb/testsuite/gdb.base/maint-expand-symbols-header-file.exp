@@ -18,10 +18,16 @@
 
 standard_testfile .c
 
-if {[prepare_for_testing "failed to prepare" $testfile \
+if {[build_executable "failed to prepare" $testfile \
 	 $srcfile {debug nowarnings}]} {
     return -1
 }
+clean_restart
+
+# Make sure that no symtabs are expanded, by setting language before
+# loading exec.
+gdb_test_no_output "set language c"
+gdb_load ${binfile}
 
 set test "verify no symtabs are expanded"
 if { [readnow] } {
