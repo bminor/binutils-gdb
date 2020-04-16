@@ -1911,8 +1911,12 @@ _bfd_elf_get_symbol_version_string (bfd *abfd, asymbol *symbol,
 	{
 	  const char *nodename
 	    = elf_tdata (abfd)->verdef[vernum - 1].vd_nodename;
-	  version_string = ((base_p || strcmp (symbol->name, nodename))
-			    ? nodename : "");
+	  version_string = "";
+	  if (base_p
+	      || nodename == NULL
+	      || symbol->name == NULL
+	      || strcmp (symbol->name, nodename) != 0)
+	    version_string = nodename;
 	}
       else
 	{

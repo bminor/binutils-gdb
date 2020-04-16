@@ -1,3 +1,9 @@
+2020-04-17  Alan Modra  <amodra@gmail.com>
+
+	PR 25842
+	* elf.c (_bfd_elf_get_symbol_version_string): Don't segfault on
+	NULL nodename.
+
 2020-04-16  Nick Clifton  <nickc@redhat.com>
 
 	PR 25803
