@@ -1230,6 +1230,31 @@ windows_nat::handle_ms_vc_exception (const EXCEPTION_RECORD *rec)
   return false;
 }
 
+/* See nat/windows-nat.h.  */
+
+bool
+windows_nat::handle_access_violation (const EXCEPTION_RECORD *rec)
+{
+#ifdef __CYGWIN__
+  /* See if the access violation happened within the cygwin DLL
+     itself.  Cygwin uses a kind of exception handling to deal with
+     passed-in invalid addresses.  gdb should not treat these as real
+     SEGVs since they will be silently handled by cygwin.  A real SEGV
+     will (theoretically) be caught by cygwin later in the process and
+     will be sent as a cygwin-specific-signal.  So, ignore SEGVs if
+     they show up within the text segment of the DLL itself.  */
+  const char *fn;
+  CORE_ADDR addr = (CORE_ADDR) (uintptr_t) rec->ExceptionAddress;
+
+  if ((!cygwin_exceptions && (addr >= cygwin_load_start
+			      && addr < cygwin_load_end))
+      || (find_pc_partial_function (addr, &fn, NULL, NULL)
+	  && startswith (fn, "KERNEL32!IsBad")))
+    return true;
+#endif
+  return false;
+}
+
 /* Resume thread specified by ID, or all artificially suspended
    threads, if we are continuing execution.  KILLED non-zero means we
    have killed the inferior, so we should ignore weird errors due to

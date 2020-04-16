@@ -1198,6 +1198,14 @@ windows_nat::handle_ms_vc_exception (const EXCEPTION_RECORD *rec)
   return false;
 }
 
+/* See nat/windows-nat.h.  */
+
+bool
+windows_nat::handle_access_violation (const EXCEPTION_RECORD *rec)
+{
+  return false;
+}
+
 /* A helper function that will, if needed, set
    'stopped_at_software_breakpoint' on the thread and adjust the
    PC.  */

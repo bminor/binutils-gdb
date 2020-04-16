@@ -1,3 +1,8 @@
+2020-04-16  Tom Tromey  <tromey@adacore.com>
+
+	* win32-low.cc (windows_nat::handle_access_violation): New
+	function.
+
 2020-04-15  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* win32-low.cc (get_child_debug_event): Fix format string warning.

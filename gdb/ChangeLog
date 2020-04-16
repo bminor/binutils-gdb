@@ -1,3 +1,11 @@
+2020-04-16  Tom Tromey  <tromey@adacore.com>
+
+	* windows-nat.c (windows_nat::handle_access_violation): New
+	function.
+	* nat/windows-nat.h (handle_access_violation): Declare.
+	* nat/windows-nat.c (handle_exception): Move Cygwin code to
+	windows-nat.c.  Call handle_access_violation.
+
 2020-04-16  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/25791

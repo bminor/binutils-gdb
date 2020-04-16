@@ -157,6 +157,13 @@ extern void handle_unload_dll ();
 
 extern bool handle_ms_vc_exception (const EXCEPTION_RECORD *rec);
 
+/* When EXCEPTION_ACCESS_VIOLATION is processed, we give the embedding
+   application a chance to change it to be considered "unhandled".
+   This function must be supplied by the embedding application.  If it
+   returns true, then the exception is "unhandled".  */
+
+extern bool handle_access_violation (const EXCEPTION_RECORD *rec);
+
 
 /* Currently executing process */
 extern HANDLE current_process_handle;
