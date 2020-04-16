@@ -1,3 +1,14 @@
+2020-04-16  Gagan Singh Sidhu  <broly@mac.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 25803
+	* config/obj-elf.c (obj_elf_type): Reject ifunc symbols on MIPS
+	targets.
+	* testsuite/gas/elf/elf.exp: Add MIPS targets to the list to skip
+	for the type-2 test.
+	* testsuite/gas/elf/type-noifunc.e: Update to allow for MIPS
+	targets running this test.
+
 2020-02-16  David Faust  <david.faust@oracle.com>
 
 	* testsuite/gas/bpf/bpf.exp: Run jump32 tests.

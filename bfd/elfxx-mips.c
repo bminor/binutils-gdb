@@ -9311,12 +9311,21 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
   hmips = (struct mips_elf_link_hash_entry *) h;
 
   /* Make sure we know what is going on here.  */
-  BFD_ASSERT (dynobj != NULL
-	      && (h->needs_plt
-		  || h->is_weakalias
-		  || (h->def_dynamic
-		      && h->ref_regular
-		      && !h->def_regular)));
+  if (dynobj == NULL
+      || (! h->needs_plt
+	  && ! h->is_weakalias
+	  && (! h->def_dynamic
+	      || ! h->ref_regular
+	      || h->def_regular)))
+    {
+      if (h->type == STT_GNU_IFUNC)
+	_bfd_error_handler (_("IFUNC symbol %s in dynamic symbol table - IFUNCS are not supported"),
+			    h->root.root.string);
+      else
+	_bfd_error_handler (_("non-dynamic symbol %s in dynamic symbol table"),
+			    h->root.root.string);
+      return TRUE;
+    }
 
   hmips = (struct mips_elf_link_hash_entry *) h;
 

@@ -2177,6 +2177,10 @@ obj_elf_type (int ignore ATTRIBUTE_UNUSED)
 	       && bed->elf_osabi != ELFOSABI_FREEBSD)
 	as_bad (_("symbol type \"%s\" is supported only by GNU "
 		  "and FreeBSD targets"), type_name);
+      /* MIPS targets do not support IFUNCS.  */
+      else if (bed->target_id == MIPS_ELF_DATA)
+	as_bad (_("symbol type \"%s\" is not supported by "
+                    "MIPS targets"), type_name);
       elf_tdata (stdoutput)->has_gnu_osabi |= elf_gnu_osabi_ifunc;
       type = BSF_FUNCTION | BSF_GNU_INDIRECT_FUNCTION;
     }

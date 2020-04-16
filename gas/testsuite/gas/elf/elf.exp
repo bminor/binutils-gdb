@@ -220,8 +220,9 @@ if { [is_elf_format] } then {
     # in the symbol type test.
     # We also need to exclude targets that do not support unique objects.
     if {    [istarget "*-*-hpux*"]
-	 || [istarget "arm*-*-*"]
-	 || [istarget "msp*-*-*"]
+	 || [istarget "arm*-*-*"]	
+         || [istarget "mips*-*-*"]
+         || [istarget "msp*-*-*"]
 	 || [istarget "visium-*-*"]
 	 || ![supports_gnu_unique]
      } then {
