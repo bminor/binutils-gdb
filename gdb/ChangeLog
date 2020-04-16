@@ -1,3 +1,9 @@
+2020-04-16  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25791
+	* dwarf2/index-write.c (write_gdbindex): Generate CU table entries for
+	CUs without psymtab.
+
 2020-04-16  Kevin Buettner  <kevinb@redhat.com>
 
 	* python/python.c (do_start_initialization): Don't call

@@ -1,5 +1,13 @@
 2020-04-16  Tom de Vries  <tdevries@suse.de>
 
+	PR symtab/25791
+	* gdb.dwarf2/gdb-add-index.exp (add_gdb_index): Move ...
+	(ensure_gdb_index): and factor out and move ...
+	* lib/gdb.exp (add_gdb_index, ensure_gdb_index): ... here.
+	* gdb.dwarf2/imported-unit-runto-main.exp: New file.
+
+2020-04-16  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/maint-expand-symbols-header-file.exp: Set language before
 	loading exec.
 

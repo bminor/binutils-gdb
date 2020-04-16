@@ -1426,18 +1426,15 @@ write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file,
 	= dwarf2_per_objfile->all_comp_units[i];
       partial_symtab *psymtab = per_cu->v.psymtab;
 
-      /* CU of a shared file from 'dwz -m' may be unused by this main file.
-	 It may be referenced from a local scope but in such case it does not
-	 need to be present in .gdb_index.  */
-      if (psymtab == NULL)
-	continue;
+      if (psymtab != NULL)
+	{
+	  if (psymtab->user == NULL)
+	    recursively_write_psymbols (objfile, psymtab, &symtab,
+					psyms_seen, i);
 
-      if (psymtab->user == NULL)
-	recursively_write_psymbols (objfile, psymtab, &symtab,
-				    psyms_seen, i);
-
-      const auto insertpair = cu_index_htab.emplace (psymtab, i);
-      gdb_assert (insertpair.second);
+	  const auto insertpair = cu_index_htab.emplace (psymtab, i);
+	  gdb_assert (insertpair.second);
+	}
 
       /* The all_comp_units list contains CUs read from the objfile as well as
 	 from the eventual dwz file.  We need to place the entry in the
