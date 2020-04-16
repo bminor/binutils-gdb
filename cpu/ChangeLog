@@ -1,3 +1,8 @@
+2020-02-16  David Faust  <david.faust@oracle.com>
+
+	* bpf.cpu (define-cond-jump-insn): Renamed from djci.
+	(dcji) New version with support for JMP32
+
 2020-02-03  Alan Modra  <amodra@gmail.com>
 
 	* m32c.cpu (f-dsp-64-s16): Mask before shifting signed value.

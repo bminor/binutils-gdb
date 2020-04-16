@@ -1,3 +1,9 @@
+2020-02-16  David Faust  <david.faust@oracle.com>
+
+	* testsuite/gas/bpf/bpf.exp: Run jump32 tests.
+	* testsuite/gas/bpf/jump32.s: New file.
+	* testsuite/gas/bpf/jump32.d: Likewise.
+
 2020-04-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/c-i386.texi: Correct -mlfence-before-indirect-branch=

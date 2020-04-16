@@ -222,7 +222,7 @@
 (define-normal-insn-enum insn-op-class "eBPF instruction class"
   (all-isas) OP_CLASS_ f-op-class
   ((LD    #b000) (LDX   #b001) (ST    #b010) (STX   #b011)
-   (ALU   #b100) (JMP   #b101) (ALU64 #b111)))
+   (ALU   #b100) (JMP   #b101) (JMP32 #b110) (ALU64 #b111)))
 
 ;; For load/store instructions, the 8-bit code field is subdivided in:
 ;;
@@ -583,25 +583,30 @@
 ;; registers.  Therefore, we need to define several variants in both
 ;; ISAs:
 ;;
-;;   J{eq,gt,ge,lt,le,set,ne,sgt,sge,slt,sle}{i,r}le for the
+;;   J{eq,gt,ge,lt,le,set,ne,sgt,sge,slt,sle}[32]{i,r}le for the
 ;;   little-endian ISA.
-;;   J{eq,gt,ge,lt,le,set,ne.sgt,sge,slt,sle}{i,r}be for the
+;;   J{eq,gt,ge,lt,le,set,ne.sgt,sge,slt,sle}[32]{i,r}be for the
 ;;   big-endian ISA.
+
+(define-pmacro (define-cond-jump-insn x-cond x-suffix x-op-class x-op-code x-endian)
+  (begin
+    (dni (.sym j x-cond x-suffix i x-endian)
+         (.str j x-cond x-suffix " i")
+         ((ISA (.sym ebpf x-endian)))
+         (.str "j" x-cond x-suffix " $dst" x-endian ",$imm32,$disp16")
+         (+ imm32 disp16 ((.sym f-src x-endian) 0) (.sym dst x-endian)
+            x-op-class OP_SRC_K (.sym OP_CODE_ x-op-code)) () ())
+    (dni (.sym j x-cond x-suffix r x-endian)
+         (.str j x-cond x-suffix " r")
+         ((ISA (.sym ebpf x-endian)))
+         (.str "j" x-cond x-suffix " $dst" x-endian ",$src" x-endian ",$disp16")
+         (+ (f-imm32 0) disp16 (.sym src x-endian) (.sym dst x-endian)
+            x-op-class OP_SRC_X (.sym OP_CODE_ x-op-code)) () ())))
 
 (define-pmacro (dcji x-cond x-op-code x-endian)
   (begin
-    (dni (.sym j x-cond i x-endian)
-         (.str j x-cond "i")
-         ((ISA (.sym ebpf x-endian)))
-         (.str "j" x-cond " $dst" x-endian ",$imm32,$disp16")
-         (+ imm32 disp16 ((.sym f-src x-endian) 0) (.sym dst x-endian)
-            OP_CLASS_JMP OP_SRC_K (.sym OP_CODE_ x-op-code)) () ())
-    (dni (.sym j x-cond r x-endian)
-         (.str j x-cond "r")
-         ((ISA (.sym ebpf x-endian)))
-         (.str "j" x-cond " $dst" x-endian ",$src" x-endian ",$disp16")
-         (+ (f-imm32 0) disp16 (.sym src x-endian) (.sym dst x-endian)
-            OP_CLASS_JMP OP_SRC_X (.sym OP_CODE_ x-op-code)) () ())))
+    (define-cond-jump-insn x-cond "" OP_CLASS_JMP x-op-code x-endian)
+    (define-cond-jump-insn x-cond "32" OP_CLASS_JMP32 x-op-code x-endian)))
 
 (define-pmacro (define-condjump-insns x-endian)
   (begin

@@ -1,3 +1,10 @@
+2020-02-16  David Faust  <david.faust@oracle.com>
+
+	* bpf-desc.c: Regenerate.
+	* bpf-desc.h: Likewise.
+	* bpf-opc.c: Regenerate.
+	* bpf-opc.h: Likewise.
+
 2020-04-07  Lili Cui  <lili.cui@intel.com>
 
 	* i386-dis.c (enum): Add PREFIX_0F01_REG_5_MOD_3_RM_1,
