@@ -999,11 +999,32 @@ is_linked_with_cygwin_dll (bfd *abfd)
   if (idata_section == nullptr)
     return false;
 
-  /* Find the virtual address of the .idata section.  We must subtract this
-     from the RVAs (relative virtual addresses) to obtain an offset in the
-     section. */
-  bfd_vma idata_addr
-    = pe_data (abfd)->pe_opthdr.DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
+  bfd_size_type idata_section_size = bfd_section_size (idata_section);
+  internal_extra_pe_aouthdr *pe_extra = &pe_data (abfd)->pe_opthdr;
+  bfd_vma import_table_va = pe_extra->DataDirectory[PE_IMPORT_TABLE].VirtualAddress;
+  bfd_vma idata_section_va = bfd_section_vma (idata_section);
+
+  /* The section's virtual address as reported by BFD has the image base applied,
+     remove it.  */
+  gdb_assert (idata_section_va >= pe_extra->ImageBase);
+  idata_section_va -= pe_extra->ImageBase;
+
+  bfd_vma idata_section_end_va = idata_section_va + idata_section_size;
+
+  /* Make sure that the import table is indeed within the .idata section's range.  */
+  if (import_table_va < idata_section_va
+      || import_table_va >= idata_section_end_va)
+    {
+      warning (_("\
+%s: import table's virtual address (0x%" BFD_VMA_FMT "x) is outside .idata \
+section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
+	       bfd_get_filename (abfd), import_table_va, idata_section_va,
+	       idata_section_end_va);
+      return false;
+    }
+
+  /* The import table starts at this offset into the .idata section.  */
+  bfd_vma import_table_offset_in_sect = import_table_va - idata_section_va;
 
   /* Get the section's data.  */
   gdb::byte_vector idata_contents;
@@ -1013,9 +1034,10 @@ is_linked_with_cygwin_dll (bfd *abfd)
       return false;
     }
 
-  size_t idata_size = idata_contents.size ();
-  const gdb_byte *iter = idata_contents.data ();
-  const gdb_byte *end = idata_contents.data () + idata_size;
+  gdb_assert (idata_contents.size () == idata_section_size);
+
+  const gdb_byte *iter = idata_contents.data () + import_table_offset_in_sect;
+  const gdb_byte *end = idata_contents.data () + idata_section_size;
   const pe_import_directory_entry null_dir_entry = { 0 };
 
   /* Iterate through all directory entries.  */
@@ -1036,21 +1058,20 @@ is_linked_with_cygwin_dll (bfd *abfd)
 		  sizeof (pe_import_directory_entry)) == 0)
 	break;
 
-      bfd_vma name_addr = dir_entry->name_rva;
+      bfd_vma name_va = dir_entry->name_rva;
 
       /* If the name's virtual address is smaller than the section's virtual
          address, there's a problem.  */
-      if (name_addr < idata_addr
-	  || name_addr >= (idata_addr + idata_size))
+      if (name_va < idata_section_va || name_va >= idata_section_end_va)
 	{
 	  warning (_("\
 Failed to parse .idata section: name's virtual address (0x%" BFD_VMA_FMT "x) \
 is outside .idata section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
-		   name_addr, idata_addr, idata_addr + idata_size);
+		   name_va, idata_section_va, idata_section_end_va);
 	  break;
 	}
 
-      const gdb_byte *name = &idata_contents[name_addr - idata_addr];
+      const gdb_byte *name = &idata_contents[name_va - idata_section_va];
 
       /* Make sure we don't overshoot the end of the section with the streq.  */
       if (name + sizeof (CYGWIN_DLL_NAME) > end)
