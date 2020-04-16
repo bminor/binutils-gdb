@@ -1,5 +1,10 @@
 2020-04-16  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* windows-tdep.c (is_linked_with_cygwin_dll): Add filename to
+	warning messages.
+
+2020-04-16  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* windows-tdep.c (is_linked_with_cygwin_dll): Consider case where
 	import table is not at beginning of .idata section.
 

@@ -1030,7 +1030,8 @@ section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
   gdb::byte_vector idata_contents;
   if (!gdb_bfd_get_full_section_contents (abfd, idata_section, &idata_contents))
     {
-      warning (_("Failed to get content of .idata section."));
+      warning (_("%s: failed to get contents of .idata section."),
+	       bfd_get_filename (abfd));
       return false;
     }
 
@@ -1046,8 +1047,8 @@ section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
       /* Is there enough space left in the section for another entry?  */
       if (iter + sizeof (pe_import_directory_entry) > end)
 	{
-	  warning (_("Failed to parse .idata section: unexpected end of "
-		     ".idata section."));
+	  warning (_("%s: unexpected end of .idata section."),
+		   bfd_get_filename (abfd));
 	  break;
 	}
 
@@ -1065,9 +1066,10 @@ section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
       if (name_va < idata_section_va || name_va >= idata_section_end_va)
 	{
 	  warning (_("\
-Failed to parse .idata section: name's virtual address (0x%" BFD_VMA_FMT "x) \
-is outside .idata section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
-		   name_va, idata_section_va, idata_section_end_va);
+%s: name's virtual address (0x%" BFD_VMA_FMT "x) is outside .idata section's \
+range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
+		   bfd_get_filename (abfd), name_va, idata_section_va,
+		   idata_section_end_va);
 	  break;
 	}
 
