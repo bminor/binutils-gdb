@@ -1,20 +1,25 @@
 SECTIONS
 {
-  .text 0x300 :
-  {
-    *(.text)
-  }
+  . = 0x80000;
   A = .;
+  .text :
+  {
+    _start = .;
+    *(.text)
+    . = 0x10000;
+  }
+  B = .;
   .data :
   {
     *(.data)
+    . = 0x10000;
   }
-  B = .;
+  C = .;
   .bss :
   {
     *(.bss)
+    . = 0x10000;
   }
-  C = .;
   D = A - C + B;
   E = A + B - C;
   /DISCARD/ : {*(*)}

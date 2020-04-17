@@ -1540,7 +1540,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	  if (s->output_section->vma == 0)
 	    {
 	      /* Huh?  Shouldn't happen, but punt if it does.  */
-	      einfo (_("%P: zero vma section reloc detected: `%s' index %d flags %x\n"),
+	      einfo (_("%P: zero vma section reloc detected: `%s' #%d f=%d\n"),
 		     s->output_section->name, s->output_section->index,
 		     s->output_section->flags);
 	      continue;
