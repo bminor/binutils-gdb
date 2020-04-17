@@ -1,3 +1,12 @@
+2020-04-17  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/config/default.exp: If not already set then create the
+	CCC_OVERRIDE_OPTIONS environment variable to help when running the
+	testsuite with clang.
+	* testsuite/ld-elf/pr22269-1.c: Add a missing return statement.
+	* testsuite/ld-elfvers/vers.exp: Add checks to detect if files
+	were built before attempting to copy them.
+
 2020-04-16  Stephen Casner  <casner@acm.org>
 
 	PR ld/18963
