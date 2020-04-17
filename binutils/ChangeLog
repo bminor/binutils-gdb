@@ -1,3 +1,8 @@
+2020-04-17  Alan Modra  <amodra@gmail.com>
+
+	PR 25840
+	* debug.c (debug_class_type_samep): Don't segfault on NULL type.
+
 2020-04-16  Alan Modra  <amodra@gmail.com>
 
 	* doc/binutils.texi: Mention --no-show-raw-insn in objdump
