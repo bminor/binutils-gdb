@@ -1,3 +1,7 @@
+2020-04-17  Kamil Rytarowski  <n54@gmx.com>
+
+	* gdb.base/fork-running-state.c: Include "signal.h".
+
 2020-04-17  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.cp/maint.exp (test_help): Simplify multiple_help_body.
