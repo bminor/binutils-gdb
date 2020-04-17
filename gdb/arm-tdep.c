@@ -8326,20 +8326,6 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
 }
 
 static void
-set_arm_command (const char *args, int from_tty)
-{
-  printf_unfiltered (_("\
-\"set arm\" must be followed by an apporpriate subcommand.\n"));
-  help_list (setarmcmdlist, "set arm ", all_commands, gdb_stdout);
-}
-
-static void
-show_arm_command (const char *args, int from_tty)
-{
-  cmd_show_list (showarmcmdlist, from_tty, "");
-}
-
-static void
 arm_update_current_architecture (void)
 {
   struct gdbarch_info info;
@@ -9517,13 +9503,13 @@ _initialize_arm_tdep ()
 				  arm_elf_osabi_sniffer);
 
   /* Add root prefix command for all "set arm"/"show arm" commands.  */
-  add_prefix_cmd ("arm", no_class, set_arm_command,
-		  _("Various ARM-specific commands."),
-		  &setarmcmdlist, "set arm ", 0, &setlist);
+  add_basic_prefix_cmd ("arm", no_class,
+			_("Various ARM-specific commands."),
+			&setarmcmdlist, "set arm ", 0, &setlist);
 
-  add_prefix_cmd ("arm", no_class, show_arm_command,
-		  _("Various ARM-specific commands."),
-		  &showarmcmdlist, "show arm ", 0, &showlist);
+  add_show_prefix_cmd ("arm", no_class,
+		       _("Various ARM-specific commands."),
+		       &showarmcmdlist, "show arm ", 0, &showlist);
 
 
   arm_disassembler_options = xstrdup ("reg-names-std");

@@ -215,20 +215,16 @@ void
 cli_style_option::add_setshow_commands (enum command_class theclass,
 					const char *prefix_doc,
 					struct cmd_list_element **set_list,
-					void (*do_set) (const char *args,
-							int from_tty),
 					struct cmd_list_element **show_list,
-					void (*do_show) (const char *args,
-							 int from_tty),
 					bool skip_intensity)
 {
   m_set_prefix = std::string ("set style ") + m_name + " ";
   m_show_prefix = std::string ("show style ") + m_name + " ";
 
-  add_prefix_cmd (m_name, no_class, do_set, prefix_doc, &m_set_list,
-		  m_set_prefix.c_str (), 0, set_list);
-  add_prefix_cmd (m_name, no_class, do_show, prefix_doc, &m_show_list,
-		  m_show_prefix.c_str (), 0, show_list);
+  add_basic_prefix_cmd (m_name, no_class, prefix_doc, &m_set_list,
+			m_set_prefix.c_str (), 0, set_list);
+  add_show_prefix_cmd (m_name, no_class, prefix_doc, &m_show_list,
+		       m_show_prefix.c_str (), 0, show_list);
 
   add_setshow_enum_cmd ("foreground", theclass, cli_colors,
 			&m_foreground,
@@ -261,20 +257,6 @@ static cmd_list_element *style_set_list;
 static cmd_list_element *style_show_list;
 
 static void
-set_style (const char *arg, int from_tty)
-{
-  printf_unfiltered (_("\"set style\" must be followed "
-		       "by an appropriate subcommand.\n"));
-  help_list (style_set_list, "set style ", all_commands, gdb_stdout);
-}
-
-static void
-show_style (const char *arg, int from_tty)
-{
-  cmd_show_list (style_show_list, from_tty, "");
-}
-
-static void
 set_style_enabled  (const char *args, int from_tty, struct cmd_list_element *c)
 {
   g_source_cache.clear ();
@@ -301,27 +283,15 @@ show_style_sources (struct ui_file *file, int from_tty,
     fprintf_filtered (file, _("Source code styling is disabled.\n"));
 }
 
-/* Builds the "set style NAME " prefix.  */
-
-static std::string
-set_style_name (const char *name)
-{
-  std::string result ("set style ");
-
-  result += name;
-  result += " ";
-  return result;
-}
-
 void _initialize_cli_style ();
 void
 _initialize_cli_style ()
 {
-  add_prefix_cmd ("style", no_class, set_style, _("\
+  add_basic_prefix_cmd ("style", no_class, _("\
 Style-specific settings.\n\
 Configure various style-related variables, such as colors"),
 		  &style_set_list, "set style ", 0, &setlist);
-  add_prefix_cmd ("style", no_class, show_style, _("\
+  add_show_prefix_cmd ("style", no_class, _("\
 Style-specific settings.\n\
 Configure various style-related variables, such as colors"),
 		  &style_show_list, "show style ", 0, &showlist);
@@ -348,78 +318,68 @@ available if the appropriate extension is available at runtime."
 			   ), set_style_enabled, show_style_sources,
 			   &style_set_list, &style_show_list);
 
-#define STYLE_ADD_SETSHOW_COMMANDS(STYLE, PREFIX_DOC, SKIP)		\
-  STYLE.add_setshow_commands (no_class, PREFIX_DOC,		\
-			      &style_set_list,				\
-			      [] (const char *args, int from_tty)	\
-			      {						\
-				help_list				\
-				  (STYLE.set_list (),			\
-				   set_style_name (STYLE.name ()).c_str (), \
-				   all_commands,			\
-				   gdb_stdout);				\
-			      },					\
-			      &style_show_list,				\
-			      [] (const char *args, int from_tty)	\
-			      {						\
-				cmd_show_list				\
-				  (STYLE.show_list (),			\
-				   from_tty,				\
-				   "");					\
-			      }, SKIP)
-
-  STYLE_ADD_SETSHOW_COMMANDS (file_name_style,
-			      _("\
+  file_name_style.add_setshow_commands (no_class, _("\
 Filename display styling.\n\
-Configure filename colors and display intensity."), false);
+Configure filename colors and display intensity."),
+					&style_set_list, &style_show_list,
+					false);
 
-  STYLE_ADD_SETSHOW_COMMANDS (function_name_style,
-			      _("\
+  function_name_style.add_setshow_commands (no_class, _("\
 Function name display styling.\n\
-Configure function name colors and display intensity"), false);
+Configure function name colors and display intensity"),
+					    &style_set_list, &style_show_list,
+					    false);
 
-  STYLE_ADD_SETSHOW_COMMANDS (variable_name_style,
-			      _("\
+  variable_name_style.add_setshow_commands (no_class, _("\
 Variable name display styling.\n\
-Configure variable name colors and display intensity"), false);
+Configure variable name colors and display intensity"),
+					    &style_set_list, &style_show_list,
+					    false);
 
-  STYLE_ADD_SETSHOW_COMMANDS (address_style,
-			      _("\
+  address_style.add_setshow_commands (no_class, _("\
 Address display styling.\n\
-Configure address colors and display intensity"), false);
+Configure address colors and display intensity"),
+				      &style_set_list, &style_show_list,
+				      false);
 
-  STYLE_ADD_SETSHOW_COMMANDS (title_style,
-			      _("\
+  title_style.add_setshow_commands (no_class, _("\
 Title display styling.\n\
 Configure title colors and display intensity\n\
 Some commands (such as \"apropos -v REGEXP\") use the title style to improve\n\
-readability."), false);
+readability."),
+				    &style_set_list, &style_show_list,
+				    false);
 
-  STYLE_ADD_SETSHOW_COMMANDS (highlight_style,
-			      _("\
+  highlight_style.add_setshow_commands (no_class, _("\
 Highlight display styling.\n\
 Configure highlight colors and display intensity\n\
 Some commands use the highlight style to draw the attention to a part\n\
-of their output."), false);
+of their output."),
+					&style_set_list, &style_show_list,
+					false);
 
-  STYLE_ADD_SETSHOW_COMMANDS (metadata_style,
-			      _("\
+  metadata_style.add_setshow_commands (no_class, _("\
 Metadata display styling.\n\
 Configure metadata colors and display intensity\n\
 The \"metadata\" style is used when GDB displays information about\n\
-your data, for example \"<unavailable>\""), false);
+your data, for example \"<unavailable>\""),
+				       &style_set_list, &style_show_list,
+				       false);
 
-  STYLE_ADD_SETSHOW_COMMANDS (tui_border_style,
-			      _("\
+  tui_border_style.add_setshow_commands (no_class, _("\
 TUI border display styling.\n\
 Configure TUI border colors\n\
 The \"tui-border\" style is used when GDB displays the border of a\n\
-TUI window that does not have the focus."), true);
+TUI window that does not have the focus."),
+					 &style_set_list, &style_show_list,
+					 true);
 
-  STYLE_ADD_SETSHOW_COMMANDS (tui_active_border_style,
-			      _("\
+  tui_active_border_style.add_setshow_commands (no_class, _("\
 TUI active border display styling.\n\
 Configure TUI active border colors\n\
 The \"tui-active-border\" style is used when GDB displays the border of a\n\
-TUI window that does have the focus."), true);
+TUI window that does have the focus."),
+						&style_set_list,
+						&style_show_list,
+						true);
 }

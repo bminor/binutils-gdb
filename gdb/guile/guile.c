@@ -396,33 +396,6 @@ static struct cmd_list_element *set_guile_list;
 static struct cmd_list_element *show_guile_list;
 static struct cmd_list_element *info_guile_list;
 
-/* Function for use by 'set guile' prefix command.  */
-
-static void
-set_guile_command (const char *args, int from_tty)
-{
-  help_list (set_guile_list, "set guile ", all_commands, gdb_stdout);
-}
-
-/* Function for use by 'show guile' prefix command.  */
-
-static void
-show_guile_command (const char *args, int from_tty)
-{
-  cmd_show_list (show_guile_list, from_tty, "");
-}
-
-/* The "info scheme" command is defined as a prefix, with
-   allow_unknown 0.  Therefore, its own definition is called only for
-   "info scheme" with no args.  */
-
-static void
-info_guile_command (const char *args, int from_tty)
-{
-  printf_unfiltered (_("\"info guile\" must be followed"
-		       " by the name of an info command.\n"));
-  help_list (info_guile_list, "info guile ", all_commands, gdb_stdout);
-}
 
 /* Initialization.  */
 
@@ -761,22 +734,22 @@ This command is only a placeholder.")
 	   );
   add_com_alias ("gu", "guile", class_obscure, 1);
 
-  add_prefix_cmd ("guile", class_obscure, set_guile_command,
-		  _("Prefix command for Guile preference settings."),
-		  &set_guile_list, "set guile ", 0,
-		  &setlist);
+  add_basic_prefix_cmd ("guile", class_obscure,
+			_("Prefix command for Guile preference settings."),
+			&set_guile_list, "set guile ", 0,
+			&setlist);
   add_alias_cmd ("gu", "guile", class_obscure, 1, &setlist);
 
-  add_prefix_cmd ("guile", class_obscure, show_guile_command,
-		  _("Prefix command for Guile preference settings."),
-		  &show_guile_list, "show guile ", 0,
-		  &showlist);
+  add_show_prefix_cmd ("guile", class_obscure,
+		       _("Prefix command for Guile preference settings."),
+		       &show_guile_list, "show guile ", 0,
+		       &showlist);
   add_alias_cmd ("gu", "guile", class_obscure, 1, &showlist);
 
-  add_prefix_cmd ("guile", class_obscure, info_guile_command,
-		  _("Prefix command for Guile info displays."),
-		  &info_guile_list, "info guile ", 0,
-		  &infolist);
+  add_basic_prefix_cmd ("guile", class_obscure,
+			_("Prefix command for Guile info displays."),
+			&info_guile_list, "info guile ", 0,
+			&infolist);
   add_info_alias ("gu", "guile", 1);
 
   /* The name "print-stack" is carried over from Python.

@@ -45,7 +45,6 @@
 #include "tui/tui-source.h"
 #include "gdb_curses.h"
 
-static void tui_layout_command (const char *, int);
 static void extract_display_start_addr (struct gdbarch **, CORE_ADDR *);
 
 /* The layouts.  */
@@ -1023,14 +1022,6 @@ tui_new_layout_command (const char *spec, int from_tty)
   new_layout.release ();
 }
 
-/* Base command for "layout".  */
-
-static void
-tui_layout_command (const char *layout_name, int from_tty)
-{
-  help_list (layout_list, "layout ", all_commands, gdb_stdout);
-}
-
 /* Function to initialize gdb commands, for tui window layout
    manipulation.  */
 
@@ -1038,10 +1029,10 @@ void _initialize_tui_layout ();
 void
 _initialize_tui_layout ()
 {
-  add_prefix_cmd ("layout", class_tui, tui_layout_command, _("\
+  add_basic_prefix_cmd ("layout", class_tui, _("\
 Change the layout of windows.\n\
 Usage: layout prev | next | LAYOUT-NAME"),
-		  &layout_list, "layout ", 0, &cmdlist);
+			&layout_list, "layout ", 0, &cmdlist);
 
   add_cmd ("next", class_tui, tui_next_layout_command,
 	   _("Apply the next TUI layout."),

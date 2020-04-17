@@ -310,7 +310,7 @@ gdb_test_multiple "" "$test" {
     -re "^info $" {
 	send_gdb "\n"
 	gdb_test_multiple "" "$test" {
-	    -re "\"info\" must be followed by the name of an info command\\.\r\nList of info subcommands.*$gdb_prompt $" {
+	    -re "List of info subcommands.*$gdb_prompt $" {
 		pass "$test"
 	    }
 	}
@@ -323,7 +323,7 @@ gdb_test_multiple "" "$test" {
     -re "^info \\\x07$" {
 	send_gdb "\n"
 	gdb_test_multiple "" "$test" {
-	    -re "\"info\" must be followed by the name of an info command\\.\r\nList of info subcommands:\r\n\r\n.*$gdb_prompt $" {
+	    -re "List of info subcommands:\r\n\r\n.*$gdb_prompt $" {
 		pass "$test"
 	    }
 	}
@@ -339,7 +339,7 @@ gdb_test_multiple "" "$test" {
 	    -re "address.*types.*$gdb_prompt " {
 		send_gdb "\n"
 		gdb_test_multiple "" "$test" {
-		    -re "\"info\".*unambiguous\\..*$gdb_prompt $" {
+		    -re "allowed if unambiguous\\..*$gdb_prompt $" {
 			pass "$test"
 		    }
 		}

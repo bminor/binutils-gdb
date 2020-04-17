@@ -411,18 +411,6 @@ maintenance_test_options_unknown_is_operand_command_completer
 /* Command list for maint test-options.  */
 struct cmd_list_element *maintenance_test_options_list;
 
-/* The "maintenance test-options" prefix command.  */
-
-static void
-maintenance_test_options_command (const char *arg, int from_tty)
-{
-  printf_unfiltered
-    (_("\"maintenance test-options\" must be followed "
-       "by the name of a subcommand.\n"));
-  help_list (maintenance_test_options_list, "maintenance test-options ",
-	     all_commands, gdb_stdout);
-}
-
 
 void _initialize_maint_test_options ();
 void
@@ -430,12 +418,12 @@ _initialize_maint_test_options ()
 {
   cmd_list_element *cmd;
 
-  add_prefix_cmd ("test-options", no_class, maintenance_test_options_command,
-		  _("\
+  add_basic_prefix_cmd ("test-options", no_class,
+			_("\
 Generic command for testing the options infrastructure."),
-		  &maintenance_test_options_list,
-		  "maintenance test-options ", 0,
-		  &maintenancelist);
+			&maintenance_test_options_list,
+			"maintenance test-options ", 0,
+			&maintenancelist);
 
   const auto def_group = make_test_options_options_def_group (nullptr);
 

@@ -623,20 +623,6 @@ serial_pipe (struct serial *scbs[2])
 static struct cmd_list_element *serial_set_cmdlist;
 static struct cmd_list_element *serial_show_cmdlist;
 
-static void
-serial_set_cmd (const char *args, int from_tty)
-{
-  printf_unfiltered ("\"set serial\" must be followed "
-		     "by the name of a command.\n");
-  help_list (serial_set_cmdlist, "set serial ", all_commands, gdb_stdout);
-}
-
-static void
-serial_show_cmd (const char *args, int from_tty)
-{
-  cmd_show_list (serial_show_cmdlist, from_tty, "");
-}
-
 /* Baud rate specified for talking to serial target systems.  Default
    is left as -1, so targets can choose their own defaults.  */
 /* FIXME: This means that "show serial baud" and gr_files_info can
@@ -686,17 +672,17 @@ Connect the terminal directly up to the command monitor.\n\
 Use <CR>~. or <CR>~^D to break out."));
 #endif /* 0 */
 
-  add_prefix_cmd ("serial", class_maintenance, serial_set_cmd, _("\
+  add_basic_prefix_cmd ("serial", class_maintenance, _("\
 Set default serial/parallel port configuration."),
-		  &serial_set_cmdlist, "set serial ",
-		  0/*allow-unknown*/,
-		  &setlist);
+			&serial_set_cmdlist, "set serial ",
+			0/*allow-unknown*/,
+			&setlist);
 
-  add_prefix_cmd ("serial", class_maintenance, serial_show_cmd, _("\
+  add_show_prefix_cmd ("serial", class_maintenance, _("\
 Show default serial/parallel port configuration."),
-		  &serial_show_cmdlist, "show serial ",
-		  0/*allow-unknown*/,
-		  &showlist);
+		       &serial_show_cmdlist, "show serial ",
+		       0/*allow-unknown*/,
+		       &showlist);
 
   /* If target is open when baud changes, it doesn't take effect until
      the next open (I think, not sure).  */

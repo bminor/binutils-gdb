@@ -191,26 +191,6 @@ error_no_arg (const char *why)
   error (_("Argument required (%s)."), why);
 }
 
-/* The "info" command is defined as a prefix, with allow_unknown = 0.
-   Therefore, its own definition is called only for "info" with no
-   args.  */
-
-static void
-info_command (const char *arg, int from_tty)
-{
-  printf_unfiltered (_("\"info\" must be followed by "
-		       "the name of an info command.\n"));
-  help_list (infolist, "info ", all_commands, gdb_stdout);
-}
-
-/* The "show" command with no arguments shows all the settings.  */
-
-static void
-show_command (const char *arg, int from_tty)
-{
-  cmd_show_list (showlist, from_tty, "");
-}
-
 /* See cli/cli-cmds.h.  */
 
 void
@@ -1852,20 +1832,6 @@ filter_sals (std::vector<symtab_and_line> &sals)
   sals.erase (from, sals.end ());
 }
 
-static void
-set_debug (const char *arg, int from_tty)
-{
-  printf_unfiltered (_("\"set debug\" must be followed by "
-		       "the name of a debug subcommand.\n"));
-  help_list (setdebuglist, "set debug ", all_commands, gdb_stdout);
-}
-
-static void
-show_debug (const char *args, int from_tty)
-{
-  cmd_show_list (showdebuglist, from_tty, "");
-}
-
 void
 init_cmd_lists (void)
 {
@@ -2208,12 +2174,12 @@ Show verbosity."), NULL,
 			   show_info_verbose,
 			   &setlist, &showlist);
 
-  add_prefix_cmd ("history", class_support, set_history,
-		  _("Generic command for setting command history parameters."),
-		  &sethistlist, "set history ", 0, &setlist);
-  add_prefix_cmd ("history", class_support, show_history,
-		  _("Generic command for showing command history parameters."),
-		  &showhistlist, "show history ", 0, &showlist);
+  add_basic_prefix_cmd ("history", class_support, _("\
+Generic command for setting command history parameters."),
+			&sethistlist, "set history ", 0, &setlist);
+  add_show_prefix_cmd ("history", class_support, _("\
+Generic command for showing command history parameters."),
+		       &showhistlist, "show history ", 0, &showlist);
 
   add_setshow_boolean_cmd ("expansion", no_class, &history_expansion_p, _("\
 Set history expansion on command input."), _("\
@@ -2223,20 +2189,21 @@ Without an argument, history expansion is enabled."),
 			   show_history_expansion_p,
 			   &sethistlist, &showhistlist);
 
-  add_prefix_cmd ("info", class_info, info_command, _("\
+  add_basic_prefix_cmd ("info", class_info, _("\
 Generic command for showing things about the program being debugged."),
-		  &infolist, "info ", 0, &cmdlist);
+			&infolist, "info ", 0, &cmdlist);
   add_com_alias ("i", "info", class_info, 1);
   add_com_alias ("inf", "info", class_info, 1);
 
   add_com ("complete", class_obscure, complete_command,
 	   _("List the completions for the rest of the line as a command."));
 
-  add_prefix_cmd ("show", class_info, show_command, _("\
+  add_show_prefix_cmd ("show", class_info, _("\
 Generic command for showing things about the debugger."),
-		  &showlist, "show ", 0, &cmdlist);
+		       &showlist, "show ", 0, &cmdlist);
   /* Another way to get at the same thing.  */
-  add_info ("set", show_command, _("Show all GDB settings."));
+  add_show_prefix_cmd ("set", class_info, _("Show all GDB settings."),
+		       &showlist, "info set ", 0, &infolist);
 
   c = add_com ("with", class_vars, with_command, _("\
 Temporarily set SETTING to VALUE, run COMMAND, and restore SETTING.\n\
@@ -2324,13 +2291,13 @@ from the target."),
 				       show_remote_timeout,
 				       &setlist, &showlist);
 
-  add_prefix_cmd ("debug", no_class, set_debug,
-		  _("Generic command for setting gdb debugging flags."),
-		  &setdebuglist, "set debug ", 0, &setlist);
+  add_basic_prefix_cmd ("debug", no_class,
+			_("Generic command for setting gdb debugging flags."),
+			&setdebuglist, "set debug ", 0, &setlist);
 
-  add_prefix_cmd ("debug", no_class, show_debug,
-		  _("Generic command for showing gdb debugging flags."),
-		  &showdebuglist, "show debug ", 0, &showlist);
+  add_show_prefix_cmd ("debug", no_class,
+		       _("Generic command for showing gdb debugging flags."),
+		       &showdebuglist, "show debug ", 0, &showlist);
 
   c = add_com ("shell", class_support, shell_command, _("\
 Execute the rest of the line as a shell command.\n\

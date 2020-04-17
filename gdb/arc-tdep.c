@@ -2111,14 +2111,6 @@ arc_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file, "arc_dump_tdep: jb_pc = %i\n", tdep->jb_pc);
 }
 
-/* Wrapper for "maintenance print arc" list of commands.  */
-
-static void
-maintenance_print_arc_command (const char *args, int from_tty)
-{
-  cmd_show_list (maintenance_print_arc_list, from_tty, "");
-}
-
 /* This command accepts single argument - address of instruction to
    disassemble.  */
 
@@ -2180,11 +2172,11 @@ _initialize_arc_tdep ()
   /* Register ARC-specific commands with gdb.  */
 
   /* Add root prefix command for "maintenance print arc" commands.  */
-  add_prefix_cmd ("arc", class_maintenance, maintenance_print_arc_command,
-		  _("ARC-specific maintenance commands for printing GDB "
-		    "internal state."),
-		  &maintenance_print_arc_list, "maintenance print arc ", 0,
-		  &maintenanceprintlist);
+  add_show_prefix_cmd ("arc", class_maintenance,
+		       _("ARC-specific maintenance commands for printing GDB "
+			 "internal state."),
+		       &maintenance_print_arc_list, "maintenance print arc ",
+		       0, &maintenanceprintlist);
 
   add_cmd ("arc-instruction", class_maintenance,
 	   dump_arc_instruction_command,

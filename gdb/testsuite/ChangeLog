@@ -1,3 +1,12 @@
+2020-04-17  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.cp/maint.exp (test_help): Simplify multiple_help_body.
+	Update tests.
+	* gdb.btrace/cpu.exp: Update tests.
+	* gdb.base/maint.exp: Update tests.
+	* gdb.base/default.exp: Update tests.
+	* gdb.base/completion.exp: Update tests.
+
 2020-04-16  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/25791

@@ -380,6 +380,58 @@ add_prefix_cmd (const char *name, enum command_class theclass,
   return c;
 }
 
+/* A helper function for add_basic_prefix_cmd.  This is a command
+   function that just forwards to help_list.  */
+
+static void
+do_prefix_cmd (const char *args, int from_tty, struct cmd_list_element *c)
+{
+  /* Look past all aliases.  */
+  while (c->cmd_pointer != nullptr)
+    c = c->cmd_pointer;
+
+  help_list (*c->prefixlist, c->prefixname, all_commands, gdb_stdout);
+}
+
+/* See command.h.  */
+
+struct cmd_list_element *
+add_basic_prefix_cmd (const char *name, enum command_class theclass,
+		      const char *doc, struct cmd_list_element **prefixlist,
+		      const char *prefixname, int allow_unknown,
+		      struct cmd_list_element **list)
+{
+  struct cmd_list_element *cmd = add_prefix_cmd (name, theclass, nullptr,
+						 doc, prefixlist, prefixname,
+						 allow_unknown, list);
+  set_cmd_sfunc (cmd, do_prefix_cmd);
+  return cmd;
+}
+
+/* A helper function for add_show_prefix_cmd.  This is a command
+   function that just forwards to cmd_show_list.  */
+
+static void
+do_show_prefix_cmd (const char *args, int from_tty, struct cmd_list_element *c)
+{
+  cmd_show_list (*c->prefixlist, from_tty, "");
+}
+
+/* See command.h.  */
+
+struct cmd_list_element *
+add_show_prefix_cmd (const char *name, enum command_class theclass,
+		     const char *doc, struct cmd_list_element **prefixlist,
+		     const char *prefixname, int allow_unknown,
+		     struct cmd_list_element **list)
+{
+  struct cmd_list_element *cmd = add_prefix_cmd (name, theclass, nullptr,
+						 doc, prefixlist, prefixname,
+						 allow_unknown, list);
+  set_cmd_sfunc (cmd, do_show_prefix_cmd);
+  return cmd;
+}
+
 /* Like ADD_PREFIX_CMD but sets the suppress_notification pointer on the
    new command list element.  */
 

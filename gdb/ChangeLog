@@ -1,3 +1,153 @@
+2020-04-17  Tom Tromey  <tromey@adacore.com>
+
+	* auto-load.c (show_auto_load_cmd): Remove.
+	(auto_load_show_cmdlist_get): Use add_show_prefix_cmd.
+	* arc-tdep.c (_initialize_arc_tdep): Use add_show_prefix_cmd.
+	(maintenance_print_arc_command): Remove.
+	* tui/tui-win.c (tui_command): Remove.
+	(tui_get_cmd_list): Use add_basic_prefix_cmd.
+	* tui/tui-layout.c (tui_layout_command): Remove.
+	(_initialize_tui_layout): Use add_basic_prefix_cmd.
+	* python/python.c (user_set_python, user_show_python): Remove.
+	(_initialize_python): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* guile/guile.c (set_guile_command, show_guile_command): Remove.
+	(install_gdb_commands): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	(info_guile_command): Remove.
+	* dwarf2/read.c (set_dwarf_cmd, show_dwarf_cmd): Remove.
+	(_initialize_dwarf2_read): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* cli/cli-style.h (class cli_style_option) <add_setshow_commands>:
+	Remove do_set and do_show parameters.
+	* cli/cli-style.c (set_style, show_style): Remove.
+	(_initialize_cli_style): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	(cli_style_option::add_setshow_commands): Remove do_set and
+	do_show parameters.
+	(cli_style_option::add_setshow_commands): Use
+	add_basic_prefix_cmd, add_show_prefix_cmd.
+	(STYLE_ADD_SETSHOW_COMMANDS): Remove macro.
+	(set_style_name): Remove.
+	* cli/cli-dump.c (dump_command, append_command): Remove.
+	(srec_dump_command, ihex_dump_command, verilog_dump_command)
+	(tekhex_dump_command, binary_dump_command)
+	(binary_append_command): Remove.
+	(_initialize_cli_dump): Use add_basic_prefix_cmd.
+	* windows-tdep.c (w32_prefix_command_valid): Remove global.
+	(init_w32_command_list): Remove; move into ...
+	(_initialize_windows_tdep): ... here.  Use add_basic_prefix_cmd.
+	* valprint.c (set_print, show_print, set_print_raw)
+	(show_print_raw): Remove.
+	(_initialize_valprint): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* typeprint.c (set_print_type, show_print_type): Remove.
+	(_initialize_typeprint): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* record.c (set_record_command, show_record_command): Remove.
+	(_initialize_record): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* cli/cli-cmds.c (_initialize_cli_cmds): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	(info_command, show_command, set_debug, show_debug): Remove.
+	* top.h (set_history, show_history): Don't declare.
+	* top.c (set_history, show_history): Remove.
+	* target-descriptions.c (set_tdesc_cmd, show_tdesc_cmd)
+	(unset_tdesc_cmd): Remove.
+	(_initialize_target_descriptions): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* symtab.c (info_module_command): Remove.
+	(_initialize_symtab): Use add_basic_prefix_cmd.
+	* symfile.c (overlay_command): Remove.
+	(_initialize_symfile): Use add_basic_prefix_cmd.
+	* sparc64-tdep.c (info_adi_command): Remove.
+	(_initialize_sparc64_adi_tdep): Use add_basic_prefix_cmd.
+	* sh-tdep.c (show_sh_command, set_sh_command): Remove.
+	(_initialize_sh_tdep): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* serial.c (serial_set_cmd, serial_show_cmd): Remove.
+	(_initialize_serial): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* ser-tcp.c (set_tcp_cmd, show_tcp_cmd): Remove.
+	(_initialize_ser_tcp): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* rs6000-tdep.c (set_powerpc_command, show_powerpc_command)
+	(_initialize_rs6000_tdep): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* riscv-tdep.c (show_riscv_command, set_riscv_command)
+	(show_debug_riscv_command, set_debug_riscv_command): Remove.
+	(_initialize_riscv_tdep): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* remote.c (remote_command, set_remote_cmd): Remove.
+	(_initialize_remote): Use add_basic_prefix_cmd.
+	* record-full.c (set_record_full_command)
+	(show_record_full_command): Remove.
+	(_initialize_record_full): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* record-btrace.c (cmd_set_record_btrace)
+	(cmd_show_record_btrace, cmd_set_record_btrace_bts)
+	(cmd_show_record_btrace_bts, cmd_set_record_btrace_pt)
+	(cmd_show_record_btrace_pt): Remove.
+	(_initialize_record_btrace): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* ravenscar-thread.c (set_ravenscar_command)
+	(show_ravenscar_command): Remove.
+	(_initialize_ravenscar): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* mips-tdep.c (show_mips_command, set_mips_command)
+	(_initialize_mips_tdep): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* maint.c (maintenance_command, maintenance_info_command)
+	(maintenance_check_command, maintenance_print_command)
+	(maintenance_set_cmd, maintenance_show_cmd): Remove.
+	(_initialize_maint_cmds): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	(show_per_command_cmd): Remove.
+	* maint-test-settings.c (maintenance_set_test_settings_cmd):
+	Remove.
+	(maintenance_show_test_settings_cmd): Remove.
+	(_initialize_maint_test_settings): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* maint-test-options.c (maintenance_test_options_command):
+	Remove.
+	(_initialize_maint_test_options): Use add_basic_prefix_cmd.
+	* macrocmd.c (macro_command): Remove
+	(_initialize_macrocmd): Use add_basic_prefix_cmd.
+	* language.c (set_check, show_check): Remove.
+	(_initialize_language): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* infcmd.c (unset_command): Remove.
+	(_initialize_infcmd): Use add_basic_prefix_cmd.
+	* i386-tdep.c (set_mpx_cmd, show_mpx_cmd): Remove.
+	(_initialize_i386_tdep): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* go32-nat.c (go32_info_dos_command): Remove.
+	(_initialize_go32_nat): Use add_basic_prefix_cmd.
+	* cli/cli-decode.c (do_prefix_cmd, add_basic_prefix_cmd)
+	(do_show_prefix_cmd, add_show_prefix_cmd): New functions.
+	* frame.c (set_backtrace_cmd, show_backtrace_cmd): Remove.
+	(_initialize_frame): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* dcache.c (set_dcache_command, show_dcache_command): Remove.
+	(_initialize_dcache): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* cp-support.c (maint_cplus_command): Remove.
+	(_initialize_cp_support): Use add_basic_prefix_cmd.
+	* btrace.c (maint_btrace_cmd, maint_btrace_set_cmd)
+	(maint_btrace_show_cmd, maint_btrace_pt_set_cmd)
+	(maint_btrace_pt_show_cmd, _initialize_btrace): Use
+	add_basic_prefix_cmd, add_show_prefix_cmd.
+	* breakpoint.c (save_command): Remove.
+	(_initialize_breakpoint): Use add_basic_prefix_cmd.
+	* arm-tdep.c (set_arm_command, show_arm_command): Remove.
+	(_initialize_arm_tdep): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* ada-lang.c (maint_set_ada_cmd, maint_show_ada_cmd)
+	(set_ada_command, show_ada_command): Remove.
+	(_initialize_ada_language): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* command.h (add_basic_prefix_cmd, add_show_prefix_cmd): Declare.
+
 2020-04-16  Kamil Rytarowski  <n54@gmx.com>
 
 	* nbsd-nat.c (inf_ptrace_target::auxv_parse): Remove.

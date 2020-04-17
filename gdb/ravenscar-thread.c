@@ -563,24 +563,6 @@ ravenscar_thread_target::get_ada_task_ptid (long lwp, long thread)
 static struct cmd_list_element *set_ravenscar_list;
 static struct cmd_list_element *show_ravenscar_list;
 
-/* Implement the "set ravenscar" prefix command.  */
-
-static void
-set_ravenscar_command (const char *arg, int from_tty)
-{
-  printf_unfiltered (_(\
-"\"set ravenscar\" must be followed by the name of a setting.\n"));
-  help_list (set_ravenscar_list, "set ravenscar ", all_commands, gdb_stdout);
-}
-
-/* Implement the "show ravenscar" prefix command.  */
-
-static void
-show_ravenscar_command (const char *args, int from_tty)
-{
-  cmd_show_list (show_ravenscar_list, from_tty, "");
-}
-
 /* Implement the "show ravenscar task-switching" command.  */
 
 static void
@@ -607,13 +589,13 @@ _initialize_ravenscar ()
      ravenscar ops if needed.  */
   gdb::observers::inferior_created.attach (ravenscar_inferior_created);
 
-  add_prefix_cmd ("ravenscar", no_class, set_ravenscar_command,
-                  _("Prefix command for changing Ravenscar-specific settings."),
-                  &set_ravenscar_list, "set ravenscar ", 0, &setlist);
+  add_basic_prefix_cmd ("ravenscar", no_class,
+			_("Prefix command for changing Ravenscar-specific settings."),
+			&set_ravenscar_list, "set ravenscar ", 0, &setlist);
 
-  add_prefix_cmd ("ravenscar", no_class, show_ravenscar_command,
-                  _("Prefix command for showing Ravenscar-specific settings."),
-                  &show_ravenscar_list, "show ravenscar ", 0, &showlist);
+  add_show_prefix_cmd ("ravenscar", no_class,
+		       _("Prefix command for showing Ravenscar-specific settings."),
+		       &show_ravenscar_list, "show ravenscar ", 0, &showlist);
 
   add_setshow_boolean_cmd ("task-switching", class_obscure,
                            &ravenscar_task_support, _("\

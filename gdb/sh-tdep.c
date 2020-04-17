@@ -2408,30 +2408,16 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   return gdbarch;
 }
 
-static void
-show_sh_command (const char *args, int from_tty)
-{
-  help_list (showshcmdlist, "show sh ", all_commands, gdb_stdout);
-}
-
-static void
-set_sh_command (const char *args, int from_tty)
-{
-  printf_unfiltered
-    ("\"set sh\" must be followed by an appropriate subcommand.\n");
-  help_list (setshcmdlist, "set sh ", all_commands, gdb_stdout);
-}
-
 void _initialize_sh_tdep ();
 void
 _initialize_sh_tdep ()
 {
   gdbarch_register (bfd_arch_sh, sh_gdbarch_init, NULL);
 
-  add_prefix_cmd ("sh", no_class, set_sh_command, "SH specific commands.",
-                  &setshcmdlist, "set sh ", 0, &setlist);
-  add_prefix_cmd ("sh", no_class, show_sh_command, "SH specific commands.",
-                  &showshcmdlist, "show sh ", 0, &showlist);
+  add_basic_prefix_cmd ("sh", no_class, "SH specific commands.",
+			&setshcmdlist, "set sh ", 0, &setlist);
+  add_show_prefix_cmd ("sh", no_class, "SH specific commands.",
+		       &showshcmdlist, "show sh ", 0, &showlist);
   
   add_setshow_enum_cmd ("calling-convention", class_vars, sh_cc_enum,
 			&sh_active_calling_convention,

@@ -46,9 +46,7 @@ public:
   void add_setshow_commands (enum command_class theclass,
 			     const char *prefix_doc,
 			     struct cmd_list_element **set_list,
-			     void (*do_set) (const char *args, int from_tty),
 			     struct cmd_list_element **show_list,
-			     void (*do_show) (const char *args, int from_tty),
 			     bool skip_intensity);
 
   /* Return the 'set style NAME' command list, that can be used

@@ -424,20 +424,6 @@ ser_tcp_send_break (struct serial *scb)
   return (serial_write (scb, "\377\363", 2));
 }
 
-/* Support for "set tcp" and "show tcp" commands.  */
-
-static void
-set_tcp_cmd (const char *args, int from_tty)
-{
-  help_list (tcp_set_cmdlist, "set tcp ", all_commands, gdb_stdout);
-}
-
-static void
-show_tcp_cmd (const char *args, int from_tty)
-{
-  help_list (tcp_show_cmdlist, "show tcp ", all_commands, gdb_stdout);
-}
-
 #ifndef USE_WIN32API
 
 /* The TCP ops.  */
@@ -480,16 +466,16 @@ _initialize_ser_tcp ()
   serial_add_interface (&tcp_ops);
 #endif /* USE_WIN32API */
 
-  add_prefix_cmd ("tcp", class_maintenance, set_tcp_cmd, _("\
+  add_basic_prefix_cmd ("tcp", class_maintenance, _("\
 TCP protocol specific variables.\n\
 Configure variables specific to remote TCP connections."),
-		  &tcp_set_cmdlist, "set tcp ",
-		  0 /* allow-unknown */, &setlist);
-  add_prefix_cmd ("tcp", class_maintenance, show_tcp_cmd, _("\
+			&tcp_set_cmdlist, "set tcp ",
+			0 /* allow-unknown */, &setlist);
+  add_show_prefix_cmd ("tcp", class_maintenance, _("\
 TCP protocol specific variables.\n\
 Configure variables specific to remote TCP connections."),
-		  &tcp_show_cmdlist, "show tcp ",
-		  0 /* allow-unknown */, &showlist);
+		       &tcp_show_cmdlist, "show tcp ",
+		       0 /* allow-unknown */, &showlist);
 
   add_setshow_boolean_cmd ("auto-retry", class_obscure,
 			   &tcp_auto_retry, _("\

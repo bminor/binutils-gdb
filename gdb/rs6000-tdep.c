@@ -7172,22 +7172,6 @@ rs6000_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
   /* FIXME: Dump gdbarch_tdep.  */
 }
 
-/* PowerPC-specific commands.  */
-
-static void
-set_powerpc_command (const char *args, int from_tty)
-{
-  printf_unfiltered (_("\
-\"set powerpc\" must be followed by an appropriate subcommand.\n"));
-  help_list (setpowerpccmdlist, "set powerpc ", all_commands, gdb_stdout);
-}
-
-static void
-show_powerpc_command (const char *args, int from_tty)
-{
-  cmd_show_list (showpowerpccmdlist, from_tty, "");
-}
-
 static void
 powerpc_set_soft_float (const char *args, int from_tty,
 			struct cmd_list_element *c)
@@ -7338,13 +7322,13 @@ _initialize_rs6000_tdep ()
 
   /* Add root prefix command for all "set powerpc"/"show powerpc"
      commands.  */
-  add_prefix_cmd ("powerpc", no_class, set_powerpc_command,
-		  _("Various PowerPC-specific commands."),
-		  &setpowerpccmdlist, "set powerpc ", 0, &setlist);
+  add_basic_prefix_cmd ("powerpc", no_class,
+			_("Various PowerPC-specific commands."),
+			&setpowerpccmdlist, "set powerpc ", 0, &setlist);
 
-  add_prefix_cmd ("powerpc", no_class, show_powerpc_command,
-		  _("Various PowerPC-specific commands."),
-		  &showpowerpccmdlist, "show powerpc ", 0, &showlist);
+  add_show_prefix_cmd ("powerpc", no_class,
+		       _("Various PowerPC-specific commands."),
+		       &showpowerpccmdlist, "show powerpc ", 0, &showlist);
 
   /* Add a command to allow the user to force the ABI.  */
   add_setshow_auto_boolean_cmd ("soft-float", class_support,

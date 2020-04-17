@@ -6479,15 +6479,6 @@ get_msymbol_address (struct objfile *objf, const struct minimal_symbol *minsym)
 
 static struct cmd_list_element *info_module_cmdlist = NULL;
 
-/* Implement the 'info module' command, just displays some help text for
-   the available sub-commands.  */
-
-static void
-info_module_command (const char *args, int from_tty)
-{
-  help_list (info_module_cmdlist, "info module ", class_info, gdb_stdout);
-}
-
 /* See symtab.h.  */
 
 std::vector<module_symbol_search>
@@ -6846,10 +6837,10 @@ Options:\n\
 		_("All module names, or those matching REGEXP."));
   set_cmd_completer_handle_brkchars (c, info_types_command_completer);
 
-  add_prefix_cmd ("module", class_info, info_module_command, _("\
+  add_basic_prefix_cmd ("module", class_info, _("\
 Print information about modules."),
-		  &info_module_cmdlist, "info module ",
-		  0, &infolist);
+			&info_module_cmdlist, "info module ",
+			0, &infolist);
 
   c = add_cmd ("functions", class_info, info_module_functions_command, _("\
 Display functions arranged by modules.\n\

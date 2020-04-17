@@ -3358,51 +3358,6 @@ maint_btrace_clear_cmd (const char *args, int from_tty)
   btrace_clear (tp);
 }
 
-/* The "maintenance btrace" command.  */
-
-static void
-maint_btrace_cmd (const char *args, int from_tty)
-{
-  help_list (maint_btrace_cmdlist, "maintenance btrace ", all_commands,
-	     gdb_stdout);
-}
-
-/* The "maintenance set btrace" command.  */
-
-static void
-maint_btrace_set_cmd (const char *args, int from_tty)
-{
-  help_list (maint_btrace_set_cmdlist, "maintenance set btrace ", all_commands,
-	     gdb_stdout);
-}
-
-/* The "maintenance show btrace" command.  */
-
-static void
-maint_btrace_show_cmd (const char *args, int from_tty)
-{
-  help_list (maint_btrace_show_cmdlist, "maintenance show btrace ",
-	     all_commands, gdb_stdout);
-}
-
-/* The "maintenance set btrace pt" command.  */
-
-static void
-maint_btrace_pt_set_cmd (const char *args, int from_tty)
-{
-  help_list (maint_btrace_pt_set_cmdlist, "maintenance set btrace pt ",
-	     all_commands, gdb_stdout);
-}
-
-/* The "maintenance show btrace pt" command.  */
-
-static void
-maint_btrace_pt_show_cmd (const char *args, int from_tty)
-{
-  help_list (maint_btrace_pt_show_cmdlist, "maintenance show btrace pt ",
-	     all_commands, gdb_stdout);
-}
-
 /* The "maintenance info btrace" command.  */
 
 static void
@@ -3478,30 +3433,32 @@ _initialize_btrace ()
   add_cmd ("btrace", class_maintenance, maint_info_btrace_cmd,
 	   _("Info about branch tracing data."), &maintenanceinfolist);
 
-  add_prefix_cmd ("btrace", class_maintenance, maint_btrace_cmd,
-		  _("Branch tracing maintenance commands."),
-		  &maint_btrace_cmdlist, "maintenance btrace ",
-		  0, &maintenancelist);
+  add_basic_prefix_cmd ("btrace", class_maintenance,
+			_("Branch tracing maintenance commands."),
+			&maint_btrace_cmdlist, "maintenance btrace ",
+			0, &maintenancelist);
 
-  add_prefix_cmd ("btrace", class_maintenance, maint_btrace_set_cmd, _("\
+  add_basic_prefix_cmd ("btrace", class_maintenance, _("\
 Set branch tracing specific variables."),
-                  &maint_btrace_set_cmdlist, "maintenance set btrace ",
-                  0, &maintenance_set_cmdlist);
+			&maint_btrace_set_cmdlist, "maintenance set btrace ",
+			0, &maintenance_set_cmdlist);
 
-  add_prefix_cmd ("pt", class_maintenance, maint_btrace_pt_set_cmd, _("\
+  add_basic_prefix_cmd ("pt", class_maintenance, _("\
 Set Intel Processor Trace specific variables."),
-                  &maint_btrace_pt_set_cmdlist, "maintenance set btrace pt ",
-                  0, &maint_btrace_set_cmdlist);
+			&maint_btrace_pt_set_cmdlist,
+			"maintenance set btrace pt ",
+			0, &maint_btrace_set_cmdlist);
 
-  add_prefix_cmd ("btrace", class_maintenance, maint_btrace_show_cmd, _("\
+  add_show_prefix_cmd ("btrace", class_maintenance, _("\
 Show branch tracing specific variables."),
-                  &maint_btrace_show_cmdlist, "maintenance show btrace ",
-                  0, &maintenance_show_cmdlist);
+		       &maint_btrace_show_cmdlist, "maintenance show btrace ",
+		       0, &maintenance_show_cmdlist);
 
-  add_prefix_cmd ("pt", class_maintenance, maint_btrace_pt_show_cmd, _("\
+  add_show_prefix_cmd ("pt", class_maintenance, _("\
 Show Intel Processor Trace specific variables."),
-                  &maint_btrace_pt_show_cmdlist, "maintenance show btrace pt ",
-                  0, &maint_btrace_show_cmdlist);
+		       &maint_btrace_pt_show_cmdlist,
+		       "maintenance show btrace pt ",
+		       0, &maint_btrace_show_cmdlist);
 
   add_setshow_boolean_cmd ("skip-pad", class_maintenance,
 			   &maint_btrace_pt_skip_pad, _("\

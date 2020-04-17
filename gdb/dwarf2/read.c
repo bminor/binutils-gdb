@@ -23482,19 +23482,6 @@ struct cmd_list_element *set_dwarf_cmdlist;
 struct cmd_list_element *show_dwarf_cmdlist;
 
 static void
-set_dwarf_cmd (const char *args, int from_tty)
-{
-  help_list (set_dwarf_cmdlist, "maintenance set dwarf ", all_commands,
-	     gdb_stdout);
-}
-
-static void
-show_dwarf_cmd (const char *args, int from_tty)
-{
-  cmd_show_list (show_dwarf_cmdlist, from_tty, "");
-}
-
-static void
 show_check_physname (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
@@ -23507,17 +23494,17 @@ void _initialize_dwarf2_read ();
 void
 _initialize_dwarf2_read ()
 {
-  add_prefix_cmd ("dwarf", class_maintenance, set_dwarf_cmd, _("\
+  add_basic_prefix_cmd ("dwarf", class_maintenance, _("\
 Set DWARF specific variables.\n\
 Configure DWARF variables such as the cache size."),
-                  &set_dwarf_cmdlist, "maintenance set dwarf ",
-                  0/*allow-unknown*/, &maintenance_set_cmdlist);
+			&set_dwarf_cmdlist, "maintenance set dwarf ",
+			0/*allow-unknown*/, &maintenance_set_cmdlist);
 
-  add_prefix_cmd ("dwarf", class_maintenance, show_dwarf_cmd, _("\
+  add_show_prefix_cmd ("dwarf", class_maintenance, _("\
 Show DWARF specific variables.\n\
 Show DWARF variables such as the cache size."),
-                  &show_dwarf_cmdlist, "maintenance show dwarf ",
-                  0/*allow-unknown*/, &maintenance_show_cmdlist);
+		       &show_dwarf_cmdlist, "maintenance show dwarf ",
+		       0/*allow-unknown*/, &maintenance_show_cmdlist);
 
   add_setshow_zinteger_cmd ("max-cache-age", class_obscure,
 			    &dwarf_max_cache_age, _("\

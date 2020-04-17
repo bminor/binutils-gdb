@@ -1590,23 +1590,6 @@ python_command (const char *arg, int from_tty)
 static struct cmd_list_element *user_set_python_list;
 static struct cmd_list_element *user_show_python_list;
 
-/* Function for use by 'set python' prefix command.  */
-
-static void
-user_set_python (const char *args, int from_tty)
-{
-  help_list (user_set_python_list, "set python ", all_commands,
-	     gdb_stdout);
-}
-
-/* Function for use by 'show python' prefix command.  */
-
-static void
-user_show_python (const char *args, int from_tty)
-{
-  cmd_show_list (user_show_python_list, from_tty, "");
-}
-
 /* Initialize the Python code.  */
 
 #ifdef HAVE_PYTHON
@@ -1871,15 +1854,15 @@ This command is only a placeholder.")
   add_com_alias ("py", "python", class_obscure, 1);
 
   /* Add set/show python print-stack.  */
-  add_prefix_cmd ("python", no_class, user_show_python,
-		  _("Prefix command for python preference settings."),
-		  &user_show_python_list, "show python ", 0,
-		  &showlist);
+  add_basic_prefix_cmd ("python", no_class,
+			_("Prefix command for python preference settings."),
+			&user_show_python_list, "show python ", 0,
+			&showlist);
 
-  add_prefix_cmd ("python", no_class, user_set_python,
-		  _("Prefix command for python preference settings."),
-		  &user_set_python_list, "set python ", 0,
-		  &setlist);
+  add_show_prefix_cmd ("python", no_class,
+		       _("Prefix command for python preference settings."),
+		       &user_set_python_list, "set python ", 0,
+		       &setlist);
 
   add_setshow_enum_cmd ("print-stack", no_class, python_excp_enums,
 			&gdbpy_should_print_stack, _("\

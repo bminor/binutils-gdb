@@ -15118,14 +15118,6 @@ add_catch_command (const char *name, const char *docstring,
   set_cmd_completer (command, completer);
 }
 
-static void
-save_command (const char *arg, int from_tty)
-{
-  printf_unfiltered (_("\"save\" must be followed by "
-		       "the name of a save subcommand.\n"));
-  help_list (save_cmdlist, "save ", all_commands, gdb_stdout);
-}
-
 struct breakpoint *
 iterate_over_breakpoints (gdb::function_view<bool (breakpoint *)> callback)
 {
@@ -15785,10 +15777,10 @@ The trace will end when the tracepoint has been passed 'count' times.\n\
 Usage: passcount COUNT TPNUM, where TPNUM may also be \"all\";\n\
 if TPNUM is omitted, passcount refers to the last tracepoint defined."));
 
-  add_prefix_cmd ("save", class_breakpoint, save_command,
-		  _("Save breakpoint definitions as a script."),
-		  &save_cmdlist, "save ",
-		  0/*allow-unknown*/, &cmdlist);
+  add_basic_prefix_cmd ("save", class_breakpoint,
+			_("Save breakpoint definitions as a script."),
+			&save_cmdlist, "save ",
+			0/*allow-unknown*/, &cmdlist);
 
   c = add_cmd ("breakpoints", class_breakpoint, save_breakpoints_command, _("\
 Save current breakpoint definitions as a script.\n\

@@ -2075,12 +2075,6 @@ go32_pte_for_address (const char *arg, int from_tty)
 
 static struct cmd_list_element *info_dos_cmdlist = NULL;
 
-static void
-go32_info_dos_command (const char *args, int from_tty)
-{
-  help_list (info_dos_cmdlist, "info dos ", class_info, gdb_stdout);
-}
-
 void _initialize_go32_nat ();
 void
 _initialize_go32_nat ()
@@ -2107,9 +2101,9 @@ _initialize_go32_nat ()
   /* We are always processing GCC-compiled programs.  */
   processing_gcc_compilation = 2;
 
-  add_prefix_cmd ("dos", class_info, go32_info_dos_command, _("\
+  add_basic_prefix_cmd ("dos", class_info, _("\
 Print information specific to DJGPP (aka MS-DOS) debugging."),
-		  &info_dos_cmdlist, "info dos ", 0, &infolist);
+			&info_dos_cmdlist, "info dos ", 0, &infolist);
 
   add_cmd ("sysinfo", class_info, go32_sysinfo, _("\
 Display information about the target system, including CPU, OS, DPMI, etc."),

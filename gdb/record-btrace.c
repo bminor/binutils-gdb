@@ -2962,25 +2962,6 @@ cmd_record_btrace_start (const char *args, int from_tty)
     }
 }
 
-/* The "set record btrace" command.  */
-
-static void
-cmd_set_record_btrace (const char *args, int from_tty)
-{
-  printf_unfiltered (_("\"set record btrace\" must be followed "
-		       "by an appropriate subcommand.\n"));
-  help_list (set_record_btrace_cmdlist, "set record btrace ",
-	     all_commands, gdb_stdout);
-}
-
-/* The "show record btrace" command.  */
-
-static void
-cmd_show_record_btrace (const char *args, int from_tty)
-{
-  cmd_show_list (show_record_btrace_cmdlist, from_tty, "");
-}
-
 /* The "show record btrace replay-memory-access" command.  */
 
 static void
@@ -3095,44 +3076,6 @@ cmd_show_record_btrace_cpu (const char *args, int from_tty)
   error (_("Internal error: bad cpu state."));
 }
 
-/* The "s record btrace bts" command.  */
-
-static void
-cmd_set_record_btrace_bts (const char *args, int from_tty)
-{
-  printf_unfiltered (_("\"set record btrace bts\" must be followed "
-		       "by an appropriate subcommand.\n"));
-  help_list (set_record_btrace_bts_cmdlist, "set record btrace bts ",
-	     all_commands, gdb_stdout);
-}
-
-/* The "show record btrace bts" command.  */
-
-static void
-cmd_show_record_btrace_bts (const char *args, int from_tty)
-{
-  cmd_show_list (show_record_btrace_bts_cmdlist, from_tty, "");
-}
-
-/* The "set record btrace pt" command.  */
-
-static void
-cmd_set_record_btrace_pt (const char *args, int from_tty)
-{
-  printf_unfiltered (_("\"set record btrace pt\" must be followed "
-		       "by an appropriate subcommand.\n"));
-  help_list (set_record_btrace_pt_cmdlist, "set record btrace pt ",
-	     all_commands, gdb_stdout);
-}
-
-/* The "show record btrace pt" command.  */
-
-static void
-cmd_show_record_btrace_pt (const char *args, int from_tty)
-{
-  cmd_show_list (show_record_btrace_pt_cmdlist, from_tty, "");
-}
-
 /* The "record bts buffer-size" show value function.  */
 
 static void
@@ -3181,13 +3124,13 @@ This format may not be available on all processors."),
 	   &record_btrace_cmdlist);
   add_alias_cmd ("pt", "btrace pt", class_obscure, 1, &record_cmdlist);
 
-  add_prefix_cmd ("btrace", class_support, cmd_set_record_btrace,
-		  _("Set record options."), &set_record_btrace_cmdlist,
-		  "set record btrace ", 0, &set_record_cmdlist);
+  add_basic_prefix_cmd ("btrace", class_support,
+			_("Set record options."), &set_record_btrace_cmdlist,
+			"set record btrace ", 0, &set_record_cmdlist);
 
-  add_prefix_cmd ("btrace", class_support, cmd_show_record_btrace,
-		  _("Show record options."), &show_record_btrace_cmdlist,
-		  "show record btrace ", 0, &show_record_cmdlist);
+  add_show_prefix_cmd ("btrace", class_support,
+		       _("Show record options."), &show_record_btrace_cmdlist,
+		       "show record btrace ", 0, &show_record_cmdlist);
 
   add_setshow_enum_cmd ("replay-memory-access", no_class,
 			replay_memory_access_types, &replay_memory_access, _("\
@@ -3230,15 +3173,17 @@ Do not enable errata workarounds for trace decode."),
 Show the cpu to be used for trace decode."),
 	   &show_record_btrace_cmdlist);
 
-  add_prefix_cmd ("bts", class_support, cmd_set_record_btrace_bts,
-		  _("Set record btrace bts options."),
-		  &set_record_btrace_bts_cmdlist,
-		  "set record btrace bts ", 0, &set_record_btrace_cmdlist);
+  add_basic_prefix_cmd ("bts", class_support,
+			_("Set record btrace bts options."),
+			&set_record_btrace_bts_cmdlist,
+			"set record btrace bts ", 0,
+			&set_record_btrace_cmdlist);
 
-  add_prefix_cmd ("bts", class_support, cmd_show_record_btrace_bts,
-		  _("Show record btrace bts options."),
-		  &show_record_btrace_bts_cmdlist,
-		  "show record btrace bts ", 0, &show_record_btrace_cmdlist);
+  add_show_prefix_cmd ("bts", class_support,
+		       _("Show record btrace bts options."),
+		       &show_record_btrace_bts_cmdlist,
+		       "show record btrace bts ", 0,
+		       &show_record_btrace_cmdlist);
 
   add_setshow_uinteger_cmd ("buffer-size", no_class,
 			    &record_btrace_conf.bts.size,
@@ -3254,15 +3199,17 @@ The trace buffer size may not be changed while recording."), NULL,
 			    &set_record_btrace_bts_cmdlist,
 			    &show_record_btrace_bts_cmdlist);
 
-  add_prefix_cmd ("pt", class_support, cmd_set_record_btrace_pt,
-		  _("Set record btrace pt options."),
-		  &set_record_btrace_pt_cmdlist,
-		  "set record btrace pt ", 0, &set_record_btrace_cmdlist);
+  add_basic_prefix_cmd ("pt", class_support,
+			_("Set record btrace pt options."),
+			&set_record_btrace_pt_cmdlist,
+			"set record btrace pt ", 0,
+			&set_record_btrace_cmdlist);
 
-  add_prefix_cmd ("pt", class_support, cmd_show_record_btrace_pt,
-		  _("Show record btrace pt options."),
-		  &show_record_btrace_pt_cmdlist,
-		  "show record btrace pt ", 0, &show_record_btrace_cmdlist);
+  add_show_prefix_cmd ("pt", class_support,
+		       _("Show record btrace pt options."),
+		       &show_record_btrace_pt_cmdlist,
+		       "show record btrace pt ", 0,
+		       &show_record_btrace_cmdlist);
 
   add_setshow_uinteger_cmd ("buffer-size", no_class,
 			    &record_btrace_conf.pt.size,

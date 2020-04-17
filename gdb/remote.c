@@ -12700,12 +12700,6 @@ remote_delete_command (const char *args, int from_tty)
   remote_file_delete (argv[0], from_tty);
 }
 
-static void
-remote_command (const char *args, int from_tty)
-{
-  help_list (remote_cmdlist, "remote ", all_commands, gdb_stdout);
-}
-
 bool
 remote_target::can_execute_reverse ()
 {
@@ -14225,12 +14219,6 @@ remote_target::thread_events (int enable)
 }
 
 static void
-set_remote_cmd (const char *args, int from_tty)
-{
-  help_list (remote_set_cmdlist, "set remote ", all_commands, gdb_stdout);
-}
-
-static void
 show_remote_cmd (const char *args, int from_tty)
 {
   /* We can't just use cmd_show_list here, because we want to skip
@@ -14382,12 +14370,12 @@ _initialize_remote ()
 
   /* set/show remote ...  */
 
-  add_prefix_cmd ("remote", class_maintenance, set_remote_cmd, _("\
+  add_basic_prefix_cmd ("remote", class_maintenance, _("\
 Remote protocol specific variables.\n\
 Configure various remote-protocol specific variables such as\n\
 the packets being used."),
-		  &remote_set_cmdlist, "set remote ",
-		  0 /* allow-unknown */, &setlist);
+			&remote_set_cmdlist, "set remote ",
+			0 /* allow-unknown */, &setlist);
   add_prefix_cmd ("remote", class_maintenance, show_remote_cmd, _("\
 Remote protocol specific variables.\n\
 Configure various remote-protocol specific variables such as\n\
@@ -14808,11 +14796,11 @@ packets."),
 				   `Z' packets is %s.  */
 				&remote_set_cmdlist, &remote_show_cmdlist);
 
-  add_prefix_cmd ("remote", class_files, remote_command, _("\
+  add_basic_prefix_cmd ("remote", class_files, _("\
 Manipulate files on the remote system.\n\
 Transfer files to and from the remote target system."),
-		  &remote_cmdlist, "remote ",
-		  0 /* allow-unknown */, &cmdlist);
+			&remote_cmdlist, "remote ",
+			0 /* allow-unknown */, &cmdlist);
 
   add_cmd ("put", class_files, remote_put_command,
 	   _("Copy a local file to the remote system."),

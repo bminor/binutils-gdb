@@ -3349,19 +3349,8 @@ overlay_load_command (const char *args, int from_tty)
     error (_("This target does not know how to read its overlay state."));
 }
 
-/* Function: overlay_command
-   A place-holder for a mis-typed command.  */
-
 /* Command list chain containing all defined "overlay" subcommands.  */
 static struct cmd_list_element *overlaylist;
-
-static void
-overlay_command (const char *args, int from_tty)
-{
-  printf_unfiltered
-    ("\"overlay\" must be followed by the name of an overlay command.\n");
-  help_list (overlaylist, "overlay ", all_commands, gdb_stdout);
-}
 
 /* Target Overlays for the "Simplest" overlay manager:
 
@@ -3913,9 +3902,9 @@ When OFFSET is provided, FILE must also be provided.  FILE can be provided\n\
 on its own."), &cmdlist);
   set_cmd_completer (c, filename_completer);
 
-  add_prefix_cmd ("overlay", class_support, overlay_command,
-		  _("Commands for debugging overlays."), &overlaylist,
-		  "overlay ", 0, &cmdlist);
+  add_basic_prefix_cmd ("overlay", class_support,
+			_("Commands for debugging overlays."), &overlaylist,
+			"overlay ", 0, &cmdlist);
 
   add_com_alias ("ovly", "overlay", class_alias, 1);
   add_com_alias ("ov", "overlay", class_alias, 1);

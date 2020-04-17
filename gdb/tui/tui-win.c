@@ -310,21 +310,13 @@ show_tui_cmd (const char *args, int from_tty)
 
 static struct cmd_list_element *tuilist;
 
-static void
-tui_command (const char *args, int from_tty)
-{
-  printf_unfiltered (_("\"tui\" must be followed by the name of a "
-                     "tui command.\n"));
-  help_list (tuilist, "tui ", all_commands, gdb_stdout);
-}
-
 struct cmd_list_element **
 tui_get_cmd_list (void)
 {
   if (tuilist == 0)
-    add_prefix_cmd ("tui", class_tui, tui_command,
-                    _("Text User Interface commands."),
-                    &tuilist, "tui ", 0, &cmdlist);
+    add_basic_prefix_cmd ("tui", class_tui,
+			  _("Text User Interface commands."),
+			  &tuilist, "tui ", 0, &cmdlist);
   return &tuilist;
 }
 
