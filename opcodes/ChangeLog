@@ -1,3 +1,9 @@
+2020-04-17  Fredrik Strupe  <fredrik@strupe.net>
+
+	* arm-dis.c (neon_opcodes): Fix VDUP instruction masks.
+	(print_insn_neon): Support disassembly of conditional
+	instructions.
+
 2020-02-16  David Faust  <david.faust@oracle.com>
 
 	* bpf-desc.c: Regenerate.

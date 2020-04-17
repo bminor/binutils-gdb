@@ -1,3 +1,15 @@
+2020-04-17  Fredrik Strupe  <fredrik@strupe.net>
+
+	* testsuite/binutils-all/arm/vdup-cond.d: New test for testing that
+	conditional VDUP instructions are disassembled correctly.
+	* testsuite/binutils-all/arm/vdup-cond.s: New file used by
+	vdup-cond.d.
+	* testsuite/binutils-all/arm/vdup-thumb.d: New test for testing
+	that VDUP instructions (which are conditional in A32) can be
+	disassembled in thumb mode.
+	* testsuite/binutils-all/arm/vdup-cond.s: New file used by
+	vdup-thumb.d.
+
 2020-04-17  Alan Modra  <amodra@gmail.com>
 
 	PR 25840
