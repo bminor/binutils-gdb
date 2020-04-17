@@ -1,3 +1,7 @@
+2020-04-17  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-bfin.h (TC_EQUAL_IN_INSN): Allow assignment to dot.
+
 2020-04-16  Gagan Singh Sidhu  <broly@mac.com>
 	    Nick Clifton  <nickc@redhat.com>
 

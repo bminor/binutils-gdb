@@ -50,7 +50,7 @@ extern bfd_boolean bfin_start_label (char *);
 extern bfd_boolean bfin_eol_in_insn (char *);
 
 /* Almost all instructions of Blackfin contain an = character.  */
-#define TC_EQUAL_IN_INSN(C, NAME) 1
+#define TC_EQUAL_IN_INSN(C, NAME) (NAME[0] != '.' || NAME[1] != 0)
 
 #define NOP_OPCODE 0x0000
 
