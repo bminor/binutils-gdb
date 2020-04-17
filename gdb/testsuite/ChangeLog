@@ -1,5 +1,11 @@
 2020-04-17  Kamil Rytarowski  <n54@gmx.com>
 
+	* gdb.base/attach-twice.c: Include "sys/types.h".
+	(PTRACE_ATTACH): Add fallback definition.
+	(main): Pass `0' to the 4th argument of `ptrace'.
+
+2020-04-17  Kamil Rytarowski  <n54@gmx.com>
+
 	* gdb.base/fork-running-state.c: Include "signal.h".
 
 2020-04-17  Tom Tromey  <tromey@adacore.com>
