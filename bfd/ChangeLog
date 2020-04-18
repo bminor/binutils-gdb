@@ -1,3 +1,9 @@
+2020-04-18  Alan Modra  <amodra@gmail.com>
+
+	* section.c (bfd_is_const_section): Correct test for special
+	sections.
+	* bfd-in2.h: Regenerate.
+
 2020-04-17  Alan Modra  <amodra@gmail.com>
 
 	PR 25842
