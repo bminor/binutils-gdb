@@ -1,3 +1,8 @@
+2020-04-18  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* testsuite/ld-elf/warn1.d: Don't xfail on 64-bit Solaris/SPARC.
+	* testsuite/ld-elf/warn2.d: Likewise.
+
 2020-04-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/elf.exp (ASFLAGS): Add "--defsym NO_SET=1" for

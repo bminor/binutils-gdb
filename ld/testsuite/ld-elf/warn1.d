@@ -5,7 +5,6 @@
 #warning: ^[^\n]*\): warning: witty one-liner$
 #readelf: -s
 #xfail: [is_generic]
-#xfail: "sparc64-*-solaris2*" "sparcv9-*-solaris2*"
 
 # Check that warnings are generated for the .gnu.warning.SYMBOL
 # construct and that the symbol still appears as expected.

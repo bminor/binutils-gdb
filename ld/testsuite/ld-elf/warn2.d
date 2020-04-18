@@ -6,7 +6,6 @@
 #readelf: -s
 # if not using elf.em, you don't get fancy section handling
 #xfail: [uses_genelf]
-#xfail: "sparc64-*-solaris2*" "sparcv9-*-solaris2*"
 
 # Check that warnings are generated for the symbols in .gnu.warning
 # construct and that the symbol still appears as expected.
