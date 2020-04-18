@@ -1,3 +1,9 @@
+2020-04-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/elf.exp (ASFLAGS): Add "--defsym NO_SET=1" for
+	alpha target.
+	* testsuite/ld-elf/pr19789.s: Use "=" if NO_SET is defined.
+
 2020-04-16  Stephen Casner  <casner@acm.org>
 
 	PR 18963
