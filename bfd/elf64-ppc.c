@@ -13772,6 +13772,8 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
     }
 
   maybe_strip_output (info, htab->brlt);
+  if (htab->relbrlt != NULL)
+    maybe_strip_output (info, htab->relbrlt);
   if (htab->glink_eh_frame != NULL)
     maybe_strip_output (info, htab->glink_eh_frame);
 
