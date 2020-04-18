@@ -74,7 +74,7 @@ tui_source_window::set_contents (struct gdbarch *arch,
   m_fullname = make_unique_xstrdup (symtab_to_fullname (s));
 
   cur_line = 0;
-  m_gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
+  m_gdbarch = SYMTAB_OBJFILE (s)->arch ();
   m_start_line_or_addr.loa = LOA_LINE;
   cur_line_no = m_start_line_or_addr.u.line_no = line_no;
 

@@ -493,7 +493,7 @@ macho_add_oso_symfile (oso_el *oso, const gdb_bfd_ref_ptr &abfd,
             {
               if (mach_o_debug_level > 4)
                 {
-                  struct gdbarch *arch = get_objfile_arch (main_objfile);
+                  struct gdbarch *arch = main_objfile->arch ();
                   printf_unfiltered
                     (_("Adding symbol %s (addr: %s)\n"),
                      sym->name, paddress (arch, sym->value));
@@ -567,7 +567,7 @@ macho_add_oso_symfile (oso_el *oso, const gdb_bfd_ref_ptr &abfd,
 
                   if (mach_o_debug_level > 3)
                     {
-                      struct gdbarch *arch = get_objfile_arch (main_objfile);
+                      struct gdbarch *arch = main_objfile->arch ();
                       printf_unfiltered
                         (_("resolve sect %s with %s (set to %s)\n"),
                          sec->name, sym->name,

@@ -3201,7 +3201,7 @@ create_overlay_event_breakpoint (void)
 	}
 
       addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->overlay_msym);
-      b = create_internal_breakpoint (get_objfile_arch (objfile), addr,
+      b = create_internal_breakpoint (objfile->arch (), addr,
                                       bp_overlay_event,
 				      &internal_breakpoint_ops);
       initialize_explicit_location (&explicit_loc);
@@ -3238,7 +3238,7 @@ create_longjmp_master_breakpoint (void)
 	struct gdbarch *gdbarch;
 	struct breakpoint_objfile_data *bp_objfile_data;
 
-	gdbarch = get_objfile_arch (objfile);
+	gdbarch = objfile->arch ();
 
 	bp_objfile_data = get_breakpoint_objfile_data (objfile);
 
@@ -3362,7 +3362,7 @@ create_std_terminate_master_breakpoint (void)
 	  }
 
 	addr = BMSYMBOL_VALUE_ADDRESS (bp_objfile_data->terminate_msym);
-	b = create_internal_breakpoint (get_objfile_arch (objfile), addr,
+	b = create_internal_breakpoint (objfile->arch (), addr,
 					bp_std_terminate_master,
 					&internal_breakpoint_ops);
 	initialize_explicit_location (&explicit_loc);
@@ -3414,7 +3414,7 @@ create_exception_master_breakpoint (void)
 
       if (!bp_objfile_data->exception_probes.empty ())
 	{
-	  gdbarch = get_objfile_arch (objfile);
+	  gdbarch = objfile->arch ();
 
 	  for (probe *p : bp_objfile_data->exception_probes)
 	    {
@@ -3434,7 +3434,7 @@ create_exception_master_breakpoint (void)
       if (msym_not_found_p (bp_objfile_data->exception_msym.minsym))
 	continue;
 
-      gdbarch = get_objfile_arch (objfile);
+      gdbarch = objfile->arch ();
 
       if (bp_objfile_data->exception_msym.minsym == NULL)
 	{
@@ -7116,9 +7116,9 @@ struct gdbarch *
 get_sal_arch (struct symtab_and_line sal)
 {
   if (sal.section)
-    return get_objfile_arch (sal.section->objfile);
+    return sal.section->objfile->arch ();
   if (sal.symtab)
-    return get_objfile_arch (SYMTAB_OBJFILE (sal.symtab));
+    return SYMTAB_OBJFILE (sal.symtab)->arch ();
 
   return NULL;
 }

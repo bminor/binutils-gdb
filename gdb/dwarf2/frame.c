@@ -2147,7 +2147,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
   dwarf2_cie_table cie_table;
   dwarf2_fde_table fde_table;
 
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
 
   /* Build a minimal decoding of the DWARF2 compilation unit.  */
   std::unique_ptr<comp_unit> unit (new comp_unit (objfile));

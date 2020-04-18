@@ -1,3 +1,95 @@
+2020-04-18  Tom Tromey  <tom@tromey.com>
+
+	* xcoffread.c (enter_line_range, scan_xcoff_symtab): Update.
+	* value.c (value_fn_field): Update.
+	* valops.c (find_function_in_inferior)
+	(value_allocate_space_in_inferior): Update.
+	* tui/tui-winsource.c (tui_update_source_windows_with_line):
+	Update.
+	* tui/tui-source.c (tui_source_window::set_contents): Update.
+	* symtab.c (lookup_global_or_static_symbol)
+	(find_function_start_sal_1, skip_prologue_sal)
+	(print_msymbol_info, find_gnu_ifunc, symbol_arch): Update.
+	* symmisc.c (dump_msymbols, dump_symtab_1)
+	(maintenance_print_one_line_table): Update.
+	* symfile.c (init_entry_point_info, section_is_mapped)
+	(list_overlays_command, simple_read_overlay_table)
+	(simple_overlay_update_1): Update.
+	* stap-probe.c (handle_stap_probe): Update.
+	* stabsread.c (dbx_init_float_type, define_symbol)
+	(read_one_struct_field, read_enum_type, read_range_type): Update.
+	* source.c (info_line_command): Update.
+	* python/python.c (gdbpy_source_objfile_script)
+	(gdbpy_execute_objfile_script): Update.
+	* python/py-type.c (save_objfile_types): Update.
+	* python/py-objfile.c (py_free_objfile): Update.
+	* python/py-inferior.c (python_new_objfile): Update.
+	* psymtab.c (psym_find_pc_sect_compunit_symtab, dump_psymtab)
+	(dump_psymtab_addrmap_1, maintenance_info_psymtabs)
+	(maintenance_check_psymtabs): Update.
+	* printcmd.c (info_address_command): Update.
+	* objfiles.h (struct objfile) <arch>: New method, from
+	get_objfile_arch.
+	(get_objfile_arch): Don't declare.
+	* objfiles.c (get_objfile_arch): Remove.
+	(filter_overlapping_sections): Update.
+	* minsyms.c (msymbol_is_function): Update.
+	* mi/mi-symbol-cmds.c (mi_cmd_symbol_list_lines)
+	(output_nondebug_symbol): Update.
+	* mdebugread.c (parse_symbol, basic_type, parse_partial_symbols)
+	(mdebug_expand_psymtab): Update.
+	* machoread.c (macho_add_oso_symfile): Update.
+	* linux-tdep.c (linux_infcall_mmap, linux_infcall_munmap):
+	Update.
+	* linux-fork.c (checkpoint_command): Update.
+	* linespec.c (convert_linespec_to_sals): Update.
+	* jit.c (finalize_symtab): Update.
+	* infrun.c (insert_exception_resume_from_probe): Update.
+	* ia64-tdep.c (ia64_find_unwind_table): Update.
+	* hppa-tdep.c (internalize_unwinds): Update.
+	* gdbtypes.c (get_type_arch, init_float_type, objfile_type):
+	Update.
+	* gcore.c (call_target_sbrk): Update.
+	* elfread.c (record_minimal_symbol, elf_symtab_read)
+	(elf_rel_plt_read, elf_gnu_ifunc_record_cache)
+	(elf_gnu_ifunc_resolve_by_got): Update.
+	* dwarf2/read.c (create_addrmap_from_index)
+	(create_addrmap_from_aranges, dw2_find_pc_sect_compunit_symtab)
+	(read_debug_names_from_section)
+	(process_psymtab_comp_unit_reader, add_partial_symbol)
+	(add_partial_subprogram, process_full_comp_unit)
+	(read_file_scope, read_func_scope, read_lexical_block_scope)
+	(read_call_site_scope, dwarf2_ranges_read)
+	(dwarf2_record_block_ranges, dwarf2_add_field)
+	(mark_common_block_symbol_computed, read_tag_pointer_type)
+	(read_tag_string_type, dwarf2_init_float_type)
+	(dwarf2_init_complex_target_type, read_base_type)
+	(partial_die_info::read, partial_die_info::read)
+	(read_attribute_value, dwarf_decode_lines_1, new_symbol)
+	(dwarf2_fetch_die_loc_sect_off): Update.
+	* dwarf2/loc.c (dwarf2_find_location_expression)
+	(class dwarf_evaluate_loc_desc, rw_pieced_value)
+	(dwarf2_evaluate_loc_desc_full, dwarf2_locexpr_baton_eval)
+	(dwarf2_loc_desc_get_symbol_read_needs)
+	(locexpr_describe_location_piece, locexpr_describe_location_1)
+	(loclist_describe_location): Update.
+	* dwarf2/index-write.c (write_debug_names): Update.
+	* dwarf2/frame.c (dwarf2_build_frame_info): Update.
+	* dtrace-probe.c (dtrace_process_dof): Update.
+	* dbxread.c (read_dbx_symtab, dbx_end_psymtab)
+	(process_one_symbol): Update.
+	* ctfread.c (ctf_init_float_type, read_base_type): Update.
+	* coffread.c (coff_symtab_read, enter_linenos, decode_base_type)
+	(coff_read_enum_type): Update.
+	* cli/cli-cmds.c (edit_command, list_command): Update.
+	* buildsym.c (buildsym_compunit::finish_block_internal): Update.
+	* breakpoint.c (create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint, get_sal_arch): Update.
+	* block.c (block_gdbarch): Update.
+	* annotate.c (annotate_source_line): Update.
+
 2020-04-17  Tom Tromey  <tromey@adacore.com>
 
 	* auto-load.c (show_auto_load_cmd): Remove.

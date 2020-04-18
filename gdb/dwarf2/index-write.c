@@ -1493,7 +1493,7 @@ write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
   const bool dwarf5_is_dwarf64 = check_dwarf64_offsets (dwarf2_per_objfile);
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   const enum bfd_endian dwarf5_byte_order
-    = gdbarch_byte_order (get_objfile_arch (objfile));
+    = gdbarch_byte_order (objfile->arch ());
 
   /* The CU list is already sorted, so we don't need to do additional
      work here.  Also, the debug_types entries do not appear in

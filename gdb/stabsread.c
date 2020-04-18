@@ -369,7 +369,7 @@ dbx_alloc_type (int typenums[2], struct objfile *objfile)
 static struct type *
 dbx_init_float_type (struct objfile *objfile, int bits)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   const struct floatformat **format;
   struct type *type;
 
@@ -649,7 +649,7 @@ struct symbol *
 define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	       struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   struct symbol *sym;
   const char *p = find_name_end (string);
   int deftype;
@@ -2823,7 +2823,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
 		       const char *p, struct type *type,
 		       struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
 
   fip->list->field.name
     = obstack_strndup (&objfile->objfile_obstack, *pp, p - *pp);
@@ -3581,7 +3581,7 @@ static struct type *
 read_enum_type (const char **pp, struct type *type,
 		struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   const char *p;
   char *name;
   long n;
@@ -3997,7 +3997,7 @@ static struct type *
 read_range_type (const char **pp, int typenums[2], int type_size,
                  struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   const char *orig_pp = *pp;
   int rangenums[2];
   long n2, n3;

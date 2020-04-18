@@ -62,7 +62,7 @@ block_gdbarch (const struct block *block)
   if (BLOCK_FUNCTION (block) != NULL)
     return symbol_arch (BLOCK_FUNCTION (block));
 
-  return get_objfile_arch (block_objfile (block));
+  return block_objfile (block)->arch ();
 }
 
 /* See block.h.  */

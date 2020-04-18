@@ -77,7 +77,7 @@ msymbol_is_function (struct objfile *objfile, minimal_symbol *minsym,
     case mst_file_bss:
     case mst_data_gnu_ifunc:
       {
-	struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	struct gdbarch *gdbarch = objfile->arch ();
 	CORE_ADDR pc
 	  = gdbarch_convert_from_func_ptr_addr (gdbarch, msym_addr,
 						current_top_target ());

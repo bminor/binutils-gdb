@@ -852,14 +852,14 @@ init_entry_point_info (struct objfile *objfile)
       /* Make certain that the address points at real code, and not a
 	 function descriptor.  */
       entry_point
-	= gdbarch_convert_from_func_ptr_addr (get_objfile_arch (objfile),
+	= gdbarch_convert_from_func_ptr_addr (objfile->arch (),
 					      entry_point,
 					      current_top_target ());
 
       /* Remove any ISA markers, so that this matches entries in the
 	 symbol table.  */
       ei->entry_point
-	= gdbarch_addr_bits_remove (get_objfile_arch (objfile), entry_point);
+	= gdbarch_addr_bits_remove (objfile->arch (), entry_point);
 
       found = 0;
       ALL_OBJFILE_OSECTIONS (objfile, osect)
@@ -2998,7 +2998,7 @@ section_is_mapped (struct obj_section *osect)
     case ovly_auto:		/* overlay debugging automatic */
       /* Unles there is a gdbarch_overlay_update function,
          there's really nothing useful to do here (can't really go auto).  */
-      gdbarch = get_objfile_arch (osect->objfile);
+      gdbarch = osect->objfile->arch ();
       if (gdbarch_overlay_update_p (gdbarch))
 	{
 	  if (overlay_cache_invalid)
@@ -3197,7 +3197,7 @@ list_overlays_command (const char *args, int from_tty)
 	ALL_OBJFILE_OSECTIONS (objfile, osect)
 	  if (section_is_mapped (osect))
 	    {
-	      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	      struct gdbarch *gdbarch = objfile->arch ();
 	      const char *name;
 	      bfd_vma lma, vma;
 	      int size;
@@ -3453,7 +3453,7 @@ simple_read_overlay_table (void)
       return 0;
     }
 
-  gdbarch = get_objfile_arch (ovly_table_msym.objfile);
+  gdbarch = ovly_table_msym.objfile->arch ();
   word_size = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
   byte_order = gdbarch_byte_order (gdbarch);
 
@@ -3482,7 +3482,7 @@ simple_overlay_update_1 (struct obj_section *osect)
 {
   int i;
   asection *bsect = osect->the_bfd_section;
-  struct gdbarch *gdbarch = get_objfile_arch (osect->objfile);
+  struct gdbarch *gdbarch = osect->objfile->arch ();
   int word_size = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 

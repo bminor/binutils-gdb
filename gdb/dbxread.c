@@ -951,7 +951,7 @@ function_outside_compilation_unit_complaint (const char *arg1)
 static void
 read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   struct external_nlist *bufp = 0;	/* =0 avoids gcc -Wall glitch.  */
   struct internal_nlist nlist;
   CORE_ADDR text_addr;
@@ -1936,7 +1936,7 @@ dbx_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
 		 int textlow_not_set)
 {
   int i;
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
 
   if (capping_symbol_offset != -1)
     LDSYMLEN (pst) = capping_symbol_offset - LDSYMOFF (pst);
@@ -2338,7 +2338,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 		    const section_offsets &section_offsets,
 		    struct objfile *objfile, enum language language)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   struct context_stack *newobj;
   struct context_stack cstk;
   /* This remembers the address of the start of a function.  It is

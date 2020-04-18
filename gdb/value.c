@@ -3068,7 +3068,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
       /* The minimal symbol might point to a function descriptor;
 	 resolve it to the actual code address instead.  */
       struct objfile *objfile = msym.objfile;
-      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+      struct gdbarch *gdbarch = objfile->arch ();
 
       set_value_address (v,
 	gdbarch_convert_from_func_ptr_addr

@@ -1442,7 +1442,7 @@ info_address_command (const char *exp, int from_tty)
 	{
 	  struct objfile *objfile = msymbol.objfile;
 
-	  gdbarch = get_objfile_arch (objfile);
+	  gdbarch = objfile->arch ();
 	  load_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 
 	  printf_filtered ("Symbol \"");

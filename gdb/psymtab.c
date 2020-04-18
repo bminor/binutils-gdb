@@ -392,7 +392,7 @@ psym_find_pc_sect_compunit_symtab (struct objfile *objfile,
 	   continue, so let's not.  */
 	warning (_("\
 (Internal error: pc %s in read in psymtab, but not in symtab.)\n"),
-		 paddress (get_objfile_arch (objfile), pc));
+		 paddress (objfile->arch (), pc));
       psymtab_to_symtab (objfile, ps);
       return ps->get_compunit_symtab ();
     }
@@ -927,7 +927,7 @@ static void
 dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
 	      struct ui_file *outfile)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   int i;
 
   if (psymtab->anonymous)
@@ -1779,7 +1779,7 @@ dump_psymtab_addrmap_1 (void *datap, CORE_ADDR start_addr, void *obj)
 {
   struct dump_psymtab_addrmap_data *data
     = (struct dump_psymtab_addrmap_data *) datap;
-  struct gdbarch *gdbarch = get_objfile_arch (data->objfile);
+  struct gdbarch *gdbarch = data->objfile->arch ();
   struct partial_symtab *addrmap_psymtab = (struct partial_symtab *) obj;
   const char *psymtab_address_or_end = NULL;
 
@@ -1999,7 +1999,7 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
   ALL_PSPACES (pspace)
     for (objfile *objfile : pspace->objfiles ())
       {
-	struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	struct gdbarch *gdbarch = objfile->arch ();
 
 	/* We don't want to print anything for this objfile until we
 	   actually find a symtab whose name matches.  */
@@ -2118,7 +2118,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
   for (objfile *objfile : current_program_space->objfiles ())
     for (partial_symtab *ps : require_partial_symbols (objfile, true))
       {
-	struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	struct gdbarch *gdbarch = objfile->arch ();
 
 	/* We don't call psymtab_to_symtab here because that may cause symtab
 	   expansion.  When debugging a problem it helps if checkers leave

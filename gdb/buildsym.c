@@ -213,7 +213,7 @@ buildsym_compunit::finish_block_internal
      CORE_ADDR start, CORE_ADDR end,
      int is_global, int expandable)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (m_objfile);
+  struct gdbarch *gdbarch = m_objfile->arch ();
   struct pending *next, *next1;
   struct block *block;
   struct pending_block *pblock;

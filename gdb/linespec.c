@@ -2291,7 +2291,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 			  if (MSYMBOL_TYPE (elem.minsym) == mst_data_gnu_ifunc)
 			    {
 			      struct gdbarch *gdbarch
-				= get_objfile_arch (elem.objfile);
+				= elem.objfile->arch ();
 			      msym_addr
 				= (gdbarch_convert_from_func_ptr_addr
 				   (gdbarch,

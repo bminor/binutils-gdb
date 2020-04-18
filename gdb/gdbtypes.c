@@ -236,7 +236,7 @@ get_type_arch (const struct type *type)
   struct gdbarch *arch;
 
   if (TYPE_OBJFILE_OWNED (type))
-    arch = get_objfile_arch (TYPE_OWNER (type).objfile);
+    arch = TYPE_OWNER (type).objfile->arch ();
   else
     arch = TYPE_OWNER (type).gdbarch;
 
@@ -3000,7 +3000,7 @@ init_float_type (struct objfile *objfile,
 {
   if (byte_order == BFD_ENDIAN_UNKNOWN)
     {
-      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+      struct gdbarch *gdbarch = objfile->arch ();
       byte_order = gdbarch_byte_order (gdbarch);
     }
   const struct floatformat *fmt = floatformats[byte_order];
@@ -5607,7 +5607,7 @@ objfile_type (struct objfile *objfile)
 				 1, struct objfile_type);
 
   /* Use the objfile architecture to determine basic type properties.  */
-  gdbarch = get_objfile_arch (objfile);
+  gdbarch = objfile->arch ();
 
   /* Basic types.  */
   objfile_type->builtin_void

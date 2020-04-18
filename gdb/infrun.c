@@ -7819,7 +7819,7 @@ insert_exception_resume_from_probe (struct thread_info *tp,
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
 			"infrun: exception resume at %s\n",
-			paddress (get_objfile_arch (probe->objfile),
+			paddress (probe->objfile->arch (),
 				  handler));
 
   bp = set_momentary_breakpoint_at_pc (get_frame_arch (frame),

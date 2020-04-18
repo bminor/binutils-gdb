@@ -282,7 +282,7 @@ call_target_sbrk (int sbrk_arg)
   else
     return (bfd_vma) 0;
 
-  gdbarch = get_objfile_arch (sbrk_objf);
+  gdbarch = sbrk_objf->arch ();
   target_sbrk_arg = value_from_longest (builtin_type (gdbarch)->builtin_int, 
 					sbrk_arg);
   gdb_assert (target_sbrk_arg);

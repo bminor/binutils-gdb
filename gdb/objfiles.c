@@ -374,14 +374,6 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
   per_bfd = get_objfile_bfd_data (this, abfd);
 }
 
-/* Retrieve the gdbarch associated with OBJFILE.  */
-
-struct gdbarch *
-get_objfile_arch (const struct objfile *objfile)
-{
-  return objfile->per_bfd->gdbarch;
-}
-
 /* If there is a valid and known entry point, function fills *ENTRY_P with it
    and returns non-zero; otherwise it returns zero.  */
 
@@ -1132,7 +1124,7 @@ filter_overlapping_sections (struct obj_section **map, int map_size)
 
 	      const CORE_ADDR sect2_endaddr = obj_section_endaddr (sect2);
 
-	      struct gdbarch *const gdbarch = get_objfile_arch (objf1);
+	      struct gdbarch *const gdbarch = objf1->arch ();
 
 	      complaint (_("unexpected overlap between:\n"
 			   " (A) section `%s' from `%s' [%s, %s)\n"

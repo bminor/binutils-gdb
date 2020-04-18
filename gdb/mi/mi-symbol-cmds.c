@@ -50,7 +50,7 @@ mi_cmd_symbol_list_lines (const char *command, char **argv, int argc)
      already sorted by increasing values in the symbol table, so no
      need to perform any other sorting.  */
 
-  gdbarch = get_objfile_arch (SYMTAB_OBJFILE (s));
+  gdbarch = SYMTAB_OBJFILE (s)->arch ();
 
   ui_out_emit_list list_emitter (uiout, "lines");
   if (SYMTAB_LINETABLE (s) != NULL && SYMTAB_LINETABLE (s)->nitems > 0)
@@ -96,7 +96,7 @@ static void
 output_nondebug_symbol (ui_out *uiout,
 			const struct bound_minimal_symbol &msymbol)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (msymbol.objfile);
+  struct gdbarch *gdbarch = msymbol.objfile->arch ();
   ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
   uiout->field_core_addr ("address", gdbarch,

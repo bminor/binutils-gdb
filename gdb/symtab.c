@@ -2666,7 +2666,7 @@ lookup_global_or_static_symbol (const char *name,
       lookup_data.block_index = block_index;
       lookup_data.domain = domain;
       gdbarch_iterate_over_objfiles_in_search_order
-	(objfile != NULL ? get_objfile_arch (objfile) : target_gdbarch (),
+	(objfile != NULL ? objfile->arch () : target_gdbarch (),
 	 lookup_symbol_global_or_static_iterator_cb, &lookup_data, objfile);
       result = lookup_data.result;
     }
@@ -3647,7 +3647,7 @@ find_function_start_sal_1 (CORE_ADDR func_addr, obj_section *section,
       && (COMPUNIT_LOCATIONS_VALID (SYMTAB_COMPUNIT (sal.symtab))
 	  || SYMTAB_LANGUAGE (sal.symtab) == language_asm))
     {
-      struct gdbarch *gdbarch = get_objfile_arch (SYMTAB_OBJFILE (sal.symtab));
+      struct gdbarch *gdbarch = SYMTAB_OBJFILE (sal.symtab)->arch ();
 
       sal.pc = func_addr;
       if (gdbarch_skip_entrypoint_p (gdbarch))
@@ -3806,7 +3806,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       name = msymbol.minsym->linkage_name ();
     }
 
-  gdbarch = get_objfile_arch (objfile);
+  gdbarch = objfile->arch ();
 
   /* Process the prologue in two passes.  In the first pass try to skip the
      prologue (SKIP is true) and verify there is a real need for it (indicated
@@ -4928,7 +4928,7 @@ print_symbol_info (enum search_domain kind,
 static void
 print_msymbol_info (struct bound_minimal_symbol msymbol)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (msymbol.objfile);
+  struct gdbarch *gdbarch = msymbol.objfile->arch ();
   char *tmp;
 
   if (gdbarch_addr_bit (gdbarch) <= 32)
@@ -5550,7 +5550,7 @@ find_gnu_ifunc (const symbol *sym)
 	  CORE_ADDR msym_addr = MSYMBOL_VALUE_ADDRESS (objfile, minsym);
 	  if (MSYMBOL_TYPE (minsym) == mst_data_gnu_ifunc)
 	    {
-	      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	      struct gdbarch *gdbarch = objfile->arch ();
 	      msym_addr
 		= gdbarch_convert_from_func_ptr_addr (gdbarch,
 						      msym_addr,
@@ -6405,7 +6405,7 @@ symbol_arch (const struct symbol *symbol)
 {
   if (!SYMBOL_OBJFILE_OWNED (symbol))
     return symbol->owner.arch;
-  return get_objfile_arch (SYMTAB_OBJFILE (symbol->owner.symtab));
+  return SYMTAB_OBJFILE (symbol->owner.symtab)->arch ();
 }
 
 /* See symtab.h.  */

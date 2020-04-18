@@ -318,7 +318,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 				 size_t *locexpr_length, CORE_ADDR pc)
 {
   struct objfile *objfile = baton->per_cu->objfile ();
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = baton->per_cu->addr_size ();
   int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
@@ -729,7 +729,7 @@ class dwarf_evaluate_loc_desc : public dwarf_expr_context
 							(CORE_ADDR) 0);
 
     scoped_restore save_arch = make_scoped_restore (&this->gdbarch);
-    this->gdbarch = get_objfile_arch (per_cu->objfile ());
+    this->gdbarch = per_cu->objfile ()->arch ();
     scoped_restore save_addr_size = make_scoped_restore (&this->addr_size);
     this->addr_size = per_cu->addr_size ();
     scoped_restore save_offset = make_scoped_restore (&this->offset);
@@ -1816,7 +1816,7 @@ rw_pieced_value (struct value *v, struct value *from)
 	      }
 
 	    struct objfile *objfile = c->per_cu->objfile ();
-	    struct gdbarch *objfile_gdbarch = get_objfile_arch (objfile);
+	    struct gdbarch *objfile_gdbarch = objfile->arch ();
 	    ULONGEST stack_value_size_bits
 	      = 8 * TYPE_LENGTH (value_type (p->v.value));
 
@@ -2192,7 +2192,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 
   scoped_value_mark free_values;
 
-  ctx.gdbarch = get_objfile_arch (objfile);
+  ctx.gdbarch = objfile->arch ();
   ctx.addr_size = per_cu->addr_size ();
   ctx.ref_addr_size = per_cu->ref_addr_size ();
   ctx.offset = per_cu->text_offset ();
@@ -2315,7 +2315,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    size_t n = TYPE_LENGTH (value_type (value));
 	    size_t len = TYPE_LENGTH (subobj_type);
 	    size_t max = TYPE_LENGTH (type);
-	    struct gdbarch *objfile_gdbarch = get_objfile_arch (objfile);
+	    struct gdbarch *objfile_gdbarch = objfile->arch ();
 
 	    if (subobj_byte_offset + len > max)
 	      invalid_synthetic_pointer ();
@@ -2409,7 +2409,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 
   objfile = dlbaton->per_cu->objfile ();
 
-  ctx.gdbarch = get_objfile_arch (objfile);
+  ctx.gdbarch = objfile->arch ();
   ctx.addr_size = dlbaton->per_cu->addr_size ();
   ctx.ref_addr_size = dlbaton->per_cu->ref_addr_size ();
   ctx.offset = dlbaton->per_cu->text_offset ();
@@ -2740,7 +2740,7 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
 
   ctx.needs = SYMBOL_NEEDS_NONE;
   ctx.per_cu = per_cu;
-  ctx.gdbarch = get_objfile_arch (objfile);
+  ctx.gdbarch = objfile->arch ();
   ctx.addr_size = per_cu->addr_size ();
   ctx.ref_addr_size = per_cu->ref_addr_size ();
   ctx.offset = per_cu->text_offset ();
@@ -3638,7 +3638,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
 				 const gdb_byte *data, const gdb_byte *end,
 				 unsigned int addr_size)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   size_t leb128_size;
 
   if (data[0] >= DW_OP_reg0 && data[0] <= DW_OP_reg31)
@@ -4234,7 +4234,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 	{
 	  fprintf_filtered (stream, _("a complex DWARF expression:\n"));
 	  data = disassemble_dwarf_expression (stream,
-					       get_objfile_arch (objfile),
+					       objfile->arch (),
 					       addr_size, offset_size, data,
 					       data, end, 0,
 					       dwarf_always_disassemble,
@@ -4436,7 +4436,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
     = (struct dwarf2_loclist_baton *) SYMBOL_LOCATION_BATON (symbol);
   const gdb_byte *loc_ptr, *buf_end;
   struct objfile *objfile = dlbaton->per_cu->objfile ();
-  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+  struct gdbarch *gdbarch = objfile->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = dlbaton->per_cu->addr_size ();
   int offset_size = dlbaton->per_cu->offset_size ();
