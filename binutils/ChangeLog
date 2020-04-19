@@ -1,3 +1,11 @@
+2020-04-20  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_num_dynamic_syms): Formatting.  Don't return
+	on error without freeing.
+	(process_dynamic_section): Don't recreate dynamic symbols from
+	dynamic tag info when the dynamic symbols have already been
+	read via section headers.
+
 2020-04-17  Fredrik Strupe  <fredrik@strupe.net>
 
 	* testsuite/binutils-all/arm/vdup-cond.d: New test for testing that

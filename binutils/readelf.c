@@ -9976,7 +9976,7 @@ get_num_dynamic_syms (Filedata * filedata)
       if (buckets != NULL && chains != NULL)
 	num_of_syms = nchains;
 
-  no_hash:
+    no_hash:
       if (num_of_syms == 0)
 	{
 	  if (buckets)
@@ -10052,7 +10052,7 @@ get_num_dynamic_syms (Filedata * filedata)
 	    if (gnubuckets[i] < gnusymidx)
 	      {
 		gnu_hash_error = TRUE;
-		return FALSE;
+		goto no_gnu_hash;
 	      }
 
 	    if (maxchain == 0xffffffff || gnubuckets[i] > maxchain)
@@ -10083,7 +10083,7 @@ get_num_dynamic_syms (Filedata * filedata)
 	  if (fread (nb, 4, 1, filedata->handle) != 1)
 	    {
 	      error (_("Failed to determine last chain length\n"));
-	  gnu_hash_error = TRUE;
+	      gnu_hash_error = TRUE;
 	      goto no_gnu_hash;
 	    }
 
@@ -10156,7 +10156,7 @@ get_num_dynamic_syms (Filedata * filedata)
 	    while (off < ngnuchains && (gnuchains[off++] & 1) == 0);
 	  }
 
-  no_gnu_hash:
+    no_gnu_hash:
       if (gnu_hash_error)
 	{
 	  if (mipsxlat)
@@ -10260,7 +10260,8 @@ process_dynamic_section (Filedata * filedata)
 
 		if (vma >= (seg->p_vaddr & -seg->p_align)
 		    && vma <= seg->p_vaddr + seg->p_filesz
-		    && (num_of_syms = get_num_dynamic_syms (filedata)))
+		    && (num_of_syms = get_num_dynamic_syms (filedata)) != 0
+		    && dynamic_symbols == NULL)
 		  {
 		    /* Since we do not know how big the symbol table is,
 		       we default to reading in up to the end of PT_LOAD
