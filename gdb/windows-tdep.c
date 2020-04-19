@@ -602,6 +602,21 @@ show_maint_show_all_tib (struct ui_file *file, int from_tty,
 			    "Thread Information Block is %s.\n"), value);
 }
 
+
+static int w32_prefix_command_valid = 0;
+void
+init_w32_command_list (void)
+{
+  if (!w32_prefix_command_valid)
+    {
+      add_basic_prefix_cmd
+	("w32", class_info,
+	 _("Print information specific to Win32 debugging."),
+	 &info_w32_cmdlist, "info w32 ", 0, &infolist);
+      w32_prefix_command_valid = 1;
+    }
+}
+
 /* Implementation of `gdbarch_gdb_signal_to_target' for Windows.  */
 
 static int
@@ -1077,10 +1092,7 @@ _initialize_windows_tdep ()
   windows_gdbarch_data_handle
     = gdbarch_data_register_post_init (init_windows_gdbarch_data);
 
-  add_basic_prefix_cmd ("w32", class_info,
-			_("Print information specific to Win32 debugging."),
-			&info_w32_cmdlist, "info w32 ", 0, &infolist);
-
+  init_w32_command_list ();
   add_cmd ("thread-information-block", class_info, display_tib,
 	   _("Display thread information block."),
 	   &info_w32_cmdlist);

@@ -1,5 +1,11 @@
 2020-04-18  Tom Tromey  <tom@tromey.com>
 
+	* windows-tdep.c (init_w32_command_list)
+	(w32_prefix_command_valid): Restore.
+	(_initialize_windows_tdep): Call init_w32_command_list.
+
+2020-04-18  Tom Tromey  <tom@tromey.com>
+
 	* xcoffread.c (enter_line_range, scan_xcoff_symtab): Update.
 	* value.c (value_fn_field): Update.
 	* valops.c (find_function_in_inferior)
