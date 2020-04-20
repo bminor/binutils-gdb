@@ -160,6 +160,7 @@ static bfd_boolean MY(write_object_contents) (bfd *);
 #undef N_REG
 #undef N_FN
 #undef N_EXT
+#undef N_STAB
 #define N_TYPE		0x1f	/* Type mask.  */
 #define N_UNDF		0x00	/* Undefined.  */
 #define N_ABS		0x01	/* Absolute.  */
@@ -169,6 +170,7 @@ static bfd_boolean MY(write_object_contents) (bfd *);
 #define N_REG		0x14	/* Register symbol.  */
 #define N_FN		0x1f	/* File name.  */
 #define N_EXT		0x20	/* External flag.  */
+#define N_STAB	 	0xc0	/* Not relevant; modified aout64.h's 0xe0 to avoid N_EXT.  */
 
 #define RELOC_SIZE 2
 
@@ -1501,7 +1503,7 @@ NAME (aout, translate_symbol_table) (bfd *abfd,
       else
 	return FALSE;
 
-      in->symbol.value = GET_SWORD (abfd,  ext->e_value);
+      in->symbol.value = GET_WORD (abfd,  ext->e_value);
       /* TODO: is 0 a safe value here?  */
       in->desc = 0;
       in->other = 0;
