@@ -1,5 +1,11 @@
 2020-04-20  Gary Benson <gbenson@redhat.com>
 
+	* gdb.base/nested-subp1.exp: Disable test when using clang.
+	* gdb.base/nested-subp2.exp: Likewise.
+	* gdb.base/nested-subp3.exp: Likewise.
+
+2020-04-20  Gary Benson <gbenson@redhat.com>
+
 	* gdb.cp/exception.cc: Fix compilation error with clang.
 
 2020-04-20  Gary Benson <gbenson@redhat.com>

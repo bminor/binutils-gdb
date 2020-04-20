@@ -24,6 +24,12 @@ standard_testfile
 
 set testcase "nested-subp2"
 
+get_compiler_info
+if { [test_compiler_info "clang-*"] } {
+    untested "compiler does not support nested functions"
+    return -1
+}
+
 if { [gdb_compile "${srcdir}/${subdir}/${testcase}.c" \
                   [standard_output_file "${testcase}"] \
                   executable \
