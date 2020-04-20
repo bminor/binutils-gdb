@@ -12188,6 +12188,7 @@ process_symbol_table (Filedata * filedata)
 
   free (buckets);
   buckets = NULL;
+  nbuckets = 0;
   free (chains);
   chains = NULL;
 
@@ -12263,8 +12264,10 @@ process_symbol_table (Filedata * filedata)
     }
   free (gnubuckets);
   gnubuckets = NULL;
+  ngnubuckets = 0;
   free (gnuchains);
   gnuchains = NULL;
+  ngnuchains = 0;
   free (mipsxlat);
   mipsxlat = NULL;
   return TRUE;
@@ -12272,12 +12275,15 @@ process_symbol_table (Filedata * filedata)
  err_out:
   free (gnubuckets);
   gnubuckets = NULL;
+  ngnubuckets = 0;
   free (gnuchains);
   gnuchains = NULL;
+  ngnuchains = 0
   free (mipsxlat);
   mipsxlat = NULL;
   free (buckets);
   buckets = NULL;
+  nbuckets = 0;
   free (chains);
   chains = NULL;
   return FALSE;

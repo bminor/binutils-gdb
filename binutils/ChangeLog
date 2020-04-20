@@ -1,5 +1,10 @@
 2020-04-20  Alan Modra  <amodra@gmail.com>
 
+	* readelf.c (process_symbol_table): Clear ngnuchains, ngnubuckets
+	and nbuckets.
+
+2020-04-20  Alan Modra  <amodra@gmail.com>
+
 	* readelf.c (process_section_headers): Free dynamic symbols etc.
 	earlier.
 
