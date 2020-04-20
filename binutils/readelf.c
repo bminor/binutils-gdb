@@ -12278,7 +12278,7 @@ process_symbol_table (Filedata * filedata)
   ngnubuckets = 0;
   free (gnuchains);
   gnuchains = NULL;
-  ngnuchains = 0
+  ngnuchains = 0;
   free (mipsxlat);
   mipsxlat = NULL;
   free (buckets);
