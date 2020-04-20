@@ -5224,7 +5224,9 @@ to one of its own internal functions or data structures.  */
 PLT entries.  Otherwise, this is just a generic 32-bit relocation.  */
   BFD_RELOC_XTENSA_PLT,
 
-/* Xtensa relocations to mark the difference of two local symbols.
+/* Xtensa relocations for backward compatibility.  These have been replaced
+by BFD_RELOC_XTENSA_PDIFF and BFD_RELOC_XTENSA_NDIFF.
+Xtensa relocations to mark the difference of two local symbols.
 These are only needed to support linker relaxation and can be ignored
 when not relaxing.  The field is set to the value of the difference
 assuming no relaxation.  The relocation encodes the position of the
@@ -5297,6 +5299,22 @@ BFD_RELOC_XTENSA_ASM_EXPAND.  */
   BFD_RELOC_XTENSA_TLS_FUNC,
   BFD_RELOC_XTENSA_TLS_ARG,
   BFD_RELOC_XTENSA_TLS_CALL,
+
+/* Xtensa relocations to mark the difference of two local symbols.
+These are only needed to support linker relaxation and can be ignored
+when not relaxing.  The field is set to the value of the difference
+assuming no relaxation.  The relocation encodes the position of the
+subtracted symbol so the linker can determine whether to adjust the field
+value.  PDIFF relocations are used for positive differences, NDIFF
+relocations are used for negative differences.  The difference value
+is treated as unsigned with these relocation types, giving full
+8/16 value ranges.  */
+  BFD_RELOC_XTENSA_PDIFF8,
+  BFD_RELOC_XTENSA_PDIFF16,
+  BFD_RELOC_XTENSA_PDIFF32,
+  BFD_RELOC_XTENSA_NDIFF8,
+  BFD_RELOC_XTENSA_NDIFF16,
+  BFD_RELOC_XTENSA_NDIFF32,
 
 /* 8 bit signed offset in (ix+d) or (iy+d).  */
   BFD_RELOC_Z80_DISP8,

@@ -1,3 +1,10 @@
+2020-04-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	PR ld/25861
+	* testsuite/ld-xtensa/relax-loc.d: New test definition.
+	* testsuite/ld-xtensa/relax-loc.s: New test source.
+	* testsuite/ld-xtensa/xtensa.exp (relax-loc): New test.
+
 2020-04-22  Fangrui Song <maskray@google.com>
 
 	PR ld/25806

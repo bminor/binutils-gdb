@@ -1,3 +1,13 @@
+2020-04-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	PR ld/25861
+	* config/tc-xtensa.c (md_apply_fix): Replace
+	BFD_RELOC_XTENSA_DIFF{8,16,32} generation with
+	BFD_RELOC_XTENSA_PDIFF{8,16,32} and
+	BFD_RELOC_XTENSA_NDIFF{8,16,32} generation.
+	* testsuite/gas/xtensa/loc.d: Replace BFD_RELOC_XTENSA_DIFF16
+	with BFD_RELOC_XTENSA_PDIFF16 in the expected output.
+
 2020-04-22  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-elf.c (elf_frob_symbol): Unconditionally remove

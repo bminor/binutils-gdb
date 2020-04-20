@@ -1,3 +1,9 @@
+2020-04-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	PR ld/25861
+	* elf/xtensa.h (elf_xtensa_reloc_type): New entries for
+	R_XTENSA_PDIFF{8,16,32} and R_XTENSA_NDIFF{8,16,32}.
+
 2020-04-21  Alan Modra  <amodra@gmail.com>
 
 	* elf/sh.h (STO_SH5_ISA32, SHF_SH5_ISA32, SHF_SH5_ISA32_MIXED),

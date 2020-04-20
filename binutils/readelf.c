@@ -13348,7 +13348,13 @@ is_none_reloc (Filedata * filedata, unsigned int reloc_type)
       return (reloc_type == 0      /* R_XTENSA_NONE.  */
 	      || reloc_type == 17  /* R_XTENSA_DIFF8.  */
 	      || reloc_type == 18  /* R_XTENSA_DIFF16.  */
-	      || reloc_type == 19  /* R_XTENSA_DIFF32.  */);
+	      || reloc_type == 19  /* R_XTENSA_DIFF32.  */
+	      || reloc_type == 57  /* R_XTENSA_PDIFF8.  */
+	      || reloc_type == 58  /* R_XTENSA_PDIFF16.  */
+	      || reloc_type == 59  /* R_XTENSA_PDIFF32.  */
+	      || reloc_type == 60  /* R_XTENSA_NDIFF8.  */
+	      || reloc_type == 61  /* R_XTENSA_NDIFF16.  */
+	      || reloc_type == 62  /* R_XTENSA_NDIFF32.  */);
     }
   return FALSE;
 }

@@ -1,3 +1,18 @@
+2020-04-22  Max Filippov  <jcmvbkbc@gmail.com>
+
+	PR ld/25861
+	* bfd-in2.h: Regenerated.
+	* elf32-xtensa.c (elf_howto_table): New entries for
+	R_XTENSA_PDIFF{8,16,32} and R_XTENSA_NDIFF{8,16,32}.
+	(elf_xtensa_reloc_type_lookup, elf_xtensa_do_reloc)
+	(relax_section): Add cases for R_XTENSA_PDIFF{8,16,32} and
+	R_XTENSA_NDIFF{8,16,32}.
+	* libbfd.h (bfd_reloc_code_real_names): Add names for
+	BFD_RELOC_XTENSA_PDIFF{8,16,32} and
+	BFD_RELOC_XTENSA_NDIFF{8,16,32}.
+	* reloc.c: Add documentation for BFD_RELOC_XTENSA_PDIFF{8,16,32}
+	and BFD_RELOC_XTENSA_NDIFF{8,16,32}.
+
 2020-04-21  Tamar Christina  <tamar.christina@arm.com>
 
 	PR binutils/24753
