@@ -4,8 +4,7 @@
 
 2020-04-20  Gary Benson <gbenson@redhat.com>
 
-	* gdb/testsuite/gdb.trace/tspeed.c: Fix compilation error with
-	clang.
+	* gdb.trace/tspeed.c: Fix compilation error with clang.
 
 2020-04-20  Gary Benson <gbenson@redhat.com>
 
