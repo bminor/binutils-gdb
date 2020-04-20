@@ -1,5 +1,10 @@
 2020-04-20  Alan Modra  <amodra@gmail.com>
 
+	* readelf.c (process_section_headers): Free dynamic symbols etc.
+	earlier.
+
+2020-04-20  Alan Modra  <amodra@gmail.com>
+
 	* readelf.c (get_num_dynamic_syms): Formatting.  Don't return
 	on error without freeing.
 	(process_dynamic_section): Don't recreate dynamic symbols from

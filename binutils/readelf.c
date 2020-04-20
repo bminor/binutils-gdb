@@ -6132,6 +6132,20 @@ process_section_headers (Filedata * filedata)
 
   free (filedata->section_headers);
   filedata->section_headers = NULL;
+  free (dynamic_symbols);
+  dynamic_symbols = NULL;
+  num_dynamic_syms = 0;
+  free (dynamic_strings);
+  dynamic_strings = NULL;
+  dynamic_strings_length = 0;
+  free (dynamic_syminfo);
+  dynamic_syminfo = NULL;
+  while (symtab_shndx_list != NULL)
+    {
+      elf_section_list *next = symtab_shndx_list->next;
+      free (symtab_shndx_list);
+      symtab_shndx_list = next;
+    }
 
   if (filedata->file_header.e_shnum == 0)
     {
@@ -6186,21 +6200,6 @@ process_section_headers (Filedata * filedata)
 
   /* Scan the sections for the dynamic symbol table
      and dynamic string table and debug sections.  */
-  free (dynamic_symbols);
-  dynamic_symbols = NULL;
-  num_dynamic_syms = 0;
-  free (dynamic_strings);
-  dynamic_strings = NULL;
-  dynamic_strings_length = 0;
-  free (dynamic_syminfo);
-  dynamic_syminfo = NULL;
-  while (symtab_shndx_list != NULL)
-    {
-      elf_section_list *next = symtab_shndx_list->next;
-      free (symtab_shndx_list);
-      symtab_shndx_list = next;
-    }
-
   eh_addr_size = is_32bit_elf ? 4 : 8;
   switch (filedata->file_header.e_machine)
     {
