@@ -24,8 +24,7 @@ standard_testfile
 
 set testcase "nested-subp3"
 
-get_compiler_info
-if { [test_compiler_info "clang-*"] } {
+if ![support_nested_function_tests] {
     untested "compiler does not support nested functions"
     return -1
 }
