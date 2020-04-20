@@ -1,3 +1,15 @@
+2020-04-20  Sudakshina Das  <sudi.das@arm.com>
+
+	* aarch64-tbl.h (aarch64_feature_bti, BTI, BTI_INSN): Remove.
+	(aarch64_feature_ras, RAS): Likewise.
+	(aarch64_feature_stat_profile, STAT_PROFILE): Likewise.
+	(aarch64_opcode_table): Update bti, xpaclri, pacia1716, pacib1716,
+	autia1716, autib1716, esb, psb, dgh, paciaz, paciasp, pacibz, pacibsp,
+	autiaz, autiasp, autibz, autibsp to be CORE_INSN.
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+
 2020-04-17  Fredrik Strupe  <fredrik@strupe.net>
 
 	* arm-dis.c (neon_opcodes): Fix VDUP instruction masks.

@@ -1,3 +1,11 @@
+2020-04-20  Sudakshina Das  <sudi.das@arm.com>
+
+	* testsuite/gas/aarch64/bti.d: Update -march option.
+	* testsuite/gas/aarch64/illegal-bti.d: Remove.
+	* testsuite/gas/aarch64/illegal-bti.l: Remove.
+	* testsuite/gas/aarch64/illegal-ras-1.l: Remove esb.
+	* testsuite/gas/aarch64/illegal-ras-1.s: Remove esb.
+
 2020-04-17  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-bfin.h (TC_EQUAL_IN_INSN): Allow assignment to dot.
