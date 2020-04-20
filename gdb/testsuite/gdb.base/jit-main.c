@@ -128,7 +128,7 @@ update_locations (const void *const addr, int idx)
 
 /* Used to spin waiting for GDB.  */
 volatile int wait_for_gdb = ATTACH;
-#define WAIT_FOR_GDB while (wait_for_gdb)
+#define WAIT_FOR_GDB do {} while (wait_for_gdb)
 
 /* The current process's PID.  GDB retrieves this.  */
 int mypid;
