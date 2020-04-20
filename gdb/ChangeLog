@@ -461,12 +461,12 @@
 2020-04-12  Kamil Rytarowski  <n54@gmx.com>
 
 	* nbsd-nat.c (nbsd_pid_to_cmdline): Add.
-        (nbsd_nat_target::info_proc): Add do_cmdline.
+	(nbsd_nat_target::info_proc): Add do_cmdline.
 
 2020-04-12  Kamil Rytarowski  <n54@gmx.com>
 
 	* nbsd-nat.c (nbsd_pid_to_cwd): Add.
-        (nbsd_nat_target::info_proc): Add do_cwd.
+	(nbsd_nat_target::info_proc): Add do_cwd.
 
 2020-04-12  Kamil Rytarowski  <n54@gmx.com>
 
@@ -528,8 +528,8 @@
 	revert partially:
 	2020-04-01  Bernd Edlinger  <bernd.edlinger@hotmail.de>
 
-        * buildsym.c (record_line): Fix undefined behavior and preserve
-        lines at eof.
+	* buildsym.c (record_line): Fix undefined behavior and preserve
+	lines at eof.
 
 2020-04-09  Kamil Rytarowski  <n54@gmx.com>
 
@@ -1742,7 +1742,7 @@
 	* configure.tgt: Likewise.
 	* arc-tdep.c (arc_tdesc_init): Use arc_read_description.
 	(_initialize_arc_tdep): Don't initialize old target descriptions.
-        (arc_read_description): New function to cache target descriptions.
+	(arc_read_description): New function to cache target descriptions.
 	* arc-tdep.h (arc_read_description): Add proto type.
 	* arch/arc.c: New file.
 	* arch/arc.h: Likewise.
@@ -4108,32 +4108,32 @@
 2020-02-05  Iain Buclaw  <ibuclaw@gdcproject.org>
 
 	PR gdb/25190:
-        * gdb/remote-sim.c (gdb_os_write_stderr): Update.
-        * gdb/remote.c (remote_console_output): Update.
-        * gdb/ui-file.c (fputs_unfiltered): Rename to...
-        (ui_file_puts): ...this.
-        * gdb/ui-file.h (ui_file_puts): Add declaration.
-        * gdb/utils.c (emit_style_escape): Update.
-        (flush_wrap_buffer): Update.
-        (fputs_maybe_filtered): Update.
-        (fputs_unfiltered): Add function.
+	* gdb/remote-sim.c (gdb_os_write_stderr): Update.
+	* gdb/remote.c (remote_console_output): Update.
+	* gdb/ui-file.c (fputs_unfiltered): Rename to...
+	(ui_file_puts): ...this.
+	* gdb/ui-file.h (ui_file_puts): Add declaration.
+	* gdb/utils.c (emit_style_escape): Update.
+	(flush_wrap_buffer): Update.
+	(fputs_maybe_filtered): Update.
+	(fputs_unfiltered): Add function.
 
 2020-02-05  Iain Buclaw  <ibuclaw@gdcproject.org>
 
-        * gdb/event-loop.c (gdb_wait_for_event): Update.
-        * gdb/printcmd.c (printf_command): Update.
-        * gdb/remote-fileio.c (remote_fileio_func_write): Update.
-        * gdb/remote-sim.c (gdb_os_flush_stdout): Update.
-        (gdb_os_flush_stderr): Update.
-        * gdb/remote.c (remote_console_output): Update.
-        * gdb/ui-file.c (gdb_flush): Rename to...
-        (ui_file_flush): ...this.
-        (stderr_file::write): Update.
-        (stderr_file::puts): Update.
-        * gdb/ui-file.h (gdb_flush): Rename to...
-        (ui_file_flush): ...this.
-        * gdb/utils.c (gdb_flush): Add function.
-        * gdb/utils.h (gdb_flush): Add declaration.
+	* gdb/event-loop.c (gdb_wait_for_event): Update.
+	* gdb/printcmd.c (printf_command): Update.
+	* gdb/remote-fileio.c (remote_fileio_func_write): Update.
+	* gdb/remote-sim.c (gdb_os_flush_stdout): Update.
+	(gdb_os_flush_stderr): Update.
+	* gdb/remote.c (remote_console_output): Update.
+	* gdb/ui-file.c (gdb_flush): Rename to...
+	(ui_file_flush): ...this.
+	(stderr_file::write): Update.
+	(stderr_file::puts): Update.
+	* gdb/ui-file.h (gdb_flush): Rename to...
+	(ui_file_flush): ...this.
+	* gdb/utils.c (gdb_flush): Add function.
+	* gdb/utils.h (gdb_flush): Add declaration.
 
 2020-02-07  Tom Tromey  <tromey@adacore.com>
 
@@ -4847,7 +4847,7 @@
 	Add rtl_user_process_parameters type.
 
 2020-01-16  Pedro Alves  <palves@redhat.com>
-            Norbert Lange  <nolange79@gmail.com>
+	    Norbert Lange  <nolange79@gmail.com>
 
 	PR build/24805
 	* gdbsupport/gdb_proc_service.h (PS_EXPORT): New.
@@ -6272,7 +6272,7 @@
 
 	* tui/tui-disasm.c (tui_disasm_window::addr_is_displayed): Avoid
 	overflow by an early check of content vs threshold.
-        * tui/tui-source.c (tui_source_window::line_is_displayed):
+	* tui/tui-source.c (tui_source_window::line_is_displayed):
 	Likewise.
 
 2020-01-06  Eli Zaretskii  <eliz@gnu.org>

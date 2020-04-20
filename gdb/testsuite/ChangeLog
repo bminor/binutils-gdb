@@ -1954,7 +1954,7 @@
 
 2019-09-29  Tom de Vries  <tdevries@suse.de>
 
-        * gdb.dwarf2/gdb-index.exp: Handle new location of .dwz file.
+	* gdb.dwarf2/gdb-index.exp: Handle new location of .dwz file.
 
 2019-09-29  Tom de Vries  <tdevries@suse.de>
 
@@ -2449,7 +2449,7 @@
 2019-07-29  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/maint.exp: Use "\r\n" instead of "\[\r\n\]+" in "maint
-          print registers" regexps.
+	print registers" regexps.
 
 2019-07-29  Tom de Vries  <tdevries@suse.de>
 
