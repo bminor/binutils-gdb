@@ -4026,7 +4026,7 @@ parse_barrier_psb (char **str,
   if (!o)
     {
       set_fatal_syntax_error
-	( _("unknown or missing option to PSB"));
+	( _("unknown or missing option to PSB/TSB"));
       return PARSE_FAIL;
     }
 
@@ -4034,7 +4034,7 @@ parse_barrier_psb (char **str,
     {
       /* PSB only accepts option name 'CSYNC'.  */
       set_syntax_error
-	(_("the specified option is not accepted for PSB"));
+	(_("the specified option is not accepted for PSB/TSB"));
       return PARSE_FAIL;
     }
 

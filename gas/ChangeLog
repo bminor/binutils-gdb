@@ -1,5 +1,13 @@
 2020-04-20  Sudakshina Das  <sudi.das@arm.com>
 
+	* config/tc-aarch64.c (parse_barrier_psb): Update error messages
+	to include TSB.
+	* testsuite/gas/aarch64/system-2.d: Update -march and new tsb tests.
+	* testsuite/gas/aarch64/system-2.s: Add new tsb tests.
+	* testsuite/gas/aarch64/system.d: Update.
+
+2020-04-20  Sudakshina Das  <sudi.das@arm.com>
+
 	* testsuite/gas/aarch64/bti.d: Update -march option.
 	* testsuite/gas/aarch64/illegal-bti.d: Remove.
 	* testsuite/gas/aarch64/illegal-bti.l: Remove.

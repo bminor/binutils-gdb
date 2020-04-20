@@ -1,5 +1,20 @@
 2020-04-20  Sudakshina Das  <sudi.das@arm.com>
 
+	* aarch64-asm.c (aarch64_ins_none): New.
+	* aarch64-asm.h (ins_none): New declaration.
+	* aarch64-dis.c (aarch64_ext_none): New.
+	* aarch64-dis.h (ext_none): New declaration.
+	* aarch64-opc.c (aarch64_print_operand): Update case for
+	AARCH64_OPND_BARRIER_PSB.
+	* aarch64-tbl.h (aarch64_opcode_table): Add tsb.
+	(AARCH64_OPERANDS): Update inserter/extracter for
+	AARCH64_OPND_BARRIER_PSB to use new dummy functions.
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+
+2020-04-20  Sudakshina Das  <sudi.das@arm.com>
+
 	* aarch64-tbl.h (aarch64_feature_bti, BTI, BTI_INSN): Remove.
 	(aarch64_feature_ras, RAS): Likewise.
 	(aarch64_feature_stat_profile, STAT_PROFILE): Likewise.
