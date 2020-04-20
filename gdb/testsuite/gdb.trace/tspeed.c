@@ -75,7 +75,7 @@ main(int argc, char **argv)
 
       /* Keep trying the speed test, with more iterations, until
 	 we get to a reasonable number.  */
-      while (problem = trace_speed_test())
+      while ((problem = trace_speed_test()))
 	{
 	  /* If iteration isn't working, give up.  */
 	  if (iters > max_iters)
