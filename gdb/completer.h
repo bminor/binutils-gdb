@@ -242,7 +242,7 @@ struct completion_result
   DISABLE_COPY_AND_ASSIGN (completion_result);
 
   /* Move a result.  */
-  completion_result (completion_result &&rhs);
+  completion_result (completion_result &&rhs) noexcept;
 
   /* Release ownership of the match list array.  */
   char **release_match_list ();

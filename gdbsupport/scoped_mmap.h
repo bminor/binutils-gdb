@@ -42,13 +42,10 @@ public:
     destroy ();
   }
 
-  scoped_mmap (scoped_mmap &&rhs)
+  scoped_mmap (scoped_mmap &&rhs) noexcept
+    : m_mem (rhs.m_mem),
+      m_length (rhs.m_length)
   {
-    destroy ();
-
-    m_mem = rhs.m_mem;
-    m_length = rhs.m_length;
-
     rhs.m_mem = MAP_FAILED;
     rhs.m_length = 0;
   }

@@ -1,3 +1,12 @@
+2020-04-20  Tom Tromey  <tromey@adacore.com>
+
+	* scoped_mmap.h (scoped_mmap): Mark move constructor as noexcept.
+	Use initialization style.  Don't call destroy.
+	* scoped_fd.h (class scoped_fd): Mark move constructor as
+	noexcept.
+	* gdb_ref_ptr.h (class ref_ptr): Mark move constructor as
+	noexcept.
+
 2020-04-13  Tom Tromey  <tom@tromey.com>
 
 	* event-loop.c: Move comment.  Remove obsolete 	comment.

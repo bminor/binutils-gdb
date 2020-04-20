@@ -2327,15 +2327,11 @@ completion_result::~completion_result ()
 
 /* See completer.h  */
 
-completion_result::completion_result (completion_result &&rhs)
+completion_result::completion_result (completion_result &&rhs) noexcept
+  : match_list (rhs.match_list),
+    number_matches (rhs.number_matches)
 {
-  if (this == &rhs)
-    return;
-
-  reset_match_list ();
-  match_list = rhs.match_list;
   rhs.match_list = NULL;
-  number_matches = rhs.number_matches;
   rhs.number_matches = 0;
 }
 

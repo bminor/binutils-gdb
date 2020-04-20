@@ -1,3 +1,14 @@
+2020-04-20  Tom Tromey  <tromey@adacore.com>
+
+	* python/python.c (struct gdbpy_event): Mark move constructor as
+	noexcept.
+	* python/py-tui.c (class gdbpy_tui_window_maker): Mark move
+	constructor as noexcept.
+	* completer.h (struct completion_result): Mark move constructor as
+	noexcept.
+	* completer.c (completion_result::completion_result): Use
+	initialization style.  Don't call reset_match_list.
+
 2020-04-20  Mihails Strasuns  <mihails.strasuns@intel.com>
 
 	* MAINTAINERS (Write After Approval): Add myself.

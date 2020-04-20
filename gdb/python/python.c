@@ -975,7 +975,7 @@ struct gdbpy_event
   {
   }
 
-  gdbpy_event (gdbpy_event &&other)
+  gdbpy_event (gdbpy_event &&other) noexcept
     : m_func (other.m_func)
   {
     other.m_func = nullptr;
