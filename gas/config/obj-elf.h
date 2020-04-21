@@ -55,18 +55,41 @@ extern int mips_flag_mdebug;
 #endif
 #endif
 
+enum elf_visibility
+{
+  visibility_unchanged = 0,
+  visibility_local,
+  visibility_hidden,
+  visibility_remove
+};
+
+struct elf_versioned_name_list
+{
+  char *name;
+  struct elf_versioned_name_list *next;
+};
+
 /* Additional information we keep for each symbol.  */
 struct elf_obj_sy
 {
   /* Whether the symbol has been marked as local.  */
-  int local;
+  unsigned int local : 1;
+
+  /* Whether the symbol has been marked for rename with @@@.  */
+  unsigned int rename : 1;
+
+  /* Whether the symbol has a bad version name.  */
+  unsigned int bad_version : 1;
+
+  /* Whether visibility of the symbol should be changed.  */
+  ENUM_BITFIELD (elf_visibility) visibility : 2;
 
   /* Use this to keep track of .size expressions that involve
      differences that we can't compute yet.  */
   expressionS *size;
 
-  /* The name specified by the .symver directive.  */
-  char *versioned_name;
+  /* The list of names specified by the .symver directive.  */
+  struct elf_versioned_name_list *versioned_name;
 
 #ifdef ECOFF_DEBUGGING
   /* If we are generating ECOFF debugging information, we need some

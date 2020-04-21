@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Extend .symver directive to update visibility of the original symbol
+  and assign one original symbol to different versioned symbols.
+
 * Add support for Intel SERIALIZE and TSXLDTRK instructions.
 
 * Add -mlfence-after-load=, -mlfence-before-indirect-branch= and

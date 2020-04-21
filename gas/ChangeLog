@@ -1,3 +1,49 @@
+2020-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/23840
+	PR gas/25295
+	* NEWS: Mention .symver extension.
+	* config/obj-elf.c (obj_elf_find_and_add_versioned_name): New
+	function.
+	(obj_elf_symver): Call obj_elf_find_and_add_versioned_name to
+	add a version name.  Add local, hidden and remove visibility
+	support.
+	(elf_frob_symbol): Handle the list of version names.  Update the
+	original symbol to local, hidden or remove it from the symbol
+	table.
+	(elf_frob_file_before_adjust): Handle the list of version names.
+	* config/obj-elf.h (elf_visibility): New.
+	(elf_versioned_name_list): Likewise.
+	(elf_obj_sy): Change local to bitfield. Add rename, bad_version
+	and visibility.  Change versioned_name pointer to struct
+	elf_versioned_name_list.
+	* doc/as.texi: Update .symver directive.
+	* testsuite/gas/symver/symver.exp: Run all *.d tests.  Add more
+	error checking tests.
+	* testsuite/gas/symver/symver6.d: New file.
+	* testsuite/gas/symver/symver7.d: Likewise.
+	* testsuite/gas/symver/symver7.s: Likewise.
+	* testsuite/gas/symver/symver8.d: Likewise.
+	* testsuite/gas/symver/symver8.s: Likewise.
+	* testsuite/gas/symver/symver9.s: Likewise.
+	* testsuite/gas/symver/symver9a.d: Likewise.
+	* testsuite/gas/symver/symver9b.d: Likewise.
+	* testsuite/gas/symver/symver10.s: Likewise.
+	* testsuite/gas/symver/symver10a.d: Likewise.
+	* testsuite/gas/symver/symver10b.d: Likewise.
+	* testsuite/gas/symver/symver11.d: Likewise.
+	* testsuite/gas/symver/symver11.s: Likewise.
+	* testsuite/gas/symver/symver12.d: Likewise.
+	* testsuite/gas/symver/symver12.s: Likewise.
+	* testsuite/gas/symver/symver13.d: Likewise.
+	* testsuite/gas/symver/symver13.s: Likewise.
+	* testsuite/gas/symver/symver14.d: Likewise.
+	* testsuite/gas/symver/symver14.l: Likewise.
+	* testsuite/gas/symver/symver15.d: Likewise.
+	* testsuite/gas/symver/symver15.l: Likewise.
+	* testsuite/gas/symver/symver6.l: Removed.
+	* testsuite/gas/symver/symver6.s: Updated.
+
 2020-04-20  Sudakshina Das  <sudi.das@arm.com>
 
 	* config/tc-aarch64.c (parse_barrier_psb): Update error messages

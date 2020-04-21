@@ -1515,6 +1515,70 @@ obj_elf_line (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+static struct elf_versioned_name_list *
+obj_elf_find_and_add_versioned_name (const char *version_name,
+				     const char *sym_name,
+				     const char *ver,
+				     struct elf_obj_sy *sy_obj)
+{
+  struct elf_versioned_name_list *versioned_name;
+  const char *p;
+
+  for (p = ver + 1; *p == ELF_VER_CHR; p++)
+    ;
+
+  /* NB: Since some tests in ld/testsuite/ld-elfvers have no version
+     names, we have to disable this.  */
+  if (0 && *p == '\0')
+    {
+      as_bad (_("missing version name in `%s' for symbol `%s'"),
+	      version_name, sym_name);
+      return NULL;
+    }
+
+  versioned_name = sy_obj->versioned_name;
+
+  switch (p - ver)
+    {
+    case 1:
+    case 2:
+      break;
+    case 3:
+      if (sy_obj->rename)
+	{
+	  if (strcmp (versioned_name->name, version_name) == 0)
+	    return versioned_name;
+	  else
+	    {
+	      as_bad (_("only one version name with `@@@' is allowed "
+			"for symbol `%s'"), sym_name);
+	      return NULL;
+	    }
+	}
+      sy_obj->rename = TRUE;
+      break;
+    default:
+      as_bad (_("invalid version name '%s' for symbol `%s'"),
+	      version_name, sym_name);
+      return NULL;
+    }
+
+  for (;
+       versioned_name != NULL;
+       versioned_name = versioned_name->next)
+    if (strcmp (versioned_name->name, version_name) == 0)
+      return versioned_name;
+
+  /* Add this versioned name to the head of the list,  */
+  versioned_name = (struct elf_versioned_name_list *)
+    xmalloc (sizeof (*versioned_name));
+  versioned_name->name = xstrdup (version_name);
+  versioned_name->next = sy_obj->versioned_name;
+  sy_obj->versioned_name = versioned_name;
+
+  return versioned_name;
+}
+
 /* This handles the .symver pseudo-op, which is used to specify a
    symbol version.  The syntax is ``.symver NAME,SYMVERNAME''.
    SYMVERNAME may contain ELF_VER_CHR ('@') characters.  This
@@ -1525,9 +1589,12 @@ static void
 obj_elf_symver (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
+  const char *sym_name;
   char c;
   char old_lexat;
   symbolS *sym;
+  struct elf_obj_sy *sy_obj;
+  char *p;
 
   sym = get_sym_from_input_line_and_check ();
 
@@ -1546,43 +1613,59 @@ obj_elf_symver (int ignore ATTRIBUTE_UNUSED)
   lex_type[(unsigned char) '@'] |= LEX_NAME;
   c = get_symbol_name (& name);
   lex_type[(unsigned char) '@'] = old_lexat;
+  sym_name = S_GET_NAME (sym);
 
   if (S_IS_COMMON (sym))
     {
       as_bad (_("`%s' can't be versioned to common symbol '%s'"),
-	      name, S_GET_NAME (sym));
+	      name, sym_name);
       ignore_rest_of_line ();
       return;
     }
 
-  if (symbol_get_obj (sym)->versioned_name == NULL)
+  p = strchr (name, ELF_VER_CHR);
+  if (p == NULL)
     {
-      symbol_get_obj (sym)->versioned_name = xstrdup (name);
-
-      (void) restore_line_pointer (c);
-
-      if (strchr (symbol_get_obj (sym)->versioned_name,
-		  ELF_VER_CHR) == NULL)
-	{
-	  as_bad (_("missing version name in `%s' for symbol `%s'"),
-		  symbol_get_obj (sym)->versioned_name,
-		  S_GET_NAME (sym));
-	  ignore_rest_of_line ();
-	  return;
-	}
+      as_bad (_("missing version name in `%s' for symbol `%s'"),
+	      name, sym_name);
+      ignore_rest_of_line ();
+      return;
     }
-  else
-    {
-      if (strcmp (symbol_get_obj (sym)->versioned_name, name))
-	{
-	  as_bad (_("multiple versions [`%s'|`%s'] for symbol `%s'"),
-		  name, symbol_get_obj (sym)->versioned_name,
-		  S_GET_NAME (sym));
-	  ignore_rest_of_line ();
-	  return;
-	}
 
-      (void) restore_line_pointer (c);
+  sy_obj = symbol_get_obj (sym);
+  if (obj_elf_find_and_add_versioned_name (name, sym_name,
+					   p, sy_obj) == NULL)
+    {
+      sy_obj->bad_version = TRUE;
+      ignore_rest_of_line ();
+      return;
+    }
+
+  (void) restore_line_pointer (c);
+
+  if (*input_line_pointer == ',')
+    {
+      char *save = input_line_pointer;
+
+      ++input_line_pointer;
+      SKIP_WHITESPACE ();
+      if (strncmp (input_line_pointer, "local", 5) == 0)
+	{
+	  input_line_pointer += 5;
+	  sy_obj->visibility = visibility_local;
+	}
+      else if (strncmp (input_line_pointer, "hidden", 6) == 0)
+	{
+	  input_line_pointer += 6;
+	  sy_obj->visibility = visibility_hidden;
+	}
+      else if (strncmp (input_line_pointer, "remove", 6) == 0)
+	{
+	  input_line_pointer += 6;
+	  sy_obj->visibility = visibility_remove;
+	}
+      else
+	input_line_pointer = save;
     }
 
   demand_empty_rest_of_line ();
@@ -2382,6 +2465,7 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 {
   struct elf_obj_sy *sy_obj;
   expressionS *size;
+  struct elf_versioned_name_list *versioned_name;
 
 #ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)
@@ -2409,73 +2493,47 @@ elf_frob_symbol (symbolS *symp, int *puntp)
       sy_obj->size = NULL;
     }
 
-  if (sy_obj->versioned_name != NULL)
+  versioned_name = sy_obj->versioned_name;
+  if (versioned_name)
     {
-      char *p;
-
-      p = strchr (sy_obj->versioned_name, ELF_VER_CHR);
-      if (p == NULL)
-	/* We will have already reported an error about a missing version.  */
-	*puntp = TRUE;
-
       /* This symbol was given a new name with the .symver directive.
-
 	 If this is an external reference, just rename the symbol to
 	 include the version string.  This will make the relocs be
-	 against the correct versioned symbol.
+	 against the correct versioned symbol.  */
 
-	 If this is a definition, add an alias.  FIXME: Using an alias
-	 will permit the debugging information to refer to the right
-	 symbol.  However, it's not clear whether it is the best
-	 approach.  */
-
-      else if (! S_IS_DEFINED (symp))
+      /* We will have already reported an version error.  */
+      if (sy_obj->bad_version)
+	*puntp = TRUE;
+      /* elf_frob_file_before_adjust only allows one version symbol for
+	 renamed symbol.  */
+      else if (sy_obj->rename)
+	S_SET_NAME (symp, versioned_name->name);
+      else if (S_IS_COMMON (symp))
 	{
-	  /* Verify that the name isn't using the @@ syntax--this is
-	     reserved for definitions of the default version to link
-	     against.  */
-	  if (p[1] == ELF_VER_CHR)
-	    {
-	      as_bad (_("invalid attempt to declare external version name"
-			" as default in symbol `%s'"),
-		      sy_obj->versioned_name);
-	      *puntp = TRUE;
-	    }
-	  S_SET_NAME (symp, sy_obj->versioned_name);
+	  as_bad (_("`%s' can't be versioned to common symbol '%s'"),
+		  versioned_name->name, S_GET_NAME (symp));
+	  *puntp = TRUE;
 	}
       else
 	{
-	  if (p[1] == ELF_VER_CHR && p[2] == ELF_VER_CHR)
+	  asymbol *bfdsym;
+	  elf_symbol_type *elfsym;
+
+	  /* This is a definition.  Add an alias for each version.
+	     FIXME: Using an alias will permit the debugging information
+	     to refer to the right symbol.  However, it's not clear
+	     whether it is the best approach.  */
+
+	  /* FIXME: Creating a new symbol here is risky.  We're
+	     in the final loop over the symbol table.  We can
+	     get away with it only because the symbol goes to
+	     the end of the list, where the loop will still see
+	     it.  It would probably be better to do this in
+	     obj_frob_file_before_adjust.  */
+	  for (; versioned_name != NULL;
+	       versioned_name = versioned_name->next)
 	    {
-	      size_t l;
-
-	      /* The @@@ syntax is a special case. It renames the
-		 symbol name to versioned_name with one `@' removed.  */
-	      l = strlen (&p[3]) + 1;
-	      memmove (&p[2], &p[3], l);
-	      S_SET_NAME (symp, sy_obj->versioned_name);
-	    }
-	  else
-	    {
-	      symbolS *symp2;
-
-	      /* FIXME: Creating a new symbol here is risky.  We're
-		 in the final loop over the symbol table.  We can
-		 get away with it only because the symbol goes to
-		 the end of the list, where the loop will still see
-		 it.  It would probably be better to do this in
-		 obj_frob_file_before_adjust.  */
-
-	      symp2 = symbol_find_or_make (sy_obj->versioned_name);
-
-	      /* Now we act as though we saw symp2 = sym.  */
-	      if (S_IS_COMMON (symp))
-		{
-		  as_bad (_("`%s' can't be versioned to common symbol '%s'"),
-			  sy_obj->versioned_name, S_GET_NAME (symp));
-		  *puntp = TRUE;
-		  return;
-		}
+	      symbolS *symp2 = symbol_find_or_make (versioned_name->name);
 
 	      S_SET_SEGMENT (symp2, S_GET_SEGMENT (symp));
 
@@ -2497,6 +2555,27 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 
 	      if (S_IS_EXTERNAL (symp))
 		S_SET_EXTERNAL (symp2);
+	    }
+
+	  switch (symbol_get_obj (symp)->visibility)
+	    {
+	    case visibility_unchanged:
+	      break;
+	    case visibility_hidden:
+	      bfdsym = symbol_get_bfdsym (symp);
+	      elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym),
+					bfdsym);
+	      elfsym->internal_elf_sym.st_other &= ~3;
+	      elfsym->internal_elf_sym.st_other |= STV_HIDDEN;
+	      break;
+	    case visibility_remove:
+	      /* Remove the symbol if it isn't used in relocation.  */
+	      if (!symbol_used_in_reloc_p (symp))
+		symbol_remove (symp, &symbol_rootP, &symbol_lastP);
+	      break;
+	    case visibility_local:
+	      S_CLEAR_EXTERNAL (symp);
+	      break;
 	    }
 	}
     }
@@ -2676,36 +2755,61 @@ elf_frob_file_before_adjust (void)
       symbolS *symp;
 
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
-	if (!S_IS_DEFINED (symp))
-	  {
-	    if (symbol_get_obj (symp)->versioned_name)
-	      {
-		char *p;
+	{
+	  struct elf_obj_sy *sy_obj = symbol_get_obj (symp);
+	  int is_defined = !!S_IS_DEFINED (symp);
 
-		/* The @@@ syntax is a special case. If the symbol is
-		   not defined, 2 `@'s will be removed from the
-		   versioned_name.  */
+	  if (sy_obj->versioned_name)
+	    {
+	      char *p = strchr (sy_obj->versioned_name->name,
+				ELF_VER_CHR);
 
-		p = strchr (symbol_get_obj (symp)->versioned_name,
-			    ELF_VER_CHR);
-		if (p != NULL && p[1] == ELF_VER_CHR && p[2] == ELF_VER_CHR)
-		  {
-		    size_t l = strlen (&p[3]) + 1;
-		    memmove (&p[1], &p[3], l);
-		  }
-		if (symbol_used_p (symp) == 0
-		    && symbol_used_in_reloc_p (symp) == 0)
-		  symbol_remove (symp, &symbol_rootP, &symbol_lastP);
-	      }
+	      if (sy_obj->rename)
+		{
+		  /* The @@@ syntax is a special case. If the symbol is
+		     not defined, 2 `@'s will be removed from the
+		     versioned_name. Otherwise, 1 `@' will be removed.   */
+		  size_t l = strlen (&p[3]) + 1;
+		  memmove (&p[1 + is_defined], &p[3], l);
+		}
 
-	    /* If there was .weak foo, but foo was neither defined nor
-	       used anywhere, remove it.  */
+	      if (!is_defined)
+		{
+		  /* Verify that the name isn't using the @@ syntax--this
+		     is reserved for definitions of the default version
+		     to link against.  */
+		  if (!sy_obj->rename && p[1] == ELF_VER_CHR)
+		    {
+		      as_bad (_("invalid attempt to declare external "
+				"version name as default in symbol `%s'"),
+			      sy_obj->versioned_name->name);
+		      return;
+		    }
 
-	    else if (S_IS_WEAK (symp)
-		     && symbol_used_p (symp) == 0
-		     && symbol_used_in_reloc_p (symp) == 0)
-	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
-	  }
+		  /* Only one version symbol is allowed for undefined
+		     symbol.  */
+		  if (sy_obj->versioned_name->next)
+		    {
+		      as_bad (_("multiple versions [`%s'|`%s'] for "
+				"symbol `%s'"),
+			      sy_obj->versioned_name->name,
+			      sy_obj->versioned_name->next->name,
+			      S_GET_NAME (symp));
+		      return;
+		    }
+
+		  sy_obj->rename = TRUE;
+		}
+	    }
+
+	  /* If there was .symver or .weak, but symbol was neither
+	     defined nor used anywhere, remove it.  */
+	  if (!is_defined
+	      && (sy_obj->versioned_name || S_IS_WEAK (symp))
+	      && symbol_used_p (symp) == 0
+	      && symbol_used_in_reloc_p (symp) == 0)
+	    symbol_remove (symp, &symbol_rootP, &symbol_lastP);
+	}
     }
 }
 
