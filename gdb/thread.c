@@ -1488,8 +1488,16 @@ scoped_restore_current_thread::scoped_restore_current_thread ()
       else
 	frame = NULL;
 
-      m_selected_frame_id = get_frame_id (frame);
-      m_selected_frame_level = frame_relative_level (frame);
+      try
+	{
+	  m_selected_frame_id = get_frame_id (frame);
+	  m_selected_frame_level = frame_relative_level (frame);
+	}
+      catch (const gdb_exception_error &ex)
+	{
+	  m_selected_frame_id = null_frame_id;
+	  m_selected_frame_level = -1;
+	}
 
       tp->incref ();
       m_thread = tp;

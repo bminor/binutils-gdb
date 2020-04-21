@@ -1,3 +1,9 @@
+2020-04-21  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25471
+	* gdb.threads/killed-outside.c: New test.
+	* gdb.threads/killed-outside.exp: New file.
+
 2020-04-20  Gary Benson <gbenson@redhat.com>
 
 	* gdb.base/nested-subp1.exp: Use support_nested_function_tests.

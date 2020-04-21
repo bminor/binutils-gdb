@@ -1,3 +1,10 @@
+2020-04-21  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25471
+	* thread.c
+	(scoped_restore_current_thread::scoped_restore_current_thread): Catch
+	exception in get_frame_id.
+
 2020-04-20  Tom Tromey  <tromey@adacore.com>
 
 	* python/python.c (struct gdbpy_event): Mark move constructor as
