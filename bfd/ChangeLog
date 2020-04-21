@@ -1,3 +1,12 @@
+2020-04-21  Tamar Christina  <tamar.christina@arm.com>
+
+	Backport from mainline.
+	2020-04-21  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/24753
+	* compress.c (bfd_get_full_section_contents): Exclude sections with no
+	content.
+
 2020-04-08  Tamar Christina  <tamar.christina@arm.com>
 
 	Backport from mainline.

@@ -1,3 +1,12 @@
+2020-04-21  Tamar Christina  <tamar.christina@arm.com>
+
+	Backport from mainline.
+	2020-04-21  Tamar Christina  <tamar.christina@arm.com>
+
+	PR binutils/24753
+	* testsuite/gas/arm/pr24753.d: New test.
+	* testsuite/gas/arm/pr24753.s: New test.
+
 2020-03-13  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	Backport from mainline.
