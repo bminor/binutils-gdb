@@ -1,3 +1,8 @@
+2020-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* infrun.c (displaced_step_fixup): Switch to the event_thread
+	before calling displaced_step_restore, not after.
+
 2020-04-21  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* record-btrace.c (record_btrace_enable_warn): Ignore thread if

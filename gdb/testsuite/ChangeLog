@@ -1,3 +1,8 @@
+2020-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.multi/run-only-second-inf.c: New file.
+	* gdb.multi/run-only-second-inf.exp: New file.
+
 2020-04-21  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/multi-inferior.c: New test.
