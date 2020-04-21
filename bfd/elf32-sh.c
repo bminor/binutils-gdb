@@ -3563,7 +3563,6 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       bfd_vma relocation;
       bfd_vma addend = (bfd_vma) 0;
       bfd_reloc_status_type r;
-      int seen_stt_datalabel = 0;
       bfd_vma off;
       enum got_type got_type;
       const char *symname = NULL;
@@ -3626,14 +3625,6 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  relocation = (sec->output_section->vma
 			+ sec->output_offset
 			+ sym->st_value);
-	  /* A local symbol never has STO_SH5_ISA32, so we don't need
-	     datalabel processing here.  Make sure this does not change
-	     without notice.  */
-	  if ((sym->st_other & STO_SH5_ISA32) != 0)
-	    (*info->callbacks->reloc_dangerous)
-	      (info,
-	       _("unexpected STO_SH5_ISA32 on local symbol is not handled"),
-	       input_bfd, input_section, rel->r_offset);
 
 	  if (sec != NULL && discarded_section (sec))
 	    /* Handled below.  */
@@ -3783,14 +3774,9 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			  || sh_elf_hash_entry (h)->got_type == GOT_TLS_GD)))
 		;
 	      else if (sec->output_section != NULL)
-		relocation = ((h->root.u.def.value
+		relocation = (h->root.u.def.value
 			      + sec->output_section->vma
-			      + sec->output_offset)
-			      /* A STO_SH5_ISA32 causes a "bitor 1" to the
-				 symbol value, unless we've seen
-				 STT_DATALABEL on the way to it.  */
-			      | ((h->other & STO_SH5_ISA32) != 0
-				 && ! seen_stt_datalabel));
+			      + sec->output_offset);
 	      else if (!bfd_link_relocatable (info)
 		       && (_bfd_elf_section_offset (output_bfd, info,
 						    input_section,

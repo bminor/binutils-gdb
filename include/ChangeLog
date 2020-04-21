@@ -1,3 +1,8 @@
+2020-04-21  Alan Modra  <amodra@gmail.com>
+
+	* elf/sh.h (STO_SH5_ISA32, SHF_SH5_ISA32, SHF_SH5_ISA32_MIXED),
+	(SHT_SH5_CR_SORTED, STT_DATALABEL): Delete.
+
 2020-04-10  Fangrui Song <maskray@google.com>
 
 	PR binutils/24613
