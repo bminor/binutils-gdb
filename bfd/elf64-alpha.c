@@ -144,14 +144,14 @@ struct alpha_elf_reloc_entry
   /* Which .reloc section? */
   asection *srel;
 
-  /* What kind of relocation? */
-  unsigned int rtype;
-
-  /* Is this against read-only section? */
-  unsigned int reltext : 1;
+  /* Which section this relocation is against? */
+  asection *sec;
 
   /* How many did we find?  */
   unsigned long count;
+
+  /* What kind of relocation? */
+  unsigned int rtype;
 };
 
 struct alpha_elf_link_hash_entry
@@ -1998,9 +1998,9 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		    return FALSE;
 
 		  rent->srel = sreloc;
+		  rent->sec = sec;
 		  rent->rtype = r_type;
 		  rent->count = 1;
-		  rent->reltext = (sec->flags & SEC_READONLY) != 0;
 
 		  rent->next = h->reloc_entries;
 		  h->reloc_entries = rent;
@@ -2014,7 +2014,13 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		 loaded into memory, we need a RELATIVE reloc.  */
 	      sreloc->size += sizeof (Elf64_External_Rela);
 	      if (sec->flags & SEC_READONLY)
-		info->flags |= DF_TEXTREL;
+		{
+		  info->flags |= DF_TEXTREL;
+		  info->callbacks->minfo
+		    (_("%pB: dynamic relocation against `%pT' in "
+		       "read-only section `%pA'\n"),
+		     sec->owner, h->root.root.root.string, sec);
+		}
 	    }
 	}
     }
@@ -2699,10 +2705,17 @@ elf64_alpha_calc_dynrel_sizes (struct alpha_elf_link_hash_entry *h,
 						 bfd_link_pie (info));
       if (entries)
 	{
+	  asection *sec = relent->sec;
 	  relent->srel->size +=
 	    entries * sizeof (Elf64_External_Rela) * relent->count;
-	  if (relent->reltext)
-	    info->flags |= DT_TEXTREL;
+	  if ((sec->flags & SEC_READONLY) != 0)
+	    {
+	      info->flags |= DT_TEXTREL;
+	      info->callbacks->minfo
+		(_("%pB: dynamic relocation against `%pT' in "
+		   "read-only section `%pA'\n"),
+		 sec->owner, h->root.root.root.string, sec);
+	    }
 	}
     }
 

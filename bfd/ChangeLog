@@ -1,3 +1,11 @@
+2020-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-alpha.c (alpha_elf_reloc_entry): Replace reltext with
+	sec.
+	(elf64_alpha_check_relocs): Set sec instead of reltext.  Warn
+	DT_TEXTREL with -M.
+	(elf64_alpha_calc_dynrel_sizes): Warn DT_TEXTREL with -M.
+
 2020-04-21  Nick Clifton  <nickc@redhat.com>
 
 	* po/sr.po: Updated Serbian translation.
