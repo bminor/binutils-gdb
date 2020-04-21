@@ -67,7 +67,7 @@ proc check_script { } {
     } 
 
     if {[info exists nm_output(tred)] \
-        && $nm_output(tred) != (0x100 + 0x8000)} {
+        && $nm_output(tred) != (0x100 + 0x4000)} {
 	send_log "tred == $nm_output(tred)\n"
 	verbose "tred == $nm_output(tred)"
 	set passes 0
@@ -87,7 +87,7 @@ proc check_script { } {
     } 
 
     if {[info exists nm_output(fred)] \
-        && $nm_output(fred) != (0x1000 + 0x10000)} {
+        && $nm_output(fred) != (0x1000 + 0x1000)} {
 	send_log "fred == $nm_output(fred)\n"
 	verbose "fred == $nm_output(fred)"
 	set passes 0
@@ -215,7 +215,7 @@ if ![ld_link $ld tmpdir/script "$flags -T $srcdir/$subdir/memory.t tmpdir/script
 }
 
 set testname "MEMORY with symbols"
-if ![ld_link $ld tmpdir/script "$flags -defsym DATA_ORIGIN=0x1000 -defsym DATA_LENGTH=0x10000 -T $srcdir/$subdir/memory_sym.t tmpdir/script.o"] {
+if ![ld_link $ld tmpdir/script "$flags -defsym DATA_ORIGIN=0x1000 -defsym DATA_LENGTH=0x1000 -T $srcdir/$subdir/memory_sym.t tmpdir/script.o"] {
     fail $testname
     untested "extract symbols"
 } else {

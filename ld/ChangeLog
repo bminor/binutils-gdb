@@ -1,3 +1,24 @@
+2020-04-21  Stephen Casner  <casner@acm.org>
+
+	PR 25829
+	* testsuite/ld-scripts/script.exp (check_script)
+	(extract_symbol_test): Make test addresses fit in 16 bits.
+	* testsuite/ld-scripts/memory.t: Likewise.
+	* testsuite/ld-scripts/memory_sym.t (TXT_LENGTH): Likewise.
+	* testsuite/ld-scripts/default-script.t (_START): Likewise.
+	* testsuite/ld-scripts/default-script1.d: Likewise.
+	* testsuite/ld-scripts/default-script2.d: Likewise.
+	* testsuite/ld-scripts/default-script3.d: Likewise.
+	* testsuite/ld-scripts/default-script4.d: Likewise.
+	* testsuite/ld-scripts/empty-address-1.t: Likewise.
+	* testsuite/ld-scripts/empty-address-1.d: Likewise.
+	* testsuite/ld-scripts/empty-address-2a.d: Likewise.
+	* testsuite/ld-scripts/empty-address-2b.d: Likewise.
+	* testsuite/ld-misc/start.s: .long -> .dc.a to allow relocation to
+	fit target address size.
+ 	* testsuite/ld-scripts/empty-address-1.s: Likewise.
+	* testsuite/ld-scripts/empty-address-2.s: Likewise.
+
 2020-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/25849
