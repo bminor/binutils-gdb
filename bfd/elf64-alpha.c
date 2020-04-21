@@ -5538,6 +5538,9 @@ static const struct elf_size_info alpha_elf_size_info =
 #define elf_backend_special_sections \
   elf64_alpha_special_sections
 
+#define elf_backend_strip_zero_sized_dynamic_sections \
+  _bfd_elf_strip_zero_sized_dynamic_sections
+
 /* A few constants that determine how the .plt section is set up.  */
 #define elf_backend_want_got_plt 0
 #define elf_backend_plt_readonly 0

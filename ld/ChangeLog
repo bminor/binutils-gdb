@@ -1,3 +1,10 @@
+2020-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/25849
+	* ldelfgen.c (ldelf_map_segments): Call
+	elf_backend_strip_zero_sized_dynamic_sections.
+	* testsuite/ld-alpha/tlsbinr.rd: Updated.
+
 2020-04-20  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/tlsopt5.s: Rename foo to aaaaa.

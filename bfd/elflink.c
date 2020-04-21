@@ -3501,6 +3501,104 @@ _bfd_elf_add_dynamic_entry (struct bfd_link_info *info,
   return TRUE;
 }
 
+/* Strip zero-sized dynamic sections.  */
+
+bfd_boolean
+_bfd_elf_strip_zero_sized_dynamic_sections (struct bfd_link_info *info)
+{
+  struct elf_link_hash_table *hash_table;
+  const struct elf_backend_data *bed;
+  asection *s, *sdynamic, **pp;
+  asection *rela_dyn, *rel_dyn;
+  Elf_Internal_Dyn dyn;
+  bfd_byte *extdyn, *next;
+  void (*swap_dyn_in) (bfd *, const void *, Elf_Internal_Dyn *);
+  bfd_boolean strip_zero_sized;
+  bfd_boolean strip_zero_sized_plt;
+
+  if (bfd_link_relocatable (info))
+    return TRUE;
+
+  hash_table = elf_hash_table (info);
+  if (!is_elf_hash_table (hash_table))
+    return FALSE;
+
+  if (!hash_table->dynobj)
+    return TRUE;
+
+  sdynamic= bfd_get_linker_section (hash_table->dynobj, ".dynamic");
+  if (!sdynamic)
+    return TRUE;
+
+  bed = get_elf_backend_data (hash_table->dynobj);
+  swap_dyn_in = bed->s->swap_dyn_in;
+
+  strip_zero_sized = FALSE;
+  strip_zero_sized_plt = FALSE;
+
+  /* Strip zero-sized dynamic sections.  */
+  rela_dyn = bfd_get_section_by_name (info->output_bfd, ".rela.dyn");
+  rel_dyn = bfd_get_section_by_name (info->output_bfd, ".rel.dyn");
+  for (pp = &info->output_bfd->sections; (s = *pp) != NULL;)
+    if (s->size == 0
+	&& (s == rela_dyn
+	    || s == rel_dyn
+	    || s == hash_table->srelplt->output_section
+	    || s == hash_table->splt->output_section))
+      {
+	*pp = s->next;
+	info->output_bfd->section_count--;
+	strip_zero_sized = TRUE;
+	if (s == rela_dyn)
+	  s = rela_dyn;
+	if (s == rel_dyn)
+	  s = rel_dyn;
+	else if (s == hash_table->splt->output_section)
+	  {
+	    s = hash_table->splt;
+	    strip_zero_sized_plt = TRUE;
+	  }
+	else
+	  s = hash_table->srelplt;
+	s->flags |= SEC_EXCLUDE;
+	s->output_section = bfd_abs_section_ptr;
+      }
+    else
+      pp = &s->next;
+
+  if (strip_zero_sized_plt)
+    for (extdyn = sdynamic->contents;
+	 extdyn < sdynamic->contents + sdynamic->size;
+	 extdyn = next)
+      {
+	next = extdyn + bed->s->sizeof_dyn;
+	swap_dyn_in (hash_table->dynobj, extdyn, &dyn);
+	switch (dyn.d_tag)
+	  {
+	  default:
+	    break;
+	  case DT_JMPREL:
+	  case DT_PLTRELSZ:
+	  case DT_PLTREL:
+	    /* Strip DT_PLTRELSZ, DT_JMPREL and DT_PLTREL entries if
+	       the procedure linkage table (the .plt section) has been
+	       removed.  */
+	    memmove (extdyn, next,
+		     sdynamic->size - (next - sdynamic->contents));
+	    next = extdyn;
+	  }
+      }
+
+  if (strip_zero_sized)
+    {
+      /* Regenerate program headers.  */
+      elf_seg_map (info->output_bfd) = NULL;
+      return _bfd_elf_map_sections_to_segments (info->output_bfd, info);
+    }
+
+  return TRUE;
+}
+
 /* Add a DT_NEEDED entry for this dynamic object.  Returns -1 on error,
    1 if a DT_NEEDED tag already exists, and 0 on success.  */
 

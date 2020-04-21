@@ -1,5 +1,19 @@
 2020-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/25849
+	* elf-bfd.h (elf_backend_data): Add
+	elf_backend_strip_zero_sized_dynamic_sections.
+	(_bfd_elf_strip_zero_sized_dynamic_sections): New prototype.
+	* elf64-alpha.c (elf_backend_strip_zero_sized_dynamic_sections):
+	New macro.
+	* elflink.c (_bfd_elf_strip_zero_sized_dynamic_sections): New
+	function.
+	* elfxx-target.h (elf_backend_strip_zero_sized_dynamic_sections):
+	New macro.
+	(elfNN_bed): Add elf_backend_strip_zero_sized_dynamic_sections.
+
+2020-04-21  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-alpha.c (alpha_elf_reloc_entry): Replace reltext with
 	sec.
 	(elf64_alpha_check_relocs): Set sec instead of reltext.  Warn

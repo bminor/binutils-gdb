@@ -485,6 +485,9 @@
 #ifndef elf_backend_size_dynamic_sections
 #define elf_backend_size_dynamic_sections 0
 #endif
+#ifndef elf_backend_strip_zero_sized_dynamic_sections
+#define elf_backend_strip_zero_sized_dynamic_sections 0
+#endif
 #ifndef elf_backend_init_index_section
 #define elf_backend_init_index_section _bfd_void_bfd_link
 #endif
@@ -831,6 +834,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_adjust_dynamic_symbol,
   elf_backend_always_size_sections,
   elf_backend_size_dynamic_sections,
+  elf_backend_strip_zero_sized_dynamic_sections,
   elf_backend_init_index_section,
   elf_backend_relocate_section,
   elf_backend_finish_dynamic_symbol,
