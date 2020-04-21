@@ -1,3 +1,8 @@
+2020-04-21  Gary Benson <gbenson@redhat.com>
+
+	* gdb.base/advance.c (func): New argument, to match call site.
+	(func2, func3): Add return statements.
+
 2020-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.multi/run-only-second-inf.c: New file.
