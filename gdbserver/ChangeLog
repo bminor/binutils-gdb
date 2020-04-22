@@ -1,3 +1,8 @@
+2020-04-22  Hannes Domani  <ssbssa@yahoo.de>
+
+	* server.cc (handle_search_memory_1): Fix gdb_read_memory return value
+	comparison.
+
 2020-04-16  Tom Tromey  <tromey@adacore.com>
 
 	* win32-low.cc (windows_nat::handle_access_violation): New

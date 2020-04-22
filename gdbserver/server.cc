@@ -1103,7 +1103,7 @@ handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
 			: chunk_size);
 
 	  if (gdb_read_memory (read_addr, search_buf + keep_len,
-			       nr_to_read) != search_buf_size)
+			       nr_to_read) != nr_to_read)
 	    {
 	      warning ("Unable to access %ld bytes of target memory "
 		       "at 0x%lx, halting search.",
