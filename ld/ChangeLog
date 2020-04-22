@@ -1,3 +1,10 @@
+2020-04-22  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-scripts/default-script1.d: Correct mingw skip.
+	* testsuite/ld-scripts/default-script2.d: Likewise.
+	* testsuite/ld-scripts/default-script3.d: Likewise.
+	* testsuite/ld-scripts/default-script4.d: Likewise.
+
 2020-04-21  Stephen Casner  <casner@acm.org>
 
 	PR 25829
@@ -16,7 +23,7 @@
 	* testsuite/ld-scripts/empty-address-2b.d: Likewise.
 	* testsuite/ld-misc/start.s: .long -> .dc.a to allow relocation to
 	fit target address size.
- 	* testsuite/ld-scripts/empty-address-1.s: Likewise.
+	* testsuite/ld-scripts/empty-address-1.s: Likewise.
 	* testsuite/ld-scripts/empty-address-2.s: Likewise.
 
 2020-04-21  H.J. Lu  <hongjiu.lu@intel.com>
