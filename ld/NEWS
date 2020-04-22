@@ -7,6 +7,10 @@
   IMAGIC (0411) for separate instruction and data spaces, and change the
   default format option for pdp11-aout to be --omagic.
 
+* Relative pathnames in INPUT() and GROUP() directives in linker scripts are
+  searched relative to the directory of the linker script before other search
+  paths.
+
 Changes in 2.34:
 
 * The ld check for "PHDR segment not covered by LOAD segment" is more

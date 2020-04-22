@@ -3657,13 +3657,16 @@ script, and then invoke the linker with nothing but a @samp{-T} option.
 In case a @dfn{sysroot prefix} is configured, and the filename starts
 with the @samp{/} character, and the script being processed was
 located inside the @dfn{sysroot prefix}, the filename will be looked
-for in the @dfn{sysroot prefix}.  Otherwise, the linker will try to
-open the file in the current directory.  If it is not found, the
-linker will search through the archive library search path.
-The @dfn{sysroot prefix} can also be forced by specifying @code{=}
-as the first character in the filename path, or prefixing the filename
-path with @code{$SYSROOT}.  See also the description of @samp{-L} in
-@ref{Options,,Command-line Options}.
+for in the @dfn{sysroot prefix}.  The @dfn{sysroot prefix} can also be forced by specifying
+@code{=} as the first character in the filename path, or prefixing the
+filename path with @code{$SYSROOT}. See also the description of
+@samp{-L} in @ref{Options,,Command-line Options}.
+
+If a @dfn{sysroot prefix} is not used then the linker will try to open
+the file in the directory containing the linker script.  If it is not
+found the linker will then search the current directory.  If it is still
+not found the linker will search through the archive library search
+path.
 
 If you use @samp{INPUT (-l@var{file})}, @command{ld} will transform the
 name to @code{lib@var{file}.a}, as with the command-line argument

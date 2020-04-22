@@ -1,3 +1,17 @@
+2020-04-22  Fangrui Song <maskray@google.com>
+
+	PR ld/25806
+	* ldlang.h (struct lang_input_statement_struct): Add extra_search_path.
+	* ldlang.c (current_input_file): New.
+	(ldirname): New.
+	(new_afile): Add from_filename parameter.  Set extra_search_path.
+	(lang_add_input_file): Pass current_input_file to new_afile.
+	(load_symbols): Set current_input_file.
+	* ldfile.c (ldfile_open_file): If extra_search_path has been set
+	then scan it for the file that needs to be opened.
+	* ld.texi: Document the new behaviour.
+	* NEWS: Mention the new feature.
+
 2020-04-22  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-scripts/default-script1.d: Correct mingw skip.
