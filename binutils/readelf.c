@@ -197,6 +197,17 @@ struct dump_list_entry
   struct dump_list_entry *  next;
 };
 
+/* A dynamic array of flags indicating for which sections a dump
+   has been requested via command line switches.  */
+struct dump_data {
+  dump_type *          dump_sects;
+  unsigned int         num_dump_sects;
+};
+
+static struct dump_data cmdline;
+
+static struct dump_list_entry * dump_sects_byname;
+
 typedef struct filedata
 {
   const char *         file_name;
@@ -212,8 +223,7 @@ typedef struct filedata
      basis and then initialised from the cmdline_dump_sects array,
      the results of interpreting the -w switch, and the
      dump_sects_byname list.  */
-  dump_type *          dump_sects;
-  unsigned int         num_dump_sects;
+  struct dump_data     dump;
 } Filedata;
 
 char * program_name = "readelf";
@@ -289,12 +299,6 @@ struct group
 static size_t           group_count;
 static struct group *   section_groups;
 static struct group **  section_headers_groups;
-
-/* A dynamic array of flags indicating for which sections a dump
-   has been requested via command line switches.  */
-static Filedata         cmdline;
-
-static struct dump_list_entry * dump_sects_byname;
 
 /* How to print a vma value.  */
 typedef enum print_mode
@@ -4578,9 +4582,10 @@ usage (FILE * stream)
    the first time.  */
 
 static void
-request_dump_bynumber (Filedata * filedata, unsigned int section, dump_type type)
+request_dump_bynumber (struct dump_data *dumpdata,
+		       unsigned int section, dump_type type)
 {
-  if (section >= filedata->num_dump_sects)
+  if (section >= dumpdata->num_dump_sects)
     {
       dump_type * new_dump_sects;
 
@@ -4591,22 +4596,22 @@ request_dump_bynumber (Filedata * filedata, unsigned int section, dump_type type
 	error (_("Out of memory allocating dump request table.\n"));
       else
 	{
-	  if (filedata->dump_sects)
+	  if (dumpdata->dump_sects)
 	    {
 	      /* Copy current flag settings.  */
-	      memcpy (new_dump_sects, filedata->dump_sects,
-		      filedata->num_dump_sects * sizeof (* new_dump_sects));
+	      memcpy (new_dump_sects, dumpdata->dump_sects,
+		      dumpdata->num_dump_sects * sizeof (* new_dump_sects));
 
-	      free (filedata->dump_sects);
+	      free (dumpdata->dump_sects);
 	    }
 
-	  filedata->dump_sects = new_dump_sects;
-	  filedata->num_dump_sects = section + 1;
+	  dumpdata->dump_sects = new_dump_sects;
+	  dumpdata->num_dump_sects = section + 1;
 	}
     }
 
-  if (filedata->dump_sects)
-    filedata->dump_sects[section] |= type;
+  if (dumpdata->dump_sects)
+    dumpdata->dump_sects[section] |= type;
 }
 
 /* Request a dump by section name.  */
@@ -4632,7 +4637,7 @@ request_dump_byname (const char * section, dump_type type)
 }
 
 static inline void
-request_dump (Filedata * filedata, dump_type type)
+request_dump (struct dump_data *dumpdata, dump_type type)
 {
   int section;
   char * cp;
@@ -4641,13 +4646,13 @@ request_dump (Filedata * filedata, dump_type type)
   section = strtoul (optarg, & cp, 0);
 
   if (! *cp && section >= 0)
-    request_dump_bynumber (filedata, section, type);
+    request_dump_bynumber (dumpdata, section, type);
   else
     request_dump_byname (optarg, type);
 }
 
 static void
-parse_args (Filedata * filedata, int argc, char ** argv)
+parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 {
   int c;
 
@@ -4730,13 +4735,13 @@ parse_args (Filedata * filedata, int argc, char ** argv)
 	  do_archive_index = TRUE;
 	  break;
 	case 'x':
-	  request_dump (filedata, HEX_DUMP);
+	  request_dump (dumpdata, HEX_DUMP);
 	  break;
 	case 'p':
-	  request_dump (filedata, STRING_DUMP);
+	  request_dump (dumpdata, STRING_DUMP);
 	  break;
 	case 'R':
-	  request_dump (filedata, RELOC_DUMP);
+	  request_dump (dumpdata, RELOC_DUMP);
 	  break;
 	case 'z':
 	  decompress_dumps = TRUE;
@@ -4783,7 +4788,7 @@ parse_args (Filedata * filedata, int argc, char ** argv)
 	  break;
 	case OPTION_CTF_DUMP:
 	  do_ctf = TRUE;
-	  request_dump (filedata, CTF_DUMP);
+	  request_dump (dumpdata, CTF_DUMP);
 	  break;
 	case OPTION_CTF_SYMBOLS:
 	  dump_ctf_symtab_name = strdup (optarg);
@@ -4799,7 +4804,7 @@ parse_args (Filedata * filedata, int argc, char ** argv)
 	  break;
 #ifdef SUPPORT_DISASSEMBLY
 	case 'i':
-	  request_dump (filedata, DISASS_DUMP);
+	  request_dump (dumpdata, DISASS_DUMP);
 	  break;
 #endif
 	case 'v':
@@ -6353,17 +6358,17 @@ process_section_headers (Filedata * filedata)
 	      || (do_debug_cu_index && const_strneq (name, "cu_index"))
 	      || (do_debug_cu_index && const_strneq (name, "tu_index"))
 	      )
-	    request_dump_bynumber (filedata, i, DEBUG_DUMP);
+	    request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
 	}
       /* Linkonce section to be combined with .debug_info at link time.  */
       else if ((do_debugging || do_debug_info)
 	       && const_strneq (name, ".gnu.linkonce.wi."))
-	request_dump_bynumber (filedata, i, DEBUG_DUMP);
+	request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
       else if (do_debug_frames && streq (name, ".eh_frame"))
-	request_dump_bynumber (filedata, i, DEBUG_DUMP);
+	request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
       else if (do_gdb_index && (streq (name, ".gdb_index")
 				|| streq (name, ".debug_names")))
-	request_dump_bynumber (filedata, i, DEBUG_DUMP);
+	request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
       /* Trace sections for Itanium VMS.  */
       else if ((do_debugging || do_trace_info || do_trace_abbrevs
                 || do_trace_aranges)
@@ -6376,12 +6381,12 @@ process_section_headers (Filedata * filedata)
 	      || (do_trace_abbrevs  && streq (name, "abbrev"))
 	      || (do_trace_aranges  && streq (name, "aranges"))
 	      )
-	    request_dump_bynumber (filedata, i, DEBUG_DUMP);
+	    request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
 	}
       else if ((do_debugging || do_debug_links)
 	       && (const_strneq (name, ".gnu_debuglink")
 		   || const_strneq (name, ".gnu_debugaltlink")))
-	request_dump_bynumber (filedata, i, DEBUG_DUMP);
+	request_dump_bynumber (&filedata->dump, i, DEBUG_DUMP);
     }
 
   if (! do_sections)
@@ -14635,7 +14640,7 @@ initialise_dumps_byname (Filedata * filedata)
       for (i = 0; i < filedata->file_header.e_shnum; i++)
 	if (streq (SECTION_NAME (filedata->section_headers + i), cur->name))
 	  {
-	    request_dump_bynumber (filedata, i, cur->type);
+	    request_dump_bynumber (&filedata->dump, i, cur->type);
 	    any = TRUE;
 	  }
 
@@ -14658,10 +14663,10 @@ process_section_contents (Filedata * filedata)
   initialise_dumps_byname (filedata);
 
   for (i = 0, section = filedata->section_headers;
-       i < filedata->file_header.e_shnum && i < filedata->num_dump_sects;
+       i < filedata->file_header.e_shnum && i < filedata->dump.num_dump_sects;
        i++, section++)
     {
-      dump_type dump = filedata->dump_sects[i];
+      dump_type dump = filedata->dump.dump_sects[i];
 
 #ifdef SUPPORT_DISASSEMBLY
       if (dump & DISASS_DUMP)
@@ -14703,9 +14708,9 @@ process_section_contents (Filedata * filedata)
 
   /* Check to see if the user requested a
      dump of a section that does not exist.  */
-  while (i < filedata->num_dump_sects)
+  while (i < filedata->dump.num_dump_sects)
     {
-      if (filedata->dump_sects[i])
+      if (filedata->dump.dump_sects[i])
 	{
 	  warn (_("Section %d was not dumped because it does not exist!\n"), i);
 	  res = FALSE;
@@ -20084,18 +20089,19 @@ process_object (Filedata * filedata)
      Note we do this even if cmdline_dump_sects is empty because we
      must make sure that the dump_sets array is zeroed out before each
      object file is processed.  */
-  if (filedata->num_dump_sects > cmdline.num_dump_sects)
-    memset (filedata->dump_sects, 0, filedata->num_dump_sects * sizeof (* filedata->dump_sects));
+  if (filedata->dump.num_dump_sects > cmdline.num_dump_sects)
+    memset (filedata->dump.dump_sects, 0,
+	    filedata->dump.num_dump_sects * sizeof (*filedata->dump.dump_sects));
 
   if (cmdline.num_dump_sects > 0)
     {
-      if (filedata->num_dump_sects == 0)
+      if (filedata->dump.num_dump_sects == 0)
 	/* A sneaky way of allocating the dump_sects array.  */
-	request_dump_bynumber (filedata, cmdline.num_dump_sects, 0);
+	request_dump_bynumber (&filedata->dump, cmdline.num_dump_sects, 0);
 
-      assert (filedata->num_dump_sects >= cmdline.num_dump_sects);
-      memcpy (filedata->dump_sects, cmdline.dump_sects,
-	      cmdline.num_dump_sects * sizeof (* filedata->dump_sects));
+      assert (filedata->dump.num_dump_sects >= cmdline.num_dump_sects);
+      memcpy (filedata->dump.dump_sects, cmdline.dump_sects,
+	      cmdline.num_dump_sects * sizeof (*filedata->dump.dump_sects));
     }
 
   if (! process_file_header (filedata))
@@ -20176,11 +20182,11 @@ process_object (Filedata * filedata)
   filedata->string_table = NULL;
   filedata->string_table_length = 0;
 
-  if (filedata->dump_sects != NULL)
+  if (filedata->dump.dump_sects != NULL)
     {
-      free (filedata->dump_sects);
-      filedata->dump_sects = NULL;
-      filedata->num_dump_sects = 0;
+      free (filedata->dump.dump_sects);
+      filedata->dump.dump_sects = NULL;
+      filedata->dump.num_dump_sects = 0;
     }
 
   if (dynamic_strings)
@@ -20611,7 +20617,7 @@ process_file (char * file_name)
   free (filedata->section_headers);
   free (filedata->program_headers);
   free (filedata->string_table);
-  free (filedata->dump_sects);
+  free (filedata->dump.dump_sects);
   free (filedata);
 
   free (ba_cache.strtab);
@@ -20659,7 +20665,6 @@ main (int argc, char ** argv)
 
   expandargv (&argc, &argv);
 
-  cmdline.file_name = "<cmdline>";
   parse_args (& cmdline, argc, argv);
 
   if (optind < (argc - 1))

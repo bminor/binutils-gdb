@@ -1,3 +1,12 @@
+2020-04-22  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (struct dump_data): New, used..
+	(cmdline): ..here, and..
+	(struct filedata): ..here.  Adjust all uses.
+	(request_dump_bynumber, request_dump, parse_args): Pass in a
+	struct dump_data* rather than Filedata*.  Adjust callers.
+	(main): Don't set cmdline.file_name.
+
 2020-04-20  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_symbol_table): Clear ngnuchains, ngnubuckets
