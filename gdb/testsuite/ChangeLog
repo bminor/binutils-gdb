@@ -1,3 +1,20 @@
+2020-02-18  Mihails Strasuns  <mihails.strasuns@intel.com>
+
+	* gdb.base/jit-attach-pie.c: Use jit-protocol.h.
+	* gdb.base/jit-elf-main.c: Use jit-protocol.h.
+	* gdb.base/jit-reader-host.c: Use jit-protocol.h.
+	* gdb.base/jit-reader-simple-jit.c: Use jit-protocol.h.
+	* gdb.base/jit-protocol.h: Update definitions to match all usage
+	  contexts.
+
+2020-02-18  Mihails Strasuns  <mihails.strasuns@intel.com>
+
+	* gdb.base: Rename all jit related test and source files.
+
+2020-02-18  Mihails Strasuns  <mihails.strasuns@intel.com>
+
+	* gdb.base/jit-reader.exp: Relax register output check.
+
 2020-04-22  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/25764
