@@ -7951,7 +7951,8 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	    case DW_TAG_variable:
 	    case DW_TAG_typedef:
 	    case DW_TAG_union_type:
-	      if (!pdi->is_declaration)
+	      if (!pdi->is_declaration
+		  || (pdi->tag == DW_TAG_variable && pdi->is_external))
 		{
 		  add_partial_symbol (pdi, cu);
 		}

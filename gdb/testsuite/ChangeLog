@@ -1,5 +1,13 @@
 2020-04-22  Tom de Vries  <tdevries@suse.de>
 
+	PR symtab/25764
+	* gdb.base/psym-external-decl-2.c: New test.
+	* gdb.base/psym-external-decl.c: New test.
+	* gdb.base/psym-external-decl.exp: New file.
+	* gdb.threads/tls.exp: Add PR25807 kfail.
+
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
 	PR symtab/25801
 	* gdb.dwarf2/imported-unit.exp: Test that we can get imported_unit.c
 	in "info source" output.

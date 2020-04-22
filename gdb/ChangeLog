@@ -1,5 +1,11 @@
 2020-04-22  Tom de Vries  <tdevries@suse.de>
 
+	PR symtab/25764
+	* dwarf2/read.c (scan_partial_symbols): Allow external variable decls
+	in psymtabs.
+
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
 	PR symtab/25801
 	* psymtab.c (psym_map_symtabs_matching_filename): Don't skip shared
 	symtabs.
