@@ -119,6 +119,7 @@ responsibility among the other maintainers.
   Nios II	   Andrew Jenner <andrew@codesourcery.com>
   OR1K		   Christian Svensson <blue@cmd.nu>
   OR1K		   Stefan Kristiansson <stefan.kristiansson@saunalahti.fi>
+  PDP11		   Stephen Casner <casner@acm.org>
   PPC		   Geoff Keating <geoffk@geoffk.org>
   PPC		   Alan Modra <amodra@gmail.com>
   PPC		   Peter Bergner <bergner@vnet.ibm.com>
