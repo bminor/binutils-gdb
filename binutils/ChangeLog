@@ -1,5 +1,18 @@
 2020-04-22  Alan Modra  <amodra@gmail.com>
 
+	* readelf.c (archive_file_offset, archive_file_size, dynamic_addr),
+	(dynamic_size, dynamic_nent, dynamic_strings, dynamic_strings_length),
+	(num_dynamic_syms, nbuckets, nchains, buckets, chains),
+	(ngnubuckets, gnubuckets, gnuchains, mipsxlat, ngnuchains),
+	(gnusymidx, dynamic_symbols, dynamic_syminfo, dynamic_syminfo_offset),
+	(dynamic_syminfo_nent, program_interpreter, dynamic_info),
+	(dynamic_info_DT_GNU_HASH, dynamic_info_DT_MIPS_XHASH, version_info),
+	(dynamic_section, symtab_shndx_list, group_count, section_groups),
+	(section_headers_groups): Move to struct filedata.  Update use
+	throughout file.
+
+2020-04-22  Alan Modra  <amodra@gmail.com>
+
 	* readelf.c (struct dump_data): New, used..
 	(cmdline): ..here, and..
 	(struct filedata): ..here.  Adjust all uses.
