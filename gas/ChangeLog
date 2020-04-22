@@ -1,3 +1,12 @@
+2020-04-22  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-elf.c (elf_frob_symbol): Unconditionally remove
+	symbol for ".symver .. remove".
+	* doc/as.texi (.symver): Update.
+	* testsuite/gas/symver/symver11.s: Make foo weak.
+	* testsuite/gas/symver/symver11.d: Expect an error.
+	* testsuite/gas/symver/symver7.d: Allow other random symbols.
+
 2020-04-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/gas/symver/symver11.s: Add ".balign 8".

@@ -7129,13 +7129,12 @@ building a shared library.  If you are attempting to override a versioned
 symbol from a shared library, then @var{nodename} should correspond to the
 nodename of the symbol you are trying to override.  The optional argument
 @var{visibility} updates the visibility of the original symbol.  The valid
-visibilities are @code{local}, @code {hidden}, and @code {remove}.  The
+visibilities are @code{local}, @code{hidden}, and @code{remove}.  The
 @code{local} visibility makes the original symbol a local symbol
 (@pxref{Local}).  The @code{hidden} visibility sets the visibility of the
 original symbol to @code{hidden} (@pxref{Hidden}).  The @code{remove}
-visibility removes the original symbol from the symbol table if it isn't
-used in relocation.  If visibility isn't specified, the original symbol
-is unchanged.
+visibility removes the original symbol from the symbol table.  If visibility
+isn't specified, the original symbol is unchanged.
 
 If the symbol @var{name} is not defined within the file being assembled, all
 references to @var{name} will be changed to @var{name2@@nodename}.  If no

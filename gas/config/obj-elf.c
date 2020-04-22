@@ -2569,9 +2569,7 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 	      elfsym->internal_elf_sym.st_other |= STV_HIDDEN;
 	      break;
 	    case visibility_remove:
-	      /* Remove the symbol if it isn't used in relocation.  */
-	      if (!symbol_used_in_reloc_p (symp))
-		symbol_remove (symp, &symbol_rootP, &symbol_lastP);
+	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
 	      break;
 	    case visibility_local:
 	      S_CLEAR_EXTERNAL (symp);

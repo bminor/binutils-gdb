@@ -1,5 +1,5 @@
 	.data
-	.globl foo
+	.weak foo
 	.type foo,%object
 foo:
 	.byte 0
