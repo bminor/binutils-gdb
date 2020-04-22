@@ -186,6 +186,12 @@ if { $psymtabs_p } {
     unsupported $test
 }
 
+gdb_test "l imported_unit.c:1" \
+    "1\timported_unit.c: No such file or directory\."
+
+gdb_test "info source" "\r\nCurrent source file is imported_unit.c\r\n.*" \
+    "info source for imported_unit.c"
+
 # Sanity check
 gdb_test "ptype main" "= int \\(void\\)"
 

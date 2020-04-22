@@ -1,5 +1,11 @@
 2020-04-22  Tom de Vries  <tdevries@suse.de>
 
+	PR symtab/25801
+	* psymtab.c (psym_map_symtabs_matching_filename): Don't skip shared
+	symtabs.
+
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
 	PR symtab/25700
 	* dwarf2/read.c (dwarf2_build_psymtabs_hard): Don't create psymtab for
 	CU if already created.

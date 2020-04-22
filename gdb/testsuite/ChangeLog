@@ -1,5 +1,11 @@
 2020-04-22  Tom de Vries  <tdevries@suse.de>
 
+	PR symtab/25801
+	* gdb.dwarf2/imported-unit.exp: Test that we can get imported_unit.c
+	in "info source" output.
+
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
 	PR symtab/25700
 	* gdb.dwarf2/imported-unit.exp: Verify that there's only one partial
 	symtab for imported_unit.c.

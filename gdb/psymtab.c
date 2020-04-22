@@ -157,17 +157,15 @@ psym_map_symtabs_matching_filename
 
   for (partial_symtab *pst : require_partial_symbols (objfile, true))
     {
-      /* We can skip shared psymtabs here, because any file name will be
-	 attached to the unshared psymtab.  */
-      if (pst->user != NULL)
-	continue;
-
       /* Anonymous psymtabs don't have a file name.  */
       if (pst->anonymous)
 	continue;
 
       if (compare_filenames_for_search (pst->filename, name))
 	{
+	  while (pst->user)
+	    pst = pst->user;
+
 	  if (partial_map_expand_apply (objfile, name, real_path,
 					pst, callback))
 	    return true;
