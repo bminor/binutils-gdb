@@ -1,3 +1,7 @@
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dlang/watch-loc.c (.debug_aranges): Fix _Dmain length.
+
 2020-02-18  Mihails Strasuns  <mihails.strasuns@intel.com>
 
 	* gdb.base/jit-attach-pie.c: Use jit-protocol.h.
