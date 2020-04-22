@@ -1,3 +1,9 @@
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25700
+	* dwarf2/read.c (dwarf2_build_psymtabs_hard): Don't create psymtab for
+	CU if already created.
+
 2020-04-21  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* infrun.c (displaced_step_fixup): Switch to the event_thread

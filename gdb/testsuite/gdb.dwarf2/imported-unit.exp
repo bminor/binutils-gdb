@@ -168,6 +168,24 @@ if { $psymtabs_p } {
 } else {
     unsupported $test
 }
+
+# Verify that there's only one partial symtab for imported_unit.c.  Test-case
+# for PR25700.
+set test "no duplicate psymtab for imported_unit.c"
+if { $psymtabs_p } {
+    set line "Partial symtab for source file imported_unit.c"
+    gdb_test_multiple "maint print psymbols" $test {
+	-re -wrap "$line.*$line.*" {
+	    fail $gdb_test_name
+	}
+	-re -wrap "$line.*" {
+	    pass $gdb_test_name
+	}
+    }
+} else {
+    unsupported $test
+}
+
 # Sanity check
 gdb_test "ptype main" "= int \\(void\\)"
 

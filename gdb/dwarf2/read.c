@@ -7779,7 +7779,12 @@ dwarf2_build_psymtabs_hard (struct dwarf2_per_objfile *dwarf2_per_objfile)
 			   addrmap_create_mutable (&temp_obstack));
 
   for (dwarf2_per_cu_data *per_cu : dwarf2_per_objfile->all_comp_units)
-    process_psymtab_comp_unit (per_cu, false, language_minimal);
+    {
+      if (per_cu->v.psymtab != NULL)
+	/* In case a forward DW_TAG_imported_unit has read the CU already.  */
+	continue;
+      process_psymtab_comp_unit (per_cu, false, language_minimal);
+    }
 
   /* This has to wait until we read the CUs, we need the list of DWOs.  */
   process_skeletonless_type_units (dwarf2_per_objfile);
