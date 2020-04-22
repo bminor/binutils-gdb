@@ -1,5 +1,12 @@
 2020-04-22  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.mi/dw2-ref-missing-frame-func.c (.debug_aranges): Fix
+	debug_info_offset.
+	* gdb.mi/dw2-ref-missing-frame.exp: Make sure $objfuncfile comes
+	before $objsfile in the line line.
+
+2020-04-22  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.dlang/watch-loc.c (.debug_aranges): Fix _Dmain length.
 
 2020-02-18  Mihails Strasuns  <mihails.strasuns@intel.com>
