@@ -19,13 +19,18 @@
 # to compare results between two runs of GDB from different trees.
 
 namespace eval ::CheckTestNames {
-    # An associative array of counts of tests that include a path in their
-    # test name.  There are two counts, 'count', which counts occurrences
-    # within a single variant run, and 'total', which counts across all
-    # variants.
+    # An associative array of all test names to the number of times each
+    # name is seen.  Used to detect duplicate test names.
+    variable all_test_names
+    array set all_test_names {}
+
+    # An associative array of counts of tests that either include a path in
+    # their test name, or have a duplicate test name.  There are two counts
+    # for each issue, 'count', which counts occurrences within a single
+    # variant run, and 'total', which counts across all variants.
     variable counts
     array set counts {}
-    foreach nm {paths} {
+    foreach nm {paths duplicates} {
 	set counts($nm,count) 0
 	set counts($nm,total) 0
     }
@@ -49,6 +54,25 @@ namespace eval ::CheckTestNames {
 		inc_count paths
 		return true
 	    }
+	}
+
+	return false
+    }
+
+    # Check if MESSAGE is a duplicate, if it is then increment the
+    # duplicates counter and return true, otherwise, return false.
+    proc _check_duplicates { message } {
+	variable all_test_names
+
+	# Initialise a count, or increment the count for this test name.
+	if {![info exists all_test_names($message)]} {
+	    set all_test_names($message) 0
+	} else {
+	    if {$all_test_names($message) == 0} {
+		inc_count duplicates
+	    }
+	    incr all_test_names($message)
+	    return true
 	}
 
 	return false
@@ -82,6 +106,10 @@ namespace eval ::CheckTestNames {
 	if [ _check_paths $message ] {
 	    clone_output "PATH: $message"
 	}
+
+	if [ _check_duplicates $message ] {
+	    clone_output "DUPLICATE: $message"
+	}
     }
 
     # If COUNT is greater than zero, disply PREFIX followed by COUNT.
@@ -109,17 +137,21 @@ namespace eval ::CheckTestNames {
 
 	maybe_show_count "# of paths in test names\t" \
 	    $counts(paths,$which)
+	maybe_show_count "# of duplicate test names\t" \
+	    $counts(duplicates,$which)
     }
 
     # Rename Dejagnu's reset_vars procedure, and create do_reset_vars to
     # replace it.  We arrange to have do_reset_vars called later.
     rename ::reset_vars reset_vars
     proc do_reset_vars {} {
+	variable all_test_names
 	variable counts
 
 	CheckTestNames::reset_vars
 
-	foreach nm {paths} {
+	unset all_test_names
+	foreach nm {paths duplicates} {
 	    set counts($nm,count) 0
 	}
     }

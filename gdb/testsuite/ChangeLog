@@ -1,5 +1,15 @@
 2020-05-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* lib/check-test-names.exp (all_test_names): New module variable.
+	(counts): Add 'duplicates' field.
+	(_check_duplicates): New procedure.
+	(check): Also check for duplicates.
+	(do_log_summary): Print duplicates count.
+	(do_reset_vars): Reset counter for duplicate test names, and
+	discard all know test names.
+
+2020-05-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* lib/gdb.exp: Include check-test-names.exp library.
 	* lib/check-test-names.exp: New file.
 
