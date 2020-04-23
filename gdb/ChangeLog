@@ -1,3 +1,12 @@
+2020-04-23  Tom Tromey  <tromey@adacore.com>
+
+	PR ada/25837:
+	* dwarf2/read.c (dw2_expand_symtabs_matching_symbol): Store a
+	"const char *", not a "const std::string &".
+	<name_and_matcher::operator==>: Update.
+	* unittests/lookup_name_info-selftests.c: Change type of
+	"result".
+
 2020-04-23  Tom Tromey  <tom@tromey.com>
 
 	* inferior.h (iterate_over_inferiors): Don't declare.

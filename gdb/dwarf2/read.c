@@ -3911,11 +3911,11 @@ dw2_expand_symtabs_matching_symbol
   struct name_and_matcher
   {
     symbol_name_matcher_ftype *matcher;
-    const std::string &name;
+    const char *name;
 
     bool operator== (const name_and_matcher &other) const
     {
-      return matcher == other.matcher && name == other.name;
+      return matcher == other.matcher && strcmp (name, other.name) == 0;
     }
   };
 
