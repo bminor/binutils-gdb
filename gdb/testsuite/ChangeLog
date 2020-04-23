@@ -1,3 +1,8 @@
+2020-05-11  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/gdb.exp: Include check-test-names.exp library.
+	* lib/check-test-names.exp: New file.
+
 2020-05-11  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.ada/packed_tagged.exp: Change kfail into xfail.
