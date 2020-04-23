@@ -1,3 +1,7 @@
+2020-04-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.btrace/multi-inferior.exp: Avoid paths in test names.
+
 2020-04-24  Tom Tromey  <tom@tromey.com>
 
 	PR symtab/12707:
