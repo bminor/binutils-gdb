@@ -2285,6 +2285,8 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
 			  name, domain_name (domain));
     }
 
+  struct block_symbol other;
+  other.symbol = NULL;
   for (compunit_symtab *cust : objfile->compunits ())
     {
       const struct blockvector *bv;
@@ -2295,18 +2297,36 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
       block = BLOCKVECTOR_BLOCK (bv, block_index);
       result.symbol = block_lookup_symbol_primary (block, name, domain);
       result.block = block;
-      if (result.symbol != NULL)
+      if (result.symbol == NULL)
+	continue;
+      if (best_symbol (result.symbol, domain))
 	{
-	  if (symbol_lookup_debug > 1)
-	    {
-	      fprintf_unfiltered (gdb_stdlog, " = %s (block %s)\n",
-				  host_address_to_string (result.symbol),
-				  host_address_to_string (block));
-	    }
-	  result.symbol = fixup_symbol_section (result.symbol, objfile);
-	  return result;
-
+	  other = result;
+	  break;
 	}
+      if (symbol_matches_domain (result.symbol->language (),
+				 SYMBOL_DOMAIN (result.symbol), domain))
+	{
+	  struct symbol *better
+	    = better_symbol (other.symbol, result.symbol, domain);
+	  if (better != other.symbol)
+	    {
+	      other.symbol = better;
+	      other.block = block;
+	    }
+	}
+    }
+
+  if (other.symbol != NULL)
+    {
+      if (symbol_lookup_debug > 1)
+	{
+	  fprintf_unfiltered (gdb_stdlog, " = %s (block %s)\n",
+			      host_address_to_string (other.symbol),
+			      host_address_to_string (other.block));
+	}
+      other.symbol = fixup_symbol_section (other.symbol, objfile);
+      return other;
     }
 
   if (symbol_lookup_debug > 1)
