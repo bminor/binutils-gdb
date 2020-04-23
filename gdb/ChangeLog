@@ -1,3 +1,9 @@
+2020-04-23  Tom de Vries  <tdevries@suse.de>
+
+	* blockframe.c (find_pc_partial_function): Use
+	find_pc_sect_compunit_symtab rather than
+	objfile->sf->qf->find_pc_sect_compunit_symtab.
+
 2020-04-22  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/25764
