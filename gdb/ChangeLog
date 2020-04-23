@@ -1,3 +1,16 @@
+2020-04-23  Tom Tromey  <tom@tromey.com>
+
+	* inferior.h (iterate_over_inferiors): Don't declare.
+	* inferior.c (iterate_over_inferiors): Remove.
+	* darwin-nat.c (find_inferior_task_it, find_inferior_pid_it):
+	Remove.
+	(darwin_find_inferior_by_task, darwin_find_inferior_by_pid): Don't
+	use iterate_over_inferiors.
+	(darwin_resume_inferior_it)
+	(struct resume_inferior_threads_param)
+	(darwin_resume_inferior_threads_it): Remove.
+	(darwin_nat_target::resume): Don't use iterate_over_inferiors.
+
 2020-04-23  Tom de Vries  <tdevries@suse.de>
 
 	* blockframe.c (find_pc_partial_function): Use

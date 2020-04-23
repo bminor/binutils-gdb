@@ -310,17 +310,6 @@ find_inferior_for_program_space (struct program_space *pspace)
   return NULL;
 }
 
-struct inferior *
-iterate_over_inferiors (int (*callback) (struct inferior *, void *),
-			void *data)
-{
-  for (inferior *inf : all_inferiors_safe ())
-    if ((*callback) (inf, data))
-      return inf;
-
-  return NULL;
-}
-
 int
 have_inferiors (void)
 {

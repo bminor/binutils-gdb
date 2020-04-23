@@ -378,32 +378,30 @@ darwin_nat_target::check_new_threads (inferior *inf)
   MACH_CHECK_ERROR (kret);
 }
 
-static int
-find_inferior_task_it (struct inferior *inf, void *port_ptr)
-{
-  darwin_inferior *priv = get_darwin_inferior (inf);
-
-  return priv != nullptr && priv->task == *(task_t *)port_ptr;
-}
-
-static int
-find_inferior_pid_it (struct inferior *inf, void *pid_ptr)
-{
-  return inf->pid == *(int *)pid_ptr;
-}
-
 /* Return an inferior by task port.  */
 static struct inferior *
 darwin_find_inferior_by_task (task_t port)
 {
-  return iterate_over_inferiors (&find_inferior_task_it, &port);
+  for (inferior *inf : all_inferiors ())
+    {
+      darwin_inferior *priv = get_darwin_inferior (inf);
+
+      if (priv != nullptr && priv->task == port)
+	return inf;
+    }
+  return nullptr;
 }
 
 /* Return an inferior by pid port.  */
 static struct inferior *
 darwin_find_inferior_by_pid (int pid)
 {
-  return iterate_over_inferiors (&find_inferior_pid_it, &pid);
+  for (inferior *inf : all_inferiors ())
+    {
+      if (inf->pid == pid)
+	return inf;
+    }
+  return nullptr;
 }
 
 /* Return a thread by port.  */
@@ -456,15 +454,6 @@ darwin_resume_inferior (struct inferior *inf)
 
       priv->suspended = 0;
     }
-}
-
-/* Iterator functions.  */
-
-static int
-darwin_resume_inferior_it (struct inferior *inf, void *arg)
-{
-  darwin_resume_inferior (inf);
-  return 0;
 }
 
 static void
@@ -886,23 +875,6 @@ darwin_resume_inferior_threads (struct inferior *inf, int step, int nsignal)
       darwin_resume_thread (inf, thread, step, nsignal);
 }
 
-struct resume_inferior_threads_param
-{
-  int step;
-  int nsignal;
-};
-
-static int
-darwin_resume_inferior_threads_it (struct inferior *inf, void *param)
-{
-  int step = ((struct resume_inferior_threads_param *)param)->step;
-  int nsignal = ((struct resume_inferior_threads_param *)param)->nsignal;
-
-  darwin_resume_inferior_threads (inf, step, nsignal);
-
-  return 0;
-}
-
 /* Suspend all threads of INF.  */
 
 static void
@@ -951,15 +923,13 @@ darwin_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
   /* minus_one_ptid is RESUME_ALL.  */
   if (ptid == minus_one_ptid)
     {
-      struct resume_inferior_threads_param param;
-
-      param.nsignal = nsignal;
-      param.step = step;
-
       /* Resume threads.  */
-      iterate_over_inferiors (darwin_resume_inferior_threads_it, &param);
+      for (inferior *inf : all_inferiors ())
+	darwin_resume_inferior_threads (inf, step, nsignal);
+
       /* Resume tasks.  */
-      iterate_over_inferiors (darwin_resume_inferior_it, NULL);
+      for (inferior *inf : all_inferiors ())
+	darwin_resume_inferior (inf);
     }
   else
     {
