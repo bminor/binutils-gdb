@@ -1071,18 +1071,19 @@ range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
 
       const gdb_byte *name = &idata_contents[name_va - idata_section_va];
 
-      /* Make sure we don't overshoot the end of the section with the streq.  */
-      if (name + sizeof (CYGWIN_DLL_NAME) > end)
-	continue;
-
-      /* Finally, check if this is the dll name we are looking for.  */
-      if (streq ((const char *) name, CYGWIN_DLL_NAME))
-	return true;
+      /* Make sure we don't overshoot the end of the section with the
+	 streq.  */
+      if (name + sizeof (CYGWIN_DLL_NAME) <= end)
+	{
+	  /* Finally, check if this is the dll name we are looking for.  */
+	  if (streq ((const char *) name, CYGWIN_DLL_NAME))
+	    return true;
+	}
 
       iter += sizeof (pe_import_directory_entry);
     }
 
-    return false;
+  return false;
 }
 
 void _initialize_windows_tdep ();

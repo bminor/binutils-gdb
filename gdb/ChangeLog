@@ -1,3 +1,8 @@
+2020-04-23  Tom Tromey  <tromey@adacore.com>
+
+	* windows-tdep.c (is_linked_with_cygwin_dll): Always update "iter"
+	in loop.
+
 2020-04-23  Luis Machado  <luis.machado@linaro.org>
 
 	* dwarf2/frame-tailcall.c (dwarf2_tailcall_sniffer_first): Use
