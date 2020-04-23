@@ -1,5 +1,9 @@
 2020-04-23  Tom de Vries  <tdevries@suse.de>
 
+	* symtab.c (lookup_global_symbol): Prefer def over decl.
+
+2020-04-23  Tom de Vries  <tdevries@suse.de>
+
 	PR symtab/25807
 	* block.c (best_symbol, better_symbol): Promote to external.
 	* block.h (best_symbol, better_symbol): Declare.

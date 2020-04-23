@@ -1,5 +1,9 @@
 2020-04-23  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/decl-before-def.exp: Run to main and print a again.
+
+2020-04-23  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/decl-before-def-decl.c: New test.
 	* gdb.base/decl-before-def-def.c: New test.
 	* gdb.base/decl-before-def.exp: New file.

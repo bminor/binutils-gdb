@@ -2718,17 +2718,23 @@ lookup_global_symbol (const char *name,
      global block first.  This yields "more expected" behavior, and is
      needed to support 'FILENAME'::VARIABLE lookups.  */
   const struct block *global_block = block_global_block (block);
+  symbol *sym = NULL;
   if (global_block != nullptr)
     {
-      symbol *sym = lookup_symbol_in_block (name,
-					    symbol_name_match_type::FULL,
-					    global_block, domain);
-      if (sym != nullptr)
+      sym = lookup_symbol_in_block (name,
+				    symbol_name_match_type::FULL,
+				    global_block, domain);
+      if (sym != NULL && best_symbol (sym, domain))
 	return { sym, global_block };
     }
 
   struct objfile *objfile = lookup_objfile_from_block (block);
-  return lookup_global_or_static_symbol (name, GLOBAL_BLOCK, objfile, domain);
+  block_symbol bs
+    = lookup_global_or_static_symbol (name, GLOBAL_BLOCK, objfile, domain);
+  if (better_symbol (sym, bs.symbol, domain) == sym)
+    return { sym, global_block };
+  else
+    return bs;
 }
 
 bool
