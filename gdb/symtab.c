@@ -667,29 +667,27 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
   return (mangled_name);
 }
 
-/* Set the demangled name of GSYMBOL to NAME.  NAME must be already
-   correctly allocated.  */
+/* See symtab.h.  */
 
 void
-symbol_set_demangled_name (struct general_symbol_info *gsymbol,
-                           const char *name,
-                           struct obstack *obstack)
+general_symbol_info::set_demangled_name (const char *name,
+					 struct obstack *obstack)
 {
-  if (gsymbol->language () == language_ada)
+  if (language () == language_ada)
     {
       if (name == NULL)
 	{
-	  gsymbol->ada_mangled = 0;
-	  gsymbol->language_specific.obstack = obstack;
+	  ada_mangled = 0;
+	  language_specific.obstack = obstack;
 	}
       else
 	{
-	  gsymbol->ada_mangled = 1;
-	  gsymbol->language_specific.demangled_name = name;
+	  ada_mangled = 1;
+	  language_specific.demangled_name = name;
 	}
     }
   else
-    gsymbol->language_specific.demangled_name = name;
+    language_specific.demangled_name = name;
 }
 
 /* Return the demangled name of GSYMBOL.  */
@@ -722,7 +720,7 @@ general_symbol_info::set_language (enum language language,
       || language == language_objc
       || language == language_fortran)
     {
-      symbol_set_demangled_name (this, NULL, obstack);
+      set_demangled_name (NULL, obstack);
     }
   else if (language == language_ada)
     {
@@ -872,7 +870,7 @@ general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
 	m_name = obstack_strndup (&per_bfd->storage_obstack,
 				  linkage_name.data (),
 				  linkage_name.length ());
-      symbol_set_demangled_name (this, NULL, &per_bfd->storage_obstack);
+      set_demangled_name (NULL, &per_bfd->storage_obstack);
 
       return;
     }
@@ -962,8 +960,7 @@ general_symbol_info::compute_and_set_names (gdb::string_view linkage_name,
     m_language = (*slot)->language;
 
   m_name = (*slot)->mangled.data ();
-  symbol_set_demangled_name (this, (*slot)->demangled.get (),
-			     &per_bfd->storage_obstack);
+  set_demangled_name ((*slot)->demangled.get (), &per_bfd->storage_obstack);
 }
 
 /* See symtab.h.  */

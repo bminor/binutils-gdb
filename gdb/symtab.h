@@ -454,6 +454,11 @@ struct general_symbol_info
   void set_linkage_name (const char *linkage_name)
   { m_name = linkage_name; }
 
+  /* Set the demangled name of this symbol to NAME.  NAME must be
+     already correctly allocated.  If the symbol's language is Ada,
+     then the name is ignored and the obstack is set.  */
+  void set_demangled_name (const char *name, struct obstack *obstack);
+
   enum language language () const
   { return m_language; }
 
@@ -536,10 +541,6 @@ struct general_symbol_info
 
   short section;
 };
-
-extern void symbol_set_demangled_name (struct general_symbol_info *,
-				       const char *,
-                                       struct obstack *);
 
 extern const char *symbol_get_demangled_name
   (const struct general_symbol_info *);

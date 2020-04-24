@@ -1418,9 +1418,8 @@ minimal_symbol_reader::install ()
 		   /* This will be freed later, by compute_and_set_names.  */
 		   char *demangled_name
 		     = symbol_find_demangled_name (msym, msym->linkage_name ());
-		   symbol_set_demangled_name
-		     (msym, demangled_name,
-		      &m_objfile->per_bfd->storage_obstack);
+		   msym->set_demangled_name
+		     (demangled_name, &m_objfile->per_bfd->storage_obstack);
 		   msym->name_set = 1;
 		 }
 	       /* This mangled_name_hash computation has to be outside of

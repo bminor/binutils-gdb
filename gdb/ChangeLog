@@ -1,3 +1,15 @@
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
+	* symtab.h (struct general_symbol_info) <set_demangled_name>: New
+	method.
+	(symbol_set_demangled_name): Don't declare.
+	* symtab.c (general_symbol_info::set_demangled_name): Rename from
+	symbol_set_demangled_name.
+	(general_symbol_info::set_language)
+	(general_symbol_info::compute_and_set_names): Update.
+	* minsyms.c (minimal_symbol_reader::install): Update.
+	* dwarf2/read.c (new_symbol): Update.
+
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
 	PR python/23662:

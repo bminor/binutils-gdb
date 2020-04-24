@@ -20569,9 +20569,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	 between gfortran, iFort etc.  */
       if (cu->language == language_fortran
           && symbol_get_demangled_name (sym) == NULL)
-	symbol_set_demangled_name (sym,
-				   dwarf2_full_name (name, die, cu),
-	                           NULL);
+	sym->set_demangled_name (dwarf2_full_name (name, die, cu), NULL);
 
       /* Default assumptions.
          Use the passed type or decode it from the die.  */
