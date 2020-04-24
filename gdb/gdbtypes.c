@@ -2298,8 +2298,9 @@ compute_variant_fields_inner (struct type *type,
 	error (_("Cannot determine struct field location"
 		 " (invalid location kind)"));
 
-      if (addr_stack->valaddr != NULL)
-	discr_value = unpack_field_as_long (type, addr_stack->valaddr, idx);
+      if (addr_stack->valaddr.data () != NULL)
+	discr_value = unpack_field_as_long (type, addr_stack->valaddr.data (),
+					    idx);
       else
 	{
 	  CORE_ADDR addr = (addr_stack->addr
@@ -2516,9 +2517,10 @@ resolve_dynamic_type_internal (struct type *type,
 	    struct property_addr_info pinfo;
 
 	    pinfo.type = check_typedef (TYPE_TARGET_TYPE (type));
-	    pinfo.valaddr = NULL;
-	    if (addr_stack->valaddr != NULL)
-	      pinfo.addr = extract_typed_address (addr_stack->valaddr, type);
+	    pinfo.valaddr = {};
+	    if (addr_stack->valaddr.data () != NULL)
+	      pinfo.addr = extract_typed_address (addr_stack->valaddr.data (),
+						  type);
 	    else
 	      pinfo.addr = read_memory_typed_address (addr_stack->addr, type);
 	    pinfo.next = addr_stack;
@@ -2566,7 +2568,8 @@ resolve_dynamic_type_internal (struct type *type,
 /* See gdbtypes.h  */
 
 struct type *
-resolve_dynamic_type (struct type *type, const gdb_byte *valaddr,
+resolve_dynamic_type (struct type *type,
+		      gdb::array_view<const gdb_byte> valaddr,
 		      CORE_ADDR addr)
 {
   struct property_addr_info pinfo

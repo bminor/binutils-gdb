@@ -3477,7 +3477,10 @@ value_from_contents_and_address (struct type *type,
 				 const gdb_byte *valaddr,
 				 CORE_ADDR address)
 {
-  struct type *resolved_type = resolve_dynamic_type (type, valaddr, address);
+  gdb::array_view<const gdb_byte> view;
+  if (valaddr != nullptr)
+    view = gdb::make_array_view (valaddr, TYPE_LENGTH (type));
+  struct type *resolved_type = resolve_dynamic_type (type, view, address);
   struct type *resolved_type_no_typedef = check_typedef (resolved_type);
   struct value *v;
 

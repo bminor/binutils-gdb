@@ -752,7 +752,7 @@ min_of_type (struct type *t)
 LONGEST
 ada_discrete_type_high_bound (struct type *type)
 {
-  type = resolve_dynamic_type (type, NULL, 0);
+  type = resolve_dynamic_type (type, {}, 0);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -773,7 +773,7 @@ ada_discrete_type_high_bound (struct type *type)
 LONGEST
 ada_discrete_type_low_bound (struct type *type)
 {
-  type = resolve_dynamic_type (type, NULL, 0);
+  type = resolve_dynamic_type (type, {}, 0);
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -2508,7 +2508,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 			        staging.data (), staging.size (),
 				is_big_endian, has_negatives (type),
 				is_scalar);
-      type = resolve_dynamic_type (type, staging.data (), 0);
+      type = resolve_dynamic_type (type, staging, 0);
       if (TYPE_LENGTH (type) < (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT)
 	{
 	  /* This happens when the length of the object is dynamic,

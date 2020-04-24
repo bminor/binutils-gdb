@@ -1057,7 +1057,9 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
 
   const gdb_byte *valaddr = value_contents_for_printing (val);
   CORE_ADDR address = value_address (val);
-  type = ada_check_typedef (resolve_dynamic_type (type, valaddr, address));
+  gdb::array_view<const gdb_byte> view
+    = gdb::make_array_view (valaddr, TYPE_LENGTH (type));
+  type = ada_check_typedef (resolve_dynamic_type (type, view, address));
   if (type != saved_type)
     {
       val = value_copy (val);

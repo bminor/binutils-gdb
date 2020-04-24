@@ -1,5 +1,24 @@
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.c (ada_discrete_type_high_bound, ada_discrete_type_low)
+	(ada_value_primitive_packed_val): Update.
+	* ada-valprint.c (ada_value_print_1): Update.
+	* dwarf2/loc.c (evaluate_for_locexpr_baton): New struct.
+	(dwarf2_locexpr_baton_eval): Take a property_addr_info rather than
+	just an address.  Use evaluate_for_locexpr_baton.
+	(dwarf2_evaluate_property): Update.
+	* dwarf2/loc.h (struct property_addr_info) <valaddr>: Now an
+	array_view.
+	* findvar.c (default_read_var_value): Update.
+	* gdbtypes.c (compute_variant_fields_inner)
+	(resolve_dynamic_type_internal): Update.
+	(resolve_dynamic_type): Change type of valaddr parameter.
+	* gdbtypes.h (resolve_dynamic_type): Update.
+	* valarith.c (value_subscripted_rvalue): Update.
+	* value.c (value_from_contents_and_address): Update.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/loc.c (dwarf2_locexpr_baton_eval): Add
 	"push_initial_value" parameter.
 	(dwarf2_evaluate_property): Likewise.

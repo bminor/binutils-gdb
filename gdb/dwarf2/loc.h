@@ -73,7 +73,7 @@ struct property_addr_info
   struct type *type;
 
   /* If not NULL, a buffer containing the object's value.  */
-  const gdb_byte *valaddr;
+  gdb::array_view<const gdb_byte> valaddr;
 
   /* The address of that object.  */
   CORE_ADDR addr;

@@ -220,7 +220,7 @@ value_subscripted_rvalue (struct value *array, LONGEST index, LONGEST lowerbound
       CORE_ADDR address;
 
       address = value_address (array) + elt_offs;
-      elt_type = resolve_dynamic_type (elt_type, NULL, address);
+      elt_type = resolve_dynamic_type (elt_type, {}, address);
     }
 
   return value_from_component (array, elt_type, elt_offs);

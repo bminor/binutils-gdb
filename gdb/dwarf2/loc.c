@@ -2384,18 +2384,56 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 					NULL, 0);
 }
 
-/* Evaluates a dwarf expression and stores the result in VAL, expecting
-   that the dwarf expression only produces a single CORE_ADDR.  FRAME is the
-   frame in which the expression is evaluated.  ADDR is a context (location of
-   a variable) and might be needed to evaluate the location expression.
-   PUSH_INITIAL_VALUE is true if ADDR should be pushed on the stack
-   before evaluating the expression;  this is required by certain
-   forms of DWARF expression.  Returns 1 on success, 0 otherwise.  */
+/* A specialization of dwarf_evaluate_loc_desc that is used by
+   dwarf2_locexpr_baton_eval.  This subclass exists to handle the case
+   where a caller of dwarf2_locexpr_baton_eval passes in some data,
+   but with the address being 0.  In this situation, we arrange for
+   memory reads to come from the passed-in buffer.  */
+
+struct evaluate_for_locexpr_baton : public dwarf_evaluate_loc_desc
+{
+  /* The data that was passed in.  */
+  gdb::array_view<const gdb_byte> data_view;
+
+  CORE_ADDR get_object_address () override
+  {
+    if (data_view.data () == nullptr && obj_address == 0)
+      error (_("Location address is not set."));
+    return obj_address;
+  }
+
+  void read_mem (gdb_byte *buf, CORE_ADDR addr, size_t len) override
+  {
+    if (len == 0)
+      return;
+
+    /* Prefer the passed-in memory, if it exists.  */
+    CORE_ADDR offset = addr - obj_address;
+    if (offset < data_view.size () && offset + len <= data_view.size ())
+      {
+	memcpy (buf, data_view.data (), len);
+	return;
+      }
+
+    read_memory (addr, buf, len);
+  }
+};
+
+/* Evaluates a dwarf expression and stores the result in VAL,
+   expecting that the dwarf expression only produces a single
+   CORE_ADDR.  FRAME is the frame in which the expression is
+   evaluated.  ADDR_STACK is a context (location of a variable) and
+   might be needed to evaluate the location expression.
+   PUSH_INITIAL_VALUE is true if the address (either from ADDR_STACK,
+   or the default of 0) should be pushed on the DWARF expression
+   evaluation stack before evaluating the expression; this is required
+   by certain forms of DWARF expression.  Returns 1 on success, 0
+   otherwise.  */
 
 static int
 dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 			   struct frame_info *frame,
-			   CORE_ADDR addr,
+			   const struct property_addr_info *addr_stack,
 			   CORE_ADDR *valp,
 			   bool push_initial_value)
 {
@@ -2404,11 +2442,17 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
   if (dlbaton == NULL || dlbaton->size == 0)
     return 0;
 
-  dwarf_evaluate_loc_desc ctx;
+  evaluate_for_locexpr_baton ctx;
 
   ctx.frame = frame;
   ctx.per_cu = dlbaton->per_cu;
-  ctx.obj_address = addr;
+  if (addr_stack == nullptr)
+    ctx.obj_address = 0;
+  else
+    {
+      ctx.obj_address = addr_stack->addr;
+      ctx.data_view = addr_stack->valaddr;
+    }
 
   objfile = dlbaton->per_cu->objfile ();
 
@@ -2418,7 +2462,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
   ctx.offset = dlbaton->per_cu->text_offset ();
 
   if (push_initial_value)
-    ctx.push_address (addr, false);
+    ctx.push_address (ctx.obj_address, false);
 
   try
     {
@@ -2485,8 +2529,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	  = (const struct dwarf2_property_baton *) prop->data.baton;
 	gdb_assert (baton->property_type != NULL);
 
-	if (dwarf2_locexpr_baton_eval (&baton->locexpr, frame,
-				       addr_stack ? addr_stack->addr : 0,
+	if (dwarf2_locexpr_baton_eval (&baton->locexpr, frame, addr_stack,
 				       value, push_initial_value))
 	  {
 	    if (baton->locexpr.is_reference)
@@ -2569,10 +2612,10 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 	  }
 	if (pinfo == NULL)
 	  error (_("cannot find reference address for offset property"));
-	if (pinfo->valaddr != NULL)
+	if (pinfo->valaddr.data () != NULL)
 	  val = value_from_contents
 		  (baton->offset_info.type,
-		   pinfo->valaddr + baton->offset_info.offset);
+		   pinfo->valaddr.data () + baton->offset_info.offset);
 	else
 	  val = value_at (baton->offset_info.type,
 			  pinfo->addr + baton->offset_info.offset);
