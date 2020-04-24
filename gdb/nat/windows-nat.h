@@ -93,6 +93,11 @@ struct windows_thread_info
      breakpoint.  This is used to offset the PC when needed.  */
   bool stopped_at_software_breakpoint = false;
 
+  /* True if we've adjusted the PC after hitting a software
+     breakpoint, false otherwise.  This lets us avoid multiple
+     adjustments if the registers are read multiple times.  */
+  bool pc_adjusted = false;
+
   /* The name of the thread, allocated by xmalloc.  */
   gdb::unique_xmalloc_ptr<char> name;
 };

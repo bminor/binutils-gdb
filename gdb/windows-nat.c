@@ -604,6 +604,7 @@ windows_fetch_one_register (struct regcache *regcache,
   else
     {
       if (th->stopped_at_software_breakpoint
+	  && !th->pc_adjusted
 	  && r == gdbarch_pc_regnum (gdbarch))
 	{
 	  int size = register_size (gdbarch, r);
@@ -622,6 +623,8 @@ windows_fetch_one_register (struct regcache *regcache,
 	      value -= gdbarch_decr_pc_after_break (gdbarch);
 	      memcpy (context_offset, &value, size);
 	    }
+	  /* Make sure we only rewrite the PC a single time.  */
+	  th->pc_adjusted = true;
 	}
       regcache->raw_supply (r, context_offset);
     }
@@ -1757,6 +1760,7 @@ windows_nat_target::get_windows_debug_event (int pid,
 	  ptid_t ptid = ptid_t (current_event.dwProcessId, thread_id, 0);
 	  th = thread_rec (ptid, INVALIDATE_CONTEXT);
 	  th->stopped_at_software_breakpoint = true;
+	  th->pc_adjusted = false;
 	}
       pending_stops.push_back ({thread_id, *ourstatus, current_event});
       thread_id = 0;
@@ -1835,7 +1839,11 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 		      || (current_event.u.Exception.ExceptionRecord.ExceptionCode
 			  == STATUS_WX86_BREAKPOINT))
 		  && windows_initialization_done)
-		current_windows_thread->stopped_at_software_breakpoint = true;
+		{
+		  current_windows_thread->stopped_at_software_breakpoint
+		    = true;
+		  current_windows_thread->pc_adjusted = false;
+		}
 	    }
 
 	  return result;

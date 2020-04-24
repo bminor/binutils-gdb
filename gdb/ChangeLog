@@ -1,3 +1,12 @@
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* nat/windows-nat.h (struct windows_thread_info)
+	<pc_adjusted>: New member.
+	* windows-nat.c (windows_fetch_one_register): Check
+	pc_adjusted.
+	(windows_nat_target::get_windows_debug_event)
+	(windows_nat_target::wait): Set pc_adjusted.
+
 2020-04-24  Tom de Vries  <tdevries@suse.de>
 
 	* contrib/cc-with-tweaks.sh: Remove <exec>.gdb-index file handling.
