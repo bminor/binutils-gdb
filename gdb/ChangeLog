@@ -1,3 +1,8 @@
+2020-04-24  Tom de Vries  <tdevries@suse.de>
+
+	* contrib/cc-with-tweaks.sh: Remove <exec>.gdb-index file handling.
+	Run gdb-add-index inside temp dir.
+
 2020-04-23  Tom Tromey  <tromey@adacore.com>
 
 	* windows-tdep.c (is_linked_with_cygwin_dll): Always update "iter"
