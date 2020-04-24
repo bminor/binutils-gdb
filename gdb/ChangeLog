@@ -1,5 +1,11 @@
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
+	* ada-typeprint.c (print_choices, print_variant_part)
+	(print_record_field_types_dynamic): New functions.
+	(print_record_field_types): Use print_record_field_types_dynamic.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/read.c (handle_data_member_location): New overload.
 	(dwarf2_add_field): Use it.
 	(decode_locdesc): Add "computed" parameter.  Update comment.

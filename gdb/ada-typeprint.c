@@ -654,6 +654,120 @@ print_selected_record_field_types (struct type *type, struct type *outer_type,
   return flds;
 }
 
+static void print_record_field_types_dynamic
+  (const gdb::array_view<variant_part> &parts,
+   int from, int to, struct type *type, struct ui_file *stream,
+   int show, int level, const struct type_print_options *flags);
+
+/* Print the choices encoded by VARIANT on STREAM.  LEVEL is the
+   indentation level.  The type of the discriminant for VARIANT is
+   given by DISR_TYPE.  */
+
+static void
+print_choices (struct type *discr_type, const variant &variant,
+	       struct ui_file *stream, int level)
+{
+  fprintf_filtered (stream, "\n%*swhen ", level, "");
+  if (variant.is_default ())
+    fprintf_filtered (stream, "others");
+  else
+    {
+      bool first = true;
+      for (const discriminant_range &range : variant.discriminants)
+	{
+	  if (!first)
+	    fprintf_filtered (stream, " | ");
+	  first = false;
+
+	  ada_print_scalar (discr_type, range.low, stream);
+	  if (range.low != range.high)
+	    ada_print_scalar (discr_type, range.high, stream);
+	}
+    }
+
+  fprintf_filtered (stream, " =>");
+}
+
+/* Print a single variant part, PART, on STREAM.  TYPE is the
+   enclosing type.  SHOW, LEVEL, and FLAGS are the usual type-printing
+   settings.  This prints information about PART and the fields it
+   controls.  It returns the index of the next field that should be
+   shown -- that is, one after the last field printed by this
+   call.  */
+
+static int
+print_variant_part (const variant_part &part,
+		    struct type *type, struct ui_file *stream,
+		    int show, int level,
+		    const struct type_print_options *flags)
+{
+  struct type *discr_type = nullptr;
+  const char *name;
+  if (part.discriminant_index == -1)
+    name = "?";
+  else
+    {
+      name = TYPE_FIELD_NAME (type, part.discriminant_index);
+      discr_type = TYPE_FIELD_TYPE (type, part.discriminant_index);
+    }
+
+  fprintf_filtered (stream, "\n%*scase %s is", level + 4, "", name);
+
+  int last_field = -1;
+  for (const variant &variant : part.variants)
+    {
+      print_choices (discr_type, variant, stream, level + 8);
+
+      if (variant.first_field == variant.last_field)
+	fprintf_filtered (stream, " null;");
+      else
+	{
+	  print_record_field_types_dynamic (variant.parts,
+					    variant.first_field,
+					    variant.last_field, type, stream,
+					    show, level + 8, flags);
+	  last_field = variant.last_field;
+	}
+    }
+
+  fprintf_filtered (stream, "\n%*send case;", level + 4, "");
+
+  return last_field;
+}
+
+/* Print some fields of TYPE to STREAM.  SHOW, LEVEL, and FLAGS are
+   the usual type-printing settings.  PARTS is the array of variant
+   parts that correspond to the range of fields to be printed.  FROM
+   and TO are the range of fields to print.  */
+
+static void
+print_record_field_types_dynamic (const gdb::array_view<variant_part> &parts,
+				  int from, int to,
+				  struct type *type, struct ui_file *stream,
+				  int show, int level,
+				  const struct type_print_options *flags)
+{
+  int field = from;
+
+  for (const variant_part &part : parts)
+    {
+      if (part.variants.empty ())
+	continue;
+
+      /* Print any non-varying fields.  */
+      int first_varying = part.variants[0].first_field;
+      print_selected_record_field_types (type, type, field,
+					 first_varying - 1, stream,
+					 show, level, flags);
+
+      field = print_variant_part (part, type, stream, show, level, flags);
+    }
+
+  /* Print any trailing fields that we were asked to print.  */
+  print_selected_record_field_types (type, type, field, to - 1, stream, show,
+				     level, flags);
+}
+
 /* Print a description on STREAM of all fields of record or union type
    TYPE, as for print_selected_record_field_types, above.  */
 
@@ -662,6 +776,21 @@ print_record_field_types (struct type *type, struct type *outer_type,
 			  struct ui_file *stream, int show, int level,
 			  const struct type_print_options *flags)
 {
+  struct dynamic_prop *prop = get_dyn_prop (DYN_PROP_VARIANT_PARTS, type);
+  if (prop != nullptr)
+    {
+      if (prop->kind == PROP_TYPE)
+	{
+	  type = prop->data.original_type;
+	  prop = get_dyn_prop (DYN_PROP_VARIANT_PARTS, type);
+	}
+      gdb_assert (prop->kind == PROP_VARIANT_PARTS);
+      print_record_field_types_dynamic (*prop->data.variant_parts,
+					0, TYPE_NFIELDS (type),
+					type, stream, show, level, flags);
+      return TYPE_NFIELDS (type);
+    }
+
   return print_selected_record_field_types (type, outer_type,
 					    0, TYPE_NFIELDS (type) - 1,
 					    stream, show, level, flags);
