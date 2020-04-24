@@ -1590,24 +1590,10 @@ psymbol_compare (const void *addr1, const void *addr2, int length)
    different domain (or address) is possible and correct.  */
 
 static struct partial_symbol *
-add_psymbol_to_bcache (gdb::string_view name, bool copy_name,
-		       domain_enum domain,
-		       enum address_class theclass,
-		       short section,
-		       CORE_ADDR coreaddr,
-		       enum language language, struct objfile *objfile,
+add_psymbol_to_bcache (const partial_symbol &psymbol,
+		       struct objfile *objfile,
 		       int *added)
 {
-  struct partial_symbol psymbol;
-  memset (&psymbol, 0, sizeof (psymbol));
-
-  psymbol.set_unrelocated_address (coreaddr);
-  psymbol.ginfo.section = section;
-  psymbol.domain = domain;
-  psymbol.aclass = theclass;
-  psymbol.ginfo.set_language (language, objfile->partial_symtabs->obstack ());
-  psymbol.ginfo.compute_and_set_names (name, copy_name, objfile->per_bfd);
-
   /* Stash the partial symbol away in the cache.  */
   return ((struct partial_symbol *)
 	  objfile->partial_symtabs->psymbol_cache.insert
@@ -1628,21 +1614,16 @@ append_psymbol_to_list (std::vector<partial_symbol *> *list,
 /* See psympriv.h.  */
 
 void
-add_psymbol_to_list (gdb::string_view name, bool copy_name,
-		     domain_enum domain,
-		     enum address_class theclass,
-		     short section,
+add_psymbol_to_list (const partial_symbol &psymbol,
 		     psymbol_placement where,
-		     CORE_ADDR coreaddr,
-		     enum language language, struct objfile *objfile)
+		     struct objfile *objfile)
 {
   struct partial_symbol *psym;
 
   int added;
 
   /* Stash the partial symbol away in the cache.  */
-  psym = add_psymbol_to_bcache (name, copy_name, domain, theclass,
-				section, coreaddr, language, objfile, &added);
+  psym = add_psymbol_to_bcache (psymbol, objfile, &added);
 
   /* Do not duplicate global partial symbols.  */
   if (where == psymbol_placement::GLOBAL && !added)
@@ -1654,6 +1635,30 @@ add_psymbol_to_list (gdb::string_view name, bool copy_name,
        ? objfile->partial_symtabs->current_static_psymbols.back ()
        : objfile->partial_symtabs->current_global_psymbols.back ());
   append_psymbol_to_list (list, psym, objfile);
+}
+
+/* See psympriv.h.  */
+
+void
+add_psymbol_to_list (gdb::string_view name, bool copy_name,
+		     domain_enum domain,
+		     enum address_class theclass,
+		     short section,
+		     psymbol_placement where,
+		     CORE_ADDR coreaddr,
+		     enum language language, struct objfile *objfile)
+{
+  struct partial_symbol psymbol;
+  memset (&psymbol, 0, sizeof (psymbol));
+
+  psymbol.set_unrelocated_address (coreaddr);
+  psymbol.ginfo.section = section;
+  psymbol.domain = domain;
+  psymbol.aclass = theclass;
+  psymbol.ginfo.set_language (language, objfile->partial_symtabs->obstack ());
+  psymbol.ginfo.compute_and_set_names (name, copy_name, objfile->per_bfd);
+
+  add_psymbol_to_list (psymbol, where, objfile);
 }
 
 /* See psympriv.h.  */

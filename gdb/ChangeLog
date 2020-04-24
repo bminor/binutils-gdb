@@ -1,5 +1,12 @@
 2020-04-24  Tom Tromey  <tom@tromey.com>
 
+	* psymtab.c (add_psymbol_to_bcache): Simplify calling convention.
+	(add_psymbol_to_list): New overload.  Make old overload call new
+	one.
+	* psympriv.h (add_psymbol_to_list): New overload.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (partial_die_info::read) <case
 	DW_AT_linkage_name>: Use value_as_string.
 	(dwarf2_string_attr): Use value_as_string.
