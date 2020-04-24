@@ -768,6 +768,8 @@ create_enum (struct gdbarch *gdbarch, int bit, const char *name,
 static const struct enum_value_name exception_values[] =
 {
   { 0x40000015, "FATAL_APP_EXIT" },
+  { 0x4000001E, "WX86_SINGLE_STEP" },
+  { 0x4000001F, "WX86_BREAKPOINT" },
   { 0x40010005, "DBG_CONTROL_C" },
   { 0x40010008, "DBG_CONTROL_BREAK" },
   { 0x80000002, "DATATYPE_MISALIGNMENT" },
