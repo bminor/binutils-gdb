@@ -6108,6 +6108,7 @@ proc clean_restart { args } {
     global srcdir
     global subdir
     global errcnt
+    global warncnt
 
     if { [llength $args] > 1 } {
 	error "bad number of args: [llength $args]"
@@ -6115,15 +6116,18 @@ proc clean_restart { args } {
 
     gdb_exit
 
+    # This is a clean restart, so reset error and warning count.
+    set errcnt 0
+    set warncnt 0
+
     # We'd like to do:
     #   if { [gdb_start] == -1 } {
     #     return -1
     #   }
     # but gdb_start is a ${tool}_start proc, which doesn't have a defined
     # return value.  So instead, we test for errcnt.
-    set saved_errcnt $errcnt
     gdb_start
-    if { $errcnt > $saved_errcnt } {
+    if { $errcnt > 0 } {
 	return -1
     }
 
