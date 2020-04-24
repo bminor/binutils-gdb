@@ -29,7 +29,9 @@ if { [lsearch -exact $GDBFLAGS -readnow] != -1 \
 
 save_vars { GDBFLAGS } {
     append GDBFLAGS " --readnever"
-    clean_restart ${binfile}
+    if { [clean_restart ${binfile}] == -1 } {
+       return -1
+    }
 }
 
 if ![runto_main] then {

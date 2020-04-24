@@ -1,3 +1,10 @@
+2020-04-24  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (default_gdb_start): Handle eof.
+	(clean_restart): Detect and handle gdb_start failure.  Return -1 upon
+	failure.
+	* gdb.base/readnever.exp: Handle clean_restart failure.
+
 2020-04-23  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/decl-before-def.exp: Run to main and print a again.
