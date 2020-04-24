@@ -1,5 +1,9 @@
 2020-04-24  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.dwarf2/dw2-error.exp: Add quiet to compile flags.
+
+2020-04-24  Tom de Vries  <tdevries@suse.de>
+
 	* lib/gdb.exp (default_gdb_start): Handle eof.
 	(clean_restart): Detect and handle gdb_start failure.  Return -1 upon
 	failure.
