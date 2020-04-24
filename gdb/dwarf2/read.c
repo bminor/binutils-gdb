@@ -18300,7 +18300,7 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	  /* Note that both forms of linkage name might appear.  We
 	     assume they will be the same, and we only store the last
 	     one we see.  */
-	  linkage_name = DW_STRING (&attr);
+	  linkage_name = attr.value_as_string ();
 	  /* rustc emits invalid values for DW_AT_linkage_name.  Ignore these.
 	     See https://github.com/rust-lang/rust/issues/32925.  */
 	  if (cu->language == language_rust && linkage_name != NULL
@@ -19485,17 +19485,8 @@ dwarf2_string_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *c
 
   if (attr != NULL)
     {
-      if (attr->form == DW_FORM_strp || attr->form == DW_FORM_line_strp
-	  || attr->form == DW_FORM_string
-	  || attr->form == DW_FORM_strx
-	  || attr->form == DW_FORM_strx1
-	  || attr->form == DW_FORM_strx2
-	  || attr->form == DW_FORM_strx3
-	  || attr->form == DW_FORM_strx4
-	  || attr->form == DW_FORM_GNU_str_index
-	  || attr->form == DW_FORM_GNU_strp_alt)
-	str = DW_STRING (attr);
-      else
+      str = attr->value_as_string ();
+      if (str == nullptr)
         complaint (_("string type expected for attribute %s for "
 		     "DIE at %s in module %s"),
 		   dwarf_attr_name (name), sect_offset_str (die->sect_off),

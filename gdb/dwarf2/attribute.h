@@ -46,6 +46,10 @@ struct attribute
      attribute's form into account.  */
   CORE_ADDR value_as_address () const;
 
+  /* If the attribute has a string form, return the string value;
+     otherwise return NULL.  */
+  const char *value_as_string () const;
+
   /* Return non-zero if ATTR's value is a section offset --- classes
      lineptr, loclistptr, macptr or rangelistptr --- or zero, otherwise.
      You may use DW_UNSND (attr) to retrieve such offsets.
