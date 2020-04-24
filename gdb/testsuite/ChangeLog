@@ -1,5 +1,10 @@
 2020-04-24  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.dwarf2/dwzbuildid.exp: Add quiet to dwzbuildid-mismatch compile
+	flags.
+
+2020-04-24  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.dwarf2/dw2-error.exp: Add quiet to compile flags.
 
 2020-04-24  Tom de Vries  <tdevries@suse.de>
