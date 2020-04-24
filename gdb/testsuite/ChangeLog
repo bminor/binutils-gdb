@@ -1,5 +1,16 @@
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/mi_var_array.exp: Try all -fgnat-encodings settings.
+	Make array type matching more lax.
+	* gdb.ada/mi_var_union.exp: Try all -fgnat-encodings settings.
+	* gdb.ada/mi_variant.exp: New file.
+	* gdb.ada/mi_variant/pck.ads: New file.
+	* gdb.ada/mi_variant/pkg.adb: New file.
+	* gdb.ada/packed_tagged.exp: Try all -fgnat-encodings settings.
+	* gdb.ada/unchecked_union.exp: Try all -fgnat-encodings settings.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/variant.exp: Add dynamic field offset tests.
 	* gdb.ada/variant/pck.ads (Nested_And_Variable): New type.
 	* gdb.ada/variant/pkg.adb: Add new variables.

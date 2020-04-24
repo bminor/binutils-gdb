@@ -17,24 +17,31 @@ load_lib "ada.exp"
 
 standard_ada_testfile comp_bug
 
-if {[gdb_compile_ada "${srcfile}" "${binfile}" executable [list debug]] != "" } {
-  return -1
+foreach_with_prefix scenario {none all minimal} {
+    set flags {debug}
+    if {$scenario != "none"} {
+	lappend flags additional_flags=-fgnat-encodings=$scenario
+    }
+
+    if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != ""} {
+	return -1
+    }
+
+    clean_restart ${testfile}
+
+    set bp_location [gdb_get_line_number "STOP" ${testdir}/comp_bug.adb]
+    runto "comp_bug.adb:$bp_location"
+
+    gdb_test "print x" \
+	"= \\(exists => true, value => 10\\)"
+
+    gdb_test "ptype x" \
+	[multi_line "type = record" \
+	     "    exists: (boolean|range false \\.\\. true);" \
+	     "    case exists is" \
+	     "        when true =>" \
+	     "            value: range 0 \\.\\. 255;" \
+	     "        when others => null;" \
+	     "    end case;" \
+	     "end record" ]
 }
-
-clean_restart ${testfile}
-
-set bp_location [gdb_get_line_number "STOP" ${testdir}/comp_bug.adb]
-runto "comp_bug.adb:$bp_location"
-
-gdb_test "print x" \
-         "= \\(exists => true, value => 10\\)"
-
-gdb_test "ptype x" \
-         [multi_line "type = record" \
-                     "    exists: (boolean|range false \\.\\. true);" \
-                     "    case exists is" \
-                     "        when true =>" \
-                     "            value: range 0 \\.\\. 255;" \
-                     "        when others => null;" \
-                     "    end case;" \
-                     "end record" ]
