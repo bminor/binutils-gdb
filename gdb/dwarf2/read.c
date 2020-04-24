@@ -10032,6 +10032,12 @@ dw2_linkage_name (struct die_info *die, struct dwarf2_cu *cu)
   if (linkage_name == NULL)
     linkage_name = dwarf2_string_attr (die, DW_AT_MIPS_linkage_name, cu);
 
+  /* rustc emits invalid values for DW_AT_linkage_name.  Ignore these.
+     See https://github.com/rust-lang/rust/issues/32925.  */
+  if (cu->language == language_rust && linkage_name != NULL
+      && strchr (linkage_name, '{') != NULL)
+    linkage_name = NULL;
+
   return linkage_name;
 }
 
@@ -10307,12 +10313,6 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
     return dwarf2_compute_name (name, die, cu, 1);
 
   mangled = dw2_linkage_name (die, cu);
-
-  /* rustc emits invalid values for DW_AT_linkage_name.  Ignore these.
-     See https://github.com/rust-lang/rust/issues/32925.  */
-  if (cu->language == language_rust && mangled != NULL
-      && strchr (mangled, '{') != NULL)
-    mangled = NULL;
 
   /* DW_AT_linkage_name is missing in some cases - depend on what GDB
      has computed.  */
@@ -18301,6 +18301,11 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	     assume they will be the same, and we only store the last
 	     one we see.  */
 	  linkage_name = DW_STRING (&attr);
+	  /* rustc emits invalid values for DW_AT_linkage_name.  Ignore these.
+	     See https://github.com/rust-lang/rust/issues/32925.  */
+	  if (cu->language == language_rust && linkage_name != NULL
+	      && strchr (linkage_name, '{') != NULL)
+	    linkage_name = NULL;
 	  break;
 	case DW_AT_low_pc:
 	  has_low_pc_attr = 1;
