@@ -111,6 +111,14 @@ arm_arch_setup (void)
   win32_tdesc = tdesc_arm;
 }
 
+/* Implement win32_target_ops "num_regs" method.  */
+
+static int
+arm_num_regs (void)
+{
+  return sizeof (mappings) / sizeof (mappings[0]),
+}
+
 /* Correct in either endianness.  We do not support Thumb yet.  */
 static const unsigned long arm_wince_breakpoint = 0xe6000010;
 #define arm_wince_breakpoint_len 4
@@ -138,7 +146,7 @@ arm_win32_set_pc (struct regcache *regcache, CORE_ADDR pc)
 
 struct win32_target_ops the_low_target = {
   arm_arch_setup,
-  sizeof (mappings) / sizeof (mappings[0]),
+  arm_num_regs,
   NULL, /* initial_stuff */
   arm_get_thread_context,
   NULL, /* prepare_to_resume */

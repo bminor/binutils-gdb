@@ -1,3 +1,35 @@
+2020-04-30  Hannes Domani  <ssbssa@yahoo.de>
+
+	* configure.srv <x86_64-*-mingw*, x86_64-*-cygwin*> (srv_tgtobj):
+	Add arch/i386.o.
+	* win32-arm-low.cc (arm_num_regs): New function.
+	(struct win32_target_ops): Use arm_num_regs.
+	* win32-i386-low.cc (win32_get_current_dr): Adapt for WOW64
+	processes.
+	(i386_get_thread_context): Likewise.
+	(i386_prepare_to_resume): Likewise.
+	(i386_thread_added): Likewise.
+	(i386_single_step): Likewise.
+	(i386_fetch_inferior_register): Likewise.
+	(i386_store_inferior_register): Likewise.
+	(i386_arch_setup): Likewise.
+	(i386_win32_num_regs): New function.
+	(struct win32_target_ops): Use i386_win32_num_regs.
+	* win32-low.cc (win32_get_thread_context): Adapt for WOW64
+	processes.
+	(win32_require_context): Likewise.
+	(child_add_thread): Likewise.
+	(do_initial_child_stuff): Likewise.
+	(continue_one_thread): Likewise.
+	(win32_process_target::resume): Likewise.
+	(load_psapi): Likewise.
+	(win32_add_all_dlls): Likewise.
+	(maybe_adjust_pc): Likewise.
+	(win32_process_target::qxfer_siginfo): Likewise.
+	(initialize_low): Likewise.
+	* win32-low.h (struct win32_target_ops): Change num_regs to
+	callback function.
+
 2020-04-27  Simon Marchi  <simon.marchi@efficios.com>
 
 	* configure.ac: Remove check for fs_base/gs_base in

@@ -88,14 +88,29 @@ static int soft_interrupt_requested = 0;
    by suspending all the threads.  */
 static int faked_breakpoint = 0;
 
-const struct target_desc *win32_tdesc;
+#ifdef __x86_64__
+bool wow64_process = false;
+#endif
 
-#define NUM_REGS (the_low_target.num_regs)
+const struct target_desc *win32_tdesc;
+#ifdef __x86_64__
+const struct target_desc *wow64_win32_tdesc;
+#endif
+
+#define NUM_REGS (the_low_target.num_regs ())
 
 typedef BOOL (WINAPI *winapi_DebugActiveProcessStop) (DWORD dwProcessId);
 typedef BOOL (WINAPI *winapi_DebugSetProcessKillOnExit) (BOOL KillOnExit);
 typedef BOOL (WINAPI *winapi_DebugBreakProcess) (HANDLE);
 typedef BOOL (WINAPI *winapi_GenerateConsoleCtrlEvent) (DWORD, DWORD);
+
+#ifdef __x86_64__
+typedef BOOL (WINAPI *winapi_Wow64SetThreadContext) (HANDLE,
+						     const WOW64_CONTEXT *);
+
+winapi_Wow64GetThreadContext win32_Wow64GetThreadContext;
+static winapi_Wow64SetThreadContext win32_Wow64SetThreadContext;
+#endif
 
 #ifndef _WIN32_WCE
 static void win32_add_all_dlls (void);
@@ -121,7 +136,12 @@ debug_event_ptid (DEBUG_EVENT *event)
 static void
 win32_get_thread_context (windows_thread_info *th)
 {
-  memset (&th->context, 0, sizeof (CONTEXT));
+#ifdef __x86_64__
+  if (wow64_process)
+    memset (&th->wow64_context, 0, sizeof (WOW64_CONTEXT));
+  else
+#endif
+    memset (&th->context, 0, sizeof (CONTEXT));
   (*the_low_target.get_thread_context) (th);
 #ifdef _WIN32_WCE
   memcpy (&th->base_context, &th->context, sizeof (CONTEXT));
@@ -146,7 +166,14 @@ win32_set_thread_context (windows_thread_info *th)
      it between stopping and resuming.  */
   if (memcmp (&th->context, &th->base_context, sizeof (CONTEXT)) != 0)
 #endif
-    SetThreadContext (th->h, &th->context);
+    {
+#ifdef __x86_64__
+      if (wow64_process)
+	win32_Wow64SetThreadContext (th->h, &th->wow64_context);
+      else
+#endif
+	SetThreadContext (th->h, &th->context);
+    }
 }
 
 /* Set the thread context of the thread associated with TH.  */
@@ -163,7 +190,14 @@ win32_prepare_to_resume (windows_thread_info *th)
 void
 win32_require_context (windows_thread_info *th)
 {
-  if (th->context.ContextFlags == 0)
+  DWORD context_flags;
+#ifdef __x86_64__
+  if (wow64_process)
+    context_flags = th->wow64_context.ContextFlags;
+  else
+#endif
+    context_flags = th->context.ContextFlags;
+  if (context_flags == 0)
     {
       th->suspend ();
       win32_get_thread_context (th);
@@ -195,7 +229,14 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
   if ((th = thread_rec (ptid, DONT_INVALIDATE_CONTEXT)))
     return th;
 
-  th = new windows_thread_info (tid, h, (CORE_ADDR) (uintptr_t) tlb);
+  CORE_ADDR base = (CORE_ADDR) (uintptr_t) tlb;
+#ifdef __x86_64__
+  /* For WOW64 processes, this is actually the pointer to the 64bit TIB,
+     and the 32bit TIB is exactly 2 pages after it.  */
+  if (wow64_process)
+    base += 2 * 4096; /* page size = 4096 */
+#endif
+  th = new windows_thread_info (tid, h, base);
 
   add_thread (ptid, th);
 
@@ -345,8 +386,31 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 
   memset (&current_event, 0, sizeof (current_event));
 
+#ifdef __x86_64__
+  BOOL wow64;
+  if (!IsWow64Process (proch, &wow64))
+    {
+      DWORD err = GetLastError ();
+      error ("Check if WOW64 process failed (error %d): %s\n",
+	     (int) err, strwinerror (err));
+    }
+  wow64_process = wow64;
+
+  if (wow64_process
+      && (win32_Wow64GetThreadContext == nullptr
+	  || win32_Wow64SetThreadContext == nullptr))
+    error ("WOW64 debugging is not supported on this system.\n");
+
+  ignore_first_breakpoint = !attached && wow64_process;
+#endif
+
   proc = add_process (pid, attached);
-  proc->tdesc = win32_tdesc;
+#ifdef __x86_64__
+  if (wow64_process)
+    proc->tdesc = wow64_win32_tdesc;
+  else
+#endif
+    proc->tdesc = win32_tdesc;
   child_init_thread_list ();
   child_initialization_done = 0;
 
@@ -416,10 +480,17 @@ continue_one_thread (thread_info *thread, int thread_id)
 
       if (th->suspended)
 	{
-	  if (th->context.ContextFlags)
+	  DWORD *context_flags;
+#ifdef __x86_64__
+	  if (wow64_process)
+	    context_flags = &th->wow64_context.ContextFlags;
+	  else
+#endif
+	    context_flags = &th->context.ContextFlags;
+	  if (*context_flags)
 	    {
 	      win32_set_thread_context (th);
-	      th->context.ContextFlags = 0;
+	      *context_flags = 0;
 	    }
 
 	  th->resume ();
@@ -943,7 +1014,14 @@ win32_process_target::resume (thread_resume *resume_info, size_t n)
     {
       win32_prepare_to_resume (th);
 
-      if (th->context.ContextFlags)
+      DWORD *context_flags;
+#ifdef __x86_64__
+      if (wow64_process)
+	context_flags = &th->wow64_context.ContextFlags;
+      else
+#endif
+	context_flags = &th->context.ContextFlags;
+      if (*context_flags)
 	{
 	  /* Move register values from the inferior into the thread
 	     context structure.  */
@@ -959,7 +1037,7 @@ win32_process_target::resume (thread_resume *resume_info, size_t n)
 	    }
 
 	  win32_set_thread_context (th);
-	  th->context.ContextFlags = 0;
+	  *context_flags = 0;
 	}
     }
 
@@ -1032,12 +1110,19 @@ win32_add_one_solib (const char *name, CORE_ADDR load_addr)
 
 typedef BOOL (WINAPI *winapi_EnumProcessModules) (HANDLE, HMODULE *,
 						  DWORD, LPDWORD);
+#ifdef __x86_64__
+typedef BOOL (WINAPI *winapi_EnumProcessModulesEx) (HANDLE, HMODULE *, DWORD,
+						    LPDWORD, DWORD);
+#endif
 typedef BOOL (WINAPI *winapi_GetModuleInformation) (HANDLE, HMODULE,
 						    LPMODULEINFO, DWORD);
 typedef DWORD (WINAPI *winapi_GetModuleFileNameExA) (HANDLE, HMODULE,
 						     LPSTR, DWORD);
 
 static winapi_EnumProcessModules win32_EnumProcessModules;
+#ifdef __x86_64__
+static winapi_EnumProcessModulesEx win32_EnumProcessModulesEx;
+#endif
 static winapi_GetModuleInformation win32_GetModuleInformation;
 static winapi_GetModuleFileNameExA win32_GetModuleFileNameExA;
 
@@ -1055,11 +1140,20 @@ load_psapi (void)
 	return FALSE;
       win32_EnumProcessModules =
 	      GETPROCADDRESS (dll, EnumProcessModules);
+#ifdef __x86_64__
+      win32_EnumProcessModulesEx =
+	      GETPROCADDRESS (dll, EnumProcessModulesEx);
+#endif
       win32_GetModuleInformation =
 	      GETPROCADDRESS (dll, GetModuleInformation);
       win32_GetModuleFileNameExA =
 	      GETPROCADDRESS (dll, GetModuleFileNameExA);
     }
+
+#ifdef __x86_64__
+  if (wow64_process && win32_EnumProcessModulesEx == nullptr)
+    return FALSE;
+#endif
 
   return (win32_EnumProcessModules != NULL
 	  && win32_GetModuleInformation != NULL
@@ -1084,10 +1178,19 @@ win32_add_all_dlls (void)
     return;
 
   cbNeeded = 0;
-  ok = (*win32_EnumProcessModules) (current_process_handle,
-				    DllHandle,
-				    sizeof (HMODULE),
-				    &cbNeeded);
+#ifdef __x86_64__
+  if (wow64_process)
+    ok = (*win32_EnumProcessModulesEx) (current_process_handle,
+					DllHandle,
+					sizeof (HMODULE),
+					&cbNeeded,
+					LIST_MODULES_32BIT);
+  else
+#endif
+    ok = (*win32_EnumProcessModules) (current_process_handle,
+				      DllHandle,
+				      sizeof (HMODULE),
+				      &cbNeeded);
 
   if (!ok || !cbNeeded)
     return;
@@ -1096,12 +1199,52 @@ win32_add_all_dlls (void)
   if (!DllHandle)
     return;
 
-  ok = (*win32_EnumProcessModules) (current_process_handle,
-				    DllHandle,
-				    cbNeeded,
-				    &cbNeeded);
+#ifdef __x86_64__
+  if (wow64_process)
+    ok = (*win32_EnumProcessModulesEx) (current_process_handle,
+					DllHandle,
+					cbNeeded,
+					&cbNeeded,
+					LIST_MODULES_32BIT);
+  else
+#endif
+    ok = (*win32_EnumProcessModules) (current_process_handle,
+				      DllHandle,
+				      cbNeeded,
+				      &cbNeeded);
   if (!ok)
     return;
+
+  char system_dir[MAX_PATH];
+  char syswow_dir[MAX_PATH];
+  size_t system_dir_len = 0;
+  bool convert_syswow_dir = false;
+#ifdef __x86_64__
+  if (wow64_process)
+#endif
+    {
+      /* This fails on 32bit Windows because it has no SysWOW64 directory,
+	 and in this case a path conversion isn't necessary.  */
+      UINT len = GetSystemWow64DirectoryA (syswow_dir, sizeof (syswow_dir));
+      if (len > 0)
+	{
+	  /* Check that we have passed a large enough buffer.  */
+	  gdb_assert (len < sizeof (syswow_dir));
+
+	  len = GetSystemDirectoryA (system_dir, sizeof (system_dir));
+	  /* Error check.  */
+	  gdb_assert (len != 0);
+	  /* Check that we have passed a large enough buffer.  */
+	  gdb_assert (len < sizeof (system_dir));
+
+	  strcat (system_dir, "\\");
+	  strcat (syswow_dir, "\\");
+	  system_dir_len = strlen (system_dir);
+
+	  convert_syswow_dir = true;
+	}
+
+    }
 
   for (i = 1; i < ((size_t) cbNeeded / sizeof (HMODULE)); i++)
     {
@@ -1118,7 +1261,22 @@ win32_add_all_dlls (void)
 					 dll_name,
 					 MAX_PATH) == 0)
 	continue;
-      win32_add_one_solib (dll_name, (CORE_ADDR) (uintptr_t) mi.lpBaseOfDll);
+
+      const char *name = dll_name;
+      /* Convert the DLL path of 32bit processes returned by
+	 GetModuleFileNameEx from the 64bit system directory to the
+	 32bit syswow64 directory if necessary.  */
+      std::string syswow_dll_path;
+      if (convert_syswow_dir
+	  && strncasecmp (dll_name, system_dir, system_dir_len) == 0
+	  && strchr (dll_name + system_dir_len, '\\') == nullptr)
+	{
+	  syswow_dll_path = syswow_dir;
+	  syswow_dll_path += dll_name + system_dir_len;
+	  name = syswow_dll_path.c_str();
+	}
+
+      win32_add_one_solib (name, (CORE_ADDR) (uintptr_t) mi.lpBaseOfDll);
     }
 }
 #endif
@@ -1221,8 +1379,10 @@ maybe_adjust_pc ()
   th->stopped_at_software_breakpoint = false;
 
   if (current_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT
-      && (current_event.u.Exception.ExceptionRecord.ExceptionCode
-	  == EXCEPTION_BREAKPOINT)
+      && ((current_event.u.Exception.ExceptionRecord.ExceptionCode
+	   == EXCEPTION_BREAKPOINT)
+	  || (current_event.u.Exception.ExceptionRecord.ExceptionCode
+	      == STATUS_WX86_BREAKPOINT))
       && child_initialization_done)
     {
       th->stopped_at_software_breakpoint = true;
@@ -1684,13 +1844,34 @@ win32_process_target::qxfer_siginfo (const char *annex,
   if (readbuf == nullptr)
     return -1;
 
-  if (offset > sizeof (siginfo_er))
+  char *buf = (char *) &siginfo_er;
+  size_t bufsize = sizeof (siginfo_er);
+
+#ifdef __x86_64__
+  EXCEPTION_RECORD32 er32;
+  if (wow64_process)
+    {
+      buf = (char *) &er32;
+      bufsize = sizeof (er32);
+
+      er32.ExceptionCode = siginfo_er.ExceptionCode;
+      er32.ExceptionFlags = siginfo_er.ExceptionFlags;
+      er32.ExceptionRecord = (uintptr_t) siginfo_er.ExceptionRecord;
+      er32.ExceptionAddress = (uintptr_t) siginfo_er.ExceptionAddress;
+      er32.NumberParameters = siginfo_er.NumberParameters;
+      int i;
+      for (i = 0; i < EXCEPTION_MAXIMUM_PARAMETERS; i++)
+	er32.ExceptionInformation[i] = siginfo_er.ExceptionInformation[i];
+    }
+#endif
+
+  if (offset > bufsize)
     return -1;
 
-  if (offset + len > sizeof (siginfo_er))
-    len = sizeof (siginfo_er) - offset;
+  if (offset + len > bufsize)
+    len = bufsize - offset;
 
-  memcpy (readbuf, (char *) &siginfo_er + offset, len);
+  memcpy (readbuf, buf + offset, len);
 
   return len;
 }
@@ -1760,4 +1941,12 @@ initialize_low (void)
 {
   set_target_ops (&the_win32_target);
   the_low_target.arch_setup ();
+
+#ifdef __x86_64__
+  /* These functions are loaded dynamically, because they are not available
+     on Windows XP.  */
+  HMODULE dll = GetModuleHandle (_T("KERNEL32.DLL"));
+  win32_Wow64GetThreadContext = GETPROCADDRESS (dll, Wow64GetThreadContext);
+  win32_Wow64SetThreadContext = GETPROCADDRESS (dll, Wow64SetThreadContext);
+#endif
 }
