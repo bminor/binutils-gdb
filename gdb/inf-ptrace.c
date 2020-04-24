@@ -353,44 +353,6 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
     }
   while (pid == -1);
 
-#ifdef PT_GET_PROCESS_STATE
-  if (WIFSTOPPED (status))
-    {
-      ptrace_state_t pe;
-      pid_t fpid;
-
-      if (ptrace (PT_GET_PROCESS_STATE, pid,
-		  (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
-	perror_with_name (("ptrace"));
-
-      switch (pe.pe_report_event)
-	{
-	case PTRACE_FORK:
-	  ourstatus->kind = TARGET_WAITKIND_FORKED;
-	  ourstatus->value.related_pid = ptid_t (pe.pe_other_pid);
-
-	  /* Make sure the other end of the fork is stopped too.  */
-	  fpid = waitpid (pe.pe_other_pid, &status, 0);
-	  if (fpid == -1)
-	    perror_with_name (("waitpid"));
-
-	  if (ptrace (PT_GET_PROCESS_STATE, fpid,
-		      (PTRACE_TYPE_ARG3)&pe, sizeof pe) == -1)
-	    perror_with_name (("ptrace"));
-
-	  gdb_assert (pe.pe_report_event == PTRACE_FORK);
-	  gdb_assert (pe.pe_other_pid == pid);
-	  if (fpid == inferior_ptid.pid ())
-	    {
-	      ourstatus->value.related_pid = ptid_t (pe.pe_other_pid);
-	      return ptid_t (fpid);
-	    }
-
-	  return ptid_t (pid);
-	}
-    }
-#endif
-
   store_waitstatus (ourstatus, status);
   return ptid_t (pid);
 }

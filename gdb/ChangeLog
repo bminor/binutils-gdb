@@ -1,3 +1,8 @@
+2020-04-25  Kamil Rytarowski  <n54@gmx.com>
+
+       * inf-ptrace.c (inf_ptrace_target::wait): Remove
+       `PT_GET_PROCESS_STATE' block.
+
 2020-04-24  Tom Tromey  <tom@tromey.com>
 
 	* symtab.h (symbol_get_demangled_name): Don't declare.
