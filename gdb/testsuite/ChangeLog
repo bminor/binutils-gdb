@@ -1,5 +1,15 @@
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/frame_arg_lang.exp: Run with multiple -fgnat-encodings
+	values.
+	* gdb.ada/funcall_ref.exp: Run with multiple -fgnat-encodings
+	values.  Update test for minimal encodings.
+	* gdb.ada/lang_switch.exp: Update test for minimal encodings.
+	* gdb.ada/var_rec_arr.exp: Run with multiple -fgnat-encodings
+	values.  Update test for minimal encodings.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
 	PR python/23662:
 	* gdb.ada/variant.exp: Add Python checks.
 	* gdb.rust/simple.exp: Add dynamic type checks.
