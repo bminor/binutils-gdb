@@ -3090,23 +3090,9 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 
 
 
-/* Unpack a bitfield of the specified FIELD_TYPE, from the object at
-   VALADDR, and store the result in *RESULT.
-   The bitfield starts at BITPOS bits and contains BITSIZE bits; if
-   BITSIZE is zero, then the length is taken from FIELD_TYPE.
+/* See value.h.  */
 
-   Extracting bits depends on endianness of the machine.  Compute the
-   number of least significant bits to discard.  For big endian machines,
-   we compute the total number of bits in the anonymous object, subtract
-   off the bit count from the MSB of the object to the MSB of the
-   bitfield, then the size of the bitfield, which leaves the LSB discard
-   count.  For little endian machines, the discard count is simply the
-   number of bits from the LSB of the anonymous object to the LSB of the
-   bitfield.
-
-   If the field is signed, we also do sign extension.  */
-
-static LONGEST
+LONGEST
 unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
 		     LONGEST bitpos, LONGEST bitsize)
 {

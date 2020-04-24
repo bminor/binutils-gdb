@@ -1,5 +1,25 @@
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
+	* gdbtypes.c (is_dynamic_type_internal): Check for variant parts.
+	(variant::matches, compute_variant_fields_recurse)
+	(compute_variant_fields_inner, compute_variant_fields): New
+	functions.
+	(resolve_dynamic_struct): Check for DYN_PROP_VARIANT_PARTS.
+	Use resolved_type after type is made.
+	(operator==): Add new cases.
+	* gdbtypes.h (TYPE_HAS_VARIANT_PARTS): New macro.
+	(struct discriminant_range, struct variant, struct variant_part):
+	New.
+	(union dynamic_prop_data) <variant_parts, original_type>: New
+	members.
+	(enum dynamic_prop_node_kind) <DYN_PROP_VARIANT_PARTS>: New constant.
+	(enum dynamic_prop_kind) <PROP_TYPE, PROP_VARIANT_PARTS>: New
+	constants.
+	* value.c (unpack_bits_as_long): Now public.
+	* value.h (unpack_bits_as_long): Declare.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
 	* rs6000-tdep.c (struct ppc_variant): Rename from "variant".
 	(variants, find_variant_by_arch, rs6000_gdbarch_init): Update.
 

@@ -39,6 +39,7 @@
 #include "dwarf2/loc.h"
 #include "gdbcore.h"
 #include "floatformat.h"
+#include <algorithm>
 
 /* Initialize BADNESS constants.  */
 
@@ -886,6 +887,10 @@ operator== (const dynamic_prop &l, const dynamic_prop &r)
     case PROP_LOCEXPR:
     case PROP_LOCLIST:
       return l.data.baton == r.data.baton;
+    case PROP_VARIANT_PARTS:
+      return l.data.variant_parts == r.data.variant_parts;
+    case PROP_TYPE:
+      return l.data.original_type == r.data.original_type;
     }
 
   gdb_assert_not_reached ("unhandled dynamic_prop kind");
@@ -1966,6 +1971,10 @@ is_dynamic_type_internal (struct type *type, int top_level)
   if (TYPE_ALLOCATED_PROP (type))
     return 1;
 
+  struct dynamic_prop *prop = get_dyn_prop (DYN_PROP_VARIANT_PARTS, type);
+  if (prop != nullptr && prop->kind != PROP_TYPE)
+    return 1;
+
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -2215,6 +2224,161 @@ resolve_dynamic_union (struct type *type,
   return resolved_type;
 }
 
+/* See gdbtypes.h.  */
+
+bool
+variant::matches (ULONGEST value, bool is_unsigned) const
+{
+  for (const discriminant_range &range : discriminants)
+    if (range.contains (value, is_unsigned))
+      return true;
+  return false;
+}
+
+static void
+compute_variant_fields_inner (struct type *type,
+			      struct property_addr_info *addr_stack,
+			      const variant_part &part,
+			      std::vector<bool> &flags);
+
+/* A helper function to determine which variant fields will be active.
+   This handles both the variant's direct fields, and any variant
+   parts embedded in this variant.  TYPE is the type we're examining.
+   ADDR_STACK holds information about the concrete object.  VARIANT is
+   the current variant to be handled.  FLAGS is where the results are
+   stored -- this function sets the Nth element in FLAGS if the
+   corresponding field is enabled.  ENABLED is whether this variant is
+   enabled or not.  */
+
+static void
+compute_variant_fields_recurse (struct type *type,
+				struct property_addr_info *addr_stack,
+				const variant &variant,
+				std::vector<bool> &flags,
+				bool enabled)
+{
+  for (int field = variant.first_field; field < variant.last_field; ++field)
+    flags[field] = enabled;
+
+  for (const variant_part &new_part : variant.parts)
+    {
+      if (enabled)
+	compute_variant_fields_inner (type, addr_stack, new_part, flags);
+      else
+	{
+	  for (const auto &sub_variant : new_part.variants)
+	    compute_variant_fields_recurse (type, addr_stack, sub_variant,
+					    flags, enabled);
+	}
+    }
+}
+
+/* A helper function to determine which variant fields will be active.
+   This evaluates the discriminant, decides which variant (if any) is
+   active, and then updates FLAGS to reflect which fields should be
+   available.  TYPE is the type we're examining.  ADDR_STACK holds
+   information about the concrete object.  VARIANT is the current
+   variant to be handled.  FLAGS is where the results are stored --
+   this function sets the Nth element in FLAGS if the corresponding
+   field is enabled.  */
+
+static void
+compute_variant_fields_inner (struct type *type,
+			      struct property_addr_info *addr_stack,
+			      const variant_part &part,
+			      std::vector<bool> &flags)
+{
+  /* Evaluate the discriminant.  */
+  gdb::optional<ULONGEST> discr_value;
+  if (part.discriminant_index != -1)
+    {
+      int idx = part.discriminant_index;
+
+      if (TYPE_FIELD_LOC_KIND (type, idx) != FIELD_LOC_KIND_BITPOS)
+	error (_("Cannot determine struct field location"
+		 " (invalid location kind)"));
+
+      if (addr_stack->valaddr != NULL)
+	discr_value = unpack_field_as_long (type, addr_stack->valaddr, idx);
+      else
+	{
+	  CORE_ADDR addr = (addr_stack->addr
+			    + (TYPE_FIELD_BITPOS (type, idx)
+			       / TARGET_CHAR_BIT));
+
+	  LONGEST bitsize = TYPE_FIELD_BITSIZE (type, idx);
+	  LONGEST size = bitsize / 8;
+	  if (size == 0)
+	    size = TYPE_LENGTH (TYPE_FIELD_TYPE (type, idx));
+
+	  gdb_byte bits[sizeof (ULONGEST)];
+	  read_memory (addr, bits, size);
+
+	  LONGEST bitpos = (TYPE_FIELD_BITPOS (type, idx)
+			    % TARGET_CHAR_BIT);
+
+	  discr_value = unpack_bits_as_long (TYPE_FIELD_TYPE (type, idx),
+					     bits, bitpos, bitsize);
+	}
+    }
+
+  /* Go through each variant and see which applies.  */
+  const variant *default_variant = nullptr;
+  const variant *applied_variant = nullptr;
+  for (const auto &variant : part.variants)
+    {
+      if (variant.is_default ())
+	default_variant = &variant;
+      else if (discr_value.has_value ()
+	       && variant.matches (*discr_value, part.is_unsigned))
+	{
+	  applied_variant = &variant;
+	  break;
+	}
+    }
+  if (applied_variant == nullptr)
+    applied_variant = default_variant;
+
+  for (const auto &variant : part.variants)
+    compute_variant_fields_recurse (type, addr_stack, variant,
+				    flags, applied_variant == &variant);
+}  
+
+/* Determine which variant fields are available in TYPE.  The enabled
+   fields are stored in RESOLVED_TYPE.  ADDR_STACK holds information
+   about the concrete object.  PARTS describes the top-level variant
+   parts for this type.  */
+
+static void
+compute_variant_fields (struct type *type,
+			struct type *resolved_type,
+			struct property_addr_info *addr_stack,
+			const gdb::array_view<variant_part> &parts)
+{
+  /* Assume all fields are included by default.  */
+  std::vector<bool> flags (TYPE_NFIELDS (resolved_type), true);
+
+  /* Now disable fields based on the variants that control them.  */
+  for (const auto &part : parts)
+    compute_variant_fields_inner (type, addr_stack, part, flags);
+
+  TYPE_NFIELDS (resolved_type) = std::count (flags.begin (), flags.end (),
+					     true);
+  TYPE_FIELDS (resolved_type)
+    = (struct field *) TYPE_ALLOC (resolved_type,
+				   TYPE_NFIELDS (resolved_type)
+				   * sizeof (struct field));
+  int out = 0;
+  for (int i = 0; i < TYPE_NFIELDS (type); ++i)
+    {
+      if (!flags[i])
+	continue;
+
+      TYPE_FIELD (resolved_type, out) = TYPE_FIELD (type, i);
+      ++out;
+    }
+}
+
 /* Resolve dynamic bounds of members of the struct TYPE to static
    bounds.  ADDR_STACK is a stack of struct property_addr_info to
    be used if needed during the dynamic resolution.  */
@@ -2231,19 +2395,35 @@ resolve_dynamic_struct (struct type *type,
   gdb_assert (TYPE_NFIELDS (type) > 0);
 
   resolved_type = copy_type (type);
-  TYPE_FIELDS (resolved_type)
-    = (struct field *) TYPE_ALLOC (resolved_type,
-				   TYPE_NFIELDS (resolved_type)
-				   * sizeof (struct field));
-  memcpy (TYPE_FIELDS (resolved_type),
-	  TYPE_FIELDS (type),
-	  TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+
+  struct dynamic_prop *variant_prop = get_dyn_prop (DYN_PROP_VARIANT_PARTS,
+						    resolved_type);
+  if (variant_prop != nullptr && variant_prop->kind == PROP_VARIANT_PARTS)
+    {
+      compute_variant_fields (type, resolved_type, addr_stack,
+			      *variant_prop->data.variant_parts);
+      /* We want to leave the property attached, so that the Rust code
+	 can tell whether the type was originally an enum.  */
+      variant_prop->kind = PROP_TYPE;
+      variant_prop->data.original_type = type;
+    }
+  else
+    {
+      TYPE_FIELDS (resolved_type)
+	= (struct field *) TYPE_ALLOC (resolved_type,
+				       TYPE_NFIELDS (resolved_type)
+				       * sizeof (struct field));
+      memcpy (TYPE_FIELDS (resolved_type),
+	      TYPE_FIELDS (type),
+	      TYPE_NFIELDS (resolved_type) * sizeof (struct field));
+    }
+
   for (i = 0; i < TYPE_NFIELDS (resolved_type); ++i)
     {
       unsigned new_bit_length;
       struct property_addr_info pinfo;
 
-      if (field_is_static (&TYPE_FIELD (type, i)))
+      if (field_is_static (&TYPE_FIELD (resolved_type, i)))
 	continue;
 
       /* As we know this field is not a static field, the field's
@@ -2253,11 +2433,11 @@ resolve_dynamic_struct (struct type *type,
 	 that verification indicates a bug in our code, the error
 	 is not severe enough to suggest to the user he stops
 	 his debugging session because of it.  */
-      if (TYPE_FIELD_LOC_KIND (type, i) != FIELD_LOC_KIND_BITPOS)
+      if (TYPE_FIELD_LOC_KIND (resolved_type, i) != FIELD_LOC_KIND_BITPOS)
 	error (_("Cannot determine struct field location"
 		 " (invalid location kind)"));
 
-      pinfo.type = check_typedef (TYPE_FIELD_TYPE (type, i));
+      pinfo.type = check_typedef (TYPE_FIELD_TYPE (resolved_type, i));
       pinfo.valaddr = addr_stack->valaddr;
       pinfo.addr
 	= (addr_stack->addr

@@ -51,6 +51,7 @@
 #include "gdbsupport/underlying.h"
 #include "gdbsupport/print-utils.h"
 #include "dwarf2.h"
+#include "gdb_obstack.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -358,6 +359,10 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 #define TYPE_IS_ALLOCATABLE(t) \
   (get_dyn_prop (DYN_PROP_ALLOCATED, t) != NULL)
 
+/* * True if this type has variant parts.  */
+#define TYPE_HAS_VARIANT_PARTS(t) \
+  (get_dyn_prop (DYN_PROP_VARIANT_PARTS, t) != nullptr)
+
 /* * Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
    others).
@@ -399,6 +404,84 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 #define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
 				   & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL)
 
+/* * Information about a single discriminant.  */
+
+struct discriminant_range
+{
+  /* * The range of values for the variant.  This is an inclusive
+     range.  */
+  ULONGEST low, high;
+
+  /* * Return true if VALUE is contained in this range.  IS_UNSIGNED
+     is true if this should be an unsigned comparison; false for
+     signed.  */
+  bool contains (ULONGEST value, bool is_unsigned) const
+  {
+    if (is_unsigned)
+      return value >= low && value <= high;
+    LONGEST valuel = (LONGEST) value;
+    return valuel >= (LONGEST) low && valuel <= (LONGEST) high;
+  }
+};
+
+struct variant_part;
+
+/* * A single variant.  A variant has a list of discriminant values.
+   When the discriminator matches one of these, the variant is
+   enabled.  Each variant controls zero or more fields; and may also
+   control other variant parts as well.  This struct corresponds to
+   DW_TAG_variant in DWARF.  */
+
+struct variant : allocate_on_obstack
+{
+  /* * The discriminant ranges for this variant.  */
+  gdb::array_view<discriminant_range> discriminants;
+
+  /* * The fields controlled by this variant.  This is inclusive on
+     the low end and exclusive on the high end.  A variant may not
+     control any fields, in which case the two values will be equal.
+     These are indexes into the type's array of fields.  */
+  int first_field;
+  int last_field;
+
+  /* * Variant parts controlled by this variant.  */
+  gdb::array_view<variant_part> parts;
+
+  /* * Return true if this is the default variant.  The default
+     variant can be recognized because it has no associated
+     discriminants.  */
+  bool is_default () const
+  {
+    return discriminants.empty ();
+  }
+
+  /* * Return true if this variant matches VALUE.  IS_UNSIGNED is true
+     if this should be an unsigned comparison; false for signed.  */
+  bool matches (ULONGEST value, bool is_unsigned) const;
+};
+
+/* * A variant part.  Each variant part has an optional discriminant
+   and holds an array of variants.  This struct corresponds to
+   DW_TAG_variant_part in DWARF.  */
+
+struct variant_part : allocate_on_obstack
+{
+  /* * The index of the discriminant field in the outer type.  This is
+     an index into the type's array of fields.  If this is -1, there
+     is no discriminant, and only the default variant can be
+     considered to be selected.  */
+  int discriminant_index;
+
+  /* * True if this discriminant is unsigned; false if signed.  This
+     comes from the type of the discriminant.  */
+  bool is_unsigned;
+
+  /* * The variants that are controlled by this variant part.  Note
+     that these will always be sorted by field number.  */
+  gdb::array_view<variant> variants;
+};
+
+
 /* * Information needed for a discriminated union.  A discriminated
    union is handled somewhat differently from an ordinary union.
 
@@ -438,7 +521,9 @@ enum dynamic_prop_kind
   PROP_CONST,     /* Constant.  */
   PROP_ADDR_OFFSET, /* Address offset.  */
   PROP_LOCEXPR,   /* Location expression.  */
-  PROP_LOCLIST    /* Location list.  */
+  PROP_LOCLIST,    /* Location list.  */
+  PROP_VARIANT_PARTS, /* Variant parts.  */
+  PROP_TYPE,	   /* Type.  */
 };
 
 union dynamic_prop_data
@@ -450,6 +535,21 @@ union dynamic_prop_data
   /* Storage for dynamic property.  */
 
   void *baton;
+
+  /* Storage of variant parts for a type.  A type with variant parts
+     has all its fields "linearized" -- stored in a single field
+     array, just as if they had all been declared that way.  The
+     variant parts are attached via a dynamic property, and then are
+     used to control which fields end up in the final type during
+     dynamic type resolution.  */
+
+  const gdb::array_view<variant_part> *variant_parts;
+
+  /* Once a variant type is resolved, we may want to be able to go
+     from the resolved type to the original type.  In this case we
+     rewrite the property's kind and set this field.  */
+
+  struct type *original_type;
 };
 
 /* * Used to store a dynamic property.  */
@@ -493,6 +593,9 @@ enum dynamic_prop_node_kind
 
   /* A property holding information about a discriminated union.  */
   DYN_PROP_DISCRIMINATED,
+
+  /* A property holding variant parts.  */
+  DYN_PROP_VARIANT_PARTS,
 };
 
 /* * List for dynamic type attributes.  */
