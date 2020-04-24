@@ -1226,14 +1226,6 @@ extern struct type *result_type_of_xmethod (struct value *method,
 extern struct value *call_xmethod (struct value *method,
 				   gdb::array_view<value *> argv);
 
-/* Given a discriminated union type and some corresponding value
-   contents, this will return the field index of the currently active
-   variant.  This will throw an exception if no active variant can be
-   found.  */
-
-extern int value_union_variant (struct type *union_type,
-				const gdb_byte *contents);
-
 /* Destroy the values currently allocated.  This is called when GDB is
    exiting (e.g., on quit_force).  */
 extern void finalize_values ();

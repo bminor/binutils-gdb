@@ -319,14 +319,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_FLAG_ENUM(t) (TYPE_MAIN_TYPE (t)->flag_flag_enum)
 
-/* * True if this type is a discriminated union type.  Only valid for
-   TYPE_CODE_UNION.  A discriminated union stores a reference to the
-   discriminant field along with the discriminator values in a dynamic
-   property.  */
-
-#define TYPE_FLAG_DISCRIMINATED_UNION(t) \
-  (TYPE_MAIN_TYPE (t)->flag_discriminated_union)
-
 /* * Constant type.  If this is set, the corresponding type has a
    const modifier.  */
 
@@ -482,39 +474,6 @@ struct variant_part : allocate_on_obstack
 };
 
 
-/* * Information needed for a discriminated union.  A discriminated
-   union is handled somewhat differently from an ordinary union.
-
-   One field is designated as the discriminant.  Only one other field
-   is active at a time; which one depends on the value of the
-   discriminant and the data in this structure.
-
-   Additionally, it is possible to have a univariant discriminated
-   union.  In this case, the union has just a single field, which is
-   assumed to be the only active variant -- in this case no
-   discriminant is provided.  */
-
-struct discriminant_info
-{
-  /* * The index of the discriminant field.  If -1, then this union
-     must have just a single field.  */
-
-  int discriminant_index;
-
-  /* * The index of the default branch of the union.  If -1, then
-     there is no default branch.  */
-
-  int default_index;
-
-  /* * The discriminant values corresponding to each branch.  This has
-     a number of entries equal to the number of fields in this union.
-     If discriminant_index is not -1, then that entry in this array is
-     not used.  If default_index is not -1, then that entry in this
-     array is not used.  */
-
-  ULONGEST discriminants[1];
-};
-
 enum dynamic_prop_kind
 {
   PROP_UNDEFINED, /* Not defined.  */
@@ -590,9 +549,6 @@ enum dynamic_prop_node_kind
 
   /* A property providing an array's byte stride.  */
   DYN_PROP_BYTE_STRIDE,
-
-  /* A property holding information about a discriminated union.  */
-  DYN_PROP_DISCRIMINATED,
 
   /* A property holding variant parts.  */
   DYN_PROP_VARIANT_PARTS,
@@ -830,13 +786,6 @@ struct main_type
      affects how the enum is printed.  */
 
   unsigned int flag_flag_enum : 1;
-
-  /* * True if this type is a discriminated union type.  Only valid
-     for TYPE_CODE_UNION.  A discriminated union stores a reference to
-     the discriminant field along with the discriminator values in a
-     dynamic property.  */
-
-  unsigned int flag_discriminated_union : 1;
 
   /* * A discriminant telling us which field of the type_specific
      union is being used for this type, if any.  */

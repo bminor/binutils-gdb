@@ -1,5 +1,37 @@
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2/read.c (struct variant_field): Rewrite.
+	(struct variant_part_builder): New.
+	(struct nextfield): Remove "variant" field.  Add "offset".
+	(struct field_info): Add "current_variant_part" and
+	"variant_parts".
+	(alloc_discriminant_info): Remove.
+	(alloc_rust_variant): New function.
+	(quirk_rust_enum): Update.
+	(dwarf2_add_field): Set "offset" member.  Don't handle
+	DW_TAG_variant_part.
+	(offset_map_type): New typedef.
+	(convert_variant_range, create_one_variant)
+	(create_one_variant_part, create_variant_parts)
+	(add_variant_property): New functions.
+	(dwarf2_attach_fields_to_type): Call add_variant_property.
+	(read_structure_type): Don't handle DW_TAG_variant_part.
+	(handle_variant_part, handle_variant): New functions.
+	(handle_struct_member_die): Use them.
+	(process_structure_scope): Don't handle variant parts.
+	* gdbtypes.h (TYPE_FLAG_DISCRIMINATED_UNION): Remove.
+	(struct discriminant_info): Remove.
+	(enum dynamic_prop_node_kind) <DYN_PROP_DISCRIMINATED>: Remove.
+	(struct main_type) <flag_discriminated_union>: Remove.
+	* rust-lang.c (rust_enum_p, rust_empty_enum_p): Rewrite.
+	(rust_enum_variant): Return int.  Remove "contents".  Rewrite.
+	(rust_print_enum, rust_print_struct_def, rust_evaluate_subexp):
+	Update.
+	* valops.c (value_union_variant): Remove.
+	* value.h (value_union_variant): Don't declare.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (ada_discrete_type_high_bound, ada_discrete_type_low)
 	(ada_value_primitive_packed_val): Update.
 	* ada-valprint.c (ada_value_print_1): Update.

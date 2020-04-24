@@ -1082,29 +1082,52 @@ struct partial_die_info : public allocate_on_obstack
    and friends.  */
 static int bits_per_byte = 8;
 
-/* When reading a variant or variant part, we track a bit more
-   information about the field, and store it in an object of this
-   type.  */
+struct variant_part_builder;
+
+/* When reading a variant, we track a bit more information about the
+   field, and store it in an object of this type.  */
 
 struct variant_field
 {
-  /* If we see a DW_TAG_variant, then this will be the discriminant
-     value.  */
-  ULONGEST discriminant_value;
+  int first_field = -1;
+  int last_field = -1;
+
+  /* A variant can contain other variant parts.  */
+  std::vector<variant_part_builder> variant_parts;
+
   /* If we see a DW_TAG_variant, then this will be set if this is the
      default branch.  */
-  bool default_branch;
-  /* While reading a DW_TAG_variant_part, this will be set if this
-     field is the discriminant.  */
-  bool is_discriminant;
+  bool default_branch = false;
+  /* If we see a DW_AT_discr_value, then this will be the discriminant
+     value.  */
+  ULONGEST discriminant_value = 0;
+  /* If we see a DW_AT_discr_list, then this is a pointer to the list
+     data.  */
+  struct dwarf_block *discr_list_data = nullptr;
+};
+
+/* This represents a DW_TAG_variant_part.  */
+
+struct variant_part_builder
+{
+  /* The offset of the discriminant field.  */
+  sect_offset discriminant_offset {};
+
+  /* Variants that are direct children of this variant part.  */
+  std::vector<variant_field> variants;
+
+  /* True if we're currently reading a variant.  */
+  bool processing_variant = false;
 };
 
 struct nextfield
 {
   int accessibility = 0;
   int virtuality = 0;
-  /* Extra information to describe a variant or variant part.  */
-  struct variant_field variant {};
+  /* Variant parts need to find the discriminant, which is a DIE
+     reference.  We track the section offset of each field to make
+     this link.  */
+  sect_offset offset;
   struct field field {};
 };
 
@@ -1138,6 +1161,13 @@ struct field_info
     /* Nested types defined by this class and the number of elements in this
        list.  */
     std::vector<struct decl_field> nested_types_list;
+
+    /* If non-null, this is the variant part we are currently
+       reading.  */
+    variant_part_builder *current_variant_part = nullptr;
+    /* This holds all the top-level variant parts attached to the type
+       we're reading.  */
+    std::vector<variant_part_builder> variant_parts;
 
     /* Return the total number of fields (including baseclasses).  */
     int nfields () const
@@ -9116,37 +9146,72 @@ rust_fully_qualify (struct obstack *obstack, const char *p1, const char *p2)
   return obconcat (obstack, p1, "::", p2, (char *) NULL);
 }
 
-/* A helper that allocates a struct discriminant_info to attach to a
-   union type.  */
+/* A helper that allocates a variant part to attach to a Rust enum
+   type.  OBSTACK is where the results should be allocated.  TYPE is
+   the type we're processing.  DISCRIMINANT_INDEX is the index of the
+   discriminant.  It must be the index of one of the fields of TYPE.
+   DEFAULT_INDEX is the index of the default field; or -1 if there is
+   no default.  RANGES is indexed by "effective" field number (the
+   field index, but omitting the discriminant and default fields) and
+   must hold the discriminant values used by the variants.  Note that
+   RANGES must have a lifetime at least as long as OBSTACK -- either
+   already allocated on it, or static.  */
 
-static struct discriminant_info *
-alloc_discriminant_info (struct type *type, int discriminant_index,
-			 int default_index)
+static void
+alloc_rust_variant (struct obstack *obstack, struct type *type,
+		    int discriminant_index, int default_index,
+		    gdb::array_view<discriminant_range> ranges)
 {
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
-  gdb_assert (discriminant_index == -1
-	      || (discriminant_index >= 0
-		  && discriminant_index < TYPE_NFIELDS (type)));
+  /* When DISCRIMINANT_INDEX == -1, we have a univariant enum.  Those
+     must be handled by the caller.  */
+  gdb_assert (discriminant_index >= 0
+	      && discriminant_index < TYPE_NFIELDS (type));
   gdb_assert (default_index == -1
 	      || (default_index >= 0 && default_index < TYPE_NFIELDS (type)));
 
-  TYPE_FLAG_DISCRIMINATED_UNION (type) = 1;
+  /* We have one variant for each non-discriminant field.  */
+  int n_variants = TYPE_NFIELDS (type) - 1;
 
-  struct discriminant_info *disc
-    = ((struct discriminant_info *)
-       TYPE_ZALLOC (type,
-		    offsetof (struct discriminant_info, discriminants)
-		    + TYPE_NFIELDS (type) * sizeof (disc->discriminants[0])));
-  disc->default_index = default_index;
-  disc->discriminant_index = discriminant_index;
+  variant *variants = new (obstack) variant[n_variants];
+  int var_idx = 0;
+  int range_idx = 0;
+  for (int i = 0; i < TYPE_NFIELDS (type); ++i)
+    {
+      if (i == discriminant_index)
+	continue;
+
+      variants[var_idx].first_field = i;
+      variants[var_idx].last_field = i + 1;
+
+      /* The default field does not need a range, but other fields do.
+	 We skipped the discriminant above.  */
+      if (i != default_index)
+	{
+	  variants[var_idx].discriminants = ranges.slice (range_idx, 1);
+	  ++range_idx;
+	}
+
+      ++var_idx;
+    }
+
+  gdb_assert (range_idx == ranges.size ());
+  gdb_assert (var_idx == n_variants);
+
+  variant_part *part = new (obstack) variant_part;
+  part->discriminant_index = discriminant_index;
+  part->is_unsigned = TYPE_UNSIGNED (TYPE_FIELD_TYPE (type,
+						      discriminant_index));
+  part->variants = gdb::array_view<variant> (variants, n_variants);
+
+  void *storage = obstack_alloc (obstack, sizeof (gdb::array_view<variant_part>));
+  gdb::array_view<variant_part> *prop_value
+    = new (storage) gdb::array_view<variant_part> (part, 1);
 
   struct dynamic_prop prop;
-  prop.kind = PROP_UNDEFINED;
-  prop.data.baton = disc;
+  prop.kind = PROP_VARIANT_PARTS;
+  prop.data.variant_parts = prop_value;
 
-  add_dyn_prop (DYN_PROP_DISCRIMINATED, prop, type);
-
-  return disc;
+  add_dyn_prop (DYN_PROP_VARIANT_PARTS, prop, type);
 }
 
 /* Some versions of rustc emitted enums in an unusual way.
@@ -9210,55 +9275,44 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	  field_type = TYPE_FIELD_TYPE (field_type, index);
 	}
 
-      /* Make a union to hold the variants.  */
-      struct type *union_type = alloc_type (objfile);
-      TYPE_CODE (union_type) = TYPE_CODE_UNION;
-      TYPE_NFIELDS (union_type) = 3;
-      TYPE_FIELDS (union_type)
+      /* Smash this type to be a structure type.  We have to do this
+	 because the type has already been recorded.  */
+      TYPE_CODE (type) = TYPE_CODE_STRUCT;
+      TYPE_NFIELDS (type) = 3;
+      /* Save the field we care about.  */
+      struct field saved_field = TYPE_FIELD (type, 0);
+      TYPE_FIELDS (type)
 	= (struct field *) TYPE_ZALLOC (type, 3 * sizeof (struct field));
-      TYPE_LENGTH (union_type) = TYPE_LENGTH (type);
-      set_type_align (union_type, TYPE_RAW_ALIGN (type));
 
-      /* Put the discriminant must at index 0.  */
-      TYPE_FIELD_TYPE (union_type, 0) = field_type;
-      TYPE_FIELD_ARTIFICIAL (union_type, 0) = 1;
-      TYPE_FIELD_NAME (union_type, 0) = "<<discriminant>>";
-      SET_FIELD_BITPOS (TYPE_FIELD (union_type, 0), bit_offset);
+      /* Put the discriminant at index 0.  */
+      TYPE_FIELD_TYPE (type, 0) = field_type;
+      TYPE_FIELD_ARTIFICIAL (type, 0) = 1;
+      TYPE_FIELD_NAME (type, 0) = "<<discriminant>>";
+      SET_FIELD_BITPOS (TYPE_FIELD (type, 0), bit_offset);
 
       /* The order of fields doesn't really matter, so put the real
 	 field at index 1 and the data-less field at index 2.  */
-      struct discriminant_info *disc
-	= alloc_discriminant_info (union_type, 0, 1);
-      TYPE_FIELD (union_type, 1) = TYPE_FIELD (type, 0);
-      TYPE_FIELD_NAME (union_type, 1)
-	= rust_last_path_segment (TYPE_NAME (TYPE_FIELD_TYPE (union_type, 1)));
-      TYPE_NAME (TYPE_FIELD_TYPE (union_type, 1))
+      TYPE_FIELD (type, 1) = saved_field;
+      TYPE_FIELD_NAME (type, 1)
+	= rust_last_path_segment (TYPE_NAME (TYPE_FIELD_TYPE (type, 1)));
+      TYPE_NAME (TYPE_FIELD_TYPE (type, 1))
 	= rust_fully_qualify (&objfile->objfile_obstack, TYPE_NAME (type),
-			      TYPE_FIELD_NAME (union_type, 1));
+			      TYPE_FIELD_NAME (type, 1));
 
       const char *dataless_name
 	= rust_fully_qualify (&objfile->objfile_obstack, TYPE_NAME (type),
 			      name);
       struct type *dataless_type = init_type (objfile, TYPE_CODE_VOID, 0,
 					      dataless_name);
-      TYPE_FIELD_TYPE (union_type, 2) = dataless_type;
+      TYPE_FIELD_TYPE (type, 2) = dataless_type;
       /* NAME points into the original discriminant name, which
 	 already has the correct lifetime.  */
-      TYPE_FIELD_NAME (union_type, 2) = name;
-      SET_FIELD_BITPOS (TYPE_FIELD (union_type, 2), 0);
-      disc->discriminants[2] = 0;
+      TYPE_FIELD_NAME (type, 2) = name;
+      SET_FIELD_BITPOS (TYPE_FIELD (type, 2), 0);
 
-      /* Smash this type to be a structure type.  We have to do this
-	 because the type has already been recorded.  */
-      TYPE_CODE (type) = TYPE_CODE_STRUCT;
-      TYPE_NFIELDS (type) = 1;
-      TYPE_FIELDS (type)
-	= (struct field *) TYPE_ZALLOC (type, sizeof (struct field));
-
-      /* Install the variant part.  */
-      TYPE_FIELD_TYPE (type, 0) = union_type;
-      SET_FIELD_BITPOS (TYPE_FIELD (type, 0), 0);
-      TYPE_FIELD_NAME (type, 0) = "<<variants>>";
+      /* Indicate that this is a variant type.  */
+      static discriminant_range ranges[1] = { { 0, 0 } };
+      alloc_rust_variant (&objfile->objfile_obstack, type, 0, 1, ranges);
     }
   /* A union with a single anonymous field is probably an old-style
      univariant enum.  */
@@ -9268,31 +9322,13 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	 because the type has already been recorded.  */
       TYPE_CODE (type) = TYPE_CODE_STRUCT;
 
-      /* Make a union to hold the variants.  */
-      struct type *union_type = alloc_type (objfile);
-      TYPE_CODE (union_type) = TYPE_CODE_UNION;
-      TYPE_NFIELDS (union_type) = TYPE_NFIELDS (type);
-      TYPE_LENGTH (union_type) = TYPE_LENGTH (type);
-      set_type_align (union_type, TYPE_RAW_ALIGN (type));
-      TYPE_FIELDS (union_type) = TYPE_FIELDS (type);
-
-      struct type *field_type = TYPE_FIELD_TYPE (union_type, 0);
+      struct type *field_type = TYPE_FIELD_TYPE (type, 0);
       const char *variant_name
 	= rust_last_path_segment (TYPE_NAME (field_type));
-      TYPE_FIELD_NAME (union_type, 0) = variant_name;
+      TYPE_FIELD_NAME (type, 0) = variant_name;
       TYPE_NAME (field_type)
 	= rust_fully_qualify (&objfile->objfile_obstack,
 			      TYPE_NAME (type), variant_name);
-
-      /* Install the union in the outer struct type.  */
-      TYPE_NFIELDS (type) = 1;
-      TYPE_FIELDS (type)
-	= (struct field *) TYPE_ZALLOC (union_type, sizeof (struct field));
-      TYPE_FIELD_TYPE (type, 0) = union_type;
-      TYPE_FIELD_NAME (type, 0) = "<<variants>>";
-      SET_FIELD_BITPOS (TYPE_FIELD (type, 0), 0);
-
-      alloc_discriminant_info (union_type, -1, 0);
     }
   else
     {
@@ -9333,33 +9369,20 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	 because the type has already been recorded.  */
       TYPE_CODE (type) = TYPE_CODE_STRUCT;
 
-      /* Make a union to hold the variants.  */
+      /* Make space for the discriminant field.  */
       struct field *disr_field = &TYPE_FIELD (disr_type, 0);
-      struct type *union_type = alloc_type (objfile);
-      TYPE_CODE (union_type) = TYPE_CODE_UNION;
-      TYPE_NFIELDS (union_type) = 1 + TYPE_NFIELDS (type);
-      TYPE_LENGTH (union_type) = TYPE_LENGTH (type);
-      set_type_align (union_type, TYPE_RAW_ALIGN (type));
-      TYPE_FIELDS (union_type)
-	= (struct field *) TYPE_ZALLOC (union_type,
-					(TYPE_NFIELDS (union_type)
-					 * sizeof (struct field)));
-
-      memcpy (TYPE_FIELDS (union_type) + 1, TYPE_FIELDS (type),
+      field *new_fields
+	= (struct field *) TYPE_ZALLOC (type, (TYPE_NFIELDS (type)
+					       * sizeof (struct field)));
+      memcpy (new_fields + 1, TYPE_FIELDS (type),
 	      TYPE_NFIELDS (type) * sizeof (struct field));
+      TYPE_FIELDS (type) = new_fields;
+      TYPE_NFIELDS (type) = TYPE_NFIELDS (type) + 1;
 
       /* Install the discriminant at index 0 in the union.  */
-      TYPE_FIELD (union_type, 0) = *disr_field;
-      TYPE_FIELD_ARTIFICIAL (union_type, 0) = 1;
-      TYPE_FIELD_NAME (union_type, 0) = "<<discriminant>>";
-
-      /* Install the union in the outer struct type.  */
-      TYPE_FIELD_TYPE (type, 0) = union_type;
-      TYPE_FIELD_NAME (type, 0) = "<<variants>>";
-      TYPE_NFIELDS (type) = 1;
-
-      /* Set the size and offset of the union type.  */
-      SET_FIELD_BITPOS (TYPE_FIELD (type, 0), 0);
+      TYPE_FIELD (type, 0) = *disr_field;
+      TYPE_FIELD_ARTIFICIAL (type, 0) = 1;
+      TYPE_FIELD_NAME (type, 0) = "<<discriminant>>";
 
       /* We need a way to find the correct discriminant given a
 	 variant name.  For convenience we build a map here.  */
@@ -9375,9 +9398,13 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	    }
 	}
 
-      int n_fields = TYPE_NFIELDS (union_type);
-      struct discriminant_info *disc
-	= alloc_discriminant_info (union_type, 0, -1);
+      int n_fields = TYPE_NFIELDS (type);
+      /* We don't need a range entry for the discriminant, but we do
+	 need one for every other field, as there is no default
+	 variant.  */
+      discriminant_range *ranges = XOBNEWVEC (&objfile->objfile_obstack,
+					      discriminant_range,
+					      n_fields - 1);
       /* Skip the discriminant here.  */
       for (int i = 1; i < n_fields; ++i)
 	{
@@ -9385,25 +9412,32 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	     That name can be used to look up the correct
 	     discriminant.  */
 	  const char *variant_name
-	    = rust_last_path_segment (TYPE_NAME (TYPE_FIELD_TYPE (union_type,
-								  i)));
+	    = rust_last_path_segment (TYPE_NAME (TYPE_FIELD_TYPE (type, i)));
 
 	  auto iter = discriminant_map.find (variant_name);
 	  if (iter != discriminant_map.end ())
-	    disc->discriminants[i] = iter->second;
+	    {
+	      ranges[i].low = iter->second;
+	      ranges[i].high = iter->second;
+	    }
 
 	  /* Remove the discriminant field, if it exists.  */
-	  struct type *sub_type = TYPE_FIELD_TYPE (union_type, i);
+	  struct type *sub_type = TYPE_FIELD_TYPE (type, i);
 	  if (TYPE_NFIELDS (sub_type) > 0)
 	    {
 	      --TYPE_NFIELDS (sub_type);
 	      ++TYPE_FIELDS (sub_type);
 	    }
-	  TYPE_FIELD_NAME (union_type, i) = variant_name;
+	  TYPE_FIELD_NAME (type, i) = variant_name;
 	  TYPE_NAME (sub_type)
 	    = rust_fully_qualify (&objfile->objfile_obstack,
 				  TYPE_NAME (type), variant_name);
 	}
+
+      /* Indicate that this is a variant type.  */
+      alloc_rust_variant (&objfile->objfile_obstack, type, 0, 1,
+			  gdb::array_view<discriminant_range> (ranges,
+							       n_fields - 1));
     }
 }
 
@@ -14202,6 +14236,8 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       new_field = &fip->fields.back ();
     }
 
+  new_field->offset = die->sect_off;
+
   attr = dwarf2_attr (die, DW_AT_accessibility, cu);
   if (attr != nullptr)
     new_field->accessibility = DW_UNSND (attr);
@@ -14360,35 +14396,6 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       FIELD_TYPE (*fp) = die_type (die, cu);
       FIELD_NAME (*fp) = TYPE_NAME (fp->type);
     }
-  else if (die->tag == DW_TAG_variant_part)
-    {
-      /* process_structure_scope will treat this DIE as a union.  */
-      process_structure_scope (die, cu);
-
-      /* The variant part is relative to the start of the enclosing
-	 structure.  */
-      SET_FIELD_BITPOS (*fp, 0);
-      fp->type = get_die_type (die, cu);
-      fp->artificial = 1;
-      fp->name = "<<variant>>";
-
-      /* Normally a DW_TAG_variant_part won't have a size, but our
-	 representation requires one, so set it to the maximum of the
-	 child sizes, being sure to account for the offset at which
-	 each child is seen.  */
-      if (TYPE_LENGTH (fp->type) == 0)
-	{
-	  unsigned max = 0;
-	  for (int i = 0; i < TYPE_NFIELDS (fp->type); ++i)
-	    {
-	      unsigned len = ((TYPE_FIELD_BITPOS (fp->type, i) + 7) / 8
-			      + TYPE_LENGTH (TYPE_FIELD_TYPE (fp->type, i)));
-	      if (len > max)
-		max = len;
-	    }
-	  TYPE_LENGTH (fp->type) = max;
-	}
-    }
   else
     gdb_assert_not_reached ("missing case in dwarf2_add_field");
 }
@@ -14455,6 +14462,201 @@ dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
     fip->nested_types_list.push_back (fp);
 }
 
+/* A convenience typedef that's used when finding the discriminant
+   field for a variant part.  */
+typedef std::unordered_map<sect_offset, int> offset_map_type;
+
+/* Compute the discriminant range for a given variant.  OBSTACK is
+   where the results will be stored.  VARIANT is the variant to
+   process.  IS_UNSIGNED indicates whether the discriminant is signed
+   or unsigned.  */
+
+static const gdb::array_view<discriminant_range>
+convert_variant_range (struct obstack *obstack, const variant_field &variant,
+		       bool is_unsigned)
+{
+  std::vector<discriminant_range> ranges;
+
+  if (variant.default_branch)
+    return {};
+
+  if (variant.discr_list_data == nullptr)
+    {
+      discriminant_range r
+	= {variant.discriminant_value, variant.discriminant_value};
+      ranges.push_back (r);
+    }
+  else
+    {
+      gdb::array_view<const gdb_byte> data (variant.discr_list_data->data,
+					    variant.discr_list_data->size);
+      while (!data.empty ())
+	{
+	  if (data[0] != DW_DSC_range && data[0] != DW_DSC_label)
+	    {
+	      complaint (_("invalid discriminant marker: %d"), data[0]);
+	      break;
+	    }
+	  bool is_range = data[0] == DW_DSC_range;
+	  data = data.slice (1);
+
+	  ULONGEST low, high;
+	  unsigned int bytes_read;
+
+	  if (data.empty ())
+	    {
+	      complaint (_("DW_AT_discr_list missing low value"));
+	      break;
+	    }
+	  if (is_unsigned)
+	    low = read_unsigned_leb128 (nullptr, data.data (), &bytes_read);
+	  else
+	    low = (ULONGEST) read_signed_leb128 (nullptr, data.data (),
+						 &bytes_read);
+	  data = data.slice (bytes_read);
+
+	  if (is_range)
+	    {
+	      if (data.empty ())
+		{
+		  complaint (_("DW_AT_discr_list missing high value"));
+		  break;
+		}
+	      if (is_unsigned)
+		high = read_unsigned_leb128 (nullptr, data.data (),
+					     &bytes_read);
+	      else
+		high = (LONGEST) read_signed_leb128 (nullptr, data.data (),
+						     &bytes_read);
+	      data = data.slice (bytes_read);
+	    }
+	  else
+	    high = low;
+
+	  ranges.push_back ({ low, high });
+	}
+    }
+
+  discriminant_range *result = XOBNEWVEC (obstack, discriminant_range,
+					  ranges.size ());
+  std::copy (ranges.begin (), ranges.end (), result);
+  return gdb::array_view<discriminant_range> (result, ranges.size ());
+}
+
+static const gdb::array_view<variant_part> create_variant_parts
+  (struct obstack *obstack,
+   const offset_map_type &offset_map,
+   struct field_info *fi,
+   const std::vector<variant_part_builder> &variant_parts);
+
+/* Fill in a "struct variant" for a given variant field.  RESULT is
+   the variant to fill in.  OBSTACK is where any needed allocations
+   will be done.  OFFSET_MAP holds the mapping from section offsets to
+   fields for the type.  FI describes the fields of the type we're
+   processing.  FIELD is the variant field we're converting.  */
+
+static void
+create_one_variant (variant &result, struct obstack *obstack,
+		    const offset_map_type &offset_map,
+		    struct field_info *fi, const variant_field &field)
+{
+  result.discriminants = convert_variant_range (obstack, field, false);
+  result.first_field = field.first_field + fi->baseclasses.size ();
+  result.last_field = field.last_field + fi->baseclasses.size ();
+  result.parts = create_variant_parts (obstack, offset_map, fi,
+				       field.variant_parts);
+}
+
+/* Fill in a "struct variant_part" for a given variant part.  RESULT
+   is the variant part to fill in.  OBSTACK is where any needed
+   allocations will be done.  OFFSET_MAP holds the mapping from
+   section offsets to fields for the type.  FI describes the fields of
+   the type we're processing.  BUILDER is the variant part to be
+   converted.  */
+
+static void
+create_one_variant_part (variant_part &result,
+			 struct obstack *obstack,
+			 const offset_map_type &offset_map,
+			 struct field_info *fi,
+			 const variant_part_builder &builder)
+{
+  auto iter = offset_map.find (builder.discriminant_offset);
+  if (iter == offset_map.end ())
+    {
+      result.discriminant_index = -1;
+      /* Doesn't matter.  */
+      result.is_unsigned = false;
+    }
+  else
+    {
+      result.discriminant_index = iter->second;
+      result.is_unsigned
+	= TYPE_UNSIGNED (FIELD_TYPE
+			 (fi->fields[result.discriminant_index].field));
+    }
+
+  size_t n = builder.variants.size ();
+  variant *output = new (obstack) variant[n];
+  for (size_t i = 0; i < n; ++i)
+    create_one_variant (output[i], obstack, offset_map, fi,
+			builder.variants[i]);
+
+  result.variants = gdb::array_view<variant> (output, n);
+}
+
+/* Create a vector of variant parts that can be attached to a type.
+   OBSTACK is where any needed allocations will be done.  OFFSET_MAP
+   holds the mapping from section offsets to fields for the type.  FI
+   describes the fields of the type we're processing.  VARIANT_PARTS
+   is the vector to convert.  */
+
+static const gdb::array_view<variant_part>
+create_variant_parts (struct obstack *obstack,
+		      const offset_map_type &offset_map,
+		      struct field_info *fi,
+		      const std::vector<variant_part_builder> &variant_parts)
+{
+  if (variant_parts.empty ())
+    return {};
+
+  size_t n = variant_parts.size ();
+  variant_part *result = new (obstack) variant_part[n];
+  for (size_t i = 0; i < n; ++i)
+    create_one_variant_part (result[i], obstack, offset_map, fi,
+			     variant_parts[i]);
+
+  return gdb::array_view<variant_part> (result, n);
+}
+
+/* Compute the variant part vector for FIP, attaching it to TYPE when
+   done.  */
+
+static void
+add_variant_property (struct field_info *fip, struct type *type,
+		      struct dwarf2_cu *cu)
+{
+  /* Map section offsets of fields to their field index.  Note the
+     field index here does not take the number of baseclasses into
+     account.  */
+  offset_map_type offset_map;
+  for (int i = 0; i < fip->fields.size (); ++i)
+    offset_map[fip->fields[i].offset] = i;
+
+  struct objfile *objfile = cu->per_cu->dwarf2_per_objfile->objfile;
+  gdb::array_view<variant_part> parts
+    = create_variant_parts (&objfile->objfile_obstack, offset_map, fip,
+			    fip->variant_parts);
+
+  struct dynamic_prop prop;
+  prop.kind = PROP_VARIANT_PARTS;
+  prop.data.variant_parts
+    = ((gdb::array_view<variant_part> *)
+       obstack_copy (&objfile->objfile_obstack, &parts, sizeof (parts)));
+
+  add_dyn_prop (DYN_PROP_VARIANT_PARTS, prop, type);
+}
+
 /* Create the vector of fields, and attach it to the type.  */
 
 static void
@@ -14500,22 +14702,8 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
       TYPE_N_BASECLASSES (type) = fip->baseclasses.size ();
     }
 
-  if (TYPE_FLAG_DISCRIMINATED_UNION (type))
-    {
-      struct discriminant_info *di = alloc_discriminant_info (type, -1, -1);
-
-      for (int index = 0; index < nfields; ++index)
-	{
-	  struct nextfield &field = fip->fields[index];
-
-	  if (field.variant.is_discriminant)
-	    di->discriminant_index = index;
-	  else if (field.variant.default_branch)
-	    di->default_index = index;
-	  else
-	    di->discriminants[index] = field.variant.discriminant_value;
-	}
-    }
+  if (!fip->variant_parts.empty ())
+    add_variant_property (fip, type, cu);
 
   /* Copy the saved-up fields into the field vector.  */
   for (int i = 0; i < nfields; ++i)
@@ -15085,11 +15273,6 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       TYPE_CODE (type) = TYPE_CODE_UNION;
     }
-  else if (die->tag == DW_TAG_variant_part)
-    {
-      TYPE_CODE (type) = TYPE_CODE_UNION;
-      TYPE_FLAG_DISCRIMINATED_UNION (type) = 1;
-    }
   else
     {
       TYPE_CODE (type) = TYPE_CODE_STRUCT;
@@ -15163,6 +15346,130 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   return type;
 }
 
+static void handle_struct_member_die
+  (struct die_info *child_die,
+   struct type *type,
+   struct field_info *fi,
+   std::vector<struct symbol *> *template_args,
+   struct dwarf2_cu *cu);
+
+/* A helper for handle_struct_member_die that handles
+   DW_TAG_variant_part.  */
+
+static void
+handle_variant_part (struct die_info *die, struct type *type,
+		     struct field_info *fi,
+		     std::vector<struct symbol *> *template_args,
+		     struct dwarf2_cu *cu)
+{
+  variant_part_builder *new_part;
+  if (fi->current_variant_part == nullptr)
+    {
+      fi->variant_parts.emplace_back ();
+      new_part = &fi->variant_parts.back ();
+    }
+  else if (!fi->current_variant_part->processing_variant)
+    {
+      complaint (_("nested DW_TAG_variant_part seen "
+		   "- DIE at %s [in module %s]"),
+		 sect_offset_str (die->sect_off),
+		 objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+      return;
+    }
+  else
+    {
+      variant_field &current = fi->current_variant_part->variants.back ();
+      current.variant_parts.emplace_back ();
+      new_part = &current.variant_parts.back ();
+    }
+
+  /* When we recurse, we want callees to add to this new variant
+     part.  */
+  scoped_restore save_current_variant_part
+    = make_scoped_restore (&fi->current_variant_part, new_part);
+
+  struct attribute *discr = dwarf2_attr (die, DW_AT_discr, cu);
+  if (discr == NULL)
+    {
+      /* It's a univariant form, an extension we support.  */
+    }
+  else if (discr->form_is_ref ())
+    {
+      struct dwarf2_cu *target_cu = cu;
+      struct die_info *target_die = follow_die_ref (die, discr, &target_cu);
+
+      new_part->discriminant_offset = target_die->sect_off;
+    }
+  else
+    {
+      complaint (_("DW_AT_discr does not have DIE reference form"
+		   " - DIE at %s [in module %s]"),
+		 sect_offset_str (die->sect_off),
+		 objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+    }
+
+  for (die_info *child_die = die->child;
+       child_die != NULL;
+       child_die = child_die->sibling)
+    handle_struct_member_die (child_die, type, fi, template_args, cu);
+}
+
+/* A helper for handle_struct_member_die that handles
+   DW_TAG_variant.  */
+
+static void
+handle_variant (struct die_info *die, struct type *type,
+		struct field_info *fi,
+		std::vector<struct symbol *> *template_args,
+		struct dwarf2_cu *cu)
+{
+  if (fi->current_variant_part == nullptr)
+    {
+      complaint (_("saw DW_TAG_variant outside DW_TAG_variant_part "
+		   "- DIE at %s [in module %s]"),
+		 sect_offset_str (die->sect_off),
+		 objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+      return;
+    }
+  if (fi->current_variant_part->processing_variant)
+    {
+      complaint (_("nested DW_TAG_variant seen "
+		   "- DIE at %s [in module %s]"),
+		 sect_offset_str (die->sect_off),
+		 objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
+      return;
+    }
+
+  scoped_restore save_processing_variant
+    = make_scoped_restore (&fi->current_variant_part->processing_variant,
+			   true);
+
+  fi->current_variant_part->variants.emplace_back ();
+  variant_field &variant = fi->current_variant_part->variants.back ();
+  variant.first_field = fi->fields.size ();
+
+  /* In a variant we want to get the discriminant and also add a
+     field for our sole member child.  */
+  struct attribute *discr = dwarf2_attr (die, DW_AT_discr_value, cu);
+  if (discr == nullptr)
+    {
+      discr = dwarf2_attr (die, DW_AT_discr_list, cu);
+      if (discr == nullptr || DW_BLOCK (discr)->size == 0)
+	variant.default_branch = true;
+      else
+	variant.discr_list_data = DW_BLOCK (discr);
+    }
+  else
+    variant.discriminant_value = DW_UNSND (discr);
+
+  for (die_info *variant_child = die->child;
+       variant_child != NULL;
+       variant_child = variant_child->sibling)
+    handle_struct_member_die (variant_child, type, fi, template_args, cu);
+
+  variant.last_field = fi->fields.size ();
+}
+
 /* A helper for process_structure_scope that handles a single member
    DIE.  */
 
@@ -15173,8 +15480,7 @@ handle_struct_member_die (struct die_info *child_die, struct type *type,
 			  struct dwarf2_cu *cu)
 {
   if (child_die->tag == DW_TAG_member
-      || child_die->tag == DW_TAG_variable
-      || child_die->tag == DW_TAG_variant_part)
+      || child_die->tag == DW_TAG_variable)
     {
       /* NOTE: carlton/2002-11-05: A C++ static data member
 	 should be a DW_TAG_member that is a declaration, but
@@ -15211,41 +15517,10 @@ handle_struct_member_die (struct die_info *child_die, struct type *type,
       if (arg != NULL)
 	template_args->push_back (arg);
     }
+  else if (child_die->tag == DW_TAG_variant_part)
+    handle_variant_part (child_die, type, fi, template_args, cu);
   else if (child_die->tag == DW_TAG_variant)
-    {
-      /* In a variant we want to get the discriminant and also add a
-	 field for our sole member child.  */
-      struct attribute *discr = dwarf2_attr (child_die, DW_AT_discr_value, cu);
-
-      for (die_info *variant_child = child_die->child;
-	   variant_child != NULL;
-	   variant_child = variant_child->sibling)
-	{
-	  if (variant_child->tag == DW_TAG_member)
-	    {
-	      handle_struct_member_die (variant_child, type, fi,
-					template_args, cu);
-	      /* Only handle the one.  */
-	      break;
-	    }
-	}
-
-      /* We don't handle this but we might as well report it if we see
-	 it.  */
-      if (dwarf2_attr (child_die, DW_AT_discr_list, cu) != nullptr)
-	  complaint (_("DW_AT_discr_list is not supported yet"
-		       " - DIE at %s [in module %s]"),
-		     sect_offset_str (child_die->sect_off),
-		     objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
-
-      /* The first field was just added, so we can stash the
-	 discriminant there.  */
-      gdb_assert (!fi->fields.empty ());
-      if (discr == NULL)
-	fi->fields.back ().variant.default_branch = true;
-      else
-	fi->fields.back ().variant.discriminant_value = DW_UNSND (discr);
-    }
+    handle_variant (child_die, type, fi, template_args, cu);
 }
 
 /* Finish creating a structure or union type, including filling in
@@ -15262,39 +15537,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (type == NULL)
     type = read_structure_type (die, cu);
 
-  /* When reading a DW_TAG_variant_part, we need to notice when we
-     read the discriminant member, so we can record it later in the
-     discriminant_info.  */
-  bool is_variant_part = TYPE_FLAG_DISCRIMINATED_UNION (type);
-  sect_offset discr_offset {};
   bool has_template_parameters = false;
-
-  if (is_variant_part)
-    {
-      struct attribute *discr = dwarf2_attr (die, DW_AT_discr, cu);
-      if (discr == NULL)
-	{
-	  /* Maybe it's a univariant form, an extension we support.
-	     In this case arrange not to check the offset.  */
-	  is_variant_part = false;
-	}
-      else if (discr->form_is_ref ())
-	{
-	  struct dwarf2_cu *target_cu = cu;
-	  struct die_info *target_die = follow_die_ref (die, discr, &target_cu);
-
-	  discr_offset = target_die->sect_off;
-	}
-      else
-	{
-	  complaint (_("DW_AT_discr does not have DIE reference form"
-		       " - DIE at %s [in module %s]"),
-		     sect_offset_str (die->sect_off),
-		     objfile_name (cu->per_cu->dwarf2_per_objfile->objfile));
-	  is_variant_part = false;
-	}
-    }
-
   if (die->child != NULL && ! die_is_declaration (die, cu))
     {
       struct field_info fi;
@@ -15305,10 +15548,6 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
       while (child_die && child_die->tag)
 	{
 	  handle_struct_member_die (child_die, type, &fi, &template_args, cu);
-
-	  if (is_variant_part && discr_offset == child_die->sect_off)
-	    fi.fields.back ().variant.is_discriminant = true;
-
 	  child_die = child_die->sibling;
 	}
 
