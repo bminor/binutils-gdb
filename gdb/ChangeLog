@@ -1,3 +1,8 @@
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* rs6000-tdep.c (struct ppc_variant): Rename from "variant".
+	(variants, find_variant_by_arch, rs6000_gdbarch_init): Update.
+
 2020-04-24  Hannes Domani  <ssbssa@yahoo.de>
 
 	* windows-tdep.c (exception_values): Add WOW64 exception numbers.

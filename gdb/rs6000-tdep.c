@@ -3315,7 +3315,7 @@ rs6000_adjust_frame_regnum (struct gdbarch *gdbarch, int num, int eh_frame_p)
 
 /* Information about a particular processor variant.  */
 
-struct variant
+struct ppc_variant
   {
     /* Name of this variant.  */
     const char *name;
@@ -3333,7 +3333,7 @@ struct variant
     struct target_desc **tdesc;
   };
 
-static struct variant variants[] =
+static struct ppc_variant variants[] =
 {
   {"powerpc", "PowerPC user-level", bfd_arch_powerpc,
    bfd_mach_ppc, &tdesc_powerpc_altivec32},
@@ -3392,10 +3392,10 @@ static struct variant variants[] =
 /* Return the variant corresponding to architecture ARCH and machine number
    MACH.  If no such variant exists, return null.  */
 
-static const struct variant *
+static const struct ppc_variant *
 find_variant_by_arch (enum bfd_architecture arch, unsigned long mach)
 {
-  const struct variant *v;
+  const struct ppc_variant *v;
 
   for (v = variants; v->name; v++)
     if (arch == v->arch && mach == v->mach)
@@ -6199,7 +6199,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      layout, if we do not already have one.  */
   if (! tdesc_has_registers (tdesc))
     {
-      const struct variant *v;
+      const struct ppc_variant *v;
 
       /* Choose variant.  */
       v = find_variant_by_arch (arch, mach);
