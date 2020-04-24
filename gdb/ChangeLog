@@ -1,5 +1,12 @@
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2/loc.c (dwarf2_locexpr_baton_eval): Add
+	"push_initial_value" parameter.
+	(dwarf2_evaluate_property): Likewise.
+	* dwarf2/loc.h (dwarf2_evaluate_property): Update.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
 	* gdbtypes.c (is_dynamic_type_internal): Check for variant parts.
 	(variant::matches, compute_variant_fields_recurse)
 	(compute_variant_fields_inner, compute_variant_fields): New

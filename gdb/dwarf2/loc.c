@@ -2388,13 +2388,16 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
    that the dwarf expression only produces a single CORE_ADDR.  FRAME is the
    frame in which the expression is evaluated.  ADDR is a context (location of
    a variable) and might be needed to evaluate the location expression.
-   Returns 1 on success, 0 otherwise.   */
+   PUSH_INITIAL_VALUE is true if ADDR should be pushed on the stack
+   before evaluating the expression;  this is required by certain
+   forms of DWARF expression.  Returns 1 on success, 0 otherwise.  */
 
 static int
 dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 			   struct frame_info *frame,
 			   CORE_ADDR addr,
-			   CORE_ADDR *valp)
+			   CORE_ADDR *valp,
+			   bool push_initial_value)
 {
   struct objfile *objfile;
 
@@ -2413,6 +2416,9 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
   ctx.addr_size = dlbaton->per_cu->addr_size ();
   ctx.ref_addr_size = dlbaton->per_cu->ref_addr_size ();
   ctx.offset = dlbaton->per_cu->text_offset ();
+
+  if (push_initial_value)
+    ctx.push_address (addr, false);
 
   try
     {
@@ -2462,7 +2468,8 @@ bool
 dwarf2_evaluate_property (const struct dynamic_prop *prop,
 			  struct frame_info *frame,
 			  const struct property_addr_info *addr_stack,
-			  CORE_ADDR *value)
+			  CORE_ADDR *value,
+			  bool push_initial_value)
 {
   if (prop == NULL)
     return false;
@@ -2480,7 +2487,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 
 	if (dwarf2_locexpr_baton_eval (&baton->locexpr, frame,
 				       addr_stack ? addr_stack->addr : 0,
-				       value))
+				       value, push_initial_value))
 	  {
 	    if (baton->locexpr.is_reference)
 	      {
