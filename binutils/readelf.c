@@ -9993,14 +9993,16 @@ get_num_dynamic_syms (Filedata * filedata)
       filedata->nbuckets = byte_get (nb, hash_ent_size);
       filedata->nchains = byte_get (nc, hash_ent_size);
 
-      filedata->buckets = get_dynamic_data (filedata, filedata->nbuckets,
-					    hash_ent_size);
-      filedata->chains  = get_dynamic_data (filedata, filedata->nchains,
-					    hash_ent_size);
+      if (filedata->nbuckets != 0 && filedata->nchains != 0)
+	{
+	  filedata->buckets = get_dynamic_data (filedata, filedata->nbuckets,
+						hash_ent_size);
+	  filedata->chains  = get_dynamic_data (filedata, filedata->nchains,
+						hash_ent_size);
 
-      if (filedata->buckets != NULL && filedata->chains != NULL)
-	num_of_syms = filedata->nchains;
-
+	  if (filedata->buckets != NULL && filedata->chains != NULL)
+	    num_of_syms = filedata->nchains;
+	}
     no_hash:
       if (num_of_syms == 0)
 	{
@@ -10243,6 +10245,8 @@ process_dynamic_section (Filedata * filedata)
   /* Find the appropriate symbol table.  */
   if (filedata->dynamic_symbols == NULL || do_histogram)
     {
+      unsigned long num_of_syms;
+
       for (entry = filedata->dynamic_section;
 	   entry < filedata->dynamic_section + filedata->dynamic_nent;
 	   ++entry)
@@ -10262,64 +10266,65 @@ process_dynamic_section (Filedata * filedata)
 	    filedata->dynamic_info_DT_GNU_HASH = entry->d_un.d_val;
 	  }
 
-      if (filedata->dynamic_info[DT_SYMTAB]
+      num_of_syms = get_num_dynamic_syms (filedata);
+
+      if (num_of_syms != 0
+	  && filedata->dynamic_symbols == NULL
+	  && filedata->dynamic_info[DT_SYMTAB]
 	  && filedata->dynamic_info[DT_SYMENT])
 	{
 	  Elf_Internal_Phdr *seg;
-	    bfd_vma vma = filedata->dynamic_info[DT_SYMTAB];
+	  bfd_vma vma = filedata->dynamic_info[DT_SYMTAB];
 
-	    if (! get_program_headers (filedata))
-	      {
-		error (_("Cannot interpret virtual addresses without program headers.\n"));
-		return FALSE;
-	      }
+	  if (! get_program_headers (filedata))
+	    {
+	      error (_("Cannot interpret virtual addresses "
+		       "without program headers.\n"));
+	      return FALSE;
+	    }
 
-	    for (seg = filedata->program_headers;
-		 seg < filedata->program_headers + filedata->file_header.e_phnum;
-		 ++seg)
-	      {
-		unsigned long num_of_syms;
+	  for (seg = filedata->program_headers;
+	       seg < filedata->program_headers + filedata->file_header.e_phnum;
+	       ++seg)
+	    {
+	      if (seg->p_type != PT_LOAD)
+		continue;
 
-		if (seg->p_type != PT_LOAD)
-		  continue;
+	      if (seg->p_offset + seg->p_filesz > filedata->file_size)
+		{
+		  /* See PR 21379 for a reproducer.  */
+		  error (_("Invalid PT_LOAD entry\n"));
+		  return FALSE;
+		}
 
-		if ((seg->p_offset + seg->p_filesz)
-		    > filedata->file_size)
-		  {
-		    /* See PR 21379 for a reproducer.  */
-		    error (_("Invalid PT_LOAD entry\n"));
-		    return FALSE;
-		  }
-
-		if (vma >= (seg->p_vaddr & -seg->p_align)
-		    && vma <= seg->p_vaddr + seg->p_filesz
-		    && (num_of_syms = get_num_dynamic_syms (filedata)) != 0
-		    && filedata->dynamic_symbols == NULL)
-		  {
-		    /* Since we do not know how big the symbol table is,
-		       we default to reading in up to the end of PT_LOAD
-		       segment and processing that.  This is overkill, I
-		       know, but it should work.  */
-		    Elf_Internal_Shdr section;
-		    section.sh_offset = (vma - seg->p_vaddr
-					 + seg->p_offset);
-		    section.sh_size = (num_of_syms
-				       * filedata->dynamic_info[DT_SYMENT]);
-		    section.sh_entsize = filedata->dynamic_info[DT_SYMENT];
-		    section.sh_name = filedata->string_table_length;
-		    filedata->dynamic_symbols
-		      = GET_ELF_SYMBOLS (filedata, &section,
-					 &filedata->num_dynamic_syms);
-		    if (filedata->dynamic_symbols == NULL
-			|| filedata->num_dynamic_syms != num_of_syms)
-		      {
-			error (_("Corrupt DT_SYMTAB dynamic entry\n"));
-			return FALSE;
-		      }
-		  }
-	      }
-	  }
-      }
+	      if (vma >= (seg->p_vaddr & -seg->p_align)
+		  && vma < seg->p_vaddr + seg->p_filesz)
+		{
+		  /* Since we do not know how big the symbol table is,
+		     we default to reading in up to the end of PT_LOAD
+		     segment and processing that.  This is overkill, I
+		     know, but it should work.  */
+		  Elf_Internal_Shdr section;
+		  section.sh_offset = (vma - seg->p_vaddr
+				       + seg->p_offset);
+		  section.sh_size = (num_of_syms
+				     * filedata->dynamic_info[DT_SYMENT]);
+		  section.sh_entsize = filedata->dynamic_info[DT_SYMENT];
+		  section.sh_name = filedata->string_table_length;
+		  filedata->dynamic_symbols
+		    = GET_ELF_SYMBOLS (filedata, &section,
+				       &filedata->num_dynamic_syms);
+		  if (filedata->dynamic_symbols == NULL
+		      || filedata->num_dynamic_syms != num_of_syms)
+		    {
+		      error (_("Corrupt DT_SYMTAB dynamic entry\n"));
+		      return FALSE;
+		    }
+		  break;
+		}
+	    }
+	}
+    }
 
   /* Similarly find a string table.  */
   if (filedata->dynamic_strings == NULL)
@@ -10403,14 +10408,17 @@ process_dynamic_section (Filedata * filedata)
 	  filedata->dynamic_syminfo = (Elf_Internal_Syminfo *) malloc (syminsz);
 	  if (filedata->dynamic_syminfo == NULL)
 	    {
-	      error (_("Out of memory allocating %lu byte for dynamic symbol info\n"),
+	      error (_("Out of memory allocating %lu bytes "
+		       "for dynamic symbol info\n"),
 		     (unsigned long) syminsz);
 	      return FALSE;
 	    }
 
-	  filedata->dynamic_syminfo_nent = syminsz / sizeof (Elf_External_Syminfo);
+	  filedata->dynamic_syminfo_nent
+	    = syminsz / sizeof (Elf_External_Syminfo);
 	  for (syminfo = filedata->dynamic_syminfo, extsym = extsyminfo;
-	       syminfo < filedata->dynamic_syminfo + filedata->dynamic_syminfo_nent;
+	       syminfo < (filedata->dynamic_syminfo
+			  + filedata->dynamic_syminfo_nent);
 	       ++syminfo, ++extsym)
 	    {
 	      syminfo->si_boundto = BYTE_GET (extsym->si_boundto);
@@ -20120,7 +20128,7 @@ process_object (Filedata * filedata)
 {
   bfd_boolean  have_separate_files;
   unsigned int i;
-  bfd_boolean res = TRUE;
+  bfd_boolean res;
 
   if (! get_file_header (filedata))
     {
@@ -20176,10 +20184,9 @@ process_object (Filedata * filedata)
     /* Without loaded section groups we cannot process unwind.  */
     do_unwind = FALSE;
 
-  if (process_program_headers (filedata))
-    process_dynamic_section (filedata);
-  else
-    res = FALSE;
+  res = process_program_headers (filedata);
+  if (res)
+    res = process_dynamic_section (filedata);
 
   if (! process_relocs (filedata))
     res = FALSE;
