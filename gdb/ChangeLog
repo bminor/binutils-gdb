@@ -1,5 +1,15 @@
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
+	PR python/23662:
+	* python/py-type.c (convert_field): Handle
+	FIELD_LOC_KIND_DWARF_BLOCK.
+	(typy_get_sizeof): Handle TYPE_HAS_DYNAMIC_LENGTH.
+	(typy_get_dynamic): Nw function.
+	(type_object_getset): Add "dynamic".
+	* NEWS: Add entry.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
 	* ada-typeprint.c (print_choices, print_variant_part)
 	(print_record_field_types_dynamic): New functions.
 	(print_record_field_types): Use print_record_field_types_dynamic.

@@ -189,8 +189,11 @@ convert_field (struct type *type, int field)
 	}
       else
 	{
-	  arg.reset (gdb_py_long_from_longest (TYPE_FIELD_BITPOS (type,
-								  field)));
+	  if (TYPE_FIELD_LOC_KIND (type, field) == FIELD_LOC_KIND_DWARF_BLOCK)
+	    arg = gdbpy_ref<>::new_reference (Py_None);
+	  else
+	    arg.reset (gdb_py_long_from_longest (TYPE_FIELD_BITPOS (type,
+								    field)));
 	  attrstring = "bitpos";
 	}
 
@@ -710,9 +713,12 @@ typy_get_sizeof (PyObject *self, void *closure)
 {
   struct type *type = ((type_object *) self)->type;
 
+  bool size_varies = false;
   try
     {
       check_typedef (type);
+
+      size_varies = TYPE_HAS_DYNAMIC_LENGTH (type);
     }
   catch (const gdb_exception &except)
     {
@@ -720,6 +726,8 @@ typy_get_sizeof (PyObject *self, void *closure)
 
   /* Ignore exceptions.  */
 
+  if (size_varies)
+    Py_RETURN_NONE;
   return gdb_py_long_from_longest (TYPE_LENGTH (type));
 }
 
@@ -742,6 +750,27 @@ typy_get_alignof (PyObject *self, void *closure)
   /* Ignore exceptions.  */
 
   return gdb_py_object_from_ulongest (align).release ();
+}
+
+/* Return whether or not the type is dynamic.  */
+static PyObject *
+typy_get_dynamic (PyObject *self, void *closure)
+{
+  struct type *type = ((type_object *) self)->type;
+
+  bool result = false;
+  try
+    {
+      result = is_dynamic_type (type);
+    }
+  catch (const gdb_exception &except)
+    {
+      /* Ignore exceptions.  */
+    }
+
+  if (result)
+    Py_RETURN_TRUE;
+  Py_RETURN_FALSE;
 }
 
 static struct type *
@@ -1436,6 +1465,8 @@ static gdb_PyGetSetDef type_object_getset[] =
     "The alignment of this type, in bytes.", NULL },
   { "code", typy_get_code, NULL,
     "The code for this type.", NULL },
+  { "dynamic", typy_get_dynamic, NULL,
+    "Whether this type is dynamic.", NULL },
   { "name", typy_get_name, NULL,
     "The name for this type, or None.", NULL },
   { "sizeof", typy_get_sizeof, NULL,

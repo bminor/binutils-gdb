@@ -1,5 +1,11 @@
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
+	PR python/23662:
+	* gdb.ada/variant.exp: Add Python checks.
+	* gdb.rust/simple.exp: Add dynamic type checks.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/mi_var_array.exp: Try all -fgnat-encodings settings.
 	Make array type matching more lax.
 	* gdb.ada/mi_var_union.exp: Try all -fgnat-encodings settings.

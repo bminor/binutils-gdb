@@ -1068,6 +1068,12 @@ The type code for this type.  The type code will be one of the
 @code{TYPE_CODE_} constants defined below.
 @end defvar
 
+@defvar Type.dynamic
+A boolean indicating whether this type is dynamic.  In some
+situations, such as Rust @code{enum} types or Ada variant records, the
+concrete type of a value may vary depending on its contents.
+@end defvar
+
 @defvar Type.name
 The name of this type.  If this type has no name, then @code{None}
 is returned.
@@ -1076,7 +1082,9 @@ is returned.
 @defvar Type.sizeof
 The size of this type, in target @code{char} units.  Usually, a
 target's @code{char} type will be an 8-bit byte.  However, on some
-unusual platforms, this type may have a different size.
+unusual platforms, this type may have a different size.  A dynamic
+type may not have a fixed size; in this case, this attribute's value
+will be @code{None}.
 @end defvar
 
 @defvar Type.tag
@@ -1106,7 +1114,9 @@ Each field is a @code{gdb.Field} object, with some pre-defined attributes:
 @item bitpos
 This attribute is not available for @code{enum} or @code{static}
 (as in C@t{++}) fields.  The value is the position, counting
-in bits, from the start of the containing type.
+in bits, from the start of the containing type.  Note that, in a
+dynamic type, the position of a field may not be constant.  In this
+case, the value will be @code{None}.
 
 @item enumval
 This attribute is only available for @code{enum} fields, and its value

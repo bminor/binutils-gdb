@@ -68,6 +68,11 @@ GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*
   ** gdb.register_window_type can be used to implement new TUI windows
      in Python.
 
+  ** Dynamic types can now be queried.  gdb.Type has a new attribute,
+     "dynamic", and gdb.Type.sizeof can be None for a dynamic type.  A
+     field of a dynamic type may have None for its "bitpos" attribute
+     as well.
+
 *** Changes in GDB 9
 
 * 'thread-exited' event is now available in the annotations interface.

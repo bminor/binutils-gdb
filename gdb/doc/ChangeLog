@@ -1,3 +1,8 @@
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	PR python/23662:
+	* python.texi (Types In Python): Document new features.
+
 2020-04-15  Artur Shepilko  <nomadbyte@gmail.com>
 
 	* gdb.texinfo: Transform @var{[host]} to [@var{host}]; this
