@@ -402,6 +402,9 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   int nblocks = 0;
   int block_loop = 0;
 
+  lookup_name_info func_matcher (GCC_FE_WRAPPER_FUNCTION,
+				 symbol_name_match_type::SEARCH_NAME);
+
   bv = SYMTAB_BLOCKVECTOR (func_sym->owner.symtab);
   nblocks = BLOCKVECTOR_NBLOCKS (bv);
 
@@ -433,9 +436,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
       if (function != NULL
 	  && (BLOCK_SUPERBLOCK (function_block)
 	      == BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK))
-	  && (strcmp_iw (function->linkage_name (),
-			 GCC_FE_WRAPPER_FUNCTION)
-	      == 0))
+	  && symbol_matches_search_name (function, func_matcher))
 	break;
     }
   if (block_loop == nblocks)
