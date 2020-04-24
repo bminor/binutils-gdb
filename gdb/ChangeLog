@@ -1,5 +1,12 @@
 2020-04-24  Tom Tromey  <tom@tromey.com>
 
+	* symtab.h (symbol_get_demangled_name): Don't declare.
+	* symtab.c (symbol_get_demangled_name): Remove.
+	(general_symbol_info::natural_name)
+	(general_symbol_info::demangled_name): Update.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
 	PR rust/25025:
 	* dwarf2/read.c (dwarf2_physname): Do not demangle for Rust.
 
