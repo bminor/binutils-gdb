@@ -22,6 +22,17 @@ procedure Pkg is
    ST1 : constant Second_Type := (I => -4, One => 1, X => 2);
    ST2 : constant Second_Type := (I => 99, One => 1, Y => 77);
 
+   NAV1 : constant Nested_And_Variable := (One => 0, Two => 93,
+                                           Str => (others => 'z'));
+   NAV2 : constant Nested_And_Variable := (One => 3, OneValue => 33,
+                                           Str => (others => 'z'),
+                                           Str2 => (others => 'q'),
+                                           Two => 0);
+   NAV3 : constant Nested_And_Variable := (One => 3, OneValue => 33,
+                                           Str => (others => 'z'),
+                                           Str2 => (others => 'q'),
+                                           Two => 7, TwoValue => 88);
+
 begin
    R := (C => 'd');
    Q := (C => Character'First, X_First => 27);

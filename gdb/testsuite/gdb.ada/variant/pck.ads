@@ -34,4 +34,21 @@ package Pck is
 	   Y : Integer;
       end case;
    end record;
+
+   type Nested_And_Variable (One, Two: Integer) is record
+       Str : String (1 .. One);
+       case One is
+          when 0 =>
+	     null;
+          when others =>
+	     OneValue : Integer;
+             Str2 : String (1 .. Two);
+             case Two is
+	        when 0 =>
+		   null;
+		when others =>
+		   TwoValue : Integer;
+             end case;
+       end case;
+   end record;
 end Pck;

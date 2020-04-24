@@ -37,4 +37,10 @@ foreach_with_prefix scenario {none all minimal} {
 
     gdb_test "print st1" " = \\(i => -4, one => 1, x => 2\\)"
     gdb_test "print st2" " = \\(i => 99, one => 1, y => 77\\)"
+
+    gdb_test "print nav1" " = \\(one => 0, two => 93, str => \"\"\\)"
+    gdb_test "print nav2" \
+	" = \\(one => 3, two => 0, str => \"zzz\", onevalue => 33, str2 => \"\"\\)"
+    gdb_test "print nav3" \
+	" = \\(one => 3, two => 7, str => \"zzz\", onevalue => 33, str2 => \"qqqqqqq\", twovalue => 88\\)"
 }

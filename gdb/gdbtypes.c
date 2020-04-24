@@ -2015,10 +2015,27 @@ is_dynamic_type_internal (struct type *type, int top_level)
       {
 	int i;
 
+	bool is_cplus = HAVE_CPLUS_STRUCT (type);
+
 	for (i = 0; i < TYPE_NFIELDS (type); ++i)
-	  if (!field_is_static (&TYPE_FIELD (type, i))
-	      && is_dynamic_type_internal (TYPE_FIELD_TYPE (type, i), 0))
+	  {
+	    /* Static fields can be ignored here.  */
+	    if (field_is_static (&TYPE_FIELD (type, i)))
+	      continue;
+	    /* If the field has dynamic type, then so does TYPE.  */
+	    if (is_dynamic_type_internal (TYPE_FIELD_TYPE (type, i), 0))
+	      return 1;
+	    /* If the field is at a fixed offset, then it is not
+	       dynamic.  */
+	    if (TYPE_FIELD_LOC_KIND (type, i) != FIELD_LOC_KIND_DWARF_BLOCK)
+	      continue;
+	    /* Do not consider C++ virtual base types to be dynamic
+	       due to the field's offset being dynamic; these are
+	       handled via other means.  */
+	    if (is_cplus && BASETYPE_VIA_VIRTUAL (type, i))
+	      continue;
 	    return 1;
+	  }
       }
       break;
     }
@@ -2429,6 +2446,24 @@ resolve_dynamic_struct (struct type *type,
 
       if (field_is_static (&TYPE_FIELD (resolved_type, i)))
 	continue;
+
+      if (TYPE_FIELD_LOC_KIND (resolved_type, i) == FIELD_LOC_KIND_DWARF_BLOCK)
+	{
+	  struct dwarf2_property_baton baton;
+	  baton.property_type
+	    = lookup_pointer_type (TYPE_FIELD_TYPE (resolved_type, i));
+	  baton.locexpr = *TYPE_FIELD_DWARF_BLOCK (resolved_type, i);
+
+	  struct dynamic_prop prop;
+	  prop.kind = PROP_LOCEXPR;
+	  prop.data.baton = &baton;
+
+	  CORE_ADDR addr;
+	  if (dwarf2_evaluate_property (&prop, nullptr, addr_stack, &addr,
+					true))
+	    SET_FIELD_BITPOS (TYPE_FIELD (resolved_type, i),
+			      TARGET_CHAR_BIT * (addr - addr_stack->addr));
+	}
 
       /* As we know this field is not a static field, the field's
 	 field_loc_kind should be FIELD_LOC_KIND_BITPOS.  Verify

@@ -1,5 +1,18 @@
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2/read.c (handle_data_member_location): New overload.
+	(dwarf2_add_field): Use it.
+	(decode_locdesc): Add "computed" parameter.  Update comment.
+	* gdbtypes.c (is_dynamic_type_internal): Also look for
+	FIELD_LOC_KIND_DWARF_BLOCK.
+	(resolve_dynamic_struct): Handle FIELD_LOC_KIND_DWARF_BLOCK.
+	* gdbtypes.c (is_dynamic_type_internal): Add special case for C++
+	virtual base classes.
+	* gnu-v3-abi.c (gnuv3_baseclass_offset): Handle
+	FIELD_LOC_KIND_DWARF_BLOCK.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/read.c (read_structure_type): Handle dynamic length.
 	* gdbtypes.c (is_dynamic_type_internal): Check
 	TYPE_HAS_DYNAMIC_LENGTH.

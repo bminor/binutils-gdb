@@ -1,5 +1,11 @@
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
+	* gdb.ada/variant.exp: Add dynamic field offset tests.
+	* gdb.ada/variant/pck.ads (Nested_And_Variable): New type.
+	* gdb.ada/variant/pkg.adb: Add new variables.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
 	* gdb.ada/variant.exp: New file
 	* gdb.ada/variant/pkg.adb: New file
 	* gdb.ada/variant/pck.adb: New file

@@ -30,6 +30,7 @@
 #include "typeprint.h"
 #include <algorithm>
 #include "cli/cli-style.h"
+#include "dwarf2/loc.h"
 
 static struct cp_abi_ops gnu_v3_abi_ops;
 
@@ -460,6 +461,31 @@ gnuv3_baseclass_offset (struct type *type, int index,
      type definition.  */
   if (!BASETYPE_VIA_VIRTUAL (type, index))
     return TYPE_BASECLASS_BITPOS (type, index) / 8;
+
+  /* If we have a DWARF expression for the offset, evaluate it.  */
+  if (TYPE_FIELD_LOC_KIND (type, index) == FIELD_LOC_KIND_DWARF_BLOCK)
+    {
+      struct dwarf2_property_baton baton;
+      baton.property_type
+	= lookup_pointer_type (TYPE_FIELD_TYPE (type, index));
+      baton.locexpr = *TYPE_FIELD_DWARF_BLOCK (type, index);
+
+      struct dynamic_prop prop;
+      prop.kind = PROP_LOCEXPR;
+      prop.data.baton = &baton;
+
+      struct property_addr_info addr_stack;
+      addr_stack.type = type;
+      /* Note that we don't set "valaddr" here.  Doing so causes
+	 regressions.  FIXME.  */
+      addr_stack.addr = address + embedded_offset;
+      addr_stack.next = nullptr;
+
+      CORE_ADDR result;
+      if (dwarf2_evaluate_property (&prop, nullptr, &addr_stack, &result,
+				    true))
+	return (int) (result - addr_stack.addr);
+    }
 
   /* To access a virtual base, we need to use the vbase offset stored in
      our vtable.  Recent GCC versions provide this information.  If it isn't
