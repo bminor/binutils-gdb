@@ -975,6 +975,7 @@ general_symbol_info::natural_name () const
     case language_go:
     case language_objc:
     case language_fortran:
+    case language_rust:
       if (symbol_get_demangled_name (this) != NULL)
 	return symbol_get_demangled_name (this);
       break;
@@ -1000,6 +1001,7 @@ general_symbol_info::demangled_name () const
     case language_go:
     case language_objc:
     case language_fortran:
+    case language_rust:
       dem_name = symbol_get_demangled_name (this);
       break;
     case language_ada:

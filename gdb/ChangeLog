@@ -1,5 +1,10 @@
 2020-04-24  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (general_symbol_info::natural_name)
+	(general_symbol_info::demangled_name): Check for language_rust.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
 	* dwarf2/read.c (dw2_linkage_name): Move Rust "{" hack here...
 	(dwarf2_physname): ... from here.
 	(partial_die_info::read): Add Rust "{" hack.
