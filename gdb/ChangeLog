@@ -1,5 +1,10 @@
 2020-04-24  Tom Tromey  <tom@tromey.com>
 
+	PR rust/25025:
+	* dwarf2/read.c (dwarf2_physname): Do not demangle for Rust.
+
+2020-04-24  Tom Tromey  <tom@tromey.com>
+
 	PR symtab/12707:
 	* dwarf2/read.c (add_partial_symbol): Use the linkage name if it
 	exists.
