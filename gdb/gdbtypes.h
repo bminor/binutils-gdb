@@ -355,6 +355,10 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 #define TYPE_HAS_VARIANT_PARTS(t) \
   (get_dyn_prop (DYN_PROP_VARIANT_PARTS, t) != nullptr)
 
+/* * True if this type has a dynamic length.  */
+#define TYPE_HAS_DYNAMIC_LENGTH(t) \
+  (get_dyn_prop (DYN_PROP_BYTE_SIZE, t) != nullptr)
+
 /* * Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
    others).
@@ -552,6 +556,9 @@ enum dynamic_prop_node_kind
 
   /* A property holding variant parts.  */
   DYN_PROP_VARIANT_PARTS,
+
+  /* A property holding the size of the type.  */
+  DYN_PROP_BYTE_SIZE,
 };
 
 /* * List for dynamic type attributes.  */
@@ -1445,6 +1452,8 @@ extern bool set_type_align (struct type *, ULONGEST);
   TYPE_DATA_LOCATION (thistype)->data.const_val
 #define TYPE_DATA_LOCATION_KIND(thistype) \
   TYPE_DATA_LOCATION (thistype)->kind
+#define TYPE_DYNAMIC_LENGTH(thistype) \
+  get_dyn_prop (DYN_PROP_BYTE_SIZE, thistype)
 
 /* Property accessors for the type allocated/associated.  */
 #define TYPE_ALLOCATED_PROP(thistype) \

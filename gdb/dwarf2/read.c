@@ -15300,14 +15300,10 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
         TYPE_LENGTH (type) = DW_UNSND (attr);
       else
 	{
-	  /* For the moment, dynamic type sizes are not supported
-	     by GDB's struct type.  The actual size is determined
-	     on-demand when resolving the type of a given object,
-	     so set the type's length to zero for now.  Otherwise,
-	     we record an expression as the length, and that expression
-	     could lead to a very large value, which could eventually
-	     lead to us trying to allocate that much memory when creating
-	     a value of that type.  */
+	  struct dynamic_prop prop;
+	  if (attr_to_dynamic_prop (attr, die, cu, &prop,
+				    cu->per_cu->addr_type ()))
+	    add_dyn_prop (DYN_PROP_BYTE_SIZE, prop, type);
           TYPE_LENGTH (type) = 0;
 	}
     }

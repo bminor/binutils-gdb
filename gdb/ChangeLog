@@ -1,5 +1,16 @@
 2020-04-24  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2/read.c (read_structure_type): Handle dynamic length.
+	* gdbtypes.c (is_dynamic_type_internal): Check
+	TYPE_HAS_DYNAMIC_LENGTH.
+	(resolve_dynamic_type_internal): Use TYPE_DYNAMIC_LENGTH.
+	* gdbtypes.h (TYPE_HAS_DYNAMIC_LENGTH, TYPE_DYNAMIC_LENGTH):
+	New macros.
+	(enum dynamic_prop_node_kind) <DYN_PROP_BYTE_SIZE>: New
+	constant.
+
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/read.c (struct variant_field): Rewrite.
 	(struct variant_part_builder): New.
 	(struct nextfield): Remove "variant" field.  Add "offset".

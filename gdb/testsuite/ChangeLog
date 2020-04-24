@@ -1,3 +1,9 @@
+2020-04-24  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/variant.exp: New file
+	* gdb.ada/variant/pkg.adb: New file
+	* gdb.ada/variant/pck.adb: New file
+
 2020-04-24  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (clean_restart): Reset errcnt and warncnt.

@@ -1975,6 +1975,9 @@ is_dynamic_type_internal (struct type *type, int top_level)
   if (prop != nullptr && prop->kind != PROP_TYPE)
     return 1;
 
+  if (TYPE_HAS_DYNAMIC_LENGTH (type))
+    return 1;
+
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
@@ -2491,12 +2494,18 @@ resolve_dynamic_type_internal (struct type *type,
 			       int top_level)
 {
   struct type *real_type = check_typedef (type);
-  struct type *resolved_type = type;
+  struct type *resolved_type = nullptr;
   struct dynamic_prop *prop;
   CORE_ADDR value;
 
   if (!is_dynamic_type_internal (real_type, top_level))
     return type;
+
+  gdb::optional<CORE_ADDR> type_length;
+  prop = TYPE_DYNAMIC_LENGTH (type);
+  if (prop != NULL
+      && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+    type_length = value;
 
   if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
     {
@@ -2551,6 +2560,15 @@ resolve_dynamic_type_internal (struct type *type,
 	  resolved_type = resolve_dynamic_struct (type, addr_stack);
 	  break;
 	}
+    }
+
+  if (resolved_type == nullptr)
+    return type;
+
+  if (type_length.has_value ())
+    {
+      TYPE_LENGTH (resolved_type) = *type_length;
+      remove_dyn_prop (DYN_PROP_BYTE_SIZE, resolved_type);
     }
 
   /* Resolve data_location attribute.  */
