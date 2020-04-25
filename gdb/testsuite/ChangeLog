@@ -1,3 +1,7 @@
+2020-04-25  Tom de Vries  <tdevries@suse.de>
+
+	* boards/debug-types.exp: New file.
+
 2020-04-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.btrace/multi-inferior.exp: Avoid paths in test names.
