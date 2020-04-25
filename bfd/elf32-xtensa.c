@@ -9670,37 +9670,44 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 		  switch (r_type)
 		    {
 		    case R_XTENSA_DIFF8:
+		      diff_mask = 0x7f;
 		      diff_value =
 			bfd_get_signed_8 (abfd, &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_DIFF16:
+		      diff_mask = 0x7fff;
 		      diff_value =
 			bfd_get_signed_16 (abfd, &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_DIFF32:
+		      diff_mask = 0x7fffffff;
 		      diff_value =
 			bfd_get_signed_32 (abfd, &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_PDIFF8:
 		    case R_XTENSA_NDIFF8:
+		      diff_mask = 0xff;
 		      diff_value =
 			bfd_get_8 (abfd, &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_PDIFF16:
 		    case R_XTENSA_NDIFF16:
+		      diff_mask = 0xffff;
 		      diff_value =
 			bfd_get_16 (abfd, &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_PDIFF32:
 		    case R_XTENSA_NDIFF32:
+		      diff_mask = 0xffffffff;
 		      diff_value =
 			bfd_get_32 (abfd, &contents[old_source_offset]);
 		      break;
 		    }
 
 		  if (r_type >= R_XTENSA_NDIFF8
-		      && r_type <= R_XTENSA_NDIFF32)
-		    diff_value = -diff_value;
+		      && r_type <= R_XTENSA_NDIFF32
+		      && diff_value)
+		    diff_value |= ~diff_mask;
 
 		  new_end_offset = offset_with_removed_text_map
 		    (&target_relax_info->action_list,
@@ -9710,43 +9717,40 @@ relax_section (bfd *abfd, asection *sec, struct bfd_link_info *link_info)
 		  switch (r_type)
 		    {
 		    case R_XTENSA_DIFF8:
-		      diff_mask = 0x7f;
 		      bfd_put_signed_8 (abfd, diff_value,
 				 &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_DIFF16:
-		      diff_mask = 0x7fff;
 		      bfd_put_signed_16 (abfd, diff_value,
 				  &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_DIFF32:
-		      diff_mask = 0x7fffffff;
 		      bfd_put_signed_32 (abfd, diff_value,
 				  &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_PDIFF8:
 		    case R_XTENSA_NDIFF8:
-		      diff_mask = 0xff;
 		      bfd_put_8 (abfd, diff_value,
 				 &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_PDIFF16:
 		    case R_XTENSA_NDIFF16:
-		      diff_mask = 0xffff;
 		      bfd_put_16 (abfd, diff_value,
 				  &contents[old_source_offset]);
 		      break;
 		    case R_XTENSA_PDIFF32:
 		    case R_XTENSA_NDIFF32:
-		      diff_mask = 0xffffffff;
 		      bfd_put_32 (abfd, diff_value,
 				  &contents[old_source_offset]);
 		      break;
 		    }
 
-		  /* Check for overflow. Sign bits must be all zeroes or all ones */
-		  if ((diff_value & ~diff_mask) != 0 &&
-		      (diff_value & ~diff_mask) != (-1 & ~diff_mask))
+		  /* Check for overflow. Sign bits must be all zeroes or
+		     all ones.  When sign bits are all ones diff_value
+		     may not be zero.  */
+		  if (((diff_value & ~diff_mask) != 0
+		       && (diff_value & ~diff_mask) != ~diff_mask)
+		      || (diff_value && (bfd_vma) diff_value == ~diff_mask))
 		    {
 		      (*link_info->callbacks->reloc_dangerous)
 			(link_info, _("overflow after relaxation"),
