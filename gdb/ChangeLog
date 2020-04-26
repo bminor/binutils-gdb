@@ -1,3 +1,8 @@
+2020-04-26  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-decode.c (lookup_cmd_composition): Fix comments
+	and whitespace.
+
 2020-04-25  Kamil Rytarowski  <n54@gmx.com>
 
        * inf-ptrace.c (inf_ptrace_target::wait): Remove
