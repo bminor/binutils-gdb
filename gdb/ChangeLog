@@ -1,3 +1,7 @@
+2020-04-26  Tom Tromey  <tom@tromey.com>
+
+	* command.h (enum command_class) <class_pseudo>: Remove.
+
 2020-04-26  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* cli/cli-decode.c (lookup_cmd_composition): Fix comments
