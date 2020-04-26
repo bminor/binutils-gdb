@@ -1,3 +1,10 @@
+2020-04-26  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_num_dynamic_syms): Check DT_MIPS_XHASH was
+	read before dereferencing, and gracefully return.  Remove
+	gnu_hash_error variable.  Free gnu hash arrays if number of
+	syms found is zero.
+
 2020-04-24  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (get_num_dynamic_syms): Check for nbuckets and nchains
