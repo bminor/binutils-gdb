@@ -441,11 +441,6 @@ generic_val_print_array (struct value *val,
       if (!get_array_bounds (type, &low_bound, &high_bound))
 	error (_("Could not determine the array high bound"));
 
-      if (options->prettyformat_arrays)
-	{
-	  print_spaces_filtered (2 + 2 * recurse, stream);
-	}
-
       fputs_filtered (decorations->array_start, stream);
       value_print_array_elements (val, stream, recurse, options, 0);
       fputs_filtered (decorations->array_end, stream);
@@ -1945,6 +1940,11 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 	  else
 	    fprintf_filtered (stream, ", ");
 	}
+      else if (options->prettyformat_arrays)
+	{
+	  fprintf_filtered (stream, "\n");
+	  print_spaces_filtered (2 + 2 * recurse, stream);
+	}
       wrap_here (n_spaces (2 + 2 * recurse));
       maybe_print_array_index (index_type, i + low_bound,
                                stream, options);
@@ -1988,6 +1988,11 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
   annotate_array_section_end ();
   if (i < len)
     fprintf_filtered (stream, "...");
+  if (options->prettyformat_arrays)
+    {
+      fprintf_filtered (stream, "\n");
+      print_spaces_filtered (2 * recurse, stream);
+    }
 }
 
 /* Read LEN bytes of target memory at address MEMADDR, placing the

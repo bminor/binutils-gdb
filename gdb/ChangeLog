@@ -1,3 +1,18 @@
+2020-04-29  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/17320
+	* ada-valprint.c (val_print_packed_array_elements): Move array
+	end bracket to new line.
+	(ada_val_print_string): Remove extra spaces before first array
+	element.
+	* c-valprint.c (c_value_print_array): Likewise.
+	* m2-valprint.c (m2_print_array_contents): Likewise.
+	(m2_value_print_inner): Likewise.
+	* p-valprint.c (pascal_value_print_inner): Likewise.
+	* valprint.c (generic_val_print_array): Likewise.
+	(value_print_array_elements): Move first array element and array
+	end bracket to new line.
+
 2020-04-29  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/25889

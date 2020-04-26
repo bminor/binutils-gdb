@@ -1,3 +1,9 @@
+2020-04-29  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/17320
+	* gdb.base/pretty-array.c: New test.
+	* gdb.base/pretty-array.exp: New file.
+
 2020-04-29  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/25889

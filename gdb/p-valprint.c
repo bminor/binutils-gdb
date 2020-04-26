@@ -93,10 +93,6 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 	    len = high_bound - low_bound + 1;
 	    elttype = check_typedef (TYPE_TARGET_TYPE (type));
 	    eltlen = TYPE_LENGTH (elttype);
-	    if (options->prettyformat_arrays)
-	      {
-		print_spaces_filtered (2 + 2 * recurse, stream);
-	      }
 	    /* If 's' format is used, try to print out as string.
 	       If no format is given, print as string if element type
 	       is of TYPE_CODE_CHAR and element size is 1,2 or 4.  */

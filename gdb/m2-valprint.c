@@ -265,8 +265,6 @@ m2_print_array_contents (struct value *val,
 
   if (TYPE_LENGTH (type) > 0)
     {
-      if (options->prettyformat_arrays)
-	print_spaces_filtered (2 + 2 * recurse, stream);
       /* For an array of chars, print with string syntax.  */
       if (TYPE_LENGTH (type) == 1 &&
 	  ((TYPE_CODE (type) == TYPE_CODE_INT)
@@ -318,8 +316,6 @@ m2_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 	{
 	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
 	  len = TYPE_LENGTH (type) / TYPE_LENGTH (elttype);
-	  if (options->prettyformat_arrays)
-	    print_spaces_filtered (2 + 2 * recurse, stream);
 	  /* For an array of chars, print with string syntax.  */
 	  if (TYPE_LENGTH (elttype) == 1 &&
 	      ((TYPE_CODE (elttype) == TYPE_CODE_INT)

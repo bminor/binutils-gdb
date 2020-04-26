@@ -252,10 +252,6 @@ c_value_print_array (struct value *val,
 
       eltlen = TYPE_LENGTH (elttype);
       len = high_bound - low_bound + 1;
-      if (options->prettyformat_arrays)
-	{
-	  print_spaces_filtered (2 + 2 * recurse, stream);
-	}
 
       /* Print arrays of textual chars with a string syntax, as
 	 long as the entire array is valid.  */

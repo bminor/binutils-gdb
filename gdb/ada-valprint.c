@@ -195,6 +195,11 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	      fprintf_filtered (stream, ", ");
 	    }
 	}
+      else if (options->prettyformat_arrays)
+	{
+	  fprintf_filtered (stream, "\n");
+	  print_spaces_filtered (2 + 2 * recurse, stream);
+	}
       wrap_here (n_spaces (2 + 2 * recurse));
       maybe_print_array_index (index_type, i + low, stream, options);
 
@@ -706,9 +711,6 @@ ada_val_print_string (struct type *type, const gdb_byte *valaddr,
 
   eltlen = TYPE_LENGTH (elttype);
   len = TYPE_LENGTH (type) / eltlen;
-
-  if (options->prettyformat_arrays)
-    print_spaces_filtered (2 + 2 * recurse, stream);
 
   /* If requested, look for the first null char and only print
      elements up to it.  */
