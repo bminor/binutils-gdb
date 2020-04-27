@@ -200,6 +200,36 @@ i386_windows_auto_wide_charset (void)
   return "UTF-16";
 }
 
+/* Implement the "push_dummy_call" gdbarch method.  */
+
+static CORE_ADDR
+i386_windows_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
+			      struct regcache *regcache, CORE_ADDR bp_addr,
+			      int nargs, struct value **args, CORE_ADDR sp,
+			      function_call_return_method return_method,
+			      CORE_ADDR struct_addr)
+{
+  /* For non-static member functions of 32bit Windows programs, the thiscall
+     calling convention is used, so the 'this' pointer is passed in ECX.  */
+  bool thiscall = false;
+
+  struct type *type = check_typedef (value_type (function));
+  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+    type = check_typedef (TYPE_TARGET_TYPE (type));
+
+  /* read_subroutine_type sets for non-static member functions the
+     artificial flag of the first parameter ('this' pointer).  */
+  if (TYPE_CODE (type) == TYPE_CODE_METHOD
+      && TYPE_NFIELDS (type) > 0
+      && TYPE_FIELD_ARTIFICIAL (type, 0)
+      && TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) == TYPE_CODE_PTR)
+    thiscall = 1;
+
+  return i386_thiscall_push_dummy_call (gdbarch, function, regcache, bp_addr,
+					nargs, args, sp, return_method,
+					struct_addr, thiscall);
+}
+
 /* Common parts for gdbarch initialization for Windows and Cygwin on i386.  */
 
 static void
@@ -234,6 +264,8 @@ i386_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   i386_windows_init_abi_common (info, gdbarch);
   windows_init_abi (info, gdbarch);
+
+  set_gdbarch_push_dummy_call (gdbarch, i386_windows_push_dummy_call);
 }
 
 /* gdbarch initialization for Cygwin on i386.  */

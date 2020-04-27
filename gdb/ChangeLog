@@ -1,3 +1,13 @@
+2020-04-30  Hannes Domani  <ssbssa@yahoo.de>
+
+	PR gdb/15559
+	* i386-tdep.c (i386_push_dummy_call): Call
+	i386_thiscall_push_dummy_call.
+	(i386_thiscall_push_dummy_call): New function.
+	* i386-tdep.h (i386_thiscall_push_dummy_call): Declare.
+	* i386-windows-tdep.c (i386_windows_push_dummy_call): New function.
+	(i386_windows_init_abi): Call set_gdbarch_push_dummy_call.
+
 2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbarch.sh (do_read): Add shellcheck disable directive for

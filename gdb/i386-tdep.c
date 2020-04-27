@@ -2668,12 +2668,15 @@ i386_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp, CORE_ADDR funaddr,
   return sp - 16;
 }
 
-static CORE_ADDR
-i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
-		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
-		      struct value **args, CORE_ADDR sp,
-		      function_call_return_method return_method,
-		      CORE_ADDR struct_addr)
+/* The "push_dummy_call" gdbarch method, optionally with the thiscall
+   calling convention.  */
+
+CORE_ADDR
+i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
+			       struct regcache *regcache, CORE_ADDR bp_addr,
+			       int nargs, struct value **args, CORE_ADDR sp,
+			       function_call_return_method return_method,
+			       CORE_ADDR struct_addr, bool thiscall)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte buf[4];
@@ -2709,7 +2712,7 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    args_space += 4;
 	}
 
-      for (i = 0; i < nargs; i++)
+      for (i = thiscall ? 1 : 0; i < nargs; i++)
 	{
 	  int len = TYPE_LENGTH (value_enclosing_type (args[i]));
 
@@ -2761,6 +2764,10 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* ...and fake a frame pointer.  */
   regcache->cooked_write (I386_EBP_REGNUM, buf);
 
+  /* The 'this' pointer needs to be in ECX.  */
+  if (thiscall)
+    regcache->cooked_write (I386_ECX_REGNUM, value_contents_all (args[0]));
+
   /* MarkK wrote: This "+ 8" is all over the place:
      (i386_frame_this_id, i386_sigtramp_frame_this_id,
      i386_dummy_id).  It's there, since all frame unwinders for
@@ -2771,6 +2778,20 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      the i386, when %ebp is used as a frame pointer, the offset
      between the contents %ebp and the CFA as defined by GCC.  */
   return sp + 8;
+}
+
+/* Implement the "push_dummy_call" gdbarch method.  */
+
+static CORE_ADDR
+i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
+		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
+		      struct value **args, CORE_ADDR sp,
+		      function_call_return_method return_method,
+		      CORE_ADDR struct_addr)
+{
+  return i386_thiscall_push_dummy_call (gdbarch, function, regcache, bp_addr,
+					nargs, args, sp, return_method,
+					struct_addr, false);
 }
 
 /* These registers are used for returning integers (and on some

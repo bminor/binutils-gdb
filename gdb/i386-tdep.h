@@ -399,6 +399,19 @@ extern CORE_ADDR i386_pe_skip_trampoline_code (struct frame_info *frame,
 extern CORE_ADDR i386_skip_main_prologue (struct gdbarch *gdbarch,
 					  CORE_ADDR pc);
 
+/* The "push_dummy_call" gdbarch method, optionally with the thiscall
+   calling convention.  */
+extern CORE_ADDR i386_thiscall_push_dummy_call (struct gdbarch *gdbarch,
+						struct value *function,
+						struct regcache *regcache,
+						CORE_ADDR bp_addr,
+						int nargs, struct value **args,
+						CORE_ADDR sp,
+						function_call_return_method
+						return_method,
+						CORE_ADDR struct_addr,
+						bool thiscall);
+
 /* Return whether the THIS_FRAME corresponds to a sigtramp routine.  */
 extern int i386_sigtramp_p (struct frame_info *this_frame);
 
