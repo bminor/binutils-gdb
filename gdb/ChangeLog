@@ -1,3 +1,13 @@
+2020-04-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure.ac: Remove check for fs_base/gs_base in
+	user_regs_struct.
+	* configure: Re-generate.
+	* config.in: Re-generate.
+	* amd64-nat.c (amd64_native_gregset_reg_offset): Adjust.
+	* amd64-linux-nat.c (amd64_linux_nat_target::fetch_registers,
+	amd64_linux_nat_target::store_registers, ps_get_thread_area, ): Adjust.
+
 2020-04-27  Luis Machado  <luis.machado@linaro.org>
 
 	* dwarf2/frame-tailcall.c (dwarf2_tailcall_sniffer_first): Handle

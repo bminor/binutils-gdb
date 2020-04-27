@@ -1,3 +1,12 @@
+2020-04-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure.ac: Remove check for fs_base/gs_base in
+	user_regs_struct.
+	* configure: Re-generate.
+	* config.in: Re-generate.
+	* linux-x86-low.cc (x86_64_regmap, x86_fill_gregset,
+	x86_store_gregset): Adjust.
+
 2020-04-22  Hannes Domani  <ssbssa@yahoo.de>
 
 	* server.cc (handle_search_memory_1): Fix gdb_read_memory return value
