@@ -1,3 +1,14 @@
+2020-04-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 25878
+	* dwarf2dbg.c (struct file_entry): Add auto_assigned field.
+	(assign_file_to_slot): New function.  Fills in an entry in the
+	files table.
+	(allocate_filenum): Use new function.
+	(allocate_filename_to_slot): Use new function.  If the specified
+	slot entry is already in use, but was chosen automatically then
+	reassign the automatic entry.
+
 2020-04-26  Hongtao Liu  <hongtao.liu@intel.com
 
 	* config/tc-i386.c (lfence_before_ret_shl): New member.
