@@ -2438,8 +2438,11 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 	    return FALSE;
 	  if (rel1 != RELC_NONE || rel2 != RELC_NONE)
 	    goto bad_context;
-	  if (op2 == 0)
+	  if (op1 == 0)
 	    {
+	      /* Divide by zero is supposed to give a result of zero,
+		 and a non-fatal warning message.  */
+	      _bfd_error_handler (_("%s divide by zero"), "ETIR__C_OPR_DIV");
 	      if (!_bfd_vms_push (abfd, 0, RELC_NONE))
 		return FALSE;
 	    }

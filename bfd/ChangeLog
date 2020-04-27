@@ -1,3 +1,8 @@
+2020-04-28  Alan Modra  <amodra@gmail.com>
+
+	* vms-alpha.c (_bfd_vms_slurp_etir): Correct divide by zero check.
+	Emit warning message.
+
 2020-04-27  Tamar Christina  <tamar.christina@arm.com>
 
 	* coff-i386.c (COFF_WITH_PE_BIGOBJ): New.
