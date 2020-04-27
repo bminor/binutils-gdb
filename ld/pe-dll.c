@@ -280,6 +280,16 @@ static pe_details_type pe_detail_list[] =
     FALSE,
     autofilter_symbollist_i386
   },
+#else
+  {
+    "pei-i386",
+    "pe-bigobj-i386",
+    7 /* R_IMAGEBASE */,
+    PE_ARCH_i386,
+    bfd_arch_i386,
+    TRUE,
+    autofilter_symbollist_i386
+  },
 #endif
   {
     "pei-shl",

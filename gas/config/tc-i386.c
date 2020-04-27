@@ -13506,7 +13506,7 @@ i386_target_format (void)
       if (flag_code == CODE_64BIT)
 	return use_big_obj ? "pe-bigobj-x86-64" : "pe-x86-64";
       else
-	return "pe-i386";
+	return use_big_obj ? "pe-bigobj-i386" : "pe-i386";
 # elif defined (TE_GO32)
     case bfd_target_coff_flavour:
       return "coff-go32";

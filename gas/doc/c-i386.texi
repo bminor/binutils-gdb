@@ -390,9 +390,10 @@ with default visibility can be preempted.  The resulting code is
 slightly bigger.  This option only affects the handling of branch
 instructions.
 
+@cindex @samp{-mbig-obj} option, i386
 @cindex @samp{-mbig-obj} option, x86-64
 @item -mbig-obj
-On x86-64 PE/COFF target this option forces the use of big object file
+On PE/COFF target this option forces the use of big object file
 format, which allows more than 32768 sections.
 
 @cindex @samp{-momit-lock-prefix=} option, i386

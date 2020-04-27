@@ -1,3 +1,19 @@
+2020-04-27  Tamar Christina  <tamar.christina@arm.com>
+
+	* coff-i386.c (COFF_WITH_PE_BIGOBJ): New.
+	* coff-x86_64.c (COFF_WITH_PE_BIGOBJ): New.
+	* config.bfd (targ_selvecs): Rename x86_64_pe_be_vec
+	to x86_64_pe_big_vec as it not a big-endian format.
+	(vec i386_pe_big_vec): New.
+	* configure.ac: Likewise.
+	* targets.c: Likewise.
+	* configure: Regenerate.
+	* pe-i386.c (TARGET_SYM_BIG, TARGET_NAME_BIG,
+	COFF_WITH_PE_BIGOBJ): New.
+	* pe-x86_64.c (TARGET_SYM_BIG, TARGET_NAME_BIG):
+	New.
+	(x86_64_pe_be_vec): Moved.
+
 2020-04-23  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* elf-bfd.h (elfcore_write_arc_v2): Add prototype.

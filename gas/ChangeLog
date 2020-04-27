@@ -1,3 +1,11 @@
+2020-04-27  Tamar Christina  <tamar.christina@arm.com>
+
+	* NEWS: Add news entry for big-obj.
+	* config/tc-i386.c (i386_target_format): Support new format.
+	* doc/c-i386.texi: Add i386 support.
+	* testsuite/gas/pe/big-obj.d: Rename test to not be x64 specific.
+	* testsuite/gas/pe/pe.exp (big-obj): Make test run on i386 as well.
+
 2020-04-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 25878

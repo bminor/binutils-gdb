@@ -13,6 +13,8 @@
   (if such output is being generated).  Added the ability to generate
   version 5 .debug_line sections.
 
+* Add -mbig-obj support to i386 MingW targets.
+
 Changes in 2.34:
 
 * Add -malign-branch-boundary=NUM, -malign-branch=TYPE[+TYPE...],
