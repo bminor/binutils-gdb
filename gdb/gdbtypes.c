@@ -2873,6 +2873,20 @@ check_typedef (struct type *type)
 	  TYPE_LENGTH (type) = TYPE_LENGTH (target_type);
 	  TYPE_TARGET_STUB (type) = 0;
 	}
+      else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	{
+	  struct type *range_type = check_typedef (TYPE_INDEX_TYPE (type));
+	  if (has_static_range (TYPE_RANGE_DATA (range_type)))
+	    {
+	      ULONGEST len = 0;
+	      LONGEST low_bound = TYPE_LOW_BOUND (range_type);
+	      LONGEST high_bound = TYPE_HIGH_BOUND (range_type);
+	      if (high_bound >= low_bound)
+		len = (high_bound - low_bound + 1) * TYPE_LENGTH (target_type);
+	      TYPE_LENGTH (type) = len;
+	      TYPE_TARGET_STUB (type) = 0;
+	    }
+	}
     }
 
   type = make_qualified_type (type, instance_flags, NULL);

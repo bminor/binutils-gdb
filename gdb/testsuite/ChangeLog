@@ -1,5 +1,13 @@
 2020-04-30  Hannes Domani  <ssbssa@yahoo.de>
 
+	PR gdb/18706
+	* gdb.cp/stub-array-size.cc: New test.
+	* gdb.cp/stub-array-size.exp: New file.
+	* gdb.cp/stub-array-size.h: New test.
+	* gdb.cp/stub-array-size2.cc: New test.
+
+2020-04-30  Hannes Domani  <ssbssa@yahoo.de>
+
 	* gdb.python/py-format-string.exp: Adjust pretty_arrays expected
 	output to the new format.
 

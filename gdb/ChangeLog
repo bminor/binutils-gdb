@@ -1,5 +1,11 @@
 2020-04-30  Hannes Domani  <ssbssa@yahoo.de>
 
+	PR gdb/18706
+	* gdbtypes.c (check_typedef): Calculate size of array of
+	stubbed type.
+
+2020-04-30  Hannes Domani  <ssbssa@yahoo.de>
+
 	PR gdb/15559
 	* i386-tdep.c (i386_push_dummy_call): Call
 	i386_thiscall_push_dummy_call.
