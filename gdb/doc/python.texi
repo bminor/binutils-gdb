@@ -1071,7 +1071,24 @@ The type code for this type.  The type code will be one of the
 @defvar Type.dynamic
 A boolean indicating whether this type is dynamic.  In some
 situations, such as Rust @code{enum} types or Ada variant records, the
-concrete type of a value may vary depending on its contents.
+concrete type of a value may vary depending on its contents.  That is,
+the declared type of a variable, or the type returned by
+@code{gdb.lookup_type} may be dynamic; while the type of the
+variable's value will be a concrete instance of that dynamic type.
+
+For example, consider this code:
+@smallexample
+int n;
+int array[n];
+@end smallexample
+
+Here, at least conceptually (whether your compiler actually does this
+is a separate issue), examining @w{@code{gdb.lookup_symbol("array", ...).type}}
+could yield a @code{gdb.Type} which reports a size of @code{None}.
+This is the dynamic type.
+
+However, examining @code{gdb.parse_and_eval("array").type} would yield
+a concrete type, whose length would be known.
 @end defvar
 
 @defvar Type.name
@@ -1116,7 +1133,8 @@ This attribute is not available for @code{enum} or @code{static}
 (as in C@t{++}) fields.  The value is the position, counting
 in bits, from the start of the containing type.  Note that, in a
 dynamic type, the position of a field may not be constant.  In this
-case, the value will be @code{None}.
+case, the value will be @code{None}.  Also, a dynamic type may have
+fields that do not appear in a corresponding concrete type.
 
 @item enumval
 This attribute is only available for @code{enum} fields, and its value
