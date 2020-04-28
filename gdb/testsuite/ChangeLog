@@ -1,5 +1,9 @@
 2020-04-28  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.ada/array_ptr_renaming.exp: Add PR number in KFAIL.
+
+2020-04-28  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.dwarf2/main-foo.c: New test.
 	* gdb.dwarf2/struct-with-sig.exp: New file.
 
