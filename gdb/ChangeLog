@@ -1,3 +1,9 @@
+2020-04-28  Simon Marchi  <simon.marchi@efficios.com>
+
+	PR gdb/25881
+	* dwarf2/read.c (offset_map_type): Use
+	gdb:hash_enum<sect_offset> as hash function.
+
 2020-04-28  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2/read.c (process_structure_scope): Add symbol for struct decl

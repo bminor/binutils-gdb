@@ -14513,7 +14513,8 @@ dwarf2_add_type_defn (struct field_info *fip, struct die_info *die,
 
 /* A convenience typedef that's used when finding the discriminant
    field for a variant part.  */
-typedef std::unordered_map<sect_offset, int> offset_map_type;
+typedef std::unordered_map<sect_offset, int, gdb::hash_enum<sect_offset>>
+  offset_map_type;
 
 /* Compute the discriminant range for a given variant.  OBSTACK is
    where the results will be stored.  VARIANT is the variant to
