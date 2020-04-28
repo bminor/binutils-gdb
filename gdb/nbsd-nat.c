@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <sys/sysctl.h>
+#include <sys/wait.h>
 
 /* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */
@@ -538,4 +539,225 @@ nbsd_nat_target::info_proc (const char *args, enum info_proc_what what)
     }
 
   return true;
+}
+
+/* Resume execution of a specified PTID, that points to a process or a thread
+   within a process.  If one thread is specified, all other threads are
+   suspended.  If STEP is nonzero, single-step it.  If SIGNAL is nonzero,
+   give it that signal.  */
+
+static void
+nbsd_resume(nbsd_nat_target *target, ptid_t ptid, int step,
+	    enum gdb_signal signal)
+{
+  int request;
+
+  gdb_assert (minus_one_ptid != ptid);
+
+  if (ptid.lwp_p ())
+    {
+      /* If ptid is a specific LWP, suspend all other LWPs in the process.  */
+      inferior *inf = find_inferior_ptid (target, ptid);
+
+      for (thread_info *tp : inf->non_exited_threads ())
+        {
+          if (tp->ptid.lwp () == ptid.lwp ())
+            request = PT_RESUME;
+          else
+            request = PT_SUSPEND;
+
+          if (ptrace (request, tp->ptid.pid (), NULL, tp->ptid.lwp ()) == -1)
+            perror_with_name (("ptrace"));
+        }
+    }
+  else
+    {
+      /* If ptid is a wildcard, resume all matching threads (they won't run
+         until the process is continued however).  */
+      for (thread_info *tp : all_non_exited_threads (target, ptid))
+        if (ptrace (PT_RESUME, tp->ptid.pid (), NULL, tp->ptid.lwp ()) == -1)
+          perror_with_name (("ptrace"));
+    }
+
+  if (step)
+    {
+      for (thread_info *tp : all_non_exited_threads (target, ptid))
+	if (ptrace (PT_SETSTEP, tp->ptid.pid (), NULL, tp->ptid.lwp ()) == -1)
+	  perror_with_name (("ptrace"));
+    }
+  else
+    {
+      for (thread_info *tp : all_non_exited_threads (target, ptid))
+	if (ptrace (PT_CLEARSTEP, tp->ptid.pid (), NULL, tp->ptid.lwp ()) == -1)
+	  perror_with_name (("ptrace"));
+    }
+
+  if (catch_syscall_enabled () > 0)
+    request = PT_SYSCALL;
+  else
+    request = PT_CONTINUE;
+
+  /* An address of (void *)1 tells ptrace to continue from
+     where it was.  If GDB wanted it to start some other way, we have
+     already written a new program counter value to the child.  */
+  if (ptrace (request, ptid.pid (), (void *)1, gdb_signal_to_host (signal)) == -1)
+    perror_with_name (("ptrace"));
+}
+
+/* Resume execution of thread PTID, or all threads of all inferiors
+   if PTID is -1.  If STEP is nonzero, single-step it.  If SIGNAL is nonzero,
+   give it that signal.  */
+
+void
+nbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
+{
+  if (minus_one_ptid != ptid)
+    nbsd_resume (this, ptid, step, signal);
+  else
+    {
+      for (inferior *inf : all_non_exited_inferiors (this))
+	nbsd_resume (this, ptid_t (inf->pid, 0, 0), step, signal);
+    }
+}
+
+/* Implement a safe wrapper around waitpid().  */
+
+static pid_t
+nbsd_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
+{
+  pid_t pid;
+  int status;
+
+  set_sigint_trap ();
+
+  do
+    {
+      /* The common code passes WNOHANG that leads to crashes, overwrite it.  */
+      pid = waitpid (ptid.pid (), &status, 0);
+    }
+  while (pid == -1 && errno == EINTR);
+
+  clear_sigint_trap ();
+
+  if (pid == -1)
+    perror_with_name (_("Child process unexpectedly missing"));
+
+  store_waitstatus (ourstatus, status);
+  return pid;
+}
+
+/* Wait for the child specified by PTID to do something.  Return the
+   process ID of the child, or MINUS_ONE_PTID in case of error; store
+   the status in *OURSTATUS.  */
+
+ptid_t
+nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+		       int target_options)
+{
+  pid_t pid = nbsd_wait (ptid, ourstatus, target_options);
+  ptid_t wptid = ptid_t (pid);
+
+  /* If the child stopped, keep investigating its status.  */
+  if (ourstatus->kind != TARGET_WAITKIND_STOPPED)
+    return wptid;
+
+  /* Extract the event and thread that received a signal.  */
+  ptrace_siginfo_t psi;
+  if (ptrace (PT_GET_SIGINFO, pid, &psi, sizeof (psi)) == -1)
+    perror_with_name (("ptrace"));
+
+  /* Pick child's siginfo_t.  */
+  siginfo_t *si = &psi.psi_siginfo;
+
+  int lwp = psi.psi_lwpid;
+
+  int signo = si->si_signo;
+  const int code = si->si_code;
+
+  /* Construct PTID with a specified thread that received the event.
+     If a signal was targeted to the whole process, lwp is 0.  */
+  wptid = ptid_t (pid, lwp, 0);
+
+  /* Bail out on non-debugger oriented signals..  */
+  if (signo != SIGTRAP)
+    return wptid;
+
+  /* Stop examining non-debugger oriented SIGTRAP codes.  */
+  if (code <= SI_USER || code == SI_NOINFO)
+    return wptid;
+
+  if (in_thread_list (this, ptid_t (pid)))
+      thread_change_ptid (this, ptid_t (pid), wptid);
+
+  if (code == TRAP_EXEC)
+    {
+      ourstatus->kind = TARGET_WAITKIND_EXECD;
+      ourstatus->value.execd_pathname = xstrdup (pid_to_exec_file (pid));
+      return wptid;
+    }
+
+  if (code == TRAP_TRACE)
+    {
+      /* Unhandled at this level.  */
+      return wptid;
+    }
+
+  if (code == TRAP_SCE || code == TRAP_SCX)
+    {
+      int sysnum = si->si_sysnum;
+
+      if (!catch_syscall_enabled () || !catching_syscall_number (sysnum))
+	{
+	  /* If the core isn't interested in this event, ignore it.  */
+	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+	  return wptid;
+	}
+
+      ourstatus->kind =
+	(code == TRAP_SCE) ? TARGET_WAITKIND_SYSCALL_ENTRY :
+	TARGET_WAITKIND_SYSCALL_RETURN;
+      ourstatus->value.syscall_number = sysnum;
+      return wptid;
+    }
+
+  if (code == TRAP_BRKPT)
+    {
+      /* Unhandled at this level.  */
+      return wptid;
+    }
+
+  /* Unclassified SIGTRAP event.  */
+  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+  return wptid;
+}
+
+/* Implement the "insert_exec_catchpoint" target_ops method.  */
+
+int
+nbsd_nat_target::insert_exec_catchpoint (int pid)
+{
+  /* Nothing to do.  */
+  return 0;
+}
+
+/* Implement the "remove_exec_catchpoint" target_ops method.  */
+
+int
+nbsd_nat_target::remove_exec_catchpoint (int pid)
+{
+  /* Nothing to do.  */
+  return 0;
+}
+
+/* Implement the "set_syscall_catchpoint" target_ops method.  */
+
+int
+nbsd_nat_target::set_syscall_catchpoint (int pid, bool needed,
+                                         int any_count,
+                                         gdb::array_view<const int> syscall_counts)
+{
+  /* Ignore the arguments.  inf-ptrace.c will use PT_SYSCALL which
+     will catch all system call entries and exits.  The system calls
+     are filtered by GDB rather than the kernel.  */
+  return 0;
 }

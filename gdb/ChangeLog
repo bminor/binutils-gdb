@@ -1,3 +1,18 @@
+2020-04-29  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c: Include "sys/wait.h".
+	(nbsd_resume, nbsd_nat_target::resume, nbsd_wait)
+	(nbsd_nat_target::wait, nbsd_nat_target::insert_exec_catchpoint)
+	(nbsd_nat_target::remove_exec_catchpoint)
+	(nbsd_nat_target::set_syscall_catchpoint): Add.
+	* nbsd-nat.h (nbsd_nat_target::resume, nbsd_nat_target::wait)
+	(nbsd_nat_target::insert_exec_catchpoint)
+	(nbsd_nat_target::remove_exec_catchpoint)
+	(nbsd_nat_target::set_syscall_catchpoint): Add.
+	* nbsd-tdep.c (nbsd_get_syscall_number): Add.
+	(nbsd_init_abi): Call `set_gdbarch_get_syscall_number' and pass
+	`nbsd_get_syscall_number'.
+
 2020-04-29  Tom Tromey  <tom@tromey.com>
 
 	* stack.c (print_block_frame_labels): Remove.
