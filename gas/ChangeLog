@@ -1,3 +1,12 @@
+2020-04-29  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (XTENSA_MARCH_EARLIEST): Define macro as 0
+	if it's not defined.
+	(microarch_earliest): New static variable.
+	(xg_translate_idioms): Translate "simcall" to "simcall 0" when
+	simcall opcode has mandatory parameter.
+	(xg_init_global_config): Initialize microarch_earliest.
+
 2020-04-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 22699
