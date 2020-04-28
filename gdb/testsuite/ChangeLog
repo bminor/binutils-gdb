@@ -1,5 +1,9 @@
 2020-04-28  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.opt/inline-cmds.exp: Set KFAIL PR.
+
+2020-04-28  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/info-macros.exp: Remove KFAIL.  Add missing trailing ".*".
 
 2020-04-28  Tom de Vries  <tdevries@suse.de>
