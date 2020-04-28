@@ -36,7 +36,7 @@
    system that only had pthread_sigmask, we could still use it with
    some extra changes.  */
 #ifdef HAVE_PTHREAD_SIGMASK
-#error pthead_sigmask available without sigprocmask - please report
+#error pthread_sigmask available without sigprocmask - please report
 #endif
 
 #endif /* HAVE_SIGPROCMASK */
