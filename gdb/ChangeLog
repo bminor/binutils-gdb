@@ -1,3 +1,7 @@
+2020-04-28  Simon Marchi  <simon.marchi@efficios.com>
+
+	* syscalls/update-freebsd.sh: Add double quotes.
+
 2020-04-28  Tom Tromey  <tom@tromey.com>
 
 	* NEWS: Update.
