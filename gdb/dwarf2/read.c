@@ -15748,7 +15748,8 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
      these DIEs are identified by the fact that they have no byte_size
      attribute, and a declaration attribute.  */
   if (dwarf2_attr (die, DW_AT_byte_size, cu) != NULL
-      || !die_is_declaration (die, cu))
+      || !die_is_declaration (die, cu)
+      || dwarf2_attr (die, DW_AT_signature, cu) != NULL)
     {
       struct symbol *sym = new_symbol (die, type, cu);
 

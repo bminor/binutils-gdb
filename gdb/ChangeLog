@@ -1,3 +1,8 @@
+2020-04-28  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c (process_structure_scope): Add symbol for struct decl
+	with DW_AT_signature.
+
 2020-04-27  Simon Marchi  <simon.marchi@efficios.com>
 
 	* configure.ac: Remove check for fs_base/gs_base in

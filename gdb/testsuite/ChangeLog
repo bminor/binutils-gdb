@@ -1,3 +1,8 @@
+2020-04-28  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/main-foo.c: New test.
+	* gdb.dwarf2/struct-with-sig.exp: New file.
+
 2020-04-25  Tom de Vries  <tdevries@suse.de>
 
 	* boards/debug-types.exp: New file.
