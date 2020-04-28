@@ -10942,6 +10942,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 	= XOBNEWVEC (&COMPUNIT_OBJFILE (cust)->objfile_obstack,
 		     struct symtab *, line_header->file_names_size ());
 
+      list_in_scope = get_builder ()->get_file_symbols ();
       auto &file_names = line_header->file_names ();
       for (i = 0; i < file_names.size (); ++i)
 	{
