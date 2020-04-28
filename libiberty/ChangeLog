@@ -1,37 +1,52 @@
+2020-04-27  Jakub Jelinek  <jakub@redhat.com>
+
+	PR demangler/94797
+	* cp-demangle.c (cplus_demangle_operators): Add ss <=> operator.
+	* testsuite/demangle-expected: Add operator<=> test.
+
+2020-04-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR bootstrap/94739
+	* Makefile.in (COMPILE.c): Add @CET_HOST_FLAGS@.
+	(configure_deps): Add $(srcdir)/../config/cet.m4 and
+	$(srcdir)/../config/enable.m4.
+	* aclocal.m4: Include ../config/cet.m4 and ../config/enable.m4.
+	* configure.ac: Add GCC_CET_HOST_FLAGS(CET_HOST_FLAGS) and
+	AC_SUBST(CET_HOST_FLAGS).
+	* configure: Regenerated.
+
+2020-03-05  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
+
+	* simple-object.c (handle_lto_debug_sections): Name
+	".GCC.command.line" among debug sections to be copied over
+	from lto objects.
+
+2020-03-02  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/demangle-expected: Update expected demangling of
+	enable_if pattern.
+
 2020-03-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR lto/93966
 	* simple-object.c (handle_lto_debug_sections): Also copy
 	.note.gnu.property section.
 
-2020-02-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+2020-02-12  Sandra Loosemore  <sandra@codesourcery.com>
 
-	* rust-demangle.h: Removed.
+	PR libstdc++/79193
+	PR libstdc++/88999
 
-	Import from gcc mainline:
-	2020-02-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+	* configure: Regenerated.
+
+2020-02-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* hashtab.c (htab_remove_elt): Make a parameter const.
 	(htab_remove_elt_with_hash): Likewise.
 
-	2020-01-23  Alexandre Oliva <oliva@adacore.com>
+2020-01-23  Alexandre Oliva <oliva@adacore.com>
 
 	* argv.c (writeargv): Output empty args as "".
-
-	2020-01-18  Iain Sandoe  <iain@sandoe.co.uk>
-
-	* cp-demangle.c (cplus_demangle_operators): Add the co_await
-	operator.
-	* testsuite/demangle-expected: Test co_await operator mangling.
-
-2020-02-19  Andrew Burgess  <andrew.burgess@embecosm.com>
-
-	* configure: Regenerate.
-
-2020-01-17  Nick Clifton  <nickc@redhat.com>
-
-	* testsuite/demangle-expected: Update expected demangling of
-	enable_if pattern.
 
 2020-01-01  Jakub Jelinek  <jakub@redhat.com>
 
