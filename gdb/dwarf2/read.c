@@ -10921,6 +10921,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 			    COMPUNIT_DIRNAME (cust),
 			    compunit_language (cust),
 			    0, cust));
+	  list_in_scope = get_builder ()->get_file_symbols ();
 	}
       return;
     }
@@ -10972,6 +10973,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 			COMPUNIT_DIRNAME (cust),
 			compunit_language (cust),
 			0, cust));
+      list_in_scope = get_builder ()->get_file_symbols ();
 
       auto &file_names = line_header->file_names ();
       for (i = 0; i < file_names.size (); ++i)
