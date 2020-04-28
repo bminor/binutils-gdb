@@ -465,7 +465,8 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       && cmdtype != class_files && cmdtype != class_support
       && cmdtype != class_info && cmdtype != class_breakpoint
       && cmdtype != class_trace && cmdtype != class_obscure
-      && cmdtype != class_maintenance && cmdtype != class_user)
+      && cmdtype != class_maintenance && cmdtype != class_user
+      && cmdtype != class_tui)
     {
       PyErr_Format (PyExc_RuntimeError, _("Invalid command class argument."));
       return -1;
@@ -593,8 +594,7 @@ gdbpy_initialize_commands (void)
   if (PyType_Ready (&cmdpy_object_type) < 0)
     return -1;
 
-  /* Note: alias and user are special; pseudo appears to be unused,
-     and there is no reason to expose tui, I think.  */
+  /* Note: alias and user are special.  */
   if (PyModule_AddIntConstant (gdb_module, "COMMAND_NONE", no_class) < 0
       || PyModule_AddIntConstant (gdb_module, "COMMAND_RUNNING", class_run) < 0
       || PyModule_AddIntConstant (gdb_module, "COMMAND_DATA", class_vars) < 0
@@ -611,7 +611,8 @@ gdbpy_initialize_commands (void)
 				  class_obscure) < 0
       || PyModule_AddIntConstant (gdb_module, "COMMAND_MAINTENANCE",
 				  class_maintenance) < 0
-      || PyModule_AddIntConstant (gdb_module, "COMMAND_USER", class_user) < 0)
+      || PyModule_AddIntConstant (gdb_module, "COMMAND_USER", class_user) < 0
+      || PyModule_AddIntConstant (gdb_module, "COMMAND_TUI", class_tui) < 0)
     return -1;
 
   for (i = 0; i < N_COMPLETERS; ++i)

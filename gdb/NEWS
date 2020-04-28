@@ -73,6 +73,9 @@ GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*
      field of a dynamic type may have None for its "bitpos" attribute
      as well.
 
+  ** Commands written in Python can be in the "TUI" help class by
+     registering with the new constant gdb.COMMAND_TUI.
+
 *** Changes in GDB 9
 
 * 'thread-exited' event is now available in the annotations interface.

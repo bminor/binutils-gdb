@@ -1,3 +1,9 @@
+2020-04-28  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Update.
+	* python/py-cmd.c (gdbpy_initialize_commands): Add COMMAND_TUI.
+	(cmdpy_init): Allow class_tui.
+
 2020-04-28 Mark Williams <mark@myosotissp.com>
 
 	PR gdb/24480

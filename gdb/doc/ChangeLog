@@ -1,3 +1,7 @@
+2020-04-28  Tom Tromey  <tom@tromey.com>
+
+	* python.texi (Commands In Python): Document gdb.COMMAND_TUI.
+
 2020-04-27  Tom Tromey  <tromey@adacore.com>
 
 	* python.texi (Types In Python): Mention missing fields.  Add

@@ -3829,6 +3829,13 @@ The command has to do with tracepoints.  For example, @code{trace},
 @kbd{help tracepoints} at the @value{GDBN} prompt to see a list of
 commands in this category.
 
+@findex COMMAND_TUI
+@findex gdb.COMMAND_TUI
+@item gdb.COMMAND_TUI
+The command has to do with the text user interface (@pxref{TUI}).
+Type @kbd{help tui} at the @value{GDBN} prompt to see a list of
+commands in this category.
+
 @findex COMMAND_USER
 @findex gdb.COMMAND_USER
 @item gdb.COMMAND_USER
