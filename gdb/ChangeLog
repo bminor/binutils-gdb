@@ -1,3 +1,10 @@
+2020-04-28  Kamil Rytarowski  <n54@gmx.com>
+
+	* syscalls/update-netbsd.sh: New file.
+	* syscalls/netbsd.xml: Regenerate.
+	* data-directory/Makefile.in: Register `netbsd.xml' in
+	`SYSCALLS_FILES'.
+
 2020-04-28  Simon Marchi  <simon.marchi@efficios.com>
 
 	* syscalls/update-freebsd.sh: Add double quotes.
