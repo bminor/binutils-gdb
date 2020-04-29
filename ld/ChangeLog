@@ -1,3 +1,14 @@
+2020-04-29  Stephen Casner  <casner@acm.org>
+
+	PR 25829
+	* testsuite/ld-scripts/default-script.exp: Add --image-base=0 to
+	LDFLAGS for targets *-*-mingw64 x86_64-*-cygwin.
+	* testsuite/ld-scripts/default-script1.d: No longer have to skip
+	test for those targets.
+	* testsuite/ld-scripts/default-script2.d: Likewise.
+	* testsuite/ld-scripts/default-script3.d: Likewise.
+	* testsuite/ld-scripts/default-script4.d: Likewise.
+
 2020-04-27  Tamar Christina  <tamar.christina@arm.com>
 
 	* pe-dll.c (pe_detail_list):  Add pe-bigobj-i386.
