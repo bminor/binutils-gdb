@@ -1,3 +1,12 @@
+2020-04-29  Tom Tromey  <tromey@adacore.com>
+
+	PR ada/25875:
+	* dwarf2/read.c (update_enumeration_type_from_children): Compute
+	type fields here.
+	(read_enumeration_type): Call
+	update_enumeration_type_from_children later.  Update comments.
+	(process_enumeration_scope): Don't create type fields.
+
 2020-04-29  Kamil Rytarowski  <n54@gmx.com>
 
 	* nbsd-tdep.c: Include "xml-syscall.h".
