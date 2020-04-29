@@ -1,3 +1,7 @@
+2020-04-29  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
 2020-04-26  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (get_num_dynamic_syms): Check DT_MIPS_XHASH was
