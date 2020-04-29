@@ -505,7 +505,7 @@ const sh_opcode_info sh_table[] =
 /* 0100nnnn1xxx0111 ldc.l @<REG_N>+,Rn_BANK */{"ldc.l",{A_INC_N,A_REG_B},{HEX_4,REG_N,REG_B,HEX_7}, arch_sh3_nommu_up},
 
 /* 0100mmmm00110100 ldrc <REG_M>        */{"ldrc",{A_REG_M},{HEX_4,REG_M,HEX_3,HEX_4}, arch_sh4al_dsp_up},
-/* 10001010i8*1.... ldrc #<imm>         */{"ldrc",{A_IMM},{HEX_8,HEX_A,IMM0_8S}, arch_sh4al_dsp_up},
+/* 10001010i8*1.... ldrc #<imm>         */{"ldrc",{A_IMM},{HEX_8,HEX_A,IMM0_8U}, arch_sh4al_dsp_up},
 
 /* 10001110i8p2.... ldre @(<disp>,PC)	*/{"ldre",{A_DISP_PC},{HEX_8,HEX_E,PCRELIMM_8BY2}, arch_sh_dsp_up},
 
@@ -708,7 +708,7 @@ const sh_opcode_info sh_table[] =
 
 /* 0100nnnn00010100 setrc <REG_N>       */{"setrc",{A_REG_N},{HEX_4,REG_N,HEX_1,HEX_4}, arch_sh_dsp_up},
 
-/* 10000010i8*1.... setrc #<imm>        */{"setrc",{A_IMM},{HEX_8,HEX_2,IMM0_8S}, arch_sh_dsp_up},
+/* 10000010i8*1.... setrc #<imm>        */{"setrc",{A_IMM},{HEX_8,HEX_2,IMM0_8U}, arch_sh_dsp_up},
 
 /* repeat start end <REG_N>       	*/{"repeat",{A_DISP_PC,A_DISP_PC,A_REG_N},{REPEAT,REG_N,HEX_1,HEX_4}, arch_sh_dsp_up},
 
