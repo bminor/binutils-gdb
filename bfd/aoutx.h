@@ -1945,7 +1945,12 @@ NAME (aout, swap_std_reloc_out) (bfd *abfd,
   PUT_WORD (abfd, g->address, natptr->r_address);
 
   BFD_ASSERT (g->howto != NULL);
-  r_length = g->howto->size ;	/* Size as a power of two.  */
+
+  if (bfd_get_reloc_size (g->howto) != 8)
+    r_length = g->howto->size;	/* Size as a power of two.  */
+  else
+    r_length = 3;
+
   r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC?  */
   /* XXX This relies on relocs coming from a.out files.  */
   r_baserel = (g->howto->type & 8) != 0;
@@ -3803,13 +3808,16 @@ aout_link_reloc_link_order (struct aout_final_link_info *flaginfo,
 	int r_baserel;
 	int r_jmptable;
 	int r_relative;
-	int r_length;
+	unsigned int r_length;
 
 	r_pcrel = (int) howto->pc_relative;
 	r_baserel = (howto->type & 8) != 0;
 	r_jmptable = (howto->type & 16) != 0;
 	r_relative = (howto->type & 32) != 0;
-	r_length = howto->size;
+	if (bfd_get_reloc_size (howto) != 8)
+	  r_length = howto->size;	/* Size as a power of two.  */
+	else
+	  r_length = 3;
 
 	PUT_WORD (flaginfo->output_bfd, p->offset, srel.r_address);
 	if (bfd_header_big_endian (flaginfo->output_bfd))

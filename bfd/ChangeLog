@@ -1,3 +1,8 @@
+2020-04-29  Gunther Nikl  <gnikl@justmail.de>
+
+	* aoutx.h (swap_std_reloc_out): Special case 64 bit relocations.
+	(aout_link_reloc_link_order): Likewise. Make r_length an unsigned.
+
 2020-04-28  Alan Modra  <amodra@gmail.com>
 
 	* vms-alpha.c (_bfd_vms_slurp_etir): Correct divide by zero check.
