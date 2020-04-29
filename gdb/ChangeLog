@@ -1,5 +1,10 @@
 2020-04-29  Kamil Rytarowski  <n54@gmx.com>
 
+	* nbsd-tdep.c: Include "xml-syscall.h".
+	(nbsd_init_abi): Call `set_xml_syscall_file_name'.
+
+2020-04-29  Kamil Rytarowski  <n54@gmx.com>
+
 	* nbsd-nat.c: Include "sys/wait.h".
 	(nbsd_resume, nbsd_nat_target::resume, nbsd_wait)
 	(nbsd_nat_target::wait, nbsd_nat_target::insert_exec_catchpoint)

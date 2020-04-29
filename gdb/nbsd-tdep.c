@@ -25,6 +25,7 @@
 #include "nbsd-tdep.h"
 #include "gdbarch.h"
 #include "objfiles.h"
+#include "xml-syscall.h"
 
 /* Flags in the 'kve_protection' field in struct kinfo_vmentry.  These
    match the KVME_PROT_* constants in <sys/sysctl.h>.  */
@@ -470,5 +471,6 @@ nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_auxv_parse (gdbarch, svr4_auxv_parse);
 
   /* `catch syscall' */
+  set_xml_syscall_file_name (gdbarch, "syscalls/netbsd.xml");
   set_gdbarch_get_syscall_number (gdbarch, nbsd_get_syscall_number);
 }
