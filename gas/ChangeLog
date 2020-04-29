@@ -6,6 +6,7 @@
 	* testsuite/gas/sh/sh4a.s: Add test of a logical insn using an
 	unsigned 8-bit immediate.
 	* testsuite/gas/sh/sh4a.d: Extended expected disassembly.
+	* testsuite/gas/sh/sh4al-dsp.d: Update expected disassembly.
 
 2020-04-27  Tamar Christina  <tamar.christina@arm.com>
 
