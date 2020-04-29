@@ -1,3 +1,7 @@
+2020-04-29  Tom Tromey  <tom@tromey.com>
+
+	* stack.c (print_block_frame_labels): Remove.
+
 2020-04-29  Hannes Domani  <ssbssa@yahoo.de>
 
 	PR gdb/17320

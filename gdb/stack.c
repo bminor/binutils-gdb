@@ -2257,56 +2257,6 @@ iterate_over_block_locals (const struct block *b,
     }
 }
 
-
-/* Same, but print labels.  */
-
-#if 0
-/* Commented out, as the code using this function has also been
-   commented out.  FIXME:brobecker/2009-01-13: Find out why the code
-   was commented out in the first place.  The discussion introducing
-   this change (2007-12-04: Support lexical blocks and function bodies
-   that occupy non-contiguous address ranges) did not explain why
-   this change was made.  */
-static int
-print_block_frame_labels (struct gdbarch *gdbarch, struct block *b,
-			  int *have_default, struct ui_file *stream)
-{
-  struct block_iterator iter;
-  struct symbol *sym;
-  int values_printed = 0;
-
-  ALL_BLOCK_SYMBOLS (b, iter, sym)
-    {
-      if (strcmp (sym->linkage_name (), "default") == 0)
-	{
-	  if (*have_default)
-	    continue;
-	  *have_default = 1;
-	}
-      if (SYMBOL_CLASS (sym) == LOC_LABEL)
-	{
-	  struct symtab_and_line sal;
-	  struct value_print_options opts;
-
-	  sal = find_pc_line (SYMBOL_VALUE_ADDRESS (sym), 0);
-	  values_printed = 1;
-	  fputs_filtered (sym->print_name (), stream);
-	  get_user_print_options (&opts);
-	  if (opts.addressprint)
-	    {
-	      fprintf_filtered (stream, " ");
-	      fputs_filtered (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (sym)),
-			      stream);
-	    }
-	  fprintf_filtered (stream, " in file %s, line %d\n",
-			    sal.symtab->filename, sal.line);
-	}
-    }
-
-  return values_printed;
-}
-#endif
-
 /* Iterate over all the local variables in block B, including all its
    superblocks, stopping when the top-level block is reached.  */
 
