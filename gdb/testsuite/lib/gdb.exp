@@ -7106,5 +7106,23 @@ proc ensure_gdb_index { binfile } {
     return -1
 }
 
+# Return 1 if executable contains .debug_types section.  Otherwise, return 0.
+
+proc debug_types { } {
+    global hex
+
+    set cmd "maint info sections"
+    gdb_test_multiple $cmd "" {
+	-re -wrap "at $hex: .debug_types.*" {
+	    return 1
+	}
+	-re -wrap "" {
+	    return 0
+	}
+    }
+
+    return 0
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

@@ -1,3 +1,9 @@
+2020-04-29  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (debug_types): New proc.
+	* gdb.guile/scm-symtab.exp: Add xfail for PR gcc/90232.
+	* gdb.python/py-symtab.exp: Same.
+
 2020-04-29  Hannes Domani  <ssbssa@yahoo.de>
 
 	PR gdb/17320

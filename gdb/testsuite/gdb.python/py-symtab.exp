@@ -32,6 +32,8 @@ if ![runto_main] then {
     return 0
 }
 
+set debug_types [debug_types]
+
 global hex decimal
 
 # Setup and get the symbol table.
@@ -75,7 +77,20 @@ gdb_test "python print (\"func\" in global_symbols)" "True" "test func in global
 gdb_test "python print (\"main\" in global_symbols)" "True" "test main in global symbols"
 gdb_test "python print (\"int\" in static_symbols)" "True" "test int in static symbols"
 gdb_test "python print (\"char\" in static_symbols)" "True" "test char in static symbols"
-gdb_test "python print (\"simple_struct\" in static_symbols)" "True" "test simple_struct in static symbols"
+gdb_test_multiple "python print (\"simple_struct\" in static_symbols)" \
+    "test simple_struct in static symbols" {
+	-re -wrap "True" {
+	    pass $gdb_test_name
+	}
+	-re -wrap "False" {
+	    if { $debug_types } {
+		# Xfail for PR gcc/90232.
+		xfail $gdb_test_name
+	    } else {
+		fail $gdb_test_name
+	    }
+	}
+    }
 
 # Test is_valid when the objfile is unloaded.  This must be the last
 # test as it unloads the object file in GDB.
