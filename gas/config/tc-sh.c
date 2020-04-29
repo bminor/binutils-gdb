@@ -2091,7 +2091,8 @@ build_Mytes (sh_opcode_info *opcode, sh_operand_info *operand)
 	    case IMM0_8BY2:
 	      insert (output + low_byte, BFD_RELOC_SH_IMM8BY2, 0, operand);
 	      break;
-	    case IMM0_8:
+	    case IMM0_8U:
+	    case IMM0_8S:
 	      insert (output + low_byte, BFD_RELOC_SH_IMM8, 0, operand);
 	      break;
 	    case IMM1_8BY4:

@@ -1,3 +1,12 @@
+2020-04-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 22699
+	* config/tc-sh.c (build_Mytes): Change operand type IMM0_8 to
+	IMM0_8S and add support for IMM0_8U.
+	* testsuite/gas/sh/sh4a.s: Add test of a logical insn using an
+	unsigned 8-bit immediate.
+	* testsuite/gas/sh/sh4a.d: Extended expected disassembly.
+
 2020-04-27  Tamar Christina  <tamar.christina@arm.com>
 
 	* NEWS: Add news entry for big-obj.
