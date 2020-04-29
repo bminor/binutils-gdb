@@ -263,12 +263,12 @@ extern unsigned char * get_build_id (void *);
 #endif
 
 static inline void
-report_leb_status (int status)
+report_leb_status (int status, const char *file, unsigned long lnum)
 {
   if ((status & 1) != 0)
-    error (_("LEB end of data\n"));
+    error (_("%s:%lu: end of data encountered whilst reading LEB\n"), file, lnum);
   else if ((status & 2) != 0)
-    error (_("LEB value too large\n"));
+    error (_("%s:%lu: read LEB value is too large to store in destination variable\n"), file, lnum);
 }
 
 #define SKIP_ULEB(start, end)					\
@@ -277,7 +277,8 @@ report_leb_status (int status)
       unsigned int _len;					\
       read_leb128 (start, end, FALSE, &_len, NULL);		\
       start += _len;						\
-    } while (0)
+    }								\
+  while (0)
 
 #define SKIP_SLEB(start, end)					\
   do								\
@@ -285,7 +286,8 @@ report_leb_status (int status)
       unsigned int _len;					\
       read_leb128 (start, end, TRUE, &_len, NULL);		\
       start += _len;						\
-    } while (0)
+    }								\
+  while (0)
 
 #define READ_ULEB(var, start, end)				\
   do								\
@@ -299,8 +301,9 @@ report_leb_status (int status)
       (var) = _val;						\
       if ((var) != _val)					\
 	_status |= 2;						\
-      report_leb_status (_status);				\
-    } while (0)
+      report_leb_status (_status, __FILE__, __LINE__);		\
+    }								\
+  while (0)
 
 #define READ_SLEB(var, start, end)				\
   do								\
@@ -314,5 +317,6 @@ report_leb_status (int status)
       (var) = _val;						\
       if ((var) != _val)					\
 	_status |= 2;						\
-      report_leb_status (_status);				\
-    } while (0)
+      report_leb_status (_status, __FILE__, __LINE__);		\
+    }								\
+  while (0)

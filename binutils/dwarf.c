@@ -2008,7 +2008,7 @@ read_and_print_leb128 (unsigned char *        data,
   int status;
   dwarf_vma val = read_leb128 (data, end, is_signed, bytes_read, &status);
   if (status != 0)
-    report_leb_status (status);
+    report_leb_status (status, __FILE__, __LINE__);
   else
     printf ("%s", dwarf_vmatoa (is_signed ? "d" : "u", val));
 }

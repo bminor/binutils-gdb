@@ -34,6 +34,15 @@
 
 extern char *program_name;
 
+/* FIXME:  This definition really ought to be in ansidecl.h.  */
+#ifndef ATTRIBUTE_WEAK
+#define ATTRIBUTE_WEAK __attribute__((weak))
+#endif
+
+/* Allow the following two functions to be overridden if desired.  */
+void error (const char *, ...) ATTRIBUTE_WEAK;
+void warn (const char *, ...) ATTRIBUTE_WEAK;
+
 void
 error (const char *message, ...)
 {

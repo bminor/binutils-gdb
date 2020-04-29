@@ -4706,6 +4706,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-V}|@option{--version-info}]
         [@option{-A}|@option{--arch-specific}]
         [@option{-D}|@option{--use-dynamic}]
+        [@option{-L}|@option{--lint}|@option{--enable-checks}]
         [@option{-x} <number or name>|@option{--hex-dump=}<number or name>]
         [@option{-p} <number or name>|@option{--string-dump=}<number or name>]
         [@option{-R} <number or name>|@option{--relocated-dump=}<number or name>]
@@ -4861,6 +4862,15 @@ symbol table sections.
 
 When displaying relocations, this option makes @command{readelf}
 display the dynamic relocations rather than the static relocations.
+
+@item -L
+@itemx --lint
+@itemx --enable-checks
+Displays warning messages about possible problems with the file(s)
+being examined.  If used on its own then all of the contents of the
+file(s) will be examined.  If used with one of the dumping options
+then the warning messages will only be produced for the things being
+displayed.
 
 @item -x <number or name>
 @itemx --hex-dump=<number or name>

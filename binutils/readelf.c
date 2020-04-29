@@ -199,7 +199,8 @@ struct dump_list_entry
 
 /* A dynamic array of flags indicating for which sections a dump
    has been requested via command line switches.  */
-struct dump_data {
+struct dump_data
+{
   dump_type *          dump_sects;
   unsigned int         num_dump_sects;
 };
@@ -230,6 +231,8 @@ static bfd_boolean do_ctf = FALSE;
 static bfd_boolean do_arch = FALSE;
 static bfd_boolean do_notes = FALSE;
 static bfd_boolean do_archive_index = FALSE;
+static bfd_boolean do_checks = FALSE;
+static bfd_boolean check_all = FALSE;
 static bfd_boolean is_32bit_elf = FALSE;
 static bfd_boolean decompress_dumps = FALSE;
 
@@ -382,6 +385,25 @@ bfd_vmatoa (char *fmtch, bfd_vma value)
   sprintf (fmt, "%%%s%s", BFD_VMA_FMT, fmtch);
   snprintf (ret, sizeof (buf[0].place), fmt, value);
   return ret;
+}
+
+/* A version of the warn() function that is disabled if do_checks is not active.  */
+
+void
+warn (const char *message, ...)
+{
+  va_list args;
+
+  if (!do_checks)
+    return;
+
+  /* Try to keep warning messages in sync with the program's normal output.  */
+  fflush (stdout);
+
+  va_start (args, message);
+  fprintf (stderr, _("%s: Warning: "), program_name);
+  vfprintf (stderr, message, args);
+  va_end (args);
 }
 
 /* Retrieve NMEMB structures, each SIZE bytes long from FILEDATA starting at
@@ -4478,6 +4500,8 @@ static struct option options[] =
   {"relocs",	       no_argument, 0, 'r'},
   {"notes",	       no_argument, 0, 'n'},
   {"dynamic",	       no_argument, 0, 'd'},
+  {"lint",             no_argument, 0, 'L'},
+  {"enable-checks",    no_argument, 0, 'L'},
   {"arch-specific",    no_argument, 0, 'A'},
   {"version-info",     no_argument, 0, 'V'},
   {"use-dynamic",      no_argument, 0, 'D'},
@@ -4525,7 +4549,7 @@ usage (FILE * stream)
   -e --headers           Equivalent to: -h -l -S\n\
   -s --syms              Display the symbol table\n\
      --symbols           An alias for --syms\n\
-  --dyn-syms             Display the dynamic symbol table\n\
+     --dyn-syms          Display the dynamic symbol table\n\
   -n --notes             Display the core notes (if present)\n\
   -r --relocs            Display the relocations (if present)\n\
   -u --unwind            Display the unwind info (if present)\n\
@@ -4534,6 +4558,7 @@ usage (FILE * stream)
   -A --arch-specific     Display architecture specific information (if any)\n\
   -c --archive-index     Display the symbol/file index in an archive\n\
   -D --use-dynamic       Use the dynamic section info when displaying symbols\n\
+  -L --lint|--enable-checks  Display warning messages for possible problems\n\
   -x --hex-dump=<number|name>\n\
                          Dump the contents of section <number|name> as bytes\n\
   -p --string-dump=<number|name>\n\
@@ -4662,7 +4687,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
     usage (stderr);
 
   while ((c = getopt_long
-	  (argc, argv, "ADHINR:SVWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
+	  (argc, argv, "ADHILNR:SVWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
     {
       switch (c)
 	{
@@ -4735,6 +4760,9 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  break;
 	case 'c':
 	  do_archive_index = TRUE;
+	  break;
+	case 'L':
+	  do_checks = TRUE;
 	  break;
 	case 'x':
 	  request_dump (dumpdata, HEX_DUMP);
@@ -4832,7 +4860,18 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
       && !do_histogram && !do_debugging && !do_arch && !do_notes
       && !do_section_groups && !do_archive_index
       && !do_dyn_syms)
-    usage (stderr);
+    {
+      if (do_checks)
+	{
+	  check_all = TRUE;
+	  do_dynamic = do_syms = do_reloc = do_unwind = do_sections = TRUE;
+	  do_segments = do_header = do_dump = do_version = TRUE;
+	  do_histogram = do_debugging = do_arch = do_notes = TRUE;
+	  do_section_groups = do_archive_index = do_dyn_syms = TRUE;
+	}
+      else
+	usage (stderr);
+    }
 }
 
 static const char *
@@ -6277,7 +6316,7 @@ process_section_headers (Filedata * filedata)
   while (0)
 
 #define CHECK_ENTSIZE(section, i, type)					\
-  CHECK_ENTSIZE_VALUES (section, i, sizeof (Elf32_External_##type),	    \
+  CHECK_ENTSIZE_VALUES (section, i, sizeof (Elf32_External_##type),	\
 			sizeof (Elf64_External_##type))
 
   for (i = 0, section = filedata->section_headers;
@@ -6286,8 +6325,11 @@ process_section_headers (Filedata * filedata)
     {
       char * name = SECTION_NAME (section);
 
-      if (section->sh_type == SHT_DYNSYM)
+      /* Run some sanity checks on the headers and
+	 possibly fill in some file data as well.  */
+      switch (section->sh_type)
 	{
+	case SHT_DYNSYM:
 	  if (filedata->dynamic_symbols != NULL)
 	    {
 	      error (_("File contains multiple dynamic symbol tables\n"));
@@ -6297,45 +6339,74 @@ process_section_headers (Filedata * filedata)
 	  CHECK_ENTSIZE (section, i, Sym);
 	  filedata->dynamic_symbols
 	    = GET_ELF_SYMBOLS (filedata, section, &filedata->num_dynamic_syms);
-	}
-      else if (section->sh_type == SHT_STRTAB
-	       && streq (name, ".dynstr"))
-	{
-	  if (filedata->dynamic_strings != NULL)
+	  break;
+
+	case SHT_STRTAB:
+	  if (streq (name, ".dynstr"))
 	    {
-	      error (_("File contains multiple dynamic string tables\n"));
-	      continue;
+	      if (filedata->dynamic_strings != NULL)
+		{
+		  error (_("File contains multiple dynamic string tables\n"));
+		  continue;
+		}
+
+	      filedata->dynamic_strings
+		= (char *) get_data (NULL, filedata, section->sh_offset,
+				     1, section->sh_size, _("dynamic strings"));
+	      filedata->dynamic_strings_length
+		= filedata->dynamic_strings == NULL ? 0 : section->sh_size;
 	    }
+	  break;
 
-	  filedata->dynamic_strings
-	    = (char *) get_data (NULL, filedata, section->sh_offset,
-				 1, section->sh_size, _("dynamic strings"));
-	  filedata->dynamic_strings_length
-	    = filedata->dynamic_strings == NULL ? 0 : section->sh_size;
-	}
-      else if (section->sh_type == SHT_SYMTAB_SHNDX)
-	{
-	  elf_section_list * entry = xmalloc (sizeof * entry);
+	case SHT_SYMTAB_SHNDX:
+	  {
+	    elf_section_list * entry = xmalloc (sizeof * entry);
 
-	  entry->hdr = section;
-	  entry->next = filedata->symtab_shndx_list;
-	  filedata->symtab_shndx_list = entry;
+	    entry->hdr = section;
+	    entry->next = filedata->symtab_shndx_list;
+	    filedata->symtab_shndx_list = entry;
+	  }
+	  break;
+
+	case SHT_SYMTAB:
+	  CHECK_ENTSIZE (section, i, Sym);
+	  break;
+
+	case SHT_GROUP:
+	  CHECK_ENTSIZE_VALUES (section, i, GRP_ENTRY_SIZE, GRP_ENTRY_SIZE);
+	  break;
+
+	case SHT_REL:
+	  CHECK_ENTSIZE (section, i, Rel);
+	  if (section->sh_size == 0)
+	    warn (_("Section '%s': zero-sized relocation section\n"), name);
+	  break;
+
+	case SHT_RELA:
+	  CHECK_ENTSIZE (section, i, Rela);
+	  if (section->sh_size == 0)
+	    warn (_("Section '%s': zero-sized relocation section\n"), name);
+	  break;
+
+	case SHT_NOTE:
+	case SHT_PROGBITS:
+	  if (section->sh_size == 0)
+	    /* This is not illegal according to the ELF standard, but
+	       it might be an indication that something is wrong.  */
+	    warn (_("Section '%s': has a size of zero - is this intended ?\n"), name);
+	  break;
+
+	default:
+	  break;
 	}
-      else if (section->sh_type == SHT_SYMTAB)
-	CHECK_ENTSIZE (section, i, Sym);
-      else if (section->sh_type == SHT_GROUP)
-	CHECK_ENTSIZE_VALUES (section, i, GRP_ENTRY_SIZE, GRP_ENTRY_SIZE);
-      else if (section->sh_type == SHT_REL)
-	CHECK_ENTSIZE (section, i, Rel);
-      else if (section->sh_type == SHT_RELA)
-	CHECK_ENTSIZE (section, i, Rela);
-      else if ((do_debugging || do_debug_info || do_debug_abbrevs
-		|| do_debug_lines || do_debug_pubnames || do_debug_pubtypes
-		|| do_debug_aranges || do_debug_frames || do_debug_macinfo
-		|| do_debug_str || do_debug_loc || do_debug_ranges
-		|| do_debug_addr || do_debug_cu_index || do_debug_links)
-	       && (const_strneq (name, ".debug_")
-                   || const_strneq (name, ".zdebug_")))
+
+      if ((do_debugging || do_debug_info || do_debug_abbrevs
+	   || do_debug_lines || do_debug_pubnames || do_debug_pubtypes
+	   || do_debug_aranges || do_debug_frames || do_debug_macinfo
+	   || do_debug_str || do_debug_loc || do_debug_ranges
+	   || do_debug_addr || do_debug_cu_index || do_debug_links)
+	  && (const_strneq (name, ".debug_")
+	      || const_strneq (name, ".zdebug_")))
 	{
           if (name[1] == 'z')
             name += sizeof (".zdebug_") - 1;
@@ -20646,7 +20717,7 @@ process_file (char * file_name)
     }
   else
     {
-      if (do_archive_index)
+      if (do_archive_index && !check_all)
 	error (_("File %s is not an archive so its index cannot be displayed.\n"),
 	       file_name);
 
@@ -20712,9 +20783,14 @@ main (int argc, char ** argv)
   parse_args (& cmdline, argc, argv);
 
   if (optind < (argc - 1))
+    /* When displaying information for more than one file,
+       prefix the information with the file name.  */
     show_name = TRUE;
   else if (optind >= argc)
     {
+      /* Ensure that the warning is always displayed.  */
+      do_checks = TRUE;
+
       warn (_("Nothing to do.\n"));
       usage (stderr);
     }

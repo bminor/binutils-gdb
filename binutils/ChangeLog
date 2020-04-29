@@ -1,5 +1,33 @@
 2020-04-29  Nick Clifton  <nickc@redhat.com>
 
+	* readelf.c (warn): New function - like elfcomm.c version but only
+	produces output if warnings are enabled.
+	(struct options): Add --lint and --enable-checks.
+	(usage): Add entry for --lint.
+	(parse_args): Handle -L.  If checks are enabled but no dumps have
+	been selected then enable all dumps.
+	(process_section_headers): Replace long if-then-else sequence with
+	a switch.  Add warning messages for empty SHT_REL, SHT_RELA and
+	SHT_PROGBITS sections.
+	(process_file): Do not complain if the file is an archive and lint
+	mode has been enabled.
+	* elfcomm.c (error): Make the function weak.
+	(warn): Likewise.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi: Document the new feature.
+	* dwarf.h (report_leb_status): Add file name and line number
+	parameters.  Include them in the diagnostic output.
+	(READ_ULEB): Pass file and line number to report_leb_status.
+	(READ_SLEB): Likewise.
+	* dwarf.c (read_and_print_leb128): Pass file and line number to
+	report_leb_status.
+	* testsuite/binutils-all/readelf.exp: Add test of new feature.
+	* testsuite/binutils-all/zero-sec.s: New test source file.
+	* testsuite/binutils-all/zero-sec.r: Expected output from new
+	test.
+
+2020-04-29  Nick Clifton  <nickc@redhat.com>
+
 	* po/sr.po: Updated Serbian translation.
 
 2020-04-26  Alan Modra  <amodra@gmail.com>
