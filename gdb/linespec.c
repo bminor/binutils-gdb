@@ -3670,12 +3670,12 @@ find_method (struct linespec_state *self, std::vector<symtab *> *file_symtabs,
      because we collect data across the program space before deciding
      what to do.  */
   last_result_len = 0;
-  unsigned int ix = 0;
   for (const auto &elt : *sym_classes)
     {
       struct type *t;
       struct program_space *pspace;
       struct symbol *sym = elt.symbol;
+      unsigned int ix = &elt - &*sym_classes->begin ();
 
       /* Program spaces that are executing startup should have
 	 been filtered out earlier.  */
@@ -3706,7 +3706,6 @@ find_method (struct linespec_state *self, std::vector<symtab *> *file_symtabs,
 
 	  superclass_vec.clear ();
 	  last_result_len = result_names.size ();
-	  ++ix;
 	}
     }
 

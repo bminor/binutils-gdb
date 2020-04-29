@@ -685,13 +685,23 @@ if {[skip_cplus_tests]} { continue }
 # test running programs
 #
 
-standard_testfile .cc
+standard_testfile cpexprs.cc
 
 if {[get_compiler_info "c++"]} {
     return -1
 }
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
+if { [info exists flags] } {
+    # Already set externally.
+} else {
+    # Initialize to empty.
+    set flags {}
+}
+
+# Include required flags.
+set flags "$flags debug c++"
+
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile "$flags"]} {
     return -1
 }
 
