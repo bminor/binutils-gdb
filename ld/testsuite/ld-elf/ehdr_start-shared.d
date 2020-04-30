@@ -2,7 +2,7 @@
 #ld: -e _start -shared
 #nm: -n
 #target: *-*-linux* *-*-gnu* *-*-nacl* arm*-*-uclinuxfdpiceabi
-#xfail: cris*-*-* frv-*-* h8300-*-*
+#xfail: cris*-*-* frv-*-* ![check_shared_lib_support] 
 
 #...
 [0-9a-f]*000 [Adrt] __ehdr_start

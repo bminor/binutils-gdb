@@ -291,6 +291,23 @@ proc check_shared_lib_support { } {
     return $shared_available_saved
 }
 
+# Returns true if -pie is supported on the target
+
+proc check_pie_support { } {
+    global pie_available_saved
+    global ld
+
+    if {![info exists pie_available_saved]} {
+	set ld_output [remote_exec host $ld "-pie"]
+	if { [ string first "not supported" $ld_output ] >= 0 } {
+	    set pie_available_saved 0
+	} else {
+	    set pie_available_saved 1
+	}
+    }
+    return $pie_available_saved
+}
+
 # Compare two files line-by-line.  FILE_1 is the actual output and FILE_2
 # is the expected output.  Ignore blank lines in either file.
 #

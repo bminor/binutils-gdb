@@ -3,7 +3,7 @@
 #ld: -shared --compress-debug-sections=zlib-gnu
 #readelf: -SW
 #target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
-#xfail: h8300-*-*
+#xfail: ![check_shared_lib_support] 
 
 #failif
 #...

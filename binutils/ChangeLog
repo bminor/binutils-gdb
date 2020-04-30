@@ -1,3 +1,8 @@
+2020-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/lib/binutils-common.exp (check_pie_support): New
+	proc.
+
 2020-04-29  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf.c (display_debug_ranges): Ignore duplicate entries in

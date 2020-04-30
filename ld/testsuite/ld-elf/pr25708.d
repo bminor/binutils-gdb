@@ -2,7 +2,7 @@
 #ld: -shared -version-script pr13195.t
 #nm: -D
 #target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
-#xfail: h8300-*-* hppa64-*-*
+#xfail: hppa64-*-* ![check_shared_lib_support] 
 # h8300 doesn't support -shared, and hppa64 creates .foo
 
 #..

@@ -6,7 +6,7 @@
 #ld: --build-id -shared
 #readelf: -l --wide
 #target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
-#xfail: h8300-*-*
+#xfail: ![check_shared_lib_support] 
 
 #...
  +[0-9]+ +\.note\.4 \.note\.1 +

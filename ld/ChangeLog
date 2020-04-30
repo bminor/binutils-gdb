@@ -1,3 +1,85 @@
+2020-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-elf/compress1c.d: XFAIL if thet target linker does
+	not support the -shared command line option.
+	* /ld-elf/compressed1c.d: Likewise.
+	* /ld-elf/compressed1e.d: Likewise.
+	* /ld-elf/dynamic1.d: Likewise.
+	* /ld-elf/dynsym1.d: Likewise.
+	* /ld-elf/ehdr_start-shared.d: Likewise.
+	* /ld-elf/exclude3b.d: Likewise.
+	* /ld-elf/global1.d: Likewise.
+	* /ld-elf/hash.d: Likewise.
+	* /ld-elf/local1.d: Likewise.
+	* /ld-elf/mbind1b.d: Likewise.
+	* /ld-elf/now-1.d: Likewise.
+	* /ld-elf/now-2.d: Likewise.
+	* /ld-elf/now-3.d: Likewise.
+	* /ld-elf/now-4.d: Likewise.
+	* /ld-elf/pr12975.d: Likewise.
+	* /ld-elf/pr13177.d: Likewise.
+	* /ld-elf/pr13195.d: Likewise.
+	* /ld-elf/pr16322.d: Likewise.
+	* /ld-elf/pr16498a.d: Likewise.
+	* /ld-elf/pr16498b.d: Likewise.
+	* /ld-elf/pr17615.d: Likewise.
+	* /ld-elf/pr19162.d: Likewise.
+	* /ld-elf/pr19698.d: Likewise.
+	* /ld-elf/pr20513c.d: Likewise.
+	* /ld-elf/pr20513d.d: Likewise.
+	* /ld-elf/pr21389a.d: Likewise.
+	* /ld-elf/pr21389b.d: Likewise.
+	* /ld-elf/pr21389c.d: Likewise.
+	* /ld-elf/pr21562a.d: Likewise.
+	* /ld-elf/pr21562b.d: Likewise.
+	* /ld-elf/pr21562c.d: Likewise.
+	* /ld-elf/pr21562d.d: Likewise.
+	* /ld-elf/pr21562e.d: Likewise.
+	* /ld-elf/pr21562f.d: Likewise.
+	* /ld-elf/pr21562g.d: Likewise.
+	* /ld-elf/pr21562h.d: Likewise.
+	* /ld-elf/pr21562i.d: Likewise.
+	* /ld-elf/pr21562j.d: Likewise.
+	* /ld-elf/pr21562k.d: Likewise.
+	* /ld-elf/pr21562l.d: Likewise.
+	* /ld-elf/pr21562m.d: Likewise.
+	* /ld-elf/pr21562n.d: Likewise.
+	* /ld-elf/pr21903a.d: Likewise.
+	* /ld-elf/pr21903b.d: Likewise.
+	* /ld-elf/pr22269b.d: Likewise.
+	* /ld-elf/pr22393-1a.d: Likewise.
+	* /ld-elf/pr22393-1b.d: Likewise.
+	* /ld-elf/pr23658-1c.d: Likewise.
+	* /ld-elf/pr25708.d: Likewise.
+	* /ld-elf/rpath-1.d: Likewise.
+	* /ld-elf/rpath-2.d: Likewise.
+	* /ld-elf/runpath-1.d: Likewise.
+	* /ld-elf/runpath-2.d: Likewise.
+	* /ld-elf/sizeofb.d: Likewise.
+	* /ld-elf/startofb.d: Likewise.
+	* /ld-elf/strtab.d: Likewise.
+	* /ld-elf/textaddr2.d: Likewise.
+	* /ld-elf/textaddr5.d: Likewise.
+	* /ld-elf/textaddr6.d: Likewise.
+	* /ld-elf/unknown2.d: Likewise.
+	* /ld-undefined/entry-3.d: Likewise.
+	* /ld-undefined/entry-4.d: Likewise.
+	* /ld-elf/mbind1c.d: XFAIL if the target linker does not support
+	the -pie option.
+	* /ld-elf/pie.d: Likewise.
+	* /ld-elf/pr19539.d: Likewise.
+	* /ld-elf/pr21903d.d: Likewise.
+	* /ld-elf/pr22269a.d: Likewise.
+	* /ld-elf/pr22393-1c.d: Likewise.
+	* /ld-elf/pr22393-1d.d: Likewise.
+	* /ld-elf/pr22423.d: Likewise.
+	* /ld-elf/loadaddr1.d: Expect to fail on the rx-linux target.
+	* /ld-elf/loadaddr2.d: Likewise.
+	* /ld-elf/pr22393-1e.d: Likewise.
+	* /ld-elf/pr22393-1f.d: Likewise.
+	* /ld-elf/textaddr1.d: Likewise.
+	* /ld-elf/textaddr4.d: Likewise.
+
 2020-04-30  Yoshinori Sato <ysato@users.sourceforge.jp>
 
 	* emulparams/elf32rx_linux.sh: New rx-linux emulation.

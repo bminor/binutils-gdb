@@ -2,7 +2,7 @@
 #readelf: -d -s -D
 #ld: -shared --hash-style=gnu
 #target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
-#xfail: h8300-*-*
+#xfail: ![check_shared_lib_support] 
 #xfail: mips*-*-*
 # MIPS uses a different style of GNU hash due to psABI restrictions
 # on dynsym table ordering.
