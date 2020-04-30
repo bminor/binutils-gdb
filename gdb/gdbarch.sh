@@ -75,7 +75,7 @@ ${line}
 EOF
 	    IFS="${OFS}"
 
-	    if test -n "${garbage_at_eol}"
+	    if test -n "${garbage_at_eol:-}"
 	    then
 		echo "Garbage at end-of-line in ${line}" 1>&2
 		kill $$
@@ -93,19 +93,19 @@ EOF
 	    done
 
 	    case "${class}" in
-		m ) staticdefault="${predefault}" ;;
+		m ) staticdefault="${predefault:-}" ;;
 		M ) staticdefault="0" ;;
 		* ) test "${staticdefault}" || staticdefault=0 ;;
 	    esac
 
 	    case "${class}" in
 	    F | V | M )
-		case "${invalid_p}" in
+		case "${invalid_p:-}" in
 		"" )
 		    if test -n "${predefault}"
 		    then
 			#invalid_p="gdbarch->${function} == ${predefault}"
-			predicate="gdbarch->${function} != ${predefault}"
+			predicate="gdbarch->${function:-} != ${predefault}"
 		    elif class_is_variable_p
 		    then
 			predicate="gdbarch->${function} != 0"
@@ -139,7 +139,7 @@ EOF
 
 fallback_default_p ()
 {
-    { [ -n "${postdefault}" ] && [ "x${invalid_p}" != "x0" ]; } \
+    { [ -n "${postdefault:-}" ] && [ "x${invalid_p}" != "x0" ]; } \
 	|| { [ -n "${predefault}" ] && [ "x${invalid_p}" = "x0" ]; }
 }
 
@@ -1206,7 +1206,7 @@ exec > new-gdbarch.log
 function_list | while do_read
 do
     cat <<EOF
-${class} ${returntype} ${function} ($formal)
+${class} ${returntype:-} ${function} (${formal:-})
 EOF
     for r in ${read}
     do
@@ -2119,7 +2119,7 @@ do
 	fi
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_%s called\\\\n\");\n" "$function"
-	if [ "x${actual}" = "x-" ] || [ "x${actual}" = "x" ]
+	if [ "x${actual:-}" = "x-" ] || [ "x${actual:-}" = "x" ]
 	then
 	    if class_is_multiarch_p
 	    then

@@ -1,5 +1,10 @@
 2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbarch.sh: Use ${foo:-} where shellcheck would report a
+	"referenced but not assigned" warning.
+
+2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbarch.sh: Remove code that sets fallbackdefault.
 
 2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
