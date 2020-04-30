@@ -1,3 +1,8 @@
+2020-04-30  Alex Coplan  <alex.coplan@arm.com>
+
+	* opcode/aarch64.h (enum aarch64_opnd): Add
+	AARCH64_OPND_UNDEFINED.
+
 2020-04-23  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* elf/common.h (NT_ARC_V2): New macro definitions.

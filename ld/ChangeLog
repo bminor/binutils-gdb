@@ -1,3 +1,10 @@
+2020-04-30  Alex Coplan  <alex.coplan@arm.com>
+
+	* testsuite/ld-aarch64/erratum843419_tls_ie.d: Use udf in disassembly.
+	* testsuite/ld-aarch64/farcall-b-section.d: Likewise.
+	* testsuite/ld-aarch64/farcall-back.d: Likewise.
+	* testsuite/ld-aarch64/farcall-bl-section.d: Likewise.
+
 2020-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-elf/compress1c.d: XFAIL if thet target linker does

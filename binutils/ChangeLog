@@ -1,3 +1,9 @@
+2020-04-30  Alex Coplan  <alex.coplan@arm.com>
+
+	* testsuite/binutils-all/aarch64/in-order-all.d: Update to use new
+	disassembly.
+	* testsuite/binutils-all/aarch64/out-of-order-all.d: Likewise.
+
 2020-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/lib/binutils-common.exp (check_pie_support): New

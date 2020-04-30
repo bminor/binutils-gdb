@@ -1,3 +1,15 @@
+2020-04-30  Alex Coplan  <alex.coplan@arm.com>
+
+	* aarch64-opc.h (enum aarch64_field_kind): Add FLD_imm16_2.
+	* aarch64-opc.c (fields): Add entry for FLD_imm16_2.
+	(operand_general_constraint_met_p): validate
+	AARCH64_OPND_UNDEFINED.
+	* aarch64-tbl.h (aarch64_opcode_table): Add udf instruction, entry
+	for FLD_imm16_2.
+	* aarch64-asm-2.c: Regenerated.
+	* aarch64-dis-2.c: Regenerated.
+	* aarch64-opc-2.c: Regenerated.
+
 2020-04-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 22699

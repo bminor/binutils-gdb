@@ -78,6 +78,7 @@ enum aarch64_field_kind
   FLD_imm12,
   FLD_imm14,
   FLD_imm16,
+  FLD_imm16_2,
   FLD_imm26,
   FLD_imms,
   FLD_immr,
