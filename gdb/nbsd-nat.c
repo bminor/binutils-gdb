@@ -222,11 +222,37 @@ nbsd_add_threads (nbsd_nat_target *target, pid_t pid)
   nbsd_thread_lister (pid, fn);
 }
 
+/* Enable additional event reporting on new processes.  */
+
+static void
+nbsd_enable_proc_events (pid_t pid)
+{
+  int events;
+
+  if (ptrace (PT_GET_EVENT_MASK, pid, &events, sizeof (events)) == -1)
+    perror_with_name (("ptrace"));
+
+  events |= PTRACE_LWP_CREATE;
+  events |= PTRACE_LWP_EXIT;
+
+  if (ptrace (PT_SET_EVENT_MASK, pid, &events, sizeof (events)) == -1)
+    perror_with_name (("ptrace"));
+}
+
+/* Implement the "post_startup_inferior" target_ops method.  */
+
+void
+nbsd_nat_target::post_startup_inferior (ptid_t ptid)
+{
+  nbsd_enable_proc_events (ptid.pid ());
+}
+
 /* Implement the "post_attach" target_ops method.  */
 
 void
 nbsd_nat_target::post_attach (int pid)
 {
+  nbsd_enable_proc_events (pid);
   nbsd_add_threads (this, pid);
 }
 
@@ -235,9 +261,7 @@ nbsd_nat_target::post_attach (int pid)
 void
 nbsd_nat_target::update_thread_list ()
 {
-  prune_threads ();
-
-  nbsd_add_threads (this, inferior_ptid.pid ());
+  delete_exited_threads ();
 }
 
 /* Convert PTID to a string.  */
@@ -686,8 +710,60 @@ nbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
   if (code <= SI_USER || code == SI_NOINFO)
     return wptid;
 
+  /* Process state for threading events */
+  ptrace_state_t pst = {};
+  if (code == TRAP_LWP)
+    {
+      if (ptrace (PT_GET_PROCESS_STATE, pid, &pst, sizeof (pst)) == -1)
+	perror_with_name (("ptrace"));
+    }
+
+  if (code == TRAP_LWP && pst.pe_report_event == PTRACE_LWP_EXIT)
+    {
+      /* If GDB attaches to a multi-threaded process, exiting
+	 threads might be skipped during post_attach that
+	 have not yet reported their PTRACE_LWP_EXIT event.
+	 Ignore exited events for an unknown LWP.  */
+      thread_info *thr = find_thread_ptid (this, wptid);
+      if (thr == nullptr)
+	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+      else
+	{
+	  ourstatus->kind = TARGET_WAITKIND_THREAD_EXITED;
+	  /* NetBSD does not store an LWP exit status.  */
+	  ourstatus->value.integer = 0;
+
+	  if (print_thread_events)
+	    printf_unfiltered (_("[%s exited]\n"),
+			       target_pid_to_str (wptid).c_str ());
+	  delete_thread (thr);
+	}
+
+      /* The GDB core expects that the rest of the threads are running.  */
+      if (ptrace (PT_CONTINUE, pid, (void *) 1, 0) == -1)
+	perror_with_name (("ptrace"));
+
+      return wptid;
+    }
+
   if (in_thread_list (this, ptid_t (pid)))
       thread_change_ptid (this, ptid_t (pid), wptid);
+
+  if (code == TRAP_LWP && pst.pe_report_event == PTRACE_LWP_CREATE)
+    {
+      /* If GDB attaches to a multi-threaded process, newborn
+	 threads might be added by nbsd_add_threads that have
+	 not yet reported their PTRACE_LWP_CREATE event.  Ignore
+	 born events for an already-known LWP.  */
+      if (in_thread_list (this, wptid))
+	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
+      else
+	{
+	  add_thread (this, wptid);
+	  ourstatus->kind = TARGET_WAITKIND_THREAD_CREATED;
+	}
+      return wptid;
+    }
 
   if (code == TRAP_EXEC)
     {

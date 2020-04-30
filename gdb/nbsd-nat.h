@@ -32,6 +32,7 @@ struct nbsd_nat_target : public inf_ptrace_target
 
   bool thread_alive (ptid_t ptid) override;
   const char *thread_name (struct thread_info *thr) override;
+  void post_startup_inferior (ptid_t ptid) override;
   void post_attach (int pid) override;
   void update_thread_list () override;
   std::string pid_to_str (ptid_t ptid) override;

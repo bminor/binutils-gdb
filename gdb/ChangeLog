@@ -1,3 +1,13 @@
+2020-04-30  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.c (nbsd_enable_proc_events)
+	(nbsd_nat_target::post_startup_inferior): Add.
+	(nbsd_nat_target::post_attach): Call `nbsd_enable_proc_events'.
+	(nbsd_nat_target::update_thread_list): Rewrite.
+	(nbsd_nat_target::wait): Handle "PTRACE_LWP_EXIT" and
+	"PTRACE_LWP_CREATE".
+	* nbsd-nat.h (nbsd_nat_target::post_startup_inferior): Add.
+
 2020-04-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 	* stack.c (_initialize_stack): Remove duplicated creation
 	of "frame" command and "f" alias.
