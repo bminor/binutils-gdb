@@ -1,3 +1,8 @@
+2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbarch.sh: Use %s with printf, instead of variables in the
+	format string.
+
 2020-04-29  Sterling Augustine <saugustine@google.com>
 
        * dwarf2/read.c (setup_type_unit_groups): Set list_in_scope.

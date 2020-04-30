@@ -1409,8 +1409,8 @@ do
     if class_is_info_p
     then
 	printf "\n"
-	printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
-	printf "/* set_gdbarch_${function}() - not applicable - pre-initialized.  */\n"
+	printf "extern %s gdbarch_%s (struct gdbarch *gdbarch);\n" "$returntype" "$function"
+	printf "/* set_gdbarch_%s() - not applicable - pre-initialized.  */\n" "$function"
     fi
 done
 
@@ -1431,33 +1431,33 @@ do
     if class_is_predicate_p
     then
 	printf "\n"
-	printf "extern int gdbarch_${function}_p (struct gdbarch *gdbarch);\n"
+	printf "extern int gdbarch_%s_p (struct gdbarch *gdbarch);\n" "$function"
     fi
     if class_is_variable_p
     then
 	printf "\n"
-	printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
-	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, ${returntype} ${function});\n"
+	printf "extern %s gdbarch_%s (struct gdbarch *gdbarch);\n" "$returntype" "$function"
+	printf "extern void set_gdbarch_%s (struct gdbarch *gdbarch, %s %s);\n" "$function" "$returntype" "$function"
     fi
     if class_is_function_p
     then
 	printf "\n"
 	if [ "x${formal}" = "xvoid" ] && class_is_multiarch_p
 	then
-	    printf "typedef ${returntype} (gdbarch_${function}_ftype) (struct gdbarch *gdbarch);\n"
+	    printf "typedef %s (gdbarch_%s_ftype) (struct gdbarch *gdbarch);\n" "$returntype" "$function"
 	elif class_is_multiarch_p
 	then
-	    printf "typedef ${returntype} (gdbarch_${function}_ftype) (struct gdbarch *gdbarch, ${formal});\n"
+	    printf "typedef %s (gdbarch_%s_ftype) (struct gdbarch *gdbarch, %s);\n" "$returntype" "$function" "$formal"
 	else
-	    printf "typedef ${returntype} (gdbarch_${function}_ftype) (${formal});\n"
+	    printf "typedef %s (gdbarch_%s_ftype) (%s);\n" "$returntype" "$function" "$formal"
 	fi
 	if [ "x${formal}" = "xvoid" ]
 	then
-	  printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch);\n"
+	  printf "extern %s gdbarch_%s (struct gdbarch *gdbarch);\n" "$returntype" "$function"
 	else
-	  printf "extern ${returntype} gdbarch_${function} (struct gdbarch *gdbarch, ${formal});\n"
+	  printf "extern %s gdbarch_%s (struct gdbarch *gdbarch, %s);\n" "$returntype" "$function" "$formal"
 	fi
-	printf "extern void set_gdbarch_${function} (struct gdbarch *gdbarch, gdbarch_${function}_ftype *${function});\n"
+	printf "extern void set_gdbarch_%s (struct gdbarch *gdbarch, gdbarch_%s_ftype *%s);\n" "$function" "$function" "$function"
     fi
 done
 
@@ -1832,7 +1832,7 @@ function_list | while do_read
 do
     if class_is_info_p
     then
-	printf "  ${returntype} ${function};\n"
+	printf "  %s %s;\n" "$returntype" "$function"
     fi
 done
 printf "\n"
@@ -1873,10 +1873,10 @@ function_list | while do_read
 do
     if class_is_variable_p
     then
-	printf "  ${returntype} ${function};\n"
+	printf "  %s %s;\n" "$returntype" "$function"
     elif class_is_function_p
     then
-	printf "  gdbarch_${function}_ftype *${function};\n"
+	printf "  gdbarch_%s_ftype *%s;\n" "$function" "$function"
     fi
 done
 printf "};\n"
@@ -1912,7 +1912,7 @@ function_list | while do_read
 do
     if class_is_info_p
     then
-	printf "  gdbarch->${function} = info->${function};\n"
+	printf "  gdbarch->%s = info->%s;\n" "$function" "$function"
     fi
 done
 printf "\n"
@@ -1923,7 +1923,7 @@ do
     then
 	if [ -n "${predefault}" -a "x${predefault}" != "x0" ]
 	then
-	  printf "  gdbarch->${function} = ${predefault};\n"
+	  printf "  gdbarch->%s = %s;\n" "$function" "$predefault"
 	fi
     fi
 done
@@ -1996,31 +1996,31 @@ do
     then
 	if [ "x${invalid_p}" = "x0" ]
 	then
-	    printf "  /* Skip verify of ${function}, invalid_p == 0 */\n"
+	    printf "  /* Skip verify of %s, invalid_p == 0 */\n" "$function"
 	elif class_is_predicate_p
 	then
-	    printf "  /* Skip verify of ${function}, has predicate.  */\n"
+	    printf "  /* Skip verify of %s, has predicate.  */\n" "$function"
 	# FIXME: See do_read for potential simplification
  	elif [ -n "${invalid_p}" -a -n "${postdefault}" ]
 	then
-	    printf "  if (${invalid_p})\n"
-	    printf "    gdbarch->${function} = ${postdefault};\n"
+	    printf "  if (%s)\n" "$invalid_p"
+	    printf "    gdbarch->%s = %s;\n" "$function" "$postdefault"
 	elif [ -n "${predefault}" -a -n "${postdefault}" ]
 	then
-	    printf "  if (gdbarch->${function} == ${predefault})\n"
-	    printf "    gdbarch->${function} = ${postdefault};\n"
+	    printf "  if (gdbarch->%s == %s)\n" "$function" "$predefault"
+	    printf "    gdbarch->%s = %s;\n" "$function" "$postdefault"
 	elif [ -n "${postdefault}" ]
 	then
-	    printf "  if (gdbarch->${function} == 0)\n"
-	    printf "    gdbarch->${function} = ${postdefault};\n"
+	    printf "  if (gdbarch->%s == 0)\n" "$function"
+	    printf "    gdbarch->%s = %s;\n" "$function" "$postdefault"
 	elif [ -n "${invalid_p}" ]
 	then
-	    printf "  if (${invalid_p})\n"
-	    printf "    log.puts (\"\\\\n\\\\t${function}\");\n"
+	    printf "  if (%s)\n" "$invalid_p"
+	    printf "    log.puts (\"\\\\n\\\\t%s\");\n" "$function"
 	elif [ -n "${predefault}" ]
 	then
-	    printf "  if (gdbarch->${function} == ${predefault})\n"
-	    printf "    log.puts (\"\\\\n\\\\t${function}\");\n"
+	    printf "  if (gdbarch->%s == %s)\n" "$function" "$predefault"
+	    printf "    log.puts (\"\\\\n\\\\t%s\");\n" "$function"
 	fi
     fi
 done
@@ -2056,15 +2056,15 @@ do
     if class_is_predicate_p
     then
 	printf "  fprintf_unfiltered (file,\n"
-	printf "                      \"gdbarch_dump: gdbarch_${function}_p() = %%d\\\\n\",\n"
-	printf "                      gdbarch_${function}_p (gdbarch));\n"
+	printf "                      \"gdbarch_dump: gdbarch_%s_p() = %%d\\\\n\",\n" "$function"
+	printf "                      gdbarch_%s_p (gdbarch));\n" "$function"
     fi
     # Print the corresponding value.
     if class_is_function_p
     then
 	printf "  fprintf_unfiltered (file,\n"
-	printf "                      \"gdbarch_dump: ${function} = <%%s>\\\\n\",\n"
-	printf "                      host_address_to_string (gdbarch->${function}));\n"
+	printf "                      \"gdbarch_dump: %s = <%%s>\\\\n\",\n" "$function"
+	printf "                      host_address_to_string (gdbarch->%s));\n" "$function"
     else
 	# It is a variable
 	case "${print}:${returntype}" in
@@ -2081,8 +2081,8 @@ do
 		;;
         esac
 	printf "  fprintf_unfiltered (file,\n"
-	printf "                      \"gdbarch_dump: ${function} = %s\\\\n\",\n" "${fmt}"
-	printf "                      ${print});\n"
+	printf "                      \"gdbarch_dump: %s = %s\\\\n\",\n" "$function" "$fmt"
+	printf "                      %s);\n" "$print"
     fi
 done
 cat <<EOF
@@ -2110,32 +2110,32 @@ do
     then
 	printf "\n"
 	printf "int\n"
-	printf "gdbarch_${function}_p (struct gdbarch *gdbarch)\n"
+	printf "gdbarch_%s_p (struct gdbarch *gdbarch)\n" "$function"
 	printf "{\n"
         printf "  gdb_assert (gdbarch != NULL);\n"
-	printf "  return ${predicate};\n"
+	printf "  return %s;\n" "$predicate"
 	printf "}\n"
     fi
     if class_is_function_p
     then
 	printf "\n"
-	printf "${returntype}\n"
+	printf "%s\n" "$returntype"
 	if [ "x${formal}" = "xvoid" ]
 	then
-	  printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
+	  printf "gdbarch_%s (struct gdbarch *gdbarch)\n" "$function"
 	else
-	  printf "gdbarch_${function} (struct gdbarch *gdbarch, ${formal})\n"
+	  printf "gdbarch_%s (struct gdbarch *gdbarch, %s)\n" "$function" "$formal"
 	fi
 	printf "{\n"
         printf "  gdb_assert (gdbarch != NULL);\n"
-	printf "  gdb_assert (gdbarch->${function} != NULL);\n"
+	printf "  gdb_assert (gdbarch->%s != NULL);\n" "$function"
 	if class_is_predicate_p && test -n "${predefault}"
 	then
 	    # Allow a call to a function with a predicate.
-	    printf "  /* Do not check predicate: ${predicate}, allow call.  */\n"
+	    printf "  /* Do not check predicate: %s, allow call.  */\n" "$predicate"
 	fi
 	printf "  if (gdbarch_debug >= 2)\n"
-	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
+	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_%s called\\\\n\");\n" "$function"
 	if [ "x${actual}" = "x-" -o "x${actual}" = "x" ]
 	then
 	    if class_is_multiarch_p
@@ -2154,58 +2154,58 @@ do
         fi
        	if [ "x${returntype}" = "xvoid" ]
 	then
-	  printf "  gdbarch->${function} (${params});\n"
+	  printf "  gdbarch->%s (%s);\n" "$function" "$params"
 	else
-	  printf "  return gdbarch->${function} (${params});\n"
+	  printf "  return gdbarch->%s (%s);\n" "$function" "$params"
 	fi
 	printf "}\n"
 	printf "\n"
 	printf "void\n"
-	printf "set_gdbarch_${function} (struct gdbarch *gdbarch,\n"
-        printf "            `echo ${function} | sed -e 's/./ /g'`  gdbarch_${function}_ftype ${function})\n"
+	printf "set_gdbarch_%s (struct gdbarch *gdbarch,\n" "$function"
+        printf "            `echo ${function} | sed -e 's/./ /g'`  gdbarch_%s_ftype %s)\n" "$function" "$function"
 	printf "{\n"
-	printf "  gdbarch->${function} = ${function};\n"
+	printf "  gdbarch->%s = %s;\n" "$function" "$function"
 	printf "}\n"
     elif class_is_variable_p
     then
 	printf "\n"
-	printf "${returntype}\n"
-	printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
+	printf "%s\n" "$returntype"
+	printf "gdbarch_%s (struct gdbarch *gdbarch)\n" "$function"
 	printf "{\n"
         printf "  gdb_assert (gdbarch != NULL);\n"
 	if [ "x${invalid_p}" = "x0" ]
 	then
-	    printf "  /* Skip verify of ${function}, invalid_p == 0 */\n"
+	    printf "  /* Skip verify of %s, invalid_p == 0 */\n" "$function"
 	elif [ -n "${invalid_p}" ]
 	then
 	    printf "  /* Check variable is valid.  */\n"
-	    printf "  gdb_assert (!(${invalid_p}));\n"
+	    printf "  gdb_assert (!(%s));\n" "$invalid_p"
 	elif [ -n "${predefault}" ]
 	then
 	    printf "  /* Check variable changed from pre-default.  */\n"
-	    printf "  gdb_assert (gdbarch->${function} != ${predefault});\n"
+	    printf "  gdb_assert (gdbarch->%s != %s);\n" "$function" "$predefault"
 	fi
 	printf "  if (gdbarch_debug >= 2)\n"
-	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
-	printf "  return gdbarch->${function};\n"
+	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_%s called\\\\n\");\n" "$function"
+	printf "  return gdbarch->%s;\n" "$function"
 	printf "}\n"
 	printf "\n"
 	printf "void\n"
-	printf "set_gdbarch_${function} (struct gdbarch *gdbarch,\n"
-        printf "            `echo ${function} | sed -e 's/./ /g'`  ${returntype} ${function})\n"
+	printf "set_gdbarch_%s (struct gdbarch *gdbarch,\n" "$function"
+        printf "            `echo ${function} | sed -e 's/./ /g'`  %s %s)\n" "$returntype" "$function"
 	printf "{\n"
-	printf "  gdbarch->${function} = ${function};\n"
+	printf "  gdbarch->%s = %s;\n" "$function" "$function"
 	printf "}\n"
     elif class_is_info_p
     then
 	printf "\n"
-	printf "${returntype}\n"
-	printf "gdbarch_${function} (struct gdbarch *gdbarch)\n"
+	printf "%s\n" "$returntype"
+	printf "gdbarch_%s (struct gdbarch *gdbarch)\n" "$function"
 	printf "{\n"
         printf "  gdb_assert (gdbarch != NULL);\n"
 	printf "  if (gdbarch_debug >= 2)\n"
-	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_${function} called\\\\n\");\n"
-	printf "  return gdbarch->${function};\n"
+	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_%s called\\\\n\");\n" "$function"
+	printf "  return gdbarch->%s;\n" "$function"
 	printf "}\n"
     fi
 done
