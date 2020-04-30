@@ -1,3 +1,7 @@
+2020-04-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+	* stack.c (_initialize_stack): Remove duplicated creation
+	of "frame" command and "f" alias.
+
 2020-04-30  Hannes Domani  <ssbssa@yahoo.de>
 
 	PR gdb/18706

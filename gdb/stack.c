@@ -3324,7 +3324,6 @@ Select and print a stack frame.\n\
 With no argument, print the selected stack frame.  (See also \"info frame\").\n\
 A single numerical argument specifies the frame to select."),
                   &frame_cmd_list, "frame ", 1, &cmdlist);
-
   add_com_alias ("f", "frame", class_stack, 1);
 
 #define FRAME_APPLY_OPTION_HELP "\
@@ -3383,14 +3382,6 @@ Usage: faas [OPTION]... COMMAND\n\
 shortcut for 'frame apply all -s [OPTION]... COMMAND'\n\
 See \"help frame apply all\" for available options."));
   set_cmd_completer_handle_brkchars (cmd, frame_apply_all_cmd_completer);
-
-  add_prefix_cmd ("frame", class_stack,
-		  &frame_cmd.base_command, _("\
-Select and print a stack frame.\n\
-With no argument, print the selected stack frame.  (See also \"info frame\").\n\
-A single numerical argument specifies the frame to select."),
-		  &frame_cmd_list, "frame ", 1, &cmdlist);
-  add_com_alias ("f", "frame", class_stack, 1);
 
   add_cmd ("address", class_stack, &frame_cmd.address,
 	   _("\
