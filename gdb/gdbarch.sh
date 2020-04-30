@@ -28,10 +28,10 @@ LC_ALL=C ; export LC_ALL
 compare_new ()
 {
     file=$1
-    if test ! -r ${file}
+    if test ! -r "${file}"
     then
 	echo "${file} missing? cp new-${file} ${file}" 1>&2
-    elif diff -u ${file} new-${file}
+    elif diff -u "${file}" "new-${file}"
     then
 	echo "${file} unchanged" 1>&2
     else
@@ -70,7 +70,7 @@ ${line}"
 	    line="`echo "${line}" | sed -e 's/;;/; ;/g' -e 's/;;/; ;/g'`"
 
 	    OFS="${IFS}" ; IFS="[;]"
-	    eval read ${read} <<EOF
+	    eval read "${read}" <<EOF
 ${line}
 EOF
 	    IFS="${OFS}"
@@ -86,9 +86,9 @@ EOF
 	    # that ended up with just that space character.
 	    for r in ${read}
 	    do
-		if eval test \"\${${r}}\" = \"\ \"
+		if eval test "\"\${${r}}\" = ' '"
 		then
-		    eval ${r}=""
+		    eval "${r}="
 		fi
 	    done
 
@@ -1227,7 +1227,7 @@ ${class} ${returntype} ${function} ($formal)
 EOF
     for r in ${read}
     do
-	eval echo \"\ \ \ \ ${r}=\${${r}}\"
+	eval echo "\"    ${r}=\${${r}}\""
     done
     if class_is_predicate_p && fallback_default_p
     then
@@ -2162,7 +2162,7 @@ do
 	printf "\n"
 	printf "void\n"
 	printf "set_gdbarch_%s (struct gdbarch *gdbarch,\n" "$function"
-        printf "            `echo ${function} | sed -e 's/./ /g'`  gdbarch_%s_ftype %s)\n" "$function" "$function"
+        printf "            `echo "$function" | sed -e 's/./ /g'`  gdbarch_%s_ftype %s)\n" "$function" "$function"
 	printf "{\n"
 	printf "  gdbarch->%s = %s;\n" "$function" "$function"
 	printf "}\n"
@@ -2192,7 +2192,7 @@ do
 	printf "\n"
 	printf "void\n"
 	printf "set_gdbarch_%s (struct gdbarch *gdbarch,\n" "$function"
-        printf "            `echo ${function} | sed -e 's/./ /g'`  %s %s)\n" "$returntype" "$function"
+        printf "            `echo "$function" | sed -e 's/./ /g'`  %s %s)\n" "$returntype" "$function"
 	printf "{\n"
 	printf "  gdbarch->%s = %s;\n" "$function" "$function"
 	printf "}\n"
