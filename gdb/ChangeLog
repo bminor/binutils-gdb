@@ -1,5 +1,10 @@
 2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbarch.sh (do_read): Add shellcheck disable directive for
+	warning SC2162.
+
+2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbarch.sh: Use ${foo:-} where shellcheck would report a
 	"referenced but not assigned" warning.
 

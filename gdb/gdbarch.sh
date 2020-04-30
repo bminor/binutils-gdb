@@ -50,6 +50,7 @@ do_read ()
     # On some SH's, 'read' trims leading and trailing whitespace by
     # default (e.g., bash), while on others (e.g., dash), it doesn't.
     # Set IFS to empty to disable the trimming everywhere.
+    # shellcheck disable=SC2162
     while IFS='' read line
     do
 	if test "${line}" = ""
