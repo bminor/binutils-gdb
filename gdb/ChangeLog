@@ -1,5 +1,10 @@
 2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbarch.sh: Use shell operators && and || instead of
+	-a and -o.
+
+2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbarch.sh: Use $(...) instead of `...`.
 
 2020-04-29  Simon Marchi  <simon.marchi@efficios.com>

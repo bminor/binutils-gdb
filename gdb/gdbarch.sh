@@ -156,8 +156,8 @@ EOF
 
 fallback_default_p ()
 {
-    [ -n "${postdefault}" -a "x${invalid_p}" != "x0" ] \
-	|| [ -n "${predefault}" -a "x${invalid_p}" = "x0" ]
+    ( [ -n "${postdefault}" ] && [ "x${invalid_p}" != "x0" ] ) \
+	|| ( [ -n "${predefault}" ] && [ "x${invalid_p}" = "x0" ] )
 }
 
 class_is_variable_p ()
@@ -1235,7 +1235,7 @@ EOF
 	kill $$
 	exit 1
     fi
-    if [ "x${invalid_p}" = "x0" -a -n "${postdefault}" ]
+    if [ "x${invalid_p}" = "x0" ] && [ -n "${postdefault}" ]
     then
 	echo "Error: postdefault is useless when invalid_p=0" 1>&2
 	kill $$
@@ -1921,7 +1921,7 @@ function_list | while do_read
 do
     if class_is_function_p || class_is_variable_p
     then
-	if [ -n "${predefault}" -a "x${predefault}" != "x0" ]
+	if [ -n "${predefault}" ] && [ "x${predefault}" != "x0" ]
 	then
 	  printf "  gdbarch->%s = %s;\n" "$function" "$predefault"
 	fi
@@ -2001,11 +2001,11 @@ do
 	then
 	    printf "  /* Skip verify of %s, has predicate.  */\n" "$function"
 	# FIXME: See do_read for potential simplification
- 	elif [ -n "${invalid_p}" -a -n "${postdefault}" ]
+	elif [ -n "${invalid_p}" ] && [ -n "${postdefault}" ]
 	then
 	    printf "  if (%s)\n" "$invalid_p"
 	    printf "    gdbarch->%s = %s;\n" "$function" "$postdefault"
-	elif [ -n "${predefault}" -a -n "${postdefault}" ]
+	elif [ -n "${predefault}" ] && [ -n "${postdefault}" ]
 	then
 	    printf "  if (gdbarch->%s == %s)\n" "$function" "$predefault"
 	    printf "    gdbarch->%s = %s;\n" "$function" "$postdefault"
@@ -2136,7 +2136,7 @@ do
 	fi
 	printf "  if (gdbarch_debug >= 2)\n"
 	printf "    fprintf_unfiltered (gdb_stdlog, \"gdbarch_%s called\\\\n\");\n" "$function"
-	if [ "x${actual}" = "x-" -o "x${actual}" = "x" ]
+	if [ "x${actual}" = "x-" ] || [ "x${actual}" = "x" ]
 	then
 	    if class_is_multiarch_p
 	    then
