@@ -1,5 +1,9 @@
 2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbarch.sh: Use $(...) instead of `...`.
+
+2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbarch.sh: Use double quotes around variables.
 
 2020-04-29  Simon Marchi  <simon.marchi@efficios.com>

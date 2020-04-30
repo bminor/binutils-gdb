@@ -67,7 +67,7 @@ ${line}"
 	    # The semantics of IFS varies between different SH's.  Some
 	    # treat ``;;' as three fields while some treat it as just two.
 	    # Work around this by eliminating ``;;'' ....
-	    line="`echo "${line}" | sed -e 's/;;/; ;/g' -e 's/;;/; ;/g'`"
+	    line="$(echo "${line}" | sed -e 's/;;/; ;/g' -e 's/;;/; ;/g')"
 
 	    OFS="${IFS}" ; IFS="[;]"
 	    eval read "${read}" <<EOF
@@ -2162,7 +2162,7 @@ do
 	printf "\n"
 	printf "void\n"
 	printf "set_gdbarch_%s (struct gdbarch *gdbarch,\n" "$function"
-        printf "            `echo "$function" | sed -e 's/./ /g'`  gdbarch_%s_ftype %s)\n" "$function" "$function"
+	printf "            %s  gdbarch_%s_ftype %s)\n" "$(echo "$function" | sed -e 's/./ /g')" "$function" "$function"
 	printf "{\n"
 	printf "  gdbarch->%s = %s;\n" "$function" "$function"
 	printf "}\n"
@@ -2192,7 +2192,7 @@ do
 	printf "\n"
 	printf "void\n"
 	printf "set_gdbarch_%s (struct gdbarch *gdbarch,\n" "$function"
-        printf "            `echo "$function" | sed -e 's/./ /g'`  %s %s)\n" "$returntype" "$function"
+	printf "            %s  %s %s)\n" "$(echo "$function" | sed -e 's/./ /g')" "$returntype" "$function"
 	printf "{\n"
 	printf "  gdbarch->%s = %s;\n" "$function" "$function"
 	printf "}\n"
