@@ -1,5 +1,9 @@
 2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbarch.sh: Remove code that sets fallbackdefault.
+
+2020-04-29  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbarch.sh: Use shell operators && and || instead of
 	-a and -o.
 

@@ -122,23 +122,6 @@ EOF
 		esac
 	    esac
 
-	    # PREDEFAULT is a valid fallback definition of MEMBER when
-	    # multi-arch is not enabled.  This ensures that the
-	    # default value, when multi-arch is the same as the
-	    # default value when not multi-arch.  POSTDEFAULT is
-	    # always a valid definition of MEMBER as this again
-	    # ensures consistency.
-
-	    if [ -n "${postdefault}" ]
-	    then
-		fallbackdefault="${postdefault}"
-	    elif [ -n "${predefault}" ]
-	    then
-		fallbackdefault="${predefault}"
-	    else
-		fallbackdefault="0"
-	    fi
-
 	    #NOT YET: See gdbarch.log for basic verification of
 	    # database
 
@@ -156,8 +139,8 @@ EOF
 
 fallback_default_p ()
 {
-    ( [ -n "${postdefault}" ] && [ "x${invalid_p}" != "x0" ] ) \
-	|| ( [ -n "${predefault}" ] && [ "x${invalid_p}" = "x0" ] )
+    { [ -n "${postdefault}" ] && [ "x${invalid_p}" != "x0" ]; } \
+	|| { [ -n "${predefault}" ] && [ "x${invalid_p}" = "x0" ]; }
 }
 
 class_is_variable_p ()
