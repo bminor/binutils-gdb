@@ -1,3 +1,8 @@
+2020-04-30  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* config/tc-rx.c (elf_flags): Reset default value.
+	(md_parse_option): For rx-elf Initialize elf_flags with RX_ABI.
+
 2020-04-29  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (XTENSA_MARCH_EARLIEST): Define macro as 0

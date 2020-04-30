@@ -277,6 +277,7 @@ ALL_EMULATION_SOURCES = \
 	eelf32lriscv_ilp32.c \
 	eelf32rl78.c \
 	eelf32rx.c \
+	eelf32rx_linux.c \
 	eelf32tilegx.c \
 	eelf32tilegx_be.c \
 	eelf32tilepro.c \
@@ -766,6 +767,7 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32lriscv_ilp32.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32rl78.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32rx.Pc@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32rx_linux.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32tilegx.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32tilegx_be.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32tilepro.Pc@am__quote@

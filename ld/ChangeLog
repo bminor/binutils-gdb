@@ -1,3 +1,11 @@
+2020-04-30  Yoshinori Sato <ysato@users.sourceforge.jp>
+
+	* emulparams/elf32rx_linux.sh: New rx-linux emulation.
+	* emultempl/rxlinux.em: New.
+	* configure.tgt: Add rx-linux.
+	* Makefile.am: Add eelf32rx_linux.c
+	* Makefile.in: Regenerate.
+
 2020-04-29  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* testsuite/ld-xtensa/relax-diff1.d: New test definition.

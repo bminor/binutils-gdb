@@ -42,12 +42,13 @@ const char EXP_CHARS[]            = "eE";
 const char FLT_CHARS[]            = "dD";
 
 /* ELF flags to set in the output file header.  */
-static int elf_flags = E_FLAG_RX_ABI;
+static int elf_flags;
 
 #ifndef TE_LINUX
 bfd_boolean rx_use_conventional_section_names = FALSE;
 #else
 bfd_boolean rx_use_conventional_section_names = TRUE;
+static int elf_flags;
 #endif
 static bfd_boolean rx_use_small_data_limit = FALSE;
 
@@ -129,6 +130,9 @@ struct cpu_type  cpu_type_list[] =
 int
 md_parse_option (int c ATTRIBUTE_UNUSED, const char * arg ATTRIBUTE_UNUSED)
 {
+#ifndef TE_LINUX
+  elf_flags = E_FLAG_RX_ABI;
+#endif
   switch (c)
     {
     case OPTION_BIG:
