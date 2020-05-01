@@ -1,5 +1,10 @@
 2020-05-01  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.ada/operator_bp.exp: Allow more than required amount of
+	breakpoint.
+
+2020-05-01  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.reverse/until-reverse.c (main): Fix Wunused-result warning.
 
 2020-04-30  Hannes Domani  <ssbssa@yahoo.de>
