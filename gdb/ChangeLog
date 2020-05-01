@@ -1,5 +1,31 @@
 2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete
+	la_lookup_transparent_type initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(cplus_language::lookup_transparent_type): New member function.
+	(asm_language_data): Delete la_lookup_transparent_type
+	initializer.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (struct language_data): Delete
+	la_lookup_transparent_type field.
+	(language_defn::lookup_transparent_type): New member function.
+	* m2-lang.c (m2_language_data): Delete la_lookup_transparent_type
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+	* symtab.c (symbol_matches_domain): Update call.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_arch_info): Delete function, move
 	implementation to...
 	(ada_language::language_arch_info): ...here, a new member

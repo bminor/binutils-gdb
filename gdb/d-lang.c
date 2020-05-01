@@ -165,7 +165,6 @@ extern const struct language_data d_language_data =
   "this",
   false,			/* la_store_sym_names_in_linkage_form_p */
   d_lookup_symbol_nonlocal,
-  basic_lookup_transparent_type,
   d_demangle,			/* Language specific symbol demangler.  */
   d_sniff_from_mangled_name,
   NULL,				/* Language specific

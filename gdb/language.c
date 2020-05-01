@@ -827,7 +827,6 @@ extern const struct language_data unknown_language_data =
   "this",        	    	/* name_of_this */
   true,				/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal, /* lookup_symbol_nonlocal */
-  basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
   NULL,
   unk_lang_class_name,		/* Language specific
@@ -895,7 +894,6 @@ extern const struct language_data auto_language_data =
   "this",		        /* name_of_this */
   false,			/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  basic_lookup_transparent_type,/* lookup_transparent_type */
   unk_lang_demangle,		/* Language specific symbol demangler */
   NULL,
   unk_lang_class_name,		/* Language specific

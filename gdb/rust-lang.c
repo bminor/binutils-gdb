@@ -2082,7 +2082,6 @@ extern const struct language_data rust_language_data =
   NULL,				/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   rust_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  basic_lookup_transparent_type,/* lookup_transparent_type */
   gdb_demangle,			/* Language specific symbol demangler */
   rust_sniff_from_mangled_name,
   NULL,				/* Language specific

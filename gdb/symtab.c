@@ -2722,7 +2722,7 @@ symbol_matches_domain (enum language symbol_language,
 struct type *
 lookup_transparent_type (const char *name)
 {
-  return current_language->la_lookup_transparent_type (name);
+  return current_language->lookup_transparent_type (name);
 }
 
 /* A helper for basic_lookup_transparent_type that interfaces with the

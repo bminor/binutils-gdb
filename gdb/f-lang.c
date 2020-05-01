@@ -616,7 +616,6 @@ extern const struct language_data f_language_data =
   NULL,                    	/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  basic_lookup_transparent_type,/* lookup_transparent_type */
 
   /* We could support demangling here to provide module namespaces
      also for inferiors with only minimal symbol table (ELF symbols).

@@ -550,7 +550,6 @@ extern const struct language_data go_language_data =
   NULL,				/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal, 
-  basic_lookup_transparent_type,
   go_demangle,			/* Language specific symbol demangler.  */
   go_sniff_from_mangled_name,
   NULL,				/* Language specific

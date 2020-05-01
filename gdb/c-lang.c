@@ -911,7 +911,6 @@ extern const struct language_data c_language_data =
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
   NULL,
   NULL,				/* Language specific
@@ -1012,7 +1011,6 @@ extern const struct language_data cplus_language_data =
   "this",                       /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  cp_lookup_transparent_type,   /* lookup_transparent_type */
   gdb_demangle,			/* Language specific symbol demangler */
   gdb_sniff_from_mangled_name,
   cp_class_name_from_physname,  /* Language specific
@@ -1112,6 +1110,12 @@ public:
     lai->bool_type_symbol = "bool";
     lai->bool_type_default = builtin->builtin_bool;
   }
+
+  /* See language.h.  */
+  struct type *lookup_transparent_type (const char *name) const override
+  {
+    return cp_lookup_transparent_type (name);
+  }
 };
 
 /* The single instance of the C++ language class.  */
@@ -1149,7 +1153,6 @@ extern const struct language_data asm_language_data =
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
   NULL,
   NULL,				/* Language specific
@@ -1221,7 +1224,6 @@ extern const struct language_data minimal_language_data =
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
   NULL,
   NULL,				/* Language specific

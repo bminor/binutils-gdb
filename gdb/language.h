@@ -315,9 +315,6 @@ struct language_data
        const struct block *,
        const domain_enum);
 
-    /* Find the definition of the type with the given name.  */
-    struct type *(*la_lookup_transparent_type) (const char *);
-
     /* Return demangled language symbol, or NULL.  */
     char *(*la_demangle) (const char *mangled, int options);
 
@@ -503,6 +500,13 @@ struct language_defn : language_data
 
   virtual void language_arch_info (struct gdbarch *,
 				   struct language_arch_info *) const = 0;
+
+  /* Find the definition of the type with the given name.  */
+
+  virtual struct type *lookup_transparent_type (const char *name) const
+  {
+    return basic_lookup_transparent_type (name);
+  }
 
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];

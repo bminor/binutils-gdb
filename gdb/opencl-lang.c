@@ -1050,7 +1050,6 @@ extern const struct language_data opencl_language_data =
   NULL,                         /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
   NULL,
   NULL,				/* Language specific
