@@ -400,7 +400,6 @@ extern const struct language_data objc_language_data =
   0,				/* String lower bound */
   default_word_break_characters,
   default_collect_symbol_completion_matches,
-  c_language_arch_info,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -420,6 +419,13 @@ public:
   objc_language ()
     : language_defn (language_objc, objc_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    c_language_arch_info (gdbarch, lai);
+  }
 };
 
 /* Single instance of the class representing the Objective-C language.  */

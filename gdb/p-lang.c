@@ -375,55 +375,6 @@ enum pascal_primitive_types {
   nr_pascal_primitive_types
 };
 
-static void
-pascal_language_arch_info (struct gdbarch *gdbarch,
-			   struct language_arch_info *lai)
-{
-  const struct builtin_type *builtin = builtin_type (gdbarch);
-
-  lai->string_char_type = builtin->builtin_char;
-  lai->primitive_type_vector
-    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_pascal_primitive_types + 1,
-                              struct type *);
-  lai->primitive_type_vector [pascal_primitive_type_int]
-    = builtin->builtin_int;
-  lai->primitive_type_vector [pascal_primitive_type_long]
-    = builtin->builtin_long;
-  lai->primitive_type_vector [pascal_primitive_type_short]
-    = builtin->builtin_short;
-  lai->primitive_type_vector [pascal_primitive_type_char]
-    = builtin->builtin_char;
-  lai->primitive_type_vector [pascal_primitive_type_float]
-    = builtin->builtin_float;
-  lai->primitive_type_vector [pascal_primitive_type_double]
-    = builtin->builtin_double;
-  lai->primitive_type_vector [pascal_primitive_type_void]
-    = builtin->builtin_void;
-  lai->primitive_type_vector [pascal_primitive_type_long_long]
-    = builtin->builtin_long_long;
-  lai->primitive_type_vector [pascal_primitive_type_signed_char]
-    = builtin->builtin_signed_char;
-  lai->primitive_type_vector [pascal_primitive_type_unsigned_char]
-    = builtin->builtin_unsigned_char;
-  lai->primitive_type_vector [pascal_primitive_type_unsigned_short]
-    = builtin->builtin_unsigned_short;
-  lai->primitive_type_vector [pascal_primitive_type_unsigned_int]
-    = builtin->builtin_unsigned_int;
-  lai->primitive_type_vector [pascal_primitive_type_unsigned_long]
-    = builtin->builtin_unsigned_long;
-  lai->primitive_type_vector [pascal_primitive_type_unsigned_long_long]
-    = builtin->builtin_unsigned_long_long;
-  lai->primitive_type_vector [pascal_primitive_type_long_double]
-    = builtin->builtin_long_double;
-  lai->primitive_type_vector [pascal_primitive_type_complex]
-    = builtin->builtin_complex;
-  lai->primitive_type_vector [pascal_primitive_type_double_complex]
-    = builtin->builtin_double_complex;
-
-  lai->bool_type_symbol = "boolean";
-  lai->bool_type_default = builtin->builtin_bool;
-}
-
 static const char *p_extensions[] =
 {
   ".pas", ".p", ".pp", NULL
@@ -464,7 +415,6 @@ extern const struct language_data pascal_language_data =
   0,				/* String lower bound */
   default_word_break_characters,
   default_collect_symbol_completion_matches,
-  pascal_language_arch_info,
   c_watch_location_expression,
   NULL,				/* la_compare_symbol_for_completion */
   iterate_over_symbols,
@@ -484,6 +434,55 @@ public:
   pascal_language ()
     : language_defn (language_pascal, pascal_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    const struct builtin_type *builtin = builtin_type (gdbarch);
+
+    lai->string_char_type = builtin->builtin_char;
+    lai->primitive_type_vector
+      = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_pascal_primitive_types + 1,
+                              struct type *);
+    lai->primitive_type_vector [pascal_primitive_type_int]
+      = builtin->builtin_int;
+    lai->primitive_type_vector [pascal_primitive_type_long]
+      = builtin->builtin_long;
+    lai->primitive_type_vector [pascal_primitive_type_short]
+      = builtin->builtin_short;
+    lai->primitive_type_vector [pascal_primitive_type_char]
+      = builtin->builtin_char;
+    lai->primitive_type_vector [pascal_primitive_type_float]
+      = builtin->builtin_float;
+    lai->primitive_type_vector [pascal_primitive_type_double]
+      = builtin->builtin_double;
+    lai->primitive_type_vector [pascal_primitive_type_void]
+      = builtin->builtin_void;
+    lai->primitive_type_vector [pascal_primitive_type_long_long]
+      = builtin->builtin_long_long;
+    lai->primitive_type_vector [pascal_primitive_type_signed_char]
+      = builtin->builtin_signed_char;
+    lai->primitive_type_vector [pascal_primitive_type_unsigned_char]
+      = builtin->builtin_unsigned_char;
+    lai->primitive_type_vector [pascal_primitive_type_unsigned_short]
+      = builtin->builtin_unsigned_short;
+    lai->primitive_type_vector [pascal_primitive_type_unsigned_int]
+      = builtin->builtin_unsigned_int;
+    lai->primitive_type_vector [pascal_primitive_type_unsigned_long]
+      = builtin->builtin_unsigned_long;
+    lai->primitive_type_vector [pascal_primitive_type_unsigned_long_long]
+      = builtin->builtin_unsigned_long_long;
+    lai->primitive_type_vector [pascal_primitive_type_long_double]
+      = builtin->builtin_long_double;
+    lai->primitive_type_vector [pascal_primitive_type_complex]
+      = builtin->builtin_complex;
+    lai->primitive_type_vector [pascal_primitive_type_double_complex]
+      = builtin->builtin_double_complex;
+
+    lai->bool_type_symbol = "boolean";
+    lai->bool_type_default = builtin->builtin_bool;
+  }
 };
 
 /* Single instance of the Pascal language class.  */

@@ -1066,51 +1066,6 @@ enum rust_primitive_types
   nr_rust_primitive_types
 };
 
-/* la_language_arch_info implementation for Rust.  */
-
-static void
-rust_language_arch_info (struct gdbarch *gdbarch,
-			 struct language_arch_info *lai)
-{
-  const struct builtin_type *builtin = builtin_type (gdbarch);
-  struct type *tem;
-  struct type **types;
-  unsigned int length;
-
-  types = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_rust_primitive_types + 1,
-				  struct type *);
-
-  types[rust_primitive_bool] = arch_boolean_type (gdbarch, 8, 1, "bool");
-  types[rust_primitive_char] = arch_character_type (gdbarch, 32, 1, "char");
-  types[rust_primitive_i8] = arch_integer_type (gdbarch, 8, 0, "i8");
-  types[rust_primitive_u8] = arch_integer_type (gdbarch, 8, 1, "u8");
-  types[rust_primitive_i16] = arch_integer_type (gdbarch, 16, 0, "i16");
-  types[rust_primitive_u16] = arch_integer_type (gdbarch, 16, 1, "u16");
-  types[rust_primitive_i32] = arch_integer_type (gdbarch, 32, 0, "i32");
-  types[rust_primitive_u32] = arch_integer_type (gdbarch, 32, 1, "u32");
-  types[rust_primitive_i64] = arch_integer_type (gdbarch, 64, 0, "i64");
-  types[rust_primitive_u64] = arch_integer_type (gdbarch, 64, 1, "u64");
-
-  length = 8 * TYPE_LENGTH (builtin->builtin_data_ptr);
-  types[rust_primitive_isize] = arch_integer_type (gdbarch, length, 0, "isize");
-  types[rust_primitive_usize] = arch_integer_type (gdbarch, length, 1, "usize");
-
-  types[rust_primitive_f32] = arch_float_type (gdbarch, 32, "f32",
-					       floatformats_ieee_single);
-  types[rust_primitive_f64] = arch_float_type (gdbarch, 64, "f64",
-					       floatformats_ieee_double);
-
-  types[rust_primitive_unit] = arch_integer_type (gdbarch, 0, 1, "()");
-
-  tem = make_cv_type (1, 0, types[rust_primitive_u8], NULL);
-  types[rust_primitive_str] = rust_slice_type ("&str", tem,
-					       types[rust_primitive_usize]);
-
-  lai->primitive_type_vector = types;
-  lai->bool_type_default = types[rust_primitive_bool];
-  lai->string_char_type = types[rust_primitive_u8];
-}
-
 
 
 /* A helper for rust_evaluate_subexp that handles OP_FUNCALL.  */
@@ -2137,7 +2092,6 @@ extern const struct language_data rust_language_data =
   0,				/* String lower bound */
   default_word_break_characters,
   default_collect_symbol_completion_matches,
-  rust_language_arch_info,
   rust_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -2157,6 +2111,47 @@ public:
   rust_language ()
     : language_defn (language_rust, rust_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    const struct builtin_type *builtin = builtin_type (gdbarch);
+
+    struct type **types
+      = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_rust_primitive_types + 1,
+				struct type *);
+
+    types[rust_primitive_bool] = arch_boolean_type (gdbarch, 8, 1, "bool");
+    types[rust_primitive_char] = arch_character_type (gdbarch, 32, 1, "char");
+    types[rust_primitive_i8] = arch_integer_type (gdbarch, 8, 0, "i8");
+    types[rust_primitive_u8] = arch_integer_type (gdbarch, 8, 1, "u8");
+    types[rust_primitive_i16] = arch_integer_type (gdbarch, 16, 0, "i16");
+    types[rust_primitive_u16] = arch_integer_type (gdbarch, 16, 1, "u16");
+    types[rust_primitive_i32] = arch_integer_type (gdbarch, 32, 0, "i32");
+    types[rust_primitive_u32] = arch_integer_type (gdbarch, 32, 1, "u32");
+    types[rust_primitive_i64] = arch_integer_type (gdbarch, 64, 0, "i64");
+    types[rust_primitive_u64] = arch_integer_type (gdbarch, 64, 1, "u64");
+
+    unsigned int length = 8 * TYPE_LENGTH (builtin->builtin_data_ptr);
+    types[rust_primitive_isize] = arch_integer_type (gdbarch, length, 0, "isize");
+    types[rust_primitive_usize] = arch_integer_type (gdbarch, length, 1, "usize");
+
+    types[rust_primitive_f32] = arch_float_type (gdbarch, 32, "f32",
+						 floatformats_ieee_single);
+    types[rust_primitive_f64] = arch_float_type (gdbarch, 64, "f64",
+						 floatformats_ieee_double);
+
+    types[rust_primitive_unit] = arch_integer_type (gdbarch, 0, 1, "()");
+
+    struct type *tem = make_cv_type (1, 0, types[rust_primitive_u8], NULL);
+    types[rust_primitive_str] = rust_slice_type ("&str", tem,
+						 types[rust_primitive_usize]);
+
+    lai->primitive_type_vector = types;
+    lai->bool_type_default = types[rust_primitive_bool];
+    lai->string_char_type = types[rust_primitive_u8];
+  }
 };
 
 /* Single instance of the Rust language class.  */

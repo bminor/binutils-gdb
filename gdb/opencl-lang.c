@@ -1015,23 +1015,6 @@ opencl_print_type (struct type *type, const char *varstring,
   c_print_type (type, varstring, stream, show, level, flags); 
 }
 
-static void
-opencl_language_arch_info (struct gdbarch *gdbarch,
-			   struct language_arch_info *lai)
-{
-  struct type **types = builtin_opencl_type (gdbarch);
-
-  /* Copy primitive types vector from gdbarch.  */
-  lai->primitive_type_vector = types;
-
-  /* Type of elements of strings.  */
-  lai->string_char_type = types [opencl_primitive_type_char];
-
-  /* Specifies the return type of logical and relational operations.  */
-  lai->bool_type_symbol = "int";
-  lai->bool_type_default = types [opencl_primitive_type_int];
-}
-
 const struct exp_descriptor exp_descriptor_opencl =
 {
   print_subexp_standard,
@@ -1077,7 +1060,6 @@ extern const struct language_data opencl_language_data =
   0,				/* String lower bound */
   default_word_break_characters,
   default_collect_symbol_completion_matches,
-  opencl_language_arch_info,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -1097,6 +1079,23 @@ public:
   opencl_language ()
     : language_defn (language_opencl, opencl_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    struct type **types = builtin_opencl_type (gdbarch);
+
+    /* Copy primitive types vector from gdbarch.  */
+    lai->primitive_type_vector = types;
+
+    /* Type of elements of strings.  */
+    lai->string_char_type = types [opencl_primitive_type_char];
+
+    /* Specifies the return type of logical and relational operations.  */
+    lai->bool_type_symbol = "int";
+    lai->bool_type_default = types [opencl_primitive_type_int];
+  }
 };
 
 /* Single instance of the OpenCL language class.  */

@@ -1,5 +1,73 @@
 2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_arch_info): Delete function, move
+	implementation to...
+	(ada_language::language_arch_info): ...here, a new member
+	function.
+	(ada_language_data): Delete la_language_arch_info.
+	* c-lang.c (c_language_data): Likewise.
+	(c_language::language_arch_info): New member function.
+	(cplus_language_arch_info): Delete function, move
+	implementation to...
+	(cplus_language::language_arch_info): ...here, a new member
+	function.
+	(cplus_language_data): Delete la_language_arch_info.
+	(asm_language_data): Likewise.
+	(asm_language::language_arch_info): New member function.
+	(minimal_language_data): Delete la_language_arch_info.
+	(minimal_language::language_arch_info): New member function.
+	* d-lang.c (d_language_arch_info): Delete function, move
+	implementation to...
+	(d_language::language_arch_info): ...here, a new member
+	function.
+	(d_language_data): Delete la_language_arch_info.
+	* f-lang.c (f_language_arch_info): Delete function, move
+	implementation to...
+	(f_language::language_arch_info): ...here, a new member
+	function.
+	(f_language_data): Delete la_language_arch_info.
+	* go-lang.c (go_language_arch_info): Delete function, move
+	implementation to...
+	(go_language::language_arch_info): ...here, a new member
+	function.
+	(go_language_data): Delete la_language_arch_info.
+	* language.c (unknown_language_data): Likewise.
+	(unknown_language::language_arch_info): New member function.
+	(auto_language_data): Delete la_language_arch_info.
+	(auto_language::language_arch_info): New member function.
+	(language_gdbarch_post_init): Update call to
+	la_language_arch_info.
+	* language.h (language_data): Delete la_language_arch_info
+	function pointer.
+	(language_defn::language_arch_info): New function.
+	* m2-lang.c (m2_language_arch_info): Delete function, move
+	implementation to...
+	(m2_language::language_arch_info): ...here, a new member
+	function.
+	(m2_language_data): Delete la_language_arch_info.
+	* objc-lang.c (objc_language_arch_info): Delete function, move
+	implementation to...
+	(objc_language::language_arch_info): ...here, a new member
+	function.
+	(objc_language_data): Delete la_language_arch_info.
+	* opencl-lang.c (opencl_language_arch_info): Delete function, move
+	implementation to...
+	(opencl_language::language_arch_info): ...here, a new member
+	function.
+	(opencl_language_data): Delete la_language_arch_info.
+	* p-lang.c (pascal_language_arch_info): Delete function, move
+	implementation to...
+	(pascal_language::language_arch_info): ...here, a new member
+	function.
+	(pascal_language_data): Delete la_language_arch_info.
+	* rust-lang.c (rust_language_arch_info): Delete function, move
+	implementation to...
+	(rust_language::language_arch_info): ...here, a new member
+	function.
+	(rust_language_data): Delete la_language_arch_info.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Delete la_pass_by_reference
 	initializer.
 	* c-lang.c (c_language_data): Likewise.

@@ -523,59 +523,6 @@ enum go_primitive_types {
   nr_go_primitive_types
 };
 
-static void
-go_language_arch_info (struct gdbarch *gdbarch,
-		       struct language_arch_info *lai)
-{
-  const struct builtin_go_type *builtin = builtin_go_type (gdbarch);
-
-  lai->string_char_type = builtin->builtin_char;
-
-  lai->primitive_type_vector
-    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_go_primitive_types + 1,
-			      struct type *);
-
-  lai->primitive_type_vector [go_primitive_type_void]
-    = builtin->builtin_void;
-  lai->primitive_type_vector [go_primitive_type_char]
-    = builtin->builtin_char;
-  lai->primitive_type_vector [go_primitive_type_bool]
-    = builtin->builtin_bool;
-  lai->primitive_type_vector [go_primitive_type_int]
-    = builtin->builtin_int;
-  lai->primitive_type_vector [go_primitive_type_uint]
-    = builtin->builtin_uint;
-  lai->primitive_type_vector [go_primitive_type_uintptr]
-    = builtin->builtin_uintptr;
-  lai->primitive_type_vector [go_primitive_type_int8]
-    = builtin->builtin_int8;
-  lai->primitive_type_vector [go_primitive_type_int16]
-    = builtin->builtin_int16;
-  lai->primitive_type_vector [go_primitive_type_int32]
-    = builtin->builtin_int32;
-  lai->primitive_type_vector [go_primitive_type_int64]
-    = builtin->builtin_int64;
-  lai->primitive_type_vector [go_primitive_type_uint8]
-    = builtin->builtin_uint8;
-  lai->primitive_type_vector [go_primitive_type_uint16]
-    = builtin->builtin_uint16;
-  lai->primitive_type_vector [go_primitive_type_uint32]
-    = builtin->builtin_uint32;
-  lai->primitive_type_vector [go_primitive_type_uint64]
-    = builtin->builtin_uint64;
-  lai->primitive_type_vector [go_primitive_type_float32]
-    = builtin->builtin_float32;
-  lai->primitive_type_vector [go_primitive_type_float64]
-    = builtin->builtin_float64;
-  lai->primitive_type_vector [go_primitive_type_complex64]
-    = builtin->builtin_complex64;
-  lai->primitive_type_vector [go_primitive_type_complex128]
-    = builtin->builtin_complex128;
-
-  lai->bool_type_symbol = "bool";
-  lai->bool_type_default = builtin->builtin_bool;
-}
-
 /* Constant data that describes the Go language.  */
 
 extern const struct language_data go_language_data =
@@ -613,7 +560,6 @@ extern const struct language_data go_language_data =
   0,				/* String lower bound.  */
   default_word_break_characters,
   default_collect_symbol_completion_matches,
-  go_language_arch_info,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -633,6 +579,59 @@ public:
   go_language ()
     : language_defn (language_go, go_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    const struct builtin_go_type *builtin = builtin_go_type (gdbarch);
+
+    lai->string_char_type = builtin->builtin_char;
+
+    lai->primitive_type_vector
+      = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_go_primitive_types + 1,
+				struct type *);
+
+    lai->primitive_type_vector [go_primitive_type_void]
+      = builtin->builtin_void;
+    lai->primitive_type_vector [go_primitive_type_char]
+      = builtin->builtin_char;
+    lai->primitive_type_vector [go_primitive_type_bool]
+      = builtin->builtin_bool;
+    lai->primitive_type_vector [go_primitive_type_int]
+      = builtin->builtin_int;
+    lai->primitive_type_vector [go_primitive_type_uint]
+      = builtin->builtin_uint;
+    lai->primitive_type_vector [go_primitive_type_uintptr]
+      = builtin->builtin_uintptr;
+    lai->primitive_type_vector [go_primitive_type_int8]
+      = builtin->builtin_int8;
+    lai->primitive_type_vector [go_primitive_type_int16]
+      = builtin->builtin_int16;
+    lai->primitive_type_vector [go_primitive_type_int32]
+      = builtin->builtin_int32;
+    lai->primitive_type_vector [go_primitive_type_int64]
+      = builtin->builtin_int64;
+    lai->primitive_type_vector [go_primitive_type_uint8]
+      = builtin->builtin_uint8;
+    lai->primitive_type_vector [go_primitive_type_uint16]
+      = builtin->builtin_uint16;
+    lai->primitive_type_vector [go_primitive_type_uint32]
+      = builtin->builtin_uint32;
+    lai->primitive_type_vector [go_primitive_type_uint64]
+      = builtin->builtin_uint64;
+    lai->primitive_type_vector [go_primitive_type_float32]
+      = builtin->builtin_float32;
+    lai->primitive_type_vector [go_primitive_type_float64]
+      = builtin->builtin_float64;
+    lai->primitive_type_vector [go_primitive_type_complex64]
+      = builtin->builtin_complex64;
+    lai->primitive_type_vector [go_primitive_type_complex128]
+      = builtin->builtin_complex128;
+
+    lai->bool_type_symbol = "bool";
+    lai->bool_type_default = builtin->builtin_bool;
+  }
 };
 
 /* Single instance of the Go language class.  */

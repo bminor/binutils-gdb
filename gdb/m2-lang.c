@@ -339,32 +339,6 @@ enum m2_primitive_types {
   nr_m2_primitive_types
 };
 
-static void
-m2_language_arch_info (struct gdbarch *gdbarch,
-		       struct language_arch_info *lai)
-{
-  const struct builtin_m2_type *builtin = builtin_m2_type (gdbarch);
-
-  lai->string_char_type = builtin->builtin_char;
-  lai->primitive_type_vector
-    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_m2_primitive_types + 1,
-                              struct type *);
-
-  lai->primitive_type_vector [m2_primitive_type_char]
-    = builtin->builtin_char;
-  lai->primitive_type_vector [m2_primitive_type_int]
-    = builtin->builtin_int;
-  lai->primitive_type_vector [m2_primitive_type_card]
-    = builtin->builtin_card;
-  lai->primitive_type_vector [m2_primitive_type_real]
-    = builtin->builtin_real;
-  lai->primitive_type_vector [m2_primitive_type_bool]
-    = builtin->builtin_bool;
-
-  lai->bool_type_symbol = "BOOLEAN";
-  lai->bool_type_default = builtin->builtin_bool;
-}
-
 const struct exp_descriptor exp_descriptor_modula2 = 
 {
   print_subexp_standard,
@@ -411,7 +385,6 @@ extern const struct language_data m2_language_data =
   0,				/* String lower bound */
   default_word_break_characters,
   default_collect_symbol_completion_matches,
-  m2_language_arch_info,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -431,6 +404,32 @@ public:
   m2_language ()
     : language_defn (language_m2, m2_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    const struct builtin_m2_type *builtin = builtin_m2_type (gdbarch);
+
+    lai->string_char_type = builtin->builtin_char;
+    lai->primitive_type_vector
+      = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_m2_primitive_types + 1,
+				struct type *);
+
+    lai->primitive_type_vector [m2_primitive_type_char]
+      = builtin->builtin_char;
+    lai->primitive_type_vector [m2_primitive_type_int]
+      = builtin->builtin_int;
+    lai->primitive_type_vector [m2_primitive_type_card]
+      = builtin->builtin_card;
+    lai->primitive_type_vector [m2_primitive_type_real]
+      = builtin->builtin_real;
+    lai->primitive_type_vector [m2_primitive_type_bool]
+      = builtin->builtin_bool;
+
+    lai->bool_type_symbol = "BOOLEAN";
+    lai->bool_type_default = builtin->builtin_bool;
+  }
 };
 
 /* Single instance of the M2 language.  */

@@ -165,44 +165,6 @@ enum f_primitive_types {
   nr_f_primitive_types
 };
 
-static void
-f_language_arch_info (struct gdbarch *gdbarch,
-		      struct language_arch_info *lai)
-{
-  const struct builtin_f_type *builtin = builtin_f_type (gdbarch);
-
-  lai->string_char_type = builtin->builtin_character;
-  lai->primitive_type_vector
-    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_f_primitive_types + 1,
-                              struct type *);
-
-  lai->primitive_type_vector [f_primitive_type_character]
-    = builtin->builtin_character;
-  lai->primitive_type_vector [f_primitive_type_logical]
-    = builtin->builtin_logical;
-  lai->primitive_type_vector [f_primitive_type_logical_s1]
-    = builtin->builtin_logical_s1;
-  lai->primitive_type_vector [f_primitive_type_logical_s2]
-    = builtin->builtin_logical_s2;
-  lai->primitive_type_vector [f_primitive_type_logical_s8]
-    = builtin->builtin_logical_s8;
-  lai->primitive_type_vector [f_primitive_type_real]
-    = builtin->builtin_real;
-  lai->primitive_type_vector [f_primitive_type_real_s8]
-    = builtin->builtin_real_s8;
-  lai->primitive_type_vector [f_primitive_type_real_s16]
-    = builtin->builtin_real_s16;
-  lai->primitive_type_vector [f_primitive_type_complex_s8]
-    = builtin->builtin_complex_s8;
-  lai->primitive_type_vector [f_primitive_type_complex_s16]
-    = builtin->builtin_complex_s16;
-  lai->primitive_type_vector [f_primitive_type_void]
-    = builtin->builtin_void;
-
-  lai->bool_type_symbol = "logical";
-  lai->bool_type_default = builtin->builtin_logical_s2;
-}
-
 /* Remove the modules separator :: from the default break list.  */
 
 static const char *
@@ -670,7 +632,6 @@ extern const struct language_data f_language_data =
   1,				/* String lower bound */
   f_word_break_characters,
   f_collect_symbol_completion_matches,
-  f_language_arch_info,
   c_watch_location_expression,
   cp_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -690,6 +651,44 @@ public:
   f_language ()
     : language_defn (language_fortran, f_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    const struct builtin_f_type *builtin = builtin_f_type (gdbarch);
+
+    lai->string_char_type = builtin->builtin_character;
+    lai->primitive_type_vector
+      = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_f_primitive_types + 1,
+				struct type *);
+
+    lai->primitive_type_vector [f_primitive_type_character]
+      = builtin->builtin_character;
+    lai->primitive_type_vector [f_primitive_type_logical]
+      = builtin->builtin_logical;
+    lai->primitive_type_vector [f_primitive_type_logical_s1]
+      = builtin->builtin_logical_s1;
+    lai->primitive_type_vector [f_primitive_type_logical_s2]
+      = builtin->builtin_logical_s2;
+    lai->primitive_type_vector [f_primitive_type_logical_s8]
+      = builtin->builtin_logical_s8;
+    lai->primitive_type_vector [f_primitive_type_real]
+      = builtin->builtin_real;
+    lai->primitive_type_vector [f_primitive_type_real_s8]
+      = builtin->builtin_real_s8;
+    lai->primitive_type_vector [f_primitive_type_real_s16]
+      = builtin->builtin_real_s16;
+    lai->primitive_type_vector [f_primitive_type_complex_s8]
+      = builtin->builtin_complex_s8;
+    lai->primitive_type_vector [f_primitive_type_complex_s16]
+      = builtin->builtin_complex_s16;
+    lai->primitive_type_vector [f_primitive_type_void]
+      = builtin->builtin_void;
+
+    lai->bool_type_symbol = "logical";
+    lai->bool_type_default = builtin->builtin_logical_s2;
+  }
 };
 
 /* Single instance of the Fortran language class.  */

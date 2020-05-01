@@ -921,7 +921,6 @@ extern const struct language_data c_language_data =
   0,				/* String lower bound */
   default_word_break_characters,
   default_collect_symbol_completion_matches,
-  c_language_arch_info,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -941,6 +940,13 @@ public:
   c_language ()
     : language_defn (language_c, c_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    c_language_arch_info (gdbarch, lai);
+  }
 };
 
 /* Single instance of the C language class.  */
@@ -974,69 +980,6 @@ enum cplus_primitive_types {
   cplus_primitive_type_wchar_t,
   nr_cplus_primitive_types
 };
-
-static void
-cplus_language_arch_info (struct gdbarch *gdbarch,
-			  struct language_arch_info *lai)
-{
-  const struct builtin_type *builtin = builtin_type (gdbarch);
-
-  lai->string_char_type = builtin->builtin_char;
-  lai->primitive_type_vector
-    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_cplus_primitive_types + 1,
-			      struct type *);
-  lai->primitive_type_vector [cplus_primitive_type_int]
-    = builtin->builtin_int;
-  lai->primitive_type_vector [cplus_primitive_type_long]
-    = builtin->builtin_long;
-  lai->primitive_type_vector [cplus_primitive_type_short]
-    = builtin->builtin_short;
-  lai->primitive_type_vector [cplus_primitive_type_char]
-    = builtin->builtin_char;
-  lai->primitive_type_vector [cplus_primitive_type_float]
-    = builtin->builtin_float;
-  lai->primitive_type_vector [cplus_primitive_type_double]
-    = builtin->builtin_double;
-  lai->primitive_type_vector [cplus_primitive_type_void]
-    = builtin->builtin_void;
-  lai->primitive_type_vector [cplus_primitive_type_long_long]
-    = builtin->builtin_long_long;
-  lai->primitive_type_vector [cplus_primitive_type_signed_char]
-    = builtin->builtin_signed_char;
-  lai->primitive_type_vector [cplus_primitive_type_unsigned_char]
-    = builtin->builtin_unsigned_char;
-  lai->primitive_type_vector [cplus_primitive_type_unsigned_short]
-    = builtin->builtin_unsigned_short;
-  lai->primitive_type_vector [cplus_primitive_type_unsigned_int]
-    = builtin->builtin_unsigned_int;
-  lai->primitive_type_vector [cplus_primitive_type_unsigned_long]
-    = builtin->builtin_unsigned_long;
-  lai->primitive_type_vector [cplus_primitive_type_unsigned_long_long]
-    = builtin->builtin_unsigned_long_long;
-  lai->primitive_type_vector [cplus_primitive_type_long_double]
-    = builtin->builtin_long_double;
-  lai->primitive_type_vector [cplus_primitive_type_complex]
-    = builtin->builtin_complex;
-  lai->primitive_type_vector [cplus_primitive_type_double_complex]
-    = builtin->builtin_double_complex;
-  lai->primitive_type_vector [cplus_primitive_type_bool]
-    = builtin->builtin_bool;
-  lai->primitive_type_vector [cplus_primitive_type_decfloat]
-    = builtin->builtin_decfloat;
-  lai->primitive_type_vector [cplus_primitive_type_decdouble]
-    = builtin->builtin_decdouble;
-  lai->primitive_type_vector [cplus_primitive_type_declong]
-    = builtin->builtin_declong;
-  lai->primitive_type_vector [cplus_primitive_type_char16_t]
-    = builtin->builtin_char16;
-  lai->primitive_type_vector [cplus_primitive_type_char32_t]
-    = builtin->builtin_char32;
-  lai->primitive_type_vector [cplus_primitive_type_wchar_t]
-    = builtin->builtin_wchar;
-
-  lai->bool_type_symbol = "bool";
-  lai->bool_type_default = builtin->builtin_bool;
-}
 
 static const char *cplus_extensions[] =
 {
@@ -1079,7 +1022,6 @@ extern const struct language_data cplus_language_data =
   0,				/* String lower bound */
   default_word_break_characters,
   default_collect_symbol_completion_matches,
-  cplus_language_arch_info,
   c_watch_location_expression,
   cp_get_symbol_name_matcher,
   iterate_over_symbols,
@@ -1106,6 +1048,69 @@ public:
 	(struct type *type) const override
   {
     return cp_pass_by_reference (type);
+  }
+
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    const struct builtin_type *builtin = builtin_type (gdbarch);
+
+    lai->string_char_type = builtin->builtin_char;
+    lai->primitive_type_vector
+      = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_cplus_primitive_types + 1,
+				struct type *);
+    lai->primitive_type_vector [cplus_primitive_type_int]
+      = builtin->builtin_int;
+    lai->primitive_type_vector [cplus_primitive_type_long]
+      = builtin->builtin_long;
+    lai->primitive_type_vector [cplus_primitive_type_short]
+      = builtin->builtin_short;
+    lai->primitive_type_vector [cplus_primitive_type_char]
+      = builtin->builtin_char;
+    lai->primitive_type_vector [cplus_primitive_type_float]
+      = builtin->builtin_float;
+    lai->primitive_type_vector [cplus_primitive_type_double]
+      = builtin->builtin_double;
+    lai->primitive_type_vector [cplus_primitive_type_void]
+      = builtin->builtin_void;
+    lai->primitive_type_vector [cplus_primitive_type_long_long]
+      = builtin->builtin_long_long;
+    lai->primitive_type_vector [cplus_primitive_type_signed_char]
+      = builtin->builtin_signed_char;
+    lai->primitive_type_vector [cplus_primitive_type_unsigned_char]
+      = builtin->builtin_unsigned_char;
+    lai->primitive_type_vector [cplus_primitive_type_unsigned_short]
+      = builtin->builtin_unsigned_short;
+    lai->primitive_type_vector [cplus_primitive_type_unsigned_int]
+      = builtin->builtin_unsigned_int;
+    lai->primitive_type_vector [cplus_primitive_type_unsigned_long]
+      = builtin->builtin_unsigned_long;
+    lai->primitive_type_vector [cplus_primitive_type_unsigned_long_long]
+      = builtin->builtin_unsigned_long_long;
+    lai->primitive_type_vector [cplus_primitive_type_long_double]
+      = builtin->builtin_long_double;
+    lai->primitive_type_vector [cplus_primitive_type_complex]
+      = builtin->builtin_complex;
+    lai->primitive_type_vector [cplus_primitive_type_double_complex]
+      = builtin->builtin_double_complex;
+    lai->primitive_type_vector [cplus_primitive_type_bool]
+      = builtin->builtin_bool;
+    lai->primitive_type_vector [cplus_primitive_type_decfloat]
+      = builtin->builtin_decfloat;
+    lai->primitive_type_vector [cplus_primitive_type_decdouble]
+      = builtin->builtin_decdouble;
+    lai->primitive_type_vector [cplus_primitive_type_declong]
+      = builtin->builtin_declong;
+    lai->primitive_type_vector [cplus_primitive_type_char16_t]
+      = builtin->builtin_char16;
+    lai->primitive_type_vector [cplus_primitive_type_char32_t]
+      = builtin->builtin_char32;
+    lai->primitive_type_vector [cplus_primitive_type_wchar_t]
+      = builtin->builtin_wchar;
+
+    lai->bool_type_symbol = "bool";
+    lai->bool_type_default = builtin->builtin_bool;
   }
 };
 
@@ -1154,7 +1159,6 @@ extern const struct language_data asm_language_data =
   0,				/* String lower bound */
   default_word_break_characters,
   default_collect_symbol_completion_matches,
-  c_language_arch_info,		/* FIXME: la_language_arch_info.  */
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -1174,6 +1178,15 @@ public:
   asm_language ()
     : language_defn (language_asm, asm_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.
+
+     FIXME: Should this have its own arch info method?  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    c_language_arch_info (gdbarch, lai);
+  }
 };
 
 /* The single instance of the ASM language class.  */
@@ -1218,7 +1231,6 @@ extern const struct language_data minimal_language_data =
   0,				/* String lower bound */
   default_word_break_characters,
   default_collect_symbol_completion_matches,
-  c_language_arch_info,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -1238,6 +1250,13 @@ public:
   minimal_language ()
     : language_defn (language_minimal, minimal_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    c_language_arch_info (gdbarch, lai);
+  }
 };
 
 /* The single instance of the minimal language class.  */

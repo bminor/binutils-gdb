@@ -368,10 +368,6 @@ struct language_data
        const char *word,
        enum type_code code);
 
-    /* The per-architecture (OS/ABI) language information.  */
-    void (*la_language_arch_info) (struct gdbarch *,
-				   struct language_arch_info *);
-
     /* Return an expression that can be used for a location
        watchpoint.  TYPE is a pointer type that points to the memory
        to watch, and ADDR is the address of the watched memory.  */
@@ -502,6 +498,11 @@ struct language_defn : language_data
   {
     return {};
   }
+
+  /* The per-architecture (OS/ABI) language information.  */
+
+  virtual void language_arch_info (struct gdbarch *,
+				   struct language_arch_info *) const = 0;
 
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];

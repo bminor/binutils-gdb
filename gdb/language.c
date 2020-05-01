@@ -837,7 +837,6 @@ extern const struct language_data unknown_language_data =
   0,				/* String lower bound */
   default_word_break_characters,
   default_collect_symbol_completion_matches,
-  unknown_language_arch_info,	/* la_language_arch_info.  */
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -857,6 +856,13 @@ public:
   unknown_language ()
     : language_defn (language_unknown, unknown_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    unknown_language_arch_info (gdbarch, lai);
+  }
 };
 
 /* Single instance of the unknown language class.  */
@@ -899,7 +905,6 @@ extern const struct language_data auto_language_data =
   0,				/* String lower bound */
   default_word_break_characters,
   default_collect_symbol_completion_matches,
-  unknown_language_arch_info,	/* la_language_arch_info.  */
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -919,6 +924,13 @@ public:
   auto_language ()
     : language_defn (language_auto, auto_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    unknown_language_arch_info (gdbarch, lai);
+  }
 };
 
 /* Single instance of the fake "auto" language.  */
@@ -944,11 +956,11 @@ language_gdbarch_post_init (struct gdbarch *gdbarch)
 
   l = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct language_gdbarch);
   for (const auto &lang : language_defn::languages)
-    if (lang != NULL && lang->la_language_arch_info != NULL)
-      {
-	lang->la_language_arch_info (gdbarch,
-				     l->arch_info + lang->la_language);
-      }
+    {
+      gdb_assert (lang != nullptr);
+      lang->language_arch_info (gdbarch,
+				l->arch_info + lang->la_language);
+    }
 
   return l;
 }
