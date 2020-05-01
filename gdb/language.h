@@ -387,12 +387,6 @@ struct language_data
     void (*la_language_arch_info) (struct gdbarch *,
 				   struct language_arch_info *);
 
-    /* Print the index of an element of an array.  */
-    void (*la_print_array_index) (struct type *index_type,
-				  LONGEST index_value,
-                                  struct ui_file *stream,
-                                  const struct value_print_options *options);
-
     /* Return information about whether TYPE should be passed
        (and returned) by reference at the language level.  */
     struct language_pass_by_ref_info (*la_pass_by_reference)
@@ -494,6 +488,14 @@ struct language_defn : language_data
     gdb_assert (languages[lang] == nullptr);
     languages[lang] = this;
   }
+
+  /* Print the index of an element of an array.  This default
+     implementation prints using C99 syntax.  */
+
+  virtual void print_array_index (struct type *index_type,
+				  LONGEST index_value,
+				  struct ui_file *stream,
+				  const value_print_options *options) const;
 
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];
@@ -600,8 +602,8 @@ extern enum language set_language (enum language);
   (current_language->la_emitchar(ch, type, stream, quoter))
 
 #define LA_PRINT_ARRAY_INDEX(index_type, index_value, stream, options)	\
-  (current_language->la_print_array_index(index_type, index_value, stream, \
-					  options))
+  (current_language->print_array_index(index_type, index_value, stream, \
+				       options))
 
 #define LA_ITERATE_OVER_SYMBOLS(BLOCK, NAME, DOMAIN, CALLBACK) \
   (current_language->la_iterate_over_symbols (BLOCK, NAME, DOMAIN, CALLBACK))
@@ -662,11 +664,6 @@ extern char *language_class_name_from_physname (const struct language_defn *,
 
 /* Splitting strings into words.  */
 extern const char *default_word_break_characters (void);
-
-/* Print the index of an array element using the C99 syntax.  */
-extern void default_print_array_index (struct type *index_type, LONGEST index,
-                                       struct ui_file *stream,
-				       const struct value_print_options *options);
 
 /* Return information about whether TYPE should be passed
    (and returned) by reference at the language level.  */

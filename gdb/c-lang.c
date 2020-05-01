@@ -923,7 +923,6 @@ extern const struct language_data c_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_language_arch_info,
-  default_print_array_index,
   default_pass_by_reference,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
@@ -1084,7 +1083,6 @@ extern const struct language_data cplus_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   cplus_language_arch_info,
-  default_print_array_index,
   cp_pass_by_reference,
   c_watch_location_expression,
   cp_get_symbol_name_matcher,
@@ -1154,7 +1152,6 @@ extern const struct language_data asm_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_language_arch_info,		/* FIXME: la_language_arch_info.  */
-  default_print_array_index,
   default_pass_by_reference,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
@@ -1221,7 +1218,6 @@ extern const struct language_data minimal_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_language_arch_info,
-  default_print_array_index,
   default_pass_by_reference,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */

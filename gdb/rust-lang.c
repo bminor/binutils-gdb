@@ -2139,7 +2139,6 @@ extern const struct language_data rust_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   rust_language_arch_info,
-  default_print_array_index,
   default_pass_by_reference,
   rust_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */

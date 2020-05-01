@@ -466,7 +466,6 @@ extern const struct language_data pascal_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   pascal_language_arch_info,
-  default_print_array_index,
   default_pass_by_reference,
   c_watch_location_expression,
   NULL,				/* la_compare_symbol_for_completion */

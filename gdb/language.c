@@ -650,12 +650,12 @@ default_word_break_characters (void)
   return " \t\n!@#$%^&*()+=|~`}{[]\"';:?/>.<,-";
 }
 
-/* Print the index of array elements using the C99 syntax.  */
+/* See language.h.  */
 
 void
-default_print_array_index (struct type *index_type, LONGEST index,
-			   struct ui_file *stream,
-			   const struct value_print_options *options)
+language_defn::print_array_index (struct type *index_type, LONGEST index,
+				  struct ui_file *stream,
+				  const value_print_options *options) const
 {
   struct value *index_value = value_from_longest (index_type, index);
 
@@ -849,7 +849,6 @@ extern const struct language_data unknown_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   unknown_language_arch_info,	/* la_language_arch_info.  */
-  default_print_array_index,
   default_pass_by_reference,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
@@ -914,7 +913,6 @@ extern const struct language_data auto_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   unknown_language_arch_info,	/* la_language_arch_info.  */
-  default_print_array_index,
   default_pass_by_reference,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */

@@ -1,5 +1,34 @@
 2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_print_array_index): Delete function, move
+	implementation to...
+	(ada_language::print_array_index): ...here.
+	(ada_language_data): Delete la_print_array_index initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (default_print_array_index): Delete function, move
+	implementation to...
+	(language_defn::print_array_index): ...here.
+	(unknown_language_data): Delete la_print_array_index initializer.
+	(auto_language_data): Likewise.
+	* language.h (struct language_data): Delete la_print_array_index
+	field.
+	(language_defn::print_array_index): New member function.
+	(LA_PRINT_ARRAY_INDEX): Update.
+	(default_print_array_index): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_print_array_index
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb/ada-lang.c (ada_language_defn): Convert to...
 	(ada_language_data): ...this.
 	(class ada_language): New class.

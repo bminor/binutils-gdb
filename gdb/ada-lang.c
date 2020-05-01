@@ -497,19 +497,6 @@ ada_get_gdb_completer_word_break_characters (void)
   return ada_completer_word_break_characters;
 }
 
-/* Print an array element index using the Ada syntax.  */
-
-static void
-ada_print_array_index (struct type *index_type, LONGEST index,
-		       struct ui_file *stream,
-                       const struct value_print_options *options)
-{
-  struct value *index_value = val_atr (index_type, index);
-
-  LA_VALUE_PRINT (index_value, stream, options);
-  fprintf_filtered (stream, " => ");
-}
-
 /* la_watch_location_expression for Ada.  */
 
 static gdb::unique_xmalloc_ptr<char>
@@ -14100,7 +14087,6 @@ extern const struct language_data ada_language_data =
   ada_get_gdb_completer_word_break_characters,
   ada_collect_symbol_completion_matches,
   ada_language_arch_info,
-  ada_print_array_index,
   default_pass_by_reference,
   ada_watch_location_expression,
   ada_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
@@ -14121,6 +14107,19 @@ public:
   ada_language ()
     : language_defn (language_ada, ada_language_data)
   { /* Nothing.  */ }
+
+  /* Print an array element index using the Ada syntax.  */
+
+  void print_array_index (struct type *index_type,
+			  LONGEST index,
+			  struct ui_file *stream,
+			  const value_print_options *options) const override
+  {
+    struct value *index_value = val_atr (index_type, index);
+
+    LA_VALUE_PRINT (index_value, stream, options);
+    fprintf_filtered (stream, " => ");
+  }
 };
 
 /* Single instance of the Ada language class.  */
