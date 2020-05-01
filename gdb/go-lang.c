@@ -599,7 +599,6 @@ extern const struct language_data go_language_data =
 				   syntax.  */
   go_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value.  */
-  default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline.  */
   NULL,				/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */

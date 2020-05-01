@@ -14023,26 +14023,6 @@ ada_get_symbol_name_matcher (const lookup_name_info &lookup_name)
     }
 }
 
-/* Implement the "la_read_var_value" language_defn method for Ada.  */
-
-static struct value *
-ada_read_var_value (struct symbol *var, const struct block *var_block,
-		    struct frame_info *frame)
-{
-  /* The only case where default_read_var_value is not sufficient
-     is when VAR is a renaming...  */
-  if (frame != nullptr)
-    {
-      const struct block *frame_block = get_frame_block (frame, NULL);
-      if (frame_block != nullptr && ada_is_renaming_symbol (var))
-	return ada_read_renaming_var_value (var, frame_block);
-    }
-
-  /* This is a typical case where we expect the default_read_var_value
-     function to work.  */
-  return default_read_var_value (var, var_block, frame);
-}
-
 static const char *ada_extensions[] =
 {
   ".adb", ".ads", ".a", ".ada", ".dg", NULL
@@ -14071,7 +14051,6 @@ extern const struct language_data ada_language_data =
   ada_print_typedef,            /* Print a typedef using appropriate syntax */
   ada_value_print_inner,	/* la_value_print_inner */
   ada_value_print,              /* Print a top-level value */
-  ada_read_var_value,		/* la_read_var_value */
   NULL,                         /* Language specific skip_trampoline */
   NULL,                         /* name_of_this */
   true,                         /* la_store_sym_names_in_linkage_form_p */
@@ -14119,6 +14098,26 @@ public:
 
     LA_VALUE_PRINT (index_value, stream, options);
     fprintf_filtered (stream, " => ");
+  }
+
+  /* Implement the "read_var_value" language_defn method for Ada.  */
+
+  struct value *read_var_value (struct symbol *var,
+				const struct block *var_block,
+				struct frame_info *frame) const override
+  {
+    /* The only case where default_read_var_value is not sufficient
+       is when VAR is a renaming...  */
+    if (frame != nullptr)
+      {
+	const struct block *frame_block = get_frame_block (frame, NULL);
+	if (frame_block != nullptr && ada_is_renaming_symbol (var))
+	  return ada_read_renaming_var_value (var, frame_block);
+      }
+
+    /* This is a typical case where we expect the default_read_var_value
+       function to work.  */
+    return language_defn::read_var_value (var, var_block, frame);
   }
 };
 

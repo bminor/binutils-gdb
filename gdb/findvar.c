@@ -578,12 +578,12 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
   return frame;
 }
 
-/* A default implementation for the "la_read_var_value" hook in
-   the language vector which should work in most situations.  */
+/* See language.h.  */
 
 struct value *
-default_read_var_value (struct symbol *var, const struct block *var_block,
-			struct frame_info *frame)
+language_defn::read_var_value (struct symbol *var,
+			       const struct block *var_block,
+			       struct frame_info *frame) const
 {
   struct value *v;
   struct type *type = SYMBOL_TYPE (var);
@@ -801,7 +801,7 @@ default_read_var_value (struct symbol *var, const struct block *var_block,
   return v;
 }
 
-/* Calls VAR's language la_read_var_value hook with the given arguments.  */
+/* Calls VAR's language read_var_value hook with the given arguments.  */
 
 struct value *
 read_var_value (struct symbol *var, const struct block *var_block,
@@ -810,9 +810,8 @@ read_var_value (struct symbol *var, const struct block *var_block,
   const struct language_defn *lang = language_def (var->language ());
 
   gdb_assert (lang != NULL);
-  gdb_assert (lang->la_read_var_value != NULL);
 
-  return lang->la_read_var_value (var, var_block, frame);
+  return lang->read_var_value (var, var_block, frame);
 }
 
 /* Install default attributes for register values.  */

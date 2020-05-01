@@ -1,5 +1,36 @@
 2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_read_var_value): Delete function, move
+	implementation to...
+	(ada_language::read_var_value): ...here.
+	(ada_language_data): Delete la_read_var_value initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* findvar.c (default_read_var_value): Rename to...
+	(language_defn::read_var_value): ...this.
+	* findvar.c (read_var_value): Update header comment, and change to
+	call member function instead of function pointer.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unknown_language_data): Delete la_read_var_value
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (struct language_data): Delete la_read_var_value
+	field.
+	(language_defn::read_var_value): New member function.
+	(default_read_var_value): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_read_var_value
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+	* value.h (default_read_var_value): Delete declaration.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_print_array_index): Delete function, move
 	implementation to...
 	(ada_language::print_array_index): ...here.

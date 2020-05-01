@@ -907,7 +907,6 @@ extern const struct language_data c_language_data =
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
-  default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
@@ -1067,7 +1066,6 @@ extern const struct language_data cplus_language_data =
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
-  default_read_var_value,	/* la_read_var_value */
   cplus_skip_trampoline,	/* Language specific skip_trampoline */
   "this",                       /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
@@ -1136,7 +1134,6 @@ extern const struct language_data asm_language_data =
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
-  default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
@@ -1202,7 +1199,6 @@ extern const struct language_data minimal_language_data =
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
-  default_read_var_value,	/* la_read_var_value */
   NULL,				/* Language specific skip_trampoline */
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */

@@ -272,21 +272,6 @@ struct language_data
     void (*la_value_print) (struct value *, struct ui_file *,
 			    const struct value_print_options *);
 
-    /* Given a symbol VAR, the corresponding block VAR_BLOCK (if any) and a
-       stack frame id FRAME, read the value of the variable and return (pointer
-       to a) struct value containing the value.
-
-       VAR_BLOCK is needed if there's a possibility for VAR to be outside
-       FRAME.  This is what happens if FRAME correspond to a nested function
-       and VAR is defined in the outer function.  If callers know that VAR is
-       located in FRAME or is global/static, NULL can be passed as VAR_BLOCK.
-
-       Throw an error if the variable cannot be found.  */
-
-    struct value *(*la_read_var_value) (struct symbol *var,
-					const struct block *var_block,
-					struct frame_info *frame);
-
     /* PC is possibly an unknown languages trampoline.
        If that PC falls in a trampoline belonging to this language,
        return the address of the first pc in the real function, or 0
@@ -496,6 +481,21 @@ struct language_defn : language_data
 				  LONGEST index_value,
 				  struct ui_file *stream,
 				  const value_print_options *options) const;
+
+  /* Given a symbol VAR, the corresponding block VAR_BLOCK (if any) and a
+     stack frame id FRAME, read the value of the variable and return (pointer
+     to a) struct value containing the value.
+
+     VAR_BLOCK is needed if there's a possibility for VAR to be outside
+     FRAME.  This is what happens if FRAME correspond to a nested function
+     and VAR is defined in the outer function.  If callers know that VAR is
+     located in FRAME or is global/static, NULL can be passed as VAR_BLOCK.
+
+     Throw an error if the variable cannot be found.  */
+
+  virtual struct value *read_var_value (struct symbol *var,
+					const struct block *var_block,
+					struct frame_info *frame) const;
 
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];

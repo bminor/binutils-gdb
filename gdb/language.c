@@ -833,7 +833,6 @@ extern const struct language_data unknown_language_data =
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_value_print_inner,	/* la_value_print_inner */
   unk_lang_value_print,		/* Print a top-level value */
-  default_read_var_value,	/* la_read_var_value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */
   "this",        	    	/* name_of_this */
   true,				/* store_sym_names_in_linkage_form_p */
@@ -897,7 +896,6 @@ extern const struct language_data auto_language_data =
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_value_print_inner,	/* la_value_print_inner */
   unk_lang_value_print,		/* Print a top-level value */
-  default_read_var_value,	/* la_read_var_value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */
   "this",		        /* name_of_this */
   false,			/* store_sym_names_in_linkage_form_p */

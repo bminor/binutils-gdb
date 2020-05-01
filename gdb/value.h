@@ -744,10 +744,6 @@ extern struct value *read_var_value (struct symbol *var,
 				     const struct block *var_block,
 				     struct frame_info *frame);
 
-extern struct value *default_read_var_value (struct symbol *var,
-					     const struct block *var_block,
-					     struct frame_info *frame);
-
 extern struct value *allocate_value (struct type *type);
 extern struct value *allocate_value_lazy (struct type *type);
 extern void value_contents_copy (struct value *dst, LONGEST dst_offset,
