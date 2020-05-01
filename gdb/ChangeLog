@@ -1,5 +1,37 @@
 2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete la_pass_by_reference
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(cplus_language::pass_by_reference_info): New method.
+	(asm_language_data): Delete la_pass_by_reference initializer.
+	(minimal_language_data): Likewise.
+	* cp-abi.c (cp_pass_by_reference): Remove use of
+	default_pass_by_reference.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* gnu-v3-abi.c (gnuv3_pass_by_reference): Remove use of
+	default_pass_by_reference.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (language_pass_by_reference): Update.
+	(default_pass_by_reference): Delete.
+	(unknown_language_data): Delete la_pass_by_reference
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (struct language_data): Delete la_pass_by_reference
+	field.
+	(language_defn::pass_by_reference_info): New member function.
+	(default_pass_by_reference): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_pass_by_reference
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_read_var_value): Delete function, move
 	implementation to...
 	(ada_language::read_var_value): ...here.

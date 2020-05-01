@@ -226,7 +226,7 @@ struct language_pass_by_ref_info
 cp_pass_by_reference (struct type *type)
 {
   if ((current_cp_abi.pass_by_reference) == NULL)
-    return default_pass_by_reference (type);
+    return {};
   return (*current_cp_abi.pass_by_reference) (type);
 }
 

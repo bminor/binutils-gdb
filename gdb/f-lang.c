@@ -671,7 +671,6 @@ extern const struct language_data f_language_data =
   f_word_break_characters,
   f_collect_symbol_completion_matches,
   f_language_arch_info,
-  default_pass_by_reference,
   c_watch_location_expression,
   cp_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
   iterate_over_symbols,

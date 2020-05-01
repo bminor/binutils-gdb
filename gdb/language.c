@@ -627,17 +627,7 @@ language_class_name_from_physname (const struct language_defn *lang,
 struct language_pass_by_ref_info
 language_pass_by_reference (struct type *type)
 {
-  return current_language->la_pass_by_reference (type);
-}
-
-/* Return a default struct that provides pass-by-reference information
-   about the given TYPE.  Languages should update the default values
-   as appropriate.  */
-
-struct language_pass_by_ref_info
-default_pass_by_reference (struct type *type)
-{
-  return {};
+  return current_language->pass_by_reference_info (type);
 }
 
 /* Return the default string containing the list of characters
@@ -848,7 +838,6 @@ extern const struct language_data unknown_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   unknown_language_arch_info,	/* la_language_arch_info.  */
-  default_pass_by_reference,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -911,7 +900,6 @@ extern const struct language_data auto_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   unknown_language_arch_info,	/* la_language_arch_info.  */
-  default_pass_by_reference,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,

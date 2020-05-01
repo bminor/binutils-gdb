@@ -922,7 +922,6 @@ extern const struct language_data c_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_language_arch_info,
-  default_pass_by_reference,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -1081,7 +1080,6 @@ extern const struct language_data cplus_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   cplus_language_arch_info,
-  cp_pass_by_reference,
   c_watch_location_expression,
   cp_get_symbol_name_matcher,
   iterate_over_symbols,
@@ -1101,6 +1099,14 @@ public:
   cplus_language ()
     : language_defn (language_cplus, cplus_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  struct language_pass_by_ref_info pass_by_reference_info
+	(struct type *type) const override
+  {
+    return cp_pass_by_reference (type);
+  }
 };
 
 /* The single instance of the C++ language class.  */
@@ -1149,7 +1155,6 @@ extern const struct language_data asm_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_language_arch_info,		/* FIXME: la_language_arch_info.  */
-  default_pass_by_reference,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,
@@ -1214,7 +1219,6 @@ extern const struct language_data minimal_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_language_arch_info,
-  default_pass_by_reference,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   iterate_over_symbols,

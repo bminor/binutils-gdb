@@ -372,11 +372,6 @@ struct language_data
     void (*la_language_arch_info) (struct gdbarch *,
 				   struct language_arch_info *);
 
-    /* Return information about whether TYPE should be passed
-       (and returned) by reference at the language level.  */
-    struct language_pass_by_ref_info (*la_pass_by_reference)
-      (struct type *type);
-
     /* Return an expression that can be used for a location
        watchpoint.  TYPE is a pointer type that points to the memory
        to watch, and ADDR is the address of the watched memory.  */
@@ -496,6 +491,17 @@ struct language_defn : language_data
   virtual struct value *read_var_value (struct symbol *var,
 					const struct block *var_block,
 					struct frame_info *frame) const;
+
+  /* Return information about whether TYPE should be passed
+     (and returned) by reference at the language level.  The default
+     implementation returns a LANGUAGE_PASS_BY_REF_INFO initialised in its
+     default state.  */
+
+  virtual struct language_pass_by_ref_info pass_by_reference_info
+	(struct type *type) const
+  {
+    return {};
+  }
 
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];
@@ -668,11 +674,6 @@ extern const char *default_word_break_characters (void);
 /* Return information about whether TYPE should be passed
    (and returned) by reference at the language level.  */
 struct language_pass_by_ref_info language_pass_by_reference (struct type *type);
-
-/* Return a default struct that provides pass-by-reference information
-   about the given TYPE.  Languages should update the default values
-   as appropriate.  */
-struct language_pass_by_ref_info default_pass_by_reference (struct type *type);
 
 /* The default implementation of la_print_typedef.  */
 void default_print_typedef (struct type *type, struct symbol *new_symbol,

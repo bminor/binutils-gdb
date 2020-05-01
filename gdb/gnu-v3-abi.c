@@ -1406,8 +1406,7 @@ gnuv3_pass_by_reference (struct type *type)
   type = check_typedef (type);
 
   /* Start with the default values.  */
-  struct language_pass_by_ref_info info
-    = default_pass_by_reference (type);
+  struct language_pass_by_ref_info info;
 
   bool has_cc_attr = false;
   bool is_pass_by_value = false;
