@@ -1,5 +1,22 @@
 2020-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gold/25473
+	* x86_64.cc (Target_x86_64<size>::Relocate::tls_desc_gd_to_ie):
+	Properly check r8 - r15 in "lea foo@TLSDESC(%rip), %reg".
+	(Target_x86_64<size>::Relocate::tls_desc_gd_to_le): Properly
+	relax r8 - r15 in "lea foo@TLSDESC(%rip), %reg".
+	* testsuite/Makefile.am (check_SCRIPTS): Add x86_64_gd_to_le.sh.
+	(check_DATA): Add x86_64_gd_to_le.stdout.
+	(MOSTLYCLEANFILES): Add x86_64_gd_to_le.
+	(x86_64_gd_to_le.o): New target.
+	(x86_64_gd_to_le): Likewise.
+	(x86_64_gd_to_le.stdout): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+	* testsuite/x86_64_gd_to_le.s: New file.
+	* testsuite/x86_64_gd_to_le.sh: Likewise.
+
+2020-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/odr_violation2.cc (Ordering::operator()): Make
 	expression even more complex.
 

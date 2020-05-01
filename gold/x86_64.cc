@@ -5477,7 +5477,9 @@ Target_x86_64<size>::Relocate::tls_desc_gd_to_ie(
       tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -3);
       tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 4);
       tls::check_tls(relinfo, relnum, rela.get_r_offset(),
-		     view[-3] == 0x48 && view[-2] == 0x8d && view[-1] == 0x05);
+		     ((view[-3] & 0xfb) == 0x48
+		      && view[-2] == 0x8d
+		      && (view[-1] & 0xc7) == 0x05));
       view[-2] = 0x8b;
       const elfcpp::Elf_Xword addend = rela.get_r_addend();
       Relocate_functions<size, false>::pcrela32(view, value, addend, address);
@@ -5516,9 +5518,12 @@ Target_x86_64<size>::Relocate::tls_desc_gd_to_le(
       tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -3);
       tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 4);
       tls::check_tls(relinfo, relnum, rela.get_r_offset(),
-		     view[-3] == 0x48 && view[-2] == 0x8d && view[-1] == 0x05);
+		     ((view[-3] & 0xfb) == 0x48
+		      && view[-2] == 0x8d
+		      && (view[-1] & 0xc7) == 0x05));
+      view[-3] = 0x48 | ((view[-3] >> 2) & 1);
       view[-2] = 0xc7;
-      view[-1] = 0xc0;
+      view[-1] = 0xc0 | ((view[-1] >> 3) & 7);
       value -= tls_segment->memsz();
       Relocate_functions<size, false>::rela32(view, value, 0);
     }

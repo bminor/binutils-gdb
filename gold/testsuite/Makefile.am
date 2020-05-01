@@ -1202,6 +1202,17 @@ x86_64_indirect_jump_to_direct1: x86_64_indirect_jump_to_direct1.o gcctestdir/ld
 x86_64_indirect_jump_to_direct1.stdout: x86_64_indirect_jump_to_direct1
 	$(TEST_OBJDUMP) -dw $< > $@
 
+check_SCRIPTS += x86_64_gd_to_le.sh
+check_DATA += x86_64_gd_to_le.stdout
+MOSTLYCLEANFILES += x86_64_gd_to_le
+
+x86_64_gd_to_le.o: x86_64_gd_to_le.s
+	$(TEST_AS) --64 -o $@ $<
+x86_64_gd_to_le: x86_64_gd_to_le.o gcctestdir/ld
+	gcctestdir/ld -o $@ $<
+x86_64_gd_to_le.stdout: x86_64_gd_to_le
+	$(TEST_OBJDUMP) -dw $< > $@
+
 check_SCRIPTS += x86_64_overflow_pc32.sh
 check_DATA += x86_64_overflow_pc32.err
 MOSTLYCLEANFILES += x86_64_overflow_pc32.err
