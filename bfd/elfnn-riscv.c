@@ -4161,15 +4161,16 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	      symval = 0;
 	      sym_sec = bfd_und_section_ptr;
 	    }
-	  else if (h->root.u.def.section->output_section == NULL
-		   || (h->root.type != bfd_link_hash_defined
-		       && h->root.type != bfd_link_hash_defweak))
-	    continue;
-	  else
+	  else if ((h->root.type == bfd_link_hash_defined
+		    || h->root.type == bfd_link_hash_defweak)
+		   && h->root.u.def.section != NULL
+		   && h->root.u.def.section->output_section != NULL)
 	    {
 	      symval = h->root.u.def.value;
 	      sym_sec = h->root.u.def.section;
 	    }
+	  else
+	    continue;
 
 	  if (h->type != STT_FUNC)
 	    reserve_size =
