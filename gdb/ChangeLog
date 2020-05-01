@@ -1,3 +1,7 @@
+2020-05-02  Hannes Domani  <ssbssa@yahoo.de>
+
+	* gdbtypes.h (enum dynamic_prop_node_kind): Fix typo.
+
 2020-05-01  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb-gdb.gdb-in: Remove breakpoint on disappeared function

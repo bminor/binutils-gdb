@@ -547,7 +547,7 @@ enum dynamic_prop_node_kind
      indicates that the object of the type can be allocated/deallocated.  */
   DYN_PROP_ALLOCATED,
 
-  /* A property representing DW_AT_allocated.  The presence of this attribute
+  /* A property representing DW_AT_associated.  The presence of this attribute
      indicated that the object of the type can be associated.  */
   DYN_PROP_ASSOCIATED,
 
