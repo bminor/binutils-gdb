@@ -7,12 +7,6 @@ if !$gdb_init_done
 
   b internal_error
 
-  b info_command
-  commands
-    silent
-    return
-  end
-
   dir @srcdir@/../libiberty
   dir @srcdir@/../bfd
   dir @srcdir@

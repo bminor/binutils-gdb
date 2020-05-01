@@ -1,3 +1,7 @@
+2020-05-01  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+	* gdb-gdb.gdb-in: Remove breakpoint on disappeared function
+	info_command.
+
 2020-04-30  Kamil Rytarowski  <n54@gmx.com>
 
 	* nbsd-nat.c (nbsd_enable_proc_events)
