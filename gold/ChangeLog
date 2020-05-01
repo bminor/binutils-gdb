@@ -1,5 +1,10 @@
 2020-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/odr_violation2.cc (Ordering::operator()): Make
+	expression even more complex.
+
+2020-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ver_test_pr16504.sh: Updated.
 
 2020-05-01  H.J. Lu  <hongjiu.lu@intel.com>
