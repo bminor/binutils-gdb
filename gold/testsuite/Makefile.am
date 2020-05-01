@@ -1032,11 +1032,11 @@ if TLS_GNU2_DIALECT
 
 check_PROGRAMS += tls_shared_gnu2_gd_to_ie_test
 
-tls_test_gnu2.o: tls_test.cc
+tls_test_gnu2.o: tls_test.cc gcctestdir/as
 	$(CXXCOMPILE) -c -fpic -mtls-dialect=gnu2 -o $@ $<
-tls_test_file2_gnu2.o: tls_test_file2.cc
+tls_test_file2_gnu2.o: tls_test_file2.cc gcctestdir/as
 	$(CXXCOMPILE) -c -fpic -mtls-dialect=gnu2 -o $@ $<
-tls_test_c_gnu2.o: tls_test_c.c
+tls_test_c_gnu2.o: tls_test_c.c gcctestdir/as
 	$(COMPILE) -c -fpic -mtls-dialect=gnu2 $(TLS_TEST_C_CFLAGS) -o $@ $<
 tls_test_gnu2_shared2.so: tls_test_file2_gnu2.o gcctestdir/ld
 	$(CXXLINK) -shared tls_test_file2_gnu2.o

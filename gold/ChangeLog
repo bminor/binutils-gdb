@@ -1,5 +1,22 @@
 2020-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gold/25426
+	* x86_64.cc (Target_x86_64<size>::Relocate::tls_desc_gd_to_ie):
+	For x32, relax "rex leal foo@tlsdesc(%rip), %reg" to
+	"rex movl foo@gottpoff(%rip), %eax" and relax ""call *(%eax)"
+	to "nopl (%rax)".
+	(Target_x86_64<size>::Relocate::tls_desc_gd_to_le): For x32,
+	relax "rex leal foo@tlsdesc(%rip), %reg" to
+	"rex movl foo@tpoff, %eax" and relax "call *foo@tlscall(%eax)"
+	to "nopl (%rax)".
+	* testsuite/Makefile.am (tls_test_gnu2.o): Depend on
+	gcctestdir/as.
+	(tls_test_file2_gnu2.o): Likewise.
+	(tls_test_c_gnu2.o): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+
+2020-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gold/25473
 	* x86_64.cc (Target_x86_64<size>::Relocate::tls_desc_gd_to_ie):
 	Properly check r8 - r15 in "lea foo@TLSDESC(%rip), %reg".

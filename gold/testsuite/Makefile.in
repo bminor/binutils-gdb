@@ -8275,11 +8275,11 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@		tls_test_c_pic.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) $(THREADFLAGS) -pie tls_test_main_pie.o tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o $(THREADLIBS)
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_test_gnu2.o: tls_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_test_gnu2.o: tls_test.cc gcctestdir/as
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -mtls-dialect=gnu2 -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_test_file2_gnu2.o: tls_test_file2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_test_file2_gnu2.o: tls_test_file2.cc gcctestdir/as
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -mtls-dialect=gnu2 -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_test_c_gnu2.o: tls_test_c.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_test_c_gnu2.o: tls_test_c.c gcctestdir/as
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	$(COMPILE) -c -fpic -mtls-dialect=gnu2 $(TLS_TEST_C_CFLAGS) -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_test_gnu2_shared2.so: tls_test_file2_gnu2.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	$(CXXLINK) -shared tls_test_file2_gnu2.o
