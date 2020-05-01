@@ -1,3 +1,10 @@
+2020-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/25872
+	* x86_64.cc (Output_data_plt_x86_64_bnd::do_address_for_local):
+	Handle local IFUNC symbol.
+	(Output_data_plt_x86_64_ibt::do_address_for_local): Likewise.
+
 2020-03-19  Fangrui Song  <maskray@google.com>
 
     * options.h (General_options): Add --no-rosegment option.

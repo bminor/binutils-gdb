@@ -2086,7 +2086,12 @@ Output_data_plt_x86_64_bnd::do_address_for_local(const Relobj* object,
 						 unsigned int r_sym)
 {
   // Convert the PLT offset into an APLT offset.
-  unsigned int plt_offset = ((object->local_plt_offset(r_sym) - plt_entry_size)
+  const Sized_relobj_file<64, false>* sized_relobj =
+    static_cast<const Sized_relobj_file<64, false>*>(object);
+  const Symbol_value<64>* psymval = sized_relobj->local_symbol(r_sym);
+  unsigned int plt_offset = ((object->local_plt_offset(r_sym)
+			      - (psymval->is_ifunc_symbol()
+				 ? 0 : plt_entry_size))
 			     / (plt_entry_size / aplt_entry_size));
   return (this->address()
 	  + this->aplt_offset_
@@ -2260,7 +2265,12 @@ Output_data_plt_x86_64_ibt<size>::do_address_for_local(const Relobj* object,
 						 unsigned int r_sym)
 {
   // Convert the PLT offset into an APLT offset.
-  unsigned int plt_offset = ((object->local_plt_offset(r_sym) - plt_entry_size)
+  const Sized_relobj_file<size, false>* sized_relobj =
+    static_cast<const Sized_relobj_file<size, false>*>(object);
+  const Symbol_value<size>* psymval = sized_relobj->local_symbol(r_sym);
+  unsigned int plt_offset = ((object->local_plt_offset(r_sym)
+			      - (psymval->is_ifunc_symbol()
+				 ? 0 : plt_entry_size))
 			     / (plt_entry_size / aplt_entry_size));
   return (this->address()
 	  + this->aplt_offset_
