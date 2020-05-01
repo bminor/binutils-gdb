@@ -1177,6 +1177,64 @@ discrete_position (struct type *type, LONGEST val, LONGEST *pos)
     }
 }
 
+/* If the array TYPE has static bounds calculate and update its
+   size, then return true.  Otherwise return false and leave TYPE
+   unchanged.  */
+
+static bool
+update_static_array_size (struct type *type)
+{
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_ARRAY);
+
+  struct type *range_type = TYPE_INDEX_TYPE (type);
+
+  if (get_dyn_prop (DYN_PROP_BYTE_STRIDE, type) == nullptr
+      && has_static_range (TYPE_RANGE_DATA (range_type))
+      && (!type_not_associated (type)
+	  && !type_not_allocated (type)))
+    {
+      LONGEST low_bound, high_bound;
+      int stride;
+      struct type *element_type;
+
+      /* If the array itself doesn't provide a stride value then take
+	 whatever stride the range provides.  Don't update BIT_STRIDE as
+	 we don't want to place the stride value from the range into this
+	 arrays bit size field.  */
+      stride = TYPE_FIELD_BITSIZE (type, 0);
+      if (stride == 0)
+	stride = TYPE_BIT_STRIDE (range_type);
+
+      if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
+	low_bound = high_bound = 0;
+      element_type = check_typedef (TYPE_TARGET_TYPE (type));
+      /* Be careful when setting the array length.  Ada arrays can be
+	 empty arrays with the high_bound being smaller than the low_bound.
+	 In such cases, the array length should be zero.  */
+      if (high_bound < low_bound)
+	TYPE_LENGTH (type) = 0;
+      else if (stride != 0)
+	{
+	  /* Ensure that the type length is always positive, even in the
+	     case where (for example in Fortran) we have a negative
+	     stride.  It is possible to have a single element array with a
+	     negative stride in Fortran (this doesn't mean anything
+	     special, it's still just a single element array) so do
+	     consider that case when touching this code.  */
+	  LONGEST element_count = std::abs (high_bound - low_bound + 1);
+	  TYPE_LENGTH (type)
+	    = ((std::abs (stride) * element_count) + 7) / 8;
+	}
+      else
+	TYPE_LENGTH (type) =
+	  TYPE_LENGTH (element_type) * (high_bound - low_bound + 1);
+
+      return true;
+    }
+
+  return false;
+}
+
 /* Create an array type using either a blank type supplied in
    RESULT_TYPE, or creating a new type, inheriting the objfile from
    RANGE_TYPE.
@@ -1222,56 +1280,6 @@ create_array_type_with_stride (struct type *result_type,
 
   TYPE_CODE (result_type) = TYPE_CODE_ARRAY;
   TYPE_TARGET_TYPE (result_type) = element_type;
-  if (byte_stride_prop == NULL
-      && has_static_range (TYPE_RANGE_DATA (range_type))
-      && (!type_not_associated (result_type)
-	  && !type_not_allocated (result_type)))
-    {
-      LONGEST low_bound, high_bound;
-      int stride;
-
-      /* If the array itself doesn't provide a stride value then take
-	 whatever stride the range provides.  Don't update BIT_STRIDE as
-	 we don't want to place the stride value from the range into this
-	 arrays bit size field.  */
-      stride = bit_stride;
-      if (stride == 0)
-	stride = TYPE_BIT_STRIDE (range_type);
-
-      if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
-	low_bound = high_bound = 0;
-      element_type = check_typedef (element_type);
-      /* Be careful when setting the array length.  Ada arrays can be
-	 empty arrays with the high_bound being smaller than the low_bound.
-	 In such cases, the array length should be zero.  */
-      if (high_bound < low_bound)
-	TYPE_LENGTH (result_type) = 0;
-      else if (stride != 0)
-	{
-	  /* Ensure that the type length is always positive, even in the
-	     case where (for example in Fortran) we have a negative
-	     stride.  It is possible to have a single element array with a
-	     negative stride in Fortran (this doesn't mean anything
-	     special, it's still just a single element array) so do
-	     consider that case when touching this code.  */
-	  LONGEST element_count = std::abs (high_bound - low_bound + 1);
-	  TYPE_LENGTH (result_type)
-	    = ((std::abs (stride) * element_count) + 7) / 8;
-	}
-      else
-	TYPE_LENGTH (result_type) =
-	  TYPE_LENGTH (element_type) * (high_bound - low_bound + 1);
-    }
-  else
-    {
-      /* This type is dynamic and its length needs to be computed
-         on demand.  In the meantime, avoid leaving the TYPE_LENGTH
-         undefined by setting it to zero.  Although we are not expected
-         to trust TYPE_LENGTH in this case, setting the size to zero
-         allows us to avoid allocating objects of random sizes in case
-         we accidently do.  */
-      TYPE_LENGTH (result_type) = 0;
-    }
 
   TYPE_NFIELDS (result_type) = 1;
   TYPE_FIELDS (result_type) =
@@ -1281,6 +1289,17 @@ create_array_type_with_stride (struct type *result_type,
     add_dyn_prop (DYN_PROP_BYTE_STRIDE, *byte_stride_prop, result_type);
   else if (bit_stride > 0)
     TYPE_FIELD_BITSIZE (result_type, 0) = bit_stride;
+
+  if (!update_static_array_size (result_type))
+    {
+      /* This type is dynamic and its length needs to be computed
+         on demand.  In the meantime, avoid leaving the TYPE_LENGTH
+         undefined by setting it to zero.  Although we are not expected
+         to trust TYPE_LENGTH in this case, setting the size to zero
+         allows us to avoid allocating objects of random sizes in case
+         we accidently do.  */
+      TYPE_LENGTH (result_type) = 0;
+    }
 
   /* TYPE_TARGET_STUB will take care of zero length arrays.  */
   if (TYPE_LENGTH (result_type) == 0)
@@ -2873,20 +2892,9 @@ check_typedef (struct type *type)
 	  TYPE_LENGTH (type) = TYPE_LENGTH (target_type);
 	  TYPE_TARGET_STUB (type) = 0;
 	}
-      else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
-	{
-	  struct type *range_type = check_typedef (TYPE_INDEX_TYPE (type));
-	  if (has_static_range (TYPE_RANGE_DATA (range_type)))
-	    {
-	      ULONGEST len = 0;
-	      LONGEST low_bound = TYPE_LOW_BOUND (range_type);
-	      LONGEST high_bound = TYPE_HIGH_BOUND (range_type);
-	      if (high_bound >= low_bound)
-		len = (high_bound - low_bound + 1) * TYPE_LENGTH (target_type);
-	      TYPE_LENGTH (type) = len;
-	      TYPE_TARGET_STUB (type) = 0;
-	    }
-	}
+      else if (TYPE_CODE (type) == TYPE_CODE_ARRAY
+	       && update_static_array_size (type))
+	TYPE_TARGET_STUB (type) = 0;
     }
 
   type = make_qualified_type (type, instance_flags, NULL);
