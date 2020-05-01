@@ -384,24 +384,6 @@ struct language_data
     symbol_name_matcher_ftype *(*la_get_symbol_name_matcher)
       (const lookup_name_info &);
 
-    /* Find all symbols in the current program space matching NAME in
-       DOMAIN, according to this language's rules.
-
-       The search is done in BLOCK only.
-       The caller is responsible for iterating up through superblocks
-       if desired.
-
-       For each one, call CALLBACK with the symbol.  If CALLBACK
-       returns false, the iteration ends at that point.
-
-       This field may not be NULL.  If the language does not need any
-       special processing here, 'iterate_over_symbols' should be
-       used as the definition.  */
-    bool (*la_iterate_over_symbols)
-      (const struct block *block, const lookup_name_info &name,
-       domain_enum domain,
-       gdb::function_view<symbol_found_callback_ftype> callback);
-
     /* Hash the given symbol search name.  Use
        default_search_name_hash if no special treatment is
        required.  */
@@ -506,6 +488,27 @@ struct language_defn : language_data
   virtual struct type *lookup_transparent_type (const char *name) const
   {
     return basic_lookup_transparent_type (name);
+  }
+
+  /* Find all symbols in the current program space matching NAME in
+     DOMAIN, according to this language's rules.
+
+     The search is done in BLOCK only.
+     The caller is responsible for iterating up through superblocks
+     if desired.
+
+     For each one, call CALLBACK with the symbol.  If CALLBACK
+     returns false, the iteration ends at that point.
+
+     This field may not be NULL.  If the language does not need any
+     special processing here, 'iterate_over_symbols' should be
+     used as the definition.  */
+  virtual bool iterate_over_symbols
+	(const struct block *block, const lookup_name_info &name,
+	 domain_enum domain,
+	 gdb::function_view<symbol_found_callback_ftype> callback) const
+  {
+    return ::iterate_over_symbols (block, name, domain, callback);
   }
 
   /* List of all known languages.  */
@@ -617,7 +620,7 @@ extern enum language set_language (enum language);
 				       options))
 
 #define LA_ITERATE_OVER_SYMBOLS(BLOCK, NAME, DOMAIN, CALLBACK) \
-  (current_language->la_iterate_over_symbols (BLOCK, NAME, DOMAIN, CALLBACK))
+  (current_language->iterate_over_symbols (BLOCK, NAME, DOMAIN, CALLBACK))
 
 /* Test a character to decide whether it can be printed in literal form
    or needs to be printed in another representation.  For example,

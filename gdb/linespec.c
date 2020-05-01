@@ -1168,7 +1168,7 @@ iterate_over_all_matching_symtabs
 		       i++)
 		    {
 		      block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), i);
-		      state->language->la_iterate_over_symbols
+		      state->language->iterate_over_symbols
 			(block, lookup_name, name_domain,
 			 [&] (block_symbol *bsym)
 			 {

@@ -5681,7 +5681,7 @@ ada_add_all_symbols (struct obstack *obstackp,
       else
 	{
 	  /* In the !full_search case we're are being called by
-	     ada_iterate_over_symbols, and we don't want to search
+	     iterate_over_symbols, and we don't want to search
 	     superblocks.  */
 	  ada_add_block_symbols (obstackp, block, lookup_name, domain, NULL);
 	}
@@ -5780,28 +5780,6 @@ ada_lookup_symbol_list (const char *name, const struct block *block,
   lookup_name_info lookup_name (name, name_match_type);
 
   return ada_lookup_symbol_list_worker (lookup_name, block, domain, results, 1);
-}
-
-/* Implementation of the la_iterate_over_symbols method.  */
-
-static bool
-ada_iterate_over_symbols
-  (const struct block *block, const lookup_name_info &name,
-   domain_enum domain,
-   gdb::function_view<symbol_found_callback_ftype> callback)
-{
-  int ndefs, i;
-  std::vector<struct block_symbol> results;
-
-  ndefs = ada_lookup_symbol_list_worker (name, block, domain, &results, 0);
-
-  for (i = 0; i < ndefs; ++i)
-    {
-      if (!callback (&results[i]))
-	return false;
-    }
-
-  return true;
 }
 
 /* The result is as for ada_lookup_symbol_list with FULL_SEARCH set
@@ -13999,7 +13977,6 @@ extern const struct language_data ada_language_data =
   ada_collect_symbol_completion_matches,
   ada_watch_location_expression,
   ada_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
-  ada_iterate_over_symbols,
   default_search_name_hash,
   &ada_varobj_ops,
   NULL,
@@ -14113,6 +14090,25 @@ public:
 
     lai->bool_type_symbol = NULL;
     lai->bool_type_default = builtin->builtin_bool;
+  }
+
+  /* See language.h.  */
+
+  bool iterate_over_symbols
+	(const struct block *block, const lookup_name_info &name,
+	 domain_enum domain,
+	 gdb::function_view<symbol_found_callback_ftype> callback) const override
+  {
+    std::vector<struct block_symbol> results;
+
+    ada_lookup_symbol_list_worker (name, block, domain, &results, 0);
+    for (block_symbol &sym : results)
+      {
+	if (!callback (&sym))
+	  return false;
+      }
+
+    return true;
   }
 };
 

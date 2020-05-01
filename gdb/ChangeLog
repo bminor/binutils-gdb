@@ -1,5 +1,32 @@
 2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_add_all_symbols): Update comment.
+	(ada_iterate_over_symbols): Delete, move implementation to...
+	(ada_language::iterate_over_symbols): ...here, a new member
+	function, rewrite to use range based for loop.
+	(ada_language_data): Delete la_iterate_over_symbols initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_iterate_over_symbols field.
+	(language_defn::iterate_over_symbols): New member function.
+	(LA_ITERATE_OVER_SYMBOLS): Update.
+	* linespec.c (iterate_over_all_matching_symtabs): Update.
+	* m2-lang.c (m2_language_data): Delete la_iterate_over_symbols
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Delete
 	la_lookup_transparent_type initializer.
 	* c-lang.c (c_language_data): Likewise.
