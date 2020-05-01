@@ -1,5 +1,11 @@
 2020-05-01  Alan Modra  <amodra@gmail.com>
 
+	PR 25882
+	* ldlang.c (lang_check): Call bfd_merge_private_bfd_data for
+	shared libraries.
+
+2020-05-01  Alan Modra  <amodra@gmail.com>
+
 	* po/BLD-POTFILES.in: Regenerate.
 
 2020-04-30  Alex Coplan  <alex.coplan@arm.com>

@@ -6938,11 +6938,12 @@ lang_check (void)
 		   bfd_printable_name (input_bfd), input_bfd,
 		   bfd_printable_name (link_info.output_bfd));
 	}
-      else if (bfd_count_sections (input_bfd))
-	{
-	  /* If the input bfd has no contents, it shouldn't set the
-	     private data of the output bfd.  */
 
+      /* If the input bfd has no contents, it shouldn't set the
+	 private data of the output bfd.  */
+      else if ((input_bfd->flags & DYNAMIC) != 0
+	       || bfd_count_sections (input_bfd) != 0)
+	{
 	  bfd_error_handler_type pfn = NULL;
 
 	  /* If we aren't supposed to warn about mismatched input

@@ -1,6 +1,12 @@
 2020-05-01  Alan Modra  <amodra@gmail.com>
 
 	PR 25882
+	* elf32-tic6x.c (elf32_tic6x_merge_attributes): Don't transfer
+	Tag_ABI_PIC or Tag_ABI_PID from dynamic objects to the output.
+
+2020-05-01  Alan Modra  <amodra@gmail.com>
+
+	PR 25882
 	* elf32-bfin.c (elf32_bfin_merge_private_bfd_data): Add FIXME.
 	* elf32-frv.c (frv_elf_merge_private_bfd_data): Likewise.
 	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Likewise.
