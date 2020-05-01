@@ -1,5 +1,9 @@
 2020-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ver_test_pr16504.sh: Updated.
+
+2020-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gold/25872
 	* x86_64.cc (Output_data_plt_x86_64_bnd::do_write): Increment
 	plt_offset after setting the reserved TLSDESC PLT entry.
