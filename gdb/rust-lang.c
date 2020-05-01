@@ -2101,7 +2101,9 @@ static const char *rust_extensions[] =
   ".rs", NULL
 };
 
-extern const struct language_defn rust_language_defn =
+/* Constant data representing the Rust language.  */
+
+extern const struct language_data rust_language_data =
 {
   "rust",
   "Rust",
@@ -2149,3 +2151,17 @@ extern const struct language_defn rust_language_defn =
   rust_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
+
+/* Class representing the Rust language.  */
+
+class rust_language : public language_defn
+{
+public:
+  rust_language ()
+    : language_defn (language_rust, rust_language_data)
+  { /* Nothing.  */ }
+};
+
+/* Single instance of the Rust language class.  */
+
+static rust_language rust_language_defn;

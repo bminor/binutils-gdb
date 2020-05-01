@@ -885,7 +885,9 @@ static const char *c_extensions[] =
   ".c", NULL
 };
 
-extern const struct language_defn c_language_defn =
+/* Constant data that describes the C language.  */
+
+extern const struct language_data c_language_data =
 {
   "c",				/* Language name */
   "C",
@@ -933,6 +935,20 @@ extern const struct language_defn c_language_defn =
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
+
+/* Class representing the C language.  */
+
+class c_language : public language_defn
+{
+public:
+  c_language ()
+    : language_defn (language_c, c_language_data)
+  { /* Nothing.  */ }
+};
+
+/* Single instance of the C language class.  */
+
+static c_language c_language_defn;
 
 enum cplus_primitive_types {
   cplus_primitive_type_int,
@@ -1030,7 +1046,9 @@ static const char *cplus_extensions[] =
   ".C", ".cc", ".cp", ".cpp", ".cxx", ".c++", NULL
 };
 
-extern const struct language_defn cplus_language_defn =
+/* Constant data that describes the C++ language.  */
+
+extern const struct language_data cplus_language_data =
 {
   "c++",			/* Language name */
   "C++",
@@ -1079,12 +1097,28 @@ extern const struct language_defn cplus_language_defn =
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
+/* A class for the C++ language.  */
+
+class cplus_language : public language_defn
+{
+public:
+  cplus_language ()
+    : language_defn (language_cplus, cplus_language_data)
+  { /* Nothing.  */ }
+};
+
+/* The single instance of the C++ language class.  */
+
+static cplus_language cplus_language_defn;
+
 static const char *asm_extensions[] =
 {
   ".s", ".sx", ".S", NULL
 };
 
-extern const struct language_defn asm_language_defn =
+/* Constant data that describes the ASM language.  */
+
+extern const struct language_data asm_language_data =
 {
   "asm",			/* Language name */
   "assembly",
@@ -1133,12 +1167,25 @@ extern const struct language_defn asm_language_defn =
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
+/* A class for the ASM language.  */
+
+class asm_language : public language_defn
+{
+public:
+  asm_language ()
+    : language_defn (language_asm, asm_language_data)
+  { /* Nothing.  */ }
+};
+
+/* The single instance of the ASM language class.  */
+static asm_language asm_language_defn;
+
 /* The following language_defn does not represent a real language.
    It just provides a minimal support a-la-C that should allow users
    to do some simple operations when debugging applications that use
    a language currently not supported by GDB.  */
 
-extern const struct language_defn minimal_language_defn =
+extern const struct language_data minimal_language_data =
 {
   "minimal",			/* Language name */
   "Minimal",
@@ -1186,3 +1233,16 @@ extern const struct language_defn minimal_language_defn =
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
+
+/* A class for the minimal language.  */
+
+class minimal_language : public language_defn
+{
+public:
+  minimal_language ()
+    : language_defn (language_minimal, minimal_language_data)
+  { /* Nothing.  */ }
+};
+
+/* The single instance of the minimal language class.  */
+static minimal_language minimal_language_defn;

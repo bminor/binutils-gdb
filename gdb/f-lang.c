@@ -628,7 +628,9 @@ static const struct exp_descriptor exp_descriptor_f =
   evaluate_subexp_f
 };
 
-extern const struct language_defn f_language_defn =
+/* Constant data that describes the Fortran language.  */
+
+extern const struct language_data f_language_data =
 {
   "fortran",
   "Fortran",
@@ -682,6 +684,20 @@ extern const struct language_defn f_language_defn =
   f_is_string_type_p,
   "(...)"			/* la_struct_too_deep_ellipsis */
 };
+
+/* Class representing the Fortran language.  */
+
+class f_language : public language_defn
+{
+public:
+  f_language ()
+    : language_defn (language_fortran, f_language_data)
+  { /* Nothing.  */ }
+};
+
+/* Single instance of the Fortran language class.  */
+
+static f_language f_language_defn;
 
 static void *
 build_fortran_types (struct gdbarch *gdbarch)

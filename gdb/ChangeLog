@@ -1,3 +1,101 @@
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb/ada-lang.c (ada_language_defn): Convert to...
+	(ada_language_data): ...this.
+	(class ada_language): New class.
+	(ada_language_defn): New static global.
+	* gdb/c-lang.c (c_language_defn): Convert to...
+	(c_language_data): ...this.
+	(class c_language): New class.
+	(c_language_defn): New static global.
+	(cplus_language_defn): Convert to...
+	(cplus_language_data): ...this.
+	(class cplus_language): New class.
+	(cplus_language_defn): New static global.
+	(asm_language_defn): Convert to...
+	(asm_language_data): ...this.
+	(class asm_language): New class.
+	(asm_language_defn): New static global.
+	(minimal_language_defn): Convert to...
+	(minimal_language_data): ...this.
+	(class minimal_language): New class.
+	(minimal_language_defn): New static global.
+	* gdb/d-lang.c (d_language_defn): Convert to...
+	(d_language_data): ...this.
+	(class d_language): New class.
+	(d_language_defn): New static global.
+	* gdb/f-lang.c (f_language_defn): Convert to...
+	(f_language_data): ...this.
+	(class f_language): New class.
+	(f_language_defn): New static global.
+	* gdb/go-lang.c (go_language_defn): Convert to...
+	(go_language_data): ...this.
+	(class go_language): New class.
+	(go_language_defn): New static global.
+	* gdb/language.c (unknown_language_defn): Remove declaration.
+	(current_language): Initialize to nullptr, real initialization is
+	moved to _initialize_language.
+	(languages): Delete global.
+	(language_defn::languages): Define.
+	(set_language_command): Use language_defn::languages.
+	(set_language): Likewise.
+	(range_error): Likewise.
+	(language_enum): Likewise.
+	(language_def): Likewise.
+	(add_set_language_command): Use language_def::languages for the
+	language list, and language_def to lookup language pointers.
+	(skip_language_trampoline): Use language_defn::languages.
+	(unknown_language_defn): Convert to...
+	(unknown_language_data): ...this.
+	(class unknown_language): New class.
+	(unknown_language_defn): New static global.
+	(auto_language_defn): Convert to...
+	(auto_language_data): ...this.
+	(class auto_language): New class.
+	(auto_language_defn): New static global.
+	(language_gdbarch_post_init): Use language_defn::languages.
+	(_initialize_language): Initialize current_language.
+	* gdb/language.h (struct language_defn): Rename to...
+	(struct language_data): ...this.
+	(struct language_defn): New.
+	(auto_language_defn): Delete.
+	(unknown_language_defn): Delete.
+	(minimal_language_defn): Delete.
+	(ada_language_defn): Delete.
+	(asm_language_defn): Delete.
+	(c_language_defn): Delete.
+	(cplus_language_defn): Delete.
+	(d_language_defn): Delete.
+	(f_language_defn): Delete.
+	(go_language_defn): Delete.
+	(m2_language_defn): Delete.
+	(objc_language_defn): Delete.
+	(opencl_language_defn): Delete.
+	(pascal_language_defn): Delete.
+	(rust_language_defn): Delete.
+	* gdb/m2-lang.c (m2_language_defn): Convert to...
+	(m2_language_data): ...this.
+	(class m2_language): New class.
+	(m2_language_defn): New static global.
+	* gdb/objc-lang.c (objc_language_defn): Convert to...
+	(objc_language_data): ...this.
+	(class objc_language): New class.
+	(objc_language_defn): New static global.
+	* gdb/opencl-lang.c (opencl_language_defn): Convert to...
+	(opencl_language_data): ...this.
+	(class opencl_language): New class.
+	(opencl_language_defn): New static global.
+	* gdb/p-lang.c (pascal_language_defn): Convert to...
+	(pascal_language_data): ...this.
+	(class pascal_language): New class.
+	(pascal_language_defn): New static global.
+	* gdb/rust-exp.y (rust_lex_tests): Use language_def to find
+	language pointer, update comment format.
+	* gdb/rust-lang.c (rust_language_defn): Convert to...
+	(rust_language_data): ...this.
+	(class rust_language): New class.
+	(rust_language_defn): New static global.
+
 2020-06-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dwarf2/read.c (class lnp_state_machine) <m_last_address>: New

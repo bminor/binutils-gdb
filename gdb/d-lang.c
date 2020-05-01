@@ -205,7 +205,9 @@ static const char *d_extensions[] =
   ".d", NULL
 };
 
-extern const struct language_defn d_language_defn =
+/* Constant data that describes the D language.  */
+
+extern const struct language_data d_language_data =
 {
   "d",
   "D",
@@ -254,6 +256,20 @@ extern const struct language_defn d_language_defn =
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
+
+/* Class representing the D language.  */
+
+class d_language : public language_defn
+{
+public:
+  d_language ()
+    : language_defn (language_d, d_language_data)
+  { /* Nothing.  */ }
+};
+
+/* Single instance of the D language class.  */
+
+static d_language d_language_defn;
 
 /* Build all D language types for the specified architecture.  */
 

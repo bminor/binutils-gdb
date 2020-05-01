@@ -1042,7 +1042,8 @@ const struct exp_descriptor exp_descriptor_opencl =
   evaluate_subexp_opencl
 };
 
-extern const struct language_defn opencl_language_defn =
+/* Constant data representing the OpenCL language.  */
+extern const struct language_data opencl_language_data =
 {
   "opencl",			/* Language name */
   "OpenCL C",
@@ -1090,6 +1091,20 @@ extern const struct language_defn opencl_language_defn =
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
+
+/* Class representing the OpenCL language.  */
+
+class opencl_language : public language_defn
+{
+public:
+  opencl_language ()
+    : language_defn (language_opencl, opencl_language_data)
+  { /* Nothing.  */ }
+};
+
+/* Single instance of the OpenCL language class.  */
+
+static opencl_language opencl_language_defn;
 
 static void *
 build_opencl_types (struct gdbarch *gdbarch)

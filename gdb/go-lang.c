@@ -576,7 +576,9 @@ go_language_arch_info (struct gdbarch *gdbarch,
   lai->bool_type_default = builtin->builtin_bool;
 }
 
-extern const struct language_defn go_language_defn =
+/* Constant data that describes the Go language.  */
+
+extern const struct language_data go_language_data =
 {
   "go",
   "Go",
@@ -625,6 +627,20 @@ extern const struct language_defn go_language_defn =
   go_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
+
+/* Class representing the Go language.  */
+
+class go_language : public language_defn
+{
+public:
+  go_language ()
+    : language_defn (language_go, go_language_data)
+  { /* Nothing.  */ }
+};
+
+/* Single instance of the Go language class.  */
+
+static go_language go_language_defn;
 
 static void *
 build_go_types (struct gdbarch *gdbarch)

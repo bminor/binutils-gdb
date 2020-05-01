@@ -62,9 +62,6 @@ static void unk_lang_value_print (struct value *, struct ui_file *,
 
 static CORE_ADDR unk_lang_trampoline (struct frame_info *, CORE_ADDR pc);
 
-/* Forward declaration */
-extern const struct language_defn unknown_language_defn;
-
 /* The current (default at startup) state of type and range checking.
    (If the modes are set to "auto", though, these are changed based
    on the default language at startup, and then again based on the
@@ -77,7 +74,7 @@ enum case_sensitivity case_sensitivity = case_sensitive_on;
 
 /* The current language and language_mode (see language.h).  */
 
-const struct language_defn *current_language = &unknown_language_defn;
+const struct language_defn *current_language = nullptr;
 enum language_mode language_mode = language_mode_auto;
 
 /* The language that the user expects to be typing in (the language
@@ -85,26 +82,9 @@ enum language_mode language_mode = language_mode_auto;
 
 const struct language_defn *expected_language;
 
-/* The list of supported languages.  Keep this in the same order as
-   the 'enum language' values.  */
+/* Define the array containing all languages.  */
 
-static const struct language_defn *languages[] = {
-  &unknown_language_defn,
-  &auto_language_defn,
-  &c_language_defn,
-  &objc_language_defn,
-  &cplus_language_defn,
-  &d_language_defn,
-  &go_language_defn,
-  &f_language_defn,
-  &m2_language_defn,
-  &asm_language_defn,
-  &pascal_language_defn,
-  &opencl_language_defn,
-  &rust_language_defn,
-  &minimal_language_defn,
-  &ada_language_defn,
-};
+const struct language_defn *language_defn::languages[nr_languages];
 
 /* The current values of the "set language/range/case-sensitive" enum
    commands.  */
@@ -162,7 +142,7 @@ set_language_command (const char *ignore,
     language = "auto";
 
   /* Search the list of languages for a match.  */
-  for (const auto &lang : languages)
+  for (const auto &lang : language_defn::languages)
     {
       if (strcmp (lang->la_name, language) == 0)
 	{
@@ -377,7 +357,7 @@ set_language (enum language lang)
   enum language prev_language;
 
   prev_language = current_language->la_language;
-  current_language = languages[lang];
+  current_language = language_def (lang);
   set_range_case ();
   return prev_language;
 }
@@ -474,7 +454,7 @@ range_error (const char *string,...)
 enum language
 language_enum (const char *str)
 {
-  for (const auto &lang : languages)
+  for (const auto &lang : language_defn::languages)
     if (strcmp (lang->la_name, str) == 0)
       return lang->la_language;
 
@@ -489,7 +469,9 @@ language_enum (const char *str)
 const struct language_defn *
 language_def (enum language lang)
 {
-  return languages[lang];
+  const struct language_defn *l = language_defn::languages[lang];
+  gdb_assert (l != nullptr);
+  return l;
 }
 
 /* Return the language as a string.  */
@@ -497,7 +479,7 @@ language_def (enum language lang)
 const char *
 language_str (enum language lang)
 {
-  return languages[lang]->la_name;
+  return language_def (lang)->la_name;
 }
 
 
@@ -512,16 +494,16 @@ add_set_language_command ()
   /* Build the language names array, to be used as enumeration in the
      "set language" enum command.  +1 for "local" and +1 for NULL
      termination.  */
-  language_names = new const char *[ARRAY_SIZE (languages) + 2];
+  language_names = new const char *[ARRAY_SIZE (language_defn::languages) + 2];
 
   /* Display "auto", "local" and "unknown" first, and then the rest,
      alpha sorted.  */
   const char **language_names_p = language_names;
-  *language_names_p++ = auto_language_defn.la_name;
+  *language_names_p++ = language_def (language_auto)->la_name;
   *language_names_p++ = "local";
-  *language_names_p++ = unknown_language_defn.la_name;
+  *language_names_p++ = language_def (language_unknown)->la_name;
   const char **sort_begin = language_names_p;
-  for (const auto &lang : languages)
+  for (const auto &lang : language_defn::languages)
     {
       /* Already handled above.  */
       if (lang->la_language == language_auto
@@ -533,7 +515,7 @@ add_set_language_command ()
   std::sort (sort_begin, language_names_p, compare_cstrings);
 
   /* Add the filename extensions.  */
-  for (const auto &lang : languages)
+  for (const auto &lang : language_defn::languages)
     if (lang->la_filename_extensions != NULL)
       {
 	for (size_t i = 0; lang->la_filename_extensions[i] != NULL; ++i)
@@ -548,7 +530,7 @@ add_set_language_command ()
 		"The currently understood settings are:\n\nlocal or "
 		"auto    Automatic setting based on source file"));
 
-  for (const auto &lang : languages)
+  for (const auto &lang : language_defn::languages)
     {
       /* Already dealt with these above.  */
       if (lang->la_language == language_unknown
@@ -583,7 +565,7 @@ add_set_language_command ()
 CORE_ADDR 
 skip_language_trampoline (struct frame_info *frame, CORE_ADDR pc)
 {
-  for (const auto &lang : languages)
+  for (const auto &lang : language_defn::languages)
     {
       if (lang->skip_trampoline != NULL)
 	{
@@ -829,7 +811,9 @@ unknown_language_arch_info (struct gdbarch *gdbarch,
 						       struct type *);
 }
 
-const struct language_defn unknown_language_defn =
+/* Constant data that describes the unknown language.  */
+
+extern const struct language_data unknown_language_data =
 {
   "unknown",
   "Unknown",
@@ -878,9 +862,23 @@ const struct language_defn unknown_language_defn =
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
-/* These two structs define fake entries for the "local" and "auto"
-   options.  */
-const struct language_defn auto_language_defn =
+/* Class representing the unknown language.  */
+
+class unknown_language : public language_defn
+{
+public:
+  unknown_language ()
+    : language_defn (language_unknown, unknown_language_data)
+  { /* Nothing.  */ }
+};
+
+/* Single instance of the unknown language class.  */
+
+static unknown_language unknown_language_defn;
+
+/* Constant data for the fake "auto" language.  */
+
+extern const struct language_data auto_language_data =
 {
   "auto",
   "Auto",
@@ -929,6 +927,20 @@ const struct language_defn auto_language_defn =
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
+/* Class representing the fake "auto" language.  */
+
+class auto_language : public language_defn
+{
+public:
+  auto_language ()
+    : language_defn (language_auto, auto_language_data)
+  { /* Nothing.  */ }
+};
+
+/* Single instance of the fake "auto" language.  */
+
+static auto_language auto_language_defn;
+
 
 /* Per-architecture language information.  */
 
@@ -947,7 +959,7 @@ language_gdbarch_post_init (struct gdbarch *gdbarch)
   struct language_gdbarch *l;
 
   l = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct language_gdbarch);
-  for (const auto &lang : languages)
+  for (const auto &lang : language_defn::languages)
     if (lang != NULL && lang->la_language_arch_info != NULL)
       {
 	lang->la_language_arch_info (gdbarch,
@@ -1168,6 +1180,11 @@ For Fortran the default is off; for other languages the default is on."),
 			set_case_command,
 			show_case_command,
 			&setlist, &showlist);
+
+  /* In order to call SET_LANGUAGE (below) we need to make sure that
+     CURRENT_LANGUAGE is not NULL.  So first set the language to unknown,
+     then we can change the language to 'auto'.  */
+  current_language = language_def (language_unknown);
 
   add_set_language_command ();
 

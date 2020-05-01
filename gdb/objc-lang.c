@@ -364,7 +364,10 @@ static const char *objc_extensions[] =
   ".m", NULL
 };
 
-extern const struct language_defn objc_language_defn = {
+/* Constant data representing the Objective-C language.  */
+
+extern const struct language_data objc_language_data =
+{
   "objective-c",		/* Language name */
   "Objective-C",
   language_objc,
@@ -411,6 +414,20 @@ extern const struct language_defn objc_language_defn = {
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
+
+/* Class representing the Objective-C language.  */
+
+class objc_language : public language_defn
+{
+public:
+  objc_language ()
+    : language_defn (language_objc, objc_language_data)
+  { /* Nothing.  */ }
+};
+
+/* Single instance of the class representing the Objective-C language.  */
+
+static objc_language objc_language_defn;
 
 /*
  * ObjC:

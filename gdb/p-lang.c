@@ -429,7 +429,9 @@ static const char *p_extensions[] =
   ".pas", ".p", ".pp", NULL
 };
 
-extern const struct language_defn pascal_language_defn =
+/* Constant data representing the Pascal language.  */
+
+extern const struct language_data pascal_language_data =
 {
   "pascal",			/* Language name */
   "Pascal",
@@ -476,3 +478,17 @@ extern const struct language_defn pascal_language_defn =
   pascal_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
+
+/* Class representing the Pascal language.  */
+
+class pascal_language : public language_defn
+{
+public:
+  pascal_language ()
+    : language_defn (language_pascal, pascal_language_data)
+  { /* Nothing.  */ }
+};
+
+/* Single instance of the Pascal language class.  */
+
+static pascal_language pascal_language_defn;

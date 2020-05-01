@@ -375,7 +375,9 @@ const struct exp_descriptor exp_descriptor_modula2 =
   evaluate_subexp_modula2
 };
 
-extern const struct language_defn m2_language_defn =
+/* Constant data describing the M2 language.  */
+
+extern const struct language_data m2_language_data =
 {
   "modula-2",
   "Modula-2",
@@ -423,6 +425,20 @@ extern const struct language_defn m2_language_defn =
   m2_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
+
+/* Class representing the M2 language.  */
+
+class m2_language : public language_defn
+{
+public:
+  m2_language ()
+    : language_defn (language_m2, m2_language_data)
+  { /* Nothing.  */ }
+};
+
+/* Single instance of the M2 language.  */
+
+static m2_language m2_language_defn;
 
 static void *
 build_m2_types (struct gdbarch *gdbarch)

@@ -14061,7 +14061,10 @@ static const char *ada_extensions[] =
   ".adb", ".ads", ".a", ".ada", ".dg", NULL
 };
 
-extern const struct language_defn ada_language_defn = {
+/* Constant data that describes the Ada language.  */
+
+extern const struct language_data ada_language_data =
+{
   "ada",                        /* Language name */
   "Ada",
   language_ada,
@@ -14109,6 +14112,20 @@ extern const struct language_defn ada_language_defn = {
   ada_is_string_type,
   "(...)"			/* la_struct_too_deep_ellipsis */
 };
+
+/* Class representing the Ada language.  */
+
+class ada_language : public language_defn
+{
+public:
+  ada_language ()
+    : language_defn (language_ada, ada_language_data)
+  { /* Nothing.  */ }
+};
+
+/* Single instance of the Ada language class.  */
+
+static ada_language ada_language_defn;
 
 /* Command-list for the "set/show ada" prefix command.  */
 static struct cmd_list_element *set_ada_list;

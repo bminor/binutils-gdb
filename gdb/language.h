@@ -169,9 +169,21 @@ struct language_pass_by_ref_info
   bool destructible = true;
 };
 
-/* Structure tying together assorted information about a language.  */
+/* Structure tying together assorted information about a language.
 
-struct language_defn
+   As we move over from the old structure based languages to a class
+   hierarchy of languages this structure will continue to contain a
+   mixture of both data and function pointers.
+
+   Once the class hierarchy of languages in place the first task is to
+   remove the function pointers from this structure and convert them into
+   member functions on the different language classes.
+
+   The current plan it to keep the constant data that describes a language
+   in this structure, and have each language pass in an instance of this
+   structure at construction time.  */
+
+struct language_data
   {
     /* Name of the language.  */
 
@@ -471,6 +483,22 @@ struct language_defn
 
   };
 
+/* Base class from which all other language classes derive.  */
+
+struct language_defn : language_data
+{
+  language_defn (enum language lang, const language_data &init_data)
+    : language_data (init_data)
+  {
+    /* We should only ever create one instance of each language.  */
+    gdb_assert (languages[lang] == nullptr);
+    languages[lang] = this;
+  }
+
+  /* List of all known languages.  */
+  static const struct language_defn *languages[nr_languages];
+};
+
 /* Pointer to the language_defn for our current language.  This pointer
    always points to *some* valid struct; it can be used without checking
    it for validity.
@@ -680,25 +708,6 @@ extern bool default_symbol_name_matcher
    may return an Ada matcher regardless of LANG.  */
 symbol_name_matcher_ftype *get_symbol_name_matcher
   (const language_defn *lang, const lookup_name_info &lookup_name);
-
-/* The languages supported by GDB.  */
-
-extern const struct language_defn auto_language_defn;
-extern const struct language_defn unknown_language_defn;
-extern const struct language_defn minimal_language_defn;
-
-extern const struct language_defn ada_language_defn;
-extern const struct language_defn asm_language_defn;
-extern const struct language_defn c_language_defn;
-extern const struct language_defn cplus_language_defn;
-extern const struct language_defn d_language_defn;
-extern const struct language_defn f_language_defn;
-extern const struct language_defn go_language_defn;
-extern const struct language_defn m2_language_defn;
-extern const struct language_defn objc_language_defn;
-extern const struct language_defn opencl_language_defn;
-extern const struct language_defn pascal_language_defn;
-extern const struct language_defn rust_language_defn;
 
 /* Save the current language and restore it upon destruction.  */
 
