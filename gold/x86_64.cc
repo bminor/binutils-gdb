@@ -2736,6 +2736,7 @@ Output_data_plt_x86_64_bnd::do_write(Output_file* of)
       this->fill_tlsdesc_entry(pov, got_address, plt_address, got_base,
 			       tlsdesc_got_offset, plt_offset);
       pov += this->get_plt_entry_size();
+      plt_offset += plt_entry_size;
     }
 
   // Write the additional PLT.
@@ -2831,6 +2832,7 @@ Output_data_plt_x86_64_ibt<size>::do_write(Output_file* of)
       this->fill_tlsdesc_entry(pov, got_address, plt_address, got_base,
 			       tlsdesc_got_offset, plt_offset);
       pov += this->get_plt_entry_size();
+      plt_offset += plt_entry_size;
     }
 
   // Write the additional PLT.
