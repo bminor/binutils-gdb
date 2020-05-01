@@ -2555,13 +2555,13 @@ disassemble_bytes (struct disassemble_info * inf,
 {
   struct objdump_disasm_info *aux;
   asection *section;
-  int octets_per_line;
-  int skip_addr_chars;
+  unsigned int octets_per_line;
+  unsigned int skip_addr_chars;
   bfd_vma addr_offset;
   unsigned int opb = inf->octets_per_byte;
   unsigned int skip_zeroes = inf->skip_zeroes;
   unsigned int skip_zeroes_at_end = inf->skip_zeroes_at_end;
-  int octets = opb;
+  size_t octets;
   SFILE sfile;
 
   aux = (struct objdump_disasm_info *) inf->application_data;
@@ -2630,7 +2630,6 @@ disassemble_bytes (struct disassemble_info * inf,
   addr_offset = start_offset;
   while (addr_offset < stop_offset)
     {
-      bfd_vma z;
       bfd_boolean need_nl = FALSE;
 
       octets = 0;
@@ -2640,41 +2639,42 @@ disassemble_bytes (struct disassemble_info * inf,
 
       /* If we see more than SKIP_ZEROES octets of zeroes, we just
 	 print `...'.  */
-      for (z = addr_offset * opb; z < stop_offset * opb; z++)
-	if (data[z] != 0)
-	  break;
+      if (! disassemble_zeroes)
+	for (; addr_offset * opb + octets < stop_offset * opb; octets++)
+	  if (data[addr_offset * opb + octets] != 0)
+	    break;
       if (! disassemble_zeroes
 	  && (inf->insn_info_valid == 0
 	      || inf->branch_delay_insns == 0)
-	  && (z - addr_offset * opb >= skip_zeroes
-	      || (z == stop_offset * opb &&
-		  z - addr_offset * opb < skip_zeroes_at_end)))
+	  && (octets >= skip_zeroes
+	      || (addr_offset * opb + octets == stop_offset * opb
+		  && octets < skip_zeroes_at_end)))
 	{
 	  /* If there are more nonzero octets to follow, we only skip
 	     zeroes in multiples of 4, to try to avoid running over
 	     the start of an instruction which happens to start with
 	     zero.  */
-	  if (z != stop_offset * opb)
-	    z = addr_offset * opb + ((z - addr_offset * opb) &~ 3);
-
-	  octets = z - addr_offset * opb;
+	  if (addr_offset * opb + octets != stop_offset * opb)
+	    octets &= ~3;
 
 	  /* If we are going to display more data, and we are displaying
 	     file offsets, then tell the user how many zeroes we skip
 	     and the file offset from where we resume dumping.  */
-	  if (display_file_offsets && ((addr_offset + (octets / opb)) < stop_offset))
-	    printf ("\t... (skipping %d zeroes, resuming at file offset: 0x%lx)\n",
-		    octets / opb,
+	  if (display_file_offsets
+	      && addr_offset + octets / opb < stop_offset)
+	    printf (_("\t... (skipping %lu zeroes, "
+		      "resuming at file offset: 0x%lx)\n"),
+		    (unsigned long) (octets / opb),
 		    (unsigned long) (section->filepos
-				     + (addr_offset + (octets / opb))));
+				     + addr_offset + octets / opb));
 	  else
 	    printf ("\t...\n");
 	}
       else
 	{
 	  char buf[50];
-	  int bpc = 0;
-	  int pb = 0;
+	  unsigned int bpc = 0;
+	  unsigned int pb = 0;
 
 	  if (with_line_numbers || with_source_code)
 	    show_line (aux->abfd, section, addr_offset);
@@ -2706,6 +2706,8 @@ disassemble_bytes (struct disassemble_info * inf,
 
 	  if (insns)
 	    {
+	      int insn_size;
+
 	      sfile.pos = 0;
 	      inf->fprintf_func = (fprintf_ftype) objdump_sprintf;
 	      inf->stream = &sfile;
@@ -2722,13 +2724,13 @@ disassemble_bytes (struct disassemble_info * inf,
 		  && *relppp < relppend)
 		{
 		  bfd_signed_vma distance_to_rel;
-		  int insn_size = 0;
 		  int max_reloc_offset
 		    = aux->abfd->arch_info->max_reloc_offset_into_insn;
 
 		  distance_to_rel = ((**relppp)->address - rel_offset
 				     - addr_offset);
 
+		  insn_size = 0;
 		  if (distance_to_rel > 0
 		      && (max_reloc_offset < 0
 			  || distance_to_rel <= max_reloc_offset))
@@ -2769,8 +2771,8 @@ disassemble_bytes (struct disassemble_info * inf,
 		}
 
 	      if (! disassemble_all
-		  && (section->flags & (SEC_CODE | SEC_HAS_CONTENTS))
-		  == (SEC_CODE | SEC_HAS_CONTENTS))
+		  && ((section->flags & (SEC_CODE | SEC_HAS_CONTENTS))
+		      == (SEC_CODE | SEC_HAS_CONTENTS)))
 		/* Set a stop_vma so that the disassembler will not read
 		   beyond the next symbol.  We assume that symbols appear on
 		   the boundaries between instructions.  We only do this when
@@ -2778,21 +2780,22 @@ disassemble_bytes (struct disassemble_info * inf,
 		inf->stop_vma = section->vma + stop_offset;
 
 	      inf->stop_offset = stop_offset;
-	      octets = (*disassemble_fn) (section->vma + addr_offset, inf);
+	      insn_size = (*disassemble_fn) (section->vma + addr_offset, inf);
+	      octets = insn_size;
 
 	      inf->stop_vma = 0;
 	      inf->fprintf_func = (fprintf_ftype) fprintf;
 	      inf->stream = stdout;
 	      if (insn_width == 0 && inf->bytes_per_line != 0)
 		octets_per_line = inf->bytes_per_line;
-	      if (octets < (int) opb)
+	      if (insn_size < (int) opb)
 		{
 		  if (sfile.pos)
 		    printf ("%s\n", sfile.buffer);
-		  if (octets >= 0)
+		  if (insn_size >= 0)
 		    {
 		      non_fatal (_("disassemble_fn returned length %d"),
-				 octets);
+				 insn_size);
 		      exit_status = 1;
 		    }
 		  break;
@@ -2838,11 +2841,11 @@ disassemble_bytes (struct disassemble_info * inf,
 		  /* PR 21580: Check for a buffer ending early.  */
 		  if (j + bpc <= stop_offset * opb)
 		    {
-		      int k;
+		      unsigned int k;
 
 		      if (inf->display_endian == BFD_ENDIAN_LITTLE)
 			{
-			  for (k = bpc - 1; k >= 0; k--)
+			  for (k = bpc; k-- != 0; )
 			    printf ("%02x", (unsigned) data[j + k]);
 			}
 		      else
@@ -2856,7 +2859,7 @@ disassemble_bytes (struct disassemble_info * inf,
 
 	      for (; pb < octets_per_line; pb += bpc)
 		{
-		  int k;
+		  unsigned int k;
 
 		  for (k = 0; k < bpc; k++)
 		    printf ("  ");
@@ -2911,11 +2914,11 @@ disassemble_bytes (struct disassemble_info * inf,
 		      /* PR 21619: Check for a buffer ending early.  */
 		      if (j + bpc <= stop_offset * opb)
 			{
-			  int k;
+			  unsigned int k;
 
 			  if (inf->display_endian == BFD_ENDIAN_LITTLE)
 			    {
-			      for (k = bpc - 1; k >= 0; k--)
+			      for (k = bpc; k-- != 0; )
 				printf ("%02x", (unsigned) data[j + k]);
 			    }
 			  else

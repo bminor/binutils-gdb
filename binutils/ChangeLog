@@ -1,3 +1,10 @@
+2020-05-01  Alan Modra  <amodra@gmail.com>
+	    Haim Shimonovich  <Haim.Shimonovich@ceva-dsp.com>
+
+	* objdump.c (disassemble_bytes): Don't scan for zeros when
+	disassembling zeros.  Translate "resuming at file offset" message.
+	Formatting.  Replace some signed variables with unsigned.
+
 2020-04-30  Alex Coplan  <alex.coplan@arm.com>
 
 	* testsuite/binutils-all/aarch64/in-order-all.d: Update to use new
