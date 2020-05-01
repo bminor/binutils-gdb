@@ -6028,6 +6028,10 @@ sh_elf_merge_private_data (bfd *ibfd, struct bfd_link_info *info)
 {
   bfd *obfd = info->output_bfd;
 
+  /* FIXME: What should be checked when linking shared libraries?  */
+  if ((ibfd->flags & DYNAMIC) != 0)
+    return TRUE;
+
   if (! is_sh_elf (ibfd) || ! is_sh_elf (obfd))
     return TRUE;
 

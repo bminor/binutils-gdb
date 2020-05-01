@@ -4744,6 +4744,10 @@ elfNN_ia64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   flagword in_flags;
   bfd_boolean ok = TRUE;
 
+  /* FIXME: What should be checked when linking shared libraries?  */
+  if ((ibfd->flags & DYNAMIC) != 0)
+    return TRUE;
+
   if (!is_ia64_elf (ibfd) || !is_ia64_elf (obfd))
     return TRUE;
 

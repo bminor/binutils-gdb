@@ -4233,6 +4233,10 @@ elf64_ia64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   flagword in_flags;
   bfd_boolean ok = TRUE;
 
+  /* FIXME: What should be checked when linking shared libraries?  */
+  if ((ibfd->flags & DYNAMIC) != 0)
+    return TRUE;
+
   /* Don't even pretend to support mixed-format linking.  */
   if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)

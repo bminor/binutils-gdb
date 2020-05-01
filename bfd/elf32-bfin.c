@@ -4755,6 +4755,10 @@ elf32_bfin_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   flagword old_flags, new_flags;
   bfd_boolean error = FALSE;
 
+  /* FIXME: What should be checked when linking shared libraries?  */
+  if ((ibfd->flags & DYNAMIC) != 0)
+    return TRUE;
+
   new_flags = elf_elfheader (ibfd)->e_flags;
   old_flags = elf_elfheader (obfd)->e_flags;
 

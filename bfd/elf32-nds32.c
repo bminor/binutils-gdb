@@ -6817,6 +6817,10 @@ nds32_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   flagword out_fpu_config;
   flagword in_fpu_config;
 
+  /* FIXME: What should be checked when linking shared libraries?  */
+  if ((ibfd->flags & DYNAMIC) != 0)
+    return TRUE;
+
   /* TODO: Revise to use object-attributes instead.  */
   if (!nds32_check_vec_size (ibfd))
     return FALSE;

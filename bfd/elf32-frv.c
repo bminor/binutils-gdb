@@ -6344,6 +6344,10 @@ frv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   char new_opt[80];
   char old_opt[80];
 
+  /* FIXME: What should be checked when linking shared libraries?  */
+  if ((ibfd->flags & DYNAMIC) != 0)
+    return TRUE;
+
   new_opt[0] = old_opt[0] = '\0';
   new_flags = elf_elfheader (ibfd)->e_flags;
   old_flags = elf_elfheader (obfd)->e_flags;

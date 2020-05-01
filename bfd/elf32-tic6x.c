@@ -3724,6 +3724,10 @@ elf32_tic6x_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
   int i;
   int array_align_in, array_align_out, array_expect_in, array_expect_out;
 
+  /* FIXME: What should be checked when linking shared libraries?  */
+  if ((ibfd->flags & DYNAMIC) != 0)
+    return TRUE;
+
   if (!elf_known_obj_attributes_proc (obfd)[0].i)
     {
       /* This is the first object.  Copy the attributes.  */

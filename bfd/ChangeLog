@@ -1,6 +1,20 @@
 2020-05-01  Alan Modra  <amodra@gmail.com>
 
 	PR 25882
+	* elf32-bfin.c (elf32_bfin_merge_private_bfd_data): Add FIXME.
+	* elf32-frv.c (frv_elf_merge_private_bfd_data): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Likewise.
+	* elf32-nds32.c (nds32_elf_merge_private_bfd_data): Likewise.
+	* elf32-score.c (s3_elf32_score_merge_private_bfd_data): Likewise.
+	* elf32-score7.c (s7_elf32_score_merge_private_bfd_data): Likewise.
+	* elf32-sh.c (sh_elf_merge_private_data): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_merge_attributes): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_merge_private_bfd_data): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_merge_private_bfd_data): Likewise.
+
+2020-05-01  Alan Modra  <amodra@gmail.com>
+
+	PR 25882
 	* elf32-ppc.c (ppc_elf_merge_private_bfd_data): Ignore e_flags
 	from shared libraries.
 

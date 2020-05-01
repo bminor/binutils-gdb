@@ -15767,6 +15767,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   /* Check to see if the input BFD actually contains any sections.  If not,
      then it has no attributes, and its flags may not have been initialized
      either, but it cannot actually cause any incompatibility.  */
+  /* FIXME: This excludes any input shared library from consideration.  */
   for (sec = ibfd->sections; sec != NULL; sec = sec->next)
     {
       /* Ignore synthetic sections and empty .text, .data and .bss sections
