@@ -149,6 +149,7 @@ eelf32ppcvxworks.c
 eelf32ppcwindiss.c
 eelf32rl78.c
 eelf32rx.c
+eelf32rx_linux.c
 eelf32tilegx.c
 eelf32tilegx_be.c
 eelf32tilepro.c
