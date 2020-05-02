@@ -1,4 +1,5 @@
 2020-05-01  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* gdb-gdb.gdb-in: Remove breakpoint on disappeared function
 	info_command.
 
@@ -13,6 +14,7 @@
 	* nbsd-nat.h (nbsd_nat_target::post_startup_inferior): Add.
 
 2020-04-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* stack.c (_initialize_stack): Remove duplicated creation
 	of "frame" command and "f" alias.
 
