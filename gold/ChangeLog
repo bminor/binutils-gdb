@@ -1,3 +1,18 @@
+2020-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gold/25904
+	* testsuite/Makefile.am (COMMON_TEST_C_CFLAGS): New.
+	(common_test_1.o): New rule.
+	(common_test_2.o): Likewise.
+	(common_test_3.o): Likewise.
+	(plugin_common_test_1.o): Likewise.
+	(plugin_common_test_2.o): Likewise.
+	(common_test_1_v1.o): Likewise.
+	(common_test_1_v2.o): Likewise.
+	(common_test_2_pic.o): Compile with $(COMMON_TEST_C_CFLAGS).
+	(common_test_3_pic.o): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+
 2020-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/25426

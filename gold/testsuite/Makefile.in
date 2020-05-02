@@ -2799,6 +2799,10 @@ TEST_AS = $(top_builddir)/../gas/as-new
 @THREADS_TRUE@THREADLIBS = @PTHREAD_LIBS@
 @OMP_SUPPORT_TRUE@TLS_TEST_C_CFLAGS = -fopenmp
 
+# Since GCC 10 defaults to -fno-common, add -fcommon to common tests to
+# force common behavior.
+COMMON_TEST_C_CFLAGS = -fcommon
+
 # 'make clean' is good about deleting some intermediate files (such as
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
@@ -8146,12 +8150,18 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_STRIP) -o two_file_strip_test two_file_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_strip.so: two_file_shared.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_STRIP) -S -o two_file_shared_strip.so two_file_shared.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1.o: common_test_1.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_2.o: common_test_2.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_2_pic.o: common_test_2.c
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic $(COMMON_TEST_C_CFLAGS) -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_2.so: common_test_2_pic.o common_test_3.so gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -shared common_test_2_pic.o common_test_3.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_3.o: common_test_3.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_3_pic.o: common_test_3.c
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -fpic $(COMMON_TEST_C_CFLAGS) -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_3.so: common_test_3_pic.o ver_test_2.script gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -shared common_test_3_pic.o -Wl,--version-script,$(srcdir)/ver_test_2.script
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_1_pic.o: exception_test_1.cc
@@ -9067,6 +9077,11 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_test.o: plugin_test.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -O0 -c -fpic -o $@ $<
 
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_common_test_1.o: plugin_common_test_1.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@plugin_common_test_2.o: plugin_common_test_2.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
+
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_main.o.syms: two_file_test_main.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@two_file_test_1.o.syms: two_file_test_1.o
@@ -9492,6 +9507,10 @@ uninstall-am:
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@sleep 1
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f common_test_1_v2.o common_test_1_tmp.o
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie common_test_1_tmp.o
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_v1.o: common_test_1_v1.c
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_v2.o: common_test_1_v2.c
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@incremental_comdat_test_1: incr_comdat_test_1.o incr_comdat_test_2_v1.o incr_comdat_test_2_v2.o incr_comdat_test_2_v3.o gcctestdir/ld
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f incr_comdat_test_2_v1.o incr_comdat_test_1_tmp.o
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-full,--incremental-patch=100 -Wl,-z,norelro,-no-pie incr_comdat_test_1.o incr_comdat_test_1_tmp.o

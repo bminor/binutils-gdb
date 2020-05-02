@@ -86,6 +86,10 @@ if OMP_SUPPORT
 TLS_TEST_C_CFLAGS = -fopenmp
 endif
 
+# Since GCC 10 defaults to -fno-common, add -fcommon to common tests to
+# force common behavior.
+COMMON_TEST_C_CFLAGS = -fcommon
+
 # 'make clean' is good about deleting some intermediate files (such as
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
@@ -737,18 +741,24 @@ check_PROGRAMS += common_test_1
 common_test_1_SOURCES = common_test_1.c
 common_test_1_DEPENDENCIES = gcctestdir/ld
 common_test_1_LDADD =
+common_test_1.o: common_test_1.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 
 check_PROGRAMS += common_test_2
 common_test_2_SOURCES = common_test_1.c
 common_test_2_DEPENDENCIES = common_test_2.so common_test_3.so gcctestdir/ld
 common_test_2_LDFLAGS = -Wl,-R,.
 common_test_2_LDADD = common_test_2.so common_test_3.so
+common_test_2.o: common_test_2.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 common_test_2_pic.o: common_test_2.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fpic $(COMMON_TEST_C_CFLAGS) -o $@ $<
 common_test_2.so: common_test_2_pic.o common_test_3.so gcctestdir/ld
 	$(LINK) -shared common_test_2_pic.o common_test_3.so
+common_test_3.o: common_test_3.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 common_test_3_pic.o: common_test_3.c
-	$(COMPILE) -c -fpic -o $@ $<
+	$(COMPILE) -c -fpic $(COMMON_TEST_C_CFLAGS) -o $@ $<
 common_test_3.so: common_test_3_pic.o ver_test_2.script gcctestdir/ld
 	$(LINK) -shared common_test_3_pic.o -Wl,--version-script,$(srcdir)/ver_test_2.script
 
@@ -2472,6 +2482,11 @@ plugin_test.so: plugin_test.o gcctestdir/ld
 plugin_test.o: plugin_test.c
 	$(COMPILE) -O0 -c -fpic -o $@ $<
 
+plugin_common_test_1.o: plugin_common_test_1.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
+plugin_common_test_2.o: plugin_common_test_2.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
+
 two_file_test_main.o.syms: two_file_test_main.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 two_file_test_1.o.syms: two_file_test_1.o
@@ -3256,6 +3271,10 @@ incremental_common_test_1: common_test_1_v1.o common_test_1_v2.o gcctestdir/ld
 	@sleep 1
 	cp -f common_test_1_v2.o common_test_1_tmp.o
 	$(CXXLINK) -Wl,--incremental-update -Wl,-z,norelro,-no-pie common_test_1_tmp.o
+common_test_1_v1.o: common_test_1_v1.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
+common_test_1_v2.o: common_test_1_v2.c
+	$(COMPILE) -c $(COMMON_TEST_C_CFLAGS) -o $@ $<
 
 check_PROGRAMS += incremental_comdat_test_1
 incremental_comdat_test_1: incr_comdat_test_1.o incr_comdat_test_2_v1.o incr_comdat_test_2_v2.o incr_comdat_test_2_v3.o gcctestdir/ld
