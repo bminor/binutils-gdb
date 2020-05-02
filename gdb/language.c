@@ -841,7 +841,6 @@ extern const struct language_data unknown_language_data =
   default_search_name_hash,
   &default_varobj_ops,
   NULL,
-  NULL,
   default_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
@@ -906,7 +905,6 @@ extern const struct language_data auto_language_data =
   NULL,				/* la_get_symbol_name_matcher */
   default_search_name_hash,
   &default_varobj_ops,
-  NULL,
   NULL,
   default_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */

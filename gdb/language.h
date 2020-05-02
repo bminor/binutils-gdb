@@ -392,16 +392,6 @@ struct language_data
     /* Various operations on varobj.  */
     const struct lang_varobj_ops *la_varobj_ops;
 
-    /* If this language allows compilation from the gdb command line,
-       this method should be non-NULL.  When called it should return
-       an instance of struct gcc_context appropriate to the language.
-       When defined this method must never return NULL; instead it
-       should throw an exception on failure.  The returned compiler
-       instance is owned by its caller and must be deallocated by
-       calling its 'destroy' method.  */
-
-    compile_instance *(*la_get_compile_instance) (void);
-
     /* This method must be defined if 'la_get_gcc_context' is defined.
        If 'la_get_gcc_context' is not defined, then this method is
        ignored.
@@ -509,6 +499,19 @@ struct language_defn : language_data
 	 gdb::function_view<symbol_found_callback_ftype> callback) const
   {
     return ::iterate_over_symbols (block, name, domain, callback);
+  }
+
+  /* If this language allows compilation from the gdb command line, then
+     this method will return an instance of struct gcc_context appropriate
+     to the language.  If compilation for this language is generally
+     supported, but something goes wrong then an exception is thrown.  The
+     returned compiler instance is owned by its caller and must be
+     deallocated by the caller.  If compilation is not supported for this
+     language then this method returns NULL.  */
+
+  virtual compile_instance *get_compile_instance () const
+  {
+    return nullptr;
   }
 
   /* List of all known languages.  */

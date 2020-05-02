@@ -1,5 +1,35 @@
 2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete la_get_compile_instance
+	initializer.
+	* c-lang.c (class compile_instance): Declare.
+	(c_language_data): Delete la_get_compile_instance initializer.
+	(c_language::get_compile_instance): New member function.
+	(cplus_language_data): Delete la_get_compile_instance initializer.
+	(cplus_language::get_compile_instance): New member function.
+	(asm_language_data): Delete la_get_compile_instance initializer.
+	(minimal_language_data): Likewise.
+	* c-lang.h (c_get_compile_context): Update comment.
+	(cplus_get_compile_context): Update comment.
+	* compile/compile.c (compile_to_object): Update calls, don't rely
+	on function pointer being NULL.
+	* d-lang.c (d_language_data): Delete la_get_compile_instance
+	initializer.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_get_compile_instance field.
+	(language_defn::get_compile_instance): New member function.
+	* m2-lang.c (m2_language_data): Delete la_get_compile_instance
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_add_all_symbols): Update comment.
 	(ada_iterate_over_symbols): Delete, move implementation to...
 	(ada_language::iterate_over_symbols): ...here, a new member

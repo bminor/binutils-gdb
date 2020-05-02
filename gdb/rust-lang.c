@@ -2096,7 +2096,6 @@ extern const struct language_data rust_language_data =
   default_search_name_hash,
   &default_varobj_ops,
   NULL,
-  NULL,
   rust_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };

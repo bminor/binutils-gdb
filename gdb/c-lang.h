@@ -157,7 +157,7 @@ extern int c_textual_element_type (struct type *, char);
    compiler is owned by the caller and must be freed using the destroy
    method.  This function never returns NULL, but rather throws an
    exception on failure.  This is suitable for use as the
-   la_get_compile_instance language method.  */
+   language_defn::get_compile_instance method.  */
 
 extern compile_instance *c_get_compile_context (void);
 
@@ -165,7 +165,7 @@ extern compile_instance *c_get_compile_context (void);
    compiler is owned by the caller and must be freed using the destroy
    method.  This function never returns NULL, but rather throws an
    exception on failure.  This is suitable for use as the
-   la_get_compile_instance language method.  */
+   language_defn::get_compile_instance method.  */
 
 extern compile_instance *cplus_get_compile_context ();
 

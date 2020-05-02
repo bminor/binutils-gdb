@@ -13980,7 +13980,6 @@ extern const struct language_data ada_language_data =
   default_search_name_hash,
   &ada_varobj_ops,
   NULL,
-  NULL,
   ada_is_string_type,
   "(...)"			/* la_struct_too_deep_ellipsis */
 };

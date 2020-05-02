@@ -37,6 +37,8 @@
 #include "gdbcore.h"
 #include "gdbarch.h"
 
+class compile_instance;
+
 /* Given a C string type, STR_TYPE, return the corresponding target
    character set name.  */
 
@@ -924,7 +926,6 @@ extern const struct language_data c_language_data =
   NULL,				/* la_get_symbol_name_matcher */
   default_search_name_hash,
   &c_varobj_ops,
-  c_get_compile_context,
   c_compute_program,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
@@ -944,6 +945,12 @@ public:
 			   struct language_arch_info *lai) const override
   {
     c_language_arch_info (gdbarch, lai);
+  }
+
+  /* See language.h.  */
+  compile_instance *get_compile_instance () const override
+  {
+    return c_get_compile_context ();
   }
 };
 
@@ -1023,7 +1030,6 @@ extern const struct language_data cplus_language_data =
   cp_get_symbol_name_matcher,
   cp_search_name_hash,
   &cplus_varobj_ops,
-  cplus_get_compile_context,
   cplus_compute_program,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
@@ -1114,6 +1120,12 @@ public:
   {
     return cp_lookup_transparent_type (name);
   }
+
+  /* See language.h.  */
+  compile_instance *get_compile_instance () const override
+  {
+    return cplus_get_compile_context ();
+  }
 };
 
 /* The single instance of the C++ language class.  */
@@ -1164,7 +1176,6 @@ extern const struct language_data asm_language_data =
   NULL,				/* la_get_symbol_name_matcher */
   default_search_name_hash,
   &default_varobj_ops,
-  NULL,
   NULL,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
@@ -1234,7 +1245,6 @@ extern const struct language_data minimal_language_data =
   NULL,				/* la_get_symbol_name_matcher */
   default_search_name_hash,
   &default_varobj_ops,
-  NULL,
   NULL,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
