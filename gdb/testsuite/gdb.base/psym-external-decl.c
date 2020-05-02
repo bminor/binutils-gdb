@@ -20,6 +20,6 @@ extern int aaa;
 int
 main (void)
 {
-  return 0;
+  return aaa;
 }
 
