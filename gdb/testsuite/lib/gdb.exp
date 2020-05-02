@@ -7007,6 +7007,18 @@ gdb_caching_proc supports_statement_frontiers {
     } executable "additional_flags=-gstatement-frontiers"]
 }
 
+# Return 1 if compiler supports -mmpx -fcheck-pointer-bounds.  Otherwise,
+# return 0.
+
+gdb_caching_proc supports_mpx_check_pointer_bounds {
+    set flags "additional_flags=-mmpx additional_flags=-fcheck-pointer-bounds"
+    return [gdb_can_simple_compile supports_mpx_check_pointer_bounds {
+	int main () {
+	    return 0;
+	}
+    } executable $flags]
+}
+
 # Return 1 if symbols were read in using -readnow.  Otherwise, return 0.
 
 proc readnow { } {

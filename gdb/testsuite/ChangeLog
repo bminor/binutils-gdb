@@ -1,5 +1,14 @@
 2020-05-02  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (supports_mpx_check_pointer_bounds): New proc.
+	* gdb.arch/i386-mpx-call.exp: Use supports_mpx_check_pointer_bounds.
+	* gdb.arch/i386-mpx-map.exp: Same.
+	* gdb.arch/i386-mpx-sigsegv.exp: Same.
+	* gdb.arch/i386-mpx-simple_segv.exp: Same.
+	* gdb.arch/i386-mpx.exp: Same.
+
+2020-05-02  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/psym-external-decl.c (main): Add use of variable aaa.
 
 2020-05-01  Tom de Vries  <tdevries@suse.de>
