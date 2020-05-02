@@ -1855,7 +1855,7 @@ demangle_for_lookup (const char *name, enum language lang,
 unsigned int
 search_name_hash (enum language language, const char *search_name)
 {
-  return language_def (language)->la_search_name_hash (search_name);
+  return language_def (language)->search_name_hash (search_name);
 }
 
 /* See symtab.h.

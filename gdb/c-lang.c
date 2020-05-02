@@ -924,7 +924,6 @@ extern const struct language_data c_language_data =
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
-  default_search_name_hash,
   &c_varobj_ops,
   c_compute_program,
   c_is_string_type_p,
@@ -1028,7 +1027,6 @@ extern const struct language_data cplus_language_data =
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
   cp_get_symbol_name_matcher,
-  cp_search_name_hash,
   &cplus_varobj_ops,
   cplus_compute_program,
   c_is_string_type_p,
@@ -1126,6 +1124,12 @@ public:
   {
     return cplus_get_compile_context ();
   }
+
+  /* See language.h.  */
+  unsigned int search_name_hash (const char *name) const override
+  {
+    return cp_search_name_hash (name);
+  }
 };
 
 /* The single instance of the C++ language class.  */
@@ -1174,7 +1178,6 @@ extern const struct language_data asm_language_data =
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
-  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   c_is_string_type_p,
@@ -1243,7 +1246,6 @@ extern const struct language_data minimal_language_data =
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
-  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   c_is_string_type_p,

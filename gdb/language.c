@@ -838,7 +838,6 @@ extern const struct language_data unknown_language_data =
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
-  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   default_is_string_type_p,
@@ -903,7 +902,6 @@ extern const struct language_data auto_language_data =
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
-  default_search_name_hash,
   &default_varobj_ops,
   NULL,
   default_is_string_type_p,

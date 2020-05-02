@@ -633,7 +633,6 @@ extern const struct language_data f_language_data =
   f_collect_symbol_completion_matches,
   c_watch_location_expression,
   cp_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
-  cp_search_name_hash,
   &default_varobj_ops,
   NULL,
   f_is_string_type_p,
@@ -685,6 +684,12 @@ public:
 
     lai->bool_type_symbol = "logical";
     lai->bool_type_default = builtin->builtin_logical_s2;
+  }
+
+  /* See language.h.  */
+  unsigned int search_name_hash (const char *name) const override
+  {
+    return cp_search_name_hash (name);
   }
 };
 

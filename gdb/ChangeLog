@@ -1,5 +1,35 @@
 2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete la_search_name_hash
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(cplus_language::search_name_hash): New member function.
+	(asm_language_data): Delete la_search_name_hash initializer.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* dictionary.c (default_search_name_hash): Rename to...
+	(language_defn::search_name_hash): ...this.
+	* f-lang.c (f_language_data): Likewise.
+	(f_language::search_name_hash): New member function.
+	* go-lang.c (go_language_data): Delete la_search_name_hash
+	initializer.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (struct language_data): Delete la_search_name_hash
+	field.
+	(language_defn::search_name_hash): Declare new member function.
+	(default_search_name_hash): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_search_name_hash
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+	* symtab.c (search_name_hash): Update call.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Delete la_get_compile_instance
 	initializer.
 	* c-lang.c (class compile_instance): Declare.

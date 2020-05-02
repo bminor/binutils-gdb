@@ -384,11 +384,6 @@ struct language_data
     symbol_name_matcher_ftype *(*la_get_symbol_name_matcher)
       (const lookup_name_info &);
 
-    /* Hash the given symbol search name.  Use
-       default_search_name_hash if no special treatment is
-       required.  */
-    unsigned int (*la_search_name_hash) (const char *name);
-
     /* Various operations on varobj.  */
     const struct lang_varobj_ops *la_varobj_ops;
 
@@ -513,6 +508,9 @@ struct language_defn : language_data
   {
     return nullptr;
   }
+
+  /* Hash the given symbol search name.  */
+  virtual unsigned int search_name_hash (const char *name) const;
 
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];
@@ -689,14 +687,6 @@ struct language_pass_by_ref_info language_pass_by_reference (struct type *type);
 /* The default implementation of la_print_typedef.  */
 void default_print_typedef (struct type *type, struct symbol *new_symbol,
 			    struct ui_file *stream);
-
-/* Default name hashing function.  */
-
-/* Produce an unsigned hash value from SEARCH_NAME that is consistent
-   with strcmp_iw, strcmp, and, at least on Ada symbols, wild_match.
-   That is, two identifiers equivalent according to any of those three
-   comparison operators hash to the same value.  */
-extern unsigned int default_search_name_hash (const char *search_name);
 
 void c_get_string (struct value *value,
 		   gdb::unique_xmalloc_ptr<gdb_byte> *buffer,

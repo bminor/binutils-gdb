@@ -719,7 +719,7 @@ expand_hashtable (struct dictionary *dict)
 /* See dictionary.h.  */
 
 unsigned int
-default_search_name_hash (const char *string0)
+language_defn::search_name_hash (const char *string0) const
 {
   /* The Ada-encoded version of a name P1.P2...Pn has either the form
      P1__P2__...Pn<suffix> or _ada_P1__P2__...Pn<suffix> (where the Pi

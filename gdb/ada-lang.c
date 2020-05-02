@@ -13977,7 +13977,6 @@ extern const struct language_data ada_language_data =
   ada_collect_symbol_completion_matches,
   ada_watch_location_expression,
   ada_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
-  default_search_name_hash,
   &ada_varobj_ops,
   NULL,
   ada_is_string_type,
