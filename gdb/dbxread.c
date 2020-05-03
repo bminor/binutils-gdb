@@ -31,10 +31,6 @@
    for real.  dbx_psymtab_to_symtab() is the function that does this */
 
 #include "defs.h"
-#if defined(__CYGNUSCLIB__)
-#include <sys/types.h>
-#include <fcntl.h>
-#endif
 
 #include "gdb_obstack.h"
 #include <sys/stat.h>
