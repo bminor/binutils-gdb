@@ -168,15 +168,6 @@ show_targetdebug (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Target debugging is %s.\n"), value);
 }
 
-/* The user just typed 'target' without the name of a target.  */
-
-static void
-target_command (const char *arg, int from_tty)
-{
-  fputs_filtered ("Argument required (target name).  Try `help target'\n",
-		  gdb_stdout);
-}
-
 int
 target_has_all_memory_1 (void)
 {
@@ -269,13 +260,13 @@ add_target (const target_info &t, target_open_ftype *func,
   func_slot = func;
 
   if (targetlist == NULL)
-    add_prefix_cmd ("target", class_run, target_command, _("\
+    add_basic_prefix_cmd ("target", class_run, _("\
 Connect to a target machine or process.\n\
 The first argument is the type or protocol of the target machine.\n\
 Remaining arguments are interpreted by the target protocol.  For more\n\
 information on the arguments for a particular protocol, type\n\
 `help target ' followed by the protocol name."),
-		    &targetlist, "target ", 0, &cmdlist);
+			  &targetlist, "target ", 0, &cmdlist);
   c = add_cmd (t.shortname, no_class, t.doc, &targetlist);
   set_cmd_context (c, (void *) &t);
   set_cmd_sfunc (c, open_target);

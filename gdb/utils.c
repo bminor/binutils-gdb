@@ -469,18 +469,6 @@ demangler_warning (const char *file, int line, const char *string, ...)
   va_end (ap);
 }
 
-/* Dummy functions to keep add_prefix_cmd happy.  */
-
-static void
-set_internal_problem_cmd (const char *args, int from_tty)
-{
-}
-
-static void
-show_internal_problem_cmd (const char *args, int from_tty)
-{
-}
-
 /* When GDB reports an internal problem (error or warning) it gives
    the user the opportunity to quit GDB and/or create a core file of
    the current debug session.  This function registers a few commands
@@ -515,19 +503,17 @@ add_internal_problem_command (struct internal_problem *problem)
   show_doc = xstrprintf (_("Show what GDB does when %s is detected."),
 			 problem->name);
 
-  add_prefix_cmd (problem->name,
-		  class_maintenance, set_internal_problem_cmd, set_doc,
-		  set_cmd_list,
-		  concat ("maintenance set ", problem->name, " ",
-			  (char *) NULL),
-		  0/*allow-unknown*/, &maintenance_set_cmdlist);
+  add_basic_prefix_cmd (problem->name, class_maintenance, set_doc,
+			set_cmd_list,
+			concat ("maintenance set ", problem->name, " ",
+				(char *) NULL),
+			0/*allow-unknown*/, &maintenance_set_cmdlist);
 
-  add_prefix_cmd (problem->name,
-		  class_maintenance, show_internal_problem_cmd, show_doc,
-		  show_cmd_list,
-		  concat ("maintenance show ", problem->name, " ",
-			  (char *) NULL),
-		  0/*allow-unknown*/, &maintenance_show_cmdlist);
+  add_show_prefix_cmd (problem->name, class_maintenance, show_doc,
+		       show_cmd_list,
+		       concat ("maintenance show ", problem->name, " ",
+			       (char *) NULL),
+		       0/*allow-unknown*/, &maintenance_show_cmdlist);
 
   if (problem->user_settable_should_quit)
     {

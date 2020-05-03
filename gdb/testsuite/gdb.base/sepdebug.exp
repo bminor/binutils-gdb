@@ -280,9 +280,6 @@ gdb_test "info break" "Num     Type.*Disp Enb Address.*What.*\[\r\n\]
 #
 if ![runto_main] then { fail "sepdebug tests suppressed" }
 
-gdb_test "catch" "Catch requires an event name.*" \
-    "catch requires an event name"
-
 gdb_test "catch fork" "Catchpoint \[0-9\]+ \\(fork\\)" \
     "set catch fork, never expected to trigger"
 

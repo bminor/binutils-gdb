@@ -586,11 +586,6 @@ delete_mem_command (const char *args, int from_tty)
   dont_repeat ();
 }
 
-static void
-dummy_cmd (const char *args, int from_tty)
-{
-}
-
 static struct cmd_list_element *mem_set_cmdlist;
 static struct cmd_list_element *mem_show_cmdlist;
 
@@ -628,14 +623,14 @@ Do \"info mem\" to see current list of IDs."), &deletelist);
   add_info ("mem", info_mem_command,
 	    _("Memory region attributes."));
 
-  add_prefix_cmd ("mem", class_vars, dummy_cmd, _("\
+  add_basic_prefix_cmd ("mem", class_vars, _("\
 Memory regions settings."),
-		  &mem_set_cmdlist, "set mem ",
-		  0/* allow-unknown */, &setlist);
-  add_prefix_cmd ("mem", class_vars, dummy_cmd, _("\
+			&mem_set_cmdlist, "set mem ",
+			0/* allow-unknown */, &setlist);
+  add_show_prefix_cmd ("mem", class_vars, _("\
 Memory regions settings."),
-		  &mem_show_cmdlist, "show mem  ",
-		  0/* allow-unknown */, &showlist);
+		       &mem_show_cmdlist, "show mem  ",
+		       0/* allow-unknown */, &showlist);
 
   add_setshow_boolean_cmd ("inaccessible-by-default", no_class,
 				  &inaccessible_by_default, _("\

@@ -246,15 +246,6 @@ index_cache::make_index_filename (const bfd_build_id *build_id,
   return m_dir + SLASH_STRING + build_id_str + suffix;
 }
 
-/* "set index-cache" handler.  */
-
-static void
-set_index_cache_command (const char *arg, int from_tty)
-{
-  printf_unfiltered (_("\
-Missing arguments.  See \"help set index-cache\" for help.\n"));
-}
-
 /* True when we are executing "show index-cache".  This is used to improve the
    printout a little bit.  */
 static bool in_show_index_cache_command = false;
@@ -341,9 +332,10 @@ _initialize_index_cache ()
     warning (_("Couldn't determine a path for the index cache directory."));
 
   /* set index-cache */
-  add_prefix_cmd ("index-cache", class_files, set_index_cache_command,
-		  _("Set index-cache options."), &set_index_cache_prefix_list,
-		  "set index-cache ", false, &setlist);
+  add_basic_prefix_cmd ("index-cache", class_files,
+			_("Set index-cache options."),
+			&set_index_cache_prefix_list,
+			"set index-cache ", false, &setlist);
 
   /* show index-cache */
   add_prefix_cmd ("index-cache", class_files, show_index_cache_command,

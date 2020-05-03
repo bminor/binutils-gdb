@@ -1,3 +1,29 @@
+2020-05-03  Tom Tromey  <tom@tromey.com>
+
+	* breakpoint.c (catch_command, tcatch_command): Remove.
+	(_initialize_breakpoint): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	(set_breakpoint_cmd, show_breakpoint_cmd): Remove
+	* utils.c (set_internal_problem_cmd, show_internal_problem_cmd):
+	Remove.
+	(add_internal_problem_command): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* mips-tdep.c (set_mipsfpu_command): Remove.
+	(_initialize_mips_tdep): Use add_basic_prefix_cmd.
+	* dwarf2/index-cache.c (set_index_cache_command): Remove.
+	(_initialize_index_cache): Use add_basic_prefix_cmd.
+	* memattr.c (dummy_cmd): Remove.
+	(_initialize_mem): Use add_basic_prefix_cmd, add_show_prefix_cmd.
+	* tui/tui-win.c (set_tui_cmd, show_tui_cmd): Remove.
+	(_initialize_tui_win): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	* cli/cli-logging.c (set_logging_command): Remove.
+	(_initialize_cli_logging): Use add_basic_prefix_cmd,
+	add_show_prefix_cmd.
+	(show_logging_command): Remove.
+	* target.c (target_command): Remove.
+	(add_target): Use add_basic_prefix_cmd.
+
 2020-05-02  Hannes Domani  <ssbssa@yahoo.de>
 
 	* gdbtypes.h (enum dynamic_prop_node_kind): Fix typo.

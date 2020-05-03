@@ -11214,18 +11214,7 @@ init_ada_exception_breakpoint (struct breakpoint *b,
   b->language = language_ada;
 }
 
-static void
-catch_command (const char *arg, int from_tty)
-{
-  error (_("Catch requires an event name."));
-}
 
-
-static void
-tcatch_command (const char *arg, int from_tty)
-{
-  error (_("Catch requires an event name."));
-}
 
 /* Compare two breakpoints and return a strcmp-like result.  */
 
@@ -14335,16 +14324,6 @@ enable_delete_command (const char *args, int from_tty)
      });
 }
 
-static void
-set_breakpoint_cmd (const char *args, int from_tty)
-{
-}
-
-static void
-show_breakpoint_cmd (const char *args, int from_tty)
-{
-}
-
 /* Invalidate last known value of any hardware watchpoint if
    the memory which that value represents has been written to by
    GDB itself.  */
@@ -15614,15 +15593,15 @@ Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."),
 	   &maintenanceinfolist);
 
-  add_prefix_cmd ("catch", class_breakpoint, catch_command, _("\
+  add_basic_prefix_cmd ("catch", class_breakpoint, _("\
 Set catchpoints to catch events."),
-		  &catch_cmdlist, "catch ",
-		  0/*allow-unknown*/, &cmdlist);
+			&catch_cmdlist, "catch ",
+			0/*allow-unknown*/, &cmdlist);
 
-  add_prefix_cmd ("tcatch", class_breakpoint, tcatch_command, _("\
+  add_basic_prefix_cmd ("tcatch", class_breakpoint, _("\
 Set temporary catchpoints to catch events."),
-		  &tcatch_cmdlist, "tcatch ",
-		  0/*allow-unknown*/, &cmdlist);
+			&tcatch_cmdlist, "tcatch ",
+			0/*allow-unknown*/, &cmdlist);
 
   add_catch_command ("fork", _("Catch calls to fork."),
 		     catch_fork_command_1,
@@ -15799,18 +15778,18 @@ Use the 'source' command in another debug session to restore them."),
   c = add_com_alias ("save-tracepoints", "save tracepoints", class_trace, 0);
   deprecate_cmd (c, "save tracepoints");
 
-  add_prefix_cmd ("breakpoint", class_maintenance, set_breakpoint_cmd, _("\
+  add_basic_prefix_cmd ("breakpoint", class_maintenance, _("\
 Breakpoint specific settings.\n\
 Configure various breakpoint-specific variables such as\n\
 pending breakpoint behavior."),
-		  &breakpoint_set_cmdlist, "set breakpoint ",
-		  0/*allow-unknown*/, &setlist);
-  add_prefix_cmd ("breakpoint", class_maintenance, show_breakpoint_cmd, _("\
+			&breakpoint_set_cmdlist, "set breakpoint ",
+			0/*allow-unknown*/, &setlist);
+  add_show_prefix_cmd ("breakpoint", class_maintenance, _("\
 Breakpoint specific settings.\n\
 Configure various breakpoint-specific variables such as\n\
 pending breakpoint behavior."),
-		  &breakpoint_show_cmdlist, "show breakpoint ",
-		  0/*allow-unknown*/, &showlist);
+		       &breakpoint_show_cmdlist, "show breakpoint ",
+		       0/*allow-unknown*/, &showlist);
 
   add_setshow_auto_boolean_cmd ("pending", no_class,
 				&pending_break_support, _("\

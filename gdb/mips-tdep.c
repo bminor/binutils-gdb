@@ -6917,14 +6917,6 @@ show_mipsfpu_command (const char *args, int from_tty)
 
 
 static void
-set_mipsfpu_command (const char *args, int from_tty)
-{
-  printf_unfiltered ("\"set mipsfpu\" must be followed by \"double\", "
-		     "\"single\",\"none\" or \"auto\".\n");
-  show_mipsfpu_command (args, from_tty);
-}
-
-static void
 set_mipsfpu_single_command (const char *args, int from_tty)
 {
   struct gdbarch_info info;
@@ -9018,9 +9010,9 @@ and is updated automatically from ELF file flags if available."),
   /* Let the user turn off floating point and set the fence post for
      heuristic_proc_start.  */
 
-  add_prefix_cmd ("mipsfpu", class_support, set_mipsfpu_command,
-		  _("Set use of MIPS floating-point coprocessor."),
-		  &mipsfpulist, "set mipsfpu ", 0, &setlist);
+  add_basic_prefix_cmd ("mipsfpu", class_support,
+			_("Set use of MIPS floating-point coprocessor."),
+			&mipsfpulist, "set mipsfpu ", 0, &setlist);
   add_cmd ("single", class_support, set_mipsfpu_single_command,
 	   _("Select single-precision MIPS floating-point coprocessor."),
 	   &mipsfpulist);

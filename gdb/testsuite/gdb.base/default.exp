@@ -78,7 +78,7 @@ gdb_test "call" "The history is empty..*"
 
 
 #test catch
-gdb_test "catch" "Catch requires an event name..*"
+gdb_test "catch" "List of catch subcommands:(\[^\r\n\]*\[\r\n\])+Type \"help catch\" followed by catch subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous."
 
 #test cd
 gdb_test "cd" "Working directory \[^\r\n\]*\(\r\n \\(canonically \[^\r\n\]*\\)\)?\\."
@@ -794,7 +794,7 @@ gdb_expect {
 }
 
 #test target
-gdb_test "target" "Argument required .target name.*"
+gdb_test "target" "List of target subcommands:(\[^\r\n\]*\[\r\n\])+Type \"help target\" followed by target subcommand name for full documentation.(\[^\r\n\]*\[\r\n\])+Command name abbreviations are allowed if unambiguous."
 #test tbreak
 gdb_test "tbreak" "No default breakpoint address now."
 #test thread
