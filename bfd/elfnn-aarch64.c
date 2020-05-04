@@ -3546,7 +3546,7 @@ elfNN_aarch64_next_input_section (struct bfd_link_info *info, asection *isec)
     {
       asection **list = htab->input_list + isec->output_section->index;
 
-      if (*list != bfd_abs_section_ptr)
+      if (*list != bfd_abs_section_ptr && (isec->flags & SEC_CODE) != 0)
 	{
 	  /* Steal the link_sec pointer for our list.  */
 	  /* This happens to make the list in reverse order,
@@ -3567,67 +3567,96 @@ elfNN_aarch64_next_input_section (struct bfd_link_info *info, asection *isec)
 static void
 group_sections (struct elf_aarch64_link_hash_table *htab,
 		bfd_size_type stub_group_size,
-		bfd_boolean stubs_always_before_branch)
+		bfd_boolean stubs_always_after_branch)
 {
-  asection **list = htab->input_list + htab->top_index;
+  asection **list = htab->input_list;
 
   do
     {
       asection *tail = *list;
+      asection *head;
 
       if (tail == bfd_abs_section_ptr)
 	continue;
 
+      /* Reverse the list: we must avoid placing stubs at the
+	 beginning of the section because the beginning of the text
+	 section may be required for an interrupt vector in bare metal
+	 code.  */
+#define NEXT_SEC PREV_SEC
+      head = NULL;
       while (tail != NULL)
 	{
+	  /* Pop from tail.  */
+	  asection *item = tail;
+	  tail = PREV_SEC (item);
+
+	  /* Push on head.  */
+	  NEXT_SEC (item) = head;
+	  head = item;
+	}
+
+      while (head != NULL)
+	{
 	  asection *curr;
-	  asection *prev;
-	  bfd_size_type total;
+	  asection *next;
+	  bfd_vma stub_group_start = head->output_offset;
+	  bfd_vma end_of_next;
 
-	  curr = tail;
-	  total = tail->size;
-	  while ((prev = PREV_SEC (curr)) != NULL
-		 && ((total += curr->output_offset - prev->output_offset)
-		     < stub_group_size))
-	    curr = prev;
+	  curr = head;
+	  while (NEXT_SEC (curr) != NULL)
+	    {
+	      next = NEXT_SEC (curr);
+	      end_of_next = next->output_offset + next->size;
+	      if (end_of_next - stub_group_start >= stub_group_size)
+		/* End of NEXT is too far from start, so stop.  */
+		break;
+	      /* Add NEXT to the group.  */
+	      curr = next;
+	    }
 
-	  /* OK, the size from the start of CURR to the end is less
+	  /* OK, the size from the start to the start of CURR is less
 	     than stub_group_size and thus can be handled by one stub
-	     section.  (Or the tail section is itself larger than
+	     section.  (Or the head section is itself larger than
 	     stub_group_size, in which case we may be toast.)
 	     We should really be keeping track of the total size of
 	     stubs added here, as stubs contribute to the final output
 	     section size.  */
 	  do
 	    {
-	      prev = PREV_SEC (tail);
+	      next = NEXT_SEC (head);
 	      /* Set up this stub group.  */
-	      htab->stub_group[tail->id].link_sec = curr;
+	      htab->stub_group[head->id].link_sec = curr;
 	    }
-	  while (tail != curr && (tail = prev) != NULL);
+	  while (head != curr && (head = next) != NULL);
 
 	  /* But wait, there's more!  Input sections up to stub_group_size
-	     bytes before the stub section can be handled by it too.  */
-	  if (!stubs_always_before_branch)
+	     bytes after the stub section can be handled by it too.  */
+	  if (!stubs_always_after_branch)
 	    {
-	      total = 0;
-	      while (prev != NULL
-		     && ((total += tail->output_offset - prev->output_offset)
-			 < stub_group_size))
+	      stub_group_start = curr->output_offset + curr->size;
+
+	      while (next != NULL)
 		{
-		  tail = prev;
-		  prev = PREV_SEC (tail);
-		  htab->stub_group[tail->id].link_sec = curr;
+		  end_of_next = next->output_offset + next->size;
+		  if (end_of_next - stub_group_start >= stub_group_size)
+		    /* End of NEXT is too far from stubs, so stop.  */
+		    break;
+		  /* Add NEXT to the stub group.  */
+		  head = next;
+		  next = NEXT_SEC (head);
+		  htab->stub_group[head->id].link_sec = curr;
 		}
 	    }
-	  tail = prev;
+	  head = next;
 	}
     }
-  while (list-- != htab->input_list);
+  while (list++ != htab->input_list + htab->top_index);
 
   free (htab->input_list);
 }
 
+#undef PREV_SEC
 #undef PREV_SEC
 
 #define AARCH64_BITS(x, pos, n) (((x) >> (pos)) & ((1 << (n)) - 1))
