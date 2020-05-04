@@ -1,3 +1,9 @@
+2020-05-04  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_nds32_specific): Check size of .nds32_e_flags
+	section.  Don't assume endian of host matches nds32 target.  Free
+	buffer.
+
 2020-05-01  Alan Modra  <amodra@gmail.com>
 	    Haim Shimonovich  <Haim.Shimonovich@ceva-dsp.com>
 

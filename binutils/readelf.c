@@ -17481,18 +17481,21 @@ process_nds32_specific (Filedata * filedata)
   Elf_Internal_Shdr *sect = NULL;
 
   sect = find_section (filedata, ".nds32_e_flags");
-  if (sect != NULL)
+  if (sect != NULL && sect->sh_size >= 4)
     {
-      unsigned int *flag;
+      unsigned char *buf;
+      unsigned int flag;
 
       printf ("\nNDS32 elf flags section:\n");
-      flag = get_data (NULL, filedata, sect->sh_offset, 1,
-		       sect->sh_size, _("NDS32 elf flags section"));
+      buf = get_data (NULL, filedata, sect->sh_offset, 1, 4,
+		      _("NDS32 elf flags section"));
 
-      if (! flag)
+      if (buf == NULL)
 	return FALSE;
 
-      switch ((*flag) & 0x3)
+      flag = byte_get (buf, 4);
+      free (buf);
+      switch (flag & 0x3)
 	{
 	case 0:
 	  printf ("(VEC_SIZE):\tNo entry.\n");
