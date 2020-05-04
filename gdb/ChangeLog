@@ -1,5 +1,18 @@
 2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* unittests/help-doc-selftests.c: Rename to
+	unittests/command-def-selftests.c
+	* unittests/command-def-selftests.c (help_doc_tests): Update some
+	comments.
+	(command_structure_tests, traverse_command_structure): New namespace
+	and function.
+	(command_structure_invariants_tests): New function.
+	(_initialize_command_def_selftests) Renamed from
+	_initialize_help_doc_selftests, register command_structure_invariants
+	selftest.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli/cli-cmds.c (_initialize_cli_cmds): Define 'info set' as
 	an alias of 'show'.
 
