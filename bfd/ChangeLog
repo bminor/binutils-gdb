@@ -1,4 +1,13 @@
-2020-05-01  Wilco Dijkstra  <wdijkstr@arm.com>
+2020-05-04  Gunther Nikl  <gnikl@justmail.de>
+
+	* aout-cris.c (DEFAULT_ARCH): Delete define.
+	(MY_set_arch_mach): Likewise.
+	(SET_ARCH_MACH): Use bfd_set_arch_mach with an explicit architecture
+	of bfd_arch_cris.
+	(swap_ext_reloc_in): Add casts to r_index extraction. Mask valid bits
+	of r_type before the shift.
+
+2020-05-04  Wilco Dijkstra  <wdijkstr@arm.com>
 
 	PR ld/25665
 	* elfnn-aarch64.c (group_sections): Copy implementation from

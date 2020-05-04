@@ -56,9 +56,6 @@
 #define TARGET_PAGE_SIZE SEGMENT_SIZE
 #define TARGETNAME "a.out-cris"
 
-/* The definition here seems not used; just provided as a convention.  */
-#define DEFAULT_ARCH bfd_arch_cris
-
 /* Do not "beautify" the CONCAT* macro args.  Traditional C will not
    remove whitespace added here, and thus will fail to concatenate
    the tokens.  */
@@ -92,9 +89,8 @@ static bfd_boolean MY (set_sizes) (bfd *);
    through SET_ARCH_MACH.  The default bfd_default_set_arch_mach will
    not call set_sizes.  */
 
-#define MY_set_arch_mach NAME (aout, set_arch_mach)
 #define SET_ARCH_MACH(BFD, EXECP) \
- MY_set_arch_mach (BFD, DEFAULT_ARCH, N_MACHTYPE (EXECP))
+  bfd_set_arch_mach (BFD, bfd_arch_cris, N_MACHTYPE (EXECP))
 
 /* These macros describe the binary layout of the reloc information we
    use in a file.  */
@@ -231,12 +227,14 @@ MY (swap_ext_reloc_in) (bfd *abfd,
   cache_ptr->address = (GET_SWORD (abfd, bytes->r_address));
 
   /* Now the fun stuff.  */
-  r_index =  (bytes->r_index[2] << 16)
-    | (bytes->r_index[1] << 8)
-    |  bytes->r_index[0];
+  r_index =  (((unsigned int) bytes->r_index[2] << 16)
+    | ((unsigned int) bytes->r_index[1] << 8)
+    |  bytes->r_index[0]);
+  
   r_extern = (0 != (bytes->r_type[0] & RELOC_EXT_BITS_EXTERN_LITTLE));
-  r_type = ((bytes->r_type[0]) >> RELOC_EXT_BITS_TYPE_SH_LITTLE)
-    & RELOC_EXT_BITS_TYPE_LITTLE;
+
+  r_type = ((bytes->r_type[0] & RELOC_EXT_BITS_TYPE_LITTLE)
+    >> RELOC_EXT_BITS_TYPE_SH_LITTLE);
 
   if (r_type > 2)
     {
