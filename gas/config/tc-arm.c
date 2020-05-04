@@ -18221,19 +18221,13 @@ do_mve_vmull (void)
 
   enum neon_shape rs = neon_select_shape (NS_HHH, NS_FFF, NS_DDD, NS_DDS,
 					  NS_QQS, NS_QQQ, NS_QQR, NS_NULL);
-  if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext)
-      && inst.cond == COND_ALWAYS
+  if (inst.cond == COND_ALWAYS
       && ((unsigned)inst.instruction) == M_MNEM_vmullt)
     {
+
       if (rs == NS_QQQ)
 	{
-
-	  struct neon_type_el et = neon_check_type (3, rs, N_EQK , N_EQK,
-						    N_SUF_32 | N_F64 | N_P8
-						    | N_P16 | N_I_MVE | N_KEY);
-	  if (((et.type == NT_poly) && et.size == 8
-	       && ARM_CPU_IS_ANY (cpu_variant))
-	      || (et.type == NT_integer) || (et.type == NT_float))
+	  if (!ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
 	    goto neon_vmul;
 	}
       else

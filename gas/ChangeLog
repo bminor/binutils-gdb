@@ -1,3 +1,13 @@
+2020-05-07  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	Backport from mainline.
+	2020-05-04  Andre Vieira  <andre.simoesdiasvieira@arm.com>
+
+	PR gas/25863
+	* config/tc-arm.c (do_mve_vmull): Fix scalar and NEON parsing of vmul.
+	* testsuite/gas/arm/mve-scalar-vmult-it.d: New test.
+	* testsuite/gas/arm/mve-scalar-vmult-it.s: New test.
+
 2020-04-21  Tamar Christina  <tamar.christina@arm.com>
 
 	Backport from mainline.
