@@ -1,3 +1,8 @@
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* cli/cli-cmds.c (_initialize_cli_cmds): Define 'info set' as
+	an alias of 'show'.
+
 2020-05-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.h: (ada_is_gnat_encoded_fixed_point_type): Renames

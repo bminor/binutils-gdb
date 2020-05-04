@@ -2209,12 +2209,11 @@ Generic command for showing things about the program being debugged."),
   add_com ("complete", class_obscure, complete_command,
 	   _("List the completions for the rest of the line as a command."));
 
-  add_show_prefix_cmd ("show", class_info, _("\
+  c = add_show_prefix_cmd ("show", class_info, _("\
 Generic command for showing things about the debugger."),
-		       &showlist, "show ", 0, &cmdlist);
+			   &showlist, "show ", 0, &cmdlist);
   /* Another way to get at the same thing.  */
-  add_show_prefix_cmd ("set", class_info, _("Show all GDB settings."),
-		       &showlist, "info set ", 0, &infolist);
+  add_alias_cmd ("set", c, class_info, 0, &infolist);
 
   c = add_com ("with", class_vars, with_command, _("\
 Temporarily set SETTING to VALUE, run COMMAND, and restore SETTING.\n\
