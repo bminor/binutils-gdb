@@ -1,3 +1,8 @@
+2020-05-04  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/async.exp: Check whether instruction addresses are a
+	"recommended breakpoint location".
+
 2020-05-03  Tom Tromey  <tom@tromey.com>
 
 	* gdb.base/sepdebug.exp: Remove "catch" test.

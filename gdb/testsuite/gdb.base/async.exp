@@ -79,7 +79,16 @@ test_background "step&" "" ".*y = foo \\(\\).*" "step& #1"
 
 test_background "step&" "" " foo \\(\\) at .*async.c.*x = 5.*" "step& #2"
 
-test_background "stepi&" "" ".*$hex.*x = 5.*"
+set is_stmt [list]
+gdb_test_multiple "maint info line-table async.c" "" {
+    -re "\r\n$decimal\[ \t\]+$decimal\[ \t\]+($hex)\[ \t\]+Y\[^\r\n\]*" {
+	lappend is_stmt $expect_out(1,string)
+	exp_continue
+    }
+    -re -wrap "" {
+	pass $gdb_test_name
+    }
+}
 
 # Get the next instruction address.
 set next_insn_addr ""
@@ -90,13 +99,46 @@ gdb_test_multiple {x/2i $pc} "$test" {
 	pass "$test"
     }
 }
+set next_insn_is_stmt \
+    [expr [lsearch -regexp $is_stmt 0x0*$next_insn_addr] != -1]
 
-# We nexti into the same source line.  The current PC is printed out.
-test_background "nexti&" "" ".* 0x0*$next_insn_addr.* x = 5; .*"
+if { $next_insn_is_stmt } {
+    set prefix ""
+} else {
+    # The current PC is printed out.
+    set prefix "0x0*$next_insn_addr.*"
+}
+test_background "stepi&" "" ".*$prefix x = 5; .*"
 
-# PC is in the middle of a source line, so the PC address is displayed.
+# Get the next instruction address.
+set next_insn_addr ""
+set test "get next insn"
+gdb_test_multiple {x/2i $pc} "$test" {
+    -re "=> $hex .* 0x(\[0-9a-f\]*) .*$gdb_prompt $" {
+	set next_insn_addr $expect_out(1,string)
+	pass "$test"
+    }
+}
+set next_insn_is_stmt \
+    [expr [lsearch -regexp $is_stmt 0x0*$next_insn_addr] != -1]
+
+if { $next_insn_is_stmt } {
+    set prefix ""
+} else {
+    # The current PC is printed out.
+    set prefix "0x0*$next_insn_addr.*"
+}
+# We nexti into the same source line.
+test_background "nexti&" "" ".*$prefix x = 5; .*"
+
+if { $next_insn_is_stmt } {
+    set prefix ""
+} else {
+    # PC is in the middle of a source line, so the PC address is displayed.
+    set prefix "0x0*$next_insn_addr in "
+}
 test_background "finish&" \
-    "Run till exit from #0  $hex in foo \\(\\) at.*async.c.*\r\n" \
+    "Run till exit from #0  ${prefix}foo \\(\\) at.*async.c.*\r\n" \
     ".*$hex in main \\(\\) at.*async.c.*y = foo \\(\\).*Value returned is.*= 8.*"
 
 set jump_here [gdb_get_line_number "jump here"]
