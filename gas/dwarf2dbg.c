@@ -1995,7 +1995,7 @@ out_dir_and_file_list (void)
   /* Emit directory list.  */
   if (DWARF2_LINE_VERSION >= 5)
     {
-      if (dirs[0] == NULL)
+      if (dirs == NULL || dirs[0] == NULL)
 	dir = remap_debug_filename (".");
       else
 	dir = remap_debug_filename (dirs[0]);

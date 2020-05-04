@@ -1,3 +1,12 @@
+2020-05-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 25917
+	* dwarf2dbg.c (out_dir_and_file_list): Check for the directory
+	table's existence before looking at its entries.
+	* testsuite/gas/elf/pr25917.s: New test source file.
+	* testsuite/gas/elf/pr25917.d: New test driver.
+	* testsuite/gas/elf/elf.exp (run_elf_list_test): Run the new test.
+
 2020-04-30  Alex Coplan  <alex.coplan@arm.com>
 
 	* config/tc-aarch64.c (fix_insn): Implement for
