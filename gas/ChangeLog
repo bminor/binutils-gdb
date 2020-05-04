@@ -1,3 +1,5 @@
+2020-05-04  Nick Clifton  <nickc@redhat.com>
+
 2020-05-04  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	PR gas/25863
@@ -10,6 +12,9 @@
 	PR 25917
 	* dwarf2dbg.c (out_dir_and_file_list): Check for the directory
 	table's existence before looking at its entries.
+	Also do not emit a default directory entry if there are no
+	directories in use.
+
 	* testsuite/gas/elf/pr25917.s: New test source file.
 	* testsuite/gas/elf/pr25917.d: New test driver.
 	* testsuite/gas/elf/elf.exp (run_elf_list_test): Run the new test.

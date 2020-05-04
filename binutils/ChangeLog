@@ -1,3 +1,11 @@
+2020-05-04  Nick Clifton  <nickc@redhat.com>
+
+	PR 25917
+	* dwarf.c (display_debug_lines_decoded): Warn if encountering a
+	supicious number of entries for DWARF-5 format directory and file
+	name tables.  Do not display file name table header if the table
+	is empty.  Do not allocate space for empty tables.
+
 2020-05-04  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_nds32_specific): Check size of .nds32_e_flags

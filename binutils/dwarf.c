@@ -4343,6 +4343,8 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 	      /* Skip directories format.  */
 	      SAFE_BYTE_GET_AND_INC (format_count, data, 1, end);
+	      if (format_count > 1)
+		warn ("Unexpectedly large number of columns in the directory name table (%u)\n", format_count);
 	      format_start = data;
 	      for (formati = 0; formati < format_count; formati++)
 		{
@@ -4357,8 +4359,11 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  break;
 		}
 
-	      directory_table = (unsigned char **)
-		xmalloc (n_directories * sizeof (unsigned char *));
+	      if (n_directories == 0)
+		directory_table = NULL;
+	      else
+		directory_table = (unsigned char **)
+		  xmalloc (n_directories * sizeof (unsigned char *));
 
 	      for (entryi = 0; entryi < n_directories; entryi++)
 		{
@@ -4411,6 +4416,9 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 	      /* Skip files format.  */
 	      SAFE_BYTE_GET_AND_INC (format_count, data, 1, end);
+	      if (format_count > 5)
+		warn ("Unexpectedly large number of columns in the file name table (%u)\n", format_count);
+	      format_count = 2;
 	      format_start = data;
 	      for (formati = 0; formati < format_count; formati++)
 		{
@@ -4419,14 +4427,17 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		}
 
 	      READ_ULEB (n_files, data, end);
-	      if (data == end)
+	      if (data == end && n_files > 0)
 		{
 		  warn (_("Corrupt file name list\n"));
 		  break;
 		}
 
-	      file_table = (File_Entry *) xcalloc (1, n_files
-						      * sizeof (File_Entry));
+	      if (n_files == 0)
+		file_table = NULL;
+	      else
+		file_table = (File_Entry *) xcalloc (1, n_files
+						     * sizeof (File_Entry));
 
 	      for (entryi = 0; entryi < n_files; entryi++)
 		{
@@ -4582,7 +4593,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 	  /* Print the Compilation Unit's name and a header.  */
 	  if (file_table == NULL)
-	    ;
+	    printf (_("CU: No directory table\n"));
 	  else if (directory_table == NULL)
 	    printf (_("CU: %s:\n"), file_table[0].name);
 	  else
@@ -4610,7 +4621,10 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		printf ("%s:\n", file_table[0].name);
 	    }
 
-	  printf (_("File name                            Line number    Starting address    View    Stmt\n"));
+	  if (n_files > 0)
+	    printf (_("File name                            Line number    Starting address    View    Stmt\n"));
+	  else
+	    printf (_("CU: Empty file name table\n"));
 	  saved_linfo = linfo;
 	}
 

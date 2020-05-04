@@ -1981,7 +1981,6 @@ out_dir_and_file_list (void)
   bfd_boolean emit_filesize = TRUE;
 
   /* Output the Directory Table.  */
-
   if (DWARF2_LINE_VERSION >= 5)
     {
       out_byte (1);
@@ -1993,7 +1992,7 @@ out_dir_and_file_list (void)
     }
       
   /* Emit directory list.  */
-  if (DWARF2_LINE_VERSION >= 5)
+  if (DWARF2_LINE_VERSION >= 5 && dirs_in_use > 0)
     {
       if (dirs == NULL || dirs[0] == NULL)
 	dir = remap_debug_filename (".");
@@ -2017,7 +2016,6 @@ out_dir_and_file_list (void)
     out_byte ('\0');
 
   /* Output the File Name Table.  */
-
   if (DWARF2_LINE_VERSION >= 5)
     {
       unsigned int columns = 4;
@@ -2045,7 +2043,6 @@ out_dir_and_file_list (void)
       
       /* The number of format entries to follow.  */
       out_byte (columns);
-
       /* The format of the file name.  */
       out_uleb128 (DW_LNCT_path);
       /* FIXME: it would be better to store these strings in
