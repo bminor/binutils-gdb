@@ -1843,15 +1843,14 @@ lookup_cmd_composition (const char *text,
 
   cur_list = cmdlist;
 
+  text = skip_spaces (text);
+
   while (1)
     {
       /* Go through as many command lists as we need to,
 	 to find the command TEXT refers to.  */
 
       prev_cmd = *cmd;
-
-      while (*text == ' ' || *text == '\t')
-	(text)++;
 
       /* Identify the name of the command.  */
       len = find_command_name_length (text);
@@ -1861,7 +1860,7 @@ lookup_cmd_composition (const char *text,
 	return 0;
 
       /* TEXT is the start of the first command word to lookup (and
-	 it's length is len).  We copy this into a local temporary.  */
+	 it's length is LEN).  We copy this into a local temporary.  */
 
       command = (char *) alloca (len + 1);
       memcpy (command, text, len);
@@ -1890,12 +1889,14 @@ lookup_cmd_composition (const char *text,
 	    }
 	  *prefix_cmd = prev_cmd;
 	}
-      if ((*cmd)->prefixlist)
+
+      text += len;
+      text = skip_spaces (text);
+
+      if ((*cmd)->prefixlist && *text != '\0')
 	cur_list = *(*cmd)->prefixlist;
       else
 	return 1;
-
-      text += len;
     }
 }
 

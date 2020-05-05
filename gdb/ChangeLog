@@ -1,5 +1,14 @@
 2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* cli/cli-cmds.c (alias_command): Check for an existing alias
+	using lookup_cmd_composition, as valid_command_p is too strict
+	and forbids aliases that are the prefix of an existing alias
+	or command.
+	* cli/cli-decode.c (lookup_cmd_composition): Ensure a prefix
+	command is properly recognised as a valid command.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* unittests/help-doc-selftests.c: Rename to
 	unittests/command-def-selftests.c
 	* unittests/command-def-selftests.c (help_doc_tests): Update some

@@ -1694,8 +1694,29 @@ alias_command (const char *args, int from_tty)
   /* ALIAS must not exist.  */
   std::string alias_string (argv_to_string (alias_argv, alias_argc));
   alias = alias_string.c_str ();
-  if (valid_command_p (alias))
-    error (_("Alias already exists: %s"), alias);
+  {
+    cmd_list_element *alias_cmd, *prefix_cmd, *cmd;
+
+    if (lookup_cmd_composition (alias, &alias_cmd, &prefix_cmd, &cmd))
+      {
+	const char *alias_name = alias_argv[alias_argc-1];
+
+	/* If we found an existing ALIAS_CMD, check that the prefix differ or
+	   the name differ.  */
+
+	if (alias_cmd != nullptr
+	    && alias_cmd->prefix == prefix_cmd
+	    && strcmp (alias_name, alias_cmd->name) == 0)
+	  error (_("Alias already exists: %s"), alias);
+
+	/* Check ALIAS differs from the found CMD.  */
+
+	if (cmd->prefix == prefix_cmd
+	    && strcmp (alias_name, cmd->name) == 0)
+	  error (_("Alias %s is the name of an existing command"), alias);
+      }
+  }
+
 
   /* If ALIAS is one word, it is an alias for the entire COMMAND.
      Example: alias spe = set print elements

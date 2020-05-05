@@ -116,3 +116,9 @@ gdb_test "show print elements" "Limit .* is 56\[.\]" "verify 56"
 
 gdb_test_no_output "set print max-elements 57"
 gdb_test "show print elements" "Limit .* is 57\[.\]" "verify 57"
+
+# Test aliases having a common prefix.
+gdb_test_no_output "alias abcd  = backtrace"
+gdb_test_no_output "alias abcde = backtrace"
+gdb_test_no_output "alias fghij = backtrace"
+gdb_test_no_output "alias fghi  = backtrace"
