@@ -1,3 +1,8 @@
+2020-10-05  Hannes Domani  <ssbssa@yahoo.de>
+
+	* gdb.base/call-sc.c: Fix return struct on stack test case.
+	* gdb.base/call-sc.exp: Likewise.
+
 2020-10-02  Gary Benson <gbenson@redhat.com>
 
 	* README: Fix "paralell".

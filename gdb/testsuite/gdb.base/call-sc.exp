@@ -280,6 +280,19 @@ proc test_scalar_returns { } {
 		fail "${test}"
 	    }
 	}
+	-re " = 57 .*${gdb_prompt} $" {
+	    if $return_value_unknown {
+		# The struct return case.
+		# The return value is stored on the stack, and since GDB
+		# didn't override it, it still has value that was stored
+		# there in the earlier Foo(init) call.
+		pass "${test}"
+	    } else {
+		# This contradicts the above claim that GDB knew
+		# the location of the return-value.
+		fail "${test}"
+	    }
+	}
 	-re ".*${gdb_prompt} $" {
 	    if $return_value_unimplemented {
 		# What a suprize.  The architecture hasn't implemented

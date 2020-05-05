@@ -125,6 +125,7 @@ amd64_windows_passed_by_integer_register (struct type *type)
       case TYPE_CODE_RVALUE_REF:
       case TYPE_CODE_STRUCT:
       case TYPE_CODE_UNION:
+      case TYPE_CODE_COMPLEX:
 	return (TYPE_LENGTH (type) == 1
 		|| TYPE_LENGTH (type) == 2
 		|| TYPE_LENGTH (type) == 4
@@ -364,17 +365,29 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
   switch (type->code ())
     {
       case TYPE_CODE_FLT:
-      case TYPE_CODE_DECFLOAT:
-        /* __m128, __m128i, __m128d, floats, and doubles are returned
-           via XMM0.  */
-        if (len == 4 || len == 8 || len == 16)
+	/* floats, and doubles are returned via XMM0.  */
+	if (len == 4 || len == 8)
           regnum = AMD64_XMM0_REGNUM;
         break;
+      case TYPE_CODE_ARRAY:
+	/* __m128, __m128i and __m128d are returned via XMM0.  */
+	if (TYPE_VECTOR (type) && len == 16)
+	  {
+	    enum type_code code = TYPE_TARGET_TYPE (type)->code ();
+	    if (code == TYPE_CODE_INT || code == TYPE_CODE_FLT)
+	      {
+		regnum = AMD64_XMM0_REGNUM;
+		break;
+	      }
+	  }
+	/* fall through */
       default:
         /* All other values that are 1, 2, 4 or 8 bytes long are returned
            via RAX.  */
         if (len == 1 || len == 2 || len == 4 || len == 8)
           regnum = AMD64_RAX_REGNUM;
+	else if (len == 16 && type->code () == TYPE_CODE_INT)
+	  regnum = AMD64_XMM0_REGNUM;
         break;
     }
 
