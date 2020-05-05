@@ -246,16 +246,6 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_PROTOTYPED(t)	(TYPE_MAIN_TYPE (t)->flag_prototyped)
 
-/* * This flag is used to indicate that processing for this type
-   is incomplete.
-
-   (Mostly intended for HP platforms, where class methods, for
-   instance, can be encountered before their classes in the debug
-   info; the incomplete type has to be marked so that the class and
-   the method can be assigned correct types.)  */
-
-#define TYPE_INCOMPLETE(t)	(TYPE_MAIN_TYPE (t)->flag_incomplete)
-
 /* * FIXME drow/2002-06-03:  Only used for methods, but applies as well
    to functions.  */
 

@@ -1,3 +1,9 @@
+2020-05-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_INCOMPLETE): Remove.
+	* gdbtypes.c (recursive_dump_type): Remove use of
+	TYPE_INCOMPLETE.
+
 2020-05-03  Tom Tromey  <tom@tromey.com>
 
 	* breakpoint.c (catch_command, tcatch_command): Remove.

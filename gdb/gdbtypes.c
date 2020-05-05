@@ -5080,10 +5080,6 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_PROTOTYPED");
     }
-  if (TYPE_INCOMPLETE (type))
-    {
-      puts_filtered (" TYPE_INCOMPLETE");
-    }
   if (TYPE_VARARGS (type))
     {
       puts_filtered (" TYPE_VARARGS");
