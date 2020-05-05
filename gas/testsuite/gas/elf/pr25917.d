@@ -1,9 +1,9 @@
 #as: --gdwarf-5
-#name: DWARF5: no files or directories
+#name: DWARF5: no files or directories (PR 25917)
 #readelf: -wl
 
 #...
  The Directory Table is empty.
 
- No Line Number Statements.
+ The File Name Table is empty.
 #pass

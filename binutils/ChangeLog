@@ -1,3 +1,20 @@
+2020-05-05  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (do_checks): New global variable.
+	(display_formatted_table): Warn about an unexpected number of
+	columns in the table, if checks are enabled.  Do not complain
+	about the lack of data following the number of entries in the
+	table if the table is empty.
+	(display_debug_lines_decoded): Only warn about an unexpected
+	number of columns in a table if checks are enabled.
+	* dwarf.h (do_checks): Add a prototype.
+	* elfcomm.c (error): Remove weak attribute.
+	(warn): Likewise.
+	* readelf.c (do_checks): Delete.
+	(warn): Delete.
+	(process_section_headers): Only warn about empty sections if
+	checks are enabled.
+
 2020-05-04  Fangrui Song   <maskray@google.com>
 
 	* objcopy.c (copy_object): Allow empty section.

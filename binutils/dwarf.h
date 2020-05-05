@@ -221,6 +221,7 @@ extern int do_debug_cu_index;
 extern int do_wide;
 extern int do_debug_links;
 extern int do_follow_links;
+extern bfd_boolean do_checks;
 
 extern int dwarf_cutoff_level;
 extern unsigned long dwarf_start_die;

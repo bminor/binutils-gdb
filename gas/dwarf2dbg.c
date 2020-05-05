@@ -1983,11 +1983,16 @@ out_dir_and_file_list (void)
   /* Output the Directory Table.  */
   if (DWARF2_LINE_VERSION >= 5)
     {
+      /* We only have one column in the directory table.  */
       out_byte (1);
+
+      /* Describe the purpose and format of the column.  */
       out_uleb128 (DW_LNCT_path);
       /* FIXME: it would be better to store these strings in
 	 the .debug_line_str section and reference them here.  */
       out_uleb128 (DW_FORM_string);
+
+      /* Now state how many rows there are in the table.  */
       out_uleb128 (dirs_in_use);
     }
       

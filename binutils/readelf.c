@@ -231,7 +231,6 @@ static bfd_boolean do_ctf = FALSE;
 static bfd_boolean do_arch = FALSE;
 static bfd_boolean do_notes = FALSE;
 static bfd_boolean do_archive_index = FALSE;
-static bfd_boolean do_checks = FALSE;
 static bfd_boolean check_all = FALSE;
 static bfd_boolean is_32bit_elf = FALSE;
 static bfd_boolean decompress_dumps = FALSE;
@@ -385,25 +384,6 @@ bfd_vmatoa (char *fmtch, bfd_vma value)
   sprintf (fmt, "%%%s%s", BFD_VMA_FMT, fmtch);
   snprintf (ret, sizeof (buf[0].place), fmt, value);
   return ret;
-}
-
-/* A version of the warn() function that is disabled if do_checks is not active.  */
-
-void
-warn (const char *message, ...)
-{
-  va_list args;
-
-  if (!do_checks)
-    return;
-
-  /* Try to keep warning messages in sync with the program's normal output.  */
-  fflush (stdout);
-
-  va_start (args, message);
-  fprintf (stderr, _("%s: Warning: "), program_name);
-  vfprintf (stderr, message, args);
-  va_end (args);
 }
 
 /* Retrieve NMEMB structures, each SIZE bytes long from FILEDATA starting at
@@ -6378,21 +6358,22 @@ process_section_headers (Filedata * filedata)
 
 	case SHT_REL:
 	  CHECK_ENTSIZE (section, i, Rel);
-	  if (section->sh_size == 0)
+	  if (do_checks && section->sh_size == 0)
 	    warn (_("Section '%s': zero-sized relocation section\n"), name);
 	  break;
 
 	case SHT_RELA:
 	  CHECK_ENTSIZE (section, i, Rela);
-	  if (section->sh_size == 0)
+	  if (do_checks && section->sh_size == 0)
 	    warn (_("Section '%s': zero-sized relocation section\n"), name);
 	  break;
 
 	case SHT_NOTE:
 	case SHT_PROGBITS:
-	  if (section->sh_size == 0)
-	    /* This is not illegal according to the ELF standard, but
-	       it might be an indication that something is wrong.  */
+	  /* Having a zero sized section is not illegal according to the
+	     ELF standard, but it might be an indication that something
+	     is wrong.  So issue a warning if we are running in lint mode.  */
+	  if (do_checks && section->sh_size == 0)
 	    warn (_("Section '%s': has a size of zero - is this intended ?\n"), name);
 	  break;
 

@@ -98,6 +98,7 @@ int do_debug_cu_index;
 int do_wide;
 int do_debug_links;
 int do_follow_links;
+bfd_boolean do_checks;
 
 int dwarf_cutoff_level = -1;
 unsigned long dwarf_start_die;
@@ -3739,6 +3740,10 @@ display_formatted_table (unsigned char *                   data,
   const char * table_name = is_dir ? N_("Directory Table") : N_("File Name Table");
   
   SAFE_BYTE_GET_AND_INC (format_count, data, 1, end);
+  if (do_checks && format_count > 5)
+    warn (_("Unexpectedly large number of columns in the %s (%u)\n"),
+	  table_name, format_count);
+
   format_start = data;
   for (formati = 0; formati < format_count; formati++)
     {
@@ -3752,17 +3757,18 @@ display_formatted_table (unsigned char *                   data,
     }
 
   READ_ULEB (data_count, data, end);
-  if (data == end)
-    {
-      warn (_("%s: Corrupt entry count\n"), table_name);
-      return data;
-    }
-
   if (data_count == 0)
     {
       printf (_("\n The %s is empty.\n"), table_name);
       return data;
     }
+  else if (data == end)
+    {
+      warn (_("%s: Corrupt entry count - expected %s but none found\n"),
+	    table_name, dwarf_vmatoa ("x", data_count));
+      return data;
+    }
+
   else if (format_count == 0)
     {
       warn (_("%s: format count is zero, but the table is not empty\n"),
@@ -4343,8 +4349,9 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 	      /* Skip directories format.  */
 	      SAFE_BYTE_GET_AND_INC (format_count, data, 1, end);
-	      if (format_count > 1)
-		warn ("Unexpectedly large number of columns in the directory name table (%u)\n", format_count);
+	      if (do_checks && format_count > 1)
+		warn (_("Unexpectedly large number of columns in the directory name table (%u)\n"),
+		      format_count);
 	      format_start = data;
 	      for (formati = 0; formati < format_count; formati++)
 		{
@@ -4416,9 +4423,9 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 
 	      /* Skip files format.  */
 	      SAFE_BYTE_GET_AND_INC (format_count, data, 1, end);
-	      if (format_count > 5)
-		warn ("Unexpectedly large number of columns in the file name table (%u)\n", format_count);
-	      format_count = 2;
+	      if (do_checks && format_count > 5)
+		warn (_("Unexpectedly large number of columns in the file name table (%u)\n"),
+		      format_count);
 	      format_start = data;
 	      for (formati = 0; formati < format_count; formati++)
 		{

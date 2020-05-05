@@ -1,3 +1,9 @@
+2020-05-05  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2dbg.c (out_dir_and_file_list): Add comments describing the
+	construction of a DWARF-5 directory name table.
+	* testsuite/gas/elf/pr25917.d: Update expected output.
+
 2020-05-05  Gunther Nikl <gnikl@justmail.de>
 
 	* config/tc-rx.c (elf_flags): Initialize for non-linux targets.
