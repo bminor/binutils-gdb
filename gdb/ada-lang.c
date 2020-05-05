@@ -1486,18 +1486,6 @@ ada_fixup_array_indexes_type (struct type *index_desc_type)
    }
 }
 
-/* Names of MAX_ADA_DIMENS bounds in P_BOUNDS fields of array descriptors.  */
-
-static const char *bound_name[] = {
-  "LB0", "UB0", "LB1", "UB1", "LB2", "UB2", "LB3", "UB3",
-  "LB4", "UB4", "LB5", "UB5", "LB6", "UB6", "LB7", "UB7"
-};
-
-/* Maximum number of array dimensions we are prepared to handle.  */
-
-#define MAX_ADA_DIMENS (sizeof(bound_name) / (2*sizeof(char *)))
-
-
 /* The desc_* routines return primitive portions of array descriptors
    (fat pointers).  */
 
@@ -1760,7 +1748,10 @@ fat_pntr_data_bitsize (struct type *type)
 static struct value *
 desc_one_bound (struct value *bounds, int i, int which)
 {
-  return value_struct_elt (&bounds, NULL, bound_name[2 * i + which - 2], NULL,
+  char bound_name[20];
+  xsnprintf (bound_name, sizeof (bound_name), "%cB%d",
+	     which ? 'U' : 'L', i - 1);
+  return value_struct_elt (&bounds, NULL, bound_name, NULL,
                            _("Bad GNAT array descriptor bounds"));
 }
 
@@ -1798,7 +1789,11 @@ desc_index_type (struct type *type, int i)
   type = desc_base_type (type);
 
   if (type->code () == TYPE_CODE_STRUCT)
-    return lookup_struct_elt_type (type, bound_name[2 * i - 2], 1);
+    {
+      char bound_name[20];
+      xsnprintf (bound_name, sizeof (bound_name), "LB%d", i - 1);
+      return lookup_struct_elt_type (type, bound_name, 1);
+    }
   else
     return NULL;
 }

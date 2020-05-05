@@ -1,3 +1,8 @@
+2020-05-20  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (bound_name, MAX_ADA_DIMENS): Remove.
+        (desc_one_bound, desc_index_type): Compute field name.
+
 2020-05-20  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/25833
