@@ -1,4 +1,7 @@
-2020-05-04  Nick Clifton  <nickc@redhat.com>
+2020-05-05  Gunther Nikl <gnikl@justmail.de>
+
+	* config/tc-rx.c (elf_flags): Initialize for non-linux targets.
+	(md_parse_option): Remove initialization of elf_flags.
 
 2020-05-04  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
