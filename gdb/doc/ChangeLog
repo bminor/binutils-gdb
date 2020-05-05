@@ -1,3 +1,9 @@
+2020-05-05  Kamil Rytarowski  <n54@gmx.com>
+
+	* gdb.texinfo (info proc, info proc cmdline, info proc cwd)
+	(info proc exe, info proc mappings, info proc stat): Mention
+	NetBSD support.
+
 2020-04-28  Tom Tromey  <tom@tromey.com>
 
 	* python.texi (Commands In Python): Document gdb.COMMAND_TUI.

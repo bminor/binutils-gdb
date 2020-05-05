@@ -23407,8 +23407,8 @@ used to examine the image of a running process using file-system
 subroutines.  This facility is supported on @sc{gnu}/Linux and Solaris
 systems.
 
-On FreeBSD systems, system control nodes are used to query process
-information.
+On FreeBSD and NetBSD systems, system control nodes are used to query
+process information.
 
 In addition, some systems may provide additional process information
 in core files.  Note that a core file may include a subset of the
@@ -23438,17 +23438,17 @@ a process ID rather than a thread ID).
 @item info proc cmdline
 @cindex info proc cmdline
 Show the original command line of the process.  This command is
-supported on @sc{gnu}/Linux and FreeBSD.
+supported on @sc{gnu}/Linux, FreeBSD and NetBSD.
 
 @item info proc cwd
 @cindex info proc cwd
 Show the current working directory of the process.  This command is
-supported on @sc{gnu}/Linux and FreeBSD.
+supported on @sc{gnu}/Linux, FreeBSD and NetBSD.
 
 @item info proc exe
 @cindex info proc exe
 Show the name of executable of the process.  This command is supported
-on @sc{gnu}/Linux and FreeBSD.
+on @sc{gnu}/Linux, FreeBSD and NetBSD.
 
 @item info proc files
 @cindex info proc files
@@ -23483,9 +23483,9 @@ Open files:
 @item info proc mappings
 @cindex memory address space mappings
 Report the memory address space ranges accessible in a process.  On
-Solaris and FreeBSD systems, each memory range includes information on
-whether the process has read, write, or execute access rights to each
-range.  On @sc{gnu}/Linux and FreeBSD systems, each memory range
+Solaris, FreeBSD and NetBSD systems, each memory range includes information
+on whether the process has read, write, or execute access rights to each
+range.  On @sc{gnu}/Linux, FreeBSD and NetBSD systems, each memory range
 includes the object file which is mapped to that range.
 
 @item info proc stat
@@ -23495,13 +23495,13 @@ Show additional process-related information, including the user ID and
 group ID; virtual memory usage; the signals that are pending, blocked,
 and ignored; its TTY; its consumption of system and user time; its
 stack size; its @samp{nice} value; etc.  These commands are supported
-on @sc{gnu}/Linux and FreeBSD.
+on @sc{gnu}/Linux, FreeBSD and NetBSD.
 
 For @sc{gnu}/Linux systems, see the @samp{proc} man page for more
 information (type @kbd{man 5 proc} from your shell prompt).
 
-For FreeBSD systems, @code{info proc stat} is an alias for @code{info
-proc status}.
+For FreeBSD and NetBSD systems, @code{info proc stat} is an alias for
+@code{info proc status}.
 
 @item info proc all
 Show all the information about the process described under all of the
