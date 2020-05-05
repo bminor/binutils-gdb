@@ -765,7 +765,6 @@ struct main_type
   unsigned int flag_target_stub : 1;
   unsigned int flag_static : 1;
   unsigned int flag_prototyped : 1;
-  unsigned int flag_incomplete : 1;
   unsigned int flag_varargs : 1;
   unsigned int flag_vector : 1;
   unsigned int flag_stub_supported : 1;

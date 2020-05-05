@@ -1,3 +1,7 @@
+2020-05-05  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct main_type) <flag_incomplete>: Remove.
+
 2020-05-04  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbtypes.h (TYPE_INCOMPLETE): Remove.
