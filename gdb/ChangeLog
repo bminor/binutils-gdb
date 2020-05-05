@@ -1,3 +1,19 @@
+2020-10-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* expprint.c (print_subexp_standard): Update to reflect changes to
+	enum range_type.
+	(dump_subexp_body_standard): Likewise.
+	* expression.h (enum range_type): Convert to a bit field enum, and
+	make the enum unsigned.
+	* f-exp.y (subrange): Update to reflect changes to enum
+	range_type.
+	* f-lang.c (value_f90_subarray): Likewise.
+	* parse.c (operator_length_standard): Likewise.
+	* rust-exp.y (rust_parser::convert_ast_to_expression): Likewise.
+	* rust-lang.c (rust_range): Likewise.
+	(rust_compute_range): Likewise.
+	(rust_subscript): Likewise.
+
 2020-10-21  Simon Marchi  <simon.marchi@efficios.com>
 
 	* infrun.c (displaced_step_in_progress_thread): Fix comment.

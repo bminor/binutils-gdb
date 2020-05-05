@@ -2492,24 +2492,29 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 
     case OP_RANGE:
       {
-	enum range_type kind = BOTH_BOUND_DEFAULT;
+	enum range_type kind = (RANGE_HIGH_BOUND_DEFAULT
+				| RANGE_LOW_BOUND_DEFAULT);
 
 	if (operation->left.op != NULL)
 	  {
 	    convert_ast_to_expression (operation->left.op, top);
-	    kind = HIGH_BOUND_DEFAULT;
+	    kind &= ~RANGE_LOW_BOUND_DEFAULT;
 	  }
 	if (operation->right.op != NULL)
 	  {
 	    convert_ast_to_expression (operation->right.op, top);
-	    if (kind == BOTH_BOUND_DEFAULT)
-	      kind = (operation->inclusive
-		      ? LOW_BOUND_DEFAULT : LOW_BOUND_DEFAULT_EXCLUSIVE);
+	    if (kind == (RANGE_HIGH_BOUND_DEFAULT | RANGE_LOW_BOUND_DEFAULT))
+	      {
+		kind = RANGE_LOW_BOUND_DEFAULT;
+		if (!operation->inclusive)
+		  kind |= RANGE_HIGH_BOUND_EXCLUSIVE;
+	      }
 	    else
 	      {
-		gdb_assert (kind == HIGH_BOUND_DEFAULT);
-		kind = (operation->inclusive
-			? NONE_BOUND_DEFAULT : NONE_BOUND_DEFAULT_EXCLUSIVE);
+		gdb_assert (kind == RANGE_HIGH_BOUND_DEFAULT);
+		kind = RANGE_STANDARD;
+		if (!operation->inclusive)
+		  kind |= RANGE_HIGH_BOUND_EXCLUSIVE;
 	      }
 	  }
 	else

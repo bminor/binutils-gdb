@@ -921,21 +921,13 @@ operator_length_standard (const struct expression *expr, int endpos,
       range_type = (enum range_type)
 	longest_to_int (expr->elts[endpos - 2].longconst);
 
-      switch (range_type)
-	{
-	case LOW_BOUND_DEFAULT:
-	case LOW_BOUND_DEFAULT_EXCLUSIVE:
-	case HIGH_BOUND_DEFAULT:
-	  args = 1;
-	  break;
-	case BOTH_BOUND_DEFAULT:
-	  args = 0;
-	  break;
-	case NONE_BOUND_DEFAULT:
-	case NONE_BOUND_DEFAULT_EXCLUSIVE:
-	  args = 2;
-	  break;
-	}
+      /* Assume the range has 2 arguments (low bound and high bound), then
+	 reduce the argument count if any bounds are set to default.  */
+      args = 2;
+      if (range_type & RANGE_LOW_BOUND_DEFAULT)
+	--args;
+      if (range_type & RANGE_HIGH_BOUND_DEFAULT)
+	--args;
 
       break;
 

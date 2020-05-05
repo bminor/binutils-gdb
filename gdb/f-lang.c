@@ -131,12 +131,12 @@ value_f90_subarray (struct value *array,
 
   *pos += 3;
 
-  if (range_type == LOW_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
+  if (range_type & RANGE_LOW_BOUND_DEFAULT)
     low_bound = range->bounds ()->low.const_val ();
   else
     low_bound = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
 
-  if (range_type == HIGH_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
+  if (range_type & RANGE_HIGH_BOUND_DEFAULT)
     high_bound = range->bounds ()->high.const_val ();
   else
     high_bound = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
