@@ -1568,14 +1568,16 @@ done by increasing the size of the last section.  The extra space is
 filled in with the value specified by @option{--gap-fill} (default zero).
 
 @item --set-start @var{val}
-Set the start address of the new file to @var{val}.  Not all object file
-formats support setting the start address.
+Set the start address (also known as the entry address) of the new
+file to @var{val}.  Not all object file formats support setting the
+start address.
 
 @item --change-start @var{incr}
 @itemx --adjust-start @var{incr}
 @cindex changing start address
-Change the start address by adding @var{incr}.  Not all object file
-formats support setting the start address.
+Change the start address (also known as the entry address) by adding
+@var{incr}.  Not all object file formats support setting the start
+address.
 
 @item --change-addresses @var{incr}
 @itemx --adjust-vma @var{incr}

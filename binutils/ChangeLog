@@ -1,3 +1,8 @@
+2020-05-07  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* doc/binutils.texi: Mention 'entry address' in the set-start and
+	adjust-start options descriptions.
+
 2020-05-05  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (do_checks): New global variable.
