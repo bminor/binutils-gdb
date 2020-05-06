@@ -1,5 +1,9 @@
 2020-05-06  Nick Clifton  <nickc@redhat.com>
 
+	* po/sv.po: Updated Swedish translation.
+
+2020-05-06  Nick Clifton  <nickc@redhat.com>
+
 	PR 25927
 	* doc/as.texi (Preprocessing): Replace cross reference to not
 	existant document with a URL to the equivalent page in the GCC
