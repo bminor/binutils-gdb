@@ -1,5 +1,9 @@
 2020-05-06  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (struct main_type) <flag_static>: Remove.
+
+2020-05-06  Simon Marchi  <simon.marchi@efficios.com>
+
 	* amd64-tdep.c (amd64_analyze_prologue): Check for `endbr64`
 	instruction, skip it if it's there.
 
