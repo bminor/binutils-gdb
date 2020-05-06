@@ -528,9 +528,18 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
       did_print_modifier = 1;
     }
 
+  if (TYPE_CAPABILITY (type))
+    {
+      if (did_print_modifier || need_pre_space)
+	fprintf_filtered (stream, " ");
+      fprintf_filtered (stream, "__capability");
+      did_print_modifier = 1;
+    }
+
   address_space_id
     = address_space_type_instance_flags_to_name (type->arch (),
 						 type->instance_flags ());
+
   if (address_space_id)
     {
       if (did_print_modifier || need_pre_space)

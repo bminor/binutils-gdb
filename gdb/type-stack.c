@@ -34,13 +34,13 @@ type_stack::insert (enum type_pieces tp)
   gdb_assert (tp == tp_pointer || tp == tp_reference
 	      || tp == tp_rvalue_reference || tp == tp_const
 	      || tp == tp_volatile || tp == tp_restrict
-	      || tp == tp_atomic);
+	      || tp == tp_atomic || tp == tp_capability);
 
   /* If there is anything on the stack (we know it will be a
      tp_pointer), insert the qualifier above it.  Otherwise, simply
      push this on the top of the stack.  */
   if (!m_elements.empty () && (tp == tp_const || tp == tp_volatile
-			       || tp == tp_restrict))
+			       || tp == tp_restrict || tp == tp_capability))
     slot = 1;
   else
     slot = 0;
@@ -97,6 +97,9 @@ type_stack::follow_type_instance_flags ()
       case tp_restrict:
 	flags |= TYPE_INSTANCE_FLAG_RESTRICT;
 	break;
+      case tp_capability:
+	flags |= TYPE_INSTANCE_FLAG_CAPABILITY;
+	break;
       default:
 	gdb_assert_not_reached ("unrecognized tp_ value in follow_types");
       }
@@ -113,6 +116,7 @@ type_stack::follow_types (struct type *follow_type)
   type_instance_flags make_addr_space = 0;
   bool make_restrict = false;
   bool make_atomic = false;
+  bool make_capability = false;
   int array_size;
 
   while (!done)
@@ -136,6 +140,9 @@ type_stack::follow_types (struct type *follow_type)
 	break;
       case tp_restrict:
 	make_restrict = true;
+	break;
+      case tp_capability:
+	make_capability = true;
 	break;
       case tp_pointer:
 	follow_type = lookup_pointer_type (follow_type);
@@ -161,9 +168,11 @@ type_stack::follow_types (struct type *follow_type)
 	  follow_type = make_restrict_type (follow_type);
 	if (make_atomic)
 	  follow_type = make_atomic_type (follow_type);
+	if (make_capability)
+	  follow_type = make_capability_type (follow_type);
 	make_const = make_volatile = 0;
 	make_addr_space = 0;
-	make_restrict = make_atomic = false;
+	make_restrict = make_atomic = make_capability = false;
 	break;
       case tp_array:
 	array_size = pop_int ();

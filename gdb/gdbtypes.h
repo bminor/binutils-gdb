@@ -227,7 +227,8 @@ enum type_instance_flag_value : unsigned
   TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2 = (1 << 5),
   TYPE_INSTANCE_FLAG_NOTTEXT = (1 << 6),
   TYPE_INSTANCE_FLAG_RESTRICT = (1 << 7),
-  TYPE_INSTANCE_FLAG_ATOMIC = (1 << 8)
+  TYPE_INSTANCE_FLAG_ATOMIC = (1 << 8),
+  TYPE_INSTANCE_FLAG_CAPABILITY = (1 << 9)
 };
 
 DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
@@ -259,6 +260,12 @@ DEF_ENUM_FLAGS_TYPE (enum type_instance_flag_value, type_instance_flags);
 
 #define TYPE_ATOMIC(t) \
   ((((t)->instance_flags ()) & TYPE_INSTANCE_FLAG_ATOMIC) != 0)
+
+/* * Capability type.  If this is set, the corresponding type has a
+   __capability modifier.  */
+
+#define TYPE_CAPABILITY(t) \
+  ((((t)->instance_flags ()) & TYPE_INSTANCE_FLAG_CAPABILITY) != 0)
 
 /* * True if this type represents either an lvalue or lvalue reference type.  */
 
@@ -1498,7 +1505,7 @@ struct type
      instance flags are completely inherited from the target type.  No
      qualifiers can be cleared by the typedef.  See also
      check_typedef.  */
-  unsigned m_instance_flags : 9;
+  unsigned m_instance_flags : 10;
 
   /* * Length of storage for a value of this type.  The value is the
      expression in host bytes of what sizeof(type) would return.  This
@@ -2344,6 +2351,12 @@ struct builtin_type
 
   struct type *builtin_func_func;
 
+  /* ARM signed integer/capability.  */
+  struct type *builtin_intcap_t;
+
+  /* ARM unsigned integer/capability.  */
+  struct type *builtin_uintcap_t;
+
   /* Data address capability.  */
   struct type *builtin_data_addr_capability;
 
@@ -2543,6 +2556,8 @@ extern struct type *make_reference_type (struct type *, struct type **,
 extern struct type *make_cv_type (int, int, struct type *, struct type **);
 
 extern struct type *make_restrict_type (struct type *);
+
+extern struct type *make_capability_type (struct type *);
 
 extern struct type *make_unqualified_type (struct type *);
 

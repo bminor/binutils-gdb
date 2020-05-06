@@ -238,8 +238,8 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
 %token SIGNED_KEYWORD LONG SHORT INT_KEYWORD CONST_KEYWORD VOLATILE_KEYWORD DOUBLE_KEYWORD
-%token RESTRICT ATOMIC
-%token FLOAT_KEYWORD COMPLEX
+%token RESTRICT ATOMIC CAPABILITY
+%token FLOAT_KEYWORD COMPLEX INTCAP_KEYWORD UINTCAP_KEYWORD
 
 %token <sval> DOLLAR_VARIABLE
 
@@ -1262,6 +1262,8 @@ single_qualifier:
 			{ cpstate->type_stack.insert (tp_atomic); }
 	| 	RESTRICT
 			{ cpstate->type_stack.insert (tp_restrict); }
+	| 	CAPABILITY
+			{ cpstate->type_stack.insert (tp_capability); }
 	|	'@' NAME
 		{
 		  cpstate->type_stack.insert (pstate,
@@ -1467,6 +1469,16 @@ scalar_type:
 	|	FLOAT_KEYWORD
 			{ $$ = lookup_typename (pstate->language (),
 						"float",
+						NULL,
+						0); }
+	|	INTCAP_KEYWORD
+			{ $$ = lookup_typename (pstate->language (),
+						"__intcap_t",
+						NULL,
+						0); }
+	|	UINTCAP_KEYWORD
+			{ $$ = lookup_typename (pstate->language (),
+						"__uintcap_t",
 						NULL,
 						0); }
 	|	LONG DOUBLE_KEYWORD
@@ -2532,6 +2544,8 @@ static const struct token ident_tokens[] =
     {"alignof", ALIGNOF, OP_NULL, FLAG_CXX},
     {"double", DOUBLE_KEYWORD, OP_NULL, 0},
     {"float", FLOAT_KEYWORD, OP_NULL, 0},
+    {"__intcap_t", INTCAP_KEYWORD, OP_NULL, 0},
+    {"__uintcap_t", UINTCAP_KEYWORD, OP_NULL, 0},
     {"false", FALSEKEYWORD, OP_NULL, FLAG_CXX},
     {"class", CLASS, OP_NULL, FLAG_CXX},
     {"union", UNION, OP_NULL, 0},
@@ -2545,6 +2559,7 @@ static const struct token ident_tokens[] =
     {"long", LONG, OP_NULL, 0},
     {"_Complex", COMPLEX, OP_NULL, 0},
     {"__complex__", COMPLEX, OP_NULL, 0},
+    {"__capability", CAPABILITY, OP_NULL, 0},
 
     {"true", TRUEKEYWORD, OP_NULL, FLAG_CXX},
     {"int", INT_KEYWORD, OP_NULL, 0},

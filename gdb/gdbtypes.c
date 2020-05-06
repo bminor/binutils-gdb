@@ -761,6 +761,23 @@ make_restrict_type (struct type *type)
 			      NULL);
 }
 
+/* Make a 'capability'-qualified version of TYPE.  */
+
+struct type *
+make_capability_type (struct type *type)
+{
+  struct type *ntype;
+  ntype = make_qualified_type (type,
+			       (type->instance_flags ()
+			        | TYPE_INSTANCE_FLAG_CAPABILITY),
+			       NULL);
+
+  /* Capability pointers are 128-bit.  */
+  TYPE_LENGTH (ntype) = 16;
+
+  return ntype;
+}
+
 /* Make a type without const, volatile, or restrict.  */
 
 struct type *
@@ -770,7 +787,8 @@ make_unqualified_type (struct type *type)
 			      (type->instance_flags ()
 			       & ~(TYPE_INSTANCE_FLAG_CONST
 				   | TYPE_INSTANCE_FLAG_VOLATILE
-				   | TYPE_INSTANCE_FLAG_RESTRICT)),
+				   | TYPE_INSTANCE_FLAG_RESTRICT
+				   | TYPE_INSTANCE_FLAG_CAPABILITY)),
 			      NULL);
 }
 
@@ -5278,6 +5296,10 @@ recursive_dump_type (struct type *type, int spaces)
     {
       puts_filtered (" TYPE_ATOMIC");
     }
+  if (TYPE_CAPABILITY (type))
+    {
+      puts_filtered (" TYPE_CAPABILITY");
+    }
   puts_filtered ("\n");
 
   printf_filtered ("%*sflags", spaces, "");
@@ -6179,6 +6201,18 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
     = lookup_pointer_type (lookup_function_type (builtin_type->builtin_void));
   builtin_type->builtin_func_func
     = lookup_function_type (builtin_type->builtin_func_ptr);
+
+  /* Capability types.  */
+  builtin_type->builtin_intcap_t
+    = arch_integer_type (gdbarch, 128, 0, "__intcap_t");
+  builtin_type->builtin_uintcap_t
+    = arch_integer_type (gdbarch, 128, 1, "__uintcap_t");
+
+  /* Capability pointer types.  */
+  builtin_type->builtin_data_addr_capability
+    = lookup_pointer_type (builtin_type->builtin_intcap_t);
+  builtin_type->builtin_code_addr_capability
+    = lookup_pointer_type (lookup_function_type (builtin_type->builtin_void));
 
   /* This type represents a GDB internal function.  */
   builtin_type->internal_fn
