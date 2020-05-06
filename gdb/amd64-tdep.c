@@ -2362,6 +2362,9 @@ amd64_x32_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
       pushq %rbp        0x55
       movl %esp, %ebp   0x89 0xe5 (or 0x8b 0xec)
 
+   The `endbr64` instruction can be found before these sequences, and will be
+   skipped if found.
+
    Any function that doesn't start with one of these sequences will be
    assumed to have no prologue and thus no valid frame pointer in
    %rbp.  */
@@ -2372,6 +2375,8 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
 			struct amd64_frame_cache *cache)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  /* The `endbr64` instruction.  */
+  static const gdb_byte endbr64[4] = { 0xf3, 0x0f, 0x1e, 0xfa };
   /* There are two variations of movq %rsp, %rbp.  */
   static const gdb_byte mov_rsp_rbp_1[3] = { 0x48, 0x89, 0xe5 };
   static const gdb_byte mov_rsp_rbp_2[3] = { 0x48, 0x8b, 0xec };
@@ -2391,6 +2396,20 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
     pc = amd64_analyze_stack_align (pc, current_pc, cache);
 
   op = read_code_unsigned_integer (pc, 1, byte_order);
+
+  /* Check for the `endbr64` instruction, skip it if found.  */
+  if (op == endbr64[0])
+    {
+      read_code (pc + 1, buf, 3);
+
+      if (memcmp (buf, &endbr64[1], 3) == 0)
+	pc += 4;
+
+      op = read_code_unsigned_integer (pc, 1, byte_order);
+    }
+
+  if (current_pc <= pc)
+    return current_pc;
 
   if (op == 0x55)		/* pushq %rbp */
     {

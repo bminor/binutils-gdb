@@ -1,3 +1,8 @@
+2020-05-06  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.arch/amd64-prologue-skip-cf-protection.exp: New file.
+	* gdb.arch/amd64-prologue-skip-cf-protection.c: New file.
+
 2020-05-06  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.reverse/consecutive-precsave.exp: Handle if instruction after

@@ -7019,6 +7019,17 @@ gdb_caching_proc supports_mpx_check_pointer_bounds {
     } executable $flags]
 }
 
+# Return 1 if compiler supports -fcf-protection=.  Otherwise,
+# return 0.
+
+gdb_caching_proc supports_fcf_protection {
+    return [gdb_can_simple_compile supports_fcf_protection {
+	int main () {
+	    return 0;
+	}
+  } executable "additional_flags=-fcf-protection=full"]
+}
+
 # Return 1 if symbols were read in using -readnow.  Otherwise, return 0.
 
 proc readnow { } {
