@@ -824,6 +824,8 @@ enum c_primitive_types {
   c_primitive_type_decfloat,
   c_primitive_type_decdouble,
   c_primitive_type_declong,
+  c_primitive_type_intcap_t,
+  c_primitive_type_uintcap_t,
   nr_c_primitive_types
 };
 
@@ -857,6 +859,8 @@ c_language_arch_info (struct gdbarch *gdbarch,
   lai->primitive_type_vector [c_primitive_type_decfloat] = builtin->builtin_decfloat;
   lai->primitive_type_vector [c_primitive_type_decdouble] = builtin->builtin_decdouble;
   lai->primitive_type_vector [c_primitive_type_declong] = builtin->builtin_declong;
+  lai->primitive_type_vector [c_primitive_type_intcap_t] = builtin->builtin_intcap_t;
+  lai->primitive_type_vector [c_primitive_type_uintcap_t] = builtin->builtin_uintcap_t;
 
   lai->bool_type_default = builtin->builtin_int;
 }
@@ -980,6 +984,8 @@ enum cplus_primitive_types {
   cplus_primitive_type_char16_t,
   cplus_primitive_type_char32_t,
   cplus_primitive_type_wchar_t,
+  cplus_primitive_type_intcap_t,
+  cplus_primitive_type_uintcap_t,
   nr_cplus_primitive_types
 };
 
@@ -1077,6 +1083,10 @@ public:
       = builtin->builtin_char32;
     lai->primitive_type_vector [cplus_primitive_type_wchar_t]
       = builtin->builtin_wchar;
+    lai->primitive_type_vector [cplus_primitive_type_intcap_t]
+      = builtin->builtin_intcap_t;
+    lai->primitive_type_vector [cplus_primitive_type_uintcap_t]
+      = builtin->builtin_uintcap_t;
 
     lai->bool_type_symbol = "bool";
     lai->bool_type_default = builtin->builtin_bool;

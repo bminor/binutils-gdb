@@ -1,3 +1,8 @@
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
+	* gdb.arch/aarch64-morello-captypes.c: New file.
+	* gdb.arch/aarch64-morello-captypes.exp: New file.
+
 2020-10-20  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/pr13961.S: Remove superfluous end-of-siblings marker.

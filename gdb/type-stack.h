@@ -43,7 +43,8 @@ enum type_pieces
     tp_atomic,
     tp_restrict,
     tp_type_stack,
-    tp_kind
+    tp_kind,
+    tp_capability
   };
 
 /* The stack can contain either an enum type_pieces or an int.  */

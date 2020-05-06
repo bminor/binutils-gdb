@@ -1,5 +1,33 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* gdb/c-exp.y (CAPABILITY, INTCAP_KEYWORD, UINTCAP_KEYWORD): New
+	tokens.
+	Handle new tokens.
+	* gdb/c-lang.c (c_primitive_types) <c_primitive_type_intcap_t>
+	<c_primitive_type_uintcap_t>: New fields.
+	(c_language_arch_info): Handle intcap/uintcap.
+	(cplus_primitive_types) <cplus_primitive_type_intcap_t>
+	<cplus_primitive_type_uintcap_t>: New fields.
+	(cplus_language::language_arch_info): Handle intcap/uintcap.
+	* gdb/c-typeprint.c (c_type_print_modifier): Handle the __capability
+	modifier.
+	* gdb/gdbtypes.c (make_capability_type): New function.
+	(make_unqualified_type): Handle capabilities.
+	(recursive_dump_type): Likewise.
+	(gdbtypes_post_init): Initialize capability builtins.
+	* gdb/gdbtypes.h (TYPE_INSTANCE_FLAG_CAPABILITY): New flag.
+	(TYPE_CAPABILITY): New define.
+	(struct type) <m_instance_flags>: New field.
+	(struct builtin_type) <builtin_intcap_t, builtin_uintcap_t>: New
+	fields.
+	(make_capability_type): New prototype.
+	* gdb/type-stack.c (type_stack::insert)
+	(type_stack::follow_type_instance_flags)
+	(type_stack::follow_types): Handle capability modifier.
+	* gdb/type-stack.h (enum type_pieces) <tp_capability>: New field.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* gdbtypes.h (enum type_code) <TYPE_CODE_CAPABILITY>: New enum.
 	(struct builtin_type) <builtin_data_addr_capability>
 	<builtin_code_addr_capability>: New fields.
