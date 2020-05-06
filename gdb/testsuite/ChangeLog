@@ -1,3 +1,7 @@
+2020-05-06  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.compile/compile-ifunc.exp: Use -Wno-attribute-alias.
+
 2020-05-04  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/async.exp: Check whether instruction addresses are a
