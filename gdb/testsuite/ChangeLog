@@ -1,5 +1,10 @@
 2020-05-06  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/shlib-call.exp: Add extra step to reach shmain.c:42, if
+	necessary.
+
+2020-05-06  Tom de Vries  <tdevries@suse.de>
+
 	* lib/unbuffer_output.c (gdb_unbuffer_output): Change return type to
 	void.
 
