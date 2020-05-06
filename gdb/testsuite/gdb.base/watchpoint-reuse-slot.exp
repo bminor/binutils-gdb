@@ -73,7 +73,7 @@ proc stepi {} {
 	    } else {
 		fail $test
 	    }
-	    set cur_addr addr
+	    set cur_addr $addr
 	}
     }
 }

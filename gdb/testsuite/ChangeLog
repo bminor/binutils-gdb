@@ -1,5 +1,9 @@
 2020-05-06  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/watchpoint-reuse-slot.exp: Fix incorrect assignment.
+
+2020-05-06  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/store.exp (check_set, up_set): Allowing missing location
 	info for r.
 
