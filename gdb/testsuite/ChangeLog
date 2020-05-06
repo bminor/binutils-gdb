@@ -1,5 +1,11 @@
 2020-05-06  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.reverse/consecutive-precsave.exp: Handle if instruction after
+	breakpoint is at a "recommended breakpoint location".
+	* gdb.reverse/consecutive-reverse.exp: Same.
+
+2020-05-06  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/watchpoint-reuse-slot.exp (stepi): Print $pc to get current
 	address.
 
