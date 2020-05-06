@@ -1,3 +1,10 @@
+2020-05-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 25927
+	* doc/as.texi (Preprocessing): Replace cross reference to not
+	existant document with a URL to the equivalent page in the GCC
+	manual.
+
 2020-05-05  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2dbg.c (out_dir_and_file_list): Add comments describing the
