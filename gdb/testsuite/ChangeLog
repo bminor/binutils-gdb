@@ -1,5 +1,13 @@
 2020-05-06  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (is_stmt_addresses, hex_in_list): New proc, factored out
+	of ...
+	* gdb.base/async.exp: ... here.
+	* gdb.base/consecutive.exp: Handle if 2nd breakpoint is at a
+	"recommended breakpoint location".
+
+2020-05-06  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.compile/compile-ifunc.exp: Use -Wno-attribute-alias.
 
 2020-05-04  Tom de Vries  <tdevries@suse.de>

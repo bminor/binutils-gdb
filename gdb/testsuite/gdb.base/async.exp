@@ -79,16 +79,7 @@ test_background "step&" "" ".*y = foo \\(\\).*" "step& #1"
 
 test_background "step&" "" " foo \\(\\) at .*async.c.*x = 5.*" "step& #2"
 
-set is_stmt [list]
-gdb_test_multiple "maint info line-table async.c" "" {
-    -re "\r\n$decimal\[ \t\]+$decimal\[ \t\]+($hex)\[ \t\]+Y\[^\r\n\]*" {
-	lappend is_stmt $expect_out(1,string)
-	exp_continue
-    }
-    -re -wrap "" {
-	pass $gdb_test_name
-    }
-}
+set is_stmt [is_stmt_addresses $srcfile]
 
 # Get the next instruction address.
 set next_insn_addr ""
@@ -99,8 +90,7 @@ gdb_test_multiple {x/2i $pc} "$test" {
 	pass "$test"
     }
 }
-set next_insn_is_stmt \
-    [expr [lsearch -regexp $is_stmt 0x0*$next_insn_addr] != -1]
+set next_insn_is_stmt [hex_in_list $next_insn_addr $is_stmt]
 
 if { $next_insn_is_stmt } {
     set prefix ""
