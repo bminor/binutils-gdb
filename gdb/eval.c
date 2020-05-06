@@ -1260,6 +1260,67 @@ is_integral_or_integral_reference (struct type *type)
 	  && is_integral_type (TYPE_TARGET_TYPE (type)));
 }
 
+/* Called from evaluate_subexp_standard to perform array indexing, and
+   sub-range extraction, for Fortran.  As well as arrays this function
+   also handles strings as they can be treated like arrays of characters.
+   ARRAY is the array or string being accessed.  EXP, POS, and NOSIDE are
+   as for evaluate_subexp_standard, and NARGS is the number of arguments
+   in this access (e.g. 'array (1,2,3)' would be NARGS 3).  */
+
+static struct value *
+fortran_value_subarray (struct value *array, struct expression *exp,
+			int *pos, int nargs, enum noside noside)
+{
+  if (exp->elts[*pos].opcode == OP_RANGE)
+    return value_f90_subarray (array, exp, pos, noside);
+
+  if (noside == EVAL_SKIP)
+    {
+      skip_undetermined_arglist (nargs, exp, pos, noside);
+      /* Return the dummy value with the correct type.  */
+      return array;
+    }
+
+  LONGEST subscript_array[MAX_FORTRAN_DIMS];
+  int ndimensions = 1;
+  struct type *type = check_typedef (value_type (array));
+
+  if (nargs > MAX_FORTRAN_DIMS)
+    error (_("Too many subscripts for F77 (%d Max)"), MAX_FORTRAN_DIMS);
+
+  ndimensions = calc_f77_array_dims (type);
+
+  if (nargs != ndimensions)
+    error (_("Wrong number of subscripts"));
+
+  gdb_assert (nargs > 0);
+
+  /* Now that we know we have a legal array subscript expression let us
+     actually find out where this element exists in the array.  */
+
+  /* Take array indices left to right.  */
+  for (int i = 0; i < nargs; i++)
+    {
+      /* Evaluate each subscript; it must be a legal integer in F77.  */
+      value *arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
+
+      /* Fill in the subscript array.  */
+      subscript_array[i] = value_as_long (arg2);
+    }
+
+  /* Internal type of array is arranged right to left.  */
+  for (int i = nargs; i > 0; i--)
+    {
+      struct type *array_type = check_typedef (value_type (array));
+      LONGEST index = subscript_array[i - 1];
+
+      array = value_subscripted_rvalue (array, index,
+					f77_get_lowerbound (array_type));
+    }
+
+  return array;
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1953,33 +2014,8 @@ evaluate_subexp_standard (struct type *expect_type,
       switch (code)
 	{
 	case TYPE_CODE_ARRAY:
-	  if (exp->elts[*pos].opcode == OP_RANGE)
-	    return value_f90_subarray (arg1, exp, pos, noside);
-	  else
-	    {
-	      if (noside == EVAL_SKIP)
-		{
-		  skip_undetermined_arglist (nargs, exp, pos, noside);
-		  /* Return the dummy value with the correct type.  */
-		  return arg1;
-		}
-	      goto multi_f77_subscript;
-	    }
-
 	case TYPE_CODE_STRING:
-	  if (exp->elts[*pos].opcode == OP_RANGE)
-	    return value_f90_subarray (arg1, exp, pos, noside);
-	  else
-	    {
-	      if (noside == EVAL_SKIP)
-		{
-		  skip_undetermined_arglist (nargs, exp, pos, noside);
-		  /* Return the dummy value with the correct type.  */
-		  return arg1;
-		}
-	      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-	      return value_subscript (arg1, value_as_long (arg2));
-	    }
+	  return fortran_value_subarray (arg1, exp, pos, nargs, noside);
 
 	case TYPE_CODE_PTR:
 	case TYPE_CODE_FUNC:
@@ -2399,49 +2435,6 @@ evaluate_subexp_standard (struct type *expect_type,
 	    }
 	}
       return (arg1);
-
-    multi_f77_subscript:
-      {
-	LONGEST subscript_array[MAX_FORTRAN_DIMS];
-	int ndimensions = 1, i;
-	struct value *array = arg1;
-
-	if (nargs > MAX_FORTRAN_DIMS)
-	  error (_("Too many subscripts for F77 (%d Max)"), MAX_FORTRAN_DIMS);
-
-	ndimensions = calc_f77_array_dims (type);
-
-	if (nargs != ndimensions)
-	  error (_("Wrong number of subscripts"));
-
-	gdb_assert (nargs > 0);
-
-	/* Now that we know we have a legal array subscript expression 
-	   let us actually find out where this element exists in the array.  */
-
-	/* Take array indices left to right.  */
-	for (i = 0; i < nargs; i++)
-	  {
-	    /* Evaluate each subscript; it must be a legal integer in F77.  */
-	    arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-
-	    /* Fill in the subscript array.  */
-
-	    subscript_array[i] = value_as_long (arg2);
-	  }
-
-	/* Internal type of array is arranged right to left.  */
-	for (i = nargs; i > 0; i--)
-	  {
-	    struct type *array_type = check_typedef (value_type (array));
-	    LONGEST index = subscript_array[i - 1];
-
-	    array = value_subscripted_rvalue (array, index,
-					      f77_get_lowerbound (array_type));
-	  }
-
-	return array;
-      }
 
     case BINOP_LOGICAL_AND:
       arg1 = evaluate_subexp (nullptr, exp, pos, noside);
@@ -3354,11 +3347,16 @@ parse_and_eval_type (char *p, int length)
   return expr->elts[1].type;
 }
 
+/* Return the number of dimensions for a Fortran array or string.  */
+
 int
 calc_f77_array_dims (struct type *array_type)
 {
   int ndimen = 1;
   struct type *tmp_type;
+
+  if ((array_type->code () == TYPE_CODE_STRING))
+    return 1;
 
   if ((array_type->code () != TYPE_CODE_ARRAY))
     error (_("Can't get dimensions for a non-array type"));
