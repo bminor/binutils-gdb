@@ -1,5 +1,10 @@
 2020-05-07  Simon Marchi  <simon.marchi@efficios.com>
 
+	* async-event.c (struct async_signal_handler, struct
+	async_event_handler): Reformat, remove typedef.
+
+2020-05-07  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (TYPE_DYN_PROP_LIST): Remove.  Update all users
 	access thistype->main_type->dyn_prop_list directly.
 
