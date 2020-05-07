@@ -1463,8 +1463,6 @@ extern bool set_type_align (struct type *, ULONGEST);
   ((thistype)->dyn_prop (DYN_PROP_ASSOCIATED))
 
 /* Attribute accessors for dynamic properties.  */
-#define TYPE_DYN_PROP_LIST(thistype) \
-  TYPE_MAIN_TYPE(thistype)->dyn_prop_list
 #define TYPE_DYN_PROP_BATON(dynprop) \
   dynprop->data.baton
 #define TYPE_DYN_PROP_ADDR(dynprop) \

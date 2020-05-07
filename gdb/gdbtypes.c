@@ -2654,7 +2654,7 @@ resolve_dynamic_type (struct type *type,
 dynamic_prop *
 type::dyn_prop (dynamic_prop_node_kind prop_kind) const
 {
-  dynamic_prop_list *node = TYPE_DYN_PROP_LIST (this);
+  dynamic_prop_list *node = this->main_type->dyn_prop_list;
 
   while (node != NULL)
     {
@@ -2678,9 +2678,9 @@ type::add_dyn_prop (dynamic_prop_node_kind prop_kind, dynamic_prop prop)
 		 struct dynamic_prop_list);
   temp->prop_kind = prop_kind;
   temp->prop = prop;
-  temp->next = TYPE_DYN_PROP_LIST (this);
+  temp->next = this->main_type->dyn_prop_list;
 
-  TYPE_DYN_PROP_LIST (this) = temp;
+  this->main_type->dyn_prop_list = temp;
 }
 
 /* See gdbtypes.h.  */
@@ -2690,7 +2690,7 @@ type::remove_dyn_prop (dynamic_prop_node_kind kind)
 {
   struct dynamic_prop_list *prev_node, *curr_node;
 
-  curr_node = TYPE_DYN_PROP_LIST (this);
+  curr_node = this->main_type->dyn_prop_list;
   prev_node = NULL;
 
   while (NULL != curr_node)
@@ -2702,7 +2702,7 @@ type::remove_dyn_prop (dynamic_prop_node_kind kind)
 	     if we are on top of it.  Nevertheless, everything is released
 	     when the complete objstack is freed.  */
 	  if (NULL == prev_node)
-	    TYPE_DYN_PROP_LIST (this) = curr_node->next;
+	    this->main_type->dyn_prop_list = curr_node->next;
 	  else
 	    prev_node->next = curr_node->next;
 
@@ -5350,10 +5350,10 @@ copy_type_recursive (struct objfile *objfile,
       *TYPE_RANGE_DATA (new_type) = *TYPE_RANGE_DATA (type);
     }
 
-  if (TYPE_DYN_PROP_LIST (type) != NULL)
-    TYPE_DYN_PROP_LIST (new_type)
+  if (type->main_type->dyn_prop_list != NULL)
+    new_type->main_type->dyn_prop_list
       = copy_dynamic_prop_list (&objfile->objfile_obstack,
-				TYPE_DYN_PROP_LIST (type));
+				type->main_type->dyn_prop_list);
 
 
   /* Copy pointers to other types.  */
@@ -5418,10 +5418,10 @@ copy_type (const struct type *type)
   TYPE_LENGTH (new_type) = TYPE_LENGTH (type);
   memcpy (TYPE_MAIN_TYPE (new_type), TYPE_MAIN_TYPE (type),
 	  sizeof (struct main_type));
-  if (TYPE_DYN_PROP_LIST (type) != NULL)
-    TYPE_DYN_PROP_LIST (new_type)
+  if (type->main_type->dyn_prop_list != NULL)
+    new_type->main_type->dyn_prop_list
       = copy_dynamic_prop_list (&TYPE_OBJFILE (type) -> objfile_obstack,
-				TYPE_DYN_PROP_LIST (type));
+				type->main_type->dyn_prop_list);
 
   return new_type;
 }

@@ -1,5 +1,10 @@
 2020-05-07  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_DYN_PROP_LIST): Remove.  Update all users
+	access thistype->main_type->dyn_prop_list directly.
+
+2020-05-07  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (struct type) <remove_dyn_prop>: New method.
 	(remove_dyn_prop): Remove.  Update all users to use
 	type::remove_dyn_prop.
