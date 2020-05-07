@@ -1188,7 +1188,7 @@ update_static_array_size (struct type *type)
 
   struct type *range_type = TYPE_INDEX_TYPE (type);
 
-  if (get_dyn_prop (DYN_PROP_BYTE_STRIDE, type) == nullptr
+  if (type->dyn_prop (DYN_PROP_BYTE_STRIDE) == nullptr
       && has_static_range (TYPE_RANGE_DATA (range_type))
       && (!type_not_associated (type)
 	  && !type_not_allocated (type)))
@@ -1957,7 +1957,7 @@ stub_noname_complaint (void)
 static int
 array_type_has_dynamic_stride (struct type *type)
 {
-  struct dynamic_prop *prop = get_dyn_prop (DYN_PROP_BYTE_STRIDE, type);
+  struct dynamic_prop *prop = type->dyn_prop (DYN_PROP_BYTE_STRIDE);
 
   return (prop != NULL && prop->kind != PROP_CONST);
 }
@@ -1990,7 +1990,7 @@ is_dynamic_type_internal (struct type *type, int top_level)
   if (TYPE_ALLOCATED_PROP (type))
     return 1;
 
-  struct dynamic_prop *prop = get_dyn_prop (DYN_PROP_VARIANT_PARTS, type);
+  struct dynamic_prop *prop = type->dyn_prop (DYN_PROP_VARIANT_PARTS);
   if (prop != nullptr && prop->kind != PROP_TYPE)
     return 1;
 
@@ -2199,7 +2199,7 @@ resolve_dynamic_array_or_string (struct type *type,
   else
     elt_type = TYPE_TARGET_TYPE (type);
 
-  prop = get_dyn_prop (DYN_PROP_BYTE_STRIDE, type);
+  prop = type->dyn_prop (DYN_PROP_BYTE_STRIDE);
   if (prop != NULL)
     {
       if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
@@ -2436,8 +2436,7 @@ resolve_dynamic_struct (struct type *type,
 
   resolved_type = copy_type (type);
 
-  struct dynamic_prop *variant_prop = get_dyn_prop (DYN_PROP_VARIANT_PARTS,
-						    resolved_type);
+  dynamic_prop *variant_prop = resolved_type->dyn_prop (DYN_PROP_VARIANT_PARTS);
   if (variant_prop != nullptr && variant_prop->kind == PROP_VARIANT_PARTS)
     {
       compute_variant_fields (type, resolved_type, addr_stack,
@@ -2652,10 +2651,10 @@ resolve_dynamic_type (struct type *type,
 
 /* See gdbtypes.h  */
 
-struct dynamic_prop *
-get_dyn_prop (enum dynamic_prop_node_kind prop_kind, const struct type *type)
+dynamic_prop *
+type::dyn_prop (dynamic_prop_node_kind prop_kind) const
 {
-  struct dynamic_prop_list *node = TYPE_DYN_PROP_LIST (type);
+  dynamic_prop_list *node = TYPE_DYN_PROP_LIST (this);
 
   while (node != NULL)
     {

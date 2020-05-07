@@ -2812,7 +2812,7 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
     = create_static_range_type (NULL, base_index_type, low, high);
   struct type *slice_type = create_array_type_with_stride
 			      (NULL, TYPE_TARGET_TYPE (type0), index_type,
-			       get_dyn_prop (DYN_PROP_BYTE_STRIDE, type0),
+			       type0->dyn_prop (DYN_PROP_BYTE_STRIDE),
 			       TYPE_FIELD_BITSIZE (type0, 0));
   int base_low =  ada_discrete_type_low_bound (TYPE_INDEX_TYPE (type0));
   LONGEST base_low_pos, low_pos;
@@ -2842,7 +2842,7 @@ ada_value_slice (struct value *array, int low, int high)
     = create_static_range_type (NULL, TYPE_INDEX_TYPE (type), low, high);
   struct type *slice_type = create_array_type_with_stride
 			      (NULL, TYPE_TARGET_TYPE (type), index_type,
-			       get_dyn_prop (DYN_PROP_BYTE_STRIDE, type),
+			       type->dyn_prop (DYN_PROP_BYTE_STRIDE),
 			       TYPE_FIELD_BITSIZE (type, 0));
   LONGEST low_pos, high_pos;
 

@@ -708,8 +708,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
       if (is_enum)
 	{
 	  fputs_filtered ("enum ", stream);
-	  struct dynamic_prop *prop = get_dyn_prop (DYN_PROP_VARIANT_PARTS,
-						    type);
+	  dynamic_prop *prop = type->dyn_prop (DYN_PROP_VARIANT_PARTS);
 	  if (prop != nullptr && prop->kind == PROP_TYPE)
 	    type = prop->data.original_type;
 	}
