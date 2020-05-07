@@ -168,14 +168,6 @@ OP (OP_FUNCALL)
    pointer.  This is an Objective C message.  */
 OP (OP_OBJC_MSGCALL)
 
-/* This is EXACTLY like OP_FUNCALL but is semantically different.
-   In F77, array subscript expressions, substring expressions and
-   function calls are all exactly the same syntactically.  They
-   may only be disambiguated at runtime.  Thus this operator,
-   which indicates that we have found something of the form
-   <name> ( <stuff> ).  */
-OP (OP_F77_UNDETERMINED_ARGLIST)
-
 /* OP_COMPLEX takes a type in the following element, followed by another
    OP_COMPLEX, making three exp_elements.  It is followed by two double
    args, and converts them into a complex number of the given type.  */

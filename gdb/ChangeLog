@@ -1,5 +1,42 @@
 2020-09-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* eval.c: Remove 'f-lang.h' include.
+	(value_f90_subarray): Moved to f-lang.c.
+	(eval_call): Renamed to...
+	(evaluate_subexp_do_call): ...this, is no longer static, header
+	comment moved into header file.
+	(evaluate_funcall): Update call to eval_call.
+	(skip_undetermined_arglist): Moved to f-lang.c.
+	(fortran_value_subarray): Likewise.
+	(evaluate_subexp_standard): OP_F77_UNDETERMINED_ARGLIST handling
+	moved to evaluate_subexp_f.
+	(calc_f77_array_dims): Moved to f-lang.c
+	* expprint.c (print_subexp_funcall): New function.
+	(print_subexp_standard): OP_F77_UNDETERMINED_ARGLIST handling
+	moved to print_subexp_f, OP_FUNCALL uses new function.
+	(dump_subexp_body_funcall): New function.
+	(dump_subexp_body_standard): OP_F77_UNDETERMINED_ARGLIST handling
+	moved to dump_subexp_f, OP_FUNCALL uses new function.
+	* expression.h (evaluate_subexp_do_call): Declare.
+	* f-lang.c (value_f90_subarray): Moved from eval.c.
+	(skip_undetermined_arglist): Likewise.
+	(calc_f77_array_dims): Likewise.
+	(fortran_value_subarray): Likewise.
+	(evaluate_subexp_f): Add OP_F77_UNDETERMINED_ARGLIST support.
+	(operator_length_f): Likewise.
+	(print_subexp_f): Likewise.
+	(dump_subexp_body_f): Likewise.
+	* fortran-operator.def (OP_F77_UNDETERMINED_ARGLIST): Move
+	declaration of this operation to here.
+	* parse.c (operator_length_standard): OP_F77_UNDETERMINED_ARGLIST
+	support moved to operator_length_f.
+	* parser-defs.h (dump_subexp_body_funcall): Declare.
+	(print_subexp_funcall): Declare.
+	* std-operator.def (OP_F77_UNDETERMINED_ARGLIST): Moved to
+	fortran-operator.def.
+
+2020-09-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* eval.c (fortran_value_subarray): New function, content is taken
 	from...
 	(evaluate_subexp_standard): ...here, in two places.  Now arrays

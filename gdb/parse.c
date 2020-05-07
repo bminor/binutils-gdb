@@ -817,7 +817,6 @@ operator_length_standard (const struct expression *expr, int endpos,
       break;
 
     case OP_FUNCALL:
-    case OP_F77_UNDETERMINED_ARGLIST:
       oplen = 3;
       args = 1 + longest_to_int (expr->elts[endpos - 2].longconst);
       break;

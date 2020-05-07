@@ -26,7 +26,6 @@
 #include "frame.h"
 #include "gdbthread.h"
 #include "language.h"		/* For CAST_IS_CONVERSION.  */
-#include "f-lang.h"		/* For array bound stuff.  */
 #include "cp-abi.h"
 #include "infcall.h"
 #include "objc-lang.h"
@@ -370,32 +369,6 @@ init_array_element (struct value *array, struct value *element,
     }
   return index;
 }
-
-static struct value *
-value_f90_subarray (struct value *array,
-		    struct expression *exp, int *pos, enum noside noside)
-{
-  int pc = (*pos) + 1;
-  LONGEST low_bound, high_bound;
-  struct type *range = check_typedef (value_type (array)->index_type ());
-  enum range_type range_type
-    = (enum range_type) longest_to_int (exp->elts[pc].longconst);
- 
-  *pos += 3;
-
-  if (range_type == LOW_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
-    low_bound = range->bounds ()->low.const_val ();
-  else
-    low_bound = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
-
-  if (range_type == HIGH_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
-    high_bound = range->bounds ()->high.const_val ();
-  else
-    high_bound = value_as_long (evaluate_subexp (nullptr, exp, pos, noside));
-
-  return value_slice (array, low_bound, high_bound - low_bound + 1);
-}
-
 
 /* Promote value ARG1 as appropriate before performing a unary operation
    on this argument.
@@ -749,17 +722,13 @@ eval_skip_value (expression *exp)
   return value_from_longest (builtin_type (exp->gdbarch)->builtin_int, 1);
 }
 
-/* Evaluate a function call.  The function to be called is in
-   ARGVEC[0] and the arguments passed to the function are in
-   ARGVEC[1..NARGS].  FUNCTION_NAME is the name of the function, if
-   known.  DEFAULT_RETURN_TYPE is used as the function's return type
-   if the return type is unknown.  */
+/* See expression.h.  */
 
-static value *
-eval_call (expression *exp, enum noside noside,
-	   int nargs, value **argvec,
-	   const char *function_name,
-	   type *default_return_type)
+value *
+evaluate_subexp_do_call (expression *exp, enum noside noside,
+			 int nargs, value **argvec,
+			 const char *function_name,
+			 type *default_return_type)
 {
   if (argvec[0] == NULL)
     error (_("Cannot evaluate function -- may be inlined"));
@@ -1230,20 +1199,8 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
       /* Nothing to be done; argvec already correctly set up.  */
     }
 
-  return eval_call (exp, noside, nargs, argvec, var_func_name, expect_type);
-}
-
-/* Helper for skipping all the arguments in an undetermined argument list.
-   This function was designed for use in the OP_F77_UNDETERMINED_ARGLIST
-   case of evaluate_subexp_standard as multiple, but not all, code paths
-   require a generic skip.  */
-
-static void
-skip_undetermined_arglist (int nargs, struct expression *exp, int *pos,
-			   enum noside noside)
-{
-  for (int i = 0; i < nargs; ++i)
-    evaluate_subexp (nullptr, exp, pos, noside);
+  return evaluate_subexp_do_call (exp, noside, nargs, argvec,
+				  var_func_name, expect_type);
 }
 
 /* Return true if type is integral or reference to integral */
@@ -1260,67 +1217,6 @@ is_integral_or_integral_reference (struct type *type)
 	  && is_integral_type (TYPE_TARGET_TYPE (type)));
 }
 
-/* Called from evaluate_subexp_standard to perform array indexing, and
-   sub-range extraction, for Fortran.  As well as arrays this function
-   also handles strings as they can be treated like arrays of characters.
-   ARRAY is the array or string being accessed.  EXP, POS, and NOSIDE are
-   as for evaluate_subexp_standard, and NARGS is the number of arguments
-   in this access (e.g. 'array (1,2,3)' would be NARGS 3).  */
-
-static struct value *
-fortran_value_subarray (struct value *array, struct expression *exp,
-			int *pos, int nargs, enum noside noside)
-{
-  if (exp->elts[*pos].opcode == OP_RANGE)
-    return value_f90_subarray (array, exp, pos, noside);
-
-  if (noside == EVAL_SKIP)
-    {
-      skip_undetermined_arglist (nargs, exp, pos, noside);
-      /* Return the dummy value with the correct type.  */
-      return array;
-    }
-
-  LONGEST subscript_array[MAX_FORTRAN_DIMS];
-  int ndimensions = 1;
-  struct type *type = check_typedef (value_type (array));
-
-  if (nargs > MAX_FORTRAN_DIMS)
-    error (_("Too many subscripts for F77 (%d Max)"), MAX_FORTRAN_DIMS);
-
-  ndimensions = calc_f77_array_dims (type);
-
-  if (nargs != ndimensions)
-    error (_("Wrong number of subscripts"));
-
-  gdb_assert (nargs > 0);
-
-  /* Now that we know we have a legal array subscript expression let us
-     actually find out where this element exists in the array.  */
-
-  /* Take array indices left to right.  */
-  for (int i = 0; i < nargs; i++)
-    {
-      /* Evaluate each subscript; it must be a legal integer in F77.  */
-      value *arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
-
-      /* Fill in the subscript array.  */
-      subscript_array[i] = value_as_long (arg2);
-    }
-
-  /* Internal type of array is arranged right to left.  */
-  for (int i = nargs; i > 0; i--)
-    {
-      struct type *array_type = check_typedef (value_type (array));
-      LONGEST index = subscript_array[i - 1];
-
-      array = value_subscripted_rvalue (array, index,
-					f77_get_lowerbound (array_type));
-    }
-
-  return array;
-}
-
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1335,7 +1231,6 @@ evaluate_subexp_standard (struct type *expect_type,
   struct type *type;
   int nargs;
   struct value **argvec;
-  int code;
   int ix;
   long mem_offset;
   struct type **arg_types;
@@ -1975,84 +1870,6 @@ evaluate_subexp_standard (struct type *expect_type,
 
     case OP_FUNCALL:
       return evaluate_funcall (expect_type, exp, pos, noside);
-
-    case OP_F77_UNDETERMINED_ARGLIST:
-
-      /* Remember that in F77, functions, substring ops and 
-         array subscript operations cannot be disambiguated 
-         at parse time.  We have made all array subscript operations, 
-         substring operations as well as function calls  come here 
-         and we now have to discover what the heck this thing actually was.
-         If it is a function, we process just as if we got an OP_FUNCALL.  */
-
-      nargs = longest_to_int (exp->elts[pc + 1].longconst);
-      (*pos) += 2;
-
-      /* First determine the type code we are dealing with.  */
-      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
-      type = check_typedef (value_type (arg1));
-      code = type->code ();
-
-      if (code == TYPE_CODE_PTR)
-	{
-	  /* Fortran always passes variable to subroutines as pointer.
-	     So we need to look into its target type to see if it is
-	     array, string or function.  If it is, we need to switch
-	     to the target value the original one points to.  */ 
-	  struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
-
-	  if (target_type->code () == TYPE_CODE_ARRAY
-	      || target_type->code () == TYPE_CODE_STRING
-	      || target_type->code () == TYPE_CODE_FUNC)
-	    {
-	      arg1 = value_ind (arg1);
-	      type = check_typedef (value_type (arg1));
-	      code = type->code ();
-	    }
-	} 
-
-      switch (code)
-	{
-	case TYPE_CODE_ARRAY:
-	case TYPE_CODE_STRING:
-	  return fortran_value_subarray (arg1, exp, pos, nargs, noside);
-
-	case TYPE_CODE_PTR:
-	case TYPE_CODE_FUNC:
-	case TYPE_CODE_INTERNAL_FUNCTION:
-	  /* It's a function call.  */
-	  /* Allocate arg vector, including space for the function to be
-	     called in argvec[0] and a terminating NULL.  */
-	  argvec = (struct value **)
-	    alloca (sizeof (struct value *) * (nargs + 2));
-	  argvec[0] = arg1;
-	  tem = 1;
-	  for (; tem <= nargs; tem++)
-	    {
-	      argvec[tem] = evaluate_subexp_with_coercion (exp, pos, noside);
-	      /* Arguments in Fortran are passed by address.  Coerce the
-		 arguments here rather than in value_arg_coerce as otherwise
-		 the call to malloc to place the non-lvalue parameters in
-		 target memory is hit by this Fortran specific logic.  This
-		 results in malloc being called with a pointer to an integer
-		 followed by an attempt to malloc the arguments to malloc in
-		 target memory.  Infinite recursion ensues.  */
-	      if (code == TYPE_CODE_PTR || code == TYPE_CODE_FUNC)
-		{
-		  bool is_artificial
-		    = TYPE_FIELD_ARTIFICIAL (value_type (arg1), tem - 1);
-		  argvec[tem] = fortran_argument_convert (argvec[tem],
-							  is_artificial);
-		}
-	    }
-	  argvec[tem] = 0;	/* signal end of arglist */
-	  if (noside == EVAL_SKIP)
-	    return eval_skip_value (exp);
-	  return eval_call (exp, noside, nargs, argvec, NULL, expect_type);
-
-	default:
-	  error (_("Cannot perform substring on this type"));
-	}
 
     case OP_COMPLEX:
       /* We have a complex number, There should be 2 floating 
@@ -3345,28 +3162,4 @@ parse_and_eval_type (char *p, int length)
   if (expr->elts[0].opcode != UNOP_CAST)
     error (_("Internal error in eval_type."));
   return expr->elts[1].type;
-}
-
-/* Return the number of dimensions for a Fortran array or string.  */
-
-int
-calc_f77_array_dims (struct type *array_type)
-{
-  int ndimen = 1;
-  struct type *tmp_type;
-
-  if ((array_type->code () == TYPE_CODE_STRING))
-    return 1;
-
-  if ((array_type->code () != TYPE_CODE_ARRAY))
-    error (_("Can't get dimensions for a non-array type"));
-
-  tmp_type = array_type;
-
-  while ((tmp_type = TYPE_TARGET_TYPE (tmp_type)))
-    {
-      if (tmp_type->code () == TYPE_CODE_ARRAY)
-	++ndimen;
-    }
-  return ndimen;
 }
