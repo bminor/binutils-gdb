@@ -1,3 +1,11 @@
+2020-05-07  Simon Marchi via Gdb-patches  <gdb-patches@sourceware.org>
+
+	* gdbtypes.h (struct type) <add_dyn_prop>: New method.
+	(add_dyn_prop): Remove.  Update all users to use
+	type::add_dyn_prop.
+	* gdbtypes.c (add_dyn_prop): Rename to...
+	(type::add_dyn_prop): ... this.
+
 2020-05-07  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbtypes.h (struct type) <get_dyn_prop>: New method.

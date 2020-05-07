@@ -1286,7 +1286,7 @@ create_array_type_with_stride (struct type *result_type,
     (struct field *) TYPE_ZALLOC (result_type, sizeof (struct field));
   TYPE_INDEX_TYPE (result_type) = range_type;
   if (byte_stride_prop != NULL)
-    add_dyn_prop (DYN_PROP_BYTE_STRIDE, *byte_stride_prop, result_type);
+    result_type->add_dyn_prop (DYN_PROP_BYTE_STRIDE, *byte_stride_prop);
   else if (bit_stride > 0)
     TYPE_FIELD_BITSIZE (result_type, 0) = bit_stride;
 
@@ -2668,20 +2668,19 @@ type::dyn_prop (dynamic_prop_node_kind prop_kind) const
 /* See gdbtypes.h  */
 
 void
-add_dyn_prop (enum dynamic_prop_node_kind prop_kind, struct dynamic_prop prop,
-              struct type *type)
+type::add_dyn_prop (dynamic_prop_node_kind prop_kind, dynamic_prop prop)
 {
   struct dynamic_prop_list *temp;
 
-  gdb_assert (TYPE_OBJFILE_OWNED (type));
+  gdb_assert (TYPE_OBJFILE_OWNED (this));
 
-  temp = XOBNEW (&TYPE_OBJFILE (type)->objfile_obstack,
+  temp = XOBNEW (&TYPE_OBJFILE (this)->objfile_obstack,
 		 struct dynamic_prop_list);
   temp->prop_kind = prop_kind;
   temp->prop = prop;
-  temp->next = TYPE_DYN_PROP_LIST (type);
+  temp->next = TYPE_DYN_PROP_LIST (this);
 
-  TYPE_DYN_PROP_LIST (type) = temp;
+  TYPE_DYN_PROP_LIST (this) = temp;
 }
 
 /* Remove dynamic property from TYPE in case it exists.  */
