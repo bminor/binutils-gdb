@@ -884,6 +884,9 @@ struct type
      This function assumes that this type is objfile-owned.  */
   void add_dyn_prop (dynamic_prop_node_kind kind, dynamic_prop prop);
 
+  /* * Remove dynamic property of kind KIND from this type, if it exists.  */
+  void remove_dyn_prop (dynamic_prop_node_kind kind);
+
   /* * Type that is a pointer to this type.
      NULL if no such pointer-to type is known yet.
      The debugger may add the address of such a type
@@ -2102,9 +2105,6 @@ extern struct type *resolve_dynamic_type
 
 /* * Predicate if the type has dynamic values, which are not resolved yet.  */
 extern int is_dynamic_type (struct type *type);
-
-extern void remove_dyn_prop (enum dynamic_prop_node_kind prop_kind,
-                             struct type *type);
 
 extern struct type *check_typedef (struct type *);
 

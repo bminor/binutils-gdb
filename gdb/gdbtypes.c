@@ -2204,7 +2204,7 @@ resolve_dynamic_array_or_string (struct type *type,
     {
       if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
 	{
-	  remove_dyn_prop (DYN_PROP_BYTE_STRIDE, type);
+	  type->remove_dyn_prop (DYN_PROP_BYTE_STRIDE);
 	  bit_stride = (unsigned int) (value * 8);
 	}
       else
@@ -2621,7 +2621,7 @@ resolve_dynamic_type_internal (struct type *type,
   if (type_length.has_value ())
     {
       TYPE_LENGTH (resolved_type) = *type_length;
-      remove_dyn_prop (DYN_PROP_BYTE_SIZE, resolved_type);
+      resolved_type->remove_dyn_prop (DYN_PROP_BYTE_SIZE);
     }
 
   /* Resolve data_location attribute.  */
@@ -2683,27 +2683,26 @@ type::add_dyn_prop (dynamic_prop_node_kind prop_kind, dynamic_prop prop)
   TYPE_DYN_PROP_LIST (this) = temp;
 }
 
-/* Remove dynamic property from TYPE in case it exists.  */
+/* See gdbtypes.h.  */
 
 void
-remove_dyn_prop (enum dynamic_prop_node_kind prop_kind,
-                 struct type *type)
+type::remove_dyn_prop (dynamic_prop_node_kind kind)
 {
   struct dynamic_prop_list *prev_node, *curr_node;
 
-  curr_node = TYPE_DYN_PROP_LIST (type);
+  curr_node = TYPE_DYN_PROP_LIST (this);
   prev_node = NULL;
 
   while (NULL != curr_node)
     {
-      if (curr_node->prop_kind == prop_kind)
+      if (curr_node->prop_kind == kind)
 	{
 	  /* Update the linked list but don't free anything.
 	     The property was allocated on objstack and it is not known
 	     if we are on top of it.  Nevertheless, everything is released
 	     when the complete objstack is freed.  */
 	  if (NULL == prev_node)
-	    TYPE_DYN_PROP_LIST (type) = curr_node->next;
+	    TYPE_DYN_PROP_LIST (this) = curr_node->next;
 	  else
 	    prev_node->next = curr_node->next;
 

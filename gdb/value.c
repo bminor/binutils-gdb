@@ -2291,7 +2291,7 @@ set_internalvar (struct internalvar *var, struct value *val)
          when accessing the value.
          If we keep it, we would still refer to the origin value.
          Remove the location property in case it exist.  */
-      remove_dyn_prop (DYN_PROP_DATA_LOCATION, value_type (new_data.value));
+      value_type (new_data.value)->remove_dyn_prop (DYN_PROP_DATA_LOCATION);
 
       break;
     }
