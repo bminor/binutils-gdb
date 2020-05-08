@@ -681,6 +681,8 @@ follow_fork ()
   struct breakpoint *exception_resume_breakpoint = NULL;
   CORE_ADDR step_range_start = 0;
   CORE_ADDR step_range_end = 0;
+  int current_line = 0;
+  symtab *current_symtab = NULL;
   struct frame_id step_frame_id = { 0 };
   struct thread_fsm *thread_fsm = NULL;
 
@@ -734,6 +736,8 @@ follow_fork ()
 					 (tp->control.step_resume_breakpoint);
 	    step_range_start = tp->control.step_range_start;
 	    step_range_end = tp->control.step_range_end;
+	    current_line = tp->current_line;
+	    current_symtab = tp->current_symtab;
 	    step_frame_id = tp->control.step_frame_id;
 	    exception_resume_breakpoint
 	      = clone_momentary_breakpoint (tp->control.exception_resume_breakpoint);
@@ -794,6 +798,8 @@ follow_fork ()
 		      = step_resume_breakpoint;
 		    tp->control.step_range_start = step_range_start;
 		    tp->control.step_range_end = step_range_end;
+		    tp->current_line = current_line;
+		    tp->current_symtab = current_symtab;
 		    tp->control.step_frame_id = step_frame_id;
 		    tp->control.exception_resume_breakpoint
 		      = exception_resume_breakpoint;
