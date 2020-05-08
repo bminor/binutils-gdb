@@ -1838,9 +1838,9 @@ demangle_for_lookup (const char *name, enum language lang,
 
       /* If we were given a non-mangled name, canonicalize it
 	 according to the language (so far only for C++).  */
-      std::string canon = cp_canonicalize_string (name);
-      if (!canon.empty ())
-	return storage.swap_string (canon);
+      gdb::unique_xmalloc_ptr<char> canon = cp_canonicalize_string (name);
+      if (canon != nullptr)
+	return storage.set_malloc_ptr (std::move (canon));
     }
   else if (lang == language_d)
     {
@@ -5349,10 +5349,10 @@ completion_list_add_symbol (completion_tracker &tracker,
       /* The call to canonicalize returns the empty string if the input
 	 string is already in canonical form, thanks to this we don't
 	 remove the symbol we just added above.  */
-      std::string str
+      gdb::unique_xmalloc_ptr<char> str
 	= cp_canonicalize_string_no_typedefs (sym->natural_name ());
-      if (!str.empty ())
-	tracker.remove_completion (str.c_str ());
+      if (str != nullptr)
+	tracker.remove_completion (str.get ());
     }
 }
 

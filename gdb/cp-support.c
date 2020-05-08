@@ -274,12 +274,13 @@ inspect_type (struct demangle_parse_info *info,
 
 		 Canonicalize the name again, and store it in the
 		 current node (RET_COMP).  */
-	      std::string canon = cp_canonicalize_string_no_typedefs (name);
+	      gdb::unique_xmalloc_ptr<char> canon
+		= cp_canonicalize_string_no_typedefs (name);
 
-	      if (!canon.empty ())
+	      if (canon != nullptr)
 		{
 		  /* Copy the canonicalization into the obstack.  */
-		  name = copy_string_to_obstack (&info->obstack, canon.c_str (), &len);
+		  name = copy_string_to_obstack (&info->obstack, canon.get (), &len);
 		}
 
 	      ret_comp->u.s_name.s = name;
@@ -506,16 +507,15 @@ replace_typedefs (struct demangle_parse_info *info,
 
 /* Parse STRING and convert it to canonical form, resolving any
    typedefs.  If parsing fails, or if STRING is already canonical,
-   return the empty string.  Otherwise return the canonical form.  If
+   return nullptr.  Otherwise return the canonical form.  If
    FINDER is not NULL, then type components are passed to FINDER to be
    looked up.  DATA is passed verbatim to FINDER.  */
 
-std::string
+gdb::unique_xmalloc_ptr<char>
 cp_canonicalize_string_full (const char *string,
 			     canonicalization_ftype *finder,
 			     void *data)
 {
-  std::string ret;
   unsigned int estimated_len;
   std::unique_ptr<demangle_parse_info> info;
 
@@ -531,41 +531,42 @@ cp_canonicalize_string_full (const char *string,
 							    estimated_len);
       gdb_assert (us);
 
-      ret = us.get ();
       /* Finally, compare the original string with the computed
 	 name, returning NULL if they are the same.  */
-      if (ret == string)
-	return std::string ();
+      if (strcmp (us.get (), string) == 0)
+	return nullptr;
+
+      return us;
     }
 
-  return ret;
+  return nullptr;
 }
 
 /* Like cp_canonicalize_string_full, but always passes NULL for
    FINDER.  */
 
-std::string
+gdb::unique_xmalloc_ptr<char>
 cp_canonicalize_string_no_typedefs (const char *string)
 {
   return cp_canonicalize_string_full (string, NULL, NULL);
 }
 
 /* Parse STRING and convert it to canonical form.  If parsing fails,
-   or if STRING is already canonical, return the empty string.
+   or if STRING is already canonical, return nullptr.
    Otherwise return the canonical form.  */
 
-std::string
+gdb::unique_xmalloc_ptr<char>
 cp_canonicalize_string (const char *string)
 {
   std::unique_ptr<demangle_parse_info> info;
   unsigned int estimated_len;
 
   if (cp_already_canonical (string))
-    return std::string ();
+    return nullptr;
 
   info = cp_demangled_name_to_comp (string, NULL);
   if (info == NULL)
-    return std::string ();
+    return nullptr;
 
   estimated_len = strlen (string) * 2;
   gdb::unique_xmalloc_ptr<char> us (cp_comp_to_string (info->tree,
@@ -575,15 +576,13 @@ cp_canonicalize_string (const char *string)
     {
       warning (_("internal error: string \"%s\" failed to be canonicalized"),
 	       string);
-      return std::string ();
+      return nullptr;
     }
 
-  std::string ret (us.get ());
+  if (strcmp (us.get (), string) == 0)
+    return nullptr;
 
-  if (ret == string)
-    return std::string ();
-
-  return ret;
+  return us;
 }
 
 /* Convert a mangled name to a demangle_component tree.  *MEMORY is

@@ -84,14 +84,14 @@ print_name_maybe_canonical (const char *name,
 			    const struct type_print_options *flags,
 			    struct ui_file *stream)
 {
-  std::string s;
+  gdb::unique_xmalloc_ptr<char> s;
 
   if (!flags->raw)
     s = cp_canonicalize_string_full (name,
 				     find_typedef_for_canonicalize,
 				     (void *) flags);
 
-  fputs_filtered (!s.empty () ? s.c_str () : name, stream);
+  fputs_filtered (s != nullptr ? s.get () : name, stream);
 }
 
 

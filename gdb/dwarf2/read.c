@@ -21736,13 +21736,11 @@ dwarf2_canonicalize_name (const char *name, struct dwarf2_cu *cu,
 {
   if (name && cu->language == language_cplus)
     {
-      std::string canon_name = cp_canonicalize_string (name);
+      gdb::unique_xmalloc_ptr<char> canon_name
+	= cp_canonicalize_string (name);
 
-      if (!canon_name.empty ())
-	{
-	  if (canon_name != name)
-	    name = objfile->intern (canon_name);
-	}
+      if (canon_name != nullptr)
+	name = objfile->intern (canon_name.get ());
     }
 
   return name;

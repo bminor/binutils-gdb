@@ -2299,20 +2299,18 @@ bool iterate_over_symbols_terminated
 /* Storage type used by demangle_for_lookup.  demangle_for_lookup
    either returns a const char * pointer that points to either of the
    fields of this type, or a pointer to the input NAME.  This is done
-   this way because the underlying functions that demangle_for_lookup
-   calls either return a std::string (e.g., cp_canonicalize_string) or
-   a malloc'ed buffer (libiberty's demangled), and we want to avoid
-   unnecessary reallocation/string copying.  */
+   this way to avoid depending on the precise details of the storage
+   for the string.  */
 class demangle_result_storage
 {
 public:
 
-  /* Swap the std::string storage with STR, and return a pointer to
-     the beginning of the new string.  */
-  const char *swap_string (std::string &str)
+  /* Swap the malloc storage to STR, and return a pointer to the
+     beginning of the new string.  */
+  const char *set_malloc_ptr (gdb::unique_xmalloc_ptr<char> &&str)
   {
-    std::swap (m_string, str);
-    return m_string.c_str ();
+    m_malloc = std::move (str);
+    return m_malloc.get ();
   }
 
   /* Set the malloc storage to now point at PTR.  Any previous malloc
@@ -2326,7 +2324,6 @@ public:
 private:
 
   /* The storage.  */
-  std::string m_string;
   gdb::unique_xmalloc_ptr<char> m_malloc;
 };
 

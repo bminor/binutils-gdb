@@ -738,7 +738,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
   else
     {
     normal:
-      std::string new_name;
+      gdb::unique_xmalloc_ptr<char> new_name;
 
       if (sym->language () == language_cplus)
 	{
@@ -748,8 +748,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  name[p - string] = '\0';
 	  new_name = cp_canonicalize_string (name);
 	}
-      if (!new_name.empty ())
-	sym->compute_and_set_names (new_name, true, objfile->per_bfd);
+      if (new_name != nullptr)
+	sym->compute_and_set_names (new_name.get (), true, objfile->per_bfd);
       else
 	sym->compute_and_set_names (gdb::string_view (string, p - string), true,
 				    objfile->per_bfd);
@@ -1637,10 +1637,10 @@ again:
 	      memcpy (name, *pp, p - *pp);
 	      name[p - *pp] = '\0';
 
-	      std::string new_name = cp_canonicalize_string (name);
-	      if (!new_name.empty ())
+	      gdb::unique_xmalloc_ptr<char> new_name = cp_canonicalize_string (name);
+	      if (new_name != nullptr)
 		type_name = obstack_strdup (&objfile->objfile_obstack,
-					    new_name);
+					    new_name.get ());
 	    }
 	  if (type_name == NULL)
 	    {

@@ -3898,9 +3898,10 @@ find_linespec_symbols (struct linespec_state *state,
 		       std::vector <block_symbol> *symbols,
 		       std::vector<bound_minimal_symbol> *minsyms)
 {
-  std::string canon = cp_canonicalize_string_no_typedefs (lookup_name);
-  if (!canon.empty ())
-    lookup_name = canon.c_str ();
+  gdb::unique_xmalloc_ptr<char> canon
+    = cp_canonicalize_string_no_typedefs (lookup_name);
+  if (canon != nullptr)
+    lookup_name = canon.get ();
 
   /* It's important to not call expand_symtabs_matching unnecessarily
      as it can really slow things down (by unnecessarily expanding

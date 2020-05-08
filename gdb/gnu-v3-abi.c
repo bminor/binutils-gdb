@@ -1090,7 +1090,8 @@ gnuv3_get_typeid (struct value *value)
   struct type *type;
   struct gdbarch *gdbarch;
   struct value *result;
-  std::string type_name, canonical;
+  std::string type_name;
+  gdb::unique_xmalloc_ptr<char> canonical;
 
   /* We have to handle values a bit trickily here, to allow this code
      to work properly with non_lvalue values that are really just
@@ -1118,8 +1119,9 @@ gnuv3_get_typeid (struct value *value)
      uses.  E.g., GDB tends to use "const char *" as a type name, but
      the demangler uses "char const *".  */
   canonical = cp_canonicalize_string (type_name.c_str ());
-  if (!canonical.empty ())
-    type_name = canonical;
+  const char *name = (canonical == nullptr
+		      ? type_name.c_str ()
+		      : canonical.get ());
 
   typeinfo_type = gnuv3_get_typeid_type (gdbarch);
 
@@ -1135,19 +1137,19 @@ gnuv3_get_typeid (struct value *value)
       vtable = gnuv3_get_vtable (gdbarch, type, address);
       if (vtable == NULL)
 	error (_("cannot find typeinfo for object of type '%s'"),
-	       type_name.c_str ());
+	       name);
       typeinfo_value = value_field (vtable, vtable_field_type_info);
       result = value_ind (value_cast (make_pointer_type (typeinfo_type, NULL),
 				      typeinfo_value));
     }
   else
     {
-      std::string sym_name = std::string ("typeinfo for ") + type_name;
+      std::string sym_name = std::string ("typeinfo for ") + name;
       bound_minimal_symbol minsym
 	= lookup_minimal_symbol (sym_name.c_str (), NULL, NULL);
 
       if (minsym.minsym == NULL)
-	error (_("could not find typeinfo symbol for '%s'"), type_name.c_str ());
+	error (_("could not find typeinfo symbol for '%s'"), name);
 
       result = value_at_lazy (typeinfo_type, BMSYMBOL_VALUE_ADDRESS (minsym));
     }

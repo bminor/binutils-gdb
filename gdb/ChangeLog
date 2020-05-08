@@ -1,3 +1,26 @@
+2020-05-08  Tom Tromey  <tom@tromey.com>
+
+	* symtab.h (class demangle_result_storage) <set_malloc_ptr>: New
+	overload.
+	<swap_string, m_string>: Remove.
+	* symtab.c (demangle_for_lookup, completion_list_add_symbol):
+	Update.
+	* stabsread.c (define_symbol, read_type): Update.
+	* linespec.c (find_linespec_symbols): Update.
+	* gnu-v3-abi.c (gnuv3_get_typeid): Update.
+	* dwarf2/read.c (dwarf2_canonicalize_name): Update.
+	* dbxread.c (read_dbx_symtab): Update.
+	* cp-support.h (cp_canonicalize_string_full)
+	(cp_canonicalize_string, cp_canonicalize_string_no_typedefs):
+	Return unique_xmalloc_ptr.
+	* cp-support.c (inspect_type): Update.
+	(cp_canonicalize_string_full): Return unique_xmalloc_ptr.
+	(cp_canonicalize_string_no_typedefs, cp_canonicalize_string):
+	Likewise.
+	* c-typeprint.c (print_name_maybe_canonical): Update.
+	* break-catch-throw.c (check_status_exception_catchpoint):
+	Update.
+
 2020-05-08  Tom de Vries  <tdevries@suse.de>
 
 	* infrun.c (follow_fork): Copy current_line and current_symtab to
