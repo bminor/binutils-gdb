@@ -32,24 +32,7 @@
 #include "cli/cli-script.h"
 #include "python/python.h"
 #include "guile/guile.h"
-
-/* Iterate over all external extension languages, regardless of whether the
-   support has been compiled in or not.
-   This does not include GDB's own scripting language.  */
-
-#define ALL_EXTENSION_LANGUAGES(i, extlang) \
-  for (/*int*/ i = 0, extlang = extension_languages[0]; \
-       extlang != NULL; \
-       extlang = extension_languages[++i])
-
-/* Iterate over all external extension languages that are supported.
-   This does not include GDB's own scripting language.  */
-
-#define ALL_ENABLED_EXTENSION_LANGUAGES(i, extlang) \
-  for (/*int*/ i = 0, extlang = extension_languages[0]; \
-       extlang != NULL; \
-       extlang = extension_languages[++i]) \
-    if (extlang->ops != NULL)
+#include <array>
 
 static script_sourcer_func source_gdb_script;
 static objfile_script_sourcer_func source_gdb_objfile_script;
@@ -99,12 +82,11 @@ const struct extension_language_defn extension_language_gdb =
    pretty-printed value is the one that is used.  This algorithm is employed
    throughout.  */
 
-static const struct extension_language_defn * const extension_languages[] =
+static const std::array<const extension_language_defn *, 2> extension_languages
 {
   /* To preserve existing behaviour, python should always appear first.  */
   &extension_language_python,
   &extension_language_guile,
-  NULL
 };
 
 /* Return a pointer to the struct extension_language_defn object of
@@ -115,15 +97,12 @@ static const struct extension_language_defn * const extension_languages[] =
 const struct extension_language_defn *
 get_ext_lang_defn (enum extension_language lang)
 {
-  int i;
-  const struct extension_language_defn *extlang;
-
   gdb_assert (lang != EXT_LANG_NONE);
 
   if (lang == EXT_LANG_GDB)
     return &extension_language_gdb;
 
-  ALL_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
       if (extlang->language == lang)
 	return extlang;
@@ -151,13 +130,10 @@ has_extension (const char *file, const char *extension)
 const struct extension_language_defn *
 get_ext_lang_of_file (const char *file)
 {
-  int i;
-  const struct extension_language_defn *extlang;
-
   if (has_extension (file, extension_language_gdb.suffix))
     return &extension_language_gdb;
 
-  ALL_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
       if (has_extension (file, extlang->suffix))
 	return extlang;
@@ -331,12 +307,10 @@ ext_lang_auto_load_enabled (const struct extension_language_defn *extlang)
 void
 finish_ext_lang_initialization (void)
 {
-  int i;
-  const struct extension_language_defn *extlang;
-
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops->finish_initialization != NULL)
+      if (extlang->ops != nullptr
+	  && extlang->ops->finish_initialization != NULL)
 	extlang->ops->finish_initialization (extlang);
     }
 }
@@ -355,10 +329,7 @@ finish_ext_lang_initialization (void)
 void
 eval_ext_lang_from_control_command (struct command_line *cmd)
 {
-  int i;
-  const struct extension_language_defn *extlang;
-
-  ALL_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
       if (extlang->cli_control_type == cmd->control_type)
 	{
@@ -385,16 +356,14 @@ eval_ext_lang_from_control_command (struct command_line *cmd)
 void
 auto_load_ext_lang_scripts_for_objfile (struct objfile *objfile)
 {
-  int i;
-  const struct extension_language_defn *extlang;
+  const struct extension_language_defn *gdb = &extension_language_gdb;
+  if (ext_lang_auto_load_enabled (gdb))
+    auto_load_objfile_script (objfile, gdb);
 
-  extlang = &extension_language_gdb;
-  if (ext_lang_auto_load_enabled (extlang))
-    auto_load_objfile_script (objfile, extlang);
-
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (ext_lang_auto_load_enabled (extlang))
+      if (extlang->ops != nullptr
+	  && ext_lang_auto_load_enabled (extlang))
 	auto_load_objfile_script (objfile, extlang);
     }
 }
@@ -410,12 +379,10 @@ auto_load_ext_lang_scripts_for_objfile (struct objfile *objfile)
 
 ext_lang_type_printers::ext_lang_type_printers ()
 {
-  int i;
-  const struct extension_language_defn *extlang;
-
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops->start_type_printers != NULL)
+      if (extlang->ops != nullptr
+	  && extlang->ops->start_type_printers != NULL)
 	extlang->ops->start_type_printers (extlang, this);
     }
 }
@@ -429,15 +396,13 @@ char *
 apply_ext_lang_type_printers (struct ext_lang_type_printers *printers,
 			      struct type *type)
 {
-  int i;
-  const struct extension_language_defn *extlang;
-
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
       char *result = NULL;
       enum ext_lang_rc rc;
 
-      if (extlang->ops->apply_type_printers == NULL)
+      if (extlang->ops == nullptr
+	  || extlang->ops->apply_type_printers == NULL)
 	continue;
       rc = extlang->ops->apply_type_printers (extlang, printers, type,
 					      &result);
@@ -460,12 +425,10 @@ apply_ext_lang_type_printers (struct ext_lang_type_printers *printers,
 
 ext_lang_type_printers::~ext_lang_type_printers ()
 {
-  int i;
-  const struct extension_language_defn *extlang;
-
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops->free_type_printers != NULL)
+      if (extlang->ops != nullptr
+	  && extlang->ops->free_type_printers != NULL)
 	extlang->ops->free_type_printers (extlang, this);
     }
 }
@@ -490,14 +453,12 @@ apply_ext_lang_val_pretty_printer (struct value *val,
 				   const struct value_print_options *options,
 				   const struct language_defn *language)
 {
-  int i;
-  const struct extension_language_defn *extlang;
-
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
       enum ext_lang_rc rc;
 
-      if (extlang->ops->apply_val_pretty_printer == NULL)
+      if (extlang->ops == nullptr
+	  || extlang->ops->apply_val_pretty_printer == NULL)
 	continue;
       rc = extlang->ops->apply_val_pretty_printer (extlang, val, stream,
 						   recurse, options, language);
@@ -544,14 +505,12 @@ apply_ext_lang_frame_filter (struct frame_info *frame,
 			     struct ui_out *out,
 			     int frame_low, int frame_high)
 {
-  int i;
-  const struct extension_language_defn *extlang;
-
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
       enum ext_lang_bt_status status;
 
-      if (extlang->ops->apply_frame_filter == NULL)
+      if (extlang->ops == nullptr
+	  || extlang->ops->apply_frame_filter == NULL)
 	continue;
       status = extlang->ops->apply_frame_filter (extlang, frame, flags,
 					       args_type, out,
@@ -577,12 +536,10 @@ apply_ext_lang_frame_filter (struct frame_info *frame,
 void
 preserve_ext_lang_values (struct objfile *objfile, htab_t copied_types)
 {
-  int i;
-  const struct extension_language_defn *extlang;
-
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops->preserve_values != NULL)
+      if (extlang->ops != nullptr
+	  && extlang->ops->preserve_values != NULL)
 	extlang->ops->preserve_values (extlang, objfile, copied_types);
     }
 }
@@ -600,12 +557,10 @@ const struct extension_language_defn *
 get_breakpoint_cond_ext_lang (struct breakpoint *b,
 			      enum extension_language skip_lang)
 {
-  int i;
-  const struct extension_language_defn *extlang;
-
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->language != skip_lang
+      if (extlang->ops != nullptr
+	  && extlang->language != skip_lang
 	  && extlang->ops->breakpoint_has_cond != NULL
 	  && extlang->ops->breakpoint_has_cond (extlang, b))
 	return extlang;
@@ -620,18 +575,17 @@ get_breakpoint_cond_ext_lang (struct breakpoint *b,
 int
 breakpoint_ext_lang_cond_says_stop (struct breakpoint *b)
 {
-  int i;
-  const struct extension_language_defn *extlang;
   enum ext_lang_bp_stop stop = EXT_LANG_BP_STOP_UNSET;
 
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
       /* There is a rule that a breakpoint can have at most one of any of a
 	 CLI or extension language condition.  However, Python hacks in "finish
 	 breakpoints" on top of the "stop" check, so we have to call this for
 	 every language, even if we could first determine whether a "stop"
 	 method exists.  */
-      if (extlang->ops->breakpoint_cond_says_stop != NULL)
+      if (extlang->ops != nullptr
+	  && extlang->ops->breakpoint_cond_says_stop != NULL)
 	{
 	  enum ext_lang_bp_stop this_stop
 	    = extlang->ops->breakpoint_cond_says_stop (extlang, b);
@@ -813,12 +767,12 @@ set_quit_flag (void)
 int
 check_quit_flag (void)
 {
-  int i, result = 0;
-  const struct extension_language_defn *extlang;
+  int result = 0;
 
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops->check_quit_flag != NULL)
+      if (extlang->ops != nullptr
+	  && extlang->ops->check_quit_flag != NULL)
 	if (extlang->ops->check_quit_flag (extlang) != 0)
 	  result = 1;
     }
@@ -843,16 +797,14 @@ void
 get_matching_xmethod_workers (struct type *type, const char *method_name,
 			      std::vector<xmethod_worker_up> *workers)
 {
-  int i;
-  const struct extension_language_defn *extlang;
-
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
       enum ext_lang_rc rc;
 
       /* If an extension language does not support xmethods, ignore
 	 it.  */
-      if (extlang->ops->get_matching_xmethod_workers == NULL)
+      if (extlang->ops == nullptr
+	  || extlang->ops->get_matching_xmethod_workers == NULL)
 	continue;
 
       rc = extlang->ops->get_matching_xmethod_workers (extlang,
@@ -901,13 +853,12 @@ xmethod_worker::get_result_type (value *object, gdb::array_view<value *> args)
 gdb::optional<std::string>
 ext_lang_colorize (const std::string &filename, const std::string &contents)
 {
-  int i;
-  const struct extension_language_defn *extlang;
   gdb::optional<std::string> result;
 
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
-      if (extlang->ops->colorize == nullptr)
+      if (extlang->ops == nullptr
+	  || extlang->ops->colorize == nullptr)
 	continue;
       result = extlang->ops->colorize (filename, contents);
       if (result.has_value ())
@@ -925,14 +876,12 @@ ext_lang_colorize (const std::string &filename, const std::string &contents)
 static void
 ext_lang_before_prompt (const char *current_gdb_prompt)
 {
-  int i;
-  const struct extension_language_defn *extlang;
-
-  ALL_ENABLED_EXTENSION_LANGUAGES (i, extlang)
+  for (const struct extension_language_defn *extlang : extension_languages)
     {
       enum ext_lang_rc rc;
 
-      if (extlang->ops->before_prompt == NULL)
+      if (extlang->ops == nullptr
+	  || extlang->ops->before_prompt == NULL)
 	continue;
       rc = extlang->ops->before_prompt (extlang, current_gdb_prompt);
       switch (rc)

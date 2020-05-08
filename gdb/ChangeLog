@@ -1,5 +1,23 @@
 2020-05-08  Tom Tromey  <tom@tromey.com>
 
+	* extension.c (extension_languages): Now a std::array.
+	(ALL_EXTENSION_LANGUAGES): Remove.
+	(get_ext_lang_defn, get_ext_lang_of_file)
+	(eval_ext_lang_from_control_command): Update.
+	(finish_ext_lang_initialization)
+	(auto_load_ext_lang_scripts_for_objfile)
+	(ext_lang_type_printers::ext_lang_type_printers)
+	(apply_ext_lang_type_printers)
+	(ext_lang_type_printers::~ext_lang_type_printers)
+	(apply_ext_lang_val_pretty_printer, apply_ext_lang_frame_filter)
+	(preserve_ext_lang_values, get_breakpoint_cond_ext_lang)
+	(breakpoint_ext_lang_cond_says_stop, check_quit_flag)
+	(get_matching_xmethod_workers, ext_lang_colorize)
+	(ext_lang_before_prompt): Update.
+	(ALL_ENABLED_EXTENSION_LANGUAGES): Remove.
+
+2020-05-08  Tom Tromey  <tom@tromey.com>
+
 	* symtab.h (class demangle_result_storage) <set_malloc_ptr>: New
 	overload.
 	<swap_string, m_string>: Remove.
