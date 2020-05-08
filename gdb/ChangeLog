@@ -1,3 +1,8 @@
+2020-05-08  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/read.c (read_lexical_block_scope): Don't process a DIE
+	already being processed.
+
 2020-05-08  Tom Tromey  <tom@tromey.com>
 
 	* printcmd.c (struct display) <next>: Remove.

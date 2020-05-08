@@ -13102,7 +13102,16 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
       for (child_die = die->child;
 	   child_die != NULL && child_die->tag;
 	   child_die = child_die->sibling)
-	process_die (child_die, cu);
+	{
+	  /* We might already be processing this DIE.  This can happen
+	     in an unusual circumstance -- where a subroutine A
+	     appears lexically in another subroutine B, but A actually
+	     inlines B.  The recursion is broken here, rather than in
+	     inherit_abstract_dies, because it seems better to simply
+	     drop concrete children here.  */
+	  if (!child_die->in_process)
+	    process_die (child_die, cu);
+	}
       return;
     case PC_BOUNDS_INVALID:
       return;
