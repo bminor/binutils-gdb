@@ -1,3 +1,8 @@
+2020-05-08  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/clang-debug-names.c: New test.
+	* gdb.dwarf2/clang-debug-names.exp: New file.
+
 2020-05-06  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdb.arch/amd64-prologue-skip-cf-protection.exp: New file.
