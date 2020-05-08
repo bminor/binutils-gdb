@@ -192,10 +192,8 @@ program_space::~program_space ()
 void
 program_space::free_all_objfiles ()
 {
-  struct so_list *so;
-
   /* Any objfile reference would become stale.  */
-  for (so = master_so_list (); so; so = so->next)
+  for (struct so_list *so : current_program_space->solibs ())
     gdb_assert (so->objfile == NULL);
 
   while (!objfiles_list.empty ())
@@ -237,6 +235,14 @@ program_space::remove_objfile (struct objfile *objfile)
 
   if (objfile == symfile_object_file)
     symfile_object_file = NULL;
+}
+
+/* See progspace.h.  */
+
+next_adapter<struct so_list>
+program_space::solibs () const
+{
+  return next_adapter<struct so_list> (this->so_list);
 }
 
 /* Copies program space SRC to DEST.  Copies the main executable file,

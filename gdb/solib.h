@@ -28,9 +28,6 @@ struct program_space;
 
 #include "symfile-add-flags.h"
 
-/* List of known shared objects */
-#define so_list_head current_program_space->so_list
-
 /* Called when we free all symtabs, to free the shared library information
    as well.  */
 
@@ -81,9 +78,9 @@ extern void set_solib_ops (struct gdbarch *gdbarch,
 /* Synchronize GDB's shared object list with inferior's.
 
    Extract the list of currently loaded shared objects from the
-   inferior, and compare it with the list of shared objects currently
-   in GDB's so_list_head list.  Edit so_list_head to bring it in sync
-   with the inferior's new list.
+   inferior, and compare it with the list of shared objects in the
+   current program space's list of shared libraries.  Edit
+   so_list_head to bring it in sync with the inferior's new list.
 
    If we notice that the inferior has unloaded some shared objects,
    free any symbolic info GDB had read about those shared objects.

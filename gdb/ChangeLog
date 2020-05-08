@@ -1,5 +1,25 @@
 2020-05-08  Tom Tromey  <tom@tromey.com>
 
+	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries): Update.
+	* solib-svr4.c (svr4_fetch_objfile_link_map): Update.
+	(enable_break): Update.
+	* solib-frv.c (frv_fdpic_find_global_pointer): Update.
+	(frv_fdpic_find_canonical_descriptor): Update.
+	(frv_fetch_objfile_link_map): Update.
+	* progspace.c (program_space::free_all_objfiles): Update.
+	(program_space::solibs): New method.
+	* progspace.h (struct program_space) <solibs>: New method.
+	* solist.h (master_so_list): Don't declare.
+	(ALL_SO_LIBS): Remove.
+	* solib.h (so_list_head): Remove.
+	(update_solib_list): Update comment.
+	* solib.c (master_so_list): Remove.
+	(solib_used, update_solib_list, solib_add)
+	(info_sharedlibrary_command, clear_solib)
+	(reload_shared_libraries_1, remove_user_added_objfile): Update.
+
+2020-05-08  Tom Tromey  <tom@tromey.com>
+
 	* extension.c (extension_languages): Now a std::array.
 	(ALL_EXTENSION_LANGUAGES): Remove.
 	(get_ext_lang_defn, get_ext_lang_of_file)

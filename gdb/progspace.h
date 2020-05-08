@@ -37,6 +37,7 @@ struct exec;
 struct address_space;
 struct program_space_data;
 struct address_space_data;
+struct so_list;
 
 typedef std::list<std::shared_ptr<objfile>> objfile_list;
 
@@ -263,6 +264,12 @@ struct program_space
 
   /* Free all the objfiles associated with this program space.  */
   void free_all_objfiles ();
+
+  /* Return a range adapter for iterating over all the solibs in this
+     program space.  Use it like:
+
+     for (so_list *so : pspace->solibs ()) { ... }  */
+  next_adapter<struct so_list> solibs () const;
 
 
   /* Pointer to next in linked list.  */

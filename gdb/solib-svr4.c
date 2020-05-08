@@ -1537,7 +1537,6 @@ svr4_current_sos (void)
 CORE_ADDR
 svr4_fetch_objfile_link_map (struct objfile *objfile)
 {
-  struct so_list *so;
   struct svr4_info *info = get_svr4_info (objfile->pspace);
 
   /* Cause svr4_current_sos() to be run if it hasn't been already.  */
@@ -1555,7 +1554,7 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
 
   /* The other link map addresses may be found by examining the list
      of shared libraries.  */
-  for (so = master_so_list (); so; so = so->next)
+  for (struct so_list *so : current_program_space->solibs ())
     if (so->objfile == objfile)
       {
 	lm_info_svr4 *li = (lm_info_svr4 *) so->lm_info;
@@ -2307,7 +2306,6 @@ enable_break (struct svr4_info *info, int from_tty)
       CORE_ADDR load_addr = 0;
       int load_addr_found = 0;
       int loader_found_in_list = 0;
-      struct so_list *so;
       struct target_ops *tmp_bfd_target;
 
       sym_addr = 0;
@@ -2340,8 +2338,7 @@ enable_break (struct svr4_info *info, int from_tty)
 
       /* On a running target, we can get the dynamic linker's base
          address from the shared library table.  */
-      so = master_so_list ();
-      while (so)
+      for (struct so_list *so : current_program_space->solibs ())
 	{
 	  if (svr4_same_1 (interp_name, so->so_original_name))
 	    {
@@ -2350,7 +2347,6 @@ enable_break (struct svr4_info *info, int from_tty)
 	      load_addr = lm_addr_check (so, tmp_bfd.get ());
 	      break;
 	    }
-	  so = so->next;
 	}
 
       /* If we were not able to find the base address of the loader

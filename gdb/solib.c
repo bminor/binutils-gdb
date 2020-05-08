@@ -647,13 +647,6 @@ free_so (struct so_list *so)
 }
 
 
-/* Return address of first so_list entry in master shared object list.  */
-struct so_list *
-master_so_list (void)
-{
-  return so_list_head;
-}
-
 /* Read in symbols for shared object SO.  If SYMFILE_VERBOSE is set in FLAGS,
    be chatty about it.  Return true if any symbols were actually loaded.  */
 
@@ -713,15 +706,13 @@ solib_read_symbols (struct so_list *so, symfile_add_flags flags)
   return false;
 }
 
-/* Return true if KNOWN->objfile is used by any other so_list object in the
-   SO_LIST_HEAD list.  Return false otherwise.  */
+/* Return true if KNOWN->objfile is used by any other so_list object
+   in the list of shared libraries.  Return false otherwise.  */
 
 static bool
 solib_used (const struct so_list *const known)
 {
-  const struct so_list *pivot;
-
-  for (pivot = so_list_head; pivot != NULL; pivot = pivot->next)
+  for (const struct so_list *pivot : current_program_space->solibs ())
     if (pivot != known && pivot->objfile == known->objfile)
       return true;
   return false;
@@ -784,8 +775,8 @@ update_solib_list (int from_tty)
      the time we're done walking GDB's list, the inferior's list
      contains only the new shared objects, which we then add.  */
 
-  gdb = so_list_head;
-  gdb_link = &so_list_head;
+  gdb = current_program_space->so_list;
+  gdb_link = &current_program_space->so_list;
   while (gdb)
     {
       struct so_list *i = inferior;
@@ -943,8 +934,6 @@ libpthread_solib_p (struct so_list *so)
 void
 solib_add (const char *pattern, int from_tty, int readsyms)
 {
-  struct so_list *gdb;
-
   if (print_symbol_loading_p (from_tty, 0, 0))
     {
       if (pattern != NULL)
@@ -979,7 +968,7 @@ solib_add (const char *pattern, int from_tty, int readsyms)
     if (from_tty)
         add_flags |= SYMFILE_VERBOSE;
 
-    for (gdb = so_list_head; gdb; gdb = gdb->next)
+    for (struct so_list *gdb : current_program_space->solibs ())
       if (! pattern || re_exec (gdb->so_name))
 	{
           /* Normally, we would read the symbols from that library
@@ -1030,7 +1019,6 @@ solib_add (const char *pattern, int from_tty, int readsyms)
 static void
 info_sharedlibrary_command (const char *pattern, int from_tty)
 {
-  struct so_list *so = NULL;	/* link map state variable */
   bool so_missing_debug_info = false;
   int addr_width;
   int nr_libs;
@@ -1053,7 +1041,8 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
   /* ui_out_emit_table table_emitter needs to know the number of rows,
      so we need to make two passes over the libs.  */
 
-  for (nr_libs = 0, so = so_list_head; so; so = so->next)
+  nr_libs = 0;
+  for (struct so_list *so : current_program_space->solibs ())
     {
       if (so->so_name[0])
 	{
@@ -1074,7 +1063,7 @@ info_sharedlibrary_command (const char *pattern, int from_tty)
 
     uiout->table_body ();
 
-    ALL_SO_LIBS (so)
+    for (struct so_list *so : current_program_space->solibs ())
       {
 	if (! so->so_name[0])
 	  continue;
@@ -1185,11 +1174,11 @@ clear_solib (void)
 
   disable_breakpoints_in_shlibs ();
 
-  while (so_list_head)
+  while (current_program_space->so_list)
     {
-      struct so_list *so = so_list_head;
+      struct so_list *so = current_program_space->so_list;
 
-      so_list_head = so->next;
+      current_program_space->so_list = so->next;
       gdb::observers::solib_unloaded.notify (so);
       remove_target_sections (so);
       free_so (so);
@@ -1284,12 +1273,10 @@ handle_solib_event (void)
 static void
 reload_shared_libraries_1 (int from_tty)
 {
-  struct so_list *so;
-
   if (print_symbol_loading_p (from_tty, 0, 0))
     printf_unfiltered (_("Loading symbols for shared libraries.\n"));
 
-  for (so = so_list_head; so != NULL; so = so->next)
+  for (struct so_list *so : current_program_space->solibs ())
     {
       const char *found_pathname = NULL;
       bool was_loaded = so->symbols_loaded != 0;
@@ -1552,18 +1539,17 @@ gdb_bfd_lookup_symbol (bfd *abfd,
   return symaddr;
 }
 
-/* SO_LIST_HEAD may contain user-loaded object files that can be removed
-   out-of-band by the user.  So upon notification of free_objfile remove
-   all references to any user-loaded file that is about to be freed.  */
+/* The shared library list may contain user-loaded object files that
+   can be removed out-of-band by the user.  So upon notification of
+   free_objfile remove all references to any user-loaded file that is
+   about to be freed.  */
 
 static void
 remove_user_added_objfile (struct objfile *objfile)
 {
-  struct so_list *so;
-
   if (objfile != 0 && objfile->flags & OBJF_USERLOADED)
     {
-      for (so = so_list_head; so != NULL; so = so->next)
+      for (struct so_list *so : current_program_space->solibs ())
 	if (so->objfile == objfile)
 	  so->objfile = NULL;
     }
