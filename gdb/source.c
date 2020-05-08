@@ -421,9 +421,7 @@ forget_cached_source_info_for_objfile (struct objfile *objfile)
 void
 forget_cached_source_info (void)
 {
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
       {
 	forget_cached_source_info_for_objfile (objfile);

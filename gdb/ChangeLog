@@ -1,5 +1,40 @@
 2020-05-08  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (set_symbol_cache_size)
+	(maintenance_print_symbol_cache, maintenance_flush_symbol_cache)
+	(maintenance_print_symbol_cache_statistics): Update.
+	* symmisc.c (print_symbol_bcache_statistics)
+	(print_objfile_statistics, maintenance_print_objfiles)
+	(maintenance_info_symtabs, maintenance_check_symtabs)
+	(maintenance_expand_symtabs, maintenance_info_line_tables):
+	Update.
+	* symfile-debug.c (set_debug_symfile): Update.
+	* source.c (forget_cached_source_info): Update.
+	* python/python.c (gdbpy_progspaces): Update.
+	* psymtab.c (maintenance_info_psymtabs): Update.
+	* probe.c (parse_probes): Update.
+	* linespec.c (iterate_over_all_matching_symtabs)
+	(collect_symtabs_from_filename, search_minsyms_for_name): Update.
+	* guile/scm-progspace.c (gdbscm_progspaces): Update.
+	* exec.c (exec_target::close): Update.
+	* ada-tasks.c (ada_tasks_new_objfile_observer): Update.
+	* breakpoint.c (print_one_breakpoint_location)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint): Update.
+	* progspace.c (program_spaces): Now a std::vector.
+	(maybe_new_address_space): Update.
+	(add_program_space): Remove.
+	(program_space::program_space): Update.
+	(remove_program_space): Update.
+	(number_of_program_spaces): Remove.
+	(print_program_space, update_address_spaces): Update.
+	* progspace.h (program_spaces): Change type.
+	(ALL_PSPACES): Remove.
+	(number_of_program_spaces): Don't declare.
+	(struct program_space) <next>: Remove.
+
+2020-05-08  Tom Tromey  <tom@tromey.com>
+
 	* mi/mi-cmd-file.c (mi_cmd_file_list_shared_libraries): Update.
 	* solib-svr4.c (svr4_fetch_objfile_link_map): Update.
 	(enable_break): Update.

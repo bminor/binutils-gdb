@@ -1276,9 +1276,7 @@ get_symbol_cache (struct program_space *pspace)
 static void
 set_symbol_cache_size (unsigned int new_size)
 {
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     {
       struct symbol_cache *cache = symbol_cache_key.get (pspace);
 
@@ -1526,9 +1524,7 @@ symbol_cache_dump (const struct symbol_cache *cache)
 static void
 maintenance_print_symbol_cache (const char *args, int from_tty)
 {
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     {
       struct symbol_cache *cache;
 
@@ -1552,9 +1548,7 @@ maintenance_print_symbol_cache (const char *args, int from_tty)
 static void
 maintenance_flush_symbol_cache (const char *args, int from_tty)
 {
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     {
       symbol_cache_flush (pspace);
     }
@@ -1597,9 +1591,7 @@ symbol_cache_stats (struct symbol_cache *cache)
 static void
 maintenance_print_symbol_cache_statistics (const char *args, int from_tty)
 {
-  struct program_space *pspace;
-
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     {
       struct symbol_cache *cache;
 

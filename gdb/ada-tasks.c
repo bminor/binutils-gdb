@@ -1433,9 +1433,7 @@ ada_tasks_new_objfile_observer (struct objfile *objfile)
     {
       /* All objfiles are being cleared, so we should clear all
 	 our caches for all program spaces.  */
-      struct program_space *pspace;
-
-      for (pspace = program_spaces; pspace != NULL; pspace = pspace->next)
+      for (struct program_space *pspace : program_spaces)
         ada_tasks_invalidate_pspace_data (pspace);
     }
   else

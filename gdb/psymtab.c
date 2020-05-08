@@ -1994,12 +1994,10 @@ maintenance_print_psymbols (const char *args, int from_tty)
 static void
 maintenance_info_psymtabs (const char *regexp, int from_tty)
 {
-  struct program_space *pspace;
-
   if (regexp)
     re_comp (regexp);
 
-  ALL_PSPACES (pspace)
+  for (struct program_space *pspace : program_spaces)
     for (objfile *objfile : pspace->objfiles ())
       {
 	struct gdbarch *gdbarch = objfile->arch ();

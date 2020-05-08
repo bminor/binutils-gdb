@@ -177,10 +177,9 @@ exec_close (void)
 void
 exec_target::close ()
 {
-  struct program_space *ss;
   scoped_restore_current_program_space restore_pspace;
 
-  ALL_PSPACES (ss)
+  for (struct program_space *ss : program_spaces)
     {
       set_current_program_space (ss);
       clear_section_table (current_target_sections);

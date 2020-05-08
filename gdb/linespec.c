@@ -1133,58 +1133,56 @@ iterate_over_all_matching_symtabs
    struct program_space *search_pspace, bool include_inline,
    gdb::function_view<symbol_found_callback_ftype> callback)
 {
-  struct program_space *pspace;
+  for (struct program_space *pspace : program_spaces)
+    {
+      if (search_pspace != NULL && search_pspace != pspace)
+	continue;
+      if (pspace->executing_startup)
+	continue;
 
-  ALL_PSPACES (pspace)
-  {
-    if (search_pspace != NULL && search_pspace != pspace)
-      continue;
-    if (pspace->executing_startup)
-      continue;
+      set_current_program_space (pspace);
 
-    set_current_program_space (pspace);
+      for (objfile *objfile : current_program_space->objfiles ())
+	{
+	  if (objfile->sf)
+	    objfile->sf->qf->expand_symtabs_matching (objfile,
+						      NULL,
+						      &lookup_name,
+						      NULL, NULL,
+						      search_domain);
 
-    for (objfile *objfile : current_program_space->objfiles ())
-      {
-	if (objfile->sf)
-	  objfile->sf->qf->expand_symtabs_matching (objfile,
-						    NULL,
-						    &lookup_name,
-						    NULL, NULL,
-						    search_domain);
+	  for (compunit_symtab *cu : objfile->compunits ())
+	    {
+	      struct symtab *symtab = COMPUNIT_FILETABS (cu);
 
-	for (compunit_symtab *cu : objfile->compunits ())
-	  {
-	    struct symtab *symtab = COMPUNIT_FILETABS (cu);
+	      iterate_over_file_blocks (symtab, lookup_name, name_domain,
+					callback);
 
-	    iterate_over_file_blocks (symtab, lookup_name, name_domain,
-				      callback);
+	      if (include_inline)
+		{
+		  const struct block *block;
+		  int i;
 
-	    if (include_inline)
-	      {
-		const struct block *block;
-		int i;
-
-		for (i = FIRST_LOCAL_BLOCK;
-		     i < BLOCKVECTOR_NBLOCKS (SYMTAB_BLOCKVECTOR (symtab));
-		     i++)
-		  {
-		    block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), i);
-		    state->language->la_iterate_over_symbols
-		      (block, lookup_name, name_domain,
-		       [&] (block_symbol *bsym)
-		       {
-			 /* Restrict calls to CALLBACK to symbols
-			    representing inline symbols only.  */
-			 if (SYMBOL_INLINED (bsym->symbol))
-			   return callback (bsym);
-			 return true;
-		       });
-		  }
-	      }
-	  }
-      }
-  }
+		  for (i = FIRST_LOCAL_BLOCK;
+		       i < BLOCKVECTOR_NBLOCKS (SYMTAB_BLOCKVECTOR (symtab));
+		       i++)
+		    {
+		      block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), i);
+		      state->language->la_iterate_over_symbols
+			(block, lookup_name, name_domain,
+			 [&] (block_symbol *bsym)
+			 {
+			   /* Restrict calls to CALLBACK to symbols
+			      representing inline symbols only.  */
+			   if (SYMBOL_INLINED (bsym->symbol))
+			     return callback (bsym);
+			   return true;
+			 });
+		    }
+		}
+	    }
+	}
+    }
 }
 
 /* Returns the block to be used for symbol searches from
@@ -3786,9 +3784,7 @@ collect_symtabs_from_filename (const char *file,
   /* Find that file's data.  */
   if (search_pspace == NULL)
     {
-      struct program_space *pspace;
-
-      ALL_PSPACES (pspace)
+      for (struct program_space *pspace : program_spaces)
         {
 	  if (pspace->executing_startup)
 	    continue;
@@ -4335,29 +4331,27 @@ search_minsyms_for_name (struct collect_info *info,
 
   if (symtab == NULL)
     {
-      struct program_space *pspace;
+      for (struct program_space *pspace : program_spaces)
+	{
+	  if (search_pspace != NULL && search_pspace != pspace)
+	    continue;
+	  if (pspace->executing_startup)
+	    continue;
 
-      ALL_PSPACES (pspace)
-      {
-	if (search_pspace != NULL && search_pspace != pspace)
-	  continue;
-	if (pspace->executing_startup)
-	  continue;
+	  set_current_program_space (pspace);
 
-	set_current_program_space (pspace);
-
-	for (objfile *objfile : current_program_space->objfiles ())
-	  {
-	    iterate_over_minimal_symbols (objfile, name,
-					  [&] (struct minimal_symbol *msym)
-					  {
-					    add_minsym (msym, objfile, nullptr,
-							info->state->list_mode,
-							&minsyms);
-					    return false;
-					  });
-	  }
-      }
+	  for (objfile *objfile : current_program_space->objfiles ())
+	    {
+	      iterate_over_minimal_symbols (objfile, name,
+					    [&] (struct minimal_symbol *msym)
+					    {
+					      add_minsym (msym, objfile, nullptr,
+							  info->state->list_mode,
+							  &minsyms);
+					      return false;
+					    });
+	    }
+	}
     }
   else
     {

@@ -28,6 +28,7 @@
 #include "gdbsupport/next-iterator.h"
 #include "gdbsupport/safe-iterator.h"
 #include <list>
+#include <vector>
 
 struct target_ops;
 struct bfd;
@@ -272,9 +273,6 @@ struct program_space
   next_adapter<struct so_list> solibs () const;
 
 
-  /* Pointer to next in linked list.  */
-  struct program_space *next = NULL;
-
   /* Unique ID number.  */
   int num = 0;
 
@@ -369,16 +367,10 @@ struct address_space
 #define current_target_sections (&current_program_space->target_sections)
 
 /* The list of all program spaces.  There's always at least one.  */
-extern struct program_space *program_spaces;
+extern std::vector<struct program_space *>program_spaces;
 
 /* The current program space.  This is always non-null.  */
 extern struct program_space *current_program_space;
-
-#define ALL_PSPACES(pspace) \
-  for ((pspace) = program_spaces; (pspace) != NULL; (pspace) = (pspace)->next)
-
-/* Returns the number of program spaces listed.  */
-extern int number_of_program_spaces (void);
 
 /* Returns true iff there's no inferior bound to PSPACE.  */
 extern int program_space_empty_p (struct program_space *pspace);

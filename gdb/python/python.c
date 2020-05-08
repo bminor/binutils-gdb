@@ -1350,19 +1350,17 @@ gdbpy_print_stack_or_quit ()
 static PyObject *
 gdbpy_progspaces (PyObject *unused1, PyObject *unused2)
 {
-  struct program_space *ps;
-
   gdbpy_ref<> list (PyList_New (0));
   if (list == NULL)
     return NULL;
 
-  ALL_PSPACES (ps)
-  {
-    gdbpy_ref<> item = pspace_to_pspace_object (ps);
+  for (struct program_space *ps : program_spaces)
+    {
+      gdbpy_ref<> item = pspace_to_pspace_object (ps);
 
-    if (item == NULL || PyList_Append (list.get (), item.get ()) == -1)
-      return NULL;
-  }
+      if (item == NULL || PyList_Append (list.get (), item.get ()) == -1)
+	return NULL;
+    }
 
   return list.release ();
 }

@@ -185,9 +185,7 @@ parse_probes (const struct event_location *location,
     }
   else
     {
-      struct program_space *pspace;
-
-      ALL_PSPACES (pspace)
+      for (struct program_space *pspace : program_spaces)
 	parse_probes_in_pspace (spops, pspace, objfile_namestr,
 				provider, name, &result);
     }
