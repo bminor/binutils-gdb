@@ -116,13 +116,27 @@ show_print_symbol_filename (struct ui_file *file, int from_tty,
 
 static int current_display_number;
 
+/* Last allocated display number.  */
+
+static int display_number;
+
 struct display
   {
-    /* Chain link to next auto-display item.  */
-    struct display *next;
+    display (const char *exp_string_, expression_up &&exp_,
+	     const struct format_data &format_, struct program_space *pspace_,
+	     const struct block *block_)
+      : exp_string (exp_string_),
+	exp (std::move (exp_)),
+	number (++display_number),
+	format (format_),
+	pspace (pspace_),
+	block (block_),
+	enabled_p (true)
+    {
+    }
 
     /* The expression as the user typed it.  */
-    char *exp_string;
+    std::string exp_string;
 
     /* Expression to be evaluated and displayed.  */
     expression_up exp;
@@ -140,27 +154,13 @@ struct display
     const struct block *block;
 
     /* Status of this display (enabled or disabled).  */
-    int enabled_p;
+    bool enabled_p;
   };
 
-/* Chain of expressions whose values should be displayed
-   automatically each time the program stops.  */
+/* Expressions whose values should be displayed automatically each
+   time the program stops.  */
 
-static struct display *display_chain;
-
-static int display_number;
-
-/* Walk the following statement or block through all displays.
-   ALL_DISPLAYS_SAFE does so even if the statement deletes the current
-   display.  */
-
-#define ALL_DISPLAYS(B)				\
-  for (B = display_chain; B; B = B->next)
-
-#define ALL_DISPLAYS_SAFE(B,TMP)		\
-  for (B = display_chain;			\
-       B ? (TMP = B->next, 1): 0;		\
-       B = TMP)
+static std::vector<std::unique_ptr<struct display>> all_displays;
 
 /* Prototypes for local functions.  */
 
@@ -1763,27 +1763,9 @@ display_command (const char *arg, int from_tty)
   innermost_block_tracker tracker;
   expression_up expr = parse_expression (exp, &tracker);
 
-  newobj = new display ();
-
-  newobj->exp_string = xstrdup (exp);
-  newobj->exp = std::move (expr);
-  newobj->block = tracker.block ();
-  newobj->pspace = current_program_space;
-  newobj->number = ++display_number;
-  newobj->format = fmt;
-  newobj->enabled_p = 1;
-  newobj->next = NULL;
-
-  if (display_chain == NULL)
-    display_chain = newobj;
-  else
-    {
-      struct display *last;
-
-      for (last = display_chain; last->next != NULL; last = last->next)
-	;
-      last->next = newobj;
-    }
+  newobj = new display (exp, std::move (expr), fmt,
+			current_program_space, tracker.block ());
+  all_displays.emplace_back (newobj);
 
   if (from_tty)
     do_one_display (newobj);
@@ -1791,26 +1773,13 @@ display_command (const char *arg, int from_tty)
   dont_repeat ();
 }
 
-static void
-free_display (struct display *d)
-{
-  xfree (d->exp_string);
-  delete d;
-}
-
 /* Clear out the display_chain.  Done when new symtabs are loaded,
    since this invalidates the types stored in many expressions.  */
 
 void
-clear_displays (void)
+clear_displays ()
 {
-  struct display *d;
-
-  while ((d = display_chain) != NULL)
-    {
-      display_chain = d->next;
-      free_display (d);
-    }
+  all_displays.clear ();
 }
 
 /* Delete the auto-display DISPLAY.  */
@@ -1818,21 +1787,16 @@ clear_displays (void)
 static void
 delete_display (struct display *display)
 {
-  struct display *d;
-
   gdb_assert (display != NULL);
 
-  if (display_chain == display)
-    display_chain = display->next;
-
-  ALL_DISPLAYS (d)
-    if (d->next == display)
-      {
-	d->next = display->next;
-	break;
-      }
-
-  free_display (display);
+  auto iter = std::find_if (all_displays.begin (),
+			    all_displays.end (),
+			    [=] (const std::unique_ptr<struct display> &item)
+			    {
+			      return item.get () == display;
+			    });
+  gdb_assert (iter != all_displays.end ());
+  all_displays.erase (iter);
 }
 
 /* Call FUNCTION on each of the displays whose numbers are given in
@@ -1840,9 +1804,7 @@ delete_display (struct display *display)
 
 static void
 map_display_numbers (const char *args,
-		     void (*function) (struct display *,
-				       void *),
-		     void *data)
+		     gdb::function_view<void (struct display *)> function)
 {
   int num;
 
@@ -1860,25 +1822,18 @@ map_display_numbers (const char *args,
 	warning (_("bad display number at or near '%s'"), p);
       else
 	{
-	  struct display *d, *tmp;
-
-	  ALL_DISPLAYS_SAFE (d, tmp)
-	    if (d->number == num)
-	      break;
-	  if (d == NULL)
+	  auto iter = std::find_if (all_displays.begin (),
+				    all_displays.end (),
+				    [=] (const std::unique_ptr<display> &item)
+				    {
+				      return item->number == num;
+				    });
+	  if (iter == all_displays.end ())
 	    printf_unfiltered (_("No display number %d.\n"), num);
 	  else
-	    function (d, data);
+	    function (iter->get ());
 	}
     }
-}
-
-/* Callback for map_display_numbers, that deletes a display.  */
-
-static void
-do_delete_display (struct display *d, void *data)
-{
-  delete_display (d);
 }
 
 /* "undisplay" command.  */
@@ -1894,7 +1849,7 @@ undisplay_command (const char *args, int from_tty)
       return;
     }
 
-  map_display_numbers (args, do_delete_display, NULL);
+  map_display_numbers (args, delete_display);
   dont_repeat ();
 }
 
@@ -1907,7 +1862,7 @@ do_one_display (struct display *d)
 {
   int within_current_scope;
 
-  if (d->enabled_p == 0)
+  if (!d->enabled_p)
     return;
 
   /* The expression carries the architecture that was used at parse time.
@@ -1929,15 +1884,15 @@ do_one_display (struct display *d)
       try
 	{
 	  innermost_block_tracker tracker;
-	  d->exp = parse_expression (d->exp_string, &tracker);
+	  d->exp = parse_expression (d->exp_string.c_str (), &tracker);
 	  d->block = tracker.block ();
 	}
       catch (const gdb_exception &ex)
 	{
 	  /* Can't re-parse the expression.  Disable this display item.  */
-	  d->enabled_p = 0;
+	  d->enabled_p = false;
 	  warning (_("Unable to display \"%s\": %s"),
-		   d->exp_string, ex.what ());
+		   d->exp_string.c_str (), ex.what ());
 	  return;
 	}
     }
@@ -1977,7 +1932,7 @@ do_one_display (struct display *d)
 
       annotate_display_expression ();
 
-      puts_filtered (d->exp_string);
+      puts_filtered (d->exp_string.c_str ());
       annotate_display_expression_end ();
 
       if (d->format.count != 1 || d->format.format == 'i')
@@ -2016,7 +1971,7 @@ do_one_display (struct display *d)
 
       annotate_display_expression ();
 
-      puts_filtered (d->exp_string);
+      puts_filtered (d->exp_string.c_str ());
       annotate_display_expression_end ();
 
       printf_filtered (" = ");
@@ -2053,10 +2008,8 @@ do_one_display (struct display *d)
 void
 do_displays (void)
 {
-  struct display *d;
-
-  for (d = display_chain; d; d = d->next)
-    do_one_display (d);
+  for (auto &d : all_displays)
+    do_one_display (d.get ());
 }
 
 /* Delete the auto-display which we were in the process of displaying.
@@ -2065,12 +2018,10 @@ do_displays (void)
 void
 disable_display (int num)
 {
-  struct display *d;
-
-  for (d = display_chain; d; d = d->next)
+  for (auto &d : all_displays)
     if (d->number == num)
       {
-	d->enabled_p = 0;
+	d->enabled_p = false;
 	return;
       }
   printf_unfiltered (_("No display number %d.\n"), num);
@@ -2093,15 +2044,13 @@ disable_current_display (void)
 static void
 info_display_command (const char *ignore, int from_tty)
 {
-  struct display *d;
-
-  if (!display_chain)
+  if (all_displays.empty ())
     printf_unfiltered (_("There are no auto-display expressions now.\n"));
   else
     printf_filtered (_("Auto-display expressions now in effect:\n\
 Num Enb Expression\n"));
 
-  for (d = display_chain; d; d = d->next)
+  for (auto &d : all_displays)
     {
       printf_filtered ("%d:   %c  ", d->number, "ny"[(int) d->enabled_p]);
       if (d->format.size)
@@ -2109,38 +2058,31 @@ Num Enb Expression\n"));
 			 d->format.format);
       else if (d->format.format)
 	printf_filtered ("/%c ", d->format.format);
-      puts_filtered (d->exp_string);
+      puts_filtered (d->exp_string.c_str ());
       if (d->block && !contained_in (get_selected_block (0), d->block, true))
 	printf_filtered (_(" (cannot be evaluated in the current context)"));
       printf_filtered ("\n");
     }
 }
 
-/* Callback fo map_display_numbers, that enables or disables the
-   passed in display D.  */
-
-static void
-do_enable_disable_display (struct display *d, void *data)
-{
-  d->enabled_p = *(int *) data;
-}
-
 /* Implementation of both the "disable display" and "enable display"
    commands.  ENABLE decides what to do.  */
 
 static void
-enable_disable_display_command (const char *args, int from_tty, int enable)
+enable_disable_display_command (const char *args, int from_tty, bool enable)
 {
   if (args == NULL)
     {
-      struct display *d;
-
-      ALL_DISPLAYS (d)
+      for (auto &d : all_displays)
 	d->enabled_p = enable;
       return;
     }
 
-  map_display_numbers (args, do_enable_disable_display, &enable);
+  map_display_numbers (args,
+		       [=] (struct display *d)
+		       {
+			 d->enabled_p = enable;
+		       });
 }
 
 /* The "enable display" command.  */
@@ -2148,7 +2090,7 @@ enable_disable_display_command (const char *args, int from_tty, int enable)
 static void
 enable_display_command (const char *args, int from_tty)
 {
-  enable_disable_display_command (args, from_tty, 1);
+  enable_disable_display_command (args, from_tty, true);
 }
 
 /* The "disable display" command.  */
@@ -2156,7 +2098,7 @@ enable_display_command (const char *args, int from_tty)
 static void
 disable_display_command (const char *args, int from_tty)
 {
-  enable_disable_display_command (args, from_tty, 0);
+  enable_disable_display_command (args, from_tty, false);
 }
 
 /* display_chain items point to blocks and expressions.  Some expressions in
@@ -2170,7 +2112,6 @@ disable_display_command (const char *args, int from_tty)
 static void
 clear_dangling_display_expressions (struct objfile *objfile)
 {
-  struct display *d;
   struct program_space *pspace;
 
   /* With no symbol file we cannot have a block or expression from it.  */
@@ -2183,7 +2124,7 @@ clear_dangling_display_expressions (struct objfile *objfile)
       gdb_assert (objfile->pspace == pspace);
     }
 
-  for (d = display_chain; d != NULL; d = d->next)
+  for (auto &d : all_displays)
     {
       if (d->pspace != pspace)
 	continue;

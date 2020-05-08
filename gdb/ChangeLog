@@ -1,5 +1,31 @@
 2020-05-08  Tom Tromey  <tom@tromey.com>
 
+	* printcmd.c (struct display) <next>: Remove.
+	<display>: New constructor.
+	<exp_string>: Now a std::string.
+	<enabled_p>: Now a bool.
+	(display_number): Move definition earlier.
+	(displays): Rename from display_chain.  Now a std::vector.
+	(ALL_DISPLAYS, ALL_DISPLAYS_SAFE): Remove.
+	(display_command): Update.
+	(do_one_display, disable_display)
+	(enable_disable_display_command, do_enable_disable_display):
+	Update.
+	(free_display): Remove.
+	(clear_displays): Rewrite.
+	(delete_display): Update.
+	(map_display_numbers): Use function_view.  Remove "data"
+	parameter.  Update.
+	(do_delete_display): Remove.
+	(undisplay_command): Update.
+	(do_one_display, do_displays, disable_display)
+	(info_display_command): Update.
+	(do_enable_disable_display): Remove.
+	(enable_disable_display_command)
+	(clear_dangling_display_expressions): Update.
+
+2020-05-08  Tom Tromey  <tom@tromey.com>
+
 	* symtab.c (set_symbol_cache_size)
 	(maintenance_print_symbol_cache, maintenance_flush_symbol_cache)
 	(maintenance_print_symbol_cache_statistics): Update.
