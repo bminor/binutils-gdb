@@ -1,3 +1,19 @@
+2020-05-18  Hongtao Liu  <hongtao.liu@intel.com>
+
+	* config/tc-i386.c: Not handle lret/iret.
+	* testsuite/gas/i386/lfence-ret-a.d: Adjust testcase.
+	* testsuite/gas/i386/lfence-ret-b.d: Ditto.
+	* testsuite/gas/i386/lfence-ret-c.d: Ditto.
+	* testsuite/gas/i386/lfence-ret-d.d: Ditto.
+	* testsuite/gas/i386/lfence-ret.s: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret-a.d: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret-b.d: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret-c.d: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret-d.d: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret-e.d: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret.s: Ditto.
+	* testsuite/gas/i386/x86-64-lfence-ret.e: Deleted.
+
 2020-05-15  Alan Modra  <amodra@gmail.com>
 	    Alex Coplan  <alex.coplan@arm.com>
 
