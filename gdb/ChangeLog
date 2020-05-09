@@ -1,3 +1,8 @@
+2020-05-09  Tom Tromey  <tom@tromey.com>
+
+	* top.c (server_command): Now bool.
+	* top.h (server_command): Now bool.
+
 2020-05-08  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2/read.c (read_lexical_block_scope): Don't process a DIE

@@ -281,7 +281,7 @@ extern void gdb_init (char *);
 extern int source_line_number;
 extern std::string source_file_name;
 extern bool history_expansion_p;
-extern int server_command;
+extern bool server_command;
 extern char *lim_at_start;
 
 extern void gdb_add_history (const char *);

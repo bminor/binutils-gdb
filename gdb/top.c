@@ -174,7 +174,7 @@ static const char *previous_repeat_arguments;
    whatever) can issue its own commands and also send along commands
    from the user, and have the user not notice that the user interface
    is issuing commands too.  */
-int server_command;
+bool server_command;
 
 /* Timeout limit for response from target.  */
 
