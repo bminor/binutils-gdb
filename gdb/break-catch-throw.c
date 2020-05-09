@@ -166,7 +166,7 @@ check_status_exception_catchpoint (struct bpstats *bs)
       type_name = cplus_typename_from_type_info (typeinfo_arg);
 
       canon = cp_canonicalize_string (type_name.c_str ());
-      name = (canon == nullptr
+      name = (canon != nullptr
 	      ? canon.get ()
 	      : type_name.c_str ());
     }

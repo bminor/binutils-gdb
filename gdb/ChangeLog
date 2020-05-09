@@ -1,3 +1,9 @@
+2020-05-09  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25955
+	* break-catch-throw.c (check_status_exception_catchpoint): Fix name
+	calculation.
+
 2020-05-09  Tom Tromey  <tom@tromey.com>
 
 	* top.c (server_command): Now bool.
