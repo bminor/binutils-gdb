@@ -5352,6 +5352,18 @@ dw2_debug_names_iterator::next ()
 	  ull = read_unsigned_leb128 (abfd, m_addr, &bytes_read);
 	  m_addr += bytes_read;
 	  break;
+	case DW_FORM_ref4:
+	  ull = read_4_bytes (abfd, m_addr);
+	  m_addr += 4;
+	  break;
+	case DW_FORM_ref8:
+	  ull = read_8_bytes (abfd, m_addr);
+	  m_addr += 8;
+	  break;
+	case DW_FORM_ref_sig8:
+	  ull = read_8_bytes (abfd, m_addr);
+	  m_addr += 8;
+	  break;
 	default:
 	  complaint (_("Unsupported .debug_names form %s [in module %s]"),
 		     dwarf_form_name (attr.form),
@@ -5383,6 +5395,12 @@ dw2_debug_names_iterator::next ()
 	      continue;
 	    }
 	  per_cu = &dwarf2_per_objfile->get_tu (ull)->per_cu;
+	  break;
+	case DW_IDX_die_offset:
+	  /* In a per-CU index (as opposed to a per-module index), index
+	     entries without CU attribute implicitly refer to the single CU.  */
+	  if (per_cu == NULL)
+	    per_cu = dwarf2_per_objfile->get_cu (0);
 	  break;
 	case DW_IDX_GNU_internal:
 	  if (!m_map.augmentation_is_gdb)
