@@ -14876,5 +14876,5 @@ Specify \"unlimited\" to display all the characters."),
 				       &setdebuglist, &showdebuglist);
 
   /* Eventually initialize fileio.  See fileio.c */
-  initialize_remote_fileio (remote_set_cmdlist, remote_show_cmdlist);
+  initialize_remote_fileio (&remote_set_cmdlist, &remote_show_cmdlist);
 }

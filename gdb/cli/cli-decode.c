@@ -61,7 +61,11 @@ lookup_cmd_for_prefixlist (struct cmd_list_element **key,
       if (p->prefixlist == NULL)
 	continue;
       else if (p->prefixlist == key)
-	return p;
+	{
+	  /* If we found an alias, we must return the aliased
+	     command.  */
+	  return p->cmd_pointer ? p->cmd_pointer : p;
+	}
 
       q = lookup_cmd_for_prefixlist (key, *(p->prefixlist));
       if (q != NULL)
@@ -69,27 +73,6 @@ lookup_cmd_for_prefixlist (struct cmd_list_element **key,
     }
 
   return NULL;
-}
-
-static void
-set_cmd_prefix (struct cmd_list_element *c, struct cmd_list_element **list)
-{
-  struct cmd_list_element *p;
-
-  /* Check to see if *LIST contains any element other than C.  */
-  for (p = *list; p != NULL; p = p->next)
-    if (p != c)
-      break;
-
-  if (p == NULL)
-    {
-      /* *SET_LIST only contains SET.  */
-      p = lookup_cmd_for_prefixlist (list, setlist);
-
-      c->prefix = p ? (p->cmd_pointer ? p->cmd_pointer : p) : p;
-    }
-  else
-    c->prefix = p->prefix;
 }
 
 static void
@@ -229,6 +212,13 @@ do_add_cmd (const char *name, enum command_class theclass,
       p->next = c;
     }
 
+  /* Search the prefix cmd of C, and assigns it to C->prefix.
+     See also add_prefix_cmd and update_prefix_field_of_prefixed_commands.  */
+  struct cmd_list_element *prefixcmd = lookup_cmd_for_prefixlist (list,
+								  cmdlist);
+  c->prefix = prefixcmd;
+
+
   return c;
 }
 
@@ -330,7 +320,6 @@ add_alias_cmd (const char *name, cmd_list_element *old,
   c->alias_chain = old->aliases;
   old->aliases = c;
 
-  set_cmd_prefix (c, list);
   return c;
 }
 
@@ -349,6 +338,37 @@ add_alias_cmd (const char *name, const char *oldname,
 }
 
 
+/* Update the prefix field of all sub-commands of the prefix command C.
+   We must do this when a prefix command is defined as the GDB init sequence
+   does not guarantee that a prefix command is created before its sub-commands.
+   For example, break-catch-sig.c initialization runs before breakpoint.c
+   initialization, but it is breakpoint.c that creates the "catch" command used
+   by the "catch signal" command created by break-catch-sig.c.  */
+
+static void
+update_prefix_field_of_prefixed_commands (struct cmd_list_element *c)
+{
+  for (cmd_list_element *p = *c->prefixlist; p != NULL; p = p->next)
+    {
+      p->prefix = c;
+
+      /* We must recursively update the prefix field to cover
+	 e.g.  'info auto-load libthread-db' where the creation
+	 order was:
+           libthread-db
+           auto-load
+           info
+	 In such a case, when 'auto-load' was created by do_add_cmd,
+         the 'libthread-db' prefix field could not be updated, as the
+	 'auto-load' command was not yet reachable by
+	    lookup_cmd_for_prefixlist (list, cmdlist)
+	    that searches from the top level 'cmdlist'.  */
+      if (p->prefixlist != nullptr)
+	update_prefix_field_of_prefixed_commands (p);
+    }
+}
+
+
 /* Like add_cmd but adds an element for a command prefix: a name that
    should be followed by a subcommand to be looked up in another
    command list.  PREFIXLIST should be the address of the variable
@@ -362,20 +382,14 @@ add_prefix_cmd (const char *name, enum command_class theclass,
 		struct cmd_list_element **list)
 {
   struct cmd_list_element *c = add_cmd (name, theclass, fun, doc, list);
-  struct cmd_list_element *p;
 
   c->prefixlist = prefixlist;
   c->prefixname = prefixname;
   c->allow_unknown = allow_unknown;
 
-  if (list == &cmdlist)
-    c->prefix = NULL;
-  else
-    set_cmd_prefix (c, list);
-
-  /* Update the field 'prefix' of each cmd_list_element in *PREFIXLIST.  */
-  for (p = *prefixlist; p != NULL; p = p->next)
-    p->prefix = c;
+  /* Now that prefix command C is defined, we need to set the prefix field
+     of all prefixed commands that were defined before C itself was defined.  */
+  update_prefix_field_of_prefixed_commands (c);
 
   return c;
 }
@@ -554,8 +568,6 @@ add_setshow_cmd_full (const char *name,
 
   if (set_func != NULL)
     set_cmd_sfunc (set, set_func);
-
-  set_cmd_prefix (set, set_list);
 
   show = add_set_or_show_cmd (name, show_cmd, theclass, var_type, var,
 			      full_show_doc, show_list);

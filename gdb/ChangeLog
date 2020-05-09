@@ -1,5 +1,23 @@
 2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* cli/cli-decode.c (lookup_cmd_for_prefix): Return the aliased command
+	as prefix, not one of its aliases.
+	(set_cmd_prefix): Remove.
+	(do_add_cmd): Centralize the setting of the prefix of a command, when
+	command is defined after its full chain of prefix commands.
+	(add_alias_cmd): Remove call to set_cmd_prefix, as do_add_cmd does it.
+	(add_setshow_cmd_full): Likewise.
+	(update_prefix_field_of_prefixed_commands): New function.
+	(add_prefix_cmd): Replace non working call to set_cmd_prefix by
+	update_prefix_field_of_prefixed_commands.
+	* gdb/remote-fileio.c (initialize_remote_fileio): Use the real
+	addresses of remote_set_cmdlist and remote_show_cmdlist given
+	as argument, not the address of an argument.
+	* gdb/remote-fileio.h (initialize_remote_fileio): Likewise.
+	* gdb/remote.c (_initialize_remote): Likewise.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli/cli-cmds.c (alias_command): Check for an existing alias
 	using lookup_cmd_composition, as valid_command_p is too strict
 	and forbids aliases that are the prefix of an existing alias
