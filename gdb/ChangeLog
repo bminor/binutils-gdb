@@ -1,5 +1,11 @@
 2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* unittests/command-def-selftests.c (traverse_command_structure):
+	Verify all commands of a list have the same prefix command and
+	that only the top cmdlist commands have a null prefix.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli/cli-decode.c (lookup_cmd_for_prefix): Return the aliased command
 	as prefix, not one of its aliases.
 	(set_cmd_prefix): Remove.
