@@ -1,7 +1,7 @@
 #source: tlsgd.s
-#as: -a64 -mfuture
+#as: -a64 -mpower10
 #ld: -melf64ppc
-#objdump: -dr -Mfuture
+#objdump: -dr -Mpower10
 
 .*:     file format .*
 

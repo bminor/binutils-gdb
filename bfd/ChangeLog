@@ -1,5 +1,9 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c: Rename powerxx to power10 throughout.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
 	PR 25961
 	* coffgen.c (coff_get_normalized_symtab): Check that buffer
 	contains required number of auxents before processing any auxent.

@@ -3713,7 +3713,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define POWER7	PPC_OPCODE_POWER7
 #define POWER8	PPC_OPCODE_POWER8
 #define POWER9	PPC_OPCODE_POWER9
-#define POWERXX PPC_OPCODE_POWERXX
+#define POWER10 PPC_OPCODE_POWER10
 #define CELL	PPC_OPCODE_CELL
 #define PPC64	PPC_OPCODE_64 | PPC_OPCODE_64_BRIDGE
 #define NON32	(PPC_OPCODE_64 | PPC_OPCODE_POWER4	\
@@ -7966,33 +7966,33 @@ const unsigned int powerpc_num_opcodes =
    The format of this opcode table is the same as the main opcode table.  */
 
 const struct powerpc_opcode prefix_opcodes[] = {
-{"pnop",	  PMRR,		       PREFIX_MASK,	POWERXX, 0,	{0}},
-{"pli",		  PMLS|OP(14),	       P_DRAPCREL_MASK,	POWERXX, 0,	{RT, SI34}},
-{"paddi",	  PMLS|OP(14),	       P_D_MASK,	POWERXX, 0,	{RT, RA0, SI34, PCREL0}},
-{"psubi",	  PMLS|OP(14),	       P_D_MASK,	POWERXX, 0,	{RT, RA0, NSI34, PCREL0}},
-{"pla",		  PMLS|OP(14),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
-{"plwz",	  PMLS|OP(32),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
-{"plbz",	  PMLS|OP(34),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
-{"pstw",	  PMLS|OP(36),	       P_D_MASK,	POWERXX, 0,	{RS, D34, PRA0, PCREL}},
-{"pstb",	  PMLS|OP(38),	       P_D_MASK,	POWERXX, 0,	{RS, D34, PRA0, PCREL}},
-{"plhz",	  PMLS|OP(40),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
-{"plwa",	  P8LS|OP(41),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
-{"plxsd",	  P8LS|OP(42),	       P_D_MASK,	POWERXX, 0,	{VD, D34, PRA0, PCREL}},
-{"plha",	  PMLS|OP(42),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
-{"plxssp",	  P8LS|OP(43),	       P_D_MASK,	POWERXX, 0,	{VD, D34, PRA0, PCREL}},
-{"psth",	  PMLS|OP(44),	       P_D_MASK,	POWERXX, 0,	{RS, D34, PRA0, PCREL}},
-{"pstxsd",	  P8LS|OP(46),	       P_D_MASK,	POWERXX, 0,	{VS, D34, PRA0, PCREL}},
-{"pstxssp",	  P8LS|OP(47),	       P_D_MASK,	POWERXX, 0,	{VS, D34, PRA0, PCREL}},
-{"plfs",	  PMLS|OP(48),	       P_D_MASK,	POWERXX, 0,	{FRT, D34, PRA0, PCREL}},
-{"plxv",	  P8LS|OP(50),	       P_D_MASK&~OP(1),	POWERXX, 0,	{XTOP, D34, PRA0, PCREL}},
-{"plfd",	  PMLS|OP(50),	       P_D_MASK,	POWERXX, 0,	{FRT, D34, PRA0, PCREL}},
-{"pstfs",	  PMLS|OP(52),	       P_D_MASK,	POWERXX, 0,	{FRS, D34, PRA0, PCREL}},
-{"pstxv",	  P8LS|OP(54),	       P_D_MASK&~OP(1),	POWERXX, 0,	{XTOP, D34, PRA0, PCREL}},
-{"pstfd",	  PMLS|OP(54),	       P_D_MASK,	POWERXX, 0,	{FRS, D34, PRA0, PCREL}},
-{"plq",		  P8LS|OP(56),	       P_D_MASK,	POWERXX, 0,	{RTQ, D34, PRAQ, PCREL}},
-{"pld",		  P8LS|OP(57),	       P_D_MASK,	POWERXX, 0,	{RT, D34, PRA0, PCREL}},
-{"pstq",	  P8LS|OP(60),	       P_D_MASK,	POWERXX, 0,	{RSQ, D34, PRA0, PCREL}},
-{"pstd",	  P8LS|OP(61),	       P_D_MASK,	POWERXX, 0,	{RS, D34, PRA0, PCREL}},
+{"pnop",	  PMRR,		       PREFIX_MASK,	POWER10, 0,	{0}},
+{"pli",		  PMLS|OP(14),	       P_DRAPCREL_MASK,	POWER10, 0,	{RT, SI34}},
+{"paddi",	  PMLS|OP(14),	       P_D_MASK,	POWER10, 0,	{RT, RA0, SI34, PCREL0}},
+{"psubi",	  PMLS|OP(14),	       P_D_MASK,	POWER10, 0,	{RT, RA0, NSI34, PCREL0}},
+{"pla",		  PMLS|OP(14),	       P_D_MASK,	POWER10, 0,	{RT, D34, PRA0, PCREL}},
+{"plwz",	  PMLS|OP(32),	       P_D_MASK,	POWER10, 0,	{RT, D34, PRA0, PCREL}},
+{"plbz",	  PMLS|OP(34),	       P_D_MASK,	POWER10, 0,	{RT, D34, PRA0, PCREL}},
+{"pstw",	  PMLS|OP(36),	       P_D_MASK,	POWER10, 0,	{RS, D34, PRA0, PCREL}},
+{"pstb",	  PMLS|OP(38),	       P_D_MASK,	POWER10, 0,	{RS, D34, PRA0, PCREL}},
+{"plhz",	  PMLS|OP(40),	       P_D_MASK,	POWER10, 0,	{RT, D34, PRA0, PCREL}},
+{"plwa",	  P8LS|OP(41),	       P_D_MASK,	POWER10, 0,	{RT, D34, PRA0, PCREL}},
+{"plxsd",	  P8LS|OP(42),	       P_D_MASK,	POWER10, 0,	{VD, D34, PRA0, PCREL}},
+{"plha",	  PMLS|OP(42),	       P_D_MASK,	POWER10, 0,	{RT, D34, PRA0, PCREL}},
+{"plxssp",	  P8LS|OP(43),	       P_D_MASK,	POWER10, 0,	{VD, D34, PRA0, PCREL}},
+{"psth",	  PMLS|OP(44),	       P_D_MASK,	POWER10, 0,	{RS, D34, PRA0, PCREL}},
+{"pstxsd",	  P8LS|OP(46),	       P_D_MASK,	POWER10, 0,	{VS, D34, PRA0, PCREL}},
+{"pstxssp",	  P8LS|OP(47),	       P_D_MASK,	POWER10, 0,	{VS, D34, PRA0, PCREL}},
+{"plfs",	  PMLS|OP(48),	       P_D_MASK,	POWER10, 0,	{FRT, D34, PRA0, PCREL}},
+{"plxv",	  P8LS|OP(50),	       P_D_MASK&~OP(1),	POWER10, 0,	{XTOP, D34, PRA0, PCREL}},
+{"plfd",	  PMLS|OP(50),	       P_D_MASK,	POWER10, 0,	{FRT, D34, PRA0, PCREL}},
+{"pstfs",	  PMLS|OP(52),	       P_D_MASK,	POWER10, 0,	{FRS, D34, PRA0, PCREL}},
+{"pstxv",	  P8LS|OP(54),	       P_D_MASK&~OP(1),	POWER10, 0,	{XTOP, D34, PRA0, PCREL}},
+{"pstfd",	  PMLS|OP(54),	       P_D_MASK,	POWER10, 0,	{FRS, D34, PRA0, PCREL}},
+{"plq",		  P8LS|OP(56),	       P_D_MASK,	POWER10, 0,	{RTQ, D34, PRAQ, PCREL}},
+{"pld",		  P8LS|OP(57),	       P_D_MASK,	POWER10, 0,	{RT, D34, PRA0, PCREL}},
+{"pstq",	  P8LS|OP(60),	       P_D_MASK,	POWER10, 0,	{RSQ, D34, PRA0, PCREL}},
+{"pstd",	  P8LS|OP(61),	       P_D_MASK,	POWER10, 0,	{RS, D34, PRA0, PCREL}},
 };
 
 const unsigned int prefix_num_opcodes =

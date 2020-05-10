@@ -1,3 +1,12 @@
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_assemble): Update for PPC_OPCODE_POWER10
+	renaming.
+	* testsuite/gas/ppc/prefix-align.d: Use -mpower10/-Mpower10 in
+	place of -mfuture/-Mfuture.
+	* testsuite/gas/ppc/prefix-pcrel.d: Likewise.
+	* testsuite/gas/ppc/prefix-reloc.d: Likewise.
+
 2020-05-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.

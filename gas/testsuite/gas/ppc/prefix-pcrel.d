@@ -1,6 +1,6 @@
-#as: -mfuture
-#objdump: -dr -Mfuture
-#name: POWERXX pcrel tests
+#as: -mpower10
+#objdump: -dr -Mpower10
+#name: POWER10 pcrel tests
 
 .*
 

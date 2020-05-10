@@ -1,3 +1,7 @@
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc: Rename powerxx to power10 throughout.
+
 2020-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gold/25904

@@ -228,8 +228,8 @@ extern const unsigned int spe2_num_opcodes;
 /* Opcode is supported by EFS2.  */
 #define PPC_OPCODE_EFS2	    0x200000000000ull
 
-/* Opcode is only supported by powerxx architecture.  */
-#define PPC_OPCODE_POWERXX  0x400000000000ull
+/* Opcode is only supported by power10 architecture.  */
+#define PPC_OPCODE_POWER10  0x400000000000ull
 
 /* A macro to extract the major opcode from an instruction.  */
 #define PPC_OP(i) (((i) >> 26) & 0x3f)

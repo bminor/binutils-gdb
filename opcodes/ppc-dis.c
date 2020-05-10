@@ -185,10 +185,15 @@ struct ppc_mopt ppc_opts[] = {
 		| PPC_OPCODE_POWER7 | PPC_OPCODE_POWER8 | PPC_OPCODE_POWER9
 		| PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX),
     0 },
+  { "power10", (PPC_OPCODE_PPC | PPC_OPCODE_ISEL | PPC_OPCODE_64
+		| PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6
+		| PPC_OPCODE_POWER7 | PPC_OPCODE_POWER8 | PPC_OPCODE_POWER9
+		| PPC_OPCODE_POWER10 | PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX),
+    0 },
   { "future",  (PPC_OPCODE_PPC | PPC_OPCODE_ISEL | PPC_OPCODE_64
 		| PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6
 		| PPC_OPCODE_POWER7 | PPC_OPCODE_POWER8 | PPC_OPCODE_POWER9
-		| PPC_OPCODE_POWERXX | PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX),
+		| PPC_OPCODE_POWER10 | PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX),
     0 },
   { "ppc",     PPC_OPCODE_PPC,
     0 },
@@ -768,7 +773,7 @@ print_insn_powerpc (bfd_vma memaddr,
 
   /* Get the major opcode of the insn.  */
   opcode = NULL;
-  if ((dialect & PPC_OPCODE_POWERXX) != 0
+  if ((dialect & PPC_OPCODE_POWER10) != 0
       && PPC_OP (insn) == 0x1)
     {
       uint64_t temp_insn, suffix;
