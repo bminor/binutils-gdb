@@ -7085,7 +7085,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"tlbsrx.",	XRC(31,850,1),	XRT_MASK,    PPCA2,	0,		{RA0, RB}},
 
-{"slbiag",	X(31,850),	XRARB_MASK,  POWER9,	0,		{RS}},
+{"slbiag",	X(31,850),	XRLARB_MASK, POWER10,	0,		{RS, A_L}},
+{"slbiag",	X(31,850),	XRARB_MASK,  POWER9,	POWER10,	{RS}},
+
 {"slbmfev",	X(31,851),	XRLA_MASK,   POWER9,	0,		{RT, RB, A_L}},
 {"slbmfev",	X(31,851),	XRA_MASK,    PPC64,	POWER9,		{RT, RB}},
 
