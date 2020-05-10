@@ -1,3 +1,25 @@
+2020-06-15  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* emultempl/xtensaelf.em (XSHAL_ABI): Remove macro definition.
+	(XTHAL_ABI_UNDEFINED, XTHAL_ABI_WINDOWED, XTHAL_ABI_CALL0): New
+	macros.
+	(elf32xtensa_abi): New declaration.
+	(xt_config_info_unpack_and_check): Set elf32xtensa_abi if it is
+	undefined.  Use xtensa_abi_choice instead of XSHAL_ABI to test
+	ABI tag consistency.
+	(xtensa_add_config_info): Use xtensa_abi_choice instead of
+	XSHAL_ABI to format ABI tag.
+	(PARSE_AND_LIST_PROLOGUE): Define OPTION_ABI_WINDOWED,
+	OPTION_ABI_CALL0 and declare elf32xtensa_abi.
+	(PARSE_AND_LIST_LONGOPTS): Add entries for --abi-windowed and
+	--abi-call0.
+	(PARSE_AND_LIST_OPTIONS): Add help text for --abi-windowed and
+	--abi-call0.
+	(PARSE_AND_LIST_ARGS_CASES): Add handlers for --abi-windowed and
+	--abi-call0.
+	* ld.texi: Add description for options --abi-windowed and
+	--abi-call0.
+
 2020-06-15  Roland McGrath  <mcgrathr@google.com>
 
 	* NEWS: Mention -z start-stop-visibility=... option for ELF.

@@ -1,3 +1,22 @@
+2020-06-15  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (XTHAL_ABI_WINDOWED, XTHAL_ABI_CALL0): New
+	macros.
+	(elf32xtensa_abi): New declaration.
+	(option_abi_windowed, option_abi_call0): New enum constants.
+	(md_longopts): Add entries for --abi-windowed and --abi-call0.
+	(md_parse_option): Add handlers for --abi-windowed and
+	--abi-call0.
+	(xtensa_add_config_info): Use xtensa_abi_choice instead of
+	XSHAL_ABI to format ABI tag.
+	* doc/as.texi (Target Xtensa options): Add --abi-windowed and
+	--abi-call0 to the list of options.
+	* doc/c-xtensa.texi: Add description for options --abi-windowed
+	and --abi-call0.
+	* testsuite/gas/xtensa/abi-call0.d: New test definition.
+	* testsuite/gas/xtensa/abi-windowed.d: New test definition.
+	* testsuite/gas/xtensa/abi.s: New test source.
+
 2020-06-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26115

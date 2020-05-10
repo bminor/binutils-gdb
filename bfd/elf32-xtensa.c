@@ -37,6 +37,22 @@
 
 #define XTENSA_NO_NOP_REMOVAL 0
 
+#ifndef XSHAL_ABI
+#define XSHAL_ABI 0
+#endif
+
+#ifndef XTHAL_ABI_UNDEFINED
+#define XTHAL_ABI_UNDEFINED -1
+#endif
+
+#ifndef XTHAL_ABI_WINDOWED
+#define XTHAL_ABI_WINDOWED 0
+#endif
+
+#ifndef XTHAL_ABI_CALL0
+#define XTHAL_ABI_CALL0 1
+#endif
+
 /* Local helper functions.  */
 
 static bfd_boolean add_extra_plt_sections (struct bfd_link_info *, int);
@@ -163,6 +179,10 @@ int elf32xtensa_no_literal_movement = 1;
    with xt.prop. prefix.  */
 
 bfd_boolean elf32xtensa_separate_props = FALSE;
+
+/* Xtensa ABI.  It affects PLT entry code.  */
+
+int elf32xtensa_abi = XTHAL_ABI_UNDEFINED;
 
 /* Rename one of the generic section flags to better document how it
    is used here.  */
@@ -2247,6 +2267,13 @@ bfd_elf_xtensa_reloc (bfd *abfd,
   return flag;
 }
 
+int xtensa_abi_choice (void)
+{
+  if (elf32xtensa_abi == XTHAL_ABI_UNDEFINED)
+    return XSHAL_ABI;
+  else
+    return elf32xtensa_abi;
+}
 
 /* Set up an entry in the procedure linkage table.  */
 
@@ -2259,6 +2286,7 @@ elf_xtensa_create_plt_entry (struct bfd_link_info *info,
   bfd_vma plt_base, got_base;
   bfd_vma code_offset, lit_offset, abi_offset;
   int chunk;
+  int abi = xtensa_abi_choice ();
 
   chunk = reloc_index / PLT_ENTRIES_PER_CHUNK;
   splt = elf_xtensa_get_plt_section (info, chunk);
@@ -2279,10 +2307,10 @@ elf_xtensa_create_plt_entry (struct bfd_link_info *info,
   /* Fill in the entry in the procedure linkage table.  */
   memcpy (splt->contents + code_offset,
 	  (bfd_big_endian (output_bfd)
-	   ? elf_xtensa_be_plt_entry[XSHAL_ABI != XTHAL_ABI_WINDOWED]
-	   : elf_xtensa_le_plt_entry[XSHAL_ABI != XTHAL_ABI_WINDOWED]),
+	   ? elf_xtensa_be_plt_entry[abi != XTHAL_ABI_WINDOWED]
+	   : elf_xtensa_le_plt_entry[abi != XTHAL_ABI_WINDOWED]),
 	  PLT_ENTRY_SIZE);
-  abi_offset = XSHAL_ABI == XTHAL_ABI_WINDOWED ? 3 : 0;
+  abi_offset = abi == XTHAL_ABI_WINDOWED ? 3 : 0;
   bfd_put_16 (output_bfd, l32r_offset (got_base + 0,
 				       plt_base + code_offset + abi_offset),
 	      splt->contents + code_offset + abi_offset + 1);

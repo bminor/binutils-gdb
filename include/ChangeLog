@@ -1,3 +1,7 @@
+2020-06-15  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf/xtensa.h (xtensa_abi_choice): New declaration.
+
 2020-06-12  Roland McGrath  <mcgrathr@google.com>
 
 	* bfdlink.h (struct bfd_link_info): New field start_stop_visibility.

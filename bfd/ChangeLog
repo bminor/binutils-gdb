@@ -1,3 +1,12 @@
+2020-06-15  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (XSHAL_ABI, XTHAL_ABI_UNDEFINED)
+	(XTHAL_ABI_WINDOWED, XTHAL_ABI_CALL0): New macros.
+	(elf32xtensa_abi): New global variable.
+	(xtensa_abi_choice): New function.
+	(elf_xtensa_create_plt_entry): Use xtensa_abi_choice instead of
+	XSHAL_ABI to select PLT code.
+
 2020-06-15  Roland McGrath  <mcgrathr@google.com>
 
 	* elflink.c (bfd_elf_define_start_stop): Use start_stop_visibility

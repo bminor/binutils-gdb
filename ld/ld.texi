@@ -8565,6 +8565,17 @@ more than performance.  With this option, the linker will not insert
 no-ops or widen density instructions to preserve branch target
 alignment.  There may still be some cases where no-ops are required to
 preserve the correctness of the code.
+
+@item --abi-windowed
+@itemx --abi-call0
+Choose ABI for the output object and for the generated PLT code.
+PLT code inserted by the linker must match ABI of the output object
+because windowed and call0 ABI use incompatible function call
+conventions.
+Default ABI is chosen by the ABI tag in the @code{.xtensa.info} section
+of the first input object.
+A warning is issued if ABI tags of input objects do not match each other
+or the chosen output object ABI.
 @end table
 
 @ifclear GENERIC

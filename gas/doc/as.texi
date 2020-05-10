@@ -626,6 +626,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--[no-]transform}]
  [@b{--rename-section} @var{oldname}=@var{newname}]
  [@b{--[no-]trampolines}]
+ [@b{--abi-windowed}|@b{--abi-call0}]
 @end ifset
 @ifset Z80
 

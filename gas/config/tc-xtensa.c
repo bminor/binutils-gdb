@@ -31,8 +31,12 @@
 #include "elf/xtensa.h"
 
 /* Provide default values for new configuration settings.  */
-#ifndef XSHAL_ABI
-#define XSHAL_ABI 0
+#ifndef XTHAL_ABI_WINDOWED
+#define XTHAL_ABI_WINDOWED 0
+#endif
+
+#ifndef XTHAL_ABI_CALL0
+#define XTHAL_ABI_CALL0 1
 #endif
 
 #ifndef XTENSA_MARCH_EARLIEST
@@ -648,6 +652,10 @@ static bfd_boolean workaround_all_short_loops = FALSE;
    This option is defined in BDF library.  */
 extern bfd_boolean elf32xtensa_separate_props;
 
+/* Xtensa ABI.
+   This option is defined in BDF library.  */
+extern int elf32xtensa_abi;
+
 static void
 xtensa_setup_hw_workarounds (int earliest, int latest)
 {
@@ -735,6 +743,9 @@ enum
 
   option_separate_props,
   option_no_separate_props,
+
+  option_abi_windowed,
+  option_abi_call0,
 };
 
 const char *md_shortopts = "";
@@ -815,6 +826,9 @@ struct option md_longopts[] =
   { "auto-litpool-limit", required_argument, NULL, option_auto_litpool_limit },
 
   { "separate-prop-tables", no_argument, NULL, option_separate_props },
+
+  { "abi-windowed", no_argument, NULL, option_abi_windowed },
+  { "abi-call0", no_argument, NULL, option_abi_call0 },
 
   { NULL, no_argument, NULL, 0 }
 };
@@ -1042,6 +1056,14 @@ md_parse_option (int c, const char *arg)
 
     case option_no_separate_props:
       elf32xtensa_separate_props = FALSE;
+      return 1;
+
+    case option_abi_windowed:
+      elf32xtensa_abi = XTHAL_ABI_WINDOWED;
+      return 1;
+
+    case option_abi_call0:
+      elf32xtensa_abi = XTHAL_ABI_CALL0;
       return 1;
 
     default:
@@ -8958,7 +8980,6 @@ is_local_forward_loop (const TInsn *insn, fragS *fragP)
   return FALSE;
 }
 
-
 #define XTINFO_NAME "Xtensa_Info"
 #define XTINFO_NAMESZ 12
 #define XTINFO_TYPE 1
@@ -8975,7 +8996,7 @@ xtensa_add_config_info (void)
 
   data = XNEWVEC (char, 100);
   sprintf (data, "USE_ABSOLUTE_LITERALS=%d\nABI=%d\n",
-	   XSHAL_USE_ABSOLUTE_LITERALS, XSHAL_ABI);
+	   XSHAL_USE_ABSOLUTE_LITERALS, xtensa_abi_choice ());
   sz = strlen (data) + 1;
 
   /* Add enough null terminators to pad to a word boundary.  */
