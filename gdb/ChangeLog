@@ -1,5 +1,19 @@
 2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* command.h (enum command_class): Improve comments, document
+	that class_alias is for user-defined aliases, give the class
+	name for each class, remove unused class_xdb.
+	* cli/cli-decode.c (add_com_alias): Document THECLASS intended usage.
+	* breakpoint.c (_initialize_breakpoint): Replace class_alias
+	by a precise class.
+	* infcmd.c (_initialize_infcmd): Likewise.
+	* reverse.c (_initialize_reverse): Likewise.
+	* stack.c (_initialize_stack): Likewise.
+	* symfile.c (_initialize_symfile): Likewise.
+	* tracepoint.c (_initialize_tracepoint): Likewise.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli/cli-decode.c (apropos_cmd): Produce output for aliases
 	when their aliased command is traversed.
 	(help_cmd): Add fput_command_names_styled call to

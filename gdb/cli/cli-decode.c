@@ -1006,7 +1006,10 @@ add_com (const char *name, enum command_class theclass,
   return add_cmd (name, theclass, fun, doc, &cmdlist);
 }
 
-/* Add an alias or abbreviation command to the list of commands.  */
+/* Add an alias or abbreviation command to the list of commands.
+   For aliases predefined by GDB (such as bt), THECLASS must be
+   different of class_alias, as class_alias is used to identify
+   user defined aliases.  */
 
 struct cmd_list_element *
 add_com_alias (const char *name, const char *oldname, enum command_class theclass,

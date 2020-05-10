@@ -1,5 +1,9 @@
 2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* gdb.base/alias.exp: Verify 'help aliases' shows user defined aliases.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* gdb.base/help.exp: Test apropos and help for commands
 	having aliases.  Fixed comments not starting with an
 	upper-case letter or not finishing with a dot.
@@ -8,7 +12,7 @@
 
 	* gdb.base/alias.exp: Update help output check.
 
-c2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/default.exp: Update output following fixes.
 

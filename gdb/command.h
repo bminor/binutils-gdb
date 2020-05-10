@@ -29,21 +29,46 @@ struct completion_tracker;
 /* Command classes are top-level categories into which commands are
    broken down for "help" purposes.
 
-   Notes on classes: class_alias is for alias commands which are not
-   abbreviations of the original command.  class-pseudo is for
-   commands which are not really commands nor help topics ("stop").  */
+   The class_alias is used for the user-defined aliases, defined
+   using the "alias" command.
+
+   Aliases pre-defined by GDB (e.g. the alias "bt" of the "backtrace" command)
+   are not using the class_alias.
+   Different pre-defined aliases of the same command do not necessarily
+   have the same classes.  For example, class_stack is used for the
+   "backtrace" and its "bt" alias", while "info stack" (also an alias
+   of "backtrace" uses class_info.  */
 
 enum command_class
 {
-  /* Special args to help_list */
-  class_deprecated = -3, all_classes = -2, all_commands = -1,
+  /* Classes of commands followed by a comment giving the name
+     to use in "help <classname>".
+     Note that help accepts unambiguous abbreviated class names.  */
+
+  /* Special classes to help_list */
+  class_deprecated = -3,
+  all_classes = -2,  /* help without <classname> */
+  all_commands = -1, /* all */
+
   /* Classes of commands */
-  no_class = -1, class_run = 0, class_vars, class_stack, class_files,
-  class_support, class_info, class_breakpoint, class_trace,
-  class_alias, class_bookmark, class_obscure, class_maintenance,
-  class_tui, class_user, class_xdb,
-  no_set_class	/* Used for "show" commands that have no corresponding
-		   "set" command.  */
+  no_class = -1,
+  class_run = 0,     /* running */
+  class_vars,        /* data */
+  class_stack,       /* stack */
+  class_files,       /* files */
+  class_support,     /* support */
+  class_info,        /* status */
+  class_breakpoint,  /* breakpoints */
+  class_trace,       /* tracepoints */
+  class_alias,       /* aliases */
+  class_bookmark,
+  class_obscure,     /* obscure */
+  class_maintenance, /* internals */
+  class_tui,
+  class_user,        /* user-defined */
+
+  /* Used for "show" commands that have no corresponding "set" command.  */
+  no_set_class
 };
 
 /* FIXME: cagney/2002-03-17: Once cmd_type() has been removed, ``enum

@@ -3180,7 +3180,7 @@ is restored."),
   cmd_name = "inferior-tty";
   c = lookup_cmd (&cmd_name, setlist, "", -1, 1);
   gdb_assert (c != NULL);
-  add_alias_cmd ("tty", c, class_alias, 0, &cmdlist);
+  add_alias_cmd ("tty", c, class_run, 0, &cmdlist);
 
   cmd_name = "args";
   add_setshow_string_noescape_cmd (cmd_name, class_run,
@@ -3318,14 +3318,14 @@ Step one instruction exactly.\n\
 Usage: stepi [N]\n\
 Argument N means step N times (or till program stops for another \
 reason)."));
-  add_com_alias ("si", "stepi", class_alias, 0);
+  add_com_alias ("si", "stepi", class_run, 0);
 
   add_com ("nexti", class_run, nexti_command, _("\
 Step one instruction, but proceed through subroutine calls.\n\
 Usage: nexti [N]\n\
 Argument N means step N times (or till program stops for another \
 reason)."));
-  add_com_alias ("ni", "nexti", class_alias, 0);
+  add_com_alias ("ni", "nexti", class_run, 0);
 
   add_com ("finish", class_run, finish_command, _("\
 Execute until selected stack frame returns.\n\

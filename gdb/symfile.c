@@ -3906,8 +3906,8 @@ on its own."), &cmdlist);
 			_("Commands for debugging overlays."), &overlaylist,
 			"overlay ", 0, &cmdlist);
 
-  add_com_alias ("ovly", "overlay", class_alias, 1);
-  add_com_alias ("ov", "overlay", class_alias, 1);
+  add_com_alias ("ovly", "overlay", class_support, 1);
+  add_com_alias ("ov", "overlay", class_support, 1);
 
   add_cmd ("map-overlay", class_support, map_overlay_command,
 	   _("Assert that an overlay section is mapped."), &overlaylist);

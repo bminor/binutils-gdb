@@ -3485,7 +3485,7 @@ With a negative COUNT, print outermost -COUNT frames."),
 
   add_com_alias ("bt", "backtrace", class_stack, 0);
 
-  add_com_alias ("where", "backtrace", class_alias, 0);
+  add_com_alias ("where", "backtrace", class_stack, 0);
   add_info ("stack", backtrace_command,
 	    _("Backtrace of the stack, or innermost COUNT frames."));
   add_info_alias ("s", "stack", 1);
