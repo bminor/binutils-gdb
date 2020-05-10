@@ -27,8 +27,8 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug f90}]} {
     return -1
 }
 
-if ![runto MAIN__] then {
-    perror "couldn't run to breakpoint MAIN__"
+if ![fortran_runto_main] then {
+    perror "couldn't run to main"
     continue
 }
 

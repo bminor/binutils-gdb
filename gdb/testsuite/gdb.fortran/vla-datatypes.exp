@@ -24,7 +24,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
 # check that all fortran standard datatypes will be
 # handled correctly when using as VLA's
 
-if ![runto_main] {
+if ![fortran_runto_main] {
     untested "could not run to main"
     return -1
 }

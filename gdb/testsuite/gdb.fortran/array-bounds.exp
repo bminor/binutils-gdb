@@ -20,13 +20,14 @@ if { [skip_fortran_tests] } { return -1 }
 
 set testfile "array-bounds"
 standard_testfile .f90
+load_lib fortran.exp
 
 if {[prepare_for_testing $testfile.exp $testfile $srcfile {f90 debug}]} {
     return -1
 }
 
-if {![runto MAIN__]} {
-    perror "Could not run to breakpoint `MAIN__'."
+if {![fortran_runto_main]} {
+    perror "Could not run to main."
     continue
 }
 

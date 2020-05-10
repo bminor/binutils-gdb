@@ -126,3 +126,23 @@ proc fortran_character1 {} {
 	return "unknown"
     }
 }
+
+# Return name of the main procedure based on the compiler version.
+
+proc fortran_main {} {
+    if {[test_compiler_info {gcc-4-[012]-*}]
+         || [test_compiler_info {gcc-*}]
+         || [test_compiler_info {icc-*}]} {
+	return "MAIN__"
+    } elseif {[test_compiler_info {clang-*}]} {
+	return "MAIN_"
+    } else {
+	return "unknown"
+    }
+}
+
+# Fortran version of runto_main.
+
+proc fortran_runto_main { } {
+    return [runto [fortran_main]]
+}
