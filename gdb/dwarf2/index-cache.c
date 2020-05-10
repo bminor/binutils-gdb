@@ -259,7 +259,7 @@ show_index_cache_command (const char *arg, int from_tty)
   auto restore_flag = make_scoped_restore (&in_show_index_cache_command, true);
 
   /* Call all "show index-cache" subcommands.  */
-  cmd_show_list (show_index_cache_prefix_list, from_tty, "");
+  cmd_show_list (show_index_cache_prefix_list, from_tty);
 
   printf_unfiltered ("\n");
   printf_unfiltered

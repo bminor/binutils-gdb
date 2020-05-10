@@ -559,7 +559,7 @@ gdb_test "show args" "Argument list to give program being debugged when it is st
 
 # test show check abbreviations
 foreach x {"c" "ch" "check"} {
-    gdb_test "show $x" "range:  *Range checking is \"auto; currently off\".(\[^\r\n\]*\[\r\n\])+type:  *Strict type checking is on\..*" \
+    gdb_test "show $x" "check range:  *Range checking is \"auto; currently off\".(\[^\r\n\]*\[\r\n\])+check type:  *Strict type checking is on\..*" \
 	"show check \"$x\" abbreviation"
 }
 
@@ -645,7 +645,7 @@ gdb_test "show history save" "Saving of the history record on exit is on."
 #test show history size
 gdb_test "show history size" "The size of the command history is.*"
 #test show history
-gdb_test "show history" "expansion:  *History expansion on command input is o(\[^\r\n\]*\[\r\n\])+filename:  *The filename in which to record the command history is.*.gdb_history(\[^\r\n\]*\[\r\n\])+save: *Saving of the history record on exit is o(\[^\r\n\]*\[\r\n\])+size: * The size of the command history is.*"
+gdb_test "show history" "history expansion:  *History expansion on command input is o(\[^\r\n\]*\[\r\n\])+history filename:  *The filename in which to record the command history is.*.gdb_history(\[^\r\n\]*\[\r\n\])+history save: *Saving of the history record on exit is o(\[^\r\n\]*\[\r\n\])+history size: * The size of the command history is.*"
 #test show language
 gdb_test "show language" "The current source language is \"auto; currently c\"."
 #test show listsize

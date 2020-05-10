@@ -1,5 +1,13 @@
 2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* cli/cli-setshow.h (cmd_show_list): Remove prefix argument.
+	* cli/cli-decode.c (do_show_prefix_cmd): Likewise.
+	* command.h (cmd_show_list): Likewise.
+	* dwarf2/index-cache.c (show_index_cache_command): Likewise.
+	* cli/cli-setshow.c (cmd_show_list): Use the prefix to produce the output.  Skip aliases.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* unittests/command-def-selftests.c (traverse_command_structure):
 	Verify all commands of a list have the same prefix command and
 	that only the top cmdlist commands have a null prefix.

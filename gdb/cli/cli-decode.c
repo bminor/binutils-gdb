@@ -428,7 +428,7 @@ add_basic_prefix_cmd (const char *name, enum command_class theclass,
 static void
 do_show_prefix_cmd (const char *args, int from_tty, struct cmd_list_element *c)
 {
-  cmd_show_list (*c->prefixlist, from_tty, "");
+  cmd_show_list (*c->prefixlist, from_tty);
 }
 
 /* See command.h.  */

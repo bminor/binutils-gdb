@@ -464,7 +464,7 @@ extern void
 
 /* Do a "show" command for each thing on a command list.  */
 
-extern void cmd_show_list (struct cmd_list_element *, int, const char *);
+extern void cmd_show_list (struct cmd_list_element *, int);
 
 /* Used everywhere whenever at least one parameter is required and
    none is specified.  */
