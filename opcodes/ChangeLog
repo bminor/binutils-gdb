@@ -1,5 +1,9 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
+	* ppc-dis.c (powerpc_init_dialect): Default to "power10".
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
 	* ppc-dis.c (ppc_opts): Add "power10" entry.
 	(print_insn_powerpc): Update for PPC_OPCODE_POWER10 renaming.
 	* ppc-opc.c (POWER10): Rename from POWERXX.  Update all uses.

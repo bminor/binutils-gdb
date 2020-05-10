@@ -359,7 +359,7 @@ powerpc_init_dialect (struct disassemble_info *info)
       break;
     default:
       if (info->arch == bfd_arch_powerpc)
-	dialect = ppc_parse_cpu (dialect, &sticky, "power9") | PPC_OPCODE_ANY;
+	dialect = ppc_parse_cpu (dialect, &sticky, "power10") | PPC_OPCODE_ANY;
       else
 	dialect = ppc_parse_cpu (dialect, &sticky, "pwr");
       break;
