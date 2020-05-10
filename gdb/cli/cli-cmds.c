@@ -2454,7 +2454,7 @@ Usage: alias [-a] [--] ALIAS = COMMAND\n\
 ALIAS is the name of the alias command to create.\n\
 COMMAND is the command being aliased to.\n\
 If \"-a\" is specified, the command is an abbreviation,\n\
-and will not appear in help command list output.\n\
+and will not be used in command completion.\n\
 \n\
 Examples:\n\
 Make \"spe\" an alias of \"set print elements\":\n\

@@ -1,5 +1,17 @@
 2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* cli/cli-decode.h (help_cmd_list): Remove declaration.
+	* cli/cli-decode.c (help_cmd_list): Declare as static,
+	remove prefix argument, use bool for recurse arg, rework to show the aliases of
+	a command together with the command.
+	(fput_command_name_styled, fput_command_names_styled): New functions.
+	(print_help_for_command): Remove prefix arg, use bool for recurse arg, use
+	fput_command_name_styled.
+	(help_list, help_all): Update callers to remove prefix arg and use bool recurse.
+	* cli/cli-cmds.c (_initialize_cli_cmds): Update alias_command doc.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli/cli-setshow.h (cmd_show_list): Remove prefix argument.
 	* cli/cli-decode.c (do_show_prefix_cmd): Likewise.
 	* command.h (cmd_show_list): Likewise.

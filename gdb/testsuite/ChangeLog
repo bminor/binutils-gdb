@@ -1,5 +1,9 @@
 2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* gdb.base/alias.exp: Update help output check.
+
+c2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* gdb.base/default.exp: Update output following fixes.
 
 2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
