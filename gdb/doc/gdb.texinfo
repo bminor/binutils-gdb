@@ -2041,8 +2041,10 @@ Command name abbreviations are allowed if unambiguous.
 
 @item help @var{class}
 Using one of the general help classes as an argument, you can get a
-list of the individual commands in that class.  For example, here is the
-help display for the class @code{status}:
+list of the individual commands in that class.  If a command has
+aliases, the aliases are given after the command name, separated by
+commas.  For example, here is the help display for the class
+@code{status}:
 
 @smallexample
 (@value{GDBP}) help status
@@ -2052,9 +2054,11 @@ List of commands:
 
 @c Line break in "show" line falsifies real output, but needed
 @c to fit in smallbook page size.
-info -- Generic command for showing things
+info, inf, i -- Generic command for showing things
         about the program being debugged
-show -- Generic command for showing things
+info address -- Describe where symbol SYM is stored.
+...
+show, info set -- Generic command for showing things
         about the debugger
 
 Type "help" followed by command name for full
@@ -2065,7 +2069,9 @@ Command name abbreviations are allowed if unambiguous.
 
 @item help @var{command}
 With a command name as @code{help} argument, @value{GDBN} displays a
-short paragraph on how to use that command.
+short paragraph on how to use that command.  If that command has
+one or more aliases, @value{GDBN} will display a first line with
+the command name and all its aliases separated by commas.
 
 @kindex apropos
 @item apropos [-v] @var{regexp}
@@ -2087,9 +2093,6 @@ results in:
 @group
 alias -- Define a new command that is an alias of an existing command
 aliases -- Aliases of other commands
-d -- Delete some breakpoints or auto-display expressions
-del -- Delete some breakpoints or auto-display expressions
-delete -- Delete some breakpoints or auto-display expressions
 @end group
 @end smallexample
 
@@ -27512,8 +27515,7 @@ underscores.
 that is being aliased.
 
 The @samp{-a} option specifies that the new alias is an abbreviation
-of the command.  Abbreviations are not shown in command
-lists displayed by the @samp{help} command.
+of the command.  Abbreviations are not used in command completion.
 
 The @samp{--} option specifies the end of options,
 and is useful when @var{ALIAS} begins with a dash.

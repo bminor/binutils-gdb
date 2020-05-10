@@ -1,5 +1,9 @@
 2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* NEWS: Mention changes to help and apropos.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* command.h (enum command_class): Improve comments, document
 	that class_alias is for user-defined aliases, give the class
 	name for each class, remove unused class_xdb.

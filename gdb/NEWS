@@ -3,6 +3,14 @@
 
 *** Changes since GDB 9
 
+* Help and apropos commands will now show the documentation of a
+  command only once, even if that command has one or more aliases.
+  These commands now show the command name, then all of its aliases,
+  and finally the description of the command.
+
+* 'help aliases' now shows only the user defined aliases.  GDB predefined
+  aliases are shown together with their aliased command.
+
 * GDB now supports debuginfod, an HTTP server for distributing ELF/DWARF
   debugging information as well as source code.
 
