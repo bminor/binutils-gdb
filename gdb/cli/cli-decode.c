@@ -1078,9 +1078,7 @@ print_doc_of_command (struct cmd_list_element *c, const char *prefix,
   if (verbose)
     fputs_filtered ("\n", stream);
 
-  fprintf_styled (stream, title_style.style (),
-		  "%s%s", prefix, c->name);
-  fputs_filtered (" -- ", stream);
+  fput_command_names_styled (c, true, " -- ", stream);
   if (verbose)
     fputs_highlighted (c->doc, highlight, stream);
   else
@@ -1106,6 +1104,14 @@ apropos_cmd (struct ui_file *stream,
   /* Walk through the commands.  */
   for (c=commandlist;c;c=c->next)
     {
+      if (c->cmd_pointer != nullptr)
+	{
+	  /* Command aliases/abbreviations are skipped to ensure we print the
+	     doc of a command only once, when encountering the aliased
+	     command.  */
+	  continue;
+	}
+
       returnvalue = -1; /* Needed to avoid double printing.  */
       if (c->name != NULL)
 	{
@@ -1115,6 +1121,17 @@ apropos_cmd (struct ui_file *stream,
 	  returnvalue = regex.search (c->name, name_len, 0, name_len, NULL);
 	  if (returnvalue >= 0)
 	    print_doc_of_command (c, prefix, verbose, regex, stream);
+
+	  /* Try to match against the name of the aliases.  */
+	  for (cmd_list_element *iter = c->aliases;
+	       returnvalue < 0 && iter;
+	       iter = iter->alias_chain)
+	    {
+	      name_len = strlen (iter->name);
+	      returnvalue = regex.search (iter->name, name_len, 0, name_len, NULL);
+	      if (returnvalue >= 0)
+		print_doc_of_command (c, prefix, verbose, regex, stream);
+	    }
 	}
       if (c->doc != NULL && returnvalue < 0)
 	{
@@ -1124,10 +1141,8 @@ apropos_cmd (struct ui_file *stream,
 	  if (regex.search (c->doc, doc_len, 0, doc_len, NULL) >= 0)
 	    print_doc_of_command (c, prefix, verbose, regex, stream);
 	}
-      /* Check if this command has subcommands and is not an
-	 abbreviation.  We skip listing subcommands of abbreviations
-	 in order to avoid duplicates in the output.  */
-      if (c->prefixlist != NULL && !c->abbrev_flag)
+      /* Check if this command has subcommands.  */
+      if (c->prefixlist != NULL)
 	{
 	  /* Recursively call ourselves on the subcommand list,
 	     passing the right prefix in.  */
@@ -1150,7 +1165,7 @@ apropos_cmd (struct ui_file *stream,
 void
 help_cmd (const char *command, struct ui_file *stream)
 {
-  struct cmd_list_element *c;
+  struct cmd_list_element *c, *alias, *prefix_cmd, *c_cmd;
 
   if (!command)
     {
@@ -1164,10 +1179,13 @@ help_cmd (const char *command, struct ui_file *stream)
       return;
     }
 
+  const char *orig_command = command;
   c = lookup_cmd (&command, cmdlist, "", 0, 0);
 
   if (c == 0)
     return;
+
+  lookup_cmd_composition (orig_command, &alias, &prefix_cmd, &c_cmd);
 
   /* There are three cases here.
      If c->prefixlist is nonzero, we have a prefix command.
@@ -1181,6 +1199,9 @@ help_cmd (const char *command, struct ui_file *stream)
      number of this class so that the commands in the class will be
      listed.  */
 
+  /* If the user asked 'help somecommand' and there is no alias,
+     the false indicates to not output the (single) command name.  */
+  fput_command_names_styled (c, false, "\n", stream);
   fputs_filtered (c->doc, stream);
   fputs_filtered ("\n", stream);
 

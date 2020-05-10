@@ -1,5 +1,12 @@
 2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
+	* cli/cli-decode.c (apropos_cmd): Produce output for aliases
+	when their aliased command is traversed.
+	(help_cmd): Add fput_command_names_styled call to
+	output command name and aliases when command has an alias.
+
+2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
 	* cli/cli-decode.h (help_cmd_list): Remove declaration.
 	* cli/cli-decode.c (help_cmd_list): Declare as static,
 	remove prefix argument, use bool for recurse arg, rework to show the aliases of
