@@ -1818,19 +1818,19 @@ coff_get_normalized_symtab (bfd *abfd)
       symbol_ptr = internal_ptr;
       internal_ptr->is_sym = TRUE;
 
+      /* PR 17512: Prevent buffer overrun.  */
+      if (symbol_ptr->u.syment.n_numaux > (raw_end - raw_src) / symesz)
+	{
+	  bfd_release (abfd, internal);
+	  return NULL;
+	}
+
       for (i = 0;
 	   i < symbol_ptr->u.syment.n_numaux;
 	   i++)
 	{
 	  internal_ptr++;
 	  raw_src += symesz;
-
-	  /* PR 17512: Prevent buffer overrun.  */
-	  if (raw_src >= raw_end || internal_ptr >= internal_end)
-	    {
-	      bfd_release (abfd, internal);
-	      return NULL;
-	    }
 
 	  bfd_coff_swap_aux_in (abfd, (void *) raw_src,
 				symbol_ptr->u.syment.n_type,

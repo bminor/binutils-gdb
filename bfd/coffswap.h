@@ -399,7 +399,7 @@ coff_swap_aux_in (bfd *abfd,
 #if FILNMLEN != E_FILNMLEN
 #error we need to cope with truncating or extending FILNMLEN
 #else
-	  if (numaux > 1)
+	  if (numaux > 1 && coff_data (abfd)->pe)
 	    {
 	      if (indx == 0)
 		memcpy (in->x_file.x_fname, ext->x_file.x_fname,
