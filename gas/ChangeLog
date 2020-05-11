@@ -1,5 +1,11 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/ppc/vsx_32byte.d,
+	* testsuite/gas/ppc/vsx_32byte.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/ppc/vec_mul.s,
 	* testsuite/gas/ppc/vec_mul.d: New test.
 	* testsuite/gas/ppc/ppc.exp: Run it.

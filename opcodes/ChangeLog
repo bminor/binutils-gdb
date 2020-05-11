@@ -1,5 +1,12 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
+	* ppc-opc.c (insert_xtp, extract_xtp): New functions.
+	(XTP, DQXP, DQXP_MASK): Define.
+	(powerpc_opcodes): Add lxvp, stxvp, lxvpx, stxvpx.
+	(prefix_opcodes): Add plxvp and pstxvp.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
 	* ppc-opc.c (powerpc_opcodes): Add vdivuw, vdivud, vdivsw, vmulld,
 	vdivsd, vmulhuw, vdiveuw, vmulhud, vdiveud, vmulhsw, vdivesw,
 	vmulhsd, vdivesd, vmoduw, vmodud, vmodsw, vmodsd.

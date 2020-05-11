@@ -133,3 +133,4 @@ if { [supports_ppc64] } then {
 }
 run_dump_test "byte_rev"
 run_dump_test "vec_mul"
+run_dump_test "vsx_32byte"

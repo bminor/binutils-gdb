@@ -8605,6 +8605,15 @@ xlate_pcrel_opt (uint64_t *pinsn1, uint64_t *pinsn2, bfd_signed_vma *poff)
       off = insn2 & 0xffff;
       break;
 
+    case 6: /* lxvp, stxvp */
+      if ((insn2 & 0xe) != 0)
+	return FALSE;
+      insn1 = ((1ULL << 58) | (1ULL << 52)
+	       | ((insn2 & 1) == 0 ? 58ULL << 26 : 62ULL << 26)
+	       | (insn2 & (31ULL << 21)));
+      off = insn2 & 0xfff0;
+      break;
+
     case 62: /* std, stq */
       if ((insn2 & 1) != 0)
 	return FALSE;

@@ -1594,6 +1594,25 @@ extract_xc6 (uint64_t insn,
   return ((insn << 2) & 0x20) | ((insn >> 6) & 0x1f);
 }
 
+/* The split XTp field in a vector paired insn.  */
+
+static uint64_t
+insert_xtp (uint64_t insn,
+	    int64_t value,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 0x1e) << 21) | ((value & 0x20) << (21 - 5));
+}
+
+static int64_t
+extract_xtp (uint64_t insn,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
+{
+  return ((insn >> (21 - 5)) & 0x20) | ((insn >> 21) & 0x1e);
+}
+
 static uint64_t
 insert_dm (uint64_t insn,
 	   int64_t value,
@@ -2817,8 +2836,12 @@ const struct powerpc_operand powerpc_operands[] =
 #define XTQ6 XSQ6
   { 0x3f, PPC_OPSHIFT_INV, insert_xtq6, extract_xtq6, PPC_OPERAND_VSR },
 
+  /* The split XTp field in a vector paired instruction.  */
+#define XTP XSQ6 + 1
+  { 0x3e, PPC_OPSHIFT_INV, insert_xtp, extract_xtp, PPC_OPERAND_VSR },
+
   /* The XT field in a plxv instruction.  Runs into the OP field.  */
-#define XTOP XSQ6 + 1
+#define XTOP XTP + 1
   { 0x3f, 21, NULL, NULL, PPC_OPERAND_VSR },
 
   /* The XA field in an XX3 form instruction.  This is split.  */
@@ -3069,6 +3092,10 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* A DQ form VSX instruction.  */
 #define DQX(op, xop) (OP (op) | ((xop) & 0x7))
 #define DQX_MASK DQX (0x3f, 7)
+
+/* A DQ form VSX vector paired instruction.  */
+#define DQXP(op, xop) (OP (op) | ((xop) & 0xf))
+#define DQXP_MASK DQXP (0x3f, 0xf)
 
 /* A DS form instruction.  */
 #define DSO(op, xop) (OP (op) | ((xop) & 0x3))
@@ -4704,6 +4731,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"nmaclhwso.",	XO (4, 494,1,1), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
 {"dcbz_l",	X  (4,1014),	XRT_MASK,    PPCPS,	0,		{RA, RB}},
 
+{"lxvp",	DQXP(6,0),	DQXP_MASK,   POWER10,	PPCVLE,		{XTP, DQ, RA0}},
+{"stxvp",	DQXP(6,1),	DQXP_MASK,   POWER10,	PPCVLE,		{XTP, DQ, RA0}},
+
 {"mulli",	OP(7),		OP_MASK,     PPCCOM,	PPCVLE,		{RT, RA, SI}},
 {"muli",	OP(7),		OP_MASK,     PWRCOM,	PPCVLE,		{RT, RA, SI}},
 
@@ -6190,6 +6220,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"lxvdsx",	X(31,332),	XX1_MASK,    PPCVSX,	0,		{XT6, RA0, RB}},
 
+{"lxvpx",	X(31,333),	XX1_MASK,    POWER10,	0,		{XTP, RA0, RB}},
+
 {"mfpmr",	X(31,334),	X_MASK, PPCPMR|PPCE300, 0,		{RT, PMR}},
 {"mftmr",	X(31,366),	X_MASK,	     PPCTMR,	0,		{RT, TMR}},
 
@@ -6567,6 +6599,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"divwu",	XO(31,459,0,0),	XO_MASK,     PPC,	0,		{RT, RA, RB}},
 {"divwu.",	XO(31,459,0,1),	XO_MASK,     PPC,	0,		{RT, RA, RB}},
+
+{"stxvpx",	X(31,461),	XX1_MASK,    POWER10,	0,		{XTP, RA0, RB}},
 
 {"mtpmr",	X(31,462),	X_MASK, PPCPMR|PPCE300, 0,		{PMR, RS}},
 {"mttmr",	X(31,494),	X_MASK,	     PPCTMR,	0,		{TMR, RS}},
@@ -8045,8 +8079,10 @@ const struct powerpc_opcode prefix_opcodes[] = {
 {"pstfd",	  PMLS|OP(54),	       P_D_MASK,	POWER10, 0,	{FRS, D34, PRA0, PCREL}},
 {"plq",		  P8LS|OP(56),	       P_D_MASK,	POWER10, 0,	{RTQ, D34, PRAQ, PCREL}},
 {"pld",		  P8LS|OP(57),	       P_D_MASK,	POWER10, 0,	{RT, D34, PRA0, PCREL}},
+{"plxvp",	  P8LS|OP(58),	       P_D_MASK,	POWER10, 0,	{XTP, D34, PRA0, PCREL}},
 {"pstq",	  P8LS|OP(60),	       P_D_MASK,	POWER10, 0,	{RSQ, D34, PRA0, PCREL}},
 {"pstd",	  P8LS|OP(61),	       P_D_MASK,	POWER10, 0,	{RS, D34, PRA0, PCREL}},
+{"pstxvp",	  P8LS|OP(62),	       P_D_MASK,	POWER10, 0,	{XTP, D34, PRA0, PCREL}},
 };
 
 const unsigned int prefix_num_opcodes =

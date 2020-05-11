@@ -1,5 +1,10 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-powerpc/pcrelopt.s: Add lxvp and stxvp.
+	* testsuite/ld-powerpc/pcrelopt.d: Update.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-powerpc/callstub-1.d: Use -mpower10/-Mpower10 in
 	place of -mfuture/-Mfuture.
 	* testsuite/ld-powerpc/notoc2.d: Likewise.
