@@ -1,5 +1,13 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-dump.c (ctf_is_slice): Delete, unnecessary.
+	(ctf_dump_format_type): improve slice formatting.  Always print
+	the type size, even of slices.
+	(ctf_dump_member): Print slices (-> bitfields) differently from
+	non-slices.  Failure to format a type is not an OOM.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-dump.c (ctf_dump_format_type): Emit a warning.
 	(ctf_dump_label): Swallow errors from ctf_dump_format_type.
 	(ctf_dump_objts): Likewise.

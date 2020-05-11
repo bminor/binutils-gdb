@@ -79,20 +79,6 @@ ctf_dump_free (ctf_dump_state_t *state)
     }
 }
 
-/* Slices need special handling to distinguish them from their referenced
-   type.  */
-
-static int
-ctf_is_slice (ctf_file_t *fp, ctf_id_t id, ctf_encoding_t *enc)
-{
-  int kind = ctf_type_kind (fp, id);
-
-  return (((kind == CTF_K_INTEGER) || (kind == CTF_K_ENUM)
-	   || (kind == CTF_K_FLOAT))
-	  && ctf_type_reference (fp, id) != CTF_ERR
-	  && ctf_type_encoding (fp, id, enc) == 0);
-}
-
 /* Return a dump for a single type, without member info: but do show the
    type's references.  */
 
@@ -129,26 +115,45 @@ ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id, int flag)
 	  goto err;
 	}
 
-      /* Slices get a different print representation.  */
+      if (asprintf (&bit, " %s%lx: ", nonroot_leader, id) < 0)
+	goto oom;
+      str = str_append (str, bit);
+      free (bit);
+      bit = NULL;
 
-      if (ctf_is_slice (fp, id, &enc))
+      if (buf[0] != '\0')
 	{
-	  ctf_type_encoding (fp, id, &enc);
-	  if (asprintf (&bit, " %s%lx: [slice 0x%x:0x%x]%s",
-			nonroot_leader, id, enc.cte_offset, enc.cte_bits,
-			nonroot_trailer) < 0)
-	    goto oom;
+	  str = str_append (str, buf);
+	  str = str_append (str, " ");
 	}
-      else
-	{
-	  if (asprintf (&bit, " %s%lx: %s (size 0x%lx)%s", nonroot_leader,
-			id, buf[0] == '\0' ? "(nameless)" : buf,
-			(unsigned long) ctf_type_size (fp, id),
-			nonroot_trailer) < 0)
-	    goto oom;
-	}
+
       free (buf);
       buf = NULL;
+
+      /* Slices get a different print representation.  */
+      if (ctf_type_kind_unsliced (fp, id) == CTF_K_SLICE)
+	{
+	  ctf_type_encoding (fp, id, &enc);
+	  if (asprintf (&bit, "[slice 0x%x:0x%x] ",
+			enc.cte_offset, enc.cte_bits) < 0)
+	    goto oom;
+	}
+      else if (ctf_type_kind (fp, id) == CTF_K_INTEGER)
+	{
+	  ctf_type_encoding (fp, id, &enc);
+	  if (asprintf (&bit, "[0x%x:0x%x] ",
+			enc.cte_offset, enc.cte_bits) < 0)
+	    goto oom;
+	}
+      str = str_append (str, bit);
+      free (bit);
+      bit = NULL;
+
+      if (asprintf (&bit, "(size 0x%lx)%s",
+		    (unsigned long) ctf_type_size (fp, id),
+		    nonroot_trailer) < 0)
+	goto oom;
+
       str = str_append (str, bit);
       free (bit);
       bit = NULL;
@@ -516,6 +521,7 @@ ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
   char *typestr = NULL;
   char *bit = NULL;
   ctf_encoding_t ep;
+  int has_encoding = 0;
   ssize_t i;
 
   for (i = 0; i < depth; i++)
@@ -535,24 +541,40 @@ ctf_dump_member (const char *name, ctf_id_t id, unsigned long offset,
 	  return 0;
 	}
 
-      goto oom;
+      return -1;				/* errno is set for us.  */
     }
 
-  if (asprintf (&bit, "    [0x%lx] (ID 0x%lx) (kind %i) %s %s (aligned at 0x%lx",
-		offset, id, ctf_type_kind (state->cdm_fp, id), typestr, name,
-		(unsigned long) ctf_type_align (state->cdm_fp, id)) < 0)
-    goto oom;
+  if (ctf_type_encoding (state->cdm_fp, id, &ep) == 0)
+    {
+      has_encoding = 1;
+      ctf_type_encoding (state->cdm_fp, id, &ep);
+
+      if (asprintf (&bit, "    [0x%lx] (ID 0x%lx) (kind %i) %s%s%s:%i "
+		    "(aligned at 0x%lx", offset, id,
+		    ctf_type_kind (state->cdm_fp, id), typestr,
+		    (name[0] != 0 && typestr[0] != 0) ? " " : "", name,
+		    ep.cte_bits, (unsigned long) ctf_type_align (state->cdm_fp,
+								 id)) < 0)
+	goto oom;
+    }
+  else
+    {
+      if (asprintf (&bit, "    [0x%lx] (ID 0x%lx) (kind %i) %s%s%s "
+		    "(aligned at 0x%lx", offset, id,
+		    ctf_type_kind (state->cdm_fp, id), typestr,
+		    (name[0] != 0 && typestr[0] != 0) ? " " : "", name,
+		    (unsigned long) ctf_type_align (state->cdm_fp, id)) < 0)
+	goto oom;
+    }
+
   *state->cdm_str = str_append (*state->cdm_str, bit);
   free (typestr);
   free (bit);
   typestr = NULL;
   bit = NULL;
 
-  if ((ctf_type_kind (state->cdm_fp, id) == CTF_K_INTEGER)
-      || (ctf_type_kind (state->cdm_fp, id) == CTF_K_FLOAT)
-      || (ctf_is_slice (state->cdm_fp, id, &ep) == CTF_K_ENUM))
+  if (has_encoding)
     {
-      ctf_type_encoding (state->cdm_fp, id, &ep);
       if (asprintf (&bit, ", format 0x%x, offset:bits 0x%x:0x%x", ep.cte_format,
 		    ep.cte_offset, ep.cte_bits) < 0)
 	goto oom;
