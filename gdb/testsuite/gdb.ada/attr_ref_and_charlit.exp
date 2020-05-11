@@ -31,7 +31,7 @@ set bp_location [gdb_get_line_number "BREAK" "${testdir}/foo.adb"]
 runto "foo.adb:$bp_location"
 with_test_prefix "run" {
     gdb_test "print s'first" " = 2"
-    gdb_test "print s'last"  " = 3Z
+    gdb_test "print s'last"  " = 3"
     gdb_test "print s(s'first) = 'a'" " = true"
     gdb_test "print s(s'last) /= 'b'" " = false"
 }
