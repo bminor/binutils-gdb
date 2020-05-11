@@ -1,5 +1,11 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/ppc/simd_perm.d,
+	* testsuite/gas/ppc/simd_perm.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/ppc/int128.d,
 	* testsuite/gas/ppc/int128.s: New test.
 	* testsuite/gas/ppc/ppc.exp: Run it.

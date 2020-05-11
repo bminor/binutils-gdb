@@ -1,5 +1,20 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
+	* ppc-opc.c (insert_imm32, extract_imm32): New functions.
+	(insert_xts, extract_xts): New functions.
+	(IMM32, UIM3, IX, UIM5, SH3, XTS, P8RR): Define.
+	(P_XX4_MASK, P_UXX4_MASK, VSOP, P_VS_MASK, P_VSI_MASK): Define.
+	(VXRC_MASK, VXSH_MASK): Define.
+	(powerpc_opcodes): Add vinsbvlx, vsldbi, vextdubvlx, vextdubvrx,
+	vextduhvlx, vextduhvrx, vextduwvlx, vextduwvrx, vextddvlx,
+	vextddvrx, vinshvlx, vinswvlx, vinsw, vinsbvrx, vinshvrx,
+	vinswvrx, vinsd, vinsblx, vsrdbi, vinshlx, vinswlx, vinsdlx,
+	vinsbrx, vinshrx, vinswrx, vinsdrx, lxvkq.
+	(prefix_opcodes): Add xxsplti32dx, xxspltidp, xxspltiw, xxblendvb,
+	xxblendvh, xxblendvw, xxblendvd, xxpermx.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
 	* ppc-opc.c (powerpc_opcodes): Add vrlq, vdivuq, vmsumcud, vrlqmi,
 	vmuloud, vcmpuq, vslq, vdivsq, vcmpsq, vrlqnm, vcmpequq, vmulosd,
 	vsrq, vdiveuq, vcmpgtuq, vmuleud, vsraq, vdivesq, vcmpgtsq, vmulesd,

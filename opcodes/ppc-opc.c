@@ -643,6 +643,25 @@ extract_nsi34 (uint64_t insn,
   return -value;
 }
 
+/* The split IMM32 field in a vector splat insn.  */
+
+static uint64_t
+insert_imm32 (uint64_t insn,
+	      int64_t value,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 0xffff0000) << 16) | (value & 0xffff);
+}
+
+static int64_t
+extract_imm32 (uint64_t insn,
+	       ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	       int *invalid ATTRIBUTE_UNUSED)
+{
+  return (insn & 0xffff) | ((insn >> 16) & 0xffff0000);
+}
+
 /* The R field in an 8-byte prefix instruction when there are restrictions
    between R's value and the RA value (ie, they cannot both be non zero).  */
 
@@ -1613,6 +1632,25 @@ extract_xtp (uint64_t insn,
   return ((insn >> (21 - 5)) & 0x20) | ((insn >> 21) & 0x1e);
 }
 
+/* The split XT field in a vector splat insn.  */
+
+static uint64_t
+insert_xts (uint64_t insn,
+	    int64_t value,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 0x1f) << 21) | ((value & 0x20) << (16 - 5));
+}
+
+static int64_t
+extract_xts (uint64_t insn,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
+{
+  return ((insn >> (16 - 5)) & 0x20) | ((insn >> 21) & 0x1f);
+}
+
 static uint64_t
 insert_dm (uint64_t insn,
 	   int64_t value,
@@ -2202,9 +2240,21 @@ const struct powerpc_operand powerpc_operands[] =
   { UINT64_C(0x3ffffffff), PPC_OPSHIFT_INV, insert_nsi34, extract_nsi34,
     PPC_OPERAND_NEGATIVE | PPC_OPERAND_SIGNED },
 
+  /* The IMM32 field in a vector splat immediate prefix instruction.  */
+#define IMM32 NSI34 + 1
+  { 0xffffffff, PPC_OPSHIFT_INV, insert_imm32, extract_imm32, 0},
+
+  /* The UIM field in a vector permute extended prefix instruction.  */
+#define UIM3 IMM32 + 1
+  { 0x7, 32, NULL, NULL, 0},
+
+  /* The IX field in xxsplti32dx.  */
+#define IX UIM3 + 1
+  { 0x1, 17, NULL, NULL, 0 },
+
   /* The DUIS or BHRBE fields in a XFX form instruction, 10 bits
      unsigned imediate */
-#define DUIS NSI34 + 1
+#define DUIS IX + 1
 #define BHRBE DUIS
   { 0x3ff, 11, NULL, NULL, 0 },
 
@@ -2524,6 +2574,7 @@ const struct powerpc_operand powerpc_operands[] =
 #define EVUIMM SH
   /* The FC field in an atomic X form instruction.  */
 #define FC SH
+#define UIM5 SH
   { 0x1f, 11, NULL, NULL, 0 },
 
 #define EVUIMM_LT8 SH + 1
@@ -2679,8 +2730,12 @@ const struct powerpc_operand powerpc_operands[] =
 #define PS SIX + 1
   { 0x1, 9, NULL, NULL, 0 },
 
+  /* The SH field in a vector shift double by bit immediate instruction.  */
+#define SH3 PS + 1
+  { 0x7, 6, NULL, NULL, 0 },
+
   /* The SHB field in a VA form instruction.  */
-#define SHB PS + 1
+#define SHB SH3 + 1
   { 0xf, 6, NULL, NULL, 0 },
 
   /* The other UIMM field in a half word EVX form instruction.  */
@@ -2840,8 +2895,11 @@ const struct powerpc_operand powerpc_operands[] =
 #define XTP XSQ6 + 1
   { 0x3e, PPC_OPSHIFT_INV, insert_xtp, extract_xtp, PPC_OPERAND_VSR },
 
+#define XTS XTP + 1
+  { 0x3f, PPC_OPSHIFT_INV, insert_xts, extract_xts, PPC_OPERAND_VSR },
+
   /* The XT field in a plxv instruction.  Runs into the OP field.  */
-#define XTOP XTP + 1
+#define XTOP XTS + 1
   { 0x3f, 21, NULL, NULL, PPC_OPERAND_VSR },
 
   /* The XA field in an XX3 form instruction.  This is split.  */
@@ -2926,6 +2984,9 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* Prefix insn, eight byte load/store form 8LS.  */
 #define P8LS (PREFIX_OP | PREFIX_FORM (0))
 
+/* Prefix insn, eight byte register to register form 8RR.  */
+#define P8RR (PREFIX_OP | PREFIX_FORM (1))
+
 /* Prefix insn, modified load/store form MLS.  */
 #define PMLS (PREFIX_OP | PREFIX_FORM (2))
 
@@ -2937,6 +2998,15 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 
 /* The same as P_D_MASK, but with the RA and PCREL fields specified.  */
 #define P_DRAPCREL_MASK (P_D_MASK | PCREL_MASK | RA_MASK)
+
+/* Mask for prefix vector permute insns.  */
+#define P_XX4_MASK (PREFIX_MASK | XX4_MASK)
+#define P_UXX4_MASK (P_XX4_MASK & ~(7ULL << 32))
+
+/* Vector splat immediate op.  */
+#define VSOP(op, xop) (OP (op) | (xop << 17))
+#define P_VS_MASK ((-1ULL << 48) | VSOP (0x3f, 0xf))
+#define P_VSI_MASK ((-1ULL << 48) | VSOP (0x3f, 0xe))
 
 /* The main opcode combined with a trap code in the TO field of a D
    form instruction.  Used for extended mnemonics for the trap
@@ -3315,6 +3385,12 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 
 /* A VX_MASK for instructions using a BF field.  */
 #define VXBF_MASK (VX_MASK | (3 << 21))
+
+/* A VX_MASK for instructions with an RC field.  */
+#define VXRC_MASK (VX_MASK & ~(0x1f << 6))
+
+/* A VX_MASK for instructions with a SH field.  */
+#define VXSH_MASK (VX_MASK & ~(0x7 << 6))
 
 /* A VA form instruction.  */
 #define VXA(op, xop) (OP (op) | (((uint64_t)(xop)) & 0x03f))
@@ -3923,21 +3999,31 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vmrghb",	VX (4,	12),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"psq_stx",	XW (4,	 7,0),	XW_MASK,     PPCPS,	0,		{FRS,RA,RB,PSWM,PSQM}},
 {"vpkuhum",	VX (4,	14),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vinsbvlx",	VX (4,  15),	VX_MASK,     POWER10,	0,		{VD, RA, VB}},
 {"mulhhwu",	XRC(4,	 8,0),	X_MASK,	     MULHW,	0,		{RT, RA, RB}},
 {"mulhhwu.",	XRC(4,	 8,1),	X_MASK,	     MULHW,	0,		{RT, RA, RB}},
 {"ps_sum0",	A  (4,	10,0),	A_MASK,	     PPCPS,	0,		{FRT, FRA, FRC, FRB}},
 {"ps_sum0.",	A  (4,	10,1),	A_MASK,	     PPCPS,	0,		{FRT, FRA, FRC, FRB}},
+{"vsldbi",	VX (4,  22),	VXSH_MASK,   POWER10,	0,		{VD, VA, VB, SH3}},
 {"ps_sum1",	A  (4,	11,0),	A_MASK,	     PPCPS,	0,		{FRT, FRA, FRC, FRB}},
 {"ps_sum1.",	A  (4,	11,1),	A_MASK,	     PPCPS,	0,		{FRT, FRA, FRC, FRB}},
+{"vextdubvlx",	VX (4,  24),	VXRC_MASK,   POWER10,	0,		{VD, VA, VB, RC}},
 {"ps_muls0",	A  (4,	12,0),	AFRB_MASK,   PPCPS,	0,		{FRT, FRA, FRC}},
 {"machhwu",	XO (4,	12,0,0), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
+{"vextdubvrx",	VX (4,  25),	VXRC_MASK,   POWER10,	0,		{VD, VA, VB, RC}},
 {"ps_muls0.",	A  (4,	12,1),	AFRB_MASK,   PPCPS,	0,		{FRT, FRA, FRC}},
 {"machhwu.",	XO (4,	12,0,1), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
+{"vextduhvlx",	VX (4,  26),	VXRC_MASK,   POWER10,	0,		{VD, VA, VB, RC}},
 {"ps_muls1",	A  (4,	13,0),	AFRB_MASK,   PPCPS,	0,		{FRT, FRA, FRC}},
+{"vextduhvrx",	VX (4,  27),	VXRC_MASK,   POWER10,	0,		{VD, VA, VB, RC}},
 {"ps_muls1.",	A  (4,	13,1),	AFRB_MASK,   PPCPS,	0,		{FRT, FRA, FRC}},
+{"vextduwvlx",	VX (4,  28),	VXRC_MASK,   POWER10,	0,		{VD, VA, VB, RC}},
 {"ps_madds0",	A  (4,	14,0),	A_MASK,	     PPCPS,	0,		{FRT, FRA, FRC, FRB}},
+{"vextduwvrx",	VX (4,  29),	VXRC_MASK,   POWER10,	0,		{VD, VA, VB, RC}},
 {"ps_madds0.",	A  (4,	14,1),	A_MASK,	     PPCPS,	0,		{FRT, FRA, FRC, FRB}},
+{"vextddvlx",	VX (4,  30),	VXRC_MASK,   POWER10,	0,		{VD, VA, VB, RC}},
 {"ps_madds1",	A  (4,	15,0),	A_MASK,	     PPCPS,	0,		{FRT, FRA, FRC, FRB}},
+{"vextddvrx",	VX (4,  31),	VXRC_MASK,   POWER10,	0,		{VD, VA, VB, RC}},
 {"ps_madds1.",	A  (4,	15,1),	A_MASK,	     PPCPS,	0,		{FRT, FRA, FRC, FRB}},
 {"vmhaddshs",	VXA(4,	32),	VXA_MASK,    PPCVEC,	0,		{VD, VA, VB, VC}},
 {"vmhraddshs",	VXA(4,	33),	VXA_MASK,    PPCVEC,	0,		{VD, VA, VB, VC}},
@@ -4000,6 +4086,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vmrghh",	VX (4,	76),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"psq_stux",	XW (4,	39,0),	XW_MASK,     PPCPS,	0,		{FRS,RA,RB,PSWM,PSQM}},
 {"vpkuwum",	VX (4,	78),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vinshvlx",	VX (4,  79),	VX_MASK,     POWER10,	0,		{VD, RA, VB}},
 {"ps_neg",	XRC(4,	40,0),	XRA_MASK,    PPCPS,	0,		{FRT, FRB}},
 {"mulhhw",	XRC(4,	40,0),	X_MASK,	     MULHW,	0,		{RT, RA, RB}},
 {"ps_neg.",	XRC(4,	40,1),	XRA_MASK,    PPCPS,	0,		{FRT, FRB}},
@@ -4020,6 +4107,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vdivuw",	VX (4,  139),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"vmrghw",	VX (4,	140),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vpkuhus",	VX (4,	142),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vinswvlx",	VX (4,  143),	VX_MASK,     POWER10,	0,		{VD, RA, VB}},
 {"ps_mr",	XRC(4,	72,0),	XRA_MASK,    PPCPS,	0,		{FRT, FRB}},
 {"ps_mr.",	XRC(4,	72,1),	XRA_MASK,    PPCPS,	0,		{FRT, FRB}},
 {"machhwsu",	XO (4,	76,0,0), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
@@ -4034,6 +4122,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vmuloud",	VX (4, 200),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"vdivud",	VX (4, 203),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"vpkuwus",	VX (4, 206),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vinsw",	VX (4, 207),   VXUIMM4_MASK, POWER10,	0,		{VD, RB, UIMM4}},
 {"machhws",	XO (4, 108,0,0), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
 {"machhws.",	XO (4, 108,0,1), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
 {"nmachhws",	XO (4, 110,0,0), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
@@ -4049,6 +4138,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vdivsq",	VX (4, 267),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"vmrglb",	VX (4, 268),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vpkshus",	VX (4, 270),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vinsbvrx",	VX (4, 271),	VX_MASK,     POWER10,	0,		{VD, RA, VB}},
 {"ps_nabs",	XRC(4, 136,0),	XRA_MASK,    PPCPS,	0,		{FRT, FRB}},
 {"mulchwu",	XRC(4, 136,0),	X_MASK,	     MULHW,	0,		{RT, RA, RB}},
 {"ps_nabs.",	XRC(4, 136,1),	XRA_MASK,    PPCPS,	0,		{FRT, FRB}},
@@ -4065,6 +4155,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vrsqrtefp",	VX (4, 330),	VXVA_MASK,   PPCVEC,	0,		{VD, VB}},
 {"vmrglh",	VX (4, 332),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vpkswus",	VX (4, 334),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vinshvrx",	VX (4, 335),	VX_MASK,     POWER10,	0,		{VD, RA, VB}},
 {"mulchw",	XRC(4, 168,0),	X_MASK,	     MULHW,	0,		{RT, RA, RB}},
 {"mulchw.",	XRC(4, 168,1),	X_MASK,	     MULHW,	0,		{RT, RA, RB}},
 {"macchw",	XO (4, 172,0,0), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
@@ -4081,6 +4172,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vdivsw",	VX (4, 395),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"vmrglw",	VX (4, 396),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"vpkshss",	VX (4, 398),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vinswvrx",	VX (4, 399),	VX_MASK,     POWER10,	0,		{VD, RA, VB}},
 {"macchwsu",	XO (4, 204,0,0), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
 {"macchwsu.",	XO (4, 204,0,1), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
 {"vmaxsd",	VX (4, 450),	VX_MASK,     PPCVEC2,	0,		{VD, VA, VB}},
@@ -4093,6 +4185,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vlogefp",	VX (4, 458),	VXVA_MASK,   PPCVEC,	0,		{VD, VB}},
 {"vdivsd",	VX (4, 459),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"vpkswss",	VX (4, 462),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vinsd",	VX (4, 463),   VXUIMM4_MASK, POWER10,	0,		{VD, RB, UIMM4}},
 {"macchws",	XO (4, 236,0,0), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
 {"macchws.",	XO (4, 236,0,1), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
 {"nmacchws",	XO (4, 238,0,0), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
@@ -4122,11 +4215,13 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"evcntlzw",	VX (4, 525),	VX_MASK,     PPCSPE,	0,		{RS, RA}},
 {"evcntlsw",	VX (4, 526),	VX_MASK,     PPCSPE,	0,		{RS, RA}},
 {"vupkhsb",	VX (4, 526),	VXVA_MASK,   PPCVEC,	0,		{VD, VB}},
+{"vinsblx",	VX (4, 527),	VX_MASK,     POWER10,	0,		{VD, RA, RB}},
 {"brinc",	VX (4, 527),	VX_MASK,     PPCSPE,	0,		{RS, RA, RB}},
 {"ps_abs",	XRC(4, 264,0),	XRA_MASK,    PPCPS,	0,		{FRT, FRB}},
 {"ps_abs.",	XRC(4, 264,1),	XRA_MASK,    PPCPS,	0,		{FRT, FRB}},
 {"evand",	VX (4, 529),	VX_MASK,     PPCSPE,	0,		{RS, RA, RB}},
 {"evandc",	VX (4, 530),	VX_MASK,     PPCSPE,	0,		{RS, RA, RB}},
+{"vsrdbi",	VX (4, 534),	VXSH_MASK,   POWER10,	0,		{VD, VA, VB, SH3}},
 {"evxor",	VX (4, 534),	VX_MASK,     PPCSPE,	0,		{RS, RA, RB}},
 {"evmr",	VX (4, 535),	VX_MASK,     PPCSPE,	0,		{RS, RAB}},
 {"evor",	VX (4, 535),	VX_MASK,     PPCSPE,	0,		{RS, RA, RB}},
@@ -4166,6 +4261,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vsplth",	VX (4, 588),   VXUIMM3_MASK, PPCVEC,	0,		{VD, VB, UIMM3}},
 {"vextractuh",	VX (4, 589),   VXUIMM4_MASK, PPCVEC3,	0,		{VD, VB, UIMM4}},
 {"vupkhsh",	VX (4, 590),	VXVA_MASK,   PPCVEC,	0,		{VD, VB}},
+{"vinshlx",	VX (4, 591),	VX_MASK,     POWER10,	0,		{VD, RA, RB}},
 {"nget",	APU(4, 300,0),	APU_RA_MASK, PPC405,	0,		{RT, FSL}},
 {"evsel",	EVSEL(4,79),	EVSEL_MASK,  PPCSPE,	0,		{RS, RA, RB, CRFS}},
 {"ncget",	APU(4, 316,0),	APU_RA_MASK, PPC405,	0,		{RT, FSL}},
@@ -4196,6 +4292,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"evfscmplt",	VX (4, 653),	VX_MASK,     PPCSPE,	0,		{CRFD, RA, RB}},
 {"evfscmpeq",	VX (4, 654),	VX_MASK,     PPCSPE,	0,		{CRFD, RA, RB}},
 {"vupklsb",	VX (4, 654),	VXVA_MASK,   PPCVEC,	0,		{VD, VB}},
+{"vinswlx",	VX (4, 655),	VX_MASK,     POWER10,	0,		{VD, RA, RB}},
 {"evfscfui",	VX (4, 656),	VX_MASK,     PPCSPE,	0,		{RS, RB}},
 {"evfscfh",	VX_RA_CONST(4, 657, 4),  VX_RA_CONST_MASK,	PPCEFS2,	0,		{RD, RB}},
 {"evfscfsi",	VX (4, 657),	VX_MASK,     PPCSPE,	0,		{RS, RB}},
@@ -4257,6 +4354,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"efscmplt",	VX (4, 717),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
 {"efscmpeq",	VX (4, 718),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
 {"vupklsh",	VX (4, 718),	VXVA_MASK,   PPCVEC,	0,		{VD, VB}},
+{"vinsdlx",	VX (4, 719),	VX_MASK,     POWER10,	0,		{VD, RA, RB}},
 {"efscfd",	VX (4, 719),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
 {"efscfui",	VX (4, 720),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
 {"efscfh",	VX_RA_CONST(4, 721, 4), VX_RA_CONST_MASK, PPCEFS2, 0,	{RD, RB}},
@@ -4337,6 +4435,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"evlhhousplat",VX (4, 781),	VX_MASK,     PPCSPE,	0,		{RS, EVUIMM_2, RA}},
 {"evlhhossplatx",VX(4, 782),	VX_MASK,     PPCSPE,	0,		{RS, RA, RB}},
 {"vpkpx",	VX (4, 782),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+{"vinsbrx",	VX (4, 783),	VX_MASK,     POWER10,	0,		{VD, RA, RB}},
 {"evlhhossplat",VX (4, 783),	VX_MASK,     PPCSPE,	0,		{RS, EVUIMM_2, RA}},
 {"mullhwu",	XRC(4, 392,0),	X_MASK,	     MULHW,	0,		{RT, RA, RB}},
 {"evlwhex",	VX (4, 784),	VX_MASK,     PPCSPE,	0,		{RS, RA, RB}},
@@ -4377,6 +4476,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vspltish",	VX (4, 844),	VXVB_MASK,   PPCVEC,	0,		{VD, SIMM}},
 {"vinserth",	VX (4, 845),   VXUIMM4_MASK, PPCVEC3,	0,		{VD, VB, UIMM4}},
 {"vupkhpx",	VX (4, 846),	VXVA_MASK,   PPCVEC,	0,		{VD, VB}},
+{"vinshrx",	VX (4, 847),	VX_MASK,     POWER10,	0,		{VD, RA, RB}},
 {"mullhw",	XRC(4, 424,0),	X_MASK,	     MULHW,	0,		{RT, RA, RB}},
 {"mullhw.",	XRC(4, 424,1),	X_MASK,	     MULHW,	0,		{RT, RA, RB}},
 {"maclhw",	XO (4, 428,0,0),XO_MASK,     MULHW,	0,		{RT, RA, RB}},
@@ -4395,6 +4495,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vdivesw",	VX (4, 907),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"vspltisw",	VX (4, 908),	VXVB_MASK,   PPCVEC,	0,		{VD, SIMM}},
 {"vinsertw",	VX (4, 909),   VXUIMM4_MASK, PPCVEC3,	0,		{VD, VB, UIMM4}},
+{"vinswrx",	VX (4, 911),	VX_MASK,     POWER10,	0,		{VD, RA, RB}},
 {"maclhwsu",	XO (4, 460,0,0), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
 {"maclhwsu.",	XO (4, 460,0,1), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
 {"vminsd",	VX (4, 962),	VX_MASK,     PPCVEC2,	0,		{VD, VA, VB}},
@@ -4408,6 +4509,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vdivesd",	VX (4, 971),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"vinsertd",	VX (4, 973),   VXUIMM4_MASK, PPCVEC3,	0,		{VD, VB, UIMM4}},
 {"vupklpx",	VX (4, 974),	VXVA_MASK,   PPCVEC,	0,		{VD, VB}},
+{"vinsdrx",	VX (4, 975),	VX_MASK,     POWER10,	0,		{VD, RA, RB}},
 {"maclhws",	XO (4, 492,0,0), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
 {"maclhws.",	XO (4, 492,0,1), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
 {"nmaclhws",	XO (4, 494,0,0), XO_MASK,    MULHW,	0,		{RT, RA, RB}},
@@ -7643,6 +7745,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"xvdivsp",	XX3(60,88),	XX3_MASK,    PPCVSX,	PPCVLE,		{XT6, XA6, XB6}},
 {"xvmsubmsp",	XX3(60,89),	XX3_MASK,    PPCVSX,	PPCVLE,		{XT6, XA6, XB6}},
 {"xxspltib",	X(60,360),   XX1_MASK|3<<19, PPCVSX3,	PPCVLE,		{XT6, IMM8}},
+{"lxvkq",	XVA(60,360,31),	XVA_MASK&~1, POWER10,	PPCVLE,		{XT6, UIM5}},
 {"xxinsertw",	XX2(60,181),   XX2UIM4_MASK, PPCVSX3,	PPCVLE,		{XT6, XB6, UIMM4}},
 {"xvcvsxwsp",	XX2(60,184),	XX2_MASK,    PPCVSX,	PPCVLE,		{XT6, XB6}},
 {"xvrspim",	XX2(60,185),	XX2_MASK,    PPCVSX,	PPCVLE,		{XT6, XB6}},
@@ -8095,7 +8198,15 @@ const struct powerpc_opcode prefix_opcodes[] = {
 {"paddi",	  PMLS|OP(14),	       P_D_MASK,	POWER10, 0,	{RT, RA0, SI34, PCREL0}},
 {"psubi",	  PMLS|OP(14),	       P_D_MASK,	POWER10, 0,	{RT, RA0, NSI34, PCREL0}},
 {"pla",		  PMLS|OP(14),	       P_D_MASK,	POWER10, 0,	{RT, D34, PRA0, PCREL}},
+{"xxsplti32dx",	  P8RR|VSOP(32,0),     P_VSI_MASK,	POWER10, 0,	{XTS, IX, IMM32}},
+{"xxspltidp",	  P8RR|VSOP(32,2),     P_VS_MASK,	POWER10, 0,	{XTS, IMM32}},
+{"xxspltiw",	  P8RR|VSOP(32,3),     P_VS_MASK,	POWER10, 0,	{XTS, IMM32}},
 {"plwz",	  PMLS|OP(32),	       P_D_MASK,	POWER10, 0,	{RT, D34, PRA0, PCREL}},
+{"xxblendvb",	  P8RR|XX4(33,0),      P_XX4_MASK,	POWER10, 0,	{XT6, XA6, XB6, XC6}},
+{"xxblendvh",	  P8RR|XX4(33,1),      P_XX4_MASK,	POWER10, 0,	{XT6, XA6, XB6, XC6}},
+{"xxblendvw",	  P8RR|XX4(33,2),      P_XX4_MASK,	POWER10, 0,	{XT6, XA6, XB6, XC6}},
+{"xxblendvd",	  P8RR|XX4(33,3),      P_XX4_MASK,	POWER10, 0,	{XT6, XA6, XB6, XC6}},
+{"xxpermx",	  P8RR|XX4(34,0),      P_UXX4_MASK,	POWER10, 0,	{XT6, XA6, XB6, XC6, UIM3}},
 {"plbz",	  PMLS|OP(34),	       P_D_MASK,	POWER10, 0,	{RT, D34, PRA0, PCREL}},
 {"pstw",	  PMLS|OP(36),	       P_D_MASK,	POWER10, 0,	{RS, D34, PRA0, PCREL}},
 {"pstb",	  PMLS|OP(38),	       P_D_MASK,	POWER10, 0,	{RS, D34, PRA0, PCREL}},
