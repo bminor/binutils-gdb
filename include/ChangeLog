@@ -1,5 +1,10 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
+	* opcode/ppc.h (PPC_OPERAND_ACC): Define.  Renumber following
+	PPC_OPERAND defines.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
 	* elf/ppc64.h: Update comment.
 	* opcode/ppc.h (PPC_OPCODE_POWER10): Rename from PPC_OPCODE_POWERXX.
 

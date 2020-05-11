@@ -1,4 +1,29 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
+	    Peter Bergner  <bergner@linux.ibm.com>
+
+	* ppc-opc.c (insert_xa6a, extract_xa6a, insert_xb6a, extract_xb6a):
+	New functions.
+	(powerpc_operands): Define ACC, PMSK8, PMSK4, PMSK2, XMSK, YMSK,
+	YMSK2, XA6a, XA6ap, XB6a entries.
+	(PMMIRR, P_X_MASK, P_XX1_MASK, P_GER_MASK): Define
+	(P_GER2_MASK, P_GER4_MASK, P_GER8_MASK, P_GER64_MASK): Define.
+	(PPCVSX4): Define.
+	(powerpc_opcodes): Add xxmfacc, xxmtacc, xxsetaccz,
+	xvi8ger4pp, xvi8ger4, xvf16ger2pp, xvf16ger2, xvf32gerpp, xvf32ger,
+	xvi4ger8pp, xvi4ger8, xvi16ger2spp, xvi16ger2s, xvbf16ger2pp,
+	xvbf16ger2, xvf64gerpp, xvf64ger, xvi16ger2, xvf16ger2np,
+	xvf32gernp, xvi8ger4spp, xvi16ger2pp, xvbf16ger2np, xvf64gernp,
+	xvf16ger2pn, xvf32gerpn, xvbf16ger2pn, xvf64gerpn, xvf16ger2nn,
+	xvf32gernn, xvbf16ger2nn, xvf64gernn, xvcvbf16sp, xvcvspbf16.
+	(prefix_opcodes): Add pmxvi8ger4pp, pmxvi8ger4, pmxvf16ger2pp,
+	pmxvf16ger2, pmxvf32gerpp, pmxvf32ger, pmxvi4ger8pp, pmxvi4ger8,
+	pmxvi16ger2spp, pmxvi16ger2s, pmxvbf16ger2pp, pmxvbf16ger2,
+	pmxvf64gerpp, pmxvf64ger, pmxvi16ger2, pmxvf16ger2np, pmxvf32gernp,
+	pmxvi8ger4spp, pmxvi16ger2pp, pmxvbf16ger2np, pmxvf64gernp,
+	pmxvf16ger2pn, pmxvf32gerpn, pmxvbf16ger2pn, pmxvf64gerpn,
+	pmxvf16ger2nn, pmxvf32gernn, pmxvbf16ger2nn, pmxvf64gernn.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (insert_imm32, extract_imm32): New functions.
 	(insert_xts, extract_xts): New functions.

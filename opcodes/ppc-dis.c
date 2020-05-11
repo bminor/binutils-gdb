@@ -881,6 +881,8 @@ print_insn_powerpc (bfd_vma memaddr,
 	    (*info->fprintf_func) (info->stream, "v%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_VSR) != 0)
 	    (*info->fprintf_func) (info->stream, "vs%" PRId64, value);
+	  else if ((operand->flags & PPC_OPERAND_ACC) != 0)
+	    (*info->fprintf_func) (info->stream, "a%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0)
 	    (*info->print_address_func) (memaddr + value, info);
 	  else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)

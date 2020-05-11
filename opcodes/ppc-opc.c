@@ -1548,6 +1548,33 @@ extract_xa6 (uint64_t insn,
   return ((insn << 3) & 0x20) | ((insn >> 16) & 0x1f);
 }
 
+/* The XA field in an MMA XX3 form instruction.  This is split
+   and must not overlap with the ACC operand.  */
+
+static uint64_t
+insert_xa6a (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect,
+	     const char **errmsg)
+{
+  int64_t acc = (insn >> 23) & 0x7;
+  if ((value >> 2) == acc)
+    *errmsg = _("VSR overlaps ACC operand");
+  return insert_xa6 (insn, value, dialect, errmsg);
+}
+
+static int64_t
+extract_xa6a (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid)
+{
+  int64_t acc = (insn >> 23) & 0x7;
+  int64_t value = extract_xa6 (insn, dialect, invalid);
+  if ((value >> 2) == acc)
+    *invalid = 1;
+  return value;
+}
+
 /* The XB field in an XX3 form instruction.  This is split.  */
 
 static uint64_t
@@ -1565,6 +1592,33 @@ extract_xb6 (uint64_t insn,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn << 4) & 0x20) | ((insn >> 11) & 0x1f);
+}
+
+/* The XB field in an MMA XX3 form instruction.  This is split
+   and must not overlap with the ACC operand.  */
+
+static uint64_t
+insert_xb6a (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect,
+	     const char **errmsg)
+{
+  int64_t acc = (insn >> 23) & 0x7;
+  if ((value >> 2) == acc)
+    *errmsg = _("VSR overlaps ACC operand");
+  return insert_xb6 (insn, value, dialect, errmsg);
+}
+
+static int64_t
+extract_xb6a (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid)
+{
+  int64_t acc = (insn >> 23) & 0x7;
+  int64_t value = extract_xb6 (insn, dialect, invalid);
+  if ((value >> 2) == acc)
+    *invalid = 1;
+  return value;
 }
 
 /* The XA and XB fields in an XX3 form instruction when they must be the same.
@@ -2095,9 +2149,13 @@ const struct powerpc_operand powerpc_operands[] =
 #define BFF BF + 1
   { 0x7, 23, NULL, NULL, 0 },
 
+  /* The ACC field in a VSX ACC 8LS:D-form instruction.  */
+#define ACC BFF + 1
+  { 0x7, 23, NULL, NULL, PPC_OPERAND_ACC },
+
   /* An optional BF field.  This is used for comparison instructions,
      in which an omitted BF field is taken as zero.  */
-#define OBF BFF + 1
+#define OBF ACC + 1
   { 0x7, 23, NULL, NULL, PPC_OPERAND_CR_REG | PPC_OPERAND_OPTIONAL },
 
   /* The BFA field in an X or XL form instruction.  */
@@ -2252,9 +2310,33 @@ const struct powerpc_operand powerpc_operands[] =
 #define IX UIM3 + 1
   { 0x1, 17, NULL, NULL, 0 },
 
+  /* The PMSK field in GER rank 8 prefix instructions.  */
+#define PMSK8 IX + 1
+  { 0xff, 40, NULL, NULL, 0 },
+
+  /* The PMSK field in GER rank 4 prefix instructions.  */
+#define PMSK4 PMSK8 + 1
+  { 0xf, 44, NULL, NULL, 0 },
+
+  /* The PMSK field in GER rank 2 prefix instructions.  */
+#define PMSK2 PMSK4 + 1
+  { 0x3, 46, NULL, NULL, 0 },
+
+  /* The XMSK field in GER prefix instructions.  */
+#define XMSK PMSK2 + 1
+  { 0xf, 36, NULL, NULL, 0 },
+
+  /* The YMSK field in GER prefix instructions.  */
+#define YMSK XMSK + 1
+  { 0xf, 32, NULL, NULL, 0 },
+
+  /* The YMSK field in 64-bit GER prefix instructions.  */
+#define YMSK2 YMSK + 1
+  { 0x3, 34, NULL, NULL, 0 },
+
   /* The DUIS or BHRBE fields in a XFX form instruction, 10 bits
      unsigned imediate */
-#define DUIS IX + 1
+#define DUIS YMSK2 + 1
 #define BHRBE DUIS
   { 0x3ff, 11, NULL, NULL, 0 },
 
@@ -2906,13 +2988,28 @@ const struct powerpc_operand powerpc_operands[] =
 #define XA6 XTOP + 1
   { 0x3f, PPC_OPSHIFT_INV, insert_xa6, extract_xa6, PPC_OPERAND_VSR },
 
+  /* The XA field in an MMA XX3 form instruction.  This is split and
+     must not overlap with the ACC operand.  */
+#define XA6a XA6 + 1
+  { 0x3f, PPC_OPSHIFT_INV, insert_xa6a, extract_xa6a, PPC_OPERAND_VSR },
+
+  /* The XAp field in an MMA XX3 form instruction.  This is split.
+     This is like XA6a, but must be even.  */
+#define XA6ap XA6a + 1
+  { 0x3e, PPC_OPSHIFT_INV, insert_xa6a, extract_xa6a, PPC_OPERAND_VSR },
+
   /* The XB field in an XX2 or XX3 form instruction.  This is split.  */
-#define XB6 XA6 + 1
+#define XB6 XA6ap + 1
   { 0x3f, PPC_OPSHIFT_INV, insert_xb6, extract_xb6, PPC_OPERAND_VSR },
+
+  /* The XB field in an XX3 form instruction.  This is split and
+     must not overlap with the ACC operand.  */
+#define XB6a XB6 + 1
+  { 0x3f, PPC_OPSHIFT_INV, insert_xb6a, extract_xb6a, PPC_OPERAND_VSR },
 
   /* The XA and XB fields in an XX3 form instruction when they must be the same.
      This is used in extended mnemonics like xvmovdp.  This is split.  */
-#define XAB6 XB6 + 1
+#define XAB6 XB6a + 1
   { 0x3f, PPC_OPSHIFT_INV, insert_xab6, extract_xab6, PPC_OPERAND_VSR },
 
   /* The XC field in an XX4 form instruction.  This is split.  */
@@ -2993,15 +3090,29 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* Prefix insn, modified register to register form MRR.  */
 #define PMRR (PREFIX_OP | PREFIX_FORM (3))
 
+/* Prefix insn, modified masked immediate register to register form MMIRR.  */
+#define PMMIRR (PREFIX_OP | PREFIX_FORM (3) | (9ULL << 52))
+
 /* An 8-byte D form prefix instruction.  */
 #define P_D_MASK (((-1ULL << 50) & ~PCREL_MASK) | OP_MASK)
 
 /* The same as P_D_MASK, but with the RA and PCREL fields specified.  */
 #define P_DRAPCREL_MASK (P_D_MASK | PCREL_MASK | RA_MASK)
 
+/* Mask for prefix X form instructions.  */
+#define P_X_MASK (PREFIX_MASK | X_MASK)
+#define P_XX1_MASK (PREFIX_MASK | XX1_MASK)
+
 /* Mask for prefix vector permute insns.  */
 #define P_XX4_MASK (PREFIX_MASK | XX4_MASK)
 #define P_UXX4_MASK (P_XX4_MASK & ~(7ULL << 32))
+
+/* MMIRR:XX3-form 8-byte outer product instructions.  */
+#define P_GER_MASK ((-1ULL << 40) | XX3_MASK | (3 << 21) | 1)
+#define P_GER2_MASK (P_GER_MASK & ~(3ULL << 46))
+#define P_GER4_MASK (P_GER_MASK & ~(15ULL << 44))
+#define P_GER8_MASK (P_GER_MASK & ~(255ULL << 40))
+#define P_GER64_MASK (P_GER_MASK | (3ULL << 32))
 
 /* Vector splat immediate op.  */
 #define VSOP(op, xop) (OP (op) | (xop << 17))
@@ -3869,6 +3980,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define PPCVSX	PPC_OPCODE_VSX
 #define PPCVSX2	PPC_OPCODE_POWER8
 #define PPCVSX3	PPC_OPCODE_POWER9
+#define PPCVSX4	PPC_OPCODE_POWER10
 #define POWER	PPC_OPCODE_POWER
 #define POWER2	PPC_OPCODE_POWER | PPC_OPCODE_POWER2
 #define PWR2COM PPC_OPCODE_POWER | PPC_OPCODE_POWER2 | PPC_OPCODE_COMMON
@@ -6115,6 +6227,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"msgclrp",	XRTRA(31,174,0,0), XRTRA_MASK, POWER8,	0,		{RB}},
 {"dcbtlse",	X(31,174),	X_MASK,	     PPCCHLK,	E500MC,		{CT, RA0, RB}},
 
+{"xxmfacc",	XVA(31,177,0), XRARB_MASK|3<<21, POWER10, 0,		{ACC}},
+{"xxmtacc",	XVA(31,177,1), XRARB_MASK|3<<21, POWER10, 0,		{ACC}},
+{"xxsetaccz",	XVA(31,177,3), XRARB_MASK|3<<21, POWER10, 0,		{ACC}},
+
 {"mtmsrd",	X(31,178),	XRLARB_MASK, PPC64,	0,		{RS, A_L}},
 
 {"mtvsrd",	X(31,179),	XX1RB_MASK,   PPCVSX2,	0,		{XT6, RA}},
@@ -7564,6 +7680,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"dqua",	ZRC(59,3,0),	Z2_MASK,     POWER6,	PPCVLE,		{FRT,FRA,FRB,RMC}},
 {"dqua.",	ZRC(59,3,1),	Z2_MASK,     POWER6,	PPCVLE,		{FRT,FRA,FRB,RMC}},
 
+{"xvi8ger4pp",	XX3(59,2),   XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+{"xvi8ger4",	XX3(59,3),   XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
 {"fdivs",	A(59,18,0),	AFRC_MASK,   PPC,	PPCEFS|PPCVLE,	{FRT, FRA, FRB}},
 {"fdivs.",	A(59,18,1),	AFRC_MASK,   PPC,	PPCEFS|PPCVLE,	{FRT, FRA, FRB}},
 
@@ -7613,20 +7732,40 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"dquai",	ZRC(59,67,0),	Z2_MASK,     POWER6,	PPCVLE,		{TE, FRT,FRB,RMC}},
 {"dquai.",	ZRC(59,67,1),	Z2_MASK,     POWER6,	PPCVLE,		{TE, FRT,FRB,RMC}},
 
+{"xvf16ger2pp",	XX3(59,18),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+{"xvf16ger2",	XX3(59,19),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
 {"dscri",	ZRC(59,98,0),	Z_MASK,	     POWER6,	PPCVLE,		{FRT, FRA, SH16}},
 {"dscri.",	ZRC(59,98,1),	Z_MASK,	     POWER6,	PPCVLE,		{FRT, FRA, SH16}},
 
 {"drintx",	ZRC(59,99,0),	Z2_MASK,     POWER6,	PPCVLE,		{R, FRT, FRB, RMC}},
 {"drintx.",	ZRC(59,99,1),	Z2_MASK,     POWER6,	PPCVLE,		{R, FRT, FRB, RMC}},
 
+{"xvf32gerpp",	XX3(59,26),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+{"xvf32ger",	XX3(59,27),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
 {"dcmpo",	X(59,130),	X_MASK,	     POWER6,	PPCVLE,		{BF,  FRA, FRB}},
 
+{"xvi4ger8pp",	XX3(59,34),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+{"xvi4ger8",	XX3(59,35),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
 {"dtstex",	X(59,162),	X_MASK,	     POWER6,	PPCVLE,		{BF,  FRA, FRB}},
+
+{"xvi16ger2spp", XX3(59,42), XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+{"xvi16ger2s",	XX3(59,43),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
 {"dtstdc",	Z(59,194),	Z_MASK,	     POWER6,	PPCVLE,		{BF,  FRA, DCM}},
+
+{"xvbf16ger2pp",XX3(59,50),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+{"xvbf16ger2",	XX3(59,51),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
 {"dtstdg",	Z(59,226),	Z_MASK,	     POWER6,	PPCVLE,		{BF,  FRA, DGM}},
 
 {"drintn",	ZRC(59,227,0),	Z2_MASK,     POWER6,	PPCVLE,		{R, FRT, FRB, RMC}},
 {"drintn.",	ZRC(59,227,1),	Z2_MASK,     POWER6,	PPCVLE,		{R, FRT, FRB, RMC}},
+
+{"xvf64gerpp",	XX3(59,58),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6ap, XB6a}},
+{"xvf64ger",	XX3(59,59),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6ap, XB6a}},
 
 {"dctdp",	XRC(59,258,0),	X_MASK,	     POWER6,	PPCVLE,		{FRT, FRB}},
 {"dctdp.",	XRC(59,258,1),	X_MASK,	     POWER6,	PPCVLE,		{FRT, FRB}},
@@ -7637,8 +7776,22 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"ddedpd",	XRC(59,322,0),	X_MASK,	     POWER6,	PPCVLE,		{SP, FRT, FRB}},
 {"ddedpd.",	XRC(59,322,1),	X_MASK,	     POWER6,	PPCVLE,		{SP, FRT, FRB}},
 
+{"xvi16ger2",	XX3(59,75),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
+{"xvf16ger2np",	XX3(59,82),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
 {"dxex",	XRC(59,354,0),	X_MASK,	     POWER6,	PPCVLE,		{FRT, FRB}},
 {"dxex.",	XRC(59,354,1),	X_MASK,	     POWER6,	PPCVLE,		{FRT, FRB}},
+
+{"xvf32gernp",	XX3(59,90),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
+{"xvi8ger4spp",	XX3(59,99),  XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
+{"xvi16ger2pp",	XX3(59,107), XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
+{"xvbf16ger2np",XX3(59,114), XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
+{"xvf64gernp",	XX3(59,122), XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6ap, XB6a}},
 
 {"dsub",	XRC(59,514,0),	X_MASK,	     POWER6,	PPCVLE,		{FRT, FRA, FRB}},
 {"dsub.",	XRC(59,514,1),	X_MASK,	     POWER6,	PPCVLE,		{FRT, FRA, FRB}},
@@ -7646,10 +7799,18 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"ddiv",	XRC(59,546,0),	X_MASK,	     POWER6,	PPCVLE,		{FRT, FRA, FRB}},
 {"ddiv.",	XRC(59,546,1),	X_MASK,	     POWER6,	PPCVLE,		{FRT, FRA, FRB}},
 
+{"xvf16ger2pn",	XX3(59,146), XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
+{"xvf32gerpn",	XX3(59,154), XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
 {"dcmpu",	X(59,642),	X_MASK,	     POWER6,	PPCVLE,		{BF,  FRA, FRB}},
 
 {"dtstsf",	X(59,674),	X_MASK,	     POWER6,	PPCVLE,		{BF,  FRA, FRB}},
 {"dtstsfi",	X(59,675),	X_MASK|1<<22,POWER9,	PPCVLE,		{BF, UIM6, FRB}},
+
+{"xvbf16ger2pn",XX3(59,178), XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
+{"xvf64gerpn",	XX3(59,186), XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6ap, XB6a}},
 
 {"drsp",	XRC(59,770,0),	X_MASK,	     POWER6,	PPCVLE,		{FRT, FRB}},
 {"drsp.",	XRC(59,770,1),	X_MASK,	     POWER6,	PPCVLE,		{FRT, FRB}},
@@ -7660,14 +7821,22 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"denbcd",	XRC(59,834,0),	X_MASK,	     POWER6,	PPCVLE,		{S, FRT, FRB}},
 {"denbcd.",	XRC(59,834,1),	X_MASK,	     POWER6,	PPCVLE,		{S, FRT, FRB}},
 
+{"xvf16ger2nn",	XX3(59,210), XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
 {"fcfids",	XRC(59,846,0),	XRA_MASK, POWER7|PPCA2,	PPCVLE,		{FRT, FRB}},
 {"fcfids.",	XRC(59,846,1),	XRA_MASK, POWER7|PPCA2,	PPCVLE,		{FRT, FRB}},
 
 {"diex",	XRC(59,866,0),	X_MASK,	     POWER6,	PPCVLE,		{FRT, FRA, FRB}},
 {"diex.",	XRC(59,866,1),	X_MASK,	     POWER6,	PPCVLE,		{FRT, FRA, FRB}},
 
+{"xvf32gernn",	XX3(59,218), XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
+{"xvbf16ger2nn",XX3(59,242), XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6a, XB6a}},
+
 {"fcfidus",	XRC(59,974,0),	XRA_MASK, POWER7|PPCA2,	PPCVLE,		{FRT, FRB}},
 {"fcfidus.",	XRC(59,974,1),	XRA_MASK, POWER7|PPCA2,	PPCVLE,		{FRT, FRB}},
+
+{"xvf64gernn",	XX3(59,250), XX3_MASK|3<<21, POWER10,	PPCVLE,		{ACC, XA6ap, XB6a}},
 
 {"xsaddsp",	XX3(60,0),	XX3_MASK,    PPCVSX2,	PPCVLE,		{XT6, XA6, XB6}},
 {"xsmaddasp",	XX3(60,1),	XX3_MASK,    PPCVSX2,	PPCVLE,		{XT6, XA6, XB6}},
@@ -7854,6 +8023,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"xvxexpsp",	XX2VA(60,475,8),XX2_MASK,    PPCVSX3,	PPCVLE,		{XT6, XB6}},
 {"xvxsigsp",	XX2VA(60,475,9),XX2_MASK,    PPCVSX3,	PPCVLE,		{XT6, XB6}},
 {"xxbrw",	XX2VA(60,475,15),XX2_MASK,   PPCVSX3,	PPCVLE,		{XT6, XB6}},
+{"xvcvbf16sp",	XX2VA(60,475,16),XX2_MASK,   PPCVSX4,	PPCVLE,		{XT6, XB6}},
+{"xvcvspbf16",	XX2VA(60,475,17),XX2_MASK,   PPCVSX4,	PPCVLE,		{XT6, XB6}},
 {"xxbrd",	XX2VA(60,475,23),XX2_MASK,   PPCVSX3,	PPCVLE,		{XT6, XB6}},
 {"xvcvhpsp",	XX2VA(60,475,24),XX2_MASK,   PPCVSX3,	PPCVLE,		{XT6, XB6}},
 {"xvcvsphp",	XX2VA(60,475,25),XX2_MASK,   PPCVSX3,	PPCVLE,		{XT6, XB6}},
@@ -8227,6 +8398,35 @@ const struct powerpc_opcode prefix_opcodes[] = {
 {"plq",		  P8LS|OP(56),	       P_D_MASK,	POWER10, 0,	{RTQ, D34, PRAQ, PCREL}},
 {"pld",		  P8LS|OP(57),	       P_D_MASK,	POWER10, 0,	{RT, D34, PRA0, PCREL}},
 {"plxvp",	  P8LS|OP(58),	       P_D_MASK,	POWER10, 0,	{XTP, D34, PRA0, PCREL}},
+{"pmxvi8ger4pp",  PMMIRR|XX3(59,2),    P_GER4_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK4}},
+{"pmxvi8ger4",	  PMMIRR|XX3(59,3),    P_GER4_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK4}},
+{"pmxvf16ger2pp", PMMIRR|XX3(59,18),   P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvf16ger2",	  PMMIRR|XX3(59,19),   P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvf32gerpp",  PMMIRR|XX3(59,26),   P_GER_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK}},
+{"pmxvf32ger",	  PMMIRR|XX3(59,27),   P_GER_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK}},
+{"pmxvi4ger8pp",  PMMIRR|XX3(59,34),   P_GER8_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK8}},
+{"pmxvi4ger8",	  PMMIRR|XX3(59,35),   P_GER8_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK8}},
+{"pmxvi16ger2spp",PMMIRR|XX3(59,42),   P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvi16ger2s",  PMMIRR|XX3(59,43),   P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvbf16ger2pp",PMMIRR|XX3(59,50),   P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvbf16ger2",  PMMIRR|XX3(59,51),   P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvf64gerpp",  PMMIRR|XX3(59,58),   P_GER64_MASK,	POWER10, 0,	{ACC, XA6ap, XB6a, XMSK, YMSK2}},
+{"pmxvf64ger",	  PMMIRR|XX3(59,59),   P_GER64_MASK,	POWER10, 0,	{ACC, XA6ap, XB6a, XMSK, YMSK2}},
+{"pmxvi16ger2",   PMMIRR|XX3(59,75),   P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvf16ger2np", PMMIRR|XX3(59,82),   P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvf32gernp",  PMMIRR|XX3(59,90),   P_GER_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK}},
+{"pmxvi8ger4spp", PMMIRR|XX3(59,99),   P_GER4_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK4}},
+{"pmxvi16ger2pp", PMMIRR|XX3(59,107),  P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvbf16ger2np",PMMIRR|XX3(59,114),  P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvf64gernp",  PMMIRR|XX3(59,122),  P_GER64_MASK,	POWER10, 0,	{ACC, XA6ap, XB6a, XMSK, YMSK2}},
+{"pmxvf16ger2pn", PMMIRR|XX3(59,146),  P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvf32gerpn",  PMMIRR|XX3(59,154),  P_GER_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK}},
+{"pmxvbf16ger2pn",PMMIRR|XX3(59,178),  P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvf64gerpn",  PMMIRR|XX3(59,186),  P_GER64_MASK,	POWER10, 0,	{ACC, XA6ap, XB6a, XMSK, YMSK2}},
+{"pmxvf16ger2nn", PMMIRR|XX3(59,210),  P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvf32gernn",  PMMIRR|XX3(59,218),  P_GER_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK}},
+{"pmxvbf16ger2nn",PMMIRR|XX3(59,242),  P_GER2_MASK,	POWER10, 0,	{ACC, XA6a, XB6a, XMSK, YMSK, PMSK2}},
+{"pmxvf64gernn",  PMMIRR|XX3(59,250),  P_GER64_MASK,	POWER10, 0,	{ACC, XA6ap, XB6a, XMSK, YMSK2}},
 {"pstq",	  P8LS|OP(60),	       P_D_MASK,	POWER10, 0,	{RSQ, D34, PRA0, PCREL}},
 {"pstd",	  P8LS|OP(61),	       P_D_MASK,	POWER10, 0,	{RS, D34, PRA0, PCREL}},
 {"pstxvp",	  P8LS|OP(62),	       P_D_MASK,	POWER10, 0,	{XTP, D34, PRA0, PCREL}},

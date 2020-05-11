@@ -1,4 +1,15 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
+	    Peter Bergner  <bergner@linux.ibm.com>
+
+	* config/tc-ppc.c (pre_defined_registers): Add accumulators.
+	(md_assemble): Check acc specified in correct operand.
+	* testsuite/gas/ppc/outerprod.d,
+	* testsuite/gas/ppc/outerprod.s,
+	* testsuite/gas/ppc/vsx4.d,
+	* testsuite/gas/ppc/vsx4.s: New tests.
+	* testsuite/gas/ppc/ppc.exp: Run them.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/ppc/simd_perm.d,
 	* testsuite/gas/ppc/simd_perm.s: New test.
