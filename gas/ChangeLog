@@ -1,5 +1,11 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/ppc/bitmanip.d,
+	* testsuite/gas/ppc/bitmanip.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/ppc/genpcv.d,
 	* testsuite/gas/ppc/genpcv.s: New test.
 	* testsuite/gas/ppc/ppc.exp: Run it.
