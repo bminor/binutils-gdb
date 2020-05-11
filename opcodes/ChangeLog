@@ -1,5 +1,9 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
+	* ppc-opc.c (powerpc_opcodes): Add xvtlsbb.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
 	* ppc-opc.c (powerpc_opcodes): Add vstribl, vstribr, vstrihl, vstrihr,
 	vclrlb, vclrrb, vstribl., vstribr., vstrihl., vstrihr..
 
