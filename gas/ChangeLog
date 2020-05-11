@@ -1,5 +1,10 @@
 2020-05-11  Peter Bergner  <bergner@linux.ibm.com>
 
+	* testsuite/gas/ppc/power10.d: Add paste. tests.
+	* testsuite/gas/ppc/power10.s: Likewise.
+
+2020-05-11  Peter Bergner  <bergner@linux.ibm.com>
+
 	* testsuite/gas/ppc/power10.s: New test.
 	* testsuite/gas/ppc/power10.d: Likewise.
 	* testsuite/gas/ppc/ppc.exp: Run it.

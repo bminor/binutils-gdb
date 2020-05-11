@@ -771,6 +771,29 @@ extract_fxm (uint64_t insn,
   return mask;
 }
 
+/* L field in the paste. instruction.  */
+
+static uint64_t
+insert_l1opt (uint64_t insn,
+	    int64_t value,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 1) << 21);
+}
+
+static int64_t
+extract_l1opt (uint64_t insn,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     int *invalid)
+{
+  /* Return a value of 1 for a missing optional operand.  */
+  if (*invalid < 0)
+    return 1;
+
+  return (insn >> 21) & 1;
+}
+
 static uint64_t
 insert_li20 (uint64_t insn,
 	     int64_t value,
@@ -2256,8 +2279,13 @@ const struct powerpc_operand powerpc_operands[] =
 #define HTM_R LOPT
   { 0x1, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
+  /* The optional L field in the paste. instruction. This is similar to LOPT
+     above, but with a default value of 1.  */
+#define L1OPT LOPT + 1
+  { 0x1, 21, insert_l1opt, extract_l1opt, PPC_OPERAND_OPTIONAL },
+
   /* The optional (for 32-bit) L field in cmp[l][i] instructions.  */
-#define L32OPT LOPT + 1
+#define L32OPT L1OPT + 1
   { 0x1, 21, NULL, NULL, PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL32 },
 
   /* The L field in dcbf instruction.  */
@@ -7123,7 +7151,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"extswsli",	XS(31,445,0),	XS_MASK,     POWER9,	0,		{RA, RS, SH6}},
 {"extswsli.",	XS(31,445,1),	XS_MASK,     POWER9,	0,		{RA, RS, SH6}},
 
-{"paste.",	XRCL(31,902,1,1),XRT_MASK,   POWER9,	0,		{RA0, RB}},
+{"paste.",	XRC(31,902,1),	XLRT_MASK,   POWER10,	0,		{RA0, RB, L1OPT}},
+{"paste.",	XRCL(31,902,1,1),XRT_MASK,   POWER9,	POWER10,	{RA0, RB}},
 
 {"stvlxl",	X(31,903),	X_MASK,	     CELL,	0,		{VS, RA0, RB}},
 {"stdfcmux",	APU(31,903,0),	APU_MASK,    PPC405,	0,		{FCRT, RA, RB}},
