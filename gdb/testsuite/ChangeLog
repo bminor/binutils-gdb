@@ -1,3 +1,7 @@
+2020-05-11  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.ada/packed_tagged.exp: Change kfail into xfail.
+
 2020-05-11  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.ada/attr_ref_and_charlit.exp: Fix typo.
