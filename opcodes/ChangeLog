@@ -1,4 +1,13 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (MP, VXVAM_MASK): Define.
+	(VXVAPS_MASK): Use VXVA_MASK.
+	(powerpc_opcodes): Add mtvsrbmi, vexpandbm, vexpandhm, vexpandwm,
+	vexpanddm, vexpandqm, vextractbm, vextracthm, vextractwm,
+	vextractdm, vextractqm, mtvsrbm, mtvsrhm, mtvsrwm, mtvsrdm, mtvsrqm,
+	vcntmbb, vcntmbh, vcntmbw, vcntmbd.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
 	    Peter Bergner  <bergner@linux.ibm.com>
 
 	* ppc-opc.c (insert_xa6a, extract_xa6a, insert_xb6a, extract_xb6a):

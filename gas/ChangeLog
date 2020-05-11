@@ -1,4 +1,10 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/maskmanip.d,
+	* testsuite/gas/ppc/maskmanip.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
 	    Peter Bergner  <bergner@linux.ibm.com>
 
 	* config/tc-ppc.c (pre_defined_registers): Add accumulators.

@@ -2886,6 +2886,7 @@ const struct powerpc_operand powerpc_operands[] =
   { 0x3, 9, NULL, NULL, 0 },
 
 #define R RMC + 1
+#define MP R
   { 0x1, 16, NULL, NULL, 0 },
 
 #define RIC R + 1
@@ -3492,7 +3493,10 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define VXPS_MASK (VX_MASK & ~(0x1 << 9))
 
 /* A VX_MASK with the VA field fixed with a PS field.  */
-#define VXVAPS_MASK ((VX_MASK | (0x1f << 16)) & ~(0x1 << 9))
+#define VXVAPS_MASK (VXVA_MASK & ~(0x1 << 9))
+
+/* A VX_MASK with the VA field fixed with a MP field.  */
+#define VXVAM_MASK (VXVA_MASK & ~(0x1 << 16))
 
 /* A VX_MASK for instructions using a BF field.  */
 #define VXBF_MASK (VX_MASK | (3 << 21))
@@ -4114,6 +4118,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vinsbvlx",	VX (4,  15),	VX_MASK,     POWER10,	0,		{VD, RA, VB}},
 {"mulhhwu",	XRC(4,	 8,0),	X_MASK,	     MULHW,	0,		{RT, RA, RB}},
 {"mulhhwu.",	XRC(4,	 8,1),	X_MASK,	     MULHW,	0,		{RT, RA, RB}},
+{"mtvsrbmi",	DX (4,10),	DX_MASK,     POWER10,	0,		{VD, DXD}},
 {"ps_sum0",	A  (4,	10,0),	A_MASK,	     PPCPS,	0,		{FRT, FRA, FRC, FRB}},
 {"ps_sum0.",	A  (4,	10,1),	A_MASK,	     PPCPS,	0,		{FRT, FRA, FRC, FRB}},
 {"vsldbi",	VX (4,  22),	VXSH_MASK,   POWER10,	0,		{VD, VA, VB, SH3}},
@@ -4898,6 +4903,27 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"vmoduq",	VX (4,1547),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"vextublx",	VX (4,1549),	VX_MASK,     PPCVEC3,	0,		{RT, RA, VB}},
 {"vsubuhs",	VX (4,1600),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
+
+{"vexpandbm",	VXVA(4,1602,0),  VXVA_MASK,  POWER10,	0,		{VD, VB}},
+{"vexpandhm",	VXVA(4,1602,1),  VXVA_MASK,  POWER10,	0,		{VD, VB}},
+{"vexpandwm",	VXVA(4,1602,2),  VXVA_MASK,  POWER10,	0,		{VD, VB}},
+{"vexpanddm",	VXVA(4,1602,3),  VXVA_MASK,  POWER10,	0,		{VD, VB}},
+{"vexpandqm",	VXVA(4,1602,4),  VXVA_MASK,  POWER10,	0,		{VD, VB}},
+{"vextractbm",	VXVA(4,1602,8),  VXVA_MASK,  POWER10,	0,		{RT, VB}},
+{"vextracthm",	VXVA(4,1602,9),  VXVA_MASK,  POWER10,	0,		{RT, VB}},
+{"vextractwm",	VXVA(4,1602,10), VXVA_MASK,  POWER10,	0,		{RT, VB}},
+{"vextractdm",	VXVA(4,1602,11), VXVA_MASK,  POWER10,	0,		{RT, VB}},
+{"vextractqm",	VXVA(4,1602,12), VXVA_MASK,  POWER10,	0,		{RT, VB}},
+{"mtvsrbm",	VXVA(4,1602,16), VXVA_MASK,  POWER10,	0,		{VD, RB}},
+{"mtvsrhm",	VXVA(4,1602,17), VXVA_MASK,  POWER10,	0,		{VD, RB}},
+{"mtvsrwm",	VXVA(4,1602,18), VXVA_MASK,  POWER10,	0,		{VD, RB}},
+{"mtvsrdm",	VXVA(4,1602,19), VXVA_MASK,  POWER10,	0,		{VD, RB}},
+{"mtvsrqm",	VXVA(4,1602,20), VXVA_MASK,  POWER10,	0,		{VD, RB}},
+{"vcntmbb",	VXVA(4,1602,24), VXVAM_MASK, POWER10,	0,		{RT, VB, MP}},
+{"vcntmbh",	VXVA(4,1602,26), VXVAM_MASK, POWER10,	0,		{RT, VB, MP}},
+{"vcntmbw",	VXVA(4,1602,28), VXVAM_MASK, POWER10,	0,		{RT, VB, MP}},
+{"vcntmbd",	VXVA(4,1602,30), VXVAM_MASK, POWER10,	0,		{RT, VB, MP}},
+
 {"mtvscr",	VX (4,1604),	VXVDVA_MASK, PPCVEC,	0,		{VB}},
 {"vcmpgtuh.",	VXR(4, 582,1),	VXR_MASK,    PPCVEC,	0,		{VD, VA, VB}},
 {"vsum4shs",	VX (4,1608),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
