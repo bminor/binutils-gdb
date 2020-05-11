@@ -191,6 +191,17 @@ error_no_arg (const char *why)
   error (_("Argument required (%s)."), why);
 }
 
+/* This implements the "info" prefix command.  Normally such commands
+   are automatically handled by add_basic_prefix_cmd, but in this case
+   a separate command is used so that it can be hooked into by
+   gdb-gdb.gdb.  */
+
+static void
+info_command (const char *arg, int from_tty)
+{
+  help_list (infolist, "info ", all_commands, gdb_stdout);
+}
+
 /* See cli/cli-cmds.h.  */
 
 void
@@ -2189,9 +2200,9 @@ Without an argument, history expansion is enabled."),
 			   show_history_expansion_p,
 			   &sethistlist, &showhistlist);
 
-  add_basic_prefix_cmd ("info", class_info, _("\
+  add_prefix_cmd ("info", class_info, info_command, _("\
 Generic command for showing things about the program being debugged."),
-			&infolist, "info ", 0, &cmdlist);
+		  &infolist, "info ", 0, &cmdlist);
   add_com_alias ("i", "info", class_info, 1);
   add_com_alias ("inf", "info", class_info, 1);
 

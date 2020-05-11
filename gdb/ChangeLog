@@ -1,5 +1,11 @@
 2020-05-11  Tom Tromey  <tromey@adacore.com>
 
+	* cli/cli-cmds.c (info_command): Restore.
+	(_initialize_cli_cmds): Use add_prefix_command for "info".
+	* gdb-gdb.gdb.in: Restore breakpoint on info_command.
+
+2020-05-11  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.c (ada_value_primitive_field): Now public.
 	* ada-lang.h (ada_value_primitive_field): Declare.
 	* ada-valprint.c (print_field_values): Use
