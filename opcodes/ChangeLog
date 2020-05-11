@@ -1,5 +1,10 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
+	* ppc-opc.c (powerpc_opcodes): Add xxgenpcvbm, xxgenpcvhm,
+	xxgenpcvwm, xxgenpcvdm.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
 	* ppc-opc.c (MP, VXVAM_MASK): Define.
 	(VXVAPS_MASK): Use VXVA_MASK.
 	(powerpc_opcodes): Add mtvsrbmi, vexpandbm, vexpandhm, vexpandwm,
