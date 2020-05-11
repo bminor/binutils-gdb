@@ -24,22 +24,6 @@
 LANG=C ; export LANG
 LC_ALL=C ; export LC_ALL
 
-
-compare_new ()
-{
-    file=$1
-    if test ! -r "${file}"
-    then
-	echo "${file} missing? cp new-${file} ${file}" 1>&2
-    elif diff -u "${file}" "new-${file}"
-    then
-	echo "${file} unchanged" 1>&2
-    else
-	echo "${file} has changed? cp new-${file} ${file}" 1>&2
-    fi
-}
-
-
 # Format of the input table
 read="class returntype function formal actual staticdefault predefault postdefault invalid_p print garbage_at_eol"
 
@@ -1203,7 +1187,7 @@ EOF
 #
 # The .log file
 #
-exec > new-gdbarch.log
+exec > gdbarch.log
 function_list | while do_read
 do
     cat <<EOF
@@ -1239,7 +1223,6 @@ EOF
 done
 
 exec 1>&2
-compare_new gdbarch.log
 
 
 copyright ()
@@ -1267,17 +1250,7 @@ cat <<EOF
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This file was created with the aid of \`\`gdbarch.sh''.
-
-   The Bourne shell script \`\`gdbarch.sh'' creates the files
-   \`\`new-gdbarch.c'' and \`\`new-gdbarch.h and then compares them
-   against the existing \`\`gdbarch.[hc]''.  Any differences found
-   being reported.
-
-   If editing this file, please also run gdbarch.sh and merge any
-   changes into that script. Conversely, when making sweeping changes
-   to this file, modifying gdbarch.sh and using its output may prove
-   easier.  */
+/* This file was created with the aid of \`\`gdbarch.sh''.  */
 
 EOF
 }
@@ -1695,8 +1668,8 @@ gdbarch_num_cooked_regs (gdbarch *arch)
 #endif
 EOF
 exec 1>&2
-#../move-if-change new-gdbarch.h gdbarch.h
-compare_new gdbarch.h
+../move-if-change new-gdbarch.h gdbarch.h
+rm -f new-gdbarch.h
 
 
 #
@@ -2605,5 +2578,5 @@ EOF
 
 # close things off
 exec 1>&2
-#../move-if-change new-gdbarch.c gdbarch.c
-compare_new gdbarch.c
+../move-if-change new-gdbarch.c gdbarch.c
+rm -f new-gdbarch.c
