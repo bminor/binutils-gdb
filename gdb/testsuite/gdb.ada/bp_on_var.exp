@@ -28,7 +28,7 @@ clean_restart ${testfile}
 # We are going to insert breakpoints using locations that are invalid.
 # Set "breakpoint pending" to "off" in order to avoid having to deal
 # with GDB asking whether to insert a pending breakpoint or not.
-gdb_test_no_output "set breakpoint pending off"
+gdb_test_no_output "set breakpoint pending off" "disable pending breakpoints"
 
 gdb_test "break pck.my_global_variable" \
          "Function \"pck\\.my_global_variable\" not defined\\."
@@ -38,7 +38,8 @@ gdb_test "break pck.my_global_variable" \
 
 clean_restart ${testfile}
 
-gdb_test_no_output "set breakpoint pending off"
+gdb_test_no_output "set breakpoint pending off" \
+    "disable pending breakpoints after restart"
 
 gdb_test "break pck.my_hidden_variable" \
          "Function \"pck\\.my_hidden_variable\" not defined\\."

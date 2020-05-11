@@ -31,9 +31,13 @@ set eol "\[\r\n\]*"
 # A convenience function that verifies that the "complete EXPR" command
 # returns the EXPECTED_OUTPUT.
 
-proc test_gdb_complete { expr expected_output } {
+proc test_gdb_complete { expr expected_output {msg ""} } {
+    set cmd "complete p $expr"
+    if {$msg == ""} {
+	set msg $cmd
+    }
     gdb_test "complete p $expr" \
-             "$expected_output"
+             "$expected_output" $msg
 }
 
 # A convenience function that verifies that the "complete EXPR" command
@@ -60,7 +64,8 @@ test_gdb_no_completion "inner.insi"
 
 # An incomplete nested package name, were lies a single symbol:
 test_gdb_complete "pck.inne" \
-                  "p pck.inner.inside_variable"
+                  "p pck.inner.inside_variable" \
+                  "complete nested package name"
 
 # A fully qualified symbol name, mangled...
 test_gdb_complete "pck__inner__ins" \
@@ -118,7 +123,8 @@ test_gdb_complete "pck.my" \
 
 # A fully qualified package name
 test_gdb_complete "pck.inne" \
-                  "p pck.inner.inside_variable"
+    "p pck.inner.inside_variable" \
+    "complete fully qualified package name"
 
 # A fully qualified package name, with a dot at the end
 test_gdb_complete "pck.inner." \

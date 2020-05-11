@@ -27,7 +27,7 @@ set bp_location [gdb_get_line_number "START" ${testdir}/assign.adb]
 runto "assign.adb:$bp_location"
 
 gdb_test "p q" \
-         "= \\(2, 3, 5, 7, 11\\)"
+         "= \\(2, 3, 5, 7, 11\\)" "initial value of q"
 
 gdb_test_no_output "set \$addr := q'address" \
          "save q'address in convenience variable"
@@ -42,4 +42,4 @@ gdb_test_no_output "set {Integer} \$addr := 19" \
          "set {Integer} \$addr := 19"
 
 gdb_test "p q" \
-         "= \\(19, 3, 5, 7, 11\\)"
+         "= \\(19, 3, 5, 7, 11\\)" "modified value of q"

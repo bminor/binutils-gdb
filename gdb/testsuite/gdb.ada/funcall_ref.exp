@@ -61,7 +61,7 @@ foreach_with_prefix scenario {all minimal} {
 			    "    s: access array \\(1 \\.\\. n\\) of character;" \
 			    "end record"]
     set supported 1
-    gdb_test_multiple "ptype get (\"Hello world!\")" "" {
+    gdb_test_multiple "ptype get(\"Hello world!\")" "" {
 	-re -wrap $pass_re {
 	    pass $gdb_test_name
 	}
@@ -82,6 +82,6 @@ foreach_with_prefix scenario {all minimal} {
 	return 0
     }
 
-    gdb_test "p get (\"Hello world!\")" \
+    gdb_test "p get(\"Hello world!\")" \
 	"= \\(n => 12, s => \"Hello world!\"\\)"
 }

@@ -1,3 +1,22 @@
+2020-05-11  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.ada/arrayparam.exp: Resolve duplicate and tail parentheses
+	test names.
+	* gdb.ada/arrayptr.exp: Likewise.
+	* gdb.ada/assign_arr.exp: Likewise.
+	* gdb.ada/attr_ref_and_charlit.exp: Likewise.
+	* gdb.ada/bp_on_var.exp: Likewise.
+	* gdb.ada/call_pn.exp: Likewise.
+	* gdb.ada/complete.exp: Likewise.
+	* gdb.ada/fun_overload_menu.exp: Likewise.
+	* gdb.ada/funcall_param.exp: Likewise.
+	* gdb.ada/funcall_ref.exp: Likewise.
+	* gdb.ada/packed_array_assign.exp: Likewise.
+	* gdb.ada/same_component_name.exp: Likewise.
+	* gdb.ada/type_coercion.exp: Likewise.
+	* gdb.ada/unc_arr_ptr_in_var_rec.exp: Likewise.
+	* gdb.ada/variant_record_packed_array.exp: Likewise.
+
 2020-05-11  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/25941

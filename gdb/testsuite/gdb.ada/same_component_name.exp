@@ -56,7 +56,7 @@ gdb_test "print obj.a" " = 48" \
 
 gdb_test "continue" \
          ".*Breakpoint $decimal, pck.assign \\(.*\\).*" \
-         "continue to bottom assign breakpoint (2nd time)"
+         "continue to bottom assign breakpoint, 2nd time"
 
 gdb_test "print obj.x" " = 6" \
          "Print field existing only in bottom component"
