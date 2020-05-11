@@ -1,5 +1,9 @@
 2020-05-11  Peter Bergner  <bergner@linux.ibm.com>
 
+	* ppc-opc.c (powerpc_opcodes) <brd, brh, brw>: New mnemonics.
+
+2020-05-11  Peter Bergner  <bergner@linux.ibm.com>
+
 	* ppc-opc.c (insert_l1opt, extract_l1opt): New functions.
 	(L1OPT): Define.
 	(powerpc_opcodes) <paste.>: Add L operand for cpu POWER10.

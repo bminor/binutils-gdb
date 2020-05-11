@@ -131,3 +131,4 @@ run_dump_test "prefix-pcrel"
 if { [supports_ppc64] } then {
     run_dump_test "prefix-reloc"
 }
+run_dump_test "byte_rev"
