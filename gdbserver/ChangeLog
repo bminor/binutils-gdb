@@ -1,3 +1,10 @@
+2020-05-15  Hannes Domani  <ssbssa@yahoo.de>
+
+	* win32-i386-low.cc (i386_supports_z_point_type): Handle
+	Z_PACKET_HW_BP z_type.
+	(i386_insert_point): Handle raw_bkpt_type type.
+	(i386_remove_point): Likewise.
+
 2020-04-30  Hannes Domani  <ssbssa@yahoo.de>
 
 	* configure.srv <x86_64-*-mingw*, x86_64-*-cygwin*> (srv_tgtobj):

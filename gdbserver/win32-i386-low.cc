@@ -162,6 +162,7 @@ i386_supports_z_point_type (char z_type)
 {
   switch (z_type)
     {
+    case Z_PACKET_HW_BP:
     case Z_PACKET_WRITE_WP:
     case Z_PACKET_ACCESS_WP:
       return 1;
@@ -176,6 +177,7 @@ i386_insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   switch (type)
     {
+    case raw_bkpt_type_hw:
     case raw_bkpt_type_write_wp:
     case raw_bkpt_type_access_wp:
       {
@@ -197,6 +199,7 @@ i386_remove_point (enum raw_bkpt_type type, CORE_ADDR addr,
 {
   switch (type)
     {
+    case raw_bkpt_type_hw:
     case raw_bkpt_type_write_wp:
     case raw_bkpt_type_access_wp:
       {
