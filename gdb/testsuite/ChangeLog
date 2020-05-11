@@ -1,3 +1,10 @@
+2020-05-11  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.cp/cpexprs.exp: Move everything except flags setting ...
+	* gdb.cp/cpexprs.exp.in: .. here.
+	* gdb.cp/cpexprs-debug-types.exp: Include cpexprs.exp.in instead of
+	cpexprs.exp.
+
 2020-05-11  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.ada/arrayparam.exp: Resolve duplicate and tail parentheses
