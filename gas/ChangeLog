@@ -1,5 +1,11 @@
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/ppc/scalarquad.d,
+	* testsuite/gas/ppc/scalarquad.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+2020-05-11  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/ppc/rightmost.d,
 	* testsuite/gas/ppc/rightmost.s: New test.
 	* testsuite/gas/ppc/ppc.exp: Run it.
