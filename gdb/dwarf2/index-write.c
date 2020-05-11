@@ -1209,6 +1209,8 @@ private:
 	  }
       case STRUCT_DOMAIN:
 	return DW_TAG_structure_type;
+      case MODULE_DOMAIN:
+	return DW_TAG_module;
       default:
 	return 0;
       }
