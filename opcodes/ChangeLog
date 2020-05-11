@@ -1,3 +1,8 @@
+2020-05-11  Peter Bergner  <bergner@linux.ibm.com>
+
+	* ppc-opc.c (powerpc_opcodes) <setbc, setbcr, setnbc, setnbcr>: New
+	mnemonics.
+
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (UIM8, P_U8XX4_MASK): Define.

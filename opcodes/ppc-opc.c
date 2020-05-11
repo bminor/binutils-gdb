@@ -6770,6 +6770,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"popcntw",	X(31,378),	XRB_MASK,    POWER7|PPCA2, 0,		{RA, RS}},
 
+{"setbc",	X(31,384),	XRB_MASK,    POWER10,	0,		{RT, BI}},
+
 {"mtdcrx",	X(31,387),	X_MASK,	     BOOKE|PPCA2|PPC476, TITAN,	{RA, RS}},
 {"mtdcrx.",	XRC(31,387,1),	X_MASK,	     PPCA2,	0,		{RA, RS}},
 
@@ -6803,6 +6805,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"orc.",	XRC(31,412,1),	X_MASK,	     COM,	0,		{RA, RS, RB}},
 
 {"sthepx",	X(31,415),	X_MASK,	  E500MC|PPCA2, 0,		{RS, RA0, RB}},
+
+{"setbcr",	X(31,416),	XRB_MASK,    POWER10,	0,		{RT, BI}},
 
 {"mtdcrux",	X(31,419),	X_MASK,	 PPC464|PPC476,	0,		{RA, RS}},
 
@@ -6840,6 +6844,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"or",		XRC(31,444,0),	X_MASK,	     COM,	0,		{RA, RS, RB}},
 {"mr.",		XRC(31,444,1),	X_MASK,	     COM,	0,		{RA, RSB}},
 {"or.",		XRC(31,444,1),	X_MASK,	     COM,	0,		{RA, RS, RB}},
+
+{"setnbc",	X(31,448),	XRB_MASK,    POWER10,	0,		{RT, BI}},
 
 {"mtexisr",	XSPR(31,451, 64), XSPR_MASK, PPC403,	0,		{RS}},
 {"mtexier",	XSPR(31,451, 66), XSPR_MASK, PPC403,	0,		{RS}},
@@ -7082,6 +7088,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"nand",	XRC(31,476,0),	X_MASK,	     COM,	0,		{RA, RS, RB}},
 {"nand.",	XRC(31,476,1),	X_MASK,	     COM,	0,		{RA, RS, RB}},
+
+{"setnbcr",	X(31,480),	XRB_MASK,    POWER10,	0,		{RT, BI}},
 
 {"dsn",		X(31,483),	XRT_MASK,    E500MC,	0,		{RA, RB}},
 
