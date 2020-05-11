@@ -204,9 +204,6 @@ static struct symbol *standard_lookup (const char *, const struct block *,
 static struct value *ada_search_struct_field (const char *, struct value *, int,
                                               struct type *);
 
-static struct value *ada_value_primitive_field (struct value *, int, int,
-                                                struct type *);
-
 static int find_struct_field (const char *, struct type *, int,
                               struct type **, int *, int *, int *, int *);
 
@@ -7125,7 +7122,7 @@ ada_in_variant (LONGEST val, struct type *type, int field_num)
    fields.  FIELDNO says which field.   Differs from value_primitive_field
    only in that it can handle packed values of arbitrary type.  */
 
-static struct value *
+struct value *
 ada_value_primitive_field (struct value *arg1, int offset, int fieldno,
                            struct type *arg_type)
 {

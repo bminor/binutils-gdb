@@ -609,7 +609,8 @@ print_field_values (struct value *value, struct value *outer_value,
 
       if (ada_is_wrapper_field (type, i))
 	{
-	  struct value *field_val = value_field (value, i);
+	  struct value *field_val = ada_value_primitive_field (value, 0,
+							       i, type);
 	  comma_needed =
 	    print_field_values (field_val, field_val,
 				stream, recurse, options,

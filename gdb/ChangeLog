@@ -1,3 +1,10 @@
+2020-05-11  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (ada_value_primitive_field): Now public.
+	* ada-lang.h (ada_value_primitive_field): Declare.
+	* ada-valprint.c (print_field_values): Use
+	ada_value_primitive_field for wrapper fields.
+
 2020-05-11  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2/index-write.c (debug_names::psymbol_tag): Handle
