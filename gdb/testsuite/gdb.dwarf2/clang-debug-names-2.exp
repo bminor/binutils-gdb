@@ -20,18 +20,22 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile clang-debug-names.c clang-debug-names-debug.S
+standard_testfile clang-debug-names-2.c clang-debug-names-debug-2.S \
+    clang-debug-names-2-foo.c
 
-lassign [function_range main ${srcdir}/${subdir}/${srcfile}] \
+lassign \
+    [function_range main \
+	 "${srcdir}/${subdir}/${srcfile} ${srcdir}/${subdir}/${srcfile3}"] \
     main_start main_length
 
 set asm_file [standard_output_file $srcfile2]
 source $srcdir/$subdir/clang-debug-names.exp.in
 
-if { [prepare_for_testing "failed to prepare" ${testfile} \
-	  [list $srcfile $asm_file] {nodebug}] } {
+if { [build_executable_from_specs "failed to prepare" ${testfile} "" \
+	  $srcfile "nodebug" $asm_file "nodebug" $srcfile3 "debug"] } {
     return -1
 }
+clean_restart $binfile
 
 set cmd "ptype main"
 set pass_re \

@@ -1,3 +1,14 @@
+2020-05-11  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25941
+	* gdb.dwarf2/clang-debug-names.exp.in: New include exp file, factored
+	out of ...
+	* gdb.dwarf2/clang-debug-names.exp: ... here.
+	* gdb.dwarf2/clang-debug-names-2.exp: New file.  Include
+	clang-debug-names.exp.in.
+	* gdb.dwarf2/clang-debug-names-2-foo.c: New test.
+	* gdb.dwarf2/clang-debug-names-2.c: New test.
+
 2020-05-10  Alok Kumar Sharma  <alokkumar.sharma@amd.com>
 
 	* lib/fortran.exp (fortran_main): New Proc, handle flang MAIN_,

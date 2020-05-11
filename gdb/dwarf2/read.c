@@ -5022,6 +5022,26 @@ create_cus_from_debug_names_list (struct dwarf2_per_objfile *dwarf2_per_objfile,
 				  dwarf2_section_info &section,
 				  bool is_dwz)
 {
+  if (!map.augmentation_is_gdb)
+    {
+    for (uint32_t i = 0; i < map.cu_count; ++i)
+      {
+	sect_offset sect_off
+	  = (sect_offset) (extract_unsigned_integer
+			   (map.cu_table_reordered + i * map.offset_size,
+			    map.offset_size,
+			    map.dwarf5_byte_order));
+	/* We don't know the length of the CU, because the CU list in a
+	   .debug_names index can be incomplete, so we can't use the start of
+	   the next CU as end of this CU.  We create the CUs here with length 0,
+	   and in cutu_reader::cutu_reader we'll fill in the actual length.  */
+	dwarf2_per_cu_data *per_cu
+	  = create_cu_from_index_list (dwarf2_per_objfile, &section, is_dwz,
+				       sect_off, 0);
+	dwarf2_per_objfile->all_comp_units.push_back (per_cu);
+      }
+    }
+
   sect_offset sect_off_prev;
   for (uint32_t i = 0; i <= map.cu_count; ++i)
     {
@@ -6946,7 +6966,10 @@ cutu_reader::cutu_reader (struct dwarf2_per_cu_data *this_cu,
 						    rcuh_kind::COMPILE);
 
 	  gdb_assert (this_cu->sect_off == cu->header.sect_off);
-	  gdb_assert (this_cu->length == cu->header.get_length ());
+	  if (this_cu->length == 0)
+	    this_cu->length = cu->header.get_length ();
+	  else
+	    gdb_assert (this_cu->length == cu->header.get_length ());
 	  this_cu->dwarf_version = cu->header.version;
 	}
     }
