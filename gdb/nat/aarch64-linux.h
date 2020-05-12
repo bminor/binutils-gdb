@@ -129,4 +129,14 @@ ps_err_e aarch64_ps_get_thread_area (struct ps_prochandle *ph,
 				       lwpid_t lwpid, int idx, void **base,
 				       int is_64bit_p);
 
+/* MTE allocation tag access */
+
+#ifndef PTRACE_PEEKMTETAGS
+#define PTRACE_PEEKMTETAGS	  33
+#endif
+
+#ifndef PTRACE_POKEMTETAGS
+#define PTRACE_POKEMTETAGS	  34
+#endif
+
 #endif /* NAT_AARCH64_LINUX_H */
