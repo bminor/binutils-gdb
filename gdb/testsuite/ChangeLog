@@ -1,5 +1,9 @@
 2020-05-12  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.pascal/gdb11492.exp: Use with_test_prefix.
+
+2020-05-12  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.gdb/complaints.exp: Use with_test_prefix.
 	* gdb.xml/tdesc-regs.exp: Same.
 	* gdb.opt/inline-locals.exp: Fix test name.
