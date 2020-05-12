@@ -1,5 +1,10 @@
 2020-05-12  Tom de Vries  <tdevries@suse.de>
 
+	* lib/jit-elf-helpers.exp: Don't use undefined variables in untested
+	messages.
+
+2020-05-12  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.multi/multi-term-settings.exp: Use with_test_prefix.
 
 2020-05-12  Tom de Vries  <tdevries@suse.de>

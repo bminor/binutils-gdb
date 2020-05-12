@@ -37,9 +37,10 @@ proc compile_jit_main {main_srcfile main_binfile options} {
 	debug]
 
     if { [gdb_compile ${main_srcfile} ${main_binfile} \
-	  executable $options] != "" } {
-	      untested "failed to compile ${main_basename}.c"
-	      return -1
+	      executable $options] != "" } {
+	set f [file tail $main_binfile]
+	untested "failed to compile $f"
+	return -1
     }
 
     return 0
@@ -61,8 +62,9 @@ proc compile_jit_elf_main_as_so {main_solib_srcfile main_solib_binfile options} 
 	debug]
 
     if { [gdb_compile_shlib ${main_solib_srcfile} ${main_solib_binfile} \
-	    $options] != "" } {
-	untested "failed to compile ${main_solib_basename}.c as a shared library"
+	      $options] != "" } {
+	set f [file tail $main_solib_binfile]
+	untested "failed to compile shared library $f"
 	return -1
     }
 
@@ -94,8 +96,10 @@ proc compile_and_download_n_jit_so {jit_solib_basename jit_solib_srcfile count} 
 	    additional_flags=-DFUNCTION_NAME=[format "jit_function_%04d" $i] \
 	    additional_flags=-Xlinker \
 	    additional_flags=-Ttext-segment=$addr]
-	if { [gdb_compile_shlib ${jit_solib_srcfile} ${binfile} $options] != "" } {
-	    untested "failed to compile ${jit_solib_basename}.c as a shared library"
+	if { [gdb_compile_shlib ${jit_solib_srcfile} ${binfile} \
+		  $options] != "" } {
+	    set f [file tail $binfile]
+	    untested "failed to compile shared library $binfile"
 	    return -1
 	}
 
