@@ -64,9 +64,11 @@ if [mi_gdb_start] {
 # 1. Try catching all exceptions handlers.  #
 #############################################
 
-if ![mi_run_to_main] then {
-   fail "cannot run to main, testcase aborted"
-   return 0
+with_test_prefix "scenario 1" {
+    if ![mi_run_to_main] then {
+	fail "cannot run to main, testcase aborted"
+	return 0
+    }
 }
 
 mi_gdb_test "-catch-handlers" \
@@ -114,9 +116,11 @@ continue_to_exception_handler \
 #  - continue, we should not stop at the Program_Error exception handler
 #    but exit instead.
 
-if ![mi_run_to_main] then {
-   fail "cannot run to main, testcase aborted"
-   return 0
+with_test_prefix "scenario 2" {
+    if ![mi_run_to_main] then {
+	fail "cannot run to main, testcase aborted"
+	return 0
+    }
 }
 
 mi_gdb_test "-catch-handlers -e Constraint_Error" \
