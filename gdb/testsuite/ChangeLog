@@ -1,3 +1,7 @@
+2020-05-11  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.base/jit-so.exp (one_jit_test): Change test name.
+
 2020-05-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* lib/check-test-names.exp (all_test_names): New module variable.
