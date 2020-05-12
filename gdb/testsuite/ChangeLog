@@ -1,3 +1,11 @@
+2020-05-12  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/comp-unit-lang.exp: Use with_test_prefix.
+	* gdb.dwarf2/dw2-bad-parameter-type.exp: Same.
+	* gdb.dwarf2/implref-struct.exp: Same.
+	* gdb.dwarf2/varval.exp: Ensure get_sizeof is called once per type.
+	* gdb.dwarf2/data-loc.exp: Same.  Remove duplicate test.
+
 2020-05-11  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/jit-so.exp (one_jit_test): Change test name.

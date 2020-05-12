@@ -177,9 +177,11 @@ foreach_with_prefix print-object {"off" "on"} {
 # Test assignment through the synthetic reference.
 gdb_test_no_output "set (ref = s2)"
 
-foreach_with_prefix print-object {"off" "on"} {
-    gdb_test_no_output "set print object ${print-object}"
+with_test_prefix "after assignment" {
+    foreach_with_prefix print-object {"off" "on"} {
+	gdb_test_no_output "set print object ${print-object}"
 
-    gdb_test "print ref" " = \\(S &\\) @${address}: \\{${s2_members}\\}" "print ref after assignment"
-    gdb_test "print s1" " = \\{${s2_members}\\}" "print s1 after assignment"
+	gdb_test "print ref" " = \\(S &\\) @${address}: \\{${s2_members}\\}" "print ref"
+	gdb_test "print s1" " = \\{${s2_members}\\}" "print s1"
+    }
 }
