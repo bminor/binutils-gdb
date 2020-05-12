@@ -1,5 +1,9 @@
 2020-05-12  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.multi/multi-term-settings.exp: Use with_test_prefix.
+
+2020-05-12  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.ada/catch_ex.exp: Use with_test_prefix.
 	* gdb.ada/mi_catch_ex.exp: Same.
 	* gdb.ada/mi_catch_ex_hand.exp: Same.
