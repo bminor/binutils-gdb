@@ -1,3 +1,10 @@
+2020-05-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* objfiles.h (is_addr_in_objfile,
+	shared_objfile_contains_address_p): Return bool.
+	* objfile.c (is_addr_in_objfile,
+	shared_objfile_contains_address_p): Return bool.
+
 2020-05-11  Tom Tromey  <tromey@adacore.com>
 
 	* cli/cli-cmds.c (info_command): Restore.

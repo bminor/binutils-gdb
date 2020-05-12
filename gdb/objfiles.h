@@ -741,13 +741,16 @@ extern void objfile_set_sym_fns (struct objfile *objfile,
 
 extern void objfiles_changed (void);
 
-extern int is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile);
+/* Return true if ADDR maps into one of the sections of OBJFILE and false
+   otherwise.  */
+
+extern bool is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile);
 
 /* Return true if ADDRESS maps into one of the sections of a
    OBJF_SHARED objfile of PSPACE and false otherwise.  */
 
-extern int shared_objfile_contains_address_p (struct program_space *pspace,
-					      CORE_ADDR address);
+extern bool shared_objfile_contains_address_p (struct program_space *pspace,
+                                               CORE_ADDR address);
 
 /* This operation deletes all objfile entries that represent solibs that
    weren't explicitly loaded by the user, via e.g., the add-symbol-file
