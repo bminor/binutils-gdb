@@ -1946,10 +1946,22 @@ NAME (aout, swap_std_reloc_out) (bfd *abfd,
 
   BFD_ASSERT (g->howto != NULL);
 
-  if (bfd_get_reloc_size (g->howto) != 8)
-    r_length = g->howto->size;	/* Size as a power of two.  */
-  else
-    r_length = 3;
+  switch (bfd_get_reloc_size (g->howto))
+    {
+    default:
+      _bfd_error_handler (_("%pB: unsupported AOUT relocation size: %d"),
+			  abfd, bfd_get_reloc_size (g->howto));
+      bfd_set_error (bfd_error_bad_value);
+      return;
+    case 1:
+    case 2:
+    case 4:
+      r_length = g->howto->size;	/* Size as a power of two.  */
+      break;
+    case 8:
+      r_length = 3;
+      break;
+    }
 
   r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC?  */
   /* XXX This relies on relocs coming from a.out files.  */
