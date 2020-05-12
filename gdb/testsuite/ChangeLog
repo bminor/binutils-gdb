@@ -1,5 +1,9 @@
 2020-05-12  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.fortran/complex.exp: Use with_test_prefix.
+
+2020-05-12  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.trace/passcount.exp: Fix test-names.
 
 2020-05-12  Tom de Vries  <tdevries@suse.de>
