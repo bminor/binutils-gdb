@@ -1126,10 +1126,25 @@ print_frame_info (const frame_print_options &fp_opts,
     {
       int mid_statement = ((print_what == SRC_LINE)
 			   && frame_show_address (frame, sal));
-      annotate_source_line (sal.symtab, sal.line, mid_statement,
-			    get_frame_pc (frame));
+      if (annotation_level > 0
+	  && annotate_source_line (sal.symtab, sal.line, mid_statement,
+				   get_frame_pc (frame)))
+	{
+	  /* The call to ANNOTATE_SOURCE_LINE already printed the
+	     annotation for this source line, so we avoid the two cases
+	     below and do not print the actual source line.  The
+	     documentation for annotations makes it clear that the source
+	     line annotation is printed __instead__ of printing the source
+	     line, not as well as.
 
-      if (deprecated_print_frame_info_listing_hook)
+	     However, if we fail to print the source line, which usually
+	     means either the source file is missing, or the requested
+	     line is out of range of the file, then we don't print the
+	     source annotation, and will pass through the "normal" print
+	     source line code below, the expectation is that this code
+	     will print an appropriate error.  */
+	}
+      else if (deprecated_print_frame_info_listing_hook)
 	deprecated_print_frame_info_listing_hook (sal.symtab, sal.line,
 						  sal.line + 1, 0);
       else

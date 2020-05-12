@@ -1,3 +1,10 @@
+2020-05-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.base/annota1.exp: Update expected results.
+	* gdb.cp/annota2.exp: Update expected results, remove duplicate
+	test name.
+	* gdb.cp/annota3.exp: Update expected results.
+
 2020-05-20  Simon Marchi  <simon.marchi@efficios.com>
 
 	PR gdb/26016

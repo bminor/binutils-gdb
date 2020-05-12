@@ -435,7 +435,7 @@ annotate_source (const char *filename, int line, int character, int mid,
 
 /* See annotate.h.  */
 
-void
+bool
 annotate_source_line (struct symtab *s, int line, int mid_statement,
 		      CORE_ADDR pc)
 {
@@ -443,16 +443,25 @@ annotate_source_line (struct symtab *s, int line, int mid_statement,
     {
       const std::vector<off_t> *offsets;
       if (!g_source_cache.get_line_charpos (s, &offsets))
-	return;
-
-      /* Don't index off the end of the line_charpos array.  */
+	return false;
       if (line > offsets->size ())
-	return;
+	return false;
 
       annotate_source (s->fullname, line, (int) (*offsets)[line - 1],
 		       mid_statement, SYMTAB_OBJFILE (s)->arch (),
 		       pc);
+
+      /* Update the current symtab and line.  */
+      symtab_and_line sal;
+      sal.pspace = SYMTAB_PSPACE (s);
+      sal.symtab = s;
+      sal.line = line;
+      set_current_source_symtab_and_line (sal);
+
+      return true;
     }
+
+  return false;
 }
 
 

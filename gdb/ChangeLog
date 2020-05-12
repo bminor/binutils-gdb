@@ -1,3 +1,14 @@
+2020-05-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* annotate.c (annotate_source_line): Update return type, add call
+	to update current symtab and line.
+	* annotate.h (annotate_source_line): Update return type, and
+	extend header comment.
+	* source.c (info_line_command): Check annotation_level before
+	calling annotate_source_line.
+	* stack.c (print_frame_info): If calling annotate_source_line
+	returns true, then don't print any other source line information.
+
 2020-05-21  Simon Marchi  <simon.marchi@efficios.com>
 
 	* lm32-tdep.c (lm32_register_reggroup_p): Fix condition.
