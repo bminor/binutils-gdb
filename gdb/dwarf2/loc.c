@@ -617,7 +617,10 @@ sect_variable_value (struct dwarf_expr_context *ctx, sect_offset sect_off,
 
 class dwarf_evaluate_loc_desc : public dwarf_expr_context
 {
- public:
+public:
+  dwarf_evaluate_loc_desc (dwarf2_per_objfile *per_objfile)
+    : dwarf_expr_context (per_objfile)
+  {}
 
   struct frame_info *frame;
   struct dwarf2_per_cu_data *per_cu;
@@ -733,8 +736,6 @@ class dwarf_evaluate_loc_desc : public dwarf_expr_context
     this->gdbarch = per_cu->objfile ()->arch ();
     scoped_restore save_addr_size = make_scoped_restore (&this->addr_size);
     this->addr_size = per_cu->addr_size ();
-    scoped_restore save_offset = make_scoped_restore (&this->offset);
-    this->offset = per_cu->text_offset ();
 
     this->eval (data_src, size);
   }
@@ -2191,7 +2192,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   if (size == 0)
     return allocate_optimized_out_value (subobj_type);
 
-  dwarf_evaluate_loc_desc ctx;
+  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
+  dwarf_evaluate_loc_desc ctx (per_objfile);
   ctx.frame = frame;
   ctx.per_cu = per_cu;
   ctx.obj_address = 0;
@@ -2201,7 +2203,6 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
   ctx.gdbarch = objfile->arch ();
   ctx.addr_size = per_cu->addr_size ();
   ctx.ref_addr_size = per_cu->ref_addr_size ();
-  ctx.offset = per_cu->text_offset ();
 
   try
     {
@@ -2398,6 +2399,10 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
 
 struct evaluate_for_locexpr_baton : public dwarf_evaluate_loc_desc
 {
+  evaluate_for_locexpr_baton (dwarf2_per_objfile *per_objfile)
+    : dwarf_evaluate_loc_desc (per_objfile)
+  {}
+
   /* The data that was passed in.  */
   gdb::array_view<const gdb_byte> data_view;
 
@@ -2443,12 +2448,11 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 			   CORE_ADDR *valp,
 			   bool push_initial_value)
 {
-  struct objfile *objfile;
-
   if (dlbaton == NULL || dlbaton->size == 0)
     return 0;
 
-  evaluate_for_locexpr_baton ctx;
+  dwarf2_per_objfile *per_objfile = dlbaton->per_objfile;
+  evaluate_for_locexpr_baton ctx (per_objfile);
 
   ctx.frame = frame;
   ctx.per_cu = dlbaton->per_cu;
@@ -2460,12 +2464,9 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
       ctx.data_view = addr_stack->valaddr;
     }
 
-  objfile = dlbaton->per_objfile->objfile;
-
-  ctx.gdbarch = objfile->arch ();
+  ctx.gdbarch = per_objfile->objfile->arch ();
   ctx.addr_size = dlbaton->per_cu->addr_size ();
   ctx.ref_addr_size = dlbaton->per_cu->ref_addr_size ();
-  ctx.offset = dlbaton->per_cu->text_offset ();
 
   if (push_initial_value)
     ctx.push_address (ctx.obj_address, false);
@@ -2675,7 +2676,10 @@ dwarf2_compile_property_to_c (string_file *stream,
 
 class symbol_needs_eval_context : public dwarf_expr_context
 {
- public:
+public:
+  symbol_needs_eval_context (dwarf2_per_objfile *per_objfile)
+    : dwarf_expr_context (per_objfile)
+  {}
 
   enum symbol_needs_kind needs;
   struct dwarf2_per_cu_data *per_cu;
@@ -2792,14 +2796,13 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
 
   scoped_value_mark free_values;
 
-  symbol_needs_eval_context ctx;
+  symbol_needs_eval_context ctx (get_dwarf2_per_objfile (objfile));
 
   ctx.needs = SYMBOL_NEEDS_NONE;
   ctx.per_cu = per_cu;
   ctx.gdbarch = objfile->arch ();
   ctx.addr_size = per_cu->addr_size ();
   ctx.ref_addr_size = per_cu->ref_addr_size ();
-  ctx.offset = per_cu->text_offset ();
 
   ctx.eval (data, size);
 
