@@ -184,6 +184,8 @@ gdb_test "ptype \$mixed_flags" \
 gdb_test "maintenance print reggroups" \
     " Group\[ \t\]+Type\[ \t\]+\r\n.* general\[ \t\]+user\[ \t\]+\r\n.* foo\[ \t\]+user\[ \t\]+"
 
-load_description "core-only.xml" "" "test-regs.xml"
-# The extra register from the previous description should be gone.
-gdb_test "ptype \$extrareg" "type = void"
+with_test_prefix "core-only.xml" {
+    load_description "core-only.xml" "" "test-regs.xml"
+    # The extra register from the previous description should be gone.
+    gdb_test "ptype \$extrareg" "type = void"
+}
