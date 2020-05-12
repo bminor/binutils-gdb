@@ -147,7 +147,7 @@ if { [compile_jit_main ${main_srcfile} ${main_binfile} {}] == 0 } {
 # registered.  We reuse the normal test, and detach/reattach at
 # specific interesting points.
 if {[can_spawn_for_attach]} {
-    if { [compile_jit_main ${main_srcfile} ${main_binfile}"-attach" \
+    if { [compile_jit_main ${main_srcfile} "${main_binfile}-attach" \
 	    {additional_flags=-DATTACH=1}] == 0 } {
 	with_test_prefix attach {
 	    one_jit_test $jit_solibs_target "${hex}  jit_function_0001\[\r\n\]+${hex}  jit_function_0002" 1
@@ -155,7 +155,8 @@ if {[can_spawn_for_attach]} {
     }
 }
 
-if { [compile_jit_main ${main_srcfile} ${main_binfile}"-pie" {additional_flags=-fPIE ldflags=-pie}] == 0 } {
+if { [compile_jit_main ${main_srcfile} "${main_binfile}-pie" \
+	  {additional_flags=-fPIE ldflags=-pie}] == 0 } {
     with_test_prefix PIE {
 	one_jit_test [lindex $jit_solibs_target 0] "${hex}  jit_function_0001" 0
     }

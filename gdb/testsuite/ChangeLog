@@ -1,5 +1,9 @@
 2020-05-12  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/jit-elf.exp: Fix string concat.
+
+2020-05-12  Tom de Vries  <tdevries@suse.de>
+
 	* lib/jit-elf-helpers.exp: Don't use undefined variables in untested
 	messages.
 
