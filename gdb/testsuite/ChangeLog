@@ -1,3 +1,7 @@
+2020-07-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/coremaker.c (filler_ro): New global constant.
+
 2020-07-22  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/mi_prot.exp: New file.
