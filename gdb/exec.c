@@ -435,6 +435,7 @@ exec_file_attach (const char *filename, int from_tty)
 #if defined(__GO32__) || defined(_WIN32) || defined(__CYGWIN__)
 	  if (scratch_chan < 0)
 	    {
+	      int first_errno = errno;
 	      char *exename = (char *) alloca (strlen (filename) + 5);
 
 	      strcat (strcpy (exename, filename), ".exe");
@@ -443,6 +444,8 @@ exec_file_attach (const char *filename, int from_tty)
 				    O_RDWR | O_BINARY
 				    : O_RDONLY | O_BINARY,
 				    &scratch_storage);
+	      if (scratch_chan < 0)
+		errno = first_errno;
 	    }
 #endif
 	  if (scratch_chan < 0)

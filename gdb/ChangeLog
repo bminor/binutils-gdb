@@ -1,5 +1,9 @@
 2020-05-27  Hannes Domani  <ssbssa@yahoo.de>
 
+	* exec.c (exec_file_attach): Use errno value of first openp failure.
+
+2020-05-27  Hannes Domani  <ssbssa@yahoo.de>
+
 	* nat/windows-nat.c (windows_thread_info::~windows_thread_info):
 	Don't close thread handle.
 
