@@ -5196,6 +5196,11 @@ rbreak_command (const char *regexp, int from_tty)
     {
       const char *colon = strchr (regexp, ':');
 
+      /* Ignore the colon if it is part of a Windows drive.  */
+      if (HAS_DRIVE_SPEC (regexp)
+	  && (regexp[2] == '/' || regexp[2] == '\\'))
+	colon = strchr (STRIP_DRIVE_SPEC (regexp), ':');
+
       if (colon && *(colon + 1) != ':')
 	{
 	  int colon_index;

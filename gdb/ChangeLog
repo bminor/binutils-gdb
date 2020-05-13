@@ -1,3 +1,7 @@
+2020-06-14  Hannes Domani  <ssbssa@yahoo.de>
+
+	* symtab.c (rbreak_command): Ignore Windows drive colon.
+
 2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
 
 	* NEWS: Mention removed GDBserver host support.
