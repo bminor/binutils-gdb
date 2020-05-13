@@ -98,6 +98,14 @@ struct _bfd_riscv_elf_obj_tdata
    && elf_tdata (bfd) != NULL				\
    && elf_object_id (bfd) == RISCV_ELF_DATA)
 
+static bfd_boolean
+elfNN_riscv_mkobject (bfd *abfd)
+{
+  return bfd_elf_allocate_object (abfd,
+				  sizeof (struct _bfd_riscv_elf_obj_tdata),
+				  RISCV_ELF_DATA);
+}
+
 #include "elf/common.h"
 #include "elf/internal.h"
 
@@ -4363,6 +4371,7 @@ riscv_elf_obj_attrs_arg_type (int tag)
 #define elf_info_to_howto_rel		     NULL
 #define elf_info_to_howto		     riscv_info_to_howto_rela
 #define bfd_elfNN_bfd_relax_section	     _bfd_riscv_relax_section
+#define bfd_elfNN_mkobject		     elfNN_riscv_mkobject
 
 #define elf_backend_init_index_section	     _bfd_elf_init_1_index_section
 
