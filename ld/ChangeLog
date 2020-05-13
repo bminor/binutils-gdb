@@ -1,3 +1,9 @@
+2020-05-13  Nick Clifton  <nickc@redhat.com>
+
+	PR 25979
+	* lexsup.c (elf_shlib_list_options): Include the default value for
+	the hash style in the output text.
+
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/pcrelopt.s: Add lxvp and stxvp.

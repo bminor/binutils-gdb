@@ -1775,7 +1775,24 @@ elf_shlib_list_options (FILE *file)
   fprintf (file, _("\
   --exclude-libs=LIBS         Make all symbols in LIBS hidden\n"));
   fprintf (file, _("\
-  --hash-style=STYLE          Set hash style to sysv, gnu or both\n"));
+  --hash-style=STYLE          Set hash style to sysv/gnu/both.  Default: "));
+  if (DEFAULT_EMIT_SYSV_HASH)
+    {
+      /* Note - these strings are not translated as
+	 they are keywords not descriptive text.  */
+      if (DEFAULT_EMIT_GNU_HASH)
+	fprintf (file, "both\n");
+      else
+	fprintf (file, "sysv\n");
+    }
+  else
+    {
+      if (DEFAULT_EMIT_GNU_HASH)
+	fprintf (file, "gnu\n");
+      else
+	/* FIXME: Can this happen ?  */
+	fprintf (file, "none\n");
+    }
   fprintf (file, _("\
   -P AUDITLIB, --depaudit=AUDITLIB\n" "\
                               Specify a library to use for auditing dependencies\n"));
