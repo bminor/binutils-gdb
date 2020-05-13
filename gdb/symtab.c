@@ -807,7 +807,7 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
     {
       const struct language_defn *lang = language_def (gsymbol->language ());
 
-      language_sniff_from_mangled_name (lang, mangled, &demangled);
+      lang->sniff_from_mangled_name (mangled, &demangled);
       return demangled;
     }
 
@@ -816,7 +816,7 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
       enum language l = (enum language) i;
       const struct language_defn *lang = language_def (l);
 
-      if (language_sniff_from_mangled_name (lang, mangled, &demangled))
+      if (lang->sniff_from_mangled_name (mangled, &demangled))
 	{
 	  gsymbol->m_language = l;
 	  return demangled;

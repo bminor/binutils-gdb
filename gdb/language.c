@@ -594,23 +594,6 @@ language_demangle (const struct language_defn *current_language,
   return NULL;
 }
 
-/* See language.h.  */
-
-int
-language_sniff_from_mangled_name (const struct language_defn *lang,
-				  const char *mangled, char **demangled)
-{
-  gdb_assert (lang != NULL);
-
-  if (lang->la_sniff_from_mangled_name == NULL)
-    {
-      *demangled = NULL;
-      return 0;
-    }
-
-  return lang->la_sniff_from_mangled_name (mangled, demangled);
-}
-
 /* Return class name from physname or NULL.  */
 char *
 language_class_name_from_physname (const struct language_defn *lang,
@@ -828,7 +811,6 @@ extern const struct language_data unknown_language_data =
   true,				/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal, /* lookup_symbol_nonlocal */
   unk_lang_demangle,		/* Language specific symbol demangler */
-  NULL,
   unk_lang_class_name,		/* Language specific
 				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */
@@ -892,7 +874,6 @@ extern const struct language_data auto_language_data =
   false,			/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   unk_lang_demangle,		/* Language specific symbol demangler */
-  NULL,
   unk_lang_class_name,		/* Language specific
 				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */

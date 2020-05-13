@@ -914,7 +914,6 @@ extern const struct language_data c_language_data =
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   NULL,				/* Language specific symbol demangler */
-  NULL,
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
@@ -1017,7 +1016,6 @@ extern const struct language_data cplus_language_data =
   false,			/* la_store_sym_names_in_linkage_form_p */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   gdb_demangle,			/* Language specific symbol demangler */
-  gdb_sniff_from_mangled_name,
   cp_class_name_from_physname,  /* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
@@ -1130,6 +1128,14 @@ public:
   {
     return cp_search_name_hash (name);
   }
+
+  /* See language.h.  */
+  bool sniff_from_mangled_name (const char *mangled,
+				char **demangled) const override
+  {
+    *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
+    return *demangled != NULL;
+  }
 };
 
 /* The single instance of the C++ language class.  */
@@ -1168,7 +1174,6 @@ extern const struct language_data asm_language_data =
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   NULL,				/* Language specific symbol demangler */
-  NULL,
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
@@ -1236,7 +1241,6 @@ extern const struct language_data minimal_language_data =
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   NULL,				/* Language specific symbol demangler */
-  NULL,
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */

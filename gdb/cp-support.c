@@ -1676,15 +1676,6 @@ gdb_demangle (const char *name, int options)
 
 /* See cp-support.h.  */
 
-int
-gdb_sniff_from_mangled_name (const char *mangled, char **demangled)
-{
-  *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
-  return *demangled != NULL;
-}
-
-/* See cp-support.h.  */
-
 unsigned int
 cp_search_name_hash (const char *search_name)
 {

@@ -1,5 +1,56 @@
 2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_sniff_from_mangled_name): Delete function,
+	implementation moves to...
+	(ada_language::sniff_from_mangled_name): ...here.  Update return
+	type.
+	(ada_language_data): Delete la_sniff_from_mangled_name
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(cplus_language::sniff_from_mangled_name): New member function,
+	implementation taken from gdb_sniff_from_mangled_name.
+	(asm_language_data): Delete la_sniff_from_mangled_name
+	initializer.
+	(minimal_language_data): Likewise.
+	* cp-support.c (gdb_sniff_from_mangled_name): Delete,
+	implementation moves to cplus_language::sniff_from_mangled_name.
+	* cp-support.h (gdb_sniff_from_mangled_name): Delete declaration.
+	* d-lang.c (d_sniff_from_mangled_name): Delete, implementation
+	moves to...
+	(d_language::sniff_from_mangled_name): ...here.
+	(d_language_data): Delete la_sniff_from_mangled_name initializer.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_sniff_from_mangled_name): Delete, implementation
+	moves to...
+	(go_language::sniff_from_mangled_name): ...here.
+	(go_language_data): Delete la_sniff_from_mangled_name initializer.
+	* language.c (language_sniff_from_mangled_name): Delete.
+	(unknown_language_data): Delete la_sniff_from_mangled_name
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_sniff_from_mangled_name
+	field.
+	(language_defn::sniff_from_mangled_name): New function.
+	(language_sniff_from_mangled_name): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_sniff_from_mangled_name
+	field.
+	* objc-lang.c (objc_sniff_from_mangled_name): Delete,
+	implementation moves to...
+	(objc_language::sniff_from_mangled_name): ...here.
+	(objc_language_data): Delete la_sniff_from_mangled_name initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_sniff_from_mangled_name): Delete,
+	implementation moves to...
+	(rust_language::sniff_from_mangled_name): ...here.
+	(rust_language_data): Delete la_sniff_from_mangled_name
+	initializer.
+	* symtab.c (symbol_find_demangled_name): Call
+	sniff_from_mangled_name member function.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Delete la_search_name_hash
 	initializer.
 	* c-lang.c (c_language_data): Likewise.

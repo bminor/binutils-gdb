@@ -1377,45 +1377,6 @@ ada_la_decode (const char *encoded, int options)
   return xstrdup (ada_decode (encoded).c_str ());
 }
 
-/* Implement la_sniff_from_mangled_name for Ada.  */
-
-static int
-ada_sniff_from_mangled_name (const char *mangled, char **out)
-{
-  std::string demangled = ada_decode (mangled);
-
-  *out = NULL;
-
-  if (demangled != mangled && demangled[0] != '<')
-    {
-      /* Set the gsymbol language to Ada, but still return 0.
-	 Two reasons for that:
-
-	 1. For Ada, we prefer computing the symbol's decoded name
-	 on the fly rather than pre-compute it, in order to save
-	 memory (Ada projects are typically very large).
-
-	 2. There are some areas in the definition of the GNAT
-	 encoding where, with a bit of bad luck, we might be able
-	 to decode a non-Ada symbol, generating an incorrect
-	 demangled name (Eg: names ending with "TB" for instance
-	 are identified as task bodies and so stripped from
-	 the decoded name returned).
-
-	 Returning 1, here, but not setting *DEMANGLED, helps us get a
-	 little bit of the best of both worlds.  Because we're last,
-	 we should not affect any of the other languages that were
-	 able to demangle the symbol before us; we get to correctly
-	 tag Ada symbols as such; and even if we incorrectly tagged a
-	 non-Ada symbol, which should be rare, any routing through the
-	 Ada language should be transparent (Ada tries to behave much
-	 like C/C++ with non-Ada symbols).  */
-      return 1;
-    }
-
-  return 0;
-}
-
 
 
                                 /* Arrays */
@@ -13967,7 +13928,6 @@ extern const struct language_data ada_language_data =
   true,                         /* la_store_sym_names_in_linkage_form_p */
   ada_lookup_symbol_nonlocal,   /* Looking up non-local symbols.  */
   ada_la_decode,                /* Language specific symbol demangler */
-  ada_sniff_from_mangled_name,
   NULL,                         /* Language specific
 				   class_name_from_physname */
   ada_op_print_tab,             /* expression operators for printing */
@@ -14107,6 +14067,44 @@ public:
       }
 
     return true;
+  }
+
+  /* See language.h.  */
+  bool sniff_from_mangled_name (const char *mangled,
+				char **out) const override
+  {
+    std::string demangled = ada_decode (mangled);
+
+    *out = NULL;
+
+    if (demangled != mangled && demangled[0] != '<')
+      {
+	/* Set the gsymbol language to Ada, but still return 0.
+	   Two reasons for that:
+
+	   1. For Ada, we prefer computing the symbol's decoded name
+	   on the fly rather than pre-compute it, in order to save
+	   memory (Ada projects are typically very large).
+
+	   2. There are some areas in the definition of the GNAT
+	   encoding where, with a bit of bad luck, we might be able
+	   to decode a non-Ada symbol, generating an incorrect
+	   demangled name (Eg: names ending with "TB" for instance
+	   are identified as task bodies and so stripped from
+	   the decoded name returned).
+
+	   Returning true, here, but not setting *DEMANGLED, helps us get
+	   a little bit of the best of both worlds.  Because we're last,
+	   we should not affect any of the other languages that were
+	   able to demangle the symbol before us; we get to correctly
+	   tag Ada symbols as such; and even if we incorrectly tagged a
+	   non-Ada symbol, which should be rare, any routing through the
+	   Ada language should be transparent (Ada tries to behave much
+	   like C/C++ with non-Ada symbols).  */
+	return true;
+      }
+
+    return false;
   }
 };
 

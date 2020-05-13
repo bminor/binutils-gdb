@@ -56,15 +56,6 @@ d_demangle (const char *symbol, int options)
   return gdb_demangle (symbol, options | DMGL_DLANG);
 }
 
-/* la_sniff_from_mangled_name implementation for D.  */
-
-static int
-d_sniff_from_mangled_name (const char *mangled, char **demangled)
-{
-  *demangled = d_demangle (mangled, 0);
-  return *demangled != NULL;
-}
-
 /* Table mapping opcodes into strings for printing operators
    and precedences of the operators.  */
 static const struct op_print d_op_print_tab[] =
@@ -166,7 +157,6 @@ extern const struct language_data d_language_data =
   false,			/* la_store_sym_names_in_linkage_form_p */
   d_lookup_symbol_nonlocal,
   d_demangle,			/* Language specific symbol demangler.  */
-  d_sniff_from_mangled_name,
   NULL,				/* Language specific
 				   class_name_from_physname.  */
   d_op_print_tab,		/* Expression operators for printing.  */
@@ -253,6 +243,14 @@ public:
 
     lai->bool_type_symbol = "bool";
     lai->bool_type_default = builtin->builtin_bool;
+  }
+
+  /* See language.h.  */
+  bool sniff_from_mangled_name (const char *mangled,
+				char **demangled) const override
+  {
+    *demangled = d_demangle (mangled, 0);
+    return *demangled != NULL;
   }
 };
 

@@ -281,15 +281,6 @@ objc_demangle (const char *mangled, int options)
     return NULL;	/* Not an objc mangled name.  */
 }
 
-/* la_sniff_from_mangled_name for ObjC.  */
-
-static int
-objc_sniff_from_mangled_name (const char *mangled, char **demangled)
-{
-  *demangled = objc_demangle (mangled, 0);
-  return *demangled != NULL;
-}
-
 /* Determine if we are currently in the Objective-C dispatch function.
    If so, get the address of the method function that the dispatcher
    would call and use that as the function to step into instead.  Also
@@ -391,7 +382,6 @@ extern const struct language_data objc_language_data =
   false,			/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   objc_demangle,		/* Language specific symbol demangler */
-  objc_sniff_from_mangled_name,
   NULL,				/* Language specific
 				   class_name_from_physname */
   objc_op_print_tab,		/* Expression operators for printing */
@@ -421,6 +411,14 @@ public:
 			   struct language_arch_info *lai) const override
   {
     c_language_arch_info (gdbarch, lai);
+  }
+
+  /* See language.h.  */
+  bool sniff_from_mangled_name (const char *mangled,
+				char **demangled) const override
+  {
+    *demangled = objc_demangle (mangled, 0);
+    return *demangled != NULL;
   }
 };
 

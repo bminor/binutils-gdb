@@ -396,15 +396,6 @@ go_demangle (const char *mangled_name, int options)
   return result;
 }
 
-/* la_sniff_from_mangled_name for Go.  */
-
-static int
-go_sniff_from_mangled_name (const char *mangled, char **demangled)
-{
-  *demangled = go_demangle (mangled, 0);
-  return *demangled != NULL;
-}
-
 /* Given a Go symbol, return its package or NULL if unknown.
    Space for the result is malloc'd, caller must free.  */
 
@@ -551,7 +542,6 @@ extern const struct language_data go_language_data =
   false,			/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal, 
   go_demangle,			/* Language specific symbol demangler.  */
-  go_sniff_from_mangled_name,
   NULL,				/* Language specific
 				   class_name_from_physname.  */
   go_op_print_tab,		/* Expression operators for printing.  */
@@ -627,6 +617,14 @@ public:
 
     lai->bool_type_symbol = "bool";
     lai->bool_type_default = builtin->builtin_bool;
+  }
+
+  /* See language.h.  */
+  bool sniff_from_mangled_name (const char *mangled,
+				char **demangled) const override
+  {
+    *demangled = go_demangle (mangled, 0);
+    return *demangled != NULL;
   }
 };
 

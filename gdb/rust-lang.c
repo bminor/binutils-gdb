@@ -2016,17 +2016,6 @@ rust_lookup_symbol_nonlocal (const struct language_defn *langdef,
 
 
 
-/* la_sniff_from_mangled_name for Rust.  */
-
-static int
-rust_sniff_from_mangled_name (const char *mangled, char **demangled)
-{
-  *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
-  return *demangled != NULL;
-}
-
-
-
 /* la_watch_location_expression for Rust.  */
 
 static gdb::unique_xmalloc_ptr<char>
@@ -2083,7 +2072,6 @@ extern const struct language_data rust_language_data =
   false,			/* la_store_sym_names_in_linkage_form_p */
   rust_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   gdb_demangle,			/* Language specific symbol demangler */
-  rust_sniff_from_mangled_name,
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
@@ -2147,6 +2135,14 @@ public:
     lai->primitive_type_vector = types;
     lai->bool_type_default = types[rust_primitive_bool];
     lai->string_char_type = types[rust_primitive_u8];
+  }
+
+  /* See language.h.  */
+  bool sniff_from_mangled_name (const char *mangled,
+				char **demangled) const override
+  {
+    *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
+    return *demangled != NULL;
   }
 };
 
