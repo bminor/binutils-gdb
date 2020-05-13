@@ -7746,15 +7746,6 @@ ada_coerce_ref (struct value *val0)
     return val0;
 }
 
-/* Return OFF rounded upward if necessary to a multiple of
-   ALIGNMENT (a power of 2).  */
-
-static unsigned int
-align_value (unsigned int off, unsigned int alignment)
-{
-  return (off + alignment - 1) & ~(alignment - 1);
-}
-
 /* Return the bit alignment required for field #F of template type TYPE.  */
 
 static unsigned int
@@ -8107,7 +8098,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 
   for (f = 0; f < nfields; f += 1)
     {
-      off = align_value (off, field_alignment (type, f))
+      off = align_up (off, field_alignment (type, f))
 	+ TYPE_FIELD_BITPOS (type, f);
       SET_FIELD_BITPOS (TYPE_FIELD (rtype, f), off);
       TYPE_FIELD_BITSIZE (rtype, f) = 0;
@@ -8228,7 +8219,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
         bit_len = off + fld_bit_len;
       off += fld_bit_len;
       TYPE_LENGTH (rtype) =
-        align_value (bit_len, TARGET_CHAR_BIT) / TARGET_CHAR_BIT;
+        align_up (bit_len, TARGET_CHAR_BIT) / TARGET_CHAR_BIT;
     }
 
   /* We handle the variant part, if any, at the end because of certain
@@ -8274,7 +8265,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
           if (off + fld_bit_len > bit_len)
             bit_len = off + fld_bit_len;
           TYPE_LENGTH (rtype) =
-            align_value (bit_len, TARGET_CHAR_BIT) / TARGET_CHAR_BIT;
+            align_up (bit_len, TARGET_CHAR_BIT) / TARGET_CHAR_BIT;
         }
     }
 
@@ -8295,8 +8286,8 @@ ada_template_to_fixed_record_type_1 (struct type *type,
     }
   else
     {
-      TYPE_LENGTH (rtype) = align_value (TYPE_LENGTH (rtype),
-                                         TYPE_LENGTH (type));
+      TYPE_LENGTH (rtype) = align_up (TYPE_LENGTH (rtype),
+				      TYPE_LENGTH (type));
     }
 
   value_free_to_mark (mark);
