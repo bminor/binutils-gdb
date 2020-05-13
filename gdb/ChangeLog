@@ -1,3 +1,8 @@
+2020-07-08  Hannes Domani  <ssbssa@yahoo.de>
+
+	* auto-load.c (auto_load_objfile_script_1): Convert drive part
+	of debugfile path on Windows.
+
 2020-07-08  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.c (fbsd_nat_target::find_memory_regions): Rename 'obfd'

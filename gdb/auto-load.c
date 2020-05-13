@@ -784,6 +784,13 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 					  "scripts-directory' path \"%s\".\n"),
 			    auto_load_dir);
 
+      /* Convert Windows file name from c:/dir/file to /c/dir/file.  */
+      if (HAS_DRIVE_SPEC (debugfile))
+	{
+	  debugfile_holder = STRIP_DRIVE_SPEC (debugfile);
+	  filename = std::string("\\") + debugfile[0] + debugfile_holder;
+	}
+
       for (const gdb::unique_xmalloc_ptr<char> &dir : vec)
 	{
 	  /* FILENAME is absolute, so we don't need a "/" here.  */
