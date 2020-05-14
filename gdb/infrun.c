@@ -4802,7 +4802,7 @@ stop_all_threads (void)
 			    "iterations=%d\n", pass, iterations);
       while (1)
 	{
-	  int need_wait = 0;
+	  int waits_needed = 0;
 
 	  for (auto *target : all_non_exited_process_targets ())
 	    {
@@ -4849,7 +4849,7 @@ stop_all_threads (void)
 		    }
 
 		  if (t->stop_requested)
-		    need_wait = 1;
+		    waits_needed++;
 		}
 	      else
 		{
@@ -4864,7 +4864,7 @@ stop_all_threads (void)
 		}
 	    }
 
-	  if (!need_wait)
+	  if (waits_needed == 0)
 	    break;
 
 	  /* If we find new threads on the second iteration, restart
@@ -4873,160 +4873,164 @@ stop_all_threads (void)
 	  if (pass > 0)
 	    pass = -1;
 
-	  wait_one_event event = wait_one ();
-
-	  if (debug_infrun)
+	  for (int i = 0; i < waits_needed; i++)
 	    {
-	      fprintf_unfiltered (gdb_stdlog,
-				  "infrun: stop_all_threads %s %s\n",
-				  target_waitstatus_to_string (&event.ws).c_str (),
-				  target_pid_to_str (event.ptid).c_str ());
-	    }
+	      wait_one_event event = wait_one ();
 
-	  if (event.ws.kind == TARGET_WAITKIND_NO_RESUMED)
-	    {
-	      /* All resumed threads exited.  */
-	    }
-	  else if (event.ws.kind == TARGET_WAITKIND_THREAD_EXITED
-		   || event.ws.kind == TARGET_WAITKIND_EXITED
-		   || event.ws.kind == TARGET_WAITKIND_SIGNALLED)
-	    {
-	      /* One thread/process exited/signalled.  */
-
-	      thread_info *t = nullptr;
-
-	      /* The target may have reported just a pid.  If so, try
-		 the first non-exited thread.  */
-	      if (event.ptid.is_pid ())
+	      if (debug_infrun)
 		{
-		  int pid  = event.ptid.pid ();
-		  inferior *inf = find_inferior_pid (event.target, pid);
-		  for (thread_info *tp : inf->non_exited_threads ())
+		  fprintf_unfiltered (gdb_stdlog,
+				      "infrun: stop_all_threads %s %s\n",
+				      target_waitstatus_to_string (&event.ws).c_str (),
+				      target_pid_to_str (event.ptid).c_str ());
+		}
+
+	      if (event.ws.kind == TARGET_WAITKIND_NO_RESUMED)
+		{
+		  /* All resumed threads exited.  */
+		  break;
+		}
+	      else if (event.ws.kind == TARGET_WAITKIND_THREAD_EXITED
+		       || event.ws.kind == TARGET_WAITKIND_EXITED
+		       || event.ws.kind == TARGET_WAITKIND_SIGNALLED)
+		{
+		  /* One thread/process exited/signalled.  */
+
+		  thread_info *t = nullptr;
+
+		  /* The target may have reported just a pid.  If so, try
+		     the first non-exited thread.  */
+		  if (event.ptid.is_pid ())
 		    {
-		      t = tp;
-		      break;
+		      int pid  = event.ptid.pid ();
+		      inferior *inf = find_inferior_pid (event.target, pid);
+		      for (thread_info *tp : inf->non_exited_threads ())
+			{
+			  t = tp;
+			  break;
+			}
+
+		      /* If there is no available thread, the event would
+			 have to be appended to a per-inferior event list,
+			 which does not exist (and if it did, we'd have
+			 to adjust run control command to be able to
+			 resume such an inferior).  We assert here instead
+			 of going into an infinite loop.  */
+		      gdb_assert (t != nullptr);
+
+		      if (debug_infrun)
+			fprintf_unfiltered (gdb_stdlog,
+					    "infrun: stop_all_threads, using %s\n",
+					    target_pid_to_str (t->ptid).c_str ());
+		    }
+		  else
+		    {
+		      t = find_thread_ptid (event.target, event.ptid);
+		      /* Check if this is the first time we see this thread.
+			 Don't bother adding if it individually exited.  */
+		      if (t == nullptr
+			  && event.ws.kind != TARGET_WAITKIND_THREAD_EXITED)
+			t = add_thread (event.target, event.ptid);
 		    }
 
-		  /* If there is no available thread, the event would
-		     have to be appended to a per-inferior event list,
-		     which does not exist (and if it did, we'd have
-		     to adjust run control command to be able to
-		     resume such an inferior).  We assert here instead
-		     of going into an infinite loop.  */
-		  gdb_assert (t != nullptr);
-
-		  if (debug_infrun)
-		    fprintf_unfiltered (gdb_stdlog,
-					"infrun: stop_all_threads, using %s\n",
-					target_pid_to_str (t->ptid).c_str ());
+		  if (t != nullptr)
+		    {
+		      /* Set the threads as non-executing to avoid
+			 another stop attempt on them.  */
+		      switch_to_thread_no_regs (t);
+		      mark_non_executing_threads (event.target, event.ptid,
+						  event.ws);
+		      save_waitstatus (t, &event.ws);
+		      t->stop_requested = false;
+		    }
 		}
 	      else
 		{
-		  t = find_thread_ptid (event.target, event.ptid);
-		  /* Check if this is the first time we see this thread.
-		     Don't bother adding if it individually exited.  */
-		  if (t == nullptr
-		      && event.ws.kind != TARGET_WAITKIND_THREAD_EXITED)
+		  thread_info *t = find_thread_ptid (event.target, event.ptid);
+		  if (t == NULL)
 		    t = add_thread (event.target, event.ptid);
-		}
 
-	      if (t != nullptr)
-		{
-		  /* Set the threads as non-executing to avoid
-		     another stop attempt on them.  */
-		  switch_to_thread_no_regs (t);
-		  mark_non_executing_threads (event.target, event.ptid,
-					      event.ws);
-		  save_waitstatus (t, &event.ws);
-		  t->stop_requested = false;
-		}
-	    }
-	  else
-	    {
-	      thread_info *t = find_thread_ptid (event.target, event.ptid);
-	      if (t == NULL)
-		t = add_thread (event.target, event.ptid);
+		  t->stop_requested = 0;
+		  t->executing = 0;
+		  t->resumed = false;
+		  t->control.may_range_step = 0;
 
-	      t->stop_requested = 0;
-	      t->executing = 0;
-	      t->resumed = false;
-	      t->control.may_range_step = 0;
-
-	      /* This may be the first time we see the inferior report
-		 a stop.  */
-	      inferior *inf = find_inferior_ptid (event.target, event.ptid);
-	      if (inf->needs_setup)
-		{
-		  switch_to_thread_no_regs (t);
-		  setup_inferior (0);
-		}
-
-	      if (event.ws.kind == TARGET_WAITKIND_STOPPED
-		  && event.ws.value.sig == GDB_SIGNAL_0)
-		{
-		  /* We caught the event that we intended to catch, so
-		     there's no event pending.  */
-		  t->suspend.waitstatus.kind = TARGET_WAITKIND_IGNORE;
-		  t->suspend.waitstatus_pending_p = 0;
-
-		  if (displaced_step_fixup (t, GDB_SIGNAL_0) < 0)
+		  /* This may be the first time we see the inferior report
+		     a stop.  */
+		  inferior *inf = find_inferior_ptid (event.target, event.ptid);
+		  if (inf->needs_setup)
 		    {
-		      /* Add it back to the step-over queue.  */
+		      switch_to_thread_no_regs (t);
+		      setup_inferior (0);
+		    }
+
+		  if (event.ws.kind == TARGET_WAITKIND_STOPPED
+		      && event.ws.value.sig == GDB_SIGNAL_0)
+		    {
+		      /* We caught the event that we intended to catch, so
+			 there's no event pending.  */
+		      t->suspend.waitstatus.kind = TARGET_WAITKIND_IGNORE;
+		      t->suspend.waitstatus_pending_p = 0;
+
+		      if (displaced_step_fixup (t, GDB_SIGNAL_0) < 0)
+			{
+			  /* Add it back to the step-over queue.  */
+			  if (debug_infrun)
+			    {
+			      fprintf_unfiltered (gdb_stdlog,
+						  "infrun: displaced-step of %s "
+						  "canceled: adding back to the "
+						  "step-over queue\n",
+						  target_pid_to_str (t->ptid).c_str ());
+			    }
+			  t->control.trap_expected = 0;
+			  thread_step_over_chain_enqueue (t);
+			}
+		    }
+		  else
+		    {
+		      enum gdb_signal sig;
+		      struct regcache *regcache;
+
+		      if (debug_infrun)
+			{
+			  std::string statstr = target_waitstatus_to_string (&event.ws);
+
+			  fprintf_unfiltered (gdb_stdlog,
+					      "infrun: target_wait %s, saving "
+					      "status for %d.%ld.%ld\n",
+					      statstr.c_str (),
+					      t->ptid.pid (),
+					      t->ptid.lwp (),
+					      t->ptid.tid ());
+			}
+
+		      /* Record for later.  */
+		      save_waitstatus (t, &event.ws);
+
+		      sig = (event.ws.kind == TARGET_WAITKIND_STOPPED
+			     ? event.ws.value.sig : GDB_SIGNAL_0);
+
+		      if (displaced_step_fixup (t, sig) < 0)
+			{
+			  /* Add it back to the step-over queue.  */
+			  t->control.trap_expected = 0;
+			  thread_step_over_chain_enqueue (t);
+			}
+
+		      regcache = get_thread_regcache (t);
+		      t->suspend.stop_pc = regcache_read_pc (regcache);
+
 		      if (debug_infrun)
 			{
 			  fprintf_unfiltered (gdb_stdlog,
-					      "infrun: displaced-step of %s "
-					      "canceled: adding back to the "
-					      "step-over queue\n",
-					      target_pid_to_str (t->ptid).c_str ());
+					      "infrun: saved stop_pc=%s for %s "
+					      "(currently_stepping=%d)\n",
+					      paddress (target_gdbarch (),
+							t->suspend.stop_pc),
+					      target_pid_to_str (t->ptid).c_str (),
+					      currently_stepping (t));
 			}
-		      t->control.trap_expected = 0;
-		      thread_step_over_chain_enqueue (t);
-		    }
-		}
-	      else
-		{
-		  enum gdb_signal sig;
-		  struct regcache *regcache;
-
-		  if (debug_infrun)
-		    {
-		      std::string statstr = target_waitstatus_to_string (&event.ws);
-
-		      fprintf_unfiltered (gdb_stdlog,
-					  "infrun: target_wait %s, saving "
-					  "status for %d.%ld.%ld\n",
-					  statstr.c_str (),
-					  t->ptid.pid (),
-					  t->ptid.lwp (),
-					  t->ptid.tid ());
-		    }
-
-		  /* Record for later.  */
-		  save_waitstatus (t, &event.ws);
-
-		  sig = (event.ws.kind == TARGET_WAITKIND_STOPPED
-			 ? event.ws.value.sig : GDB_SIGNAL_0);
-
-		  if (displaced_step_fixup (t, sig) < 0)
-		    {
-		      /* Add it back to the step-over queue.  */
-		      t->control.trap_expected = 0;
-		      thread_step_over_chain_enqueue (t);
-		    }
-
-		  regcache = get_thread_regcache (t);
-		  t->suspend.stop_pc = regcache_read_pc (regcache);
-
-		  if (debug_infrun)
-		    {
-		      fprintf_unfiltered (gdb_stdlog,
-					  "infrun: saved stop_pc=%s for %s "
-					  "(currently_stepping=%d)\n",
-					  paddress (target_gdbarch (),
-						    t->suspend.stop_pc),
-					  target_pid_to_str (t->ptid).c_str (),
-					  currently_stepping (t));
 		    }
 		}
 	    }

@@ -1,3 +1,9 @@
+2020-05-14  Laurent Morichetti  <Laurent.Morichetti@amd.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
+	* infrun.c (stop_all_threads): Collect multiple wait events at
+	each pass.
+
 2020-05-14  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbtypes.h (TYPE_CODE): Remove.  Change all call sites to use
