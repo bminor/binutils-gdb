@@ -600,9 +600,9 @@ read_structure_type (struct ctf_context *ccp, ctf_id_t tid)
 
   kind = ctf_type_kind (fp, tid);
   if (kind == CTF_K_UNION)
-    TYPE_CODE (type) = TYPE_CODE_UNION;
+    type->set_code (TYPE_CODE_UNION);
   else
-    TYPE_CODE (type) = TYPE_CODE_STRUCT;
+    type->set_code (TYPE_CODE_STRUCT);
 
   TYPE_LENGTH (type) = ctf_type_size (fp, tid);
   set_type_align (type, ctf_type_align (fp, tid));
@@ -656,7 +656,7 @@ read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
   if (name != NULL && strlen (name.get ()) != 0)
     TYPE_NAME (type) = obstack_strdup (&of->objfile_obstack, name.get ());
 
-  TYPE_CODE (type) = TYPE_CODE_FUNC;
+  type->set_code (TYPE_CODE_FUNC);
   ctf_func_type_info (fp, tid, &cfi);
   rettype = get_tid_type (of, cfi.ctc_return);
   TYPE_TARGET_TYPE (type) = rettype;
@@ -682,7 +682,7 @@ read_enum_type (struct ctf_context *ccp, ctf_id_t tid)
   if (name != NULL && strlen (name.get ()) != 0)
     TYPE_NAME (type) = obstack_strdup (&of->objfile_obstack, name.get ());
 
-  TYPE_CODE (type) = TYPE_CODE_ENUM;
+  type->set_code (TYPE_CODE_ENUM);
   TYPE_LENGTH (type) = ctf_type_size (fp, tid);
   ctf_func_type_info (fp, tid, &fi);
   target_type = get_tid_type (of, fi.ctc_return);

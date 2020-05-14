@@ -981,7 +981,7 @@ rust_composite_type (struct type *original,
   if (field2 != NULL)
     ++nfields;
 
-  TYPE_CODE (result) = TYPE_CODE_STRUCT;
+  result->set_code (TYPE_CODE_STRUCT);
   TYPE_NAME (result) = name;
 
   TYPE_NFIELDS (result) = nfields;

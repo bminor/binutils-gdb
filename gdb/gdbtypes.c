@@ -182,7 +182,7 @@ alloc_type (struct objfile *objfile)
 
   /* Initialize the fields that might not be zero.  */
 
-  TYPE_CODE (type) = TYPE_CODE_UNDEF;
+  type->set_code (TYPE_CODE_UNDEF);
   TYPE_CHAIN (type) = type;	/* Chain back to itself.  */
 
   return type;
@@ -209,7 +209,7 @@ alloc_type_arch (struct gdbarch *gdbarch)
 
   /* Initialize the fields that might not be zero.  */
 
-  TYPE_CODE (type) = TYPE_CODE_UNDEF;
+  type->set_code (TYPE_CODE_UNDEF);
   TYPE_CHAIN (type) = type;	/* Chain back to itself.  */
 
   return type;
@@ -366,7 +366,7 @@ make_pointer_type (struct type *type, struct type **typeptr)
 
   TYPE_LENGTH (ntype)
     = gdbarch_ptr_bit (get_type_arch (type)) / TARGET_CHAR_BIT;
-  TYPE_CODE (ntype) = TYPE_CODE_PTR;
+  ntype->set_code (TYPE_CODE_PTR);
 
   /* Mark pointers as unsigned.  The target converts between pointers
      and addresses (CORE_ADDRs) using gdbarch_pointer_to_address and
@@ -450,7 +450,7 @@ make_reference_type (struct type *type, struct type **typeptr,
 
   TYPE_LENGTH (ntype) =
     gdbarch_ptr_bit (get_type_arch (type)) / TARGET_CHAR_BIT;
-  TYPE_CODE (ntype) = refcode;
+  ntype->set_code (refcode);
 
   *reftype = ntype;
 
@@ -515,7 +515,7 @@ make_function_type (struct type *type, struct type **typeptr)
   TYPE_TARGET_TYPE (ntype) = type;
 
   TYPE_LENGTH (ntype) = 1;
-  TYPE_CODE (ntype) = TYPE_CODE_FUNC;
+  ntype->set_code (TYPE_CODE_FUNC);
 
   INIT_FUNC_SPECIFIC (ntype);
 
@@ -861,7 +861,7 @@ allocate_stub_method (struct type *type)
   struct type *mtype;
 
   mtype = alloc_type_copy (type);
-  TYPE_CODE (mtype) = TYPE_CODE_METHOD;
+  mtype->set_code (TYPE_CODE_METHOD);
   TYPE_LENGTH (mtype) = 1;
   TYPE_STUB (mtype) = 1;
   TYPE_TARGET_TYPE (mtype) = type;
@@ -928,7 +928,7 @@ create_range_type (struct type *result_type, struct type *index_type,
 
   if (result_type == NULL)
     result_type = alloc_type_copy (index_type);
-  TYPE_CODE (result_type) = TYPE_CODE_RANGE;
+  result_type->set_code (TYPE_CODE_RANGE);
   TYPE_TARGET_TYPE (result_type) = index_type;
   if (TYPE_STUB (index_type))
     TYPE_TARGET_STUB (result_type) = 1;
@@ -1278,7 +1278,7 @@ create_array_type_with_stride (struct type *result_type,
   if (result_type == NULL)
     result_type = alloc_type_copy (range_type);
 
-  TYPE_CODE (result_type) = TYPE_CODE_ARRAY;
+  result_type->set_code (TYPE_CODE_ARRAY);
   TYPE_TARGET_TYPE (result_type) = element_type;
 
   TYPE_NFIELDS (result_type) = 1;
@@ -1357,7 +1357,7 @@ create_string_type (struct type *result_type,
   result_type = create_array_type (result_type,
 				   string_char_type,
 				   range_type);
-  TYPE_CODE (result_type) = TYPE_CODE_STRING;
+  result_type->set_code (TYPE_CODE_STRING);
   return result_type;
 }
 
@@ -1369,7 +1369,7 @@ lookup_string_range_type (struct type *string_char_type,
 
   result_type = lookup_array_range_type (string_char_type,
 					 low_bound, high_bound);
-  TYPE_CODE (result_type) = TYPE_CODE_STRING;
+  result_type->set_code (TYPE_CODE_STRING);
   return result_type;
 }
 
@@ -1379,7 +1379,7 @@ create_set_type (struct type *result_type, struct type *domain_type)
   if (result_type == NULL)
     result_type = alloc_type_copy (domain_type);
 
-  TYPE_CODE (result_type) = TYPE_CODE_SET;
+  result_type->set_code (TYPE_CODE_SET);
   TYPE_NFIELDS (result_type) = 1;
   TYPE_FIELDS (result_type)
     = (struct field *) TYPE_ZALLOC (result_type, sizeof (struct field));
@@ -1508,7 +1508,7 @@ smash_to_memberptr_type (struct type *type, struct type *self_type,
 			 struct type *to_type)
 {
   smash_type (type);
-  TYPE_CODE (type) = TYPE_CODE_MEMBERPTR;
+  type->set_code (TYPE_CODE_MEMBERPTR);
   TYPE_TARGET_TYPE (type) = to_type;
   set_type_self_type (type, self_type);
   /* Assume that a data member pointer is the same size as a normal
@@ -1527,7 +1527,7 @@ void
 smash_to_methodptr_type (struct type *type, struct type *to_type)
 {
   smash_type (type);
-  TYPE_CODE (type) = TYPE_CODE_METHODPTR;
+  type->set_code (TYPE_CODE_METHODPTR);
   TYPE_TARGET_TYPE (type) = to_type;
   set_type_self_type (type, TYPE_SELF_TYPE (to_type));
   TYPE_LENGTH (type) = cplus_method_ptr_size (to_type);
@@ -1546,7 +1546,7 @@ smash_to_method_type (struct type *type, struct type *self_type,
 		      int nargs, int varargs)
 {
   smash_type (type);
-  TYPE_CODE (type) = TYPE_CODE_METHOD;
+  type->set_code (TYPE_CODE_METHOD);
   TYPE_TARGET_TYPE (type) = to_type;
   set_type_self_type (type, self_type);
   TYPE_FIELDS (type) = args;
@@ -3111,7 +3111,7 @@ allocate_gnat_aux_type (struct type *type)
 static void
 set_type_code (struct type *type, enum type_code code)
 {
-  TYPE_CODE (type) = code;
+  type->set_code (code);
 
   switch (code)
     {

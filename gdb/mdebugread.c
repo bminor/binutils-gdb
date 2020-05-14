@@ -1015,7 +1015,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  TYPE_NAME (t) = obconcat (&mdebugread_objfile->objfile_obstack,
 				    name, (char *) NULL);
 
-	TYPE_CODE (t) = type_code;
+	t->set_code (type_code);
 	TYPE_LENGTH (t) = sh->value;
 	TYPE_NFIELDS (t) = nfields;
 	TYPE_FIELDS (t) = f = ((struct field *)
@@ -1668,7 +1668,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 
 	  if (TYPE_CODE (tp) != type_code)
 	    {
-	      TYPE_CODE (tp) = type_code;
+	      tp->set_code (type_code);
 	    }
 
 	  /* Do not set the tag name if it is a compiler generated tag name
@@ -1709,7 +1709,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	  if (TYPE_CODE (tp) != type_code)
 	    {
 	      bad_tag_guess_complaint (sym_name);
-	      TYPE_CODE (tp) = type_code;
+	      tp->set_code (type_code);
 	    }
 	  if (TYPE_NAME (tp) == NULL
 	      || strcmp (TYPE_NAME (tp), name) != 0)

@@ -658,7 +658,7 @@ fake_method::fake_method (type_instance_flags flags,
 
   TYPE_MAIN_TYPE (type) = &m_main_type;
   TYPE_LENGTH (type) = 1;
-  TYPE_CODE (type) = TYPE_CODE_METHOD;
+  type->set_code (TYPE_CODE_METHOD);
   TYPE_CHAIN (type) = type;
   TYPE_INSTANCE_FLAGS (type) = flags;
   if (num_types > 0)

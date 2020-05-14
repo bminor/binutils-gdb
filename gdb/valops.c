@@ -3792,7 +3792,7 @@ value_slice (struct value *array, int lowbound, int length)
     slice_type = create_array_type (NULL,
 				    element_type,
 				    slice_range_type);
-    TYPE_CODE (slice_type) = TYPE_CODE (array_type);
+    slice_type->set_code (TYPE_CODE (array_type));
 
     if (VALUE_LVAL (array) == lval_memory && value_lazy (array))
       slice = allocate_value_lazy (slice_type);

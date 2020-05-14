@@ -1687,7 +1687,7 @@ again:
 	   fill in the rest of the fields when we get the full
 	   type.  */
 	type = dbx_alloc_type (typenums, objfile);
-	TYPE_CODE (type) = code;
+	type->set_code (code);
 	TYPE_NAME (type) = type_name;
 	INIT_CPLUS_SPECIFIC (type);
 	TYPE_STUB (type) = 1;
@@ -1716,14 +1716,14 @@ again:
       /* Allocate and enter the typedef type first.
          This handles recursive types.  */
       type = dbx_alloc_type (typenums, objfile);
-      TYPE_CODE (type) = TYPE_CODE_TYPEDEF;
+      type->set_code (TYPE_CODE_TYPEDEF);
       {
 	struct type *xtype = read_type (pp, objfile);
 
 	if (type == xtype)
 	  {
 	    /* It's being defined as itself.  That means it is "void".  */
-	    TYPE_CODE (type) = TYPE_CODE_VOID;
+	    type->set_code (TYPE_CODE_VOID);
 	    TYPE_LENGTH (type) = 1;
 	  }
 	else if (type_size >= 0 || is_string)
@@ -2022,7 +2022,7 @@ again:
       type = dbx_alloc_type (typenums, objfile);
       type = read_array_type (pp, type, objfile);
       if (is_string)
-	TYPE_CODE (type) = TYPE_CODE_STRING;
+	type->set_code (TYPE_CODE_STRING);
       if (is_vector)
 	make_vector_type (type);
       break;
@@ -2370,7 +2370,7 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 
 	  /* These are methods, not functions.  */
 	  if (TYPE_CODE (new_sublist->fn_field.type) == TYPE_CODE_FUNC)
-	    TYPE_CODE (new_sublist->fn_field.type) = TYPE_CODE_METHOD;
+	    new_sublist->fn_field.type->set_code (TYPE_CODE_METHOD);
 	  else
 	    gdb_assert (TYPE_CODE (new_sublist->fn_field.type)
 			== TYPE_CODE_METHOD);
@@ -3477,7 +3477,7 @@ read_struct_type (const char **pp, struct type *type, enum type_code type_code,
     }
 
   INIT_CPLUS_SPECIFIC (type);
-  TYPE_CODE (type) = type_code;
+  type->set_code (type_code);
   TYPE_STUB (type) = 0;
 
   /* First comes the total size in bytes.  */
@@ -3652,7 +3652,7 @@ read_enum_type (const char **pp, struct type *type,
 
   TYPE_LENGTH (type) = gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT;
   set_length_in_type_chain (type);
-  TYPE_CODE (type) = TYPE_CODE_ENUM;
+  type->set_code (TYPE_CODE_ENUM);
   TYPE_STUB (type) = 0;
   if (unsigned_enum)
     TYPE_UNSIGNED (type) = 1;

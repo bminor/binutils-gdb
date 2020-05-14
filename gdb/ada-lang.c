@@ -8027,7 +8027,7 @@ empty_record (struct type *templ)
 {
   struct type *type = alloc_type_copy (templ);
 
-  TYPE_CODE (type) = TYPE_CODE_STRUCT;
+  type->set_code (TYPE_CODE_STRUCT);
   TYPE_NFIELDS (type) = 0;
   TYPE_FIELDS (type) = NULL;
   INIT_NONE_SPECIFIC (type);
@@ -8083,7 +8083,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
     }
 
   rtype = alloc_type_copy (type);
-  TYPE_CODE (rtype) = TYPE_CODE_STRUCT;
+  rtype->set_code (TYPE_CODE_STRUCT);
   INIT_NONE_SPECIFIC (rtype);
   TYPE_NFIELDS (rtype) = nfields;
   TYPE_FIELDS (rtype) = (struct field *)
@@ -8358,7 +8358,7 @@ template_to_static_fixed_type (struct type *type0)
 	  if (type == type0)
 	    {
 	      TYPE_TARGET_TYPE (type0) = type = alloc_type_copy (type0);
-	      TYPE_CODE (type) = TYPE_CODE (type0);
+	      type->set_code (TYPE_CODE(type0));
 	      INIT_NONE_SPECIFIC (type);
 	      TYPE_NFIELDS (type) = nfields;
 	      TYPE_FIELDS (type) = (struct field *)
@@ -8407,7 +8407,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
     dval = dval0;
 
   rtype = alloc_type_copy (type);
-  TYPE_CODE (rtype) = TYPE_CODE_STRUCT;
+  rtype->set_code (TYPE_CODE_STRUCT);
   INIT_NONE_SPECIFIC (rtype);
   TYPE_NFIELDS (rtype) = nfields;
   TYPE_FIELDS (rtype) =
@@ -10376,7 +10376,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         /* The result type will have code OP_STRING, bashed there from 
            OP_ARRAY.  Bash it back.  */
         if (TYPE_CODE (value_type (result)) == TYPE_CODE_STRING)
-          TYPE_CODE (value_type (result)) = TYPE_CODE_ARRAY;
+          value_type (result)->set_code (TYPE_CODE_ARRAY);
         return result;
       }
 
