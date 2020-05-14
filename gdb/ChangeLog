@@ -1,5 +1,10 @@
 2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* infrun.c (resume_1): Move a 'regcache_read_pc' call down to first
+	use.
+
+2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* regcache.c (regcache_read_pc_protected): New function
 	implementation that returns 0 if the PC cannot read via
 	'regcache_read_pc'.

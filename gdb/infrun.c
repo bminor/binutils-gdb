@@ -2279,7 +2279,6 @@ resume_1 (enum gdb_signal sig)
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = regcache->arch ();
   struct thread_info *tp = inferior_thread ();
-  CORE_ADDR pc = regcache_read_pc (regcache);
   const address_space *aspace = regcache->aspace ();
   ptid_t resume_ptid;
   /* This represents the user's step vs continue request.  When
@@ -2357,6 +2356,8 @@ resume_1 (enum gdb_signal sig)
 			    "infrun: resume : clear step\n");
       step = 0;
     }
+
+  CORE_ADDR pc = regcache_read_pc (regcache);
 
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
