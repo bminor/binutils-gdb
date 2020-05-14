@@ -4712,6 +4712,47 @@ save_waitstatus (struct thread_info *tp, const target_waitstatus *ws)
     }
 }
 
+/* Mark the non-executing threads accordingly.  In all-stop, all
+   threads of all processes are stopped when we get any event
+   reported.  In non-stop mode, only the event thread stops.  */
+
+static void
+mark_non_executing_threads (process_stratum_target *target,
+			    ptid_t event_ptid,
+			    struct target_waitstatus ws)
+{
+  ptid_t mark_ptid;
+
+  if (!target_is_non_stop_p ())
+    mark_ptid = minus_one_ptid;
+  else if (ws.kind == TARGET_WAITKIND_SIGNALLED
+	   || ws.kind == TARGET_WAITKIND_EXITED)
+    {
+      /* If we're handling a process exit in non-stop mode, even
+	 though threads haven't been deleted yet, one would think
+	 that there is nothing to do, as threads of the dead process
+	 will be soon deleted, and threads of any other process were
+	 left running.  However, on some targets, threads survive a
+	 process exit event.  E.g., for the "checkpoint" command,
+	 when the current checkpoint/fork exits, linux-fork.c
+	 automatically switches to another fork from within
+	 target_mourn_inferior, by associating the same
+	 inferior/thread to another fork.  We haven't mourned yet at
+	 this point, but we must mark any threads left in the
+	 process as not-executing so that finish_thread_state marks
+	 them stopped (in the user's perspective) if/when we present
+	 the stop to the user.  */
+      mark_ptid = ptid_t (event_ptid.pid ());
+    }
+  else
+    mark_ptid = event_ptid;
+
+  set_executing (target, mark_ptid, false);
+
+  /* Likewise the resumed flag.  */
+  set_resumed (target, mark_ptid, false);
+}
+
 /* See infrun.h.  */
 
 void
@@ -5145,41 +5186,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	}
     }
 
-  /* Mark the non-executing threads accordingly.  In all-stop, all
-     threads of all processes are stopped when we get any event
-     reported.  In non-stop mode, only the event thread stops.  */
-  {
-    ptid_t mark_ptid;
-
-    if (!target_is_non_stop_p ())
-      mark_ptid = minus_one_ptid;
-    else if (ecs->ws.kind == TARGET_WAITKIND_SIGNALLED
-	     || ecs->ws.kind == TARGET_WAITKIND_EXITED)
-      {
-	/* If we're handling a process exit in non-stop mode, even
-	   though threads haven't been deleted yet, one would think
-	   that there is nothing to do, as threads of the dead process
-	   will be soon deleted, and threads of any other process were
-	   left running.  However, on some targets, threads survive a
-	   process exit event.  E.g., for the "checkpoint" command,
-	   when the current checkpoint/fork exits, linux-fork.c
-	   automatically switches to another fork from within
-	   target_mourn_inferior, by associating the same
-	   inferior/thread to another fork.  We haven't mourned yet at
-	   this point, but we must mark any threads left in the
-	   process as not-executing so that finish_thread_state marks
-	   them stopped (in the user's perspective) if/when we present
-	   the stop to the user.  */
-	mark_ptid = ptid_t (ecs->ptid.pid ());
-      }
-    else
-      mark_ptid = ecs->ptid;
-
-    set_executing (ecs->target, mark_ptid, false);
-
-    /* Likewise the resumed flag.  */
-    set_resumed (ecs->target, mark_ptid, false);
-  }
+  mark_non_executing_threads (ecs->target, ecs->ptid, ecs->ws);
 
   switch (ecs->ws.kind)
     {

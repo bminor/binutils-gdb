@@ -1,5 +1,11 @@
 2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* infrun.c (handle_inferior_event): Extract out a piece of code
+	into...
+	(mark_non_executing_threads): ...this new function.
+
+2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* infrun.c (resume_1): Move a 'regcache_read_pc' call down to first
 	use.
 
