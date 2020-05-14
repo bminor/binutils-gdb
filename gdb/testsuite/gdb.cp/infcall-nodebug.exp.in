@@ -24,13 +24,6 @@ if [target_info exists gdb,cannot_call_functions] {
     continue
 }
 
-# Only test C++ if we are able.  Always use C.
-if { [skip_cplus_tests] || [get_compiler_info "c++"] } {
-    set lang {c}
-} else {
-    set lang {c c++}
-}
-
 set main_basename infcall-nodebug-main
 set lib_basename infcall-nodebug-lib
 standard_testfile ${main_basename}.c ${lib_basename}.c
@@ -53,19 +46,13 @@ proc build_and_run_test { lang symbols } {
 	set debug_flags ""
     }
 
-    # Setup directory.
-
-    set dir "$lang-$symbols"
-    remote_exec build "rm -rf [standard_output_file ${dir}]"
-    remote_exec build "mkdir -p [standard_output_file ${dir}]"
-
     # Compile both files to objects, then link together.
 
     set main_flags "$lang debug"
     set lib_flags "$lang $debug_flags"
-    set main_o [standard_output_file ${dir}/${main_basename}.o]
-    set lib_o [standard_output_file ${dir}/${lib_basename}.o]
-    set binfile [standard_output_file ${dir}/${testfile}]
+    set main_o [standard_output_file ${main_basename}.o]
+    set lib_o [standard_output_file ${lib_basename}.o]
+    set binfile [standard_output_file ${testfile}]
 
     if { [gdb_compile $mainsrc $main_o object ${main_flags}] != "" } {
 	untested "failed to compile main file to object"
@@ -111,9 +98,4 @@ proc build_and_run_test { lang symbols } {
 
 }
 
-foreach_with_prefix l $lang {
-    foreach_with_prefix s {debug nodebug} {
-	build_and_run_test $l $s
-    }
-}
-
+build_and_run_test $lang $debug

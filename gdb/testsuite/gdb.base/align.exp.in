@@ -15,16 +15,6 @@
 
 # This file is part of the gdb testsuite
 
-# This tests that C11 _Alignof and C++11 alignof works in gdb, and
-# that it agrees with the compiler.
-
-# Only test C++ if we are able.  Always use C.
-if { [skip_cplus_tests] || [get_compiler_info "c++"] } {
-    set lang {c}
-} else {
-    set lang {c c++}
-}
-
 # The types we're going to test.
 
 set typelist {
@@ -60,7 +50,7 @@ proc prepare_test_source_file { lang } {
 	set align_func "_Alignof"
     }
 
-    set filename [standard_output_file "$lang/align.$suffix"]
+    set filename [standard_output_file "align.$suffix"]
     set outfile [open $filename w]
 
     # Prologue.
@@ -140,7 +130,7 @@ proc run_alignment_test { lang } {
 	lappend flags "additional_flags=-std=c++11"
     }
     standard_testfile $filename
-    if {[prepare_for_testing "failed to prepare" "$lang/$testfile" $srcfile $flags]} {
+    if {[prepare_for_testing "failed to prepare" "$testfile" $srcfile $flags]} {
 	return -1
     }
 
@@ -186,14 +176,4 @@ proc run_alignment_test { lang } {
     }
 }
 
-# Create nested 'c' and 'c++' directories within this tests directory.
-foreach l $lang {
-    set dir "$l"
-    remote_exec host "rm -rf [standard_output_file ${dir}]"
-    remote_exec host "mkdir -p [standard_output_file ${dir}]"
-}
-
-# Now run the test for each language.
-foreach_with_prefix l $lang {
-    run_alignment_test $l
-}
+run_alignment_test $lang

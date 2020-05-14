@@ -15,26 +15,13 @@
 
 # Tests GDB's handling of 'set print max-depth'.
 
-# Only test C++ if we are able.  Always use C.
-if { [skip_cplus_tests] || [get_compiler_info "c++"] } {
-    set lang {c}
-} else {
-    set lang {c c++}
-}
-
-foreach l $lang {
-    set dir "$l"
-    remote_exec host "rm -rf [standard_output_file ${dir}]"
-    remote_exec host "mkdir -p [standard_output_file ${dir}]"
-}
-
 proc compile_and_run_tests { lang } {
     global testfile
     global srcfile
     global binfile
     global hex
 
-    standard_testfile .c
+    standard_testfile max-depth.c
 
     # Create the additional flags.
     set flags "debug"
@@ -43,8 +30,6 @@ proc compile_and_run_tests { lang } {
 	lappend flags "additional_flags=-std=c++11"
     }
 
-    set dir "$lang"
-    set binfile [standard_output_file ${dir}/${testfile}]
     if { [prepare_for_testing "failed to prepare" "${binfile}" "${srcfile}" "${flags}"] } {
 	return 0
     }
@@ -163,6 +148,4 @@ proc compile_and_run_tests { lang } {
     }
 }
 
-foreach_with_prefix l $lang {
-    compile_and_run_tests $l
-}
+compile_and_run_tests $lang

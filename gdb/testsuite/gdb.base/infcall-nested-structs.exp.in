@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 # Some targets can't call functions, so don't even bother with this
 # test.
 
@@ -23,20 +22,6 @@ if [target_info exists gdb,cannot_call_functions] {
     unsupported "this target can not call functions"
     continue
 }
-
-# Only test C++ if we are able.  Always use C.
-if { [skip_cplus_tests] || [get_compiler_info "c++"] } {
-    set lang {c}
-} else {
-    set lang {c c++}
-}
-
-foreach l $lang {
-    set dir "$l"
-    remote_exec host "rm -rf [standard_output_file ${dir}]"
-    remote_exec host "mkdir -p [standard_output_file ${dir}]"
-}
-
 
 set int_types { tc ts ti tl tll }
 set float_types { tf td tld }
@@ -67,8 +52,7 @@ proc start_nested_structs_test { lang types } {
     global srcdir
     global compile_flags
 
-    standard_testfile .c
-    set dir "$lang"
+    standard_testfile infcall-nested-structs.c
 
     # Create the additional flags
     set flags $compile_flags
@@ -82,7 +66,6 @@ proc start_nested_structs_test { lang types } {
 	append testfile "-" "$t"
     }
 
-    set binfile [standard_output_file ${dir}/${testfile}]
     if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "${flags}"] != "" } {
 	unresolved "failed to compile"
 	return 0
@@ -161,11 +144,9 @@ proc start_gdb_and_run_tests { lang types } {
 	append prefix "-" "${t}"
     }
 
-    foreach_with_prefix l $lang {
-	with_test_prefix $prefix {
-	    if { [start_nested_structs_test $l $types] } {
-		run_tests $l $prefix
-	    }
+    with_test_prefix $prefix {
+	if { [start_nested_structs_test $lang $types] } {
+	    run_tests $lang $prefix
 	}
     }
 }

@@ -16,19 +16,6 @@
 # Check that 'info types' produces the expected output for an inferior
 # containing a number of different types.
 
-# Only test C++ if we are able.  Always use C.
-if { [skip_cplus_tests] || [get_compiler_info "c++"] } {
-    set lang {c}
-} else {
-    set lang {c c++}
-}
-
-foreach l $lang {
-    set dir "$l"
-    remote_exec host "rm -rf [standard_output_file ${dir}]"
-    remote_exec host "mkdir -p [standard_output_file ${dir}]"
-}
-
 # Run 'info types' test, compiling the test file for language LANG,
 # which should be either 'c' or 'c++'.
 proc run_test { lang } {
@@ -39,10 +26,10 @@ proc run_test { lang } {
     global srcdir
     global compile_flags
 
-    standard_testfile .c
+    standard_testfile info-types.c
 
     if {[prepare_for_testing "failed to prepare" \
-	     "${lang}/${testfile}" $srcfile "debug $lang"]} {
+	     "${testfile}" $srcfile "debug $lang"]} {
 	return -1
     }
 
@@ -140,6 +127,4 @@ proc run_test { lang } {
     }
 }
 
-foreach_with_prefix l $lang {
-    run_test $l
-}
+run_test $lang
