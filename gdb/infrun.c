@@ -2995,7 +2995,8 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
   gdbarch = regcache->arch ();
   const address_space *aspace = regcache->aspace ();
 
-  pc = regcache_read_pc (regcache);
+  pc = regcache_read_pc_protected (regcache);
+
   thread_info *cur_thr = inferior_thread ();
 
   /* Fill in with reasonable starting values.  */
@@ -3122,7 +3123,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
      advanced.  Must do this before resuming any thread, as in
      all-stop/remote, once we resume we can't send any other packet
      until the target stops again.  */
-  cur_thr->prev_pc = regcache_read_pc (regcache);
+  cur_thr->prev_pc = regcache_read_pc_protected (regcache);
 
   {
     scoped_restore save_defer_tc = make_scoped_defer_target_commit_resume ();
@@ -7929,7 +7930,7 @@ keep_going_pass_signal (struct execution_control_state *ecs)
 
   /* Save the pc before execution, to compare with pc after stop.  */
   ecs->event_thread->prev_pc
-    = regcache_read_pc (get_thread_regcache (ecs->event_thread));
+    = regcache_read_pc_protected (get_thread_regcache (ecs->event_thread));
 
   if (ecs->event_thread->control.trap_expected)
     {

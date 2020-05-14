@@ -56,6 +56,11 @@ extern int regcache_register_size (const struct regcache *regcache, int n);
 
 extern CORE_ADDR regcache_read_pc (struct regcache *regcache);
 
+/* Read the PC register.  If PC cannot be read, return 0.
+   This is a wrapper around 'regcache_read_pc'.  */
+
+extern CORE_ADDR regcache_read_pc_protected (regcache *regcache);
+
 /* Read a raw register into a unsigned integer.  */
 extern enum register_status regcache_raw_read_unsigned
   (struct regcache *regcache, int regnum, ULONGEST *val);

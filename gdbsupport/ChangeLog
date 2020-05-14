@@ -1,3 +1,8 @@
+2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* common-regcache.h (regcache_read_pc_protected): New function
+	declaration.
+
 2020-04-28  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb-sigmask.h: Fix typo (pthead_sigmask -> pthread_sigmask).

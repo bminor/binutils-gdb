@@ -1220,6 +1220,24 @@ regcache_read_pc (struct regcache *regcache)
   return pc_val;
 }
 
+/* See gdbsupport/common-regcache.h.  */
+
+CORE_ADDR
+regcache_read_pc_protected (regcache *regcache)
+{
+  CORE_ADDR pc;
+  try
+    {
+      pc = regcache_read_pc (regcache);
+    }
+  catch (const gdb_exception_error &ex)
+    {
+      pc = 0;
+    }
+
+  return pc;
+}
+
 void
 regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
