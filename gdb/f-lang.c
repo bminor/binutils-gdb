@@ -608,7 +608,6 @@ extern const struct language_data f_language_data =
   f_printchar,			/* Print character constant */
   f_printstr,			/* function to print string constant */
   f_emit_char,			/* Function to print a single character */
-  f_print_type,			/* Print a type using appropriate syntax */
   f_print_typedef,		/* Print a typedef using appropriate syntax */
   f_value_print_innner,		/* la_value_print_inner */
   c_value_print,		/* FIXME */
@@ -689,6 +688,15 @@ public:
   unsigned int search_name_hash (const char *name) const override
   {
     return cp_search_name_hash (name);
+  }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    f_print_type (type, varstring, stream, show, level, flags);
   }
 };
 

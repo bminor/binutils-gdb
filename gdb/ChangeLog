@@ -1,5 +1,51 @@
 2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete la_print_type
+	initializer.
+	(ada_language::print_type): New member function.
+	* c-lang.c (c_language_data): Delete la_print_type initializer.
+	(c_language::print_type): New member function.
+	(cplus_language_data): Delete la_print_type initializer.
+	(cplus_language::print_type): New member function.
+	(asm_language_data): Delete la_print_type initializer.
+	(asm_language::print_type): New member function.
+	(minimal_language_data): Delete la_print_type initializer.
+	(minimal_language::print_type): New member function.
+	* d-lang.c (d_language_data): Delete la_print_type initializer.
+	(d_language::print_type): New member function.
+	* f-lang.c (f_language_data): Delete la_print_type initializer.
+	(f_language::print_type): New member function.
+	* go-lang.c (go_language_data): Delete la_print_type initializer.
+	(go_language::print_type): New member function.
+	* language.c (unk_lang_print_type): Delete.
+	(unknown_language_data): Delete la_print_type initializer.
+	(unknown_language::print_type): New member function.
+	(auto_language_data): Delete la_print_type initializer.
+	(auto_language::print_type): New member function.
+	* language.h (language_data): Delete la_print_type field.
+	(language_defn::print_type): New function.
+	(LA_PRINT_TYPE): Update.
+	* m2-lang.c (m2_language_data): Delete la_print_type initializer.
+	(m2_language::print_type): New member function.
+	* objc-lang.c (objc_language_data): Delete la_print_type
+	initializer.
+	(objc_language::print_type): New member function.
+	* opencl-lang.c (opencl_print_type): Delete, implementation moved
+	to opencl_language::print_type.
+	(opencl_language_data): Delete la_print_type initializer.
+	(opencl_language::print_type): New member function, implementation
+	from opencl_print_type.
+	* p-lang.c (pascal_language_data): Delete la_print_type
+	initializer.
+	(pascal_language::print_type): New member function.
+	* rust-lang.c (rust_print_type): Delete, implementation moved to
+	rust_language::print_type.
+	(rust_language_data): Delete la_print_type initializer.
+	(rust_language::print_type): New member function, implementation
+	from rust_print_type.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_sniff_from_mangled_name): Delete function,
 	implementation moves to...
 	(ada_language::sniff_from_mangled_name): ...here.  Update return

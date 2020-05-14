@@ -13919,7 +13919,6 @@ extern const struct language_data ada_language_data =
   ada_printchar,                /* Print a character constant */
   ada_printstr,                 /* Function to print string constant */
   emit_char,                    /* Function to print single char (not used) */
-  ada_print_type,               /* Print a type using appropriate syntax */
   ada_print_typedef,            /* Print a typedef using appropriate syntax */
   ada_value_print_inner,	/* la_value_print_inner */
   ada_value_print,              /* Print a top-level value */
@@ -14105,6 +14104,15 @@ public:
       }
 
     return false;
+  }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    ada_print_type (type, varstring, stream, show, level, flags);
   }
 };
 

@@ -248,11 +248,6 @@ struct language_data
     void (*la_emitchar) (int ch, struct type *chtype,
 			 struct ui_file * stream, int quoter);
 
-    /* Print a type using syntax appropriate for this language.  */
-
-    void (*la_print_type) (struct type *, const char *, struct ui_file *, int,
-			   int, const struct type_print_options *);
-
     /* Print a typedef using syntax appropriate for this language.
        TYPE is the underlying type.  NEW_SYMBOL is the symbol naming
        the type.  STREAM is the output stream on which to print.  */
@@ -517,6 +512,11 @@ struct language_defn : language_data
     return false;
   }
 
+  /* Print a type using syntax appropriate for this language.  */
+
+  virtual void print_type (struct type *, const char *, struct ui_file *, int,
+			   int, const struct type_print_options *) const = 0;
+
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];
 };
@@ -605,7 +605,7 @@ extern enum language set_language (enum language);
    with the "set language" command.  */
 
 #define LA_PRINT_TYPE(type,varstring,stream,show,level,flags)		\
-  (current_language->la_print_type(type,varstring,stream,show,level,flags))
+  (current_language->print_type(type,varstring,stream,show,level,flags))
 
 #define LA_PRINT_TYPEDEF(type,new_symbol,stream) \
   (current_language->la_print_typedef(type,new_symbol,stream))

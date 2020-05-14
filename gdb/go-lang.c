@@ -532,7 +532,6 @@ extern const struct language_data go_language_data =
   c_printchar,			/* Print a character constant.  */
   c_printstr,			/* Function to print string constant.  */
   c_emit_char,			/* Print a single char.  */
-  go_print_type,		/* Print a type using appropriate syntax.  */
   c_print_typedef,		/* Print a typedef using appropriate
 				   syntax.  */
   go_value_print_inner,		/* la_value_print_inner */
@@ -625,6 +624,15 @@ public:
   {
     *demangled = go_demangle (mangled, 0);
     return *demangled != NULL;
+  }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    go_print_type (type, varstring, stream, show, level, flags);
   }
 };
 

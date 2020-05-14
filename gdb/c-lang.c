@@ -905,7 +905,6 @@ extern const struct language_data c_language_data =
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
-  c_print_type,			/* Print a type using appropriate syntax */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
@@ -949,6 +948,15 @@ public:
   compile_instance *get_compile_instance () const override
   {
     return c_get_compile_context ();
+  }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    c_print_type (type, varstring, stream, show, level, flags);
   }
 };
 
@@ -1007,7 +1015,6 @@ extern const struct language_data cplus_language_data =
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
-  c_print_type,			/* Print a type using appropriate syntax */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
@@ -1136,6 +1143,15 @@ public:
     *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
     return *demangled != NULL;
   }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    c_print_type (type, varstring, stream, show, level, flags);
+  }
 };
 
 /* The single instance of the C++ language class.  */
@@ -1165,7 +1181,6 @@ extern const struct language_data asm_language_data =
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
-  c_print_type,			/* Print a type using appropriate syntax */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
@@ -1206,6 +1221,15 @@ public:
   {
     c_language_arch_info (gdbarch, lai);
   }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    c_print_type (type, varstring, stream, show, level, flags);
+  }
 };
 
 /* The single instance of the ASM language class.  */
@@ -1232,7 +1256,6 @@ extern const struct language_data minimal_language_data =
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
-  c_print_type,			/* Print a type using appropriate syntax */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
@@ -1270,6 +1293,15 @@ public:
 			   struct language_arch_info *lai) const override
   {
     c_language_arch_info (gdbarch, lai);
+  }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    c_print_type (type, varstring, stream, show, level, flags);
   }
 };
 

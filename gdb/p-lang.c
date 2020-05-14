@@ -398,7 +398,6 @@ extern const struct language_data pascal_language_data =
   pascal_printchar,		/* Print a character constant */
   pascal_printstr,		/* Function to print string constant */
   pascal_emit_char,		/* Print a single char */
-  pascal_print_type,		/* Print a type using appropriate syntax */
   pascal_print_typedef,		/* Print a typedef using appropriate syntax */
   pascal_value_print_inner,	/* la_value_print_inner */
   pascal_value_print,		/* Print a top-level value */
@@ -477,6 +476,15 @@ public:
 
     lai->bool_type_symbol = "boolean";
     lai->bool_type_default = builtin->builtin_bool;
+  }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    pascal_print_type (type, varstring, stream, show, level, flags);
   }
 };
 

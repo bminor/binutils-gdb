@@ -367,7 +367,6 @@ extern const struct language_data m2_language_data =
   m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */
   m2_emit_char,			/* Function to print a single character */
-  m2_print_type,		/* Print a type using appropriate syntax */
   m2_print_typedef,		/* Print a typedef using appropriate syntax */
   m2_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
@@ -424,6 +423,15 @@ public:
 
     lai->bool_type_symbol = "BOOLEAN";
     lai->bool_type_default = builtin->builtin_bool;
+  }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    m2_print_type (type, varstring, stream, show, level, flags);
   }
 };
 

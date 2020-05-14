@@ -951,16 +951,6 @@ rust_internal_print_type (struct type *type, const char *varstring,
     }
 }
 
-static void
-rust_print_type (struct type *type, const char *varstring,
-		 struct ui_file *stream, int show, int level,
-		 const struct type_print_options *flags)
-{
-  print_offset_data podata;
-  rust_internal_print_type (type, varstring, stream, show, level,
-			    flags, false, &podata);
-}
-
 
 
 /* Like arch_composite_type, but uses TYPE to decide how to allocate
@@ -2063,7 +2053,6 @@ extern const struct language_data rust_language_data =
   rust_printchar,		/* Print a character constant */
   rust_printstr,		/* Function to print string constant */
   rust_emitchar,		/* Print a single char */
-  rust_print_type,		/* Print a type using appropriate syntax */
   rust_print_typedef,		/* Print a typedef using appropriate syntax */
   rust_value_print_inner,	/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
@@ -2143,6 +2132,17 @@ public:
   {
     *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
     return *demangled != NULL;
+  }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    print_offset_data podata;
+    rust_internal_print_type (type, varstring, stream, show, level,
+			      flags, false, &podata);
   }
 };
 

@@ -728,15 +728,6 @@ unk_lang_printstr (struct ui_file *stream, struct type *type,
 }
 
 static void
-unk_lang_print_type (struct type *type, const char *varstring,
-		     struct ui_file *stream, int show, int level,
-		     const struct type_print_options *flags)
-{
-  error (_("internal error - unimplemented "
-	   "function unk_lang_print_type called."));
-}
-
-static void
 unk_lang_value_print_inner (struct value *val,
 			    struct ui_file *stream, int recurse,
 			    const struct value_print_options *options)
@@ -802,7 +793,6 @@ extern const struct language_data unknown_language_data =
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_emit_char,
-  unk_lang_print_type,		/* Print a type using appropriate syntax */
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_value_print_inner,	/* la_value_print_inner */
   unk_lang_value_print,		/* Print a top-level value */
@@ -841,6 +831,15 @@ public:
   {
     unknown_language_arch_info (gdbarch, lai);
   }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    error (_("unimplemented unknown_language::print_type called"));
+  }
 };
 
 /* Single instance of the unknown language class.  */
@@ -865,7 +864,6 @@ extern const struct language_data auto_language_data =
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_emit_char,
-  unk_lang_print_type,		/* Print a type using appropriate syntax */
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_value_print_inner,	/* la_value_print_inner */
   unk_lang_value_print,		/* Print a top-level value */
@@ -903,6 +901,15 @@ public:
 			   struct language_arch_info *lai) const override
   {
     unknown_language_arch_info (gdbarch, lai);
+  }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    error (_("unimplemented auto_language::print_type called"));
   }
 };
 

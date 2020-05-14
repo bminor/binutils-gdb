@@ -373,7 +373,6 @@ extern const struct language_data objc_language_data =
   c_printchar,		       /* Print a character constant */
   c_printstr,		       /* Function to print string constant */
   c_emit_char,
-  c_print_type,			/* Print a type using appropriate syntax */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
@@ -419,6 +418,15 @@ public:
   {
     *demangled = objc_demangle (mangled, 0);
     return *demangled != NULL;
+  }
+
+  /* See language.h.  */
+
+  void print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags) const override
+  {
+    c_print_type (type, varstring, stream, show, level, flags);
   }
 };
 
