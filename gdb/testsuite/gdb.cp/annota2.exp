@@ -218,7 +218,7 @@ set pat [multi_line "" \
 	     "\032\032post-prompt" \
 	     "" \
 	     "\032\032starting" \
-	     "\(${frames_invalid}\)*${breakpoints_invalid}" \
+	     "\(${frames_invalid}\)*${breakpoints_invalid}\(${frames_invalid}\)*" \
 	     "\032\032watchpoint 3" \
 	     ".*atchpoint 3: a.x" \
 	     "" \
