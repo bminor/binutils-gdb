@@ -1,3 +1,7 @@
+2020-05-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* btrace-common.h (btrace_cpu_vendor): Add CV_AMD.
+
 2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* common-regcache.h (regcache_read_pc_protected): New function
