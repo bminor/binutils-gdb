@@ -908,7 +908,6 @@ extern const struct language_data c_language_data =
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
-  NULL,				/* Language specific skip_trampoline */
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
@@ -1017,7 +1016,6 @@ extern const struct language_data cplus_language_data =
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
-  cplus_skip_trampoline,	/* Language specific skip_trampoline */
   "this",                       /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
@@ -1157,6 +1155,14 @@ public:
   {
     c_print_type (type, varstring, stream, show, level, flags);
   }
+
+  /* See language.h.  */
+
+  CORE_ADDR skip_trampoline (struct frame_info *fi,
+			     CORE_ADDR pc) const override
+  {
+    return cplus_skip_trampoline (fi, pc);
+  }
 };
 
 /* The single instance of the C++ language class.  */
@@ -1189,7 +1195,6 @@ extern const struct language_data asm_language_data =
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
-  NULL,				/* Language specific skip_trampoline */
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
@@ -1263,7 +1268,6 @@ extern const struct language_data minimal_language_data =
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
-  NULL,				/* Language specific skip_trampoline */
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */

@@ -611,7 +611,6 @@ extern const struct language_data f_language_data =
   f_print_typedef,		/* Print a typedef using appropriate syntax */
   f_value_print_innner,		/* la_value_print_inner */
   c_value_print,		/* FIXME */
-  NULL,				/* Language specific skip_trampoline */
   NULL,                    	/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */

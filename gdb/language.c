@@ -60,8 +60,6 @@ static void unk_lang_printchar (int c, struct type *type,
 static void unk_lang_value_print (struct value *, struct ui_file *,
 				  const struct value_print_options *);
 
-static CORE_ADDR unk_lang_trampoline (struct frame_info *, CORE_ADDR pc);
-
 /* The current (default at startup) state of type and range checking.
    (If the modes are set to "auto", though, these are changed based
    on the default language at startup, and then again based on the
@@ -567,13 +565,10 @@ skip_language_trampoline (struct frame_info *frame, CORE_ADDR pc)
 {
   for (const auto &lang : language_defn::languages)
     {
-      if (lang->skip_trampoline != NULL)
-	{
-	  CORE_ADDR real_pc = lang->skip_trampoline (frame, pc);
+      CORE_ADDR real_pc = lang->skip_trampoline (frame, pc);
 
-	  if (real_pc)
-	    return real_pc;
-	}
+      if (real_pc != 0)
+	return real_pc;
     }
 
   return 0;
@@ -744,11 +739,6 @@ unk_lang_value_print (struct value *val, struct ui_file *stream,
 	   "function unk_lang_value_print called."));
 }
 
-static CORE_ADDR unk_lang_trampoline (struct frame_info *frame, CORE_ADDR pc)
-{
-  return 0;
-}
-
 static char *unk_lang_class_name (const char *mangled)
 {
   return NULL;
@@ -790,7 +780,6 @@ extern const struct language_data unknown_language_data =
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_value_print_inner,	/* la_value_print_inner */
   unk_lang_value_print,		/* Print a top-level value */
-  unk_lang_trampoline,		/* Language specific skip_trampoline */
   "this",        	    	/* name_of_this */
   true,				/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal, /* lookup_symbol_nonlocal */
@@ -868,7 +857,6 @@ extern const struct language_data auto_language_data =
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_value_print_inner,	/* la_value_print_inner */
   unk_lang_value_print,		/* Print a top-level value */
-  unk_lang_trampoline,		/* Language specific skip_trampoline */
   "this",		        /* name_of_this */
   false,			/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */

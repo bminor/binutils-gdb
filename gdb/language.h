@@ -267,12 +267,6 @@ struct language_data
     void (*la_value_print) (struct value *, struct ui_file *,
 			    const struct value_print_options *);
 
-    /* PC is possibly an unknown languages trampoline.
-       If that PC falls in a trampoline belonging to this language,
-       return the address of the first pc in the real function, or 0
-       if it isn't a language tramp for this language.  */
-    CORE_ADDR (*skip_trampoline) (struct frame_info *, CORE_ADDR);
-
     /* Now come some hooks for lookup_symbol.  */
 
     /* If this is non-NULL, specifies the name that of the implicit
@@ -519,6 +513,15 @@ struct language_defn : language_data
 
   virtual void print_type (struct type *, const char *, struct ui_file *, int,
 			   int, const struct type_print_options *) const = 0;
+
+  /* PC is possibly an unknown languages trampoline.
+     If that PC falls in a trampoline belonging to this language, return
+     the address of the first pc in the real function, or 0 if it isn't a
+     language tramp for this language.  */
+  virtual CORE_ADDR skip_trampoline (struct frame_info *fi, CORE_ADDR pc) const
+  {
+    return (CORE_ADDR) 0;
+  }
 
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];

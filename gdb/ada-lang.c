@@ -13922,7 +13922,6 @@ extern const struct language_data ada_language_data =
   ada_print_typedef,            /* Print a typedef using appropriate syntax */
   ada_value_print_inner,	/* la_value_print_inner */
   ada_value_print,              /* Print a top-level value */
-  NULL,                         /* Language specific skip_trampoline */
   NULL,                         /* name_of_this */
   true,                         /* la_store_sym_names_in_linkage_form_p */
   ada_lookup_symbol_nonlocal,   /* Looking up non-local symbols.  */

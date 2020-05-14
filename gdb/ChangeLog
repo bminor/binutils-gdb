@@ -1,5 +1,35 @@
 2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete skip_trampoline
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(cplus_language::skip_trampoline): New member function.
+	(asm_language_data): Delete skip_trampoline initializer.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unk_lang_trampoline): Delete function.
+	(skip_language_trampoline): Update.
+	(unknown_language_data): Delete skip_trampoline initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete skip_trampoline field.
+	(language_defn::skip_trampoline): New function.
+	* m2-lang.c (m2_language_data): Delete skip_trampoline
+	initializer.
+	* objc-lang.c (objc_skip_trampoline): Delete function, move
+	implementation to objc_language::skip_trampoline.
+	(objc_language_data): Delete skip_trampoline initializer.
+	(objc_language::skip_trampoline): New member function with
+	implementation from objc_skip_trampoline.
+	* opencl-lang.c (opencl_language_data): Delete skip_trampoline
+	initializer.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Delete la_demangle initializer.
 	(ada_language::demangle): New member function.
 	* c-lang.c (c_language_data): Delete la_demangle initializer.

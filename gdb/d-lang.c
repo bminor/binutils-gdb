@@ -151,7 +151,6 @@ extern const struct language_data d_language_data =
 				   syntax.  */
   d_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value.  */
-  NULL,				/* Language specific skip_trampoline.  */
   "this",
   false,			/* la_store_sym_names_in_linkage_form_p */
   d_lookup_symbol_nonlocal,

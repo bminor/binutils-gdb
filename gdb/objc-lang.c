@@ -281,37 +281,6 @@ objc_demangle (const char *mangled, int options)
     return NULL;	/* Not an objc mangled name.  */
 }
 
-/* Determine if we are currently in the Objective-C dispatch function.
-   If so, get the address of the method function that the dispatcher
-   would call and use that as the function to step into instead.  Also
-   skip over the trampoline for the function (if any).  This is better
-   for the user since they are only interested in stepping into the
-   method function anyway.  */
-static CORE_ADDR 
-objc_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
-{
-  struct gdbarch *gdbarch = get_frame_arch (frame);
-  CORE_ADDR real_stop_pc;
-  CORE_ADDR method_stop_pc;
-  
-  real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
-
-  if (real_stop_pc != 0)
-    find_objc_msgcall (real_stop_pc, &method_stop_pc);
-  else
-    find_objc_msgcall (stop_pc, &method_stop_pc);
-
-  if (method_stop_pc)
-    {
-      real_stop_pc = gdbarch_skip_trampoline_code
-		       (gdbarch, frame, method_stop_pc);
-      if (real_stop_pc == 0)
-	real_stop_pc = method_stop_pc;
-    }
-
-  return real_stop_pc;
-}
-
 
 /* Table mapping opcodes into strings for printing operators
    and precedences of the operators.  */
@@ -376,7 +345,6 @@ extern const struct language_data objc_language_data =
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_value_print_inner,		/* la_value_print_inner */
   c_value_print,		/* Print a top-level value */
-  objc_skip_trampoline, 	/* Language specific skip_trampoline */
   "self",		        /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
@@ -433,6 +401,40 @@ public:
 		   const struct type_print_options *flags) const override
   {
     c_print_type (type, varstring, stream, show, level, flags);
+  }
+
+  /* See language.h.  */
+
+  CORE_ADDR skip_trampoline (struct frame_info *frame,
+			     CORE_ADDR stop_pc) const override
+  {
+    struct gdbarch *gdbarch = get_frame_arch (frame);
+    CORE_ADDR real_stop_pc;
+    CORE_ADDR method_stop_pc;
+
+    /* Determine if we are currently in the Objective-C dispatch function.
+       If so, get the address of the method function that the dispatcher
+       would call and use that as the function to step into instead.  Also
+       skip over the trampoline for the function (if any).  This is better
+       for the user since they are only interested in stepping into the
+       method function anyway.  */
+
+    real_stop_pc = gdbarch_skip_trampoline_code (gdbarch, frame, stop_pc);
+
+    if (real_stop_pc != 0)
+      find_objc_msgcall (real_stop_pc, &method_stop_pc);
+    else
+      find_objc_msgcall (stop_pc, &method_stop_pc);
+
+    if (method_stop_pc)
+      {
+	real_stop_pc = gdbarch_skip_trampoline_code
+	  (gdbarch, frame, method_stop_pc);
+	if (real_stop_pc == 0)
+	  real_stop_pc = method_stop_pc;
+      }
+
+    return real_stop_pc;
   }
 };
 
