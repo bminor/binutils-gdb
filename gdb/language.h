@@ -310,9 +310,6 @@ struct language_data
        const struct block *,
        const domain_enum);
 
-    /* Return demangled language symbol, or NULL.  */
-    char *(*la_demangle) (const char *mangled, int options);
-
     /* Return class name of a mangled method name or NULL.  */
     char *(*la_class_name_from_physname) (const char *physname);
 
@@ -510,6 +507,12 @@ struct language_defn : language_data
   {
     *demangled = nullptr;
     return false;
+  }
+
+  /* Return demangled language symbol version of MANGLED, or NULL.  */
+  virtual char *demangle (const char *mangled, int options) const
+  {
+    return nullptr;
   }
 
   /* Print a type using syntax appropriate for this language.  */

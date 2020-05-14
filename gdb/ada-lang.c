@@ -13926,7 +13926,6 @@ extern const struct language_data ada_language_data =
   NULL,                         /* name_of_this */
   true,                         /* la_store_sym_names_in_linkage_form_p */
   ada_lookup_symbol_nonlocal,   /* Looking up non-local symbols.  */
-  ada_la_decode,                /* Language specific symbol demangler */
   NULL,                         /* Language specific
 				   class_name_from_physname */
   ada_op_print_tab,             /* expression operators for printing */
@@ -14104,6 +14103,13 @@ public:
       }
 
     return false;
+  }
+
+  /* See language.h.  */
+
+  char *demangle (const char *mangled, int options) const override
+  {
+    return ada_la_decode (mangled, options);
   }
 
   /* See language.h.  */

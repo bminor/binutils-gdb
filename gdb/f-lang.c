@@ -615,13 +615,6 @@ extern const struct language_data f_language_data =
   NULL,                    	/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-
-  /* We could support demangling here to provide module namespaces
-     also for inferiors with only minimal symbol table (ELF symbols).
-     Just the mangling standard is not standardized across compilers
-     and there is no DW_AT_producer available for inferiors with only
-     the ELF symbols to check the mangling kind.  */
-  NULL,				/* Language specific symbol demangler */
   NULL,				/* Language specific
 				   class_name_from_physname */
   f_op_print_tab,		/* expression operators for printing */
@@ -688,6 +681,18 @@ public:
   unsigned int search_name_hash (const char *name) const override
   {
     return cp_search_name_hash (name);
+  }
+
+  /* See language.h.  */
+
+  char *demangle (const char *mangled, int options) const override
+  {
+      /* We could support demangling here to provide module namespaces
+	 also for inferiors with only minimal symbol table (ELF symbols).
+	 Just the mangling standard is not standardized across compilers
+	 and there is no DW_AT_producer available for inferiors with only
+	 the ELF symbols to check the mangling kind.  */
+    return nullptr;
   }
 
   /* See language.h.  */

@@ -380,7 +380,6 @@ extern const struct language_data objc_language_data =
   "self",		        /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  objc_demangle,		/* Language specific symbol demangler */
   NULL,				/* Language specific
 				   class_name_from_physname */
   objc_op_print_tab,		/* Expression operators for printing */
@@ -418,6 +417,13 @@ public:
   {
     *demangled = objc_demangle (mangled, 0);
     return *demangled != NULL;
+  }
+
+  /* See language.h.  */
+
+  char *demangle (const char *mangled, int options) const override
+  {
+    return objc_demangle (mangled, options);
   }
 
   /* See language.h.  */

@@ -2060,7 +2060,6 @@ extern const struct language_data rust_language_data =
   NULL,				/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   rust_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  gdb_demangle,			/* Language specific symbol demangler */
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
@@ -2132,6 +2131,13 @@ public:
   {
     *demangled = gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
     return *demangled != NULL;
+  }
+
+  /* See language.h.  */
+
+  char *demangle (const char *mangled, int options) const override
+  {
+    return gdb_demangle (mangled, options);
   }
 
   /* See language.h.  */

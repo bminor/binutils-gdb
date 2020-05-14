@@ -589,8 +589,8 @@ char *
 language_demangle (const struct language_defn *current_language, 
 				const char *mangled, int options)
 {
-  if (current_language != NULL && current_language->la_demangle)
-    return current_language->la_demangle (mangled, options);
+  if (current_language != NULL)
+    return current_language->demangle (mangled, options);
   return NULL;
 }
 
@@ -749,12 +749,6 @@ static CORE_ADDR unk_lang_trampoline (struct frame_info *frame, CORE_ADDR pc)
   return 0;
 }
 
-/* Unknown languages just use the cplus demangler.  */
-static char *unk_lang_demangle (const char *mangled, int options)
-{
-  return gdb_demangle (mangled, options);
-}
-
 static char *unk_lang_class_name (const char *mangled)
 {
   return NULL;
@@ -800,7 +794,6 @@ extern const struct language_data unknown_language_data =
   "this",        	    	/* name_of_this */
   true,				/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal, /* lookup_symbol_nonlocal */
-  unk_lang_demangle,		/* Language specific symbol demangler */
   unk_lang_class_name,		/* Language specific
 				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */
@@ -840,6 +833,14 @@ public:
   {
     error (_("unimplemented unknown_language::print_type called"));
   }
+
+  /* See language.h.  */
+
+  char *demangle (const char *mangled, int options) const override
+  {
+    /* The unknown language just uses the C++ demangler.  */
+    return gdb_demangle (mangled, options);
+  }
 };
 
 /* Single instance of the unknown language class.  */
@@ -871,7 +872,6 @@ extern const struct language_data auto_language_data =
   "this",		        /* name_of_this */
   false,			/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  unk_lang_demangle,		/* Language specific symbol demangler */
   unk_lang_class_name,		/* Language specific
 				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */
@@ -910,6 +910,14 @@ public:
 		   const struct type_print_options *flags) const override
   {
     error (_("unimplemented auto_language::print_type called"));
+  }
+
+  /* See language.h.  */
+
+  char *demangle (const char *mangled, int options) const override
+  {
+    /* The auto language just uses the C++ demangler.  */
+    return gdb_demangle (mangled, options);
   }
 };
 

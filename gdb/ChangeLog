@@ -1,5 +1,38 @@
 2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete la_demangle initializer.
+	(ada_language::demangle): New member function.
+	* c-lang.c (c_language_data): Delete la_demangle initializer.
+	(cplus_language_data): Delete la_demangle initializer.
+	(cplus_language::demangle): New member function.
+	(asm_language_data): Delete la_demangle initializer.
+	(minimal_language_data): Delete la_demangle initializer.
+	* d-lang.c (d_language_data): Delete la_demangle initializer.
+	(d_language::demangle): New member function.
+	* f-lang.c (f_language_data): Delete la_demangle initializer.
+	(f_language::demangle): New member function.
+	* go-lang.c (go_language_data): Delete la_demangle initializer.
+	(go_language::demangle): New member function.
+	* language.c (language_demangle): Update.
+	(unk_lang_demangle): Delete.
+	(unknown_language_data): Delete la_demangle initializer.
+	(unknown_language::demangle): New member function.
+	(auto_language_data): Delete la_demangle initializer.
+	(auto_language::demangle): New member function.
+	* language.h (language_data): Delete la_demangle field.
+	(language_defn::demangle): New function.
+	* m2-lang.c (m2_language_data): Delete la_demangle initializer.
+	* objc-lang.c (objc_language_data): Delete la_demangle
+	initializer.
+	(objc_language::demangle): New member function.
+	* opencl-lang.c (opencl_language_data): Delete la_demangle
+	initializer.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+	(rust_language::demangle): New member function.
+
+2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Delete la_print_type
 	initializer.
 	(ada_language::print_type): New member function.

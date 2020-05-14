@@ -912,7 +912,6 @@ extern const struct language_data c_language_data =
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  NULL,				/* Language specific symbol demangler */
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
@@ -1022,7 +1021,6 @@ extern const struct language_data cplus_language_data =
   "this",                       /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  gdb_demangle,			/* Language specific symbol demangler */
   cp_class_name_from_physname,  /* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
@@ -1146,6 +1144,13 @@ public:
 
   /* See language.h.  */
 
+  char *demangle (const char *mangled, int options) const override
+  {
+    return gdb_demangle (mangled, options);
+  }
+
+  /* See language.h.  */
+
   void print_type (struct type *type, const char *varstring,
 		   struct ui_file *stream, int show, int level,
 		   const struct type_print_options *flags) const override
@@ -1188,7 +1193,6 @@ extern const struct language_data asm_language_data =
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  NULL,				/* Language specific symbol demangler */
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
@@ -1263,7 +1267,6 @@ extern const struct language_data minimal_language_data =
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  NULL,				/* Language specific symbol demangler */
   NULL,				/* Language specific
 				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */

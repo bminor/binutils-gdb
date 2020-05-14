@@ -155,7 +155,6 @@ extern const struct language_data d_language_data =
   "this",
   false,			/* la_store_sym_names_in_linkage_form_p */
   d_lookup_symbol_nonlocal,
-  d_demangle,			/* Language specific symbol demangler.  */
   NULL,				/* Language specific
 				   class_name_from_physname.  */
   d_op_print_tab,		/* Expression operators for printing.  */
@@ -250,6 +249,13 @@ public:
   {
     *demangled = d_demangle (mangled, 0);
     return *demangled != NULL;
+  }
+
+  /* See language.h.  */
+
+  char *demangle (const char *mangled, int options) const override
+  {
+    return d_demangle (mangled, options);
   }
 
   /* See language.h.  */

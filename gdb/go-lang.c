@@ -540,7 +540,6 @@ extern const struct language_data go_language_data =
   NULL,				/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal, 
-  go_demangle,			/* Language specific symbol demangler.  */
   NULL,				/* Language specific
 				   class_name_from_physname.  */
   go_op_print_tab,		/* Expression operators for printing.  */
@@ -624,6 +623,13 @@ public:
   {
     *demangled = go_demangle (mangled, 0);
     return *demangled != NULL;
+  }
+
+  /* See language.h.  */
+
+  char *demangle (const char *mangled, int options) const override
+  {
+    return go_demangle (mangled, options);
   }
 
   /* See language.h.  */
