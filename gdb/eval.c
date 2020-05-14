@@ -302,7 +302,7 @@ evaluate_struct_tuple (struct value *struct_val,
       if (fieldno >= TYPE_NFIELDS (struct_type))
 	error (_("too many initializers"));
       field_type = TYPE_FIELD_TYPE (struct_type, fieldno);
-      if (TYPE_CODE (field_type) == TYPE_CODE_UNION
+      if (field_type->code () == TYPE_CODE_UNION
 	  && TYPE_FIELD_NAME (struct_type, fieldno)[0] == '0')
 	error (_("don't know which variant you want to set"));
 
@@ -450,21 +450,21 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
   type1 = check_typedef (value_type (*arg1));
   type2 = check_typedef (value_type (*arg2));
 
-  if ((TYPE_CODE (type1) != TYPE_CODE_FLT
-       && TYPE_CODE (type1) != TYPE_CODE_DECFLOAT
+  if ((type1->code () != TYPE_CODE_FLT
+       && type1->code () != TYPE_CODE_DECFLOAT
        && !is_integral_type (type1))
-      || (TYPE_CODE (type2) != TYPE_CODE_FLT
-	  && TYPE_CODE (type2) != TYPE_CODE_DECFLOAT
+      || (type2->code () != TYPE_CODE_FLT
+	  && type2->code () != TYPE_CODE_DECFLOAT
 	  && !is_integral_type (type2)))
     return;
 
-  if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT
-      || TYPE_CODE (type2) == TYPE_CODE_DECFLOAT)
+  if (type1->code () == TYPE_CODE_DECFLOAT
+      || type2->code () == TYPE_CODE_DECFLOAT)
     {
       /* No promotion required.  */
     }
-  else if (TYPE_CODE (type1) == TYPE_CODE_FLT
-	   || TYPE_CODE (type2) == TYPE_CODE_FLT)
+  else if (type1->code () == TYPE_CODE_FLT
+	   || type2->code () == TYPE_CODE_FLT)
     {
       switch (language->la_language)
 	{
@@ -489,8 +489,8 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 	  break;
 	}
     }
-  else if (TYPE_CODE (type1) == TYPE_CODE_BOOL
-	   && TYPE_CODE (type2) == TYPE_CODE_BOOL)
+  else if (type1->code () == TYPE_CODE_BOOL
+	   && type2->code () == TYPE_CODE_BOOL)
     {
       /* No promotion required.  */
     }
@@ -616,7 +616,7 @@ ptrmath_type_p (const struct language_defn *lang, struct type *type)
   if (TYPE_IS_REFERENCE (type))
     type = TYPE_TARGET_TYPE (type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_PTR:
     case TYPE_CODE_FUNC:
@@ -668,7 +668,7 @@ fake_method::fake_method (type_instance_flags flags,
 	  --num_types;
 	  TYPE_VARARGS (type) = 1;
 	}
-      else if (TYPE_CODE (check_typedef (param_types[num_types - 1]))
+      else if (check_typedef (param_types[num_types - 1])->code ()
 	       == TYPE_CODE_VOID)
 	{
 	  --num_types;
@@ -772,7 +772,7 @@ eval_call (expression *exp, enum noside noside,
 
       type *ftype = value_type (argvec[0]);
 
-      if (TYPE_CODE (ftype) == TYPE_CODE_INTERNAL_FUNCTION)
+      if (ftype->code () == TYPE_CODE_INTERNAL_FUNCTION)
 	{
 	  /* We don't know anything about what the internal
 	     function might return, but we have to return
@@ -780,7 +780,7 @@ eval_call (expression *exp, enum noside noside,
 	  return value_zero (builtin_type (exp->gdbarch)->builtin_int,
 			     not_lval);
 	}
-      else if (TYPE_CODE (ftype) == TYPE_CODE_XMETHOD)
+      else if (ftype->code () == TYPE_CODE_XMETHOD)
 	{
 	  type *return_type
 	    = result_type_of_xmethod (argvec[0],
@@ -791,8 +791,8 @@ eval_call (expression *exp, enum noside noside,
 	    error (_("Xmethod is missing return type."));
 	  return value_zero (return_type, not_lval);
 	}
-      else if (TYPE_CODE (ftype) == TYPE_CODE_FUNC
-	       || TYPE_CODE (ftype) == TYPE_CODE_METHOD)
+      else if (ftype->code () == TYPE_CODE_FUNC
+	       || ftype->code () == TYPE_CODE_METHOD)
 	{
 	  if (TYPE_GNU_IFUNC (ftype))
 	    {
@@ -817,7 +817,7 @@ eval_call (expression *exp, enum noside noside,
 	error (_("Expression of type other than "
 		 "\"Function returning ...\" used as function"));
     }
-  switch (TYPE_CODE (value_type (argvec[0])))
+  switch (value_type (argvec[0])->code ())
     {
     case TYPE_CODE_INTERNAL_FUNCTION:
       return call_internal_function (exp->gdbarch, exp->language_defn,
@@ -879,7 +879,7 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
       if (noside == EVAL_SKIP)
 	tem = 1;  /* Set it to the right arg index so that all
 		     arguments can also be skipped.  */
-      else if (TYPE_CODE (a1_type) == TYPE_CODE_METHODPTR)
+      else if (a1_type->code () == TYPE_CODE_METHODPTR)
 	{
 	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	    arg1 = value_zero (TYPE_TARGET_TYPE (a1_type), not_lval);
@@ -891,7 +891,7 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
 	  tem = 2;
 	  argvec[1] = arg2;
 	}
-      else if (TYPE_CODE (a1_type) == TYPE_CODE_MEMBERPTR)
+      else if (a1_type->code () == TYPE_CODE_MEMBERPTR)
 	{
 	  struct type *type_ptr
 	    = lookup_pointer_type (TYPE_SELF_TYPE (a1_type));
@@ -987,7 +987,7 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
 
       function = NULL;
       function_name = NULL;
-      if (TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
+      if (type->code () == TYPE_CODE_NAMESPACE)
 	{
 	  function = cp_lookup_symbol_namespace (TYPE_NAME (type),
 						 name,
@@ -1002,8 +1002,8 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
 	}
       else
 	{
-	  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
-		      || TYPE_CODE (type) == TYPE_CODE_UNION);
+	  gdb_assert (type->code () == TYPE_CODE_STRUCT
+		      || type->code () == TYPE_CODE_UNION);
 	  function_name = name;
 
 	  /* We need a properly typed value for method lookup.  For
@@ -1054,9 +1054,9 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
 
 	  argvec[0] = evaluate_subexp_with_coercion (exp, pos, noside);
 	  type *type = value_type (argvec[0]);
-	  if (type && TYPE_CODE (type) == TYPE_CODE_PTR)
+	  if (type && type->code () == TYPE_CODE_PTR)
 	    type = TYPE_TARGET_TYPE (type);
-	  if (type && TYPE_CODE (type) == TYPE_CODE_FUNC)
+	  if (type && type->code () == TYPE_CODE_FUNC)
 	    {
 	      for (; tem <= nargs && tem <= TYPE_NFIELDS (type); tem++)
 		{
@@ -1313,7 +1313,7 @@ evaluate_subexp_standard (struct type *expect_type,
       {
 	(*pos) += 3;
 	symbol *var = exp->elts[pc + 2].symbol;
-	if (TYPE_CODE (SYMBOL_TYPE (var)) == TYPE_CODE_ERROR)
+	if (SYMBOL_TYPE (var)->code () == TYPE_CODE_ERROR)
 	  error_unknown_type (var->print_name ());
 	if (noside != EVAL_SKIP)
 	    return evaluate_var_value (noside, exp->elts[pc + 1].block, var);
@@ -1335,7 +1335,7 @@ evaluate_subexp_standard (struct type *expect_type,
 					      msymbol);
 
 	type = value_type (val);
-	if (TYPE_CODE (type) == TYPE_CODE_ERROR
+	if (type->code () == TYPE_CODE_ERROR
 	    && (noside != EVAL_AVOID_SIDE_EFFECTS || pc != 0))
 	  error_unknown_type (msymbol->print_name ());
 	return val;
@@ -1449,7 +1449,7 @@ evaluate_subexp_standard (struct type *expect_type,
       type = expect_type ? check_typedef (expect_type) : NULL_TYPE;
 
       if (expect_type != NULL_TYPE && noside != EVAL_SKIP
-	  && TYPE_CODE (type) == TYPE_CODE_STRUCT)
+	  && type->code () == TYPE_CODE_STRUCT)
 	{
 	  struct value *rec = allocate_value (expect_type);
 
@@ -1458,7 +1458,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
 
       if (expect_type != NULL_TYPE && noside != EVAL_SKIP
-	  && TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	  && type->code () == TYPE_CODE_ARRAY)
 	{
 	  struct type *range_type = TYPE_INDEX_TYPE (type);
 	  struct type *element_type = TYPE_TARGET_TYPE (type);
@@ -1506,7 +1506,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
 
       if (expect_type != NULL_TYPE && noside != EVAL_SKIP
-	  && TYPE_CODE (type) == TYPE_CODE_SET)
+	  && type->code () == TYPE_CODE_SET)
 	{
 	  struct value *set = allocate_value (expect_type);
 	  gdb_byte *valaddr = value_contents_raw (set);
@@ -1515,8 +1515,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	  LONGEST low_bound, high_bound;
 
 	  /* Get targettype of elementtype.  */
-	  while (TYPE_CODE (check_type) == TYPE_CODE_RANGE
-		 || TYPE_CODE (check_type) == TYPE_CODE_TYPEDEF)
+	  while (check_type->code () == TYPE_CODE_RANGE
+		 || check_type->code () == TYPE_CODE_TYPEDEF)
 	    check_type = TYPE_TARGET_TYPE (check_type);
 
 	  if (get_discrete_bounds (element_type, &low_bound, &high_bound) < 0)
@@ -1535,17 +1535,17 @@ evaluate_subexp_standard (struct type *expect_type,
 	      /* Check types of elements to avoid mixture of elements from
 	         different types. Also check if type of element is "compatible"
 	         with element type of powerset.  */
-	      if (TYPE_CODE (range_low_type) == TYPE_CODE_RANGE)
+	      if (range_low_type->code () == TYPE_CODE_RANGE)
 		range_low_type = TYPE_TARGET_TYPE (range_low_type);
-	      if (TYPE_CODE (range_high_type) == TYPE_CODE_RANGE)
+	      if (range_high_type->code () == TYPE_CODE_RANGE)
 		range_high_type = TYPE_TARGET_TYPE (range_high_type);
-	      if ((TYPE_CODE (range_low_type) != TYPE_CODE (range_high_type))
-		  || (TYPE_CODE (range_low_type) == TYPE_CODE_ENUM
+	      if ((range_low_type->code () != range_high_type->code ())
+		  || (range_low_type->code () == TYPE_CODE_ENUM
 		      && (range_low_type != range_high_type)))
 		/* different element modes.  */
 		error (_("POWERSET tuple elements of different mode"));
-	      if ((TYPE_CODE (check_type) != TYPE_CODE (range_low_type))
-		  || (TYPE_CODE (check_type) == TYPE_CODE_ENUM
+	      if ((check_type->code () != range_low_type->code ())
+		  || (check_type->code () == TYPE_CODE_ENUM
 		      && range_low_type != check_type))
 		error (_("incompatible POWERSET tuple elements"));
 	      if (range_low > range_high)
@@ -1799,9 +1799,9 @@ evaluate_subexp_standard (struct type *expect_type,
 	    block_for_pc (funaddr);
 
 	    val_type = check_typedef (val_type);
-	  
-	    if ((val_type == NULL) 
-		|| (TYPE_CODE(val_type) == TYPE_CODE_ERROR))
+
+	    if ((val_type == NULL)
+		|| (val_type->code () == TYPE_CODE_ERROR))
 	      {
 		if (expect_type != NULL)
 		  val_type = expect_type;
@@ -1815,7 +1815,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	    struct_return = using_struct_return (exp->gdbarch, NULL,
 						 check_typedef (expect_type));
 	  }
-	
+
 	/* Found a function symbol.  Now we will substitute its
 	   value in place of the message dispatcher (obj_msgSend),
 	   so that we call the method directly instead of thru
@@ -1831,7 +1831,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	
 	if (method)
 	  {
-	    if (TYPE_CODE (value_type (method)) != TYPE_CODE_FUNC)
+	    if (value_type (method)->code () != TYPE_CODE_FUNC)
 	      error (_("method address has symbol information "
 		       "with non-function type; skipping"));
 
@@ -1873,13 +1873,13 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	    struct type *callee_type = value_type (called_method);
 
-	    if (callee_type && TYPE_CODE (callee_type) == TYPE_CODE_PTR)
+	    if (callee_type && callee_type->code () == TYPE_CODE_PTR)
 	      callee_type = TYPE_TARGET_TYPE (callee_type);
 	    callee_type = TYPE_TARGET_TYPE (callee_type);
 
 	    if (callee_type)
 	    {
-	      if ((TYPE_CODE (callee_type) == TYPE_CODE_ERROR) && expect_type)
+	      if ((callee_type->code () == TYPE_CODE_ERROR) && expect_type)
 		return allocate_value (expect_type);
 	      else
 		return allocate_value (callee_type);
@@ -1933,7 +1933,7 @@ evaluate_subexp_standard (struct type *expect_type,
       /* First determine the type code we are dealing with.  */
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       type = check_typedef (value_type (arg1));
-      code = TYPE_CODE (type);
+      code = type->code ();
 
       if (code == TYPE_CODE_PTR)
 	{
@@ -1943,13 +1943,13 @@ evaluate_subexp_standard (struct type *expect_type,
 	     to the target value the original one points to.  */ 
 	  struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
 
-	  if (TYPE_CODE (target_type) == TYPE_CODE_ARRAY
-	      || TYPE_CODE (target_type) == TYPE_CODE_STRING
-	      || TYPE_CODE (target_type) == TYPE_CODE_FUNC)
+	  if (target_type->code () == TYPE_CODE_ARRAY
+	      || target_type->code () == TYPE_CODE_STRING
+	      || target_type->code () == TYPE_CODE_FUNC)
 	    {
 	      arg1 = value_ind (arg1);
 	      type = check_typedef (value_type (arg1));
-	      code = TYPE_CODE (type);
+	      code = type->code ();
 	    }
 	} 
 
@@ -2082,7 +2082,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	get_user_print_options (&opts);
         if (opts.objectprint && TYPE_TARGET_TYPE (arg_type)
-            && (TYPE_CODE (TYPE_TARGET_TYPE (arg_type)) == TYPE_CODE_STRUCT))
+            && (TYPE_TARGET_TYPE (arg_type)->code () == TYPE_CODE_STRUCT))
           {
             real_type = value_rtti_indirect_type (arg1, &full, &top,
 						  &using_enc);
@@ -2110,7 +2110,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	return eval_skip_value (exp);
 
       type = check_typedef (value_type (arg2));
-      switch (TYPE_CODE (type))
+      switch (type->code ())
 	{
 	case TYPE_CODE_METHODPTR:
 	  if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -2118,7 +2118,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	  else
 	    {
 	      arg2 = cplus_method_ptr_to_value (&arg1, arg2);
-	      gdb_assert (TYPE_CODE (value_type (arg2)) == TYPE_CODE_PTR);
+	      gdb_assert (value_type (arg2)->code () == TYPE_CODE_PTR);
 	      return value_ind (arg2);
 	    }
 
@@ -2324,8 +2324,8 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	  arg1 = coerce_ref (arg1);
 	  type = check_typedef (value_type (arg1));
-	  if (TYPE_CODE (type) != TYPE_CODE_ARRAY
-	      && TYPE_CODE (type) != TYPE_CODE_PTR)
+	  if (type->code () != TYPE_CODE_ARRAY
+	      && type->code () != TYPE_CODE_PTR)
 	    {
 	      if (TYPE_NAME (type))
 		error (_("cannot subscript something of type `%s'"),
@@ -2383,7 +2383,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      arg1 = coerce_ref (arg1);
 	      type = check_typedef (value_type (arg1));
 
-	      switch (TYPE_CODE (type))
+	      switch (type->code ())
 		{
 		case TYPE_CODE_PTR:
 		case TYPE_CODE_ARRAY:
@@ -2607,8 +2607,8 @@ evaluate_subexp_standard (struct type *expect_type,
       if (noside == EVAL_SKIP)
 	return eval_skip_value (exp);
       type = check_typedef (value_type (arg2));
-      if (TYPE_CODE (type) != TYPE_CODE_INT
-          && TYPE_CODE (type) != TYPE_CODE_ENUM)
+      if (type->code () != TYPE_CODE_INT
+          && type->code () != TYPE_CODE_ENUM)
 	error (_("Non-integral right operand for \"@\" operator."));
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
@@ -2673,12 +2673,12 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
 
     case UNOP_IND:
-      if (expect_type && TYPE_CODE (expect_type) == TYPE_CODE_PTR)
+      if (expect_type && expect_type->code () == TYPE_CODE_PTR)
 	expect_type = TYPE_TARGET_TYPE (check_typedef (expect_type));
       arg1 = evaluate_subexp (expect_type, exp, pos, noside);
       type = check_typedef (value_type (arg1));
-      if (TYPE_CODE (type) == TYPE_CODE_METHODPTR
-	  || TYPE_CODE (type) == TYPE_CODE_MEMBERPTR)
+      if (type->code () == TYPE_CODE_METHODPTR
+	  || type->code () == TYPE_CODE_MEMBERPTR)
 	error (_("Attempt to dereference pointer "
 		 "to member without an object"));
       if (noside == EVAL_SKIP)
@@ -2688,14 +2688,14 @@ evaluate_subexp_standard (struct type *expect_type,
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	{
 	  type = check_typedef (value_type (arg1));
-	  if (TYPE_CODE (type) == TYPE_CODE_PTR
+	  if (type->code () == TYPE_CODE_PTR
 	      || TYPE_IS_REFERENCE (type)
 	  /* In C you can dereference an array to get the 1st elt.  */
-	      || TYPE_CODE (type) == TYPE_CODE_ARRAY
+	      || type->code () == TYPE_CODE_ARRAY
 	    )
 	    return value_zero (TYPE_TARGET_TYPE (type),
 			       lval_memory);
-	  else if (TYPE_CODE (type) == TYPE_CODE_INT)
+	  else if (type->code () == TYPE_CODE_INT)
 	    /* GDB allows dereferencing an int.  */
 	    return value_zero (builtin_type (exp->gdbarch)->builtin_int,
 			       lval_memory);
@@ -2707,7 +2707,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	 This returns an int, which seems like the most C-like thing to
 	 do.  "long long" variables are rare enough that
 	 BUILTIN_TYPE_LONGEST would seem to be a mistake.  */
-      if (TYPE_CODE (type) == TYPE_CODE_INT)
+      if (type->code () == TYPE_CODE_INT)
 	return value_at_lazy (builtin_type (exp->gdbarch)->builtin_int,
 			      (CORE_ADDR) value_as_address (arg1));
       return value_ind (arg1);
@@ -3140,7 +3140,7 @@ evaluate_subexp_with_coercion (struct expression *exp,
     case OP_VAR_VALUE:
       var = exp->elts[pc + 2].symbol;
       type = check_typedef (SYMBOL_TYPE (var));
-      if (TYPE_CODE (type) == TYPE_CODE_ARRAY
+      if (type->code () == TYPE_CODE_ARRAY
 	  && !TYPE_VECTOR (type)
 	  && CAST_IS_CONVERSION (exp->language_defn))
 	{
@@ -3186,9 +3186,9 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
       (*pos)++;
       val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
       type = check_typedef (value_type (val));
-      if (TYPE_CODE (type) != TYPE_CODE_PTR
+      if (type->code () != TYPE_CODE_PTR
 	  && !TYPE_IS_REFERENCE (type)
-	  && TYPE_CODE (type) != TYPE_CODE_ARRAY)
+	  && type->code () != TYPE_CODE_ARRAY)
 	error (_("Attempt to take contents of a non-pointer value."));
       type = TYPE_TARGET_TYPE (type);
       if (is_dynamic_type (type))
@@ -3212,7 +3212,7 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 	{
 	  val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_NORMAL);
 	  type = value_type (val);
-	  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
+	  if (type->code () == TYPE_CODE_ARRAY
               && is_dynamic_type (TYPE_INDEX_TYPE (type))
               && TYPE_HIGH_BOUND_UNDEFINED (TYPE_INDEX_TYPE (type)))
 	    return allocate_optimized_out_value (size_type);
@@ -3231,7 +3231,7 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 					       msymbol);
 
 	type = value_type (mval);
-	if (TYPE_CODE (type) == TYPE_CODE_ERROR)
+	if (type->code () == TYPE_CODE_ERROR)
 	  error_unknown_type (msymbol->print_name ());
 
 	return value_from_longest (size_type, TYPE_LENGTH (type));
@@ -3249,10 +3249,10 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 
 	  val = evaluate_subexp (NULL_TYPE, exp, &npc, EVAL_AVOID_SIDE_EFFECTS);
 	  type = check_typedef (value_type (val));
-	  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	  if (type->code () == TYPE_CODE_ARRAY)
 	    {
 	      type = check_typedef (TYPE_TARGET_TYPE (type));
-	      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	      if (type->code () == TYPE_CODE_ARRAY)
 		{
 		  type = TYPE_INDEX_TYPE (type);
 		  /* Only re-evaluate the right hand side if the resulting type
@@ -3364,14 +3364,14 @@ calc_f77_array_dims (struct type *array_type)
   int ndimen = 1;
   struct type *tmp_type;
 
-  if ((TYPE_CODE (array_type) != TYPE_CODE_ARRAY))
+  if ((array_type->code () != TYPE_CODE_ARRAY))
     error (_("Can't get dimensions for a non-array type"));
 
   tmp_type = array_type;
 
   while ((tmp_type = TYPE_TARGET_TYPE (tmp_type)))
     {
-      if (TYPE_CODE (tmp_type) == TYPE_CODE_ARRAY)
+      if (tmp_type->code () == TYPE_CODE_ARRAY)
 	++ndimen;
     }
   return ndimen;

@@ -157,7 +157,7 @@ typy_get_code (PyObject *self, void *closure)
 {
   struct type *type = ((type_object *) self)->type;
 
-  return PyInt_FromLong (TYPE_CODE (type));
+  return PyInt_FromLong (type->code ());
 }
 
 /* Helper function for typy_fields which converts a single field to a
@@ -181,7 +181,7 @@ convert_field (struct type *type, int field)
     {
       const char *attrstring;
 
-      if (TYPE_CODE (type) == TYPE_CODE_ENUM)
+      if (type->code () == TYPE_CODE_ENUM)
 	{
 	  arg.reset (gdb_py_long_from_longest (TYPE_FIELD_ENUMVAL (type,
 								   field)));
@@ -227,7 +227,7 @@ convert_field (struct type *type, int field)
   if (PyObject_SetAttrString (result.get (), "artificial", arg.get ()) < 0)
     return NULL;
 
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     arg = gdbpy_ref<>::new_reference (field < TYPE_N_BASECLASSES (type)
 				      ? Py_True : Py_False);
   else
@@ -356,7 +356,7 @@ typy_fields (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
 
-  if (TYPE_CODE (type) != TYPE_CODE_ARRAY)
+  if (type->code () != TYPE_CODE_ARRAY)
     return typy_fields_items (self, iter_values);
 
   /* Array type.  Handle this as a special case because the common
@@ -405,9 +405,9 @@ typy_get_tag (PyObject *self, void *closure)
   struct type *type = ((type_object *) self)->type;
   const char *tagname = nullptr;
 
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (type) == TYPE_CODE_UNION
-      || TYPE_CODE (type) == TYPE_CODE_ENUM)
+  if (type->code () == TYPE_CODE_STRUCT
+      || type->code () == TYPE_CODE_UNION
+      || type->code () == TYPE_CODE_ENUM)
     tagname = TYPE_NAME (type);
 
   if (tagname == nullptr)
@@ -463,17 +463,17 @@ typy_get_composite (struct type *type)
 	  GDB_PY_HANDLE_EXCEPTION (except);
 	}
 
-      if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
+      if (type->code () != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
 	break;
       type = TYPE_TARGET_TYPE (type);
     }
 
   /* If this is not a struct, union, or enum type, raise TypeError
      exception.  */
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-      && TYPE_CODE (type) != TYPE_CODE_UNION
-      && TYPE_CODE (type) != TYPE_CODE_ENUM
-      && TYPE_CODE (type) != TYPE_CODE_FUNC)
+  if (type->code () != TYPE_CODE_STRUCT
+      && type->code () != TYPE_CODE_UNION
+      && type->code () != TYPE_CODE_ENUM
+      && type->code () != TYPE_CODE_FUNC)
     {
       PyErr_SetString (PyExc_TypeError,
 		       "Type is not a structure, union, enum, or function type.");
@@ -579,16 +579,16 @@ typy_range (PyObject *self, PyObject *args)
   /* Initialize these to appease GCC warnings.  */
   LONGEST low = 0, high = 0;
 
-  if (TYPE_CODE (type) != TYPE_CODE_ARRAY
-      && TYPE_CODE (type) != TYPE_CODE_STRING
-      && TYPE_CODE (type) != TYPE_CODE_RANGE)
+  if (type->code () != TYPE_CODE_ARRAY
+      && type->code () != TYPE_CODE_STRING
+      && type->code () != TYPE_CODE_RANGE)
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("This type does not have a range."));
       return NULL;
     }
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_STRING:

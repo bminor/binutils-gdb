@@ -605,8 +605,8 @@ sect_variable_value (struct dwarf_expr_context *ctx, sect_offset sect_off,
 
   /* Note: Things still work when the following test is removed.  This
      test and error is here to conform to the proposed specification.  */
-  if (TYPE_CODE (die_type) != TYPE_CODE_INT
-      && TYPE_CODE (die_type) != TYPE_CODE_PTR)
+  if (die_type->code () != TYPE_CODE_INT
+      && die_type->code () != TYPE_CODE_PTR)
     error (_("Type of DW_OP_GNU_variable_value DIE must be an integer or pointer."));
 
   struct type *type = lookup_pointer_type (die_type);
@@ -915,7 +915,7 @@ func_addr_to_tail_call_list (struct gdbarch *gdbarch, CORE_ADDR addr)
 		 paddress (gdbarch, addr));
 
   type = SYMBOL_TYPE (sym);
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FUNC);
+  gdb_assert (type->code () == TYPE_CODE_FUNC);
   gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_FUNC);
 
   return sym;
@@ -2027,7 +2027,7 @@ indirect_pieced_value (struct value *value)
   enum bfd_endian byte_order;
 
   type = check_typedef (value_type (value));
-  if (TYPE_CODE (type) != TYPE_CODE_PTR)
+  if (type->code () != TYPE_CODE_PTR)
     return NULL;
 
   bit_length = 8 * TYPE_LENGTH (type);
@@ -2289,7 +2289,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	       the operation.  Therefore, we do the conversion here
 	       since the type is readily available.  */
 
-	    switch (TYPE_CODE (subobj_type))
+	    switch (subobj_type->code ())
 	      {
 		case TYPE_CODE_FUNC:
 		case TYPE_CODE_METHOD:

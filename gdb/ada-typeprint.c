@@ -101,7 +101,7 @@ type_is_full_subrange_of_target_type (struct type *type)
 {
   struct type *subtype;
 
-  if (TYPE_CODE (type) != TYPE_CODE_RANGE)
+  if (type->code () != TYPE_CODE_RANGE)
     return 0;
 
   subtype = TYPE_TARGET_TYPE (type);
@@ -146,7 +146,7 @@ print_range (struct type *type, struct ui_file *stream,
 	type = TYPE_TARGET_TYPE (type);
     }
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_RANGE:
     case TYPE_CODE_ENUM:
@@ -208,7 +208,7 @@ print_range_bound (struct type *type, const char *bounds, int *n,
          to indicate default output when we detect that the bound is negative,
          and the type is a TYPE_CODE_INT.  The bound is negative when
          'm' is the last character of the number scanned in BOUNDS.  */
-      if (bounds[*n - 1] == 'm' && TYPE_CODE (type) == TYPE_CODE_INT)
+      if (bounds[*n - 1] == 'm' && type->code () == TYPE_CODE_INT)
 	type = NULL;
       ada_print_scalar (type, B, stream);
       if (bounds[*n] == '_')
@@ -270,7 +270,7 @@ print_range_type (struct type *raw_type, struct ui_file *stream,
   name = TYPE_NAME (raw_type);
   gdb_assert (name != NULL);
 
-  if (TYPE_CODE (raw_type) == TYPE_CODE_RANGE)
+  if (raw_type->code () == TYPE_CODE_RANGE)
     base_type = TYPE_TARGET_TYPE (raw_type);
   else
     base_type = raw_type;
@@ -402,7 +402,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
       bitsize = 0;
       if (range_desc_type == NULL)
 	{
-	  for (arr_type = type; TYPE_CODE (arr_type) == TYPE_CODE_ARRAY;
+	  for (arr_type = type; arr_type->code () == TYPE_CODE_ARRAY;
 	       arr_type = TYPE_TARGET_TYPE (arr_type))
 	    {
 	      if (arr_type != type)
@@ -552,10 +552,10 @@ print_variant_clauses (struct type *type, int field_num,
   var_type = TYPE_FIELD_TYPE (type, field_num);
   discr_type = ada_variant_discrim_type (var_type, outer_type);
 
-  if (TYPE_CODE (var_type) == TYPE_CODE_PTR)
+  if (var_type->code () == TYPE_CODE_PTR)
     {
       var_type = TYPE_TARGET_TYPE (var_type);
-      if (var_type == NULL || TYPE_CODE (var_type) != TYPE_CODE_UNION)
+      if (var_type == NULL || var_type->code () != TYPE_CODE_UNION)
 	return;
     }
 
@@ -898,7 +898,7 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
   int i, len = TYPE_NFIELDS (type);
 
   if (TYPE_TARGET_TYPE (type) != NULL
-      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_VOID)
+      && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_VOID)
     fprintf_filtered (stream, "procedure");
   else
     fprintf_filtered (stream, "function");
@@ -928,7 +928,7 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
 
   if (TYPE_TARGET_TYPE (type) == NULL)
     fprintf_filtered (stream, " return <unknown return type>");
-  else if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+  else if (TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
     {
       fprintf_filtered (stream, " return ");
       ada_print_type (TYPE_TARGET_TYPE (type), "", stream, 0, 0, flags);
@@ -970,7 +970,7 @@ ada_print_type (struct type *type0, const char *varstring,
   if (show > 0)
     type = ada_check_typedef (type);
 
-  if (is_var_decl && TYPE_CODE (type) != TYPE_CODE_FUNC)
+  if (is_var_decl && type->code () != TYPE_CODE_FUNC)
     fprintf_filtered (stream, "%.*s: ",
 		      ada_name_prefix_len (varstring), varstring);
 
@@ -984,10 +984,10 @@ ada_print_type (struct type *type0, const char *varstring,
   if (ada_is_aligner_type (type))
     ada_print_type (ada_aligned_type (type), "", stream, show, level, flags);
   else if (ada_is_constrained_packed_array_type (type)
-	   && TYPE_CODE (type) != TYPE_CODE_PTR)
+	   && type->code () != TYPE_CODE_PTR)
     print_array_type (type, stream, show, level, flags);
   else
-    switch (TYPE_CODE (type))
+    switch (type->code ())
       {
       default:
 	fprintf_filtered (stream, "<");

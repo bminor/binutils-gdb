@@ -498,9 +498,9 @@ v850_register_type (struct gdbarch *gdbarch, int regnum)
 static int
 v850_type_is_scalar (struct type *t)
 {
-  return (TYPE_CODE (t) != TYPE_CODE_STRUCT
-	  && TYPE_CODE (t) != TYPE_CODE_UNION
-	  && TYPE_CODE (t) != TYPE_CODE_ARRAY);
+  return (t->code () != TYPE_CODE_STRUCT
+	  && t->code () != TYPE_CODE_UNION
+	  && t->code () != TYPE_CODE_ARRAY);
 }
 
 /* Should call_function allocate stack space for a struct return?  */
@@ -530,15 +530,15 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
   /* The value is a structure or union with a single element and that
      element is either a single basic type or an array of a single basic
      type whose size is greater than or equal to 4 -> returned in register.  */
-  if ((TYPE_CODE (type) == TYPE_CODE_STRUCT
-       || TYPE_CODE (type) == TYPE_CODE_UNION)
+  if ((type->code () == TYPE_CODE_STRUCT
+       || type->code () == TYPE_CODE_UNION)
        && TYPE_NFIELDS (type) == 1)
     {
       fld_type = TYPE_FIELD_TYPE (type, 0);
       if (v850_type_is_scalar (fld_type) && TYPE_LENGTH (fld_type) >= 4)
 	return 0;
 
-      if (TYPE_CODE (fld_type) == TYPE_CODE_ARRAY)
+      if (fld_type->code () == TYPE_CODE_ARRAY)
         {
 	  tgt_type = TYPE_TARGET_TYPE (fld_type);
 	  if (v850_type_is_scalar (tgt_type) && TYPE_LENGTH (tgt_type) >= 4)
@@ -549,14 +549,14 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
   /* The value is a structure whose first element is an integer or a float,
      and which contains no arrays of more than two elements -> returned in
      register.  */
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+  if (type->code () == TYPE_CODE_STRUCT
       && v850_type_is_scalar (TYPE_FIELD_TYPE (type, 0))
       && TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) == 4)
     {
       for (i = 1; i < TYPE_NFIELDS (type); ++i)
         {
 	  fld_type = TYPE_FIELD_TYPE (type, 0);
-	  if (TYPE_CODE (fld_type) == TYPE_CODE_ARRAY)
+	  if (fld_type->code () == TYPE_CODE_ARRAY)
 	    {
 	      tgt_type = TYPE_TARGET_TYPE (fld_type);
 	      if (TYPE_LENGTH (tgt_type) > 0
@@ -570,7 +570,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
   /* The value is a union which contains at least one field which
      would be returned in registers according to these rules ->
      returned in register.  */
-  if (TYPE_CODE (type) == TYPE_CODE_UNION)
+  if (type->code () == TYPE_CODE_UNION)
     {
       for (i = 0; i < TYPE_NFIELDS (type); ++i)
         {

@@ -550,7 +550,7 @@ _initialize_sparc64_adi_tdep ()
 static int
 sparc64_integral_or_pointer_p (const struct type *type)
 {
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_INT:
     case TYPE_CODE_BOOL:
@@ -582,7 +582,7 @@ sparc64_integral_or_pointer_p (const struct type *type)
 static int
 sparc64_floating_p (const struct type *type)
 {
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_FLT:
       {
@@ -602,7 +602,7 @@ sparc64_floating_p (const struct type *type)
 static int
 sparc64_complex_floating_p (const struct type *type)
 {
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_COMPLEX:
       {
@@ -626,7 +626,7 @@ sparc64_complex_floating_p (const struct type *type)
 static int
 sparc64_structure_or_union_p (const struct type *type)
 {
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
@@ -1165,7 +1165,7 @@ static const struct frame_base sparc64_frame_base =
 static int
 sparc64_16_byte_align_p (struct type *type)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+  if (type->code () == TYPE_CODE_ARRAY)
     {
       struct type *t = check_typedef (TYPE_TARGET_TYPE (type));
 
@@ -1206,7 +1206,7 @@ sparc64_store_floating_fields (struct regcache *regcache, struct type *type,
 
   gdb_assert (element < 16);
 
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+  if (type->code () == TYPE_CODE_ARRAY)
     {
       gdb_byte buf[8];
       int regnum = SPARC_F0_REGNUM + element * 2 + bitpos / 32;
@@ -1295,7 +1295,7 @@ sparc64_extract_floating_fields (struct regcache *regcache, struct type *type,
 {
   struct gdbarch *gdbarch = regcache->arch ();
 
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+  if (type->code () == TYPE_CODE_ARRAY)
     {
       int len = TYPE_LENGTH (type);
       int regnum =  SPARC_F0_REGNUM + bitpos / 32;
@@ -1656,7 +1656,7 @@ sparc64_extract_return_value (struct type *type, struct regcache *regcache,
 
       for (i = 0; i < ((len + 7) / 8); i++)
 	regcache->cooked_read (SPARC_O0_REGNUM + i, buf + i * 8);
-      if (TYPE_CODE (type) != TYPE_CODE_UNION)
+      if (type->code () != TYPE_CODE_UNION)
 	sparc64_extract_floating_fields (regcache, type, buf, 0);
       memcpy (valbuf, buf, len);
     }
@@ -1667,7 +1667,7 @@ sparc64_extract_return_value (struct type *type, struct regcache *regcache,
 	regcache->cooked_read (SPARC_F0_REGNUM + i, buf + i * 4);
       memcpy (valbuf, buf, len);
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+  else if (type->code () == TYPE_CODE_ARRAY)
     {
       /* Small arrays are returned the same way as small structures.  */
       gdb_assert (len <= 32);
@@ -1711,7 +1711,7 @@ sparc64_store_return_value (struct type *type, struct regcache *regcache,
       memcpy (buf, valbuf, len);
       for (i = 0; i < ((len + 7) / 8); i++)
 	regcache->cooked_write (SPARC_O0_REGNUM + i, buf + i * 8);
-      if (TYPE_CODE (type) != TYPE_CODE_UNION)
+      if (type->code () != TYPE_CODE_UNION)
 	sparc64_store_floating_fields (regcache, type, buf, 0, 0);
     }
   else if (sparc64_floating_p (type) || sparc64_complex_floating_p (type))
@@ -1721,7 +1721,7 @@ sparc64_store_return_value (struct type *type, struct regcache *regcache,
       for (i = 0; i < len / 4; i++)
 	regcache->cooked_write (SPARC_F0_REGNUM + i, buf + i * 4);
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+  else if (type->code () == TYPE_CODE_ARRAY)
     {
       /* Small arrays are returned the same way as small structures.  */
       gdb_assert (len <= 32);

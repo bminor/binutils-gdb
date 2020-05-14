@@ -95,7 +95,7 @@ lookup_struct_typedef (const char *name, const struct block *block, int noerr)
       else 
 	error (_("No struct type named %s."), name);
     }
-  if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_STRUCT)
+  if (SYMBOL_TYPE (sym)->code () != TYPE_CODE_STRUCT)
     {
       if (noerr)
 	return 0;

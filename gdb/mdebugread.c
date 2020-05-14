@@ -747,7 +747,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	{
 	  t = parse_type (cur_fd, ax, sh->index + 1, 0, bigend, name);
 	  if (strcmp (name, "malloc") == 0
-	      && TYPE_CODE (t) == TYPE_CODE_VOID)
+	      && t->code () == TYPE_CODE_VOID)
 	    {
 	      /* I don't know why, but, at least under Alpha GNU/Linux,
 	         when linking against a malloc without debugging
@@ -1298,11 +1298,11 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       /* Incomplete definitions of structs should not get a name.  */
       if (TYPE_NAME (SYMBOL_TYPE (s)) == NULL
 	  && (TYPE_NFIELDS (SYMBOL_TYPE (s)) != 0
-	      || (TYPE_CODE (SYMBOL_TYPE (s)) != TYPE_CODE_STRUCT
-		  && TYPE_CODE (SYMBOL_TYPE (s)) != TYPE_CODE_UNION)))
+	      || (SYMBOL_TYPE (s)->code () != TYPE_CODE_STRUCT
+		  && SYMBOL_TYPE (s)->code () != TYPE_CODE_UNION)))
 	{
-	  if (TYPE_CODE (SYMBOL_TYPE (s)) == TYPE_CODE_PTR
-	      || TYPE_CODE (SYMBOL_TYPE (s)) == TYPE_CODE_FUNC)
+	  if (SYMBOL_TYPE (s)->code () == TYPE_CODE_PTR
+	      || SYMBOL_TYPE (s)->code () == TYPE_CODE_FUNC)
 	    {
 	      /* If we are giving a name to a type such as "pointer to
 	         foo" or "function returning foo", we better not set
@@ -1639,16 +1639,16 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 
       /* DEC c89 produces cross references to qualified aggregate types,
          dereference them.  */
-      while (TYPE_CODE (tp) == TYPE_CODE_PTR
-	     || TYPE_CODE (tp) == TYPE_CODE_ARRAY)
+      while (tp->code () == TYPE_CODE_PTR
+	     || tp->code () == TYPE_CODE_ARRAY)
 	tp = TYPE_TARGET_TYPE (tp);
 
       /* Make sure that TYPE_CODE(tp) has an expected type code.
          Any type may be returned from cross_ref if file indirect entries
          are corrupted.  */
-      if (TYPE_CODE (tp) != TYPE_CODE_STRUCT
-	  && TYPE_CODE (tp) != TYPE_CODE_UNION
-	  && TYPE_CODE (tp) != TYPE_CODE_ENUM)
+      if (tp->code () != TYPE_CODE_STRUCT
+	  && tp->code () != TYPE_CODE_UNION
+	  && tp->code () != TYPE_CODE_ENUM)
 	{
 	  unexpected_type_code_complaint (sym_name);
 	}
@@ -1658,15 +1658,15 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	     exception is if we guessed wrong re struct/union/enum.
 	     But for struct vs. union a wrong guess is harmless, so
 	     don't complain().  */
-	  if ((TYPE_CODE (tp) == TYPE_CODE_ENUM
+	  if ((tp->code () == TYPE_CODE_ENUM
 	       && type_code != TYPE_CODE_ENUM)
-	      || (TYPE_CODE (tp) != TYPE_CODE_ENUM
+	      || (tp->code () != TYPE_CODE_ENUM
 		  && type_code == TYPE_CODE_ENUM))
 	    {
 	      bad_tag_guess_complaint (sym_name);
 	    }
 
-	  if (TYPE_CODE (tp) != type_code)
+	  if (tp->code () != type_code)
 	    {
 	      tp->set_code (type_code);
 	    }
@@ -1698,7 +1698,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
       /* Make sure that TYPE_CODE(tp) has an expected type code.
          Any type may be returned from cross_ref if file indirect entries
          are corrupted.  */
-      if (TYPE_CODE (tp) != TYPE_CODE_RANGE)
+      if (tp->code () != TYPE_CODE_RANGE)
 	{
 	  unexpected_type_code_complaint (sym_name);
 	}
@@ -1706,7 +1706,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	{
 	  /* Usually, TYPE_CODE(tp) is already type_code.  The main
 	     exception is if we guessed wrong re struct/union/enum.  */
-	  if (TYPE_CODE (tp) != type_code)
+	  if (tp->code () != type_code)
 	    {
 	      bad_tag_guess_complaint (sym_name);
 	      tp->set_code (type_code);
@@ -1831,7 +1831,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
 
       /* The bounds type should be an integer type, but might be anything
          else due to corrupt aux entries.  */
-      if (TYPE_CODE (indx) != TYPE_CODE_INT)
+      if (indx->code () != TYPE_CODE_INT)
 	{
 	  complaint (_("illegal array index type for %s, assuming int"),
 		     sym_name);
@@ -2038,7 +2038,7 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
 
   if (processing_gcc_compilation == 0
       && found_ecoff_debugging_info == 0
-      && TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (s))) == TYPE_CODE_VOID)
+      && TYPE_TARGET_TYPE (SYMBOL_TYPE (s))->code () == TYPE_CODE_VOID)
     SYMBOL_TYPE (s) = objfile_type (mdebugread_objfile)->nodebug_text_symbol;
 }
 

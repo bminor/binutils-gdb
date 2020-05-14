@@ -92,10 +92,10 @@ sh_is_renesas_calling_convention (struct type *func_type)
     {
       func_type = check_typedef (func_type);
 
-      if (TYPE_CODE (func_type) == TYPE_CODE_PTR)
+      if (func_type->code () == TYPE_CODE_PTR)
         func_type = check_typedef (TYPE_TARGET_TYPE (func_type));
 
-      if (TYPE_CODE (func_type) == TYPE_CODE_FUNC
+      if (func_type->code () == TYPE_CODE_FUNC
           && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GNU_renesas_sh)
         val = 1;
     }
@@ -816,8 +816,8 @@ sh_use_struct_convention (int renesas_abi, struct type *type)
   int nelem = TYPE_NFIELDS (type);
 
   /* The Renesas ABI returns aggregate types always on stack.  */
-  if (renesas_abi && (TYPE_CODE (type) == TYPE_CODE_STRUCT
-		      || TYPE_CODE (type) == TYPE_CODE_UNION))
+  if (renesas_abi && (type->code () == TYPE_CODE_STRUCT
+		      || type->code () == TYPE_CODE_UNION))
     return 1;
 
   /* Non-power of 2 length types and types bigger than 8 bytes (which don't
@@ -1040,17 +1040,17 @@ static int
 sh_treat_as_flt_p (struct type *type)
 {
   /* Ordinary float types are obviously treated as float.  */
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (type->code () == TYPE_CODE_FLT)
     return 1;
   /* Otherwise non-struct types are not treated as float.  */
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT)
+  if (type->code () != TYPE_CODE_STRUCT)
     return 0;
   /* Otherwise structs with more than one member are not treated as float.  */
   if (TYPE_NFIELDS (type) != 1)
     return 0;
   /* Otherwise if the type of that member is float, the whole type is
      treated as float.  */
-  if (TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) == TYPE_CODE_FLT)
+  if (TYPE_FIELD_TYPE (type, 0)->code () == TYPE_CODE_FLT)
     return 1;
   /* Otherwise it's not treated as float.  */
   return 0;
@@ -1115,9 +1115,9 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
       /* In Renesas ABI, long longs and aggregate types are always passed
 	 on stack.  */
       else if (sh_is_renesas_calling_convention (func_type)
-	       && ((TYPE_CODE (type) == TYPE_CODE_INT && len == 8)
-		   || TYPE_CODE (type) == TYPE_CODE_STRUCT
-		   || TYPE_CODE (type) == TYPE_CODE_UNION))
+	       && ((type->code () == TYPE_CODE_INT && len == 8)
+		   || type->code () == TYPE_CODE_STRUCT
+		   || type->code () == TYPE_CODE_UNION))
 	pass_on_stack = 1;
       /* In contrast to non-FPU CPUs, arguments are never split between
 	 registers and stack.  If an argument doesn't fit in the remaining
@@ -1248,10 +1248,10 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
       /* Renesas ABI pushes doubles and long longs entirely on stack.
 	 Same goes for aggregate types.  */
       if (sh_is_renesas_calling_convention (func_type)
-	  && ((TYPE_CODE (type) == TYPE_CODE_INT && len >= 8)
-	      || (TYPE_CODE (type) == TYPE_CODE_FLT && len >= 8)
-	      || TYPE_CODE (type) == TYPE_CODE_STRUCT
-	      || TYPE_CODE (type) == TYPE_CODE_UNION))
+	  && ((type->code () == TYPE_CODE_INT && len >= 8)
+	      || (type->code () == TYPE_CODE_FLT && len >= 8)
+	      || type->code () == TYPE_CODE_STRUCT
+	      || type->code () == TYPE_CODE_UNION))
 	pass_on_stack = 1;
       while (len > 0)
 	{

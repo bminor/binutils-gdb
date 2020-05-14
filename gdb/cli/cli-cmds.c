@@ -1912,8 +1912,8 @@ setting_cmd (const char *fnname, struct cmd_list_element *showlist,
 
   struct type *type0 = check_typedef (value_type (argv[0]));
 
-  if (TYPE_CODE (type0) != TYPE_CODE_ARRAY
-      && TYPE_CODE (type0) != TYPE_CODE_STRING)
+  if (type0->code () != TYPE_CODE_ARRAY
+      && type0->code () != TYPE_CODE_STRING)
     error (_("First argument of %s must be a string."), fnname);
 
   const char *a0 = (const char *) value_contents (argv[0]);

@@ -181,15 +181,15 @@ static bool
 m2_is_string_type_p (struct type *type)
 {
   type = check_typedef (type);
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
+  if (type->code () == TYPE_CODE_ARRAY
       && TYPE_LENGTH (type) > 0
       && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
     {
       struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
 
       if (TYPE_LENGTH (elttype) == 1
-	  && (TYPE_CODE (elttype) == TYPE_CODE_INT
-	      || TYPE_CODE (elttype) == TYPE_CODE_CHAR))
+	  && (elttype->code () == TYPE_CODE_INT
+	      || elttype->code () == TYPE_CODE_CHAR))
 	return true;
     }
 
@@ -251,7 +251,7 @@ evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
 	{
 	  struct value *temp = arg1;
 	  type = TYPE_FIELD_TYPE (type, 0);
-	  if (type == NULL || (TYPE_CODE (type) != TYPE_CODE_PTR))
+	  if (type == NULL || (type->code () != TYPE_CODE_PTR))
 	    {
 	      warning (_("internal error: unbounded "
 			 "array structure is unknown"));
@@ -269,7 +269,7 @@ evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
 	  return value_ind (value_ptradd (arg1, value_as_long (arg2)));
 	}
       else
-	if (TYPE_CODE (type) != TYPE_CODE_ARRAY)
+	if (type->code () != TYPE_CODE_ARRAY)
 	  {
 	    if (TYPE_NAME (type))
 	      error (_("cannot subscript something of type `%s'"),

@@ -330,7 +330,7 @@ ia64_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   if (group == all_reggroup)
     return 1;
   vector_p = TYPE_VECTOR (register_type (gdbarch, regnum));
-  float_p = TYPE_CODE (register_type (gdbarch, regnum)) == TYPE_CODE_FLT;
+  float_p = register_type (gdbarch, regnum)->code () == TYPE_CODE_FLT;
   raw_p = regnum < NUM_IA64_RAW_REGS;
   if (group == float_reggroup)
     return float_p;
@@ -1212,7 +1212,7 @@ static int
 ia64_convert_register_p (struct gdbarch *gdbarch, int regno, struct type *type)
 {
   return (regno >= IA64_FR0_REGNUM && regno <= IA64_FR127_REGNUM
-	  && TYPE_CODE (type) == TYPE_CODE_FLT
+	  && type->code () == TYPE_CODE_FLT
 	  && type != ia64_ext_type (gdbarch));
 }
 
@@ -3149,9 +3149,9 @@ ia64_use_struct_convention (struct type *type)
 
   /* Don't use the struct convention for anything but structure,
      union, or array types.  */
-  if (!(TYPE_CODE (type) == TYPE_CODE_STRUCT
-	|| TYPE_CODE (type) == TYPE_CODE_UNION
-	|| TYPE_CODE (type) == TYPE_CODE_ARRAY))
+  if (!(type->code () == TYPE_CODE_STRUCT
+	|| type->code () == TYPE_CODE_UNION
+	|| type->code () == TYPE_CODE_ARRAY))
     return 0;
 
   /* HFAs are structures (or arrays) consisting entirely of floating
@@ -3173,8 +3173,8 @@ ia64_use_struct_convention (struct type *type)
 static int
 ia64_struct_type_p (const struct type *type)
 {
-  return (TYPE_CODE (type) == TYPE_CODE_STRUCT
-          || TYPE_CODE (type) == TYPE_CODE_UNION);
+  return (type->code () == TYPE_CODE_STRUCT
+          || type->code () == TYPE_CODE_UNION);
 }
 
 static void
@@ -3320,7 +3320,7 @@ ia64_return_value (struct gdbarch *gdbarch, struct value *function,
 static int
 is_float_or_hfa_type_recurse (struct type *t, struct type **etp)
 {
-  switch (TYPE_CODE (t))
+  switch (t->code ())
     {
     case TYPE_CODE_FLT:
       if (*etp)
@@ -3374,7 +3374,7 @@ is_float_or_hfa_type (struct type *t)
 static int
 slot_alignment_is_next_even (struct type *t)
 {
-  switch (TYPE_CODE (t))
+  switch (t->code ())
     {
     case TYPE_CODE_INT:
     case TYPE_CODE_FLT:
@@ -3699,7 +3699,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if ((nslots & 1) && slot_alignment_is_next_even (type))
 	nslots++;
 
-      if (TYPE_CODE (type) == TYPE_CODE_FUNC)
+      if (type->code () == TYPE_CODE_FUNC)
 	nfuncargs++;
 
       nslots += (len + 7) / 8;
@@ -3740,9 +3740,9 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       len = TYPE_LENGTH (type);
 
       /* Special handling for function parameters.  */
-      if (len == 8 
-          && TYPE_CODE (type) == TYPE_CODE_PTR 
-	  && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC)
+      if (len == 8
+          && type->code () == TYPE_CODE_PTR
+          && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_FUNC)
 	{
 	  gdb_byte val_buf[8];
 	  ULONGEST faddr = extract_unsigned_integer (value_contents (arg),

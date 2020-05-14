@@ -564,9 +564,9 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
       else
 	{
 	  fprintf_filtered (outfile, "%s %s = ",
-			 (TYPE_CODE (SYMBOL_TYPE (symbol)) == TYPE_CODE_ENUM
+			 (SYMBOL_TYPE (symbol)->code () == TYPE_CODE_ENUM
 			  ? "enum"
-		     : (TYPE_CODE (SYMBOL_TYPE (symbol)) == TYPE_CODE_STRUCT
+		     : (SYMBOL_TYPE (symbol)->code () == TYPE_CODE_STRUCT
 			? "struct" : "union")),
 			    symbol->linkage_name ());
 	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), "", outfile, 1, depth,
@@ -583,7 +583,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	  /* Print details of types, except for enums where it's clutter.  */
 	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), symbol->print_name (),
 			 outfile,
-			 TYPE_CODE (SYMBOL_TYPE (symbol)) != TYPE_CODE_ENUM,
+			 SYMBOL_TYPE (symbol)->code () != TYPE_CODE_ENUM,
 			 depth,
 			 &type_print_raw_options);
 	  fprintf_filtered (outfile, "; ");

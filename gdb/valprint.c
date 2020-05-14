@@ -276,7 +276,7 @@ val_print_scalar_type_p (struct type *type)
       type = TYPE_TARGET_TYPE (type);
       type = check_typedef (type);
     }
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_STRUCT:
@@ -323,9 +323,9 @@ valprint_check_validity (struct ui_file *stream,
       return 0;
     }
 
-  if (TYPE_CODE (type) != TYPE_CODE_UNION
-      && TYPE_CODE (type) != TYPE_CODE_STRUCT
-      && TYPE_CODE (type) != TYPE_CODE_ARRAY)
+  if (type->code () != TYPE_CODE_UNION
+      && type->code () != TYPE_CODE_STRUCT
+      && type->code () != TYPE_CODE_ARRAY)
     {
       if (value_bits_any_optimized_out (val,
 					TARGET_CHAR_BIT * embedded_offset,
@@ -338,7 +338,7 @@ valprint_check_validity (struct ui_file *stream,
       if (value_bits_synthetic_pointer (val, TARGET_CHAR_BIT * embedded_offset,
 					TARGET_CHAR_BIT * TYPE_LENGTH (type)))
 	{
-	  const int is_ref = TYPE_CODE (type) == TYPE_CODE_REF;
+	  const int is_ref = type->code () == TYPE_CODE_REF;
 	  int ref_is_addressable = 0;
 
 	  if (is_ref)
@@ -408,7 +408,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 {
   struct gdbarch *gdbarch = get_type_arch (type);
 
-  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
+  if (elttype->code () == TYPE_CODE_FUNC)
     {
       /* Try to print what function it points to.  */
       print_function_pointer_address (options, gdbarch, address, stream);
@@ -527,7 +527,7 @@ generic_val_print_ref (struct type *type,
 				    TARGET_CHAR_BIT * TYPE_LENGTH (type));
   const int must_coerce_ref = ((options->addressprint && value_is_synthetic)
 			       || options->deref_ref);
-  const int type_is_defined = TYPE_CODE (elttype) != TYPE_CODE_UNDEF;
+  const int type_is_defined = elttype->code () != TYPE_CODE_UNDEF;
   const gdb_byte *valaddr = value_contents_for_printing (original_value);
 
   if (must_coerce_ref && type_is_defined)
@@ -825,7 +825,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
   struct type *type = value_type (val);
 
   type = check_typedef (type);
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
       generic_val_print_array (val, stream, recurse, options, decorations);
@@ -924,7 +924,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
     case TYPE_CODE_METHODPTR:
     default:
       error (_("Unhandled type code %d in symbol table."),
-	     TYPE_CODE (type));
+	     type->code ());
     }
 }
 
@@ -1043,7 +1043,7 @@ value_check_printable (struct value *val, struct ui_file *stream,
       return 0;
     }
 
-  if (TYPE_CODE (value_type (val)) == TYPE_CODE_INTERNAL_FUNCTION)
+  if (value_type (val)->code () == TYPE_CODE_INTERNAL_FUNCTION)
     {
       fprintf_styled (stream, metadata_style.style (),
 		      _("<internal function %s>"),
@@ -1170,7 +1170,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
 	      fprintf_filtered (stream, " %ps=",
 				styled_string (variable_name_style.style (),
 					       TYPE_FIELD_NAME (type, field)));
-	      if (TYPE_CODE (field_type) == TYPE_CODE_ENUM)
+	      if (field_type->code () == TYPE_CODE_ENUM)
 		generic_val_print_enum_1 (field_type, field_val, stream);
 	      else
 		print_longest (stream, 'd', 0, field_val);
@@ -1889,7 +1889,7 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 
   if (get_array_bounds (type, &low_bound, &high_bound))
     {
-      if (TYPE_CODE (index_type) == TYPE_CODE_RANGE)
+      if (index_type->code () == TYPE_CODE_RANGE)
 	base_index_type = TYPE_TARGET_TYPE (index_type);
       else
 	base_index_type = index_type;

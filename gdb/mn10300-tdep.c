@@ -88,7 +88,7 @@ mn10300_type_align (struct type *type)
 {
   int i, align = 1;
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_INT:
     case TYPE_CODE_ENUM:
@@ -137,7 +137,7 @@ mn10300_use_struct_convention (struct type *type)
   if (TYPE_LENGTH (type) > 8)
     return 1;
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
@@ -174,7 +174,7 @@ mn10300_store_return_value (struct gdbarch *gdbarch, struct type *type,
   int len = TYPE_LENGTH (type);
   int reg, regsz;
   
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+  if (type->code () == TYPE_CODE_PTR)
     reg = 4;
   else
     reg = 0;
@@ -202,7 +202,7 @@ mn10300_extract_return_value (struct gdbarch *gdbarch, struct type *type,
   int len = TYPE_LENGTH (type);
   int reg, regsz;
 
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+  if (type->code () == TYPE_CODE_PTR)
     reg = 4;
   else
     reg = 0;
@@ -1208,7 +1208,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       /* FIXME what about structs?  Unions?  */
-      if (TYPE_CODE (value_type (*args)) == TYPE_CODE_STRUCT
+      if (value_type (*args)->code () == TYPE_CODE_STRUCT
 	  && TYPE_LENGTH (value_type (*args)) > 8)
 	{
 	  /* Change to pointer-to-type.  */

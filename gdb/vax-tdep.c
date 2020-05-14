@@ -206,9 +206,9 @@ vax_return_value (struct gdbarch *gdbarch, struct value *function,
   int len = TYPE_LENGTH (type);
   gdb_byte buf[8];
 
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (type) == TYPE_CODE_UNION
-      || TYPE_CODE (type) == TYPE_CODE_ARRAY)
+  if (type->code () == TYPE_CODE_STRUCT
+      || type->code () == TYPE_CODE_UNION
+      || type->code () == TYPE_CODE_ARRAY)
     {
       /* The default on VAX is to return structures in static memory.
          Consequently a function must return the address where we can

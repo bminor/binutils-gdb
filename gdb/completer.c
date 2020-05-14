@@ -1103,7 +1103,7 @@ add_struct_fields (struct type *type, completion_list &output,
 			     fieldname, namelen))
 		output.emplace_back (xstrdup (TYPE_FIELD_NAME (type, i)));
 	    }
-	  else if (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_UNION)
+	  else if (TYPE_FIELD_TYPE (type, i)->code () == TYPE_CODE_UNION)
 	    {
 	      /* Recurse into anonymous unions.  */
 	      add_struct_fields (TYPE_FIELD_TYPE (type, i),
@@ -1156,13 +1156,13 @@ complete_expression (completion_tracker &tracker,
       for (;;)
 	{
 	  type = check_typedef (type);
-	  if (TYPE_CODE (type) != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
+	  if (type->code () != TYPE_CODE_PTR && !TYPE_IS_REFERENCE (type))
 	    break;
 	  type = TYPE_TARGET_TYPE (type);
 	}
 
-      if (TYPE_CODE (type) == TYPE_CODE_UNION
-	  || TYPE_CODE (type) == TYPE_CODE_STRUCT)
+      if (type->code () == TYPE_CODE_UNION
+	  || type->code () == TYPE_CODE_STRUCT)
 	{
 	  completion_list result;
 

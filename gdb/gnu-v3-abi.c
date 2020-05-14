@@ -208,10 +208,10 @@ gnuv3_dynamic_class (struct type *type)
   int fieldnum, fieldelem;
 
   type = check_typedef (type);
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	      || TYPE_CODE (type) == TYPE_CODE_UNION);
+  gdb_assert (type->code () == TYPE_CODE_STRUCT
+	      || type->code () == TYPE_CODE_UNION);
 
-  if (TYPE_CODE (type) == TYPE_CODE_UNION)
+  if (type->code () == TYPE_CODE_UNION)
     return 0;
 
   if (TYPE_CPLUS_DYNAMIC (type))
@@ -259,7 +259,7 @@ gnuv3_get_vtable (struct gdbarch *gdbarch,
   CORE_ADDR vtable_address;
 
   container_type = check_typedef (container_type);
-  gdb_assert (TYPE_CODE (container_type) == TYPE_CODE_STRUCT);
+  gdb_assert (container_type->code () == TYPE_CODE_STRUCT);
 
   /* If this type does not have a virtual table, don't read the first
      field.  */
@@ -303,7 +303,7 @@ gnuv3_rtti_type (struct value *value,
   const char *atsign;
 
   /* We only have RTTI for dynamic class objects.  */
-  if (TYPE_CODE (values_type) != TYPE_CODE_STRUCT
+  if (values_type->code () != TYPE_CODE_STRUCT
       || !gnuv3_dynamic_class (values_type))
     return NULL;
 
@@ -418,7 +418,7 @@ gnuv3_virtual_fn_field (struct value **value_p,
   struct gdbarch *gdbarch;
 
   /* Some simple sanity checks.  */
-  if (TYPE_CODE (values_type) != TYPE_CODE_STRUCT)
+  if (values_type->code () != TYPE_CODE_STRUCT)
     error (_("Only classes can have virtual functions."));
 
   /* Determine architecture.  */
@@ -849,7 +849,7 @@ compute_vtable_size (htab_t offset_hash,
   void **slot;
   struct value_and_voffset search_vo, *current_vo;
 
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT);
+  gdb_assert (type->code () == TYPE_CODE_STRUCT);
 
   /* If the object is not dynamic, then we are done; as it cannot have
      dynamic base types either.  */
@@ -964,7 +964,7 @@ gnuv3_print_vtable (struct value *value)
 
   value = coerce_ref (value);
   type = check_typedef (value_type (value));
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+  if (type->code () == TYPE_CODE_PTR)
     {
       value = value_ind (value);
       type = check_typedef (value_type (value));
@@ -982,7 +982,7 @@ gnuv3_print_vtable (struct value *value)
   gdbarch = get_type_arch (type);
 
   vtable = NULL;
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     vtable = gnuv3_get_vtable (gdbarch, type,
 			       value_as_address (value_addr (value)));
 
@@ -1103,7 +1103,7 @@ gnuv3_get_typeid (struct value *value)
 
   /* In the non_lvalue case, a reference might have slipped through
      here.  */
-  if (TYPE_CODE (type) == TYPE_CODE_REF)
+  if (type->code () == TYPE_CODE_REF)
     type = check_typedef (TYPE_TARGET_TYPE (type));
 
   /* Ignore top-level cv-qualifiers.  */
@@ -1127,7 +1127,7 @@ gnuv3_get_typeid (struct value *value)
 
   /* We check for lval_memory because in the "typeid (type-id)" case,
      the type is passed via a not_lval value object.  */
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+  if (type->code () == TYPE_CODE_STRUCT
       && value_lval_const (value) == lval_memory
       && gnuv3_dynamic_class (type))
     {
@@ -1333,7 +1333,7 @@ is_copy_or_move_constructor_type (struct type *class_type,
      type, with the expected type code...  */
   struct type *arg_type = TYPE_FIELD_TYPE (method_type, 1);
 
-  if (TYPE_CODE (arg_type) != expected)
+  if (arg_type->code () != expected)
     return false;
 
   struct type *target = check_typedef (TYPE_TARGET_TYPE (arg_type));
@@ -1417,8 +1417,8 @@ gnuv3_pass_by_reference (struct type *type)
   definition_style mctor_def = DOES_NOT_EXIST_IN_SOURCE;
 
   /* We're only interested in things that can have methods.  */
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-      && TYPE_CODE (type) != TYPE_CODE_UNION)
+  if (type->code () != TYPE_CODE_STRUCT
+      && type->code () != TYPE_CODE_UNION)
     return info;
 
   /* The compiler may have emitted the calling convention attribute.
@@ -1533,7 +1533,7 @@ gnuv3_pass_by_reference (struct type *type)
 	struct type *field_type = TYPE_FIELD_TYPE (type, fieldnum);
 
 	/* For arrays, make the decision based on the element type.  */
-	if (TYPE_CODE (field_type) == TYPE_CODE_ARRAY)
+	if (field_type->code () == TYPE_CODE_ARRAY)
 	  field_type = check_typedef (TYPE_TARGET_TYPE (field_type));
 
 	struct language_pass_by_ref_info field_info

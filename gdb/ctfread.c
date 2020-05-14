@@ -460,7 +460,7 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
 	    SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
 	    break;
 	  case CTF_K_CONST:
-	    if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_VOID)
+	    if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_VOID)
 	      SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_int;
 	    break;
 	  case CTF_K_TYPEDEF:
@@ -726,7 +726,7 @@ add_array_cv_type (struct ctf_context *ccp,
   base_type = copy_type (base_type);
   inner_array = base_type;
 
-  while (TYPE_CODE (TYPE_TARGET_TYPE (inner_array)) == TYPE_CODE_ARRAY)
+  while (TYPE_TARGET_TYPE (inner_array)->code () == TYPE_CODE_ARRAY)
     {
       TYPE_TARGET_TYPE (inner_array)
 	= copy_type (TYPE_TARGET_TYPE (inner_array));

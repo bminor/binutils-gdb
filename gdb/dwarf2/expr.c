@@ -146,9 +146,9 @@ dwarf_expr_context::fetch (int n)
 static void
 dwarf_require_integral (struct type *type)
 {
-  if (TYPE_CODE (type) != TYPE_CODE_INT
-      && TYPE_CODE (type) != TYPE_CODE_CHAR
-      && TYPE_CODE (type) != TYPE_CODE_BOOL)
+  if (type->code () != TYPE_CODE_INT
+      && type->code () != TYPE_CODE_CHAR
+      && type->code () != TYPE_CODE_BOOL)
     error (_("integral type expected in DWARF expression"));
 }
 
@@ -363,7 +363,7 @@ dwarf_expr_require_composition (const gdb_byte *op_ptr, const gdb_byte *op_end,
 static int
 base_types_equal_p (struct type *t1, struct type *t2)
 {
-  if (TYPE_CODE (t1) != TYPE_CODE (t2))
+  if (t1->code () != t2->code ())
     return 0;
   if (TYPE_UNSIGNED (t1) != TYPE_UNSIGNED (t2))
     return 0;

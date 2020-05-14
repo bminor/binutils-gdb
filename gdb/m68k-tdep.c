@@ -191,7 +191,7 @@ m68k_convert_register_p (struct gdbarch *gdbarch,
     return 0;
   return (regnum >= M68K_FP0_REGNUM && regnum <= M68K_FP0_REGNUM + 7
 	  /* We only support floating-point values.  */
-	  && TYPE_CODE (type) == TYPE_CODE_FLT
+	  && type->code () == TYPE_CODE_FLT
 	  && type != register_type (gdbarch, M68K_FP0_REGNUM));
 }
 
@@ -207,7 +207,7 @@ m68k_register_to_value (struct frame_info *frame, int regnum,
   gdb_byte from[M68K_MAX_REGISTER_SIZE];
   struct type *fpreg_type = register_type (gdbarch, M68K_FP0_REGNUM);
 
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+  gdb_assert (type->code () == TYPE_CODE_FLT);
 
   /* Convert to TYPE.  */
   if (!get_frame_register_bytes (frame, regnum, 0,
@@ -232,7 +232,7 @@ m68k_value_to_register (struct frame_info *frame, int regnum,
 					   M68K_FP0_REGNUM);
 
   /* We only support floating-point values.  */
-  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+  if (type->code () != TYPE_CODE_FLT)
     {
       warning (_("Cannot convert non-floating-point type "
 	       "to floating-point register value."));
@@ -308,13 +308,13 @@ m68k_svr4_extract_return_value (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (tdep->float_return && TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (tdep->float_return && type->code () == TYPE_CODE_FLT)
     {
       struct type *fpreg_type = register_type (gdbarch, M68K_FP0_REGNUM);
       regcache->raw_read (M68K_FP0_REGNUM, buf);
       target_float_convert (buf, fpreg_type, valbuf, type);
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_PTR && TYPE_LENGTH (type) == 4)
+  else if (type->code () == TYPE_CODE_PTR && TYPE_LENGTH (type) == 4)
     regcache->raw_read (M68K_A0_REGNUM, valbuf);
   else
     m68k_extract_return_value (type, regcache, valbuf);
@@ -347,14 +347,14 @@ m68k_svr4_store_return_value (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (tdep->float_return && TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (tdep->float_return && type->code () == TYPE_CODE_FLT)
     {
       struct type *fpreg_type = register_type (gdbarch, M68K_FP0_REGNUM);
       gdb_byte buf[M68K_MAX_REGISTER_SIZE];
       target_float_convert (valbuf, type, buf, fpreg_type);
       regcache->raw_write (M68K_FP0_REGNUM, buf);
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_PTR && TYPE_LENGTH (type) == 4)
+  else if (type->code () == TYPE_CODE_PTR && TYPE_LENGTH (type) == 4)
     {
       regcache->raw_write (M68K_A0_REGNUM, valbuf);
       regcache->raw_write (M68K_D0_REGNUM, valbuf);
@@ -371,7 +371,7 @@ static int
 m68k_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  enum type_code code = TYPE_CODE (type);
+  enum type_code code = type->code ();
   int len = TYPE_LENGTH (type);
 
   gdb_assert (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION
@@ -394,7 +394,7 @@ m68k_return_value (struct gdbarch *gdbarch, struct value *function,
 		   struct type *type, struct regcache *regcache,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  enum type_code code = TYPE_CODE (type);
+  enum type_code code = type->code ();
 
   /* GCC returns a `long double' in memory too.  */
   if (((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION
@@ -430,7 +430,7 @@ m68k_svr4_return_value (struct gdbarch *gdbarch, struct value *function,
 			struct type *type, struct regcache *regcache,
 			gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  enum type_code code = TYPE_CODE (type);
+  enum type_code code = type->code ();
 
   if ((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION
        || code == TYPE_CODE_COMPLEX)
@@ -511,9 +511,9 @@ m68k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       /* Non-scalars bigger than 4 bytes are left aligned, others are
 	 right aligned.  */
-      if ((TYPE_CODE (value_type) == TYPE_CODE_STRUCT
-	   || TYPE_CODE (value_type) == TYPE_CODE_UNION
-	   || TYPE_CODE (value_type) == TYPE_CODE_ARRAY)
+      if ((value_type->code () == TYPE_CODE_STRUCT
+	   || value_type->code () == TYPE_CODE_UNION
+	   || value_type->code () == TYPE_CODE_ARRAY)
 	  && len > 4)
 	offset = 0;
       else

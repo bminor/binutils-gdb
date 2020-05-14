@@ -2769,7 +2769,7 @@ return_command (const char *retval_exp, int from_tty)
 	function = read_var_value (thisfun, NULL, thisframe);
 
       rv_conv = RETURN_VALUE_REGISTER_CONVENTION;
-      if (TYPE_CODE (return_type) == TYPE_CODE_VOID)
+      if (return_type->code () == TYPE_CODE_VOID)
 	/* If the return-type is "void", don't try to find the
            return-value's location.  However, do still evaluate the
            return expression so that, even when the expression result

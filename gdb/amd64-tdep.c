@@ -546,8 +546,8 @@ static void amd64_classify (struct type *type, enum amd64_reg_class theclass[2])
 static bool
 amd64_has_unaligned_fields (struct type *type)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (type) == TYPE_CODE_UNION)
+  if (type->code () == TYPE_CODE_STRUCT
+      || type->code () == TYPE_CODE_UNION)
     {
       for (int i = 0; i < TYPE_NFIELDS (type); i++)
 	{
@@ -603,8 +603,8 @@ amd64_classify_aggregate_field (struct type *type, int i,
   if (field_is_static (&TYPE_FIELD (type, i)) || bitsize == 0)
     return;
 
-  if (TYPE_CODE (subtype) == TYPE_CODE_STRUCT
-      || TYPE_CODE (subtype) == TYPE_CODE_UNION)
+  if (subtype->code () == TYPE_CODE_STRUCT
+      || subtype->code () == TYPE_CODE_UNION)
     {
       /* Each field of an object is classified recursively.  */
       int j;
@@ -667,7 +667,7 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class theclass[2])
         calculated according to the classes of the fields in the
         eightbyte: */
 
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+  if (type->code () == TYPE_CODE_ARRAY)
     {
       struct type *subtype = check_typedef (TYPE_TARGET_TYPE (type));
 
@@ -681,8 +681,8 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class theclass[2])
       int i;
 
       /* Structure or union.  */
-      gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT
-		  || TYPE_CODE (type) == TYPE_CODE_UNION);
+      gdb_assert (type->code () == TYPE_CODE_STRUCT
+		  || type->code () == TYPE_CODE_UNION);
 
       for (i = 0; i < TYPE_NFIELDS (type); i++)
 	amd64_classify_aggregate_field (type, i, theclass, 0);
@@ -708,7 +708,7 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class theclass[2])
 static void
 amd64_classify (struct type *type, enum amd64_reg_class theclass[2])
 {
-  enum type_code code = TYPE_CODE (type);
+  enum type_code code = type->code ();
   int len = TYPE_LENGTH (type);
 
   theclass[0] = theclass[1] = AMD64_NO_CLASS;

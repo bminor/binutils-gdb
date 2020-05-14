@@ -1048,8 +1048,8 @@ rl78_pointer_to_address (struct gdbarch *gdbarch,
     = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
 
   /* Is it a code address?  */
-  if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
-      || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD
+  if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_FUNC
+      || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_METHOD
       || TYPE_CODE_SPACE (TYPE_TARGET_TYPE (type))
       || TYPE_LENGTH (type) == 4)
     return rl78_make_instruction_address (addr);

@@ -116,7 +116,7 @@ c_print_type_1 (struct type *type,
     type = check_typedef (type);
 
   local_name = typedef_hash_table::find_typedef (flags, type);
-  code = TYPE_CODE (type);
+  code = type->code ();
   if (local_name != NULL)
     {
       fputs_filtered (local_name, stream);
@@ -209,7 +209,7 @@ c_print_typedef (struct type *type,
   if (TYPE_NAME ((SYMBOL_TYPE (new_symbol))) == 0
       || strcmp (TYPE_NAME ((SYMBOL_TYPE (new_symbol))),
 		 new_symbol->linkage_name ()) != 0
-      || TYPE_CODE (SYMBOL_TYPE (new_symbol)) == TYPE_CODE_TYPEDEF)
+      || SYMBOL_TYPE (new_symbol)->code () == TYPE_CODE_TYPEDEF)
     fprintf_filtered (stream, " %s", new_symbol->print_name ());
   fprintf_filtered (stream, ";");
 }
@@ -327,7 +327,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
       struct type *domain;
 
       gdb_assert (nargs > 0);
-      gdb_assert (TYPE_CODE (args[0].type) == TYPE_CODE_PTR);
+      gdb_assert (args[0].type->code () == TYPE_CODE_PTR);
       domain = TYPE_TARGET_TYPE (args[0].type);
 
       if (TYPE_CONST (domain))
@@ -378,7 +378,7 @@ c_type_print_varspec_prefix (struct type *type,
 
   QUIT;
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_PTR:
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
@@ -421,7 +421,7 @@ c_type_print_varspec_prefix (struct type *type,
       c_type_print_varspec_prefix (TYPE_TARGET_TYPE (type),
 				   stream, show, 1, 0, language, flags,
 				   podata);
-      fprintf_filtered (stream, TYPE_CODE(type) == TYPE_CODE_REF ? "&" : "&&");
+      fprintf_filtered (stream, type->code () == TYPE_CODE_REF ? "&" : "&&");
       c_type_print_modifier (type, stream, 1, need_post_space, language);
       break;
 
@@ -767,7 +767,7 @@ c_type_print_varspec_suffix (struct type *type,
 
   QUIT;
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
       {
@@ -1056,7 +1056,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
     }
 
   c_type_print_modifier (type, stream, 0, 1, language);
-  if (TYPE_CODE (type) == TYPE_CODE_UNION)
+  if (type->code () == TYPE_CODE_UNION)
     fprintf_filtered (stream, "union ");
   else if (TYPE_DECLARED_CLASS (type))
     fprintf_filtered (stream, "class ");
@@ -1179,8 +1179,8 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	  int newshow = show - 1;
 
 	  if (!is_static && flags->print_offsets
-	      && (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_STRUCT
-		  || TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_UNION))
+	      && (TYPE_FIELD_TYPE (type, i)->code () == TYPE_CODE_STRUCT
+		  || TYPE_FIELD_TYPE (type, i)->code () == TYPE_CODE_UNION))
 	    {
 	      /* If we're printing offsets and this field's type is
 		 either a struct or an union, then we're interested in
@@ -1401,7 +1401,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	      struct type *target = TYPE_TYPEDEF_FIELD_TYPE (type, i);
 
 	      /* Dereference the typedef declaration itself.  */
-	      gdb_assert (TYPE_CODE (target) == TYPE_CODE_TYPEDEF);
+	      gdb_assert (target->code () == TYPE_CODE_TYPEDEF);
 	      target = TYPE_TARGET_TYPE (target);
 
 	      if (need_access_label)
@@ -1492,16 +1492,16 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	 way. */
       if (language == language_c || language == language_minimal)
 	{
-	  if (TYPE_CODE (type) == TYPE_CODE_UNION)
+	  if (type->code () == TYPE_CODE_UNION)
 	    fprintf_filtered (stream, "union ");
-	  else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+	  else if (type->code () == TYPE_CODE_STRUCT)
 	    {
 	      if (TYPE_DECLARED_CLASS (type))
 		fprintf_filtered (stream, "class ");
 	      else
 		fprintf_filtered (stream, "struct ");
 	    }
-	  else if (TYPE_CODE (type) == TYPE_CODE_ENUM)
+	  else if (type->code () == TYPE_CODE_ENUM)
 	    fprintf_filtered (stream, "enum ");
 	}
 
@@ -1511,7 +1511,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 
   type = check_typedef (type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_TYPEDEF:
       /* If we get here, the typedef doesn't have a name, and we
@@ -1702,7 +1702,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	  /* At least for dump_symtab, it is important that this not
 	     be an error ().  */
 	  fprintf_styled (stream, metadata_style.style (),
-			  _("<invalid type code %d>"), TYPE_CODE (type));
+			  _("<invalid type code %d>"), type->code ());
 	}
       break;
     }

@@ -92,7 +92,7 @@ go_value_print_inner (struct value *val, struct ui_file *stream,
 {
   struct type *type = check_typedef (value_type (val));
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
       case TYPE_CODE_STRUCT:
 	{

@@ -429,11 +429,11 @@ find_gnu_ifunc_target_type (CORE_ADDR resolver_funaddr)
 
       /* If we found a pointer to function, then the resolved type
 	 is the type of the pointed-to function.  */
-      if (TYPE_CODE (resolver_ret_type) == TYPE_CODE_PTR)
+      if (resolver_ret_type->code () == TYPE_CODE_PTR)
 	{
 	  struct type *resolved_type
 	    = TYPE_TARGET_TYPE (resolver_ret_type);
-	  if (TYPE_CODE (check_typedef (resolved_type)) == TYPE_CODE_FUNC)
+	  if (check_typedef (resolved_type)->code () == TYPE_CODE_FUNC)
 	    return resolved_type;
 	}
     }

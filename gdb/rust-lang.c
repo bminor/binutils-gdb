@@ -109,7 +109,7 @@ rust_tuple_type_p (struct type *type)
   /* The current implementation is a bit of a hack, but there's
      nothing else in the debuginfo to distinguish a tuple from a
      struct.  */
-  return (TYPE_CODE (type) == TYPE_CODE_STRUCT
+  return (type->code () == TYPE_CODE_STRUCT
 	  && TYPE_NAME (type) != NULL
 	  && TYPE_NAME (type)[0] == '(');
 }
@@ -124,7 +124,7 @@ rust_underscore_fields (struct type *type)
 
   field_number = 0;
 
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT)
+  if (type->code () != TYPE_CODE_STRUCT)
     return false;
   for (i = 0; i < TYPE_NFIELDS (type); ++i)
     {
@@ -157,7 +157,7 @@ rust_tuple_struct_type_p (struct type *type)
 static bool
 rust_slice_type_p (struct type *type)
 {
-  return (TYPE_CODE (type) == TYPE_CODE_STRUCT
+  return (type->code () == TYPE_CODE_STRUCT
 	  && TYPE_NAME (type) != NULL
 	  && (strncmp (TYPE_NAME (type), "&[", 2) == 0
 	      || strcmp (TYPE_NAME (type), "&str") == 0));
@@ -170,7 +170,7 @@ rust_range_type_p (struct type *type)
 {
   int i;
 
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
+  if (type->code () != TYPE_CODE_STRUCT
       || TYPE_NFIELDS (type) > 2
       || TYPE_NAME (type) == NULL
       || strstr (TYPE_NAME (type), "::Range") == NULL)
@@ -211,7 +211,7 @@ rust_inclusive_range_type_p (struct type *type)
 static bool
 rust_u8_type_p (struct type *type)
 {
-  return (TYPE_CODE (type) == TYPE_CODE_INT
+  return (type->code () == TYPE_CODE_INT
 	  && TYPE_UNSIGNED (type)
 	  && TYPE_LENGTH (type) == 1);
 }
@@ -221,7 +221,7 @@ rust_u8_type_p (struct type *type)
 static bool
 rust_chartype_p (struct type *type)
 {
-  return (TYPE_CODE (type) == TYPE_CODE_CHAR
+  return (type->code () == TYPE_CODE_CHAR
 	  && TYPE_LENGTH (type) == 4
 	  && TYPE_UNSIGNED (type));
 }
@@ -234,13 +234,13 @@ rust_is_string_type_p (struct type *type)
   LONGEST low_bound, high_bound;
 
   type = check_typedef (type);
-  return ((TYPE_CODE (type) == TYPE_CODE_STRING)
-	  || (TYPE_CODE (type) == TYPE_CODE_PTR
-	      && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ARRAY
+  return ((type->code () == TYPE_CODE_STRING)
+	  || (type->code () == TYPE_CODE_PTR
+	      && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ARRAY
 		  && rust_u8_type_p (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (type)))
 		  && get_array_bounds (TYPE_TARGET_TYPE (type), &low_bound,
 				       &high_bound)))
-	  || (TYPE_CODE (type) == TYPE_CODE_STRUCT
+	  || (type->code () == TYPE_CODE_STRUCT
 	      && !rust_enum_p (type)
 	      && rust_slice_type_p (type)
 	      && strcmp (TYPE_NAME (type), "&str") == 0));
@@ -255,7 +255,7 @@ rust_get_trait_object_pointer (struct value *value)
 {
   struct type *type = check_typedef (value_type (value));
 
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT || TYPE_NFIELDS (type) != 2)
+  if (type->code () != TYPE_CODE_STRUCT || TYPE_NFIELDS (type) != 2)
     return NULL;
 
   /* Try to be a bit resilient if the ABI changes.  */
@@ -559,13 +559,13 @@ rust_value_print_inner (struct value *val, struct ui_file *stream,
 			 ? Val_prettyformat : Val_no_prettyformat);
 
   struct type *type = check_typedef (value_type (val));
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_PTR:
       {
 	LONGEST low_bound, high_bound;
 	
-	if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ARRAY
+	if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ARRAY
 	    && rust_u8_type_p (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (type)))
 	    && get_array_bounds (TYPE_TARGET_TYPE (type), &low_bound,
 				 &high_bound))
@@ -712,7 +712,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
 	  if (prop != nullptr && prop->kind == PROP_TYPE)
 	    type = prop->data.original_type;
 	}
-      else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+      else if (type->code () == TYPE_CODE_STRUCT)
 	fputs_filtered ("struct ", stream);
       else
 	fputs_filtered ("union ", stream);
@@ -828,7 +828,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
     {
       /* Rust calls the unit type "void" in its debuginfo,
          but we don't want to print it as that.  */
-      if (TYPE_CODE (type) == TYPE_CODE_VOID)
+      if (type->code () == TYPE_CODE_VOID)
         fputs_filtered ("()", stream);
       else
         fputs_filtered (TYPE_NAME (type), stream);
@@ -836,7 +836,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
     }
 
   type = check_typedef (type);
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_VOID:
       /* If we have an enum, we've already printed the type's
@@ -865,7 +865,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
 	}
       fputs_filtered (")", stream);
       /* If it returns unit, we can omit the return type.  */
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+      if (TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
         {
           fputs_filtered (" -> ", stream);
           rust_internal_print_type (TYPE_TARGET_TYPE (type), "", stream,
@@ -1151,13 +1151,13 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
   args[0] = arg0;
 
   /* We don't yet implement real Deref semantics.  */
-  while (TYPE_CODE (value_type (args[0])) == TYPE_CODE_PTR)
+  while (value_type (args[0])->code () == TYPE_CODE_PTR)
     args[0] = value_ind (args[0]);
 
   type = value_type (args[0]);
-  if ((TYPE_CODE (type) != TYPE_CODE_STRUCT
-       && TYPE_CODE (type) != TYPE_CODE_UNION
-       && TYPE_CODE (type) != TYPE_CODE_ENUM)
+  if ((type->code () != TYPE_CODE_STRUCT
+       && type->code () != TYPE_CODE_UNION
+       && type->code () != TYPE_CODE_ENUM)
       || rust_tuple_type_p (type))
     error (_("Method calls only supported on struct or enum types"));
   if (TYPE_NAME (type) == NULL)
@@ -1174,7 +1174,7 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
   if (TYPE_NFIELDS (fn_type) == 0)
     error (_("Function '%s' takes no arguments"), name.c_str ());
 
-  if (TYPE_CODE (TYPE_FIELD_TYPE (fn_type, 0)) == TYPE_CODE_PTR)
+  if (TYPE_FIELD_TYPE (fn_type, 0)->code () == TYPE_CODE_PTR)
     args[0] = value_addr (args[0]);
 
   function = address_of_variable (sym.symbol, block);
@@ -1361,7 +1361,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
       struct type *base_type = nullptr;
-      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+      if (type->code () == TYPE_CODE_ARRAY)
 	base_type = TYPE_TARGET_TYPE (type);
       else if (rust_slice_type_p (type))
 	{
@@ -1376,7 +1376,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
 	  if (base_type == nullptr)
 	    error (_("Could not find 'data_ptr' in slice type"));
 	}
-      else if (TYPE_CODE (type) == TYPE_CODE_PTR)
+      else if (type->code () == TYPE_CODE_PTR)
 	base_type = TYPE_TARGET_TYPE (type);
       else
 	error (_("Cannot subscript non-array type"));
@@ -1405,7 +1405,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
       LONGEST low_bound;
       struct value *base;
 
-      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+      if (type->code () == TYPE_CODE_ARRAY)
 	{
 	  base = lhs;
 	  if (!get_array_bounds (type, &low_bound, &high_bound))
@@ -1423,7 +1423,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
 	  low_bound = 0;
 	  high_bound = value_as_long (len);
 	}
-      else if (TYPE_CODE (type) == TYPE_CODE_PTR)
+      else if (type->code () == TYPE_CODE_PTR)
 	{
 	  base = lhs;
 	  low_bound = 0;
@@ -1526,7 +1526,7 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	    /* Preserving the type is enough.  */
 	    return value;
 	  }
-	if (TYPE_CODE (value_type (value)) == TYPE_CODE_BOOL)
+	if (value_type (value)->code () == TYPE_CODE_BOOL)
 	  result = value_from_longest (value_type (value),
 				       value_logical_not (value));
 	else
@@ -1655,7 +1655,7 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
         type = value_type (lhs);
 
-	if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+	if (type->code () == TYPE_CODE_STRUCT)
 	  {
 	    struct type *outer_type = NULL;
 
@@ -1727,7 +1727,7 @@ tuple structs, and tuple-like enum variants"));
 
 	const char *field_name = &exp->elts[pc + 2].string;
         type = value_type (lhs);
-        if (TYPE_CODE (type) == TYPE_CODE_STRUCT && rust_enum_p (type))
+        if (type->code () == TYPE_CODE_STRUCT && rust_enum_p (type))
 	  {
 	    gdb::array_view<const gdb_byte> view (value_contents (lhs),
 						  TYPE_LENGTH (type));

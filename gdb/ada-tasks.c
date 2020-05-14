@@ -431,9 +431,9 @@ read_fat_string_value (char *dest, struct value *val, int max_len)
       bounds_fieldno = ada_get_field_index (type, "P_BOUNDS", 0);
 
       bounds_type = TYPE_FIELD_TYPE (type, bounds_fieldno);
-      if (TYPE_CODE (bounds_type) == TYPE_CODE_PTR)
+      if (bounds_type->code () == TYPE_CODE_PTR)
         bounds_type = TYPE_TARGET_TYPE (bounds_type);
-      if (TYPE_CODE (bounds_type) != TYPE_CODE_STRUCT)
+      if (bounds_type->code () != TYPE_CODE_STRUCT)
         error (_("Unknown task name format. Aborting"));
       upper_bound_fieldno = ada_get_field_index (bounds_type, "UB0", 0);
 
@@ -890,10 +890,10 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 	  struct type *eltype = NULL;
 	  struct type *idxtype = NULL;
 
-	  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+	  if (type->code () == TYPE_CODE_ARRAY)
 	    eltype = check_typedef (TYPE_TARGET_TYPE (type));
 	  if (eltype != NULL
-	      && TYPE_CODE (eltype) == TYPE_CODE_PTR)
+	      && eltype->code () == TYPE_CODE_PTR)
 	    idxtype = check_typedef (TYPE_INDEX_TYPE (type));
 	  if (idxtype != NULL
 	      && !TYPE_LOW_BOUND_UNDEFINED (idxtype)
@@ -933,7 +933,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 	  /* Validate.  */
 	  struct type *type = check_typedef (SYMBOL_TYPE (sym));
 
-	  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+	  if (type->code () == TYPE_CODE_PTR)
 	    {
 	      data->known_tasks_element = type;
 	      return;

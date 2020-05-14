@@ -570,8 +570,8 @@ msp430_return_value (struct gdbarch *gdbarch,
   int code_model = gdbarch_tdep (gdbarch)->code_model;
 
   if (TYPE_LENGTH (valtype) > 8
-      || TYPE_CODE (valtype) == TYPE_CODE_STRUCT
-      || TYPE_CODE (valtype) == TYPE_CODE_UNION)
+      || valtype->code () == TYPE_CODE_STRUCT
+      || valtype->code () == TYPE_CODE_UNION)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   if (readbuf)
@@ -585,7 +585,7 @@ msp430_return_value (struct gdbarch *gdbarch,
 	  int size = 2;
 
 	  if (code_model == MSP_LARGE_CODE_MODEL
-	      && TYPE_CODE (valtype) == TYPE_CODE_PTR)
+	      && valtype->code () == TYPE_CODE_PTR)
 	    {
 	      size = 4;
 	    }
@@ -609,7 +609,7 @@ msp430_return_value (struct gdbarch *gdbarch,
 	  int size = 2;
 
 	  if (code_model == MSP_LARGE_CODE_MODEL
-	      && TYPE_CODE (valtype) == TYPE_CODE_PTR)
+	      && valtype->code () == TYPE_CODE_PTR)
 	    {
 	      size = 4;
 	    }
@@ -652,12 +652,12 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   struct type *func_type = value_type (function);
 
   /* Dereference function pointer types.  */
-  while (TYPE_CODE (func_type) == TYPE_CODE_PTR)
+  while (func_type->code () == TYPE_CODE_PTR)
     func_type = TYPE_TARGET_TYPE (func_type);
 
   /* The end result had better be a function or a method.  */
-  gdb_assert (TYPE_CODE (func_type) == TYPE_CODE_FUNC
-	      || TYPE_CODE (func_type) == TYPE_CODE_METHOD);
+  gdb_assert (func_type->code () == TYPE_CODE_FUNC
+	      || func_type->code () == TYPE_CODE_METHOD);
 
   /* We make two passes; the first does the stack allocation,
      the second actually stores the arguments.  */
@@ -691,8 +691,8 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	  current_arg_on_stack = 0;
 
-	  if (TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
-	      || TYPE_CODE (arg_type) == TYPE_CODE_UNION)
+	  if (arg_type->code () == TYPE_CODE_STRUCT
+	      || arg_type->code () == TYPE_CODE_UNION)
 	    {
 	      /* Aggregates of any size are passed by reference.  */
 	      store_unsigned_integer (struct_addr_buf, 4, byte_order,
@@ -723,10 +723,10 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  int size = 2;
 
 		  if (code_model == MSP_LARGE_CODE_MODEL
-		      && (TYPE_CODE (arg_type) == TYPE_CODE_PTR
+		      && (arg_type->code () == TYPE_CODE_PTR
 		          || TYPE_IS_REFERENCE (arg_type)
-			  || TYPE_CODE (arg_type) == TYPE_CODE_STRUCT
-			  || TYPE_CODE (arg_type) == TYPE_CODE_UNION))
+			  || arg_type->code () == TYPE_CODE_STRUCT
+			  || arg_type->code () == TYPE_CODE_UNION))
 		    {
 		      /* When using the large memory model, pointer,
 			 reference, struct, and union arguments are

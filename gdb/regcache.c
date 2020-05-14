@@ -101,7 +101,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
 
   /* Lay out the register cache.
 
-     NOTE: cagney/2002-05-22: Only register_type() is used when
+     NOTE: cagney/2002-05-22: Only register_type () is used when
      constructing the register cache.  It is assumed that the
      register's raw size, virtual size and type length are all the
      same.  */
@@ -1810,17 +1810,17 @@ cooked_write_test (struct gdbarch *gdbarch)
       std::vector<gdb_byte> buf (register_size (gdbarch, regnum), 0);
       const auto type = register_type (gdbarch, regnum);
 
-      if (TYPE_CODE (type) == TYPE_CODE_FLT
-	  || TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
+      if (type->code () == TYPE_CODE_FLT
+	  || type->code () == TYPE_CODE_DECFLOAT)
 	{
 	  /* Generate valid float format.  */
 	  target_float_from_string (expected.data (), type, "1.25");
 	}
-      else if (TYPE_CODE (type) == TYPE_CODE_INT
-	       || TYPE_CODE (type) == TYPE_CODE_ARRAY
-	       || TYPE_CODE (type) == TYPE_CODE_PTR
-	       || TYPE_CODE (type) == TYPE_CODE_UNION
-	       || TYPE_CODE (type) == TYPE_CODE_STRUCT)
+      else if (type->code () == TYPE_CODE_INT
+	       || type->code () == TYPE_CODE_ARRAY
+	       || type->code () == TYPE_CODE_PTR
+	       || type->code () == TYPE_CODE_UNION
+	       || type->code () == TYPE_CODE_STRUCT)
 	{
 	  if (bfd_arch == bfd_arch_ia64
 	      || (regnum >= gdbarch_num_regs (gdbarch)
@@ -1850,7 +1850,7 @@ cooked_write_test (struct gdbarch *gdbarch)
 		expected[j] = j;
 	    }
 	}
-      else if (TYPE_CODE (type) == TYPE_CODE_FLAGS)
+      else if (type->code () == TYPE_CODE_FLAGS)
 	{
 	  /* No idea how to test flags.  */
 	  continue;

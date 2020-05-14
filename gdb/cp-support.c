@@ -183,8 +183,8 @@ inspect_type (struct demangle_parse_info *info,
 	}
 
       /* If the type is a typedef or namespace alias, replace it.  */
-      if (TYPE_CODE (otype) == TYPE_CODE_TYPEDEF
-	  || TYPE_CODE (otype) == TYPE_CODE_NAMESPACE)
+      if (otype->code () == TYPE_CODE_TYPEDEF
+	  || otype->code () == TYPE_CODE_NAMESPACE)
 	{
 	  long len;
 	  int is_anon;
@@ -212,16 +212,16 @@ inspect_type (struct demangle_parse_info *info,
 	    return 0;
 
 	  is_anon = (TYPE_NAME (type) == NULL
-		     && (TYPE_CODE (type) == TYPE_CODE_ENUM
-			 || TYPE_CODE (type) == TYPE_CODE_STRUCT
-			 || TYPE_CODE (type) == TYPE_CODE_UNION));
+		     && (type->code () == TYPE_CODE_ENUM
+			 || type->code () == TYPE_CODE_STRUCT
+			 || type->code () == TYPE_CODE_UNION));
 	  if (is_anon)
 	    {
 	      struct type *last = otype;
 
 	      /* Find the last typedef for the type.  */
 	      while (TYPE_TARGET_TYPE (last) != NULL
-		     && (TYPE_CODE (TYPE_TARGET_TYPE (last))
+		     && (TYPE_TARGET_TYPE (last)->code ()
 			 == TYPE_CODE_TYPEDEF))
 		last = TYPE_TARGET_TYPE (last);
 
@@ -1267,13 +1267,13 @@ add_symbol_overload_list_adl_namespace (struct type *type,
   const char *type_name;
   int i, prefix_len;
 
-  while (TYPE_CODE (type) == TYPE_CODE_PTR
+  while (type->code () == TYPE_CODE_PTR
 	 || TYPE_IS_REFERENCE (type)
-         || TYPE_CODE (type) == TYPE_CODE_ARRAY
-         || TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+         || type->code () == TYPE_CODE_ARRAY
+         || type->code () == TYPE_CODE_TYPEDEF)
     {
-      if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
-	type = check_typedef(type);
+      if (type->code () == TYPE_CODE_TYPEDEF)
+	type = check_typedef (type);
       else
 	type = TYPE_TARGET_TYPE (type);
     }
@@ -1296,7 +1296,7 @@ add_symbol_overload_list_adl_namespace (struct type *type,
     }
 
   /* Check public base type */
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
       {
 	if (BASETYPE_VIA_PUBLIC (type, i))
@@ -1450,7 +1450,7 @@ cp_lookup_rtti_type (const char *name, const struct block *block)
 
   rtti_type = check_typedef (SYMBOL_TYPE (rtti_sym));
 
-  switch (TYPE_CODE (rtti_type))
+  switch (rtti_type->code ())
     {
     case TYPE_CODE_STRUCT:
       break;

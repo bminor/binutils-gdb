@@ -1402,7 +1402,7 @@ nds32_check_calling_use_fpr (struct type *type)
   while (1)
     {
       t = check_typedef (t);
-      typecode = TYPE_CODE (t);
+      typecode = t->code ();
       if (typecode != TYPE_CODE_STRUCT)
 	break;
       else if (TYPE_NFIELDS (t) != 1)

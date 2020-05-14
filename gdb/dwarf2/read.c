@@ -9285,7 +9285,7 @@ alloc_rust_variant (struct obstack *obstack, struct type *type,
 static void
 quirk_rust_enum (struct type *type, struct objfile *objfile)
 {
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
+  gdb_assert (type->code () == TYPE_CODE_UNION);
 
   /* We don't need to deal with empty enums.  */
   if (TYPE_NFIELDS (type) == 0)
@@ -9385,7 +9385,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	{
 	  disr_type = TYPE_FIELD_TYPE (type, i);
 
-	  if (TYPE_CODE (disr_type) != TYPE_CODE_STRUCT)
+	  if (disr_type->code () != TYPE_CODE_STRUCT)
 	    {
 	      /* All fields of a true enum will be structs.  */
 	      return;
@@ -10299,7 +10299,7 @@ dwarf2_compute_name (const char *name,
 		     the two cases.  */
 		  if (TYPE_NFIELDS (type) > 0
 		      && TYPE_FIELD_ARTIFICIAL (type, 0)
-		      && TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) == TYPE_CODE_PTR
+		      && TYPE_FIELD_TYPE (type, 0)->code () == TYPE_CODE_PTR
 		      && TYPE_CONST (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type,
 									0))))
 		    buf.puts (" const");
@@ -10483,7 +10483,7 @@ read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu)
 	  sect_offset sect_off = attr->get_ref_die_offset ();
 
 	  type = get_die_type_at_offset (sect_off, cu->per_cu);
-	  if (type != NULL && TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
+	  if (type != NULL && type->code () == TYPE_CODE_NAMESPACE)
 	    {
 	      /* This declaration is a global namespace alias.  Add
 		 a symbol for it whose type is the aliased namespace.  */
@@ -13308,7 +13308,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	    func_type = get_die_type (func_die, cu);
 	  if (func_type != NULL)
 	    {
-	      gdb_assert (TYPE_CODE (func_type) == TYPE_CODE_FUNC);
+	      gdb_assert (func_type->code () == TYPE_CODE_FUNC);
 
 	      /* Enlist this call site to the function.  */
 	      call_site->tail_call_next = TYPE_TAIL_CALL_LIST (func_type);
@@ -14959,7 +14959,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 
   fnp->type = alloc_type (objfile);
   this_type = read_type_die (die, cu);
-  if (this_type && TYPE_CODE (this_type) == TYPE_CODE_FUNC)
+  if (this_type && this_type->code () == TYPE_CODE_FUNC)
     {
       int nparams = TYPE_NFIELDS (this_type);
 
@@ -15157,7 +15157,7 @@ quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
   struct type *pfn_type, *self_type, *new_type;
 
   /* Check for a structure with no name and two children.  */
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT || TYPE_NFIELDS (type) != 2)
+  if (type->code () != TYPE_CODE_STRUCT || TYPE_NFIELDS (type) != 2)
     return;
 
   /* Check for __pfn and __delta members.  */
@@ -15170,15 +15170,15 @@ quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
   /* Find the type of the method.  */
   pfn_type = TYPE_FIELD_TYPE (type, 0);
   if (pfn_type == NULL
-      || TYPE_CODE (pfn_type) != TYPE_CODE_PTR
-      || TYPE_CODE (TYPE_TARGET_TYPE (pfn_type)) != TYPE_CODE_FUNC)
+      || pfn_type->code () != TYPE_CODE_PTR
+      || TYPE_TARGET_TYPE (pfn_type)->code () != TYPE_CODE_FUNC)
     return;
 
   /* Look for the "this" argument.  */
   pfn_type = TYPE_TARGET_TYPE (pfn_type);
   if (TYPE_NFIELDS (pfn_type) == 0
       /* || TYPE_FIELD_TYPE (pfn_type, 0) == NULL */
-      || TYPE_CODE (TYPE_FIELD_TYPE (pfn_type, 0)) != TYPE_CODE_PTR)
+      || TYPE_FIELD_TYPE (pfn_type, 0)->code () != TYPE_CODE_PTR)
     return;
 
   self_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (pfn_type, 0));
@@ -16679,9 +16679,9 @@ read_tag_ptr_to_member_type (struct die_info *die, struct dwarf2_cu *cu)
   if (type)
     return type;
 
-  if (TYPE_CODE (check_typedef (to_type)) == TYPE_CODE_METHOD)
+  if (check_typedef (to_type)->code () == TYPE_CODE_METHOD)
     type = lookup_methodptr_type (to_type);
-  else if (TYPE_CODE (check_typedef (to_type)) == TYPE_CODE_FUNC)
+  else if (check_typedef (to_type)->code () == TYPE_CODE_FUNC)
     {
       struct type *new_type
 	= alloc_type (cu->per_cu->dwarf2_per_objfile->objfile);
@@ -16746,7 +16746,7 @@ add_array_cv_type (struct die_info *die, struct dwarf2_cu *cu,
   base_type = copy_type (base_type);
   inner_array = base_type;
 
-  while (TYPE_CODE (TYPE_TARGET_TYPE (inner_array)) == TYPE_CODE_ARRAY)
+  while (TYPE_TARGET_TYPE (inner_array)->code () == TYPE_CODE_ARRAY)
     {
       TYPE_TARGET_TYPE (inner_array) =
 	copy_type (TYPE_TARGET_TYPE (inner_array));
@@ -16775,7 +16775,7 @@ read_tag_const_type (struct die_info *die, struct dwarf2_cu *cu)
 
   /* In case the const qualifier is applied to an array type, the element type
      is so qualified, not the array type (section 6.7.3 of C99).  */
-  if (TYPE_CODE (base_type) == TYPE_CODE_ARRAY)
+  if (base_type->code () == TYPE_CODE_ARRAY)
     return add_array_cv_type (die, cu, base_type, 1, 0);
 
   cv_type = make_cv_type (1, TYPE_VOLATILE (base_type), base_type, 0);
@@ -16797,7 +16797,7 @@ read_tag_volatile_type (struct die_info *die, struct dwarf2_cu *cu)
   /* In case the volatile qualifier is applied to an array type, the
      element type is so qualified, not the array type (section 6.7.3
      of C99).  */
-  if (TYPE_CODE (base_type) == TYPE_CODE_ARRAY)
+  if (base_type->code () == TYPE_CODE_ARRAY)
     return add_array_cv_type (die, cu, base_type, 0, 1);
 
   cv_type = make_cv_type (TYPE_CONST (base_type), 1, base_type, 0);
@@ -17323,7 +17323,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
       case DW_ATE_complex_float:
 	type = dwarf2_init_complex_target_type (cu, objfile, bits / 2, name,
 						byte_order);
-	if (TYPE_CODE (type) == TYPE_CODE_ERROR)
+	if (type->code () == TYPE_CODE_ERROR)
 	  {
 	    if (name == nullptr)
 	      {
@@ -17578,7 +17578,7 @@ read_subrange_index_type (struct die_info *die, struct dwarf2_cu *cu)
      GCC produces an empty range DIE.
      FIXME: muller/2010-05-28: Possible references to object for low bound,
      high bound or count are not yet handled by this code.  */
-  if (TYPE_CODE (index_type) == TYPE_CODE_VOID)
+  if (index_type->code () == TYPE_CODE_VOID)
     index_type = cu->per_cu->addr_sized_int_type (false);
 
   return index_type;
@@ -20717,7 +20717,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  /* Compilation with minimal debug info may result in
 	     variables with missing type entries.  Change the
 	     misleading `void' type to something sensible.  */
-	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_VOID)
+	  if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_VOID)
 	    SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_int;
 
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
@@ -23639,11 +23639,11 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
      But this is not a problem, because the gnat-specific information
      is actually not needed for these types.  */
   if (need_gnat_info (cu)
-      && TYPE_CODE (type) != TYPE_CODE_FUNC
-      && TYPE_CODE (type) != TYPE_CODE_FLT
-      && TYPE_CODE (type) != TYPE_CODE_METHODPTR
-      && TYPE_CODE (type) != TYPE_CODE_MEMBERPTR
-      && TYPE_CODE (type) != TYPE_CODE_METHOD
+      && type->code () != TYPE_CODE_FUNC
+      && type->code () != TYPE_CODE_FLT
+      && type->code () != TYPE_CODE_METHODPTR
+      && type->code () != TYPE_CODE_MEMBERPTR
+      && type->code () != TYPE_CODE_METHOD
       && !HAVE_GNAT_AUX_INFO (type))
     INIT_GNAT_SPECIFIC (type);
 

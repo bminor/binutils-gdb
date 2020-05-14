@@ -66,11 +66,11 @@ c_textual_element_type (struct type *type, char format)
   true_type = check_typedef (type);
 
   /* TYPE_CODE_CHAR is always textual.  */
-  if (TYPE_CODE (true_type) == TYPE_CODE_CHAR)
+  if (true_type->code () == TYPE_CODE_CHAR)
     return 1;
 
   /* Any other character-like types must be integral.  */
-  if (TYPE_CODE (true_type) != TYPE_CODE_INT)
+  if (true_type->code () != TYPE_CODE_INT)
     return 0;
 
   /* We peel typedefs one by one, looking for a match.  */
@@ -81,7 +81,7 @@ c_textual_element_type (struct type *type, char format)
       if (TYPE_NAME (iter_type) && textual_name (TYPE_NAME (iter_type)))
 	return 1;
 
-      if (TYPE_CODE (iter_type) != TYPE_CODE_TYPEDEF)
+      if (iter_type->code () != TYPE_CODE_TYPEDEF)
 	break;
 
       /* Peel a single typedef.  If the typedef doesn't have a target
@@ -97,7 +97,7 @@ c_textual_element_type (struct type *type, char format)
     {
       /* Print this as a string if we can manage it.  For now, no wide
 	 character support.  */
-      if (TYPE_CODE (true_type) == TYPE_CODE_INT
+      if (true_type->code () == TYPE_CODE_INT
 	  && TYPE_LENGTH (true_type) == 1)
 	return 1;
     }
@@ -106,7 +106,7 @@ c_textual_element_type (struct type *type, char format)
       /* If a one-byte TYPE_CODE_INT is missing the not-a-character
 	 flag, then we treat it as text; otherwise, we assume it's
 	 being used as data.  */
-      if (TYPE_CODE (true_type) == TYPE_CODE_INT
+      if (true_type->code () == TYPE_CODE_INT
 	  && TYPE_LENGTH (true_type) == 1
 	  && !TYPE_NOTTEXT (true_type))
 	return 1;
@@ -146,7 +146,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
   int want_space = 0;
   struct gdbarch *gdbarch = get_type_arch (type);
 
-  if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
+  if (elttype->code () == TYPE_CODE_FUNC)
     {
       /* Try to print what function it points to.  */
       print_function_pointer_address (options, gdbarch, address, stream);
@@ -365,7 +365,7 @@ c_value_print_struct (struct value *val, struct ui_file *stream, int recurse,
 {
   struct type *type = check_typedef (value_type (val));
 
-  if (TYPE_CODE (type) == TYPE_CODE_UNION && recurse && !options->unionprint)
+  if (type->code () == TYPE_CODE_UNION && recurse && !options->unionprint)
     fprintf_filtered (stream, "{...}");
   else if (options->vtblprint && cp_is_vtbl_ptr_type (type))
     {
@@ -443,7 +443,7 @@ c_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
   const gdb_byte *valaddr = value_contents_for_printing (val);
 
   type = check_typedef (type);
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
       c_value_print_array (val, stream, recurse, options);
@@ -512,7 +512,7 @@ c_value_print (struct value *val, struct ui_file *stream,
 
   type = check_typedef (value_type (val));
 
-  if (TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type))
+  if (type->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type))
     {
       struct type *original_type = value_type (val);
 
@@ -520,7 +520,7 @@ c_value_print (struct value *val, struct ui_file *stream,
          type is indicated by the quoted string anyway.
          (Don't use c_textual_element_type here; quoted strings
          are always exactly (char *), (wchar_t *), or the like.  */
-      if (TYPE_CODE (original_type) == TYPE_CODE_PTR
+      if (original_type->code () == TYPE_CODE_PTR
 	  && TYPE_NAME (original_type) == NULL
 	  && TYPE_NAME (TYPE_TARGET_TYPE (original_type)) != NULL
 	  && (strcmp (TYPE_NAME (TYPE_TARGET_TYPE (original_type)),
@@ -530,7 +530,7 @@ c_value_print (struct value *val, struct ui_file *stream,
 	  /* Print nothing.  */
 	}
       else if (options->objectprint
-	       && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT))
+	       && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRUCT))
 	{
 	  int is_ref = TYPE_IS_REFERENCE (type);
 	  enum type_code refcode = TYPE_CODE_UNDEF;
@@ -538,7 +538,7 @@ c_value_print (struct value *val, struct ui_file *stream,
 	  if (is_ref)
 	    {
 	      val = value_addr (val);
-	      refcode = TYPE_CODE (type);
+	      refcode = type->code ();
 	    }
 
 	  /* Pointer to class, check real type of object.  */
@@ -581,7 +581,7 @@ c_value_print (struct value *val, struct ui_file *stream,
   if (!value_initialized (val))
     fprintf_filtered (stream, " [uninitialized] ");
 
-  if (options->objectprint && (TYPE_CODE (type) == TYPE_CODE_STRUCT))
+  if (options->objectprint && (type->code () == TYPE_CODE_STRUCT))
     {
       /* Attempt to determine real type of object.  */
       real_type = value_rtti_type (val, &full, &top, &using_enc);

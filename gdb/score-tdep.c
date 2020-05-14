@@ -442,9 +442,9 @@ score_return_value (struct gdbarch *gdbarch, struct value *function,
                     struct type *type, struct regcache *regcache,
                     gdb_byte * readbuf, const gdb_byte * writebuf)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (type) == TYPE_CODE_UNION
-      || TYPE_CODE (type) == TYPE_CODE_ARRAY)
+  if (type->code () == TYPE_CODE_STRUCT
+      || type->code () == TYPE_CODE_UNION
+      || type->code () == TYPE_CODE_ARRAY)
     return RETURN_VALUE_STRUCT_CONVENTION;
   else
     {
@@ -469,7 +469,7 @@ score_return_value (struct gdbarch *gdbarch, struct value *function,
 static int
 score_type_needs_double_align (struct type *type)
 {
-  enum type_code typecode = TYPE_CODE (type);
+  enum type_code typecode = type->code ();
 
   if ((typecode == TYPE_CODE_INT && TYPE_LENGTH (type) == 8)
       || (typecode == TYPE_CODE_FLT && TYPE_LENGTH (type) == 8))
@@ -529,7 +529,7 @@ score_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (value_type (arg));
-      enum type_code typecode = TYPE_CODE (arg_type);
+      enum type_code typecode = arg_type->code ();
       const gdb_byte *val = value_contents (arg);
       int downward_offset = 0;
       int arg_last_part_p = 0;

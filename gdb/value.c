@@ -1177,9 +1177,9 @@ value_actual_type (struct value *value, int resolve_simple_types,
     {
       /* If result's target type is TYPE_CODE_STRUCT, proceed to
 	 fetch its rtti type.  */
-      if ((TYPE_CODE (result) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (result))
-	  && TYPE_CODE (check_typedef (TYPE_TARGET_TYPE (result)))
-	     == TYPE_CODE_STRUCT
+      if ((result->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (result))
+	  && (check_typedef (TYPE_TARGET_TYPE (result))->code ()
+	      == TYPE_CODE_STRUCT)
 	  && !value_optimized_out (value))
         {
           struct type *real_type;
@@ -2189,7 +2189,7 @@ get_internalvar_integer (struct internalvar *var, LONGEST *result)
     {
       struct type *type = check_typedef (value_type (var->u.value));
 
-      if (TYPE_CODE (type) == TYPE_CODE_INT)
+      if (type->code () == TYPE_CODE_INT)
 	{
 	  *result = value_as_long (var->u.value);
 	  return 1;
@@ -2254,7 +2254,7 @@ set_internalvar (struct internalvar *var, struct value *val)
     error (_("Cannot overwrite convenience function %s"), var->name);
 
   /* Prepare new contents.  */
-  switch (TYPE_CODE (check_typedef (value_type (val))))
+  switch (check_typedef (value_type (val))->code ())
     {
     case TYPE_CODE_VOID:
       new_kind = INTERNALVAR_VOID;
@@ -2591,7 +2591,7 @@ value_from_xmethod (xmethod_worker_up &&worker)
 struct type *
 result_type_of_xmethod (struct value *method, gdb::array_view<value *> argv)
 {
-  gdb_assert (TYPE_CODE (value_type (method)) == TYPE_CODE_XMETHOD
+  gdb_assert (value_type (method)->code () == TYPE_CODE_XMETHOD
 	      && method->lval == lval_xcallable && !argv.empty ());
 
   return method->location.xm_worker->get_result_type (argv[0], argv.slice (1));
@@ -2602,7 +2602,7 @@ result_type_of_xmethod (struct value *method, gdb::array_view<value *> argv)
 struct value *
 call_xmethod (struct value *method, gdb::array_view<value *> argv)
 {
-  gdb_assert (TYPE_CODE (value_type (method)) == TYPE_CODE_XMETHOD
+  gdb_assert (value_type (method)->code () == TYPE_CODE_XMETHOD
 	      && method->lval == lval_xcallable && !argv.empty ());
 
   return method->location.xm_worker->invoke (argv[0], argv.slice (1));
@@ -2677,8 +2677,8 @@ value_as_address (struct value *val)
 
      The following shortcut avoids this whole mess.  If VAL is a
      function, just return its address directly.  */
-  if (TYPE_CODE (value_type (val)) == TYPE_CODE_FUNC
-      || TYPE_CODE (value_type (val)) == TYPE_CODE_METHOD)
+  if (value_type (val)->code () == TYPE_CODE_FUNC
+      || value_type (val)->code () == TYPE_CODE_METHOD)
     return value_address (val);
 
   val = coerce_array (val);
@@ -2720,7 +2720,7 @@ value_as_address (struct value *val)
      converted to pointers; usually, the ABI doesn't either, but
      ABI-specific code is a more reasonable place to handle it.  */
 
-  if (TYPE_CODE (value_type (val)) != TYPE_CODE_PTR
+  if (value_type (val)->code () != TYPE_CODE_PTR
       && !TYPE_IS_REFERENCE (value_type (val))
       && gdbarch_integer_to_address_p (gdbarch))
     return gdbarch_integer_to_address (gdbarch, value_type (val),
@@ -2748,7 +2748,7 @@ LONGEST
 unpack_long (struct type *type, const gdb_byte *valaddr)
 {
   enum bfd_endian byte_order = type_byte_order (type);
-  enum type_code code = TYPE_CODE (type);
+  enum type_code code = type->code ();
   int len = TYPE_LENGTH (type);
   int nosign = TYPE_UNSIGNED (type);
 
@@ -3317,7 +3317,7 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
   type = check_typedef (type);
   len = TYPE_LENGTH (type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_RANGE:
       num -= TYPE_RANGE_DATA (type)->bias;
@@ -3344,7 +3344,7 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
 
     default:
       error (_("Unexpected type (%d) encountered for integer constant."),
-	     TYPE_CODE (type));
+	     type->code ());
     }
 }
 
@@ -3361,7 +3361,7 @@ pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
   len = TYPE_LENGTH (type);
   byte_order = type_byte_order (type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:
@@ -3387,7 +3387,7 @@ pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
     default:
       error (_("Unexpected type (%d) encountered "
 	       "for unsigned integer constant."),
-	     TYPE_CODE (type));
+	     type->code ());
     }
 }
 
@@ -3438,7 +3438,7 @@ struct value *
 value_from_host_double (struct type *type, double d)
 {
   struct value *value = allocate_value (type);
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
+  gdb_assert (type->code () == TYPE_CODE_FLT);
   target_float_from_host_double (value_contents_raw (value),
 				 value_type (value), d);
   return value;
@@ -3664,7 +3664,7 @@ coerce_array (struct value *arg)
   arg = coerce_ref (arg);
   type = check_typedef (value_type (arg));
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
       if (!TYPE_VECTOR (type) && current_language->c_style_arrays)
@@ -3685,7 +3685,7 @@ enum return_value_convention
 struct_return_convention (struct gdbarch *gdbarch,
 			  struct value *function, struct type *value_type)
 {
-  enum type_code code = TYPE_CODE (value_type);
+  enum type_code code = value_type->code ();
 
   if (code == TYPE_CODE_ERROR)
     error (_("Function return type unknown."));
@@ -3703,7 +3703,7 @@ int
 using_struct_return (struct gdbarch *gdbarch,
 		     struct value *function, struct type *value_type)
 {
-  if (TYPE_CODE (value_type) == TYPE_CODE_VOID)
+  if (value_type->code () == TYPE_CODE_VOID)
     /* A void return value is never in memory.  See also corresponding
        code in "print_return_value".  */
     return 0;
@@ -3931,7 +3931,7 @@ isvoid_internal_fn (struct gdbarch *gdbarch,
   if (argc != 1)
     error (_("You must provide one argument for $_isvoid."));
 
-  ret = TYPE_CODE (value_type (argv[0])) == TYPE_CODE_VOID;
+  ret = value_type (argv[0])->code () == TYPE_CODE_VOID;
 
   return value_from_longest (builtin_type (gdbarch)->builtin_int, ret);
 }
@@ -3949,7 +3949,7 @@ creal_internal_fn (struct gdbarch *gdbarch,
 
   value *cval = argv[0];
   type *ctype = check_typedef (value_type (cval));
-  if (TYPE_CODE (ctype) != TYPE_CODE_COMPLEX)
+  if (ctype->code () != TYPE_CODE_COMPLEX)
     error (_("expected a complex number"));
   return value_real_part (cval);
 }
@@ -3968,7 +3968,7 @@ cimag_internal_fn (struct gdbarch *gdbarch,
 
   value *cval = argv[0];
   type *ctype = check_typedef (value_type (cval));
-  if (TYPE_CODE (ctype) != TYPE_CODE_COMPLEX)
+  if (ctype->code () != TYPE_CODE_COMPLEX)
     error (_("expected a complex number"));
   return value_imaginary_part (cval);
 }

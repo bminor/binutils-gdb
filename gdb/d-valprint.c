@@ -35,7 +35,7 @@ dynamic_array_type (struct type *type,
 		    const struct value_print_options *options)
 {
   if (TYPE_NFIELDS (type) == 2
-      && TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) == TYPE_CODE_INT
+      && TYPE_FIELD_TYPE (type, 0)->code () == TYPE_CODE_INT
       && strcmp (TYPE_FIELD_NAME (type, 0), "length") == 0
       && strcmp (TYPE_FIELD_NAME (type, 1), "ptr") == 0
       && !value_bits_any_optimized_out (val,
@@ -78,7 +78,7 @@ d_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
   int ret;
 
   struct type *type = check_typedef (value_type (val));
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
       case TYPE_CODE_STRUCT:
 	ret = dynamic_array_type (type, value_embedded_offset (val),

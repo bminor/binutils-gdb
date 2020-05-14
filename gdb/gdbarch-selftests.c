@@ -118,7 +118,7 @@ register_to_value_test (struct gdbarch *gdbarch)
 	    {
 	      std::vector<gdb_byte> expected (TYPE_LENGTH (type), 0);
 
-	      if (TYPE_CODE (type) == TYPE_CODE_FLT)
+	      if (type->code () == TYPE_CODE_FLT)
 		{
 		  /* Generate valid float format.  */
 		  target_float_from_string (expected.data (), type, "1.25");

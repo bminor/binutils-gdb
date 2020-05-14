@@ -48,7 +48,7 @@ static int amd64_windows_dummy_call_integer_regs[] =
 static int
 amd64_windows_passed_by_integer_register (struct type *type)
 {
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
       case TYPE_CODE_INT:
       case TYPE_CODE_ENUM:
@@ -76,8 +76,8 @@ amd64_windows_passed_by_integer_register (struct type *type)
 static int
 amd64_windows_passed_by_xmm_register (struct type *type)
 {
-  return ((TYPE_CODE (type) == TYPE_CODE_FLT
-	   || TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
+  return ((type->code () == TYPE_CODE_FLT
+	   || type->code () == TYPE_CODE_DECFLOAT)
           && (TYPE_LENGTH (type) == 4 || TYPE_LENGTH (type) == 8));
 }
 
@@ -296,7 +296,7 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
 
   /* See if our value is returned through a register.  If it is, then
      store the associated register number in REGNUM.  */
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
       case TYPE_CODE_FLT:
       case TYPE_CODE_DECFLOAT:

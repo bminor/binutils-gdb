@@ -253,7 +253,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 		check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (function)));
 
               /* Remember only non-void return types.  */
-              if (TYPE_CODE (ret_type) != TYPE_CODE_VOID)
+              if (ret_type->code () != TYPE_CODE_VOID)
                 {
                   struct value *func_value;
 

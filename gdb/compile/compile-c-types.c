@@ -94,11 +94,11 @@ convert_struct_or_union (compile_c_instance *context, struct type *type)
 
   /* First we create the resulting type and enter it into our hash
      table.  This lets recursive types work.  */
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     result = context->plugin ().build_record_type ();
   else
     {
-      gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
+      gdb_assert (type->code () == TYPE_CODE_UNION);
       result = context->plugin ().build_union_type ();
     }
   context->insert_type (type, result);
@@ -282,7 +282,7 @@ convert_type_basic (compile_c_instance *context, struct type *type)
 				     | TYPE_INSTANCE_FLAG_RESTRICT)) != 0)
     return convert_qualified (context, type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_PTR:
       return convert_pointer (context, type);

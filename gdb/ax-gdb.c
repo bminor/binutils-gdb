@@ -362,7 +362,7 @@ gen_traced_pop (struct agent_expr *ax, struct axs_value *value)
 {
   int string_trace = 0;
   if (ax->trace_string
-      && TYPE_CODE (value->type) == TYPE_CODE_PTR
+      && value->type->code () == TYPE_CODE_PTR
       && c_textual_element_type (check_typedef (TYPE_TARGET_TYPE (value->type)),
 				 's'))
     string_trace = 1;
@@ -429,8 +429,8 @@ gen_traced_pop (struct agent_expr *ax, struct axs_value *value)
 
   /* To trace C++ classes with static fields stored elsewhere.  */
   if (ax->tracing
-      && (TYPE_CODE (value->type) == TYPE_CODE_STRUCT
-	  || TYPE_CODE (value->type) == TYPE_CODE_UNION))
+      && (value->type->code () == TYPE_CODE_STRUCT
+	  || value->type->code () == TYPE_CODE_UNION))
     gen_trace_static_fields (ax, value->type);
 }
 
@@ -474,10 +474,10 @@ gen_fetch (struct agent_expr *ax, struct type *type)
       ax_trace_quick (ax, TYPE_LENGTH (type));
     }
 
-  if (TYPE_CODE (type) == TYPE_CODE_RANGE)
+  if (type->code () == TYPE_CODE_RANGE)
     type = TYPE_TARGET_TYPE (type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
@@ -775,10 +775,10 @@ require_rvalue (struct agent_expr *ax, struct axs_value *value)
   /* Only deal with scalars, structs and such may be too large
      to fit in a stack entry.  */
   value->type = check_typedef (value->type);
-  if (TYPE_CODE (value->type) == TYPE_CODE_ARRAY
-      || TYPE_CODE (value->type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (value->type) == TYPE_CODE_UNION
-      || TYPE_CODE (value->type) == TYPE_CODE_FUNC)
+  if (value->type->code () == TYPE_CODE_ARRAY
+      || value->type->code () == TYPE_CODE_STRUCT
+      || value->type->code () == TYPE_CODE_UNION
+      || value->type->code () == TYPE_CODE_FUNC)
     error (_("Value not scalar: cannot be an rvalue."));
 
   switch (value->kind)
@@ -831,7 +831,7 @@ gen_usual_unary (struct agent_expr *ax, struct axs_value *value)
      the stack.  Should we tweak the type?  */
 
   /* Some types require special handling.  */
-  switch (TYPE_CODE (value->type))
+  switch (value->type->code ())
     {
       /* Functions get converted to a pointer to the function.  */
     case TYPE_CODE_FUNC:
@@ -943,8 +943,8 @@ gen_usual_arithmetic (struct agent_expr *ax, struct axs_value *value1,
 		      struct axs_value *value2)
 {
   /* Do the usual binary conversions.  */
-  if (TYPE_CODE (value1->type) == TYPE_CODE_INT
-      && TYPE_CODE (value2->type) == TYPE_CODE_INT)
+  if (value1->type->code () == TYPE_CODE_INT
+      && value2->type->code () == TYPE_CODE_INT)
     {
       /* The ANSI integral promotions seem to work this way: Order the
          integer types by size, and then by signedness: an n-bit
@@ -1003,7 +1003,7 @@ gen_cast (struct agent_expr *ax, struct axs_value *value, struct type *type)
   /* Dereference typedefs.  */
   type = check_typedef (type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
@@ -1070,7 +1070,7 @@ gen_ptradd (struct agent_expr *ax, struct axs_value *value,
 	    struct axs_value *value1, struct axs_value *value2)
 {
   gdb_assert (pointer_type (value1->type));
-  gdb_assert (TYPE_CODE (value2->type) == TYPE_CODE_INT);
+  gdb_assert (value2->type->code () == TYPE_CODE_INT);
 
   gen_scale (ax, aop_mul, value1->type);
   ax_simple (ax, aop_add);
@@ -1086,7 +1086,7 @@ gen_ptrsub (struct agent_expr *ax, struct axs_value *value,
 	    struct axs_value *value1, struct axs_value *value2)
 {
   gdb_assert (pointer_type (value1->type));
-  gdb_assert (TYPE_CODE (value2->type) == TYPE_CODE_INT);
+  gdb_assert (value2->type->code () == TYPE_CODE_INT);
 
   gen_scale (ax, aop_mul, value1->type);
   ax_simple (ax, aop_sub);
@@ -1158,8 +1158,8 @@ gen_binop (struct agent_expr *ax, struct axs_value *value,
 	   int may_carry, const char *name)
 {
   /* We only handle INT op INT.  */
-  if ((TYPE_CODE (value1->type) != TYPE_CODE_INT)
-      || (TYPE_CODE (value2->type) != TYPE_CODE_INT))
+  if ((value1->type->code () != TYPE_CODE_INT)
+      || (value2->type->code () != TYPE_CODE_INT))
     error (_("Invalid combination of types in %s."), name);
 
   ax_simple (ax,
@@ -1175,8 +1175,8 @@ static void
 gen_logical_not (struct agent_expr *ax, struct axs_value *value,
 		 struct type *result_type)
 {
-  if (TYPE_CODE (value->type) != TYPE_CODE_INT
-      && TYPE_CODE (value->type) != TYPE_CODE_PTR)
+  if (value->type->code () != TYPE_CODE_INT
+      && value->type->code () != TYPE_CODE_PTR)
     error (_("Invalid type of operand to `!'."));
 
   ax_simple (ax, aop_log_not);
@@ -1187,7 +1187,7 @@ gen_logical_not (struct agent_expr *ax, struct axs_value *value,
 static void
 gen_complement (struct agent_expr *ax, struct axs_value *value)
 {
-  if (TYPE_CODE (value->type) != TYPE_CODE_INT)
+  if (value->type->code () != TYPE_CODE_INT)
     error (_("Invalid type of operand to `~'."));
 
   ax_simple (ax, aop_bit_not);
@@ -1214,9 +1214,9 @@ gen_deref (struct axs_value *value)
      T" to "T", and mark the value as an lvalue in memory.  Leave it
      to the consumer to actually dereference it.  */
   value->type = check_typedef (TYPE_TARGET_TYPE (value->type));
-  if (TYPE_CODE (value->type) == TYPE_CODE_VOID)
+  if (value->type->code () == TYPE_CODE_VOID)
     error (_("Attempt to dereference a generic pointer."));
-  value->kind = ((TYPE_CODE (value->type) == TYPE_CODE_FUNC)
+  value->kind = ((value->type->code () == TYPE_CODE_FUNC)
 		 ? axs_rvalue : axs_lvalue_memory);
 }
 
@@ -1228,7 +1228,7 @@ gen_address_of (struct axs_value *value)
   /* Special case for taking the address of a function.  The ANSI
      standard describes this as a special case, too, so this
      arrangement is not without motivation.  */
-  if (TYPE_CODE (value->type) == TYPE_CODE_FUNC)
+  if (value->type->code () == TYPE_CODE_FUNC)
     /* The value's already an rvalue on the stack, so we just need to
        change the type.  */
     value->type = lookup_pointer_type (value->type);
@@ -1518,8 +1518,8 @@ gen_struct_ref (struct agent_expr *ax, struct axs_value *value,
   type = check_typedef (value->type);
 
   /* This must yield a structure or a union.  */
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-      && TYPE_CODE (type) != TYPE_CODE_UNION)
+  if (type->code () != TYPE_CODE_STRUCT
+      && type->code () != TYPE_CODE_UNION)
     error (_("The left operand of `%s' is not a %s."),
 	   operator_name, operand_name);
 
@@ -1583,8 +1583,8 @@ gen_struct_elt_for_reference (struct agent_expr *ax, struct axs_value *value,
   struct type *t = type;
   int i;
 
-  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
-      && TYPE_CODE (t) != TYPE_CODE_UNION)
+  if (t->code () != TYPE_CODE_STRUCT
+      && t->code () != TYPE_CODE_UNION)
     internal_error (__FILE__, __LINE__,
 		    _("non-aggregate type to gen_struct_elt_for_reference"));
 
@@ -1668,7 +1668,7 @@ static int
 gen_aggregate_elt_ref (struct agent_expr *ax, struct axs_value *value,
 		       struct type *type, char *field)
 {
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
@@ -1716,7 +1716,7 @@ gen_repeat (struct expression *exp, union exp_element **pc,
     if (!v)
       error (_("Right operand of `@' must be a "
 	       "constant, in agent expressions."));
-    if (TYPE_CODE (value_type (v)) != TYPE_CODE_INT)
+    if (value_type (v)->code () != TYPE_CODE_INT)
       error (_("Right operand of `@' must be an integer."));
     length = value_as_long (v);
     if (length <= 0)
@@ -1788,7 +1788,7 @@ gen_expr_for_cast (struct expression *exp, union exp_element **pc,
 	}
       else
 	gen_msym_var_ref (ax, value, (*pc)[2].msymbol, (*pc)[1].objfile);
-      if (TYPE_CODE (value->type) == TYPE_CODE_ERROR)
+      if (value->type->code () == TYPE_CODE_ERROR)
 	value->type = to_type;
       (*pc) += 4;
     }
@@ -2010,7 +2010,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 	error (_("`%s' has been optimized out, cannot use"),
 	       (*pc)[2].symbol->print_name ());
 
-      if (TYPE_CODE (value->type) == TYPE_CODE_ERROR)
+      if (value->type->code () == TYPE_CODE_ERROR)
 	error_unknown_type ((*pc)[2].symbol->print_name ());
 
       (*pc) += 4;
@@ -2019,7 +2019,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
     case OP_VAR_MSYM_VALUE:
       gen_msym_var_ref (ax, value, (*pc)[2].msymbol, (*pc)[1].objfile);
 
-      if (TYPE_CODE (value->type) == TYPE_CODE_ERROR)
+      if (value->type->code () == TYPE_CODE_ERROR)
 	error_unknown_type ((*pc)[2].msymbol->linkage_name ());
 
       (*pc) += 4;
@@ -2289,7 +2289,7 @@ gen_expr_binop_rest (struct expression *exp,
   switch (op)
     {
     case BINOP_ADD:
-      if (TYPE_CODE (value1->type) == TYPE_CODE_INT
+      if (value1->type->code () == TYPE_CODE_INT
 	  && pointer_type (value2->type))
 	{
 	  /* Swap the values and proceed normally.  */
@@ -2297,7 +2297,7 @@ gen_expr_binop_rest (struct expression *exp,
 	  gen_ptradd (ax, value, value2, value1);
 	}
       else if (pointer_type (value1->type)
-	       && TYPE_CODE (value2->type) == TYPE_CODE_INT)
+	       && value2->type->code () == TYPE_CODE_INT)
 	gen_ptradd (ax, value, value1, value2);
       else
 	gen_binop (ax, value, value1, value2,
@@ -2305,7 +2305,7 @@ gen_expr_binop_rest (struct expression *exp,
       break;
     case BINOP_SUB:
       if (pointer_type (value1->type)
-	  && TYPE_CODE (value2->type) == TYPE_CODE_INT)
+	  && value2->type->code () == TYPE_CODE_INT)
 	gen_ptrsub (ax,value, value1, value2);
       else if (pointer_type (value1->type)
 	       && pointer_type (value2->type))
@@ -2351,8 +2351,8 @@ gen_expr_binop_rest (struct expression *exp,
 	       an array or pointer type (like a plain int variable for
 	       example), then report this as an error.  */
 	    type = check_typedef (value1->type);
-	    if (TYPE_CODE (type) != TYPE_CODE_ARRAY
-		&& TYPE_CODE (type) != TYPE_CODE_PTR)
+	    if (type->code () != TYPE_CODE_ARRAY
+		&& type->code () != TYPE_CODE_PTR)
 	      {
 		if (TYPE_NAME (type))
 		  error (_("cannot subscript something of type `%s'"),

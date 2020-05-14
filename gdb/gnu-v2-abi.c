@@ -132,8 +132,8 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 
   /* With older versions of g++, the vtbl field pointed to an array
      of structures.  Nowadays it points directly to the structure.  */
-  if (TYPE_CODE (value_type (vtbl)) == TYPE_CODE_PTR
-      && TYPE_CODE (TYPE_TARGET_TYPE (value_type (vtbl))) == TYPE_CODE_ARRAY)
+  if (value_type (vtbl)->code () == TYPE_CODE_PTR
+      && TYPE_TARGET_TYPE (value_type (vtbl))->code () == TYPE_CODE_ARRAY)
     {
       /* Handle the case where the vtbl field points to an
          array of structures.  */
@@ -155,7 +155,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 
   entry_type = check_typedef (value_type (entry));
 
-  if (TYPE_CODE (entry_type) == TYPE_CODE_STRUCT)
+  if (entry_type->code () == TYPE_CODE_STRUCT)
     {
       /* Move the `this' pointer according to the virtual function table.  */
       set_value_offset (arg1, value_offset (arg1)
@@ -169,7 +169,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
 
       vfn = value_field (entry, 2);
     }
-  else if (TYPE_CODE (entry_type) == TYPE_CODE_PTR)
+  else if (entry_type->code () == TYPE_CODE_PTR)
     vfn = entry;
   else
     error (_("I'm confused:  virtual function table has bad type"));
@@ -206,7 +206,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, LONGEST *top, int *using_enc)
   known_type = value_type (v);
   known_type = check_typedef (known_type);
   /* RTTI works only or class objects.  */
-  if (TYPE_CODE (known_type) != TYPE_CODE_STRUCT)
+  if (known_type->code () != TYPE_CODE_STRUCT)
     return NULL;
 
   /* Plan on this changing in the future as i get around to setting
@@ -314,7 +314,7 @@ vb_match (struct type *type, int index, struct type *basetype)
      it is for this baseclass.  */
   fieldtype = TYPE_FIELD_TYPE (type, index);
   if (fieldtype == NULL
-      || TYPE_CODE (fieldtype) != TYPE_CODE_PTR)
+      || fieldtype->code () != TYPE_CODE_PTR)
     /* "Can't happen".  */
     return 0;
 

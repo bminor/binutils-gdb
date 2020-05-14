@@ -3306,7 +3306,7 @@ static ULONGEST
 arm_type_align (gdbarch *gdbarch, struct type *t)
 {
   t = check_typedef (t);
-  if (TYPE_CODE (t) == TYPE_CODE_ARRAY && TYPE_VECTOR (t))
+  if (t->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (t))
     {
       /* Use the natural alignment for vector types (the same for
 	 scalar type), but the maximum alignment is 64-bit.  */
@@ -3393,7 +3393,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 			    enum arm_vfp_cprc_base_type *base_type)
 {
   t = check_typedef (t);
-  switch (TYPE_CODE (t))
+  switch (t->code ())
     {
     case TYPE_CODE_FLT:
       switch (TYPE_LENGTH (t))
@@ -3615,7 +3615,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Determine the type of this function and whether the VFP ABI
      applies.  */
   ftype = check_typedef (value_type (function));
-  if (TYPE_CODE (ftype) == TYPE_CODE_PTR)
+  if (ftype->code () == TYPE_CODE_PTR)
     ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
   use_vfp_abi = arm_vfp_abi_for_function (gdbarch, ftype);
 
@@ -3660,7 +3660,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       arg_type = check_typedef (value_type (args[argnum]));
       len = TYPE_LENGTH (arg_type);
       target_type = TYPE_TARGET_TYPE (arg_type);
-      typecode = TYPE_CODE (arg_type);
+      typecode = arg_type->code ();
       val = value_contents (args[argnum]);
 
       align = type_align (arg_type);
@@ -3758,7 +3758,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	 the THUMB bit in it.  */
       if (TYPE_CODE_PTR == typecode
 	  && target_type != NULL
-	  && TYPE_CODE_FUNC == TYPE_CODE (check_typedef (target_type)))
+	  && TYPE_CODE_FUNC == check_typedef (target_type)->code ())
 	{
 	  CORE_ADDR regval = extract_unsigned_integer (val, len, byte_order);
 	  if (arm_pc_is_thumb (gdbarch, regval))
@@ -3990,7 +3990,7 @@ arm_register_type (struct gdbarch *gdbarch, int regnum)
       struct type *t = tdesc_register_type (gdbarch, regnum);
 
       if (regnum >= ARM_D0_REGNUM && regnum < ARM_D0_REGNUM + 32
-	  && TYPE_CODE (t) == TYPE_CODE_FLT
+	  && t->code () == TYPE_CODE_FLT
 	  && gdbarch_tdep (gdbarch)->have_neon)
 	return arm_neon_double_type (gdbarch);
       else
@@ -7805,7 +7805,7 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
   struct gdbarch *gdbarch = regs->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
-  if (TYPE_CODE_FLT == TYPE_CODE (type))
+  if (TYPE_CODE_FLT == type->code ())
     {
       switch (gdbarch_tdep (gdbarch)->fp_model)
 	{
@@ -7840,12 +7840,12 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	  break;
 	}
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_INT
-	   || TYPE_CODE (type) == TYPE_CODE_CHAR
-	   || TYPE_CODE (type) == TYPE_CODE_BOOL
-	   || TYPE_CODE (type) == TYPE_CODE_PTR
+  else if (type->code () == TYPE_CODE_INT
+	   || type->code () == TYPE_CODE_CHAR
+	   || type->code () == TYPE_CODE_BOOL
+	   || type->code () == TYPE_CODE_PTR
 	   || TYPE_IS_REFERENCE (type)
-	   || TYPE_CODE (type) == TYPE_CODE_ENUM)
+	   || type->code () == TYPE_CODE_ENUM)
     {
       /* If the type is a plain integer, then the access is
 	 straight-forward.  Otherwise we have to play around a bit
@@ -7901,7 +7901,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 
   /* Simple, non-aggregate types (ie not including vectors and
      complex) are always returned in a register (or registers).  */
-  code = TYPE_CODE (type);
+  code = type->code ();
   if (TYPE_CODE_STRUCT != code && TYPE_CODE_UNION != code
       && TYPE_CODE_ARRAY != code && TYPE_CODE_COMPLEX != code)
     return 0;
@@ -7975,8 +7975,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 	      enum type_code field_type_code;
 
 	      field_type_code
-		= TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type,
-							     i)));
+		= check_typedef (TYPE_FIELD_TYPE (type, i))->code ();
 
 	      /* Is it a floating point type field?  */
 	      if (field_type_code == TYPE_CODE_FLT)
@@ -8014,7 +8013,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
   struct gdbarch *gdbarch = regs->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
-  if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  if (type->code () == TYPE_CODE_FLT)
     {
       gdb_byte buf[ARM_FP_REGISTER_SIZE];
 
@@ -8044,12 +8043,12 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	  break;
 	}
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_INT
-	   || TYPE_CODE (type) == TYPE_CODE_CHAR
-	   || TYPE_CODE (type) == TYPE_CODE_BOOL
-	   || TYPE_CODE (type) == TYPE_CODE_PTR
+  else if (type->code () == TYPE_CODE_INT
+	   || type->code () == TYPE_CODE_CHAR
+	   || type->code () == TYPE_CODE_BOOL
+	   || type->code () == TYPE_CODE_PTR
 	   || TYPE_IS_REFERENCE (type)
-	   || TYPE_CODE (type) == TYPE_CODE_ENUM)
+	   || type->code () == TYPE_CODE_ENUM)
     {
       if (TYPE_LENGTH (type) <= 4)
 	{
@@ -8145,15 +8144,15 @@ arm_return_value (struct gdbarch *gdbarch, struct value *function,
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
 
-  if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
-      || TYPE_CODE (valtype) == TYPE_CODE_UNION
-      || TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
+  if (valtype->code () == TYPE_CODE_STRUCT
+      || valtype->code () == TYPE_CODE_UNION
+      || valtype->code () == TYPE_CODE_ARRAY)
     {
       if (tdep->struct_return == pcc_struct_return
 	  || arm_return_in_memory (gdbarch, valtype))
 	return RETURN_VALUE_STRUCT_CONVENTION;
     }
-  else if (TYPE_CODE (valtype) == TYPE_CODE_COMPLEX)
+  else if (valtype->code () == TYPE_CODE_COMPLEX)
     {
       if (arm_return_in_memory (gdbarch, valtype))
 	return RETURN_VALUE_STRUCT_CONVENTION;

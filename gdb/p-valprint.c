@@ -82,7 +82,7 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
   int want_space = 0;
   const gdb_byte *valaddr = value_contents_for_printing (val);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
       {
@@ -98,7 +98,7 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 	       is of TYPE_CODE_CHAR and element size is 1,2 or 4.  */
 	    if (options->format == 's'
 		|| ((eltlen == 1 || eltlen == 2 || eltlen == 4)
-		    && TYPE_CODE (elttype) == TYPE_CODE_CHAR
+		    && elttype->code () == TYPE_CODE_CHAR
 		    && options->format == 0))
 	      {
 		/* If requested, look for the first null char and only print
@@ -167,7 +167,7 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
     print_unpacked_pointer:
       elttype = check_typedef (TYPE_TARGET_TYPE (type));
 
-      if (TYPE_CODE (elttype) == TYPE_CODE_FUNC)
+      if (elttype->code () == TYPE_CODE_FUNC)
 	{
 	  /* Try to print what function it points to.  */
 	  print_address_demangle (options, gdbarch, addr, stream, demangle);
@@ -183,10 +183,10 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
       /* For a pointer to char or unsigned char, also print the string
 	 pointed to, unless pointer is null.  */
       if (((TYPE_LENGTH (elttype) == 1
-	   && (TYPE_CODE (elttype) == TYPE_CODE_INT
-	      || TYPE_CODE (elttype) == TYPE_CODE_CHAR))
-	  || ((TYPE_LENGTH (elttype) == 2 || TYPE_LENGTH (elttype) == 4)
-	      && TYPE_CODE (elttype) == TYPE_CODE_CHAR))
+	   && (elttype->code () == TYPE_CODE_INT
+               || elttype->code () == TYPE_CODE_CHAR))
+           || ((TYPE_LENGTH (elttype) == 2 || TYPE_LENGTH (elttype) == 4)
+               && elttype->code () == TYPE_CODE_CHAR))
 	  && (options->format == 0 || options->format == 's')
 	  && addr != 0)
 	{
@@ -397,7 +397,7 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
 
     default:
       error (_("Invalid pascal type code %d in symbol table."),
-	     TYPE_CODE (type));
+	     type->code ());
     }
 }
 
@@ -417,12 +417,12 @@ pascal_value_print (struct value *val, struct ui_file *stream,
 
      Object pascal: if it is a member pointer, we will take care
      of that when we print it.  */
-  if (TYPE_CODE (type) == TYPE_CODE_PTR
-      || TYPE_CODE (type) == TYPE_CODE_REF)
+  if (type->code () == TYPE_CODE_PTR
+      || type->code () == TYPE_CODE_REF)
     {
       /* Hack:  remove (char *) for char strings.  Their
          type is indicated by the quoted string anyway.  */
-      if (TYPE_CODE (type) == TYPE_CODE_PTR
+      if (type->code () == TYPE_CODE_PTR
 	  && TYPE_NAME (type) == NULL
 	  && TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL
 	  && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char") == 0)
@@ -481,15 +481,15 @@ pascal_object_is_vtbl_ptr_type (struct type *type)
 int
 pascal_object_is_vtbl_member (struct type *type)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+  if (type->code () == TYPE_CODE_PTR)
     {
       type = TYPE_TARGET_TYPE (type);
-      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+      if (type->code () == TYPE_CODE_ARRAY)
 	{
 	  type = TYPE_TARGET_TYPE (type);
-	  if (TYPE_CODE (type) == TYPE_CODE_STRUCT	/* If not using
+	  if (type->code () == TYPE_CODE_STRUCT	/* If not using
 							   thunks.  */
-	      || TYPE_CODE (type) == TYPE_CODE_PTR)	/* If using thunks.  */
+	      || type->code () == TYPE_CODE_PTR)	/* If using thunks.  */
 	    {
 	      /* Virtual functions tables are full of pointers
 	         to virtual functions.  */
@@ -826,7 +826,7 @@ pascal_object_print_static_field (struct value *val,
       return;
     }
 
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     {
       CORE_ADDR *first_dont_print, addr;
       int i;

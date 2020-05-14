@@ -1386,7 +1386,7 @@ convert_char_literal (struct type *type, LONGEST val)
   if (type == NULL)
     return val;
   type = check_typedef (type);
-  if (TYPE_CODE (type) != TYPE_CODE_ENUM)
+  if (type->code () != TYPE_CODE_ENUM)
     return val;
 
   if ((val >= 'a' && val <= 'z') || (val >= '0' && val <= '9'))

@@ -311,12 +311,12 @@ print_formatted (struct value *val, int size,
     }
 
   if (options->format == 0 || options->format == 's'
-      || TYPE_CODE (type) == TYPE_CODE_REF
-      || TYPE_CODE (type) == TYPE_CODE_ARRAY
-      || TYPE_CODE (type) == TYPE_CODE_STRING
-      || TYPE_CODE (type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (type) == TYPE_CODE_UNION
-      || TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
+      || type->code () == TYPE_CODE_REF
+      || type->code () == TYPE_CODE_ARRAY
+      || type->code () == TYPE_CODE_STRING
+      || type->code () == TYPE_CODE_STRUCT
+      || type->code () == TYPE_CODE_UNION
+      || type->code () == TYPE_CODE_NAMESPACE)
     value_print (val, stream, options);
   else
     /* User specified format, so don't look to the type to tell us
@@ -361,7 +361,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
   /* If the value is a pointer, and pointers and addresses are not the
      same, then at this point, the value's length (in target bytes) is
      gdbarch_addr_bit/TARGET_CHAR_BIT, not TYPE_LENGTH (type).  */
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+  if (type->code () == TYPE_CODE_PTR)
     len = gdbarch_addr_bit (gdbarch) / TARGET_CHAR_BIT;
 
   /* If we are printing it as unsigned, truncate it in case it is actually
@@ -411,14 +411,14 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
      range case, we want to avoid this, so we store the unpacked value
      here for possible use later.  */
   gdb::optional<LONGEST> val_long;
-  if ((TYPE_CODE (type) == TYPE_CODE_FLT
+  if ((type->code () == TYPE_CODE_FLT
        && (options->format == 'o'
 	   || options->format == 'x'
 	   || options->format == 't'
 	   || options->format == 'z'
 	   || options->format == 'd'
 	   || options->format == 'u'))
-      || (TYPE_CODE (type) == TYPE_CODE_RANGE
+      || (type->code () == TYPE_CODE_RANGE
 	  && TYPE_RANGE_DATA (type)->bias != 0))
     {
       val_long.emplace (unpack_long (type, valaddr));
@@ -432,10 +432,10 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
      of a floating-point type of the same length, if that exists.  Otherwise,
      the data is printed as integer.  */
   char format = options->format;
-  if (format == 'f' && TYPE_CODE (type) != TYPE_CODE_FLT)
+  if (format == 'f' && type->code () != TYPE_CODE_FLT)
     {
       type = float_type_from_length (type);
-      if (TYPE_CODE (type) != TYPE_CODE_FLT)
+      if (type->code () != TYPE_CODE_FLT)
         format = 0;
     }
 
@@ -451,7 +451,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       print_decimal_chars (stream, valaddr, len, false, byte_order);
       break;
     case 0:
-      if (TYPE_CODE (type) != TYPE_CODE_FLT)
+      if (type->code () != TYPE_CODE_FLT)
 	{
 	  print_decimal_chars (stream, valaddr, len, !TYPE_UNSIGNED (type),
 			       byte_order);
@@ -1218,7 +1218,7 @@ print_command_1 (const char *args, int voidprint)
     val = access_value_history (0);
 
   if (voidprint || (val && value_type (val) &&
-		    TYPE_CODE (value_type (val)) != TYPE_CODE_VOID))
+		    value_type (val)->code () != TYPE_CODE_VOID))
     print_value (val, print_opts);
 }
 
@@ -1681,8 +1681,7 @@ x_command (const char *exp, int from_tty)
 	val = coerce_ref (val);
       /* In rvalue contexts, such as this, functions are coerced into
          pointers to functions.  This makes "x/i main" work.  */
-      if (/* last_format == 'i'  && */ 
-	  TYPE_CODE (value_type (val)) == TYPE_CODE_FUNC
+      if (value_type (val)->code () == TYPE_CODE_FUNC
 	   && VALUE_LVAL (val) == lval_memory)
 	next_address = value_address (val);
       else
@@ -2198,7 +2197,7 @@ printf_c_string (struct ui_file *stream, const char *format,
 {
   const gdb_byte *str;
 
-  if (TYPE_CODE (value_type (value)) != TYPE_CODE_PTR
+  if (value_type (value)->code () != TYPE_CODE_PTR
       && VALUE_LVAL (value) == lval_internalvar
       && c_is_string_type_p (value_type (value)))
     {
@@ -2379,7 +2378,7 @@ printf_floating (struct ui_file *stream, const char *format,
      In either case, the result of the conversion is a byte buffer
      formatted in the target format for the target type.  */
 
-  if (TYPE_CODE (fmt_type) == TYPE_CODE_FLT)
+  if (fmt_type->code () == TYPE_CODE_FLT)
     {
       param_type = float_type_from_length (param_type);
       if (param_type != value_type (value))
@@ -2549,7 +2548,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 
 	      valtype = value_type (val_args[i]);
 	      if (TYPE_LENGTH (valtype) != TYPE_LENGTH (wctype)
-		  || TYPE_CODE (valtype) != TYPE_CODE_INT)
+		  || valtype->code () != TYPE_CODE_INT)
 		error (_("expected wchar_t argument for %%lc"));
 
 	      bytes = value_contents (val_args[i]);

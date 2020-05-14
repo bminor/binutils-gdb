@@ -462,7 +462,7 @@ PrimaryExpression:
 			  /* Check if the qualified name is in the global
 			     context.  However if the symbol has not already
 			     been resolved, it's not likely to be found.  */
-			  if (TYPE_CODE (type) == TYPE_CODE_MODULE)
+			  if (type->code () == TYPE_CODE_MODULE)
 			    {
 			      struct bound_minimal_symbol msymbol;
 			      struct block_symbol sym;
@@ -644,10 +644,10 @@ BasicType:
 static int
 type_aggregate_p (struct type *type)
 {
-  return (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	  || TYPE_CODE (type) == TYPE_CODE_UNION
-	  || TYPE_CODE (type) == TYPE_CODE_MODULE
-	  || (TYPE_CODE (type) == TYPE_CODE_ENUM
+  return (type->code () == TYPE_CODE_STRUCT
+	  || type->code () == TYPE_CODE_UNION
+	  || type->code () == TYPE_CODE_MODULE
+	  || (type->code () == TYPE_CODE_ENUM
 	      && TYPE_DECLARED_CLASS (type)));
 }
 

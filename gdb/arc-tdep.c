@@ -893,8 +893,8 @@ arc_return_value (struct gdbarch *gdbarch, struct value *function,
      function passes a hidden first parameter to the callee (in R0).  That
      parameter is the address at which the value being returned should be
      stored.  Otherwise, the result is returned in registers.  */
-  int is_struct_return = (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
-			  || TYPE_CODE (valtype) == TYPE_CODE_UNION
+  int is_struct_return = (valtype->code () == TYPE_CODE_STRUCT
+			  || valtype->code () == TYPE_CODE_UNION
 			  || TYPE_LENGTH (valtype) > 2 * ARC_REGISTER_SIZE);
 
   if (arc_debug)
@@ -1916,7 +1916,7 @@ arc_tdesc_init (struct gdbarch_info info, const struct target_desc **tdesc,
 static ULONGEST
 arc_type_align (struct gdbarch *gdbarch, struct type *type)
 {
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_PTR:
     case TYPE_CODE_FUNC:

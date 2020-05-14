@@ -86,7 +86,7 @@ m2_print_type (struct type *type, const char *varstring,
       return;
     }
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_SET:
       m2_short_set(type, stream, show, level);
@@ -282,7 +282,7 @@ m2_procedure (struct type *type, struct ui_file *stream,
   fprintf_filtered (stream, "PROCEDURE ");
   m2_type_name (type, stream);
   if (TYPE_TARGET_TYPE (type) == NULL
-      || TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_VOID)
+      || TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
     {
       int i, len = TYPE_NFIELDS (type);
 
@@ -341,7 +341,7 @@ m2_is_long_set (struct type *type)
   int len, i;
   struct type *range;
 
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     {
 
       /* check if all fields of the RECORD are consecutive sets.  */
@@ -351,7 +351,7 @@ m2_is_long_set (struct type *type)
 	{
 	  if (TYPE_FIELD_TYPE (type, i) == NULL)
 	    return 0;
-	  if (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) != TYPE_CODE_SET)
+	  if (TYPE_FIELD_TYPE (type, i)->code () != TYPE_CODE_SET)
 	    return 0;
 	  if (TYPE_FIELD_NAME (type, i) != NULL
 	      && (strcmp (TYPE_FIELD_NAME (type, i), "") != 0))
@@ -376,7 +376,7 @@ static int
 m2_get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 {
   type = check_typedef (type);
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_CHAR:
       if (TYPE_LENGTH (type) < sizeof (LONGEST))
@@ -407,7 +407,7 @@ m2_is_long_set_of_type (struct type *type, struct type **of_type)
   LONGEST l1, l2;
   LONGEST h1, h2;
 
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     {
       len = TYPE_NFIELDS (type);
       i = TYPE_N_BASECLASSES (type);
@@ -482,7 +482,7 @@ m2_long_set (struct type *type, struct ui_file *stream, int show, int level,
 int
 m2_is_unbounded_array (struct type *type)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     {
       /*
        *  check if we have a structure with exactly two fields named
@@ -496,7 +496,7 @@ m2_is_unbounded_array (struct type *type)
 	return 0;
       if (strcmp (TYPE_FIELD_NAME (type, 1), "_m2_high") != 0)
 	return 0;
-      if (TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) != TYPE_CODE_PTR)
+      if (TYPE_FIELD_TYPE (type, 0)->code () != TYPE_CODE_PTR)
 	return 0;
       return 1;
     }
@@ -542,9 +542,9 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
   wrap_here ("    ");
   if (show < 0)
     {
-      if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+      if (type->code () == TYPE_CODE_STRUCT)
 	fprintf_filtered (stream, "RECORD ... END ");
-      else if (TYPE_CODE (type) == TYPE_CODE_UNION)
+      else if (type->code () == TYPE_CODE_UNION)
 	fprintf_filtered (stream, "CASE ... END ");
     }
   else if (show > 0)
@@ -552,9 +552,9 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
       int i;
       int len = TYPE_NFIELDS (type);
 
-      if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+      if (type->code () == TYPE_CODE_STRUCT)
 	fprintf_filtered (stream, "RECORD\n");
-      else if (TYPE_CODE (type) == TYPE_CODE_UNION)
+      else if (type->code () == TYPE_CODE_UNION)
 	/* i18n: Do not translate "CASE" and "OF".  */
 	fprintf_filtered (stream, _("CASE <variant> OF\n"));
 

@@ -1806,8 +1806,8 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		 for it explicitly, never if they just happen to
 		 appear in the middle of some value chain.  */
 	      if (v == result
-		  || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
-		      && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
+		  || (vtype->code () != TYPE_CODE_STRUCT
+		      && vtype->code () != TYPE_CODE_ARRAY))
 		{
 		  CORE_ADDR addr;
 		  enum target_hw_bp_type type;
@@ -10806,8 +10806,8 @@ can_use_hardware_watchpoint (const std::vector<value_ref_ptr> &vals)
 		 explicitly, never if they just happen to appear in a
 		 middle of some value chain.  */
 	      if (v == head
-		  || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
-		      && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
+		  || (vtype->code () != TYPE_CODE_STRUCT
+		      && vtype->code () != TYPE_CODE_ARRAY))
 		{
 		  CORE_ADDR vaddr = value_address (v);
 		  int len;

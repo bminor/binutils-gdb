@@ -614,9 +614,9 @@ s12z_return_value (struct gdbarch *gdbarch, struct value *function,
                    struct type *type, struct regcache *regcache,
                    gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
-      || TYPE_CODE (type) == TYPE_CODE_UNION
-      || TYPE_CODE (type) == TYPE_CODE_ARRAY
+  if (type->code () == TYPE_CODE_STRUCT
+      || type->code () == TYPE_CODE_UNION
+      || type->code () == TYPE_CODE_ARRAY
       || TYPE_LENGTH (type) > 4)
     return RETURN_VALUE_STRUCT_CONVENTION;
 

@@ -1651,9 +1651,9 @@ xtensa_return_value (struct gdbarch *gdbarch,
 {
   /* Structures up to 16 bytes are returned in registers.  */
 
-  int struct_return = ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
-			|| TYPE_CODE (valtype) == TYPE_CODE_UNION
-			|| TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
+  int struct_return = ((valtype->code () == TYPE_CODE_STRUCT
+			|| valtype->code () == TYPE_CODE_UNION
+			|| valtype->code () == TYPE_CODE_ARRAY)
 		       && TYPE_LENGTH (valtype) > 16);
 
   if (struct_return)
@@ -1726,7 +1726,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	  fprintf_unfiltered (gdb_stdlog, "%2d: %s %3s ", i,
 			      host_address_to_string (arg),
 			      pulongest (TYPE_LENGTH (arg_type)));
-	  switch (TYPE_CODE (arg_type))
+	  switch (arg_type->code ())
 	    {
 	    case TYPE_CODE_INT:
 	      fprintf_unfiltered (gdb_stdlog, "int");
@@ -1735,7 +1735,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	      fprintf_unfiltered (gdb_stdlog, "struct");
 	      break;
 	    default:
-	      fprintf_unfiltered (gdb_stdlog, "%3d", TYPE_CODE (arg_type));
+	      fprintf_unfiltered (gdb_stdlog, "%3d", arg_type->code ());
 	      break;
 	    }
 	  fprintf_unfiltered (gdb_stdlog, " %s\n",
@@ -1760,7 +1760,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
       struct value *arg = args[i];
       struct type *arg_type = check_typedef (value_type (arg));
 
-      switch (TYPE_CODE (arg_type))
+      switch (arg_type->code ())
 	{
 	case TYPE_CODE_INT:
 	case TYPE_CODE_BOOL:

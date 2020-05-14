@@ -65,7 +65,7 @@ f_print_type (struct type *type, const char *varstring, struct ui_file *stream,
   enum type_code code;
 
   f_type_print_base (type, stream, show, level);
-  code = TYPE_CODE (type);
+  code = type->code ();
   if ((varstring != NULL && *varstring != '\0')
       /* Need a space if going to print stars or brackets; but not if we
 	 will print just a type name.  */
@@ -76,10 +76,10 @@ f_print_type (struct type *type, const char *varstring, struct ui_file *stream,
 	      || code == TYPE_CODE_ARRAY
 	      || ((code == TYPE_CODE_PTR
 		   || code == TYPE_CODE_REF)
-		  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
-		      || (TYPE_CODE (TYPE_TARGET_TYPE (type))
+		  && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_FUNC
+		      || (TYPE_TARGET_TYPE (type)->code ()
 			  == TYPE_CODE_METHOD)
-		      || (TYPE_CODE (TYPE_TARGET_TYPE (type))
+		      || (TYPE_TARGET_TYPE (type)->code ()
 			  == TYPE_CODE_ARRAY))))))
     fputs_filtered (" ", stream);
   f_type_print_varspec_prefix (type, stream, show, 0);
@@ -119,7 +119,7 @@ f_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
 
   QUIT;
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_PTR:
       f_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
@@ -183,7 +183,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 
   QUIT;
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
       arrayprint_recurse_level++;
@@ -207,7 +207,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	  print_rank_only = true;
 	}
 
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ARRAY)
+      if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ARRAY)
 	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
 				     0, 0, arrayprint_recurse_level,
 				     print_rank_only);
@@ -233,7 +233,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	    }
 	}
 
-      if (TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_ARRAY)
+      if (TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_ARRAY)
 	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
 				     0, 0, arrayprint_recurse_level,
 				     print_rank_only);
@@ -335,18 +335,18 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
   if ((show <= 0) && (TYPE_NAME (type) != NULL))
     {
       const char *prefix = "";
-      if (TYPE_CODE (type) == TYPE_CODE_UNION)
+      if (type->code () == TYPE_CODE_UNION)
 	prefix = "Type, C_Union :: ";
-      else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+      else if (type->code () == TYPE_CODE_STRUCT)
 	prefix = "Type ";
       fprintfi_filtered (level, stream, "%s%s", prefix, TYPE_NAME (type));
       return;
     }
 
-  if (TYPE_CODE (type) != TYPE_CODE_TYPEDEF)
+  if (type->code () != TYPE_CODE_TYPEDEF)
     type = check_typedef (type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_TYPEDEF:
       f_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
@@ -420,7 +420,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      if (TYPE_CODE (type) == TYPE_CODE_UNION)
+      if (type->code () == TYPE_CODE_UNION)
 	fprintfi_filtered (level, stream, "Type, C_Union :: ");
       else
 	fprintfi_filtered (level, stream, "Type ");
@@ -459,7 +459,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
       if (TYPE_NAME (type) != NULL)
 	fprintfi_filtered (level, stream, "%s", TYPE_NAME (type));
       else
-	error (_("Invalid type code (%d) in symbol table."), TYPE_CODE (type));
+	error (_("Invalid type code (%d) in symbol table."), type->code ());
       break;
     }
 

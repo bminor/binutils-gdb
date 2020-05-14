@@ -81,16 +81,16 @@ gccgo_string_p (struct type *type)
       type0 = check_typedef (type0);
       type1 = check_typedef (type1);
 
-      if (TYPE_CODE (type0) == TYPE_CODE_PTR
+      if (type0->code () == TYPE_CODE_PTR
 	  && strcmp (TYPE_FIELD_NAME (type, 0), "__data") == 0
-	  && TYPE_CODE (type1) == TYPE_CODE_INT
+	  && type1->code () == TYPE_CODE_INT
 	  && strcmp (TYPE_FIELD_NAME (type, 1), "__length") == 0)
 	{
 	  struct type *target_type = TYPE_TARGET_TYPE (type0);
 
 	  target_type = check_typedef (target_type);
 
-	  if (TYPE_CODE (target_type) == TYPE_CODE_INT
+	  if (target_type->code () == TYPE_CODE_INT
 	      && TYPE_LENGTH (target_type) == 1
 	      && strcmp (TYPE_NAME (target_type), "uint8") == 0)
 	    return 1;
@@ -137,7 +137,7 @@ static bool
 go_is_string_type_p (struct type *type)
 {
   type = check_typedef (type);
-  return (TYPE_CODE (type) == TYPE_CODE_STRUCT
+  return (type->code () == TYPE_CODE_STRUCT
 	  && go_classify_struct_type (type) == GO_TYPE_STRING);
 }
 

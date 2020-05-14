@@ -1,5 +1,10 @@
 2020-05-14  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_CODE): Remove.  Change all call sites to use
+	type::code instead.
+
+2020-05-14  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (struct type) <code, set_code>: New methods.
 	(TYPE_CODE): Use type::code.  Change all call sites used to set
 	the code to use type::set_code instead.

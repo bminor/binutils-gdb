@@ -214,7 +214,7 @@ sparc_integral_or_pointer_p (const struct type *type)
 {
   int len = TYPE_LENGTH (type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_INT:
     case TYPE_CODE_BOOL:
@@ -242,7 +242,7 @@ sparc_integral_or_pointer_p (const struct type *type)
 static int
 sparc_floating_p (const struct type *type)
 {
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_FLT:
       {
@@ -261,7 +261,7 @@ sparc_floating_p (const struct type *type)
 static int
 sparc_complex_floating_p (const struct type *type)
 {
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_COMPLEX:
       {
@@ -284,7 +284,7 @@ sparc_complex_floating_p (const struct type *type)
 static int
 sparc_structure_or_union_p (const struct type *type)
 {
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
@@ -303,7 +303,7 @@ sparc_structure_or_union_p (const struct type *type)
 static bool
 sparc_structure_return_p (const struct type *type)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+  if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
     {
       /* Float vectors are always returned by memory.  */
       if (sparc_floating_p (check_typedef (TYPE_TARGET_TYPE (type))))
@@ -331,7 +331,7 @@ sparc_structure_return_p (const struct type *type)
 static bool
 sparc_arg_by_memory_p (const struct type *type)
 {
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
+  if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type))
     {
       /* Float vectors are always passed by memory.  */
       if (sparc_floating_p (check_typedef (TYPE_TARGET_TYPE (type))))
@@ -1228,7 +1228,7 @@ static int
 sparc32_struct_return_from_sym (struct symbol *sym)
 {
   struct type *type = check_typedef (SYMBOL_TYPE (sym));
-  enum type_code code = TYPE_CODE (type);
+  enum type_code code = type->code ();
 
   if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
     {
@@ -1402,7 +1402,7 @@ sparc32_extract_return_value (struct type *type, struct regcache *regcache,
   gdb_assert (!sparc_structure_return_p (type));
 
   if (sparc_floating_p (type) || sparc_complex_floating_p (type)
-      || TYPE_CODE (type) == TYPE_CODE_ARRAY)
+      || type->code () == TYPE_CODE_ARRAY)
     {
       /* Floating return values.  */
       regcache->cooked_read (SPARC_F0_REGNUM, buf);

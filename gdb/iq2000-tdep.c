@@ -89,7 +89,7 @@ iq2000_pointer_to_address (struct gdbarch *gdbarch,
 			   struct type * type, const gdb_byte * buf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  enum type_code target = TYPE_CODE (TYPE_TARGET_TYPE (type));
+  enum type_code target = TYPE_TARGET_TYPE (type)->code ();
   CORE_ADDR addr
     = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
 
@@ -109,7 +109,7 @@ iq2000_address_to_pointer (struct gdbarch *gdbarch,
 			   struct type *type, gdb_byte *buf, CORE_ADDR addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  enum type_code target = TYPE_CODE (TYPE_TARGET_TYPE (type));
+  enum type_code target = TYPE_TARGET_TYPE (type)->code ();
 
   if (target == TYPE_CODE_FUNC || target == TYPE_CODE_METHOD)
     addr = insn_ptr_from_addr (addr);
@@ -504,8 +504,8 @@ iq2000_store_return_value (struct type *type, struct regcache *regcache,
 static int
 iq2000_use_struct_convention (struct type *type)
 {
-  return ((TYPE_CODE (type) == TYPE_CODE_STRUCT)
-	  || (TYPE_CODE (type) == TYPE_CODE_UNION))
+  return ((type->code () == TYPE_CODE_STRUCT)
+	  || (type->code () == TYPE_CODE_UNION))
 	 && TYPE_LENGTH (type) > 8;
 }
 
@@ -597,11 +597,11 @@ iq2000_pass_8bytetype_by_address (struct type *type)
   struct type *ftype;
 
   /* Skip typedefs.  */
-  while (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+  while (type->code () == TYPE_CODE_TYPEDEF)
     type = TYPE_TARGET_TYPE (type);
   /* Non-struct and non-union types are always passed by value.  */
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
-      && TYPE_CODE (type) != TYPE_CODE_UNION)
+  if (type->code () != TYPE_CODE_STRUCT
+      && type->code () != TYPE_CODE_UNION)
     return 0;
   /* Structs with more than 1 field are always passed by address.  */
   if (TYPE_NFIELDS (type) != 1)
@@ -612,11 +612,11 @@ iq2000_pass_8bytetype_by_address (struct type *type)
   if (TYPE_LENGTH (ftype) != 8)
     return 1;
   /* Skip typedefs of field type.  */
-  while (TYPE_CODE (ftype) == TYPE_CODE_TYPEDEF)
+  while (ftype->code () == TYPE_CODE_TYPEDEF)
     ftype = TYPE_TARGET_TYPE (ftype);
   /* If field is int or float, pass by value.  */
-  if (TYPE_CODE (ftype) == TYPE_CODE_FLT
-      || TYPE_CODE (ftype) == TYPE_CODE_INT)
+  if (ftype->code () == TYPE_CODE_FLT
+      || ftype->code () == TYPE_CODE_INT)
     return 0;
   /* Everything else, pass by address.  */
   return 1;

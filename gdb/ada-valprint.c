@@ -41,7 +41,7 @@ static int print_field_values (struct value *, struct value *,
 static void
 adjust_type_signedness (struct type *type)
 {
-  if (type != NULL && TYPE_CODE (type) == TYPE_CODE_RANGE
+  if (type != NULL && type->code () == TYPE_CODE_RANGE
       && TYPE_LOW_BOUND (type) >= 0)
     TYPE_UNSIGNED (type) = 1;
 }
@@ -73,7 +73,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
 
   index_type = TYPE_INDEX_TYPE (type);
 
-  while (TYPE_CODE (index_type) == TYPE_CODE_RANGE)
+  while (index_type->code () == TYPE_CODE_RANGE)
     {
       /* We need to know what the base type is, in order to do the
          appropriate check below.  Otherwise, if this is a subrange
@@ -84,7 +84,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
     }
 
   /* Don't print the lower bound if it's the default one.  */
-  switch (TYPE_CODE (index_type))
+  switch (index_type->code ())
     {
     case TYPE_CODE_BOOL:
     case TYPE_CODE_CHAR:
@@ -141,12 +141,12 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
     else
       len = high - low + 1;
 
-    if (TYPE_CODE (index_type) == TYPE_CODE_RANGE)
+    if (index_type->code () == TYPE_CODE_RANGE)
         base_index_type = TYPE_TARGET_TYPE (index_type);
       else
         base_index_type = index_type;
 
-    if (TYPE_CODE (base_index_type) == TYPE_CODE_ENUM)
+    if (base_index_type->code () == TYPE_CODE_ENUM)
       {
         LONGEST low_pos, high_pos;
 
@@ -396,7 +396,7 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 
   type = ada_check_typedef (type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
 
     case TYPE_CODE_ENUM:
@@ -749,13 +749,13 @@ ada_val_print_gnat_array (struct value *val,
      of the case where ADDRESS is meaningless because original_value
      was not an lval.  */
   val = coerce_ref (val);
-  if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)  /* array access type.  */
+  if (type->code () == TYPE_CODE_TYPEDEF)  /* array access type.  */
     val = ada_coerce_to_simple_array_ptr (val);
   else
     val = ada_coerce_to_simple_array (val);
   if (val == NULL)
     {
-      gdb_assert (TYPE_CODE (type) == TYPE_CODE_TYPEDEF);
+      gdb_assert (type->code () == TYPE_CODE_TYPEDEF);
       fprintf_filtered (stream, "0x0");
     }
   else
@@ -805,10 +805,10 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
       fputs_filtered (str.c_str (), stream);
       return;
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_RANGE
-	   && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_ENUM
-	       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_BOOL
-	       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CHAR))
+  else if (type->code () == TYPE_CODE_RANGE
+	   && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ENUM
+	       || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_BOOL
+	       || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_CHAR))
     {
       /* For enum-valued ranges, we want to recurse, because we'll end
 	 up printing the constant's name rather than its numeric
@@ -992,7 +992,7 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
   struct value *deref_val;
   CORE_ADDR deref_val_int;
 
-  if (TYPE_CODE (elttype) == TYPE_CODE_UNDEF)
+  if (elttype->code () == TYPE_CODE_UNDEF)
     {
       fputs_styled ("<ref to undefined type>", metadata_style.style (),
 		    stream);
@@ -1048,7 +1048,7 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
 
   if (ada_is_array_descriptor_type (type)
       || (ada_is_constrained_packed_array_type (type)
-	  && TYPE_CODE (type) != TYPE_CODE_PTR))
+	  && type->code () != TYPE_CODE_PTR))
     {
       ada_val_print_gnat_array (val, stream, recurse, options);
       return;
@@ -1069,7 +1069,7 @@ ada_value_print_1 (struct value *val, struct ui_file *stream, int recurse,
       deprecated_set_value_type (val, type);
     }
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     default:
       common_val_print (val, stream, recurse, options,
@@ -1145,12 +1145,12 @@ ada_value_print (struct value *val0, struct ui_file *stream,
   struct value_print_options opts;
 
   /* If it is a pointer, indicate what it points to.  */
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+  if (type->code () == TYPE_CODE_PTR)
     {
       /* Hack:  don't print (char *) for char strings.  Their
          type is indicated by the quoted string anyway.  */
       if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) != sizeof (char)
-	  || TYPE_CODE (TYPE_TARGET_TYPE (type)) != TYPE_CODE_INT 
+	  || TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_INT
 	  || TYPE_UNSIGNED (TYPE_TARGET_TYPE (type)))
 	{
 	  fprintf_filtered (stream, "(");
@@ -1163,7 +1163,7 @@ ada_value_print (struct value *val0, struct ui_file *stream,
       /* We do not print the type description unless TYPE is an array
 	 access type (this is encoded by the compiler as a typedef to
 	 a fat pointer - hence the check against TYPE_CODE_TYPEDEF).  */
-      if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+      if (type->code () == TYPE_CODE_TYPEDEF)
         {
 	  fprintf_filtered (stream, "(");
 	  type_print (type, "", stream, -1);

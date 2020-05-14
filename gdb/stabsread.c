@@ -955,7 +955,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* Function result types are described as the result type in stabs.
          We need to convert this to the function-returning-type-X type
          in GDB.  E.g. "int" is converted to "function returning int".  */
-      if (TYPE_CODE (SYMBOL_TYPE (sym)) != TYPE_CODE_FUNC)
+      if (SYMBOL_TYPE (sym)->code () != TYPE_CODE_FUNC)
 	SYMBOL_TYPE (sym) = lookup_function_type (SYMBOL_TYPE (sym));
 
       /* All functions in C++ have prototypes.  Stabs does not offer an
@@ -1004,7 +1004,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	         a TYPE_CODE_VOID type by read_type, and we have to turn
 	         it back into builtin_int here.
 	         FIXME: Do we need a new builtin_promoted_int_arg ?  */
-	      if (TYPE_CODE (ptype) == TYPE_CODE_VOID)
+	      if (ptype->code () == TYPE_CODE_VOID)
 		ptype = objfile_type (objfile)->builtin_int;
 	      TYPE_FIELD_TYPE (ftype, nparams) = ptype;
 	      TYPE_FIELD_ARTIFICIAL (ftype, nparams++) = 0;
@@ -1093,7 +1093,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	     really an int.  */
 	  if (TYPE_LENGTH (SYMBOL_TYPE (sym))
 	      < gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT
-	      && TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT)
+	      && SYMBOL_TYPE (sym)->code () == TYPE_CODE_INT)
 	    {
 	      SYMBOL_TYPE (sym) =
 		TYPE_UNSIGNED (SYMBOL_TYPE (sym))
@@ -1239,8 +1239,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
          derived class was output.  We fill in the derived class's
          base part member's name here in that case.  */
       if (TYPE_NAME (SYMBOL_TYPE (sym)) != NULL)
-	if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_STRUCT
-	     || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_UNION)
+	if ((SYMBOL_TYPE (sym)->code () == TYPE_CODE_STRUCT
+	     || SYMBOL_TYPE (sym)->code () == TYPE_CODE_UNION)
 	    && TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)))
 	  {
 	    int j;
@@ -1253,9 +1253,9 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
       if (TYPE_NAME (SYMBOL_TYPE (sym)) == NULL)
 	{
-	  if ((TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
+	  if ((SYMBOL_TYPE (sym)->code () == TYPE_CODE_PTR
 	       && strcmp (sym->linkage_name (), vtbl_ptr_name))
-	      || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FUNC)
+	      || SYMBOL_TYPE (sym)->code () == TYPE_CODE_FUNC)
 	    {
 	      /* If we are giving a name to a type such as "pointer to
 	         foo" or "function returning foo", we better not set
@@ -1548,7 +1548,7 @@ read_type (const char **pp, struct objfile *objfile)
           /* If this is a forward reference, arrange to complain if it
              doesn't get patched up by the time we're done
              reading.  */
-          if (TYPE_CODE (type) == TYPE_CODE_UNDEF)
+          if (type->code () == TYPE_CODE_UNDEF)
             add_undefined_type (type, typenums);
 
           return type;
@@ -1670,7 +1670,7 @@ again:
 
 	      if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
 		  && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
-		  && (TYPE_CODE (SYMBOL_TYPE (sym)) == code)
+		  && (SYMBOL_TYPE (sym)->code () == code)
 		  && strcmp (sym->linkage_name (), type_name) == 0)
 		{
 		  obstack_free (&objfile->objfile_obstack, type_name);
@@ -1835,7 +1835,7 @@ again:
            that's just an empty argument list.  */
         if (arg_types
             && ! arg_types->next
-            && TYPE_CODE (arg_types->type) == TYPE_CODE_VOID)
+            && arg_types->type->code () == TYPE_CODE_VOID)
           num_args = 0;
 
         TYPE_FIELDS (func_type)
@@ -2369,10 +2369,10 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 	    }
 
 	  /* These are methods, not functions.  */
-	  if (TYPE_CODE (new_sublist->fn_field.type) == TYPE_CODE_FUNC)
+	  if (new_sublist->fn_field.type->code () == TYPE_CODE_FUNC)
 	    new_sublist->fn_field.type->set_code (TYPE_CODE_METHOD);
 	  else
-	    gdb_assert (TYPE_CODE (new_sublist->fn_field.type)
+	    gdb_assert (new_sublist->fn_field.type->code ()
 			== TYPE_CODE_METHOD);
 
 	  /* If this is just a stub, then we don't have the real name here.  */
@@ -2920,16 +2920,16 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
 
       struct type *field_type = check_typedef (FIELD_TYPE (fip->list->field));
 
-      if (TYPE_CODE (field_type) != TYPE_CODE_INT
-	  && TYPE_CODE (field_type) != TYPE_CODE_RANGE
-	  && TYPE_CODE (field_type) != TYPE_CODE_BOOL
-	  && TYPE_CODE (field_type) != TYPE_CODE_ENUM)
+      if (field_type->code () != TYPE_CODE_INT
+	  && field_type->code () != TYPE_CODE_RANGE
+	  && field_type->code () != TYPE_CODE_BOOL
+	  && field_type->code () != TYPE_CODE_ENUM)
 	{
 	  FIELD_BITSIZE (fip->list->field) = 0;
 	}
       if ((FIELD_BITSIZE (fip->list->field)
 	   == TARGET_CHAR_BIT * TYPE_LENGTH (field_type)
-	   || (TYPE_CODE (field_type) == TYPE_CODE_ENUM
+	   || (field_type->code () == TYPE_CODE_ENUM
 	       && FIELD_BITSIZE (fip->list->field)
 		  == gdbarch_int_bit (gdbarch))
 	  )
@@ -3382,7 +3382,7 @@ complain_about_struct_wipeout (struct type *type)
   if (TYPE_NAME (type))
     {
       name = TYPE_NAME (type);
-      switch (TYPE_CODE (type))
+      switch (type->code ())
         {
         case TYPE_CODE_STRUCT: kind = "struct "; break;
         case TYPE_CODE_UNION:  kind = "union ";  break;
@@ -3467,7 +3467,7 @@ read_struct_type (const char **pp, struct type *type, enum type_code type_code,
      Obviously, GDB can't fix this by itself, but it can at least avoid
      scribbling on existing structure type objects when new definitions
      appear.  */
-  if (! (TYPE_CODE (type) == TYPE_CODE_UNDEF
+  if (! (type->code () == TYPE_CODE_UNDEF
          || TYPE_STUB (type)))
     {
       complain_about_struct_wipeout (type);
@@ -4231,7 +4231,7 @@ read_args (const char **pp, int end, struct objfile *objfile, int *nargsp,
       complaint (_("Invalid (empty) method arguments"));
       *varargsp = 0;
     }
-  else if (TYPE_CODE (types[n - 1]) != TYPE_CODE_VOID)
+  else if (types[n - 1]->code () != TYPE_CODE_VOID)
     *varargsp = 1;
   else
     {
@@ -4429,7 +4429,7 @@ cleanup_undefined_types_noname (struct objfile *objfile)
       struct type **type;
 
       type = dbx_lookup_type (nat.typenums, objfile);
-      if (nat.type != *type && TYPE_CODE (*type) != TYPE_CODE_UNDEF)
+      if (nat.type != *type && (*type)->code () != TYPE_CODE_UNDEF)
         {
           /* The instance flags of the undefined type are still unset,
              and needs to be copied over from the reference type.
@@ -4479,7 +4479,7 @@ cleanup_undefined_types_1 (void)
 
   for (type = undef_types; type < undef_types + undef_types_length; type++)
     {
-      switch (TYPE_CODE (*type))
+      switch ((*type)->code ())
 	{
 
 	case TYPE_CODE_STRUCT:
@@ -4510,8 +4510,8 @@ cleanup_undefined_types_1 (void)
 
 			if (SYMBOL_CLASS (sym) == LOC_TYPEDEF
 			    && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
-			    && (TYPE_CODE (SYMBOL_TYPE (sym)) ==
-				TYPE_CODE (*type))
+			    && (SYMBOL_TYPE (sym)->code () ==
+				(*type)->code ())
 			    && (TYPE_INSTANCE_FLAGS (*type) ==
 				TYPE_INSTANCE_FLAGS (SYMBOL_TYPE (sym)))
 			    && strcmp (sym->linkage_name (), type_name) == 0)
@@ -4526,7 +4526,7 @@ cleanup_undefined_types_1 (void)
 	  {
 	    complaint (_("forward-referenced types left unresolved, "
                        "type code %d."),
-		       TYPE_CODE (*type));
+		       (*type)->code ());
 	  }
 	  break;
 	}

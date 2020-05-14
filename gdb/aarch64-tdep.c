@@ -1254,7 +1254,7 @@ static ULONGEST
 aarch64_type_align (gdbarch *gdbarch, struct type *t)
 {
   t = check_typedef (t);
-  if (TYPE_CODE (t) == TYPE_CODE_ARRAY && TYPE_VECTOR (t))
+  if (t->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (t))
     {
       /* Use the natural alignment for vector types (the same for
 	 scalar type), but the maximum alignment is 128-bit.  */
@@ -1283,7 +1283,7 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
   if (type == nullptr)
     return -1;
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_FLT:
       if (TYPE_LENGTH (type) > 16)
@@ -1292,7 +1292,7 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
       if (*fundamental_type == nullptr)
 	*fundamental_type = type;
       else if (TYPE_LENGTH (type) != TYPE_LENGTH (*fundamental_type)
-	       || TYPE_CODE (type) != TYPE_CODE (*fundamental_type))
+	       || type->code () != (*fundamental_type)->code ())
 	return -1;
 
       return 1;
@@ -1306,7 +1306,7 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 	if (*fundamental_type == nullptr)
 	  *fundamental_type = target_type;
 	else if (TYPE_LENGTH (target_type) != TYPE_LENGTH (*fundamental_type)
-		 || TYPE_CODE (target_type) != TYPE_CODE (*fundamental_type))
+		 || target_type->code () != (*fundamental_type)->code ())
 	  return -1;
 
 	return 2;
@@ -1322,7 +1322,7 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 	    if (*fundamental_type == nullptr)
 	      *fundamental_type = type;
 	    else if (TYPE_LENGTH (type) != TYPE_LENGTH (*fundamental_type)
-		     || TYPE_CODE (type) != TYPE_CODE (*fundamental_type))
+		     || type->code () != (*fundamental_type)->code ())
 	      return -1;
 
 	    return 1;
@@ -1449,7 +1449,7 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int len = TYPE_LENGTH (type);
-  enum type_code typecode = TYPE_CODE (type);
+  enum type_code typecode = type->code ();
   int regnum = AARCH64_X0_REGNUM + info->ngrn;
   const bfd_byte *buf = value_contents (arg);
 
@@ -1600,7 +1600,7 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
 			 struct aarch64_call_info *info, struct type *arg_type,
 			 struct value *arg)
 {
-  switch (TYPE_CODE (arg_type))
+  switch (arg_type->code ())
     {
     case TYPE_CODE_FLT:
       return pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (arg_type),
@@ -1736,7 +1736,7 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  continue;
 	}
 
-      switch (TYPE_CODE (arg_type))
+      switch (arg_type->code ())
 	{
 	case TYPE_CODE_INT:
 	case TYPE_CODE_BOOL:
@@ -2120,12 +2120,12 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
 	  valbuf += len;
 	}
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_INT
-	   || TYPE_CODE (type) == TYPE_CODE_CHAR
-	   || TYPE_CODE (type) == TYPE_CODE_BOOL
-	   || TYPE_CODE (type) == TYPE_CODE_PTR
+  else if (type->code () == TYPE_CODE_INT
+	   || type->code () == TYPE_CODE_CHAR
+	   || type->code () == TYPE_CODE_BOOL
+	   || type->code () == TYPE_CODE_PTR
 	   || TYPE_IS_REFERENCE (type)
-	   || TYPE_CODE (type) == TYPE_CODE_ENUM)
+	   || type->code () == TYPE_CODE_ENUM)
     {
       /* If the type is a plain integer, then the access is
 	 straight-forward.  Otherwise we have to play around a bit
@@ -2233,12 +2233,12 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	  valbuf += len;
 	}
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_INT
-	   || TYPE_CODE (type) == TYPE_CODE_CHAR
-	   || TYPE_CODE (type) == TYPE_CODE_BOOL
-	   || TYPE_CODE (type) == TYPE_CODE_PTR
+  else if (type->code () == TYPE_CODE_INT
+	   || type->code () == TYPE_CODE_CHAR
+	   || type->code () == TYPE_CODE_BOOL
+	   || type->code () == TYPE_CODE_PTR
 	   || TYPE_IS_REFERENCE (type)
-	   || TYPE_CODE (type) == TYPE_CODE_ENUM)
+	   || type->code () == TYPE_CODE_ENUM)
     {
       if (TYPE_LENGTH (type) <= X_REGISTER_SIZE)
 	{
@@ -2294,9 +2294,9 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
 		      gdb_byte *readbuf, const gdb_byte *writebuf)
 {
 
-  if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
-      || TYPE_CODE (valtype) == TYPE_CODE_UNION
-      || TYPE_CODE (valtype) == TYPE_CODE_ARRAY)
+  if (valtype->code () == TYPE_CODE_STRUCT
+      || valtype->code () == TYPE_CODE_UNION
+      || valtype->code () == TYPE_CODE_ARRAY)
     {
       if (aarch64_return_in_memory (gdbarch, valtype))
 	{

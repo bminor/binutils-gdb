@@ -332,7 +332,7 @@ i387_convert_register_p (struct gdbarch *gdbarch, int regnum,
       /* Floating point registers must be converted unless we are
 	 accessing them in their hardware type or TYPE is not float.  */
       if (type == i387_ext_type (gdbarch)
-	  || TYPE_CODE (type) != TYPE_CODE_FLT)
+	  || type->code () != TYPE_CODE_FLT)
 	return 0;
       else
 	return 1;
@@ -355,7 +355,7 @@ i387_register_to_value (struct frame_info *frame, int regnum,
   gdb_assert (i386_fp_regnum_p (gdbarch, regnum));
 
   /* We only support floating-point values.  */
-  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+  if (type->code () != TYPE_CODE_FLT)
     {
       warning (_("Cannot convert floating-point register value "
 	       "to non-floating-point type."));
@@ -387,7 +387,7 @@ i387_value_to_register (struct frame_info *frame, int regnum,
   gdb_assert (i386_fp_regnum_p (gdbarch, regnum));
 
   /* We only support floating-point values.  */
-  if (TYPE_CODE (type) != TYPE_CODE_FLT)
+  if (type->code () != TYPE_CODE_FLT)
     {
       warning (_("Cannot convert non-floating-point type "
 	       "to floating-point register value."));

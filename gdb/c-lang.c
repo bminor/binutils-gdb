@@ -86,7 +86,7 @@ classify_type (struct type *elttype, struct gdbarch *gdbarch,
     {
       const char *name = TYPE_NAME (elttype);
 
-      if (TYPE_CODE (elttype) == TYPE_CODE_CHAR || !name)
+      if (elttype->code () == TYPE_CODE_CHAR || !name)
 	{
 	  result = C_CHAR;
 	  goto done;
@@ -110,7 +110,7 @@ classify_type (struct type *elttype, struct gdbarch *gdbarch,
 	  goto done;
 	}
 
-      if (TYPE_CODE (elttype) != TYPE_CODE_TYPEDEF)
+      if (elttype->code () != TYPE_CODE_TYPEDEF)
 	break;
 
       /* Call for side effects.  */
@@ -250,12 +250,12 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
   if (element_type == NULL)
     goto error;
 
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+  if (type->code () == TYPE_CODE_ARRAY)
     {
       /* If we know the size of the array, we can use it as a limit on
 	 the number of characters to be fetched.  */
       if (TYPE_NFIELDS (type) == 1
-	  && TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) == TYPE_CODE_RANGE)
+	  && TYPE_FIELD_TYPE (type, 0)->code () == TYPE_CODE_RANGE)
 	{
 	  LONGEST low_bound, high_bound;
 
@@ -266,7 +266,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
       else
 	fetchlimit = UINT_MAX;
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_PTR)
+  else if (type->code () == TYPE_CODE_PTR)
     fetchlimit = UINT_MAX;
   else
     /* We work only with arrays and pointers.  */
@@ -292,7 +292,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
      avoids running off the end of the value's contents.  */
   if ((VALUE_LVAL (value) == not_lval
        || VALUE_LVAL (value) == lval_internalvar
-       || TYPE_CODE (type) == TYPE_CODE_ARRAY)
+       || type->code () == TYPE_CODE_ARRAY)
       && fetchlimit != UINT_MAX
       && (*length < 0 || *length <= fetchlimit))
     {
@@ -322,7 +322,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
 	 c_style_arrays is false, so we handle that specially
 	 here.  */
       CORE_ADDR addr;
-      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+      if (type->code () == TYPE_CODE_ARRAY)
 	{
 	  if (VALUE_LVAL (value) != lval_memory)
 	    error (_("Attempt to take address of value "
@@ -629,13 +629,13 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
 	/* If the caller expects an array of some integral type,
 	   satisfy them.  If something odder is expected, rely on the
 	   caller to cast.  */
-	if (expect_type && TYPE_CODE (expect_type) == TYPE_CODE_ARRAY)
+	if (expect_type && expect_type->code () == TYPE_CODE_ARRAY)
 	  {
 	    struct type *element_type
 	      = check_typedef (TYPE_TARGET_TYPE (expect_type));
 
-	    if (TYPE_CODE (element_type) == TYPE_CODE_INT
-		|| TYPE_CODE (element_type) == TYPE_CODE_CHAR)
+	    if (element_type->code () == TYPE_CODE_INT
+		|| element_type->code () == TYPE_CODE_CHAR)
 	      {
 		type = element_type;
 		satisfy_expected = 1;
@@ -742,13 +742,13 @@ bool
 c_is_string_type_p (struct type *type)
 {
   type = check_typedef (type);
-  while (TYPE_CODE (type) == TYPE_CODE_REF)
+  while (type->code () == TYPE_CODE_REF)
     {
       type = TYPE_TARGET_TYPE (type);
       type = check_typedef (type);
     }
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
       {

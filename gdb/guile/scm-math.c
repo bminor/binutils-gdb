@@ -65,7 +65,7 @@ enum valscm_binary_opcode
 
 /* If TYPE is a reference, return the target; otherwise return TYPE.  */
 #define STRIP_REFERENCE(TYPE) \
-  ((TYPE_CODE (TYPE) == TYPE_CODE_REF) ? (TYPE_TARGET_TYPE (TYPE)) : (TYPE))
+  ((TYPE->code () == TYPE_CODE_REF) ? (TYPE_TARGET_TYPE (TYPE)) : (TYPE))
 
 /* Helper for vlscm_unop.  Contains all the code that may throw a GDB
    exception.  */
@@ -168,10 +168,10 @@ vlscm_binop_gdbthrow (enum valscm_binary_opcode opcode, SCM x, SCM y,
 	rtype = check_typedef (rtype);
 	rtype = STRIP_REFERENCE (rtype);
 
-	if (TYPE_CODE (ltype) == TYPE_CODE_PTR
+	if (ltype->code () == TYPE_CODE_PTR
 	    && is_integral_type (rtype))
 	  res_val = value_ptradd (arg1, value_as_long (arg2));
-	else if (TYPE_CODE (rtype) == TYPE_CODE_PTR
+	else if (rtype->code () == TYPE_CODE_PTR
 		 && is_integral_type (ltype))
 	  res_val = value_ptradd (arg2, value_as_long (arg1));
 	else
@@ -188,15 +188,15 @@ vlscm_binop_gdbthrow (enum valscm_binary_opcode opcode, SCM x, SCM y,
 	rtype = check_typedef (rtype);
 	rtype = STRIP_REFERENCE (rtype);
 
-	if (TYPE_CODE (ltype) == TYPE_CODE_PTR
-	    && TYPE_CODE (rtype) == TYPE_CODE_PTR)
+	if (ltype->code () == TYPE_CODE_PTR
+	    && rtype->code () == TYPE_CODE_PTR)
 	  {
 	    /* A ptrdiff_t for the target would be preferable here.  */
 	    res_val
 	      = value_from_longest (builtin_type (gdbarch)->builtin_long,
 				    value_ptrdiff (arg1, arg2));
 	  }
-	else if (TYPE_CODE (ltype) == TYPE_CODE_PTR
+	else if (ltype->code () == TYPE_CODE_PTR
 		 && is_integral_type (rtype))
 	  res_val = value_ptradd (arg1, - value_as_long (arg2));
 	else
@@ -525,7 +525,7 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
 			    struct gdbarch *gdbarch, SCM *except_scmp)
 {
   if (is_integral_type (type)
-      || TYPE_CODE (type) == TYPE_CODE_PTR)
+      || type->code () == TYPE_CODE_PTR)
     {
       if (TYPE_UNSIGNED (type))
 	{
@@ -558,7 +558,7 @@ vlscm_convert_typed_number (const char *func_name, int obj_arg_pos, SCM obj,
 	  return value_from_longest (type, gdbscm_scm_to_longest (obj));
 	}
     }
-  else if (TYPE_CODE (type) == TYPE_CODE_FLT)
+  else if (type->code () == TYPE_CODE_FLT)
     return value_from_host_double (type, scm_to_double (obj));
   else
     {

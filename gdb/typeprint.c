@@ -117,7 +117,7 @@ print_offset_data::update (struct type *type, unsigned int field_idx,
     }
 
   struct type *ftype = check_typedef (TYPE_FIELD_TYPE (type, field_idx));
-  if (TYPE_CODE (type) == TYPE_CODE_UNION)
+  if (type->code () == TYPE_CODE_UNION)
     {
       /* Since union fields don't have the concept of offsets, we just
 	 print their sizes.  */
@@ -515,7 +515,7 @@ whatis_exp (const char *exp, int show)
 	     Use check_typedef to resolve stubs, but ignore its result
 	     because we do not want to dig past all typedefs.  */
 	  check_typedef (type);
-	  if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+	  if (type->code () == TYPE_CODE_TYPEDEF)
 	    type = TYPE_TARGET_TYPE (type);
 
 	  /* If the expression is actually a type, then there's no
@@ -540,16 +540,16 @@ whatis_exp (const char *exp, int show)
   get_user_print_options (&opts);
   if (val != NULL && opts.objectprint)
     {
-      if (((TYPE_CODE (type) == TYPE_CODE_PTR) || TYPE_IS_REFERENCE (type))
-	  && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_STRUCT))
+      if (((type->code () == TYPE_CODE_PTR) || TYPE_IS_REFERENCE (type))
+	  && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRUCT))
         real_type = value_rtti_indirect_type (val, &full, &top, &using_enc);
-      else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+      else if (type->code () == TYPE_CODE_STRUCT)
 	real_type = value_rtti_type (val, &full, &top, &using_enc);
     }
 
   if (flags.print_offsets
-      && (TYPE_CODE (type) == TYPE_CODE_STRUCT
-	  || TYPE_CODE (type) == TYPE_CODE_UNION))
+      && (type->code () == TYPE_CODE_STRUCT
+	  || type->code () == TYPE_CODE_UNION))
     fprintf_filtered (gdb_stdout, "/* offset    |  size */  ");
 
   printf_filtered ("type = ");
@@ -615,7 +615,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
 
   type = check_typedef (type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
 
     case TYPE_CODE_ENUM:

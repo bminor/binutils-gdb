@@ -100,7 +100,7 @@ is_pascal_string_type (struct type *type,int *length_pos,
 		       struct type **char_type,
 		       const char **arrayname)
 {
-  if (type != NULL && TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type != NULL && type->code () == TYPE_CODE_STRUCT)
     {
       /* Old Borland type pascal strings from Free Pascal Compiler.  */
       /* Two fields: length and st.  */
@@ -141,7 +141,7 @@ is_pascal_string_type (struct type *type,int *length_pos,
 	    {
 	      *char_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 2));
 
-	      if (TYPE_CODE (*char_type) == TYPE_CODE_ARRAY)
+	      if ((*char_type)->code () == TYPE_CODE_ARRAY)
 		*char_type = TYPE_TARGET_TYPE (*char_type);
 	    }
  	  if (arrayname)

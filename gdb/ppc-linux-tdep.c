@@ -250,8 +250,8 @@ ppc_linux_return_value (struct gdbarch *gdbarch, struct value *function,
 			struct type *valtype, struct regcache *regcache,
 			gdb_byte *readbuf, const gdb_byte *writebuf)
 {  
-  if ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
-       || TYPE_CODE (valtype) == TYPE_CODE_UNION)
+  if ((valtype->code () == TYPE_CODE_STRUCT
+       || valtype->code () == TYPE_CODE_UNION)
       && !((TYPE_LENGTH (valtype) == 16 || TYPE_LENGTH (valtype) == 8)
 	   && TYPE_VECTOR (valtype)))
     return RETURN_VALUE_STRUCT_CONVENTION;

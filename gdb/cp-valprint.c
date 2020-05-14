@@ -74,25 +74,25 @@ cp_is_vtbl_member (struct type *type)
 {
   /* With older versions of g++, the vtbl field pointed to an array of
      structures.  Nowadays it points directly to the structure.  */
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+  if (type->code () == TYPE_CODE_PTR)
     {
       type = TYPE_TARGET_TYPE (type);
-      if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+      if (type->code () == TYPE_CODE_ARRAY)
 	{
 	  type = TYPE_TARGET_TYPE (type);
-	  if (TYPE_CODE (type) == TYPE_CODE_STRUCT    /* if not using thunks */
-	      || TYPE_CODE (type) == TYPE_CODE_PTR)   /* if using thunks */
+	  if (type->code () == TYPE_CODE_STRUCT    /* if not using thunks */
+	      || type->code () == TYPE_CODE_PTR)   /* if using thunks */
 	    {
 	      /* Virtual functions tables are full of pointers
 	         to virtual functions.  */
 	      return cp_is_vtbl_ptr_type (type);
 	    }
 	}
-      else if (TYPE_CODE (type) == TYPE_CODE_STRUCT)  /* if not using thunks */
+      else if (type->code () == TYPE_CODE_STRUCT)  /* if not using thunks */
 	{
 	  return cp_is_vtbl_ptr_type (type);
 	}
-      else if (TYPE_CODE (type) == TYPE_CODE_PTR)     /* if using thunks */
+      else if (type->code () == TYPE_CODE_PTR)     /* if using thunks */
 	{
 	  /* The type name of the thunk pointer is NULL when using
 	     dwarf2.  We could test for a pointer to a function, but
@@ -563,7 +563,7 @@ cp_print_static_field (struct type *type,
     }
 
   struct type *real_type = check_typedef (type);
-  if (TYPE_CODE (real_type) == TYPE_CODE_STRUCT)
+  if (real_type->code () == TYPE_CODE_STRUCT)
     {
       CORE_ADDR *first_dont_print;
       CORE_ADDR addr = value_address (val);
@@ -591,7 +591,7 @@ cp_print_static_field (struct type *type,
       return;
     }
 
-  if (TYPE_CODE (real_type) == TYPE_CODE_ARRAY)
+  if (real_type->code () == TYPE_CODE_ARRAY)
     {
       struct type **first_dont_print;
       int i;

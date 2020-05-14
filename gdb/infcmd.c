@@ -1589,7 +1589,7 @@ get_return_value (struct value *function, struct type *value_type)
   struct value *value;
 
   value_type = check_typedef (value_type);
-  gdb_assert (TYPE_CODE (value_type) != TYPE_CODE_VOID);
+  gdb_assert (value_type->code () != TYPE_CODE_VOID);
 
   /* FIXME: 2003-09-27: When returning from a nested inferior function
      call, it's possible (with no help from the architecture vector)
@@ -1680,7 +1680,7 @@ void
 print_return_value (struct ui_out *uiout, struct return_value_info *rv)
 {
   if (rv->type == NULL
-      || TYPE_CODE (check_typedef (rv->type)) == TYPE_CODE_VOID)
+      || check_typedef (rv->type)->code () == TYPE_CODE_VOID)
     return;
 
   try
@@ -1744,7 +1744,7 @@ finish_command_fsm::should_stop (struct thread_info *tp)
 	internal_error (__FILE__, __LINE__,
 			_("finish_command: function has no target type"));
 
-      if (TYPE_CODE (check_typedef (rv->type)) != TYPE_CODE_VOID)
+      if (check_typedef (rv->type)->code () != TYPE_CODE_VOID)
 	{
 	  struct value *func;
 
@@ -2250,8 +2250,8 @@ default_print_one_register_info (struct ui_file *file,
 
   /* If virtual format is floating, print it that way, and in raw
      hex.  */
-  if (TYPE_CODE (regtype) == TYPE_CODE_FLT
-      || TYPE_CODE (regtype) == TYPE_CODE_DECFLOAT)
+  if (regtype->code () == TYPE_CODE_FLT
+      || regtype->code () == TYPE_CODE_DECFLOAT)
     {
       struct value_print_options opts;
       const gdb_byte *valaddr = value_contents_for_printing (val);

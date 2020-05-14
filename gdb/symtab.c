@@ -2062,11 +2062,11 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 	  /* I'm not really sure that type of this can ever
 	     be typedefed; just be safe.  */
 	  t = check_typedef (t);
-	  if (TYPE_CODE (t) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (t))
+	  if (t->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (t))
 	    t = TYPE_TARGET_TYPE (t);
 
-	  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
-	      && TYPE_CODE (t) != TYPE_CODE_UNION)
+	  if (t->code () != TYPE_CODE_STRUCT
+	      && t->code () != TYPE_CODE_UNION)
 	    error (_("Internal error: `%s' is not an aggregate"),
 		   langdef->la_name_of_this);
 
@@ -4652,7 +4652,7 @@ global_symbol_searcher::add_matching_symbols
 			      members.  We only want to skip enums
 			      here.  */
 			   && !(SYMBOL_CLASS (sym) == LOC_CONST
-				&& (TYPE_CODE (SYMBOL_TYPE (sym))
+				&& (SYMBOL_TYPE (sym)->code ()
 				    == TYPE_CODE_ENUM))
 			   && (!treg.has_value ()
 			       || treg_matches_sym_type_name (*treg, sym)))
@@ -4858,7 +4858,7 @@ symbol_to_info_string (struct symbol *sym, int block,
 	 For the struct printing case below, things are worse, we force
 	 printing of the ";" in this function, which is going to be wrong
 	 for languages that don't require a ";" between statements.  */
-      if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_TYPEDEF)
+      if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_TYPEDEF)
 	typedef_print (SYMBOL_TYPE (sym), sym, &tmp_stream);
       else
 	type_print (SYMBOL_TYPE (sym), "", &tmp_stream, -1);
@@ -5484,7 +5484,7 @@ completion_list_add_fields (completion_tracker &tracker,
   if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
     {
       struct type *t = SYMBOL_TYPE (sym);
-      enum type_code c = TYPE_CODE (t);
+      enum type_code c = t->code ();
       int j;
 
       if (c == TYPE_CODE_UNION || c == TYPE_CODE_STRUCT)
@@ -5501,7 +5501,7 @@ completion_list_add_fields (completion_tracker &tracker,
 bool
 symbol_is_function_or_method (symbol *sym)
 {
-  switch (TYPE_CODE (SYMBOL_TYPE (sym)))
+  switch (SYMBOL_TYPE (sym)->code ())
     {
     case TYPE_CODE_FUNC:
     case TYPE_CODE_METHOD:
@@ -5601,7 +5601,7 @@ add_symtab_completions (struct compunit_symtab *cust,
 
 	  if (code == TYPE_CODE_UNDEF
 	      || (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
-		  && TYPE_CODE (SYMBOL_TYPE (sym)) == code))
+		  && SYMBOL_TYPE (sym)->code () == code))
 	    completion_list_add_symbol (tracker, sym,
 					lookup_name,
 					text, word);
@@ -5752,7 +5752,7 @@ default_collect_symbol_completion_matches_break_on
 					    sym_text, word);
 	      }
 	    else if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
-		     && TYPE_CODE (SYMBOL_TYPE (sym)) == code)
+		     && SYMBOL_TYPE (sym)->code () == code)
 	      completion_list_add_symbol (tracker, sym, lookup_name,
 					  sym_text, word);
 	  }

@@ -214,15 +214,15 @@ i386_windows_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   bool thiscall = false;
 
   struct type *type = check_typedef (value_type (function));
-  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+  if (type->code () == TYPE_CODE_PTR)
     type = check_typedef (TYPE_TARGET_TYPE (type));
 
   /* read_subroutine_type sets for non-static member functions the
      artificial flag of the first parameter ('this' pointer).  */
-  if (TYPE_CODE (type) == TYPE_CODE_METHOD
+  if (type->code () == TYPE_CODE_METHOD
       && TYPE_NFIELDS (type) > 0
       && TYPE_FIELD_ARTIFICIAL (type, 0)
-      && TYPE_CODE (TYPE_FIELD_TYPE (type, 0)) == TYPE_CODE_PTR)
+      && TYPE_FIELD_TYPE (type, 0)->code () == TYPE_CODE_PTR)
     thiscall = 1;
 
   return i386_thiscall_push_dummy_call (gdbarch, function, regcache, bp_addr,

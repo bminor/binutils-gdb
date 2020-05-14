@@ -2334,7 +2334,7 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 		   call expression.  */
 		rust_op_vector *params = operation->right.params;
 
-		if (TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
+		if (type->code () != TYPE_CODE_NAMESPACE)
 		  {
 		    if (!rust_tuple_struct_type_p (type))
 		      error (_("Type %s is not a tuple struct"), varname);
@@ -2413,7 +2413,7 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 	      error (_("No symbol '%s' in current context"), varname);
 
 	    if (!want_type
-		&& TYPE_CODE (type) == TYPE_CODE_STRUCT
+		&& type->code () == TYPE_CODE_STRUCT
 		&& TYPE_NFIELDS (type) == 0)
 	      {
 		/* A unit-like struct.  */
@@ -2470,7 +2470,7 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 	if (type == NULL)
 	  error (_("Could not find type '%s'"), operation->left.sval.ptr);
 
-	if (TYPE_CODE (type) != TYPE_CODE_STRUCT
+	if (type->code () != TYPE_CODE_STRUCT
 	    || rust_tuple_type_p (type)
 	    || rust_tuple_struct_type_p (type))
 	  error (_("Struct expression applied to non-struct type"));

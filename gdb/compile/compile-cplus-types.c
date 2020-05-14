@@ -88,7 +88,7 @@ get_field_access_flag (const struct type *type, int num)
 enum gcc_cp_symbol_kind
 get_method_access_flag (const struct type *type, int fni, int num)
 {
-  gdb_assert (TYPE_CODE (type) == TYPE_CODE_STRUCT);
+  gdb_assert (type->code () == TYPE_CODE_STRUCT);
 
   /* If this type was not declared a class, everything is public.  */
   if (!TYPE_DECLARED_CLASS (type))
@@ -161,7 +161,7 @@ type_name_to_scope (const char *type_name, const struct block *block)
 
 	  scope.push_back (comp);
 
-	  if (TYPE_CODE (SYMBOL_TYPE (bsymbol.symbol)) != TYPE_CODE_NAMESPACE)
+	  if (SYMBOL_TYPE (bsymbol.symbol)->code () != TYPE_CODE_NAMESPACE)
 	    {
 	      /* We're done.  */
 	      break;
@@ -271,7 +271,7 @@ compile_cplus_instance::enter_scope (compile_scope &&new_scope)
 	(m_scopes.back ().begin (), m_scopes.back ().end () - 1,
 	 [this] (const scope_component &comp)
 	 {
-	  gdb_assert (TYPE_CODE (SYMBOL_TYPE (comp.bsymbol.symbol))
+	  gdb_assert (SYMBOL_TYPE (comp.bsymbol.symbol)->code ()
 		      == TYPE_CODE_NAMESPACE);
 
 	  const char *ns = (comp.name == CP_ANONYMOUS_NAMESPACE_STR ? nullptr
@@ -313,7 +313,7 @@ compile_cplus_instance::leave_scope ()
       std::for_each
 	(current.begin (),current.end () - 1,
 	 [this] (const scope_component &comp) {
-	  gdb_assert (TYPE_CODE (SYMBOL_TYPE (comp.bsymbol.symbol))
+	  gdb_assert (SYMBOL_TYPE (comp.bsymbol.symbol)->code ()
 		      == TYPE_CODE_NAMESPACE);
 	  this->plugin ().pop_binding_level (comp.name.c_str ());
 	});
@@ -413,7 +413,7 @@ compile_cplus_convert_reference (compile_cplus_instance *instance,
   gcc_type target = instance->convert_type (TYPE_TARGET_TYPE (type));
 
   enum gcc_cp_ref_qualifiers quals = GCC_CP_REF_QUAL_NONE;
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_REF:
       quals = GCC_CP_REF_QUAL_LVALUE;
@@ -826,7 +826,7 @@ compile_cplus_convert_struct_or_union (compile_cplus_instance *instance,
      table.  This lets recursive types work.  */
 
   gcc_decl resuld;
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     {
       const char *what = TYPE_DECLARED_CLASS (type) ? "struct" : "class";
 
@@ -839,14 +839,14 @@ compile_cplus_convert_struct_or_union (compile_cplus_instance *instance,
     }
   else
     {
-      gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
+      gdb_assert (type->code () == TYPE_CODE_UNION);
       resuld = instance->plugin ().build_decl
 	("union", name.get (), GCC_CP_SYMBOL_UNION | nested_access,
 	 0, nullptr, 0, filename, line);
     }
 
   gcc_type result;
-  if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
+  if (type->code () == TYPE_CODE_STRUCT)
     {
       struct gcc_vbase_array bases;
       int num_baseclasses = TYPE_N_BASECLASSES (type);
@@ -878,7 +878,7 @@ compile_cplus_convert_struct_or_union (compile_cplus_instance *instance,
     }
   else
     {
-      gdb_assert (TYPE_CODE (type) == TYPE_CODE_UNION);
+      gdb_assert (type->code () == TYPE_CODE_UNION);
       result = instance->plugin ().start_class_type
 	(name.get (), resuld, nullptr, filename, line);
     }
@@ -1140,7 +1140,7 @@ convert_type_cplus_basic (compile_cplus_instance *instance,
 				     | TYPE_INSTANCE_FLAG_RESTRICT)) != 0)
     return compile_cplus_convert_qualified (instance, type);
 
-  switch (TYPE_CODE (type))
+  switch (type->code ())
     {
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
@@ -1198,7 +1198,7 @@ convert_type_cplus_basic (compile_cplus_instance *instance,
     }
 
   std::string s = string_printf (_("unhandled TYPE_CODE %d"),
-				 TYPE_CODE (type));
+				 type->code ());
 
   return instance->plugin ().error (s.c_str ());
 }

@@ -202,8 +202,8 @@ default_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   if (group == all_reggroup)
     return 1;
   vector_p = TYPE_VECTOR (register_type (gdbarch, regnum));
-  float_p = (TYPE_CODE (register_type (gdbarch, regnum)) == TYPE_CODE_FLT
-	     || (TYPE_CODE (register_type (gdbarch, regnum))
+  float_p = (register_type (gdbarch, regnum)->code () == TYPE_CODE_FLT
+	     || (register_type (gdbarch, regnum)->code ()
 		 == TYPE_CODE_DECFLOAT));
   raw_p = regnum < gdbarch_num_regs (gdbarch);
   if (group == float_reggroup)

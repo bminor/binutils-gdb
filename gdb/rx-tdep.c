@@ -668,12 +668,12 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   struct type *func_type = value_type (function);
 
   /* Dereference function pointer types.  */
-  while (TYPE_CODE (func_type) == TYPE_CODE_PTR)
+  while (func_type->code () == TYPE_CODE_PTR)
     func_type = TYPE_TARGET_TYPE (func_type);
 
   /* The end result had better be a function or a method.  */
-  gdb_assert (TYPE_CODE (func_type) == TYPE_CODE_FUNC
-	      || TYPE_CODE (func_type) == TYPE_CODE_METHOD);
+  gdb_assert (func_type->code () == TYPE_CODE_FUNC
+	      || func_type->code () == TYPE_CODE_METHOD);
 
   /* Functions with a variable number of arguments have all of their
      variable arguments and the last non-variable argument passed
@@ -706,8 +706,8 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  struct type *return_type = TYPE_TARGET_TYPE (func_type);
 
-	  gdb_assert (TYPE_CODE (return_type) == TYPE_CODE_STRUCT
-		      || TYPE_CODE (func_type) == TYPE_CODE_UNION);
+	  gdb_assert (return_type->code () == TYPE_CODE_STRUCT
+		      || func_type->code () == TYPE_CODE_UNION);
 
 	  if (TYPE_LENGTH (return_type) > 16
 	      || TYPE_LENGTH (return_type) % 4 != 0)
@@ -728,7 +728,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	  if (i == 0 && struct_addr != 0
 	      && return_method != return_method_struct
-	      && TYPE_CODE (arg_type) == TYPE_CODE_PTR
+	      && arg_type->code () == TYPE_CODE_PTR
 	      && extract_unsigned_integer (arg_bits, 4,
 					   byte_order) == struct_addr)
 	    {
@@ -739,8 +739,8 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		regcache_cooked_write_unsigned (regcache, RX_R15_REGNUM,
 						struct_addr);
 	    }
-	  else if (TYPE_CODE (arg_type) != TYPE_CODE_STRUCT
-		   && TYPE_CODE (arg_type) != TYPE_CODE_UNION
+	  else if (arg_type->code () != TYPE_CODE_STRUCT
+		   && arg_type->code () != TYPE_CODE_UNION
 		   && arg_size <= 8)
 	    {
 	      /* Argument is a scalar.  */
@@ -874,8 +874,8 @@ rx_return_value (struct gdbarch *gdbarch,
   ULONGEST valtype_len = TYPE_LENGTH (valtype);
 
   if (TYPE_LENGTH (valtype) > 16
-      || ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
-	   || TYPE_CODE (valtype) == TYPE_CODE_UNION)
+      || ((valtype->code () == TYPE_CODE_STRUCT
+	   || valtype->code () == TYPE_CODE_UNION)
 	  && TYPE_LENGTH (valtype) % 4 != 0))
     return RETURN_VALUE_STRUCT_CONVENTION;
 

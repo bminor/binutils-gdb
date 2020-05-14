@@ -1494,7 +1494,7 @@ patch_opaque_types (struct symtab *s)
          from different files with the same name.  */
       if (SYMBOL_CLASS (real_sym) == LOC_TYPEDEF
 	  && SYMBOL_DOMAIN (real_sym) == VAR_DOMAIN
-	  && TYPE_CODE (SYMBOL_TYPE (real_sym)) == TYPE_CODE_PTR
+	  && SYMBOL_TYPE (real_sym)->code () == TYPE_CODE_PTR
 	  && TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (real_sym))) != 0)
 	{
 	  const char *name = real_sym->linkage_name ();
@@ -1660,8 +1660,8 @@ process_coff_symbol (struct coff_symbol *cs,
 	  /* If type has no name, give it one.  */
 	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
 	    {
-	      if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
-		  || TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_FUNC)
+	      if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_PTR
+		  || SYMBOL_TYPE (sym)->code () == TYPE_CODE_FUNC)
 		{
 		  /* If we are giving a name to a type such as
 		     "pointer to foo" or "function returning foo", we
@@ -1694,10 +1694,10 @@ process_coff_symbol (struct coff_symbol *cs,
 	     not an empty structured type, though; the forward
 	     references work themselves out via the magic of
 	     coff_lookup_type.  */
-	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_PTR
+	  if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_PTR
 	      && TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (sym))) == 0
-	      && TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (sym)))
-	         != TYPE_CODE_UNDEF)
+	      && TYPE_TARGET_TYPE (SYMBOL_TYPE (sym))->code ()
+	      != TYPE_CODE_UNDEF)
 	    {
 	      int i = hashname (sym->linkage_name ());
 

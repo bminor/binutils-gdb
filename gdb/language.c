@@ -410,7 +410,7 @@ language_info (int quietly)
 int
 pointer_type (struct type *type)
 {
-  return TYPE_CODE (type) == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type);
+  return type->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type);
 }
 
 
@@ -710,12 +710,12 @@ bool
 default_is_string_type_p (struct type *type)
 {
   type = check_typedef (type);
-  while (TYPE_CODE (type) == TYPE_CODE_REF)
+  while (type->code () == TYPE_CODE_REF)
     {
       type = TYPE_TARGET_TYPE (type);
       type = check_typedef (type);
     }
-  return (TYPE_CODE (type)  == TYPE_CODE_STRING);
+  return (type->code ()  == TYPE_CODE_STRING);
 }
 
 /* See language.h.  */
@@ -981,7 +981,7 @@ language_bool_type (const struct language_defn *la,
 	{
 	  struct type *type = SYMBOL_TYPE (sym);
 
-	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
+	  if (type && type->code () == TYPE_CODE_BOOL)
 	    return type;
 	}
     }

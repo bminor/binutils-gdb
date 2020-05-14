@@ -3491,9 +3491,9 @@ decode_compound_collector::operator () (block_symbol *bsym)
 
   t = SYMBOL_TYPE (sym);
   t = check_typedef (t);
-  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
-      && TYPE_CODE (t) != TYPE_CODE_UNION
-      && TYPE_CODE (t) != TYPE_CODE_NAMESPACE)
+  if (t->code () != TYPE_CODE_STRUCT
+      && t->code () != TYPE_CODE_UNION
+      && t->code () != TYPE_CODE_NAMESPACE)
     return true; /* Continue iterating.  */
 
   slot = htab_find_slot (m_unique_syms, sym, INSERT);
@@ -4164,7 +4164,7 @@ linespec_parse_variable (struct linespec_state *self, const char *variable)
       sscanf ((variable[1] == '$') ? variable + 2 : variable + 1, "%d", &index);
       val_history
 	= access_value_history ((variable[1] == '$') ? -index : index);
-      if (TYPE_CODE (value_type (val_history)) != TYPE_CODE_INT)
+      if (value_type (val_history)->code () != TYPE_CODE_INT)
 	error (_("History values used in line "
 		 "specs must have integer values."));
       offset.offset = value_as_long (val_history);
