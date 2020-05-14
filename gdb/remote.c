@@ -3785,6 +3785,18 @@ remote_target::remote_get_threads_with_qthreadinfo (threads_listing_context *con
   return 0;
 }
 
+/* Return true if INF only has one non-exited thread.  */
+
+static bool
+has_single_non_exited_thread (inferior *inf)
+{
+  int count = 0;
+  for (thread_info *tp ATTRIBUTE_UNUSED : inf->non_exited_threads ())
+    if (++count > 1)
+      break;
+  return count == 1;
+}
+
 /* Implement the to_update_thread_list function for the remote
    targets.  */
 
@@ -3824,6 +3836,14 @@ remote_target::update_thread_list ()
 
 	  if (!context.contains_thread (tp->ptid))
 	    {
+	      /* Do not remove the thread if it is the last thread in
+		 the inferior.  This situation happens when we have a
+		 pending exit process status to process.  Otherwise we
+		 may end up with a seemingly live inferior (i.e.  pid
+		 != 0) that has no threads.  */
+	      if (has_single_non_exited_thread (tp->inf))
+		continue;
+
 	      /* Not found.  */
 	      delete_thread (tp);
 	    }

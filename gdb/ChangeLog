@@ -1,4 +1,21 @@
 2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+	    Tom de Vries  <tdevries@suse.de>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR threads/25478
+	* infrun.c (stop_all_threads): Do NOT ignore
+	TARGET_WAITKIND_NO_RESUMED, TARGET_WAITKIND_THREAD_EXITED,
+	TARGET_WAITKIND_EXITED, TARGET_WAITKIND_SIGNALLED wait statuses
+	received.
+	(handle_no_resumed): Remove code handling a live inferior with no
+	threads.
+	* remote.c (has_single_non_exited_thread): New.
+	(remote_target::update_thread_list): Do not delete a thread if is
+	the last thread of the process.
+	* thread.c (thread_select): Call delete_exited_threads instead of
+	prune_threads.
+
+2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* infrun.c (stop_all_threads): Enable/disable thread events of all
 	targets.  Move a debug message denoting the end of the function

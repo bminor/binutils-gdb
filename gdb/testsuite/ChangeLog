@@ -1,4 +1,12 @@
 2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/multi-exit.c: New file.
+	* gdb.multi/multi-exit.exp: New file.
+	* gdb.multi/multi-kill.c: New file.
+	* gdb.multi/multi-kill.exp: New file.
+
+2020-05-14  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.base/annota1.exp: Update the expected output.
 	* gdb.cp/annota2.exp: Ditto.
