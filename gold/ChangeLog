@@ -1,3 +1,7 @@
+2020-05-15  Nikita Ermakov  <coffe92@gmail.com>
+
+	* powerpc.cc (do_gc_mark_symbol): Don't segfault on plugin symbols.
+
 2020-05-14  Nick Clifton  <nickc@redhat.com>
 
 	* po/sr.po: New Serbian translation.

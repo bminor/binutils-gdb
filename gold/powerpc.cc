@@ -9056,7 +9056,7 @@ Target_powerpc<size, big_endian>::do_gc_mark_symbol(
     Symbol_table* symtab,
     Symbol* sym) const
 {
-  if (size == 64)
+  if (size == 64 && sym->object()->pluginobj() == NULL)
     {
       Powerpc_relobj<size, big_endian>* ppc_object
 	= static_cast<Powerpc_relobj<size, big_endian>*>(sym->object());
