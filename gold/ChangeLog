@@ -1,3 +1,7 @@
+2020-05-14  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: New Serbian translation.
+
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc: Rename powerxx to power10 throughout.

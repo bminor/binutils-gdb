@@ -20,7 +20,7 @@ msgstr ""
 "Project-Id-Version: gas 2.33.90\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
 "POT-Creation-Date: 2020-01-18 14:02+0000\n"
-"PO-Revision-Date: 2020-05-05 04:48+0800\n"
+"PO-Revision-Date: 2020-05-14 00:50+0800\n"
 "Last-Translator: Sebastian Rasmussen <sebras@gmail.com>\n"
 "Language-Team: Swedish <tp-sv-list@lists.sourceforge.net>\n"
 "Language: sv\n"
@@ -551,10 +551,9 @@ msgid "failed to read instruction table %s\n"
 msgstr "misslyckades med att läsa instruktionstabellen %s\n"
 
 #: as.c:847
-#, fuzzy, c-format
-#| msgid "Invalid --size-check= option: `%s'"
+#, c-format
 msgid "Invalid --gdwarf-cie-version `%s'"
-msgstr "Ogiltig --size-check=-flagga: ”%s”"
+msgstr "Ogiltig --gdwarf-cie-version ”%s”"
 
 #: as.c:925
 #, c-format
@@ -765,16 +764,12 @@ msgid "cannot create floating-point number"
 msgstr "kan inte skapa flyttalsnummer"
 
 #: config/atof-ieee.c:318
-#, fuzzy
-#| msgid "NaNs are not supported by this target\n"
 msgid "NaNs are not supported by this target"
-msgstr "NaN stöds inte av detta mål\n"
+msgstr "NaN stöds inte av detta mål"
 
 #: config/atof-ieee.c:362 config/atof-ieee.c:407
-#, fuzzy
-#| msgid "Infinities are not supported by this target\n"
 msgid "Infinities are not supported by this target"
-msgstr "Oändligheter stöds inte av detta mål\n"
+msgstr "Oändligheter stöds inte av detta mål"
 
 #: config/atof-ieee.c:829 config/atof-vax.c:449 config/tc-arm.c:1294
 #: config/tc-ia64.c:11603 config/tc-tic30.c:1263 config/tc-tic4x.c:2583
@@ -984,10 +979,9 @@ msgid "missing name"
 msgstr "saknar namn"
 
 #: config/obj-elf.c:1050
-#, fuzzy, c-format
-#| msgid "address calculation needs a strongly defined nearby symbol"
+#, c-format
 msgid "section name '%s' already defined as another symbol"
-msgstr "adressuträkning behöver en väldefinierad närliggande symbol"
+msgstr "sektionsnamn ”%s” redan definierat som en annan symbol"
 
 #: config/obj-elf.c:1143
 msgid "invalid merge entity size"
@@ -1020,10 +1014,8 @@ msgid "SHF_ALLOC isn't set for GNU_MBIND section: %s"
 msgstr "SHF_ALLOC är inte satt för GNU_MBIND-sektion: %s"
 
 #: config/obj-elf.c:1256
-#, fuzzy
-#| msgid "symbol type \"%s\" is supported only by GNU and FreeBSD targets"
 msgid "GNU_MBIND section is supported only by GNU and FreeBSD targets"
-msgstr "stöd för symboltyp ”%s” finns bara för GNU- och FreeBSD-mål"
+msgstr "GNU_MBIND-sektion stöds endast för GNU och FreeBSD-mål"
 
 #: config/obj-elf.c:1359
 msgid ".previous without corresponding .section; ignored"
@@ -1120,10 +1112,9 @@ msgid "unrecognized symbol type \"%s\""
 msgstr "symboltyp ”%s” stöds inte"
 
 #: config/obj-elf.c:2117
-#, fuzzy, c-format
-#| msgid "`%s' can't be equated to common symbol `%s'"
+#, c-format
 msgid "cannot change type of common symbol '%s'"
-msgstr "”%s” kan inte likställas med allmän symbol ”%s”"
+msgstr "kan inte ändra typ för allmän symbol ”%s”"
 
 #: config/obj-elf.c:2129
 #, c-format
@@ -1482,10 +1473,8 @@ msgid "bad segment"
 msgstr "felaktigt segment"
 
 #: config/tc-aarch64.c:651 config/tc-arm.c:1234
-#, fuzzy
-#| msgid "Invalid floating point number"
 msgid "invalid floating point number"
-msgstr "Ogiltigt flyttalsnummer"
+msgstr "ogiltigt flyttalsnummer"
 
 #: config/tc-aarch64.c:882
 #, c-format
@@ -3182,10 +3171,8 @@ msgid "XScale accumulator register expected"
 msgstr "XScale-ackumulatorregister förväntades"
 
 #: config/tc-arm.c:707
-#, fuzzy
-#| msgid "SVE vector register expected"
 msgid "MVE vector register expected"
-msgstr "SVE-vektorregister förväntades"
+msgstr "MVE-vektorregister förväntades"
 
 #. For score5u : div/mul will pop warning message, mmu/alw/asw will pop error message.
 #: config/tc-arm.c:873 config/tc-score.c:259
@@ -3233,20 +3220,16 @@ msgid "branch must be last instruction in IT block"
 msgstr "gren måste vara sista instruktion i IT-block"
 
 #: config/tc-arm.c:884
-#, fuzzy
-#| msgid "%s out of domain (%d is not a multiple of %d)"
 msgid "branch out of range or not a multiple of 2"
-msgstr "%s utanför intervall (%d är inte en multipel av %d)"
+msgstr "gren utanför intervall eller inte en multipel av 2"
 
 #: config/tc-arm.c:885
 msgid "instruction not allowed in IT block"
 msgstr "instruktion inte tillåten i IT-block"
 
 #: config/tc-arm.c:886
-#, fuzzy
-#| msgid "No instruction or missing opcode."
 msgid "instruction missing MVE vector predication code"
-msgstr "Ingen instruktion eller så saknas opkod."
+msgstr "instruktion saknar MVE-vektorvillkorskod"
 
 #: config/tc-arm.c:887
 msgid "selected FPU does not support instruction"
@@ -3257,20 +3240,16 @@ msgid "thumb conditional instruction should be in IT block"
 msgstr "villkorad thumb-instruktion bör vara i IT-block"
 
 #: config/tc-arm.c:890
-#, fuzzy
-#| msgid "thumb conditional instruction should be in IT block"
 msgid "vector predicated instruction should be in VPT/VPST block"
-msgstr "villkorad thumb-instruktion bör vara i IT-block"
+msgstr "vektorvillkorad instruktion bör vara i VPT/VPST-block"
 
 #: config/tc-arm.c:891
 msgid "incorrect condition in IT block"
 msgstr "felaktigt villkor i IT-block"
 
 #: config/tc-arm.c:892
-#, fuzzy
-#| msgid "incorrect condition in IT block"
 msgid "incorrect condition in VPT/VPST block"
-msgstr "felaktigt villkor i IT-block"
+msgstr "felaktigt villkor i VPT/VPST-block"
 
 #: config/tc-arm.c:893
 msgid "IT falling in the range of a previous IT block"
@@ -3293,10 +3272,8 @@ msgid "selected processor does not support fp16 instruction"
 msgstr "vald processor har inte stöd för fp16-instruktion"
 
 #: config/tc-arm.c:901
-#, fuzzy
-#| msgid "selected processor does not support fp16 instruction"
 msgid "selected processor does not support bf16 instruction"
-msgstr "vald processor har inte stöd för fp16-instruktion"
+msgstr "vald processor har inte stöd för bf16-instruktion"
 
 #: config/tc-arm.c:902
 msgid "using "
@@ -3323,10 +3300,8 @@ msgid "Warning: instruction is UNPREDICTABLE with SP operand"
 msgstr "Varning: instruktion är OTILLFÖRLITLIG med SP-operand"
 
 #: config/tc-arm.c:912
-#, fuzzy
-#| msgid "bad type in Neon instruction"
 msgid "bad type in SIMD instruction"
-msgstr "felaktig typ i Neon-instruktion"
+msgstr "felaktig typ i SIMD-instruktion"
 
 #: config/tc-arm.c:914
 msgid "GAS auto-detection mode and -march=all is deprecated for MVE, please use a valid -march or -mcpu option."
@@ -3341,10 +3316,8 @@ msgid "bad element type for instruction"
 msgstr "felaktig elementtyp för instruktion"
 
 #: config/tc-arm.c:919
-#, fuzzy
-#| msgid "SVE vector register expected"
 msgid "MVE vector register Q[0..7] expected"
-msgstr "SVE-vektorregister förväntades"
+msgstr "MVE-vektorregister Q[0..7] förväntades"
 
 #: config/tc-arm.c:1139
 msgid "immediate expression requires a # prefix"
@@ -3368,10 +3341,8 @@ msgid "bad size %d in type specifier"
 msgstr "felaktig storlek %d i typespecificerare"
 
 #: config/tc-arm.c:1539
-#, fuzzy
-#| msgid "unexpected character `%c' in element size"
 msgid "unexpected type character `b' -- did you mean `bf'?"
-msgstr "oväntat tecken ”%c” i elementstorlek"
+msgstr "oväntat typtecken ”b”, menade du ”bf”?"
 
 #: config/tc-arm.c:1546
 #, c-format
@@ -3387,10 +3358,8 @@ msgid "vector type expected"
 msgstr "vektortyp förväntades"
 
 #: config/tc-arm.c:1728
-#, fuzzy
-#| msgid "expected EP register"
 msgid "expected MVE register [q0..q7]"
-msgstr "förväntade EP-register"
+msgstr "förväntade MVE-register [q0..q7]"
 
 #: config/tc-arm.c:1748
 msgid "can't redefine type for operand"
@@ -3422,10 +3391,8 @@ msgid "scalar index out of range"
 msgstr "skalärindex utanför intervall"
 
 #: config/tc-arm.c:1961
-#, fuzzy
-#| msgid "'APSR', 'CPSR' or 'SPSR' expected"
 msgid "r0-r12, lr or APSR expected"
-msgstr "”APSR”, ”CPSR” eller ”SPSR” förväntades"
+msgstr "r0-r12, lr eller APSR förväntades"
 
 #: config/tc-arm.c:1980
 msgid "bad range in register list"
@@ -3453,17 +3420,13 @@ msgid "VPR expected last"
 msgstr "VPR förväntas sist"
 
 #: config/tc-arm.c:2177
-#, fuzzy
-#| msgid "VFP single precision register expected"
 msgid "VFP single precision register or VPR expected"
-msgstr "VFP-enkelprecisionsregister förväntades"
+msgstr "VFP-enkelprecisionsregister eller VPR förväntades"
 
 #. regtype == REG_TYPE_VFD.
 #: config/tc-arm.c:2180
-#, fuzzy
-#| msgid "VFP/Neon double precision register expected"
 msgid "VFP/Neon double precision register or VPR expected"
-msgstr "VFP-/Neon-dubbelprecisionsregister förväntades"
+msgstr "VFP-/Neon-dubbelprecisionsregister eller VPR förväntades"
 
 #: config/tc-arm.c:2197 config/tc-arm.c:2241
 msgid "register out of range in list"
@@ -3746,10 +3709,9 @@ msgid "invalid unwind opcode"
 msgstr "ogiltig upprullningsopkod"
 
 #: config/tc-arm.c:5052 config/tc-arm.c:31762
-#, fuzzy, c-format
-#| msgid "unrecognized option \"%s\""
+#, c-format
 msgid "unrecognised float16 format \"%s\""
-msgstr "okänd flagga ”%s”"
+msgstr "okänt float16-format ”%s”"
 
 #: config/tc-arm.c:5063
 msgid "float16 format cannot be set more than once, ignoring."
@@ -3769,10 +3731,8 @@ msgid "invalid FPA immediate expression"
 msgstr "ogiltigt omedelbart FPA-uttryck"
 
 #: config/tc-arm.c:5533
-#, fuzzy
-#| msgid "SP not allowed here"
 msgid "'UXTW' not allowed here"
-msgstr "SP tillåts inte här"
+msgstr "”UXTW” tillåts inte här"
 
 #: config/tc-arm.c:5541
 msgid "'LSL' or 'ASR' required"
@@ -3787,10 +3747,8 @@ msgid "'ASR' required"
 msgstr "”ASR” krävs"
 
 #: config/tc-arm.c:5564
-#, fuzzy
-#| msgid "')' required"
 msgid "'UXTW' required"
-msgstr "”)” krävs"
+msgstr "”UXTW” krävs"
 
 #: config/tc-arm.c:5643
 msgid "invalid rotation"
@@ -3878,10 +3836,8 @@ msgid "invalid shift"
 msgstr "ogiltig skift"
 
 #: config/tc-arm.c:6767
-#, fuzzy
-#| msgid "expected EP register"
 msgid "expected ARM or MVE vector register"
-msgstr "förväntade EP-register"
+msgstr "förväntade ARM- eller MVE-vektorregister"
 
 #: config/tc-arm.c:6816
 msgid "can't use Neon quad register here"
@@ -3892,20 +3848,16 @@ msgid "expected <Rm> or <Dm> or <Qm> operand"
 msgstr "förväntade <Rm>- eller <Dm>- eller <Qm>-operand"
 
 #: config/tc-arm.c:6985
-#, fuzzy
-#| msgid "VFP single or double precision register expected"
 msgid "VFP single, double or MVE vector register expected"
-msgstr "VFP-enkel- eller dubbelprecisionsregister förväntades"
+msgstr "VFP-enkel- eller -dubbelregister eller MVE-vektorregister förväntades"
 
 #: config/tc-arm.c:7005
 msgid "parse error"
 msgstr "tolkningfel"
 
 #: config/tc-arm.c:7299
-#, fuzzy
-#| msgid "immediate 1 or 2 expected"
 msgid "immediate value 48 or 64 expected"
-msgstr "omedelbar 1 eller 2 förväntad"
+msgstr "omedelbart värde 48 eller 64 förväntades"
 
 #. ISB can only take SY as an option.
 #: config/tc-arm.c:7348
@@ -3929,10 +3881,8 @@ msgid "Banked registers are not available with this architecture."
 msgstr "Bankregister är inte tillåtna med denna arkitektur."
 
 #: config/tc-arm.c:8067
-#, fuzzy
-#| msgid "source operand must be 8 bit register"
 msgid "operand must be LR register"
-msgstr "källoperand måste vara 8-bitarsregister"
+msgstr "operand måste vara LR-register"
 
 #: config/tc-arm.c:8138 config/tc-score.c:264
 msgid "garbage following instruction"
@@ -4113,16 +4063,12 @@ msgstr "operand 1 måste vara FPSCR"
 
 #: config/tc-arm.c:10040 config/tc-arm.c:10049 config/tc-arm.c:10103
 #: config/tc-arm.c:10112
-#, fuzzy
-#| msgid "selected processor does not support fp16 instruction"
 msgid "selected processor does not support instruction"
-msgstr "vald processor har inte stöd för fp16-instruktion"
+msgstr "vald processor har inte stöd för instruktion"
 
 #: config/tc-arm.c:10052 config/tc-arm.c:10115
-#, fuzzy
-#| msgid "writeback of base register is UNPREDICTABLE"
 msgid "accessing MVE system register without MVE is UNPREDICTABLE"
-msgstr "återskrivning av basregister är OPÅLITLIGT"
+msgstr "åtkomst av MVE-systemregister utan MVE är OPÅLITLIGT"
 
 #: config/tc-arm.c:10143 config/tc-arm.c:13345
 msgid "bad register for mrs"
@@ -4178,10 +4124,8 @@ msgid "extraneous shift as part of operand to shift insn"
 msgstr "extra skift som del av operand till skift-instr"
 
 #: config/tc-arm.c:10421 config/tc-arm.c:14053
-#, fuzzy
-#| msgid "5-bit immediate too large"
 msgid "immediate too large (bigger than 0xF)"
-msgstr "5-bitars omedelbar för stor"
+msgstr "omedelbar för stor (större än 0xF)"
 
 #: config/tc-arm.c:10445 config/tc-arm.c:10454
 msgid "selected processor does not support SETPAN instruction"
@@ -4474,34 +4418,24 @@ msgid "inconsistent types in Neon instruction"
 msgstr "inkonsekventa typer i Neon-instruktion"
 
 #: config/tc-arm.c:15927
-#, fuzzy
-#| msgid "zero flag is not valid for this instruction"
 msgid "Type is not allowed for this instruction"
-msgstr "nollflagga inte giltig för denna instruktion"
+msgstr "Typ är inte tillåten för denna instruktion"
 
 #: config/tc-arm.c:16002
-#, fuzzy
-#| msgid "SVE vector register expected"
 msgid "MVE vector or ARM register expected"
-msgstr "SVE-vektorregister förväntades"
+msgstr "MVE-vektor eller ARM-register förväntades"
 
 #: config/tc-arm.c:16119
-#, fuzzy
-#| msgid "immediate must be 1 or 2"
 msgid "immediate must be either 1, 2, 4 or 8"
-msgstr "omedelbar måste vara 1 eller 2"
+msgstr "omedelbart värde måste vara antingen 1, 2, 4 eller 8"
 
 #: config/tc-arm.c:16276
-#, fuzzy
-#| msgid "immediate value out of range, expected range [1, 32]"
 msgid "immediate operand expected in the range [1,8]"
-msgstr "omedelbart värde utanför intervall, förväntat intervall [1, 32]"
+msgstr "omedelbart värde förväntat i intervall [1,8]"
 
 #: config/tc-arm.c:16277
-#, fuzzy
-#| msgid "immediate value out of range, expected range [0, 16]"
 msgid "immediate operand expected in the range [1,16]"
-msgstr "omedelbart värde utanför intervall, förväntat intervall [0, 16]"
+msgstr "omedelbart värde förväntat i intervall [1,16]"
 
 #: config/tc-arm.c:16419
 msgid "expected LR"
@@ -4517,22 +4451,16 @@ msgid "first and second operands shall be the same register"
 msgstr "första och andra operander bör vara samma register"
 
 #: config/tc-arm.c:17326 config/tc-arm.c:17388
-#, fuzzy
-#| msgid "destination register same as write-back base"
 msgid "destination register and offset register may not be the same"
-msgstr "destinationsregister är det samma som återskrivningsbas"
+msgstr "destinationsregister och avståndsregister får inte vara det samma"
 
 #: config/tc-arm.c:17338 config/tc-arm.c:17457
-#, fuzzy
-#| msgid "immediate value must be a multiple of %d at operand %d -- `%s'"
 msgid "immediate must be a multiple of 4 in the range of +/-[0,508]"
-msgstr "omedelbart värde måste vara en multipel av %d vid operand %d -- ”%s”"
+msgstr "omedelbart värde måste vara en multipel av 4 i intervallet +-[0,508]"
 
 #: config/tc-arm.c:17340
-#, fuzzy
-#| msgid "immediate value must be a multiple of %d at operand %d -- `%s'"
 msgid "immediate must be a multiple of 8 in the range of +/-[0,1016]"
-msgstr "omedelbart värde måste vara en multipel av %d vid operand %d -- ”%s”"
+msgstr "omedelbart värde måste vara en multipel av 8 i intervallet +/-[0,1016]"
 
 #: config/tc-arm.c:17361
 msgid "can not shift offsets when accessing less than half-word"
@@ -4543,38 +4471,28 @@ msgid "shift immediate must be 1, 2 or 3 for half-word, word or double-word acce
 msgstr "omedelbart skift måste vara 1, 2 eller 3 för halvords-, ord- respektive dubbelordsåtkomster"
 
 #: config/tc-arm.c:17450
-#, fuzzy
-#| msgid "number of registers must be in the range [1:4]"
 msgid "immediate must be in the range of +/-[0,127]"
-msgstr "antalet register måste vara i intervallet [1:4]"
+msgstr "omedelbar måste vara i intervallet +/-[0,127]"
 
 #: config/tc-arm.c:17453
-#, fuzzy
-#| msgid "immediate value must be a multiple of %d at operand %d -- `%s'"
 msgid "immediate must be a multiple of 2 in the range of +/-[0,254]"
-msgstr "omedelbart värde måste vara en multipel av %d vid operand %d -- ”%s”"
+msgstr "omedelbart värde måste vara en multipel av 2 i intervallet +/-[0,254]"
 
 #: config/tc-arm.c:17467 config/tc-arm.c:18299
-#, fuzzy
-#| msgid "SVE vector register expected"
 msgid "MVE vector register in the range [Q0..Q7] expected"
-msgstr "SVE-vektorregister förväntades"
+msgstr "MVE-vektorregister i intervallet [Q0..Q7] förväntades"
 
 #: config/tc-arm.c:17783 config/tc-arm.c:19652
 msgid "scalar out of range for multiply instruction"
 msgstr "skalär utanför intervall för multiplkationsinstruktion"
 
 #: config/tc-arm.c:17871
-#, fuzzy
-#| msgid "Shift value should be in the range [0,31]"
 msgid "index must be in the range 0 to 3"
-msgstr "Skiftvärde bör vara i intervall [0,31]"
+msgstr "index måste vara i intervallet 0 till 3"
 
 #: config/tc-arm.c:17874
-#, fuzzy
-#| msgid "64-bit operator src/dst register must be less than 15"
 msgid "indexed register must be less than 8"
-msgstr "64-bitarsoperator src/dst-register måste vara mindre än 15"
+msgstr "indexerat regsiter måste vara mindre än 8"
 
 #: config/tc-arm.c:18075 config/tc-arm.c:21394
 msgid "Warning: 32-bit element size and same first and third operand makes instruction UNPREDICTABLE"
@@ -4633,10 +4551,8 @@ msgid "Index one must be [2,3] and index two must be two less than index one."
 msgstr "Index ett måste vara [2,3] och index två måste vara två mindre än index ett."
 
 #: config/tc-arm.c:19951
-#, fuzzy
-#| msgid "registers may not be the same"
 msgid "General purpose registers may not be the same"
-msgstr "register kan inte vara de samma"
+msgstr "Generella register kan inte vara desamma"
 
 #: config/tc-arm.c:20149 config/tc-arm.c:20232
 msgid "bad type for scalar"
@@ -4675,22 +4591,16 @@ msgid "Use of PC here is deprecated"
 msgstr "Användning av PC här är föråldrat"
 
 #: config/tc-arm.c:20733
-#, fuzzy
-#| msgid "instruction does not accept scaled register index"
 msgid "instruction does not accept register index"
-msgstr "instruktion accepterar inte skalat registerindex"
+msgstr "instruktion accepterar inte registerindex"
 
 #: config/tc-arm.c:20736
-#, fuzzy
-#| msgid "instruction does not accept preindexed addressing"
 msgid "instruction does not accept PC-relative addressing"
-msgstr "instruktionen accepterar inte förindexerad adressering"
+msgstr "instruktionen accepterar inte PC-relativ adressering"
 
 #: config/tc-arm.c:20758 config/tc-arm.c:20767
-#, fuzzy
-#| msgid "Instruction not supported by this architecture"
 msgid "Instruction not permitted on this architecture"
-msgstr "Instruktion stöds inte av denna arkitektur"
+msgstr "Instruktion inte tillåten för denna arkitektur"
 
 #: config/tc-arm.c:20816
 msgid "bad alignment"
@@ -4734,16 +4644,12 @@ msgid "Dot Product instructions cannot be conditional,  the behaviour is UNPREDI
 msgstr "Korsprodukt-instruktioner kan inte vara villkorade, beteende är OFÖRUTSÄGBART"
 
 #: config/tc-arm.c:21514 config/tc-arm.c:21542 config/tc-arm.c:21777
-#, fuzzy
-#| msgid "immediate must be 1 or 2"
 msgid "index must be 0 or 1"
-msgstr "omedelbar måste vara 1 eller 2"
+msgstr "index måste vara 0 eller 1"
 
 #: config/tc-arm.c:21517 config/tc-arm.c:21545 config/tc-arm.c:21780
-#, fuzzy
-#| msgid "64-bit operator src/dst register must be less than 15"
 msgid "indexed register must be less than 16"
-msgstr "64-bitarsoperator src/dst-register måste vara mindre än 15"
+msgstr "indexerat register måste vara mindre än 16"
 
 #: config/tc-arm.c:22130 config/tc-arm.c:22234
 msgid "conditional infixes are deprecated in unified syntax"
@@ -4854,20 +4760,17 @@ msgid "section '%s' finished with an open IT block."
 msgstr "sektion ”%s” avslutad med ett öppet IT-block."
 
 #: config/tc-arm.c:23127
-#, fuzzy, c-format
-#| msgid "section '%s' finished with an open IT block."
+#, c-format
 msgid "section '%s' finished with an open VPT/VPST block."
-msgstr "sektion ”%s” avslutad med ett öppet IT-block."
+msgstr "sektion ”%s” avslutad med ett öppet VPT/VPST-block."
 
 #: config/tc-arm.c:23134
 msgid "file finished with an open IT block."
 msgstr "fil avslutad med ett öppet IT-block."
 
 #: config/tc-arm.c:23136
-#, fuzzy
-#| msgid "file finished with an open IT block."
 msgid "file finished with an open VPT/VPST block."
-msgstr "fil avslutad med ett öppet IT-block."
+msgstr "fil avslutad med ett öppet VPT/VPST-block."
 
 #: config/tc-arm.c:26787
 #, c-format
@@ -5075,10 +4978,9 @@ msgid "ADRL used for a symbol not defined in the same file"
 msgstr "ADRL använt för en symbol som inte definierats i samma fil"
 
 #: config/tc-arm.c:29638
-#, fuzzy, c-format
-#| msgid "ADRL used for a symbol not defined in the same file"
+#, c-format
 msgid "%s used for a symbol not defined in the same file"
-msgstr "ADRL använt för en symbol som inte definierats i samma fil"
+msgstr "%s använt för en symbol är inte definierat i samma fil"
 
 #: config/tc-arm.c:29654
 #, c-format
@@ -5159,10 +5061,8 @@ msgid "do not warn on use of deprecated feature"
 msgstr "varna inte vid användning av funktion som är föråldrat"
 
 #: config/tc-arm.c:30535
-#, fuzzy
-#| msgid "IT blocks containing 32-bit Thumb instructions are performance deprecated in ARMv8-A and ARMv8-R"
 msgid "warn about performance deprecated IT instructions in ARMv8-A and ARMv8-R"
-msgstr "IT-block som innehåller 32-bitars Thumb-instruktioner är prestandaföråldrade för ARMv8-A och ARMv8-R"
+msgstr "varna för prestandaföråldrade IT-instruktioner i ARMv8-A och ARMv8-R"
 
 #: config/tc-arm.c:30539
 msgid "warn about symbols that match instruction names [default]"
@@ -5443,6 +5343,9 @@ msgid ""
 "                          set the encoding for half precision floating point numbers to IEEE\n"
 "                          or Arm alternative format."
 msgstr ""
+"[ieee|alternative]\n"
+"                          ställ in kodningen för halvprecisionsflyttal till IEEE\n"
+"                          eller Arm-alternativt format."
 
 #: config/tc-arm.c:32073
 #, c-format
@@ -5823,18 +5726,13 @@ msgstr ""
 "BPF-flaggor:\n"
 
 #: config/tc-bpf.c:144
-#, fuzzy, c-format
-#| msgid ""
-#| "PJ options:\n"
-#| "-little\t\t\tgenerate little endian code\n"
-#| "-big\t\t\tgenerate big endian code\n"
+#, c-format
 msgid ""
 "  --EL\t\t\tgenerate code for a little endian machine\n"
 "  --EB\t\t\tgenerate code for a big endian machine\n"
 msgstr ""
-"PJ-flaggor:\n"
-"-little\t\t\tgenerera kod med omvänd byteordning\n"
-"-big\t\t\tgenerera kod med rak byteordning\n"
+"  --EL\t\t\tgenerera kod med omvänd byteordning\n"
+"  --EB\t\t\tgenerera kod med rak byteordning\n"
 
 #: config/tc-bpf.c:279
 msgid "convert_frag called"
@@ -8162,10 +8060,9 @@ msgid "translating to `%sp'"
 msgstr "översätter till ”%sp”"
 
 #: config/tc-i386.c:4518
-#, fuzzy, c-format
-#| msgid "instruction `%s' isn't supported in 16-bit mode."
+#, c-format
 msgid "instruction `%s' isn't supported outside of protected mode."
-msgstr "instruktion ”%s” stöds inte i 16-bitarsläge."
+msgstr "instruktion ”%s” stöds inte utanför skyddatläge."
 
 #: config/tc-i386.c:4579
 #, c-format
@@ -8364,10 +8261,9 @@ msgid "stand-alone `%s' prefix"
 msgstr "fristående ”%s”-prefix"
 
 #: config/tc-i386.c:6266
-#, fuzzy, c-format
-#| msgid "`%s' operand %d must use `%ses' segment"
+#, c-format
 msgid "`%s' operand %u must use `%ses' segment"
-msgstr "”%s” operand %d måste använda ”%ses”-segment"
+msgstr "”%s” operand %u måste använda ”%ses”-segment"
 
 #. We have to know the operand size for crc32.
 #: config/tc-i386.c:6324
@@ -8442,10 +8338,9 @@ msgid "segment override on `%s' is ineffectual"
 msgstr "segmentåsidosättning för ”%s” har ingen effekt"
 
 #: config/tc-i386.c:7912 config/tc-i386.c:8055 config/tc-i386.c:8116
-#, fuzzy, c-format
-#| msgid "skipping prefixes on this instruction"
+#, c-format
 msgid "skipping prefixes on `%s'"
-msgstr "hoppar över prefix för denna instruktion"
+msgstr "hoppar över prefix för ”%s”"
 
 #: config/tc-i386.c:8136
 msgid "16-bit jump out of range"
@@ -8765,29 +8660,23 @@ msgid "invalid -malign-branch-boundary= value: %s"
 msgstr "ogiltigt -malign-branch-boundary=-värde: %s"
 
 #: config/tc-i386.c:12501
-#, fuzzy, c-format
-#| msgid "invalid -momit-lock-prefix= option: `%s'"
+#, c-format
 msgid "invalid -malign-branch-prefix-size= value: %s"
-msgstr "ogiltig -momit-lock-prefix=-flagga: ”%s”"
+msgstr "ogiltig -malign-branch-prefix-size=-flagga: %s"
 
 #: config/tc-i386.c:12528
-#, fuzzy, c-format
-#| msgid "invalid -march= option: `%s'"
+#, c-format
 msgid "invalid -malign-branch= option: `%s'"
-msgstr "ogiltig -march=-flagga: ”%s”"
+msgstr "ogiltig -malign-branch=-flagga: ”%s”"
 
 #: config/tc-i386.c:12684
-#, fuzzy, c-format
-#| msgid ""
-#| "  -Q                      ignored\n"
-#| "  -V                      print assembler version number\n"
-#| "  -k                      ignored\n"
+#, c-format
 msgid ""
 "  -Qy, -Qn                ignored\n"
 "  -V                      print assembler version number\n"
 "  -k                      ignored\n"
 msgstr ""
-"  -Q                      hoppas över\n"
+"  -Qy, -Qn                hoppas över\n"
 "  -V                      skriv ut versionsnummer för assembler\n"
 "  -k                      hoppas över\n"
 
@@ -9017,6 +8906,8 @@ msgid ""
 "  -malign-branch-boundary=NUM (default: 0)\n"
 "                          align branches within NUM byte boundary\n"
 msgstr ""
+"  -malign-branch-boundary=NUM (standardvärde: 0)\n"
+"                          justera grenar inom NUM bytegräns\n"
 
 #: config/tc-i386.c:12797
 #, c-format
@@ -9026,18 +8917,19 @@ msgid ""
 "                           indirect\n"
 "                          specify types of branches to align\n"
 msgstr ""
+"  -malign-branch=TYP[+TYP…] (standardvärde: jcc+fused+jmp)\n"
+"                          TYP är en kobmination av jcc, fused, jmp call, ret,\n"
+"                           indirect\n"
+"                          ange typer av grenar att justera\n"
 
 #: config/tc-i386.c:12802
-#, fuzzy, c-format
-#| msgid ""
-#| "  -momit-lock-prefix=[no|yes] (default: no)\n"
-#| "                          strip all lock prefixes\n"
+#, c-format
 msgid ""
 "  -malign-branch-prefix-size=NUM (default: 5)\n"
 "                          align branches with NUM prefixes per instruction\n"
 msgstr ""
-"  -momit-lock-prefix=[no|yes] (standard: no)\n"
-"                          rensa bort alla låsprefix\n"
+"  -malign-branch-prefix-size=NUM (standardvärde: 5)\n"
+"                          justera grenar med NUM prefix per instruktion\n"
 
 #: config/tc-i386.c:12805
 #, c-format
@@ -9045,6 +8937,8 @@ msgid ""
 "  -mbranches-within-32B-boundaries\n"
 "                          align branches within 32 byte boundary\n"
 msgstr ""
+"  -mbranches-within-32B-boundaries\n"
+"                          justera grenar inom 32 bytegräns\n"
 
 #: config/tc-i386.c:12808
 #, c-format
@@ -12969,6 +12863,8 @@ msgid ""
 "-mfix-loongson3-llsc\twork around Loongson3 LL/SC errata, default\n"
 "-mno-fix-loongson3-llsc\tdisable work around Loongson3 LL/SC errata\n"
 msgstr ""
+"-mfix-loongson3-llsc\tgå runt Loongson3 LL/SC-fel, standard\n"
+"-mno-fix-loongson3-llsc\tinaktivera åtgärder för Loongson3 LL/SC-fel\n"
 
 #: config/tc-mips.c:20418
 #, c-format
@@ -12976,25 +12872,11 @@ msgid ""
 "-mfix-loongson3-llsc\twork around Loongson3 LL/SC errata\n"
 "-mno-fix-loongson3-llsc\tdisable work around Loongson3 LL/SC errata, default\n"
 msgstr ""
+"-mfix-loongson3-llsc\tgå runt Loongson3 LL/SC-fel\n"
+"-mno-fix-loongson3-llsc\tinaktivera åtgärder för Loongson3 LL/SC-fel, standard\n"
 
 #: config/tc-mips.c:20422
-#, fuzzy, c-format
-#| msgid ""
-#| "-mfix-loongson2f-jump\twork around Loongson2F JUMP instructions\n"
-#| "-mfix-loongson2f-nop\twork around Loongson2F NOP errata\n"
-#| "-mfix-vr4120\t\twork around certain VR4120 errata\n"
-#| "-mfix-vr4130\t\twork around VR4130 mflo/mfhi errata\n"
-#| "-mfix-24k\t\tinsert a nop after ERET and DERET instructions\n"
-#| "-mfix-cn63xxp1\t\twork around CN63XXP1 PREF errata\n"
-#| "-mfix-r5900\t\twork around R5900 short loop errata\n"
-#| "-mgp32\t\t\tuse 32-bit GPRs, regardless of the chosen ISA\n"
-#| "-mfp32\t\t\tuse 32-bit FPRs, regardless of the chosen ISA\n"
-#| "-msym32\t\t\tassume all symbols have 32-bit values\n"
-#| "-O0\t\t\tdo not remove unneeded NOPs, do not swap branches\n"
-#| "-O, -O1\t\t\tremove unneeded NOPs, do not swap branches\n"
-#| "-O2\t\t\tremove unneeded NOPs and swap branches\n"
-#| "--trap, --no-break\ttrap exception on div by 0 and mult overflow\n"
-#| "--break, --no-trap\tbreak exception on div by 0 and mult overflow\n"
+#, c-format
 msgid ""
 "-mfix-loongson2f-jump\twork around Loongson2F JUMP instructions\n"
 "-mfix-loongson2f-nop\twork around Loongson2F NOP errata\n"
@@ -13014,16 +12896,18 @@ msgid ""
 "--trap, --no-break\ttrap exception on div by 0 and mult overflow\n"
 "--break, --no-trap\tbreak exception on div by 0 and mult overflow\n"
 msgstr ""
-"-mfix-loongson2f-jump\tlösning för Loongson2F JUMP-instruktioner\n"
-"-mfix-loongson2f-nop\tlösning för Loongson2F NOP-errata\n"
-"-mfix-vr4120\t\tlösning för specifika VR4120-errata\n"
-"-mfix-vr4130\t\tlösning för VR4130 mflo/mfhi-errata\n"
+"-mfix-loongson2f-jump\tgå runt Loongson2F JUMP-instruktioner\n"
+"-mfix-loongson2f-nop\tgå runt Loongson2F NOP-fel\n"
+"-mfix-loongson3-llsc\tgå runt Loongson3 LL/SC-fel\n"
+"-mno-fix-loongson3-llsc\tinaktivera åtgärder för Loongson3 LL/SC-fel\n"
+"-mfix-vr4120\t\tgå runt specifika VR4120-fel\n"
+"-mfix-vr4130\t\tgå runt VR4130 mflo/mfhi-fel\n"
 "-mfix-24k\t\tinfoga en nop efter ERET- och DERET-instruktioner\n"
 "-mfix-cn63xxp1\t\tlösning för CN63XXP1 PREF-errata\n"
-"-mfix-r5900\t\tarbeta runt errata för kort loop på R5900\n"
-"-mgp32\t\t\tanvänd 32-bitars GPRs, oberoende av vald ISA\n"
-"-mfp32\t\t\tanvänd 32-bitars FPRs, oberoende av vald ISA\n"
-"-msym32\t\t\tantag att alla symbole har 32-bitars värden\n"
+"-mfix-r5900\t\tarbeta runt fel för kort loop på R5900\n"
+"-mgp32\t\t\tanvänd 32-bitars GPR:s, oberoende av vald ISA\n"
+"-mfp32\t\t\tanvänd 32-bitars FPR:s, oberoende av vald ISA\n"
+"-msym32\t\t\tantag att alla symboler har 32-bitarsvärden\n"
 "-O0\t\t\tta inte bort onödiga NOP:ar, växla inte grenar\n"
 "-O, -O1\t\t\tta bort onödiga NOP:ar, växla inte grenar\n"
 "-O2\t\t\tta bort onödiga NOP:ar och växla grenar\n"
@@ -13600,6 +13484,8 @@ msgid ""
 "  -mU - for an instruction which changes interrupt state, but where it is not\n"
 "        known how the state is changed, do not warn/insert NOPs\n"
 msgstr ""
+"  -mU - för en instruktion som ändrar avbrottstillstånd, men där det inte är\n"
+"        känt hur tillståndet ändras, varna inte/infoga inte NOP:ar\n"
 
 #: config/tc-msp430.c:1794
 #, c-format
@@ -13608,6 +13494,9 @@ msgid ""
 "        known how the state is changed, warn/insert NOPs (default)\n"
 "        -mn and/or -my are required for this to have any effect\n"
 msgstr ""
+"  -mu - för en instruktion som ändrar avbrottstillstånd, men där det inte är\n"
+"        känt hur tillståndet ändras, varna inte/infoga inte NOP:par (standard)\n"
+"        -mn och/eller -my krävs för att detta ska få någon effekt\n"
 
 #: config/tc-msp430.c:1798
 #, c-format
@@ -14916,39 +14805,34 @@ msgid "PowerPC options:\n"
 msgstr "PowerPC-flaggor:\n"
 
 #: config/tc-ppc.c:1347
-#, fuzzy, c-format
-#| msgid "  -KPIC                   generate PIC\n"
+#, c-format
 msgid "-a32                    generate ELF32/XCOFF32\n"
-msgstr "  -KPIC                   generera PIC\n"
+msgstr "-a32                    generera ELF32/XCOFF32\n"
 
 #: config/tc-ppc.c:1350
-#, fuzzy, c-format
-#| msgid "  -KPIC                   generate PIC\n"
+#, c-format
 msgid "-a64                    generate ELF64/XCOFF64\n"
-msgstr "  -KPIC                   generera PIC\n"
+msgstr "-a64                    generera ELF64/XCOFF64\n"
 
 #: config/tc-ppc.c:1352
-#, fuzzy, c-format
-#| msgid "  -w                      ignored\n"
+#, c-format
 msgid "-u                      ignored\n"
-msgstr "  -w                      hoppas över\n"
+msgstr "-u                      hoppas över\n"
 
 #: config/tc-ppc.c:1354
 #, c-format
 msgid "-mpwrx, -mpwr2          generate code for POWER/2 (RIOS2)\n"
-msgstr ""
+msgstr "-mpwrx, -mpwr2          generera kod för POWER/2 (RIOS2)\n"
 
 #: config/tc-ppc.c:1356
-#, fuzzy, c-format
-#| msgid "  -KPIC                   generate PIC\n"
+#, c-format
 msgid "-mpwr                   generate code for POWER (RIOS1)\n"
-msgstr "  -KPIC                   generera PIC\n"
+msgstr "-mpwr                   ” POWER (RIOS1)\n"
 
 #: config/tc-ppc.c:1358
-#, fuzzy, c-format
-#| msgid "  -KPIC                   generate PIC\n"
+#, c-format
 msgid "-m601                   generate code for PowerPC 601\n"
-msgstr "  -KPIC                   generera PIC\n"
+msgstr "-m601                   generera kod för PowerPC 601\n"
 
 #: config/tc-ppc.c:1360
 #, c-format
@@ -14956,36 +14840,33 @@ msgid ""
 "-mppc, -mppc32, -m603, -m604\n"
 "                        generate code for PowerPC 603/604\n"
 msgstr ""
+"-mppc, -mppc32, -m603, -m604\n"
+"                        generera kod för PowerPC 603/604\n"
 
 #: config/tc-ppc.c:1363
-#, fuzzy, c-format
-#| msgid "  -KPIC                   generate PIC\n"
+#, c-format
 msgid "-m403                   generate code for PowerPC 403\n"
-msgstr "  -KPIC                   generera PIC\n"
+msgstr "-m403                   generera kod för PowerPC 403\n"
 
 #: config/tc-ppc.c:1365
-#, fuzzy, c-format
-#| msgid "  -KPIC                   generate PIC\n"
+#, c-format
 msgid "-m405                   generate code for PowerPC 405\n"
-msgstr "  -KPIC                   generera PIC\n"
+msgstr "-m405                   generera kod för PowerPC 405\n"
 
 #: config/tc-ppc.c:1367
-#, fuzzy, c-format
-#| msgid "  -KPIC                   generate PIC\n"
+#, c-format
 msgid "-m440                   generate code for PowerPC 440\n"
-msgstr "  -KPIC                   generera PIC\n"
+msgstr "-m440                   generera kod för PowerPC 440\n"
 
 #: config/tc-ppc.c:1369
-#, fuzzy, c-format
-#| msgid "  -KPIC                   generate PIC\n"
+#, c-format
 msgid "-m464                   generate code for PowerPC 464\n"
-msgstr "  -KPIC                   generera PIC\n"
+msgstr "-m464                   generera kod för PowerPC 464\n"
 
 #: config/tc-ppc.c:1371
-#, fuzzy, c-format
-#| msgid "  -KPIC                   generate PIC\n"
+#, c-format
 msgid "-m476                   generate code for PowerPC 476\n"
-msgstr "  -KPIC                   generera PIC\n"
+msgstr "-m476                   generera kod för PowerPC 476\n"
 
 #: config/tc-ppc.c:1373
 #, c-format
@@ -14993,6 +14874,8 @@ msgid ""
 "-m7400, -m7410, -m7450, -m7455\n"
 "                        generate code for PowerPC 7400/7410/7450/7455\n"
 msgstr ""
+"-m7400, -m7410, -m7450, -m7455\n"
+"                        generera kod för PowerPC 7400/7410/7450/7455\n"
 
 #: config/tc-ppc.c:1376
 #, c-format
@@ -15000,241 +14883,220 @@ msgid ""
 "-m750cl, -mgekko, -mbroadway\n"
 "                        generate code for PowerPC 750cl/Gekko/Broadway\n"
 msgstr ""
+"-m750cl, -mgekko, -mbroadway\n"
+"                        generera kod för PowerPC 750cl/Gekko/Broadway\n"
 
 #: config/tc-ppc.c:1379
 #, c-format
 msgid "-m821, -m850, -m860     generate code for PowerPC 821/850/860\n"
-msgstr ""
+msgstr "-m821, -m850, -m860     generera kod för PowerPC 821/850/860\n"
 
 #: config/tc-ppc.c:1381
 #, c-format
 msgid "-mppc64, -m620          generate code for PowerPC 620/625/630\n"
-msgstr ""
+msgstr "-mppc64, -m620          generera kod för PowerPC 620/625/630\n"
 
 #: config/tc-ppc.c:1383
 #, c-format
 msgid "-mppc64bridge           generate code for PowerPC 64, including bridge insns\n"
-msgstr ""
+msgstr "-mppc64bridge           generera kod för PowerPC 64, inklusive brygg-instr\n"
 
 #: config/tc-ppc.c:1385
-#, fuzzy, c-format
-#| msgid "  -mbig-obj               generate big object files\n"
+#, c-format
 msgid "-mbooke                 generate code for 32-bit PowerPC BookE\n"
-msgstr "  -mbig-obj               generera stora objektfiler\n"
+msgstr "-mbooke                 generera kod för 32-bit PowerPC BookE\n"
 
 #: config/tc-ppc.c:1387
-#, fuzzy, c-format
-#| msgid "  -Z                      generate object file even after errors\n"
+#, c-format
 msgid "-ma2                    generate code for A2 architecture\n"
-msgstr "  -Z                      generera objektfil även efter fel\n"
+msgstr "-ma2                    generera kod för A2-arkitektur\n"
 
 #: config/tc-ppc.c:1389
 #, c-format
 msgid "-mpower4, -mpwr4        generate code for Power4 architecture\n"
-msgstr ""
+msgstr "-mpower4, -mpwr4        generera kod för Power4-arkitektur\n"
 
 #: config/tc-ppc.c:1391
-#, fuzzy, c-format
-#| msgid "  -Z                      generate object file even after errors\n"
+#, c-format
 msgid ""
 "-mpower5, -mpwr5, -mpwr5x\n"
 "                        generate code for Power5 architecture\n"
-msgstr "  -Z                      generera objektfil även efter fel\n"
+msgstr ""
+"-mpower5, -mpwr5, -mpwr5x\n"
+"                        generera kod för Power5-arkitektur\n"
 
 #: config/tc-ppc.c:1394
 #, c-format
 msgid "-mpower6, -mpwr6        generate code for Power6 architecture\n"
-msgstr ""
+msgstr "-mpower6, -mpwr6        generera kod för Power6-arkitektur\n"
 
 #: config/tc-ppc.c:1396
 #, c-format
 msgid "-mpower7, -mpwr7        generate code for Power7 architecture\n"
-msgstr ""
+msgstr "-mpower7, -mpwr7        generera kod för Power7-arkitektur\n"
 
 #: config/tc-ppc.c:1398
 #, c-format
 msgid "-mpower8, -mpwr8        generate code for Power8 architecture\n"
-msgstr ""
+msgstr "-mpower8, -mpwr8        generera kod för Power8-arkitektur\n"
 
 #: config/tc-ppc.c:1400
 #, c-format
 msgid "-mpower9, -mpwr9        generate code for Power9 architecture\n"
-msgstr ""
+msgstr "-mpower9, -mpwr9        generera kod för Power9-arkitektur\n"
 
 #: config/tc-ppc.c:1402
 #, c-format
 msgid "-mcell                  generate code for Cell Broadband Engine architecture\n"
-msgstr ""
+msgstr "-mcell                  generera kod för Cell Broadband Engine-arkitektur\n"
 
 #: config/tc-ppc.c:1404
-#, fuzzy, c-format
-#| msgid "  -m32r                   disable support for the m32rx instruction set\n"
+#, c-format
 msgid "-mcom                   generate code for Power/PowerPC common instructions\n"
-msgstr "  -m32r                   inaktivera stöd för m32rx instruktionsuppsättning\n"
+msgstr "-mcom                   generera kod för allmänna Power/PowerPC-instruktioner\n"
 
 #: config/tc-ppc.c:1406
-#, fuzzy, c-format
-#| msgid "  -Z                      generate object file even after errors\n"
+#, c-format
 msgid "-many                   generate code for any architecture (PWR/PWRX/PPC)\n"
-msgstr "  -Z                      generera objektfil även efter fel\n"
+msgstr "-many                   generera kod för vilken arkitektur som helst (PWR/PWRX/PPC)\n"
 
 #: config/tc-ppc.c:1408
-#, fuzzy, c-format
-#| msgid "  -mbig-obj               generate big object files\n"
+#, c-format
 msgid "-maltivec               generate code for AltiVec\n"
-msgstr "  -mbig-obj               generera stora objektfiler\n"
+msgstr "-maltivec               generera kod för AltiVec\n"
 
 #: config/tc-ppc.c:1410
-#, fuzzy, c-format
-#| msgid "                          generate relax relocations\n"
+#, c-format
 msgid "-mvsx                   generate code for Vector-Scalar (VSX) instructions\n"
-msgstr "                          generera lättnadsomlokaliseringar\n"
+msgstr "-mvsx                   generera kod för Vector-Scalar-instruktioner (VSX)\n"
 
 #: config/tc-ppc.c:1412
-#, fuzzy, c-format
-#| msgid "  --fdpic                 generate an FDPIC object file\n"
+#, c-format
 msgid "-me300                  generate code for PowerPC e300 family\n"
-msgstr "  --fdpic                 generera en FDPIC-objektfil\n"
+msgstr "-me300                  generera kod för PowerPC e300-familjen\n"
 
 #: config/tc-ppc.c:1414
 #, c-format
 msgid "-me500, -me500x2        generate code for Motorola e500 core complex\n"
-msgstr ""
+msgstr "-me500, -me500x2        generera kod för Motorola e500-kärnkomplex\n"
 
 #: config/tc-ppc.c:1416
 #, c-format
 msgid "-me500mc,               generate code for Freescale e500mc core complex\n"
-msgstr ""
+msgstr "-me500mc,               generera kod för Freescale e500mc-kärnkomplex\n"
 
 #: config/tc-ppc.c:1418
 #, c-format
 msgid "-me500mc64,             generate code for Freescale e500mc64 core complex\n"
-msgstr ""
+msgstr "-me500mc64,             generera kod för Freescale e500mc64-kärnkomplex\n"
 
 #: config/tc-ppc.c:1420
 #, c-format
 msgid "-me5500,                generate code for Freescale e5500 core complex\n"
-msgstr ""
+msgstr "-me5500,                generera kod för Freescale e5500-kärnkomplex\n"
 
 #: config/tc-ppc.c:1422
 #, c-format
 msgid "-me6500,                generate code for Freescale e6500 core complex\n"
-msgstr ""
+msgstr "-me6500,                generera kod för Freescale e6500-kärnkomplex\n"
 
 #: config/tc-ppc.c:1424
-#, fuzzy, c-format
-#| msgid "                          generate relax relocations\n"
+#, c-format
 msgid "-mspe                   generate code for Motorola SPE instructions\n"
-msgstr "                          generera lättnadsomlokaliseringar\n"
+msgstr "-mspe                   generera kod för Motorola SPE-instruktioner\n"
 
 #: config/tc-ppc.c:1426
-#, fuzzy, c-format
-#| msgid "  -m32r                   disable support for the m32rx instruction set\n"
+#, c-format
 msgid "-mspe2                  generate code for Freescale SPE2 instructions\n"
-msgstr "  -m32r                   inaktivera stöd för m32rx instruktionsuppsättning\n"
+msgstr "-mspe2                  generera kod för Freescale SPE2-instruktioner\n"
 
 #: config/tc-ppc.c:1428
-#, fuzzy, c-format
-#| msgid "                          generate relax relocations\n"
+#, c-format
 msgid "-mvle                   generate code for Freescale VLE instructions\n"
-msgstr "                          generera lättnadsomlokaliseringar\n"
+msgstr "-mvle                   generera kod för Freescale VLE-instruktioner\n"
 
 #: config/tc-ppc.c:1430
 #, c-format
 msgid "-mtitan                 generate code for AppliedMicro Titan core complex\n"
-msgstr ""
+msgstr "-mtitan                 generera kod för AppliedMicro Titan-kärnkomplex\n"
 
 #: config/tc-ppc.c:1432
-#, fuzzy, c-format
-#| msgid "  -mindex-reg             support pseudo index registers\n"
+#, c-format
 msgid "-mregnames              Allow symbolic names for registers\n"
-msgstr "  -mindex-reg             ha stöd för pseudoindexregister\n"
+msgstr "-mregnames              Tillåt symboliska namn för register\n"
 
 #: config/tc-ppc.c:1434
-#, fuzzy, c-format
-#| msgid "  -mindex-reg             support pseudo index registers\n"
+#, c-format
 msgid "-mno-regnames           Do not allow symbolic names for registers\n"
-msgstr "  -mindex-reg             ha stöd för pseudoindexregister\n"
+msgstr "-mno-regnames           Tillåt inte symboliska namn för register\n"
 
 #: config/tc-ppc.c:1437
 #, c-format
 msgid "-mrelocatable           support for GCC's -mrelocatble option\n"
-msgstr ""
+msgstr "-mrelocatable           stöd för GCC:s -mrelocatble-flagga\n"
 
 #: config/tc-ppc.c:1439
 #, c-format
 msgid "-mrelocatable-lib       support for GCC's -mrelocatble-lib option\n"
-msgstr ""
+msgstr "-mrelocatable-lib       stöd för GCC:s -mrelocatble-lib-flagga\n"
 
 #: config/tc-ppc.c:1441
 #, c-format
 msgid "-memb                   set PPC_EMB bit in ELF flags\n"
-msgstr ""
+msgstr "-memb                   sätt PPC_EMB biten bland ELF-flaggorna\n"
 
 #: config/tc-ppc.c:1443
-#, fuzzy, c-format
-#| msgid "  -mlittle-endian         generate little-endian code\n"
+#, c-format
 msgid ""
 "-mlittle, -mlittle-endian, -le\n"
 "                        generate code for a little endian machine\n"
-msgstr "  -mlittle-endian         generera kod enligt omvänd byteordning\n"
+msgstr ""
+"-mlittle, -mlittle-endian, -le\n"
+"                        generera kod för en maskin med omvänd byteordning\n"
 
 #: config/tc-ppc.c:1446
-#, fuzzy, c-format
-#| msgid "  -mbig-endian            generate big-endian code\n"
+#, c-format
 msgid ""
 "-mbig, -mbig-endian, -be\n"
 "                        generate code for a big endian machine\n"
-msgstr "  -mbig-endian            generera kod enligt rak byteordning\n"
+msgstr ""
+"-mbig, -mbig-endian, -be\n"
+"                        generera kod för en maskin med rak byteordning\n"
 
 #: config/tc-ppc.c:1449
-#, fuzzy, c-format
-#| msgid "  -mbig-obj               generate big object files\n"
+#, c-format
 msgid "-msolaris               generate code for Solaris\n"
-msgstr "  -mbig-obj               generera stora objektfiler\n"
+msgstr "-msolaris               generera kod för Solaris\n"
 
 #: config/tc-ppc.c:1451
-#, fuzzy, c-format
-#| msgid "  -mbig-obj               generate big object files\n"
+#, c-format
 msgid "-mno-solaris            do not generate code for Solaris\n"
-msgstr "  -mbig-obj               generera stora objektfiler\n"
+msgstr "-mno-solaris            generera inte kod för Solaris\n"
 
 #: config/tc-ppc.c:1453
 #, c-format
 msgid "-K PIC                  set EF_PPC_RELOCATABLE_LIB in ELF flags\n"
-msgstr ""
+msgstr "-K PIC                  sätt EF_PPC_RELOCATABLE_LIB bland ELF-flaggorna\n"
 
 #: config/tc-ppc.c:1455
-#, fuzzy, c-format
-#| msgid "  --version               print assembler version number and exit\n"
+#, c-format
 msgid "-V                      print assembler version number\n"
-msgstr "  --version               skriv ut versionsnummer för assembler och avsluta\n"
+msgstr "-V                      skriv ut versionsnummer för assembler\n"
 
 #: config/tc-ppc.c:1457
-#, fuzzy, c-format
-#| msgid "  -nocpp                  ignored\n"
+#, c-format
 msgid "-Qy, -Qn                ignored\n"
-msgstr "  -nocpp                  hoppas över\n"
+msgstr "-Qy, -Qn                hoppas över\n"
 
 #: config/tc-ppc.c:1460
-#, fuzzy, c-format
-#| msgid ""
-#| "-nops=count             when aligning, more than COUNT nops uses a branch\n"
-#| "-ppc476-workaround      warn if emitting data to code sections\n"
+#, c-format
 msgid "-nops=count             when aligning, more than COUNT nops uses a branch\n"
-msgstr ""
-"-nops=antal             vid justering använder mer än ANTAL NOP:ar en gren\n"
-"-ppc476-workaround      varna om data matas ut till kodsektioner\n"
+msgstr "-nops=antal             vid justering använder mer än ANTAL NOP:ar en gren\n"
 
 #: config/tc-ppc.c:1462
-#, fuzzy, c-format
-#| msgid ""
-#| "-nops=count             when aligning, more than COUNT nops uses a branch\n"
-#| "-ppc476-workaround      warn if emitting data to code sections\n"
+#, c-format
 msgid "-ppc476-workaround      warn if emitting data to code sections\n"
-msgstr ""
-"-nops=antal             vid justering använder mer än ANTAL NOP:ar en gren\n"
-"-ppc476-workaround      varna om data matas ut till kodsektioner\n"
+msgstr "-ppc476-workaround      varna om data matas ut till kodsektioner\n"
 
 #: config/tc-ppc.c:1492
 #, c-format
@@ -15752,10 +15614,8 @@ msgid "internal error: invalid macro"
 msgstr "internt fel: ogiltigt makro"
 
 #: config/tc-riscv.c:953
-#, fuzzy
-#| msgid "internal error: lookup/get operands failed"
 msgid "internal error: vasprintf failed"
-msgstr "internt fel: uppslag/hämtning av operander misslyckades"
+msgstr "internt fel: vasprintf misslyckades"
 
 #: config/tc-riscv.c:982 config/tc-riscv.c:1053
 msgid "unsupported large constant"
@@ -16166,17 +16026,15 @@ msgstr ""
 
 #: config/tc-s12z.c:149
 msgid "  -mreg-prefix=PREFIX     set a prefix used to indicate register names (default none)\n"
-msgstr ""
+msgstr "  -mreg-prefix=PREFIX     sätt ett prefix som används för att indikera register namn (standardvärde inget)\n"
 
 #: config/tc-s12z.c:150
 msgid "  -mdollar-hex            the prefix '$' instead of '0x' is used to indicate literal hexadecimal constants\n"
-msgstr ""
+msgstr "  -mdollar-hex            prefixet ”$” används istället för ”0x” för att indikera literala hexadecimala konstanter\n"
 
 #: config/tc-s12z.c:317
-#, fuzzy
-#| msgid "non-constant expression in \".if\" statement"
 msgid "A non-constant expression is not permitted here"
-msgstr "icke-konstant uttryck i ”.if”-sats"
+msgstr "Ett icke-konstant uttryck tillåts inte här"
 
 #: config/tc-s12z.c:434
 #, c-format
@@ -16184,10 +16042,8 @@ msgid "Expecting '%c'"
 msgstr "Förväntade ”%c”"
 
 #: config/tc-s12z.c:457
-#, fuzzy
-#| msgid ": Immediate value in cbcond is out of range."
 msgid "An immediate value in a source operand is inappropriate"
-msgstr ": Omedelbart värde i cbcond är utanför intervall."
+msgstr "Ett omedelbart värde i en källoperand är olämpligt"
 
 #: config/tc-s12z.c:506 config/tc-s12z.c:607
 msgid "Bad operand for constant offset"
@@ -16232,10 +16088,8 @@ msgid "Source register for %s is no larger than the destination register"
 msgstr "Källregister för %s är inte större än destinationsregistret"
 
 #: config/tc-s12z.c:1433
-#, fuzzy
-#| msgid "invalid source register list"
 msgid "The destination and source registers are identical"
-msgstr "ogiltig registerlista för källa"
+msgstr "Destinations och källregister är identiska"
 
 #: config/tc-s12z.c:1457
 #, c-format
@@ -18283,10 +18137,8 @@ msgid "Can't redirect stderr to the file '%s'"
 msgstr "Kan inte omdirigera stderr till filen ”%s”"
 
 #: config/tc-tic54x.c:2503
-#, fuzzy
-#| msgid "macros nested too deeply"
 msgid "Macro nesting is too deep"
-msgstr "makro nästlade för djupt"
+msgstr "Makronästling för djup"
 
 #: config/tc-tic54x.c:2602
 #, c-format
@@ -20483,26 +20335,22 @@ msgid "multiple sections remapped to output section %s"
 msgstr "multipla sektioner ommappade till utdatasektion %s"
 
 #: config/tc-z80.c:194
-#, fuzzy, c-format
-#| msgid "Invalid floating point number"
+#, c-format
 msgid "invalid floating point numbers type `%s'"
-msgstr "Ogiltigt flyttalsnummer"
+msgstr "ogiltigt flyttalsnummertyp ”%s”"
 
 #: config/tc-z80.c:215 config/tc-z80.c:224
-#, fuzzy, c-format
-#| msgid "Invalid FTEST completer: %s"
+#, c-format
 msgid "invalid INST in command line: %s"
-msgstr "Ogiltigt FTEST-slutförare: %s"
+msgstr "ogiltig INST i kommandorad: %s"
 
 #: config/tc-z80.c:583
 msgid "-- unterminated string"
 msgstr "-- oterminerad sträng"
 
 #: config/tc-z80.c:750
-#, fuzzy
-#| msgid "unrecognised instruction %s"
 msgid "undocumented instruction"
-msgstr "okänd instruktion %s"
+msgstr "odokumenterad instruktion"
 
 #: config/tc-z80.c:794 config/tc-z80.c:800
 msgid "mismatched parentheses"
@@ -20513,10 +20361,9 @@ msgid "bad expression syntax"
 msgstr "felaktig uttryckssyntax"
 
 #: config/tc-z80.c:1071
-#, fuzzy, c-format
-#| msgid "invalid immediate size"
+#, c-format
 msgid "invalid data size %d"
-msgstr "ogiltig omedelbarstorlek"
+msgstr "ogiltig datastorlek %d"
 
 #: config/tc-z80.c:1140
 msgid "cannot make a relative jump to an absolute location"
@@ -20547,20 +20394,16 @@ msgstr "ADL-lägesinstruktion"
 #. SIL prefix, in Z80 it is LD D,D
 #. LIL prefix, in Z80 it is LD E,E
 #: config/tc-z80.c:2356
-#, fuzzy
-#| msgid "unsupported instruction `%s'"
 msgid "unsupported instruction, assembled as NOP"
-msgstr "instruktion ”%s” stöds inte"
+msgstr "instruktion stöds inte, assemblerad som NOP"
 
 #: config/tc-z80.c:2849 config/tc-z80.c:2880
 msgid "parentheses ignored"
 msgstr "parenteser överhoppade"
 
 #: config/tc-z80.c:2897
-#, fuzzy
-#| msgid "opcode `%s' not supported for target %s"
 msgid "CPU mode is unsupported by target"
-msgstr "opkod ”%s” stöds inte för mål %s"
+msgstr "CPU-läge stöds inte av mål"
 
 #: config/tc-z80.c:2919
 msgid "assignment expected"
@@ -20580,10 +20423,8 @@ msgid "md_apply_fix: unknown r_type 0x%x\n"
 msgstr "md_apply_fix: okänd r_type 0x%x\n"
 
 #: config/tc-z80.c:3611 config/tc-z80.c:3670
-#, fuzzy
-#| msgid "invalid syntax class"
 msgid "invalid syntax"
-msgstr "ogiltig syntaxklass"
+msgstr "ogiltig syntax"
 
 #: config/tc-z8k.c:281
 #, c-format
@@ -20915,7 +20756,7 @@ msgstr ".cfi_personality_id stöds inte för detta mål"
 #: dw2gencfi.c:1893
 #, c-format
 msgid "return column number %d overflows in CIE version 1"
-msgstr ""
+msgstr "retur av kolumnnummer %d orsaka överspill i CIE-version 1"
 
 #: dw2gencfi.c:2385 dw2gencfi.c:2541
 msgid "open CFI at the end of file; missing .cfi_endproc directive"
@@ -20939,10 +20780,9 @@ msgid "file number less than one"
 msgstr "filnummer mindre än ett"
 
 #: dwarf2dbg.c:820
-#, fuzzy, c-format
-#| msgid "file number %ld already allocated"
+#, c-format
 msgid "file number %u already allocated"
-msgstr "filnummer %ld redan allokerat"
+msgstr "filnummer %u redan allokerat"
 
 #: dwarf2dbg.c:859 dwarf2dbg.c:1727
 #, c-format
@@ -21547,10 +21387,9 @@ msgid "Please report this bug.\n"
 msgstr "Rapportera denna bugg.\n"
 
 #: messages.c:400
-#, fuzzy, c-format
-#| msgid ".%s outside of %s"
+#, c-format
 msgid "%s out of domain (%"
-msgstr ".%s utanför %s"
+msgstr "%s utanför domän (%"
 
 #: messages.c:417
 #, c-format
@@ -22193,15 +22032,17 @@ msgstr "oimplementerat .nops-direktiv"
 #, c-format
 msgid "can't write %ld byte to section %s of %s: '%s'"
 msgid_plural "can't write %ld bytes to section %s of %s: '%s'"
-msgstr[0] "kan inte skriva %ld byte till avsnitt %s av %s eftersom : ”%s”"
-msgstr[1] "kan inte skriva %ld byte till avsnitt %s av %s eftersom : ”%s”"
+msgstr[0] "kan inte skriva %ld byte till sektion %s av %s eftersom : ”%s”"
+msgstr[1] "kan inte skriva %ld byte till sektion %s av %s eftersom : ”%s”"
 
 #: write.c:1648 write.c:1675 write.c:1711
 #, c-format
 msgid "can't fill %ld byte in section %s of %s: '%s'"
 msgid_plural "can't fill %ld bytes in section %s of %s: '%s'"
-msgstr[0] "kan inte skriva %ld byte till avsnitt %s av %s eftersom : ”%s”"
-msgstr[1] "kan inte skriva %ld byte till avsnitt %s av %s eftersom : ”%s”"
+msgstr[0] "kan inte skriva %ld byte till sektion %s av %s eftersom : ”%s”"
+msgstr[1] ""
+"kan inte skriva %ld byte till sektion\n"
+" %s av %s eftersom : ”%s”"
 
 #: write.c:1914
 msgid "unable to create reloc for build note"
