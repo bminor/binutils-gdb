@@ -1,5 +1,10 @@
 2020-05-14  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.fortran/nested-funcs-2.exp: Use gdb_test_stdio to test inferior
+	output.
+
+2020-05-14  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/align.exp: Split into ...
 	* gdb.base/align.exp.in: ...
 	* gdb.base/align-c++.exp: ...
