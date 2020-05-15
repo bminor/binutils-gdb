@@ -1,3 +1,8 @@
+2020-05-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* dg-extract-results.py: Update from gcc repo.
+	* dg-extract-results.sh: Likewise.
+
 2019-10-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* dg-extract-results.py: Update from gcc repo.
