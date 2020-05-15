@@ -1,3 +1,11 @@
+2020-05-15  Gary Benson <gbenson@redhat.com>
+
+	* gdb.opencl/callfuncs.exp: Report when test skipped.
+	* gdb.opencl/convs_casts.exp: Likewise.
+	* gdb.opencl/datatypes.exp: Likewise.
+	* gdb.opencl/operators.exp: Likewise.
+	* gdb.opencl/vec_comps.exp: Likewise.
+
 2020-05-15  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/align.exp.in: Rename to ...
