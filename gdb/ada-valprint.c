@@ -793,7 +793,7 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
   struct type *type = ada_check_typedef (value_type (val));
   const gdb_byte *valaddr = value_contents_for_printing (val);
 
-  if (ada_is_fixed_point_type (type))
+  if (ada_is_gnat_encoded_fixed_point_type (type))
     {
       struct value *scale = ada_scaling_factor (type);
       val = value_cast (value_type (scale), val);

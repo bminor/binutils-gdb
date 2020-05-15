@@ -1,3 +1,16 @@
+2020-05-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.h: (ada_is_gnat_encoded_fixed_point_type): Renames
+	ada_is_fixed_point_type.  Update all callers.
+	(gnat_encoded_fixed_point_delta): Renames ada_delta.  Update
+	all callers.
+	* ada-lang.c (gnat_encoded_fixed_type_info): Renames fixed_type_info.
+	Update all callers.
+	* ada-typeprint.c (print_gnat_encoded_fixed_point_type): Renames
+	print_fixed_point_type.  Update all callers.
+	* ada-valprint.c (ada_value_print_num): Replace call to
+	ada_is_fixed_point_type by ada_is_gnat_encoded_fixed_point_type.
+
 2020-05-14  Kevin Buettner  <kevinb@redhat.com>
 
 	* nat/linux-btrace.c (btrace_this_cpu): Add check for AMD

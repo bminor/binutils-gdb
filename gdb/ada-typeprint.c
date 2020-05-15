@@ -342,9 +342,9 @@ print_enum_type (struct type *type, struct ui_file *stream)
 /* Print representation of Ada fixed-point type TYPE on STREAM.  */
 
 static void
-print_fixed_point_type (struct type *type, struct ui_file *stream)
+print_gnat_encoded_fixed_point_type (struct type *type, struct ui_file *stream)
 {
-  struct value *delta = ada_delta (type);
+  struct value *delta = gnat_encoded_fixed_point_delta (type);
   struct value *small = ada_scaling_factor (type);
 
   if (delta == nullptr)
@@ -1012,8 +1012,8 @@ ada_print_type (struct type *type0, const char *varstring,
 	fprintf_filtered (stream, "(false, true)");
 	break;
       case TYPE_CODE_INT:
-	if (ada_is_fixed_point_type (type))
-	  print_fixed_point_type (type, stream);
+	if (ada_is_gnat_encoded_fixed_point_type (type))
+	  print_gnat_encoded_fixed_point_type (type, stream);
 	else
 	  {
 	    const char *name = ada_type_name (type);
@@ -1030,8 +1030,8 @@ ada_print_type (struct type *type0, const char *varstring,
 	  }
 	break;
       case TYPE_CODE_RANGE:
-	if (ada_is_fixed_point_type (type))
-	  print_fixed_point_type (type, stream);
+	if (ada_is_gnat_encoded_fixed_point_type (type))
+	  print_gnat_encoded_fixed_point_type (type, stream);
 	else if (ada_is_modular_type (type))
 	  fprintf_filtered (stream, "mod %s", 
 			    int_string (ada_modulus (type), 10, 0, 0, 1));

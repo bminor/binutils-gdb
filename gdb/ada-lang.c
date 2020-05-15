@@ -9460,7 +9460,7 @@ cast_to_fixed (struct type *type, struct value *arg)
     return arg;
 
   struct value *scale = ada_scaling_factor (type);
-  if (ada_is_fixed_point_type (value_type (arg)))
+  if (ada_is_gnat_encoded_fixed_point_type (value_type (arg)))
     arg = cast_from_fixed (value_type (scale), arg);
   else
     arg = value_cast (value_type (scale), arg);
@@ -10008,10 +10008,10 @@ ada_value_cast (struct type *type, struct value *arg2)
   if (type == ada_check_typedef (value_type (arg2)))
     return arg2;
 
-  if (ada_is_fixed_point_type (type))
+  if (ada_is_gnat_encoded_fixed_point_type (type))
     return cast_to_fixed (type, arg2);
 
-  if (ada_is_fixed_point_type (value_type (arg2)))
+  if (ada_is_gnat_encoded_fixed_point_type (value_type (arg2)))
     return cast_from_fixed (type, arg2);
 
   return value_cast (type, arg2);
@@ -10411,9 +10411,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	{
 	  /* Nothing.  */
 	}
-      else if (ada_is_fixed_point_type (value_type (arg1)))
+      else if (ada_is_gnat_encoded_fixed_point_type (value_type (arg1)))
         arg2 = cast_to_fixed (value_type (arg1), arg2);
-      else if (ada_is_fixed_point_type (value_type (arg2)))
+      else if (ada_is_gnat_encoded_fixed_point_type (value_type (arg2)))
         error
           (_("Fixed-point values must be assigned to fixed-point variables"));
       else
@@ -10433,8 +10433,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         return (value_from_longest
                  (value_type (arg2),
                   value_as_long (arg1) + value_as_long (arg2)));
-      if ((ada_is_fixed_point_type (value_type (arg1))
-           || ada_is_fixed_point_type (value_type (arg2)))
+      if ((ada_is_gnat_encoded_fixed_point_type (value_type (arg1))
+           || ada_is_gnat_encoded_fixed_point_type (value_type (arg2)))
           && value_type (arg1) != value_type (arg2))
         error (_("Operands of fixed-point addition must have the same type"));
       /* Do the addition, and cast the result to the type of the first
@@ -10459,8 +10459,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         return (value_from_longest
                  (value_type (arg2),
                   value_as_long (arg1) - value_as_long (arg2)));
-      if ((ada_is_fixed_point_type (value_type (arg1))
-           || ada_is_fixed_point_type (value_type (arg2)))
+      if ((ada_is_gnat_encoded_fixed_point_type (value_type (arg1))
+           || ada_is_gnat_encoded_fixed_point_type (value_type (arg2)))
           && value_type (arg1) != value_type (arg2))
         error (_("Operands of fixed-point subtraction "
 		 "must have the same type"));
@@ -10489,9 +10489,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       else
         {
           type = builtin_type (exp->gdbarch)->builtin_double;
-          if (ada_is_fixed_point_type (value_type (arg1)))
+          if (ada_is_gnat_encoded_fixed_point_type (value_type (arg1)))
             arg1 = cast_from_fixed (type, arg1);
-          if (ada_is_fixed_point_type (value_type (arg2)))
+          if (ada_is_gnat_encoded_fixed_point_type (value_type (arg2)))
             arg2 = cast_from_fixed (type, arg2);
           binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
           return ada_value_binop (arg1, arg2, op);
@@ -10519,7 +10519,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
-      else if (ada_is_fixed_point_type (value_type (arg1)))
+      else if (ada_is_gnat_encoded_fixed_point_type (value_type (arg1)))
         return value_cast (value_type (arg1), value_neg (arg1));
       else
 	{
@@ -11391,7 +11391,7 @@ nosideret:
    Otherwise, return NULL.  */
 
 static const char *
-fixed_type_info (struct type *type)
+gnat_encoded_fixed_type_info (struct type *type)
 {
   const char *name = ada_type_name (type);
   enum type_code code = (type == NULL) ? TYPE_CODE_UNDEF : type->code ();
@@ -11406,7 +11406,7 @@ fixed_type_info (struct type *type)
         return tail + 5;
     }
   else if (code == TYPE_CODE_RANGE && TYPE_TARGET_TYPE (type) != type)
-    return fixed_type_info (TYPE_TARGET_TYPE (type));
+    return gnat_encoded_fixed_type_info (TYPE_TARGET_TYPE (type));
   else
     return NULL;
 }
@@ -11414,9 +11414,9 @@ fixed_type_info (struct type *type)
 /* Returns non-zero iff TYPE represents an Ada fixed-point type.  */
 
 int
-ada_is_fixed_point_type (struct type *type)
+ada_is_gnat_encoded_fixed_point_type (struct type *type)
 {
-  return fixed_type_info (type) != NULL;
+  return gnat_encoded_fixed_type_info (type) != NULL;
 }
 
 /* Return non-zero iff TYPE represents a System.Address type.  */
@@ -11443,9 +11443,9 @@ ada_scaling_type (struct type *type)
    delta cannot be determined.  */
 
 struct value *
-ada_delta (struct type *type)
+gnat_encoded_fixed_point_delta (struct type *type)
 {
-  const char *encoding = fixed_type_info (type);
+  const char *encoding = gnat_encoded_fixed_type_info (type);
   struct type *scale_type = ada_scaling_type (type);
 
   long long num, den;
@@ -11457,13 +11457,13 @@ ada_delta (struct type *type)
 			value_from_longest (scale_type, den), BINOP_DIV);
 }
 
-/* Assuming that ada_is_fixed_point_type (TYPE), return the scaling
-   factor ('SMALL value) associated with the type.  */
+/* Assuming that ada_is_gnat_encoded_fixed_point_type (TYPE), return
+   the scaling factor ('SMALL value) associated with the type.  */
 
 struct value *
 ada_scaling_factor (struct type *type)
 {
-  const char *encoding = fixed_type_info (type);
+  const char *encoding = gnat_encoded_fixed_type_info (type);
   struct type *scale_type = ada_scaling_type (type);
 
   long long num0, den0, num1, den1;

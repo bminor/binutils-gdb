@@ -281,11 +281,11 @@ extern struct type *ada_aligned_type (struct type *);
 extern const gdb_byte *ada_aligned_value_addr (struct type *,
 					       const gdb_byte *);
 
-extern int ada_is_fixed_point_type (struct type *);
+extern int ada_is_gnat_encoded_fixed_point_type (struct type *);
 
 extern int ada_is_system_address_type (struct type *);
 
-extern struct value *ada_delta (struct type *);
+extern struct value *gnat_encoded_fixed_point_delta (struct type *);
 
 extern struct value *ada_scaling_factor (struct type *);
 
