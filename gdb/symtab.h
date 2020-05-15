@@ -2238,10 +2238,6 @@ bool producer_is_realview (const char *producer);
 void fixup_section (struct general_symbol_info *ginfo,
 		    CORE_ADDR addr, struct objfile *objfile);
 
-/* Look up objfile containing BLOCK.  */
-
-struct objfile *lookup_objfile_from_block (const struct block *block);
-
 extern unsigned int symtab_create_debug;
 
 extern unsigned int symbol_lookup_debug;

@@ -2128,12 +2128,20 @@ clear_dangling_display_expressions (struct objfile *objfile)
       if (d->pspace != pspace)
 	continue;
 
-      if (lookup_objfile_from_block (d->block) == objfile
+      struct objfile *bl_objf = nullptr;
+      if (d->block != nullptr)
+	{
+	  bl_objf = block_objfile (d->block);
+	  if (bl_objf->separate_debug_objfile_backlink != nullptr)
+	    bl_objf = bl_objf->separate_debug_objfile_backlink;
+	}
+
+      if (bl_objf == objfile
 	  || (d->exp != NULL && exp_uses_objfile (d->exp.get (), objfile)))
-      {
-	d->exp.reset ();
-	d->block = NULL;
-      }
+	{
+	  d->exp.reset ();
+	  d->block = NULL;
+	}
     }
 }
 

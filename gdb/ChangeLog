@@ -1,5 +1,17 @@
 2020-05-15  Tom Tromey  <tom@tromey.com>
 
+	* symtab.c (lookup_language_this, lookup_symbol_aux): Use
+	block_objfile.
+	(lookup_objfile_from_block): Remove.
+	(lookup_symbol_in_block, lookup_symbol_in_static_block)
+	(lookup_global_symbol): Use block_objfile.
+	* symtab.h (lookup_objfile_from_block): Don't declare.
+	* printcmd.c (clear_dangling_display_expressions): Use
+	block_objfile.
+	* parse.c (operator_check_standard): Use block_objfile.
+
+2020-05-15  Tom Tromey  <tom@tromey.com>
+
 	* language.c (language_alloc_type_symbol): Set
 	SYMBOL_SECTION.
 	* symtab.c (initialize_objfile_symbol): Remove.

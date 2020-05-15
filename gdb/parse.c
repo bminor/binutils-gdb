@@ -1340,7 +1340,7 @@ operator_check_standard (struct expression *exp, int pos,
 	  return 1;
 
 	/* Check objfile where is placed the code touching the variable.  */
-	objfile = lookup_objfile_from_block (block);
+	objfile = block_objfile (block);
 
 	type = SYMBOL_TYPE (symbol);
       }
