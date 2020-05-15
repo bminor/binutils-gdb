@@ -1,3 +1,7 @@
+2020-05-20  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/array_char_idx.exp: Recognize initialized array.
+
 2020-05-20  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/25833
