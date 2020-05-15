@@ -44,9 +44,9 @@ namespace eval $testfile {
 
 # Start inferior NUM and record its PID in the TESTPID array.
 
-proc start_inferior {num testpid} {
+proc start_inferior {num} {
     with_test_prefix "start_inferior $num" {
-	upvar $testpid tpid
+	variable testpid
 	global binfile srcfile
 
 	if {$num != 1} {
@@ -62,8 +62,8 @@ proc start_inferior {num testpid} {
 	gdb_run_cmd
 	gdb_test "" ".*reakpoint .*, initialized .*${srcfile}.*" "run"
 
-	set tpid($num) [get_integer_valueof "pid" -1]
-	if {$tpid($num) == -1} {
+	set testpid($num) [get_integer_valueof "pid" -1]
+	if {$testpid($num) == -1} {
 	    return -1
 	}
 
@@ -76,10 +76,11 @@ proc start_inferior {num testpid} {
 set NUM_INFS 10
 
 # The array holding each inferior's PID, indexed by inferior number.
+variable testpid
 array set testpid {}
 
 for {set i 1} {$i <= $NUM_INFS} {incr i} {
-    if {[start_inferior $i testpid] < 0} {
+    if {[start_inferior $i] < 0} {
 	return -1
     }
 }

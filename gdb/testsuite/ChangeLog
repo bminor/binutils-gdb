@@ -1,5 +1,11 @@
 2020-05-15  Pedro Alves  <palves@redhat.com>
 
+	* gdb.multi/multi-kill.exp (start_inferior): Remove
+	'testpid' parameter.  Refer to namespace variable directly.
+	(testpid): Declare as namespace variable.
+
+2020-05-15  Pedro Alves  <palves@redhat.com>
+
 	* gdb.multi/multi-kill.exp: Wrap in namespace.
 	(start_inferior): Add TESTPID parameter.  Use it instead of the
 	testpid global.
