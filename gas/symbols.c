@@ -118,7 +118,7 @@ struct symbol
 /* A pointer in the symbol may point to either a complete symbol
    (struct symbol above) or to a local symbol (struct local_symbol
    defined here).  The symbol code can detect the case by examining
-   the first field.  It is always NULL for a local symbol.
+   the first field which is present in both structs.
 
    We do this because we ordinarily only need a small amount of
    information for a local symbol.  The symbol table takes up a lot of
@@ -1237,11 +1237,18 @@ resolve_symbol_value (symbolS *symp)
   if (symp->sy_flags.sy_resolved)
     {
       final_val = 0;
-      while (symp->sy_value.X_op == O_symbol
-	     && symp->sy_value.X_add_symbol->sy_flags.sy_resolved)
+      while (symp->sy_value.X_op == O_symbol)
 	{
 	  final_val += symp->sy_value.X_add_number;
 	  symp = symp->sy_value.X_add_symbol;
+	  if (LOCAL_SYMBOL_CHECK (symp))
+	    {
+	      struct local_symbol *locsym = (struct local_symbol *) symp;
+	      final_val += locsym->lsy_value;
+	      return final_val;
+	    }
+	  if (!symp->sy_flags.sy_resolved)
+	    return 0;
 	}
       if (symp->sy_value.X_op == O_constant)
 	final_val += symp->sy_value.X_add_number;
@@ -1377,6 +1384,11 @@ resolve_symbol_value (symbolS *symp)
 	      resolved = symbol_resolved_p (add_symbol);
 	      break;
 	    }
+
+	  /* Don't leave symbol loops.  */
+	  if (finalize_syms
+	      && add_symbol->sy_flags.sy_resolving)
+	    break;
 
 	  if (finalize_syms && final_val == 0)
 	    {

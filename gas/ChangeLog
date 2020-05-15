@@ -1,3 +1,16 @@
+2020-05-15  Alan Modra  <amodra@gmail.com>
+	    Alex Coplan  <alex.coplan@arm.com>
+
+	* symbols.c (struct local_symbol): Update comment.
+	(resolve_symbol_value): For resolved symbols equated to other
+	symbols, verify that the referenced symbol is not a local_symbol
+	before accessing sy_value.  Don't leave symbol loops during
+	finalize_syms resolution.
+	* testsuite/gas/all/assign-bad-recursive.d: New test.
+	* testsuite/gas/all/assign-bad-recursive.l: Error output for test.
+	* testsuite/gas/all/assign-bad-recursive.s: Assembly for test.
+	* testsuite/gas/all/gas.exp: Run it.
+
 2020-03-13  Andre Vieira  <andre.simoesdiasvieira@arm.com>
 
 	Backport from mainline.
