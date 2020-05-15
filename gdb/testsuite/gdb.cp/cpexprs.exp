@@ -21,4 +21,4 @@
 
 # Run cpexprs.exp.
 set flags {}
-source $srcdir/$subdir/cpexprs.exp.in
+source $srcdir/$subdir/cpexprs.exp.tcl

@@ -1,3 +1,46 @@
+2020-05-15  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/align.exp.in: Rename to ...
+	* gdb.base/align.exp.tcl: ... this.
+	* gdb.base/align-c++.exp: Update.
+	* gdb.base/align-c.exp: Update.
+	* gdb.base/all-architectures.exp.in: Rename to ...
+	* gdb.base/all-architectures.exp: ... this.
+	* gdb.base/all-architectures-0.exp: Update.
+	* gdb.base/all-architectures-1.exp: Update.
+	* gdb.base/all-architectures-2.exp: Update.
+	* gdb.base/all-architectures-3.exp: Update.
+	* gdb.base/all-architectures-4.exp: Update.
+	* gdb.base/all-architectures-5.exp: Update.
+	* gdb.base/all-architectures-6.exp: Update.
+	* gdb.base/all-architectures-7.exp: Update.
+	* gdb.base/infcall-nested-structs.exp.in: Rename to ...
+	* gdb.base/infcall-nested-structs.exp.tcl: ... this.
+	* gdb.base/infcall-nested-structs-c++.exp: Update.
+	* gdb.base/infcall-nested-structs-c.exp: Update.
+	* gdb.base/info-types.exp.in: Rename to ...
+	* gdb.base/info-types.exp.tcl: ... this.
+	* gdb.base/info-types-c++.exp: Update.
+	* gdb.base/info-types-c.exp: Update.
+	* gdb.base/max-depth.exp.in: Rename to ...
+	* gdb.base/max-depth.exp.tcl: ... this.
+	* gdb.base/max-depth-c++.exp: Update.
+	* gdb.base/max-depth-c.exp: Update.
+	* gdb.cp/cpexprs.exp.in: Rename to ...
+	* gdb.cp/cpexprs.exp.tcl: ... this.
+	* gdb.cp/cpexprs-debug-types.exp: Update.
+	* gdb.cp/cpexprs.exp: Update.
+	* gdb.cp/infcall-nodebug.exp.in: Rename to ...
+	* gdb.cp/infcall-nodebug.exp.tcl: ... this.
+	* gdb.cp/infcall-nodebug-c++-d0.exp: Update.
+	* gdb.cp/infcall-nodebug-c++-d1.exp: Update.
+	* gdb.cp/infcall-nodebug-c-d0.exp: Update.
+	* gdb.cp/infcall-nodebug-c-d1.exp: Update.
+	* gdb.dwarf2/clang-debug-names.exp.in: Rename to ...
+	* gdb.dwarf2/clang-debug-names.exp.tcl: ... this.
+	* gdb.dwarf2/clang-debug-names-2.exp: Update.
+	* gdb.dwarf2/clang-debug-names.exp: Update.
+
 2020-05-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* lib/check-test-names.exp: Remove code that prevents this file

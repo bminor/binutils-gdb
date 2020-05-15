@@ -17,4 +17,4 @@
 
 # Run cpexprs.exp with -fdebug-types-section.
 set flags {additional_flags=-fdebug-types-section}
-source $srcdir/$subdir/cpexprs.exp.in
+source $srcdir/$subdir/cpexprs.exp.tcl

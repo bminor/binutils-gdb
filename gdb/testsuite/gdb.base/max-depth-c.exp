@@ -15,4 +15,4 @@
 
 set lang {c}
 
-source $srcdir/$subdir/max-depth.exp.in
+source $srcdir/$subdir/max-depth.exp.tcl

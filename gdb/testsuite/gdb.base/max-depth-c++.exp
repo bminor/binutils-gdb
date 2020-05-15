@@ -19,4 +19,4 @@ if { [skip_cplus_tests] || [get_compiler_info "c++"] } {
 }
 set lang c++
 
-source $srcdir/$subdir/max-depth.exp.in
+source $srcdir/$subdir/max-depth.exp.tcl

@@ -14,4 +14,4 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 set test_slice 7
-source $srcdir/$subdir/all-architectures.exp.in
+source $srcdir/$subdir/all-architectures.exp.tcl

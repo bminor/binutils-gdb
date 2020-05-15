@@ -20,4 +20,4 @@
 
 set lang c
 
-source $srcdir/$subdir/align.exp.in
+source $srcdir/$subdir/align.exp.tcl

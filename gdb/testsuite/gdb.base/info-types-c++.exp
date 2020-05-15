@@ -19,4 +19,4 @@ if { [skip_cplus_tests] || [get_compiler_info "c++"] } {
 }
 set lang c++
 
-source $srcdir/$subdir/info-types.exp.in
+source $srcdir/$subdir/info-types.exp.tcl

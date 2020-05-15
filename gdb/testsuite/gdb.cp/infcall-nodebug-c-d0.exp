@@ -18,4 +18,4 @@ set lang {c}
 
 set debug nodebug
 
-source $srcdir/$subdir/infcall-nodebug.exp.in
+source $srcdir/$subdir/infcall-nodebug.exp.tcl

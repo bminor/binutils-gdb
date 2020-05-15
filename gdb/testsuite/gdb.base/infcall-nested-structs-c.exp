@@ -17,4 +17,4 @@
 
 set lang {c}
 
-source $srcdir/$subdir/infcall-nested-structs.exp.in
+source $srcdir/$subdir/infcall-nested-structs.exp.tcl

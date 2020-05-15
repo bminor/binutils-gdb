@@ -15,4 +15,4 @@
 
 set lang {c}
 
-source $srcdir/$subdir/info-types.exp.in
+source $srcdir/$subdir/info-types.exp.tcl
