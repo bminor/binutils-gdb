@@ -407,7 +407,7 @@ ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
 
   if (name != NULL)
     {
-      struct symbol *sym = allocate_symbol (ccp->of);
+      struct symbol *sym = new (&ccp->of->objfile_obstack) symbol;
       OBJSTAT (ccp->of, n_syms++);
 
       sym->set_language (language_c, &ccp->of->objfile_obstack);
@@ -436,7 +436,7 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
   gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
   if (name != NULL)
     {
-      sym = allocate_symbol (objfile);
+      sym = new (&objfile->objfile_obstack) symbol;
       OBJSTAT (objfile, n_syms++);
 
       sym->set_language (language_c, &objfile->objfile_obstack);
@@ -1071,7 +1071,7 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
 	  complaint (_("ctf_add_var_cb: %s has NO type (%ld)"), name, id);
 	  type = objfile_type (ccp->of)->builtin_error;
 	}
-	sym = allocate_symbol (ccp->of);
+	sym = new (&ccp->of->objfile_obstack) symbol;
 	OBJSTAT (ccp->of, n_syms++);
 	SYMBOL_TYPE (sym) = type;
 	SYMBOL_DOMAIN (sym) = VAR_DOMAIN;

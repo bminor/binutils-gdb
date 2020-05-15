@@ -6355,42 +6355,6 @@ initialize_ordinary_address_classes (void)
 
 
 
-/* Initialize the symbol SYM, and mark it as being owned by an objfile.  */
-
-void
-initialize_objfile_symbol (struct symbol *sym)
-{
-  SYMBOL_OBJFILE_OWNED (sym) = 1;
-  SYMBOL_SECTION (sym) = -1;
-}
-
-/* Allocate and initialize a new 'struct symbol' on OBJFILE's
-   obstack.  */
-
-struct symbol *
-allocate_symbol (struct objfile *objfile)
-{
-  struct symbol *result = new (&objfile->objfile_obstack) symbol ();
-
-  initialize_objfile_symbol (result);
-
-  return result;
-}
-
-/* Allocate and initialize a new 'struct template_symbol' on OBJFILE's
-   obstack.  */
-
-struct template_symbol *
-allocate_template_symbol (struct objfile *objfile)
-{
-  struct template_symbol *result;
-
-  result = new (&objfile->objfile_obstack) template_symbol ();
-  initialize_objfile_symbol (result);
-
-  return result;
-}
-
 /* See symtab.h.  */
 
 struct objfile *

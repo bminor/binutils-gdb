@@ -1056,7 +1056,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		FIELD_NAME (*f) = debug_info->ss + cur_fdr->issBase + tsym.iss;
 		FIELD_BITSIZE (*f) = 0;
 
-		enum_sym = allocate_symbol (mdebugread_objfile);
+		enum_sym = new (&mdebugread_objfile->objfile_obstack) symbol;
 		enum_sym->set_linkage_name
 		  (obstack_strdup (&mdebugread_objfile->objfile_obstack,
 				   f->name));
@@ -4721,7 +4721,7 @@ new_block (enum block_type type, enum language language)
 static struct symbol *
 new_symbol (const char *name)
 {
-  struct symbol *s = allocate_symbol (mdebugread_objfile);
+  struct symbol *s = new (&mdebugread_objfile->objfile_obstack) symbol;
 
   s->set_language (psymtab_language, &mdebugread_objfile->objfile_obstack);
   s->compute_and_set_names (name, true, mdebugread_objfile->per_bfd);

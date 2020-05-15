@@ -1,3 +1,31 @@
+2020-05-15  Tom Tromey  <tom@tromey.com>
+
+	* language.c (language_alloc_type_symbol): Set
+	SYMBOL_SECTION.
+	* symtab.c (initialize_objfile_symbol): Remove.
+	(allocate_symbol): Remove.
+	(allocate_template_symbol): Remove.
+	* dwarf2/read.c (fixup_go_packaging): Use "new".
+	(new_symbol): Use "new".
+	(read_variable): Don't call initialize_objfile_symbol.  Use
+	"new".
+	(read_func_scope): Use "new".
+	* xcoffread.c (process_xcoff_symbol): Don't call
+	initialize_objfile_symbol.
+	(SYMBOL_DUP): Remove.
+	* coffread.c (process_coff_symbol, coff_read_enum_type): Use
+	"new".
+	* symtab.h (allocate_symbol, initialize_objfile_symbol)
+	(allocate_template_symbol): Don't declare.
+	(struct symbol): Add copy constructor.  Change defaults.
+	* jit.c (finalize_symtab): Use "new".
+	* ctfread.c (ctf_add_enum_member_cb, new_symbol, ctf_add_var_cb):
+	Use "new".
+	* stabsread.c (patch_block_stabs, define_symbol, read_enum_type)
+	(common_block_end): Use "new".
+	* mdebugread.c (parse_symbol): Use "new".
+	(new_symbol): Likewise.
+
 2020-05-15  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* NEWS: Mention changes to help and apropos.

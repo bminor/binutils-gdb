@@ -1556,7 +1556,7 @@ process_coff_symbol (struct coff_symbol *cs,
 		     union internal_auxent *aux,
 		     struct objfile *objfile)
 {
-  struct symbol *sym = allocate_symbol (objfile);
+  struct symbol *sym = new (&objfile->objfile_obstack) symbol;
   char *name;
 
   name = cs->c_name;
@@ -2095,7 +2095,7 @@ coff_read_enum_type (int index, int length, int lastsym,
       switch (ms->c_sclass)
 	{
 	case C_MOE:
-	  sym = allocate_symbol (objfile);
+	  sym = new (&objfile->objfile_obstack) symbol;
 
 	  name = obstack_strdup (&objfile->objfile_obstack, name);
 	  sym->set_linkage_name (name);
