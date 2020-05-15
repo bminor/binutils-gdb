@@ -39,11 +39,15 @@ save_vars { GDBFLAGS } {
     clean_restart ${binfile}
 }
 
+# Wrap the entire test in a namespace to avoid contaminating other tests.
+namespace eval $testfile {
+
 # Start inferior NUM and record its PID in the TESTPID array.
 
-proc start_inferior {num} {
+proc start_inferior {num testpid} {
     with_test_prefix "start_inferior $num" {
-	global testpid binfile srcfile
+	upvar $testpid tpid
+	global binfile srcfile
 
 	if {$num != 1} {
 	    gdb_test "add-inferior" "Added inferior .*" \
@@ -58,8 +62,8 @@ proc start_inferior {num} {
 	gdb_run_cmd
 	gdb_test "" ".*reakpoint .*, initialized .*${srcfile}.*" "run"
 
-	set testpid($num) [get_integer_valueof "pid" -1]
-	if {$testpid($num) == -1} {
+	set tpid($num) [get_integer_valueof "pid" -1]
+	if {$tpid($num) == -1} {
 	    return -1
 	}
 
@@ -71,8 +75,11 @@ proc start_inferior {num} {
 # is killed while we're handling a killed event.
 set NUM_INFS 10
 
+# The array holding each inferior's PID, indexed by inferior number.
+array set testpid {}
+
 for {set i 1} {$i <= $NUM_INFS} {incr i} {
-    if {[start_inferior $i] < 0} {
+    if {[start_inferior $i testpid] < 0} {
 	return -1
     }
 }
@@ -124,4 +131,6 @@ for {set i 2} {$i <= $NUM_INFS} {incr i} {
 	    "Program terminated with signal SIGKILL, .*" \
 	    "continue to SIGKILL"
     }
+}
+
 }

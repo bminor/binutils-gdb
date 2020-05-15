@@ -1,3 +1,11 @@
+2020-05-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.multi/multi-kill.exp: Wrap in namespace.
+	(start_inferior): Add TESTPID parameter.  Use it instead of the
+	testpid global.
+	(top level): Define empty TESTPID array, and pass it down to
+	start_inferior.
+
 2020-05-14  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.fortran/nested-funcs-2.exp: Use gdb_test_stdio to test inferior
