@@ -24,6 +24,7 @@ static int
 foo (void)
 {
   usleep (1);
+  return 0;
 }
 
 static void *

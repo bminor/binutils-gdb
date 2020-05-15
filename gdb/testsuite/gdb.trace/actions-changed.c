@@ -18,6 +18,7 @@
 int
 end (int i)
 {
+  return 0;
 }
 
 int

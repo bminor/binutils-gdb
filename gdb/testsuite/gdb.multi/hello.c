@@ -29,7 +29,7 @@ bar()
     exit(1);
 }
 
-int commonfun() { bar(); } /* from hello */
+int commonfun() { bar(); return 0; } /* from hello */
 
 int
 hello(int x)

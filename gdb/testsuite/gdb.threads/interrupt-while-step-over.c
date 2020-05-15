@@ -44,6 +44,8 @@ child_function (void *arg)
   pthread_barrier_wait (&threads_started_barrier);
 
   infinite_loop ();
+
+  return NULL;
 }
 
 void

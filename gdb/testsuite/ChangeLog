@@ -1,5 +1,25 @@
 2020-05-15  Gary Benson <gbenson@redhat.com>
 
+	* gdb.base/info-os.c (main): Add return statement.
+	* gdb.base/info_minsym.c (minsym_fun): Likewise.
+	* gdb.base/large-frame-2.c (func): Likewise.
+	* gdb.base/pr10179-a.c (foo1, bar1): Likewise.
+	* gdb.base/pr10179-b.c (foo2): Likewise.
+	* gdb.base/valgrind-disp-step.c (foo): Likewise.
+	* gdb.base/watch-cond.c (func): Likewise.
+	* gdb.multi/goodbye.c (verylongfun): Likewise.
+	* gdb.multi/hello.c (commonfun): Likewise.
+	* gdb.python/py-finish-breakpoint.c (call_longjmp): Likewise.
+	* gdb.threads/fork-plus-threads.c (thread_func): Likewise.
+	* gdb.threads/forking-threads-plus-breakpoint.c (thread_forks):
+	Likewise.
+	* gdb.threads/hand-call-new-thread.c (foo): Likewise.
+	* gdb.threads/interrupt-while-step-over.c (child_function):
+	Likewise.
+	* gdb.trace/actions-changed.c (end): Likewise.
+
+2020-05-15  Gary Benson <gbenson@redhat.com>
+
 	* gdb.opencl/callfuncs.exp: Report when test skipped.
 	* gdb.opencl/convs_casts.exp: Likewise.
 	* gdb.opencl/datatypes.exp: Likewise.

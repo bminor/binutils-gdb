@@ -20,6 +20,7 @@ static int minsym_var;
 static int minsym_fun (void)
 {
    minsym_var++;
+   return 0;
 }
 
 int

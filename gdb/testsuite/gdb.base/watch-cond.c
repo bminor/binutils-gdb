@@ -23,6 +23,7 @@ int func(int *foo)
   (*foo)++;
   global++;
   global2++;
+  return 0;
 }
 
 void func2(int *foo)

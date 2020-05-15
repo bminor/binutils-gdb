@@ -37,6 +37,7 @@ int verylongfun()
   glob *= 8;
   glob += 9;
   glob *= 9;
+  return 0;
 }
 
 void

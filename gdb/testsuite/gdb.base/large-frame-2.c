@@ -22,4 +22,5 @@ func (void)
 {
   int a[4096];
   blah (a);
+  return 0;
 }
