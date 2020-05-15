@@ -1,3 +1,8 @@
+2020-05-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/check-test-names.exp: Remove code that prevents this file
+	loading when tests are run in parallel.
+
 2020-05-15  Pedro Alves  <palves@redhat.com>
 
 	* gdb.multi/multi-kill.exp (start_inferior): Remove
