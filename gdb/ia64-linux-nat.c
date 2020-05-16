@@ -80,6 +80,8 @@ public:
   /* Override linux_nat_target low methods.  */
   void low_new_thread (struct lwp_info *lp) override;
   bool low_status_is_event (int status) override;
+
+  void enable_watchpoints_in_psr (ptid_t ptid);
 };
 
 static ia64_linux_nat_target the_ia64_linux_nat_target;
@@ -529,10 +531,10 @@ fill_fpregset (const struct regcache *regcache,
 #define IA64_PSR_DB (1UL << 24)
 #define IA64_PSR_DD (1UL << 39)
 
-static void
-enable_watchpoints_in_psr (ptid_t ptid)
+void
+ia64_linux_nat_target::enable_watchpoints_in_psr (ptid_t ptid)
 {
-  struct regcache *regcache = get_thread_regcache (ptid);
+  struct regcache *regcache = get_thread_regcache (this, ptid);
   ULONGEST psr;
 
   regcache_cooked_read_unsigned (regcache, IA64_PSR_REGNUM, &psr);

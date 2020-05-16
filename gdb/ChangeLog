@@ -1,3 +1,10 @@
+2020-05-16  Pedro Alves  <palves@redhat.com>
+
+	* ia64-linux-nat.c
+	(ia64_linux_nat_target) <enable_watchpoints_in_psr(ptid_t)>:
+	Declare method.
+	(enable_watchpoints_in_psr): Now a method of ia64_linux_nat_target.
+
 2020-05-15  Simon Marchi  <simon.marchi@efficios.com>
 
 	* sparc64-tdep.c (adi_stat_t): Remove typedef (leaving struct).
