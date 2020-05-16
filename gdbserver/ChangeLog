@@ -1,3 +1,9 @@
+2020-05-16  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* linux-ia64-low.cc (ia64_target::sw_breakpoint_from_kind):
+	Fix incorrect 'gdb_assert_no_reached' to 'gdb_assert_not_reached'.
+	(ia64_target::low_breakpoint_at): Ditto.
+
 2020-05-15  Hannes Domani  <ssbssa@yahoo.de>
 
 	* win32-i386-low.cc (i386_supports_z_point_type): Handle

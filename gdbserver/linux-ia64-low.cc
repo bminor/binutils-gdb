@@ -53,15 +53,15 @@ static ia64_target the_ia64_target;
 const gdb_byte *
 ia64_target::sw_breakpoint_from_kind (int kind, int *size)
 {
-  gdb_assert_no_reached ("target op sw_breakpoint_from_kind is not "
-			 "implemented by this target");
+  gdb_assert_not_reached ("target op sw_breakpoint_from_kind is not "
+			  "implemented by this target");
 }
 
 bool
 ia64_target::low_breakpoint_at (CORE_ADDR pc)
 {
-  gdb_assert_no_reached ("linux target op low_breakpoint_at is not "
-			 "implemented by this target");
+  gdb_assert_not_reached ("linux target op low_breakpoint_at is not "
+			  "implemented by this target");
 }
 
 /* Defined in auto-generated file reg-ia64.c.  */
