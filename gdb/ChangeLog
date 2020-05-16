@@ -1,3 +1,9 @@
+2020-05-27  Luis Machado  <luis.machado@linaro.org>
+
+	PR tdep/26000
+	* arm-tdep.c (thumb_analyze_prologue): Fix instruction matching
+	for ldrd (immediate).
+
 2020-05-26  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* command.h: Add comment giving the name of class_tui.

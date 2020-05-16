@@ -931,7 +931,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	       parameters from memory.  */
 	    ;
 
-	  else if ((insn & 0xffb0) == 0xe950	/* ldrd Rt, Rt2,
+	  else if ((insn & 0xff70) == 0xe950    /* ldrd Rt, Rt2,
 						   [Rn, #+/-imm] */
 		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
 	    /* Similarly ignore dual loads from the stack.  */
