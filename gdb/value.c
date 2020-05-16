@@ -1001,9 +1001,9 @@ check_type_length_before_alloc (const struct type *type)
 
   if (max_value_size > -1 && length > max_value_size)
     {
-      if (TYPE_NAME (type) != NULL)
+      if (type->name () != NULL)
 	error (_("value of type `%s' requires %u bytes, which is more "
-		 "than max-value-size"), TYPE_NAME (type), length);
+		 "than max-value-size"), type->name (), length);
       else
 	error (_("value requires %u bytes, which is more than "
 		 "max-value-size"), length);

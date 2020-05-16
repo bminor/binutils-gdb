@@ -577,7 +577,7 @@ ada_get_field_index (const struct type *type, const char *field_name,
 
   if (!maybe_missing)
     error (_("Unable to find field %s in struct %s.  Aborting"),
-           field_name, TYPE_NAME (struct_type));
+           field_name, struct_type->name ());
 
   return -1;
 }
@@ -1470,8 +1470,8 @@ ada_fixup_array_indexes_type (struct type *index_desc_type)
      If our INDEX_DESC_TYPE was generated using the older encoding,
      the field type should be a meaningless integer type whose name
      is not equal to the field name.  */
-  if (TYPE_NAME (TYPE_FIELD_TYPE (index_desc_type, 0)) != NULL
-      && strcmp (TYPE_NAME (TYPE_FIELD_TYPE (index_desc_type, 0)),
+  if (TYPE_FIELD_TYPE (index_desc_type, 0)->name () != NULL
+      && strcmp (TYPE_FIELD_TYPE (index_desc_type, 0)->name (),
                  TYPE_FIELD_NAME (index_desc_type, 0)) == 0)
     return;
 
@@ -3405,7 +3405,7 @@ See set/show multiple-symbol."));
 			       SYMBOL_LINE (syms[i].symbol));
 	    }
           else if (is_enumeral
-                   && TYPE_NAME (SYMBOL_TYPE (syms[i].symbol)) != NULL)
+                   && SYMBOL_TYPE (syms[i].symbol)->name () != NULL)
             {
               printf_filtered (("[%d] "), i + first_choice);
               ada_print_type (SYMBOL_TYPE (syms[i].symbol), NULL,
@@ -5158,7 +5158,7 @@ xget_renaming_scope (struct type *renaming_type)
      So, to extract the scope, we search for the "___XR" extension,
      and then backtrack until we find the first "__".  */
 
-  const char *name = TYPE_NAME (renaming_type);
+  const char *name = renaming_type->name ();
   const char *suffix = strstr (name, "___XR");
   const char *last;
 
@@ -6506,7 +6506,7 @@ ada_is_dispatch_table_ptr_type (struct type *type)
   if (type->code () != TYPE_CODE_PTR)
     return 0;
 
-  name = TYPE_NAME (TYPE_TARGET_TYPE (type));
+  name = TYPE_TARGET_TYPE (type)->name ();
   if (name == NULL)
     return 0;
 
@@ -6518,7 +6518,7 @@ ada_is_dispatch_table_ptr_type (struct type *type)
 static int
 ada_is_interface_tag (struct type *type)
 {
-  const char *name = TYPE_NAME (type);
+  const char *name = type->name ();
 
   if (name == NULL)
     return 0;
@@ -7834,7 +7834,7 @@ ada_prefer_type (struct type *type0, struct type *type1)
     return 1;
   else if (type0->code () == TYPE_CODE_VOID)
     return 0;
-  else if (TYPE_NAME (type1) == NULL && TYPE_NAME (type0) != NULL)
+  else if (type1->name () == NULL && type0->name () != NULL)
     return 1;
   else if (ada_is_constrained_packed_array_type (type0))
     return 1;
@@ -7843,8 +7843,8 @@ ada_prefer_type (struct type *type0, struct type *type1)
     return 1;
   else
     {
-      const char *type0_name = TYPE_NAME (type0);
-      const char *type1_name = TYPE_NAME (type1);
+      const char *type0_name = type0->name ();
+      const char *type1_name = type1->name ();
 
       if (type0_name != NULL && strstr (type0_name, "___XR") != NULL
 	  && (type1_name == NULL || strstr (type1_name, "___XR") == NULL))
@@ -7861,7 +7861,7 @@ ada_type_name (struct type *type)
 {
   if (type == NULL)
     return NULL;
-  return TYPE_NAME (type);
+  return type->name ();
 }
 
 /* Search the list of "descriptive" types associated to TYPE for a type
@@ -8275,9 +8275,9 @@ ada_template_to_fixed_record_type_1 (struct type *type,
      the current RTYPE length might be good enough for our purposes.  */
   if (TYPE_LENGTH (type) <= 0)
     {
-      if (TYPE_NAME (rtype))
+      if (rtype->name ())
 	warning (_("Invalid type size for `%s' detected: %s."),
-		 TYPE_NAME (rtype), pulongest (TYPE_LENGTH (type)));
+		 rtype->name (), pulongest (TYPE_LENGTH (type)));
       else
 	warning (_("Invalid type size for <unnamed> detected: %s."),
 		 pulongest (TYPE_LENGTH (type)));
@@ -8563,10 +8563,10 @@ ada_is_redundant_range_encoding (struct type *range_type,
   if (is_dynamic_type (range_type))
     return 0;
 
-  if (TYPE_NAME (encoding_type) == NULL)
+  if (encoding_type->name () == NULL)
     return 0;
 
-  bounds_str = strstr (TYPE_NAME (encoding_type), "___XDLU_");
+  bounds_str = strstr (encoding_type->name (), "___XDLU_");
   if (bounds_str == NULL)
     return 0;
 
@@ -8734,7 +8734,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
   /* We want to preserve the type name.  This can be useful when
      trying to get the type name of a value that has already been
      printed (for instance, if the user did "print VAR; whatis $".  */
-  result->set_name (TYPE_NAME (type0));
+  result->set_name (type0->name ());
 
   if (constrained_packed_array_p)
     {
@@ -9025,11 +9025,11 @@ ada_check_typedef (struct type *type)
   type = check_typedef (type);
   if (type == NULL || type->code () != TYPE_CODE_ENUM
       || !TYPE_STUB (type)
-      || TYPE_NAME (type) == NULL)
+      || type->name () == NULL)
     return type;
   else
     {
-      const char *name = TYPE_NAME (type);
+      const char *name = type->name ();
       struct type *type1 = ada_find_any_type (name);
 
       if (type1 == NULL)
@@ -11424,8 +11424,7 @@ ada_is_gnat_encoded_fixed_point_type (struct type *type)
 int
 ada_is_system_address_type (struct type *type)
 {
-  return (TYPE_NAME (type)
-          && strcmp (TYPE_NAME (type), "system__address") == 0);
+  return (type->name () && strcmp (type->name (), "system__address") == 0);
 }
 
 /* Assuming that TYPE is the representation of an Ada fixed-point
@@ -11593,14 +11592,14 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
   const char *subtype_info;
 
   gdb_assert (raw_type != NULL);
-  gdb_assert (TYPE_NAME (raw_type) != NULL);
+  gdb_assert (raw_type->name () != NULL);
 
   if (raw_type->code () == TYPE_CODE_RANGE)
     base_type = TYPE_TARGET_TYPE (raw_type);
   else
     base_type = raw_type;
 
-  name = TYPE_NAME (raw_type);
+  name = raw_type->name ();
   subtype_info = strstr (name, "___XD");
   if (subtype_info == NULL)
     {
@@ -13075,7 +13074,7 @@ catch_assert_command (const char *arg_entry, int from_tty,
 static int
 ada_is_exception_sym (struct symbol *sym)
 {
-  const char *type_name = TYPE_NAME (SYMBOL_TYPE (sym));
+  const char *type_name = SYMBOL_TYPE (sym)->name ();
 
   return (SYMBOL_CLASS (sym) != LOC_TYPEDEF
           && SYMBOL_CLASS (sym) != LOC_BLOCK

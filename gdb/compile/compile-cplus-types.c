@@ -364,7 +364,7 @@ compile_cplus_instance::new_scope (const char *type_name, struct type *type)
     }
   else
     {
-      if (TYPE_NAME (type) == nullptr)
+      if (type->name () == nullptr)
 	{
 	  /* Anonymous type  */
 
@@ -383,8 +383,8 @@ compile_cplus_instance::new_scope (const char *type_name, struct type *type)
 	{
 	  scope_component comp
 	    = {
-	        decl_name (TYPE_NAME (type)).get (),
-		lookup_symbol (TYPE_NAME (type), block (), VAR_DOMAIN, nullptr)
+	        decl_name (type->name ()).get (),
+		lookup_symbol (type->name (), block (), VAR_DOMAIN, nullptr)
 	      };
 	  scope.push_back (comp);
 	}
@@ -515,13 +515,13 @@ compile_cplus_convert_typedef (compile_cplus_instance *instance,
 			       struct type *type,
 			       enum gcc_cp_symbol_kind nested_access)
 {
-  compile_scope scope = instance->new_scope (TYPE_NAME (type), type);
+  compile_scope scope = instance->new_scope (type->name (), type);
 
   if (scope.nested_type () != GCC_TYPE_NONE)
     return scope.nested_type ();
 
   gdb::unique_xmalloc_ptr<char> name
-    = compile_cplus_instance::decl_name (TYPE_NAME (type));
+    = compile_cplus_instance::decl_name (type->name ());
 
   /* Make sure the scope for this type has been pushed.  */
   instance->enter_scope (std::move (scope));
@@ -807,10 +807,10 @@ compile_cplus_convert_struct_or_union (compile_cplus_instance *instance,
 
   /* Get the decl name of this type.  */
   gdb::unique_xmalloc_ptr<char> name
-    = compile_cplus_instance::decl_name (TYPE_NAME (type));
+    = compile_cplus_instance::decl_name (type->name ());
 
   /* Create a new scope for TYPE.  */
-  compile_scope scope = instance->new_scope (TYPE_NAME (type), type);
+  compile_scope scope = instance->new_scope (type->name (), type);
 
   if (scope.nested_type () != GCC_TYPE_NONE)
     {
@@ -913,7 +913,7 @@ compile_cplus_convert_enum (compile_cplus_instance *instance, struct type *type,
   bool scoped_enum_p = false;
 
   /* Create a new scope for this type.  */
-  compile_scope scope = instance->new_scope (TYPE_NAME (type), type);
+  compile_scope scope = instance->new_scope (type->name (), type);
 
   if (scope.nested_type () != GCC_TYPE_NONE)
     {
@@ -923,7 +923,7 @@ compile_cplus_convert_enum (compile_cplus_instance *instance, struct type *type,
     }
 
   gdb::unique_xmalloc_ptr<char> name
-    = compile_cplus_instance::decl_name (TYPE_NAME (type));
+    = compile_cplus_instance::decl_name (type->name ());
 
   /* Push all scopes.  */
   instance->enter_scope (std::move (scope));
@@ -1022,7 +1022,7 @@ compile_cplus_convert_int (compile_cplus_instance *instance, struct type *type)
     }
 
   return instance->plugin ().get_int_type
-    (TYPE_UNSIGNED (type), TYPE_LENGTH (type), TYPE_NAME (type));
+    (TYPE_UNSIGNED (type), TYPE_LENGTH (type), type->name ());
 }
 
 /* Convert a floating-point type to its gcc representation.  */
@@ -1032,7 +1032,7 @@ compile_cplus_convert_float (compile_cplus_instance *instance,
 			     struct type *type)
 {
   return instance->plugin ().get_float_type
-    (TYPE_LENGTH (type), TYPE_NAME (type));
+    (TYPE_LENGTH (type), type->name ());
 }
 
 /* Convert the 'void' type to its gcc representation.  */
@@ -1102,9 +1102,9 @@ static gcc_type
 compile_cplus_convert_namespace (compile_cplus_instance *instance,
 				 struct type *type)
 {
-  compile_scope scope = instance->new_scope (TYPE_NAME (type), type);
+  compile_scope scope = instance->new_scope (type->name (), type);
   gdb::unique_xmalloc_ptr<char> name
-    = compile_cplus_instance::decl_name (TYPE_NAME (type));
+    = compile_cplus_instance::decl_name (type->name ());
 
   /* Push scope.  */
   instance->enter_scope (std::move (scope));

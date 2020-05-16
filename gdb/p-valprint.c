@@ -423,9 +423,9 @@ pascal_value_print (struct value *val, struct ui_file *stream,
       /* Hack:  remove (char *) for char strings.  Their
          type is indicated by the quoted string anyway.  */
       if (type->code () == TYPE_CODE_PTR
-	  && TYPE_NAME (type) == NULL
-	  && TYPE_NAME (TYPE_TARGET_TYPE (type)) != NULL
-	  && strcmp (TYPE_NAME (TYPE_TARGET_TYPE (type)), "char") == 0)
+	  && type->name () == NULL
+	  && TYPE_TARGET_TYPE (type)->name () != NULL
+	  && strcmp (TYPE_TARGET_TYPE (type)->name (), "char") == 0)
 	{
 	  /* Print nothing.  */
 	}
@@ -469,7 +469,7 @@ const char pascal_vtbl_ptr_name[] =
 int
 pascal_object_is_vtbl_ptr_type (struct type *type)
 {
-  const char *type_name = TYPE_NAME (type);
+  const char *type_name = type->name ();
 
   return (type_name != NULL
 	  && strcmp (type_name, pascal_vtbl_ptr_name) == 0);
@@ -564,7 +564,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 		  fprintf_filtered (stream, "\n");
 		  print_spaces_filtered (2 + 2 * recurse, stream);
 		  fputs_filtered ("members of ", stream);
-		  fputs_filtered (TYPE_NAME (type), stream);
+		  fputs_filtered (type->name (), stream);
 		  fputs_filtered (": ", stream);
 		}
 	    }
@@ -710,7 +710,7 @@ pascal_object_print_value (struct value *val, struct ui_file *stream,
     {
       LONGEST boffset = 0;
       struct type *baseclass = check_typedef (TYPE_BASECLASS (type, i));
-      const char *basename = TYPE_NAME (baseclass);
+      const char *basename = baseclass->name ();
       int skip = 0;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))

@@ -84,7 +84,7 @@ classify_type (struct type *elttype, struct gdbarch *gdbarch,
      that would do the wrong thing.  */
   while (elttype)
     {
-      const char *name = TYPE_NAME (elttype);
+      const char *name = elttype->name ();
 
       if (elttype->code () == TYPE_CODE_CHAR || !name)
 	{

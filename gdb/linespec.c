@@ -1222,7 +1222,7 @@ find_methods (struct type *t, enum language t_lang, const char *name,
 	      std::vector<struct type *> *superclasses)
 {
   int ibase;
-  const char *class_name = TYPE_NAME (t);
+  const char *class_name = t->name ();
 
   /* Ignore this class if it doesn't have a name.  This is ugly, but
      unless we figure out how to get the physname without the name of

@@ -1,5 +1,10 @@
 2020-05-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_NAME): Remove.  Change all cal sites to use
+	type::name instead.
+
+2020-05-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (struct type) <name, set_name>: New methods.
 	(TYPE_CODE): Use type::name.  Change all call sites used to set
 	the name to use type::set_name instead.

@@ -1296,7 +1296,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
 
       /* Incomplete definitions of structs should not get a name.  */
-      if (TYPE_NAME (SYMBOL_TYPE (s)) == NULL
+      if (SYMBOL_TYPE (s)->name () == NULL
 	  && (TYPE_NFIELDS (SYMBOL_TYPE (s)) != 0
 	      || (SYMBOL_TYPE (s)->code () != TYPE_CODE_STRUCT
 		  && SYMBOL_TYPE (s)->code () != TYPE_CODE_UNION)))
@@ -1675,8 +1675,8 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	     (.Fxx or .xxfake or empty) for unnamed struct/union/enums.  */
 	  if (name[0] == '.' || name[0] == '\0')
 	    tp->set_name (NULL);
-	  else if (TYPE_NAME (tp) == NULL
-		   || strcmp (TYPE_NAME (tp), name) != 0)
+	  else if (tp->name () == NULL
+		   || strcmp (tp->name (), name) != 0)
 	    tp->set_name (obstack_strdup (&mdebugread_objfile->objfile_obstack,
 					  name));
 	}
@@ -1711,8 +1711,8 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	      bad_tag_guess_complaint (sym_name);
 	      tp->set_code (type_code);
 	    }
-	  if (TYPE_NAME (tp) == NULL
-	      || strcmp (TYPE_NAME (tp), name) != 0)
+	  if (tp->name () == NULL
+	      || strcmp (tp->name (), name) != 0)
 	    tp->set_name (obstack_strdup (&mdebugread_objfile->objfile_obstack,
 					  name));
 	}

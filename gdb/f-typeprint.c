@@ -70,7 +70,7 @@ f_print_type (struct type *type, const char *varstring, struct ui_file *stream,
       /* Need a space if going to print stars or brackets; but not if we
 	 will print just a type name.  */
       || ((show > 0
-	   || TYPE_NAME (type) == 0)
+	   || type->name () == 0)
           && (code == TYPE_CODE_FUNC
 	      || code == TYPE_CODE_METHOD
 	      || code == TYPE_CODE_ARRAY
@@ -114,7 +114,7 @@ f_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
   if (type == 0)
     return;
 
-  if (TYPE_NAME (type) && show <= 0)
+  if (type->name () && show <= 0)
     return;
 
   QUIT;
@@ -178,7 +178,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
   if (type == 0)
     return;
 
-  if (TYPE_NAME (type) && show <= 0)
+  if (type->name () && show <= 0)
     return;
 
   QUIT;
@@ -332,14 +332,14 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
   /* When SHOW is zero or less, and there is a valid type name, then always
      just print the type name directly from the type.  */
 
-  if ((show <= 0) && (TYPE_NAME (type) != NULL))
+  if ((show <= 0) && (type->name () != NULL))
     {
       const char *prefix = "";
       if (type->code () == TYPE_CODE_UNION)
 	prefix = "Type, C_Union :: ";
       else if (type->code () == TYPE_CODE_STRUCT)
 	prefix = "Type ";
-      fprintfi_filtered (level, stream, "%s%s", prefix, TYPE_NAME (type));
+      fprintfi_filtered (level, stream, "%s%s", prefix, type->name ());
       return;
     }
 
@@ -376,7 +376,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
       {
 	gdbarch *gdbarch = get_type_arch (type);
 	struct type *void_type = builtin_f_type (gdbarch)->builtin_void;
-	fprintfi_filtered (level, stream, "%s", TYPE_NAME (void_type));
+	fprintfi_filtered (level, stream, "%s", void_type->name ());
       }
       break;
 
@@ -399,7 +399,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
          through as TYPE_CODE_INT since dbxstclass.h is so
          C-oriented, we must change these to "character" from "char".  */
 
-      if (strcmp (TYPE_NAME (type), "char") == 0)
+      if (strcmp (type->name (), "char") == 0)
 	fprintfi_filtered (level, stream, "character");
       else
 	goto default_case;
@@ -424,7 +424,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 	fprintfi_filtered (level, stream, "Type, C_Union :: ");
       else
 	fprintfi_filtered (level, stream, "Type ");
-      fputs_filtered (TYPE_NAME (type), stream);
+      fputs_filtered (type->name (), stream);
       /* According to the definition,
          we only print structure elements in case show > 0.  */
       if (show > 0)
@@ -442,12 +442,12 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      fputs_filtered ("\n", stream);
 	    }
 	  fprintfi_filtered (level, stream, "End Type ");
-	  fputs_filtered (TYPE_NAME (type), stream);
+	  fputs_filtered (type->name (), stream);
 	}
       break;
 
     case TYPE_CODE_MODULE:
-      fprintfi_filtered (level, stream, "module %s", TYPE_NAME (type));
+      fprintfi_filtered (level, stream, "module %s", type->name ());
       break;
 
     default_case:
@@ -456,8 +456,8 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
          such as fundamental types.  For these, just print whatever
          the type name is, as recorded in the type itself.  If there
          is no type name, then complain.  */
-      if (TYPE_NAME (type) != NULL)
-	fprintfi_filtered (level, stream, "%s", TYPE_NAME (type));
+      if (type->name () != NULL)
+	fprintfi_filtered (level, stream, "%s", type->name ());
       else
 	error (_("Invalid type code (%d) in symbol table."), type->code ());
       break;

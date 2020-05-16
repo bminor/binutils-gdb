@@ -999,7 +999,7 @@ language_lookup_primitive_type_1 (const struct language_arch_info *lai,
 
   for (p = lai->primitive_type_vector; (*p) != NULL; p++)
     {
-      if (strcmp (TYPE_NAME (*p), name) == 0)
+      if (strcmp ((*p)->name (), name) == 0)
 	return p;
     }
   return NULL;
@@ -1037,7 +1037,7 @@ language_alloc_type_symbol (enum language lang, struct type *type)
   gdbarch = TYPE_OWNER (type).gdbarch;
   symbol = new (gdbarch_obstack (gdbarch)) struct symbol ();
 
-  symbol->m_name = TYPE_NAME (type);
+  symbol->m_name = type->name ();
   symbol->set_language (lang, nullptr);
   symbol->owner.arch = gdbarch;
   SYMBOL_OBJFILE_OWNED (symbol) = 0;

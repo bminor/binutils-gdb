@@ -60,7 +60,7 @@ find_size_for_pointer_math (struct type *ptr_type)
 	{
 	  const char *name;
 	  
-	  name = TYPE_NAME (ptr_target);
+	  name = ptr_target->name ();
 	  if (name == NULL)
 	    error (_("Cannot perform pointer math on incomplete types, "
 		   "try casting to a known type, or void *."));
@@ -888,8 +888,8 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
 	target_float_from_longest (x, *eff_type_x, value_as_long (arg1));
     }
   else
-    error (_("Don't know how to convert from %s to %s."), TYPE_NAME (type1),
-	     TYPE_NAME (type2));
+    error (_("Don't know how to convert from %s to %s."), type1->name (),
+	     type2->name ());
 
   /* Obtain value of arg2, converting from other types if necessary.  */
 
@@ -907,8 +907,8 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
 	target_float_from_longest (y, *eff_type_y, value_as_long (arg2));
     }
   else
-    error (_("Don't know how to convert from %s to %s."), TYPE_NAME (type1),
-	     TYPE_NAME (type2));
+    error (_("Don't know how to convert from %s to %s."), type1->name (),
+	     type2->name ());
 }
 
 /* A helper function that finds the type to use for a binary operation

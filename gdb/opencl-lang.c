@@ -1008,7 +1008,7 @@ opencl_print_type (struct type *type, const char *varstring,
     {
       type = check_typedef (type);
       if (type->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
-	  && TYPE_NAME (type) != NULL)
+	  && type->name () != NULL)
 	show = 0;
     }
 

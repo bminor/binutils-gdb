@@ -78,7 +78,7 @@ c_textual_element_type (struct type *type, char format)
   while (iter_type)
     {
       /* Check the name of the type.  */
-      if (TYPE_NAME (iter_type) && textual_name (TYPE_NAME (iter_type)))
+      if (iter_type->name () && textual_name (iter_type->name ()))
 	return 1;
 
       if (iter_type->code () != TYPE_CODE_TYPEDEF)
@@ -521,11 +521,11 @@ c_value_print (struct value *val, struct ui_file *stream,
          (Don't use c_textual_element_type here; quoted strings
          are always exactly (char *), (wchar_t *), or the like.  */
       if (original_type->code () == TYPE_CODE_PTR
-	  && TYPE_NAME (original_type) == NULL
-	  && TYPE_NAME (TYPE_TARGET_TYPE (original_type)) != NULL
-	  && (strcmp (TYPE_NAME (TYPE_TARGET_TYPE (original_type)),
+	  && original_type->name () == NULL
+	  && TYPE_TARGET_TYPE (original_type)->name () != NULL
+	  && (strcmp (TYPE_TARGET_TYPE (original_type)->name (),
 		      "char") == 0
-	      || textual_name (TYPE_NAME (TYPE_TARGET_TYPE (original_type)))))
+	      || textual_name (TYPE_TARGET_TYPE (original_type)->name ())))
 	{
 	  /* Print nothing.  */
 	}
@@ -598,14 +598,14 @@ c_value_print (struct value *val, struct ui_file *stream,
 		    < TYPE_LENGTH (value_enclosing_type (val)))))
 	    val = value_cast (real_type, val);
 	  fprintf_filtered (stream, "(%s%s) ",
-			    TYPE_NAME (real_type),
+			    real_type->name (),
 			    full ? "" : _(" [incomplete object]"));
 	}
       else if (type != check_typedef (value_enclosing_type (val)))
 	{
 	  /* No RTTI information, so let's do our best.  */
 	  fprintf_filtered (stream, "(%s ?) ",
-			    TYPE_NAME (value_enclosing_type (val)));
+			    value_enclosing_type (val)->name ());
 	  val = value_cast (value_enclosing_type (val), val);
 	}
     }

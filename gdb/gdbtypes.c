@@ -1572,11 +1572,11 @@ type_name_or_error (struct type *type)
 
   type = check_typedef (type);
 
-  name = TYPE_NAME (type);
+  name = type->name ();
   if (name != NULL)
     return name;
 
-  name = TYPE_NAME (saved_type);
+  name = saved_type->name ();
   objfile = TYPE_OBJFILE (saved_type);
   error (_("Invalid anonymous type %s [in module %s], GCC PR debug/47510 bug?"),
 	 name ? name : "<anonymous>",
@@ -1706,11 +1706,11 @@ lookup_template_type (const char *name, struct type *type,
 {
   struct symbol *sym;
   char *nam = (char *) 
-    alloca (strlen (name) + strlen (TYPE_NAME (type)) + 4);
+    alloca (strlen (name) + strlen (type->name ()) + 4);
 
   strcpy (nam, name);
   strcat (nam, "<");
-  strcat (nam, TYPE_NAME (type));
+  strcat (nam, type->name ());
   strcat (nam, " >");	/* FIXME, extra space still introduced in gcc?  */
 
   sym = lookup_symbol (nam, block, VAR_DOMAIN, 0).symbol;
@@ -2213,7 +2213,7 @@ resolve_dynamic_array_or_string (struct type *type,
 	     if the DWARF info is not correct.  Issue a warning,
 	     and assume no byte/bit stride (leave bit_stride = 0).  */
 	  warning (_("cannot determine array stride for type %s"),
-		   TYPE_NAME (type) ? TYPE_NAME (type) : "<no name>");
+		   type->name () ? type->name () : "<no name>");
 	}
     }
   else
@@ -2764,7 +2764,7 @@ check_typedef (struct type *type)
 	  if (currently_reading_symtab)
 	    return make_qualified_type (type, instance_flags, NULL);
 
-	  name = TYPE_NAME (type);
+	  name = type->name ();
 	  /* FIXME: shouldn't we look in STRUCT_DOMAIN and/or
 	     VAR_DOMAIN as appropriate?  */
 	  if (name == NULL)
@@ -2817,7 +2817,7 @@ check_typedef (struct type *type)
       && opaque_type_resolution 
       && !currently_reading_symtab)
     {
-      const char *name = TYPE_NAME (type);
+      const char *name = type->name ();
       struct type *newtype;
 
       if (name == NULL)
@@ -2851,7 +2851,7 @@ check_typedef (struct type *type)
      types.  */
   else if (TYPE_STUB (type) && !currently_reading_symtab)
     {
-      const char *name = TYPE_NAME (type);
+      const char *name = type->name ();
       /* FIXME: shouldn't we look in STRUCT_DOMAIN and/or VAR_DOMAIN
          as appropriate?  */
       struct symbol *sym;
@@ -3297,10 +3297,10 @@ init_complex_type (const char *name, struct type *target_type)
 	{
 	  char *new_name
 	    = (char *) TYPE_ALLOC (target_type,
-				   strlen (TYPE_NAME (target_type))
+				   strlen (target_type->name ())
 				   + strlen ("_Complex ") + 1);
 	  strcpy (new_name, "_Complex ");
-	  strcat (new_name, TYPE_NAME (target_type));
+	  strcat (new_name, target_type->name ());
 	  name = new_name;
 	}
 
@@ -3575,8 +3575,8 @@ int
 class_types_same_p (const struct type *a, const struct type *b)
 {
   return (TYPE_MAIN_TYPE (a) == TYPE_MAIN_TYPE (b)
-	  || (TYPE_NAME (a) && TYPE_NAME (b)
-	      && !strcmp (TYPE_NAME (a), TYPE_NAME (b))));
+	  || (a->name () && b->name ()
+	      && !strcmp (a->name (), b->name ())));
 }
 
 /* If BASE is an ancestor of DCLASS return the distance between them.
@@ -3929,8 +3929,8 @@ types_equal (struct type *a, struct type *b)
      stubs.  The types won't point to the same address, but they
      really are the same.  */
 
-  if (TYPE_NAME (a) && TYPE_NAME (b)
-      && strcmp (TYPE_NAME (a), TYPE_NAME (b)) == 0)
+  if (a->name () && b->name ()
+      && strcmp (a->name (), b->name ()) == 0)
     return true;
 
   /* Check if identical after resolving typedefs.  */
@@ -4011,9 +4011,9 @@ check_types_equal (struct type *type1, struct type *type2,
       || TYPE_NFIELDS (type1) != TYPE_NFIELDS (type2))
     return false;
 
-  if (!compare_maybe_null_strings (TYPE_NAME (type1), TYPE_NAME (type2)))
+  if (!compare_maybe_null_strings (type1->name (), type2->name ()))
     return false;
-  if (!compare_maybe_null_strings (TYPE_NAME (type1), TYPE_NAME (type2)))
+  if (!compare_maybe_null_strings (type1->name (), type2->name ()))
     return false;
 
   if (type1->code () == TYPE_CODE_RANGE)
@@ -4290,12 +4290,12 @@ rank_one_type_parm_int (struct type *parm, struct type *arg, struct value *value
 		{
 		  /* unsigned int -> unsigned int, or
 		     unsigned long -> unsigned long */
-		  if (integer_types_same_name_p (TYPE_NAME (parm),
-						 TYPE_NAME (arg)))
+		  if (integer_types_same_name_p (parm->name (),
+						 arg->name ()))
 		    return EXACT_MATCH_BADNESS;
-		  else if (integer_types_same_name_p (TYPE_NAME (arg),
+		  else if (integer_types_same_name_p (arg->name (),
 						      "int")
-			   && integer_types_same_name_p (TYPE_NAME (parm),
+			   && integer_types_same_name_p (parm->name (),
 							 "long"))
 		    /* unsigned int -> unsigned long */
 		    return INTEGER_PROMOTION_BADNESS;
@@ -4305,9 +4305,9 @@ rank_one_type_parm_int (struct type *parm, struct type *arg, struct value *value
 		}
 	      else
 		{
-		  if (integer_types_same_name_p (TYPE_NAME (arg),
+		  if (integer_types_same_name_p (arg->name (),
 						 "long")
-		      && integer_types_same_name_p (TYPE_NAME (parm),
+		      && integer_types_same_name_p (parm->name (),
 						    "int"))
 		    /* signed long -> unsigned int */
 		    return INTEGER_CONVERSION_BADNESS;
@@ -4318,12 +4318,12 @@ rank_one_type_parm_int (struct type *parm, struct type *arg, struct value *value
 	    }
 	  else if (!TYPE_NOSIGN (arg) && !TYPE_UNSIGNED (arg))
 	    {
-	      if (integer_types_same_name_p (TYPE_NAME (parm),
-					     TYPE_NAME (arg)))
+	      if (integer_types_same_name_p (parm->name (),
+					     arg->name ()))
 		return EXACT_MATCH_BADNESS;
-	      else if (integer_types_same_name_p (TYPE_NAME (arg),
+	      else if (integer_types_same_name_p (arg->name (),
 						  "int")
-		       && integer_types_same_name_p (TYPE_NAME (parm),
+		       && integer_types_same_name_p (parm->name (),
 						     "long"))
 		return INTEGER_PROMOTION_BADNESS;
 	      else
@@ -4629,8 +4629,8 @@ rank_one_type (struct type *parm, struct type *arg, struct value *value)
   /* Debugging only.  */
     fprintf_filtered (gdb_stderr,
 		      "------ Arg is %s [%d], parm is %s [%d]\n",
-		      TYPE_NAME (arg), arg->code (),
-		      TYPE_NAME (parm), parm->code ());
+		      arg->name (), arg->code (),
+		      parm->name (), parm->code ());
 
   /* x -> y means arg of type x being supplied for parameter of type y.  */
 
@@ -4905,8 +4905,8 @@ recursive_dump_type (struct type *type, int spaces)
   gdb_print_host_address (type, gdb_stdout);
   printf_filtered ("\n");
   printfi_filtered (spaces, "name '%s' (",
-		    TYPE_NAME (type) ? TYPE_NAME (type) : "<NULL>");
-  gdb_print_host_address (TYPE_NAME (type), gdb_stdout);
+		    type->name () ? type->name () : "<NULL>");
+  gdb_print_host_address (type->name (), gdb_stdout);
   printf_filtered (")\n");
   printfi_filtered (spaces, "code 0x%x ", type->code ());
   switch (type->code ())
@@ -5289,8 +5289,8 @@ copy_type_recursive (struct objfile *objfile,
   TYPE_OBJFILE_OWNED (new_type) = 0;
   TYPE_OWNER (new_type).gdbarch = get_type_arch (type);
 
-  if (TYPE_NAME (type))
-    new_type->set_name (xstrdup (TYPE_NAME (type)));
+  if (type->name ())
+    new_type->set_name (xstrdup (type->name ()));
 
   TYPE_INSTANCE_FLAGS (new_type) = TYPE_INSTANCE_FLAGS (type);
   TYPE_LENGTH (new_type) = TYPE_LENGTH (type);

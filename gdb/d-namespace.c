@@ -131,7 +131,7 @@ d_lookup_symbol (const struct language_defn *langdef,
 	    return {};
 
 	  type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (lang_this.symbol)));
-	  classname = TYPE_NAME (type);
+	  classname = type->name ();
 	  nested = name;
 	}
       else

@@ -989,13 +989,13 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
       function_name = NULL;
       if (type->code () == TYPE_CODE_NAMESPACE)
 	{
-	  function = cp_lookup_symbol_namespace (TYPE_NAME (type),
+	  function = cp_lookup_symbol_namespace (type->name (),
 						 name,
 						 get_selected_block (0),
 						 VAR_DOMAIN).symbol;
 	  if (function == NULL)
 	    error (_("No symbol \"%s\" in namespace \"%s\"."),
-		   name, TYPE_NAME (type));
+		   name, type->name ());
 
 	  tem = 1;
 	  /* arg2 is left as NULL on purpose.  */
@@ -2327,9 +2327,9 @@ evaluate_subexp_standard (struct type *expect_type,
 	  if (type->code () != TYPE_CODE_ARRAY
 	      && type->code () != TYPE_CODE_PTR)
 	    {
-	      if (TYPE_NAME (type))
+	      if (type->name ())
 		error (_("cannot subscript something of type `%s'"),
-		       TYPE_NAME (type));
+		       type->name ());
 	      else
 		error (_("cannot subscript requested type"));
 	    }
@@ -2370,7 +2370,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	      else
 		{
 		  error (_("cannot subscript something of type `%s'"),
-			 TYPE_NAME (value_type (arg1)));
+			 value_type (arg1)->name ());
 		}
 	    }
 
@@ -2392,9 +2392,9 @@ evaluate_subexp_standard (struct type *expect_type,
 		  break;
 
 		default:
-		  if (TYPE_NAME (type))
+		  if (type->name ())
 		    error (_("cannot subscript something of type `%s'"),
-			   TYPE_NAME (type));
+			   type->name ());
 		  else
 		    error (_("cannot subscript requested type"));
 		}

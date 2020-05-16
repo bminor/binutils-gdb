@@ -595,7 +595,7 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
   struct fn_field *method = &f[signature_id];
   const char *field_name = TYPE_FN_FIELDLIST_NAME (type, method_id);
   const char *physname = TYPE_FN_FIELD_PHYSNAME (f, signature_id);
-  const char *newname = TYPE_NAME (type);
+  const char *newname = type->name ();
 
   /* Does the form of physname indicate that it is the full mangled name
      of a constructor (not just the args)?  */

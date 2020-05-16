@@ -207,11 +207,11 @@ inspect_type (struct demangle_parse_info *info,
 
 	     If the symbol is typedef and its type name is the same
 	     as the symbol's name, e.g., "typedef struct foo foo;".  */
-	  if (TYPE_NAME (type) != nullptr
-	      && strcmp (TYPE_NAME (type), name) == 0)
+	  if (type->name () != nullptr
+	      && strcmp (type->name (), name) == 0)
 	    return 0;
 
-	  is_anon = (TYPE_NAME (type) == NULL
+	  is_anon = (type->name () == NULL
 		     && (type->code () == TYPE_CODE_ENUM
 			 || type->code () == TYPE_CODE_STRUCT
 			 || type->code () == TYPE_CODE_UNION));
@@ -1278,7 +1278,7 @@ add_symbol_overload_list_adl_namespace (struct type *type,
 	type = TYPE_TARGET_TYPE (type);
     }
 
-  type_name = TYPE_NAME (type);
+  type_name = type->name ();
 
   if (type_name == NULL)
     return;

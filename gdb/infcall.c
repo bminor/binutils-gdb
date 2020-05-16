@@ -1062,11 +1062,11 @@ call_function_by_hand_dummy (struct value *function,
       auto info = language_pass_by_reference (param_type);
       if (!info.copy_constructible)
 	error (_("expression cannot be evaluated because the type '%s' "
-		 "is not copy constructible"), TYPE_NAME (param_type));
+		 "is not copy constructible"), param_type->name ());
 
       if (!info.destructible)
 	error (_("expression cannot be evaluated because the type '%s' "
-		 "is not destructible"), TYPE_NAME (param_type));
+		 "is not destructible"), param_type->name ());
 
       if (info.trivially_copyable)
 	continue;
@@ -1091,14 +1091,14 @@ call_function_by_hand_dummy (struct value *function,
 	  value *copy_ctor;
 	  value *cctor_args[2] = { clone_ptr, original_arg };
 	  find_overload_match (gdb::make_array_view (cctor_args, 2),
-			       TYPE_NAME (param_type), METHOD,
+			       param_type->name (), METHOD,
 			       &clone_ptr, nullptr, &copy_ctor, nullptr,
 			       nullptr, 0, EVAL_NORMAL);
 
 	  if (copy_ctor == nullptr)
 	    error (_("expression cannot be evaluated because a copy "
 		     "constructor for the type '%s' could not be found "
-		     "(maybe inlined?)"), TYPE_NAME (param_type));
+		     "(maybe inlined?)"), param_type->name ());
 
 	  call_function_by_hand (copy_ctor, default_return_type,
 				 gdb::make_array_view (cctor_args, 2));
@@ -1130,7 +1130,7 @@ call_function_by_hand_dummy (struct value *function,
 	  if (dtor_name == nullptr)
 	    error (_("expression cannot be evaluated because a destructor "
 		     "for the type '%s' could not be found "
-		     "(maybe inlined?)"), TYPE_NAME (param_type));
+		     "(maybe inlined?)"), param_type->name ());
 
 	  value *dtor
 	    = find_function_in_inferior (dtor_name, 0);

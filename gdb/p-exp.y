@@ -669,7 +669,7 @@ qualified_name:	typebase COLONCOLON name
 			  if (type->code () != TYPE_CODE_STRUCT
 			      && type->code () != TYPE_CODE_UNION)
 			    error (_("`%s' is not defined as an aggregate type."),
-				   TYPE_NAME (type));
+				   type->name ());
 
 			  write_exp_elt_opcode (pstate, OP_SCOPE);
 			  write_exp_elt_type (pstate, type);

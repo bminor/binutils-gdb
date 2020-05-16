@@ -393,9 +393,9 @@ typy_get_name (PyObject *self, void *closure)
 {
   struct type *type = ((type_object *) self)->type;
 
-  if (TYPE_NAME (type) == NULL)
+  if (type->name () == NULL)
     Py_RETURN_NONE;
-  return PyString_FromString (TYPE_NAME (type));
+  return PyString_FromString (type->name ());
 }
 
 /* Return the type's tag, or None.  */
@@ -408,7 +408,7 @@ typy_get_tag (PyObject *self, void *closure)
   if (type->code () == TYPE_CODE_STRUCT
       || type->code () == TYPE_CODE_UNION
       || type->code () == TYPE_CODE_ENUM)
-    tagname = TYPE_NAME (type);
+    tagname = type->name ();
 
   if (tagname == nullptr)
     Py_RETURN_NONE;
@@ -875,7 +875,7 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
   std::string err;
   struct type *argtype;
 
-  if (TYPE_NAME (type) == NULL)
+  if (type->name () == NULL)
     {
       PyErr_SetString (PyExc_RuntimeError, _("Null type name."));
       return NULL;
@@ -884,7 +884,7 @@ typy_legacy_template_argument (struct type *type, const struct block *block,
   try
     {
       /* Note -- this is not thread-safe.  */
-      info = cp_demangled_name_to_comp (TYPE_NAME (type), &err);
+      info = cp_demangled_name_to_comp (type->name (), &err);
     }
   catch (const gdb_exception &except)
     {

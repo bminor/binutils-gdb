@@ -92,7 +92,7 @@ gccgo_string_p (struct type *type)
 
 	  if (target_type->code () == TYPE_CODE_INT
 	      && TYPE_LENGTH (target_type) == 1
-	      && strcmp (TYPE_NAME (target_type), "uint8") == 0)
+	      && strcmp (target_type->name (), "uint8") == 0)
 	    return 1;
 	}
     }
@@ -107,8 +107,8 @@ static int
 sixg_string_p (struct type *type)
 {
   if (TYPE_NFIELDS (type) == 2
-      && TYPE_NAME (type) != NULL
-      && strcmp (TYPE_NAME (type), "string") == 0)
+      && type->name () != NULL
+      && strcmp (type->name (), "string") == 0)
     return 1;
 
   return 0;

@@ -1392,7 +1392,7 @@ register_dump::dump (ui_file *file)
 	  {
 	    static const char blt[] = "builtin_type";
 
-	    t = TYPE_NAME (register_type (m_gdbarch, regnum));
+	    t = register_type (m_gdbarch, regnum)->name ();
 	    if (t == NULL)
 	      {
 		if (!footnote_register_type_name_null)

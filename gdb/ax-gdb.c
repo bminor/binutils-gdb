@@ -520,7 +520,7 @@ gen_fetch (struct agent_expr *ax, struct type *type)
 	 type.  Error out and give callers a chance to handle the failure
 	 gracefully.  */
       error (_("gen_fetch: Unsupported type code `%s'."),
-	     TYPE_NAME (type));
+	     type->name ());
     }
 }
 
@@ -1533,7 +1533,7 @@ gen_struct_ref (struct agent_expr *ax, struct axs_value *value,
   
   if (!found)
     error (_("Couldn't find member named `%s' in struct/union/class `%s'"),
-	   field, TYPE_NAME (type));
+	   field, type->name ());
 }
 
 static int
@@ -1629,7 +1629,7 @@ gen_namespace_elt (struct agent_expr *ax, struct axs_value *value,
 
   if (!found)
     error (_("No symbol \"%s\" in namespace \"%s\"."), 
-	   name, TYPE_NAME (curtype));
+	   name, curtype->name ());
 
   return found;
 }
@@ -1644,7 +1644,7 @@ static int
 gen_maybe_namespace_elt (struct agent_expr *ax, struct axs_value *value,
 			 const struct type *curtype, char *name)
 {
-  const char *namespace_name = TYPE_NAME (curtype);
+  const char *namespace_name = curtype->name ();
   struct block_symbol sym;
 
   sym = cp_lookup_symbol_namespace (namespace_name, name,
@@ -2354,9 +2354,9 @@ gen_expr_binop_rest (struct expression *exp,
 	    if (type->code () != TYPE_CODE_ARRAY
 		&& type->code () != TYPE_CODE_PTR)
 	      {
-		if (TYPE_NAME (type))
+		if (type->name ())
 		  error (_("cannot subscript something of type `%s'"),
-			 TYPE_NAME (type));
+			 type->name ());
 		else
 		  error (_("cannot subscript requested type"));
 	      }

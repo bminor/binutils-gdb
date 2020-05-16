@@ -271,9 +271,9 @@ evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
       else
 	if (type->code () != TYPE_CODE_ARRAY)
 	  {
-	    if (TYPE_NAME (type))
+	    if (type->name ())
 	      error (_("cannot subscript something of type `%s'"),
-		     TYPE_NAME (type));
+		     type->name ());
 	    else
 	      error (_("cannot subscript requested type"));
 	  }

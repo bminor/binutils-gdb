@@ -180,8 +180,8 @@ print_range (struct type *type, struct ui_file *stream,
       break;
     default:
       fprintf_filtered (stream, "%.*s",
-			ada_name_prefix_len (TYPE_NAME (type)),
-			TYPE_NAME (type));
+			ada_name_prefix_len (type->name ()),
+			type->name ());
       break;
     }
 }
@@ -267,7 +267,7 @@ print_range_type (struct type *raw_type, struct ui_file *stream,
   const char *subtype_info;
 
   gdb_assert (raw_type != NULL);
-  name = TYPE_NAME (raw_type);
+  name = raw_type->name ();
   gdb_assert (name != NULL);
 
   if (raw_type->code () == TYPE_CODE_RANGE)

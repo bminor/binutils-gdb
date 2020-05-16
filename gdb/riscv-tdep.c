@@ -576,8 +576,8 @@ riscv_register_type (struct gdbarch *gdbarch, int regnum)
       if (flen == 8
           && type->code () == TYPE_CODE_FLT
           && TYPE_LENGTH (type) == flen
-          && (strcmp (TYPE_NAME (type), "builtin_type_ieee_double") == 0
-              || strcmp (TYPE_NAME (type), "double") == 0))
+          && (strcmp (type->name (), "builtin_type_ieee_double") == 0
+              || strcmp (type->name (), "double") == 0))
         type = riscv_fpreg_d_type (gdbarch);
     }
 

@@ -1120,7 +1120,7 @@ add_struct_fields (struct type *type, completion_list &output,
 	{
 	  if (!computed_type_name)
 	    {
-	      type_name = TYPE_NAME (type);
+	      type_name = type->name ();
 	      computed_type_name = 1;
 	    }
 	  /* Omit constructors from the completion list.  */

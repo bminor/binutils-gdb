@@ -1431,13 +1431,13 @@ scalar_type:
 						0); }
 	|	UNSIGNED type_name
 			{ $$ = lookup_unsigned_typename (pstate->language (),
-							 TYPE_NAME($2.type)); }
+							 $2.type->name ()); }
 	|	UNSIGNED
 			{ $$ = lookup_unsigned_typename (pstate->language (),
 							 "int"); }
 	|	SIGNED_KEYWORD type_name
 			{ $$ = lookup_signed_typename (pstate->language (),
-						       TYPE_NAME($2.type)); }
+						       $2.type->name ()); }
 	|	SIGNED_KEYWORD
 			{ $$ = lookup_signed_typename (pstate->language (),
 						       "int"); }

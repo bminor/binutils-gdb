@@ -1238,7 +1238,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
          a base type which did not have its name defined when the
          derived class was output.  We fill in the derived class's
          base part member's name here in that case.  */
-      if (TYPE_NAME (SYMBOL_TYPE (sym)) != NULL)
+      if (SYMBOL_TYPE (sym)->name () != NULL)
 	if ((SYMBOL_TYPE (sym)->code () == TYPE_CODE_STRUCT
 	     || SYMBOL_TYPE (sym)->code () == TYPE_CODE_UNION)
 	    && TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)))
@@ -1248,10 +1248,10 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    for (j = TYPE_N_BASECLASSES (SYMBOL_TYPE (sym)) - 1; j >= 0; j--)
 	      if (TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) == 0)
 		TYPE_BASECLASS_NAME (SYMBOL_TYPE (sym), j) =
-		  TYPE_NAME (TYPE_BASECLASS (SYMBOL_TYPE (sym), j));
+		  TYPE_BASECLASS (SYMBOL_TYPE (sym), j)->name ();
 	  }
 
-      if (TYPE_NAME (SYMBOL_TYPE (sym)) == NULL)
+      if (SYMBOL_TYPE (sym)->name () == NULL)
 	{
 	  if ((SYMBOL_TYPE (sym)->code () == TYPE_CODE_PTR
 	       && strcmp (sym->linkage_name (), vtbl_ptr_name))
@@ -1311,7 +1311,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
           SYMBOL_ACLASS_INDEX (struct_sym) = LOC_TYPEDEF;
           SYMBOL_VALUE (struct_sym) = valu;
           SYMBOL_DOMAIN (struct_sym) = STRUCT_DOMAIN;
-          if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
+          if (SYMBOL_TYPE (sym)->name () == 0)
 	    SYMBOL_TYPE (sym)->set_name
 	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
 			 (char *) NULL));
@@ -1338,7 +1338,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
-      if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
+      if (SYMBOL_TYPE (sym)->name () == 0)
 	SYMBOL_TYPE (sym)->set_name
 	  (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
 		     (char *) NULL));
@@ -1353,7 +1353,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  SYMBOL_ACLASS_INDEX (typedef_sym) = LOC_TYPEDEF;
 	  SYMBOL_VALUE (typedef_sym) = valu;
 	  SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
-	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
+	  if (SYMBOL_TYPE (sym)->name () == 0)
 	    SYMBOL_TYPE (sym)->set_name
 	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
 			 (char *) NULL));
@@ -2748,7 +2748,7 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
       switch (cpp_abbrev)
 	{
 	case 'f':		/* $vf -- a virtual function table pointer */
-	  name = TYPE_NAME (context);
+	  name = context->name ();
 	  if (name == NULL)
 	    {
 	      name = "";
@@ -2758,7 +2758,7 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
 	  break;
 
 	case 'b':		/* $vb -- a virtual bsomethingorother */
-	  name = TYPE_NAME (context);
+	  name = context->name ();
 	  if (name == NULL)
 	    {
 	      complaint (_("C++ abbreviated type name "
@@ -3161,7 +3161,7 @@ read_baseclasses (struct stab_field_info *fip, const char **pp,
          field's name.  */
 
       newobj->field.type = read_type (pp, objfile);
-      newobj->field.name = TYPE_NAME (newobj->field.type);
+      newobj->field.name = newobj->field.type->name ();
 
       /* Skip trailing ';' and bump count of number of fields seen.  */
       if (**pp == ';')
@@ -3248,7 +3248,7 @@ read_tilde_fields (struct stab_field_info *fip, const char **pp,
 	      /* Virtual function table field not found.  */
 	      complaint (_("virtual function table pointer "
 			   "not found when defining class `%s'"),
-			 TYPE_NAME (type));
+			 type->name ());
 	      return 0;
 	    }
 	  else
@@ -3377,9 +3377,9 @@ complain_about_struct_wipeout (struct type *type)
   const char *name = "";
   const char *kind = "";
 
-  if (TYPE_NAME (type))
+  if (type->name ())
     {
-      name = TYPE_NAME (type);
+      name = type->name ();
       switch (type->code ())
         {
         case TYPE_CODE_STRUCT: kind = "struct "; break;
@@ -4408,7 +4408,7 @@ add_undefined_type_1 (struct type *type)
 static void
 add_undefined_type (struct type *type, int typenums[2])
 {
-  if (TYPE_NAME (type) == NULL)
+  if (type->name () == NULL)
     add_undefined_type_noname (type, typenums);
   else
     add_undefined_type_1 (type);
@@ -4493,7 +4493,7 @@ cleanup_undefined_types_1 (void)
 		struct pending *ppt;
 		int i;
 		/* Name of the type, without "struct" or "union".  */
-		const char *type_name = TYPE_NAME (*type);
+		const char *type_name = (*type)->name ();
 
 		if (type_name == NULL)
 		  {

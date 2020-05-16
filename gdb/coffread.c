@@ -1463,13 +1463,13 @@ patch_type (struct type *type, struct type *real_type)
 	  TYPE_FIELDS (real_target), 
 	  field_size);
 
-  if (TYPE_NAME (real_target))
+  if (real_target->name ())
     {
       /* The previous copy of TYPE_NAME is allocated by
 	 process_coff_symbol.  */
-      if (TYPE_NAME (target))
-	xfree ((char*) TYPE_NAME (target));
-      target->set_name (xstrdup (TYPE_NAME (real_target)));
+      if (target->name ())
+	xfree ((char*) target->name ());
+      target->set_name (xstrdup (real_target->name ()));
     }
 }
 
@@ -1658,7 +1658,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 
 	  /* If type has no name, give it one.  */
-	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
+	  if (SYMBOL_TYPE (sym)->name () == 0)
 	    {
 	      if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_PTR
 		  || SYMBOL_TYPE (sym)->code () == TYPE_CODE_FUNC)
@@ -1715,7 +1715,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	  /* Some compilers try to be helpful by inventing "fake"
 	     names for anonymous enums, structures, and unions, like
 	     "~0fake" or ".0fake".  Thanks, but no thanks...  */
-	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
+	  if (SYMBOL_TYPE (sym)->name () == 0)
 	    if (sym->linkage_name () != NULL
 		&& *sym->linkage_name () != '~'
 		&& *sym->linkage_name () != '.')

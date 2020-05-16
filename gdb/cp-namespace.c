@@ -224,7 +224,7 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
       /* If TYPE_NAME is NULL, abandon trying to find this symbol.
 	 This can happen for lambda functions compiled with clang++,
 	 which outputs no name for the container class.  */
-      if (TYPE_NAME (type) == NULL)
+      if (type->name () == NULL)
 	return {};
 
       /* Look for symbol NAME in this class.  */
@@ -918,7 +918,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
 
   if (symbol_lookup_debug)
     {
-      const char *type_name = TYPE_NAME (saved_parent_type);
+      const char *type_name = saved_parent_type->name ();
 
       fprintf_unfiltered (gdb_stdlog,
 			  "cp_lookup_nested_symbol (%s, %s, %s, %s)\n",

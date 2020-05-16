@@ -222,17 +222,17 @@ value_cast_structs (struct type *type, struct value *v2)
 	       || t2->code () == TYPE_CODE_UNION)
 	      && !!"Precondition is that value is of STRUCT or UNION kind");
 
-  if (TYPE_NAME (t1) != NULL
-      && TYPE_NAME (t2) != NULL
-      && !strcmp (TYPE_NAME (t1), TYPE_NAME (t2)))
+  if (t1->name () != NULL
+      && t2->name () != NULL
+      && !strcmp (t1->name (), t2->name ()))
     return NULL;
 
   /* Upcasting: look in the type of the source to see if it contains the
      type of the target as a superclass.  If so, we'll need to
      offset the pointer rather than just change its type.  */
-  if (TYPE_NAME (t1) != NULL)
+  if (t1->name () != NULL)
     {
-      v = search_struct_field (TYPE_NAME (t1),
+      v = search_struct_field (t1->name (),
 			       v2, t2, 1);
       if (v)
 	return v;
@@ -241,7 +241,7 @@ value_cast_structs (struct type *type, struct value *v2)
   /* Downcasting: look in the type of the target to see if it contains the
      type of the source as a superclass.  If so, we'll need to
      offset the pointer rather than just change its type.  */
-  if (TYPE_NAME (t2) != NULL)
+  if (t2->name () != NULL)
     {
       /* Try downcasting using the run-time type of the value.  */
       int full, using_enc;
@@ -257,11 +257,11 @@ value_cast_structs (struct type *type, struct value *v2)
 
 	  /* We might be trying to cast to the outermost enclosing
 	     type, in which case search_struct_field won't work.  */
-	  if (TYPE_NAME (real_type) != NULL
-	      && !strcmp (TYPE_NAME (real_type), TYPE_NAME (t1)))
+	  if (real_type->name () != NULL
+	      && !strcmp (real_type->name (), t1->name ()))
 	    return v;
 
-	  v = search_struct_field (TYPE_NAME (t2), v, real_type, 1);
+	  v = search_struct_field (t2->name (), v, real_type, 1);
 	  if (v)
 	    return v;
 	}
@@ -269,7 +269,7 @@ value_cast_structs (struct type *type, struct value *v2)
       /* Try downcasting using information from the destination type
 	 T2.  This wouldn't work properly for classes with virtual
 	 bases, but those were handled above.  */
-      v = search_struct_field (TYPE_NAME (t2),
+      v = search_struct_field (t2->name (),
 			       value_zero (t1, not_lval), t1, 1);
       if (v)
 	{
@@ -443,7 +443,7 @@ value_cast (struct type *type, struct value *arg2)
 
   if ((code1 == TYPE_CODE_STRUCT || code1 == TYPE_CODE_UNION)
       && (code2 == TYPE_CODE_STRUCT || code2 == TYPE_CODE_UNION)
-      && TYPE_NAME (type) != 0)
+      && type->name () != 0)
     {
       struct value *v = value_cast_structs (to_type, arg2);
 
@@ -2479,7 +2479,7 @@ find_overload_match (gdb::array_view<value *> args,
       obj = coerce_ref (obj);
       while (check_typedef (value_type (obj))->code () == TYPE_CODE_PTR)
 	obj = coerce_ref (value_ind (obj));
-      obj_type_name = TYPE_NAME (value_type (obj));
+      obj_type_name = value_type (obj)->name ();
 
       /* First check whether this is a data member, e.g. a pointer to
 	 a function.  */
@@ -3141,7 +3141,7 @@ enum_constant_from_type (struct type *type, const char *name)
     }
 
   error (_("no constant named \"%s\" in enum \"%s\""),
-	 name, TYPE_NAME (type));
+	 name, type->name ());
 }
 
 /* C++: Given an aggregate type CURTYPE, and a member name NAME,
@@ -3528,7 +3528,7 @@ value_namespace_elt (const struct type *curtype,
 
   if (retval == NULL)
     error (_("No symbol \"%s\" in namespace \"%s\"."), 
-	   name, TYPE_NAME (curtype));
+	   name, curtype->name ());
 
   return retval;
 }
@@ -3544,7 +3544,7 @@ value_maybe_namespace_elt (const struct type *curtype,
 			   const char *name, int want_address,
 			   enum noside noside)
 {
-  const char *namespace_name = TYPE_NAME (curtype);
+  const char *namespace_name = curtype->name ();
   struct block_symbol sym;
   struct value *result;
 
@@ -3684,7 +3684,7 @@ value_full_object (struct value *argp,
     {
       warning (_("Couldn't retrieve complete object of RTTI "
 		 "type %s; object may be in register(s)."), 
-	       TYPE_NAME (real_type));
+	       real_type->name ());
 
       return argp;
     }

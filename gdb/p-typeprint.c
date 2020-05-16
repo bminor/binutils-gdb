@@ -140,7 +140,7 @@ pascal_type_print_derivation_info (struct ui_file *stream, struct type *type)
       fprintf_filtered (stream, "%s%s ",
 			BASETYPE_VIA_PUBLIC (type, i) ? "public" : "private",
 			BASETYPE_VIA_VIRTUAL (type, i) ? " virtual" : "");
-      name = TYPE_NAME (TYPE_BASECLASS (type, i));
+      name = TYPE_BASECLASS (type, i)->name ();
       fprintf_filtered (stream, "%s", name ? name : "(null)");
     }
   if (i > 0)
@@ -211,7 +211,7 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
   if (type == 0)
     return;
 
-  if (TYPE_NAME (type) && show <= 0)
+  if (type->name () && show <= 0)
     return;
 
   QUIT;
@@ -377,7 +377,7 @@ pascal_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
   if (type == 0)
     return;
 
-  if (TYPE_NAME (type) && show <= 0)
+  if (type->name () && show <= 0)
     return;
 
   QUIT;
@@ -479,7 +479,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
   if ((type->code () == TYPE_CODE_PTR)
       && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_VOID))
     {
-      fputs_filtered (TYPE_NAME (type) ? TYPE_NAME (type) : "pointer",
+      fputs_filtered (type->name () ? type->name () : "pointer",
 		      stream);
       return;
     }
@@ -487,9 +487,9 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
      just print the type name directly from the type.  */
 
   if (show <= 0
-      && TYPE_NAME (type) != NULL)
+      && type->name () != NULL)
     {
-      fputs_filtered (TYPE_NAME (type), stream);
+      fputs_filtered (type->name (), stream);
       return;
     }
 
@@ -523,9 +523,9 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
          only after args !!  */
       break;
     case TYPE_CODE_STRUCT:
-      if (TYPE_NAME (type) != NULL)
+      if (type->name () != NULL)
 	{
-	  fputs_filtered (TYPE_NAME (type), stream);
+	  fputs_filtered (type->name (), stream);
 	  fputs_filtered (" = ", stream);
 	}
       if (HAVE_CPLUS_STRUCT (type))
@@ -539,9 +539,9 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
       goto struct_union;
 
     case TYPE_CODE_UNION:
-      if (TYPE_NAME (type) != NULL)
+      if (type->name () != NULL)
 	{
-	  fputs_filtered (TYPE_NAME (type), stream);
+	  fputs_filtered (type->name (), stream);
 	  fputs_filtered (" = ", stream);
 	}
       fprintf_filtered (stream, "case <?> of ");
@@ -551,10 +551,10 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
       if (show < 0)
 	{
 	  /* If we just printed a tag name, no need to print anything else.  */
-	  if (TYPE_NAME (type) == NULL)
+	  if (type->name () == NULL)
 	    fprintf_filtered (stream, "{...}");
 	}
-      else if (show > 0 || TYPE_NAME (type) == NULL)
+      else if (show > 0 || type->name () == NULL)
 	{
 	  pascal_type_print_derivation_info (stream, type);
 
@@ -739,9 +739,9 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     case TYPE_CODE_ENUM:
-      if (TYPE_NAME (type) != NULL)
+      if (type->name () != NULL)
 	{
-	  fputs_filtered (TYPE_NAME (type), stream);
+	  fputs_filtered (type->name (), stream);
 	  if (show > 0)
 	    fputs_filtered (" ", stream);
 	}
@@ -752,10 +752,10 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
       if (show < 0)
 	{
 	  /* If we just printed a tag name, no need to print anything else.  */
-	  if (TYPE_NAME (type) == NULL)
+	  if (type->name () == NULL)
 	    fprintf_filtered (stream, "(...)");
 	}
-      else if (show > 0 || TYPE_NAME (type) == NULL)
+      else if (show > 0 || type->name () == NULL)
 	{
 	  fprintf_filtered (stream, "(");
 	  len = TYPE_NFIELDS (type);
@@ -818,9 +818,9 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
          such as fundamental types.  For these, just print whatever
          the type name is, as recorded in the type itself.  If there
          is no type name, then complain.  */
-      if (TYPE_NAME (type) != NULL)
+      if (type->name () != NULL)
 	{
-	  fputs_filtered (TYPE_NAME (type), stream);
+	  fputs_filtered (type->name (), stream);
 	}
       else
 	{

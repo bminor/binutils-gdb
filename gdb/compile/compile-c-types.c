@@ -201,7 +201,7 @@ convert_int (compile_c_instance *context, struct type *type)
 	}
       return context->plugin ().int_type (TYPE_UNSIGNED (type),
 					  TYPE_LENGTH (type),
-					  TYPE_NAME (type));
+					  type->name ());
     }
   else
     return context->plugin ().int_type_v0 (TYPE_UNSIGNED (type),
@@ -215,7 +215,7 @@ convert_float (compile_c_instance *context, struct type *type)
 {
   if (context->plugin ().version () >= GCC_C_FE_VERSION_1)
     return context->plugin ().float_type (TYPE_LENGTH (type),
-					  TYPE_NAME (type));
+					  type->name ());
   else
     return context->plugin ().float_type_v0 (TYPE_LENGTH (type));
 }

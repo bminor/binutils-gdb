@@ -580,7 +580,7 @@ gdbscm_type_tag (SCM self)
   if (type->code () == TYPE_CODE_STRUCT
       || type->code () == TYPE_CODE_UNION
       || type->code () == TYPE_CODE_ENUM)
-    tagname = TYPE_NAME (type);
+    tagname = type->name ();
 
   if (tagname == nullptr)
     return SCM_BOOL_F;
@@ -597,9 +597,9 @@ gdbscm_type_name (SCM self)
     = tyscm_get_type_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct type *type = t_smob->type;
 
-  if (!TYPE_NAME (type))
+  if (!type->name ())
     return SCM_BOOL_F;
-  return gdbscm_scm_from_c_string (TYPE_NAME (type));
+  return gdbscm_scm_from_c_string (type->name ());
 }
 
 /* (type-print-name <gdb:type>) -> string

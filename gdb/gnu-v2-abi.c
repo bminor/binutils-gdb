@@ -325,10 +325,10 @@ vb_match (struct type *type, int index, struct type *basetype)
   if (TYPE_TARGET_TYPE (fieldtype) == basetype)
     return 1;
 
-  if (TYPE_NAME (basetype) != NULL
-      && TYPE_NAME (TYPE_TARGET_TYPE (fieldtype)) != NULL
-      && strcmp (TYPE_NAME (basetype),
-		 TYPE_NAME (TYPE_TARGET_TYPE (fieldtype))) == 0)
+  if (basetype->name () != NULL
+      && TYPE_TARGET_TYPE (fieldtype)->name () != NULL
+      && strcmp (basetype->name (),
+		 TYPE_TARGET_TYPE (fieldtype)->name ()) == 0)
     return 1;
   return 0;
 }

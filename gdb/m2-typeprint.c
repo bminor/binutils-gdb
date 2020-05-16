@@ -163,8 +163,8 @@ m2_print_typedef (struct type *type, struct symbol *new_symbol,
 {
   type = check_typedef (type);
   fprintf_filtered (stream, "TYPE ");
-  if (!TYPE_NAME (SYMBOL_TYPE (new_symbol))
-      || strcmp (TYPE_NAME ((SYMBOL_TYPE (new_symbol))),
+  if (!SYMBOL_TYPE (new_symbol)->name ()
+      || strcmp ((SYMBOL_TYPE (new_symbol))->name (),
 		 new_symbol->linkage_name ()) != 0)
     fprintf_filtered (stream, "%s = ", new_symbol->print_name ());
   else
@@ -178,8 +178,8 @@ m2_print_typedef (struct type *type, struct symbol *new_symbol,
 void
 m2_type_name (struct type *type, struct ui_file *stream)
 {
-  if (TYPE_NAME (type) != NULL)
-    fputs_filtered (TYPE_NAME (type), stream);
+  if (type->name () != NULL)
+    fputs_filtered (type->name (), stream);
 }
 
 /* m2_range - displays a Modula-2 subrange type.  */
@@ -211,9 +211,9 @@ static void
 m2_typedef (struct type *type, struct ui_file *stream, int show,
 	    int level, const struct type_print_options *flags)
 {
-  if (TYPE_NAME (type) != NULL)
+  if (type->name () != NULL)
     {
-      fputs_filtered (TYPE_NAME (type), stream);
+      fputs_filtered (type->name (), stream);
       fputs_filtered (" = ", stream);
     }
   m2_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level, flags);
@@ -440,9 +440,9 @@ m2_long_set (struct type *type, struct ui_file *stream, int show, int level,
 
   if (m2_is_long_set (type))
     {
-      if (TYPE_NAME (type) != NULL)
+      if (type->name () != NULL)
 	{
-	  fputs_filtered (TYPE_NAME (type), stream);
+	  fputs_filtered (type->name (), stream);
 	  if (show == 0)
 	    return 1;
 	  fputs_filtered (" = ", stream);
@@ -530,11 +530,11 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 		  int level, const struct type_print_options *flags)
 {
   /* Print the tag if it exists.  */
-  if (TYPE_NAME (type) != NULL)
+  if (type->name () != NULL)
     {
-      if (!startswith (TYPE_NAME (type), "$$"))
+      if (!startswith (type->name (), "$$"))
 	{
-	  fputs_filtered (TYPE_NAME (type), stream);
+	  fputs_filtered (type->name (), stream);
 	  if (show > 0)
 	    fprintf_filtered (stream, " = ");
 	}
@@ -595,10 +595,10 @@ m2_enum (struct type *type, struct ui_file *stream, int show, int level)
   if (show < 0)
     {
       /* If we just printed a tag name, no need to print anything else.  */
-      if (TYPE_NAME (type) == NULL)
+      if (type->name () == NULL)
 	fprintf_filtered (stream, "(...)");
     }
-  else if (show > 0 || TYPE_NAME (type) == NULL)
+  else if (show > 0 || type->name () == NULL)
     {
       fprintf_filtered (stream, "(");
       len = TYPE_NFIELDS (type);
