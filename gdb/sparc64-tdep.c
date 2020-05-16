@@ -86,7 +86,7 @@
 static struct cmd_list_element *sparc64adilist = NULL;
 
 /* ADI stat settings.  */
-typedef struct
+struct adi_stat_t
 {
   /* The ADI block size.  */
   unsigned long blksize;
@@ -108,11 +108,11 @@ typedef struct
   /* ADI is available.  */
   bool is_avail = false;
 
-} adi_stat_t;
+};
 
 /* Per-process ADI stat info.  */
 
-typedef struct sparc64_adi_info
+struct sparc64_adi_info
 {
   sparc64_adi_info (pid_t pid_)
     : pid (pid_)
@@ -124,7 +124,7 @@ typedef struct sparc64_adi_info
   /* The ADI stat.  */
   adi_stat_t stat = {};
 
-} sparc64_adi_info;
+};
 
 static std::forward_list<sparc64_adi_info> adi_proc_list;
 

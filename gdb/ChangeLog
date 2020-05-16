@@ -1,3 +1,8 @@
+2020-05-15  Simon Marchi  <simon.marchi@efficios.com>
+
+	* sparc64-tdep.c (adi_stat_t): Remove typedef (leaving struct).
+	(sparc64_adi_info): Likewise.
+
 2020-05-15  Tom Tromey  <tom@tromey.com>
 
 	* symtab.c (lookup_language_this, lookup_symbol_aux): Use
