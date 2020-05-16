@@ -2144,7 +2144,7 @@ constrained_packed_array_type (struct type *type, long *elt_bits)
 				   elt_bits);
   create_array_type (new_type, new_elt_type, index_type);
   TYPE_FIELD_BITSIZE (new_type, 0) = *elt_bits;
-  TYPE_NAME (new_type) = ada_type_name (type);
+  new_type->set_name (ada_type_name (type));
 
   if ((check_typedef (index_type)->code () == TYPE_CODE_RANGE
        && is_dynamic_type (check_typedef (index_type)))
@@ -8029,7 +8029,7 @@ empty_record (struct type *templ)
   TYPE_NFIELDS (type) = 0;
   TYPE_FIELDS (type) = NULL;
   INIT_NONE_SPECIFIC (type);
-  TYPE_NAME (type) = "<empty>";
+  type->set_name ("<empty>");
   TYPE_LENGTH (type) = 0;
   return type;
 }
@@ -8087,7 +8087,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
   TYPE_FIELDS (rtype) = (struct field *)
     TYPE_ALLOC (rtype, nfields * sizeof (struct field));
   memset (TYPE_FIELDS (rtype), 0, sizeof (struct field) * nfields);
-  TYPE_NAME (rtype) = ada_type_name (type);
+  rtype->set_name (ada_type_name (type));
   TYPE_FIXED_INSTANCE (rtype) = 1;
 
   off = 0;
@@ -8363,7 +8363,7 @@ template_to_static_fixed_type (struct type *type0)
 		TYPE_ALLOC (type, nfields * sizeof (struct field));
 	      memcpy (TYPE_FIELDS (type), TYPE_FIELDS (type0),
 		      sizeof (struct field) * nfields);
-	      TYPE_NAME (type) = ada_type_name (type0);
+	      type->set_name (ada_type_name (type0));
 	      TYPE_FIXED_INSTANCE (type) = 1;
 	      TYPE_LENGTH (type) = 0;
 	    }
@@ -8412,7 +8412,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
     (struct field *) TYPE_ALLOC (rtype, nfields * sizeof (struct field));
   memcpy (TYPE_FIELDS (rtype), TYPE_FIELDS (type),
           sizeof (struct field) * nfields);
-  TYPE_NAME (rtype) = ada_type_name (type);
+  rtype->set_name (ada_type_name (type));
   TYPE_FIXED_INSTANCE (rtype) = 1;
   TYPE_LENGTH (rtype) = TYPE_LENGTH (type);
 
@@ -8734,7 +8734,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
   /* We want to preserve the type name.  This can be useful when
      trying to get the type name of a value that has already been
      printed (for instance, if the user did "print VAR; whatis $".  */
-  TYPE_NAME (result) = TYPE_NAME (type0);
+  result->set_name (TYPE_NAME (type0));
 
   if (constrained_packed_array_p)
     {
@@ -8978,7 +8978,7 @@ static_unwrap_type (struct type *type)
     {
       struct type *type1 = TYPE_FIELD_TYPE (ada_check_typedef (type), 0);
       if (ada_type_name (type1) == NULL)
-        TYPE_NAME (type1) = ada_type_name (type);
+	type1->set_name (ada_type_name (type));
 
       return static_unwrap_type (type1);
     }
@@ -9420,7 +9420,7 @@ unwrap_value (struct value *val)
       struct type *val_type = ada_check_typedef (value_type (v));
 
       if (ada_type_name (val_type) == NULL)
-        TYPE_NAME (val_type) = ada_type_name (type);
+	val_type->set_name (ada_type_name (type));
 
       return unwrap_value (v);
     }
@@ -11674,7 +11674,7 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
          to match the size of the base_type, which is not what we want.
          Set it back to the original range type's length.  */
       TYPE_LENGTH (type) = TYPE_LENGTH (raw_type);
-      TYPE_NAME (type) = name;
+      type->set_name (name);
       return type;
     }
 }
@@ -13836,8 +13836,8 @@ ada_language_arch_info (struct gdbarch *gdbarch,
   lai->primitive_type_vector [ada_primitive_type_system_address]
     = lookup_pointer_type (arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT,
 				      "void"));
-  TYPE_NAME (lai->primitive_type_vector [ada_primitive_type_system_address])
-    = "system__address";
+  lai->primitive_type_vector [ada_primitive_type_system_address]
+    ->set_name ("system__address");
 
   /* Create the equivalent of the System.Storage_Elements.Storage_Offset
      type.  This is a signed integral type whose size is the same as

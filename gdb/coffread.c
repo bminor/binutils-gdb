@@ -1469,7 +1469,7 @@ patch_type (struct type *type, struct type *real_type)
 	 process_coff_symbol.  */
       if (TYPE_NAME (target))
 	xfree ((char*) TYPE_NAME (target));
-      TYPE_NAME (target) = xstrdup (TYPE_NAME (real_target));
+      target->set_name (xstrdup (TYPE_NAME (real_target)));
     }
 }
 
@@ -1684,8 +1684,7 @@ process_coff_symbol (struct coff_symbol *cs,
 		  ;
 		}
 	      else
-		TYPE_NAME (SYMBOL_TYPE (sym)) =
-		  xstrdup (sym->linkage_name ());
+		SYMBOL_TYPE (sym)->set_name (xstrdup (sym->linkage_name ()));
 	    }
 
 	  /* Keep track of any type which points to empty structured
@@ -1720,7 +1719,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	    if (sym->linkage_name () != NULL
 		&& *sym->linkage_name () != '~'
 		&& *sym->linkage_name () != '.')
-	      TYPE_NAME (SYMBOL_TYPE (sym)) = xstrdup (sym->linkage_name ());
+	      SYMBOL_TYPE (sym)->set_name (xstrdup (sym->linkage_name ()));
 
 	  add_symbol_to_list (sym, get_file_symbols ());
 	  break;
@@ -1881,7 +1880,7 @@ decode_base_type (struct coff_symbol *cs,
 	  /* Anonymous structure type.  */
 	  type = coff_alloc_type (cs->c_symnum);
 	  type->set_code (TYPE_CODE_STRUCT);
-	  TYPE_NAME (type) = NULL;
+	  type->set_name (NULL);
 	  INIT_CPLUS_SPECIFIC (type);
 	  TYPE_LENGTH (type) = 0;
 	  TYPE_FIELDS (type) = 0;
@@ -1901,7 +1900,7 @@ decode_base_type (struct coff_symbol *cs,
 	{
 	  /* Anonymous union type.  */
 	  type = coff_alloc_type (cs->c_symnum);
-	  TYPE_NAME (type) = NULL;
+	  type->set_name (NULL);
 	  INIT_CPLUS_SPECIFIC (type);
 	  TYPE_LENGTH (type) = 0;
 	  TYPE_FIELDS (type) = 0;
@@ -1923,7 +1922,7 @@ decode_base_type (struct coff_symbol *cs,
 	  /* Anonymous enum type.  */
 	  type = coff_alloc_type (cs->c_symnum);
 	  type->set_code (TYPE_CODE_ENUM);
-	  TYPE_NAME (type) = NULL;
+	  type->set_name (NULL);
 	  TYPE_LENGTH (type) = 0;
 	  TYPE_FIELDS (type) = 0;
 	  TYPE_NFIELDS (type) = 0;

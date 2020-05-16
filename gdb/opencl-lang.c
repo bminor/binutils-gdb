@@ -1105,21 +1105,21 @@ build_opencl_types (struct gdbarch *gdbarch)
 #define BUILD_OCL_VTYPES(TYPE)\
   types[opencl_primitive_type_##TYPE##2] \
     = init_vector_type (types[opencl_primitive_type_##TYPE], 2); \
-  TYPE_NAME (types[opencl_primitive_type_##TYPE##2]) = OCL_STRING(TYPE ## 2); \
+  types[opencl_primitive_type_##TYPE##2]->set_name (OCL_STRING(TYPE ## 2)); \
   types[opencl_primitive_type_##TYPE##3] \
     = init_vector_type (types[opencl_primitive_type_##TYPE], 3); \
-  TYPE_NAME (types[opencl_primitive_type_##TYPE##3]) = OCL_STRING(TYPE ## 3); \
+  types[opencl_primitive_type_##TYPE##3]->set_name (OCL_STRING(TYPE ## 3)); \
   TYPE_LENGTH (types[opencl_primitive_type_##TYPE##3]) \
     = 4 * TYPE_LENGTH (types[opencl_primitive_type_##TYPE]); \
   types[opencl_primitive_type_##TYPE##4] \
     = init_vector_type (types[opencl_primitive_type_##TYPE], 4); \
-  TYPE_NAME (types[opencl_primitive_type_##TYPE##4]) = OCL_STRING(TYPE ## 4); \
+  types[opencl_primitive_type_##TYPE##4]->set_name (OCL_STRING(TYPE ## 4)); \
   types[opencl_primitive_type_##TYPE##8] \
     = init_vector_type (types[opencl_primitive_type_##TYPE], 8); \
-  TYPE_NAME (types[opencl_primitive_type_##TYPE##8]) = OCL_STRING(TYPE ## 8); \
+  types[opencl_primitive_type_##TYPE##8]->set_name (OCL_STRING(TYPE ## 8)); \
   types[opencl_primitive_type_##TYPE##16] \
     = init_vector_type (types[opencl_primitive_type_##TYPE], 16); \
-  TYPE_NAME (types[opencl_primitive_type_##TYPE##16]) = OCL_STRING(TYPE ## 16)
+  types[opencl_primitive_type_##TYPE##16]->set_name (OCL_STRING(TYPE ## 16))
 
   types[opencl_primitive_type_char]
     = arch_integer_type (gdbarch, 8, 0, "char");

@@ -3174,7 +3174,7 @@ init_type (struct objfile *objfile, enum type_code code, int bit,
   set_type_code (type, code);
   gdb_assert ((bit % TARGET_CHAR_BIT) == 0);
   TYPE_LENGTH (type) = bit / TARGET_CHAR_BIT;
-  TYPE_NAME (type) = name;
+  type->set_name (name);
 
   return type;
 }
@@ -3307,7 +3307,7 @@ init_complex_type (const char *name, struct type *target_type)
       t = alloc_type_copy (target_type);
       set_type_code (t, TYPE_CODE_COMPLEX);
       TYPE_LENGTH (t) = 2 * TYPE_LENGTH (target_type);
-      TYPE_NAME (t) = name;
+      t->set_name (name);
 
       TYPE_TARGET_TYPE (t) = target_type;
       TYPE_MAIN_TYPE (target_type)->flds_bnds.complex_type = t;
@@ -5290,7 +5290,7 @@ copy_type_recursive (struct objfile *objfile,
   TYPE_OWNER (new_type).gdbarch = get_type_arch (type);
 
   if (TYPE_NAME (type))
-    TYPE_NAME (new_type) = xstrdup (TYPE_NAME (type));
+    new_type->set_name (xstrdup (TYPE_NAME (type)));
 
   TYPE_INSTANCE_FLAGS (new_type) = TYPE_INSTANCE_FLAGS (type);
   TYPE_LENGTH (new_type) = TYPE_LENGTH (type);
@@ -5443,7 +5443,7 @@ arch_type (struct gdbarch *gdbarch,
   TYPE_LENGTH (type) = bit / TARGET_CHAR_BIT;
 
   if (name)
-    TYPE_NAME (type) = gdbarch_obstack_strdup (gdbarch, name);
+    type->set_name (gdbarch_obstack_strdup (gdbarch, name));
 
   return type;
 }
@@ -5615,7 +5615,7 @@ arch_composite_type (struct gdbarch *gdbarch, const char *name,
 
   gdb_assert (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION);
   t = arch_type (gdbarch, code, 0, NULL);
-  TYPE_NAME (t) = name;
+  t->set_name (name);
   INIT_CPLUS_SPECIFIC (t);
   return t;
 }

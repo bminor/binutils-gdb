@@ -167,7 +167,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
   t = arch_type (arch, TYPE_CODE_STRUCT, offset * TARGET_CHAR_BIT, NULL);
   TYPE_NFIELDS (t) = field - field_list;
   TYPE_FIELDS (t) = field_list;
-  TYPE_NAME (t) = "gdb_gnu_v3_abi_vtable";
+  t->set_name ("gdb_gnu_v3_abi_vtable");
   INIT_CPLUS_SPECIFIC (t);
 
   return make_type_with_address_space (t, TYPE_INSTANCE_FLAG_CODE_SPACE);
@@ -1056,7 +1056,7 @@ build_std_type_info_type (struct gdbarch *arch)
   t = arch_type (arch, TYPE_CODE_STRUCT, offset * TARGET_CHAR_BIT, NULL);
   TYPE_NFIELDS (t) = field - field_list;
   TYPE_FIELDS (t) = field_list;
-  TYPE_NAME (t) = "gdb_gnu_v3_type_info";
+  t->set_name ("gdb_gnu_v3_type_info");
   INIT_CPLUS_SPECIFIC (t);
 
   return t;

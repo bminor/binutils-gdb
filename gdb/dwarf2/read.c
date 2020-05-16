@@ -9343,9 +9343,9 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       TYPE_FIELD (type, 1) = saved_field;
       TYPE_FIELD_NAME (type, 1)
 	= rust_last_path_segment (TYPE_NAME (TYPE_FIELD_TYPE (type, 1)));
-      TYPE_NAME (TYPE_FIELD_TYPE (type, 1))
-	= rust_fully_qualify (&objfile->objfile_obstack, TYPE_NAME (type),
-			      TYPE_FIELD_NAME (type, 1));
+      TYPE_FIELD_TYPE (type, 1)->set_name
+	(rust_fully_qualify (&objfile->objfile_obstack, TYPE_NAME (type),
+			     TYPE_FIELD_NAME (type, 1)));
 
       const char *dataless_name
 	= rust_fully_qualify (&objfile->objfile_obstack, TYPE_NAME (type),
@@ -9374,9 +9374,9 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       const char *variant_name
 	= rust_last_path_segment (TYPE_NAME (field_type));
       TYPE_FIELD_NAME (type, 0) = variant_name;
-      TYPE_NAME (field_type)
-	= rust_fully_qualify (&objfile->objfile_obstack,
-			      TYPE_NAME (type), variant_name);
+      field_type->set_name
+	(rust_fully_qualify (&objfile->objfile_obstack,
+			     TYPE_NAME (type), variant_name));
     }
   else
     {
@@ -9477,9 +9477,9 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	      ++TYPE_FIELDS (sub_type);
 	    }
 	  TYPE_FIELD_NAME (type, i) = variant_name;
-	  TYPE_NAME (sub_type)
-	    = rust_fully_qualify (&objfile->objfile_obstack,
-				  TYPE_NAME (type), variant_name);
+	  sub_type->set_name
+	    (rust_fully_qualify (&objfile->objfile_obstack,
+				 TYPE_NAME (type), variant_name));
 	}
 
       /* Indicate that this is a variant type.  */
@@ -15356,13 +15356,13 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 	  if (get_die_type (die, cu) != NULL)
 	    return get_die_type (die, cu);
 
-	  TYPE_NAME (type) = full_name;
+	  type->set_name (full_name);
 	}
       else
 	{
 	  /* The name is already allocated along with this objfile, so
 	     we don't need to duplicate it for the type.  */
-	  TYPE_NAME (type) = name;
+	  type->set_name (name);
 	}
     }
 
@@ -15939,7 +15939,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   type->set_code (TYPE_CODE_ENUM);
   name = dwarf2_full_name (NULL, die, cu);
   if (name != NULL)
-    TYPE_NAME (type) = name;
+    type->set_name (name);
 
   attr = dwarf2_attr (die, DW_AT_type, cu);
   if (attr != NULL)
@@ -16186,7 +16186,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 
   name = dwarf2_name (die, cu);
   if (name)
-    TYPE_NAME (type) = name;
+    type->set_name (name);
 
   maybe_set_alignment (cu, die, type);
 
@@ -17757,7 +17757,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 
   name = dwarf2_name (die, cu);
   if (name)
-    TYPE_NAME (range_type) = name;
+    range_type->set_name (name);
 
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr)
@@ -17780,7 +17780,7 @@ read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
 
   type = init_type (cu->per_cu->dwarf2_per_objfile->objfile, TYPE_CODE_VOID,0,
 		    NULL);
-  TYPE_NAME (type) = dwarf2_name (die, cu);
+  type->set_name (dwarf2_name (die, cu));
 
   /* In Ada, an unspecified type is typically used when the description
      of the type is deferred to a different unit.  When encountering
@@ -20905,7 +20905,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		       with this objfile, so we don't need to
 		       duplicate it for the type.  */
 		    if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-		      TYPE_NAME (SYMBOL_TYPE (sym)) = sym->search_name ();
+		      SYMBOL_TYPE (sym)->set_name (sym->search_name ());
 		  }
 	      }
 	  }

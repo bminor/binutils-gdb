@@ -230,7 +230,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   /* list entry */
 
   list_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
-  TYPE_NAME (list_type) = xstrdup ("list");
+  list_type->set_name (xstrdup ("list"));
 
   module_list_ptr_type = void_ptr_type;
 
@@ -242,7 +242,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   /* Structured Exception Handler */
 
   seh_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
-  TYPE_NAME (seh_type) = xstrdup ("seh");
+  seh_type->set_name (xstrdup ("seh"));
 
   seh_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
 			    TYPE_LENGTH (void_ptr_type) * TARGET_CHAR_BIT,
@@ -255,7 +255,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
 
   /* struct _PEB_LDR_DATA */
   peb_ldr_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
-  TYPE_NAME (peb_ldr_type) = xstrdup ("peb_ldr_data");
+  peb_ldr_type->set_name (xstrdup ("peb_ldr_data"));
 
   append_composite_type_field (peb_ldr_type, "length", dword32_type);
   append_composite_type_field (peb_ldr_type, "initialized", dword32_type);
@@ -324,7 +324,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
 
   /* struct process environment block */
   peb_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
-  TYPE_NAME (peb_type) = xstrdup ("peb");
+  peb_type->set_name (xstrdup ("peb"));
 
   /* First bytes contain several flags.  */
   append_composite_type_field (peb_type, "flags", dword_ptr_type);
@@ -343,7 +343,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
 
   /* struct thread information block */
   tib_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
-  TYPE_NAME (tib_type) = xstrdup ("tib");
+  tib_type->set_name (xstrdup ("tib"));
 
   /* uint32_t current_seh;			%fs:0x0000 */
   append_composite_type_field (tib_type, "current_seh", seh_ptr_type);

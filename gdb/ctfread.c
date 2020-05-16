@@ -596,7 +596,7 @@ read_structure_type (struct ctf_context *ccp, ctf_id_t tid)
 
   gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
   if (name != NULL && strlen (name.get() ) != 0)
-    TYPE_NAME (type) = obstack_strdup (&of->objfile_obstack, name.get ());
+    type->set_name (obstack_strdup (&of->objfile_obstack, name.get ()));
 
   kind = ctf_type_kind (fp, tid);
   if (kind == CTF_K_UNION)
@@ -654,7 +654,7 @@ read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
 
   gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
   if (name != NULL && strlen (name.get ()) != 0)
-    TYPE_NAME (type) = obstack_strdup (&of->objfile_obstack, name.get ());
+    type->set_name (obstack_strdup (&of->objfile_obstack, name.get ()));
 
   type->set_code (TYPE_CODE_FUNC);
   ctf_func_type_info (fp, tid, &cfi);
@@ -680,7 +680,7 @@ read_enum_type (struct ctf_context *ccp, ctf_id_t tid)
 
   gdb::unique_xmalloc_ptr<char> name (ctf_type_aname_raw (fp, tid));
   if (name != NULL && strlen (name.get ()) != 0)
-    TYPE_NAME (type) = obstack_strdup (&of->objfile_obstack, name.get ());
+    type->set_name (obstack_strdup (&of->objfile_obstack, name.get ()));
 
   type->set_code (TYPE_CODE_ENUM);
   TYPE_LENGTH (type) = ctf_type_size (fp, tid);

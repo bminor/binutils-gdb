@@ -3920,7 +3920,7 @@ arm_neon_double_type (struct gdbarch *gdbarch)
       append_composite_type_field (t, "f64", elem);
 
       TYPE_VECTOR (t) = 1;
-      TYPE_NAME (t) = "neon_d";
+      t->set_name ("neon_d");
       tdep->neon_double_type = t;
     }
 
@@ -3959,7 +3959,7 @@ arm_neon_quad_type (struct gdbarch *gdbarch)
       append_composite_type_field (t, "f64", init_vector_type (elem, 2));
 
       TYPE_VECTOR (t) = 1;
-      TYPE_NAME (t) = "neon_q";
+      t->set_name ("neon_q");
       tdep->neon_quad_type = t;
     }
 

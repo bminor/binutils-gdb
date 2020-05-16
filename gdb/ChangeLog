@@ -1,3 +1,9 @@
+2020-05-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <name, set_name>: New methods.
+	(TYPE_CODE): Use type::name.  Change all call sites used to set
+	the name to use type::set_name instead.
+
 2020-05-16  Tom Tromey  <tom@tromey.com>
 
 	* top.c (quit_force): Update.

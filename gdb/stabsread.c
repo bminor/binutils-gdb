@@ -1294,12 +1294,10 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	      /* Pascal accepts names for pointer types.  */
 	      if (get_current_subfile ()->language == language_pascal)
-		{
-		  TYPE_NAME (SYMBOL_TYPE (sym)) = sym->linkage_name ();
-          	}
+		SYMBOL_TYPE (sym)->set_name (sym->linkage_name ());
 	    }
 	  else
-	    TYPE_NAME (SYMBOL_TYPE (sym)) = sym->linkage_name ();
+	    SYMBOL_TYPE (sym)->set_name (sym->linkage_name ());
 	}
 
       add_symbol_to_list (sym, get_file_symbols ());
@@ -1314,12 +1312,12 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
           SYMBOL_VALUE (struct_sym) = valu;
           SYMBOL_DOMAIN (struct_sym) = STRUCT_DOMAIN;
           if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-            TYPE_NAME (SYMBOL_TYPE (sym))
-	      = obconcat (&objfile->objfile_obstack, sym->linkage_name (),
-			  (char *) NULL);
+	    SYMBOL_TYPE (sym)->set_name
+	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
+			 (char *) NULL));
           add_symbol_to_list (struct_sym, get_file_symbols ());
         }
-      
+
       break;
 
     case 'T':
@@ -1341,9 +1339,9 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
       if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-	TYPE_NAME (SYMBOL_TYPE (sym))
-	  = obconcat (&objfile->objfile_obstack, sym->linkage_name (),
-		      (char *) NULL);
+	SYMBOL_TYPE (sym)->set_name
+	  (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
+		     (char *) NULL));
       add_symbol_to_list (sym, get_file_symbols ());
 
       if (synonym)
@@ -1356,9 +1354,9 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  SYMBOL_VALUE (typedef_sym) = valu;
 	  SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
 	  if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
-	    TYPE_NAME (SYMBOL_TYPE (sym))
-	      = obconcat (&objfile->objfile_obstack, sym->linkage_name (),
-			  (char *) NULL);
+	    SYMBOL_TYPE (sym)->set_name
+	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
+			 (char *) NULL));
 	  add_symbol_to_list (typedef_sym, get_file_symbols ());
 	}
       break;
@@ -1688,7 +1686,7 @@ again:
 	   type.  */
 	type = dbx_alloc_type (typenums, objfile);
 	type->set_code (code);
-	TYPE_NAME (type) = type_name;
+	type->set_name (type_name);
 	INIT_CPLUS_SPECIFIC (type);
 	TYPE_STUB (type) = 1;
 
@@ -1752,7 +1750,7 @@ again:
                "complete_this_type" function, but never create unnecessary
                copies of a type otherwise.  */
 	    replace_type (type, xtype);
-	    TYPE_NAME (type) = NULL;
+	    type->set_name (NULL);
 	  }
 	else
 	  {

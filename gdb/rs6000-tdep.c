@@ -2274,7 +2274,7 @@ rs6000_builtin_type_vec64 (struct gdbarch *gdbarch)
 				   init_vector_type (bt->builtin_int8, 8));
 
       TYPE_VECTOR (t) = 1;
-      TYPE_NAME (t) = "ppc_builtin_type_vec64";
+      t->set_name ("ppc_builtin_type_vec64");
       tdep->ppc_builtin_type_vec64 = t;
     }
 
@@ -2321,7 +2321,7 @@ rs6000_builtin_type_vec128 (struct gdbarch *gdbarch)
 				   init_vector_type (bt->builtin_int8, 16));
 
       TYPE_VECTOR (t) = 1;
-      TYPE_NAME (t) = "ppc_builtin_type_vec128";
+      t->set_name ("ppc_builtin_type_vec128");
       tdep->ppc_builtin_type_vec128 = t;
     }
 
