@@ -22,6 +22,7 @@
 
 #include "gdbsupport/buffer.h"
 #include "gdbsupport/event-loop.h"
+#include "gdbsupport/next-iterator.h"
 #include "value.h"
 
 struct tl_interp_info;
@@ -206,9 +207,12 @@ public:
 #define SWITCH_THRU_ALL_UIS()		\
   for (switch_thru_all_uis stau_state; !stau_state.done (); stau_state.next ())
 
-/* Traverse over all UIs.  */
-#define ALL_UIS(UI)				\
-  for (UI = ui_list; UI; UI = UI->next)		\
+/* An adapter that can be used to traverse over all UIs.  */
+static inline
+next_adapter<ui> all_uis ()
+{
+  return next_adapter<ui> (ui_list);
+}
 
 /* Register the UI's input file descriptor in the event loop.  */
 extern void ui_register_input_event_handler (struct ui *ui);

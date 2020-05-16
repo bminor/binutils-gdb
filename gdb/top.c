@@ -1782,12 +1782,11 @@ quit_force (int *exit_arg, int from_tty)
     {
       if (write_history_p && history_filename)
 	{
-	  struct ui *ui;
 	  int save = 0;
 
 	  /* History is currently shared between all UIs.  If there's
 	     any UI with a terminal, save history.  */
-	  ALL_UIS (ui)
+	  for (ui *ui : all_uis ())
 	    {
 	      if (input_interactive_p (ui))
 		{

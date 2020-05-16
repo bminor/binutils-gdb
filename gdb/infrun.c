@@ -5045,10 +5045,9 @@ handle_no_resumed (struct execution_control_state *ecs)
 {
   if (target_can_async_p ())
     {
-      struct ui *ui;
       int any_sync = 0;
 
-      ALL_UIS (ui)
+      for (ui *ui : all_uis ())
 	{
 	  if (ui->prompt_state == PROMPT_BLOCKED)
 	    {
