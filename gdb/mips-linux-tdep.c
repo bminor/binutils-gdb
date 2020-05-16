@@ -633,16 +633,14 @@ mips_linux_in_dynsym_stub (CORE_ADDR pc)
   if (n64)
     {
       /* 'daddu t7,ra' or 'or t7, ra, zero'*/
-      if (insn != 0x03e0782d || insn != 0x03e07825)
+      if (insn != 0x03e0782d && insn != 0x03e07825)
 	return 0;
-
     }
   else
     {
       /* 'addu t7,ra'  or 'or t7, ra, zero'*/
-      if (insn != 0x03e07821 || insn != 0x03e07825)
+      if (insn != 0x03e07821 && insn != 0x03e07825)
 	return 0;
-
     }
 
   insn = extract_unsigned_integer (p + 8, 4, byte_order);
