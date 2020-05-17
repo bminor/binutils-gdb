@@ -1,3 +1,25 @@
+2020-05-17  Pedro Alves  <palves@redhat.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Keno Fischer  <keno@juliacomputing.com>
+
+	PR gdb/25741
+	* breakpoint.c (build_target_condition_list): Update comments.
+	(build_target_command_list): Update comments and skip matching
+	locations.
+	(insert_bp_location): Move "set breakpoint auto-hw on" handling to
+	a separate function.  Simplify "set breakpoint auto-hw off"
+	handling.
+	(insert_breakpoints): Update comment.
+	(tracepoint_locations_match): New parameter.  For breakpoints,
+	compare location types too, if the caller wants to.
+	(handle_automatic_hardware_breakpoints): New functions.
+	(bp_location_is_less_than): Also sort by location type and
+	hardware breakpoint length.
+	(update_global_location_list): Handle "set breakpoint auto-hw on"
+	here.
+	(update_breakpoint_locations): Ask breakpoint_locations_match to
+	ignore location types.
+
 2020-05-16  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbtypes.h (TYPE_NAME): Remove.  Change all cal sites to use

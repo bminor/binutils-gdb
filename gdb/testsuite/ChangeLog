@@ -1,3 +1,8 @@
+2020-05-17  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/25741
+	* gdb.base/hw-sw-break-same-address.exp: New file.
+
 2020-05-16  Pedro Alves  <palves@redhat.com>
 
 	* gdb.multi/multi-re-run.exp (test_re_run): Switch
