@@ -1,6 +1,7 @@
 2020-05-17  Tom Tromey  <tromey@adacore.com>
 
 	Pushed by Joel Brobecker  <brobecker@adacore.com>
+	PR symtab/26003
 	* symfile.c (symbol_file_add_separate): Preserve OBJF_MAINLINE.
 
 2020-03-03  Sergio Durigan Junior  <sergiodj@redhat.com>
