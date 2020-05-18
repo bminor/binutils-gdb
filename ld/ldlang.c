@@ -155,8 +155,6 @@ static int lang_sizing_iteration = 0;
 #define outside_symbol_address(q) \
   ((q)->value + outside_section_address (q->section))
 
-#define SECTION_NAME_MAP_LENGTH (16)
-
 /* CTF sections smaller than this are not compressed: compression of
    dictionaries this small doesn't gain much, and this lets consumers mmap the
    sections directly out of the ELF file and use them with no decompression
@@ -4619,7 +4617,7 @@ print_input_statement (lang_input_statement_type *statm)
 /* Print all symbols defined in a particular section.  This is called
    via bfd_link_hash_traverse, or by print_all_symbols.  */
 
-static bfd_boolean
+bfd_boolean
 print_one_symbol (struct bfd_link_hash_entry *hash_entry, void *ptr)
 {
   asection *sec = (asection *) ptr;
@@ -4683,7 +4681,7 @@ print_all_symbols (asection *sec)
 
   /* Print the symbols.  */
   for (i = 0; i < ud->map_symbol_def_count; i++)
-    print_one_symbol (entries[i], sec);
+    ldemul_print_symbol (entries[i], sec);
 
   obstack_free (&map_obstack, entries);
 }
@@ -4747,7 +4745,7 @@ print_input_section (asection *i, bfd_boolean is_discarded)
       && i->output_section->owner == link_info.output_bfd)
     {
       if (link_info.reduce_memory_overheads)
-	bfd_link_hash_traverse (link_info.hash, print_one_symbol, i);
+	bfd_link_hash_traverse (link_info.hash, ldemul_print_symbol, i);
       else
 	print_all_symbols (i);
 

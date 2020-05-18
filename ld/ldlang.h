@@ -23,6 +23,8 @@
 
 #define DEFAULT_MEMORY_REGION   "*default*"
 
+#define SECTION_NAME_MAP_LENGTH (16)
+
 typedef enum
 {
   lang_input_file_is_l_enum,
@@ -700,5 +702,8 @@ lang_print_memory_usage (void);
 
 extern void
 lang_add_gc_name (const char *);
+
+extern bfd_boolean
+print_one_symbol (struct bfd_link_hash_entry *hash_entry, void *ptr);
 
 #endif

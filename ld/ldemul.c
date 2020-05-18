@@ -428,3 +428,11 @@ ldemul_examine_strtab_for_ctf (struct ctf_file *ctf_output,
     ld_emulation->examine_strtab_for_ctf (ctf_output, syms,
 					  symcount, symstrtab);
 }
+
+bfd_boolean
+ldemul_print_symbol (struct bfd_link_hash_entry *hash_entry, void *ptr)
+{
+  if (ld_emulation->print_symbol)
+    return ld_emulation->print_symbol (hash_entry, ptr);
+  return print_one_symbol (hash_entry, ptr);
+}

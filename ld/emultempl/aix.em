@@ -1534,6 +1534,36 @@ gld${EMULATION_NAME}_open_dynamic_archive (const char *arch,
   return TRUE;
 }
 
+static bfd_boolean
+gld${EMULATION_NAME}_print_symbol (struct bfd_link_hash_entry *hash_entry,
+				   void *ptr)
+{
+  asection *sec = (asection *) ptr;
+
+  if ((hash_entry->type == bfd_link_hash_defined
+       || hash_entry->type == bfd_link_hash_defweak)
+      && sec == hash_entry->u.def.section)
+    {
+      int i;
+      struct xcoff_link_hash_entry *h;
+
+      for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
+	print_space ();
+      minfo ("0x%V   ",
+	     (hash_entry->u.def.value
+	      + hash_entry->u.def.section->output_offset
+	      + hash_entry->u.def.section->output_section->vma));
+
+      /* Flag symbol if it has been garbage collected.  */
+      h = (struct xcoff_link_hash_entry *) hash_entry;
+      if ((h != NULL) && !(h->flags & XCOFF_MARK))
+	minfo (" -->gc");
+      minfo ("             %pT\n", hash_entry->root.string);
+    }
+
+  return TRUE;
+}
+
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   gld${EMULATION_NAME}_before_parse,
   syslib_default,
@@ -1564,6 +1594,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
   NULL,				/* new_vers_pattern */
   NULL,				/* extra_map_file_text */
   ${LDEMUL_EMIT_CTF_EARLY-NULL},
-  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL}
+  ${LDEMUL_EXAMINE_STRTAB_FOR_CTF-NULL},
+  gld${EMULATION_NAME}_print_symbol
 };
 EOF

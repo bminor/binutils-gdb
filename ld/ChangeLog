@@ -1,3 +1,27 @@
+2020-05-18  Douglas B Rupp  <rupp@adacore.com>
+
+	* ldemul.h (ldemul_print_symbol): New.
+	(ld_emulation_xfer_type) <print_symbol): Likewise.
+	* ldemul.c (ldemul_print_symbol): New.
+	* ldlang.c (SECTION_NAME_MAP_LANGTH): Move to ...
+	(print_one_symbol): Make global and move declaration to ...
+	(print_all_symbols): Rename print_one_symbol to ldemul_print_symbol
+	(print_input_section): Likewise
+	* ldlang.h: ... here.
+	* emultempl/aix.em (gld${EMULATION_NAME}_print_symbol): New.
+	(ld_emulation_xfer_struct): Use it.
+	* emultempl/armcoff.em (ld_emulation_xfer_struct): Add print_symbol
+	and default to NULL.
+	* emultempl/beos.em (ld_emulation_xfer_struct): Likewise
+	* emultempl/elf.em (ld_emulation_xfer_struct): Likewise
+	* emultempl/generic.em (ld_emulation_xfer_struct): Likewise
+	* emultempl/linux.em (ld_emulation_xfer_struct): Likewise
+	* emultempl/msp430.em (ld_emulation_xfer_struct): Likewise
+	* emultempl/pe.em (ld_emulation_xfer_struct): Likewise
+	* emultempl/pep.em (ld_emulation_xfer_struct): Likewise
+	* emultempl/ticoff.em (ld_emulation_xfer_struct): Likewise
+	* emultempl/vanilla.em (ld_emulation_xfer_struct): Likewise
+
 2020-05-18  Sergei Trofimovich  <siarheit@google.com>
 
 	* ldmain.c (add_archive_element): Fix s/claimi/claim/ typo
