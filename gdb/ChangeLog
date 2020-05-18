@@ -1,3 +1,13 @@
+2020-05-18  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR build/25981
+	* procfs.c [(__i386__ || __x86_64__) && sun] (proc_get_LDT_entry,
+	procfs_find_LDT_entry): Remove.
+	* procfs.h [(__i386__ || __x86_64__) && sun] (struct ssd,
+	procfs_find_LDT_entry): Remove.
+	* sol-thread.c [(__i386__ || __x86_64__) && sun] (ps_lgetLDT):
+	Remove.
+
 2020-05-17  Pedro Alves  <palves@redhat.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Keno Fischer  <keno@juliacomputing.com>
