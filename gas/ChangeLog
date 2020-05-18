@@ -1,3 +1,8 @@
+2020-05-18  Alan Modra  <amodra@gmail.com>
+
+	* symbols.c (resolve_symbol_value): Invoke LOCAL_SYMBOL_CHECK
+	before looking at add_symbol->sy_flags.
+
 2020-05-18  Hongtao Liu  <hongtao.liu@intel.com>
 
 	* config/tc-i386.c: Not handle lret/iret.

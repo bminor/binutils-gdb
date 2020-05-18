@@ -1389,6 +1389,7 @@ resolve_symbol_value (symbolS *symp)
 
 	  /* Don't leave symbol loops.  */
 	  if (finalize_syms
+	      && !LOCAL_SYMBOL_CHECK (add_symbol)
 	      && add_symbol->sy_flags.sy_resolving)
 	    break;
 
