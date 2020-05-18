@@ -1,5 +1,9 @@
 2020-05-18  Nick Clifton  <nickc@redhat.com>
 
+	* po/sv.po: Update Swedish translation.
+
+2020-05-18  Nick Clifton  <nickc@redhat.com>
+
 	PR 25993
 	* emultempl/pe.em (_after_open): Check for duplicate filename
 	pointers before renaming the dll.
