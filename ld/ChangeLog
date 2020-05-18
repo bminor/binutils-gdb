@@ -1,3 +1,8 @@
+2020-05-18  Sergei Trofimovich  <siarheit@google.com>
+
+	* ldmain.c (add_archive_element): Fix s/claimi/claim/ typo
+	in info message.
+
 2020-05-18  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Update Swedish translation.

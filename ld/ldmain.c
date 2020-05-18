@@ -839,7 +839,7 @@ add_archive_element (struct bfd_link_info *info,
 	      /* Don't claim new IR symbols after all IR symbols have
 		 been claimed.  */
 	      if (verbose)
-		info_msg ("%pI: no new IR symbols to claimi\n",
+		info_msg ("%pI: no new IR symbols to claim\n",
 			  &orig_input);
 	      input->flags.claimed = 0;
 	      return FALSE;
