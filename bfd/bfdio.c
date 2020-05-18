@@ -130,7 +130,7 @@ _bfd_real_fopen (const char *filename, const char *modes)
       strcat (fullpath, filename);
 
       /* Convert any UNIX style path separators into the DOS form.  */
-      for (i = 0, fullpath[i]; i++)
+      for (i = 0; fullpath[i]; i++)
         {
           if (IS_UNIX_DIR_SEPARATOR (fullpath[i]))
 	    fullpath[i] = '\\';
