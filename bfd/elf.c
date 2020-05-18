@@ -2071,7 +2071,11 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       if (sections_being_created == NULL)
 	{
 	  size_t amt = elf_numsections (abfd) * sizeof (bfd_boolean);
-	  sections_being_created = (bfd_boolean *) bfd_zalloc (abfd, amt);
+
+	  /* PR 26005: Do not use bfd_zalloc here as the memory might
+	     be released before the bfd has been fully scanned.  */
+	  sections_being_created = (bfd_boolean *) bfd_malloc (amt);
+	  memset (sections_being_created, FALSE, amt);
 	  if (sections_being_created == NULL)
 	    return FALSE;
 	  sections_being_created_abfd = abfd;
@@ -2611,8 +2615,9 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
     sections_being_created [shindex] = FALSE;
   if (-- nesting == 0)
     {
+      free (sections_being_created);
       sections_being_created = NULL;
-      sections_being_created_abfd = abfd;
+      sections_being_created_abfd = NULL;
     }
   return ret;
 }

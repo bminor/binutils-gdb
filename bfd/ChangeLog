@@ -1,3 +1,9 @@
+2020-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 26005
+	* elf.c (bfd_section_from_shdr): Use bfd_malloc to allocate memory
+	for the sections_being_created array.
+
 2020-05-18  Alan Modra  <amodra@gmail.com>
 
 	* ecoff.c (ecoff_slurp_reloc_table): Malloc external_relocs so
