@@ -1,3 +1,8 @@
+2020-05-18  Alan Modra  <amodra@gmail.com>
+
+	* ecoff.c (ecoff_slurp_reloc_table): Malloc external_relocs so
+	they can be freed without also freeing internal_relocs.
+
 2020-05-18  Jaydeep Chauhan  <jaydeepchauhan1494@gmail.com>
 
 	PR 25713

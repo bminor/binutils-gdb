@@ -1626,7 +1626,7 @@ ecoff_slurp_reloc_table (bfd *abfd,
   amt = external_reloc_size * section->reloc_count;
   if (bfd_seek (abfd, section->rel_filepos, SEEK_SET) != 0)
     return FALSE;
-  external_relocs = _bfd_alloc_and_read (abfd, amt, amt);
+  external_relocs = _bfd_malloc_and_read (abfd, amt, amt);
   if (external_relocs == NULL)
     return FALSE;
 
@@ -1635,7 +1635,7 @@ ecoff_slurp_reloc_table (bfd *abfd,
   internal_relocs = (arelent *) bfd_alloc (abfd, amt);
   if (internal_relocs == NULL)
     {
-      bfd_release (abfd, external_relocs);
+      free (external_relocs);
       return FALSE;
     }
 
@@ -1703,7 +1703,7 @@ ecoff_slurp_reloc_table (bfd *abfd,
       (*backend->adjust_reloc_in) (abfd, &intern, rptr);
     }
 
-  bfd_release (abfd, external_relocs);
+  free (external_relocs);
 
   section->relocation = internal_relocs;
 
