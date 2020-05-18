@@ -1,3 +1,13 @@
+2020-07-06  Stefan Schulze Frielinghaus  <stefansf@linux.ibm.com>
+
+	Backport from mainline.
+	2020-05-26  Stefan Schulze Frielinghaus  <stefansf@linux.ibm.com>
+
+	* testsuite/gas/s390/zarch-z13.d: Add regexp checks for vector
+	load/store instruction variants with alignment hints.
+	* testsuite/gas/s390/zarch-z13.s: Emit new vector load/store
+	instruction variants with alignment hints.
+
 2020-06-10  Alex Coplan  <alex.coplan@arm.com>
 
 	Backport from master

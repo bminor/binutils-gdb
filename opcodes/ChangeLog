@@ -1,3 +1,12 @@
+2020-07-06  Stefan Schulze Frielinghaus  <stefansf@linux.ibm.com>
+
+	Backport from mainline.
+	2020-05-26  Stefan Schulze Frielinghaus  <stefansf@linux.ibm.com>
+
+	* s390-opc.txt: Relocate vector load/store instructions with
+	additional alignment parameter and change architecture level
+	constraint from z14 to z13.
+
 2020-02-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/25516
