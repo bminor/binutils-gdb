@@ -1,3 +1,9 @@
+2020-05-18  Jaydeep Chauhan  <jaydeepchauhan1494@gmail.com>
+
+	PR 25713
+	* bfdio.c (_bfd_real_fopen): Convert UNIX style sirectory
+	separators into DOS style when creating a WIN32 fullpath.
+
 2020-05-14  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfnn-riscv.c (elfNN_riscv_mkobject):  New function.  We need this

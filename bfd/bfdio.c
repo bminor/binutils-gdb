@@ -120,13 +120,22 @@ _bfd_real_fopen (const char *filename, const char *modes)
 
   if (filelen > MAX_PATH - 1)
     {
-      FILE *file;
-      char* fullpath = (char *) malloc (filelen + 8);
+      FILE * file;
+      char * fullpath = (char *) malloc (filelen + 8);
+      int    i;
 
       /* Add a Microsoft recommended prefix that
 	 will allow the extra-long path to work.  */
       strcpy (fullpath, "\\\\?\\");
       strcat (fullpath, filename);
+
+      /* Convert any UNIX style path separators into the DOS form.  */
+      for (i = 0, fullpath[i]; i++)
+        {
+          if (IS_UNIX_DIR_SEPARATOR (fullpath[i]))
+	    fullpath[i] = '\\';
+        }
+
       file = close_on_exec (fopen (fullpath, modes));
       free (fullpath);
       return file;
