@@ -327,14 +327,14 @@ local_symbol_make (const char *name, segT section, valueT val, fragS *frag)
 {
   const char *name_copy;
   struct local_symbol *ret;
+  struct symbol_flags flags = { .sy_local_symbol = 1, .sy_resolved = 0 };
 
   ++local_symbol_count;
 
   name_copy = save_symbol_name (name);
 
   ret = (struct local_symbol *) obstack_alloc (&notes, sizeof *ret);
-  ret->lsy_flags.sy_local_symbol = 1;
-  ret->lsy_flags.sy_resolved = 0;
+  ret->lsy_flags = flags;
   ret->lsy_name = name_copy;
   ret->lsy_section = section;
   local_symbol_set_frag (ret, frag);

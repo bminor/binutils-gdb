@@ -1,3 +1,7 @@
+2020-05-19  Alan Modra  <amodra@gmail.com>
+
+	* symbols.c (local_symbol_make): Init all of lsy_flags.
+
 2020-05-18  Alan Modra  <amodra@gmail.com>
 
 	* symbols.c (resolve_symbol_value): Invoke LOCAL_SYMBOL_CHECK
