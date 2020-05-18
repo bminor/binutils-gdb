@@ -1,6 +1,10 @@
 2020-05-18  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR build/25981
+	* i386-sol2-nat.c [PR_MODEL_NATIVE != PR_MODEL_LP64] (regmap):
+	Hardcode register numbers.
+
+	PR build/25981
 	* procfs.c [(__i386__ || __x86_64__) && sun] (proc_get_LDT_entry,
 	procfs_find_LDT_entry): Remove.
 	* procfs.h [(__i386__ || __x86_64__) && sun] (struct ssd,
