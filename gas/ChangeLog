@@ -1,3 +1,10 @@
+2020-05-19  Alexander Fedotov  <alfedotov@gmail.com>
+
+	PR 25992
+	* config/tc-arm.c : Add arm_ext_v8r feature.
+	(it_fsm_post_encode): Check arm_ext_v8r feature.
+	(get_aeabi_cpu_arch_from_fset): Check arm_ext_v8r feature.
+
 2020-05-19  Alan Modra  <amodra@gmail.com>
 
 	* write.c (write_contents): Use bfd_get_filename rather than

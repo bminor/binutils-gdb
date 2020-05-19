@@ -230,6 +230,7 @@ static const arm_feature_set arm_ext_div = ARM_FEATURE_CORE_LOW (ARM_EXT_DIV);
 static const arm_feature_set arm_ext_v7 = ARM_FEATURE_CORE_LOW (ARM_EXT_V7);
 static const arm_feature_set arm_ext_v7a = ARM_FEATURE_CORE_LOW (ARM_EXT_V7A);
 static const arm_feature_set arm_ext_v7r = ARM_FEATURE_CORE_LOW (ARM_EXT_V7R);
+static const arm_feature_set arm_ext_v8r = ARM_FEATURE_CORE_HIGH (ARM_EXT2_V8R);
 #ifdef OBJ_ELF
 static const arm_feature_set ATTRIBUTE_UNUSED arm_ext_v7m = ARM_FEATURE_CORE_LOW (ARM_EXT_V7M);
 #endif
@@ -23298,7 +23299,8 @@ it_fsm_post_encode (void)
       && warn_on_restrict_it
       && !now_pred.warn_deprecated
       && warn_on_deprecated
-      && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8)
+      && (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8)
+          || ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8r))
       && !ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_m))
     {
       if (inst.instruction >= 0x10000)
@@ -32878,12 +32880,14 @@ get_aeabi_cpu_arch_from_fset (const arm_feature_set *arch_ext_fset,
 
  found:
   /* Tag_CPU_arch_profile.  */
-  if (ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v7a)
-      || ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v8)
-      || (ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_atomics)
-	  && !ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v8m_m_only)))
+  if (!ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v8r)
+      && (ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v7a)
+          || ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v8)
+          || (ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_atomics)
+              && !ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v8m_m_only))))
     *profile = 'A';
-  else if (ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v7r))
+  else if (ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v7r)
+      || ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_v8r))
     *profile = 'R';
   else if (ARM_CPU_HAS_FEATURE (p_ver_ret->flags, arm_ext_m))
     *profile = 'M';
