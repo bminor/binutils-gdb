@@ -4105,7 +4105,6 @@ remote_target::get_offsets ()
   char *ptr;
   int lose, num_segments = 0, do_sections, do_segments;
   CORE_ADDR text_addr, data_addr, bss_addr, segments[2];
-  struct symfile_segment_data *data;
 
   if (symfile_objfile == NULL)
     return;
@@ -4185,7 +4184,8 @@ remote_target::get_offsets ()
 
   section_offsets offs = symfile_objfile->section_offsets;
 
-  data = get_symfile_segment_data (symfile_objfile->obfd);
+  symfile_segment_data_up data
+    = get_symfile_segment_data (symfile_objfile->obfd);
   do_segments = (data != NULL);
   do_sections = num_segments == 0;
 
@@ -4220,8 +4220,9 @@ remote_target::get_offsets ()
 
   if (do_segments)
     {
-      int ret = symfile_map_offsets_to_segments (symfile_objfile->obfd, data,
-						 offs, num_segments, segments);
+      int ret = symfile_map_offsets_to_segments (symfile_objfile->obfd,
+						 data.get (), offs,
+						 num_segments, segments);
 
       if (ret == 0 && !do_sections)
 	error (_("Can not handle qOffsets TextSeg "
@@ -4230,9 +4231,6 @@ remote_target::get_offsets ()
       if (ret > 0)
 	do_sections = 0;
     }
-
-  if (data)
-    free_symfile_segment_data (data);
 
   if (do_sections)
     {

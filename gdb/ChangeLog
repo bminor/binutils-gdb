@@ -1,3 +1,25 @@
+2020-05-19  Simon Marchi  <simon.marchi@efficios.com>
+
+	* symfile.h (struct symfile_segment_data): Initialize fields.
+	<~symfile_segment_data>: Add.
+	(symfile_segment_data_up): New.
+	(struct sym_fns) <sym_segments>: Return a
+	symfile_segment_data_up.
+	(default_symfile_segments): Return a symfile_segment_data_up.
+	(free_symfile_segment_data): Remove.
+	(get_symfile_segment_data): Return a symfile_segment_data_up.
+	* symfile.c (default_symfile_segments): Likewise.
+	(get_symfile_segment_data): Likewise.
+	(free_symfile_segment_data): Remove.
+	(symfile_find_segment_sections): Update.
+	* elfread.c (elf_symfile_segments): Return a
+	symfile_segment_data_up.
+	* remote.c (remote_target::get_offsets): Update.
+	* solib-target.c (solib_target_relocate_section_addresses):
+	Update.
+	* symfile-debug.c (debug_sym_segments): Return a
+	symfile_segment_data_up.
+
 2020-05-18  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR build/25981

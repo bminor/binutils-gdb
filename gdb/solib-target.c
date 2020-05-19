@@ -364,9 +364,9 @@ Could not relocate shared library \"%s\": wrong number of ALLOC sections"),
 	}
       else if (!li->segment_bases.empty ())
 	{
-	  struct symfile_segment_data *data;
+	  symfile_segment_data_up data
+	    = get_symfile_segment_data (so->abfd);
 
-	  data = get_symfile_segment_data (so->abfd);
 	  if (data == NULL)
 	    warning (_("\
 Could not relocate shared library \"%s\": no segments"), so->so_name);
@@ -375,7 +375,7 @@ Could not relocate shared library \"%s\": no segments"), so->so_name);
 	      ULONGEST orig_delta;
 	      int i;
 
-	      if (!symfile_map_offsets_to_segments (so->abfd, data,
+	      if (!symfile_map_offsets_to_segments (so->abfd, data.get (),
 						    li->offsets,
 						    li->segment_bases.size (),
 						    li->segment_bases.data ()))
@@ -407,8 +407,6 @@ Could not relocate shared library \"%s\": bad offsets"), so->so_name);
 			       + data->segment_sizes[i - 1]
 			       + orig_delta);
 	      gdb_assert (so->addr_low <= so->addr_high);
-
-	      free_symfile_segment_data (data);
 	    }
 	}
     }

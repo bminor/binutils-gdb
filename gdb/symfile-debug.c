@@ -475,7 +475,7 @@ debug_sym_offsets (struct objfile *objfile,
   debug_data->real_sf->sym_offsets (objfile, info);
 }
 
-static struct symfile_segment_data *
+static symfile_segment_data_up
 debug_sym_segments (bfd *abfd)
 {
   /* This API function is annoying, it doesn't take a "this" pointer.
