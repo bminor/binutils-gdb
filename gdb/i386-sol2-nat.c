@@ -178,10 +178,22 @@ fill_fpregset (const struct regcache *regcache,
    format and GDB's register array layout.  */
 static int regmap[] =
 {
-  EAX, ECX, EDX, EBX,
-  UESP, EBP, ESI, EDI,
-  EIP, EFL, CS, SS,
-  DS, ES, FS, GS
+  11	/* EAX */,
+  10	/* ECX */,
+  9	/* EDX */,
+  8	/* EBX */,
+  17	/* UESP */,
+  6	/* EBP */,
+  5	/* ESI */,
+  4	/* EDI */,
+  14	/* EIP */,
+  16	/* EFL */,
+  15	/* CS */,
+  18	/* SS */,
+  3	/* DS */,
+  2	/* ES */,
+  1	/* FS */,
+  0	/* GS */
 };
 
 /* Fill GDB's register array with the general-purpose register values
