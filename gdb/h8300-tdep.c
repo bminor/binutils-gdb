@@ -178,10 +178,10 @@ h8300_is_argument_spill (struct gdbarch *gdbarch, CORE_ADDR pc)
       if (IS_MOVB_Rn24_SP (read_memory_unsigned_integer (pc + 2,
 							 2, byte_order)))
 	{
-	  LONGEST disp = read_memory_integer (pc + 4, 4, byte_order);
+	  ULONGEST disp = read_memory_unsigned_integer (pc + 4, 4, byte_order);
 
 	  /* ... and d:24 is negative.  */
-	  if (disp < 0 && disp > 0xffffff)
+	  if ((disp & 0x00800000) != 0)
 	    return 8;
 	}
     }
@@ -197,10 +197,10 @@ h8300_is_argument_spill (struct gdbarch *gdbarch, CORE_ADDR pc)
       if (IS_MOVW_Rn24_SP (read_memory_unsigned_integer (pc + 2,
 							 2, byte_order)))
 	{
-	  LONGEST disp = read_memory_integer (pc + 4, 4, byte_order);
+	  ULONGEST disp = read_memory_unsigned_integer (pc + 4, 4, byte_order);
 
 	  /* ... and d:24 is negative.  */
-	  if (disp < 0 && disp > 0xffffff)
+	  if ((disp & 0x00800000) != 0)
 	    return 8;
 	}
     }
@@ -219,10 +219,11 @@ h8300_is_argument_spill (struct gdbarch *gdbarch, CORE_ADDR pc)
 	{
 	  if (IS_MOVL_Rn24_SP (read_memory_integer (pc + 4, 2, byte_order)))
 	    {
-	      LONGEST disp = read_memory_integer (pc + 6, 4, byte_order);
+	      ULONGEST disp = read_memory_unsigned_integer (pc + 6, 4,
+							    byte_order);
 
 	      /* ... and d:24 is negative.  */
-	      if (disp < 0 && disp > 0xffffff)
+	      if ((disp & 0x00800000) != 0)
 		return 10;
 	    }
 	}

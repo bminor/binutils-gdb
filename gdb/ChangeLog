@@ -1,3 +1,8 @@
+2020-05-19  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* h8300-tdep.c (h8300_is_argument_spill): Change how we check
+	whether disp is negative.
+
 2020-05-19  Simon Marchi  <simon.marchi@efficios.com>
 
 	* symfile.h (struct symfile_segment_data)
