@@ -1,3 +1,10 @@
+2020-05-20  Alan Modra  <amodra@gmail.com>
+
+	PR 26011
+	* elf.c (_bfd_elf_get_reloc_upper_bound): Sanity check reloc
+	section size against file size.
+	(_bfd_elf_get_dynamic_reloc_upper_bound): Likewise.
+
 2020-05-19  Gunther Nikl  <gnikl@justmail.de>
 
 	PR 26005

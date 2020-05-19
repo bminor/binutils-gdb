@@ -8508,9 +8508,23 @@ _bfd_elf_get_dynamic_symtab_upper_bound (bfd *abfd)
 }
 
 long
-_bfd_elf_get_reloc_upper_bound (bfd *abfd ATTRIBUTE_UNUSED,
-				sec_ptr asect)
+_bfd_elf_get_reloc_upper_bound (bfd *abfd, sec_ptr asect)
 {
+  if (asect->reloc_count != 0)
+    {
+      /* Sanity check reloc section size.  */
+      struct bfd_elf_section_data *d = elf_section_data (asect);
+      Elf_Internal_Shdr *rel_hdr = &d->this_hdr;
+      bfd_size_type ext_rel_size = rel_hdr->sh_size;
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+
+      if (filesize != 0 && ext_rel_size > filesize)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return -1;
+	}
+    }
+
 #if SIZEOF_LONG == SIZEOF_INT
   if (asect->reloc_count >= LONG_MAX / sizeof (arelent *))
     {
@@ -8576,7 +8590,7 @@ _bfd_elf_canonicalize_dynamic_symtab (bfd *abfd,
 long
 _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
 {
-  bfd_size_type count;
+  bfd_size_type count, ext_rel_size;
   asection *s;
 
   if (elf_dynsymtab (abfd) == 0)
@@ -8586,11 +8600,18 @@ _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
     }
 
   count = 1;
+  ext_rel_size = 0;
   for (s = abfd->sections; s != NULL; s = s->next)
     if (elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
 	&& (elf_section_data (s)->this_hdr.sh_type == SHT_REL
 	    || elf_section_data (s)->this_hdr.sh_type == SHT_RELA))
       {
+	ext_rel_size += s->size;
+	if (ext_rel_size < s->size)
+	  {
+	    bfd_set_error (bfd_error_file_truncated);
+	    return -1;
+	  }
 	count += s->size / elf_section_data (s)->this_hdr.sh_entsize;
 	if (count > LONG_MAX / sizeof (arelent *))
 	  {
@@ -8598,6 +8619,16 @@ _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
 	    return -1;
 	  }
       }
+  if (count > 1)
+    {
+      /* Sanity check reloc section sizes.  */
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+      if (filesize != 0 && ext_rel_size > filesize)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return -1;
+	}
+    }
   return count * sizeof (arelent *);
 }
 
