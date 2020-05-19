@@ -1,3 +1,12 @@
+2020-05-19  Alan Modra  <amodra@gmail.com>
+
+	* ar.c (map_over_members, get_pos_bfd, delete_members, move_members),
+	(replace_members): Use bfd_get_filename rather than accessing
+	bfd->filename directly.
+	* arsup.c (map_over_list, ar_delete, ar_replace, ar_extract): Likewise.
+	* binemul.c (do_ar_emul_append): Likewise.
+	* coffgrok.c (coff_grok): Likewise.
+
 2020-05-18  Stafford Horne  <shorne@gmail.com>
 
 	* MAINTAINERS (OR1K): Add myself as maintainer.

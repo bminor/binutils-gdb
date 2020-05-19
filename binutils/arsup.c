@@ -77,8 +77,8 @@ map_over_list (bfd *arch, void (*function) (bfd *, bfd *), struct list *list)
 
 	  for (head = arch->archive_next; head; head = head->archive_next)
 	    {
-	      if (head->filename != NULL
-		  && FILENAME_CMP (ptr->name, head->filename) == 0)
+	      if (bfd_get_filename (head) != NULL
+		  && FILENAME_CMP (ptr->name, bfd_get_filename (head)) == 0)
 		{
 		  found = TRUE;
 		  function (head, prev);
@@ -311,7 +311,7 @@ ar_delete (struct list *list)
 
 	  while (member)
 	    {
-	      if (FILENAME_CMP(member->filename, list->name) == 0)
+	      if (FILENAME_CMP (bfd_get_filename (member), list->name) == 0)
 		{
 		  *prev = member->archive_next;
 		  found = 1;
@@ -376,7 +376,7 @@ ar_replace (struct list *list)
 
 	  while (member)
 	    {
-	      if (FILENAME_CMP (member->filename, list->name) == 0)
+	      if (FILENAME_CMP (bfd_get_filename (member), list->name) == 0)
 		{
 		  /* Found the one to replace.  */
 		  bfd *abfd = bfd_openr (list->name, NULL);
@@ -474,7 +474,7 @@ ar_extract (struct list *list)
 
 	  while (member && !found)
 	    {
-	      if (FILENAME_CMP (member->filename, list->name) == 0)
+	      if (FILENAME_CMP (bfd_get_filename (member), list->name) == 0)
 		{
 		  extract_file (member);
 		  found = 1;

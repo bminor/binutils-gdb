@@ -84,7 +84,7 @@ do_ar_emul_append (bfd **after_bfd, bfd *new_bfd,
   if (!check (new_bfd))
     return FALSE;
 
-  AR_EMUL_APPEND_PRINT_VERBOSE (verbose, new_bfd->filename);
+  AR_EMUL_APPEND_PRINT_VERBOSE (verbose, bfd_get_filename (new_bfd));
 
   new_bfd->archive_next = *after_bfd;
   *after_bfd = new_bfd;
