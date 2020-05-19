@@ -80,29 +80,31 @@ typedef std::vector<other_sections> section_addr_info;
    each BFD section belongs to.  */
 struct symfile_segment_data
 {
+  struct segment
+  {
+    segment (CORE_ADDR base, CORE_ADDR size)
+      : base (base), size (size)
+    {}
+
+    /* The original base address the segment.  */
+    CORE_ADDR base;
+
+    /* The memory size of the segment.  */
+    CORE_ADDR size;
+  };
+
   ~symfile_segment_data ()
   {
-    xfree (this->segment_bases);
-    xfree (this->segment_sizes);
     xfree (this->segment_info);
   }
 
-  /* How many segments are present in this file.  If there are
+  /* The segments present in this file.  If there are
      two, the text segment is the first one and the data segment
      is the second one.  */
-  int num_segments = 0;
+  std::vector<segment> segments;
 
-  /* If NUM_SEGMENTS is greater than zero, the original base address
-     of each segment.  */
-  CORE_ADDR *segment_bases = nullptr;
-
-  /* If NUM_SEGMENTS is greater than zero, the memory size of each
-     segment.  */
-  CORE_ADDR *segment_sizes = nullptr;
-
-  /* If NUM_SEGMENTS is greater than zero, this is an array of entries
-     recording which segment contains each BFD section.
-     SEGMENT_INFO[I] is S+1 if the I'th BFD section belongs to segment
+  /* This is an array of entries recording which segment contains each BFD
+     section.  SEGMENT_INFO[I] is S+1 if the I'th BFD section belongs to segment
      S, or zero if it is not in any segment.  */
   int *segment_info = nullptr;
 };

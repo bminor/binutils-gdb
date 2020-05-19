@@ -1,5 +1,16 @@
 2020-05-19  Simon Marchi  <simon.marchi@efficios.com>
 
+	* symfile.h (struct symfile_segment_data) <struct segment>: New.
+	<segments>: New.
+	<segment_bases, segment_sizes>: Remove.
+	* symfile.c (default_symfile_segments): Update.
+	* elfread.c (elf_symfile_segments): Update.
+	* remote.c (remote_target::get_offsets): Update.
+	* solib-target.c (solib_target_relocate_section_addresses):
+	Update.
+
+2020-05-19  Simon Marchi  <simon.marchi@efficios.com>
+
 	* symfile.h (struct symfile_segment_data): Initialize fields.
 	<~symfile_segment_data>: Add.
 	(symfile_segment_data_up): New.

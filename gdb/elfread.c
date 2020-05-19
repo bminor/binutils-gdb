@@ -112,15 +112,10 @@ elf_symfile_segments (bfd *abfd)
     return NULL;
 
   symfile_segment_data_up data (new symfile_segment_data);
-  data->num_segments = num_segments;
-  data->segment_bases = XCNEWVEC (CORE_ADDR, num_segments);
-  data->segment_sizes = XCNEWVEC (CORE_ADDR, num_segments);
+  data->segments.reserve (num_segments);
 
   for (i = 0; i < num_segments; i++)
-    {
-      data->segment_bases[i] = segments[i]->p_vaddr;
-      data->segment_sizes[i] = segments[i]->p_memsz;
-    }
+    data->segments.emplace_back (segments[i]->p_vaddr, segments[i]->p_memsz);
 
   num_sections = bfd_count_sections (abfd);
   data->segment_info = XCNEWVEC (int, num_sections);

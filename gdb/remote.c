@@ -4198,10 +4198,10 @@ remote_target::get_offsets ()
      by assuming that the .text and .data offsets apply to the whole
      text and data segments.  Convert the offsets given in the packet
      to base addresses for symfile_map_offsets_to_segments.  */
-  else if (data && data->num_segments == 2)
+  else if (data != nullptr && data->segments.size () == 2)
     {
-      segments[0] = data->segment_bases[0] + text_addr;
-      segments[1] = data->segment_bases[1] + data_addr;
+      segments[0] = data->segments[0].base + text_addr;
+      segments[1] = data->segments[1].base + data_addr;
       num_segments = 2;
     }
   /* If the object file has only one segment, assume that it is text
@@ -4209,9 +4209,9 @@ remote_target::get_offsets ()
      but programs with no code are useless.  Of course the code might
      have ended up in the data segment... to detect that we would need
      the permissions here.  */
-  else if (data && data->num_segments == 1)
+  else if (data && data->segments.size () == 1)
     {
-      segments[0] = data->segment_bases[0] + text_addr;
+      segments[0] = data->segments[0].base + text_addr;
       num_segments = 1;
     }
   /* There's no way to relocate by segment.  */

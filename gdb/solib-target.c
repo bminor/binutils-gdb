@@ -386,9 +386,9 @@ Could not relocate shared library \"%s\": bad offsets"), so->so_name);
 		 "info sharedlibrary".  Report any consecutive segments
 		 which were relocated as a single unit.  */
 	      gdb_assert (li->segment_bases.size () > 0);
-	      orig_delta = li->segment_bases[0] - data->segment_bases[0];
+	      orig_delta = li->segment_bases[0] - data->segments[0].base;
 
-	      for (i = 1; i < data->num_segments; i++)
+	      for (i = 1; i < data->segments.size (); i++)
 		{
 		  /* If we have run out of offsets, assume all
 		     remaining segments have the same offset.  */
@@ -397,14 +397,14 @@ Could not relocate shared library \"%s\": bad offsets"), so->so_name);
 
 		  /* If this segment does not have the same offset, do
 		     not include it in the library's range.  */
-		  if (li->segment_bases[i] - data->segment_bases[i]
+		  if (li->segment_bases[i] - data->segments[i].base
 		      != orig_delta)
 		    break;
 		}
 
 	      so->addr_low = li->segment_bases[0];
-	      so->addr_high = (data->segment_bases[i - 1]
-			       + data->segment_sizes[i - 1]
+	      so->addr_high = (data->segments[i - 1].base
+			       + data->segments[i - 1].size
 			       + orig_delta);
 	      gdb_assert (so->addr_low <= so->addr_high);
 	    }
