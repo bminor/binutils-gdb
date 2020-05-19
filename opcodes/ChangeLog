@@ -1,3 +1,15 @@
+2020-05-19  Stafford Horne  <shorne@gmail.com>
+
+	PR 25184
+	* or1k-asm.c: Regenerate.
+	* or1k-desc.c: Regenerate.
+	* or1k-desc.h: Regenerate.
+	* or1k-dis.c: Regenerate.
+	* or1k-ibld.c: Regenerate.
+	* or1k-opc.c: Regenerate.
+	* or1k-opc.h: Regenerate.
+	* or1k-opinst.c: Regenerate.
+
 2020-05-11  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc (powerpc_opcodes): Add xscmpeqqp, xscmpgeqp, xscmpgtqp,
