@@ -2775,13 +2775,11 @@ target_ops::fileio_readlink (struct inferior *inf, const char *filename,
   return {};
 }
 
-/* Helper for target_fileio_open and
-   target_fileio_open_warn_if_slow.  */
+/* See target.h.  */
 
-static int
-target_fileio_open_1 (struct inferior *inf, const char *filename,
-		      int flags, int mode, int warn_if_slow,
-		      int *target_errno)
+int
+target_fileio_open (struct inferior *inf, const char *filename,
+		    int flags, int mode, bool warn_if_slow, int *target_errno)
 {
   for (target_ops *t = default_fileio_target (); t != NULL; t = t->beneath ())
     {
@@ -2809,27 +2807,6 @@ target_fileio_open_1 (struct inferior *inf, const char *filename,
 
   *target_errno = FILEIO_ENOSYS;
   return -1;
-}
-
-/* See target.h.  */
-
-int
-target_fileio_open (struct inferior *inf, const char *filename,
-		    int flags, int mode, int *target_errno)
-{
-  return target_fileio_open_1 (inf, filename, flags, mode, 0,
-			       target_errno);
-}
-
-/* See target.h.  */
-
-int
-target_fileio_open_warn_if_slow (struct inferior *inf,
-				 const char *filename,
-				 int flags, int mode, int *target_errno)
-{
-  return target_fileio_open_1 (inf, filename, flags, mode, 1,
-			       target_errno);
 }
 
 /* See target.h.  */
@@ -3036,7 +3013,7 @@ target_fileio_read_alloc_1 (struct inferior *inf, const char *filename,
   int target_errno;
 
   scoped_target_fd fd (target_fileio_open (inf, filename, FILEIO_O_RDONLY,
-					   0700, &target_errno));
+					   0700, false, &target_errno));
   if (fd.get () == -1)
     return -1;
 

@@ -2135,21 +2135,15 @@ extern int target_search_memory (CORE_ADDR start_addr,
   current_top_target ()->filesystem_is_local ()
 
 /* Open FILENAME on the target, in the filesystem as seen by INF,
-   using FLAGS and MODE.  If INF is NULL, use the filesystem seen
-   by the debugger (GDB or, for remote targets, the remote stub).
-   Return a target file descriptor, or -1 if an error occurs (and
-   set *TARGET_ERRNO).  */
+   using FLAGS and MODE.  If INF is NULL, use the filesystem seen by
+   the debugger (GDB or, for remote targets, the remote stub).  Return
+   a target file descriptor, or -1 if an error occurs (and set
+   *TARGET_ERRNO).  If WARN_IF_SLOW is true, print a warning message
+   if the file is being accessed over a link that may be slow.  */
 extern int target_fileio_open (struct inferior *inf,
 			       const char *filename, int flags,
-			       int mode, int *target_errno);
-
-/* Like target_fileio_open, but print a warning message if the
-   file is being accessed over a link that may be slow.  */
-extern int target_fileio_open_warn_if_slow (struct inferior *inf,
-					    const char *filename,
-					    int flags,
-					    int mode,
-					    int *target_errno);
+			       int mode, bool warn_if_slow,
+			       int *target_errno);
 
 /* Write up to LEN bytes from WRITE_BUF to FD on the target.
    Return the number of bytes written, or -1 if an error occurs

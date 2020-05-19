@@ -1,5 +1,15 @@
 2020-05-19  Pedro Alves  <palves@redhat.com>
 
+	* gdb_bfd.c (gdb_bfd_iovec_fileio_open): Adjust.
+	* target.c (target_fileio_open_1): Rename to target_fileio_open
+	and make extern.  Use bool.
+	(target_fileio_open, target_fileio_open_warn_if_slow): Delete.
+	(target_fileio_read_alloc_1): Adjust.
+	* target.h (target_fileio_open): Add 'warn_if_slow' parameter.
+	(target_fileio_open_warn_if_slow): Delete declaration.
+
+2020-05-19  Pedro Alves  <palves@redhat.com>
+
 	* gdb_bfd.h: (gdb_bfd_open): Default to 'fd' parameter to -1.
 	Adjust all callers.
 
