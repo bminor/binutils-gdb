@@ -1,5 +1,13 @@
 2020-05-19  Simon Marchi  <simon.marchi@efficios.com>
 
+	* symfile.h (struct symfile_segment_data)
+	<~symfile_segment_data>: Remove.
+	<segment_info>: Change to std::vector.
+	* symfile.c (default_symfile_segments): Update.
+	* elfread.c (elf_symfile_segments): Update.
+
+2020-05-19  Simon Marchi  <simon.marchi@efficios.com>
+
 	* symfile.h (struct symfile_segment_data) <struct segment>: New.
 	<segments>: New.
 	<segment_bases, segment_sizes>: Remove.

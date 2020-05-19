@@ -747,7 +747,9 @@ default_symfile_segments (bfd *abfd)
   symfile_segment_data_up data (new symfile_segment_data);
 
   num_sections = bfd_count_sections (abfd);
-  data->segment_info = XCNEWVEC (int, num_sections);
+
+  /* All elements are initialized to 0 (map to no segment).  */
+  data->segment_info.resize (num_sections);
 
   for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
     {

@@ -93,11 +93,6 @@ struct symfile_segment_data
     CORE_ADDR size;
   };
 
-  ~symfile_segment_data ()
-  {
-    xfree (this->segment_info);
-  }
-
   /* The segments present in this file.  If there are
      two, the text segment is the first one and the data segment
      is the second one.  */
@@ -106,7 +101,7 @@ struct symfile_segment_data
   /* This is an array of entries recording which segment contains each BFD
      section.  SEGMENT_INFO[I] is S+1 if the I'th BFD section belongs to segment
      S, or zero if it is not in any segment.  */
-  int *segment_info = nullptr;
+  std::vector<int> segment_info;
 };
 
 using symfile_segment_data_up = std::unique_ptr<symfile_segment_data>;
