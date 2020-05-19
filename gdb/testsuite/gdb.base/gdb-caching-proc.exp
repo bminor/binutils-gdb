@@ -28,7 +28,7 @@ proc test_proc { name } {
 
     set resultlist [list]
 
-    with_test_prefix intial {
+    with_test_prefix initial {
 	set first [gdb_do_cache_wrap $real_name]
     }
     lappend resultlist $first

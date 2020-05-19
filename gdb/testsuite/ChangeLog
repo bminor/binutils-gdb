@@ -1,3 +1,7 @@
+2020-05-19  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/gdb-caching-proc.exp: Fix typo.
+
 2020-05-19  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.rust/simple.exp: Add some test descriptions.
