@@ -1,3 +1,7 @@
+2020-05-19  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (quirk_rust_enum): Allocate enough fields.
+
 2020-05-19  Pedro Alves  <palves@redhat.com>
 
 	* NEWS (set exec-file-mismatch): Adjust entry.

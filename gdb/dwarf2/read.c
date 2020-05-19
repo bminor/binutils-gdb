@@ -9420,7 +9420,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       /* Make space for the discriminant field.  */
       struct field *disr_field = &TYPE_FIELD (disr_type, 0);
       field *new_fields
-	= (struct field *) TYPE_ZALLOC (type, (TYPE_NFIELDS (type)
+	= (struct field *) TYPE_ZALLOC (type, ((TYPE_NFIELDS (type) + 1)
 					       * sizeof (struct field)));
       memcpy (new_fields + 1, TYPE_FIELDS (type),
 	      TYPE_NFIELDS (type) * sizeof (struct field));
