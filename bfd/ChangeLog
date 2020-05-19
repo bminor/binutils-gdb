@@ -1,5 +1,21 @@
 2020-05-20  Alan Modra  <amodra@gmail.com>
 
+	PR 25993
+	* archive.c (_bfd_get_elt_at_filepos): Don't strdup filename,
+	use bfd_set_filename.
+	* elfcode.h (_bfd_elf_bfd_from_remote_memory): Likewise.
+	* mach-o.c (bfd_mach_o_fat_member_init): Likewise.
+	* opncls.c (bfd_fopen, bfd_openstreamr, bfd_openr_iovec, bfd_openw),
+	(bfd_create): Likewise.
+	(_bfd_delete_bfd): Don't free filename.
+	(bfd_set_filename): Copy filename param to bfd_alloc'd memory,
+	return pointer to the copy or NULL on alloc fail.
+	* vms-lib.c (_bfd_vms_lib_get_module): Free newname and test
+	result of bfd_set_filename.
+	* bfd-in2.h: Regenerate.
+
+2020-05-20  Alan Modra  <amodra@gmail.com>
+
 	PR 26011
 	* elf.c (_bfd_elf_get_reloc_upper_bound): Sanity check reloc
 	section size against file size.

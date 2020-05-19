@@ -1452,6 +1452,12 @@ _bfd_vms_lib_get_module (bfd *abfd, unsigned int modidx)
       break;
     }
   bfd_set_filename (res, newname);
+  free (newname);
+  if (bfd_get_filename (res) == NULL)
+    {
+      bfd_close (res);
+      return NULL;
+    }
 
   tdata->cache[modidx] = res;
 

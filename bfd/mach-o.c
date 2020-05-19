@@ -5573,26 +5573,23 @@ bfd_mach_o_fat_member_init (bfd *abfd,
   struct areltdata *areltdata;
   /* Create the member filename. Use ARCH_NAME.  */
   const bfd_arch_info_type *ap = bfd_lookup_arch (arch_type, arch_subtype);
-  char *filename;
+  const char *filename;
 
   if (ap)
     {
       /* Use the architecture name if known.  */
-      filename = bfd_strdup (ap->printable_name);
-      if (filename == NULL)
-	return FALSE;
+      filename = bfd_set_filename (abfd, ap->printable_name);
     }
   else
     {
       /* Forge a uniq id.  */
-      const size_t namelen = 2 + 8 + 1 + 2 + 8 + 1;
-      filename = bfd_malloc (namelen);
-      if (filename == NULL)
-	return FALSE;
-      snprintf (filename, namelen, "0x%lx-0x%lx",
+      char buf[2 + 8 + 1 + 2 + 8 + 1];
+      snprintf (buf, sizeof (buf), "0x%lx-0x%lx",
 		entry->cputype, entry->cpusubtype);
+      filename = bfd_set_filename (abfd, buf);
     }
-  bfd_set_filename (abfd, filename);
+  if (!filename)
+    return FALSE;
 
   areltdata = bfd_zmalloc (sizeof (struct areltdata));
   if (areltdata == NULL)

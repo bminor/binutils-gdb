@@ -637,10 +637,10 @@ solib_aix_bfd_open (const char *pathname)
      along with appended parenthesized member name in order to allow commands
      listing all shared libraries to display.  Otherwise, we would only be
      displaying the name of the archive member object.  */
-  bfd_set_filename (object_bfd.get (),
-		    xstrprintf ("%s%s",
-				bfd_get_filename (archive_bfd.get ()),
-				sep));
+  std::string fname = string_printf ("%s%s",
+				     bfd_get_filename (archive_bfd.get ()),
+				     sep);
+  bfd_set_filename (object_bfd.get (), fname.c_str ());
 
   return object_bfd;
 }

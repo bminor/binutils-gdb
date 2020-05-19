@@ -1,3 +1,12 @@
+2020-05-20  Alan Modra  <amodra@gmail.com>
+
+	PR 25993
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open): Don't copy
+	other_bfd_filename for bfd_set_filename, and test result of
+	bfd_set_filename call.  Don't create a new is->filename, simply
+	copy from bfd filename.  Free new_name after bfd_set_filename.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_after_open): Likewise.
+
 2020-05-19  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
 	* testsuite/ld-aarch64/aarch64-elf.exp: New test

@@ -126,7 +126,6 @@ _bfd_delete_bfd (bfd *abfd)
       objalloc_free ((struct objalloc *) abfd->memory);
     }
 
-  free ((char *) bfd_get_filename (abfd));
   free (abfd->arelt_data);
   free (abfd);
 }
@@ -232,8 +231,7 @@ bfd_fopen (const char *filename, const char *target, const char *mode, int fd)
 
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = bfd_strdup (filename);
-  if (nbfd->filename == NULL)
+  if (!bfd_set_filename (nbfd, filename))
     {
       fclose (nbfd->iostream);
       _bfd_delete_bfd (nbfd);
@@ -406,8 +404,7 @@ bfd_openstreamr (const char *filename, const char *target, void *streamarg)
   nbfd->iostream = stream;
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = bfd_strdup (filename);
-  if (nbfd->filename == NULL)
+  if (!bfd_set_filename (nbfd, filename))
     {
       _bfd_delete_bfd (nbfd);
       return NULL;
@@ -607,8 +604,7 @@ bfd_openr_iovec (const char *filename, const char *target,
 
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = bfd_strdup (filename);
-  if (nbfd->filename == NULL)
+  if (!bfd_set_filename (nbfd, filename))
     {
       _bfd_delete_bfd (nbfd);
       return NULL;
@@ -679,8 +675,7 @@ bfd_openw (const char *filename, const char *target)
 
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = bfd_strdup (filename);
-  if (nbfd->filename == NULL)
+  if (!bfd_set_filename (nbfd, filename))
     {
       _bfd_delete_bfd (nbfd);
       return NULL;
@@ -824,8 +819,7 @@ bfd_create (const char *filename, bfd *templ)
     return NULL;
   /* PR 11983: Do not cache the original filename, but
      rather make a copy - the original might go away.  */
-  nbfd->filename = bfd_strdup (filename);
-  if (nbfd->filename == NULL)
+  if (!bfd_set_filename (nbfd, filename))
     {
       _bfd_delete_bfd (nbfd);
       return NULL;
@@ -2040,17 +2034,23 @@ FUNCTION
 	bfd_set_filename
 
 SYNOPSIS
-	void bfd_set_filename (bfd *abfd, char *filename);
+	const char *bfd_set_filename (bfd *abfd, const char *filename);
 
 DESCRIPTION
-	Set the filename of @var{abfd}.  The old filename, if any, is freed.
-	@var{filename} must be allocated using @code{xmalloc}.  After
-	this call, it is owned @var{abfd}.
+	Set the filename of @var{abfd}, copying the FILENAME parameter to
+	bfd_alloc'd memory owned by @var{abfd}.  Returns a pointer the
+	newly allocated name, or NULL if the allocation failed.
 */
 
-void
-bfd_set_filename (bfd *abfd, char *filename)
+const char *
+bfd_set_filename (bfd *abfd, const char *filename)
 {
-  free ((char *) abfd->filename);
-  abfd->filename = filename;
+  size_t len = strlen (filename) + 1;
+  char *n = bfd_alloc (abfd, len);
+  if (n)
+    {
+      memcpy (n, filename, len);
+      abfd->filename = n;
+    }
+  return n;
 }

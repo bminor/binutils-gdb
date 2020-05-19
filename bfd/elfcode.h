@@ -1680,7 +1680,6 @@ NAME(_bfd_elf,bfd_from_remote_memory)
   bfd_vma high_offset;
   bfd_vma shdr_end;
   bfd_vma loadbase;  /* Bytes.  */
-  char *filename;
   size_t amt;
   unsigned int opb = bfd_octets_per_byte (templ, NULL);
 
@@ -1894,22 +1893,14 @@ NAME(_bfd_elf,bfd_from_remote_memory)
       free (contents);
       return NULL;
     }
-  filename = bfd_strdup ("<in-memory>");
-  if (filename == NULL)
-    {
-      free (bim);
-      free (contents);
-      return NULL;
-    }
   nbfd = _bfd_new_bfd ();
-  if (nbfd == NULL)
+  if (nbfd == NULL
+      || !bfd_set_filename (nbfd, "<in-memory>"))
     {
-      free (filename);
       free (bim);
       free (contents);
       return NULL;
     }
-  nbfd->filename = filename;
   nbfd->xvec = templ->xvec;
   bim->size = high_offset;
   bim->buffer = contents;

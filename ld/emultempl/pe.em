@@ -1523,7 +1523,6 @@ gld_${EMULATION_NAME}_after_open (void)
 			struct bfd_symbol *s;
 			struct bfd_link_hash_entry * blhe;
 			const char *other_bfd_filename;
-			char *n;
 
 			s = (relocs[i]->sym_ptr_ptr)[0];
 
@@ -1550,9 +1549,9 @@ gld_${EMULATION_NAME}_after_open (void)
 			  continue;
 
 			/* Rename this implib to match the other one.  */
-			n = xmalloc (strlen (other_bfd_filename) + 1);
-			strcpy (n, other_bfd_filename);
-			bfd_set_filename (is->the_bfd->my_archive, n);
+			if (!bfd_set_filename (is->the_bfd->my_archive,
+					       other_bfd_filename))
+			  einfo ("%F%P: %pB: %E\n", is->the_bfd);
 		      }
 
 		    free (relocs);
@@ -1655,28 +1654,14 @@ gld_${EMULATION_NAME}_after_open (void)
 		else /* sentinel */
 		  seq = 'c';
 
-		/* PR 25993: It is possible that is->the_bfd-filename == is->filename.
-		   In which case calling bfd_set_filename on one will free the memory
-		   pointed to by the other.  */
-		if (is->filename == bfd_get_filename (is->the_bfd))
-		  {
-		    new_name = xmalloc (strlen (is->filename) + 3);
-		    sprintf (new_name, "%s.%c", is->filename, seq);
-		    bfd_set_filename (is->the_bfd, new_name);
-		    is->filename = new_name;
-		  }
-		else
-		  {
-		    new_name
-		      = xmalloc (strlen (bfd_get_filename (is->the_bfd)) + 3);
-		    sprintf (new_name, "%s.%c",
-			     bfd_get_filename (is->the_bfd), seq);
-		    bfd_set_filename (is->the_bfd, new_name);
-
-		    new_name = xmalloc (strlen (is->filename) + 3);
-		    sprintf (new_name, "%s.%c", is->filename, seq);
-		    is->filename = new_name;
-		  }
+		new_name
+		  = xmalloc (strlen (bfd_get_filename (is->the_bfd)) + 3);
+		sprintf (new_name, "%s.%c",
+			 bfd_get_filename (is->the_bfd), seq);
+		is->filename = bfd_set_filename (is->the_bfd, new_name);
+		free (new_name);
+		if (!is->filename)
+		  einfo ("%F%P: %pB: %E\n", is->the_bfd);
 	      }
 	  }
       }

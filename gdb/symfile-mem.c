@@ -78,11 +78,10 @@ target_read_memory_bfd (bfd_vma memaddr, bfd_byte *myaddr, bfd_size_type len)
    and read its in-core symbols out of inferior memory.  SIZE, if
    non-zero, is the known size of the object.  TEMPL is a bfd
    representing the target's format.  NAME is the name to use for this
-   symbol file in messages; it can be NULL or a malloc-allocated string
-   which will be attached to the BFD.  */
+   symbol file in messages; it can be NULL.  */
 static struct objfile *
 symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
-			     size_t size, char *name, int from_tty)
+			     size_t size, const char *name, int from_tty)
 {
   struct objfile *objf;
   struct bfd *nbfd;
@@ -102,7 +101,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
   gdb_bfd_ref_ptr nbfd_holder = gdb_bfd_ref_ptr::new_reference (nbfd);
 
   if (name == NULL)
-    name = xstrdup ("shared object read from target memory");
+    name = "shared object read from target memory";
   bfd_set_filename (nbfd, name);
 
   if (!bfd_check_format (nbfd, bfd_object))
@@ -183,8 +182,9 @@ add_vsyscall_page (struct target_ops *target, int from_tty)
 	  return;
 	}
 
-      char *name = xstrprintf ("system-supplied DSO at %s",
-			       paddress (target_gdbarch (), vsyscall_range.start));
+      std::string name = string_printf ("system-supplied DSO at %s",
+					paddress (target_gdbarch (),
+						  vsyscall_range.start));
       try
 	{
 	  /* Pass zero for FROM_TTY, because the action of loading the
@@ -193,7 +193,7 @@ add_vsyscall_page (struct target_ops *target, int from_tty)
 	  symbol_file_add_from_memory (bfd,
 				       vsyscall_range.start,
 				       vsyscall_range.length,
-				       name,
+				       name.c_str (),
 				       0 /* from_tty */);
 	}
       catch (const gdb_exception &ex)

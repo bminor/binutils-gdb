@@ -1,5 +1,17 @@
 2020-05-20  Alan Modra  <amodra@gmail.com>
 
+	PR 25993
+	* solib-darwin.c (darwin_bfd_open): Don't strdup pathname for
+	bfd_set_filename.
+	* solib-aix.c (solib_aix_bfd_open): Use std::string for name
+	passed to bfd_set_filename.
+	* symfile-mem.c (add_vsyscall_page): Likewise for string
+	passed to symbol_file_add_from_memory.
+	(symbol_file_add_from_memory): Make name param a const char* and
+	don't strdup.
+
+2020-05-20  Alan Modra  <amodra@gmail.com>
+
 	* coff-pe-read.c (read_pe_exported_syms): Use bfd_get_filename
 	rather than accessing bfd->filename directly.
 	* dtrace-probe.c (dtrace_static_probe_ops::get_probes): Likewise,
