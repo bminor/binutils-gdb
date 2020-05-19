@@ -6660,7 +6660,7 @@ som_write_armap (bfd *abfd,
   unsigned int module_count;
 
   /* We'll use this for the archive's date and mode later.  */
-  if (stat (abfd->filename, &statbuf) != 0)
+  if (stat (bfd_get_filename (abfd), &statbuf) != 0)
     {
       bfd_set_error (bfd_error_system_call);
       return FALSE;

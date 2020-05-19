@@ -180,7 +180,8 @@ MY (object_p) (bfd *abfd)
 #ifndef S_IXUSR
 #define S_IXUSR 0100	/* Execute by owner.  */
 #endif
-      if (stat (abfd->filename, &buf) == 0 && (buf.st_mode & S_IXUSR))
+      if (stat (bfd_get_filename (abfd), &buf) == 0
+	  && (buf.st_mode & S_IXUSR) != 0)
 	abfd->flags |= EXEC_P;
     }
 #endif /* ENTRY_CAN_BE_ZERO */

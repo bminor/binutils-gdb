@@ -6075,12 +6075,12 @@ bfd_mach_o_follow_dsym (bfd *abfd)
   if (abfd->my_archive && !bfd_is_thin_archive (abfd->my_archive))
     base_bfd = abfd->my_archive;
   /* BFD may have been opened from a stream. */
-  if (base_bfd->filename == NULL)
+  if (bfd_get_filename (base_bfd) == NULL)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return NULL;
     }
-  base_basename = lbasename (base_bfd->filename);
+  base_basename = lbasename (bfd_get_filename (base_bfd));
 
   uuid_cmd = bfd_mach_o_lookup_uuid_command (abfd);
   if (uuid_cmd == NULL)
@@ -6090,14 +6090,14 @@ bfd_mach_o_follow_dsym (bfd *abfd)
      It seems apple's GDB checks all files in the dSYM bundle directory.
      http://opensource.apple.com/source/gdb/gdb-1708/src/gdb/macosx/macosx-tdep.c
   */
-  dsym_filename = (char *)bfd_malloc (strlen (base_bfd->filename)
+  dsym_filename = (char *)bfd_malloc (strlen (bfd_get_filename (base_bfd))
 				       + strlen (dsym_subdir) + 1
 				       + strlen (base_basename) + 1);
   if (dsym_filename == NULL)
     return NULL;
 
   sprintf (dsym_filename, "%s%s/%s",
-	   base_bfd->filename, dsym_subdir, base_basename);
+	   bfd_get_filename (base_bfd), dsym_subdir, base_basename);
 
   dsym_bfd = bfd_mach_o_find_dsym (dsym_filename, uuid_cmd,
 				   bfd_get_arch_info (abfd));
@@ -6175,8 +6175,8 @@ bfd_mach_o_close_and_cleanup (bfd *abfd)
 	     but it is small, and happens when we are closing down, so it
 	     should not matter too much.  */
 	  char *dsym_filename = (char *)(fat_bfd
-					 ? fat_bfd->filename
-					 : mdata->dsym_bfd->filename);
+					 ? bfd_get_filename (fat_bfd)
+					 : bfd_get_filename (mdata->dsym_bfd));
 #endif
 	  bfd_close (mdata->dsym_bfd);
 	  mdata->dsym_bfd = NULL;

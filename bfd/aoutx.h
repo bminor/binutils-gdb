@@ -2686,7 +2686,7 @@ NAME (aout, find_nearest_line) (bfd *abfd,
   bfd_size_type filelen, funclen;
   char *buf;
 
-  *filename_ptr = abfd->filename;
+  *filename_ptr = bfd_get_filename (abfd);
   *functionname_ptr = NULL;
   *line_ptr = 0;
   if (disriminator_ptr)
@@ -4846,7 +4846,8 @@ aout_link_write_symbols (struct aout_final_link_info *flaginfo, bfd *input_bfd)
      discarding such symbols.  */
   if (strip != strip_all
       && (strip != strip_some
-	  || bfd_hash_lookup (flaginfo->info->keep_hash, input_bfd->filename,
+	  || bfd_hash_lookup (flaginfo->info->keep_hash,
+			      bfd_get_filename (input_bfd),
 			      FALSE, FALSE) != NULL)
       && discard != discard_all)
     {
@@ -4854,7 +4855,7 @@ aout_link_write_symbols (struct aout_final_link_info *flaginfo, bfd *input_bfd)
       H_PUT_8 (output_bfd, 0, outsym->e_other);
       H_PUT_16 (output_bfd, 0, outsym->e_desc);
       strtab_index = add_to_stringtab (output_bfd, flaginfo->strtab,
-				       input_bfd->filename, FALSE);
+				       bfd_get_filename (input_bfd), FALSE);
       if (strtab_index == (bfd_size_type) -1)
 	return FALSE;
       PUT_WORD (output_bfd, strtab_index, outsym->e_strx);

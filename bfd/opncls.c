@@ -126,8 +126,7 @@ _bfd_delete_bfd (bfd *abfd)
       objalloc_free ((struct objalloc *) abfd->memory);
     }
 
-  if (abfd->filename)
-    free ((char *) abfd->filename);
+  free ((char *) bfd_get_filename (abfd));
   free (abfd->arelt_data);
   free (abfd);
 }
@@ -709,7 +708,7 @@ _maybe_make_executable (bfd * abfd)
     {
       struct stat buf;
 
-      if (stat (abfd->filename, &buf) == 0
+      if (stat (bfd_get_filename (abfd), &buf) == 0
 	  /* Do not attempt to change non-regular files.  This is
 	     here especially for configure scripts and kernel builds
 	     which run tests with "ld [...] -o /dev/null".  */
@@ -718,7 +717,7 @@ _maybe_make_executable (bfd * abfd)
 	  unsigned int mask = umask (0);
 
 	  umask (mask);
-	  chmod (abfd->filename,
+	  chmod (bfd_get_filename (abfd),
 		 (0777
 		  & (buf.st_mode | ((S_IXUSR | S_IXGRP | S_IXOTH) &~ mask))));
 	}
@@ -1400,7 +1399,7 @@ find_separate_debug_file (bfd *		  abfd,
     debug_file_directory = ".";
 
   /* BFD may have been opened from a stream.  */
-  if (abfd->filename == NULL)
+  if (bfd_get_filename (abfd) == NULL)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return NULL;
@@ -1420,8 +1419,9 @@ find_separate_debug_file (bfd *		  abfd,
 
   if (include_dirs)
     {
-      for (dirlen = strlen (abfd->filename); dirlen > 0; dirlen--)
-	if (IS_DIR_SEPARATOR (abfd->filename[dirlen - 1]))
+      const char *fname = bfd_get_filename (abfd);
+      for (dirlen = strlen (fname); dirlen > 0; dirlen--)
+	if (IS_DIR_SEPARATOR (fname[dirlen - 1]))
 	  break;
 
       dir = (char *) bfd_malloc (dirlen + 1);
@@ -1430,7 +1430,7 @@ find_separate_debug_file (bfd *		  abfd,
 	  free (base);
 	  return NULL;
 	}
-      memcpy (dir, abfd->filename, dirlen);
+      memcpy (dir, fname, dirlen);
       dir[dirlen] = '\0';
     }
   else
@@ -1442,7 +1442,7 @@ find_separate_debug_file (bfd *		  abfd,
 
   /* Compute the canonical name of the bfd object with all symbolic links
      resolved, for use in the global debugfile directory.  */
-  canon_dir = lrealpath (abfd->filename);
+  canon_dir = lrealpath (bfd_get_filename (abfd));
   for (canon_dirlen = strlen (canon_dir); canon_dirlen > 0; canon_dirlen--)
     if (IS_DIR_SEPARATOR (canon_dir[canon_dirlen - 1]))
       break;
@@ -1909,7 +1909,7 @@ get_build_id_name (bfd *abfd, void *build_id_out_p)
   bfd_size_type s;
   bfd_byte *d;
 
-  if (abfd == NULL || abfd->filename == NULL || build_id_out == NULL)
+  if (abfd == NULL || bfd_get_filename (abfd) == NULL || build_id_out == NULL)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return NULL;

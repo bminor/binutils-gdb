@@ -1015,15 +1015,15 @@ srec_write_record (bfd *abfd,
 static bfd_boolean
 srec_write_header (bfd *abfd)
 {
-  unsigned int len = strlen (abfd->filename);
+  unsigned int len = strlen (bfd_get_filename (abfd));
 
   /* I'll put an arbitrary 40 char limit on header size.  */
   if (len > 40)
     len = 40;
 
   return srec_write_record (abfd, 0, (bfd_vma) 0,
-			    (bfd_byte *) abfd->filename,
-			    (bfd_byte *) abfd->filename + len);
+			    (bfd_byte *) bfd_get_filename (abfd),
+			    (bfd_byte *) bfd_get_filename (abfd) + len);
 }
 
 static bfd_boolean
@@ -1089,9 +1089,9 @@ srec_write_symbols (bfd *abfd)
       bfd_size_type len;
       asymbol **table = bfd_get_outsymbols (abfd);
 
-      len = strlen (abfd->filename);
+      len = strlen (bfd_get_filename (abfd));
       if (bfd_bwrite ("$$ ", (bfd_size_type) 3, abfd) != 3
-	  || bfd_bwrite (abfd->filename, len, abfd) != len
+	  || bfd_bwrite (bfd_get_filename (abfd), len, abfd) != len
 	  || bfd_bwrite ("\r\n", (bfd_size_type) 2, abfd) != 2)
 	return FALSE;
 

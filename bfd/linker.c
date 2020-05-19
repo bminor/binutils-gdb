@@ -1995,7 +1995,7 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 	      newsym = bfd_make_empty_symbol (input_bfd);
 	      if (!newsym)
 		return FALSE;
-	      newsym->name = input_bfd->filename;
+	      newsym->name = bfd_get_filename (input_bfd);
 	      newsym->value = 0;
 	      newsym->flags = BSF_LOCAL | BSF_FILE;
 	      newsym->section = sec;

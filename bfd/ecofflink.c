@@ -1112,7 +1112,7 @@ bfd_ecoff_debug_accumulate_other (void * handle,
   fdr.issBase = output_symhdr->issMax;
   fdr.cbSs = 0;
   fdr.rss = ecoff_add_string (ainfo, info, output_debug, &fdr,
-			      input_bfd->filename);
+			      bfd_get_filename (input_bfd));
   if (fdr.rss == -1)
     return FALSE;
   fdr.isymBase = output_symhdr->isymMax;

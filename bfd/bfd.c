@@ -787,8 +787,8 @@ bfd_errmsg (bfd_error_type error_tag)
       char *buf;
       const char *msg = bfd_errmsg (input_error);
 
-      if (asprintf (&buf, _(bfd_errmsgs [error_tag]), input_bfd->filename, msg)
-	  != -1)
+      if (asprintf (&buf, _(bfd_errmsgs [error_tag]),
+		    bfd_get_filename (input_bfd), msg) != -1)
 	return buf;
 
       /* Ick, what to do on out of memory?  */
@@ -1114,10 +1114,10 @@ _bfd_doprnt (FILE *stream, const char *format, union _bfd_doprnt_args *args)
 		  else if (abfd->my_archive
 			   && !bfd_is_thin_archive (abfd->my_archive))
 		    result = fprintf (stream, "%s(%s)",
-				      abfd->my_archive->filename,
-				      abfd->filename);
+				      bfd_get_filename (abfd->my_archive),
+				      bfd_get_filename (abfd));
 		  else
-		    result = fprintf (stream, "%s", abfd->filename);
+		    result = fprintf (stream, "%s", bfd_get_filename (abfd));
 		}
 	      else
 		PRINT_TYPE (void *, p);

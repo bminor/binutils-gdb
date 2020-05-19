@@ -3040,7 +3040,7 @@ elf_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
   /* Do not attempt to sort non-regular files.  This is here
      especially for configure scripts and kernel builds which run
      tests with "ld [...] -o /dev/null".  */
-  if (stat (abfd->filename, &buf) != 0
+  if (stat (bfd_get_filename (abfd), &buf) != 0
       || !S_ISREG(buf.st_mode))
     return TRUE;
 

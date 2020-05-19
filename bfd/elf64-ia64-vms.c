@@ -2844,7 +2844,7 @@ elf64_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 					   elf_ia64_vms_ident (abfd)))
 	    return FALSE;
 
-	  soname = vms_get_module_name (abfd->filename, TRUE);
+	  soname = vms_get_module_name (bfd_get_filename (abfd), TRUE);
 	  if (soname == NULL)
 	    return FALSE;
 	  strindex = dynstrsec->size;

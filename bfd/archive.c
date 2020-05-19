@@ -403,7 +403,7 @@ find_nested_archive (const char *filename, bfd *arch_bfd)
   bfd *abfd;
 
   /* PR 15140: Don't allow a nested archive pointing to itself.  */
-  if (filename_cmp (filename, arch_bfd->filename) == 0)
+  if (filename_cmp (filename, bfd_get_filename (arch_bfd)) == 0)
     {
       bfd_set_error (bfd_error_malformed_archive);
       return NULL;
@@ -413,7 +413,7 @@ find_nested_archive (const char *filename, bfd *arch_bfd)
        abfd != NULL;
        abfd = abfd->archive_next)
     {
-      if (filename_cmp (filename, abfd->filename) == 0)
+      if (filename_cmp (filename, bfd_get_filename (abfd)) == 0)
 	return abfd;
     }
   abfd = open_nested_file (filename, arch_bfd);
@@ -628,7 +628,7 @@ _bfd_generic_read_ar_hdr_mag (bfd *abfd, const char *mag)
 char *
 _bfd_append_relative_path (bfd *arch, char *elt_name)
 {
-  const char *arch_name = arch->filename;
+  const char *arch_name = bfd_get_filename (arch);
   const char *base_name = lbasename (arch_name);
   size_t prefix_len;
   char *filename;
@@ -1564,13 +1564,13 @@ _bfd_construct_extended_name_table (bfd *abfd,
 
       if (bfd_is_thin_archive (abfd))
 	{
-	  const char *filename = current->filename;
+	  const char *filename = bfd_get_filename (current);
 
 	  /* If the element being added is a member of another archive
 	     (i.e., we are flattening), use the containing archive's name.  */
 	  if (current->my_archive
 	      && ! bfd_is_thin_archive (current->my_archive))
-	    filename = current->my_archive->filename;
+	    filename = bfd_get_filename (current->my_archive);
 
 	  /* If the path is the same as the previous path seen,
 	     reuse it.  This can happen when flattening a thin
@@ -1583,8 +1583,8 @@ _bfd_construct_extended_name_table (bfd *abfd,
 	  /* If the path is relative, adjust it relative to
 	     the containing archive. */
 	  if (! IS_ABSOLUTE_PATH (filename)
-	      && ! IS_ABSOLUTE_PATH (abfd->filename))
-	    normal = adjust_relative_path (filename, abfd->filename);
+	      && ! IS_ABSOLUTE_PATH (bfd_get_filename (abfd)))
+	    normal = adjust_relative_path (filename, bfd_get_filename (abfd));
 	  else
 	    normal = filename;
 
@@ -1598,7 +1598,7 @@ _bfd_construct_extended_name_table (bfd *abfd,
 	  continue;
 	}
 
-      normal = normalize (abfd, current->filename);
+      normal = normalize (abfd, bfd_get_filename (current));
       if (normal == NULL)
 	return FALSE;
 
@@ -1655,7 +1655,7 @@ _bfd_construct_extended_name_table (bfd *abfd,
       const char *normal;
       unsigned int thislen;
       long stroff;
-      const char *filename = current->filename;
+      const char *filename = bfd_get_filename (current);
 
       if (bfd_is_thin_archive (abfd))
 	{
@@ -1663,7 +1663,7 @@ _bfd_construct_extended_name_table (bfd *abfd,
 	     (i.e., we are flattening), use the containing archive's name.  */
 	  if (current->my_archive
 	      && ! bfd_is_thin_archive (current->my_archive))
-	    filename = current->my_archive->filename;
+	    filename = bfd_get_filename (current->my_archive);
 	  /* If the path is the same as the previous path seen,
 	     reuse it.  This can happen when flattening a thin
 	     archive that contains other archives.
@@ -1672,8 +1672,8 @@ _bfd_construct_extended_name_table (bfd *abfd,
 	  if (last_filename && filename_cmp (last_filename, filename) == 0)
 	    normal = last_filename;
 	  else if (! IS_ABSOLUTE_PATH (filename)
-		   && ! IS_ABSOLUTE_PATH (abfd->filename))
-	    normal = adjust_relative_path (filename, abfd->filename);
+		   && ! IS_ABSOLUTE_PATH (bfd_get_filename (abfd)))
+	    normal = adjust_relative_path (filename, bfd_get_filename (abfd));
 	  else
 	    normal = filename;
 	}
@@ -1741,7 +1741,7 @@ _bfd_archive_bsd44_construct_extended_name_table (bfd *abfd,
        current != NULL;
        current = current->archive_next)
     {
-      const char *normal = normalize (abfd, current->filename);
+      const char *normal = normalize (abfd, bfd_get_filename (current));
       int has_space = 0;
       unsigned int len;
 
@@ -1787,7 +1787,7 @@ _bfd_bsd44_write_ar_hdr (bfd *archive, bfd *abfd)
   if (is_bsd44_extended_name (hdr->ar_name))
     {
       /* This is a BSD 4.4 extended name.  */
-      const char *fullname = normalize (abfd, abfd->filename);
+      const char *fullname = normalize (abfd, bfd_get_filename (abfd));
       unsigned int len = strlen (fullname);
       unsigned int padded_len = (len + 3) & ~3;
 
@@ -2139,13 +2139,15 @@ _bfd_write_archive_contents (bfd *arch)
       if (!current->arelt_data)
 	{
 	  current->arelt_data =
-	    bfd_ar_hdr_from_filesystem (arch, current->filename, current);
+	    bfd_ar_hdr_from_filesystem (arch, bfd_get_filename (current),
+					current);
 	  if (!current->arelt_data)
 	    goto input_err;
 
 	  /* Put in the file name.  */
 	  BFD_SEND (arch, _bfd_truncate_arname,
-		    (arch, current->filename, (char *) arch_hdr (current)));
+		    (arch, bfd_get_filename (current),
+		     (char *) arch_hdr (current)));
 	}
 
       if (makemap && ! hasobjects)
@@ -2294,7 +2296,7 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 
   /* Drop all the files called __.SYMDEF, we're going to make our own.  */
   while (arch->archive_head
-	 && strcmp (arch->archive_head->filename, "__.SYMDEF") == 0)
+	 && strcmp (bfd_get_filename (arch->archive_head), "__.SYMDEF") == 0)
     arch->archive_head = arch->archive_head->archive_next;
 
   /* Map over each element.  */
@@ -2495,7 +2497,7 @@ _bfd_bsd_write_armap (bfd *arch,
     {
       struct stat statbuf;
 
-      if (stat (arch->filename, &statbuf) == 0)
+      if (stat (bfd_get_filename (arch), &statbuf) == 0)
 	bfd_ardata (arch)->armap_timestamp = (statbuf.st_mtime
 					      + ARMAP_TIME_OFFSET);
       uid = getuid();

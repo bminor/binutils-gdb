@@ -1,5 +1,46 @@
 2020-05-19  Alan Modra  <amodra@gmail.com>
 
+	* aix5ppc-core.c (xcoff64_core_file_matches_executable_p): Use
+	bfd_get_filename rather than accessing bfd->filename directly.
+	* aout-target.h (MY (object_p)): Likewise.
+	* aoutx.h (aout_find_nearest_line, aout_link_write_symbols): Likewise.
+	* archive.c (find_nested_archive, _bfd_generic_read_ar_hdr_mag),
+	(_bfd_construct_extended_name_table, _bfd_bsd44_write_ar_hdr),
+	(_bfd_archive_bsd44_construct_extended_name_table),
+	(_bfd_write_archive_contents, _bfd_compute_and_write_armap),
+	(_bfd_bsd_write_armap): Likewise.
+	* bfd.c (bfd_errmsg, _bfd_doprnt): Likewise.
+	* cache.c (bfd_open_file): Likewise.
+	* ecoff.c (_bfd_ecoff_write_armap): Likewise.
+	* ecofflink.c (bfd_ecoff_debug_accumulate_other): Likewise.
+	* elf32-bfin.c (bfinfdpic_relocate_section): Likewise.
+	* elf32-frv.c (elf32_frv_relocate_section): Likewise.
+	* elf32-hppa.c (elf32_hppa_final_link): Likewise.
+	* elf32-nds32.c (nds32_elf_output_symbol_hook),
+	(patch_tls_desc_to_ie): Likewise.
+	* elf32-spu.c (sort_bfds, print_one_overlay_section),
+	(spu_elf_auto_overlay): Likewise.
+	* elf64-hppa.c (elf_hppa_final_link): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_size_dynamic_sections): Likewise.
+	* elfcore.h (elf_core_file_matches_executable_p): Likewise.
+	* elflink.c (bfd_elf_size_dynamic_sections),
+	(elf_link_input_bfd): Likewise.
+	* linker.c (_bfd_generic_link_output_symbols): Likewise.
+	* mach-o.c (bfd_mach_o_follow_dsym),
+	(bfd_mach_o_close_and_cleanup): Likewise.
+	* opncls.c (_bfd_delete_bfd, _maybe_make_executable),
+	(find_separate_debug_file, get_build_id_name): Likewise.
+	* pdp11.c (aout_find_nearest_line, aout_link_write_symbols): Likewise.
+	* plugin.c (bfd_plugin_open_input): Likewise.
+	* rs6000-core.c (rs6000coff_core_file_matches_executable_p): Likewise.
+	* som.c (som_write_armap): Likewise.
+	* srec.c (srec_write_record, srec_write_symbols): Likewise.
+	* vms-lib.c (_bfd_vms_lib_get_imagelib_file),
+	(_bfd_vms_lib_write_archive_contents): Likewise.
+	* xcofflink.c (xcoff_link_add_dynamic_symbols): Likewise.
+
+2020-05-19  Alan Modra  <amodra@gmail.com>
+
 	PR 25713
 	* bfdio.c (_bfd_real_fopen): Typo fix.
 

@@ -4862,7 +4862,7 @@ nds32_elf_output_symbol_hook (struct bfd_link_info *info,
       if (bfd_is_const_section (input_sec))
 	source = input_sec->name;
       else
-	source = input_sec->owner->filename;
+	source = bfd_get_filename (input_sec->owner);
 
       fprintf (sym_ld_script, "\t%s = 0x%08lx;\t /* %s */\n",
 	       h->root.root.string,
@@ -5047,7 +5047,7 @@ patch_tls_desc_to_ie (bfd_byte *contents, Elf_Internal_Rela *rel, bfd *ibfd)
 
   if (!rz)
     {
-      printf ("%s: %s @ 0x%08x\n", __func__, ibfd->filename,
+      printf ("%s: %s @ 0x%08x\n", __func__, bfd_get_filename (ibfd),
 	      (int) rel->r_offset);
       BFD_ASSERT(0); /* Unsupported pattern.  */
     }

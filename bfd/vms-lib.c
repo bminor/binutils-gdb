@@ -1491,7 +1491,7 @@ bfd *
 _bfd_vms_lib_get_imagelib_file (bfd *el)
 {
   bfd *archive = el->my_archive;
-  const char *modname = el->filename;
+  const char *modname = bfd_get_filename (el);
   int modlen = strlen (modname);
   char *filename;
   int j;
@@ -1517,7 +1517,7 @@ _bfd_vms_lib_get_imagelib_file (bfd *el)
     {
       /* xgettext:c-format */
       _bfd_error_handler(_("could not open shared image '%s' from '%s'"),
-			 filename, archive->filename);
+			 filename, bfd_get_filename (archive));
       bfd_release (archive, filename);
       return NULL;
     }
@@ -2152,7 +2152,7 @@ _bfd_vms_lib_write_archive_contents (bfd *arch)
       unsigned int nl;
 
       modules[i].abfd = current;
-      modules[i].name = vms_get_module_name (current->filename, FALSE);
+      modules[i].name = vms_get_module_name (bfd_get_filename (current), FALSE);
       modules[i].ref = 1;
 
       /* FIXME: silently truncate long names ?  */

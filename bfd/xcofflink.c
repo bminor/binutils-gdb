@@ -1000,7 +1000,7 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
 
   if (abfd->my_archive == NULL || bfd_is_thin_archive (abfd->my_archive))
     {
-      if (!bfd_xcoff_split_import_path (abfd, abfd->filename,
+      if (!bfd_xcoff_split_import_path (abfd, bfd_get_filename (abfd),
 					&n->path, &n->file))
 	return FALSE;
       n->member = "";
@@ -1013,7 +1013,8 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
       if (!archive_info->impfile)
 	{
 	  if (!bfd_xcoff_split_import_path (archive_info->archive,
-					    archive_info->archive->filename,
+					    bfd_get_filename (archive_info
+							      ->archive),
 					    &archive_info->imppath,
 					    &archive_info->impfile))
 	    return FALSE;

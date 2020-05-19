@@ -6623,7 +6623,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	    {
 	      size_t indx;
 
-	      name = lbasename (output_bfd->filename);
+	      name = lbasename (bfd_get_filename (output_bfd));
 	      def.vd_hash = bfd_elf_hash (name);
 	      indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
 					  name, FALSE);
@@ -6850,7 +6850,8 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	      indx = _bfd_elf_strtab_add (elf_hash_table (info)->dynstr,
 					  elf_dt_name (vn->vn_bfd) != NULL
 					  ? elf_dt_name (vn->vn_bfd)
-					  : lbasename (vn->vn_bfd->filename),
+					  : lbasename (bfd_get_filename
+						       (vn->vn_bfd)),
 					  FALSE);
 	      if (indx == (size_t) -1)
 		return FALSE;
@@ -10675,7 +10676,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	{
 	  _bfd_error_handler (_("warning: --enable-non-contiguous-regions "
 				"discards section `%s' from '%s'\n"),
-			      isec->name, isec->owner->filename);
+			      isec->name, bfd_get_filename (isec->owner));
 	  continue;
 	}
 
@@ -10726,7 +10727,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	  osym.st_shndx = SHN_ABS;
 	  if (!elf_link_output_symstrtab (flinfo,
 					  (input_bfd->lto_output ? NULL
-					   : input_bfd->filename),
+					   : bfd_get_filename (input_bfd)),
 					  &osym, bfd_abs_section_ptr,
 					  NULL))
 	    return FALSE;
@@ -11028,7 +11029,7 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 #ifdef DEBUG
 		  printf ("Encountered a complex symbol!");
 		  printf (" (input_bfd %s, section %s, reloc %ld\n",
-			  input_bfd->filename, o->name,
+			  bfd_get_filename (input_bfd), o->name,
 			  (long) (rel - internal_relocs));
 		  printf (" symbol: idx  %8.8lx, name %s\n",
 			  r_symndx, sym_name);
