@@ -1,5 +1,17 @@
 2020-05-19  Pedro Alves  <palves@redhat.com>
 
+	* NEWS (set exec-file-mismatch): Adjust entry.
+	* exec.c: Include "build-id.h".
+	(validate_exec_file): Try to match build IDs instead of filenames.
+	* gdb_bfd.c (struct gdb_bfd_open_closure): New.
+	(gdb_bfd_iovec_fileio_open): Adjust to use gdb_bfd_open_closure
+	and pass down 'warn_if_slow'.
+	(gdb_bfd_open): Add 'warn_if_slow' parameter.  Use
+	gdb_bfd_open_closure to pass it down.
+	* gdb_bfd.h (gdb_bfd_open): Add 'warn_if_slow' parameter.
+
+2020-05-19  Pedro Alves  <palves@redhat.com>
+
 	* gdb_bfd.c (gdb_bfd_iovec_fileio_open): Adjust.
 	* target.c (target_fileio_open_1): Rename to target_fileio_open
 	and make extern.  Use bool.

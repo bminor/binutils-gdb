@@ -2909,22 +2909,22 @@ the @code{file} command to load the program.  @xref{Files, ,Commands to
 Specify Files}.
 
 @anchor{set exec-file-mismatch}
-If the debugger can determine the name of the executable file running
-in the process it is attaching to, and this file name does not match
-the name of the current exec-file loaded by @value{GDBN}, the option
-@code{exec-file-mismatch} specifies how to handle the mismatch.
+If the debugger can determine that the executable file running in the
+process it is attaching to does not match the current exec-file loaded
+by @value{GDBN}, the option @code{exec-file-mismatch} specifies how to
+handle the mismatch.  @value{GDBN} tries to compare the files by
+comparing their build IDs (@pxref{build ID}), if available.
 
 @table @code
 @kindex exec-file-mismatch
 @cindex set exec-file-mismatch
 @item set exec-file-mismatch @samp{ask|warn|off}
 
-Whether to detect mismatch between the name of the current executable
-file loaded by @value{GDBN} and the name of the executable file used to
-start the process.  If @samp{ask}, the default, display a warning
-and ask the user whether to load the process executable file; if
-@samp{warn}, just display a warning; if @samp{off}, don't attempt to
-detect a mismatch.
+Whether to detect mismatch between the current executable file loaded
+by @value{GDBN} and the executable file used to start the process.  If
+@samp{ask}, the default, display a warning and ask the user whether to
+load the process executable file; if @samp{warn}, just display a
+warning; if @samp{off}, don't attempt to detect a mismatch.
 
 @cindex show exec-file-mismatch
 @item show exec-file-mismatch
@@ -20874,6 +20874,7 @@ checksum for the debug file, which @value{GDBN} uses to validate that
 the executable and the debug file came from the same build.
 
 @item
+@anchor{build ID}
 The executable contains a @dfn{build ID}, a unique bit string that is
 also present in the corresponding debug info file.  (This is supported
 only on some operating systems, when using the ELF or PE file formats
