@@ -1,3 +1,9 @@
+2020-05-19  Gunther Nikl  <gnikl@justmail.de>
+
+	PR 26005
+	* elf.c (bfd_section_from_shdr): Replace bfd_malloc + memset with
+	bfd_zmalloc to allocate memory for the sections_being_created array.
+
 2020-05-19  Stafford Horne  <shorne@gmail.com>
 
 	* elf32-or1k.c (or1k_elf_finish_dynamic_symbol): Rename srela

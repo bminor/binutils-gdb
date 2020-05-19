@@ -2075,9 +2075,9 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  /* PR 26005: Do not use bfd_zalloc here as the memory might
 	     be released before the bfd has been fully scanned.  */
 	  sections_being_created = (bfd_boolean *) bfd_malloc (amt);
-	  memset (sections_being_created, FALSE, amt);
 	  if (sections_being_created == NULL)
 	    return FALSE;
+	  memset (sections_being_created, FALSE, amt);
 	  sections_being_created_abfd = abfd;
 	}
       if (sections_being_created [shindex])
