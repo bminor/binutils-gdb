@@ -1,3 +1,7 @@
+2020-05-19  Tom Tromey  <tromey@adacore.com>
+
+	* sparc64-tdep.c (adi_tag_fd): Update call to target_fileio_open.
+
 2020-05-19  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2/read.c (quirk_rust_enum): Allocate enough fields.

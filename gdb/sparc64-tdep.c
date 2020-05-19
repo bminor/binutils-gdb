@@ -287,7 +287,7 @@ adi_tag_fd (void)
   snprintf (cl_name, sizeof(cl_name), "/proc/%ld/adi/tags", (long) pid);
   int target_errno;
   proc->stat.tag_fd = target_fileio_open (NULL, cl_name, O_RDWR|O_EXCL, 
-                                          0, &target_errno);
+                                          false, 0, &target_errno);
   return proc->stat.tag_fd;
 }
 
