@@ -267,8 +267,10 @@ typedef struct filedata
   bfd_size_type        dynamic_size;
   size_t               dynamic_nent;
   Elf_Internal_Dyn *   dynamic_section;
+  Elf_Internal_Shdr *  dynamic_strtab_section;
   char *               dynamic_strings;
   unsigned long        dynamic_strings_length;
+  Elf_Internal_Shdr *  dynamic_symtab_section;
   unsigned long        num_dynamic_syms;
   Elf_Internal_Sym *   dynamic_symbols;
   bfd_vma              version_info[16];
@@ -5363,13 +5365,13 @@ process_program_headers (Filedata * filedata)
 	      filedata->dynamic_addr = sec->sh_offset;
 	      filedata->dynamic_size = sec->sh_size;
 
-	      if (filedata->dynamic_addr < segment->p_offset
-		  || filedata->dynamic_addr > segment->p_offset + segment->p_filesz)
-		warn (_("the .dynamic section is not contained"
-			" within the dynamic segment\n"));
-	      else if (filedata->dynamic_addr > segment->p_offset)
-		warn (_("the .dynamic section is not the first section"
-			" in the dynamic segment.\n"));
+	      /* The PT_DYNAMIC segment, which is used by the run-time
+		 loader,  should exactly match the .dynamic section.  */
+	      if (do_checks
+		  && (filedata->dynamic_addr != segment->p_offset
+		      || filedata->dynamic_size != segment->p_filesz))
+		warn (_("\
+the .dynamic section is not the same as the dynamic segment\n"));
 	    }
 
 	  /* PR binutils/17512: Avoid corrupt dynamic section info in the
@@ -6319,6 +6321,7 @@ process_section_headers (Filedata * filedata)
 	  CHECK_ENTSIZE (section, i, Sym);
 	  filedata->dynamic_symbols
 	    = GET_ELF_SYMBOLS (filedata, section, &filedata->num_dynamic_syms);
+	  filedata->dynamic_symtab_section = section;
 	  break;
 
 	case SHT_STRTAB:
@@ -6335,6 +6338,7 @@ process_section_headers (Filedata * filedata)
 				     1, section->sh_size, _("dynamic strings"));
 	      filedata->dynamic_strings_length
 		= filedata->dynamic_strings == NULL ? 0 : section->sh_size;
+	      filedata->dynamic_strtab_section = section;
 	    }
 	  break;
 
@@ -10341,6 +10345,18 @@ process_dynamic_section (Filedata * filedata)
 		  section.sh_size = (num_of_syms
 				     * filedata->dynamic_info[DT_SYMENT]);
 		  section.sh_entsize = filedata->dynamic_info[DT_SYMENT];
+
+		  if (do_checks
+		      && filedata->dynamic_symtab_section != NULL
+		      && ((filedata->dynamic_symtab_section->sh_offset
+			   != section.sh_offset)
+			  || (filedata->dynamic_symtab_section->sh_size
+			      != section.sh_size)
+			  || (filedata->dynamic_symtab_section->sh_entsize
+			      != section.sh_entsize)))
+		    warn (_("\
+the .dynsym section doesn't match the DT_SYMTAB and DT_SYMENT tags\n"));
+
 		  section.sh_name = filedata->string_table_length;
 		  filedata->dynamic_symbols
 		    = GET_ELF_SYMBOLS (filedata, &section,
@@ -10378,6 +10394,15 @@ process_dynamic_section (Filedata * filedata)
 	    offset = offset_from_vma (filedata,
 				      filedata->dynamic_info[DT_STRTAB],
 				      str_tab_len);
+	    if (do_checks
+		&& filedata->dynamic_strtab_section
+		&& ((filedata->dynamic_strtab_section->sh_offset
+		     != (file_ptr) offset)
+		    || (filedata->dynamic_strtab_section->sh_size
+			!= str_tab_len)))
+	      warn (_("\
+the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
+
 	    filedata->dynamic_strings
 	      = (char *) get_data (NULL, filedata, offset, 1, str_tab_len,
 				   _("dynamic string table"));

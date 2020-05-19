@@ -1,3 +1,18 @@
+2020-05-19  H.J. Lu  <hjl.tools@gmail.com>
+
+	PR binutils/25809
+	* readelf.c (process_program_headers): Warn if the PT_DYNAMIC
+	segment doesn't match the .dynamic section and checks are
+	enabled.
+	(struct filedata): Add dynamic_symtab_section and
+	dynamic_strtab_section fields.
+	(process_section_headers): Set dynamic_symtab_section to the
+	.dynsym section.  Set dynamic_strtab_section to the .dynstr
+	section.
+	(process_dynamic_section): Warn if the .dynsym section doesn't
+	match DT_SYMTAB and DT_SYMENT or the .dynstr section doesn't
+	DT_STRTAB and DT_STRSZ.  But only if checks are enabled.
+
 2020-05-19  Alan Modra  <amodra@gmail.com>
 
 	* ar.c (map_over_members, get_pos_bfd, delete_members, move_members),
