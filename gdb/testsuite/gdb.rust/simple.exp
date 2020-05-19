@@ -45,11 +45,11 @@ gdb_test "ptype c" " = i32"
 gdb_test "print sizeof(c)" " = 4"
 
 gdb_test "print c = 87" " = \\(\\)"
-gdb_test "print c" " = 87"
+gdb_test "print c" " = 87" "print after assignment"
 gdb_test "print c += 3" " = \\(\\)"
-gdb_test "print c" " = 90"
+gdb_test "print c" " = 90" "print after plus assignment"
 gdb_test "print c -= 90" " = \\(\\)"
-gdb_test "print c" " = 0"
+gdb_test "print c" " = 0" "print after minus assignment"
 gdb_test "print *&c" " = 0"
 gdb_test "print *(&c as &i32)" " = 0"
 gdb_test "print *(&c as *const i32)" " = 0"
@@ -88,7 +88,7 @@ gdb_test "print w\[2\] @ 2" " = \\\[3, 4\\\]"
 gdb_test "print w_ptr\[2\]" " = 3"
 gdb_test "print fromslice" " = 3"
 gdb_test "print slice\[0\]" " = 3"
-gdb_test "print slice as &\[i32\]\[0\]" " = 3"
+gdb_test "print slice as &\[i32\]\[0\]"
 
 gdb_test_sequence "ptype slice" "" {
     " = struct &\\\[i32\\\] \\{"
@@ -289,12 +289,14 @@ gdb_test "print st" \
     " = simple::StringAtOffset {field1: \"hello\", field2: 1, field3: \"world\"}"
 
 proc test_one_slice {svar length base range} {
-    global hex
+    with_test_prefix $range {
+	global hex
 
-    set result " = &\\\[.*\\\] \\{data_ptr: $hex, length: $length\\}"
+	set result " = &\\\[.*\\\] \\{data_ptr: $hex, length: $length\\}"
 
-    gdb_test "print $svar" $result
-    gdb_test "print &${base}\[${range}\]" $result
+	gdb_test "print $svar" $result
+	gdb_test "print &${base}\[${range}\]" $result
+    }
 }
 
 test_one_slice slice 1 w 2..3
