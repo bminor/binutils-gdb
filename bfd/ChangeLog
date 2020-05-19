@@ -1,3 +1,31 @@
+2020-05-19  Stafford Horne  <shorne@gmail.com>
+
+	* elf32-or1k.c (or1k_elf_finish_dynamic_symbol): Rename srela
+	to relgot.
+	(or1k_elf_relocate_section): Access srelgot via
+	htab->root.srelgot.  Add assertions for srelgot->contents.
+	Introduce local variable for srelgot to not reuse global
+	sreloc.
+	(or1k_elf_relocate_section): Fixup dynamic symbol detection.
+	(or1k_set_got_and_rela_sizes): New function.
+	(or1k_initial_exec_offset): New function.
+	(TLS_GD, TLS_IE, TLS_LD, TLS_LE): Redefine macros as masks.
+	(or1k_elf_relocate_section): Allow for TLS to handle multiple
+	model access.
+	(or1k_elf_check_relocs): Use OR to set TLS access.
+	(allocate_dynrelocs): Use or1k_set_got_and_rela_sizes to set
+	sizes.
+	(or1k_elf_size_dynamic_sections): Use
+	or1k_set_got_and_rela_sizes to set sizes.
+	(or1k_elf_relocate_section): Fixup PCREL relocation calculation.
+	(TCB_SIZE): New macro.
+	(tpoff): Use TCB_SIZE and alignment to calculate offset.
+	(allocate_dynrelocs, readonly_dynrelocs, or1k_elf_check_relocs)
+	(or1k_elf_size_dynamic_sections): Rename p to sec_relocs.
+	(allocate_dynrelocs): Rename s to splt or sgot based on usage.
+	(tpoff): Add dynamic boolean argument.
+	(or1k_elf_relocate_section): Pass dynamic flag to tpoff.
+
 2020-05-19  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Club
