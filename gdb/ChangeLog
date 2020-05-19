@@ -1,3 +1,13 @@
+2020-05-19  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR build/25981
+	* procfs.c [(__i386__ || __x86_64__) && sun] (proc_get_LDT_entry,
+	procfs_find_LDT_entry): Remove.
+	* procfs.h [(__i386__ || __x86_64__) && sun] (struct ssd,
+	procfs_find_LDT_entry): Remove.
+	* sol-thread.c [(__i386__ || __x86_64__) && sun] (ps_lgetLDT):
+	Remove.
+
 2020-05-17  Tom Tromey  <tromey@adacore.com>
 
 	Pushed by Joel Brobecker  <brobecker@adacore.com>
@@ -12,7 +22,7 @@
 
 2020-02-22  Eli Zaretskii  <eliz@gnu.org>
 
-	PRE gdb/25586:
+	PR gdb/25586
 	* tui/tui-win.c (new_height_ok, tui_adjust_win_heights): Rename
 	'locator' to 'status_line', to better match terminology in the
 	manual.
