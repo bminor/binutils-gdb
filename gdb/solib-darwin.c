@@ -436,7 +436,7 @@ darwin_get_dyld_bfd ()
     return NULL;
 
   /* Create a bfd for the interpreter.  */
-  gdb_bfd_ref_ptr dyld_bfd (gdb_bfd_open (interp_name, gnutarget, -1));
+  gdb_bfd_ref_ptr dyld_bfd (gdb_bfd_open (interp_name, gnutarget));
   if (dyld_bfd != NULL)
     {
       gdb_bfd_ref_ptr sub

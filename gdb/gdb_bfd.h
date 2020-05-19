@@ -80,7 +80,8 @@ typedef gdb::ref_ptr<struct bfd, gdb_bfd_ref_policy> gdb_bfd_ref_ptr;
    bfd_get_filename will not be exactly NAME but rather NAME with
    TARGET_SYSROOT_PREFIX stripped.  */
 
-gdb_bfd_ref_ptr gdb_bfd_open (const char *name, const char *target, int fd);
+gdb_bfd_ref_ptr gdb_bfd_open (const char *name, const char *target,
+			      int fd = -1);
 
 /* Mark the CHILD BFD as being a member of PARENT.  Also, increment
    the reference count of CHILD.  Calling this function ensures that

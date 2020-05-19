@@ -537,7 +537,7 @@ windows_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
 
   if (!text_offset)
     {
-      gdb_bfd_ref_ptr dll (gdb_bfd_open (so_name, gnutarget, -1));
+      gdb_bfd_ref_ptr dll (gdb_bfd_open (so_name, gnutarget));
       /* The following calls are OK even if dll is NULL.
 	 The default value 0x1000 is returned by pe_text_section_offset
 	 in that case.  */

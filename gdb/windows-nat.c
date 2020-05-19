@@ -834,7 +834,7 @@ windows_make_so (const char *name, LPVOID load_addr)
     {
       asection *text = NULL;
 
-      gdb_bfd_ref_ptr abfd (gdb_bfd_open (so->so_name, "pei-i386", -1));
+      gdb_bfd_ref_ptr abfd (gdb_bfd_open (so->so_name, "pei-i386"));
 
       if (abfd == NULL)
 	return so;

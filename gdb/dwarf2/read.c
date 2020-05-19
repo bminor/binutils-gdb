@@ -2115,7 +2115,7 @@ dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
   /* First try the file name given in the section.  If that doesn't
      work, try to use the build-id instead.  */
-  gdb_bfd_ref_ptr dwz_bfd (gdb_bfd_open (filename, gnutarget, -1));
+  gdb_bfd_ref_ptr dwz_bfd (gdb_bfd_open (filename, gnutarget));
   if (dwz_bfd != NULL)
     {
       if (!build_id_verify (dwz_bfd.get (), buildid_len, buildid))
@@ -2138,7 +2138,7 @@ dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
       if (fd.get () >= 0)
 	{
 	  /* File successfully retrieved from server.  */
-	  dwz_bfd = gdb_bfd_open (alt_filename.get (), gnutarget, -1);
+	  dwz_bfd = gdb_bfd_open (alt_filename.get (), gnutarget);
 
 	  if (dwz_bfd == nullptr)
 	    warning (_("File \"%s\" from debuginfod cannot be opened as bfd"),

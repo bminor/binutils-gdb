@@ -1275,7 +1275,7 @@ separate_debug_file_exists (const std::string &name, unsigned long crc,
       gdb_flush (gdb_stdout);
     }
 
-  gdb_bfd_ref_ptr abfd (gdb_bfd_open (name.c_str (), gnutarget, -1));
+  gdb_bfd_ref_ptr abfd (gdb_bfd_open (name.c_str (), gnutarget));
 
   if (abfd == NULL)
     {
@@ -2039,7 +2039,7 @@ generic_load (const char *args, int from_tty)
     }
 
   /* Open the file for loading.  */
-  gdb_bfd_ref_ptr loadfile_bfd (gdb_bfd_open (filename.get (), gnutarget, -1));
+  gdb_bfd_ref_ptr loadfile_bfd (gdb_bfd_open (filename.get (), gnutarget));
   if (loadfile_bfd == NULL)
     perror_with_name (filename.get ());
 
@@ -2524,7 +2524,7 @@ reread_symbols (void)
 	    obfd_filename = bfd_get_filename (objfile->obfd);
 	    /* Open the new BFD before freeing the old one, so that
 	       the filename remains live.  */
-	    gdb_bfd_ref_ptr temp (gdb_bfd_open (obfd_filename, gnutarget, -1));
+	    gdb_bfd_ref_ptr temp (gdb_bfd_open (obfd_filename, gnutarget));
 	    objfile->obfd = temp.release ();
 	    if (objfile->obfd == NULL)
 	      error (_("Can't open %s to read symbols."), obfd_filename);

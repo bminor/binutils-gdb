@@ -604,7 +604,7 @@ compile_object_load (const compile_file_names &file_names,
   gdb::unique_xmalloc_ptr<char> filename
     (tilde_expand (file_names.object_file ()));
 
-  gdb_bfd_ref_ptr abfd (gdb_bfd_open (filename.get (), gnutarget, -1));
+  gdb_bfd_ref_ptr abfd (gdb_bfd_open (filename.get (), gnutarget));
   if (abfd == NULL)
     error (_("\"%s\": could not open as compiled module: %s"),
           filename.get (), bfd_errmsg (bfd_get_error ()));
