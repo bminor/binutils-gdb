@@ -1,3 +1,10 @@
+2020-05-19  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Club
+	BFD_RELOC_AARCH64_BRANCH19 and BFD_RELOC_AARCH64_TSTBR14
+	cases with BFD_RELOC_AARCH64_JUMP26.
+	(elfNN_aarch64_check_relocs): Likewise.
+
 2020-05-19  Alan Modra  <amodra@gmail.com>
 
 	* aix5ppc-core.c (xcoff64_core_file_matches_executable_p): Use
