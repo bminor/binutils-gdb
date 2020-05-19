@@ -1,3 +1,16 @@
+2020-05-19  Stafford Horne  <shorne@gmail.com>
+
+	PR 25184
+	* or1k.cpu (arch or1k): Remove or64 and or64nd machs.
+	(ORBIS-MACHS, ORFPX32-MACHS): Remove pmacros.
+	(cpu or1k64bf, mach or64, mach or64nd): Remove definitions.
+	* or1kcommon.cpu (h-fdr): Remove hardware.
+	* or1korfpx.cpu (rDDF, rADF, rBDF): Remove operand definitions.
+	(float-regreg-insn): Remove lf- mnemonic -d instruction pattern.
+	(float-setflag-insn-base): Remove lf-sf mnemonic -d pattern.
+	(float-cust-insn): Remove "lf-cust" cust-num "-d" pattern.
+	(lf-rem-d, lf-itof-d, lf-ftoi-d, lf-madd-d): Remove.
+
 2020-02-16  David Faust  <david.faust@oracle.com>
 
 	* bpf.cpu (define-cond-jump-insn): Renamed from djci.
