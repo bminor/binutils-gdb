@@ -1,3 +1,20 @@
+2020-05-19  Peter Bergner  <bergner@linux.ibm.com>
+
+	* ppc-opc.c (insert_ls, extract_ls): Handle 3-bit L fields and new
+	WC values on POWER10 sync, dcbf  and wait instructions.
+	(insert_pl, extract_pl): New functions.
+	(L2OPT, LS, WC): Use insert_ls and extract_ls.
+	(LS3): New , 3-bit L for sync.
+	(LS3, L3OPT): New, 3-bit L for sync and dcbf.
+	(SC2, PL): New, 2-bit SC and PL for sync and wait.
+	(XWCPL_MASK, XL3RT_MASK, XSYNCLS_MASK): New instruction masks.
+	(XOPL3, XWCPL, XSYNCLS): New opcode macros.
+	(powerpc_opcodes) <dcbflp, dcbfps, dcbstps pause_short, phwsync,
+	plwsync, stcisync, stncisync, stsync, waitrsv>: New extended mnemonics.
+	<wait>: Enable PL operand on POWER10.
+	<dcbf>: Enable L3OPT operand on POWER10.
+	<sync>: Enable SC2 operand on POWER10.
+
 2020-05-19  Stafford Horne  <shorne@gmail.com>
 
 	PR 25184

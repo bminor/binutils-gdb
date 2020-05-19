@@ -835,10 +835,16 @@ extract_li20 (uint64_t insn,
 	   | (insn & 0x7ff)) ^ 0x80000) - 0x80000;
 }
 
-/* The 2-bit L field in a SYNC or WC field in a WAIT instruction.
+/* The 2-bit/3-bit L or 2-bit WC field in a SYNC, DCBF or WAIT instruction.
    For SYNC, some L values are reserved:
-     * Value 3 is reserved on newer server cpus.
-     * Values 2 and 3 are reserved on all other cpus.  */
+     * Values 6 and 7 are reserved on newer server cpus.
+     * Value 3 is reserved on all server cpus.
+     * Value 2 is reserved on all other cpus.
+   For DCBF, some L values are reserved:
+     * Values 2, 5 and 7 are reserved on all cpus.
+   For WAIT, some WC values are reserved:
+     * Value 3 is reserved on all server cpus.
+     * Values 1 and 2 are reserved on older server cpus.  */
 
 static uint64_t
 insert_ls (uint64_t insn,
@@ -846,15 +852,73 @@ insert_ls (uint64_t insn,
 	   ppc_cpu_t dialect,
 	   const char **errmsg)
 {
-  /* For SYNC, some L values are illegal.  */
+  int64_t mask;
+
   if (((insn >> 1) & 0x3ff) == 598)
     {
-      int64_t max_lvalue = (dialect & PPC_OPCODE_POWER4) ? 2 : 1;
-      if (value > max_lvalue)
-	*errmsg = _("illegal L operand value");
+      /* For SYNC, some L values are illegal.  */
+      mask = (dialect & PPC_OPCODE_POWER10) ?  0x7 : 0x3;
+
+      /* If the value is within range, check for other illegal values.  */
+      if ((value & mask) == value)
+	switch (value)
+	  {
+	  case 2:
+	    if (dialect & PPC_OPCODE_POWER4)
+	      break;
+	    /* Fall through.  */
+	  case 3:
+	  case 6:
+	  case 7:
+	    *errmsg = _("illegal L operand value");
+	    break;
+	  default:
+	    break;
+	  }
+    }
+  else if (((insn >> 1) & 0x3ff) == 86)
+    {
+      /* For DCBF, some L values are illegal.  */
+      mask = (dialect & PPC_OPCODE_POWER10) ?  0x7 : 0x3;
+
+      /* If the value is within range, check for other illegal values.  */
+      if ((value & mask) == value)
+	switch (value)
+	  {
+	  case 2:
+	  case 5:
+	  case 7:
+	    *errmsg = _("illegal L operand value");
+	    break;
+	  default:
+	    break;
+	  }
+    }
+  else
+    {
+      /* For WAIT, some WC values are illegal.  */
+      mask = 0x3;
+
+      /* If the value is within range, check for other illegal values.  */
+      if ((dialect & PPC_OPCODE_A2) == 0
+	  && (dialect & PPC_OPCODE_E500MC) == 0
+	  && (value & mask) == value)
+	switch (value)
+	  {
+	  case 1:
+	  case 2:
+	    if (dialect & PPC_OPCODE_POWER10)
+	      break;
+	    /* Fall through.  */
+	  case 3:
+	    *errmsg = _("illegal WC operand value");
+	    break;
+	  default:
+	    break;
+	  }
     }
 
-  return insn | ((value & 0x3) << 21);
+  return insn | ((value & mask) << 21);
 }
 
 static int64_t
@@ -862,18 +926,72 @@ extract_ls (uint64_t insn,
 	    ppc_cpu_t dialect,
 	    int *invalid)
 {
+  uint64_t value;
+
   /* Missing optional operands have a value of zero.  */
   if (*invalid < 0)
     return 0;
 
-  uint64_t lvalue = (insn >> 21) & 3;
   if (((insn >> 1) & 0x3ff) == 598)
     {
-      uint64_t max_lvalue = (dialect & PPC_OPCODE_POWER4) ? 2 : 1;
-      if (lvalue > max_lvalue)
-	*invalid = 1;
+      /* For SYNC, some L values are illegal.  */
+      int64_t mask = (dialect & PPC_OPCODE_POWER10) ?  0x7 : 0x3;
+
+      value = (insn >> 21) & mask;
+      switch (value)
+	{
+	case 2:
+	  if (dialect & PPC_OPCODE_POWER4)
+	    break;
+	  /* Fall through.  */
+	case 3:
+	case 6:
+	case 7:
+	  *invalid = 1;
+	  break;
+	default:
+	  break;
+	}
     }
-  return lvalue;
+  else if (((insn >> 1) & 0x3ff) == 86)
+    {
+      /* For DCBF, some L values are illegal.  */
+      int64_t mask = (dialect & PPC_OPCODE_POWER10) ?  0x7 : 0x3;
+
+      value = (insn >> 21) & mask;
+      switch (value)
+	{
+	case 2:
+	case 5:
+	case 7:
+	  *invalid = 1;
+	  break;
+	default:
+	  break;
+	}
+    }
+  else
+    {
+      /* For WAIT, some WC values are illegal.  */
+      value = (insn >> 21) & 0x3;
+      if ((dialect & PPC_OPCODE_A2) == 0
+	  && (dialect & PPC_OPCODE_E500MC) == 0)
+	switch (value)
+	  {
+	  case 1:
+	  case 2:
+	    if (dialect & PPC_OPCODE_POWER10)
+	      break;
+	    /* Fall through.  */
+	  case 3:
+	    *invalid = 1;
+	    break;
+	  default:
+	    break;
+	  }
+    }
+
+  return value;
 }
 
 /* The 4-bit E field in a sync instruction that accepts 2 operands.
@@ -1077,6 +1195,41 @@ extract_nsi (uint64_t insn,
 {
   *invalid = 1;
   return -(((insn & 0xffff) ^ 0x8000) - 0x8000);
+}
+
+/* The 2-bit SC field in a SYNC or PL field in a WAIT instruction.
+   For WAIT, some PL values are reserved:
+     * Values 1, 2 and 3 are reserved.  */
+
+static uint64_t
+insert_pl (uint64_t insn,
+	   int64_t value,
+	   ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	   const char **errmsg)
+{
+  /* For WAIT, some PL values are illegal.  */
+  if (((insn >> 1) & 0x3ff) == 30
+      && value != 0)
+    *errmsg = _("illegal PL operand value");
+  return insn | ((value & 0x3) << 16);
+}
+
+static int64_t
+extract_pl (uint64_t insn,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    int *invalid)
+{
+  /* Missing optional operands have a value of zero.  */
+  if (*invalid < 0)
+    return 0;
+
+  uint64_t value = (insn >> 16) & 0x3;
+
+  /* For WAIT, some PL values are illegal.  */
+  if (((insn >> 1) & 0x3ff) == 30
+      && value != 0)
+    *invalid = 1;
+  return value;
 }
 
 /* The RA field in a D or X form instruction which is an updating
@@ -2443,9 +2596,11 @@ const struct powerpc_operand powerpc_operands[] =
 #define L32OPT L1OPT + 1
   { 0x1, 21, NULL, NULL, PPC_OPERAND_OPTIONAL | PPC_OPERAND_OPTIONAL32 },
 
-  /* The L field in dcbf instruction.  */
+  /* The 2-bit L or WC field in an X (sync, dcbf or wait) form instruction.  */
 #define L2OPT L32OPT + 1
-  { 0x3, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
+#define LS L2OPT
+#define WC L2OPT
+  { 0x3, 21, insert_ls, extract_ls, PPC_OPERAND_OPTIONAL },
 
   /* The LEV field in a POWER SVC / POWER9 SCV form instruction.  */
 #define SVC_LEV L2OPT + 1
@@ -2465,13 +2620,13 @@ const struct powerpc_operand powerpc_operands[] =
 #define LIA LI + 1
   { 0x3fffffc, 0, NULL, NULL, PPC_OPERAND_ABSOLUTE | PPC_OPERAND_SIGNED },
 
-  /* The LS or WC field in an X (sync or wait) form instruction.  */
-#define LS LIA + 1
-#define WC LS
-  { 0x3, 21, insert_ls, extract_ls, PPC_OPERAND_OPTIONAL },
+  /* The 3-bit L field in a sync or dcbf instruction.  */
+#define LS3 LIA + 1
+#define L3OPT LS3
+  { 0x7, 21, insert_ls, extract_ls, PPC_OPERAND_OPTIONAL },
 
   /* The ME field in an M form instruction.  */
-#define ME LS + 1
+#define ME LS3 + 1
 #define ME_MASK (0x1f << 1)
   { 0x1f, 1, NULL, NULL, 0 },
 
@@ -3044,8 +3199,13 @@ const struct powerpc_operand powerpc_operands[] =
 #define IH ERAT_T + 1
   { 0x7, 21, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
+  /* The 2-bit SC or PL field in an X form instruction.  */
+#define SC2 IH + 1
+#define PL SC2
+  { 0x3, 16, insert_pl, extract_pl, PPC_OPERAND_OPTIONAL },
+
   /* The 8-bit IMM8 field in a XX1 form instruction.  */
-#define IMM8 IH + 1
+#define IMM8 SC2 + 1
   { 0xff, 11, NULL, NULL, PPC_OPERAND_SIGNOPT },
 
 #define VX_OFF IMM8 + 1
@@ -3594,6 +3754,10 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
    field.  */
 #define XWC_MASK (XRC (0x3f, 0x3ff, 1) | (7 << 23) | RA_MASK | RB_MASK)
 
+/* An X form wait instruction with everything filled in except the WC
+   and PL fields.  */
+#define XWCPL_MASK (XRC (0x3f, 0x3ff, 1) | (7 << 23) | (3 << 18) | RB_MASK)
+
 /* The mask for an XX1 form instruction.  */
 #define XX1_MASK X (0x3f, 0x3ff)
 
@@ -3659,8 +3823,11 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* An X_MASK with the RT field fixed.  */
 #define XRT_MASK (X_MASK | RT_MASK)
 
-/* An XRT_MASK mask with the L bits clear.  */
+/* An XRT_MASK mask with the 2 L bits clear.  */
 #define XLRT_MASK (XRT_MASK & ~((uint64_t) 0x3 << 21))
+
+/* An XRT_MASK mask with the 3 L bits clear.  */
+#define XL3RT_MASK (XRT_MASK & ~((uint64_t) 0x7 << 21))
 
 /* An X_MASK with the RA and RB fields fixed.  */
 #define XRARB_MASK (X_MASK | RA_MASK | RB_MASK)
@@ -3700,10 +3867,20 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
   (X ((op), (xop))				\
    | ((((uint64_t)(l)) & 1) << 21))
 
-/* An X form instruction with the L bits specified.  */
+/* An X form instruction with the 2 L bits specified.  */
 #define XOPL2(op, xop, l)			\
   (X ((op), (xop))				\
    | ((((uint64_t)(l)) & 3) << 21))
+
+/* An X form instruction with the 3 L bits specified.  */
+#define XOPL3(op, xop, l)			\
+  (X ((op), (xop))				\
+   | ((((uint64_t)(l)) & 7) << 21))
+
+/* An X form instruction with the WC and PL bits specified.  */
+#define XWCPL(op, xop, wc, pl)			\
+  (XOPL3 ((op), (xop), (wc))			\
+   | ((((uint64_t)(pl)) & 3) << 16))
 
 /* An X form instruction with the L bit and RC bit specified.  */
 #define XRCL(op, xop, l, rc)			\
@@ -3752,6 +3929,16 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 /* An X form sync instruction with everything filled in except the L
    and E fields.  */
 #define XSYNCLE_MASK (0xff90ffff)
+
+/* An X form sync instruction.  */
+#define XSYNCLS(op, xop, l, s)			\
+  (X ((op), (xop))				\
+   | ((((uint64_t)(l)) & 7) << 21)		\
+   | ((((uint64_t)(s)) & 3) << 16))
+
+/* An X form sync instruction with everything filled in except the
+   L and SC fields.  */
+#define XSYNCLS_MASK (0xff1cffff)
 
 /* An X_MASK, but with the EH bit clear.  */
 #define XEH_MASK (X_MASK & ~((uint64_t )1))
@@ -6076,7 +6263,10 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"ldepx",	X(31,29),	X_MASK,	  E500MC|PPCA2, 0,		{RT, RA0, RB}},
 
 {"waitasec",	X(31,30),      XRTRARB_MASK, POWER8,	POWER9,		{0}},
-{"wait",	X(31,30),	XWC_MASK,    POWER9,	0,		{WC}},
+{"waitrsv",	XWCPL(31,30,1,0),0xffffffff, POWER10,	0,		{0}},
+{"pause_short",	XWCPL(31,30,2,0),0xffffffff, POWER10,	0,		{0}},
+{"wait",	X(31,30),	XWCPL_MASK,  POWER10,	0,		{WC, PL}},
+{"wait",	X(31,30),	XWC_MASK,    POWER9,	POWER10,	{WC}},
 
 {"lwepx",	X(31,31),	X_MASK,	  E500MC|PPCA2, 0,		{RT, RA0, RB}},
 
@@ -6174,7 +6364,11 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"ldarx",	X(31,84),	XEH_MASK,    PPC64,	0,		{RT, RA0, RB, EH}},
 
 {"dcbfl",	XOPL(31,86,1),	XRT_MASK,    POWER5,	PPC476,		{RA0, RB}},
-{"dcbf",	X(31,86),	XLRT_MASK,   PPC,	0,		{RA0, RB, L2OPT}},
+{"dcbflp",	XOPL2(31,86,3), XRT_MASK,    POWER9,	PPC476,		{RA0, RB}},
+{"dcbfps",	XOPL3(31,86,4), XRT_MASK,    POWER10,   PPC476,		{RA0, RB}},
+{"dcbstps",	XOPL3(31,86,6), XRT_MASK,    POWER10,   PPC476,		{RA0, RB}},
+{"dcbf",	X(31,86),	XL3RT_MASK,  POWER10,	PPC476,		{RA0, RB, L3OPT}},
+{"dcbf",	X(31,86),	XLRT_MASK,   PPC,	POWER10,	{RA0, RB, L2OPT}},
 
 {"lbzx",	X(31,87),	X_MASK,	     COM,	0,		{RT, RA0, RB}},
 
@@ -7243,8 +7437,14 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"hwsync",	XSYNC(31,598,0), 0xffffffff, POWER4,	BOOKE|PPC476,	{0}},
 {"lwsync",	XSYNC(31,598,1), 0xffffffff, PPC,	E500,		{0}},
 {"ptesync",	XSYNC(31,598,2), 0xffffffff, PPC64,	0,		{0}},
+{"phwsync",	XSYNCLS(31,598,4,0), 0xffffffff, POWER10, 0,		{0}},
+{"plwsync",	XSYNCLS(31,598,5,0), 0xffffffff, POWER10, 0,		{0}},
+{"stncisync",	XSYNCLS(31,598,1,1), 0xffffffff, POWER10, 0,		{0}},
+{"stcisync",	XSYNCLS(31,598,0,2), 0xffffffff, POWER10, 0,		{0}},
+{"stsync",	XSYNCLS(31,598,0,3), 0xffffffff, POWER10, 0,		{0}},
+{"sync",	X(31,598),     XSYNCLS_MASK, POWER10,	BOOKE|PPC476,	{LS3, SC2}},
 {"sync",	X(31,598),     XSYNCLE_MASK, E6500,	0,		{LS, ESYNC}},
-{"sync",	X(31,598),     XSYNC_MASK,   PPCCOM,	BOOKE|PPC476,	{LS}},
+{"sync",	X(31,598),     XSYNC_MASK,   PPCCOM,	POWER10|BOOKE|PPC476, {LS}},
 {"msync",	X(31,598),     0xffffffff, BOOKE|PPCA2|PPC476, 0,	{0}},
 {"sync",	X(31,598),     0xffffffff,   BOOKE|PPC476, E6500,	{0}},
 {"lwsync",	X(31,598),     0xffffffff,   E500,	0,		{0}},
