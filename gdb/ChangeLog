@@ -1,3 +1,8 @@
+2020-08-17  Sergei Trofimovich  <siarheit@google.com>
+
+	* ia64-linux-nat.c: Include "gdbarch.h" to declare used
+	'gdbarch_num_regs'.
+
 2020-08-17  Tom Tromey  <tromey@adacore.com>
 
 	* ada-varobj.c (ada_varobj_decode_var): Handle case where
