@@ -2450,7 +2450,7 @@ reread_symbols (void)
 	 a `shared library' on AIX is also an archive), then you should
 	 stat on the archive name, not member name.  */
       if (objfile->obfd->my_archive)
-	res = stat (objfile->obfd->my_archive->filename, &new_statbuf);
+	res = stat (bfd_get_filename (objfile->obfd->my_archive), &new_statbuf);
       else
 	res = stat (objfile_name (objfile), &new_statbuf);
       if (res != 0)

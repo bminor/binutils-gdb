@@ -1,3 +1,15 @@
+2020-05-20  Alan Modra  <amodra@gmail.com>
+
+	* coff-pe-read.c (read_pe_exported_syms): Use bfd_get_filename
+	rather than accessing bfd->filename directly.
+	* dtrace-probe.c (dtrace_static_probe_ops::get_probes): Likewise,
+	and use bfd_section_name.
+	* dwarf2/frame.c (decode_frame_entry): Likewise.
+	* exec.c (exec_set_section_address): Likewise.
+	* solib-aix.c (solib_aix_bfd_open): Likewise.
+	* stap-probe.c (get_stap_base_address): Likewise.
+	* symfile.c (reread_symbols): Likewise.
+
 2020-05-19  Tom Tromey  <tromey@adacore.com>
 
 	* sparc64-tdep.c (adi_tag_fd): Update call to target_fileio_open.

@@ -860,7 +860,7 @@ dtrace_static_probe_ops::get_probes
          else
 	    complaint (_("could not obtain the contents of"
 			 "section '%s' in objfile `%s'."),
-		       sect->name, abfd->filename);
+		       bfd_section_name (sect), bfd_get_filename (abfd));
 
 	  xfree (dof);
 	}

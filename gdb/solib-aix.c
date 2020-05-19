@@ -611,7 +611,7 @@ solib_aix_bfd_open (const char *pathname)
     (gdb_bfd_openr_next_archived_file (archive_bfd.get (), NULL));
   while (object_bfd != NULL)
     {
-      if (member_name == object_bfd->filename)
+      if (member_name == bfd_get_filename (object_bfd.get ()))
 	break;
 
       object_bfd = gdb_bfd_openr_next_archived_file (archive_bfd.get (),

@@ -1173,7 +1173,8 @@ exec_set_section_address (const char *filename, int index, CORE_ADDR address)
   table = current_target_sections;
   for (p = table->sections; p < table->sections_end; p++)
     {
-      if (filename_cmp (filename, p->the_bfd_section->owner->filename) == 0
+      if (filename_cmp (filename,
+			bfd_get_filename (p->the_bfd_section->owner)) == 0
 	  && index == p->the_bfd_section->index)
 	{
 	  p->endaddr += address - p->addr;

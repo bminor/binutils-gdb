@@ -2101,21 +2101,21 @@ decode_frame_entry (struct gdbarch *gdbarch,
     case ALIGN4:
       complaint (_("\
 Corrupt data in %s:%s; align 4 workaround apparently succeeded"),
-		 unit->dwarf_frame_section->owner->filename,
-		 unit->dwarf_frame_section->name);
+		 bfd_get_filename (unit->dwarf_frame_section->owner),
+		 bfd_section_name (unit->dwarf_frame_section));
       break;
 
     case ALIGN8:
       complaint (_("\
 Corrupt data in %s:%s; align 8 workaround apparently succeeded"),
-		 unit->dwarf_frame_section->owner->filename,
-		 unit->dwarf_frame_section->name);
+		 bfd_get_filename (unit->dwarf_frame_section->owner),
+		 bfd_section_name (unit->dwarf_frame_section));
       break;
 
     default:
       complaint (_("Corrupt data in %s:%s"),
-		 unit->dwarf_frame_section->owner->filename,
-		 unit->dwarf_frame_section->name);
+		 bfd_get_filename (unit->dwarf_frame_section->owner),
+		 bfd_section_name (unit->dwarf_frame_section));
       break;
     }
 
