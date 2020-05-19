@@ -400,12 +400,13 @@ sort_by_file_name (const void *a, const void *b)
   asection *sb = (*rb)->section;
   int i, a_sec, b_sec;
 
-  i = filename_cmp (sa->owner->my_archive->filename,
-		    sb->owner->my_archive->filename);
+  i = filename_cmp (bfd_get_filename (sa->owner->my_archive),
+		    bfd_get_filename (sb->owner->my_archive));
   if (i != 0)
     return i;
 
-  i = filename_cmp (sa->owner->filename, sb->owner->filename);
+  i = filename_cmp (bfd_get_filename (sa->owner),
+		    bfd_get_filename (sb->owner));
   if (i != 0)
     return i;
   /* the tail idata4/5 are the only ones without relocs to an

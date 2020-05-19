@@ -232,7 +232,7 @@ input_statement_is_archive_path (const char *file_spec, char *sep,
 
       if (sep != file_spec)
 	{
-	  const char *aname = f->the_bfd->my_archive->filename;
+	  const char *aname = bfd_get_filename (f->the_bfd->my_archive);
 	  *sep = 0;
 	  match = name_match (file_spec, aname) == 0;
 	  *sep = link_info.path_separator;
@@ -294,7 +294,7 @@ walk_wild_file_in_exclude_list (struct name_list *exclude_list,
       else if (file->the_bfd != NULL
 	       && file->the_bfd->my_archive != NULL
 	       && name_match (list_tmp->name,
-			      file->the_bfd->my_archive->filename) == 0)
+			      bfd_get_filename (file->the_bfd->my_archive)) == 0)
 	return TRUE;
     }
 
@@ -2776,7 +2776,7 @@ wild_sort (lang_wild_statement_type *wild,
 	    }
 	  else
 	    {
-	      ln = ls->section->owner->filename;
+	      ln = bfd_get_filename (ls->section->owner);
 	      la = FALSE;
 	    }
 
@@ -2791,7 +2791,7 @@ wild_sort (lang_wild_statement_type *wild,
 	      if (fa)
 		fn = file->filename;
 	      if (la)
-		ln = ls->section->owner->filename;
+		ln = bfd_get_filename (ls->section->owner);
 
 	      i = filename_cmp (fn, ln);
 	      if (i > 0)
@@ -2986,7 +2986,7 @@ check_excluded_libs (bfd *abfd)
   while (lib)
     {
       int len = strlen (lib->name);
-      const char *filename = lbasename (abfd->filename);
+      const char *filename = lbasename (bfd_get_filename (abfd));
 
       if (strcmp (lib->name, "ALL") == 0)
 	{

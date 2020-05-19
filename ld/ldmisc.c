@@ -456,10 +456,11 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		    fprintf (fp, "%s generated", program_name);
 		  else if (abfd->my_archive != NULL
 			   && !bfd_is_thin_archive (abfd->my_archive))
-		    fprintf (fp, "%s(%s)", abfd->my_archive->filename,
-			     abfd->filename);
+		    fprintf (fp, "%s(%s)",
+			     bfd_get_filename (abfd->my_archive),
+			     bfd_get_filename (abfd));
 		  else
-		    fprintf (fp, "%s", abfd->filename);
+		    fprintf (fp, "%s", bfd_get_filename (abfd));
 		}
 	      else if (*fmt == 'I')
 		{
@@ -472,7 +473,8 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		  if (i->the_bfd != NULL
 		      && i->the_bfd->my_archive != NULL
 		      && !bfd_is_thin_archive (i->the_bfd->my_archive))
-		    fprintf (fp, "(%s)%s", i->the_bfd->my_archive->filename,
+		    fprintf (fp, "(%s)%s",
+			     bfd_get_filename (i->the_bfd->my_archive),
 			     i->local_sym_name);
 		  else
 		    fprintf (fp, "%s", i->filename);

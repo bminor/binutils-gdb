@@ -1,3 +1,18 @@
+2020-05-19  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/beos.em (sort_by_file_name): Use bfd_get_filename
+	rather than accessing bfd->filename directly.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_after_open): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_after_open): Likewise.
+	* emultempl/spuelf.em (embedded_spu_file): Likewise.
+	* ldlang.c (input_statement_is_archive_path, wild_sort),
+	(check_excluded_libs): Likewise.
+	* ldmain.c (add_archive_element): Likewise.
+	* ldmisc.c (vfinfo): Likewise.
+	* pe-dll.c (auto_export, generate_edata, pe_create_import_fixup),
+	(pe_dll_generate_implib, pe_process_import_defs): Likewise.
+	* plugin.c (plugin_object_p): Likewise.
+
 2020-05-18  Douglas B Rupp  <rupp@adacore.com>
 
 	* ldemul.h (ldemul_print_symbol): New.
