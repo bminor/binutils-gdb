@@ -1625,7 +1625,7 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 				"to section %s of %s: '%s'",
 				(long) f->fr_fix),
 		      (long) f->fr_fix,
-		      sec->name, stdoutput->filename,
+		      bfd_section_name (sec), bfd_get_filename (stdoutput),
 		      bfd_errmsg (bfd_get_error ()));
 	  offset += f->fr_fix;
 	}
@@ -1649,9 +1649,11 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 				    "in section %s of %s: '%s'",
 				    "can't fill %ld bytes "
 				    "in section %s of %s: '%s'",
-				    (long) count), (long) count,
-				    sec->name, stdoutput->filename,
-				    bfd_errmsg (bfd_get_error ()));
+				    (long) count),
+			  (long) count,
+			  bfd_section_name (sec),
+			  bfd_get_filename (stdoutput),
+			  bfd_errmsg (bfd_get_error ()));
 	      offset += count;
 	      free (buf);
 	    }
@@ -1678,7 +1680,8 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 					"in section %s of %s: '%s'",
 					(long) fill_size),
 			      (long) fill_size,
-			      sec->name, stdoutput->filename,
+			      bfd_section_name (sec),
+			      bfd_get_filename (stdoutput),
 			      bfd_errmsg (bfd_get_error ()));
 		  offset += fill_size;
 		}
@@ -1714,7 +1717,8 @@ write_contents (bfd *abfd ATTRIBUTE_UNUSED,
 					"in section %s of %s: '%s'",
 					(long) (n_per_buf * fill_size)),
 			      (long) (n_per_buf * fill_size),
-			      sec->name, stdoutput->filename,
+			      bfd_section_name (sec),
+			      bfd_get_filename (stdoutput),
 			      bfd_errmsg (bfd_get_error ()));
 		  offset += n_per_buf * fill_size;
 		}
