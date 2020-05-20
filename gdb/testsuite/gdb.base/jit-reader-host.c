@@ -15,6 +15,7 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,6 +59,8 @@ main (int argc, char **argv)
   char *code = mmap (NULL, getpagesize (), PROT_WRITE | PROT_EXEC,
 		     MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
   char *code_end = code;
+
+  assert (code != MAP_FAILED);
 
   /* "JIT" function_stack_mangle.  */
   memcpy (code_end, jit_function_stack_mangle_code,

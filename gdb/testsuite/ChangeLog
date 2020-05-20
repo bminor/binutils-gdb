@@ -1,3 +1,13 @@
+2020-05-20  Simon Marchi  <simon.marchi@efficios.com>
+
+	PR gdb/26016
+	* gdb.base/coredump-filter.c (do_mmap): Check mmap ret val
+	against MAP_FAILED.
+	* gdb.base/coremaker.c (mmapdata): Likewise.
+	* gdb.base/jit-reader-host.c (main): Likewise.
+	* gdb.base/sym-file-loader.c (load): Likewise.
+	(load_shlib): Likewise.
+
 2020-05-20  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/array_char_idx.exp: Recognize initialized array.

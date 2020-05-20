@@ -77,7 +77,7 @@ mmapdata ()
   /* Now map the file into our address space as buf2 */
 
   buf2 = (char *) mmap (0, MAPSIZE, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
-  if (buf2 == (char *) -1)
+  if (buf2 == (char *) MAP_FAILED)
     {
       perror ("mmap failed");
       return;
