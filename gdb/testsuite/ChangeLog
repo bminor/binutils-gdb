@@ -1,3 +1,10 @@
+2020-05-20  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/25833
+	* gdb.base/with-mf-inc.c: New test.
+	* gdb.base/with-mf-main.c: New test.
+	* gdb.base/with-mf.exp: New file.
+
 2020-05-19  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.rust/simple.exp: Restore missing test result.

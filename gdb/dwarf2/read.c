@@ -3650,6 +3650,20 @@ dw2_expand_symtabs_with_fullname (struct objfile *objfile,
 }
 
 static void
+dw2_expand_symtabs_matching_symbol
+  (mapped_index_base &index,
+   const lookup_name_info &lookup_name_in,
+   gdb::function_view<expand_symtabs_symbol_matcher_ftype> symbol_matcher,
+   enum search_domain kind,
+   gdb::function_view<bool (offset_type)> match_callback);
+
+static void
+dw2_expand_symtabs_matching_one
+  (struct dwarf2_per_cu_data *per_cu,
+   gdb::function_view<expand_symtabs_file_matcher_ftype> file_matcher,
+   gdb::function_view<expand_symtabs_exp_notify_ftype> expansion_notify);
+
+static void
 dw2_map_matching_symbols
   (struct objfile *objfile,
    const lookup_name_info &name, domain_enum domain,
@@ -3661,19 +3675,41 @@ dw2_map_matching_symbols
   struct dwarf2_per_objfile *dwarf2_per_objfile
     = get_dwarf2_per_objfile (objfile);
 
+  const block_enum block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
+
   if (dwarf2_per_objfile->index_table != nullptr)
     {
       /* Ada currently doesn't support .gdb_index (see PR24713).  We can get
 	 here though if the current language is Ada for a non-Ada objfile
-	 using GNU index.  As Ada does not look for non-Ada symbols this
-	 function should just return.  */
-      return;
-    }
+	 using GNU index.  */
+      mapped_index &index = *dwarf2_per_objfile->index_table;
 
-  /* We have -readnow: no .gdb_index, but no partial symtabs either.  So,
-     inline psym_map_matching_symbols here, assuming all partial symtabs have
-     been read in.  */
-  const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
+      const char *match_name = name.ada ().lookup_name ().c_str ();
+      auto matcher = [&] (const char *symname)
+	{
+	  if (ordered_compare == nullptr)
+	    return true;
+	  return ordered_compare (symname, match_name) == 0;
+	};
+
+      dw2_expand_symtabs_matching_symbol (index, name, matcher, ALL_DOMAIN,
+					  [&] (offset_type namei)
+      {
+	struct dw2_symtab_iterator iter;
+	struct dwarf2_per_cu_data *per_cu;
+
+	dw2_symtab_iter_init (&iter, dwarf2_per_objfile, block_kind, domain,
+			      match_name);
+	while ((per_cu = dw2_symtab_iter_next (&iter)) != NULL)
+	  dw2_expand_symtabs_matching_one (per_cu, nullptr, nullptr);
+	return true;
+      });
+    }
+  else
+    {
+      /* We have -readnow: no .gdb_index, but no partial symtabs either.  So,
+	 proceed assuming all symtabs have been read in.  */
+    }
 
   for (compunit_symtab *cust : objfile->compunits ())
     {
