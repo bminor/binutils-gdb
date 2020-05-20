@@ -76,9 +76,10 @@
 #define ARM_EXT2_V8_6A	     0x00010000	/* ARM V8.6A.			     */
 #define ARM_EXT2_BF16	     0x00020000 /* ARMv8 bfloat16.		     */
 #define ARM_EXT2_I8MM	     0x00040000 /* ARMv8.6A i8mm.		     */
-#define ARM_EXT2_CRC	     0x00080000	/* ARMv8 CRC32 */
-#define ARM_EXT2_MVE	     0x00100000	/* MVE Integer extension.	   */
-#define ARM_EXT2_MVE_FP	     0x00200000	/* MVE Floating Point extension.   */
+#define ARM_EXT2_CRC	     0x00080000	/* ARMv8 CRC32.                      */
+#define ARM_EXT2_MVE	     0x00100000	/* MVE Integer extension.	     */
+#define ARM_EXT2_MVE_FP	     0x00200000	/* MVE Floating Point extension.     */
+#define ARM_EXT2_V8R	     0x80000000	/* ARM V8-R.	                     */
 
 /* Co-processor space extensions.  */
 #define ARM_CEXT_XSCALE	     0x00000001	/* Allow MIA etc.	 	   */
@@ -182,7 +183,7 @@
 #define ARM_AEXT2_V8M_MAIN	(ARM_AEXT2_V8M_BASE | ARM_EXT2_V8M_MAIN)
 #define ARM_AEXT2_V8M_MAIN_DSP	 ARM_AEXT2_V8M_MAIN
 #define ARM_AEXT_V8R		 ARM_AEXT_V8A
-#define ARM_AEXT2_V8R		 ARM_AEXT2_V8AR
+#define ARM_AEXT2_V8R		 (ARM_EXT2_V8R | ARM_AEXT2_V8AR)
 #define ARM_AEXT_V8_1M_MAIN	 ARM_AEXT_V8M_MAIN
 #define ARM_AEXT2_V8_1M_MAIN	(ARM_AEXT2_V8M_MAIN | ARM_EXT2_V8_1M_MAIN     \
 						    | ARM_EXT2_FP16_INST)
