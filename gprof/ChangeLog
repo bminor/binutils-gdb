@@ -1,3 +1,8 @@
+2020-05-21  Alan Modra  <amodra@gmail.com>
+
+	* utils.c (print_name_only): Free demangled without checking
+	first for non-NULL.
+
 2020-05-18  Nick Clifton  <nickc@redhat.com>
 
 	* po/es.po: Update Spanish translation.
