@@ -2899,8 +2899,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 
 	  hash_delete (arm_reg_hsh, name, FALSE);
 	  free ((char *) reg->name);
-	  if (reg->neon)
-	    free (reg->neon);
+	  free (reg->neon);
 	  free (reg);
 
 	  /* Also locate the all upper case and all lower case versions.
@@ -2915,8 +2914,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	    {
 	      hash_delete (arm_reg_hsh, nbuf, FALSE);
 	      free ((char *) reg->name);
-	      if (reg->neon)
-		free (reg->neon);
+	      free (reg->neon);
 	      free (reg);
 	    }
 
@@ -2927,8 +2925,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	    {
 	      hash_delete (arm_reg_hsh, nbuf, FALSE);
 	      free ((char *) reg->name);
-	      if (reg->neon)
-		free (reg->neon);
+	      free (reg->neon);
 	      free (reg);
 	    }
 

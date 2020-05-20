@@ -8269,8 +8269,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
   /* Free the allocated the struct aarch64_inst.
      N.B. currently there are very limited number of fix-up types actually use
      this field, so the impact on the performance should be minimal .  */
-  if (fixP->tc_fix_data.inst != NULL)
-    free (fixP->tc_fix_data.inst);
+  free (fixP->tc_fix_data.inst);
 
   return;
 }
@@ -9557,8 +9556,7 @@ aarch64_elf_copy_symbol_attributes (symbolS *dest, symbolS *src)
     }
   else
     {
-      if (destelf->size != NULL)
-	free (destelf->size);
+      free (destelf->size);
       destelf->size = NULL;
     }
   S_SET_SIZE (dest, S_GET_SIZE (src));

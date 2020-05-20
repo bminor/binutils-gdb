@@ -923,14 +923,12 @@ symbol_find_noref (const char *name, int noref)
 	*copy++ = TOUPPER (c);
       *copy = '\0';
 
-      if (copy2 != NULL)
-	free (copy2);
+      free (copy2);
       copy = (char *) name;
     }
 
   result = symbol_find_exact_noref (name, noref);
-  if (copy != NULL)
-    free (copy);
+  free (copy);
   return result;
 }
 

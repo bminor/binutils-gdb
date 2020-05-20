@@ -1,3 +1,19 @@
+2020-05-21  Alan Modra  <amodra@gmail.com>
+
+	* atof-generic.c: Replace "if (x) free (x)" with "free (x)"
+	throughout.
+	* config/obj-elf.c: Likewise.
+	* config/tc-aarch64.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-nios2.c: Likewise.
+	* config/tc-tic30.c: Likewise.
+	* ecoff.c: Likewise.
+	* read.c: Likewise.
+	* stabs.c: Likewise.
+	* symbols.c: Likewise.
+	* testsuite/gas/all/test-gen.c: Likewise.
+
 2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
 
 	* testsuite/gas/riscv/priv-reg-fail-read-only-01.s: Updated.

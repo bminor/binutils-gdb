@@ -611,10 +611,8 @@ atof_generic (/* return pointer to just AFTER number we read.  */
       /* Assert sign of the number we made is '+'.  */
       address_of_generic_floating_point_number->sign = digits_sign_char;
 
-      if (temporary_binary_low)
-	free (temporary_binary_low);
-      if (power_binary_low)
-	free (power_binary_low);
+      free (temporary_binary_low);
+      free (power_binary_low);
       free (digits_binary_low);
     }
   return return_value;

@@ -564,8 +564,7 @@ generate_asm_file (int type, const char *file)
 
   colon (sym);
 
-  if (last_file != NULL)
-    free (last_file);
+  free (last_file);
   last_file = xstrdup (file);
 
   free (buf);
