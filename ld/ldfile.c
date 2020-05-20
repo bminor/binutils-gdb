@@ -240,8 +240,8 @@ ldfile_try_open_bfd (const char *attempt,
 				skip = 1;
 			    }
 			  free (arg1);
-			  if (arg2) free (arg2);
-			  if (arg3) free (arg3);
+			  free (arg2);
+			  free (arg3);
 			  break;
 			case NAME:
 			case LNAME:
@@ -250,8 +250,7 @@ ldfile_try_open_bfd (const char *attempt,
 			  free (yylval.name);
 			  break;
 			case INT:
-			  if (yylval.bigint.str)
-			    free (yylval.bigint.str);
+			  free (yylval.bigint.str);
 			  break;
 			}
 		      token = yylex ();

@@ -620,11 +620,8 @@ gld${EMULATION_NAME}_handle_option (int optc)
       return FALSE;
 
     case OPTION_BUILD_ID:
-      if (ldelf_emit_note_gnu_build_id != NULL)
-	{
-	  free ((char *) ldelf_emit_note_gnu_build_id);
-	  ldelf_emit_note_gnu_build_id = NULL;
-	}
+      free ((char *) ldelf_emit_note_gnu_build_id);
+      ldelf_emit_note_gnu_build_id = NULL;
       if (optarg == NULL)
 	optarg = DEFAULT_BUILD_ID_STYLE;
       if (strcmp (optarg, "none"))

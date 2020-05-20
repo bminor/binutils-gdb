@@ -375,13 +375,11 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 				    abfd, functionname);
 
 			    last_bfd = abfd;
-			    if (last_file != NULL)
-			      free (last_file);
+			    free (last_file);
 			    last_file = NULL;
 			    if (filename)
 			      last_file = xstrdup (filename);
-			    if (last_function != NULL)
-			      free (last_function);
+			    free (last_function);
 			    last_function = xstrdup (functionname);
 			  }
 			discard_last = FALSE;
@@ -412,16 +410,10 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bfd_boolean is_warning)
 		if (discard_last)
 		  {
 		    last_bfd = NULL;
-		    if (last_file != NULL)
-		      {
-			free (last_file);
-			last_file = NULL;
-		      }
-		    if (last_function != NULL)
-		      {
-			free (last_function);
-			last_function = NULL;
-		      }
+		    free (last_file);
+		    last_file = NULL;
+		    free (last_function);
+		    last_function = NULL;
 		  }
 	      }
 	      break;

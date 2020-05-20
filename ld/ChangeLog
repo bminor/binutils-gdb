@@ -1,3 +1,19 @@
+2020-05-21  Alan Modra  <amodra@gmail.com>
+
+	* deffilep.y: Replace "if (x) free (x)" with "free (x)" thoughout.
+	* emultempl/elf.em: Likewise.
+	* emultempl/msp430.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/xtensaelf.em: Likewise.
+	* ldelf.c: Likewise.
+	* ldfile.c: Likewise.
+	* ldmain.c: Likewise.
+	* ldmisc.c: Likewise.
+	* lexsup.c: Likewise.
+	* pe-dll.c: Likewise.
+
 2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
 
 	* testsuite/ld-riscv-elf/attr-merge-arch-01.d: Updated

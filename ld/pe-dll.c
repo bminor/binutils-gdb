@@ -891,12 +891,9 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 	  e[j - 1].flag_constant |= e[i].flag_constant;
 	  e[j - 1].flag_noname |= e[i].flag_noname;
 	  e[j - 1].flag_data |= e[i].flag_data;
-	  if (e[i].name)
-	    free (e[i].name);
-	  if (e[i].internal_name)
-	    free (e[i].internal_name);
-	  if (e[i].its_name)
-	    free (e[i].its_name);
+	  free (e[i].name);
+	  free (e[i].internal_name);
+	  free (e[i].its_name);
 	}
       else
 	{

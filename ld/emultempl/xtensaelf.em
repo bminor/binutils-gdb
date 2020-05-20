@@ -216,18 +216,15 @@ replace_insn_sec_with_prop_sec (bfd *abfd,
 
   remove_section (abfd, insn_sec);
 
-  if (insn_contents)
-    free (insn_contents);
+  free (insn_contents);
 
   return TRUE;
 
  cleanup:
   if (prop_sec && prop_sec->owner)
     remove_section (abfd, prop_sec);
-  if (insn_contents)
-    free (insn_contents);
-  if (internal_relocs)
-    free (internal_relocs);
+  free (insn_contents);
+  free (internal_relocs);
 
   return FALSE;
 }
@@ -271,8 +268,7 @@ replace_instruction_table_sections (bfd *abfd, asection *sec)
 		 insn_sec_name, abfd, message);
 	}
     }
-  if (owned_prop_sec_name)
-    free (owned_prop_sec_name);
+  free (owned_prop_sec_name);
 }
 
 
@@ -636,8 +632,7 @@ xtensa_append_section_deps (reloc_deps_graph *deps, asection *sec)
 	{
 	  new_sections[i] = deps->sections[i];
 	}
-      if (deps->sections != NULL)
-	free (deps->sections);
+      free (deps->sections);
       deps->sections = new_sections;
       deps->size = new_size;
     }
@@ -675,9 +670,7 @@ free_reloc_deps_graph (reloc_deps_graph *deps)
 	}
       xtensa_set_section_deps (deps, sec, NULL);
     }
-  if (deps->sections)
-    free (deps->sections);
-
+  free (deps->sections);
   free (deps);
 }
 

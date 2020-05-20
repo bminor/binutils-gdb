@@ -1349,8 +1349,7 @@ undefined_symbol (struct bfd_link_info *info,
   else
     {
       error_count = 0;
-      if (error_name != NULL)
-	free (error_name);
+      free (error_name);
       error_name = xstrdup (name);
     }
 

@@ -1485,8 +1485,7 @@ parse_args (unsigned argc, char **argv)
 	case 'Y':
 	  if (CONST_STRNEQ (optarg, "P,"))
 	    optarg += 2;
-	  if (default_dirlist != NULL)
-	    free (default_dirlist);
+	  free (default_dirlist);
 	  default_dirlist = xstrdup (optarg);
 	  break;
 	case 'y':

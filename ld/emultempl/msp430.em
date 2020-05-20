@@ -330,8 +330,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
  end:
   free (upper_name);
   free (lower_name);
-  if (buf)
-    free (buf);
+  free (buf);
   return lower;
 }
 EOF

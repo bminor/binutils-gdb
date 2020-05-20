@@ -831,11 +831,8 @@ gld${EMULATION_NAME}_handle_option (int optc)
       pe_dll_characteristics |= IMAGE_DLLCHARACTERISTICS_TERMINAL_SERVER_AWARE;
       break;
     case OPTION_BUILD_ID:
-      if (emit_build_id != NULL)
-	{
-	  free ((char *) emit_build_id);
-	  emit_build_id = NULL;
-	}
+      free ((char *) emit_build_id);
+      emit_build_id = NULL;
       if (optarg == NULL)
 	optarg = DEFAULT_BUILD_ID_STYLE;
       if (strcmp (optarg, "none"))
