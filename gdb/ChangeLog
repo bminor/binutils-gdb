@@ -1,3 +1,9 @@
+2020-05-20  Simon Marchi  <simon.marchi@efficios.com>
+
+	* symfile.c (reread_symbols): Clear objfile's section_offsets
+	vector and section indices, re-compute them by calling
+	sym_offsets.
+
 2020-05-20  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (bound_name, MAX_ADA_DIMENS): Remove.

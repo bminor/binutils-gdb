@@ -2543,6 +2543,11 @@ reread_symbols (void)
 	     will need to be called (see discussion below).  */
 	  obstack_free (&objfile->objfile_obstack, 0);
 	  objfile->sections = NULL;
+	  objfile->section_offsets.clear ();
+	  objfile->sect_index_bss = -1;
+	  objfile->sect_index_data = -1;
+	  objfile->sect_index_rodata = -1;
+	  objfile->sect_index_text = -1;
 	  objfile->compunit_symtabs = NULL;
 	  objfile->template_symbols = NULL;
 	  objfile->static_links.reset (nullptr);
@@ -2596,6 +2601,9 @@ reread_symbols (void)
 	     again.  */
 
 	  objfiles_changed ();
+
+	  /* Recompute section offsets and section indices.  */
+	  objfile->sf->sym_offsets (objfile, {});
 
 	  read_symbols (objfile, 0);
 
