@@ -993,41 +993,20 @@ _bfd_coff_final_link (bfd *abfd,
   coff_debug_merge_hash_table_free (&flaginfo.debug_merge);
   debug_merge_allocated = FALSE;
 
-  if (flaginfo.internal_syms != NULL)
-    {
-      free (flaginfo.internal_syms);
-      flaginfo.internal_syms = NULL;
-    }
-  if (flaginfo.sec_ptrs != NULL)
-    {
-      free (flaginfo.sec_ptrs);
-      flaginfo.sec_ptrs = NULL;
-    }
-  if (flaginfo.sym_indices != NULL)
-    {
-      free (flaginfo.sym_indices);
-      flaginfo.sym_indices = NULL;
-    }
-  if (flaginfo.linenos != NULL)
-    {
-      free (flaginfo.linenos);
-      flaginfo.linenos = NULL;
-    }
-  if (flaginfo.contents != NULL)
-    {
-      free (flaginfo.contents);
-      flaginfo.contents = NULL;
-    }
-  if (flaginfo.external_relocs != NULL)
-    {
-      free (flaginfo.external_relocs);
-      flaginfo.external_relocs = NULL;
-    }
-  if (flaginfo.internal_relocs != NULL)
-    {
-      free (flaginfo.internal_relocs);
-      flaginfo.internal_relocs = NULL;
-    }
+  free (flaginfo.internal_syms);
+  flaginfo.internal_syms = NULL;
+  free (flaginfo.sec_ptrs);
+  flaginfo.sec_ptrs = NULL;
+  free (flaginfo.sym_indices);
+  flaginfo.sym_indices = NULL;
+  free (flaginfo.linenos);
+  flaginfo.linenos = NULL;
+  free (flaginfo.contents);
+  flaginfo.contents = NULL;
+  free (flaginfo.external_relocs);
+  flaginfo.external_relocs = NULL;
+  free (flaginfo.internal_relocs);
+  flaginfo.internal_relocs = NULL;
 
   /* The value of the last C_FILE symbol is supposed to be the symbol
      index of the first external symbol.  Write it out again if
@@ -1066,11 +1045,8 @@ _bfd_coff_final_link (bfd *abfd,
     goto error_return;
 
   /* The outsyms buffer is used by _bfd_coff_write_global_sym.  */
-  if (flaginfo.outsyms != NULL)
-    {
-      free (flaginfo.outsyms);
-      flaginfo.outsyms = NULL;
-    }
+  free (flaginfo.outsyms);
+  flaginfo.outsyms = NULL;
 
   if (bfd_link_relocatable (info) && max_output_reloc_count > 0)
     {
@@ -1141,10 +1117,8 @@ _bfd_coff_final_link (bfd *abfd,
 
       for (i = 0; i < abfd->section_count; i++)
 	{
-	  if (flaginfo.section_info[i].relocs != NULL)
-	    free (flaginfo.section_info[i].relocs);
-	  if (flaginfo.section_info[i].rel_hashes != NULL)
-	    free (flaginfo.section_info[i].rel_hashes);
+	  free (flaginfo.section_info[i].relocs);
+	  free (flaginfo.section_info[i].rel_hashes);
 	}
       free (flaginfo.section_info);
       flaginfo.section_info = NULL;
@@ -1203,31 +1177,20 @@ _bfd_coff_final_link (bfd *abfd,
 
       for (i = 0; i < abfd->section_count; i++)
 	{
-	  if (flaginfo.section_info[i].relocs != NULL)
-	    free (flaginfo.section_info[i].relocs);
-	  if (flaginfo.section_info[i].rel_hashes != NULL)
-	    free (flaginfo.section_info[i].rel_hashes);
+	  free (flaginfo.section_info[i].relocs);
+	  free (flaginfo.section_info[i].rel_hashes);
 	}
       free (flaginfo.section_info);
     }
-  if (flaginfo.internal_syms != NULL)
-    free (flaginfo.internal_syms);
-  if (flaginfo.sec_ptrs != NULL)
-    free (flaginfo.sec_ptrs);
-  if (flaginfo.sym_indices != NULL)
-    free (flaginfo.sym_indices);
-  if (flaginfo.outsyms != NULL)
-    free (flaginfo.outsyms);
-  if (flaginfo.linenos != NULL)
-    free (flaginfo.linenos);
-  if (flaginfo.contents != NULL)
-    free (flaginfo.contents);
-  if (flaginfo.external_relocs != NULL)
-    free (flaginfo.external_relocs);
-  if (flaginfo.internal_relocs != NULL)
-    free (flaginfo.internal_relocs);
-  if (external_relocs != NULL)
-    free (external_relocs);
+  free (flaginfo.internal_syms);
+  free (flaginfo.sec_ptrs);
+  free (flaginfo.sym_indices);
+  free (flaginfo.outsyms);
+  free (flaginfo.linenos);
+  free (flaginfo.contents);
+  free (flaginfo.external_relocs);
+  free (flaginfo.internal_relocs);
+  free (external_relocs);
   return FALSE;
 }
 
@@ -1286,8 +1249,7 @@ process_embedded_commands (bfd *output_bfd,
 
   if (!bfd_malloc_and_get_section (abfd, sec, &copy))
     {
-      if (copy != NULL)
-	free (copy);
+      free (copy);
       return 0;
     }
   e = (char *) copy + sec->size;

@@ -1144,8 +1144,7 @@ elf_checksum_contents (bfd *abfd,
       if (contents != NULL)
 	{
 	  (*process) (contents, i_shdr.sh_size, arg);
-	  if (free_contents != NULL)
-	    free (free_contents);
+	  free (free_contents);
 	}
     }
 
@@ -1402,16 +1401,14 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
       *symptrs = 0;		/* Final null pointer */
     }
 
-  if (xverbuf != NULL)
-    free (xverbuf);
-  if (isymbuf != NULL && hdr->contents != (unsigned char *) isymbuf)
+  free (xverbuf);
+  if (hdr->contents != (unsigned char *) isymbuf)
     free (isymbuf);
   return symcount;
 
  error_return:
-  if (xverbuf != NULL)
-    free (xverbuf);
-  if (isymbuf != NULL && hdr->contents != (unsigned char *) isymbuf)
+  free (xverbuf);
+  if (hdr->contents != (unsigned char *) isymbuf)
     free (isymbuf);
   return -1;
 }
@@ -1509,13 +1506,11 @@ elf_slurp_reloc_table_from_section (bfd *abfd,
 	goto error_return;
     }
 
-  if (allocated != NULL)
-    free (allocated);
+  free (allocated);
   return TRUE;
 
  error_return:
-  if (allocated != NULL)
-    free (allocated);
+  free (allocated);
   return FALSE;
 }
 

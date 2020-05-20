@@ -873,13 +873,11 @@ elfNN_ia64_relax_section (bfd *abfd, asection *sec,
   return TRUE;
 
  error_return:
-  if (isymbuf != NULL && (unsigned char *) isymbuf != symtab_hdr->contents)
+  if ((unsigned char *) isymbuf != symtab_hdr->contents)
     free (isymbuf);
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
+  if (elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
   return FALSE;
 }
@@ -1310,8 +1308,7 @@ elfNN_ia64_hash_copy_indirect (struct bfd_link_info *info,
       struct elfNN_ia64_dyn_sym_info *dyn_i;
       unsigned int count;
 
-      if (dir->info)
-	free (dir->info);
+      free (dir->info);
 
       dir->info = ind->info;
       dir->count = ind->count;
@@ -1399,14 +1396,11 @@ elfNN_ia64_global_dyn_info_free (void **xentry,
   struct elfNN_ia64_link_hash_entry *entry
     = (struct elfNN_ia64_link_hash_entry *) xentry;
 
-  if (entry->info)
-    {
-      free (entry->info);
-      entry->info = NULL;
-      entry->count = 0;
-      entry->sorted_count = 0;
-      entry->size = 0;
-    }
+  free (entry->info);
+  entry->info = NULL;
+  entry->count = 0;
+  entry->sorted_count = 0;
+  entry->size = 0;
 
   return TRUE;
 }
@@ -1420,14 +1414,11 @@ elfNN_ia64_local_dyn_info_free (void **slot,
   struct elfNN_ia64_local_hash_entry *entry
     = (struct elfNN_ia64_local_hash_entry *) *slot;
 
-  if (entry->info)
-    {
-      free (entry->info);
-      entry->info = NULL;
-      entry->count = 0;
-      entry->sorted_count = 0;
-      entry->size = 0;
-    }
+  free (entry->info);
+  entry->info = NULL;
+  entry->count = 0;
+  entry->sorted_count = 0;
+  entry->size = 0;
 
   return TRUE;
 }

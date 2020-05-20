@@ -312,7 +312,7 @@ bfd_realloc_or_free (void *ptr, bfd_size_type size)
 {
   void *ret = bfd_realloc (ptr, size);
 
-  if (ret == NULL && ptr != NULL)
+  if (ret == NULL)
     free (ptr);
 
   return ret;

@@ -4093,16 +4093,13 @@ v850_elf_relax_section (bfd *abfd,
     }
 
  finish:
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != (unsigned char *) contents)
+  if (elf_section_data (sec)->this_hdr.contents != (unsigned char *) contents)
     free (contents);
 
-  if (isymbuf != NULL
-      && symtab_hdr->contents != (bfd_byte *) isymbuf)
+  if (symtab_hdr->contents != (bfd_byte *) isymbuf)
     free (isymbuf);
 
   return result;

@@ -4538,8 +4538,7 @@ nios2_elf32_relocate_section (bfd *output_bfd,
 	    {
 	      (*info->callbacks->warning) (info, msg, name, input_bfd,
 					   input_section, rel->r_offset);
-	      if (msgbuf)
-		free (msgbuf);
+	      free (msgbuf);
 	      return FALSE;
 	    }
 	}

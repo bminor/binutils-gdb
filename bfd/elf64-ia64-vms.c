@@ -792,13 +792,11 @@ elf64_ia64_relax_section (bfd *abfd, asection *sec,
   return TRUE;
 
  error_return:
-  if (isymbuf != NULL && (unsigned char *) isymbuf != symtab_hdr->contents)
+  if ((unsigned char *) isymbuf != symtab_hdr->contents)
     free (isymbuf);
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
+  if (elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
   return FALSE;
 }
@@ -999,14 +997,11 @@ elf64_ia64_global_dyn_info_free (void **xentry,
   if (entry->root.root.type == bfd_link_hash_warning)
     entry = (struct elf64_ia64_link_hash_entry *) entry->root.root.u.i.link;
 
-  if (entry->info)
-    {
-      free (entry->info);
-      entry->info = NULL;
-      entry->count = 0;
-      entry->sorted_count = 0;
-      entry->size = 0;
-    }
+  free (entry->info);
+  entry->info = NULL;
+  entry->count = 0;
+  entry->sorted_count = 0;
+  entry->size = 0;
 
   return TRUE;
 }
@@ -1020,14 +1015,11 @@ elf64_ia64_local_dyn_info_free (void **slot,
   struct elf64_ia64_local_hash_entry *entry
     = (struct elf64_ia64_local_hash_entry *) *slot;
 
-  if (entry->info)
-    {
-      free (entry->info);
-      entry->info = NULL;
-      entry->count = 0;
-      entry->sorted_count = 0;
-      entry->size = 0;
-    }
+  free (entry->info);
+  entry->info = NULL;
+  entry->count = 0;
+  entry->sorted_count = 0;
+  entry->size = 0;
 
   return TRUE;
 }
@@ -5242,11 +5234,8 @@ elf64_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (isymbuf != NULL)
-    {
-      free (isymbuf);
-      isymbuf = NULL;
-    }
+  free (isymbuf);
+  isymbuf = NULL;
 
   /* If this object is the same format as the output object, and it is
      not a shared library, then let the backend look through the
@@ -5303,8 +5292,7 @@ elf64_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
  error_free_vers:
  error_free_sym:
-  if (isymbuf != NULL)
-    free (isymbuf);
+  free (isymbuf);
  error_return:
   return FALSE;
 }

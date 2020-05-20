@@ -381,8 +381,7 @@ ihex_scan (bfd *abfd)
 	      /* An end record.  */
 	      if (abfd->start_address == 0)
 		abfd->start_address = addr;
-	      if (buf != NULL)
-		free (buf);
+	      free (buf);
 	      return TRUE;
 
 	    case 2:
@@ -474,14 +473,11 @@ ihex_scan (bfd *abfd)
   if (error)
     goto error_return;
 
-  if (buf != NULL)
-    free (buf);
-
+  free (buf);
   return TRUE;
 
  error_return:
-  if (buf != NULL)
-    free (buf);
+  free (buf);
   return FALSE;
 }
 
@@ -603,8 +599,7 @@ ihex_read_section (bfd *abfd, asection *section, bfd_byte *contents)
       if ((bfd_size_type) (p - contents) >= section->size)
 	{
 	  /* We've read everything in the section.  */
-	  if (buf != NULL)
-	    free (buf);
+	  free (buf);
 	  return TRUE;
 	}
 
@@ -621,14 +616,11 @@ ihex_read_section (bfd *abfd, asection *section, bfd_byte *contents)
       goto error_return;
     }
 
-  if (buf != NULL)
-    free (buf);
-
+  free (buf);
   return TRUE;
 
  error_return:
-  if (buf != NULL)
-    free (buf);
+  free (buf);
   return FALSE;
 }
 

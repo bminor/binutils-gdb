@@ -1372,7 +1372,7 @@ mn10300_elf_check_relocs (bfd *abfd,
 
   result = TRUE;
  fail:
-  if (isymbuf != NULL && symtab_hdr->contents != (unsigned char *) isymbuf)
+  if (symtab_hdr->contents != (unsigned char *) isymbuf)
     free (isymbuf);
 
   return result;
@@ -2912,8 +2912,7 @@ mn10300_elf_relax_section (bfd *abfd,
 		}
 
 	      /* Cache or free any memory we allocated for the relocs.  */
-	      if (internal_relocs != NULL
-		  && elf_section_data (section)->relocs != internal_relocs)
+	      if (elf_section_data (section)->relocs != internal_relocs)
 		free (internal_relocs);
 	      internal_relocs = NULL;
 
@@ -3222,8 +3221,7 @@ mn10300_elf_relax_section (bfd *abfd,
 		}
 
 	      /* Cache or free any memory we allocated for the relocs.  */
-	      if (internal_relocs != NULL
-		  && elf_section_data (section)->relocs != internal_relocs)
+	      if (elf_section_data (section)->relocs != internal_relocs)
 		free (internal_relocs);
 	      internal_relocs = NULL;
 
@@ -4391,21 +4389,17 @@ mn10300_elf_relax_section (bfd *abfd,
 	}
     }
 
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
   return TRUE;
 
  error_return:
-  if (isymbuf != NULL
-      && symtab_hdr->contents != (unsigned char *) isymbuf)
+  if (symtab_hdr->contents != (unsigned char *) isymbuf)
     free (isymbuf);
-  if (contents != NULL
-      && elf_section_data (section)->this_hdr.contents != contents)
+  if (elf_section_data (section)->this_hdr.contents != contents)
     free (contents);
-  if (internal_relocs != NULL
-      && elf_section_data (section)->relocs != internal_relocs)
+  if (elf_section_data (section)->relocs != internal_relocs)
     free (internal_relocs);
 
   return FALSE;
@@ -4494,9 +4488,8 @@ mn10300_elf_get_relocated_section_contents (bfd *output_bfd,
 					  isymbuf, sections))
 	goto error_return;
 
-      if (sections != NULL)
-	free (sections);
-      if (isymbuf != NULL && symtab_hdr->contents != (unsigned char *) isymbuf)
+      free (sections);
+      if (symtab_hdr->contents != (unsigned char *) isymbuf)
 	free (isymbuf);
       if (internal_relocs != elf_section_data (input_section)->relocs)
 	free (internal_relocs);
@@ -4505,12 +4498,10 @@ mn10300_elf_get_relocated_section_contents (bfd *output_bfd,
   return data;
 
  error_return:
-  if (sections != NULL)
-    free (sections);
-  if (isymbuf != NULL && symtab_hdr->contents != (unsigned char *) isymbuf)
+  free (sections);
+  if (symtab_hdr->contents != (unsigned char *) isymbuf)
     free (isymbuf);
-  if (internal_relocs != NULL
-      && internal_relocs != elf_section_data (input_section)->relocs)
+  if (internal_relocs != elf_section_data (input_section)->relocs)
     free (internal_relocs);
   return NULL;
 }

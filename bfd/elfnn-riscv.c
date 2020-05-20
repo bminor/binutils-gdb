@@ -2393,9 +2393,8 @@ riscv_elf_relocate_section (bfd *output_bfd,
       if (msg && r != bfd_reloc_dangerous)
 	info->callbacks->einfo (msg);
 
-      /* Free the unused `msg_buf` if needed.  */
-      if (msg_buf)
-	free (msg_buf);
+      /* Free the unused `msg_buf`.  */
+      free (msg_buf);
 
       /* We already reported the error via a callback, so don't try to report
 	 it again by returning false.  That leads to spurious errors.  */

@@ -1598,9 +1598,7 @@ process_stubs (struct bfd_link_info *info, bfd_boolean build)
 		  if (elf_section_data (isec)->relocs != internal_relocs)
 		    free (internal_relocs);
 		error_ret_free_local:
-		  if (local_syms != NULL
-		      && (symtab_hdr->contents
-			  != (unsigned char *) local_syms))
+		  if (symtab_hdr->contents != (unsigned char *) local_syms)
 		    free (local_syms);
 		  return FALSE;
 		}
@@ -3013,13 +3011,10 @@ discover_functions (struct bfd_link_info *info)
 	  continue;
 	}
 
-      if (symtab_hdr->contents != NULL)
-	{
-	  /* Don't use cached symbols since the generic ELF linker
-	     code only reads local symbols, and we need globals too.  */
-	  free (symtab_hdr->contents);
-	  symtab_hdr->contents = NULL;
-	}
+      /* Don't use cached symbols since the generic ELF linker
+	 code only reads local symbols, and we need globals too.  */
+      free (symtab_hdr->contents);
+      symtab_hdr->contents = NULL;
       syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, symcount, 0,
 				   NULL, NULL, NULL);
       symtab_hdr->contents = (void *) syms;

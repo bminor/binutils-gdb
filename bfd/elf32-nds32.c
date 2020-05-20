@@ -12572,15 +12572,13 @@ nds32_elf_relax_section (bfd *abfd, asection *sec,
     }
 
  finish:
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
+  if (elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
 
-  if (isymbuf != NULL && symtab_hdr->contents != (bfd_byte *) isymbuf)
+  if (symtab_hdr->contents != (bfd_byte *) isymbuf)
     free (isymbuf);
 
   return result;
@@ -13473,7 +13471,7 @@ elf32_nds32_check_relax_group (bfd *abfd, asection *asec)
     }
   while (FALSE);
 
-  if ((relocs != NULL) && (elf_section_data (asec)->relocs != relocs))
+  if (elf_section_data (asec)->relocs != relocs)
     free (relocs);
 
   if ((min_id != relax_group_ptr->min_id)
@@ -13612,7 +13610,7 @@ elf32_nds32_unify_relax_group (bfd *abfd, asection *asec)
     }
   while (FALSE);
 
-  if (relocs != NULL && elf_section_data (asec)->relocs != relocs)
+  if (elf_section_data (asec)->relocs != relocs)
     free (relocs);
 
   return result;
@@ -14038,15 +14036,13 @@ nds32_elf_unify_tls_model (bfd *inbfd, asection *insec, bfd_byte *incontents,
   if (incontents)
     contents = NULL;
 
-  if (internal_relocs != NULL
-      && elf_section_data (insec)->relocs != internal_relocs)
+  if (elf_section_data (insec)->relocs != internal_relocs)
     free (internal_relocs);
 
-  if (contents != NULL
-      && elf_section_data (insec)->this_hdr.contents != contents)
+  if (elf_section_data (insec)->this_hdr.contents != contents)
     free (contents);
 
-  if (local_syms != NULL && symtab_hdr->contents != (bfd_byte *) local_syms)
+  if (symtab_hdr->contents != (bfd_byte *) local_syms)
     free (local_syms);
 
   if (chain.next)

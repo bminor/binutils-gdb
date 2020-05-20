@@ -1,3 +1,26 @@
+2020-05-21  Alan Modra  <amodra@gmail.com>
+
+	* aoutx.h: Replace "if (x) free (x)" with "free (x)" throughout.
+	* archive.c, * bfd.c, * bfdio.c, * coff-alpha.c, * coff-ppc.c,
+	* coff-sh.c, * coff-stgo32.c, * coffcode.h, * coffgen.c,
+	* cofflink.c, * cpu-arm.c, * doc/chew.c, * dwarf2.c, * ecoff.c,
+	* ecofflink.c, * elf-eh-frame.c, * elf-m10200.c, * elf-m10300.c,
+	* elf-strtab.c, * elf.c, * elf32-arc.c, * elf32-arm.c,
+	* elf32-avr.c, * elf32-bfin.c, * elf32-cr16.c, * elf32-crx.c,
+	* elf32-epiphany.c, * elf32-ft32.c, * elf32-h8300.c,
+	* elf32-ip2k.c, * elf32-m32c.c, * elf32-m68hc11.c,
+	* elf32-m68k.c, * elf32-microblaze.c, * elf32-msp430.c,
+	* elf32-nds32.c, * elf32-nios2.c, * elf32-ppc.c, * elf32-pru.c,
+	* elf32-rl78.c, * elf32-rx.c, * elf32-sh.c, * elf32-spu.c,
+	* elf32-v850.c, * elf32-xtensa.c, * elf64-alpha.c,
+	* elf64-hppa.c, * elf64-ia64-vms.c, * elf64-mips.c
+	* elf64-mmix.c, * elf64-ppc.c, * elf64-sparc.c, * elfcode.h,
+	* elflink.c, * elfnn-ia64.c, * elfnn-riscv.c, * elfxx-mips.c,
+	* elfxx-x86.c, * format.c, * ihex.c, * libbfd.c, * linker.c,
+	* mmo.c, * opncls.c, * pdp11.c, * peXXigen.c, * pef.c,
+	* peicode.h, * simple.c, * som.c, * srec.c, * stabs.c, * syms.c,
+	* targets.c, * vms-lib.c, * xcofflink.c, * xtensa-isa.c: Likewise.
+
 2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfxx-riscv.h (riscv_parse_subset_t): Add new callback function

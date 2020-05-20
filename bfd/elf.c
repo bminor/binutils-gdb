@@ -513,17 +513,14 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 	_bfd_error_handler (_("%pB symbol number %lu references"
 			      " nonexistent SHT_SYMTAB_SHNDX section"),
 			    ibfd, (unsigned long) symoffset);
-	if (alloc_intsym != NULL)
-	  free (alloc_intsym);
+	free (alloc_intsym);
 	intsym_buf = NULL;
 	goto out;
       }
 
  out:
-  if (alloc_ext != NULL)
-    free (alloc_ext);
-  if (alloc_extshndx != NULL)
-    free (alloc_extshndx);
+  free (alloc_ext);
+  free (alloc_extshndx);
 
   return intsym_buf;
 }
@@ -1878,8 +1875,7 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
   return TRUE;
 
  error_return:
-  if (dynbuf != NULL)
-    free (dynbuf);
+  free (dynbuf);
   return FALSE;
 }
 
@@ -5252,8 +5248,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 
  error_return:
-  if (sections != NULL)
-    free (sections);
+  free (sections);
   return FALSE;
 }
 
@@ -9037,8 +9032,7 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bfd_boolean default_imported_symver)
   return TRUE;
 
  error_return:
-  if (contents != NULL)
-    free (contents);
+  free (contents);
   return FALSE;
 }
 

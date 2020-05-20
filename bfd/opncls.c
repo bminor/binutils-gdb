@@ -1162,8 +1162,7 @@ bfd_get_debug_link_info_1 (bfd *abfd, void *crc32_out)
 
   if (!bfd_malloc_and_get_section (abfd, sect, &contents))
     {
-      if (contents != NULL)
-	free (contents);
+      free (contents);
       return NULL;
     }
 
@@ -1252,8 +1251,7 @@ bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
 
   if (!bfd_malloc_and_get_section (abfd, sect, & contents))
     {
-      if (contents != NULL)
-	free (contents);
+      free (contents);
       return NULL;
     }
 
@@ -1821,8 +1819,7 @@ get_build_id (bfd *abfd)
 
   if (!bfd_malloc_and_get_section (abfd, sect, & contents))
     {
-      if (contents != NULL)
-	free (contents);
+      free (contents);
       return NULL;
     }
 

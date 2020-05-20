@@ -1468,8 +1468,7 @@ adjust_relative_path (const char * path, const char * ref_path)
 
   if (len > pathbuf_len)
     {
-      if (pathbuf != NULL)
-	free (pathbuf);
+      free (pathbuf);
       pathbuf_len = 0;
       pathbuf = (char *) bfd_malloc (len);
       if (pathbuf == NULL)
@@ -2326,8 +2325,7 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 	    {
 	      if (storage > syms_max)
 		{
-		  if (syms_max > 0)
-		    free (syms);
+		  free (syms);
 		  syms_max = storage;
 		  syms = (asymbol **) bfd_malloc (syms_max);
 		  if (syms == NULL)
@@ -2408,20 +2406,16 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
   ret = BFD_SEND (arch, write_armap,
 		  (arch, elength, map, orl_count, stridx));
 
-  if (syms_max > 0)
-    free (syms);
-  if (map != NULL)
-    free (map);
+  free (syms);
+  free (map);
   if (first_name != NULL)
     bfd_release (arch, first_name);
 
   return ret;
 
  error_return:
-  if (syms_max > 0)
-    free (syms);
-  if (map != NULL)
-    free (map);
+  free (syms);
+  free (map);
   if (first_name != NULL)
     bfd_release (arch, first_name);
 

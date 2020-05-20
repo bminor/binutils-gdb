@@ -2451,8 +2451,7 @@ _bfd_x86_elf_get_synthetic_symtab (bfd *abfd,
     count = n;
 
   for (j = 0; plts[j].name != NULL; j++)
-    if (plts[j].contents != NULL)
-      free (plts[j].contents);
+    free (plts[j].contents);
 
   free (dynrelbuf);
 

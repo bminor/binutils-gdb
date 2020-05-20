@@ -1633,8 +1633,7 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
       apuinfo_set = TRUE;
       if (largest_input_size < asec->size)
 	{
-	  if (buffer)
-	    free (buffer);
+	  free (buffer);
 	  largest_input_size = asec->size;
 	  buffer = bfd_malloc (largest_input_size);
 	  if (!buffer)
@@ -1692,8 +1691,7 @@ ppc_elf_begin_write_processing (bfd *abfd, struct bfd_link_info *link_info)
     }
 
  fail:
-  if (buffer)
-    free (buffer);
+  free (buffer);
 
   if (error_message)
     _bfd_error_handler (error_message, APUINFO_SECTION_NAME, ibfd);
@@ -4263,8 +4261,7 @@ ppc_elf_inline_plt (struct bfd_link_info *info)
 		  {
 		    if (elf_section_data (sec)->relocs != relstart)
 		      free (relstart);
-		    if (local_syms != NULL
-			&& symtab_hdr->contents != (unsigned char *) local_syms)
+		    if (symtab_hdr->contents != (unsigned char *) local_syms)
 		      free (local_syms);
 		    return FALSE;
 		  }
@@ -6651,8 +6648,7 @@ ppc_elf_relax_section (bfd *abfd,
       rel_hdr = _bfd_elf_single_rel_hdr (isec);
       rel_hdr->sh_size += changes * rel_hdr->sh_entsize;
     }
-  else if (internal_relocs != NULL
-	   && elf_section_data (isec)->relocs != internal_relocs)
+  else if (elf_section_data (isec)->relocs != internal_relocs)
     free (internal_relocs);
 
   *again = changes != 0 || workaround_change;
@@ -6665,13 +6661,11 @@ ppc_elf_relax_section (bfd *abfd,
       branch_fixups = branch_fixups->next;
       free (f);
     }
-  if (isymbuf != NULL && (unsigned char *) isymbuf != symtab_hdr->contents)
+  if ((unsigned char *) isymbuf != symtab_hdr->contents)
     free (isymbuf);
-  if (contents != NULL
-      && elf_section_data (isec)->this_hdr.contents != contents)
+  if (elf_section_data (isec)->this_hdr.contents != contents)
     free (contents);
-  if (internal_relocs != NULL
-      && elf_section_data (isec)->relocs != internal_relocs)
+  if (elf_section_data (isec)->relocs != internal_relocs)
     free (internal_relocs);
   return FALSE;
 }
@@ -9710,8 +9704,7 @@ ppc_finish_symbols (struct bfd_link_info *info)
 		if (!get_sym_h (NULL, &sym, &sym_sec, NULL, &local_syms,
 				lplt - local_plt, ibfd))
 		  {
-		    if (local_syms != NULL
-			&& symtab_hdr->contents != (unsigned char *) local_syms)
+		    if (symtab_hdr->contents != (unsigned char *) local_syms)
 		      free (local_syms);
 		    return FALSE;
 		  }

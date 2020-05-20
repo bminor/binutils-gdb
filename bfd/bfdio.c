@@ -662,8 +662,7 @@ memory_bclose (struct bfd *abfd)
 {
   struct bfd_in_memory *bim = (struct bfd_in_memory *) abfd->iostream;
 
-  if (bim->buffer != NULL)
-    free (bim->buffer);
+  free (bim->buffer);
   free (bim);
   abfd->iostream = NULL;
 

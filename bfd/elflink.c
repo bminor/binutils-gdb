@@ -2643,8 +2643,7 @@ _bfd_elf_link_read_relocs (bfd *abfd,
   if (keep_memory)
     esdo->relocs = internal_relocs;
 
-  if (alloc1 != NULL)
-    free (alloc1);
+  free (alloc1);
 
   /* Don't free alloc2, since if it was allocated we are passing it
      back (under the name of internal_relocs).  */
@@ -2652,8 +2651,7 @@ _bfd_elf_link_read_relocs (bfd *abfd,
   return internal_relocs;
 
  error_return:
-  if (alloc1 != NULL)
-    free (alloc1);
+  free (alloc1);
   if (alloc2 != NULL)
     {
       if (keep_memory)
@@ -5299,17 +5297,10 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (extversym != NULL)
-    {
-      free (extversym);
-      extversym = NULL;
-    }
-
-  if (isymbuf != NULL)
-    {
-      free (isymbuf);
-      isymbuf = NULL;
-    }
+  free (extversym);
+  extversym = NULL;
+  free (isymbuf);
+  isymbuf = NULL;
 
   if ((elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0)
     {
@@ -5389,8 +5380,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       free (old_tab);
       objalloc_free_block ((struct objalloc *) htab->root.table.memory,
 			   alloc_mark);
-      if (nondeflt_vers != NULL)
-	free (nondeflt_vers);
+      free (nondeflt_vers);
       return TRUE;
     }
 
@@ -5673,17 +5663,12 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 
  error_free_vers:
-  if (old_tab != NULL)
-    free (old_tab);
-  if (old_strtab != NULL)
-    free (old_strtab);
-  if (nondeflt_vers != NULL)
-    free (nondeflt_vers);
-  if (extversym != NULL)
-    free (extversym);
+  free (old_tab);
+  free (old_strtab);
+  free (nondeflt_vers);
+  free (extversym);
  error_free_sym:
-  if (isymbuf != NULL)
-    free (isymbuf);
+  free (isymbuf);
  error_return:
   return FALSE;
 }
@@ -5891,12 +5876,10 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
   while (loop);
 
   free (included);
-
   return TRUE;
 
  error_return:
-  if (included != NULL)
-    free (included);
+  free (included);
   return FALSE;
 }
 
@@ -5967,9 +5950,7 @@ elf_collect_hash_codes (struct elf_link_hash_entry *h, void *data)
      later.  */
   h->u.elf_hash_value = ha;
 
-  if (alc != NULL)
-    free (alc);
-
+  free (alc);
   return TRUE;
 }
 
@@ -6043,9 +6024,7 @@ elf_collect_gnu_hash_codes (struct elf_link_hash_entry *h, void *data)
   if (s->min_dynindx < 0 || s->min_dynindx > h->dynindx)
     s->min_dynindx = h->dynindx;
 
-  if (alc != NULL)
-    free (alc);
-
+  free (alc);
   return TRUE;
 }
 
@@ -7973,8 +7952,7 @@ bfd_elf_get_bfd_needed_list (bfd *abfd,
   return TRUE;
 
  error_return:
-  if (dynbuf != NULL)
-    free (dynbuf);
+  free (dynbuf);
   return FALSE;
 }
 
@@ -8313,14 +8291,10 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
   result = TRUE;
 
  done:
-  if (symtable1)
-    free (symtable1);
-  if (symtable2)
-    free (symtable2);
-  if (isymbuf1)
-    free (isymbuf1);
-  if (isymbuf2)
-    free (isymbuf2);
+  free (symtable1);
+  free (symtable2);
+  free (isymbuf1);
+  free (isymbuf2);
 
   return result;
 }
@@ -11875,32 +11849,21 @@ elf_final_link_free (bfd *obfd, struct elf_final_link_info *flinfo)
 
   if (flinfo->symstrtab != NULL)
     _bfd_elf_strtab_free (flinfo->symstrtab);
-  if (flinfo->contents != NULL)
-    free (flinfo->contents);
-  if (flinfo->external_relocs != NULL)
-    free (flinfo->external_relocs);
-  if (flinfo->internal_relocs != NULL)
-    free (flinfo->internal_relocs);
-  if (flinfo->external_syms != NULL)
-    free (flinfo->external_syms);
-  if (flinfo->locsym_shndx != NULL)
-    free (flinfo->locsym_shndx);
-  if (flinfo->internal_syms != NULL)
-    free (flinfo->internal_syms);
-  if (flinfo->indices != NULL)
-    free (flinfo->indices);
-  if (flinfo->sections != NULL)
-    free (flinfo->sections);
-  if (flinfo->symshndxbuf != NULL
-      && flinfo->symshndxbuf != (Elf_External_Sym_Shndx *) -1)
+  free (flinfo->contents);
+  free (flinfo->external_relocs);
+  free (flinfo->internal_relocs);
+  free (flinfo->external_syms);
+  free (flinfo->locsym_shndx);
+  free (flinfo->internal_syms);
+  free (flinfo->indices);
+  free (flinfo->sections);
+  if (flinfo->symshndxbuf != (Elf_External_Sym_Shndx *) -1)
     free (flinfo->symshndxbuf);
   for (o = obfd->sections; o != NULL; o = o->next)
     {
       struct bfd_elf_section_data *esdo = elf_section_data (o);
-      if ((o->flags & SEC_RELOC) != 0 && esdo->rel.hashes != NULL)
-	free (esdo->rel.hashes);
-      if ((o->flags & SEC_RELOC) != 0 && esdo->rela.hashes != NULL)
-	free (esdo->rela.hashes);
+      free (esdo->rel.hashes);
+      free (esdo->rela.hashes);
     }
 }
 
@@ -12488,8 +12451,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   if (!info->reduce_memory_overheads)
     {
       for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
-	if (bfd_get_flavour (sub) == bfd_target_elf_flavour
-	    && elf_tdata (sub)->symbuf)
+	if (bfd_get_flavour (sub) == bfd_target_elf_flavour)
 	  {
 	    free (elf_tdata (sub)->symbuf);
 	    elf_tdata (sub)->symbuf = NULL;
@@ -13097,8 +13059,7 @@ fini_reloc_cookie (struct elf_reloc_cookie *cookie, bfd *abfd)
   Elf_Internal_Shdr *symtab_hdr;
 
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
-  if (cookie->locsyms != NULL
-      && symtab_hdr->contents != (unsigned char *) cookie->locsyms)
+  if (symtab_hdr->contents != (unsigned char *) cookie->locsyms)
     free (cookie->locsyms);
 }
 
@@ -13135,7 +13096,7 @@ static void
 fini_reloc_cookie_rels (struct elf_reloc_cookie *cookie,
 			asection *sec)
 {
-  if (cookie->rels && elf_section_data (sec)->relocs != cookie->rels)
+  if (elf_section_data (sec)->relocs != cookie->rels)
     free (cookie->rels);
 }
 

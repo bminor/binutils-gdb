@@ -2422,8 +2422,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	free_contents_and_exit_err:
 	  count = -1;
 	free_contents_and_exit:
-	  if (contents)
-	    free (contents);
+	  free (contents);
 	  goto done;
 	}
 
@@ -7303,11 +7302,9 @@ ppc64_elf_edit_opd (struct bfd_link_info *info)
 	      bfd_byte *loc;
 	      if (!bfd_malloc_and_get_section (ibfd, sec, &loc))
 		{
-		  if (loc != NULL)
-		    free (loc);
+		  free (loc);
 		error_ret:
-		  if (local_syms != NULL
-		      && symtab_hdr->contents != (unsigned char *) local_syms)
+		  if (symtab_hdr->contents != (unsigned char *) local_syms)
 		    free (local_syms);
 		  if (elf_section_data (sec)->relocs != relstart)
 		    free (relstart);
@@ -7633,8 +7630,7 @@ ppc64_elf_inline_plt (struct bfd_link_info *info)
 		  {
 		    if (elf_section_data (sec)->relocs != relstart)
 		      free (relstart);
-		    if (local_syms != NULL
-			&& symtab_hdr->contents != (bfd_byte *) local_syms)
+		    if (symtab_hdr->contents != (bfd_byte *) local_syms)
 		      free (local_syms);
 		    return FALSE;
 		  }
@@ -7975,11 +7971,9 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 		    err_free_rel:
 		      if (elf_section_data (sec)->relocs != relstart)
 			free (relstart);
-		      if (toc_ref != NULL)
-			free (toc_ref);
-		      if (locsyms != NULL
-			  && (elf_symtab_hdr (ibfd).contents
-			      != (unsigned char *) locsyms))
+		      free (toc_ref);
+		      if (elf_symtab_hdr (ibfd).contents
+			  != (unsigned char *) locsyms)
 			free (locsyms);
 		      return ret;
 		    }
@@ -8394,8 +8388,7 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 	  }
       }
 
-  if (toc_ref != NULL)
-    free (toc_ref);
+  free (toc_ref);
   htab->do_tls_opt = 1;
   return TRUE;
 }
@@ -8835,18 +8828,14 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
       if (used == NULL)
 	{
 	error_ret:
-	  if (local_syms != NULL
-	      && symtab_hdr->contents != (unsigned char *) local_syms)
+	  if (symtab_hdr->contents != (unsigned char *) local_syms)
 	    free (local_syms);
 	  if (sec != NULL
-	      && relstart != NULL
 	      && elf_section_data (sec)->relocs != relstart)
 	    free (relstart);
-	  if (toc_relocs != NULL
-	      && elf_section_data (toc)->relocs != toc_relocs)
+	  if (elf_section_data (toc)->relocs != toc_relocs)
 	    free (toc_relocs);
-	  if (skip != NULL)
-	    free (skip);
+	  free (skip);
 	  return FALSE;
 	}
 
@@ -9213,8 +9202,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      rel_hdr->sh_size = toc->reloc_count * sz;
 	    }
 	}
-      else if (toc_relocs != NULL
-	       && elf_section_data (toc)->relocs != toc_relocs)
+      else if (elf_section_data (toc)->relocs != toc_relocs)
 	free (toc_relocs);
 
       if (local_syms != NULL
@@ -9265,11 +9253,9 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	  if (relstart == NULL)
 	    {
 	    got_error_ret:
-	      if (local_syms != NULL
-		  && symtab_hdr->contents != (unsigned char *) local_syms)
+	      if (symtab_hdr->contents != (unsigned char *) local_syms)
 		free (local_syms);
 	      if (sec != NULL
-		  && relstart != NULL
 		  && elf_section_data (sec)->relocs != relstart)
 		free (relstart);
 	      return FALSE;
@@ -12792,9 +12778,8 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
 	    }
 	}
 
-      if (local_syms != NULL
-	  && (elf_symtab_hdr (isec->owner).contents
-	      != (unsigned char *) local_syms))
+      if (elf_symtab_hdr (isec->owner).contents
+	  != (unsigned char *) local_syms)
 	free (local_syms);
       if (elf_section_data (isec)->relocs != relstart)
 	free (relstart);
@@ -13547,9 +13532,8 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		      if (elf_section_data (section)->relocs == NULL)
 			free (internal_relocs);
 		    error_ret_free_local:
-		      if (local_syms != NULL
-			  && (symtab_hdr->contents
-			      != (unsigned char *) local_syms))
+		      if (symtab_hdr->contents
+			  != (unsigned char *) local_syms)
 			free (local_syms);
 		      return FALSE;
 		    }
@@ -14120,8 +14104,7 @@ write_plt_relocs_for_local_syms (struct bfd_link_info *info)
 	      if (!get_sym_h (NULL, &sym, &sym_sec, NULL, &local_syms,
 			      lplt - local_plt, ibfd))
 		{
-		  if (local_syms != NULL
-		      && symtab_hdr->contents != (unsigned char *) local_syms)
+		  if (symtab_hdr->contents != (unsigned char *) local_syms)
 		    free (local_syms);
 		  return FALSE;
 		}
@@ -17199,8 +17182,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		 reloc_name, sym_name, (int) r);
 	      ret = FALSE;
 	    }
-	  if (more_info != NULL)
-	    free (more_info);
+	  free (more_info);
 	}
     copy_reloc:
       if (wrel != rel)

@@ -488,12 +488,10 @@ ecoff_slurp_symbolic_header (bfd *abfd)
   /* Now we can get the correct number of symbols.  */
   abfd->symcount = internal_symhdr->isymMax + internal_symhdr->iextMax;
 
-  if (raw != NULL)
-    free (raw);
+  free (raw);
   return TRUE;
  error_return:
-  if (raw != NULL)
-    free (raw);
+  free (raw);
   return FALSE;
 }
 
@@ -2797,14 +2795,12 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
 
   if (reloc_buff != NULL)
     bfd_release (abfd, reloc_buff);
-  if (buff != NULL)
-    free (buff);
+  free (buff);
   return TRUE;
  error_return:
   if (reloc_buff != NULL)
     bfd_release (abfd, reloc_buff);
-  if (buff != NULL)
-    free (buff);
+  free (buff);
   return FALSE;
 }
 
@@ -3528,17 +3524,13 @@ ecoff_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 
   result = ecoff_link_add_externals (abfd, info, external_ext, ssext);
 
-  if (ssext != NULL)
-    free (ssext);
-  if (external_ext != NULL)
-    free (external_ext);
+  free (ssext);
+  free (external_ext);
   return result;
 
  error_return:
-  if (ssext != NULL)
-    free (ssext);
-  if (external_ext != NULL)
-    free (external_ext);
+  free (ssext);
+  free (external_ext);
   return FALSE;
 }
 
@@ -3820,24 +3812,15 @@ ecoff_final_link_debug_accumulate (bfd *output_bfd,
  return_something:
   if (ecoff_data (input_bfd)->raw_syments == NULL)
     {
-      if (debug->line != NULL)
-	free (debug->line);
-      if (debug->external_dnr != NULL)
-	free (debug->external_dnr);
-      if (debug->external_pdr != NULL)
-	free (debug->external_pdr);
-      if (debug->external_sym != NULL)
-	free (debug->external_sym);
-      if (debug->external_opt != NULL)
-	free (debug->external_opt);
-      if (debug->external_aux != NULL)
-	free (debug->external_aux);
-      if (debug->ss != NULL)
-	free (debug->ss);
-      if (debug->external_fdr != NULL)
-	free (debug->external_fdr);
-      if (debug->external_rfd != NULL)
-	free (debug->external_rfd);
+      free (debug->line);
+      free (debug->external_dnr);
+      free (debug->external_pdr);
+      free (debug->external_sym);
+      free (debug->external_opt);
+      free (debug->external_aux);
+      free (debug->ss);
+      free (debug->external_fdr);
+      free (debug->external_rfd);
 
       /* Make sure we don't accidentally follow one of these pointers
 	 into freed memory.  */
@@ -3926,17 +3909,13 @@ ecoff_indirect_link_order (bfd *output_bfd,
       output_section->reloc_count += input_section->reloc_count;
     }
 
-  if (contents != NULL)
-    free (contents);
-  if (external_relocs != NULL)
-    free (external_relocs);
+  free (contents);
+  free (external_relocs);
   return TRUE;
 
  error_return:
-  if (contents != NULL)
-    free (contents);
-  if (external_relocs != NULL)
-    free (external_relocs);
+  free (contents);
+  free (external_relocs);
   return FALSE;
 }
 

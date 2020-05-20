@@ -2045,8 +2045,7 @@ _bfd_vms_lib_build_map (unsigned int nbr_modules,
 	{
 	  if (storage > syms_max)
 	    {
-	      if (syms_max > 0)
-		free (syms);
+	      free (syms);
 	      syms_max = storage;
 	      syms = (asymbol **) bfd_malloc (syms_max);
 	      if (syms == NULL)
@@ -2097,10 +2096,8 @@ _bfd_vms_lib_build_map (unsigned int nbr_modules,
   return TRUE;
 
  error_return:
-  if (syms_max > 0)
-    free (syms);
-  if (map != NULL)
-    free (map);
+  free (syms);
+  free (map);
   return FALSE;
 }
 

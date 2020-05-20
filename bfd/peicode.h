@@ -1133,8 +1133,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
   return TRUE;
 
  error_return:
-  if (vars.bim->buffer != NULL)
-    free (vars.bim->buffer);
+  free (vars.bim->buffer);
   free (vars.bim);
   return FALSE;
 }
@@ -1350,8 +1349,7 @@ pe_bfd_read_buildid (bfd *abfd)
   /* Read the whole section. */
   if (!bfd_malloc_and_get_section (abfd, section, &data))
     {
-      if (data != NULL)
-	free (data);
+      free (data);
       return;
     }
 

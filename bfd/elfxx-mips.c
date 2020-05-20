@@ -1450,30 +1450,18 @@ _bfd_mips_elf_read_ecoff_info (bfd *abfd, asection *section,
   return TRUE;
 
  error_return:
-  if (ext_hdr != NULL)
-    free (ext_hdr);
-  if (debug->line != NULL)
-    free (debug->line);
-  if (debug->external_dnr != NULL)
-    free (debug->external_dnr);
-  if (debug->external_pdr != NULL)
-    free (debug->external_pdr);
-  if (debug->external_sym != NULL)
-    free (debug->external_sym);
-  if (debug->external_opt != NULL)
-    free (debug->external_opt);
-  if (debug->external_aux != NULL)
-    free (debug->external_aux);
-  if (debug->ss != NULL)
-    free (debug->ss);
-  if (debug->ssext != NULL)
-    free (debug->ssext);
-  if (debug->external_fdr != NULL)
-    free (debug->external_fdr);
-  if (debug->external_rfd != NULL)
-    free (debug->external_rfd);
-  if (debug->external_ext != NULL)
-    free (debug->external_ext);
+  free (ext_hdr);
+  free (debug->line);
+  free (debug->external_dnr);
+  free (debug->external_pdr);
+  free (debug->external_sym);
+  free (debug->external_opt);
+  free (debug->external_aux);
+  free (debug->ss);
+  free (debug->ssext);
+  free (debug->external_fdr);
+  free (debug->external_rfd);
+  free (debug->external_ext);
   return FALSE;
 }
 
@@ -1618,30 +1606,19 @@ mips_elf_create_procedure_table (void *handle, bfd *abfd,
      matters, but someday it might).  */
   s->map_head.link_order = NULL;
 
-  if (epdr != NULL)
-    free (epdr);
-  if (rpdr != NULL)
-    free (rpdr);
-  if (esym != NULL)
-    free (esym);
-  if (ss != NULL)
-    free (ss);
-  if (sv != NULL)
-    free (sv);
-
+  free (epdr);
+  free (rpdr);
+  free (esym);
+  free (ss);
+  free (sv);
   return TRUE;
 
  error_return:
-  if (epdr != NULL)
-    free (epdr);
-  if (rpdr != NULL)
-    free (rpdr);
-  if (esym != NULL)
-    free (esym);
-  if (ss != NULL)
-    free (ss);
-  if (sv != NULL)
-    free (sv);
+  free (epdr);
+  free (rpdr);
+  free (esym);
+  free (ss);
+  free (sv);
   return FALSE;
 }
 
@@ -13391,13 +13368,11 @@ _bfd_elf_mips_get_relocated_section_contents
 	    }
 	}
     }
-  if (reloc_vector != NULL)
-    free (reloc_vector);
+  free (reloc_vector);
   return data;
 
  error_return:
-  if (reloc_vector != NULL)
-    free (reloc_vector);
+  free (reloc_vector);
   return NULL;
 }
 
@@ -14274,21 +14249,17 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
 	}
     }
 
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
   return TRUE;
 
  error_return:
-  if (isymbuf != NULL
-      && symtab_hdr->contents != (unsigned char *) isymbuf)
+  if (symtab_hdr->contents != (unsigned char *) isymbuf)
     free (isymbuf);
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
+  if (elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
   return FALSE;

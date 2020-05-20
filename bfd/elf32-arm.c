@@ -6617,9 +6617,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
 			free (internal_relocs);
 		    /* Fall through.  */
 		    error_ret_free_local:
-		      if (local_syms != NULL
-			  && (symtab_hdr->contents
-			      != (unsigned char *) local_syms))
+		      if (symtab_hdr->contents != (unsigned char *) local_syms)
 			free (local_syms);
 		      return FALSE;
 		    }
@@ -7986,13 +7984,11 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
 	    }
 	}
 
-      if (contents != NULL
-	  && elf_section_data (sec)->this_hdr.contents != contents)
+      if (elf_section_data (sec)->this_hdr.contents != contents)
 	free (contents);
       contents = NULL;
 
-      if (internal_relocs != NULL
-	  && elf_section_data (sec)->relocs != internal_relocs)
+      if (elf_section_data (sec)->relocs != internal_relocs)
 	free (internal_relocs);
       internal_relocs = NULL;
     }
@@ -8000,11 +7996,9 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
   return TRUE;
 
  error_return:
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
+  if (elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
   return FALSE;
@@ -8607,8 +8601,7 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
 	    }
 	}
 
-      if (contents != NULL
-	  && elf_section_data (sec)->this_hdr.contents != contents)
+      if (elf_section_data (sec)->this_hdr.contents != contents)
 	free (contents);
       contents = NULL;
     }
@@ -8616,8 +8609,7 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
   return TRUE;
 
  error_return:
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
+  if (elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
 
   return FALSE;
@@ -9044,8 +9036,7 @@ bfd_elf32_arm_stm32l4xx_erratum_scan (bfd *abfd,
 	    }
 	}
 
-      if (contents != NULL
-	  && elf_section_data (sec)->this_hdr.contents != contents)
+      if (elf_section_data (sec)->this_hdr.contents != contents)
 	free (contents);
       contents = NULL;
     }
@@ -9053,8 +9044,7 @@ bfd_elf32_arm_stm32l4xx_erratum_scan (bfd *abfd,
   return TRUE;
 
  error_return:
-  if (contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != contents)
+  if (elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
 
   return FALSE;

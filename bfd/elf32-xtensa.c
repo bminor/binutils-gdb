@@ -3048,9 +3048,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	}
     }
 
-  if (lit_table)
-    free (lit_table);
-
+  free (lit_table);
   input_section->reloc_done = TRUE;
 
   return TRUE;
@@ -3130,8 +3128,7 @@ elf_xtensa_combine_prop_entries (bfd *output_bfd,
 
   if (!bfd_malloc_and_get_section (output_bfd, sxtlit, &contents))
     {
-      if (contents != 0)
-	free (contents);
+      free (contents);
       free (table);
       return -1;
     }
@@ -6295,8 +6292,7 @@ free_section_cache (section_cache_t *sec_cache)
     {
       release_contents (sec_cache->sec, sec_cache->contents);
       release_internal_relocs (sec_cache->sec, sec_cache->relocs);
-      if (sec_cache->ptbl)
-	free (sec_cache->ptbl);
+      free (sec_cache->ptbl);
     }
 }
 
@@ -6353,8 +6349,7 @@ section_cache_section (section_cache_t *sec_cache,
  err:
   release_contents (sec, contents);
   release_internal_relocs (sec, internal_relocs);
-  if (prop_table)
-    free (prop_table);
+  free (prop_table);
   return FALSE;
 }
 
@@ -6473,8 +6468,7 @@ init_ebb_constraint (ebb_constraint *c)
 static void
 free_ebb_constraint (ebb_constraint *c)
 {
-  if (c->actions)
-    free (c->actions);
+  free (c->actions);
 }
 
 
@@ -6708,8 +6702,7 @@ ebb_propose_action (ebb_constraint *c,
 
       for (i = 0; i < c->action_count; i++)
 	new_actions[i] = c->actions[i];
-      if (c->actions)
-	free (c->actions);
+      free (c->actions);
       c->actions = new_actions;
       c->action_allocated = new_allocated;
     }
@@ -6761,8 +6754,7 @@ pin_internal_relocs (asection *sec, Elf_Internal_Rela *internal_relocs)
 static void
 release_internal_relocs (asection *sec, Elf_Internal_Rela *internal_relocs)
 {
-  if (internal_relocs
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 }
 
@@ -6780,8 +6772,7 @@ retrieve_contents (bfd *abfd, asection *sec, bfd_boolean keep_memory)
     {
       if (!bfd_malloc_and_get_section (abfd, sec, &contents))
 	{
-	  if (contents)
-	    free (contents);
+	  free (contents);
 	  return NULL;
 	}
       if (keep_memory)
@@ -6801,7 +6792,7 @@ pin_contents (asection *sec, bfd_byte *contents)
 static void
 release_contents (asection *sec, bfd_byte *contents)
 {
-  if (contents && elf_section_data (sec)->this_hdr.contents != contents)
+  if (elf_section_data (sec)->this_hdr.contents != contents)
     free (contents);
 }
 
@@ -7886,10 +7877,8 @@ compute_text_actions (bfd *abfd,
  error_return:
   release_contents (sec, contents);
   release_internal_relocs (sec, internal_relocs);
-  if (prop_table)
-    free (prop_table);
-  if (reloc_opcodes)
-    free (reloc_opcodes);
+  free (prop_table);
+  free (reloc_opcodes);
 
   return ok;
 }
@@ -8489,10 +8478,11 @@ build_xlate_map (asection *sec, xtensa_relax_info *relax_info)
 static void
 free_xlate_map (xlate_map_t *map)
 {
-  if (map && map->entry)
-    free (map->entry);
   if (map)
-    free (map);
+    {
+      free (map->entry);
+      free (map);
+    }
 }
 
 
@@ -8676,8 +8666,7 @@ check_section_ebb_pcrels_fit (bfd *abfd,
 	}
     }
 
-  if (xmap)
-    free_xlate_map (xmap);
+  free_xlate_map (xmap);
 
   return ok;
 }
@@ -8889,8 +8878,7 @@ compute_removed_literals (bfd *abfd,
 #endif /* DEBUG */
 
  error_return:
-  if (prop_table)
-    free (prop_table);
+  free (prop_table);
   free_section_cache (&target_sec_cache);
 
   release_contents (sec, contents);

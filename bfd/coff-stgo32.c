@@ -249,8 +249,7 @@ go32exe_cleanup (bfd *abfd)
 {
   abfd->origin = 0;
 
-  if (go32exe_temp_stub != NULL)
-    free (go32exe_temp_stub);
+  free (go32exe_temp_stub);
   go32exe_temp_stub = NULL;
   go32exe_temp_stub_size = 0;
 }

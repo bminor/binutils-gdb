@@ -544,11 +544,8 @@ _bfd_coff_read_internal_relocs (bfd *abfd,
   for (; erel < erel_end; erel += relsz, irel++)
     bfd_coff_swap_reloc_in (abfd, (void *) erel, (void *) irel);
 
-  if (free_external != NULL)
-    {
-      free (free_external);
-      free_external = NULL;
-    }
+  free (free_external);
+  free_external = NULL;
 
   if (cache && free_internal != NULL)
     {
@@ -566,10 +563,8 @@ _bfd_coff_read_internal_relocs (bfd *abfd,
   return internal_relocs;
 
  error_return:
-  if (free_external != NULL)
-    free (free_external);
-  if (free_internal != NULL)
-    free (free_internal);
+  free (free_external);
+  free (free_internal);
   return NULL;
 }
 

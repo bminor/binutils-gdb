@@ -493,8 +493,7 @@ srec_scan (bfd *abfd)
 
 	    if (bytes * 2 > bufsize)
 	      {
-		if (buf != NULL)
-		  free (buf);
+		free (buf);
 		buf = (bfd_byte *) bfd_malloc ((bfd_size_type) bytes * 2);
 		if (buf == NULL)
 		  goto error_return;
@@ -618,9 +617,7 @@ srec_scan (bfd *abfd)
 		    goto error_return;
 		  }
 
-		if (buf != NULL)
-		  free (buf);
-
+		free (buf);
 		return TRUE;
 	      }
 	  }
@@ -631,16 +628,12 @@ srec_scan (bfd *abfd)
   if (error)
     goto error_return;
 
-  if (buf != NULL)
-    free (buf);
-
+  free (buf);
   return TRUE;
 
  error_return:
-  if (symbuf != NULL)
-    free (symbuf);
-  if (buf != NULL)
-    free (buf);
+  free (symbuf);
+  free (buf);
   return FALSE;
 }
 
@@ -751,8 +744,7 @@ srec_read_section (bfd *abfd, asection *section, bfd_byte *contents)
 
       if (bytes * 2 > bufsize)
 	{
-	  if (buf != NULL)
-	    free (buf);
+	  free (buf);
 	  buf = (bfd_byte *) bfd_malloc ((bfd_size_type) bytes * 2);
 	  if (buf == NULL)
 	    goto error_return;
@@ -768,8 +760,7 @@ srec_read_section (bfd *abfd, asection *section, bfd_byte *contents)
 	{
 	default:
 	  BFD_ASSERT (sofar == section->size);
-	  if (buf != NULL)
-	    free (buf);
+	  free (buf);
 	  return TRUE;
 
 	case '3':
@@ -793,8 +784,7 @@ srec_read_section (bfd *abfd, asection *section, bfd_byte *contents)
 	    {
 	      /* We've come to the end of this section.  */
 	      BFD_ASSERT (sofar == section->size);
-	      if (buf != NULL)
-		free (buf);
+	      free (buf);
 	      return TRUE;
 	    }
 
@@ -817,14 +807,11 @@ srec_read_section (bfd *abfd, asection *section, bfd_byte *contents)
 
   BFD_ASSERT (sofar == section->size);
 
-  if (buf != NULL)
-    free (buf);
-
+  free (buf);
   return TRUE;
 
  error_return:
-  if (buf != NULL)
-    free (buf);
+  free (buf);
   return FALSE;
 }
 

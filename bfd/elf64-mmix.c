@@ -2844,8 +2844,7 @@ mmix_elf_relax_section (bfd *abfd,
 
   BFD_ASSERT(pjsno == mmix_elf_section_data (sec)->pjs.n_pushj_relocs);
 
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
 
   if (sec->size < size + mmix_elf_section_data (sec)->pjs.stubs_size_sum)
@@ -2860,10 +2859,9 @@ mmix_elf_relax_section (bfd *abfd,
   return TRUE;
 
  error_return:
-  if (isymbuf != NULL && (unsigned char *) isymbuf != symtab_hdr->contents)
+  if ((unsigned char *) isymbuf != symtab_hdr->contents)
     free (isymbuf);
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
   return FALSE;
 }

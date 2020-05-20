@@ -494,10 +494,8 @@ _bfd_link_section_stabs (bfd *abfd,
   return TRUE;
 
  error_return:
-  if (stabbuf != NULL)
-    free (stabbuf);
-  if (stabstrbuf != NULL)
-    free (stabstrbuf);
+  free (stabbuf);
+  free (stabstrbuf);
   return FALSE;
 }
 
@@ -648,8 +646,7 @@ _bfd_discard_section_stabs (bfd *abfd,
   return skip > 0;
 
  error_return:
-  if (stabbuf != NULL)
-    free (stabbuf);
+  free (stabbuf);
   return FALSE;
 }
 

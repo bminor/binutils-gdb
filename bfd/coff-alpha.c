@@ -1127,13 +1127,11 @@ alpha_ecoff_get_relocated_section_contents (bfd *abfd,
     abort ();
 
  successful_return:
-  if (reloc_vector != NULL)
-    free (reloc_vector);
+  free (reloc_vector);
   return data;
 
  error_return:
-  if (reloc_vector != NULL)
-    free (reloc_vector);
+  free (reloc_vector);
   return NULL;
 }
 
@@ -2171,8 +2169,7 @@ alpha_ecoff_get_elt_at_filepos (bfd *archive, file_ptr filepos)
   return nbfd;
 
  error_return:
-  if (buf != NULL)
-    free (buf);
+  free (buf);
   if (nbfd != NULL)
     bfd_close (nbfd);
   return NULL;

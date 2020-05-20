@@ -2369,20 +2369,13 @@ setup_sections (bfd *abfd,
   for (i = 0; i < total_subspaces; i++)
     subspace_sections[i]->target_index = i;
 
-  if (space_strings != NULL)
-    free (space_strings);
-
-  if (subspace_sections != NULL)
-    free (subspace_sections);
-
+  free (space_strings);
+  free (subspace_sections);
   return TRUE;
 
  error_return:
-  if (space_strings != NULL)
-    free (space_strings);
-
-  if (subspace_sections != NULL)
-    free (subspace_sections);
+  free (space_strings);
+  free (subspace_sections);
   return FALSE;
 }
 
@@ -4528,12 +4521,11 @@ som_build_and_write_symbol_table (bfd *abfd)
   if (bfd_bwrite ((void *) som_symtab, symtab_size, abfd) != symtab_size)
     goto error_return;
 
-  if (som_symtab != NULL)
-    free (som_symtab);
+  free (som_symtab);
   return TRUE;
+
  error_return:
-  if (som_symtab != NULL)
-    free (som_symtab);
+  free (som_symtab);
   return FALSE;
 }
 
@@ -4827,15 +4819,12 @@ som_slurp_symbol_table (bfd *abfd)
   /* Save our results and return success.  */
   obj_som_symtab (abfd) = symbase;
  successful_return:
-  if (buf != NULL)
-    free (buf);
+  free (buf);
   return (TRUE);
 
  error_return:
-  if (symbase != NULL)
-    free (symbase);
-  if (buf != NULL)
-    free (buf);
+  free (symbase);
+  free (buf);
   return FALSE;
 }
 
@@ -5230,8 +5219,7 @@ som_set_reloc_info (unsigned char *fixup,
 		      if (!bfd_malloc_and_get_section (section->owner, section,
 						       &contents))
 			{
-			  if (contents != NULL)
-			    free (contents);
+			  free (contents);
 			  return (unsigned) -1;
 			}
 		      section->contents = contents;
@@ -5977,13 +5965,11 @@ som_bfd_count_ar_symbols (bfd *abfd,
 	  (*count)++;
 	}
     }
-  if (hash_table != NULL)
-    free (hash_table);
+  free (hash_table);
   return TRUE;
 
  error_return:
-  if (hash_table != NULL)
-    free (hash_table);
+  free (hash_table);
   return FALSE;
 }
 
@@ -6152,17 +6138,13 @@ som_bfd_fill_in_ar_symbols (bfd *abfd,
     }
   /* If we haven't died by now, then we successfully read the entire
      archive symbol table.  */
-  if (hash_table != NULL)
-    free (hash_table);
-  if (som_dict != NULL)
-    free (som_dict);
+  free (hash_table);
+  free (som_dict);
   return TRUE;
 
  error_return:
-  if (hash_table != NULL)
-    free (hash_table);
-  if (som_dict != NULL)
-    free (som_dict);
+  free (hash_table);
+  free (som_dict);
   return FALSE;
 }
 
@@ -6611,29 +6593,19 @@ som_bfd_ar_write_symbol_stuff (bfd *abfd,
   if (bfd_bwrite ((void *) strings, amt, abfd) != amt)
     goto error_return;
 
-  if (hash_table != NULL)
-    free (hash_table);
-  if (som_dict != NULL)
-    free (som_dict);
-  if (last_hash_entry != NULL)
-    free (last_hash_entry);
-  if (lst_syms != NULL)
-    free (lst_syms);
-  if (strings != NULL)
-    free (strings);
+  free (hash_table);
+  free (som_dict);
+  free (last_hash_entry);
+  free (lst_syms);
+  free (strings);
   return TRUE;
 
  error_return:
-  if (hash_table != NULL)
-    free (hash_table);
-  if (som_dict != NULL)
-    free (som_dict);
-  if (last_hash_entry != NULL)
-    free (last_hash_entry);
-  if (lst_syms != NULL)
-    free (lst_syms);
-  if (strings != NULL)
-    free (strings);
+  free (hash_table);
+  free (som_dict);
+  free (last_hash_entry);
+  free (lst_syms);
+  free (strings);
 
   return FALSE;
 }
@@ -6785,7 +6757,7 @@ som_bfd_free_cached_info (bfd *abfd)
     {
       asection *o;
 
-#define FREE(x) if (x != NULL) { free (x); x = NULL; }
+#define FREE(x) do { free (x); x = NULL; } while (0)
       /* Free the native string and symbol tables.  */
       FREE (obj_som_symtab (abfd));
       FREE (obj_som_stringtab (abfd));

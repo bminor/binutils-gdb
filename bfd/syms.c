@@ -830,8 +830,7 @@ _bfd_generic_read_minisymbols (bfd *abfd,
 
  error_return:
   bfd_set_error (bfd_error_no_symbols);
-  if (syms != NULL)
-    free (syms);
+  free (syms);
   return -1;
 }
 
@@ -1054,8 +1053,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 					    symbols);
       if (reloc_count < 0)
 	{
-	  if (reloc_vector != NULL)
-	    free (reloc_vector);
+	  free (reloc_vector);
 	  return FALSE;
 	}
       if (reloc_count > 0)
@@ -1086,8 +1084,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 		  _bfd_error_handler
 		    (_("unsupported .stab relocation"));
 		  bfd_set_error (bfd_error_invalid_operation);
-		  if (reloc_vector != NULL)
-		    free (reloc_vector);
+		  free (reloc_vector);
 		  return FALSE;
 		}
 
@@ -1099,8 +1096,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	    }
 	}
 
-      if (reloc_vector != NULL)
-	free (reloc_vector);
+      free (reloc_vector);
 
       /* First time through this function, build a table matching
 	 function VM addresses to stabs, then sort based on starting

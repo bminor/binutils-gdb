@@ -1049,13 +1049,10 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
     (_("error in %pB(%pA); no .eh_frame_hdr table will be created"),
      abfd, sec);
   hdr_info->u.dwarf.table = FALSE;
-  if (sec_info)
-    free (sec_info);
+  free (sec_info);
  success:
-  if (ehbuf)
-    free (ehbuf);
-  if (local_cies)
-    free (local_cies);
+  free (ehbuf);
+  free (local_cies);
 #undef REQUIRE
 }
 
@@ -1558,11 +1555,8 @@ _bfd_elf_discard_section_eh_frame
 	  }
       }
 
-  if (sec_info->cies)
-    {
-      free (sec_info->cies);
-      sec_info->cies = NULL;
-    }
+  free (sec_info->cies);
+  sec_info->cies = NULL;
 
   /* It may be that some .eh_frame input section has greater alignment
      than other .eh_frame sections.  In that case we run the risk of
@@ -2511,8 +2505,7 @@ write_dwarf_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
     retval = FALSE;
   free (contents);
 
-  if (hdr_info->u.dwarf.array != NULL)
-    free (hdr_info->u.dwarf.array);
+  free (hdr_info->u.dwarf.array);
   return retval;
 }
 

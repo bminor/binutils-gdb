@@ -1422,30 +1422,18 @@ elf64_alpha_read_ecoff_info (bfd *abfd, asection *section,
   return TRUE;
 
  error_return:
-  if (ext_hdr != NULL)
-    free (ext_hdr);
-  if (debug->line != NULL)
-    free (debug->line);
-  if (debug->external_dnr != NULL)
-    free (debug->external_dnr);
-  if (debug->external_pdr != NULL)
-    free (debug->external_pdr);
-  if (debug->external_sym != NULL)
-    free (debug->external_sym);
-  if (debug->external_opt != NULL)
-    free (debug->external_opt);
-  if (debug->external_aux != NULL)
-    free (debug->external_aux);
-  if (debug->ss != NULL)
-    free (debug->ss);
-  if (debug->ssext != NULL)
-    free (debug->ssext);
-  if (debug->external_fdr != NULL)
-    free (debug->external_fdr);
-  if (debug->external_rfd != NULL)
-    free (debug->external_rfd);
-  if (debug->external_ext != NULL)
-    free (debug->external_ext);
+  free (ext_hdr);
+  free (debug->line);
+  free (debug->external_dnr);
+  free (debug->external_pdr);
+  free (debug->external_sym);
+  free (debug->external_opt);
+  free (debug->external_aux);
+  free (debug->ss);
+  free (debug->ssext);
+  free (debug->external_fdr);
+  free (debug->external_rfd);
+  free (debug->external_ext);
   return FALSE;
 }
 
@@ -3186,12 +3174,10 @@ elf64_alpha_relax_opt_call (struct alpha_relax_info *info, bfd_vma symval)
 
       if (!gpdisp || gpdisp->r_addend != 4)
 	{
-	  if (tsec_free)
-	    free (tsec_free);
+	  free (tsec_free);
 	  return 0;
 	}
-      if (tsec_free)
-	free (tsec_free);
+      free (tsec_free);
     }
 
   /* We've now determined that we can skip an initial gp load.  Verify
@@ -4037,14 +4023,11 @@ elf64_alpha_relax_section (bfd *abfd, asection *sec,
   return TRUE;
 
  error_return:
-  if (isymbuf != NULL
-      && symtab_hdr->contents != (unsigned char *) isymbuf)
+  if (symtab_hdr->contents != (unsigned char *) isymbuf)
     free (isymbuf);
-  if (info.contents != NULL
-      && elf_section_data (sec)->this_hdr.contents != info.contents)
+  if (elf_section_data (sec)->this_hdr.contents != info.contents)
     free (info.contents);
-  if (internal_relocs != NULL
-      && elf_section_data (sec)->relocs != internal_relocs)
+  if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
   return FALSE;
 }

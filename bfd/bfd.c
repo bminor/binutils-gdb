@@ -2487,8 +2487,7 @@ bfd_demangle (bfd *abfd, const char *name, int options)
 
   res = cplus_demangle (name, options);
 
-  if (alloc != NULL)
-    free (alloc);
+  free (alloc);
 
   if (res == NULL)
     {
