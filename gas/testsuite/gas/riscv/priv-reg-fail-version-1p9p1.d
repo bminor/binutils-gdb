@@ -1,7 +1,6 @@
-#source: attr-merge-priv-spec-a.s
-#source: attr-merge-priv-spec-b.s
-#as: -march-attr
-#ld: -r
+#as: -march=rv32if -mcsr-check -mpriv-spec=1.9.1 -march-attr
+#source: priv-reg.s
+#warning_output: priv-reg-fail-version-1p9p1.l
 #readelf: -A
 
 Attribute Section: riscv
@@ -10,3 +9,4 @@ File Attributes
   Tag_RISCV_priv_spec: 1
   Tag_RISCV_priv_spec_minor: 9
   Tag_RISCV_priv_spec_revision: 1
+#...

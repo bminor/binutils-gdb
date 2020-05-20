@@ -1,3 +1,166 @@
+2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/gas/riscv/priv-reg-fail-read-only-01.s: Updated.
+	* config/tc-riscv.c (default_arch_with_ext, default_isa_spec):
+	Static variables which are used to set the ISA extensions. You can
+	use -march (or ELF build attributes) and -misa-spec to set them,
+	respectively.
+	(ext_version_hash): The hash table used to handle the extensions
+	with versions.
+	(init_ext_version_hash): Initialize the ext_version_hash according
+	to riscv_ext_version_table.
+	(riscv_get_default_ext_version): The callback function of
+	riscv_parse_subset_t.  According to the choosed ISA spec,
+	get the default version for the specific extension.
+	(riscv_set_arch): Set the callback function.
+	(enum options, struct option md_longopts): Add new option -misa-spec.
+	(md_parse_option): Do not call riscv_set_arch for -march.  We will
+	call it later in riscv_after_parse_args.  Call riscv_get_isa_spec_class
+	to set default_isa_spec class.
+	(riscv_after_parse_args): Call init_ext_version_hash to initialize the
+	ext_version_hash, and then call riscv_set_arch to set the architecture
+	with versions according to default_arch_with_ext.
+	* testsuite/gas/riscv/attribute-02.d: Set 0p0 as default version for
+	x extensions.
+	* testsuite/gas/riscv/attribute-03.d: Likewise.
+	* testsuite/gas/riscv/attribute-09.d: New testcase.  For i-ext, we
+	already set it's version to 2p1 by march, so no need to use the default
+	2p2 version.  For m-ext, we do not set the version by -march and ELF arch
+	attribute, so set the default 2p0 to it.  For zicsr, it is not defined in
+	ISA spec 2p2, so set 0p0 to it.
+	* testsuite/gas/riscv/attribute-10.d: New testcase.  The version of
+	zicsr is 2p0 according to ISA spec 20191213.
+	* config/tc-riscv.c (DEFAULT_RISCV_ARCH_WITH_EXT)
+	(DEFAULT_RISCV_ISA_SPEC): Default configure option settings.
+	You can set them by configure options --with-arch and
+	--with-isa-spec, respectively.
+	(riscv_set_default_isa_spec): New function used to set the
+	default ISA spec.
+	(md_parse_option): Call riscv_set_default_isa_spec rather than
+	call riscv_get_isa_spec_class directly.
+	(riscv_after_parse_args): If the -isa-spec is not set, then we
+	set the default ISA spec according to DEFAULT_RISCV_ISA_SPEC by
+	calling riscv_set_default_isa_spec.
+	* testsuite/gas/riscv/attribute-01.d: Add -misa-spec=2.2, since
+	the --with-isa-spec may be set to different ISA spec.
+	* testsuite/gas/riscv/attribute-02.d: Likewise.
+	* testsuite/gas/riscv/attribute-03.d: Likewise.
+	* testsuite/gas/riscv/attribute-04.d: Likewise.
+	* testsuite/gas/riscv/attribute-05.d: Likewise.
+	* testsuite/gas/riscv/attribute-06.d: Likewise.
+	* testsuite/gas/riscv/attribute-07.d: Likewise.
+	* configure.ac: Add configure options, --with-arch and
+	--with-isa-spec.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+	* config/tc-riscv.c (default_priv_spec): Static variable which is
+	used to check if the CSR is valid for the chosen privilege spec. You
+	can use -mpriv-spec to set it.
+	(enum reg_class): We now get the CSR address from csr_extra_hash rather
+	than reg_names_hash.  Therefore, move RCLASS_CSR behind RCLASS_MAX.
+	(riscv_init_csr_hashes): Only need to initialize one hash table
+	csr_extra_hash.
+	(riscv_csr_class_check): Change the return type to void.  Don't check
+	the ISA dependency if -mcsr-check isn't set.
+	(riscv_csr_version_check): New function.  Check and find the CSR address
+	from csr_extra_hash, according to default_priv_spec.  Report warning
+	for the invalid CSR if -mcsr-check is set.
+	(reg_csr_lookup_internal): Updated.
+	(reg_lookup_internal): Likewise.
+	(md_begin): Updated since DECLARE_CSR and DECLARE_CSR_ALIAS are changed.
+	(enum options, struct option md_longopts): Add new GAS option -mpriv-spec.
+	(md_parse_option): Call riscv_set_default_priv_version to set
+	default_priv_spec.
+	(riscv_after_parse_args): If -mpriv-spec isn't set, then set the default
+	privilege spec to the newest one.
+	(enum riscv_csr_class, struct riscv_csr_extra): Move them to
+	include/opcode/riscv.h.
+	* testsuite/gas/riscv/priv-reg-fail-fext.d: This test case just want
+	to check the ISA dependency for CSR, so fix the spec version by adding
+	-mpriv-spec=1.11.
+	* testsuite/gas/riscv/priv-reg-fail-fext.l: Likewise.  There are some
+	version warnings for the test case.
+	* gas/testsuite/gas/riscv/priv-reg-fail-read-only-01.d: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-read-only-01.l: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-read-only-02.d: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-rv32-only.d: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-rv32-only.l: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p9.d: New test case.
+	Check whether the CSR is valid when privilege version 1.9 is choosed.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p9.l: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p9p1.d: New test case.
+	Check whether the CSR is valid when privilege version 1.9.1 is choosed.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p9p1.l: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p10.d: New test case.
+	Check whether the CSR is valid when privilege version 1.10 is choosed.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p10.l: Likewise.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p11.d: New test case.
+	Check whether the CSR is valid when privilege version 1.11 is choosed.
+	* gas/testsuite/gas/riscv/priv-reg-fail-version-1p11.l: Likewise.
+	* config/tc-riscv.c (DEFAULT_RISCV_ISA_SPEC): Default configure option
+	setting.  You can set it by configure option --with-priv-spec.
+	(riscv_set_default_priv_spec): New function used to set the default
+	privilege spec.
+	(md_parse_option): Call riscv_set_default_priv_spec rather than
+	call riscv_get_priv_spec_class directly.
+	(riscv_after_parse_args): If -mpriv-spec isn't set, then we set the
+	default privilege spec according to DEFAULT_RISCV_PRIV_SPEC by
+	calling riscv_set_default_priv_spec.
+	* testsuite/gas/riscv/csr-dw-regnums.d: Add -mpriv-spec=1.11, since
+	the --with-priv-spec may be set to different privilege spec.
+	* testsuite/gas/riscv/priv-reg.d: Likewise.
+	* configure.ac: Add configure option --with-priv-spec.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+	* config/tc-riscv.c (explicit_attr): Rename explicit_arch_attr to
+	explicit_attr.  Set it to TRUE if any ELF attribute is found.
+	(riscv_set_default_priv_spec): Try to set the default_priv_spec if
+	the priv attributes are set.
+	(md_assemble): Set the default_priv_spec according to the priv
+	attributes when we start to assemble instruction.
+	(riscv_write_out_attrs): Rename riscv_write_out_arch_attr to
+	riscv_write_out_attrs.  Update the arch and priv attributes.  If we
+	don't set the corresponding ELF attributes, then try to output the
+	default ones.
+	(riscv_set_public_attributes): If any ELF attribute or -march-attr
+	options is set (explicit_attr is TRUE), then call riscv_write_out_attrs
+	to update the arch and priv attributes.
+	(s_riscv_attribute): Make sure all arch and priv attributes are set
+	before any instruction.
+	* testsuite/gas/riscv/attribute-01.d: Update the priv attributes if any
+	ELF attribute or -march-attr is set.  If the priv attributes are not
+	set, then try to update them by the default setting (-mpriv-spec or
+	--with-priv-spec).
+	* testsuite/gas/riscv/attribute-02.d: Likewise.
+	* testsuite/gas/riscv/attribute-03.d: Likewise.
+	* testsuite/gas/riscv/attribute-04.d: Likewise.
+	* testsuite/gas/riscv/attribute-06.d: Likewise.
+	* testsuite/gas/riscv/attribute-07.d: Likewise.
+	* testsuite/gas/riscv/attribute-08.d: Likewise.
+	* testsuite/gas/riscv/attribute-09.d: Likewise.
+	* testsuite/gas/riscv/attribute-10.d: Likewise.
+	* testsuite/gas/riscv/attribute-unknown.d: Likewise.
+	* testsuite/gas/riscv/attribute-05.d: Likewise.  Also, the priv spec
+	set by priv attributes must be supported.
+	* testsuite/gas/riscv/attribute-05.s: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p9.d: Likewise.  Updated
+	priv attributes according to the -mpriv-spec option.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p9p1.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p10.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p11.d: Likewise.
+	* testsuite/gas/riscv/priv-reg.d: Removed.
+	* testsuite/gas/riscv/priv-reg-version-1p9.d: New test case.  Dump the
+	CSR according to the priv spec 1.9.
+	* testsuite/gas/riscv/priv-reg-version-1p9p1.d: New test case.  Dump the
+	CSR according to the priv spec 1.9.1.
+	* testsuite/gas/riscv/priv-reg-version-1p10.d: New test case.  Dump the
+	CSR according to the priv spec 1.10.
+	* testsuite/gas/riscv/priv-reg-version-1p11.d: New test case.  Dump the
+	CSR according to the priv spec 1.11.
+	* config/tc-riscv.c (md_show_usage): Add descriptions about
+	the new GAS options.
+	* doc/c-riscv.texi: Likewise.
+
 2020-05-19  Peter Bergner  <bergner@linux.ibm.com>
 
 	* testsuite/gas/ppc/power9.s <dcbf, dcbfl, dcbflp>: Add tests.

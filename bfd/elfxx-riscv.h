@@ -72,6 +72,9 @@ typedef struct {
   void (*error_handler) (const char *,
 			 ...) ATTRIBUTE_PRINTF_1;
   unsigned *xlen;
+  void (*get_default_version) (const char *,
+                              unsigned int *,
+                              unsigned int *);
 } riscv_parse_subset_t;
 
 extern bfd_boolean
@@ -86,6 +89,9 @@ riscv_release_subset_list (riscv_subset_list_t *);
 
 extern char *
 riscv_arch_str (unsigned, const riscv_subset_list_t *);
+
+extern size_t
+riscv_estimate_digit (unsigned);
 
 /* ISA extension name class. E.g. "zbb" corresponds to RV_ISA_CLASS_Z,
    "xargs" corresponds to RV_ISA_CLASS_X, etc.  Order is important

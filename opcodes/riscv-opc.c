@@ -884,3 +884,147 @@ const struct riscv_opcode riscv_insn_types[] =
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };
+
+/* All standard extensions defined in all supported ISA spec.  */
+const struct riscv_ext_version riscv_ext_version_table[] =
+{
+/* name, ISA spec, major version, minor_version.  */
+{"e", ISA_SPEC_CLASS_20191213, 1, 9},
+{"e", ISA_SPEC_CLASS_20190608, 1, 9},
+{"e", ISA_SPEC_CLASS_2P2,      1, 9},
+
+{"i", ISA_SPEC_CLASS_20191213, 2, 1},
+{"i", ISA_SPEC_CLASS_20190608, 2, 1},
+{"i", ISA_SPEC_CLASS_2P2,      2, 0},
+
+{"m", ISA_SPEC_CLASS_20191213, 2, 0},
+{"m", ISA_SPEC_CLASS_20190608, 2, 0},
+{"m", ISA_SPEC_CLASS_2P2,      2, 0},
+
+{"a", ISA_SPEC_CLASS_20191213, 2, 1},
+{"a", ISA_SPEC_CLASS_20190608, 2, 0},
+{"a", ISA_SPEC_CLASS_2P2,      2, 0},
+
+{"f", ISA_SPEC_CLASS_20191213, 2, 2},
+{"f", ISA_SPEC_CLASS_20190608, 2, 2},
+{"f", ISA_SPEC_CLASS_2P2,      2, 0},
+
+{"d", ISA_SPEC_CLASS_20191213, 2, 2},
+{"d", ISA_SPEC_CLASS_20190608, 2, 2},
+{"d", ISA_SPEC_CLASS_2P2,      2, 0},
+
+{"q", ISA_SPEC_CLASS_20191213, 2, 2},
+{"q", ISA_SPEC_CLASS_20190608, 2, 2},
+{"q", ISA_SPEC_CLASS_2P2,      2, 0},
+
+{"c", ISA_SPEC_CLASS_20191213, 2, 0},
+{"c", ISA_SPEC_CLASS_20190608, 2, 0},
+{"c", ISA_SPEC_CLASS_2P2,      2, 0},
+
+{"p", ISA_SPEC_CLASS_20191213, 0, 2},
+{"p", ISA_SPEC_CLASS_20190608, 0, 2},
+{"p", ISA_SPEC_CLASS_2P2,      0, 1},
+
+{"v", ISA_SPEC_CLASS_20191213, 0, 7},
+{"v", ISA_SPEC_CLASS_20190608, 0, 7},
+{"v", ISA_SPEC_CLASS_2P2,      0, 7},
+
+{"n", ISA_SPEC_CLASS_20190608, 1, 1},
+{"n", ISA_SPEC_CLASS_2P2,      1, 1},
+
+{"zicsr", ISA_SPEC_CLASS_20191213, 2, 0},
+{"zicsr", ISA_SPEC_CLASS_20190608, 2, 0},
+
+/* Terminate the list.  */
+{NULL, 0, 0, 0}
+};
+
+struct isa_spec_t
+{
+  const char *name;
+  enum riscv_isa_spec_class class;
+};
+
+/* List for all supported ISA spec versions.  */
+static const struct isa_spec_t isa_specs[] =
+{
+  {"2.2",      ISA_SPEC_CLASS_2P2},
+  {"20190608", ISA_SPEC_CLASS_20190608},
+  {"20191213", ISA_SPEC_CLASS_20191213},
+
+/* Terminate the list.  */
+  {NULL, 0}
+};
+
+/* Get the corresponding ISA spec class by giving a ISA spec string.  */
+
+bfd_boolean
+riscv_get_isa_spec_class (const char *s,
+                         enum riscv_isa_spec_class *class)
+{
+  const struct isa_spec_t *version;
+
+  if (s == NULL)
+    return FALSE;
+
+  for (version = &isa_specs[0]; version->name != NULL; ++version)
+    if (strcmp (version->name, s) == 0)
+      {
+       *class = version->class;
+       return TRUE;
+      }
+
+  /* Can not find the supported ISA spec.  */
+  return FALSE;
+}
+
+struct priv_spec_t
+{
+  const char *name;
+  enum riscv_priv_spec_class class;
+};
+
+/* List for all supported privilege versions.  */
+static const struct priv_spec_t priv_specs[] =
+{
+  {"1.9",   PRIV_SPEC_CLASS_1P9},
+  {"1.9.1", PRIV_SPEC_CLASS_1P9P1},
+  {"1.10",  PRIV_SPEC_CLASS_1P10},
+  {"1.11",  PRIV_SPEC_CLASS_1P11},
+
+/* Terminate the list.  */
+  {NULL, 0}
+};
+
+/* Get the corresponding CSR version class by giving a privilege
+   version string.  */
+
+bfd_boolean
+riscv_get_priv_spec_class (const char *s,
+                          enum riscv_priv_spec_class *class)
+{
+  const struct priv_spec_t *version;
+
+  if (s == NULL)
+    return FALSE;
+
+  for (version = &priv_specs[0]; version->name != NULL; ++version)
+    if (strcmp (version->name, s) == 0)
+      {
+       *class = version->class;
+       return TRUE;
+      }
+
+  /* Can not find the supported privilege version.  */
+  return FALSE;
+}
+
+/* Get the corresponding privilege version string by giving a CSR
+   version class.  */
+
+const char *
+riscv_get_priv_spec_name (enum riscv_priv_spec_class class)
+{
+  /* The first enum is PRIV_SPEC_CLASS_NONE.  */
+  return priv_specs[class - 1].name;
+}

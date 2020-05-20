@@ -1,3 +1,24 @@
+2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfxx-riscv.h (riscv_parse_subset_t): Add new callback function
+	get_default_version.  It is used to find the default version for
+	the specific extension.
+	* elfxx-riscv.c (riscv_parsing_subset_version): Remove the parameters
+	default_major_version and default_minor_version.  Add new bfd_boolean
+	parameter *use_default_version.  Set it to TRUE if we need to call
+	the callback rps->get_default_version to find the default version.
+	(riscv_parse_std_ext): Call rps->get_default_version if we fail to find
+	the default version in riscv_parsing_subset_version, and then call
+	riscv_add_subset to add the subset into subset list.
+	(riscv_parse_prefixed_ext): Likewise.
+	(riscv_std_z_ext_strtab): Support Zicsr extensions.
+	* elfnn-riscv.c (riscv_merge_std_ext): Use strcasecmp to compare the
+	strings rather than characters.
+	riscv_merge_arch_attr_info): The callback function get_default_version
+	is only needed for assembler, so set it to NULL int the linker.
+	* elfxx-riscv.c (riscv_estimate_digit): Remove the static.
+	* elfxx-riscv.h: Updated.
+
 2020-05-20  Alan Modra  <amodra@gmail.com>
 
 	PR 25993

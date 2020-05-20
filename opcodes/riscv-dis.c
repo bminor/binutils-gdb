@@ -31,6 +31,8 @@
 #include "bfd_stdint.h"
 #include <ctype.h>
 
+static enum riscv_priv_spec_class default_priv_spec = PRIV_SPEC_CLASS_NONE;
+
 struct riscv_private_data
 {
   bfd_vma gp;
@@ -52,8 +54,8 @@ set_default_riscv_dis_options (void)
   no_aliases = 0;
 }
 
-static void
-parse_riscv_dis_option (const char *option)
+static bfd_boolean
+parse_riscv_dis_option_without_args (const char *option)
 {
   if (strcmp (option, "no-aliases") == 0)
     no_aliases = 1;
@@ -61,6 +63,44 @@ parse_riscv_dis_option (const char *option)
     {
       riscv_gpr_names = riscv_gpr_names_numeric;
       riscv_fpr_names = riscv_fpr_names_numeric;
+    }
+  else
+    return FALSE;
+  return TRUE;
+}
+
+static void
+parse_riscv_dis_option (const char *option)
+{
+  char *equal, *value;
+
+  if (parse_riscv_dis_option_without_args (option))
+    return;
+
+  equal = strchr (option, '=');
+  if (equal == NULL)
+    {
+      /* The option without '=' should be defined above.  */
+      opcodes_error_handler (_("unrecognized disassembler option: %s"), option);
+      return;
+    }
+  if (equal == option
+      || *(equal + 1) == '\0')
+    {
+      /* Invalid options with '=', no option name before '=',
+       and no value after '='.  */
+      opcodes_error_handler (_("unrecognized disassembler option with '=': %s"),
+                            option);
+      return;
+    }
+
+  *equal = '\0';
+  value = equal + 1;
+  if (strcmp (option, "priv-spec") == 0)
+    {
+      if (!riscv_get_priv_spec_class (value, &default_priv_spec))
+       opcodes_error_handler (_("unknown privilege spec set by %s=%s"),
+                              option, value);
     }
   else
     {
@@ -322,16 +362,32 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 
 	case 'E':
 	  {
-	    const char* csr_name = NULL;
+	    static const char *riscv_csr_hash[4096];    /* Total 2^12 CSR.  */
+	    static bfd_boolean init_csr = FALSE;
 	    unsigned int csr = EXTRACT_OPERAND (CSR, l);
-	    switch (csr)
+
+	    if (!init_csr)
 	      {
-#define DECLARE_CSR(name, num, class) case num: csr_name = #name; break;
+		unsigned int i;
+		for (i = 0; i < 4096; i++)
+		  riscv_csr_hash[i] = NULL;
+
+		/* Set to the newest privilege version.  */
+		if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
+		  default_priv_spec = PRIV_SPEC_CLASS_DRAFT - 1;
+
+#define DECLARE_CSR(name, num, class, define_version, abort_version) \
+		if (default_priv_spec >= define_version		     \
+		    && default_priv_spec < abort_version)	     \
+		  riscv_csr_hash[num] = #name;
+#define DECLARE_CSR_ALIAS(name, num, class, define_version, abort_version) \
+		DECLARE_CSR (name, num, class, define_version, abort_version)
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
 	      }
-	    if (csr_name)
-	      print (info->stream, "%s", csr_name);
+
+	    if (riscv_csr_hash[csr] != NULL)
+	      print (info->stream, "%s", riscv_csr_hash[csr]);
 	    else
 	      print (info->stream, "0x%x", csr);
 	    break;
@@ -547,11 +603,15 @@ The following RISC-V-specific disassembler options are supported for use\n\
 with the -M switch (multiple options should be separated by commas):\n"));
 
   fprintf (stream, _("\n\
-  numeric       Print numeric register names, rather than ABI names.\n"));
+  numeric         Print numeric register names, rather than ABI names.\n"));
 
   fprintf (stream, _("\n\
-  no-aliases    Disassemble only into canonical instructions, rather\n\
-                than into pseudoinstructions.\n"));
+  no-aliases      Disassemble only into canonical instructions, rather\n\
+                  than into pseudoinstructions.\n"));
+
+  fprintf (stream, _("\n\
+  priv-spec=PRIV  Print the CSR according to the chosen privilege spec\n\
+                  (1.9, 1.9.1, 1.10, 1.11).\n"));
 
   fprintf (stream, _("\n"));
 }

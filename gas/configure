@@ -13009,7 +13009,7 @@ $as_echo "#define NDS32_DEFAULT_ZOL_EXT 1" >>confdefs.h
 $as_echo "$enable_zol_ext" >&6; }
 	;;
 
-      aarch64 | i386 | riscv | s390 | sparc)
+      aarch64 | i386 | s390 | sparc)
 	if test $this_target = $target ; then
 
 cat >>confdefs.h <<_ACEOF
@@ -13018,6 +13018,56 @@ _ACEOF
 
 	fi
 	;;
+
+      riscv)
+        # --target=riscv[32|64]-*-*.  */
+        if test $this_target = $target ; then
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_ARCH "${arch}"
+_ACEOF
+
+        fi
+
+        # --with-arch=<value>.  The syntax of <value> is same as Gas option -march.
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --with-arch" >&5
+$as_echo_n "checking for default configuration of --with-arch... " >&6; }
+        if test "x${with_arch}" != x; then
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_RISCV_ARCH_WITH_EXT "$with_arch"
+_ACEOF
+
+        fi
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_arch" >&5
+$as_echo "$with_arch" >&6; }
+
+        # --with-isa-spec=[2.2|20190608|20191213].
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --with-isa-spec" >&5
+$as_echo_n "checking for default configuration of --with-isa-spec... " >&6; }
+        if test "x${with_isa_spec}" != x; then
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_RISCV_ISA_SPEC "$with_isa_spec"
+_ACEOF
+
+        fi
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_isa_spec" >&5
+$as_echo "$with_isa_spec" >&6; }
+
+        # --with-priv-spec=[1.9|1.9.1|1.10|1.11].
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --with-priv-spec" >&5
+$as_echo_n "checking for default configuration of --with-priv-spec... " >&6; }
+        if test "x${with_priv_spec}" != x; then
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_RISCV_PRIV_SPEC "$with_priv_spec"
+_ACEOF
+
+        fi
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_priv_spec" >&5
+$as_echo "$with_priv_spec" >&6; }
+        ;;
 
       rl78)
 	f=rl78-parse.o

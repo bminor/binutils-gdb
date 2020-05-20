@@ -1,3 +1,7 @@
+2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* dwarf.c: Updated since DECLARE_CSR is changed.
+
 2020-05-19  H.J. Lu  <hjl.tools@gmail.com>
 
 	PR binutils/25809

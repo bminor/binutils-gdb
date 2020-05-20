@@ -1,3 +1,34 @@
+2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-opc.c (riscv_ext_version_table): The table used to store
+	all information about the supported spec and the corresponding ISA
+	versions.  Currently, only Zicsr is supported to verify the
+	correctness of Z sub extension settings.  Others will be supported
+	in the future patches.
+	(struct isa_spec_t, isa_specs): List for all supported ISA spec
+	classes and the corresponding strings.
+	(riscv_get_isa_spec_class): New function.  Get the corresponding ISA
+	spec class by giving a ISA spec string.
+	* riscv-opc.c (struct priv_spec_t): New structure.
+	(struct priv_spec_t priv_specs): List for all supported privilege spec
+	classes and the corresponding strings.
+	(riscv_get_priv_spec_class): New function.  Get the corresponding
+	privilege spec class by giving a spec string.
+	(riscv_get_priv_spec_name): New function.  Get the corresponding
+	privilege spec string by giving a CSR version class.
+	* riscv-dis.c: Updated since DECLARE_CSR is changed.
+	* riscv-dis.c: Add new disassembler option -Mpriv-spec to dump the CSR
+	according to the chosen version.  Build a hash table riscv_csr_hash to
+	store the valid CSR for the chosen pirv verison.  Dump the direct
+	CSR address rather than it's name if it is invalid.
+	(parse_riscv_dis_option_without_args): New function.  Parse the options
+	without arguments.
+	(parse_riscv_dis_option): Call parse_riscv_dis_option_without_args to
+	parse the options without arguments first, and then handle the options
+	with arguments.  Add the new option -Mpriv-spec, which has argument.
+	* riscv-dis.c (print_riscv_disassembler_options): Add description
+	about the new OBJDUMP option.
+
 2020-05-19  Peter Bergner  <bergner@linux.ibm.com>
 
 	* ppc-opc.c (insert_ls, extract_ls): Handle 3-bit L fields and new

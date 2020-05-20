@@ -1,3 +1,23 @@
+2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv.h: Include "bfd.h" to support bfd_boolean.
+	(enum riscv_isa_spec_class): New enum class.  All supported ISA spec
+	belong to one of the class
+	(struct riscv_ext_version): New structure holds version information
+	for the specific ISA.
+	* opcode/riscv-opc.h (DECLARE_CSR): There are two version information,
+	define_version and abort_version.  The define_version means which
+	privilege spec is started to define the CSR, and the abort_version
+	means which privilege spec is started to abort the CSR.  If the CSR is
+	valid for the newest spec, then the abort_version should be
+	PRIV_SPEC_CLASS_DRAFT.
+	(DECLARE_CSR_ALIAS): Same as DECLARE_CSR, but only for the obselete CSR.
+	* opcode/riscv.h (enum riscv_priv_spec_class): New enum class.  Define
+	the current supported privilege spec versions.
+	(struct riscv_csr_extra): Add new fields to store more information
+	about the CSR.  We use these information to find the suitable CSR
+	address when user choosing a specific privilege spec.
+
 2020-05-19  Alexander Fedotov  <alfedotov@gmail.com>
 
 	PR 25992
