@@ -314,8 +314,7 @@ translate_addresses (bfd *abfd, asection *section)
                   else
                     printf ("\n");
 
-                  if (alloc != NULL)
-                    free (alloc);
+		  free (alloc);
                 }
 
               if (base_names && filename != NULL)
@@ -410,11 +409,8 @@ process_file (const char *file_name, const char *section_name,
 
   translate_addresses (abfd, section);
 
-  if (syms != NULL)
-    {
-      free (syms);
-      syms = NULL;
-    }
+  free (syms);
+  syms = NULL;
 
   bfd_close (abfd);
 

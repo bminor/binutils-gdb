@@ -704,8 +704,7 @@ quot (const char *string)
   if ((buflen < slen * 2 + 2) || ! buf)
     {
       buflen = slen * 2 + 2;
-      if (buf)
-	free (buf);
+      free (buf);
       buf = (char *) xmalloc (buflen);
     }
 

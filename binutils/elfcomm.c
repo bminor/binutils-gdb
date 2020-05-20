@@ -744,14 +744,10 @@ setup_nested_archive (struct archive_info *nested_arch,
 void
 release_archive (struct archive_info * arch)
 {
-  if (arch->file_name != NULL)
-    free (arch->file_name);
-  if (arch->index_array != NULL)
-    free (arch->index_array);
-  if (arch->sym_table != NULL)
-    free (arch->sym_table);
-  if (arch->longnames != NULL)
-    free (arch->longnames);
+  free (arch->file_name);
+  free (arch->index_array);
+  free (arch->sym_table);
+  free (arch->longnames);
 }
 
 /* Get the name of an archive member from the current archive header.

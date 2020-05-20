@@ -1253,8 +1253,7 @@ def_import (const char *app_name, const char *module, const char *dllext,
 
   append_import (application_name, module, ord_val, its_name);
 
-  if (buf)
-    free (buf);
+  free (buf);
 }
 
 void
@@ -1335,7 +1334,7 @@ run (const char *what, char *args)
 
   pid = pexecute (argv[0], (char * const *) argv, program_name, temp_base,
 		  &errmsg_fmt, &errmsg_arg, PEXECUTE_ONE | PEXECUTE_SEARCH);
-  free(argv);
+  free (argv);
 
   if (pid == -1)
     {
@@ -3388,15 +3387,8 @@ dll_name_list_free_contents (dll_name_list_node_type * entry)
   if (entry)
     {
       if (entry->next)
-        {
-          dll_name_list_free_contents (entry->next);
-          entry->next = NULL;
-        }
-      if (entry->dllname)
-        {
-          free (entry->dllname);
-          entry->dllname = NULL;
-        }
+	dll_name_list_free_contents (entry->next);
+      free (entry->dllname);
       free (entry);
     }
 }

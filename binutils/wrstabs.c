@@ -1224,8 +1224,7 @@ stab_method_type (void *p, bfd_boolean domainp, int argcount,
     }
   strcat (buf, ";");
 
-  if (args != NULL)
-    free (args);
+  free (args);
 
   if (! stab_push_string (info, buf, 0, definition, 0))
     return FALSE;

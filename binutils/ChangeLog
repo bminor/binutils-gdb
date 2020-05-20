@@ -1,5 +1,17 @@
 2020-05-21  Alan Modra  <amodra@gmail.com>
 
+	* addr2line.c: Replace "if (x) free (x)" with "free (x)" throughout.
+	* dlltool.c: Likewise.
+	* elfcomm.c: Likewise.
+	* rddbg.c: Likewise.
+	* readelf.c: Likewise.
+	* stabs.c: Likewise.
+	* windmc.c: Likewise.
+	* windres.c: Likewise.
+	* wrstabs.c: Likewise.
+
+2020-05-21  Alan Modra  <amodra@gmail.com>
+
 	* readelf.c (get_num_dynamic_syms): Bounds check mipsxlat array
 	access.
 

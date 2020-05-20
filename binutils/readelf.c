@@ -7010,8 +7010,7 @@ process_section_groups (Filedata * filedata)
 	  if (symtab_sec != sec)
 	    {
 	      symtab_sec = sec;
-	      if (symtab)
-		free (symtab);
+	      free (symtab);
 	      symtab = GET_ELF_SYMBOLS (filedata, symtab_sec, & num_syms);
 	    }
 
@@ -7040,8 +7039,7 @@ process_section_groups (Filedata * filedata)
 
 	      group_name = SECTION_NAME (filedata->section_headers + sym->st_shndx);
 	      strtab_sec = NULL;
-	      if (strtab)
-		free (strtab);
+	      free (strtab);
 	      strtab = NULL;
 	      strtab_size = 0;
 	    }
@@ -7051,8 +7049,7 @@ process_section_groups (Filedata * filedata)
 	      if (symtab_sec->sh_link >= filedata->file_header.e_shnum)
 		{
 		  strtab_sec = NULL;
-		  if (strtab)
-		    free (strtab);
+		  free (strtab);
 		  strtab = NULL;
 		  strtab_size = 0;
 		}
@@ -7060,8 +7057,7 @@ process_section_groups (Filedata * filedata)
 		       != (sec = filedata->section_headers + symtab_sec->sh_link))
 		{
 		  strtab_sec = sec;
-		  if (strtab)
-		    free (strtab);
+		  free (strtab);
 
 		  strtab = (char *) get_data (NULL, filedata, strtab_sec->sh_offset,
 					      1, strtab_sec->sh_size,
@@ -7169,17 +7165,14 @@ process_section_groups (Filedata * filedata)
 	      group->root = g;
 	    }
 
-	  if (start)
-	    free (start);
+	  free (start);
 
 	  group++;
 	}
     }
 
-  if (symtab)
-    free (symtab);
-  if (strtab)
-    free (strtab);
+  free (symtab);
+  free (strtab);
   return TRUE;
 }
 
@@ -7367,8 +7360,7 @@ process_ia64_vms_dynamic_relocs (Filedata * filedata)
 	}
     }
 
-  if (strtab != NULL)
-    free (strtab);
+  free (strtab);
 
   return res;
 }
@@ -7514,8 +7506,7 @@ process_relocs (Filedata * filedata)
 				    symtab, nsyms, strtab, strtablen,
 				    is_rela,
 				    symsec->sh_type == SHT_DYNSYM);
-		  if (strtab)
-		    free (strtab);
+		  free (strtab);
 		  free (symtab);
 		}
 	      else
@@ -8041,19 +8032,15 @@ ia64_process_unwind (Filedata * filedata)
 	      && aux.table_len > 0)
 	    dump_ia64_unwind (filedata, & aux);
 
-	  if (aux.table)
-	    free ((char *) aux.table);
-	  if (aux.info)
-	    free ((char *) aux.info);
+	  free ((char *) aux.table);
+	  free ((char *) aux.info);
 	  aux.table = NULL;
 	  aux.info = NULL;
 	}
     }
 
-  if (aux.symtab)
-    free (aux.symtab);
-  if (aux.strtab)
-    free ((char *) aux.strtab);
+  free (aux.symtab);
+  free ((char *) aux.strtab);
 
   return res;
 }
@@ -8423,16 +8410,13 @@ hppa_process_unwind (Filedata * filedata)
 		res = FALSE;
 	    }
 
-	  if (aux.table)
-	    free ((char *) aux.table);
+	  free ((char *) aux.table);
 	  aux.table = NULL;
 	}
     }
 
-  if (aux.symtab)
-    free (aux.symtab);
-  if (aux.strtab)
-    free ((char *) aux.strtab);
+  free (aux.symtab);
+  free ((char *) aux.strtab);
 
   return res;
 }
@@ -8492,11 +8476,8 @@ arm_print_vma_and_name (Filedata *                 filedata,
 static void
 arm_free_section (struct arm_section *arm_sec)
 {
-  if (arm_sec->data != NULL)
-    free (arm_sec->data);
-
-  if (arm_sec->rela != NULL)
-    free (arm_sec->rela);
+  free (arm_sec->data);
+  free (arm_sec->rela);
 }
 
 /* 1) If SEC does not match the one cached in ARM_SEC, then free the current
@@ -9530,10 +9511,8 @@ arm_process_unwind (Filedata * filedata)
 	  }
       }
 
-  if (aux.symtab)
-    free (aux.symtab);
-  if (aux.strtab)
-    free ((char *) aux.strtab);
+  free (aux.symtab);
+  free ((char *) aux.strtab);
 
   return res;
 }
@@ -10062,16 +10041,10 @@ get_num_dynamic_syms (Filedata * filedata)
     no_hash:
       if (num_of_syms == 0)
 	{
-	  if (filedata->buckets)
-	    {
-	      free (filedata->buckets);
-	      filedata->buckets = NULL;
-	    }
-	  if (filedata->chains)
-	    {
-	      free (filedata->chains);
-	      filedata->chains = NULL;
-	    }
+	  free (filedata->buckets);
+	  filedata->buckets = NULL;
+	  free (filedata->chains);
+	  filedata->chains = NULL;
 	  filedata->nbuckets = 0;
 	}
     }
@@ -10229,21 +10202,12 @@ get_num_dynamic_syms (Filedata * filedata)
       if (num_of_syms == 0)
 	{
 	no_gnu_hash:
-	  if (filedata->mipsxlat)
-	    {
-	      free (filedata->mipsxlat);
-	      filedata->mipsxlat = NULL;
-	    }
-	  if (filedata->gnuchains)
-	    {
-	      free (filedata->gnuchains);
-	      filedata->gnuchains = NULL;
-	    }
-	  if (filedata->gnubuckets)
-	    {
-	      free (filedata->gnubuckets);
-	      filedata->gnubuckets = NULL;
-	    }
+	  free (filedata->mipsxlat);
+	  filedata->mipsxlat = NULL;
+	  free (filedata->gnuchains);
+	  filedata->gnuchains = NULL;
+	  free (filedata->gnubuckets);
+	  filedata->gnubuckets = NULL;
 	  filedata->ngnubuckets = 0;
 	  filedata->ngnuchains = 0;
 	}
@@ -14654,12 +14618,9 @@ free_debug_section (enum dwarf_section_display_enum debug)
   section->address = 0;
   section->size = 0;
 
-  if (section->reloc_info != NULL)
-    {
-      free (section->reloc_info);
-      section->reloc_info = NULL;
-      section->num_relocs = 0;
-    }
+  free (section->reloc_info);
+  section->reloc_info = NULL;
+  section->num_relocs = 0;
 }
 
 static bfd_boolean
@@ -16763,8 +16724,7 @@ process_mips_specific (Filedata * filedata)
 	    }
 
 	sgot_print_fail:
-	  if (data)
-	    free (data);
+	  free (data);
 	}
       return res;
     }
@@ -17396,8 +17356,7 @@ process_mips_specific (Filedata * filedata)
 	}
 
     got_print_fail:
-      if (data)
-	free (data);
+      free (data);
     }
 
   if (mips_pltgot != 0 && jmprel != 0 && pltrel != 0 && pltrelsz != 0)
@@ -17474,8 +17433,7 @@ process_mips_specific (Filedata * filedata)
 	}
       printf ("\n");
 
-      if (data)
-	free (data);
+      free (data);
       free (rels);
     }
 
@@ -19747,11 +19705,8 @@ process_notes_at (Filedata *           filedata,
       if (! process_note (& inote, filedata))
 	res = FALSE;
 
-      if (temp != NULL)
-	{
-	  free (temp);
-	  temp = NULL;
-	}
+      free (temp);
+      temp = NULL;
     }
 
   free (pnotes);
@@ -20305,38 +20260,23 @@ process_object (Filedata * filedata)
   filedata->string_table = NULL;
   filedata->string_table_length = 0;
 
-  if (filedata->dump.dump_sects != NULL)
-    {
-      free (filedata->dump.dump_sects);
-      filedata->dump.dump_sects = NULL;
-      filedata->dump.num_dump_sects = 0;
-    }
+  free (filedata->dump.dump_sects);
+  filedata->dump.dump_sects = NULL;
+  filedata->dump.num_dump_sects = 0;
 
-  if (filedata->dynamic_strings)
-    {
-      free (filedata->dynamic_strings);
-      filedata->dynamic_strings = NULL;
-      filedata->dynamic_strings_length = 0;
-    }
+  free (filedata->dynamic_strings);
+  filedata->dynamic_strings = NULL;
+  filedata->dynamic_strings_length = 0;
 
-  if (filedata->dynamic_symbols)
-    {
-      free (filedata->dynamic_symbols);
-      filedata->dynamic_symbols = NULL;
-      filedata->num_dynamic_syms = 0;
-    }
+  free (filedata->dynamic_symbols);
+  filedata->dynamic_symbols = NULL;
+  filedata->num_dynamic_syms = 0;
 
-  if (filedata->dynamic_syminfo)
-    {
-      free (filedata->dynamic_syminfo);
-      filedata->dynamic_syminfo = NULL;
-    }
+  free (filedata->dynamic_syminfo);
+  filedata->dynamic_syminfo = NULL;
 
-  if (filedata->dynamic_section)
-    {
-      free (filedata->dynamic_section);
-      filedata->dynamic_section = NULL;
-    }
+  free (filedata->dynamic_section);
+  filedata->dynamic_section = NULL;
 
   while (filedata->symtab_shndx_list != NULL)
     {
@@ -20345,11 +20285,8 @@ process_object (Filedata * filedata)
       filedata->symtab_shndx_list = next;
     }
 
-  if (filedata->section_headers_groups)
-    {
-      free (filedata->section_headers_groups);
-      filedata->section_headers_groups = NULL;
-    }
+  free (filedata->section_headers_groups);
+  filedata->section_headers_groups = NULL;
 
   if (filedata->section_groups)
     {
@@ -20810,8 +20747,7 @@ main (int argc, char ** argv)
     if (! process_file (argv[optind++]))
       err = TRUE;
 
-  if (cmdline.dump_sects != NULL)
-    free (cmdline.dump_sects);
+  free (cmdline.dump_sects);
 
   free (dump_ctf_symtab_name);
   free (dump_ctf_strtab_name);
