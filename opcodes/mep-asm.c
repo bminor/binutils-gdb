@@ -811,8 +811,7 @@ mep_cgen_expand_macros_and_parse_operand (CGEN_CPU_DESC cd, int opindex,
 	*strp_in += (str - hold);
     }
 
-  if (hold)
-    free (hold);
+  free (hold);
 
   return errmsg;
 }

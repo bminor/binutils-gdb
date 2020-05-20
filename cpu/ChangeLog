@@ -1,3 +1,8 @@
+2020-05-21  Alan Modra  <amodra@gmail.com>
+
+	* mep.opc (mep_cgen_expand_macros_and_parse_operand): Replace
+	"if (x) free (x)" with "free (x)".
+
 2020-05-19  Stafford Horne  <shorne@gmail.com>
 
 	PR 25184

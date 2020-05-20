@@ -1,3 +1,25 @@
+2020-05-21  Alan Modra  <amodra@gmail.com>
+
+	* arc-ext.c: Replace "if (x) free (x)" with "free (x)" throughout.
+	* sparc-dis.c: Likewise.
+	* tic4x-dis.c: Likewise.
+	* xtensa-dis.c: Likewise.
+	* bpf-desc.c: Regenerate.
+	* epiphany-desc.c: Regenerate.
+	* fr30-desc.c: Regenerate.
+	* frv-desc.c: Regenerate.
+	* ip2k-desc.c: Regenerate.
+	* iq2000-desc.c: Regenerate.
+	* lm32-desc.c: Regenerate.
+	* m32c-desc.c: Regenerate.
+	* m32r-desc.c: Regenerate.
+	* mep-asm.c: Regenerate.
+	* mep-desc.c: Regenerate.
+	* mt-desc.c: Regenerate.
+	* or1k-desc.c: Regenerate.
+	* xc16x-desc.c: Regenerate.
+	* xstormy16-desc.c: Regenerate.
+
 2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
 
 	* riscv-opc.c (riscv_ext_version_table): The table used to store
