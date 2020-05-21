@@ -81,7 +81,7 @@ lm32_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return ((regnum >= SIM_LM32_R0_REGNUM) && (regnum <= SIM_LM32_RA_REGNUM))
       || (regnum == SIM_LM32_PC_REGNUM);
   else if (group == system_reggroup)
-    return ((regnum >= SIM_LM32_EA_REGNUM) && (regnum <= SIM_LM32_BA_REGNUM))
+    return ((regnum >= SIM_LM32_BA_REGNUM) && (regnum <= SIM_LM32_EA_REGNUM))
       || ((regnum >= SIM_LM32_EID_REGNUM) && (regnum <= SIM_LM32_IP_REGNUM));
   return default_register_reggroup_p (gdbarch, regnum, group);
 }
