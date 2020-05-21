@@ -1,3 +1,10 @@
+2020-05-24  Fangrui Song <maskray@google.com>
+
+	PR ld/26018
+	* lexsup.c (parse_args): Simplify.
+	* testsuite/ld-elf/dl4e.out: New.
+	* testsuite/ld-elf/shared.exp: Updated for PR ld/26018 tests.
+
 2020-05-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26018
