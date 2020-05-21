@@ -10211,7 +10211,8 @@ get_num_dynamic_syms (Filedata * filedata)
 	      {
 		if (filedata->dynamic_info_DT_MIPS_XHASH)
 		  {
-		    if (filedata->mipsxlat[off] >= num_of_syms)
+		    if (off < filedata->ngnuchains
+			&& filedata->mipsxlat[off] >= num_of_syms)
 		      num_of_syms = filedata->mipsxlat[off] + 1;
 		  }
 		else

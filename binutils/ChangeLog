@@ -1,3 +1,8 @@
+2020-05-21  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_num_dynamic_syms): Bounds check mipsxlat array
+	access.
+
 2020-05-20  Nelson Chu  <nelson.chu@sifive.com>
 
 	* dwarf.c: Updated since DECLARE_CSR is changed.
