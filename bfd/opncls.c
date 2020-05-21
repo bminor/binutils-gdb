@@ -84,6 +84,7 @@ _bfd_new_bfd (void)
   if (!bfd_hash_table_init_n (& nbfd->section_htab, bfd_section_hash_newfunc,
 			      sizeof (struct section_hash_entry), 13))
     {
+      objalloc_free ((struct objalloc *) nbfd->memory);
       free (nbfd);
       return NULL;
     }
@@ -125,6 +126,8 @@ _bfd_delete_bfd (bfd *abfd)
       bfd_hash_table_free (&abfd->section_htab);
       objalloc_free ((struct objalloc *) abfd->memory);
     }
+  else
+    free ((char *) bfd_get_filename (abfd));
 
   free (abfd->arelt_data);
   free (abfd);
@@ -137,6 +140,29 @@ _bfd_free_cached_info (bfd *abfd)
 {
   if (abfd->memory)
     {
+      const char *filename = bfd_get_filename (abfd);
+      if (filename)
+	{
+	  /* We can't afford to lose the bfd filename when freeing
+	     abfd->memory, because that would kill the cache.c scheme
+	     of closing and reopening files in order to limit the
+	     number of open files.  To reopen, you need the filename.
+	     And indeed _bfd_compute_and_write_armap calls
+	     _bfd_free_cached_info to free up space used by symbols
+	     and by check_format_matches.  Which we want to continue
+	     doing to handle very large archives.  Later the archive
+	     elements are copied, which might require reopening files.
+	     We also want to keep using objalloc memory for the
+	     filename since that allows the name to be updated
+	     without either leaking memory or implementing some sort
+	     of reference counted string for copies of the filename.  */
+	  size_t len = strlen (filename) + 1;
+	  char *copy = bfd_malloc (len);
+	  if (copy == NULL)
+	    return FALSE;
+	  memcpy (copy, filename, len);
+	  abfd->filename = copy;
+	}
       bfd_hash_table_free (&abfd->section_htab);
       objalloc_free ((struct objalloc *) abfd->memory);
 

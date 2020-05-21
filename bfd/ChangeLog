@@ -1,5 +1,13 @@
 2020-05-21  Alan Modra  <amodra@gmail.com>
 
+	PR 25993
+	* opncls.c (_bfd_free_cached_info): Keep a copy of the bfd
+	filename.
+	(_bfd_delete_bfd): Free the copy.
+	(_bfd_new_bfd): Free nbfd->memory on error.
+
+2020-05-21  Alan Modra  <amodra@gmail.com>
+
 	* aoutx.h: Replace "if (x) free (x)" with "free (x)" throughout.
 	* archive.c, * bfd.c, * bfdio.c, * coff-alpha.c, * coff-ppc.c,
 	* coff-sh.c, * coff-stgo32.c, * coffcode.h, * coffgen.c,
