@@ -2615,8 +2615,7 @@ remote_target::pass_signals (gdb::array_view<const unsigned char> pass_signals)
 	  putpkt (pass_packet);
 	  getpkt (&rs->buf, 0);
 	  packet_ok (rs->buf, &remote_protocol_packets[PACKET_QPassSignals]);
-	  if (rs->last_pass_packet)
-	    xfree (rs->last_pass_packet);
+	  xfree (rs->last_pass_packet);
 	  rs->last_pass_packet = pass_packet;
 	}
       else

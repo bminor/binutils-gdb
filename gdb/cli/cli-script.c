@@ -1528,8 +1528,7 @@ document_command (const char *comname, int from_tty)
   counted_command_line doclines = read_command_lines (prompt.c_str (),
 						      from_tty, 0, 0);
 
-  if (c->doc)
-    xfree ((char *) c->doc);
+  xfree ((char *) c->doc);
 
   {
     struct command_line *cl1;

@@ -1467,8 +1467,7 @@ patch_type (struct type *type, struct type *real_type)
     {
       /* The previous copy of TYPE_NAME is allocated by
 	 process_coff_symbol.  */
-      if (target->name ())
-	xfree ((char*) target->name ());
+      xfree ((char *) target->name ());
       target->set_name (xstrdup (real_target->name ()));
     }
 }

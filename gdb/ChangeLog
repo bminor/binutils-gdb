@@ -1,3 +1,15 @@
+2020-05-21  Simon Marchi  <simon.marchi@efficios.com>
+
+	* coffread.c (patch_type): Remove NULL check before xfree.
+	* corefile.c (set_gnutarget): Likewise.
+	* cp-abi.c (set_cp_abi_as_auto_default): Likewise.
+	* exec.c (build_section_table): Likewise.
+	* remote.c (remote_target::pass_signals): Likewise.
+	* utils.c (n_spaces): Likewise.
+	* cli/cli-script.c (document_command): Likewise.
+	* i386-windows-tdep.c (core_process_module_section): Likewise.
+	* linux-fork.c (struct fork_info) <~fork_info>: Likewise.
+
 2020-05-20  Simon Marchi  <simon.marchi@efficios.com>
 
 	* symfile.c (reread_symbols): Clear objfile's section_offsets

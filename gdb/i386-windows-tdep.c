@@ -142,8 +142,7 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
   data->module_count++;
 
 out:
-  if (buf)
-    xfree (buf);
+  xfree (buf);
   return;
 }
 

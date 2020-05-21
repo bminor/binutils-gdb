@@ -3404,8 +3404,7 @@ enum ovly_index
 static void
 simple_free_overlay_table (void)
 {
-  if (cache_ovly_table)
-    xfree (cache_ovly_table);
+  xfree (cache_ovly_table);
   cache_novlys = 0;
   cache_ovly_table = NULL;
   cache_ovly_table_base = 0;

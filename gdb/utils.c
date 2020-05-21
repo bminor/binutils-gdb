@@ -2260,8 +2260,7 @@ n_spaces (int n)
 
   if (n > max_spaces)
     {
-      if (spaces)
-	xfree (spaces);
+      xfree (spaces);
       spaces = (char *) xmalloc (n + 1);
       for (t = spaces + n; t != spaces;)
 	*--t = ' ';

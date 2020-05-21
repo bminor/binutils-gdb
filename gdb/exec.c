@@ -648,8 +648,7 @@ build_section_table (struct bfd *some_bfd, struct target_section **start,
   unsigned count;
 
   count = bfd_count_sections (some_bfd);
-  if (*start)
-    xfree (* start);
+  xfree (*start);
   *start = XNEWVEC (struct target_section, count);
   *end = *start;
   bfd_map_over_sections (some_bfd, add_to_section_table, (char *) end);

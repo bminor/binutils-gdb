@@ -61,8 +61,8 @@ struct fork_info
 
     if (savedregs)
       delete savedregs;
-    if (filepos)
-      xfree (filepos);
+
+    xfree (filepos);
   }
 
   ptid_t ptid = null_ptid;
