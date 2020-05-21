@@ -180,7 +180,7 @@ mi_run_cmd
 mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
   { "" "disp=\"del\"" } "run to breakpoint at line $bp_lineno"
 mi_gdb_test "590-data-evaluate-expression pvla2" \
-  "590\\^done,value=\"\\(\\( 2, 2, 2, 2, 2\\) \\( 2, 2, 2, 2, 2\\) \\)\"" \
+  "590\\^done,value=\"\\(\\(2, 2, 2, 2, 2\\) \\(2, 2, 2, 2, 2\\)\\)\"" \
   "evaluate associated vla"
 
 mi_create_varobj_checked pvla2_associated pvla2 \

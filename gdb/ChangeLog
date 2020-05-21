@@ -1,5 +1,10 @@
 2020-09-19  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* f-valprint.c (f77_print_array_1): Adjust printing of whitespace
+	for arrays.
+
+2020-09-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* eval.c: Remove 'f-lang.h' include.
 	(value_f90_subarray): Moved to f-lang.c.
 	(eval_call): Renamed to...

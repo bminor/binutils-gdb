@@ -137,14 +137,17 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
 	    (TYPE_TARGET_TYPE (type), value_contents_for_printing_const (val)
 	     + offs, addr + offs);
 
-	  fprintf_filtered (stream, "( ");
+	  fprintf_filtered (stream, "(");
 	  f77_print_array_1 (nss + 1, ndimensions, value_type (subarray),
 			     value_contents_for_printing (subarray),
 			     value_embedded_offset (subarray),
 			     value_address (subarray),
 			     stream, recurse, subarray, options, elts);
 	  offs += byte_stride;
-	  fprintf_filtered (stream, ") ");
+	  fprintf_filtered (stream, ")");
+
+	  if (i < upperbound)
+	    fprintf_filtered (stream, " ");
 	}
       if (*elts >= options->print_max && i < upperbound)
 	fprintf_filtered (stream, "...");

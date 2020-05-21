@@ -1,3 +1,11 @@
+2020-09-19  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/array-slices.exp: Update expected results.
+	* gdb.fortran/class-allocatable-array.exp: Likewise.
+	* gdb.fortran/multi-dim.exp: Likewise.
+	* gdb.fortran/vla-type.exp: Likewise.
+	* gdb.mi/mi-vla-fortran.exp: Likewise.
+
 2020-09-18  Victor Collod  <vcollod@nvidia.com>
 
 	PR gdb/26635

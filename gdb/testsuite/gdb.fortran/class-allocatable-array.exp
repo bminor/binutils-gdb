@@ -40,4 +40,4 @@ gdb_continue_to_breakpoint "Break Here"
 # cetainly going to fail.
 gdb_test "print this" " = \\( _data = \[^\r\n\]+, _vptr = \[^\r\n\]+\\)"
 gdb_test "print this%_data" " = \\(PTR TO -> \\( Type test_type \\)\\) \[^\r\n\]+"
-gdb_test "print this%_data%b" " = \\(\\( 1, 2, 3\\) \\( 4, 5, 6\\) \\)"
+gdb_test "print this%_data%b" " = \\(\\(1, 2, 3\\) \\(4, 5, 6\\)\\)"
