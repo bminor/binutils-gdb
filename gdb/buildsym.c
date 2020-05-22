@@ -271,7 +271,7 @@ buildsym_compunit::finish_block_internal
 	    }
 	  if (nparams > 0)
 	    {
-	      TYPE_NFIELDS (ftype) = nparams;
+	      ftype->set_num_fields (nparams);
 	      TYPE_FIELDS (ftype) = (struct field *)
 		TYPE_ALLOC (ftype, nparams * sizeof (struct field));
 

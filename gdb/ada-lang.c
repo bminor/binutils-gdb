@@ -8021,7 +8021,6 @@ empty_record (struct type *templ)
   struct type *type = alloc_type_copy (templ);
 
   type->set_code (TYPE_CODE_STRUCT);
-  TYPE_NFIELDS (type) = 0;
   TYPE_FIELDS (type) = NULL;
   INIT_NONE_SPECIFIC (type);
   type->set_name ("<empty>");
@@ -8078,7 +8077,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
   rtype = alloc_type_copy (type);
   rtype->set_code (TYPE_CODE_STRUCT);
   INIT_NONE_SPECIFIC (rtype);
-  TYPE_NFIELDS (rtype) = nfields;
+  rtype->set_num_fields (nfields);
   TYPE_FIELDS (rtype) = (struct field *)
     TYPE_ALLOC (rtype, nfields * sizeof (struct field));
   memset (TYPE_FIELDS (rtype), 0, sizeof (struct field) * nfields);
@@ -8246,7 +8245,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
         {
           for (f = variant_field + 1; f < TYPE_NFIELDS (rtype); f += 1)
             TYPE_FIELDS (rtype)[f - 1] = TYPE_FIELDS (rtype)[f];
-          TYPE_NFIELDS (rtype) -= 1;
+	  rtype->set_num_fields (rtype->num_fields () - 1);
         }
       else
         {
@@ -8353,7 +8352,7 @@ template_to_static_fixed_type (struct type *type0)
 	      TYPE_TARGET_TYPE (type0) = type = alloc_type_copy (type0);
 	      type->set_code (type0->code ());
 	      INIT_NONE_SPECIFIC (type);
-	      TYPE_NFIELDS (type) = nfields;
+	      type->set_num_fields (nfields);
 	      TYPE_FIELDS (type) = (struct field *)
 		TYPE_ALLOC (type, nfields * sizeof (struct field));
 	      memcpy (TYPE_FIELDS (type), TYPE_FIELDS (type0),
@@ -8402,7 +8401,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   rtype = alloc_type_copy (type);
   rtype->set_code (TYPE_CODE_STRUCT);
   INIT_NONE_SPECIFIC (rtype);
-  TYPE_NFIELDS (rtype) = nfields;
+  rtype->set_num_fields (nfields);
   TYPE_FIELDS (rtype) =
     (struct field *) TYPE_ALLOC (rtype, nfields * sizeof (struct field));
   memcpy (TYPE_FIELDS (rtype), TYPE_FIELDS (type),
@@ -8425,7 +8424,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
 
       for (f = variant_field + 1; f < nfields; f += 1)
         TYPE_FIELDS (rtype)[f - 1] = TYPE_FIELDS (rtype)[f];
-      TYPE_NFIELDS (rtype) -= 1;
+      rtype->set_num_fields (rtype->num_fields () - 1);
     }
   else
     {

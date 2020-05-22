@@ -562,7 +562,7 @@ lookup_function_type_with_arguments (struct type *type,
 	TYPE_PROTOTYPED (fn) = 1;
     }
 
-  TYPE_NFIELDS (fn) = nparams;
+  fn->set_num_fields (nparams);
   TYPE_FIELDS (fn)
     = (struct field *) TYPE_ZALLOC (fn, nparams * sizeof (struct field));
   for (i = 0; i < nparams; ++i)
@@ -1281,7 +1281,7 @@ create_array_type_with_stride (struct type *result_type,
   result_type->set_code (TYPE_CODE_ARRAY);
   TYPE_TARGET_TYPE (result_type) = element_type;
 
-  TYPE_NFIELDS (result_type) = 1;
+  result_type->set_num_fields (1);
   TYPE_FIELDS (result_type) =
     (struct field *) TYPE_ZALLOC (result_type, sizeof (struct field));
   TYPE_INDEX_TYPE (result_type) = range_type;
@@ -1380,7 +1380,7 @@ create_set_type (struct type *result_type, struct type *domain_type)
     result_type = alloc_type_copy (domain_type);
 
   result_type->set_code (TYPE_CODE_SET);
-  TYPE_NFIELDS (result_type) = 1;
+  result_type->set_num_fields (1);
   TYPE_FIELDS (result_type)
     = (struct field *) TYPE_ZALLOC (result_type, sizeof (struct field));
 
@@ -1550,7 +1550,7 @@ smash_to_method_type (struct type *type, struct type *self_type,
   TYPE_TARGET_TYPE (type) = to_type;
   set_type_self_type (type, self_type);
   TYPE_FIELDS (type) = args;
-  TYPE_NFIELDS (type) = nargs;
+  type->set_num_fields (nargs);
   if (varargs)
     TYPE_VARARGS (type) = 1;
   TYPE_LENGTH (type) = 1;	/* In practice, this is never needed.  */
@@ -2402,8 +2402,8 @@ compute_variant_fields (struct type *type,
   for (const auto &part : parts)
     compute_variant_fields_inner (type, addr_stack, part, flags);
 
-  TYPE_NFIELDS (resolved_type) = std::count (flags.begin (), flags.end (),
-					     true);
+  resolved_type->set_num_fields
+    (std::count (flags.begin (), flags.end (), true));
   TYPE_FIELDS (resolved_type)
     = (struct field *) TYPE_ALLOC (resolved_type,
 				   TYPE_NFIELDS (resolved_type)
@@ -5558,7 +5558,7 @@ arch_flags_type (struct gdbarch *gdbarch, const char *name, int bit)
 
   type = arch_type (gdbarch, TYPE_CODE_FLAGS, bit, name);
   TYPE_UNSIGNED (type) = 1;
-  TYPE_NFIELDS (type) = 0;
+  type->set_num_fields (0);
   /* Pre-allocate enough space assuming every field is one bit.  */
   TYPE_FIELDS (type)
     = (struct field *) TYPE_ZALLOC (type, bit * sizeof (struct field));
@@ -5587,7 +5587,7 @@ append_flags_type_field (struct type *type, int start_bitpos, int nr_bits,
   TYPE_FIELD_TYPE (type, field_nr) = field_type;
   SET_FIELD_BITPOS (TYPE_FIELD (type, field_nr), start_bitpos);
   TYPE_FIELD_BITSIZE (type, field_nr) = nr_bits;
-  ++TYPE_NFIELDS (type);
+  type->set_num_fields (type->num_fields () + 1);
 }
 
 /* Special version of append_flags_type_field to add a flag field.
@@ -5630,7 +5630,7 @@ append_composite_type_field_raw (struct type *t, const char *name,
 {
   struct field *f;
 
-  TYPE_NFIELDS (t) = TYPE_NFIELDS (t) + 1;
+  t->set_num_fields (TYPE_NFIELDS (t) + 1);
   TYPE_FIELDS (t) = XRESIZEVEC (struct field, TYPE_FIELDS (t),
 				TYPE_NFIELDS (t));
   f = &(TYPE_FIELDS (t)[TYPE_NFIELDS (t) - 1]);

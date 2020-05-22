@@ -1017,7 +1017,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	t->set_code (type_code);
 	TYPE_LENGTH (t) = sh->value;
-	TYPE_NFIELDS (t) = nfields;
+	t->set_num_fields (nfields);
 	TYPE_FIELDS (t) = f = ((struct field *)
 			       TYPE_ALLOC (t,
 					   nfields * sizeof (struct field)));
@@ -1186,7 +1186,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		{
 		  struct block_iterator iter;
 
-		  TYPE_NFIELDS (ftype) = nparams;
+		  ftype->set_num_fields (nparams);
 		  TYPE_FIELDS (ftype) = (struct field *)
 		    TYPE_ALLOC (ftype, nparams * sizeof (struct field));
 
@@ -1733,7 +1733,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
   /* Deal with range types.  */
   if (t->bt == btRange)
     {
-      TYPE_NFIELDS (tp) = 0;
+      tp->set_num_fields (0);
       TYPE_RANGE_DATA (tp) = ((struct range_bounds *)
 			  TYPE_ZALLOC (tp, sizeof (struct range_bounds)));
       TYPE_LOW_BOUND (tp) = AUX_GET_DNLOW (bigend, ax);

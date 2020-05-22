@@ -682,7 +682,7 @@ fake_method::fake_method (type_instance_flags flags,
      neither an objfile nor a gdbarch.  As a result we must manually
      allocate memory for auxiliary fields, and free the memory ourselves
      when we are done with it.  */
-  TYPE_NFIELDS (type) = num_types;
+  type->set_num_fields (num_types);
   TYPE_FIELDS (type) = (struct field *)
     xzalloc (sizeof (struct field) * num_types);
 

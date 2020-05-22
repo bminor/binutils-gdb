@@ -9362,7 +9362,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       /* Smash this type to be a structure type.  We have to do this
 	 because the type has already been recorded.  */
       type->set_code (TYPE_CODE_STRUCT);
-      TYPE_NFIELDS (type) = 3;
+      type->set_num_fields (3);
       /* Save the field we care about.  */
       struct field saved_field = TYPE_FIELD (type, 0);
       TYPE_FIELDS (type)
@@ -9461,7 +9461,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       memcpy (new_fields + 1, TYPE_FIELDS (type),
 	      TYPE_NFIELDS (type) * sizeof (struct field));
       TYPE_FIELDS (type) = new_fields;
-      TYPE_NFIELDS (type) = TYPE_NFIELDS (type) + 1;
+      type->set_num_fields (TYPE_NFIELDS (type) + 1);
 
       /* Install the discriminant at index 0 in the union.  */
       TYPE_FIELD (type, 0) = *disr_field;
@@ -9509,7 +9509,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	  struct type *sub_type = TYPE_FIELD_TYPE (type, i);
 	  if (TYPE_NFIELDS (sub_type) > 0)
 	    {
-	      --TYPE_NFIELDS (sub_type);
+	      sub_type->set_num_fields (sub_type->num_fields () - 1);
 	      ++TYPE_FIELDS (sub_type);
 	    }
 	  TYPE_FIELD_NAME (type, i) = variant_name;
@@ -14804,7 +14804,7 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 
   /* Record the field count, allocate space for the array of fields,
      and create blank accessibility bitfields if necessary.  */
-  TYPE_NFIELDS (type) = nfields;
+  type->set_num_fields (nfields);
   TYPE_FIELDS (type) = (struct field *)
     TYPE_ZALLOC (type, sizeof (struct field) * nfields);
 
@@ -15933,7 +15933,7 @@ update_enumeration_type_from_children (struct die_info *die,
 
   if (!fields.empty ())
     {
-      TYPE_NFIELDS (type) = fields.size ();
+      type->set_num_fields (fields.size ());
       TYPE_FIELDS (type) = (struct field *)
 	TYPE_ALLOC (type, sizeof (struct field) * fields.size ());
       memcpy (TYPE_FIELDS (type), fields.data (),
@@ -17084,7 +17084,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 	}
 
       /* Allocate storage for parameters and fill them in.  */
-      TYPE_NFIELDS (ftype) = nparams;
+      ftype->set_num_fields (nparams);
       TYPE_FIELDS (ftype) = (struct field *)
 	TYPE_ZALLOC (ftype, nparams * sizeof (struct field));
 

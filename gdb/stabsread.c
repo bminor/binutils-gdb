@@ -1009,7 +1009,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      TYPE_FIELD_TYPE (ftype, nparams) = ptype;
 	      TYPE_FIELD_ARTIFICIAL (ftype, nparams++) = 0;
 	    }
-	  TYPE_NFIELDS (ftype) = nparams;
+	  ftype->set_num_fields (nparams);
 	  TYPE_PROTOTYPED (ftype) = 1;
 	}
       break;
@@ -1850,7 +1850,7 @@ again:
           for (t = arg_types, i = num_args - 1; t; t = t->next, i--)
             TYPE_FIELD_TYPE (func_type, i) = t->type;
         }
-        TYPE_NFIELDS (func_type) = num_args;
+        func_type->set_num_fields (num_args);
         TYPE_PROTOTYPED (func_type) = 1;
 
         type = func_type;
@@ -3308,7 +3308,7 @@ attach_fields_to_type (struct stab_field_info *fip, struct type *type,
      non-public fields.  Record the field count, allocate space for the
      array of fields, and create blank visibility bitfields if necessary.  */
 
-  TYPE_NFIELDS (type) = nfields;
+  type->set_num_fields (nfields);
   TYPE_FIELDS (type) = (struct field *)
     TYPE_ALLOC (type, sizeof (struct field) * nfields);
   memset (TYPE_FIELDS (type), 0, sizeof (struct field) * nfields);
@@ -3654,7 +3654,7 @@ read_enum_type (const char **pp, struct type *type,
   TYPE_STUB (type) = 0;
   if (unsigned_enum)
     TYPE_UNSIGNED (type) = 1;
-  TYPE_NFIELDS (type) = nsyms;
+  type->set_num_fields (nsyms);
   TYPE_FIELDS (type) = (struct field *)
     TYPE_ALLOC (type, sizeof (struct field) * nsyms);
   memset (TYPE_FIELDS (type), 0, sizeof (struct field) * nsyms);
