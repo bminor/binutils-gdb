@@ -8242,7 +8242,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
       if (branch_type == NULL)
         {
           for (f = variant_field + 1; f < rtype->num_fields (); f += 1)
-            TYPE_FIELDS (rtype)[f - 1] = TYPE_FIELDS (rtype)[f];
+            rtype->field (f - 1) = rtype->field (f);
 	  rtype->set_num_fields (rtype->num_fields () - 1);
         }
       else
@@ -8355,7 +8355,7 @@ template_to_static_fixed_type (struct type *type0)
 	      field *fields =
 		((struct field *)
 		 TYPE_ALLOC (type, nfields * sizeof (struct field)));
-	      memcpy (fields, TYPE_FIELDS (type0),
+	      memcpy (fields, type0->fields (),
 		      sizeof (struct field) * nfields);
 	      type->set_fields (fields);
 
@@ -8407,7 +8407,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
 
   field *fields =
     (struct field *) TYPE_ALLOC (rtype, nfields * sizeof (struct field));
-  memcpy (fields, TYPE_FIELDS (type), sizeof (struct field) * nfields);
+  memcpy (fields, type->fields (), sizeof (struct field) * nfields);
   rtype->set_fields (fields);
 
   rtype->set_name (ada_type_name (type));
@@ -8427,7 +8427,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
       int f;
 
       for (f = variant_field + 1; f < nfields; f += 1)
-        TYPE_FIELDS (rtype)[f - 1] = TYPE_FIELDS (rtype)[f];
+        rtype->field (f - 1) = rtype->field (f);
       rtype->set_num_fields (rtype->num_fields () - 1);
     }
   else

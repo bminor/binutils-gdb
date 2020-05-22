@@ -512,7 +512,7 @@ tyscm_field_smob_to_field (field_smob *f_smob)
   struct type *type = tyscm_field_smob_containing_type (f_smob);
 
   /* This should be non-NULL by construction.  */
-  gdb_assert (TYPE_FIELDS (type) != NULL);
+  gdb_assert (type->fields () != NULL);
 
   return &TYPE_FIELD (type, f_smob->field_num);
 }

@@ -914,13 +914,19 @@ struct type
   }
 
   /* Get the fields array of this type.  */
-  field *fields () const
+  struct field *fields () const
   {
     return this->main_type->flds_bnds.fields;
   }
 
+  /* Get the field at index IDX.  */
+  struct field &field (int idx) const
+  {
+    return this->fields ()[idx];
+  }
+
   /* Set the fields array of this type.  */
-  void set_fields (field *fields)
+  void set_fields (struct field *fields)
   {
     this->main_type->flds_bnds.fields = fields;
   }
@@ -1470,8 +1476,6 @@ extern unsigned type_align (struct type *);
    space in struct type.  */
 extern bool set_type_align (struct type *, ULONGEST);
 
-#define TYPE_FIELDS(thistype) (thistype)->fields ()
-
 #define TYPE_INDEX_TYPE(type) TYPE_FIELD_TYPE (type, 0)
 #define TYPE_RANGE_DATA(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.bounds
 #define TYPE_LOW_BOUND(range_type) \
@@ -1667,7 +1671,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_FN_FIELD(thisfn, n) (thisfn)[n]
 #define TYPE_FN_FIELD_PHYSNAME(thisfn, n) (thisfn)[n].physname
 #define TYPE_FN_FIELD_TYPE(thisfn, n) (thisfn)[n].type
-#define TYPE_FN_FIELD_ARGS(thisfn, n) TYPE_FIELDS ((thisfn)[n].type)
+#define TYPE_FN_FIELD_ARGS(thisfn, n) (((thisfn)[n].type)->fields ())
 #define TYPE_FN_FIELD_CONST(thisfn, n) ((thisfn)[n].is_const)
 #define TYPE_FN_FIELD_VOLATILE(thisfn, n) ((thisfn)[n].is_volatile)
 #define TYPE_FN_FIELD_PRIVATE(thisfn, n) ((thisfn)[n].is_private)

@@ -9458,7 +9458,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       field *new_fields
 	= (struct field *) TYPE_ZALLOC (type, ((type->num_fields () + 1)
 					       * sizeof (struct field)));
-      memcpy (new_fields + 1, TYPE_FIELDS (type),
+      memcpy (new_fields + 1, type->fields (),
 	      type->num_fields () * sizeof (struct field));
       type->set_fields (new_fields);
       type->set_num_fields (type->num_fields () + 1);
@@ -15002,7 +15002,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 	   of the method itself (TYPE_CODE_METHOD).  */
       smash_to_method_type (fnp->type, type,
 			    TYPE_TARGET_TYPE (this_type),
-			    TYPE_FIELDS (this_type),
+			    this_type->fields (),
 			    this_type->num_fields (),
 			    TYPE_VARARGS (this_type));
 
@@ -15219,7 +15219,7 @@ quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
   self_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (pfn_type, 0));
   new_type = alloc_type (objfile);
   smash_to_method_type (new_type, self_type, TYPE_TARGET_TYPE (pfn_type),
-			TYPE_FIELDS (pfn_type), pfn_type->num_fields (),
+			pfn_type->fields (), pfn_type->num_fields (),
 			TYPE_VARARGS (pfn_type));
   smash_to_methodptr_type (type, new_type);
 }
@@ -15937,7 +15937,7 @@ update_enumeration_type_from_children (struct die_info *die,
       type->set_fields
 	((struct field *)
 	 TYPE_ALLOC (type, sizeof (struct field) * fields.size ()));
-      memcpy (TYPE_FIELDS (type), fields.data (),
+      memcpy (type->fields (), fields.data (),
 	      sizeof (struct field) * fields.size ());
     }
 
@@ -16723,7 +16723,7 @@ read_tag_ptr_to_member_type (struct die_info *die, struct dwarf2_cu *cu)
 	= alloc_type (cu->per_cu->dwarf2_per_objfile->objfile);
 
       smash_to_method_type (new_type, domain, TYPE_TARGET_TYPE (to_type),
-			    TYPE_FIELDS (to_type), to_type->num_fields (),
+			    to_type->fields (), to_type->num_fields (),
 			    TYPE_VARARGS (to_type));
       type = lookup_methodptr_type (new_type);
     }

@@ -1233,8 +1233,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
     case stMember:		/* member of struct or union */
       {
-	struct field *f
-	  = &TYPE_FIELDS (top_stack->cur_type)[top_stack->cur_field++];
+	struct field *f = &top_stack->cur_type->field (top_stack->cur_field);
+	top_stack->cur_field++;
 	FIELD_NAME (*f) = name;
 	SET_FIELD_BITPOS (*f, sh->value);
 	bitsize = 0;

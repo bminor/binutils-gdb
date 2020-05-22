@@ -2242,8 +2242,8 @@ resolve_dynamic_union (struct type *type,
     ((struct field *)
      TYPE_ALLOC (resolved_type,
 		 resolved_type->num_fields () * sizeof (struct field)));
-  memcpy (TYPE_FIELDS (resolved_type),
-	  TYPE_FIELDS (type),
+  memcpy (resolved_type->fields (),
+	  type->fields (),
 	  resolved_type->num_fields () * sizeof (struct field));
   for (i = 0; i < resolved_type->num_fields (); ++i)
     {
@@ -2453,8 +2453,8 @@ resolve_dynamic_struct (struct type *type,
 	((struct field *)
 	 TYPE_ALLOC (resolved_type,
 		     resolved_type->num_fields () * sizeof (struct field)));
-      memcpy (TYPE_FIELDS (resolved_type),
-	      TYPE_FIELDS (type),
+      memcpy (resolved_type->fields (),
+	      type->fields (),
 	      resolved_type->num_fields () * sizeof (struct field));
     }
 
@@ -5103,7 +5103,7 @@ recursive_dump_type (struct type *type, int spaces)
     }
   puts_filtered ("\n");
   printfi_filtered (spaces, "nfields %d ", type->num_fields ());
-  gdb_print_host_address (TYPE_FIELDS (type), gdb_stdout);
+  gdb_print_host_address (type->fields (), gdb_stdout);
   puts_filtered ("\n");
   for (idx = 0; idx < type->num_fields (); idx++)
     {
@@ -5634,9 +5634,9 @@ append_composite_type_field_raw (struct type *t, const char *name,
   struct field *f;
 
   t->set_num_fields (t->num_fields () + 1);
-  t->set_fields (XRESIZEVEC (struct field, TYPE_FIELDS (t),
+  t->set_fields (XRESIZEVEC (struct field, t->fields (),
 			     t->num_fields ()));
-  f = &(TYPE_FIELDS (t)[t->num_fields () - 1]);
+  f = &t->field (t->num_fields () - 1);
   memset (f, 0, sizeof f[0]);
   FIELD_TYPE (f[0]) = field;
   FIELD_NAME (f[0]) = name;

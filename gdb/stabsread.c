@@ -1840,7 +1840,7 @@ again:
 	func_type->set_fields
 	  ((struct field *) TYPE_ALLOC (func_type,
 					num_args * sizeof (struct field)));
-        memset (TYPE_FIELDS (func_type), 0, num_args * sizeof (struct field));
+        memset (func_type->fields (), 0, num_args * sizeof (struct field));
         {
           int i;
           struct type_list *t;
@@ -3313,7 +3313,7 @@ attach_fields_to_type (struct stab_field_info *fip, struct type *type,
   type->set_fields
     ((struct field *)
      TYPE_ALLOC (type, sizeof (struct field) * nfields));
-  memset (TYPE_FIELDS (type), 0, sizeof (struct field) * nfields);
+  memset (type->fields (), 0, sizeof (struct field) * nfields);
 
   if (non_public_fields)
     {
@@ -3660,7 +3660,7 @@ read_enum_type (const char **pp, struct type *type,
   type->set_fields
     ((struct field *)
      TYPE_ALLOC (type, sizeof (struct field) * nsyms));
-  memset (TYPE_FIELDS (type), 0, sizeof (struct field) * nsyms);
+  memset (type->fields (), 0, sizeof (struct field) * nsyms);
 
   /* Find the symbols for the values and put them into the type.
      The symbols can be found in the symlist that we put them on

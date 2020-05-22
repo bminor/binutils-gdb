@@ -277,7 +277,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 			   enum language language,
 			   const struct type_print_options *flags)
 {
-  struct field *args = TYPE_FIELDS (mtype);
+  struct field *args = mtype->fields ();
   int nargs = mtype->num_fields ();
   int varargs = TYPE_VARARGS (mtype);
   int i;

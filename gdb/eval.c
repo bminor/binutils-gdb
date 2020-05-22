@@ -692,7 +692,7 @@ fake_method::fake_method (type_instance_flags flags,
 
 fake_method::~fake_method ()
 {
-  xfree (TYPE_FIELDS (&m_type));
+  xfree (m_type.fields ());
 }
 
 /* Helper for evaluating an OP_VAR_VALUE.  */
