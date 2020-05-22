@@ -1,3 +1,10 @@
+2020-05-22  Alan Modra  <amodra@gmail.com>
+
+	PR 25882
+	* powerpc.cc (merge_object_attributes): Replace name param with
+	obj param.  Update callers.  Don't init FP attributes from shared
+	libraries, and do not emit an error if they don't match.
+
 2020-05-15  Nikita Ermakov  <coffe92@gmail.com>
 
 	* powerpc.cc (do_gc_mark_symbol): Don't segfault on plugin symbols.

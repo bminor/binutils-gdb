@@ -1,3 +1,10 @@
+2020-05-22  Alan Modra  <amodra@gmail.com>
+
+	PR 25882
+	* elf32-ppc.c (_bfd_elf_ppc_merge_fp_attributes): Don't init FP
+	attributes from shared libraries, and do not return an error if
+	they don't match.
+
 2020-05-21  Alan Modra  <amodra@gmail.com>
 
 	PR 25993

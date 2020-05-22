@@ -1204,7 +1204,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
 
   // Merge object attributes from input object with those in the output.
   void
-  merge_object_attributes(const char*, const Attributes_section_data*);
+  merge_object_attributes(const Object*, const Attributes_section_data*);
 
  private:
 
@@ -9481,7 +9481,7 @@ Target_powerpc<size, big_endian>::do_finalize_sections(
       Powerpc_relobj<size, big_endian>* ppc_relobj
 	= static_cast<Powerpc_relobj<size, big_endian>*>(*p);
       if (ppc_relobj->attributes_section_data())
-	this->merge_object_attributes(ppc_relobj->name().c_str(),
+	this->merge_object_attributes(ppc_relobj,
 				      ppc_relobj->attributes_section_data());
     }
   for (Input_objects::Dynobj_iterator p = input_objects->dynobj_begin();
@@ -9491,7 +9491,7 @@ Target_powerpc<size, big_endian>::do_finalize_sections(
       Powerpc_dynobj<size, big_endian>* ppc_dynobj
 	= static_cast<Powerpc_dynobj<size, big_endian>*>(*p);
       if (ppc_dynobj->attributes_section_data())
-	this->merge_object_attributes(ppc_dynobj->name().c_str(),
+	this->merge_object_attributes(ppc_dynobj,
 				      ppc_dynobj->attributes_section_data());
     }
 
@@ -9514,7 +9514,7 @@ Target_powerpc<size, big_endian>::do_finalize_sections(
 template<int size, bool big_endian>
 void
 Target_powerpc<size, big_endian>::merge_object_attributes(
-    const char* name,
+    const Object* obj,
     const Attributes_section_data* pasd)
 {
   // Return if there is no attributes section data.
@@ -9530,12 +9530,14 @@ Target_powerpc<size, big_endian>::merge_object_attributes(
   Object_attribute* out_attr
     = this->attributes_section_data_->known_attributes(vendor);
 
+  const char* name = obj->name().c_str();
   const char* err;
   const char* first;
   const char* second;
   int tag = elfcpp::Tag_GNU_Power_ABI_FP;
   int in_fp = in_attr[tag].int_value() & 0xf;
   int out_fp = out_attr[tag].int_value() & 0xf;
+  bool warn_only = obj->is_dynamic();
   if (in_fp != out_fp)
     {
       err = NULL;
@@ -9543,10 +9545,13 @@ Target_powerpc<size, big_endian>::merge_object_attributes(
 	;
       else if ((out_fp & 3) == 0)
 	{
-	  out_fp |= in_fp & 3;
-	  out_attr[tag].set_int_value(out_fp);
-	  out_attr[tag].set_type(Object_attribute::ATTR_TYPE_FLAG_INT_VAL);
-	  this->last_fp_ = name;
+	  if (!warn_only)
+	    {
+	      out_fp |= in_fp & 3;
+	      out_attr[tag].set_int_value(out_fp);
+	      out_attr[tag].set_type(Object_attribute::ATTR_TYPE_FLAG_INT_VAL);
+	      this->last_fp_ = name;
+	    }
 	}
       else if ((out_fp & 3) != 2 && (in_fp & 3) == 2)
 	{
@@ -9579,10 +9584,13 @@ Target_powerpc<size, big_endian>::merge_object_attributes(
 	;
       else if ((out_fp & 0xc) == 0)
 	{
-	  out_fp |= in_fp & 0xc;
-	  out_attr[tag].set_int_value(out_fp);
-	  out_attr[tag].set_type(Object_attribute::ATTR_TYPE_FLAG_INT_VAL);
-	  this->last_ld_ = name;
+	  if (!warn_only)
+	    {
+	      out_fp |= in_fp & 0xc;
+	      out_attr[tag].set_int_value(out_fp);
+	      out_attr[tag].set_type(Object_attribute::ATTR_TYPE_FLAG_INT_VAL);
+	      this->last_ld_ = name;
+	    }
 	}
       else if ((out_fp & 0xc) != 2 * 4 && (in_fp & 0xc) == 2 * 4)
 	{
@@ -9612,10 +9620,16 @@ Target_powerpc<size, big_endian>::merge_object_attributes(
       if (err)
 	{
 	  if (parameters->options().warn_mismatch())
-	    gold_error(_(err), first, second);
+	    {
+	      if (warn_only)
+		gold_warning(_(err), first, second);
+	      else
+		gold_error(_(err), first, second);
+	    }
 	  // Arrange for this attribute to be deleted.  It's better to
 	  // say "don't know" about a file than to wrongly claim compliance.
-	  out_attr[tag].set_type(0);
+	  if (!warn_only)
+	    out_attr[tag].set_type(0);
 	}
     }
 

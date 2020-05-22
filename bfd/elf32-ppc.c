@@ -3557,6 +3557,17 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
   obj_attribute *in_attr, *in_attrs;
   obj_attribute *out_attr, *out_attrs;
   bfd_boolean ret = TRUE;
+  bfd_boolean warn_only;
+
+  /* We only warn about shared library mismatches, because common
+     libraries advertise support for a particular long double variant
+     but actually support more than one variant.  For example, glibc
+     typically supports 128-bit IBM long double in the shared library
+     but has a compatibility static archive for 64-bit long double.
+     The linker doesn't have the smarts to see that an app using
+     object files marked as 64-bit long double call the compatibility
+     layer objects and only from there call into the shared library.  */
+  warn_only = (ibfd->flags & DYNAMIC) != 0;
 
   in_attrs = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
   out_attrs = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
@@ -3574,9 +3585,12 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	;
       else if (out_fp == 0)
 	{
-	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
-	  out_attr->i ^= in_fp;
-	  last_fp = ibfd;
+	  if (!warn_only)
+	    {
+	      out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
+	      out_attr->i ^= in_fp;
+	      last_fp = ibfd;
+	    }
 	}
       else if (out_fp != 2 && in_fp == 2)
 	{
@@ -3584,7 +3598,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses hard float, %pB uses soft float"),
 	     last_fp, ibfd);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
       else if (out_fp == 2 && in_fp != 2)
 	{
@@ -3592,7 +3606,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses hard float, %pB uses soft float"),
 	     ibfd, last_fp);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
       else if (out_fp == 1 && in_fp == 3)
 	{
@@ -3600,7 +3614,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses double-precision hard float, "
 	       "%pB uses single-precision hard float"), last_fp, ibfd);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
       else if (out_fp == 3 && in_fp == 1)
 	{
@@ -3608,7 +3622,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses double-precision hard float, "
 	       "%pB uses single-precision hard float"), ibfd, last_fp);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
 
       in_fp = in_attr->i & 0xc;
@@ -3617,9 +3631,12 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	;
       else if (out_fp == 0)
 	{
-	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
-	  out_attr->i ^= in_fp;
-	  last_ld = ibfd;
+	  if (!warn_only)
+	    {
+	      out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
+	      out_attr->i ^= in_fp;
+	      last_ld = ibfd;
+	    }
 	}
       else if (out_fp != 2 * 4 && in_fp == 2 * 4)
 	{
@@ -3627,7 +3644,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses 64-bit long double, "
 	       "%pB uses 128-bit long double"), ibfd, last_ld);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
       else if (in_fp != 2 * 4 && out_fp == 2 * 4)
 	{
@@ -3635,7 +3652,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses 64-bit long double, "
 	       "%pB uses 128-bit long double"), last_ld, ibfd);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
       else if (out_fp == 1 * 4 && in_fp == 3 * 4)
 	{
@@ -3643,7 +3660,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses IBM long double, "
 	       "%pB uses IEEE long double"), last_ld, ibfd);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
       else if (out_fp == 3 * 4 && in_fp == 1 * 4)
 	{
@@ -3651,7 +3668,7 @@ _bfd_elf_ppc_merge_fp_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    /* xgettext:c-format */
 	    (_("%pB uses IBM long double, "
 	       "%pB uses IEEE long double"), ibfd, last_ld);
-	  ret = FALSE;
+	  ret = warn_only;
 	}
     }
 
