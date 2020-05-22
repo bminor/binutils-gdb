@@ -1018,9 +1018,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	t->set_code (type_code);
 	TYPE_LENGTH (t) = sh->value;
 	t->set_num_fields (nfields);
-	TYPE_FIELDS (t) = f = ((struct field *)
-			       TYPE_ALLOC (t,
-					   nfields * sizeof (struct field)));
+	f = ((struct field *) TYPE_ALLOC (t, nfields * sizeof (struct field)));
+	t->set_fields (f);
 
 	if (type_code == TYPE_CODE_ENUM)
 	  {
@@ -1187,8 +1186,9 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		  struct block_iterator iter;
 
 		  ftype->set_num_fields (nparams);
-		  TYPE_FIELDS (ftype) = (struct field *)
-		    TYPE_ALLOC (ftype, nparams * sizeof (struct field));
+		  ftype->set_fields
+		    ((struct field *)
+		     TYPE_ALLOC (ftype, nparams * sizeof (struct field)));
 
 		  iparams = 0;
 		  ALL_BLOCK_SYMBOLS (cblock, iter, sym)

@@ -683,8 +683,8 @@ fake_method::fake_method (type_instance_flags flags,
      allocate memory for auxiliary fields, and free the memory ourselves
      when we are done with it.  */
   type->set_num_fields (num_types);
-  TYPE_FIELDS (type) = (struct field *)
-    xzalloc (sizeof (struct field) * num_types);
+  type->set_fields
+    ((struct field *) xzalloc (sizeof (struct field) * num_types));
 
   while (num_types-- > 0)
     TYPE_FIELD_TYPE (type, num_types) = param_types[num_types];

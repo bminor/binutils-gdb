@@ -563,8 +563,8 @@ lookup_function_type_with_arguments (struct type *type,
     }
 
   fn->set_num_fields (nparams);
-  TYPE_FIELDS (fn)
-    = (struct field *) TYPE_ZALLOC (fn, nparams * sizeof (struct field));
+  fn->set_fields
+    ((struct field *) TYPE_ZALLOC (fn, nparams * sizeof (struct field)));
   for (i = 0; i < nparams; ++i)
     TYPE_FIELD_TYPE (fn, i) = param_types[i];
 
@@ -1282,8 +1282,8 @@ create_array_type_with_stride (struct type *result_type,
   TYPE_TARGET_TYPE (result_type) = element_type;
 
   result_type->set_num_fields (1);
-  TYPE_FIELDS (result_type) =
-    (struct field *) TYPE_ZALLOC (result_type, sizeof (struct field));
+  result_type->set_fields
+    ((struct field *) TYPE_ZALLOC (result_type, sizeof (struct field)));
   TYPE_INDEX_TYPE (result_type) = range_type;
   if (byte_stride_prop != NULL)
     result_type->add_dyn_prop (DYN_PROP_BYTE_STRIDE, *byte_stride_prop);
@@ -1381,8 +1381,8 @@ create_set_type (struct type *result_type, struct type *domain_type)
 
   result_type->set_code (TYPE_CODE_SET);
   result_type->set_num_fields (1);
-  TYPE_FIELDS (result_type)
-    = (struct field *) TYPE_ZALLOC (result_type, sizeof (struct field));
+  result_type->set_fields
+    ((struct field *) TYPE_ZALLOC (result_type, sizeof (struct field)));
 
   if (!TYPE_STUB (domain_type))
     {
@@ -1549,7 +1549,7 @@ smash_to_method_type (struct type *type, struct type *self_type,
   type->set_code (TYPE_CODE_METHOD);
   TYPE_TARGET_TYPE (type) = to_type;
   set_type_self_type (type, self_type);
-  TYPE_FIELDS (type) = args;
+  type->set_fields (args);
   type->set_num_fields (nargs);
   if (varargs)
     TYPE_VARARGS (type) = 1;
@@ -2238,10 +2238,10 @@ resolve_dynamic_union (struct type *type,
   gdb_assert (type->code () == TYPE_CODE_UNION);
 
   resolved_type = copy_type (type);
-  TYPE_FIELDS (resolved_type)
-    = (struct field *) TYPE_ALLOC (resolved_type,
-				   resolved_type->num_fields ()
-				   * sizeof (struct field));
+  resolved_type->set_fields
+    ((struct field *)
+     TYPE_ALLOC (resolved_type,
+		 resolved_type->num_fields () * sizeof (struct field)));
   memcpy (TYPE_FIELDS (resolved_type),
 	  TYPE_FIELDS (type),
 	  resolved_type->num_fields () * sizeof (struct field));
@@ -2404,10 +2404,11 @@ compute_variant_fields (struct type *type,
 
   resolved_type->set_num_fields
     (std::count (flags.begin (), flags.end (), true));
-  TYPE_FIELDS (resolved_type)
-    = (struct field *) TYPE_ALLOC (resolved_type,
-				   resolved_type->num_fields ()
-				   * sizeof (struct field));
+  resolved_type->set_fields
+    ((struct field *)
+     TYPE_ALLOC (resolved_type,
+		 resolved_type->num_fields () * sizeof (struct field)));
+
   int out = 0;
   for (int i = 0; i < type->num_fields (); ++i)
     {
@@ -2448,10 +2449,10 @@ resolve_dynamic_struct (struct type *type,
     }
   else
     {
-      TYPE_FIELDS (resolved_type)
-	= (struct field *) TYPE_ALLOC (resolved_type,
-				       resolved_type->num_fields ()
-				       * sizeof (struct field));
+      resolved_type->set_fields
+	((struct field *)
+	 TYPE_ALLOC (resolved_type,
+		     resolved_type->num_fields () * sizeof (struct field)));
       memcpy (TYPE_FIELDS (resolved_type),
 	      TYPE_FIELDS (type),
 	      resolved_type->num_fields () * sizeof (struct field));
@@ -5301,8 +5302,10 @@ copy_type_recursive (struct objfile *objfile,
       int i, nfields;
 
       nfields = type->num_fields ();
-      TYPE_FIELDS (new_type) = (struct field *)
-        TYPE_ZALLOC (new_type, nfields * sizeof (struct field));
+      new_type->set_fields
+	((struct field *)
+	 TYPE_ZALLOC (new_type, nfields * sizeof (struct field)));
+
       for (i = 0; i < nfields; i++)
 	{
 	  TYPE_FIELD_ARTIFICIAL (new_type, i) = 
@@ -5560,8 +5563,8 @@ arch_flags_type (struct gdbarch *gdbarch, const char *name, int bit)
   TYPE_UNSIGNED (type) = 1;
   type->set_num_fields (0);
   /* Pre-allocate enough space assuming every field is one bit.  */
-  TYPE_FIELDS (type)
-    = (struct field *) TYPE_ZALLOC (type, bit * sizeof (struct field));
+  type->set_fields
+    ((struct field *) TYPE_ZALLOC (type, bit * sizeof (struct field)));
 
   return type;
 }
@@ -5631,8 +5634,8 @@ append_composite_type_field_raw (struct type *t, const char *name,
   struct field *f;
 
   t->set_num_fields (t->num_fields () + 1);
-  TYPE_FIELDS (t) = XRESIZEVEC (struct field, TYPE_FIELDS (t),
-				t->num_fields ());
+  t->set_fields (XRESIZEVEC (struct field, TYPE_FIELDS (t),
+			     t->num_fields ()));
   f = &(TYPE_FIELDS (t)[t->num_fields () - 1]);
   memset (f, 0, sizeof f[0]);
   FIELD_TYPE (f[0]) = field;

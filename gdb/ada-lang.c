@@ -8021,7 +8021,6 @@ empty_record (struct type *templ)
   struct type *type = alloc_type_copy (templ);
 
   type->set_code (TYPE_CODE_STRUCT);
-  TYPE_FIELDS (type) = NULL;
   INIT_NONE_SPECIFIC (type);
   type->set_name ("<empty>");
   TYPE_LENGTH (type) = 0;
@@ -8078,9 +8077,8 @@ ada_template_to_fixed_record_type_1 (struct type *type,
   rtype->set_code (TYPE_CODE_STRUCT);
   INIT_NONE_SPECIFIC (rtype);
   rtype->set_num_fields (nfields);
-  TYPE_FIELDS (rtype) = (struct field *)
-    TYPE_ALLOC (rtype, nfields * sizeof (struct field));
-  memset (TYPE_FIELDS (rtype), 0, sizeof (struct field) * nfields);
+  rtype->set_fields
+   ((struct field *) TYPE_ZALLOC (rtype, nfields * sizeof (struct field)));
   rtype->set_name (ada_type_name (type));
   TYPE_FIXED_INSTANCE (rtype) = 1;
 
@@ -8353,10 +8351,14 @@ template_to_static_fixed_type (struct type *type0)
 	      type->set_code (type0->code ());
 	      INIT_NONE_SPECIFIC (type);
 	      type->set_num_fields (nfields);
-	      TYPE_FIELDS (type) = (struct field *)
-		TYPE_ALLOC (type, nfields * sizeof (struct field));
-	      memcpy (TYPE_FIELDS (type), TYPE_FIELDS (type0),
+
+	      field *fields =
+		((struct field *)
+		 TYPE_ALLOC (type, nfields * sizeof (struct field)));
+	      memcpy (fields, TYPE_FIELDS (type0),
 		      sizeof (struct field) * nfields);
+	      type->set_fields (fields);
+
 	      type->set_name (ada_type_name (type0));
 	      TYPE_FIXED_INSTANCE (type) = 1;
 	      TYPE_LENGTH (type) = 0;
@@ -8402,10 +8404,12 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   rtype->set_code (TYPE_CODE_STRUCT);
   INIT_NONE_SPECIFIC (rtype);
   rtype->set_num_fields (nfields);
-  TYPE_FIELDS (rtype) =
+
+  field *fields =
     (struct field *) TYPE_ALLOC (rtype, nfields * sizeof (struct field));
-  memcpy (TYPE_FIELDS (rtype), TYPE_FIELDS (type),
-          sizeof (struct field) * nfields);
+  memcpy (fields, TYPE_FIELDS (type), sizeof (struct field) * nfields);
+  rtype->set_fields (fields);
+
   rtype->set_name (ada_type_name (type));
   TYPE_FIXED_INSTANCE (rtype) = 1;
   TYPE_LENGTH (rtype) = TYPE_LENGTH (type);

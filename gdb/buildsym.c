@@ -272,8 +272,9 @@ buildsym_compunit::finish_block_internal
 	  if (nparams > 0)
 	    {
 	      ftype->set_num_fields (nparams);
-	      TYPE_FIELDS (ftype) = (struct field *)
-		TYPE_ALLOC (ftype, nparams * sizeof (struct field));
+	      ftype->set_fields
+		((struct field *)
+		 TYPE_ALLOC (ftype, nparams * sizeof (struct field)));
 
 	      iparams = 0;
 	      /* Here we want to directly access the dictionary, because

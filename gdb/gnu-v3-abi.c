@@ -166,7 +166,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
 
   t = arch_type (arch, TYPE_CODE_STRUCT, offset * TARGET_CHAR_BIT, NULL);
   t->set_num_fields (field - field_list);
-  TYPE_FIELDS (t) = field_list;
+  t->set_fields (field_list);
   t->set_name ("gdb_gnu_v3_abi_vtable");
   INIT_CPLUS_SPECIFIC (t);
 
@@ -1055,7 +1055,7 @@ build_std_type_info_type (struct gdbarch *arch)
 
   t = arch_type (arch, TYPE_CODE_STRUCT, offset * TARGET_CHAR_BIT, NULL);
   t->set_num_fields (field - field_list);
-  TYPE_FIELDS (t) = field_list;
+  t->set_fields (field_list);
   t->set_name ("gdb_gnu_v3_type_info");
   INIT_CPLUS_SPECIFIC (t);
 
