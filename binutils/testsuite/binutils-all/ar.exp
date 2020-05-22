@@ -649,6 +649,61 @@ proc extract_an_element { } {
     pass $testname
 }
 
+proc many_files { } {
+    global AR
+    global AS
+    global srcdir
+    global subdir
+
+    set testname "ar many files"
+
+    set ofiles {}
+    set max_file 150
+    for { set i 0 } { $i < $max_file } { incr i } {
+	set sfile "tmpdir/d-$i.s"
+	if [catch { set ofd [open $sfile w] } x] {
+	    perror "$x"
+	    unresolved $testname
+	    return
+	}
+
+	puts $ofd " .globl data_sym$i"
+	puts $ofd " .data"
+	puts $ofd "data_sym$i:"
+	puts $ofd " .long $i"
+	close $ofd
+
+	set ofile "tmpdir/d-$i.o"
+	if ![binutils_assemble $sfile $ofile] {
+	    unresolved $testname
+	    return
+	}
+
+	set objfile $ofile
+	if [is_remote host] {
+	    remote_file host delete $sfile
+	    set objfile [remote_download host $ofile]
+	    remote_file build delete $ofile
+	}
+	remote_file build delete $sfile
+	lappend ofiles $objfile
+    }
+
+    set archive tmpdir/many.a
+    remote_file host delete $archive
+
+    set got [binutils_run $AR "cr $archive $ofiles"]
+    if ![string match "" $got] {
+	fail $testname
+	return
+    }
+
+    remote_file host delete $archive
+    eval remote_file host delete $ofiles
+
+    pass $testname
+}
+
 # Run the tests.
 
 # Only run the bfdtest checks if the programs exist.  Since these
@@ -670,6 +725,7 @@ delete_an_element
 move_an_element
 empty_archive
 extract_an_element
+many_files
 
 if { [is_elf_format] && [supports_gnu_unique] } {
     unique_symbol

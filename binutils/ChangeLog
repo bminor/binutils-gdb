@@ -1,3 +1,7 @@
+2020-05-23  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/ar.exp (many_files): New test.
+
 2020-05-21  Alan Modra  <amodra@gmail.com>
 
 	* addr2line.c: Replace "if (x) free (x)" with "free (x)" throughout.
