@@ -81,7 +81,7 @@ rust_enum_p (struct type *type)
 static bool
 rust_empty_enum_p (const struct type *type)
 {
-  return TYPE_NFIELDS (type) == 0;
+  return type->num_fields () == 0;
 }
 
 /* Given an already-resolved enum type and contents, find which
@@ -91,7 +91,7 @@ static int
 rust_enum_variant (struct type *type)
 {
   /* The active variant is simply the first non-artificial field.  */
-  for (int i = 0; i < TYPE_NFIELDS (type); ++i)
+  for (int i = 0; i < type->num_fields (); ++i)
     if (!TYPE_FIELD_ARTIFICIAL (type, i))
       return i;
 
@@ -126,7 +126,7 @@ rust_underscore_fields (struct type *type)
 
   if (type->code () != TYPE_CODE_STRUCT)
     return false;
-  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+  for (i = 0; i < type->num_fields (); ++i)
     {
       if (!field_is_static (&TYPE_FIELD (type, i)))
 	{
@@ -149,7 +149,7 @@ rust_tuple_struct_type_p (struct type *type)
   /* This is just an approximation until DWARF can represent Rust more
      precisely.  We exclude zero-length structs because they may not
      be tuple structs, and there's no way to tell.  */
-  return TYPE_NFIELDS (type) > 0 && rust_underscore_fields (type);
+  return type->num_fields () > 0 && rust_underscore_fields (type);
 }
 
 /* Return true if TYPE is a slice type, otherwise false.  */
@@ -171,22 +171,22 @@ rust_range_type_p (struct type *type)
   int i;
 
   if (type->code () != TYPE_CODE_STRUCT
-      || TYPE_NFIELDS (type) > 2
+      || type->num_fields () > 2
       || type->name () == NULL
       || strstr (type->name (), "::Range") == NULL)
     return false;
 
-  if (TYPE_NFIELDS (type) == 0)
+  if (type->num_fields () == 0)
     return true;
 
   i = 0;
   if (strcmp (TYPE_FIELD_NAME (type, 0), "start") == 0)
     {
-      if (TYPE_NFIELDS (type) == 1)
+      if (type->num_fields () == 1)
 	return true;
       i = 1;
     }
-  else if (TYPE_NFIELDS (type) == 2)
+  else if (type->num_fields () == 2)
     {
       /* First field had to be "start".  */
       return false;
@@ -255,7 +255,7 @@ rust_get_trait_object_pointer (struct value *value)
 {
   struct type *type = check_typedef (value_type (value));
 
-  if (type->code () != TYPE_CODE_STRUCT || TYPE_NFIELDS (type) != 2)
+  if (type->code () != TYPE_CODE_STRUCT || type->num_fields () != 2)
     return NULL;
 
   /* Try to be a bit resilient if the ABI changes.  */
@@ -402,7 +402,7 @@ val_print_struct (struct value *val, struct ui_file *stream, int recurse,
       if (type->name () != NULL)
         fprintf_filtered (stream, "%s", type->name ());
 
-      if (TYPE_NFIELDS (type) == 0)
+      if (type->num_fields () == 0)
         return;
 
       if (type->name () != NULL)
@@ -418,7 +418,7 @@ val_print_struct (struct value *val, struct ui_file *stream, int recurse,
   opts.deref_ref = 0;
 
   first_field = 1;
-  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+  for (i = 0; i < type->num_fields (); ++i)
     {
       if (field_is_static (&TYPE_FIELD (type, i)))
         continue;
@@ -488,7 +488,7 @@ rust_print_enum (struct value *val, struct ui_file *stream, int recurse,
   val = value_field (val, variant_fieldno);
   struct type *variant_type = TYPE_FIELD_TYPE (type, variant_fieldno);
 
-  int nfields = TYPE_NFIELDS (variant_type);
+  int nfields = variant_type->num_fields ();
 
   bool is_tuple = rust_tuple_struct_type_p (variant_type);
 
@@ -510,7 +510,7 @@ rust_print_enum (struct value *val, struct ui_file *stream, int recurse,
     }
 
   bool first_field = true;
-  for (int j = 0; j < TYPE_NFIELDS (variant_type); j++)
+  for (int j = 0; j < variant_type->num_fields (); j++)
     {
       if (!first_field)
 	fputs_filtered (", ", stream);
@@ -721,7 +721,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
 	fputs_filtered (tagname, stream);
     }
 
-  if (TYPE_NFIELDS (type) == 0 && !is_tuple)
+  if (type->num_fields () == 0 && !is_tuple)
     return;
   if (for_rust_enum && !flags->print_offsets)
     fputs_filtered (is_tuple_struct ? "(" : "{", stream);
@@ -733,7 +733,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
      field indices here because it simplifies calls to
      print_offset_data::update below.  */
   std::vector<int> fields;
-  for (int i = 0; i < TYPE_NFIELDS (type); ++i)
+  for (int i = 0; i < type->num_fields (); ++i)
     {
       if (field_is_static (&TYPE_FIELD (type, i)))
 	continue;
@@ -783,7 +783,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
       /* Note that this check of "I" is ok because we only sorted the
 	 fields by offset when print_offsets was set, so we won't take
 	 this branch in that case.  */
-      else if (i + 1 < TYPE_NFIELDS (type))
+      else if (i + 1 < type->num_fields ())
 	fputs_filtered (", ", stream);
     }
 
@@ -855,7 +855,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
       if (varstring != NULL)
 	fputs_filtered (varstring, stream);
       fputs_filtered ("(", stream);
-      for (int i = 0; i < TYPE_NFIELDS (type); ++i)
+      for (int i = 0; i < type->num_fields (); ++i)
 	{
 	  QUIT;
 	  if (i > 0)
@@ -911,7 +911,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
 	  }
 	fputs_filtered ("{\n", stream);
 
-	for (int i = 0; i < TYPE_NFIELDS (type); ++i)
+	for (int i = 0; i < type->num_fields (); ++i)
 	  {
 	    const char *name = TYPE_FIELD_NAME (type, i);
 
@@ -1171,7 +1171,7 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
     error (_("Could not find function named '%s'"), name.c_str ());
 
   fn_type = SYMBOL_TYPE (sym.symbol);
-  if (TYPE_NFIELDS (fn_type) == 0)
+  if (fn_type->num_fields () == 0)
     error (_("Function '%s' takes no arguments"), name.c_str ());
 
   if (TYPE_FIELD_TYPE (fn_type, 0)->code () == TYPE_CODE_PTR)
@@ -1303,7 +1303,7 @@ rust_compute_range (struct type *type, struct value *range,
   *high = 0;
   *kind = BOTH_BOUND_DEFAULT;
 
-  if (TYPE_NFIELDS (type) == 0)
+  if (type->num_fields () == 0)
     return;
 
   i = 0;
@@ -1313,7 +1313,7 @@ rust_compute_range (struct type *type, struct value *range,
       *low = value_as_long (value_field (range, 0));
       ++i;
     }
-  if (TYPE_NFIELDS (type) > i
+  if (type->num_fields () > i
       && strcmp (TYPE_FIELD_NAME (type, i), "end") == 0)
     {
       *kind = (*kind == BOTH_BOUND_DEFAULT
@@ -1365,7 +1365,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
 	base_type = TYPE_TARGET_TYPE (type);
       else if (rust_slice_type_p (type))
 	{
-	  for (int i = 0; i < TYPE_NFIELDS (type); ++i)
+	  for (int i = 0; i < type->num_fields (); ++i)
 	    {
 	      if (strcmp (TYPE_FIELD_NAME (type, i), "data_ptr") == 0)
 		{
@@ -1676,7 +1676,7 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	      }
 
 	    /* Tuples and tuple structs */
-	    nfields = TYPE_NFIELDS (type);
+	    nfields = type->num_fields ();
 
 	    if (field_number >= nfields || field_number < 0)
 	      {

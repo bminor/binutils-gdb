@@ -254,7 +254,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 
     case TYPE_CODE_FUNC:
       {
-	int i, nfields = TYPE_NFIELDS (type);
+	int i, nfields = type->num_fields ();
 
 	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
 				     passed_a_ptr, 0,
@@ -430,7 +430,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
       if (show > 0)
 	{
 	  fputs_filtered ("\n", stream);
-	  for (index = 0; index < TYPE_NFIELDS (type); index++)
+	  for (index = 0; index < type->num_fields (); index++)
 	    {
 	      f_type_print_base (TYPE_FIELD_TYPE (type, index), stream,
 				 show - 1, level + 4);

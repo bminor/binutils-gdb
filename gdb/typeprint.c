@@ -619,7 +619,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     {
 
     case TYPE_CODE_ENUM:
-      len = TYPE_NFIELDS (type);
+      len = type->num_fields ();
       for (i = 0; i < len; i++)
 	{
 	  if (TYPE_FIELD_ENUMVAL (type, i) == val)

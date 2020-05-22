@@ -3340,7 +3340,7 @@ is_float_or_hfa_type_recurse (struct type *t, struct type **etp)
       {
 	int i;
 
-	for (i = 0; i < TYPE_NFIELDS (t); i++)
+	for (i = 0; i < t->num_fields (); i++)
 	  if (!is_float_or_hfa_type_recurse
 	      (check_typedef (TYPE_FIELD_TYPE (t, i)), etp))
 	    return 0;
@@ -3389,7 +3389,7 @@ slot_alignment_is_next_even (struct type *t)
       {
 	int i;
 
-	for (i = 0; i < TYPE_NFIELDS (t); i++)
+	for (i = 0; i < t->num_fields (); i++)
 	  if (slot_alignment_is_next_even
 	      (check_typedef (TYPE_FIELD_TYPE (t, i))))
 	    return 1;

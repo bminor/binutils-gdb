@@ -278,7 +278,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 			   const struct type_print_options *flags)
 {
   struct field *args = TYPE_FIELDS (mtype);
-  int nargs = TYPE_NFIELDS (mtype);
+  int nargs = mtype->num_fields ();
   int varargs = TYPE_VARARGS (mtype);
   int i;
 
@@ -560,7 +560,7 @@ c_type_print_args (struct type *type, struct ui_file *stream,
 
   fprintf_filtered (stream, "(");
 
-  for (i = 0; i < TYPE_NFIELDS (type); i++)
+  for (i = 0; i < type->num_fields (); i++)
     {
       struct type *param_type;
 
@@ -965,7 +965,7 @@ need_access_label_p (struct type *type)
   if (TYPE_DECLARED_CLASS (type))
     {
       QUIT;
-      for (int i = TYPE_N_BASECLASSES (type); i < TYPE_NFIELDS (type); i++)
+      for (int i = TYPE_N_BASECLASSES (type); i < type->num_fields (); i++)
 	if (!TYPE_FIELD_PRIVATE (type, i))
 	  return true;
       QUIT;
@@ -982,7 +982,7 @@ need_access_label_p (struct type *type)
   else
     {
       QUIT;
-      for (int i = TYPE_N_BASECLASSES (type); i < TYPE_NFIELDS (type); i++)
+      for (int i = TYPE_N_BASECLASSES (type); i < type->num_fields (); i++)
 	if (TYPE_FIELD_PRIVATE (type, i) || TYPE_FIELD_PROTECTED (type, i))
 	  return true;
       QUIT;
@@ -1115,7 +1115,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 
       fprintf_filtered (stream, "{\n");
 
-      if (TYPE_NFIELDS (type) == 0 && TYPE_NFN_FIELDS (type) == 0
+      if (type->num_fields () == 0 && TYPE_NFN_FIELDS (type) == 0
 	  && TYPE_TYPEDEF_FIELD_COUNT (type) == 0)
 	{
 	  if (TYPE_STUB (type))
@@ -1143,7 +1143,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
       /* If there is a base class for this type,
 	 do not print the field that it occupies.  */
 
-      int len = TYPE_NFIELDS (type);
+      int len = type->num_fields ();
       vptr_fieldno = get_vptr_fieldno (type, &basetype);
 
       struct print_offset_data local_podata;
@@ -1374,7 +1374,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 	  if (semi_local_flags.print_nested_type_limit > 0)
 	    --semi_local_flags.print_nested_type_limit;
 
-	  if (TYPE_NFIELDS (type) != 0 || TYPE_NFN_FIELDS (type) != 0)
+	  if (type->num_fields () != 0 || TYPE_NFN_FIELDS (type) != 0)
 	    fprintf_filtered (stream, "\n");
 
 	  for (int i = 0; i < TYPE_NESTED_TYPES_COUNT (type); ++i)
@@ -1392,7 +1392,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 
       if (TYPE_TYPEDEF_FIELD_COUNT (type) != 0 && flags->print_typedefs)
 	{
-	  if (TYPE_NFIELDS (type) != 0 || TYPE_NFN_FIELDS (type) != 0
+	  if (type->num_fields () != 0 || TYPE_NFN_FIELDS (type) != 0
 	      || TYPE_NESTED_TYPES_COUNT (type) != 0)
 	    fprintf_filtered (stream, "\n");
 
@@ -1593,7 +1593,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	    }
 
 	  fprintf_filtered (stream, "{");
-	  len = TYPE_NFIELDS (type);
+	  len = type->num_fields ();
 	  for (i = 0; i < len; i++)
 	    {
 	      QUIT;
@@ -1627,7 +1627,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 	  {
 	    fputs_filtered (" ", stream);
 	    fprintf_filtered (stream, "{\n");
-	    if (TYPE_NFIELDS (type) == 0)
+	    if (type->num_fields () == 0)
 	      {
 		if (TYPE_STUB (type))
 		  fprintfi_filtered (level + 4, stream,
@@ -1638,7 +1638,7 @@ c_type_print_base_1 (struct type *type, struct ui_file *stream,
 				     _("%p[<no data fields>%p]\n"),
 				     metadata_style.style ().ptr (), nullptr);
 	      }
-	    len = TYPE_NFIELDS (type);
+	    len = type->num_fields ();
 	    for (i = 0; i < len; i++)
 	      {
 		QUIT;

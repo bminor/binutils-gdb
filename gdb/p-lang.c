@@ -104,7 +104,7 @@ is_pascal_string_type (struct type *type,int *length_pos,
     {
       /* Old Borland type pascal strings from Free Pascal Compiler.  */
       /* Two fields: length and st.  */
-      if (TYPE_NFIELDS (type) == 2
+      if (type->num_fields () == 2
 	  && TYPE_FIELD_NAME (type, 0)
 	  && strcmp (TYPE_FIELD_NAME (type, 0), "length") == 0
 	  && TYPE_FIELD_NAME (type, 1)
@@ -124,7 +124,7 @@ is_pascal_string_type (struct type *type,int *length_pos,
         };
       /* GNU pascal strings.  */
       /* Three fields: Capacity, length and schema$ or _p_schema.  */
-      if (TYPE_NFIELDS (type) == 3
+      if (type->num_fields () == 3
 	  && TYPE_FIELD_NAME (type, 0)
 	  && strcmp (TYPE_FIELD_NAME (type, 0), "Capacity") == 0
 	  && TYPE_FIELD_NAME (type, 1)

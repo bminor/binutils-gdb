@@ -580,7 +580,7 @@ static void
 compile_cplus_convert_struct_or_union_members
   (compile_cplus_instance *instance, struct type *type, gcc_type comp_type)
 {
-  for (int i = TYPE_N_BASECLASSES (type); i < TYPE_NFIELDS (type); ++i)
+  for (int i = TYPE_N_BASECLASSES (type); i < type->num_fields (); ++i)
     {
       const char *field_name = TYPE_FIELD_NAME (type, i);
 
@@ -938,7 +938,7 @@ compile_cplus_convert_enum (compile_cplus_instance *instance, struct type *type,
 					      ? GCC_CP_FLAG_ENUM_SCOPED
 					      : GCC_CP_FLAG_ENUM_NOFLAG),
 					   nullptr, 0);
-  for (int i = 0; i < TYPE_NFIELDS (type); ++i)
+  for (int i = 0; i < type->num_fields (); ++i)
     {
       gdb::unique_xmalloc_ptr<char> fname
 	= compile_cplus_instance::decl_name (TYPE_FIELD_NAME (type, i));
@@ -986,9 +986,9 @@ compile_cplus_convert_func (compile_cplus_instance *instance,
   gcc_type return_type = instance->convert_type (target_type);
 
   struct gcc_type_array array =
-    { TYPE_NFIELDS (type), XNEWVEC (gcc_type, TYPE_NFIELDS (type)) };
+    { type->num_fields (), XNEWVEC (gcc_type, type->num_fields ()) };
   int artificials = 0;
-  for (int i = 0; i < TYPE_NFIELDS (type); ++i)
+  for (int i = 0; i < type->num_fields (); ++i)
     {
       if (strip_artificial && TYPE_FIELD_ARTIFICIAL (type, i))
 	{

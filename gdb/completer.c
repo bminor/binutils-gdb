@@ -1090,7 +1090,7 @@ add_struct_fields (struct type *type, completion_list &output,
   const char *type_name = NULL;
 
   type = check_typedef (type);
-  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+  for (i = 0; i < type->num_fields (); ++i)
     {
       if (i < TYPE_N_BASECLASSES (type))
 	add_struct_fields (TYPE_BASECLASS (type, i),

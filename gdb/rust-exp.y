@@ -2414,7 +2414,7 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
 
 	    if (!want_type
 		&& type->code () == TYPE_CODE_STRUCT
-		&& TYPE_NFIELDS (type) == 0)
+		&& type->num_fields () == 0)
 	      {
 		/* A unit-like struct.  */
 		write_exp_elt_opcode (pstate, OP_AGGREGATE);

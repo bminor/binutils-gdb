@@ -284,7 +284,7 @@ m2_procedure (struct type *type, struct ui_file *stream,
   if (TYPE_TARGET_TYPE (type) == NULL
       || TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
     {
-      int i, len = TYPE_NFIELDS (type);
+      int i, len = type->num_fields ();
 
       fprintf_filtered (stream, " (");
       for (i = 0; i < len; i++)
@@ -311,7 +311,7 @@ m2_print_bounds (struct type *type,
 {
   struct type *target = TYPE_TARGET_TYPE (type);
 
-  if (TYPE_NFIELDS(type) == 0)
+  if (type->num_fields () == 0)
     return;
 
   if (print_high)
@@ -346,7 +346,7 @@ m2_is_long_set (struct type *type)
 
       /* check if all fields of the RECORD are consecutive sets.  */
 
-      len = TYPE_NFIELDS (type);
+      len = type->num_fields ();
       for (i = TYPE_N_BASECLASSES (type); i < len; i++)
 	{
 	  if (TYPE_FIELD_TYPE (type, i) == NULL)
@@ -409,7 +409,7 @@ m2_is_long_set_of_type (struct type *type, struct type **of_type)
 
   if (type->code () == TYPE_CODE_STRUCT)
     {
-      len = TYPE_NFIELDS (type);
+      len = type->num_fields ();
       i = TYPE_N_BASECLASSES (type);
       if (len == 0)
 	return 0;
@@ -434,7 +434,7 @@ m2_long_set (struct type *type, struct ui_file *stream, int show, int level,
 {
   struct type *of_type;
   int i;
-  int len = TYPE_NFIELDS (type);
+  int len = type->num_fields ();
   LONGEST low;
   LONGEST high;
 
@@ -490,7 +490,7 @@ m2_is_unbounded_array (struct type *type)
        *  type of _m2_contents is a pointer.  The TYPE_TARGET_TYPE
        *  of the pointer determines the unbounded ARRAY OF type.
        */
-      if (TYPE_NFIELDS (type) != 2)
+      if (type->num_fields () != 2)
 	return 0;
       if (strcmp (TYPE_FIELD_NAME (type, 0), "_m2_contents") != 0)
 	return 0;
@@ -550,7 +550,7 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
   else if (show > 0)
     {
       int i;
-      int len = TYPE_NFIELDS (type);
+      int len = type->num_fields ();
 
       if (type->code () == TYPE_CODE_STRUCT)
 	fprintf_filtered (stream, "RECORD\n");
@@ -601,7 +601,7 @@ m2_enum (struct type *type, struct ui_file *stream, int show, int level)
   else if (show > 0 || type->name () == NULL)
     {
       fprintf_filtered (stream, "(");
-      len = TYPE_NFIELDS (type);
+      len = type->num_fields ();
       lastval = 0;
       for (i = 0; i < len; i++)
 	{

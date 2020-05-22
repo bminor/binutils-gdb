@@ -313,7 +313,7 @@ f_value_print_innner (struct value *val, struct ui_file *stream, int recurse,
       /* Starting from the Fortran 90 standard, Fortran supports derived
          types.  */
       fprintf_filtered (stream, "( ");
-      for (index = 0; index < TYPE_NFIELDS (type); index++)
+      for (index = 0; index < type->num_fields (); index++)
         {
 	  struct value *field = value_field (val, index);
 

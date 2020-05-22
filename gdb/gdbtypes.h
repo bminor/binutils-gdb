@@ -1458,7 +1458,6 @@ extern unsigned type_align (struct type *);
    space in struct type.  */
 extern bool set_type_align (struct type *, ULONGEST);
 
-#define TYPE_NFIELDS(thistype) ((thistype)->num_fields ())
 #define TYPE_FIELDS(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.fields
 
 #define TYPE_INDEX_TYPE(type) TYPE_FIELD_TYPE (type, 0)
@@ -1705,7 +1704,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_IS_OPAQUE(thistype) \
   ((((thistype)->code () == TYPE_CODE_STRUCT) \
     || ((thistype)->code () == TYPE_CODE_UNION)) \
-   && (TYPE_NFIELDS (thistype) == 0) \
+   && ((thistype)->num_fields () == 0) \
    && (!HAVE_CPLUS_STRUCT (thistype) \
        || TYPE_NFN_FIELDS (thistype) == 0) \
    && (TYPE_STUB (thistype) || !TYPE_STUB_SUPPORTED (thistype)))

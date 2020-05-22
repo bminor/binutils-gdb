@@ -587,7 +587,7 @@ generic_val_print_enum_1 (struct type *type, LONGEST val,
   unsigned int i;
   unsigned int len;
 
-  len = TYPE_NFIELDS (type);
+  len = type->num_fields ();
   for (i = 0; i < len; i++)
     {
       QUIT;
@@ -1135,7 +1135,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
   const gdb_byte *valaddr = (value_contents_for_printing (original_value)
 			     + embedded_offset);
   ULONGEST val = unpack_long (type, valaddr);
-  int field, nfields = TYPE_NFIELDS (type);
+  int field, nfields = type->num_fields ();
   struct gdbarch *gdbarch = get_type_arch (type);
   struct type *bool_type = builtin_type (gdbarch)->builtin_bool;
 

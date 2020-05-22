@@ -73,7 +73,7 @@ gccgo_string_p (struct type *type)
 {
   /* gccgo strings don't necessarily have a name we can use.  */
 
-  if (TYPE_NFIELDS (type) == 2)
+  if (type->num_fields () == 2)
     {
       struct type *type0 = TYPE_FIELD_TYPE (type, 0);
       struct type *type1 = TYPE_FIELD_TYPE (type, 1);
@@ -106,7 +106,7 @@ gccgo_string_p (struct type *type)
 static int
 sixg_string_p (struct type *type)
 {
-  if (TYPE_NFIELDS (type) == 2
+  if (type->num_fields () == 2
       && type->name () != NULL
       && strcmp (type->name (), "string") == 0)
     return 1;

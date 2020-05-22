@@ -532,7 +532,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
      type whose size is greater than or equal to 4 -> returned in register.  */
   if ((type->code () == TYPE_CODE_STRUCT
        || type->code () == TYPE_CODE_UNION)
-       && TYPE_NFIELDS (type) == 1)
+       && type->num_fields () == 1)
     {
       fld_type = TYPE_FIELD_TYPE (type, 0);
       if (v850_type_is_scalar (fld_type) && TYPE_LENGTH (fld_type) >= 4)
@@ -553,7 +553,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
       && v850_type_is_scalar (TYPE_FIELD_TYPE (type, 0))
       && TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) == 4)
     {
-      for (i = 1; i < TYPE_NFIELDS (type); ++i)
+      for (i = 1; i < type->num_fields (); ++i)
         {
 	  fld_type = TYPE_FIELD_TYPE (type, 0);
 	  if (fld_type->code () == TYPE_CODE_ARRAY)
@@ -572,7 +572,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
      returned in register.  */
   if (type->code () == TYPE_CODE_UNION)
     {
-      for (i = 0; i < TYPE_NFIELDS (type); ++i)
+      for (i = 0; i < type->num_fields (); ++i)
         {
 	  fld_type = TYPE_FIELD_TYPE (type, 0);
 	  if (!v850_use_struct_convention (gdbarch, fld_type))
@@ -981,7 +981,7 @@ v850_eight_byte_align_p (struct type *type)
     {
       int i;
 
-      for (i = 0; i < TYPE_NFIELDS (type); i++)
+      for (i = 0; i < type->num_fields (); i++)
 	{
 	  if (v850_eight_byte_align_p (TYPE_FIELD_TYPE (type, i)))
 	    return 1;

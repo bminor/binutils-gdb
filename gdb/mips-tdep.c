@@ -4407,7 +4407,7 @@ fp_register_arg_p (struct gdbarch *gdbarch, enum type_code typecode,
 	   || (MIPS_EABI (gdbarch)
 	       && (typecode == TYPE_CODE_STRUCT
 		   || typecode == TYPE_CODE_UNION)
-	       && TYPE_NFIELDS (arg_type) == 1
+	       && arg_type->num_fields () == 1
 	       && check_typedef (TYPE_FIELD_TYPE (arg_type, 0))->code ()
 	       == TYPE_CODE_FLT))
 	  && MIPS_FPU_TYPE(gdbarch) != MIPS_FPU_NONE);
@@ -4425,7 +4425,7 @@ mips_type_needs_double_align (struct type *type)
     return 1;
   else if (typecode == TYPE_CODE_STRUCT)
     {
-      if (TYPE_NFIELDS (type) < 1)
+      if (type->num_fields () < 1)
 	return 0;
       return mips_type_needs_double_align (TYPE_FIELD_TYPE (type, 0));
     }
@@ -4433,7 +4433,7 @@ mips_type_needs_double_align (struct type *type)
     {
       int i, n;
 
-      n = TYPE_NFIELDS (type);
+      n = type->num_fields ();
       for (i = 0; i < n; i++)
 	if (mips_type_needs_double_align (TYPE_FIELD_TYPE (type, i)))
 	  return 1;
@@ -4788,7 +4788,7 @@ mips_eabi_return_value (struct gdbarch *gdbarch, struct value *function,
 	 are returned in a floating point register.  */
       if ((type->code () == TYPE_CODE_STRUCT
 	   || type->code () == TYPE_CODE_UNION)
-	  && TYPE_NFIELDS (type) == 1)
+	  && type->num_fields () == 1)
 	{
 	  struct type *fieldtype = TYPE_FIELD_TYPE (type, 0);
 
@@ -4850,7 +4850,7 @@ mips_n32n64_fp_arg_chunk_p (struct gdbarch *gdbarch, struct type *arg_type,
   if (TYPE_LENGTH (arg_type) < offset + MIPS64_REGSIZE)
     return 0;
 
-  for (i = 0; i < TYPE_NFIELDS (arg_type); i++)
+  for (i = 0; i < arg_type->num_fields (); i++)
     {
       int pos;
       struct type *field_type;
@@ -5226,12 +5226,12 @@ mips_n32n64_return_value (struct gdbarch *gdbarch, struct value *function,
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   else if (type->code () == TYPE_CODE_STRUCT
-	   && TYPE_NFIELDS (type) <= 2
-	   && TYPE_NFIELDS (type) >= 1
-	   && ((TYPE_NFIELDS (type) == 1
+	   && type->num_fields () <= 2
+	   && type->num_fields () >= 1
+	   && ((type->num_fields () == 1
 		&& (check_typedef (TYPE_FIELD_TYPE (type, 0))->code ()
 		    == TYPE_CODE_FLT))
-	       || (TYPE_NFIELDS (type) == 2
+	       || (type->num_fields () == 2
 		   && (check_typedef (TYPE_FIELD_TYPE (type, 0))->code ()
 		       == TYPE_CODE_FLT)
 		   && (check_typedef (TYPE_FIELD_TYPE (type, 1))->code ()
@@ -5245,7 +5245,7 @@ mips_n32n64_return_value (struct gdbarch *gdbarch, struct value *function,
       for (field = 0, regnum = (tdep->mips_fpu_type != MIPS_FPU_NONE
 				? mips_regnum (gdbarch)->fp0
 				: MIPS_V0_REGNUM);
-	   field < TYPE_NFIELDS (type); field++, regnum += 2)
+	   field < type->num_fields (); field++, regnum += 2)
 	{
 	  int offset = (FIELD_BITPOS (TYPE_FIELDS (type)[field])
 			/ TARGET_CHAR_BIT);
@@ -5779,12 +5779,12 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct value *function,
     }
 #if 0
   else if (type->code () == TYPE_CODE_STRUCT
-	   && TYPE_NFIELDS (type) <= 2
-	   && TYPE_NFIELDS (type) >= 1
-	   && ((TYPE_NFIELDS (type) == 1
+	   && type->num_fields () <= 2
+	   && type->num_fields () >= 1
+	   && ((type->num_fields () == 1
 		&& (TYPE_CODE (TYPE_FIELD_TYPE (type, 0))
 		    == TYPE_CODE_FLT))
-	       || (TYPE_NFIELDS (type) == 2
+	       || (type->num_fields () == 2
 		   && (TYPE_CODE (TYPE_FIELD_TYPE (type, 0))
 		       == TYPE_CODE_FLT)
 		   && (TYPE_CODE (TYPE_FIELD_TYPE (type, 1))
@@ -5797,7 +5797,7 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct value *function,
       int regnum;
       int field;
       for (field = 0, regnum = mips_regnum (gdbarch)->fp0;
-	   field < TYPE_NFIELDS (type); field++, regnum += 2)
+	   field < type->num_fields (); field++, regnum += 2)
 	{
 	  int offset = (FIELD_BITPOS (TYPE_FIELDS (type)[field])
 			/ TARGET_CHAR_BIT);

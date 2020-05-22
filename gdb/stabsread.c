@@ -3232,7 +3232,7 @@ read_tilde_fields (struct stab_field_info *fip, const char **pp,
 	  set_type_vptr_basetype (type, t);
 	  if (type == t)	/* Our own class provides vtbl ptr.  */
 	    {
-	      for (i = TYPE_NFIELDS (t) - 1;
+	      for (i = t->num_fields () - 1;
 		   i >= TYPE_N_BASECLASSES (t);
 		   --i)
 		{

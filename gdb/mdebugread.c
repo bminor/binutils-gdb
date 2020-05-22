@@ -1036,7 +1036,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	       are hopefully rare enough.
 	       Alpha cc -migrate has a sh.value field of zero, we adjust
 	       that too.  */
-	    if (TYPE_LENGTH (t) == TYPE_NFIELDS (t)
+	    if (TYPE_LENGTH (t) == t->num_fields ()
 		|| TYPE_LENGTH (t) == 0)
 	      TYPE_LENGTH (t) = gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT;
 	    for (ext_tsym = ext_sh + external_sym_size;
@@ -1085,7 +1085,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	/* gcc puts out an empty struct for an opaque struct definitions,
 	   do not create a symbol for it either.  */
-	if (TYPE_NFIELDS (t) == 0)
+	if (t->num_fields () == 0)
 	  {
 	    TYPE_STUB (t) = 1;
 	    break;
@@ -1174,7 +1174,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		}
 	    }
 
-	  if (TYPE_NFIELDS (ftype) <= 0)
+	  if (ftype->num_fields () <= 0)
 	    {
 	      /* No parameter type information is recorded with the function's
 	         type.  Set that from the type of the parameter symbols.  */
@@ -1297,7 +1297,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
       /* Incomplete definitions of structs should not get a name.  */
       if (SYMBOL_TYPE (s)->name () == NULL
-	  && (TYPE_NFIELDS (SYMBOL_TYPE (s)) != 0
+	  && (SYMBOL_TYPE (s)->num_fields () != 0
 	      || (SYMBOL_TYPE (s)->code () != TYPE_CODE_STRUCT
 		  && SYMBOL_TYPE (s)->code () != TYPE_CODE_UNION)))
 	{

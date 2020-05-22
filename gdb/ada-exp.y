@@ -1394,7 +1394,7 @@ convert_char_literal (struct type *type, LONGEST val)
   else
     xsnprintf (name, sizeof (name), "QU%02x", (int) val);
   size_t len = strlen (name);
-  for (f = 0; f < TYPE_NFIELDS (type); f += 1)
+  for (f = 0; f < type->num_fields (); f += 1)
     {
       /* Check the suffix because an enum constant in a package will
 	 have a name like "pkg__QUxx".  This is safe enough because we

@@ -813,7 +813,7 @@ static int
 sh_use_struct_convention (int renesas_abi, struct type *type)
 {
   int len = TYPE_LENGTH (type);
-  int nelem = TYPE_NFIELDS (type);
+  int nelem = type->num_fields ();
 
   /* The Renesas ABI returns aggregate types always on stack.  */
   if (renesas_abi && (type->code () == TYPE_CODE_STRUCT
@@ -849,7 +849,7 @@ static int
 sh_use_struct_convention_nofpu (int renesas_abi, struct type *type)
 {
   /* The Renesas ABI returns long longs/doubles etc. always on stack.  */
-  if (renesas_abi && TYPE_NFIELDS (type) == 0 && TYPE_LENGTH (type) >= 8)
+  if (renesas_abi && type->num_fields () == 0 && TYPE_LENGTH (type) >= 8)
     return 1;
   return sh_use_struct_convention (renesas_abi, type);
 }
@@ -1046,7 +1046,7 @@ sh_treat_as_flt_p (struct type *type)
   if (type->code () != TYPE_CODE_STRUCT)
     return 0;
   /* Otherwise structs with more than one member are not treated as float.  */
-  if (TYPE_NFIELDS (type) != 1)
+  if (type->num_fields () != 1)
     return 0;
   /* Otherwise if the type of that member is float, the whole type is
      treated as float.  */
@@ -1084,7 +1084,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
      registers have been used so far.  */
   if (sh_is_renesas_calling_convention (func_type)
       && TYPE_VARARGS (func_type))
-    last_reg_arg = TYPE_NFIELDS (func_type) - 2;
+    last_reg_arg = func_type->num_fields () - 2;
 
   /* First force sp to a 4-byte alignment.  */
   sp = sh_frame_align (gdbarch, sp);
@@ -1225,7 +1225,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
      registers have been used so far.  */
   if (sh_is_renesas_calling_convention (func_type)
       && TYPE_VARARGS (func_type))
-    last_reg_arg = TYPE_NFIELDS (func_type) - 2;
+    last_reg_arg = func_type->num_fields () - 2;
 
   /* First force sp to a 4-byte alignment.  */
   sp = sh_frame_align (gdbarch, sp);

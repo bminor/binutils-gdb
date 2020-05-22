@@ -1805,7 +1805,7 @@ do_search_struct_field (const char *name, struct value *arg1, LONGEST offset,
   nbases = TYPE_N_BASECLASSES (type);
 
   if (!looking_for_baseclass)
-    for (i = TYPE_NFIELDS (type) - 1; i >= nbases; i--)
+    for (i = type->num_fields () - 1; i >= nbases; i--)
       {
 	const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
@@ -1851,7 +1851,7 @@ do_search_struct_field (const char *name, struct value *arg1, LONGEST offset,
 		   bitpos is zero in an anonymous union field, so we
 		   have to add the offset of the union here.  */
 		if (field_type->code () == TYPE_CODE_STRUCT
-		    || (TYPE_NFIELDS (field_type) > 0
+		    || (field_type->num_fields () > 0
 			&& TYPE_FIELD_BITPOS (field_type, 0) == 0))
 		  new_offset += TYPE_FIELD_BITPOS (type, i) / 8;
 
@@ -2007,7 +2007,7 @@ search_struct_method (const char *name, struct value **arg1p,
 	      {
 		if (!typecmp (TYPE_FN_FIELD_STATIC_P (f, j),
 			      TYPE_VARARGS (TYPE_FN_FIELD_TYPE (f, j)),
-			      TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (f, j)),
+			      TYPE_FN_FIELD_TYPE (f, j)->num_fields (),
 			      TYPE_FN_FIELD_ARGS (f, j), args))
 		  {
 		    if (TYPE_FN_FIELD_VIRTUAL_P (f, j))
@@ -2219,7 +2219,7 @@ value_struct_elt_bitpos (struct value **argp, int bitpos, struct type *ftype,
     error (_("Attempt to extract a component of a value that is not a %s."),
 	   err);
 
-  for (i = TYPE_N_BASECLASSES (t); i < TYPE_NFIELDS (t); i++)
+  for (i = TYPE_N_BASECLASSES (t); i < t->num_fields (); i++)
     {
       if (!field_is_static (&TYPE_FIELD (t, i))
 	  && bitpos == TYPE_FIELD_BITPOS (t, i)
@@ -2957,11 +2957,11 @@ find_oload_champ (gdb::array_view<value *> args,
 
 	  if (methods != NULL)
 	    {
-	      nparms = TYPE_NFIELDS (TYPE_FN_FIELD_TYPE (methods, ix));
+	      nparms = TYPE_FN_FIELD_TYPE (methods, ix)->num_fields ();
 	      static_offset = oload_method_static_p (methods, ix);
 	    }
 	  else
-	    nparms = TYPE_NFIELDS (SYMBOL_TYPE (functions[ix]));
+	    nparms = SYMBOL_TYPE (functions[ix])->num_fields ();
 
 	  parm_types.reserve (nparms);
 	  for (jj = 0; jj < nparms; jj++)
@@ -3121,7 +3121,7 @@ enum_constant_from_type (struct type *type, const char *name)
   gdb_assert (type->code () == TYPE_CODE_ENUM
 	      && TYPE_DECLARED_CLASS (type));
 
-  for (i = TYPE_N_BASECLASSES (type); i < TYPE_NFIELDS (type); ++i)
+  for (i = TYPE_N_BASECLASSES (type); i < type->num_fields (); ++i)
     {
       const char *fname = TYPE_FIELD_NAME (type, i);
       int len;
@@ -3189,14 +3189,14 @@ compare_parameters (struct type *t1, struct type *t2, int skip_artificial)
 {
   int start = 0;
 
-  if (TYPE_NFIELDS (t1) > 0 && TYPE_FIELD_ARTIFICIAL (t1, 0))
+  if (t1->num_fields () > 0 && TYPE_FIELD_ARTIFICIAL (t1, 0))
     ++start;
 
   /* If skipping artificial fields, find the first real field
      in T1.  */
   if (skip_artificial)
     {
-      while (start < TYPE_NFIELDS (t1)
+      while (start < t1->num_fields ()
 	     && TYPE_FIELD_ARTIFICIAL (t1, start))
 	++start;
     }
@@ -3205,15 +3205,15 @@ compare_parameters (struct type *t1, struct type *t2, int skip_artificial)
 
   /* Special case: a method taking void.  T1 will contain no
      non-artificial fields, and T2 will contain TYPE_CODE_VOID.  */
-  if ((TYPE_NFIELDS (t1) - start) == 0 && TYPE_NFIELDS (t2) == 1
+  if ((t1->num_fields () - start) == 0 && t2->num_fields () == 1
       && TYPE_FIELD_TYPE (t2, 0)->code () == TYPE_CODE_VOID)
     return 1;
 
-  if ((TYPE_NFIELDS (t1) - start) == TYPE_NFIELDS (t2))
+  if ((t1->num_fields () - start) == t2->num_fields ())
     {
       int i;
 
-      for (i = 0; i < TYPE_NFIELDS (t2); ++i)
+      for (i = 0; i < t2->num_fields (); ++i)
 	{
 	  if (compare_ranks (rank_one_type (TYPE_FIELD_TYPE (t1, start + i),
 					    TYPE_FIELD_TYPE (t2, i), NULL),
@@ -3293,7 +3293,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
     error (_("Internal error: non-aggregate type "
 	     "to value_struct_elt_for_reference"));
 
-  for (i = TYPE_NFIELDS (t) - 1; i >= TYPE_N_BASECLASSES (t); i--)
+  for (i = t->num_fields () - 1; i >= TYPE_N_BASECLASSES (t); i--)
     {
       const char *t_field_name = TYPE_FIELD_NAME (t, i);
 

@@ -560,7 +560,7 @@ gdbscm_type_fields (SCM self)
     containing_type_scm = tyscm_scm_from_type (containing_type);
 
   result = SCM_EOL;
-  for (i = 0; i < TYPE_NFIELDS (containing_type); ++i)
+  for (i = 0; i < containing_type->num_fields (); ++i)
     result = scm_cons (tyscm_make_field_smob (containing_type_scm, i), result);
 
   return scm_reverse_x (result, SCM_EOL);
@@ -969,7 +969,7 @@ gdbscm_type_num_fields (SCM self)
     gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, self,
 			       _(not_composite_error));
 
-  return scm_from_long (TYPE_NFIELDS (type));
+  return scm_from_long (type->num_fields ());
 }
 
 /* (type-field <gdb:type> string) -> <gdb:field>
@@ -997,7 +997,7 @@ gdbscm_type_field (SCM self, SCM field_scm)
   {
     gdb::unique_xmalloc_ptr<char> field = gdbscm_scm_to_c_string (field_scm);
 
-    for (int i = 0; i < TYPE_NFIELDS (type); i++)
+    for (int i = 0; i < type->num_fields (); i++)
       {
 	const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
@@ -1039,7 +1039,7 @@ gdbscm_type_has_field_p (SCM self, SCM field_scm)
     gdb::unique_xmalloc_ptr<char> field
       = gdbscm_scm_to_c_string (field_scm);
 
-    for (int i = 0; i < TYPE_NFIELDS (type); i++)
+    for (int i = 0; i < type->num_fields (); i++)
       {
 	const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
@@ -1105,11 +1105,11 @@ gdbscm_type_next_field_x (SCM self)
   type = t_smob->type;
 
   SCM_ASSERT_TYPE (scm_is_signed_integer (progress,
-					  0, TYPE_NFIELDS (type)),
+					  0, type->num_fields ()),
 		   progress, SCM_ARG1, FUNC_NAME, _("integer"));
   field = scm_to_int (progress);
 
-  if (field < TYPE_NFIELDS (type))
+  if (field < type->num_fields ())
     {
       result = tyscm_make_field_smob (object, field);
       itscm_set_iterator_smob_progress_x (i_smob, scm_from_int (field + 1));

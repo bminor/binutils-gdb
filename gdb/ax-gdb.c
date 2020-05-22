@@ -316,7 +316,7 @@ gen_trace_static_fields (struct agent_expr *ax,
 
   type = check_typedef (type);
 
-  for (i = TYPE_NFIELDS (type) - 1; i >= nbases; i--)
+  for (i = type->num_fields () - 1; i >= nbases; i--)
     {
       if (field_is_static (&TYPE_FIELD (type, i)))
 	{
@@ -1444,7 +1444,7 @@ gen_struct_ref_recursive (struct agent_expr *ax, struct axs_value *value,
 
   type = check_typedef (type);
 
-  for (i = TYPE_NFIELDS (type) - 1; i >= nbases; i--)
+  for (i = type->num_fields () - 1; i >= nbases; i--)
     {
       const char *this_name = TYPE_FIELD_NAME (type, i);
 
@@ -1588,7 +1588,7 @@ gen_struct_elt_for_reference (struct agent_expr *ax, struct axs_value *value,
     internal_error (__FILE__, __LINE__,
 		    _("non-aggregate type to gen_struct_elt_for_reference"));
 
-  for (i = TYPE_NFIELDS (t) - 1; i >= TYPE_N_BASECLASSES (t); i--)
+  for (i = t->num_fields () - 1; i >= TYPE_N_BASECLASSES (t); i--)
     {
       const char *t_field_name = TYPE_FIELD_NAME (t, i);
 

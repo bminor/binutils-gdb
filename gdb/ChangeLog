@@ -1,5 +1,10 @@
 2020-05-22  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_NFIELDS): Remove.  Change all cal sites to use
+	type::num_fields instead.
+
+2020-05-22  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (struct type) <num_fields, set_num_fields>: New
 	methods.
 	(TYPE_NFIELDS): Use type::num_fields.  Change all call sites

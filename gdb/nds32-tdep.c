@@ -1405,7 +1405,7 @@ nds32_check_calling_use_fpr (struct type *type)
       typecode = t->code ();
       if (typecode != TYPE_CODE_STRUCT)
 	break;
-      else if (TYPE_NFIELDS (t) != 1)
+      else if (t->num_fields () != 1)
 	return 0;
       else
 	t = TYPE_FIELD_TYPE (t, 0);
@@ -1496,7 +1496,7 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	 and pushes all unnamed arguments in stack.  */
 
       if (abi_use_fpr && TYPE_VARARGS (func_type)
-	  && i >= TYPE_NFIELDS (func_type))
+	  && i >= func_type->num_fields ())
 	goto use_stack;
 
       /* Try to use FPRs to pass arguments only when

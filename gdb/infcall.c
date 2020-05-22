@@ -827,7 +827,7 @@ call_function_by_hand_dummy (struct value *function,
 
   values_type = check_typedef (values_type);
 
-  if (args.size () < TYPE_NFIELDS (ftype))
+  if (args.size () < ftype->num_fields ())
     error (_("Too few arguments in function call."));
 
   /* A holder for the inferior status.
@@ -1027,7 +1027,7 @@ call_function_by_hand_dummy (struct value *function,
 	 prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
       if (ftype->code () == TYPE_CODE_METHOD)
 	prototyped = 1;
-      if (TYPE_TARGET_TYPE (ftype) == NULL && TYPE_NFIELDS (ftype) == 0
+      if (TYPE_TARGET_TYPE (ftype) == NULL && ftype->num_fields () == 0
 	  && default_return_type != NULL)
 	{
 	  /* Calling a no-debug function with the return type
@@ -1042,12 +1042,12 @@ call_function_by_hand_dummy (struct value *function,
 	  */
 	  prototyped = 1;
 	}
-      else if (i < TYPE_NFIELDS (ftype))
+      else if (i < ftype->num_fields ())
 	prototyped = TYPE_PROTOTYPED (ftype);
       else
 	prototyped = 0;
 
-      if (i < TYPE_NFIELDS (ftype))
+      if (i < ftype->num_fields ())
 	param_type = TYPE_FIELD_TYPE (ftype, i);
       else
 	param_type = NULL;

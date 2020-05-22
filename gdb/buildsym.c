@@ -254,7 +254,7 @@ buildsym_compunit::finish_block_internal
       SYMBOL_BLOCK_VALUE (symbol) = block;
       BLOCK_FUNCTION (block) = symbol;
 
-      if (TYPE_NFIELDS (ftype) <= 0)
+      if (ftype->num_fields () <= 0)
 	{
 	  /* No parameter type information is recorded with the
 	     function's type.  Set that from the type of the

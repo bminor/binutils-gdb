@@ -149,7 +149,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
     }
 
   fprintf_filtered (stream, "{");
-  len = TYPE_NFIELDS (type);
+  len = type->num_fields ();
   n_baseclasses = TYPE_N_BASECLASSES (type);
 
   /* First, print out baseclasses such that we don't print
@@ -638,7 +638,7 @@ cp_find_class_member (struct type **self_p, int *fieldno,
 
   *self_p = check_typedef (*self_p);
   self = *self_p;
-  len = TYPE_NFIELDS (self);
+  len = self->num_fields ();
 
   for (i = TYPE_N_BASECLASSES (self); i < len; i++)
     {

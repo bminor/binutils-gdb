@@ -1138,7 +1138,7 @@ ppc64_aggregate_candidate (struct type *type,
 	  LONGEST count = 0;
 	  int i;
 
-	  for (i = 0; i < TYPE_NFIELDS (type); i++)
+	  for (i = 0; i < type->num_fields (); i++)
 	    {
 	      LONGEST sub_count;
 
@@ -1494,10 +1494,10 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 	 single floating-point value, at any level of nesting of
 	 single-member structs, are passed in floating-point registers.  */
       if (type->code () == TYPE_CODE_STRUCT
-	  && TYPE_NFIELDS (type) == 1)
+	  && type->num_fields () == 1)
 	{
 	  while (type->code () == TYPE_CODE_STRUCT
-		 && TYPE_NFIELDS (type) == 1)
+		 && type->num_fields () == 1)
 	    type = check_typedef (TYPE_FIELD_TYPE (type, 0));
 
 	  if (type->code () == TYPE_CODE_FLT)

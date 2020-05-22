@@ -687,7 +687,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      of the ``arg_reg'' variable to get these other details correct.  */
 
   if (TYPE_VARARGS (func_type))
-    num_register_candidate_args = TYPE_NFIELDS (func_type) - 1;
+    num_register_candidate_args = func_type->num_fields () - 1;
   else
     num_register_candidate_args = 4;
 
@@ -796,7 +796,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      int p_arg_size = 4;
 
 		      if (TYPE_PROTOTYPED (func_type)
-			  && i < TYPE_NFIELDS (func_type))
+			  && i < func_type->num_fields ())
 			{
 			  struct type *p_arg_type =
 			    TYPE_FIELD_TYPE (func_type, i);

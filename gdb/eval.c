@@ -295,11 +295,11 @@ evaluate_struct_tuple (struct value *struct_val,
 
       fieldno++;
       /* Skip static fields.  */
-      while (fieldno < TYPE_NFIELDS (struct_type)
+      while (fieldno < struct_type->num_fields ()
 	     && field_is_static (&TYPE_FIELD (struct_type,
 					      fieldno)))
 	fieldno++;
-      if (fieldno >= TYPE_NFIELDS (struct_type))
+      if (fieldno >= struct_type->num_fields ())
 	error (_("too many initializers"));
       field_type = TYPE_FIELD_TYPE (struct_type, fieldno);
       if (field_type->code () == TYPE_CODE_UNION
@@ -1058,7 +1058,7 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
 	    type = TYPE_TARGET_TYPE (type);
 	  if (type && type->code () == TYPE_CODE_FUNC)
 	    {
-	      for (; tem <= nargs && tem <= TYPE_NFIELDS (type); tem++)
+	      for (; tem <= nargs && tem <= type->num_fields (); tem++)
 		{
 		  argvec[tem] = evaluate_subexp (TYPE_FIELD_TYPE (type,
 								  tem - 1),

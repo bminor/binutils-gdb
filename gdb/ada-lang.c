@@ -571,7 +571,7 @@ ada_get_field_index (const struct type *type, const char *field_name,
   int fieldno;
   struct type *struct_type = check_typedef ((struct type *) type);
 
-  for (fieldno = 0; fieldno < TYPE_NFIELDS (struct_type); fieldno++)
+  for (fieldno = 0; fieldno < struct_type->num_fields (); fieldno++)
     if (field_name_match (TYPE_FIELD_NAME (struct_type, fieldno), field_name))
       return fieldno;
 
@@ -755,7 +755,7 @@ ada_discrete_type_high_bound (struct type *type)
     case TYPE_CODE_RANGE:
       return TYPE_HIGH_BOUND (type);
     case TYPE_CODE_ENUM:
-      return TYPE_FIELD_ENUMVAL (type, TYPE_NFIELDS (type) - 1);
+      return TYPE_FIELD_ENUMVAL (type, type->num_fields () - 1);
     case TYPE_CODE_BOOL:
       return 1;
     case TYPE_CODE_CHAR:
@@ -1461,7 +1461,7 @@ ada_fixup_array_indexes_type (struct type *index_desc_type)
 
   if (index_desc_type == NULL)
     return;
-  gdb_assert (TYPE_NFIELDS (index_desc_type) > 0);
+  gdb_assert (index_desc_type->num_fields () > 0);
 
   /* Check if INDEX_DESC_TYPE follows the older encoding (it is sufficient
      to check one field only, no need to check them all).  If not, return
@@ -1476,7 +1476,7 @@ ada_fixup_array_indexes_type (struct type *index_desc_type)
     return;
 
   /* Fixup each field of INDEX_DESC_TYPE.  */
-  for (i = 0; i < TYPE_NFIELDS (index_desc_type); i++)
+  for (i = 0; i < index_desc_type->num_fields (); i++)
    {
      const char *name = TYPE_FIELD_NAME (index_desc_type, i);
      struct type *raw_type = ada_check_typedef (ada_find_any_type (name));
@@ -1807,7 +1807,7 @@ desc_arity (struct type *type)
   type = desc_base_type (type);
 
   if (type != NULL)
-    return TYPE_NFIELDS (type) / 2;
+    return type->num_fields () / 2;
   return 0;
 }
 
@@ -3206,12 +3206,12 @@ ada_print_symbol_signature (struct ui_file *stream, struct symbol *sym,
       || type->code () != TYPE_CODE_FUNC)
     return;
 
-  if (TYPE_NFIELDS (type) > 0)
+  if (type->num_fields () > 0)
     {
       int i;
 
       fprintf_filtered (stream, " (");
-      for (i = 0; i < TYPE_NFIELDS (type); ++i)
+      for (i = 0; i < type->num_fields (); ++i)
 	{
 	  if (i > 0)
 	    fprintf_filtered (stream, "; ");
@@ -3897,7 +3897,7 @@ ada_args_match (struct symbol *func, struct value **actuals, int n_actuals)
   else if (func_type == NULL || func_type->code () != TYPE_CODE_FUNC)
     return 0;
 
-  if (TYPE_NFIELDS (func_type) != n_actuals)
+  if (func_type->num_fields () != n_actuals)
     return 0;
 
   for (i = 0; i < n_actuals; i += 1)
@@ -4958,7 +4958,7 @@ is_nondebugging_type (struct type *type)
 
    This function assumes that TYPE1 and TYPE2 are both TYPE_CODE_ENUM
    types and that their number of enumerals is identical (in other
-   words, TYPE_NFIELDS (type1) == TYPE_NFIELDS (type2)).  */
+   words, type1->num_fields () == type2->num_fields ()).  */
 
 static int
 ada_identical_enum_types_p (struct type *type1, struct type *type2)
@@ -4971,13 +4971,13 @@ ada_identical_enum_types_p (struct type *type1, struct type *type2)
      underlying value and name.  */
 
   /* All enums in the type should have an identical underlying value.  */
-  for (i = 0; i < TYPE_NFIELDS (type1); i++)
+  for (i = 0; i < type1->num_fields (); i++)
     if (TYPE_FIELD_ENUMVAL (type1, i) != TYPE_FIELD_ENUMVAL (type2, i))
       return 0;
 
   /* All enumerals should also have the same name (modulo any numerical
      suffix).  */
-  for (i = 0; i < TYPE_NFIELDS (type1); i++)
+  for (i = 0; i < type1->num_fields (); i++)
     {
       const char *name_1 = TYPE_FIELD_NAME (type1, i);
       const char *name_2 = TYPE_FIELD_NAME (type2, i);
@@ -5040,8 +5040,8 @@ symbols_are_identical_enums (const std::vector<struct block_symbol> &syms)
 
   /* Quick check: They should all have the same number of enumerals.  */
   for (i = 1; i < syms.size (); i++)
-    if (TYPE_NFIELDS (SYMBOL_TYPE (syms[i].symbol))
-        != TYPE_NFIELDS (SYMBOL_TYPE (syms[0].symbol)))
+    if (SYMBOL_TYPE (syms[i].symbol)->num_fields ()
+        != SYMBOL_TYPE (syms[0].symbol)->num_fields ())
       return 0;
 
   /* All the sanity checks passed, so we might have a set of
@@ -6527,7 +6527,7 @@ ada_is_interface_tag (struct type *type)
 int
 ada_is_ignored_field (struct type *type, int field_num)
 {
-  if (field_num < 0 || field_num > TYPE_NFIELDS (type))
+  if (field_num < 0 || field_num > type->num_fields ())
     return 1;
 
   /* Check the name of that field.  */
@@ -6863,7 +6863,7 @@ ada_parent_type (struct type *type)
   if (type == NULL || type->code () != TYPE_CODE_STRUCT)
     return NULL;
 
-  for (i = 0; i < TYPE_NFIELDS (type); i += 1)
+  for (i = 0; i < type->num_fields (); i += 1)
     if (ada_is_parent_field (type, i))
       {
         struct type *parent_type = TYPE_FIELD_TYPE (type, i);
@@ -7226,7 +7226,7 @@ find_struct_field (const char *name, struct type *type, int offset,
   if (bit_size_p != NULL)
     *bit_size_p = 0;
 
-  for (i = 0; i < TYPE_NFIELDS (type); i += 1)
+  for (i = 0; i < type->num_fields (); i += 1)
     {
       int bit_pos = TYPE_FIELD_BITPOS (type, i);
       int fld_offset = offset + bit_pos / 8;
@@ -7278,7 +7278,7 @@ find_struct_field (const char *name, struct type *type, int offset,
           struct type *field_type
 	    = ada_check_typedef (TYPE_FIELD_TYPE (type, i));
 
-          for (j = 0; j < TYPE_NFIELDS (field_type); j += 1)
+          for (j = 0; j < field_type->num_fields (); j += 1)
             {
               if (find_struct_field (name, TYPE_FIELD_TYPE (field_type, j),
                                      fld_offset
@@ -7338,7 +7338,7 @@ ada_search_struct_field (const char *name, struct value *arg, int offset,
   int parent_offset = -1;
 
   type = ada_check_typedef (type);
-  for (i = 0; i < TYPE_NFIELDS (type); i += 1)
+  for (i = 0; i < type->num_fields (); i += 1)
     {
       const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
@@ -7381,7 +7381,7 @@ ada_search_struct_field (const char *name, struct value *arg, int offset,
 									i));
           int var_offset = offset + TYPE_FIELD_BITPOS (type, i) / 8;
 
-          for (j = 0; j < TYPE_NFIELDS (field_type); j += 1)
+          for (j = 0; j < field_type->num_fields (); j += 1)
             {
               struct value *v = ada_search_struct_field /* Force line
 							   break.  */
@@ -7439,7 +7439,7 @@ ada_index_struct_field_1 (int *index_p, struct value *arg, int offset,
   int i;
   type = ada_check_typedef (type);
 
-  for (i = 0; i < TYPE_NFIELDS (type); i += 1)
+  for (i = 0; i < type->num_fields (); i += 1)
     {
       if (TYPE_FIELD_NAME (type, i) == NULL)
         continue;
@@ -7532,7 +7532,7 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
 
   type = to_static_fixed_type (type);
 
-  for (i = 0; i < TYPE_NFIELDS (type); i += 1)
+  for (i = 0; i < type->num_fields (); i += 1)
     {
       const char *t_field_name = TYPE_FIELD_NAME (type, i);
       struct type *t;
@@ -7571,7 +7571,7 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
           struct type *field_type = ada_check_typedef (TYPE_FIELD_TYPE (type,
 									i));
 
-          for (j = TYPE_NFIELDS (field_type) - 1; j >= 0; j -= 1)
+          for (j = field_type->num_fields () - 1; j >= 0; j -= 1)
             {
 	      /* FIXME pnh 2008/01/26: We check for a field that is
 	         NOT wrapped in a struct, since the compiler sometimes
@@ -7655,7 +7655,7 @@ ada_which_variant_applies (struct type *var_type, struct value *outer)
   discrim_val = value_as_long (discrim);
 
   others_clause = -1;
-  for (i = 0; i < TYPE_NFIELDS (var_type); i += 1)
+  for (i = 0; i < var_type->num_fields (); i += 1)
     {
       if (ada_is_others_clause (var_type, i))
         others_clause = i;
@@ -8005,7 +8005,7 @@ variant_field_index (struct type *type)
   if (type == NULL || type->code () != TYPE_CODE_STRUCT)
     return -1;
 
-  for (f = 0; f < TYPE_NFIELDS (type); f += 1)
+  for (f = 0; f < type->num_fields (); f += 1)
     {
       if (ada_is_variant_part (type, f))
         return f;
@@ -8064,11 +8064,11 @@ ada_template_to_fixed_record_type_1 (struct type *type,
      to be processed: unless keep_dynamic_fields, this includes only
      fields whose position and length are static will be processed.  */
   if (keep_dynamic_fields)
-    nfields = TYPE_NFIELDS (type);
+    nfields = type->num_fields ();
   else
     {
       nfields = 0;
-      while (nfields < TYPE_NFIELDS (type)
+      while (nfields < type->num_fields ()
              && !ada_is_variant_part (type, nfields)
              && !is_dynamic_field (type, nfields))
         nfields++;
@@ -8243,7 +8243,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
          cond_offset_target (address, off / TARGET_CHAR_BIT), dval);
       if (branch_type == NULL)
         {
-          for (f = variant_field + 1; f < TYPE_NFIELDS (rtype); f += 1)
+          for (f = variant_field + 1; f < rtype->num_fields (); f += 1)
             TYPE_FIELDS (rtype)[f - 1] = TYPE_FIELDS (rtype)[f];
 	  rtype->set_num_fields (rtype->num_fields () - 1);
         }
@@ -8325,7 +8325,7 @@ template_to_static_fixed_type (struct type *type0)
 
   /* Don't clone TYPE0 until we are sure we are going to need a copy.  */
   type = type0;
-  nfields = TYPE_NFIELDS (type0);
+  nfields = type0->num_fields ();
 
   /* Whether or not we cloned TYPE0, cache the result so that we don't do
      recompute all over next time.  */
@@ -8384,7 +8384,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   struct value *dval;
   struct type *rtype;
   struct type *branch_type;
-  int nfields = TYPE_NFIELDS (type);
+  int nfields = type->num_fields ();
   int variant_field = variant_field_index (type);
 
   if (variant_field == -1)
@@ -8590,7 +8590,7 @@ ada_is_redundant_index_type_desc (struct type *array_type,
   struct type *this_layer = check_typedef (array_type);
   int i;
 
-  for (i = 0; i < TYPE_NFIELDS (desc_type); i++)
+  for (i = 0; i < desc_type->num_fields (); i++)
     {
       if (!ada_is_redundant_range_encoding (TYPE_INDEX_TYPE (this_layer),
 					    TYPE_FIELD_TYPE (desc_type, i)))
@@ -8694,7 +8694,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
       struct type *elt_type0;
 
       elt_type0 = type0;
-      for (i = TYPE_NFIELDS (index_type_desc); i > 0; i -= 1)
+      for (i = index_type_desc->num_fields (); i > 0; i -= 1)
         elt_type0 = TYPE_TARGET_TYPE (elt_type0);
 
       /* NOTE: result---the fixed version of elt_type0---should never
@@ -8712,7 +8712,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
         ada_to_fixed_type (ada_check_typedef (elt_type0), 0, 0, dval, 1);
 
       elt_type0 = type0;
-      for (i = TYPE_NFIELDS (index_type_desc) - 1; i >= 0; i -= 1)
+      for (i = index_type_desc->num_fields () - 1; i >= 0; i -= 1)
         {
           struct type *range_type =
             to_fixed_range_type (TYPE_FIELD_TYPE (index_type_desc, i), dval);
@@ -9148,7 +9148,7 @@ value_val_atr (struct type *type, struct value *arg)
     {
       long pos = value_as_long (arg);
 
-      if (pos < 0 || pos >= TYPE_NFIELDS (type))
+      if (pos < 0 || pos >= type->num_fields ())
         error (_("argument to 'VAL out of range"));
       return value_from_longest (type, TYPE_FIELD_ENUMVAL (type, pos));
     }
@@ -9229,7 +9229,7 @@ ada_is_aligner_type (struct type *type)
     return 0;
 
   return (type->code () == TYPE_CODE_STRUCT
-          && TYPE_NFIELDS (type) == 1
+          && type->num_fields () == 1
           && strcmp (TYPE_FIELD_NAME (type, 0), "F") == 0);
 }
 
@@ -9263,7 +9263,7 @@ ada_get_base_type (struct type *raw_type)
   real_type_namer = ada_find_parallel_type (raw_type, "___XVS");
   if (real_type_namer == NULL
       || real_type_namer->code () != TYPE_CODE_STRUCT
-      || TYPE_NFIELDS (real_type_namer) != 1)
+      || real_type_namer->num_fields () != 1)
     return raw_type;
 
   if (TYPE_FIELD_TYPE (real_type_namer, 0)->code () != TYPE_CODE_REF)

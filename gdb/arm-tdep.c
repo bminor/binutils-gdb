@@ -3497,7 +3497,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	int count = 0;
 	unsigned unitlen;
 	int i;
-	for (i = 0; i < TYPE_NFIELDS (t); i++)
+	for (i = 0; i < t->num_fields (); i++)
 	  {
 	    int sub_count = 0;
 
@@ -3526,7 +3526,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	int count = 0;
 	unsigned unitlen;
 	int i;
-	for (i = 0; i < TYPE_NFIELDS (t); i++)
+	for (i = 0; i < t->num_fields (); i++)
 	  {
 	    int sub_count = arm_vfp_cprc_sub_candidate (TYPE_FIELD_TYPE (t, i),
 							base_type);
@@ -7970,7 +7970,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 	     --> yes, nRc = 1
 	  */
 
-	  for (i = 0; i < TYPE_NFIELDS (type); i++)
+	  for (i = 0; i < type->num_fields (); i++)
 	    {
 	      enum type_code field_type_code;
 

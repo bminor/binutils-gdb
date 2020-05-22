@@ -1150,7 +1150,7 @@ typy_length (PyObject *self)
   if (type == NULL)
     return -1;
 
-  return TYPE_NFIELDS (type);
+  return type->num_fields ();
 }
 
 /* Implements boolean evaluation of gdb.Type.  Handle this like other
@@ -1193,7 +1193,7 @@ typy_getitem (PyObject *self, PyObject *key)
   if (type == NULL)
     return NULL;
 
-  for (i = 0; i < TYPE_NFIELDS (type); i++)
+  for (i = 0; i < type->num_fields (); i++)
     {
       const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
@@ -1251,7 +1251,7 @@ typy_has_key (PyObject *self, PyObject *args)
   if (type == NULL)
     return NULL;
 
-  for (i = 0; i < TYPE_NFIELDS (type); i++)
+  for (i = 0; i < type->num_fields (); i++)
     {
       const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
@@ -1336,7 +1336,7 @@ typy_iterator_iternext (PyObject *self)
   typy_iterator_object *iter_obj = (typy_iterator_object *) self;
   struct type *type = iter_obj->source->type;
 
-  if (iter_obj->field < TYPE_NFIELDS (type))
+  if (iter_obj->field < type->num_fields ())
     {
       gdbpy_ref<> result = make_fielditem (type, iter_obj->field,
 					   iter_obj->kind);

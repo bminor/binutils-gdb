@@ -34,7 +34,7 @@ dynamic_array_type (struct type *type,
 		    struct value *val,
 		    const struct value_print_options *options)
 {
-  if (TYPE_NFIELDS (type) == 2
+  if (type->num_fields () == 2
       && TYPE_FIELD_TYPE (type, 0)->code () == TYPE_CODE_INT
       && strcmp (TYPE_FIELD_NAME (type, 0), "length") == 0
       && strcmp (TYPE_FIELD_NAME (type, 1), "ptr") == 0

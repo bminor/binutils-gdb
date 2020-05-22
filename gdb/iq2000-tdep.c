@@ -604,7 +604,7 @@ iq2000_pass_8bytetype_by_address (struct type *type)
       && type->code () != TYPE_CODE_UNION)
     return 0;
   /* Structs with more than 1 field are always passed by address.  */
-  if (TYPE_NFIELDS (type) != 1)
+  if (type->num_fields () != 1)
     return 1;
   /* Get field type.  */
   ftype = (TYPE_FIELDS (type))[0].type;

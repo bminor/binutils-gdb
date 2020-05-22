@@ -103,7 +103,7 @@ convert_struct_or_union (compile_c_instance *context, struct type *type)
     }
   context->insert_type (type, result);
 
-  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+  for (i = 0; i < type->num_fields (); ++i)
     {
       gcc_type field_type;
       unsigned long bitsize = TYPE_FIELD_BITSIZE (type, i);
@@ -134,7 +134,7 @@ convert_enum (compile_c_instance *context, struct type *type)
 					     TYPE_LENGTH (type));
 
   result = context->plugin ().build_enum_type (int_type);
-  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+  for (i = 0; i < type->num_fields (); ++i)
     {
       context->plugin ().build_add_enum_constant
 	(result, TYPE_FIELD_NAME (type, i), TYPE_FIELD_ENUMVAL (type, i));
@@ -175,9 +175,9 @@ convert_func (compile_c_instance *context, struct type *type)
      types.  Those are impossible in C, though.  */
   return_type = context->convert_type (target_type);
 
-  array.n_elements = TYPE_NFIELDS (type);
-  array.elements = XNEWVEC (gcc_type, TYPE_NFIELDS (type));
-  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+  array.n_elements = type->num_fields ();
+  array.elements = XNEWVEC (gcc_type, type->num_fields ());
+  for (i = 0; i < type->num_fields (); ++i)
     array.elements[i] = context->convert_type (TYPE_FIELD_TYPE (type, i));
 
   result = context->plugin ().build_function_type (return_type,

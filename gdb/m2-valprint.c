@@ -51,7 +51,7 @@ get_long_set_bounds (struct type *type, LONGEST *low, LONGEST *high)
 
   if (type->code () == TYPE_CODE_STRUCT)
     {
-      len = TYPE_NFIELDS (type);
+      len = type->num_fields ();
       i = TYPE_N_BASECLASSES (type);
       if (len == 0)
 	return 0;
@@ -83,7 +83,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
   type = check_typedef (type);
 
   fprintf_filtered (stream, "{");
-  len = TYPE_NFIELDS (type);
+  len = type->num_fields ();
   if (get_long_set_bounds (type, &low_bound, &high_bound))
     {
       field = TYPE_N_BASECLASSES (type);

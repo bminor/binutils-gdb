@@ -549,7 +549,7 @@ amd64_has_unaligned_fields (struct type *type)
   if (type->code () == TYPE_CODE_STRUCT
       || type->code () == TYPE_CODE_UNION)
     {
-      for (int i = 0; i < TYPE_NFIELDS (type); i++)
+      for (int i = 0; i < type->num_fields (); i++)
 	{
 	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
 	  int bitpos = TYPE_FIELD_BITPOS (type, i);
@@ -608,7 +608,7 @@ amd64_classify_aggregate_field (struct type *type, int i,
     {
       /* Each field of an object is classified recursively.  */
       int j;
-      for (j = 0; j < TYPE_NFIELDS (subtype); j++)
+      for (j = 0; j < subtype->num_fields (); j++)
 	amd64_classify_aggregate_field (subtype, j, theclass, bitpos);
       return;
     }
@@ -684,7 +684,7 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class theclass[2])
       gdb_assert (type->code () == TYPE_CODE_STRUCT
 		  || type->code () == TYPE_CODE_UNION);
 
-      for (i = 0; i < TYPE_NFIELDS (type); i++)
+      for (i = 0; i < type->num_fields (); i++)
 	amd64_classify_aggregate_field (type, i, theclass, 0);
     }
 

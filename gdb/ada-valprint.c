@@ -400,7 +400,7 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
     {
 
     case TYPE_CODE_ENUM:
-      len = TYPE_NFIELDS (type);
+      len = type->num_fields ();
       for (i = 0; i < len; i++)
 	{
 	  if (TYPE_FIELD_ENUMVAL (type, i) == val)
@@ -600,7 +600,7 @@ print_field_values (struct value *value, struct value *outer_value,
   int i, len;
 
   struct type *type = value_type (value);
-  len = TYPE_NFIELDS (type);
+  len = type->num_fields ();
 
   for (i = 0; i < len; i += 1)
     {
@@ -886,7 +886,7 @@ ada_val_print_enum (struct value *value, struct ui_file *stream, int recurse,
   const gdb_byte *valaddr = value_contents_for_printing (value);
   int offset_aligned = ada_aligned_value_addr (type, valaddr) - valaddr;
 
-  len = TYPE_NFIELDS (type);
+  len = type->num_fields ();
   val = unpack_long (type, valaddr + offset_aligned);
   for (i = 0; i < len; i++)
     {

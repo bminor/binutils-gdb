@@ -463,7 +463,7 @@ m68k_svr4_return_value (struct gdbarch *gdbarch, struct value *function,
      changing TYPE into the type of the first member of the structure.
      Since that should work for all structures that have only one
      member, we don't bother to check the member's type here.  */
-  if (code == TYPE_CODE_STRUCT && TYPE_NFIELDS (type) == 1)
+  if (code == TYPE_CODE_STRUCT && type->num_fields () == 1)
     {
       type = check_typedef (TYPE_FIELD_TYPE (type, 0));
       return m68k_svr4_return_value (gdbarch, function, type, regcache,

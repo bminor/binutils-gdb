@@ -1644,7 +1644,7 @@ s390_effective_inner_type (struct type *type, unsigned int min_size)
 
       /* Find a non-static field, if any.  Unless there's exactly one,
 	 abort the unwrapping.  */
-      for (int i = 0; i < TYPE_NFIELDS (type); i++)
+      for (int i = 0; i < type->num_fields (); i++)
 	{
 	  struct field f = TYPE_FIELD (type, i);
 
@@ -1938,7 +1938,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      and arg_state.argp with the size of the parameter area.  */
   for (i = 0; i < nargs; i++)
     s390_handle_arg (&arg_state, args[i], tdep, word_size, byte_order,
-		     TYPE_VARARGS (ftype) && i >= TYPE_NFIELDS (ftype));
+		     TYPE_VARARGS (ftype) && i >= ftype->num_fields ());
 
   param_area_start = align_down (arg_state.copy - arg_state.argp, 8);
 
@@ -1965,7 +1965,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Write all parameters.  */
   for (i = 0; i < nargs; i++)
     s390_handle_arg (&arg_state, args[i], tdep, word_size, byte_order,
-		     TYPE_VARARGS (ftype) && i >= TYPE_NFIELDS (ftype));
+		     TYPE_VARARGS (ftype) && i >= ftype->num_fields ());
 
   /* Store return PSWA.  In 31-bit mode, keep addressing mode bit.  */
   if (word_size == 4)

@@ -309,7 +309,7 @@ static void
 pascal_print_func_args (struct type *type, struct ui_file *stream,
 			const struct type_print_options *flags)
 {
-  int i, len = TYPE_NFIELDS (type);
+  int i, len = type->num_fields ();
 
   if (len)
     {
@@ -559,7 +559,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	  pascal_type_print_derivation_info (stream, type);
 
 	  fprintf_filtered (stream, "\n");
-	  if ((TYPE_NFIELDS (type) == 0) && (TYPE_NFN_FIELDS (type) == 0))
+	  if ((type->num_fields () == 0) && (TYPE_NFN_FIELDS (type) == 0))
 	    {
 	      if (TYPE_STUB (type))
 		fprintfi_filtered (level + 4, stream, "<incomplete type>\n");
@@ -576,7 +576,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	  /* If there is a base class for this type,
 	     do not print the field that it occupies.  */
 
-	  len = TYPE_NFIELDS (type);
+	  len = type->num_fields ();
 	  for (i = TYPE_N_BASECLASSES (type); i < len; i++)
 	    {
 	      QUIT;
@@ -758,7 +758,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
       else if (show > 0 || type->name () == NULL)
 	{
 	  fprintf_filtered (stream, "(");
-	  len = TYPE_NFIELDS (type);
+	  len = type->num_fields ();
 	  lastval = 0;
 	  for (i = 0; i < len; i++)
 	    {

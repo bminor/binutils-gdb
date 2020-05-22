@@ -312,7 +312,7 @@ print_range_type (struct type *raw_type, struct ui_file *stream,
 static void
 print_enum_type (struct type *type, struct ui_file *stream)
 {
-  int len = TYPE_NFIELDS (type);
+  int len = type->num_fields ();
   int i;
   LONGEST lastval;
 
@@ -417,7 +417,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 	{
 	  int k;
 
-	  n_indices = TYPE_NFIELDS (range_desc_type);
+	  n_indices = range_desc_type->num_fields ();
 	  for (k = 0, arr_type = type;
 	       k < n_indices;
 	       k += 1, arr_type = TYPE_TARGET_TYPE (arr_type))
@@ -563,7 +563,7 @@ print_variant_clauses (struct type *type, int field_num,
   if (par_type != NULL)
     var_type = par_type;
 
-  for (i = 0; i < TYPE_NFIELDS (var_type); i += 1)
+  for (i = 0; i < var_type->num_fields (); i += 1)
     {
       fprintf_filtered (stream, "\n%*swhen ", level + 4, "");
       if (print_choices (var_type, i, stream, discr_type))
@@ -786,13 +786,13 @@ print_record_field_types (struct type *type, struct type *outer_type,
 	}
       gdb_assert (prop->kind == PROP_VARIANT_PARTS);
       print_record_field_types_dynamic (*prop->data.variant_parts,
-					0, TYPE_NFIELDS (type),
+					0, type->num_fields (),
 					type, stream, show, level, flags);
-      return TYPE_NFIELDS (type);
+      return type->num_fields ();
     }
 
   return print_selected_record_field_types (type, outer_type,
-					    0, TYPE_NFIELDS (type) - 1,
+					    0, type->num_fields () - 1,
 					    stream, show, level, flags);
 }
    
@@ -863,7 +863,7 @@ print_unchecked_union_type (struct type *type, struct ui_file *stream,
 {
   if (show < 0)
     fprintf_filtered (stream, "record (?) is ... end record");
-  else if (TYPE_NFIELDS (type) == 0)
+  else if (type->num_fields () == 0)
     fprintf_filtered (stream, "record (?) is null; end record");
   else
     {
@@ -871,7 +871,7 @@ print_unchecked_union_type (struct type *type, struct ui_file *stream,
 
       fprintf_filtered (stream, "record (?) is\n%*scase ? is", level + 4, "");
 
-      for (i = 0; i < TYPE_NFIELDS (type); i += 1)
+      for (i = 0; i < type->num_fields (); i += 1)
 	{
 	  fprintf_filtered (stream, "\n%*swhen ? =>\n%*s", level + 8, "",
 			    level + 12, "");
@@ -895,7 +895,7 @@ static void
 print_func_type (struct type *type, struct ui_file *stream, const char *name,
 		 const struct type_print_options *flags)
 {
-  int i, len = TYPE_NFIELDS (type);
+  int i, len = type->num_fields ();
 
   if (TYPE_TARGET_TYPE (type) != NULL
       && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_VOID)

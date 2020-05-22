@@ -2033,7 +2033,7 @@ m32c_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
        separately, but the code in GCC doesn't actually do so.  */
     if (TYPE_PROTOTYPED (func_type))
 #endif
-      num_prototyped_args = TYPE_NFIELDS (func_type);
+      num_prototyped_args = func_type->num_fields ();
   }
 
   /* First, if the function returns an aggregate by value, push a

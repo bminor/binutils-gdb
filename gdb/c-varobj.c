@@ -164,7 +164,7 @@ c_is_path_expr_parent (const struct varobj *var)
 	    {
 	      const char *field_name;
 
-	      gdb_assert (var->index < TYPE_NFIELDS (parent_type));
+	      gdb_assert (var->index < parent_type->num_fields ());
 	      field_name = TYPE_FIELD_NAME (parent_type, var->index);
 	      return !(field_name == NULL || *field_name == '\0');
 	    }
@@ -202,7 +202,7 @@ c_number_of_children (const struct varobj *var)
 
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
-      children = TYPE_NFIELDS (type);
+      children = type->num_fields ();
       break;
 
     case TYPE_CODE_PTR:
@@ -649,7 +649,7 @@ cplus_class_num_children (struct type *type, int children[3])
   children[v_protected] = 0;
 
   vptr_fieldno = get_vptr_fieldno (type, &basetype);
-  for (i = TYPE_N_BASECLASSES (type); i < TYPE_NFIELDS (type); i++)
+  for (i = TYPE_N_BASECLASSES (type); i < type->num_fields (); i++)
     {
       /* If we have a virtual table pointer, omit it.  Even if virtual
 	 table pointers are not specifically marked in the debug info,

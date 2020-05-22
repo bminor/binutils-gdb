@@ -1452,10 +1452,10 @@ patch_type (struct type *type, struct type *real_type)
 {
   struct type *target = TYPE_TARGET_TYPE (type);
   struct type *real_target = TYPE_TARGET_TYPE (real_type);
-  int field_size = TYPE_NFIELDS (real_target) * sizeof (struct field);
+  int field_size = real_target->num_fields () * sizeof (struct field);
 
   TYPE_LENGTH (target) = TYPE_LENGTH (real_target);
-  target->set_num_fields (TYPE_NFIELDS (real_target));
+  target->set_num_fields (real_target->num_fields ());
   TYPE_FIELDS (target) = (struct field *) TYPE_ALLOC (target,
 						      field_size);
 

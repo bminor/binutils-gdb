@@ -136,7 +136,7 @@ i386_darwin_arg_type_alignment (struct type *type)
     {
       int i;
       int res = 4;
-      for (i = 0; i < TYPE_NFIELDS (type); i++)
+      for (i = 0; i < type->num_fields (); i++)
 	{
 	  int align
 	    = i386_darwin_arg_type_alignment (TYPE_FIELD_TYPE (type, i));

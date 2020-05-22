@@ -1179,7 +1179,7 @@ sparc64_16_byte_align_p (struct type *type)
     {
       int i;
 
-      for (i = 0; i < TYPE_NFIELDS (type); i++)
+      for (i = 0; i < type->num_fields (); i++)
 	{
 	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
 
@@ -1256,7 +1256,7 @@ sparc64_store_floating_fields (struct regcache *regcache, struct type *type,
     {
       int i;
 
-      for (i = 0; i < TYPE_NFIELDS (type); i++)
+      for (i = 0; i < type->num_fields (); i++)
 	{
 	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
 	  int subpos = bitpos + TYPE_FIELD_BITPOS (type, i);
@@ -1274,7 +1274,7 @@ sparc64_store_floating_fields (struct regcache *regcache, struct type *type,
          probably in older releases to.  To appease GCC, if a
          structure has only a single `float' member, we store its
          value in %f1 too (we already have stored in %f0).  */
-      if (TYPE_NFIELDS (type) == 1)
+      if (type->num_fields () == 1)
 	{
 	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, 0));
 
@@ -1344,7 +1344,7 @@ sparc64_extract_floating_fields (struct regcache *regcache, struct type *type,
     {
       int i;
 
-      for (i = 0; i < TYPE_NFIELDS (type); i++)
+      for (i = 0; i < type->num_fields (); i++)
 	{
 	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
 	  int subpos = bitpos + TYPE_FIELD_BITPOS (type, i);

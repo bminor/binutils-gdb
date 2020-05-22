@@ -635,7 +635,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       int len = TYPE_LENGTH (arg_type);
       enum type_code typecode = arg_type->code ();
 
-      if (TYPE_VARARGS (func_type) && argnum >= TYPE_NFIELDS (func_type))
+      if (TYPE_VARARGS (func_type) && argnum >= func_type->num_fields ())
 	break; /* end or regular args, varargs go to stack.  */
 
       /* Extract the value, either a reference or the data.  */

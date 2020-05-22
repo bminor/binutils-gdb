@@ -153,23 +153,23 @@ compile_object_run (struct compile_module *module)
       func_val = value_from_pointer (lookup_pointer_type (func_type),
 				   BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (func_sym)));
 
-      vargs = XALLOCAVEC (struct value *, TYPE_NFIELDS (func_type));
-      if (TYPE_NFIELDS (func_type) >= 1)
+      vargs = XALLOCAVEC (struct value *, func_type->num_fields ());
+      if (func_type->num_fields () >= 1)
 	{
 	  gdb_assert (regs_addr != 0);
 	  vargs[current_arg] = value_from_pointer
 			  (TYPE_FIELD_TYPE (func_type, current_arg), regs_addr);
 	  ++current_arg;
 	}
-      if (TYPE_NFIELDS (func_type) >= 2)
+      if (func_type->num_fields () >= 2)
 	{
 	  gdb_assert (data->out_value_addr != 0);
 	  vargs[current_arg] = value_from_pointer
 	       (TYPE_FIELD_TYPE (func_type, current_arg), data->out_value_addr);
 	  ++current_arg;
 	}
-      gdb_assert (current_arg == TYPE_NFIELDS (func_type));
-      auto args = gdb::make_array_view (vargs, TYPE_NFIELDS (func_type));
+      gdb_assert (current_arg == func_type->num_fields ());
+      auto args = gdb::make_array_view (vargs, func_type->num_fields ());
       call_function_by_hand_dummy (func_val, NULL, args,
 				   do_module_cleanup, data);
     }

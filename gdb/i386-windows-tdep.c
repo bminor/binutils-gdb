@@ -219,7 +219,7 @@ i386_windows_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* read_subroutine_type sets for non-static member functions the
      artificial flag of the first parameter ('this' pointer).  */
   if (type->code () == TYPE_CODE_METHOD
-      && TYPE_NFIELDS (type) > 0
+      && type->num_fields () > 0
       && TYPE_FIELD_ARTIFICIAL (type, 0)
       && TYPE_FIELD_TYPE (type, 0)->code () == TYPE_CODE_PTR)
     thiscall = 1;

@@ -524,7 +524,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
   struct type *type = check_typedef (value_type (val));
 
   fprintf_filtered (stream, "{");
-  len = TYPE_NFIELDS (type);
+  len = type->num_fields ();
   n_baseclasses = TYPE_N_BASECLASSES (type);
 
   /* Print out baseclasses such that we don't print

@@ -348,7 +348,7 @@ gnuv2_baseclass_offset (struct type *type, int index,
   if (BASETYPE_VIA_VIRTUAL (type, index))
     {
       /* Must hunt for the pointer to this virtual baseclass.  */
-      int i, len = TYPE_NFIELDS (type);
+      int i, len = type->num_fields ();
       int n_baseclasses = TYPE_N_BASECLASSES (type);
 
       /* First look for the virtual baseclass pointer

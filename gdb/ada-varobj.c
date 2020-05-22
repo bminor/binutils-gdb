@@ -273,7 +273,7 @@ ada_varobj_get_struct_number_of_children (struct value *parent_value,
   gdb_assert (parent_type->code () == TYPE_CODE_STRUCT
 	      || parent_type->code () == TYPE_CODE_UNION);
 
-  for (i = 0; i < TYPE_NFIELDS (parent_type); i++)
+  for (i = 0; i < parent_type->num_fields (); i++)
     {
       if (ada_is_ignored_field (parent_type, i))
 	continue;
@@ -421,7 +421,7 @@ ada_varobj_describe_struct_child (struct value *parent_value,
   gdb_assert (parent_type->code () == TYPE_CODE_STRUCT
 	      || parent_type->code () == TYPE_CODE_UNION);
 
-  for (fieldno = 0; fieldno < TYPE_NFIELDS (parent_type); fieldno++)
+  for (fieldno = 0; fieldno < parent_type->num_fields (); fieldno++)
     {
       if (ada_is_ignored_field (parent_type, fieldno))
 	continue;

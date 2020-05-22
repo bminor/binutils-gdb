@@ -642,11 +642,11 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 
   if (regtype->code () == TYPE_CODE_FLT
       || (regtype->code () == TYPE_CODE_UNION
-	  && TYPE_NFIELDS (regtype) == 2
+	  && regtype->num_fields () == 2
 	  && TYPE_FIELD_TYPE (regtype, 0)->code () == TYPE_CODE_FLT
 	  && TYPE_FIELD_TYPE (regtype, 1)->code () == TYPE_CODE_FLT)
       || (regtype->code () == TYPE_CODE_UNION
-	  && TYPE_NFIELDS (regtype) == 3
+	  && regtype->num_fields () == 3
 	  && TYPE_FIELD_TYPE (regtype, 0)->code () == TYPE_CODE_FLT
 	  && TYPE_FIELD_TYPE (regtype, 1)->code () == TYPE_CODE_FLT
 	  && TYPE_FIELD_TYPE (regtype, 2)->code () == TYPE_CODE_FLT))
@@ -2044,7 +2044,7 @@ private:
 void
 riscv_struct_info::analyse_inner (struct type *type, int offset)
 {
-  unsigned int count = TYPE_NFIELDS (type);
+  unsigned int count = type->num_fields ();
   unsigned int i;
 
   for (i = 0; i < count; ++i)
@@ -2445,7 +2445,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
       arg_type = check_typedef (value_type (arg_value));
 
       riscv_arg_location (gdbarch, info, &call_info, arg_type,
-			  TYPE_VARARGS (ftype) && i >= TYPE_NFIELDS (ftype));
+			  TYPE_VARARGS (ftype) && i >= ftype->num_fields ());
 
       if (info->type != arg_type)
 	arg_value = value_cast (info->type, arg_value);

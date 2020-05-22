@@ -254,7 +254,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
     {
       /* If we know the size of the array, we can use it as a limit on
 	 the number of characters to be fetched.  */
-      if (TYPE_NFIELDS (type) == 1
+      if (type->num_fields () == 1
 	  && TYPE_FIELD_TYPE (type, 0)->code () == TYPE_CODE_RANGE)
 	{
 	  LONGEST low_bound, high_bound;

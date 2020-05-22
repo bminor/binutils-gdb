@@ -2643,7 +2643,7 @@ i386_16_byte_align_p (struct type *type)
       || type->code () == TYPE_CODE_UNION)
     {
       int i;
-      for (i = 0; i < TYPE_NFIELDS (type); i++)
+      for (i = 0; i < type->num_fields (); i++)
 	{
 	  if (i386_16_byte_align_p (TYPE_FIELD_TYPE (type, i)))
 	    return 1;
@@ -2952,7 +2952,7 @@ i386_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
 
   /* Structures consisting of a single `float', `double' or 'long
      double' member are returned in %st(0).  */
-  if (code == TYPE_CODE_STRUCT && TYPE_NFIELDS (type) == 1)
+  if (code == TYPE_CODE_STRUCT && type->num_fields () == 1)
     {
       type = check_typedef (TYPE_FIELD_TYPE (type, 0));
       if (type->code () == TYPE_CODE_FLT)
@@ -3020,7 +3020,7 @@ i386_return_value (struct gdbarch *gdbarch, struct value *function,
      the structure.  Since that should work for all structures that
      have only one member, we don't bother to check the member's type
      here.  */
-  if (code == TYPE_CODE_STRUCT && TYPE_NFIELDS (type) == 1)
+  if (code == TYPE_CODE_STRUCT && type->num_fields () == 1)
     {
       type = check_typedef (TYPE_FIELD_TYPE (type, 0));
       return i386_return_value (gdbarch, function, type, regcache,

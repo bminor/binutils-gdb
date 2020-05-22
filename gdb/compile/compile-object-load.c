@@ -505,7 +505,7 @@ get_regs_type (struct symbol *func_sym, struct objfile *objfile)
   struct type *regsp_type, *regs_type;
 
   /* No register parameter present.  */
-  if (TYPE_NFIELDS (func_type) == 0)
+  if (func_type->num_fields () == 0)
     return NULL;
 
   regsp_type = check_typedef (TYPE_FIELD_TYPE (func_type, 0));
@@ -534,7 +534,7 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
   struct gdbarch *gdbarch = target_gdbarch ();
   int fieldno;
 
-  for (fieldno = 0; fieldno < TYPE_NFIELDS (regs_type); fieldno++)
+  for (fieldno = 0; fieldno < regs_type->num_fields (); fieldno++)
     {
       const char *reg_name = TYPE_FIELD_NAME (regs_type, fieldno);
       ULONGEST reg_bitpos = TYPE_FIELD_BITPOS (regs_type, fieldno);
@@ -670,10 +670,10 @@ compile_object_load (const compile_file_names &file_names,
     default:
       internal_error (__FILE__, __LINE__, _("invalid scope %d"), scope);
     }
-  if (TYPE_NFIELDS (func_type) != expect_parameters)
+  if (func_type->num_fields () != expect_parameters)
     error (_("Invalid %d parameters of function \"%s\" in compiled "
 	     "module \"%s\"."),
-	   TYPE_NFIELDS (func_type), GCC_FE_WRAPPER_FUNCTION,
+	   func_type->num_fields (), GCC_FE_WRAPPER_FUNCTION,
 	   objfile_name (objfile));
   if (!types_deeply_equal (expect_return_type, TYPE_TARGET_TYPE (func_type)))
     error (_("Invalid return type of function \"%s\" in compiled "
