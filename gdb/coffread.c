@@ -2045,7 +2045,7 @@ coff_read_struct_type (int index, int length, int lastsym,
   /* Copy the saved-up fields into the field vector.  */
 
   for (n = nfields; list; list = list->next)
-    TYPE_FIELD (type, --n) = list->field;
+    type->field (--n) = list->field;
 
   return type;
 }
@@ -2142,7 +2142,7 @@ coff_read_enum_type (int index, int length, int lastsym,
 
 	  SYMBOL_TYPE (xsym) = type;
 	  TYPE_FIELD_NAME (type, n) = xsym->linkage_name ();
-	  SET_FIELD_ENUMVAL (TYPE_FIELD (type, n), SYMBOL_VALUE (xsym));
+	  SET_FIELD_ENUMVAL (type->field (n), SYMBOL_VALUE (xsym));
 	  if (SYMBOL_VALUE (xsym) < 0)
 	    unsigned_enum = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;

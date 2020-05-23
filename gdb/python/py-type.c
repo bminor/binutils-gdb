@@ -177,7 +177,7 @@ convert_field (struct type *type, int field)
   if (PyObject_SetAttrString (result.get (), "parent_type", arg.get ()) < 0)
     return NULL;
 
-  if (!field_is_static (&TYPE_FIELD (type, field)))
+  if (!field_is_static (&type->field (field)))
     {
       const char *attrstring;
 

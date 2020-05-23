@@ -318,7 +318,7 @@ gen_trace_static_fields (struct agent_expr *ax,
 
   for (i = type->num_fields () - 1; i >= nbases; i--)
     {
-      if (field_is_static (&TYPE_FIELD (type, i)))
+      if (field_is_static (&type->field (i)))
 	{
 	  gen_static_field (ax, &value, type, i);
 	  if (value.optimized_out)
@@ -1456,7 +1456,7 @@ gen_struct_ref_recursive (struct agent_expr *ax, struct axs_value *value,
 		 "this") will have been generated already, which will
 		 be unnecessary but not harmful if the static field is
 		 being handled as a global.  */
-	      if (field_is_static (&TYPE_FIELD (type, i)))
+	      if (field_is_static (&type->field (i)))
 		{
 		  gen_static_field (ax, value, type, i);
 		  if (value->optimized_out)
@@ -1594,7 +1594,7 @@ gen_struct_elt_for_reference (struct agent_expr *ax, struct axs_value *value,
 
       if (t_field_name && strcmp (t_field_name, fieldname) == 0)
 	{
-	  if (field_is_static (&TYPE_FIELD (t, i)))
+	  if (field_is_static (&t->field (i)))
 	    {
 	      gen_static_field (ax, value, t, i);
 	      if (value->optimized_out)

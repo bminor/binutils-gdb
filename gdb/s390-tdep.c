@@ -1646,7 +1646,7 @@ s390_effective_inner_type (struct type *type, unsigned int min_size)
 	 abort the unwrapping.  */
       for (int i = 0; i < type->num_fields (); i++)
 	{
-	  struct field f = TYPE_FIELD (type, i);
+	  struct field f = type->field (i);
 
 	  if (field_is_static (&f))
 	    continue;

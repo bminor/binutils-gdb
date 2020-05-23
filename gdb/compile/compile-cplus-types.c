@@ -595,7 +595,7 @@ compile_cplus_convert_struct_or_union_members
       gcc_type field_type
 	= instance->convert_type (TYPE_FIELD_TYPE (type, i));
 
-      if (field_is_static (&TYPE_FIELD (type, i)))
+      if (field_is_static (&type->field (i)))
 	{
 	  CORE_ADDR physaddr;
 

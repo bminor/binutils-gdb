@@ -1813,7 +1813,7 @@ do_search_struct_field (const char *name, struct value *arg1, LONGEST offset,
 	  {
 	    struct value *v;
 
-	    if (field_is_static (&TYPE_FIELD (type, i)))
+	    if (field_is_static (&type->field (i)))
 	      v = value_static_field (type, i);
 	    else
 	      v = value_primitive_field (arg1, offset, i, type);
@@ -2221,7 +2221,7 @@ value_struct_elt_bitpos (struct value **argp, int bitpos, struct type *ftype,
 
   for (i = TYPE_N_BASECLASSES (t); i < t->num_fields (); i++)
     {
-      if (!field_is_static (&TYPE_FIELD (t, i))
+      if (!field_is_static (&t->field (i))
 	  && bitpos == TYPE_FIELD_BITPOS (t, i)
 	  && types_equal (ftype, TYPE_FIELD_TYPE (t, i)))
 	return value_primitive_field (*argp, 0, i, t);
@@ -3299,7 +3299,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
       if (t_field_name && strcmp (t_field_name, name) == 0)
 	{
-	  if (field_is_static (&TYPE_FIELD (t, i)))
+	  if (field_is_static (&t->field (i)))
 	    {
 	      struct value *v = value_static_field (t, i);
 	      if (want_address)

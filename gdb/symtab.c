@@ -1973,7 +1973,7 @@ check_field (struct type *type, const char *name,
       if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	{
 	  is_a_field_of_this->type = type;
-	  is_a_field_of_this->field = &TYPE_FIELD (type, i);
+	  is_a_field_of_this->field = &type->field (i);
 	  return 1;
 	}
     }

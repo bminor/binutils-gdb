@@ -128,7 +128,7 @@ rust_underscore_fields (struct type *type)
     return false;
   for (i = 0; i < type->num_fields (); ++i)
     {
-      if (!field_is_static (&TYPE_FIELD (type, i)))
+      if (!field_is_static (&type->field (i)))
 	{
 	  char buf[20];
 
@@ -420,7 +420,7 @@ val_print_struct (struct value *val, struct ui_file *stream, int recurse,
   first_field = 1;
   for (i = 0; i < type->num_fields (); ++i)
     {
-      if (field_is_static (&TYPE_FIELD (type, i)))
+      if (field_is_static (&type->field (i)))
         continue;
 
       if (!first_field)
@@ -735,7 +735,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
   std::vector<int> fields;
   for (int i = 0; i < type->num_fields (); ++i)
     {
-      if (field_is_static (&TYPE_FIELD (type, i)))
+      if (field_is_static (&type->field (i)))
 	continue;
       if (is_enum && TYPE_FIELD_ARTIFICIAL (type, i))
 	continue;
@@ -753,7 +753,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
     {
       QUIT;
 
-      gdb_assert (!field_is_static (&TYPE_FIELD (type, i)));
+      gdb_assert (!field_is_static (&type->field (i)));
       gdb_assert (! (is_enum && TYPE_FIELD_ARTIFICIAL (type, i)));
 
       if (flags->print_offsets)
@@ -992,7 +992,7 @@ rust_composite_type (struct type *original,
   bitpos = 0;
   if (field1 != NULL)
     {
-      struct field *field = &TYPE_FIELD (result, i);
+      struct field *field = &result->field (i);
 
       SET_FIELD_BITPOS (*field, bitpos);
       bitpos += TYPE_LENGTH (type1) * TARGET_CHAR_BIT;
@@ -1003,7 +1003,7 @@ rust_composite_type (struct type *original,
     }
   if (field2 != NULL)
     {
-      struct field *field = &TYPE_FIELD (result, i);
+      struct field *field = &result->field (i);
       unsigned align = type_align (type2);
 
       if (align != 0)

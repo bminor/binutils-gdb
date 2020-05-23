@@ -1528,7 +1528,7 @@ gnuv3_pass_by_reference (struct type *type)
      about recursive loops here, since we are only looking at members
      of complete class type.  Also ignore any static members.  */
   for (fieldnum = 0; fieldnum < type->num_fields (); fieldnum++)
-    if (!field_is_static (&TYPE_FIELD (type, fieldnum)))
+    if (!field_is_static (&type->field (fieldnum)))
       {
 	struct type *field_type = TYPE_FIELD_TYPE (type, fieldnum);
 

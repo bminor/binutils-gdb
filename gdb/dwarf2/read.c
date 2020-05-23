@@ -9364,7 +9364,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       type->set_code (TYPE_CODE_STRUCT);
       type->set_num_fields (3);
       /* Save the field we care about.  */
-      struct field saved_field = TYPE_FIELD (type, 0);
+      struct field saved_field = type->field (0);
       type->set_fields
 	((struct field *) TYPE_ZALLOC (type, 3 * sizeof (struct field)));
 
@@ -9372,11 +9372,11 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       TYPE_FIELD_TYPE (type, 0) = field_type;
       TYPE_FIELD_ARTIFICIAL (type, 0) = 1;
       TYPE_FIELD_NAME (type, 0) = "<<discriminant>>";
-      SET_FIELD_BITPOS (TYPE_FIELD (type, 0), bit_offset);
+      SET_FIELD_BITPOS (type->field (0), bit_offset);
 
       /* The order of fields doesn't really matter, so put the real
 	 field at index 1 and the data-less field at index 2.  */
-      TYPE_FIELD (type, 1) = saved_field;
+      type->field (1) = saved_field;
       TYPE_FIELD_NAME (type, 1)
 	= rust_last_path_segment (TYPE_FIELD_TYPE (type, 1)->name ());
       TYPE_FIELD_TYPE (type, 1)->set_name
@@ -9392,7 +9392,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       /* NAME points into the original discriminant name, which
 	 already has the correct lifetime.  */
       TYPE_FIELD_NAME (type, 2) = name;
-      SET_FIELD_BITPOS (TYPE_FIELD (type, 2), 0);
+      SET_FIELD_BITPOS (type->field (2), 0);
 
       /* Indicate that this is a variant type.  */
       static discriminant_range ranges[1] = { { 0, 0 } };
@@ -9454,7 +9454,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       type->set_code (TYPE_CODE_STRUCT);
 
       /* Make space for the discriminant field.  */
-      struct field *disr_field = &TYPE_FIELD (disr_type, 0);
+      struct field *disr_field = &disr_type->field (0);
       field *new_fields
 	= (struct field *) TYPE_ZALLOC (type, ((type->num_fields () + 1)
 					       * sizeof (struct field)));
@@ -9464,7 +9464,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       type->set_num_fields (type->num_fields () + 1);
 
       /* Install the discriminant at index 0 in the union.  */
-      TYPE_FIELD (type, 0) = *disr_field;
+      type->field (0) = *disr_field;
       TYPE_FIELD_ARTIFICIAL (type, 0) = 1;
       TYPE_FIELD_NAME (type, 0) = "<<discriminant>>";
 
@@ -14849,7 +14849,7 @@ dwarf2_attach_fields_to_type (struct field_info *fip, struct type *type,
 	= ((i < fip->baseclasses.size ()) ? fip->baseclasses[i]
 	   : fip->fields[i - fip->baseclasses.size ()]);
 
-      TYPE_FIELD (type, i) = field.field;
+      type->field (i) = field.field;
       switch (field.accessibility)
 	{
 	case DW_ACCESS_private:

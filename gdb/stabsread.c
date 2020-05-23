@@ -3339,7 +3339,7 @@ attach_fields_to_type (struct stab_field_info *fip, struct type *type,
 
   while (nfields-- > 0)
     {
-      TYPE_FIELD (type, nfields) = fip->list->field;
+      type->field (nfields) = fip->list->field;
       switch (fip->list->visibility)
 	{
 	case VISIBILITY_PRIVATE:
@@ -3681,7 +3681,7 @@ read_enum_type (const char **pp, struct type *type,
 
 	  SYMBOL_TYPE (xsym) = type;
 	  TYPE_FIELD_NAME (type, n) = xsym->linkage_name ();
-	  SET_FIELD_ENUMVAL (TYPE_FIELD (type, n), SYMBOL_VALUE (xsym));
+	  SET_FIELD_ENUMVAL (type->field (n), SYMBOL_VALUE (xsym));
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}
       if (syms == osyms)

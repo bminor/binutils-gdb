@@ -316,7 +316,7 @@ attach_fields_to_type (struct ctf_field_info *fip, struct type *type)
   for (int i = 0; i < nfields; ++i)
     {
       struct ctf_nextfield &field = fip->fields[i];
-      TYPE_FIELD (type, i) = field.field;
+      type->field (i) = field.field;
     }
 }
 

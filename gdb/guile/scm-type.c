@@ -514,7 +514,7 @@ tyscm_field_smob_to_field (field_smob *f_smob)
   /* This should be non-NULL by construction.  */
   gdb_assert (type->fields () != NULL);
 
-  return &TYPE_FIELD (type, f_smob->field_num);
+  return &type->field (f_smob->field_num);
 }
 
 /* Type smob accessors.  */

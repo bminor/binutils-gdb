@@ -1757,7 +1757,7 @@ lookup_struct_elt (struct type *type, const char *name, int noerr)
 
       if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	{
-	  return {&TYPE_FIELD (type, i), TYPE_FIELD_BITPOS (type, i)};
+	  return {&type->field (i), TYPE_FIELD_BITPOS (type, i)};
 	}
      else if (!t_field_name || *t_field_name == '\0')
 	{
@@ -2039,7 +2039,7 @@ is_dynamic_type_internal (struct type *type, int top_level)
 	for (i = 0; i < type->num_fields (); ++i)
 	  {
 	    /* Static fields can be ignored here.  */
-	    if (field_is_static (&TYPE_FIELD (type, i)))
+	    if (field_is_static (&type->field (i)))
 	      continue;
 	    /* If the field has dynamic type, then so does TYPE.  */
 	    if (is_dynamic_type_internal (TYPE_FIELD_TYPE (type, i), 0))
@@ -2249,7 +2249,7 @@ resolve_dynamic_union (struct type *type,
     {
       struct type *t;
 
-      if (field_is_static (&TYPE_FIELD (type, i)))
+      if (field_is_static (&type->field (i)))
 	continue;
 
       t = resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
@@ -2415,7 +2415,7 @@ compute_variant_fields (struct type *type,
       if (!flags[i])
 	continue;
 
-      TYPE_FIELD (resolved_type, out) = TYPE_FIELD (type, i);
+      resolved_type->field (out) = type->field (i);
       ++out;
     }
 }
@@ -2463,7 +2463,7 @@ resolve_dynamic_struct (struct type *type,
       unsigned new_bit_length;
       struct property_addr_info pinfo;
 
-      if (field_is_static (&TYPE_FIELD (resolved_type, i)))
+      if (field_is_static (&resolved_type->field (i)))
 	continue;
 
       if (TYPE_FIELD_LOC_KIND (resolved_type, i) == FIELD_LOC_KIND_DWARF_BLOCK)
@@ -2480,7 +2480,7 @@ resolve_dynamic_struct (struct type *type,
 	  CORE_ADDR addr;
 	  if (dwarf2_evaluate_property (&prop, nullptr, addr_stack, &addr,
 					true))
-	    SET_FIELD_BITPOS (TYPE_FIELD (resolved_type, i),
+	    SET_FIELD_BITPOS (resolved_type->field (i),
 			      TARGET_CHAR_BIT * (addr - addr_stack->addr));
 	}
 
@@ -3391,7 +3391,7 @@ type_align (struct type *type)
 	int number_of_non_static_fields = 0;
 	for (unsigned i = 0; i < type->num_fields (); ++i)
 	  {
-	    if (!field_is_static (&TYPE_FIELD (type, i)))
+	    if (!field_is_static (&type->field (i)))
 	      {
 		number_of_non_static_fields++;
 		ULONGEST f_align = type_align (TYPE_FIELD_TYPE (type, i));
@@ -4028,8 +4028,8 @@ check_types_equal (struct type *type1, struct type *type2,
 
       for (i = 0; i < type1->num_fields (); ++i)
 	{
-	  const struct field *field1 = &TYPE_FIELD (type1, i);
-	  const struct field *field2 = &TYPE_FIELD (type2, i);
+	  const struct field *field1 = &type1->field (i);
+	  const struct field *field2 = &type2->field (i);
 
 	  if (FIELD_ARTIFICIAL (*field1) != FIELD_ARTIFICIAL (*field2)
 	      || FIELD_BITSIZE (*field1) != FIELD_BITSIZE (*field2)
@@ -5321,19 +5321,19 @@ copy_type_recursive (struct objfile *objfile,
 	  switch (TYPE_FIELD_LOC_KIND (type, i))
 	    {
 	    case FIELD_LOC_KIND_BITPOS:
-	      SET_FIELD_BITPOS (TYPE_FIELD (new_type, i),
+	      SET_FIELD_BITPOS (new_type->field (i),
 				TYPE_FIELD_BITPOS (type, i));
 	      break;
 	    case FIELD_LOC_KIND_ENUMVAL:
-	      SET_FIELD_ENUMVAL (TYPE_FIELD (new_type, i),
+	      SET_FIELD_ENUMVAL (new_type->field (i),
 				 TYPE_FIELD_ENUMVAL (type, i));
 	      break;
 	    case FIELD_LOC_KIND_PHYSADDR:
-	      SET_FIELD_PHYSADDR (TYPE_FIELD (new_type, i),
+	      SET_FIELD_PHYSADDR (new_type->field (i),
 				  TYPE_FIELD_STATIC_PHYSADDR (type, i));
 	      break;
 	    case FIELD_LOC_KIND_PHYSNAME:
-	      SET_FIELD_PHYSNAME (TYPE_FIELD (new_type, i),
+	      SET_FIELD_PHYSNAME (new_type->field (i),
 				  xstrdup (TYPE_FIELD_STATIC_PHYSNAME (type,
 								       i)));
 	      break;
@@ -5588,7 +5588,7 @@ append_flags_type_field (struct type *type, int start_bitpos, int nr_bits,
 
   TYPE_FIELD_NAME (type, field_nr) = xstrdup (name);
   TYPE_FIELD_TYPE (type, field_nr) = field_type;
-  SET_FIELD_BITPOS (TYPE_FIELD (type, field_nr), start_bitpos);
+  SET_FIELD_BITPOS (type->field (field_nr), start_bitpos);
   TYPE_FIELD_BITSIZE (type, field_nr) = nr_bits;
   type->set_num_fields (type->num_fields () + 1);
 }

@@ -1613,18 +1613,17 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
-#define TYPE_FIELD(thistype, n) TYPE_MAIN_TYPE(thistype)->flds_bnds.fields[n]
-#define TYPE_FIELD_TYPE(thistype, n) FIELD_TYPE(TYPE_FIELD(thistype, n))
-#define TYPE_FIELD_NAME(thistype, n) FIELD_NAME(TYPE_FIELD(thistype, n))
-#define TYPE_FIELD_LOC_KIND(thistype, n) FIELD_LOC_KIND (TYPE_FIELD (thistype, n))
-#define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS (TYPE_FIELD (thistype, n))
-#define TYPE_FIELD_ENUMVAL(thistype, n) FIELD_ENUMVAL (TYPE_FIELD (thistype, n))
-#define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) FIELD_STATIC_PHYSNAME (TYPE_FIELD (thistype, n))
-#define TYPE_FIELD_STATIC_PHYSADDR(thistype, n) FIELD_STATIC_PHYSADDR (TYPE_FIELD (thistype, n))
-#define TYPE_FIELD_DWARF_BLOCK(thistype, n) FIELD_DWARF_BLOCK (TYPE_FIELD (thistype, n))
-#define TYPE_FIELD_ARTIFICIAL(thistype, n) FIELD_ARTIFICIAL(TYPE_FIELD(thistype,n))
-#define TYPE_FIELD_BITSIZE(thistype, n) FIELD_BITSIZE(TYPE_FIELD(thistype,n))
-#define TYPE_FIELD_PACKED(thistype, n) (FIELD_BITSIZE(TYPE_FIELD(thistype,n))!=0)
+#define TYPE_FIELD_TYPE(thistype, n) FIELD_TYPE((thistype)->field (n))
+#define TYPE_FIELD_NAME(thistype, n) FIELD_NAME((thistype)->field (n))
+#define TYPE_FIELD_LOC_KIND(thistype, n) FIELD_LOC_KIND ((thistype)->field (n))
+#define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS ((thistype)->field (n))
+#define TYPE_FIELD_ENUMVAL(thistype, n) FIELD_ENUMVAL ((thistype)->field (n))
+#define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) FIELD_STATIC_PHYSNAME ((thistype)->field (n))
+#define TYPE_FIELD_STATIC_PHYSADDR(thistype, n) FIELD_STATIC_PHYSADDR ((thistype)->field (n))
+#define TYPE_FIELD_DWARF_BLOCK(thistype, n) FIELD_DWARF_BLOCK ((thistype)->field (n))
+#define TYPE_FIELD_ARTIFICIAL(thistype, n) FIELD_ARTIFICIAL((thistype)->field (n))
+#define TYPE_FIELD_BITSIZE(thistype, n) FIELD_BITSIZE((thistype)->field (n))
+#define TYPE_FIELD_PACKED(thistype, n) (FIELD_BITSIZE((thistype)->field (n))!=0)
 
 #define TYPE_FIELD_PRIVATE_BITS(thistype) \
   TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits
