@@ -62,6 +62,17 @@ show exec-file-mismatch -- Show exec-file-mismatch handling (ask|warn|off).
   executable file; if 'warn', just display a warning; if 'off', don't
   attempt to detect a mismatch.
 
+set style completion-prefix foreground COLOR
+set style completion-prefix background COLOR
+set style completion-prefix intensity VALUE
+set style completion-difference foreground COLOR
+set style completion-difference background COLOR
+set style completion-difference intensity VALUE
+set style completion-suffix foreground COLOR
+set style completion-suffix background COLOR
+set style completion-suffix intensity VALUE
+  Control the styling of completions.
+
 tui new-layout NAME WINDOW WEIGHT [WINDOW WEIGHT]...
   Define a new TUI layout, specifying its name and the windows that
   will be displayed.

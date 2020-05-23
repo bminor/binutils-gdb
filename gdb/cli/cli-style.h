@@ -124,6 +124,15 @@ extern cli_style_option tui_border_style;
 /* The border style of a TUI window that does have the focus.  */
 extern cli_style_option tui_active_border_style;
 
+/* The style for the common prefix of completions.  */
+extern cli_style_option completion_prefix_style;
+
+/* The style for the difference character of completions.  */
+extern cli_style_option completion_difference_style;
+
+/* The style for the suffix of completions.  */
+extern cli_style_option completion_suffix_style;
+
 /* True if source styling is enabled.  */
 extern bool source_styling;
 

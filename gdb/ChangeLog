@@ -1,3 +1,17 @@
+2020-05-23  Tom Tromey  <tom@tromey.com>
+
+	* NEWS: Add entry for completion styling.
+	* completer.c (_rl_completion_prefix_display_length): Move
+	declaration earlier.
+	(gdb_fnprint): Use completion_style.
+	(gdb_display_match_list_1): Likewise.
+	* cli/cli-style.c (completion_prefix_style)
+	(completion_difference_style, completion_suffix_style): New
+	globals.
+	(_initialize_cli_style): Register new globals.
+	* cli/cli-style.h (completion_prefix_style)
+	(completion_difference_style, completion_suffix_style): Declare.
+
 2020-05-23  Pedro Alves  <palves@redhat.com>
 
 	* utils.c: Include "gdbsupport/gdb-safe-ctype.h".

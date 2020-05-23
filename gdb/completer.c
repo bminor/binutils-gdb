@@ -31,6 +31,7 @@
 #include <algorithm>
 #include "linespec.h"
 #include "cli/cli-decode.h"
+#include "cli/cli-style.h"
 
 /* FIXME: This is needed because of lookup_cmd_1 ().  We should be
    calling a hook instead so we eliminate the CLI dependency.  */
@@ -2714,6 +2715,8 @@ gdb_fnwidth (const char *string)
   return width;
 }
 
+extern int _rl_completion_prefix_display_length;
+
 /* Print TO_PRINT, one matching completion.
    PREFIX_BYTES is number of common prefix bytes.
    Based on readline/complete.c:fnprint.  */
@@ -2722,7 +2725,7 @@ static int
 gdb_fnprint (const char *to_print, int prefix_bytes,
 	     const struct match_list_displayer *displayer)
 {
-  int printed_len, w;
+  int common_prefix_len, printed_len, w;
   const char *s;
 #if defined (HANDLE_MULTIBYTE)
   mbstate_t ps;
@@ -2735,14 +2738,18 @@ gdb_fnprint (const char *to_print, int prefix_bytes,
   memset (&ps, 0, sizeof (mbstate_t));
 #endif
 
-  printed_len = 0;
+  printed_len = common_prefix_len = 0;
 
   /* Don't print only the ellipsis if the common prefix is one of the
      possible completions */
   if (to_print[prefix_bytes] == '\0')
     prefix_bytes = 0;
 
-  if (prefix_bytes)
+  ui_file_style style = completion_prefix_style.style ();
+  if (!style.is_default ())
+    displayer->puts (displayer, style.to_ansi ().c_str ());
+
+  if (prefix_bytes && _rl_completion_prefix_display_length > 0)
     {
       char ellipsis;
 
@@ -2751,6 +2758,16 @@ gdb_fnprint (const char *to_print, int prefix_bytes,
 	displayer->putch (displayer, ellipsis);
       printed_len = ELLIPSIS_LEN;
     }
+  else if (prefix_bytes && !style.is_default ())
+    {
+      common_prefix_len = prefix_bytes;
+      prefix_bytes = 0;
+    }
+
+  /* There are 3 states: the initial state (#0), when we use the
+     prefix style; the difference state (#1), which lasts a single
+     character; and then the suffix state (#2).  */
+  int state = 0;
 
   s = to_print + prefix_bytes;
   while (*s)
@@ -2802,7 +2819,30 @@ gdb_fnprint (const char *to_print, int prefix_bytes,
 	  printed_len++;
 #endif
 	}
+      if (common_prefix_len > 0 && (s - to_print) >= common_prefix_len)
+	{
+	  if (!style.is_default ())
+	    displayer->puts (displayer, ui_file_style ().to_ansi ().c_str ());
+
+	  ++state;
+	  if (state == 1)
+	    {
+	      common_prefix_len = 1;
+	      style = completion_difference_style.style ();
+	    }
+	  else
+	    {
+	      common_prefix_len = 0;
+	      style = completion_suffix_style.style ();
+	    }
+
+	  if (!style.is_default ())
+	    displayer->puts (displayer, style.to_ansi ().c_str ());
+	}
     }
+
+  if (!style.is_default ())
+    displayer->puts (displayer, ui_file_style ().to_ansi ().c_str ());
 
   return printed_len;
 }
@@ -2912,7 +2952,6 @@ gdb_complete_get_screenwidth (const struct match_list_displayer *displayer)
   return displayer->width;
 }
 
-extern int _rl_completion_prefix_display_length;
 extern int _rl_print_completions_horizontally;
 
 EXTERN_C int _rl_qsort_string_compare (const void *, const void *);
@@ -2931,19 +2970,23 @@ gdb_display_match_list_1 (char **matches, int len, int max,
   char *temp, *t;
   int page_completions = displayer->height != INT_MAX && pagination_enabled;
 
+  bool want_style = !completion_prefix_style.style ().is_default ();
+
   /* Find the length of the prefix common to all items: length as displayed
      characters (common_length) and as a byte index into the matches (sind) */
   common_length = sind = 0;
-  if (_rl_completion_prefix_display_length > 0)
+  if (_rl_completion_prefix_display_length > 0 || want_style)
     {
       t = gdb_printable_part (matches[0]);
       temp = strrchr (t, '/');
       common_length = temp ? gdb_fnwidth (temp) : gdb_fnwidth (t);
       sind = temp ? strlen (temp) : strlen (t);
 
-      if (common_length > _rl_completion_prefix_display_length && common_length > ELLIPSIS_LEN)
+      if (_rl_completion_prefix_display_length > 0
+	  && common_length > _rl_completion_prefix_display_length
+	  && common_length > ELLIPSIS_LEN)
 	max -= common_length - ELLIPSIS_LEN;
-      else
+      else if (!want_style || common_length > max || sind > max)
 	common_length = sind = 0;
     }
 

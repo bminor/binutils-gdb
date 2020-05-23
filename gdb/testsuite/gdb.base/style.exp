@@ -167,4 +167,18 @@ save_vars { env(TERM) } {
 	"warning: [style .*? file] is not a directory\\..*"
     gdb_test "show data-directory" \
 	"GDB's data directory is \"[style .*? file]\"\\..*"
+
+    if {[readline_is_used]} {
+	set test "complete print VALUE_"
+	# ESC-? is the readline binding to show all completions.
+	send_gdb "print VALUE_\x1b?"
+	set pfx [style VALUE_ completion-prefix]
+	set d1 [style O completion-difference]
+	set d2 [style T completion-difference]
+	gdb_test_multiple "" $test {
+	    -re "${pfx}${d1}NE\[ \t\]+${pfx}${d2}WO.*$gdb_prompt print VALUE_$" {
+		gdb_test "ONE" " = .*"
+	    }
+	}
+    }
 }

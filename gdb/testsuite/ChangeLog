@@ -1,3 +1,8 @@
+2020-05-23  Tom Tromey  <tom@tromey.com>
+
+	* gdb.base/style.exp: Add completion styling test.
+	* lib/gdb-utils.exp (style): Add completion styles.
+
 2020-05-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.base/annota1.exp: Update expected results.

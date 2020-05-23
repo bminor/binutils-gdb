@@ -98,6 +98,21 @@ cli_style_option metadata_style ("metadata", ui_file_style::DIM);
 
 /* See cli-style.h.  */
 
+cli_style_option completion_prefix_style ("completion-prefix",
+					  ui_file_style::DIM);
+
+/* See cli-style.h.  */
+
+cli_style_option completion_difference_style ("completion-difference",
+					      ui_file_style::MAGENTA);
+
+/* See cli-style.h.  */
+
+cli_style_option completion_suffix_style ("completion-suffix",
+					  ui_file_style::NONE);
+
+/* See cli-style.h.  */
+
 cli_style_option::cli_style_option (const char *name,
 				    ui_file_style::basic_color fg)
   : changed (name),
@@ -365,6 +380,33 @@ The \"metadata\" style is used when GDB displays information about\n\
 your data, for example \"<unavailable>\""),
 				       &style_set_list, &style_show_list,
 				       false);
+
+  completion_prefix_style.add_setshow_commands (no_class, _("\
+Completion prefix display styling.\n\
+Configure completion prefix colors and display intensity\n\
+The \"completion-prefix\" style is used when GDB displays the shared\n\
+prefix common to the possible completions."),
+						&style_set_list,
+						&style_show_list,
+						false);
+
+  completion_difference_style.add_setshow_commands (no_class, _("\
+Completion difference display styling.\n\
+Configure completion difference colors and display intensity\n\
+The \"completion-difference\" style is used when GDB displays the\n\
+character that differs between the possible completions."),
+						&style_set_list,
+						&style_show_list,
+						false);
+
+  completion_suffix_style.add_setshow_commands (no_class, _("\
+Completion suffix display styling.\n\
+Configure completion suffix colors and display intensity\n\
+The \"completion-suffix\" style is used when GDB displays the suffix\n\
+of the possible completions."),
+						&style_set_list,
+						&style_show_list,
+						false);
 
   tui_border_style.add_setshow_commands (no_class, _("\
 TUI border display styling.\n\
