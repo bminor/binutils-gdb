@@ -256,6 +256,14 @@ validate_exec_file (int from_tty)
 
   /* Try validating via build-id, if available.  This is the most
      reliable check.  */
+
+  /* In case current_exec_file was changed, reopen_exec_file ensures
+     an up to date build_id (will do nothing if the file timestamp
+     did not change).  If exec file changed, reopen_exec_file has
+     allocated another file name, so get_exec_file again.  */
+  reopen_exec_file ();
+  current_exec_file = get_exec_file (0);
+
   const bfd_build_id *exec_file_build_id = build_id_bfd_get (exec_bfd);
   if (exec_file_build_id != nullptr)
     {

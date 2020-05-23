@@ -17,12 +17,13 @@ if {![can_spawn_for_attach]} {
     return 0
 }
 
-standard_testfile attach.c attach2.c
+standard_testfile attach.c attach2.c attach3.c
 set binfile2 ${binfile}2
+set binfile3 ${binfile}3
 set escapedbinfile  [string_to_regexp $binfile]
 
 #execute_anywhere "rm -f ${binfile} ${binfile2}"
-remote_exec build "rm -f ${binfile} ${binfile2}"
+remote_exec build "rm -f ${binfile} ${binfile2} ${binfile3}"
 # For debugging this test
 #
 #log_user 1
@@ -38,6 +39,13 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {debug}] != "" } {
     untested "failed to compile in-system-call test"
+    return -1
+}
+
+# Build the third file, used to check attach when the exec-file has changed.
+
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile3}" "${binfile3}" executable {debug}] != "" } {
+    untested "failed to compile attach exec-file changed test"
     return -1
 }
 
@@ -515,6 +523,7 @@ proc_with_prefix do_attach_exec_mismatch_handling_tests {} {
     global gdb_prompt
     global binfile
     global binfile2
+    global binfile3
 
     clean_restart $binfile
 
@@ -577,10 +586,51 @@ proc_with_prefix do_attach_exec_mismatch_handling_tests {} {
     # Detach the process.
     gdb_test "detach" "Detaching from program: .* detached\\\]" "$test detach attach"
 
+    # Test that the 'exec-file' changed is checked before exec-file-mismatch.
+    set test "mismatch exec-file changed has priority"
+    gdb_test_no_output "set exec-file-mismatch ask"
+    gdb_test_multiple "attach $testpid" "$test attach1 again, initial exec-file" {
+	-re "Attaching to program.*exec-file-mismatch handling is currently \"ask\".*Load new symbol table from .*attach\".*\(y or n\)" {
+	    gdb_test "y" "Reading symbols from .*attach.*" $gdb_test_name
+	}
+    }
+    
+
+    gdb_test "detach" "Detaching from program: .* detached\\\]" "$test detach attach initial exec-file"
+
+    # Change the exec-file and attach to a new process using the changed file.
+    remote_exec build "mv ${binfile} ${binfile}.initial"
+    remote_exec build "mv ${binfile3} ${binfile}"
+    # Ensure GDB detects ${binfile} has changed when checking timestamp.
+    sleep 1
+    remote_exec build "touch ${binfile}"
+    set test_spawn_id3 [spawn_wait_for_attach $binfile]
+    set testpid3 [spawn_id_get_pid $test_spawn_id3]
+
+    gdb_test "attach $testpid3" "Attaching to program.*attach' has changed; re-reading symbols.*" \
+	"$test attach1 again, after changing exec-file"
+    gdb_test "detach" "Detaching from program: .* detached\\\]" "$test detach after attach changed exec-file"
+
+    # Now, test the situation when current exec-file has changed
+    # and we attach to a pid using another file.
+    # Ensure GDB detects ${binfile} has changed when checking timestamp.
+    sleep 1
+    remote_exec build "touch ${binfile}"
+
+    gdb_test_multiple "attach $testpid2" "$test attach2" {
+	-re "Attaching to program.*exec-file-mismatch handling is currently \"ask\".*Load new symbol table from .*attach2\".*\(y or n\)" {
+	    gdb_test "y" "Reading symbols from .*attach2.*" $gdb_test_name
+	}
+    }
+
+    # Restore initial build situation.
+    remote_exec build "mv ${binfile} ${binfile3}"
+    remote_exec build "mv ${binfile}.initial ${binfile}"
 
     # Don't leave a process around
     kill_wait_spawned_process $test_spawn_id
     kill_wait_spawned_process $test_spawn_id2
+    kill_wait_spawned_process $test_spawn_id3
 }
 
 do_attach_tests

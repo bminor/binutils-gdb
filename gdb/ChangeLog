@@ -1,3 +1,9 @@
+2020-06-21  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* exec.c (validate_exec_file): Ensure the build-id is up to
+	date by calling reopen_exec_file (that checks file timestamp
+	to decide to re-read the file).
+
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/25412
