@@ -99,7 +99,7 @@ proc do_catch_exec_test { } {
 # before re-running.
 
 proc do_follow_exec_mode_tests { mode cmd infswitch } {
-    global binfile srcfile srcfile2 testfile testfile2
+    global binfile srcfile srcfile2 testfile testfile2 bkptno_numopt_re
     global gdb_prompt
 
     with_test_prefix "$mode,$cmd,$infswitch" {
@@ -125,7 +125,7 @@ proc do_follow_exec_mode_tests { mode cmd infswitch } {
 	# Set up the output we expect to see after we execute past the exec.
 	#
 	set execd_line [gdb_get_line_number "after-exec" $srcfile2]
-	set expected_re ".*xecuting new program: .*${testfile2}.*Breakpoint .,.*${srcfile2}:${execd_line}.*$gdb_prompt $"
+	set expected_re ".*xecuting new program: .*${testfile2}.*Breakpoint ${bkptno_numopt_re},.*${srcfile2}:${execd_line}.*$gdb_prompt $"
 
 	# Set a breakpoint after the exec call if we aren't single-stepping
 	# past it.
@@ -189,7 +189,7 @@ proc do_follow_exec_mode_tests { mode cmd infswitch } {
 		send_gdb "y\n"
 		exp_continue
 	    }
-	    -re "Starting program: .*$expected_inf.*Breakpoint .,.*\r\n$gdb_prompt $" {
+	    -re "Starting program: .*$expected_inf.*Breakpoint $bkptno_numopt_re,.*\r\n$gdb_prompt $" {
 		pass $test
 	    }
 	}

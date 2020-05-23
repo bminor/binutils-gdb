@@ -273,6 +273,14 @@ set inferior_exited_re "(?:\\\[Inferior \[0-9\]+ \\(\[^\n\r\]*\\) exited)"
 # E.g., $1, $2, etc.
 set valnum_re "\\\$$decimal"
 
+# A regular expression that matches a breakpoint hit with a breakpoint
+# having several code locations.
+set bkptno_num_re "$decimal\\.$decimal"
+
+# A regular expression that matches a breakpoint hit
+# with one or several code locations.
+set bkptno_numopt_re "($decimal\\.$decimal|$decimal)"
+
 ### Only procedures should come after this point.
 
 #
@@ -709,6 +717,7 @@ proc gdb_breakpoint { linespec args } {
 
 proc runto { linespec args } {
     global gdb_prompt
+    global bkptno_numopt_re
     global decimal
 
     delete_breakpoints
@@ -746,7 +755,7 @@ proc runto { linespec args } {
 	    }
 	    return 1
 	}
-	-re "Breakpoint \[0-9\]*, \[0-9xa-f\]* in .*$gdb_prompt $" { 
+	-re "Breakpoint $bkptno_numopt_re, \[0-9xa-f\]* in .*$gdb_prompt $" {
 	    if { $print_pass } {
 		pass $test_name
 	    }

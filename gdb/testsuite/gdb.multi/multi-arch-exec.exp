@@ -148,6 +148,7 @@ proc build_executables { first_arch } {
 }
 
 proc do_test { first_arch mode selected_thread } {
+        global bkptno_numopt_re
 	set from_exec "$first_arch-multi-arch-exec"
 
 	clean_restart ${from_exec}
@@ -169,7 +170,7 @@ proc do_test { first_arch mode selected_thread } {
 
 	# Test that GDB updates the target description / arch successfuly
 	# after the exec.
-	gdb_test "continue" "Breakpoint 2, main.*" "continue across exec that changes architecture"
+	gdb_test "continue" "Breakpoint $bkptno_numopt_re, main.*" "continue across exec that changes architecture"
 }
 
 # Test both arch1=>arch2 and arch2=>arch1.

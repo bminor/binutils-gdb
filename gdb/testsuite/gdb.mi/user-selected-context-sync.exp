@@ -307,8 +307,13 @@ proc test_continue_to_start { mode inf } {
 
 	    # Consume MI event output.
 	    with_spawn_id $mi_spawn_id {
-		mi_expect_stop "breakpoint-hit" "main" "" "$srcfile" \
-		    "$decimal" {"" "disp=\"del\""} "stop at breakpoint in main"
+		if { $inf == 1 } {
+		    mi_expect_stop "breakpoint-hit" "main" "" "$srcfile" \
+			"$decimal" {"" "disp=\"del\""} "stop at breakpoint in main"
+		} else {
+		    mi_expect_stop "breakpoint-hit" "main" "" "$srcfile" \
+			"$decimal" {"" "disp=\"del\"" "locno=\"[0-9]+\""} "stop at breakpoint in main"
+		}
 	    }
 
 	    if { $mode == "all-stop" } {
@@ -330,9 +335,15 @@ proc test_continue_to_start { mode inf } {
 
 		    # Consume MI output.
 		    with_spawn_id $mi_spawn_id {
-			mi_expect_stop "breakpoint-hit" "child_sub_function" \
-			    "" "$srcfile" "$decimal" {"" "disp=\"del\""} \
-			    "thread $inf.$thread stops MI"
+			if { $inf == 1} {
+			    mi_expect_stop "breakpoint-hit" "child_sub_function" \
+				"" "$srcfile" "$decimal" {"" "disp=\"del\""} \
+				"thread $inf.$thread stops MI"
+			} else {
+			    mi_expect_stop "breakpoint-hit" "child_sub_function" \
+				"" "$srcfile" "$decimal" {"" "disp=\"del\"" "locno=\"[0-9]+\""} \
+				"thread $inf.$thread stops MI"
+			}
 		    }
 		}
 
@@ -359,9 +370,15 @@ proc test_continue_to_start { mode inf } {
 
 		# Consume MI output.
 		with_spawn_id $mi_spawn_id {
-		    mi_expect_stop "breakpoint-hit" "child_sub_function" \
-			"" "$srcfile" "$decimal" {"" "disp=\"del\""} \
-			"thread $inf.2 stops MI"
+		    if { $inf == 1} {
+			mi_expect_stop "breakpoint-hit" "child_sub_function" \
+			    "" "$srcfile" "$decimal" {"" "disp=\"del\""} \
+			    "thread $inf.2 stops MI"
+		    } else {
+			mi_expect_stop "breakpoint-hit" "child_sub_function" \
+			    "" "$srcfile" "$decimal" {"" "disp=\"del\"" "locno=\"[0-9]+\""} \
+			    "thread $inf.2 stops MI"
+		    }
 		}
 	    }
 	}
@@ -434,7 +451,7 @@ proc_with_prefix test_setup { mode } {
 
 	with_spawn_id $mi_spawn_id {
 	    mi_expect_stop "breakpoint-hit" "main" "" "$srcfile" "$decimal" \
-		{"" "disp=\"del\""} "main stop"
+		{"" "disp=\"del\"" "locno=\"[0-9]+\""} "main stop"
 	}
 
 	# Consume CLI output.

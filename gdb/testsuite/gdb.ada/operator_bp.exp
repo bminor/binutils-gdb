@@ -56,7 +56,7 @@ foreach op { "*" "/" "mod" "rem" "**" "<" "<=" ">" ">=" "=" "and" "or" "xor" "&"
 foreach op { "+" "-" "*" "/" "mod" "rem" "**" "<" "<=" ">" ">=" "=" "and" "or" "xor" "&" "abs" "not"} {
     set op_re [string_to_regexp $op]
     gdb_test "continue" \
-             "Breakpoint $decimal, ops\\.\"$op_re\" .*"\
+             "Breakpoint $bkptno_numopt_re, ops\\.\"$op_re\" .*"\
              "continue to \"$op\""
 }
 
@@ -86,7 +86,7 @@ foreach op { "*" "/" "mod" "rem" "**" "<" "<=" ">" ">=" "=" "and" "or" "xor" "&"
 foreach op { "+" "-" "*" "/" "mod" "rem" "**" "<" "<=" ">" ">=" "=" "and" "or" "xor" "&" "abs" "not"} {
     set op_re [string_to_regexp $op]
     gdb_test "continue" \
-             "Breakpoint $decimal, ops\\.\"$op_re\" .*"\
+             "Breakpoint $bkptno_numopt_re, ops\\.\"$op_re\" .*"\
              "continue to ops.\"$op\""
 }
 

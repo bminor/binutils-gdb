@@ -1241,6 +1241,20 @@ extern enum print_stop_action bpstat_print (bpstat *bs, target_waitkind kind);
    Return 1 otherwise.  */
 extern int bpstat_num (bpstat **, int *);
 
+/* If BS indicates a breakpoint and this breakpoint has several code locations,
+   return the location number of BS, otherwise return 0.  */
+
+extern int bpstat_locno (const bpstat *bs);
+
+/* Print BS breakpoint number optionally followed by a . and breakpoint locno.
+
+   For a breakpoint with only one code location, outputs the signed field
+   "bkptno" breakpoint number of BS (as returned by bpstat_num).
+   If BS has several code locations, outputs a '.' character followed by
+   the signed field "locno" (as returned by bpstat_locno).  */
+
+extern void print_num_locno (const bpstat *bs, struct ui_out *);
+
 /* Perform actions associated with the stopped inferior.  Actually, we
    just use this for breakpoint commands.  Perhaps other actions will
    go here later, but this is executed at a late time (from the

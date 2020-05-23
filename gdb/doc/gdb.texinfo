@@ -4375,9 +4375,75 @@ are operated on.
 @cindex latest breakpoint
 Breakpoints are set with the @code{break} command (abbreviated
 @code{b}).  The debugger convenience variable @samp{$bpnum} records the
-number of the breakpoint you've set most recently; see @ref{Convenience
-Vars,, Convenience Variables}, for a discussion of what you can do with
-convenience variables.
+number of the breakpoint you've set most recently:
+@smallexample
+(gdb) b main
+Breakpoint 1 at 0x11c6: file zeoes.c, line 24.
+(gdb) p $bpnum
+$1 = 1
+@end smallexample
+
+A breakpoint may be mapped to multiple code locations for example with
+inlined functions, Ada generics, C@t{++} templates or overloaded function names.
+@value{GDBN} then indicates the number of code locations in the breakpoint
+command output:
+@smallexample
+(gdb) b some_func
+Breakpoint 2 at 0x1179: some_func. (3 locations)
+(gdb) p $bpnum
+$2 = 2
+(gdb)
+@end smallexample
+
+@vindex $_hit_bpnum@r{, convenience variable}
+@vindex $_hit_locno@r{, convenience variable}
+When your program stops on a breakpoint, the convenience variables
+@samp{$_hit_bpnum} and @samp{$_hit_locno} are respectively set to the number of
+the encountered breakpoint and the number of the breakpoint's code location:
+@smallexample
+Thread 1 "zeoes" hit Breakpoint 2.1, some_func () at zeoes.c:8
+8	  printf("some func\n");
+(gdb) p $_hit_bpnum
+$5 = 2
+(gdb) p $_hit_locno
+$6 = 1
+(gdb)
+@end smallexample
+
+Note that @samp{$_hit_bpnum} and @samp{$bpnum} are not equivalent:
+@samp{$_hit_bpnum} is set to the breakpoint number @b{last hit}, while
+@samp{$bpnum} is set to the breakpoint number @b{last set}.
+
+
+If the encountered breakpoint has only one code location, @samp{$_hit_locno}
+is set to 1:
+@smallexample
+Breakpoint 1, main (argc=1, argv=0x7fffffffe018) at zeoes.c:24
+24	  if (argc > 1)
+(gdb) p $_hit_bpnum
+$3 = 1
+(gdb) p $_hit_locno
+$4 = 1
+(gdb)
+@end smallexample
+
+The @samp{$_hit_bpnum} and @samp{$_hit_locno} variables can typically be used
+in a breakpoint command list.
+(@pxref{Break Commands, ,Breakpoint Command Lists}).  For example, as
+part of the breakpoint command list, you can disable completely the
+encountered breakpoint using @kbd{disable $_hit_bpnum} or disable the
+specific encountered breakpoint location using
+@kbd{disable $_hit_bpnum.$_hit_locno}.
+If a breakpoint has only one location, @samp{$_hit_locno} is set to 1
+and the commands @kbd{disable $_hit_bpnum} and
+@kbd{disable $_hit_bpnum.$_hit_locno} both disable the breakpoint.
+
+You can also define aliases to easily disable the last hit location or
+last hit breakpoint:
+@smallexample
+(gdb) alias lld = disable $_hit_bpnum.$_hit_locno
+(gdb) alias lbd = disable $_hit_bpnum
+@end smallexample
 
 @table @code
 @item break @var{locspec}
@@ -5775,6 +5841,14 @@ Expressions}).
 
 Pressing @key{RET} as a means of repeating the last @value{GDBN} command is
 disabled within a @var{command-list}.
+
+Inside a command list, you can use the command
+@kbd{disable $_hit_bpnum} to disable the encountered breakpoint.
+
+If your breakpoint has several code locations, the command
+@kbd{disable $_hit_bpnum.$_hit_locno} will disable the specific breakpoint
+code location encountered.  If the breakpoint has only one location,
+this command will disable the encountered breakpoint.
 
 You can use breakpoint commands to start your program up again.  Simply
 use the @code{continue} command, or @code{step}, or any other command
@@ -32840,6 +32914,20 @@ line="13",arch="i386:x86_64"@}
 (gdb)
 @end smallexample
 
+For a @samp{breakpoint-hit} stopped reason, when the breakpoint
+encountered has multiple locations, the field @samp{bkptno} is
+followed by the field @samp{locno}.
+
+@smallexample
+-exec-continue
+^running
+(gdb)
+@@Hello world
+*stopped,reason="breakpoint-hit",disp="keep",bkptno="2",locno="3",frame=@{
+func="foo",args=[],file="hello.c",fullname="/home/foo/bar/hello.c",
+line="13",arch="i386:x86_64"@}
+(gdb)
+@end smallexample
 
 @subheading The @code{-exec-finish} Command
 @findex -exec-finish

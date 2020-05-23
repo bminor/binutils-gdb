@@ -541,13 +541,14 @@ if ![runto_main] then {
 gdb_test_multiple "break $bp_location1" \
     "set to-be-silent break bp_location1" {
 	-re "Breakpoint (\[0-9\]*) at .*, line $bp_location1.*$gdb_prompt $" {
+	    set bpno $expect_out(1,string)
 	    pass "set to-be-silent break bp_location1"
 	}
     }
 
-gdb_test "commands $expect_out(1,string)\nsilent\nend" ">end" "set silent break bp_location1"
+gdb_test "commands $bpno\nsilent\nend" ">end" "set silent break bp_location1"
 
-gdb_test "info break $expect_out(1,string)" \
+gdb_test "info break $bpno" \
     "\[0-9\]*\[ \t\]*breakpoint.*:$bp_location1\r\n\[ \t\]*silent.*" \
     "info silent break bp_location1"
 
@@ -557,6 +558,10 @@ gdb_test "continue" "Continuing." \
 gdb_test "bt" "#0  main .* at .*:$bp_location1.*" \
     "stopped for silent break bp_location1"
 
+# Verify the $_hit_bpnum convenience variable is set to the silent hit bpno.
+gdb_test "printf \"%d\\n\", \$_hit_bpnum" "$bpno" \
+    "Silent breakpoint hit \$_hit_bpnum is silent $bpno"
+ 
 # Verify that GDB can at least parse a breakpoint with the
 # "thread" keyword.  (We won't attempt to test here that a
 # thread-specific breakpoint really triggers appropriately.

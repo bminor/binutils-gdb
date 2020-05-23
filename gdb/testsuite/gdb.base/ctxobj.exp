@@ -67,9 +67,17 @@ gdb_test "break ctxobj-f.c:$bp_location" \
          "Breakpoint \[0-9\]+ at 0x\[0-9a-fA-F\]+: .*" \
          "break in get_version functions"
 
-gdb_test "continue" \
-         "Breakpoint $decimal, get_version_1 \\(\\).*" \
-         "continue to get_version_1"
+global expect_out
+set test "continue to get_version_1"
+gdb_test_multiple "continue" $test {
+    -re "Breakpoint ($bkptno_num_re), get_version_1 \\(\\).*" {
+	set bpno $expect_out(1,string)
+	pass $test
+    }
+}
+# Verify $_hit_bpnum.$_hit_locno convenience variables are set to the hit bpno.
+gdb_test "printf \"%d.%d\\n\", \$_hit_bpnum, \$_hit_locno" "$bpno" \
+    "$test \$_hit_bpnum.\$_hit_locno is $bpno"
 
 # Try printing "this_version_num".  There are two global variables
 # with that name, and some systems such as GNU/Linux merge them
@@ -100,10 +108,16 @@ gdb_test "print this_version_num == v" \
         "print libctxobj1's this_version_num from symtab"
 
 # Do the same, but from get_version_2.
-
-gdb_test "continue" \
-         "Breakpoint $decimal, get_version_2 \\(\\).*" \
-         "continue to get_version_2"
+set test "continue to get_version_2"
+gdb_test_multiple "continue" $test {
+    -re "Breakpoint ($bkptno_num_re), get_version_2 \\(\\).*" {
+	set bpno $expect_out(1,string)
+	pass $test
+    }
+}
+# Verify the $_hit_bpnum.$_hit_locno convenience variables are set to the hit bpno.
+gdb_test "printf \"%d.%d\\n\", \$_hit_bpnum, \$_hit_locno" "$bpno" \
+    "$test \$_hit_bpnum.\$_hit_locno is $bpno"
 
 gdb_test "print this_version_num == v" \
          " = 1" \

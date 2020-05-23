@@ -67,14 +67,21 @@ gdb_test "info break $bp" \
 # See the comments in condbreak.exp for "run until breakpoint at
 # marker1" for an explanation of the xfail below.
 set test "continue to break marker1"
+set bpno 0
 gdb_test_multiple "continue" "$test" {
-    -re "Breakpoint \[0-9\]*, marker1.*$gdb_prompt $" {
+    -re "Breakpoint (\[0-9\]*), marker1.*$gdb_prompt $" {
+	set bpno $expect_out(1,string)
 	pass "$test"
     }
-    -re "Breakpoint \[0-9\]*, $hex in marker1.*$gdb_prompt $" {
+    -re "Breakpoint (\[0-9\]*), $hex in marker1.*$gdb_prompt $" {
+	set bpno $expect_out(1,string)
 	xfail "$test"
     }
 }
+# Verify the $_hit_bbnum convenience variable is equal to the hit bpno.
+gdb_test "print \$_hit_bpnum" " = $bpno" "$test \$_hit_bpnum is $bpno"
+# Verify the $_hit_locno is 1, as there is only one code location.
+gdb_test "print \$_hit_locno" " = 1" "$test \$_hit_locno is 1"
 
 gdb_test_no_output "delete $bp" "delete break marker1"
 
@@ -359,7 +366,8 @@ with_test_prefix "4th breakpoint" {
 }
 
 # Perform tests for disable/enable commands on multiple
-# locations and breakpoints.
+# code locations and breakpoints.  If a breakpoint has only one code location,
+# enable/disable num  and enable/disable num.1 should be equivalent.
 #
 # WHAT - the command to test (disable/enable).
 #
@@ -372,7 +380,7 @@ proc test_ena_dis_br { what } {
     global b3
     global b4
     global gdb_prompt
-    
+
     # OPPOS    - the command opposite to WHAT.
     # WHAT_RES - whether breakpoints are expected to end
     #            up enabled or disabled.
@@ -395,13 +403,13 @@ proc test_ena_dis_br { what } {
 	set p2 "pass"
     }
 
-    # Now enable(disable) $b.1 $b2.1.
+    # Now enable(disable) $b1.1 $b2.1.
     gdb_test_no_output "$what $b1.1 $b2.1" "$what \$b1.1 \$b2.1"
     set test1 "${what}d \$b1.1 and \$b2.1"
 
     # Now $b1.1 and $b2.1 should be enabled(disabled).
     gdb_test_multiple "info break" "$test1" {
-       -re "(${b1}.1)(\[^\n\r\]*)( n.*)(${b2}.1)(\[^\n\r\]*)( n.*)$gdb_prompt $" {
+       -re "(${b1})(\[^\n\r\]*)( n.*)(${b2})(\[^\n\r\]*)( n.*)$gdb_prompt $" {
            $p1 "$test1"
        }
        -re ".*$gdb_prompt $" {
@@ -420,19 +428,16 @@ proc test_ena_dis_br { what } {
        "${what}d \$b1"
 
     gdb_test_no_output "$oppos $b3" "$oppos \$b3"
-    gdb_test_no_output "$what $b4 $b3.1" "$what \$b4 \$b3.1"
-    set test1 "${what}d \$b4 and \$b3.1,remain ${oppos}d \$b3"
+    # Now $b4 $b3 should be enabled(disabled)
+    set test1 "${what}d \$b4 and \$b3"
+    gdb_test "info break" "(${b3})(\[^\n\r]*)( $oppos_res.*).*(${b4})(\[^\n\r\]*)( $oppos_res.*)" "$test1"
 
-    # Now $b4 $b3.1 should be enabled(disabled) and
-    # $b3 should remain disabled(enabled).
-    gdb_test_multiple "info break" "$test1" {
-       -re "(${b3})(\[^\n\r]*)( $oppos_res.*)(${b3}.1)(\[^\n\r\]*)( n.*)(${b4})(\[^\n\r\]*)( $what_res.*)$gdb_prompt $" {
-           $p1 "$test1"
-       }
-       -re "(${b3})(\[^\n\r]*)( $oppos_res.*)(${b4})(\[^\n\r\]*)( $what_res.*)$gdb_prompt $" {
-           $p2 "$test1"
-       }
-    }
+    gdb_test_no_output "$what $b4 $b3.1" "$what \$b4 \$b3.1"
+    set test1 "${what}d \$b4 and \$b3.1, changing \$b3"
+
+    # Now $b4 $b3 should be enabled(disabled)
+    gdb_test "info break" "(${b3})(\[^\n\r]*)( $what_res.*).*(${b4})(\[^\n\r\]*)( $what_res.*)" "$test1"
+
 
     # Now enable(disable) '$b4.1 fooobaar'.  This should error on
     # fooobaar.
@@ -443,7 +448,7 @@ proc test_ena_dis_br { what } {
 
     # $b4.1 should be enabled(disabled).
     gdb_test_multiple "info break" "$test1" {
-        -re "(${b4}.1)(\[^\n\r\]*)( n.*)$gdb_prompt $" {
+        -re "(${b4})(\[^\n\r\]*)( n.*)$gdb_prompt $" {
            $p1 "$test1"
        }
        -re ".*$gdb_prompt $" {

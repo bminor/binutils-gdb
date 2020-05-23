@@ -1208,11 +1208,11 @@ proc mi_detect_async {} {
 # filename of a file without debug info.  ARGS should not include [] the
 # list of argument is enclosed in, and other regular expressions should
 # not include quotes.
-# If EXTRA is a list of one element, it's the regular expression
+# EXTRA can be a list of one, two or three elements.
+# The first element is the regular expression
 # for output expected right after *stopped, and before GDB prompt.
-# If EXTRA is a list of two elements, the first element is for
-# output right after *stopped, and the second element is output
-# right after reason field.  The regex after reason should not include
+# The third element is the regulation expression for the locno
+# right after bkptno field.  The locno regex should not include
 # the comma separating it from the following fields.
 #
 # When we fail to match output at all, -1 is returned.  If FILE does
@@ -1237,7 +1237,14 @@ proc mi_expect_stop { reason func args file line extra test } {
 
     set after_stopped ""
     set after_reason ""
-    if { [llength $extra] == 2 } {
+    set locno ""
+    if { [llength $extra] == 3 } {
+	set after_stopped [lindex $extra 0]
+	set after_reason [lindex $extra 1]
+	set after_reason "${after_reason},"
+	set locno [lindex $extra 2]
+	set locno "${locno},"
+    } elseif { [llength $extra] == 2 } {
 	set after_stopped [lindex $extra 0]
 	set after_reason [lindex $extra 1]
 	set after_reason "${after_reason},"
@@ -1311,10 +1318,12 @@ proc mi_expect_stop { reason func args file line extra test } {
     set ebn ""
     if { $reason == "breakpoint-hit" } {
 	set bn {bkptno="[0-9]+",}
+	set bn "${bn}${locno}"
     } elseif { $reason == "solib-event" } {
 	set bn ".*"
     } elseif { $reason == "exception-caught" } {
 	set ebn {bkptno="[0-9]+",}
+	set ebn "${ebn}${locno}"
 	set bn ".*"
 	set reason "breakpoint-hit"
     }
@@ -1328,6 +1337,7 @@ proc mi_expect_stop { reason func args file line extra test } {
     set a $after_reason
 
     verbose -log "mi_expect_stop: expecting: \\*stopped,${ebn}${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,(?:file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\",arch=\"$any\"|from=\"$file\")\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re"
+
     gdb_expect {
 	-re "\\*stopped,${ebn}${r}${a}${bn}frame=\{addr=\"$hex\",func=\"$func\",args=$args,(?:file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\",arch=\"$any\"|from=\"$file\")\}$after_stopped,thread-id=\"$decimal\",stopped-threads=$any\r\n($thread_selected_re|$breakpoint_re)*$prompt_re" {
 	    pass "$test"

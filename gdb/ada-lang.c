@@ -12356,7 +12356,7 @@ ada_catchpoint::print_it (const bpstat *bs) const
 
   uiout->text (disposition == disp_del
 	       ? "\nTemporary catchpoint " : "\nCatchpoint ");
-  uiout->field_signed ("bkptno", number);
+  print_num_locno (bs, uiout);
   uiout->text (", ");
 
   /* ada_exception_name_addr relies on the selected frame being the

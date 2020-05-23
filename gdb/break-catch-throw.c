@@ -254,7 +254,7 @@ exception_catchpoint::print_it (const bpstat *bs) const
   bp_temp = disposition == disp_del;
   uiout->text (bp_temp ? "Temporary catchpoint "
 		       : "Catchpoint ");
-  uiout->field_signed ("bkptno", number);
+  print_num_locno (bs, uiout);
   uiout->text ((kind == EX_EVENT_THROW ? " (exception thrown), "
 		: (kind == EX_EVENT_CATCH ? " (exception caught), "
 		   : " (exception rethrown), ")));
