@@ -495,8 +495,9 @@ bfd_get_file_size (bfd *abfd)
       struct areltdata *adata = (struct areltdata *) abfd->arelt_data;
       archive_size = adata->parsed_size;
       /* If the archive is compressed we can't compare against file size.  */
-      if (memcmp (((struct ar_hdr *) adata->arch_header)->ar_fmag,
-		  "Z\012", 2) == 0)
+      if (adata->arch_header != NULL
+	  && memcmp (((struct ar_hdr *) adata->arch_header)->ar_fmag,
+		     "Z\012", 2) == 0)
 	return archive_size;
       abfd = abfd->my_archive;
     }
