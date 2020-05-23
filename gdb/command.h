@@ -64,7 +64,7 @@ enum command_class
   class_bookmark,
   class_obscure,     /* obscure */
   class_maintenance, /* internals */
-  class_tui,
+  class_tui,         /* text-user-interface */
   class_user,        /* user-defined */
 
   /* Used for "show" commands that have no corresponding "set" command.  */

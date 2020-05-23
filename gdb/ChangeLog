@@ -1,3 +1,9 @@
+2020-05-26  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* command.h: Add comment giving the name of class_tui.
+	* cli/cli-cmds.c (_initialize_cli_cmds): If TUI defined,
+	create the fake command for the help for class_tui.
+
 2020-05-26  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (ada_print_array_index): Change type.  Call val_atr.

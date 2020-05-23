@@ -2150,6 +2150,12 @@ Variable lookups are done with respect to the selected frame.\n\
 When the program being debugged stops, gdb selects the innermost frame.\n\
 The commands below can be used to select other frames by number or address."),
 	   &cmdlist);
+#ifdef TUI
+  add_cmd ("text-user-interface", class_tui,
+	   _("TUI is the GDB text based interface.\n\
+In TUI mode, GDB can display several text windows showing\n\
+the source file, the processor registers, the program disassembly, ..."), &cmdlist);
+#endif
   add_cmd ("running", class_run, _("Running the program."), &cmdlist);
 
   /* Define general commands.  */
