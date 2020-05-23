@@ -830,8 +830,8 @@ shell_escape (const char *arg, int from_tty)
   /* Make sure to return to the directory GDB thinks it is, in case
      the shell command we just ran changed it.  */
   chdir (current_directory);
-  exit_status_set_internal_vars (rc);
 #endif
+  exit_status_set_internal_vars (rc);
 #else /* Can fork.  */
   int status, pid;
 

@@ -1,5 +1,9 @@
 2020-05-27  Hannes Domani  <ssbssa@yahoo.de>
 
+	* cli/cli-cmds.c (shell_escape): Move exit_status_set_internal_vars.
+
+2020-05-27  Hannes Domani  <ssbssa@yahoo.de>
+
 	* exec.c (exec_file_attach): Use errno value of first openp failure.
 
 2020-05-27  Hannes Domani  <ssbssa@yahoo.de>
