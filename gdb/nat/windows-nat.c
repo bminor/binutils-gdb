@@ -51,7 +51,6 @@ bool ignore_first_breakpoint = false;
 
 windows_thread_info::~windows_thread_info ()
 {
-  CloseHandle (h);
 }
 
 void

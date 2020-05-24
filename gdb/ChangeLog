@@ -1,3 +1,8 @@
+2020-05-27  Hannes Domani  <ssbssa@yahoo.de>
+
+	* nat/windows-nat.c (windows_thread_info::~windows_thread_info):
+	Don't close thread handle.
+
 2020-05-27  Tom Tromey  <tom@tromey.com>
 	    Simon Marchi  <simon.marchi@efficios.com>
 
