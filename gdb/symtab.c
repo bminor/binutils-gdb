@@ -5260,7 +5260,7 @@ compare_symbol_name (const char *symbol_name, language symbol_language,
 
 /*  See symtab.h.  */
 
-void
+bool
 completion_list_add_name (completion_tracker &tracker,
 			  language symbol_language,
 			  const char *symname,
@@ -5272,7 +5272,7 @@ completion_list_add_name (completion_tracker &tracker,
 
   /* Clip symbols that cannot match.  */
   if (!compare_symbol_name (symname, symbol_language, lookup_name, match_res))
-    return;
+    return false;
 
   /* Refresh SYMNAME from the match string.  It's potentially
      different depending on language.  (E.g., on Ada, the match may be
@@ -5296,6 +5296,8 @@ completion_list_add_name (completion_tracker &tracker,
     tracker.add_completion (std::move (completion),
 			    &match_res.match_for_lcd, text, word);
   }
+
+  return true;
 }
 
 /* completion_list_add_name wrapper for struct symbol.  */
@@ -5306,9 +5308,10 @@ completion_list_add_symbol (completion_tracker &tracker,
 			    const lookup_name_info &lookup_name,
 			    const char *text, const char *word)
 {
-  completion_list_add_name (tracker, sym->language (),
-			    sym->natural_name (),
-			    lookup_name, text, word);
+  if (!completion_list_add_name (tracker, sym->language (),
+				 sym->natural_name (),
+				 lookup_name, text, word))
+    return;
 
   /* C++ function symbols include the parameters within both the msymbol
      name and the symbol name.  The problem is that the msymbol name will

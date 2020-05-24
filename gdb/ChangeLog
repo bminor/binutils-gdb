@@ -1,3 +1,11 @@
+2020-05-24  Pedro Alves  <palves@redhat.com>
+
+	* symtab.c (completion_list_add_name): Return boolean indication
+	of whether the symbol matched.
+	(completion_list_add_symbol): Don't try to remove C++ aliases if
+	the symbol didn't match in the first place.
+	* symtab.h (completion_list_add_name): Return bool.
+
 2020-05-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbtypes.h (TYPE_FIELD): Remove.  Replace all uses with
