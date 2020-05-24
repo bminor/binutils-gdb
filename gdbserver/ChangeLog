@@ -1,3 +1,9 @@
+2020-05-27  Hannes Domani  <ssbssa@yahoo.de>
+
+	* win32-low.cc (do_initial_child_stuff): Set open_process_used.
+	(win32_clear_inferiors): Use open_process_used.
+	(get_child_debug_event): Likewise.
+
 2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
 
 	PR gdbserver/25893

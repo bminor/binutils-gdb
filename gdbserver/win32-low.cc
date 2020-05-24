@@ -88,6 +88,9 @@ static int soft_interrupt_requested = 0;
    by suspending all the threads.  */
 static int faked_breakpoint = 0;
 
+/* True if current_process_handle needs to be closed.  */
+static bool open_process_used = false;
+
 #ifdef __x86_64__
 bool wow64_process = false;
 #endif
@@ -383,6 +386,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 
   soft_interrupt_requested = 0;
   faked_breakpoint = 0;
+  open_process_used = true;
 
   memset (&current_event, 0, sizeof (current_event));
 
@@ -859,8 +863,11 @@ windows_nat::handle_output_debug_string (struct target_waitstatus *ourstatus)
 static void
 win32_clear_inferiors (void)
 {
-  if (current_process_handle != NULL)
-    CloseHandle (current_process_handle);
+  if (open_process_used)
+    {
+      CloseHandle (current_process_handle);
+      open_process_used = false;
+    }
 
   for_each_thread (delete_thread_info);
   siginfo_er.ExceptionCode = 0;
@@ -1513,6 +1520,12 @@ get_child_debug_event (DWORD *continue_status,
 		(unsigned) current_event.dwThreadId));
       CloseHandle (current_event.u.CreateProcessInfo.hFile);
 
+      if (open_process_used)
+	{
+	  CloseHandle (current_process_handle);
+	  open_process_used = false;
+	}
+
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
       main_thread_id = current_event.dwThreadId;
 
@@ -1560,8 +1573,6 @@ get_child_debug_event (DWORD *continue_status,
 	  }
       }
       child_continue (DBG_CONTINUE, desired_stop_thread_id);
-      CloseHandle (current_process_handle);
-      current_process_handle = NULL;
       break;
 
     case LOAD_DLL_DEBUG_EVENT:
