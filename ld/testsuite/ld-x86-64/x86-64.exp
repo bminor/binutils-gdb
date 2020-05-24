@@ -467,6 +467,7 @@ run_dump_test "pr25416-2a"
 run_dump_test "pr25416-2b"
 run_dump_test "pr25416-3"
 run_dump_test "pr25416-4"
+run_dump_test "pr26018"
 
 if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
     return
