@@ -3062,7 +3062,11 @@ void
 riscv_pre_output_hook (void)
 {
   const frchainS *frch;
-  const asection *s;
+  segT s;
+
+  /* Save the current segment info.  */
+  segT seg = now_seg;
+  subsegT subseg = now_subseg;
 
   for (s = stdoutput->sections; s; s = s->next)
     for (frch = seg_info (s)->frchainP; frch; frch = frch->frch_next)
@@ -3082,11 +3086,18 @@ riscv_pre_output_hook (void)
 		exp.X_add_number = 0;
 		exp.X_op_symbol = symval->X_op_symbol;
 
+		/* We must set the segment before creating a frag after all
+		   frag chains have been chained together.  */
+		subseg_set (s, frch->frch_subseg);
+
 		fix_new_exp (frag, (int) frag->fr_offset, 1, &exp, 0,
 			     BFD_RELOC_RISCV_CFA);
 	      }
 	  }
       }
+
+  /* Restore the original segment info.  */
+  subseg_set (seg, subseg);
 }
 
 

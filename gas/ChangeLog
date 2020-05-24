@@ -1,3 +1,10 @@
+2020-05-24  Jim Wilson  <jimw@sifive.com>
+
+	PR 26025
+	* config/tc-riscv.c (riscv_pre_output_hook): Change s type from const
+	asection to segT.  New locals seg and subseg.  Call subseg_set before
+	fix_new_exp.  Call subseg_set after loop to restore original values.
+
 2020-05-21  Alan Modra  <amodra@gmail.com>
 
 	* atof-generic.c: Replace "if (x) free (x)" with "free (x)"
