@@ -1,5 +1,5 @@
 #source: ehdr_start.s
-#ld: -e _start -shared
+#ld: -e _start -shared -z notext
 #nm: -n
 #target: *-*-linux* *-*-gnu* *-*-nacl* arm*-*-uclinuxfdpiceabi
 #xfail: cris*-*-* frv-*-* ![check_shared_lib_support] 

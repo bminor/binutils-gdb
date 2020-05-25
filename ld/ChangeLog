@@ -1,3 +1,40 @@
+2020-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/eh6.d: Pass -z notext to linker.
+	* testsuite/ld-elf/ehdr_start-shared.d: Likewise.
+	* testsuite/ld-elf/pr19539.d: Likewise.
+	* testsuite/ld-elfvers/vers.exp: Likewise.
+	* testsuite/ld-elfvsb/elfvsb.exp: Likewise.
+	* testsuite/ld-i386/i386.exp: Likewise.
+	* testsuite/ld-i386/nogot1.d: Likewise.
+	* testsuite/ld-i386/pr19539.d: Likewise.
+	* testsuite/ld-i386/pr19636-2a.d: Likewise.
+	* testsuite/ld-i386/pr19636-2b.d: Likewise.
+	* testsuite/ld-i386/pr19636-2c.d: Likewise.
+	* testsuite/ld-i386/pr19636-2d.d: Likewise.
+	* testsuite/ld-i386/pr19636-2e.d: Likewise.
+	* testsuite/ld-i386/pr19636-3d.d: Likewise.
+	* testsuite/ld-i386/pr19636-3e.d: Likewise.
+	* testsuite/ld-i386/pr19939b.d: Likewise.
+	* testsuite/ld-i386/undefweaka.d: Likewise.
+	* testsuite/ld-i386/undefweakb.d: Likewise.
+	* testsuite/ld-shared/shared.exp: Likewise.
+	* testsuite/ld-size/size.exp: Likewise.
+	* testsuite/ld-unique/unique.exp: Likewise.
+	* testsuite/ld-x86-64/pie1.d: Likewise.
+	* testsuite/ld-x86-64/pr19539a.d: Likewise.
+	* testsuite/ld-x86-64/pr19539b.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1d.d: Likewise.
+	* testsuite/ld-x86-64/pr19636-1e.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-1a.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-1b.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2b.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2c.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2d.d: Likewise.
+	* testsuite/ld-x86-64/pr19807-2e.d: Likewise.
+	* testsuite/ld-x86-64/pr19939b.d: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
 2020-05-24  Fangrui Song <maskray@google.com>
 
 	PR ld/26018

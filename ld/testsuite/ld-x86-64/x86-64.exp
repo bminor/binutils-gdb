@@ -212,9 +212,12 @@ set x86_64tests {
      "--64" { pr19827a.S }}
     {"Build pr19827b.so" "-melf_x86_64 -shared" ""
      "--64" { pr19827b.S } {} "pr19827b.so"}
-    {"Build pr19827" "-melf_x86_64 -pie tmpdir/pr19827a.o tmpdir/pr19827b.so" ""
+    {"Build pr19827"
+     "-melf_x86_64 -pie -z notext tmpdir/pr19827a.o tmpdir/pr19827b.so"
+     ""
      "--64" { dummy.s } {{readelf {-rW} pr19827.rd}} "pr19827"}
-    {"Build pr19827.so" "-melf_x86_64 -shared -Bsymbolic" ""
+    {"Build pr19827.so"
+     "-melf_x86_64 -shared -Bsymbolic -z notext" ""
      "--64" { pr19827a.S }  {{readelf {-rW} pr19827.rd}} "pr19827.so"}
     {"Build pr19969.so" "-melf_x86_64 -shared" ""
      "--64" { pr19969a.S } {} "pr19969.so"}
@@ -222,7 +225,9 @@ set x86_64tests {
      "--64" { pr20550a.s }}
     {"Build pr20550b.so" "-melf_x86_64 -shared" ""
      "--64" { pr20550b.s } {} "pr20550b.so"}
-    {"Build pr20550" "-melf_x86_64 -pie tmpdir/pr20550a.o tmpdir/pr20550b.so" ""
+    {"Build pr20550"
+     "-melf_x86_64 -pie -z notext tmpdir/pr20550a.o tmpdir/pr20550b.so"
+     ""
      "--64" { dummy.s } {} "pr20550"}
 }
 
@@ -1172,7 +1177,7 @@ if { [isnative] && [check_compiler_available] } {
 	] \
 	[list \
 	    "Build pr22001-1a" \
-	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed,-z,notext tmpdir/pr22001-1.so" \
 	    "$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
 	    { pr22001-1b.c } \
 	    {{error_output "pr22001-1a.err"}} \
@@ -1188,7 +1193,7 @@ if { [isnative] && [check_compiler_available] } {
 	] \
 	[list \
 	    "Build pr21997-1a" \
-	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed,-z,notext tmpdir/pr21997-1.so" \
 	    "$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
 	    { pr21997-1b.c } \
 	    {{error_output "pr21997-1a.err"}} \
@@ -1263,7 +1268,7 @@ if { [isnative] && [check_compiler_available] } {
 	] \
 	[list \
 	    "Build pr22791-1" \
-	    "-pie -Wl,--no-as-needed tmpdir/pr22791-1.so" \
+	    "-pie -Wl,--no-as-needed,-z,notext tmpdir/pr22791-1.so" \
 	    "$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
 	    { pr22791-1b.s } \
 	    {{error_output "pr22791-1.err"}} \
@@ -1359,7 +1364,7 @@ if { [isnative] && [check_compiler_available] } {
 	run_ld_link_exec_tests [list \
 	    [list \
 		"Run pr22001-1b" \
-		"$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+		"$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed,-z,notext tmpdir/pr22001-1.so" \
 		"-Wa,-mx86-used-note=yes" \
 		{ pr22001-1c.c } \
 		"pr22001-1b" \
@@ -1368,7 +1373,7 @@ if { [isnative] && [check_compiler_available] } {
 	    ] \
 	    [list \
 		"Run pr21997-1b" \
-		"$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+		"$NOPIE_LDFLAGS -Wl,--no-as-needed,-z,notext tmpdir/pr21997-1.so" \
 		"-Wa,-mx86-used-note=yes" \
 		{ pr21997-1c.c } \
 		"pr21997-1b" \
@@ -1422,7 +1427,7 @@ if { [isnative] && [check_compiler_available] } {
 	    ] \
 	    [list \
 		"Run pr25416-5f (PIE GDesc -> LE -maddress-mode=short)" \
-		"-pie tmpdir/pr25416-5b.o tmpdir/pr25416-5d.o" \
+		"-pie -Wl,-z,notext tmpdir/pr25416-5b.o tmpdir/pr25416-5d.o" \
 		"-Wa,-mx86-used-note=yes" \
 		{ pr25416-5a.c } \
 		"pr25416-5f" \
@@ -1430,7 +1435,7 @@ if { [isnative] && [check_compiler_available] } {
 	    ] \
 	    [list \
 		"Run pr25416-5g (PIE GDesc -> LE -maddress-mode=long)" \
-		"-pie tmpdir/pr25416-5c.o tmpdir/pr25416-5d.o" \
+		"-pie -Wl,-z,notext tmpdir/pr25416-5c.o tmpdir/pr25416-5d.o" \
 		"-Wa,-mx86-used-note=yes" \
 		{ pr25416-5a.c } \
 		"pr25416-5g" \

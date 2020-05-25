@@ -181,7 +181,7 @@ set i386tests {
       {objdump -sj.got tlsbindesc.sd} {objdump -sj.tdata tlsbindesc.td}}
       "tlsbindesc"}
     {"TLS -fno-pic -shared"
-     "-shared -melf_i386 --no-ld-generated-unwind-info \
+     "-shared -melf_i386 --no-ld-generated-unwind-info -z notext \
       -z noseparate-code --hash-style=sysv" ""
      "--32" {tlsnopic1.s tlsnopic2.s}
      {{readelf -Ssrl tlsnopic.rd} {objdump -drj.text tlsnopic.dd}
@@ -197,7 +197,8 @@ set i386tests {
      {{objdump -sj.debug_foobar tlsg.sd}} "tlsg"}
     {"TLS @indntpoff with %eax" "-melf_i386" "" "--32" {tlsindntpoff.s}
      {{objdump -drj.text tlsindntpoff.dd}} "tlsindntpoff"}
-    {"Reloc section order" "-shared -melf_i386 -z nocombreloc" "" "--32"
+    {"Reloc section order"
+     "-shared -melf_i386 -z nocombreloc -z notext" "" "--32"
      {reloc.s} {{objdump -hw reloc.d}} "reloc.so"}
     {"Basic --emit-relocs support" "-shared -melf_i386 --emit-relocs" "" "--32"
      {emit-relocs.s} {{readelf --relocs emit-relocs.rd}} "emit-relocs.so"}
@@ -238,10 +239,13 @@ set i386tests {
     {"Build pr19827b.so" "-melf_i386 -shared" ""
      "--32 -mx86-used-note=yes"
      { pr19827b.S } {} "pr19827b.so"}
-    {"Build pr19827" "-melf_i386 -pie tmpdir/pr19827a.o tmpdir/pr19827b.so" ""
+    {"Build pr19827"
+     "-melf_i386 -pie -z notext tmpdir/pr19827a.o tmpdir/pr19827b.so"
+     ""
      "--32 -mx86-used-note=yes"
      { dummy.s } {{readelf {-rW} pr19827.rd}} "pr19827"}
-    {"Build pr19827.so" "-melf_i386 -shared -Bsymbolic" ""
+    {"Build pr19827.so"
+     "-melf_i386 -shared -Bsymbolic -z notext" ""
      "--32 -mx86-used-note=yes"
      { pr19827a.S }  {{readelf {-rW} pr19827.rd}} "pr19827.so"}
 }
@@ -1316,7 +1320,7 @@ if { [isnative]
     run_cc_link_tests [list \
 	[list \
 	    "Build pr22001-1.so" \
-	    "-shared" \
+	    "-shared -Wl,-z,notext" \
 	    "-Wa,-mx86-used-note=yes" \
 	    { pr22001-1a.c } \
 	    {} \
@@ -1352,7 +1356,7 @@ if { [isnative]
 	] \
 	[list \
 	    "Run pr22001-1" \
-	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+	    "$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed,-z,notext tmpdir/pr22001-1.so" \
 	    "-Wa,-mx86-used-note=yes" \
 	    { pr22001-1b.c } \
 	    "pr22001-1" \
@@ -1395,7 +1399,7 @@ if { [isnative]
 	] \
 	[list \
 	    "Run pr21997-1" \
-	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed,-z,notext tmpdir/pr21997-1.so" \
 	    "-Wa,-mx86-used-note=yes" \
 	    { pr21997-1b.c } \
 	    "pr21997-1" \

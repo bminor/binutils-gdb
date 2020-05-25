@@ -133,6 +133,9 @@ proc shared_test { progname testname main sh1 sh2 dat args } {
     if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
 	set shared "-bM:SRE -bE:$tmpdir/xcoff.exp"
     }
+    if { [is_elf_format] && [check_shared_lib_support] } {
+	append shared " -Wl,-z,notext"
+    }
     if {![ld_link $CC $tmpdir/$progname.so "$shared $shldflags $tmpdir/$sh1 $tmpdir/$sh2"]} {
         fail "$testname"
     	return
