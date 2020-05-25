@@ -126,8 +126,8 @@ set live_data [fetch_auxv "info auxv on live process"]
 set gcore_works [gdb_gcore_cmd "$gcorefile" "gcore"]
 
 # Let the program continue and die.
-gdb_test continue ".*Program received signal.*"
-gdb_test continue ".*Program terminated with signal.*"
+gdb_test continue ".*Program received signal.*" "continue until signal"
+gdb_test continue ".*Program terminated with signal.*" "continue and terminate"
 
 # Now collect the core dump it left.
 set test "generate native core dump"

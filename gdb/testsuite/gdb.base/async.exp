@@ -87,7 +87,7 @@ set test "get next insn"
 gdb_test_multiple {x/2i $pc} "$test" {
     -re "=> $hex .* 0x(\[0-9a-f\]*) .*$gdb_prompt $" {
 	set next_insn_addr $expect_out(1,string)
-	pass "$test"
+	pass $gdb_test_name
     }
 }
 set next_insn_is_stmt [hex_in_list $next_insn_addr $is_stmt]
@@ -102,11 +102,11 @@ test_background "stepi&" "" ".*$prefix x = 5; .*"
 
 # Get the next instruction address.
 set next_insn_addr ""
-set test "get next insn"
+set test "get next insn, 2nd"
 gdb_test_multiple {x/2i $pc} "$test" {
     -re "=> $hex .* 0x(\[0-9a-f\]*) .*$gdb_prompt $" {
 	set next_insn_addr $expect_out(1,string)
-	pass "$test"
+	pass $gdb_test_name
     }
 }
 set next_insn_is_stmt \

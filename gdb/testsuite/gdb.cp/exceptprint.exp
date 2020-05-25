@@ -76,16 +76,20 @@ if {![runto_main]} {
     return -1
 }
 
-gdb_test "catch catch int if \$_exception == 23" \
-    "Catchpoint \[0-9\]+ \\(catch\\)" \
-    "catch catch"
-gdb_test "catch throw int if \$_exception == 23" \
-    "Catchpoint \[0-9\]+ \\(throw\\)" \
-    "catch throw"
-gdb_test "catch rethrow int if \$_exception == 23" \
-    "Catchpoint \[0-9\]+ \\(rethrow\\)" \
-    "catch rethrow"
+with_test_prefix "2nd run" {
+    gdb_test "catch catch int if \$_exception == 23" \
+	"Catchpoint \[0-9\]+ \\(catch\\)" \
+	"catch catch"
+    gdb_test "catch throw int if \$_exception == 23" \
+	"Catchpoint \[0-9\]+ \\(throw\\)" \
+	"catch throw"
+    gdb_test "catch rethrow int if \$_exception == 23" \
+	"Catchpoint \[0-9\]+ \\(rethrow\\)" \
+	"catch rethrow"
+}
 
 # This tests both the case where the regular expression does not
 # match, and the case where it does.
-do_exceptprint_tests int 23
+with_test_prefix "2nd run" {
+    do_exceptprint_tests int 23
+}

@@ -1,3 +1,28 @@
+2020-05-27  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.arch/aarch64-sighandler-regs.exp: Fix duplicated test names.
+	* gdb.arch/aarch64-tagged-pointer.exp: Likewise.
+	* gdb.arch/arm-disassembler-options.exp: Likewise.
+	* gdb.arch/arm-disp-step.exp: Likewise.
+	* gdb.arch/thumb-prologue.exp: Likewise.
+	* gdb.base/async.exp: Likewise.
+	* gdb.base/auxv.exp: Likewise.
+	* gdb.base/complex-parts.exp: Likewise.
+	* gdb.base/ena-dis-br.exp: Likewise.
+	* gdb.base/foll-exec.exp: Likewise.
+	* gdb.base/permissions.exp: Likewise.
+	* gdb.base/relocate.exp: Likewise.
+	* gdb.base/return2.exp: Likewise.
+	* gdb.base/sigbpt.exp: Likewise.
+	* gdb.base/siginfo-obj.exp: Likewise.
+	* gdb.cp/converts.exp: Likewise.
+	* gdb.cp/exceptprint.exp: Likewise.
+	* gdb.cp/inherit.exp: Likewise.
+	* gdb.cp/nsnoimports.exp: Likewise.
+	* gdb.cp/virtbase2.exp: Likewise.
+	* gdb.mi/mi-var-cmd.exp: Likewise.
+	* gdb.mi/var-cmd.c: Likewise.
+
 2020-05-26  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/arr_acc_idx_w_gap.exp: Add tests.
