@@ -363,7 +363,10 @@ avr_integer_to_address (struct gdbarch *gdbarch,
 {
   ULONGEST addr = unpack_long (type, buf);
 
-  return avr_make_saddr (addr);
+  if (TYPE_DATA_SPACE (type))
+    return avr_make_saddr (addr);
+  else
+    return avr_make_iaddr (addr);
 }
 
 static CORE_ADDR
