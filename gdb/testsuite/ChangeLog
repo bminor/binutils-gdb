@@ -1,5 +1,10 @@
 2020-05-25  Tom de Vries  <tdevries@suse.de>
 
+	PR testsuite/26031
+	* lib/gdb.exp (exec_is_pie): Test readelf -h output.
+
+2020-05-25  Tom de Vries  <tdevries@suse.de>
+
 	* boards/gold.exp: New file.
 
 2020-05-23  Tom Tromey  <tom@tromey.com>
