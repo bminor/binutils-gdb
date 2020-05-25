@@ -1,3 +1,7 @@
+2020-05-25  Tom de Vries  <tdevries@suse.de>
+
+	* boards/gold-gdb-index.exp: New file.
+
 2020-05-25  Simon Marchi  <simon.marchi@efficios.com>
 
 	* boards/simavr.exp: New file.
