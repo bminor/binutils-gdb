@@ -1,3 +1,8 @@
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
+	* common-inferior.h, common-inferior.cc: (construct_inferior_arguments):
+	Move function here from gdb/infcmd.c, gdb/inferior.h
+
 2020-05-14  Kevin Buettner  <kevinb@redhat.com>
 
 	* btrace-common.h (btrace_cpu_vendor): Add CV_AMD.

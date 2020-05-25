@@ -184,8 +184,6 @@ extern void child_interrupt (struct target_ops *self);
    STARTUP_INFERIOR.  */
 extern ptid_t gdb_startup_inferior (pid_t pid, int num_traps);
 
-extern char *construct_inferior_arguments (int, char **);
-
 /* From infcmd.c */
 
 /* Initial inferior setup.  Determines the exec file is not yet known,

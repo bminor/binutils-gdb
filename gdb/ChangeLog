@@ -1,3 +1,8 @@
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
+	* infcmd.c, inferior.h: (construct_inferior_arguments):
+	Moved function from here to gdbsupport/common-inferior.{h,cc}
+
 2020-05-23  Tom Tromey  <tom@tromey.com>
 
 	Revert commit eca1f90c:
