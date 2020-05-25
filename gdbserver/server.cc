@@ -2957,7 +2957,7 @@ handle_v_run (char *own_buf)
       else if (p == next_p)
 	{
 	  /* Empty argument.  */
-	  new_argv.push_back (xstrdup ("''"));
+	  new_argv.push_back (xstrdup (""));
 	}
       else
 	{

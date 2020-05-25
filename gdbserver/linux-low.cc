@@ -984,7 +984,7 @@ linux_process_target::create_inferior (const char *program,
   {
     maybe_disable_address_space_randomization restore_personality
       (cs.disable_randomization);
-    std::string str_program_args = stringify_argv (program_args);
+    std::string str_program_args = construct_inferior_arguments (program_args);
 
     pid = fork_inferior (program,
 			 str_program_args.c_str (),

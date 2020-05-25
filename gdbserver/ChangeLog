@@ -1,5 +1,18 @@
 2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
 
+	PR gdbserver/25893
+	* linux-low.cc (linux_process_target::create_inferior),
+	lynx-low.cc (lynx_process_target::create_inferior),
+	win32-low.cc (win32_process_target::create_inferior): Use
+	construct_inferior_arguments instead of stringify_argv
+	to get string representation which properly escapes
+	special characters.
+	* server.cc (handle_v_run): Just pass empty program arg
+	as such, since any further processing is now handled via
+	construct_inferior_arguments.
+
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
 	* nto-low.cc (nto_process_target::create_inferior): Pass
 	argv to spawnp function as char **.
 
