@@ -28,10 +28,8 @@ bool startup_with_shell = true;
 /* See common-inferior.h.  */
 
 std::string
-construct_inferior_arguments (int argc, char * const *argv)
+construct_inferior_arguments (gdb::array_view<char * const> argv)
 {
-  gdb_assert (argc >= 0);
-
   std::string result;
 
   if (startup_with_shell)
@@ -48,7 +46,7 @@ construct_inferior_arguments (int argc, char * const *argv)
       static const char special[] = "\"!#$&*()\\|[]{}<>?'`~^; \t\n";
       static const char quote = '\'';
 #endif
-      for (int i = 0; i < argc; ++i)
+      for (int i = 0; i < argv.size (); ++i)
 	{
 	  if (i > 0)
 	    result += ' ';
@@ -103,19 +101,19 @@ construct_inferior_arguments (int argc, char * const *argv)
     {
       /* In this case we can't handle arguments that contain spaces,
 	 tabs, or newlines -- see breakup_args().  */
-      for (int i = 0; i < argc; ++i)
+      for (char *arg : argv)
 	{
-	  char *cp = strchr (argv[i], ' ');
+	  char *cp = strchr (arg, ' ');
 	  if (cp == NULL)
-	    cp = strchr (argv[i], '\t');
+	    cp = strchr (arg, '\t');
 	  if (cp == NULL)
-	    cp = strchr (argv[i], '\n');
+	    cp = strchr (arg, '\n');
 	  if (cp != NULL)
 	    error (_("can't handle command-line "
 		     "argument containing whitespace"));
 	}
 
-      for (int i = 0; i < argc; ++i)
+      for (int i = 0; i < argv.size (); ++i)
 	{
 	  if (i > 0)
 	    result += " ";

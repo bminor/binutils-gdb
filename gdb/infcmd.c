@@ -151,8 +151,9 @@ get_inferior_args (void)
 {
   if (current_inferior ()->argc != 0)
     {
-      std::string n = construct_inferior_arguments (current_inferior ()->argc,
-					            current_inferior ()->argv);
+      gdb::array_view<char * const> args (current_inferior ()->argv,
+                                          current_inferior ()->argc);
+      std::string n = construct_inferior_arguments (args);
       set_inferior_args (n.c_str ());
     }
 
