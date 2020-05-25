@@ -1,5 +1,9 @@
 2020-05-25  Simon Marchi  <simon.marchi@efficios.com>
 
+	* boards/simavr.exp: New file.
+
+2020-05-25  Simon Marchi  <simon.marchi@efficios.com>
+
 	* lib/gdb.exp (gdb_run_cmd): Return success or failure.
 	* gdb.base/inferior-args.exp: New file.
 	* gdb.base/inferior-args.c: New file.
