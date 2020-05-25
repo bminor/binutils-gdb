@@ -1446,7 +1446,7 @@ if { [isnative] && [check_compiler_available] } {
 	run_cc_link_tests [list \
 	    [list \
 		"Build pr22001-1b" \
-		"$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed tmpdir/pr22001-1.so" \
+		"$NOPIE_LDFLAGS -Wl,-z,nocopyreloc,--no-as-needed,-z,notext tmpdir/pr22001-1.so" \
 		"$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
 		{ pr22001-1c.c } \
 		{{error_output "pr22001-1b.err"}} \
@@ -1454,7 +1454,7 @@ if { [isnative] && [check_compiler_available] } {
 	    ] \
 	    [list \
 		"Build pr21997-1b" \
-		"$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr21997-1.so" \
+		"$NOPIE_LDFLAGS -Wl,--no-as-needed,-z,notext tmpdir/pr21997-1.so" \
 		"$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
 		{ pr21997-1c.c } \
 		{{error_output "pr21997-1b.err"}} \

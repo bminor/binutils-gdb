@@ -1,5 +1,9 @@
 2020-05-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-x86-64/x86-64.exp: Pass -z notext to linker.
+
+2020-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/eh6.d: Pass -z notext to linker.
 	* testsuite/ld-elf/ehdr_start-shared.d: Likewise.
 	* testsuite/ld-elf/pr19539.d: Likewise.
