@@ -375,29 +375,6 @@ free_vector_argv (std::vector<char *> &v)
 
 /* See gdbsupport/common-utils.h.  */
 
-std::string
-stringify_argv (const std::vector<char *> &args)
-{
-  std::string ret;
-
-  if (!args.empty () && args[0] != NULL)
-    {
-      for (auto s : args)
-	if (s != NULL)
-	  {
-	    ret += s;
-	    ret += ' ';
-	  }
-
-      /* Erase the last whitespace.  */
-      ret.erase (ret.end () - 1);
-    }
-
-  return ret;
-}
-
-/* See gdbsupport/common-utils.h.  */
-
 ULONGEST
 align_up (ULONGEST v, int n)
 {

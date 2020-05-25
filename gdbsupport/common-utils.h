@@ -154,10 +154,6 @@ extern const char *skip_to_space (const char *inp);
    freeing all the elements.  */
 extern void free_vector_argv (std::vector<char *> &v);
 
-/* Given a vector of arguments ARGV, return a string equivalent to
-   joining all the arguments with a whitespace separating them.  */
-extern std::string stringify_argv (const std::vector<char *> &argv);
-
 /* Return true if VALUE is in [LOW, HIGH].  */
 
 template <typename T>

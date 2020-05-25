@@ -1,5 +1,10 @@
 2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
 
+	* common-utils.cc, common-utils.h (stringify_argv): Drop
+	now unused function stringify_argv
+
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
 	* common-inferior.cc, common-inferior.h (construct_inferior_arguments):
 	Adapt to take a gdb::array_view<char * const> parameter.
 	Adapt call site.
