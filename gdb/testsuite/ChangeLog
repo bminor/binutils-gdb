@@ -1,5 +1,11 @@
 2020-05-25  Simon Marchi  <simon.marchi@efficios.com>
 
+	* lib/gdb.exp (gdb_run_cmd): Return success or failure.
+	* gdb.base/inferior-args.exp: New file.
+	* gdb.base/inferior-args.c: New file.
+
+2020-05-25  Simon Marchi  <simon.marchi@efficios.com>
+
 	* lib/gdb.exp (gdb_run_cmd): Change argument from args to
 	inferior_args.  Pass it to gdb_reload.
 	(gdb_start_cmd, gdb_starti_cmd): Change argument from args to

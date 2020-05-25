@@ -242,6 +242,8 @@ proc target_can_use_run_cmd {} {
 
 # Generic run command.
 #
+# Return 0 if we could start the program, -1 if we could not.
+#
 # The second pattern below matches up to the first newline *only*.
 # Using ``.*$'' could swallow up output that we attempt to match
 # elsewhere.
@@ -269,14 +271,14 @@ proc gdb_run_cmd { {inferior_args {}} } {
     if $use_gdb_stub {
 	if [target_info exists gdb,do_reload_on_run] {
 	    if { [gdb_reload $inferior_args] != 0 } {
-		return
+		return -1
 	    }
 	    send_gdb "continue\n"
 	    gdb_expect 60 {
 		-re "Continu\[^\r\n\]*\[\r\n\]" {}
 		default {}
 	    }
-	    return
+	    return 0
 	}
 
 	if [target_info exists gdb,start_symbol] {
@@ -292,7 +294,7 @@ proc gdb_run_cmd { {inferior_args {}} } {
 	    # clever and not send a command when it has failed.
 	    if [expr $start_attempt > 3] {
 		perror "Jump to start() failed (retry count exceeded)"
-		return
+		return -1
 	    }
 	    set start_attempt [expr $start_attempt + 1]
 	    gdb_expect 30 {
@@ -301,7 +303,7 @@ proc gdb_run_cmd { {inferior_args {}} } {
 		}
 		-re "No symbol \"_start\" in current.*$gdb_prompt $" {
 		    perror "Can't find start symbol to run in gdb_run"
-		    return
+		    return -1
 		}
 		-re "No symbol \"start\" in current.*$gdb_prompt $" {
 		    send_gdb "jump *_start\n"
@@ -314,22 +316,23 @@ proc gdb_run_cmd { {inferior_args {}} } {
 		}
 		-re "The program is not being run.*$gdb_prompt $" {
 		    if { [gdb_reload $inferior_args] != 0 } {
-			return
+			return -1
 		    }
 		    send_gdb "jump *$start\n"
 		}
 		timeout {
 		    perror "Jump to start() failed (timeout)"
-		    return
+		    return -1
 		}
 	    }
 	}
-	return
+
+	return 0
     }
 
     if [target_info exists gdb,do_reload_on_run] {
 	if { [gdb_reload $inferior_args] != 0 } {
-	    return
+	    return -1
 	}
     }
     send_gdb "run $inferior_args\n"
@@ -346,6 +349,8 @@ proc gdb_run_cmd { {inferior_args {}} } {
 	    # There is no more input expected.
 	}
     }
+
+    return 0
 }
 
 # Generic start command.  Return 0 if we could start the program, -1
