@@ -3081,7 +3081,7 @@ md_convert_frag (bfd *headers ATTRIBUTE_UNUSED, segT seg, fragS *fragP)
 	 differently from ones without delay slots.  */
       {
 	unsigned char *buffer =
-	  (unsigned char *) (fragP->fr_fix + fragP->fr_literal);
+	  (unsigned char *) (fragP->fr_fix + &fragP->fr_literal[0]);
 	int highbyte = target_big_endian ? 0 : 1;
 	int lowbyte = target_big_endian ? 1 : 0;
 	int delay = fragP->fr_subtype == C (COND_JUMP_DELAY, COND12);

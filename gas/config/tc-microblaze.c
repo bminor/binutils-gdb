@@ -1983,7 +1983,7 @@ md_apply_fix (fixS *   fixP,
 	      valueT * valp,
 	      segT     segment)
 {
-  char *       buf  = fixP->fx_where + fixP->fx_frag->fr_literal;
+  char *       buf  = fixP->fx_where + &fixP->fx_frag->fr_literal[0];
   const char *       file = fixP->fx_file ? fixP->fx_file : _("unknown");
   const char * symname;
   /* Note: use offsetT because it is signed, valueT is unsigned.  */

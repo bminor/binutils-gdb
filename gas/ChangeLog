@@ -1,3 +1,10 @@
+2020-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-csky.c (md_convert_frag): Replace fragp->fr_literal
+	with &fragp->fr_literal[0].
+	* config/tc-microblaze.c (md_apply_fix): Likewise.
+	* config/tc-sh.c (md_convert_frag): Likewise.
+
 2020-05-24  Jim Wilson  <jimw@sifive.com>
 
 	PR 26025
