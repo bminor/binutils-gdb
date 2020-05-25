@@ -1,5 +1,10 @@
 2020-05-23  Tom Tromey  <tom@tromey.com>
 
+	* gdb.base/style.exp: Remove completion styling test.
+	* lib/gdb-utils.exp (style): Remove completion styles.
+
+2020-05-23  Tom Tromey  <tom@tromey.com>
+
 	* gdb.base/style.exp: Add completion styling test.
 	* lib/gdb-utils.exp (style): Add completion styles.
 

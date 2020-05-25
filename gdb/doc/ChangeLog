@@ -1,5 +1,10 @@
 2020-05-23  Tom Tromey  <tom@tromey.com>
 
+	* gdb.texinfo (Output Styling): Don't mention completion styling.
+	(Editing): Don't mention readline completion styling.
+
+2020-05-23  Tom Tromey  <tom@tromey.com>
+
 	* gdb.texinfo (Output Styling): Mention completion styling.
 	(Editing): Mention readline completion styling.
 

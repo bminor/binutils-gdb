@@ -1,3 +1,18 @@
+2020-05-23  Tom Tromey  <tom@tromey.com>
+
+	Revert commit eca1f90c:
+	* NEWS: Remove entry for completion styling.
+	* completer.c (_rl_completion_prefix_display_length): Move
+	declaration later.
+	(gdb_fnprint): Revert.
+	(gdb_display_match_list_1): Likewise.
+	* cli/cli-style.c (completion_prefix_style)
+	(completion_difference_style, completion_suffix_style): Remove.
+	(_initialize_cli_style): Revert.
+	* cli/cli-style.h (completion_prefix_style)
+	(completion_difference_style, completion_suffix_style): Don't
+	declare.
+
 2020-05-24  Pedro Alves  <palves@redhat.com>
 
 	* symtab.c (completion_list_add_name): Return boolean indication

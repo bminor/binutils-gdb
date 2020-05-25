@@ -25271,10 +25271,6 @@ This command accepts the current line for execution and fetches the
 next line relative to the current line from the history for editing.
 Any argument is ignored.
 
-Note that @value{GDBN} ignores the Readline
-@code{colored-completion-prefix} setting.  Instead, this is handled
-using the style settings (@xref{Output Styling}).
-
 @node Command History
 @section Command History
 @cindex command history
@@ -25607,22 +25603,6 @@ general styling to @value{GDBN}.  @xref{TUI Configuration}.
 @item tui-active-border
 Control the styling of the active TUI border; that is, the TUI window
 that has the focus.
-
-@item completion-prefix
-Control the styling of the completion prefix.  When completing, the
-common prefix of completion candidates will be shown with this style.
-By default, this style's intensity is dim.
-
-@item completion-difference
-Control the styling of the completion difference character.  When
-completing, the character that differs between different completions
-will be shown using this style.  By default, this style's foreground
-color is magenta.
-
-@item completion-suffix
-Control the styling of the completion suffix.  When completing, the
-suffix of completion candidates will be shown with this style.  By
-default, this style is the same as the default styling.
 
 @end table
 
