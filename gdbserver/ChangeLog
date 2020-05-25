@@ -1,5 +1,10 @@
 2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
 
+	* nto-low.cc (nto_process_target::create_inferior): Pass
+	argv to spawnp function as char **.
+
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
 	* server.cc (captured_main), (handle_v_run): No longer
 	insert extra NULL element to args vector.
 

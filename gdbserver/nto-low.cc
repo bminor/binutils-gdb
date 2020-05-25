@@ -357,7 +357,6 @@ nto_process_target::create_inferior (const char *program,
   struct inheritance inherit;
   pid_t pid;
   sigset_t set;
-  std::string str_program_args = stringify_argv (program_args);
 
   TRACE ("%s %s\n", __func__, program);
   /* Clear any pending SIGUSR1's but keep the behavior the same.  */
@@ -371,7 +370,7 @@ nto_process_target::create_inferior (const char *program,
   inherit.flags |= SPAWN_SETGROUP | SPAWN_HOLD;
   inherit.pgroup = SPAWN_NEWPGROUP;
   pid = spawnp (program, 0, NULL, &inherit,
-		(char *) str_program_args.c_str (), 0);
+		program_args.data (), 0);
   sigprocmask (SIG_BLOCK, &set, NULL);
 
   if (pid == -1)
