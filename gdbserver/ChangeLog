@@ -1,3 +1,8 @@
+2020-05-25  Michael Weghorn  <m.weghorn@posteo.de>
+
+	* server.cc (captured_main), (handle_v_run): No longer
+	insert extra NULL element to args vector.
+
 2020-05-23  Pedro Alves  <palves@redhat.com>
 
 	* gdb-safe-ctype.h: New.
