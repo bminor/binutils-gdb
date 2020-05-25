@@ -5509,6 +5509,9 @@ proc exec_is_pie { executable } {
 	return -1
     }
     set readelf_program [gdb_find_readelf]
+    # We're not testing readelf -d | grep "FLAGS_1.*Flags:.*PIE"
+    # because the PIE flag is not set by all versions of gold, see PR
+    # binutils/26039.
     set res [catch {exec $readelf_program -h $executable} output]
     if { $res != 0 } {
 	return -1
