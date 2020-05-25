@@ -151,12 +151,9 @@ get_inferior_args (void)
 {
   if (current_inferior ()->argc != 0)
     {
-      char *n;
-
-      n = construct_inferior_arguments (current_inferior ()->argc,
-					current_inferior ()->argv);
-      set_inferior_args (n);
-      xfree (n);
+      std::string n = construct_inferior_arguments (current_inferior ()->argc,
+					            current_inferior ()->argv);
+      set_inferior_args (n.c_str ());
     }
 
   if (current_inferior ()->args == NULL)
