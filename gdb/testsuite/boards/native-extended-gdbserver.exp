@@ -102,7 +102,7 @@ proc gdb_file_cmd { arg } {
     return [extended_gdbserver_load_last_file]
 }
 
-proc gdb_reload { } {
+proc gdb_reload { {inferior_args {}} } {
     return [extended_gdbserver_load_last_file]
 }
 

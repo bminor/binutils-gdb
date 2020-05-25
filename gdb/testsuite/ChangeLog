@@ -1,3 +1,19 @@
+2020-05-25  Simon Marchi  <simon.marchi@efficios.com>
+
+	* lib/gdb.exp (gdb_run_cmd): Change argument from args to
+	inferior_args.  Pass it to gdb_reload.
+	(gdb_start_cmd, gdb_starti_cmd): Change argument from args to
+	inferior_args.
+	(gdb_reload): Add inferior_args argument.
+	* config/gdbserver.exp (gdb_reload): Add inferior_args argument,
+	pass it to gdbserver_run.
+	* boards/native-gdbserver.exp: Do not set noargs.
+	* boards/native-extended-gdbserver.exp (gdb_reload): Add
+	inferior_args argument.
+	* boards/stdio-gdbserver-base.exp (gdb_reload): Likewise.
+	* gdb.base/a2-run.exp: Check for use_gdb_stub.
+	* gdb.base/args.exp: Likewise.
+
 2020-05-25  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (exec_is_pie): Add comment.

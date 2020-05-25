@@ -246,10 +246,13 @@ proc target_can_use_run_cmd {} {
 # Using ``.*$'' could swallow up output that we attempt to match
 # elsewhere.
 #
+# INFERIOR_ARGS is passed as arguments to the start command, so may contain
+# inferior arguments.
+#
 # N.B. This function does not wait for gdb to return to the prompt,
 # that is the caller's responsibility.
 
-proc gdb_run_cmd {args} {
+proc gdb_run_cmd { {inferior_args {}} } {
     global gdb_prompt use_gdb_stub
 
     foreach command [gdb_init_commands] {
@@ -265,7 +268,7 @@ proc gdb_run_cmd {args} {
 
     if $use_gdb_stub {
 	if [target_info exists gdb,do_reload_on_run] {
-	    if { [gdb_reload] != 0 } {
+	    if { [gdb_reload $inferior_args] != 0 } {
 		return
 	    }
 	    send_gdb "continue\n"
@@ -310,7 +313,7 @@ proc gdb_run_cmd {args} {
 		    send_gdb "y\n" answer
 		}
 		-re "The program is not being run.*$gdb_prompt $" {
-		    if { [gdb_reload] != 0 } {
+		    if { [gdb_reload $inferior_args] != 0 } {
 			return
 		    }
 		    send_gdb "jump *$start\n"
@@ -325,11 +328,11 @@ proc gdb_run_cmd {args} {
     }
 
     if [target_info exists gdb,do_reload_on_run] {
-	if { [gdb_reload] != 0 } {
+	if { [gdb_reload $inferior_args] != 0 } {
 	    return
 	}
     }
-    send_gdb "run $args\n"
+    send_gdb "run $inferior_args\n"
 # This doesn't work quite right yet.
 # Use -notransfer here so that test cases (like chng-sym.exp)
 # may test for additional start-up messages.
@@ -348,10 +351,13 @@ proc gdb_run_cmd {args} {
 # Generic start command.  Return 0 if we could start the program, -1
 # if we could not.
 #
+# INFERIOR_ARGS is passed as arguments to the start command, so may contain
+# inferior arguments.
+#
 # N.B. This function does not wait for gdb to return to the prompt,
 # that is the caller's responsibility.
 
-proc gdb_start_cmd {args} {
+proc gdb_start_cmd { {inferior_args {}} } {
     global gdb_prompt use_gdb_stub
 
     foreach command [gdb_init_commands] {
@@ -369,7 +375,7 @@ proc gdb_start_cmd {args} {
 	return -1
     }
 
-    send_gdb "start $args\n"
+    send_gdb "start $inferior_args\n"
     # Use -notransfer here so that test cases (like chng-sym.exp)
     # may test for additional start-up messages.
     gdb_expect 60 {
@@ -387,10 +393,13 @@ proc gdb_start_cmd {args} {
 # Generic starti command.  Return 0 if we could start the program, -1
 # if we could not.
 #
+# INFERIOR_ARGS is passed as arguments to the starti command, so may contain
+# inferior arguments.
+#
 # N.B. This function does not wait for gdb to return to the prompt,
 # that is the caller's responsibility.
 
-proc gdb_starti_cmd {args} {
+proc gdb_starti_cmd { {inferior_args {}} } {
     global gdb_prompt use_gdb_stub
 
     foreach command [gdb_init_commands] {
@@ -408,7 +417,7 @@ proc gdb_starti_cmd {args} {
 	return -1
     }
 
-    send_gdb "starti $args\n"
+    send_gdb "starti $inferior_args\n"
     gdb_expect 60 {
 	-re "The program .* has been started already.*y or n. $" {
 	    send_gdb "y\n" answer
@@ -4818,8 +4827,13 @@ proc gdb_load { arg } {
 # either the first time or after already starting the program once,
 # for remote targets.  Most files that override gdb_load should now
 # override this instead.
+#
+# INFERIOR_ARGS contains the arguments to pass to the inferiors, as a
+# single string to get interpreted by a shell.  If the target board
+# overriding gdb_reload is a "stub", then it should arrange things such
+# these arguments make their way to the inferior process.
 
-proc gdb_reload { } {
+proc gdb_reload { {inferior_args {}} } {
     # For the benefit of existing configurations, default to gdb_load.
     # Specifying no file defaults to the executable currently being
     # debugged.
