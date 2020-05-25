@@ -1,5 +1,10 @@
 2020-05-25  Tom de Vries  <tdevries@suse.de>
 
+	* lib/jit-elf-helpers.exp (compile_and_download_n_jit_so): Use $f
+	instead of $binfile in the untested message.
+
+2020-05-25  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/26031
 	* lib/gdb.exp (exec_is_pie): Test readelf -h output.
 

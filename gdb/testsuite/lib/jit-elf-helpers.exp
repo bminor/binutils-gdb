@@ -99,7 +99,7 @@ proc compile_and_download_n_jit_so {jit_solib_basename jit_solib_srcfile count} 
 	if { [gdb_compile_shlib ${jit_solib_srcfile} ${binfile} \
 		  $options] != "" } {
 	    set f [file tail $binfile]
-	    untested "failed to compile shared library $binfile"
+	    untested "failed to compile shared library $f"
 	    return -1
 	}
 
