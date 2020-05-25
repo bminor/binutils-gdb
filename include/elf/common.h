@@ -91,8 +91,9 @@
 
 #define ET_NONE		0	/* No file type */
 #define ET_REL		1	/* Relocatable file */
-#define ET_EXEC		2	/* Executable file */
-#define ET_DYN		3	/* Shared object file */
+#define ET_EXEC		2	/* Position-dependent executable file */
+#define ET_DYN		3	/* Position-independent executable or
+				   shared object file */
 #define ET_CORE		4	/* Core file */
 #define ET_LOOS		0xFE00	/* Operating system-specific */
 #define ET_HIOS		0xFEFF	/* Operating system-specific */
