@@ -4537,9 +4537,10 @@ s3_do_macro_bcmp (char *str)
 	      if (s3_append_insn (append_str, TRUE) == (int) s3_FAIL)
 		goto out;
 	      if ((inst_main.instruction & 0x3e00007e) == 0x0000004c)
-		sprintf (append_str, "beq %s", keep_data);
+		memcpy (append_str, "beq ", 4);
 	      else
-		sprintf (append_str, "bne %s", keep_data);
+		memcpy (append_str, "bne ", 4);
+	      memmove (append_str + 4, keep_data, strlen (keep_data) + 1);
 	      if (s3_append_insn (append_str, TRUE) == (int) s3_FAIL)
 		goto out;
 	    }
@@ -4570,9 +4571,10 @@ s3_do_macro_bcmp (char *str)
 	  memcpy (&inst_expand[0], &s3_inst, sizeof (struct s3_score_it));
 
 	  if ((inst_main.instruction & 0x3e00007e) == 0x0000004c)
-	    sprintf (append_str, "beq %s", keep_data);
+	    memcpy (append_str, "beq ", 4);
 	  else
-	    sprintf (append_str, "bne %s", keep_data);
+	    memcpy (append_str, "bne ", 4);
+	  memmove (append_str + 4, keep_data, strlen (keep_data) + 1);
 	  if (s3_append_insn (append_str, FALSE) == (int) s3_FAIL)
 	    goto out;
 	  memcpy (&inst_expand[1], &s3_inst, sizeof (struct s3_score_it));
@@ -4685,9 +4687,10 @@ s3_do_macro_bcmpz (char *str)
 	      if (s3_append_insn (append_str, TRUE) == (int) s3_FAIL)
 		goto out;
 	      if ((inst_main.instruction & 0x3e00007e) == 0x0000004c)
-		sprintf (append_str, "beq %s", keep_data);
+		memcpy (append_str, "beq ", 4);
 	      else
-		sprintf (append_str, "bne %s", keep_data);
+		memcpy (append_str, "bne ", 4);
+	      memmove (append_str + 4, keep_data, strlen (keep_data) + 1);
 	      if (s3_append_insn (append_str, TRUE) == (int) s3_FAIL)
 		goto out;
             }
@@ -4717,9 +4720,10 @@ s3_do_macro_bcmpz (char *str)
 	    goto out;
 	  memcpy (&inst_expand[0], &s3_inst, sizeof (struct s3_score_it));
 	  if ((inst_main.instruction & 0x3e00007e) == 0x0000004c)
-	    sprintf (append_str, "beq %s", keep_data);
+	    memcpy (append_str, "beq ", 4);
 	  else
-	    sprintf (append_str, "bne %s", keep_data);
+	    memcpy (append_str, "bne ", 4);
+	  memmove (append_str + 4, keep_data, strlen (keep_data) + 1);
 	  if (s3_append_insn (append_str, FALSE) == (int) s3_FAIL)
 	    goto out;
 	  memcpy (&inst_expand[1], &s3_inst, sizeof (struct s3_score_it));
