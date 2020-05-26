@@ -1,6 +1,14 @@
 2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26044
+	* config/tc-xgate.c (md_apply_fix): Check BFD_RELOC_XGATE_PCREL_X
+	instead of R_XGATE_PCREL_X.
+	(xgate_parse_operand): Replace R_XGATE_PCREL_X with
+	BFD_RELOC_XGATE_PCREL_X.
+
+2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26044
 	* config/tc-visium.c (md_convert_frag): Replace fragP->fr_literal
 	with &fragP->fr_literal[0].
 
