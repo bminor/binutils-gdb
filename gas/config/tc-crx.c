@@ -153,7 +153,7 @@ static void    handle_LoadStor	        (const char *);
 static int     get_cinv_parameters      (const char *);
 static long    getconstant		(long, int);
 static op_err  check_range		(long *, int, unsigned int, int);
-static int     getreg_image	        (reg);
+static int     getreg_image	        (int);
 static void    parse_operands	        (ins *, char *);
 static void    parse_insn	        (ins *, char *);
 static void    print_operand	        (int, int, argument *);
@@ -402,7 +402,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, fragS *fragP)
 {
   /* 'opcode' points to the start of the instruction, whether
      we need to change the instruction's fixed encoding.  */
-  char *opcode = fragP->fr_literal + fragP->fr_fix;
+  char *opcode = &fragP->fr_literal[0] + fragP->fr_fix;
   bfd_reloc_code_real_type reloc;
 
   subseg_change (sec, 0);
@@ -1107,7 +1107,7 @@ get_cinv_parameters (const char *operand)
    issue an error.  */
 
 static int
-getreg_image (reg r)
+getreg_image (int r)
 {
   const reg_entry *rreg;
   char *reg_name;

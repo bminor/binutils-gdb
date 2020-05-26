@@ -1,6 +1,13 @@
 2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26044
+	* config/tc-crx.c (getreg_image): Change argument type to int.
+	(md_convert_frag): Replace fragP->fr_literal with
+	&fragP->fr_literal[0].
+
+2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26044
 	* onfig/tc-score.c (s3_do_macro_bcmp): Replace overlapping
 	sprintf with memmove.
 
