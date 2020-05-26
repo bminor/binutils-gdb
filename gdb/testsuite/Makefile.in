@@ -209,7 +209,7 @@ check-single-racy:
 	-rm -rf cache racy_outputs temp
 	mkdir -p racy_outputs; \
 	racyiter="$(RACY_ITER)"; \
-	test "x$$racyiter" == "x" && \
+	test "x$$racyiter" = "x" && \
 	  racyiter=$(DEFAULT_RACY_ITER); \
 	if test $$racyiter -lt 2 ; then \
 	  echo "RACY_ITER must be at least 2."; \
@@ -239,7 +239,7 @@ check-parallel:
 check-parallel-racy:
 	-rm -rf cache racy_outputs temp
 	racyiter="$(RACY_ITER)"; \
-	test "x$$racyiter" == "x" && \
+	test "x$$racyiter" = "x" && \
 	  racyiter=$(DEFAULT_RACY_ITER); \
 	if test $$racyiter -lt 2 ; then \
 	  echo "RACY_ITER must be at least 2."; \

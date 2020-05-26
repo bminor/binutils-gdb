@@ -1,3 +1,8 @@
+2020-05-26  Christian Biesinger  <cbiesinger@google.com>
+
+	* Makefile.in: Use = instead of == for the test command
+	for portability.
+
 2020-05-26  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/gold-gdb-index-2.c: New test.
