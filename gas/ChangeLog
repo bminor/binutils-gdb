@@ -1,3 +1,10 @@
+2020-05-26  Stefan Schulze Frielinghaus  <stefansf@linux.ibm.com>
+
+	* testsuite/gas/s390/zarch-z13.d: Add regexp checks for vector
+	load/store instruction variants with alignment hints.
+	* testsuite/gas/s390/zarch-z13.s: Emit new vector load/store
+	instruction variants with alignment hints.
+
 2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26044
