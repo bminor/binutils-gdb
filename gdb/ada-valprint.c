@@ -92,8 +92,9 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
 	return 0;
       break;
     case TYPE_CODE_ENUM:
-      if (low_bound == TYPE_FIELD_ENUMVAL (index_type, 0))
+      if (low_bound == 0)
 	return 0;
+      low_bound = TYPE_FIELD_ENUMVAL (index_type, low_bound);
       break;
     case TYPE_CODE_UNDEF:
       index_type = NULL;
@@ -134,46 +135,23 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 
   {
     LONGEST high;
-    struct type *base_index_type;
 
     if (get_discrete_bounds (index_type, &low, &high) < 0)
       len = 1;
-    else
-      len = high - low + 1;
-
-    if (index_type->code () == TYPE_CODE_RANGE)
-        base_index_type = TYPE_TARGET_TYPE (index_type);
-      else
-        base_index_type = index_type;
-
-    if (base_index_type->code () == TYPE_CODE_ENUM)
+    else if (low > high)
       {
-        LONGEST low_pos, high_pos;
-
-        /* Non-contiguous enumerations types can by used as index types
-           so the array length is computed from the positions of the
-           first and last literal in the enumeration type, and not from
-           the values of these literals.  */
-
-        if (!discrete_position (base_index_type, low, &low_pos)
-          || !discrete_position (base_index_type, high, &high_pos))
-          {
-            warning (_("unable to get positions in array, use bounds instead"));
-            low_pos = low;
-            high_pos = high;
-          }
-
         /* The array length should normally be HIGH_POS - LOW_POS + 1.
            But in Ada we allow LOW_POS to be greater than HIGH_POS for
            empty arrays.  In that situation, the array length is just zero,
            not negative!  */
-
-        if (low_pos > high_pos)
-          len = 0;
-        else
-          len = high_pos - low_pos + 1;
+	len = 0;
       }
+    else
+      len = high - low + 1;
   }
+
+  if (index_type->code () == TYPE_CODE_RANGE)
+    index_type = TYPE_TARGET_TYPE (index_type);
 
   i = 0;
   annotate_array_section_begin (i, elttype);

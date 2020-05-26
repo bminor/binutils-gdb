@@ -376,7 +376,8 @@ struct language_defn
 				   struct language_arch_info *);
 
     /* Print the index of an element of an array.  */
-    void (*la_print_array_index) (struct value *index_value,
+    void (*la_print_array_index) (struct type *index_type,
+				  LONGEST index_value,
                                   struct ui_file *stream,
                                   const struct value_print_options *options);
 
@@ -570,8 +571,9 @@ extern enum language set_language (enum language);
 #define LA_EMIT_CHAR(ch, type, stream, quoter) \
   (current_language->la_emitchar(ch, type, stream, quoter))
 
-#define LA_PRINT_ARRAY_INDEX(index_value, stream, options) \
-  (current_language->la_print_array_index(index_value, stream, options))
+#define LA_PRINT_ARRAY_INDEX(index_type, index_value, stream, options)	\
+  (current_language->la_print_array_index(index_type, index_value, stream, \
+					  options))
 
 #define LA_ITERATE_OVER_SYMBOLS(BLOCK, NAME, DOMAIN, CALLBACK) \
   (current_language->la_iterate_over_symbols (BLOCK, NAME, DOMAIN, CALLBACK))
@@ -634,7 +636,7 @@ extern char *language_class_name_from_physname (const struct language_defn *,
 extern const char *default_word_break_characters (void);
 
 /* Print the index of an array element using the C99 syntax.  */
-extern void default_print_array_index (struct value *index_value,
+extern void default_print_array_index (struct type *index_type, LONGEST index,
                                        struct ui_file *stream,
 				       const struct value_print_options *options);
 

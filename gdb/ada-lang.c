@@ -196,6 +196,8 @@ static LONGEST pos_atr (struct value *);
 
 static struct value *value_pos_atr (struct type *, struct value *);
 
+static struct value *val_atr (struct type *, LONGEST);
+
 static struct value *value_val_atr (struct type *, struct value *);
 
 static struct symbol *standard_lookup (const char *, const struct block *,
@@ -498,9 +500,12 @@ ada_get_gdb_completer_word_break_characters (void)
 /* Print an array element index using the Ada syntax.  */
 
 static void
-ada_print_array_index (struct value *index_value, struct ui_file *stream,
+ada_print_array_index (struct type *index_type, LONGEST index,
+		       struct ui_file *stream,
                        const struct value_print_options *options)
 {
+  struct value *index_value = val_atr (index_type, index);
+
   LA_VALUE_PRINT (index_value, stream, options);
   fprintf_filtered (stream, " => ");
 }
@@ -2775,15 +2780,13 @@ ada_value_ptr_subscript (struct value *arr, int arity, struct value **ind)
   for (k = 0; k < arity; k += 1)
     {
       LONGEST lwb, upb;
-      struct value *lwb_value;
 
       if (type->code () != TYPE_CODE_ARRAY)
         error (_("too many subscripts (%d expected)"), k);
       arr = value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
                         value_copy (arr));
       get_discrete_bounds (TYPE_INDEX_TYPE (type), &lwb, &upb);
-      lwb_value = value_from_longest (value_type (ind[k]), lwb);
-      arr = value_ptradd (arr, pos_atr (ind[k]) - pos_atr (lwb_value));
+      arr = value_ptradd (arr, pos_atr (ind[k]) - lwb);
       type = TYPE_TARGET_TYPE (type);
     }
 
@@ -9141,6 +9144,21 @@ value_pos_atr (struct type *type, struct value *arg)
 /* Evaluate the TYPE'VAL attribute applied to ARG.  */
 
 static struct value *
+val_atr (struct type *type, LONGEST val)
+{
+  gdb_assert (discrete_type_p (type));
+  if (type->code () == TYPE_CODE_RANGE)
+    type = TYPE_TARGET_TYPE (type);
+  if (type->code () == TYPE_CODE_ENUM)
+    {
+      if (val < 0 || val >= type->num_fields ())
+        error (_("argument to 'VAL out of range"));
+      val = TYPE_FIELD_ENUMVAL (type, val);
+    }
+  return value_from_longest (type, val);
+}
+
+static struct value *
 value_val_atr (struct type *type, struct value *arg)
 {
   if (!discrete_type_p (type))
@@ -9148,19 +9166,7 @@ value_val_atr (struct type *type, struct value *arg)
   if (!integer_type_p (value_type (arg)))
     error (_("'VAL requires integral argument"));
 
-  if (type->code () == TYPE_CODE_RANGE)
-    type = TYPE_TARGET_TYPE (type);
-
-  if (type->code () == TYPE_CODE_ENUM)
-    {
-      long pos = value_as_long (arg);
-
-      if (pos < 0 || pos >= type->num_fields ())
-        error (_("argument to 'VAL out of range"));
-      return value_from_longest (type, TYPE_FIELD_ENUMVAL (type, pos));
-    }
-  else
-    return value_from_longest (type, value_as_long (arg));
+  return val_atr (type, value_as_long (arg));
 }
 
 

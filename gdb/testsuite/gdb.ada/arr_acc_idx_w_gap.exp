@@ -57,3 +57,6 @@ gdb_test "print s(2..4)" \
 gdb_test "print v" " = lit3"
 gdb_test "print enum_subrange'pos(v)" " = 3"
 gdb_test "print enum_subrange'val(3)" " = lit3"
+
+gdb_test "print indexed_by_enum(lit2)" "43"
+gdb_test "print s(2)" "101 'e'"

@@ -1851,14 +1851,10 @@ maybe_print_array_index (struct type *index_type, LONGEST index,
                          struct ui_file *stream,
 			 const struct value_print_options *options)
 {
-  struct value *index_value;
-
   if (!options->print_array_indexes)
     return; 
     
-  index_value = value_from_longest (index_type, index);
-
-  LA_PRINT_ARRAY_INDEX (index_value, stream, options);
+  LA_PRINT_ARRAY_INDEX (index_type, index, stream, options);
 }
 
 /* See valprint.h.  */
@@ -1871,7 +1867,7 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 {
   unsigned int things_printed = 0;
   unsigned len;
-  struct type *elttype, *index_type, *base_index_type;
+  struct type *elttype, *index_type;
   unsigned eltlen;
   /* Position of the array element we are examining to see
      whether it is repeated.  */
@@ -1879,43 +1875,26 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
   /* Number of repetitions we have detected so far.  */
   unsigned int reps;
   LONGEST low_bound, high_bound;
-  LONGEST low_pos, high_pos;
 
   struct type *type = check_typedef (value_type (val));
 
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = type_length_units (check_typedef (elttype));
   index_type = TYPE_INDEX_TYPE (type);
+  if (index_type->code () == TYPE_CODE_RANGE)
+    index_type = TYPE_TARGET_TYPE (index_type);
 
   if (get_array_bounds (type, &low_bound, &high_bound))
     {
-      if (index_type->code () == TYPE_CODE_RANGE)
-	base_index_type = TYPE_TARGET_TYPE (index_type);
-      else
-	base_index_type = index_type;
-
-      /* Non-contiguous enumerations types can by used as index types
-	 in some languages (e.g. Ada).  In this case, the array length
-	 shall be computed from the positions of the first and last
-	 literal in the enumeration type, and not from the values
-	 of these literals.  */
-      if (!discrete_position (base_index_type, low_bound, &low_pos)
-	  || !discrete_position (base_index_type, high_bound, &high_pos))
-	{
-	  warning (_("unable to get positions in array, use bounds instead"));
-	  low_pos = low_bound;
-	  high_pos = high_bound;
-	}
-
-      /* The array length should normally be HIGH_POS - LOW_POS + 1.
-         But we have to be a little extra careful, because some languages
-	 such as Ada allow LOW_POS to be greater than HIGH_POS for
-	 empty arrays.  In that situation, the array length is just zero,
-	 not negative!  */
-      if (low_pos > high_pos)
+      /* The array length should normally be HIGH_BOUND - LOW_BOUND +
+         1.  But we have to be a little extra careful, because some
+         languages such as Ada allow LOW_BOUND to be greater than
+         HIGH_BOUND for empty arrays.  In that situation, the array
+         length is just zero, not negative!  */
+      if (low_bound > high_bound)
 	len = 0;
       else
-	len = high_pos - low_pos + 1;
+	len = high_bound - low_bound + 1;
     }
   else
     {

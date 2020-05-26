@@ -671,9 +671,12 @@ default_word_break_characters (void)
 /* Print the index of array elements using the C99 syntax.  */
 
 void
-default_print_array_index (struct value *index_value, struct ui_file *stream,
+default_print_array_index (struct type *index_type, LONGEST index,
+			   struct ui_file *stream,
 			   const struct value_print_options *options)
 {
+  struct value *index_value = value_from_longest (index_type, index);
+
   fprintf_filtered (stream, "[");
   LA_VALUE_PRINT (index_value, stream, options);
   fprintf_filtered (stream, "] = ");
