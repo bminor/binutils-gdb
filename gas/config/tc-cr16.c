@@ -2560,8 +2560,11 @@ md_assemble (char *op)
   if (streq ("cinv", op))
     {
      /* Validate the cinv options.  */
+      unsigned int op_len, param_len;
       check_cinv_options (param);
-      strcat (op, param);
+      op_len = strlen (op);
+      param_len = strlen (param) + 1;
+      memmove (op + op_len, param, param_len);
     }
 
   /* MAPPING - SHIFT INSN, if imm4/imm16 positive values

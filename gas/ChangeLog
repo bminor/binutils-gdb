@@ -1,5 +1,11 @@
 2020-05-25  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR gas/26041
+	* config/tc-cr16.c (md_assemble): Use memmove to concatenate
+	2 overlapping strings.
+
+2020-05-25  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-cr16.c (md_convert_frag): Replace fragP->fr_literal
 	with &fragP->fr_literal[0].
 
