@@ -1,6 +1,12 @@
 2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26044
+	* config/tc-visium.c (md_convert_frag): Replace fragP->fr_literal
+	with &fragP->fr_literal[0].
+
+2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26044
 	* config/tc-vax.c (md_estimate_size_before_relax): Replace
 	fragP->fr_literal with &fragP->fr_literal[0].
 	(md_convert_frag): Likewise.
