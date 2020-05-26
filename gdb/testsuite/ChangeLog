@@ -1,3 +1,11 @@
+2020-05-26  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/arr_acc_idx_w_gap.exp: Add enum subrange tests.
+	* gdb.ada/arr_acc_idx_w_gap/enum_with_gap.ads (Enum_Subrange): New
+	type.
+	* gdb.ada/arr_acc_idx_w_gap/enum_with_gap_main.adb (V): New
+	variable.
+
 2020-05-26  Christian Biesinger  <cbiesinger@google.com>
 
 	* Makefile.in: Use = instead of == for the test command

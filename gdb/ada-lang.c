@@ -9148,6 +9148,9 @@ value_val_atr (struct type *type, struct value *arg)
   if (!integer_type_p (value_type (arg)))
     error (_("'VAL requires integral argument"));
 
+  if (type->code () == TYPE_CODE_RANGE)
+    type = TYPE_TARGET_TYPE (type);
+
   if (type->code () == TYPE_CODE_ENUM)
     {
       long pos = value_as_long (arg);

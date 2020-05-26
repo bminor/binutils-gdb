@@ -1155,6 +1155,9 @@ get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
 int
 discrete_position (struct type *type, LONGEST val, LONGEST *pos)
 {
+  if (type->code () == TYPE_CODE_RANGE)
+    type = TYPE_TARGET_TYPE (type);
+
   if (type->code () == TYPE_CODE_ENUM)
     {
       int i;
