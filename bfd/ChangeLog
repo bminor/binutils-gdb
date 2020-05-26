@@ -1,3 +1,8 @@
+2020-05-26  Nick Clifton  <nickc@redhat.com>
+
+	* plugin.c (try_load_plugin): Extend error message when a plugin
+	fails to open.
+
 2020-05-23  Alan Modra  <amodra@gmail.com>
 
 	* bfdio.c (bfd_get_file_size): Don't segfault on NULL arch_header.

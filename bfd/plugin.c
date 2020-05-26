@@ -273,7 +273,8 @@ try_load_plugin (const char *pname,
   plugin_handle = dlopen (pname, RTLD_NOW);
   if (!plugin_handle)
     {
-      _bfd_error_handler ("%s\n", dlerror ());
+      _bfd_error_handler ("Failed to load plugin '%s', reason: %s\n",
+			  pname, dlerror ());
       return 0;
     }
 
