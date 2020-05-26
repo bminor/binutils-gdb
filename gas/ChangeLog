@@ -1,3 +1,9 @@
+2020-05-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/align-branch-9.d: Updated for PECOFF.
+	* testsuite/gas/i386/inval-avx512f.s: Add .p2align for PECOFF.
+	* testsuite/gas/i386/inval-avx512f.l: Updated.
+
 2020-05-26  Stefan Schulze Frielinghaus  <stefansf@linux.ibm.com>
 
 	* testsuite/gas/s390/zarch-z13.d: Add regexp checks for vector

@@ -67,7 +67,7 @@ Disassembly of section .text:
   96:	89 b5 50 fb ff ff    	mov    %esi,-0x4b0\(%ebp\)
   9c:	89 b5 50 fb ff ff    	mov    %esi,-0x4b0\(%ebp\)
   a2:	89 75 0c             	mov    %esi,0xc\(%ebp\)
-  a5:	e9 fc ff ff ff       	jmp    a6 <foo\+0xa6>
+  a5:	e9 [0-9a-f ]+       	jmp    .*
   aa:	89 b5 50 fb ff ff    	mov    %esi,-0x4b0\(%ebp\)
   b0:	89 b5 50 fb ff ff    	mov    %esi,-0x4b0\(%ebp\)
   b6:	89 b5 50 fb ff ff    	mov    %esi,-0x4b0\(%ebp\)
