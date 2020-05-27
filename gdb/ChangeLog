@@ -1,5 +1,19 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.c (lookup_dwo_comp_unit): Change
+	dwarf2_per_cu_data parameter fo dwarf2_cu.
+	(lookup_dwo_type_unit): Likewise.
+	(read_cutu_die_from_dwo): Likewise.
+	(lookup_dwo_unit): Likewise.
+	(open_and_init_dwo_file): Likewise.
+	(lookup_dwo_cutu): Likewise.
+	(lookup_dwo_comp_unit): Likewise.
+	(lookup_dwo_type_unit): Likewise.
+	(cutu_reader::init_tu_and_read_dwo_dies): Update.
+	(cutu_reader::cutu_reader): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c (process_full_comp_unit): Add dwarf2_per_objfile
 	parameter.
 	(process_full_type_unit): Likewise.

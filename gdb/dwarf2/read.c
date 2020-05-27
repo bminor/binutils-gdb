@@ -1672,10 +1672,11 @@ static struct dwp_file *get_dwp_file
   (struct dwarf2_per_objfile *dwarf2_per_objfile);
 
 static struct dwo_unit *lookup_dwo_comp_unit
-  (struct dwarf2_per_cu_data *, const char *, const char *, ULONGEST);
+  (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
+   ULONGEST signature);
 
 static struct dwo_unit *lookup_dwo_type_unit
-  (struct signatured_type *, const char *, const char *);
+  (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir);
 
 static void queue_and_load_all_dwo_tus (struct dwarf2_per_cu_data *);
 
@@ -6688,7 +6689,7 @@ init_cu_die_reader (struct die_reader_specs *reader,
    The result is non-zero if a valid (non-dummy) DIE was found.  */
 
 static int
-read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
+read_cutu_die_from_dwo (dwarf2_cu *cu,
 			struct dwo_unit *dwo_unit,
 			struct die_info *stub_comp_unit_die,
 			const char *stub_comp_dir,
@@ -6697,9 +6698,9 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
 			struct die_info **result_comp_unit_die,
 			abbrev_table_up *result_dwo_abbrev_table)
 {
-  struct dwarf2_per_objfile *dwarf2_per_objfile = this_cu->dwarf2_per_objfile;
+  struct dwarf2_per_objfile *dwarf2_per_objfile = cu->per_objfile;
+  dwarf2_per_cu_data *per_cu = cu->per_cu;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  struct dwarf2_cu *cu = this_cu->cu;
   bfd *abfd;
   const gdb_byte *begin_info_ptr, *info_ptr;
   struct attribute *comp_dir, *stmt_list, *low_pc, *high_pc, *ranges;
@@ -6728,7 +6729,7 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
     {
       /* For TUs in DWO files, the DW_AT_stmt_list attribute lives in the
 	 DWO file.  */
-      if (! this_cu->is_debug_types)
+      if (!per_cu->is_debug_types)
 	stmt_list = dwarf2_attr (stub_comp_unit_die, DW_AT_stmt_list, cu);
       low_pc = dwarf2_attr (stub_comp_unit_die, DW_AT_low_pc, cu);
       high_pc = dwarf2_attr (stub_comp_unit_die, DW_AT_high_pc, cu);
@@ -6761,9 +6762,9 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
 			       + to_underlying (dwo_unit->sect_off));
   dwo_abbrev_section = &dwo_unit->dwo_file->sections.abbrev;
 
-  if (this_cu->is_debug_types)
+  if (per_cu->is_debug_types)
     {
-      struct signatured_type *sig_type = (struct signatured_type *) this_cu;
+      signatured_type *sig_type = (struct signatured_type *) per_cu;
 
       info_ptr = read_and_check_comp_unit_head (dwarf2_per_objfile,
 						&cu->header, section,
@@ -6874,11 +6875,9 @@ lookup_dwo_id (struct dwarf2_cu *cu, struct die_info* comp_unit_die)
    Returns NULL if the specified DWO unit cannot be found.  */
 
 static struct dwo_unit *
-lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
-		 struct die_info *comp_unit_die,
-		 const char *dwo_name)
+lookup_dwo_unit (dwarf2_cu *cu, die_info *comp_unit_die, const char *dwo_name)
 {
-  struct dwarf2_cu *cu = this_cu->cu;
+  dwarf2_per_cu_data *per_cu = cu->per_cu;
   struct dwo_unit *dwo_unit;
   const char *comp_dir;
 
@@ -6888,24 +6887,18 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
   dwo_name = dwarf2_dwo_name (comp_unit_die, cu);
   comp_dir = dwarf2_string_attr (comp_unit_die, DW_AT_comp_dir, cu);
 
-  if (this_cu->is_debug_types)
-    {
-      struct signatured_type *sig_type;
-
-      /* Since this_cu is the first member of struct signatured_type,
-	 we can go from a pointer to one to a pointer to the other.  */
-      sig_type = (struct signatured_type *) this_cu;
-      dwo_unit = lookup_dwo_type_unit (sig_type, dwo_name, comp_dir);
-    }
+  if (per_cu->is_debug_types)
+    dwo_unit = lookup_dwo_type_unit (cu, dwo_name, comp_dir);
   else
     {
       gdb::optional<ULONGEST> signature = lookup_dwo_id (cu, comp_unit_die);
+
       if (!signature.has_value ())
 	error (_("Dwarf Error: missing dwo_id for dwo_name %s"
 		 " [in module %s]"),
-	       dwo_name, bfd_get_filename (this_cu->per_bfd->obfd));
-      dwo_unit = lookup_dwo_comp_unit (this_cu, dwo_name, comp_dir,
-				       *signature);
+	       dwo_name, bfd_get_filename (per_cu->per_bfd->obfd));
+
+      dwo_unit = lookup_dwo_comp_unit (cu, dwo_name, comp_dir, *signature);
     }
 
   return dwo_unit;
@@ -6945,7 +6938,7 @@ cutu_reader::init_tu_and_read_dwo_dies (dwarf2_per_cu_data *this_cu,
      abbrev table.  When reading DWOs with skeletonless TUs, all the TUs
      could share abbrev tables.  */
 
-  if (read_cutu_die_from_dwo (this_cu, sig_type->dwo_unit,
+  if (read_cutu_die_from_dwo (this_cu->cu, sig_type->dwo_unit,
 			      NULL /* stub_comp_unit_die */,
 			      sig_type->dwo_unit->dwo_file->comp_dir,
 			      this, &info_ptr,
@@ -7132,10 +7125,10 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
 		     sect_offset_str (this_cu->sect_off),
 		     bfd_get_filename (abfd));
 	}
-      dwo_unit = lookup_dwo_unit (this_cu, comp_unit_die, dwo_name);
+      dwo_unit = lookup_dwo_unit (cu, comp_unit_die, dwo_name);
       if (dwo_unit != NULL)
 	{
-	  if (read_cutu_die_from_dwo (this_cu, dwo_unit,
+	  if (read_cutu_die_from_dwo (cu, dwo_unit,
 				      comp_unit_die, NULL,
 				      this, &info_ptr,
 				      &dwo_comp_unit_die,
@@ -12363,10 +12356,10 @@ dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp, void *dwo_sections_ptr)
    The result is NULL if DWO_NAME can't be found.  */
 
 static struct dwo_file *
-open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
-			const char *dwo_name, const char *comp_dir)
+open_and_init_dwo_file (dwarf2_cu *cu, const char *dwo_name,
+			const char *comp_dir)
 {
-  struct dwarf2_per_objfile *dwarf2_per_objfile = per_cu->dwarf2_per_objfile;
+  struct dwarf2_per_objfile *dwarf2_per_objfile = cu->per_objfile;
 
   gdb_bfd_ref_ptr dbfd = open_dwo_file (dwarf2_per_objfile, dwo_name, comp_dir);
   if (dbfd == NULL)
@@ -12384,7 +12377,7 @@ open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
   bfd_map_over_sections (dwo_file->dbfd.get (), dwarf2_locate_dwo_sections,
 			 &dwo_file->sections);
 
-  create_cus_hash_table (dwarf2_per_objfile, per_cu->cu, *dwo_file,
+  create_cus_hash_table (dwarf2_per_objfile, cu, *dwo_file,
 			 dwo_file->sections.info, dwo_file->cus);
 
   create_debug_types_hash_table (dwarf2_per_objfile, dwo_file.get (),
@@ -12695,11 +12688,10 @@ get_dwp_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
    (dwo_id mismatch or couldn't find the DWO/DWP file).  */
 
 static struct dwo_unit *
-lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
-		 const char *dwo_name, const char *comp_dir,
+lookup_dwo_cutu (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
 		 ULONGEST signature, int is_debug_types)
 {
-  struct dwarf2_per_objfile *dwarf2_per_objfile = this_unit->dwarf2_per_objfile;
+  struct dwarf2_per_objfile *dwarf2_per_objfile = cu->per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   const char *kind = is_debug_types ? "TU" : "CU";
   void **dwo_file_slot;
@@ -12745,7 +12737,7 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
       if (*dwo_file_slot == NULL)
 	{
 	  /* Read in the file and build a table of the CUs/TUs it contains.  */
-	  *dwo_file_slot = open_and_init_dwo_file (this_unit, dwo_name, comp_dir);
+	  *dwo_file_slot = open_and_init_dwo_file (cu, dwo_name, comp_dir);
 	}
       /* NOTE: This will be NULL if unable to open the file.  */
       dwo_file = (struct dwo_file *) *dwo_file_slot;
@@ -12810,10 +12802,8 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
 
     warning (_("Could not find DWO %s %s(%s)%s referenced by %s at offset %s"
 	       " [in module %s]"),
-	     kind, dwo_name, hex_string (signature),
-	     dwp_text.c_str (),
-	     this_unit->is_debug_types ? "TU" : "CU",
-	     sect_offset_str (this_unit->sect_off), objfile_name (objfile));
+	     kind, dwo_name, hex_string (signature), dwp_text.c_str (), kind,
+	     sect_offset_str (cu->per_cu->sect_off), objfile_name (objfile));
   }
   return NULL;
 }
@@ -12822,21 +12812,25 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
    See lookup_dwo_cutu_unit for details.  */
 
 static struct dwo_unit *
-lookup_dwo_comp_unit (struct dwarf2_per_cu_data *this_cu,
-		      const char *dwo_name, const char *comp_dir,
+lookup_dwo_comp_unit (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir,
 		      ULONGEST signature)
 {
-  return lookup_dwo_cutu (this_cu, dwo_name, comp_dir, signature, 0);
+  gdb_assert (!cu->per_cu->is_debug_types);
+
+  return lookup_dwo_cutu (cu, dwo_name, comp_dir, signature, 0);
 }
 
 /* Lookup the DWO TU DWO_NAME/SIGNATURE referenced from THIS_TU.
    See lookup_dwo_cutu_unit for details.  */
 
 static struct dwo_unit *
-lookup_dwo_type_unit (struct signatured_type *this_tu,
-		      const char *dwo_name, const char *comp_dir)
+lookup_dwo_type_unit (dwarf2_cu *cu, const char *dwo_name, const char *comp_dir)
 {
-  return lookup_dwo_cutu (&this_tu->per_cu, dwo_name, comp_dir, this_tu->signature, 1);
+  gdb_assert (cu->per_cu->is_debug_types);
+
+  signatured_type *sig_type = (signatured_type *) cu->per_cu;
+
+  return lookup_dwo_cutu (cu, dwo_name, comp_dir, sig_type->signature, 1);
 }
 
 /* Traversal function for queue_and_load_all_dwo_tus.  */
