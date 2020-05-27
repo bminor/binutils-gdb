@@ -2447,6 +2447,7 @@ dwarf2_per_cu_data *
 dwarf2_per_bfd::allocate_per_cu ()
 {
   dwarf2_per_cu_data *result = OBSTACK_ZALLOC (&obstack, dwarf2_per_cu_data);
+  result->per_bfd = this;
   result->index = m_num_psymtabs++;
   return result;
 }
@@ -2457,6 +2458,7 @@ signatured_type *
 dwarf2_per_bfd::allocate_signatured_type ()
 {
   signatured_type *result = OBSTACK_ZALLOC (&obstack, signatured_type);
+  result->per_cu.per_bfd = this;
   result->per_cu.index = m_num_psymtabs++;
   return result;
 }
@@ -6451,10 +6453,12 @@ fill_in_sig_entry_from_dwo_entry (struct dwarf2_per_objfile *dwarf2_per_objfile,
 				  struct signatured_type *sig_entry,
 				  struct dwo_unit *dwo_entry)
 {
+  dwarf2_per_bfd *per_bfd = dwarf2_per_objfile->per_bfd;
+
   /* Make sure we're not clobbering something we don't expect to.  */
   gdb_assert (! sig_entry->per_cu.queued);
   gdb_assert (sig_entry->per_cu.cu == NULL);
-  if (dwarf2_per_objfile->per_bfd->using_index)
+  if (per_bfd->using_index)
     {
       gdb_assert (sig_entry->per_cu.v.quick != NULL);
       gdb_assert (!dwarf2_per_objfile->symtab_set_p (&sig_entry->per_cu));
@@ -6471,6 +6475,7 @@ fill_in_sig_entry_from_dwo_entry (struct dwarf2_per_objfile *dwarf2_per_objfile,
   sig_entry->per_cu.length = dwo_entry->length;
   sig_entry->per_cu.reading_dwo_directly = 1;
   sig_entry->per_cu.dwarf2_per_objfile = dwarf2_per_objfile;
+  sig_entry->per_cu.per_bfd = per_bfd;
   sig_entry->type_offset_in_tu = dwo_entry->type_offset_in_tu;
   sig_entry->dwo_unit = dwo_entry;
 }
@@ -7283,6 +7288,7 @@ static struct type_unit_group *
 create_type_unit_group (struct dwarf2_cu *cu, sect_offset line_offset_struct)
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile = cu->per_objfile;
+  dwarf2_per_bfd *per_bfd = dwarf2_per_objfile->per_bfd;
   struct dwarf2_per_cu_data *per_cu;
   struct type_unit_group *tu_group;
 
@@ -7290,10 +7296,11 @@ create_type_unit_group (struct dwarf2_cu *cu, sect_offset line_offset_struct)
 			     struct type_unit_group);
   per_cu = &tu_group->per_cu;
   per_cu->dwarf2_per_objfile = dwarf2_per_objfile;
+  per_cu->per_bfd = per_bfd;
 
-  if (dwarf2_per_objfile->per_bfd->using_index)
+  if (per_bfd->using_index)
     {
-      per_cu->v.quick = OBSTACK_ZALLOC (&dwarf2_per_objfile->per_bfd->obstack,
+      per_cu->v.quick = OBSTACK_ZALLOC (&per_bfd->obstack,
 					struct dwarf2_per_cu_quick_data);
     }
   else
@@ -8906,7 +8913,7 @@ queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
 		 enum language pretend_language)
 {
   per_cu->queued = 1;
-  per_cu->dwarf2_per_objfile->per_bfd->queue.emplace (per_cu, pretend_language);
+  per_cu->per_bfd->queue.emplace (per_cu, pretend_language);
 }
 
 /* If PER_CU is not yet queued, add it to the queue.
@@ -8926,7 +8933,7 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
   /* We may arrive here during partial symbol reading, if we need full
      DIEs to process an unusual case (e.g. template arguments).  Do
      not queue PER_CU, just tell our caller to load its DIEs.  */
-  if (per_cu->dwarf2_per_objfile->per_bfd->reading_partial_symbols)
+  if (per_cu->per_bfd->reading_partial_symbols)
     {
       if (per_cu->cu == NULL || per_cu->cu->dies == NULL)
 	return 1;
@@ -11274,6 +11281,7 @@ create_cus_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 		       dwarf2_section_info &section, htab_up &cus_htab)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
+  dwarf2_per_bfd *per_bfd = dwarf2_per_objfile->per_bfd;
   const gdb_byte *info_ptr, *end_ptr;
 
   section.read (objfile);
@@ -11300,6 +11308,7 @@ create_cus_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
       memset (&per_cu, 0, sizeof (per_cu));
       per_cu.dwarf2_per_objfile = dwarf2_per_objfile;
+      per_cu.per_bfd = per_bfd;
       per_cu.is_debug_types = 0;
       per_cu.sect_off = sect_offset (info_ptr - section.buffer);
       per_cu.section = &section;
@@ -11317,7 +11326,7 @@ create_cus_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
       if (cus_htab == NULL)
 	cus_htab = allocate_dwo_unit_table ();
 
-      dwo_unit = OBSTACK_ZALLOC (&dwarf2_per_objfile->per_bfd->obstack,
+      dwo_unit = OBSTACK_ZALLOC (&per_bfd->obstack,
 				 struct dwo_unit);
       *dwo_unit = read_unit;
       slot = htab_find_slot (cus_htab.get (), dwo_unit, INSERT);

@@ -1,3 +1,17 @@
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <per_bfd>: New
+	member.
+	* dwarf2/read.c (dwarf2_per_bfd::allocate_per_cu): Initialize
+	dwarf2_per_cu_data::per_bfd.
+	(dwarf2_per_bfd::allocate_signatured_type): Likewise.
+	(create_type_unit_group): Likewise.
+	(queue_comp_unit): Remove reference to
+	per_cu->dwarf2_per_objfile.
+	(maybe_queue_comp_unit): Likewise.
+	(fill_in_sig_entry_from_dwo_entry): Assign new field.
+	(create_cus_hash_table): Assign new field.
+
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2/read.c: Replace

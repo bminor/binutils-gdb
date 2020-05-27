@@ -412,6 +412,9 @@ struct dwarf2_per_cu_data
   /* The corresponding dwarf2_per_objfile.  */
   struct dwarf2_per_objfile *dwarf2_per_objfile;
 
+  /* Backlink to the owner of this.  */
+  dwarf2_per_bfd *per_bfd;
+
   /* When dwarf2_per_bfd::using_index is true, the 'quick' field
      is active.  Otherwise, the 'psymtab' field is active.  */
   union
