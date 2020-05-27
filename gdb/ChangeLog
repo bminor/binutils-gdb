@@ -1,3 +1,34 @@
+2020-05-27  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (struct dwarf2_per_bfd) <num_psymtabs>: New
+	method.
+	(struct dwarf2_per_objfile) <resize_symtabs, symtab_set_p,
+	get_symtab, set_symtab>: New methods.
+	<m_symtabs>: New field.
+	(struct dwarf2_psymtab): Derive from partial_symtab.
+	<readin_p, get_compunit_symtab>: Declare methods.
+	* dwarf2/read.c (dwarf2_per_objfile::symtab_set_p,
+	dwarf2_per_objfile::get_symtab, dwarf2_per_objfile::set_symtab):
+	New methods.
+	(struct dwarf2_per_cu_quick_data) <compunit_symtab>: Remove.
+	(dw2_do_instantiate_symtab, dw2_instantiate_symtab)
+	(dw2_map_expand_apply, dw2_map_symtabs_matching_filename)
+	(dw2_symtab_iter_next, dw2_print_stats)
+	(dw2_expand_symtabs_with_fullname)
+	(dw2_expand_symtabs_matching_one)
+	(dw_expand_symtabs_matching_file_matcher)
+	(dw2_find_pc_sect_compunit_symtab, dw2_map_symbol_filenames)
+	(dw2_debug_names_iterator::next)
+	(dw2_debug_names_map_matching_symbols)
+	(fill_in_sig_entry_from_dwo_entry, dwarf2_psymtab::read_symtab)
+	(process_queue, dwarf2_psymtab::expand_psymtab): Update.
+	(dwarf2_psymtab::readin_p, dwarf2_psymtab::get_compunit_symtab):
+	New methods.
+	(get_compunit_symtab, process_full_comp_unit)
+	(process_full_type_unit): Update.
+	(dwarf2_build_psymtabs, dwarf2_initialize_objfile, add_type_unit): Call
+
 2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2/read.h (dwarf2_per_objfile): Rename to dwarf2_per_bfd,
