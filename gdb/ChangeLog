@@ -1,3 +1,22 @@
+2020-05-27  Tom Tromey  <tom@tromey.com>
+
+	* dwarf2/read.h (struct dwarf2_per_objfile) <obstack>: New
+	member.
+	* dwarf2/read.c (delete_file_name_entry): Fix comment.
+	(create_cu_from_index_list)
+	(create_signatured_type_table_from_index)
+	(create_signatured_type_table_from_debug_names)
+	(dw2_get_file_names_reader, dwarf2_initialize_objfile)
+	(dwarf2_create_include_psymtab)
+	(create_debug_type_hash_table, add_type_unit)
+	(create_type_unit_group, read_comp_units_from_section)
+	(dwarf2_compute_name, create_cus_hash_table)
+	(create_dwp_hash_table, create_dwo_unit_in_dwp_v1)
+	(create_dwo_unit_in_dwp_v2, open_and_init_dwp_file): Use new
+	obstack.
+	(dw2_get_real_path): Likewise.  Change argument to
+	dwarf2_per_objfile.
+
 2020-05-27  Luis Machado  <luis.machado@linaro.org>
 
 	PR tdep/26000
