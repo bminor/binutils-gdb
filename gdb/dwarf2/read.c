@@ -7162,8 +7162,11 @@ cutu_reader::keep ()
   gdb_assert (!dummy_p);
   if (m_new_cu != NULL)
     {
-      struct dwarf2_per_objfile *dwarf2_per_objfile
-	= m_this_cu->dwarf2_per_objfile;
+      /* We know that m_this_cu->cu is set, since we are in the process of
+         parsing the CU.  */
+      gdb_assert (m_this_cu->cu != nullptr);
+      dwarf2_per_objfile *dwarf2_per_objfile = m_this_cu->cu->per_objfile;
+
       /* Link this CU into read_in_chain.  */
       m_this_cu->cu->read_in_chain = dwarf2_per_objfile->per_bfd->read_in_chain;
       dwarf2_per_objfile->per_bfd->read_in_chain = m_this_cu;
