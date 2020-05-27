@@ -27,6 +27,7 @@
 #include "dwarf2.h"
 #include "dwarf2/expr.h"
 #include "dwarf2/loc.h"
+#include "dwarf2/read.h"
 #include "gdbsupport/underlying.h"
 #include "gdbarch.h"
 
@@ -88,17 +89,17 @@ dwarf_expr_context::address_type () const
 
 /* Create a new context for the expression evaluator.  */
 
-dwarf_expr_context::dwarf_expr_context ()
+dwarf_expr_context::dwarf_expr_context (dwarf2_per_objfile *per_objfile)
 : gdbarch (NULL),
   addr_size (0),
   ref_addr_size (0),
-  offset (0),
   recursion_depth (0),
   max_recursion_depth (0x100),
   location (DWARF_VALUE_MEMORY),
   len (0),
   data (NULL),
-  initialized (0)
+  initialized (0),
+  per_objfile (per_objfile)
 {
 }
 
@@ -631,7 +632,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	     index, not an address.  We don't support things like
 	     branching between the address and the TLS op.  */
 	  if (op_ptr >= op_end || *op_ptr != DW_OP_GNU_push_tls_address)
-	    result += this->offset;
+	    result += this->per_objfile->objfile->text_section_offset ();
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 
@@ -639,7 +640,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	case DW_OP_GNU_addr_index:
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	  result = this->get_addr_index (uoffset);
-	  result += this->offset;
+	  result += this->per_objfile->objfile->text_section_offset ();
 	  result_val = value_from_ulongest (address_type, result);
 	  break;
 	case DW_OP_GNU_const_index:

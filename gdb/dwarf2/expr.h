@@ -25,6 +25,8 @@
 #include "leb128.h"
 #include "gdbtypes.h"
 
+struct dwarf2_per_objfile;
+
 /* The location of a value.  */
 enum dwarf_value_location
 {
@@ -117,7 +119,7 @@ struct dwarf_stack_value
    its current state and its callbacks.  */
 struct dwarf_expr_context
 {
-  dwarf_expr_context ();
+  dwarf_expr_context (dwarf2_per_objfile *per_objfile);
   virtual ~dwarf_expr_context () = default;
 
   void push_address (CORE_ADDR value, bool in_stack_memory);
@@ -138,10 +140,6 @@ struct dwarf_expr_context
   /* DW_FORM_ref_addr size in bytes.  If -1 DWARF is executed from a frame
      context and operations depending on DW_FORM_ref_addr are not allowed.  */
   int ref_addr_size;
-
-  /* Offset used to relocate DW_OP_addr, DW_OP_addrx, and
-     DW_OP_GNU_addr_index arguments.  */
-  CORE_ADDR offset;
 
   /* The current depth of dwarf expression recursion, via DW_OP_call*,
      DW_OP_fbreg, DW_OP_push_object_address, etc., and the maximum
@@ -184,6 +182,9 @@ struct dwarf_expr_context
      'size' field; the size comes from the surrounding data.  So the
      two cases need to be handled separately.)  */
   std::vector<dwarf_expr_piece> pieces;
+
+  /* We evaluate the expression in the context of this objfile.  */
+  dwarf2_per_objfile *per_objfile;
 
   /* Return the value of register number REGNUM (a DWARF register number),
      read as an address.  */
