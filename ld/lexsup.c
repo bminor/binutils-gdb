@@ -516,9 +516,11 @@ static const struct ld_option ld_options[] =
   { {"warn-section-align", no_argument, NULL, OPTION_WARN_SECTION_ALIGN},
     '\0', NULL, N_("Warn if start of section changes due to alignment"),
     TWO_DASHES },
-  { {"warn-shared-textrel", no_argument, NULL, OPTION_WARN_SHARED_TEXTREL},
-    '\0', NULL, N_("Warn if shared object has DT_TEXTREL"),
+  { {"warn-textrel", no_argument, NULL, OPTION_WARN_TEXTREL},
+    '\0', NULL, N_("Warn if outpout has DT_TEXTREL"),
     TWO_DASHES },
+  { {"warn-shared-textrel", no_argument, NULL, OPTION_WARN_TEXTREL},
+    '\0', NULL, NULL, NO_HELP },
   { {"warn-alternate-em", no_argument, NULL, OPTION_WARN_ALTERNATE_EM},
     '\0', NULL, N_("Warn if an object has alternate ELF machine code"),
     TWO_DASHES },
@@ -1438,8 +1440,8 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_WARN_SECTION_ALIGN:
 	  config.warn_section_align = TRUE;
 	  break;
-	case OPTION_WARN_SHARED_TEXTREL:
-	  link_info.warn_shared_textrel = TRUE;
+	case OPTION_WARN_TEXTREL:
+	  link_info.textrel_check = textrel_check_warning;
 	  break;
 	case OPTION_WARN_ALTERNATE_EM:
 	  link_info.warn_alternate_em = TRUE;
@@ -1846,12 +1848,26 @@ elf_shlib_list_options (FILE *file)
   -z nocommon                 Generate common symbols with STT_OBJECT type\n"));
   fprintf (file, _("\
   -z stack-size=SIZE          Set size of stack segment\n"));
-  fprintf (file, _("\
-  -z text                     Treat DT_TEXTREL in shared object as error\n"));
-  fprintf (file, _("\
-  -z notext                   Don't treat DT_TEXTREL in shared object as error\n"));
-  fprintf (file, _("\
-  -z textoff                  Don't treat DT_TEXTREL in shared object as error\n"));
+  if (link_info.textrel_check == textrel_check_error)
+    fprintf (file, _("\
+  -z text                     Treat DT_TEXTREL in output as error (default)\n"));
+  else
+    fprintf (file, _("\
+  -z text                     Treat DT_TEXTREL in output as error\n"));
+  if (link_info.textrel_check == textrel_check_none)
+    {
+      fprintf (file, _("\
+  -z notext                   Don't treat DT_TEXTREL in output as error (default)\n"));
+      fprintf (file, _("\
+  -z textoff                  Don't treat DT_TEXTREL in output as error (default)\n"));
+    }
+  else
+    {
+      fprintf (file, _("\
+  -z notext                   Don't treat DT_TEXTREL in output as error\n"));
+      fprintf (file, _("\
+  -z textoff                  Don't treat DT_TEXTREL in output as error\n"));
+    }
 }
 
 static void

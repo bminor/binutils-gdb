@@ -1,7 +1,8 @@
 #source: start.s
 #source: pr19539.s
-#ld: -pie -T pr19539.t -z notext
+#ld: -pie -T pr19539.t --warn-textrel
 #readelf : --dyn-syms --wide
+#warning: .*: creating DT_TEXTREL in a PIE
 #target: *-*-linux* *-*-gnu* *-*-solaris* arm*-*-uclinuxfdpiceabi
 #xfail: cris*-*-* ![check_pie_support] 
 

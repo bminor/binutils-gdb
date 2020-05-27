@@ -803,11 +803,11 @@ fragment <<EOF
       else if (strcmp (optarg, "nocommon") == 0)
 	link_info.elf_stt_common = no_elf_stt_common;
       else if (strcmp (optarg, "text") == 0)
-	link_info.error_textrel = TRUE;
+	link_info.textrel_check = textrel_check_error;
       else if (strcmp (optarg, "notext") == 0)
-	link_info.error_textrel = FALSE;
+	link_info.textrel_check = textrel_check_none;
       else if (strcmp (optarg, "textoff") == 0)
-	link_info.error_textrel = FALSE;
+	link_info.textrel_check = textrel_check_none;
 EOF
 fi
 

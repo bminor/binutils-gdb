@@ -1,3 +1,11 @@
+2020-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22909
+	* bfdlink.h (textrel_check_method): New enum.
+	(bfd_link_textrel_check): New.
+	(bfd_link_info): Replace warn_shared_textrel and error_textrel
+	with textrel_check.
+
 2020-05-25  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf/common.h: Update comments for ET_EXEC and ET_DYN.

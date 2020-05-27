@@ -1,3 +1,11 @@
+2020-05-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/22909
+	* elflink.c (bfd_elf_final_link): Use bfd_link_textrel_check.
+	Check bfd_link_dll when issue a DT_TEXTREL warning.
+	* elfxx-x86.c (maybe_set_textrel): Likewise.
+	(_bfd_x86_elf_size_dynamic_sections): Likewise.
+
 2020-05-26  Nick Clifton  <nickc@redhat.com>
 
 	* plugin.c (try_load_plugin): Extend error message when a plugin
