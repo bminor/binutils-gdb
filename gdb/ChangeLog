@@ -1,5 +1,25 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.c (dw2_do_instantiate_symtab): Add per_objfile
+	parameter, don't use per_cu->dwarf2_per_objfile.
+	(dw2_instantiate_symtab): Likewise.
+	(dw2_find_last_source_symtab): Update.
+	(dw2_map_expand_apply): Update.
+	(dw2_lookup_symbol): Update.
+	(dw2_expand_symtabs_for_function): Update.
+	(dw2_expand_all_symtabs): Update.
+	(dw2_expand_symtabs_with_fullname): Update.
+	(dw2_expand_symtabs_matching_one): Add per_objfile parameter,
+	don't use per_cu->dwarf2_per_objfile.
+	(dw2_expand_marked_cus): Update.
+	(dw2_find_pc_sect_compunit_symtab): Update.
+	(dw2_debug_names_lookup_symbol): Update.
+	(dw2_debug_names_expand_symtabs_for_function): Update.
+	(dw2_debug_names_map_matching_symbols): Update.
+	(dwarf2_psymtab::expand_psymtab): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c (struct dwarf2_cu) <dwarf2_cu>: Add parameter.
 	<per_objfile>: New member.
 	(class cutu_reader) <init_tu_and_read_dwo_dies>: Add parameter.
