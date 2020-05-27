@@ -695,6 +695,7 @@ riscv_init_csr_hash (const char *name,
   entry->address = address;
   entry->define_version = define_version;
   entry->abort_version = abort_version;
+  entry->next = NULL;
 
   /* If the CSR hasn't been inserted in the hash table, then insert it.
      Otherwise, attach the extra information to the entry which is already
