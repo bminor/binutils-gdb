@@ -1,5 +1,37 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.c (struct mapped_index_base) <symbol_name_at,
+	build_name_components, find_name_components_bounds>:
+	Add per_objfile parameter.
+	(struct mapped_index) <symbol_name_at>: Likewise.
+	(struct mapped_debug_names): Remove constructor.
+	<dwarf2_per_objfile>: Remove field.
+	<namei_to_name, symbol_name_at>: Add per_objfile parameter.
+	(mapped_index_base::find_name_components_bounds,
+	mapped_index_base::build_name_components,
+	dw2_expand_symtabs_matching_symbol): Likewise.
+	(class mock_mapped_index) <symbol_name_at>: Likewise.
+	(check_match): Likewise.
+	(check_find_bounds_finds): Likewise.
+	(test_mapped_index_find_name_component_bounds): Update.
+	(CHECK_MATCH): Update.
+	(dw2_expand_symtabs_matching): Update.
+	(class dw2_debug_names_iterator) <dw2_debug_names_iterator>: Add
+	per_objfile parameter.
+	<find_vec_in_debug_names>: Likewise.
+	<m_per_objfile>: New field.
+	(mapped_debug_names::namei_to_name): Add dwarf2_per_objfile
+	parameter.
+	(dw2_debug_names_iterator::find_vec_in_debug_names): Likewise.
+	(dw2_debug_names_iterator::next): Update.
+	(dw2_debug_names_lookup_symbol): Update.
+	(dw2_debug_names_expand_symtabs_for_function): Update.
+	(dw2_debug_names_map_matching_symbols): Update.
+	(dw2_debug_names_expand_symtabs_matching): Update.
+	(dwarf2_read_debug_names): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.h (struct dwarf2_cu): Forward-declare.
 	(struct dwarf2_per_bfd) <free_cached_comp_units>: Remove,
 	move to dwarf2_per_objfile.
