@@ -1,6 +1,19 @@
 2020-05-27  Tom Tromey  <tom@tromey.com>
 	    Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.h (struct dwarf2_per_objfile)
+	<get_type_for_signatured_type, set_type_for_signatured_type>:
+	New methods.
+	<m_type_map>: New member.
+	(struct signatured_type) <type>: Remove.
+	* dwarf2/read.c
+	(dwarf2_per_objfile::get_type_for_signatured_type,
+	dwarf2_per_objfile::set_type_for_signatured_type): New.
+	(get_signatured_type): Use new methods.
+
+2020-05-27  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.h (struct type_unit_group_unshareable): New.
 	(struct dwarf2_per_objfile) <type_units>: New member.
 	<get_type_unit_group_unshareable>: New method.
