@@ -301,6 +301,10 @@ struct dwarf2_per_objfile
   /* Set the compunit_symtab associated to PER_CU.  */
   void set_symtab (const dwarf2_per_cu_data *per_cu, compunit_symtab *symtab);
 
+  /* Find an integer type SIZE_IN_BYTES bytes in size and return it.
+     UNSIGNED_P controls if the integer is unsigned or not.  */
+  struct type *int_type (int size_in_bytes, bool unsigned_p) const;
+
   /* Back link.  */
   struct objfile *objfile;
 
@@ -509,20 +513,6 @@ struct dwarf2_per_cu_data
      debuginfo file, then the offset may be different from the
      corresponding offset in the parent objfile.  */
   CORE_ADDR text_offset () const;
-
-  /* Return a type that is a generic pointer type, the size of which
-     matches the address size given in the compilation unit header for
-     this CU.  */
-  struct type *addr_type () const;
-
-  /* Find an integer type SIZE_IN_BYTES bytes in size and return it.
-     UNSIGNED_P controls if the integer is unsigned or not.  */
-  struct type *int_type (int size_in_bytes, bool unsigned_p) const;
-
-  /* Find an integer type the same size as the address size given in
-     the compilation unit header for this CU.  UNSIGNED_P controls if
-     the integer is unsigned or not.  */
-  struct type *addr_sized_int_type (bool unsigned_p) const;
 
   /* Return DWARF version number of this CU.  */
   short version () const

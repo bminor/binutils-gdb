@@ -1,5 +1,26 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <addr_type,
+	addr_sized_int_type>: Move to dwarf2_cu.
+	<int_type>: Move to dwarf2_per_objfile.
+	(struct dwarf2_per_objfile) <int_type>: Move here.
+	* dwarf2/read.c (struct dwarf2_cu) <addr_type,
+	addr_sized_int_type>: Move here.
+	(read_func_scope): Update.
+	(read_array_type): Update.
+	(read_tag_string_type): Update.
+	(attr_to_dynamic_prop): Update.
+	(dwarf2_per_cu_data::int_type): Rename to...
+	(dwarf2_per_objfile::int_type): ... this.
+	(dwarf2_per_cu_data::addr_sized_int_type): Rename to...
+	(dwarf2_cu::addr_sized_int_type): ... this.
+	(read_subrange_type): Update.
+	(dwarf2_per_cu_data::addr_type): Rename to...
+	(dwarf2_cu::addr_type): ... this.
+	(set_die_type): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c (queue_and_load_all_dwo_tus): Access per_objfile
 	data through per_cu->cu.
 
