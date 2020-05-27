@@ -1,3 +1,12 @@
+2020-05-27  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/attribute.h (struct attribute) <form_is_ref>: Inline.
+	<get_ref_die_offset>: Inline.
+	<get_ref_die_offset_complaint>: New method.
+	* dwarf2/attribute.c (attribute::form_is_ref): Move to header.
+	(attribute::get_ref_die_offset_complaint): Rename from
+	get_ref_die_offset.  Just issue complaint.
+
 2020-05-27  Hannes Domani  <ssbssa@yahoo.de>
 
 	* cli/cli-cmds.c (shell_escape): Move exit_status_set_internal_vars.
