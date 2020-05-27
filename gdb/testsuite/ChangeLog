@@ -1,3 +1,11 @@
+2020-05-27  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/cp-completion-aliases.exp: Remove readline_is_used
+	check.  Use test_gdb_complete_unique instead of
+	test_gdb_complete_tab_unique + test_gdb_complete_cmd_unique.  Use
+	test_gdb_complete_multiple instead of
+	test_gdb_complete_tab_multiple + test_gdb_complete_cmd_multiple.
+
 2020-05-27  Luis Machado  <luis.machado@linaro.org>
 
 	* gdb.arch/aarch64-sighandler-regs.exp: Fix duplicated test names.
