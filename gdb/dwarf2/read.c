@@ -971,6 +971,10 @@ struct partial_die_info : public allocate_on_obstack
 			  const struct abbrev_info &abbrev,
 			  const gdb_byte *info_ptr);
 
+    /* Compute the name of this partial DIE.  This memoizes the
+       result, so it is safe to call multiple times.  */
+    const char *name (dwarf2_cu *cu);
+
     /* Offset of this DIE.  */
     const sect_offset sect_off;
 
@@ -1012,9 +1016,11 @@ struct partial_die_info : public allocate_on_obstack
     /* Flag set if spec_offset uses DW_FORM_GNU_ref_alt.  */
     unsigned int spec_is_dwz : 1;
 
+    unsigned int canonical_name : 1;
+
     /* The name of this DIE.  Normally the value of DW_AT_name, but
        sometimes a default name for unnamed DIEs.  */
-    const char *name = nullptr;
+    const char *raw_name = nullptr;
 
     /* The linkage name, if present.  */
     const char *linkage_name = nullptr;
@@ -1083,6 +1089,7 @@ struct partial_die_info : public allocate_on_obstack
       fixup_called = 0;
       is_dwz = 0;
       spec_is_dwz = 0;
+      canonical_name = 0;
     }
   };
 
@@ -8172,7 +8179,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	 children, so we need to look at them.  Ditto for anonymous
 	 enums.  */
 
-      if (pdi->name != NULL || pdi->tag == DW_TAG_namespace
+      if (pdi->raw_name != NULL || pdi->tag == DW_TAG_namespace
 	  || pdi->tag == DW_TAG_module || pdi->tag == DW_TAG_enumeration_type
 	  || pdi->tag == DW_TAG_imported_unit
 	  || pdi->tag == DW_TAG_inlined_subroutine)
@@ -8317,7 +8324,7 @@ partial_die_parent_scope (struct partial_die_info *pdi,
      Work around this problem here.  */
   if (cu->language == language_cplus
       && parent->tag == DW_TAG_namespace
-      && strcmp (parent->name, "::") == 0
+      && strcmp (parent->name (cu), "::") == 0
       && grandparent_scope == NULL)
     {
       parent->scope = NULL;
@@ -8341,11 +8348,11 @@ partial_die_parent_scope (struct partial_die_info *pdi,
 	  && pdi->tag == DW_TAG_subprogram))
     {
       if (grandparent_scope == NULL)
-	parent->scope = parent->name;
+	parent->scope = parent->name (cu);
       else
 	parent->scope = typename_concat (&cu->comp_unit_obstack,
 					 grandparent_scope,
-					 parent->name, 0, cu);
+					 parent->name (cu), 0, cu);
     }
   else
     {
@@ -8379,7 +8386,7 @@ partial_die_full_name (struct partial_die_info *pdi,
     {
       pdi->fixup (cu);
 
-      if (pdi->name != NULL && strchr (pdi->name, '<') == NULL)
+      if (pdi->name (cu) != NULL && strchr (pdi->name (cu), '<') == NULL)
 	{
 	  struct die_info *die;
 	  struct attribute attr;
@@ -8400,7 +8407,8 @@ partial_die_full_name (struct partial_die_info *pdi,
     return NULL;
   else
     return gdb::unique_xmalloc_ptr<char> (typename_concat (NULL, parent_scope,
-							   pdi->name, 0, cu));
+							   pdi->name (cu),
+							   0, cu));
 }
 
 static void
@@ -8421,7 +8429,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
     actual_name = built_actual_name.get ();
 
   if (actual_name == NULL)
-    actual_name = pdi->name;
+    actual_name = pdi->name (cu);
 
   partial_symbol psymbol;
   memset (&psymbol, 0, sizeof (psymbol));
@@ -8683,7 +8691,7 @@ add_partial_subprogram (struct partial_die_info *pdi,
 	    /* Ignore subprogram DIEs that do not have a name, they are
 	       illegal.  Do not emit a complaint at this point, we will
 	       do so when we convert this psymtab into a symtab.  */
-	    if (pdi->name)
+	    if (pdi->name (cu))
 	      add_partial_symbol (pdi, cu);
         }
     }
@@ -8714,13 +8722,13 @@ add_partial_enumeration (struct partial_die_info *enum_pdi,
 {
   struct partial_die_info *pdi;
 
-  if (enum_pdi->name != NULL)
+  if (enum_pdi->name (cu) != NULL)
     add_partial_symbol (enum_pdi, cu);
 
   pdi = enum_pdi->die_child;
   while (pdi)
     {
-      if (pdi->tag != DW_TAG_enumerator || pdi->name == NULL)
+      if (pdi->tag != DW_TAG_enumerator || pdi->raw_name == NULL)
 	complaint (_("malformed enumerator DIE ignored"));
       else
 	add_partial_symbol (pdi, cu);
@@ -18349,8 +18357,8 @@ load_partial_dies (const struct die_reader_specs *reader,
 	      || pdi.tag == DW_TAG_base_type
 	      || pdi.tag == DW_TAG_subrange_type))
 	{
-	  if (building_psymtab && pdi.name != NULL)
-	    add_psymbol_to_list (pdi.name, false,
+	  if (building_psymtab && pdi.raw_name != NULL)
+	    add_psymbol_to_list (pdi.name (cu), false,
 				 VAR_DOMAIN, LOC_TYPEDEF, -1,
 				 psymbol_placement::STATIC,
 				 0, cu->language, objfile);
@@ -18381,10 +18389,10 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  && parent_die->tag == DW_TAG_enumeration_type
 	  && parent_die->has_specification == 0)
 	{
-	  if (pdi.name == NULL)
+	  if (pdi.raw_name == NULL)
 	    complaint (_("malformed enumerator DIE ignored"));
 	  else if (building_psymtab)
-	    add_psymbol_to_list (pdi.name, false,
+	    add_psymbol_to_list (pdi.name (cu), false,
 				 VAR_DOMAIN, LOC_CONST, -1,
 				 cu->language == language_cplus
 				 ? psymbol_placement::GLOBAL
@@ -18468,8 +18476,8 @@ load_partial_dies (const struct die_reader_specs *reader,
 	      || last_die->tag == DW_TAG_enumeration_type
 	      || (cu->language == language_cplus
 		  && last_die->tag == DW_TAG_subprogram
-		  && (last_die->name == NULL
-		      || strchr (last_die->name, '<') == NULL))
+		  && (last_die->raw_name == NULL
+		      || strchr (last_die->raw_name, '<') == NULL))
 	      || (cu->language != language_c
 		  && (last_die->tag == DW_TAG_class_type
 		      || last_die->tag == DW_TAG_interface_type
@@ -18496,6 +18504,21 @@ partial_die_info::partial_die_info (sect_offset sect_off_,
 				    struct abbrev_info *abbrev)
   : partial_die_info (sect_off_, abbrev->tag, abbrev->has_children)
 {
+}
+
+/* See class definition.  */
+
+const char *
+partial_die_info::name (dwarf2_cu *cu)
+{
+  if (!canonical_name && raw_name != nullptr)
+    {
+      struct objfile *objfile = cu->per_objfile->objfile;
+      raw_name = dwarf2_canonicalize_name (raw_name, cu, objfile);
+      canonical_name = 1;
+    }
+
+  return raw_name;
 }
 
 /* Read a minimal amount of information into the minimal die structure.
@@ -18539,15 +18562,12 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	    case DW_TAG_enumerator:
 	      /* These tags always have simple identifiers already; no need
 		 to canonicalize them.  */
-	      name = DW_STRING (&attr);
+	      canonical_name = 1;
+	      raw_name = DW_STRING (&attr);
 	      break;
 	    default:
-	      {
-		struct objfile *objfile = dwarf2_per_objfile->objfile;
-
-		name
-		  = dwarf2_canonicalize_name (DW_STRING (&attr), cu, objfile);
-	      }
+	      canonical_name = 0;
+	      raw_name = DW_STRING (&attr);
 	      break;
 	    }
 	  break;
@@ -18699,7 +18719,7 @@ partial_die_info::read (const struct die_reader_specs *reader,
      Really, though, this is just a workaround for the fact that gdb
      doesn't store both the name and the linkage name.  */
   if (cu->language == language_ada && linkage_name != nullptr)
-    name = linkage_name;
+    raw_name = linkage_name;
 
   if (high_pc_relative)
     highpc += lowpc;
@@ -18877,7 +18897,8 @@ guess_partial_die_structure_name (struct partial_die_info *struct_pdi,
 	  if (actual_class_name != NULL)
 	    {
 	      struct objfile *objfile = cu->per_objfile->objfile;
-	      struct_pdi->name = objfile->intern (actual_class_name.get ());
+	      struct_pdi->raw_name = objfile->intern (actual_class_name.get ());
+	      struct_pdi->canonical_name = 1;
 	    }
 	  break;
 	}
@@ -18915,7 +18936,7 @@ partial_die_info::fixup (struct dwarf2_cu *cu)
   /* If we found a reference attribute and the DIE has no name, try
      to find a name in the referred to DIE.  */
 
-  if (name == NULL && has_specification)
+  if (raw_name == NULL && has_specification)
     {
       struct partial_die_info *spec_die;
 
@@ -18925,9 +18946,10 @@ partial_die_info::fixup (struct dwarf2_cu *cu)
 
       spec_die->fixup (cu);
 
-      if (spec_die->name)
+      if (spec_die->raw_name)
 	{
-	  name = spec_die->name;
+	  raw_name = spec_die->raw_name;
+	  canonical_name = spec_die->canonical_name;
 
 	  /* Copy DW_AT_external attribute if it is set.  */
 	  if (spec_die->is_external)
@@ -18955,8 +18977,11 @@ partial_die_info::fixup (struct dwarf2_cu *cu)
 
   /* Set default names for some unnamed DIEs.  */
 
-  if (name == NULL && tag == DW_TAG_namespace)
-    name = CP_ANONYMOUS_NAMESPACE_STR;
+  if (raw_name == NULL && tag == DW_TAG_namespace)
+    {
+      raw_name = CP_ANONYMOUS_NAMESPACE_STR;
+      canonical_name = 1;
+    }
 
   /* If there is no parent die to provide a namespace, and there are
      children, see if we can determine the namespace from their linkage
@@ -18972,7 +18997,7 @@ partial_die_info::fixup (struct dwarf2_cu *cu)
 
   /* GCC might emit a nameless struct or union that has a linkage
      name.  See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=47510.  */
-  if (name == NULL
+  if (raw_name == NULL
       && (tag == DW_TAG_class_type
 	  || tag == DW_TAG_interface_type
 	  || tag == DW_TAG_structure_type
@@ -18994,7 +19019,8 @@ partial_die_info::fixup (struct dwarf2_cu *cu)
 	    base = demangled.get ();
 
 	  struct objfile *objfile = cu->per_objfile->objfile;
-	  name = objfile->intern (base);
+	  raw_name = objfile->intern (base);
+	  canonical_name = 1;
 	}
     }
 

@@ -1,5 +1,20 @@
 2020-05-27  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2/read.c (struct partial_die_info) <name>: Declare new
+	method.
+	<canonical_name>: New member.
+	<raw_name>: Rename from "name".
+	(partial_die_info): Initialize canonical_name.
+	(scan_partial_symbols): Check raw_name.
+	(partial_die_parent_scope, partial_die_full_name)
+	(add_partial_symbol, add_partial_subprogram)
+	(add_partial_enumeration, load_partial_dies): Use "name" method.
+	(partial_die_info::name): New method.
+	(partial_die_info::read, guess_partial_die_structure_name)
+	(partial_die_info::fixup): Update.
+
+2020-05-27  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/attribute.h (struct attribute) <form_is_ref>: Inline.
 	<get_ref_die_offset>: Inline.
 	<get_ref_die_offset_complaint>: New method.
