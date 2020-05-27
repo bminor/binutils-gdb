@@ -251,6 +251,11 @@ public:
   /* CUs that are queued to be read.  */
   std::queue<dwarf2_queue_item> queue;
 
+  /* We keep a separate reference to the partial symtabs, in case we
+     are sharing them between objfiles.  This is only set after
+     partial symbols have been read the first time.  */
+  std::shared_ptr<psymtab_storage> partial_symtabs;
+
 private:
 
   /* The total number of per_cu and signatured_type objects that have

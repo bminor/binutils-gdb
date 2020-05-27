@@ -1,3 +1,21 @@
+2020-05-27  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
+	* objfiles.h (struct objfile) <partial_symtabs>: Now a
+	shared_ptr.
+	* dwarf2/read.h (struct dwarf2_per_objfile) <partial_symtabs>: New
+	member.
+	* dwarf2/read.c (dwarf2_per_bfd_bfd_data_key,
+	dwarf2_per_bfd_objfile_data_key>: New globals.
+	(dwarf2_has_info): Use shared dwarf2_per_bfd if possible.
+	(dwarf2_get_section_info): Use get_dwarf2_per_objfile.
+	(dwarf2_initialize_objfile): Consider cases where per_bfd can be
+	shared.
+	(dwarf2_build_psymtabs): Set objfile::partial_symtabs and
+	short-circuit when sharing.
+	(dwarf2_build_psymtabs): Set dwarf2_per_objfile::partial_symtabs.
+	(dwarf2_psymtab::expand_psymtab): Use free_cached_comp_units.
+
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2/read.h (struct dwarf2_per_bfd) <line_header_hash>: Move

@@ -576,7 +576,7 @@ public:
 
   /* The partial symbol tables.  */
 
-  std::unique_ptr<psymtab_storage> partial_symtabs;
+  std::shared_ptr<psymtab_storage> partial_symtabs;
 
   /* The object file's BFD.  Can be null if the objfile contains only
      minimal symbols, e.g. the run time common symbols for SunOS4.  */
