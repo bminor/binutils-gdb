@@ -1,3 +1,15 @@
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.h (dwarf2_get_die_type): Add dwarf2_per_objfile
+	parameter.
+	* dwarf2/read.c (get_die_type_at_offset): Likewise.
+	(read_namespace_alias): Update.
+	(lookup_die_type): Update.
+	(dwarf2_get_die_type): Add dwarf2_per_objfile parameter.
+	* dwarf2/loc.c (class dwarf_evaluate_loc_desc) <get_base_type>:
+	Update.
+	(disassemble_dwarf_expression): Update.
+
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2/read.h (struct dwarf2_queue_item): Add
