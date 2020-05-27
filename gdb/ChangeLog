@@ -1,5 +1,19 @@
 2020-05-27  Tom Tromey  <tom@tromey.com>
 
+	* dwarf2/read.h (struct dwarf2_per_objfile) <allocate_per_cu,
+	allocate_signatured_type>: Declare new methods.
+	<m_num_psymtabs>: New member.
+	(struct dwarf2_per_cu_data) <index>: New member.
+	* dwarf2/read.c (dwarf2_per_objfile::allocate_per_cu)
+	(dwarf2_per_objfile::allocate_signatured_type): New methods.
+	(create_cu_from_index_list): Use allocate_per_cu.
+	(create_signatured_type_table_from_index)
+	(create_signatured_type_table_from_debug_names)
+	(create_debug_type_hash_table, add_type_unit)
+	(read_comp_units_from_section): Use allocate_signatured_type.
+
+2020-05-27  Tom Tromey  <tom@tromey.com>
+
 	* psymtab.c (partial_map_expand_apply)
 	(psym_find_pc_sect_compunit_symtab, psym_lookup_symbol)
 	(psym_lookup_global_symbol_language)

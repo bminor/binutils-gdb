@@ -111,6 +111,16 @@ struct dwarf2_per_objfile
   /* Free all cached compilation units.  */
   void free_cached_comp_units ();
 
+  /* A convenience function to allocate a dwarf2_per_cu_data.  The
+     returned object has its "index" field set properly.  The object
+     is allocated on the dwarf2_per_objfile obstack.  */
+  dwarf2_per_cu_data *allocate_per_cu ();
+
+  /* A convenience function to allocate a signatured_type.  The
+     returned object has its "index" field set properly.  The object
+     is allocated on the dwarf2_per_objfile obstack.  */
+  signatured_type *allocate_signatured_type ();
+
   /* Return pointer to string at .debug_line_str offset as read from BUF.
      BUF is assumed to be in a compilation unit described by CU_HEADER.
      Return *BYTES_READ_PTR count of bytes read from BUF.  */
@@ -249,6 +259,12 @@ public:
 
   /* CUs that are queued to be read.  */
   std::queue<dwarf2_queue_item> queue;
+
+private:
+
+  /* The total number of per_cu and signatured_type objects that have
+     been created so far for this reader.  */
+  size_t m_num_psymtabs = 0;
 };
 
 /* Get the dwarf2_per_objfile associated to OBJFILE.  */
@@ -321,6 +337,9 @@ struct dwarf2_per_cu_data
      "midflight").
      This flag is only valid if is_debug_types is true.  */
   unsigned int tu_read : 1;
+
+  /* Our index in the unshared "symtabs" vector.  */
+  unsigned index;
 
   /* The section this CU/TU lives in.
      If the DIE refers to a DWO file, this is always the original die,

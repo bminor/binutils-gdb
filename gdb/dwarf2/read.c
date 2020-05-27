@@ -2408,6 +2408,26 @@ dwarf2_per_objfile::get_tu (int index)
   return this->all_type_units[index];
 }
 
+/* See read.h.  */
+
+dwarf2_per_cu_data *
+dwarf2_per_objfile::allocate_per_cu ()
+{
+  dwarf2_per_cu_data *result = OBSTACK_ZALLOC (&obstack, dwarf2_per_cu_data);
+  result->index = m_num_psymtabs++;
+  return result;
+}
+
+/* See read.h.  */
+
+signatured_type *
+dwarf2_per_objfile::allocate_signatured_type ()
+{
+  signatured_type *result = OBSTACK_ZALLOC (&obstack, signatured_type);
+  result->per_cu.index = m_num_psymtabs++;
+  return result;
+}
+
 /* Return a new dwarf2_per_cu_data allocated on the dwarf2_per_objfile
    obstack, and constructed with the specified field values.  */
 
@@ -2417,9 +2437,7 @@ create_cu_from_index_list (struct dwarf2_per_objfile *dwarf2_per_objfile,
                           int is_dwz,
                           sect_offset sect_off, ULONGEST length)
 {
-  dwarf2_per_cu_data *the_cu
-    = OBSTACK_ZALLOC (&dwarf2_per_objfile->obstack,
-                     struct dwarf2_per_cu_data);
+  dwarf2_per_cu_data *the_cu = dwarf2_per_objfile->allocate_per_cu ();
   the_cu->sect_off = sect_off;
   the_cu->length = length;
   the_cu->dwarf2_per_objfile = dwarf2_per_objfile;
@@ -2508,8 +2526,7 @@ create_signatured_type_table_from_index
       signature = extract_unsigned_integer (bytes + 16, 8, BFD_ENDIAN_LITTLE);
       bytes += 3 * 8;
 
-      sig_type = OBSTACK_ZALLOC (&dwarf2_per_objfile->obstack,
-				 struct signatured_type);
+      sig_type = dwarf2_per_objfile->allocate_signatured_type ();
       sig_type->signature = signature;
       sig_type->type_offset_in_tu = type_offset_in_tu;
       sig_type->per_cu.is_debug_types = 1;
@@ -2565,8 +2582,7 @@ create_signatured_type_table_from_debug_names
 				     section->buffer + to_underlying (sect_off),
 				     rcuh_kind::TYPE);
 
-      sig_type = OBSTACK_ZALLOC (&dwarf2_per_objfile->obstack,
-				 struct signatured_type);
+      sig_type = dwarf2_per_objfile->allocate_signatured_type ();
       sig_type->signature = cu_header.signature;
       sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
       sig_type->per_cu.is_debug_types = 1;
@@ -6242,8 +6258,7 @@ create_debug_type_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 	  /* N.B.: type_offset is not usable if this type uses a DWO file.
 	     The real type_offset is in the DWO file.  */
 	  dwo_tu = NULL;
-	  sig_type = OBSTACK_ZALLOC (&dwarf2_per_objfile->obstack,
-				     struct signatured_type);
+	  sig_type = dwarf2_per_objfile->allocate_signatured_type ();
 	  sig_type->signature = header.signature;
 	  sig_type->type_offset_in_tu = header.type_cu_offset_in_tu;
 	  sig_type->per_cu.dwarf2_per_objfile = dwarf2_per_objfile;
@@ -6358,8 +6373,7 @@ add_type_unit (struct dwarf2_per_objfile *dwarf2_per_objfile, ULONGEST sig,
       == dwarf2_per_objfile->all_type_units.capacity ())
     ++dwarf2_per_objfile->tu_stats.nr_all_type_units_reallocs;
 
-  signatured_type *sig_type = OBSTACK_ZALLOC (&dwarf2_per_objfile->obstack,
-					      struct signatured_type);
+  signatured_type *sig_type = dwarf2_per_objfile->allocate_signatured_type ();
 
   dwarf2_per_objfile->all_type_units.push_back (sig_type);
   sig_type->signature = sig;
@@ -7964,16 +7978,10 @@ read_comp_units_from_section (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
       /* Save the compilation unit for later lookup.  */
       if (cu_header.unit_type != DW_UT_type)
-	{
-	  this_cu = XOBNEW (&dwarf2_per_objfile->obstack,
-			    struct dwarf2_per_cu_data);
-	  memset (this_cu, 0, sizeof (*this_cu));
-	}
+	this_cu = dwarf2_per_objfile->allocate_per_cu ();
       else
 	{
-	  auto sig_type = XOBNEW (&dwarf2_per_objfile->obstack,
-				  struct signatured_type);
-	  memset (sig_type, 0, sizeof (*sig_type));
+	  auto sig_type = dwarf2_per_objfile->allocate_signatured_type ();
 	  sig_type->signature = cu_header.signature;
 	  sig_type->type_offset_in_tu = cu_header.type_cu_offset_in_tu;
 	  this_cu = &sig_type->per_cu;
