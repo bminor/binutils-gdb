@@ -7614,7 +7614,7 @@ process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
   this_cu->lang = this_cu->cu->language;
 
   /* Age out any secondary CUs.  */
-  age_cached_comp_units (this_cu->dwarf2_per_objfile);
+  age_cached_comp_units (per_objfile);
 }
 
 /* Reader function for build_type_psymtabs.  */
@@ -9723,7 +9723,7 @@ compute_compunit_symtab_includes (dwarf2_per_cu_data *per_cu,
       /* Now we have a transitive closure of all the included symtabs.  */
       len = result_symtabs.size ();
       cust->includes
-	= XOBNEWVEC (&per_cu->dwarf2_per_objfile->objfile->objfile_obstack,
+	= XOBNEWVEC (&per_objfile->objfile->objfile_obstack,
 		     struct compunit_symtab *, len + 1);
       memcpy (cust->includes, result_symtabs.data (),
 	      len * sizeof (compunit_symtab *));
@@ -20593,7 +20593,7 @@ dwarf2_cu::start_symtab (const char *name, const char *comp_dir,
   gdb_assert (m_builder == nullptr);
 
   m_builder.reset (new struct buildsym_compunit
-		   (per_cu->dwarf2_per_objfile->objfile,
+		   (this->per_objfile->objfile,
 		    name, comp_dir, language, low_pc));
 
   list_in_scope = get_builder ()->get_file_symbols ();

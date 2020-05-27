@@ -1,3 +1,10 @@
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (process_psymtab_comp_unit): Remove reference to
+	dwarf2_per_cu_data::dwarf2_per_objfile.
+	(compute_compunit_symtab_includes): Likewise.
+	(dwarf2_cu::start_symtab): Likewise.
+
 2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2/read.h (dwarf2_get_die_type): Add dwarf2_per_objfile
