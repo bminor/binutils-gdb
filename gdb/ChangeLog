@@ -1,5 +1,16 @@
 2020-05-27  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2/abbrev.h (struct abbrev_table) <lookup_abbrev>: Inline.
+	Use htab_find_with_hash.
+	<add_abbrev>: Remove "abbrev_number" parameter.
+	* dwarf2/abbrev.c (abbrev_table::add_abbrev): Remove
+	"abbrev_number" parameter.  Use htab_find_slot_with_hash.
+	(hash_abbrev): Add comment.
+	(abbrev_table::lookup_abbrev): Move to header file.
+	(abbrev_table::read): Update.
+
+2020-05-27  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/read.c (struct partial_die_info) <name>: Declare new
 	method.
 	<canonical_name>: New member.
