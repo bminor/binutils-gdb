@@ -1,3 +1,34 @@
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.h (dwarf2_per_objfile): Rename to dwarf2_per_bfd,
+	then introduce a new dwarf2_per_objfile type.
+	<read_line_string>: Move to the new dwarf2_per_objfile type.
+	<objfile>: Likewise.
+	(dwarf2_per_bfd): Rename dwarf2_per_objfile to this.
+	* dwarf2/read.c: Replace references to dwarf2_per_objfile with
+	dwarf2_per_objfile->per_bfd.
+	(dwarf2_per_objfile::dwarf2_per_objfile): Rename to...
+	(dwarf2_per_bfd::dwarf2_per_bfd): ... this.
+	(dwarf2_per_objfile::free_cached_comp_units): Rename to...
+	(dwarf2_per_bfd::free_cached_comp_units): ... this.
+	(dwarf2_has_info): Allocate dwarf2_per_bfd.
+	(dwarf2_per_objfile::locate_sections): Rename to...
+	(dwarf2_per_bfd::locate_sections): ... this.
+	(dwarf2_per_objfile::get_cutu): Rename to...
+	(dwarf2_per_bfd::get_cutu): ... this.
+	(dwarf2_per_objfile::get_cu): Rename to...
+	(dwarf2_per_bfd::get_cu): ... this.
+	(dwarf2_per_objfile::get_tu): Rename to...
+	(dwarf2_per_bfd::get_tu): ... this.
+	(dwarf2_per_objfile::allocate_per_cu): Rename to...
+	(dwarf2_per_bfd::allocate_per_cu): ... this.
+	(dwarf2_per_objfile::allocate_signatured_type): Rename to...
+	(dwarf2_per_bfd::allocate_signatured_type): ... this.
+	(get_gdb_index_contents_ftype): Change parameter from
+	dwarf2_per_objfile to dwarf2_per_bfd.
+	* dwarf2/macro.c, dwarf2/index-write.c: Replace references to
+	dwarf2_per_objfile with dwarf2_per_objfile->per_bfd.
+
 2020-05-27  Tom Tromey  <tom@tromey.com>
 	    Simon Marchi  <simon.marchi@efficios.com>
 

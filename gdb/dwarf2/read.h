@@ -66,32 +66,34 @@ struct dwarf2_queue_item
   enum language pretend_language;
 };
 
-/* Collection of data recorded per objfile.
-   This hangs off of dwarf2_objfile_data_key.  */
+/* Some DWARF data can be shared across objfiles who share the same BFD,
+   this data is stored in this object.
 
-struct dwarf2_per_objfile
+   Two dwarf2_per_objfile objects representing objfiles sharing the same BFD
+   will point to the same instance of dwarf2_per_bfd, unless the BFD requires
+   relocation.  */
+
+struct dwarf2_per_bfd
 {
-  /* Construct a dwarf2_per_objfile for OBJFILE.  NAMES points to the
+  /* Construct a dwarf2_per_bfd for OBFD.  NAMES points to the
      dwarf2 section names, or is NULL if the standard ELF names are
      used.  CAN_COPY is true for formats where symbol
      interposition is possible and so symbol values must follow copy
      relocation rules.  */
-  dwarf2_per_objfile (struct objfile *objfile,
-		      const dwarf2_debug_sections *names,
-		      bool can_copy);
+  dwarf2_per_bfd (bfd *obfd, const dwarf2_debug_sections *names, bool can_copy);
 
-  ~dwarf2_per_objfile ();
+  ~dwarf2_per_bfd ();
 
-  DISABLE_COPY_AND_ASSIGN (dwarf2_per_objfile);
+  DISABLE_COPY_AND_ASSIGN (dwarf2_per_bfd);
 
   /* Return the CU/TU given its index.
 
      This is intended for loops like:
 
-     for (i = 0; i < (dwarf2_per_objfile->n_comp_units
-		      + dwarf2_per_objfile->n_type_units); ++i)
+     for (i = 0; i < (dwarf2_per_bfd->n_comp_units
+		      + dwarf2_per_bfd->n_type_units); ++i)
        {
-         dwarf2_per_cu_data *per_cu = dwarf2_per_objfile->get_cutu (i);
+         dwarf2_per_cu_data *per_cu = dwarf2_per_bfd->get_cutu (i);
 
          ...;
        }
@@ -113,20 +115,13 @@ struct dwarf2_per_objfile
 
   /* A convenience function to allocate a dwarf2_per_cu_data.  The
      returned object has its "index" field set properly.  The object
-     is allocated on the dwarf2_per_objfile obstack.  */
+     is allocated on the dwarf2_per_bfd obstack.  */
   dwarf2_per_cu_data *allocate_per_cu ();
 
   /* A convenience function to allocate a signatured_type.  The
      returned object has its "index" field set properly.  The object
-     is allocated on the dwarf2_per_objfile obstack.  */
+     is allocated on the dwarf2_per_bfd obstack.  */
   signatured_type *allocate_signatured_type ();
-
-  /* Return pointer to string at .debug_line_str offset as read from BUF.
-     BUF is assumed to be in a compilation unit described by CU_HEADER.
-     Return *BYTES_READ_PTR count of bytes read from BUF.  */
-  const char *read_line_string (const gdb_byte *buf,
-				const struct comp_unit_head *cu_header,
-				unsigned int *bytes_read_ptr);
 
 private:
   /* This function is mapped across the sections and remembers the
@@ -161,9 +156,6 @@ public:
   dwarf2_section_info debug_aranges {};
 
   std::vector<dwarf2_section_info> types;
-
-  /* Back link.  */
-  struct objfile *objfile = NULL;
 
   /* Table of all the compilation units.  This is used to locate
      the target compilation unit of a particular reference.  */
@@ -267,6 +259,33 @@ private:
   size_t m_num_psymtabs = 0;
 };
 
+/* Collection of data recorded per objfile.
+   This hangs off of dwarf2_objfile_data_key.
+
+   Some DWARF data cannot (currently) be shared across objfiles.  Such
+   data is stored in this object.  */
+
+struct dwarf2_per_objfile
+{
+  dwarf2_per_objfile (struct objfile *objfile, dwarf2_per_bfd *per_bfd)
+    : objfile (objfile), per_bfd (per_bfd)
+  {}
+
+  /* Return pointer to string at .debug_line_str offset as read from BUF.
+     BUF is assumed to be in a compilation unit described by CU_HEADER.
+     Return *BYTES_READ_PTR count of bytes read from BUF.  */
+  const char *read_line_string (const gdb_byte *buf,
+				const struct comp_unit_head *cu_header,
+				unsigned int *bytes_read_ptr);
+
+  /* Back link.  */
+  struct objfile *objfile;
+
+  /* Pointer to the data that is (possibly) shared between this objfile and
+     other objfiles backed by the same BFD.  */
+  struct dwarf2_per_bfd *per_bfd;
+};
+
 /* Get the dwarf2_per_objfile associated to OBJFILE.  */
 
 dwarf2_per_objfile *get_dwarf2_per_objfile (struct objfile *objfile);
@@ -360,7 +379,7 @@ struct dwarf2_per_cu_data
   /* The corresponding dwarf2_per_objfile.  */
   struct dwarf2_per_objfile *dwarf2_per_objfile;
 
-  /* When dwarf2_per_objfile->using_index is true, the 'quick' field
+  /* When dwarf2_per_bfd::using_index is true, the 'quick' field
      is active.  Otherwise, the 'psymtab' field is active.  */
   union
   {
