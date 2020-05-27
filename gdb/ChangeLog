@@ -1,3 +1,35 @@
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.c (class cutu_reader) <cutu_reader>: Add
+	per_objfile parameter.
+	(load_full_type_unit): Add per_objfile parameter.
+	(read_signatured_type): Likewise.
+	(load_full_comp_unit): Likewise.
+	(load_cu): Likewise.
+	(dw2_do_instantiate_symtab): Likewise.
+	(dw2_get_file_names): Likewise.
+	(dw2_map_symtabs_matching_filename): Update.
+	(dw_expand_symtabs_matching_file_matcher): Update.
+	(dw2_map_symbol_filenames): Update.
+	(process_psymtab_comp_unit): Add per_objfile parameter.
+	(build_type_psymtabs_1): Update.
+	(process_skeletonless_type_unit): Update.
+	(dwarf2_build_psymtabs_hard): Update.
+	(load_partial_comp_unit): Add per_objfile parameter.
+	(scan_partial_symbols): Update.
+	(load_full_comp_unit): Add per_objfile parameter.
+	(process_imported_unit_die): Update.
+	(create_cus_hash_table): Update.
+	(find_partial_die): Update.
+	(dwarf2_read_addr_index): Update.
+	(follow_die_offset): Update.
+	(dwarf2_fetch_die_loc_sect_off): Update.
+	(dwarf2_fetch_constant_bytes): Update.
+	(dwarf2_fetch_die_type_sect_off): Update.
+	(follow_die_sig_1): Update.
+	(load_full_type_unit): Add per_objfile parameter.
+	(read_signatured_type): Likewise.
+
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2/read.c (lookup_dwo_unit): Use bfd_get_filename instead
