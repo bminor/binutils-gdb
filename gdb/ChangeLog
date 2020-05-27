@@ -1,5 +1,12 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.c (recursively_compute_inclusions): Add
+	dwarf2_per_objfile parameter.
+	(compute_compunit_symtab_includes): Likewise.
+	(process_cu_includes): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c (create_partial_symtab): Add dwarf2_per_objfile
 	parameter.
 	(create_type_unit_group): Update.
