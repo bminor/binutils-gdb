@@ -1,5 +1,11 @@
 2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2/read.c (queue_and_load_dwo_tu): Expect a dwarf2_cu as
+	the info parameter.
+	(queue_and_load_all_dwo_tus): Pass per_cu->cu.
+
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2/read.c (class cutu_reader) <cutu_reader>: Add
 	per_objfile parameter.
 	(load_full_type_unit): Add per_objfile parameter.
