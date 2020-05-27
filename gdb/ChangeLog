@@ -1,5 +1,13 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.c (create_partial_symtab): Add dwarf2_per_objfile
+	parameter.
+	(create_type_unit_group): Update.
+	(process_psymtab_comp_unit_reader): Update.
+	(build_type_psymtabs_reader): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c (cutu_reader::keep): Access dwarf2_per_objfile
 	object through m_this_cu->cu.
 
