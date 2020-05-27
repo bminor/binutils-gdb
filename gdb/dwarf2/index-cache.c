@@ -108,7 +108,7 @@ index_cache::store (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
   /* Get build id of dwz file, if present.  */
   gdb::optional<std::string> dwz_build_id_str;
-  const dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
+  const dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
   const char *dwz_build_id_ptr = NULL;
 
   if (dwz != nullptr)

@@ -1752,7 +1752,8 @@ line_header_eq_voidp (const void *item_lhs, const void *item_rhs)
 
 dwarf2_per_bfd::dwarf2_per_bfd (bfd *obfd, const dwarf2_debug_sections *names,
 				bool can_copy_)
-  : can_copy (can_copy_)
+  : obfd (obfd),
+    can_copy (can_copy_)
 {
   if (names == NULL)
     names = &dwarf2_elf_names;
@@ -2112,19 +2113,19 @@ locate_dwz_sections (bfd *abfd, asection *sectp, void *arg)
 /* See dwarf2read.h.  */
 
 struct dwz_file *
-dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
+dwarf2_get_dwz_file (dwarf2_per_bfd *per_bfd)
 {
   const char *filename;
   bfd_size_type buildid_len_arg;
   size_t buildid_len;
   bfd_byte *buildid;
 
-  if (dwarf2_per_objfile->per_bfd->dwz_file != NULL)
-    return dwarf2_per_objfile->per_bfd->dwz_file.get ();
+  if (per_bfd->dwz_file != NULL)
+    return per_bfd->dwz_file.get ();
 
   bfd_set_error (bfd_error_no_error);
   gdb::unique_xmalloc_ptr<char> data
-    (bfd_get_alt_debug_link_info (dwarf2_per_objfile->objfile->obfd,
+    (bfd_get_alt_debug_link_info (per_bfd->obfd,
 				  &buildid_len_arg, &buildid));
   if (data == NULL)
     {
@@ -2144,7 +2145,7 @@ dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
   if (!IS_ABSOLUTE_PATH (filename))
     {
       gdb::unique_xmalloc_ptr<char> abs
-	= gdb_realpath (objfile_name (dwarf2_per_objfile->objfile));
+	= gdb_realpath (bfd_get_filename (per_bfd->obfd));
 
       abs_storage = ldirname (abs.get ()) + SLASH_STRING + filename;
       filename = abs_storage.c_str ();
@@ -2165,7 +2166,7 @@ dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
   if (dwz_bfd == nullptr)
     {
       gdb::unique_xmalloc_ptr<char> alt_filename;
-      const char *origname = dwarf2_per_objfile->objfile->original_name;
+      const char *origname = bfd_get_filename (per_bfd->obfd);
 
       scoped_fd fd (debuginfod_debuginfo_query (buildid,
 						buildid_len,
@@ -2187,7 +2188,7 @@ dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
   if (dwz_bfd == NULL)
     error (_("could not find '.gnu_debugaltlink' file for %s"),
-	   objfile_name (dwarf2_per_objfile->objfile));
+	   bfd_get_filename (per_bfd->obfd));
 
   std::unique_ptr<struct dwz_file> result
     (new struct dwz_file (std::move (dwz_bfd)));
@@ -2195,10 +2196,9 @@ dwarf2_get_dwz_file (struct dwarf2_per_objfile *dwarf2_per_objfile)
   bfd_map_over_sections (result->dwz_bfd.get (), locate_dwz_sections,
 			 result.get ());
 
-  gdb_bfd_record_inclusion (dwarf2_per_objfile->objfile->obfd,
-			    result->dwz_bfd.get ());
-  dwarf2_per_objfile->per_bfd->dwz_file = std::move (result);
-  return dwarf2_per_objfile->per_bfd->dwz_file.get ();
+  gdb_bfd_record_inclusion (per_bfd->obfd, result->dwz_bfd.get ());
+  per_bfd->dwz_file = std::move (result);
+  return per_bfd->dwz_file.get ();
 }
 
 /* DWARF quick_symbols_functions support.  */
@@ -2526,7 +2526,7 @@ create_cus_from_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
   if (dwz_elements == 0)
     return;
 
-  dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
+  dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
   create_cus_from_index_list (dwarf2_per_objfile, dwz_list, dwz_elements,
 			      &dwz->info, 1);
 }
@@ -3073,7 +3073,7 @@ dwarf2_read_gdb_index
 
   /* If there is a .dwz file, read it so we can get its CU list as
      well.  */
-  dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
+  dwz = dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
   if (dwz != NULL)
     {
       struct mapped_index dwz_map;
@@ -5173,7 +5173,7 @@ create_cus_from_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
   if (dwz_map.cu_count == 0)
     return;
 
-  dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
+  dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
   create_cus_from_debug_names_list (dwarf2_per_objfile, dwz_map, dwz->info,
 				    true /* is_dwz */);
 }
@@ -5200,7 +5200,7 @@ dwarf2_read_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile)
 
   /* If there is a .dwz file, read it so we can get its CU list as
      well.  */
-  dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
+  dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
   if (dwz != NULL)
     {
       if (!read_debug_names_from_section (objfile,
@@ -6032,12 +6032,12 @@ static struct dwarf2_section_info *
 get_abbrev_section_for_cu (struct dwarf2_per_cu_data *this_cu)
 {
   struct dwarf2_section_info *abbrev;
-  struct dwarf2_per_objfile *dwarf2_per_objfile = this_cu->dwarf2_per_objfile;
+  dwarf2_per_bfd *per_bfd = this_cu->per_bfd;
 
   if (this_cu->is_dwz)
-    abbrev = &dwarf2_get_dwz_file (dwarf2_per_objfile)->abbrev;
+    abbrev = &dwarf2_get_dwz_file (per_bfd)->abbrev;
   else
-    abbrev = &dwarf2_per_objfile->per_bfd->abbrev;
+    abbrev = &per_bfd->abbrev;
 
   return abbrev;
 }
@@ -8058,7 +8058,7 @@ create_all_comp_units (struct dwarf2_per_objfile *dwarf2_per_objfile)
   read_comp_units_from_section (dwarf2_per_objfile, &dwarf2_per_objfile->per_bfd->info,
 				&dwarf2_per_objfile->per_bfd->abbrev, 0);
 
-  dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
+  dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
   if (dwz != NULL)
     read_comp_units_from_section (dwarf2_per_objfile, &dwz->info, &dwz->abbrev,
 				  1);
@@ -19103,7 +19103,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       /* FALLTHROUGH */
     case DW_FORM_GNU_strp_alt:
       {
-	struct dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
+	dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
 	LONGEST str_offset = cu_header->read_offset (abfd, info_ptr,
 						     &bytes_read);
 
@@ -19698,7 +19698,7 @@ get_debug_line_section (struct dwarf2_cu *cu)
     section = &cu->dwo_unit->dwo_file->sections.line;
   else if (cu->per_cu->is_dwz)
     {
-      struct dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile);
+      dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
 
       section = &dwz->line;
     }
