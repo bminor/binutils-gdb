@@ -1,5 +1,22 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.h (dwarf2_read_addr_index): Add dwarf2_per_objfile
+	parameter.
+	* dwarf2/read.c (dwarf2_read_addr_index): Likewise.
+	* dwarf2/loc.c (decode_debug_loclists_addresses): Add
+	dwarf2_per_objfile parameter.
+	(decode_debug_loc_dwo_addresses): Likewise.
+	(dwarf2_find_location_expression): Update.
+	(class dwarf_evaluate_loc_desc) <get_addr_index>: Update.
+	(locexpr_describe_location_piece): Add dwarf2_per_objfile
+	parameter.
+	(disassemble_dwarf_expression): Add dwarf2_per_objfile
+	parameter.
+	(locexpr_describe_location_1): Likewise.
+	(locexpr_describe_location): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.h (struct dwarf2_per_cu_data) <text_offset>:
 	Remove.
 	* dwarf2/read.c (dwarf2_per_cu_data::text_offset): Remove.

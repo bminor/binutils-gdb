@@ -163,7 +163,8 @@ decode_debug_loc_addresses (const gdb_byte *loc_ptr, const gdb_byte *buf_end,
    The result indicates the kind of entry found.  */
 
 static enum debug_loc_kind
-decode_debug_loclists_addresses (struct dwarf2_per_cu_data *per_cu,
+decode_debug_loclists_addresses (dwarf2_per_cu_data *per_cu,
+				 dwarf2_per_objfile *per_objfile,
 				 const gdb_byte *loc_ptr,
 				 const gdb_byte *buf_end,
 				 const gdb_byte **new_ptr,
@@ -184,14 +185,14 @@ decode_debug_loclists_addresses (struct dwarf2_per_cu_data *per_cu,
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &u64);
       if (loc_ptr == NULL)
 	 return DEBUG_LOC_BUFFER_OVERFLOW;
-      *high = dwarf2_read_addr_index (per_cu, u64);
+      *high = dwarf2_read_addr_index (per_cu, per_objfile, u64);
       *new_ptr = loc_ptr;
       return DEBUG_LOC_BASE_ADDRESS;
     case DW_LLE_startx_length:
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &u64);
       if (loc_ptr == NULL)
 	 return DEBUG_LOC_BUFFER_OVERFLOW;
-      *low = dwarf2_read_addr_index (per_cu, u64);
+      *low = dwarf2_read_addr_index (per_cu, per_objfile, u64);
       *high = *low;
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &u64);
       if (loc_ptr == NULL)
@@ -253,7 +254,8 @@ decode_debug_loclists_addresses (struct dwarf2_per_cu_data *per_cu,
    The result indicates the kind of entry found.  */
 
 static enum debug_loc_kind
-decode_debug_loc_dwo_addresses (struct dwarf2_per_cu_data *per_cu,
+decode_debug_loc_dwo_addresses (dwarf2_per_cu_data *per_cu,
+				dwarf2_per_objfile *per_objfile,
 				const gdb_byte *loc_ptr,
 				const gdb_byte *buf_end,
 				const gdb_byte **new_ptr,
@@ -275,25 +277,25 @@ decode_debug_loc_dwo_addresses (struct dwarf2_per_cu_data *per_cu,
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &high_index);
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
-      *high = dwarf2_read_addr_index (per_cu, high_index);
+      *high = dwarf2_read_addr_index (per_cu, per_objfile, high_index);
       *new_ptr = loc_ptr;
       return DEBUG_LOC_BASE_ADDRESS;
     case DW_LLE_GNU_start_end_entry:
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &low_index);
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
-      *low = dwarf2_read_addr_index (per_cu, low_index);
+      *low = dwarf2_read_addr_index (per_cu, per_objfile, low_index);
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &high_index);
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
-      *high = dwarf2_read_addr_index (per_cu, high_index);
+      *high = dwarf2_read_addr_index (per_cu, per_objfile, high_index);
       *new_ptr = loc_ptr;
       return DEBUG_LOC_START_END;
     case DW_LLE_GNU_start_length_entry:
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &low_index);
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
-      *low = dwarf2_read_addr_index (per_cu, low_index);
+      *low = dwarf2_read_addr_index (per_cu, per_objfile, low_index);
       if (loc_ptr + 4 > buf_end)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
       *high = *low;
@@ -340,6 +342,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 
       if (baton->per_cu->version () < 5 && baton->from_dwo)
 	kind = decode_debug_loc_dwo_addresses (baton->per_cu,
+					       baton->per_objfile,
 					       loc_ptr, buf_end, &new_ptr,
 					       &low, &high, byte_order);
       else if (baton->per_cu->version () < 5)
@@ -349,6 +352,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 					   signed_addr_p);
       else
 	kind = decode_debug_loclists_addresses (baton->per_cu,
+						baton->per_objfile,
 						loc_ptr, buf_end, &new_ptr,
 						&low, &high, byte_order,
 						addr_size, signed_addr_p);
@@ -682,7 +686,7 @@ public:
 
   CORE_ADDR get_addr_index (unsigned int index) override
   {
-    return dwarf2_read_addr_index (per_cu, index);
+    return dwarf2_read_addr_index (per_cu, per_objfile, index);
   }
 
   /* Callback function for get_object_address. Return the address of the VLA
@@ -3698,11 +3702,12 @@ locexpr_regname (struct gdbarch *gdbarch, int dwarf_regnum)
 
 static const gdb_byte *
 locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
-				 CORE_ADDR addr, struct objfile *objfile,
-				 struct dwarf2_per_cu_data *per_cu,
+				 CORE_ADDR addr, dwarf2_per_cu_data *per_cu,
+				 dwarf2_per_objfile *per_objfile,
 				 const gdb_byte *data, const gdb_byte *end,
 				 unsigned int addr_size)
 {
+  objfile *objfile = per_objfile->objfile;
   struct gdbarch *gdbarch = objfile->arch ();
   size_t leb128_size;
 
@@ -3841,7 +3846,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
       uint64_t offset;
 
       data = safe_read_uleb128 (data + 1, end, &offset);
-      offset = dwarf2_read_addr_index (per_cu, offset);
+      offset = dwarf2_read_addr_index (per_cu, per_objfile, offset);
       fprintf_filtered (stream, 
 			_("a thread-local variable at offset 0x%s "
 			  "in the thread-local storage for `%s'"),
@@ -3874,7 +3879,8 @@ disassemble_dwarf_expression (struct ui_file *stream,
 			      int offset_size, const gdb_byte *start,
 			      const gdb_byte *data, const gdb_byte *end,
 			      int indent, int all,
-			      struct dwarf2_per_cu_data *per_cu)
+			      dwarf2_per_cu_data *per_cu,
+			      dwarf2_per_objfile *per_objfile)
 {
   while (data < end
 	 && (all
@@ -4212,7 +4218,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  fputc_filtered ('\n', stream);
 	  disassemble_dwarf_expression (stream, arch, addr_size, offset_size,
 					start, data, data + ul, indent + 2,
-					all, per_cu);
+					all, per_cu, per_objfile);
 	  data += ul;
 	  continue;
 
@@ -4225,12 +4231,12 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	case DW_OP_addrx:
 	case DW_OP_GNU_addr_index:
 	  data = safe_read_uleb128 (data, end, &ul);
-	  ul = dwarf2_read_addr_index (per_cu, ul);
+	  ul = dwarf2_read_addr_index (per_cu, per_objfile, ul);
 	  fprintf_filtered (stream, " 0x%s", phex_nz (ul, addr_size));
 	  break;
 	case DW_OP_GNU_const_index:
 	  data = safe_read_uleb128 (data, end, &ul);
-	  ul = dwarf2_read_addr_index (per_cu, ul);
+	  ul = dwarf2_read_addr_index (per_cu, per_objfile, ul);
 	  fprintf_filtered (stream, " %s", pulongest (ul));
 	  break;
 
@@ -4267,11 +4273,13 @@ static void
 locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 			     struct ui_file *stream,
 			     const gdb_byte *data, size_t size,
-			     struct objfile *objfile, unsigned int addr_size,
-			     int offset_size, struct dwarf2_per_cu_data *per_cu)
+			     unsigned int addr_size,
+			     int offset_size, dwarf2_per_cu_data *per_cu,
+			     dwarf2_per_objfile *per_objfile)
 {
   const gdb_byte *end = data + size;
   int first_piece = 1, bad = 0;
+  objfile *objfile = per_objfile->objfile;
 
   while (data < end)
     {
@@ -4286,7 +4294,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
       if (!dwarf_always_disassemble)
 	{
 	  data = locexpr_describe_location_piece (symbol, stream,
-						  addr, objfile, per_cu,
+						  addr, per_cu, per_objfile,
 						  data, end, addr_size);
 	  /* If we printed anything, or if we have an empty piece,
 	     then don't disassemble.  */
@@ -4303,7 +4311,7 @@ locexpr_describe_location_1 (struct symbol *symbol, CORE_ADDR addr,
 					       addr_size, offset_size, data,
 					       data, end, 0,
 					       dwarf_always_disassemble,
-					       per_cu);
+					       per_cu, per_objfile);
 	}
 
       if (data < end)
@@ -4363,15 +4371,13 @@ locexpr_describe_location (struct symbol *symbol, CORE_ADDR addr,
 {
   struct dwarf2_locexpr_baton *dlbaton
     = (struct dwarf2_locexpr_baton *) SYMBOL_LOCATION_BATON (symbol);
-  dwarf2_per_objfile *per_objfile = dlbaton->per_objfile;
-  struct objfile *objfile = per_objfile->objfile;
   unsigned int addr_size = dlbaton->per_cu->addr_size ();
   int offset_size = dlbaton->per_cu->offset_size ();
 
   locexpr_describe_location_1 (symbol, addr, stream,
 			       dlbaton->data, dlbaton->size,
-			       objfile, addr_size, offset_size,
-			       dlbaton->per_cu);
+			       addr_size, offset_size,
+			       dlbaton->per_cu, dlbaton->per_objfile);
 }
 
 /* Describe the location of SYMBOL as an agent value in VALUE, generating
@@ -4529,6 +4535,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 
       if (dlbaton->per_cu->version () < 5 && dlbaton->from_dwo)
 	kind = decode_debug_loc_dwo_addresses (dlbaton->per_cu,
+					       dlbaton->per_objfile,
 					       loc_ptr, buf_end, &new_ptr,
 					       &low, &high, byte_order);
       else if (dlbaton->per_cu->version () < 5)
@@ -4538,6 +4545,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 					   signed_addr_p);
       else
 	kind = decode_debug_loclists_addresses (dlbaton->per_cu,
+						dlbaton->per_objfile,
 						loc_ptr, buf_end, &new_ptr,
 						&low, &high, byte_order,
 						addr_size, signed_addr_p);
@@ -4590,8 +4598,8 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 
       /* Now describe this particular location.  */
       locexpr_describe_location_1 (symbol, low, stream, loc_ptr, length,
-				   objfile, addr_size, offset_size,
-				   dlbaton->per_cu);
+				   addr_size, offset_size,
+				   dlbaton->per_cu, dlbaton->per_objfile);
 
       fprintf_filtered (stream, "\n");
 
