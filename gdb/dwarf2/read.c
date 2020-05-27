@@ -23335,26 +23335,23 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
     }
 }
 
-/* Return comp_unit_head for PER_CU, either already available in PER_CU->CU
-   (CU_HEADERP is unused in such case) or prepare a temporary copy at
-   CU_HEADERP first.  */
+/* See read.h.  */
 
-static const struct comp_unit_head *
-per_cu_header_read_in (struct comp_unit_head *cu_headerp,
-		       const struct dwarf2_per_cu_data *per_cu)
+const comp_unit_head *
+dwarf2_per_cu_data::get_header () const
 {
-  const gdb_byte *info_ptr;
+  if (!m_header_read_in)
+    {
+      const gdb_byte *info_ptr
+	= this->section->buffer + to_underlying (this->sect_off);
 
-  if (per_cu->cu)
-    return &per_cu->cu->header;
+      memset (&m_header, 0, sizeof (m_header));
 
-  info_ptr = per_cu->section->buffer + to_underlying (per_cu->sect_off);
+      read_comp_unit_head (&m_header, info_ptr, this->section,
+			   rcuh_kind::COMPILE);
+    }
 
-  memset (cu_headerp, 0, sizeof (*cu_headerp));
-  read_comp_unit_head (cu_headerp, info_ptr, per_cu->section,
-		       rcuh_kind::COMPILE);
-
-  return cu_headerp;
+  return &m_header;
 }
 
 /* See read.h.  */
@@ -23362,12 +23359,7 @@ per_cu_header_read_in (struct comp_unit_head *cu_headerp,
 int
 dwarf2_per_cu_data::addr_size () const
 {
-  struct comp_unit_head cu_header_local;
-  const struct comp_unit_head *cu_headerp;
-
-  cu_headerp = per_cu_header_read_in (&cu_header_local, this);
-
-  return cu_headerp->addr_size;
+  return this->get_header ()->addr_size;
 }
 
 /* See read.h.  */
@@ -23375,12 +23367,7 @@ dwarf2_per_cu_data::addr_size () const
 int
 dwarf2_per_cu_data::offset_size () const
 {
-  struct comp_unit_head cu_header_local;
-  const struct comp_unit_head *cu_headerp;
-
-  cu_headerp = per_cu_header_read_in (&cu_header_local, this);
-
-  return cu_headerp->offset_size;
+  return this->get_header ()->offset_size;
 }
 
 /* See read.h.  */
@@ -23388,15 +23375,12 @@ dwarf2_per_cu_data::offset_size () const
 int
 dwarf2_per_cu_data::ref_addr_size () const
 {
-  struct comp_unit_head cu_header_local;
-  const struct comp_unit_head *cu_headerp;
+  const comp_unit_head *header = this->get_header ();
 
-  cu_headerp = per_cu_header_read_in (&cu_header_local, this);
-
-  if (cu_headerp->version == 2)
-    return cu_headerp->addr_size;
+  if (header->version == 2)
+    return header->addr_size;
   else
-    return cu_headerp->offset_size;
+    return header->offset_size;
 }
 
 /* See read.h.  */

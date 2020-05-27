@@ -1,5 +1,16 @@
 2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <m_header,
+	m_header_read_in>: New fields.
+	<get_header>: New method.
+	* dwarf2/read.c (per_cu_header_read_in): Remove.
+	(dwarf2_per_cu_data::get_header): New.
+	(dwarf2_per_cu_data::addr_size): Update.
+	(dwarf2_per_cu_data::offset_size): Update.
+	(dwarf2_per_cu_data::ref_addr_size): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2/read.c (load_cu): Return dwarf2_cu.
 	(dw2_do_instantiate_symtab): Update.
 	(queue_and_load_all_dwo_tus): Change parameter from

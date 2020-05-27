@@ -22,6 +22,7 @@
 
 #include <queue>
 #include <unordered_map>
+#include "dwarf2/comp-unit.h"
 #include "dwarf2/index-cache.h"
 #include "dwarf2/section.h"
 #include "filename-seen-cache.h"
@@ -468,6 +469,21 @@ struct dwarf2_per_cu_data
   /* Backlink to the owner of this.  */
   dwarf2_per_bfd *per_bfd;
 
+  /* DWARF header of this CU.  Note that dwarf2_cu reads its own version of the
+     header, which may differ from this one, since it may pass rcuh_kind::TYPE
+     to read_comp_unit_head, whereas for dwarf2_per_cu_data we always pass
+     rcuh_kind::COMPILE.
+
+     Don't access this field directly, use the get_header method instead.  It
+     should be private, but we can't make it private at the moment.  */
+  mutable comp_unit_head m_header;
+
+  /* True if HEADER has been read in.
+
+     Don't access this field directly.  It should be private, but we can't make
+     it private at the moment.  */
+  mutable bool m_header_read_in;
+
   /* When dwarf2_per_bfd::using_index is true, the 'quick' field
      is active.  Otherwise, the 'psymtab' field is active.  */
   union
@@ -536,6 +552,9 @@ struct dwarf2_per_cu_data
     delete imported_symtabs;
     imported_symtabs = nullptr;
   }
+
+  /* Get the header of this per_cu, reading it if necessary.  */
+  const comp_unit_head *get_header () const;
 
   /* Return the address size given in the compilation unit header for
      this CU.  */
