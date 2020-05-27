@@ -491,11 +491,6 @@ struct dwarf2_per_cu_data
     imported_symtabs = nullptr;
   }
 
-  /* Return the OBJFILE associated with this compilation unit.  If
-     this compilation unit came from a separate debuginfo file, then
-     the master objfile is returned.  */
-  struct objfile *objfile () const;
-
   /* Return the address size given in the compilation unit header for
      this CU.  */
   int addr_size () const;

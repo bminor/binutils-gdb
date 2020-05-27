@@ -58,6 +58,8 @@ struct field;
 struct block;
 struct value_print_options;
 struct language_defn;
+struct dwarf2_per_cu_data;
+struct dwarf2_per_objfile;
 
 /* These declarations are DWARF-specific as some of the gdbtypes.h data types
    are already DWARF-specific.  */
@@ -1390,7 +1392,11 @@ struct call_site
     /* * CU of the function where the call is located.  It gets used
        for DWARF blocks execution in the parameter array below.  */
 
-    struct dwarf2_per_cu_data *per_cu;
+    dwarf2_per_cu_data *per_cu;
+
+    /* objfile of the function where the call is located.  */
+
+    dwarf2_per_objfile *per_objfile;
 
     /* * Describe DW_TAG_call_site's DW_TAG_formal_parameter.  */
 

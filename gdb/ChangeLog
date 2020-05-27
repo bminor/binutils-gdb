@@ -1,5 +1,34 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <objfile>: Remove.
+	* dwarf2/read.c (dwarf2_compute_name): Pass per_objfile down.
+	(read_call_site_scope): Assign per_objfile.
+	(dwarf2_per_cu_data::objfile): Remove.
+	* gdbtypes.h (struct call_site) <per_objfile>: New member.
+	* dwarf2/loc.h (dwarf2_evaluate_loc_desc): Add
+	dwarf2_per_objfile parameter.
+	* dwarf2/loc.c (dwarf2_evaluate_loc_desc_full): Add
+	dwarf2_per_objfile parameter.
+	(dwarf_expr_reg_to_entry_parameter): Add output
+	dwarf2_per_objfile parameter.
+	(locexpr_get_frame_base): Update.
+	(class dwarf_evaluate_loc_desc) <get_tls_address>: Update.
+	<push_dwarf_reg_entry_value>: Update.
+	<call_site_to_target_addr>: Update.
+	(dwarf_entry_parameter_to_value): Add dwarf2_per_objfile
+	parameter.
+	(value_of_dwarf_reg_entry): Update.
+	(rw_pieced_value): Update.
+	(indirect_synthetic_pointer): Update.
+	(dwarf2_evaluate_property): Update.
+	(dwarf2_loc_desc_get_symbol_read_needs): Add dwarf2_per_objfile
+	parameter.
+	(locexpr_read_variable): Update.
+	(locexpr_get_symbol_read_needs): Update.
+	(loclist_read_variable): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.h (dwarf2_fetch_die_loc_sect_off,
 	dwarf2_fetch_die_loc_cu_off, dwarf2_fetch_constant_bytes,
 	dwarf2_fetch_die_type_sect_off): Add dwarf2_per_objfile
