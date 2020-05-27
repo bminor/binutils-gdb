@@ -6040,12 +6040,12 @@ struct dwarf2_include_psymtab : public partial_symtab
     gdb_assert (false);
   }
 
-  bool readin_p () const override
+  bool readin_p (struct objfile *objfile) const override
   {
-    return includer ()->readin_p ();
+    return includer ()->readin_p (objfile);
   }
 
-  struct compunit_symtab *get_compunit_symtab () const override
+  compunit_symtab *get_compunit_symtab (struct objfile *objfile) const override
   {
     return nullptr;
   }
@@ -8987,7 +8987,7 @@ dwarf2_psymtab::expand_psymtab (struct objfile *objfile)
   expand_dependencies (objfile);
 
   dw2_do_instantiate_symtab (per_cu_data, false);
-  gdb_assert (get_compunit_symtab () != nullptr);
+  gdb_assert (get_compunit_symtab (objfile) != nullptr);
 }
 
 /* Trivial hash function for die_info: the hash value of a DIE

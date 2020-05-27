@@ -147,13 +147,16 @@ struct partial_symtab
   void expand_dependencies (struct objfile *);
 
   /* Return true if the symtab corresponding to this psymtab has been
-     readin.  */
-  virtual bool readin_p () const = 0;
+     read in in the context of this objfile.  */
+  virtual bool readin_p (struct objfile *) const = 0;
 
-  /* Return a pointer to the compunit allocated for this source file.
-     Return nullptr if !readin or if there was no symtab.  */
-  virtual struct compunit_symtab *get_compunit_symtab () const = 0;
+  /* Return a pointer to the compunit allocated for this source file
+     in the context of this objfile.
 
+     Return nullptr if the compunit was not read in or if there was no
+     symtab.  */
+  virtual struct compunit_symtab *get_compunit_symtab
+    (struct objfile *) const = 0;
 
   /* Return the raw low text address of this partial_symtab.  */
   CORE_ADDR raw_text_low () const
@@ -319,14 +322,12 @@ struct standard_psymtab : public partial_symtab
   {
   }
 
-  bool readin_p () const override
+  bool readin_p (struct objfile *) const override
   {
     return readin;
   }
 
-  /* Return a pointer to the compunit allocated for this source file.
-     Return nullptr if !readin or if there was no symtab.  */
-  struct compunit_symtab *get_compunit_symtab () const override
+  struct compunit_symtab *get_compunit_symtab (struct objfile *) const override
   {
     return compunit_symtab;
   }
