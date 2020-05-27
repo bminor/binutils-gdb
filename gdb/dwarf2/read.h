@@ -234,9 +234,6 @@ public:
   /* The CUs we recently read.  */
   std::vector<dwarf2_per_cu_data *> just_read_cus;
 
-  /* Table containing line_header indexed by offset and offset_in_dwz.  */
-  htab_up line_header_hash;
-
   /* Table containing all filenames.  This is an optional because the
      table is lazily constructed on first access.  */
   gdb::optional<filename_seen_cache> filenames_cache;
@@ -367,6 +364,9 @@ struct dwarf2_per_objfile
      This is nullptr if not allocated yet.
      The mapping is done via (CU/TU + DIE offset) -> type.  */
   htab_up die_type_hash;
+
+  /* Table containing line_header indexed by offset and offset_in_dwz.  */
+  htab_up line_header_hash;
 
 private:
   /* Hold the corresponding compunit_symtab for each CU or TU.  This

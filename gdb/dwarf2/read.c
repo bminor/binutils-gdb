@@ -10888,10 +10888,10 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
      compile_unit, then use the line header hash table if it's already
      created, but don't create one just yet.  */
 
-  if (dwarf2_per_objfile->per_bfd->line_header_hash == NULL
+  if (dwarf2_per_objfile->line_header_hash == NULL
       && die->tag == DW_TAG_partial_unit)
     {
-      dwarf2_per_objfile->per_bfd->line_header_hash
+      dwarf2_per_objfile->line_header_hash
 	.reset (htab_create_alloc (127, line_header_hash_voidp,
 				   line_header_eq_voidp,
 				   free_line_header_voidp,
@@ -10901,9 +10901,9 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
   line_header_local.sect_off = line_offset;
   line_header_local.offset_in_dwz = cu->per_cu->is_dwz;
   line_header_local_hash = line_header_hash (&line_header_local);
-  if (dwarf2_per_objfile->per_bfd->line_header_hash != NULL)
+  if (dwarf2_per_objfile->line_header_hash != NULL)
     {
-      slot = htab_find_slot_with_hash (dwarf2_per_objfile->per_bfd->line_header_hash.get (),
+      slot = htab_find_slot_with_hash (dwarf2_per_objfile->line_header_hash.get (),
 				       &line_header_local,
 				       line_header_local_hash, NO_INSERT);
 
@@ -10927,11 +10927,11 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
   cu->line_header = lh.release ();
   cu->line_header_die_owner = die;
 
-  if (dwarf2_per_objfile->per_bfd->line_header_hash == NULL)
+  if (dwarf2_per_objfile->line_header_hash == NULL)
     slot = NULL;
   else
     {
-      slot = htab_find_slot_with_hash (dwarf2_per_objfile->per_bfd->line_header_hash.get (),
+      slot = htab_find_slot_with_hash (dwarf2_per_objfile->line_header_hash.get (),
 				       &line_header_local,
 				       line_header_local_hash, INSERT);
       gdb_assert (slot != NULL);

@@ -1,5 +1,12 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.h (struct dwarf2_per_bfd) <line_header_hash>: Move
+	to...
+	(struct dwarf2_per_objfile) <line_header_hash>: ... here.
+	* dwarf2/read.c (handle_DW_AT_stmt_list): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c (struct mapped_index_base) <symbol_name_at,
 	build_name_components, find_name_components_bounds>:
 	Add per_objfile parameter.
