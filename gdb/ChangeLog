@@ -1,5 +1,24 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.h (struct dwarf2_per_cu_data) <text_offset>:
+	Remove.
+	* dwarf2/read.c (dwarf2_per_cu_data::text_offset): Remove.
+	* dwarf2/loc.c (dwarf2_find_location_expression): Update.
+	(dwarf2_compile_property_to_c): Update.
+	(dwarf2_compile_expr_to_ax): Add dwarf2_per_objfile parameter,
+	use text offset from objfile.
+	(locexpr_tracepoint_var_ref): Update.
+	(locexpr_generate_c_location): Update.
+	(loclist_describe_location): Update.
+	(loclist_tracepoint_var_ref): Update.
+	* dwarf2/compile.h (compile_dwarf_bounds_to_c): Add
+	dwarf2_per_objfile parameter.
+	* dwarf2/loc2c.c (do_compile_dwarf_expr_to_c): Likewise,
+	use text offset from objfile.
+	(compile_dwarf_expr_to_c): Add dwarf2_per_objfile parameter.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/expr.h (struct dwarf_expr_context)
 	<dwarf_expr_context>: Add dwarf2_per_objfile parameter.
 	<offset>: Remove.
