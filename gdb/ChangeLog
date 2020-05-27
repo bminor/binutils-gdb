@@ -1,5 +1,19 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.h (struct dwarf2_per_cu_data):
+	<dwarf2_per_objfile>: Remove.
+	* dwarf2/read.c (create_cu_from_index_list): Don't assign
+	dwarf2_per_objfile.
+	(create_signatured_type_table_from_index): Likewise.
+	(create_signatured_type_table_from_debug_names): Likewise.
+	(create_debug_type_hash_table): Likewise.
+	(fill_in_sig_entry_from_dwo_entry): Likewise.
+	(create_type_unit_group): Likewise.
+	(read_comp_units_from_section): Likewise.
+	(create_cus_hash_table): Likewise.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c (process_psymtab_comp_unit): Remove reference to
 	dwarf2_per_cu_data::dwarf2_per_objfile.
 	(compute_compunit_symtab_includes): Likewise.

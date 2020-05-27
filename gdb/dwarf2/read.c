@@ -2499,7 +2499,6 @@ create_cu_from_index_list (struct dwarf2_per_objfile *dwarf2_per_objfile,
   dwarf2_per_cu_data *the_cu = dwarf2_per_objfile->per_bfd->allocate_per_cu ();
   the_cu->sect_off = sect_off;
   the_cu->length = length;
-  the_cu->dwarf2_per_objfile = dwarf2_per_objfile;
   the_cu->section = section;
   the_cu->v.quick = OBSTACK_ZALLOC (&dwarf2_per_objfile->per_bfd->obstack,
 				    struct dwarf2_per_cu_quick_data);
@@ -2591,7 +2590,6 @@ create_signatured_type_table_from_index
       sig_type->per_cu.is_debug_types = 1;
       sig_type->per_cu.section = section;
       sig_type->per_cu.sect_off = sect_off;
-      sig_type->per_cu.dwarf2_per_objfile = dwarf2_per_objfile;
       sig_type->per_cu.v.quick
 	= OBSTACK_ZALLOC (&dwarf2_per_objfile->per_bfd->obstack,
 			  struct dwarf2_per_cu_quick_data);
@@ -2647,7 +2645,6 @@ create_signatured_type_table_from_debug_names
       sig_type->per_cu.is_debug_types = 1;
       sig_type->per_cu.section = section;
       sig_type->per_cu.sect_off = sect_off;
-      sig_type->per_cu.dwarf2_per_objfile = dwarf2_per_objfile;
       sig_type->per_cu.v.quick
 	= OBSTACK_ZALLOC (&dwarf2_per_objfile->per_bfd->obstack,
 			  struct dwarf2_per_cu_quick_data);
@@ -6337,7 +6334,6 @@ create_debug_type_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
 	  sig_type = dwarf2_per_objfile->per_bfd->allocate_signatured_type ();
 	  sig_type->signature = header.signature;
 	  sig_type->type_offset_in_tu = header.type_cu_offset_in_tu;
-	  sig_type->per_cu.dwarf2_per_objfile = dwarf2_per_objfile;
 	  sig_type->per_cu.is_debug_types = 1;
 	  sig_type->per_cu.section = section;
 	  sig_type->per_cu.sect_off = sect_off;
@@ -6503,7 +6499,6 @@ fill_in_sig_entry_from_dwo_entry (struct dwarf2_per_objfile *dwarf2_per_objfile,
   sig_entry->per_cu.sect_off = dwo_entry->sect_off;
   sig_entry->per_cu.length = dwo_entry->length;
   sig_entry->per_cu.reading_dwo_directly = 1;
-  sig_entry->per_cu.dwarf2_per_objfile = dwarf2_per_objfile;
   sig_entry->per_cu.per_bfd = per_bfd;
   sig_entry->type_offset_in_tu = dwo_entry->type_offset_in_tu;
   sig_entry->dwo_unit = dwo_entry;
@@ -7319,7 +7314,6 @@ create_type_unit_group (struct dwarf2_cu *cu, sect_offset line_offset_struct)
   tu_group = OBSTACK_ZALLOC (&dwarf2_per_objfile->per_bfd->obstack,
 			     struct type_unit_group);
   per_cu = &tu_group->per_cu;
-  per_cu->dwarf2_per_objfile = dwarf2_per_objfile;
   per_cu->per_bfd = per_bfd;
 
   if (per_bfd->using_index)
@@ -8069,7 +8063,6 @@ read_comp_units_from_section (struct dwarf2_per_objfile *dwarf2_per_objfile,
       this_cu->sect_off = sect_off;
       this_cu->length = cu_header.length + cu_header.initial_length_size;
       this_cu->is_dwz = is_dwz;
-      this_cu->dwarf2_per_objfile = dwarf2_per_objfile;
       this_cu->section = section;
 
       dwarf2_per_objfile->per_bfd->all_comp_units.push_back (this_cu);
@@ -11349,7 +11342,6 @@ create_cus_hash_table (struct dwarf2_per_objfile *dwarf2_per_objfile,
       sect_offset sect_off = (sect_offset) (info_ptr - section.buffer);
 
       memset (&per_cu, 0, sizeof (per_cu));
-      per_cu.dwarf2_per_objfile = dwarf2_per_objfile;
       per_cu.per_bfd = per_bfd;
       per_cu.is_debug_types = 0;
       per_cu.sect_off = sect_offset (info_ptr - section.buffer);
