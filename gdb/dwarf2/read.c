@@ -12870,8 +12870,8 @@ queue_and_load_all_dwo_tus (struct dwarf2_per_cu_data *per_cu)
   struct dwo_file *dwo_file;
 
   gdb_assert (!per_cu->is_debug_types);
-  gdb_assert (get_dwp_file (per_cu->dwarf2_per_objfile) == NULL);
   gdb_assert (per_cu->cu != NULL);
+  gdb_assert (get_dwp_file (per_cu->cu->per_objfile) == NULL);
 
   dwo_unit = per_cu->cu->dwo_unit;
   gdb_assert (dwo_unit != NULL);
