@@ -1,3 +1,15 @@
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* dwarf2/read.c (create_cu_from_index_list): Replace
+	dwarf2_per_objfile parameter with dwarf2_per_bfd.
+	(create_cus_from_index_list): Likewise.
+	(create_cus_from_index): Likewise.
+	(create_signatured_type_table_from_index): Likewise.
+	(create_cus_from_debug_names_list): Likewise.
+	(create_cus_from_debug_names): Likewise.
+	(dwarf2_read_gdb_index): Update.
+	(dwarf2_read_debug_names): Update.
+
 2020-05-27  Tom Tromey  <tom@tromey.com>
 	    Simon Marchi  <simon.marchi@efficios.com>
 

@@ -2474,20 +2474,20 @@ dwarf2_per_bfd::allocate_signatured_type ()
   return result;
 }
 
-/* Return a new dwarf2_per_cu_data allocated on the dwarf2_per_objfile
+/* Return a new dwarf2_per_cu_data allocated on the per-bfd
    obstack, and constructed with the specified field values.  */
 
 static dwarf2_per_cu_data *
-create_cu_from_index_list (struct dwarf2_per_objfile *dwarf2_per_objfile,
-                          struct dwarf2_section_info *section,
-                          int is_dwz,
-                          sect_offset sect_off, ULONGEST length)
+create_cu_from_index_list (dwarf2_per_bfd *per_bfd,
+			   struct dwarf2_section_info *section,
+			   int is_dwz,
+			   sect_offset sect_off, ULONGEST length)
 {
-  dwarf2_per_cu_data *the_cu = dwarf2_per_objfile->per_bfd->allocate_per_cu ();
+  dwarf2_per_cu_data *the_cu = per_bfd->allocate_per_cu ();
   the_cu->sect_off = sect_off;
   the_cu->length = length;
   the_cu->section = section;
-  the_cu->v.quick = OBSTACK_ZALLOC (&dwarf2_per_objfile->per_bfd->obstack,
+  the_cu->v.quick = OBSTACK_ZALLOC (&per_bfd->obstack,
 				    struct dwarf2_per_cu_quick_data);
   the_cu->is_dwz = is_dwz;
   return the_cu;
@@ -2497,7 +2497,7 @@ create_cu_from_index_list (struct dwarf2_per_objfile *dwarf2_per_objfile,
    CUs.  */
 
 static void
-create_cus_from_index_list (struct dwarf2_per_objfile *dwarf2_per_objfile,
+create_cus_from_index_list (dwarf2_per_bfd *per_bfd,
 			    const gdb_byte *cu_list, offset_type n_elements,
 			    struct dwarf2_section_info *section,
 			    int is_dwz)
@@ -2512,32 +2512,31 @@ create_cus_from_index_list (struct dwarf2_per_objfile *dwarf2_per_objfile,
       cu_list += 2 * 8;
 
       dwarf2_per_cu_data *per_cu
-	= create_cu_from_index_list (dwarf2_per_objfile, section, is_dwz,
-				     sect_off, length);
-      dwarf2_per_objfile->per_bfd->all_comp_units.push_back (per_cu);
+	= create_cu_from_index_list (per_bfd, section, is_dwz, sect_off,
+				     length);
+      per_bfd->all_comp_units.push_back (per_cu);
     }
 }
 
 /* Read the CU list from the mapped index, and use it to create all
-   the CU objects for this objfile.  */
+   the CU objects for PER_BFD.  */
 
 static void
-create_cus_from_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
+create_cus_from_index (dwarf2_per_bfd *per_bfd,
 		       const gdb_byte *cu_list, offset_type cu_list_elements,
 		       const gdb_byte *dwz_list, offset_type dwz_elements)
 {
-  gdb_assert (dwarf2_per_objfile->per_bfd->all_comp_units.empty ());
-  dwarf2_per_objfile->per_bfd->all_comp_units.reserve
-    ((cu_list_elements + dwz_elements) / 2);
+  gdb_assert (per_bfd->all_comp_units.empty ());
+  per_bfd->all_comp_units.reserve ((cu_list_elements + dwz_elements) / 2);
 
-  create_cus_from_index_list (dwarf2_per_objfile, cu_list, cu_list_elements,
-			      &dwarf2_per_objfile->per_bfd->info, 0);
+  create_cus_from_index_list (per_bfd, cu_list, cu_list_elements,
+			      &per_bfd->info, 0);
 
   if (dwz_elements == 0)
     return;
 
-  dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
-  create_cus_from_index_list (dwarf2_per_objfile, dwz_list, dwz_elements,
+  dwz_file *dwz = dwarf2_get_dwz_file (per_bfd);
+  create_cus_from_index_list (per_bfd, dwz_list, dwz_elements,
 			      &dwz->info, 1);
 }
 
@@ -2545,13 +2544,11 @@ create_cus_from_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
 static void
 create_signatured_type_table_from_index
-  (struct dwarf2_per_objfile *dwarf2_per_objfile,
-   struct dwarf2_section_info *section,
-   const gdb_byte *bytes,
-   offset_type elements)
+  (dwarf2_per_bfd *per_bfd, struct dwarf2_section_info *section,
+   const gdb_byte *bytes, offset_type elements)
 {
-  gdb_assert (dwarf2_per_objfile->per_bfd->all_type_units.empty ());
-  dwarf2_per_objfile->per_bfd->all_type_units.reserve (elements / 3);
+  gdb_assert (per_bfd->all_type_units.empty ());
+  per_bfd->all_type_units.reserve (elements / 3);
 
   htab_up sig_types_hash = allocate_signatured_type_table ();
 
@@ -2571,23 +2568,23 @@ create_signatured_type_table_from_index
       signature = extract_unsigned_integer (bytes + 16, 8, BFD_ENDIAN_LITTLE);
       bytes += 3 * 8;
 
-      sig_type = dwarf2_per_objfile->per_bfd->allocate_signatured_type ();
+      sig_type = per_bfd->allocate_signatured_type ();
       sig_type->signature = signature;
       sig_type->type_offset_in_tu = type_offset_in_tu;
       sig_type->per_cu.is_debug_types = 1;
       sig_type->per_cu.section = section;
       sig_type->per_cu.sect_off = sect_off;
       sig_type->per_cu.v.quick
-	= OBSTACK_ZALLOC (&dwarf2_per_objfile->per_bfd->obstack,
+	= OBSTACK_ZALLOC (&per_bfd->obstack,
 			  struct dwarf2_per_cu_quick_data);
 
       slot = htab_find_slot (sig_types_hash.get (), sig_type, INSERT);
       *slot = sig_type;
 
-      dwarf2_per_objfile->per_bfd->all_type_units.push_back (sig_type);
+      per_bfd->all_type_units.push_back (sig_type);
     }
 
-  dwarf2_per_objfile->per_bfd->signatured_types = std::move (sig_types_hash);
+  per_bfd->signatured_types = std::move (sig_types_hash);
 }
 
 /* Create the signatured type hash table from .debug_names.  */
@@ -3106,7 +3103,7 @@ dwarf2_read_gdb_index
 	}
     }
 
-  create_cus_from_index (dwarf2_per_objfile, cu_list, cu_list_elements,
+  create_cus_from_index (dwarf2_per_objfile->per_bfd, cu_list, cu_list_elements,
 			 dwz_list, dwz_list_elements);
 
   if (types_list_elements)
@@ -3118,8 +3115,9 @@ dwarf2_read_gdb_index
 
       dwarf2_section_info *section = &dwarf2_per_objfile->per_bfd->types[0];
 
-      create_signatured_type_table_from_index (dwarf2_per_objfile, section,
-					       types_list, types_list_elements);
+      create_signatured_type_table_from_index (dwarf2_per_objfile->per_bfd,
+					       section, types_list,
+					       types_list_elements);
     }
 
   create_addrmap_from_index (dwarf2_per_objfile, map.get ());
@@ -5117,7 +5115,7 @@ read_debug_names_from_section (struct objfile *objfile,
    list.  */
 
 static void
-create_cus_from_debug_names_list (struct dwarf2_per_objfile *dwarf2_per_objfile,
+create_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 				  const mapped_debug_names &map,
 				  dwarf2_section_info &section,
 				  bool is_dwz)
@@ -5136,9 +5134,8 @@ create_cus_from_debug_names_list (struct dwarf2_per_objfile *dwarf2_per_objfile,
 	   the next CU as end of this CU.  We create the CUs here with length 0,
 	   and in cutu_reader::cutu_reader we'll fill in the actual length.  */
 	dwarf2_per_cu_data *per_cu
-	  = create_cu_from_index_list (dwarf2_per_objfile, &section, is_dwz,
-				       sect_off, 0);
-	dwarf2_per_objfile->per_bfd->all_comp_units.push_back (per_cu);
+	  = create_cu_from_index_list (per_bfd, &section, is_dwz, sect_off, 0);
+	per_bfd->all_comp_units.push_back (per_cu);
       }
     }
 
@@ -5160,9 +5157,9 @@ create_cus_from_debug_names_list (struct dwarf2_per_objfile *dwarf2_per_objfile,
 	{
 	  const ULONGEST length = sect_off_next - sect_off_prev;
 	  dwarf2_per_cu_data *per_cu
-	    = create_cu_from_index_list (dwarf2_per_objfile, &section, is_dwz,
+	    = create_cu_from_index_list (per_bfd, &section, is_dwz,
 					 sect_off_prev, length);
-	  dwarf2_per_objfile->per_bfd->all_comp_units.push_back (per_cu);
+	  per_bfd->all_comp_units.push_back (per_cu);
 	}
       sect_off_prev = sect_off_next;
     }
@@ -5172,22 +5169,21 @@ create_cus_from_debug_names_list (struct dwarf2_per_objfile *dwarf2_per_objfile,
    the CU objects for this dwarf2_per_objfile.  */
 
 static void
-create_cus_from_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
+create_cus_from_debug_names (dwarf2_per_bfd *per_bfd,
 			     const mapped_debug_names &map,
 			     const mapped_debug_names &dwz_map)
 {
-  gdb_assert (dwarf2_per_objfile->per_bfd->all_comp_units.empty ());
-  dwarf2_per_objfile->per_bfd->all_comp_units.reserve (map.cu_count + dwz_map.cu_count);
+  gdb_assert (per_bfd->all_comp_units.empty ());
+  per_bfd->all_comp_units.reserve (map.cu_count + dwz_map.cu_count);
 
-  create_cus_from_debug_names_list (dwarf2_per_objfile, map,
-				    dwarf2_per_objfile->per_bfd->info,
+  create_cus_from_debug_names_list (per_bfd, map, per_bfd->info,
 				    false /* is_dwz */);
 
   if (dwz_map.cu_count == 0)
     return;
 
-  dwz_file *dwz = dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
-  create_cus_from_debug_names_list (dwarf2_per_objfile, dwz_map, dwz->info,
+  dwz_file *dwz = dwarf2_get_dwz_file (per_bfd);
+  create_cus_from_debug_names_list (per_bfd, dwz_map, dwz->info,
 				    true /* is_dwz */);
 }
 
@@ -5226,7 +5222,7 @@ dwarf2_read_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile)
 	}
     }
 
-  create_cus_from_debug_names (dwarf2_per_objfile, *map, dwz_map);
+  create_cus_from_debug_names (dwarf2_per_objfile->per_bfd, *map, dwz_map);
 
   if (map->tu_count != 0)
     {
