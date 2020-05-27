@@ -63,7 +63,8 @@ static struct call_site_parameter *dwarf_expr_reg_to_entry_parameter
 
 static struct value *indirect_synthetic_pointer
   (sect_offset die, LONGEST byte_offset,
-   struct dwarf2_per_cu_data *per_cu,
+   dwarf2_per_cu_data *per_cu,
+   dwarf2_per_objfile *per_objfile,
    struct frame_info *frame,
    struct type *type, bool resolve_abstract_p = false);
 
@@ -581,11 +582,11 @@ get_frame_pc_for_per_cu_dwarf_call (void *baton)
 
 static void
 per_cu_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset,
-		   struct dwarf2_per_cu_data *per_cu)
+		   dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile)
 {
   struct dwarf2_locexpr_baton block;
 
-  block = dwarf2_fetch_die_loc_cu_off (die_offset, per_cu,
+  block = dwarf2_fetch_die_loc_cu_off (die_offset, per_cu, per_objfile,
 				       get_frame_pc_for_per_cu_dwarf_call,
 				       ctx);
 
@@ -601,9 +602,11 @@ per_cu_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset,
 
 static struct value *
 sect_variable_value (struct dwarf_expr_context *ctx, sect_offset sect_off,
-		     struct dwarf2_per_cu_data *per_cu)
+		     dwarf2_per_cu_data *per_cu,
+		     dwarf2_per_objfile *per_objfile)
 {
-  struct type *die_type = dwarf2_fetch_die_type_sect_off (sect_off, per_cu);
+  struct type *die_type
+    = dwarf2_fetch_die_type_sect_off (sect_off, per_cu, per_objfile);
 
   if (die_type == NULL)
     error (_("Bad DW_OP_GNU_variable_value DIE."));
@@ -616,7 +619,8 @@ sect_variable_value (struct dwarf_expr_context *ctx, sect_offset sect_off,
 
   struct type *type = lookup_pointer_type (die_type);
   struct frame_info *frame = get_selected_frame (_("No frame selected."));
-  return indirect_synthetic_pointer (sect_off, 0, per_cu, frame, type, true);
+  return indirect_synthetic_pointer (sect_off, 0, per_cu, per_objfile, frame,
+				     type, true);
 }
 
 class dwarf_evaluate_loc_desc : public dwarf_expr_context
@@ -660,7 +664,7 @@ public:
 
   void dwarf_call (cu_offset die_offset) override
   {
-    per_cu_dwarf_call (this, die_offset, per_cu);
+    per_cu_dwarf_call (this, die_offset, per_cu, per_objfile);
   }
 
   /* Helper interface of sect_variable_value for
@@ -668,7 +672,7 @@ public:
 
   struct value *dwarf_variable_value (sect_offset sect_off) override
   {
-    return sect_variable_value (this, sect_off, per_cu);
+    return sect_variable_value (this, sect_off, per_cu, per_objfile);
   }
 
   struct type *get_base_type (cu_offset die_offset, int size) override
@@ -1963,7 +1967,8 @@ get_frame_address_in_block_wrapper (void *baton)
 
 static struct value *
 fetch_const_value_from_synthetic_pointer (sect_offset die, LONGEST byte_offset,
-					  struct dwarf2_per_cu_data *per_cu,
+					  dwarf2_per_cu_data *per_cu,
+					  dwarf2_per_objfile *per_objfile,
 					  struct type *type)
 {
   struct value *result = NULL;
@@ -1971,7 +1976,8 @@ fetch_const_value_from_synthetic_pointer (sect_offset die, LONGEST byte_offset,
   LONGEST len;
 
   auto_obstack temp_obstack;
-  bytes = dwarf2_fetch_constant_bytes (die, per_cu, &temp_obstack, &len);
+  bytes = dwarf2_fetch_constant_bytes (die, per_cu, per_objfile,
+				       &temp_obstack, &len);
 
   if (bytes != NULL)
     {
@@ -1994,18 +2000,20 @@ fetch_const_value_from_synthetic_pointer (sect_offset die, LONGEST byte_offset,
 
 static struct value *
 indirect_synthetic_pointer (sect_offset die, LONGEST byte_offset,
-			    struct dwarf2_per_cu_data *per_cu,
+			    dwarf2_per_cu_data *per_cu,
+			    dwarf2_per_objfile *per_objfile,
 			    struct frame_info *frame, struct type *type,
 			    bool resolve_abstract_p)
 {
   /* Fetch the location expression of the DIE we're pointing to.  */
   struct dwarf2_locexpr_baton baton
-    = dwarf2_fetch_die_loc_sect_off (die, per_cu,
+    = dwarf2_fetch_die_loc_sect_off (die, per_cu, per_objfile,
 				     get_frame_address_in_block_wrapper, frame,
 				     resolve_abstract_p);
 
   /* Get type of pointed-to DIE.  */
-  struct type *orig_type = dwarf2_fetch_die_type_sect_off (die, per_cu);
+  struct type *orig_type = dwarf2_fetch_die_type_sect_off (die, per_cu,
+							   per_objfile);
   if (orig_type == NULL)
     invalid_synthetic_pointer ();
 
@@ -2019,7 +2027,7 @@ indirect_synthetic_pointer (sect_offset die, LONGEST byte_offset,
 					  byte_offset);
   else
     return fetch_const_value_from_synthetic_pointer (die, byte_offset, per_cu,
-						     type);
+						     per_objfile, type);
 }
 
 /* An implementation of an lval_funcs method to indirect through a
@@ -2096,7 +2104,7 @@ indirect_pieced_value (struct value *value)
 
   return indirect_synthetic_pointer (piece->v.ptr.die_sect_off,
 				     byte_offset, c->per_cu,
-				     frame, type);
+				     c->per_objfile, frame, type);
 }
 
 /* Implementation of the coerce_ref method of lval_funcs for synthetic C++
@@ -2123,7 +2131,7 @@ coerce_pieced_ref (const struct value *value)
       return indirect_synthetic_pointer
 	(closure->pieces[0].v.ptr.die_sect_off,
 	 closure->pieces[0].v.ptr.offset,
-	 closure->per_cu, frame, type);
+	 closure->per_cu, closure->per_objfile, frame, type);
     }
   else
     {
@@ -2752,7 +2760,7 @@ public:
 
   void dwarf_call (cu_offset die_offset) override
   {
-    per_cu_dwarf_call (this, die_offset, per_cu);
+    per_cu_dwarf_call (this, die_offset, per_cu, per_objfile);
   }
 
   /* Helper interface of sect_variable_value for
@@ -2760,7 +2768,7 @@ public:
 
   struct value *dwarf_variable_value (sect_offset sect_off) override
   {
-    return sect_variable_value (this, sect_off, per_cu);
+    return sect_variable_value (this, sect_off, per_cu, per_objfile);
   }
 
   /* DW_OP_entry_value accesses require a caller, therefore a
@@ -3589,7 +3597,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	    op_ptr += size;
 
 	    cu_offset cuoffset = (cu_offset) uoffset;
-	    block = dwarf2_fetch_die_loc_cu_off (cuoffset, per_cu,
+	    block = dwarf2_fetch_die_loc_cu_off (cuoffset, per_cu, per_objfile,
 						 get_ax_pc, expr);
 
 	    /* DW_OP_call_ref is currently not supported.  */
