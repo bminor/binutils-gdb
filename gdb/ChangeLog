@@ -1,5 +1,15 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.c (struct dwarf2_cu) <dwarf2_cu>: Add parameter.
+	<per_objfile>: New member.
+	(class cutu_reader) <init_tu_and_read_dwo_dies>: Add parameter.
+	(cutu_reader::init_tu_and_read_dwo_dies): Add parameter, update
+	call to dwarf2_cu.
+	(cutu_reader::cutu_reader): Update.
+	(dwarf2_cu::dwarf2_cu): Add parameter, initialize per_objfile.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.h (struct dwarf2_per_bfd) <die_type_hash>: Move to
 	struct dwarf2_per_objfile.
 	(struct dwarf2_per_objfile) <die_type_hash>: Move from struct
