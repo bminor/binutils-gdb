@@ -1,5 +1,63 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.h (struct dwarf2_cu): Forward-declare.
+	(struct dwarf2_per_bfd) <free_cached_comp_units>: Remove,
+	move to dwarf2_per_objfile.
+	<read_in_chain>: Remove.
+	(struct dwarf2_per_objfile) <get_cu, set_cu, remove_cu,
+	remove_all_cus, age_comp_units>: New methods.
+	<m_dwarf2_cus>: New member.
+	(struct dwarf2_per_cu_data) <cu>: Remove.
+	* dwarf2/read.c (struct dwarf2_cu) <read_in_chain>: Remove.
+	(age_cached_comp_units, free_one_cached_comp_unit): Remove,
+	moved to methods of dwarf2_per_objfile.
+	(dwarf2_clear_marks): Remove.
+	(dwarf2_queue_item::~dwarf2_queue_item): Update.
+	(dwarf2_per_bfd::~dwarf2_per_bfd): Don't free dwarf2_cus.
+	(dwarf2_per_bfd::free_cached_comp_units): Remove.
+	(dwarf2_per_objfile::remove_all_cus): New.
+	(class free_cached_comp_units) <~free_cached_comp_units>:
+	Update.
+	(load_cu): Update.
+	(dw2_do_instantiate_symtab): Adjust.
+	(fill_in_sig_entry_from_dwo_entry): Adjust.
+	(cutu_reader::init_tu_and_read_dwo_dies): Update.
+	(cutu_reader::cutu_reader): Likewise.
+	(cutu_reader::keep): Use dwarf2_per_objfile::set_cu.
+	(cutu_reader::cutu_reader): Use dwarf2_per_objfile::get_cu.
+	(process_psymtab_comp_unit): Use dwarf2_per_objfile::remove_cu
+	and dwarf2_per_objfile::age_comp_units.
+	(load_partial_comp_unit): Update.
+	(maybe_queue_comp_unit): Use dwarf2_per_objfile::get_cu.
+	(process_queue): Likewise.
+	(find_partial_die): Use dwarf2_per_objfile::get_cu instead of cu
+	backlink.
+	(dwarf2_read_addr_index): Likewise.
+	(follow_die_offset): Likewise.
+	(dwarf2_fetch_die_loc_sect_off): Likewise.
+	(dwarf2_fetch_constant_bytes): Likewise.
+	(dwarf2_fetch_die_type_sect_off): Likewise.
+	(follow_die_sig_1): Likewise.
+	(load_full_type_unit): Likewise.
+	(read_signatured_type): Likewise.
+	(dwarf2_cu::dwarf2_cu): Don't set cu field.
+	(dwarf2_cu::~dwarf2_cu): Remove.
+	(dwarf2_per_objfile::get_cu): New.
+	(dwarf2_per_objfile::set_cu): New.
+	(age_cached_comp_units): Rename to...
+	(dwarf2_per_objfile::age_comp_units): ... this.  Adjust
+	to std::unordered_map.
+	(free_one_cached_comp_unit): Rename to...
+	(dwarf2_per_objfile::remove_cu): ... this.  Adjust
+	to std::unordered_map.
+	(dwarf2_per_objfile::~dwarf2_per_objfile): New.
+	(dwarf2_mark_helper): Use dwarf2_per_objfile::get_cu, expect
+	a dwarf2_per_objfile in data.
+	(dwarf2_mark): Pass dwarf2_per_objfile in data to htab_traverse.
+	(dwarf2_clear_marks): Remove.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c (class cutu_reader) <cutu_reader>: Replace
 	`int use_existing_cu` parameter with `dwarf2_cu *existing_cu`.
 	(init_tu_and_read_dwo_dies): Likewise.
