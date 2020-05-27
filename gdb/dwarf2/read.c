@@ -1570,12 +1570,10 @@ static void load_full_comp_unit (dwarf2_per_cu_data *per_cu,
 				 bool skip_partial,
 				 enum language pretend_language);
 
-static void process_full_comp_unit (dwarf2_per_cu_data *per_cu,
-				    dwarf2_per_objfile *per_objfile,
+static void process_full_comp_unit (dwarf2_cu *cu,
 				    enum language pretend_language);
 
-static void process_full_type_unit (dwarf2_per_cu_data *per_cu,
-				    dwarf2_per_objfile *per_objfile,
+static void process_full_type_unit (dwarf2_cu *cu,
 				    enum language pretend_language);
 
 static void dwarf2_add_dependence (struct dwarf2_cu *,
@@ -9021,11 +9019,9 @@ process_queue (struct dwarf2_per_objfile *dwarf2_per_objfile)
 	    fprintf_unfiltered (gdb_stdlog, "Expanding symtab of %s\n", buf);
 
 	  if (per_cu->is_debug_types)
-	    process_full_type_unit (per_cu, dwarf2_per_objfile,
-				    item.pretend_language);
+	    process_full_type_unit (per_cu->cu, item.pretend_language);
 	  else
-	    process_full_comp_unit (per_cu, dwarf2_per_objfile,
-				    item.pretend_language);
+	    process_full_comp_unit (per_cu->cu, item.pretend_language);
 
 	  if (dwarf_read_debug >= debug_print_threshold)
 	    fprintf_unfiltered (gdb_stdlog, "Done expanding %s\n", buf);
@@ -9759,15 +9755,13 @@ process_cu_includes (struct dwarf2_per_objfile *dwarf2_per_objfile)
   dwarf2_per_objfile->per_bfd->just_read_cus.clear ();
 }
 
-/* Generate full symbol information for PER_CU, whose DIEs have
+/* Generate full symbol information for CU, whose DIEs have
    already been loaded into memory.  */
 
 static void
-process_full_comp_unit (dwarf2_per_cu_data *per_cu,
-			dwarf2_per_objfile *dwarf2_per_objfile,
-			enum language pretend_language)
+process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
 {
-  struct dwarf2_cu *cu = per_cu->cu;
+  dwarf2_per_objfile *dwarf2_per_objfile = cu->per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct gdbarch *gdbarch = objfile->arch ();
   CORE_ADDR lowpc, highpc;
@@ -9850,30 +9844,29 @@ process_full_comp_unit (dwarf2_per_cu_data *per_cu,
       cust->call_site_htab = cu->call_site_htab;
     }
 
-  dwarf2_per_objfile->set_symtab (per_cu, cust);
+  dwarf2_per_objfile->set_symtab (cu->per_cu, cust);
 
   /* Push it for inclusion processing later.  */
-  dwarf2_per_objfile->per_bfd->just_read_cus.push_back (per_cu);
+  dwarf2_per_objfile->per_bfd->just_read_cus.push_back (cu->per_cu);
 
   /* Not needed any more.  */
   cu->reset_builder ();
 }
 
-/* Generate full symbol information for type unit PER_CU, whose DIEs have
+/* Generate full symbol information for type unit CU, whose DIEs have
    already been loaded into memory.  */
 
 static void
-process_full_type_unit (dwarf2_per_cu_data *per_cu,
-			dwarf2_per_objfile *dwarf2_per_objfile,
+process_full_type_unit (dwarf2_cu *cu,
 			enum language pretend_language)
 {
-  struct dwarf2_cu *cu = per_cu->cu;
+  dwarf2_per_objfile *dwarf2_per_objfile = cu->per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct compunit_symtab *cust;
   struct signatured_type *sig_type;
 
-  gdb_assert (per_cu->is_debug_types);
-  sig_type = (struct signatured_type *) per_cu;
+  gdb_assert (cu->per_cu->is_debug_types);
+  sig_type = (struct signatured_type *) cu->per_cu;
 
   /* Clear the list here in case something was left over.  */
   cu->method_list.clear ();
@@ -9925,7 +9918,7 @@ process_full_type_unit (dwarf2_per_cu_data *per_cu,
       cust = tug_unshare->compunit_symtab;
     }
 
-  dwarf2_per_objfile->set_symtab (per_cu, cust);
+  dwarf2_per_objfile->set_symtab (cu->per_cu, cust);
 
   /* Not needed any more.  */
   cu->reset_builder ();
