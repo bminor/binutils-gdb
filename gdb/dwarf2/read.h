@@ -47,6 +47,7 @@ struct dwarf2_per_cu_data;
 struct mapped_index;
 struct mapped_debug_names;
 struct signatured_type;
+struct type_unit_group;
 
 /* One item on the queue of compilation units to read in full symbols
    for.  */
@@ -265,6 +266,30 @@ private:
   size_t m_num_psymtabs = 0;
 };
 
+/* This is the per-objfile data associated with a type_unit_group.  */
+
+struct type_unit_group_unshareable
+{
+  /* The compunit symtab.
+     Type units in a group needn't all be defined in the same source file,
+     so we create an essentially anonymous symtab as the compunit symtab.  */
+  struct compunit_symtab *compunit_symtab = nullptr;
+
+  /* The number of symtabs from the line header.
+     The value here must match line_header.num_file_names.  */
+  unsigned int num_symtabs = 0;
+
+  /* The symbol tables for this TU (obtained from the files listed in
+     DW_AT_stmt_list).
+     WARNING: The order of entries here must match the order of entries
+     in the line header.  After the first TU using this type_unit_group, the
+     line header for the subsequent TUs is recreated from this.  This is done
+     because we need to use the same symtabs for each TU using the same
+     DW_AT_stmt_list value.  Also note that symtabs may be repeated here,
+     there's no guarantee the line header doesn't have duplicate entries.  */
+  struct symtab **symtabs = nullptr;
+};
+
 /* Collection of data recorded per objfile.
    This hangs off of dwarf2_objfile_data_key.
 
@@ -304,6 +329,11 @@ struct dwarf2_per_objfile
   /* Set the compunit_symtab associated to PER_CU.  */
   void set_symtab (const dwarf2_per_cu_data *per_cu, compunit_symtab *symtab);
 
+/* Get the type_unit_group_unshareable corresponding to TU_GROUP.  If one
+   does not exist, create it.  */
+  type_unit_group_unshareable *get_type_unit_group_unshareable
+    (type_unit_group *tu_group);
+
   /* Find an integer type SIZE_IN_BYTES bytes in size and return it.
      UNSIGNED_P controls if the integer is unsigned or not.  */
   struct type *int_type (int size_in_bytes, bool unsigned_p) const;
@@ -325,6 +355,14 @@ private:
      is indexed by dwarf2_per_cu_data::index.  A NULL value means
      that the CU/TU has not been expanded yet.  */
   std::vector<compunit_symtab *> m_symtabs;
+
+  /* Map from a type unit group to the corresponding unshared
+     structure.  */
+  typedef std::unique_ptr<type_unit_group_unshareable>
+    type_unit_group_unshareable_up;
+
+  std::unordered_map<type_unit_group *, type_unit_group_unshareable_up>
+    m_type_units;
 };
 
 /* Get the dwarf2_per_objfile associated to OBJFILE.  */
