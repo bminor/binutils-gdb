@@ -317,7 +317,8 @@ const gdb_byte *
 dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 				 size_t *locexpr_length, CORE_ADDR pc)
 {
-  struct objfile *objfile = baton->per_cu->objfile ();
+  dwarf2_per_objfile *per_objfile = baton->per_objfile;
+  struct objfile *objfile = per_objfile->objfile;
   struct gdbarch *gdbarch = objfile->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = baton->per_cu->addr_size ();
@@ -1552,6 +1553,9 @@ struct piece_closure
   /* Reference count.  */
   int refc = 0;
 
+  /* The objfile from which this closure's expression came.  */
+  dwarf2_per_objfile *per_objfile = nullptr;
+
   /* The CU from which this closure's expression came.  */
   struct dwarf2_per_cu_data *per_cu = NULL;
 
@@ -1574,6 +1578,8 @@ allocate_piece_closure (struct dwarf2_per_cu_data *per_cu,
   struct piece_closure *c = new piece_closure;
 
   c->refc = 1;
+  /* We must capture this here due to sharing of DWARF state.  */
+  c->per_objfile = per_cu->dwarf2_per_objfile;
   c->per_cu = per_cu;
   c->pieces = std::move (pieces);
   if (frame == NULL)
@@ -2454,7 +2460,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
       ctx.data_view = addr_stack->valaddr;
     }
 
-  objfile = dlbaton->per_cu->objfile ();
+  objfile = dlbaton->per_objfile->objfile;
 
   ctx.gdbarch = objfile->arch ();
   ctx.addr_size = dlbaton->per_cu->addr_size ();
@@ -4348,7 +4354,8 @@ locexpr_describe_location (struct symbol *symbol, CORE_ADDR addr,
 {
   struct dwarf2_locexpr_baton *dlbaton
     = (struct dwarf2_locexpr_baton *) SYMBOL_LOCATION_BATON (symbol);
-  struct objfile *objfile = dlbaton->per_cu->objfile ();
+  dwarf2_per_objfile *per_objfile = dlbaton->per_objfile;
+  struct objfile *objfile = per_objfile->objfile;
   unsigned int addr_size = dlbaton->per_cu->addr_size ();
   int offset_size = dlbaton->per_cu->offset_size ();
 
@@ -4485,7 +4492,8 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
   struct dwarf2_loclist_baton *dlbaton
     = (struct dwarf2_loclist_baton *) SYMBOL_LOCATION_BATON (symbol);
   const gdb_byte *loc_ptr, *buf_end;
-  struct objfile *objfile = dlbaton->per_cu->objfile ();
+  dwarf2_per_objfile *per_objfile = dlbaton->per_objfile;
+  struct objfile *objfile = per_objfile->objfile;
   struct gdbarch *gdbarch = objfile->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = dlbaton->per_cu->addr_size ();

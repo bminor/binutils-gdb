@@ -1,4 +1,21 @@
 2020-05-27  Tom Tromey  <tom@tromey.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/loc.c (struct piece_closure) <per_objfile>: New member.
+	(allocate_piece_closure): Set "per_objfile" member.
+	(dwarf2_find_location_expression, dwarf2_locexpr_baton_eval)
+	(locexpr_describe_location, loclist_describe_location): Use new
+	member.
+	* dwarf2/read.c (read_call_site_scope)
+	(mark_common_block_symbol_computed, attr_to_dynamic_prop)
+	(dwarf2_const_value_attr, dwarf2_fetch_die_loc_sect_off)
+	(fill_in_loclist_baton, dwarf2_symbol_mark_computed,
+	handle_data_member_location): Set per_objfile member.
+	* dwarf2/loc.h (struct dwarf2_locexpr_baton) <per_objfile>: New
+	member.
+	(struct dwarf2_loclist_baton) <per_objfile>: New member.
+
+2020-05-27  Tom Tromey  <tom@tromey.com>
 
 	* dwarf2/read.h (struct dwarf2_per_objfile) <allocate_per_cu,
 	allocate_signatured_type>: Declare new methods.
