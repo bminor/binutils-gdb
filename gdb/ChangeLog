@@ -1,5 +1,15 @@
 2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2/read.c (load_cu): Return dwarf2_cu.
+	(dw2_do_instantiate_symtab): Update.
+	(queue_and_load_all_dwo_tus): Change parameter from
+	dwarf2_per_cu_data to dwarf2_cu.
+	(dwarf2_fetch_die_loc_sect_off): Update.
+	(dwarf2_fetch_constant_bytes): Update.
+	(dwarf2_fetch_die_type_sect_off): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2/read.c (process_full_comp_unit,
 	process_full_type_unit): Remove per_cu, per_objfile paramters.
 	Add dwarf2_cu parameter.
