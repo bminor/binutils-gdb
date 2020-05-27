@@ -1568,7 +1568,8 @@ static void prepare_one_comp_unit (struct dwarf2_cu *cu,
 
 static void age_cached_comp_units (struct dwarf2_per_objfile *dwarf2_per_objfile);
 
-static void free_one_cached_comp_unit (struct dwarf2_per_cu_data *);
+static void free_one_cached_comp_unit (dwarf2_per_cu_data *target_per_cu,
+				       dwarf2_per_objfile *per_objfile);
 
 static struct type *set_die_type (struct die_info *, struct type *,
 				  struct dwarf2_cu *);
@@ -1602,7 +1603,8 @@ static struct type *get_die_type_at_offset (sect_offset,
 
 static struct type *get_die_type (struct die_info *die, struct dwarf2_cu *cu);
 
-static void queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
+static void queue_comp_unit (dwarf2_per_cu_data *per_cu,
+			     dwarf2_per_objfile *per_objfile,
 			     enum language pretend_language);
 
 static void process_queue (struct dwarf2_per_objfile *dwarf2_per_objfile);
@@ -1642,7 +1644,7 @@ dwarf2_queue_item::~dwarf2_queue_item ()
   if (per_cu->queued)
     {
       if (per_cu->cu != NULL)
-	free_one_cached_comp_unit (per_cu);
+	free_one_cached_comp_unit (per_cu, per_objfile);
       per_cu->queued = 0;
     }
 }
@@ -2381,7 +2383,7 @@ dw2_do_instantiate_symtab (dwarf2_per_cu_data *per_cu,
 
   if (!dwarf2_per_objfile->symtab_set_p (per_cu))
     {
-      queue_comp_unit (per_cu, language_minimal);
+      queue_comp_unit (per_cu, dwarf2_per_objfile, language_minimal);
       load_cu (per_cu, dwarf2_per_objfile, skip_partial);
 
       /* If we just loaded a CU from a DWO, and we're working with an index
@@ -7579,7 +7581,7 @@ process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
      read in the compilation unit (see load_partial_dies).
      This problem could be avoided, but the benefit is unclear.  */
   if (this_cu->cu != NULL)
-    free_one_cached_comp_unit (this_cu);
+    free_one_cached_comp_unit (this_cu, per_objfile);
 
   cutu_reader reader (this_cu, per_objfile, NULL, 0, false);
 
@@ -8937,11 +8939,12 @@ dwarf2_psymtab::read_symtab (struct objfile *objfile)
 /* Add PER_CU to the queue.  */
 
 static void
-queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
+queue_comp_unit (dwarf2_per_cu_data *per_cu,
+		 dwarf2_per_objfile *per_objfile,
 		 enum language pretend_language)
 {
   per_cu->queued = 1;
-  per_cu->per_bfd->queue.emplace (per_cu, pretend_language);
+  per_cu->per_bfd->queue.emplace (per_cu, per_objfile, pretend_language);
 }
 
 /* If PER_CU is not yet queued, add it to the queue.
@@ -8955,7 +8958,8 @@ queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
 
 static int
 maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
-		       struct dwarf2_per_cu_data *per_cu,
+		       dwarf2_per_cu_data *per_cu,
+		       dwarf2_per_objfile *per_objfile,
 		       enum language pretend_language)
 {
   /* We may arrive here during partial symbol reading, if we need full
@@ -8986,7 +8990,7 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
     }
 
   /* Add it to the queue.  */
-  queue_comp_unit (per_cu, pretend_language);
+  queue_comp_unit (per_cu, per_objfile,  pretend_language);
 
   return 1;
 }
@@ -9947,7 +9951,7 @@ process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
 	return;
 
       /* If necessary, add it to the queue and load its DIEs.  */
-      if (maybe_queue_comp_unit (cu, per_cu, cu->language))
+      if (maybe_queue_comp_unit (cu, per_cu, per_objfile, cu->language))
 	load_full_comp_unit (per_cu, per_objfile, false, cu->language);
 
       cu->per_cu->imported_symtabs_push (per_cu);
@@ -12861,7 +12865,7 @@ queue_and_load_dwo_tu (void **slot, void *info)
       /* We pass NULL for DEPENDENT_CU because we don't yet know if there's
 	 a real dependency of PER_CU on SIG_TYPE.  That is detected later
 	 while processing PER_CU.  */
-      if (maybe_queue_comp_unit (NULL, sig_cu, cu->language))
+      if (maybe_queue_comp_unit (NULL, sig_cu, cu->per_objfile, cu->language))
 	load_full_type_unit (sig_cu, cu->per_objfile);
       cu->per_cu->imported_symtabs_push (sig_cu);
     }
@@ -22247,7 +22251,7 @@ follow_die_offset (sect_offset sect_off, int offset_in_dwz,
 						 dwarf2_per_objfile);
 
       /* If necessary, add it to the queue and load its DIEs.  */
-      if (maybe_queue_comp_unit (cu, per_cu, cu->language))
+      if (maybe_queue_comp_unit (cu, per_cu, dwarf2_per_objfile, cu->language))
 	load_full_comp_unit (per_cu, dwarf2_per_objfile, false, cu->language);
 
       target_cu = per_cu->cu;
@@ -22610,6 +22614,8 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
   struct die_info temp_die;
   struct dwarf2_cu *sig_cu, *cu = *ref_cu;
   struct die_info *die;
+  dwarf2_per_objfile *dwarf2_per_objfile = (*ref_cu)->per_objfile;
+
 
   /* While it might be nice to assert sig_type->type == NULL here,
      we can get here for DW_AT_imported_declaration where we need
@@ -22617,8 +22623,9 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
 
   /* If necessary, add it to the queue and load its DIEs.  */
 
-  if (maybe_queue_comp_unit (*ref_cu, &sig_type->per_cu, language_minimal))
-    read_signatured_type (sig_type, (*ref_cu)->per_objfile);
+  if (maybe_queue_comp_unit (*ref_cu, &sig_type->per_cu, dwarf2_per_objfile,
+			     language_minimal))
+    read_signatured_type (sig_type, dwarf2_per_objfile);
 
   sig_cu = sig_type->per_cu.cu;
   gdb_assert (sig_cu != NULL);
@@ -22628,8 +22635,6 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
 						 to_underlying (temp_die.sect_off));
   if (die)
     {
-      struct dwarf2_per_objfile *dwarf2_per_objfile = (*ref_cu)->per_objfile;
-
       /* For .gdb_index version 7 keep track of included TUs.
 	 http://sourceware.org/bugzilla/show_bug.cgi?id=15021.  */
       if (dwarf2_per_objfile->per_bfd->index_table != NULL
@@ -23607,11 +23612,10 @@ age_cached_comp_units (struct dwarf2_per_objfile *dwarf2_per_objfile)
 /* Remove a single compilation unit from the cache.  */
 
 static void
-free_one_cached_comp_unit (struct dwarf2_per_cu_data *target_per_cu)
+free_one_cached_comp_unit (dwarf2_per_cu_data *target_per_cu,
+			   dwarf2_per_objfile *dwarf2_per_objfile)
 {
   struct dwarf2_per_cu_data *per_cu, **last_chain;
-  struct dwarf2_per_objfile *dwarf2_per_objfile
-    = target_per_cu->dwarf2_per_objfile;
 
   per_cu = dwarf2_per_objfile->per_bfd->read_in_chain;
   last_chain = &dwarf2_per_objfile->per_bfd->read_in_chain;

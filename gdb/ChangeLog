@@ -1,5 +1,21 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.h (struct dwarf2_queue_item): Add
+	dwarf2_per_objfile parameter, assign new parameter.
+	<per_objfile>: New field.
+	* dwarf2/read.c (free_one_cached_comp_unit): Add
+	dwarf2_per_objfile parameter.
+	(queue_comp_unit): Likewise.
+	(dw2_do_instantiate_symtab): Update.
+	(process_psymtab_comp_unit): Update.
+	(maybe_queue_comp_unit): Add dwarf2_per_objfile parameter.
+	(process_imported_unit_die): Update.
+	(queue_and_load_dwo_tu): Update.
+	(follow_die_offset): Update.
+	(follow_die_sig_1): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.h (struct dwarf2_per_cu_data) <objfile>: Remove.
 	* dwarf2/read.c (dwarf2_compute_name): Pass per_objfile down.
 	(read_call_site_scope): Assign per_objfile.
