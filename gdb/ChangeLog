@@ -1,3 +1,19 @@
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.c (class cutu_reader) <cutu_reader>: Replace
+	`int use_existing_cu` parameter with `dwarf2_cu *existing_cu`.
+	(init_tu_and_read_dwo_dies): Likewise.
+	(cutu_reader::init_tu_and_read_dwo_dies): Likewise.
+	(cutu_reader::cutu_reader): Likewise.
+	(load_partial_comp_unit): Likewise.
+	(process_psymtab_comp_unit): Update.
+	(build_type_psymtabs_1): Update.
+	(process_skeletonless_type_unit): Update.
+	(load_full_comp_unit): Update.
+	(find_partial_die): Update.
+	(dwarf2_read_addr_index): Update.
+	(read_signatured_type): Update.
+
 2020-05-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2/read.h (struct dwarf2_per_cu_data) <m_header,
