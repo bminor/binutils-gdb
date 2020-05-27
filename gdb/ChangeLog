@@ -1,5 +1,11 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/loc.c (allocate_piece_closure): Add dwarf2_per_objfile
+	parameter.
+	(dwarf2_evaluate_loc_desc_full): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.h (dwarf2_read_addr_index): Add dwarf2_per_objfile
 	parameter.
 	* dwarf2/read.c (dwarf2_read_addr_index): Likewise.
