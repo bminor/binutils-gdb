@@ -1,3 +1,12 @@
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/read.h (struct dwarf2_per_bfd) <die_type_hash>: Move to
+	struct dwarf2_per_objfile.
+	(struct dwarf2_per_objfile) <die_type_hash>: Move from struct
+	dwarf2_per_bfd.
+	* dwarf2/read.c (set_die_type): Update.
+	(get_die_type_at_offset): Update.
+
 2020-05-27  Tom Tromey  <tom@tromey.com>
 	    Simon Marchi  <simon.marchi@efficios.com>
 
