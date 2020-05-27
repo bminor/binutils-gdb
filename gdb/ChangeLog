@@ -1,5 +1,12 @@
 2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/read.c (process_full_comp_unit): Add dwarf2_per_objfile
+	parameter.
+	(process_full_type_unit): Likewise.
+	(process_queue): Update.
+
+2020-05-27  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/read.c (recursively_compute_inclusions): Add
 	dwarf2_per_objfile parameter.
 	(compute_compunit_symtab_includes): Likewise.
