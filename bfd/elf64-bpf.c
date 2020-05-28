@@ -64,7 +64,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
 	 MINUS_ONE,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
-  /* 32-immediate in LDDW instruction.  */
+  /* 32-immediate in many instructions. Note: handled manually.  */
   HOWTO (R_BPF_INSN_32,		/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -457,6 +457,31 @@ bpf_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
                      contents + rel->r_offset
                      + (howto->bitsize == 16 ? 2 : 4));
 
+            r = bfd_reloc_ok;
+            break;
+          }
+        case R_BPF_INSN_32:
+          {
+            /*  Write relocated value */
+            bfd_put (howto->bitsize, input_bfd, relocation,
+                     contents + rel->r_offset + 4);
+
+            r = bfd_reloc_ok;
+            break;
+          }
+        case R_BPF_INSN_64:
+          {
+            /*
+                LDDW instructions are 128 bits long, with a 64-bit immediate.
+                The lower 32 bits of the immediate are in the same position
+                as the imm32 field of other instructions.
+                The upper 32 bits of the immediate are stored at the end of
+                the instruction.
+             */
+            bfd_put (32, input_bfd, (relocation & 0xFFFFFFFF),
+                     contents + rel->r_offset + 4);
+            bfd_put (32, input_bfd, (relocation >> 32),
+                     contents + rel->r_offset + 12);
             r = bfd_reloc_ok;
             break;
           }
