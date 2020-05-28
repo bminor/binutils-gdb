@@ -1,3 +1,16 @@
+2020-05-28  Stephen Casner  <casner@acm.org>
+
+	Fix unexpected failures in gas testsuite for pdp11-aout target.
+	These are caused by the PDP11's mix of little-endian octets in
+	shorts but shorts in big endian order for long or quad.
+
+	* config/tc-pdp11.c (md_number_to_chars): Implement .quad
+	* testsuite/gas/all/gas.exp: Select alternate test scripts for
+	pdp11, skip octa test completely.
+	* testsuite/gas/all/eqv-dot-pdp11.s: Identical to eqv-dot.s
+	* testsuite/gas/all/eqv-dot-pdp11.d: Match different octet order.
+	* testsuite/gas/all/cond-pdp11.l: Match different octet order.
+
 2020-05-28  Alex Coplan  <alex.coplan@arm.com>
 
 	* frags.c (frag_grow): Fix comment.

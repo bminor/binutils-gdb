@@ -91,7 +91,11 @@ switch -glob $target_triplet {
 
 gas_test "eqv-ok.s" "" "" ".eqv support"
 gas_test_error "eqv-bad.s" "" ".eqv for symbol already set"
-run_dump_test eqv-dot
+if { [istarget "pdp11-*-*"] } then {
+    run_dump_test eqv-dot-pdp11
+} else {
+    run_dump_test eqv-dot
+}
 
 if { ![istarget "bfin-*-*"] } then {
     gas_test "assign-ok.s" "" "" "== assignment support"
@@ -326,12 +330,17 @@ proc test_cond {} {
     global subdir
 
     set testname "conditional listings"
+    if { [istarget "pdp11-*-*"] } then {
+	set listing "cond-pdp11.l"
+    } else {
+	set listing "cond.l"
+    }
     gas_run cond.s "-alc" ">dump.out"
     if ![string match "" $comp_output] {
 	send_log "$comp_output\n"
 	fail $testname
     } else {
-	if { [regexp_diff dump.out $srcdir/$subdir/cond.l] } {
+	if { [regexp_diff dump.out $srcdir/$subdir/$listing] } {
 	    fail $testname
 	} else {
 	    pass $testname
@@ -392,7 +401,11 @@ if { ![istarget "powerpc*-*-*"] && ![istarget "rs6000*-*-*"] && ![istarget "s390
 }
 
 run_dump_test quad
-run_dump_test octa
+
+# poor little PDP-11 can't handle 16-byte values
+if { ![istarget "pdp11-*-*"] } {
+    run_dump_test octa
+}
 
 # .set works differently on some targets.
 switch -glob $target_triplet {
