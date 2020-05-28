@@ -1,3 +1,8 @@
+2020-05-28  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c	(dw2_symtab_iter_next, dw2_expand_marked_cus): Limit
+	PR gold/15646 workaround to symbol kind "type".
+
 2020-05-27  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2/read.c (load_partial_dies): Use add_partial_symbol.

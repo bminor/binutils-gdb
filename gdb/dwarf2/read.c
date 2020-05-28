@@ -3522,10 +3522,14 @@ dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
 	    }
 
 	  /* Work around gold/15646.  */
-	  if (!is_static && iter->global_seen)
-	    continue;
-	  if (!is_static)
-	    iter->global_seen = 1;
+	  if (!is_static
+	      && symbol_kind == GDB_INDEX_SYMBOL_KIND_TYPE)
+	    {
+	      if (iter->global_seen)
+		continue;
+
+	      iter->global_seen = 1;
+	    }
 	}
 
       /* Only check the symbol's kind if it has one.  */
@@ -4627,12 +4631,14 @@ dw2_expand_marked_cus
 	 && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
 
       /* Work around gold/15646.  */
-      if (attrs_valid)
+      if (attrs_valid
+	  && !is_static
+	  && symbol_kind == GDB_INDEX_SYMBOL_KIND_TYPE)
 	{
-	  if (!is_static && global_seen)
+	  if (global_seen)
 	    continue;
-	  if (!is_static)
-	    global_seen = true;
+
+	  global_seen = true;
 	}
 
       /* Only check the symbol's kind if it has one.  */
