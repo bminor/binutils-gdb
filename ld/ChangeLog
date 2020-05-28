@@ -1,3 +1,13 @@
+2020-05-28  Nick Clifton  <nickc@redhat.com>
+
+	* lexsup.c (parse_args): Generate an error if a name is not
+	provided to the -Map option.
+	(ld_options): Mention that the -Map option supports a directory
+	name as an argument.
+	* NEWS: Remove mention of support for an empty string as an
+	argument to -Map.
+	* ld.texi: Likewise.
+
 2020-05-27  Hans-Peter Nilsson  <hp@axis.com>
 
 	PR ld/22909

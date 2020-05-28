@@ -1,9 +1,8 @@
 -*- text -*-
 
 * The -Map=<filename> command line option has been extended so that if
-  <filename> is omitted then a file called <output-filename>.map will be
-  created.  Plus if <filename> is a directory then
-  <filename>/<output-filename>.map will be created.
+  <filename> is a directory then <filename>/<output-filename>.map will be
+  created.
 
 * Add a command-line option for ELF linker, --warn-textrel, to warn that
   DT_TEXTREL is set in a position-independent executable or shared object.

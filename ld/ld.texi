@@ -1760,12 +1760,10 @@ Print a summary of all target-specific options on the standard output and exit.
 @kindex -Map=@var{mapfile}
 @item -Map=@var{mapfile}
 Print a link map to the file @var{mapfile}.  See the description of the
-@option{-M} option, above.  Specifying the empty string as @var{mapfile}
-(that is, @code{-Map=}) causes the link map to be written to a file
-named after the @var{output} file, with @code{.map} appended.
-Specifying a directory as @var{mapfile} causes the link map to be
-written into a file inside the directory.  The name of the file is
-again based upon the @var{output} filename with @code{.map} appended.
+@option{-M} option, above.  Specifying a directory as @var{mapfile}
+causes the linker map to be written into a file inside the directory.
+The name of the file is based upon the @var{output} filename with
+@code{.map} appended.
 
 @cindex memory usage
 @kindex --no-keep-memory

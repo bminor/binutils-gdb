@@ -359,7 +359,7 @@ static const struct ld_option ld_options[] =
   { {"init", required_argument, NULL, OPTION_INIT},
     '\0', N_("SYMBOL"), N_("Call SYMBOL at load-time"), ONE_DASH },
   { {"Map", required_argument, NULL, OPTION_MAP},
-    '\0', N_("[FILE]"), N_("Write a map file (default: <outputname>.map)"), ONE_DASH },
+    '\0', N_("FILE/DIR"), N_("Write a linker map to FILE or DIR/<outputname>.map"), ONE_DASH },
   { {"no-define-common", no_argument, NULL, OPTION_NO_DEFINE_COMMON},
     '\0', NULL, N_("Do not define Common storage"), TWO_DASHES },
   { {"no-demangle", no_argument, NULL, OPTION_NO_DEMANGLE },
@@ -1598,29 +1598,33 @@ parse_args (unsigned argc, char **argv)
   /* Run a couple of checks on the map filename.  */
   if (config.map_filename)
     {
-      /* If name has been provided then use the
-	 output filename with a .map extension.  */
       if (config.map_filename[0] == 0)
 	{
-	  /* FIXME: This is a memory leak as the string is never freed.  */
-	  if (asprintf (&config.map_filename, "%s.map", output_filename) < 0)
-	    einfo (_("%F%P: %s: can not create name of map file: %E\n"));
+	  einfo (_("%P: no file/directory name provided for map output; ignored\n"));
+	  config.map_filename = NULL;
 	}
       else
 	{
 	  struct stat s;
 
 	  /* If the map filename is actually a directory then create
-	     a file inside it, again based upon the output filename.  */
+	     a file inside it, based upon the output filename.  */
 	  if (stat (config.map_filename, &s) >= 0
 	      && S_ISDIR (s.st_mode))
 	    {
 	      char * new_name;
 
-	      /* FIXME: Another memory leak.  */
+	      /* FIXME: This is a (trivial) memory leak.  */
 	      if (asprintf (&new_name, "%s/%s.map",
 			    config.map_filename, output_filename) < 0)
-		einfo (_("%F%P: %s: can not create name of map file: %E\n"));
+		{
+		  /* If this alloc fails then something is probably very
+		     wrong.  Better to halt now rather than continue on
+		     into more problems.  */
+		  einfo (_("%P%F: cannot create name for linker map file: %E\n"));
+		  new_name = NULL;
+		}
+
 	      config.map_filename = new_name;
 	    }
 	}
