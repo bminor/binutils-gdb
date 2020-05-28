@@ -1,7 +1,9 @@
 2020-05-28  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* configure.tgt (ac_default_ld_textrel_check): Set to if unset
-	for Linux/x86 targets.
+	* NEWS: Mention --enable-textrel-check=yes is default for
+	Linux/x86 targets.
+	* configure.tgt (ac_default_ld_textrel_check): Set to yes if
+	unset for Linux/x86 targets.
 
 2020-05-28  H.J. Lu  <hongjiu.lu@intel.com>
 
