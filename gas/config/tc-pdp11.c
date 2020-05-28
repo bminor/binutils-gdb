@@ -358,8 +358,17 @@ parse_reg (char *str, struct pdp11_code *operand)
       str += 2;
     }
   else
-    operand->error = _("Bad register name");
+    {
+      operand->error = _("Bad register name");
+      return str;
+    }
 
+  if (ISALNUM (*str) || *str == '_' || *str == '.')
+    {
+      operand->error = _("Bad register name");
+      str -= 2;
+    }
+  
   return str;
 }
 

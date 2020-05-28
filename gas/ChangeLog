@@ -1,3 +1,12 @@
+2020-05-27  Stephen Casner  <casner@acm.org>
+
+	PR gas/26001
+	* config/tc-pdp11.c (parse_reg): Distinguish register names from
+	symbols that begin with a register name.
+	* testsuite/gas/pdp11/pdp11.exp: Add test of such symbols.
+	* testsuite/gas/pdp11/pr26001.s: Likewise.
+	* testsuite/gas/pdp11/pr26001.d: Likewise.
+
 2020-05-27  Simon Cook  <simon.cook@embecosm.com>
 
         * config/tc-riscv.c (riscv_init_csr_hash): NULL initilize next
