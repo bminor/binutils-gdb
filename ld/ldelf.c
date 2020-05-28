@@ -1038,6 +1038,17 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 
   get_elf_backend_data (link_info.output_bfd)->setup_gnu_properties (&link_info);
 
+  /* Do not allow executable files to be used as inputs to the link.  */
+  for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
+    {
+      if (elf_tdata (abfd) != NULL
+	  && elf_tdata (abfd)->elf_header != NULL
+	  /* FIXME: Maybe check for other non-supportable types as well ?  */
+	  && elf_tdata (abfd)->elf_header->e_type == ET_EXEC)
+	einfo (_("%F%P: cannot use executable file '%pB' as input to a link\n"),
+	       abfd);
+    }
+
   if (bfd_link_relocatable (&link_info))
     {
       if (link_info.execstack == !link_info.noexecstack)
@@ -1054,7 +1065,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 	}
       return;
     }
-
+  
   if (!link_info.traditional_format)
     {
       bfd *elfbfd = NULL;
