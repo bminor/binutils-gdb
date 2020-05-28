@@ -1,3 +1,9 @@
+2020-05-28  Alan Modra  <amodra@gmail.com>
+
+	* ns32k-dis.c (print_insn_arg): Handle d value of 'f' for
+	immediates.
+	(print_insn_ns32k): Revert last change.
+
 2020-05-28  Nick Clifton  <nickc@redhat.com>
 
 	* ns32k-dis.c (print_insn_ns32k): Change the arg_bufs array to
