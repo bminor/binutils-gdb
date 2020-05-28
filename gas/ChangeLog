@@ -1,3 +1,7 @@
+2020-05-28  Alex Coplan  <alex.coplan@arm.com>
+
+	* frags.c (frag_grow): Fix comment.
+
 2020-05-27  Stephen Casner  <casner@acm.org>
 
 	PR gas/26001
