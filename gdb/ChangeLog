@@ -1,3 +1,13 @@
+2020-05-28  Kevin Buettner  <kevinb@redhat.com>
+	    Keith Seitz  <keiths@redhat.com>
+
+	* python/python.c (do_start_initialization): Call PyEval_SaveThread
+	instead of PyEval_ReleaseLock.
+	(class gdbpy_gil): Move to earlier in file.
+	(finalize_python): Set gdb_python_initialized.
+	(gdbpy_check_quit_flag): Acquire GIL via gdbpy_gil.  Return early
+	when not initialized.
+
 2020-05-28  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2/loc.c (class dwarf_evaluate_loc_desc)
