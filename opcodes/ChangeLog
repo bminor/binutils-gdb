@@ -1,5 +1,10 @@
 2020-05-28  Alan Modra  <amodra@gmail.com>
 
+	* nios2-dis.c (nios2_print_insn_arg): Avoid shift left of negative
+	values.
+
+2020-05-28  Alan Modra  <amodra@gmail.com>
+
 	* ns32k-dis.c (print_insn_arg): Handle d value of 'f' for
 	immediates.
 	(print_insn_ns32k): Revert last change.
