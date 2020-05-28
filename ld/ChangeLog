@@ -1,3 +1,9 @@
+2020-05-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 26047
+	* ldelf.c (ldelf_after_open): Fail if attempting to link one
+	executable into another.
+
 2020-05-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention --enable-textrel-check=yes is default for

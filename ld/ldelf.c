@@ -1065,6 +1065,13 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 	{
 	  int type = 0;
 
+	  if (bfd_link_executable (& link_info)
+	      && elf_tdata (abfd)->elf_header->e_type == ET_EXEC)
+	    {
+	      einfo (_("%F%P: cannot use executable file '%pB' as input to a link\n"),
+		     abfd);
+	    }
+
 	  if (bfd_input_just_syms (abfd))
 	    continue;
 
