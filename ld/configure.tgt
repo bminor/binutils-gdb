@@ -1116,11 +1116,14 @@ frv-*-* | hppa*-*-* | ia64-*-* | mips*-*-*)
   ;;
 esac
 
-# Enable -z separate-code by default for Linux/x86.
+# Enable -z separate-code and --warn-textrel by default for Linux/x86.
 case "${target}" in
 i[3-7]86-*-linux-* | x86_64-*-linux-*)
   if test ${ac_default_ld_z_separate_code} = unset; then
     ac_default_ld_z_separate_code=1
+  fi
+  if test ${ac_default_ld_textrel_check} = unset; then
+    ac_default_ld_textrel_check=yes
   fi
   ;;
 esac
