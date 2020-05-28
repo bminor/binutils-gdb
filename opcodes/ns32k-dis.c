@@ -738,7 +738,10 @@ print_insn_ns32k (bfd_vma memaddr, disassemble_info *info)
   unsigned short first_word;
   int ioffset;		/* Bits into instruction.  */
   int aoffset;		/* Bits into arguments.  */
-  char arg_bufs[MAX_ARGS+1][ARG_LEN];
+  /* The arg_bufs array is made static in order to avoid a potential
+     use of an uninitialised value if we are asekd to disassemble a
+     corrupt instruction.  */
+  static char arg_bufs[MAX_ARGS+1][ARG_LEN];
   int argnum;
   int maxarg;
   struct private priv;
