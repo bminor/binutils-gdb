@@ -1,3 +1,33 @@
+2020-05-28  Jose E. Marchesi  <jose.marchesi@oracle.com>
+	    David Faust <david.faust@oracle.com>
+
+	* bpf.cpu (define-alu-insn-un): Add definitions of semantics.
+	(define-alu-insn-mov): Likewise.
+	(daib): Likewise.
+	(define-alu-instructions): Likewise.
+	(define-endian-insn): Likewise.
+	(define-lddw): Likewise.
+	(dlabs): Likewise.
+	(dlind): Likewise.
+	(dxli): Likewise.
+	(dxsi): Likewise.
+	(dsti): Likewise.
+	(define-ldstx-insns): Likewise.
+	(define-st-insns): Likewise.
+	(define-cond-jump-insn): Likewise.
+	(dcji): Likewise.
+	(define-condjump-insns): Likewise.
+	(define-call-insn): Likewise.
+	(ja): Likewise.
+	("exit"): Likewise.
+	(define-atomic-insns): Likewise.
+	(sem-exchange-and-add): New macro.
+	* bpf.cpu ("brkpt"): New instruction.
+	(bpfbf): Set word-bitsize to 32 and insn-endian big.
+	(h-gpr): Prefer r0 to `a' and r6 to `ctx'.
+	(h-pc): Expand definition.
+	* bpf.opc (bpf_print_insn): Set endian_code to BIG.
+
 2020-05-21  Alan Modra  <amodra@gmail.com>
 
 	* mep.opc (mep_cgen_expand_macros_and_parse_operand): Replace

@@ -144,8 +144,8 @@ static CGEN_KEYWORD_ENTRY bpf_cgen_opval_h_gpr_entries[] =
   { "%r8", 8, {0, {{{0, 0}}}}, 0, 0 },
   { "%r9", 9, {0, {{{0, 0}}}}, 0, 0 },
   { "%fp", 10, {0, {{{0, 0}}}}, 0, 0 },
-  { "%a", 0, {0, {{{0, 0}}}}, 0, 0 },
-  { "%ctx", 6, {0, {{{0, 0}}}}, 0, 0 },
+  { "%r0", 0, {0, {{{0, 0}}}}, 0, 0 },
+  { "%r6", 6, {0, {{{0, 0}}}}, 0, 0 },
   { "%r10", 10, {0, {{{0, 0}}}}, 0, 0 }
 };
 
@@ -169,7 +169,7 @@ const CGEN_HW_ENTRY bpf_cgen_hw_table[] =
   { "h-addr", HW_H_ADDR, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } } },
   { "h-iaddr", HW_H_IADDR, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } } },
   { "h-gpr", HW_H_GPR, CGEN_ASM_KEYWORD, (PTR) & bpf_cgen_opval_h_gpr, { 0, { { { (1<<MACH_BPF), 0 } }, { { 1, "\xc0" } } } } },
-  { "h-pc", HW_H_PC, CGEN_ASM_NONE, 0, { 0|A(PROFILE)|A(PC), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } } },
+  { "h-pc", HW_H_PC, CGEN_ASM_NONE, 0, { 0|A(PROFILE)|A(PC), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } } },
   { "h-sint64", HW_H_SINT64, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } } },
   { 0, 0, CGEN_ASM_NONE, 0, { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } } }
 };
@@ -494,26 +494,6 @@ static const CGEN_IBASE bpf_cgen_insn_table[MAX_INSNS] =
     BPF_INSN_XOR32RLE, "xor32rle", "xor32", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
-/* mov $dstle,$imm32 */
-  {
-    BPF_INSN_MOVILE, "movile", "mov", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
-  },
-/* mov $dstle,$srcle */
-  {
-    BPF_INSN_MOVRLE, "movrle", "mov", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
-  },
-/* mov32 $dstle,$imm32 */
-  {
-    BPF_INSN_MOV32ILE, "mov32ile", "mov32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
-  },
-/* mov32 $dstle,$srcle */
-  {
-    BPF_INSN_MOV32RLE, "mov32rle", "mov32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
-  },
 /* arsh $dstle,$imm32 */
   {
     BPF_INSN_ARSHILE, "arshile", "arsh", 64,
@@ -542,6 +522,26 @@ static const CGEN_IBASE bpf_cgen_insn_table[MAX_INSNS] =
 /* neg32 $dstle */
   {
     BPF_INSN_NEG32LE, "neg32le", "neg32", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+  },
+/* mov $dstle,$imm32 */
+  {
+    BPF_INSN_MOVILE, "movile", "mov", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+  },
+/* mov $dstle,$srcle */
+  {
+    BPF_INSN_MOVRLE, "movrle", "mov", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+  },
+/* mov32 $dstle,$imm32 */
+  {
+    BPF_INSN_MOV32ILE, "mov32ile", "mov32", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+  },
+/* mov32 $dstle,$srcle */
+  {
+    BPF_INSN_MOV32RLE, "mov32rle", "mov32", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* add $dstbe,$imm32 */
@@ -744,26 +744,6 @@ static const CGEN_IBASE bpf_cgen_insn_table[MAX_INSNS] =
     BPF_INSN_XOR32RBE, "xor32rbe", "xor32", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
-/* mov $dstbe,$imm32 */
-  {
-    BPF_INSN_MOVIBE, "movibe", "mov", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
-  },
-/* mov $dstbe,$srcbe */
-  {
-    BPF_INSN_MOVRBE, "movrbe", "mov", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
-  },
-/* mov32 $dstbe,$imm32 */
-  {
-    BPF_INSN_MOV32IBE, "mov32ibe", "mov32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
-  },
-/* mov32 $dstbe,$srcbe */
-  {
-    BPF_INSN_MOV32RBE, "mov32rbe", "mov32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
-  },
 /* arsh $dstbe,$imm32 */
   {
     BPF_INSN_ARSHIBE, "arshibe", "arsh", 64,
@@ -792,6 +772,26 @@ static const CGEN_IBASE bpf_cgen_insn_table[MAX_INSNS] =
 /* neg32 $dstbe */
   {
     BPF_INSN_NEG32BE, "neg32be", "neg32", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+  },
+/* mov $dstbe,$imm32 */
+  {
+    BPF_INSN_MOVIBE, "movibe", "mov", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+  },
+/* mov $dstbe,$srcbe */
+  {
+    BPF_INSN_MOVRBE, "movrbe", "mov", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+  },
+/* mov32 $dstbe,$imm32 */
+  {
+    BPF_INSN_MOV32IBE, "mov32ibe", "mov32", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+  },
+/* mov32 $dstbe,$srcbe */
+  {
+    BPF_INSN_MOV32RBE, "mov32rbe", "mov32", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* endle $dstle,$endsize */
@@ -1007,452 +1007,457 @@ static const CGEN_IBASE bpf_cgen_insn_table[MAX_INSNS] =
 /* jeq $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JEQILE, "jeqile", "jeq", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jeq $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JEQRLE, "jeqrle", "jeq", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jeq32 $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JEQ32ILE, "jeq32ile", "jeq32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jeq32 $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JEQ32RLE, "jeq32rle", "jeq32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jgt $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JGTILE, "jgtile", "jgt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jgt $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JGTRLE, "jgtrle", "jgt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jgt32 $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JGT32ILE, "jgt32ile", "jgt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jgt32 $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JGT32RLE, "jgt32rle", "jgt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jge $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JGEILE, "jgeile", "jge", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jge $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JGERLE, "jgerle", "jge", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jge32 $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JGE32ILE, "jge32ile", "jge32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jge32 $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JGE32RLE, "jge32rle", "jge32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jlt $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JLTILE, "jltile", "jlt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jlt $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JLTRLE, "jltrle", "jlt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jlt32 $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JLT32ILE, "jlt32ile", "jlt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jlt32 $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JLT32RLE, "jlt32rle", "jlt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jle $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JLEILE, "jleile", "jle", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jle $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JLERLE, "jlerle", "jle", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jle32 $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JLE32ILE, "jle32ile", "jle32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jle32 $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JLE32RLE, "jle32rle", "jle32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jset $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JSETILE, "jsetile", "jset", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jset $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JSETRLE, "jsetrle", "jset", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jset32 $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JSET32ILE, "jset32ile", "jset32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jset32 $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JSET32RLE, "jset32rle", "jset32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jne $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JNEILE, "jneile", "jne", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jne $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JNERLE, "jnerle", "jne", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jne32 $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JNE32ILE, "jne32ile", "jne32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jne32 $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JNE32RLE, "jne32rle", "jne32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jsgt $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JSGTILE, "jsgtile", "jsgt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jsgt $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JSGTRLE, "jsgtrle", "jsgt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jsgt32 $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JSGT32ILE, "jsgt32ile", "jsgt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jsgt32 $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JSGT32RLE, "jsgt32rle", "jsgt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jsge $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JSGEILE, "jsgeile", "jsge", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jsge $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JSGERLE, "jsgerle", "jsge", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jsge32 $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JSGE32ILE, "jsge32ile", "jsge32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jsge32 $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JSGE32RLE, "jsge32rle", "jsge32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jslt $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JSLTILE, "jsltile", "jslt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jslt $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JSLTRLE, "jsltrle", "jslt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jslt32 $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JSLT32ILE, "jslt32ile", "jslt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jslt32 $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JSLT32RLE, "jslt32rle", "jslt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jsle $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JSLEILE, "jsleile", "jsle", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jsle $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JSLERLE, "jslerle", "jsle", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jsle32 $dstle,$imm32,$disp16 */
   {
     BPF_INSN_JSLE32ILE, "jsle32ile", "jsle32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jsle32 $dstle,$srcle,$disp16 */
   {
     BPF_INSN_JSLE32RLE, "jsle32rle", "jsle32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
   },
 /* jeq $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JEQIBE, "jeqibe", "jeq", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jeq $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JEQRBE, "jeqrbe", "jeq", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jeq32 $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JEQ32IBE, "jeq32ibe", "jeq32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jeq32 $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JEQ32RBE, "jeq32rbe", "jeq32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jgt $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JGTIBE, "jgtibe", "jgt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jgt $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JGTRBE, "jgtrbe", "jgt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jgt32 $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JGT32IBE, "jgt32ibe", "jgt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jgt32 $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JGT32RBE, "jgt32rbe", "jgt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jge $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JGEIBE, "jgeibe", "jge", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jge $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JGERBE, "jgerbe", "jge", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jge32 $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JGE32IBE, "jge32ibe", "jge32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jge32 $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JGE32RBE, "jge32rbe", "jge32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jlt $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JLTIBE, "jltibe", "jlt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jlt $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JLTRBE, "jltrbe", "jlt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jlt32 $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JLT32IBE, "jlt32ibe", "jlt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jlt32 $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JLT32RBE, "jlt32rbe", "jlt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jle $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JLEIBE, "jleibe", "jle", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jle $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JLERBE, "jlerbe", "jle", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jle32 $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JLE32IBE, "jle32ibe", "jle32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jle32 $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JLE32RBE, "jle32rbe", "jle32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jset $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JSETIBE, "jsetibe", "jset", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jset $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JSETRBE, "jsetrbe", "jset", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jset32 $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JSET32IBE, "jset32ibe", "jset32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jset32 $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JSET32RBE, "jset32rbe", "jset32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jne $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JNEIBE, "jneibe", "jne", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jne $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JNERBE, "jnerbe", "jne", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jne32 $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JNE32IBE, "jne32ibe", "jne32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jne32 $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JNE32RBE, "jne32rbe", "jne32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jsgt $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JSGTIBE, "jsgtibe", "jsgt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jsgt $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JSGTRBE, "jsgtrbe", "jsgt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jsgt32 $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JSGT32IBE, "jsgt32ibe", "jsgt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jsgt32 $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JSGT32RBE, "jsgt32rbe", "jsgt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jsge $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JSGEIBE, "jsgeibe", "jsge", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jsge $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JSGERBE, "jsgerbe", "jsge", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jsge32 $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JSGE32IBE, "jsge32ibe", "jsge32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jsge32 $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JSGE32RBE, "jsge32rbe", "jsge32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jslt $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JSLTIBE, "jsltibe", "jslt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jslt $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JSLTRBE, "jsltrbe", "jslt", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jslt32 $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JSLT32IBE, "jslt32ibe", "jslt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jslt32 $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JSLT32RBE, "jslt32rbe", "jslt32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jsle $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JSLEIBE, "jsleibe", "jsle", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jsle $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JSLERBE, "jslerbe", "jsle", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jsle32 $dstbe,$imm32,$disp16 */
   {
     BPF_INSN_JSLE32IBE, "jsle32ibe", "jsle32", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* jsle32 $dstbe,$srcbe,$disp16 */
   {
     BPF_INSN_JSLE32RBE, "jsle32rbe", "jsle32", 64,
+    { 0|A(COND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+  },
+/* call $disp32 */
+  {
+    BPF_INSN_CALLLE, "callle", "call", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x80" } } } }
+  },
+/* call $disp32 */
+  {
+    BPF_INSN_CALLBE, "callbe", "call", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
   },
 /* ja $disp16 */
   {
     BPF_INSN_JA, "ja", "ja", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } }
-  },
-/* call $disp32 */
-  {
-    BPF_INSN_CALL, "call", "call", 64,
-    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } }
+    { 0|A(UNCOND_CTI), { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } }
   },
 /* exit */
   {
@@ -1478,6 +1483,11 @@ static const CGEN_IBASE bpf_cgen_insn_table[MAX_INSNS] =
   {
     BPF_INSN_XADDWBE, "xaddwbe", "xaddw", 64,
     { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\x40" } } } }
+  },
+/* brkpt */
+  {
+    BPF_INSN_BRKPT, "brkpt", "brkpt", 64,
+    { 0, { { { (1<<MACH_BASE), 0 } }, { { 1, "\xc0" } } } }
   },
 };
 
@@ -1821,10 +1831,18 @@ bpf_cgen_cpu_close (CGEN_CPU_DESC cd)
 	  regfree (CGEN_INSN_RX (insns));
     }
 
-  free ((CGEN_INSN *) cd->macro_insn_table.init_entries);
-  free ((CGEN_INSN *) cd->insn_table.init_entries);
-  free ((CGEN_HW_ENTRY *) cd->hw_table.entries);
-  free ((CGEN_HW_ENTRY *) cd->operand_table.entries);
+  if (cd->macro_insn_table.init_entries)
+    free ((CGEN_INSN *) cd->macro_insn_table.init_entries);
+
+  if (cd->insn_table.init_entries)
+    free ((CGEN_INSN *) cd->insn_table.init_entries);
+
+  if (cd->hw_table.entries)
+    free ((CGEN_HW_ENTRY *) cd->hw_table.entries);
+
+  if (cd->operand_table.entries)
+    free ((CGEN_HW_ENTRY *) cd->operand_table.entries);
+
   free (cd);
 }
 

@@ -1,3 +1,11 @@
+2020-05-28  Jose E. Marchesi  <jose.marchesi@oracle.com>
+	    David Faust <david.faust@oracle.com>
+
+	* bpf-desc.c: Regenerate.
+	* bpf-opc.h: Likewise.
+	* bpf-opc.c: Likewise.
+	* bpf-dis.c: Likewise.
+
 2020-05-28  Alan Modra  <amodra@gmail.com>
 
 	* nios2-dis.c (nios2_print_insn_arg): Avoid shift left of negative
