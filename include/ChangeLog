@@ -1,3 +1,9 @@
+2020-05-28  Alan Modra  <amodra@gmail.com>
+
+	PR 26044
+	* opcode/tilepro.h (TILEPRO_NUM_PIPELINE_ENCODINGS): Move to
+	tilepro_pipeline enum.
+
 2020-05-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/22909
