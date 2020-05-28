@@ -1,5 +1,10 @@
 2020-05-28  Gary Benson <gbenson@redhat.com>
 
+	* gdb.base/sigaltstack.c (catcher): Add default case to switch
+	statement.
+
+2020-05-28  Gary Benson <gbenson@redhat.com>
+
 	* gdb.cp/classes.exp (prepare_for_testing): Add
 	additional_flags=-Wno-deprecated-register.
 	* gdb.cp/inherit.exp (prepare_for_testing): Likewise.

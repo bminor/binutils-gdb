@@ -68,6 +68,8 @@ catcher (int signal)
     case INNER:
       level = LEAF;
       return;
+    default:
+      abort ();
     }
 }
 
