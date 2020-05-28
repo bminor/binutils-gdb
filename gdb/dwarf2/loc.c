@@ -726,8 +726,6 @@ public:
     data_src = deref_size == -1 ? parameter->value : parameter->data_value;
     size = deref_size == -1 ? parameter->value_size : parameter->data_value_size;
 
-    gdb_assert (this->per_objfile == caller_per_objfile);
-
     /* DEREF_SIZE size is not verified here.  */
     if (data_src == NULL)
       throw_error (NO_ENTRY_VALUE_ERROR,
@@ -739,11 +737,13 @@ public:
 						      caller_per_cu);
     scoped_restore save_obj_addr = make_scoped_restore (&this->obj_address,
 							(CORE_ADDR) 0);
+    scoped_restore save_per_objfile = make_scoped_restore (&this->per_objfile,
+							   caller_per_objfile);
 
     scoped_restore save_arch = make_scoped_restore (&this->gdbarch);
     this->gdbarch = this->per_objfile->objfile->arch ();
     scoped_restore save_addr_size = make_scoped_restore (&this->addr_size);
-    this->addr_size = per_cu->addr_size ();
+    this->addr_size = this->per_cu->addr_size ();
 
     this->eval (data_src, size);
   }

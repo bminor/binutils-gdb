@@ -1,3 +1,9 @@
+2020-05-28  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/loc.c (class dwarf_evaluate_loc_desc)
+	<push_dwarf_reg_entry_value>: Remove assert.  Override
+	per_objfile with caller_per_objfile.
+
 2020-05-28  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf2/read.c	(dw2_symtab_iter_next, dw2_expand_marked_cus): Limit
