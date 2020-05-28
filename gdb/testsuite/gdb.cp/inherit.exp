@@ -26,7 +26,8 @@ load_lib "cp-support.exp"
 
 standard_testfile misc.cc
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 {debug c++ additional_flags=-Wno-deprecated-register}]} {
     return -1
 }
 

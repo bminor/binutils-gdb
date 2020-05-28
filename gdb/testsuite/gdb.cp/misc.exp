@@ -19,7 +19,8 @@ if { [skip_cplus_tests] } { continue }
 
 standard_testfile .cc
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 {debug c++ additional_flags=-Wno-deprecated-register}]} {
     return -1
 }
 

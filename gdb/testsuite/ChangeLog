@@ -1,5 +1,12 @@
 2020-05-28  Gary Benson <gbenson@redhat.com>
 
+	* gdb.cp/classes.exp (prepare_for_testing): Add
+	additional_flags=-Wno-deprecated-register.
+	* gdb.cp/inherit.exp (prepare_for_testing): Likewise.
+	* gdb.cp/misc.exp: Likewise.
+
+2020-05-28  Gary Benson <gbenson@redhat.com>
+
 	* gdb.linespec/cpls-ops.cc (dummy): New static global.
 	(test_op_new::operator new): Add return statement.
 	(test_op_new_array::operator new[]): Likewise.
