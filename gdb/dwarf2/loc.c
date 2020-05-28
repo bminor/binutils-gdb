@@ -731,6 +731,12 @@ public:
       throw_error (NO_ENTRY_VALUE_ERROR,
 		   _("Cannot resolve DW_AT_call_data_value"));
 
+    /* We are about to evaluate an expression in the context of the caller
+       of the current frame.  This evaluation context may be different from
+       the current (callee's) context), so temporarily set the caller's context.
+
+       It is possible for the caller to be from a different objfile from the
+       callee if the call is made through a function pointer.  */
     scoped_restore save_frame = make_scoped_restore (&this->frame,
 						     caller_frame);
     scoped_restore save_per_cu = make_scoped_restore (&this->per_cu,
