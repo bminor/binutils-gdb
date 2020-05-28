@@ -176,6 +176,15 @@ AC_ARG_ENABLE(relro,
   no)  ac_default_ld_z_relro=0 ;;
 esac])dnl
 
+# Decide if DT_TEXTREL check should be enabled in ELF linker.
+ac_default_ld_textrel_check=unset
+AC_ARG_ENABLE([textrel-check],
+	      AC_HELP_STRING([--enable-textrel-check=@<:@yes|no|warning|error@:>@],
+			     [enable DT_TEXTREL check in ELF linker]),
+[case "${enableval}" in
+  yes|no|warning|error) ac_default_ld_textrel_check=${enableval} ;;
+esac])
+
 # Decide if -z separate-code should be enabled in ELF linker by default.
 ac_default_ld_z_separate_code=unset
 AC_ARG_ENABLE(separate-code,
@@ -446,6 +455,26 @@ fi
 AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_RELRO,
   $ac_default_ld_z_relro,
   [Define to 1 if you want to enable -z relro in ELF linker by default.])
+
+ac_default_ld_textrel_check_warning=0
+case "${ac_default_ld_textrel_check}" in
+  unset|no)
+    ac_default_ld_textrel_check=textrel_check_none
+    ;;
+  yes|warning)
+    ac_default_ld_textrel_check=textrel_check_warning
+    ac_default_ld_textrel_check_warning=1
+    ;;
+  error)
+    ac_default_ld_textrel_check=textrel_check_error
+    ;;
+esac
+AC_DEFINE_UNQUOTED(DEFAULT_LD_TEXTREL_CHECK,
+  $ac_default_ld_textrel_check,
+  [The default method for DT_TEXTREL check in ELF linker.])
+AC_DEFINE_UNQUOTED(DEFAULT_LD_TEXTREL_CHECK_WARNING,
+  $ac_default_ld_textrel_check_warning,
+  [Define to 1 if DT_TEXTREL check is warning in ELF linker by default.])
 
 if test "${ac_default_ld_z_separate_code}" = unset; then
   ac_default_ld_z_separate_code=0

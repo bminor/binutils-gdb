@@ -286,6 +286,7 @@ main (int argc, char **argv)
   link_info.combreloc = TRUE;
   link_info.strip_discarded = TRUE;
   link_info.prohibit_multiple_definition_absolute = FALSE;
+  link_info.textrel_check = DEFAULT_LD_TEXTREL_CHECK;
   link_info.emit_hash = DEFAULT_EMIT_SYSV_HASH;
   link_info.emit_gnu_hash = DEFAULT_EMIT_GNU_HASH;
   link_info.callbacks = &link_callbacks;

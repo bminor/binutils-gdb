@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Add a configure option, --enable-textrel-check=[no|yes|warning|error],
+  to decide what ELF linker should do by default with DT_TEXTREL in an
+  executable or shared library.
+
 * The -Map=<filename> command line option has been extended so that if
   <filename> is a directory then <filename>/<output-filename>.map will be
   created.

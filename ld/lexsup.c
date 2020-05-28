@@ -517,7 +517,12 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Warn if start of section changes due to alignment"),
     TWO_DASHES },
   { {"warn-textrel", no_argument, NULL, OPTION_WARN_TEXTREL},
-    '\0', NULL, N_("Warn if outpout has DT_TEXTREL"),
+    '\0', NULL,
+#if DEFAULT_LD_TEXTREL_CHECK_WARNING
+    N_("Warn if outpout has DT_TEXTREL (default)"),
+#else
+    N_("Warn if outpout has DT_TEXTREL"),
+#endif
     TWO_DASHES },
   { {"warn-shared-textrel", no_argument, NULL, OPTION_WARN_TEXTREL},
     '\0', NULL, NULL, NO_HELP },

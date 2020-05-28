@@ -16,6 +16,12 @@
 /* Define if you want compressed debug sections by default. */
 #undef DEFAULT_FLAG_COMPRESS_DEBUG
 
+/* The default method for DT_TEXTREL check in ELF linker. */
+#undef DEFAULT_LD_TEXTREL_CHECK
+
+/* Define to 1 if DT_TEXTREL check is warning in ELF linker by default. */
+#undef DEFAULT_LD_TEXTREL_CHECK_WARNING
+
 /* Define to 1 if you want to enable -z relro in ELF linker by default. */
 #undef DEFAULT_LD_Z_RELRO
 

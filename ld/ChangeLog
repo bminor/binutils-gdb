@@ -1,3 +1,16 @@
+2020-05-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/20824
+	* NEWS: Mention --enable-textrel-check=[no|yes|warning|error].
+	* configure.ac: Add --enable-textrel-check=[no|yes|warning|error].
+	(DEFAULT_LD_TEXTREL_CHECK): New AC_DEFINE_UNQUOTED.
+	(DEFAULT_LD_TEXTREL_CHECK_WARNING): Likewise.
+	* ldmain.c (main): Initialize link_info.textrel_check to
+	DEFAULT_LD_TEXTREL_CHECK.
+	* lexsup.c (ld_options): Check DEFAULT_LD_TEXTREL_CHECK_WARNING.
+	* config.in: Regenerated.
+	* configure: Likewise.
+
 2020-05-28  Nick Clifton  <nickc@redhat.com>
 
 	* lexsup.c (parse_args): Generate an error if a name is not

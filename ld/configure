@@ -831,6 +831,7 @@ enable_got
 enable_compressed_debug_sections
 enable_new_dtags
 enable_relro
+enable_textrel_check
 enable_separate_code
 enable_default_hash_style
 enable_werror
@@ -1498,6 +1499,8 @@ Optional Features:
                           compress debug sections by default]
   --enable-new-dtags      set DT_RUNPATH instead of DT_RPATH by default]
   --enable-relro          enable -z relro in ELF linker by default
+  --enable-textrel-check=[yes|no|warning|error]
+                          enable DT_TEXTREL check in ELF linker
   --enable-separate-code  enable -z separate-code in ELF linker by default
   --enable-default-hash-style={sysv,gnu,both}
                           use this default hash style
@@ -12032,7 +12035,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12035 "configure"
+#line 12038 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12138,7 +12141,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12141 "configure"
+#line 12144 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15876,6 +15879,16 @@ if test "${enable_relro+set}" = set; then :
 esac
 fi
 
+# Decide if DT_TEXTREL check should be enabled in ELF linker.
+ac_default_ld_textrel_check=unset
+# Check whether --enable-textrel-check was given.
+if test "${enable_textrel_check+set}" = set; then :
+  enableval=$enable_textrel_check; case "${enableval}" in
+  yes|no|warning|error) ac_default_ld_textrel_check=${enableval} ;;
+esac
+fi
+
+
 # Decide if -z separate-code should be enabled in ELF linker by default.
 ac_default_ld_z_separate_code=unset
 # Check whether --enable-separate-code was given.
@@ -17615,6 +17628,30 @@ fi
 
 cat >>confdefs.h <<_ACEOF
 #define DEFAULT_LD_Z_RELRO $ac_default_ld_z_relro
+_ACEOF
+
+
+ac_default_ld_textrel_check_warning=0
+case "${ac_default_ld_textrel_check}" in
+  unset|no)
+    ac_default_ld_textrel_check=textrel_check_none
+    ;;
+  yes|warning)
+    ac_default_ld_textrel_check=textrel_check_warning
+    ac_default_ld_textrel_check_warning=1
+    ;;
+  error)
+    ac_default_ld_textrel_check=textrel_check_error
+    ;;
+esac
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_LD_TEXTREL_CHECK $ac_default_ld_textrel_check
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_LD_TEXTREL_CHECK_WARNING $ac_default_ld_textrel_check_warning
 _ACEOF
 
 
