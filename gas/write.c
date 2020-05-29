@@ -2936,7 +2936,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 
 	      case rs_org:
 		{
-		  addressT target = offset;
+		  offsetT target = offset;
 		  addressT after;
 
 		  if (symbolP)
@@ -2956,7 +2956,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 		  /* Growth may be negative, but variable part of frag
 		     cannot have fewer than 0 chars.  That is, we can't
 		     .org backwards.  */
-		  if (address + fragP->fr_fix > target)
+		  if ((offsetT) (address + fragP->fr_fix) > target)
 		    {
 		      growth = 0;
 

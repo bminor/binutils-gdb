@@ -1,3 +1,16 @@
+2020-06-10  Alex Coplan  <alex.coplan@arm.com>
+
+	Backport from master
+	2020-06-01  Alex Coplan  <alex.coplan@arm.com>
+	* write.c (relax_segment): Fix handling of negative offset when
+	relaxing an rs_org frag.
+	* testsuite/gas/aarch64/org-neg.d: New test.
+	* testsuite/gas/aarch64/org-neg.l: Error output for test.
+	* testsuite/gas/aarch64/org-neg.s: Input for test.
+	* testsuite/gas/arm/org-neg.d: New test.
+	* testsuite/gas/arm/org-neg.l: Error output for test.
+	* testsuite/gas/arm/org-neg.s: Input for test.
+
 2020-05-18  Alexander Fedotov <alfedotov@gmail.com>
 
 	PR 25992
