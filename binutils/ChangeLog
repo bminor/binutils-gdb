@@ -1,3 +1,7 @@
+2020-05-28  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* MAINTAINERS (Xtensa): Add myself as maintainer.
+
 2020-05-23  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/ar.exp (many_files): New test.
