@@ -1,3 +1,14 @@
+2020-06-01  Alex Coplan  <alex.coplan@arm.com>
+
+	* write.c (relax_segment): Fix handling of negative offset when
+	relaxing an rs_org frag.
+	* testsuite/gas/aarch64/org-neg.d: New test.
+	* testsuite/gas/aarch64/org-neg.l: Error output for test.
+	* testsuite/gas/aarch64/org-neg.s: Input for test.
+	* testsuite/gas/arm/org-neg.d: New test.
+	* testsuite/gas/arm/org-neg.l: Error output for test.
+	* testsuite/gas/arm/org-neg.s: Input for test.
+
 2020-05-28  Stephen Casner  <casner@acm.org>
 
 	Fix unexpected failures in gas testsuite for pdp11-aout target.
