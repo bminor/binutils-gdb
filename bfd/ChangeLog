@@ -1,3 +1,13 @@
+2020-06-05  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c (riscv_merge_attributes): Add new boolean
+	priv_may_conflict, in_priv_zero and out_priv_zero to decide
+	whether the object can be linked according to it's priv
+	attributes.  The object without any priv spec attributes can
+	be linked with others.  If the first input object doesn't contain
+	any priv attributes, then we need to copy the setting from the
+	next input one.  Also report more detailed error messages to user.
+
 2020-06-04  Stephen Casner  <casner@acm.org>
 
 	Extend pdp11-aout symbol table format to accommodate .stab

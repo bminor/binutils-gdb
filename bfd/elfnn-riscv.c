@@ -2987,6 +2987,9 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
   obj_attribute *in_attr;
   obj_attribute *out_attr;
   bfd_boolean result = TRUE;
+  bfd_boolean priv_may_conflict = FALSE;
+  bfd_boolean in_priv_zero = TRUE;
+  bfd_boolean out_priv_zero = TRUE;
   const char *sec_name = get_elf_backend_data (ibfd)->obj_attrs_section;
   unsigned int i;
 
@@ -3041,20 +3044,52 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      out_attr[Tag_RISCV_arch].s = merged_arch;
 	  }
 	break;
+
       case Tag_RISCV_priv_spec:
       case Tag_RISCV_priv_spec_minor:
       case Tag_RISCV_priv_spec_revision:
+	if (in_attr[i].i != 0)
+	  in_priv_zero = FALSE;
+	if (out_attr[i].i != 0)
+	  out_priv_zero = FALSE;
 	if (out_attr[i].i != in_attr[i].i)
+	  priv_may_conflict = TRUE;
+
+	/* We check the priv version conflict when parsing the
+	   revision version.  */
+	if (i != Tag_RISCV_priv_spec_revision)
+	  break;
+
+	/* Allow to link the object without the priv setting.  */
+	if (out_priv_zero)
+	  {
+	    out_attr[i].i = in_attr[i].i;
+	    out_attr[Tag_RISCV_priv_spec].i =
+		in_attr[Tag_RISCV_priv_spec].i;
+	    out_attr[Tag_RISCV_priv_spec_minor].i =
+		in_attr[Tag_RISCV_priv_spec_minor].i;
+	  }
+	else if (!in_priv_zero
+		 && priv_may_conflict)
 	  {
 	    _bfd_error_handler
-	      (_("error: %pB: conflicting priv spec version "
-		 "(major/minor/revision)."), ibfd);
+	      (_("error: %pB use privilege spec version %u.%u.%u but "
+		 "the output use version %u.%u.%u."),
+	       ibfd,
+	       in_attr[Tag_RISCV_priv_spec].i,
+	       in_attr[Tag_RISCV_priv_spec_minor].i,
+	       in_attr[i].i,
+	       out_attr[Tag_RISCV_priv_spec].i,
+	       out_attr[Tag_RISCV_priv_spec_minor].i,
+	       out_attr[i].i);
 	    result = FALSE;
 	  }
 	break;
+
       case Tag_RISCV_unaligned_access:
 	out_attr[i].i |= in_attr[i].i;
 	break;
+
       case Tag_RISCV_stack_align:
 	if (out_attr[i].i == 0)
 	  out_attr[i].i = in_attr[i].i;
@@ -3069,6 +3104,7 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	    result = FALSE;
 	  }
 	break;
+
       default:
 	result &= _bfd_elf_merge_unknown_attribute_low (ibfd, obfd, i);
       }

@@ -1,5 +1,20 @@
 2020-06-05  Nelson Chu  <nelson.chu@sifive.com>
 
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec.d: Rename to
+	attr-merge-priv-spec-01.d.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-c.s: Set spec to 1.11.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-d.s: Empty priv spec set.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-02.d: New testcase.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-03.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-02.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-03.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-04.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-05.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-06.d: Likewise.
+	* testsuite/ld-riscv-elf/ld-riscv-elf.exp: Updated.
+
+2020-06-05  Nelson Chu  <nelson.chu@sifive.com>
+
 	* testsuite/ld-riscv-elf/attr-merge-arch-01.d: The CSR isn't used,
 	so ignore the -mpriv-spec setting.
 	* testsuite/ld-riscv-elf/attr-merge-arch-02.d: Likewise.
