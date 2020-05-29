@@ -1,5 +1,11 @@
 2020-05-29  Gary Benson <gbenson@redhat.com>
 
+	* gdb.arch/i386-avx.exp (additional_flags): Also set when
+	building with clang.
+	* gdb.arch/i386-sse.exp (additional_flags): Likewise.
+
+2020-05-29  Gary Benson <gbenson@redhat.com>
+
 	* gdb.cp/koenig.exp (prepare_for_testing): Add
 	additional_flags=-Wno-unused-comparison.
 	* gdb.cp/operator.exp (prepare_for_testing): Likewise.
