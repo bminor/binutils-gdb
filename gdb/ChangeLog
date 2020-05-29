@@ -1,3 +1,13 @@
+2020-05-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/comp-unit.c, dwarf2/comp-unit.h, dwarf2/index-cache.c,
+	dwarf2/index-cache.h, dwarf2/index-write.c,
+	dwarf2/index-write.h, dwarf2/line-header.c,
+	dwarf2/line-header.h, dwarf2/macro.c, dwarf2/macro.h,
+	dwarf2/read.c, dwarf2/read.h: Rename struct dwarf2_per_objfile
+	variables and fields from `dwarf2_per_objfile` to just
+	`per_objfile` throughout.
+
 2020-05-28  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2/loc.c (class dwarf_evaluate_loc_desc)

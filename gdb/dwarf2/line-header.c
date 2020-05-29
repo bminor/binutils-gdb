@@ -154,9 +154,8 @@ read_checked_initial_length_and_offset (bfd *abfd, const gdb_byte *buf,
    format.  */
 
 static void
-read_formatted_entries (struct dwarf2_per_objfile *dwarf2_per_objfile,
-			bfd *abfd, const gdb_byte **bufp,
-			struct line_header *lh,
+read_formatted_entries (dwarf2_per_objfile *per_objfile, bfd *abfd,
+			const gdb_byte **bufp, struct line_header *lh,
 			const struct comp_unit_head *cu_header,
 			void (*callback) (struct line_header *lh,
 					  const char *name,
@@ -208,9 +207,7 @@ read_formatted_entries (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
 	    case DW_FORM_line_strp:
 	      string.emplace
-		(dwarf2_per_objfile->read_line_string (buf,
-						       cu_header,
-						       &bytes_read));
+		(per_objfile->read_line_string (buf, cu_header, &bytes_read));
 	      buf += bytes_read;
 	      break;
 
@@ -286,7 +283,7 @@ read_formatted_entries (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
 line_header_up
 dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
-			   struct dwarf2_per_objfile *dwarf2_per_objfile,
+			   dwarf2_per_objfile *per_objfile,
 			   struct dwarf2_section_info *section,
 			   const struct comp_unit_head *cu_header)
 {
@@ -393,7 +390,7 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
   if (lh->version >= 5)
     {
       /* Read directory table.  */
-      read_formatted_entries (dwarf2_per_objfile, abfd, &line_ptr, lh.get (),
+      read_formatted_entries (per_objfile, abfd, &line_ptr, lh.get (),
 			      cu_header,
 			      [] (struct line_header *header, const char *name,
 				  dir_index d_index, unsigned int mod_time,
@@ -403,7 +400,7 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
 	});
 
       /* Read file name table.  */
-      read_formatted_entries (dwarf2_per_objfile, abfd, &line_ptr, lh.get (),
+      read_formatted_entries (per_objfile, abfd, &line_ptr, lh.get (),
 			      cu_header,
 			      [] (struct line_header *header, const char *name,
 				  dir_index d_index, unsigned int mod_time,

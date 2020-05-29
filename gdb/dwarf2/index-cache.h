@@ -53,7 +53,7 @@ public:
   void disable ();
 
   /* Store an index for the specified object file in the cache.  */
-  void store (struct dwarf2_per_objfile *dwarf2_per_objfile);
+  void store (dwarf2_per_objfile *per_objfile);
 
   /* Look for an index file matching BUILD_ID.  If found, return the contents
      as an array_view and store the underlying resources (allocated memory,

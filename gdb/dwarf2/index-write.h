@@ -33,7 +33,7 @@
    same, but for the dwz file's index.  */
 
 extern void write_psymtabs_to_index
-  (struct dwarf2_per_objfile *dwarf2_per_objfile, const char *dir,
-   const char *basename, const char *dwz_basename, dw_index_kind index_kind);
+  (dwarf2_per_objfile *per_objfile, const char *dir, const char *basename,
+   const char *dwz_basename, dw_index_kind index_kind);
 
 #endif /* DWARF_INDEX_WRITE_H */

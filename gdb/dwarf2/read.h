@@ -651,7 +651,7 @@ struct type *dwarf2_get_die_type (cu_offset die_offset,
    may no longer exist.  */
 
 CORE_ADDR dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu,
-				  dwarf2_per_objfile *dwarf2_per_objfile,
+				  dwarf2_per_objfile *per_objfile,
 				  unsigned int addr_index);
 
 /* Return DWARF block referenced by DW_AT_location of DIE at SECT_OFF at PER_CU.

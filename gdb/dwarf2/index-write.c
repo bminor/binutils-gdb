@@ -661,7 +661,7 @@ recursively_write_psymbols (struct objfile *objfile,
 class debug_names
 {
 public:
-  debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile, bool is_dwarf64,
+  debug_names (dwarf2_per_objfile *per_objfile, bool is_dwarf64,
 	       bfd_endian dwarf5_byte_order)
     : m_dwarf5_byte_order (dwarf5_byte_order),
       m_dwarf32 (dwarf5_byte_order),
@@ -671,7 +671,7 @@ public:
 	       : static_cast<dwarf &> (m_dwarf32)),
       m_name_table_string_offs (m_dwarf.name_table_string_offs),
       m_name_table_entry_offs (m_dwarf.name_table_entry_offs),
-      m_debugstrlookup (dwarf2_per_objfile)
+      m_debugstrlookup (per_objfile)
   {}
 
   int dwarf5_offset_size () const
@@ -957,21 +957,21 @@ private:
 
     /* Object constructor to be called for current DWARF2_PER_OBJFILE.
        All .debug_str section strings are automatically stored.  */
-    debug_str_lookup (struct dwarf2_per_objfile *dwarf2_per_objfile)
-      : m_abfd (dwarf2_per_objfile->objfile->obfd),
-	m_dwarf2_per_objfile (dwarf2_per_objfile)
+    debug_str_lookup (dwarf2_per_objfile *per_objfile)
+      : m_abfd (per_objfile->objfile->obfd),
+	m_per_objfile (per_objfile)
     {
-      dwarf2_per_objfile->per_bfd->str.read (dwarf2_per_objfile->objfile);
-      if (dwarf2_per_objfile->per_bfd->str.buffer == NULL)
+      per_objfile->per_bfd->str.read (per_objfile->objfile);
+      if (per_objfile->per_bfd->str.buffer == NULL)
 	return;
-      for (const gdb_byte *data = dwarf2_per_objfile->per_bfd->str.buffer;
-	   data < (dwarf2_per_objfile->per_bfd->str.buffer
-		   + dwarf2_per_objfile->per_bfd->str.size);)
+      for (const gdb_byte *data = per_objfile->per_bfd->str.buffer;
+	   data < (per_objfile->per_bfd->str.buffer
+		   + per_objfile->per_bfd->str.size);)
 	{
 	  const char *const s = reinterpret_cast<const char *> (data);
 	  const auto insertpair
 	    = m_str_table.emplace (c_str_view (s),
-				   data - dwarf2_per_objfile->per_bfd->str.buffer);
+				   data - per_objfile->per_bfd->str.buffer);
 	  if (!insertpair.second)
 	    complaint (_("Duplicate string \"%s\" in "
 			 ".debug_str section [in module %s]"),
@@ -988,7 +988,7 @@ private:
       const auto it = m_str_table.find (c_str_view (s));
       if (it != m_str_table.end ())
 	return it->second;
-      const size_t offset = (m_dwarf2_per_objfile->per_bfd->str.size
+      const size_t offset = (m_per_objfile->per_bfd->str.size
 			     + m_str_add_buf.size ());
       m_str_table.emplace (c_str_view (s), offset);
       m_str_add_buf.append_cstr0 (s);
@@ -1004,7 +1004,7 @@ private:
   private:
     std::unordered_map<c_str_view, size_t, c_str_view_hasher> m_str_table;
     bfd *const m_abfd;
-    struct dwarf2_per_objfile *m_dwarf2_per_objfile;
+    dwarf2_per_objfile *m_per_objfile;
 
     /* Data to add at the end of .debug_str for new needed symbol names.  */
     data_buf m_str_add_buf;
@@ -1294,14 +1294,14 @@ private:
    .debug_names section.  */
 
 static bool
-check_dwarf64_offsets (struct dwarf2_per_objfile *dwarf2_per_objfile)
+check_dwarf64_offsets (dwarf2_per_objfile *per_objfile)
 {
-  for (dwarf2_per_cu_data *per_cu : dwarf2_per_objfile->per_bfd->all_comp_units)
+  for (dwarf2_per_cu_data *per_cu : per_objfile->per_bfd->all_comp_units)
     {
       if (to_underlying (per_cu->sect_off) >= (static_cast<uint64_t> (1) << 32))
 	return true;
     }
-  for (const signatured_type *sigtype : dwarf2_per_objfile->per_bfd->all_type_units)
+  for (const signatured_type *sigtype : per_objfile->per_bfd->all_type_units)
     {
       const dwarf2_per_cu_data &per_cu = sigtype->per_cu;
 
@@ -1318,10 +1318,10 @@ check_dwarf64_offsets (struct dwarf2_per_objfile *dwarf2_per_objfile)
    malloc/free.  */
 
 static size_t
-psyms_seen_size (struct dwarf2_per_objfile *dwarf2_per_objfile)
+psyms_seen_size (dwarf2_per_objfile *per_objfile)
 {
   size_t psyms_count = 0;
-  for (dwarf2_per_cu_data *per_cu : dwarf2_per_objfile->per_bfd->all_comp_units)
+  for (dwarf2_per_cu_data *per_cu : per_objfile->per_bfd->all_comp_units)
     {
       partial_symtab *psymtab = per_cu->v.psymtab;
 
@@ -1401,10 +1401,10 @@ write_gdbindex_1 (FILE *out_file,
    associated dwz file, DWZ_OUT_FILE must be NULL.  */
 
 static void
-write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file,
+write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
 		FILE *dwz_out_file)
 {
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  struct objfile *objfile = per_objfile->objfile;
   mapped_symtab symtab;
   data_buf objfile_cu_list;
   data_buf dwz_cu_list;
@@ -1414,18 +1414,17 @@ write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file,
      in the index file).  This will later be needed to write the address
      table.  */
   psym_index_map cu_index_htab;
-  cu_index_htab.reserve (dwarf2_per_objfile->per_bfd->all_comp_units.size ());
+  cu_index_htab.reserve (per_objfile->per_bfd->all_comp_units.size ());
 
   /* The CU list is already sorted, so we don't need to do additional
      work here.  Also, the debug_types entries do not appear in
      all_comp_units, but only in their own hash table.  */
 
   std::unordered_set<partial_symbol *> psyms_seen
-    (psyms_seen_size (dwarf2_per_objfile));
-  for (int i = 0; i < dwarf2_per_objfile->per_bfd->all_comp_units.size (); ++i)
+    (psyms_seen_size (per_objfile));
+  for (int i = 0; i < per_objfile->per_bfd->all_comp_units.size (); ++i)
     {
-      struct dwarf2_per_cu_data *per_cu
-	= dwarf2_per_objfile->per_bfd->all_comp_units[i];
+      dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->all_comp_units[i];
       partial_symtab *psymtab = per_cu->v.psymtab;
 
       if (psymtab != NULL)
@@ -1453,15 +1452,15 @@ write_gdbindex (struct dwarf2_per_objfile *dwarf2_per_objfile, FILE *out_file,
 
   /* Write out the .debug_type entries, if any.  */
   data_buf types_cu_list;
-  if (dwarf2_per_objfile->per_bfd->signatured_types)
+  if (per_objfile->per_bfd->signatured_types)
     {
       signatured_type_index_data sig_data (types_cu_list,
 					   psyms_seen);
 
       sig_data.objfile = objfile;
       sig_data.symtab = &symtab;
-      sig_data.cu_index = dwarf2_per_objfile->per_bfd->all_comp_units.size ();
-      htab_traverse_noresize (dwarf2_per_objfile->per_bfd->signatured_types.get (),
+      sig_data.cu_index = per_objfile->per_bfd->all_comp_units.size ();
+      htab_traverse_noresize (per_objfile->per_bfd->signatured_types.get (),
 			      write_one_signatured_type, &sig_data);
     }
 
@@ -1489,11 +1488,11 @@ static const gdb_byte dwarf5_gdb_augmentation[] = { 'G', 'D', 'B', 0 };
    many bytes were expected to be written into OUT_FILE.  */
 
 static void
-write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
+write_debug_names (dwarf2_per_objfile *per_objfile,
 		   FILE *out_file, FILE *out_file_str)
 {
-  const bool dwarf5_is_dwarf64 = check_dwarf64_offsets (dwarf2_per_objfile);
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  const bool dwarf5_is_dwarf64 = check_dwarf64_offsets (per_objfile);
+  struct objfile *objfile = per_objfile->objfile;
   const enum bfd_endian dwarf5_byte_order
     = gdbarch_byte_order (objfile->arch ());
 
@@ -1501,13 +1500,12 @@ write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
      work here.  Also, the debug_types entries do not appear in
      all_comp_units, but only in their own hash table.  */
   data_buf cu_list;
-  debug_names nametable (dwarf2_per_objfile, dwarf5_is_dwarf64,
-			 dwarf5_byte_order);
+  debug_names nametable (per_objfile, dwarf5_is_dwarf64, dwarf5_byte_order);
   std::unordered_set<partial_symbol *>
-    psyms_seen (psyms_seen_size (dwarf2_per_objfile));
-  for (int i = 0; i < dwarf2_per_objfile->per_bfd->all_comp_units.size (); ++i)
+    psyms_seen (psyms_seen_size (per_objfile));
+  for (int i = 0; i < per_objfile->per_bfd->all_comp_units.size (); ++i)
     {
-      const dwarf2_per_cu_data *per_cu = dwarf2_per_objfile->per_bfd->all_comp_units[i];
+      const dwarf2_per_cu_data *per_cu = per_objfile->per_bfd->all_comp_units[i];
       partial_symtab *psymtab = per_cu->v.psymtab;
 
       /* CU of a shared file from 'dwz -m' may be unused by this main
@@ -1525,7 +1523,7 @@ write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
   /* Write out the .debug_type entries, if any.  */
   data_buf types_cu_list;
-  if (dwarf2_per_objfile->per_bfd->signatured_types)
+  if (per_objfile->per_bfd->signatured_types)
     {
       debug_names::write_one_signatured_type_data sig_data (nametable,
 			signatured_type_index_data (types_cu_list, psyms_seen));
@@ -1534,7 +1532,7 @@ write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
       /* It is used only for gdb_index.  */
       sig_data.info.symtab = nullptr;
       sig_data.info.cu_index = 0;
-      htab_traverse_noresize (dwarf2_per_objfile->per_bfd->signatured_types.get (),
+      htab_traverse_noresize (per_objfile->per_bfd->signatured_types.get (),
 			      debug_names::write_one_signatured_type,
 			      &sig_data);
     }
@@ -1574,12 +1572,12 @@ write_debug_names (struct dwarf2_per_objfile *dwarf2_per_objfile,
 
   /* comp_unit_count - The number of CUs in the CU list.  */
   header.append_uint (4, dwarf5_byte_order,
-		      dwarf2_per_objfile->per_bfd->all_comp_units.size ());
+		      per_objfile->per_bfd->all_comp_units.size ());
 
   /* local_type_unit_count - The number of TUs in the local TU
      list.  */
   header.append_uint (4, dwarf5_byte_order,
-		      dwarf2_per_objfile->per_bfd->all_type_units.size ());
+		      per_objfile->per_bfd->all_type_units.size ());
 
   /* foreign_type_unit_count - The number of TUs in the foreign TU
      list.  */
@@ -1669,17 +1667,16 @@ struct index_wip_file
 /* See dwarf-index-write.h.  */
 
 void
-write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
-			 const char *dir, const char *basename,
-			 const char *dwz_basename,
+write_psymtabs_to_index (dwarf2_per_objfile *per_objfile, const char *dir,
+			 const char *basename, const char *dwz_basename,
 			 dw_index_kind index_kind)
 {
-  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  struct objfile *objfile = per_objfile->objfile;
 
-  if (dwarf2_per_objfile->per_bfd->using_index)
+  if (per_objfile->per_bfd->using_index)
     error (_("Cannot use an index to create the index"));
 
-  if (dwarf2_per_objfile->per_bfd->types.size () > 1)
+  if (per_objfile->per_bfd->types.size () > 1)
     error (_("Cannot make an index when the file has multiple .debug_types sections"));
 
   if (!objfile->partial_symtabs->psymtabs
@@ -1703,13 +1700,13 @@ write_psymtabs_to_index (struct dwarf2_per_objfile *dwarf2_per_objfile,
     {
       index_wip_file str_wip_file (dir, basename, DEBUG_STR_SUFFIX);
 
-      write_debug_names (dwarf2_per_objfile, objfile_index_wip.out_file.get (),
+      write_debug_names (per_objfile, objfile_index_wip.out_file.get (),
 			 str_wip_file.out_file.get ());
 
       str_wip_file.finalize ();
     }
   else
-    write_gdbindex (dwarf2_per_objfile, objfile_index_wip.out_file.get (),
+    write_gdbindex (per_objfile, objfile_index_wip.out_file.get (),
 		    (dwz_index_wip.has_value ()
 		     ? dwz_index_wip->out_file.get () : NULL));
 
@@ -1753,23 +1750,21 @@ save_gdb_index_command (const char *arg, int from_tty)
       if (stat (objfile_name (objfile), &st) < 0)
 	continue;
 
-      struct dwarf2_per_objfile *dwarf2_per_objfile
-	= get_dwarf2_per_objfile (objfile);
+      dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
-      if (dwarf2_per_objfile != NULL)
+      if (per_objfile != NULL)
 	{
 	  try
 	    {
 	      const char *basename = lbasename (objfile_name (objfile));
-	      const dwz_file *dwz
-		= dwarf2_get_dwz_file (dwarf2_per_objfile->per_bfd);
+	      const dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
 	      const char *dwz_basename = NULL;
 
 	      if (dwz != NULL)
 		dwz_basename = lbasename (dwz->filename ());
 
-	      write_psymtabs_to_index (dwarf2_per_objfile, arg, basename,
-				       dwz_basename, index_kind);
+	      write_psymtabs_to_index (per_objfile, arg, basename, dwz_basename,
+				       index_kind);
 	    }
 	  catch (const gdb_exception_error &except)
 	    {
