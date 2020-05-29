@@ -1,5 +1,12 @@
 2020-05-29  Gary Benson <gbenson@redhat.com>
 
+	* gdb.compile/compile-cplus.exp (additional_flags): Also
+	set when building with clang.
+	(additional_flags, srcfilesoptions): Pass -Wno-deprecated
+	when building with clang.
+
+2020-05-29  Gary Benson <gbenson@redhat.com>
+
 	* gdb.arch/i386-avx.exp (additional_flags): Also set when
 	building with clang.
 	* gdb.arch/i386-sse.exp (additional_flags): Likewise.
