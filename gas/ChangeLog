@@ -1,3 +1,30 @@
+2020-06-05  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (explicit_csr): New static boolean.
+	Used to indicate CSR are explictly used.
+	(riscv_ip): Set explicit_csr to TRUE if any CSR is used.
+	(riscv_write_out_attrs): If we already have set elf priv
+	attributes, then generate them.  Otherwise, don't generate
+	them when no CSR are used.
+	* testsuite/gas/riscv/attribute-01.d: Remove the priv attributes.
+	* testsuite/gas/riscv/attribute-02.d: Likewise.
+	* testsuite/gas/riscv/attribute-03.d: Likewise.
+	* testsuite/gas/riscv/attribute-04.d: Likewise.
+	* testsuite/gas/riscv/attribute-05.d: Likewise.
+	* testsuite/gas/riscv/attribute-06.d: Likewise.
+	* testsuite/gas/riscv/attribute-07.d: Likewise.
+	* testsuite/gas/riscv/attribute-08.d: Likewise.
+	* testsuite/gas/riscv/attribute-09.d: Likewise.
+	* testsuite/gas/riscv/attribute-10.d: Likewise.
+	* testsuite/gas/riscv/attribute-unknown.d: Likewise.
+	* testsuite/gas/riscv/attribute-11.s: New testcase.
+	* testsuite/gas/riscv/attribute-11.d: New testcase.  The CSR is
+	used, so we should output the ELF priv attributes.
+	* testsuite/gas/riscv/attribute-12.d: New testcase.  The CSR is
+	used, so output the priv attributes according to the -mpriv-spec.
+	* testsuite/gas/riscv/attribute-13.d: New testcase.  The CSR isn't
+	used, so ignore the -mpriv-spec setting.
+
 2020-06-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-ip2k. (ip2k_apply_fix): Pass endianness to

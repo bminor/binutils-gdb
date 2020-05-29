@@ -1,3 +1,17 @@
+2020-06-05  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/ld-riscv-elf/attr-merge-arch-01.d: The CSR isn't used,
+	so ignore the -mpriv-spec setting.
+	* testsuite/ld-riscv-elf/attr-merge-arch-02.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-03.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-stack-align.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-01.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-02.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-03.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-04.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-strict-align-05.d: Likewise.
+	* testsuite/ld-riscv-elf/call-relax.d: Add -mno-arch-attr.
+
 2020-06-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26080

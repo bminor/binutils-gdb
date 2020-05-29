@@ -374,6 +374,9 @@ static bfd_boolean start_assemble = FALSE;
 /* Indicate ELF attributes are explictly set.  */
 static bfd_boolean explicit_attr = FALSE;
 
+/* Indicate CSR are explictly used.  */
+static bfd_boolean explicit_csr = FALSE;
+
 /* Macros for encoding relaxation state for RVC branches and far jumps.  */
 #define RELAX_BRANCH_ENCODE(uncond, rvc, length)	\
   ((relax_substateT) 					\
@@ -2212,6 +2215,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 
 	    case 'E':		/* Control register.  */
 	      insn_with_csr = TRUE;
+	      explicit_csr = TRUE;
 	      if (reg_lookup (&s, RCLASS_CSR, &regno))
 		INSERT_OPERAND (CSR, *ip, regno);
 	      else
@@ -3603,6 +3607,11 @@ riscv_write_out_attrs (void)
      it seems strange.  */
   if (!start_assemble
       && !riscv_set_default_priv_spec (NULL))
+    return;
+
+  /* If we already have set elf priv attributes, then generate them.
+     Otherwise, don't generate them when no CSR are used.  */
+  if (!explicit_csr)
     return;
 
   /* Re-write priv attributes by default_priv_spec.  */
