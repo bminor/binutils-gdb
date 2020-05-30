@@ -1,5 +1,11 @@
 2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
+	* gnu-nat.c (gnu_nat_target::create_inferior): Move push_target call
+	before fork_inferior call. Avoid calling it if target_is_pushed returns
+	true.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
 	* gnu-nat.h (gnu_target): New variable declaration.
 	* i386-gnu-nat.c (_initialize_i386gnu_nat): Initialize
 	gnu_target.

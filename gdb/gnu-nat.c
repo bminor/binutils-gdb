@@ -2146,6 +2146,9 @@ gnu_nat_target::create_inferior (const char *exec_file,
 
   inf_debug (inf, "creating inferior");
 
+  if (!target_is_pushed (this))
+    push_target (this);
+
   pid = fork_inferior (exec_file, allargs, env, gnu_ptrace_me,
                        NULL, NULL, NULL, NULL);
 
@@ -2158,8 +2161,6 @@ gnu_nat_target::create_inferior (const char *exec_file,
   inf_debug (inf, "attaching to child: %d", pid);
 
   inf_attach (inf, pid);
-
-  push_target (this);
 
   inf->pending_execs = 1;
   inf->nomsg = 1;
