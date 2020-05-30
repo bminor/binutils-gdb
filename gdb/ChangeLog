@@ -1,5 +1,10 @@
 2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
+	* config/i386/i386gnu.mn (%_reply_S.c): Add dependency on
+	$(srcdir)/reply_mig_hack.awk.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
 	* gnu-nat.h (gnu_debug_flag): Set type to bool.
 
 2020-05-30  Jonny Grant  <jg@jguk.org>
