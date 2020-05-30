@@ -1,5 +1,9 @@
 2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
+	* gnu-nat.c: Include "gdbarch.h".
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
 	* reply_mig_hack.awk (Error return): Cast function through
 	void *, to bypass compiler function call check.
 
