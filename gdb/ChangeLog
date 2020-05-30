@@ -1,5 +1,10 @@
 2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
+	* reply_mig_hack.awk (Error return): Cast function through
+	void *, to bypass compiler function call check.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
 	* config/i386/i386gnu.mn (%_reply_S.c): Add dependency on
 	$(srcdir)/reply_mig_hack.awk.
 
