@@ -2552,7 +2552,6 @@ gnu_xfer_auxv (gdb_byte *readbuf, const gdb_byte *writebuf,
 		    ? gnu_current_inf->task->port : 0)
 		 : 0);
   process_t proc;
-  int res;
   kern_return_t err;
   vm_address_t entry;
   ElfW(auxv_t) auxv[2];
@@ -2642,7 +2641,6 @@ gnu_nat_target::find_memory_regions (find_memory_region_ftype func,
       mach_port_t object_name;
       vm_offset_t offset;
       vm_size_t region_length = VM_MAX_ADDRESS - region_address;
-      vm_address_t old_address = region_address;
 
       err = vm_region (task,
 		       &region_address,
