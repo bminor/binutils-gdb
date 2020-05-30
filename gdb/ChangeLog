@@ -1,3 +1,9 @@
+2020-05-30  Pedro Alves  <palves@redhat.com>
+
+	* cp-support.c (replace_typedefs_template): New.
+	(replace_typedefs_qualified_name): Handle
+	DEMANGLE_COMPONENT_TEMPLATE.
+
 2020-05-29  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2/comp-unit.c, dwarf2/comp-unit.h, dwarf2/index-cache.c,

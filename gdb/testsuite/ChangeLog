@@ -1,3 +1,8 @@
+2020-05-30  Pedro Alves  <palves@redhat.com>
+
+	* gdb.linespec/cp-replace-typedefs-ns-template.cc: New.
+	* gdb.linespec/cp-replace-typedefs-ns-template.exp: New.
+
 2020-05-29  Gary Benson <gbenson@redhat.com>
 
 	* gdb.compile/compile-cplus.exp (additional_flags): Also

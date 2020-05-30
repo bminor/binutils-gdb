@@ -294,6 +294,42 @@ inspect_type (struct demangle_parse_info *info,
   return 0;
 }
 
+/* Helper for replace_typedefs_qualified_name to handle
+   DEMANGLE_COMPONENT_TEMPLATE.  TMPL is the template node.  BUF is
+   the buffer that holds the qualified name being built by
+   replace_typedefs_qualified_name.  REPL is the node that will be
+   rewritten as a DEMANGLE_COMPONENT_NAME node holding the 'template
+   plus template arguments' name with typedefs replaced.  */
+
+static bool
+replace_typedefs_template (struct demangle_parse_info *info,
+			   string_file &buf,
+			   struct demangle_component *tmpl,
+			   struct demangle_component *repl,
+			   canonicalization_ftype *finder,
+			   void *data)
+{
+  demangle_component *tmpl_arglist = d_right (tmpl);
+
+  /* Replace typedefs in the template argument list.  */
+  replace_typedefs (info, tmpl_arglist, finder, data);
+
+  /* Convert 'template + replaced template argument list' to a string
+     and replace the REPL node.  */
+  gdb::unique_xmalloc_ptr<char> tmpl_str = cp_comp_to_string (tmpl, 100);
+  if (tmpl_str == nullptr)
+    {
+      /* If something went astray, abort typedef substitutions.  */
+      return false;
+    }
+  buf.puts (tmpl_str.get ());
+
+  repl->type = DEMANGLE_COMPONENT_NAME;
+  repl->u.s_name.s = obstack_strdup (&info->obstack, buf.string ());
+  repl->u.s_name.len = buf.size ();
+  return true;
+}
+
 /* Replace any typedefs appearing in the qualified name
    (DEMANGLE_COMPONENT_QUAL_NAME) represented in RET_COMP for the name parse
    given in INFO.  */
@@ -314,6 +350,29 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
      substituted name.  */
   while (comp->type == DEMANGLE_COMPONENT_QUAL_NAME)
     {
+      if (d_left (comp)->type == DEMANGLE_COMPONENT_TEMPLATE)
+	{
+	  /* Convert 'template + replaced template argument list' to a
+	     string and replace the top DEMANGLE_COMPONENT_QUAL_NAME
+	     node.  */
+	  if (!replace_typedefs_template (info, buf,
+					  d_left (comp), d_left (ret_comp),
+					  finder, data))
+	    return;
+
+	  buf.clear ();
+	  d_right (ret_comp) = d_right (comp);
+	  comp = ret_comp;
+
+	  /* Fallback to DEMANGLE_COMPONENT_NAME processing.  We want
+	     to call inspect_type for this template, in case we have a
+	     template alias, like:
+	       template<typename T> using alias = base<int, t>;
+	     in which case we want inspect_type to do a replacement like:
+	       alias<int> -> base<int, int>
+	  */
+	}
+
       if (d_left (comp)->type == DEMANGLE_COMPONENT_NAME)
 	{
 	  struct demangle_component newobj;
@@ -370,11 +429,20 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
       comp = d_right (comp);
     }
 
-  /* If the next component is DEMANGLE_COMPONENT_NAME, save the qualified
-     name assembled above and append the name given by COMP.  Then use this
-     reassembled name to check for a typedef.  */
+  /* If the next component is DEMANGLE_COMPONENT_TEMPLATE or
+     DEMANGLE_COMPONENT_NAME, save the qualified name assembled above
+     and append the name given by COMP.  Then use this reassembled
+     name to check for a typedef.  */
 
-  if (comp->type == DEMANGLE_COMPONENT_NAME)
+  if (comp->type == DEMANGLE_COMPONENT_TEMPLATE)
+    {
+      /* Replace the top (DEMANGLE_COMPONENT_QUAL_NAME) node with a
+	 DEMANGLE_COMPONENT_NAME node containing the whole name.  */
+      if (!replace_typedefs_template (info, buf, comp, ret_comp, finder, data))
+	return;
+      inspect_type (info, ret_comp, finder, data);
+    }
+  else if (comp->type == DEMANGLE_COMPONENT_NAME)
     {
       buf.write (comp->u.s_name.s, comp->u.s_name.len);
 
