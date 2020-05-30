@@ -150,4 +150,7 @@ struct gnu_nat_target : public inf_child_target
   void stop (ptid_t) override;
 };
 
+/* The final/concrete instance.  */
+extern gnu_nat_target *gnu_target;
+
 #endif /* GNU_NAT_H */

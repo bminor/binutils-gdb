@@ -1,5 +1,18 @@
 2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
+	* gnu-nat.h (gnu_target): New variable declaration.
+	* i386-gnu-nat.c (_initialize_i386gnu_nat): Initialize
+	gnu_target.
+	* gnu-nat.c (gnu_target): New variable.
+	(inf_validate_procs): Pass gnu_target to thread_change_ptid,
+	add_thread_silent, and add_thread calls.
+	(gnu_nat_target::create_inferior): Pass gnu_target to
+	add_thread_silent, thread_change_ptid call.
+	(gnu_nat_target::detach): Pass gnu_target to detach_inferior
+	call.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
 	* gnu-nat.c (gnu_xfer_auxv): Remove unused `res' variable.
 	(gnu_nat_target::find_memory_regions): Remove unused
 	`old_address' variable.
