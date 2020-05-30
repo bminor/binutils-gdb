@@ -111,7 +111,7 @@ extern char *proc_string (struct proc *proc);
 	      __proc_pid (__proc), __proc->tid, \
 	      host_address_to_string (__proc) , ##args); } while (0)
 
-extern int gnu_debug_flag;
+extern bool gnu_debug_flag;
 
 #define debug(msg, args...) \
  do { if (gnu_debug_flag) \
