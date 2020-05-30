@@ -1,5 +1,17 @@
 2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
+	* i386-gnu-tdep.c: Include "gdbcore.h"
+	(gnu_sigtramp_code, i386_gnu_sc_reg_offset): New arrays.
+	(GNU_SIGTRAMP_LEN, GNU_SIGTRAMP_TAIL,
+	I386_GNU_SIGCONTEXT_THREAD_STATE_OFFSET): New macros
+	(i386_gnu_sigtramp_start, i386_gnu_sigtramp_p,
+	i386_gnu_sigcontext_addr): New functions
+	(i386gnu_init_abi): Register i386_gnu_sigtramp_p,
+	i386_gnu_sigcontext_addr, and i386_gnu_sc_reg_offset in the gdbarch
+	tdep.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
 	* gnu-nat.c (gnu_nat_target::create_inferior): Move push_target call
 	before fork_inferior call. Avoid calling it if target_is_pushed returns
 	true.
