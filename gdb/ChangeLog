@@ -1,3 +1,7 @@
+2020-05-30  Jonny Grant  <jg@jguk.org>
+
+	* configure.ac (ACX_BUGURL): change bug URL to https.
+
 2020-05-30  Pedro Alves  <palves@redhat.com>
 
 	* cp-support.c (replace_typedefs_template): New.

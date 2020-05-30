@@ -430,7 +430,7 @@ AC_ARG_ENABLE([codesign],
 AC_SUBST([CODESIGN_CERT])
 
 ACX_PKGVERSION([GDB])
-ACX_BUGURL([http://www.gnu.org/software/gdb/bugs/])
+ACX_BUGURL([https://www.gnu.org/software/gdb/bugs/])
 AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
 AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address])
 
