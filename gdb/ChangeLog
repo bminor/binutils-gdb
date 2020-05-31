@@ -1,5 +1,25 @@
 2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
+	* gnu-nat.h (inf_validate_procs, inf_suspend, inf_set_traced,
+	steal_exc_port, proc_get_state, inf_clear_wait, inf_cleanup,
+	inf_startup, inf_update_suspends, inf_set_pid, inf_steal_exc_ports,
+	inf_validate_procinfo, inf_validate_task_sc, inf_restore_exc_ports,
+	inf_set_threads_resume_sc, inf_set_threads_resume_sc_for_signal_thread,
+	inf_resume, inf_set_step_thread, inf_detach, inf_attach, inf_signal,
+	inf_continue, make_proc, proc_abort, _proc_free, proc_update_sc,
+	proc_get_exception_port, proc_set_exception_port, _proc_get_exc_port,
+	proc_steal_exc_port, proc_restore_exc_port, proc_trace): Move functions
+	to gnu_nat_target class.
+	* gnu-nat.c: Likewise.
+	(inf_update_procs, S_proc_wait_reply, set_task_pause_cmd,
+	set_task_exc_port_cmd, set_signals_cmd, set_thread_pause_cmd,
+	set_thread_exc_port_cmd): Call inf_validate_procs through gnu_target
+	object.
+	(gnu_nat_target::create_inferior, gnu_nat_target::detach): Pass `this'
+	instead of `gnu_target'.
+
+2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
 	* i386-gnu-tdep.c: Include "gdbcore.h"
 	(gnu_sigtramp_code, i386_gnu_sc_reg_offset): New arrays.
 	(GNU_SIGTRAMP_LEN, GNU_SIGTRAMP_TAIL,
