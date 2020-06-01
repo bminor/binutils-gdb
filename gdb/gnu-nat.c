@@ -83,6 +83,8 @@ extern "C"
 #include "msg_reply_S.h"
 #include "exc_request_U.h"
 #include "msg_U.h"
+
+#include "gnu-nat-mig.h"
 }
 
 struct gnu_nat_target *gnu_target;
@@ -1429,12 +1431,6 @@ struct inf *gnu_current_inf = 0;
 /* The inferior being waited for by gnu_wait.  Since GDB is decidely not
    multi-threaded, we don't bother to lock this.  */
 static struct inf *waiting_inf;
-
-/* MIG stubs are not yet ready for C++ compilation.  */
-extern "C" int exc_server (mach_msg_header_t *, mach_msg_header_t *);
-extern "C" int msg_reply_server (mach_msg_header_t *, mach_msg_header_t *);
-extern "C" int notify_server (mach_msg_header_t *, mach_msg_header_t *);
-extern "C" int process_reply_server (mach_msg_header_t *, mach_msg_header_t *);
 
 /* Wait for something to happen in the inferior, returning what in STATUS.  */
 

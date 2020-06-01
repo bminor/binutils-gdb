@@ -1,3 +1,12 @@
+2020-06-01  Samuel Thibault  <samuel.thibault@ens-lyon.org>
+
+	* config/i386/i386gnu.mn [%_S.o %_U.o] (COMPILE.post): Add
+	"-include gnu-nat-mig.h".
+	* gnu-nat-mig.h: New file.
+	* gnu-nat.c: Include "gnu-nat-mig.h".
+	(exc_server, msg_reply_server, notify_server,
+	process_reply_server): Remove declarations.
+
 2020-05-30  Samuel Thibault  <samuel.thibault@ens-lyon.org>
 
 	* gnu-nat.h (inf_validate_procs, inf_suspend, inf_set_traced,
