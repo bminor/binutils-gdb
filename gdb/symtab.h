@@ -1952,13 +1952,6 @@ extern void default_collect_symbol_completion_matches_break_on
    symbol_name_match_type name_match_type,
    const char *text, const char *word, const char *break_on,
    enum type_code code);
-extern void default_collect_symbol_completion_matches
-  (completion_tracker &tracker,
-   complete_symbol_mode,
-   symbol_name_match_type name_match_type,
-   const char *,
-   const char *,
-   enum type_code);
 extern void collect_symbol_completion_matches
   (completion_tracker &tracker,
    complete_symbol_mode mode,

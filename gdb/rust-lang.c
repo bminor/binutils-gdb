@@ -2062,7 +2062,6 @@ extern const struct language_data rust_language_data =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  default_collect_symbol_completion_matches,
   rust_watch_location_expression,
   &default_varobj_ops,
   rust_is_string_type_p,

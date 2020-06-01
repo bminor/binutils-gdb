@@ -6272,134 +6272,6 @@ ada_lookup_name_info::matches
   return true;
 }
 
-/* Add the list of possible symbol names completing TEXT to TRACKER.
-   WORD is the entire command on which completion is made.  */
-
-static void
-ada_collect_symbol_completion_matches (completion_tracker &tracker,
-				       complete_symbol_mode mode,
-				       symbol_name_match_type name_match_type,
-				       const char *text, const char *word,
-				       enum type_code code)
-{
-  struct symbol *sym;
-  const struct block *b, *surrounding_static_block = 0;
-  struct block_iterator iter;
-
-  gdb_assert (code == TYPE_CODE_UNDEF);
-
-  lookup_name_info lookup_name (text, name_match_type, true);
-
-  /* First, look at the partial symtab symbols.  */
-  expand_symtabs_matching (NULL,
-			   lookup_name,
-			   NULL,
-			   NULL,
-			   ALL_DOMAIN);
-
-  /* At this point scan through the misc symbol vectors and add each
-     symbol you find to the list.  Eventually we want to ignore
-     anything that isn't a text symbol (everything else will be
-     handled by the psymtab code above).  */
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      for (minimal_symbol *msymbol : objfile->msymbols ())
-	{
-	  QUIT;
-
-	  if (completion_skip_symbol (mode, msymbol))
-	    continue;
-
-	  language symbol_language = msymbol->language ();
-
-	  /* Ada minimal symbols won't have their language set to Ada.  If
-	     we let completion_list_add_name compare using the
-	     default/C-like matcher, then when completing e.g., symbols in a
-	     package named "pck", we'd match internal Ada symbols like
-	     "pckS", which are invalid in an Ada expression, unless you wrap
-	     them in '<' '>' to request a verbatim match.
-
-	     Unfortunately, some Ada encoded names successfully demangle as
-	     C++ symbols (using an old mangling scheme), such as "name__2Xn"
-	     -> "Xn::name(void)" and thus some Ada minimal symbols end up
-	     with the wrong language set.  Paper over that issue here.  */
-	  if (symbol_language == language_auto
-	      || symbol_language == language_cplus)
-	    symbol_language = language_ada;
-
-	  completion_list_add_name (tracker,
-				    symbol_language,
-				    msymbol->linkage_name (),
-				    lookup_name, text, word);
-	}
-    }
-
-  /* Search upwards from currently selected frame (so that we can
-     complete on local vars.  */
-
-  for (b = get_selected_block (0); b != NULL; b = BLOCK_SUPERBLOCK (b))
-    {
-      if (!BLOCK_SUPERBLOCK (b))
-        surrounding_static_block = b;   /* For elmin of dups */
-
-      ALL_BLOCK_SYMBOLS (b, iter, sym)
-      {
-	if (completion_skip_symbol (mode, sym))
-	  continue;
-
-	completion_list_add_name (tracker,
-				  sym->language (),
-				  sym->linkage_name (),
-				  lookup_name, text, word);
-      }
-    }
-
-  /* Go through the symtabs and check the externs and statics for
-     symbols which match.  */
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      for (compunit_symtab *s : objfile->compunits ())
-	{
-	  QUIT;
-	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), GLOBAL_BLOCK);
-	  ALL_BLOCK_SYMBOLS (b, iter, sym)
-	    {
-	      if (completion_skip_symbol (mode, sym))
-		continue;
-
-	      completion_list_add_name (tracker,
-					sym->language (),
-					sym->linkage_name (),
-					lookup_name, text, word);
-	    }
-	}
-    }
-
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      for (compunit_symtab *s : objfile->compunits ())
-	{
-	  QUIT;
-	  b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), STATIC_BLOCK);
-	  /* Don't do this block twice.  */
-	  if (b == surrounding_static_block)
-	    continue;
-	  ALL_BLOCK_SYMBOLS (b, iter, sym)
-	    {
-	      if (completion_skip_symbol (mode, sym))
-		continue;
-
-	      completion_list_add_name (tracker,
-					sym->language (),
-					sym->linkage_name (),
-					lookup_name, text, word);
-	    }
-	}
-    }
-}
-
                                 /* Field Access */
 
 /* Return non-zero if TYPE is a pointer to the GNAT dispatch table used
@@ -13911,7 +13783,6 @@ extern const struct language_data ada_language_data =
   ada_op_print_tab,             /* expression operators for printing */
   0,                            /* c-style arrays */
   1,                            /* String lower bound */
-  ada_collect_symbol_completion_matches,
   ada_watch_location_expression,
   &ada_varobj_ops,
   ada_is_string_type,
@@ -14103,6 +13974,132 @@ public:
   const char *word_break_characters (void) const override
   {
     return ada_completer_word_break_characters;
+  }
+
+  /* See language.h.  */
+
+  void collect_symbol_completion_matches (completion_tracker &tracker,
+					  complete_symbol_mode mode,
+					  symbol_name_match_type name_match_type,
+					  const char *text, const char *word,
+					  enum type_code code) const override
+  {
+    struct symbol *sym;
+    const struct block *b, *surrounding_static_block = 0;
+    struct block_iterator iter;
+
+    gdb_assert (code == TYPE_CODE_UNDEF);
+
+    lookup_name_info lookup_name (text, name_match_type, true);
+
+    /* First, look at the partial symtab symbols.  */
+    expand_symtabs_matching (NULL,
+			     lookup_name,
+			     NULL,
+			     NULL,
+			     ALL_DOMAIN);
+
+    /* At this point scan through the misc symbol vectors and add each
+       symbol you find to the list.  Eventually we want to ignore
+       anything that isn't a text symbol (everything else will be
+       handled by the psymtab code above).  */
+
+    for (objfile *objfile : current_program_space->objfiles ())
+      {
+	for (minimal_symbol *msymbol : objfile->msymbols ())
+	  {
+	    QUIT;
+
+	    if (completion_skip_symbol (mode, msymbol))
+	      continue;
+
+	    language symbol_language = msymbol->language ();
+
+	    /* Ada minimal symbols won't have their language set to Ada.  If
+	       we let completion_list_add_name compare using the
+	       default/C-like matcher, then when completing e.g., symbols in a
+	       package named "pck", we'd match internal Ada symbols like
+	       "pckS", which are invalid in an Ada expression, unless you wrap
+	       them in '<' '>' to request a verbatim match.
+
+	       Unfortunately, some Ada encoded names successfully demangle as
+	       C++ symbols (using an old mangling scheme), such as "name__2Xn"
+	       -> "Xn::name(void)" and thus some Ada minimal symbols end up
+	       with the wrong language set.  Paper over that issue here.  */
+	    if (symbol_language == language_auto
+		|| symbol_language == language_cplus)
+	      symbol_language = language_ada;
+
+	    completion_list_add_name (tracker,
+				      symbol_language,
+				      msymbol->linkage_name (),
+				      lookup_name, text, word);
+	  }
+      }
+
+    /* Search upwards from currently selected frame (so that we can
+       complete on local vars.  */
+
+    for (b = get_selected_block (0); b != NULL; b = BLOCK_SUPERBLOCK (b))
+      {
+	if (!BLOCK_SUPERBLOCK (b))
+	  surrounding_static_block = b;   /* For elmin of dups */
+
+	ALL_BLOCK_SYMBOLS (b, iter, sym)
+	  {
+	    if (completion_skip_symbol (mode, sym))
+	      continue;
+
+	    completion_list_add_name (tracker,
+				      sym->language (),
+				      sym->linkage_name (),
+				      lookup_name, text, word);
+	  }
+      }
+
+    /* Go through the symtabs and check the externs and statics for
+       symbols which match.  */
+
+    for (objfile *objfile : current_program_space->objfiles ())
+      {
+	for (compunit_symtab *s : objfile->compunits ())
+	  {
+	    QUIT;
+	    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), GLOBAL_BLOCK);
+	    ALL_BLOCK_SYMBOLS (b, iter, sym)
+	      {
+		if (completion_skip_symbol (mode, sym))
+		  continue;
+
+		completion_list_add_name (tracker,
+					  sym->language (),
+					  sym->linkage_name (),
+					  lookup_name, text, word);
+	      }
+	  }
+      }
+
+    for (objfile *objfile : current_program_space->objfiles ())
+      {
+	for (compunit_symtab *s : objfile->compunits ())
+	  {
+	    QUIT;
+	    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), STATIC_BLOCK);
+	    /* Don't do this block twice.  */
+	    if (b == surrounding_static_block)
+	      continue;
+	    ALL_BLOCK_SYMBOLS (b, iter, sym)
+	      {
+		if (completion_skip_symbol (mode, sym))
+		  continue;
+
+		completion_list_add_name (tracker,
+					  sym->language (),
+					  sym->linkage_name (),
+					  lookup_name, text, word);
+	      }
+	  }
+      }
   }
 
 protected:

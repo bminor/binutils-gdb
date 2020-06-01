@@ -1,5 +1,47 @@
 2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_collect_symbol_completion_matches): Rename to
+	ada_language::collect_symbol_completion_matches.
+	(ada_language_data): Delete la_collect_symbol_completion_matches
+	initializer.
+	(ada_language::collect_symbol_completion_matches): New member
+	function, implementation from
+	ada_collect_symbol_completion_matches.
+	* c-lang.c (c_language_data): Delete
+	la_collect_symbol_completion_matches initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_collect_symbol_completion_matches): Rename to
+	f_language::collect_symbol_completion_matches.
+	(f_language_data): Delete la_collect_symbol_completion_matches
+	initializer.
+	(f_language::collect_symbol_completion_matches) New member
+	function, implementation from f_collect_symbol_completion_matches.
+	* go-lang.c (go_language_data): Delete
+	la_collect_symbol_completion_matches initializer.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete
+	la_collect_symbol_completion_matches field.
+	(language_defn::collect_symbol_completion_matches): New member
+	function.
+	* m2-lang.c (m2_language_data): Delete
+	la_collect_symbol_completion_matches initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+	* symtab.c (default_collect_symbol_completion_matches): Delete.
+	(collect_symbol_completion_matches): Update call to
+	collect_symbol_completion_matches.
+	(collect_symbol_completion_matches_type): Likewise.
+	* symtab.h (default_collect_symbol_completion_matches): Delete
+	declaration.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_get_gdb_completer_word_break_characters): Delete.
 	(ada_language_data): Delete la_word_break_characters initializer.
 	(ada_language::word_break_characters): New member function.

@@ -165,21 +165,6 @@ enum f_primitive_types {
   nr_f_primitive_types
 };
 
-/* Consider the modules separator :: as a valid symbol name character
-   class.  */
-
-static void
-f_collect_symbol_completion_matches (completion_tracker &tracker,
-				     complete_symbol_mode mode,
-				     symbol_name_match_type compare_name,
-				     const char *text, const char *word,
-				     enum type_code code)
-{
-  default_collect_symbol_completion_matches_break_on (tracker, mode,
-						      compare_name,
-						      text, word, ":", code);
-}
-
 /* Special expression evaluation cases for Fortran.  */
 
 static struct value *
@@ -593,7 +578,6 @@ extern const struct language_data f_language_data =
   f_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
-  f_collect_symbol_completion_matches,
   c_watch_location_expression,
   &default_varobj_ops,
   f_is_string_type_p,
@@ -696,6 +680,23 @@ public:
 	  }
       }
     return retval;
+  }
+
+
+  /* See language.h.  */
+
+  void collect_symbol_completion_matches (completion_tracker &tracker,
+					  complete_symbol_mode mode,
+					  symbol_name_match_type name_match_type,
+					  const char *text, const char *word,
+					  enum type_code code) const override
+  {
+    /* Consider the modules separator :: as a valid symbol name character
+       class.  */
+    default_collect_symbol_completion_matches_break_on (tracker, mode,
+							name_match_type,
+							text, word, ":",
+							code);
   }
 
 protected:

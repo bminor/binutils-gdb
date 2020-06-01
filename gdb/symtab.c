@@ -5806,19 +5806,6 @@ default_collect_symbol_completion_matches_break_on
     }
 }
 
-void
-default_collect_symbol_completion_matches (completion_tracker &tracker,
-					   complete_symbol_mode mode,
-					   symbol_name_match_type name_match_type,
-					   const char *text, const char *word,
-					   enum type_code code)
-{
-  return default_collect_symbol_completion_matches_break_on (tracker, mode,
-							     name_match_type,
-							     text, word, "",
-							     code);
-}
-
 /* Collect all symbols (regardless of class) which begin by matching
    TEXT.  */
 
@@ -5828,10 +5815,10 @@ collect_symbol_completion_matches (completion_tracker &tracker,
 				   symbol_name_match_type name_match_type,
 				   const char *text, const char *word)
 {
-  current_language->la_collect_symbol_completion_matches (tracker, mode,
-							  name_match_type,
-							  text, word,
-							  TYPE_CODE_UNDEF);
+  current_language->collect_symbol_completion_matches (tracker, mode,
+						       name_match_type,
+						       text, word,
+						       TYPE_CODE_UNDEF);
 }
 
 /* Like collect_symbol_completion_matches, but only collect
@@ -5848,9 +5835,9 @@ collect_symbol_completion_matches_type (completion_tracker &tracker,
   gdb_assert (code == TYPE_CODE_UNION
 	      || code == TYPE_CODE_STRUCT
 	      || code == TYPE_CODE_ENUM);
-  current_language->la_collect_symbol_completion_matches (tracker, mode,
-							  name_match_type,
-							  text, word, code);
+  current_language->collect_symbol_completion_matches (tracker, mode,
+						       name_match_type,
+						       text, word, code);
 }
 
 /* Like collect_symbol_completion_matches, but collects a list of

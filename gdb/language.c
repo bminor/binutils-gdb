@@ -779,7 +779,6 @@ extern const struct language_data unknown_language_data =
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  default_collect_symbol_completion_matches,
   c_watch_location_expression,
   &default_varobj_ops,
   default_is_string_type_p,
@@ -851,7 +850,6 @@ extern const struct language_data auto_language_data =
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  default_collect_symbol_completion_matches,
   c_watch_location_expression,
   &default_varobj_ops,
   default_is_string_type_p,

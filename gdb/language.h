@@ -319,19 +319,6 @@ struct language_data
     /* Index to use for extracting the first element of a string.  */
     char string_lower_bound;
 
-    /* Add to the completion tracker all symbols which are possible
-       completions for TEXT.  WORD is the entire command on which the
-       completion is being made.  If CODE is TYPE_CODE_UNDEF, then all
-       symbols should be examined; otherwise, only STRUCT_DOMAIN
-       symbols whose type has a code of CODE should be matched.  */
-    void (*la_collect_symbol_completion_matches)
-      (completion_tracker &tracker,
-       complete_symbol_mode mode,
-       symbol_name_match_type match_type,
-       const char *text,
-       const char *word,
-       enum type_code code);
-
     /* Return an expression that can be used for a location
        watchpoint.  TYPE is a pointer type that points to the memory
        to watch, and ADDR is the address of the watched memory.  */
@@ -533,6 +520,24 @@ struct language_defn : language_data
   virtual const char *word_break_characters (void) const
   {
     return default_word_break_characters ();
+  }
+
+  /* Add to the completion tracker all symbols which are possible
+     completions for TEXT.  WORD is the entire command on which the
+     completion is being made.  If CODE is TYPE_CODE_UNDEF, then all
+     symbols should be examined; otherwise, only STRUCT_DOMAIN symbols
+     whose type has a code of CODE should be matched.  */
+
+  virtual void collect_symbol_completion_matches
+	(completion_tracker &tracker,
+	 complete_symbol_mode mode,
+	 symbol_name_match_type name_match_type,
+	 const char *text,
+	 const char *word,
+	 enum type_code code) const
+  {
+    return default_collect_symbol_completion_matches_break_on
+      (tracker, mode, name_match_type, text, word, "", code);
   }
 
   /* List of all known languages.  */
