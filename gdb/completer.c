@@ -155,7 +155,7 @@ enum explicit_location_match_type
    but it does affect how much stuff M-? lists.
    (2) If one of the matches contains a word break character, readline
    will quote it.  That's why we switch between
-   current_language->la_word_break_characters() and
+   current_language->word_break_characters () and
    gdb_completer_command_word_break_characters.  I'm not sure when
    we need this behavior (perhaps for funky characters in C++ 
    symbols?).  */
@@ -448,7 +448,7 @@ const char *
 advance_to_expression_complete_word_point (completion_tracker &tracker,
 					   const char *text)
 {
-  const char *brk_chars = current_language->la_word_break_characters ();
+  const char *brk_chars = current_language->word_break_characters ();
   return advance_to_completion_word (tracker, brk_chars, text);
 }
 
@@ -573,7 +573,7 @@ complete_files_symbols (completion_tracker &tracker,
 	  colon = p;
 	  symbol_start = p + 1;
 	}
-      else if (strchr (current_language->la_word_break_characters(), *p))
+      else if (strchr (current_language->word_break_characters (), *p))
 	symbol_start = p + 1;
     }
 
@@ -1348,7 +1348,7 @@ complete_line_internal_1 (completion_tracker &tracker,
      strings, which leaves out the '-' and '.' character used in some
      commands.  */
   set_rl_completer_word_break_characters
-    (current_language->la_word_break_characters());
+    (current_language->word_break_characters ());
 
   /* Decide whether to complete on a list of gdb commands or on
      symbols.  */
@@ -1964,7 +1964,7 @@ default_completer_handle_brkchars (struct cmd_list_element *ignore,
 				   const char *text, const char *word)
 {
   set_rl_completer_word_break_characters
-    (current_language->la_word_break_characters ());
+    (current_language->word_break_characters ());
 }
 
 /* See definition in completer.h.  */
@@ -2473,7 +2473,7 @@ skip_quoted_chars (const char *str, const char *quotechars,
     quotechars = gdb_completer_quote_characters;
 
   if (breakchars == NULL)
-    breakchars = current_language->la_word_break_characters();
+    breakchars = current_language->word_break_characters ();
 
   for (scan = str; *scan != '\0'; scan++)
     {

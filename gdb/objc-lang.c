@@ -351,7 +351,6 @@ extern const struct language_data objc_language_data =
   objc_op_print_tab,		/* Expression operators for printing */
   1,				/* C-style arrays */
   0,				/* String lower bound */
-  default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
   &default_varobj_ops,

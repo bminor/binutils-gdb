@@ -488,12 +488,6 @@ add_angle_brackets (const char *str)
   return string_printf ("<%s>", str);
 }
 
-static const char *
-ada_get_gdb_completer_word_break_characters (void)
-{
-  return ada_completer_word_break_characters;
-}
-
 /* la_watch_location_expression for Ada.  */
 
 static gdb::unique_xmalloc_ptr<char>
@@ -13917,7 +13911,6 @@ extern const struct language_data ada_language_data =
   ada_op_print_tab,             /* expression operators for printing */
   0,                            /* c-style arrays */
   1,                            /* String lower bound */
-  ada_get_gdb_completer_word_break_characters,
   ada_collect_symbol_completion_matches,
   ada_watch_location_expression,
   &ada_varobj_ops,
@@ -14103,6 +14096,13 @@ public:
 		   const struct type_print_options *flags) const override
   {
     ada_print_type (type, varstring, stream, show, level, flags);
+  }
+
+  /* See language.h.  */
+
+  const char *word_break_characters (void) const override
+  {
+    return ada_completer_word_break_characters;
   }
 
 protected:

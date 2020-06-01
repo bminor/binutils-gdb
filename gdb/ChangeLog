@@ -1,5 +1,42 @@
 2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_get_gdb_completer_word_break_characters): Delete.
+	(ada_language_data): Delete la_word_break_characters initializer.
+	(ada_language::word_break_characters): New member function.
+	* c-lang.c (c_language_data): Delete la_word_break_characters
+	initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* completer.c: Update global comment.
+	(advance_to_expression_complete_word_point): Update call to
+	word_break_characters.
+	(complete_files_symbols): Likewise.
+	(complete_line_internal_1): Likewise.
+	(default_completer_handle_brkchars): Likewise.
+	(skip_quoted_chars): Likewise.
+	* d-lang.c (d_language_data): Delete la_word_break_characters
+	initializer.
+	* f-lang.c (f_word_break_characters): Delete.
+	(f_language_data): Delete la_word_break_characters initializer.
+	(f_language::word_break_characters): New member function.
+	* go-lang.c (go_language_data): Delete la_word_break_characters
+	initializer.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (default_word_break_characters): Move declaration to
+	earlier in the file.
+	(language_data): Delete la_word_break_characters field.
+	(language_defn::word_break_characters): New member function.
+	* m2-lang.c (m2_language_data): Delete la_word_break_characters
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_get_symbol_name_matcher): Update header comment.
 	(ada_language_data): Delete la_get_symbol_name_matcher
 	initializer.

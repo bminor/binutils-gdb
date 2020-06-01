@@ -169,6 +169,9 @@ struct language_pass_by_ref_info
   bool destructible = true;
 };
 
+/* Splitting strings into words.  */
+extern const char *default_word_break_characters (void);
+
 /* Structure tying together assorted information about a language.
 
    As we move over from the old structure based languages to a class
@@ -315,9 +318,6 @@ struct language_data
 
     /* Index to use for extracting the first element of a string.  */
     char string_lower_bound;
-
-    /* The list of characters forming word boundaries.  */
-    const char *(*la_word_break_characters) (void);
 
     /* Add to the completion tracker all symbols which are possible
        completions for TEXT.  WORD is the entire command on which the
@@ -529,6 +529,12 @@ struct language_defn : language_data
     return nullptr;
   }
 
+  /* The list of characters forming word boundaries.  */
+  virtual const char *word_break_characters (void) const
+  {
+    return default_word_break_characters ();
+  }
+
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];
 
@@ -690,9 +696,6 @@ extern CORE_ADDR skip_language_trampoline (struct frame_info *, CORE_ADDR pc);
 /* Return demangled language symbol, or NULL.  */
 extern char *language_demangle (const struct language_defn *current_language, 
 				const char *mangled, int options);
-
-/* Splitting strings into words.  */
-extern const char *default_word_break_characters (void);
 
 /* Return information about whether TYPE should be passed
    (and returned) by reference at the language level.  */

@@ -165,30 +165,6 @@ enum f_primitive_types {
   nr_f_primitive_types
 };
 
-/* Remove the modules separator :: from the default break list.  */
-
-static const char *
-f_word_break_characters (void)
-{
-  static char *retval;
-
-  if (!retval)
-    {
-      char *s;
-
-      retval = xstrdup (default_word_break_characters ());
-      s = strchr (retval, ':');
-      if (s)
-	{
-	  char *last_char = &s[strlen (s) - 1];
-
-	  *s = *last_char;
-	  *last_char = 0;
-	}
-    }
-  return retval;
-}
-
 /* Consider the modules separator :: as a valid symbol name character
    class.  */
 
@@ -617,7 +593,6 @@ extern const struct language_data f_language_data =
   f_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
-  f_word_break_characters,
   f_collect_symbol_completion_matches,
   c_watch_location_expression,
   &default_varobj_ops,
@@ -697,6 +672,30 @@ public:
 		   const struct type_print_options *flags) const override
   {
     f_print_type (type, varstring, stream, show, level, flags);
+  }
+
+  /* See language.h.  This just returns default set of word break
+     characters but with the modules separator `::' removed.  */
+
+  const char *word_break_characters (void) const override
+  {
+    static char *retval;
+
+    if (!retval)
+      {
+	char *s;
+
+	retval = xstrdup (language_defn::word_break_characters ());
+	s = strchr (retval, ':');
+	if (s)
+	  {
+	    char *last_char = &s[strlen (s) - 1];
+
+	    *s = *last_char;
+	    *last_char = 0;
+	  }
+      }
+    return retval;
   }
 
 protected:
