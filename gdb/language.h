@@ -354,26 +354,6 @@ struct language_data
     /* Various operations on varobj.  */
     const struct lang_varobj_ops *la_varobj_ops;
 
-    /* This method must be defined if 'la_get_gcc_context' is defined.
-       If 'la_get_gcc_context' is not defined, then this method is
-       ignored.
-
-       This takes the user-supplied text and returns a new bit of code
-       to compile.
-
-       INST is the compiler instance being used.
-       INPUT is the user's input text.
-       GDBARCH is the architecture to use.
-       EXPR_BLOCK is the block in which the expression is being
-       parsed.
-       EXPR_PC is the PC at which the expression is being parsed.  */
-
-    std::string (*la_compute_program) (compile_instance *inst,
-				       const char *input,
-				       struct gdbarch *gdbarch,
-				       const struct block *expr_block,
-				       CORE_ADDR expr_pc);
-
     /* Return true if TYPE is a string type.  */
     bool (*la_is_string_type_p) (struct type *type);
 
@@ -474,6 +454,28 @@ struct language_defn : language_data
   virtual compile_instance *get_compile_instance () const
   {
     return nullptr;
+  }
+
+  /* This method must be overridden if 'get_compile_instance' is
+     overridden.
+
+     This takes the user-supplied text and returns a new bit of code
+     to compile.
+
+     INST is the compiler instance being used.
+     INPUT is the user's input text.
+     GDBARCH is the architecture to use.
+     EXPR_BLOCK is the block in which the expression is being
+     parsed.
+     EXPR_PC is the PC at which the expression is being parsed.  */
+
+  virtual std::string compute_program (compile_instance *inst,
+				       const char *input,
+				       struct gdbarch *gdbarch,
+				       const struct block *expr_block,
+				       CORE_ADDR expr_pc) const
+  {
+    gdb_assert_not_reached ("language_defn::compute_program");
   }
 
   /* Hash the given symbol search name.  */

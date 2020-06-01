@@ -660,7 +660,7 @@ typedef compile_program<compile_cplus_instance,
 			cplus_add_code_header, c_add_code_footer,
 			cplus_add_input> cplus_compile_program;
 
-/* The la_compute_program method for C.  */
+/* The compute_program method for C.  */
 
 std::string
 c_compute_program (compile_instance *inst,
@@ -675,7 +675,7 @@ c_compute_program (compile_instance *inst,
   return program.compute (input, expr_block, expr_pc);
 }
 
-/* The la_compute_program method for C++.  */
+/* The compute_program method for C++.  */
 
 std::string
 cplus_compute_program (compile_instance *inst,

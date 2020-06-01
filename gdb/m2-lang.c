@@ -381,7 +381,6 @@ extern const struct language_data m2_language_data =
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   &default_varobj_ops,
-  NULL,
   m2_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };

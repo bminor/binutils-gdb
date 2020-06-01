@@ -622,7 +622,6 @@ extern const struct language_data f_language_data =
   c_watch_location_expression,
   cp_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
   &default_varobj_ops,
-  NULL,
   f_is_string_type_p,
   "(...)"			/* la_struct_too_deep_ellipsis */
 };

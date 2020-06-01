@@ -724,8 +724,8 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
     error (_("Neither a simple expression, or a multi-line specified."));
 
   std::string code
-    = current_language->la_compute_program (compiler.get (), input, gdbarch,
-					    expr_block, expr_pc);
+    = current_language->compute_program (compiler.get (), input, gdbarch,
+					 expr_block, expr_pc);
   if (compile_debug)
     fprintf_unfiltered (gdb_stdlog, "debug output:\n\n%s", code.c_str ());
 

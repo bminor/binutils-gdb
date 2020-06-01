@@ -172,7 +172,7 @@ extern compile_instance *cplus_get_compile_context ();
 /* This takes the user-supplied text and returns a new bit of code to
    compile.
 
-   This is used as the la_compute_program language method; see that
+   This is used as the compute_program language method; see that
    for a description of the arguments.  */
 
 extern std::string c_compute_program (compile_instance *inst,
@@ -183,7 +183,7 @@ extern std::string c_compute_program (compile_instance *inst,
 
 /* This takes the user-supplied text and returns a new bit of code to compile.
 
-   This is used as the la_compute_program language method; see that
+   This is used as the compute_program language method; see that
    for a description of the arguments.  */
 
 extern std::string cplus_compute_program (compile_instance *inst,

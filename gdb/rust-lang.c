@@ -2067,7 +2067,6 @@ extern const struct language_data rust_language_data =
   rust_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   &default_varobj_ops,
-  NULL,
   rust_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };

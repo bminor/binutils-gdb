@@ -776,7 +776,6 @@ extern const struct language_data unknown_language_data =
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   &default_varobj_ops,
-  NULL,
   default_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
@@ -851,7 +850,6 @@ extern const struct language_data auto_language_data =
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   &default_varobj_ops,
-  NULL,
   default_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };

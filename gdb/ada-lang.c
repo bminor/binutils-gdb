@@ -13922,7 +13922,6 @@ extern const struct language_data ada_language_data =
   ada_watch_location_expression,
   ada_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
   &ada_varobj_ops,
-  NULL,
   ada_is_string_type,
   "(...)"			/* la_struct_too_deep_ellipsis */
 };

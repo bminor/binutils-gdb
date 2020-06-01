@@ -1,5 +1,36 @@
 2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete la_compute_program
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(c_language::compute_program): New member function.
+	(cplus_language_data): Delete la_compute_program initializer.
+	(cplus_language::compute_program): New member function.
+	(asm_language_data): Delete la_compute_program initializer.
+	(minimal_language_data): Likewise.
+	* c-lang.h (c_compute_program): Update comment.
+	(cplus_compute_program): Likewise.
+	* compile/compile-c-support.c (c_compute_program): Likewise.
+	(cplus_compute_program): Likewise.
+	* compile/compile.c (compile_to_object): Update call to
+	la_compute_program.
+	* d-lang.c (d_language_data): Delete la_compute_program
+	initializer.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_compute_program field.
+	(language_defn::compute_program): New member function.
+	* m2-lang.c (m2_language_data): Delete la_compute_program
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data) Delete
 	la_class_name_from_physname initializer.
 	* c-lang.c (c_language_data): Likewise.

@@ -919,7 +919,6 @@ extern const struct language_data c_language_data =
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   &c_varobj_ops,
-  c_compute_program,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
@@ -944,6 +943,16 @@ public:
   compile_instance *get_compile_instance () const override
   {
     return c_get_compile_context ();
+  }
+
+  /* See language.h.  */
+  std::string compute_program (compile_instance *inst,
+			       const char *input,
+			       struct gdbarch *gdbarch,
+			       const struct block *expr_block,
+			       CORE_ADDR expr_pc) const override
+  {
+    return c_compute_program (inst, input, gdbarch, expr_block, expr_pc);
   }
 
   /* See language.h.  */
@@ -1025,7 +1034,6 @@ extern const struct language_data cplus_language_data =
   c_watch_location_expression,
   cp_get_symbol_name_matcher,
   &cplus_varobj_ops,
-  cplus_compute_program,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
@@ -1123,6 +1131,16 @@ public:
   }
 
   /* See language.h.  */
+  std::string compute_program (compile_instance *inst,
+			       const char *input,
+			       struct gdbarch *gdbarch,
+			       const struct block *expr_block,
+			       CORE_ADDR expr_pc) const override
+  {
+    return cplus_compute_program (inst, input, gdbarch, expr_block, expr_pc);
+  }
+
+  /* See language.h.  */
   unsigned int search_name_hash (const char *name) const override
   {
     return cp_search_name_hash (name);
@@ -1209,7 +1227,6 @@ extern const struct language_data asm_language_data =
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   &default_varobj_ops,
-  NULL,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
@@ -1280,7 +1297,6 @@ extern const struct language_data minimal_language_data =
   c_watch_location_expression,
   NULL,				/* la_get_symbol_name_matcher */
   &default_varobj_ops,
-  NULL,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };

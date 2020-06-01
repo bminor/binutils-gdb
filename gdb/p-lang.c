@@ -412,7 +412,6 @@ extern const struct language_data pascal_language_data =
   c_watch_location_expression,
   NULL,				/* la_compare_symbol_for_completion */
   &default_varobj_ops,
-  NULL,
   pascal_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
