@@ -1,5 +1,52 @@
 2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_lookup_symbol_nonlocal): Rename to
+	ada_language::lookup_symbol_nonlocal.
+	(ada_language_data): Delete la_lookup_symbol_nonlocal initializer.
+	(ada_language::lookup_symbol_nonlocal): New member function,
+	implementation from ada_lookup_symbol_nonlocal.
+	* c-lang.c (c_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	(cplus_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	(cplus_language::lookup_symbol_nonlocal): New member function.
+	(asm_language_data): Delete la_lookup_symbol_nonlocal initializer.
+	(minimal_language_data) Likewise.
+	* cp-namespace.c (cp_lookup_nested_symbol): Update comment.
+	* d-lang.c (d_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	(d_language::lookup_symbol_nonlocal): New member function.
+	* f-lang.c (f_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	(f_language::lookup_symbol_nonlocal): New member function.
+	* go-lang.c (go_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_lookup_symbol_nonlocal
+	field.
+	(language_defn::lookup_symbol_nonlocal): New member function.
+	* m2-lang.c (m2_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_lookup_symbol_nonlocal): Rename to
+	rust_language::lookup_symbol_nonlocal.
+	(rust_language_data): Delete la_lookup_symbol_nonlocal
+	initializer.
+	(rust_language::lookup_symbol_nonlocal): New member function,
+	implementation from rust_lookup_symbol_nonlocal.
+	* symtab.c (lookup_symbol_aux): Update call to
+	lookup_symbol_nonlocal.
+	(basic_lookup_symbol_nonlocal): Rename to...
+	(language_defn::lookup_symbol_nonlocal): ...this, and update
+	header comment.  Remove language_defn parameter, and replace with
+	uses of `this'.
+	* symtab.h (basic_lookup_symbol_nonlocal): Delete declaration.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Delete la_value_print_inner
 	initializer.
 	(ada_language::value_print_inner): New member function.

@@ -285,16 +285,6 @@ struct language_data
 
     const bool la_store_sym_names_in_linkage_form_p;
 
-    /* This is a function that lookup_symbol will call when it gets to
-       the part of symbol lookup where C looks up static and global
-       variables.  */
-
-    struct block_symbol (*la_lookup_symbol_nonlocal)
-      (const struct language_defn *,
-       const char *,
-       const struct block *,
-       const domain_enum);
-
     /* Table for printing expressions.  */
 
     const struct op_print *la_op_print_tab;
@@ -521,6 +511,15 @@ struct language_defn : language_data
     return default_collect_symbol_completion_matches_break_on
       (tracker, mode, name_match_type, text, word, "", code);
   }
+
+  /* This is a function that lookup_symbol will call when it gets to
+     the part of symbol lookup where C looks up static and global
+     variables.  This default implements the basic C lookup rules.  */
+
+  virtual struct block_symbol lookup_symbol_nonlocal
+	(const char *name,
+	 const struct block *block,
+	 const domain_enum domain) const;
 
   /* Return an expression that can be used for a location
      watchpoint.  TYPE is a pointer type that points to the memory

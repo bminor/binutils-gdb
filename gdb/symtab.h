@@ -1644,16 +1644,6 @@ extern struct block_symbol lookup_symbol_search_name (const char *search_name,
 						      const struct block *block,
 						      domain_enum domain);
 
-/* A default version of lookup_symbol_nonlocal for use by languages
-   that can't think of anything better to do.
-   This implements the C lookup rules.  */
-
-extern struct block_symbol
-  basic_lookup_symbol_nonlocal (const struct language_defn *langdef,
-				const char *,
-				const struct block *,
-				const domain_enum);
-
 /* Some helper functions for languages that need to write their own
    lookup_symbol_nonlocal functions.  */
 

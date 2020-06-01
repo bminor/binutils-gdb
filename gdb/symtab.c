@@ -2086,7 +2086,7 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
   /* Now do whatever is appropriate for LANGUAGE to look
      up static and global variables.  */
 
-  result = langdef->la_lookup_symbol_nonlocal (langdef, name, block, domain);
+  result = langdef->lookup_symbol_nonlocal (name, block, domain);
   if (result.symbol != NULL)
     {
       if (symbol_lookup_debug)
@@ -2401,13 +2401,12 @@ lookup_symbol_via_quick_fns (struct objfile *objfile,
   return result;
 }
 
-/* See symtab.h.  */
+/* See language.h.  */
 
 struct block_symbol
-basic_lookup_symbol_nonlocal (const struct language_defn *langdef,
-			      const char *name,
-			      const struct block *block,
-			      const domain_enum domain)
+language_defn::lookup_symbol_nonlocal (const char *name,
+				       const struct block *block,
+				       const domain_enum domain) const
 {
   struct block_symbol result;
 
@@ -2433,7 +2432,7 @@ basic_lookup_symbol_nonlocal (const struct language_defn *langdef,
 	gdbarch = target_gdbarch ();
       else
 	gdbarch = block_gdbarch (block);
-      result.symbol = language_lookup_primitive_type_as_symbol (langdef,
+      result.symbol = language_lookup_primitive_type_as_symbol (this,
 								gdbarch, name);
       result.block = NULL;
       if (result.symbol != NULL)

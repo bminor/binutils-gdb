@@ -151,7 +151,6 @@ extern const struct language_data d_language_data =
 				   syntax.  */
   "this",
   false,			/* la_store_sym_names_in_linkage_form_p */
-  d_lookup_symbol_nonlocal,
   d_op_print_tab,		/* Expression operators for printing.  */
   1,				/* C-style arrays.  */
   0,				/* String lower bound.  */
@@ -264,6 +263,15 @@ public:
 	 const struct value_print_options *options) const override
   {
     return d_value_print_inner (val, stream, recurse, options);
+  }
+
+  /* See language.h.  */
+
+  struct block_symbol lookup_symbol_nonlocal
+	(const char *name, const struct block *block,
+	 const domain_enum domain) const override
+  {
+    return d_lookup_symbol_nonlocal (this, name, block, domain);
   }
 };
 

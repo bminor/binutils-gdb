@@ -5764,46 +5764,6 @@ ada_lookup_symbol (const char *name, const struct block *block0,
   return info;
 }
 
-static struct block_symbol
-ada_lookup_symbol_nonlocal (const struct language_defn *langdef,
-			    const char *name,
-                            const struct block *block,
-                            const domain_enum domain)
-{
-  struct block_symbol sym;
-
-  sym = ada_lookup_symbol (name, block_static_block (block), domain);
-  if (sym.symbol != NULL)
-    return sym;
-
-  /* If we haven't found a match at this point, try the primitive
-     types.  In other languages, this search is performed before
-     searching for global symbols in order to short-circuit that
-     global-symbol search if it happens that the name corresponds
-     to a primitive type.  But we cannot do the same in Ada, because
-     it is perfectly legitimate for a program to declare a type which
-     has the same name as a standard type.  If looking up a type in
-     that situation, we have traditionally ignored the primitive type
-     in favor of user-defined types.  This is why, unlike most other
-     languages, we search the primitive types this late and only after
-     having searched the global symbols without success.  */
-
-  if (domain == VAR_DOMAIN)
-    {
-      struct gdbarch *gdbarch;
-
-      if (block == NULL)
-	gdbarch = target_gdbarch ();
-      else
-	gdbarch = block_gdbarch (block);
-      sym.symbol = language_lookup_primitive_type_as_symbol (langdef, gdbarch, name);
-      if (sym.symbol != NULL)
-	return sym;
-    }
-
-  return {};
-}
-
 
 /* True iff STR is a possible encoded suffix of a normal Ada name
    that is to be ignored for matching purposes.  Suffixes of parallel
@@ -13766,7 +13726,6 @@ extern const struct language_data ada_language_data =
   ada_print_typedef,            /* Print a typedef using appropriate syntax */
   NULL,                         /* name_of_this */
   true,                         /* la_store_sym_names_in_linkage_form_p */
-  ada_lookup_symbol_nonlocal,   /* Looking up non-local symbols.  */
   ada_op_print_tab,             /* expression operators for printing */
   0,                            /* c-style arrays */
   1,                            /* String lower bound */
@@ -14114,6 +14073,47 @@ public:
 	 const struct value_print_options *options) const override
   {
     return ada_value_print_inner (val, stream, recurse, options);
+  }
+
+  /* See language.h.  */
+
+  struct block_symbol lookup_symbol_nonlocal
+	(const char *name, const struct block *block,
+	 const domain_enum domain) const override
+  {
+    struct block_symbol sym;
+
+    sym = ada_lookup_symbol (name, block_static_block (block), domain);
+    if (sym.symbol != NULL)
+      return sym;
+
+    /* If we haven't found a match at this point, try the primitive
+       types.  In other languages, this search is performed before
+       searching for global symbols in order to short-circuit that
+       global-symbol search if it happens that the name corresponds
+       to a primitive type.  But we cannot do the same in Ada, because
+       it is perfectly legitimate for a program to declare a type which
+       has the same name as a standard type.  If looking up a type in
+       that situation, we have traditionally ignored the primitive type
+       in favor of user-defined types.  This is why, unlike most other
+       languages, we search the primitive types this late and only after
+       having searched the global symbols without success.  */
+
+    if (domain == VAR_DOMAIN)
+      {
+	struct gdbarch *gdbarch;
+
+	if (block == NULL)
+	  gdbarch = target_gdbarch ();
+	else
+	  gdbarch = block_gdbarch (block);
+	sym.symbol
+	  = language_lookup_primitive_type_as_symbol (this, gdbarch, name);
+	if (sym.symbol != NULL)
+	  return sym;
+      }
+
+    return {};
   }
 
 protected:

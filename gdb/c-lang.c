@@ -897,7 +897,6 @@ extern const struct language_data c_language_data =
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
-  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
@@ -1006,7 +1005,6 @@ extern const struct language_data cplus_language_data =
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   "this",                       /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
-  cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
@@ -1162,6 +1160,15 @@ public:
     return cp_class_name_from_physname (physname);
   }
 
+  /* See language.h.  */
+
+  struct block_symbol lookup_symbol_nonlocal
+	(const char *name, const struct block *block,
+	 const domain_enum domain) const override
+  {
+    return cp_lookup_symbol_nonlocal (this, name, block, domain);
+  }
+
 protected:
 
   /* See language.h.  */
@@ -1203,7 +1210,6 @@ extern const struct language_data asm_language_data =
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
-  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
@@ -1267,7 +1273,6 @@ extern const struct language_data minimal_language_data =
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
-  basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */

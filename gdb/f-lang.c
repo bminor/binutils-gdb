@@ -572,7 +572,6 @@ extern const struct language_data f_language_data =
   f_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,                    	/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
-  cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   f_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
@@ -705,6 +704,14 @@ public:
     return f_value_print_inner (val, stream, recurse, options);
   }
 
+  /* See language.h.  */
+
+  struct block_symbol lookup_symbol_nonlocal
+	(const char *name, const struct block *block,
+	 const domain_enum domain) const override
+  {
+    return cp_lookup_symbol_nonlocal (this, name, block, domain);
+  }
 
 protected:
 
