@@ -1,3 +1,11 @@
+2020-06-01  Alan Modra  <amodra@gmail.com>
+
+	* vms-alpha.c (_bfd_vms_slurp_etir): Check bound for the current
+	command against cmd_length, not the end of record.  For
+	ETIR__C_STO_IMMR check size against cmd_length, mask repeat count
+	to 32-bits and break out on zero size.  Add ETIR__C_STC_LP_PSB
+	cmd_length test.
+
 2020-05-28  David Faust  <david.faust@oracle.com>
 
 	* elf64-bpf.c (bpf_elf_relocate_section): Fix handling of
