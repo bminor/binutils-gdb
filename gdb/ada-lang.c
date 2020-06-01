@@ -488,17 +488,6 @@ add_angle_brackets (const char *str)
   return string_printf ("<%s>", str);
 }
 
-/* la_watch_location_expression for Ada.  */
-
-static gdb::unique_xmalloc_ptr<char>
-ada_watch_location_expression (struct type *type, CORE_ADDR addr)
-{
-  type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
-  std::string name = type_to_string (type);
-  return gdb::unique_xmalloc_ptr<char>
-    (xstrprintf ("{%s} %s", name.c_str (), core_addr_to_string (addr)));
-}
-
 /* Assuming V points to an array of S objects,  make sure that it contains at
    least M objects, updating V and S as necessary.  */
 
@@ -13783,7 +13772,6 @@ extern const struct language_data ada_language_data =
   ada_op_print_tab,             /* expression operators for printing */
   0,                            /* c-style arrays */
   1,                            /* String lower bound */
-  ada_watch_location_expression,
   &ada_varobj_ops,
   ada_is_string_type,
   "(...)"			/* la_struct_too_deep_ellipsis */
@@ -14100,6 +14088,17 @@ public:
 	      }
 	  }
       }
+  }
+
+  /* See language.h.  */
+
+  gdb::unique_xmalloc_ptr<char> watch_location_expression
+	(struct type *type, CORE_ADDR addr) const override
+  {
+    type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
+    std::string name = type_to_string (type);
+    return gdb::unique_xmalloc_ptr<char>
+      (xstrprintf ("{%s} %s", name.c_str (), core_addr_to_string (addr)));
   }
 
 protected:

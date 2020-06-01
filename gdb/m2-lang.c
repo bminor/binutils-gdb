@@ -376,7 +376,6 @@ extern const struct language_data m2_language_data =
   m2_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   0,				/* String lower bound */
-  c_watch_location_expression,
   &default_varobj_ops,
   m2_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */

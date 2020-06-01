@@ -10738,7 +10738,7 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
       CORE_ADDR addr = value_as_address (val.get ());
 
       w->exp_string_reparse
-	= current_language->la_watch_location_expression (t, addr).release ();
+	= current_language->watch_location_expression (t, addr).release ();
 
       w->exp_string = xstrprintf ("-location %.*s",
 				  (int) (exp_end - exp_start), exp_start);

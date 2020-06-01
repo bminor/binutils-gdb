@@ -727,17 +727,6 @@ evaluate_subexp_c (struct type *expect_type, struct expression *exp,
   return evaluate_subexp_standard (expect_type, exp, pos, noside);
 }
 
-/* la_watch_location_expression for C.  */
-
-gdb::unique_xmalloc_ptr<char>
-c_watch_location_expression (struct type *type, CORE_ADDR addr)
-{
-  type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
-  std::string name = type_to_string (type);
-  return gdb::unique_xmalloc_ptr<char>
-    (xstrprintf ("* (%s *) %s", name.c_str (), core_addr_to_string (addr)));
-}
-
 /* See c-lang.h.  */
 
 bool
@@ -914,7 +903,6 @@ extern const struct language_data c_language_data =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  c_watch_location_expression,
   &c_varobj_ops,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
@@ -1026,7 +1014,6 @@ extern const struct language_data cplus_language_data =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  c_watch_location_expression,
   &cplus_varobj_ops,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
@@ -1226,7 +1213,6 @@ extern const struct language_data asm_language_data =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  c_watch_location_expression,
   &default_varobj_ops,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
@@ -1293,7 +1279,6 @@ extern const struct language_data minimal_language_data =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  c_watch_location_expression,
   &default_varobj_ops,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */

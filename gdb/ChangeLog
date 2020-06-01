@@ -1,5 +1,48 @@
 2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_watch_location_expression): Rename to
+	ada_language::watch_location_expression.
+	(ada_language_data): Delete la_watch_location_expression
+	initializer.
+	(ada_language::watch_location_expression): New member function,
+	implementation from ada_watch_location_expression.
+	* breakpoint.c (watch_command_1): Update call to
+	watch_location_expression.
+	* c-lang.c (c_watch_location_expression): Rename to
+	language_defn::watch_location_expression.
+	(c_language_data): Delete la_watch_location_expression
+	initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* c-lang.h (c_watch_location_expression): Delete declaration.
+	* d-lang.c (d_language_data): Delete la_watch_location_expression
+	initializer.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (language_defn::watch_location_expression): Member
+	function implementation from c_watch_location_expression.
+	(unknown_language_data): Delete la_watch_location_expression
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_watch_location_expression
+	field.
+	(language_defn::watch_location_expression): Declare new member
+	function.
+	* m2-lang.c (m2_language_data): Delete
+	la_watch_location_expression initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_watch_location_expression): Rename to
+	rust_language::watch_location_expression.
+	(rust_language_data): Delete la_watch_location_expression
+	initializer.
+	(rust_language::watch_location_expression): New member function,
+	implementation from rust_watch_location_expression.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_collect_symbol_completion_matches): Rename to
 	ada_language::collect_symbol_completion_matches.
 	(ada_language_data): Delete la_collect_symbol_completion_matches

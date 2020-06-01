@@ -407,7 +407,6 @@ extern const struct language_data pascal_language_data =
   pascal_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  c_watch_location_expression,
   &default_varobj_ops,
   pascal_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */

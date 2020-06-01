@@ -578,7 +578,6 @@ extern const struct language_data f_language_data =
   f_op_print_tab,		/* expression operators for printing */
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
-  c_watch_location_expression,
   &default_varobj_ops,
   f_is_string_type_p,
   "(...)"			/* la_struct_too_deep_ellipsis */

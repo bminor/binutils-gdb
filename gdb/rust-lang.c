@@ -2006,20 +2006,6 @@ rust_lookup_symbol_nonlocal (const struct language_defn *langdef,
 
 
 
-/* la_watch_location_expression for Rust.  */
-
-static gdb::unique_xmalloc_ptr<char>
-rust_watch_location_expression (struct type *type, CORE_ADDR addr)
-{
-  type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
-  std::string name = type_to_string (type);
-  return gdb::unique_xmalloc_ptr<char>
-    (xstrprintf ("*(%s as *mut %s)", core_addr_to_string (addr),
-		 name.c_str ()));
-}
-
-
-
 static const struct exp_descriptor exp_descriptor_rust = 
 {
   rust_print_subexp,
@@ -2062,7 +2048,6 @@ extern const struct language_data rust_language_data =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  rust_watch_location_expression,
   &default_varobj_ops,
   rust_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
@@ -2142,6 +2127,18 @@ public:
     print_offset_data podata;
     rust_internal_print_type (type, varstring, stream, show, level,
 			      flags, false, &podata);
+  }
+
+  /* See language.h.  */
+
+  gdb::unique_xmalloc_ptr<char> watch_location_expression
+	(struct type *type, CORE_ADDR addr) const override
+  {
+    type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
+    std::string name = type_to_string (type);
+    return gdb::unique_xmalloc_ptr<char>
+      (xstrprintf ("*(%s as *mut %s)", core_addr_to_string (addr),
+		   name.c_str ()));
   }
 };
 

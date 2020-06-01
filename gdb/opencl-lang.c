@@ -1030,7 +1030,6 @@ extern const struct language_data opencl_language_data =
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  c_watch_location_expression,
   &default_varobj_ops,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */

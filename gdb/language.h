@@ -319,12 +319,6 @@ struct language_data
     /* Index to use for extracting the first element of a string.  */
     char string_lower_bound;
 
-    /* Return an expression that can be used for a location
-       watchpoint.  TYPE is a pointer type that points to the memory
-       to watch, and ADDR is the address of the watched memory.  */
-    gdb::unique_xmalloc_ptr<char> (*la_watch_location_expression)
-         (struct type *type, CORE_ADDR addr);
-
     /* Various operations on varobj.  */
     const struct lang_varobj_ops *la_varobj_ops;
 
@@ -539,6 +533,12 @@ struct language_defn : language_data
     return default_collect_symbol_completion_matches_break_on
       (tracker, mode, name_match_type, text, word, "", code);
   }
+
+  /* Return an expression that can be used for a location
+     watchpoint.  TYPE is a pointer type that points to the memory
+     to watch, and ADDR is the address of the watched memory.  */
+  virtual gdb::unique_xmalloc_ptr<char> watch_location_expression
+	(struct type *type, CORE_ADDR addr) const;
 
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];

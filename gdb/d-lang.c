@@ -157,7 +157,6 @@ extern const struct language_data d_language_data =
   d_op_print_tab,		/* Expression operators for printing.  */
   1,				/* C-style arrays.  */
   0,				/* String lower bound.  */
-  c_watch_location_expression,
   &default_varobj_ops,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */

@@ -622,6 +622,19 @@ language_defn::print_array_index (struct type *index_type, LONGEST index,
   fprintf_filtered (stream, "] = ");
 }
 
+/* See language.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+language_defn::watch_location_expression (struct type *type,
+					  CORE_ADDR addr) const
+{
+  /* Generates an expression that assumes a C like syntax is valid.  */
+  type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
+  std::string name = type_to_string (type);
+  return gdb::unique_xmalloc_ptr<char>
+    (xstrprintf ("* (%s *) %s", name.c_str (), core_addr_to_string (addr)));
+}
+
 /* The default implementation of the get_symbol_name_matcher_inner method
    from the language_defn class.  Matches with strncmp_iw.  */
 
@@ -779,7 +792,6 @@ extern const struct language_data unknown_language_data =
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  c_watch_location_expression,
   &default_varobj_ops,
   default_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
@@ -850,7 +862,6 @@ extern const struct language_data auto_language_data =
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
-  c_watch_location_expression,
   &default_varobj_ops,
   default_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
