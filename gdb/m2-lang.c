@@ -369,7 +369,6 @@ extern const struct language_data m2_language_data =
   m2_emit_char,			/* Function to print a single character */
   m2_print_typedef,		/* Print a typedef using appropriate syntax */
   m2_value_print_inner,		/* la_value_print_inner */
-  c_value_print,		/* Print a top-level value */
   NULL,		                /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */

@@ -2041,7 +2041,6 @@ extern const struct language_data rust_language_data =
   rust_emitchar,		/* Print a single char */
   rust_print_typedef,		/* Print a typedef using appropriate syntax */
   rust_value_print_inner,	/* la_value_print_inner */
-  c_value_print,		/* Print a top-level value */
   NULL,				/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   rust_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */

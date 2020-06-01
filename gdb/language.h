@@ -265,11 +265,6 @@ struct language_data
 				  int recurse,
 				  const struct value_print_options *);
 
-    /* Print a top-level value using syntax appropriate for this language.  */
-
-    void (*la_value_print) (struct value *, struct ui_file *,
-			    const struct value_print_options *);
-
     /* Now come some hooks for lookup_symbol.  */
 
     /* If this is non-NULL, specifies the name that of the implicit
@@ -543,6 +538,10 @@ struct language_defn : language_data
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];
 
+  /* Print a top-level value using syntax appropriate for this language.  */
+  virtual void value_print (struct value *val, struct ui_file *stream,
+			    const struct value_print_options *options) const;
+
 protected:
 
   /* This is the overridable part of the GET_SYMBOL_NAME_MATCHER method.
@@ -642,7 +641,7 @@ extern enum language set_language (enum language);
   (current_language->la_print_typedef(type,new_symbol,stream))
 
 #define LA_VALUE_PRINT(val,stream,options) \
-  (current_language->la_value_print(val,stream,options))
+  (current_language->value_print (val,stream,options))
 
 #define LA_PRINT_CHAR(ch, type, stream) \
   (current_language->la_printchar(ch, type, stream))

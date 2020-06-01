@@ -13765,7 +13765,6 @@ extern const struct language_data ada_language_data =
   emit_char,                    /* Function to print single char (not used) */
   ada_print_typedef,            /* Print a typedef using appropriate syntax */
   ada_value_print_inner,	/* la_value_print_inner */
-  ada_value_print,              /* Print a top-level value */
   NULL,                         /* name_of_this */
   true,                         /* la_store_sym_names_in_linkage_form_p */
   ada_lookup_symbol_nonlocal,   /* Looking up non-local symbols.  */
@@ -14099,6 +14098,14 @@ public:
     std::string name = type_to_string (type);
     return gdb::unique_xmalloc_ptr<char>
       (xstrprintf ("{%s} %s", name.c_str (), core_addr_to_string (addr)));
+  }
+
+  /* See language.h.  */
+
+  void value_print (struct value *val, struct ui_file *stream,
+		    const struct value_print_options *options) const override
+  {
+    return ada_value_print (val, stream, options);
   }
 
 protected:

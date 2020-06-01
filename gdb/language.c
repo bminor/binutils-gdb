@@ -57,9 +57,6 @@ static void unk_lang_emit_char (int c, struct type *type,
 static void unk_lang_printchar (int c, struct type *type,
 				struct ui_file *stream);
 
-static void unk_lang_value_print (struct value *, struct ui_file *,
-				  const struct value_print_options *);
-
 /* The current (default at startup) state of type and range checking.
    (If the modes are set to "auto", though, these are changed based
    on the default language at startup, and then again based on the
@@ -635,6 +632,15 @@ language_defn::watch_location_expression (struct type *type,
     (xstrprintf ("* (%s *) %s", name.c_str (), core_addr_to_string (addr)));
 }
 
+/* See language.h.  */
+
+void
+language_defn::value_print (struct value *val, struct ui_file *stream,
+	       const struct value_print_options *options) const
+{
+  return c_value_print (val, stream, options);
+}
+
 /* The default implementation of the get_symbol_name_matcher_inner method
    from the language_defn class.  Matches with strncmp_iw.  */
 
@@ -742,14 +748,6 @@ unk_lang_value_print_inner (struct value *val,
 	   "function unk_lang_value_print_inner called."));
 }
 
-static void
-unk_lang_value_print (struct value *val, struct ui_file *stream,
-		      const struct value_print_options *options)
-{
-  error (_("internal error - unimplemented "
-	   "function unk_lang_value_print called."));
-}
-
 static const struct op_print unk_op_print_tab[] =
 {
   {NULL, OP_NULL, PREC_NULL, 0}
@@ -785,7 +783,6 @@ extern const struct language_data unknown_language_data =
   unk_lang_emit_char,
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_value_print_inner,	/* la_value_print_inner */
-  unk_lang_value_print,		/* Print a top-level value */
   "this",        	    	/* name_of_this */
   true,				/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal, /* lookup_symbol_nonlocal */
@@ -829,6 +826,14 @@ public:
     /* The unknown language just uses the C++ demangler.  */
     return gdb_demangle (mangled, options);
   }
+
+  /* See language.h.  */
+
+  void value_print (struct value *val, struct ui_file *stream,
+		    const struct value_print_options *options) const override
+  {
+    error (_("unimplemented unknown_language::value_print called"));
+  }
 };
 
 /* Single instance of the unknown language class.  */
@@ -855,7 +860,6 @@ extern const struct language_data auto_language_data =
   unk_lang_emit_char,
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_value_print_inner,	/* la_value_print_inner */
-  unk_lang_value_print,		/* Print a top-level value */
   "this",		        /* name_of_this */
   false,			/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
@@ -898,6 +902,14 @@ public:
   {
     /* The auto language just uses the C++ demangler.  */
     return gdb_demangle (mangled, options);
+  }
+
+  /* See language.h.  */
+
+  void value_print (struct value *val, struct ui_file *stream,
+		    const struct value_print_options *options) const override
+  {
+    error (_("unimplemented auto_language::value_print called"));
   }
 };
 

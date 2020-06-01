@@ -1,5 +1,34 @@
 2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete la_value_print
+	initializer.
+	(ada_language::value_print): New member function.
+	* c-lang.c (c_language_data): Delete la_value_print initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unk_lang_value_print): Delete.
+	(language_defn::value_print): Define new member function.
+	(unknown_language_data): Delete la_value_print initializer.
+	(unknown_language::value_print): New member function.
+	(auto_language_data): Delete la_value_print initializer.
+	(auto_language::value_print): New member function.
+	* language.h (language_data): Delete la_value_print field.
+	(language_defn::value_print): Declare new member function.
+	(LA_VALUE_PRINT): Update call to value_print.
+	* m2-lang.c (m2_language_data): Delete la_value_print initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	(pascal_language::value_print): New member function.
+	* rust-lang.c (rust_language_data): Delete la_value_print
+	initializer.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_watch_location_expression): Rename to
 	ada_language::watch_location_expression.
 	(ada_language_data): Delete la_watch_location_expression

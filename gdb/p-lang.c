@@ -400,7 +400,6 @@ extern const struct language_data pascal_language_data =
   pascal_emit_char,		/* Print a single char */
   pascal_print_typedef,		/* Print a typedef using appropriate syntax */
   pascal_value_print_inner,	/* la_value_print_inner */
-  pascal_value_print,		/* Print a top-level value */
   "this",		        /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
@@ -477,6 +476,14 @@ public:
 		   const struct type_print_options *flags) const override
   {
     pascal_print_type (type, varstring, stream, show, level, flags);
+  }
+
+  /* See language.h.  */
+
+  void value_print (struct value *val, struct ui_file *stream,
+		    const struct value_print_options *options) const override
+  {
+    return pascal_value_print (val, stream, options);
   }
 };
 
