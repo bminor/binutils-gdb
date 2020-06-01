@@ -338,19 +338,6 @@ struct language_data
     gdb::unique_xmalloc_ptr<char> (*la_watch_location_expression)
          (struct type *type, CORE_ADDR addr);
 
-    /* Return a pointer to the function that should be used to match a
-       symbol name against LOOKUP_NAME, according to this language's
-       rules.  The matching algorithm depends on LOOKUP_NAME.  For
-       example, on Ada, the matching algorithm depends on the symbol
-       name (wild/full/verbatim matching), and on whether we're doing
-       a normal lookup or a completion match lookup.
-
-       This field may be NULL, in which case
-       default_symbol_name_matcher is used to perform the
-       matching.  */
-    symbol_name_matcher_ftype *(*la_get_symbol_name_matcher)
-      (const lookup_name_info &);
-
     /* Various operations on varobj.  */
     const struct lang_varobj_ops *la_varobj_ops;
 
@@ -443,6 +430,20 @@ struct language_defn : language_data
     return ::iterate_over_symbols (block, name, domain, callback);
   }
 
+  /* Return a pointer to the function that should be used to match a
+     symbol name against LOOKUP_NAME, according to this language's
+     rules.  The matching algorithm depends on LOOKUP_NAME.  For
+     example, on Ada, the matching algorithm depends on the symbol
+     name (wild/full/verbatim matching), and on whether we're doing
+     a normal lookup or a completion match lookup.
+
+     As Ada wants to capture symbol matching for all languages in some
+     cases, then this method is a non-overridable interface.  Languages
+     should override GET_SYMBOL_NAME_MATCHER_INNER if they need to.  */
+
+  symbol_name_matcher_ftype *get_symbol_name_matcher
+	(const lookup_name_info &lookup_name) const;
+
   /* If this language allows compilation from the gdb command line, then
      this method will return an instance of struct gcc_context appropriate
      to the language.  If compilation for this language is generally
@@ -530,6 +531,14 @@ struct language_defn : language_data
 
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];
+
+protected:
+
+  /* This is the overridable part of the GET_SYMBOL_NAME_MATCHER method.
+     See that method for a description of the arguments.  */
+
+  virtual symbol_name_matcher_ftype *get_symbol_name_matcher_inner
+	  (const lookup_name_info &lookup_name) const;
 };
 
 /* Pointer to the language_defn for our current language.  This pointer
@@ -697,13 +706,6 @@ void c_get_string (struct value *value,
 		   gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
 		   int *length, struct type **char_type,
 		   const char **charset);
-
-/* The default implementation of la_symbol_name_matcher.  Matches with
-   strncmp_iw.  */
-extern bool default_symbol_name_matcher
-  (const char *symbol_search_name,
-   const lookup_name_info &lookup_name,
-   completion_match_result *comp_match_res);
 
 /* Get LANG's symbol_name_matcher method for LOOKUP_NAME.  Returns
    default_symbol_name_matcher if not set.  LANG is used as a hint;

@@ -127,8 +127,7 @@ extern struct type *cp_lookup_rtti_type (const char *name,
    "function" or "bar::function" in all namespaces is possible.  */
 extern unsigned int cp_search_name_hash (const char *search_name);
 
-/* Implement the "la_get_symbol_name_matcher" language_defn method for
-   C++.  */
+/* Implement the "get_symbol_name_matcher" language_defn method for C++.  */
 extern symbol_name_matcher_ftype *cp_get_symbol_name_matcher
   (const lookup_name_info &lookup_name);
 

@@ -917,7 +917,6 @@ extern const struct language_data c_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_matcher */
   &c_varobj_ops,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
@@ -1032,7 +1031,6 @@ extern const struct language_data cplus_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
-  cp_get_symbol_name_matcher,
   &cplus_varobj_ops,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
@@ -1184,6 +1182,16 @@ public:
   {
     return cp_class_name_from_physname (physname);
   }
+
+protected:
+
+  /* See language.h.  */
+
+  symbol_name_matcher_ftype *get_symbol_name_matcher_inner
+	(const lookup_name_info &lookup_name) const override
+  {
+    return cp_get_symbol_name_matcher (lookup_name);
+  }
 };
 
 /* The single instance of the C++ language class.  */
@@ -1225,7 +1233,6 @@ extern const struct language_data asm_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_matcher */
   &default_varobj_ops,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
@@ -1295,7 +1302,6 @@ extern const struct language_data minimal_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_matcher */
   &default_varobj_ops,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */

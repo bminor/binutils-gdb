@@ -1,5 +1,64 @@
 2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_get_symbol_name_matcher): Update header comment.
+	(ada_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	(language_defn::get_symbol_name_matcher_inner): New member
+	function.
+	* c-lang.c (c_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	(cplus_language_data): Likewise.
+	(cplus_language::get_symbol_name_matcher_inner): New member
+	function.
+	(asm_language_data): Delete la_get_symbol_name_matcher initializer.
+	(minimal_language_data): Likewise.
+	* cp-support.h (cp_get_symbol_name_matcher): Update header comment.
+	* d-lang.c (d_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	* dictionary.c (iter_match_first_hashed): Update call to
+	get_symbol_name_matcher.
+	(iter_match_next_hashed): Likewise.
+	(iter_match_next_linear): Likewise.
+	* dwarf2/read.c (dw2_expand_symtabs_matching_symbol): Likewise.
+	* f-lang.c (f_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	(f_language::get_symbol_name_matcher_inner): New member function.
+	* go-lang.c (go_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	* language.c (default_symbol_name_matcher): Update header comment,
+	make static.
+	(language_defn::get_symbol_name_matcher): New definition.
+	(language_defn::get_symbol_name_matcher_inner): Likewise.
+	(get_symbol_name_matcher): Delete.
+	(unknown_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_get_symbol_name_matcher
+	field.
+	(language_defn::get_symbol_name_matcher): New member function.
+	(language_defn::get_symbol_name_matcher_inner): Likewise.
+	(default_symbol_name_matcher): Delete declaration.
+	* linespec.c (find_methods): Update call to
+	get_symbol_name_matcher.
+	* m2-lang.c (m2_language_data): Delete la_get_symbol_name_matcher
+	initializer.
+	* minsyms.c (lookup_minimal_symbol): Update call to
+	get_symbol_name_matcher.
+	(iterate_over_minimal_symbols): Likewise.
+	* objc-lang.c (objc_language_data): Delete
+	la_get_symbol_name_matcher initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* psymtab.c (psymbol_name_matches): Update call to
+	get_symbol_name_matcher.
+	* rust-lang.c (rust_language_data): Delete
+	la_get_symbol_name_matcher initializer.
+	* symtab.c (symbol_matches_search_name): Update call to
+	get_symbol_name_matcher.
+	(compare_symbol_name): Likewise.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Delete la_compute_program
 	initializer.
 	* c-lang.c (c_language_data): Likewise.

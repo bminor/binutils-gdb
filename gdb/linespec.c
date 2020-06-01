@@ -1232,7 +1232,7 @@ find_methods (struct type *t, enum language t_lang, const char *name,
       int method_counter;
       lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
       symbol_name_matcher_ftype *symbol_name_compare
-	= get_symbol_name_matcher (language_def (t_lang), lookup_name);
+	= language_def (t_lang)->get_symbol_name_matcher (lookup_name);
 
       t = check_typedef (t);
 

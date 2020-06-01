@@ -620,7 +620,6 @@ extern const struct language_data f_language_data =
   f_word_break_characters,
   f_collect_symbol_completion_matches,
   c_watch_location_expression,
-  cp_get_symbol_name_matcher,	/* la_get_symbol_name_matcher */
   &default_varobj_ops,
   f_is_string_type_p,
   "(...)"			/* la_struct_too_deep_ellipsis */
@@ -698,6 +697,16 @@ public:
 		   const struct type_print_options *flags) const override
   {
     f_print_type (type, varstring, stream, show, level, flags);
+  }
+
+protected:
+
+  /* See language.h.  */
+
+  symbol_name_matcher_ftype *get_symbol_name_matcher_inner
+	(const lookup_name_info &lookup_name) const override
+  {
+    return cp_get_symbol_name_matcher (lookup_name);
   }
 };
 

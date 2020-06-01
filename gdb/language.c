@@ -622,9 +622,10 @@ language_defn::print_array_index (struct type *index_type, LONGEST index,
   fprintf_filtered (stream, "] = ");
 }
 
-/* See language.h.  */
+/* The default implementation of the get_symbol_name_matcher_inner method
+   from the language_defn class.  Matches with strncmp_iw.  */
 
-bool
+static bool
 default_symbol_name_matcher (const char *symbol_search_name,
 			     const lookup_name_info &lookup_name,
 			     completion_match_result *comp_match_res)
@@ -649,6 +650,31 @@ default_symbol_name_matcher (const char *symbol_search_name,
 
 /* See language.h.  */
 
+symbol_name_matcher_ftype *
+language_defn::get_symbol_name_matcher
+	(const lookup_name_info &lookup_name) const
+{
+  /* If currently in Ada mode, and the lookup name is wrapped in
+     '<...>', hijack all symbol name comparisons using the Ada
+     matcher, which handles the verbatim matching.  */
+  if (current_language->la_language == language_ada
+      && lookup_name.ada ().verbatim_p ())
+    return current_language->get_symbol_name_matcher_inner (lookup_name);
+
+  return this->get_symbol_name_matcher_inner (lookup_name);
+}
+
+/* See language.h.  */
+
+symbol_name_matcher_ftype *
+language_defn::get_symbol_name_matcher_inner
+	(const lookup_name_info &lookup_name) const
+{
+  return default_symbol_name_matcher;
+}
+
+/* See language.h.  */
+
 bool
 default_is_string_type_p (struct type *type)
 {
@@ -659,24 +685,6 @@ default_is_string_type_p (struct type *type)
       type = check_typedef (type);
     }
   return (type->code ()  == TYPE_CODE_STRING);
-}
-
-/* See language.h.  */
-
-symbol_name_matcher_ftype *
-get_symbol_name_matcher (const language_defn *lang,
-			 const lookup_name_info &lookup_name)
-{
-  /* If currently in Ada mode, and the lookup name is wrapped in
-     '<...>', hijack all symbol name comparisons using the Ada
-     matcher, which handles the verbatim matching.  */
-  if (current_language->la_language == language_ada
-      && lookup_name.ada ().verbatim_p ())
-    return current_language->la_get_symbol_name_matcher (lookup_name);
-
-  if (lang->la_get_symbol_name_matcher != nullptr)
-    return lang->la_get_symbol_name_matcher (lookup_name);
-  return default_symbol_name_matcher;
 }
 
 /* Define the language that is no language.  */
@@ -774,7 +782,6 @@ extern const struct language_data unknown_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_matcher */
   &default_varobj_ops,
   default_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
@@ -848,7 +855,6 @@ extern const struct language_data auto_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_matcher */
   &default_varobj_ops,
   default_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */

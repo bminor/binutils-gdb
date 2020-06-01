@@ -410,7 +410,6 @@ extern const struct language_data pascal_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
-  NULL,				/* la_compare_symbol_for_completion */
   &default_varobj_ops,
   pascal_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */

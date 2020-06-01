@@ -354,7 +354,6 @@ extern const struct language_data objc_language_data =
   default_word_break_characters,
   default_collect_symbol_completion_matches,
   c_watch_location_expression,
-  NULL,				/* la_get_symbol_name_matcher */
   &default_varobj_ops,
   c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */

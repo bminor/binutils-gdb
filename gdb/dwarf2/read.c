@@ -4097,7 +4097,7 @@ dw2_expand_symtabs_matching_symbol
 
       const language_defn *lang = language_def (lang_e);
       symbol_name_matcher_ftype *name_matcher
-	= get_symbol_name_matcher (lang, lookup_name_without_params);
+	= lang->get_symbol_name_matcher (lookup_name_without_params);
 
       name_and_matcher key {
          name_matcher,
