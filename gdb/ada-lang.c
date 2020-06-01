@@ -13764,7 +13764,6 @@ extern const struct language_data ada_language_data =
   ada_printstr,                 /* Function to print string constant */
   emit_char,                    /* Function to print single char (not used) */
   ada_print_typedef,            /* Print a typedef using appropriate syntax */
-  ada_value_print_inner,	/* la_value_print_inner */
   NULL,                         /* name_of_this */
   true,                         /* la_store_sym_names_in_linkage_form_p */
   ada_lookup_symbol_nonlocal,   /* Looking up non-local symbols.  */
@@ -14106,6 +14105,15 @@ public:
 		    const struct value_print_options *options) const override
   {
     return ada_value_print (val, stream, options);
+  }
+
+  /* See language.h.  */
+
+  void value_print_inner
+	(struct value *val, struct ui_file *stream, int recurse,
+	 const struct value_print_options *options) const override
+  {
+    return ada_value_print_inner (val, stream, recurse, options);
   }
 
 protected:

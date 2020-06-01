@@ -2040,7 +2040,6 @@ extern const struct language_data rust_language_data =
   rust_printstr,		/* Function to print string constant */
   rust_emitchar,		/* Print a single char */
   rust_print_typedef,		/* Print a typedef using appropriate syntax */
-  rust_value_print_inner,	/* la_value_print_inner */
   NULL,				/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   rust_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
@@ -2138,6 +2137,15 @@ public:
     return gdb::unique_xmalloc_ptr<char>
       (xstrprintf ("*(%s as *mut %s)", core_addr_to_string (addr),
 		   name.c_str ()));
+  }
+
+  /* See language.h.  */
+
+  void value_print_inner
+	(struct value *val, struct ui_file *stream, int recurse,
+	 const struct value_print_options *options) const override
+  {
+    return rust_value_print_inner (val, stream, recurse, options);
   }
 };
 

@@ -211,7 +211,7 @@ static const struct generic_val_print_decorations f_decorations =
 /* See f-lang.h.  */
 
 void
-f_value_print_innner (struct value *val, struct ui_file *stream, int recurse,
+f_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 		      const struct value_print_options *options)
 {
   struct type *type = check_typedef (value_type (val));

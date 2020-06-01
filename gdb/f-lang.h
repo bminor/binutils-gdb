@@ -38,7 +38,7 @@ extern void f_print_type (struct type *, const char *, struct ui_file *, int,
 
 /* Implement la_value_print_inner for Fortran.  */
 
-extern void f_value_print_innner (struct value *val, struct ui_file *stream,
+extern void f_value_print_inner (struct value *val, struct ui_file *stream,
 				  int recurse,
 				  const struct value_print_options *options);
 

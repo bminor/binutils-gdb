@@ -641,6 +641,16 @@ language_defn::value_print (struct value *val, struct ui_file *stream,
   return c_value_print (val, stream, options);
 }
 
+/* See language.h.  */
+
+void
+language_defn::value_print_inner
+	(struct value *val, struct ui_file *stream, int recurse,
+	 const struct value_print_options *options) const
+{
+  return c_value_print_inner (val, stream, recurse, options);
+}
+
 /* The default implementation of the get_symbol_name_matcher_inner method
    from the language_defn class.  Matches with strncmp_iw.  */
 
@@ -739,15 +749,6 @@ unk_lang_printstr (struct ui_file *stream, struct type *type,
 	   "function unk_lang_printstr called."));
 }
 
-static void
-unk_lang_value_print_inner (struct value *val,
-			    struct ui_file *stream, int recurse,
-			    const struct value_print_options *options)
-{
-  error (_("internal error - unimplemented "
-	   "function unk_lang_value_print_inner called."));
-}
-
 static const struct op_print unk_op_print_tab[] =
 {
   {NULL, OP_NULL, PREC_NULL, 0}
@@ -782,7 +783,6 @@ extern const struct language_data unknown_language_data =
   unk_lang_printstr,
   unk_lang_emit_char,
   default_print_typedef,	/* Print a typedef using appropriate syntax */
-  unk_lang_value_print_inner,	/* la_value_print_inner */
   "this",        	    	/* name_of_this */
   true,				/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal, /* lookup_symbol_nonlocal */
@@ -834,6 +834,15 @@ public:
   {
     error (_("unimplemented unknown_language::value_print called"));
   }
+
+  /* See language.h.  */
+
+  void value_print_inner
+	(struct value *val, struct ui_file *stream, int recurse,
+	 const struct value_print_options *options) const override
+  {
+    error (_("unimplemented unknown_language::value_print_inner called"));
+  }
 };
 
 /* Single instance of the unknown language class.  */
@@ -859,7 +868,6 @@ extern const struct language_data auto_language_data =
   unk_lang_printstr,
   unk_lang_emit_char,
   default_print_typedef,	/* Print a typedef using appropriate syntax */
-  unk_lang_value_print_inner,	/* la_value_print_inner */
   "this",		        /* name_of_this */
   false,			/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
@@ -910,6 +918,15 @@ public:
 		    const struct value_print_options *options) const override
   {
     error (_("unimplemented auto_language::value_print called"));
+  }
+
+  /* See language.h.  */
+
+  void value_print_inner
+	(struct value *val, struct ui_file *stream, int recurse,
+	 const struct value_print_options *options) const override
+  {
+    error (_("unimplemented auto_language::value_print_inner called"));
   }
 };
 

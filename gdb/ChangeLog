@@ -1,5 +1,49 @@
 2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete la_value_print_inner
+	initializer.
+	(ada_language::value_print_inner): New member function.
+	* c-lang.c (c_language_data): Delete la_value_print_inner
+	initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	(d_language::value_print_inner): New member function.
+	* f-lang.c (f_language_data): Delete la_value_print_inner
+	initializer.
+	(f_language::value_print_inner): New member function.
+	* f-lang.h (f_value_print_innner): Rename to...
+	(f_value_print_inner): ...this (note spelling of 'inner').
+	* f-valprint.c (f_value_print_innner): Rename to...
+	(f_value_print_inner): ...this (note spelling of 'inner').
+	* go-lang.c (go_language_data): Delete la_value_print_inner
+	initializer.
+	(go_language::value_print_inner): New member function.
+	* language.c (language_defn::value_print_inner): Define new member
+	function.
+	(unk_lang_value_print_inner): Delete.
+	(unknown_language_data): Delete la_value_print_inner initializer.
+	(unknown_language::value_print_inner): New member function.
+	(auto_language_data): Delete la_value_print_inner initializer.
+	(auto_language::value_print_inner): New member function.
+	* language.h (language_data): Delete la_value_print_inner field.
+	(language_defn::value_print_inner): Delcare new member function.
+	* m2-lang.c (m2_language_data): Delete la_value_print_inner
+	initializer.
+	(m2_language::value_print_inner): New member function.
+	* objc-lang.c (objc_language_data): Delete la_value_print_inner
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	(pascal_language::value_print_inner): New member function.
+	* rust-lang.c (rust_language_data): Delete la_value_print_inner
+	initializer.
+	(rust_language::value_print_inner): New member function.
+	* valprint.c (do_val_print): Update call to value_print_inner.
+
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Delete la_value_print
 	initializer.
 	(ada_language::value_print): New member function.

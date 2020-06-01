@@ -979,7 +979,7 @@ do_val_print (struct value *value, struct ui_file *stream, int recurse,
 
   try
     {
-      language->la_value_print_inner (value, stream, recurse, &local_opts);
+      language->value_print_inner (value, stream, recurse, &local_opts);
     }
   catch (const gdb_exception_error &except)
     {

@@ -258,13 +258,6 @@ struct language_data
     void (*la_print_typedef) (struct type *type, struct symbol *new_symbol,
 			      struct ui_file *stream);
 
-    /* Print a value using syntax appropriate for this language.
-       RECURSE is the recursion depth.  It is zero-based.  */
-
-    void (*la_value_print_inner) (struct value *, struct ui_file *,
-				  int recurse,
-				  const struct value_print_options *);
-
     /* Now come some hooks for lookup_symbol.  */
 
     /* If this is non-NULL, specifies the name that of the implicit
@@ -541,6 +534,12 @@ struct language_defn : language_data
   /* Print a top-level value using syntax appropriate for this language.  */
   virtual void value_print (struct value *val, struct ui_file *stream,
 			    const struct value_print_options *options) const;
+
+  /* Print a value using syntax appropriate for this language.  RECURSE is
+     the recursion depth.  It is zero-based.  */
+  virtual void value_print_inner
+	(struct value *val, struct ui_file *stream, int recurse,
+	 const struct value_print_options *options) const;
 
 protected:
 

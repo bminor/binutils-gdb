@@ -534,7 +534,6 @@ extern const struct language_data go_language_data =
   c_emit_char,			/* Print a single char.  */
   c_print_typedef,		/* Print a typedef using appropriate
 				   syntax.  */
-  go_value_print_inner,		/* la_value_print_inner */
   NULL,				/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal, 
@@ -630,6 +629,15 @@ public:
 		   const struct type_print_options *flags) const override
   {
     go_print_type (type, varstring, stream, show, level, flags);
+  }
+
+  /* See language.h.  */
+
+  void value_print_inner
+	(struct value *val, struct ui_file *stream, int recurse,
+	 const struct value_print_options *options) const override
+  {
+    return go_value_print_inner (val, stream, recurse, options);
   }
 };
 
