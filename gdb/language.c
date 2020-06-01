@@ -589,16 +589,6 @@ language_demangle (const struct language_defn *current_language,
   return NULL;
 }
 
-/* Return class name from physname or NULL.  */
-char *
-language_class_name_from_physname (const struct language_defn *lang,
-				   const char *physname)
-{
-  if (lang != NULL && lang->la_class_name_from_physname)
-    return lang->la_class_name_from_physname (physname);
-  return NULL;
-}
-
 /* Return information about whether TYPE should be passed
    (and returned) by reference at the language level.  */
 
@@ -739,11 +729,6 @@ unk_lang_value_print (struct value *val, struct ui_file *stream,
 	   "function unk_lang_value_print called."));
 }
 
-static char *unk_lang_class_name (const char *mangled)
-{
-  return NULL;
-}
-
 static const struct op_print unk_op_print_tab[] =
 {
   {NULL, OP_NULL, PREC_NULL, 0}
@@ -783,8 +768,6 @@ extern const struct language_data unknown_language_data =
   "this",        	    	/* name_of_this */
   true,				/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal, /* lookup_symbol_nonlocal */
-  unk_lang_class_name,		/* Language specific
-				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
@@ -860,8 +843,6 @@ extern const struct language_data auto_language_data =
   "this",		        /* name_of_this */
   false,			/* store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  unk_lang_class_name,		/* Language specific
-				   class_name_from_physname */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */

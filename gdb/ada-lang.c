@@ -13914,8 +13914,6 @@ extern const struct language_data ada_language_data =
   NULL,                         /* name_of_this */
   true,                         /* la_store_sym_names_in_linkage_form_p */
   ada_lookup_symbol_nonlocal,   /* Looking up non-local symbols.  */
-  NULL,                         /* Language specific
-				   class_name_from_physname */
   ada_op_print_tab,             /* expression operators for printing */
   0,                            /* c-style arrays */
   1,                            /* String lower bound */

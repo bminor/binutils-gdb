@@ -1027,8 +1027,6 @@ extern const struct language_data opencl_language_data =
   NULL,                         /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  NULL,				/* Language specific
-				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */

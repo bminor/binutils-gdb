@@ -304,9 +304,6 @@ struct language_data
        const struct block *,
        const domain_enum);
 
-    /* Return class name of a mangled method name or NULL.  */
-    char *(*la_class_name_from_physname) (const char *physname);
-
     /* Table for printing expressions.  */
 
     const struct op_print *la_op_print_tab;
@@ -523,6 +520,12 @@ struct language_defn : language_data
     return (CORE_ADDR) 0;
   }
 
+  /* Return class name of a mangled method name or NULL.  */
+  virtual char *class_name_from_physname (const char *physname) const
+  {
+    return nullptr;
+  }
+
   /* List of all known languages.  */
   static const struct language_defn *languages[nr_languages];
 };
@@ -676,10 +679,6 @@ extern CORE_ADDR skip_language_trampoline (struct frame_info *, CORE_ADDR pc);
 /* Return demangled language symbol, or NULL.  */
 extern char *language_demangle (const struct language_defn *current_language, 
 				const char *mangled, int options);
-
-/* Return class name from physname, or NULL.  */
-extern char *language_class_name_from_physname (const struct language_defn *,
-					        const char *physname);
 
 /* Splitting strings into words.  */
 extern const char *default_word_break_characters (void);

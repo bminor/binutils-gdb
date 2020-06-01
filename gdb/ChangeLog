@@ -1,3 +1,36 @@
+2020-06-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data) Delete
+	la_class_name_from_physname initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(cplus_language::class_name_from_physname): New member function.
+	(asm_language_data): Delete la_class_name_from_physname
+	initializer.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* dwarf2/read.c (guess_partial_die_structure_name): Update to call
+	method on language_defn class.
+	(guess_full_die_structure_name): Likewise.
+	* f-lang.c (f_language_data): Delete la_class_name_from_physname
+	initializer.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (language_class_name_from_physname): Delete.
+	(unk_lang_class_name): Delete.
+	(unknown_language_data): Delete la_class_name_from_physname
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_class_name_from_physname
+	field.
+	(language_defn::class_name_from_physname): New function.
+	(language_class_name_from_physname): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_class_name_from_physname
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
 2020-06-16  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-data.h (STATUS_NAME): New macro.

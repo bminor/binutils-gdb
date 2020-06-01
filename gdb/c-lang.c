@@ -911,8 +911,6 @@ extern const struct language_data c_language_data =
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  NULL,				/* Language specific
-				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
@@ -1019,8 +1017,6 @@ extern const struct language_data cplus_language_data =
   "this",                       /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  cp_class_name_from_physname,  /* Language specific
-				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
@@ -1163,6 +1159,13 @@ public:
   {
     return cplus_skip_trampoline (fi, pc);
   }
+
+  /* See language.h.  */
+
+  char *class_name_from_physname (const char *physname) const override
+  {
+    return cp_class_name_from_physname (physname);
+  }
 };
 
 /* The single instance of the C++ language class.  */
@@ -1198,8 +1201,6 @@ extern const struct language_data asm_language_data =
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  NULL,				/* Language specific
-				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
@@ -1271,8 +1272,6 @@ extern const struct language_data minimal_language_data =
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
-  NULL,				/* Language specific
-				   class_name_from_physname */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
   0,				/* String lower bound */
