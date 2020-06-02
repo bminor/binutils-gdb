@@ -38,6 +38,12 @@ ctf_dynhash_cinsert (ctf_dynhash_t *h, const void *k, const void *v)
   return ctf_dynhash_insert (h, (void *) k, (void *) v);
 }
 
+static inline int
+ctf_dynset_cinsert (ctf_dynset_t *h, const void *k)
+{
+  return ctf_dynset_insert (h, (void *) k);
+}
+
 #ifdef	__cplusplus
 }
 #endif

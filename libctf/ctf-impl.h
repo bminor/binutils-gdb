@@ -34,6 +34,7 @@
 #include <ctype.h>
 #include <elf.h>
 #include <bfd.h>
+#include "hashtab.h"
 
 #ifdef	__cplusplus
 extern "C"
@@ -73,6 +74,7 @@ extern "C"
 
 typedef struct ctf_fixed_hash ctf_hash_t; /* Private to ctf-hash.c.  */
 typedef struct ctf_dynhash ctf_dynhash_t; /* Private to ctf-hash.c.  */
+typedef struct ctf_dynset ctf_dynset_t;   /* Private to ctf-hash.c.  */
 
 typedef struct ctf_strs
 {
@@ -378,6 +380,8 @@ extern int ctf_hash_eq_integer (const void *, const void *);
 extern int ctf_hash_eq_string (const void *, const void *);
 extern int ctf_hash_eq_type_mapping_key (const void *, const void *);
 
+extern int ctf_dynset_eq_string (const void *, const void *);
+
 typedef void (*ctf_hash_free_fun) (void *);
 
 typedef void (*ctf_hash_iter_f) (void *key, void *value, void *arg);
@@ -406,6 +410,15 @@ extern void ctf_dynhash_iter_remove (ctf_dynhash_t *, ctf_hash_iter_remove_f,
 				     void *);
 extern void *ctf_dynhash_iter_find (ctf_dynhash_t *, ctf_hash_iter_find_f,
 				    void *);
+
+extern ctf_dynset_t *ctf_dynset_create (htab_hash, htab_eq, ctf_hash_free_fun);
+extern int ctf_dynset_insert (ctf_dynset_t *, void *);
+extern void ctf_dynset_remove (ctf_dynset_t *, const void *);
+extern void ctf_dynset_destroy (ctf_dynset_t *);
+extern void *ctf_dynset_lookup (ctf_dynset_t *, const void *);
+extern int ctf_dynset_exists (ctf_dynset_t *, const void *key,
+			      const void **orig_key);
+extern void *ctf_dynset_lookup_any (ctf_dynset_t *);
 
 #define	ctf_list_prev(elem)	((void *)(((ctf_list_t *)(elem))->l_prev))
 #define	ctf_list_next(elem)	((void *)(((ctf_list_t *)(elem))->l_next))

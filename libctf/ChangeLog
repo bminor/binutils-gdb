@@ -1,5 +1,32 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-hash.c (ctf_dynset_eq_string): New.
+	(ctf_dynset_create): New.
+	(DYNSET_EMPTY_ENTRY_REPLACEMENT): New.
+	(DYNSET_DELETED_ENTRY_REPLACEMENT): New.
+	(key_to_internal): New.
+	(internal_to_key): New.
+	(ctf_dynset_insert): New.
+	(ctf_dynset_remove): New.
+	(ctf_dynset_destroy): New.
+	(ctf_dynset_lookup): New.
+	(ctf_dynset_exists): New.
+	(ctf_dynset_lookup_any): New.
+	(ctf_hash_insert_type): Coding style.
+	(ctf_hash_define_type): Likewise.
+	* ctf-impl.h (ctf_dynset_t): New.
+	(ctf_dynset_eq_string): New.
+	(ctf_dynset_create): New.
+	(ctf_dynset_insert): New.
+	(ctf_dynset_remove): New.
+	(ctf_dynset_destroy): New.
+	(ctf_dynset_lookup): New.
+	(ctf_dynset_exists): New.
+	(ctf_dynset_lookup_any): New.
+	* ctf-inlines.h (ctf_dynset_cinsert): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-hash.c (ctf_helem_t) <key_free>: Remove.
 	<value_free>: Likewise.
 	<owner>: New.

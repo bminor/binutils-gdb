@@ -22,14 +22,21 @@
 #include "libiberty.h"
 #include "hashtab.h"
 
-/* We have two hashtable implementations: one, ctf_dynhash_*(), is an interface to
-   a dynamically-expanding hash with unknown size that should support addition
-   of large numbers of items, and removal as well, and is used only at
-   type-insertion time; the other, ctf_dynhash_*(), is an interface to a
-   fixed-size hash from const char * -> ctf_id_t with number of elements
-   specified at creation time, that should support addition of items but need
-   not support removal.  These can be implemented by the same underlying hashmap
-   if you wish.  */
+/* We have three hashtable implementations:
+
+   - ctf_hash_* is an interface to a fixed-size hash from const char * ->
+     ctf_id_t with number of elements specified at creation time, that should
+     support addition of items but need not support removal.
+
+   - ctf_dynhash_* is an interface to a dynamically-expanding hash with
+     unknown size that should support addition of large numbers of items, and
+     removal as well, and is used only at type-insertion time and during
+     linking.
+
+   - ctf_dynset_* is an interface to a dynamically-expanding hash that contains
+     only keys: no values.
+
+   These can be implemented by the same underlying hashmap if you wish.  */
 
 /* The helem is used for general key/value mappings in both the ctf_hash and
    ctf_dynhash: the owner may not have space allocated for it, and will be
@@ -51,7 +58,7 @@ struct ctf_dynhash
   ctf_hash_free_fun value_free;
 };
 
-/* Hash functions. */
+/* Hash and eq functions for the dynhash and hash. */
 
 unsigned int
 ctf_hash_integer (const void *ptr)
@@ -107,6 +114,16 @@ ctf_hash_eq_type_mapping_key (const void *a, const void *b)
 
   return (key_a->cltm_fp == key_b->cltm_fp)
     && (key_a->cltm_idx == key_b->cltm_idx);
+}
+
+
+/* Hash and eq functions for the dynset.  Most of these can just use the
+   underlying hashtab functions directly.   */
+
+int
+ctf_dynset_eq_string (const void *a, const void *b)
+{
+  return !strcmp((const char *) a, (const char *) b);
 }
 
 /* The dynhash, used for hashes whose size is not known at creation time. */
@@ -369,6 +386,135 @@ ctf_dynhash_destroy (ctf_dynhash_t *hp)
   free (hp);
 }
 
+/* The dynset, used for sets of keys with no value.  The implementation of this
+   can be much simpler, because without a value the slot can simply be the
+   stored key, which means we don't need to store the freeing functions and the
+   dynset itself is just a htab.  */
+
+ctf_dynset_t *
+ctf_dynset_create (htab_hash hash_fun, htab_eq eq_fun,
+		   ctf_hash_free_fun key_free)
+{
+  /* 7 is arbitrary and untested for now.  */
+  return (ctf_dynset_t *) htab_create_alloc (7, (htab_hash) hash_fun, eq_fun,
+					     key_free, xcalloc, free);
+}
+
+/* The dynset has one complexity: the underlying implementation reserves two
+   values for internal hash table implementation details (empty versus deleted
+   entries).  These values are otherwise very useful for pointers cast to ints,
+   so transform the ctf_dynset_inserted value to allow for it.  (This
+   introduces an ambiguity in that one can no longer store these two values in
+   the dynset, but if we pick high enough values this is very unlikely to be a
+   problem.)
+
+   We leak this implementation detail to the freeing functions on the grounds
+   that any use of these functions is overwhelmingly likely to be in sets using
+   real pointers, which will be unaffected.  */
+
+#define DYNSET_EMPTY_ENTRY_REPLACEMENT ((void *) (uintptr_t) -64)
+#define DYNSET_DELETED_ENTRY_REPLACEMENT ((void *) (uintptr_t) -63)
+
+static void *
+key_to_internal (const void *key)
+{
+  if (key == HTAB_EMPTY_ENTRY)
+    return DYNSET_EMPTY_ENTRY_REPLACEMENT;
+  else if (key == HTAB_DELETED_ENTRY)
+    return DYNSET_DELETED_ENTRY_REPLACEMENT;
+
+  return (void *) key;
+}
+
+static void *
+internal_to_key (const void *internal)
+{
+  if (internal == DYNSET_EMPTY_ENTRY_REPLACEMENT)
+    return HTAB_EMPTY_ENTRY;
+  else if (internal == DYNSET_DELETED_ENTRY_REPLACEMENT)
+    return HTAB_DELETED_ENTRY;
+  return (void *) internal;
+}
+
+int
+ctf_dynset_insert (ctf_dynset_t *hp, void *key)
+{
+  struct htab *htab = (struct htab *) hp;
+  void **slot;
+
+  slot = htab_find_slot (htab, key, INSERT);
+
+  if (!slot)
+    {
+      errno = ENOMEM;
+      return -errno;
+    }
+
+  if (*slot)
+    {
+      if (htab->del_f)
+	(*htab->del_f) (*slot);
+    }
+
+  *slot = key_to_internal (key);
+
+  return 0;
+}
+
+void
+ctf_dynset_remove (ctf_dynset_t *hp, const void *key)
+{
+  htab_remove_elt ((struct htab *) hp, key_to_internal (key));
+}
+
+void
+ctf_dynset_destroy (ctf_dynset_t *hp)
+{
+  if (hp != NULL)
+    htab_delete ((struct htab *) hp);
+}
+
+void *
+ctf_dynset_lookup (ctf_dynset_t *hp, const void *key)
+{
+  void **slot = htab_find_slot ((struct htab *) hp,
+				key_to_internal (key), NO_INSERT);
+
+  if (slot)
+    return internal_to_key (*slot);
+  return NULL;
+}
+
+/* TRUE/FALSE return.  */
+int
+ctf_dynset_exists (ctf_dynset_t *hp, const void *key, const void **orig_key)
+{
+  void **slot = htab_find_slot ((struct htab *) hp,
+				key_to_internal (key), NO_INSERT);
+
+  if (orig_key && slot)
+    *orig_key = internal_to_key (*slot);
+  return (slot != NULL);
+}
+
+/* Look up a completely random value from the set, if any exist.
+   Keys with value zero cannot be distinguished from a nonexistent key.  */
+void *
+ctf_dynset_lookup_any (ctf_dynset_t *hp)
+{
+  struct htab *htab = (struct htab *) hp;
+  void **slot = htab->entries;
+  void **limit = slot + htab_size (htab);
+
+  while (slot < limit
+	 && (*slot == HTAB_EMPTY_ENTRY || *slot == HTAB_DELETED_ENTRY))
+      slot++;
+
+  if (slot < limit)
+    return internal_to_key (*slot);
+  return NULL;
+}
+
 /* ctf_hash, used for fixed-size maps from const char * -> ctf_id_t without
    removal.  This is a straight cast of a hashtab.  */
 
@@ -415,12 +561,12 @@ ctf_hash_insert_type (ctf_hash_t *hp, ctf_file_t *fp, uint32_t type,
 
 /* if the key is already in the hash, override the previous definition with
    this new official definition. If the key is not present, then call
-   ctf_hash_insert_type() and hash it in.  */
+   ctf_hash_insert_type and hash it in.  */
 int
 ctf_hash_define_type (ctf_hash_t *hp, ctf_file_t *fp, uint32_t type,
                       uint32_t name)
 {
-  /* This matches the semantics of ctf_hash_insert_type() in this
+  /* This matches the semantics of ctf_hash_insert_type in this
      implementation anyway.  */
 
   return ctf_hash_insert_type (hp, fp, type, name);
