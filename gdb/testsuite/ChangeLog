@@ -1,3 +1,8 @@
+2020-06-02  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/multidictionary.exp: Don't use
+	gdb_spawn_with_cmdline_opts.
+
 2020-06-01  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.cp/step-and-next-inline.exp (do_test): Skip all tests in the
