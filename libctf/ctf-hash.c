@@ -31,13 +31,18 @@
    not support removal.  These can be implemented by the same underlying hashmap
    if you wish.  */
 
+/* The helem is used for general key/value mappings in both the ctf_hash and
+   ctf_dynhash: the owner may not have space allocated for it, and will be
+   garbage (not NULL!) in that case.  */
+
 typedef struct ctf_helem
 {
   void *key;			 /* Either a pointer, or a coerced ctf_id_t.  */
   void *value;			 /* The value (possibly a coerced int).  */
-  ctf_hash_free_fun key_free;
-  ctf_hash_free_fun value_free;
+  ctf_dynhash_t *owner;          /* The hash that owns us.  */
 } ctf_helem_t;
+
+/* Equally, the key_free and value_free may not exist.  */
 
 struct ctf_dynhash
 {
@@ -106,17 +111,17 @@ ctf_hash_eq_type_mapping_key (const void *a, const void *b)
 
 /* The dynhash, used for hashes whose size is not known at creation time. */
 
-/* Free a single ctf_helem.  */
+/* Free a single ctf_helem with arbitrary key/value functions.  */
 
 static void
 ctf_dynhash_item_free (void *item)
 {
   ctf_helem_t *helem = item;
 
-  if (helem->key_free && helem->key)
-    helem->key_free (helem->key);
-  if (helem->value_free && helem->value)
-    helem->value_free (helem->value);
+  if (helem->owner->key_free && helem->key)
+    helem->owner->key_free (helem->key);
+  if (helem->owner->value_free && helem->value)
+    helem->owner->value_free (helem->value);
   free (helem);
 }
 
@@ -125,21 +130,31 @@ ctf_dynhash_create (ctf_hash_fun hash_fun, ctf_hash_eq_fun eq_fun,
                     ctf_hash_free_fun key_free, ctf_hash_free_fun value_free)
 {
   ctf_dynhash_t *dynhash;
+  htab_del del = ctf_dynhash_item_free;
 
-  dynhash = malloc (sizeof (ctf_dynhash_t));
+  if (key_free || value_free)
+    dynhash = malloc (sizeof (ctf_dynhash_t));
+  else
+    dynhash = malloc (offsetof (ctf_dynhash_t, key_free));
   if (!dynhash)
     return NULL;
 
-  /* 7 is arbitrary and untested for now..  */
+  if (key_free == NULL && value_free == NULL)
+    del = free;
+
+  /* 7 is arbitrary and untested for now.  */
   if ((dynhash->htab = htab_create_alloc (7, (htab_hash) hash_fun, eq_fun,
-                                          ctf_dynhash_item_free, xcalloc, free)) == NULL)
+					  del, xcalloc, free)) == NULL)
     {
       free (dynhash);
       return NULL;
     }
 
-  dynhash->key_free = key_free;
-  dynhash->value_free = value_free;
+  if (key_free || value_free)
+    {
+      dynhash->key_free = key_free;
+      dynhash->value_free = value_free;
+    }
 
   return dynhash;
 }
@@ -162,13 +177,18 @@ ctf_hashtab_insert (struct htab *htab, void *key, void *value,
 
   if (!slot)
     {
-      errno = -ENOMEM;
+      errno = ENOMEM;
       return NULL;
     }
 
   if (!*slot)
     {
-      *slot = malloc (sizeof (ctf_helem_t));
+      /* Only spend space on the owner if we're going to use it: if there is a
+	 key or value freeing function.  */
+      if (key_free || value_free)
+	*slot = malloc (sizeof (ctf_helem_t));
+      else
+	*slot = malloc (offsetof (ctf_helem_t, owner));
       if (!*slot)
 	return NULL;
       (*slot)->key = key;
@@ -188,19 +208,25 @@ int
 ctf_dynhash_insert (ctf_dynhash_t *hp, void *key, void *value)
 {
   ctf_helem_t *slot;
+  ctf_hash_free_fun key_free = NULL, value_free = NULL;
 
+  if (hp->htab->del_f == ctf_dynhash_item_free)
+    {
+      key_free = hp->key_free;
+      value_free = hp->value_free;
+    }
   slot = ctf_hashtab_insert (hp->htab, key, value,
-			     hp->key_free, hp->value_free);
+			     key_free, value_free);
 
   if (!slot)
     return errno;
 
-  /* We need to keep the key_free and value_free around in each item because the
-     del function has no visibility into the hash as a whole, only into the
-     individual items.  */
+  /* Keep track of the owner, so that the del function can get at the key_free
+     and value_free functions.  Only do this if one of those functions is set:
+     if not, the owner is not even present in the helem.  */
 
-  slot->key_free = hp->key_free;
-  slot->value_free = hp->value_free;
+  if (key_free || value_free)
+    slot->owner = hp;
 
   return 0;
 }
@@ -208,7 +234,7 @@ ctf_dynhash_insert (ctf_dynhash_t *hp, void *key, void *value)
 void
 ctf_dynhash_remove (ctf_dynhash_t *hp, const void *key)
 {
-  ctf_helem_t hep = { (void *) key, NULL, NULL, NULL };
+  ctf_helem_t hep = { (void *) key, NULL, NULL };
   htab_remove_elt (hp->htab, &hep);
 }
 

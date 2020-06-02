@@ -1,5 +1,20 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-hash.c (ctf_helem_t) <key_free>: Remove.
+	<value_free>: Likewise.
+	<owner>: New.
+	(ctf_dynhash_item_free): Indirect through the owner.
+	(ctf_dynhash_create): Only pass in ctf_dynhash_item_free and
+	allocate space for the key_free and value_free fields fields
+	if necessary.
+	(ctf_hashtab_insert): Likewise.  Fix OOM errno value.
+	(ctf_dynhash_insert): Only access ctf_hashtab's key_free and
+	value_free if they will exist.  Set the slot's owner, but only
+	if it exists.
+	(ctf_dynhash_remove): Adjust.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-hash.c (ctf_hashtab_insert): Free the key passed in if
 	there is a key-freeing function and the key already exists.
 
