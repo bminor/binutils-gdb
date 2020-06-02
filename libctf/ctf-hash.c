@@ -171,15 +171,15 @@ ctf_hashtab_insert (struct htab *htab, void *key, void *value,
       *slot = malloc (sizeof (ctf_helem_t));
       if (!*slot)
 	return NULL;
+      (*slot)->key = key;
     }
   else
     {
       if (key_free)
-	  key_free ((*slot)->key);
+	  key_free (key);
       if (value_free)
 	  value_free ((*slot)->value);
     }
-  (*slot)->key = key;
   (*slot)->value = value;
   return *slot;
 }

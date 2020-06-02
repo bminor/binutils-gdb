@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-hash.c (ctf_hashtab_insert): Free the key passed in if
+	there is a key-freeing function and the key already exists.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-inlines.h: New file.
 	* ctf-impl.h: Include it.
 	(ctf_hash_iter_find_f): New typedef.
