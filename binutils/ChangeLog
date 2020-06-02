@@ -1,3 +1,13 @@
+2020-06-02  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/ar.exp (obj): Set up object file name
+	extension.  Use throughout.  Don't completely exclude non-ELF
+	alpha targets.  Run long_filenames test for tic30.  Exclude thin
+	archive tests for aix, ecoff and vms.
+	* estsuite/binutils-all/objdump.exp (obj): Set up object file name
+	extension.  Use throughout.  Don't exclude non-ELF alpha targets
+	from "bintest.a".
+
 2020-05-28  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* MAINTAINERS (Xtensa): Add myself as maintainer.
