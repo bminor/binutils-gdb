@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-types.c (ctf_type_aname): Return ECTF_CORRUPT if
+	ints, floats or typedefs have no name.  Fix comment typo.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c (ctf_add_slice): Support slices of any kind that
 	resolves to an integral type.
 	* ctf-types.c (ctf_type_encoding): Resolve the type before

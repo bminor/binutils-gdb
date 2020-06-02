@@ -316,7 +316,7 @@ ctf_id_t ctf_lookup_by_rawhash (ctf_file_t *fp, ctf_names_t *np, const char *nam
   return id;
 }
 
-/* Lookup the given type ID and return its name as a new dynamcally-allocated
+/* Lookup the given type ID and return its name as a new dynamically-allocated
    string.  */
 
 char *
@@ -379,6 +379,15 @@ ctf_type_aname (ctf_file_t *fp, ctf_id_t type)
 	    case CTF_K_INTEGER:
 	    case CTF_K_FLOAT:
 	    case CTF_K_TYPEDEF:
+	      /* Integers, floats, and typedefs must always be named types.  */
+
+	      if (name[0] == '\0')
+		{
+		  ctf_set_errno (fp, ECTF_CORRUPT);
+		  ctf_decl_fini (&cd);
+		  return NULL;
+		}
+
 	      ctf_decl_sprintf (&cd, "%s", name);
 	      break;
 	    case CTF_K_POINTER:
