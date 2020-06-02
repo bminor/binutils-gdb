@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-open.c (init_types): Remove typeless CTF_K_FORWARD
+	special-casing.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-types.c (ctf_type_reference): Add support for dynamic slices.
 
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>

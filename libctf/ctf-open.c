@@ -692,17 +692,11 @@ init_types (ctf_file_t *fp, ctf_header_t *cth)
       if (vbytes < 0)
 	return ECTF_CORRUPT;
 
+      /* For forward declarations, ctt_type is the CTF_K_* kind for the tag,
+	 so bump that population count too.  */
       if (kind == CTF_K_FORWARD)
-	{
-	  /* For forward declarations, ctt_type is the CTF_K_* kind for the tag,
-	     so bump that population count too.  If ctt_type is unknown, treat
-	     the tag as a struct.  */
+	pop[tp->ctt_type]++;
 
-	  if (tp->ctt_type == CTF_K_UNKNOWN || tp->ctt_type >= CTF_K_MAX)
-	    pop[CTF_K_STRUCT]++;
-	  else
-	    pop[tp->ctt_type]++;
-	}
       tp = (ctf_type_t *) ((uintptr_t) tp + increment + vbytes);
       pop[kind]++;
     }
