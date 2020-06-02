@@ -680,10 +680,19 @@ ctf_type_reference (ctf_file_t *fp, ctf_id_t type)
       /* Slices store their type in an unusual place.  */
     case CTF_K_SLICE:
       {
+	ctf_dtdef_t *dtd;
 	const ctf_slice_t *sp;
-	ssize_t increment;
-	(void) ctf_get_ctt_size (fp, tp, NULL, &increment);
-	sp = (const ctf_slice_t *) ((uintptr_t) tp + increment);
+
+	if ((dtd = ctf_dynamic_type (ofp, type)) == NULL)
+	  {
+	    ssize_t increment;
+
+	    (void) ctf_get_ctt_size (fp, tp, NULL, &increment);
+	    sp = (const ctf_slice_t *) ((uintptr_t) tp + increment);
+	  }
+	else
+	  sp = &dtd->dtd_u.dtu_slice;
+
 	return sp->cts_type;
       }
     default:

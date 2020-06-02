@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-types.c (ctf_type_reference): Add support for dynamic slices.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c (ctf_serialize): Add cast.
 	(ctf_add_slice): Likewise.
 
