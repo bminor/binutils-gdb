@@ -13534,13 +13534,6 @@ emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
   ada_emit_char (c, type, stream, quoter, 1);
 }
 
-static int
-parse (struct parser_state *ps)
-{
-  warnings_issued = 0;
-  return ada_parse (ps);
-}
-
 static const struct exp_descriptor ada_exp_descriptor = {
   ada_print_subexp,
   ada_operator_length,
@@ -13718,7 +13711,6 @@ extern const struct language_data ada_language_data =
   macro_expansion_no,
   ada_extensions,
   &ada_exp_descriptor,
-  parse,
   resolve,
   ada_printchar,                /* Print a character constant */
   ada_printstr,                 /* Function to print string constant */
@@ -14114,6 +14106,14 @@ public:
       }
 
     return {};
+  }
+
+  /* See language.h.  */
+
+  int parser (struct parser_state *ps) const override
+  {
+    warnings_issued = 0;
+    return ada_parse (ps);
   }
 
 protected:

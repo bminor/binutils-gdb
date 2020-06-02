@@ -1016,7 +1016,6 @@ extern const struct language_data opencl_language_data =
   macro_expansion_c,
   NULL,
   &exp_descriptor_opencl,
-  c_parse,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */

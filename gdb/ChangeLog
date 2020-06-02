@@ -1,5 +1,39 @@
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (parse): Rename to ada_language::parser.
+	(ada_language_data): Delete la_parser initializer.
+	(ada_language::parser): New member function, implementation from
+	parse.
+	* c-lang.c (c_language_data): Delete la_parser initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	(d_language::parser): New member function.
+	* f-lang.c (f_language_data): Delete la_parser initializer.
+	(f_language::parser): New member function.
+	* go-lang.c (go_language_data): Delete la_parser initializer.
+	(go_language::parser): New member function.
+	* language.c (unk_lang_parser): Delete.
+	(language_defn::parser): Define new member function.
+	(unknown_language_data): Delete la_parser initializer.
+	(unknown_language::parser): New member function.
+	(auto_language_data): Delete la_parser initializer.
+	(auto_language::parser): New member function.
+	* language.h (language_data): Delete la_parser field.
+	(language_defn::parser): Declare new member function.
+	* m2-lang.c (m2_language_data): Delete la_parser initializer.
+	(m2_language::parser): New member function.
+	* objc-lang.c (objc_language_data): Delete la_parser initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	(pascal_language::parser): New member function.
+	* parse.c (parse_exp_in_context): Update call to parser.
+	* rust-lang.c (rust_language_data): Delete la_parser initializer.
+	(rust_language::parser): New member function.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* top.c (print_gdb_configuration): Print --with-python-libdir
 	configuration value.
 

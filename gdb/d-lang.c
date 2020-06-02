@@ -142,7 +142,6 @@ extern const struct language_data d_language_data =
   macro_expansion_no,
   d_extensions,
   &exp_descriptor_c,
-  d_parse,
   null_post_parser,
   c_printchar,			/* Print a character constant.  */
   c_printstr,			/* Function to print string constant.  */
@@ -272,6 +271,13 @@ public:
 	 const domain_enum domain) const override
   {
     return d_lookup_symbol_nonlocal (this, name, block, domain);
+  }
+
+  /* See language.h.  */
+
+  int parser (struct parser_state *ps) const override
+  {
+    return d_parse (ps);
   }
 };
 

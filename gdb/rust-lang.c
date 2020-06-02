@@ -1989,7 +1989,6 @@ extern const struct language_data rust_language_data =
   macro_expansion_no,
   rust_extensions,
   &exp_descriptor_rust,
-  rust_parse,
   null_post_parser,
   rust_printchar,		/* Print a character constant */
   rust_printstr,		/* Function to print string constant */
@@ -2141,6 +2140,13 @@ public:
 	  result = lookup_global_symbol (name, block, domain);
       }
     return result;
+  }
+
+  /* See language.h.  */
+
+  int parser (struct parser_state *ps) const override
+  {
+    return rust_parse (ps);
   }
 };
 

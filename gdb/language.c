@@ -47,8 +47,6 @@
 #include <algorithm>
 #include "gdbarch.h"
 
-static int unk_lang_parser (struct parser_state *);
-
 static void set_range_case (void);
 
 static void unk_lang_emit_char (int c, struct type *type,
@@ -643,6 +641,14 @@ language_defn::value_print (struct value *val, struct ui_file *stream,
 
 /* See language.h.  */
 
+int
+language_defn::parser (struct parser_state *ps) const
+{
+  return c_parse (ps);
+}
+
+/* See language.h.  */
+
 void
 language_defn::value_print_inner
 	(struct value *val, struct ui_file *stream, int recurse,
@@ -718,12 +724,6 @@ default_is_string_type_p (struct type *type)
 
 /* Define the language that is no language.  */
 
-static int
-unk_lang_parser (struct parser_state *ps)
-{
-  return 1;
-}
-
 static void
 unk_lang_emit_char (int c, struct type *type, struct ui_file *stream,
 		    int quoter)
@@ -777,7 +777,6 @@ extern const struct language_data unknown_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_standard,
-  unk_lang_parser,
   null_post_parser,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
@@ -842,6 +841,14 @@ public:
   {
     error (_("unimplemented unknown_language::value_print_inner called"));
   }
+
+  /* See language.h.  */
+
+  int parser (struct parser_state *ps) const override
+  {
+    /* No parsing is done, just claim success.  */
+    return 1;
+  }
 };
 
 /* Single instance of the unknown language class.  */
@@ -861,7 +868,6 @@ extern const struct language_data auto_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_standard,
-  unk_lang_parser,
   null_post_parser,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
@@ -925,6 +931,14 @@ public:
 	 const struct value_print_options *options) const override
   {
     error (_("unimplemented auto_language::value_print_inner called"));
+  }
+
+  /* See language.h.  */
+
+  int parser (struct parser_state *ps) const override
+  {
+    /* No parsing is done, just claim success.  */
+    return 1;
   }
 };
 

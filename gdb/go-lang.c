@@ -527,7 +527,6 @@ extern const struct language_data go_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_c,
-  go_parse,
   null_post_parser,
   c_printchar,			/* Print a character constant.  */
   c_printstr,			/* Function to print string constant.  */
@@ -637,6 +636,13 @@ public:
 	 const struct value_print_options *options) const override
   {
     return go_value_print_inner (val, stream, recurse, options);
+  }
+
+  /* See language.h.  */
+
+  int parser (struct parser_state *ps) const override
+  {
+    return go_parse (ps);
   }
 };
 

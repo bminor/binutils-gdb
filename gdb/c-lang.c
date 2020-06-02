@@ -889,7 +889,6 @@ extern const struct language_data c_language_data =
   macro_expansion_c,
   c_extensions,
   &exp_descriptor_c,
-  c_parse,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -997,7 +996,6 @@ extern const struct language_data cplus_language_data =
   macro_expansion_c,
   cplus_extensions,
   &exp_descriptor_c,
-  c_parse,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -1202,7 +1200,6 @@ extern const struct language_data asm_language_data =
   macro_expansion_c,
   asm_extensions,
   &exp_descriptor_c,
-  c_parse,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
@@ -1265,7 +1262,6 @@ extern const struct language_data minimal_language_data =
   macro_expansion_c,
   NULL,
   &exp_descriptor_c,
-  c_parse,
   null_post_parser,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */

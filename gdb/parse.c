@@ -1119,7 +1119,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 
   try
     {
-      lang->la_parser (&ps);
+      lang->parser (&ps);
     }
   catch (const gdb_exception &except)
     {

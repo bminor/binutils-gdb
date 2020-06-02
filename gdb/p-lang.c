@@ -393,7 +393,6 @@ extern const struct language_data pascal_language_data =
   macro_expansion_no,
   p_extensions,
   &exp_descriptor_standard,
-  pascal_parse,
   null_post_parser,
   pascal_printchar,		/* Print a character constant */
   pascal_printstr,		/* Function to print string constant */
@@ -491,6 +490,13 @@ public:
 	 const struct value_print_options *options) const override
   {
     return pascal_value_print_inner (val, stream, recurse, options);
+  }
+
+  /* See language.h.  */
+
+  int parser (struct parser_state *ps) const override
+  {
+    return pascal_parse (ps);
   }
 };
 

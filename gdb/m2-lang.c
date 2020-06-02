@@ -362,7 +362,6 @@ extern const struct language_data m2_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_modula2,
-  m2_parse,			/* parser */
   null_post_parser,
   m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */
@@ -429,6 +428,13 @@ public:
 	 const struct value_print_options *options) const override
   {
     return m2_value_print_inner (val, stream, recurse, options);
+  }
+
+  /* See language.h.  */
+
+  int parser (struct parser_state *ps) const override
+  {
+    return m2_parse (ps);
   }
 };
 

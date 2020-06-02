@@ -225,10 +225,6 @@ struct language_data
 
     const struct exp_descriptor *la_exp_desc;
 
-    /* Parser function.  */
-
-    int (*la_parser) (struct parser_state *);
-
     /* Given an expression *EXPP created by prefixifying the result of
        la_parser, perform any remaining processing necessary to complete
        its translation.  *EXPP may change; la_post_parser is responsible 
@@ -539,6 +535,10 @@ struct language_defn : language_data
   virtual void value_print_inner
 	(struct value *val, struct ui_file *stream, int recurse,
 	 const struct value_print_options *options) const;
+
+  /* Parser function.  */
+
+  virtual int parser (struct parser_state *ps) const;
 
 protected:
 
