@@ -1602,6 +1602,11 @@ membcmp (const char *name, ctf_id_t type _libctf_unused_, unsigned long offset,
   ctf_bundle_t *ctb = arg;
   ctf_membinfo_t ctm;
 
+  /* Don't check nameless members (e.g. anonymous structs/unions) against each
+     other.  */
+  if (name[0] == 0)
+    return 0;
+
   if (ctf_member_info (ctb->ctb_file, ctb->ctb_type, name, &ctm) < 0)
     {
       ctf_dprintf ("Conflict due to member %s iteration error: %s.\n", name,
