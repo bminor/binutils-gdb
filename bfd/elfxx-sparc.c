@@ -690,9 +690,6 @@ struct _bfd_sparc_elf_link_hash_entry
 {
   struct elf_link_hash_entry elf;
 
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
-
 #define GOT_UNKNOWN     0
 #define GOT_NORMAL      1
 #define GOT_TLS_GD      2
@@ -1028,7 +1025,6 @@ link_hash_newfunc (struct bfd_hash_entry *entry,
       struct _bfd_sparc_elf_link_hash_entry *eh;
 
       eh = (struct _bfd_sparc_elf_link_hash_entry *) entry;
-      eh->dyn_relocs = NULL;
       eh->tls_type = GOT_UNKNOWN;
       eh->has_got_reloc = 0;
       eh->has_non_got_reloc = 0;
@@ -1289,20 +1285,20 @@ _bfd_sparc_elf_copy_indirect_symbol (struct bfd_link_info *info,
   edir = (struct _bfd_sparc_elf_link_hash_entry *) dir;
   eind = (struct _bfd_sparc_elf_link_hash_entry *) ind;
 
-  if (eind->dyn_relocs != NULL)
+  if (ind->dyn_relocs != NULL)
     {
-      if (edir->dyn_relocs != NULL)
+      if (dir->dyn_relocs != NULL)
 	{
 	  struct elf_dyn_relocs **pp;
 	  struct elf_dyn_relocs *p;
 
 	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
-	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &ind->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      struct elf_dyn_relocs *q;
 
-	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
+	      for (q = dir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
 		  {
 		    q->pc_count += p->pc_count;
@@ -1313,11 +1309,11 @@ _bfd_sparc_elf_copy_indirect_symbol (struct bfd_link_info *info,
 	      if (q == NULL)
 		pp = &p->next;
 	    }
-	  *pp = edir->dyn_relocs;
+	  *pp = dir->dyn_relocs;
 	}
 
-      edir->dyn_relocs = eind->dyn_relocs;
-      eind->dyn_relocs = NULL;
+      dir->dyn_relocs = ind->dyn_relocs;
+      ind->dyn_relocs = NULL;
     }
 
   if (ind->root.type == bfd_link_hash_indirect && dir->got.refcount <= 0)
@@ -1790,7 +1786,7 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      /* If this is a global symbol, we count the number of
 		 relocations we need for this symbol.  */
 	      if (h != NULL)
-		head = &((struct _bfd_sparc_elf_link_hash_entry *) h)->dyn_relocs;
+		head = &h->dyn_relocs;
 	      else
 		{
 		  /* Track dynamic relocs needed for local syms too.
@@ -1930,7 +1926,7 @@ readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
   struct elf_dyn_relocs *p;
 
-  for (p = _bfd_sparc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *s = p->sec->output_section;
 
@@ -2257,7 +2253,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   else
     h->got.offset = (bfd_vma) -1;
 
-  if (eh->dyn_relocs == NULL)
+  if (h->dyn_relocs == NULL)
     return TRUE;
 
   /* In the shared -Bsymbolic case, discard space allocated for
@@ -2272,7 +2268,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	{
 	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      p->count -= p->pc_count;
 	      p->pc_count = 0;
@@ -2287,7 +2283,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	{
 	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      if (strcmp (p->sec->output_section->name, ".tls_vars") == 0)
 		*pp = p->next;
@@ -2298,7 +2294,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility or in PIE.  */
-      if (eh->dyn_relocs != NULL
+      if (h->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  /* An undefined weak symbol is never
@@ -2313,7 +2309,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 		     can branch to 0 without PLT.  */
 		  struct elf_dyn_relocs **pp;
 
-		  for (pp = &eh->dyn_relocs; (p = *pp) != NULL;)
+		  for (pp = &h->dyn_relocs; (p = *pp) != NULL;)
 		    if (p->pc_count == 0)
 		      *pp = p->next;
 		    else
@@ -2323,7 +2319,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 			pp = &p->next;
 		      }
 
-		  if (eh->dyn_relocs != NULL)
+		  if (h->dyn_relocs != NULL)
 		    {
 		      /* Make sure undefined weak symbols are output
 			 as dynamic symbols in PIEs for dynamic non-GOT
@@ -2333,7 +2329,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 		    }
 		}
 	      else
-		eh->dyn_relocs = NULL;
+		h->dyn_relocs = NULL;
 	    }
 
 	  /* Make sure undefined weak symbols are output as a dynamic
@@ -2377,13 +2373,13 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	    goto keep;
 	}
 
-      eh->dyn_relocs = NULL;
+      h->dyn_relocs = NULL;
 
     keep: ;
     }
 
   /* Finally, allocate space.  */
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc = elf_section_data (p->sec)->sreloc;
       sreloc->size += p->count * SPARC_ELF_RELA_BYTES (htab);

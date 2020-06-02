@@ -1867,7 +1867,7 @@ elf_i386_check_relocs (bfd *abfd,
 		 relocations we need for this symbol.  */
 	      if (h != NULL)
 		{
-		  head = &eh->dyn_relocs;
+		  head = &h->dyn_relocs;
 		}
 	      else
 		{

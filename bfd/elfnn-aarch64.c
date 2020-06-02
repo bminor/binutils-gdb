@@ -2570,9 +2570,6 @@ struct elf_aarch64_link_hash_entry
 {
   struct elf_link_hash_entry root;
 
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
-
   /* Since PLT entries have variable size, we need to record the
      index into .got.plt instead of recomputing it from the PLT
      offset.  */
@@ -2728,7 +2725,6 @@ elfNN_aarch64_link_hash_newfunc (struct bfd_hash_entry *entry,
 				     table, string));
   if (ret != NULL)
     {
-      ret->dyn_relocs = NULL;
       ret->got_type = GOT_UNKNOWN;
       ret->plt_got_offset = (bfd_vma) - 1;
       ret->stub_cache = NULL;
@@ -2855,20 +2851,20 @@ elfNN_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
   edir = (struct elf_aarch64_link_hash_entry *) dir;
   eind = (struct elf_aarch64_link_hash_entry *) ind;
 
-  if (eind->dyn_relocs != NULL)
+  if (ind->dyn_relocs != NULL)
     {
-      if (edir->dyn_relocs != NULL)
+      if (dir->dyn_relocs != NULL)
 	{
 	  struct elf_dyn_relocs **pp;
 	  struct elf_dyn_relocs *p;
 
 	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
-	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL;)
+	  for (pp = &ind->dyn_relocs; (p = *pp) != NULL;)
 	    {
 	      struct elf_dyn_relocs *q;
 
-	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
+	      for (q = dir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
 		  {
 		    q->pc_count += p->pc_count;
@@ -2879,11 +2875,11 @@ elfNN_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
 	      if (q == NULL)
 		pp = &p->next;
 	    }
-	  *pp = edir->dyn_relocs;
+	  *pp = dir->dyn_relocs;
 	}
 
-      edir->dyn_relocs = eind->dyn_relocs;
-      eind->dyn_relocs = NULL;
+      dir->dyn_relocs = ind->dyn_relocs;
+      ind->dyn_relocs = NULL;
     }
 
   if (ind->root.type == bfd_link_hash_indirect)
@@ -7392,7 +7388,7 @@ readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
   struct elf_dyn_relocs *p;
 
-  for (p = elf_aarch64_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *s = p->sec->output_section;
 
@@ -7410,7 +7406,7 @@ need_copy_relocation_p (struct elf_aarch64_link_hash_entry *eh)
   struct elf_dyn_relocs *p;
   asection *s;
 
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  for (p = eh->root.dyn_relocs; p != NULL; p = p->next)
     {
       /* If there is any pc-relative reference, we need to keep copy relocation
 	 to avoid propagating the relocation into runtime that current glibc
@@ -7889,9 +7885,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	       relocations we need for this symbol.  */
 	    if (h != NULL)
 	      {
-		struct elf_aarch64_link_hash_entry *eh;
-		eh = (struct elf_aarch64_link_hash_entry *) h;
-		head = &eh->dyn_relocs;
+		head = &h->dyn_relocs;
 	      }
 	    else
 	      {
@@ -8752,7 +8746,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       h->got.offset = (bfd_vma) - 1;
     }
 
-  if (eh->dyn_relocs == NULL)
+  if (h->dyn_relocs == NULL)
     return TRUE;
 
   /* In the shared -Bsymbolic case, discard space allocated for
@@ -8773,7 +8767,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	{
 	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL;)
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL;)
 	    {
 	      p->count -= p->pc_count;
 	      p->pc_count = 0;
@@ -8786,11 +8780,11 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
-      if (eh->dyn_relocs != NULL && h->root.type == bfd_link_hash_undefweak)
+      if (h->dyn_relocs != NULL && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
 	      || UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
-	    eh->dyn_relocs = NULL;
+	    h->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
 	     symbol in PIEs.  */
@@ -8829,13 +8823,13 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    goto keep;
 	}
 
-      eh->dyn_relocs = NULL;
+      h->dyn_relocs = NULL;
 
     keep:;
     }
 
   /* Finally, allocate space.  */
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc;
 
@@ -8858,7 +8852,6 @@ elfNN_aarch64_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
 {
   struct bfd_link_info *info;
   struct elf_aarch64_link_hash_table *htab;
-  struct elf_aarch64_link_hash_entry *eh;
 
   /* An example of a bfd_link_hash_indirect symbol is versioned
      symbol. For example: __gxx_personality_v0(bfd_link_hash_indirect)
@@ -8878,14 +8871,12 @@ elfNN_aarch64_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
   info = (struct bfd_link_info *) inf;
   htab = elf_aarch64_hash_table (info);
 
-  eh = (struct elf_aarch64_link_hash_entry *) h;
-
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle it
      here if it is defined and referenced in a non-shared object.  */
   if (h->type == STT_GNU_IFUNC
       && h->def_regular)
     return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
-					       &eh->dyn_relocs,
+					       &h->dyn_relocs,
 					       NULL,
 					       htab->plt_entry_size,
 					       htab->plt_header_size,

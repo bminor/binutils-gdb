@@ -184,9 +184,6 @@ struct elf_arc_link_hash_entry
 {
   struct elf_link_hash_entry root;
 
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
-
   struct got_entry *got_ents;
 };
 
@@ -340,7 +337,6 @@ elf_arc_link_hash_newfunc (struct bfd_hash_entry *entry,
 				     table, string));
   if (ret != NULL)
     {
-      ret->dyn_relocs = NULL;
       ret->got_ents = NULL;
     }
 

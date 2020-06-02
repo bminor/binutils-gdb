@@ -1,3 +1,147 @@
+2020-06-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26067
+	* elf-bfd.h (elf_link_hash_entry): Add dyn_relocs after size.
+	* elf-s390-common.c (s390_elf_allocate_ifunc_dyn_relocs):
+	Updated.
+	* elf32-arc.c (elf_arc_link_hash_entry): Remove dyn_relocs.
+	(elf_arc_link_hash_newfunc): Updated.
+	* elf32-arm.c (elf32_arm_link_hash_entry): Remove dyn_relocs.
+	(elf32_arm_link_hash_newfunc): Updated.
+	(elf32_arm_copy_indirect_symbol): Likewise.
+	(elf32_arm_check_relocs): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(allocate_dynrelocs_for_symbol): Likewise.
+	* elf32-csky.c (csky_elf_link_hash_entry): Remove dyn_relocs.
+	(csky_elf_link_hash_newfunc): Updated.
+	(csky_allocate_dynrelocs): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(csky_elf_copy_indirect_symbol): Likewise.
+	* elf32-hppa.c (elf32_hppa_link_hash_entry): Remove dyn_relocs.
+	(hppa_link_hash_newfunc): Updated.
+	(elf32_hppa_copy_indirect_symbol): Likewise.
+	(elf32_hppa_hide_symbol): Likewise.
+	(elf32_hppa_adjust_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(elf32_hppa_relocate_section): Likewise.
+	* elf32-i386.c (elf_i386_check_relocs): Likewise.
+	* elf32-lm32.c (elf_lm32_link_hash_entry): Removed.
+	(lm32_elf_link_hash_newfunc): Likewise.
+	(lm32_elf_link_hash_table_create): Updated.
+	(readonly_dynrelocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(lm32_elf_copy_indirect_symbol): Likewise.
+	* elf32-m32r.c (elf_m32r_link_hash_entry): Removed.
+	(m32r_elf_link_hash_newfunc): Likewise.
+	(m32r_elf_link_hash_table_create): Updated.
+	(m32r_elf_copy_indirect_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	* elf32-metag.c (elf_metag_link_hash_entry): Remove dyn_relocs.
+	(metag_link_hash_newfunc): Updated.
+	(elf_metag_copy_indirect_symbol): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	* elf32-microblaze.c (elf32_mb_link_hash_entry): Remove
+	dyn_relocs.
+	(link_hash_newfunc): Updated.
+	(microblaze_elf_check_relocs): Likewise.
+	(microblaze_elf_copy_indirect_symbol): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	* elf32-nds32.c (elf_nds32_link_hash_entry): Remove dyn_relocs.
+	(nds32_elf_link_hash_newfunc): Updated.
+	(nds32_elf_copy_indirect_symbol): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(nds32_elf_check_relocs): Likewise.
+	* elf32-nios2.c (elf32_nios2_link_hash_entry): Remove dyn_relocs.
+	(link_hash_newfunc): Updated.
+	(nios2_elf32_copy_indirect_symbol): Likewise.
+	(nios2_elf32_check_relocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	* elf32-or1k.c (elf_or1k_link_hash_entry): Remove dyn_relocs.
+	(or1k_elf_link_hash_newfunc): Updated.
+	(readonly_dynrelocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(or1k_elf_copy_indirect_symbol): Likewise.
+	* elf32-ppc.c (ppc_elf_link_hash_entry): Remove dyn_relocs.
+	(ppc_elf_link_hash_newfunc): Updated.
+	(ppc_elf_copy_indirect_symbol): Likewise.
+	(ppc_elf_check_relocs): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(ppc_elf_adjust_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	* elf32-s390.c (elf_s390_link_hash_entry): Remove dyn_relocs.
+	(link_hash_newfunc): Updated.
+	(elf_s390_copy_indirect_symbol): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(elf_s390_adjust_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	* elf32-sh.c (elf_sh_link_hash_entry): Remove dyn_relocs.
+	(sh_elf_link_hash_newfunc): Updated.
+	(readonly_dynrelocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(sh_elf_copy_indirect_symbol): Likewise.
+	(sh_elf_check_relocs): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_link_hash_entry): Removed.
+	(elf32_tic6x_link_hash_newfunc): Likewise.
+	(elf32_tic6x_link_hash_table_create): Updated.
+	(readonly_dynrelocs): Likewise.
+	(elf32_tic6x_check_relocs): Likewise.
+	(elf32_tic6x_allocate_dynrelocs): Likewise.
+	* elf32-tilepro.c (tilepro_elf_link_hash_entry): Remove
+	dyn_relocs.
+	(link_hash_newfunc): Updated.
+	(tilepro_elf_copy_indirect_symbol): Likewise.
+	(tilepro_elf_check_relocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	* elf64-ppc.c (ppc_link_hash_entry): Remove dyn_relocs.
+	(ppc64_elf_copy_indirect_symbol): Updated.
+	(ppc64_elf_check_relocs): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(ppc64_elf_adjust_dynamic_symbol): Likewise.
+	(dec_dynrel_count): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+	* elf64-s390.c (elf_s390_link_hash_entry): Remove dyn_relocs.
+	(link_hash_newfunc): Updated.
+	(elf_s390_copy_indirect_symbol): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+	* elfnn-aarch64.c (elf_aarch64_link_hash_entry): Remove
+	dyn_relocs.
+	(elfNN_aarch64_link_hash_newfunc): Updated.
+	(elfNN_aarch64_copy_indirect_symbol): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(need_copy_relocation_p): Likewise.
+	(elfNN_aarch64_allocate_dynrelocs): Likewise.
+	(elfNN_aarch64_allocate_ifunc_dynrelocs): Likewise.
+	* elfnn-riscv.c (riscv_elf_link_hash_entry): Remove dyn_relocs.
+	(link_hash_newfunc): Updated.
+	(riscv_elf_copy_indirect_symbol): Likewise.
+	(riscv_elf_check_relocs): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_link_hash_entry): Remove
+	dyn_relocs.
+	(link_hash_newfunc): Updated.
+	(_bfd_sparc_elf_copy_indirect_symbol): Likewise.
+	(_bfd_sparc_elf_check_relocs): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_link_hash_entry): Remove dyn_relocs.
+	(link_hash_newfunc): Updated.
+	(tilegx_elf_copy_indirect_symbol): Likewise.
+	(tilegx_elf_check_relocs): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Likewise.
+	(readonly_dynrelocs): Likewise.
+	(_bfd_x86_elf_copy_indirect_symbol): Likewise.
+	* elfxx-x86.h (elf_x86_link_hash_entry): Remove dyn_relocs.
+
 2020-06-01  Alan Modra  <amodra@gmail.com>
 
 	* vms-alpha.c (_bfd_vms_slurp_etir): Check bound for the current

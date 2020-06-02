@@ -1498,16 +1498,6 @@ struct elf_m32r_pcrel_relocs_copied
   bfd_size_type count;
 };
 
-/* m32r ELF linker hash entry.  */
-
-struct elf_m32r_link_hash_entry
-{
-  struct elf_link_hash_entry root;
-
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
-};
-
 /* m32r ELF linker hash table.  */
 
 struct elf_m32r_link_hash_table
@@ -1536,39 +1526,6 @@ struct elf_m32r_link_hash_table
   (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
   == M32R_ELF_DATA ? ((struct elf_m32r_link_hash_table *) ((p)->hash)) : NULL)
 
-/* Create an entry in an m32r ELF linker hash table.  */
-
-static struct bfd_hash_entry *
-m32r_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
-			    struct bfd_hash_table *table,
-			    const char *string)
-{
-  struct elf_m32r_link_hash_entry *ret =
-    (struct elf_m32r_link_hash_entry *) entry;
-
-  /* Allocate the structure if it has not already been allocated by a
-     subclass.  */
-  if (ret == NULL)
-    ret = bfd_hash_allocate (table,
-			     sizeof (struct elf_m32r_link_hash_entry));
-  if (ret == NULL)
-    return NULL;
-
-  /* Call the allocation method of the superclass.  */
-  ret = ((struct elf_m32r_link_hash_entry *)
-	 _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret,
-				     table, string));
-  if (ret != NULL)
-    {
-      struct elf_m32r_link_hash_entry *eh;
-
-      eh = (struct elf_m32r_link_hash_entry *) ret;
-      eh->dyn_relocs = NULL;
-    }
-
-  return (struct bfd_hash_entry *) ret;
-}
-
 /* Create an m32r ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -1582,8 +1539,8 @@ m32r_elf_link_hash_table_create (bfd *abfd)
     return NULL;
 
   if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
-				      m32r_elf_link_hash_newfunc,
-				      sizeof (struct elf_m32r_link_hash_entry),
+				      _bfd_elf_link_hash_newfunc,
+				      sizeof (struct elf_link_hash_entry),
 				      M32R_ELF_DATA))
     {
       free (ret);
@@ -1708,26 +1665,20 @@ m32r_elf_copy_indirect_symbol (struct bfd_link_info *info,
 			       struct elf_link_hash_entry *dir,
 			       struct elf_link_hash_entry *ind)
 {
-  struct elf_m32r_link_hash_entry * edir;
-  struct elf_m32r_link_hash_entry * eind;
-
-  edir = (struct elf_m32r_link_hash_entry *) dir;
-  eind = (struct elf_m32r_link_hash_entry *) ind;
-
-  if (eind->dyn_relocs != NULL)
+  if (ind->dyn_relocs != NULL)
     {
-      if (edir->dyn_relocs != NULL)
+      if (dir->dyn_relocs != NULL)
 	{
 	  struct elf_dyn_relocs **pp;
 	  struct elf_dyn_relocs *p;
 
 	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
-	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL;)
+	  for (pp = &ind->dyn_relocs; (p = *pp) != NULL;)
 	    {
 	      struct elf_dyn_relocs *q;
 
-	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
+	      for (q = dir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
 		  {
 		    q->pc_count += p->pc_count;
@@ -1738,11 +1689,11 @@ m32r_elf_copy_indirect_symbol (struct bfd_link_info *info,
 	      if (q == NULL)
 		pp = &p->next;
 	    }
-	  *pp = edir->dyn_relocs;
+	  *pp = dir->dyn_relocs;
 	}
 
-      edir->dyn_relocs = eind->dyn_relocs;
-      eind->dyn_relocs = NULL;
+      dir->dyn_relocs = ind->dyn_relocs;
+      ind->dyn_relocs = NULL;
     }
 
   _bfd_elf_link_hash_copy_indirect (info, dir, ind);
@@ -1755,9 +1706,8 @@ static asection *
 readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
   struct elf_dyn_relocs *p;
-  struct elf_m32r_link_hash_entry *eh = (struct elf_m32r_link_hash_entry *) h;
 
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *s = p->sec->output_section;
 
@@ -1905,7 +1855,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 {
   struct bfd_link_info *info;
   struct elf_m32r_link_hash_table *htab;
-  struct elf_m32r_link_hash_entry *eh;
   struct elf_dyn_relocs *p;
 
   if (h->root.type == bfd_link_hash_indirect)
@@ -1915,8 +1864,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   htab = m32r_elf_hash_table (info);
   if (htab == NULL)
     return FALSE;
-
-  eh = (struct elf_m32r_link_hash_entry *) h;
 
   if (htab->root.dynamic_sections_created
       && h->plt.refcount > 0)
@@ -2000,7 +1947,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
   else
     h->got.offset = (bfd_vma) -1;
 
-  if (eh->dyn_relocs == NULL)
+  if (h->dyn_relocs == NULL)
     return TRUE;
 
   /* In the shared -Bsymbolic case, discard space allocated for
@@ -2017,7 +1964,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	{
 	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL;)
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL;)
 	    {
 	      p->count -= p->pc_count;
 	      p->pc_count = 0;
@@ -2030,11 +1977,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
-      if (eh->dyn_relocs != NULL
+      if (h->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-	    eh->dyn_relocs = NULL;
+	    h->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
 	     symbol in PIEs.  */
@@ -2074,13 +2021,13 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	    goto keep;
 	}
 
-      eh->dyn_relocs = NULL;
+      h->dyn_relocs = NULL;
 
     keep: ;
     }
 
   /* Finally, allocate space.  */
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc = elf_section_data (p->sec)->sreloc;
       sreloc->size += p->count * sizeof (Elf32_External_Rela);
@@ -3751,7 +3698,7 @@ m32r_elf_check_relocs (bfd *abfd,
 	      /* If this is a global symbol, we count the number of
 		 relocations we need for this symbol.  */
 	      if (h != NULL)
-		head = &((struct elf_m32r_link_hash_entry *) h)->dyn_relocs;
+		head = &h->dyn_relocs;
 	      else
 		{
 		  /* Track dynamic relocs needed for local syms too.  */

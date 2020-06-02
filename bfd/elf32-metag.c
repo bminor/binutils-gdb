@@ -785,10 +785,6 @@ struct elf_metag_link_hash_entry
      symbol.  */
   struct elf_metag_stub_hash_entry *hsh_cache;
 
-  /* Used to count relocations for delayed sizing of relocation
-     sections.  */
-  struct elf_dyn_relocs *dyn_relocs;
-
   enum
     {
       GOT_UNKNOWN = 0, GOT_NORMAL = 1, GOT_TLS_IE = 2, GOT_TLS_LDM = 4, GOT_TLS_GD = 8
@@ -994,7 +990,6 @@ metag_link_hash_newfunc (struct bfd_hash_entry *entry,
       /* Initialize the local fields.  */
       hh = (struct elf_metag_link_hash_entry *) entry;
       hh->hsh_cache = NULL;
-      hh->dyn_relocs = NULL;
       hh->tls_type = GOT_UNKNOWN;
     }
 
@@ -2328,7 +2323,7 @@ elf_metag_check_relocs (bfd *abfd,
 	      /* If this is a global symbol, we count the number of
 		 relocations we need for this symbol.  */
 	      if (hh != NULL)
-		hdh_head = &((struct elf_metag_link_hash_entry *) hh)->dyn_relocs;
+		hdh_head = &hh->eh.dyn_relocs;
 	      else
 		{
 		  /* Track dynamic relocs needed for local syms too.  */
@@ -2395,9 +2390,9 @@ elf_metag_copy_indirect_symbol (struct bfd_link_info *info,
   hh_dir = metag_elf_hash_entry (eh_dir);
   hh_ind = metag_elf_hash_entry (eh_ind);
 
-  if (hh_ind->dyn_relocs != NULL)
+  if (eh_ind->dyn_relocs != NULL)
     {
-      if (hh_dir->dyn_relocs != NULL)
+      if (eh_dir->dyn_relocs != NULL)
 	{
 	  struct elf_dyn_relocs **hdh_pp;
 	  struct elf_dyn_relocs *hdh_p;
@@ -2407,11 +2402,11 @@ elf_metag_copy_indirect_symbol (struct bfd_link_info *info,
 
 	  /* Add reloc counts against the weak sym to the strong sym
 	     list.  Merge any entries against the same section.  */
-	  for (hdh_pp = &hh_ind->dyn_relocs; (hdh_p = *hdh_pp) != NULL; )
+	  for (hdh_pp = &eh_ind->dyn_relocs; (hdh_p = *hdh_pp) != NULL; )
 	    {
 	      struct elf_dyn_relocs *hdh_q;
 
-	      for (hdh_q = hh_dir->dyn_relocs; hdh_q != NULL;
+	      for (hdh_q = eh_dir->dyn_relocs; hdh_q != NULL;
 		   hdh_q = hdh_q->next)
 		if (hdh_q->sec == hdh_p->sec)
 		  {
@@ -2423,11 +2418,11 @@ elf_metag_copy_indirect_symbol (struct bfd_link_info *info,
 	      if (hdh_q == NULL)
 		hdh_pp = &hdh_p->next;
 	    }
-	  *hdh_pp = hh_dir->dyn_relocs;
+	  *hdh_pp = eh_dir->dyn_relocs;
 	}
 
-      hh_dir->dyn_relocs = hh_ind->dyn_relocs;
-      hh_ind->dyn_relocs = NULL;
+      eh_dir->dyn_relocs = eh_ind->dyn_relocs;
+      eh_ind->dyn_relocs = NULL;
     }
 
   if (eh_ind->root.type == bfd_link_hash_indirect
@@ -2447,7 +2442,7 @@ readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
   struct elf_dyn_relocs *p;
 
-  for (p = metag_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *s = p->sec->output_section;
 
@@ -2580,7 +2575,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 {
   struct bfd_link_info *info;
   struct elf_metag_link_hash_table *htab;
-  struct elf_metag_link_hash_entry *hh;
   struct elf_dyn_relocs *hdh_p;
 
   if (eh->root.type == bfd_link_hash_indirect)
@@ -2687,8 +2681,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
   else
     eh->got.offset = (bfd_vma) -1;
 
-  hh = (struct elf_metag_link_hash_entry *) eh;
-  if (hh->dyn_relocs == NULL)
+  if (eh->dyn_relocs == NULL)
     return TRUE;
 
   /* If this is a -Bsymbolic shared link, then we need to discard all
@@ -2702,7 +2695,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 	{
 	  struct elf_dyn_relocs **hdh_pp;
 
-	  for (hdh_pp = &hh->dyn_relocs; (hdh_p = *hdh_pp) != NULL; )
+	  for (hdh_pp = &eh->dyn_relocs; (hdh_p = *hdh_pp) != NULL; )
 	    {
 	      hdh_p->count -= hdh_p->pc_count;
 	      hdh_p->pc_count = 0;
@@ -2715,11 +2708,11 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
-      if (hh->dyn_relocs != NULL
+      if (eh->dyn_relocs != NULL
 	  && eh->root.type == bfd_link_hash_undefweak)
 	{
 	  if (ELF_ST_VISIBILITY (eh->other) != STV_DEFAULT)
-	    hh->dyn_relocs = NULL;
+	    eh->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
 	     symbol in PIEs.  */
@@ -2758,14 +2751,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *eh, void *inf)
 	    goto keep;
 	}
 
-      hh->dyn_relocs = NULL;
+      eh->dyn_relocs = NULL;
       return TRUE;
 
     keep: ;
     }
 
   /* Finally, allocate space.  */
-  for (hdh_p = hh->dyn_relocs; hdh_p != NULL; hdh_p = hdh_p->next)
+  for (hdh_p = eh->dyn_relocs; hdh_p != NULL; hdh_p = hdh_p->next)
     {
       asection *sreloc = elf_section_data (hdh_p->sec)->sreloc;
       sreloc->size += hdh_p->count * sizeof (Elf32_External_Rela);

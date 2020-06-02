@@ -131,7 +131,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (h->type == STT_GNU_IFUNC
       && h->def_regular)
     {
-      if (_bfd_elf_allocate_ifunc_dyn_relocs (info, h, &eh->dyn_relocs,
+      if (_bfd_elf_allocate_ifunc_dyn_relocs (info, h, &h->dyn_relocs,
 					      &htab->readonly_dynrelocs_against_ifunc,
 					      plt_entry_size,
 					      (htab->plt.has_plt0
@@ -375,7 +375,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   else
     h->got.offset = (bfd_vma) -1;
 
-  if (eh->dyn_relocs == NULL)
+  if (h->dyn_relocs == NULL)
     return TRUE;
 
   /* In the shared -Bsymbolic case, discard space allocated for
@@ -396,7 +396,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	{
 	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      p->count -= p->pc_count;
 	      p->pc_count = 0;
@@ -410,7 +410,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       if (htab->target_os == is_vxworks)
 	{
 	  struct elf_dyn_relocs **pp;
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      if (strcmp (p->sec->output_section->name, ".tls_vars") == 0)
 		*pp = p->next;
@@ -421,7 +421,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility or in PIE.  */
-      if (eh->dyn_relocs != NULL)
+      if (h->dyn_relocs != NULL)
 	{
 	  if (h->root.type == bfd_link_hash_undefweak)
 	    {
@@ -437,7 +437,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 			 that we can branch to 0 without PLT.  */
 		      struct elf_dyn_relocs **pp;
 
-		      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+		      for (pp = &h->dyn_relocs; (p = *pp) != NULL; )
 			if (p->pc_count == 0)
 			  *pp = p->next;
 			else
@@ -450,12 +450,12 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		      /* Make sure undefined weak symbols are output
 			 as dynamic symbols in PIEs for dynamic non-GOT
 			 non-PLT reloations.  */
-		      if (eh->dyn_relocs != NULL
+		      if (h->dyn_relocs != NULL
 			  && !bfd_elf_link_record_dynamic_symbol (info, h))
 			return FALSE;
 		    }
 		  else
-		    eh->dyn_relocs = NULL;
+		    h->dyn_relocs = NULL;
 		}
 	      else if (h->dynindx == -1
 		       && !h->forced_local
@@ -472,7 +472,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		 which turn out to need copy relocs.  */
 	      struct elf_dyn_relocs **pp;
 
-	      for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	      for (pp = &h->dyn_relocs; (p = *pp) != NULL; )
 		{
 		  if (p->pc_count != 0)
 		    *pp = p->next;
@@ -513,13 +513,13 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    goto keep;
 	}
 
-      eh->dyn_relocs = NULL;
+      h->dyn_relocs = NULL;
 
     keep: ;
     }
 
   /* Finally, allocate space.  */
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc;
 
@@ -539,7 +539,7 @@ readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
   struct elf_dyn_relocs *p;
 
-  for (p = elf_x86_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *s = p->sec->output_section;
 
@@ -1783,20 +1783,20 @@ _bfd_x86_elf_copy_indirect_symbol (struct bfd_link_info *info,
   edir = (struct elf_x86_link_hash_entry *) dir;
   eind = (struct elf_x86_link_hash_entry *) ind;
 
-  if (eind->dyn_relocs != NULL)
+  if (ind->dyn_relocs != NULL)
     {
-      if (edir->dyn_relocs != NULL)
+      if (dir->dyn_relocs != NULL)
 	{
 	  struct elf_dyn_relocs **pp;
 	  struct elf_dyn_relocs *p;
 
 	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
-	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &ind->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      struct elf_dyn_relocs *q;
 
-	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
+	      for (q = dir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
 		  {
 		    q->pc_count += p->pc_count;
@@ -1807,11 +1807,11 @@ _bfd_x86_elf_copy_indirect_symbol (struct bfd_link_info *info,
 	      if (q == NULL)
 		pp = &p->next;
 	    }
-	  *pp = edir->dyn_relocs;
+	  *pp = dir->dyn_relocs;
 	}
 
-      edir->dyn_relocs = eind->dyn_relocs;
-      eind->dyn_relocs = NULL;
+      dir->dyn_relocs = ind->dyn_relocs;
+      ind->dyn_relocs = NULL;
     }
 
   if (ind->root.type == bfd_link_hash_indirect
@@ -1950,7 +1950,7 @@ _bfd_x86_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  struct elf_dyn_relocs **pp;
 
 	  eh = (struct elf_x86_link_hash_entry *) h;
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      pc_count += p->pc_count;
 	      p->count -= p->pc_count;

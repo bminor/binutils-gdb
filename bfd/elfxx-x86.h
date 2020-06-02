@@ -250,9 +250,6 @@ struct elf_x86_link_hash_entry
 {
   struct elf_link_hash_entry elf;
 
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
-
   unsigned char tls_type;
 
   /* Bit 0: Symbol has no GOT nor PLT relocations.

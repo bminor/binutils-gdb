@@ -2116,9 +2116,6 @@ struct ppc_elf_link_hash_entry
      from the beginning of the section.  */
   elf_linker_section_pointers_t *linker_section_pointer;
 
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
-
   /* Contexts in which symbol is used in the GOT.
      Bits are or'd into the mask as the corresponding relocs are
      encountered during check_relocs, with TLS_TLS being set when any
@@ -2264,7 +2261,6 @@ ppc_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
   if (entry != NULL)
     {
       ppc_elf_hash_entry (entry)->linker_section_pointer = NULL;
-      ppc_elf_hash_entry (entry)->dyn_relocs = NULL;
       ppc_elf_hash_entry (entry)->tls_mask = 0;
       ppc_elf_hash_entry (entry)->has_sda_refs = 0;
     }
@@ -2538,20 +2534,20 @@ ppc_elf_copy_indirect_symbol (struct bfd_link_info *info,
   if (eind->elf.root.type != bfd_link_hash_indirect)
     return;
 
-  if (eind->dyn_relocs != NULL)
+  if (ind->dyn_relocs != NULL)
     {
-      if (edir->dyn_relocs != NULL)
+      if (dir->dyn_relocs != NULL)
 	{
 	  struct elf_dyn_relocs **pp;
 	  struct elf_dyn_relocs *p;
 
 	  /* Add reloc counts against the indirect sym to the direct sym
 	     list.  Merge any entries against the same section.  */
-	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &ind->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      struct elf_dyn_relocs *q;
 
-	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
+	      for (q = dir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
 		  {
 		    q->pc_count += p->pc_count;
@@ -2562,11 +2558,11 @@ ppc_elf_copy_indirect_symbol (struct bfd_link_info *info,
 	      if (q == NULL)
 		pp = &p->next;
 	    }
-	  *pp = edir->dyn_relocs;
+	  *pp = dir->dyn_relocs;
 	}
 
-      edir->dyn_relocs = eind->dyn_relocs;
-      eind->dyn_relocs = NULL;
+      dir->dyn_relocs = ind->dyn_relocs;
+      ind->dyn_relocs = NULL;
     }
 
   /* Copy over the GOT refcount entries that we may have already seen to
@@ -3482,7 +3478,7 @@ ppc_elf_check_relocs (bfd *abfd,
 		  struct elf_dyn_relocs *p;
 		  struct elf_dyn_relocs **rel_head;
 
-		  rel_head = &ppc_elf_hash_entry (h)->dyn_relocs;
+		  rel_head = &h->dyn_relocs;
 		  p = *rel_head;
 		  if (p == NULL || p->sec != sec)
 		    {
@@ -4705,7 +4701,7 @@ readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
   struct elf_dyn_relocs *p;
 
-  for (p = ppc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *s = p->sec->output_section;
 
@@ -4740,7 +4736,7 @@ pc_dynrelocs (struct elf_link_hash_entry *h)
 {
   struct elf_dyn_relocs *p;
 
-  for (p = ppc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     if (p->pc_count != 0)
       return TRUE;
   return FALSE;
@@ -4784,7 +4780,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       /* Discard dyn_relocs when non-pic if we've decided that a
 	 function symbol is local.  */
       if (!bfd_link_pic (info) && local)
-	ppc_elf_hash_entry (h)->dyn_relocs = NULL;
+	h->dyn_relocs = NULL;
 
       /* Clear procedure linkage table information for any symbol that
 	 won't need a .plt entry.  */
@@ -4841,7 +4837,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  else if (!bfd_link_pic (info))
 	    /* We are going to be defining the function symbol on the
 	       plt stub, so no dyn_relocs needed when non-pic.  */
-	    ppc_elf_hash_entry (h)->dyn_relocs = NULL;
+	    h->dyn_relocs = NULL;
 	}
       h->protected_def = 0;
       /* Function symbols can't have copy relocs.  */
@@ -4862,7 +4858,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       if (def->root.u.def.section == htab->elf.sdynbss
 	  || def->root.u.def.section == htab->elf.sdynrelro
 	  || def->root.u.def.section == htab->dynsbss)
-	ppc_elf_hash_entry (h)->dyn_relocs = NULL;
+	h->dyn_relocs = NULL;
       return TRUE;
     }
 
@@ -4958,7 +4954,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     }
 
   /* We no longer want dyn_relocs.  */
-  ppc_elf_hash_entry (h)->dyn_relocs = NULL;
+  h->dyn_relocs = NULL;
   return _bfd_elf_adjust_dynamic_copy (info, h, s);
 }
 
@@ -5168,19 +5164,19 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
      IFUNCs which are handled even in static executables.  */
   if (!htab->elf.dynamic_sections_created
       && h->type != STT_GNU_IFUNC)
-    eh->dyn_relocs = NULL;
+    h->dyn_relocs = NULL;
 
   /* Discard relocs on undefined symbols that must be local.  */
   else if (h->root.type == bfd_link_hash_undefined
 	   && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-    eh->dyn_relocs = NULL;
+    h->dyn_relocs = NULL;
 
   /* Also discard relocs on undefined weak syms with non-default
      visibility, or when dynamic_undefined_weak says so.  */
   else if (UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
-    eh->dyn_relocs = NULL;
+    h->dyn_relocs = NULL;
 
-  if (eh->dyn_relocs == NULL)
+  if (h->dyn_relocs == NULL)
     ;
 
   /* In the shared -Bsymbolic case, discard space allocated for
@@ -5200,7 +5196,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	{
 	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      p->count -= p->pc_count;
 	      p->pc_count = 0;
@@ -5215,7 +5211,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	{
 	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      if (strcmp (p->sec->output_section->name, ".tls_vars") == 0)
 		*pp = p->next;
@@ -5224,7 +5220,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
 
-      if (eh->dyn_relocs != NULL)
+      if (h->dyn_relocs != NULL)
 	{
 	  /* Make sure this symbol is output as a dynamic symbol.  */
 	  if (!ensure_undef_dynamic (info, h))
@@ -5249,14 +5245,14 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    return FALSE;
 
 	  if (h->dynindx == -1)
-	    eh->dyn_relocs = NULL;
+	    h->dyn_relocs = NULL;
 	}
       else
-	eh->dyn_relocs = NULL;
+	h->dyn_relocs = NULL;
     }
 
   /* Allocate space.  */
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc = elf_section_data (p->sec)->sreloc;
       if (eh->elf.type == STT_GNU_IFUNC)
@@ -8111,11 +8107,11 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	  if (bfd_link_pic (info)
 	      ? ((h == NULL
-		  || ppc_elf_hash_entry (h)->dyn_relocs != NULL)
+		  || h->dyn_relocs != NULL)
 		 && ((h != NULL && pc_dynrelocs (h))
 		     || must_be_dyn_reloc (info, r_type)))
 	      : (h != NULL
-		 && ppc_elf_hash_entry (h)->dyn_relocs != NULL))
+		 && h->dyn_relocs != NULL))
 	    {
 	      int skip;
 	      bfd_byte *loc;

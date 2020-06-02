@@ -721,9 +721,6 @@ struct elf32_mb_link_hash_entry
 {
   struct elf_link_hash_entry elf;
 
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
-
   /* TLS Reference Types for the symbol; Updated by check_relocs */
 #define TLS_GD     1  /* GD reloc. */
 #define TLS_LD     2  /* LD reloc. */
@@ -790,7 +787,6 @@ link_hash_newfunc (struct bfd_hash_entry *entry,
       struct elf32_mb_link_hash_entry *eh;
 
       eh = (struct elf32_mb_link_hash_entry *) entry;
-      eh->dyn_relocs = NULL;
       eh->tls_mask = 0;
     }
 
@@ -2516,7 +2512,7 @@ microblaze_elf_check_relocs (bfd * abfd,
 		/* If this is a global symbol, we count the number of
 		   relocations we need for this symbol.  */
 		if (h != NULL)
-		  head = &((struct elf32_mb_link_hash_entry *) h)->dyn_relocs;
+		  head = &h->dyn_relocs;
 		else
 		  {
 		    /* Track dynamic relocs needed for local syms too.
@@ -2579,9 +2575,9 @@ microblaze_elf_copy_indirect_symbol (struct bfd_link_info *info,
   edir = (struct elf32_mb_link_hash_entry *) dir;
   eind = (struct elf32_mb_link_hash_entry *) ind;
 
-  if (eind->dyn_relocs != NULL)
+  if (ind->dyn_relocs != NULL)
     {
-      if (edir->dyn_relocs != NULL)
+      if (dir->dyn_relocs != NULL)
 	{
 	  struct elf_dyn_relocs **pp;
 	  struct elf_dyn_relocs *p;
@@ -2591,11 +2587,11 @@ microblaze_elf_copy_indirect_symbol (struct bfd_link_info *info,
 
 	  /* Add reloc counts against the weak sym to the strong sym
 	     list.  Merge any entries against the same section.  */
-	  for (pp = &eind->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &ind->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      struct elf_dyn_relocs *q;
 
-	      for (q = edir->dyn_relocs; q != NULL; q = q->next)
+	      for (q = dir->dyn_relocs; q != NULL; q = q->next)
 		if (q->sec == p->sec)
 		  {
 		    q->pc_count += p->pc_count;
@@ -2606,11 +2602,11 @@ microblaze_elf_copy_indirect_symbol (struct bfd_link_info *info,
 	      if (q == NULL)
 		pp = &p->next;
 	    }
-	  *pp = edir->dyn_relocs;
+	  *pp = dir->dyn_relocs;
 	}
 
-      edir->dyn_relocs = eind->dyn_relocs;
-      eind->dyn_relocs = NULL;
+      dir->dyn_relocs = ind->dyn_relocs;
+      ind->dyn_relocs = NULL;
     }
 
   edir->tls_mask |= eind->tls_mask;
@@ -2625,7 +2621,7 @@ readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
   struct elf_dyn_relocs *p;
 
-  for (p = elf32_mb_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *s = p->sec->output_section;
 
@@ -2898,7 +2894,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * dat)
   else
     h->got.offset = (bfd_vma) -1;
 
-  if (eh->dyn_relocs == NULL)
+  if (h->dyn_relocs == NULL)
     return TRUE;
 
   /* In the shared -Bsymbolic case, discard space allocated for
@@ -2915,7 +2911,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * dat)
 	{
 	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      p->count -= p->pc_count;
 	      p->pc_count = 0;
@@ -2926,7 +2922,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * dat)
 	    }
 	}
       else if (UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
-	eh->dyn_relocs = NULL;
+	h->dyn_relocs = NULL;
     }
   else
     {
@@ -2956,13 +2952,13 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * dat)
 	    goto keep;
 	}
 
-      eh->dyn_relocs = NULL;
+      h->dyn_relocs = NULL;
 
     keep: ;
     }
 
   /* Finally, allocate space.  */
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc = elf_section_data (p->sec)->sreloc;
       sreloc->size += p->count * sizeof (Elf32_External_Rela);

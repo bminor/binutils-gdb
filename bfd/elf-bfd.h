@@ -156,8 +156,12 @@ struct elf_link_hash_entry
   /* Same, but tracks a procedure linkage table entry.  */
   union gotplt_union plt;
 
-  /* Symbol size.  */
+  /* Symbol size.  NB: All fields starting from here are cleared by
+    _bfd_elf_link_hash_newfunc.  */
   bfd_size_type size;
+
+  /* Track dynamic relocs copied for this symbol.  */
+  struct elf_dyn_relocs *dyn_relocs;
 
   /* Symbol type (STT_NOTYPE, STT_OBJECT, etc.).  */
   unsigned int type : 8;

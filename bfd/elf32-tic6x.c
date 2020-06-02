@@ -61,16 +61,6 @@ struct elf32_tic6x_link_hash_table
 #define elf32_tic6x_hash_table(p) \
   ((struct elf32_tic6x_link_hash_table *) ((p)->hash))
 
-/* TI C6X ELF linker hash entry.  */
-
-struct elf32_tic6x_link_hash_entry
-{
-  struct elf_link_hash_entry elf;
-
-  /* Track dynamic relocs copied for this symbol.  */
-  struct elf_dyn_relocs *dyn_relocs;
-};
-
 typedef enum
 {
   DELETE_EXIDX_ENTRY,
@@ -1559,36 +1549,6 @@ elf32_tic6x_set_use_rela_p (bfd *abfd, bfd_boolean use_rela_p)
   elf32_tic6x_tdata (abfd)->use_rela_p = use_rela_p;
 }
 
-/* Create an entry in a C6X ELF linker hash table.  */
-
-static struct bfd_hash_entry *
-elf32_tic6x_link_hash_newfunc (struct bfd_hash_entry *entry,
-			    struct bfd_hash_table *table,
-			    const char *string)
-{
-  /* Allocate the structure if it has not already been allocated by a
-     subclass.  */
-  if (entry == NULL)
-    {
-      entry = bfd_hash_allocate (table,
-				 sizeof (struct elf32_tic6x_link_hash_entry));
-      if (entry == NULL)
-	return entry;
-    }
-
-  /* Call the allocation method of the superclass.  */
-  entry = _bfd_elf_link_hash_newfunc (entry, table, string);
-  if (entry != NULL)
-    {
-      struct elf32_tic6x_link_hash_entry *eh;
-
-      eh = (struct elf32_tic6x_link_hash_entry *) entry;
-      eh->dyn_relocs = NULL;
-    }
-
-  return entry;
-}
-
 /* Create a C6X ELF linker hash table.  */
 
 static struct bfd_link_hash_table *
@@ -1602,8 +1562,8 @@ elf32_tic6x_link_hash_table_create (bfd *abfd)
     return NULL;
 
   if (!_bfd_elf_link_hash_table_init (&ret->elf, abfd,
-				      elf32_tic6x_link_hash_newfunc,
-				      sizeof (struct elf32_tic6x_link_hash_entry),
+				      _bfd_elf_link_hash_newfunc,
+				      sizeof (struct elf_link_hash_entry),
 				      TIC6X_ELF_DATA))
     {
       free (ret);
@@ -2009,10 +1969,8 @@ static asection *
 readonly_dynrelocs (struct elf_link_hash_entry *h)
 {
   struct elf_dyn_relocs *p;
-  struct elf32_tic6x_link_hash_entry *eh
-    = (struct elf32_tic6x_link_hash_entry *) h;
 
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *s = p->sec->output_section;
 
@@ -2924,7 +2882,7 @@ elf32_tic6x_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		 relocations we need for this symbol.  */
 	      if (h != NULL)
 		{
-		  head = &((struct elf32_tic6x_link_hash_entry *) h)->dyn_relocs;
+		  head = &h->dyn_relocs;
 		}
 	      else
 		{
@@ -3089,13 +3047,11 @@ elf32_tic6x_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct elf32_tic6x_link_hash_table *htab;
-  struct elf32_tic6x_link_hash_entry *eh;
   struct elf_dyn_relocs *p;
 
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  eh = (struct elf32_tic6x_link_hash_entry *) h;
   info = (struct bfd_link_info *) inf;
   htab = elf32_tic6x_hash_table (info);
 
@@ -3176,7 +3132,7 @@ elf32_tic6x_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   else
     h->got.offset = (bfd_vma) -1;
 
-  if (eh->dyn_relocs == NULL)
+  if (h->dyn_relocs == NULL)
     return TRUE;
 
   /* Discard relocs on undefined weak syms with non-default
@@ -3189,7 +3145,7 @@ elf32_tic6x_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	{
 	  struct elf_dyn_relocs **pp;
 
-	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	  for (pp = &h->dyn_relocs; (p = *pp) != NULL; )
 	    {
 	      p->count -= p->pc_count;
 	      p->pc_count = 0;
@@ -3200,11 +3156,11 @@ elf32_tic6x_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
 
-      if (eh->dyn_relocs != NULL
+      if (h->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefweak)
 	{
 	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
-	    eh->dyn_relocs = NULL;
+	    h->dyn_relocs = NULL;
 
 	  /* Make sure undefined weak symbols are output as a dynamic
 	     symbol in PIEs.  */
@@ -3218,7 +3174,7 @@ elf32_tic6x_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     }
 
   /* Finally, allocate space.  */
-  for (p = eh->dyn_relocs; p != NULL; p = p->next)
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc;
 
