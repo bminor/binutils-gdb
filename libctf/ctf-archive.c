@@ -617,6 +617,16 @@ ctf_arc_open_by_offset (const struct ctf_archive *arc,
   return fp;
 }
 
+/* Return the number of members in an archive.  */
+size_t
+ctf_archive_count (const ctf_archive_t *wrapper)
+{
+  if (!wrapper->ctfi_is_archive)
+    return 1;
+
+  return wrapper->ctfi_archive->ctfa_nfiles;
+}
+
 /* Raw iteration over all CTF files in an archive.  We pass the raw data for all
    CTF files in turn to the specified callback function.  */
 static int

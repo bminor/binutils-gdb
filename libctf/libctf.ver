@@ -135,6 +135,7 @@ LIBCTF_1.0 {
 	ctf_arc_close;
 	ctf_arc_open_by_name;
 	ctf_arc_open_by_name_sections;
+	ctf_archive_count;
 	ctf_archive_iter;
 	ctf_archive_raw_iter;
 	ctf_get_arc;

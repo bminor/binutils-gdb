@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-archive.c (ctf_archive_count): New.
+	* libctf.ver: New public function.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-types.c (ctf_member_count): New.
 	* libctf.ver: New public function.
 

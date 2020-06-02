@@ -276,6 +276,7 @@ extern ctf_file_t *ctf_arc_open_by_name_sections (const ctf_archive_t *,
 						  const ctf_sect_t *,
 						  const ctf_sect_t *,
 						  const char *, int *);
+extern size_t ctf_archive_count (const ctf_archive_t *);
 
 /* The next functions return or close real CTF files, or write out CTF archives,
    not opaque containers around either.  */
