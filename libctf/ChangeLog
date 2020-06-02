@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-types.c (ctf_type_kind_forwarded): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-types.c (ctf_type_name_raw): New.
 	(ctf_type_aname_raw): Reimplement accordingly.
 

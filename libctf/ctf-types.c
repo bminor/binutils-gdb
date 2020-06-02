@@ -677,6 +677,26 @@ ctf_type_kind (ctf_file_t *fp, ctf_id_t type)
   return kind;
 }
 
+/* Return the kind of this type, except, for forwards, return the kind of thing
+   this is a forward to.  */
+int
+ctf_type_kind_forwarded (ctf_file_t *fp, ctf_id_t type)
+{
+  int kind;
+  const ctf_type_t *tp;
+
+  if ((kind = ctf_type_kind (fp, type)) < 0)
+    return -1;			/* errno is set for us.  */
+
+  if (kind != CTF_K_FORWARD)
+    return kind;
+
+  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+    return -1;			/* errno is set for us.  */
+
+  return tp->ctt_type;
+}
+
 /* If the type is one that directly references another type (such as POINTER),
    then return the ID of the type to which it refers.  */
 

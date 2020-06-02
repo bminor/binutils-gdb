@@ -328,6 +328,7 @@ extern const char *ctf_type_name_raw (ctf_file_t *, ctf_id_t);
 extern ssize_t ctf_type_size (ctf_file_t *, ctf_id_t);
 extern ssize_t ctf_type_align (ctf_file_t *, ctf_id_t);
 extern int ctf_type_kind (ctf_file_t *, ctf_id_t);
+extern int ctf_type_kind_forwarded (ctf_file_t *, ctf_id_t);
 extern ctf_id_t ctf_type_reference (ctf_file_t *, ctf_id_t);
 extern ctf_id_t ctf_type_pointer (ctf_file_t *, ctf_id_t);
 extern int ctf_type_encoding (ctf_file_t *, ctf_id_t, ctf_encoding_t *);
