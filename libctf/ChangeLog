@@ -1,5 +1,19 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-error.c: Include <stddef.h>, for offsetof.
+	(_ctf_errlist): Migrate to...
+	(_ctf_errlist_t): ... this.
+	(_ctf_erridx): New, indexes into _ctf_errlist_t.
+	(_ctf_nerr): Remove.
+	(ctf_errmsg): Adjust accordingly.
+	* Makefile.am (BUILT_SOURCES): Note...
+	(ctf-error.h): ... this new rule.
+	* Makefile.in: Regenerate.
+	* mkerrors.sed: New, process ctf-api.h to generate ctf-error.h.
+	* .gitignore: New, ignore ctf-error.h.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h: Fix typos in comments.
 
 2020-07-22  Nick Clifton  <nickc@redhat.com>

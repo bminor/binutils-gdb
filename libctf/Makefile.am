@@ -52,3 +52,8 @@ libctf_la_LIBADD = @BFD_LIBADD@ $(libctf_nobfd_la_LIBADD)
 libctf_la_DEPENDENCIES = @BFD_DEPENDENCIES@
 libctf_la_LDFLAGS = $(libctf_nobfd_la_LDFLAGS)
 libctf_la_SOURCES = $(libctf_nobfd_la_SOURCES) ctf-open-bfd.c
+
+BUILT_SOURCES = ctf-error.h
+
+ctf-error.h: $(srcdir)/mkerrors.sed $(srcdir)/../include/ctf-api.h
+	sed -nf $(srcdir)/mkerrors.sed < $(srcdir)/../include/ctf-api.h > $@

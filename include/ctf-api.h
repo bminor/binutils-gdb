@@ -153,59 +153,61 @@ typedef struct ctf_snapshot_id
 
 enum
   {
-   ECTF_FMT = ECTF_BASE,	/* File is not in CTF or ELF format.  */
-   ECTF_BFDERR,			/* BFD error.  */
-   ECTF_CTFVERS,		/* CTF version is more recent than libctf.  */
-   ECTF_BFD_AMBIGUOUS,		/* Ambiguous BFD target.  */
-   ECTF_SYMTAB,			/* Symbol table uses invalid entry size.  */
-   ECTF_SYMBAD,			/* Symbol table data buffer invalid.  */
-   ECTF_STRBAD,			/* String table data buffer invalid.  */
-   ECTF_CORRUPT,		/* File data corruption detected.  */
-   ECTF_NOCTFDATA,		/* ELF file does not contain CTF data.  */
-   ECTF_NOCTFBUF,		/* Buffer does not contain CTF data.  */
-   ECTF_NOSYMTAB,		/* Symbol table data is not available.  */
-   ECTF_NOPARENT,		/* Parent CTF container is not available.  */
-   ECTF_DMODEL,			/* Data model mismatch.  */
-   ECTF_LINKADDEDLATE,		/* File added to link too late.  */
-   ECTF_ZALLOC,			/* Failed to allocate (de)compression buffer.  */
-   ECTF_DECOMPRESS,		/* Failed to decompress CTF data.  */
-   ECTF_STRTAB,			/* String table for this string is missing.  */
-   ECTF_BADNAME,		/* String offset is corrupt w.r.t. strtab.  */
-   ECTF_BADID,			/* Invalid type ID number.  */
-   ECTF_NOTSOU,			/* Type is not a struct or union.  */
-   ECTF_NOTENUM,		/* Type is not an enum.  */
-   ECTF_NOTSUE,			/* Type is not a struct, union, or enum.  */
-   ECTF_NOTINTFP,		/* Type is not an integer, float, or enum.  */
-   ECTF_NOTARRAY,		/* Type is not an array.  */
-   ECTF_NOTREF,			/* Type does not reference another type.  */
-   ECTF_NAMELEN,		/* Buffer is too small to hold type name.  */
-   ECTF_NOTYPE,			/* No type found corresponding to name.  */
-   ECTF_SYNTAX,			/* Syntax error in type name.  */
-   ECTF_NOTFUNC,		/* Symbol entry or type is not a function.  */
-   ECTF_NOFUNCDAT,		/* No func info available for function.  */
-   ECTF_NOTDATA,		/* Symtab entry does not refer to a data obj.  */
-   ECTF_NOTYPEDAT,		/* No type info available for object.  */
-   ECTF_NOLABEL,		/* No label found corresponding to name.  */
-   ECTF_NOLABELDATA,		/* File does not contain any labels.  */
-   ECTF_NOTSUP,			/* Feature not supported.  */
-   ECTF_NOENUMNAM,		/* Enum element name not found.  */
-   ECTF_NOMEMBNAM,		/* Member name not found.  */
-   ECTF_RDONLY,			/* CTF container is read-only.  */
-   ECTF_DTFULL,			/* CTF type is full (no more members allowed).  */
-   ECTF_FULL,			/* CTF container is full.  */
-   ECTF_DUPLICATE,		/* Duplicate member or variable name.  */
-   ECTF_CONFLICT,		/* Conflicting type definition present.  */
-   ECTF_OVERROLLBACK,		/* Attempt to roll back past a ctf_update.  */
-   ECTF_COMPRESS,		/* Failed to compress CTF data.  */
-   ECTF_ARCREATE,		/* Error creating CTF archive.  */
-   ECTF_ARNNAME,		/* Name not found in CTF archive.  */
-   ECTF_SLICEOVERFLOW,		/* Overflow of type bitness or offset in slice.  */
-   ECTF_DUMPSECTUNKNOWN,	/* Unknown section number in dump.  */
-   ECTF_DUMPSECTCHANGED,	/* Section changed in middle of dump.  */
-   ECTF_NOTYET,			/* Feature not yet implemented.  */
-   ECTF_INTERNAL,		/* Internal error in link.  */
-   ECTF_NONREPRESENTABLE	/* Type not representable in CTF.  */
+   ECTF_FMT = ECTF_BASE, /* File is not in CTF or ELF format.  */
+   ECTF_BFDERR,		/* BFD error.  */
+   ECTF_CTFVERS,	/* CTF dict version is too new for libctf.  */
+   ECTF_BFD_AMBIGUOUS,	/* Ambiguous BFD target.  */
+   ECTF_SYMTAB,		/* Symbol table uses invalid entry size.  */
+   ECTF_SYMBAD,		/* Symbol table data buffer is not valid.  */
+   ECTF_STRBAD,		/* String table data buffer is not valid.  */
+   ECTF_CORRUPT,	/* File data structure corruption detected.  */
+   ECTF_NOCTFDATA,	/* File does not contain CTF data.  */
+   ECTF_NOCTFBUF,	/* Buffer does not contain CTF data.  */
+   ECTF_NOSYMTAB,	/* Symbol table information is not available.  */
+   ECTF_NOPARENT,	/* The parent CTF dictionary is unavailable.  */
+   ECTF_DMODEL,		/* Data model mismatch.  */
+   ECTF_LINKADDEDLATE,	/* File added to link too late.  */
+   ECTF_ZALLOC,		/* Failed to allocate (de)compression buffer.  */
+   ECTF_DECOMPRESS,	/* Failed to decompress CTF data.  */
+   ECTF_STRTAB,		/* External string table is not available.  */
+   ECTF_BADNAME,	/* String name offset is corrupt.  */
+   ECTF_BADID,		/* Invalid type identifier.  */
+   ECTF_NOTSOU,		/* Type is not a struct or union.  */
+   ECTF_NOTENUM,	/* Type is not an enum.  */
+   ECTF_NOTSUE,		/* Type is not a struct, union, or enum.  */
+   ECTF_NOTINTFP,	/* Type is not an integer, float, or enum.  */
+   ECTF_NOTARRAY,	/* Type is not an array.  */
+   ECTF_NOTREF,		/* Type does not reference another type.  */
+   ECTF_NAMELEN,	/* Buffer is too small to hold type name.  */
+   ECTF_NOTYPE,		/* No type found corresponding to name.  */
+   ECTF_SYNTAX,		/* Syntax error in type name.  */
+   ECTF_NOTFUNC,	/* Symbol table entry or type is not a function.  */
+   ECTF_NOFUNCDAT,	/* No function information available for function.  */
+   ECTF_NOTDATA,	/* Symbol table entry does not refer to a data object.  */
+   ECTF_NOTYPEDAT,	/* No type information available for symbol.  */
+   ECTF_NOLABEL,	/* No label found corresponding to name.  */
+   ECTF_NOLABELDATA,	/* File does not contain any labels.  */
+   ECTF_NOTSUP,		/* Feature not supported.  */
+   ECTF_NOENUMNAM,	/* Enum element name not found.  */
+   ECTF_NOMEMBNAM,	/* Member name not found.  */
+   ECTF_RDONLY,		/* CTF container is read-only.  */
+   ECTF_DTFULL,		/* CTF type is full (no more members allowed).  */
+   ECTF_FULL,		/* CTF container is full.  */
+   ECTF_DUPLICATE,	/* Duplicate member or variable name.  */
+   ECTF_CONFLICT,	/* Conflicting type is already defined.  */
+   ECTF_OVERROLLBACK,	/* Attempt to roll back past a ctf_update.  */
+   ECTF_COMPRESS,	/* Failed to compress CTF data.  */
+   ECTF_ARCREATE,	/* Error creating CTF archive.  */
+   ECTF_ARNNAME,	/* Name not found in CTF archive.  */
+   ECTF_SLICEOVERFLOW,	/* Overflow of type bitness or offset in slice.  */
+   ECTF_DUMPSECTUNKNOWN, /* Unknown section number in dump.  */
+   ECTF_DUMPSECTCHANGED, /* Section changed in middle of dump.  */
+   ECTF_NOTYET,		/* Feature not yet implemented.  */
+   ECTF_INTERNAL,	/* Internal error in link.  */
+   ECTF_NONREPRESENTABLE /* Type not representable in CTF.  */
   };
+
+#define ECTF_NERR (ECTF_NONREPRESENTABLE - ECTF_BASE + 1)	/* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel() is explicitly called.  */
