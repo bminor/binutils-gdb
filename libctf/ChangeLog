@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-types.c (ctf_type_name_raw): New.
+	(ctf_type_aname_raw): Reimplement accordingly.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-subr.c (ctf_dprintf): _libctf_debug is unlikely to be set.
 
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>

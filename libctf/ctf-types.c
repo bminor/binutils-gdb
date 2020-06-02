@@ -472,19 +472,30 @@ ctf_type_name (ctf_file_t *fp, ctf_id_t type, char *buf, size_t len)
   return (rv >= 0 && (size_t) rv < len ? buf : NULL);
 }
 
-/* Lookup the given type ID and return its raw, unadorned, undecorated name as a
-   new dynamcally-allocated string.  */
+/* Lookup the given type ID and return its raw, unadorned, undecorated name.
+   The name will live as long as its ctf_file_t does.  */
 
-char *
-ctf_type_aname_raw (ctf_file_t *fp, ctf_id_t type)
+const char *
+ctf_type_name_raw (ctf_file_t *fp, ctf_id_t type)
 {
   const ctf_type_t *tp;
 
   if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
     return NULL;		/* errno is set for us.  */
 
-  if (ctf_strraw (fp, tp->ctt_name) != NULL)
-    return strdup (ctf_strraw (fp, tp->ctt_name));
+  return ctf_strraw (fp, tp->ctt_name);
+}
+
+/* Lookup the given type ID and return its raw, unadorned, undecorated name as a
+   new dynamically-allocated string.  */
+
+char *
+ctf_type_aname_raw (ctf_file_t *fp, ctf_id_t type)
+{
+  const char *name = ctf_type_name_raw (fp, type);
+
+  if (name != NULL)
+    return strdup (name);
 
   return NULL;
 }

@@ -57,6 +57,7 @@ LIBCTF_1.0 {
 	ctf_type_resolve;
 	ctf_type_lname;
 	ctf_type_name;
+	ctf_type_name_raw;
 	ctf_type_aname;
 	ctf_type_aname_raw;
 	ctf_type_size;
