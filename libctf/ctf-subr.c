@@ -183,7 +183,7 @@ int ctf_getdebug (void)
 _libctf_printflike_ (1, 2)
 void ctf_dprintf (const char *format, ...)
 {
-  if (_libctf_debug)
+  if (_libctf_unlikely_ (_libctf_debug))
     {
       va_list alist;
 

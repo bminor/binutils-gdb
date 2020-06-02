@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-subr.c (ctf_dprintf): _libctf_debug is unlikely to be set.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (struct ctf_archive_internal)
 	<ctfi_unmap_on_close>: New.
 	(ctf_new_archive_internal): Adjust.
