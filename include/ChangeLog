@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (ctf_member_count): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ctf_type_kind_forwarded): New.
 
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>

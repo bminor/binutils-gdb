@@ -349,6 +349,7 @@ extern const char *ctf_label_get (ctf_file_t *);
 extern const char *ctf_label_topmost (ctf_file_t *);
 extern int ctf_label_info (ctf_file_t *, const char *, ctf_lblinfo_t *);
 
+extern int ctf_member_count (ctf_file_t *, ctf_id_t);
 extern int ctf_member_iter (ctf_file_t *, ctf_id_t, ctf_member_f *, void *);
 extern int ctf_enum_iter (ctf_file_t *, ctf_id_t, ctf_enum_f *, void *);
 extern int ctf_type_iter (ctf_file_t *, ctf_type_f *, void *);

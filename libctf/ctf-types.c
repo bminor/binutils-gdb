@@ -963,6 +963,30 @@ ctf_type_compat (ctf_file_t *lfp, ctf_id_t ltype,
     }
 }
 
+/* Return the number of members in a STRUCT or UNION, or the number of
+   enumerators in an ENUM.  */
+
+int
+ctf_member_count (ctf_file_t *fp, ctf_id_t type)
+{
+  ctf_file_t *ofp = fp;
+  const ctf_type_t *tp;
+  uint32_t kind;
+
+  if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
+    return -1;			/* errno is set for us.  */
+
+  if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+    return -1;			/* errno is set for us.  */
+
+  kind = LCTF_INFO_KIND (fp, tp->ctt_info);
+
+  if (kind != CTF_K_STRUCT && kind != CTF_K_UNION && kind != CTF_K_ENUM)
+    return (ctf_set_errno (ofp, ECTF_NOTSUE));
+
+  return LCTF_INFO_VLEN (fp, tp->ctt_info);
+}
+
 /* Return the type and offset for a given member of a STRUCT or UNION.  */
 
 int

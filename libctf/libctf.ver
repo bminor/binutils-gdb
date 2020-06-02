@@ -73,6 +73,7 @@ LIBCTF_1.0 {
 
 	ctf_member_info;
 	ctf_array_info;
+	ctf_member_count;
 
 	ctf_enum_name;
 	ctf_enum_value;
