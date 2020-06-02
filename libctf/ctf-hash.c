@@ -218,6 +218,12 @@ ctf_dynhash_empty (ctf_dynhash_t *hp)
   htab_empty (hp->htab);
 }
 
+size_t
+ctf_dynhash_elements (ctf_dynhash_t *hp)
+{
+  return htab_elements (hp->htab);
+}
+
 void *
 ctf_dynhash_lookup (ctf_dynhash_t *hp, const void *key)
 {
@@ -229,6 +235,26 @@ ctf_dynhash_lookup (ctf_dynhash_t *hp, const void *key)
     return (*slot)->value;
 
   return NULL;
+}
+
+/* TRUE/FALSE return.  */
+int
+ctf_dynhash_lookup_kv (ctf_dynhash_t *hp, const void *key,
+		       const void **orig_key, void **value)
+{
+  ctf_helem_t **slot;
+
+  slot = ctf_hashtab_lookup (hp->htab, key, NO_INSERT);
+
+  if (slot)
+    {
+      if (orig_key)
+	*orig_key = (*slot)->key;
+      if (value)
+	*value = (*slot)->value;
+      return 1;
+    }
+  return 0;
 }
 
 typedef struct ctf_traverse_cb_arg
@@ -252,6 +278,35 @@ ctf_dynhash_iter (ctf_dynhash_t *hp, ctf_hash_iter_f fun, void *arg_)
 {
   ctf_traverse_cb_arg_t arg = { fun, arg_ };
   htab_traverse (hp->htab, ctf_hashtab_traverse, &arg);
+}
+
+typedef struct ctf_traverse_find_cb_arg
+{
+  ctf_hash_iter_find_f fun;
+  void *arg;
+  void *found_key;
+} ctf_traverse_find_cb_arg_t;
+
+static int
+ctf_hashtab_traverse_find (void **slot, void *arg_)
+{
+  ctf_helem_t *helem = *((ctf_helem_t **) slot);
+  ctf_traverse_find_cb_arg_t *arg = (ctf_traverse_find_cb_arg_t *) arg_;
+
+  if (arg->fun (helem->key, helem->value, arg->arg))
+    {
+      arg->found_key = helem->key;
+      return 0;
+    }
+  return 1;
+}
+
+void *
+ctf_dynhash_iter_find (ctf_dynhash_t *hp, ctf_hash_iter_find_f fun, void *arg_)
+{
+  ctf_traverse_find_cb_arg_t arg = { fun, arg_, NULL };
+  htab_traverse (hp->htab, ctf_hashtab_traverse_find, &arg);
+  return arg.found_key;
 }
 
 typedef struct ctf_traverse_remove_cb_arg

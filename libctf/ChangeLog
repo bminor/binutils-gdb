@@ -1,5 +1,19 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-inlines.h: New file.
+	* ctf-impl.h: Include it.
+	(ctf_hash_iter_find_f): New typedef.
+	(ctf_dynhash_elements): New.
+	(ctf_dynhash_lookup_kv): New.
+	(ctf_dynhash_iter_find): New.
+	* ctf-hash.c (ctf_dynhash_lookup_kv): New.
+	(ctf_traverse_find_cb_arg_t): New.
+	(ctf_hashtab_traverse_find): New.
+	(ctf_dynhash_iter_find): New.
+	(ctf_dynhash_elements): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h [!__GNUC__] (__extension__): Define to nothing.
 
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
