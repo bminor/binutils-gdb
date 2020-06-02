@@ -448,7 +448,7 @@ ctf_serialize (ctf_file_t *fp)
 	    uint32_t argc;
 
 	    for (argc = 0; argc < vlen; argc++)
-	      *argv++ = (uint32_t) dtd->dtd_u.dtu_argv[argc];
+	      *argv++ = dtd->dtd_u.dtu_argv[argc];
 
 	    if (vlen & 1)
 	      *argv++ = 0;	/* Pad to 4-byte boundary.  */
@@ -1052,7 +1052,7 @@ ctf_add_function (ctf_file_t *fp, uint32_t flag,
   ctf_dtdef_t *dtd;
   ctf_id_t type;
   uint32_t vlen;
-  ctf_id_t *vdat = NULL;
+  uint32_t *vdat = NULL;
   ctf_file_t *tmp = fp;
   size_t i;
 
@@ -1068,18 +1068,22 @@ ctf_add_function (ctf_file_t *fp, uint32_t flag,
       && ctf_lookup_by_id (&tmp, ctc->ctc_return) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
-  for (i = 0; i < ctc->ctc_argc; i++)
-    {
-      tmp = fp;
-      if (argv[i] != 0 && ctf_lookup_by_id (&tmp, argv[i]) == NULL)
-	return CTF_ERR;		/* errno is set for us.  */
-    }
-
   if (vlen > CTF_MAX_VLEN)
     return (ctf_set_errno (fp, EOVERFLOW));
 
   if (vlen != 0 && (vdat = malloc (sizeof (ctf_id_t) * vlen)) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
+
+  for (i = 0; i < ctc->ctc_argc; i++)
+    {
+      tmp = fp;
+      if (argv[i] != 0 && ctf_lookup_by_id (&tmp, argv[i]) == NULL)
+	{
+	  free (vdat);
+	  return CTF_ERR;	   /* errno is set for us.  */
+	}
+      vdat[i] = (uint32_t) argv[i];
+    }
 
   if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_FUNCTION,
 			       &dtd)) == CTF_ERR)
@@ -1091,7 +1095,6 @@ ctf_add_function (ctf_file_t *fp, uint32_t flag,
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_FUNCTION, flag, vlen);
   dtd->dtd_data.ctt_type = (uint32_t) ctc->ctc_return;
 
-  memcpy (vdat, argv, sizeof (ctf_id_t) * ctc->ctc_argc);
   if (ctc->ctc_flags & CTF_FUNC_VARARG)
     vdat[vlen - 1] = 0;		   /* Add trailing zero to indicate varargs.  */
   dtd->dtd_u.dtu_argv = vdat;

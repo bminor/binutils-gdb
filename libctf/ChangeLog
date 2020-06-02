@@ -1,5 +1,15 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_dtdef_t) <dtu_argv>: Fix type.
+	* ctf-create.c (ctf_add_function): Check for unimplemented type
+	and populate at the same time.  Populate one-by-one, not via
+	memcpy.
+	(ctf_serialize): Remove unnecessary cast.
+	* ctf-types.c (ctf_func_type_info): Likewise.
+	(ctf_func_type_args): Likewise.  Fix comment typo.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c (ctf_add_reftype): Support refs to type zero.
 	(ctf_add_array): Support array contents of type zero.
 	(ctf_add_function): Support arguments and return types of

@@ -172,7 +172,7 @@ typedef struct ctf_dtdef
     ctf_list_t dtu_members;	/* struct, union, or enum */
     ctf_arinfo_t dtu_arr;	/* array */
     ctf_encoding_t dtu_enc;	/* integer or float */
-    ctf_id_t *dtu_argv;		/* function */
+    uint32_t *dtu_argv;		/* function */
     ctf_slice_t dtu_slice;	/* slice */
   } dtd_u;
 } ctf_dtdef_t;
