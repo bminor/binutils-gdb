@@ -393,7 +393,6 @@ extern const struct language_data pascal_language_data =
   macro_expansion_no,
   p_extensions,
   &exp_descriptor_standard,
-  null_post_parser,
   pascal_printchar,		/* Print a character constant */
   pascal_printstr,		/* Function to print string constant */
   pascal_emit_char,		/* Print a single char */

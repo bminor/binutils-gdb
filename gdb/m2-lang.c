@@ -362,7 +362,6 @@ extern const struct language_data m2_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_modula2,
-  null_post_parser,
   m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */
   m2_emit_char,			/* Function to print a single character */

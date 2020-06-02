@@ -564,7 +564,6 @@ extern const struct language_data f_language_data =
   macro_expansion_no,
   f_extensions,
   &exp_descriptor_f,
-  null_post_parser,
   f_printchar,			/* Print character constant */
   f_printstr,			/* function to print string constant */
   f_emit_char,			/* Function to print a single character */

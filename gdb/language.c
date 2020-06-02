@@ -777,7 +777,6 @@ extern const struct language_data unknown_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_standard,
-  null_post_parser,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_emit_char,
@@ -868,7 +867,6 @@ extern const struct language_data auto_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_standard,
-  null_post_parser,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   unk_lang_emit_char,

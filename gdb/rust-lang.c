@@ -1989,7 +1989,6 @@ extern const struct language_data rust_language_data =
   macro_expansion_no,
   rust_extensions,
   &exp_descriptor_rust,
-  null_post_parser,
   rust_printchar,		/* Print a character constant */
   rust_printstr,		/* Function to print string constant */
   rust_emitchar,		/* Print a single char */

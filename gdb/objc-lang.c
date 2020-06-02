@@ -337,7 +337,6 @@ extern const struct language_data objc_language_data =
   macro_expansion_c,
   objc_extensions,
   &exp_descriptor_standard,
-  null_post_parser,
   c_printchar,		       /* Print a character constant */
   c_printstr,		       /* Function to print string constant */
   c_emit_char,

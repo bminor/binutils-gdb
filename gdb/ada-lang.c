@@ -3360,28 +3360,6 @@ See set/show multiple-symbol."));
   return n_chosen;
 }
 
-/* Same as evaluate_type (*EXP), but resolves ambiguous symbol
-   references (marked by OP_VAR_VALUE nodes in which the symbol has an
-   undefined namespace) and converts operators that are
-   user-defined into appropriate function calls.  If CONTEXT_TYPE is
-   non-null, it provides a preferred result type [at the moment, only
-   type void has any effect---causing procedures to be preferred over
-   functions in calls].  A null CONTEXT_TYPE indicates that a non-void
-   return type is preferred.  May change (expand) *EXP.  */
-
-static void
-resolve (expression_up *expp, int void_context_p, int parse_completion,
-	 innermost_block_tracker *tracker)
-{
-  struct type *context_type = NULL;
-  int pc = 0;
-
-  if (void_context_p)
-    context_type = builtin_type ((*expp)->gdbarch)->builtin_void;
-
-  resolve_subexp (expp, &pc, 1, context_type, parse_completion, tracker);
-}
-
 /* Resolve the operator of the subexpression beginning at
    position *POS of *EXPP.  "Resolving" consists of replacing
    the symbols that have undefined namespaces in OP_VAR_VALUE nodes
@@ -13711,7 +13689,6 @@ extern const struct language_data ada_language_data =
   macro_expansion_no,
   ada_extensions,
   &ada_exp_descriptor,
-  resolve,
   ada_printchar,                /* Print a character constant */
   ada_printstr,                 /* Function to print string constant */
   emit_char,                    /* Function to print single char (not used) */
@@ -14114,6 +14091,29 @@ public:
   {
     warnings_issued = 0;
     return ada_parse (ps);
+  }
+
+  /* See language.h.
+
+     Same as evaluate_type (*EXP), but resolves ambiguous symbol references
+     (marked by OP_VAR_VALUE nodes in which the symbol has an undefined
+     namespace) and converts operators that are user-defined into
+     appropriate function calls.  If CONTEXT_TYPE is non-null, it provides
+     a preferred result type [at the moment, only type void has any
+     effect---causing procedures to be preferred over functions in calls].
+     A null CONTEXT_TYPE indicates that a non-void return type is
+     preferred.  May change (expand) *EXP.  */
+
+  void post_parser (expression_up *expp, int void_context_p, int completing,
+		    innermost_block_tracker *tracker) const override
+  {
+    struct type *context_type = NULL;
+    int pc = 0;
+
+    if (void_context_p)
+      context_type = builtin_type ((*expp)->gdbarch)->builtin_void;
+
+    resolve_subexp (expp, &pc, 1, context_type, completing, tracker);
   }
 
 protected:
