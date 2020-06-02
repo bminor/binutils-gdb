@@ -758,9 +758,12 @@ ctf_type_encoding (ctf_file_t *fp, ctf_id_t type, ctf_encoding_t *ep)
 	  {
 	    const ctf_slice_t *slice;
 	    ctf_encoding_t underlying_en;
-	    slice = &dtd->dtd_u.dtu_slice;
+	    ctf_id_t underlying;
 
-	    data = ctf_type_encoding (fp, slice->cts_type, &underlying_en);
+	    slice = &dtd->dtd_u.dtu_slice;
+	    underlying = ctf_type_resolve (fp, slice->cts_type);
+	    data = ctf_type_encoding (fp, underlying, &underlying_en);
+
 	    ep->cte_format = underlying_en.cte_format;
 	    ep->cte_offset = slice->cts_offset;
 	    ep->cte_bits = slice->cts_bits;
@@ -792,9 +795,11 @@ ctf_type_encoding (ctf_file_t *fp, ctf_id_t type, ctf_encoding_t *ep)
       {
 	const ctf_slice_t *slice;
 	ctf_encoding_t underlying_en;
+	ctf_id_t underlying;
 
 	slice = (ctf_slice_t *) ((uintptr_t) tp + increment);
-	data = ctf_type_encoding (fp, slice->cts_type, &underlying_en);
+	underlying = ctf_type_resolve (fp, slice->cts_type);
+	data = ctf_type_encoding (fp, underlying, &underlying_en);
 
 	ep->cte_format = underlying_en.cte_format;
 	ep->cte_offset = slice->cts_offset;

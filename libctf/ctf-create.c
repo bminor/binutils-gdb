@@ -944,6 +944,7 @@ ctf_add_slice (ctf_file_t *fp, uint32_t flag, ctf_id_t ref,
 	       const ctf_encoding_t *ep)
 {
   ctf_dtdef_t *dtd;
+  ctf_id_t resolved_ref = ref;
   ctf_id_t type;
   int kind;
   const ctf_type_t *tp;
@@ -961,7 +962,13 @@ ctf_add_slice (ctf_file_t *fp, uint32_t flag, ctf_id_t ref,
   if (ref != 0 && ((tp = ctf_lookup_by_id (&tmp, ref)) == NULL))
     return CTF_ERR;		/* errno is set for us.  */
 
-  kind = ctf_type_kind_unsliced (tmp, ref);
+  /* Make sure we ultimately point to an integral type.  We also allow slices to
+     point to the unimplemented type, for now, because the compiler can emit
+     such slices, though they're not very much use.  */
+
+  resolved_ref = ctf_type_resolve_unsliced (tmp, ref);
+  kind = ctf_type_kind_unsliced (tmp, resolved_ref);
+
   if ((kind != CTF_K_INTEGER) && (kind != CTF_K_FLOAT) &&
       (kind != CTF_K_ENUM)
       && (ref != 0))
