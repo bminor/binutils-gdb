@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h [!__GNUC__] (__extension__): Define to nothing.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-archive.c (ctf_archive_count): New.
 	* libctf.ver: New public function.
 

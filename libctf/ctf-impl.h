@@ -65,6 +65,7 @@ extern "C"
 #define _libctf_unlikely_(x) (x)
 #define _libctf_unused_
 #define _libctf_malloc_
+#define __extension__
 
 #endif
 
