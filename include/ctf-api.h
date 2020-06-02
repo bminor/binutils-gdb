@@ -30,7 +30,7 @@
 
 #ifdef	__cplusplus
 extern "C"
-  {
+{
 #endif
 
 /* Clients can open one or more CTF containers and obtain a pointer to an
@@ -80,7 +80,7 @@ typedef struct ctf_link_sym
 
 /* Indication of how to share types when linking.  */
 
-/* Share all types thare are not in conflict.  The default.  */
+/* Share all types that are not in conflict.  The default.  */
 #define CTF_LINK_SHARE_UNCONFLICTED 0x0
 
 /* Share only types that are used by multiple inputs.  Not implemented yet.  */
@@ -428,7 +428,7 @@ extern unsigned char *ctf_link_write (ctf_file_t *, size_t *size,
 				      size_t threshold);
 
 /* Specialist linker functions.  These functions are not used by ld, but can be
-   used by other prgorams making use of the linker machinery for other purposes
+   used by other programs making use of the linker machinery for other purposes
    to customize its output.  */
 extern int ctf_link_add_cu_mapping (ctf_file_t *, const char *from,
 				    const char *to);

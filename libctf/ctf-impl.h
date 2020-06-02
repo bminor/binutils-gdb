@@ -37,7 +37,7 @@
 
 #ifdef	__cplusplus
 extern "C"
-  {
+{
 #endif
 
 /* Compiler attributes.  */
