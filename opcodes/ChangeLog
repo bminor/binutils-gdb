@@ -1,3 +1,8 @@
+2020-06-03  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-opc.c (riscv_get_isa_spec_class): Change bfd_boolean to int.
+	(riscv_get_priv_spec_class): Likewise.
+
 2020-06-01  Alan Modra  <amodra@gmail.com>
 
 	* bpf-desc.c: Regenerate.

@@ -1,3 +1,9 @@
+2020-06-03  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv.h: Remove #include "bfd.h".  And change the return
+	types of riscv_get_isa_spec_class and riscv_get_priv_spec_class
+	from bfd_boolean to int.
+
 2020-05-28  Alan Modra  <amodra@gmail.com>
 
 	PR 26044

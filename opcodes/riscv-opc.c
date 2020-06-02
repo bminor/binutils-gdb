@@ -958,24 +958,24 @@ static const struct isa_spec_t isa_specs[] =
 
 /* Get the corresponding ISA spec class by giving a ISA spec string.  */
 
-bfd_boolean
+int
 riscv_get_isa_spec_class (const char *s,
                          enum riscv_isa_spec_class *class)
 {
   const struct isa_spec_t *version;
 
   if (s == NULL)
-    return FALSE;
+    return 0;
 
   for (version = &isa_specs[0]; version->name != NULL; ++version)
     if (strcmp (version->name, s) == 0)
       {
        *class = version->class;
-       return TRUE;
+       return 1;
       }
 
   /* Can not find the supported ISA spec.  */
-  return FALSE;
+  return 0;
 }
 
 struct priv_spec_t
@@ -999,24 +999,24 @@ static const struct priv_spec_t priv_specs[] =
 /* Get the corresponding CSR version class by giving a privilege
    version string.  */
 
-bfd_boolean
+int
 riscv_get_priv_spec_class (const char *s,
                           enum riscv_priv_spec_class *class)
 {
   const struct priv_spec_t *version;
 
   if (s == NULL)
-    return FALSE;
+    return 0;
 
   for (version = &priv_specs[0]; version->name != NULL; ++version)
     if (strcmp (version->name, s) == 0)
       {
        *class = version->class;
-       return TRUE;
+       return 1;
       }
 
   /* Can not find the supported privilege version.  */
-  return FALSE;
+  return 0;
 }
 
 /* Get the corresponding privilege version string by giving a CSR

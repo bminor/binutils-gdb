@@ -24,7 +24,6 @@
 #include "riscv-opc.h"
 #include <stdlib.h>
 #include <stdint.h>
-#include "bfd.h"
 
 typedef uint64_t insn_t;
 
@@ -490,9 +489,9 @@ extern const struct riscv_opcode riscv_opcodes[];
 extern const struct riscv_opcode riscv_insn_types[];
 extern const struct riscv_ext_version riscv_ext_version_table[];
 
-extern bfd_boolean
+extern int
 riscv_get_isa_spec_class (const char *, enum riscv_isa_spec_class *);
-extern bfd_boolean
+extern int
 riscv_get_priv_spec_class (const char *, enum riscv_priv_spec_class *);
 extern const char *
 riscv_get_priv_spec_name (enum riscv_priv_spec_class);
