@@ -1,5 +1,15 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (ctf_add_reftype): Support refs to type zero.
+	(ctf_add_array): Support array contents of type zero.
+	(ctf_add_function): Support arguments and return types of
+	type zero.
+	(ctf_add_typedef): Support typedefs to type zero.
+	(ctf_add_member_offset): Support members of type zero,
+	unless added at unspecified (naturally-aligned) offset.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-error.c: Include <stddef.h>, for offsetof.
 	(_ctf_errlist): Migrate to...
 	(_ctf_errlist_t): ... this.

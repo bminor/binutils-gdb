@@ -900,7 +900,7 @@ ctf_add_reftype (ctf_file_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_errno (fp, EINVAL));
 
-  if (ctf_lookup_by_id (&tmp, ref) == NULL)
+  if (ref != 0 && ctf_lookup_by_id (&tmp, ref) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   if ((type = ctf_add_generic (fp, flag, NULL, kind, &dtd)) == CTF_ERR)
@@ -957,12 +957,13 @@ ctf_add_slice (ctf_file_t *fp, uint32_t flag, ctf_id_t ref,
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_errno (fp, EINVAL));
 
-  if ((tp = ctf_lookup_by_id (&tmp, ref)) == NULL)
+  if (ref != 0 && ((tp = ctf_lookup_by_id (&tmp, ref)) == NULL))
     return CTF_ERR;		/* errno is set for us.  */
 
   kind = ctf_type_kind_unsliced (tmp, ref);
   if ((kind != CTF_K_INTEGER) && (kind != CTF_K_FLOAT) &&
-      (kind != CTF_K_ENUM))
+      (kind != CTF_K_ENUM)
+      && (ref != 0))
     return (ctf_set_errno (fp, ECTF_NOTINTFP));
 
   if ((type = ctf_add_generic (fp, flag, NULL, CTF_K_SLICE, &dtd)) == CTF_ERR)
@@ -1008,7 +1009,8 @@ ctf_add_array (ctf_file_t *fp, uint32_t flag, const ctf_arinfo_t *arp)
   if (arp == NULL)
     return (ctf_set_errno (fp, EINVAL));
 
-  if (ctf_lookup_by_id (&tmp, arp->ctr_contents) == NULL)
+  if (arp->ctr_contents != 0
+      && ctf_lookup_by_id (&tmp, arp->ctr_contents) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   tmp = fp;
@@ -1062,13 +1064,14 @@ ctf_add_function (ctf_file_t *fp, uint32_t flag,
   if (ctc->ctc_flags & CTF_FUNC_VARARG)
     vlen++;	       /* Add trailing zero to indicate varargs (see below).  */
 
-  if (ctf_lookup_by_id (&tmp, ctc->ctc_return) == NULL)
+  if (ctc->ctc_return != 0
+      && ctf_lookup_by_id (&tmp, ctc->ctc_return) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   for (i = 0; i < ctc->ctc_argc; i++)
     {
       tmp = fp;
-      if (ctf_lookup_by_id (&tmp, argv[i]) == NULL)
+      if (argv[i] != 0 && ctf_lookup_by_id (&tmp, argv[i]) == NULL)
 	return CTF_ERR;		/* errno is set for us.  */
     }
 
@@ -1259,7 +1262,7 @@ ctf_add_typedef (ctf_file_t *fp, uint32_t flag, const char *name,
   if (ref == CTF_ERR || ref > CTF_MAX_TYPE)
     return (ctf_set_errno (fp, EINVAL));
 
-  if (ctf_lookup_by_id (&tmp, ref) == NULL)
+  if (ref != 0 && ctf_lookup_by_id (&tmp, ref) == NULL)
     return CTF_ERR;		/* errno is set for us.  */
 
   if ((type = ctf_add_generic (fp, flag, name, CTF_K_TYPEDEF,
@@ -1387,7 +1390,20 @@ ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
 
   if ((msize = ctf_type_size (fp, type)) < 0 ||
       (malign = ctf_type_align (fp, type)) < 0)
-    return -1;			/* errno is set for us.  */
+    {
+      /* The unimplemented type, and any type that resolves to it, has no size
+	 and no alignment: it can correspond to any number of compiler-inserted
+	 types.  */
+
+      if (ctf_errno (fp) == ECTF_NONREPRESENTABLE)
+	{
+	  msize = 0;
+	  malign = 0;
+	  ctf_set_errno (fp, 0);
+	}
+      else
+	return -1;		/* errno is set for us.  */
+    }
 
   if ((dmd = malloc (sizeof (ctf_dmdef_t))) == NULL)
     return (ctf_set_errno (fp, EAGAIN));
@@ -1414,6 +1430,16 @@ ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
 
 	  ctf_encoding_t linfo;
 	  ssize_t lsize;
+
+	  /* Propagate any error from ctf_type_resolve.  If the last member was
+	     of unimplemented type, this may be -ECTF_NONREPRESENTABLE: we
+	     cannot insert right after such a member without explicit offset
+	     specification, because its alignment and size is not known.  */
+	  if (ltype == CTF_ERR)
+	    {
+	      free (dmd);
+	      return -1;	/* errno is set for us.  */
+	    }
 
 	  if (ctf_type_encoding (fp, ltype, &linfo) == 0)
 	    off += linfo.cte_bits;
