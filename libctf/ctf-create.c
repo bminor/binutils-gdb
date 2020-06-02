@@ -373,7 +373,7 @@ ctf_serialize (ctf_file_t *fp)
       ctf_varent_t *var = &dvarents[i];
 
       ctf_str_add_ref (fp, dvd->dvd_name, &var->ctv_name);
-      var->ctv_type = dvd->dvd_type;
+      var->ctv_type = (uint32_t) dvd->dvd_type;
     }
   assert (i == nvars);
 
@@ -972,7 +972,7 @@ ctf_add_slice (ctf_file_t *fp, uint32_t flag, ctf_id_t ref,
   dtd->dtd_data.ctt_info = CTF_TYPE_INFO (CTF_K_SLICE, flag, 0);
   dtd->dtd_data.ctt_size = clp2 (P2ROUNDUP (ep->cte_bits, CHAR_BIT)
 				 / CHAR_BIT);
-  dtd->dtd_u.dtu_slice.cts_type = ref;
+  dtd->dtd_u.dtu_slice.cts_type = (uint32_t) ref;
   dtd->dtd_u.dtu_slice.cts_bits = ep->cte_bits;
   dtd->dtd_u.dtu_slice.cts_offset = ep->cte_offset;
 

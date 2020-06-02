@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (ctf_serialize): Add cast.
+	(ctf_add_slice): Likewise.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_dtdef_t) <dtu_argv>: Fix type.
 	* ctf-create.c (ctf_add_function): Check for unimplemented type
 	and populate at the same time.  Populate one-by-one, not via
