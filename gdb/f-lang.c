@@ -42,8 +42,6 @@
 /* Local functions */
 
 static void f_printchar (int c, struct type *type, struct ui_file * stream);
-static void f_emit_char (int c, struct type *type,
-			 struct ui_file * stream, int quoter);
 
 /* Return the encoding that should be used for the character type
    TYPE.  */
@@ -70,20 +68,6 @@ f_get_encoding (struct type *type)
     }
 
   return encoding;
-}
-
-/* Print the character C on STREAM as part of the contents of a literal
-   string whose delimiter is QUOTER.  Note that that format for printing
-   characters and strings is language specific.
-   FIXME:  This is a copy of the same function from c-exp.y.  It should
-   be replaced with a true F77 version.  */
-
-static void
-f_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
-{
-  const char *encoding = f_get_encoding (type);
-
-  generic_emit_char (c, type, stream, quoter, encoding);
 }
 
 /* Implementation of la_printchar.  */
@@ -566,7 +550,6 @@ extern const struct language_data f_language_data =
   &exp_descriptor_f,
   f_printchar,			/* Print character constant */
   f_printstr,			/* function to print string constant */
-  f_emit_char,			/* Function to print a single character */
   f_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,                    	/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
@@ -716,6 +699,15 @@ public:
   int parser (struct parser_state *ps) const override
   {
     return f_parse (ps);
+  }
+
+  /* See language.h.  */
+
+  void emitchar (int ch, struct type *chtype,
+		 struct ui_file *stream, int quoter) const override
+  {
+    const char *encoding = f_get_encoding (chtype);
+    generic_emit_char (ch, chtype, stream, quoter, encoding);
   }
 
 protected:

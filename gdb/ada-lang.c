@@ -13504,14 +13504,6 @@ enum ada_primitive_types {
 
 				/* Language vector */
 
-/* Not really used, but needed in the ada_language_defn.  */
-
-static void
-emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
-{
-  ada_emit_char (c, type, stream, quoter, 1);
-}
-
 static const struct exp_descriptor ada_exp_descriptor = {
   ada_print_subexp,
   ada_operator_length,
@@ -13691,7 +13683,6 @@ extern const struct language_data ada_language_data =
   &ada_exp_descriptor,
   ada_printchar,                /* Print a character constant */
   ada_printstr,                 /* Function to print string constant */
-  emit_char,                    /* Function to print single char (not used) */
   ada_print_typedef,            /* Print a typedef using appropriate syntax */
   NULL,                         /* name_of_this */
   true,                         /* la_store_sym_names_in_linkage_form_p */
@@ -14114,6 +14105,14 @@ public:
       context_type = builtin_type ((*expp)->gdbarch)->builtin_void;
 
     resolve_subexp (expp, &pc, 1, context_type, completing, tracker);
+  }
+
+  /* See language.h.  */
+
+  void emitchar (int ch, struct type *chtype,
+		 struct ui_file *stream, int quoter) const override
+  {
+    ada_emit_char (ch, chtype, stream, quoter, 1);
   }
 
 protected:

@@ -49,9 +49,6 @@
 
 static void set_range_case (void);
 
-static void unk_lang_emit_char (int c, struct type *type,
-				struct ui_file *stream, int quoter);
-
 static void unk_lang_printchar (int c, struct type *type,
 				struct ui_file *stream);
 
@@ -657,6 +654,15 @@ language_defn::value_print_inner
   return c_value_print_inner (val, stream, recurse, options);
 }
 
+/* See language.h.  */
+
+void
+language_defn::emitchar (int ch, struct type *chtype,
+			 struct ui_file * stream, int quoter) const
+{
+  c_emit_char (ch, chtype, stream, quoter);
+}
+
 /* The default implementation of the get_symbol_name_matcher_inner method
    from the language_defn class.  Matches with strncmp_iw.  */
 
@@ -722,16 +728,6 @@ default_is_string_type_p (struct type *type)
   return (type->code ()  == TYPE_CODE_STRING);
 }
 
-/* Define the language that is no language.  */
-
-static void
-unk_lang_emit_char (int c, struct type *type, struct ui_file *stream,
-		    int quoter)
-{
-  error (_("internal error - unimplemented "
-	   "function unk_lang_emit_char called."));
-}
-
 static void
 unk_lang_printchar (int c, struct type *type, struct ui_file *stream)
 {
@@ -779,7 +775,6 @@ extern const struct language_data unknown_language_data =
   &exp_descriptor_standard,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
-  unk_lang_emit_char,
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   "this",        	    	/* name_of_this */
   true,				/* store_sym_names_in_linkage_form_p */
@@ -848,6 +843,14 @@ public:
     /* No parsing is done, just claim success.  */
     return 1;
   }
+
+  /* See language.h.  */
+
+  void emitchar (int ch, struct type *chtype,
+		 struct ui_file *stream, int quoter) const override
+  {
+    error (_("unimplemented unknown_language::emitchar called"));
+  }
 };
 
 /* Single instance of the unknown language class.  */
@@ -869,7 +872,6 @@ extern const struct language_data auto_language_data =
   &exp_descriptor_standard,
   unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
-  unk_lang_emit_char,
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   "this",		        /* name_of_this */
   false,			/* store_sym_names_in_linkage_form_p */
@@ -937,6 +939,14 @@ public:
   {
     /* No parsing is done, just claim success.  */
     return 1;
+  }
+
+  /* See language.h.  */
+
+  void emitchar (int ch, struct type *chtype,
+		 struct ui_file *stream, int quoter) const override
+  {
+    error (_("unimplemented auto_language::emitchar called"));
   }
 };
 

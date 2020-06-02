@@ -281,32 +281,6 @@ rust_get_trait_object_pointer (struct value *value)
 
 
 
-/* la_emitchar implementation for Rust.  */
-
-static void
-rust_emitchar (int c, struct type *type, struct ui_file *stream, int quoter)
-{
-  if (!rust_chartype_p (type))
-    generic_emit_char (c, type, stream, quoter,
-		       target_charset (get_type_arch (type)));
-  else if (c == '\\' || c == quoter)
-    fprintf_filtered (stream, "\\%c", c);
-  else if (c == '\n')
-    fputs_filtered ("\\n", stream);
-  else if (c == '\r')
-    fputs_filtered ("\\r", stream);
-  else if (c == '\t')
-    fputs_filtered ("\\t", stream);
-  else if (c == '\0')
-    fputs_filtered ("\\0", stream);
-  else if (c >= 32 && c <= 127 && isprint (c))
-    fputc_filtered (c, stream);
-  else if (c <= 255)
-    fprintf_filtered (stream, "\\x%02x", c);
-  else
-    fprintf_filtered (stream, "\\u{%06x}", c);
-}
-
 /* la_printchar implementation for Rust.  */
 
 static void
@@ -1991,7 +1965,6 @@ extern const struct language_data rust_language_data =
   &exp_descriptor_rust,
   rust_printchar,		/* Print a character constant */
   rust_printstr,		/* Function to print string constant */
-  rust_emitchar,		/* Print a single char */
   rust_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,				/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
@@ -2146,6 +2119,32 @@ public:
   int parser (struct parser_state *ps) const override
   {
     return rust_parse (ps);
+  }
+
+  /* See language.h.  */
+
+  void emitchar (int ch, struct type *chtype,
+		 struct ui_file *stream, int quoter) const override
+  {
+    if (!rust_chartype_p (chtype))
+      generic_emit_char (ch, chtype, stream, quoter,
+			 target_charset (get_type_arch (chtype)));
+    else if (ch == '\\' || ch == quoter)
+      fprintf_filtered (stream, "\\%c", ch);
+    else if (ch == '\n')
+      fputs_filtered ("\\n", stream);
+    else if (ch == '\r')
+      fputs_filtered ("\\r", stream);
+    else if (ch == '\t')
+      fputs_filtered ("\\t", stream);
+    else if (ch == '\0')
+      fputs_filtered ("\\0", stream);
+    else if (ch >= 32 && ch <= 127 && isprint (ch))
+      fputc_filtered (ch, stream);
+    else if (ch <= 255)
+      fprintf_filtered (stream, "\\x%02x", ch);
+    else
+      fprintf_filtered (stream, "\\u{%06x}", ch);
   }
 };
 

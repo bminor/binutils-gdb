@@ -233,9 +233,6 @@ struct language_data
 			 const char *encoding, int force_ellipses,
 			 const struct value_print_options *);
 
-    void (*la_emitchar) (int ch, struct type *chtype,
-			 struct ui_file * stream, int quoter);
-
     /* Print a typedef using syntax appropriate for this language.
        TYPE is the underlying type.  NEW_SYMBOL is the symbol naming
        the type.  STREAM is the output stream on which to print.  */
@@ -544,6 +541,12 @@ struct language_defn : language_data
     /* By default the post-parser does nothing.  */
   }
 
+  /* Print the character CH (of type CHTYPE) on STREAM as part of the
+     contents of a literal string whose delimiter is QUOTER.  */
+
+  virtual void emitchar (int ch, struct type *chtype,
+			 struct ui_file *stream, int quoter) const;
+
 protected:
 
   /* This is the overridable part of the GET_SYMBOL_NAME_MATCHER method.
@@ -651,7 +654,7 @@ extern enum language set_language (enum language);
   (current_language->la_printstr(stream, elttype, string, length, \
 				 encoding, force_ellipses,options))
 #define LA_EMIT_CHAR(ch, type, stream, quoter) \
-  (current_language->la_emitchar(ch, type, stream, quoter))
+  (current_language->emitchar (ch, type, stream, quoter))
 
 #define LA_PRINT_ARRAY_INDEX(index_type, index_value, stream, options)	\
   (current_language->print_array_index(index_type, index_value, stream, \

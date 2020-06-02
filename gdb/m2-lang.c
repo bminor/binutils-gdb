@@ -30,59 +30,6 @@
 #include "gdbarch.h"
 
 static void m2_printchar (int, struct type *, struct ui_file *);
-static void m2_emit_char (int, struct type *, struct ui_file *, int);
-
-/* Print the character C on STREAM as part of the contents of a literal
-   string whose delimiter is QUOTER.  Note that that format for printing
-   characters and strings is language specific.
-   FIXME:  This is a copy of the same function from c-exp.y.  It should
-   be replaced with a true Modula version.  */
-
-static void
-m2_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
-{
-
-  c &= 0xFF;			/* Avoid sign bit follies.  */
-
-  if (PRINT_LITERAL_FORM (c))
-    {
-      if (c == '\\' || c == quoter)
-	{
-	  fputs_filtered ("\\", stream);
-	}
-      fprintf_filtered (stream, "%c", c);
-    }
-  else
-    {
-      switch (c)
-	{
-	case '\n':
-	  fputs_filtered ("\\n", stream);
-	  break;
-	case '\b':
-	  fputs_filtered ("\\b", stream);
-	  break;
-	case '\t':
-	  fputs_filtered ("\\t", stream);
-	  break;
-	case '\f':
-	  fputs_filtered ("\\f", stream);
-	  break;
-	case '\r':
-	  fputs_filtered ("\\r", stream);
-	  break;
-	case '\033':
-	  fputs_filtered ("\\e", stream);
-	  break;
-	case '\007':
-	  fputs_filtered ("\\a", stream);
-	  break;
-	default:
-	  fprintf_filtered (stream, "\\%.3o", (unsigned int) c);
-	  break;
-	}
-    }
-}
 
 /* FIXME:  This is a copy of the same function from c-exp.y.  It should
    be replaced with a true Modula version.  */
@@ -364,7 +311,6 @@ extern const struct language_data m2_language_data =
   &exp_descriptor_modula2,
   m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */
-  m2_emit_char,			/* Function to print a single character */
   m2_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,		                /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
@@ -434,6 +380,51 @@ public:
   int parser (struct parser_state *ps) const override
   {
     return m2_parse (ps);
+  }
+
+  /* See language.h.  */
+
+  void emitchar (int ch, struct type *chtype,
+		 struct ui_file *stream, int quoter) const override
+  {
+    ch &= 0xFF;			/* Avoid sign bit follies.  */
+
+    if (PRINT_LITERAL_FORM (ch))
+      {
+	if (ch == '\\' || ch == quoter)
+	  fputs_filtered ("\\", stream);
+	fprintf_filtered (stream, "%c", ch);
+      }
+    else
+      {
+	switch (ch)
+	  {
+	  case '\n':
+	    fputs_filtered ("\\n", stream);
+	    break;
+	  case '\b':
+	    fputs_filtered ("\\b", stream);
+	    break;
+	  case '\t':
+	    fputs_filtered ("\\t", stream);
+	    break;
+	  case '\f':
+	    fputs_filtered ("\\f", stream);
+	    break;
+	  case '\r':
+	    fputs_filtered ("\\r", stream);
+	    break;
+	  case '\033':
+	    fputs_filtered ("\\e", stream);
+	    break;
+	  case '\007':
+	    fputs_filtered ("\\a", stream);
+	    break;
+	  default:
+	    fprintf_filtered (stream, "\\%.3o", (unsigned int) ch);
+	    break;
+	  }
+      }
   }
 };
 

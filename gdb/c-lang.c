@@ -891,7 +891,6 @@ extern const struct language_data c_language_data =
   &exp_descriptor_c,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
-  c_emit_char,			/* Print a single char */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
@@ -997,7 +996,6 @@ extern const struct language_data cplus_language_data =
   &exp_descriptor_c,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
-  c_emit_char,			/* Print a single char */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   "this",                       /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
@@ -1200,7 +1198,6 @@ extern const struct language_data asm_language_data =
   &exp_descriptor_c,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
-  c_emit_char,			/* Print a single char */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
@@ -1261,7 +1258,6 @@ extern const struct language_data minimal_language_data =
   &exp_descriptor_c,
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
-  c_emit_char,			/* Print a single char */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */

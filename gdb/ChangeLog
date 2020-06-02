@@ -1,5 +1,46 @@
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (emit_char): Renamed to ada_language::emitchar.
+	(ada_language_data): Delete la_emitchar initializer.
+	(ada_language::emitchar): New member function, implementation from
+	emit_char.
+	* c-lang.c (c_language_data): Delete la_emitchar initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_emit_char): Rename to f_language::emitchar.
+	(f_language_data): Delete la_emitchar initializer.
+	(f_language::emitchar): New member function, implementation from
+	f_emit_char.
+	* go-lang.c (go_language_data): Delete la_emitchar initializer.
+	* language.c (unk_lang_emit_char): Delete.
+	(language_defn::emitchar): New member function definition.
+	(unknown_language_data): Delete la_emitchar initializer.
+	(unknown_language::emitchar): New member function.
+	(auto_language_data): Delete la_emitchar initializer.
+	(auto_language::emitchar): New member function.
+	* language.h (language_data): Delete la_emitchar field.
+	(language_defn::emitchar): New member field declaration.
+	(LA_EMIT_CHAR): Update call to emitchar.
+	* m2-lang.c (m2_emit_char): Rename to m2_language::emitchar.
+	(m2_language_data): Delete la_emitchar initializer.
+	(m2_language::emitchar): New member function, implementation from
+	m2_emit_char.
+	* objc-lang.c (objc_language_data): Delete la_emitchar
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_emit_char): Rename to pascal_language::emitchar.
+	(pascal_language_data): Delete la_emitchar initializer.
+	(pascal_language::emitchar): New member function, implementation
+	from pascal_emit_char.
+	* rust-lang.c (rust_emitchar): Rename to rust_language::emitchar.
+	(rust_language_data): Delete la_emitchar initializer.
+	(rust_language::emitchar): New member function, implementation
+	from rust_emitchar.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (resolve): Rename to ada_language::post_parser.
 	(ada_language_data): Delete la_post_parser initializer.
 	(ada_language::post_parser): New member function.

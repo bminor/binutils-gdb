@@ -192,23 +192,6 @@ pascal_one_char (int c, struct ui_file *stream, int *in_quotes)
     }
 }
 
-static void pascal_emit_char (int c, struct type *type,
-			      struct ui_file *stream, int quoter);
-
-/* Print the character C on STREAM as part of the contents of a literal
-   string whose delimiter is QUOTER.  Note that that format for printing
-   characters and strings is language specific.  */
-
-static void
-pascal_emit_char (int c, struct type *type, struct ui_file *stream, int quoter)
-{
-  int in_quotes = 0;
-
-  pascal_one_char (c, stream, &in_quotes);
-  if (in_quotes)
-    fputs_filtered ("'", stream);
-}
-
 void
 pascal_printchar (int c, struct type *type, struct ui_file *stream)
 {
@@ -395,7 +378,6 @@ extern const struct language_data pascal_language_data =
   &exp_descriptor_standard,
   pascal_printchar,		/* Print a character constant */
   pascal_printstr,		/* Function to print string constant */
-  pascal_emit_char,		/* Print a single char */
   pascal_print_typedef,		/* Print a typedef using appropriate syntax */
   "this",		        /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
@@ -496,6 +478,18 @@ public:
   int parser (struct parser_state *ps) const override
   {
     return pascal_parse (ps);
+  }
+
+  /* See language.h.  */
+
+  void emitchar (int ch, struct type *chtype,
+		 struct ui_file *stream, int quoter) const override
+  {
+    int in_quotes = 0;
+
+    pascal_one_char (ch, stream, &in_quotes);
+    if (in_quotes)
+      fputs_filtered ("'", stream);
   }
 };
 
