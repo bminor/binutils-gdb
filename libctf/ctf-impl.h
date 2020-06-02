@@ -312,6 +312,7 @@ struct ctf_file
 struct ctf_archive_internal
 {
   int ctfi_is_archive;
+  int ctfi_unmap_on_close;
   ctf_file_t *ctfi_file;
   struct ctf_archive *ctfi_archive;
   ctf_sect_t ctfi_symsect;
@@ -443,10 +444,11 @@ extern void ctf_str_rollback (ctf_file_t *, ctf_snapshot_id_t);
 extern void ctf_str_purge_refs (ctf_file_t *);
 extern ctf_strs_writable_t ctf_str_write_strtab (ctf_file_t *);
 
-extern struct ctf_archive_internal *ctf_new_archive_internal
-	(int is_archive, struct ctf_archive *arc,
-	 ctf_file_t *fp, const ctf_sect_t *symsect,
-	 const ctf_sect_t *strsect, int *errp);
+extern struct ctf_archive_internal *
+ctf_new_archive_internal (int is_archive, int unmap_on_close,
+			  struct ctf_archive *, ctf_file_t *,
+			  const ctf_sect_t *symsect,
+			  const ctf_sect_t *strsect, int *errp);
 extern struct ctf_archive *ctf_arc_open_internal (const char *, int *);
 extern void ctf_arc_close_internal (struct ctf_archive *);
 extern void *ctf_set_open_errno (int *, int);

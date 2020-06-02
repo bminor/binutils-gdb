@@ -230,7 +230,7 @@ ctf_fdopen (int fd, const char *filename, const char *target, int *errp)
       fp->ctf_data_mmapped = data;
       fp->ctf_data_mmapped_len = (size_t) st.st_size;
 
-      return ctf_new_archive_internal (0, NULL, fp, NULL, NULL, errp);
+      return ctf_new_archive_internal (0, 1, NULL, fp, NULL, NULL, errp);
     }
 
   if ((nbytes = ctf_pread (fd, &arc_magic, sizeof (arc_magic), 0)) <= 0)
@@ -243,7 +243,7 @@ ctf_fdopen (int fd, const char *filename, const char *target, int *errp)
       if ((arc = ctf_arc_open_internal (filename, errp)) == NULL)
 	return NULL;			/* errno is set for us.  */
 
-      return ctf_new_archive_internal (1, arc, NULL, NULL, NULL, errp);
+      return ctf_new_archive_internal (1, 1, arc, NULL, NULL, NULL, errp);
     }
 
   /* Attempt to open the file with BFD.  We must dup the fd first, since bfd

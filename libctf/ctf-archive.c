@@ -336,10 +336,11 @@ search_modent_by_name (const void *key, const void *ent, void *arg)
 
 /* Make a new struct ctf_archive_internal wrapper for a ctf_archive or a
    ctf_file.  Closes ARC and/or FP on error.  Arrange to free the SYMSECT or
-   STRSECT, as needed, on close.  */
+   STRSECT, as needed, on close.  Possibly do not unmap on close.  */
 
 struct ctf_archive_internal *
-ctf_new_archive_internal (int is_archive, struct ctf_archive *arc,
+ctf_new_archive_internal (int is_archive, int unmap_on_close,
+			  struct ctf_archive *arc,
 			  ctf_file_t *fp, const ctf_sect_t *symsect,
 			  const ctf_sect_t *strsect,
 			  int *errp)
@@ -349,7 +350,10 @@ ctf_new_archive_internal (int is_archive, struct ctf_archive *arc,
   if ((arci = calloc (1, sizeof (struct ctf_archive_internal))) == NULL)
     {
       if (is_archive)
-	ctf_arc_close_internal (arc);
+	{
+	  if (unmap_on_close)
+	    ctf_arc_close_internal (arc);
+	}
       else
 	ctf_file_close (fp);
       return (ctf_set_open_errno (errp, errno));
@@ -364,6 +368,7 @@ ctf_new_archive_internal (int is_archive, struct ctf_archive *arc,
   if (strsect)
      memcpy (&arci->ctfi_strsect, strsect, sizeof (struct ctf_sect));
   arci->ctfi_free_symsect = 0;
+  arci->ctfi_unmap_on_close = unmap_on_close;
 
   return arci;
 }
@@ -382,7 +387,13 @@ ctf_arc_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   if (ctfsect->cts_size > sizeof (uint64_t) &&
       ((*(uint64_t *) ctfsect->cts_data) == CTFA_MAGIC))
     {
-      /* The archive is mmappable, so this operation is trivial.  */
+      /* The archive is mmappable, so this operation is trivial.
+
+	 This buffer is nonmodifiable, so the trick involving mmapping only part
+	 of it and storing the length in the magic number is not applicable: so
+	 record this fact in the archive-wrapper header.  (We cannot record it
+	 in the archive, because the archive may very well be a read-only
+	 mapping.)  */
 
       is_archive = 1;
       arc = (struct ctf_archive *) ctfsect->cts_data;
@@ -397,7 +408,7 @@ ctf_arc_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	  return NULL;
 	}
     }
-  return ctf_new_archive_internal (is_archive, arc, fp, symsect, strsect,
+  return ctf_new_archive_internal (is_archive, 0, arc, fp, symsect, strsect,
 				   errp);
 }
 
@@ -474,7 +485,10 @@ ctf_arc_close (ctf_archive_t *arc)
     return;
 
   if (arc->ctfi_is_archive)
-    ctf_arc_close_internal (arc->ctfi_archive);
+    {
+      if (arc->ctfi_unmap_on_close)
+	ctf_arc_close_internal (arc->ctfi_archive);
+    }
   else
     ctf_file_close (arc->ctfi_file);
   if (arc->ctfi_free_symsect)

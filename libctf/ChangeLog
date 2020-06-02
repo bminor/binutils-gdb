@@ -1,5 +1,17 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (struct ctf_archive_internal)
+	<ctfi_unmap_on_close>: New.
+	(ctf_new_archive_internal): Adjust.
+	* ctf-archive.c (ctf_new_archive_internal): Likewise.
+	Initialize ctfi_unmap_on_close.  Adjust error path.
+	(ctf_arc_bufopen): Adjust ctf_new_archive_internal call
+	(unmap_on_close is 0).
+	(ctf_arc_close): Only unmap if ctfi_unmap_on_close.
+	* ctf-open-bfd.c (ctf_fdopen): Adjust.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-types.c (ctf_type_aname): Return ECTF_CORRUPT if
 	ints, floats or typedefs have no name.  Fix comment typo.
 
