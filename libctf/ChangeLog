@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (ctf_add_member_offset): Support names of ""
+	as if they were the null pointer.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-open.c (init_types): Remove typeless CTF_K_FORWARD
 	special-casing.
 

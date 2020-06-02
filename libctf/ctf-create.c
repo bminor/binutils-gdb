@@ -1371,6 +1371,9 @@ ctf_add_member_offset (ctf_file_t *fp, ctf_id_t souid, const char *name,
   if (dtd == NULL)
     return (ctf_set_errno (fp, ECTF_BADID));
 
+  if (name != NULL && name[0] == '\0')
+    name = NULL;
+
   kind = LCTF_INFO_KIND (fp, dtd->dtd_data.ctt_info);
   root = LCTF_INFO_ISROOT (fp, dtd->dtd_data.ctt_info);
   vlen = LCTF_INFO_VLEN (fp, dtd->dtd_data.ctt_info);
