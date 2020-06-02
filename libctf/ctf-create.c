@@ -126,6 +126,7 @@ ctf_create (int *errp)
   fp->ctf_dtoldid = 0;
   fp->ctf_snapshots = 1;
   fp->ctf_snapshot_lu = 0;
+  fp->ctf_flags |= LCTF_DIRTY;
 
   ctf_set_ctl_hashes (fp);
   ctf_setmodel (fp, CTF_MODEL_NATIVE);

@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (ctf_create): Mark dirty.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-create.c (membcmp)  Skip nameless members.
 
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
