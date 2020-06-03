@@ -328,6 +328,13 @@ struct ctf_archive_internal
 
 /* Iterator state for the *_next() functions.  */
 
+/* A single hash key/value pair.  */
+typedef struct ctf_next_hkv
+{
+  void *hkv_key;
+  void *hkv_value;
+} ctf_next_hkv_t;
+
 struct ctf_next
 {
   void (*ctn_iter_fun) (void);
@@ -346,13 +353,17 @@ struct ctf_next
     const ctf_dmdef_t *ctn_dmd;
     const ctf_enum_t *ctn_en;
     const ctf_dvdef_t *ctn_dvd;
+    ctf_next_hkv_t *ctn_sorted_hkv;
+    void **ctn_hash_slot;
   } u;
   /* This union is of various sorts of container we can iterate over:
-     currently dictionaries and archives.  */
+     currently dictionaries and archives, dynhashes, and dynsets.  */
   union
   {
     const ctf_file_t *ctn_fp;
     const ctf_archive_t *ctn_arc;
+    const ctf_dynhash_t *ctn_h;
+    const ctf_dynset_t *ctn_s;
   } cu;
 };
 
@@ -411,6 +422,8 @@ typedef void (*ctf_hash_free_fun) (void *);
 typedef void (*ctf_hash_iter_f) (void *key, void *value, void *arg);
 typedef int (*ctf_hash_iter_remove_f) (void *key, void *value, void *arg);
 typedef int (*ctf_hash_iter_find_f) (void *key, void *value, void *arg);
+typedef int (*ctf_hash_sort_f) (const ctf_next_hkv_t *, const ctf_next_hkv_t *,
+				void *arg);
 
 extern ctf_hash_t *ctf_hash_create (unsigned long, ctf_hash_fun, ctf_hash_eq_fun);
 extern int ctf_hash_insert_type (ctf_hash_t *, ctf_file_t *, uint32_t, uint32_t);
@@ -434,6 +447,11 @@ extern void ctf_dynhash_iter_remove (ctf_dynhash_t *, ctf_hash_iter_remove_f,
 				     void *);
 extern void *ctf_dynhash_iter_find (ctf_dynhash_t *, ctf_hash_iter_find_f,
 				    void *);
+extern int ctf_dynhash_next (ctf_dynhash_t *, ctf_next_t **,
+			     void **key, void **value);
+extern int ctf_dynhash_next_sorted (ctf_dynhash_t *, ctf_next_t **,
+				    void **key, void **value, ctf_hash_sort_f,
+				    void *);
 
 extern ctf_dynset_t *ctf_dynset_create (htab_hash, htab_eq, ctf_hash_free_fun);
 extern int ctf_dynset_insert (ctf_dynset_t *, void *);
@@ -442,6 +460,7 @@ extern void ctf_dynset_destroy (ctf_dynset_t *);
 extern void *ctf_dynset_lookup (ctf_dynset_t *, const void *);
 extern int ctf_dynset_exists (ctf_dynset_t *, const void *key,
 			      const void **orig_key);
+extern int ctf_dynset_next (ctf_dynset_t *, ctf_next_t **, void **key);
 extern void *ctf_dynset_lookup_any (ctf_dynset_t *);
 
 #define	ctf_list_prev(elem)	((void *)(((ctf_list_t *)(elem))->l_prev))

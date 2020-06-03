@@ -187,6 +187,11 @@ ctf_next_create (void)
 void
 ctf_next_destroy (ctf_next_t *i)
 {
+  if (i == NULL)
+    return;
+
+  if (i->ctn_iter_fun == (void (*) (void)) ctf_dynhash_next_sorted)
+    free (i->u.ctn_sorted_hkv);
   free (i);
 }
 
@@ -200,5 +205,17 @@ ctf_next_copy (ctf_next_t *i)
   if ((i2 = ctf_next_create()) == NULL)
     return NULL;
   memcpy (i2, i, sizeof (struct ctf_next));
+
+  if (i2->ctn_iter_fun == (void (*) (void)) ctf_dynhash_next_sorted)
+    {
+      size_t els = ctf_dynhash_elements ((ctf_dynhash_t *) i->cu.ctn_h);
+      if ((i2->u.ctn_sorted_hkv = calloc (els, sizeof (ctf_next_hkv_t))) == NULL)
+	{
+	  free (i2);
+	  return NULL;
+	}
+      memcpy (i2->u.ctn_sorted_hkv, i->u.ctn_sorted_hkv,
+	      els * sizeof (ctf_next_hkv_t));
+    }
   return i2;
 }

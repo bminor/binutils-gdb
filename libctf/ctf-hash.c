@@ -378,6 +378,163 @@ ctf_dynhash_iter_remove (ctf_dynhash_t *hp, ctf_hash_iter_remove_f fun,
   htab_traverse (hp->htab, ctf_hashtab_traverse_remove, &arg);
 }
 
+/* Traverse a dynhash in arbitrary order, in _next iterator form.
+
+   Mutating the dynhash while iterating is not supported (just as it isn't for
+   htab_traverse).
+
+   Note: unusually, this returns zero on success and a *positive* value on
+   error, because it does not take an fp, taking an error pointer would be
+   incredibly clunky, and nearly all error-handling ends up stuffing the result
+   of this into some sort of errno or ctf_errno, which is invariably
+   positive.  So doing this simplifies essentially all callers.  */
+int
+ctf_dynhash_next (ctf_dynhash_t *h, ctf_next_t **it, void **key, void **value)
+{
+  ctf_next_t *i = *it;
+  ctf_helem_t *slot;
+
+  if (!i)
+    {
+      size_t size = htab_size (h->htab);
+
+      /* If the table has too many entries to fit in an ssize_t, just give up.
+	 This might be spurious, but if any type-related hashtable has ever been
+	 nearly as large as that then something very odd is going on.  */
+      if (((ssize_t) size) < 0)
+	return EDOM;
+
+      if ((i = ctf_next_create ()) == NULL)
+	return ENOMEM;
+
+      i->u.ctn_hash_slot = h->htab->entries;
+      i->cu.ctn_h = h;
+      i->ctn_n = 0;
+      i->ctn_size = (ssize_t) size;
+      i->ctn_iter_fun = (void (*) (void)) ctf_dynhash_next;
+      *it = i;
+    }
+
+  if ((void (*) (void)) ctf_dynhash_next != i->ctn_iter_fun)
+    return ECTF_NEXT_WRONGFUN;
+
+  if (h != i->cu.ctn_h)
+    return ECTF_NEXT_WRONGFP;
+
+  if ((ssize_t) i->ctn_n == i->ctn_size)
+    goto hash_end;
+
+  while ((ssize_t) i->ctn_n < i->ctn_size
+	 && (*i->u.ctn_hash_slot == HTAB_EMPTY_ENTRY
+	     || *i->u.ctn_hash_slot == HTAB_DELETED_ENTRY))
+    {
+      i->u.ctn_hash_slot++;
+      i->ctn_n++;
+    }
+
+  if ((ssize_t) i->ctn_n == i->ctn_size)
+    goto hash_end;
+
+  slot = *i->u.ctn_hash_slot;
+
+  if (key)
+    *key = slot->key;
+  if (value)
+    *value = slot->value;
+
+  i->u.ctn_hash_slot++;
+  i->ctn_n++;
+
+  return 0;
+
+ hash_end:
+  ctf_next_destroy (i);
+  *it = NULL;
+  return ECTF_NEXT_END;
+}
+
+/* Traverse a sorted dynhash, in _next iterator form.
+
+   See ctf_dynhash_next for notes on error returns, etc.
+
+   Sort keys before iterating over them using the SORT_FUN and SORT_ARG.
+
+   If SORT_FUN is null, thunks to ctf_dynhash_next.  */
+int
+ctf_dynhash_next_sorted (ctf_dynhash_t *h, ctf_next_t **it, void **key,
+			 void **value, ctf_hash_sort_f sort_fun, void *sort_arg)
+{
+  ctf_next_t *i = *it;
+
+  if (sort_fun == NULL)
+    return ctf_dynhash_next (h, it, key, value);
+
+  if (!i)
+    {
+      size_t els = ctf_dynhash_elements (h);
+      ctf_next_t *accum_i = NULL;
+      void *key, *value;
+      int err;
+      ctf_next_hkv_t *walk;
+
+      if (((ssize_t) els) < 0)
+	return EDOM;
+
+      if ((i = ctf_next_create ()) == NULL)
+	return ENOMEM;
+
+      if ((i->u.ctn_sorted_hkv = calloc (els, sizeof (ctf_next_hkv_t))) == NULL)
+	{
+	  ctf_next_destroy (i);
+	  return ENOMEM;
+	}
+      walk = i->u.ctn_sorted_hkv;
+
+      i->cu.ctn_h = h;
+
+      while ((err = ctf_dynhash_next (h, &accum_i, &key, &value)) == 0)
+	{
+	  walk->hkv_key = key;
+	  walk->hkv_value = value;
+	  walk++;
+	}
+      if (err != ECTF_NEXT_END)
+	{
+	  ctf_next_destroy (i);
+	  return err;
+	}
+
+      if (sort_fun)
+	  ctf_qsort_r (i->u.ctn_sorted_hkv, els, sizeof (ctf_next_hkv_t),
+		       (int (*) (const void *, const void *, void *)) sort_fun,
+		       sort_arg);
+      i->ctn_n = 0;
+      i->ctn_size = (ssize_t) els;
+      i->ctn_iter_fun = (void (*) (void)) ctf_dynhash_next_sorted;
+      *it = i;
+    }
+
+  if ((void (*) (void)) ctf_dynhash_next_sorted != i->ctn_iter_fun)
+    return ECTF_NEXT_WRONGFUN;
+
+  if (h != i->cu.ctn_h)
+    return ECTF_NEXT_WRONGFP;
+
+  if ((ssize_t) i->ctn_n == i->ctn_size)
+    {
+      ctf_next_destroy (i);
+      *it = NULL;
+      return ECTF_NEXT_END;
+    }
+
+  if (key)
+    *key = i->u.ctn_sorted_hkv[i->ctn_n].hkv_key;
+  if (value)
+    *value = i->u.ctn_sorted_hkv[i->ctn_n].hkv_value;
+  i->ctn_n++;
+  return 0;
+}
+
 void
 ctf_dynhash_destroy (ctf_dynhash_t *hp)
 {
@@ -513,6 +670,74 @@ ctf_dynset_lookup_any (ctf_dynset_t *hp)
   if (slot < limit)
     return internal_to_key (*slot);
   return NULL;
+}
+
+/* Traverse a dynset in arbitrary order, in _next iterator form.
+
+   Otherwise, just like ctf_dynhash_next.  */
+int
+ctf_dynset_next (ctf_dynset_t *hp, ctf_next_t **it, void **key)
+{
+  struct htab *htab = (struct htab *) hp;
+  ctf_next_t *i = *it;
+  void *slot;
+
+  if (!i)
+    {
+      size_t size = htab_size (htab);
+
+      /* If the table has too many entries to fit in an ssize_t, just give up.
+	 This might be spurious, but if any type-related hashtable has ever been
+	 nearly as large as that then somthing very odd is going on.  */
+
+      if (((ssize_t) size) < 0)
+	return EDOM;
+
+      if ((i = ctf_next_create ()) == NULL)
+	return ENOMEM;
+
+      i->u.ctn_hash_slot = htab->entries;
+      i->cu.ctn_s = hp;
+      i->ctn_n = 0;
+      i->ctn_size = (ssize_t) size;
+      i->ctn_iter_fun = (void (*) (void)) ctf_dynset_next;
+      *it = i;
+    }
+
+  if ((void (*) (void)) ctf_dynset_next != i->ctn_iter_fun)
+    return ECTF_NEXT_WRONGFUN;
+
+  if (hp != i->cu.ctn_s)
+    return ECTF_NEXT_WRONGFP;
+
+  if ((ssize_t) i->ctn_n == i->ctn_size)
+    goto set_end;
+
+  while ((ssize_t) i->ctn_n < i->ctn_size
+	 && (*i->u.ctn_hash_slot == HTAB_EMPTY_ENTRY
+	     || *i->u.ctn_hash_slot == HTAB_DELETED_ENTRY))
+    {
+      i->u.ctn_hash_slot++;
+      i->ctn_n++;
+    }
+
+  if ((ssize_t) i->ctn_n == i->ctn_size)
+    goto set_end;
+
+  slot = *i->u.ctn_hash_slot;
+
+  if (key)
+    *key = internal_to_key (slot);
+
+  i->u.ctn_hash_slot++;
+  i->ctn_n++;
+
+  return 0;
+
+ set_end:
+  ctf_next_destroy (i);
+  *it = NULL;
+  return ECTF_NEXT_END;
 }
 
 /* ctf_hash, used for fixed-size maps from const char * -> ctf_id_t without

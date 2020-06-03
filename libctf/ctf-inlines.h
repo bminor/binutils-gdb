@@ -46,11 +46,32 @@ ctf_forwardable_kind (int kind)
   return (kind == CTF_K_STRUCT || kind == CTF_K_UNION || kind == CTF_K_ENUM);
 }
 
+static inline int
+ctf_dynhash_cnext_sorted (ctf_dynhash_t *h, ctf_next_t **i, const void **key,
+			  const void **value, ctf_hash_sort_f sort_fun,
+			  void *sort_arg)
+{
+  return ctf_dynhash_next_sorted (h, i, (void **) key, (void **) value,
+				  sort_fun, sort_arg);
+}
+
+static inline int
+ctf_dynhash_cnext (ctf_dynhash_t *h, ctf_next_t **it,
+		  const void **key, const void **value)
+{
+  return ctf_dynhash_next (h, it, (void **) key, (void **) value);
+}
 
 static inline int
 ctf_dynhash_cinsert (ctf_dynhash_t *h, const void *k, const void *v)
 {
   return ctf_dynhash_insert (h, (void *) k, (void *) v);
+}
+
+static inline int
+ctf_dynset_cnext (ctf_dynset_t *h, ctf_next_t **it, const void **key)
+{
+  return ctf_dynset_next (h, it, (void **) key);
 }
 
 static inline int

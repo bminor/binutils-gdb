@@ -1,5 +1,27 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_next_hkv_t): New, kv-pairs passed to
+	sorting functions.
+	(ctf_next_t) <u.ctn_sorted_hkv>: New, sorted kv-pairs for
+	ctf_dynhash_next_sorted.
+	<cu.ctn_h>: New, pointer to the dynhash under iteration.
+	<cu.ctn_s>: New, pointer to the dynset under iteration.
+	(ctf_hash_sort_f): Sorting function passed to...
+	(ctf_dynhash_next_sorted): ... this new function.
+	(ctf_dynhash_next): New.
+	(ctf_dynset_next): New.
+	* ctf-inlines.h (ctf_dynhash_cnext_sorted): New.
+	(ctf_dynhash_cnext): New.
+	(ctf_dynset_cnext): New.
+	* ctf-hash.c (ctf_dynhash_next_sorted): New.
+	(ctf_dynhash_next): New.
+	(ctf_dynset_next): New.
+	* ctf-util.c (ctf_next_destroy): Free the u.ctn_sorted_hkv if
+	needed.
+	(ctf_next_copy): Alloc-and-copy the u.ctn_sorted_hkv if needed.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_next): New.
 	(ctf_get_dict): New prototype.
 	* ctf-lookup.c (ctf_get_dict): New, split out of...
