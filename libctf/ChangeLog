@@ -1,5 +1,24 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_next): New.
+	(ctf_get_dict): New prototype.
+	* ctf-lookup.c (ctf_get_dict): New, split out of...
+	(ctf_lookup_by_id): ... here.
+	* ctf-util.c (ctf_next_create): New.
+	(ctf_next_destroy): New.
+	(ctf_next_copy): New.
+	* ctf-types.c (includes): Add <assert.h>.
+	(ctf_member_next): New.
+	(ctf_enum_next): New.
+	(ctf_type_iter): Document the lack of iteration over parent
+	types.
+	(ctf_type_next): New.
+	(ctf_variable_next): New.
+	* ctf-archive.c (ctf_archive_next): New.
+	* libctf.ver: Add new public functions.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* libctf.ver (ctf_ref): New.
 	* ctf-open.c (ctf_ref): Implement it.
 

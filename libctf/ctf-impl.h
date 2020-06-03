@@ -326,6 +326,36 @@ struct ctf_archive_internal
   void (*ctfi_bfd_close) (struct ctf_archive_internal *);
 };
 
+/* Iterator state for the *_next() functions.  */
+
+struct ctf_next
+{
+  void (*ctn_iter_fun) (void);
+  ctf_id_t ctn_type;
+  ssize_t ctn_size;
+  ssize_t ctn_increment;
+  uint32_t ctn_n;
+  /* We can save space on this side of things by noting that a container is
+     either dynamic or not, as a whole, and a given iterator can only iterate
+     over one kind of thing at once: so we can overlap the DTD and non-DTD
+     members, and the structure, variable and enum members, etc.  */
+  union
+  {
+    const ctf_member_t *ctn_mp;
+    const ctf_lmember_t *ctn_lmp;
+    const ctf_dmdef_t *ctn_dmd;
+    const ctf_enum_t *ctn_en;
+    const ctf_dvdef_t *ctn_dvd;
+  } u;
+  /* This union is of various sorts of container we can iterate over:
+     currently dictionaries and archives.  */
+  union
+  {
+    const ctf_file_t *ctn_fp;
+    const ctf_archive_t *ctn_arc;
+  } cu;
+};
+
 /* Return x rounded up to an alignment boundary.
    eg, P2ROUNDUP(0x1234, 0x100) == 0x1300 (0x13*align)
    eg, P2ROUNDUP(0x5600, 0x100) == 0x5600 (0x56*align)  */
@@ -361,6 +391,8 @@ extern const ctf_type_t *ctf_lookup_by_id (ctf_file_t **, ctf_id_t);
 extern ctf_id_t ctf_lookup_by_rawname (ctf_file_t *, int, const char *);
 extern ctf_id_t ctf_lookup_by_rawhash (ctf_file_t *, ctf_names_t *, const char *);
 extern void ctf_set_ctl_hashes (ctf_file_t *);
+
+extern ctf_file_t *ctf_get_dict (ctf_file_t *fp, ctf_id_t type);
 
 typedef unsigned int (*ctf_hash_fun) (const void *ptr);
 extern unsigned int ctf_hash_integer (const void *ptr);

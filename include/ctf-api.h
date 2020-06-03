@@ -204,10 +204,13 @@ enum
    ECTF_DUMPSECTCHANGED, /* Section changed in middle of dump.  */
    ECTF_NOTYET,		/* Feature not yet implemented.  */
    ECTF_INTERNAL,	/* Internal error in link.  */
-   ECTF_NONREPRESENTABLE /* Type not representable in CTF.  */
+   ECTF_NONREPRESENTABLE, /* Type not representable in CTF.  */
+   ECTF_NEXT_END,	/* End of iteration.  */
+   ECTF_NEXT_WRONGFUN,	/* Wrong iteration function called.  */
+   ECTF_NEXT_WRONGFP	/* Iteration entity changed in mid-iterate.  */
   };
 
-#define ECTF_NERR (ECTF_NONREPRESENTABLE - ECTF_BASE + 1)	/* Count of CTF errors.  */
+#define ECTF_NERR (ECTF_NEXT_WRONGFP - ECTF_BASE + 1)	/* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel() is explicitly called.  */
@@ -227,8 +230,9 @@ enum
 #define	CTF_ADD_NONROOT	0	/* Type only visible in nested scope.  */
 #define	CTF_ADD_ROOT	1	/* Type visible at top-level scope.  */
 
-/* These typedefs are used to define the signature for callback functions
-   that can be used with the iteration and visit functions below.  */
+/* These typedefs are used to define the signature for callback functions that
+   can be used with the iteration and visit functions below.  There is also a
+   family of iteration functions that do not require callbacks.  */
 
 typedef int ctf_visit_f (const char *name, ctf_id_t type, unsigned long offset,
 			 int depth, void *arg);
@@ -247,6 +251,15 @@ typedef char *ctf_dump_decorate_f (ctf_sect_names_t sect,
 				   char *line, void *arg);
 
 typedef struct ctf_dump_state ctf_dump_state_t;
+
+/* Iteration state for the _next() functions, and allocators/copiers/freers for
+   it.  (None of these are needed for the simple case of iterating to the end:
+   the _next() function allocate and free the iterators for you.)  */
+
+typedef struct ctf_next ctf_next_t;
+extern ctf_next_t *ctf_next_create (void);
+extern void ctf_next_destroy (ctf_next_t *);
+extern ctf_next_t *ctf_next_copy (ctf_next_t *);
 
 /* Opening.  These mostly return an abstraction over both CTF files and CTF
    archives: so they can be used to open both.  CTF files will appear to be an
@@ -353,13 +366,25 @@ extern int ctf_label_info (ctf_file_t *, const char *, ctf_lblinfo_t *);
 
 extern int ctf_member_count (ctf_file_t *, ctf_id_t);
 extern int ctf_member_iter (ctf_file_t *, ctf_id_t, ctf_member_f *, void *);
+extern ssize_t ctf_member_next (ctf_file_t *, ctf_id_t, ctf_next_t **,
+				const char **name, ctf_id_t *membtype);
 extern int ctf_enum_iter (ctf_file_t *, ctf_id_t, ctf_enum_f *, void *);
+extern const char *ctf_enum_next (ctf_file_t *, ctf_id_t, ctf_next_t **,
+				  int *);
 extern int ctf_type_iter (ctf_file_t *, ctf_type_f *, void *);
 extern int ctf_type_iter_all (ctf_file_t *, ctf_type_all_f *, void *);
+extern ctf_id_t ctf_type_next (ctf_file_t *, ctf_next_t **,
+			       int *flag, int want_hidden);
 extern int ctf_label_iter (ctf_file_t *, ctf_label_f *, void *);
+extern int ctf_label_next (ctf_file_t *, ctf_next_t **, const char **); /* TBD */
 extern int ctf_variable_iter (ctf_file_t *, ctf_variable_f *, void *);
+extern ctf_id_t ctf_variable_next (ctf_file_t *, ctf_next_t **,
+				   const char **);
 extern int ctf_archive_iter (const ctf_archive_t *, ctf_archive_member_f *,
 			     void *);
+extern ctf_file_t *ctf_archive_next (const ctf_archive_t *, ctf_next_t **,
+				     const char **, int skip_parent, int *errp);
+
 /* This function alone does not currently operate on CTF files masquerading
    as archives, and returns -EINVAL: the raw data is no longer available.  It is
    expected to be used only by archiving tools, in any case, which have no need

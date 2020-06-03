@@ -1,5 +1,21 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (ECTF_NEXT_END): New error.
+	(ECTF_NEXT_WRONGFUN): Likewise.
+	(ECTF_NEXT_WRONGFP): Likewise.
+	(ECTF_NERR): Adjust.
+	(ctf_next_t): New.
+	(ctf_next_create): New prototype.
+	(ctf_next_destroy): Likewise.
+	(ctf_next_copy): Likewise.
+	(ctf_member_next): Likewise.
+	(ctf_enum_next): Likewise.
+	(ctf_type_next): Likewise.
+	(ctf_label_next): Likewise.
+	(ctf_variable_next): Likewise.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ctf_ref): New.
 
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>

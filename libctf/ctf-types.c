@@ -18,6 +18,7 @@
    <http://www.gnu.org/licenses/>.  */
 
 #include <ctf-impl.h>
+#include <assert.h>
 #include <string.h>
 
 /* Determine whether a type is a parent or a child.  */
@@ -103,6 +104,125 @@ ctf_member_iter (ctf_file_t *fp, ctf_id_t type, ctf_member_f *func, void *arg)
   return 0;
 }
 
+/* Iterate over the members of a STRUCT or UNION, returning each member's
+   offset and optionally name and member type in turn.  On end-of-iteration,
+   returns -1.  */
+
+ssize_t
+ctf_member_next (ctf_file_t *fp, ctf_id_t type, ctf_next_t **it,
+		 const char **name, ctf_id_t *membtype)
+{
+  ctf_file_t *ofp = fp;
+  uint32_t kind;
+  ssize_t offset;
+  ctf_next_t *i = *it;
+
+  if (!i)
+    {
+      const ctf_type_t *tp;
+      ctf_dtdef_t *dtd;
+
+      if ((type = ctf_type_resolve (fp, type)) == CTF_ERR)
+	return -1;			/* errno is set for us.  */
+
+      if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+	return -1;			/* errno is set for us.  */
+
+      if ((i = ctf_next_create ()) == NULL)
+	return ctf_set_errno (ofp, ENOMEM);
+      i->cu.ctn_fp = ofp;
+
+      (void) ctf_get_ctt_size (fp, tp, &i->ctn_size,
+			       &i->ctn_increment);
+      kind = LCTF_INFO_KIND (fp, tp->ctt_info);
+
+      if (kind != CTF_K_STRUCT && kind != CTF_K_UNION)
+	{
+	  ctf_next_destroy (i);
+	  return (ctf_set_errno (ofp, ECTF_NOTSOU));
+	}
+
+      dtd = ctf_dynamic_type (fp, type);
+      i->ctn_iter_fun = (void (*) (void)) ctf_member_next;
+
+      /* We depend below on the RDWR state indicating whether the DTD-related
+	 fields or the DMD-related fields have been initialized.  */
+
+      assert ((dtd && (fp->ctf_flags & LCTF_RDWR))
+	      || (!dtd && (!(fp->ctf_flags & LCTF_RDWR))));
+
+      if (dtd == NULL)
+	{
+	  i->ctn_n = LCTF_INFO_VLEN (fp, tp->ctt_info);
+
+	  if (i->ctn_size < CTF_LSTRUCT_THRESH)
+	    i->u.ctn_mp = (const ctf_member_t *) ((uintptr_t) tp +
+						  i->ctn_increment);
+	  else
+	    i->u.ctn_lmp = (const ctf_lmember_t *) ((uintptr_t) tp +
+						    i->ctn_increment);
+	}
+      else
+	i->u.ctn_dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
+
+      *it = i;
+    }
+
+  if ((void (*) (void)) ctf_member_next != i->ctn_iter_fun)
+    return (ctf_set_errno (ofp, ECTF_NEXT_WRONGFUN));
+
+  if (ofp != i->cu.ctn_fp)
+    return (ctf_set_errno (ofp, ECTF_NEXT_WRONGFP));
+
+  /* Resolve to the native dict of this type.  */
+  if ((fp = ctf_get_dict (ofp, type)) == NULL)
+    return (ctf_set_errno (ofp, ECTF_NOPARENT));
+
+  if (!(fp->ctf_flags & LCTF_RDWR))
+    {
+      if (i->ctn_n == 0)
+	goto end_iter;
+
+      if (i->ctn_size < CTF_LSTRUCT_THRESH)
+	{
+	  if (name)
+	    *name = ctf_strptr (fp, i->u.ctn_mp->ctm_name);
+	  if (membtype)
+	    *membtype = i->u.ctn_mp->ctm_type;
+	  offset = i->u.ctn_mp->ctm_offset;
+	  i->u.ctn_mp++;
+	}
+      else
+	{
+	  if (name)
+	    *name = ctf_strptr (fp, i->u.ctn_lmp->ctlm_name);
+	  if (membtype)
+	    *membtype = i->u.ctn_lmp->ctlm_type;
+	  offset = (unsigned long) CTF_LMEM_OFFSET (i->u.ctn_lmp);
+	  i->u.ctn_lmp++;
+	}
+      i->ctn_n--;
+    }
+  else
+    {
+      if (i->u.ctn_dmd == NULL)
+	goto end_iter;
+      if (name)
+	*name = i->u.ctn_dmd->dmd_name;
+      if (membtype)
+	*membtype = i->u.ctn_dmd->dmd_type;
+      offset = i->u.ctn_dmd->dmd_offset;
+      i->u.ctn_dmd = ctf_list_next (i->u.ctn_dmd);
+    }
+
+  return offset;
+
+ end_iter:
+  ctf_next_destroy (i);
+  *it = NULL;
+  return ctf_set_errno (ofp, ECTF_NEXT_END);
+}
+
 /* Iterate over the members of an ENUM.  We pass the string name and associated
    integer value of each enum element to the specified callback function.  */
 
@@ -154,8 +274,126 @@ ctf_enum_iter (ctf_file_t *fp, ctf_id_t type, ctf_enum_f *func, void *arg)
   return 0;
 }
 
+/* Iterate over the members of an enum TYPE, returning each enumerand's NAME or
+   NULL at end of iteration or error, and optionally passing back the
+   enumerand's integer VALue.  */
+
+const char *
+ctf_enum_next (ctf_file_t *fp, ctf_id_t type, ctf_next_t **it,
+	       int *val)
+{
+  ctf_file_t *ofp = fp;
+  uint32_t kind;
+  const char *name;
+  ctf_next_t *i = *it;
+
+  if (!i)
+    {
+      const ctf_type_t *tp;
+      ctf_dtdef_t *dtd;
+
+      if ((type = ctf_type_resolve_unsliced (fp, type)) == CTF_ERR)
+	return NULL;			/* errno is set for us.  */
+
+      if ((tp = ctf_lookup_by_id (&fp, type)) == NULL)
+	return NULL;			/* errno is set for us.  */
+
+      if ((i = ctf_next_create ()) == NULL)
+	{
+	  ctf_set_errno (ofp, ENOMEM);
+	  return NULL;
+	}
+      i->cu.ctn_fp = ofp;
+
+      (void) ctf_get_ctt_size (fp, tp, NULL,
+			       &i->ctn_increment);
+      kind = LCTF_INFO_KIND (fp, tp->ctt_info);
+
+      if (kind != CTF_K_ENUM)
+	{
+	  ctf_next_destroy (i);
+	  ctf_set_errno (ofp, ECTF_NOTENUM);
+	  return NULL;
+	}
+
+      dtd = ctf_dynamic_type (fp, type);
+      i->ctn_iter_fun = (void (*) (void)) ctf_enum_next;
+
+      /* We depend below on the RDWR state indicating whether the DTD-related
+	 fields or the DMD-related fields have been initialized.  */
+
+      assert ((dtd && (fp->ctf_flags & LCTF_RDWR))
+	      || (!dtd && (!(fp->ctf_flags & LCTF_RDWR))));
+
+      if (dtd == NULL)
+	{
+	  i->ctn_n = LCTF_INFO_VLEN (fp, tp->ctt_info);
+
+	  i->u.ctn_en = (const ctf_enum_t *) ((uintptr_t) tp +
+					      i->ctn_increment);
+	}
+      else
+	i->u.ctn_dmd = ctf_list_next (&dtd->dtd_u.dtu_members);
+
+      *it = i;
+    }
+
+  if ((void (*) (void)) ctf_enum_next != i->ctn_iter_fun)
+    {
+      ctf_set_errno (ofp, ECTF_NEXT_WRONGFUN);
+      return NULL;
+    }
+
+  if (ofp != i->cu.ctn_fp)
+    {
+      ctf_set_errno (ofp, ECTF_NEXT_WRONGFP);
+      return NULL;
+    }
+
+  /* Resolve to the native dict of this type.  */
+  if ((fp = ctf_get_dict (ofp, type)) == NULL)
+    {
+      ctf_set_errno (ofp, ECTF_NOPARENT);
+      return NULL;
+    }
+
+  if (!(fp->ctf_flags & LCTF_RDWR))
+    {
+      if (i->ctn_n == 0)
+	goto end_iter;
+
+      name = ctf_strptr (fp, i->u.ctn_en->cte_name);
+      if (val)
+	*val = i->u.ctn_en->cte_value;
+      i->u.ctn_en++;
+      i->ctn_n--;
+    }
+  else
+    {
+      if (i->u.ctn_dmd == NULL)
+	goto end_iter;
+
+      name = i->u.ctn_dmd->dmd_name;
+      if (val)
+	*val = i->u.ctn_dmd->dmd_value;
+      i->u.ctn_dmd = ctf_list_next (i->u.ctn_dmd);
+    }
+
+  return name;
+
+ end_iter:
+  ctf_next_destroy (i);
+  *it = NULL;
+  ctf_set_errno (ofp, ECTF_NEXT_END);
+  return NULL;
+}
+
 /* Iterate over every root (user-visible) type in the given CTF container.
-   We pass the type ID of each type to the specified callback function.  */
+   We pass the type ID of each type to the specified callback function.
+
+   Does not traverse parent types: you have to do that explicitly.  This is by
+   design, to avoid traversing them more than once if traversing many children
+   of a single parent.  */
 
 int
 ctf_type_iter (ctf_file_t *fp, ctf_type_f *func, void *arg)
@@ -175,7 +413,11 @@ ctf_type_iter (ctf_file_t *fp, ctf_type_f *func, void *arg)
 }
 
 /* Iterate over every type in the given CTF container, user-visible or not.
-   We pass the type ID of each type to the specified callback function.  */
+   We pass the type ID of each type to the specified callback function.
+
+   Does not traverse parent types: you have to do that explicitly.  This is by
+   design, to avoid traversing them more than once if traversing many children
+   of a single parent.  */
 
 int
 ctf_type_iter_all (ctf_file_t *fp, ctf_type_all_f *func, void *arg)
@@ -193,6 +435,55 @@ ctf_type_iter_all (ctf_file_t *fp, ctf_type_all_f *func, void *arg)
     }
 
   return 0;
+}
+
+/* Iterate over every type in the given CTF container, optionally including
+   non-user-visible types, returning each type ID and hidden flag in turn.
+   Returns CTF_ERR on end of iteration or error.
+
+   Does not traverse parent types: you have to do that explicitly.  This is by
+   design, to avoid traversing them more than once if traversing many children
+   of a single parent.  */
+
+ctf_id_t
+ctf_type_next (ctf_file_t *fp, ctf_next_t **it, int *flag, int want_hidden)
+{
+  ctf_next_t *i = *it;
+
+  if (!i)
+    {
+      if ((i = ctf_next_create ()) == NULL)
+	return ctf_set_errno (fp, ENOMEM);
+
+      i->cu.ctn_fp = fp;
+      i->ctn_type = 1;
+      i->ctn_iter_fun = (void (*) (void)) ctf_type_next;
+      *it = i;
+    }
+
+  if ((void (*) (void)) ctf_type_next != i->ctn_iter_fun)
+    return (ctf_set_errno (fp, ECTF_NEXT_WRONGFUN));
+
+  if (fp != i->cu.ctn_fp)
+    return (ctf_set_errno (fp, ECTF_NEXT_WRONGFP));
+
+  while (i->ctn_type <= fp->ctf_typemax)
+    {
+      const ctf_type_t *tp = LCTF_INDEX_TO_TYPEPTR (fp, i->ctn_type);
+
+      if ((!want_hidden) && (!LCTF_INFO_ISROOT (fp, tp->ctt_info)))
+	{
+	  i->ctn_type++;
+	  continue;
+	}
+
+      if (flag)
+	*flag = LCTF_INFO_ISROOT (fp, tp->ctt_info);
+      return LCTF_INDEX_TO_TYPE (fp, i->ctn_type++, fp->ctf_flags & LCTF_CHILD);
+    }
+  ctf_next_destroy (i);
+  *it = NULL;
+  return ctf_set_errno (fp, ECTF_NEXT_END);
 }
 
 /* Iterate over every variable in the given CTF container, in arbitrary order.
@@ -227,6 +518,63 @@ ctf_variable_iter (ctf_file_t *fp, ctf_variable_f *func, void *arg)
     }
 
   return 0;
+}
+
+/* Iterate over every variable in the given CTF container, in arbitrary order,
+   returning the name and type of each variable in turn.  The name argument is
+   not optional.  Returns CTF_ERR on end of iteration or error.  */
+
+ctf_id_t
+ctf_variable_next (ctf_file_t *fp, ctf_next_t **it, const char **name)
+{
+  ctf_next_t *i = *it;
+
+  if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parent == NULL))
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
+
+  if (!i)
+    {
+      if ((i = ctf_next_create ()) == NULL)
+	return ctf_set_errno (fp, ENOMEM);
+
+      i->cu.ctn_fp = fp;
+      i->ctn_iter_fun = (void (*) (void)) ctf_variable_next;
+      if (fp->ctf_flags & LCTF_RDWR)
+	i->u.ctn_dvd = ctf_list_next (&fp->ctf_dvdefs);
+      *it = i;
+    }
+
+  if ((void (*) (void)) ctf_variable_next != i->ctn_iter_fun)
+    return (ctf_set_errno (fp, ECTF_NEXT_WRONGFUN));
+
+  if (fp != i->cu.ctn_fp)
+    return (ctf_set_errno (fp, ECTF_NEXT_WRONGFP));
+
+  if (!(fp->ctf_flags & LCTF_RDWR))
+    {
+      if (i->ctn_n >= fp->ctf_nvars)
+	goto end_iter;
+
+      *name = ctf_strptr (fp, fp->ctf_vars[i->ctn_n].ctv_name);
+      return fp->ctf_vars[i->ctn_n++].ctv_type;
+    }
+  else
+    {
+      ctf_id_t id;
+
+      if (i->u.ctn_dvd == NULL)
+	goto end_iter;
+
+      *name = i->u.ctn_dvd->dvd_name;
+      id = i->u.ctn_dvd->dvd_type;
+      i->u.ctn_dvd = ctf_list_next (i->u.ctn_dvd);
+      return id;
+    }
+
+ end_iter:
+  ctf_next_destroy (i);
+  *it = NULL;
+  return ctf_set_errno (fp, ECTF_NEXT_END);
 }
 
 /* Follow a given type through the graph for TYPEDEF, VOLATILE, CONST, and

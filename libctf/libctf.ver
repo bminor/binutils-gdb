@@ -73,6 +73,7 @@ LIBCTF_1.0 {
 	ctf_type_compat;
 
 	ctf_member_info;
+	ctf_member_next;
 	ctf_array_info;
 	ctf_member_count;
 
@@ -87,10 +88,17 @@ LIBCTF_1.0 {
 
 	ctf_member_iter;
 	ctf_enum_iter;
+	ctf_enum_next;
 	ctf_type_iter;
+	ctf_type_next;
 	ctf_type_iter_all;
 	ctf_label_iter;
 	ctf_variable_iter;
+	ctf_variable_next;
+
+	ctf_next_create;
+	ctf_next_destroy;
+	ctf_next_copy;
 
 	ctf_add_array;
 	ctf_add_const;
@@ -138,6 +146,7 @@ LIBCTF_1.0 {
 	ctf_arc_open_by_name_sections;
 	ctf_archive_count;
 	ctf_archive_iter;
+	ctf_archive_next;
 	ctf_archive_raw_iter;
 	ctf_get_arc;
 

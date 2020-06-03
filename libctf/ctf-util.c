@@ -173,3 +173,32 @@ ctf_set_errno (ctf_file_t * fp, int err)
   fp->ctf_errno = err;
   return CTF_ERR;
 }
+
+/* Create a ctf_next_t.  */
+
+ctf_next_t *
+ctf_next_create (void)
+{
+  return calloc (1, sizeof (struct ctf_next));
+}
+
+/* Destroy a ctf_next_t, for early exit from iterators.  */
+
+void
+ctf_next_destroy (ctf_next_t *i)
+{
+  free (i);
+}
+
+/* Copy a ctf_next_t.  */
+
+ctf_next_t *
+ctf_next_copy (ctf_next_t *i)
+{
+  ctf_next_t *i2;
+
+  if ((i2 = ctf_next_create()) == NULL)
+    return NULL;
+  memcpy (i2, i, sizeof (struct ctf_next));
+  return i2;
+}
