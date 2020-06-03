@@ -1,5 +1,13 @@
 2020-06-03  Tom de Vries  <tdevries@suse.de>
 
+	PR symtab/26046
+	* gdb.cp/breakpoint-locs-2.cc: New test.
+	* gdb.cp/breakpoint-locs.cc: New test.
+	* gdb.cp/breakpoint-locs.exp: New file.
+	* gdb.cp/breakpoint-locs.h: New test.
+
+2020-06-03  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/25609
 	* gdb.base/jit-elf-so.exp: Don't modify testing behaviour based on
 	value of global verbose.

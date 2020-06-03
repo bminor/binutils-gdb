@@ -1,3 +1,11 @@
+2020-06-03  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/26046
+	* dwarf2/read.c (scan_partial_symbols): Recurse into DW_TAG_subprogram
+	children for C++.
+	(load_partial_dies): Don't skip DW_TAG_inlined_subroutine child of
+	DW_TAG_subprogram.
+
 2020-06-02  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ada-lang.c (ada_language_data): Delete skip_trampoline

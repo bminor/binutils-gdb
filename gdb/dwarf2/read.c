@@ -8146,6 +8146,9 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	    case DW_TAG_subprogram:
 	    case DW_TAG_inlined_subroutine:
 	      add_partial_subprogram (pdi, lowpc, highpc, set_addrmap, cu);
+	      if (cu->language == language_cplus)
+		scan_partial_symbols (pdi->die_child, lowpc, highpc,
+				      set_addrmap, cu);
 	      break;
 	    case DW_TAG_constant:
 	    case DW_TAG_variable:
@@ -18246,7 +18249,8 @@ load_partial_dies (const struct die_reader_specs *reader,
       if (!load_all
 	  && cu->language == language_cplus
 	  && parent_die != NULL
-	  && parent_die->tag == DW_TAG_subprogram)
+	  && parent_die->tag == DW_TAG_subprogram
+	  && abbrev->tag != DW_TAG_inlined_subroutine)
 	{
 	  info_ptr = skip_one_die (reader, info_ptr + bytes_read, abbrev);
 	  continue;
