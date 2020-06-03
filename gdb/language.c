@@ -49,9 +49,6 @@
 
 static void set_range_case (void);
 
-static void unk_lang_printchar (int c, struct type *type,
-				struct ui_file *stream);
-
 /* The current (default at startup) state of type and range checking.
    (If the modes are set to "auto", though, these are changed based
    on the default language at startup, and then again based on the
@@ -663,6 +660,15 @@ language_defn::emitchar (int ch, struct type *chtype,
   c_emit_char (ch, chtype, stream, quoter);
 }
 
+/* See language.h.  */
+
+void
+language_defn::printchar (int ch, struct type *chtype,
+			  struct ui_file * stream) const
+{
+  c_printchar (ch, chtype, stream);
+}
+
 /* The default implementation of the get_symbol_name_matcher_inner method
    from the language_defn class.  Matches with strncmp_iw.  */
 
@@ -729,13 +735,6 @@ default_is_string_type_p (struct type *type)
 }
 
 static void
-unk_lang_printchar (int c, struct type *type, struct ui_file *stream)
-{
-  error (_("internal error - unimplemented "
-	   "function unk_lang_printchar called."));
-}
-
-static void
 unk_lang_printstr (struct ui_file *stream, struct type *type,
 		   const gdb_byte *string, unsigned int length,
 		   const char *encoding, int force_ellipses,
@@ -773,7 +772,6 @@ extern const struct language_data unknown_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_standard,
-  unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   "this",        	    	/* name_of_this */
@@ -851,6 +849,14 @@ public:
   {
     error (_("unimplemented unknown_language::emitchar called"));
   }
+
+  /* See language.h.  */
+
+  void printchar (int ch, struct type *chtype,
+		  struct ui_file *stream) const override
+  {
+    error (_("unimplemented unknown_language::printchar called"));
+  }
 };
 
 /* Single instance of the unknown language class.  */
@@ -870,7 +876,6 @@ extern const struct language_data auto_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_standard,
-  unk_lang_printchar,		/* Print character constant */
   unk_lang_printstr,
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   "this",		        /* name_of_this */
@@ -947,6 +952,14 @@ public:
 		 struct ui_file *stream, int quoter) const override
   {
     error (_("unimplemented auto_language::emitchar called"));
+  }
+
+  /* See language.h.  */
+
+  void printchar (int ch, struct type *chtype,
+		  struct ui_file *stream) const override
+  {
+    error (_("unimplemented auto_language::printchar called"));
   }
 };
 

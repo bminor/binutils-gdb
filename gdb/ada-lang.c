@@ -13681,7 +13681,6 @@ extern const struct language_data ada_language_data =
   macro_expansion_no,
   ada_extensions,
   &ada_exp_descriptor,
-  ada_printchar,                /* Print a character constant */
   ada_printstr,                 /* Function to print string constant */
   ada_print_typedef,            /* Print a typedef using appropriate syntax */
   NULL,                         /* name_of_this */
@@ -14113,6 +14112,14 @@ public:
 		 struct ui_file *stream, int quoter) const override
   {
     ada_emit_char (ch, chtype, stream, quoter, 1);
+  }
+
+  /* See language.h.  */
+
+  void printchar (int ch, struct type *chtype,
+		  struct ui_file *stream) const override
+  {
+    ada_printchar (ch, chtype, stream);
   }
 
 protected:

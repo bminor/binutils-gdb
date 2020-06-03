@@ -281,16 +281,6 @@ rust_get_trait_object_pointer (struct value *value)
 
 
 
-/* la_printchar implementation for Rust.  */
-
-static void
-rust_printchar (int c, struct type *type, struct ui_file *stream)
-{
-  fputs_filtered ("'", stream);
-  LA_EMIT_CHAR (c, type, stream, '\'');
-  fputs_filtered ("'", stream);
-}
-
 /* la_printstr implementation for Rust.  */
 
 static void
@@ -1963,7 +1953,6 @@ extern const struct language_data rust_language_data =
   macro_expansion_no,
   rust_extensions,
   &exp_descriptor_rust,
-  rust_printchar,		/* Print a character constant */
   rust_printstr,		/* Function to print string constant */
   rust_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,				/* name_of_this */
@@ -2145,6 +2134,16 @@ public:
       fprintf_filtered (stream, "\\x%02x", ch);
     else
       fprintf_filtered (stream, "\\u{%06x}", ch);
+  }
+
+  /* See language.h.  */
+
+  void printchar (int ch, struct type *chtype,
+		  struct ui_file *stream) const override
+  {
+    fputs_filtered ("'", stream);
+    LA_EMIT_CHAR (ch, chtype, stream, '\'');
+    fputs_filtered ("'", stream);
   }
 };
 

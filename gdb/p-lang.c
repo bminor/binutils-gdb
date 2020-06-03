@@ -376,7 +376,6 @@ extern const struct language_data pascal_language_data =
   macro_expansion_no,
   p_extensions,
   &exp_descriptor_standard,
-  pascal_printchar,		/* Print a character constant */
   pascal_printstr,		/* Function to print string constant */
   pascal_print_typedef,		/* Print a typedef using appropriate syntax */
   "this",		        /* name_of_this */
@@ -491,6 +490,15 @@ public:
     if (in_quotes)
       fputs_filtered ("'", stream);
   }
+
+  /* See language.h.  */
+
+  void printchar (int ch, struct type *chtype,
+		  struct ui_file *stream) const override
+  {
+    pascal_printchar (ch, chtype, stream);
+  }
+
 };
 
 /* Single instance of the Pascal language class.  */

@@ -309,7 +309,6 @@ extern const struct language_data m2_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_modula2,
-  m2_printchar,			/* Print character constant */
   m2_printstr,			/* function to print string constant */
   m2_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,		                /* name_of_this */
@@ -425,6 +424,14 @@ public:
 	    break;
 	  }
       }
+  }
+
+  /* See language.h.  */
+
+  void printchar (int ch, struct type *chtype,
+		  struct ui_file *stream) const override
+  {
+    m2_printchar (ch, chtype, stream);
   }
 };
 

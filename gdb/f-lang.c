@@ -41,8 +41,6 @@
 
 /* Local functions */
 
-static void f_printchar (int c, struct type *type, struct ui_file * stream);
-
 /* Return the encoding that should be used for the character type
    TYPE.  */
 
@@ -68,16 +66,6 @@ f_get_encoding (struct type *type)
     }
 
   return encoding;
-}
-
-/* Implementation of la_printchar.  */
-
-static void
-f_printchar (int c, struct type *type, struct ui_file *stream)
-{
-  fputs_filtered ("'", stream);
-  LA_EMIT_CHAR (c, type, stream, '\'');
-  fputs_filtered ("'", stream);
 }
 
 /* Print the character string STRING, printing at most LENGTH characters.
@@ -548,7 +536,6 @@ extern const struct language_data f_language_data =
   macro_expansion_no,
   f_extensions,
   &exp_descriptor_f,
-  f_printchar,			/* Print character constant */
   f_printstr,			/* function to print string constant */
   f_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,                    	/* name_of_this */
@@ -708,6 +695,16 @@ public:
   {
     const char *encoding = f_get_encoding (chtype);
     generic_emit_char (ch, chtype, stream, quoter, encoding);
+  }
+
+  /* See language.h.  */
+
+  void printchar (int ch, struct type *chtype,
+		  struct ui_file *stream) const override
+  {
+    fputs_filtered ("'", stream);
+    LA_EMIT_CHAR (ch, chtype, stream, '\'');
+    fputs_filtered ("'", stream);
   }
 
 protected:

@@ -142,7 +142,6 @@ extern const struct language_data d_language_data =
   macro_expansion_no,
   d_extensions,
   &exp_descriptor_c,
-  c_printchar,			/* Print a character constant.  */
   c_printstr,			/* Function to print string constant.  */
   c_print_typedef,		/* Print a typedef using appropriate
 				   syntax.  */

@@ -1,5 +1,42 @@
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete la_printchar initializer.
+	(ada_language::printchar): New member function.
+	* c-lang.c (c_language_data): Delete la_printchar initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_printchar): Rename to f_language::printchar.
+	(f_language_data): Delete la_printchar initializer.
+	(f_language::printchar): New member function, implementation from
+	f_printchar.
+	* go-lang.c (go_language_data): Delete la_printchar initializer.
+	* language.c (unk_lang_printchar): Delete.
+	(language_defn::printchar): Define new member function.
+	(unknown_language_data): Delete la_printchar initializer.
+	(unknown_language::printchar): New member function.
+	(auto_language_data): Delete la_printchar initializer.
+	(auto_language::printchar): New member function.
+	* language.h (language_data): Delete la_printchar field.
+	(language_defn::printchar): Declare new member function.
+	(LA_PRINT_CHAR): Update call to printchar.
+	* m2-lang.c (m2_language_data): Delete la_printchar initializer.
+	(m2_language::printchar): New member function.
+	* objc-lang.c (objc_language_data): Delete la_printchar
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Delete la_printchar
+	initializer.
+	(pascal_language::printchar): New member function.
+	* rust-lang.c (rust_printchar): Rename to
+	rust_language::printchar.
+	(rust_language_data): Delete la_printchar initializer.
+	(rust_language::printchar): New member function, implementation
+	from rust_printchar.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (emit_char): Renamed to ada_language::emitchar.
 	(ada_language_data): Delete la_emitchar initializer.
 	(ada_language::emitchar): New member function, implementation from

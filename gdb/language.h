@@ -225,9 +225,6 @@ struct language_data
 
     const struct exp_descriptor *la_exp_desc;
 
-    void (*la_printchar) (int ch, struct type *chtype,
-			  struct ui_file * stream);
-
     void (*la_printstr) (struct ui_file * stream, struct type *elttype,
 			 const gdb_byte *string, unsigned int length,
 			 const char *encoding, int force_ellipses,
@@ -547,6 +544,9 @@ struct language_defn : language_data
   virtual void emitchar (int ch, struct type *chtype,
 			 struct ui_file *stream, int quoter) const;
 
+  virtual void printchar (int ch, struct type *chtype,
+			  struct ui_file * stream) const;
+
 protected:
 
   /* This is the overridable part of the GET_SYMBOL_NAME_MATCHER method.
@@ -649,7 +649,7 @@ extern enum language set_language (enum language);
   (current_language->value_print (val,stream,options))
 
 #define LA_PRINT_CHAR(ch, type, stream) \
-  (current_language->la_printchar(ch, type, stream))
+  (current_language->printchar (ch, type, stream))
 #define LA_PRINT_STRING(stream, elttype, string, length, encoding, force_ellipses, options) \
   (current_language->la_printstr(stream, elttype, string, length, \
 				 encoding, force_ellipses,options))
