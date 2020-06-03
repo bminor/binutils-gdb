@@ -4294,6 +4294,7 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	      status = 1;
 	      bfd_nonfatal_message (NULL, ibfd, isection,
 				    _("relocation count is negative"));
+	      free (relpp);
 	      return;
 	    }
 	}
@@ -4318,7 +4319,7 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 		  temp_relpp [temp_relcount++] = relpp [i];
 	    }
 	  relcount = temp_relcount;
-	  if (isection->orelocation == NULL)
+	  if (relpp != isection->orelocation)
 	    free (relpp);
 	  relpp = temp_relpp;
 	}
@@ -4327,7 +4328,8 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       if (relcount == 0)
 	{
 	  osection->flags &= ~SEC_RELOC;
-	  free (relpp);
+	  if (relpp != isection->orelocation)
+	    free (relpp);
 	}
     }
 }

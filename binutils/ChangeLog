@@ -1,3 +1,9 @@
+2020-06-03  Alan Modra  <amodra@gmail.com>
+
+	PR 26069
+	* objcopy.c (copy_relocations_in_section): Free relpp on error.
+	Don't accidentally free isection->orelocation.
+
 2020-06-02  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/ar.exp (obj): Set up object file name
