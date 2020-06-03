@@ -123,7 +123,7 @@ if [board_info [target_info name] exists cflags] {
 }
 
 # Create executable containing unique symbol.
-if ![ld_link "$CC $board_cflags" "tmpdir/unique_prog" "tmpdir/unique.o"] {
+if ![ld_link "$CC $NOPIE_LDFLAGS $board_cflags" "tmpdir/unique_prog" "tmpdir/unique.o"] {
     fail "Could not link a unique executable"
     set fails [expr $fails + 1]
 }
@@ -202,7 +202,7 @@ if {![ld_link $ld "tmpdir/libunique_shared.so" "-shared tmpdir/unique_shared.o"]
 }
 
 # Create executable NOT containing unique symbol linked against library.
-if {![ld_link "$CC $board_cflags" "tmpdir/unique_shared_prog" "-Ltmpdir tmpdir/unique_empty.o -Wl,-Bdynamic,-rpath=./tmpdir -lunique_shared"] } {
+if {![ld_link "$CC $NOPIE_LDFLAGS $board_cflags" "tmpdir/unique_shared_prog" "-Ltmpdir tmpdir/unique_empty.o -Wl,-Bdynamic,-rpath=./tmpdir -lunique_shared"] } {
     fail "Could not link a dynamic executable"
     set fails [expr $fails + 1]
 }
