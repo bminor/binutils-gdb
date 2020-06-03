@@ -68,29 +68,6 @@ f_get_encoding (struct type *type)
   return encoding;
 }
 
-/* Print the character string STRING, printing at most LENGTH characters.
-   Printing stops early if the number hits print_max; repeat counts
-   are printed as appropriate.  Print ellipses at the end if we
-   had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.
-   FIXME:  This is a copy of the same function from c-exp.y.  It should
-   be replaced with a true F77 version.  */
-
-static void
-f_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
-	    unsigned int length, const char *encoding, int force_ellipses,
-	    const struct value_print_options *options)
-{
-  const char *type_encoding = f_get_encoding (type);
-
-  if (TYPE_LENGTH (type) == 4)
-    fputs_filtered ("4_", stream);
-
-  if (!encoding || !*encoding)
-    encoding = type_encoding;
-
-  generic_printstr (stream, type, string, length, encoding,
-		    force_ellipses, '\'', 0, options);
-}
 
 
 /* Table of operators and their precedences for printing expressions.  */
@@ -536,7 +513,6 @@ extern const struct language_data f_language_data =
   macro_expansion_no,
   f_extensions,
   &exp_descriptor_f,
-  f_printstr,			/* function to print string constant */
   f_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,                    	/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
@@ -705,6 +681,25 @@ public:
     fputs_filtered ("'", stream);
     LA_EMIT_CHAR (ch, chtype, stream, '\'');
     fputs_filtered ("'", stream);
+  }
+
+  /* See language.h.  */
+
+  void printstr (struct ui_file *stream, struct type *elttype,
+		 const gdb_byte *string, unsigned int length,
+		 const char *encoding, int force_ellipses,
+		 const struct value_print_options *options) const override
+  {
+    const char *type_encoding = f_get_encoding (elttype);
+
+    if (TYPE_LENGTH (elttype) == 4)
+      fputs_filtered ("4_", stream);
+
+    if (!encoding || !*encoding)
+      encoding = type_encoding;
+
+    generic_printstr (stream, elttype, string, length, encoding,
+		      force_ellipses, '\'', 0, options);
   }
 
 protected:

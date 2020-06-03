@@ -42,86 +42,6 @@ m2_printchar (int c, struct type *type, struct ui_file *stream)
   fputs_filtered ("'", stream);
 }
 
-/* Print the character string STRING, printing at most LENGTH characters.
-   Printing stops early if the number hits print_max; repeat counts
-   are printed as appropriate.  Print ellipses at the end if we
-   had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.
-   FIXME:  This is a copy of the same function from c-exp.y.  It should
-   be replaced with a true Modula version.  */
-
-static void
-m2_printstr (struct ui_file *stream, struct type *type, const gdb_byte *string,
-	     unsigned int length, const char *encoding, int force_ellipses,
-	     const struct value_print_options *options)
-{
-  unsigned int i;
-  unsigned int things_printed = 0;
-  int in_quotes = 0;
-  int need_comma = 0;
-
-  if (length == 0)
-    {
-      fputs_filtered ("\"\"", gdb_stdout);
-      return;
-    }
-
-  for (i = 0; i < length && things_printed < options->print_max; ++i)
-    {
-      /* Position of the character we are examining
-         to see whether it is repeated.  */
-      unsigned int rep1;
-      /* Number of repetitions we have detected so far.  */
-      unsigned int reps;
-
-      QUIT;
-
-      if (need_comma)
-	{
-	  fputs_filtered (", ", stream);
-	  need_comma = 0;
-	}
-
-      rep1 = i + 1;
-      reps = 1;
-      while (rep1 < length && string[rep1] == string[i])
-	{
-	  ++rep1;
-	  ++reps;
-	}
-
-      if (reps > options->repeat_count_threshold)
-	{
-	  if (in_quotes)
-	    {
-	      fputs_filtered ("\", ", stream);
-	      in_quotes = 0;
-	    }
-	  m2_printchar (string[i], type, stream);
-	  fprintf_filtered (stream, " <repeats %u times>", reps);
-	  i = rep1 - 1;
-	  things_printed += options->repeat_count_threshold;
-	  need_comma = 1;
-	}
-      else
-	{
-	  if (!in_quotes)
-	    {
-	      fputs_filtered ("\"", stream);
-	      in_quotes = 1;
-	    }
-	  LA_EMIT_CHAR (string[i], type, stream, '"');
-	  ++things_printed;
-	}
-    }
-
-  /* Terminate the quotes if necessary.  */
-  if (in_quotes)
-    fputs_filtered ("\"", stream);
-
-  if (force_ellipses || i < length)
-    fputs_filtered ("...", stream);
-}
-
 /* Return true if TYPE is a string.  */
 
 static bool
@@ -309,7 +229,6 @@ extern const struct language_data m2_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_modula2,
-  m2_printstr,			/* function to print string constant */
   m2_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,		                /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
@@ -432,6 +351,81 @@ public:
 		  struct ui_file *stream) const override
   {
     m2_printchar (ch, chtype, stream);
+  }
+
+  /* See language.h.  */
+
+  void printstr (struct ui_file *stream, struct type *elttype,
+		 const gdb_byte *string, unsigned int length,
+		 const char *encoding, int force_ellipses,
+		 const struct value_print_options *options) const override
+  {
+    unsigned int i;
+    unsigned int things_printed = 0;
+    int in_quotes = 0;
+    int need_comma = 0;
+
+    if (length == 0)
+      {
+	fputs_filtered ("\"\"", gdb_stdout);
+	return;
+      }
+
+    for (i = 0; i < length && things_printed < options->print_max; ++i)
+      {
+	/* Position of the character we are examining
+	   to see whether it is repeated.  */
+	unsigned int rep1;
+	/* Number of repetitions we have detected so far.  */
+	unsigned int reps;
+
+	QUIT;
+
+	if (need_comma)
+	  {
+	    fputs_filtered (", ", stream);
+	    need_comma = 0;
+	  }
+
+	rep1 = i + 1;
+	reps = 1;
+	while (rep1 < length && string[rep1] == string[i])
+	  {
+	    ++rep1;
+	    ++reps;
+	  }
+
+	if (reps > options->repeat_count_threshold)
+	  {
+	    if (in_quotes)
+	      {
+		fputs_filtered ("\", ", stream);
+		in_quotes = 0;
+	      }
+	    m2_printchar (string[i], elttype, stream);
+	    fprintf_filtered (stream, " <repeats %u times>", reps);
+	    i = rep1 - 1;
+	    things_printed += options->repeat_count_threshold;
+	    need_comma = 1;
+	  }
+	else
+	  {
+	    if (!in_quotes)
+	      {
+		fputs_filtered ("\"", stream);
+		in_quotes = 1;
+	      }
+	    LA_EMIT_CHAR (string[i], elttype, stream, '"');
+	    ++things_printed;
+	  }
+      }
+
+    /* Terminate the quotes if necessary.  */
+    if (in_quotes)
+      fputs_filtered ("\"", stream);
+
+    if (force_ellipses || i < length)
+      fputs_filtered ("...", stream);
   }
 };
 

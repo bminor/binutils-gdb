@@ -1,5 +1,45 @@
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete la_printstr initializer.
+	(ada_language::printstr): New member function.
+	* c-lang.c (c_language_data): Delete la_printstr initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_printstr): Rename to f_language::printstr.
+	(f_language_data): Delete la_printstr initializer.
+	(f_language::printstr): New member function, implementation from
+	f_printstr.
+	* go-lang.c (go_language_data): Delete la_printstr initializer.
+	* language.c (language_defn::printstr): Define new member
+	function.
+	(unk_lang_printstr): Delete.
+	(unknown_language_data): Delete la_printstr initializer.
+	(unknown_language::printstr): New member function.
+	(auto_language_data): Delete la_printstr initializer.
+	(auto_language::printstr): New member function.
+	* language.h (language_data): Delete la_printstr field.
+	(language_defn::printstr): Declare new member function.
+	(LA_PRINT_STRING): Update call to printstr.
+	* m2-lang.c (m2_printstr): Rename to m2_language::printstr.
+	(m2_language_data): Delete la_printstr initializer.
+	(m2_language::printstr): New member function, implementation from
+	m2_printstr.
+	* objc-lang.c (objc_language_data): Delete la_printstr
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_printstr): Rename to pascal_language::printstr.
+	(pascal_language_data): Delete la_printstr initializer.
+	(pascal_language::printstr): New member function, implementation
+	from pascal_printstr.
+	* p-lang.h (pascal_printstr): Delete declaration.
+	* rust-lang.c (rust_printstr): Update header comment.
+	(rust_language_data): Delete la_printstr initializer.
+	(rust_language::printstr): New member function.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Delete la_printchar initializer.
 	(ada_language::printchar): New member function.
 	* c-lang.c (c_language_data): Delete la_printchar initializer.

@@ -669,6 +669,18 @@ language_defn::printchar (int ch, struct type *chtype,
   c_printchar (ch, chtype, stream);
 }
 
+/* See language.h.  */
+
+void
+language_defn::printstr (struct ui_file *stream, struct type *elttype,
+			 const gdb_byte *string, unsigned int length,
+			 const char *encoding, int force_ellipses,
+			 const struct value_print_options *options) const
+{
+  c_printstr (stream, elttype, string, length, encoding, force_ellipses,
+	      options);
+}
+
 /* The default implementation of the get_symbol_name_matcher_inner method
    from the language_defn class.  Matches with strncmp_iw.  */
 
@@ -734,16 +746,6 @@ default_is_string_type_p (struct type *type)
   return (type->code ()  == TYPE_CODE_STRING);
 }
 
-static void
-unk_lang_printstr (struct ui_file *stream, struct type *type,
-		   const gdb_byte *string, unsigned int length,
-		   const char *encoding, int force_ellipses,
-		   const struct value_print_options *options)
-{
-  error (_("internal error - unimplemented "
-	   "function unk_lang_printstr called."));
-}
-
 static const struct op_print unk_op_print_tab[] =
 {
   {NULL, OP_NULL, PREC_NULL, 0}
@@ -772,7 +774,6 @@ extern const struct language_data unknown_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_standard,
-  unk_lang_printstr,
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   "this",        	    	/* name_of_this */
   true,				/* store_sym_names_in_linkage_form_p */
@@ -857,6 +858,16 @@ public:
   {
     error (_("unimplemented unknown_language::printchar called"));
   }
+
+  /* See language.h.  */
+
+  void printstr (struct ui_file *stream, struct type *elttype,
+		 const gdb_byte *string, unsigned int length,
+		 const char *encoding, int force_ellipses,
+		 const struct value_print_options *options) const override
+  {
+    error (_("unimplemented unknown_language::printstr called"));
+  }
 };
 
 /* Single instance of the unknown language class.  */
@@ -876,7 +887,6 @@ extern const struct language_data auto_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_standard,
-  unk_lang_printstr,
   default_print_typedef,	/* Print a typedef using appropriate syntax */
   "this",		        /* name_of_this */
   false,			/* store_sym_names_in_linkage_form_p */
@@ -960,6 +970,16 @@ public:
 		  struct ui_file *stream) const override
   {
     error (_("unimplemented auto_language::printchar called"));
+  }
+
+  /* See language.h.  */
+
+  void printstr (struct ui_file *stream, struct type *elttype,
+		 const gdb_byte *string, unsigned int length,
+		 const char *encoding, int force_ellipses,
+		 const struct value_print_options *options) const override
+  {
+    error (_("unimplemented auto_language::printstr called"));
   }
 };
 

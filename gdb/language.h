@@ -225,11 +225,6 @@ struct language_data
 
     const struct exp_descriptor *la_exp_desc;
 
-    void (*la_printstr) (struct ui_file * stream, struct type *elttype,
-			 const gdb_byte *string, unsigned int length,
-			 const char *encoding, int force_ellipses,
-			 const struct value_print_options *);
-
     /* Print a typedef using syntax appropriate for this language.
        TYPE is the underlying type.  NEW_SYMBOL is the symbol naming
        the type.  STREAM is the output stream on which to print.  */
@@ -547,6 +542,16 @@ struct language_defn : language_data
   virtual void printchar (int ch, struct type *chtype,
 			  struct ui_file * stream) const;
 
+/* Print the character string STRING, printing at most LENGTH characters.
+   Printing stops early if the number hits print_max; repeat counts
+   are printed as appropriate.  Print ellipses at the end if we
+   had to stop before printing LENGTH characters, or if FORCE_ELLIPSES.  */
+
+  virtual void printstr (struct ui_file *stream, struct type *elttype,
+			 const gdb_byte *string, unsigned int length,
+			 const char *encoding, int force_ellipses,
+			 const struct value_print_options *options) const;
+
 protected:
 
   /* This is the overridable part of the GET_SYMBOL_NAME_MATCHER method.
@@ -651,8 +656,8 @@ extern enum language set_language (enum language);
 #define LA_PRINT_CHAR(ch, type, stream) \
   (current_language->printchar (ch, type, stream))
 #define LA_PRINT_STRING(stream, elttype, string, length, encoding, force_ellipses, options) \
-  (current_language->la_printstr(stream, elttype, string, length, \
-				 encoding, force_ellipses,options))
+  (current_language->printstr (stream, elttype, string, length, \
+			       encoding, force_ellipses,options))
 #define LA_EMIT_CHAR(ch, type, stream, quoter) \
   (current_language->emitchar (ch, type, stream, quoter))
 
