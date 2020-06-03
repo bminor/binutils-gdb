@@ -1,5 +1,13 @@
 2020-06-03  Alan Modra  <amodra@gmail.com>
 
+	PR 26069
+	PR 18758
+	* peicode.h (pe_ILF_make_a_section): Align data for compilers
+	other than gcc.
+	(pe_ILF_build_a_bfd): Likewise.
+
+2020-06-03  Alan Modra  <amodra@gmail.com>
+
 	PR 26029
 	* elf.c (_bfd_elf_close_and_cleanup): Free elf_shstrtab for
 	core files as well as objects.

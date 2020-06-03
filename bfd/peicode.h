@@ -622,6 +622,7 @@ pe_ILF_make_a_section (pe_ILF_vars * vars,
 {
   asection_ptr sec;
   flagword     flags;
+  intptr_t alignment;
 
   sec = bfd_make_section_old_way (vars->abfd, name);
   if (sec == NULL)
@@ -652,20 +653,18 @@ pe_ILF_make_a_section (pe_ILF_vars * vars,
   if (size & 1)
     vars->data --;
 
-# if (GCC_VERSION >= 3000)
   /* PR 18758: See note in pe_ILF_buid_a_bfd.  We must make sure that we
-     preserve host alignment requirements.  We test 'size' rather than
-     vars.data as we cannot perform binary arithmetic on pointers.  We assume
-     that vars.data was sufficiently aligned upon entry to this function.
-     The BFD_ASSERTs in this functions will warn us if we run out of room,
-     but we should already have enough padding built in to ILF_DATA_SIZE.  */
-  {
-    unsigned int alignment = __alignof__ (struct coff_section_tdata);
-
-    if (size & (alignment - 1))
-      vars->data += alignment - (size & (alignment - 1));
-  }
+     preserve host alignment requirements.  The BFD_ASSERTs in this
+     functions will warn us if we run out of room, but we should
+     already have enough padding built in to ILF_DATA_SIZE.  */
+#if GCC_VERSION >= 3000
+  alignment = __alignof__ (struct coff_section_tdata);
+#else
+  alignment = 8;
 #endif
+  vars->data
+    = (bfd_byte *) (((intptr_t) vars->data + alignment - 1) & -alignment);
+
   /* Create a coff_section_tdata structure for our use.  */
   sec->used_by_bfd = (struct coff_section_tdata *) vars->data;
   vars->data += sizeof (struct coff_section_tdata);
@@ -779,6 +778,7 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
   asection_ptr		   id4, id5, id6 = NULL, text = NULL;
   coff_symbol_type **	   imp_sym;
   unsigned int		   imp_index;
+  intptr_t alignment;
 
   /* Decode and verify the types field of the ILF structure.  */
   import_type = types & 0x3;
@@ -874,23 +874,17 @@ pe_ILF_build_a_bfd (bfd *	    abfd,
 
   /* The remaining space in bim->buffer is used
      by the pe_ILF_make_a_section() function.  */
-# if (GCC_VERSION >= 3000)
+
   /* PR 18758: Make sure that the data area is sufficiently aligned for
-     pointers on the host.  __alignof__ is a gcc extension, hence the test
-     above.  For other compilers we will have to assume that the alignment is
-     unimportant, or else extra code can be added here and in
-     pe_ILF_make_a_section.
-
-     Note - we cannot test 'ptr' directly as it is illegal to perform binary
-     arithmetic on pointers, but we know that the strings section is the only
-     one that might end on an unaligned boundary.  */
-  {
-    unsigned int alignment = __alignof__ (char *);
-
-    if (SIZEOF_ILF_STRINGS & (alignment - 1))
-      ptr += alignment - (SIZEOF_ILF_STRINGS & (alignment - 1));
-  }
+     struct coff_section_tdata.  __alignof__ is a gcc extension, hence
+     the test of GCC_VERSION.  For other compilers we assume 8 byte
+     alignment.  */
+#if GCC_VERSION >= 3000
+  alignment = __alignof__ (struct coff_section_tdata);
+#else
+  alignment = 8;
 #endif
+  ptr = (bfd_byte *) (((intptr_t) ptr + alignment - 1) & -alignment);
 
   vars.data = ptr;
   vars.abfd = abfd;
