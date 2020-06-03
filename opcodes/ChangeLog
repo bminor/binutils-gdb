@@ -1,3 +1,7 @@
+2020-06-03  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
 2020-06-03  Nelson Chu  <nelson.chu@sifive.com>
 
 	* riscv-opc.c (riscv_get_isa_spec_class): Change bfd_boolean to int.
