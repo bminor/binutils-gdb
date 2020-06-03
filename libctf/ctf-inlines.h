@@ -31,6 +31,15 @@ extern "C"
 #error "ctf-inlines.h" should not be included directly: include "ctf-impl.h".
 #endif
 
+static inline ssize_t
+ctf_get_ctt_size (const ctf_file_t *fp,
+		  const ctf_type_t *tp,
+		  ssize_t *sizep,
+		  ssize_t *incrementp)
+{
+  return (fp->ctf_fileops->ctfo_get_ctt_size (fp, tp, sizep, incrementp));
+}
+
 
 static inline int
 ctf_dynhash_cinsert (ctf_dynhash_t *h, const void *k, const void *v)

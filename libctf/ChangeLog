@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_get_ctt_size): Move definition from here...
+	* ctf-inlines.h (ctf_get_ctt_size): ... to here.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-hash.c (ctf_dynset_eq_string): New.
 	(ctf_dynset_create): New.
 	(DYNSET_EMPTY_ENTRY_REPLACEMENT): New.

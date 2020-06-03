@@ -352,14 +352,6 @@ struct ctf_archive_internal
 #define LCTF_VBYTES(fp, kind, size, vlen) \
   ((fp)->ctf_fileops->ctfo_get_vbytes(kind, size, vlen))
 
-static inline ssize_t ctf_get_ctt_size (const ctf_file_t *fp,
-					const ctf_type_t *tp,
-					ssize_t *sizep,
-					ssize_t *incrementp)
-{
-  return (fp->ctf_fileops->ctfo_get_ctt_size (fp, tp, sizep, incrementp));
-}
-
 #define LCTF_CHILD	0x0001	/* CTF container is a child */
 #define LCTF_RDWR	0x0002	/* CTF container is writable */
 #define LCTF_DIRTY	0x0004	/* CTF container has been modified */
