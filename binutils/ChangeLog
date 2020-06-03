@@ -1,3 +1,11 @@
+2020-06-03  Joel Anderson  <joelanderson333@gmail.com>
+
+	* windmc.h (struct mc_node): Add id_typecast field.
+	* mcparse.y (message): Initialise the id_typecast field.
+	* windmc.c (write_dbg): Use the id_typecast field as a parameter
+	when calling write_dbg_define.
+	(write_header): Likewise.
+
 2020-06-03  Alan Modra  <amodra@gmail.com>
 
 	PR 26069

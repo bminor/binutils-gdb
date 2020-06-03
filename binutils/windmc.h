@@ -66,6 +66,7 @@ typedef struct mc_node
   unichar *symbol;
   rc_uint_type id;
   rc_uint_type vid;
+  unichar *id_typecast;
   mc_node_lang *sub;
 } mc_node;
 
