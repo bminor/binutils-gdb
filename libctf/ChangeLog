@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-inlines.h (ctf_forwardable_kind): New.
+	* ctf-create.c (ctf_add_forward): Use it.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_get_ctt_size): Move definition from here...
 	* ctf-inlines.h (ctf_get_ctt_size): ... to here.
 

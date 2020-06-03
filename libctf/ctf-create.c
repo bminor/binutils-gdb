@@ -1241,7 +1241,7 @@ ctf_add_forward (ctf_file_t *fp, uint32_t flag, const char *name,
   ctf_dtdef_t *dtd;
   ctf_id_t type = 0;
 
-  if (kind != CTF_K_STRUCT && kind != CTF_K_UNION && kind != CTF_K_ENUM)
+  if (!ctf_forwardable_kind (kind))
     return (ctf_set_errno (fp, ECTF_NOTSUE));
 
   /* If the type is already defined or exists as a forward tag, just

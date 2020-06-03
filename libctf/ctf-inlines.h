@@ -40,6 +40,12 @@ ctf_get_ctt_size (const ctf_file_t *fp,
   return (fp->ctf_fileops->ctfo_get_ctt_size (fp, tp, sizep, incrementp));
 }
 
+static inline int
+ctf_forwardable_kind (int kind)
+{
+  return (kind == CTF_K_STRUCT || kind == CTF_K_UNION || kind == CTF_K_ENUM);
+}
+
 
 static inline int
 ctf_dynhash_cinsert (ctf_dynhash_t *h, const void *k, const void *v)
