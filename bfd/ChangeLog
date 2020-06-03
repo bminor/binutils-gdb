@@ -1,3 +1,8 @@
+2020-06-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elfxx-x86.h (GENERATE_DYNAMIC_RELOCATION_P): Silence
+	-fsanitize=undefined.
+
 2020-06-03  Alan Modra  <amodra@gmail.com>
 
 	PR 26069

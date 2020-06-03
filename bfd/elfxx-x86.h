@@ -133,9 +133,9 @@
 	|| ((ELF_ST_VISIBILITY ((EH)->elf.other) == STV_DEFAULT \
 	     && (!(RESOLVED_TO_ZERO) || PC32_RELOC)) \
 	    || (EH)->elf.root.type != bfd_link_hash_undefweak)) \
-    && ((!X86_PCREL_TYPE_P (R_TYPE) \
-	 && !X86_SIZE_TYPE_P (R_TYPE)) \
-	 || ! SYMBOL_CALLS_LOCAL ((INFO), &(EH)->elf))) \
+    && ((!X86_PCREL_TYPE_P (R_TYPE) && !X86_SIZE_TYPE_P (R_TYPE)) \
+	|| ! SYMBOL_CALLS_LOCAL ((INFO), \
+				 (struct elf_link_hash_entry *) (EH)))) \
    || (ELIMINATE_COPY_RELOCS \
        && !bfd_link_pic (INFO) \
        && (EH) != NULL \
