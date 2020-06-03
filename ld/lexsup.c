@@ -504,6 +504,10 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Use C++ typeinfo dynamic list"), TWO_DASHES },
   { {"dynamic-list", required_argument, NULL, OPTION_DYNAMIC_LIST},
     '\0', N_("FILE"), N_("Read dynamic list"), TWO_DASHES },
+  { {"export-dynamic-symbol", required_argument, NULL, OPTION_EXPORT_DYNAMIC_SYMBOL},
+    '\0', N_("SYMBOL"), N_("Export the specified symbol"), EXACTLY_TWO_DASHES },
+  { {"export-dynamic-symbol-list", required_argument, NULL, OPTION_EXPORT_DYNAMIC_SYMBOL_LIST},
+    '\0', N_("FILE"), N_("Read export dynamic symbol list"), EXACTLY_TWO_DASHES },
   { {"warn-common", no_argument, NULL, OPTION_WARN_COMMON},
     '\0', NULL, N_("Warn about duplicate common symbols"), TWO_DASHES },
   { {"warn-constructors", no_argument, NULL, OPTION_WARN_CONSTRUCTORS},
@@ -588,6 +592,7 @@ parse_args (unsigned argc, char **argv)
     dynamic_list_data,
     dynamic_list
   } opt_dynamic_list = dynamic_list_unset;
+  struct bfd_elf_dynamic_list *export_list = NULL;
 
   shortopts = (char *) xmalloc (OPTION_COUNT * 3 + 2);
   longopts = (struct option *)
@@ -1419,10 +1424,34 @@ parse_args (unsigned argc, char **argv)
 	    ldfile_open_command_file (optarg);
 	    saved_script_handle = hold_script_handle;
 	    parser_input = input_dynamic_list;
+	    current_dynamic_list_p = &link_info.dynamic_list;
 	    yyparse ();
 	  }
 	  if (opt_dynamic_list != dynamic_list_data)
 	    opt_dynamic_list = dynamic_list;
+	  break;
+	case OPTION_EXPORT_DYNAMIC_SYMBOL:
+	  {
+	    struct bfd_elf_version_expr *expr
+	      = lang_new_vers_pattern (NULL, xstrdup (optarg), NULL,
+				       FALSE);
+	    lang_append_dynamic_list (&export_list, expr);
+          }
+	  break;
+	case OPTION_EXPORT_DYNAMIC_SYMBOL_LIST:
+	  /* This option indicates a small script that only specifies
+	     an export list.  Read it, but don't assume that we've
+	     seen a linker script.  */
+	  {
+	    FILE *hold_script_handle;
+
+	    hold_script_handle = saved_script_handle;
+	    ldfile_open_command_file (optarg);
+	    saved_script_handle = hold_script_handle;
+	    parser_input = input_dynamic_list;
+	    current_dynamic_list_p = &export_list;
+	    yyparse ();
+	  }
 	  break;
 	case OPTION_WARN_COMMON:
 	  config.warn_common = TRUE;
@@ -1665,6 +1694,49 @@ parse_args (unsigned argc, char **argv)
   if (bfd_link_relocatable (&link_info)
       && command_line.check_section_addresses < 0)
     command_line.check_section_addresses = 0;
+
+  if (export_list)
+    {
+      struct bfd_elf_version_expr *head = export_list->head.list;
+      struct bfd_elf_version_expr *next;
+
+      /* For --export-dynamic-symbol[-list]:
+	 1. When building executable, treat like --dynamic-list.
+	 2. When building shared object:
+	    a. If -Bsymbolic or --dynamic-list are used, treat like
+	       --dynamic-list.
+	    b. Otherwise, ignored.
+       */
+      if (!bfd_link_relocatable (&link_info)
+	  && (bfd_link_executable (&link_info)
+	      || opt_symbolic != symbolic_unset
+	      || opt_dynamic_list != dynamic_list_unset))
+	{
+	  /* Append the export list to link_info.dynamic_list.  */
+	  if (link_info.dynamic_list)
+	    {
+	      for (next = head; next->next != NULL; next = next->next)
+		;
+	      next->next = link_info.dynamic_list->head.list;
+	      link_info.dynamic_list->head.list = head;
+	    }
+	  else
+	    link_info.dynamic_list = export_list;
+
+	  if (opt_dynamic_list != dynamic_list_data)
+	    opt_dynamic_list = dynamic_list;
+	}
+      else
+	{
+	  /* Free the export list.  */
+	  for (; head->next != NULL; head = next)
+	    {
+	      next = head->next;
+	      free (head);
+	    }
+	  free (export_list);
+	}
+    }
 
   switch (opt_dynamic_list)
     {

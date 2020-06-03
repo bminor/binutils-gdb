@@ -118,6 +118,7 @@ lang_statement_list_type file_chain = { NULL, NULL };
    lang_statement_union).  */
 lang_statement_list_type input_file_chain;
 static const char *current_input_file;
+struct bfd_elf_dynamic_list **current_dynamic_list_p;
 struct bfd_sym_chain entry_symbol = { NULL, NULL };
 const char *entry_section = ".text";
 struct lang_input_statement_flags input_flags;
@@ -9324,15 +9325,16 @@ lang_add_unique (const char *name)
 /* Append the list of dynamic symbols to the existing one.  */
 
 void
-lang_append_dynamic_list (struct bfd_elf_version_expr *dynamic)
+lang_append_dynamic_list (struct bfd_elf_dynamic_list **list_p,
+			  struct bfd_elf_version_expr *dynamic)
 {
-  if (link_info.dynamic_list)
+  if (*list_p)
     {
       struct bfd_elf_version_expr *tail;
       for (tail = dynamic; tail->next != NULL; tail = tail->next)
 	;
-      tail->next = link_info.dynamic_list->head.list;
-      link_info.dynamic_list->head.list = dynamic;
+      tail->next = (*list_p)->head.list;
+      (*list_p)->head.list = dynamic;
     }
   else
     {
@@ -9341,7 +9343,7 @@ lang_append_dynamic_list (struct bfd_elf_version_expr *dynamic)
       d = (struct bfd_elf_dynamic_list *) xcalloc (1, sizeof *d);
       d->head.list = dynamic;
       d->match = lang_vers_match;
-      link_info.dynamic_list = d;
+      *list_p = d;
     }
 }
 
@@ -9363,7 +9365,7 @@ lang_append_dynamic_list_cpp_typeinfo (void)
     dynamic = lang_new_vers_pattern (dynamic, symbols [i], "C++",
 				     FALSE);
 
-  lang_append_dynamic_list (dynamic);
+  lang_append_dynamic_list (&link_info.dynamic_list, dynamic);
 }
 
 /* Append the list of C++ operator new and delete dynamic symbols to the
@@ -9384,7 +9386,7 @@ lang_append_dynamic_list_cpp_new (void)
     dynamic = lang_new_vers_pattern (dynamic, symbols [i], "C++",
 				     FALSE);
 
-  lang_append_dynamic_list (dynamic);
+  lang_append_dynamic_list (&link_info.dynamic_list, dynamic);
 }
 
 /* Scan a space and/or comma separated string of features.  */

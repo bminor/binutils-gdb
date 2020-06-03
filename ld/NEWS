@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add ELF linker command-line options, --export-dynamic-symbol and
+  --export-dynamic-symbol-list, to make symbols dynamic.
+
 * Add a configure option, --enable-textrel-check=[no|yes|warning|error],
   to decide what ELF linker should do by default with DT_TEXTREL in an
   executable or shared library.  Default to yes for Linux/x86 targets.

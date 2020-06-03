@@ -1313,7 +1313,7 @@ dynamic_list_node:
 dynamic_list_tag:
 		vers_defns ';'
 		{
-		  lang_append_dynamic_list ($1);
+		  lang_append_dynamic_list (current_dynamic_list_p, $1);
 		}
 	;
 

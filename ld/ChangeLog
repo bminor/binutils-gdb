@@ -1,3 +1,44 @@
+2020-06-03  Fangrui Song  <maskray@google.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/25910
+	* NEWS: Mention --export-dynamic-symbol[-list].
+	* ld.texi: Document --export-dynamic-symbol[-list].
+	* ldgram.y: Pass current_dynamic_list_p to
+	lang_append_dynamic_list.
+	* ldlang.c (current_dynamic_list_p): New.
+	(ang_append_dynamic_list): Updated to take a pointer to
+	struct bfd_elf_dynamic_list * argument instead of using
+	link_info.dynamic_list.
+	(lang_append_dynamic_list_cpp_typeinfo): Pass
+	&link_info.dynamic_list to ang_append_dynamic_list.
+	(lang_append_dynamic_list_cpp_new): Likewise.
+	* ldlang.h (current_dynamic_list_p): New.
+	(lang_append_dynamic_list): Add a pointer to
+	struct bfd_elf_dynamic_list * argument.
+	* ldlex.h (option_values): Add OPTION_EXPORT_DYNAMIC_SYMBOL and
+	OPTION_EXPORT_DYNAMIC_SYMBOL_LIST.
+	* lexsup.c (ld_options): Add entries for
+	OPTION_EXPORT_DYNAMIC_SYMBOL and
+	OPTION_EXPORT_DYNAMIC_SYMBOL_LIST.
+	(parse_args): Handle --export-dynamic-symbol and
+	--export-dynamic-symbol-list.
+	* testsuite/ld-dynamic/export-dynamic-symbol-1.d: New.
+	* testsuite/ld-dynamic/export-dynamic-symbol-2.d: New.
+	* testsuite/ld-dynamic/export-dynamic-symbol-glob.d: New.
+	* testsuite/ld-dynamic/export-dynamic-symbol-list-1.d: New.
+	* testsuite/ld-dynamic/export-dynamic-symbol-list-2.d: New.
+	* testsuite/ld-dynamic/export-dynamic-symbol-list-glob.d: New.
+	* testsuite/ld-dynamic/export-dynamic-symbol.exp: New.
+	* testsuite/ld-dynamic/export-dynamic-symbol.s: New.
+	* testsuite/ld-dynamic/foo-bar.list: New.
+	* testsuite/ld-dynamic/foo.list: New.
+	* testsuite/ld-dynamic/foo.s: New.
+	* testsuite/ld-dynamic/fstar.list: New.
+	* testsuite/ld-elf/dlempty.list: New.
+	* testsuite/ld-elf/shared.exp: Add tests for
+	--export-dynamic-symbol and --export-dynamic-symbol-list.
+
 2020-06-03  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/ld-elf/linux-x86.exp: Make copied source files

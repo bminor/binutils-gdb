@@ -601,6 +601,27 @@ set build_tests {
   {"Build libdl2d.so with --dynamic-list-data -Bsymbolic"
    "-shared -Wl,-Bsymbolic,--dynamic-list-data" "-fPIC"
    {dl2.c dl2xxx.c} {} "libdl2d.so"}
+  {"Build libdl2e.so with --export-dynamic-symbol=foo"
+   "-shared -Wl,--export-dynamic-symbol=foo" "-fPIC"
+   {dl2.c dl2xxx.c} {} "libdl2e.so"}
+  {"Build libdl2f.so with --dynamic-list=dlempty.list and --export-dynamic-symbol=foo"
+   "-shared -Wl,--dynamic-list=dlempty.list,--export-dynamic-symbol=foo" "-fPIC"
+   {dl2.c dl2xxx.c} {} "libdl2f.so"}
+  {"Build libdl2g.so with --export-dynamic-symbol-list=dl2.list"
+   "-shared -Wl,--export-dynamic-symbol-list=dl2.list" "-fPIC"
+   {dl2.c dl2xxx.c} {} "libdl2g.so"}
+  {"Build libdl2h.so with --dynamic-list=dlempty.list and --export-dynamic-symbol-list=dl2.list"
+   "-shared -Wl,--dynamic-list=dlempty.list,--export-dynamic-symbol-list=dl2.list" "-fPIC"
+   {dl2.c dl2xxx.c} {} "libdl2h.so"}
+  {"Build libdl2i.so with -Bsymbolic and --export-dynamic-symbol=foo"
+   "-shared -Wl,-Bsymbolic,--export-dynamic-symbol=foo" "-fPIC"
+   {dl2.c dl2xxx.c} {} "libdl2i.so"}
+  {"Build libdl2j.so with -Bsymbolic and --export-dynamic-symbol-list=dl2.list"
+   "-shared -Wl,-Bsymbolic,--export-dynamic-symbol-list=dl2.list" "-fPIC"
+   {dl2.c dl2xxx.c} {} "libdl2j.so"}
+  {"Build libdl2k.so with --export-dynamic-symbol-list=dl2.list and -Bsymbolic"
+   "-shared -Wl,--export-dynamic-symbol-list=dl2.list,-Bsymbolic" "-fPIC"
+   {dl2.c dl2xxx.c} {} "libdl2k.so"}
   {"Build libdl4a.so with --dynamic-list=dl4.list"
    "-shared -Wl,--dynamic-list=dl4.list" "-fPIC"
    {dl4.c dl4xxx.c} {} "libdl4a.so"}
@@ -880,6 +901,27 @@ set run_tests [list \
     [list "Run with libdl2d.so" \
      "-Wl,--no-as-needed tmpdir/libdl2d.so" "" \
      {dl2main.c} "dl2d" "dl2a.out" ] \
+    [list "Run with libdl2e.so" \
+     "-Wl,--no-as-needed tmpdir/libdl2e.so" "" \
+     {dl2main.c} "dl2e" "dl2b.out" ] \
+    [list "Run with libdl2f.so" \
+     "-Wl,--no-as-needed tmpdir/libdl2f.so" "" \
+     {dl2main.c} "dl2f" "dl2a.out" ] \
+    [list "Run with libdl2g.so" \
+     "-Wl,--no-as-needed tmpdir/libdl2g.so" "" \
+     {dl2main.c} "dl2g" "dl2b.out" ] \
+    [list "Run with libdl2h.so" \
+     "-Wl,--no-as-needed tmpdir/libdl2h.so" "" \
+     {dl2main.c} "dl2h" "dl2a.out" ] \
+    [list "Run with libdl2i.so" \
+     "-Wl,--no-as-needed tmpdir/libdl2i.so" "" \
+     {dl2main.c} "dl2i" "dl2a.out" ] \
+    [list "Run with libdl2j.so" \
+     "-Wl,--no-as-needed tmpdir/libdl2j.so" "" \
+     {dl2main.c} "dl2j" "dl2a.out" ] \
+    [list "Run with libdl2k.so" \
+     "-Wl,--no-as-needed tmpdir/libdl2k.so" "" \
+     {dl2main.c} "dl2k" "dl2a.out" ] \
     [list "Run with libdl4a.so" \
      "-Wl,--no-as-needed tmpdir/libdl4a.so" "" \
      {dl4main.c} "dl4a" "dl4a.out" ] \
