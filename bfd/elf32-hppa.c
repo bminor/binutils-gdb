@@ -1654,23 +1654,6 @@ elf32_hppa_hide_symbol (struct bfd_link_info *info,
     }
 }
 
-/* Find any dynamic relocs that apply to read-only sections.  */
-
-static asection *
-readonly_dynrelocs (struct elf_link_hash_entry *eh)
-{
-  struct elf_dyn_relocs *hdh_p;
-
-  for (hdh_p = eh->dyn_relocs; hdh_p != NULL; hdh_p = hdh_p->next)
-    {
-      asection *sec = hdh_p->sec->output_section;
-
-      if (sec != NULL && (sec->flags & SEC_READONLY) != 0)
-	return hdh_p->sec;
-    }
-  return NULL;
-}
-
 /* Return true if we have dynamic relocs against H or any of its weak
    aliases, that apply to read-only sections.  Cannot be used after
    size_dynamic_sections.  */
@@ -1681,7 +1664,7 @@ alias_readonly_dynrelocs (struct elf_link_hash_entry *eh)
   struct elf32_hppa_link_hash_entry *hh = hppa_elf_hash_entry (eh);
   do
     {
-      if (readonly_dynrelocs (&hh->eh))
+      if (_bfd_elf_readonly_dynrelocs (&hh->eh))
 	return TRUE;
       hh = hppa_elf_hash_entry (hh->eh.u.alias);
     } while (hh != NULL && &hh->eh != eh);
@@ -2106,7 +2089,7 @@ maybe_set_textrel (struct elf_link_hash_entry *eh, void *inf)
   if (eh->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  sec = readonly_dynrelocs (eh);
+  sec = _bfd_elf_readonly_dynrelocs (eh);
   if (sec != NULL)
     {
       struct bfd_link_info *info = (struct bfd_link_info *) inf;

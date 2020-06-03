@@ -14793,3 +14793,20 @@ bfd_elf_define_start_stop (struct bfd_link_info *info,
     }
   return NULL;
 }
+
+/* Find dynamic relocs for H that apply to read-only sections.  */
+
+asection *
+_bfd_elf_readonly_dynrelocs (struct elf_link_hash_entry *h)
+{
+  struct elf_dyn_relocs *p;
+
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
+    {
+      asection *s = p->sec->output_section;
+
+      if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	return p->sec;
+    }
+  return NULL;
+}

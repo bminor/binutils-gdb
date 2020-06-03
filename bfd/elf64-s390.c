@@ -1352,23 +1352,6 @@ elf_s390_adjust_gotplt (struct elf_s390_link_hash_entry *h)
   h->gotplt_refcount = -1;
 }
 
-/* Find dynamic relocs for H that apply to read-only sections.  */
-
-static asection *
-readonly_dynrelocs (struct elf_link_hash_entry *h)
-{
-  struct elf_dyn_relocs *p;
-
-  for (p = h->dyn_relocs; p != NULL; p = p->next)
-    {
-      asection *s = p->sec->output_section;
-
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	return p->sec;
-    }
-  return NULL;
-}
-
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -1492,7 +1475,7 @@ elf_s390_adjust_dynamic_symbol (struct bfd_link_info *info,
 
   /* If we don't find any dynamic relocs in read-only sections, then
      we'll be keeping the dynamic relocs and avoiding the copy reloc.  */
-  if (ELIMINATE_COPY_RELOCS && !readonly_dynrelocs (h))
+  if (ELIMINATE_COPY_RELOCS && !_bfd_elf_readonly_dynrelocs (h))
     {
       h->non_got_ref = 0;
       return TRUE;
@@ -1772,7 +1755,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  sec = readonly_dynrelocs (h);
+  sec = _bfd_elf_readonly_dynrelocs (h);
   if (sec != NULL)
     {
       struct bfd_link_info *info = (struct bfd_link_info *) info_p;

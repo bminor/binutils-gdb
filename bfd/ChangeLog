@@ -1,5 +1,91 @@
 2020-06-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/26067
+	* elf-bfd.h (_bfd_elf_readonly_dynrelocs): New.
+	* elf32-arm.c (readonly_dynrelocs): Removed.
+	(maybe_set_textrel): Replace readonly_dynrelocs with
+	_bfd_elf_readonly_dynrelocs.
+	* elf32-csky.c (readonly_dynrelocs): Removed.
+	(maybe_set_textrel): Replace readonly_dynrelocs with
+	_bfd_elf_readonly_dynrelocs.
+	*  elf32-hppa.c(readonly_dynrelocs): Removed.
+	(alias_readonly_dynrelocs): Replace readonly_dynrelocs with
+	_bfd_elf_readonly_dynrelocs.
+	(maybe_set_textrel): Likewise.
+	* elf32-lm32.c (readonly_dynrelocs): Removed.
+	(lm32_elf_adjust_dynamic_symbol): Replace readonly_dynrelocs
+	with _bfd_elf_readonly_dynrelocs.
+	(maybe_set_textrel): Likewise.
+	* elf32-m32r.c (readonly_dynrelocs): Removed.
+	(m32r_elf_adjust_dynamic_symbol): Replace readonly_dynrelocs
+	with _bfd_elf_readonly_dynrelocs.
+	(maybe_set_textrel): Likewise.
+	* elf32-metag.c (readonly_dynrelocs): Removed.
+	(elf_metag_adjust_dynamic_symbol): Replace readonly_dynrelocs
+	with _bfd_elf_readonly_dynrelocs.
+	(maybe_set_textrel): Likewise.
+	* elf32-microblaze.c (readonly_dynrelocs): Removed.
+	(microblaze_elf_adjust_dynamic_symbol): Replace readonly_dynrelocs
+	with _bfd_elf_readonly_dynrelocs.
+	* elf32-nds32.c (readonly_dynrelocs): Removed.
+	(nds32_elf_adjust_dynamic_symbol): Replace readonly_dynrelocs
+	with _bfd_elf_readonly_dynrelocs.
+	(maybe_set_textrel): Likewise.
+	* elf32-or1k.c (readonly_dynrelocs): Removed.
+	(or1k_elf_adjust_dynamic_symbol): Replace readonly_dynrelocs
+	with _bfd_elf_readonly_dynrelocs.
+	* elf32-ppc.c (readonly_dynrelocs): Removed.
+	(alias_readonly_dynrelocs): Replace readonly_dynrelocs with
+	_bfd_elf_readonly_dynrelocs.
+	(ppc_elf_adjust_dynamic_symbol): Likewise.
+	(maybe_set_textrel): Likewise.
+	* elf32-s390.c (readonly_dynrelocs): Removed.
+	(elf_s390_adjust_dynamic_symbol): Replace readonly_dynrelocs
+	with _bfd_elf_readonly_dynrelocs.
+	(maybe_set_textrel): Likewise.
+	* elf32-sh.c (readonly_dynrelocs): Removed.
+	(sh_elf_adjust_dynamic_symbol): Replace readonly_dynrelocs with
+	_bfd_elf_readonly_dynrelocs.
+	(maybe_set_textrel): Likewise.
+	* elf32-tic6x.c (readonly_dynrelocs): Removed.
+	(maybe_set_textrel): Replace readonly_dynrelocs with
+	_bfd_elf_readonly_dynrelocs.
+	* elf32-tilepro.c (readonly_dynrelocs): Removed.
+	(tilepro_elf_adjust_dynamic_symbol): Replace readonly_dynrelocs
+	with _bfd_elf_readonly_dynrelocs.
+	(maybe_set_textrel): Likewise.
+	* elf64-ppc.c (readonly_dynrelocs): Removed.
+	(alias_readonly_dynrelocs): Replace readonly_dynrelocs with
+	_bfd_elf_readonly_dynrelocs.
+	(ppc64_elf_adjust_dynamic_symbol): Likewise.
+	(maybe_set_textrel): Likewise.
+	* elf64-s390.c (readonly_dynrelocs): Removed.
+	(elf_s390_adjust_dynamic_symbol): Replace readonly_dynrelocs
+	with _bfd_elf_readonly_dynrelocs.
+	(maybe_set_textrel): Likewise.
+	* elflink.c (_bfd_elf_readonly_dynrelocs): New.
+	* elfnn-aarch64.c (readonly_dynrelocs): Removed.
+	(maybe_set_textrel): Replace readonly_dynrelocs with
+	_bfd_elf_readonly_dynrelocs.
+	* elfnn-riscv.c (readonly_dynrelocs): Removed.
+	(riscv_elf_adjust_dynamic_symbol): Replace readonly_dynrelocs
+	with _bfd_elf_readonly_dynrelocs.
+	(maybe_set_textrel): Likewise.
+	* elfxx-sparc.c (readonly_dynrelocs): Removed.
+	(_bfd_sparc_elf_adjust_dynamic_symbol): Replace
+	readonly_dynrelocs with _bfd_elf_readonly_dynrelocs.
+	(maybe_set_textrel): Likewise.
+	* elfxx-tilegx.c (readonly_dynrelocs): Removed.
+	(tilegx_elf_adjust_dynamic_symbol): Replace readonly_dynrelocs
+	with _bfd_elf_readonly_dynrelocs.
+	(maybe_set_textrel): Likewise.
+	* elfxx-x86.c (readonly_dynrelocs): Removed.
+	(maybe_set_textrel): Replace readonly_dynrelocs with
+	_bfd_elf_readonly_dynrelocs.
+	(_bfd_x86_elf_adjust_dynamic_symbol): Likewise.
+
+2020-06-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elfxx-x86.h (GENERATE_DYNAMIC_RELOCATION_P): Silence
 	-fsanitize=undefined.
 

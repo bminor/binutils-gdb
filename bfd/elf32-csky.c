@@ -1893,21 +1893,6 @@ csky_allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
   return TRUE;
 }
 
-static asection *
-readonly_dynrelocs (struct elf_link_hash_entry *h)
-{
-  struct elf_dyn_relocs *p;
-
-  for (p = h->dyn_relocs; p != NULL; p = p->next)
-    {
-      asection *s = p->sec->output_section;
-
-      if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	return p->sec;
-    }
-  return NULL;
-}
-
 /* Set DF_TEXTREL if we find any dynamic relocs that apply to
    read-only sections.  */
 
@@ -1919,7 +1904,7 @@ maybe_set_textrel (struct elf_link_hash_entry *h, void *info_p)
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
-  sec = readonly_dynrelocs (h);
+  sec = _bfd_elf_readonly_dynrelocs (h);
   if (sec != NULL)
     {
       struct bfd_link_info *info = (struct bfd_link_info *) info_p;
