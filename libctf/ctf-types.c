@@ -495,7 +495,7 @@ ctf_variable_iter (ctf_file_t *fp, ctf_variable_f *func, void *arg)
   int rc;
 
   if ((fp->ctf_flags & LCTF_CHILD) && (fp->ctf_parent == NULL))
-    return ECTF_NOPARENT;
+    return (ctf_set_errno (fp, ECTF_NOPARENT));
 
   if (!(fp->ctf_flags & LCTF_RDWR))
     {
