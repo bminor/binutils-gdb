@@ -128,6 +128,18 @@ DESCRIPTION
 #include "aout/stab_gnu.h"
 #include "aout/ar.h"
 
+#ifdef BMAGIC
+#define N_IS_BMAGIC(x) (N_MAGIC (x) == BMAGIC)
+#else
+#define N_IS_BMAGIC(x) (0)
+#endif
+
+#ifdef QMAGIC
+#define N_SET_QMAGIC(x) N_SET_MAGIC (x, QMAGIC)
+#else
+#define N_SET_QMAGIC(x) do { /**/ } while (0)
+#endif
+
 /*
 SUBSECTION
 	Relocations
@@ -492,7 +504,7 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
       abfd->flags |= D_PAGED | WP_TEXT;
       adata (abfd).magic = z_magic;
     }
-  else if (N_MAGIC (execp) == QMAGIC)
+  else if (N_IS_QMAGIC (execp))
     {
       abfd->flags |= D_PAGED | WP_TEXT;
       adata (abfd).magic = z_magic;
@@ -503,8 +515,7 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
       abfd->flags |= WP_TEXT;
       adata (abfd).magic = n_magic;
     }
-  else if (N_MAGIC (execp) == OMAGIC
-	   || N_MAGIC (execp) == BMAGIC)
+  else if (N_MAGIC (execp) == OMAGIC || N_IS_BMAGIC (execp))
     adata (abfd).magic = o_magic;
   else
     /* Should have been checked with N_BADMAG before this routine
@@ -1026,7 +1037,7 @@ adjust_z_magic (bfd *abfd, struct internal_exec *execp)
   if (ztih && (!abdp || (abdp && !abdp->exec_header_not_counted)))
     execp->a_text += adata (abfd).exec_bytes_size;
   if (obj_aout_subformat (abfd) == q_magic_format)
-    N_SET_MAGIC (execp, QMAGIC);
+    N_SET_QMAGIC (execp);
   else
     N_SET_MAGIC (execp, ZMAGIC);
 

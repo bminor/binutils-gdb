@@ -1,3 +1,13 @@
+2020-06-03  Gunther Nikl  <gnikl@justmail.de>
+
+	* aout64.c (BMAGIC, QMAGIC): Do not define.
+	* aoutx.h (N_IS_BMAGIC, N_SET_QMAGIC): New defines.
+	(NAME (aout, some_aout_object_p)): Use N_IS_QMAGIC and N_IS_BMAGIC
+	to check the file format.
+	(adjust_z_magic): Use N_SET_QMAGIC to set file format.
+	* i386aout.c (NO_WRITE_HEADER_KLUDGE): Delete define.
+	* libaout.h (NO_WRITE_HEADER_KLUDGE): Do not define.
+
 2020-06-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (_bfd_elf_maybe_set_textrel): New

@@ -21,12 +21,4 @@
 
 #define ARCH_SIZE 64
 
-/* aoutx.h requires definitions for BMAGIC and QMAGIC.  */
-#ifndef BMAGIC
-#define BMAGIC 0
-#endif
-#ifndef QMAGIC
-#define QMAGIC 0
-#endif
-
 #include "aoutx.h"
