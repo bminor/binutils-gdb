@@ -1,3 +1,13 @@
+2020-06-03  Nick Clifton  <nickc@redhat.com>
+
+	Import from mainline:
+	2020-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 25993
+	* emultempl/pe.em (_after_open): Check for duplicate filename
+	pointers before renaming the dll.
+	* emultempl/pep.em (_after_open): Likewise.
+
 2020-04-08  Tamar Christina  <tamar.christina@arm.com>
 
 	Backport from mainline.

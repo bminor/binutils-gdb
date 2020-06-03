@@ -1652,13 +1652,26 @@ gld_${EMULATION_NAME}_after_open (void)
 		else /* sentinel */
 		  seq = 'c';
 
-		new_name = xmalloc (strlen (is->the_bfd->filename) + 3);
-		sprintf (new_name, "%s.%c", is->the_bfd->filename, seq);
-		bfd_set_filename (is->the_bfd, new_name);
+		/* PR 25993: It is possible that is->the_bfd-filename == is->filename.
+		   In which case calling bfd_set_filename on one will free the memory
+		   pointed to by the other.  */
+		if (is->filename == is->the_bfd->filename)
+		  {
+		    new_name = xmalloc (strlen (is->filename) + 3);
+		    sprintf (new_name, "%s.%c", is->filename, seq);
+		    bfd_set_filename (is->the_bfd, new_name);
+		    is->filename = new_name;
+		  }
+		else
+		  {
+		    new_name = xmalloc (strlen (is->the_bfd->filename) + 3);
+		    sprintf (new_name, "%s.%c", is->the_bfd->filename, seq);
+		    bfd_set_filename (is->the_bfd, new_name);
 
-		new_name = xmalloc (strlen (is->filename) + 3);
-		sprintf (new_name, "%s.%c", is->filename, seq);
-		is->filename = new_name;
+		    new_name = xmalloc (strlen (is->filename) + 3);
+		    sprintf (new_name, "%s.%c", is->filename, seq);
+		    is->filename = new_name;
+		  }
 	      }
 	  }
       }
