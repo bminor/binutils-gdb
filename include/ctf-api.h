@@ -207,10 +207,11 @@ enum
    ECTF_NONREPRESENTABLE, /* Type not representable in CTF.  */
    ECTF_NEXT_END,	/* End of iteration.  */
    ECTF_NEXT_WRONGFUN,	/* Wrong iteration function called.  */
-   ECTF_NEXT_WRONGFP	/* Iteration entity changed in mid-iterate.  */
+   ECTF_NEXT_WRONGFP,	/* Iteration entity changed in mid-iterate.  */
+   ECTF_FLAGS		/* CTF header contains flags unknown to libctf.  */
   };
 
-#define ECTF_NERR (ECTF_NEXT_WRONGFP - ECTF_BASE + 1)	/* Count of CTF errors.  */
+#define ECTF_NERR (ECTF_FLAGS - ECTF_BASE + 1)	/* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel() is explicitly called.  */

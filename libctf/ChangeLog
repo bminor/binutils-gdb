@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-open.c (ctf_bufopen_internal): Diagnose invalid flags.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	ctf-decls.h (ctf_qsort_compar_thunk): Fix arg passing.
 
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>

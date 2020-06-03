@@ -1384,6 +1384,9 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   if (pp->ctp_version < CTF_VERSION_3)
     hdrsz = sizeof (ctf_header_v2_t);
 
+  if (_libctf_unlikely_ (pp->ctp_flags > CTF_F_MAX))
+    return (ctf_set_open_errno (errp, ECTF_FLAGS));
+
   if (ctfsect->cts_size < hdrsz)
     return (ctf_set_open_errno (errp, ECTF_NOCTFBUF));
 

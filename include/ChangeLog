@@ -1,5 +1,11 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (ECTF_FLAGS): New.
+	(ECTF_NERR): Adjust.
+	* ctf.h (CTF_F_MAX): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ECTF_NEXT_END): New error.
 	(ECTF_NEXT_WRONGFUN): Likewise.
 	(ECTF_NEXT_WRONGFP): Likewise.
