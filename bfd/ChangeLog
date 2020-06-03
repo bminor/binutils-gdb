@@ -258,7 +258,7 @@
 
 2020-06-03  Alan Modra  <amodra@gmail.com>
 
-	PR 26029
+	PR 26069
 	* elf.c (_bfd_elf_close_and_cleanup): Free elf_shstrtab for
 	core files as well as objects.
 
