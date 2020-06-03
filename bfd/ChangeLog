@@ -1,6 +1,12 @@
 2020-06-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26066
+	* elf32-nios2.c (nios2_elf32_size_dynamic_sections): Call
+	_bfd_elf_maybe_set_textrel to set DF_TEXTREL.
+
+2020-06-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26066
 	* elf32-nios2.c (nios2_elf32_check_relocs): Skip non-loaded,
 	non-alloced sections.
 

@@ -5761,8 +5761,6 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		{
 		  srel = elf_section_data (p->sec)->sreloc;
 		  srel->size += p->count * sizeof (Elf32_External_Rela);
-		  if ((p->sec->output_section->flags & SEC_READONLY) != 0)
-		    info->flags |= DF_TEXTREL;
 		}
 	    }
 	}
@@ -5911,17 +5909,24 @@ nios2_elf32_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      || !add_dynamic_entry (DT_JMPREL, 0)))
 	return FALSE;
 
-      if (relocs
-	  && (!add_dynamic_entry (DT_RELA, 0)
+      if (relocs)
+	{
+	  if (!add_dynamic_entry (DT_RELA, 0)
 	      || !add_dynamic_entry (DT_RELASZ, 0)
-	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela))))
-	return FALSE;
+	      || !add_dynamic_entry (DT_RELAENT,
+				     sizeof (Elf32_External_Rela)))
+	    return FALSE;
+
+	  if ((info->flags & DF_TEXTREL) == 0)
+	    elf_link_hash_traverse (&htab->root,
+				    _bfd_elf_maybe_set_textrel, info);
+
+	  if ((info->flags & DF_TEXTREL) != 0
+	      && !add_dynamic_entry (DT_TEXTREL, 0))
+	    return FALSE;
+	}
 
       if (!bfd_link_pic (info) && !add_dynamic_entry (DT_NIOS2_GP, 0))
-	return FALSE;
-
-      if ((info->flags & DF_TEXTREL) != 0
-	  && !add_dynamic_entry (DT_TEXTREL, 0))
 	return FALSE;
     }
 #undef add_dynamic_entry
