@@ -2390,41 +2390,6 @@ elf_metag_copy_indirect_symbol (struct bfd_link_info *info,
   hh_dir = metag_elf_hash_entry (eh_dir);
   hh_ind = metag_elf_hash_entry (eh_ind);
 
-  if (eh_ind->dyn_relocs != NULL)
-    {
-      if (eh_dir->dyn_relocs != NULL)
-	{
-	  struct elf_dyn_relocs **hdh_pp;
-	  struct elf_dyn_relocs *hdh_p;
-
-	  if (eh_ind->root.type == bfd_link_hash_indirect)
-	    abort ();
-
-	  /* Add reloc counts against the weak sym to the strong sym
-	     list.  Merge any entries against the same section.  */
-	  for (hdh_pp = &eh_ind->dyn_relocs; (hdh_p = *hdh_pp) != NULL; )
-	    {
-	      struct elf_dyn_relocs *hdh_q;
-
-	      for (hdh_q = eh_dir->dyn_relocs; hdh_q != NULL;
-		   hdh_q = hdh_q->next)
-		if (hdh_q->sec == hdh_p->sec)
-		  {
-		    hdh_q->pc_count += hdh_p->pc_count;
-		    hdh_q->count += hdh_p->count;
-		    *hdh_pp = hdh_p->next;
-		    break;
-		  }
-	      if (hdh_q == NULL)
-		hdh_pp = &hdh_p->next;
-	    }
-	  *hdh_pp = eh_dir->dyn_relocs;
-	}
-
-      eh_dir->dyn_relocs = eh_ind->dyn_relocs;
-      eh_ind->dyn_relocs = NULL;
-    }
-
   if (eh_ind->root.type == bfd_link_hash_indirect
       && eh_dir->got.refcount <= 0)
     {

@@ -2390,47 +2390,6 @@ lm32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 }
 
-/* Copy the extra info we tack onto an elf_link_hash_entry.  */
-
-static void
-lm32_elf_copy_indirect_symbol (struct bfd_link_info *info,
-			       struct elf_link_hash_entry *dir,
-			       struct elf_link_hash_entry *ind)
-{
-  if (ind->dyn_relocs != NULL)
-    {
-      if (dir->dyn_relocs != NULL)
-	{
-	  struct elf_dyn_relocs **pp;
-	  struct elf_dyn_relocs *p;
-
-	  /* Add reloc counts against the indirect sym to the direct sym
-	     list.  Merge any entries against the same section.  */
-	  for (pp = &ind->dyn_relocs; (p = *pp) != NULL;)
-	    {
-	      struct elf_dyn_relocs *q;
-
-	      for (q = dir->dyn_relocs; q != NULL; q = q->next)
-		if (q->sec == p->sec)
-		  {
-		    q->pc_count += p->pc_count;
-		    q->count += p->count;
-		    *pp = p->next;
-		    break;
-		  }
-	      if (q == NULL)
-		pp = &p->next;
-	    }
-	  *pp = dir->dyn_relocs;
-	}
-
-      dir->dyn_relocs = ind->dyn_relocs;
-      ind->dyn_relocs = NULL;
-    }
-
-  _bfd_elf_link_hash_copy_indirect (info, dir, ind);
-}
-
 static bfd_boolean
 lm32_elf_always_size_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
@@ -2518,7 +2477,6 @@ lm32_elf_fdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 #define bfd_elf32_bfd_link_hash_table_create	lm32_elf_link_hash_table_create
 #define elf_backend_check_relocs		lm32_elf_check_relocs
 #define elf_backend_reloc_type_class		lm32_elf_reloc_type_class
-#define elf_backend_copy_indirect_symbol	lm32_elf_copy_indirect_symbol
 #define elf_backend_size_dynamic_sections	lm32_elf_size_dynamic_sections
 #define elf_backend_omit_section_dynsym		_bfd_elf_omit_section_dynsym_all
 #define elf_backend_create_dynamic_sections	lm32_elf_create_dynamic_sections

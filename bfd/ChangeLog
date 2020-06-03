@@ -1,6 +1,34 @@
 2020-06-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26067
+	* elf32-arm.c (elf32_arm_copy_indirect_symbol): Don't copy
+	dyn_relocs.
+	* elf32-csky.c (csky_elf_copy_indirect_symbol): Likewise.
+	* elf32-hppa.c (elf32_hppa_copy_indirect_symbol): Likewise.
+	* elf32-metag.c (elf_metag_copy_indirect_symbol): Likewise.
+	* elf32-microblaze.c (microblaze_elf_copy_indirect_symbol):
+	Likewise.
+	* elf32-nds32.c (nds32_elf_copy_indirect_symbol): Likewise.
+	* elf32-nios2.c (nios2_elf32_copy_indirect_symbol): Likewise.
+	* elf32-or1k.c (or1k_elf_copy_indirect_symbol): Likewise.
+	* elf32-s390.c (elf_s390_copy_indirect_symbol): Likewise.
+	* elf32-sh.c (sh_elf_copy_indirect_symbol): Likewise.
+	* elf32-tilepro.c (tilepro_elf_copy_indirect_symbol): Likewise.
+	* elf64-s390.c (elf_s390_copy_indirect_symbol): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_copy_indirect_symbol): Likewise.
+	* elfnn-riscv.c (riscv_elf_copy_indirect_symbol): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_copy_indirect_symbol): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_copy_indirect_symbol): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_copy_indirect_symbol): Likewise.
+	* elf32-lm32.c (lm32_elf_copy_indirect_symbol): Removed.
+	(elf_backend_copy_indirect_symbol): Likewise.
+	* elf32-m32r.c (m32r_elf_copy_indirect_symbol): Removed.
+	(elf_backend_copy_indirect_symbol): Likewise.
+	* elflink.c (_bfd_elf_link_hash_copy_indirect): Copy dyn_relocs.
+
+2020-06-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26067
 	* elf-bfd.h (_bfd_elf_readonly_dynrelocs): New.
 	* elf32-arm.c (readonly_dynrelocs): Removed.
 	(maybe_set_textrel): Replace readonly_dynrelocs with

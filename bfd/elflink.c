@@ -7650,6 +7650,37 @@ _bfd_elf_link_hash_copy_indirect (struct bfd_link_info *info,
 {
   struct elf_link_hash_table *htab;
 
+  if (ind->dyn_relocs != NULL)
+    {
+      if (dir->dyn_relocs != NULL)
+	{
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
+
+	  /* Add reloc counts against the indirect sym to the direct sym
+	     list.  Merge any entries against the same section.  */
+	  for (pp = &ind->dyn_relocs; (p = *pp) != NULL; )
+	    {
+	      struct elf_dyn_relocs *q;
+
+	      for (q = dir->dyn_relocs; q != NULL; q = q->next)
+		if (q->sec == p->sec)
+		  {
+		    q->pc_count += p->pc_count;
+		    q->count += p->count;
+		    *pp = p->next;
+		    break;
+		  }
+	      if (q == NULL)
+		pp = &p->next;
+	    }
+	  *pp = dir->dyn_relocs;
+	}
+
+      dir->dyn_relocs = ind->dyn_relocs;
+      ind->dyn_relocs = NULL;
+    }
+
   /* Copy down any references that we may have already seen to the
      symbol which just became indirect.  */
 

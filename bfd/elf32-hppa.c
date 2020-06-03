@@ -1040,42 +1040,6 @@ elf32_hppa_copy_indirect_symbol (struct bfd_link_info *info,
   hh_dir = hppa_elf_hash_entry (eh_dir);
   hh_ind = hppa_elf_hash_entry (eh_ind);
 
-  if (eh_ind->dyn_relocs != NULL
-      && eh_ind->root.type == bfd_link_hash_indirect)
-    {
-      if (eh_dir->dyn_relocs != NULL)
-	{
-	  struct elf_dyn_relocs **hdh_pp;
-	  struct elf_dyn_relocs *hdh_p;
-
-	  /* Add reloc counts against the indirect sym to the direct sym
-	     list.  Merge any entries against the same section.  */
-	  for (hdh_pp = &eh_ind->dyn_relocs; (hdh_p = *hdh_pp) != NULL; )
-	    {
-	      struct elf_dyn_relocs *hdh_q;
-
-	      for (hdh_q = eh_dir->dyn_relocs;
-		   hdh_q != NULL;
-		   hdh_q = hdh_q->next)
-		if (hdh_q->sec == hdh_p->sec)
-		  {
-#if RELATIVE_DYNRELOCS
-		    hdh_q->pc_count += hdh_p->pc_count;
-#endif
-		    hdh_q->count += hdh_p->count;
-		    *hdh_pp = hdh_p->next;
-		    break;
-		  }
-	      if (hdh_q == NULL)
-		hdh_pp = &hdh_p->next;
-	    }
-	  *hdh_pp = eh_dir->dyn_relocs;
-	}
-
-      eh_dir->dyn_relocs = eh_ind->dyn_relocs;
-      eh_ind->dyn_relocs = NULL;
-    }
-
   if (eh_ind->root.type == bfd_link_hash_indirect)
     {
       hh_dir->plabel |= hh_ind->plabel;

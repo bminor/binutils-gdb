@@ -2447,35 +2447,6 @@ csky_elf_copy_indirect_symbol (struct bfd_link_info *info,
   edir = (struct csky_elf_link_hash_entry *) dir;
   eind = (struct csky_elf_link_hash_entry *) ind;
 
-  if (ind->dyn_relocs != NULL)
-    {
-      if (dir->dyn_relocs != NULL)
-	{
-	  struct elf_dyn_relocs **pp;
-	  struct elf_dyn_relocs *p;
-
-	  /* Add reloc counts against the indirect sym to the direct sym
-	     list.  Merge any entries against the same section.  */
-	  for (pp = &ind->dyn_relocs; (p = *pp) != NULL; )
-	    {
-	      struct elf_dyn_relocs *q;
-
-	      for (q = dir->dyn_relocs; q != NULL; q = q->next)
-		if (q->sec == p->sec)
-		  {
-		    q->pc_count += p->pc_count;
-		    q->count += p->count;
-		    *pp = p->next;
-		    break;
-		  }
-	      if (q == NULL)
-		pp = &p->next;
-	    }
-	  *pp = dir->dyn_relocs;
-	}
-      dir->dyn_relocs = ind->dyn_relocs;
-      ind->dyn_relocs = NULL;
-    }
   if (ind->root.type == bfd_link_hash_indirect
       && dir->got.refcount <= 0)
     {
