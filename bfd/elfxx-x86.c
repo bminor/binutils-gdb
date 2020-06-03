@@ -532,44 +532,6 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
-/* Set DF_TEXTREL if we find any dynamic relocs that apply to
-   read-only sections.  */
-
-static bfd_boolean
-maybe_set_textrel (struct elf_link_hash_entry *h, void *inf)
-{
-  asection *sec;
-
-  if (h->root.type == bfd_link_hash_indirect)
-    return TRUE;
-
-  /* Skip local IFUNC symbols. */
-  if (h->forced_local && h->type == STT_GNU_IFUNC)
-    return TRUE;
-
-  sec = _bfd_elf_readonly_dynrelocs (h);
-  if (sec != NULL)
-    {
-      struct bfd_link_info *info = (struct bfd_link_info *) inf;
-
-      info->flags |= DF_TEXTREL;
-      /* xgettext:c-format */
-      info->callbacks->minfo (_("%pB: dynamic relocation against `%pT' "
-				"in read-only section `%pA'\n"),
-			      sec->owner, h->root.root.string, sec);
-
-      if (bfd_link_textrel_check (info))
-	/* xgettext:c-format */
-	info->callbacks->einfo (_("%P: %pB: warning: relocation against `%s' "
-				  "in read-only section `%pA'\n"),
-				sec->owner, h->root.root.string, sec);
-
-      /* Not an error, just cut short the traversal.  */
-      return FALSE;
-    }
-  return TRUE;
-}
-
 /* Allocate space in .plt, .got and associated reloc sections for
    local dynamic relocs.  */
 
@@ -1450,7 +1412,8 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 	  /* If any dynamic relocs apply to a read-only section,
 	     then we need a DT_TEXTREL entry.  */
 	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->elf, maybe_set_textrel, info);
+	    elf_link_hash_traverse (&htab->elf,
+				    _bfd_elf_maybe_set_textrel, info);
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {

@@ -2876,6 +2876,8 @@ extern unsigned int _bfd_elf_symbol_section_index
 
 extern asection *_bfd_elf_readonly_dynrelocs
   (struct elf_link_hash_entry *);
+extern bfd_boolean _bfd_elf_maybe_set_textrel
+  (struct elf_link_hash_entry *, void *);
 
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;

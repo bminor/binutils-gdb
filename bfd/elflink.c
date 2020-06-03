@@ -14841,3 +14841,37 @@ _bfd_elf_readonly_dynrelocs (struct elf_link_hash_entry *h)
     }
   return NULL;
 }
+
+/* Set DF_TEXTREL if we find any dynamic relocs that apply to
+   read-only sections.  */
+
+bfd_boolean
+_bfd_elf_maybe_set_textrel (struct elf_link_hash_entry *h, void *inf)
+{
+  asection *sec;
+
+  if (h->root.type == bfd_link_hash_indirect)
+    return TRUE;
+
+  sec = _bfd_elf_readonly_dynrelocs (h);
+  if (sec != NULL)
+    {
+      struct bfd_link_info *info = (struct bfd_link_info *) inf;
+
+      info->flags |= DF_TEXTREL;
+      /* xgettext:c-format */
+      info->callbacks->minfo (_("%pB: dynamic relocation against `%pT' "
+				"in read-only section `%pA'\n"),
+			      sec->owner, h->root.root.string, sec);
+
+      if (bfd_link_textrel_check (info))
+	/* xgettext:c-format */
+	info->callbacks->einfo (_("%P: %pB: warning: relocation against `%s' "
+				  "in read-only section `%pA'\n"),
+				sec->owner, h->root.root.string, sec);
+
+      /* Not an error, just cut short the traversal.  */
+      return FALSE;
+    }
+  return TRUE;
+}

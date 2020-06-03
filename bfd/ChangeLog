@@ -1,5 +1,70 @@
 2020-06-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf-bfd.h (_bfd_elf_maybe_set_textrel): New
+	* elf32-arm.c (maybe_set_textrel): Removed.
+	(elf32_arm_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf32-csky.c (maybe_set_textrel): Removed.
+	(csky_elf_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf32-hppa.c (maybe_set_textrel): Removed.
+	(elf32_hppa_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf32-lm32.c (maybe_set_textrel): Removed.
+	(lm32_elf_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf32-m32r.c (maybe_set_textrel): Removed.
+	(m32r_elf_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf32-metag.c (maybe_set_textrel): Removed.
+	(elf_metag_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf32-nds32.c (maybe_set_textrel): Removed.
+	(nds32_elf_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf32-or1k.c (maybe_set_textrel): Removed.
+	(or1k_elf_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf32-ppc.c (maybe_set_textrel): Removed.
+	(ppc_elf_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf32-s390.c (maybe_set_textrel): Removed.
+	(elf_s390_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf32-sh.c (maybe_set_textrel): Removed.
+	(sh_elf_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf32-tic6x.c (maybe_set_textrel): Removed.
+	(elf32_tic6x_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf32-tilepro.c (maybe_set_textrel): Removed.
+	(tilepro_elf_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf64-ppc.c (maybe_set_textrel): Removed.
+	(ppc64_elf_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elf64-s390.c (maybe_set_textrel): Removed.
+	(elf_s390_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elfnn-aarch64.c (maybe_set_textrel): Removed.
+	(elfNN_aarch64_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elfnn-riscv.c (maybe_set_textrel): Removed.
+	(riscv_elf_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elfxx-sparc.c (maybe_set_textrel): Removed.
+	(_bfd_sparc_elf_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elfxx-tilegx.c (maybe_set_textrel): Removed.
+	(tilegx_elf_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elfxx-x86.c (maybe_set_textrel): Removed.
+	(_bfd_x86_elf_size_dynamic_sections): Replace maybe_set_textrel
+	with _bfd_elf_maybe_set_textrel.
+	* elflink.c (_bfd_elf_maybe_set_textrel): New.
+
+2020-06-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/26067
 	* elf32-arm.c (elf32_arm_copy_indirect_symbol): Don't copy
 	dyn_relocs.
