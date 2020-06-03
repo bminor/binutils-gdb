@@ -1,3 +1,12 @@
+2020-06-02  Frédéric Pétrot  <frederic.petrot@univ-grenoble-alpes.fr>
+	    Jim Wilson  <jimw@sifive.com>
+
+	PR 26051
+	* doc/c-riscv.texi (RISC-V-Formats): Add missing I format using
+	simm12(rs1).  Correct S format to use simm12(rs1).  Drop SB and B
+	formats using simm12(rs1).  Correct SB and B to use rs1 and rs2.
+	Move B before SB.  Move J before UJ.
+
 2020-06-01  Alex Coplan  <alex.coplan@arm.com>
 
 	* write.c (relax_segment): Fix handling of negative offset when
