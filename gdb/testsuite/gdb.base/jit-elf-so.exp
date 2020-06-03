@@ -28,6 +28,9 @@ if {[get_compiler_info]} {
 
 load_lib jit-elf-helpers.exp
 
+# Increase this to see more detail.
+set test_verbose 0
+
 # The "real" main of this test, which loads jit-elf-main
 # as a shared library.
 set main_loader_basename jit-elf-dlmain
@@ -73,7 +76,7 @@ proc compile_jit_dlmain {options} {
 proc one_jit_test {solib_binfiles_target match_str} {
     set count [llength $solib_binfiles_target]
     with_test_prefix "one_jit_test-$count" {
-	global verbose
+	global test_verbose
 	global main_loader_binfile main_loader_srcfile
 	global main_solib_binfile main_solib_srcfile
 
@@ -81,7 +84,7 @@ proc one_jit_test {solib_binfiles_target match_str} {
 	gdb_load_shlib $main_solib_binfile
 
 	# This is just to help debugging when things fail
-	if {$verbose > 0} {
+	if {$test_verbose > 0} {
 	    gdb_test "set debug jit 1"
 	}
 
@@ -121,7 +124,7 @@ proc one_jit_test {solib_binfiles_target match_str} {
 	gdb_test "info function jit_function" "$match_str"
 
 	# This is just to help debugging when things fail
-	if {$verbose > 0} {
+	if {$test_verbose > 0} {
 	    gdb_test "maintenance print objfiles"
 	    gdb_test "maintenance info break"
 	}

@@ -32,6 +32,10 @@ if {[get_compiler_info]} {
     return 1
 }
 
+
+# Increase this to see more detail.
+set test_verbose 0
+
 set jit_host_src $srcfile
 set jit_host_bin $binfile
 
@@ -104,7 +108,7 @@ proc info_registers_current_frame {sp} {
 proc jit_reader_test {} {
     global jit_host_bin
     global jit_reader_bin
-    global verbose
+    global test_verbose
     global hex decimal
 
     set any "\[^\r\n\]*"
@@ -112,7 +116,7 @@ proc jit_reader_test {} {
     clean_restart $jit_host_bin
     gdb_load_shlib $jit_reader_bin
 
-    if {$verbose > 0} {
+    if {$test_verbose > 0} {
 	gdb_test_no_output "set debug jit 1"
     }
 

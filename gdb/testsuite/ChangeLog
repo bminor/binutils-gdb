@@ -1,3 +1,11 @@
+2020-06-03  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/25609
+	* gdb.base/jit-elf-so.exp: Don't modify testing behaviour based on
+	value of global verbose.
+	* gdb.base/jit-elf.exp: Same.
+	* gdb.base/jit-reader.exp: Same.
+
 2020-06-02  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.dwarf2/multidictionary.exp: Don't use
