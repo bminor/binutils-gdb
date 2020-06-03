@@ -2712,7 +2712,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
       const char *name;
       int r_type;
       asection *osec;
-      struct frvfdpic_relocs_info *picrel;
+      struct frvfdpic_relocs_info *picrel = NULL;
       bfd_vma orig_addend = rel->r_addend;
 
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -2806,6 +2806,9 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	case R_FRV_GETTLSOFF_RELAX:
 	case R_FRV_TLSOFF_RELAX:
 	case R_FRV_TLSMOFF:
+	  if ((input_section->flags & SEC_ALLOC) == 0)
+	    break;
+
 	  if (h != NULL)
 	    picrel = frvfdpic_relocs_info_for_global (frvfdpic_relocs_info
 						      (info), input_bfd, h,
