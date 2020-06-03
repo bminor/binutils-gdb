@@ -46,8 +46,9 @@ set seltests {
     {A::foo() B::foo() dropme1() dropme2()} {*-*-*}}
 }
 
-set cflags "-w -O -ffunction-sections -fdata-sections"
-set cxxflags "-fno-exceptions -fno-rtti"
+global NOSANTIZE_CFLAGS
+set cflags "-w -O -ffunction-sections -fdata-sections $NOSANTIZE_CFLAGS"
+set cxxflags "-fno-exceptions -fno-rtti $NOSANTIZE_CFLAGS"
 set ldflags "--gc-sections -Bstatic"
 
 if [istarget mips*-*] {

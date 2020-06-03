@@ -33,6 +33,7 @@ if ![check_shared_lib_support] {
 
 # Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
 global NOPIE_CFLAGS NOPIE_LDFLAGS
+global NOSANTIZE_CFLAGS
 
 set old_ASFLAGS $ASFLAGS
 
@@ -1510,7 +1511,7 @@ if { ([istarget "*-*-linux*"]
 	    { pr23161a.c } \
 	    {{readelf {--dyn-syms -rW} pr23161a.rd}} \
 	    "libpr23161a.so" \
-	    "-fPIC -O2" \
+	    "-fPIC -O2 $NOSANTIZE_CFLAGS" \
 	] \
 	[list \
 	    "Build pr23161a" \
@@ -1520,7 +1521,7 @@ if { ([istarget "*-*-linux*"]
 	    { pr23161b.c } \
 	    {{readelf {--dyn-syms -rW} pr23161b.rd}} \
 	    "pr23161a" \
-	    "-fPIC -O0" \
+	    "-fPIC -O0 $NOSANTIZE_CFLAGS" \
 	] \
 	[list \
 	    "Build libpr23161b.so" \
@@ -1530,7 +1531,7 @@ if { ([istarget "*-*-linux*"]
 	    { pr23161a.c } \
 	    {{readelf {--dyn-syms -rW} pr23161a.rd}} \
 	    "libpr23161b.so" \
-	    "-fPIC -O2" \
+	    "-fPIC -O2 $NOSANTIZE_CFLAGS" \
 	] \
 	[list \
 	    "Build pr23161b" \
@@ -1540,7 +1541,7 @@ if { ([istarget "*-*-linux*"]
 	    { pr23161b.c } \
 	    {{readelf {--dyn-syms -rW} pr23161b.rd}} \
 	    "pr23161b" \
-	    "-fPIC -O0" \
+	    "-fPIC -O0 $NOSANTIZE_CFLAGS" \
 	] \
     ]
 }
@@ -1556,7 +1557,7 @@ if { [istarget "i?86-*-*"]
 	    { pr23161c.c } \
 	    {{readelf {--dyn-syms -rW} pr23161c.rd}} \
 	    "libpr23161c.so" \
-	    "-fPIC -O2" \
+	    "-fPIC -O2 $NOSANTIZE_CFLAGS" \
 	] \
 	[list \
 	    "Build pr23161c" \
@@ -1566,7 +1567,7 @@ if { [istarget "i?86-*-*"]
 	    { pr23161b.c } \
 	    {{readelf {--dyn-syms -rW} pr23161d.rd}} \
 	    "pr23161c" \
-	    "-fPIC -O0" \
+	    "-fPIC -O0 $NOSANTIZE_CFLAGS" \
 	] \
     ]
 }

@@ -23,7 +23,9 @@ if ![check_gc_sections_available] {
     return
 }
 
-set cflags "-ffunction-sections -fdata-sections"
+global NOSANTIZE_CFLAGS
+
+set cflags "-ffunction-sections -fdata-sections $NOSANTIZE_CFLAGS"
 set objfile "tmpdir/gc.o"
 
 # Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.

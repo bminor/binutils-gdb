@@ -38,6 +38,8 @@ set saved_CXXFLAGS "$CXXFLAGS"
 regsub -all "(\\-Wp,)?-D_FORTIFY_SOURCE=\[0-9\]+" $CFLAGS "" CFLAGS
 regsub -all "(\\-Wp,)?-D_FORTIFY_SOURCE=\[0-9\]+" $CXXFLAGS "" CXXFLAGS
 
+global NOSANTIZE_CFLAGS
+
 proc restore_notify { } {
   global saved_CFLAGS
   global saved_CXXFLAGS
@@ -74,10 +76,11 @@ set lto_link_tests [list \
    "-O2 -flto -fuse-linker-plugin" "-flto -fuse-linker-plugin" \
    {lto-1a.c lto-1b.c} {} "lto-1.exe"] \
   [list "Compile 2" \
-   "" "-O2 -flto -fuse-linker-plugin" \
+   "" "-O2 -flto -fuse-linker-plugin $NOSANTIZE_CFLAGS" \
    {lto-2.c} {} ""] \
   [list "LTO 2" \
-   "-static -O2 -flto -fuse-linker-plugin tmpdir/lto-2.o -lm" "" \
+   "-static -O2 -flto -fuse-linker-plugin tmpdir/lto-2.o -lm" \
+   "$NOSANTIZE_CFLAGS" \
    {dummy.c} {} "lto-2.exe"] \
   [list "Compile 3a" \
    "" "-flto" \
@@ -143,10 +146,11 @@ set lto_link_tests [list \
    "" "" \
    {pr12758a.s} {} ""] \
   [list "Build libpr12758.a" \
-   "" "-flto -O2 $lto_fat" \
+   "" "-flto -O2 $lto_fat $NOSANTIZE_CFLAGS" \
    {pr12758b.c} {} "libpr12758.a"] \
   [list "PR ld/12758" \
-   "-O2 -Wl,-e,foo -nostdlib -flto -fuse-linker-plugin tmpdir/pr12758a.o -Wl,--start-group tmpdir/libpr12758.a -Wl,--end-group" "" \
+   "-O2 -Wl,-e,foo -nostdlib -flto -fuse-linker-plugin tmpdir/pr12758a.o -Wl,--start-group tmpdir/libpr12758.a -Wl,--end-group" \
+   "$NOSANTIZE_CFLAGS" \
    {dummy.c} {} "pr12758.exe"] \
   [list "Compile PR ld/12760" \
    "" "-g -O0" \

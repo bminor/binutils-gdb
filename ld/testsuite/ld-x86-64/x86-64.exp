@@ -748,13 +748,17 @@ global PLT_CFLAGS
 global NOPIE_CFLAGS NOPIE_LDFLAGS
 # Add $NOCF_PROTECTION_CFLAGS if -fcf-protection=none is required.
 global NOCF_PROTECTION_CFLAGS
+global NOSANTIZE_CFLAGS
 
 # Must be native with the C compiler
 if { [isnative] && [check_compiler_available] } {
-    run_cc_link_tests {
-	{"Helper X32 DSO from x86-64 object" "" "-m64 -fPIC -g"
-	 {simple.c} {} "libsimple.a"}
-    }
+    run_cc_link_tests [list \
+	[list \
+	    "Helper X32 DSO from x86-64 object" "" \
+	    "-m64 $NOSANTIZE_CFLAGS -fPIC -g" \
+	    {simple.c} {} "libsimple.a" \
+	] \
+    ]
 
     set convertx32 "$objcopy -O elf32-x86-64 tmpdir/simple.o tmpdir/simple-x32.o"
     send_log "$convertx32\n"
@@ -765,12 +769,16 @@ if { [isnative] && [check_compiler_available] } {
 	return
     }
 
-    run_ld_link_tests {
-	{"X32 DSO from x86-64 object"
-	 "-shared -melf32_x86_64 tmpdir/simple-x32.o" ""
-	 "--x32 -mx86-used-note=yes"
-	{dummy.s} {{readelf {-s --wide} x86-64-x32.rd}} "x86-64-x32"}
-    }
+    run_ld_link_tests [list \
+	[list \
+	    "X32 DSO from x86-64 object" \
+	    "-shared -melf32_x86_64 tmpdir/simple-x32.o" \
+	    "$NOSANTIZE_CFLAGS" \
+	    "--x32 -mx86-used-note=yes" \
+	    {dummy.s} {{readelf {-s --wide} x86-64-x32.rd}} \
+	    "x86-64-x32" \
+	] \
+    ]
 
     run_cc_link_tests [list \
 	[list \
