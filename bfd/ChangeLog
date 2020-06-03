@@ -10,6 +10,11 @@
 
 2020-06-03  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-arc.c (elf_arc_relocate_section): Don't generate dynamic
+	relocations for non SEC_ALLOC sections.
+
+2020-06-03  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf-bfd.h (_bfd_elf_maybe_set_textrel): New
 	* elf32-arm.c (maybe_set_textrel): Removed.
 	(elf32_arm_size_dynamic_sections): Replace maybe_set_textrel

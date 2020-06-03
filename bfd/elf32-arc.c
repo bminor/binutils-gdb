@@ -1782,6 +1782,7 @@ elf_arc_relocate_section (bfd *			  output_bfd,
 	  case R_ARC_PC32:
 	  case R_ARC_32_PCREL:
 	    if (bfd_link_pic (info)
+		&& (input_section->flags & SEC_ALLOC) != 0
 		&& (!IS_ARC_PCREL_TYPE (r_type)
 		    || (h != NULL
 			&& h->dynindx != -1
