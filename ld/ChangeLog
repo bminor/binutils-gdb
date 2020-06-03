@@ -1,3 +1,8 @@
+2020-06-03  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/ld-elf/linux-x86.exp: Make copied source files
+	writeable.
+
 2020-05-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 26047

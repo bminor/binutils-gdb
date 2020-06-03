@@ -134,6 +134,7 @@ proc check_pr25749a {testname srcfilea srcfileb cflags ldflags lderror} {
     }
 
     exec cp $srcdir/$subdir/$srcfilea $srcfilea
+    exec chmod +w $srcfilea
     set pr25749_bin "$objcopy -B $output_arch -I binary -O $output_target $srcfilea tmpdir/pr25749-bin.o"
     send_log "$pr25749_bin\n"
     set got [remote_exec host "$pr25749_bin"]
@@ -237,6 +238,7 @@ proc check_pr25749b {testname srcfilea srcfileb cflags ldflags dsoldflags} {
     }
 
     exec cp $srcdir/$subdir/$srcfilea $srcfilea
+    exec chmod +w $srcfilea
     set pr25749_bin "$objcopy -B $output_arch -I binary -O $output_target $srcfilea tmpdir/pr25749-bin.o"
     send_log "$pr25749_bin\n"
     set got [remote_exec host "$pr25749_bin"]
