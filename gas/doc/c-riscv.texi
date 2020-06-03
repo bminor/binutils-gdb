@@ -42,7 +42,7 @@ Don't generate position-independent code (default)
 @cindex @samp{-march=ISA} option, RISC-V
 @item -march=ISA
 Select the base isa, as specified by ISA.  For example -march=rv32ima.
-If this option and the architecture attributes aren’t set, then assembler
+If this option and the architecture attributes aren't set, then assembler
 will check the default configure setting --with-arch=ISA.
 
 @cindex @samp{-misa-spec=ISAspec} option, RISC-V

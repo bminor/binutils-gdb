@@ -1,3 +1,7 @@
+2020-06-03  Stephen Casner  <casner@acm.org>
+
+	* doc/c-riscv.texi (RISC-V-Options): Fix non-ASCII apostrophe.
+
 2020-06-02  Frédéric Pétrot  <frederic.petrot@univ-grenoble-alpes.fr>
 	    Jim Wilson  <jimw@sifive.com>
 
