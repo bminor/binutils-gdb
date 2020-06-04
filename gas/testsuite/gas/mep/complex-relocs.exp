@@ -38,7 +38,6 @@ proc regexp_test { file1 file2 test } {
 }
 
 
-global srcdir subdir
 if [istarget mep*-*-*] {
 
     # test that complex relocs between files work, generally

@@ -1,3 +1,13 @@
+2020-06-04  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/config/default.exp: Remove global directive outside
+	proc body.
+	* testsuite/gas/mep/complex-relocs.exp: Likewise.
+	* testsuite/gas/microblaze/relax_size.exp: Likewise.
+	* testsuite/gas/microblaze/reloc_sym.exp: Likewise.
+	* testsuite/gas/mt/relocs.exp: Likewise.
+	* testsuite/gas/rx/rx.exp: Likewise.
+
 2020-06-03  Stephen Casner  <casner@acm.org>
 
 	* doc/c-riscv.texi (RISC-V-Options): Fix non-ASCII apostrophe.

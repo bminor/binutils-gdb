@@ -35,7 +35,6 @@ proc regexp_test { file1 file2 test } {
 }
 
 
-global srcdir subdir
 if [istarget mt-*] {
     gas_test "relocs1.s" {-o relocs1.o} {} {assembling relocs1}
 
