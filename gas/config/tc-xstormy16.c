@@ -502,13 +502,15 @@ xstormy16_md_apply_fix (fixS *   fixP,
 	  {
 	    CGEN_INSN_INT insn_value =
 	      cgen_get_insn_value (cd, (unsigned char *) where,
-				   CGEN_INSN_BITSIZE (insn));
+				   CGEN_INSN_BITSIZE (insn),
+				   gas_cgen_cpu_desc->insn_endian);
 
 	    /* ??? 0 is passed for `pc'.  */
 	    errmsg = CGEN_CPU_INSERT_OPERAND (cd) (cd, opindex, fields,
 						   &insn_value, (bfd_vma) 0);
 	    cgen_put_insn_value (cd, (unsigned char *) where,
-				 CGEN_INSN_BITSIZE (insn), insn_value);
+				 CGEN_INSN_BITSIZE (insn), insn_value,
+				 gas_cgen_cpu_desc->insn_endian);
 	  }
 #else
 	  /* ??? 0 is passed for `pc'.  */

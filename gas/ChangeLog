@@ -1,3 +1,10 @@
+2020-06-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-ip2k. (ip2k_apply_fix): Pass endianness to
+	cgen_get_insn_value.
+	* config/tc-xstormy16.c (xstormy16_md_apply_fix): Pass
+	endianness to cgen_get_insn_value and cgen_put_insn_value.
+
 2020-06-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* config/tc-bpf.c (md_apply_fix): Simplify and avoid using
