@@ -1,5 +1,11 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (ECTF_NEEDSBFD): New.
+	(ECTF_NERR): Adjust.
+	(ctf_link): Rename share_mode arg to flags.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ECTF_INTERNAL): Adjust error text.
 	(ctf_errwarning_next): New.
 

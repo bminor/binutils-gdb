@@ -314,6 +314,9 @@ struct ctf_file
   ctf_dynhash_t *ctf_link_type_mapping; /* Map input types to output types.  */
   ctf_dynhash_t *ctf_link_cu_mapping;	/* Map CU names to CTF dict names.  */
   /* Allow the caller to Change the name of link archive members.  */
+  /* CTF linker flags.  */
+  int ctf_link_flags;
+
   ctf_link_memb_name_changer_f *ctf_link_memb_name_changer;
   void *ctf_link_memb_name_changer_arg; /* Argument for it.  */
   ctf_dynhash_t *ctf_add_processing; /* Types ctf_add_type is working on now.  */
@@ -560,6 +563,7 @@ _libctf_printflike_ (3, 4)
 extern void ctf_err_warn (ctf_file_t *, int is_warning, const char *, ...);
 extern void ctf_assert_fail_internal (ctf_file_t *, const char *,
 				      size_t, const char *);
+extern const char *ctf_link_input_name (ctf_file_t *);
 
 extern Elf64_Sym *ctf_sym_to_elf64 (const Elf32_Sym *src, Elf64_Sym *dst);
 extern const char *ctf_lookup_symbol_name (ctf_file_t *fp, unsigned long symidx);

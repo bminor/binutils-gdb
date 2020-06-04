@@ -208,10 +208,11 @@ enum
    ECTF_NEXT_END,	/* End of iteration.  */
    ECTF_NEXT_WRONGFUN,	/* Wrong iteration function called.  */
    ECTF_NEXT_WRONGFP,	/* Iteration entity changed in mid-iterate.  */
-   ECTF_FLAGS		/* CTF header contains flags unknown to libctf.  */
+   ECTF_FLAGS,		/* CTF header contains flags unknown to libctf.  */
+   ECTF_NEEDSBFD	/* This feature needs a libctf with BFD support.  */
   };
 
-#define ECTF_NERR (ECTF_FLAGS - ECTF_BASE + 1)	/* Count of CTF errors.  */
+#define ECTF_NERR (ECTF_NEEDSBFD - ECTF_BASE + 1) /* Count of CTF errors.  */
 
 /* The CTF data model is inferred to be the caller's data model or the data
    model of the given object, unless ctf_setmodel() is explicitly called.  */
@@ -452,10 +453,8 @@ extern int ctf_gzwrite (ctf_file_t *fp, gzFile fd);
 extern int ctf_compress_write (ctf_file_t * fp, int fd);
 extern unsigned char *ctf_write_mem (ctf_file_t *, size_t *, size_t threshold);
 
-/* The ctf_link interfaces are not stable yet.  No guarantees!  */
-
 extern int ctf_link_add_ctf (ctf_file_t *, ctf_archive_t *, const char *);
-extern int ctf_link (ctf_file_t *, int share_mode);
+extern int ctf_link (ctf_file_t *, int flags);
 typedef const char *ctf_link_strtab_string_f (uint32_t *offset, void *arg);
 extern int ctf_link_add_strtab (ctf_file_t *, ctf_link_strtab_string_f *,
 				void *);

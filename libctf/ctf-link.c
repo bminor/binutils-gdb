@@ -20,6 +20,10 @@
 #include <ctf-impl.h>
 #include <string.h>
 
+#if defined (PIC)
+#pragma weak ctf_open
+#endif
+
 /* Type tracking machinery.  */
 
 /* Record the correspondence between a source and ctf_add_type()-added
@@ -137,45 +141,143 @@ ctf_type_mapping (ctf_file_t *src_fp, ctf_id_t src_type, ctf_file_t **dst_fp)
    (otherwise) and returns it, suitable for addition in the .ctf section of the
    output.  */
 
-/* Add a file to a link.  */
-
-static void ctf_arc_close_thunk (void *arc)
+/* Return the name of the compilation unit this CTF dict or its parent applies
+   to, or a non-null string otherwise: prefer the parent.  Used in debugging
+   output.  Sometimes used for outputs too.  */
+const char *
+ctf_link_input_name (ctf_file_t *fp)
 {
-  ctf_arc_close ((ctf_archive_t *) arc);
+  if (fp->ctf_parent && fp->ctf_parent->ctf_cuname)
+    return fp->ctf_parent->ctf_cuname;
+  else if (fp->ctf_cuname)
+    return fp->ctf_cuname;
+  else
+    return "(unnamed)";
 }
 
-static void ctf_file_close_thunk (void *file)
+/* The linker inputs look like this.  clin_fp is used for short-circuited
+   CU-mapped links that can entirely avoid the first link phase in some
+   situations in favour of just passing on the contained ctf_file_t: it is
+   always the sole ctf_file_t inside the corresponding clin_arc.  If set, it
+   gets assigned directly to the final link inputs and freed from there, so it
+   never gets explicitly freed in the ctf_link_input.  */
+typedef struct ctf_link_input
 {
-  ctf_file_close ((ctf_file_t *) file);
+  const char *clin_filename;
+  ctf_archive_t *clin_arc;
+  ctf_file_t *clin_fp;
+  int n;
+} ctf_link_input_t;
+
+static void
+ctf_link_input_close (void *input)
+{
+  ctf_link_input_t *i = (ctf_link_input_t *) input;
+  if (i->clin_arc)
+    ctf_arc_close (i->clin_arc);
+  free (i);
 }
 
-int
-ctf_link_add_ctf (ctf_file_t *fp, ctf_archive_t *ctf, const char *name)
+/* Like ctf_link_add_ctf, below, but with no error-checking, so it can be called
+   in the middle of an ongoing link.  */
+static int
+ctf_link_add_ctf_internal (ctf_file_t *fp, ctf_archive_t *ctf,
+			   ctf_file_t *fp_input, const char *name)
 {
+  ctf_link_input_t *input = NULL;
   char *dupname = NULL;
+
+  if ((input = calloc (1, sizeof (ctf_link_input_t))) == NULL)
+    goto oom;
+
+  if ((dupname = strdup (name)) == NULL)
+    goto oom;
+
+  input->clin_arc = ctf;
+  input->clin_fp = fp_input;
+  input->clin_filename = dupname;
+  input->n = ctf_dynhash_elements (fp->ctf_link_inputs);
+
+  if (ctf_dynhash_insert (fp->ctf_link_inputs, dupname, input) < 0)
+    goto oom;
+
+  return 0;
+ oom:
+  free (input);
+  free (dupname);
+  return ctf_set_errno (fp, ENOMEM);
+}
+
+/* Add a file, memory buffer, or unopened file (by name) to a link.
+
+   You can call this with:
+
+    CTF and NAME: link the passed ctf_archive_t, with the given NAME.
+    NAME alone: open NAME as a CTF file when needed.
+    BUF and NAME: open the BUF (of length N) as CTF, with the given NAME.  (Not
+    yet implemented.)
+
+    Passed in CTF args are owned by the dictionary and will be freed by it.
+    The BUF arg is *not* owned by the dictionary, and the user should not free
+    its referent until the link is done.
+
+    The order of calls to this function influences the order of types in the
+    final link output, but otherwise is not important.
+
+    Private for now, but may in time become public once support for BUF is
+    implemented.  */
+
+static int
+ctf_link_add (ctf_file_t *fp, ctf_archive_t *ctf, const char *name,
+	      void *buf _libctf_unused_, size_t n _libctf_unused_)
+{
+  if (buf)
+    return (ctf_set_errno (fp, ECTF_NOTYET));
+
+  if (!((ctf && name && !buf)
+	|| (name && !buf && !ctf)
+	|| (buf && name && !ctf)))
+    return (ctf_set_errno (fp, EINVAL));
+
+  /* We can only lazily open files if libctf.so is in use rather than
+     libctf-nobfd.so.  This is a little tricky: in shared libraries, we can use
+     a weak symbol so that -lctf -lctf-nobfd works, but in static libraries we
+     must distinguish between the two libraries explicitly.  */
+
+#if defined (PIC)
+  if (!buf && !ctf && name && !ctf_open)
+    return (ctf_set_errno (fp, ECTF_NEEDSBFD));
+#elif NOBFD
+  if (!buf && !ctf && name)
+    return (ctf_set_errno (fp, ECTF_NEEDSBFD));
+#endif
 
   if (fp->ctf_link_outputs)
     return (ctf_set_errno (fp, ECTF_LINKADDEDLATE));
   if (fp->ctf_link_inputs == NULL)
     fp->ctf_link_inputs = ctf_dynhash_create (ctf_hash_string,
 					      ctf_hash_eq_string, free,
-					      ctf_arc_close_thunk);
+					      ctf_link_input_close);
 
   if (fp->ctf_link_inputs == NULL)
-    goto oom;
+    return (ctf_set_errno (fp, ENOMEM));
 
-  if ((dupname = strdup (name)) == NULL)
-    goto oom;
+  return ctf_link_add_ctf_internal (fp, ctf, NULL, name);
+}
 
-  if (ctf_dynhash_insert (fp->ctf_link_inputs, dupname, ctf) < 0)
-    goto oom;
+/* Add an opened CTF archive or unopened file (by name) to a link.
+   If CTF is NULL and NAME is non-null, an unopened file is meant:
+   otherwise, the specified archive is assumed to have the given NAME.
 
-  return 0;
- oom:
-  free (fp->ctf_link_inputs);
-  fp->ctf_link_inputs = NULL;
-  free (dupname);
-  return (ctf_set_errno (fp, ENOMEM));
+    Passed in CTF args are owned by the dictionary and will be freed by it.
+
+    The order of calls to this function influences the order of types in the
+    final link output, but otherwise is not important.  */
+
+int
+ctf_link_add_ctf (ctf_file_t *fp, ctf_archive_t *ctf, const char *name)
+{
+  return ctf_link_add (fp, ctf, name, NULL, 0);
 }
 
 /* Return a per-CU output CTF dictionary suitable for the given CU, creating and
@@ -210,9 +312,9 @@ ctf_create_per_cu (ctf_file_t *fp, const char *filename, const char *cuname)
 
       if ((cu_fp = ctf_create (&err)) == NULL)
 	{
-	  ctf_dprintf ("Cannot create per-CU CTF archive for CU %s from "
-		       "input file %s: %s\n", cuname, filename,
-		       ctf_errmsg (err));
+	  ctf_err_warn (fp, 0, "Cannot create per-CU CTF archive for "
+			"CU %s from input file %s: %s", cuname, filename,
+			ctf_errmsg (err));
 	  ctf_set_errno (fp, err);
 	  return NULL;
 	}
@@ -262,7 +364,8 @@ ctf_link_add_cu_mapping (ctf_file_t *fp, const char *from, const char *to)
   if (fp->ctf_link_outputs == NULL)
     fp->ctf_link_outputs = ctf_dynhash_create (ctf_hash_string,
 					       ctf_hash_eq_string, free,
-					       ctf_file_close_thunk);
+					       (ctf_hash_free_fun)
+					       ctf_file_close);
 
   if (fp->ctf_link_outputs == NULL)
     return ctf_set_errno (fp, ENOMEM);
@@ -310,15 +413,27 @@ ctf_link_set_memb_name_changer (ctf_file_t *fp,
 
 typedef struct ctf_link_in_member_cb_arg
 {
+  /* The shared output dictionary.  */
   ctf_file_t *out_fp;
-  const char *file_name;
+
+  /* The filename of the input file, and an fp to each dictionary in that file
+     in turn.  */
+  const char *in_file_name;
   ctf_file_t *in_fp;
-  ctf_file_t *main_input_fp;
+
+  /* The CU name of the dict being processed.  */
   const char *cu_name;
-  char *arcname;
-  int done_main_member;
-  int share_mode;
   int in_input_cu_file;
+
+  /* The parent dictionary in the input, and whether it's been processed yet.
+     Not needed by ctf_link_one_type / ctf_link_one_variable, only by higher
+     layers.  */
+  ctf_file_t *in_fp_parent;
+  int done_parent;
+
+  /* If true, this is the CU-mapped portion of a deduplicating link: no child
+     dictionaries should be created.  */
+  int cu_mapped;
 } ctf_link_in_member_cb_arg_t;
 
 /* Link one type into the link.  We rely on ctf_add_type() to detect
@@ -332,9 +447,9 @@ ctf_link_one_type (ctf_id_t type, int isroot _libctf_unused_, void *arg_)
   ctf_file_t *per_cu_out_fp;
   int err;
 
-  if (arg->share_mode != CTF_LINK_SHARE_UNCONFLICTED)
+  if (arg->in_fp->ctf_link_flags != CTF_LINK_SHARE_UNCONFLICTED)
     {
-      ctf_dprintf ("Share-duplicated mode not yet implemented.\n");
+      ctf_err_warn (arg->out_fp, 0, "Share-duplicated mode not yet implemented");
       return ctf_set_errno (arg->out_fp, ECTF_NOTYET);
     }
 
@@ -352,19 +467,18 @@ ctf_link_one_type (ctf_id_t type, int isroot _libctf_unused_, void *arg_)
       if (err != ECTF_CONFLICT)
 	{
 	  if (err != ECTF_NONREPRESENTABLE)
-	    ctf_dprintf ("Cannot link type %lx from archive member %s, input file %s "
-			 "into output link: %s\n", type, arg->arcname, arg->file_name,
-			 ctf_errmsg (err));
+	    ctf_err_warn (arg->out_fp, 1, "Cannot link type %lx from input file %s, "
+			  "CU %s into output link: %s", type, arg->cu_name,
+			 arg->in_file_name, ctf_errmsg (err));
 	  /* We must ignore this problem or we end up losing future types, then
 	     trying to link the variables in, then exploding.  Better to link as
-	     much as possible.  XXX when we add a proper link warning
-	     infrastructure, we should report the error here!  */
+	     much as possible.  */
 	  return 0;
 	}
       ctf_set_errno (arg->out_fp, 0);
     }
 
-  if ((per_cu_out_fp = ctf_create_per_cu (arg->out_fp, arg->file_name,
+  if ((per_cu_out_fp = ctf_create_per_cu (arg->out_fp, arg->in_file_name,
 					  arg->cu_name)) == NULL)
     return -1;					/* Errno is set for us.  */
 
@@ -373,10 +487,10 @@ ctf_link_one_type (ctf_id_t type, int isroot _libctf_unused_, void *arg_)
 
   err = ctf_errno (per_cu_out_fp);
   if (err != ECTF_NONREPRESENTABLE)
-    ctf_dprintf ("Cannot link type %lx from CTF archive member %s, input file %s "
-		 "into output per-CU CTF archive member %s: %s: skipped\n", type,
-		 arg->arcname, arg->file_name, arg->arcname,
-		 ctf_errmsg (err));
+    ctf_err_warn (arg->out_fp, 1, "Cannot link type %lx from input file %s, CU %s "
+		 "into output per-CU CTF archive member %s: %s: skipped", type,
+		 ctf_link_input_name (arg->in_fp), arg->in_file_name,
+		 ctf_link_input_name (per_cu_out_fp), ctf_errmsg (err));
   if (err == ECTF_CONFLICT)
       /* Conflicts are possible at this stage only if a non-ld user has combined
 	 multiple TUs into a single output dictionary.  Even in this case we do not
@@ -402,8 +516,9 @@ check_variable (const char *name, ctf_file_t *fp, ctf_id_t type,
   if (dvd->dvd_type != type)
     {
       /* Variable here.  Wrong type: cannot add.  Just skip it, because there is
-	 no way to express this in CTF.  (This might be the parent, in which
-	 case we'll try adding in the child first, and only then give up.)  */
+	 no way to express this in CTF.  Don't even warn: this case is too
+	 common.  (This might be the parent, in which case we'll try adding in
+	 the child first, and only then give up.)  */
       ctf_dprintf ("Inexpressible duplicate variable %s skipped.\n", name);
     }
 
@@ -448,9 +563,18 @@ ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
 
   /* Can't add to the parent due to a name clash, or because it references a
      type only present in the child.  Try adding to the child, creating if need
-     be.  */
+     be.  If we can't do that, skip it.  Don't add to a child if we're doing a
+     CU-mapped link, since that has only one output.  */
 
-  if ((per_cu_out_fp = ctf_create_per_cu (arg->out_fp, arg->file_name,
+  if (arg->cu_mapped)
+    {
+      ctf_dprintf ("Variable %s in input file %s depends on a type %lx hidden "
+		   "due to conflicts: skipped.\n", name, arg->in_file_name,
+		   type);
+      return 0;
+    }
+
+  if ((per_cu_out_fp = ctf_create_per_cu (arg->out_fp, arg->in_file_name,
 					  arg->cu_name)) == NULL)
     return -1;					/* Errno is set for us.  */
 
@@ -462,8 +586,9 @@ ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
 
       if (dst_type == 0)
 	{
-	  ctf_dprintf ("Type %lx for variable %s in input file %s not "
-		       "found: skipped.\n", type, name, arg->file_name);
+	  ctf_err_warn (arg->out_fp, 1, "Type %lx for variable %s in input "
+			"file %s not found: skipped", type, name,
+			arg->in_file_name);
 	  /* Do not terminate the link: just skip the variable.  */
 	  return 0;
 	}
@@ -475,11 +600,11 @@ ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
   return 0;
 }
 
-/* Merge every type and variable in this archive member into the link, so we can
-   relink things that have already had ld run on them.  We use the archive
-   member name, sans any leading '.ctf.', as the CU name for ambiguous types if
-   there is one and it's not the default: otherwise, we use the name of the
-   input file.  */
+/* Merge every type (and optionally, variable) in this archive member into the
+   link, so we can relink things that have already had ld run on them.  We use
+   the archive member name, sans any leading '.ctf.', as the CU name for
+   ambiguous types if there is one and it's not the default: otherwise, we use
+   the name of the input file.  */
 static int
 ctf_link_one_input_archive_member (ctf_file_t *in_fp, const char *name, void *arg_)
 {
@@ -497,31 +622,15 @@ ctf_link_one_input_archive_member (ctf_file_t *in_fp, const char *name, void *ar
 	 causes the system to erroneously conclude that all types are duplicated
 	 and should be shared, even if they are not.  */
 
-      if (arg->done_main_member)
+      if (arg->done_parent)
 	return 0;
-      arg->arcname = strdup (".ctf.");
-      if (arg->arcname)
-	{
-	  char *new_name;
-
-	  new_name = ctf_str_append (arg->arcname, arg->file_name);
-	  if (new_name)
-	    arg->arcname = new_name;
-	  else
-	    free (arg->arcname);
-	}
     }
   else
     {
-      arg->arcname = strdup (name);
-
       /* Get ambiguous types from our parent.  */
-      ctf_import (in_fp, arg->main_input_fp);
+      ctf_import (in_fp, arg->in_fp_parent);
       arg->in_input_cu_file = 1;
     }
-
-  if (!arg->arcname)
-    return ctf_set_errno (in_fp, ENOMEM);
 
   arg->cu_name = name;
   if (strncmp (arg->cu_name, ".ctf.", strlen (".ctf.")) == 0)
@@ -532,7 +641,6 @@ ctf_link_one_input_archive_member (ctf_file_t *in_fp, const char *name, void *ar
     err = ctf_variable_iter (in_fp, ctf_link_one_variable, arg);
 
   arg->in_input_cu_file = 0;
-  free (arg->arcname);
 
   if (err < 0)
       return -1;				/* Errno is set for us.  */
@@ -551,61 +659,128 @@ empty_link_type_mapping (void *key _libctf_unused_, void *value,
     ctf_dynhash_empty (fp->ctf_link_type_mapping);
 }
 
+/* Lazily open a CTF archive for linking, if not already open.
+
+   Returns the number of files contained within the opened archive (0 for none),
+   or -1 on error, as usual.  */
+static ssize_t
+ctf_link_lazy_open (ctf_file_t *fp, ctf_link_input_t *input)
+{
+  size_t count;
+  int err;
+
+  if (input->clin_arc)
+    return ctf_archive_count (input->clin_arc);
+
+  if (input->clin_fp)
+    return 1;
+
+  /* See ctf_link_add_ctf.  */
+#if defined (PIC) || !NOBFD
+  input->clin_arc = ctf_open (input->clin_filename, NULL, &err);
+#else
+  ctf_err_warn (fp, 0, "Cannot open %s lazily: %s", input->clin_filename,
+		ctf_errmsg (ECTF_NEEDSBFD));
+  ctf_set_errno (fp, ECTF_NEEDSBFD);
+  return -1;
+#endif
+
+  /* Having no CTF sections is not an error.  We just don't need to do
+     anything.  */
+
+  if (!input->clin_arc)
+    {
+      if (err == ECTF_NOCTFDATA)
+	return 0;
+
+      ctf_err_warn (fp, 0, "Opening CTF %s failed: %s",
+		    input->clin_filename, ctf_errmsg (err));
+      ctf_set_errno (fp, err);
+      return -1;
+    }
+
+  if ((count = ctf_archive_count (input->clin_arc)) == 0)
+    ctf_arc_close (input->clin_arc);
+
+  return (ssize_t) count;
+}
+
+/* Close an input, as a ctf_dynhash_iter iterator.  */
+static void
+ctf_link_close_one_input_archive (void *key _libctf_unused_, void *value,
+				  void *arg _libctf_unused_)
+{
+  ctf_link_input_t *input = (ctf_link_input_t *) value;
+  if (input->clin_arc)
+    ctf_arc_close (input->clin_arc);
+  input->clin_arc = NULL;
+}
+
 /* Link one input file's types into the output file.  */
 static void
 ctf_link_one_input_archive (void *key, void *value, void *arg_)
 {
   const char *file_name = (const char *) key;
-  ctf_archive_t *arc = (ctf_archive_t *) value;
+  ctf_link_input_t *input = (ctf_link_input_t *)value;
   ctf_link_in_member_cb_arg_t *arg = (ctf_link_in_member_cb_arg_t *) arg_;
-  int err;
+  int err = 0;
 
-  arg->file_name = file_name;
-  arg->done_main_member = 0;
-  if ((arg->main_input_fp = ctf_arc_open_by_name (arc, NULL, &err)) == NULL)
+  if (!input->clin_arc)
+    {
+      err = ctf_link_lazy_open (arg->out_fp, input);
+      if (err == 0)				/* Just no CTF.  */
+	return;
+
+      if (err < 0)
+	return;					/* errno is set for us.  */
+    }
+
+  arg->in_file_name = file_name;
+  arg->done_parent = 0;
+  if ((arg->in_fp_parent = ctf_arc_open_by_name (input->clin_arc, NULL,
+						 &err)) == NULL)
     if (err != ECTF_ARNNAME)
       {
-	ctf_dprintf ("Cannot open main archive member in input file %s in the "
-		     "link: skipping: %s.\n", arg->file_name,
-		     ctf_errmsg (err));
-	return;
+	ctf_err_warn (arg->out_fp, 0, "Cannot open main archive member in "
+		      "input file %s in the link: skipping: %s",
+		      arg->in_file_name, ctf_errmsg (err));
+	goto out;
       }
 
-  if (ctf_link_one_input_archive_member (arg->main_input_fp,
+  if (ctf_link_one_input_archive_member (arg->in_fp_parent,
 					 _CTF_SECTION, arg) < 0)
     {
-      ctf_file_close (arg->main_input_fp);
-      return;
+      ctf_file_close (arg->in_fp_parent);
+      goto out;
     }
-  arg->done_main_member = 1;
-  if (ctf_archive_iter (arc, ctf_link_one_input_archive_member, arg) < 0)
-    ctf_dprintf ("Cannot traverse archive in input file %s: link "
-		 "cannot continue: %s.\n", arg->file_name,
-		 ctf_errmsg (ctf_errno (arg->out_fp)));
+  arg->done_parent = 1;
+  if (ctf_archive_iter (input->clin_arc, ctf_link_one_input_archive_member,
+			arg) < 0)
+    ctf_err_warn (arg->out_fp, 0, "Cannot traverse archive in input file %s: "
+		  "link cannot continue: %s", arg->in_file_name,
+		  ctf_errmsg (ctf_errno (arg->out_fp)));
   else
     {
       /* The only error indication to the caller is the errno: so ensure that it
 	 is zero if there was no actual error from the caller.  */
       ctf_set_errno (arg->out_fp, 0);
     }
-  ctf_file_close (arg->main_input_fp);
+  ctf_file_close (arg->in_fp_parent);
 
-  /* Discard the now-unnecessary mapping table data.  */
-  if (arg->out_fp->ctf_link_type_mapping)
-    ctf_dynhash_empty (arg->out_fp->ctf_link_type_mapping);
-  ctf_dynhash_iter (arg->out_fp->ctf_link_outputs, empty_link_type_mapping, NULL);
+ out:
+  ctf_link_close_one_input_archive (key, value, NULL);
 }
 
 /* Merge types and variable sections in all files added to the link
-   together.  */
+   together.  All the added files are closed.  */
 int
-ctf_link (ctf_file_t *fp, int share_mode)
+ctf_link (ctf_file_t *fp, int flags)
 {
   ctf_link_in_member_cb_arg_t arg;
 
   memset (&arg, 0, sizeof (struct ctf_link_in_member_cb_arg));
   arg.out_fp = fp;
-  arg.share_mode = share_mode;
+  fp->ctf_link_flags = flags;
 
   if (fp->ctf_link_inputs == NULL)
     return 0;					/* Nothing to do. */
@@ -613,7 +788,8 @@ ctf_link (ctf_file_t *fp, int share_mode)
   if (fp->ctf_link_outputs == NULL)
     fp->ctf_link_outputs = ctf_dynhash_create (ctf_hash_string,
 					       ctf_hash_eq_string, free,
-					       ctf_file_close_thunk);
+					       (ctf_hash_free_fun)
+					       ctf_file_close);
 
   if (fp->ctf_link_outputs == NULL)
     return ctf_set_errno (fp, ENOMEM);
@@ -621,7 +797,12 @@ ctf_link (ctf_file_t *fp, int share_mode)
   ctf_dynhash_iter (fp->ctf_link_inputs, ctf_link_one_input_archive,
 		    &arg);
 
-  if (ctf_errno (fp) != 0)
+  /* Discard the now-unnecessary mapping table data from all the outputs.  */
+  if (fp->ctf_link_type_mapping)
+    ctf_dynhash_empty (fp->ctf_link_type_mapping);
+  ctf_dynhash_iter (fp->ctf_link_outputs, empty_link_type_mapping, NULL);
+
+  if ((ctf_errno (fp) != 0) && (ctf_errno (fp) != ECTF_NOCTFDATA))
     return -1;
   return 0;
 }
@@ -908,7 +1089,7 @@ ctf_link_write (ctf_file_t *fp, size_t *size, size_t threshold)
 	free (arg.dynames[i]);
       free (arg.dynames);
     }
-  ctf_dprintf ("Cannot write archive in link: %s failure: %s\n", errloc,
-	       ctf_errmsg (ctf_errno (fp)));
+  ctf_err_warn (fp, 0, "Cannot write archive in link: %s failure: %s", errloc,
+		ctf_errmsg (ctf_errno (fp)));
   return NULL;
 }

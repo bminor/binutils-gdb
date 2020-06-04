@@ -1,5 +1,50 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* Makefile.am: Set -DNOBFD=1 in libctf-nobfd, and =0 elsewhere.
+	* Makefile.in: Regenerated.
+	* ctf-impl.h (ctf_link_input_name): New.
+	(ctf_file_t) <ctf_link_flags>: New.
+	* ctf-create.c (ctf_serialize): Adjust accordingly.
+	* ctf-link.c: Define ctf_open as weak when PIC.
+	(ctf_arc_close_thunk): Remove unnecessary thunk.
+	(ctf_file_close_thunk): Likewise.
+	(ctf_link_input_name): New.
+	(ctf_link_input_t): New value of the ctf_file_t.ctf_link_input.
+	(ctf_link_input_close): Adjust accordingly.
+	(ctf_link_add_ctf_internal): New, split from...
+	(ctf_link_add_ctf): ... here.  Return error if lazy loading of
+	CTF is not possible.  Change to just call...
+	(ctf_link_add): ... this new function.
+	(ctf_link_add_cu_mapping): Transition to ctf_err_warn.  Drop the
+	ctf_file_close_thunk.
+	(ctf_link_in_member_cb_arg_t) <file_name> Rename to...
+	<in_file_name>: ... this.
+	<arcname>: Drop.
+	<share_mode>: Likewise (migrated to ctf_link_flags).
+	<done_main_member>: Rename to...
+	<done_parent>: ... this.
+	<main_input_fp>: Rename to...
+	<in_fp_parent>: ... this.
+	<cu_mapped>: New.
+	(ctf_link_one_type): Adjuwt accordingly.  Transition to
+	ctf_err_warn, removing a TODO.
+	(ctf_link_one_variable): Note a case too common to warn about.
+	Report in the debug stream if a cu-mapped link prevents addition
+	of a conflicting variable.
+	(ctf_link_one_input_archive_member): Adjust.
+	(ctf_link_lazy_open): New, open a CTF archive for linking when
+	needed.
+	(ctf_link_close_one_input_archive): New, close it again.
+	(ctf_link_one_input_archive): Adjust for lazy opening, member
+	renames, and ctf_err_warn transition.  Move the
+	empty_link_type_mapping call to...
+	(ctf_link): ... here.  Adjut for renamings and thunk removal.
+	Don't spuriously fail if some input contains no CTF data.
+	(ctf_link_write): ctf_err_warn transition.
+	* libctf.ver: Remove not-yet-stable comment.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_strerror): Delete.
 	* ctf-subr.c (ctf_strerror): Likewise.
 	* ctf-error.c (ctf_errmsg): Stop using ctf_strerror: just use
