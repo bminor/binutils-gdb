@@ -1,5 +1,15 @@
 2020-06-04  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-dynamic/export-dynamic-symbol-2.d: Match output for
+	mips-sgi-irix6.
+	* testsuite/ld-dynamic/export-dynamic-symbol-glob.d: Likewise.
+	* testsuite/ld-dynamic/export-dynamic-symbol-list-2.d: Likewise.
+	* testsuite/ld-dynamic/export-dynamic-symbol-list-glob.d: Likewise.
+	* testsuite/ld-dynamic/export-dynamic-symbol.exp: Exclude targets
+	with poor PIE support.
+
+2020-06-04  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-plugin/lto.exp (pr12758.exe): Add NOPIE_LDFLAGS.
 	* testsuite/ld-unique/unique.exp: Add NOPIE_LDFLAGS to unique
 	executable and dynamic executable tests.

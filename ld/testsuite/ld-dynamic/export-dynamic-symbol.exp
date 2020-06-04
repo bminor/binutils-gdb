@@ -23,9 +23,16 @@ if ![is_elf_format] {
     return
 }
 
-# Skip targets where -shared is not supported
+# Skip targets where -shared or -pie is not supported
+if { ![check_shared_lib_support] || ![check_pie_support] } {
+    return
+}
 
-if ![check_shared_lib_support] {
+# Skip targets that have poor PIE support, resulting in failures due to
+# PHDR segment not covered by LOAD segment errors.
+if { ([istarget "bfin-*-*"] && ![istarget "bfin-*-linux*"])
+     || [istarget "mn10300-*-*"]
+     || [istarget "score-*-*"] } {
     return
 }
 
