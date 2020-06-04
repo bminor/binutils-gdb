@@ -1,3 +1,46 @@
+2020-06-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* cgen-opc.c (cgen_get_insn_value): Get an `endian' argument.
+	(cgen_put_insn_value): Likewise.
+	(cgen_lookup_insn): Pass endianness to cgen_{get,put}_insn_value.
+	* cgen-dis.in (print_insn): Likewise.
+	* cgen-ibld.in (insert_1): Likewise.
+	(insert_1): Likewise.
+	(insert_insn_normal): Likewise.
+	(extract_1): Likewise.
+	* bpf-dis.c: Regenerate.
+	* bpf-ibld.c: Likewise.
+	* bpf-ibld.c: Likewise.
+	* cgen-dis.in: Likewise.
+	* cgen-ibld.in: Likewise.
+	* cgen-opc.c: Likewise.
+	* epiphany-dis.c: Likewise.
+	* epiphany-ibld.c: Likewise.
+	* fr30-dis.c: Likewise.
+	* fr30-ibld.c: Likewise.
+	* frv-dis.c: Likewise.
+	* frv-ibld.c: Likewise.
+	* ip2k-dis.c: Likewise.
+	* ip2k-ibld.c: Likewise.
+	* iq2000-dis.c: Likewise.
+	* iq2000-ibld.c: Likewise.
+	* lm32-dis.c: Likewise.
+	* lm32-ibld.c: Likewise.
+	* m32c-dis.c: Likewise.
+	* m32c-ibld.c: Likewise.
+	* m32r-dis.c: Likewise.
+	* m32r-ibld.c: Likewise.
+	* mep-dis.c: Likewise.
+	* mep-ibld.c: Likewise.
+	* mt-dis.c: Likewise.
+	* mt-ibld.c: Likewise.
+	* or1k-dis.c: Likewise.
+	* or1k-ibld.c: Likewise.
+	* xc16x-dis.c: Likewise.
+	* xc16x-ibld.c: Likewise.
+	* xstormy16-dis.c: Likewise.
+	* xstormy16-ibld.c: Likewise.
+
 2020-06-04  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* cgen-dis.in (cpu_desc_list): New field `insn_endian'.

@@ -467,7 +467,7 @@ print_slot_insn (CGEN_CPU_DESC cd,
   CGEN_INSN_INT insn_value;
   CGEN_EXTRACT_INFO ex_info;
 
-  insn_value = cgen_get_insn_value (cd, buf, 32);
+  insn_value = cgen_get_insn_value (cd, buf, 32, cd->insn_endian);
 
   /* Fill in ex_info fields like read_insn would.  Don't actually call
      read_insn, since the incoming buffer is already read (and possibly
@@ -1360,7 +1360,7 @@ print_insn (CGEN_CPU_DESC cd,
   /* Extract base part of instruction, just in case CGEN_DIS_* uses it. */
   basesize = cd->base_insn_bitsize < buflen * 8 ?
                                      cd->base_insn_bitsize : buflen * 8;
-  insn_value = cgen_get_insn_value (cd, buf, basesize);
+  insn_value = cgen_get_insn_value (cd, buf, basesize, cd->insn_endian);
 
 
   /* Fill in ex_info fields like read_insn would.  Don't actually call

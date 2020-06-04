@@ -88,7 +88,7 @@ insert_1 (CGEN_CPU_DESC cd,
   unsigned long x,mask;
   int shift;
 
-  x = cgen_get_insn_value (cd, bufp, word_length);
+  x = cgen_get_insn_value (cd, bufp, word_length, cd->endian);
 
   /* Written this way to avoid undefined behaviour.  */
   mask = (((1L << (length - 1)) - 1) << 1) | 1;
@@ -98,7 +98,7 @@ insert_1 (CGEN_CPU_DESC cd,
     shift = (word_length - (start + length));
   x = (x & ~(mask << shift)) | ((value & mask) << shift);
 
-  cgen_put_insn_value (cd, bufp, word_length, (bfd_vma) x);
+  cgen_put_insn_value (cd, bufp, word_length, (bfd_vma) x, cd->endian);
 }
 
 #endif /* ! CGEN_INT_INSN_P */
@@ -269,8 +269,8 @@ insert_insn_normal (CGEN_CPU_DESC cd,
 #else
 
   cgen_put_insn_value (cd, buffer, min ((unsigned) cd->base_insn_bitsize,
-					(unsigned) CGEN_FIELDS_BITSIZE (fields)),
-		       value);
+                                        (unsigned) CGEN_FIELDS_BITSIZE (fields)),
+		       value, cd->insn_endian);
 
 #endif /* ! CGEN_INT_INSN_P */
 
@@ -387,7 +387,7 @@ extract_1 (CGEN_CPU_DESC cd,
   unsigned long x;
   int shift;
 
-  x = cgen_get_insn_value (cd, bufp, word_length);
+  x = cgen_get_insn_value (cd, bufp, word_length, cd->endian);
 
   if (CGEN_INSN_LSB0_P)
     shift = (start + 1) - length;

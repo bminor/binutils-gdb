@@ -1,3 +1,8 @@
+2020-06-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* opcode/cgen.h: Get an `endian' argument in both
+	cgen_get_insn_value and cgen_put_insn_value.
+
 2020-06-04  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* opcode/cgen.h (enum cgen_cpu_open_arg): New value

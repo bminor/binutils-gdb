@@ -1,3 +1,8 @@
+2020-06-02  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* mep.opc (print_slot_insn): Pass the insn endianness to
+	cgen_get_insn_value.
+
 2020-05-28  Jose E. Marchesi  <jose.marchesi@oracle.com>
 	    David Faust <david.faust@oracle.com>
 

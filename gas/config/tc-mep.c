@@ -1111,7 +1111,7 @@ mep_check_ivc2_scheduling (void)
 
 #if CGEN_INT_INSN_P
       cgen_put_insn_value (gas_cgen_cpu_desc, (unsigned char *) temp, 32,
-			   m->buffer[0]);
+			   m->buffer[0], gas_cgen_cpu_desc->insn_endian);
 #else
       memcpy (temp, m->buffer, byte_len);
 #endif

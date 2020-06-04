@@ -1,3 +1,14 @@
+2020-06-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* cgen.c (gas_cgen_finish_insn): Pass the endianness to
+	cgen_put_insn_value.
+	(gas_cgen_md_apply_fix): Likewise.
+	(gas_cgen_md_apply_fix): Likewise.
+	* config/tc-bpf.c (md_apply_fix): Pass data endianness to
+	cgen_put_insn_value.
+	* config/tc-mep.c (mep_check_ivc2_scheduling): Pass endianness to
+	cgen_put_insn_value.
+
 2020-06-04  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/config/default.exp: Remove global directive outside

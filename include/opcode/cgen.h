@@ -1463,9 +1463,9 @@ extern const CGEN_INSN * cgen_lookup_get_insn_operands
 /* Cover fns to bfd_get/set.  */
 
 extern CGEN_INSN_INT cgen_get_insn_value
-  (CGEN_CPU_DESC, unsigned char *, int);
+  (CGEN_CPU_DESC, unsigned char *, int, int);
 extern void cgen_put_insn_value
-  (CGEN_CPU_DESC, unsigned char *, int, CGEN_INSN_INT);
+  (CGEN_CPU_DESC, unsigned char *, int, CGEN_INSN_INT, int);
 
 extern CGEN_INSN_INT cgen_get_base_insn_value
   (CGEN_CPU_DESC, unsigned char *, int);

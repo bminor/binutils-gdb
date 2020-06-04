@@ -621,7 +621,8 @@ gas_cgen_finish_insn (const CGEN_INSN *insn, CGEN_INSN_BYTES_PTR buf,
   /* If we're recording insns as numbers (rather than a string of bytes),
      target byte order handling is deferred until now.  */
 #if CGEN_INT_INSN_P
-  cgen_put_insn_value (gas_cgen_cpu_desc, (unsigned char *) f, length, *buf);
+  cgen_put_insn_value (gas_cgen_cpu_desc, (unsigned char *) f, length, *buf,
+                       gas_cgen_cpu_desc->insn_endian);
 #else
   memcpy (f, buf, byte_len);
 #endif
@@ -906,13 +907,15 @@ gas_cgen_md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  {
 	    CGEN_INSN_INT insn_value =
 	      cgen_get_insn_value (cd, (unsigned char *) where,
-				   CGEN_INSN_BITSIZE (insn));
+				   CGEN_INSN_BITSIZE (insn),
+                                   cd->insn_endian);
 
 	    /* ??? 0 is passed for `pc'.  */
 	    errmsg = CGEN_CPU_INSERT_OPERAND (cd) (cd, opindex, fields,
 						   &insn_value, (bfd_vma) 0);
 	    cgen_put_insn_value (cd, (unsigned char *) where,
-				 CGEN_INSN_BITSIZE (insn), insn_value);
+				 CGEN_INSN_BITSIZE (insn), insn_value,
+                                 cd->insn_endian);
 	  }
 #else
 	  /* ??? 0 is passed for `pc'.  */
