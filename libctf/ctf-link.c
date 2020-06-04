@@ -1071,6 +1071,7 @@ ctf_link_write (ctf_file_t *fp, size_t *size, size_t threshold)
 	free (arg.dynames[i]);
       free (arg.dynames);
     }
+  fclose (f);
   return buf;
 
  err_no:

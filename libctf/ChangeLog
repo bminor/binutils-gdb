@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-link.c (ctf_link_write): Close the fd.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* Makefile.am: Set -DNOBFD=1 in libctf-nobfd, and =0 elsewhere.
 	* Makefile.in: Regenerated.
 	* ctf-impl.h (ctf_link_input_name): New.
