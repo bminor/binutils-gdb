@@ -20,8 +20,6 @@ if {!([istarget "x86_64-*-linux*"]
     return
 }
 
-global tempfile
-global copyfile
 set tempfile tmpdir/x86-64temp.o
 set copyfile tmpdir/x86-64copy
 

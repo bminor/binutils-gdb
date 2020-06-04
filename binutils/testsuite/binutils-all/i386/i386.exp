@@ -24,8 +24,6 @@ if {!([istarget "i*86-*-linux*"]
     return
 }
 
-global tempfile
-global copyfile
 set tempfile tmpdir/i386temp.o
 set copyfile tmpdir/i386copy
 

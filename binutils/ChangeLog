@@ -1,3 +1,10 @@
+2020-06-04  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/binutils-all/i386/i386.exp: Remove global directive
+	outside proc body.
+	* testsuite/binutils-all/x86-64/objects.exp: Likewise.
+	* testsuite/binutils-all/x86-64/x86-64.exp: Likewise.
+
 2020-06-03  Joel Anderson  <joelanderson333@gmail.com>
 
 	* windmc.h (struct mc_node): Add id_typecast field.
