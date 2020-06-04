@@ -65,8 +65,6 @@ set DOBJDUMP_FLAGS --dynamic-syms
 set SOBJDUMP_FLAGS --syms
 set shared "--shared -Wl,--no-as-needed"
 
-global NOSANTIZE_CFLAGS
-
 #
 # objdump_symstuff
 #	Dump non-dynamic symbol stuff and make sure that it is sane.

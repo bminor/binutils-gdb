@@ -53,9 +53,6 @@ if { ![check_compiler_available] } {
     return
 }
 
-# Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
-global NOPIE_CFLAGS NOPIE_LDFLAGS
-
 run_cc_link_tests [list \
     [list \
 	"Build libsize-1.so" \

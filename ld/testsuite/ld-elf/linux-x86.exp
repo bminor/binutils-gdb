@@ -52,12 +52,6 @@ if { ![isnative] || ![check_compiler_available] } {
     return
 }
 
-# Add $PLT_CFLAGS if PLT is expected.
-global PLT_CFLAGS
-# Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
-global NOPIE_CFLAGS NOPIE_LDFLAGS
-global NOSANTIZE_CFLAGS
-
 run_ld_link_exec_tests [list \
     [list \
 	"Run PR ld/23428 test" \

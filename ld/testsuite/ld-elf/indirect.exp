@@ -110,8 +110,6 @@ set build_tests {
 
 run_cc_link_tests $build_tests
 
-global ld
-
 set string ": final link failed: bad value"
 set string1 ": local symbol \`foo\' in tmpdir/indirect1b.o is referenced by DSO"
 
@@ -127,8 +125,6 @@ set string2 ": no symbol version section for versioned symbol \`foo@FOO\'"
 set testname "Indirect symbol 2"
 set cmd "$ld -shared  -o tmpdir/indirect2.so tmpdir/indirect2.o"
 check_link_message "$cmd" [list $string2] "$testname"
-
-global NOPIE_CFLAGS NOPIE_LDFLAGS
 
 set run_tests {
     {"Run with libindirect3c.so 1"

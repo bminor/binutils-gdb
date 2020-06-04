@@ -34,7 +34,6 @@ if [istarget "*-*-nacl*"] {
     set emul "elf_x86_64"
 }
 
-global ASFLAGS
 set saved_ASFLAGS "$ASFLAGS"
 set ASFLAGS "$ASFLAGS -mx86-used-note=no"
 
@@ -264,9 +263,6 @@ if [istarget "*-*-nacl*"] {
 }
 
 run_ld_link_tests $x86_64tests
-
-global link_output
-global ld
 
 set test_name "Mixed x86_64 and i386 input test 1"
 set test mixed1
@@ -741,14 +737,6 @@ proc undefined_weak {cflags ldflags} {
 	pass $testname
     }
 }
-
-# Add $PLT_CFLAGS if PLT is expected.
-global PLT_CFLAGS
-# Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
-global NOPIE_CFLAGS NOPIE_LDFLAGS
-# Add $NOCF_PROTECTION_CFLAGS if -fcf-protection=none is required.
-global NOCF_PROTECTION_CFLAGS
-global NOSANTIZE_CFLAGS
 
 # Must be native with the C compiler
 if { [isnative] && [check_compiler_available] } {
@@ -2148,7 +2136,6 @@ run_ld_link_tests [list \
 ]
 
 # Linux only tests
-global LD_CLASS
 if { "$LD_CLASS" == "64bit" } then {
     # This test needs 64-bit linker.
     run_dump_test "pr17618"

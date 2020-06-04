@@ -121,7 +121,6 @@ if {![info exists CXXFLAGS]} {
 # \param Edit - The override command to perform.
 # \param SavedStrings - Set to use for storing string representations.
 
-global env
 # Only set up the environment variable if the user has not already provided one.
 if {! [info exists env(CCC_OVERRIDE_OPTIONS)]} {
     set env(CCC_OVERRIDE_OPTIONS) "#\

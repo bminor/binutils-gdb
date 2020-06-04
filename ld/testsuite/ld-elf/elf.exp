@@ -121,7 +121,6 @@ if [is_underscore_target] {
     set ASFLAGS "$ASFLAGS --defsym UNDERSCORE=1"
 }
 
-global ASFLAGS
 set saved_ASFLAGS "$ASFLAGS"
 if { [istarget "i?86-*-*"] || [istarget "x86_64-*-*"] } {
     set ASFLAGS "$ASFLAGS -mx86-used-note=no"

@@ -29,16 +29,10 @@ if { ![check_plugin_api_available]
     return
 }
 
-global INT128_CFLAGS
-
-global CFLAGS
-global CXXFLAGS
 set saved_CFLAGS "$CFLAGS"
 set saved_CXXFLAGS "$CXXFLAGS"
 regsub -all "(\\-Wp,)?-D_FORTIFY_SOURCE=\[0-9\]+" $CFLAGS "" CFLAGS
 regsub -all "(\\-Wp,)?-D_FORTIFY_SOURCE=\[0-9\]+" $CXXFLAGS "" CXXFLAGS
-
-global NOSANTIZE_CFLAGS
 
 proc restore_notify { } {
   global saved_CFLAGS

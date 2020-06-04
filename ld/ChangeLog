@@ -1,5 +1,46 @@
 2020-06-04  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/config/default.exp: Remove global directive outside
+	proc body.
+	* testsuite/ld-bootstrap/bootstrap.exp: Likewise.
+	* testsuite/ld-elf/compress.exp: Likewise.
+	* testsuite/ld-elf/elf.exp: Likewise.
+	* testsuite/ld-elf/exclude.exp: Likewise.
+	* testsuite/ld-elf/frame.exp: Likewise.
+	* testsuite/ld-elf/indirect.exp: Likewise.
+	* testsuite/ld-elf/linux-x86.exp: Likewise.
+	* testsuite/ld-elf/shared.exp: Likewise.
+	* testsuite/ld-elf/tls.exp: Likewise.
+	* testsuite/ld-elf/tls_common.exp: Likewise.
+	* testsuite/ld-elfcomm/elfcomm.exp: Likewise.
+	* testsuite/ld-elfweak/elfweak.exp: Likewise.
+	* testsuite/ld-frv/fdpic.exp: Likewise.
+	* testsuite/ld-frv/tls.exp: Likewise.
+	* testsuite/ld-gc/gc.exp: Likewise.
+	* testsuite/ld-i386/i386.exp: Likewise.
+	* testsuite/ld-i386/no-plt.exp: Likewise.
+	* testsuite/ld-ifunc/ifunc.exp: Likewise.
+	* testsuite/ld-mips-elf/mips-elf-flags.exp: Likewise.
+	* testsuite/ld-nios2/nios2.exp: Likewise.
+	* testsuite/ld-plugin/lto.exp: Likewise.
+	* testsuite/ld-plugin/plugin.exp: Likewise.
+	* testsuite/ld-powerpc/export-class.exp: Likewise.
+	* testsuite/ld-scripts/align.exp: Likewise.
+	* testsuite/ld-scripts/crossref.exp: Likewise.
+	* testsuite/ld-scripts/defined.exp: Likewise.
+	* testsuite/ld-scripts/overlay-size.exp: Likewise.
+	* testsuite/ld-scripts/provide.exp: Likewise.
+	* testsuite/ld-scripts/weak.exp: Likewise.
+	* testsuite/ld-selective/selective.exp: Likewise.
+	* testsuite/ld-sh/rd-sh.exp: Likewise.
+	* testsuite/ld-size/size.exp: Likewise.
+	* testsuite/ld-srec/srec.exp: Likewise.
+	* testsuite/ld-x86-64/mpx.exp: Likewise.
+	* testsuite/ld-x86-64/no-plt.exp: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+
+2020-06-04  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-dynamic/export-dynamic-symbol-2.d: Match output for
 	mips-sgi-irix6.
 	* testsuite/ld-dynamic/export-dynamic-symbol-glob.d: Likewise.

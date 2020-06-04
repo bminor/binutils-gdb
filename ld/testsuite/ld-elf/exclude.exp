@@ -39,12 +39,6 @@ if { [istarget "tic6x-*-*"] } {
     set as_opt "-mpic -mpid=near"
 }
 
-global ar
-global as
-global ld
-global nm
-global nm_output
-
 set test1 "ld link shared library"
 set test2 "ld export symbols from archive"
 set test3 "ld link shared library with --exclude-libs"

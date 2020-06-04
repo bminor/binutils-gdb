@@ -19,7 +19,6 @@
 # MA 02110-1301, USA.
 #
 
-global ASFLAGS
 set saved_ASFLAGS "$ASFLAGS"
 if { [is_elf_format] \
      && ([istarget "i?86-*-*"] || [istarget "x86_64-*-*"]) } {
@@ -580,9 +579,6 @@ proc undefined_weak {cflags ldflags} {
 	pass $testname
     }
 }
-
-# Add $PLT_CFLAGS if PLT is expected.
-global PLT_CFLAGS
 
 # Must be Linux native with the C compiler
 if { [isnative]
@@ -1192,8 +1188,6 @@ if { [isnative]
     undefined_weak "-fPIE" "-z nodynamic-undefined-weak $NOPIE_LDFLAGS"
     undefined_weak "-fPIE" "-pie -z nodynamic-undefined-weak"
 }
-
-global NOPIE_CFLAGS NOPIE_LDFLAGS
 
 # Must be native with the C compiler and working IFUNC support,
 if { [isnative]

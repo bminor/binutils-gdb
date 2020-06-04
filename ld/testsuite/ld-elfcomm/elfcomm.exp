@@ -177,9 +177,6 @@ if {   ![ld_compile "$CC $CFLAGS -fcommon" $srcdir/$subdir/common1a.c tmpdir/com
     return
 }
 
-global ld
-global link_output
-
 set options "-r tmpdir/common1a.o tmpdir/common1b.o"
 
 if { [ld_link $ld tmpdir/common1.o $options] } {

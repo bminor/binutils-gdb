@@ -29,8 +29,6 @@ if ![isnative] {
     return
 }
 
-global STATIC_LDFLAGS
-
 # Determine if plugin support is present.
 remote_exec host "$nm --help" "" "/dev/null" "plugin-support"
 set tmp [file_contents "plugin-support"]

@@ -22,7 +22,6 @@ if ![is_elf_format] {
     return
 }
 
-global ASFLAGS
 set saved_ASFLAGS "$ASFLAGS"
 if { [is_elf_format] \
      && ([istarget "i?86-*-*"] || [istarget "x86_64-*-*"]) } {

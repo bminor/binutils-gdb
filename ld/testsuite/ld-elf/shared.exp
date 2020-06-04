@@ -31,10 +31,6 @@ if ![check_shared_lib_support] {
     return
 }
 
-# Add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if non-PIE is required.
-global NOPIE_CFLAGS NOPIE_LDFLAGS
-global NOSANTIZE_CFLAGS
-
 set old_ASFLAGS $ASFLAGS
 
 # This target requires extra GAS options when building code for shared

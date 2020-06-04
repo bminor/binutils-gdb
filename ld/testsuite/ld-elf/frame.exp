@@ -55,9 +55,6 @@ if { [istarget "tic6x-*-*"] } {
 set test1	"read-only .eh_frame section"
 set test2	"read-only .gcc_except_table section"
 
-global as
-global ld
-
 if { ![ld_assemble_flags $as $as_opt $srcdir/$subdir/tbss.s tmpdir/tbss.o ]
      || ![ld_assemble_flags $as $as_opt $srcdir/$subdir/frame.s tmpdir/frame.o] } {
     unresolved "$test1"

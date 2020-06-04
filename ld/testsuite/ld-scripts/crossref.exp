@@ -38,12 +38,10 @@ if { ![check_compiler_available] } {
     return
 }
 
-global CFLAGS
 set old_CFLAGS "$CFLAGS"
 
 # Pass -fplt to CC since -fno-plt doesn't work with NOCROSSREFS tests.
 # Also add $NOPIE_CFLAGS since PIE doesn't work NOCROSSREFS tests.
-global PLT_CFLAGS NOPIE_CFLAGS
 set old_CC "$CC"
 set CC "$CC $PLT_CFLAGS $NOPIE_CFLAGS"
 

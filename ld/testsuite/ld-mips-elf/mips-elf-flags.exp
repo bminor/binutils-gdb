@@ -21,7 +21,6 @@ if {![istarget mips*-*-*] || ![is_elf_format]} {
     return
 }
 
-global ldemul
 if {[istarget mips*-*-irix6*]} {
     set ldemul "-melf32bsmip"
 } elseif {[istarget mips*el-*-linux*]} {

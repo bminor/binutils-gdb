@@ -352,7 +352,6 @@ if { ![check_compiler_available] } {
 # tests. Also add $NOPIE_CFLAGS and $NOPIE_LDFLAGS if PIE doesn't work
 # with S-records.  Also add $NOCF_PROTECTION_CFLAGS for S-records.
 # Also add $NOSANTIZE_CFLAGS for S-records.
-global PLT_CFLAGS NOPIE_CFLAGS NOPIE_LDFLAGS NOCF_PROTECTION_CFLAGS NOSANTIZE_CFLAGS
 set old_CC "$CC"
 set CC "$CC $PLT_CFLAGS $NOPIE_CFLAGS $NOPIE_LDFLAGS $NOCF_PROTECTION_CFLAGS $NOSANTIZE_CFLAGS"
 set old_CXX "$CXX"

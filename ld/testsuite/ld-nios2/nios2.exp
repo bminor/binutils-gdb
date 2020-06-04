@@ -6,9 +6,6 @@ foreach test [lsort [glob -nocomplain $srcdir/$subdir/*.d]] {
     run_dump_test [file rootname $test]
 }
 
-global link_output
-global ld
-
 set test_name "NIOS2 Mixed R1 and R2 objects"
 set test mixed1
 

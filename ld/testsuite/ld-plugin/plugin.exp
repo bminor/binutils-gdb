@@ -34,8 +34,6 @@ if { ![check_compiler_available] } {
 
 pass "plugin API enabled"
 
-global base_dir
-
 # Look for the name we can dlopen in the test plugin's libtool control script.
 set plugin_name [file_contents "$base_dir/libldtestplug.la"]
 set plugin_name [regsub "'.*" [regsub ".*dlname='" "$plugin_name" ""] ""]
@@ -95,7 +93,6 @@ if { [istarget m681*-*-*] || [istarget m68hc1*-*-*] || [istarget m9s12x*-*-*] } 
 set failed_compile 0
 set _ ""
 set plugin_nm_output ""
-global NOSANTIZE_CFLAGS
 set old_CFLAGS "$CFLAGS"
 append CFLAGS " $NOSANTIZE_CFLAGS"
 if { $can_compile && \
