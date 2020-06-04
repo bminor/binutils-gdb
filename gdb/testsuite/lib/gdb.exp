@@ -1761,6 +1761,7 @@ proc gdb_file_cmd { arg } {
     }
 
     send_gdb "file $arg\n"
+    set new_symbol_table 0
     gdb_expect 120 {
 	-re "Reading symbols from.*LZMA support was disabled.*$gdb_prompt $" {
 	    verbose "\t\tLoaded $arg into $GDB; .gnu_debugdata found but no LZMA available"
@@ -1778,22 +1779,14 @@ proc gdb_file_cmd { arg } {
 	    return 0
         }
         -re "Load new symbol table from \".*\".*y or n. $" {
+	    if { $new_symbol_table > 0 } {
+		perror "Couldn't load $arg, interactive prompt loop detected."
+		return -1
+	    }
             send_gdb "y\n" answer
-            gdb_expect 120 {
-                -re "Reading symbols from.*$gdb_prompt $" {
-                    verbose "\t\tLoaded $arg with new symbol table into $GDB"
-		    set gdb_file_cmd_debug_info "debug"
-		    return 0
-                }
-                timeout {
-                    perror "Couldn't load $arg, other program already loaded (timeout)."
-		    return -1
-                }
-		eof {
-		    perror "Couldn't load $arg, other program already loaded (eof)."
-		    return -1
-		}
-            }
+	    incr new_symbol_table
+	    set arg "$arg -- with new symbol table"
+	    exp_continue
 	}
         -re "No such file or directory.*$gdb_prompt $" {
             perror "($arg) No such file or directory"
