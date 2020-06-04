@@ -3956,8 +3956,16 @@ _bfd_elf_link_check_relocs (bfd *abfd, struct bfd_link_info *info)
 	  Elf_Internal_Rela *internal_relocs;
 	  bfd_boolean ok;
 
-	  /* Don't check relocations in excluded sections.  */
-	  if ((o->flags & SEC_RELOC) == 0
+	  /* Don't check relocations in excluded sections.  Don't do
+	     anything special with non-loaded, non-alloced sections.
+	     In particular, any relocs in such sections should not
+	     affect GOT and PLT reference counting (ie.  we don't
+	     allow them to create GOT or PLT entries), there's no
+	     possibility or desire to optimize TLS relocs, and
+	     there's not much point in propagating relocs to shared
+	     libs that the dynamic linker won't relocate.  */
+	  if ((o->flags & SEC_ALLOC) == 0
+	      || (o->flags & SEC_RELOC) == 0
 	      || (o->flags & SEC_EXCLUDE) != 0
 	      || o->reloc_count == 0
 	      || ((info->strip == strip_all || info->strip == strip_debugger)

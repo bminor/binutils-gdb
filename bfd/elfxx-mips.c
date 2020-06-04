@@ -8654,10 +8654,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       call_reloc_p = FALSE;
 
       /* Set CONSTRAIN_SYMBOL_P if we need to take the relocation
-	 into account when deciding how to define the symbol.
-	 Relocations in nonallocatable sections such as .pdr and
-	 .debug* should have no effect.  */
-      constrain_symbol_p = ((sec->flags & SEC_ALLOC) != 0);
+	 into account when deciding how to define the symbol.  */
+      constrain_symbol_p = TRUE;
 
       switch (r_type)
 	{

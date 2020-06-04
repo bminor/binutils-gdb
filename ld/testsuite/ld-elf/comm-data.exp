@@ -79,12 +79,6 @@ setup_xfail "bfin-*-*"
 
 setup_xfail "arm*-*-*" "ld/13802"
 
-# List targets here that keep copy relocs rather than eliminating
-# them where possible in favour to dynamic relocs in the relevant
-# loadable sections; see also the "-z nocopyreloc" command-line
-# option and the ELIMINATE_COPY_RELOCS macro some backends use.
-set copy_reloc [expr [istarget mn10300-*-*] || [istarget vax-*-*]]
-
 # Verify that a common symbol has been converted to an undefined
 # reference to the global symbol of the same name defined above
 # and that the debug reference has been dropped.
@@ -95,12 +89,9 @@ run_ld_link_tests [list \
 	"$AFLAGS" \
 	{ comm-data2.s } \
 	[list \
-	    [list readelf -s \
-		[expr { $copy_reloc ? "comm-data2r.sd" : "comm-data2.sd"}]] \
-	    [list readelf -r \
-		[expr { $copy_reloc ? "comm-data2r.rd" : "comm-data2.rd"}]] \
-	    [list readelf "-x .debug_foo" \
-		[expr { $copy_reloc ? "comm-data2r.xd" : "comm-data2.xd"}]]] \
+	    [list readelf -s comm-data2.sd] \
+	    [list readelf -r comm-data2.rd] \
+	    [list readelf "-x .debug_foo" comm-data2.xd]] \
 	"comm-data" \
     ] \
     [list \

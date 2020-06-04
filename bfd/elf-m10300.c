@@ -2066,12 +2066,12 @@ mn10300_elf_relocate_section (bfd *output_bfd,
 		      && elf_hash_table (info)->dynamic_sections_created
 		      && !SYMBOL_REFERENCES_LOCAL (info, hh))
 		  || (r_type == R_MN10300_32
+		      && !SYMBOL_REFERENCES_LOCAL (info, hh)
 		      /* _32 relocs in executables force _COPY relocs,
 			 such that the address of the symbol ends up
 			 being local.  */
-		      && !bfd_link_executable (info)
-		      && !SYMBOL_REFERENCES_LOCAL (info, hh)
-		      && ((input_section->flags & SEC_ALLOC) != 0
+		      && (((input_section->flags & SEC_ALLOC) != 0
+			   && !bfd_link_executable (info))
 			  /* DWARF will emit R_MN10300_32 relocations
 			     in its sections against symbols defined
 			     externally in shared libraries.  We can't

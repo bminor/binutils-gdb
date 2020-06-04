@@ -2888,15 +2888,6 @@ ppc_elf_check_relocs (bfd *abfd,
   if (bfd_link_relocatable (info))
     return TRUE;
 
-  /* Don't do anything special with non-loaded, non-alloced sections.
-     In particular, any relocs in such sections should not affect GOT
-     and PLT reference counting (ie. we don't allow them to create GOT
-     or PLT entries), there's no possibility or desire to optimize TLS
-     relocs, and there's not much point in propagating relocs to shared
-     libs that the dynamic linker won't relocate.  */
-  if ((sec->flags & SEC_ALLOC) == 0)
-    return TRUE;
-
 #ifdef DEBUG
   _bfd_error_handler ("ppc_elf_check_relocs called for section %pA in %pB",
 		      sec, abfd);

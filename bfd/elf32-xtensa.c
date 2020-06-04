@@ -1039,7 +1039,7 @@ elf_xtensa_check_relocs (bfd *abfd,
   const Elf_Internal_Rela *rel;
   const Elf_Internal_Rela *rel_end;
 
-  if (bfd_link_relocatable (info) || (sec->flags & SEC_ALLOC) == 0)
+  if (bfd_link_relocatable (info))
     return TRUE;
 
   BFD_ASSERT (is_xtensa_elf (abfd));

@@ -1,3 +1,28 @@
+2020-06-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26080
+	* elf-m10300.c (mn10300_elf_relocate_section): Resolve relocation
+	in debug section against symbol defined in shared library to 0.
+	* elf32-i386.c (elf_i386_check_relocs): Remove SEC_ALLOC check.
+	* elf32-lm32.c (lm32_elf_check_relocs): Likewise.
+	* elf32-m32r.c (m32r_elf_check_relocs): Likewise.
+	* elf32-nds32.c (nds32_elf_check_relocs): Likewise.
+	* elf32-nios2.c (nios2_elf32_check_relocs): Likewise.
+	* elf32-or1k.c (or1k_elf_check_relocs): Likewise.
+	* elf32-ppc.c (ppc_elf_check_relocs): Likewise.
+	* elf32-sh.c (sh_elf_check_relocs): Likewise.
+	* elf32-xtensa.c (elf_xtensa_check_relocs): Likewise.
+	* elf64-alpha.c (elf64_alpha_check_relocs): Likewise.
+	* elf64-ppc.c (ppc64_elf_check_relocs): Likewise.
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Likewise.
+	* elf32-vax.c (elf_vax_check_relocs): Set non_got_ref for non-GOT
+	reference.
+	(elf_vax_adjust_dynamic_symbol): Generate a copy reloc only if
+	there is non-GOT reference.
+	* elflink.c (_bfd_elf_link_check_relocs): Skip non-loaded,
+	non-alloced sections.
+
 2020-06-03  Stephen Casner  <casner@acm.org>
 
 	Copy several years of fixes from bfd/aoutx.h to bfd/pdp11.c.

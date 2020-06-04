@@ -712,6 +712,11 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 		h->plt.refcount++;
 	    }
 
+	  /* Non-GOT reference may need a copy reloc in executable or
+	     a dynamic reloc in shared library.  */
+	  if (h != NULL)
+	    h->non_got_ref = 1;
+
 	  /* If we are creating a shared library, we need to copy the
 	     reloc into the shared library.  */
 	  if (bfd_link_pic (info)
@@ -927,6 +932,11 @@ elf_vax_adjust_dynamic_symbol (struct bfd_link_info *info,
      For such cases we need not do anything here; the relocations will
      be handled correctly by relocate_section.  */
   if (bfd_link_pic (info))
+    return TRUE;
+
+  /* If there are no references to this symbol that do not use the
+     GOT relocation, we don't need to generate a copy reloc.  */
+  if (!h->non_got_ref)
     return TRUE;
 
   /* We must allocate the symbol in our .dynbss section, which will
