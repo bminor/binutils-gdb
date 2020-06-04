@@ -660,6 +660,7 @@ disassemble_init_for_target (struct disassemble_info * info)
 #endif
 #ifdef ARCH_bpf
     case bfd_arch_bpf:
+      info->endian_code = BFD_ENDIAN_LITTLE;
       if (!info->private_data)
 	{
 	  info->private_data = cgen_bitset_create (ISA_EBPFMAX);

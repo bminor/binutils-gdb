@@ -1,5 +1,11 @@
 2020-06-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* config/tc-bpf.c (md_begin): Pass CGEN_CPU_OPEN_INSN_ENDIAN to
+	bpf_cgen_cpu_open.
+	(md_assemble): Remove no longer needed hack.
+
+2020-06-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* cgen.c (gas_cgen_finish_insn): Pass the endianness to
 	cgen_put_insn_value.
 	(gas_cgen_md_apply_fix): Likewise.

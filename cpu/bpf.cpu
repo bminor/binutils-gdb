@@ -98,13 +98,9 @@
     ;; Length of an unknown instruction.  Used by disassembly and by the
     ;; simulator's invalid insn handler.
     (default-insn-bitsize 64)
-    ;; Number of bits of insn that can be initially fetched.  XXX this
-    ;; should be 64 (the size of the smallest insn) but until CGEN
-    ;; gets fixed to place constant fields in their own words, we have
-    ;; to use this workaround to avoid the opcode byte to be placed at
-    ;; the wrong side of the instruction when assembling in
-    ;; big-endian.
-    (base-insn-bitsize 8)))
+    ;; Number of bits of insn that can be initially fetched.  This is
+    ;; the size of the smallest insn.
+    (base-insn-bitsize 64)))
 
 (define-bpf-isa le)
 (define-bpf-isa be)

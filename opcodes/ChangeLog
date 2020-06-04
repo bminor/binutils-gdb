@@ -1,3 +1,11 @@
+2020-06-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* disassemble.c (disassemble_init_for_target): Set endian_code for
+	bpf targets.
+	* bpf-desc.c: Regenerate.
+	* bpf-opc.c: Likewise.
+	* bpf-dis.c: Likewise.
+
 2020-06-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* cgen-opc.c (cgen_get_insn_value): Get an `endian' argument.

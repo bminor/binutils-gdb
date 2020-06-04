@@ -1,5 +1,10 @@
 2020-06-02  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	* bpf.cpu (define-bpf-isa): Set base-insn-bitsize to 64.
+	* bpf.opc (bpf_print_insn): Do not set endian_code here.
+
+2020-06-02  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* mep.opc (print_slot_insn): Pass the insn endianness to
 	cgen_get_insn_value.
 

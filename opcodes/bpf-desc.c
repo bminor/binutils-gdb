@@ -119,8 +119,8 @@ const CGEN_ATTR_TABLE bpf_cgen_insn_attr_table[] =
 /* Instruction set variants.  */
 
 static const CGEN_ISA bpf_cgen_isa_table[] = {
-  { "ebpfle", 64, 8, 64, 128 },
-  { "ebpfbe", 64, 8, 64, 128 },
+  { "ebpfle", 64, 64, 64, 128 },
+  { "ebpfbe", 64, 64, 64, 128 },
   { 0, 0, 0, 0, 0 }
 };
 
