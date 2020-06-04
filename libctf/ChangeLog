@@ -1,5 +1,11 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-types.c (ctf_type_aname): Print arg types here...
+	* ctf-dump.c (ctf_dump_funcs): ... not here: but do substitute
+	in the type name here.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_assert): New.
 	(ctf_err_warning_t): Likewise.
 	(ctf_file_t) <ctf_errs_warnings>: Likewise.

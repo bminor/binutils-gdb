@@ -397,13 +397,11 @@ ctf_dump_funcs (ctf_file_t *fp, ctf_dump_state_t *state)
   for (i = 0; i < fp->ctf_nsyms; i++)
     {
       char *str;
-      char *bit;
+      char *bit = NULL;
       const char *err;
       const char *sym_name;
       ctf_funcinfo_t fi;
       ctf_id_t type;
-      size_t j;
-      ctf_id_t *args;
 
       if ((type = ctf_func_info (state->cds_fp, i, &fi)) == CTF_ERR)
 	switch (ctf_errno (state->cds_fp))
@@ -418,74 +416,65 @@ ctf_dump_funcs (ctf_file_t *fp, ctf_dump_state_t *state)
 	  case ECTF_NOFUNCDAT:
 	    continue;
 	  }
-      if ((args = calloc (fi.ctc_argc, sizeof (ctf_id_t))) == NULL)
-	return (ctf_set_errno (fp, ENOMEM));
 
-      /* Return type.  */
-      if ((str = ctf_type_aname (state->cds_fp, type)) == NULL)
+      /* Return type and all args.  */
+      if ((bit = ctf_type_aname (state->cds_fp, type)) == NULL)
 	{
 	  err = "look up return type";
 	  goto err;
 	}
 
-      str = str_append (str, " ");
-
-      /* Function name.  */
+      /* Replace in the returned string, dropping in the function name.  */
 
       sym_name = ctf_lookup_symbol_name (fp, i);
-      if (sym_name[0] == '\0')
+      if (sym_name[0] != '\0')
 	{
-	  if (asprintf (&bit, "0x%lx ", (unsigned long) i) < 0)
+	  char *retstar;
+	  char *new_bit;
+	  char *walk;
+
+	  new_bit = malloc (strlen (bit) + 1 + strlen (sym_name));
+	  if (!new_bit)
 	    goto oom;
+
+	  /* See ctf_type_aname.  */
+	  retstar = strstr (bit, "(*) (");
+	  if (!ctf_assert (fp, retstar))
+	    goto assert_err;
+	  retstar += 2;			/* After the '*' */
+
+	  /* C is not good at search-and-replace.  */
+	  walk = new_bit;
+	  memcpy (walk, bit, retstar - bit);
+	  walk += (retstar - bit);
+	  strcpy (walk, sym_name);
+	  walk += strlen (sym_name);
+	  strcpy (walk, retstar);
+
+	  free (bit);
+	  bit = new_bit;
 	}
-      else
-	{
-	  if (asprintf (&bit, "%s (0x%lx) ", sym_name, (unsigned long) i) < 0)
-	    goto oom;
-	}
-      str = str_append (str, bit);
-      str = str_append (str, " (");
+
+      if (asprintf (&str, "Symbol 0x%lx: %s", (unsigned long) i, bit) < 0)
+	goto oom;
       free (bit);
 
-      /* Function arguments.  */
-
-      if (ctf_func_args (state->cds_fp, i, fi.ctc_argc, args) < 0)
-	{
-	  err = "look up argument type";
-	  goto err;
-	}
-
-      for (j = 0; j < fi.ctc_argc; j++)
-	{
-	  if ((bit = ctf_type_aname (state->cds_fp, args[j])) == NULL)
-	    {
-	      err = "look up argument type name";
-	      goto err;
-	    }
-	  str = str_append (str, bit);
-	  if ((j < fi.ctc_argc - 1) || (fi.ctc_flags & CTF_FUNC_VARARG))
-	    str = str_append (str, ", ");
-	  free (bit);
-	}
-
-      if (fi.ctc_flags & CTF_FUNC_VARARG)
-	str = str_append (str, "...");
-      str = str_append (str, ")");
-
-      free (args);
       ctf_dump_append (state, str);
       continue;
 
-    oom:
-      free (args);
-      free (str);
-      return (ctf_set_errno (fp, errno));
     err:
-      ctf_dprintf ("Cannot %s dumping function type for symbol 0x%li: %s\n",
-		   err, (unsigned long) i,
-		   ctf_errmsg (ctf_errno (state->cds_fp)));
-      free (args);
-      free (str);
+      ctf_err_warn (fp, 1, "Cannot %s dumping function type for "
+		    "symbol 0x%li: %s", err, (unsigned long) i,
+		    ctf_errmsg (ctf_errno (state->cds_fp)));
+      free (bit);
+      return -1;		/* errno is set for us.  */
+
+    oom:
+      free (bit);
+      return (ctf_set_errno (fp, errno));
+
+    assert_err:
+      free (bit);
       return -1;		/* errno is set for us.  */
     }
   return 0;

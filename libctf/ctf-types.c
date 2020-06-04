@@ -745,7 +745,51 @@ ctf_type_aname (ctf_file_t *fp, ctf_id_t type)
 	      ctf_decl_sprintf (&cd, "[%u]", cdp->cd_n);
 	      break;
 	    case CTF_K_FUNCTION:
-	      ctf_decl_sprintf (&cd, "()");
+	      {
+		size_t i;
+		ctf_funcinfo_t fi;
+		ctf_id_t *argv = NULL;
+
+		if (ctf_func_type_info (rfp, cdp->cd_type, &fi) < 0)
+		  goto err;		/* errno is set for us.  */
+
+		if ((argv = calloc (fi.ctc_argc, sizeof (ctf_id_t *))) == NULL)
+		  {
+		    ctf_set_errno (rfp, errno);
+		    goto err;
+		  }
+
+		if (ctf_func_type_args (rfp, cdp->cd_type,
+					fi.ctc_argc, argv) < 0)
+		  goto err;		/* errno is set for us.  */
+
+		ctf_decl_sprintf (&cd, "(*) (");
+		for (i = 0; i < fi.ctc_argc; i++)
+		  {
+		    char *arg = ctf_type_aname (rfp, argv[i]);
+
+		    if (arg == NULL)
+		      goto err;		/* errno is set for us.  */
+		    ctf_decl_sprintf (&cd, "%s", arg);
+		    free (arg);
+
+		    if ((i < fi.ctc_argc - 1)
+			|| (fi.ctc_flags & CTF_FUNC_VARARG))
+		      ctf_decl_sprintf (&cd, ", ");
+		  }
+
+		if (fi.ctc_flags & CTF_FUNC_VARARG)
+		  ctf_decl_sprintf (&cd, "...");
+		ctf_decl_sprintf (&cd, ")");
+
+		free (argv);
+		break;
+
+	      err:
+		free (argv);
+		ctf_decl_fini (&cd);
+		return NULL;
+	      }
 	      break;
 	    case CTF_K_STRUCT:
 	    case CTF_K_FORWARD:
