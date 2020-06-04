@@ -1494,7 +1494,7 @@ NAME (aout, make_empty_symbol) (bfd *abfd)
   return &new_symbol_type->symbol;
 }
 
-/* Translate a set of internal symbols into external symbols.  */
+/* Translate a set of external symbols into internal symbols.  */
 
 bfd_boolean
 NAME (aout, translate_symbol_table) (bfd *abfd,
