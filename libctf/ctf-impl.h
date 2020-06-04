@@ -291,6 +291,7 @@ struct ctf_file
   const char *ctf_cuname;	  /* Compilation unit name (if any).  */
   char *ctf_dyncuname;		  /* Dynamically allocated name of CU.  */
   struct ctf_file *ctf_parent;	  /* Parent CTF container (if any).  */
+  int ctf_parent_unreffed;	  /* Parent set by ctf_import_unref?  */
   const char *ctf_parlabel;	  /* Label in parent container (if any).  */
   const char *ctf_parname;	  /* Basename of parent (if any).  */
   char *ctf_dynparname;		  /* Dynamically allocated name of parent.  */
@@ -536,6 +537,7 @@ extern ctf_file_t *ctf_simple_open_internal (const char *, size_t, const char *,
 extern ctf_file_t *ctf_bufopen_internal (const ctf_sect_t *, const ctf_sect_t *,
 					 const ctf_sect_t *, ctf_dynhash_t *,
 					 int, int *);
+extern int ctf_import_unref (ctf_file_t *fp, ctf_file_t *pfp);
 extern int ctf_serialize (ctf_file_t *);
 
 _libctf_malloc_

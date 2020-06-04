@@ -1657,9 +1657,17 @@ ctf_file_close (ctf_file_t *fp)
       return;
     }
 
+  /* It is possible to recurse back in here, notably if dicts in the
+     ctf_link_inputs or ctf_link_outputs cite this dict as a parent without
+     using ctf_import_unref.  Do nothing in that case.  */
+  if (fp->ctf_refcnt == 0)
+    return;
+
+  fp->ctf_refcnt--;
   free (fp->ctf_dyncuname);
   free (fp->ctf_dynparname);
-  ctf_file_close (fp->ctf_parent);
+  if (fp->ctf_parent && !fp->ctf_parent_unreffed)
+    ctf_file_close (fp->ctf_parent);
 
   for (dtd = ctf_list_next (&fp->ctf_dtdefs); dtd != NULL; dtd = ntd)
     {
@@ -1816,12 +1824,9 @@ ctf_import (ctf_file_t *fp, ctf_file_t *pfp)
   if (pfp != NULL && pfp->ctf_dmodel != fp->ctf_dmodel)
     return (ctf_set_errno (fp, ECTF_DMODEL));
 
-  if (fp->ctf_parent != NULL)
-    {
-      fp->ctf_parent->ctf_refcnt--;
-      ctf_file_close (fp->ctf_parent);
-      fp->ctf_parent = NULL;
-    }
+  if (fp->ctf_parent && !fp->ctf_parent_unreffed)
+    ctf_file_close (fp->ctf_parent);
+  fp->ctf_parent = NULL;
 
   if (pfp != NULL)
     {
@@ -1833,6 +1838,40 @@ ctf_import (ctf_file_t *fp, ctf_file_t *pfp)
 
       fp->ctf_flags |= LCTF_CHILD;
       pfp->ctf_refcnt++;
+      fp->ctf_parent_unreffed = 0;
+    }
+
+  fp->ctf_parent = pfp;
+  return 0;
+}
+
+/* Like ctf_import, but does not increment the refcount on the imported parent
+   or close it at any point: as a result it can go away at any time and the
+   caller must do all freeing itself.  Used internally to avoid refcount
+   loops.  */
+int
+ctf_import_unref (ctf_file_t *fp, ctf_file_t *pfp)
+{
+  if (fp == NULL || fp == pfp || (pfp != NULL && pfp->ctf_refcnt == 0))
+    return (ctf_set_errno (fp, EINVAL));
+
+  if (pfp != NULL && pfp->ctf_dmodel != fp->ctf_dmodel)
+    return (ctf_set_errno (fp, ECTF_DMODEL));
+
+  if (fp->ctf_parent && !fp->ctf_parent_unreffed)
+    ctf_file_close (fp->ctf_parent);
+  fp->ctf_parent = NULL;
+
+  if (pfp != NULL)
+    {
+      int err;
+
+      if (fp->ctf_parname == NULL)
+	if ((err = ctf_parent_name_set (fp, "PARENT")) < 0)
+	  return err;
+
+      fp->ctf_flags |= LCTF_CHILD;
+      fp->ctf_parent_unreffed = 1;
     }
 
   fp->ctf_parent = pfp;

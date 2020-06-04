@@ -516,8 +516,9 @@ ctf_serialize (ctf_file_t *fp)
     }
 
   (void) ctf_setmodel (nfp, ctf_getmodel (fp));
-  (void) ctf_import (nfp, fp->ctf_parent);
 
+  nfp->ctf_parent = fp->ctf_parent;
+  nfp->ctf_parent_unreffed = fp->ctf_parent_unreffed;
   nfp->ctf_refcnt = fp->ctf_refcnt;
   nfp->ctf_flags |= fp->ctf_flags & ~LCTF_DIRTY;
   if (nfp->ctf_dynbase == NULL)
@@ -565,6 +566,7 @@ ctf_serialize (ctf_file_t *fp)
   fp->ctf_syn_ext_strtab = NULL;
   fp->ctf_link_cu_mapping = NULL;
   fp->ctf_link_type_mapping = NULL;
+  fp->ctf_parent_unreffed = 1;
 
   fp->ctf_dvhash = NULL;
   memset (&fp->ctf_dvdefs, 0, sizeof (ctf_list_t));

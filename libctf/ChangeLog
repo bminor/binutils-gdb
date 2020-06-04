@@ -1,5 +1,21 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.c (ctf_file_t) <ctf_parent_unreffed>: New.
+	(ctf_import_unref): New.
+	* ctf-open.c (ctf_file_close) Drop the refcount all the way to
+	zero.  Don't recurse back in if the refcount is already zero.
+	(ctf_import): Check ctf_parent_unreffed before deciding whether
+	to close a pre-existing parent.  Set it to zero.
+	(ctf_import_unreffed): New, as above, setting
+	ctf_parent_unreffed to 1.
+	* ctf-create.c (ctf_serialize): Do not ctf_import into the new
+	child: use direct assignment, and set unreffed on the new and
+	old children.
+	* ctf-link.c (ctf_create_per_cu): Import the parent using
+	ctf_import_unreffed.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_link_type_mapping_key): Rename to...
 	(ctf_link_type_key): ... this, adjusting member prefixes to
 	match.

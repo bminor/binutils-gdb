@@ -222,7 +222,7 @@ ctf_create_per_cu (ctf_file_t *fp, const char *filename, const char *cuname)
       if (ctf_dynhash_insert (fp->ctf_link_outputs, dynname, cu_fp) < 0)
 	goto oom;
 
-      ctf_import (cu_fp, fp);
+      ctf_import_unref (cu_fp, fp);
       ctf_cuname_set (cu_fp, cuname);
       ctf_parent_name_set (cu_fp, _CTF_SECTION);
     }
