@@ -3068,9 +3068,10 @@ dwarf2_read_gdb_index
   offset_type cu_list_elements, types_list_elements, dwz_list_elements = 0;
   struct dwz_file *dwz;
   struct objfile *objfile = per_objfile->objfile;
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   gdb::array_view<const gdb_byte> main_index_contents
-    = get_gdb_index_contents (objfile, per_objfile->per_bfd);
+    = get_gdb_index_contents (objfile, per_bfd);
 
   if (main_index_contents.empty ())
     return 0;
@@ -3089,7 +3090,7 @@ dwarf2_read_gdb_index
 
   /* If there is a .dwz file, read it so we can get its CU list as
      well.  */
-  dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
+  dwz = dwarf2_get_dwz_file (per_bfd);
   if (dwz != NULL)
     {
       struct mapped_index dwz_map;
@@ -3114,29 +3115,33 @@ dwarf2_read_gdb_index
 	}
     }
 
-  create_cus_from_index (per_objfile->per_bfd, cu_list, cu_list_elements,
-			 dwz_list, dwz_list_elements);
+  create_cus_from_index (per_bfd, cu_list, cu_list_elements, dwz_list,
+			 dwz_list_elements);
 
   if (types_list_elements)
     {
       /* We can only handle a single .debug_types when we have an
 	 index.  */
-      if (per_objfile->per_bfd->types.size () != 1)
+      if (per_bfd->types.size () != 1)
 	return 0;
 
-      dwarf2_section_info *section = &per_objfile->per_bfd->types[0];
+      dwarf2_section_info *section = &per_bfd->types[0];
 
-      create_signatured_type_table_from_index (per_objfile->per_bfd,
-					       section, types_list,
+      create_signatured_type_table_from_index (per_bfd, section, types_list,
 					       types_list_elements);
     }
 
   create_addrmap_from_index (per_objfile, map.get ());
 
-  per_objfile->per_bfd->index_table = std::move (map);
-  per_objfile->per_bfd->using_index = 1;
-  per_objfile->per_bfd->quick_file_names_table =
-    create_quick_file_names_table (per_objfile->per_bfd->all_comp_units.size ());
+  per_bfd->index_table = std::move (map);
+  per_bfd->using_index = 1;
+  per_bfd->quick_file_names_table =
+    create_quick_file_names_table (per_bfd->all_comp_units.size ());
+
+  /* Save partial symtabs in the per_bfd object, for the benefit of subsequent
+     objfiles using the same BFD.  */
+  gdb_assert (per_bfd->partial_symtabs == nullptr);
+  per_bfd->partial_symtabs = objfile->partial_symtabs;
 
   return 1;
 }
@@ -5205,6 +5210,7 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
   std::unique_ptr<mapped_debug_names> map (new mapped_debug_names);
   mapped_debug_names dwz_map;
   struct objfile *objfile = per_objfile->objfile;
+  dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   if (!read_debug_names_from_section (objfile, objfile_name (objfile),
 				      &per_objfile->per_bfd->debug_names, *map))
@@ -5216,7 +5222,7 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 
   /* If there is a .dwz file, read it so we can get its CU list as
      well.  */
-  dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
+  dwz_file *dwz = dwarf2_get_dwz_file (per_bfd);
   if (dwz != NULL)
     {
       if (!read_debug_names_from_section (objfile,
@@ -5229,28 +5235,32 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 	}
     }
 
-  create_cus_from_debug_names (per_objfile->per_bfd, *map, dwz_map);
+  create_cus_from_debug_names (per_bfd, *map, dwz_map);
 
   if (map->tu_count != 0)
     {
       /* We can only handle a single .debug_types when we have an
 	 index.  */
-      if (per_objfile->per_bfd->types.size () != 1)
+      if (per_bfd->types.size () != 1)
 	return false;
 
-      dwarf2_section_info *section = &per_objfile->per_bfd->types[0];
+      dwarf2_section_info *section = &per_bfd->types[0];
 
       create_signatured_type_table_from_debug_names
-	(per_objfile, *map, section, &per_objfile->per_bfd->abbrev);
+	(per_objfile, *map, section, &per_bfd->abbrev);
     }
 
-  create_addrmap_from_aranges (per_objfile,
-			       &per_objfile->per_bfd->debug_aranges);
+  create_addrmap_from_aranges (per_objfile, &per_bfd->debug_aranges);
 
-  per_objfile->per_bfd->debug_names_table = std::move (map);
-  per_objfile->per_bfd->using_index = 1;
-  per_objfile->per_bfd->quick_file_names_table =
+  per_bfd->debug_names_table = std::move (map);
+  per_bfd->using_index = 1;
+  per_bfd->quick_file_names_table =
     create_quick_file_names_table (per_objfile->per_bfd->all_comp_units.size ());
+
+  /* Save partial symtabs in the per_bfd object, for the benefit of subsequent
+     objfiles using the same BFD.  */
+  gdb_assert (per_bfd->partial_symtabs == nullptr);
+  per_bfd->partial_symtabs = objfile->partial_symtabs;
 
   return true;
 }
@@ -5972,6 +5982,7 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
   if (per_bfd->debug_names_table != nullptr)
     {
       *index_kind = dw_index_kind::DEBUG_NAMES;
+      per_objfile->objfile->partial_symtabs = per_bfd->partial_symtabs;
       per_objfile->resize_symtabs ();
       return true;
     }
@@ -5981,6 +5992,7 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
   if (per_bfd->index_table != nullptr)
     {
       *index_kind = dw_index_kind::GDB_INDEX;
+      per_objfile->objfile->partial_symtabs = per_bfd->partial_symtabs;
       per_objfile->resize_symtabs ();
       return true;
     }
