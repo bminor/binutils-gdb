@@ -4081,6 +4081,9 @@ dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
 			  "Function objects", "Variables", "Types", "Strings",
 			  ""};
   const char **thing;
+  ctf_next_t *it = NULL;
+  char *errtext;
+  int is_warning;
   size_t i;
 
   /* Only print out the name of non-default-named archive members.
@@ -4117,6 +4120,20 @@ dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
 	  break;
 	}
     }
+
+  /* Dump accumulated errors and warnings.  */
+  while ((errtext = ctf_errwarning_next (ctf, &it, &is_warning)) != NULL)
+    {
+      non_fatal (_("%s: `%s'"), is_warning ? _("warning"): _("error"),
+		 errtext);
+      free (errtext);
+    }
+  if (ctf_errno (ctf) != ECTF_NEXT_END)
+    {
+      non_fatal (_("CTF error: cannot get CTF errors: `%s'"),
+		 ctf_errmsg (ctf_errno (ctf)));
+    }
+
   return 0;
 }
 

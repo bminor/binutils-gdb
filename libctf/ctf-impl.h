@@ -70,6 +70,10 @@ extern "C"
 
 #endif
 
+#define ctf_assert(fp, expr)						\
+  _libctf_unlikely_ (ctf_assert_internal (fp, __FILE__, __LINE__,	\
+					  #expr, !!(expr)))
+
 /* libctf in-memory state.  */
 
 typedef struct ctf_fixed_hash ctf_hash_t; /* Private to ctf-hash.c.  */
@@ -195,6 +199,13 @@ typedef struct ctf_bundle
   ctf_dtdef_t *ctb_dtd;		/* CTF dynamic type definition (if any).  */
 } ctf_bundle_t;
 
+typedef struct ctf_err_warning
+{
+  ctf_list_t cew_list;		/* List forward/back pointers.  */
+  int cew_is_warning;		/* 1 if warning, 0 if error.  */
+  char *cew_text;		/* Error/warning text.  */
+} ctf_err_warning_t;
+
 /* Atoms associate strings with a list of the CTF items that reference that
    string, so that ctf_update() can instantiate all the strings using the
    ctf_str_atoms and then reassociate them with the real string later.
@@ -297,6 +308,7 @@ struct ctf_file
   unsigned long ctf_snapshots;	  /* ctf_snapshot() plus ctf_update() count.  */
   unsigned long ctf_snapshot_lu;  /* ctf_snapshot() call count at last update.  */
   ctf_archive_t *ctf_archive;	  /* Archive this ctf_file_t came from.  */
+  ctf_list_t ctf_errs_warnings;	  /* CTF errors and warnings.  */
   ctf_dynhash_t *ctf_link_inputs; /* Inputs to this link.  */
   ctf_dynhash_t *ctf_link_outputs; /* Additional outputs from this link.  */
   ctf_dynhash_t *ctf_link_type_mapping; /* Map input types to output types.  */
@@ -542,6 +554,11 @@ extern int ctf_type_kind_unsliced (ctf_file_t *, ctf_id_t);
 _libctf_printflike_ (1, 2)
 extern void ctf_dprintf (const char *, ...);
 extern void libctf_init_debug (void);
+
+_libctf_printflike_ (3, 4)
+extern void ctf_err_warn (ctf_file_t *, int is_warning, const char *, ...);
+extern void ctf_assert_fail_internal (ctf_file_t *, const char *,
+				      size_t, const char *);
 
 extern Elf64_Sym *ctf_sym_to_elf64 (const Elf32_Sym *src, Elf64_Sym *dst);
 extern const char *ctf_lookup_symbol_name (ctf_file_t *fp, unsigned long symidx);

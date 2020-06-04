@@ -194,3 +194,96 @@ void ctf_dprintf (const char *format, ...)
       va_end (alist);
     }
 }
+
+/* Errors and warnings.  */
+_libctf_printflike_ (3, 4)
+extern void
+ctf_err_warn (ctf_file_t *fp, int is_warning, const char *format, ...)
+{
+  va_list alist;
+  ctf_err_warning_t *cew;
+
+  /* Don't bother reporting errors here: we can't do much about them if they
+     happen.  If we're so short of memory that a tiny malloc doesn't work, a
+     vfprintf isn't going to work either and the caller will have to rely on the
+     ENOMEM return they'll be getting in short order anyway.  */
+
+  if ((cew = malloc (sizeof (ctf_err_warning_t))) == NULL)
+    return;
+
+  cew->cew_is_warning = is_warning;
+  va_start (alist, format);
+  if (vasprintf (&cew->cew_text, format, alist) < 0)
+    {
+      free (cew);
+      va_end (alist);
+      return;
+    }
+  va_end (alist);
+
+  ctf_dprintf ("%s: %s\n", is_warning ? "error" : "warning", cew->cew_text);
+
+  ctf_list_append (&fp->ctf_errs_warnings, cew);
+}
+
+/* Error-warning reporting: an 'iterator' that returns errors and warnings from
+   the error/warning list, in order of emission.  Errors and warnings are popped
+   after return: the caller must free the returned error-text pointer.  */
+char *
+ctf_errwarning_next (ctf_file_t *fp, ctf_next_t **it, int *is_warning)
+{
+  ctf_next_t *i = *it;
+  char *ret;
+  ctf_err_warning_t *cew;
+
+  if (!i)
+    {
+      if ((i = ctf_next_create ()) == NULL)
+	{
+	  ctf_set_errno (fp, ENOMEM);
+	  return NULL;
+	}
+
+      i->cu.ctn_fp = fp;
+      i->ctn_iter_fun = (void (*) (void)) ctf_errwarning_next;
+      *it = i;
+    }
+
+  if ((void (*) (void)) ctf_errwarning_next != i->ctn_iter_fun)
+    {
+      ctf_set_errno (fp, ECTF_NEXT_WRONGFUN);
+      return NULL;
+    }
+
+  if (fp != i->cu.ctn_fp)
+    {
+      ctf_set_errno (fp, ECTF_NEXT_WRONGFP);
+      return NULL;
+    }
+
+  cew = ctf_list_next (&fp->ctf_errs_warnings);
+
+  if (!cew)
+    {
+      ctf_next_destroy (i);
+      *it = NULL;
+      ctf_set_errno (fp, ECTF_NEXT_END);
+      return NULL;
+    }
+
+  if (is_warning)
+    *is_warning = cew->cew_is_warning;
+  ret = cew->cew_text;
+  ctf_list_delete (&fp->ctf_errs_warnings, cew);
+  free (cew);
+  return ret;
+}
+
+void
+ctf_assert_fail_internal (ctf_file_t *fp, const char *file, size_t line,
+			  const char *exprstr)
+{
+  ctf_err_warn (fp, 0, "%s: %lu: libctf assertion failed: %s", file,
+		(long unsigned int) line, exprstr);
+  ctf_set_errno (fp, ECTF_INTERNAL);
+}

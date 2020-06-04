@@ -534,6 +534,7 @@ ctf_serialize (ctf_file_t *fp)
   nfp->ctf_ptrtab_len = fp->ctf_ptrtab_len;
   nfp->ctf_link_inputs = fp->ctf_link_inputs;
   nfp->ctf_link_outputs = fp->ctf_link_outputs;
+  nfp->ctf_errs_warnings = fp->ctf_errs_warnings;
   nfp->ctf_str_prov_offset = fp->ctf_str_prov_offset;
   nfp->ctf_syn_ext_strtab = fp->ctf_syn_ext_strtab;
   nfp->ctf_link_cu_mapping = fp->ctf_link_cu_mapping;
@@ -556,6 +557,7 @@ ctf_serialize (ctf_file_t *fp)
   fp->ctf_str_atoms = NULL;
   fp->ctf_prov_strtab = NULL;
   memset (&fp->ctf_dtdefs, 0, sizeof (ctf_list_t));
+  memset (&fp->ctf_errs_warnings, 0, sizeof (ctf_list_t));
   fp->ctf_add_processing = NULL;
   fp->ctf_ptrtab = NULL;
   fp->ctf_link_inputs = NULL;

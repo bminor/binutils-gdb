@@ -14215,7 +14215,11 @@ dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
 			  "Function objects", "Variables", "Types", "Strings",
 			  ""};
   const char **thing;
+  ctf_next_t *it = NULL;
+  char *errtext;
+  int is_warning;
   size_t i;
+  int err = 0;
 
   /* Only print out the name of non-default-named archive members.
      The name .ctf appears everywhere, even for things that aren't
@@ -14248,10 +14252,25 @@ dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
 	{
 	  error (_("Iteration failed: %s, %s\n"), *thing,
 		 ctf_errmsg (ctf_errno (ctf)));
-	  return 1;
+	  err = 1;
+	  goto out;
 	}
     }
-  return 0;
+
+ out:
+  /* Dump accumulated errors and warnings.  */
+  while ((errtext = ctf_errwarning_next (ctf, &it, &is_warning)) != NULL)
+    {
+      error (_("%s: `%s'\n"), is_warning ? _("warning"): _("error"),
+	     errtext);
+      free (errtext);
+    }
+  if (ctf_errno (ctf) != ECTF_NEXT_END)
+    {
+      error (_("CTF error: cannot get CTF errors: `%s'\n"),
+	     ctf_errmsg (ctf_errno (ctf)));
+    }
+  return err;
 }
 
 static bfd_boolean

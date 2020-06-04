@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (ECTF_INTERNAL): Adjust error text.
+	(ctf_errwarning_next): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ECTF_FLAGS): New.
 	(ECTF_NERR): Adjust.
 	* ctf.h (CTF_F_MAX): New.

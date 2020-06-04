@@ -203,7 +203,7 @@ enum
    ECTF_DUMPSECTUNKNOWN, /* Unknown section number in dump.  */
    ECTF_DUMPSECTCHANGED, /* Section changed in middle of dump.  */
    ECTF_NOTYET,		/* Feature not yet implemented.  */
-   ECTF_INTERNAL,	/* Internal error in link.  */
+   ECTF_INTERNAL,	/* Internal error: assertion failure.  */
    ECTF_NONREPRESENTABLE, /* Type not representable in CTF.  */
    ECTF_NEXT_END,	/* End of iteration.  */
    ECTF_NEXT_WRONGFUN,	/* Wrong iteration function called.  */
@@ -395,6 +395,12 @@ extern int ctf_archive_raw_iter (const ctf_archive_t *,
 extern char *ctf_dump (ctf_file_t *, ctf_dump_state_t **state,
 		       ctf_sect_names_t sect, ctf_dump_decorate_f *,
 		       void *arg);
+
+/* Error-warning reporting: an 'iterator' that returns errors and warnings from
+   the error/warning list, in order of emission.  Errors and warnings are popped
+   after return: the caller must free the returned error-text pointer.  */
+extern char *ctf_errwarning_next (ctf_file_t *, ctf_next_t **,
+				  int *is_warning);
 
 extern ctf_id_t ctf_add_array (ctf_file_t *, uint32_t,
 			       const ctf_arinfo_t *);

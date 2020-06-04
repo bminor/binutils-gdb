@@ -1644,6 +1644,7 @@ ctf_file_close (ctf_file_t *fp)
 {
   ctf_dtdef_t *dtd, *ntd;
   ctf_dvdef_t *dvd, *nvd;
+  ctf_err_warning_t *err, *nerr;
 
   if (fp == NULL)
     return;		   /* Allow ctf_file_close(NULL) to simplify caller code.  */
@@ -1709,6 +1710,14 @@ ctf_file_close (ctf_file_t *fp)
   ctf_dynhash_destroy (fp->ctf_link_type_mapping);
   ctf_dynhash_destroy (fp->ctf_link_cu_mapping);
   ctf_dynhash_destroy (fp->ctf_add_processing);
+
+  for (err = ctf_list_next (&fp->ctf_errs_warnings); err != NULL; err = nerr)
+    {
+      nerr = ctf_list_next (err);
+      ctf_list_delete (&fp->ctf_errs_warnings, err);
+      free (err->cew_text);
+      free (err);
+    }
 
   free (fp->ctf_sxlate);
   free (fp->ctf_txlate);

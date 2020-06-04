@@ -1,3 +1,10 @@
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ldlang.c (lang_ctf_errs_warnings): New, print CTF errors
+	and warnings.  Assert when libctf asserts.
+	(lang_merge_ctf): Call it.
+	(land_write_ctf): Likewise.
+
 2020-07-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26262

@@ -3725,6 +3725,29 @@ ldlang_open_ctf (void)
     ctf_close (errfile->the_ctf);
 }
 
+/* Emit CTF errors and warnings.  */
+static void
+lang_ctf_errs_warnings (ctf_file_t *fp)
+{
+  ctf_next_t *i = NULL;
+  char *text;
+  int is_warning;
+
+  while ((text = ctf_errwarning_next (fp, &i, &is_warning)) != NULL)
+    {
+      einfo (_("%s: `%s'\n"), is_warning ? _("CTF warning"): _("CTF error"),
+	     text);
+      free (text);
+    }
+  if (ctf_errno (fp) != ECTF_NEXT_END)
+    {
+      einfo (_("CTF error: cannot get CTF errors: `%s'\n"),
+	     ctf_errmsg (ctf_errno (fp)));
+    }
+
+  ASSERT (ctf_errno (fp) != ECTF_INTERNAL);
+}
+
 /* Merge together CTF sections.  After this, only the symtab-dependent
    function and data object sections need adjustment.  */
 
@@ -3778,6 +3801,7 @@ lang_merge_ctf (void)
 	  output_sect->flags |= SEC_EXCLUDE;
 	}
     }
+  lang_ctf_errs_warnings (ctf_output);
 }
 
 /* Let the emulation examine the symbol table and strtab to help it optimize the
@@ -3831,6 +3855,8 @@ lang_write_ctf (int late)
 	  output_sect->size = 0;
 	  output_sect->flags |= SEC_EXCLUDE;
 	}
+
+      lang_ctf_errs_warnings (ctf_output);
     }
 
   /* This also closes every CTF input file used in the link.  */

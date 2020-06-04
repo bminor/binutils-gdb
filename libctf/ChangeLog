@@ -1,3 +1,18 @@
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-impl.h (ctf_assert): New.
+	(ctf_err_warning_t): Likewise.
+	(ctf_file_t) <ctf_errs_warnings>: Likewise.
+	(ctf_err_warn): New prototype.
+	(ctf_assert_fail_internal): Likewise.
+	* ctf-inlines.h (ctf_assert_internal): Likewise.
+	* ctf-open.c (ctf_file_close): Free ctf_errs_warnings.
+	* ctf-create.c (ctf_serialize): Copy it on serialization.
+	* ctf-subr.c (ctf_err_warn): New, add an error/warning.
+	(ctf_errwarning_next): New iterator, free and pass back
+	errors/warnings in succession.
+	* libctf.ver (ctf_errwarning_next): Add.
+
 2020-07-22  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
 
 	* ctf-types.c (ctf_variable_iter): Fix error return.

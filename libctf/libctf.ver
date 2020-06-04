@@ -154,6 +154,7 @@ LIBCTF_1.0 {
 
 	ctf_setdebug;
 	ctf_getdebug;
+	ctf_errwarning_next;
 
 	/* Not yet part of the stable API.  */
 

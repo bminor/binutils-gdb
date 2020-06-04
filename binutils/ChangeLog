@@ -1,3 +1,8 @@
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* objdump.c (ctf_archive_member): Print CTF errors and warnings.
+	* readelf.c (dump_ctf_archive_member): Likewise.
+
 2020-07-22  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (parse_args): Silence potential warnings about a
