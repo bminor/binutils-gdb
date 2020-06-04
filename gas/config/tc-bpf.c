@@ -325,9 +325,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
              Note that the CALL instruction has only one operand, so
              this code is executed only once per instruction.  */
           where = fixP->fx_frag->fr_literal + fixP->fx_where;
-          cgen_put_insn_value (gas_cgen_cpu_desc, (unsigned char *) where + 1, 8,
-                               target_big_endian ? 0x01 : 0x10,
-                               gas_cgen_cpu_desc->endian);
+          where[1] = target_big_endian ? 0x01 : 0x10;
           /* Fallthrough.  */
         case BPF_OPERAND_DISP16:
           /* The PC-relative displacement fields in jump instructions
