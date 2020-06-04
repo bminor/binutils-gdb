@@ -1,5 +1,12 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_strerror): Delete.
+	* ctf-subr.c (ctf_strerror): Likewise.
+	* ctf-error.c (ctf_errmsg): Stop using ctf_strerror: just use
+	strerror directly.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.c (ctf_file_t) <ctf_parent_unreffed>: New.
 	(ctf_import_unref): New.
 	* ctf-open.c (ctf_file_close) Drop the refcount all the way to

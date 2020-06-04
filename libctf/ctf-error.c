@@ -19,6 +19,7 @@
 
 #include <ctf-impl.h>
 #include <stddef.h>
+#include <string.h>
 
 /* This construct is due to Bruno Haible: much thanks.  */
 
@@ -67,7 +68,7 @@ ctf_errmsg (int error)
   if (error >= ECTF_BASE && (error - ECTF_BASE) < ECTF_NERR)
     str = _ctf_errlist.str + _ctf_erridx[error - ECTF_BASE];
   else
-    str = ctf_strerror (error);
+    str = (const char *) strerror (error);
 
   return (str ? str : "Unknown error");
 }

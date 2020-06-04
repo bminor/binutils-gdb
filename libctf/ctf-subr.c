@@ -122,12 +122,6 @@ ctf_pread (int fd, void *buf, ssize_t count, off_t offset)
   return acc;
 }
 
-const char *
-ctf_strerror (int err)
-{
-  return (const char *) (strerror (err));
-}
-
 /* Set the CTF library client version to the specified version.  If version is
    zero, we just return the default library version number.  */
 int
