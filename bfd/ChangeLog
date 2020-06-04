@@ -1,3 +1,37 @@
+2020-06-03  Stephen Casner  <casner@acm.org>
+
+	Copy several years of fixes from bfd/aoutx.h to bfd/pdp11.c.
+
+	* pdp11.c (some_aout_object_p): 4c1534c7a2a - Don't set EXEC_P for
+	files with relocs.
+	(aout_get_external_symbols): 6b8f0fd579d - Return if count is zero.
+	0301ce1486b PR 22306 - Handle stringsize of zero, and error for any
+	other size that doesn't qcover the header word.
+	bf82069dce1 PR 23056 - Allocate an extra byte at the end of the
+	string table, and zero it.
+	(translate_symbol_table): 0d329c0a83a PR 22887 - Print an error
+	message and set bfd_error on finding an invalid name string offset.
+	(add_to_stringtab): INLINE -> inline
+	(pdp11_aout_swap_reloc_in): 116acb2c268 PR 22887 - Correct r_index
+	bound check.
+	(squirt_out_relocs): e2996cc315d PR 20921 - Check for and report
+	any relocs that could not be recognised.
+	92744f05809 PR 20929 - Check for relocs	without an associated symbol.
+	(find_nearest_line):  808346fcfcf PR 23055 - Check that the symbol
+	name exists and is long enough, before attempting to see if it is
+	for a .o file.
+	c3864421222 - Correct case for N_SO being the last symbol.
+	50455f1ab29 PR 20891 - Handle the case where the main file name
+	and the directory name are both empty.
+	e82ab856bb4 PR 20892 - Handle the case where function name is empty.
+	(aout_link_add_symbols): e517df3dbf7 PR 19629 - Check for out of
+	range string table offsets.
+	531336e3a0b PR 20909 - Fix off-by-one error in check for an
+	illegal string offset. 
+	(aout_link_includes_newfunc): Add comment.
+	(pdp11_aout_link_input_section): ad756e3f9e6 - Return with an error
+	on unexpected relocation type rather than ASSERT.
+
 2020-06-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26066

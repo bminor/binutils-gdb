@@ -623,8 +623,11 @@ NAME (aout, some_aout_object_p) (bfd *abfd,
      sets the entry point, and that is likely to be non-zero for most systems. */
 
   if (execp->a_entry != 0
-      || (execp->a_entry >= obj_textsec(abfd)->vma
-	  && execp->a_entry < obj_textsec(abfd)->vma + obj_textsec(abfd)->size))
+      || (execp->a_entry >= obj_textsec (abfd)->vma
+	  && execp->a_entry < (obj_textsec (abfd)->vma
+			       + obj_textsec (abfd)->size)
+	  && execp->a_trsize == 0
+	  && execp->a_drsize == 0))
     abfd->flags |= EXEC_P;
 #ifdef STAT_FOR_EXEC
   else
@@ -1241,7 +1244,7 @@ aout_get_external_symbols (bfd *abfd)
       syms = (struct external_nlist *)
 	_bfd_malloc_and_read (abfd, count * EXTERNAL_NLIST_SIZE,
 			      count * EXTERNAL_NLIST_SIZE);
-      if (syms == NULL && count != 0)
+      if (syms == NULL)
 	return FALSE;
 #endif
 
@@ -1255,36 +1258,54 @@ aout_get_external_symbols (bfd *abfd)
       unsigned char string_chars[BYTES_IN_LONG];
       bfd_size_type stringsize;
       char *strings;
+      bfd_size_type amt = BYTES_IN_LONG;
 
       /* Get the size of the strings.  */
       if (bfd_seek (abfd, obj_str_filepos (abfd), SEEK_SET) != 0
-	  || (bfd_bread ((void *) string_chars, (bfd_size_type) BYTES_IN_LONG,
-			abfd) != BYTES_IN_LONG))
+	  || bfd_bread ((void *) string_chars, amt, abfd) != amt)
 	return FALSE;
       stringsize = H_GET_32 (abfd, string_chars);
-
-#ifdef USE_MMAP
-      if (! bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize,
-				 &obj_aout_string_window (abfd), TRUE))
-	return FALSE;
-      strings = (char *) obj_aout_string_window (abfd).data;
-#else
-      strings = bfd_malloc (stringsize + 1);
-      if (strings == NULL)
-	return FALSE;
-
-      /* Skip space for the string count in the buffer for convenience
-	 when using indexes.  */
-      if (bfd_bread (strings + 4, stringsize - 4, abfd) != stringsize - 4)
+      if (stringsize == 0)
+	stringsize = 1;
+      else if (stringsize < BYTES_IN_LONG
+	       || (size_t) stringsize != stringsize)
 	{
-	  free (strings);
+	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
+
+#ifdef USE_MMAP
+      if (stringsize >= BYTES_IN_LONG)
+	{
+	  if (! bfd_get_file_window (abfd, obj_str_filepos (abfd), stringsize + 1,
+				     &obj_aout_string_window (abfd), TRUE))
+	    return FALSE;
+	  strings = (char *) obj_aout_string_window (abfd).data;
+	}
+      else
 #endif
+	{
+	  strings = (char *) bfd_malloc (stringsize + 1);
+	  if (strings == NULL)
+	    return FALSE;
+
+	  if (stringsize >= BYTES_IN_LONG)
+	    {
+	      /* Keep the string count in the buffer for convenience
+		 when indexing with e_strx.  */
+	      amt = stringsize - BYTES_IN_LONG;
+	      if (bfd_bread (strings + BYTES_IN_LONG, amt, abfd) != amt)
+		{
+		  free (strings);
+		  return FALSE;
+		}
+	    }
+	}
       /* Ensure that a zero index yields an empty string.  */
       strings[0] = '\0';
 
-      strings[stringsize - 1] = 0;
+      /* Ensure that the string buffer is NUL terminated.  */
+      strings[stringsize] = 0;
 
       obj_aout_external_strings (abfd) = strings;
       obj_aout_external_string_size (abfd) = stringsize;
@@ -1504,7 +1525,13 @@ NAME (aout, translate_symbol_table) (bfd *abfd,
       else if (x < strsize)
 	in->symbol.name = str + x;
       else
-	return FALSE;
+	{
+	  _bfd_error_handler
+	    (_("%pB: invalid string offset %" PRIu64 " >= %" PRIu64),
+	     abfd, (uint64_t) x, (uint64_t) strsize);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
 
       in->symbol.value = GET_WORD (abfd,  ext->e_value);
       /* TODO: is 0 a safe value here?  */
@@ -1596,7 +1623,7 @@ NAME (aout, slurp_symbol_table) (bfd *abfd)
 /* Get the index of a string in a strtab, adding it if it is not
    already present.  */
 
-static INLINE bfd_size_type
+static inline bfd_size_type
 add_to_stringtab (bfd *abfd,
 		  struct bfd_strtab_hash *tab,
 		  const char *str,
@@ -1834,10 +1861,12 @@ pdp11_aout_swap_reloc_in (bfd *		 abfd,
      local or global.  */
   r_extern = (reloc_entry & RTYPE) == REXT;
 
-  if (r_extern && r_index > symcount)
+  if (r_extern && r_index >= symcount)
     {
       /* We could arrange to return an error, but it might be useful
-	 to see the file even if it is bad.  */
+	 to see the file even if it is bad.  FIXME: Of course this
+	 means that objdump -r *doesn't* see the actual reloc, and
+	 objcopy silently writes a different reloc.  */
       r_extern = 0;
       r_index = N_ABS;
     }
@@ -1960,6 +1989,15 @@ NAME (aout, squirt_out_relocs) (bfd *abfd, asection *section)
 	{
 	  bfd_byte *r;
 
+	  if ((*generic)->howto == NULL
+	      || (*generic)->sym_ptr_ptr == NULL)
+	    {
+	      bfd_set_error (bfd_error_invalid_operation);
+	      _bfd_error_handler (_("%pB: attempt to write out "
+				    "unknown reloc type"), abfd);
+	      bfd_release (abfd, native);
+	      return FALSE;
+	    }
 	  r = native + (*generic)->address;
 	  pdp11_aout_swap_reloc_out (abfd, *generic, r);
 	  count--;
@@ -2229,7 +2267,7 @@ NAME (aout, find_nearest_line) (bfd *abfd,
   char *buf;
 
   *filename_ptr = bfd_get_filename (abfd);
-  *functionname_ptr = 0;
+  *functionname_ptr = NULL;
   *line_ptr = 0;
   if (discriminator_ptr)
     *discriminator_ptr = 0;
@@ -2257,7 +2295,10 @@ NAME (aout, find_nearest_line) (bfd *abfd,
 		  const char * symname;
 
 		  symname = q->symbol.name;
-		  if (strcmp (symname + strlen (symname) - 2, ".o") == 0)
+
+		  if (symname != NULL
+		      && strlen (symname) > 2
+		      && strcmp (symname + strlen (symname) - 2, ".o") == 0)
 		    {
 		      if (q->symbol.value > low_line_vma)
 			{
@@ -2289,7 +2330,7 @@ NAME (aout, find_nearest_line) (bfd *abfd,
 	      /* Look ahead to next symbol to check if that too is an N_SO.  */
 	      p++;
 	      if (*p == NULL)
-		break;
+		goto done;
 	      q = (aout_symbol_type *)(*p);
 	      if (q->type != (int) N_SO)
 		goto next;
@@ -2367,9 +2408,17 @@ NAME (aout, find_nearest_line) (bfd *abfd,
 	*filename_ptr = main_file_name;
       else
 	{
-	  sprintf (buf, "%s%s", directory_name, main_file_name);
-	  *filename_ptr = buf;
-	  buf += filelen + 1;
+	  if (buf == NULL)
+	    /* PR binutils/20891: In a corrupt input file both
+	       main_file_name and directory_name can be empty...  */
+	    * filename_ptr = NULL;
+	  else
+	    {
+	      snprintf (buf, filelen + 1, "%s%s", directory_name,
+			main_file_name);
+	      *filename_ptr = buf;
+	      buf += filelen + 1;
+	    }
 	}
     }
 
@@ -2378,6 +2427,12 @@ NAME (aout, find_nearest_line) (bfd *abfd,
       const char *function = func->name;
       char *colon;
 
+      if (buf == NULL)
+	{
+	  /* PR binutils/20892: In a corrupt input file func can be empty.  */
+	  * functionname_ptr = NULL;
+	  return TRUE;
+	}
       /* The caller expects a symbol name.  We actually have a
 	 function name, without the leading underscore.  Put the
 	 underscore back in, so that the caller gets a symbol name.  */
@@ -2808,6 +2863,9 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 
       type = H_GET_8 (abfd, p->e_type);
 
+      /* PR 19629: Corrupt binaries can contain illegal string offsets.  */
+      if (GET_WORD (abfd, p->e_strx) >= obj_aout_external_string_size (abfd))
+	return FALSE;
       name = strings + GET_WORD (abfd, p->e_strx);
       value = GET_WORD (abfd, p->e_value);
       flags = BSF_GLOBAL;
@@ -2919,6 +2977,9 @@ aout_link_includes_newfunc (struct bfd_hash_entry *entry,
 
   return (struct bfd_hash_entry *) ret;
 }
+
+/* Write out a symbol that was not associated with an a.out input
+   object.  */
 
 static bfd_boolean
 aout_link_write_other_symbol (struct bfd_hash_entry *bh, void *data)
@@ -3304,8 +3365,15 @@ pdp11_aout_link_input_section (struct aout_final_link_info *flaginfo,
 	r_extern = (r_type == REXT);
 
 	howto_idx = r_pcrel;
-	BFD_ASSERT (howto_idx < TABLE_SIZE (howto_table_pdp11));
-	howto = howto_table_pdp11 + howto_idx;
+	if (howto_idx < TABLE_SIZE (howto_table_pdp11))
+	  howto = howto_table_pdp11 + howto_idx;
+	else
+	  {
+	    _bfd_error_handler (_("%pB: unsupported relocation type"),
+				input_bfd);
+	    bfd_set_error (bfd_error_bad_value);
+	    return FALSE;
+	  }
       }
 
       if (relocatable)
