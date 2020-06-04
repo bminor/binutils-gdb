@@ -1762,6 +1762,7 @@ proc gdb_file_cmd { arg } {
 
     send_gdb "file $arg\n"
     set new_symbol_table 0
+    set basename [file tail $arg]
     gdb_expect 120 {
 	-re "Reading symbols from.*LZMA support was disabled.*$gdb_prompt $" {
 	    verbose "\t\tLoaded $arg into $GDB; .gnu_debugdata found but no LZMA available"
@@ -1780,36 +1781,39 @@ proc gdb_file_cmd { arg } {
         }
         -re "Load new symbol table from \".*\".*y or n. $" {
 	    if { $new_symbol_table > 0 } {
-		perror "Couldn't load $arg, interactive prompt loop detected."
+		perror [join [list "Couldn't load $basename,"
+			      "interactive prompt loop detected."]]
 		return -1
 	    }
             send_gdb "y\n" answer
 	    incr new_symbol_table
-	    set arg "$arg -- with new symbol table"
+	    set suffix "-- with new symbol table"
+	    set arg "$arg $suffix"
+	    set basename "$basename $suffix"
 	    exp_continue
 	}
         -re "No such file or directory.*$gdb_prompt $" {
-            perror "($arg) No such file or directory"
+            perror "($basename) No such file or directory"
 	    return -1
         }
 	-re "A problem internal to GDB has been detected" {
-	    perror "Couldn't load $arg into $GDB (GDB internal error)."
+	    perror "Couldn't load $basename into GDB (GDB internal error)."
 	    gdb_internal_error_resync
 	    return -1
 	}
         -re "$gdb_prompt $" {
-            perror "Couldn't load $arg into $GDB."
+            perror "Couldn't load $basename into GDB."
 	    return -1
             }
         timeout {
-            perror "Couldn't load $arg into $GDB (timeout)."
+            perror "Couldn't load $basename into GDB (timeout)."
 	    return -1
         }
         eof {
             # This is an attempt to detect a core dump, but seems not to
             # work.  Perhaps we need to match .* followed by eof, in which
             # gdb_expect does not seem to have a way to do that.
-            perror "Couldn't load $arg into $GDB (eof)."
+            perror "Couldn't load $basename into GDB (eof)."
 	    return -1
         }
     }
