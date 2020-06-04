@@ -3479,6 +3479,8 @@ disassemble_data (bfd *abfd)
        instead.  */
     disasm_info.endian = BFD_ENDIAN_UNKNOWN;
 
+  disasm_info.endian_code = disasm_info.endian;
+
   /* Allow the target to customize the info structure.  */
   disassemble_init_for_target (& disasm_info);
 

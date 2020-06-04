@@ -1,3 +1,9 @@
+2020-06-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* objdump.c (disassemble_data): Set disasm_info.endian_code to
+	disasm_info.endian after the latter is initialized to the
+	endianness reported by BFD.
+
 2020-06-04  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/i386/i386.exp: Remove global directive

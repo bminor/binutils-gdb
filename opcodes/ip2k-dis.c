@@ -592,6 +592,7 @@ typedef struct cpu_desc_list
   CGEN_BITSET *isa;
   int mach;
   int endian;
+  int insn_endian;
   CGEN_CPU_DESC cd;
 } cpu_desc_list;
 
@@ -604,12 +605,16 @@ print_insn_ip2k (bfd_vma pc, disassemble_info *info)
   static CGEN_BITSET *prev_isa;
   static int prev_mach;
   static int prev_endian;
+  static int prev_insn_endian;
   int length;
   CGEN_BITSET *isa;
   int mach;
   int endian = (info->endian == BFD_ENDIAN_BIG
 		? CGEN_ENDIAN_BIG
 		: CGEN_ENDIAN_LITTLE);
+  int insn_endian = (info->endian_code == BFD_ENDIAN_BIG
+                     ? CGEN_ENDIAN_BIG
+                     : CGEN_ENDIAN_LITTLE);
   enum bfd_architecture arch;
 
   /* ??? gdb will set mach but leave the architecture as "unknown" */
@@ -675,9 +680,11 @@ print_insn_ip2k (bfd_vma pc, disassemble_info *info)
       prev_isa = cgen_bitset_copy (isa);
       prev_mach = mach;
       prev_endian = endian;
+      prev_insn_endian = insn_endian;
       cd = ip2k_cgen_cpu_open (CGEN_CPU_OPEN_ISAS, prev_isa,
 				 CGEN_CPU_OPEN_BFDMACH, mach_name,
 				 CGEN_CPU_OPEN_ENDIAN, prev_endian,
+                                 CGEN_CPU_OPEN_INSN_ENDIAN, prev_insn_endian,
 				 CGEN_CPU_OPEN_END);
       if (!cd)
 	abort ();

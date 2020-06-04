@@ -1392,7 +1392,9 @@ enum cgen_cpu_open_arg {
      Multiple machines can be specified by repeated use.  */
   CGEN_CPU_OPEN_BFDMACH,
   /* Select endian, arg is CGEN_ENDIAN_*.  */
-  CGEN_CPU_OPEN_ENDIAN
+  CGEN_CPU_OPEN_ENDIAN,
+  /* Select instruction endian, arg is CGEN_ENDIAN_*.  */
+  CGEN_CPU_OPEN_INSN_ENDIAN,
 };
 
 /* Open a cpu descriptor table for use.
@@ -1463,6 +1465,11 @@ extern const CGEN_INSN * cgen_lookup_get_insn_operands
 extern CGEN_INSN_INT cgen_get_insn_value
   (CGEN_CPU_DESC, unsigned char *, int);
 extern void cgen_put_insn_value
+  (CGEN_CPU_DESC, unsigned char *, int, CGEN_INSN_INT);
+
+extern CGEN_INSN_INT cgen_get_base_insn_value
+  (CGEN_CPU_DESC, unsigned char *, int);
+extern void cgen_put_base_insn_value
   (CGEN_CPU_DESC, unsigned char *, int, CGEN_INSN_INT);
 
 /* Read in a cpu description file.

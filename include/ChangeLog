@@ -1,3 +1,8 @@
+2020-06-04  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* opcode/cgen.h (enum cgen_cpu_open_arg): New value
+	CGEN_CPU_OPEN_INSN_ENDIAN.
+
 2020-06-03  Nelson Chu  <nelson.chu@sifive.com>
 
 	* opcode/riscv.h: Remove #include "bfd.h".  And change the return

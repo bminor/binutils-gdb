@@ -1,3 +1,36 @@
+2020-06-04  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* cgen-dis.in (cpu_desc_list): New field `insn_endian'.
+	(print_insn_): Handle instruction endian.
+	* bpf-dis.c: Regenerate.
+	* bpf-desc.c: Regenerate.
+	* epiphany-dis.c: Likewise.
+	* epiphany-desc.c: Likewise.
+	* fr30-dis.c: Likewise.
+	* fr30-desc.c: Likewise.
+	* frv-dis.c: Likewise.
+	* frv-desc.c: Likewise.
+	* ip2k-dis.c: Likewise.
+	* ip2k-desc.c: Likewise.
+	* iq2000-dis.c: Likewise.
+	* iq2000-desc.c: Likewise.
+	* lm32-dis.c: Likewise.
+	* lm32-desc.c: Likewise.
+	* m32c-dis.c: Likewise.
+	* m32c-desc.c: Likewise.
+	* m32r-dis.c: Likewise.
+	* m32r-desc.c: Likewise.
+	* mep-dis.c: Likewise.
+	* mep-desc.c: Likewise.
+	* mt-dis.c: Likewise.
+	* mt-desc.c: Likewise.
+	* or1k-dis.c: Likewise.
+	* or1k-desc.c: Likewise.
+	* xc16x-dis.c: Likewise.
+	* xc16x-desc.c: Likewise.
+	* xstormy16-dis.c: Likewise.
+	* xstormy16-desc.c: Likewise.
+
 2020-06-03  Nick Clifton  <nickc@redhat.com>
 
 	* po/sr.po: Updated Serbian translation.
