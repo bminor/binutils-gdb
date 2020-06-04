@@ -169,6 +169,8 @@ ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id, int flag)
  oom:
   ctf_set_errno (fp, errno);
  err:
+  ctf_err_warn (fp, 1, "Cannot format name dumping type 0x%lx: %s", id,
+		ctf_errmsg (ctf_errno (fp)));
   free (buf);
   free (str);
   free (bit);
@@ -318,7 +320,7 @@ ctf_dump_label (const char *name, const ctf_lblinfo_t *info,
 				       CTF_ADD_ROOT)) == NULL)
     {
       free (str);
-      return -1;			/* errno is set for us.  */
+      return 0;				/* Swallow the error.  */
     }
 
   str = str_append (str, typestr);
@@ -375,7 +377,7 @@ ctf_dump_objts (ctf_file_t *fp, ctf_dump_state_t *state)
 					   CTF_ADD_ROOT)) == NULL)
 	{
 	  free (str);
-	  return -1;			/* errno is set for us.  */
+	  return 0;			/* Swallow the error.  */
 	}
 
       str = str_append (str, typestr);
@@ -495,7 +497,7 @@ ctf_dump_var (const char *name, ctf_id_t type, void *arg)
 				       CTF_ADD_ROOT)) == NULL)
     {
       free (str);
-      return -1;			/* errno is set for us.  */
+      return 0;			/* Swallow the error.  */
     }
 
   str = str_append (str, typestr);
@@ -579,10 +581,7 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
   size_t len;
 
   if ((str = ctf_dump_format_type (state->cds_fp, id, flag)) == NULL)
-    {
-      err = "format type";
-      goto err;
-    }
+    goto err_nomsg;		/* Error already logged for us.  */
 
   str = str_append (str, "\n");
   if ((ctf_type_visit (state->cds_fp, id, ctf_dump_member, &membstate)) < 0)
@@ -605,10 +604,11 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
   return 0;
 
  err:
-  ctf_dprintf ("Cannot %s dumping type 0x%lx: %s\n", err, id,
-	       ctf_errmsg (ctf_errno (state->cds_fp)));
+  ctf_err_warn (state->cds_fp, 1, "Cannot %s dumping type 0x%lx: %s",
+		err, id, ctf_errmsg (ctf_errno (state->cds_fp)));
+ err_nomsg:
   free (str);
-  return -1;				/* errno is set for us.  */
+  return 0;				/* Swallow the error.  */
 }
 
 /* Dump the string table into the cds_items.  */

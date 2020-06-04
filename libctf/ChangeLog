@@ -1,5 +1,14 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-dump.c (ctf_dump_format_type): Emit a warning.
+	(ctf_dump_label): Swallow errors from ctf_dump_format_type.
+	(ctf_dump_objts): Likewise.
+	(ctf_dump_var): Likewise.
+	(ctf_dump_type): Do not emit a duplicate message.  Move to
+	ctf_err_warning, and swallow all errors.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-decl.c (ctf_decl_fini): Free the cd_buf.
 	(ctf_decl_buf): Once it escapes, don't try to free it later.
 
