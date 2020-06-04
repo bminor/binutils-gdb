@@ -531,7 +531,6 @@ struct elf_x86_link_hash_table
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
   bfd_boolean (*is_reloc_section) (const char *);
-  enum elf_target_id target_id;
   enum elf_x86_target_os target_os;
   unsigned int sizeof_reloc;
   unsigned int dt_reloc;
@@ -629,7 +628,7 @@ struct elf_x86_plt
 #define is_x86_elf(bfd, htab)				\
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
    && elf_tdata (bfd) != NULL				\
-   && elf_object_id (bfd) == (htab)->target_id)
+   && elf_object_id (bfd) == (htab)->elf.hash_table_id)
 
 extern bfd_boolean _bfd_x86_elf_mkobject
   (bfd *);

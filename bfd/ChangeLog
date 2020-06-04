@@ -1,5 +1,11 @@
 2020-06-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-x86.h (elf_x86_link_hash_table): Remove target_id.
+	(is_x86_elf): Check elf.hash_table_id instead of target_id.
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Updated.
+
+2020-06-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/26080
 	* elf-m10300.c (mn10300_elf_relocate_section): Resolve relocation
 	in debug section against symbol defined in shared library to 0.
