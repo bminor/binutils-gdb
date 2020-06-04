@@ -1,5 +1,24 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_link_type_mapping_key): Rename to...
+	(ctf_link_type_key): ... this, adjusting member prefixes to
+	match.
+	(ctf_hash_type_mapping_key): Rename to...
+	(ctf_hash_type_key): ... this.
+	(ctf_hash_eq_type_mapping_key): Rename to...
+	(ctf_hash_eq_type_key): ... this.
+	* ctf-hash.c (ctf_hash_type_mapping_key): Rename to...
+	(ctf_hash_type_key): ... this, and adjust for member name
+	changes.
+	(ctf_hash_eq_type_mapping_key): Rename to...
+	(ctf_hash_eq_type_key): ... this, and adjust for member name
+	changes.
+	* ctf-link.c (ctf_add_type_mapping): Adjust.  Note the lack of
+	need for out-of-memory checking in this code.
+	(ctf_type_mapping): Adjust.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	configure.ac: Check for vasprintf.
 	configure: Regenerated.
 	config.h.in: Likewise.

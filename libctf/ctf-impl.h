@@ -232,16 +232,15 @@ typedef struct ctf_str_atom_ref
   uint32_t *caf_ref;		/* A single ref to this string.  */
 } ctf_str_atom_ref_t;
 
-/* The structure used as the key in a ctf_link_type_mapping, which lets the
-   linker machinery determine which type IDs on the input side of a link map to
-   which types on the output side.  (The value is a ctf_id_t: another
-   index, not a type.)  */
+/* The structure used as the key in a ctf_link_type_mapping.  The value is a
+   type index, not a type ID.  */
 
-typedef struct ctf_link_type_mapping_key
+typedef struct ctf_link_type_key
 {
-  ctf_file_t *cltm_fp;
-  ctf_id_t cltm_idx;
-} ctf_link_type_mapping_key_t;
+  ctf_file_t *cltk_fp;
+  ctf_id_t cltk_idx;
+} ctf_link_type_key_t;
+
 
 /* The ctf_file is the structure used to represent a CTF container to library
    clients, who see it only as an opaque pointer.  Modifications can therefore
@@ -421,12 +420,12 @@ extern ctf_file_t *ctf_get_dict (ctf_file_t *fp, ctf_id_t type);
 typedef unsigned int (*ctf_hash_fun) (const void *ptr);
 extern unsigned int ctf_hash_integer (const void *ptr);
 extern unsigned int ctf_hash_string (const void *ptr);
-extern unsigned int ctf_hash_type_mapping_key (const void *ptr);
+extern unsigned int ctf_hash_type_key (const void *ptr);
 
 typedef int (*ctf_hash_eq_fun) (const void *, const void *);
 extern int ctf_hash_eq_integer (const void *, const void *);
 extern int ctf_hash_eq_string (const void *, const void *);
-extern int ctf_hash_eq_type_mapping_key (const void *, const void *);
+extern int ctf_hash_eq_type_key (const void *, const void *);
 
 extern int ctf_dynset_eq_string (const void *, const void *);
 

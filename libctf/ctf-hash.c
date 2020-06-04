@@ -94,26 +94,27 @@ ctf_hash_eq_string (const void *a, const void *b)
   return !strcmp((const char *) hep_a->key, (const char *) hep_b->key);
 }
 
-/* Hash a type_mapping_key.  */
+/* Hash a type_key.  */
 unsigned int
-ctf_hash_type_mapping_key (const void *ptr)
+ctf_hash_type_key (const void *ptr)
 {
   ctf_helem_t *hep = (ctf_helem_t *) ptr;
-  ctf_link_type_mapping_key_t *k = (ctf_link_type_mapping_key_t *) hep->key;
+  ctf_link_type_key_t *k = (ctf_link_type_key_t *) hep->key;
 
-  return htab_hash_pointer (k->cltm_fp) + 59 * htab_hash_pointer ((void *) k->cltm_idx);
+  return htab_hash_pointer (k->cltk_fp) + 59
+    * htab_hash_pointer ((void *) (uintptr_t) k->cltk_idx);
 }
 
 int
-ctf_hash_eq_type_mapping_key (const void *a, const void *b)
+ctf_hash_eq_type_key (const void *a, const void *b)
 {
   ctf_helem_t *hep_a = (ctf_helem_t *) a;
   ctf_helem_t *hep_b = (ctf_helem_t *) b;
-  ctf_link_type_mapping_key_t *key_a = (ctf_link_type_mapping_key_t *) hep_a->key;
-  ctf_link_type_mapping_key_t *key_b = (ctf_link_type_mapping_key_t *) hep_b->key;
+  ctf_link_type_key_t *key_a = (ctf_link_type_key_t *) hep_a->key;
+  ctf_link_type_key_t *key_b = (ctf_link_type_key_t *) hep_b->key;
 
-  return (key_a->cltm_fp == key_b->cltm_fp)
-    && (key_a->cltm_idx == key_b->cltm_idx);
+  return (key_a->cltk_fp == key_b->cltk_fp)
+    && (key_a->cltk_idx == key_b->cltk_idx);
 }
 
 

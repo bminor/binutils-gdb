@@ -53,22 +53,25 @@ ctf_add_type_mapping (ctf_file_t *src_fp, ctf_id_t src_type,
 
   if (dst_fp->ctf_link_type_mapping == NULL)
     {
-      ctf_hash_fun f = ctf_hash_type_mapping_key;
-      ctf_hash_eq_fun e = ctf_hash_eq_type_mapping_key;
+      ctf_hash_fun f = ctf_hash_type_key;
+      ctf_hash_eq_fun e = ctf_hash_eq_type_key;
 
       if ((dst_fp->ctf_link_type_mapping = ctf_dynhash_create (f, e, free,
 							       NULL)) == NULL)
 	return;
     }
 
-  ctf_link_type_mapping_key_t *key;
-  key = calloc (1, sizeof (struct ctf_link_type_mapping_key));
+  ctf_link_type_key_t *key;
+  key = calloc (1, sizeof (struct ctf_link_type_key));
   if (!key)
     return;
 
-  key->cltm_fp = src_fp;
-  key->cltm_idx = src_type;
+  key->cltk_fp = src_fp;
+  key->cltk_idx = src_type;
 
+  /* No OOM checking needed, because if this doesn't work the worst we'll do is
+     add a few more duplicate types (which will probably run out of memory
+     anyway).  */
   ctf_dynhash_insert (dst_fp->ctf_link_type_mapping, key,
 		      (void *) (uintptr_t) dst_type);
 }
@@ -78,7 +81,7 @@ ctf_add_type_mapping (ctf_file_t *src_fp, ctf_id_t src_type,
 ctf_id_t
 ctf_type_mapping (ctf_file_t *src_fp, ctf_id_t src_type, ctf_file_t **dst_fp)
 {
-  ctf_link_type_mapping_key_t key;
+  ctf_link_type_key_t key;
   ctf_file_t *target_fp = *dst_fp;
   ctf_id_t dst_type = 0;
 
@@ -86,8 +89,8 @@ ctf_type_mapping (ctf_file_t *src_fp, ctf_id_t src_type, ctf_file_t **dst_fp)
     src_fp = src_fp->ctf_parent;
 
   src_type = LCTF_TYPE_TO_INDEX(src_fp, src_type);
-  key.cltm_fp = src_fp;
-  key.cltm_idx = src_type;
+  key.cltk_fp = src_fp;
+  key.cltk_idx = src_type;
 
   if (target_fp->ctf_link_type_mapping)
     dst_type = (uintptr_t) ctf_dynhash_lookup (target_fp->ctf_link_type_mapping,
