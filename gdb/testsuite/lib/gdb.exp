@@ -1800,7 +1800,7 @@ proc gdb_file_cmd { arg } {
 	    return -1
         }
 	-re "A problem internal to GDB has been detected" {
-	    fail "($arg) (GDB internal error)"
+	    perror "Couldn't load $arg into $GDB (GDB internal error)."
 	    gdb_internal_error_resync
 	    return -1
 	}
