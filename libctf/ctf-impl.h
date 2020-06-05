@@ -71,9 +71,14 @@ extern "C"
 
 #endif
 
+#if defined (ENABLE_LIBCTF_HASH_DEBUGGING) && !defined (NDEBUG)
+#include <assert.h>
+#define ctf_assert(fp, expr) (assert (expr), 1)
+#else
 #define ctf_assert(fp, expr)						\
   _libctf_unlikely_ (ctf_assert_internal (fp, __FILE__, __LINE__,	\
 					  #expr, !!(expr)))
+#endif
 
 /* libctf in-memory state.  */
 

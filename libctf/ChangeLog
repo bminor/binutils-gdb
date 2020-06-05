@@ -1,5 +1,15 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* configure.ac: Add --enable-libctf-hash-debugging.
+	* aclocal.m4: Pull in enable.m4, for GCC_ENABLE.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+	* config.h.in: Likewise.
+	* ctf-impl.h [ENABLE_LIBCTF_HASH_DEBUGGING]
+	(ctf_assert): Define to assert.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-sha1.h: New, inline wrappers around sha1_init_ctx and
 	sha1_process_bytes.
 	* ctf-impl.h: Include it.

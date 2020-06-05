@@ -67,6 +67,12 @@ AC_FUNC_MMAP
 AC_SEARCH_LIBS(dlopen, dl)
 AM_ZLIB
 
+GCC_ENABLE([libctf-hash-debugging], [no], [], [Enable expensive debugging of CTF deduplication type hashing])
+if test "${enable_libctf_hash_debugging}" = yes; then
+    AC_DEFINE(ENABLE_LIBCTF_HASH_DEBUGGING, 1, [Enable expensive debugging of CTF deduplication type hashing])
+fi
+AM_CONDITIONAL(ENABLE_LIBCTF_HASH_DEBUGGING, test "${enable_libctf_hash_debugging}" = yes)
+
 # Similar to GDB_AC_CHECK_BFD.
 OLD_CFLAGS=$CFLAGS
 OLD_LDFLAGS=$LDFLAGS
