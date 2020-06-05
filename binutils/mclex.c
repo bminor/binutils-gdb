@@ -337,17 +337,19 @@ yylex (void)
   if (mclex_want_line)
     {
       start_token = input_stream_pos;
+      if (input_stream_pos[0] == 0)
+	return -1;
       if (input_stream_pos[0] == '.'
 	  && (input_stream_pos[1] == '\n'
 	      || (input_stream_pos[1] == '\r' && input_stream_pos[2] == '\n')))
-      {
-	mclex_want_line = FALSE;
-	while (input_stream_pos[0] != 0 && input_stream_pos[0] != '\n')
-	  ++input_stream_pos;
-	if (input_stream_pos[0] == '\n')
-	  ++input_stream_pos;
-	return MCENDLINE;
-      }
+	{
+	  mclex_want_line = FALSE;
+	  while (input_stream_pos[0] != 0 && input_stream_pos[0] != '\n')
+	    ++input_stream_pos;
+	  if (input_stream_pos[0] == '\n')
+	    ++input_stream_pos;
+	  return MCENDLINE;
+	}
       while (input_stream_pos[0] != 0 && input_stream_pos[0] != '\n')
 	++input_stream_pos;
       if (input_stream_pos[0] == '\n')

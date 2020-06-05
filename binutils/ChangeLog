@@ -1,3 +1,8 @@
+2020-06-05  Joel Anderson  <joelanderson333@gmail.com>
+
+	PR 26082
+	* mclex.c (yylex): Add test for an empty input stream.
+
 2020-06-04  Stephen Casner  <casner@acm.org>
 
 	* testsuite/binutils-all/pr25662-pdp11.s: Alternate source file
