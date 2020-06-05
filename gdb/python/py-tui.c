@@ -433,7 +433,7 @@ gdbpy_tui_set_title (PyObject *self, PyObject *newvalue, void *closure)
   if (value == nullptr)
     return -1;
 
-  win->window->title = value.release ();
+  win->window->title = value.get ();
   return 0;
 }
 
