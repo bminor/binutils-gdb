@@ -638,7 +638,7 @@ Solaris 10			i?86-*-solaris2.10, x86_64-*-solaris2.10,
 set debug compile-cplus-types
 show debug compile-cplus-types
   Control the display of debug output about type conversion in the
-  C++ compile feature.  Commands have no effect while compiliong
+  C++ compile feature.  Commands have no effect while compiling
   for other languages.
 
 set debug skip
@@ -1381,7 +1381,7 @@ skip -rfunction regular-expression
   Additionally, a file spec and a function spec may now be combined.
 
 maint info line-table REGEXP
-  Display the contents of GDB's internal line table data struture.
+  Display the contents of GDB's internal line table data structure.
 
 maint selftest
   Run any GDB unit tests that were compiled in.
@@ -1553,7 +1553,7 @@ show remote thread-events
 set ada print-signatures on|off
 show ada print-signatures"
   Control whether parameter types and return types are displayed in overloads
-  selection menus.  It is activaled (@code{on}) by default.
+  selection menus.  It is activated (@code{on}) by default.
 
 set max-value-size
 show max-value-size
@@ -1885,7 +1885,7 @@ Qbtrace-conf:bts:size
   Set the requested ring buffer size for branch tracing in BTS format.
 
 Qbtrace:pt
-  Enable Intel Procesor Trace-based branch tracing for the current
+  Enable Intel Processor Trace-based branch tracing for the current
   process.  The remote stub reports support for this packet to GDB's
   qSupported query.
 
@@ -4238,7 +4238,7 @@ qXfer:siginfo:write
 * Removed remote protocol undocumented extension
 
   An undocumented extension to the remote protocol's `S' stop reply
-  packet that permited the stub to pass a process id was removed.
+  packet that permitted the stub to pass a process id was removed.
   Remote servers should use the `T' stop reply packet instead.
 
 * GDB now supports multiple function calling conventions according to the
@@ -4258,7 +4258,7 @@ with the --compress-debug-sections=zlib flag.
 * Watchpoints can now be set on unreadable memory locations, e.g. addresses
 which will be allocated using malloc later in program execution.
 
-* The qXfer:libraries:read remote procotol packet now allows passing a
+* The qXfer:libraries:read remote protocol packet now allows passing a
 list of section offsets.
 
 * On GNU/Linux, GDB can now attach to stopped processes.  Several race
@@ -4632,7 +4632,7 @@ Xtensa GNU/Linux		xtensa*-*-linux*
 * New targets
 
 NetBSD/hppa			hppa*-*-netbsd*
-Xtensa GNU/Lunux		xtensa*-*-linux*
+Xtensa GNU/Linux		xtensa*-*-linux*
 
 * Change in command line behavior -- corefiles vs. process ids.
 
@@ -5288,7 +5288,7 @@ GDB to dump core).
 
 * New ``start'' command.
 
-This command runs the program until the begining of the main procedure.
+This command runs the program until the beginning of the main procedure.
 
 * New BSD Kernel Data Access Library (libkvm) interface
 
@@ -5485,7 +5485,7 @@ M32R with SDI protocol				m32r-*-elf*
 * "set prompt-escape-char" command deleted.
 
 The command "set prompt-escape-char" has been deleted.  This command,
-and its very obscure effet on GDB's prompt, was never documented,
+and its very obscure effect on GDB's prompt, was never documented,
 tested, nor mentioned in the NEWS file.
 
 * OBSOLETE configurations and files
@@ -7195,7 +7195,7 @@ Calling of methods and virtual functions has been improved as well.
 
  * Major bug fixes
 
-The crash that occured when debugging Sun Ansi-C compiled binaries is
+The crash that occurred when debugging Sun Ansi-C compiled binaries is
 fixed.  This was due to mishandling of the extra N_SO stabs output
 by the compiler.
 
@@ -7296,7 +7296,7 @@ for the list of formats.
 Recent versions of gcc have a bug in how they emit debugging information for
 C++ methods (when using dbx-style stabs).  The file 'gcc.patch' (in this
 directory) can be applied to gcc to fix the problem.  Alternatively, if you
-can't fix gcc, you can #define GCC_MANGLE_BUG when compling gdb/symtab.c. The
+can't fix gcc, you can #define GCC_MANGLE_BUG when compiling gdb/symtab.c. The
 usual symptom is difficulty with setting breakpoints on methods.  GDB complains
 about the method being non-existent.  (We believe that version 2.2.2 of GCC has
 this problem.)
@@ -7382,7 +7382,7 @@ SGI Irix-4.x				mips-sgi-irix4	or iris4
  * New malloc package
 
 GDB now uses a new memory manager called mmalloc, based on gmalloc.
-Mmalloc is capable of handling mutiple heaps of memory.  It is also
+Mmalloc is capable of handling multiple heaps of memory.  It is also
 capable of saving a heap to a file, and then mapping it back in later.
 This can be used to greatly speedup the startup of GDB by using a
 pre-parsed symbol table which lives in a mmalloc managed heap.  For
