@@ -1,5 +1,18 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-sha1.h: New, inline wrappers around sha1_init_ctx and
+	sha1_process_bytes.
+	* ctf-impl.h: Include it.
+	(ctf_sha1_init): New.
+	(ctf_sha1_add): Likewise.
+	(ctf_sha1_fini): Likewise.
+	* ctf-sha1.c: New, non-inline wrapper around sha1_finish_ctx
+	producing strings.
+	* Makefile.am: Add file.
+	* Makefile.in: Regenerate.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* libctf.ver (ctf_link_set_variable_filter): Add.
 	* ctf-impl.h (ctf_file_t) <ctf_link_variable_filter>: New.
 	<ctf_link_variable_filter_arg>: Likewise.

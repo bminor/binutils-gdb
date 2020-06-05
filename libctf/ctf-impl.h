@@ -25,6 +25,7 @@
 #include <sys/param.h>
 #include "ctf-decls.h"
 #include <ctf-api.h>
+#include "ctf-sha1.h"
 #include <sys/types.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -498,6 +499,10 @@ extern int ctf_dynset_exists (ctf_dynset_t *, const void *key,
 			      const void **orig_key);
 extern int ctf_dynset_next (ctf_dynset_t *, ctf_next_t **, void **key);
 extern void *ctf_dynset_lookup_any (ctf_dynset_t *);
+
+extern void ctf_sha1_init (ctf_sha1_t *);
+extern void ctf_sha1_add (ctf_sha1_t *, const void *, size_t);
+extern char *ctf_sha1_fini (ctf_sha1_t *, char *);
 
 #define	ctf_list_prev(elem)	((void *)(((ctf_list_t *)(elem))->l_prev))
 #define	ctf_list_next(elem)	((void *)(((ctf_list_t *)(elem))->l_next))
