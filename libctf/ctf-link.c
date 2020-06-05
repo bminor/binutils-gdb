@@ -819,6 +819,659 @@ ctf_link_one_input_archive (void *key, void *value, void *arg_)
   ctf_link_close_one_input_archive (key, value, NULL);
 }
 
+typedef struct link_sort_inputs_cb_arg
+{
+  int is_cu_mapped;
+  ctf_file_t *fp;
+} link_sort_inputs_cb_arg_t;
+
+/* Sort the inputs by N (the link order).  For CU-mapped links, this is a
+   mapping of input to output name, not a mapping of input name to input
+   ctf_link_input_t: compensate accordingly.  */
+static int
+ctf_link_sort_inputs (const ctf_next_hkv_t *one, const ctf_next_hkv_t *two,
+		      void *arg)
+{
+  ctf_link_input_t *input_1;
+  ctf_link_input_t *input_2;
+  link_sort_inputs_cb_arg_t *cu_mapped = (link_sort_inputs_cb_arg_t *) arg;
+
+  if (!cu_mapped || !cu_mapped->is_cu_mapped)
+    {
+      input_1 = (ctf_link_input_t *) one->hkv_value;
+      input_2 = (ctf_link_input_t *) two->hkv_value;
+    }
+  else
+    {
+      const char *name_1 = (const char *) one->hkv_key;
+      const char *name_2 = (const char *) two->hkv_key;
+
+      input_1 = ctf_dynhash_lookup (cu_mapped->fp->ctf_link_inputs, name_1);
+      input_2 = ctf_dynhash_lookup (cu_mapped->fp->ctf_link_inputs, name_2);
+
+      /* There is no guarantee that CU-mappings actually have corresponding
+	 inputs: the relative ordering in that case is unimportant.  */
+      if (!input_1)
+	return -1;
+      if (!input_2)
+	return 1;
+    }
+
+  if (input_1->n < input_2->n)
+    return -1;
+  else if (input_1->n > input_2->n)
+    return 1;
+  else
+    return 0;
+}
+
+/* Count the number of input dicts in the ctf_link_inputs, or that subset of the
+   ctf_link_inputs given by CU_NAMES if set.  Return the number of input dicts,
+   and optionally the name and ctf_link_input_t of the single input archive if
+   only one exists (no matter how many dicts it contains).  */
+static ssize_t
+ctf_link_deduplicating_count_inputs (ctf_file_t *fp, ctf_dynhash_t *cu_names,
+				     ctf_link_input_t **only_one_input)
+{
+  ctf_dynhash_t *inputs = fp->ctf_link_inputs;
+  ctf_next_t *i = NULL;
+  void *name, *input;
+  ctf_link_input_t *one_input = NULL;
+  const char *one_name = NULL;
+  ssize_t count = 0, narcs = 0;
+  int err;
+
+  if (cu_names)
+    inputs = cu_names;
+
+  while ((err = ctf_dynhash_next (inputs, &i, &name, &input)) == 0)
+    {
+      ssize_t one_count;
+
+      one_name = (const char *) name;
+      /* If we are processing CU names, get the real input.  */
+      if (cu_names)
+	one_input = ctf_dynhash_lookup (fp->ctf_link_inputs, one_name);
+      else
+	one_input = (ctf_link_input_t *) input;
+
+      if (!one_input)
+	continue;
+
+      one_count = ctf_link_lazy_open (fp, one_input);
+
+      if (one_count < 0)
+	{
+	  ctf_next_destroy (i);
+	  return -1;				/* errno is set for us.  */
+	}
+
+      count += one_count;
+      narcs++;
+    }
+  if (err != ECTF_NEXT_END)
+    {
+      ctf_err_warn (fp, 0, "Iteration error counting deduplicating CTF link "
+		    "inputs: %s", ctf_errmsg (err));
+      ctf_set_errno (fp, err);
+      return -1;
+    }
+
+  if (!count)
+    return 0;
+
+  if (narcs == 1)
+    {
+      if (only_one_input)
+	*only_one_input = one_input;
+    }
+  else if (only_one_input)
+    *only_one_input = NULL;
+
+  return count;
+}
+
+/* Allocate and populate an inputs array big enough for a given set of inputs:
+   either a specific set of CU names (those from that set found in the
+   ctf_link_inputs), or the entire ctf_link_inputs (if cu_names is not set).
+   The number of inputs (from ctf_link_deduplicating_count_inputs, above) is
+   passed in NINPUTS: an array of uint32_t containing parent pointers
+   (corresponding to those members of the inputs that have parents) is allocated
+   and returned in PARENTS.
+
+   The inputs are *archives*, not files: the archive can have multiple members
+   if it is the result of a previous incremental link.  We want to add every one
+   in turn, including the shared parent.  (The dedup machinery knows that a type
+   used by a single dictionary and its parent should not be shared in
+   CTF_LINK_SHARE_DUPLICATED mode.)
+
+   If no inputs exist that correspond to these CUs, return NULL with the errno
+   set to ECTF_NOCTFDATA.  */
+static ctf_file_t **
+ctf_link_deduplicating_open_inputs (ctf_file_t *fp, ctf_dynhash_t *cu_names,
+				    ssize_t ninputs, uint32_t **parents)
+{
+  ctf_dynhash_t *inputs = fp->ctf_link_inputs;
+  ctf_next_t *i = NULL;
+  void *name, *input;
+  link_sort_inputs_cb_arg_t sort_arg;
+  ctf_file_t **dedup_inputs = NULL;
+  ctf_file_t **walk;
+  uint32_t *parents_ = NULL;
+  int err;
+
+  if (cu_names)
+    inputs = cu_names;
+
+  if ((dedup_inputs = calloc (ninputs, sizeof (ctf_file_t *))) == NULL)
+    goto oom;
+
+  if ((parents_ = calloc (ninputs, sizeof (uint32_t))) == NULL)
+    goto oom;
+
+  walk = dedup_inputs;
+
+  /* Counting done: push every input into the array, in the order they were
+     passed to ctf_link_add_ctf (and ultimately ld).  */
+
+  sort_arg.is_cu_mapped = (cu_names != NULL);
+  sort_arg.fp = fp;
+
+  while ((err = ctf_dynhash_next_sorted (inputs, &i, &name, &input,
+					 ctf_link_sort_inputs, &sort_arg)) == 0)
+    {
+      const char *one_name = (const char *) name;
+      ctf_link_input_t *one_input;
+      ctf_file_t *one_fp;
+      ctf_file_t *parent_fp = NULL;
+      uint32_t parent_i;
+      ctf_next_t *j = NULL;
+
+      /* If we are processing CU names, get the real input.  All the inputs
+	 will have been opened, if they contained any CTF at all.  */
+      if (cu_names)
+	one_input = ctf_dynhash_lookup (fp->ctf_link_inputs, one_name);
+      else
+	one_input = (ctf_link_input_t *) input;
+
+      if (!one_input || (!one_input->clin_arc && !one_input->clin_fp))
+	continue;
+
+      /* Short-circuit: if clin_fp is set, just use it.   */
+      if (one_input->clin_fp)
+	{
+	  parents_[walk - dedup_inputs] = walk - dedup_inputs;
+	  *walk = one_input->clin_fp;
+	  walk++;
+	  continue;
+	}
+
+      /* Get and insert the parent archive (if any), if this archive has
+	 multiple members.  We assume, as elsewhere, that the parent is named
+	 _CTF_SECTION.  */
+
+      if ((parent_fp = ctf_arc_open_by_name (one_input->clin_arc,
+					     _CTF_SECTION, &err)) == NULL)
+	{
+	  if (err != ECTF_NOMEMBNAM)
+	    {
+	      ctf_next_destroy (i);
+	      ctf_set_errno (fp, err);
+	      goto err;
+	    }
+	}
+      else
+	{
+	  *walk = parent_fp;
+	  parent_i = walk - dedup_inputs;
+	  walk++;
+	}
+
+      /* We disregard the input archive name: either it is the parent (which we
+	 already have), or we want to put everything into one TU sharing the
+	 cuname anyway (if this is a CU-mapped link), or this is the final phase
+	 of a relink with CU-mapping off (i.e. ld -r) in which case the cuname
+	 is correctly set regardless.  */
+      while ((one_fp = ctf_archive_next (one_input->clin_arc, &j, NULL,
+					 1, &err)) != NULL)
+	{
+	  if (one_fp->ctf_flags & LCTF_CHILD)
+	    {
+	      /* The contents of the parents array for elements not
+		 corresponding to children is undefined.  If there is no parent
+		 (itself a sign of a likely linker bug or corrupt input), we set
+		 it to itself.  */
+
+	      ctf_import (one_fp, parent_fp);
+	      if (parent_fp)
+		parents_[walk - dedup_inputs] = parent_i;
+	      else
+		parents_[walk - dedup_inputs] = walk - dedup_inputs;
+	    }
+	  *walk = one_fp;
+	  walk++;
+	}
+      if (err != ECTF_NEXT_END)
+	{
+	  ctf_next_destroy (i);
+	  goto iterr;
+	}
+    }
+  if (err != ECTF_NEXT_END)
+    goto iterr;
+
+  *parents = parents_;
+
+  return dedup_inputs;
+
+ oom:
+  err = ENOMEM;
+
+ iterr:
+  ctf_set_errno (fp, err);
+
+ err:
+  free (dedup_inputs);
+  free (parents_);
+  ctf_err_warn (fp, 0, "Error in deduplicating CTF link input allocation: %s",
+		ctf_errmsg (ctf_errno (fp)));
+  return NULL;
+}
+
+/* Close INPUTS that have already been linked, first the passed array, and then
+   that subset of the ctf_link_inputs archives they came from cited by the
+   CU_NAMES.  If CU_NAMES is not specified, close all the ctf_link_inputs in one
+   go, leaving it empty.  */
+static int
+ctf_link_deduplicating_close_inputs (ctf_file_t *fp, ctf_dynhash_t *cu_names,
+				     ctf_file_t **inputs, ssize_t ninputs)
+{
+  ctf_next_t *it = NULL;
+  void *name;
+  int err;
+  ssize_t i;
+
+  /* This is the inverse of ctf_link_deduplicating_open_inputs: so first, close
+     all the individual input dicts, opened by the archive iterator.  */
+  for (i = 0; i < ninputs; i++)
+    ctf_file_close (inputs[i]);
+
+  /* Now close the archives they are part of.  */
+  if (cu_names)
+    {
+      while ((err = ctf_dynhash_next (cu_names, &it, &name, NULL)) == 0)
+	{
+	  /* Remove the input from the linker inputs, if it exists, which also
+	     closes it.  */
+
+	  ctf_dynhash_remove (fp->ctf_link_inputs, (const char *) name);
+	}
+      if (err != ECTF_NEXT_END)
+	{
+	  ctf_err_warn (fp, 0, "Iteration error in deduplicating link input "
+			"freeing: %s", ctf_errmsg (err));
+	  ctf_set_errno (fp, err);
+	}
+    }
+  else
+    ctf_dynhash_empty (fp->ctf_link_inputs);
+
+  return 0;
+}
+
+/* Do a deduplicating link of all variables in the inputs.  */
+static int
+ctf_link_deduplicating_variables (ctf_file_t *fp, ctf_file_t **inputs,
+				  size_t ninputs, int cu_mapped)
+{
+  ctf_link_in_member_cb_arg_t arg;
+  size_t i;
+
+  arg.cu_mapped = cu_mapped;
+  arg.out_fp = fp;
+  arg.in_input_cu_file = 0;
+
+  for (i = 0; i < ninputs; i++)
+    {
+      arg.in_fp = inputs[i];
+      if (ctf_cuname (inputs[i]) != NULL)
+	arg.in_file_name = ctf_cuname (inputs[i]);
+      else
+	arg.in_file_name = "unnamed-CU";
+      arg.cu_name = arg.in_file_name;
+      if (ctf_variable_iter (arg.in_fp, ctf_link_one_variable, &arg) < 0)
+	return ctf_set_errno (fp, ctf_errno (arg.in_fp));
+
+      /* Outputs > 0 are per-CU.  */
+      arg.in_input_cu_file = 1;
+    }
+  return 0;
+}
+
+/* Do the per-CU part of a deduplicating link.  */
+static int
+ctf_link_deduplicating_per_cu (ctf_file_t *fp)
+{
+  ctf_next_t *i = NULL;
+  int err;
+  void *out_cu;
+  void *in_cus;
+
+  /* Links with a per-CU mapping in force get a first pass of deduplication,
+     dedupping the inputs for a given CU mapping into the output for that
+     mapping.  The outputs from this process get fed back into the final pass
+     that is carried out even for non-CU links.  */
+
+  while ((err = ctf_dynhash_next (fp->ctf_link_out_cu_mapping, &i, &out_cu,
+				  &in_cus)) == 0)
+    {
+      const char *out_name = (const char *) out_cu;
+      ctf_dynhash_t *in = (ctf_dynhash_t *) in_cus;
+      ctf_file_t *out = NULL;
+      ctf_file_t **inputs;
+      ctf_file_t **outputs;
+      ctf_archive_t *in_arc;
+      ssize_t ninputs;
+      ctf_link_input_t *only_input;
+      uint32_t noutputs;
+      uint32_t *parents;
+
+      if ((ninputs = ctf_link_deduplicating_count_inputs (fp, in,
+							  &only_input)) == -1)
+	goto err_open_inputs;
+
+      /* CU mapping with no inputs?  Skip.  */
+      if (ninputs == 0)
+	continue;
+
+      if (labs ((long int) ninputs) > 0xfffffffe)
+	{
+	  ctf_err_warn (fp, 0, "Too many inputs in deduplicating link: %li",
+			(long int) ninputs);
+	  goto err_open_inputs;
+	}
+
+      /* Short-circuit: a cu-mapped link with only one input archive with
+	 unconflicting contents is a do-nothing, and we can just leave the input
+	 in place: we do have to change the cuname, though, so we unwrap it,
+	 change the cuname, then stuff it back in the linker input again, via
+	 the clin_fp short-circuit member.  ctf_link_deduplicating_open_inputs
+	 will spot this member and jam it straight into the next link phase,
+	 ignoring the corresponding archive.  */
+      if (only_input && ninputs == 1)
+	{
+	  ctf_next_t *ai = NULL;
+	  int err;
+
+	  /* We can abuse an archive iterator to get the only member cheaply, no
+	     matter what its name.  */
+	  only_input->clin_fp = ctf_archive_next (only_input->clin_arc,
+						  &ai, NULL, 0, &err);
+	  if (!only_input->clin_fp)
+	    {
+	      ctf_err_warn (fp, 0, "Cannot open archive %s in CU-mapped CTF "
+			    "link: %s", only_input->clin_filename,
+			    ctf_errmsg (err));
+	      ctf_set_errno (fp, err);
+	      goto err_open_inputs;
+	    }
+	  ctf_next_destroy (ai);
+
+	  if (strcmp (only_input->clin_filename, out_name) != 0)
+	    {
+	      /* Renaming. We need to add a new input, then null out the
+		 clin_arc and clin_fp of the old one to stop it being
+		 auto-closed on removal.  The new input needs its cuname changed
+		 to out_name, which is doable only because the cuname is a
+		 dynamic property which can be changed even in readonly
+		 dicts. */
+
+	      ctf_cuname_set (only_input->clin_fp, out_name);
+	      if (ctf_link_add_ctf_internal (fp, only_input->clin_arc,
+					     only_input->clin_fp,
+					     out_name) < 0)
+		{
+		  ctf_err_warn (fp, 0, "Cannot add intermediate files "
+				"to link: %s", ctf_errmsg (ctf_errno (fp)));
+		  goto err_open_inputs;
+		}
+	      only_input->clin_arc = NULL;
+	      only_input->clin_fp = NULL;
+	      ctf_dynhash_remove (fp->ctf_link_inputs,
+				  only_input->clin_filename);
+	    }
+	  continue;
+	}
+
+      /* This is a real CU many-to-one mapping: we must dedup the inputs into
+	 a new output to be used in the final link phase.  */
+
+      if ((inputs = ctf_link_deduplicating_open_inputs (fp, in, ninputs,
+							&parents)) == NULL)
+	{
+	  ctf_next_destroy (i);
+	  goto err_inputs;
+	}
+
+      if ((out = ctf_create (&err)) == NULL)
+	{
+	  ctf_err_warn (fp, 0, "Cannot create per-CU CTF archive for %s: %s",
+		       out_name, ctf_errmsg (err));
+	  ctf_set_errno (fp, err);
+	  goto err_inputs;
+	}
+
+      /* Share the atoms table to reduce memory usage.  */
+      out->ctf_dedup_atoms = fp->ctf_dedup_atoms_alloc;
+
+      /* No ctf_imports at this stage: this per-CU dictionary has no parents.
+	 Parent/child deduplication happens in the link's final pass.  However,
+	 the cuname *is* important, as it is propagated into the final
+	 dictionary.  */
+      ctf_cuname_set (out, out_name);
+
+      if (ctf_dedup (out, inputs, ninputs, parents, 1) < 0)
+	{
+	  ctf_err_warn (fp, 0, "CU-mapped deduplication failed for %s: %s",
+		       out_name, ctf_errmsg (ctf_errno (out)));
+	  goto err_inputs;
+	}
+
+      if ((outputs = ctf_dedup_emit (out, inputs, ninputs, parents,
+				     &noutputs, 1)) == NULL)
+	{
+	  ctf_err_warn (fp, 0, "CU-mapped deduplicating link type emission "
+			"failed for %s: %s", out_name,
+			ctf_errmsg (ctf_errno (out)));
+	  goto err_inputs;
+	}
+      if (!ctf_assert (fp, noutputs == 1))
+	goto err_inputs_outputs;
+
+      if (!(fp->ctf_link_flags & CTF_LINK_OMIT_VARIABLES_SECTION)
+	  && ctf_link_deduplicating_variables (out, inputs, ninputs, 1) < 0)
+	{
+	  ctf_err_warn (fp, 0, "CU-mapped deduplicating link variable "
+			"emission failed for %s: %s", out_name,
+			ctf_errmsg (ctf_errno (out)));
+	  goto err_inputs_outputs;
+	}
+
+      if (ctf_link_deduplicating_close_inputs (fp, in, inputs, ninputs) < 0)
+	{
+	  free (inputs);
+	  free (parents);
+	  goto err_outputs;
+	}
+      free (inputs);
+      free (parents);
+
+      /* Splice any errors or warnings created during this link back into the
+	 dict that the caller knows about.  */
+      ctf_list_splice (&fp->ctf_errs_warnings, &outputs[0]->ctf_errs_warnings);
+
+      /* This output now becomes an input to the next link phase, with a name
+	 equal to the CU name.  We have to wrap it in an archive wrapper
+	 first.  */
+
+      if ((in_arc = ctf_new_archive_internal (0, 0, NULL, outputs[0], NULL,
+					      NULL, &err)) == NULL)
+	{
+	  ctf_set_errno (fp, err);
+	  goto err_outputs;
+	}
+
+      if (ctf_link_add_ctf_internal (fp, in_arc, NULL,
+				     ctf_cuname (outputs[0])) < 0)
+	{
+	  ctf_err_warn (fp, 0, "Cannot add intermediate files to link: %s",
+			ctf_errmsg (ctf_errno (fp)));
+	  goto err_outputs;
+	}
+
+      ctf_file_close (out);
+      free (outputs);
+      continue;
+
+    err_inputs_outputs:
+      ctf_list_splice (&fp->ctf_errs_warnings, &outputs[0]->ctf_errs_warnings);
+      ctf_file_close (outputs[0]);
+      free (outputs);
+    err_inputs:
+      ctf_link_deduplicating_close_inputs (fp, in, inputs, ninputs);
+      ctf_file_close (out);
+      free (inputs);
+      free (parents);
+    err_open_inputs:
+      ctf_next_destroy (i);
+      return -1;
+
+    err_outputs:
+      ctf_list_splice (&fp->ctf_errs_warnings, &outputs[0]->ctf_errs_warnings);
+      ctf_file_close (outputs[0]);
+      free (outputs);
+      ctf_next_destroy (i);
+      return -1;				/* Errno is set for us.  */
+    }
+  if (err != ECTF_NEXT_END)
+    {
+      ctf_err_warn (fp, 0, "Iteration error in CU-mapped deduplicating "
+		    "link: %s", ctf_errmsg (err));
+      return ctf_set_errno (fp, err);
+    }
+
+  return 0;
+}
+
+/* Do a deduplicating link using the ctf-dedup machinery.  */
+static void
+ctf_link_deduplicating (ctf_file_t *fp)
+{
+  size_t i;
+  ctf_file_t **inputs, **outputs = NULL;
+  ssize_t ninputs;
+  uint32_t noutputs;
+  uint32_t *parents;
+
+  if (ctf_dedup_atoms_init (fp) < 0)
+    {
+      ctf_err_warn (fp, 0, "%s allocating CTF dedup atoms table",
+		    ctf_errmsg (ctf_errno (fp)));
+      return;					/* Errno is set for us.  */
+    }
+
+  if (fp->ctf_link_out_cu_mapping
+      && (ctf_link_deduplicating_per_cu (fp) < 0))
+    return;					/* Errno is set for us.  */
+
+  if ((ninputs = ctf_link_deduplicating_count_inputs (fp, NULL, NULL)) < 0)
+    return;					/* Errno is set for us.  */
+
+  if ((inputs = ctf_link_deduplicating_open_inputs (fp, NULL, ninputs,
+						    &parents)) == NULL)
+    return;					/* Errno is set for us.  */
+
+  if (ninputs == 1 && ctf_cuname (inputs[0]) != NULL)
+    ctf_cuname_set (fp, ctf_cuname (inputs[0]));
+
+  if (ctf_dedup (fp, inputs, ninputs, parents, 0) < 0)
+    {
+      ctf_err_warn (fp, 0, "Deduplication failed for %s: %s",
+		    ctf_link_input_name (fp), ctf_errmsg (ctf_errno (fp)));
+      goto err;
+    }
+
+  if ((outputs = ctf_dedup_emit (fp, inputs, ninputs, parents, &noutputs,
+				 0)) == NULL)
+    {
+      ctf_err_warn (fp, 0, "Deduplicating link type emission failed "
+		    "for %s: %s", ctf_link_input_name (fp),
+		    ctf_errmsg (ctf_errno (fp)));
+      goto err;
+    }
+
+  if (!ctf_assert (fp, outputs[0] == fp))
+    goto err;
+
+  for (i = 0; i < noutputs; i++)
+    {
+      char *dynname;
+
+      /* We already have access to this one.  Close the duplicate.  */
+      if (i == 0)
+	{
+	  ctf_file_close (outputs[0]);
+	  continue;
+	}
+
+      if ((dynname = strdup (ctf_cuname (outputs[i]))) == NULL)
+	goto oom_one_output;
+
+      if (ctf_dynhash_insert (fp->ctf_link_outputs, dynname, outputs[i]) < 0)
+	goto oom_one_output;
+
+      continue;
+
+    oom_one_output:
+      ctf_err_warn (fp, 0, "Out of memory allocating link outputs");
+      ctf_set_errno (fp, ENOMEM);
+      free (dynname);
+
+      for (; i < noutputs; i++)
+	ctf_file_close (outputs[i]);
+      goto err;
+    }
+
+  if (!(fp->ctf_link_flags & CTF_LINK_OMIT_VARIABLES_SECTION)
+      && ctf_link_deduplicating_variables (fp, inputs, ninputs, 0) < 0)
+    {
+      ctf_err_warn (fp, 0, "Deduplicating link variable emission failed for "
+		    "%s: %s", ctf_link_input_name (fp),
+		    ctf_errmsg (ctf_errno (fp)));
+      for (i = 1; i < noutputs; i++)
+	ctf_file_close (outputs[i]);
+      goto err;
+    }
+
+  /* Now close all the inputs, including per-CU intermediates.  */
+
+  if (ctf_link_deduplicating_close_inputs (fp, NULL, inputs, ninputs) < 0)
+    return;					/* errno is set for us.  */
+
+  ninputs = 0;					/* Prevent double-close.  */
+  ctf_set_errno (fp, 0);
+
+  /* Fall through.  */
+
+ err:
+  for (i = 0; i < (size_t) ninputs; i++)
+    ctf_file_close (inputs[i]);
+  free (inputs);
+  free (parents);
+  free (outputs);
+  return;
+}
+
 /* Merge types and variable sections in all files added to the link
    together.  All the added files are closed.  */
 int
@@ -871,8 +1524,11 @@ ctf_link (ctf_file_t *fp, int flags)
 	}
     }
 
-  ctf_dynhash_iter (fp->ctf_link_inputs, ctf_link_one_input_archive,
-		    &arg);
+  if ((flags & CTF_LINK_NONDEDUP) || (getenv ("LD_NO_CTF_DEDUP")))
+    ctf_dynhash_iter (fp->ctf_link_inputs, ctf_link_one_input_archive,
+		      &arg);
+  else
+    ctf_link_deduplicating (fp);
 
   /* Discard the now-unnecessary mapping table data from all the outputs.  */
   if (fp->ctf_link_type_mapping)

@@ -629,6 +629,7 @@ extern char *ctf_sha1_fini (ctf_sha1_t *, char *);
 extern void ctf_list_append (ctf_list_t *, void *);
 extern void ctf_list_prepend (ctf_list_t *, void *);
 extern void ctf_list_delete (ctf_list_t *, void *);
+extern void ctf_list_splice (ctf_list_t *, ctf_list_t *);
 extern int ctf_list_empty_p (ctf_list_t *lp);
 
 extern int ctf_dtd_insert (ctf_file_t *, ctf_dtdef_t *, int flag, int kind);

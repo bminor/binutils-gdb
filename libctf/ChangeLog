@@ -1,5 +1,19 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_list_splice): New.
+	* ctf-util.h (ctf_list_splice): Likewise.
+	* ctf-link.c (link_sort_inputs_cb_arg_t): Likewise.
+	(ctf_link_sort_inputs): Likewise.
+	(ctf_link_deduplicating_count_inputs): Likewise.
+	(ctf_link_deduplicating_open_inputs): Likewise.
+	(ctf_link_deduplicating_close_inputs): Likewise.
+	(ctf_link_deduplicating_variables): Likewise.
+	(ctf_link_deduplicating_per_cu): Likewise.
+	(ctf_link_deduplicating): Likewise.
+	(ctf_link): Call it.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-link.c (ctf_link_one_input_archive_member): Check
 	CTF_LINK_OMIT_VARIABLES_SECTION.
 

@@ -88,6 +88,26 @@ ctf_list_empty_p (ctf_list_t *lp)
   return (lp->l_next == NULL && lp->l_prev == NULL);
 }
 
+/* Splice one entire list onto the end of another one.  The existing list is
+   emptied.  */
+
+void
+ctf_list_splice (ctf_list_t *lp, ctf_list_t *append)
+{
+  if (ctf_list_empty_p (append))
+    return;
+
+  if (lp->l_prev != NULL)
+    lp->l_prev->l_next = append->l_next;
+  else
+    lp->l_next = append->l_next;
+
+  append->l_next->l_prev = lp->l_prev;
+  lp->l_prev = append->l_prev;
+  append->l_next = NULL;
+  append->l_prev = NULL;
+}
+
 /* Convert a 32-bit ELF symbol into Elf64 and return a pointer to it.  */
 
 Elf64_Sym *

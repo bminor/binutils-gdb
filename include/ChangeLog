@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (CTF_LINK_NONDEDUP): New, turn off the
+	deduplicator.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (CTF_LINK_OMIT_VARIABLES_SECTION): New.
 
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
