@@ -324,8 +324,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 
              Note that the CALL instruction has only one operand, so
              this code is executed only once per instruction.  */
-          where = fixP->fx_frag->fr_literal + fixP->fx_where;
-          where[1] = target_big_endian ? 0x01 : 0x10;
+          where = fixP->fx_frag->fr_literal + fixP->fx_where + 1;
+          where[0] = target_big_endian ? 0x01 : 0x10;
           /* Fallthrough.  */
         case BPF_OPERAND_DISP16:
           /* The PC-relative displacement fields in jump instructions

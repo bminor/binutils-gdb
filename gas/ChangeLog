@@ -1,3 +1,8 @@
+2020-06-05  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* config/tc-bpf.c (md_apply_fix): Avoid GCC 10 warning
+	stringop-overflow.
+
 2020-06-05  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c (explicit_csr): New static boolean.
