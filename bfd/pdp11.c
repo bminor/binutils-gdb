@@ -2925,14 +2925,15 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 
       type = H_GET_8 (abfd, p->e_type);
 
-      /* Ignore debugging symbols.  */
-      if (is_stab(type, name))
-	continue;
-
       /* PR 19629: Corrupt binaries can contain illegal string offsets.  */
       if (GET_WORD (abfd, p->e_strx) >= obj_aout_external_string_size (abfd))
 	return FALSE;
       name = strings + GET_WORD (abfd, p->e_strx);
+
+      /* Ignore debugging symbols.  */
+      if (is_stab (type, name))
+	continue;
+
       value = GET_WORD (abfd, p->e_value);
       flags = BSF_GLOBAL;
       string = NULL;

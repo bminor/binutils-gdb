@@ -1,3 +1,8 @@
+2020-06-05  Nick Clifton  <nickc@redhat.com>
+
+	* pdp11.c (aout_link_add_symbols): Fix use before initialisation
+	bug.
+
 2020-06-05  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfnn-riscv.c (riscv_merge_attributes): Add new boolean
