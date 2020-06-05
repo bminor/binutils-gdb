@@ -1348,4 +1348,10 @@ setup_xfail "sh-*-coff*"
 setup_xfail "spu-*-*"
 clear_xfail "hppa*64*-*-hpux*" "hppa*-*-linux*" "hppa*-*-lites*"
 clear_xfail "hppa*-*-*n*bsd*" "hppa*-*-rtems*" "hppa*-*-*elf*"
-objcopy_test "pr25662" pr25662.s executable "" "-T$srcdir/$subdir/pr25662.ld"
+if { [istarget pdp11-*-*] } {
+    set src "pr25662-pdp11.s"
+} else {
+    set src "pr25662.s"
+}
+
+objcopy_test "pr25662" $src executable "" "-T$srcdir/$subdir/pr25662.ld"
