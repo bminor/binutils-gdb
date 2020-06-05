@@ -2552,6 +2552,7 @@ bfinfdpic_relocate_section (bfd * output_bfd,
       h      = NULL;
       sym    = NULL;
       sec    = NULL;
+      picrel = NULL;
 
       if (r_symndx < symtab_hdr->sh_info)
 	{
