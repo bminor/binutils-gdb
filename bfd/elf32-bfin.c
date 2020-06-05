@@ -2614,6 +2614,9 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 	case R_BFIN_FUNCDESC_GOTOFFLO:
 	case R_BFIN_FUNCDESC:
 	case R_BFIN_FUNCDESC_VALUE:
+	  if ((input_section->flags & SEC_ALLOC) == 0)
+	    break;
+
 	  if (h != NULL)
 	    picrel = bfinfdpic_relocs_info_for_global (bfinfdpic_relocs_info
 						       (info), input_bfd, h,
