@@ -685,7 +685,8 @@ ctf_link_one_input_archive_member (ctf_file_t *in_fp, const char *name, void *ar
   arg->in_fp = in_fp;
 
   if ((err = ctf_type_iter_all (in_fp, ctf_link_one_type, arg)) > -1)
-    err = ctf_variable_iter (in_fp, ctf_link_one_variable, arg);
+    if (!(in_fp->ctf_link_flags & CTF_LINK_OMIT_VARIABLES_SECTION))
+      err = ctf_variable_iter (in_fp, ctf_link_one_variable, arg);
 
   arg->in_input_cu_file = 0;
 

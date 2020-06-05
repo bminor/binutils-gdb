@@ -90,6 +90,9 @@ typedef struct ctf_link_sym
    emitted into them.  */
 #define CTF_LINK_EMPTY_CU_MAPPINGS 0x4
 
+/* Omit the content of the variables section.  */
+#define CTF_LINK_OMIT_VARIABLES_SECTION 0x8
+
 /* Symbolic names for CTF sections.  */
 
 typedef enum ctf_sect_names

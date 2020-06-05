@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-link.c (ctf_link_one_input_archive_member): Check
+	CTF_LINK_OMIT_VARIABLES_SECTION.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_type_id_key): New, the key in the
 	cd_id_to_file_t.
 	(ctf_dedup): New, core deduplicator state.
