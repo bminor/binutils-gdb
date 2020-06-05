@@ -1612,6 +1612,40 @@ definition.  If the symbol is defined as a common value then any files
 where this happens appear next.  Finally any files that reference the
 symbol are listed.
 
+@cindex ctf variables
+@kindex --ctf-variables
+@kindex --no-ctf-variables
+@item --ctf-variables
+@item --no-ctf-variables
+The CTF debuginfo format supports a section which encodes the names and
+types of variables found in the program which do not appear in any symbol
+table. These variables clearly cannot be looked up by address by
+conventional debuggers, so the space used for their types and names is
+usually wasted: the types are usually small but the names are often not.
+@option{--ctf-variables} causes the generation of such a section.
+The default behaviour can be restored with @option{--no-ctf-variables}.
+
+@cindex ctf type sharing
+@kindex --ctf-share-types
+@item --ctf-share-types=@var{method}
+Adjust the method used to share types between translation units in CTF.
+
+@table @samp
+@item share-unconflicted
+Put all types that do not have ambiguous definitions into the shared dictionary,
+where debuggers can easily access them, even if they only occur in one
+translation unit.  This is the default.
+
+@item share-duplicated
+Put only types that occur in multiple translation units into the shared
+dictionary: types with only one definition go into per-translation-unit
+dictionaries.  Types with ambiguous definitions in multiple translation units
+always go into per-translation-unit dictionaries.  This tends to make the CTF
+larger, but may reduce the amount of CTF in the shared dictionary.  For very
+large projects this may speed up opening the CTF and save memory in the CTF
+consumer at runtime.
+@end table
+
 @cindex common allocation
 @kindex --no-define-common
 @item --no-define-common

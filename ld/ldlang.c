@@ -3755,6 +3755,7 @@ static void
 lang_merge_ctf (void)
 {
   asection *output_sect;
+  int flags = 0;
 
   if (!ctf_output)
     return;
@@ -3791,7 +3792,14 @@ lang_merge_ctf (void)
 	}
     }
 
-  if (ctf_link (ctf_output, CTF_LINK_SHARE_UNCONFLICTED) < 0)
+  if (!config.ctf_share_duplicated)
+    flags = CTF_LINK_SHARE_UNCONFLICTED;
+  else
+    flags = CTF_LINK_SHARE_DUPLICATED;
+  if (!config.ctf_variables)
+    flags |= CTF_LINK_OMIT_VARIABLES_SECTION;
+
+  if (ctf_link (ctf_output, flags) < 0)
     {
       einfo (_("%P: warning: CTF linking failed; "
 	       "output will have no CTF section: `%s'\n"),

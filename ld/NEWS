@@ -1,5 +1,15 @@
 -*- text -*-
 
+* The linker now deduplicates the types in .ctf sections.  The new
+  command-line option --ctf-share-types describes how to do this:
+  its default value, share-unconflicted, produces the most compact
+  output.
+
+* The linker now omits the "variable section" from .ctf sections by
+  default, saving space.  This is almost certainly what you want
+  unless you are working on a project that has its own analogue
+  of symbol tables that are not reflected in the ELF symtabs.
+
 Changes in 2.35:
 
 * X86 NaCl target support is removed.

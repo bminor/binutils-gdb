@@ -1,3 +1,17 @@
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ldlex.h (option_values) <OPTION_CTF_VARIABLES,
+	OPTION_NO_CTF_VARIABLES, OPTION_CTF_SHARE_TYPES>: New.
+	* ld.h (ld_config_type) <ctf_variables, ctf_share_duplicated>:
+	New fields.
+	* ldlang.c (lang_merge_ctf): Use them.
+	* lexsup.c (ld_options): Add ctf-variables, no-ctf-variables,
+	ctf-share-types.
+	(parse_args) <OPTION_CTF_VARIABLES, OPTION_NO_CTF_VARIABLES,
+	OPTION_CTF_SHARE_TYPES>: New cases.
+	* ld.texi: Document new options.
+	* NEWS: Likewise.
+
 2020-07-22  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
 
 	* ldlang.c (lang_merge_ctf): Turn errors into warnings.
