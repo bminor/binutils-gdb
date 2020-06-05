@@ -333,7 +333,12 @@ struct ctf_file
 
   /* Allow the caller to change the name of link archive members.  */
   ctf_link_memb_name_changer_f *ctf_link_memb_name_changer;
-  void *ctf_link_memb_name_changer_arg; /* Argument for it.  */
+  void *ctf_link_memb_name_changer_arg;         /* Argument for it.  */
+
+  /* Allow the caller to filter out variables they don't care about.  */
+  ctf_link_variable_filter_f *ctf_link_variable_filter;
+  void *ctf_link_variable_filter_arg;           /* Argument for it. */
+
   ctf_dynhash_t *ctf_add_processing; /* Types ctf_add_type is working on now.  */
   char *ctf_tmp_typeslice;	  /* Storage for slicing up type names.  */
   size_t ctf_tmp_typeslicelen;	  /* Size of the typeslice.  */

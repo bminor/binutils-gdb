@@ -458,6 +458,12 @@ extern int ctf_compress_write (ctf_file_t * fp, int fd);
 extern unsigned char *ctf_write_mem (ctf_file_t *, size_t *, size_t threshold);
 
 extern int ctf_link_add_ctf (ctf_file_t *, ctf_archive_t *, const char *);
+/* The variable filter should return nonzero if a variable should not
+   appear in the output.  */
+typedef int ctf_link_variable_filter_f (ctf_file_t *, const char *, ctf_id_t,
+					void *);
+extern int ctf_link_set_variable_filter (ctf_file_t *,
+					 ctf_link_variable_filter_f *, void *);
 extern int ctf_link (ctf_file_t *, int flags);
 typedef const char *ctf_link_strtab_string_f (uint32_t *offset, void *arg);
 extern int ctf_link_add_strtab (ctf_file_t *, ctf_link_strtab_string_f *,

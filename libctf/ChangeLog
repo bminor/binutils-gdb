@@ -1,5 +1,14 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* libctf.ver (ctf_link_set_variable_filter): Add.
+	* ctf-impl.h (ctf_file_t) <ctf_link_variable_filter>: New.
+	<ctf_link_variable_filter_arg>: Likewise.
+	* ctf-create.c (ctf_serialize): Adjust.
+	* ctf-link.c (ctf_link_set_variable_filter): New, set it.
+	(ctf_link_one_variable): Call it if set.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-link.c (ctf_link_one_variable): Check the dst_type for
 	conflicts, not the source type.
 

@@ -528,6 +528,16 @@ ctf_link_one_type (ctf_id_t type, int isroot _libctf_unused_, void *arg_)
   return 0;					/* As above: do not lose types.  */
 }
 
+/* Set a function which is used to filter out unwanted variables from the link.  */
+int
+ctf_link_set_variable_filter (ctf_file_t *fp, ctf_link_variable_filter_f *filter,
+			      void *arg)
+{
+  fp->ctf_link_variable_filter = filter;
+  fp->ctf_link_variable_filter_arg = arg;
+  return 0;
+}
+
 /* Check if we can safely add a variable with the given type to this container.  */
 
 static int
@@ -563,6 +573,15 @@ ctf_link_one_variable (const char *name, ctf_id_t type, void *arg_)
   ctf_id_t dst_type = 0;
   ctf_file_t *check_fp;
   ctf_dvdef_t *dvd;
+
+  /* See if this variable is filtered out.  */
+
+  if (arg->out_fp->ctf_link_variable_filter)
+    {
+      void *farg = arg->out_fp->ctf_link_variable_filter_arg;
+      if (arg->out_fp->ctf_link_variable_filter (arg->in_fp, name, type, farg))
+	return 0;
+    }
 
   /* In unconflicted link mode, if this type is mapped to a type in the parent
      container, we want to try to add to that first: if it reports a duplicate,

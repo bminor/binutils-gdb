@@ -159,6 +159,7 @@ LIBCTF_1.0 {
 	ctf_link_add_ctf;
 	ctf_link_add_cu_mapping;
 	ctf_link_set_memb_name_changer;
+	ctf_link_set_variable_filter;
 	ctf_link;
 	ctf_link_add_strtab;
 	ctf_link_shuffle_syms;

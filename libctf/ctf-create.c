@@ -543,6 +543,8 @@ ctf_serialize (ctf_file_t *fp)
   nfp->ctf_link_type_mapping = fp->ctf_link_type_mapping;
   nfp->ctf_link_memb_name_changer = fp->ctf_link_memb_name_changer;
   nfp->ctf_link_memb_name_changer_arg = fp->ctf_link_memb_name_changer_arg;
+  nfp->ctf_link_variable_filter = fp->ctf_link_variable_filter;
+  nfp->ctf_link_variable_filter_arg = fp->ctf_link_variable_filter_arg;
   nfp->ctf_link_flags = fp->ctf_link_flags;
 
   nfp->ctf_snapshot_lu = fp->ctf_snapshots;
