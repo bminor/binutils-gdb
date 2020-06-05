@@ -1759,6 +1759,7 @@ do_start_initialization ()
       || gdbpy_initialize_py_events () < 0
       || gdbpy_initialize_event () < 0
       || gdbpy_initialize_arch () < 0
+      || gdbpy_initialize_registers () < 0
       || gdbpy_initialize_xmethods () < 0
       || gdbpy_initialize_unwind () < 0
       || gdbpy_initialize_tui () < 0)

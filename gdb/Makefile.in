@@ -401,6 +401,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-record.c \
 	python/py-record-btrace.c \
 	python/py-record-full.c \
+	python/py-registers.c \
 	python/py-signalevent.c \
 	python/py-stopevent.c \
 	python/py-symbol.c \

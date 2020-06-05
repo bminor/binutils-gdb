@@ -1,5 +1,12 @@
 2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python.texi (Python API): Add new section to the menu.
+	(Frames In Python): Add new @anchor.
+	(Architectures In Python): Document new registers method.
+	(Registers In Python): New section.
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* python.texi (Unwinding Frames in Python): Document
 	PendingFrame.architecture method.
 

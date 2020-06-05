@@ -120,6 +120,11 @@ GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*
   ** New method gdb.PendingFrame.architecture () to retrieve the
      architecture of the pending frame.
 
+  ** New gdb.Architecture.registers method that returns a
+     gdb.RegisterDescriptorIterator object, an iterator that returns
+     gdb.RegisterDescriptor objects.  The new RegisterDescriptor is a
+     way to query the registers available for an architecture.
+
 *** Changes in GDB 9
 
 * 'thread-exited' event is now available in the annotations interface.

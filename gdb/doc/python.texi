@@ -163,6 +163,7 @@ optional arguments while skipping others.  Example:
                                 using Python.
 * Lazy Strings In Python::      Python representation of lazy strings.
 * Architectures In Python::     Python representation of architectures.
+* Registers In Python::         Python representation of registers.
 * TUI Windows In Python::       Implementing new TUI windows.
 @end menu
 
@@ -4684,6 +4685,7 @@ Return the frame's symtab and line object.
 @xref{Symbol Tables In Python}.
 @end defun
 
+@anchor{gdbpy_frame_read_register}
 @defun Frame.read_register (register)
 Return the value of @var{register} in this frame.  The @var{register}
 argument must be a string (e.g., @code{'sp'} or @code{'rax'}).
@@ -5714,6 +5716,37 @@ instruction in bytes.
 
 @end table
 @end defun
+
+@anchor{gdbpy_architecture_registers}
+@defun Architecture.registers (@r{[} @var{reggroup} @r{]})
+Return a @code{gdb.RegisterDescriptorIterator} (@pxref{Registers In
+Python}) for all of the registers in @var{reggroup}, a string that is
+the name of a register group.  If @var{reggroup} is omitted, or is the
+empty string, then the register group @samp{all} is assumed.
+@end defun
+
+@node Registers In Python
+@subsubsection Registers In Python
+@cindex Registers In Python
+
+Python code can request from a @code{gdb.Architecture} information
+about the set of registers available
+(@pxref{gdbpy_architecture_registers,,@code{Architecture.registers}}).
+The register information is returned as a
+@code{gdb.RegisterDescriptorIterator}, which is an iterator that in
+turn returns @code{gdb.RegisterDescriptor} objects.
+
+A @code{gdb.RegisterDescriptor} does not provide the value of a
+register (@pxref{gdbpy_frame_read_register,,@code{Frame.read_register}}
+for reading a register's value), instead the @code{RegisterDescriptor}
+is a way to discover which registers are available for a particular
+architecture.
+
+A @code{gdb.RegisterDescriptor} has the following read-only properties:
+
+@defvar RegisterDescriptor.name
+The name of this register.
+@end defvar
 
 @node TUI Windows In Python
 @subsubsection Implementing new TUI windows

@@ -1,5 +1,18 @@
 2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* Makefile.in (SUBDIR_PYTHON_SRCS): Add py-registers.c
+	* python/py-arch.c (archpy_registers): New function.
+	(arch_object_methods): Add 'registers' method.
+	* python/py-registers.c: New file.
+	* python/python-internal.h
+	(gdbpy_new_register_descriptor_iterator): Declare.
+	(gdbpy_initialize_registers): Declare.
+	* python/python.c (do_start_initialization): Call
+	gdbpy_initialize_registers.
+	* NEWS: Mention additions to the Python API.
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* NEWS: Mention new Python API method.
 	* python/py-unwind.c (pending_framepy_architecture): New function.
 	(pending_frame_object_methods): Add architecture method.
