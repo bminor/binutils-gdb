@@ -1,3 +1,8 @@
+2020-06-05  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/py-tui.c (gdbpy_tui_set_title): Use release, not get, to
+	avoid use after free.
+
 2020-06-05  Tom de Vries  <tdevries@suse.de>
 
 	* NEWS: Fix typos.
