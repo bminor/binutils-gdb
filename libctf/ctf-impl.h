@@ -247,6 +247,106 @@ typedef struct ctf_link_type_key
   ctf_id_t cltk_idx;
 } ctf_link_type_key_t;
 
+/* The structure used as the key in a cd_id_to_file_t on 32-bit platforms.  */
+typedef struct ctf_type_id_key
+{
+  int ctii_input_num;
+  ctf_id_t ctii_type;
+} ctf_type_id_key_t;
+
+/* Deduplicator state.
+
+   The dedup state below uses three terms consistently. A "hash" is a
+   ctf_dynhash_t; a "hash value" is the hash value of a type as returned by
+   ctf_dedup_hash_type; a "global type ID" or "global ID" is a packed-together
+   reference to a single ctf_file_t (by array index in an array of inputs) and
+   ctf_id_t, i.e. a single instance of some hash value in some input.
+
+   The deduplication algorithm takes a bunch of inputs and yields a single
+   shared "output" and possibly many outputs corresponding to individual inputs
+   that still contain types after sharing of unconflicted types.  Almost all
+   deduplicator state is stored in the struct ctf_dedup in the output, though a
+   (very) few things are stored in inputs for simplicity's sake, usually if they
+   are linking together things within the scope of a single TU.
+
+   Flushed at the end of every ctf_dedup run.  */
+
+typedef struct ctf_dedup
+{
+  /* The CTF linker flags in force for this dedup run.  */
+  int cd_link_flags;
+
+  /* On 32-bit platforms only, a hash of global type IDs, in the form of
+     a ctf_link_type_id_key_t.  */
+  ctf_dynhash_t *cd_id_to_file_t;
+
+  /* Atoms tables of decorated names: maps undecorated name to decorated name.
+     (The actual allocations are in the CTF file for the former and the real
+     atoms table for the latter).  Uses the same namespaces as ctf_lookups,
+     below, but has no need for null-termination.  */
+  ctf_dynhash_t *cd_decorated_names[4];
+
+  /* Map type names to a hash from type hash value -> number of times each value
+     has appeared.  */
+  ctf_dynhash_t *cd_name_counts;
+
+  /* Map global type IDs to type hash values.  Used to determine if types are
+     already hashed without having to recompute their hash values again, and to
+     link types together at later stages.  Forwards that are peeked through to
+     structs and unions are not represented in here, so lookups that might be
+     such a type (in practice, all lookups) must go via cd_replaced_types first
+     to take this into account.  Discarded before each rehashing.  */
+  ctf_dynhash_t *cd_type_hashes;
+
+  /* Maps from the names of structs/unions/enums to a a single GID which is the
+     only appearance of that type in any input: if it appears in more than one
+     input, a value which is a GID with an input_num of -1 appears.  Used in
+     share-duplicated link mode link modes to determine whether structs/unions
+     can be cited from multiple TUs.  Only populated in that link mode.  */
+  ctf_dynhash_t *cd_struct_origin;
+
+  /* Maps type hash values to a set of hash values of the types that cite them:
+     i.e., pointing backwards up the type graph.  Used for recursive conflict
+     marking.  Citations from tagged structures, unions, and forwards do not
+     appear in this graph.  */
+  ctf_dynhash_t *cd_citers;
+
+  /* Maps type hash values to input global type IDs.  The value is a set (a
+     hash) of global type IDs.  Discarded before each rehashing.  The result of
+     the ctf_dedup function.  */
+  ctf_dynhash_t *cd_output_mapping;
+
+  /* A map giving the GID of the first appearance of each type for each type
+     hash value.  */
+  ctf_dynhash_t *cd_output_first_gid;
+
+  /* Used to ensure that we never try to map a single type ID to more than one
+     hash.  */
+  ctf_dynhash_t *cd_output_mapping_guard;
+
+  /* Maps the global type IDs of structures in input TUs whose members still
+     need emission to the global type ID of the already-emitted target type
+     (which has no members yet) in the appropriate target.  Uniquely, the latter
+     ID represents a *target* ID (i.e. the cd_output_mapping of some specified
+     input): we encode the shared (parent) dict with an ID of -1.  */
+  ctf_dynhash_t *cd_emission_struct_members;
+
+  /* A set (a hash) of hash values of conflicting types.  */
+  ctf_dynset_t *cd_conflicting_types;
+
+  /* Maps type hashes to ctf_id_t's in this dictionary.  Populated only at
+     emission time, in the dictionary where emission is taking place.  */
+  ctf_dynhash_t *cd_output_emission_hashes;
+
+  /* Maps the decorated names of conflicted cross-TU forwards that were forcibly
+     emitted in this TU to their emitted ctf_id_ts.  Populated only at emission
+     time, in the dictionary where emission is taking place. */
+  ctf_dynhash_t *cd_output_emission_conflicted_forwards;
+
+  /* Points to the output counterpart of this input dictionary, at emission
+     time.  */
+  ctf_file_t *cd_output;
+} ctf_dedup_t;
 
 /* The ctf_file is the structure used to represent a CTF container to library
    clients, who see it only as an opaque pointer.  Modifications can therefore
@@ -346,6 +446,18 @@ struct ctf_file
   void *ctf_link_variable_filter_arg;           /* Argument for it. */
 
   ctf_dynhash_t *ctf_add_processing; /* Types ctf_add_type is working on now.  */
+
+  /* Atoms table for dedup string storage.  All strings in the ctf_dedup_t are
+     stored here.  Only the _alloc copy is allocated or freed: the
+     ctf_dedup_atoms may be pointed to some other CTF dict, to share its atoms.
+     We keep the atoms table outside the ctf_dedup so that atoms can be
+     preserved across multiple similar links, such as when doing cu-mapped
+     links.  */
+  ctf_dynset_t *ctf_dedup_atoms;
+  ctf_dynset_t *ctf_dedup_atoms_alloc;
+
+  ctf_dedup_t ctf_dedup;	  /* Deduplicator state.  */
+
   char *ctf_tmp_typeslice;	  /* Storage for slicing up type names.  */
   size_t ctf_tmp_typeslicelen;	  /* Size of the typeslice.  */
   void *ctf_specific;		  /* Data for ctf_get/setspecific().  */
@@ -451,11 +563,13 @@ typedef unsigned int (*ctf_hash_fun) (const void *ptr);
 extern unsigned int ctf_hash_integer (const void *ptr);
 extern unsigned int ctf_hash_string (const void *ptr);
 extern unsigned int ctf_hash_type_key (const void *ptr);
+extern unsigned int ctf_hash_type_id_key (const void *ptr);
 
 typedef int (*ctf_hash_eq_fun) (const void *, const void *);
 extern int ctf_hash_eq_integer (const void *, const void *);
 extern int ctf_hash_eq_string (const void *, const void *);
 extern int ctf_hash_eq_type_key (const void *, const void *);
+extern int ctf_hash_eq_type_id_key (const void *, const void *);
 
 extern int ctf_dynset_eq_string (const void *, const void *);
 
@@ -526,10 +640,23 @@ extern int ctf_dvd_insert (ctf_file_t *, ctf_dvdef_t *);
 extern void ctf_dvd_delete (ctf_file_t *, ctf_dvdef_t *);
 extern ctf_dvdef_t *ctf_dvd_lookup (const ctf_file_t *, const char *);
 
+extern ctf_id_t ctf_add_encoded (ctf_file_t *, uint32_t, const char *,
+				 const ctf_encoding_t *, uint32_t kind);
+extern ctf_id_t ctf_add_reftype (ctf_file_t *, uint32_t, ctf_id_t,
+				 uint32_t kind);
+
 extern void ctf_add_type_mapping (ctf_file_t *src_fp, ctf_id_t src_type,
 				  ctf_file_t *dst_fp, ctf_id_t dst_type);
 extern ctf_id_t ctf_type_mapping (ctf_file_t *src_fp, ctf_id_t src_type,
 				  ctf_file_t **dst_fp);
+
+extern int ctf_dedup_atoms_init (ctf_file_t *);
+extern int ctf_dedup (ctf_file_t *, ctf_file_t **, uint32_t ninputs,
+		      uint32_t *parents, int cu_mapped);
+extern void ctf_dedup_fini (ctf_file_t *, ctf_file_t **, uint32_t);
+extern ctf_file_t **ctf_dedup_emit (ctf_file_t *, ctf_file_t **,
+				    uint32_t ninputs, uint32_t *parents,
+				    uint32_t *noutputs, int cu_mapped);
 
 extern void ctf_decl_init (ctf_decl_t *);
 extern void ctf_decl_fini (ctf_decl_t *);

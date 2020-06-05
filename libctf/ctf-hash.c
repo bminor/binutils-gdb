@@ -117,6 +117,28 @@ ctf_hash_eq_type_key (const void *a, const void *b)
     && (key_a->cltk_idx == key_b->cltk_idx);
 }
 
+/* Hash a type_id_key.  */
+unsigned int
+ctf_hash_type_id_key (const void *ptr)
+{
+  ctf_helem_t *hep = (ctf_helem_t *) ptr;
+  ctf_type_id_key_t *k = (ctf_type_id_key_t *) hep->key;
+
+  return htab_hash_pointer ((void *) (uintptr_t) k->ctii_input_num)
+    + 59 * htab_hash_pointer ((void *) (uintptr_t) k->ctii_type);
+}
+
+int
+ctf_hash_eq_type_id_key (const void *a, const void *b)
+{
+  ctf_helem_t *hep_a = (ctf_helem_t *) a;
+  ctf_helem_t *hep_b = (ctf_helem_t *) b;
+  ctf_type_id_key_t *key_a = (ctf_type_id_key_t *) hep_a->key;
+  ctf_type_id_key_t *key_b = (ctf_type_id_key_t *) hep_b->key;
+
+  return (key_a->ctii_input_num == key_b->ctii_input_num)
+    && (key_a->ctii_type == key_b->ctii_type);
+}
 
 /* Hash and eq functions for the dynset.  Most of these can just use the
    underlying hashtab functions directly.   */

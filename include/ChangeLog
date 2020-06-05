@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (CTF_LINK_SHARE_DUPLICATED): No longer unimplemented.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ctf_link_variable_filter_t): New.
 	(ctf_link_set_variable_filter): Likewise.
 

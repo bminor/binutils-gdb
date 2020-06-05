@@ -1719,6 +1719,8 @@ ctf_file_close (ctf_file_t *fp)
   ctf_dynhash_destroy (fp->ctf_link_in_cu_mapping);
   ctf_dynhash_destroy (fp->ctf_link_out_cu_mapping);
   ctf_dynhash_destroy (fp->ctf_add_processing);
+  ctf_dedup_fini (fp, NULL, 0);
+  ctf_dynset_destroy (fp->ctf_dedup_atoms_alloc);
 
   for (err = ctf_list_next (&fp->ctf_errs_warnings); err != NULL; err = nerr)
     {

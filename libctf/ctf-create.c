@@ -546,6 +546,9 @@ ctf_serialize (ctf_file_t *fp)
   nfp->ctf_link_variable_filter = fp->ctf_link_variable_filter;
   nfp->ctf_link_variable_filter_arg = fp->ctf_link_variable_filter_arg;
   nfp->ctf_link_flags = fp->ctf_link_flags;
+  nfp->ctf_dedup_atoms = fp->ctf_dedup_atoms;
+  nfp->ctf_dedup_atoms_alloc = fp->ctf_dedup_atoms_alloc;
+  memcpy (&nfp->ctf_dedup, &fp->ctf_dedup, sizeof (fp->ctf_dedup));
 
   nfp->ctf_snapshot_lu = fp->ctf_snapshots;
 
@@ -571,11 +574,14 @@ ctf_serialize (ctf_file_t *fp)
   fp->ctf_link_in_cu_mapping = NULL;
   fp->ctf_link_out_cu_mapping = NULL;
   fp->ctf_link_type_mapping = NULL;
+  fp->ctf_dedup_atoms = NULL;
+  fp->ctf_dedup_atoms_alloc = NULL;
   fp->ctf_parent_unreffed = 1;
 
   fp->ctf_dvhash = NULL;
   memset (&fp->ctf_dvdefs, 0, sizeof (ctf_list_t));
   memset (fp->ctf_lookups, 0, sizeof (fp->ctf_lookups));
+  memset (&fp->ctf_dedup, 0, sizeof (fp->ctf_dedup));
   fp->ctf_structs.ctn_writable = NULL;
   fp->ctf_unions.ctn_writable = NULL;
   fp->ctf_enums.ctn_writable = NULL;
@@ -878,7 +884,7 @@ clp2 (size_t x)
   return (x + 1);
 }
 
-static ctf_id_t
+ctf_id_t
 ctf_add_encoded (ctf_file_t *fp, uint32_t flag,
 		 const char *name, const ctf_encoding_t *ep, uint32_t kind)
 {
@@ -899,7 +905,7 @@ ctf_add_encoded (ctf_file_t *fp, uint32_t flag,
   return type;
 }
 
-static ctf_id_t
+ctf_id_t
 ctf_add_reftype (ctf_file_t *fp, uint32_t flag, ctf_id_t ref, uint32_t kind)
 {
   ctf_dtdef_t *dtd;

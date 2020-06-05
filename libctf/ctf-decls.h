@@ -72,4 +72,8 @@ void ctf_qsort_r (void *base, size_t nmemb, size_t size,
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
+#if !HAVE_DECL_STPCPY
+extern char *stpcpy (char *, const char *);
+#endif
+
 #endif /* _CTF_DECLS_H */

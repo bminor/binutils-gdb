@@ -1,5 +1,31 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_type_id_key): New, the key in the
+	cd_id_to_file_t.
+	(ctf_dedup): New, core deduplicator state.
+	(ctf_file_t) <ctf_dedup>: New.
+	<ctf_dedup_atoms>: New.
+	<ctf_dedup_atoms_alloc>: New.
+	(ctf_hash_type_id_key): New prototype.
+	(ctf_hash_eq_type_id_key): Likewise.
+	(ctf_dedup_atoms_init): Likewise.
+	* ctf-hash.c (ctf_hash_eq_type_id_key): New.
+	(ctf_dedup_atoms_init): Likewise.
+	* ctf-create.c (ctf_serialize): Adjusted.
+	(ctf_add_encoded): No longer static.
+	(ctf_add_reftype): Likewise.
+	* ctf-open.c (ctf_file_close): Destroy the
+	ctf_dedup_atoms_alloc.
+	* ctf-dedup.c: New file.
+        * ctf-decls.h [!HAVE_DECL_STPCPY]: Add prototype.
+	* configure.ac: Check for stpcpy.
+	* Makefile.am: Add it.
+	* Makefile.in: Regenerate.
+        * config.h.in: Regenerate.
+        * configure: Regenerate.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* configure.ac: Add --enable-libctf-hash-debugging.
 	* aclocal.m4: Pull in enable.m4, for GCC_ENABLE.
 	* Makefile.in: Regenerated.
