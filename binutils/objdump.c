@@ -4115,7 +4115,7 @@ dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
 
       if (ctf_errno (ctf))
 	{
-	  non_fatal (_("Iteration failed: %s, %s\n"), *thing,
+	  non_fatal (_("Iteration failed: %s, %s"), *thing,
 		   ctf_errmsg (ctf_errno (ctf)));
 	  break;
 	}
@@ -4162,7 +4162,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
   ctfsect = make_ctfsect (sect_name, ctfdata, ctfsize);
   if ((ctfa = ctf_bfdopen_ctfsect (abfd, &ctfsect, &err)) == NULL)
     {
-      non_fatal (_("CTF open failure: %s\n"), ctf_errmsg (err));
+      non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));
       bfd_fatal (bfd_get_filename (abfd));
     }
 
@@ -4171,7 +4171,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
       ctfsect = make_ctfsect (parent_name, parentdata, parentsize);
       if ((parenta = ctf_bfdopen_ctfsect (abfd, &ctfsect, &err)) == NULL)
 	{
-	  non_fatal (_("CTF open failure: %s\n"), ctf_errmsg (err));
+	  non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));
 	  bfd_fatal (bfd_get_filename (abfd));
 	}
 
@@ -4185,7 +4185,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
      put CTFs and their parents in archives together.)  */
   if ((parent = ctf_arc_open_by_name (lookparent, NULL, &err)) == NULL)
     {
-      non_fatal (_("CTF open failure: %s\n"), ctf_errmsg (err));
+      non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));
       bfd_fatal (bfd_get_filename (abfd));
     }
 

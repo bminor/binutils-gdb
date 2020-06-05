@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* objdump.c (dump_ctf_archive_member): Remove linefeeds.
+	(dump_ctf): Likewise.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* objdump.c (ctf_archive_member): Print CTF errors and warnings.
 	* readelf.c (dump_ctf_archive_member): Likewise.
 
