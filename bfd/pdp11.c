@@ -22,7 +22,9 @@
 /* BFD backend for PDP-11, running 2.11BSD in particular.
 
    This file was hacked up by looking hard at the existing vaxnetbsd
-   back end and the header files in 2.11BSD.
+   back end and the header files in 2.11BSD.  The symbol table format
+   of 2.11BSD has been extended to accommodate .stab symbols.  See
+   struct pdp11_external_nlist below for details.
 
    TODO
    * support for V7 file formats
@@ -101,10 +103,23 @@ struct pdp11_external_exec
 
 #define A_FLAG_RELOC_STRIPPED	0x0001
 
+/* The following struct defines the format of an entry in the object file
+   symbol table.  In the original 2.11BSD struct the index into the string
+   table is stored as a long, but the PDP11 C convention for storing a long in
+   memory placed the most significant word first even though the bytes within a
+   word are stored least significant first.  So here the string table index is
+   considered to be just 16 bits and the first two bytes of the struct were
+   previously named e_unused.  To extend the symbol table format to accommodate
+   .stab symbols, the e_unused bytes are renamed e_desc to store the desc field
+   of the .stab symbol.  The GDP Project's STABS document says that the "other"
+   field is almost always unused and can be set to zero; the only nonzero cases
+   identified were for stabs in their own sections, which does not apply for
+   pdp11 a.out format, and for a special case of GNU Modula2 which is not
+   supported for the PDP11.  */
 #define external_nlist pdp11_external_nlist
 struct pdp11_external_nlist
 {
-  bfd_byte e_unused[2];		/* Unused.  */
+  bfd_byte e_desc[2];		/* The desc field for .stab symbols, else 0.  */
   bfd_byte e_strx[2];		/* Index into string table of name.  */
   bfd_byte e_type[1];		/* Type of symbol.  */
   bfd_byte e_ovly[1];		/* Overlay number.  */
@@ -151,6 +166,13 @@ static bfd_boolean MY(write_object_contents) (bfd *);
 #include "aout/stab_gnu.h"
 #include "aout/ar.h"
 
+/* The symbol type numbers for the 16-bit a.out format from 2.11BSD differ from
+   those defined in aout64.h so we must redefine them here.  N_EXT changes from
+   0x01 to 0x20 which creates a conflict with some .stab values, in particular
+   between undefined externals (N_UNDF+N_EXT) vs. global variables (N_GYSM) and
+   between external bss symbols (N_BSS+N_EXT) vs. function names (N_FUN).  We
+   disambiguate those conflicts with a hack in is_stab() to look for the ':' in
+   the global variable or function name string.  */
 #undef N_TYPE
 #undef N_UNDF
 #undef N_ABS
@@ -170,7 +192,12 @@ static bfd_boolean MY(write_object_contents) (bfd *);
 #define N_REG		0x14	/* Register symbol.  */
 #define N_FN		0x1f	/* File name.  */
 #define N_EXT		0x20	/* External flag.  */
-#define N_STAB	 	0xc0	/* Not relevant; modified aout64.h's 0xe0 to avoid N_EXT.  */
+/* Type numbers from .stab entries that could conflict:
+	N_GSYM		0x20	   Global variable [conflict with external undef]
+	N_FNAME		0x22	   Function name (for BSD Fortran) [ignored]
+	N_FUN		0x24	   Function name [conflict with external BSS]
+	N_NOMAP		0x34	   No DST map for sym. [ext. reg. doesn't exist]
+*/
 
 #define RELOC_SIZE 2
 
@@ -298,6 +325,19 @@ NAME (aout, reloc_name_lookup) (bfd *abfd ATTRIBUTE_UNUSED,
       return &howto_table_pdp11[i];
 
   return NULL;
+}
+
+/* Disambiguate conflicts between normal symbol types and .stab symbol types
+   (undefined externals N_UNDF+N_EXT vs. global variables N_GYSM and external
+   bss symbols N_BSS+N_EXT vs. function names N_FUN) with a hack to look for
+   the ':' in the global variable or function name string.  */
+
+static int
+is_stab (int type, const char *name)
+{
+  if (type == N_GSYM || type == N_FUN)
+    return (index(name, ':') != NULL);
+  return (type > N_FUN);
 }
 
 static int
@@ -1325,7 +1365,7 @@ translate_from_native_sym_flags (bfd *abfd,
 {
   flagword visible;
 
-  if (cache_ptr->type == N_FN)
+  if (is_stab (cache_ptr->type, cache_ptr->symbol.name))
     {
       asection *sec;
 
@@ -1333,20 +1373,25 @@ translate_from_native_sym_flags (bfd *abfd,
       cache_ptr->symbol.flags = BSF_DEBUGGING;
 
       /* Work out the symbol section.  */
-      switch (cache_ptr->type & N_TYPE)
+      switch (cache_ptr->type)
 	{
-	case N_TEXT:
+	case N_SO:
+	case N_SOL:
+	case N_FUN:
+	case N_ENTRY:
+	case N_SLINE:
 	case N_FN:
 	  sec = obj_textsec (abfd);
 	  break;
-	case N_DATA:
+	case N_STSYM:
+	case N_DSLINE:
 	  sec = obj_datasec (abfd);
 	  break;
-	case N_BSS:
+	case N_LCSYM:
+	case N_BSLINE:
 	  sec = obj_bsssec (abfd);
 	  break;
 	default:
-	case N_ABS:
 	  sec = bfd_abs_section_ptr;
 	  break;
 	}
@@ -1418,10 +1463,12 @@ translate_to_native_sym_flags (bfd *abfd,
   bfd_vma value = cache_ptr->value;
   asection *sec;
   bfd_vma off;
+  const char *name = cache_ptr->name != NULL ? cache_ptr->name : "*unknown*";
 
   /* Mask out any existing type bits in case copying from one section
      to another.  */
-  sym_pointer->e_type[0] &= ~N_TYPE;
+  if (!is_stab (sym_pointer->e_type[0], name))
+    sym_pointer->e_type[0] &= ~N_TYPE;
 
   sec = bfd_asymbol_section (cache_ptr);
   off = 0;
@@ -1433,7 +1480,7 @@ translate_to_native_sym_flags (bfd *abfd,
       _bfd_error_handler
 	/* xgettext:c-format */
 	(_("%pB: can not represent section for symbol `%s' in a.out object file format"),
-	 abfd, cache_ptr->name != NULL ? cache_ptr->name : "*unknown*");
+	 abfd, name);
       bfd_set_error (bfd_error_nonrepresentable_section);
       return FALSE;
     }
@@ -1511,6 +1558,7 @@ NAME (aout, translate_symbol_table) (bfd *abfd,
   for (; ext < ext_end; ext++, in++)
     {
       bfd_vma x;
+      int ovly;
 
       x = GET_WORD (abfd, ext->e_strx);
       in->symbol.the_bfd = abfd;
@@ -1533,9 +1581,19 @@ NAME (aout, translate_symbol_table) (bfd *abfd,
 	  return FALSE;
 	}
 
+      ovly = H_GET_8 (abfd, ext->e_ovly);
+      if (ovly != 0)
+	{
+	  _bfd_error_handler
+	    (_("%pB: symbol indicates overlay (not supported)"), abfd);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+
       in->symbol.value = GET_WORD (abfd,  ext->e_value);
-      /* TODO: is 0 a safe value here?  */
-      in->desc = 0;
+      /* e_desc is zero for normal symbols but for .stab symbols it
+	 carries the desc field in our extended 2.11BSD format. */
+      in->desc = H_GET_16 (abfd, ext->e_desc);
       in->other = 0;
       in->type = H_GET_8 (abfd,  ext->e_type);
       in->symbol.udata.p = NULL;
@@ -1686,22 +1744,26 @@ NAME (aout, write_syms) (bfd *abfd)
       bfd_size_type indx;
       struct external_nlist nsp;
 
-      PUT_WORD (abfd, 0, nsp.e_unused);
-
       indx = add_to_stringtab (abfd, strtab, g->name, FALSE);
       if (indx == (bfd_size_type) -1)
 	goto error_return;
       PUT_WORD (abfd, indx, nsp.e_strx);
 
       if (bfd_asymbol_flavour(g) == abfd->xvec->flavour)
-	H_PUT_8 (abfd, aout_symbol(g)->type,  nsp.e_type);
+	{
+	  H_PUT_16 (abfd, aout_symbol (g)->desc,  nsp.e_desc);
+	  H_PUT_8 (abfd, 0, nsp.e_ovly);
+	  H_PUT_8 (abfd, aout_symbol (g)->type,  nsp.e_type);
+	}
       else
-	H_PUT_8 (abfd, 0, nsp.e_type);
+	{
+	  H_PUT_16 (abfd, 0, nsp.e_desc);
+	  H_PUT_8 (abfd, 0, nsp.e_ovly);
+	  H_PUT_8 (abfd, 0, nsp.e_type);
+	}
 
       if (! translate_to_native_sym_flags (abfd, g, &nsp))
 	goto error_return;
-
-      H_PUT_8 (abfd, 0, nsp.e_ovly);
 
       if (bfd_bwrite ((void *)&nsp, (bfd_size_type) EXTERNAL_NLIST_SIZE, abfd)
 	  != EXTERNAL_NLIST_SIZE)
@@ -2643,17 +2705,17 @@ aout_link_check_ar_symbols (bfd *abfd,
   for (; p < pend; p++)
     {
       int type = H_GET_8 (abfd, p->e_type);
-      const char *name;
+      const char *name = strings + GET_WORD (abfd, p->e_strx);
       struct bfd_link_hash_entry *h;
 
       /* Ignore symbols that are not externally visible.  This is an
 	 optimization only, as we check the type more thoroughly
 	 below.  */
       if ((type & N_EXT) == 0
+	  || is_stab(type, name)
 	  || type == N_FN)
 	continue;
 
-      name = strings + GET_WORD (abfd, p->e_strx);
       h = bfd_link_hash_lookup (info->hash, name, FALSE, FALSE, TRUE);
 
       /* We are only interested in symbols that are currently
@@ -2863,6 +2925,10 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 
       type = H_GET_8 (abfd, p->e_type);
 
+      /* Ignore debugging symbols.  */
+      if (is_stab(type, name))
+	continue;
+
       /* PR 19629: Corrupt binaries can contain illegal string offsets.  */
       if (GET_WORD (abfd, p->e_strx) >= obj_aout_external_string_size (abfd))
 	return FALSE;
@@ -2873,8 +2939,8 @@ aout_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
       switch (type)
 	{
 	default:
-	  /* Anything else should be a debugging symbol.  */
-	  BFD_ASSERT ((type & N_STAB) != 0);
+	  /* Shouldn't be any types not covered.  */
+	  BFD_ASSERT (0);
 	  continue;
 
 	case N_UNDF:
@@ -3077,12 +3143,14 @@ aout_link_write_other_symbol (struct bfd_hash_entry *bh, void *data)
     }
 
   H_PUT_8 (output_bfd, type, outsym.e_type);
+  H_PUT_8 (output_bfd, 0, outsym.e_ovly);
   indx = add_to_stringtab (output_bfd, flaginfo->strtab, h->root.root.string,
 			   FALSE);
   if (indx == (bfd_size_type) -1)
     /* FIXME: No way to handle errors.  */
     abort ();
 
+  PUT_WORD (output_bfd, 0, outsym.e_desc);
   PUT_WORD (output_bfd, indx, outsym.e_strx);
   PUT_WORD (output_bfd, val, outsym.e_value);
 
@@ -4097,6 +4165,8 @@ aout_link_write_symbols (struct aout_final_link_info *flaginfo, bfd *input_bfd)
       && discard != discard_all)
     {
       H_PUT_8 (output_bfd, N_TEXT, outsym->e_type);
+      H_PUT_8 (output_bfd, 0, outsym->e_ovly);
+      H_PUT_16 (output_bfd, 0, outsym->e_desc);
       strtab_index = add_to_stringtab (output_bfd, flaginfo->strtab,
 				       bfd_get_filename (input_bfd), FALSE);
       if (strtab_index == (bfd_size_type) -1)
@@ -4210,7 +4280,7 @@ aout_link_write_symbols (struct aout_final_link_info *flaginfo, bfd *input_bfd)
 	    case strip_none:
 	      break;
 	    case strip_debugger:
-	      if ((type & N_STAB) != 0)
+	      if (is_stab (type, name))
 		skip = TRUE;
 	      break;
 	    case strip_some:
@@ -4230,7 +4300,33 @@ aout_link_write_symbols (struct aout_final_link_info *flaginfo, bfd *input_bfd)
 	    }
 
 	  /* Get the value of the symbol.  */
-	  if ((type & N_TYPE) == N_TEXT
+	  if (is_stab (type, name))
+	    {
+	      switch (type)
+		{
+		default:
+		  symsec = bfd_abs_section_ptr;
+		  break;
+		case N_SO:
+		case N_SOL:
+		case N_FUN:
+		case N_ENTRY:
+		case N_SLINE:
+		case N_FN:
+		  symsec = obj_textsec (input_bfd);
+		  break;
+		case N_STSYM:
+		case N_DSLINE:
+		  symsec = obj_datasec (input_bfd);
+		  break;
+		case N_LCSYM:
+		case N_BSLINE:
+		  symsec = obj_bsssec (input_bfd);
+		  break;
+		}
+	      val = GET_WORD (input_bfd, sym->e_value);
+	    }
+	  else if ((type & N_TYPE) == N_TEXT
 	      || type == N_WEAKT)
 	    symsec = obj_textsec (input_bfd);
 	  else if ((type & N_TYPE) == N_DATA
@@ -4255,11 +4351,6 @@ aout_link_write_symbols (struct aout_final_link_info *flaginfo, bfd *input_bfd)
 		 the correct definition so the debugger will
 		 understand it.  */
 	      pass = TRUE;
-	      val = GET_WORD (input_bfd, sym->e_value);
-	      symsec = NULL;
-	    }
-	  else if ((type & N_STAB) != 0)
-	    {
 	      val = GET_WORD (input_bfd, sym->e_value);
 	      symsec = NULL;
 	    }
@@ -4376,7 +4467,7 @@ aout_link_write_symbols (struct aout_final_link_info *flaginfo, bfd *input_bfd)
 		case discard_sec_merge:
 		  break;
 		case discard_l:
-		  if ((type & N_STAB) == 0
+		  if (!is_stab (type, name)
 		      && bfd_is_local_label_name (input_bfd, name))
 		    skip = TRUE;
 		  break;
@@ -4500,6 +4591,8 @@ aout_link_write_symbols (struct aout_final_link_info *flaginfo, bfd *input_bfd)
       /* Copy this symbol into the list of symbols we are going to
 	 write out.  */
       H_PUT_8 (output_bfd, type, outsym->e_type);
+      H_PUT_8 (output_bfd, H_GET_8 (input_bfd, sym->e_ovly), outsym->e_ovly);
+      H_PUT_16 (output_bfd, H_GET_16 (input_bfd, sym->e_desc), outsym->e_desc);
       copy = FALSE;
       if (! flaginfo->info->keep_memory)
 	{

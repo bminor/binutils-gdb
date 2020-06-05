@@ -1,5 +1,27 @@
 2020-06-04  Stephen Casner  <casner@acm.org>
 
+	Extend pdp11-aout symbol table format to accommodate .stab
+	symbols and implement correct handling of them.
+
+	* pdp11.c (pdp11_external_nlist): Repurposed e_unused to e_desc.
+	(N_STAB, is_stab): Needed new function is_stab to disambiguate
+	normal vs. .stab symbol table type values, replacing N_STAB mask.
+	(translate_from_native_sym_flags): Determine correct section for
+	different .stab types.
+	(translate_to_native_sym_flags): Leave .stab types intact.
+	(translate_symbol_table): Error if symbol indicates overlay;
+	store desc field from .stab symbols.
+	(write_syms): Output desc field with symbol.
+	(aout_link_check_ar_symbols): Skip .stab symbols.
+	(aout_link_add_symbols): Correctly distinguish .stab symbols.
+	(aout_link_write_other_symbol): Write 0 for desk and ovly fields.
+	(aout_link_write_symbols): Write 0 for desk and ovly fields;
+	correctly distinguish .stab symbols and select calculate their
+	section and value; and copy desc and ovly fields from input symbol
+	to output symbol.
+
+2020-06-04  Stephen Casner  <casner@acm.org>
+
 	* aoutx.h (translate_symbol_table): Comment had external and
 	internal swapped.
 	* pdp11.c (translate_symbol_table): Likewise.
