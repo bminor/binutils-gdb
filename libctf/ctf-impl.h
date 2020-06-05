@@ -311,12 +311,27 @@ struct ctf_file
   ctf_list_t ctf_errs_warnings;	  /* CTF errors and warnings.  */
   ctf_dynhash_t *ctf_link_inputs; /* Inputs to this link.  */
   ctf_dynhash_t *ctf_link_outputs; /* Additional outputs from this link.  */
-  ctf_dynhash_t *ctf_link_type_mapping; /* Map input types to output types.  */
-  ctf_dynhash_t *ctf_link_cu_mapping;	/* Map CU names to CTF dict names.  */
-  /* Allow the caller to Change the name of link archive members.  */
+
+  /* Map input types to output types: populated in each output dict.
+     Key is a ctf_link_type_key_t: value is a type ID.  Used by
+     nondeduplicating links and ad-hoc ctf_add_type calls only.  */
+  ctf_dynhash_t *ctf_link_type_mapping;
+
+  /* Map input CU names to output CTF dict names: populated in the top-level
+     output dict.
+
+     Key and value are dynamically-allocated strings.  */
+  ctf_dynhash_t *ctf_link_in_cu_mapping;
+
+  /* Map output CTF dict names to input CU names: populated in the top-level
+     output dict.  A hash of string to hash (set) of strings.  Key and
+     individual value members are shared with ctf_link_in_cu_mapping.  */
+  ctf_dynhash_t *ctf_link_out_cu_mapping;
+
   /* CTF linker flags.  */
   int ctf_link_flags;
 
+  /* Allow the caller to change the name of link archive members.  */
   ctf_link_memb_name_changer_f *ctf_link_memb_name_changer;
   void *ctf_link_memb_name_changer_arg; /* Argument for it.  */
   ctf_dynhash_t *ctf_add_processing; /* Types ctf_add_type is working on now.  */

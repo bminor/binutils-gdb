@@ -78,13 +78,17 @@ typedef struct ctf_link_sym
   uint32_t st_value;
 } ctf_link_sym_t;
 
-/* Indication of how to share types when linking.  */
+/* Flags applying to this specific link.  */
 
 /* Share all types that are not in conflict.  The default.  */
 #define CTF_LINK_SHARE_UNCONFLICTED 0x0
 
 /* Share only types that are used by multiple inputs.  Not implemented yet.  */
 #define CTF_LINK_SHARE_DUPLICATED 0x1
+
+/* Create empty outputs for all registered CU mappings even if no types are
+   emitted into them.  */
+#define CTF_LINK_EMPTY_CU_MAPPINGS 0x4
 
 /* Symbolic names for CTF sections.  */
 

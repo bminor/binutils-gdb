@@ -538,7 +538,8 @@ ctf_serialize (ctf_file_t *fp)
   nfp->ctf_errs_warnings = fp->ctf_errs_warnings;
   nfp->ctf_str_prov_offset = fp->ctf_str_prov_offset;
   nfp->ctf_syn_ext_strtab = fp->ctf_syn_ext_strtab;
-  nfp->ctf_link_cu_mapping = fp->ctf_link_cu_mapping;
+  nfp->ctf_link_in_cu_mapping = fp->ctf_link_in_cu_mapping;
+  nfp->ctf_link_out_cu_mapping = fp->ctf_link_out_cu_mapping;
   nfp->ctf_link_type_mapping = fp->ctf_link_type_mapping;
   nfp->ctf_link_memb_name_changer = fp->ctf_link_memb_name_changer;
   nfp->ctf_link_memb_name_changer_arg = fp->ctf_link_memb_name_changer_arg;
@@ -565,7 +566,8 @@ ctf_serialize (ctf_file_t *fp)
   fp->ctf_link_inputs = NULL;
   fp->ctf_link_outputs = NULL;
   fp->ctf_syn_ext_strtab = NULL;
-  fp->ctf_link_cu_mapping = NULL;
+  fp->ctf_link_in_cu_mapping = NULL;
+  fp->ctf_link_out_cu_mapping = NULL;
   fp->ctf_link_type_mapping = NULL;
   fp->ctf_parent_unreffed = 1;
 

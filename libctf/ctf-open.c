@@ -1716,7 +1716,8 @@ ctf_file_close (ctf_file_t *fp)
   ctf_dynhash_destroy (fp->ctf_link_inputs);
   ctf_dynhash_destroy (fp->ctf_link_outputs);
   ctf_dynhash_destroy (fp->ctf_link_type_mapping);
-  ctf_dynhash_destroy (fp->ctf_link_cu_mapping);
+  ctf_dynhash_destroy (fp->ctf_link_in_cu_mapping);
+  ctf_dynhash_destroy (fp->ctf_link_out_cu_mapping);
   ctf_dynhash_destroy (fp->ctf_add_processing);
 
   for (err = ctf_list_next (&fp->ctf_errs_warnings); err != NULL; err = nerr)

@@ -1,5 +1,25 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-impl.h (ctf_file_t): Improve comments.
+	<ctf_link_cu_mapping>: Split into...
+	<ctf_link_in_cu_mapping>: ... this...
+	<ctf_link_out_cu_mapping>: ... and this.
+	* ctf-create.c (ctf_serialize): Adjust.
+	* ctf-open.c (ctf_file_close): Likewise.
+	* ctf-link.c (ctf_create_per_cu): Look things up in the
+	in_cu_mapping instead of the cu_mapping.
+	(ctf_link_add_cu_mapping): The deduplicating link will define
+	what happens if many FROMs share a TO.
+	(ctf_link_add_cu_mapping): Create in_cu_mapping and
+	out_cu_mapping. Do not create ctf_link_outputs here any more, or
+	create per-CU dicts here: they are already created when needed.
+	(ctf_link_one_variable): Log a debug message if we skip a
+	variable due to its type being concealed in a CU-mapped link.
+	(This is probably too common a case to make into a warning.)
+	(ctf_link): Create empty per-CU dicts if requested.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-link.c (ctf_link_write): Close the fd.
 
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>

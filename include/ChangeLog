@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-api.h (CTF_LINK_EMPTY_CU_MAPPINGS): New.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-api.h (ECTF_NEEDSBFD): New.
 	(ECTF_NERR): Adjust.
 	(ctf_link): Rename share_mode arg to flags.

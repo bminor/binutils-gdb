@@ -296,10 +296,12 @@ ctf_create_per_cu (ctf_file_t *fp, const char *filename, const char *cuname)
      dictionary name.  We prefer the filename because this is easier for likely
      callers to determine.  */
 
-  if (fp->ctf_link_cu_mapping)
+  if (fp->ctf_link_in_cu_mapping)
     {
-      if (((ctf_name = ctf_dynhash_lookup (fp->ctf_link_cu_mapping, filename)) == NULL) &&
-	  ((ctf_name = ctf_dynhash_lookup (fp->ctf_link_cu_mapping, cuname)) == NULL))
+      if (((ctf_name = ctf_dynhash_lookup (fp->ctf_link_in_cu_mapping,
+					   filename)) == NULL) &&
+	  ((ctf_name = ctf_dynhash_lookup (fp->ctf_link_in_cu_mapping,
+					   cuname)) == NULL))
 	ctf_name = filename;
     }
 
@@ -339,10 +341,7 @@ ctf_create_per_cu (ctf_file_t *fp, const char *filename, const char *cuname)
 
 /* Add a mapping directing that the CU named FROM should have its
    conflicting/non-duplicate types (depending on link mode) go into a container
-   named TO.  Many FROMs can share a TO: in this case, the effect on conflicting
-   types is not yet defined (but in time an auto-renaming algorithm will be
-   added: ugly, but there is really no right thing one can do in this
-   situation).
+   named TO.  Many FROMs can share a TO.
 
    We forcibly add a container named TO in every case, even though it may well
    wind up empty, because clients that use this facility usually expect to find
@@ -352,34 +351,63 @@ int
 ctf_link_add_cu_mapping (ctf_file_t *fp, const char *from, const char *to)
 {
   int err;
-  char *f, *t;
+  char *f = NULL, *t = NULL;
+  ctf_dynhash_t *one_out;
 
-  if (fp->ctf_link_cu_mapping == NULL)
-    fp->ctf_link_cu_mapping = ctf_dynhash_create (ctf_hash_string,
-						  ctf_hash_eq_string, free,
-						  free);
-  if (fp->ctf_link_cu_mapping == NULL)
-    return ctf_set_errno (fp, ENOMEM);
+  if (fp->ctf_link_in_cu_mapping == NULL)
+    fp->ctf_link_in_cu_mapping = ctf_dynhash_create (ctf_hash_string,
+						     ctf_hash_eq_string, free,
+						     free);
+  if (fp->ctf_link_in_cu_mapping == NULL)
+    goto oom;
 
-  if (fp->ctf_link_outputs == NULL)
-    fp->ctf_link_outputs = ctf_dynhash_create (ctf_hash_string,
-					       ctf_hash_eq_string, free,
-					       (ctf_hash_free_fun)
-					       ctf_file_close);
-
-  if (fp->ctf_link_outputs == NULL)
-    return ctf_set_errno (fp, ENOMEM);
+  if (fp->ctf_link_out_cu_mapping == NULL)
+    fp->ctf_link_out_cu_mapping = ctf_dynhash_create (ctf_hash_string,
+						      ctf_hash_eq_string, free,
+						      (ctf_hash_free_fun)
+						      ctf_dynhash_destroy);
+  if (fp->ctf_link_out_cu_mapping == NULL)
+    goto oom;
 
   f = strdup (from);
   t = strdup (to);
   if (!f || !t)
     goto oom;
 
-  if (ctf_create_per_cu (fp, t, t) == NULL)
-    goto oom_noerrno;				/* Errno is set for us.  */
+  /* Track both in a list from FROM to TO and in a list from TO to a list of
+     FROM.  The former is used to create TUs with the mapped-to name at need:
+     the latter is used in deduplicating links to pull in all input CUs
+     corresponding to a single output CU.  */
 
-  err = ctf_dynhash_insert (fp->ctf_link_cu_mapping, f, t);
-  if (err)
+  if ((err = ctf_dynhash_insert (fp->ctf_link_in_cu_mapping, f, t)) < 0)
+    {
+      ctf_set_errno (fp, err);
+      goto oom_noerrno;
+    }
+
+  /* f and t are now owned by the in_cu_mapping: reallocate them.  */
+  f = strdup (from);
+  t = strdup (to);
+  if (!f || !t)
+    goto oom;
+
+  if ((one_out = ctf_dynhash_lookup (fp->ctf_link_out_cu_mapping, t)) == NULL)
+    {
+      if ((one_out = ctf_dynhash_create (ctf_hash_string, ctf_hash_eq_string,
+					 free, NULL)) == NULL)
+	goto oom;
+      if ((err = ctf_dynhash_insert (fp->ctf_link_out_cu_mapping,
+				     t, one_out)) < 0)
+	{
+	  ctf_dynhash_destroy (one_out);
+	  ctf_set_errno (fp, err);
+	  goto oom_noerrno;
+	}
+    }
+  else
+    free (t);
+
+  if (ctf_dynhash_insert (one_out, f, NULL) < 0)
     {
       ctf_set_errno (fp, err);
       goto oom_noerrno;
@@ -777,6 +805,8 @@ int
 ctf_link (ctf_file_t *fp, int flags)
 {
   ctf_link_in_member_cb_arg_t arg;
+  ctf_next_t *i = NULL;
+  int err;
 
   memset (&arg, 0, sizeof (struct ctf_link_in_member_cb_arg));
   arg.out_fp = fp;
@@ -793,6 +823,33 @@ ctf_link (ctf_file_t *fp, int flags)
 
   if (fp->ctf_link_outputs == NULL)
     return ctf_set_errno (fp, ENOMEM);
+
+  /* Create empty CUs if requested.  We do not currently claim that multiple
+     links in succession with CTF_LINK_EMPTY_CU_MAPPINGS set in some calls and
+     not set in others will do anything especially sensible.  */
+
+  if (fp->ctf_link_out_cu_mapping && (flags & CTF_LINK_EMPTY_CU_MAPPINGS))
+    {
+      void *v;
+
+      while ((err = ctf_dynhash_next (fp->ctf_link_out_cu_mapping, &i, &v,
+				      NULL)) == 0)
+	{
+	  const char *to = (const char *) v;
+	  if (ctf_create_per_cu (fp, to, to) == NULL)
+	    {
+	      ctf_next_destroy (i);
+	      return -1;			/* Errno is set for us.  */
+	    }
+	}
+      if (err != ECTF_NEXT_END)
+	{
+	  ctf_err_warn (fp, 1, "Iteration error creating empty CUs: %s",
+			ctf_errmsg (err));
+	  ctf_set_errno (fp, err);
+	  return -1;
+	}
+    }
 
   ctf_dynhash_iter (fp->ctf_link_inputs, ctf_link_one_input_archive,
 		    &arg);
