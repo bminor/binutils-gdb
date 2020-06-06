@@ -1,3 +1,7 @@
+2020-06-06  Alan Modra  <amodra@gmail.com>
+
+	* doc/binutils.texi (PowerPC -M option): Mention power10 and pwr10.
+
 2020-06-05  Joel Anderson  <joelanderson333@gmail.com>
 
 	PR 26082

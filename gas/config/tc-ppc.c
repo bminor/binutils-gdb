@@ -1410,6 +1410,8 @@ PowerPC options:\n"));
   fprintf (stream, _("\
 -mpower9, -mpwr9        generate code for Power9 architecture\n"));
   fprintf (stream, _("\
+-mpower10, -mpwr10      generate code for Power10 architecture\n"));
+  fprintf (stream, _("\
 -mcell                  generate code for Cell Broadband Engine architecture\n"));
   fprintf (stream, _("\
 -mcom                   generate code for Power/PowerPC common instructions\n"));

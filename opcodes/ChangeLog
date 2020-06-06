@@ -1,3 +1,7 @@
+2020-06-06  Alan Modra  <amodra@gmail.com>
+
+	* ppc-dis.c (ppc_opts): Accept -mpwr10/-Mpwr10.
+
 2020-06-05  Alan Modra  <amodra@gmail.com>
 
 	* cgen-dis.c (hash_insn_array): Increase size of buf.  Assert

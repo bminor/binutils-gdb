@@ -1,5 +1,10 @@
 2020-06-06  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-ppc.c (md_show_usage): Mention -mpower10 and -mpwr10.
+	* doc/c-ppc.texi: Likewise.
+
+2020-06-06  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.c: Update throughout for reloc renaming.
 
 2020-06-05  Jose E. Marchesi  <jose.marchesi@oracle.com>
