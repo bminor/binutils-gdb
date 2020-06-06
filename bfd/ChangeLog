@@ -1,3 +1,15 @@
+2020-06-06  Alan Modra  <amodra@gmail.com>
+
+	* reloc.c: Rename
+	BFD_RELOC_PPC64_GOT_TLSGD34 to BFD_RELOC_PPC64_GOT_TLSGD_PCREL34,
+	BFD_RELOC_PPC64_GOT_TLSLD34 to BFD_RELOC_PPC64_GOT_TLSLD_PCREL34,
+	BFD_RELOC_PPC64_GOT_TPREL34 to BFD_RELOC_PPC64_GOT_TPREL_PCREL34,
+	BFD_RELOC_PPC64_GOT_DTPREL34 to BFD_RELOC_PPC64_GOT_DTPREL_PCREL34.
+	* elf64-ppc.c: Update throughout for reloc renaming.
+	(ppc64_elf_reloc_name_lookup): Handle old reloc names.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2020-06-05  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26080

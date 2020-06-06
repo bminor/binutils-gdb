@@ -2233,10 +2233,10 @@ ppc_elf_suffix (char **str_p, expressionS *exp_p)
     MAP64 ("got@pcrel",		BFD_RELOC_PPC64_GOT_PCREL34),
     MAP64 ("plt@pcrel",		BFD_RELOC_PPC64_PLT_PCREL34),
     MAP64 ("tls@pcrel",		BFD_RELOC_PPC64_TLS_PCREL),
-    MAP64 ("got@tlsgd@pcrel",	BFD_RELOC_PPC64_GOT_TLSGD34),
-    MAP64 ("got@tlsld@pcrel",	BFD_RELOC_PPC64_GOT_TLSLD34),
-    MAP64 ("got@tprel@pcrel",	BFD_RELOC_PPC64_GOT_TPREL34),
-    MAP64 ("got@dtprel@pcrel",	BFD_RELOC_PPC64_GOT_DTPREL34),
+    MAP64 ("got@tlsgd@pcrel",	BFD_RELOC_PPC64_GOT_TLSGD_PCREL34),
+    MAP64 ("got@tlsld@pcrel",	BFD_RELOC_PPC64_GOT_TLSLD_PCREL34),
+    MAP64 ("got@tprel@pcrel",	BFD_RELOC_PPC64_GOT_TPREL_PCREL34),
+    MAP64 ("got@dtprel@pcrel",	BFD_RELOC_PPC64_GOT_DTPREL_PCREL34),
     MAP64 ("higher34",		BFD_RELOC_PPC64_ADDR16_HIGHER34),
     MAP64 ("highera34",		BFD_RELOC_PPC64_ADDR16_HIGHERA34),
     MAP64 ("highest34",		BFD_RELOC_PPC64_ADDR16_HIGHEST34),
@@ -3219,10 +3219,10 @@ fixup_size (bfd_reloc_code_real_type reloc, bfd_boolean *pc_relative)
     case BFD_RELOC_64_PCREL:
     case BFD_RELOC_64_PLT_PCREL:
     case BFD_RELOC_PPC64_GOT_PCREL34:
-    case BFD_RELOC_PPC64_GOT_TLSGD34:
-    case BFD_RELOC_PPC64_GOT_TLSLD34:
-    case BFD_RELOC_PPC64_GOT_TPREL34:
-    case BFD_RELOC_PPC64_GOT_DTPREL34:
+    case BFD_RELOC_PPC64_GOT_TLSGD_PCREL34:
+    case BFD_RELOC_PPC64_GOT_TLSLD_PCREL34:
+    case BFD_RELOC_PPC64_GOT_TPREL_PCREL34:
+    case BFD_RELOC_PPC64_GOT_DTPREL_PCREL34:
     case BFD_RELOC_PPC64_PCREL28:
     case BFD_RELOC_PPC64_PCREL34:
     case BFD_RELOC_PPC64_PLT_PCREL34:
@@ -3804,10 +3804,10 @@ md_assemble (char *str)
 		  /* Fall through.  */
 		case BFD_RELOC_PPC64_GOT_PCREL34:
 		case BFD_RELOC_PPC64_PLT_PCREL34:
-		case BFD_RELOC_PPC64_GOT_TLSGD34:
-		case BFD_RELOC_PPC64_GOT_TLSLD34:
-		case BFD_RELOC_PPC64_GOT_TPREL34:
-		case BFD_RELOC_PPC64_GOT_DTPREL34:
+		case BFD_RELOC_PPC64_GOT_TLSGD_PCREL34:
+		case BFD_RELOC_PPC64_GOT_TLSLD_PCREL34:
+		case BFD_RELOC_PPC64_GOT_TPREL_PCREL34:
+		case BFD_RELOC_PPC64_GOT_DTPREL_PCREL34:
 		  if (operand->bitm != 0x3ffffffffULL
 		      || (operand->flags & PPC_OPERAND_NEGATIVE) != 0)
 		    as_warn (_("%s unsupported on this instruction"), "@pcrel");
@@ -7532,10 +7532,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 	case BFD_RELOC_PPC64_DTPREL16_HIGHESTA:
 	case BFD_RELOC_PPC64_TPREL34:
 	case BFD_RELOC_PPC64_DTPREL34:
-	case BFD_RELOC_PPC64_GOT_TLSGD34:
-	case BFD_RELOC_PPC64_GOT_TLSLD34:
-	case BFD_RELOC_PPC64_GOT_TPREL34:
-	case BFD_RELOC_PPC64_GOT_DTPREL34:
+	case BFD_RELOC_PPC64_GOT_TLSGD_PCREL34:
+	case BFD_RELOC_PPC64_GOT_TLSLD_PCREL34:
+	case BFD_RELOC_PPC64_GOT_TPREL_PCREL34:
+	case BFD_RELOC_PPC64_GOT_DTPREL_PCREL34:
 	  gas_assert (fixP->fx_addsy != NULL);
 	  S_SET_THREAD_LOCAL (fixP->fx_addsy);
 	  fieldval = 0;

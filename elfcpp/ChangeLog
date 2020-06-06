@@ -1,3 +1,11 @@
+2020-06-06  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.h: Rename
+	R_PPC64_GOT_TLSGD34 to R_PPC64_GOT_TLSGD_PCREL34,
+	R_PPC64_GOT_TLSLD34 to R_PPC64_GOT_TLSLD_PCREL34,
+	R_PPC64_GOT_TPREL34 to R_PPC64_GOT_TPREL_PCREL34, and
+	R_PPC64_GOT_DTPREL34 to R_PPC64_GOT_DTPREL_PCREL34.
+
 2020-01-18  Nick Clifton  <nickc@redhat.com>
 
 	Binutils 2.34 branch created.

@@ -7286,10 +7286,10 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(
     case elfcpp::R_PPC64_TLSLD:
     case elfcpp::R_PPC64_TPREL34:
     case elfcpp::R_PPC64_DTPREL34:
-    case elfcpp::R_PPC64_GOT_TLSGD34:
-    case elfcpp::R_PPC64_GOT_TLSLD34:
-    case elfcpp::R_PPC64_GOT_TPREL34:
-    case elfcpp::R_PPC64_GOT_DTPREL34:
+    case elfcpp::R_PPC64_GOT_TLSGD_PCREL34:
+    case elfcpp::R_PPC64_GOT_TLSLD_PCREL34:
+    case elfcpp::R_PPC64_GOT_TPREL_PCREL34:
+    case elfcpp::R_PPC64_GOT_DTPREL_PCREL34:
       ref = Symbol::TLS_REF;
       break;
 
@@ -7883,7 +7883,7 @@ Target_powerpc<size, big_endian>::Scan::local(
       target->got_section(symtab, layout);
       break;
 
-    case elfcpp::R_PPC64_GOT_TLSGD34:
+    case elfcpp::R_PPC64_GOT_TLSGD_PCREL34:
     case elfcpp::R_POWERPC_GOT_TLSGD16:
     case elfcpp::R_POWERPC_GOT_TLSGD16_LO:
     case elfcpp::R_POWERPC_GOT_TLSGD16_HI:
@@ -7908,7 +7908,7 @@ Target_powerpc<size, big_endian>::Scan::local(
       }
       break;
 
-    case elfcpp::R_PPC64_GOT_TLSLD34:
+    case elfcpp::R_PPC64_GOT_TLSLD_PCREL34:
     case elfcpp::R_POWERPC_GOT_TLSLD16:
     case elfcpp::R_POWERPC_GOT_TLSLD16_LO:
     case elfcpp::R_POWERPC_GOT_TLSLD16_HI:
@@ -7932,7 +7932,7 @@ Target_powerpc<size, big_endian>::Scan::local(
       }
       break;
 
-    case elfcpp::R_PPC64_GOT_DTPREL34:
+    case elfcpp::R_PPC64_GOT_DTPREL_PCREL34:
     case elfcpp::R_POWERPC_GOT_DTPREL16:
     case elfcpp::R_POWERPC_GOT_DTPREL16_LO:
     case elfcpp::R_POWERPC_GOT_DTPREL16_HI:
@@ -7945,7 +7945,7 @@ Target_powerpc<size, big_endian>::Scan::local(
       }
       break;
 
-    case elfcpp::R_PPC64_GOT_TPREL34:
+    case elfcpp::R_PPC64_GOT_TPREL_PCREL34:
     case elfcpp::R_POWERPC_GOT_TPREL16:
     case elfcpp::R_POWERPC_GOT_TPREL16_LO:
     case elfcpp::R_POWERPC_GOT_TPREL16_HI:
@@ -8177,10 +8177,10 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_PPC64_PLT_PCREL34:
     case elfcpp::R_PPC64_PLT_PCREL34_NOTOC:
     case elfcpp::R_PPC64_GOT_PCREL34:
-    case elfcpp::R_PPC64_GOT_TLSGD34:
-    case elfcpp::R_PPC64_GOT_TLSLD34:
-    case elfcpp::R_PPC64_GOT_DTPREL34:
-    case elfcpp::R_PPC64_GOT_TPREL34:
+    case elfcpp::R_PPC64_GOT_TLSGD_PCREL34:
+    case elfcpp::R_PPC64_GOT_TLSLD_PCREL34:
+    case elfcpp::R_PPC64_GOT_DTPREL_PCREL34:
+    case elfcpp::R_PPC64_GOT_TPREL_PCREL34:
       target->set_power10_stubs();
       break;
     default:
@@ -8616,7 +8616,7 @@ Target_powerpc<size, big_endian>::Scan::global(
       target->got_section(symtab, layout);
       break;
 
-    case elfcpp::R_PPC64_GOT_TLSGD34:
+    case elfcpp::R_PPC64_GOT_TLSGD_PCREL34:
     case elfcpp::R_POWERPC_GOT_TLSGD16:
     case elfcpp::R_POWERPC_GOT_TLSGD16_LO:
     case elfcpp::R_POWERPC_GOT_TLSGD16_HI:
@@ -8665,7 +8665,7 @@ Target_powerpc<size, big_endian>::Scan::global(
       }
       break;
 
-    case elfcpp::R_PPC64_GOT_TLSLD34:
+    case elfcpp::R_PPC64_GOT_TLSLD_PCREL34:
     case elfcpp::R_POWERPC_GOT_TLSLD16:
     case elfcpp::R_POWERPC_GOT_TLSLD16_LO:
     case elfcpp::R_POWERPC_GOT_TLSLD16_HI:
@@ -8689,7 +8689,7 @@ Target_powerpc<size, big_endian>::Scan::global(
       }
       break;
 
-    case elfcpp::R_PPC64_GOT_DTPREL34:
+    case elfcpp::R_PPC64_GOT_DTPREL_PCREL34:
     case elfcpp::R_POWERPC_GOT_DTPREL16:
     case elfcpp::R_POWERPC_GOT_DTPREL16_LO:
     case elfcpp::R_POWERPC_GOT_DTPREL16_HI:
@@ -8709,7 +8709,7 @@ Target_powerpc<size, big_endian>::Scan::global(
       }
       break;
 
-    case elfcpp::R_PPC64_GOT_TPREL34:
+    case elfcpp::R_PPC64_GOT_TPREL_PCREL34:
     case elfcpp::R_POWERPC_GOT_TPREL16:
     case elfcpp::R_POWERPC_GOT_TPREL16_LO:
     case elfcpp::R_POWERPC_GOT_TPREL16_HI:
@@ -8935,10 +8935,10 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_PPC64_PLT_PCREL34:
     case elfcpp::R_PPC64_PLT_PCREL34_NOTOC:
     case elfcpp::R_PPC64_GOT_PCREL34:
-    case elfcpp::R_PPC64_GOT_TLSGD34:
-    case elfcpp::R_PPC64_GOT_TLSLD34:
-    case elfcpp::R_PPC64_GOT_DTPREL34:
-    case elfcpp::R_PPC64_GOT_TPREL34:
+    case elfcpp::R_PPC64_GOT_TLSGD_PCREL34:
+    case elfcpp::R_PPC64_GOT_TLSLD_PCREL34:
+    case elfcpp::R_PPC64_GOT_DTPREL_PCREL34:
+    case elfcpp::R_PPC64_GOT_TPREL_PCREL34:
       target->set_power10_stubs();
       break;
     default:
@@ -10263,7 +10263,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	   || r_type == elfcpp::R_POWERPC_GOT_TLSGD16_LO
 	   || r_type == elfcpp::R_POWERPC_GOT_TLSGD16_HI
 	   || r_type == elfcpp::R_POWERPC_GOT_TLSGD16_HA
-	   || r_type == elfcpp::R_PPC64_GOT_TLSGD34)
+	   || r_type == elfcpp::R_PPC64_GOT_TLSGD_PCREL34)
     {
       // First instruction of a global dynamic sequence, arg setup insn.
       const bool final = gsym == NULL || gsym->final_value_is_known();
@@ -10285,14 +10285,14 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	      gold_assert(object->local_has_got_offset(r_sym, got_type));
 	      value = object->local_got_offset(r_sym, got_type);
 	    }
-	  if (r_type == elfcpp::R_PPC64_GOT_TLSGD34)
+	  if (r_type == elfcpp::R_PPC64_GOT_TLSGD_PCREL34)
 	    value += target->got_section()->address();
 	  else
 	    value -= target->got_section()->got_base_offset(object);
 	}
       if (tls_type == tls::TLSOPT_TO_IE)
 	{
-	  if (r_type == elfcpp::R_PPC64_GOT_TLSGD34)
+	  if (r_type == elfcpp::R_PPC64_GOT_TLSGD_PCREL34)
 	    {
 	      Insn* iview = reinterpret_cast<Insn*>(view);
 	      uint64_t pinsn = elfcpp::Swap<32, big_endian>::readval(iview);
@@ -10303,7 +10303,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	      elfcpp::Swap<32, big_endian>::writeval(iview, pinsn >> 32);
 	      elfcpp::Swap<32, big_endian>::writeval(iview + 1,
 						     pinsn & 0xffffffff);
-	      r_type = elfcpp::R_PPC64_GOT_TPREL34;
+	      r_type = elfcpp::R_PPC64_GOT_TPREL_PCREL34;
 	    }
 	  else
 	    {
@@ -10325,7 +10325,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	}
       else if (tls_type == tls::TLSOPT_TO_LE)
 	{
-	  if (r_type == elfcpp::R_PPC64_GOT_TLSGD34)
+	  if (r_type == elfcpp::R_PPC64_GOT_TLSGD_PCREL34)
 	    {
 	      Insn* iview = reinterpret_cast<Insn*>(view);
 	      uint64_t pinsn = elfcpp::Swap<32, big_endian>::readval(iview);
@@ -10369,14 +10369,14 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	   || r_type == elfcpp::R_POWERPC_GOT_TLSLD16_LO
 	   || r_type == elfcpp::R_POWERPC_GOT_TLSLD16_HI
 	   || r_type == elfcpp::R_POWERPC_GOT_TLSLD16_HA
-	   || r_type == elfcpp::R_PPC64_GOT_TLSLD34)
+	   || r_type == elfcpp::R_PPC64_GOT_TLSLD_PCREL34)
     {
       // First instruction of a local dynamic sequence, arg setup insn.
       const tls::Tls_optimization tls_type = target->optimize_tls_ld();
       if (tls_type == tls::TLSOPT_NONE)
 	{
 	  value = target->tlsld_got_offset();
-	  if (r_type == elfcpp::R_PPC64_GOT_TLSLD34)
+	  if (r_type == elfcpp::R_PPC64_GOT_TLSLD_PCREL34)
 	    value += target->got_section()->address();
 	  else
 	    value -= target->got_section()->got_base_offset(object);
@@ -10384,7 +10384,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       else
 	{
 	  gold_assert(tls_type == tls::TLSOPT_TO_LE);
-	  if (r_type == elfcpp::R_PPC64_GOT_TLSLD34)
+	  if (r_type == elfcpp::R_PPC64_GOT_TLSLD_PCREL34)
 	    {
 	      Insn* iview = reinterpret_cast<Insn*>(view);
 	      uint64_t pinsn = elfcpp::Swap<32, big_endian>::readval(iview);
@@ -10425,7 +10425,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	   || r_type == elfcpp::R_POWERPC_GOT_DTPREL16_LO
 	   || r_type == elfcpp::R_POWERPC_GOT_DTPREL16_HI
 	   || r_type == elfcpp::R_POWERPC_GOT_DTPREL16_HA
-	   || r_type == elfcpp::R_PPC64_GOT_DTPREL34)
+	   || r_type == elfcpp::R_PPC64_GOT_DTPREL_PCREL34)
     {
       // Accesses relative to a local dynamic sequence address,
       // no optimisation here.
@@ -10439,7 +10439,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	  gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_DTPREL));
 	  value = object->local_got_offset(r_sym, GOT_TYPE_DTPREL);
 	}
-      if (r_type == elfcpp::R_PPC64_GOT_DTPREL34)
+      if (r_type == elfcpp::R_PPC64_GOT_DTPREL_PCREL34)
 	value += target->got_section()->address();
       else
 	value -= target->got_section()->got_base_offset(object);
@@ -10448,7 +10448,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	   || r_type == elfcpp::R_POWERPC_GOT_TPREL16_LO
 	   || r_type == elfcpp::R_POWERPC_GOT_TPREL16_HI
 	   || r_type == elfcpp::R_POWERPC_GOT_TPREL16_HA
-	   || r_type == elfcpp::R_PPC64_GOT_TPREL34)
+	   || r_type == elfcpp::R_PPC64_GOT_TPREL_PCREL34)
     {
       // First instruction of initial exec sequence.
       const bool final = gsym == NULL || gsym->final_value_is_known();
@@ -10465,7 +10465,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	      gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_TPREL));
 	      value = object->local_got_offset(r_sym, GOT_TYPE_TPREL);
 	    }
-	  if (r_type == elfcpp::R_PPC64_GOT_TPREL34)
+	  if (r_type == elfcpp::R_PPC64_GOT_TPREL_PCREL34)
 	    value += target->got_section()->address();
 	  else
 	    value -= target->got_section()->got_base_offset(object);
@@ -10473,7 +10473,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       else
 	{
 	  gold_assert(tls_type == tls::TLSOPT_TO_LE);
-	  if (r_type == elfcpp::R_PPC64_GOT_TPREL34)
+	  if (r_type == elfcpp::R_PPC64_GOT_TPREL_PCREL34)
 	    {
 	      Insn* iview = reinterpret_cast<Insn*>(view);
 	      uint64_t pinsn = elfcpp::Swap<32, big_endian>::readval(iview);
@@ -10745,10 +10745,10 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_PPC64_PLT_PCREL34:
     case elfcpp::R_PPC64_PLT_PCREL34_NOTOC:
     case elfcpp::R_PPC64_PCREL28:
-    case elfcpp::R_PPC64_GOT_TLSGD34:
-    case elfcpp::R_PPC64_GOT_TLSLD34:
-    case elfcpp::R_PPC64_GOT_TPREL34:
-    case elfcpp::R_PPC64_GOT_DTPREL34:
+    case elfcpp::R_PPC64_GOT_TLSGD_PCREL34:
+    case elfcpp::R_PPC64_GOT_TLSLD_PCREL34:
+    case elfcpp::R_PPC64_GOT_TPREL_PCREL34:
+    case elfcpp::R_PPC64_GOT_DTPREL_PCREL34:
     case elfcpp::R_PPC64_REL16_HIGHER34:
     case elfcpp::R_PPC64_REL16_HIGHERA34:
     case elfcpp::R_PPC64_REL16_HIGHEST34:
@@ -11285,10 +11285,10 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_PPC64_PCREL28:
     case elfcpp::R_PPC64_TPREL34:
     case elfcpp::R_PPC64_DTPREL34:
-    case elfcpp::R_PPC64_GOT_TLSGD34:
-    case elfcpp::R_PPC64_GOT_TLSLD34:
-    case elfcpp::R_PPC64_GOT_TPREL34:
-    case elfcpp::R_PPC64_GOT_DTPREL34:
+    case elfcpp::R_PPC64_GOT_TLSGD_PCREL34:
+    case elfcpp::R_PPC64_GOT_TLSLD_PCREL34:
+    case elfcpp::R_PPC64_GOT_TPREL_PCREL34:
+    case elfcpp::R_PPC64_GOT_DTPREL_PCREL34:
       overflow = Reloc::CHECK_SIGNED;
       break;
     }
@@ -11587,10 +11587,10 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_PPC64_PLT_PCREL34_NOTOC:
     case elfcpp::R_PPC64_TPREL34:
     case elfcpp::R_PPC64_DTPREL34:
-    case elfcpp::R_PPC64_GOT_TLSGD34:
-    case elfcpp::R_PPC64_GOT_TLSLD34:
-    case elfcpp::R_PPC64_GOT_TPREL34:
-    case elfcpp::R_PPC64_GOT_DTPREL34:
+    case elfcpp::R_PPC64_GOT_TLSGD_PCREL34:
+    case elfcpp::R_PPC64_GOT_TLSLD_PCREL34:
+    case elfcpp::R_PPC64_GOT_TPREL_PCREL34:
+    case elfcpp::R_PPC64_GOT_DTPREL_PCREL34:
       if (size == 32)
 	goto unsupp;
       status = Reloc::addr34(view, value, overflow);
