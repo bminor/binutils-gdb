@@ -436,14 +436,6 @@ struct elf_x86_plt_layout
 #define elf_x86_hash_entry(ent) \
   ((struct elf_x86_link_hash_entry *)(ent))
 
-enum elf_x86_target_os
-{
-  is_normal,
-  is_solaris,
-  is_vxworks,
-  is_nacl
-};
-
 /* x86 ELF linker hash table.  */
 
 struct elf_x86_link_hash_table
@@ -531,7 +523,6 @@ struct elf_x86_link_hash_table
   bfd_vma (*r_info) (bfd_vma, bfd_vma);
   bfd_vma (*r_sym) (bfd_vma);
   bfd_boolean (*is_reloc_section) (const char *);
-  enum elf_x86_target_os target_os;
   unsigned int sizeof_reloc;
   unsigned int dt_reloc;
   unsigned int dt_reloc_sz;
@@ -545,18 +536,6 @@ struct elf_x86_link_hash_table
   /* Options passed from the linker.  */
   struct elf_linker_x86_params *params;
 };
-
-/* Architecture-specific backend data for x86.  */
-
-struct elf_x86_backend_data
-{
-  /* Target system.  */
-  enum elf_x86_target_os target_os;
-};
-
-#define get_elf_x86_backend_data(abfd) \
-  ((const struct elf_x86_backend_data *) \
-   get_elf_backend_data (abfd)->arch_data)
 
 struct elf_x86_init_table
 {

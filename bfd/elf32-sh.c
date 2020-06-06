@@ -2182,9 +2182,6 @@ struct elf_sh_link_hash_table
   /* The type of PLT to use.  */
   const struct elf_sh_plt_info *plt_info;
 
-  /* True if the target system is VxWorks.  */
-  bfd_boolean vxworks_p;
-
   /* True if the target system uses FDPIC.  */
   bfd_boolean fdpic_p;
 };
@@ -2258,7 +2255,6 @@ sh_elf_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-  ret->vxworks_p = vxworks_object_p (abfd);
   ret->fdpic_p = fdpic_object_p (abfd);
 
   return &ret->root.root;
@@ -2467,7 +2463,7 @@ sh_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
-  if (htab->vxworks_p)
+  if (htab->root.target_os == is_vxworks)
     {
       if (!elf_vxworks_create_dynamic_sections (abfd, info, &htab->srelplt2))
 	return FALSE;
@@ -2688,7 +2684,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  /* We also need to make an entry in the .rel.plt section.  */
 	  htab->root.srelplt->size += sizeof (Elf32_External_Rela);
 
-	  if (htab->vxworks_p && !bfd_link_pic (info))
+	  if (htab->root.target_os == is_vxworks && !bfd_link_pic (info))
 	    {
 	      /* VxWorks executables have a second set of relocations
 		 for each PLT entry.  They go in a separate relocation
@@ -2847,7 +2843,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
 
-      if (htab->vxworks_p)
+      if (htab->root.target_os == is_vxworks)
 	{
 	  struct elf_dyn_relocs **pp;
 
@@ -3006,7 +3002,7 @@ sh_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		     linker script /DISCARD/, so we'll be discarding
 		     the relocs too.  */
 		}
-	      else if (htab->vxworks_p
+	      else if (htab->root.target_os == is_vxworks
 		       && strcmp (p->sec->output_section->name,
 				  ".tls_vars") == 0)
 		{
@@ -3250,7 +3246,7 @@ sh_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		return FALSE;
 	    }
 	}
-      if (htab->vxworks_p
+      if (htab->root.target_os == is_vxworks
 	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
 	return FALSE;
     }
@@ -3490,7 +3486,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
   /* We have to handle relocations in vxworks .tls_vars sections
      specially, because the dynamic loader is 'weird'.  */
-  is_vxworks_tls = (htab && htab->vxworks_p && bfd_link_pic (info)
+  is_vxworks_tls = (htab && htab->root.target_os == is_vxworks && bfd_link_pic (info)
 		    && !strcmp (input_section->output_section->name,
 				".tls_vars"));
 
@@ -6080,7 +6076,7 @@ sh_elf_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
 			     (splt->contents
 			      + h->plt.offset
 			      + plt_info->symbol_fields.got_entry));
-	  if (htab->vxworks_p)
+	  if (htab->root.target_os == is_vxworks)
 	    {
 	      unsigned int reachable_plts, plts_per_4k;
 	      int distance;
@@ -6161,7 +6157,7 @@ sh_elf_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
       loc = srelplt->contents + plt_index * sizeof (Elf32_External_Rela);
       bfd_elf32_swap_reloca_out (output_bfd, &rel, loc);
 
-      if (htab->vxworks_p && !bfd_link_pic (info))
+      if (htab->root.target_os == is_vxworks && !bfd_link_pic (info))
 	{
 	  /* Create the .rela.plt.unloaded relocations for this PLT entry.
 	     Begin by pointing LOC to the first such relocation.  */
@@ -6284,7 +6280,7 @@ sh_elf_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
      _GLOBAL_OFFSET_TABLE_ is not absolute: it is relative to the
      ".got" section.  */
   if (h == htab->root.hdynamic
-      || (!htab->vxworks_p && h == htab->root.hgot))
+      || (htab->root.target_os != is_vxworks && h == htab->root.hgot))
     sym->st_shndx = SHN_ABS;
 
   return TRUE;
@@ -6325,7 +6321,7 @@ sh_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	  switch (dyn.d_tag)
 	    {
 	    default:
-	      if (htab->vxworks_p
+	      if (htab->root.target_os == is_vxworks
 		  && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
 		bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
@@ -6372,7 +6368,7 @@ sh_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 				 (splt->contents
 				  + htab->plt_info->plt0_got_fields[i]));
 
-	  if (htab->vxworks_p)
+	  if (htab->root.target_os == is_vxworks)
 	    {
 	      /* Finalize the .rela.plt.unloaded contents.  */
 	      Elf_Internal_Rela rel;
@@ -6772,6 +6768,9 @@ sh_elf_encode_eh_address (bfd *abfd,
 #undef	ELF_MAXPAGESIZE
 #define	ELF_MAXPAGESIZE			0x1000
 #undef	ELF_COMMONPAGESIZE
+
+#undef	ELF_TARGET_OS
+#define	ELF_TARGET_OS			is_vxworks
 
 #include "elf32-target.h"
 

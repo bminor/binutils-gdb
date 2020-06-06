@@ -2670,6 +2670,9 @@ mips_vxworks_final_write_processing (bfd *abfd)
 #define ELF_MAXPAGESIZE			0x1000
 #define ELF_COMMONPAGESIZE		0x1000
 
+#undef ELF_TARGET_OS
+#define ELF_TARGET_OS			is_vxworks
+
 #undef elf_backend_want_got_plt
 #define elf_backend_want_got_plt		1
 #undef elf_backend_want_plt_sym

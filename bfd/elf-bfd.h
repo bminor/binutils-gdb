@@ -540,6 +540,15 @@ struct bfd_link_needed_list
   const char *name;
 };
 
+enum elf_target_os
+{
+  is_normal,
+  is_symbian,	/* Symbian OS.  */
+  is_solaris,	/* Solaris.  */
+  is_vxworks,	/* VxWorks.  */
+  is_nacl	/* Native Client.  */
+};
+
 /* ELF linker hash table.  */
 
 struct elf_link_hash_table
@@ -640,6 +649,9 @@ struct elf_link_hash_table
   /* Cached first output tls section and size of PT_TLS segment.  */
   asection *tls_sec;
   bfd_size_type tls_size;  /* Bytes.  */
+
+  /* Target OS for linker output.  */
+  enum elf_target_os target_os;
 
   /* A linked list of dynamic BFD's loaded in the link.  */
   struct elf_link_loaded_list *dyn_loaded;
@@ -860,6 +872,9 @@ struct elf_backend_data
   /* An identifier used to distinguish different target specific
      extensions to elf_obj_tdata and elf_link_hash_table structures.  */
   enum elf_target_id target_id;
+
+  /* Target OS.  */
+  enum elf_target_os target_os;
 
   /* The ELF machine code (EM_xxxx) for this backend.  */
   int elf_machine_code;

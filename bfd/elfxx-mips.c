@@ -462,9 +462,6 @@ struct mips_elf_link_hash_table
   /* True if we are targetting R6 compact branches.  */
   bfd_boolean compact_branches;
 
-  /* True if we're generating code for VxWorks.  */
-  bfd_boolean is_vxworks;
-
   /* True if we already reported the small-data section overflow.  */
   bfd_boolean small_data_overflow_reported;
 
@@ -904,7 +901,8 @@ static bfd *reldyn_sorting_bfd;
 
 /* The name of the dynamic relocation section.  */
 #define MIPS_ELF_REL_DYN_NAME(INFO) \
-  (mips_elf_hash_table (INFO)->is_vxworks ? ".rela.dyn" : ".rel.dyn")
+  (mips_elf_hash_table (INFO)->root.target_os == is_vxworks \
+   ? ".rela.dyn" : ".rel.dyn")
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value
    from smaller values.  Start with zero, widen, *then* decrement.  */
@@ -919,7 +917,8 @@ static bfd *reldyn_sorting_bfd;
 
 /* The offset of $gp from the beginning of the .got section.  */
 #define ELF_MIPS_GP_OFFSET(INFO) \
-  (mips_elf_hash_table (INFO)->is_vxworks ? 0x0 : 0x7ff0)
+  (mips_elf_hash_table (INFO)->root.target_os == is_vxworks \
+   ? 0x0 : 0x7ff0)
 
 /* The maximum size of the GOT for it to be addressable using 16-bit
    offsets from $gp.  */
@@ -3821,7 +3820,7 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
   MIPS_ELF_PUT_WORD (abfd, value, htab->root.sgot->contents + entry->gotidx);
 
   /* These GOT entries need a dynamic relocation on VxWorks.  */
-  if (htab->is_vxworks)
+  if (htab->root.target_os == is_vxworks)
     {
       Elf_Internal_Rela outrel;
       asection *s;
@@ -4166,7 +4165,7 @@ mips_elf_allocate_dynamic_relocations (bfd *abfd, struct bfd_link_info *info,
   s = mips_elf_rel_dyn_section (info, FALSE);
   BFD_ASSERT (s != NULL);
 
-  if (htab->is_vxworks)
+  if (htab->root.target_os == is_vxworks)
     s->size += n * MIPS_ELF_RELA_SIZE (abfd);
   else
     {
@@ -4552,7 +4551,7 @@ mips_elf_count_got_symbols (struct mips_elf_link_hash_entry *h, void *data)
 	   entry if it was only used for relocations; those relocations
 	   will be against the null or section symbol instead of H.  */
 	h->global_got_area = GGA_NONE;
-      else if (htab->is_vxworks
+      else if (htab->root.target_os == is_vxworks
 	       && h->got_only_for_calls
 	       && h->root.plt.plist->mips_offset != MINUS_ONE)
 	/* On VxWorks, calls can refer directly to the .got.plt entry;
@@ -5266,7 +5265,7 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 static bfd_boolean
 is_gott_symbol (struct bfd_link_info *info, struct elf_link_hash_entry *h)
 {
-  return (mips_elf_hash_table (info)->is_vxworks
+  return (mips_elf_hash_table (info)->root.target_os == is_vxworks
 	  && bfd_link_pic (info)
 	  && (strcmp (h->root.root.string, "__GOTT_BASE__") == 0
 	      || strcmp (h->root.root.string, "__GOTT_INDEX__") == 0));
@@ -5904,7 +5903,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	{
 	  /* On VxWorks, CALL relocations should refer to the .got.plt
 	     entry, which is initialized to point at the PLT stub.  */
-	  if (htab->is_vxworks
+	  if (htab->root.target_os == is_vxworks
 	      && (call_hi16_reloc_p (r_type)
 		  || call_lo16_reloc_p (r_type)
 		  || call16_reloc_p (r_type)))
@@ -5924,7 +5923,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 		MIPS_ELF_PUT_WORD (dynobj, symbol, htab->root.sgot->contents + g);
 	    }
 	}
-      else if (!htab->is_vxworks
+      else if (htab->root.target_os != is_vxworks
 	       && (call16_reloc_p (r_type) || got16_reloc_p (r_type)))
 	/* The calculation below does not involve "g".  */
 	break;
@@ -6206,7 +6205,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
     case R_MICROMIPS_CALL16:
       /* VxWorks does not have separate local and global semantics for
 	 R_MIPS*_GOT16; every relocation evaluates to "G".  */
-      if (!htab->is_vxworks && local_p)
+      if (htab->root.target_os != is_vxworks && local_p)
 	{
 	  value = mips_elf_got16_entry (abfd, input_bfd, info,
 					symbol + addend, !was_local_p);
@@ -6745,7 +6744,8 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
      in the relocation.  */
   if (h != NULL && ! SYMBOL_REFERENCES_LOCAL (info, &h->root))
     {
-      BFD_ASSERT (htab->is_vxworks || h->global_got_area != GGA_NONE);
+      BFD_ASSERT (htab->root.target_os == is_vxworks
+		  || h->global_got_area != GGA_NONE);
       indx = h->root.dynindx;
       if (SGI_COMPAT (output_bfd))
 	defined_p = h->root.def_regular;
@@ -6804,7 +6804,7 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
   if (defined_p && r_type != R_MIPS_REL32)
     *addendp += symbol;
 
-  if (htab->is_vxworks)
+  if (htab->root.target_os == is_vxworks)
     /* VxWorks uses non-relative relocations for this.  */
     outrel[0].r_info = ELF32_R_INFO (indx, R_MIPS_32);
   else
@@ -6850,7 +6850,7 @@ mips_elf_create_dynamic_relocation (bfd *output_bfd,
 	 (sreloc->contents
 	  + sreloc->reloc_count * sizeof (Elf64_Mips_External_Rel)));
     }
-  else if (htab->is_vxworks)
+  else if (htab->root.target_os == is_vxworks)
     {
       /* VxWorks uses RELA rather than REL dynamic relocations.  */
       outrel[0].r_addend = *addendp;
@@ -7973,7 +7973,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 
   /* The psABI requires a read-only .dynamic section, but the VxWorks
      EABI doesn't.  */
-  if (!htab->is_vxworks)
+  if (htab->root.target_os != is_vxworks)
     {
       s = bfd_get_linker_section (abfd, ".dynamic");
       if (s != NULL)
@@ -8121,7 +8121,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   /* Do the usual VxWorks handling.  */
-  if (htab->is_vxworks
+  if (htab->root.target_os == is_vxworks
       && !elf_vxworks_create_dynamic_sections (abfd, info, &htab->srelplt2))
     return FALSE;
 
@@ -8723,7 +8723,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    elf_hash_table (info)->dynobj = dynobj = abfd;
 	  if (!mips_elf_create_got_section (dynobj, info))
 	    return FALSE;
-	  if (htab->is_vxworks && !bfd_link_pic (info))
+	  if (htab->root.target_os == is_vxworks
+	      && !bfd_link_pic (info))
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
@@ -8769,7 +8770,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     against a read-only section.  */
 	  if ((bfd_link_pic (info)
 	       || (h != NULL
-		   && !htab->is_vxworks
+		   && htab->root.target_os != is_vxworks
 		   && strcmp (h->root.root.string, "__gnu_local_gp") != 0
 		   && !(!info->nocopyreloc
 			&& !PIC_OBJECT_P (abfd)
@@ -8811,7 +8812,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		 relocations related to taking the function's address.
 		 This doesn't apply to VxWorks, where CALL relocs refer
 		 to a .got.plt entry instead of a normal .got entry.  */
-	      if (!htab->is_vxworks && (!can_make_dynamic_p || !call_reloc_p))
+	      if (htab->root.target_os != is_vxworks
+		  && (!can_make_dynamic_p || !call_reloc_p))
 		((struct mips_elf_link_hash_entry *) h)->no_fn_stub = TRUE;
 	    }
 
@@ -8836,7 +8838,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       else if (call_lo16_reloc_p (r_type)
 	       || got_lo16_reloc_p (r_type)
 	       || got_disp_reloc_p (r_type)
-	       || (got16_reloc_p (r_type) && htab->is_vxworks))
+	       || (got16_reloc_p (r_type)
+		   && htab->root.target_os == is_vxworks))
 	{
 	  /* We may need a local GOT entry for this relocation.  We
 	     don't count R_MIPS_GOT_PAGE because we can estimate the
@@ -9200,7 +9203,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   /* VxWorks executables are handled elsewhere; we only need to
      allocate relocations in shared objects.  */
-  if (htab->is_vxworks && !bfd_link_pic (info))
+  if (htab->root.target_os == is_vxworks && !bfd_link_pic (info))
     return TRUE;
 
   /* Ignore indirect symbols.  All relocations against such symbols
@@ -9245,7 +9248,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	     VxWorks does not enforce the same mapping between the GOT
 	     and the symbol table, so the same requirement does not
 	     apply there.  */
-	  if (!htab->is_vxworks)
+	  if (htab->root.target_os != is_vxworks)
 	    {
 	      if (hmips->global_got_area > GGA_RELOC_ONLY)
 		hmips->global_got_area = GGA_RELOC_ONLY;
@@ -9312,7 +9315,9 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
      Traditional stubs are only available on SVR4 psABI-based systems;
      VxWorks always uses PLTs instead.  */
-  if (!htab->is_vxworks && h->needs_plt && !hmips->no_fn_stub)
+  if (htab->root.target_os != is_vxworks
+      && h->needs_plt
+      && !hmips->no_fn_stub)
     {
       if (! elf_hash_table (info)->dynamic_sections_created)
 	return TRUE;
@@ -9361,7 +9366,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	     entry is 16 bytes and the PLT0 entry is 32 bytes.
 	     Encourage better cache usage by aligning.  We do this
 	     lazily to avoid pessimizing traditional objects.  */
-	  if (!htab->is_vxworks
+	  if (htab->root.target_os != is_vxworks
 	      && !bfd_set_section_alignment (htab->root.splt, 5))
 	    return FALSE;
 
@@ -9373,21 +9378,23 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 
 	  /* On non-VxWorks targets, the first two entries in .got.plt
 	     are reserved.  */
-	  if (!htab->is_vxworks)
+	  if (htab->root.target_os != is_vxworks)
 	    htab->plt_got_index
 	      += (get_elf_backend_data (dynobj)->got_header_size
 		  / MIPS_ELF_GOT_SIZE (dynobj));
 
 	  /* On VxWorks, also allocate room for the header's
 	     .rela.plt.unloaded entries.  */
-	  if (htab->is_vxworks && !bfd_link_pic (info))
+	  if (htab->root.target_os == is_vxworks
+	      && !bfd_link_pic (info))
 	    htab->srelplt2->size += 2 * sizeof (Elf32_External_Rela);
 
 	  /* Now work out the sizes of individual PLT entries.  */
-	  if (htab->is_vxworks && bfd_link_pic (info))
+	  if (htab->root.target_os == is_vxworks
+	      && bfd_link_pic (info))
 	    htab->plt_mips_entry_size
 	      = 4 * ARRAY_SIZE (mips_vxworks_shared_plt_entry);
-	  else if (htab->is_vxworks)
+	  else if (htab->root.target_os == is_vxworks)
 	    htab->plt_mips_entry_size
 	      = 4 * ARRAY_SIZE (mips_vxworks_exec_plt_entry);
 	  else if (newabi_p)
@@ -9430,7 +9437,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	 standard entry actually has to be used as the stub ends with a J
 	 instruction.  */
       if (newabi_p
-	  || htab->is_vxworks
+	  || htab->root.target_os == is_vxworks
 	  || hmips->call_stub
 	  || hmips->call_fp_stub)
 	{
@@ -9472,12 +9479,12 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	hmips->use_plt_entry = TRUE;
 
       /* Make room for the R_MIPS_JUMP_SLOT relocation.  */
-      htab->root.srelplt->size += (htab->is_vxworks
+      htab->root.srelplt->size += (htab->root.target_os == is_vxworks
 				   ? MIPS_ELF_RELA_SIZE (dynobj)
 				   : MIPS_ELF_REL_SIZE (dynobj));
 
       /* Make room for the .rela.plt.unloaded relocations.  */
-      if (htab->is_vxworks && !bfd_link_pic (info))
+      if (htab->root.target_os == is_vxworks && !bfd_link_pic (info))
 	htab->srelplt2->size += 3 * sizeof (Elf32_External_Rela);
 
       /* All relocations against this symbol that could have been made
@@ -9542,7 +9549,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     }
   if ((h->root.u.def.section->flags & SEC_ALLOC) != 0)
     {
-      if (htab->is_vxworks)
+      if (htab->root.target_os == is_vxworks)
 	srel->size += sizeof (Elf32_External_Rela);
       else
 	mips_elf_allocate_dynamic_relocations (dynobj, info, 1);
@@ -9625,7 +9632,7 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
   /* Allocate room for the reserved entries.  VxWorks always reserves
      3 entries; other objects only reserve 2 entries.  */
   BFD_ASSERT (g->assigned_low_gotno == 0);
-  if (htab->is_vxworks)
+  if (htab->root.target_os == is_vxworks)
     htab->reserved_gotno = 3;
   else
     htab->reserved_gotno = 2;
@@ -9657,7 +9664,7 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
 	}
     }
 
-  if (htab->is_vxworks)
+  if (htab->root.target_os == is_vxworks)
     /* There's no need to allocate page entries for VxWorks; R_MIPS*_GOT16
        relocations against local symbols evaluate to "G", and the EABI does
        not include R_MIPS_GOT_PAGE.  */
@@ -9682,7 +9689,8 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
   /* VxWorks does not support multiple GOTs.  It initializes $gp to
      __GOTT_BASE__[__GOTT_INDEX__], the value of which is set by the
      dynamic loader.  */
-  if (!htab->is_vxworks && s->size > MIPS_ELF_GOT_MAX_SIZE (info))
+  if (htab->root.target_os != is_vxworks
+      && s->size > MIPS_ELF_GOT_MAX_SIZE (info))
     {
       if (!mips_elf_multi_got (output_bfd, info, s, page_gotno))
 	return FALSE;
@@ -9708,7 +9716,7 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
 		  == g->global_gotno + g->local_gotno + g->tls_gotno);
 
       /* Each VxWorks GOT entry needs an explicit relocation.  */
-      if (htab->is_vxworks && bfd_link_pic (info))
+      if (htab->root.target_os == is_vxworks && bfd_link_pic (info))
 	g->relocs += g->global_gotno + g->local_gotno - htab->reserved_gotno;
 
       /* Allocate room for the TLS relocations.  */
@@ -9890,7 +9898,7 @@ mips_elf_set_plt_sym_value (struct mips_elf_link_hash_entry *h, void *data)
       /* For VxWorks, point at the PLT load stub rather than the lazy
 	 resolution stub; this stub will become the canonical function
 	 address.  */
-      if (htab->is_vxworks)
+      if (htab->root.target_os == is_vxworks)
 	val += 8;
 
       h->root.root.u.def.section = htab->root.splt;
@@ -9955,9 +9963,9 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	  BFD_ASSERT (htab->root.sgotplt->size == 0);
 	  BFD_ASSERT (htab->root.splt->size == 0);
 
-	  if (htab->is_vxworks && bfd_link_pic (info))
+	  if (htab->root.target_os == is_vxworks && bfd_link_pic (info))
 	    size = 4 * ARRAY_SIZE (mips_vxworks_shared_plt0_entry);
-	  else if (htab->is_vxworks)
+	  else if (htab->root.target_os == is_vxworks)
 	    size = 4 * ARRAY_SIZE (mips_vxworks_exec_plt0_entry);
 	  else if (ABI_64_P (output_bfd))
 	    size = 4 * ARRAY_SIZE (mips_n64_exec_plt0_entry);
@@ -10073,7 +10081,8 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	     room for an extra nop to fill the delay slot.  This is
 	     for CPUs without load interlocking.  */
 	  if (! LOAD_INTERLOCKS_P (output_bfd)
-	      && ! htab->is_vxworks && s->size > 0)
+	      && htab->root.target_os != is_vxworks
+	      && s->size > 0)
 	    s->size += 4;
 	}
       else if (! CONST_STRNEQ (name, ".init")
@@ -10131,7 +10140,9 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	  && !MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_DEBUG, 0))
 	return FALSE;
 
-      if (reltext && (SGI_COMPAT (output_bfd) || htab->is_vxworks))
+      if (reltext
+	  && (SGI_COMPAT (output_bfd)
+	      || htab->root.target_os == is_vxworks))
 	info->flags |= DF_TEXTREL;
 
       if ((info->flags & DF_TEXTREL) != 0)
@@ -10150,7 +10161,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	return FALSE;
 
       sreldyn = mips_elf_rel_dyn_section (info, FALSE);
-      if (htab->is_vxworks)
+      if (htab->root.target_os == is_vxworks)
 	{
 	  /* VxWorks uses .rela.dyn instead of .rel.dyn.  It does not
 	     use any of the DT_MIPS_* tags.  */
@@ -10230,7 +10241,7 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	  if (! MIPS_ELF_ADD_DYNAMIC_ENTRY (info, DT_MIPS_PLTGOT, 0))
 	    return FALSE;
 	}
-      if (htab->is_vxworks
+      if (htab->root.target_os == is_vxworks
 	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
 	return FALSE;
     }
@@ -10872,7 +10883,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
   dynobj = elf_hash_table (info)->dynobj;
   hmips = (struct mips_elf_link_hash_entry *) h;
 
-  BFD_ASSERT (!htab->is_vxworks);
+  BFD_ASSERT (htab->root.target_os != is_vxworks);
 
   if (h->plt.plist != NULL
       && (h->plt.plist->mips_offset != MINUS_ONE
@@ -11808,7 +11819,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_RELAENT:
-	      BFD_ASSERT (htab->is_vxworks);
+	      BFD_ASSERT (htab->root.target_os == is_vxworks);
 	      dyn.d_un.d_val = MIPS_ELF_RELA_SIZE (dynobj);
 	      break;
 
@@ -11947,7 +11958,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 
 	    case DT_PLTREL:
 	      BFD_ASSERT (htab->use_plts_and_copy_relocs);
-	      if (htab->is_vxworks)
+	      if (htab->root.target_os == is_vxworks)
 		dyn.d_un.d_val = DT_RELA;
 	      else
 		dyn.d_un.d_val = DT_REL;
@@ -11991,7 +12002,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 
 	    default:
 	      swap_out_p = FALSE;
-	      if (htab->is_vxworks
+	      if (htab->root.target_os == is_vxworks
 		  && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
 		swap_out_p = TRUE;
 	      break;
@@ -12016,7 +12027,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
   if (sgot != NULL && sgot->size > 0
       && !bfd_is_abs_section (sgot->output_section))
     {
-      if (htab->is_vxworks)
+      if (htab->root.target_os == is_vxworks)
 	{
 	  /* The first entry of the global offset table points to the
 	     ".dynamic" section.  The second is initialized by the
@@ -12179,7 +12190,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
        increasing order of r_symndx.  The VxWorks EABI doesn't require
        this, and because the code below handles REL rather than RELA
        relocations, using it for VxWorks would be outright harmful.  */
-    if (!htab->is_vxworks)
+    if (htab->root.target_os != is_vxworks)
       {
 	s = mips_elf_rel_dyn_section (info, FALSE);
 	if (s != NULL
@@ -12201,7 +12212,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 
   if (htab->root.splt && htab->root.splt->size > 0)
     {
-      if (htab->is_vxworks)
+      if (htab->root.target_os == is_vxworks)
 	{
 	  if (bfd_link_pic (info))
 	    mips_vxworks_finish_shared_plt (output_bfd, info);
@@ -14303,7 +14314,6 @@ _bfd_mips_vxworks_link_hash_table_create (bfd *abfd)
 
       htab = (struct mips_elf_link_hash_table *) ret;
       htab->use_plts_and_copy_relocs = TRUE;
-      htab->is_vxworks = TRUE;
     }
   return ret;
 }
@@ -14682,7 +14692,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	elf_gp (abfd) = (h->u.def.value
 			 + h->u.def.section->output_section->vma
 			 + h->u.def.section->output_offset);
-      else if (htab->is_vxworks
+      else if (htab->root.target_os == is_vxworks
 	       && (h = bfd_link_hash_lookup (info->hash,
 					     "_GLOBAL_OFFSET_TABLE_",
 					     FALSE, FALSE, TRUE))
@@ -16637,7 +16647,9 @@ _bfd_mips_init_file_header (bfd *abfd, struct bfd_link_info *link_info)
       BFD_ASSERT (htab != NULL);
     }
 
-  if (htab != NULL && htab->use_plts_and_copy_relocs && !htab->is_vxworks)
+  if (htab != NULL
+      && htab->use_plts_and_copy_relocs
+      && htab->root.target_os != is_vxworks)
     i_ehdrp->e_ident[EI_ABIVERSION] = MIPS_LIBC_ABI_MIPS_PLT;
 
   if (mips_elf_tdata (abfd)->abiflags.fp_abi == Val_GNU_MIPS_ABI_FP_64

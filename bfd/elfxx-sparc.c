@@ -1216,7 +1216,7 @@ _bfd_sparc_elf_create_dynamic_sections (bfd *dynobj,
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
 
-  if (htab->is_vxworks)
+  if (htab->elf.target_os == is_vxworks)
     {
       if (!elf_vxworks_create_dynamic_sections (dynobj, info, &htab->srelplt2))
 	return FALSE;
@@ -2076,7 +2076,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	      s->size = htab->plt_header_size;
 
 	      /* Allocate space for the .rela.plt.unloaded relocations.  */
-	      if (htab->is_vxworks && !bfd_link_pic (info))
+	      if (htab->elf.target_os == is_vxworks
+		  && !bfd_link_pic (info))
 		htab->srelplt2->size = sizeof (Elf32_External_Rela) * 2;
 	    }
 
@@ -2128,7 +2129,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 		htab->elf.irelplt->size += SPARC_ELF_RELA_BYTES (htab);
 	    }
 
-	  if (htab->is_vxworks)
+	  if (htab->elf.target_os == is_vxworks)
 	    {
 	      /* Allocate space for the .got.plt entry.  */
 	      htab->elf.sgotplt->size += 4;
@@ -2231,7 +2232,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	    }
 	}
 
-      if (htab->is_vxworks)
+      if (htab->elf.target_os == is_vxworks)
 	{
 	  struct elf_dyn_relocs **pp;
 
@@ -2433,7 +2434,7 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 		     linker script /DISCARD/, so we'll be discarding
 		     the relocs too.  */
 		}
-	      else if (htab->is_vxworks
+	      else if (htab->elf.target_os == is_vxworks
 		       && strcmp (p->sec->output_section->name,
 				  ".tls_vars") == 0)
 		{
@@ -2503,7 +2504,7 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
   htab_traverse (htab->loc_hash_table, allocate_local_dynrelocs, info);
 
   if (! ABI_64_P (output_bfd)
-      && !htab->is_vxworks
+      && htab->elf.target_os != is_vxworks
       && elf_hash_table (info)->dynamic_sections_created)
     {
       /* Make space for the trailing nop in .plt.  */
@@ -2829,7 +2830,8 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
   sreloc = elf_section_data (input_section)->sreloc;
   /* We have to handle relocations in vxworks .tls_vars sections
      specially, because the dynamic loader is 'weird'.  */
-  is_vxworks_tls = (htab->is_vxworks && bfd_link_pic (info)
+  is_vxworks_tls = (htab->elf.target_os == is_vxworks
+		    && bfd_link_pic (info)
 		    && !strcmp (input_section->output_section->name,
 				".tls_vars"));
 
@@ -4272,7 +4274,7 @@ _bfd_sparc_elf_finish_dynamic_symbol (bfd *output_bfd,
 	abort ();
 
       /* Fill in the entry in the .rela.plt section.  */
-      if (htab->is_vxworks)
+      if (htab->elf.target_os == is_vxworks)
 	{
 	  /* Work out the index of this PLT entry.  */
 	  rela_index = ((h->plt.offset - htab->plt_header_size)
@@ -4474,7 +4476,7 @@ _bfd_sparc_elf_finish_dynamic_symbol (bfd *output_bfd,
      ".got" section.  Likewise _PROCEDURE_LINKAGE_TABLE_ and ".plt".  */
   if (sym != NULL
       && (h == htab->elf.hdynamic
-	  || (!htab->is_vxworks
+	  || (htab->elf.target_os != is_vxworks
 	      && (h == htab->elf.hgot || h == htab->elf.hplt))))
     sym->st_shndx = SHN_ABS;
 
@@ -4508,7 +4510,7 @@ sparc_finish_dyn (bfd *output_bfd, struct bfd_link_info *info,
 
       bed->s->swap_dyn_in (dynobj, dyncon, &dyn);
 
-      if (htab->is_vxworks && dyn.d_tag == DT_PLTGOT)
+      if (htab->elf.target_os == is_vxworks && dyn.d_tag == DT_PLTGOT)
 	{
 	  /* On VxWorks, DT_PLTGOT should point to the start of the GOT,
 	     not to the start of the PLT.  */
@@ -4519,7 +4521,7 @@ sparc_finish_dyn (bfd *output_bfd, struct bfd_link_info *info,
 	      bed->s->swap_dyn_out (output_bfd, &dyn, dyncon);
 	    }
 	}
-      else if (htab->is_vxworks
+      else if (htab->elf.target_os == is_vxworks
 	       && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
 	bed->s->swap_dyn_out (output_bfd, &dyn, dyncon);
       else if (abi_64_p && dyn.d_tag == DT_SPARC_REGISTER)
@@ -4744,7 +4746,7 @@ _bfd_sparc_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
       /* Initialize the contents of the .plt section.  */
       if (splt->size > 0)
 	{
-	  if (htab->is_vxworks)
+	  if (htab->elf.target_os == is_vxworks)
 	    {
 	      if (bfd_link_pic (info))
 		sparc_vxworks_finish_shared_plt (output_bfd, info);
@@ -4762,7 +4764,8 @@ _bfd_sparc_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
 
       if (elf_section_data (splt->output_section) != NULL)
 	elf_section_data (splt->output_section)->this_hdr.sh_entsize
-	  = ((htab->is_vxworks || !ABI_64_P (output_bfd))
+	  = ((htab->elf.target_os == is_vxworks
+	      || !ABI_64_P (output_bfd))
 	     ? 0 : htab->plt_entry_size);
     }
 

@@ -843,14 +843,6 @@ static const struct elf_x86_non_lazy_plt_layout elf_i386_non_lazy_ibt_plt =
 #define PLTRESOLVE_RELOCS 2
 #define PLT_NON_JUMP_SLOT_RELOCS 2
 
-/* These are the standard parameters.  */
-static const struct elf_x86_backend_data elf_i386_arch_bed =
-  {
-    is_normal				/* os */
-  };
-
-#define	elf_backend_arch_data	&elf_i386_arch_bed
-
 /* Return TRUE if the TLS access code sequence support transition
    from R_TYPE.  */
 
@@ -2043,7 +2035,7 @@ elf_i386_relocate_section (bfd *output_bfd,
   local_tlsdesc_gotents = elf_x86_local_tlsdesc_gotent (input_bfd);
   /* We have to handle relocations in vxworks .tls_vars sections
      specially, because the dynamic loader is 'weird'.  */
-  is_vxworks_tls = (htab->target_os == is_vxworks
+  is_vxworks_tls = (htab->elf.target_os == is_vxworks
 		    && bfd_link_pic (info)
 		    && !strcmp (input_section->output_section->name,
 				".tls_vars"));
@@ -3597,7 +3589,7 @@ elf_i386_finish_dynamic_symbol (bfd *output_bfd,
 		      resolved_plt->contents + plt_offset
 		      + htab->plt.plt_got_offset);
 
-	  if (htab->target_os == is_vxworks)
+	  if (htab->elf.target_os == is_vxworks)
 	    {
 	      int s, k, reloc_index;
 
@@ -4015,7 +4007,7 @@ elf_i386_finish_dynamic_sections (bfd *output_bfd,
 			  htab->elf.splt->contents
 			  + htab->lazy_plt->plt0_got2_offset);
 
-	      if (htab->target_os == is_vxworks)
+	      if (htab->elf.target_os == is_vxworks)
 		{
 		  Elf_Internal_Rela rel;
 		  int num_plts = (htab->elf.splt->size
@@ -4156,7 +4148,7 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
   lazy_plt = NULL;
   non_lazy_ibt_plt = NULL;
   lazy_ibt_plt = NULL;
-  switch (get_elf_x86_backend_data (abfd)->target_os)
+  switch (get_elf_backend_data (abfd)->target_os)
     {
     case is_normal:
     case is_solaris:
@@ -4170,6 +4162,8 @@ elf_i386_get_synthetic_symtab (bfd *abfd,
     case is_nacl:
       lazy_plt = &elf_i386_nacl_plt;
       break;
+    default:
+      abort ();
     }
 
   got_addr = 0;
@@ -4316,7 +4310,7 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 {
   struct elf_x86_init_table init_table;
 
-  switch (get_elf_x86_backend_data (info->output_bfd)->target_os)
+  switch (get_elf_backend_data (info->output_bfd)->target_os)
     {
     case is_normal:
     case is_solaris:
@@ -4340,6 +4334,8 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
       init_table.lazy_ibt_plt = NULL;
       init_table.non_lazy_ibt_plt = NULL;
       break;
+    default:
+      abort ();
     }
 
   init_table.r_info = elf32_r_info;
@@ -4443,13 +4439,8 @@ elf_i386_fbsd_init_file_header (bfd *abfd, struct bfd_link_info *info)
 #undef	TARGET_LITTLE_NAME
 #define	TARGET_LITTLE_NAME		"elf32-i386-sol2"
 
-static const struct elf_x86_backend_data elf_i386_solaris_arch_bed =
-  {
-    is_solaris				/* os */
-  };
-
-#undef	elf_backend_arch_data
-#define	elf_backend_arch_data		&elf_i386_solaris_arch_bed
+#undef	ELF_TARGET_OS
+#define	ELF_TARGET_OS			is_solaris
 
 /* Restore default: we cannot use ELFOSABI_SOLARIS, otherwise ELFOSABI_NONE
    objects won't be recognized.  */
@@ -4575,9 +4566,7 @@ elf32_iamcu_elf_object_p (bfd *abfd)
 #undef	ELF_MACHINE_CODE
 #define	ELF_MACHINE_CODE		EM_IAMCU
 
-#undef	elf_backend_arch_data
-#define	elf_backend_arch_data		&elf_i386_arch_bed
-
+#undef	ELF_TARGET_OS
 #undef	ELF_OSABI
 
 #undef  elf32_bed
@@ -4704,7 +4693,7 @@ static const bfd_byte elf_i386_nacl_eh_frame_plt[] =
      || PLT_FDE_LENGTH != 36				\
      || PLT_FDE_START_OFFSET != 4 + PLT_CIE_LENGTH + 8	\
      || PLT_FDE_LEN_OFFSET != 4 + PLT_CIE_LENGTH + 12)
-# error "Need elf_x86_backend_data parameters for eh_frame_plt offsets!"
+# error "Need PLT_CIE_LENGTH parameters for eh_frame_plt offsets!"
 #endif
     PLT_CIE_LENGTH, 0, 0, 0,		/* CIE length */
     0, 0, 0, 0,				/* CIE ID */
@@ -4764,11 +4753,6 @@ static const struct elf_x86_lazy_plt_layout elf_i386_nacl_plt =
     sizeof (elf_i386_nacl_eh_frame_plt) /* eh_frame_plt_size */
   };
 
-static const struct elf_x86_backend_data elf_i386_nacl_arch_bed =
-  {
-    is_nacl				/* os */
-  };
-
 static bfd_boolean
 elf32_i386_nacl_elf_object_p (bfd *abfd)
 {
@@ -4777,8 +4761,8 @@ elf32_i386_nacl_elf_object_p (bfd *abfd)
   return TRUE;
 }
 
-#undef	elf_backend_arch_data
-#define elf_backend_arch_data	&elf_i386_nacl_arch_bed
+#undef	ELF_TARGET_OS
+#define ELF_TARGET_OS		is_nacl
 
 #undef	elf_backend_object_p
 #define elf_backend_object_p			elf32_i386_nacl_elf_object_p
@@ -4809,13 +4793,8 @@ elf32_i386_nacl_elf_object_p (bfd *abfd)
 #undef	elf_backend_plt_alignment
 #define elf_backend_plt_alignment	4
 
-static const struct elf_x86_backend_data elf_i386_vxworks_arch_bed =
-  {
-    is_vxworks				/* os */
-  };
-
-#undef	elf_backend_arch_data
-#define	elf_backend_arch_data	&elf_i386_vxworks_arch_bed
+#undef	ELF_TARGET_OS
+#define ELF_TARGET_OS		is_vxworks
 
 #undef elf_backend_relocs_compatible
 #undef elf_backend_add_symbol_hook

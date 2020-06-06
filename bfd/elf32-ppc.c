@@ -2195,9 +2195,6 @@ struct ppc_elf_link_hash_table
   /* The type of PLT we have chosen to use.  */
   enum ppc_elf_plt_type plt_type;
 
-  /* True if the target system is VxWorks.  */
-  unsigned int is_vxworks:1;
-
   /* Whether there exist local gnu indirect function resolvers,
      referenced by dynamic relocations.  */
   unsigned int local_ifunc_resolver:1;
@@ -2335,7 +2332,7 @@ ppc_elf_create_got (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   htab = ppc_elf_hash_table (info);
-  if (!htab->is_vxworks)
+  if (htab->elf.target_os != is_vxworks)
     {
       /* The powerpc .got has a blrl instruction in it.  Mark it
 	 executable.  */
@@ -2495,7 +2492,7 @@ ppc_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	return FALSE;
     }
 
-  if (htab->is_vxworks
+  if (htab->elf.target_os == is_vxworks
       && !elf_vxworks_create_dynamic_sections (abfd, info, &htab->srelplt2))
     return FALSE;
 
@@ -2953,7 +2950,7 @@ ppc_elf_check_relocs (bfd *abfd,
       tls_type = 0;
       r_type = ELF32_R_TYPE (rel->r_info);
       ifunc = NULL;
-      if (h == NULL && !htab->is_vxworks)
+      if (h == NULL && htab->elf.target_os != is_vxworks)
 	{
 	  Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->sym_cache,
 							  abfd, r_symndx);
@@ -2992,7 +2989,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	    }
 	}
 
-      if (!htab->is_vxworks
+      if (htab->elf.target_os != is_vxworks
 	  && is_branch_reloc (r_type)
 	  && h != NULL
 	  && h == tga)
@@ -4798,7 +4795,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	       || (h->non_got_ref
 		   && !h->ref_regular_nonweak
 		   && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)))
-	      && !htab->is_vxworks
+	      && htab->elf.target_os != is_vxworks
 	      && !ppc_elf_hash_entry (h)->has_sda_refs
 	      && !_bfd_elf_readonly_dynrelocs (h))
 	    {
@@ -4884,7 +4881,7 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       executable.  */
   if (ELIMINATE_COPY_RELOCS
       && !ppc_elf_hash_entry (h)->has_sda_refs
-      && !htab->is_vxworks
+      && htab->elf.target_os != is_vxworks
       && !h->def_regular
       && !alias_readonly_dynrelocs (h))
     return TRUE;
@@ -5181,7 +5178,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
 
-      if (htab->is_vxworks)
+      if (htab->elf.target_os == is_vxworks)
 	{
 	  struct elf_dyn_relocs **pp;
 
@@ -5495,7 +5492,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 		     linker script /DISCARD/, so we'll be discarding
 		     the relocs too.  */
 		}
-	      else if (htab->is_vxworks
+	      else if (htab->elf.target_os == is_vxworks
 		       && strcmp (p->sec->output_section->name,
 				  ".tls_vars") == 0)
 		{
@@ -5560,7 +5557,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	else
 	  *local_got = (bfd_vma) -1;
 
-      if (htab->is_vxworks)
+      if (htab->elf.target_os == is_vxworks)
 	continue;
 
       /* Allocate space for calls to local STT_GNU_IFUNC syms in .iplt.  */
@@ -5873,7 +5870,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return FALSE;
 	}
-      if (htab->is_vxworks
+      if (htab->elf.target_os == is_vxworks
 	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
 	return FALSE;
    }
@@ -6980,7 +6977,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
   sym_hashes = elf_sym_hashes (input_bfd);
   /* We have to handle relocations in vxworks .tls_vars sections
      specially, because the dynamic loader is 'weird'.  */
-  is_vxworks_tls = (htab->is_vxworks && bfd_link_pic (info)
+  is_vxworks_tls = (htab->elf.target_os == is_vxworks && bfd_link_pic (info)
 		    && !strcmp (input_section->output_section->name,
 				".tls_vars"));
   if (input_section->sec_info_type == SEC_INFO_TYPE_TARGET)
@@ -7512,7 +7509,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	}
 
       ifunc = NULL;
-      if (!htab->is_vxworks)
+      if (htab->elf.target_os != is_vxworks)
 	{
 	  struct plt_entry *ent;
 
@@ -9884,7 +9881,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	  switch (dyn.d_tag)
 	    {
 	    case DT_PLTGOT:
-	      if (htab->is_vxworks)
+	      if (htab->elf.target_os == is_vxworks)
 		s = htab->elf.sgotplt;
 	      else
 		s = htab->elf.splt;
@@ -9916,7 +9913,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	      continue;
 
 	    default:
-	      if (htab->is_vxworks
+	      if (htab->elf.target_os == is_vxworks
 		  && elf_vxworks_finish_dynamic_entry (output_bfd, &dyn))
 		break;
 	      continue;
@@ -9968,7 +9965,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
     }
 
   /* Fill in the first entry in the VxWorks procedure linkage table.  */
-  if (htab->is_vxworks
+  if (htab->elf.target_os == is_vxworks
       && htab->elf.splt != NULL
       && htab->elf.splt->size != 0
       && htab->elf.splt->output_section != bfd_abs_section_ptr)
@@ -10377,6 +10374,9 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 
 #undef  ELF_OSABI
 
+#undef ELF_TARGET_OS
+#define ELF_TARGET_OS		is_vxworks
+
 /* VxWorks uses the elf default section flags for .plt.  */
 static const struct bfd_elf_special_section *
 ppc_elf_vxworks_get_sec_type_attr (bfd *abfd, asection *sec)
@@ -10402,7 +10402,6 @@ ppc_elf_vxworks_link_hash_table_create (bfd *abfd)
     {
       struct ppc_elf_link_hash_table *htab
 	= (struct ppc_elf_link_hash_table *)ret;
-      htab->is_vxworks = 1;
       htab->plt_type = PLT_VXWORKS;
       htab->plt_entry_size = VXWORKS_PLT_ENTRY_SIZE;
       htab->plt_slot_size = VXWORKS_PLT_ENTRY_SIZE;

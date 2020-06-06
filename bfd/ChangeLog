@@ -1,3 +1,111 @@
+2020-06-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_target_os): New.
+	(elf_link_hash_table): Add target_os.
+	(elf_backend_data): Add target_os.
+	* elf32-arm.c (elf32_arm_link_hash_table): Remove vxworks_p,
+	symbian_p and nacl_p.
+	(create_got_section): Updated.
+	(elf32_arm_create_dynamic_sections): Likewise.
+	(arm_type_of_stub): Likewise.
+	(elf32_arm_create_or_find_stub_sec): Likewise.
+	(elf32_arm_allocate_plt_entry): Likewise.
+	(elf32_arm_populate_plt_entry): Likewise.
+	(elf32_arm_final_link_relocate): Likewise.
+	(elf32_arm_check_relocs): Likewise.
+	(allocate_dynrelocs_for_symbol): Likewise.
+	(elf32_arm_finish_dynamic_symbol): Likewise.
+	(elf32_arm_finish_dynamic_sections): Likewise.
+	(elf32_arm_output_plt_map_1): Likewise.
+	(elf32_arm_output_arch_local_syms): Likewise.
+	(elf32_arm_add_symbol_hook): Likewise.
+	(elf32_arm_nacl_link_hash_table_create): Likewise.
+	(elf32_arm_vxworks_link_hash_table_create): Likewise.
+	(elf32_arm_symbian_link_hash_table_create): Likewise.
+	(ELF_TARGET_OS): New.
+	* elf32-i386.c (elf_i386_arch_bed): Removed.
+	(elf_backend_arch_data): Likewise.
+	(elf_i386_solaris_arch_bed): Likewise.
+	(elf_i386_nacl_arch_bed): Likewise.
+	(elf_i386_vxworks_arch_bed): Likewise.
+	(elf_i386_relocate_section): Updated.
+	(elf_i386_finish_dynamic_sections): Likewise.
+	(elf_i386_get_synthetic_symtab): Likewise.
+	(elf_i386_link_setup_gnu_properties): Likewise.
+	(ELF_TARGET_OS): New.
+	* elf32-mips.c (ELF_TARGET_OS): New.
+	* elf32-ppc.c (ppc_elf_link_hash_table): Remove is_vxworks.
+	(ppc_elf_create_got): Updated.
+	(ppc_elf_create_dynamic_sections): Likewise.
+	(ppc_elf_check_relocs): Likewise.
+	(ppc_elf_adjust_dynamic_symbol): Likewise.
+	(ppc_elf_size_dynamic_sections): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	(ppc_elf_finish_dynamic_sections): Likewise.
+	(ppc_elf_vxworks_link_hash_table_create): Likewise.
+	(ELF_TARGET_OS): New.
+	* elf32-sh.c (elf_sh_link_hash_table): Remove vxworks_p.
+	(sh_elf_link_hash_table_create): Updated.
+	(sh_elf_create_dynamic_sections): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(sh_elf_size_dynamic_sections): Likewise.
+	(sh_elf_relocate_section): Likewise.
+	(sh_elf_finish_dynamic_symbol): Likewise.
+	(sh_elf_finish_dynamic_sections): Likewise.
+	(ELF_TARGET_OS): New.
+	* elf32-sparc.c (elf32_sparc_vxworks_link_hash_table_create):
+	Removed.
+	(bfd_elf32_bfd_link_hash_table_create): Likewise.
+	(ELF_TARGET_OS): New.
+	* elf64-x86-64.c (elf_x86_64_arch_bed): Removed.
+	(elf_x86_64_solaris_arch_bed): Likewise.
+	(elf_x86_64_nacl_arch_bed): Likewise.
+	(elf_x86_64_finish_dynamic_sections): Updated.
+	(elf_x86_64_get_synthetic_symtab): Likewise.
+	(elf_x86_64_link_setup_gnu_properties): Likewise.
+	(ELF_TARGET_OS): New.
+	* elflink.c (_bfd_elf_link_hash_table_init): Initialize
+	target_o.
+	* elfxx-mips.c (mips_elf_link_hash_table): Remove is_vxworks.
+	(MIPS_ELF_REL_DYN_NAME): Updated.
+	(ELF_MIPS_GP_OFFSET): Likewise.
+	(mips_elf_create_local_got_entry): Likewise.
+	(mips_elf_allocate_dynamic_relocations): Likewise.
+	(mips_elf_count_got_symbols): Likewise.
+	(is_gott_symbol): Likewise.
+	(mips_elf_calculate_relocation): Likewise.
+	(mips_elf_create_dynamic_relocation): Likewise.
+	(_bfd_mips_elf_check_relocs): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Likewise.
+	(mips_elf_lay_out_got): Likewise.
+	(mips_elf_set_plt_sym_value): Likewise.
+	(_bfd_mips_elf_size_dynamic_sections): Likewise.
+	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.
+	(_bfd_mips_elf_finish_dynamic_sections): Likewise.
+	(_bfd_mips_elf_final_link): Likewise.
+	(_bfd_mips_init_file_header): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_create_dynamic_sections):
+	Likewise.
+	(allocate_dynrelocs): Likewise.
+	(_bfd_sparc_elf_size_dynamic_sections): Likewise.
+	(_bfd_sparc_elf_relocate_section): Likewise.
+	(_bfd_sparc_elf_finish_dynamic_symbol): Likewise.
+	(sparc_finish_dyn): Likewise.
+	(_bfd_sparc_elf_finish_dynamic_sections): Likewise.
+	* elfxx-target.h (ELF_TARGET_OS): New.
+	(elfNN_bed): Add ELF_TARGET_OS.
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Updated.
+	(_bfd_x86_elf_link_hash_table_create): Likewise.
+	(_bfd_x86_elf_size_dynamic_sections): Likewise.
+	(_bfd_x86_elf_finish_dynamic_sections): Likewise.
+	(_bfd_x86_elf_adjust_dynamic_symbol): Likewise.
+	(_bfd_x86_elf_link_setup_gnu_properties): Likewise.
+	* elfxx-x86.h (elf_x86_target_os): Removed.
+	(elf_x86_backend_data): Likewise.
+	(get_elf_x86_backend_data): Likewise.
+	(elf_x86_link_hash_table): Remove target_os.
+
 2020-06-06  Alan Modra  <amodra@gmail.com>
 
 	* reloc.c: Rename

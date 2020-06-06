@@ -362,6 +362,10 @@
 #define ELF_TARGET_ID	GENERIC_ELF_DATA
 #endif
 
+#ifndef ELF_TARGET_OS
+#define ELF_TARGET_OS	is_normal
+#endif
+
 #ifndef ELF_OSABI
 #define ELF_OSABI ELFOSABI_NONE
 #endif
@@ -799,6 +803,7 @@ static struct elf_backend_data elfNN_bed =
 {
   ELF_ARCH,			/* arch */
   ELF_TARGET_ID,		/* target_id */
+  ELF_TARGET_OS,		/* target_os */
   ELF_MACHINE_CODE,		/* elf_machine_code */
   ELF_OSABI,			/* elf_osabi  */
   ELF_MAXPAGESIZE,		/* maxpagesize */

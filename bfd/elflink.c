@@ -7804,6 +7804,7 @@ _bfd_elf_link_hash_table_init
 
   table->root.type = bfd_link_elf_hash_table;
   table->hash_table_id = target_id;
+  table->target_os = get_elf_backend_data (abfd)->target_os;
 
   return ret;
 }

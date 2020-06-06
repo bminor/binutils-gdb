@@ -985,12 +985,6 @@ static const struct elf_x86_non_lazy_plt_layout elf_x32_non_lazy_ibt_plt =
     sizeof (elf_x86_64_eh_frame_non_lazy_plt) /* eh_frame_plt_size */
   };
 
-static const struct elf_x86_backend_data elf_x86_64_arch_bed =
-  {
-    is_normal				 /* os */
-  };
-
-#define	elf_backend_arch_data	&elf_x86_64_arch_bed
 
 static bfd_boolean
 elf64_x86_64_elf_object_p (bfd *abfd)
@@ -4797,7 +4791,7 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
   if (relsize <= 0)
     return -1;
 
-  if (get_elf_x86_backend_data (abfd)->target_os != is_nacl)
+  if (get_elf_backend_data (abfd)->target_os != is_nacl)
     {
       lazy_plt = &elf_x86_64_lazy_plt;
       non_lazy_plt = &elf_x86_64_non_lazy_plt;
@@ -5148,7 +5142,7 @@ elf_x86_64_link_setup_gnu_properties (struct bfd_link_info *info)
   /* This is unused for x86-64.  */
   init_table.plt0_pad_byte = 0x90;
 
-  if (get_elf_x86_backend_data (info->output_bfd)->target_os != is_nacl)
+  if (get_elf_backend_data (info->output_bfd)->target_os != is_nacl)
     {
       const struct elf_backend_data *bed
 	= get_elf_backend_data (info->output_bfd);
@@ -5329,13 +5323,8 @@ elf_x86_64_special_sections[]=
 #undef  TARGET_LITTLE_NAME
 #define TARGET_LITTLE_NAME		    "elf64-x86-64-sol2"
 
-static const struct elf_x86_backend_data elf_x86_64_solaris_arch_bed =
-  {
-    is_solaris				    /* os */
-  };
-
-#undef	elf_backend_arch_data
-#define	elf_backend_arch_data		    &elf_x86_64_solaris_arch_bed
+#undef ELF_TARGET_OS
+#define	ELF_TARGET_OS			    is_solaris
 
 /* Restore default: we cannot use ELFOSABI_SOLARIS, otherwise ELFOSABI_NONE
    objects won't be recognized.  */
@@ -5465,7 +5454,7 @@ static const bfd_byte elf_x86_64_nacl_eh_frame_plt[] =
      || PLT_FDE_LENGTH != 36				\
      || PLT_FDE_START_OFFSET != 4 + PLT_CIE_LENGTH + 8	\
      || PLT_FDE_LEN_OFFSET != 4 + PLT_CIE_LENGTH + 12)
-# error "Need elf_x86_backend_data parameters for eh_frame_plt offsets!"
+# error "Need PLT_CIE_LENGTH parameters for eh_frame_plt offsets!"
 #endif
     PLT_CIE_LENGTH, 0, 0, 0,	/* CIE length */
     0, 0, 0, 0,			/* CIE ID */
@@ -5525,13 +5514,8 @@ static const struct elf_x86_lazy_plt_layout elf_x86_64_nacl_plt =
     sizeof (elf_x86_64_nacl_eh_frame_plt)    /* eh_frame_plt_size */
   };
 
-static const struct elf_x86_backend_data elf_x86_64_nacl_arch_bed =
-  {
-    is_nacl				     /* os */
-  };
-
-#undef	elf_backend_arch_data
-#define	elf_backend_arch_data	&elf_x86_64_nacl_arch_bed
+#undef ELF_TARGET_OS
+#define	ELF_TARGET_OS				is_nacl
 
 #undef	elf_backend_object_p
 #define elf_backend_object_p			elf64_x86_64_nacl_elf_object_p
@@ -5635,8 +5619,7 @@ elf64_l1om_elf_object_p (bfd *abfd)
 #define ELF_COMMONPAGESIZE		0x1000
 #undef	elf_backend_plt_alignment
 #define elf_backend_plt_alignment	4
-#undef	elf_backend_arch_data
-#define	elf_backend_arch_data	&elf_x86_64_arch_bed
+#undef ELF_TARGET_OS
 
 #include "elf64-target.h"
 
