@@ -185,6 +185,11 @@ static const struct ld_option ld_options[] =
   { {"flto-partition=", required_argument, NULL, OPTION_IGNORE},
     '\0', NULL, N_("Ignored for GCC LTO option compatibility"),
     ONE_DASH },
+#else
+  { {"plugin", required_argument, NULL, OPTION_IGNORE},
+    '\0', N_("PLUGIN"), N_("Load named plugin (ignored)"), ONE_DASH },
+  { {"plugin-opt", required_argument, NULL, OPTION_IGNORE},
+    '\0', N_("ARG"), N_("Send arg to last-loaded plugin (ignored)"), ONE_DASH },
 #endif /* ENABLE_PLUGINS */
   { {"fuse-ld=", required_argument, NULL, OPTION_IGNORE},
     '\0', NULL, N_("Ignored for GCC linker option compatibility"),

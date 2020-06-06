@@ -1,3 +1,9 @@
+2020-06-06  Alan Modra  <amodra@gmail.com>
+
+	* lexsup.c (ld_options): Accept -plugin and -plugin-opt when
+	!ENABLE_PLUGINS.
+	* testsuite/lib/ld-lib.exp (check_plugin_api_available): Adjust.
+
 2020-06-05  Nelson Chu  <nelson.chu@sifive.com>
 
 	* testsuite/ld-riscv-elf/attr-merge-priv-spec.d: Rename to
