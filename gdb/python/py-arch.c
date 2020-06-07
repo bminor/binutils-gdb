@@ -248,6 +248,20 @@ archpy_registers (PyObject *self, PyObject *args, PyObject *kw)
   return gdbpy_new_register_descriptor_iterator (gdbarch, group_name);
 }
 
+/* Implementation of gdb.Architecture.register_groups (self) -> Iterator.
+   Returns an iterator that will give up all valid register groups in the
+   architecture SELF.  */
+
+static PyObject *
+archpy_register_groups (PyObject *self, PyObject *args)
+{
+  struct gdbarch *gdbarch = NULL;
+
+  /* Extract the gdbarch from the self object.  */
+  ARCHPY_REQUIRE_VALID (self, gdbarch);
+  return gdbpy_new_reggroup_iterator (gdbarch);
+}
+
 /* Initializes the Architecture class in the gdb module.  */
 
 int
@@ -276,6 +290,10 @@ END_PC." },
     "registers ([ group-name ]) -> Iterator.\n\
 Return an iterator of register descriptors for the registers in register\n\
 group GROUP-NAME." },
+  { "register_groups", archpy_register_groups,
+    METH_NOARGS,
+    "register_groups () -> Iterator.\n\
+Return an iterator over all of the register groups in this architecture." },
   {NULL}  /* Sentinel */
 };
 

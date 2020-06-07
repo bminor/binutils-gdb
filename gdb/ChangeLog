@@ -1,5 +1,24 @@
 2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* NEWS: Mention additions to Python API.
+	* python/py-arch.c (archpy_register_groups): New function.
+	(arch_object_methods): Add 'register_groups' method.
+	* python/py-registers.c (reggroup_iterator_object): New struct.
+	(reggroup_object): New struct.
+	(gdbpy_new_reggroup): New function.
+	(gdbpy_reggroup_to_string): New function.
+	(gdbpy_reggroup_name): New function.
+	(gdbpy_reggroup_iter): New function.
+	(gdbpy_reggroup_iter_next): New function.
+	(gdbpy_new_reggroup_iterator): New function
+	(gdbpy_initialize_registers): Register new types.
+	(reggroup_iterator_object_type): Define new Python type.
+	(gdbpy_reggroup_getset): New static global.
+	(reggroup_object_type): Define new Python type.
+	* python/python-internal.h
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* Makefile.in (SUBDIR_PYTHON_SRCS): Add py-registers.c
 	* python/py-arch.c (archpy_registers): New function.
 	(arch_object_methods): Add 'registers' method.

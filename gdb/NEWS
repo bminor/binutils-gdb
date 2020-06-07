@@ -125,6 +125,11 @@ GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*
      gdb.RegisterDescriptor objects.  The new RegisterDescriptor is a
      way to query the registers available for an architecture.
 
+  ** New gdb.Architecture.register_groups method that returns a
+     gdb.RegisterGroupIterator object, an iterator that returns
+     gdb.RegisterGroup objects.  The new RegisterGroup is a way to
+     discover the available register groups.
+
 *** Changes in GDB 9
 
 * 'thread-exited' event is now available in the annotations interface.

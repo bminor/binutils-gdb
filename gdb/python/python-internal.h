@@ -475,6 +475,7 @@ PyObject *gdbarch_to_arch_object (struct gdbarch *gdbarch);
 
 PyObject *gdbpy_new_register_descriptor_iterator (struct gdbarch *gdbarch,
 						  const char *group_name);
+PyObject *gdbpy_new_reggroup_iterator (struct gdbarch *gdbarch);
 
 gdbpy_ref<thread_object> create_thread_object (struct thread_info *tp);
 gdbpy_ref<> thread_to_thread_object (thread_info *thr);;

@@ -5725,6 +5725,13 @@ the name of a register group.  If @var{reggroup} is omitted, or is the
 empty string, then the register group @samp{all} is assumed.
 @end defun
 
+@anchor{gdbpy_architecture_reggroups}
+@defun Architecture.register_groups ()
+Return a @code{gdb.RegisterGroupsIterator} (@pxref{Registers In
+Python}) for all of the register groups available for the
+@code{gdb.Architecture}.
+@end defun
+
 @node Registers In Python
 @subsubsection Registers In Python
 @cindex Registers In Python
@@ -5746,6 +5753,31 @@ A @code{gdb.RegisterDescriptor} has the following read-only properties:
 
 @defvar RegisterDescriptor.name
 The name of this register.
+@end defvar
+
+Python code can also request from a @code{gdb.Architecture}
+information about the set of register groups available on a given
+architecture
+(@pxref{gdbpy_architecture_reggroups,,@code{Architecture.register_groups}}).
+
+Every register can be a member of zero or more register groups.  Some
+register groups are used internally within @value{GDBN} to control
+things like which registers must be saved when calling into the
+program being debugged (@pxref{Calling,,Calling Program Functions}).
+Other register groups exist to allow users to easily see related sets
+of registers in commands like @code{info registers}
+(@pxref{info_registers_reggroup,,@code{info registers
+@var{reggroup}}}).
+
+The register groups information is returned as a
+@code{gdb.RegisterGroupsIterator}, which is an iterator that in turn
+returns @code{gdb.RegisterGroup} objects.
+
+A @code{gdb.RegisterGroup} object has the following read-only
+properties:
+
+@defvar RegisterGroup.name
+A string that is the name of this register group.
 @end defvar
 
 @node TUI Windows In Python

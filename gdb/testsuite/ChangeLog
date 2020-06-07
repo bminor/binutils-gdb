@@ -1,5 +1,9 @@
 2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-arch-reg-groups.exp: New file.
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-arch-reg-names.exp: New file.
 
 2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>

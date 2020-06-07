@@ -12435,6 +12435,7 @@ and vector registers (in the selected stack frame).
 Print the names and values of all registers, including floating-point
 and vector registers (in the selected stack frame).
 
+@anchor{info_registers_reggroup}
 @item info registers @var{reggroup} @dots{}
 Print the name and value of the registers in each of the specified
 @var{reggroup}s.  The @var{reggroup} can be any of those returned by
