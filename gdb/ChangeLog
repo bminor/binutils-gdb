@@ -1,3 +1,9 @@
+2020-06-07  Tom Tromey  <tom@tromey.com>
+
+	* valprint.c (generic_val_print_float): Remove "embedded_offset"
+	parameter.
+	(generic_value_print): Update.
+
 2020-06-05  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	Revert commit 982a38f60b0.
