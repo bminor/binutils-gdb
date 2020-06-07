@@ -1,5 +1,11 @@
 2020-06-06  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections): Updated.
+	* elfxx-sparc.h (_bfd_sparc_elf_link_hash_table): Remove
+	is_vxworks.
+
+2020-06-06  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf-bfd.h (elf_target_os): New.
 	(elf_link_hash_table): Add target_os.
 	(elf_backend_data): Add target_os.

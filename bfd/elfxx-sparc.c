@@ -2678,7 +2678,7 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 		eht->dynsymcount++;
 	      }
 	}
-      if (htab->is_vxworks
+      if (htab->elf.target_os == is_vxworks
 	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
 	return FALSE;
     }

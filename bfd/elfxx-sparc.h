@@ -62,9 +62,6 @@ struct _bfd_sparc_elf_link_hash_table
   htab_t loc_hash_table;
   void *loc_hash_memory;
 
-  /* True if the target system is VxWorks.  */
-  int is_vxworks;
-
   /* The (unloaded but important) .rela.plt.unloaded section, for VxWorks.  */
   asection *srelplt2;
 
