@@ -467,7 +467,7 @@ run_ld_link_tests [list \
 # These targets don't copy dynamic variables into .bss.
 setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*"
 # or don't have .data.rel.ro
-setup_xfail "hppa*64*-*-hpux*"
+setup_xfail "hppa*64*-*-hpux*" "tic6x-*-*"
 run_ld_link_tests [list \
     [list \
 	"pr20995" \
@@ -477,7 +477,7 @@ run_ld_link_tests [list \
 # xfail on arm*-*-eabi* is particularly because of no support of GNU_RELRO.
 # Please see the link above for details.
 setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*" "arm*-*-eabi*"
-setup_xfail "hppa*64*-*-hpux*" "aarch64*-*-elf*"
+setup_xfail "hppa*64*-*-hpux*" "aarch64*-*-elf*" "tic6x-*-*"
 run_ld_link_tests [list \
     [list \
 	"pr20995-2" \
