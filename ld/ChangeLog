@@ -1,5 +1,10 @@
 2020-06-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/shared.exp: Pass $LFLAGS to PR ld/21703
+	shared test.
+
+2020-06-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/shared.exp: Xfail pr20995/pr20995-2 for
 	tic6x-*-*.
 
