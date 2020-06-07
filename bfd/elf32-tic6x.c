@@ -4254,6 +4254,8 @@ elf32_tic6x_write_section (bfd *output_bfd,
   return TRUE;
 }
 
+#define	elf32_bed		elf32_tic6x_bed
+
 #define TARGET_LITTLE_SYM	tic6x_elf32_le_vec
 #define TARGET_LITTLE_NAME	"elf32-tic6x-le"
 #define TARGET_BIG_SYM		tic6x_elf32_be_vec

@@ -1,5 +1,10 @@
 2020-06-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-tic6x.c (elf32_bed): Defined the default to
+	elf32_tic6x_bed.
+
+2020-06-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf64-hppa.c (elf64_hppa_link_hash_table): Remove plt_sec and
 	plt_rel_sec.
 	(elf64_hppa_check_relocs): Replace plt_sec/plt_rel_sec with
