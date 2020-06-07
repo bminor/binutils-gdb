@@ -30,7 +30,6 @@ class FrameId(object):
     def pc(self):
         return self._pc
 
-
 class TestUnwinder(Unwinder):
     AMD64_RBP = 6
     AMD64_RSP = 7
@@ -69,6 +68,15 @@ class TestUnwinder(Unwinder):
         This unwinder recognizes the corrupt frames by checking that
         *RBP == RBP, and restores previous RBP from the word above it.
         """
+
+        # Check that we can access the architecture of the pending
+        # frame, and that this is the same architecture as for the
+        # currently selected inferior.
+        inf_arch = gdb.selected_inferior ().architecture ()
+        frame_arch = pending_frame.architecture ()
+        if (inf_arch != frame_arch):
+            raise gdb.GdbError ("architecture mismatch")
+
         try:
             # NOTE: the registers in Unwinder API can be referenced
             # either by name or by number. The code below uses both

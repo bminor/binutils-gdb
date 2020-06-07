@@ -441,6 +441,22 @@ pending_framepy_create_unwind_info (PyObject *self, PyObject *args)
                                     frame_id_build_special (sp, pc, special));
 }
 
+/* Implementation of PendingFrame.architecture (self) -> gdb.Architecture.  */
+
+static PyObject *
+pending_framepy_architecture (PyObject *self, PyObject *args)
+{
+  pending_frame_object *pending_frame = (pending_frame_object *) self;
+
+  if (pending_frame->frame_info == NULL)
+    {
+      PyErr_SetString (PyExc_ValueError,
+                       "Attempting to read register from stale PendingFrame");
+      return NULL;
+    }
+  return gdbarch_to_arch_object (pending_frame->gdbarch);
+}
+
 /* frame_unwind.this_id method.  */
 
 static void
@@ -671,6 +687,10 @@ static PyMethodDef pending_frame_object_methods[] =
     "create_unwind_info (FRAME_ID) -> gdb.UnwindInfo\n"
     "Construct UnwindInfo for this PendingFrame, using FRAME_ID\n"
     "to identify it." },
+  { "architecture",
+    pending_framepy_architecture, METH_NOARGS,
+    "architecture () -> gdb.Architecture\n"
+    "The architecture for this PendingFrame." },
   {NULL}  /* Sentinel */
 };
 

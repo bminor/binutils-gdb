@@ -117,6 +117,9 @@ GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*
   ** Commands written in Python can be in the "TUI" help class by
      registering with the new constant gdb.COMMAND_TUI.
 
+  ** New method gdb.PendingFrame.architecture () to retrieve the
+     architecture of the pending frame.
+
 *** Changes in GDB 9
 
 * 'thread-exited' event is now available in the annotations interface.

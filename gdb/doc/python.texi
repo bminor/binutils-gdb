@@ -2518,6 +2518,12 @@ Each attribute value should be an instance of @code{gdb.Value}.
 
 @end defun
 
+@defun PendingFrame.architecture ()
+Return the @code{gdb.Architecture} (@pxref{Architectures In Python})
+for this @code{gdb.PendingFrame}.  This represents the architecture of
+the particular frame being unwound.
+@end defun
+
 @subheading Unwinder Output: UnwindInfo
 
 Use @code{PendingFrame.create_unwind_info} method described above to

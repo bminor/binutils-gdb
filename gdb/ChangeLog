@@ -1,5 +1,11 @@
 2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* NEWS: Mention new Python API method.
+	* python/py-unwind.c (pending_framepy_architecture): New function.
+	(pending_frame_object_methods): Add architecture method.
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdbarch.c: Regenerate.
 	* gdbarch.h: Regenerate.
 	* gdbarch.sh (deprecated_set_gdbarch_data): Delete.
