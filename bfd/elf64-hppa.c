@@ -117,8 +117,6 @@ struct elf64_hppa_link_hash_table
   /* Shortcuts to get to the various linker defined sections.  */
   asection *dlt_sec;
   asection *dlt_rel_sec;
-  asection *plt_sec;
-  asection *plt_rel_sec;
   asection *opd_sec;
   asection *opd_rel_sec;
   asection *other_rel_sec;
@@ -802,7 +800,7 @@ elf64_hppa_check_relocs (bfd *abfd,
 
       if (need_entry & NEED_PLT)
 	{
-	  if (! hppa_info->plt_sec
+	  if (! hppa_info->root.splt
 	      && ! get_plt (abfd, info, hppa_info))
 	    goto err_out;
 
@@ -1181,7 +1179,7 @@ get_plt (bfd *abfd,
   asection *plt;
   bfd *dynobj;
 
-  plt = hppa_info->plt_sec;
+  plt = hppa_info->root.splt;
   if (!plt)
     {
       dynobj = hppa_info->root.dynobj;
@@ -1201,7 +1199,7 @@ get_plt (bfd *abfd,
 	  return FALSE;
 	}
 
-      hppa_info->plt_sec = plt;
+      hppa_info->root.splt = plt;
     }
 
   return TRUE;
@@ -1360,7 +1358,7 @@ elf64_hppa_create_dynamic_sections (bfd *abfd,
   if (s == NULL
       || !bfd_set_section_alignment (s, 3))
     return FALSE;
-  hppa_info->plt_rel_sec = s;
+  hppa_info->root.srelplt = s;
 
   s = bfd_make_section_anyway_with_flags (abfd, ".rela.data",
 					  (SEC_ALLOC | SEC_LOAD
@@ -1454,7 +1452,7 @@ allocate_dynrel_entries (struct elf_link_hash_entry *eh, void *data)
       else if (shared)
 	t = 2 * sizeof (Elf64_External_Rela);
 
-      hppa_info->plt_rel_sec->size += t;
+      hppa_info->root.srelplt->size += t;
     }
 
   return TRUE;
@@ -1653,8 +1651,8 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	}
       else
 	{
-	  sec = hppa_info->plt_sec;
-	  srel = hppa_info->plt_rel_sec;
+	  sec = hppa_info->root.splt;
+	  srel = hppa_info->root.srelplt;
 	  for (; local_plt < end_local_plt; ++local_plt)
 	    {
 	      if (*local_plt > 0)
@@ -1707,12 +1705,12 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
       hppa_info->dlt_sec->size = data.ofs;
     }
 
-  if (hppa_info->plt_sec)
+  if (hppa_info->root.splt)
     {
-      data.ofs = hppa_info->plt_sec->size;
+      data.ofs = hppa_info->root.splt->size;
       elf_link_hash_traverse (&hppa_info->root,
 			      allocate_global_data_plt, &data);
-      hppa_info->plt_sec->size = data.ofs;
+      hppa_info->root.splt->size = data.ofs;
     }
 
   if (hppa_info->stub_sec)
@@ -1950,9 +1948,9 @@ elf64_hppa_finish_dynamic_symbol (bfd *output_bfd,
     return FALSE;
 
   stub = hppa_info->stub_sec;
-  splt = hppa_info->plt_sec;
+  splt = hppa_info->root.splt;
   sopd = hppa_info->opd_sec;
-  spltrel = hppa_info->plt_rel_sec;
+  spltrel = hppa_info->root.srelplt;
 
   /* Incredible.  It is actually necessary to NOT use the symbol's real
      value when building the dynamic symbol table for a shared library.
@@ -2532,13 +2530,13 @@ elf64_hppa_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_JMPREL:
-	      s = hppa_info->plt_rel_sec;
+	      s = hppa_info->root.srelplt;
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_PLTRELSZ:
-	      s = hppa_info->plt_rel_sec;
+	      s = hppa_info->root.srelplt;
 	      dyn.d_un.d_val = s->size;
 	      bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
@@ -2563,7 +2561,7 @@ elf64_hppa_finish_dynamic_sections (bfd *output_bfd,
 	      /* There is some question about whether or not the size of
 		 the PLT relocs should be included here.  HP's tools do
 		 it, so we'll emulate them.  */
-	      s = hppa_info->plt_rel_sec;
+	      s = hppa_info->root.srelplt;
 	      dyn.d_un.d_val += s->size;
 	      bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
@@ -2981,7 +2979,7 @@ elf_hppa_final_link (bfd *abfd, struct bfd_link_info *info)
 	     that order) and set __gp to the base address of whichever
 	     section is found first.  */
 
-	  sec = hppa_info->plt_sec;
+	  sec = hppa_info->root.splt;
 	  if (sec && ! (sec->flags & SEC_EXCLUDE))
 	    gp_val = (sec->output_offset
 		      + sec->output_section->vma
@@ -3530,8 +3528,8 @@ elf_hppa_final_link_relocate (Elf_Internal_Rela *rel,
 	   to the start of the DLT, so we have to compute the absolute
 	   address, then subtract out the value of __gp.  */
 	value = (hh->plt_offset
-		 + hppa_info->plt_sec->output_offset
-		 + hppa_info->plt_sec->output_section->vma);
+		 + hppa_info->root.splt->output_offset
+		 + hppa_info->root.splt->output_section->vma);
 	value -= _bfd_get_gp_value (output_bfd);
 
 	/* All PLTOFF relocations are basically the same at this point,

@@ -1,3 +1,15 @@
+2020-06-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-hppa.c (elf64_hppa_link_hash_table): Remove plt_sec and
+	plt_rel_sec.
+	(elf64_hppa_check_relocs): Replace plt_sec/plt_rel_sec with
+	root.splt/root.srelplt.
+	(elf64_hppa_create_dynamic_sections): Likewise.
+	(elf64_hppa_size_dynamic_sections): Likewise.
+	(elf64_hppa_finish_dynamic_symbol): Likewise.
+	(elf_hppa_final_link): Likewise.
+	(elf_hppa_final_link_relocate): Likewise.
+
 2020-06-06  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections): Updated.
