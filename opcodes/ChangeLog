@@ -1,3 +1,8 @@
+2020-06-08  Alex Coplan  <alex.coplan@arm.com>
+
+	* arm-dis.c (arm_opcodes): Add dfb.
+	(thumb32_opcodes): Add dfb.
+
 2020-06-08  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-opc.h (reg_entry): Const-qualify reg_name field.

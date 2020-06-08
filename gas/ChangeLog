@@ -1,3 +1,9 @@
+2020-06-08  Alex Coplan  <alex.coplan@arm.com>
+
+	* config/tc-arm.c (insns): Add dfb.
+	* testsuite/gas/arm/dfb.d: New test.
+	* testsuite/gas/arm/dfb.s: Input for test.
+
 2020-06-08  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/gas/cfi/cfi-i386-2.d: Skip for PE based targets.

@@ -24950,6 +24950,13 @@ static const struct asm_opcode insns[] =
 							ldrexd, t_ldrexd),
  TCE("stlexd",	1a00e90, e8c000f0, 4, (RRnpc, RRnpc, oRRnpc, RRnpcb),
 							strexd, t_strexd),
+#undef THUMB_VARIANT
+#define THUMB_VARIANT & arm_ext_v8r
+#undef ARM_VARIANT
+#define ARM_VARIANT & arm_ext_v8r
+
+/* ARMv8-R instructions.  */
+ TUF("dfb",	57ff04c, f3bf8f4c, 0, (), noargs, noargs),
 
 /* Defined in V8 but is in undefined encoding space for earlier
    architectures.  However earlier architectures are required to treat
