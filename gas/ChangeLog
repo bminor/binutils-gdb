@@ -1,5 +1,11 @@
 2020-06-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (parse_real_register): Add allow_pseudo_reg
+	check to %st(N) parsing logic.
+	* testsuite/gas/cfi/cfi-i386.s: Set "generic32" arch.
+
+2020-06-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (bad_reg): New.
 	(check_VecOperations, i386_att_operand, i386_parse_name): Check
 	for it.

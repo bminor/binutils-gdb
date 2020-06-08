@@ -12452,7 +12452,8 @@ parse_real_register (char *reg_string, char **end_op)
     {
       if (!cpu_arch_flags.bitfield.cpu8087
 	  && !cpu_arch_flags.bitfield.cpu287
-	  && !cpu_arch_flags.bitfield.cpu387)
+	  && !cpu_arch_flags.bitfield.cpu387
+	  && !allow_pseudo_reg)
 	return (const reg_entry *) NULL;
 
       if (is_space_char (*s))
