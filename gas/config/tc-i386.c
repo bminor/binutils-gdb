@@ -210,6 +210,10 @@ static unsigned int x86_used_note = DEFAULT_X86_USED_NOTE;
 
 static const char *default_arch = DEFAULT_ARCH;
 
+/* parse_register() returns this when a register alias cannot be used.  */
+static const reg_entry bad_reg = { "<bad>", OPERAND_TYPE_NONE, 0, 0,
+				   { Dw2Inval, Dw2Inval } };
+
 /* This struct describes rounding control and SAE in the instruction.  */
 struct RC_Operation
 {
@@ -10176,6 +10180,9 @@ check_VecOperations (char *op_string, char *op_end)
 	  /* Check masking operation.  */
 	  else if ((mask = parse_register (op_string, &end_op)) != NULL)
 	    {
+	      if (mask == &bad_reg)
+		return NULL;
+
 	      /* k0 can't be used for write mask.  */
 	      if (mask->reg_type.bitfield.class != RegMask || !mask->reg_num)
 		{
@@ -11035,6 +11042,9 @@ i386_att_operand (char *operand_string)
     {
       i386_operand_type temp;
 
+      if (r == &bad_reg)
+	return 0;
+
       /* Check for a segment override by searching for ':' after a
 	 segment register.  */
       op_string = end_op;
@@ -11211,6 +11221,8 @@ i386_att_operand (char *operand_string)
 
 	      if (i.base_reg)
 		{
+		  if (i.base_reg == &bad_reg)
+		    return 0;
 		  base_string = end_op;
 		  if (is_space_char (*base_string))
 		    ++base_string;
@@ -11226,6 +11238,8 @@ i386_att_operand (char *operand_string)
 		  if ((i.index_reg = parse_register (base_string, &end_op))
 		      != NULL)
 		    {
+		      if (i.index_reg == &bad_reg)
+			return 0;
 		      base_string = end_op;
 		      if (is_space_char (*base_string))
 			++base_string;
@@ -12331,6 +12345,73 @@ output_invalid (int c)
   return output_invalid_buf;
 }
 
+/* Verify that @r can be used in the current context.  */
+
+static bfd_boolean check_register (const reg_entry *r)
+{
+  if (allow_pseudo_reg)
+    return TRUE;
+
+  if (operand_type_all_zero (&r->reg_type))
+    return FALSE;
+
+  if ((r->reg_type.bitfield.dword
+       || (r->reg_type.bitfield.class == SReg && r->reg_num > 3)
+       || r->reg_type.bitfield.class == RegCR
+       || r->reg_type.bitfield.class == RegDR
+       || r->reg_type.bitfield.class == RegTR)
+      && !cpu_arch_flags.bitfield.cpui386)
+    return FALSE;
+
+  if (r->reg_type.bitfield.class == RegMMX && !cpu_arch_flags.bitfield.cpummx)
+    return FALSE;
+
+  if (!cpu_arch_flags.bitfield.cpuavx512f)
+    {
+      if (r->reg_type.bitfield.zmmword
+	  || r->reg_type.bitfield.class == RegMask)
+	return FALSE;
+
+      if (!cpu_arch_flags.bitfield.cpuavx)
+	{
+	  if (r->reg_type.bitfield.ymmword)
+	    return FALSE;
+
+	  if (!cpu_arch_flags.bitfield.cpusse && r->reg_type.bitfield.xmmword)
+	    return FALSE;
+	}
+    }
+
+  if (r->reg_type.bitfield.class == RegBND && !cpu_arch_flags.bitfield.cpumpx)
+    return FALSE;
+
+  /* Don't allow fake index register unless allow_index_reg isn't 0. */
+  if (!allow_index_reg && r->reg_num == RegIZ)
+    return FALSE;
+
+  /* Upper 16 vector registers are only available with VREX in 64bit
+     mode, and require EVEX encoding.  */
+  if (r->reg_flags & RegVRex)
+    {
+      if (!cpu_arch_flags.bitfield.cpuavx512f
+	  || flag_code != CODE_64BIT)
+	return FALSE;
+
+      i.vec_encoding = vex_encoding_evex;
+    }
+
+  if (((r->reg_flags & (RegRex64 | RegRex)) || r->reg_type.bitfield.qword)
+      && (!cpu_arch_flags.bitfield.cpulm || r->reg_type.bitfield.class != RegCR)
+      && flag_code != CODE_64BIT)
+    return FALSE;
+
+  if (r->reg_type.bitfield.class == SReg && r->reg_num == RegFlat
+      && !intel_syntax)
+    return FALSE;
+
+  return TRUE;
+}
+
 /* REG_STRING starts *before* REGISTER_PREFIX.  */
 
 static const reg_entry *
@@ -12400,67 +12481,7 @@ parse_real_register (char *reg_string, char **end_op)
 	}
     }
 
-  if (r == NULL || allow_pseudo_reg)
-    return r;
-
-  if (operand_type_all_zero (&r->reg_type))
-    return (const reg_entry *) NULL;
-
-  if ((r->reg_type.bitfield.dword
-       || (r->reg_type.bitfield.class == SReg && r->reg_num > 3)
-       || r->reg_type.bitfield.class == RegCR
-       || r->reg_type.bitfield.class == RegDR
-       || r->reg_type.bitfield.class == RegTR)
-      && !cpu_arch_flags.bitfield.cpui386)
-    return (const reg_entry *) NULL;
-
-  if (r->reg_type.bitfield.class == RegMMX && !cpu_arch_flags.bitfield.cpummx)
-    return (const reg_entry *) NULL;
-
-  if (!cpu_arch_flags.bitfield.cpuavx512f)
-    {
-      if (r->reg_type.bitfield.zmmword
-	  || r->reg_type.bitfield.class == RegMask)
-	return (const reg_entry *) NULL;
-
-      if (!cpu_arch_flags.bitfield.cpuavx)
-	{
-	  if (r->reg_type.bitfield.ymmword)
-	    return (const reg_entry *) NULL;
-
-	  if (!cpu_arch_flags.bitfield.cpusse && r->reg_type.bitfield.xmmword)
-	    return (const reg_entry *) NULL;
-	}
-    }
-
-  if (r->reg_type.bitfield.class == RegBND && !cpu_arch_flags.bitfield.cpumpx)
-    return (const reg_entry *) NULL;
-
-  /* Don't allow fake index register unless allow_index_reg isn't 0. */
-  if (!allow_index_reg && r->reg_num == RegIZ)
-    return (const reg_entry *) NULL;
-
-  /* Upper 16 vector registers are only available with VREX in 64bit
-     mode, and require EVEX encoding.  */
-  if (r->reg_flags & RegVRex)
-    {
-      if (!cpu_arch_flags.bitfield.cpuavx512f
-	  || flag_code != CODE_64BIT)
-	return (const reg_entry *) NULL;
-
-      i.vec_encoding = vex_encoding_evex;
-    }
-
-  if (((r->reg_flags & (RegRex64 | RegRex)) || r->reg_type.bitfield.qword)
-      && (!cpu_arch_flags.bitfield.cpulm || r->reg_type.bitfield.class != RegCR)
-      && flag_code != CODE_64BIT)
-    return (const reg_entry *) NULL;
-
-  if (r->reg_type.bitfield.class == SReg && r->reg_num == RegFlat
-      && !intel_syntax)
-    return (const reg_entry *) NULL;
-
-  return r;
+  return r && check_register (r) ? r : NULL;
 }
 
 /* REG_STRING starts *before* REGISTER_PREFIX.  */
@@ -12491,8 +12512,12 @@ parse_register (char *reg_string, char **end_op)
 	  know (e->X_add_number >= 0
 		&& (valueT) e->X_add_number < i386_regtab_size);
 	  r = i386_regtab + e->X_add_number;
-	  if ((r->reg_flags & RegVRex))
-	    i.vec_encoding = vex_encoding_evex;
+	  if (!check_register (r))
+	    {
+	      as_bad (_("register '%s%s' cannot be used here"),
+		      register_prefix, r->reg_name);
+	      r = &bad_reg;
+	    }
 	  *end_op = input_line_pointer;
 	}
       *input_line_pointer = c;
@@ -12513,8 +12538,13 @@ i386_parse_name (char *name, expressionS *e, char *nextcharP)
     {
       *nextcharP = *input_line_pointer;
       *input_line_pointer = 0;
-      e->X_op = O_register;
-      e->X_add_number = r - i386_regtab;
+      if (r != &bad_reg)
+	{
+	  e->X_op = O_register;
+	  e->X_add_number = r - i386_regtab;
+	}
+      else
+	  e->X_op = O_illegal;
       return 1;
     }
   input_line_pointer = end;

@@ -906,7 +906,7 @@ extern const insn_template i386_optab[];
 /* these are for register name --> number & type hash lookup */
 typedef struct
 {
-  char *reg_name;
+  const char *reg_name;
   i386_operand_type reg_type;
   unsigned char reg_flags;
 #define RegRex	    0x1  /* Extended register.  */

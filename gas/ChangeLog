@@ -1,3 +1,16 @@
+2020-06-08  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (bad_reg): New.
+	(check_VecOperations, i386_att_operand, i386_parse_name): Check
+	for it.
+	(check_register): New, broken out from ...
+	(parse_real_register): ... here. Call it.
+	(parse_register): Call it, and error upon failure.
+	* testsuite/gas/i386/equ-bad.s, testsuite/gas/i386/equ-bad.l,
+	testsuite/gas/i386/x86-64-equ-bad.s,
+	testsuite/gas/i386/x86-64-equ-bad.l: New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
 2020-06-06  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_show_usage): Mention -mpower10 and -mpwr10.
