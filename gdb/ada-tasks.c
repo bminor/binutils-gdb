@@ -894,7 +894,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 	    eltype = check_typedef (TYPE_TARGET_TYPE (type));
 	  if (eltype != NULL
 	      && eltype->code () == TYPE_CODE_PTR)
-	    idxtype = check_typedef (TYPE_INDEX_TYPE (type));
+	    idxtype = check_typedef (type->index_type ());
 	  if (idxtype != NULL
 	      && !TYPE_LOW_BOUND_UNDEFINED (idxtype)
 	      && !TYPE_HIGH_BOUND_UNDEFINED (idxtype))

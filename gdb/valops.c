@@ -390,7 +390,7 @@ value_cast (struct type *type, struct value *arg2)
 
       if (element_length > 0 && TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
 	{
-	  struct type *range_type = TYPE_INDEX_TYPE (type);
+	  struct type *range_type = type->index_type ();
 	  int val_length = TYPE_LENGTH (type2);
 	  LONGEST low_bound, high_bound, new_length;
 
@@ -3769,7 +3769,7 @@ value_slice (struct value *array, int lowbound, int length)
   if (type_not_associated (array_type))
     error (_("array not associated"));
 
-  range_type = TYPE_INDEX_TYPE (array_type);
+  range_type = array_type->index_type ();
   if (get_discrete_bounds (range_type, &lowerbound, &upperbound) < 0)
     error (_("slice from bad array or bitstring"));
 

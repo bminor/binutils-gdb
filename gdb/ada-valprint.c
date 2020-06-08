@@ -71,7 +71,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
   if (low_bound > high_bound)
     return 0;
 
-  index_type = TYPE_INDEX_TYPE (type);
+  index_type = type->index_type ();
 
   while (index_type->code () == TYPE_CODE_RANGE)
     {
@@ -131,7 +131,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
   LONGEST low = 0;
 
   elttype = TYPE_TARGET_TYPE (type);
-  index_type = TYPE_INDEX_TYPE (type);
+  index_type = type->index_type ();
 
   {
     LONGEST high;

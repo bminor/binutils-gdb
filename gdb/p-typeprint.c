@@ -805,7 +805,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 
     case TYPE_CODE_SET:
       fputs_filtered ("set of ", stream);
-      pascal_print_type (TYPE_INDEX_TYPE (type), "", stream,
+      pascal_print_type (type->index_type (), "", stream,
 			 show - 1, level, flags);
       break;
 

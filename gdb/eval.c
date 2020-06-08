@@ -377,7 +377,7 @@ value_f90_subarray (struct value *array,
 {
   int pc = (*pos) + 1;
   LONGEST low_bound, high_bound;
-  struct type *range = check_typedef (TYPE_INDEX_TYPE (value_type (array)));
+  struct type *range = check_typedef (value_type (array)->index_type ());
   enum range_type range_type
     = (enum range_type) longest_to_int (exp->elts[pc].longconst);
  
@@ -1459,7 +1459,7 @@ evaluate_subexp_standard (struct type *expect_type,
       if (expect_type != NULL_TYPE && noside != EVAL_SKIP
 	  && type->code () == TYPE_CODE_ARRAY)
 	{
-	  struct type *range_type = TYPE_INDEX_TYPE (type);
+	  struct type *range_type = type->index_type ();
 	  struct type *element_type = TYPE_TARGET_TYPE (type);
 	  struct value *array = allocate_value (expect_type);
 	  int element_size = TYPE_LENGTH (check_typedef (element_type));
@@ -1509,7 +1509,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	{
 	  struct value *set = allocate_value (expect_type);
 	  gdb_byte *valaddr = value_contents_raw (set);
-	  struct type *element_type = TYPE_INDEX_TYPE (type);
+	  struct type *element_type = type->index_type ();
 	  struct type *check_type = element_type;
 	  LONGEST low_bound, high_bound;
 
@@ -3212,8 +3212,8 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 	  val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_NORMAL);
 	  type = value_type (val);
 	  if (type->code () == TYPE_CODE_ARRAY
-              && is_dynamic_type (TYPE_INDEX_TYPE (type))
-              && TYPE_HIGH_BOUND_UNDEFINED (TYPE_INDEX_TYPE (type)))
+              && is_dynamic_type (type->index_type ())
+              && TYPE_HIGH_BOUND_UNDEFINED (type->index_type ()))
 	    return allocate_optimized_out_value (size_type);
 	}
       else
@@ -3253,7 +3253,7 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 	      type = check_typedef (TYPE_TARGET_TYPE (type));
 	      if (type->code () == TYPE_CODE_ARRAY)
 		{
-		  type = TYPE_INDEX_TYPE (type);
+		  type = type->index_type ();
 		  /* Only re-evaluate the right hand side if the resulting type
 		     is a variable length type.  */
 		  if (TYPE_RANGE_DATA (type)->flag_bound_evaluated)

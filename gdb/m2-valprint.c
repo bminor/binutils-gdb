@@ -55,9 +55,8 @@ get_long_set_bounds (struct type *type, LONGEST *low, LONGEST *high)
       i = TYPE_N_BASECLASSES (type);
       if (len == 0)
 	return 0;
-      *low = TYPE_LOW_BOUND (TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, i)));
-      *high = TYPE_HIGH_BOUND (TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type,
-								 len-1)));
+      *low = TYPE_LOW_BOUND (TYPE_FIELD_TYPE (type, i)->index_type ());
+      *high = TYPE_HIGH_BOUND (TYPE_FIELD_TYPE (type, len - 1)->index_type ());
       return 1;
     }
   error (_("expecting long_set"));
@@ -87,7 +86,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
   if (get_long_set_bounds (type, &low_bound, &high_bound))
     {
       field = TYPE_N_BASECLASSES (type);
-      range = TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, field));
+      range = TYPE_FIELD_TYPE (type, field)->index_type ();
     }
   else
     {
@@ -137,7 +136,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 	      field++;
 	      if (field == len)
 		break;
-	      range = TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, field));
+	      range = TYPE_FIELD_TYPE (type, field)->index_type ();
 	      if (get_discrete_bounds (range, &field_low, &field_high) < 0)
 		break;
 	      target = TYPE_TARGET_TYPE (range);
@@ -382,7 +381,7 @@ m2_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
       break;
 
     case TYPE_CODE_SET:
-      elttype = TYPE_INDEX_TYPE (type);
+      elttype = type->index_type ();
       elttype = check_typedef (elttype);
       if (TYPE_STUB (elttype))
 	{

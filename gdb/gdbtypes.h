@@ -1492,7 +1492,6 @@ extern unsigned type_align (struct type *);
    space in struct type.  */
 extern bool set_type_align (struct type *, ULONGEST);
 
-#define TYPE_INDEX_TYPE(type) ((type)->index_type ())
 #define TYPE_RANGE_DATA(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.bounds
 #define TYPE_LOW_BOUND(range_type) \
   TYPE_RANGE_DATA(range_type)->low.data.const_val
@@ -1541,18 +1540,18 @@ extern bool set_type_align (struct type *, ULONGEST);
    index type.  */
 
 #define TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED(arraytype) \
-   TYPE_HIGH_BOUND_UNDEFINED(TYPE_INDEX_TYPE(arraytype))
+   TYPE_HIGH_BOUND_UNDEFINED((arraytype)->index_type ())
 #define TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED(arraytype) \
-   TYPE_LOW_BOUND_UNDEFINED(TYPE_INDEX_TYPE(arraytype))
+   TYPE_LOW_BOUND_UNDEFINED((arraytype)->index_type ())
 
 #define TYPE_ARRAY_UPPER_BOUND_VALUE(arraytype) \
-   (TYPE_HIGH_BOUND(TYPE_INDEX_TYPE((arraytype))))
+   (TYPE_HIGH_BOUND((arraytype)->index_type ()))
 
 #define TYPE_ARRAY_LOWER_BOUND_VALUE(arraytype) \
-   (TYPE_LOW_BOUND(TYPE_INDEX_TYPE((arraytype))))
+   (TYPE_LOW_BOUND((arraytype)->index_type ()))
 
 #define TYPE_ARRAY_BIT_STRIDE(arraytype) \
-  (TYPE_BIT_STRIDE(TYPE_INDEX_TYPE((arraytype))))
+  (TYPE_BIT_STRIDE(((arraytype)->index_type ())))
 
 /* C++ */
 

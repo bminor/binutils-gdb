@@ -228,11 +228,11 @@ static void m2_array (struct type *type, struct ui_file *stream,
   if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
       && !TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
     {
-      if (TYPE_INDEX_TYPE (type) != 0)
+      if (type->index_type () != 0)
 	{
-	  m2_print_bounds (TYPE_INDEX_TYPE (type), stream, show, -1, 0);
+	  m2_print_bounds (type->index_type (), stream, show, -1, 0);
 	  fprintf_filtered (stream, "..");
-	  m2_print_bounds (TYPE_INDEX_TYPE (type), stream, show, -1, 1);
+	  m2_print_bounds (type->index_type (), stream, show, -1, 1);
 	}
       else
 	fputs_filtered (pulongest ((TYPE_LENGTH (type)
@@ -324,11 +324,11 @@ static void
 m2_short_set (struct type *type, struct ui_file *stream, int show, int level)
 {
   fprintf_filtered(stream, "SET [");
-  m2_print_bounds (TYPE_INDEX_TYPE (type), stream,
+  m2_print_bounds (type->index_type (), stream,
 		   show - 1, level, 0);
 
   fprintf_filtered(stream, "..");
-  m2_print_bounds (TYPE_INDEX_TYPE (type), stream,
+  m2_print_bounds (type->index_type (), stream,
 		   show - 1, level, 1);
   fprintf_filtered(stream, "]");
 }
@@ -356,7 +356,7 @@ m2_is_long_set (struct type *type)
 	  if (TYPE_FIELD_NAME (type, i) != NULL
 	      && (strcmp (TYPE_FIELD_NAME (type, i), "") != 0))
 	    return 0;
-	  range = TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, i));
+	  range = TYPE_FIELD_TYPE (type, i)->index_type ();
 	  if ((i > TYPE_N_BASECLASSES (type))
 	      && previous_high + 1 != TYPE_LOW_BOUND (range))
 	    return 0;
@@ -413,11 +413,11 @@ m2_is_long_set_of_type (struct type *type, struct type **of_type)
       i = TYPE_N_BASECLASSES (type);
       if (len == 0)
 	return 0;
-      range = TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, i));
+      range = TYPE_FIELD_TYPE (type, i)->index_type ();
       target = TYPE_TARGET_TYPE (range);
 
-      l1 = TYPE_LOW_BOUND (TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, i)));
-      h1 = TYPE_HIGH_BOUND (TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, len-1)));
+      l1 = TYPE_LOW_BOUND (TYPE_FIELD_TYPE (type, i)->index_type ());
+      h1 = TYPE_HIGH_BOUND (TYPE_FIELD_TYPE (type, len - 1)->index_type ());
       *of_type = target;
       if (m2_get_discrete_bounds (target, &l2, &h2) >= 0)
 	return (l1 == l2 && h1 == h2);
@@ -457,12 +457,12 @@ m2_long_set (struct type *type, struct ui_file *stream, int show, int level,
 	  else
 	    {
 	      fprintf_filtered(stream, "[");
-	      m2_print_bounds (TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, i)),
+	      m2_print_bounds (TYPE_FIELD_TYPE (type, i)->index_type (),
 			       stream, show - 1, level, 0);
 
 	      fprintf_filtered(stream, "..");
 
-	      m2_print_bounds (TYPE_INDEX_TYPE (TYPE_FIELD_TYPE (type, len-1)),
+	      m2_print_bounds (TYPE_FIELD_TYPE (type, len - 1)->index_type (),
 			       stream, show - 1, level, 1);
 	      fprintf_filtered(stream, "]");
 	    }

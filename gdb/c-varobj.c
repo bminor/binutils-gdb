@@ -307,12 +307,12 @@ c_describe_child (const struct varobj *parent, int index,
     case TYPE_CODE_ARRAY:
       if (cname)
 	*cname = int_string (index
-			     + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)),
+			     + TYPE_LOW_BOUND (type->index_type ()),
 			     10, 1, 0, 0);
 
       if (cvalue && value)
 	{
-	  int real_index = index + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type));
+	  int real_index = index + TYPE_LOW_BOUND (type->index_type ());
 
 	  try
 	    {
@@ -330,7 +330,7 @@ c_describe_child (const struct varobj *parent, int index,
 	*cfull_expression = 
 	  string_printf ("(%s)[%s]", parent_expression.c_str (),
 			 int_string (index
-				     + TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)),
+				     + TYPE_LOW_BOUND (type->index_type ()),
 				     10, 1, 0, 0));
 
 

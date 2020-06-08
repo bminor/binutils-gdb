@@ -149,7 +149,7 @@ value_subscript (struct value *array, LONGEST index)
   if (tarray->code () == TYPE_CODE_ARRAY
       || tarray->code () == TYPE_CODE_STRING)
     {
-      struct type *range_type = TYPE_INDEX_TYPE (tarray);
+      struct type *range_type = tarray->index_type ();
       LONGEST lowerbound, upperbound;
 
       get_discrete_bounds (range_type, &lowerbound, &upperbound);
@@ -1870,7 +1870,7 @@ value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
   LONGEST low_bound, high_bound;
   LONGEST word;
   unsigned rel_index;
-  struct type *range = TYPE_INDEX_TYPE (type);
+  struct type *range = type->index_type ();
 
   if (get_discrete_bounds (range, &low_bound, &high_bound) < 0)
     return -2;

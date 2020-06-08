@@ -1117,7 +1117,7 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 int
 get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
 {
-  struct type *index = TYPE_INDEX_TYPE (type);
+  struct type *index = type->index_type ();
   LONGEST low = 0;
   LONGEST high = 0;
   int res;
@@ -1195,7 +1195,7 @@ update_static_array_size (struct type *type)
 {
   gdb_assert (type->code () == TYPE_CODE_ARRAY);
 
-  struct type *range_type = TYPE_INDEX_TYPE (type);
+  struct type *range_type = type->index_type ();
 
   if (type->dyn_prop (DYN_PROP_BYTE_STRIDE) == nullptr
       && has_static_range (TYPE_RANGE_DATA (range_type))
@@ -2027,7 +2027,7 @@ is_dynamic_type_internal (struct type *type, int top_level)
 	gdb_assert (type->num_fields () == 1);
 
 	/* The array is dynamic if either the bounds are dynamic...  */
-	if (is_dynamic_type_internal (TYPE_INDEX_TYPE (type), 0))
+	if (is_dynamic_type_internal (type->index_type (), 0))
 	  return 1;
 	/* ... or the elements it contains have a dynamic contents...  */
 	if (is_dynamic_type_internal (TYPE_TARGET_TYPE (type), 0))
@@ -2183,7 +2183,7 @@ resolve_dynamic_array_or_string (struct type *type,
   type = copy_type (type);
 
   elt_type = type;
-  range_type = check_typedef (TYPE_INDEX_TYPE (elt_type));
+  range_type = check_typedef (elt_type->index_type ());
   range_type = resolve_dynamic_range (range_type, addr_stack);
 
   /* Resolve allocated/associated here before creating a new array type, which
@@ -3541,12 +3541,12 @@ is_scalar_type_recursive (struct type *t)
   /* Are we dealing with an array or string of known dimensions?  */
   else if ((t->code () == TYPE_CODE_ARRAY
 	    || t->code () == TYPE_CODE_STRING) && t->num_fields () == 1
-	   && TYPE_INDEX_TYPE(t)->code () == TYPE_CODE_RANGE)
+	   && t->index_type ()->code () == TYPE_CODE_RANGE)
     {
       LONGEST low_bound, high_bound;
       struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (t));
 
-      get_discrete_bounds (TYPE_INDEX_TYPE (t), &low_bound, &high_bound);
+      get_discrete_bounds (t->index_type (), &low_bound, &high_bound);
 
       return high_bound == low_bound && is_scalar_type_recursive (elt_type);
     }

@@ -1875,7 +1875,7 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = type_length_units (check_typedef (elttype));
-  index_type = TYPE_INDEX_TYPE (type);
+  index_type = type->index_type ();
   if (index_type->code () == TYPE_CODE_RANGE)
     index_type = TYPE_TARGET_TYPE (index_type);
 

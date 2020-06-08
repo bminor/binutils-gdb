@@ -2081,7 +2081,7 @@ constrained_packed_array_type (struct type *type, long *elt_bits)
     index_type = to_fixed_range_type (TYPE_FIELD_TYPE (index_type_desc, 0),
 				      NULL);
   else
-    index_type = TYPE_INDEX_TYPE (type);
+    index_type = type->index_type ();
 
   new_type = alloc_type_copy (type);
   new_elt_type =
@@ -2235,7 +2235,7 @@ value_subscript_packed (struct value *arr, int arity, struct value **ind)
 	     "something other than a packed array"));
       else
         {
-          struct type *range_type = TYPE_INDEX_TYPE (elt_type);
+          struct type *range_type = elt_type->index_type ();
           LONGEST lowerbound, upperbound;
           LONGEST idx;
 
@@ -2730,7 +2730,7 @@ ada_value_ptr_subscript (struct value *arr, int arity, struct value **ind)
         error (_("too many subscripts (%d expected)"), k);
       arr = value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
                         value_copy (arr));
-      get_discrete_bounds (TYPE_INDEX_TYPE (type), &lwb, &upb);
+      get_discrete_bounds (type->index_type (), &lwb, &upb);
       arr = value_ptradd (arr, pos_atr (ind[k]) - lwb);
       type = TYPE_TARGET_TYPE (type);
     }
@@ -2747,14 +2747,14 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
                           int low, int high)
 {
   struct type *type0 = ada_check_typedef (type);
-  struct type *base_index_type = TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type0));
+  struct type *base_index_type = TYPE_TARGET_TYPE (type0->index_type ());
   struct type *index_type
     = create_static_range_type (NULL, base_index_type, low, high);
   struct type *slice_type = create_array_type_with_stride
 			      (NULL, TYPE_TARGET_TYPE (type0), index_type,
 			       type0->dyn_prop (DYN_PROP_BYTE_STRIDE),
 			       TYPE_FIELD_BITSIZE (type0, 0));
-  int base_low =  ada_discrete_type_low_bound (TYPE_INDEX_TYPE (type0));
+  int base_low =  ada_discrete_type_low_bound (type0->index_type ());
   LONGEST base_low_pos, low_pos;
   CORE_ADDR base;
 
@@ -2777,9 +2777,9 @@ static struct value *
 ada_value_slice (struct value *array, int low, int high)
 {
   struct type *type = ada_check_typedef (value_type (array));
-  struct type *base_index_type = TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type));
+  struct type *base_index_type = TYPE_TARGET_TYPE (type->index_type ());
   struct type *index_type
-    = create_static_range_type (NULL, TYPE_INDEX_TYPE (type), low, high);
+    = create_static_range_type (NULL, type->index_type (), low, high);
   struct type *slice_type = create_array_type_with_stride
 			      (NULL, TYPE_TARGET_TYPE (type), index_type,
 			       type->dyn_prop (DYN_PROP_BYTE_STRIDE),
@@ -2892,7 +2892,7 @@ ada_index_type (struct type *type, int n, const char *name)
 
       for (i = 1; i < n; i += 1)
         type = TYPE_TARGET_TYPE (type);
-      result_type = TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (type));
+      result_type = TYPE_TARGET_TYPE (type->index_type ());
       /* FIXME: The stabs type r(0,0);bound;bound in an array type
          has a target type of TYPE_CODE_UNDEF.  We compensate here, but
          perhaps stabsread.c would make more sense.  */
@@ -2957,7 +2957,7 @@ ada_array_bound_from_type (struct type *arr_type, int n, int which)
       for (i = 1; i < n; i++)
 	elt_type = check_typedef (TYPE_TARGET_TYPE (elt_type));
 
-      index_type = TYPE_INDEX_TYPE (elt_type);
+      index_type = elt_type->index_type ();
     }
 
   return
@@ -3044,7 +3044,7 @@ empty_array (struct type *arr_type, int low, int high)
   struct type *arr_type0 = ada_check_typedef (arr_type);
   struct type *index_type
     = create_static_range_type
-        (NULL, TYPE_TARGET_TYPE (TYPE_INDEX_TYPE (arr_type0)), low,
+        (NULL, TYPE_TARGET_TYPE (arr_type0->index_type ()), low,
 	 high < low ? low - 1 : high);
   struct type *elt_type = ada_array_element_type (arr_type0, 1);
 
@@ -8522,7 +8522,7 @@ ada_is_redundant_index_type_desc (struct type *array_type,
 
   for (i = 0; i < desc_type->num_fields (); i++)
     {
-      if (!ada_is_redundant_range_encoding (TYPE_INDEX_TYPE (this_layer),
+      if (!ada_is_redundant_range_encoding (this_layer->index_type (),
 					    TYPE_FIELD_TYPE (desc_type, i)))
 	return 0;
       this_layer = check_typedef (TYPE_TARGET_TYPE (this_layer));
@@ -8616,7 +8616,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
         result = type0;
       else
         result = create_array_type (alloc_type_copy (type0),
-                                    elt_type, TYPE_INDEX_TYPE (type0));
+                                    elt_type, type0->index_type ());
     }
   else
     {

@@ -172,7 +172,7 @@ type_stack::follow_types (struct type *follow_type)
 	  lookup_array_range_type (follow_type,
 				   0, array_size >= 0 ? array_size - 1 : 0);
 	if (array_size < 0)
-	  TYPE_HIGH_BOUND_KIND (TYPE_INDEX_TYPE (follow_type))
+	  TYPE_HIGH_BOUND_KIND (follow_type->index_type ())
 	    = PROP_UNDEFINED;
 	break;
       case tp_function:

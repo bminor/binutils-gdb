@@ -178,7 +178,7 @@ ada_varobj_simple_array_elt (struct value *parent_value,
   if (parent_value)
     {
       struct value *index_value =
-	value_from_longest (TYPE_INDEX_TYPE (parent_type), elt_index);
+	value_from_longest (parent_type->index_type (), elt_index);
 
       value = ada_value_subscript (parent_value, 1, &index_value);
       type = value_type (value);
@@ -234,7 +234,7 @@ ada_varobj_get_array_number_of_children (struct value *parent_value,
   LONGEST lo, hi;
 
   if (parent_value == NULL
-      && is_dynamic_type (TYPE_INDEX_TYPE (parent_type)))
+      && is_dynamic_type (parent_type->index_type ()))
     {
       /* This happens when listing the children of an object
 	 which does not exist in memory (Eg: when requesting
@@ -589,7 +589,7 @@ ada_varobj_describe_simple_array_child (struct value *parent_value,
 
   gdb_assert (parent_type->code () == TYPE_CODE_ARRAY);
 
-  index_type = TYPE_INDEX_TYPE (parent_type);
+  index_type = parent_type->index_type ();
   real_index = child_index + ada_discrete_type_low_bound (index_type);
 
   if (child_name)

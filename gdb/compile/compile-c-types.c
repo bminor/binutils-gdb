@@ -40,7 +40,7 @@ static gcc_type
 convert_array (compile_c_instance *context, struct type *type)
 {
   gcc_type element_type;
-  struct type *range = TYPE_INDEX_TYPE (type);
+  struct type *range = type->index_type ();
 
   element_type = context->convert_type (TYPE_TARGET_TYPE (type));
 

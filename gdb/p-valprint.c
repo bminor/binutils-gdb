@@ -330,7 +330,7 @@ pascal_value_print_inner (struct value *val, struct ui_file *stream,
       break;
 
     case TYPE_CODE_SET:
-      elttype = TYPE_INDEX_TYPE (type);
+      elttype = type->index_type ();
       elttype = check_typedef (elttype);
       if (TYPE_STUB (elttype))
 	{

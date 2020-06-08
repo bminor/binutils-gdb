@@ -1,5 +1,10 @@
 2020-06-08  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_INDEX_TYPE): Remove.  Change all call sites
+	to use type::index_type instead.
+
+2020-06-08  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (struct type) <index_type, set_index_type>: New
 	methods.
 	(TYPE_INDEX_TYPE): Use type::index_type.

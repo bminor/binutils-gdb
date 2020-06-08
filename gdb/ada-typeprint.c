@@ -407,7 +407,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 	    {
 	      if (arr_type != type)
 		fprintf_filtered (stream, ", ");
-	      print_range (TYPE_INDEX_TYPE (arr_type), stream,
+	      print_range (arr_type->index_type (), stream,
 			   0 /* bounds_prefered_p */);
 	      if (TYPE_FIELD_BITSIZE (arr_type, 0) > 0)
 		bitsize = TYPE_FIELD_BITSIZE (arr_type, 0);

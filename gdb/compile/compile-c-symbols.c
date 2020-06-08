@@ -516,7 +516,7 @@ generate_vla_size (compile_instance *compiler,
 
     case TYPE_CODE_ARRAY:
       generate_vla_size (compiler, stream, gdbarch, registers_used, pc,
-			 TYPE_INDEX_TYPE (type), sym);
+			 type->index_type (), sym);
       generate_vla_size (compiler, stream, gdbarch, registers_used, pc,
 			 TYPE_TARGET_TYPE (type), sym);
       break;

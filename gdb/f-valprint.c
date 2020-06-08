@@ -112,7 +112,7 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
 		   const struct value_print_options *options,
 		   int *elts)
 {
-  struct type *range_type = TYPE_INDEX_TYPE (check_typedef (type));
+  struct type *range_type = check_typedef (type)->index_type ();
   CORE_ADDR addr = address + embedded_offset;
   LONGEST lowerbound, upperbound;
   LONGEST i;

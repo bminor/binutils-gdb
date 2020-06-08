@@ -826,8 +826,8 @@ gdbscm_type_range (SCM self)
     {
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_STRING:
-      low = TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type));
-      high = TYPE_HIGH_BOUND (TYPE_INDEX_TYPE (type));
+      low = TYPE_LOW_BOUND (type->index_type ());
+      high = TYPE_HIGH_BOUND (type->index_type ());
       break;
     case TYPE_CODE_RANGE:
       low = TYPE_LOW_BOUND (type);
