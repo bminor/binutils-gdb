@@ -1,3 +1,21 @@
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (deprecated_set_gdbarch_data): Delete.
+	(gdbarch_data): Use internal_error for the case where
+	deprecated_set_gdbarch_data was originally needed.
+	* ia64-libunwind-tdep.c (libunwind_descr_init): Update parameters,
+	and use passed in obstack.
+	(libunwind_frame_set_descr): Should no longer get back NULL from
+	gdbarch_data.
+	(_initialize_libunwind_frame): Register as a pre-init gdbarch data
+	type.
+	* user-regs.c (user_regs_init): Update parameters, and use passed
+	in obstack.
+	(user_reg_add): Should no longer get back NULL from gdbarch_data.
+	(_initialize_user_regs): Register as a pre-init gdbarch data type.
+
 2020-07-06  Tom de Vries  <tdevries@suse.de>
 
 	* buildsym.c (buildsym_compunit::end_symtab_with_blockvector): Handle

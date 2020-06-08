@@ -1630,9 +1630,6 @@ typedef void *(gdbarch_data_pre_init_ftype) (struct obstack *obstack);
 extern struct gdbarch_data *gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *init);
 typedef void *(gdbarch_data_post_init_ftype) (struct gdbarch *gdbarch);
 extern struct gdbarch_data *gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *init);
-extern void deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
-                                         struct gdbarch_data *data,
-			                 void *pointer);
 
 extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
@@ -2237,20 +2234,6 @@ alloc_gdbarch_data (struct gdbarch *gdbarch)
   gdbarch->data = GDBARCH_OBSTACK_CALLOC (gdbarch, gdbarch->nr_data, void *);
 }
 
-/* Initialize the current value of the specified per-architecture
-   data-pointer.  */
-
-void
-deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
-			     struct gdbarch_data *data,
-			     void *pointer)
-{
-  gdb_assert (data->index < gdbarch->nr_data);
-  gdb_assert (gdbarch->data[data->index] == NULL);
-  gdb_assert (data->pre_init == NULL);
-  gdbarch->data[data->index] = pointer;
-}
-
 /* Return the current value of the specified per-architecture
    data-pointer.  */
 
@@ -2280,11 +2263,9 @@ gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
 	  data->init_p = 1;
 	}
       else
-	/* The architecture initialization hasn't completed - punt -
-	 hope that the caller knows what they are doing.  Once
-	 deprecated_set_gdbarch_data has been initialized, this can be
-	 changed to an internal error.  */
-	return NULL;
+	internal_error (__FILE__, __LINE__,
+			_("gdbarch post-init data field can only be used "
+			  "after gdbarch is fully initialised"));
       gdb_assert (gdbarch->data[data->index] != NULL);
     }
   return gdbarch->data[data->index];

@@ -1839,9 +1839,6 @@ typedef void *(gdbarch_data_pre_init_ftype) (struct obstack *obstack);
 extern struct gdbarch_data *gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *init);
 typedef void *(gdbarch_data_post_init_ftype) (struct gdbarch *gdbarch);
 extern struct gdbarch_data *gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *init);
-extern void deprecated_set_gdbarch_data (struct gdbarch *gdbarch,
-                                         struct gdbarch_data *data,
-			                 void *pointer);
 
 extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
 
