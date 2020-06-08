@@ -300,7 +300,7 @@ evaluate_struct_tuple (struct value *struct_val,
 	fieldno++;
       if (fieldno >= struct_type->num_fields ())
 	error (_("too many initializers"));
-      field_type = TYPE_FIELD_TYPE (struct_type, fieldno);
+      field_type = struct_type->field (fieldno).type ();
       if (field_type->code () == TYPE_CODE_UNION
 	  && TYPE_FIELD_NAME (struct_type, fieldno)[0] == '0')
 	error (_("don't know which variant you want to set"));
@@ -314,7 +314,7 @@ evaluate_struct_tuple (struct value *struct_val,
 	 subfieldno is the index of the actual real (named inner) field
 	 in substruct_type.  */
 
-      field_type = TYPE_FIELD_TYPE (struct_type, fieldno);
+      field_type = struct_type->field (fieldno).type ();
       if (val == 0)
 	val = evaluate_subexp (field_type, exp, pos, noside);
 
@@ -1059,8 +1059,7 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
 	    {
 	      for (; tem <= nargs && tem <= type->num_fields (); tem++)
 		{
-		  argvec[tem] = evaluate_subexp (TYPE_FIELD_TYPE (type,
-								  tem - 1),
+		  argvec[tem] = evaluate_subexp (type->field (tem - 1).type (),
 						 exp, pos, noside);
 		}
 	    }

@@ -1158,7 +1158,7 @@ get_symbol_field_type (struct symbol *sym, char *encoded_field_name)
 
       fieldno = ada_get_field_index (type, field_name, 1);
       if (fieldno >= 0)
-        return TYPE_FIELD_TYPE (type, fieldno);
+        return type->field (fieldno).type ();
 
       subfield_name = field_name;
       while (*subfield_name != '\0' && *subfield_name != '.' 
@@ -1173,7 +1173,7 @@ get_symbol_field_type (struct symbol *sym, char *encoded_field_name)
       if (fieldno < 0)
         return NULL;
 
-      type = TYPE_FIELD_TYPE (type, fieldno);
+      type = type->field (fieldno).type ();
       field_name = subfield_name;
     }
 

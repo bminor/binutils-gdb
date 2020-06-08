@@ -317,7 +317,7 @@ f_value_print_innner (struct value *val, struct ui_file *stream, int recurse,
         {
 	  struct value *field = value_field (val, index);
 
-	  struct type *field_type = check_typedef (TYPE_FIELD_TYPE (type, index));
+	  struct type *field_type = check_typedef (type->field (index).type ());
 
 
 	  if (field_type->code () != TYPE_CODE_FUNC)

@@ -1048,7 +1048,7 @@ call_function_by_hand_dummy (struct value *function,
 	prototyped = 0;
 
       if (i < ftype->num_fields ())
-	param_type = TYPE_FIELD_TYPE (ftype, i);
+	param_type = ftype->field (i).type ();
       else
 	param_type = NULL;
 

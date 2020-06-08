@@ -105,7 +105,7 @@ ada_varobj_struct_elt (struct value *parent_value,
       type = value_type (value);
     }
   else
-    type = TYPE_FIELD_TYPE (parent_type, fieldno);
+    type = parent_type->field (fieldno).type ();
 
   if (child_value)
     *child_value = value;

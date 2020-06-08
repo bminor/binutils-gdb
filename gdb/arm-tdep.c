@@ -3502,7 +3502,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	    int sub_count = 0;
 
 	    if (!field_is_static (&t->field (i)))
-	      sub_count = arm_vfp_cprc_sub_candidate (TYPE_FIELD_TYPE (t, i),
+	      sub_count = arm_vfp_cprc_sub_candidate (t->field (i).type (),
 						      base_type);
 	    if (sub_count == -1)
 	      return -1;
@@ -3528,7 +3528,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	int i;
 	for (i = 0; i < t->num_fields (); i++)
 	  {
-	    int sub_count = arm_vfp_cprc_sub_candidate (TYPE_FIELD_TYPE (t, i),
+	    int sub_count = arm_vfp_cprc_sub_candidate (t->field (i).type (),
 							base_type);
 	    if (sub_count == -1)
 	      return -1;
@@ -7975,7 +7975,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 	      enum type_code field_type_code;
 
 	      field_type_code
-		= check_typedef (TYPE_FIELD_TYPE (type, i))->code ();
+		= check_typedef (type->field (i).type ())->code ();
 
 	      /* Is it a floating point type field?  */
 	      if (field_type_code == TYPE_CODE_FLT)

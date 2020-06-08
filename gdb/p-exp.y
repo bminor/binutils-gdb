@@ -316,8 +316,9 @@ exp	:	exp '['
 			      stringsval.ptr = buf;
 			      stringsval.length = strlen (arrayname);
 			      strcpy (buf, arrayname);
-			      current_type = TYPE_FIELD_TYPE (current_type,
-				arrayfieldindex - 1);
+			      current_type
+				= (current_type
+				   ->field (arrayfieldindex - 1).type ());
 			      write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);
 			      write_exp_string (pstate, stringsval);
 			      write_exp_elt_opcode (pstate, STRUCTOP_STRUCT);

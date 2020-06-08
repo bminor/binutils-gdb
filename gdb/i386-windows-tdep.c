@@ -221,7 +221,7 @@ i386_windows_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   if (type->code () == TYPE_CODE_METHOD
       && type->num_fields () > 0
       && TYPE_FIELD_ARTIFICIAL (type, 0)
-      && TYPE_FIELD_TYPE (type, 0)->code () == TYPE_CODE_PTR)
+      && type->field (0).type ()->code () == TYPE_CODE_PTR)
     thiscall = 1;
 
   return i386_thiscall_push_dummy_call (gdbarch, function, regcache, bp_addr,

@@ -108,9 +108,9 @@ convert_struct_or_union (compile_c_instance *context, struct type *type)
       gcc_type field_type;
       unsigned long bitsize = TYPE_FIELD_BITSIZE (type, i);
 
-      field_type = context->convert_type (TYPE_FIELD_TYPE (type, i));
+      field_type = context->convert_type (type->field (i).type ());
       if (bitsize == 0)
-	bitsize = 8 * TYPE_LENGTH (TYPE_FIELD_TYPE (type, i));
+	bitsize = 8 * TYPE_LENGTH (type->field (i).type ());
       context->plugin ().build_add_field (result,
 					  TYPE_FIELD_NAME (type, i),
 					  field_type,
@@ -178,7 +178,7 @@ convert_func (compile_c_instance *context, struct type *type)
   array.n_elements = type->num_fields ();
   array.elements = XNEWVEC (gcc_type, type->num_fields ());
   for (i = 0; i < type->num_fields (); ++i)
-    array.elements[i] = context->convert_type (TYPE_FIELD_TYPE (type, i));
+    array.elements[i] = context->convert_type (type->field (i).type ());
 
   result = context->plugin ().build_function_type (return_type,
 						   &array, is_varargs);

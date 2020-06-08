@@ -109,7 +109,7 @@ mn10300_type_align (struct type *type)
     case TYPE_CODE_UNION:
       for (i = 0; i < type->num_fields (); i++)
 	{
-	  int falign = mn10300_type_align (TYPE_FIELD_TYPE (type, i));
+	  int falign = mn10300_type_align (type->field (i).type ());
 	  while (align < falign)
 	    align <<= 1;
 	}
@@ -144,7 +144,7 @@ mn10300_use_struct_convention (struct type *type)
       /* Structures with a single field are handled as the field
 	 itself.  */
       if (type->num_fields () == 1)
-	return mn10300_use_struct_convention (TYPE_FIELD_TYPE (type, 0));
+	return mn10300_use_struct_convention (type->field (0).type ());
 
       /* Structures with word or double-word size are passed in memory, as
 	 long as they require at least word alignment.  */

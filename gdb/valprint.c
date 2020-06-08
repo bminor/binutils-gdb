@@ -1139,7 +1139,7 @@ val_print_type_code_flags (struct type *type, struct value *original_value,
     {
       if (TYPE_FIELD_NAME (type, field)[0] != '\0')
 	{
-	  struct type *field_type = TYPE_FIELD_TYPE (type, field);
+	  struct type *field_type = type->field (field).type ();
 
 	  if (field_type == bool_type
 	      /* We require boolean types here to be one bit wide.  This is a

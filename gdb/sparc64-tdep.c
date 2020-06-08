@@ -1181,7 +1181,7 @@ sparc64_16_byte_align_p (struct type *type)
 
       for (i = 0; i < type->num_fields (); i++)
 	{
-	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
+	  struct type *subtype = check_typedef (type->field (i).type ());
 
 	  if (sparc64_16_byte_align_p (subtype))
 	    return 1;
@@ -1258,7 +1258,7 @@ sparc64_store_floating_fields (struct regcache *regcache, struct type *type,
 
       for (i = 0; i < type->num_fields (); i++)
 	{
-	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
+	  struct type *subtype = check_typedef (type->field (i).type ());
 	  int subpos = bitpos + TYPE_FIELD_BITPOS (type, i);
 
 	  sparc64_store_floating_fields (regcache, subtype, valbuf,
@@ -1276,7 +1276,7 @@ sparc64_store_floating_fields (struct regcache *regcache, struct type *type,
          value in %f1 too (we already have stored in %f0).  */
       if (type->num_fields () == 1)
 	{
-	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, 0));
+	  struct type *subtype = check_typedef (type->field (0).type ());
 
 	  if (sparc64_floating_p (subtype) && TYPE_LENGTH (subtype) == 4)
 	    regcache->cooked_write (SPARC_F1_REGNUM, valbuf);
@@ -1346,7 +1346,7 @@ sparc64_extract_floating_fields (struct regcache *regcache, struct type *type,
 
       for (i = 0; i < type->num_fields (); i++)
 	{
-	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
+	  struct type *subtype = check_typedef (type->field (i).type ());
 	  int subpos = bitpos + TYPE_FIELD_BITPOS (type, i);
 
 	  sparc64_extract_floating_fields (regcache, subtype, valbuf, subpos);

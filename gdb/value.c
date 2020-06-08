@@ -2838,7 +2838,7 @@ value_static_field (struct type *type, int fieldno)
   switch (TYPE_FIELD_LOC_KIND (type, fieldno))
     {
     case FIELD_LOC_KIND_PHYSADDR:
-      retval = value_at_lazy (TYPE_FIELD_TYPE (type, fieldno),
+      retval = value_at_lazy (type->field (fieldno).type (),
 			      TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
       break;
     case FIELD_LOC_KIND_PHYSNAME:
@@ -2853,7 +2853,7 @@ value_static_field (struct type *type, int fieldno)
 	     reported as non-debuggable symbols.  */
 	  struct bound_minimal_symbol msym
 	    = lookup_minimal_symbol (phys_name, NULL, NULL);
-	  struct type *field_type = TYPE_FIELD_TYPE (type, fieldno);
+	  struct type *field_type = type->field (fieldno).type ();
 
 	  if (!msym.minsym)
 	    retval = allocate_optimized_out_value (field_type);
@@ -2906,7 +2906,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
   int unit_size = gdbarch_addressable_memory_unit_size (arch);
 
   arg_type = check_typedef (arg_type);
-  type = TYPE_FIELD_TYPE (arg_type, fieldno);
+  type = arg_type->field (fieldno).type ();
 
   /* Call check_typedef on our type to make sure that, if TYPE
      is a TYPE_CODE_TYPEDEF, its length is set to the length
@@ -3158,7 +3158,7 @@ unpack_value_field_as_long (struct type *type, const gdb_byte *valaddr,
 {
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
-  struct type *field_type = TYPE_FIELD_TYPE (type, fieldno);
+  struct type *field_type = type->field (fieldno).type ();
   int bit_offset;
 
   gdb_assert (val != NULL);
@@ -3181,7 +3181,7 @@ unpack_field_as_long (struct type *type, const gdb_byte *valaddr, int fieldno)
 {
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
-  struct type *field_type = TYPE_FIELD_TYPE (type, fieldno);
+  struct type *field_type = type->field (fieldno).type ();
 
   return unpack_bits_as_long (field_type, valaddr, bitpos, bitsize);
 }
@@ -3246,7 +3246,7 @@ value_field_bitfield (struct type *type, int fieldno,
 {
   int bitpos = TYPE_FIELD_BITPOS (type, fieldno);
   int bitsize = TYPE_FIELD_BITSIZE (type, fieldno);
-  struct value *res_val = allocate_value (TYPE_FIELD_TYPE (type, fieldno));
+  struct value *res_val = allocate_value (type->field (fieldno).type ());
 
   unpack_value_bitfield (res_val, bitpos, bitsize,
 			 valaddr, embedded_offset, val);

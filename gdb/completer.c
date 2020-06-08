@@ -1103,10 +1103,10 @@ add_struct_fields (struct type *type, completion_list &output,
 			     fieldname, namelen))
 		output.emplace_back (xstrdup (TYPE_FIELD_NAME (type, i)));
 	    }
-	  else if (TYPE_FIELD_TYPE (type, i)->code () == TYPE_CODE_UNION)
+	  else if (type->field (i).type ()->code () == TYPE_CODE_UNION)
 	    {
 	      /* Recurse into anonymous unions.  */
-	      add_struct_fields (TYPE_FIELD_TYPE (type, i),
+	      add_struct_fields (type->field (i).type (),
 				 output, fieldname, namelen);
 	    }
 	}

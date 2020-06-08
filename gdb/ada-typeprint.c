@@ -424,7 +424,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 	    {
 	      if (k > 0)
 		fprintf_filtered (stream, ", ");
-	      print_range_type (TYPE_FIELD_TYPE (range_desc_type, k),
+	      print_range_type (range_desc_type->field (k).type (),
 				stream, 0 /* bounds_prefered_p */);
 	      if (TYPE_FIELD_BITSIZE (arr_type, 0) > 0)
 		bitsize = TYPE_FIELD_BITSIZE (arr_type, 0);
@@ -549,7 +549,7 @@ print_variant_clauses (struct type *type, int field_num,
   struct type *var_type, *par_type;
   struct type *discr_type;
 
-  var_type = TYPE_FIELD_TYPE (type, field_num);
+  var_type = type->field (field_num).type ();
   discr_type = ada_variant_discrim_type (var_type, outer_type);
 
   if (var_type->code () == TYPE_CODE_PTR)
@@ -568,7 +568,7 @@ print_variant_clauses (struct type *type, int field_num,
       fprintf_filtered (stream, "\n%*swhen ", level + 4, "");
       if (print_choices (var_type, i, stream, discr_type))
 	{
-	  if (print_record_field_types (TYPE_FIELD_TYPE (var_type, i),
+	  if (print_record_field_types (var_type->field (i).type (),
 					outer_type, stream, show, level + 4,
 					flags)
 	      <= 0)
@@ -594,7 +594,7 @@ print_variant_part (struct type *type, int field_num, struct type *outer_type,
 		    const struct type_print_options *flags)
 {
   const char *variant
-    = ada_variant_discrim_name (TYPE_FIELD_TYPE (type, field_num));
+    = ada_variant_discrim_name (type->field (field_num).type ());
   if (*variant == '\0')
     variant = "?";
 
@@ -633,7 +633,7 @@ print_selected_record_field_types (struct type *type, struct type *outer_type,
       if (ada_is_parent_field (type, i) || ada_is_ignored_field (type, i))
 	;
       else if (ada_is_wrapper_field (type, i))
-	flds += print_record_field_types (TYPE_FIELD_TYPE (type, i), type,
+	flds += print_record_field_types (type->field (i).type (), type,
 					  stream, show, level, flags);
       else if (ada_is_variant_part (type, i))
 	{
@@ -644,7 +644,7 @@ print_selected_record_field_types (struct type *type, struct type *outer_type,
 	{
 	  flds += 1;
 	  fprintf_filtered (stream, "\n%*s", level + 4, "");
-	  ada_print_type (TYPE_FIELD_TYPE (type, i),
+	  ada_print_type (type->field (i).type (),
 			  TYPE_FIELD_NAME (type, i),
 			  stream, show - 1, level + 4, flags);
 	  fprintf_filtered (stream, ";");
@@ -708,7 +708,7 @@ print_variant_part (const variant_part &part,
   else
     {
       name = TYPE_FIELD_NAME (type, part.discriminant_index);
-      discr_type = TYPE_FIELD_TYPE (type, part.discriminant_index);
+      discr_type = type->field (part.discriminant_index).type ();
     }
 
   fprintf_filtered (stream, "\n%*scase %s is", level + 4, "", name);
@@ -875,7 +875,7 @@ print_unchecked_union_type (struct type *type, struct ui_file *stream,
 	{
 	  fprintf_filtered (stream, "\n%*swhen ? =>\n%*s", level + 8, "",
 			    level + 12, "");
-	  ada_print_type (TYPE_FIELD_TYPE (type, i),
+	  ada_print_type (type->field (i).type (),
 			  TYPE_FIELD_NAME (type, i),
 			  stream, show - 1, level + 12, flags);
 	  fprintf_filtered (stream, ";");
@@ -920,7 +920,7 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
 	      wrap_here ("    ");
 	    }
 	  fprintf_filtered (stream, "a%d: ", i + 1);
-	  ada_print_type (TYPE_FIELD_TYPE (type, i), "", stream, -1, 0,
+	  ada_print_type (type->field (i).type (), "", stream, -1, 0,
 			  flags);
 	}
       fprintf_filtered (stream, ")");

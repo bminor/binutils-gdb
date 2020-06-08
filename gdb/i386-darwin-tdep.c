@@ -139,7 +139,7 @@ i386_darwin_arg_type_alignment (struct type *type)
       for (i = 0; i < type->num_fields (); i++)
 	{
 	  int align
-	    = i386_darwin_arg_type_alignment (TYPE_FIELD_TYPE (type, i));
+	    = i386_darwin_arg_type_alignment (type->field (i).type ());
 
 	  res = std::max (res, align);
 	}

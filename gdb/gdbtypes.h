@@ -1598,7 +1598,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define TYPE_CALLING_CONVENTION(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->calling_convention
 #define TYPE_NO_RETURN(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->is_noreturn
 #define TYPE_TAIL_CALL_LIST(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.func_stuff->tail_call_list
-#define TYPE_BASECLASS(thistype,index) TYPE_FIELD_TYPE(thistype, index)
+#define TYPE_BASECLASS(thistype,index) ((thistype)->field (index).type ())
 #define TYPE_N_BASECLASSES(thistype) TYPE_CPLUS_SPECIFIC(thistype)->n_baseclasses
 #define TYPE_BASECLASS_NAME(thistype,index) TYPE_FIELD_NAME(thistype, index)
 #define TYPE_BASECLASS_BITPOS(thistype,index) TYPE_FIELD_BITPOS(thistype,index)
@@ -1637,7 +1637,6 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
 
-#define TYPE_FIELD_TYPE(thistype, n) ((thistype)->field (n).type ())
 #define TYPE_FIELD_NAME(thistype, n) FIELD_NAME((thistype)->field (n))
 #define TYPE_FIELD_LOC_KIND(thistype, n) FIELD_LOC_KIND ((thistype)->field (n))
 #define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS ((thistype)->field (n))

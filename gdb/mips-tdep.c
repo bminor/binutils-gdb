@@ -4408,7 +4408,7 @@ fp_register_arg_p (struct gdbarch *gdbarch, enum type_code typecode,
 	       && (typecode == TYPE_CODE_STRUCT
 		   || typecode == TYPE_CODE_UNION)
 	       && arg_type->num_fields () == 1
-	       && check_typedef (TYPE_FIELD_TYPE (arg_type, 0))->code ()
+	       && check_typedef (arg_type->field (0).type ())->code ()
 	       == TYPE_CODE_FLT))
 	  && MIPS_FPU_TYPE(gdbarch) != MIPS_FPU_NONE);
 }
@@ -4427,7 +4427,7 @@ mips_type_needs_double_align (struct type *type)
     {
       if (type->num_fields () < 1)
 	return 0;
-      return mips_type_needs_double_align (TYPE_FIELD_TYPE (type, 0));
+      return mips_type_needs_double_align (type->field (0).type ());
     }
   else if (typecode == TYPE_CODE_UNION)
     {
@@ -4435,7 +4435,7 @@ mips_type_needs_double_align (struct type *type)
 
       n = type->num_fields ();
       for (i = 0; i < n; i++)
-	if (mips_type_needs_double_align (TYPE_FIELD_TYPE (type, i)))
+	if (mips_type_needs_double_align (type->field (i).type ()))
 	  return 1;
       return 0;
     }
@@ -4790,7 +4790,7 @@ mips_eabi_return_value (struct gdbarch *gdbarch, struct value *function,
 	   || type->code () == TYPE_CODE_UNION)
 	  && type->num_fields () == 1)
 	{
-	  struct type *fieldtype = TYPE_FIELD_TYPE (type, 0);
+	  struct type *fieldtype = type->field (0).type ();
 
 	  if (check_typedef (fieldtype)->code () == TYPE_CODE_FLT)
 	    fp_return_type = 1;
@@ -4865,7 +4865,7 @@ mips_n32n64_fp_arg_chunk_p (struct gdbarch *gdbarch, struct type *arg_type,
       if (pos > offset)
 	return 0;
 
-      field_type = check_typedef (TYPE_FIELD_TYPE (arg_type, i));
+      field_type = check_typedef (arg_type->field (i).type ());
 
       /* If this field is entirely before the requested offset, go
 	 on to the next one.  */
@@ -5229,12 +5229,12 @@ mips_n32n64_return_value (struct gdbarch *gdbarch, struct value *function,
 	   && type->num_fields () <= 2
 	   && type->num_fields () >= 1
 	   && ((type->num_fields () == 1
-		&& (check_typedef (TYPE_FIELD_TYPE (type, 0))->code ()
+		&& (check_typedef (type->field (0).type ())->code ()
 		    == TYPE_CODE_FLT))
 	       || (type->num_fields () == 2
-		   && (check_typedef (TYPE_FIELD_TYPE (type, 0))->code ()
+		   && (check_typedef (type->field (0).type ())->code ()
 		       == TYPE_CODE_FLT)
-		   && (check_typedef (TYPE_FIELD_TYPE (type, 1))->code ()
+		   && (check_typedef (type->field (1).type ())->code ()
 		       == TYPE_CODE_FLT))))
     {
       /* A struct that contains one or two floats.  Each value is part
@@ -5252,7 +5252,7 @@ mips_n32n64_return_value (struct gdbarch *gdbarch, struct value *function,
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stderr, "Return float struct+%d\n",
 				offset);
-	  if (TYPE_LENGTH (TYPE_FIELD_TYPE (type, field)) == 16)
+	  if (TYPE_LENGTH (type->field (field).type ()) == 16)
 	    {
 	      /* A 16-byte long double field goes in two consecutive
 		 registers.  */
@@ -5270,7 +5270,7 @@ mips_n32n64_return_value (struct gdbarch *gdbarch, struct value *function,
 	  else
 	    mips_xfer_register (gdbarch, regcache,
 				gdbarch_num_regs (gdbarch) + regnum,
-				TYPE_LENGTH (TYPE_FIELD_TYPE (type, field)),
+				TYPE_LENGTH (type->field (field).type ()),
 				gdbarch_byte_order (gdbarch),
 				readbuf, writebuf, offset);
 	}
@@ -5782,12 +5782,12 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct value *function,
 	   && type->num_fields () <= 2
 	   && type->num_fields () >= 1
 	   && ((type->num_fields () == 1
-		&& (TYPE_CODE (TYPE_FIELD_TYPE (type, 0))
+		&& (TYPE_CODE (type->field (0).type ())
 		    == TYPE_CODE_FLT))
 	       || (type->num_fields () == 2
-		   && (TYPE_CODE (TYPE_FIELD_TYPE (type, 0))
+		   && (TYPE_CODE (type->field (0).type ())
 		       == TYPE_CODE_FLT)
-		   && (TYPE_CODE (TYPE_FIELD_TYPE (type, 1))
+		   && (TYPE_CODE (type->field (1).type ())
 		       == TYPE_CODE_FLT)))
 	   && tdep->mips_fpu_type != MIPS_FPU_NONE)
     {
@@ -5806,7 +5806,7 @@ mips_o32_return_value (struct gdbarch *gdbarch, struct value *function,
 				offset);
 	  mips_xfer_register (gdbarch, regcache,
 			      gdbarch_num_regs (gdbarch) + regnum,
-			      TYPE_LENGTH (TYPE_FIELD_TYPE (type, field)),
+			      TYPE_LENGTH (type->field (field).type ()),
 			      gdbarch_byte_order (gdbarch),
 			      readbuf, writebuf, offset);
 	}

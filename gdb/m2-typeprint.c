@@ -294,7 +294,7 @@ m2_procedure (struct type *type, struct ui_file *stream,
 	      fputs_filtered (", ", stream);
 	      wrap_here ("    ");
 	    }
-	  m2_print_type (TYPE_FIELD_TYPE (type, i), "", stream, -1, 0, flags);
+	  m2_print_type (type->field (i).type (), "", stream, -1, 0, flags);
 	}
       fprintf_filtered (stream, ") : ");
       if (TYPE_TARGET_TYPE (type) != NULL)
@@ -349,14 +349,14 @@ m2_is_long_set (struct type *type)
       len = type->num_fields ();
       for (i = TYPE_N_BASECLASSES (type); i < len; i++)
 	{
-	  if (TYPE_FIELD_TYPE (type, i) == NULL)
+	  if (type->field (i).type () == NULL)
 	    return 0;
-	  if (TYPE_FIELD_TYPE (type, i)->code () != TYPE_CODE_SET)
+	  if (type->field (i).type ()->code () != TYPE_CODE_SET)
 	    return 0;
 	  if (TYPE_FIELD_NAME (type, i) != NULL
 	      && (strcmp (TYPE_FIELD_NAME (type, i), "") != 0))
 	    return 0;
-	  range = TYPE_FIELD_TYPE (type, i)->index_type ();
+	  range = type->field (i).type ()->index_type ();
 	  if ((i > TYPE_N_BASECLASSES (type))
 	      && previous_high + 1 != TYPE_LOW_BOUND (range))
 	    return 0;
@@ -413,11 +413,11 @@ m2_is_long_set_of_type (struct type *type, struct type **of_type)
       i = TYPE_N_BASECLASSES (type);
       if (len == 0)
 	return 0;
-      range = TYPE_FIELD_TYPE (type, i)->index_type ();
+      range = type->field (i).type ()->index_type ();
       target = TYPE_TARGET_TYPE (range);
 
-      l1 = TYPE_LOW_BOUND (TYPE_FIELD_TYPE (type, i)->index_type ());
-      h1 = TYPE_HIGH_BOUND (TYPE_FIELD_TYPE (type, len - 1)->index_type ());
+      l1 = TYPE_LOW_BOUND (type->field (i).type ()->index_type ());
+      h1 = TYPE_HIGH_BOUND (type->field (len - 1).type ()->index_type ());
       *of_type = target;
       if (m2_get_discrete_bounds (target, &l2, &h2) >= 0)
 	return (l1 == l2 && h1 == h2);
@@ -457,12 +457,12 @@ m2_long_set (struct type *type, struct ui_file *stream, int show, int level,
 	  else
 	    {
 	      fprintf_filtered(stream, "[");
-	      m2_print_bounds (TYPE_FIELD_TYPE (type, i)->index_type (),
+	      m2_print_bounds (type->field (i).type ()->index_type (),
 			       stream, show - 1, level, 0);
 
 	      fprintf_filtered(stream, "..");
 
-	      m2_print_bounds (TYPE_FIELD_TYPE (type, len - 1)->index_type (),
+	      m2_print_bounds (type->field (len - 1).type ()->index_type (),
 			       stream, show - 1, level, 1);
 	      fprintf_filtered(stream, "]");
 	    }
@@ -496,7 +496,7 @@ m2_is_unbounded_array (struct type *type)
 	return 0;
       if (strcmp (TYPE_FIELD_NAME (type, 1), "_m2_high") != 0)
 	return 0;
-      if (TYPE_FIELD_TYPE (type, 0)->code () != TYPE_CODE_PTR)
+      if (type->field (0).type ()->code () != TYPE_CODE_PTR)
 	return 0;
       return 1;
     }
@@ -517,7 +517,7 @@ m2_unbounded_array (struct type *type, struct ui_file *stream, int show,
       if (show > 0)
 	{
 	  fputs_filtered ("ARRAY OF ", stream);
-	  m2_print_type (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 0)),
+	  m2_print_type (TYPE_TARGET_TYPE (type->field (0).type ()),
 			 "", stream, 0, level, flags);
 	}
       return 1;
@@ -566,7 +566,7 @@ m2_record_fields (struct type *type, struct ui_file *stream, int show,
 	  fputs_styled (TYPE_FIELD_NAME (type, i),
 			variable_name_style.style (), stream);
 	  fputs_filtered (" : ", stream);
-	  m2_print_type (TYPE_FIELD_TYPE (type, i),
+	  m2_print_type (type->field (i).type (),
 			 "",
 			 stream, 0, level + 4, flags);
 	  if (TYPE_FIELD_PACKED (type, i))

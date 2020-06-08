@@ -222,7 +222,7 @@ evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
 	    {
 	      struct value *temp = arg1;
 
-	      type = TYPE_FIELD_TYPE (type, 1);
+	      type = type->field (1).type ();
 	      /* i18n: Do not translate the "_m2_high" part!  */
 	      arg1 = value_struct_elt (&temp, NULL, "_m2_high", NULL,
 				       _("unbounded structure "
@@ -250,7 +250,7 @@ evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
       if (m2_is_unbounded_array (type))
 	{
 	  struct value *temp = arg1;
-	  type = TYPE_FIELD_TYPE (type, 0);
+	  type = type->field (0).type ();
 	  if (type == NULL || (type->code () != TYPE_CODE_PTR))
 	    {
 	      warning (_("internal error: unbounded "

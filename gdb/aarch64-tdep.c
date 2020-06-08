@@ -1352,7 +1352,7 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 	    if (field_is_static (&type->field (i)))
 	      continue;
 
-	    struct type *member = check_typedef (TYPE_FIELD_TYPE (type, i));
+	    struct type *member = check_typedef (type->field (i).type ());
 
 	    int sub_count = aapcs_is_vfp_call_or_return_candidate_1
 			      (member, fundamental_type);

@@ -158,14 +158,14 @@ compile_object_run (struct compile_module *module)
 	{
 	  gdb_assert (regs_addr != 0);
 	  vargs[current_arg] = value_from_pointer
-			  (TYPE_FIELD_TYPE (func_type, current_arg), regs_addr);
+			  (func_type->field (current_arg).type (), regs_addr);
 	  ++current_arg;
 	}
       if (func_type->num_fields () >= 2)
 	{
 	  gdb_assert (data->out_value_addr != 0);
 	  vargs[current_arg] = value_from_pointer
-	       (TYPE_FIELD_TYPE (func_type, current_arg), data->out_value_addr);
+	       (func_type->field (current_arg).type (), data->out_value_addr);
 	  ++current_arg;
 	}
       gdb_assert (current_arg == func_type->num_fields ());

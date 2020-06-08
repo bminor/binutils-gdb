@@ -1,5 +1,10 @@
 2020-06-08  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_FIELD_TYPE): Remove.  Change all call sites
+	to use type::field and field::type instead.
+
+2020-06-08  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (FIELD_TYPE): Remove.  Change all call sites
 	to use field::type instead.
 

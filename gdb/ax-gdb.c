@@ -1417,7 +1417,7 @@ gen_primitive_field (struct agent_expr *ax, struct axs_value *value,
 {
   /* Is this a bitfield?  */
   if (TYPE_FIELD_PACKED (type, fieldno))
-    gen_bitfield_ref (ax, value, TYPE_FIELD_TYPE (type, fieldno),
+    gen_bitfield_ref (ax, value, type->field (fieldno).type (),
 		      (offset * TARGET_CHAR_BIT
 		       + TYPE_FIELD_BITPOS (type, fieldno)),
 		      (offset * TARGET_CHAR_BIT
@@ -1428,7 +1428,7 @@ gen_primitive_field (struct agent_expr *ax, struct axs_value *value,
       gen_offset (ax, offset
 		  + TYPE_FIELD_BITPOS (type, fieldno) / TARGET_CHAR_BIT);
       value->kind = axs_lvalue_memory;
-      value->type = TYPE_FIELD_TYPE (type, fieldno);
+      value->type = type->field (fieldno).type ();
     }
 }
 
@@ -1551,7 +1551,7 @@ gen_static_field (struct agent_expr *ax, struct axs_value *value,
     {
       ax_const_l (ax, TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
       value->kind = axs_lvalue_memory;
-      value->type = TYPE_FIELD_TYPE (type, fieldno);
+      value->type = type->field (fieldno).type ();
       value->optimized_out = 0;
     }
   else

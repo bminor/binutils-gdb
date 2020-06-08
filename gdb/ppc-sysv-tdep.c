@@ -1146,7 +1146,7 @@ ppc64_aggregate_candidate (struct type *type,
 		continue;
 
 	      sub_count = ppc64_aggregate_candidate
-			   (TYPE_FIELD_TYPE (type, i), field_type);
+			   (type->field (i).type (), field_type);
 	      if (sub_count == -1)
 		return -1;
 
@@ -1498,7 +1498,7 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 	{
 	  while (type->code () == TYPE_CODE_STRUCT
 		 && type->num_fields () == 1)
-	    type = check_typedef (TYPE_FIELD_TYPE (type, 0));
+	    type = check_typedef (type->field (0).type ());
 
 	  if (type->code () == TYPE_CODE_FLT)
 	    ppc64_sysv_abi_push_freg (gdbarch, type, val, argpos);

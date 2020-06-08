@@ -486,7 +486,7 @@ rust_print_enum (struct value *val, struct ui_file *stream, int recurse,
 
   int variant_fieldno = rust_enum_variant (type);
   val = value_field (val, variant_fieldno);
-  struct type *variant_type = TYPE_FIELD_TYPE (type, variant_fieldno);
+  struct type *variant_type = type->field (variant_fieldno).type ();
 
   int nfields = variant_type->num_fields ();
 
@@ -775,7 +775,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
 			  styled_string (variable_name_style.style (),
 					 TYPE_FIELD_NAME (type, i)));
 
-      rust_internal_print_type (TYPE_FIELD_TYPE (type, i), NULL,
+      rust_internal_print_type (type->field (i).type (), NULL,
 				stream, (is_enum ? show : show - 1),
 				level + 2, flags, is_enum, podata);
       if (!for_rust_enum || flags->print_offsets)
@@ -860,7 +860,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
 	  QUIT;
 	  if (i > 0)
 	    fputs_filtered (", ", stream);
-	  rust_internal_print_type (TYPE_FIELD_TYPE (type, i), "", stream,
+	  rust_internal_print_type (type->field (i).type (), "", stream,
 				    -1, 0, flags, false, podata);
 	}
       fputs_filtered (")", stream);
@@ -1015,7 +1015,7 @@ rust_composite_type (struct type *original,
   if (i > 0)
     TYPE_LENGTH (result)
       = (TYPE_FIELD_BITPOS (result, i - 1) / TARGET_CHAR_BIT +
-	 TYPE_LENGTH (TYPE_FIELD_TYPE (result, i - 1)));
+	 TYPE_LENGTH (result->field (i - 1).type ()));
   return result;
 }
 
@@ -1119,7 +1119,7 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
   if (fn_type->num_fields () == 0)
     error (_("Function '%s' takes no arguments"), name.c_str ());
 
-  if (TYPE_FIELD_TYPE (fn_type, 0)->code () == TYPE_CODE_PTR)
+  if (fn_type->field (0).type ()->code () == TYPE_CODE_PTR)
     args[0] = value_addr (args[0]);
 
   function = address_of_variable (sym.symbol, block);
@@ -1314,7 +1314,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
 	    {
 	      if (strcmp (TYPE_FIELD_NAME (type, i), "data_ptr") == 0)
 		{
-		  base_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, i));
+		  base_type = TYPE_TARGET_TYPE (type->field (i).type ());
 		  break;
 		}
 	    }

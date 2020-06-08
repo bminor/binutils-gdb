@@ -551,7 +551,7 @@ amd64_has_unaligned_fields (struct type *type)
     {
       for (int i = 0; i < type->num_fields (); i++)
 	{
-	  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
+	  struct type *subtype = check_typedef (type->field (i).type ());
 	  int bitpos = TYPE_FIELD_BITPOS (type, i);
 	  int align = type_align(subtype);
 
@@ -587,7 +587,7 @@ amd64_classify_aggregate_field (struct type *type, int i,
 				enum amd64_reg_class theclass[2],
 				unsigned int bitoffset)
 {
-  struct type *subtype = check_typedef (TYPE_FIELD_TYPE (type, i));
+  struct type *subtype = check_typedef (type->field (i).type ());
   int bitpos = bitoffset + TYPE_FIELD_BITPOS (type, i);
   int pos = bitpos / 64;
   enum amd64_reg_class subclass[2];

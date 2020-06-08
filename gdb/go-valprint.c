@@ -44,7 +44,7 @@ print_go_string (struct type *type,
 		 const struct value_print_options *options)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
-  struct type *elt_ptr_type = TYPE_FIELD_TYPE (type, 0);
+  struct type *elt_ptr_type = type->field (0).type ();
   struct type *elt_type = TYPE_TARGET_TYPE (elt_ptr_type);
   LONGEST length;
   /* TODO(dje): The encapsulation of what a pointer is belongs in value.c.

@@ -480,7 +480,7 @@ score_type_needs_double_align (struct type *type)
 
       n = type->num_fields ();
       for (i = 0; i < n; i++)
-        if (score_type_needs_double_align (TYPE_FIELD_TYPE (type, i)))
+        if (score_type_needs_double_align (type->field (i).type ()))
           return 1;
       return 0;
     }

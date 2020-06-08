@@ -75,8 +75,8 @@ gccgo_string_p (struct type *type)
 
   if (type->num_fields () == 2)
     {
-      struct type *type0 = TYPE_FIELD_TYPE (type, 0);
-      struct type *type1 = TYPE_FIELD_TYPE (type, 1);
+      struct type *type0 = type->field (0).type ();
+      struct type *type1 = type->field (1).type ();
 
       type0 = check_typedef (type0);
       type1 = check_typedef (type1);

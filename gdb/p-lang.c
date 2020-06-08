@@ -113,11 +113,11 @@ is_pascal_string_type (struct type *type,int *length_pos,
           if (length_pos)
 	    *length_pos = TYPE_FIELD_BITPOS (type, 0) / TARGET_CHAR_BIT;
           if (length_size)
-	    *length_size = TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0));
+	    *length_size = TYPE_LENGTH (type->field (0).type ());
           if (string_pos)
 	    *string_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
           if (char_type)
-	    *char_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 1));
+	    *char_type = TYPE_TARGET_TYPE (type->field (1).type ());
  	  if (arrayname)
 	    *arrayname = TYPE_FIELD_NAME (type, 1);
          return 2;
@@ -133,13 +133,13 @@ is_pascal_string_type (struct type *type,int *length_pos,
 	  if (length_pos)
 	    *length_pos = TYPE_FIELD_BITPOS (type, 1) / TARGET_CHAR_BIT;
 	  if (length_size)
-	    *length_size = TYPE_LENGTH (TYPE_FIELD_TYPE (type, 1));
+	    *length_size = TYPE_LENGTH (type->field (1).type ());
 	  if (string_pos)
 	    *string_pos = TYPE_FIELD_BITPOS (type, 2) / TARGET_CHAR_BIT;
           /* FIXME: how can I detect wide chars in GPC ??  */
           if (char_type)
 	    {
-	      *char_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, 2));
+	      *char_type = TYPE_TARGET_TYPE (type->field (2).type ());
 
 	      if ((*char_type)->code () == TYPE_CODE_ARRAY)
 		*char_type = TYPE_TARGET_TYPE (*char_type);

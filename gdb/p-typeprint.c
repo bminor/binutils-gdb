@@ -327,7 +327,7 @@ pascal_print_func_args (struct type *type, struct ui_file *stream,
          {
          fprintf_filtered (stream, "var ");
          } */
-      pascal_print_type (TYPE_FIELD_TYPE (type, i), ""	/* TYPE_FIELD_NAME
+      pascal_print_type (type->field (i).type (), ""	/* TYPE_FIELD_NAME
 							   seems invalid!  */
 			 ,stream, -1, 0, flags);
     }
@@ -620,7 +620,7 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
 	      print_spaces_filtered (level + 4, stream);
 	      if (field_is_static (&type->field (i)))
 		fprintf_filtered (stream, "static ");
-	      pascal_print_type (TYPE_FIELD_TYPE (type, i),
+	      pascal_print_type (type->field (i).type (),
 				 TYPE_FIELD_NAME (type, i),
 				 stream, show - 1, level + 4, flags);
 	      if (!field_is_static (&type->field (i))

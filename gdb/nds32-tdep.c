@@ -1408,7 +1408,7 @@ nds32_check_calling_use_fpr (struct type *type)
       else if (t->num_fields () != 1)
 	return 0;
       else
-	t = TYPE_FIELD_TYPE (t, 0);
+	t = t->field (0).type ();
     }
 
   return typecode == TYPE_CODE_FLT;

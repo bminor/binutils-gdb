@@ -1420,8 +1420,8 @@ ada_fixup_array_indexes_type (struct type *index_desc_type)
      If our INDEX_DESC_TYPE was generated using the older encoding,
      the field type should be a meaningless integer type whose name
      is not equal to the field name.  */
-  if (TYPE_FIELD_TYPE (index_desc_type, 0)->name () != NULL
-      && strcmp (TYPE_FIELD_TYPE (index_desc_type, 0)->name (),
+  if (index_desc_type->field (0).type ()->name () != NULL
+      && strcmp (index_desc_type->field (0).type ()->name (),
                  TYPE_FIELD_NAME (index_desc_type, 0)) == 0)
     return;
 
@@ -1622,7 +1622,7 @@ fat_pntr_bounds_bitsize (struct type *type)
   if (TYPE_FIELD_BITSIZE (type, 1) > 0)
     return TYPE_FIELD_BITSIZE (type, 1);
   else
-    return 8 * TYPE_LENGTH (ada_check_typedef (TYPE_FIELD_TYPE (type, 1)));
+    return 8 * TYPE_LENGTH (ada_check_typedef (type->field (1).type ()));
 }
 
 /* If TYPE is the type of an array descriptor (fat or thin pointer) or a
@@ -1637,7 +1637,7 @@ desc_data_target_type (struct type *type)
 
   /* NOTE: The following is bogus; see comment in desc_bounds.  */
   if (is_thin_pntr (type))
-    return desc_base_type (TYPE_FIELD_TYPE (thin_descriptor_type (type), 1));
+    return desc_base_type (thin_descriptor_type (type)->field (1).type ());
   else if (is_thick_pntr (type))
     {
       struct type *data_type = lookup_struct_elt_type (type, "P_ARRAY", 1);
@@ -1688,7 +1688,7 @@ fat_pntr_data_bitsize (struct type *type)
   if (TYPE_FIELD_BITSIZE (type, 0) > 0)
     return TYPE_FIELD_BITSIZE (type, 0);
   else
-    return TARGET_CHAR_BIT * TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0));
+    return TARGET_CHAR_BIT * TYPE_LENGTH (type->field (0).type ());
 }
 
 /* If BOUNDS is an array-bounds structure (or pointer to one), return
@@ -1727,7 +1727,7 @@ desc_bound_bitsize (struct type *type, int i, int which)
   if (TYPE_FIELD_BITSIZE (type, 2 * i + which - 2) > 0)
     return TYPE_FIELD_BITSIZE (type, 2 * i + which - 2);
   else
-    return 8 * TYPE_LENGTH (TYPE_FIELD_TYPE (type, 2 * i + which - 2));
+    return 8 * TYPE_LENGTH (type->field (2 * i + which - 2).type ());
 }
 
 /* If TYPE is the type of an array-bounds structure, the type of its
@@ -2078,7 +2078,7 @@ constrained_packed_array_type (struct type *type, long *elt_bits)
 
   index_type_desc = ada_find_parallel_type (type, "___XA");
   if (index_type_desc)
-    index_type = to_fixed_range_type (TYPE_FIELD_TYPE (index_type_desc, 0),
+    index_type = to_fixed_range_type (index_type_desc->field (0).type (),
 				      NULL);
   else
     index_type = type->index_type ();
@@ -2948,7 +2948,7 @@ ada_array_bound_from_type (struct type *arr_type, int n, int which)
     }
 
   if (index_type_desc != NULL)
-    index_type = to_fixed_range_type (TYPE_FIELD_TYPE (index_type_desc, n - 1),
+    index_type = to_fixed_range_type (index_type_desc->field (n - 1).type (),
 				      NULL);
   else
     {
@@ -3163,7 +3163,7 @@ ada_print_symbol_signature (struct ui_file *stream, struct symbol *sym,
 	{
 	  if (i > 0)
 	    fprintf_filtered (stream, "; ");
-	  ada_print_type (TYPE_FIELD_TYPE (type, i), NULL, stream, -1, 0,
+	  ada_print_type (type->field (i).type (), NULL, stream, -1, 0,
 			  flags);
 	}
       fprintf_filtered (stream, ")");
@@ -3854,8 +3854,7 @@ ada_args_match (struct symbol *func, struct value **actuals, int n_actuals)
         return 0;
       else
         {
-          struct type *ftype = ada_check_typedef (TYPE_FIELD_TYPE (func_type,
-								   i));
+          struct type *ftype = ada_check_typedef (func_type->field (i).type ());
           struct type *atype = ada_check_typedef (value_type (actuals[i]));
 
           if (!ada_type_match (ftype, atype, 1))
@@ -4505,14 +4504,14 @@ make_array_descriptor (struct type *type, struct value *arr)
   modify_field (value_type (descriptor),
 		value_contents_writeable (descriptor),
 		value_pointer (ensure_lval (arr),
-			       TYPE_FIELD_TYPE (desc_type, 0)),
+			       desc_type->field (0).type ()),
 		fat_pntr_data_bitpos (desc_type),
 		fat_pntr_data_bitsize (desc_type));
 
   modify_field (value_type (descriptor),
 		value_contents_writeable (descriptor),
 		value_pointer (bounds,
-			       TYPE_FIELD_TYPE (desc_type, 1)),
+			       desc_type->field (1).type ()),
 		fat_pntr_bounds_bitpos (desc_type),
 		fat_pntr_bounds_bitsize (desc_type));
 
@@ -6480,8 +6479,8 @@ ada_is_ignored_field (struct type *type, int field_num)
   /* If this is the dispatch table of a tagged type or an interface tag,
      then ignore.  */
   if (ada_is_tagged_type (type, 1)
-      && (ada_is_dispatch_table_ptr_type (TYPE_FIELD_TYPE (type, field_num))
-	  || ada_is_interface_tag (TYPE_FIELD_TYPE (type, field_num))))
+      && (ada_is_dispatch_table_ptr_type (type->field (field_num).type ())
+	  || ada_is_interface_tag (type->field (field_num).type ())))
     return 1;
 
   /* Not a special field, so it should not be ignored.  */
@@ -6792,7 +6791,7 @@ ada_parent_type (struct type *type)
   for (i = 0; i < type->num_fields (); i += 1)
     if (ada_is_parent_field (type, i))
       {
-        struct type *parent_type = TYPE_FIELD_TYPE (type, i);
+        struct type *parent_type = type->field (i).type ();
 
         /* If the _parent field is a pointer, then dereference it.  */
         if (parent_type->code () == TYPE_CODE_PTR)
@@ -6860,7 +6859,7 @@ ada_is_variant_part (struct type *type, int field_num)
   if (!ADA_TYPE_P (type))
     return 0;
 
-  struct type *field_type = TYPE_FIELD_TYPE (type, field_num);
+  struct type *field_type = type->field (field_num).type ();
 
   return (field_type->code () == TYPE_CODE_UNION
 	  || (is_dynamic_field (type, field_num)
@@ -7049,7 +7048,7 @@ ada_value_primitive_field (struct value *arg1, int offset, int fieldno,
   struct type *type;
 
   arg_type = ada_check_typedef (arg_type);
-  type = TYPE_FIELD_TYPE (arg_type, fieldno);
+  type = arg_type->field (fieldno).type ();
 
   /* Handle packed fields.  It might be that the field is not packed
      relative to its containing structure, but the structure itself is
@@ -7180,7 +7179,7 @@ find_struct_field (const char *name, struct type *type, int offset,
           int bit_size = TYPE_FIELD_BITSIZE (type, i);
 
 	  if (field_type_p != NULL)
-	    *field_type_p = TYPE_FIELD_TYPE (type, i);
+	    *field_type_p = type->field (i).type ();
 	  if (byte_offset_p != NULL)
 	    *byte_offset_p = fld_offset;
 	  if (bit_offset_p != NULL)
@@ -7191,7 +7190,7 @@ find_struct_field (const char *name, struct type *type, int offset,
         }
       else if (ada_is_wrapper_field (type, i))
         {
-	  if (find_struct_field (name, TYPE_FIELD_TYPE (type, i), fld_offset,
+	  if (find_struct_field (name, type->field (i).type (), fld_offset,
 				 field_type_p, byte_offset_p, bit_offset_p,
 				 bit_size_p, index_p))
             return 1;
@@ -7202,11 +7201,11 @@ find_struct_field (const char *name, struct type *type, int offset,
 	     fixed type?? */
           int j;
           struct type *field_type
-	    = ada_check_typedef (TYPE_FIELD_TYPE (type, i));
+	    = ada_check_typedef (type->field (i).type ());
 
           for (j = 0; j < field_type->num_fields (); j += 1)
             {
-              if (find_struct_field (name, TYPE_FIELD_TYPE (field_type, j),
+              if (find_struct_field (name, field_type->field (j).type (),
                                      fld_offset
                                      + TYPE_FIELD_BITPOS (field_type, j) / 8,
                                      field_type_p, byte_offset_p,
@@ -7226,7 +7225,7 @@ find_struct_field (const char *name, struct type *type, int offset,
       int bit_pos = TYPE_FIELD_BITPOS (type, parent_offset);
       int fld_offset = offset + bit_pos / 8;
 
-      if (find_struct_field (name, TYPE_FIELD_TYPE (type, parent_offset),
+      if (find_struct_field (name, type->field (parent_offset).type (),
                              fld_offset, field_type_p, byte_offset_p,
                              bit_offset_p, bit_size_p, index_p))
         return 1;
@@ -7293,7 +7292,7 @@ ada_search_struct_field (const char *name, struct value *arg, int offset,
           struct value *v =     /* Do not let indent join lines here.  */
             ada_search_struct_field (name, arg,
                                      offset + TYPE_FIELD_BITPOS (type, i) / 8,
-                                     TYPE_FIELD_TYPE (type, i));
+                                     type->field (i).type ());
 
           if (v != NULL)
             return v;
@@ -7303,8 +7302,7 @@ ada_search_struct_field (const char *name, struct value *arg, int offset,
         {
 	  /* PNH: Do we ever get here?  See find_struct_field.  */
           int j;
-          struct type *field_type = ada_check_typedef (TYPE_FIELD_TYPE (type,
-									i));
+          struct type *field_type = ada_check_typedef (type->field (i).type ());
           int var_offset = offset + TYPE_FIELD_BITPOS (type, i) / 8;
 
           for (j = 0; j < field_type->num_fields (); j += 1)
@@ -7313,7 +7311,7 @@ ada_search_struct_field (const char *name, struct value *arg, int offset,
 							   break.  */
                 (name, arg,
                  var_offset + TYPE_FIELD_BITPOS (field_type, j) / 8,
-                 TYPE_FIELD_TYPE (field_type, j));
+                 field_type->field (j).type ());
 
               if (v != NULL)
                 return v;
@@ -7328,7 +7326,7 @@ ada_search_struct_field (const char *name, struct value *arg, int offset,
     {
       struct value *v = ada_search_struct_field (
 	name, arg, offset + TYPE_FIELD_BITPOS (type, parent_offset) / 8,
-	TYPE_FIELD_TYPE (type, parent_offset));
+	type->field (parent_offset).type ());
 
       if (v != NULL)
         return v;
@@ -7374,7 +7372,7 @@ ada_index_struct_field_1 (int *index_p, struct value *arg, int offset,
           struct value *v =     /* Do not let indent join lines here.  */
             ada_index_struct_field_1 (index_p, arg,
 				      offset + TYPE_FIELD_BITPOS (type, i) / 8,
-				      TYPE_FIELD_TYPE (type, i));
+				      type->field (i).type ());
 
           if (v != NULL)
             return v;
@@ -7481,11 +7479,11 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
         }
 
       else if (field_name_match (t_field_name, name))
-	return TYPE_FIELD_TYPE (type, i);
+	return type->field (i).type ();
 
       else if (ada_is_wrapper_field (type, i))
         {
-          t = ada_lookup_struct_elt_type (TYPE_FIELD_TYPE (type, i), name,
+          t = ada_lookup_struct_elt_type (type->field (i).type (), name,
                                           0, 1);
           if (t != NULL)
 	    return t;
@@ -7494,8 +7492,7 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
       else if (ada_is_variant_part (type, i))
         {
           int j;
-          struct type *field_type = ada_check_typedef (TYPE_FIELD_TYPE (type,
-									i));
+          struct type *field_type = ada_check_typedef (type->field (i).type ());
 
           for (j = field_type->num_fields () - 1; j >= 0; j -= 1)
             {
@@ -7507,10 +7504,9 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
 
 	      if (v_field_name != NULL 
 		  && field_name_match (v_field_name, name))
-		t = TYPE_FIELD_TYPE (field_type, j);
+		t = field_type->field (j).type ();
 	      else
-		t = ada_lookup_struct_elt_type (TYPE_FIELD_TYPE (field_type,
-								 j),
+		t = ada_lookup_struct_elt_type (field_type->field (j).type (),
 						name, 0, 1);
 
               if (t != NULL)
@@ -7527,7 +7523,7 @@ ada_lookup_struct_elt_type (struct type *type, const char *name, int refok,
       {
         struct type *t;
 
-        t = ada_lookup_struct_elt_type (TYPE_FIELD_TYPE (type, parent_offset),
+        t = ada_lookup_struct_elt_type (type->field (parent_offset).type (),
                                         name, 0, 1);
         if (t != NULL)
 	  return t;
@@ -7916,7 +7912,7 @@ is_dynamic_field (struct type *templ_type, int field_num)
   const char *name = TYPE_FIELD_NAME (templ_type, field_num);
 
   return name != NULL
-    && TYPE_FIELD_TYPE (templ_type, field_num)->code () == TYPE_CODE_PTR
+    && templ_type->field (field_num).type ()->code () == TYPE_CODE_PTR
     && strstr (name, "___XVL") != NULL;
 }
 
@@ -8029,7 +8025,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	  const gdb_byte *field_valaddr = valaddr;
 	  CORE_ADDR field_address = address;
 	  struct type *field_type =
-	    TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (type, f));
+	    TYPE_TARGET_TYPE (type->field (f).type ());
 
           if (dval0 == NULL)
 	    {
@@ -8097,7 +8093,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	     adding overflow recovery code to this already complex code,
 	     we just assume that it's not going to happen.  */
           fld_bit_len =
-            TYPE_LENGTH (TYPE_FIELD_TYPE (rtype, f)) * TARGET_CHAR_BIT;
+            TYPE_LENGTH (rtype->field (f).type ()) * TARGET_CHAR_BIT;
         }
       else
         {
@@ -8111,14 +8107,14 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	     structure, the typedef is the only clue which allows us
 	     to distinguish between the two options.  Stripping it
 	     would prevent us from printing this field appropriately.  */
-          rtype->field (f).set_type (TYPE_FIELD_TYPE (type, f));
+          rtype->field (f).set_type (type->field (f).type ());
           TYPE_FIELD_NAME (rtype, f) = TYPE_FIELD_NAME (type, f);
           if (TYPE_FIELD_BITSIZE (type, f) > 0)
             fld_bit_len =
               TYPE_FIELD_BITSIZE (rtype, f) = TYPE_FIELD_BITSIZE (type, f);
           else
 	    {
-	      struct type *field_type = TYPE_FIELD_TYPE (type, f);
+	      struct type *field_type = type->field (f).type ();
 
 	      /* We need to be careful of typedefs when computing
 		 the length of our field.  If this is a typedef,
@@ -8162,7 +8158,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 
       branch_type =
         to_fixed_variant_branch_type
-        (TYPE_FIELD_TYPE (type, variant_field),
+        (type->field (variant_field).type (),
          cond_offset_host (valaddr, off / TARGET_CHAR_BIT),
          cond_offset_target (address, off / TARGET_CHAR_BIT), dval);
       if (branch_type == NULL)
@@ -8176,7 +8172,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
           rtype->field (variant_field).set_type (branch_type);
           TYPE_FIELD_NAME (rtype, variant_field) = "S";
           fld_bit_len =
-            TYPE_LENGTH (TYPE_FIELD_TYPE (rtype, variant_field)) *
+            TYPE_LENGTH (rtype->field (variant_field).type ()) *
             TARGET_CHAR_BIT;
           if (off + fld_bit_len > bit_len)
             bit_len = off + fld_bit_len;
@@ -8257,7 +8253,7 @@ template_to_static_fixed_type (struct type *type0)
 
   for (f = 0; f < nfields; f += 1)
     {
-      struct type *field_type = TYPE_FIELD_TYPE (type0, f);
+      struct type *field_type = type0->field (f).type ();
       struct type *new_type;
 
       if (is_dynamic_field (type0, f))
@@ -8341,7 +8337,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   TYPE_LENGTH (rtype) = TYPE_LENGTH (type);
 
   branch_type = to_fixed_variant_branch_type
-    (TYPE_FIELD_TYPE (type, variant_field),
+    (type->field (variant_field).type (),
      cond_offset_host (valaddr,
                        TYPE_FIELD_BITPOS (type, variant_field)
                        / TARGET_CHAR_BIT),
@@ -8363,7 +8359,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
       TYPE_FIELD_BITSIZE (rtype, variant_field) = 0;
       TYPE_LENGTH (rtype) += TYPE_LENGTH (branch_type);
     }
-  TYPE_LENGTH (rtype) -= TYPE_LENGTH (TYPE_FIELD_TYPE (type, variant_field));
+  TYPE_LENGTH (rtype) -= TYPE_LENGTH (type->field (variant_field).type ());
 
   value_free_to_mark (mark);
   return rtype;
@@ -8449,14 +8445,14 @@ to_fixed_variant_branch_type (struct type *var_type0, const gdb_byte *valaddr,
     return empty_record (var_type);
   else if (is_dynamic_field (var_type, which))
     return to_fixed_record_type
-      (TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (var_type, which)),
+      (TYPE_TARGET_TYPE (var_type->field (which).type ()),
        valaddr, address, dval);
-  else if (variant_field_index (TYPE_FIELD_TYPE (var_type, which)) >= 0)
+  else if (variant_field_index (var_type->field (which).type ()) >= 0)
     return
       to_fixed_record_type
-      (TYPE_FIELD_TYPE (var_type, which), valaddr, address, dval);
+      (var_type->field (which).type (), valaddr, address, dval);
   else
-    return TYPE_FIELD_TYPE (var_type, which);
+    return var_type->field (which).type ();
 }
 
 /* Assuming RANGE_TYPE is a TYPE_CODE_RANGE, return nonzero if
@@ -8523,7 +8519,7 @@ ada_is_redundant_index_type_desc (struct type *array_type,
   for (i = 0; i < desc_type->num_fields (); i++)
     {
       if (!ada_is_redundant_range_encoding (this_layer->index_type (),
-					    TYPE_FIELD_TYPE (desc_type, i)))
+					    desc_type->field (i).type ()))
 	return 0;
       this_layer = check_typedef (TYPE_TARGET_TYPE (this_layer));
     }
@@ -8645,7 +8641,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
       for (i = index_type_desc->num_fields () - 1; i >= 0; i -= 1)
         {
           struct type *range_type =
-            to_fixed_range_type (TYPE_FIELD_TYPE (index_type_desc, i), dval);
+            to_fixed_range_type (index_type_desc->field (i).type (), dval);
 
           result = create_array_type (alloc_type_copy (elt_type0),
                                       result, range_type);
@@ -8900,7 +8896,7 @@ static_unwrap_type (struct type *type)
 {
   if (ada_is_aligner_type (type))
     {
-      struct type *type1 = TYPE_FIELD_TYPE (ada_check_typedef (type), 0);
+      struct type *type1 = ada_check_typedef (type)->field (0).type ();
       if (ada_type_name (type1) == NULL)
 	type1->set_name (ada_type_name (type));
 
@@ -9202,7 +9198,7 @@ ada_get_base_type (struct type *raw_type)
       || real_type_namer->num_fields () != 1)
     return raw_type;
 
-  if (TYPE_FIELD_TYPE (real_type_namer, 0)->code () != TYPE_CODE_REF)
+  if (real_type_namer->field (0).type ()->code () != TYPE_CODE_REF)
     {
       /* This is an older encoding form where the base type needs to be
 	 looked up by name.  We prefer the newer encoding because it is
@@ -9215,7 +9211,7 @@ ada_get_base_type (struct type *raw_type)
     }
 
   /* The field in our XVS type is a reference to the base type.  */
-  return TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (real_type_namer, 0));
+  return TYPE_TARGET_TYPE (real_type_namer->field (0).type ());
 }
 
 /* The type of value designated by TYPE, with all aligners removed.  */
@@ -9224,7 +9220,7 @@ struct type *
 ada_aligned_type (struct type *type)
 {
   if (ada_is_aligner_type (type))
-    return ada_aligned_type (TYPE_FIELD_TYPE (type, 0));
+    return ada_aligned_type (type->field (0).type ());
   else
     return ada_get_base_type (type);
 }
@@ -9237,7 +9233,7 @@ const gdb_byte *
 ada_aligned_value_addr (struct type *type, const gdb_byte *valaddr)
 {
   if (ada_is_aligner_type (type))
-    return ada_aligned_value_addr (TYPE_FIELD_TYPE (type, 0),
+    return ada_aligned_value_addr (type->field (0).type (),
                                    valaddr +
                                    TYPE_FIELD_BITPOS (type,
                                                       0) / TARGET_CHAR_BIT);

@@ -273,7 +273,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 		  fputs_filtered (", ", stream);
 		  wrap_here ("    ");
 		}
-	      f_print_type (TYPE_FIELD_TYPE (type, i), "", stream, -1, 0, 0);
+	      f_print_type (type->field (i).type (), "", stream, -1, 0, 0);
 	    }
 	fprintf_filtered (stream, ")");
       }
@@ -432,12 +432,12 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
 	  fputs_filtered ("\n", stream);
 	  for (index = 0; index < type->num_fields (); index++)
 	    {
-	      f_type_print_base (TYPE_FIELD_TYPE (type, index), stream,
+	      f_type_print_base (type->field (index).type (), stream,
 				 show - 1, level + 4);
 	      fputs_filtered (" :: ", stream);
 	      fputs_styled (TYPE_FIELD_NAME (type, index),
 			    variable_name_style.style (), stream);
-	      f_type_print_varspec_suffix (TYPE_FIELD_TYPE (type, index),
+	      f_type_print_varspec_suffix (type->field (index).type (),
 					   stream, show - 1, 0, 0, 0, false);
 	      fputs_filtered ("\n", stream);
 	    }

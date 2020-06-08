@@ -430,7 +430,7 @@ read_fat_string_value (char *dest, struct value *val, int max_len)
       array_fieldno = ada_get_field_index (type, "P_ARRAY", 0);
       bounds_fieldno = ada_get_field_index (type, "P_BOUNDS", 0);
 
-      bounds_type = TYPE_FIELD_TYPE (type, bounds_fieldno);
+      bounds_type = type->field (bounds_fieldno).type ();
       if (bounds_type->code () == TYPE_CODE_PTR)
         bounds_type = TYPE_TARGET_TYPE (bounds_type);
       if (bounds_type->code () != TYPE_CODE_STRUCT)

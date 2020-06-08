@@ -116,7 +116,7 @@ print_offset_data::update (struct type *type, unsigned int field_idx,
       return;
     }
 
-  struct type *ftype = check_typedef (TYPE_FIELD_TYPE (type, field_idx));
+  struct type *ftype = check_typedef (type->field (field_idx).type ());
   if (type->code () == TYPE_CODE_UNION)
     {
       /* Since union fields don't have the concept of offsets, we just

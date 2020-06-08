@@ -465,7 +465,7 @@ m68k_svr4_return_value (struct gdbarch *gdbarch, struct value *function,
      member, we don't bother to check the member's type here.  */
   if (code == TYPE_CODE_STRUCT && type->num_fields () == 1)
     {
-      type = check_typedef (TYPE_FIELD_TYPE (type, 0));
+      type = check_typedef (type->field (0).type ());
       return m68k_svr4_return_value (gdbarch, function, type, regcache,
 				     readbuf, writebuf);
     }

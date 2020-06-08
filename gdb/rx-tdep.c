@@ -799,7 +799,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			  && i < func_type->num_fields ())
 			{
 			  struct type *p_arg_type =
-			    TYPE_FIELD_TYPE (func_type, i);
+			    func_type->field (i).type ();
 			  p_arg_size = TYPE_LENGTH (p_arg_type);
 			}
 

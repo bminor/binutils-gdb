@@ -832,13 +832,13 @@ sh_use_struct_convention (int renesas_abi, struct type *type)
 
   /* If the first field in the aggregate has the same length as the entire
      aggregate type, the type is returned in registers.  */
-  if (TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) == len)
+  if (TYPE_LENGTH (type->field (0).type ()) == len)
     return 0;
 
   /* If the size of the aggregate is 8 bytes and the first field is
      of size 4 bytes its alignment is equal to long long's alignment,
      so it's returned in registers.  */
-  if (len == 8 && TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) == 4)
+  if (len == 8 && TYPE_LENGTH (type->field (0).type ()) == 4)
     return 0;
 
   /* Otherwise use struct convention.  */
@@ -1050,7 +1050,7 @@ sh_treat_as_flt_p (struct type *type)
     return 0;
   /* Otherwise if the type of that member is float, the whole type is
      treated as float.  */
-  if (TYPE_FIELD_TYPE (type, 0)->code () == TYPE_CODE_FLT)
+  if (type->field (0).type ()->code () == TYPE_CODE_FLT)
     return 1;
   /* Otherwise it's not treated as float.  */
   return 0;

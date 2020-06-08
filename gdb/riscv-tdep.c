@@ -643,13 +643,13 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
   if (regtype->code () == TYPE_CODE_FLT
       || (regtype->code () == TYPE_CODE_UNION
 	  && regtype->num_fields () == 2
-	  && TYPE_FIELD_TYPE (regtype, 0)->code () == TYPE_CODE_FLT
-	  && TYPE_FIELD_TYPE (regtype, 1)->code () == TYPE_CODE_FLT)
+	  && regtype->field (0).type ()->code () == TYPE_CODE_FLT
+	  && regtype->field (1).type ()->code () == TYPE_CODE_FLT)
       || (regtype->code () == TYPE_CODE_UNION
 	  && regtype->num_fields () == 3
-	  && TYPE_FIELD_TYPE (regtype, 0)->code () == TYPE_CODE_FLT
-	  && TYPE_FIELD_TYPE (regtype, 1)->code () == TYPE_CODE_FLT
-	  && TYPE_FIELD_TYPE (regtype, 2)->code () == TYPE_CODE_FLT))
+	  && regtype->field (0).type ()->code () == TYPE_CODE_FLT
+	  && regtype->field (1).type ()->code () == TYPE_CODE_FLT
+	  && regtype->field (2).type ()->code () == TYPE_CODE_FLT))
     {
       struct value_print_options opts;
       const gdb_byte *valaddr = value_contents_for_printing (val);
@@ -2052,7 +2052,7 @@ riscv_struct_info::analyse_inner (struct type *type, int offset)
       if (TYPE_FIELD_LOC_KIND (type, i) != FIELD_LOC_KIND_BITPOS)
 	continue;
 
-      struct type *field_type = TYPE_FIELD_TYPE (type, i);
+      struct type *field_type = type->field (i).type ();
       field_type = check_typedef (field_type);
       int field_offset
 	= offset + TYPE_FIELD_BITPOS (type, i) / TARGET_CHAR_BIT;

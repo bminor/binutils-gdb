@@ -529,7 +529,7 @@ generate_vla_size (compile_instance *compiler,
 	for (i = 0; i < type->num_fields (); ++i)
 	  if (!field_is_static (&type->field (i)))
 	    generate_vla_size (compiler, stream, gdbarch, registers_used, pc,
-			       TYPE_FIELD_TYPE (type, i), sym);
+			       type->field (i).type (), sym);
       }
       break;
     }

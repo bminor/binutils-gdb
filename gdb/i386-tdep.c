@@ -2645,7 +2645,7 @@ i386_16_byte_align_p (struct type *type)
       int i;
       for (i = 0; i < type->num_fields (); i++)
 	{
-	  if (i386_16_byte_align_p (TYPE_FIELD_TYPE (type, i)))
+	  if (i386_16_byte_align_p (type->field (i).type ()))
 	    return 1;
 	}
     }
@@ -2954,7 +2954,7 @@ i386_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
      double' member are returned in %st(0).  */
   if (code == TYPE_CODE_STRUCT && type->num_fields () == 1)
     {
-      type = check_typedef (TYPE_FIELD_TYPE (type, 0));
+      type = check_typedef (type->field (0).type ());
       if (type->code () == TYPE_CODE_FLT)
 	return (len == 4 || len == 8 || len == 12);
     }
@@ -3022,7 +3022,7 @@ i386_return_value (struct gdbarch *gdbarch, struct value *function,
      here.  */
   if (code == TYPE_CODE_STRUCT && type->num_fields () == 1)
     {
-      type = check_typedef (TYPE_FIELD_TYPE (type, 0));
+      type = check_typedef (type->field (0).type ());
       return i386_return_value (gdbarch, function, type, regcache,
 				readbuf, writebuf);
     }
