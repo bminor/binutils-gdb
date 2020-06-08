@@ -1,5 +1,10 @@
 2020-06-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (check_byte_reg): Drop dead conditional
+	around as_bad().
+
+2020-06-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (check_register): Split RegTR handling, to
 	fail recognition also in 64-bit mode as well as with i586 or
 	i686 explicitly enabled.

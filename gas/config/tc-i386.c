@@ -7132,21 +7132,10 @@ check_byte_reg (void)
 	continue;
 
       /* Any other register is bad.  */
-      if (i.types[op].bitfield.class == Reg
-	  || i.types[op].bitfield.class == RegMMX
-	  || i.types[op].bitfield.class == RegSIMD
-	  || i.types[op].bitfield.class == SReg
-	  || i.types[op].bitfield.class == RegCR
-	  || i.types[op].bitfield.class == RegDR
-	  || i.types[op].bitfield.class == RegTR)
-	{
-	  as_bad (_("`%s%s' not allowed with `%s%c'"),
-		  register_prefix,
-		  i.op[op].regs->reg_name,
-		  i.tm.name,
-		  i.suffix);
-	  return 0;
-	}
+      as_bad (_("`%s%s' not allowed with `%s%c'"),
+	      register_prefix, i.op[op].regs->reg_name,
+	      i.tm.name, i.suffix);
+      return 0;
     }
   return 1;
 }
