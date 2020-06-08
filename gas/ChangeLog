@@ -1,3 +1,7 @@
+2020-06-08  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/cfi/cfi-i386-2.d: Skip for PE based targets.
+
 2020-06-08  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (pi): Add checks for RegMask and RegBND.

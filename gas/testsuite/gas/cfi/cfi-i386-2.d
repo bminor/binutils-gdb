@@ -1,5 +1,8 @@
 #readelf: -wf
 #name: CFI on i386, 2
+# PE based targets do not support the .type pseudo-op
+#notarget: *-*-mingw* *-*-cygwin* *-*-pe
+
 Contents of the .eh_frame section:
 
 00000000 0+0014 0+0000 CIE
