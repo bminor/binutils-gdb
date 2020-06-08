@@ -1,5 +1,11 @@
 2020-06-30  Nelson Chu  <nelson.chu@sifive.com>
 
+	* opcode/riscv-opc.h: Support the unprivileged CSR.  The versions
+	of the unprivileged CSR should be PRIV_SPEC_CLASS_NONE for now.
+	* opcode/riscv.h (enum riscv_csr_class): Add CSR_CLASS_DEBUG.
+
+2020-06-30  Nelson Chu  <nelson.chu@sifive.com>
+
 	* opcode/riscv-opc.h: Cleanup and remove the unused macros.
 
 2020-06-29  Alan Modra  <amodra@gmail.com>

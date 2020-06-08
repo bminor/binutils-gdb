@@ -26,5 +26,3 @@
 .*Warning: Invalid CSR `pmpaddr14' for the privilege spec `1.9.1'
 .*Warning: Invalid CSR `pmpaddr15' for the privilege spec `1.9.1'
 .*Warning: Invalid CSR `mcountinhibit' for the privilege spec `1.9.1'
-.*Warning: Invalid CSR `dscratch0' for the privilege spec `1.9.1'
-.*Warning: Invalid CSR `dscratch1' for the privilege spec `1.9.1'

@@ -700,53 +700,49 @@ riscv_init_csr_hash (const char *name,
     pre_entry->next = entry;
 }
 
-/* Check wether the CSR is valid according to the ISA.  */
+/* Return the suitable CSR address after checking the ISA dependency and
+   priv spec versions.  */
 
-static void
-riscv_csr_class_check (const char *s,
-		       enum riscv_csr_class csr_class)
+static unsigned int
+riscv_csr_address (const char *csr_name,
+		   struct riscv_csr_extra *entry)
 {
+  struct riscv_csr_extra *saved_entry = entry;
+  enum riscv_csr_class csr_class = entry->csr_class;
+  bfd_boolean need_check_version = TRUE;
   bfd_boolean result = TRUE;
-
-  /* Don't check the ISA dependency when -mcsr-check isn't set.  */
-  if (!riscv_opts.csr_check)
-    return;
 
   switch (csr_class)
     {
     case CSR_CLASS_I:
       result = riscv_subset_supports ("i");
       break;
-    case CSR_CLASS_F:
-      result = riscv_subset_supports ("f");
-      break;
     case CSR_CLASS_I_32:
       result = (xlen == 32 && riscv_subset_supports ("i"));
+      break;
+    case CSR_CLASS_F:
+      result = riscv_subset_supports ("f");
+      need_check_version = FALSE;
+      break;
+    case CSR_CLASS_DEBUG:
+      need_check_version = FALSE;
       break;
     default:
       as_bad (_("internal: bad RISC-V CSR class (0x%x)"), csr_class);
     }
 
-  if (!result)
-    as_warn (_("Invalid CSR `%s' for the current ISA"), s);
-}
-
-/* Check and find the CSR address according to the privilege spec version.  */
-
-static void
-riscv_csr_version_check (const char *csr_name,
-			 struct riscv_csr_extra **entryP)
-{
-  struct riscv_csr_extra *entry = *entryP;
+  /* Don't report the ISA conflict when -mcsr-check isn't set.  */
+  if (riscv_opts.csr_check && !result)
+    as_warn (_("Invalid CSR `%s' for the current ISA"), csr_name);
 
   while (entry != NULL)
     {
-      if (default_priv_spec >= entry->define_version
-	  && default_priv_spec < entry->abort_version)
+      if (!need_check_version
+	  || (default_priv_spec >= entry->define_version
+	      && default_priv_spec < entry->abort_version))
        {
          /* Find the suitable CSR according to the specific version.  */
-         *entryP = entry;
-         return;
+         return entry->address;
        }
       entry = entry->next;
     }
@@ -763,6 +759,8 @@ riscv_csr_version_check (const char *csr_name,
 	as_warn (_("Invalid CSR `%s' for the privilege spec `%s'"),
 		 csr_name, priv_name);
     }
+
+  return saved_entry->address;
 }
 
 /* Once the CSR is defined, including the old privilege spec, then we call
@@ -785,10 +783,7 @@ reg_csr_lookup_internal (const char *s)
      will regard it as a "Unknown CSR" and report error.  If user use number
      to set the CSR, but over the range (> 0xfff), then assembler will report
      "Improper CSR" error for it.  */
-  riscv_csr_class_check (s, r->csr_class);
-  riscv_csr_version_check (s, &r);
-
-  return r->address;
+  return riscv_csr_address (s, r);
 }
 
 static unsigned int

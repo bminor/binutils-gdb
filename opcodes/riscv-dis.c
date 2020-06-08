@@ -377,9 +377,12 @@ print_insn_args (const char *d, insn_t l, bfd_vma pc, disassemble_info *info)
 		if (default_priv_spec == PRIV_SPEC_CLASS_NONE)
 		  default_priv_spec = PRIV_SPEC_CLASS_DRAFT - 1;
 
-#define DECLARE_CSR(name, num, class, define_version, abort_version) \
-		if (default_priv_spec >= define_version		     \
-		    && default_priv_spec < abort_version)	     \
+#define DECLARE_CSR(name, num, class, define_version, abort_version)	\
+		if (riscv_csr_hash[num] == NULL 			\
+		    && ((define_version == PRIV_SPEC_CLASS_NONE 	\
+			 && abort_version == PRIV_SPEC_CLASS_NONE)	\
+			|| (default_priv_spec >= define_version 	\
+			    && default_priv_spec < abort_version)))	\
 		  riscv_csr_hash[num] = #name;
 #define DECLARE_CSR_ALIAS(name, num, class, define_version, abort_version) \
 		DECLARE_CSR (name, num, class, define_version, abort_version)

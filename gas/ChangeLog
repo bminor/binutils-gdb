@@ -1,3 +1,37 @@
+2020-06-30  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (riscv_csr_class_check): Removed.  Move the
+	checking into riscv_csr_address.
+	(riscv_csr_version_check): Likewise.
+	(riscv_csr_address): New function.  Return the suitable CSR address
+	after checking the ISA dependency and versions.  Issue warnings if
+	we find any conflict and -mcsr-check is set.  CSR_CLASS_F and
+	CSR_CLASS_DEBUG are unprivileged CSR for now, so don't check the
+	priv spec versions for them.
+	(reg_csr_lookup_internal): Call riscv_csr_address to find the
+	suitable CSR address.
+	* testsuite/gas/riscv/priv-reg-fail-fext.d: Remove -mpriv-spec=1.11.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-01.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-rv32-only.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-fext.l:  We don't care the
+	priv spec warnings here.  These warnings are added by accident.
+	Remove them and only focus on the ISA dependency warnings.
+	* testsuite/gas/riscv/priv-reg-fail-rv32-only.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-read-only-01.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p9.l: Updated since
+	dscratch0 and dscratch1 are regarded as the unprivileged CSR rather
+	than the privileged ones.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p9p1.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p10.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p11.l: Likewise.
+	* testsuite/gas/riscv/priv-reg.s: Likewise.  Add missing debug CSR.
+	* testsuite/gas/riscv/priv-reg-version-1p9.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-version-1p9p1.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-version-1p10.d: Likewise.
+	* testsuite/gas/riscv/priv-reg-version-1p11.d: Likewise.
+	* testsuite/gas/riscv/csr-dw-regnums.d: Likewise.
+	* testsuite/gas/riscv/csr-dw-regnums.s: Likewise.
+
 2020-06-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* tc-i386.c (build_vex_prefix): Support VEX base opcode length > 1.
