@@ -1,5 +1,10 @@
 2020-06-08  Nick Clifton  <nickc@redhat.com>
 
+	PR 26093
+	* doc/binutils.texi (strings): Fix typo.
+
+2020-06-08  Nick Clifton  <nickc@redhat.com>
+
 	PR 26086
 	* dwarf.c (process_debug_info): Check that there is space in the
 	debug_information array before filling in an entry.
