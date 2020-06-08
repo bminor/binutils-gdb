@@ -3267,6 +3267,7 @@ process_debug_info (struct dwarf_section *           section,
 
       if ((do_loc || do_debug_loc || do_debug_ranges)
 	  && num_debug_info_entries == 0
+	  && alloc_num_debug_info_entries > unit
 	  && ! do_types)
 	{
 	  debug_information [unit].cu_offset = cu_offset;
