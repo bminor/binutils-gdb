@@ -3198,10 +3198,12 @@ pi (const char *line, i386_insn *x)
       if (x->types[j].bitfield.class == Reg
 	  || x->types[j].bitfield.class == RegMMX
 	  || x->types[j].bitfield.class == RegSIMD
+	  || x->types[j].bitfield.class == RegMask
 	  || x->types[j].bitfield.class == SReg
 	  || x->types[j].bitfield.class == RegCR
 	  || x->types[j].bitfield.class == RegDR
-	  || x->types[j].bitfield.class == RegTR)
+	  || x->types[j].bitfield.class == RegTR
+	  || x->types[j].bitfield.class == RegBND)
 	fprintf (stdout, "%s\n", x->op[j].regs->reg_name);
       if (operand_type_check (x->types[j], imm))
 	pe (x->op[j].imms);

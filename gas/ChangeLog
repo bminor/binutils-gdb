@@ -1,5 +1,9 @@
 2020-06-08  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (pi): Add checks for RegMask and RegBND.
+
+2020-06-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (check_byte_reg): Drop dead conditional
 	around as_bad().
 
