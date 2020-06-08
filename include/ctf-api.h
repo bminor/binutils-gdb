@@ -285,6 +285,7 @@ extern ctf_file_t *ctf_simple_open (const char *, size_t, const char *, size_t,
 				   size_t, const char *, size_t, int *);
 extern ctf_file_t *ctf_bufopen (const ctf_sect_t *, const ctf_sect_t *,
 				const ctf_sect_t *, int *);
+extern void ctf_ref (ctf_file_t *);
 extern void ctf_file_close (ctf_file_t *);
 
 extern int ctf_arc_write (const char *, ctf_file_t **, size_t,

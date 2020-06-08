@@ -1620,6 +1620,17 @@ bad:
   return NULL;
 }
 
+/* Bump the refcount on the specified CTF container, to allow export of
+   ctf_file_t's from iterators that open and close the ctf_file_t around the
+   loop.  (This does not extend their lifetime beyond that of the ctf_archive_t
+   in which they are contained.)  */
+
+void
+ctf_ref (ctf_file_t *fp)
+{
+  fp->ctf_refcnt++;
+}
+
 /* Close the specified CTF container and free associated data structures.  Note
    that ctf_file_close() is a reference counted operation: if the specified file
    is the parent of other active containers, its reference count will be greater
