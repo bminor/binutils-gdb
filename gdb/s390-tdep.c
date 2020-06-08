@@ -1652,7 +1652,7 @@ s390_effective_inner_type (struct type *type, unsigned int min_size)
 	    continue;
 	  if (inner != NULL)
 	    return type;
-	  inner = FIELD_TYPE (f);
+	  inner = f.type ();
 	}
 
       if (inner == NULL)

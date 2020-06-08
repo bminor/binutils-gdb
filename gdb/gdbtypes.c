@@ -1802,7 +1802,7 @@ lookup_struct_elt_type (struct type *type, const char *name, int noerr)
 {
   struct_elt elt = lookup_struct_elt (type, name, noerr);
   if (elt.field != NULL)
-    return FIELD_TYPE (*elt.field);
+    return elt.field->type ();
   else
     return NULL;
 }
@@ -4085,7 +4085,7 @@ check_types_equal (struct type *type1, struct type *type2,
 			      FIELD_LOC_KIND (*field1));
 	    }
 
-	  worklist->emplace_back (FIELD_TYPE (*field1), FIELD_TYPE (*field2));
+	  worklist->emplace_back (field1->type (), field2->type ());
 	}
     }
 
@@ -5673,7 +5673,7 @@ append_composite_type_field_aligned (struct type *t, const char *name,
 	{
 	  SET_FIELD_BITPOS (f[0],
 			    (FIELD_BITPOS (f[-1])
-			     + (TYPE_LENGTH (FIELD_TYPE (f[-1]))
+			     + (TYPE_LENGTH (f[-1].type ())
 				* TARGET_CHAR_BIT)));
 
 	  if (alignment)

@@ -9605,7 +9605,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 
       /* We need a way to find the correct discriminant given a
 	 variant name.  For convenience we build a map here.  */
-      struct type *enum_type = FIELD_TYPE (*disr_field);
+      struct type *enum_type = disr_field->type ();
       std::unordered_map<std::string, ULONGEST> discriminant_map;
       for (int i = 0; i < enum_type->num_fields (); ++i)
 	{
@@ -14867,8 +14867,7 @@ create_one_variant_part (variant_part &result,
     {
       result.discriminant_index = iter->second;
       result.is_unsigned
-	= TYPE_UNSIGNED (FIELD_TYPE
-			 (fi->fields[result.discriminant_index].field));
+	= TYPE_UNSIGNED (fi->fields[result.discriminant_index].field.type ());
     }
 
   size_t n = builder.variants.size ();

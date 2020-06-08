@@ -2917,7 +2917,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
          Note that forward refs cannot be packed,
          and treat enums as if they had the width of ints.  */
 
-      struct type *field_type = check_typedef (FIELD_TYPE (fip->list->field));
+      struct type *field_type = check_typedef (fip->list->field.type ());
 
       if (field_type->code () != TYPE_CODE_INT
 	  && field_type->code () != TYPE_CODE_RANGE

@@ -1147,8 +1147,8 @@ gdbscm_field_type (SCM self)
   struct field *field = tyscm_field_smob_to_field (f_smob);
 
   /* A field can have a NULL type in some situations.  */
-  if (FIELD_TYPE (*field))
-    return tyscm_scm_from_type (FIELD_TYPE (*field));
+  if (field->type ())
+    return tyscm_scm_from_type (field->type ());
   return SCM_BOOL_F;
 }
 
