@@ -1293,7 +1293,7 @@ create_array_type_with_stride (struct type *result_type,
   result_type->set_num_fields (1);
   result_type->set_fields
     ((struct field *) TYPE_ZALLOC (result_type, sizeof (struct field)));
-  TYPE_INDEX_TYPE (result_type) = range_type;
+  result_type->set_index_type (range_type);
   if (byte_stride_prop != NULL)
     result_type->add_dyn_prop (DYN_PROP_BYTE_STRIDE, *byte_stride_prop);
   else if (bit_stride > 0)

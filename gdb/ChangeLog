@@ -1,3 +1,10 @@
+2020-06-08  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <index_type, set_index_type>: New
+	methods.
+	(TYPE_INDEX_TYPE): Use type::index_type.
+	* gdbtypes.c (create_array_type_with_stride): Likewise.
+
 2020-06-07  Tom Tromey  <tom@tromey.com>
 
 	* valprint.c (generic_val_print_float): Remove "embedded_offset"

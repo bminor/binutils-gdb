@@ -933,6 +933,16 @@ struct type
     this->main_type->flds_bnds.fields = fields;
   }
 
+  type *index_type () const
+  {
+    return this->field (0).type;
+  }
+
+  void set_index_type (type *index_type)
+  {
+    this->field (0).type = index_type;
+  }
+
   /* * Return the dynamic property of the requested KIND from this type's
      list of dynamic properties.  */
   dynamic_prop *dyn_prop (dynamic_prop_node_kind kind) const;
@@ -1482,7 +1492,7 @@ extern unsigned type_align (struct type *);
    space in struct type.  */
 extern bool set_type_align (struct type *, ULONGEST);
 
-#define TYPE_INDEX_TYPE(type) TYPE_FIELD_TYPE (type, 0)
+#define TYPE_INDEX_TYPE(type) ((type)->index_type ())
 #define TYPE_RANGE_DATA(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.bounds
 #define TYPE_LOW_BOUND(range_type) \
   TYPE_RANGE_DATA(range_type)->low.data.const_val
