@@ -48,6 +48,7 @@ if  { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } then {
     if { [gas_x86_32_check] }  then {
 	set ASFLAGS "$ASFLAGS --32"
 	run_dump_test "cfi-i386"
+	run_dump_test "cfi-i386-2"
 	set ASFLAGS "$old_ASFLAGS"
     }
 

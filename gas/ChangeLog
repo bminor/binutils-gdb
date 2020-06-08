@@ -1,5 +1,10 @@
 2020-06-08  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/cfi/cfi-i386-2.d: Adjust expectations.
+	* testsuite/gas/cfi/cfi.exp: Run this test.
+
+2020-06-08  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (parse_real_register): Add allow_pseudo_reg
 	check to %st(N) parsing logic.
 	* testsuite/gas/cfi/cfi-i386.s: Set "generic32" arch.
