@@ -12358,9 +12358,15 @@ static bfd_boolean check_register (const reg_entry *r)
   if ((r->reg_type.bitfield.dword
        || (r->reg_type.bitfield.class == SReg && r->reg_num > 3)
        || r->reg_type.bitfield.class == RegCR
-       || r->reg_type.bitfield.class == RegDR
-       || r->reg_type.bitfield.class == RegTR)
+       || r->reg_type.bitfield.class == RegDR)
       && !cpu_arch_flags.bitfield.cpui386)
+    return FALSE;
+
+  if (r->reg_type.bitfield.class == RegTR
+      && (flag_code == CODE_64BIT
+	  || !cpu_arch_flags.bitfield.cpui386
+	  || cpu_arch_isa_flags.bitfield.cpui586
+	  || cpu_arch_isa_flags.bitfield.cpui686))
     return FALSE;
 
   if (r->reg_type.bitfield.class == RegMMX && !cpu_arch_flags.bitfield.cpummx)

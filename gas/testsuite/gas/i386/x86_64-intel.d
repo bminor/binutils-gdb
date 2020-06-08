@@ -256,4 +256,6 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	48 0f b7 00          	movzx  rax,WORD PTR \[rax\]
 [ 	]*[a-f0-9]+:	0f c3 00             	movnti DWORD PTR \[rax\],eax
 [ 	]*[a-f0-9]+:	48 0f c3 00          	movnti QWORD PTR \[rax\],rax
+[ 	]*[a-f0-9]+:	8b 04 25 00 00 00 00 	mov    eax,DWORD PTR (ds:)?0x0
+[ 	]*[a-f0-9]+:	48 89 0c 25 00 00 00 00 	mov    QWORD PTR (ds:)?0x0,rcx
 #pass

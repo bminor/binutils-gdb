@@ -256,4 +256,6 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	48 0f b7 00          	movzwq \(%rax\),%rax
 [ 	]*[a-f0-9]+:	0f c3 00             	movnti %eax,\(%rax\)
 [ 	]*[a-f0-9]+:	48 0f c3 00          	movnti %rax,\(%rax\)
+[ 	]*[a-f0-9]+:	8b 04 25 00 00 00 00 	mov    0x0,%eax
+[ 	]*[a-f0-9]+:	48 89 0c 25 00 00 00 00 	mov    %rcx,0x0
 #pass
