@@ -1051,7 +1051,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		  break;
 
 		SET_FIELD_ENUMVAL (*f, tsym.value);
-		FIELD_TYPE (*f) = t;
+		f->set_type (t);
 		FIELD_NAME (*f) = debug_info->ss + cur_fdr->issBase + tsym.iss;
 		FIELD_BITSIZE (*f) = 0;
 
@@ -1198,7 +1198,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 		      if (SYMBOL_IS_ARGUMENT (sym))
 			{
-			  TYPE_FIELD_TYPE (ftype, iparams) = SYMBOL_TYPE (sym);
+			  ftype->field (iparams).set_type (SYMBOL_TYPE (sym));
 			  TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
 			  iparams++;
 			}
@@ -1238,8 +1238,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	FIELD_NAME (*f) = name;
 	SET_FIELD_BITPOS (*f, sh->value);
 	bitsize = 0;
-	FIELD_TYPE (*f) = parse_type (cur_fd, ax, sh->index,
-				      &bitsize, bigend, name);
+	f->set_type (parse_type (cur_fd, ax, sh->index, &bitsize, bigend,
+				 name));
 	FIELD_BITSIZE (*f) = bitsize;
       }
       break;

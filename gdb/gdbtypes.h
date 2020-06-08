@@ -635,6 +635,16 @@ union field_location
 
 struct field
 {
+  struct type *type () const
+  {
+    return this->m_type;
+  }
+
+  void set_type (struct type *type)
+  {
+    this->m_type = type;
+  }
+
   union field_location loc;
 
   /* * For a function or member type, this is 1 if the argument is
@@ -660,7 +670,7 @@ struct field
      - In a function or member type, type of this argument.
      - In an array type, the domain-type of the array.  */
 
-  struct type *type;
+  struct type *m_type;
 
   /* * Name of field, value or argument.
      NULL for range bounds, array domains, and member function
@@ -935,12 +945,12 @@ struct type
 
   type *index_type () const
   {
-    return this->field (0).type;
+    return this->field (0).type ();
   }
 
   void set_index_type (type *index_type)
   {
-    this->field (0).type = index_type;
+    this->field (0).set_type (index_type);
   }
 
   /* * Return the dynamic property of the requested KIND from this type's
@@ -1600,7 +1610,7 @@ extern void set_type_vptr_basetype (struct type *, struct type *);
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (index)))
 
-#define FIELD_TYPE(thisfld) ((thisfld).type)
+#define FIELD_TYPE(thisfld) ((thisfld).type ())
 #define FIELD_NAME(thisfld) ((thisfld).name)
 #define FIELD_LOC_KIND(thisfld) ((thisfld).loc_kind)
 #define FIELD_BITPOS_LVAL(thisfld) ((thisfld).loc.bitpos)

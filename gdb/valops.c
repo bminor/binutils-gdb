@@ -1707,7 +1707,7 @@ typecmp (int staticp, int varargs, int nargs,
     t2 ++;
 
   for (i = 0;
-       (i < nargs) && t1[i].type->code () != TYPE_CODE_VOID;
+       (i < nargs) && t1[i].type ()->code () != TYPE_CODE_VOID;
        i++)
     {
       struct type *tt1, *tt2;
@@ -1715,7 +1715,7 @@ typecmp (int staticp, int varargs, int nargs,
       if (!t2[i])
 	return i + 1;
 
-      tt1 = check_typedef (t1[i].type);
+      tt1 = check_typedef (t1[i].type ());
       tt2 = check_typedef (value_type (t2[i]));
 
       if (TYPE_IS_REFERENCE (tt1)
@@ -1754,7 +1754,7 @@ typecmp (int staticp, int varargs, int nargs,
       /* We should be doing much hairier argument matching (see
          section 13.2 of the ARM), but as a quick kludge, just check
          for the same type code.  */
-      if (t1[i].type->code () != value_type (t2[i])->code ())
+      if (t1[i].type ()->code () != value_type (t2[i])->code ())
 	return i + 1;
     }
   if (varargs || t2[i] == NULL)
@@ -2967,7 +2967,7 @@ find_oload_champ (gdb::array_view<value *> args,
 	  for (jj = 0; jj < nparms; jj++)
 	    {
 	      type *t = (methods != NULL
-			 ? (TYPE_FN_FIELD_ARGS (methods, ix)[jj].type)
+			 ? (TYPE_FN_FIELD_ARGS (methods, ix)[jj].type ())
 			 : TYPE_FIELD_TYPE (SYMBOL_TYPE (functions[ix]),
 					    jj));
 	      parm_types.push_back (t);

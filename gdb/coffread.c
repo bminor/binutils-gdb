@@ -2008,8 +2008,8 @@ coff_read_struct_type (int index, int length, int lastsym,
 
 	  /* Save the data.  */
 	  list->field.name = obstack_strdup (&objfile->objfile_obstack, name);
-	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type,
-						  &sub_aux, objfile);
+	  list->field.set_type (decode_type (ms, ms->c_type, &sub_aux,
+					     objfile));
 	  SET_FIELD_BITPOS (list->field, 8 * ms->c_value);
 	  FIELD_BITSIZE (list->field) = 0;
 	  nfields++;
@@ -2024,8 +2024,8 @@ coff_read_struct_type (int index, int length, int lastsym,
 
 	  /* Save the data.  */
 	  list->field.name = obstack_strdup (&objfile->objfile_obstack, name);
-	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type,
-						  &sub_aux, objfile);
+	  list->field.set_type (decode_type (ms, ms->c_type, &sub_aux,
+					     objfile));
 	  SET_FIELD_BITPOS (list->field, ms->c_value);
 	  FIELD_BITSIZE (list->field) = sub_aux.x_sym.x_misc.x_lnsz.x_size;
 	  nfields++;

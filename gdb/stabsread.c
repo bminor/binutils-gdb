@@ -1007,7 +1007,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	         FIXME: Do we need a new builtin_promoted_int_arg ?  */
 	      if (ptype->code () == TYPE_CODE_VOID)
 		ptype = objfile_type (objfile)->builtin_int;
-	      TYPE_FIELD_TYPE (ftype, nparams) = ptype;
+	      ftype->field (nparams).set_type (ptype);
 	      TYPE_FIELD_ARTIFICIAL (ftype, nparams++) = 0;
 	    }
 	  ftype->set_num_fields (nparams);
@@ -1849,7 +1849,7 @@ again:
              when we read it, so the list is reversed.  Build the
              fields array right-to-left.  */
           for (t = arg_types, i = num_args - 1; t; t = t->next, i--)
-            TYPE_FIELD_TYPE (func_type, i) = t->type;
+            func_type->field (i).set_type (t->type);
         }
         func_type->set_num_fields (num_args);
         TYPE_PROTOTYPED (func_type) = 1;
@@ -2788,7 +2788,7 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
 	  invalid_cpp_abbrev_complaint (*pp);
 	  return 0;
 	}
-      fip->list->field.type = read_type (pp, objfile);
+      fip->list->field.set_type (read_type (pp, objfile));
       if (**pp == ',')
 	(*pp)++;		/* Skip the comma.  */
       else
@@ -2840,7 +2840,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
       fip->list->visibility = VISIBILITY_PUBLIC;
     }
 
-  fip->list->field.type = read_type (pp, objfile);
+  fip->list->field.set_type (read_type (pp, objfile));
   if (**pp == ':')
     {
       p = ++(*pp);
@@ -3161,8 +3161,8 @@ read_baseclasses (struct stab_field_info *fip, const char **pp,
          base class.  Read it, and remember it's type name as this
          field's name.  */
 
-      newobj->field.type = read_type (pp, objfile);
-      newobj->field.name = newobj->field.type->name ();
+      newobj->field.set_type (read_type (pp, objfile));
+      newobj->field.name = newobj->field.type ()->name ();
 
       /* Skip trailing ';' and bump count of number of fields seen.  */
       if (**pp == ';')
@@ -4242,7 +4242,7 @@ read_args (const char **pp, int end, struct objfile *objfile, int *nargsp,
 
   rval = XCNEWVEC (struct field, n);
   for (i = 0; i < n; i++)
-    rval[i].type = types[i];
+    rval[i].set_type (types[i]);
   *nargsp = n;
   return rval;
 }

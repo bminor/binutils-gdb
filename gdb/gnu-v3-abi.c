@@ -135,28 +135,28 @@ build_gdb_vtable_type (struct gdbarch *arch)
 
   /* ptrdiff_t vcall_and_vbase_offsets[0]; */
   FIELD_NAME (*field) = "vcall_and_vbase_offsets";
-  FIELD_TYPE (*field) = lookup_array_range_type (ptrdiff_type, 0, -1);
+  field->set_type (lookup_array_range_type (ptrdiff_type, 0, -1));
   SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
   offset += TYPE_LENGTH (FIELD_TYPE (*field));
   field++;
 
   /* ptrdiff_t offset_to_top; */
   FIELD_NAME (*field) = "offset_to_top";
-  FIELD_TYPE (*field) = ptrdiff_type;
+  field->set_type (ptrdiff_type);
   SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
   offset += TYPE_LENGTH (FIELD_TYPE (*field));
   field++;
 
   /* void *type_info; */
   FIELD_NAME (*field) = "type_info";
-  FIELD_TYPE (*field) = void_ptr_type;
+  field->set_type (void_ptr_type);
   SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
   offset += TYPE_LENGTH (FIELD_TYPE (*field));
   field++;
 
   /* void (*virtual_functions[0]) (); */
   FIELD_NAME (*field) = "virtual_functions";
-  FIELD_TYPE (*field) = lookup_array_range_type (ptr_to_void_fn_type, 0, -1);
+  field->set_type (lookup_array_range_type (ptr_to_void_fn_type, 0, -1));
   SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
   offset += TYPE_LENGTH (FIELD_TYPE (*field));
   field++;
@@ -1039,14 +1039,14 @@ build_std_type_info_type (struct gdbarch *arch)
 
   /* The vtable.  */
   FIELD_NAME (*field) = "_vptr.type_info";
-  FIELD_TYPE (*field) = void_ptr_type;
+  field->set_type (void_ptr_type);
   SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
   offset += TYPE_LENGTH (FIELD_TYPE (*field));
   field++;
 
   /* The name.  */
   FIELD_NAME (*field) = "__name";
-  FIELD_TYPE (*field) = char_ptr_type;
+  field->set_type (char_ptr_type);
   SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
   offset += TYPE_LENGTH (FIELD_TYPE (*field));
   field++;

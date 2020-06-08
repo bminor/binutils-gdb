@@ -379,7 +379,7 @@ ctf_add_member_cb (const char *name,
   if (kind == CTF_K_STRUCT || kind == CTF_K_UNION)
     process_struct_members (ccp, tid, t);
 
-  FIELD_TYPE (*fp) = t;
+  fp->set_type (t);
   SET_FIELD_BITPOS (*fp, offset / TARGET_CHAR_BIT);
   FIELD_BITSIZE (*fp) = get_bitsize (ccp->fp, tid, kind);
 
@@ -401,7 +401,7 @@ ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
 
   fp = &new_field.field;
   FIELD_NAME (*fp) = name;
-  FIELD_TYPE (*fp) = NULL;
+  fp->set_type (NULL);
   SET_FIELD_ENUMVAL (*fp, enum_value);
   FIELD_BITSIZE (*fp) = 0;
 
@@ -1152,9 +1152,9 @@ add_stt_func (struct ctf_context *ccp, unsigned long idx)
     {
       atyp = get_tid_type (ccp->of, argv[iparam]);
       if (atyp)
-	TYPE_FIELD_TYPE (ftype, iparam) = atyp;
+	ftype->field (iparam).set_type (atyp);
       else
-	TYPE_FIELD_TYPE (ftype, iparam) = void_type;
+	ftype->field (iparam).set_type (void_type);
     }
 
   sym = new_symbol (ccp, ftype, tid);

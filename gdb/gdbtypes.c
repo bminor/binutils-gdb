@@ -566,7 +566,7 @@ lookup_function_type_with_arguments (struct type *type,
   fn->set_fields
     ((struct field *) TYPE_ZALLOC (fn, nparams * sizeof (struct field)));
   for (i = 0; i < nparams; ++i)
-    TYPE_FIELD_TYPE (fn, i) = param_types[i];
+    fn->field (i).set_type (param_types[i]);
 
   return fn;
 }
@@ -1405,7 +1405,7 @@ create_set_type (struct type *result_type, struct type *domain_type)
       if (low_bound >= 0)
 	TYPE_UNSIGNED (result_type) = 1;
     }
-  TYPE_FIELD_TYPE (result_type, 0) = domain_type;
+  result_type->field (0).set_type (domain_type);
 
   return result_type;
 }
@@ -2263,7 +2263,7 @@ resolve_dynamic_union (struct type *type,
 
       t = resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
 					 addr_stack, 0);
-      TYPE_FIELD_TYPE (resolved_type, i) = t;
+      resolved_type->field (i).set_type (t);
       if (TYPE_LENGTH (t) > max_len)
 	max_len = TYPE_LENGTH (t);
     }
@@ -2511,9 +2511,9 @@ resolve_dynamic_struct (struct type *type,
 	   + (TYPE_FIELD_BITPOS (resolved_type, i) / TARGET_CHAR_BIT));
       pinfo.next = addr_stack;
 
-      TYPE_FIELD_TYPE (resolved_type, i)
-	= resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
-					 &pinfo, 0);
+      resolved_type->field (i).set_type
+	(resolve_dynamic_type_internal (TYPE_FIELD_TYPE (resolved_type, i),
+					&pinfo, 0));
       gdb_assert (TYPE_FIELD_LOC_KIND (resolved_type, i)
 		  == FIELD_LOC_KIND_BITPOS);
 
@@ -3011,7 +3011,7 @@ check_stub_method (struct type *type, int method_id, int signature_id)
     argcount = 0;
   else
     {
-      argtypes[0].type = lookup_pointer_type (type);
+      argtypes[0].set_type (lookup_pointer_type (type));
       argcount = 1;
     }
 
@@ -3027,8 +3027,8 @@ check_stub_method (struct type *type, int method_id, int signature_id)
 	      if (strncmp (argtypetext, "...", p - argtypetext) != 0
 		  && strncmp (argtypetext, "void", p - argtypetext) != 0)
 		{
-		  argtypes[argcount].type =
-		    safe_parse_type (gdbarch, argtypetext, p - argtypetext);
+		  argtypes[argcount].set_type
+		    (safe_parse_type (gdbarch, argtypetext, p - argtypetext));
 		  argcount += 1;
 		}
 	      argtypetext = p + 1;
@@ -4712,7 +4712,7 @@ print_args (struct field *args, int nargs, int spaces)
 	{
 	  printfi_filtered (spaces, "[%d] name '%s'\n", i,
 			    args[i].name != NULL ? args[i].name : "<NULL>");
-	  recursive_dump_type (args[i].type, spaces + 2);
+	  recursive_dump_type (args[i].type (), spaces + 2);
 	}
     }
 }
@@ -5321,9 +5321,9 @@ copy_type_recursive (struct objfile *objfile,
 	    TYPE_FIELD_ARTIFICIAL (type, i);
 	  TYPE_FIELD_BITSIZE (new_type, i) = TYPE_FIELD_BITSIZE (type, i);
 	  if (TYPE_FIELD_TYPE (type, i))
-	    TYPE_FIELD_TYPE (new_type, i)
-	      = copy_type_recursive (objfile, TYPE_FIELD_TYPE (type, i),
-				     copied_types);
+	    new_type->field (i).set_type
+	      (copy_type_recursive (objfile, TYPE_FIELD_TYPE (type, i),
+				    copied_types));
 	  if (TYPE_FIELD_NAME (type, i))
 	    TYPE_FIELD_NAME (new_type, i) = 
 	      xstrdup (TYPE_FIELD_NAME (type, i));
@@ -5596,7 +5596,7 @@ append_flags_type_field (struct type *type, int start_bitpos, int nr_bits,
   gdb_assert (name != NULL);
 
   TYPE_FIELD_NAME (type, field_nr) = xstrdup (name);
-  TYPE_FIELD_TYPE (type, field_nr) = field_type;
+  type->field (field_nr).set_type (field_type);
   SET_FIELD_BITPOS (type->field (field_nr), start_bitpos);
   TYPE_FIELD_BITSIZE (type, field_nr) = nr_bits;
   type->set_num_fields (type->num_fields () + 1);
@@ -5647,7 +5647,7 @@ append_composite_type_field_raw (struct type *t, const char *name,
 			     t->num_fields ()));
   f = &t->field (t->num_fields () - 1);
   memset (f, 0, sizeof f[0]);
-  FIELD_TYPE (f[0]) = field;
+  f[0].set_type (field);
   FIELD_NAME (f[0]) = name;
   return f;
 }

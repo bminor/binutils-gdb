@@ -1,5 +1,14 @@
 2020-06-08  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (struct field) <type, set_type>: New methods.
+	Rename `type` field to...
+	<m_type>: ... this.  Change references throughout to use type or
+	set_type methods.
+	(FIELD_TYPE): Use field::type.  Change call sites that modify
+	the field's type to use field::set_type instead.
+
+2020-06-08  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (TYPE_INDEX_TYPE): Remove.  Change all call sites
 	to use type::index_type instead.
 

@@ -686,7 +686,7 @@ fake_method::fake_method (type_instance_flags flags,
     ((struct field *) xzalloc (sizeof (struct field) * num_types));
 
   while (num_types-- > 0)
-    TYPE_FIELD_TYPE (type, num_types) = param_types[num_types];
+    type->field (num_types).set_type (param_types[num_types]);
 }
 
 fake_method::~fake_method ()

@@ -1432,7 +1432,7 @@ ada_fixup_array_indexes_type (struct type *index_desc_type)
      struct type *raw_type = ada_check_typedef (ada_find_any_type (name));
 
      if (raw_type)
-       TYPE_FIELD_TYPE (index_desc_type, i) = raw_type;
+       index_desc_type->field (i).set_type (raw_type);
    }
 }
 
@@ -8088,7 +8088,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	     record size.  */
 	  ada_ensure_varsize_limit (field_type);
 
-	  TYPE_FIELD_TYPE (rtype, f) = field_type;
+	  rtype->field (f).set_type (field_type);
           TYPE_FIELD_NAME (rtype, f) = TYPE_FIELD_NAME (type, f);
 	  /* The multiplication can potentially overflow.  But because
 	     the field length has been size-checked just above, and
@@ -8111,7 +8111,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	     structure, the typedef is the only clue which allows us
 	     to distinguish between the two options.  Stripping it
 	     would prevent us from printing this field appropriately.  */
-          TYPE_FIELD_TYPE (rtype, f) = TYPE_FIELD_TYPE (type, f);
+          rtype->field (f).set_type (TYPE_FIELD_TYPE (type, f));
           TYPE_FIELD_NAME (rtype, f) = TYPE_FIELD_NAME (type, f);
           if (TYPE_FIELD_BITSIZE (type, f) > 0)
             fld_bit_len =
@@ -8173,7 +8173,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
         }
       else
         {
-          TYPE_FIELD_TYPE (rtype, variant_field) = branch_type;
+          rtype->field (variant_field).set_type (branch_type);
           TYPE_FIELD_NAME (rtype, variant_field) = "S";
           fld_bit_len =
             TYPE_LENGTH (TYPE_FIELD_TYPE (rtype, variant_field)) *
@@ -8289,7 +8289,7 @@ template_to_static_fixed_type (struct type *type0)
 	      TYPE_FIXED_INSTANCE (type) = 1;
 	      TYPE_LENGTH (type) = 0;
 	    }
-	  TYPE_FIELD_TYPE (type, f) = new_type;
+	  type->field (f).set_type (new_type);
 	  TYPE_FIELD_NAME (type, f) = TYPE_FIELD_NAME (type0, f);
 	}
     }
@@ -8358,7 +8358,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
     }
   else
     {
-      TYPE_FIELD_TYPE (rtype, variant_field) = branch_type;
+      rtype->field (variant_field).set_type (branch_type);
       TYPE_FIELD_NAME (rtype, variant_field) = "S";
       TYPE_FIELD_BITSIZE (rtype, variant_field) = 0;
       TYPE_LENGTH (rtype) += TYPE_LENGTH (branch_type);

@@ -302,7 +302,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 	  if (FIELD_ARTIFICIAL (arg))
 	    continue;
 
-	  c_print_type (arg.type, "", stream, 0, 0, flags);
+	  c_print_type (arg.type (), "", stream, 0, 0, flags);
 
 	  if (i == nargs && varargs)
 	    fprintf_filtered (stream, ", ...");
@@ -327,8 +327,8 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
       struct type *domain;
 
       gdb_assert (nargs > 0);
-      gdb_assert (args[0].type->code () == TYPE_CODE_PTR);
-      domain = TYPE_TARGET_TYPE (args[0].type);
+      gdb_assert (args[0].type ()->code () == TYPE_CODE_PTR);
+      domain = TYPE_TARGET_TYPE (args[0].type ());
 
       if (TYPE_CONST (domain))
 	fprintf_filtered (stream, " const");

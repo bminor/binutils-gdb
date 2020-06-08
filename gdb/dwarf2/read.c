@@ -9504,7 +9504,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	((struct field *) TYPE_ZALLOC (type, 3 * sizeof (struct field)));
 
       /* Put the discriminant at index 0.  */
-      TYPE_FIELD_TYPE (type, 0) = field_type;
+      type->field (0).set_type (field_type);
       TYPE_FIELD_ARTIFICIAL (type, 0) = 1;
       TYPE_FIELD_NAME (type, 0) = "<<discriminant>>";
       SET_FIELD_BITPOS (type->field (0), bit_offset);
@@ -9523,7 +9523,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 			      name);
       struct type *dataless_type = init_type (objfile, TYPE_CODE_VOID, 0,
 					      dataless_name);
-      TYPE_FIELD_TYPE (type, 2) = dataless_type;
+      type->field (2).set_type (dataless_type);
       /* NAME points into the original discriminant name, which
 	 already has the correct lifetime.  */
       TYPE_FIELD_NAME (type, 2) = name;
@@ -14539,7 +14539,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* Data member other than a C++ static data member.  */
 
       /* Get type of field.  */
-      fp->type = die_type (die, cu);
+      fp->set_type (die_type (die, cu));
 
       SET_FIELD_BITPOS (*fp, 0);
 
@@ -14593,7 +14593,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 		     the bit field must be inferred from the type
 		     attribute of the data member containing the
 		     bit field.  */
-		  anonymous_size = TYPE_LENGTH (fp->type);
+		  anonymous_size = TYPE_LENGTH (fp->type ());
 		}
 	      SET_FIELD_BITPOS (*fp,
 				(FIELD_BITPOS (*fp)
@@ -14659,7 +14659,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* The name is already allocated along with this objfile, so we don't
 	 need to duplicate it for the type.  */
       SET_FIELD_PHYSNAME (*fp, physname ? physname : "");
-      FIELD_TYPE (*fp) = die_type (die, cu);
+      fp->set_type (die_type (die, cu));
       FIELD_NAME (*fp) = fieldname;
     }
   else if (die->tag == DW_TAG_inheritance)
@@ -14667,8 +14667,8 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* C++ base class field.  */
       handle_data_member_location (die, cu, fp);
       FIELD_BITSIZE (*fp) = 0;
-      FIELD_TYPE (*fp) = die_type (die, cu);
-      FIELD_NAME (*fp) = fp->type->name ();
+      fp->set_type (die_type (die, cu));
+      FIELD_NAME (*fp) = fp->type ()->name ();
     }
   else
     gdb_assert_not_reached ("missing case in dwarf2_add_field");
@@ -17227,7 +17227,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
       /* TYPE_FIELD_TYPE must never be NULL.  Pre-fill the array to ensure it
 	 even if we error out during the parameters reading below.  */
       for (iparams = 0; iparams < nparams; iparams++)
-	TYPE_FIELD_TYPE (ftype, iparams) = void_type;
+	ftype->field (iparams).set_type (void_type);
 
       iparams = 0;
       child_die = die->child;
@@ -17284,7 +17284,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 					     arg_type, 0);
 		}
 
-	      TYPE_FIELD_TYPE (ftype, iparams) = arg_type;
+	      ftype->field (iparams).set_type (arg_type);
 	      iparams++;
 	    }
 	  child_die = child_die->sibling;

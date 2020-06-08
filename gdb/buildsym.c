@@ -286,7 +286,7 @@ buildsym_compunit::finish_block_internal
 
 		  if (SYMBOL_IS_ARGUMENT (sym))
 		    {
-		      TYPE_FIELD_TYPE (ftype, iparams) = SYMBOL_TYPE (sym);
+		      ftype->field (iparams).set_type (SYMBOL_TYPE (sym));
 		      TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
 		      iparams++;
 		    }
