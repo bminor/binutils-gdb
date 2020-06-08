@@ -2682,19 +2682,8 @@ struct elf_aarch64_link_hash_table
   /* JUMP_SLOT relocs for variant PCS symbols may be present.  */
   int variant_pcs;
 
-  /* The offset into splt of the PLT entry for the TLS descriptor
-     resolver.  Special values are 0, if not necessary (or not found
-     to be necessary yet), and -1 if needed but not determined
-     yet.  */
-  bfd_vma tlsdesc_plt;
-
   /* The number of bytes in the PLT enty for the TLS descriptor.  */
   bfd_size_type tlsdesc_plt_entry_size;
-
-  /* The GOT offset for the lazy trampoline.  Communicated to the
-     loader via DT_TLSDESC_GOT.  The magic value (bfd_vma) -1
-     indicates an offset is not allocated.  */
-  bfd_vma dt_tlsdesc_got;
 
   /* Used by local STT_GNU_IFUNC symbols.  */
   htab_t loc_hash_table;
@@ -2932,7 +2921,7 @@ elfNN_aarch64_link_hash_table_create (bfd *abfd)
   ret->plt_entry = elfNN_aarch64_small_plt_entry;
   ret->tlsdesc_plt_entry_size = PLT_TLSDESC_ENTRY_SIZE;
   ret->obfd = abfd;
-  ret->dt_tlsdesc_got = (bfd_vma) - 1;
+  ret->root.tlsdesc_got = (bfd_vma) - 1;
 
   if (!bfd_hash_table_init (&ret->stub_hash_table, stub_hash_newfunc,
 			    sizeof (struct elf_aarch64_stub_hash_entry)))
@@ -8682,7 +8671,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		     type.  */
 
 		  /* TLSDESC PLT is now needed, but not yet determined.  */
-		  htab->tlsdesc_plt = (bfd_vma) - 1;
+		  htab->root.tlsdesc_plt = (bfd_vma) - 1;
 		}
 
 	      if (got_type & GOT_TLS_GD)
@@ -8968,7 +8957,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		    {
 		      htab->root.srelplt->size += RELOC_SIZE (htab);
 		      /* Note RELOC_COUNT not incremented here! */
-		      htab->tlsdesc_plt = (bfd_vma) - 1;
+		      htab->root.tlsdesc_plt = (bfd_vma) - 1;
 		    }
 
 		  if (got_type & GOT_TLS_GD)
@@ -9011,19 +9000,21 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (htab->root.srelplt)
     htab->sgotplt_jump_table_size = aarch64_compute_jump_table_size (htab);
 
-  if (htab->tlsdesc_plt)
+  if (htab->root.tlsdesc_plt)
     {
       if (htab->root.splt->size == 0)
 	htab->root.splt->size += htab->plt_header_size;
 
       /* If we're not using lazy TLS relocations, don't generate the
 	 GOT and PLT entry required.  */
-      if (!(info->flags & DF_BIND_NOW))
+      if ((info->flags & DF_BIND_NOW))
+	htab->root.tlsdesc_plt = 0;
+      else
 	{
-	  htab->tlsdesc_plt = htab->root.splt->size;
+	  htab->root.tlsdesc_plt = htab->root.splt->size;
 	  htab->root.splt->size += htab->tlsdesc_plt_entry_size;
 
-	  htab->dt_tlsdesc_got = htab->root.sgot->size;
+	  htab->root.tlsdesc_got = htab->root.sgot->size;
 	  htab->root.sgot->size += GOT_ENTRY_SIZE;
 	}
     }
@@ -9129,8 +9120,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      && !add_dynamic_entry (DT_AARCH64_VARIANT_PCS, 0))
 	    return FALSE;
 
-	  if (htab->tlsdesc_plt
-	      && !(info->flags & DF_BIND_NOW)
+	  if (htab->root.tlsdesc_plt
 	      && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
 		  || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
 	    return FALSE;
@@ -9639,14 +9629,14 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	    case DT_TLSDESC_PLT:
 	      s = htab->root.splt;
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset
-		+ htab->tlsdesc_plt;
+		+ htab->root.tlsdesc_plt;
 	      break;
 
 	    case DT_TLSDESC_GOT:
 	      s = htab->root.sgot;
-	      BFD_ASSERT (htab->dt_tlsdesc_got != (bfd_vma)-1);
+	      BFD_ASSERT (htab->root.tlsdesc_got != (bfd_vma)-1);
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset
-		+ htab->dt_tlsdesc_got;
+		+ htab->root.tlsdesc_got;
 	      break;
 	    }
 
@@ -9664,11 +9654,11 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	this_hdr.sh_entsize = htab->plt_entry_size;
 
 
-      if (htab->tlsdesc_plt && !(info->flags & DF_BIND_NOW))
+      if (htab->root.tlsdesc_plt && !(info->flags & DF_BIND_NOW))
 	{
-	  BFD_ASSERT (htab->dt_tlsdesc_got != (bfd_vma)-1);
+	  BFD_ASSERT (htab->root.tlsdesc_got != (bfd_vma)-1);
 	  bfd_put_NN (output_bfd, (bfd_vma) 0,
-		      htab->root.sgot->contents + htab->dt_tlsdesc_got);
+		      htab->root.sgot->contents + htab->root.tlsdesc_got);
 
 	  const bfd_byte *entry = elfNN_aarch64_tlsdesc_small_plt_entry;
 	  htab->tlsdesc_plt_entry_size = PLT_TLSDESC_ENTRY_SIZE;
@@ -9679,13 +9669,14 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	      entry = elfNN_aarch64_tlsdesc_small_plt_bti_entry;
 	    }
 
-	  memcpy (htab->root.splt->contents + htab->tlsdesc_plt,
+	  memcpy (htab->root.splt->contents + htab->root.tlsdesc_plt,
 		  entry, htab->tlsdesc_plt_entry_size);
 
 	  {
 	    bfd_vma adrp1_addr =
 	      htab->root.splt->output_section->vma
-	      + htab->root.splt->output_offset + htab->tlsdesc_plt + 4;
+	      + htab->root.splt->output_offset
+	      + htab->root.tlsdesc_plt + 4;
 
 	    bfd_vma adrp2_addr = adrp1_addr + 4;
 
@@ -9697,10 +9688,10 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	      htab->root.sgotplt->output_section->vma
 	      + htab->root.sgotplt->output_offset;
 
-	    bfd_vma dt_tlsdesc_got = got_addr + htab->dt_tlsdesc_got;
+	    bfd_vma dt_tlsdesc_got = got_addr + htab->root.tlsdesc_got;
 
 	    bfd_byte *plt_entry =
-	      htab->root.splt->contents + htab->tlsdesc_plt;
+	      htab->root.splt->contents + htab->root.tlsdesc_plt;
 
 	   /* First instruction in BTI enabled PLT stub is a BTI
 	      instruction so skip it.  */

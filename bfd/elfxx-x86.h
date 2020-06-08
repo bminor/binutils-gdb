@@ -478,10 +478,6 @@ struct elf_x86_link_hash_table
   htab_t loc_hash_table;
   void * loc_hash_memory;
 
-  /* The offset into sgot of the GOT entry used by the PLT entry
-     above.  */
-  bfd_vma tlsdesc_got;
-
   /* The index of the next R_X86_64_JUMP_SLOT entry in .rela.plt.  */
   bfd_vma next_jump_slot_index;
   /* The index of the next R_X86_64_IRELATIVE entry in .rela.plt.  */
@@ -498,12 +494,6 @@ struct elf_x86_link_hash_table
   /* The index of the next unused R_386_TLS_DESC slot in .rel.plt.  This
      is only used for i386.  */
   bfd_vma next_tls_desc_index;
-
-  /* The offset into splt of the PLT entry for the TLS descriptor
-     resolver.  Special values are 0, if not necessary (or not found
-     to be necessary yet), and -1 if needed but not determined
-     yet.  This is only used for x86-64.  */
-  bfd_vma tlsdesc_plt;
 
    /* Value used to fill the unused bytes of the first PLT entry.  This
       is only used for i386.  */

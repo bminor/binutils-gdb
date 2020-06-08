@@ -3380,16 +3380,6 @@ struct elf32_arm_link_hash_table
   /* The (unloaded but important) VxWorks .rela.plt.unloaded section.  */
   asection *srelplt2;
 
-  /* The offset into splt of the PLT entry for the TLS descriptor
-     resolver.  Special values are 0, if not necessary (or not found
-     to be necessary yet), and -1 if needed but not determined
-     yet.  */
-  bfd_vma dt_tlsdesc_plt;
-
-  /* The offset into sgot of the GOT entry used by the PLT entry
-     above.  */
-  bfd_vma dt_tlsdesc_got;
-
   /* Offset in .plt section of tls_arm_trampoline.  */
   bfd_vma tls_trampoline;
 
@@ -16971,12 +16961,14 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 
       /* If we're not using lazy TLS relocations, don't generate the
 	 PLT and GOT entries they require.  */
-      if (!(info->flags & DF_BIND_NOW))
+      if ((info->flags & DF_BIND_NOW))
+	htab->root.tlsdesc_plt = 0;
+      else
 	{
-	  htab->dt_tlsdesc_got = htab->root.sgot->size;
+	  htab->root.tlsdesc_got = htab->root.sgot->size;
 	  htab->root.sgot->size += 4;
 
-	  htab->dt_tlsdesc_plt = htab->root.splt->size;
+	  htab->root.tlsdesc_plt = htab->root.splt->size;
 	  htab->root.splt->size += 4 * ARRAY_SIZE (dl_tlsdesc_lazy_trampoline);
 	}
     }
@@ -17077,7 +17069,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 	      || !add_dynamic_entry (DT_JMPREL, 0))
 	    return FALSE;
 
-	  if (htab->dt_tlsdesc_plt
+	  if (htab->root.tlsdesc_plt
 	      && (!add_dynamic_entry (DT_TLSDESC_PLT,0)
 		  || !add_dynamic_entry (DT_TLSDESC_GOT,0)))
 	    return FALSE;
@@ -17462,14 +17454,14 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	    case DT_TLSDESC_PLT:
 	      s = htab->root.splt;
 	      dyn.d_un.d_ptr = (s->output_section->vma + s->output_offset
-				+ htab->dt_tlsdesc_plt);
+				+ htab->root.tlsdesc_plt);
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_TLSDESC_GOT:
 	      s = htab->root.sgot;
 	      dyn.d_un.d_ptr = (s->output_section->vma + s->output_offset
-				+ htab->dt_tlsdesc_got);
+				+ htab->root.tlsdesc_got);
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
@@ -17580,7 +17572,7 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
       if (splt->output_section->owner == output_bfd)
 	elf_section_data (splt->output_section)->this_hdr.sh_entsize = 4;
 
-      if (htab->dt_tlsdesc_plt)
+      if (htab->root.tlsdesc_plt)
 	{
 	  bfd_vma got_address
 	    = sgot->output_section->vma + sgot->output_offset;
@@ -17590,18 +17582,18 @@ elf32_arm_finish_dynamic_sections (bfd * output_bfd, struct bfd_link_info * info
 	    = splt->output_section->vma + splt->output_offset;
 
 	  arm_put_trampoline (htab, output_bfd,
-			      splt->contents + htab->dt_tlsdesc_plt,
+			      splt->contents + htab->root.tlsdesc_plt,
 			      dl_tlsdesc_lazy_trampoline, 6);
 
 	  bfd_put_32 (output_bfd,
-		      gotplt_address + htab->dt_tlsdesc_got
-		      - (plt_address + htab->dt_tlsdesc_plt)
+		      gotplt_address + htab->root.tlsdesc_got
+		      - (plt_address + htab->root.tlsdesc_plt)
 		      - dl_tlsdesc_lazy_trampoline[6],
-		      splt->contents + htab->dt_tlsdesc_plt + 24);
+		      splt->contents + htab->root.tlsdesc_plt + 24);
 	  bfd_put_32 (output_bfd,
-		      got_address - (plt_address + htab->dt_tlsdesc_plt)
+		      got_address - (plt_address + htab->root.tlsdesc_plt)
 		      - dl_tlsdesc_lazy_trampoline[7],
-		      splt->contents + htab->dt_tlsdesc_plt + 24 + 4);
+		      splt->contents + htab->root.tlsdesc_plt + 24 + 4);
 	}
 
       if (htab->tls_trampoline)
@@ -18374,14 +18366,15 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 	    }
 	}
     }
-  if (htab->dt_tlsdesc_plt != 0)
+  if (htab->root.tlsdesc_plt != 0)
     {
       /* Mapping symbols for the lazy tls trampoline.  */
-      if (!elf32_arm_output_map_sym (&osi, ARM_MAP_ARM, htab->dt_tlsdesc_plt))
+      if (!elf32_arm_output_map_sym (&osi, ARM_MAP_ARM,
+				     htab->root.tlsdesc_plt))
 	return FALSE;
 
       if (!elf32_arm_output_map_sym (&osi, ARM_MAP_DATA,
-				     htab->dt_tlsdesc_plt + 24))
+				     htab->root.tlsdesc_plt + 24))
 	return FALSE;
     }
   if (htab->tls_trampoline != 0)

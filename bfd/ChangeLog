@@ -1,3 +1,32 @@
+2020-06-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_link_hash_entry): Add tlsdesc_plt and
+	tlsdesc_got.
+	* elf32-arm.c (elf32_arm_link_hash_table): Remove tlsdesc_plt
+	and dt_tlsdesc_got.
+	(elf32_arm_size_dynamic_sections): Updated.  Clear
+	root.tlsdesc_plt for DF_BIND_NOW.
+	(elf32_arm_finish_dynamic_sections): Updated.
+	(elf32_arm_output_arch_local_syms): Likewise.
+	* elf32-nds32.c (nds32_elf_size_dynamic_sections): Updated.
+	Clear root.tlsdesc_plt for DF_BIND_NOW.
+	(nds32_elf_finish_dynamic_sections): Updated.
+	* elf32-nds32.h (elf_nds32_link_hash_table): Remove
+	dt_tlsdesc_plt and dt_tlsdesc_got.
+	* elf64-x86-64.c (elf_x86_64_finish_dynamic_sections): Updated.
+	* elfnn-aarch64.c (elf_aarch64_link_hash_table): Remove
+	tlsdesc_plt and dt_tlsdesc_got.
+	(elfNN_aarch64_allocate_dynrelocs): Updated.
+	(elfNN_aarch64_finish_dynamic_sections): Likewise.
+	(elfNN_aarch64_size_dynamic_sections): Updated.  Clear
+	root.tlsdesc_plt for DF_BIND_NOW.  Don't check DF_BIND_NOW
+	twice.
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Updated.
+	(_bfd_x86_elf_size_dynamic_sections): Likewise.
+	(_bfd_x86_elf_finish_dynamic_sections): Likewise.
+	* elfxx-x86.h (elf_x86_link_hash_table): Remove tlsdesc_plt and
+	tlsdesc_got.
+
 2020-06-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-tic6x.c (elf32_bed): Defined the default to

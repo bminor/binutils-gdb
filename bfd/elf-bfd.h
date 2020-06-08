@@ -650,6 +650,17 @@ struct elf_link_hash_table
   asection *tls_sec;
   bfd_size_type tls_size;  /* Bytes.  */
 
+  /* The offset into splt of the PLT entry for the TLS descriptor
+     resolver.  Special values are 0, if not necessary (or not found
+     to be necessary yet), and -1 if needed but not determined
+     yet.  */
+  bfd_vma tlsdesc_plt;
+
+  /* The GOT offset for the lazy trampoline.  Communicated to the
+     loader via DT_TLSDESC_GOT.  The magic value (bfd_vma) -1
+     indicates an offset is not allocated.  */
+  bfd_vma tlsdesc_got;
+
   /* Target OS for linker output.  */
   enum elf_target_os target_os;
 

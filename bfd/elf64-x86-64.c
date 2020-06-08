@@ -4667,12 +4667,12 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 		       + htab->lazy_plt->plt0_got2_offset));
 	}
 
-      if (htab->tlsdesc_plt)
+      if (htab->elf.tlsdesc_plt)
 	{
 	  bfd_put_64 (output_bfd, (bfd_vma) 0,
-		      htab->elf.sgot->contents + htab->tlsdesc_got);
+		      htab->elf.sgot->contents + htab->elf.tlsdesc_got);
 
-	  memcpy (htab->elf.splt->contents + htab->tlsdesc_plt,
+	  memcpy (htab->elf.splt->contents + htab->elf.tlsdesc_plt,
 		  htab->lazy_plt->plt_tlsdesc_entry,
 		  htab->lazy_plt->plt_tlsdesc_entry_size);
 
@@ -4685,10 +4685,10 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 		       + 8
 		       - htab->elf.splt->output_section->vma
 		       - htab->elf.splt->output_offset
-		       - htab->tlsdesc_plt
+		       - htab->elf.tlsdesc_plt
 		       - htab->lazy_plt->plt_tlsdesc_got1_insn_end),
 		      (htab->elf.splt->contents
-		       + htab->tlsdesc_plt
+		       + htab->elf.tlsdesc_plt
 		       + htab->lazy_plt->plt_tlsdesc_got1_offset));
 	  /* Add offset for indirect branch via GOT+TDG, where TDG
 	     stands for htab->tlsdesc_got, subtracting the offset
@@ -4696,13 +4696,13 @@ elf_x86_64_finish_dynamic_sections (bfd *output_bfd,
 	  bfd_put_32 (output_bfd,
 		      (htab->elf.sgot->output_section->vma
 		       + htab->elf.sgot->output_offset
-		       + htab->tlsdesc_got
+		       + htab->elf.tlsdesc_got
 		       - htab->elf.splt->output_section->vma
 		       - htab->elf.splt->output_offset
-		       - htab->tlsdesc_plt
+		       - htab->elf.tlsdesc_plt
 		       - htab->lazy_plt->plt_tlsdesc_got2_insn_end),
 		      (htab->elf.splt->contents
-		       + htab->tlsdesc_plt
+		       + htab->elf.tlsdesc_plt
 		       + htab->lazy_plt->plt_tlsdesc_got2_offset));
 	}
     }

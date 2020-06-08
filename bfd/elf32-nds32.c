@@ -4405,12 +4405,14 @@ nds32_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       /* If we're not using lazy TLS relocations, don't generate the
 	 PLT and GOT entries they require.  */
-      if (!(info->flags & DF_BIND_NOW))
+      if ((info->flags & DF_BIND_NOW))
+	htab->root.tlsdesc_plt = 0;
+      else
 	{
-	  htab->dt_tlsdesc_got = htab->root.sgot->size;
+	  htab->root.tlsdesc_got = htab->root.sgot->size;
 	  htab->root.sgot->size += 4;
 
-	  htab->dt_tlsdesc_plt = htab->root.splt->size;
+	  htab->root.tlsdesc_plt = htab->root.splt->size;
 	  htab->root.splt->size += 4 * ARRAY_SIZE (dl_tlsdesc_lazy_trampoline);
 	}
     }
@@ -4509,7 +4511,7 @@ nds32_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       if (htab->tls_desc_trampoline && plt)
 	{
-	  if (htab->dt_tlsdesc_plt
+	  if (htab->root.tlsdesc_plt
 	      && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
 		  || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
 	    return FALSE;
@@ -6435,14 +6437,14 @@ nds32_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	    case DT_TLSDESC_PLT:
 	      s = htab->root.splt;
 	      dyn.d_un.d_ptr = (s->output_section->vma + s->output_offset
-				+ htab->dt_tlsdesc_plt);
+				+ htab->root.tlsdesc_plt);
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 
 	    case DT_TLSDESC_GOT:
 	      s = htab->root.sgot;
 	      dyn.d_un.d_ptr = (s->output_section->vma + s->output_offset
-				+ htab->dt_tlsdesc_got);
+				+ htab->root.tlsdesc_got);
 	      bfd_elf32_swap_dyn_out (output_bfd, &dyn, dyncon);
 	      break;
 	    }
@@ -6505,14 +6507,14 @@ nds32_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	    PLT_ENTRY_SIZE;
 	}
 
-      if (htab->dt_tlsdesc_plt)
+      if (htab->root.tlsdesc_plt)
 	{
 	  /* Calculate addresses.  */
 	  asection *sgot = sgot = ehtab->sgot;
 	  bfd_vma pltgot = sgotplt->output_section->vma
 	    + sgotplt->output_offset;
 	  bfd_vma tlsdesc_got = sgot->output_section->vma + sgot->output_offset
-	    + htab->dt_tlsdesc_got;
+	    + htab->root.tlsdesc_got;
 
 	  /* Get GP offset.  */
 	  pltgot -= elf_gp (output_bfd) - 4; /* PLTGOT[1]  */
@@ -6525,7 +6527,7 @@ nds32_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	  dl_tlsdesc_lazy_trampoline[5] +=  0xfff & pltgot;
 
 	  /* Insert .plt.  */
-	  nds32_put_trampoline (splt->contents + htab->dt_tlsdesc_plt,
+	  nds32_put_trampoline (splt->contents + htab->root.tlsdesc_plt,
 				dl_tlsdesc_lazy_trampoline,
 				ARRAY_SIZE (dl_tlsdesc_lazy_trampoline));
 	}

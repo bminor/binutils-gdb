@@ -369,7 +369,7 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	{
 	  htab->elf.srelplt->size += htab->sizeof_reloc;
 	  if (bed->target_id == X86_64_ELF_DATA)
-	    htab->tlsdesc_plt = (bfd_vma) -1;
+	    htab->elf.tlsdesc_plt = (bfd_vma) -1;
 	}
     }
   else
@@ -1116,7 +1116,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 		    {
 		      htab->elf.srelplt->size += htab->sizeof_reloc;
 		      if (bed->target_id == X86_64_ELF_DATA)
-			htab->tlsdesc_plt = (bfd_vma) -1;
+			htab->elf.tlsdesc_plt = (bfd_vma) -1;
 		    }
 		}
 	    }
@@ -1163,22 +1163,22 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
   else if (htab->elf.irelplt)
     htab->next_irelative_index = htab->elf.irelplt->reloc_count - 1;
 
-  if (htab->tlsdesc_plt)
+  if (htab->elf.tlsdesc_plt)
     {
       /* NB: tlsdesc_plt is set only for x86-64.  If we're not using
 	 lazy TLS relocations, don't generate the PLT and GOT entries
 	 they require.  */
       if ((info->flags & DF_BIND_NOW))
-	htab->tlsdesc_plt = 0;
+	htab->elf.tlsdesc_plt = 0;
       else
 	{
-	  htab->tlsdesc_got = htab->elf.sgot->size;
+	  htab->elf.tlsdesc_got = htab->elf.sgot->size;
 	  htab->elf.sgot->size += htab->got_entry_size;
 	  /* Reserve room for the initial entry.
 	     FIXME: we could probably do away with it in this case.  */
 	  if (htab->elf.splt->size == 0)
 	    htab->elf.splt->size = htab->plt.plt_entry_size;
-	  htab->tlsdesc_plt = htab->elf.splt->size;
+	  htab->elf.tlsdesc_plt = htab->elf.splt->size;
 	  htab->elf.splt->size += htab->plt.plt_entry_size;
 	}
     }
@@ -1395,7 +1395,7 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 	    return FALSE;
 	}
 
-      if (htab->tlsdesc_plt
+      if (htab->elf.tlsdesc_plt
 	  && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
 	      || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
 	return FALSE;
@@ -1544,13 +1544,13 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 	case DT_TLSDESC_PLT:
 	  s = htab->elf.splt;
 	  dyn.d_un.d_ptr = s->output_section->vma + s->output_offset
-	    + htab->tlsdesc_plt;
+	    + htab->elf.tlsdesc_plt;
 	  break;
 
 	case DT_TLSDESC_GOT:
 	  s = htab->elf.sgot;
 	  dyn.d_un.d_ptr = s->output_section->vma + s->output_offset
-	    + htab->tlsdesc_got;
+	    + htab->elf.tlsdesc_got;
 	  break;
 	}
 

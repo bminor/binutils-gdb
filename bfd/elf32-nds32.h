@@ -138,16 +138,6 @@ struct elf_nds32_link_hash_table
   /* Disable if linking a dynamically linked executable.  */
   int load_store_relax;
 
-  /* The offset into splt of the PLT entry for the TLS descriptor
-     resolver.  Special values are 0, if not necessary (or not found
-     to be necessary yet), and -1 if needed but not determined
-     yet.  */
-  bfd_vma dt_tlsdesc_plt;
-
-  /* The offset into sgot of the GOT entry used by the PLT entry
-     above.  */
-  bfd_vma dt_tlsdesc_got;
-
   /* Offset in .plt section of tls_nds32_trampoline.  */
   bfd_vma tls_trampoline;
 
