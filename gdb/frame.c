@@ -687,14 +687,6 @@ frame_id_build_wild (CORE_ADDR stack_addr)
   return id;
 }
 
-bool
-frame_id_computed_p (struct frame_info *frame)
-{
-  gdb_assert (frame != nullptr);
-
-  return frame->this_id.p != 0;
-}
-
 int
 frame_id_p (struct frame_id l)
 {

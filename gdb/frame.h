@@ -236,10 +236,6 @@ extern struct frame_id
    as the special identifier address are set to indicate wild cards.  */
 extern struct frame_id frame_id_build_wild (CORE_ADDR stack_addr);
 
-/* Returns true if FRAME's id has been computed.
-   Returns false otherwise.  */
-extern bool frame_id_computed_p (struct frame_info *frame);
-
 /* Returns non-zero when L is a valid frame (a valid frame has a
    non-zero .base).  The outermost frame is valid even without an
    ID.  */

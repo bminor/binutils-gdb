@@ -1,5 +1,15 @@
 2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	PR python/22748
+	* dwarf2/frame-tailcall.c (dwarf2_tailcall_sniffer_first): Remove
+	special handling for inline frames.
+	* findvar.c (value_of_register_lazy): Skip inline frames when
+	creating lazy register values.
+	* frame.c (frame_id_computed_p): Delete definition.
+	* frame.h (frame_id_computed_p): Delete declaration.
+
+2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* NEWS: Mention additions to Python API.
 	* python/py-arch.c (archpy_register_groups): New function.
 	(arch_object_methods): Add 'register_groups' method.

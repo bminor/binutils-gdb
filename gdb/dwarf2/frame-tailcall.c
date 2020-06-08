@@ -384,43 +384,8 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
 
       prev_gdbarch = frame_unwind_arch (this_frame);
 
-      /* The dwarf2 tailcall sniffer runs early, at the end of populating the
-	 dwarf2 frame cache for the current frame.  If there exists inline
-	 frames inner (next) to the current frame, there is a good possibility
-	 of that inline frame not having a computed frame id yet.
-
-	 This is because computing such a frame id requires us to walk through
-	 the frame chain until we find the first normal frame after the inline
-	 frame and then compute the normal frame's id first.
-
-	 Some architectures' compilers generate enough register location
-	 information for a dwarf unwinder to fetch PC without relying on inner
-	 frames (x86_64 for example).  In this case the PC is retrieved
-	 according to dwarf rules.
-
-	 But others generate less strict dwarf data for which assumptions are
-	 made (like interpreting DWARF2_FRAME_REG_UNSPECIFIED as
-	 DWARF2_FRAME_REG_SAME_VALUE).  For such cases, GDB may attempt to
-	 create lazy values for registers, and those lazy values must be
-	 created with a valid frame id, but we potentially have no valid id.
-
-	 So, to avoid breakage, if we see a dangerous situation with inline
-	 frames without a computed id, use safer functions to retrieve the
-	 current frame's PC.  Otherwise use the provided dwarf rules.  */
-      frame_info *next_frame = get_next_frame (this_frame);
-
       /* Simulate frame_unwind_pc without setting this_frame->prev_pc.p.  */
-      if (next_frame != nullptr && get_frame_type (next_frame) == INLINE_FRAME
-	  && !frame_id_computed_p (next_frame))
-	{
-	  /* The next frame is an inline frame and its frame id has not been
-	     computed yet.  */
-	  get_frame_register (this_frame, gdbarch_pc_regnum (prev_gdbarch),
-			      (gdb_byte *) &prev_pc);
-	  prev_pc = gdbarch_addr_bits_remove (prev_gdbarch, prev_pc);
-	}
-      else
-	prev_pc = gdbarch_unwind_pc (prev_gdbarch, this_frame);
+      prev_pc = gdbarch_unwind_pc (prev_gdbarch, this_frame);
 
       /* call_site_find_chain can throw an exception.  */
       chain = call_site_find_chain (prev_gdbarch, prev_pc, this_pc);
