@@ -800,7 +800,7 @@ enum
   MOD_0F2B_PREFIX_1,
   MOD_0F2B_PREFIX_2,
   MOD_0F2B_PREFIX_3,
-  MOD_0F51,
+  MOD_0F50,
   MOD_0F71_REG_2,
   MOD_0F71_REG_4,
   MOD_0F71_REG_6,
@@ -2746,7 +2746,7 @@ static const struct dis386 dis386_twobyte[] = {
   { "cmovleS",		{ Gv, Ev }, 0 },
   { "cmovgS",		{ Gv, Ev }, 0 },
   /* 50 */
-  { MOD_TABLE (MOD_0F51) },
+  { MOD_TABLE (MOD_0F50) },
   { PREFIX_TABLE (PREFIX_0F51) },
   { PREFIX_TABLE (PREFIX_0F52) },
   { PREFIX_TABLE (PREFIX_0F53) },
@@ -10384,7 +10384,7 @@ static const struct dis386 mod_table[][2] = {
     {"movntsd",		{ Mq, XM }, PREFIX_OPCODE },
   },
   {
-    /* MOD_0F51 */
+    /* MOD_0F50 */
     { Bad_Opcode },
     { "movmskpX",	{ Gdq, XS }, PREFIX_OPCODE },
   },

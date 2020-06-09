@@ -1,3 +1,8 @@
+2020-06-09  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (MOD_0F51): Rename to ...
+	(MOD_0F50): ... this.
+
 2020-06-08  Alex Coplan  <alex.coplan@arm.com>
 
 	* arm-dis.c (arm_opcodes): Add dfb.
