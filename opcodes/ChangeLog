@@ -1,3 +1,7 @@
+2020-06-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (prefix_table): Fix a typo in comments.
+
 2020-06-09  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (rex_ignored): Delete.

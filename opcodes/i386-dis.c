@@ -3572,7 +3572,7 @@ static const struct dis386 prefix_table[][4] = {
     { NULL, { { NULL, 0 } }, PREFIX_IGNORED }
   },
 
-  /* PREFIX_0F01_REG_3_MOD_1 */
+  /* PREFIX_0F01_REG_3_RM_1 */
   {
     { "vmmcall",	{ Skip_MODRM }, 0 },
     { "vmgexit",	{ Skip_MODRM }, 0 },
