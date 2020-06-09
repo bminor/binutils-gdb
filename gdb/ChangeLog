@@ -1,5 +1,14 @@
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* target-descriptions.c (tdesc_architecture_name): Protect against
+	NULL pointer dereference.
+	(maint_print_xml_tdesc_cmd): New function.
+	(_initialize_target_descriptions): Register new 'maint print
+	xml-tdesc' command and give it the filename completer.
+	* NEWS: Mention new 'maint print xml-tdesc' command.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* target-descriptions.c (class tdesc_compatible_info): New class.
 	(struct target_desc): Change type of compatible vector.
 	(tdesc_compatible_p): Update for change in type of

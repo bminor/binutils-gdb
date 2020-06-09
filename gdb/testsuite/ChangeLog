@@ -1,3 +1,11 @@
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.xml/tdesc-reload.c: New file.
+	* gdb.xml/tdesc-reload.exp: New file.
+	* gdb.xml/maint-xml-dump-01.xml: New file.
+	* gdb.xml/maint-xml-dump-02.xml: New file.
+	* gdb.xml/maint-xml-dump.exp: New file.
+
 2020-06-23  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* lib/completion-support.exp (test_gdb_completion_offers_commands):

@@ -410,7 +410,8 @@ class print_xml_feature : public tdesc_element_visitor
 {
 public:
   print_xml_feature (std::string *buffer_)
-    : m_buffer (buffer_)
+    : m_buffer (buffer_),
+      m_depth (0)
   {}
 
   void visit_pre (const target_desc *e) override;
@@ -423,7 +424,27 @@ public:
   void visit (const tdesc_reg *reg) override;
 
 private:
+
+  /* Called with a positive value of ADJUST when we move inside an element,
+     for example inside <target>, and with a negative value when we leave
+     the element.  In this class this function does nothing, but a
+     sub-class can override this to track the current level of nesting.  */
+  void indent (int adjust)
+  {
+    m_depth += (adjust * 2);
+  }
+
+  /* Functions to add lines to the output buffer M_BUFFER.  Each of these
+     functions appends a newline, so don't include one in the strings being
+     passed.  */
+  void add_line (const std::string &str);
+  void add_line (const char *fmt, ...);
+
+  /* The buffer we are writing too.  */
   std::string *m_buffer;
+
+  /* The current indentation depth.  */
+  int m_depth;
 };
 
 #endif /* COMMON_TDESC_H */

@@ -1,5 +1,18 @@
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* tdesc.cc (print_xml_feature::visit_pre): Use add_line to add
+	output content, and call indent as needed in all overloaded
+	variants.
+	(print_xml_feature::visit_post): Likewise.
+	(print_xml_feature::visit): Likewise.
+	(print_xml_feature::add_line): Two new overloaded functions.
+	* tdesc.h (print_xml_feature::indent): New member function.
+	(print_xml_feature::add_line): Two new overloaded member
+	functions.
+	(print_xml_feature::m_depth): New member variable.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* tdesc.cc (print_xml_feature::visit_pre): Print compatible
 	information.
 	* tdesc.h (struct tdesc_compatible_info): Declare new struct.

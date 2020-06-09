@@ -79,6 +79,12 @@ tui new-layout NAME WINDOW WEIGHT [WINDOW WEIGHT]...
   Define a new TUI layout, specifying its name and the windows that
   will be displayed.
 
+maintenance print xml-tdesc [FILE]
+  Prints the current target description as an XML document.  If the
+  optional FILE is provided (which is an XML target description) then
+  the target description is read from FILE into GDB, and then
+  reprinted.
+
 * Changed commands
 
 alias [-a] [--] ALIAS = COMMAND [DEFAULT-ARGS...]

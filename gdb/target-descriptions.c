@@ -662,7 +662,9 @@ tdesc_architecture (const struct target_desc *target_desc)
 const char *
 tdesc_architecture_name (const struct target_desc *target_desc)
 {
-  return target_desc->arch->printable_name;
+  if (target_desc->arch != NULL)
+    return target_desc->arch->printable_name;
+  return NULL;
 }
 
 /* See gdbsupport/tdesc.h.  */
@@ -1755,6 +1757,36 @@ maint_print_c_tdesc_cmd (const char *args, int from_tty)
     }
 }
 
+/* Implement the maintenance print xml-tdesc command.  */
+
+static void
+maint_print_xml_tdesc_cmd (const char *args, int from_tty)
+{
+  const struct target_desc *tdesc;
+
+  if (args == NULL)
+    {
+      /* Use the global target-supplied description, not the current
+	 architecture's.  This lets a GDB for one architecture generate XML
+	 for another architecture's description, even though the gdbarch
+	 initialization code will reject the new description.  */
+      tdesc = current_target_desc;
+    }
+  else
+    {
+      /* Use the target description from the XML file.  */
+      tdesc = file_read_description_xml (args);
+    }
+
+  if (tdesc == NULL)
+    error (_("There is no target description to print."));
+
+  std::string buf;
+  print_xml_feature v (&buf);
+  tdesc->accept (v);
+  puts_unfiltered (buf.c_str ());
+}
+
 namespace selftests {
 
 /* A reference target description, used for testing (see record_xml_tdesc).  */
@@ -1890,6 +1922,11 @@ When unset, GDB will read the description from the target."),
   cmd = add_cmd ("c-tdesc", class_maintenance, maint_print_c_tdesc_cmd, _("\
 Print the current target description as a C source file."),
 	   &maintenanceprintlist);
+  set_cmd_completer (cmd, filename_completer);
+
+  cmd = add_cmd ("xml-tdesc", class_maintenance, maint_print_xml_tdesc_cmd, _("\
+Print the current target description as an XML file."),
+		 &maintenanceprintlist);
   set_cmd_completer (cmd, filename_completer);
 
   cmd = add_cmd ("xml-descriptions", class_maintenance,

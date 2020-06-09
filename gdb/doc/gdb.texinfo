@@ -38501,6 +38501,15 @@ The created source file is built into @value{GDBN} when @value{GDBN} is
 built again.  This command is used by developers after they add or
 modify XML target descriptions.
 
+@kindex maint print xml-tdesc
+@item maint print xml-tdesc  @r{[}@var{file}@r{]}
+Print the target description (@pxref{Target Descriptions}) as an XML
+file.  By default print the target description for the current target,
+but if the optional argument @var{file} is provided, then that file is
+read in by GDB and then used to produce the description.  The
+@var{file} should be an XML document, of the form described in
+@ref{Target Description Format}.
+
 @kindex maint check xml-descriptions
 @item maint check xml-descriptions @var{dir}
 Check that the target descriptions dynamically created by @value{GDBN}
