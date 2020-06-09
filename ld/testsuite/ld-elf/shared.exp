@@ -921,22 +921,22 @@ set run_tests [list \
      {dl2main.c} "dl2k" "dl2a.out" ] \
     [list "Run with libdl4a.so" \
      "-Wl,--no-as-needed tmpdir/libdl4a.so" "" \
-     {dl4main.c} "dl4a" "dl4a.out" ] \
+     {dl4main.c} "dl4a" "dl4a.out" "-fPIC"] \
     [list "Run with libdl4b.so" \
      "-Wl,--no-as-needed tmpdir/libdl4b.so" "" \
-     {dl4main.c} "dl4b" "dl4a.out" ] \
+     {dl4main.c} "dl4b" "dl4a.out" "-fPIC"] \
     [list "Run with libdl4c.so" \
      "-Wl,--no-as-needed tmpdir/libdl4c.so" "" \
-     {dl4main.c} "dl4c" "dl4b.out" ] \
+     {dl4main.c} "dl4c" "dl4b.out" "-fPIC"] \
     [list "Run with libdl4d.so" \
      "-Wl,--no-as-needed tmpdir/libdl4d.so" "" \
-     {dl4main.c} "dl4d" "dl4b.out" ] \
+     {dl4main.c} "dl4d" "dl4b.out" "-fPIC"] \
     [list "Run with libdl4e.so" \
      "-Wl,--no-as-needed tmpdir/libdl4e.so" "" \
-     {dl4main.c} "dl4e" "dl4e.out" ] \
+     {dl4main.c} "dl4e" "dl4a.out" "-fPIC"] \
     [list "Run with libdl4f.so" \
      "-Wl,--no-as-needed tmpdir/libdl4f.so" "" \
-     {dl4main.c} "dl4f" "dl4e.out" ] \
+     {dl4main.c} "dl4f" "dl4a.out" "-fPIC"] \
     [list "Run with libdata1.so" \
      "-Wl,--no-as-needed tmpdir/libdata1.so" "" \
      {dynbss1.c} "dynbss1" "pass.out" ] \

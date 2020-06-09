@@ -1,3 +1,10 @@
+2020-06-09  Alan Modra  <amodra@gmail.com>
+
+	PR 26065
+	* testsuite/ld-elf/shared.exp: Compile dl4main.c -fPIC.
+	(dl4e, dl4f): Expect dl4a.out.
+	* testsuite/ld-elf/dl4e.out: Delete.
+
 2020-06-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/shared.exp: Pass $LFLAGS to PR ld/21703
