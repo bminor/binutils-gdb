@@ -2987,9 +2987,7 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
   obj_attribute *in_attr;
   obj_attribute *out_attr;
   bfd_boolean result = TRUE;
-  bfd_boolean priv_may_conflict = FALSE;
-  bfd_boolean in_priv_zero = TRUE;
-  bfd_boolean out_priv_zero = TRUE;
+  bfd_boolean priv_attrs_merged = FALSE;
   const char *sec_name = get_elf_backend_data (ibfd)->obj_attrs_section;
   unsigned int i;
 
@@ -3048,41 +3046,42 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
       case Tag_RISCV_priv_spec:
       case Tag_RISCV_priv_spec_minor:
       case Tag_RISCV_priv_spec_revision:
-	if (in_attr[i].i != 0)
-	  in_priv_zero = FALSE;
-	if (out_attr[i].i != 0)
-	  out_priv_zero = FALSE;
-	if (out_attr[i].i != in_attr[i].i)
-	  priv_may_conflict = TRUE;
-
-	/* We check the priv version conflict when parsing the
-	   revision version.  */
-	if (i != Tag_RISCV_priv_spec_revision)
-	  break;
-
-	/* Allow to link the object without the priv setting.  */
-	if (out_priv_zero)
+	/* If we have handled the priv attributes, then skip it.  */
+	if (!priv_attrs_merged)
 	  {
-	    out_attr[i].i = in_attr[i].i;
-	    out_attr[Tag_RISCV_priv_spec].i =
-		in_attr[Tag_RISCV_priv_spec].i;
-	    out_attr[Tag_RISCV_priv_spec_minor].i =
-		in_attr[Tag_RISCV_priv_spec_minor].i;
-	  }
-	else if (!in_priv_zero
-		 && priv_may_conflict)
-	  {
-	    _bfd_error_handler
-	      (_("error: %pB use privilege spec version %u.%u.%u but "
-		 "the output use version %u.%u.%u."),
-	       ibfd,
-	       in_attr[Tag_RISCV_priv_spec].i,
-	       in_attr[Tag_RISCV_priv_spec_minor].i,
-	       in_attr[i].i,
-	       out_attr[Tag_RISCV_priv_spec].i,
-	       out_attr[Tag_RISCV_priv_spec_minor].i,
-	       out_attr[i].i);
-	    result = FALSE;
+	    unsigned int Tag_a = Tag_RISCV_priv_spec;
+	    unsigned int Tag_b = Tag_RISCV_priv_spec_minor;
+	    unsigned int Tag_c = Tag_RISCV_priv_spec_revision;
+
+	    /* Allow to link the object without the priv specs.  */
+	    if (out_attr[Tag_a].i == 0
+		&& out_attr[Tag_b].i == 0
+		&& out_attr[Tag_c].i == 0)
+	      {
+		out_attr[Tag_a].i = in_attr[Tag_a].i;
+		out_attr[Tag_b].i = in_attr[Tag_b].i;
+		out_attr[Tag_c].i = in_attr[Tag_c].i;
+	      }
+	    else if ((in_attr[Tag_a].i != 0
+		      || in_attr[Tag_b].i != 0
+		      || in_attr[Tag_c].i != 0)
+		     && (out_attr[Tag_a].i != in_attr[Tag_a].i
+			 || out_attr[Tag_b].i != in_attr[Tag_b].i
+			 || out_attr[Tag_c].i != in_attr[Tag_c].i))
+	      {
+		_bfd_error_handler
+		  (_("error: %pB use privilege spec version %u.%u.%u but "
+		     "the output use version %u.%u.%u."),
+		   ibfd,
+		   in_attr[Tag_a].i,
+		   in_attr[Tag_b].i,
+		   in_attr[Tag_c].i,
+		   out_attr[Tag_a].i,
+		   out_attr[Tag_b].i,
+		   out_attr[Tag_c].i);
+		result = FALSE;
+	      }
+	    priv_attrs_merged = TRUE;
 	  }
 	break;
 

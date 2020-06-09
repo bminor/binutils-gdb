@@ -1,3 +1,11 @@
+2020-06-22  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c (riscv_merge_attributes): Once we meet one of the
+	priv attributes, we will check the conflicts for all of them (major,
+	minor and revision), and then set the priv_attrs_merged to TRUE to
+	indicate that we have handled all of the priv attributes.  Remove
+	the unused boolean priv_may_conflict, in_priv_zero and out_priv_zero.
+
 2020-06-21  Alan Modra  <amodra@gmail.com>
 
 	PR 26132
