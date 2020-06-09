@@ -132,7 +132,6 @@ elf_x86_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       && h->def_regular)
     {
       if (_bfd_elf_allocate_ifunc_dyn_relocs (info, h, &h->dyn_relocs,
-					      &htab->readonly_dynrelocs_against_ifunc,
 					      plt_entry_size,
 					      (htab->plt.has_plt0
 					       * plt_entry_size),
@@ -1416,15 +1415,11 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 
 	  if ((info->flags & DF_TEXTREL) != 0)
 	    {
-	      if (htab->readonly_dynrelocs_against_ifunc)
-		{
-		  info->callbacks->einfo
-		    (_("%P%X: read-only segment has dynamic IFUNC relocations;"
-		       " recompile with %s\n"),
-		     bfd_link_dll (info) ? "-fPIC" : "-fPIE");
-		  bfd_set_error (bfd_error_bad_value);
-		  return FALSE;
-		}
+	      if (htab->elf.ifunc_resolvers)
+		info->callbacks->einfo
+		  (_("%P: warning: GNU indirect functions with DT_TEXTREL "
+		     "may result in a segfault at runtime; recompile with %s\n"),
+		   bfd_link_dll (info) ? "-fPIC" : "-fPIE");
 
 	      if (!add_dynamic_entry (DT_TEXTREL, 0))
 		return FALSE;

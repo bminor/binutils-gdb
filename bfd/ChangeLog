@@ -1,3 +1,26 @@
+2020-06-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18801
+	* elf-bfd.h (elf_link_hash_table): Add ifunc_resolvers.
+	(_bfd_elf_allocate_ifunc_dyn_relocs): Remove the
+	bfd_boolean * argument.  Set ifunc_resolvers if there are IFUNC
+	resolvers.
+	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Updated.
+	Set ifunc_resolvers if there are FUNC resolvers.
+	* elf64-ppc.c (ppc_link_hash_table): Remove local_ifunc_resolver.
+	(build_global_entry_stubs_and_plt): Replace local_ifunc_resolver
+	with elf.ifunc_resolvers.
+	(write_plt_relocs_for_local_syms): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+	(ppc64_elf_finish_dynamic_sections): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_allocate_ifunc_dynrelocs):
+	Updated.
+	* elfxx-x86.c (elf_x86_allocate_dynrelocs): Likewise.
+	(_bfd_x86_elf_size_dynamic_sections): Check elf.ifunc_resolvers
+	instead of readonly_dynrelocs_against_ifunc.
+	* elfxx-x86.h (elf_x86_link_hash_table): Remove
+	readonly_dynrelocs_against_ifunc.
+
 2020-06-09  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct ppc_link_hash_table): Delete

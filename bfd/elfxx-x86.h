@@ -483,10 +483,6 @@ struct elf_x86_link_hash_table
   /* The index of the next R_X86_64_IRELATIVE entry in .rela.plt.  */
   bfd_vma next_irelative_index;
 
-  /* TRUE if there are dynamic relocs against IFUNC symbols that apply
-     to read-only sections.  */
-  bfd_boolean readonly_dynrelocs_against_ifunc;
-
   /* The (unloaded but important) .rel.plt.unloaded section on VxWorks.
      This is used for i386 only.  */
   asection *srelplt2;

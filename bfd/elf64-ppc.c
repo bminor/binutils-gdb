@@ -3239,10 +3239,6 @@ struct ppc_link_hash_table
   /* Whether func_desc_adjust needs to be run over symbols.  */
   unsigned int need_func_desc_adj:1;
 
-  /* Whether there exist local gnu indirect function resolvers,
-     referenced by dynamic relocations.  */
-  unsigned int local_ifunc_resolver:1;
-
   /* Whether plt calls for ELFv2 localentry:0 funcs have been optimized.  */
   unsigned int has_plt_localentry0:1;
 
@@ -13880,7 +13876,7 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 	      {
 		plt = htab->elf.iplt;
 		relplt = htab->elf.irelplt;
-		htab->local_ifunc_resolver = 1;
+		htab->elf.ifunc_resolvers = TRUE;
 		if (htab->opd_abi)
 		  rela.r_info = ELF64_R_INFO (0, R_PPC64_JMP_IREL);
 		else
@@ -13934,7 +13930,7 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 		   + ((ent->plt.offset - PLT_INITIAL_ENTRY_SIZE (htab))
 		      / PLT_ENTRY_SIZE (htab) * sizeof (Elf64_External_Rela)));
 	    if (h->type == STT_GNU_IFUNC && is_static_defined (h))
-	      htab->local_ifunc_resolver = 1;
+	      htab->elf.ifunc_resolvers = TRUE;
 	    bfd_elf64_swap_reloca_out (info->output_bfd, &rela, loc);
 	  }
       }
@@ -14076,7 +14072,7 @@ write_plt_relocs_for_local_syms (struct bfd_link_info *info)
 
 	      if (ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 		{
-		  htab->local_ifunc_resolver = 1;
+		  htab->elf.ifunc_resolvers = TRUE;
 		  plt = htab->elf.iplt;
 		  relplt = htab->elf.irelplt;
 		}
@@ -16103,7 +16099,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  {
 		    relgot = htab->elf.irelplt;
 		    if (indx == 0 || is_static_defined (&h->elf))
-		      htab->local_ifunc_resolver = 1;
+		      htab->elf.ifunc_resolvers = TRUE;
 		  }
 		else if (indx != 0
 			 || (bfd_link_pic (info)
@@ -16633,7 +16629,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		{
 		  sreloc = htab->elf.irelplt;
 		  if (indx == 0 || is_static_defined (&h->elf))
-		    htab->local_ifunc_resolver = 1;
+		    htab->elf.ifunc_resolvers = TRUE;
 		}
 	      if (sreloc == NULL)
 		abort ();
@@ -17397,7 +17393,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_TEXTREL:
-	      if (htab->local_ifunc_resolver)
+	      if (htab->elf.ifunc_resolvers)
 		info->callbacks->einfo
 		  (_("%P: warning: text relocations and GNU indirect "
 		     "functions may result in a segfault at runtime\n"));

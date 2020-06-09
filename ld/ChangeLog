@@ -1,3 +1,25 @@
+2020-06-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/18801
+	* testsuite/ld-i386/i386.exp: Run ifunc-textrel-1a,
+	ifunc-textrel-1b, ifunc-textrel-2a and ifunc-textrel-2b.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/ifunc-textrel-1a.d: Likewise.
+	* testsuite/ld-i386/ifunc-textrel-1b.d: Likewise.
+	* testsuite/ld-i386/ifunc-textrel-2a.d: Likewise.
+	* testsuite/ld-i386/ifunc-textrel-2b.d: Likewise.
+	* testsuite/ld-x86-64/ifunc-textrel-1.s: Likewise.
+	* testsuite/ld-x86-64/ifunc-textrel-1a.d: Likewise.
+	* testsuite/ld-x86-64/ifunc-textrel-1b.d: Likewise.
+	* testsuite/ld-x86-64/ifunc-textrel-2.s: Likewise.
+	* testsuite/ld-x86-64/ifunc-textrel-2a.d: Likewise.
+	* testsuite/ld-x86-64/ifunc-textrel-2b.d: Likewise.
+	* testsuite/ld-i386/pr18801a.d: Expect warning for IFUNC
+	resolvers.
+	* testsuite/ld-i386/pr18801b.d: Likewise.
+	* estsuite/ld-x86-64/pr18801a.d: Likewise.
+	* estsuite/ld-x86-64/pr18801b.d: Likewise.
+
 2020-06-09  Alan Modra  <amodra@gmail.com>
 
 	PR 26065
