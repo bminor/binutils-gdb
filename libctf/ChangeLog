@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-decl.c (ctf_decl_fini): Free the cd_buf.
+	(ctf_decl_buf): Once it escapes, don't try to free it later.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-types.c (ctf_type_aname): Print arg types here...
 	* ctf-dump.c (ctf_dump_funcs): ... not here: but do substitute
 	in the type name here.

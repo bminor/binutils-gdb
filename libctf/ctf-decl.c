@@ -68,6 +68,7 @@ ctf_decl_fini (ctf_decl_t *cd)
 	  free (cdp);
 	}
     }
+  free (cd->cd_buf);
 }
 
 void
@@ -195,5 +196,7 @@ void ctf_decl_sprintf (ctf_decl_t *cd, const char *format, ...)
 
 char *ctf_decl_buf (ctf_decl_t *cd)
 {
-  return cd->cd_buf;
+  char *buf = cd->cd_buf;
+  cd->cd_buf = NULL;
+  return buf;
 }
