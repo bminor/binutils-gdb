@@ -1,5 +1,15 @@
 2020-06-09  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (vex_table): Use PREFIX_OPCODE for vunpcklpX,
+	vunpckhpX, vmovapX, vandpX, vandnpX, vorpX, vxorpX and vshufpX.
+	(vex_len_table) : Likewise for vmovlpX, vmovhpX, vmovntpX, and
+	vmovmskpX.
+	(print_insn): Drop pointless check against bad_opcode. Split
+	prefix validation into legacy and VEX-and-alike parts.
+	(putop): Re-work 'X' macro handling.
+
+2020-06-09  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (MOD_0F51): Rename to ...
 	(MOD_0F50): ... this.
 
