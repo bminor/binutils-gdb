@@ -1,3 +1,13 @@
+2020-06-09  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct ppc_link_hash_table): Delete
+	maybe_local_ifunc_resolver field.
+	(build_global_entry_stubs_and_plt): Set local_ifunc_resolver in
+	cases where maybe_local_ifunc_resolver was set.
+	(ppc64_elf_relocate_section): Likewise.
+	(ppc64_elf_finish_dynamic_sections): Downgrade ifunc with textrel
+	error to a warning.
+
 2020-06-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (elf_link_hash_entry): Add tlsdesc_plt and

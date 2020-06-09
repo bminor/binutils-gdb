@@ -3242,7 +3242,6 @@ struct ppc_link_hash_table
   /* Whether there exist local gnu indirect function resolvers,
      referenced by dynamic relocations.  */
   unsigned int local_ifunc_resolver:1;
-  unsigned int maybe_local_ifunc_resolver:1;
 
   /* Whether plt calls for ELFv2 localentry:0 funcs have been optimized.  */
   unsigned int has_plt_localentry0:1;
@@ -13935,7 +13934,7 @@ build_global_entry_stubs_and_plt (struct elf_link_hash_entry *h, void *inf)
 		   + ((ent->plt.offset - PLT_INITIAL_ENTRY_SIZE (htab))
 		      / PLT_ENTRY_SIZE (htab) * sizeof (Elf64_External_Rela)));
 	    if (h->type == STT_GNU_IFUNC && is_static_defined (h))
-	      htab->maybe_local_ifunc_resolver = 1;
+	      htab->local_ifunc_resolver = 1;
 	    bfd_elf64_swap_reloca_out (info->output_bfd, &rela, loc);
 	  }
       }
@@ -16103,10 +16102,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		if (ifunc)
 		  {
 		    relgot = htab->elf.irelplt;
-		    if (indx == 0)
+		    if (indx == 0 || is_static_defined (&h->elf))
 		      htab->local_ifunc_resolver = 1;
-		    else if (is_static_defined (&h->elf))
-		      htab->maybe_local_ifunc_resolver = 1;
 		  }
 		else if (indx != 0
 			 || (bfd_link_pic (info)
@@ -16635,10 +16632,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
 		{
 		  sreloc = htab->elf.irelplt;
-		  if (indx == 0)
+		  if (indx == 0 || is_static_defined (&h->elf))
 		    htab->local_ifunc_resolver = 1;
-		  else if (is_static_defined (&h->elf))
-		    htab->maybe_local_ifunc_resolver = 1;
 		}
 	      if (sreloc == NULL)
 		abort ();
@@ -17403,10 +17398,6 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 
 	    case DT_TEXTREL:
 	      if (htab->local_ifunc_resolver)
-		info->callbacks->einfo
-		  (_("%X%P: text relocations and GNU indirect "
-		     "functions will result in a segfault at runtime\n"));
-	      else if (htab->maybe_local_ifunc_resolver)
 		info->callbacks->einfo
 		  (_("%P: warning: text relocations and GNU indirect "
 		     "functions may result in a segfault at runtime\n"));
