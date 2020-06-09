@@ -333,6 +333,7 @@ struct ctf_archive_internal
   ctf_sect_t ctfi_symsect;
   ctf_sect_t ctfi_strsect;
   int ctfi_free_symsect;
+  int ctfi_free_strsect;
   void *ctfi_data;
   bfd *ctfi_abfd;		    /* Optional source of section data.  */
   void (*ctfi_bfd_close) (struct ctf_archive_internal *);

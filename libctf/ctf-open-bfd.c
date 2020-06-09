@@ -94,46 +94,69 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
   ctf_sect_t *symsectp = NULL;
   ctf_sect_t *strsectp = NULL;
   const char *bfderrstr = NULL;
+  char *strtab_alloc = NULL;
 
 #ifdef HAVE_BFD_ELF
   ctf_sect_t symsect, strsect;
-  Elf_Internal_Shdr *strhdr;
   Elf_Internal_Shdr *symhdr = &elf_symtab_hdr (abfd);
-  size_t symcount = symhdr->sh_size / symhdr->sh_entsize;
+  size_t symcount;
   Elf_Internal_Sym *isymbuf;
-  bfd_byte *symtab;
+  bfd_byte *symtab = NULL;
   const char *strtab = NULL;
+  size_t strsize;
   /* TODO: handle SYMTAB_SHNDX.  */
 
-  if ((symtab = malloc (symhdr->sh_size)) == NULL)
+  /* Get the symtab, and the strtab associated with it.  */
+  if (elf_tdata (abfd) && symhdr && symhdr->sh_size && symhdr->sh_entsize)
     {
-      bfderrstr = "Cannot malloc symbol table";
-      goto err;
-    }
-
-  isymbuf = bfd_elf_get_elf_syms (abfd, symhdr, symcount, 0,
-				  NULL, symtab, NULL);
-  free (isymbuf);
-  if (isymbuf == NULL)
-    {
-      bfderrstr = "Cannot read symbol table";
-      goto err_free_sym;
-    }
-
-  if (elf_elfsections (abfd) != NULL
-      && symhdr->sh_link < elf_numsections (abfd))
-    {
-      strhdr = elf_elfsections (abfd)[symhdr->sh_link];
-      if (strhdr->contents == NULL)
+      symcount = symhdr->sh_size / symhdr->sh_entsize;
+      if ((symtab = malloc (symhdr->sh_size)) == NULL)
 	{
-	  if ((strtab = bfd_elf_get_str_section (abfd, symhdr->sh_link)) == NULL)
+	  bfderrstr = "Cannot malloc symbol table";
+	  goto err;
+	}
+
+      isymbuf = bfd_elf_get_elf_syms (abfd, symhdr, symcount, 0,
+				      NULL, symtab, NULL);
+      free (isymbuf);
+      if (isymbuf == NULL)
+	{
+	  bfderrstr = "Cannot read symbol table";
+	  goto err_free_sym;
+	}
+
+      if (elf_elfsections (abfd) != NULL
+	  && symhdr->sh_link < elf_numsections (abfd))
+	{
+	  Elf_Internal_Shdr *strhdr = elf_elfsections (abfd)[symhdr->sh_link];
+
+	  strsize = strhdr->sh_size;
+	  if (strhdr->contents == NULL)
 	    {
-	      bfderrstr = "Cannot read string table";
-	      goto err_free_sym;
+	      if ((strtab = bfd_elf_get_str_section (abfd, symhdr->sh_link)) == NULL)
+		{
+		  bfderrstr = "Cannot read string table";
+		  goto err_free_sym;
+		}
+	    }
+	  else
+	    strtab = (const char *) strhdr->contents;
+	}
+    }
+  else		/* No symtab: just try getting .strtab by name.  */
+    {
+      bfd_byte *str_bcontents;
+      asection *str_asect;
+
+      if ((str_asect = bfd_get_section_by_name (abfd, ".strtab")) != NULL)
+	{
+	  if (bfd_malloc_and_get_section (abfd, str_asect, &str_bcontents))
+	    {
+	      strtab = (const char *) str_bcontents;
+	      strtab_alloc = (char *) str_bcontents;
+	      strsize = str_asect->size;
 	    }
 	}
-      else
-	strtab = (const char *) strhdr->contents;
     }
 
   if (strtab)
@@ -144,9 +167,12 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
 
       strsect.cts_data = strtab;
       strsect.cts_name = ".strtab";
-      strsect.cts_size = strhdr->sh_size;
+      strsect.cts_size = strsize;
       strsectp = &strsect;
+    }
 
+  if (symtab)
+    {
       assert (symhdr->sh_entsize == get_elf_backend_data (abfd)->s->sizeof_sym);
       symsect.cts_name = ".symtab";
       symsect.cts_entsize = symhdr->sh_entsize;
@@ -159,13 +185,16 @@ ctf_bfdopen_ctfsect (struct bfd *abfd _libctf_unused_,
   arci = ctf_arc_bufopen (ctfsect, symsectp, strsectp, errp);
   if (arci)
     {
-      /* Request freeing of the symsect.  */
+      /* Request freeing of the symsect and possibly the strsect.  */
       arci->ctfi_free_symsect = 1;
+      if (strtab_alloc)
+	arci->ctfi_free_strsect = 1;
       return arci;
     }
 #ifdef HAVE_BFD_ELF
  err_free_sym:
   free (symtab);
+  free (strtab_alloc);
 #endif
 err: _libctf_unused_;
   if (bfderrstr)
