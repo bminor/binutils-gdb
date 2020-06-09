@@ -424,7 +424,8 @@ struct _i386_insn
 	vex_encoding_default = 0,
 	vex_encoding_vex,
 	vex_encoding_vex3,
-	vex_encoding_evex
+	vex_encoding_evex,
+	vex_encoding_error
       } vec_encoding;
 
     /* REP prefix.  */
@@ -5999,6 +6000,20 @@ check_VecOperands (const insn_template *t)
 	}
     }
 
+  /* Check the special Imm4 cases; must be the first operand.  */
+  if (t->cpu_flags.bitfield.cpuxop && t->operands == 5)
+    {
+      if (i.op[0].imms->X_op != O_constant
+	  || !fits_in_imm4 (i.op[0].imms->X_add_number))
+	{
+	  i.error = bad_imm4;
+	  return 1;
+	}
+
+      /* Turn off Imm<N> so that update_imm won't complain.  */
+      operand_type_set (&i.types[0], 0);
+    }
+
   /* Check vector Disp8 operand.  */
   if (t->opcode_modifier.disp8memshift
       && i.disp_encoding != disp_encoding_32bit)
@@ -6068,12 +6083,17 @@ check_VecOperands (const insn_template *t)
   return 0;
 }
 
-/* Check if operands are valid for the instruction.  Update VEX
-   operand types.  */
+/* Check if encoding requirements are met by the instruction.  */
 
 static int
-VEX_check_operands (const insn_template *t)
+VEX_check_encoding (const insn_template *t)
 {
+  if (i.vec_encoding == vex_encoding_error)
+    {
+      i.error = unsupported;
+      return 1;
+    }
+
   if (i.vec_encoding == vex_encoding_evex)
     {
       /* This instruction must be encoded with EVEX prefix.  */
@@ -6094,20 +6114,6 @@ VEX_check_operands (const insn_template *t)
 	  return 1;
 	}
       return 0;
-    }
-
-  /* Check the special Imm4 cases; must be the first operand.  */
-  if (t->cpu_flags.bitfield.cpuxop && t->operands == 5)
-    {
-      if (i.op[0].imms->X_op != O_constant
-	  || !fits_in_imm4 (i.op[0].imms->X_add_number))
-	{
-	  i.error = bad_imm4;
-	  return 1;
-	}
-
-      /* Turn off Imm<N> so that update_imm won't complain.  */
-      operand_type_set (&i.types[0], 0);
     }
 
   return 0;
@@ -6265,8 +6271,16 @@ match_template (char mnem_suffix)
 
       /* Do not verify operands when there are none.  */
       if (!t->operands)
-	/* We've found a match; break out of loop.  */
-	break;
+	{
+	  if (VEX_check_encoding (t))
+	    {
+	      specific_error = i.error;
+	      continue;
+	    }
+
+	  /* We've found a match; break out of loop.  */
+	  break;
+	}
 
       if (!t->opcode_modifier.jump
 	  || t->opcode_modifier.jump == JUMP_ABSOLUTE)
@@ -6509,8 +6523,15 @@ match_template (char mnem_suffix)
 	     slip through to break.  */
 	}
 
-      /* Check if vector and VEX operands are valid.  */
-      if (check_VecOperands (t) || VEX_check_operands (t))
+      /* Check if vector operands are valid.  */
+      if (check_VecOperands (t))
+	{
+	  specific_error = i.error;
+	  continue;
+	}
+
+      /* Check if VEX/EVEX encoding requirements can be satisfied.  */
+      if (VEX_check_encoding (t))
 	{
 	  specific_error = i.error;
 	  continue;
@@ -12394,7 +12415,10 @@ static bfd_boolean check_register (const reg_entry *r)
 	  || flag_code != CODE_64BIT)
 	return FALSE;
 
-      i.vec_encoding = vex_encoding_evex;
+      if (i.vec_encoding == vex_encoding_default)
+	i.vec_encoding = vex_encoding_evex;
+      else if (i.vec_encoding != vex_encoding_evex)
+	i.vec_encoding = vex_encoding_error;
     }
 
   if (((r->reg_flags & (RegRex64 | RegRex)) || r->reg_type.bitfield.qword)

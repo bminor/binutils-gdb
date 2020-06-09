@@ -1,3 +1,18 @@
+2020-06-09  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (vex_encoding_error): New enumerator.
+	(VEX_check_operands): Rename to VEX_check_encoding. Check
+	for vex_encoding_error. Move Imm4 handling ...
+	(check_VecOperands): ... here.
+	(match_template): Call VEX_check_encoding when there are no
+	operands. Split construct calling check_VecOperands and
+	VEX_check_encoding (when there are operands).
+	(check_register): Don't blindly set vex_encoding_evex.
+	* testsuite/gas/i386/pseudos-bad.s,
+	testsuite/gas/i386/pseudos-bad.l: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+	* testsuite/gas/i386/xmmhi64.s: Drop {vex2}.
+
 2020-06-08  Alex Coplan  <alex.coplan@arm.com>
 
 	* config/tc-arm.c (insns): Add dfb.
