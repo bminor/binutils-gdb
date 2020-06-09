@@ -1,3 +1,12 @@
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* target-descriptions.c (print_c_tdesc::print_c_tdesc): Change
+	whitespace to underscore.
+	(maint_print_c_tdesc_cmd): Use fake filename for target
+	descriptions that came from the target.
+	(_initialize_target_descriptions): Add filename command completion
+	for 'maint print c-tdesc'.
+
 2020-06-23  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2/loc.c (decode_debug_loclists_addresses): Add empty

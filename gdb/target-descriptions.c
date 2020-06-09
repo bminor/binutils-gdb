@@ -1270,6 +1270,8 @@ public:
 	break;
       else if (*inp == '-')
 	*outp++ = '_';
+      else if (*inp == ' ')
+	*outp++ = '_';
       else
 	*outp++ = *inp;
     *outp = '\0';
@@ -1680,7 +1682,7 @@ maint_print_c_tdesc_cmd (const char *args, int from_tty)
     error (_("There is no target description to print."));
 
   if (filename == NULL)
-    error (_("The current target description did not come from an XML file."));
+    filename = "fetched from target";
 
   std::string filename_after_features (filename);
   auto loc = filename_after_features.rfind ("/features/");
@@ -1811,6 +1813,8 @@ void _initialize_target_descriptions ();
 void
 _initialize_target_descriptions ()
 {
+  cmd_list_element *cmd;
+
   tdesc_data = gdbarch_data_register_pre_init (tdesc_data_init);
 
   add_basic_prefix_cmd ("tdesc", class_maintenance, _("\
@@ -1842,11 +1846,10 @@ Unset the file to read for an XML target description.\n\
 When unset, GDB will read the description from the target."),
 	   &tdesc_unset_cmdlist);
 
-  add_cmd ("c-tdesc", class_maintenance, maint_print_c_tdesc_cmd, _("\
+  cmd = add_cmd ("c-tdesc", class_maintenance, maint_print_c_tdesc_cmd, _("\
 Print the current target description as a C source file."),
 	   &maintenanceprintlist);
-
-  cmd_list_element *cmd;
+  set_cmd_completer (cmd, filename_completer);
 
   cmd = add_cmd ("xml-descriptions", class_maintenance,
 		 maintenance_check_xml_descriptions, _("\
