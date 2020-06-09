@@ -59,8 +59,10 @@ noreg:
 	ins	%dx, %es:(%rdi)
 	iret
 	jmp	*(%rax)
+	lcall	*(%rax)
 	lgdt	(%rax)
 	lidt	(%rax)
+	ljmp	*(%rax)
 	lldt	(%rax)
 	lmsw	(%rax)
 	lods

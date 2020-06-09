@@ -66,8 +66,10 @@ Disassembly of section .text:
  *[a-f0-9]+:	6d                   	insl   \(%dx\),%es:\(%rdi\)
  *[a-f0-9]+:	cf                   	iret *
  *[a-f0-9]+:	ff 20                	jmpq   \*\(%rax\)
+ *[a-f0-9]+:	ff 18                	lcall  \*\(%rax\)
  *[a-f0-9]+:	0f 01 10             	lgdt   \(%rax\)
  *[a-f0-9]+:	0f 01 18             	lidt   \(%rax\)
+ *[a-f0-9]+:	ff 28                	ljmp   \*\(%rax\)
  *[a-f0-9]+:	0f 00 10             	lldt   \(%rax\)
  *[a-f0-9]+:	0f 01 30             	lmsw   \(%rax\)
  *[a-f0-9]+:	ad                   	lods   %ds:\(%rsi\),%eax

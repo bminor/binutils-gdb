@@ -759,6 +759,8 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_list_test "x86-64-sysenter-amd" "-mamd64"
     run_dump_test "noreg64"
     run_list_test "noreg64"
+    run_dump_test "noreg-intel64"
+    run_list_test "noreg-intel64" "-I${srcdir}/$subdir -mintel64"
     run_list_test "movx64" "-al"
     run_list_test "cvtsi2sX"
     run_dump_test "x86-64-sse4_1"
