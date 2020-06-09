@@ -258,6 +258,16 @@ riscv_create_csr_aliases ()
       int csr_num = reg.regnum - RISCV_FIRST_CSR_REGNUM;
       const char *alias = xstrprintf ("csr%d", csr_num);
       reg.names.push_back (alias);
+
+      /* Setup the other csr aliases.  We don't use a switch table here in
+         case there are multiple aliases with the same value.  Also filter
+         based on ABRT_VER in order to avoid a very old alias for misa that
+         duplicates the name "misa" but at a different CSR address.  */
+#define DECLARE_CSR_ALIAS(NAME,VALUE,CLASS,DEF_VER,ABRT_VER)	 \
+      if (csr_num == VALUE && ABRT_VER >= PRIV_SPEC_CLASS_1P11)  \
+        reg.names.push_back ( # NAME );
+#include "opcode/riscv-opc.h"
+#undef DECLARE_CSR_ALIAS
     }
 }
 
@@ -2945,6 +2955,37 @@ riscv_find_default_target_description (const struct gdbarch_info info)
   return riscv_lookup_target_description (features);
 }
 
+/* Information about a register alias that needs to be set up for this
+   target.  These are collected when the target's XML description is
+   analysed, and then processed later, once the gdbarch has been created.  */
+
+class riscv_pending_register_alias
+{
+public:
+  /* Constructor.  */
+
+  riscv_pending_register_alias (const char *name, const void *baton)
+    : m_name (name),
+      m_baton (baton)
+  { /* Nothing.  */ }
+
+  /* Convert this into a user register for GDBARCH.  */
+
+  void create (struct gdbarch *gdbarch) const
+  {
+    user_reg_add (gdbarch, m_name, value_of_riscv_user_reg, m_baton);
+  }
+
+private:
+  /* The name for this alias.  */
+  const char *m_name;
+
+  /* The baton value for passing to user_reg_add.  This must point to some
+     data that will live for at least as long as the gdbarch object to
+     which the user register is attached.  */
+  const void *m_baton;
+};
+
 /* All of the registers in REG_SET are checked for in FEATURE, TDESC_DATA
    is updated with the register numbers for each register as listed in
    REG_SET.  If any register marked as required in REG_SET is not found in
@@ -2953,7 +2994,8 @@ riscv_find_default_target_description (const struct gdbarch_info info)
 static bool
 riscv_check_tdesc_feature (struct tdesc_arch_data *tdesc_data,
                            const struct tdesc_feature *feature,
-                           const struct riscv_register_feature *reg_set)
+                           const struct riscv_register_feature *reg_set,
+                           std::vector<riscv_pending_register_alias> *aliases)
 {
   for (const auto &reg : reg_set->registers)
     {
@@ -2965,7 +3007,15 @@ riscv_check_tdesc_feature (struct tdesc_arch_data *tdesc_data,
 	    tdesc_numbered_register (feature, tdesc_data, reg.regnum, name);
 
 	  if (found)
-	    break;
+            {
+              /* We know that the target description mentions this
+                 register.  In RISCV_REGISTER_NAME we ensure that GDB
+                 always uses the first name for each register, so here we
+                 add aliases for all of the remaining names.  */
+              for (int i = 0; i < reg.names.size (); ++i)
+		aliases->emplace_back (reg.names[i], (void *) &reg.regnum);
+              break;
+            }
 	}
 
       if (!found && reg.required_p)
@@ -2991,24 +3041,6 @@ riscv_add_reggroups (struct gdbarch *gdbarch)
 
   /* Add RISC-V specific register groups.  */
   reggroup_add (gdbarch, csr_reggroup);
-}
-
-/* Create register aliases for all the alternative names that exist for
-   registers in REG_SET.  */
-
-static void
-riscv_setup_register_aliases (struct gdbarch *gdbarch,
-                              const struct riscv_register_feature *reg_set)
-{
-  for (auto &reg : reg_set->registers)
-    {
-      /* The first item in the names list is the preferred name for the
-         register, this is what RISCV_REGISTER_NAME returns, and so we
-         don't need to create an alias with that name here.  */
-      for (int i = 1; i < reg.names.size (); ++i)
-        user_reg_add (gdbarch, reg.names[i], value_of_riscv_user_reg,
-                      &reg.regnum);
-    }
 }
 
 /* Implement the "dwarf2_reg_to_regnum" gdbarch method.  */
@@ -3114,10 +3146,12 @@ riscv_gdbarch_init (struct gdbarch_info info,
     return NULL;
 
   struct tdesc_arch_data *tdesc_data = tdesc_data_alloc ();
+  std::vector<riscv_pending_register_alias> pending_aliases;
 
   bool valid_p = riscv_check_tdesc_feature (tdesc_data,
                                             feature_cpu,
-                                            &riscv_xreg_feature);
+                                            &riscv_xreg_feature,
+                                            &pending_aliases);
   if (valid_p)
     {
       /* Check that all of the core cpu registers have the same bitsize.  */
@@ -3137,7 +3171,8 @@ riscv_gdbarch_init (struct gdbarch_info info,
   if (feature_fpu != NULL)
     {
       valid_p &= riscv_check_tdesc_feature (tdesc_data, feature_fpu,
-                                            &riscv_freg_feature);
+                                            &riscv_freg_feature,
+                                            &pending_aliases);
 
       /* Search for the first floating point register (by any alias), to
          determine the bitsize.  */
@@ -3173,11 +3208,13 @@ riscv_gdbarch_init (struct gdbarch_info info,
 
   if (feature_virtual)
     riscv_check_tdesc_feature (tdesc_data, feature_virtual,
-                               &riscv_virtual_feature);
+                               &riscv_virtual_feature,
+                               &pending_aliases);
 
   if (feature_csr)
     riscv_check_tdesc_feature (tdesc_data, feature_csr,
-                               &riscv_csr_feature);
+                               &riscv_csr_feature,
+                               &pending_aliases);
 
   if (!valid_p)
     {
@@ -3315,11 +3352,11 @@ riscv_gdbarch_init (struct gdbarch_info info,
      want, ignoring what the target tells us.  */
   set_gdbarch_register_reggroup_p (gdbarch, riscv_register_reggroup_p);
 
-  /* Create register aliases for alternative register names.  */
-  riscv_setup_register_aliases (gdbarch, &riscv_xreg_feature);
-  if (riscv_has_fp_regs (gdbarch))
-    riscv_setup_register_aliases (gdbarch, &riscv_freg_feature);
-  riscv_setup_register_aliases (gdbarch, &riscv_csr_feature);
+  /* Create register aliases for alternative register names.  We only
+     create aliases for registers which were mentioned in the target
+     description.  */
+  for (const auto &alias : pending_aliases)
+    alias.create (gdbarch);
 
   /* Compile command hooks.  */
   set_gdbarch_gcc_target_options (gdbarch, riscv_gcc_target_options);

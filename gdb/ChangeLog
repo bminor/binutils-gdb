@@ -1,3 +1,15 @@
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* riscv-tdep.c (riscv_create_csr_aliases): Handle csr aliases from
+	riscv-opc.h.
+	(class riscv_pending_register_alias): New class.
+	(riscv_check_tdesc_feature): Take vector of pending aliases and
+	populate it as appropriate.
+	(riscv_setup_register_aliases): Delete.
+	(riscv_gdbarch_init): Create vector of pending aliases and pass it
+	to riscv_check_tdesc_feature in all cases.  Use the vector to
+	create the register aliases.
+
 2020-06-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* sol2-tdep.c (sol2_static_transform_name): Remove.
