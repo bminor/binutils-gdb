@@ -210,6 +210,8 @@ enum
   CpuAVX512_BF16,
   /* Intel AVX-512 VP2INTERSECT Instructions support required.  */
   CpuAVX512_VP2INTERSECT,
+  /* TDX Instructions support required.  */
+  CpuTDX,
   /* mwaitx instruction required */
   CpuMWAITX,
   /* Clzero instruction required */
@@ -375,6 +377,7 @@ typedef union i386_cpu_flags
       unsigned int cpuavx512_bitalg:1;
       unsigned int cpuavx512_bf16:1;
       unsigned int cpuavx512_vp2intersect:1;
+      unsigned int cputdx:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;

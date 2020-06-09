@@ -952,6 +952,10 @@ enum
 enum
 {
   PREFIX_90 = 0,
+  PREFIX_0F01_REG_1_RM_4,
+  PREFIX_0F01_REG_1_RM_5,
+  PREFIX_0F01_REG_1_RM_6,
+  PREFIX_0F01_REG_1_RM_7,
   PREFIX_0F01_REG_3_RM_1,
   PREFIX_0F01_REG_5_MOD_0,
   PREFIX_0F01_REG_5_MOD_3_RM_0,
@@ -1175,6 +1179,9 @@ enum
   X86_64_EA,
   X86_64_0F01_REG_0,
   X86_64_0F01_REG_1,
+  X86_64_0F01_REG_1_RM_5_PREFIX_2,
+  X86_64_0F01_REG_1_RM_6_PREFIX_2,
+  X86_64_0F01_REG_1_RM_7_PREFIX_2,
   X86_64_0F01_REG_2,
   X86_64_0F01_REG_3,
   X86_64_0F24,
@@ -3083,6 +3090,38 @@ static const struct dis386 prefix_table[][4] = {
     { NULL, { { NULL, 0 } }, PREFIX_IGNORED }
   },
 
+  /* PREFIX_0F01_REG_1_RM_4 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "tdcall", 	{ Skip_MODRM }, 0 },
+    { Bad_Opcode },
+  },
+
+  /* PREFIX_0F01_REG_1_RM_5 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_0F01_REG_1_RM_5_PREFIX_2) },
+    { Bad_Opcode },
+  },
+
+  /* PREFIX_0F01_REG_1_RM_6 */
+  {
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_0F01_REG_1_RM_6_PREFIX_2) },
+    { Bad_Opcode },
+  },
+
+  /* PREFIX_0F01_REG_1_RM_7 */
+  {
+    { "encls",		{ Skip_MODRM }, 0 },
+    { Bad_Opcode },
+    { X86_64_TABLE (X86_64_0F01_REG_1_RM_7_PREFIX_2) },
+    { Bad_Opcode },
+  },
+
   /* PREFIX_0F01_REG_3_RM_1 */
   {
     { "vmmcall",	{ Skip_MODRM }, 0 },
@@ -4203,6 +4242,24 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { "sidt{Q|Q}", { M }, 0 },
     { "sidt", { M }, 0 },
+  },
+
+  /* X86_64_0F01_REG_1_RM_5_PREFIX_2 */
+  {
+    { Bad_Opcode },
+    { "seamret",	{ Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0F01_REG_1_RM_6_PREFIX_2 */
+  {
+    { Bad_Opcode },
+    { "seamops",	{ Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0F01_REG_1_RM_7_PREFIX_2 */
+  {
+    { Bad_Opcode },
+    { "seamcall",	{ Skip_MODRM }, 0 },
   },
 
   /* X86_64_0F01_REG_2 */
@@ -8784,10 +8841,10 @@ static const struct dis386 rm_table[][8] = {
     { "mwait",		{ { OP_Mwait, 0 } }, 0 },
     { "clac",		{ Skip_MODRM }, 0 },
     { "stac",		{ Skip_MODRM }, 0 },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { "encls",		{ Skip_MODRM }, 0 },
+    { PREFIX_TABLE (PREFIX_0F01_REG_1_RM_4) },
+    { PREFIX_TABLE (PREFIX_0F01_REG_1_RM_5) },
+    { PREFIX_TABLE (PREFIX_0F01_REG_1_RM_6) },
+    { PREFIX_TABLE (PREFIX_0F01_REG_1_RM_7) },
   },
   {
     /* RM_0F01_REG_2 */

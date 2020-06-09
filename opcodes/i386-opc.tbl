@@ -4133,3 +4133,12 @@ aesencwide256kl, 1, 0xf30f38d8, 0x2, 3, CpuWideKL, Modrm|No_bSuf|No_wSuf|No_lSuf
 aesdecwide256kl, 1, 0xf30f38d8, 0x3, 3, CpuWideKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
 
 // KEYLOCKER instructions end.
+
+// TDX instructions.
+
+tdcall, 0, 0x660f01cc, None, 3, CpuTDX, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+seamret, 0, 0x660f01cd, None, 3, CpuTDX|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+seamops, 0, 0x660f01ce, None, 3, CpuTDX|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+seamcall, 0, 0x660f01cf, None, 3, CpuTDX|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+
+// TDX instructions end.

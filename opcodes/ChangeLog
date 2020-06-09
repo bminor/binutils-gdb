@@ -1,3 +1,21 @@
+2020-09-24  Lili Cui  <lili.cui@intel.com>
+
+	* i386-dis.c (enum): Add PREFIX_0F01_REG_1_RM_5,
+	PREFIX_0F01_REG_1_RM_6, PREFIX_0F01_REG_1_RM_7,
+	X86_64_0F01_REG_1_RM_5_P_2, X86_64_0F01_REG_1_RM_6_P_2,
+	X86_64_0F01_REG_1_RM_7_P_2.
+	(prefix_table): Likewise.
+	(x86_64_table): Likewise.
+	(rm_table): Likewise.
+	* i386-gen.c (cpu_flag_init): Add CPU_TDX_FLAGS
+	and CPU_ANY_TDX_FLAGS.
+	(cpu_flags): Add CpuTDX.
+	* i386-opc.h (enum): Add CpuTDX.
+	(i386_cpu_flags): Add cputdx.
+	* i386-opc.tbl: Add TDX insns.
+	* i386-init.h: Regenerate.
+	* i386-tbl.h: Likewise.
+
 2020-09-17 Cooper Qu <<cooper.qu@linux.alibaba.com>>
 
 	opcodes/
