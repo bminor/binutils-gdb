@@ -153,8 +153,6 @@ static int prefixes;
 static int rex;
 /* Bits of REX we've already used.  */
 static int rex_used;
-/* REX bits in original REX prefix ignored.  */
-static int rex_ignored;
 /* Mark parts used in the REX prefix.  When we are testing for
    empty prefix (for 8bit register REX extension), just mask it
    out.  Otherwise test for REX bit is excuse for existence of REX
@@ -11057,7 +11055,6 @@ ckprefix (void)
 {
   int newrex, i, length;
   rex = 0;
-  rex_ignored = 0;
   prefixes = 0;
   used_prefixes = 0;
   rex_used = 0;
@@ -11517,8 +11514,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 
     case USE_XOP_8F_TABLE:
       FETCH_DATA (info, codep + 3);
-      /* All bits in the REX prefix are ignored.  */
-      rex_ignored = rex;
       rex = ~(*codep >> 5) & 0x7;
 
       /* VEX_TABLE_INDEX is the mmmmm part of the XOP byte 1 "RCB.mmmmm".  */
@@ -11580,8 +11575,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
     case USE_VEX_C4_TABLE:
       /* VEX prefix.  */
       FETCH_DATA (info, codep + 3);
-      /* All bits in the REX prefix are ignored.  */
-      rex_ignored = rex;
       rex = ~(*codep >> 5) & 0x7;
       switch ((*codep & 0x1f))
 	{
@@ -11647,8 +11640,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
     case USE_VEX_C5_TABLE:
       /* VEX prefix.  */
       FETCH_DATA (info, codep + 2);
-      /* All bits in the REX prefix are ignored.  */
-      rex_ignored = rex;
       rex = (*codep & 0x80) ? 0 : REX_R;
 
       /* For the 2-byte VEX prefix in 32-bit mode, the highest bit in
@@ -11697,8 +11688,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       /* EVEX prefix.  */
       vex.evex = 1;
       FETCH_DATA (info, codep + 4);
-      /* All bits in the REX prefix are ignored.  */
-      rex_ignored = rex;
       /* The first byte after 0x62.  */
       rex = ~(*codep >> 5) & 0x7;
       vex.r = *codep & 0x10;
@@ -12179,7 +12168,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
     }
 
   /* Check if the REX prefix is used.  */
-  if (rex_ignored == 0 && (rex ^ rex_used) == 0 && last_rex_prefix >= 0)
+  if ((rex ^ rex_used) == 0 && !need_vex && last_rex_prefix >= 0)
     all_prefixes[last_rex_prefix] = 0;
 
   /* Check if the SEG prefix is used.  */
@@ -12195,7 +12184,8 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
   /* Check if the DATA prefix is used.  */
   if ((prefixes & PREFIX_DATA) != 0
-      && (used_prefixes & PREFIX_DATA) != 0)
+      && (used_prefixes & PREFIX_DATA) != 0
+      && !need_vex)
     all_prefixes[last_data_prefix] = 0;
 
   /* Print the extra prefixes.  */

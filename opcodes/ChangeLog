@@ -1,5 +1,13 @@
 2020-06-09  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (rex_ignored): Delete.
+	(ckprefix): Drop rex_ignored initialization.
+	(get_valid_dis386): Drop setting of rex_ignored.
+	(print_insn): Drop checking of rex_ignored. Don't record data
+	size prefix as used with VEX-and-alike encodings.
+
+2020-06-09  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (MOD_0F12_PREFIX_2, MOD_0F16_PREFIX_2,
 	MOD_VEX_0F12_PREFIX_2, MOD_VEX_0F16_PREFIX_2): New enumerators.
 	(VEX_LEN_0F12_P_2, VEX_LEN_0F16_P_2): Delete.

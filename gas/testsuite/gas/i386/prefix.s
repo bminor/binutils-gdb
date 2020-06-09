@@ -451,6 +451,11 @@
 
 	int $3
 
+	.byte 0x66; vmovaps %xmm0, %xmm0
+	repz; {vex3} vmovaps %xmm0, %xmm0
+	repnz; vmovaps %xmm0, %xmm0
+	lock; {evex} vmovaps %xmm0, %xmm0
+
 	vcvtpd2dqx 0x20(%eax),%xmm0
 	vcvtpd2dq 0x20(%eax){1to2},%xmm0
 	vcvtpd2dqx 0x20(%eax),%xmm0
