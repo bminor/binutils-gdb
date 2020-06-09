@@ -404,7 +404,7 @@ ctf_arc_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       is_archive = 0;
       if ((fp = ctf_bufopen (ctfsect, symsect, strsect, errp)) == NULL)
 	{
-	  ctf_dprintf ("ctf_internal_open(): cannot open CTF: %s\n",
+	  ctf_dprintf ("ctf_arc_bufopen(): cannot open CTF: %s\n",
 		       ctf_errmsg (*errp));
 	  return NULL;
 	}

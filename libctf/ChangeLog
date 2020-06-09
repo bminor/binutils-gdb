@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-archive.c (ctf_arc_bufopen): Fix message.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (struct ctf_archive_internal) <ctfi_free_strsect>
 	New.
 	* ctf-open-bfd.c (ctf_bfdopen_ctfsect): Explicitly open a strtab
