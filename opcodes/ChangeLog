@@ -1,5 +1,20 @@
 2020-06-09  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (MOD_0F12_PREFIX_2, MOD_0F16_PREFIX_2,
+	MOD_VEX_0F12_PREFIX_2, MOD_VEX_0F16_PREFIX_2): New enumerators.
+	(VEX_LEN_0F12_P_2, VEX_LEN_0F16_P_2): Delete.
+	(VEX_LEN_0F12_P_2_M_0, VEX_LEN_0F16_P_2_M_0): Define.
+	(prefix_table): Decode MOD for cases 2 of opcodes 0F12, 0F16,
+	VEX_0F12, and VEX_0F16.
+	(vex_len_table): Use X for vmovlp* and vmovh*s. Drop
+	VEX_LEN_0F12_P_2 and VEX_LEN_0F16_P_2 entries.
+	(mod_table): Use X for movlpX and movhpX. Drop PREFIX_OPCODE
+	from movlps and movhlps. New MOD_0F12_PREFIX_2,
+	MOD_0F16_PREFIX_2, MOD_VEX_0F12_PREFIX_2, and
+	MOD_VEX_0F16_PREFIX_2 entries.
+
+2020-06-09  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (MOD_EVEX_0F12_PREFIX_2, MOD_EVEX_0F13,
 	MOD_EVEX_0F16_PREFIX_2, MOD_EVEX_0F17, MOD_EVEX_0F2B): New enumerators.
 	(PREFIX_EVEX_0F13, PREFIX_EVEX_0F14, PREFIX_EVEX_0F15,

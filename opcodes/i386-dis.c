@@ -778,8 +778,10 @@ enum
   MOD_0F01_REG_5,
   MOD_0F01_REG_7,
   MOD_0F12_PREFIX_0,
+  MOD_0F12_PREFIX_2,
   MOD_0F13,
   MOD_0F16_PREFIX_0,
+  MOD_0F16_PREFIX_2,
   MOD_0F17,
   MOD_0F18_REG_0,
   MOD_0F18_REG_1,
@@ -842,8 +844,10 @@ enum
   MOD_C4_32BIT,
   MOD_C5_32BIT,
   MOD_VEX_0F12_PREFIX_0,
+  MOD_VEX_0F12_PREFIX_2,
   MOD_VEX_0F13,
   MOD_VEX_0F16_PREFIX_0,
+  MOD_VEX_0F16_PREFIX_2,
   MOD_VEX_0F17,
   MOD_VEX_0F2B,
   MOD_VEX_W_0_0F41_P_0_LEN_1,
@@ -1799,11 +1803,11 @@ enum
 {
   VEX_LEN_0F12_P_0_M_0 = 0,
   VEX_LEN_0F12_P_0_M_1,
-  VEX_LEN_0F12_P_2,
+#define VEX_LEN_0F12_P_2_M_0 VEX_LEN_0F12_P_0_M_0
   VEX_LEN_0F13_M_0,
   VEX_LEN_0F16_P_0_M_0,
   VEX_LEN_0F16_P_0_M_1,
-  VEX_LEN_0F16_P_2,
+#define VEX_LEN_0F16_P_2_M_0 VEX_LEN_0F16_P_0_M_0
   VEX_LEN_0F17_M_0,
   VEX_LEN_0F41_P_0,
   VEX_LEN_0F41_P_2,
@@ -3643,7 +3647,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { MOD_TABLE (MOD_0F12_PREFIX_0) },
     { "movsldup", { XM, EXx }, PREFIX_OPCODE },
-    { "movlpd",	{ XM, EXq }, PREFIX_OPCODE },
+    { MOD_TABLE (MOD_0F12_PREFIX_2) },
     { "movddup", { XM, EXq }, PREFIX_OPCODE },
   },
 
@@ -3651,7 +3655,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { MOD_TABLE (MOD_0F16_PREFIX_0) },
     { "movshdup", { XM, EXx }, PREFIX_OPCODE },
-    { "movhpd",	{ XM, EXq }, PREFIX_OPCODE },
+    { MOD_TABLE (MOD_0F16_PREFIX_2) },
   },
 
   /* PREFIX_0F1A */
@@ -4648,7 +4652,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { MOD_TABLE (MOD_VEX_0F12_PREFIX_0) },
     { "vmovsldup",	{ XM, EXx }, 0 },
-    { VEX_LEN_TABLE (VEX_LEN_0F12_P_2) },
+    { MOD_TABLE (MOD_VEX_0F12_PREFIX_2) },
     { "vmovddup",	{ XM, EXymmq }, 0 },
   },
 
@@ -4656,7 +4660,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { MOD_TABLE (MOD_VEX_0F16_PREFIX_0) },
     { "vmovshdup",	{ XM, EXx }, 0 },
-    { VEX_LEN_TABLE (VEX_LEN_0F16_P_2) },
+    { MOD_TABLE (MOD_VEX_0F16_PREFIX_2) },
   },
 
   /* PREFIX_VEX_0F2A */
@@ -9279,9 +9283,9 @@ static const struct dis386 vex_table[][256] = {
 #include "i386-dis-evex.h"
 
 static const struct dis386 vex_len_table[][2] = {
-  /* VEX_LEN_0F12_P_0_M_0 */
+  /* VEX_LEN_0F12_P_0_M_0 / VEX_LEN_0F12_P_2_M_0 */
   {
-    { "vmovlps",	{ XM, Vex128, EXq }, 0 },
+    { "vmovlpX",	{ XM, Vex128, EXq }, 0 },
   },
 
   /* VEX_LEN_0F12_P_0_M_1 */
@@ -9289,29 +9293,19 @@ static const struct dis386 vex_len_table[][2] = {
     { "vmovhlps",	{ XM, Vex128, EXq }, 0 },
   },
 
-  /* VEX_LEN_0F12_P_2 */
-  {
-    { "vmovlpd",	{ XM, Vex128, EXq }, 0 },
-  },
-
   /* VEX_LEN_0F13_M_0 */
   {
     { "vmovlpX",	{ EXq, XM }, PREFIX_OPCODE },
   },
 
-  /* VEX_LEN_0F16_P_0_M_0 */
+  /* VEX_LEN_0F16_P_0_M_0 / VEX_LEN_0F16_P_2_M_0 */
   {
-    { "vmovhps",	{ XM, Vex128, EXq }, 0 },
+    { "vmovhpX",	{ XM, Vex128, EXq }, 0 },
   },
 
   /* VEX_LEN_0F16_P_0_M_1 */
   {
     { "vmovlhps",	{ XM, Vex128, EXq }, 0 },
-  },
-
-  /* VEX_LEN_0F16_P_2 */
-  {
-    { "vmovhpd",	{ XM, Vex128, EXq }, 0 },
   },
 
   /* VEX_LEN_0F17_M_0 */
@@ -10225,8 +10219,12 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F12_PREFIX_0 */
-    { "movlps",		{ XM, EXq }, PREFIX_OPCODE },
-    { "movhlps",	{ XM, EXq }, PREFIX_OPCODE },
+    { "movlpX",		{ XM, EXq }, 0 },
+    { "movhlps",	{ XM, EXq }, 0 },
+  },
+  {
+    /* MOD_0F12_PREFIX_2 */
+    { "movlpX",	{ XM, EXq }, 0 },
   },
   {
     /* MOD_0F13 */
@@ -10234,8 +10232,12 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0F16_PREFIX_0 */
-    { "movhps",		{ XM, EXq }, 0 },
+    { "movhpX",		{ XM, EXq }, 0 },
     { "movlhps",	{ XM, EXq }, 0 },
+  },
+  {
+    /* MOD_0F16_PREFIX_2 */
+    { "movhpX",	{ XM, EXq }, 0 },
   },
   {
     /* MOD_0F17 */
@@ -10519,6 +10521,10 @@ static const struct dis386 mod_table[][2] = {
     { VEX_LEN_TABLE (VEX_LEN_0F12_P_0_M_1) },
   },
   {
+    /* MOD_VEX_0F12_PREFIX_2 */
+    { VEX_LEN_TABLE (VEX_LEN_0F12_P_2_M_0) },
+  },
+  {
     /* MOD_VEX_0F13 */
     { VEX_LEN_TABLE (VEX_LEN_0F13_M_0) },
   },
@@ -10526,6 +10532,10 @@ static const struct dis386 mod_table[][2] = {
     /* MOD_VEX_0F16_PREFIX_0 */
     { VEX_LEN_TABLE (VEX_LEN_0F16_P_0_M_0) },
     { VEX_LEN_TABLE (VEX_LEN_0F16_P_0_M_1) },
+  },
+  {
+    /* MOD_VEX_0F16_PREFIX_2 */
+    { VEX_LEN_TABLE (VEX_LEN_0F16_P_2_M_0) },
   },
   {
     /* MOD_VEX_0F17 */
