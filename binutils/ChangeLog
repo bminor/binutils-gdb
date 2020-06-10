@@ -1,3 +1,9 @@
+2020-06-10  Ralf Habacker  <ralf.habacker@freenet.de>
+
+	PR 26082
+	* mclex.c (yylex): Reject lines that reach end-of-file without a
+	terminating newline character.
+
 2020-06-08  Nick Clifton  <nickc@redhat.com>
 
 	PR 26093
