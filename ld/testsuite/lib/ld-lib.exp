@@ -773,14 +773,9 @@ proc run_ld_link_exec_tests { ldtests args } {
 		verbose "$exec_output" 1
 		set failed 1
 	    } else {
-		send_log "diff $binfile.out $srcdir/$subdir/$expfile\n"
-		verbose "diff $binfile.out $srcdir/$subdir/$expfile"
-		catch "exec diff $binfile.out $srcdir/$subdir/$expfile" exec_output
-		set exec_output [prune_warnings $exec_output]
-
-		if ![string match "" $exec_output] then {
-		    send_log "$exec_output\n"
-		    verbose "$exec_output" 1
+		send_log [file_contents $binfile.out]
+		verbose [file_contents $binfile.out] 2
+		if [regexp_diff "$binfile.out" "$srcdir/$subdir/$expfile"] {
 		    set failed 1
 		}
 	    }
