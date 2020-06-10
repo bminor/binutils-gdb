@@ -184,6 +184,9 @@ struct mapped_symtab
 
   offset_type n_elements = 0;
   std::vector<symtab_index_entry> data;
+
+  /* Temporary storage for Ada names.  */
+  auto_obstack m_string_obstack;
 };
 
 /* Find a slot in SYMTAB for the symbol NAME.  Returns a reference to
@@ -543,18 +546,47 @@ write_psymbols (struct mapped_symtab *symtab,
   for (; count-- > 0; ++psymp)
     {
       struct partial_symbol *psym = *psymp;
+      const char *name = psym->ginfo.search_name ();
 
       if (psym->ginfo.language () == language_ada)
-	error (_("Ada is not currently supported by the index; "
-		 "use the DWARF 5 index instead"));
+	{
+	  /* We want to ensure that the Ada main function's name appears
+	     verbatim in the index.  However, this name will be of the
+	     form "_ada_mumble", and will be rewritten by ada_decode.
+	     So, recognize it specially here and add it to the index by
+	     hand.  */
+	  if (strcmp (main_name (), name) == 0)
+	    {
+	      gdb_index_symbol_kind kind = symbol_kind (psym);
+
+	      add_index_entry (symtab, name, is_static, kind, cu_index);
+	    }
+
+	  /* In order for the index to work when read back into gdb, it
+	     has to supply a funny form of the name: it should be the
+	     encoded name, with any suffixes stripped.  Using the
+	     ordinary encoded name will not work properly with the
+	     searching logic in find_name_components_bounds; nor will
+	     using the decoded name.  Furthermore, an Ada "verbatim"
+	     name (of the form "<MumBle>") must be entered without the
+	     angle brackets.  Note that the current index is unusual,
+	     see PR symtab/24820 for details.  */
+	  std::string decoded = ada_decode (name);
+	  if (decoded[0] == '<')
+	    name = (char *) obstack_copy0 (&symtab->m_string_obstack,
+					   decoded.c_str () + 1,
+					   decoded.length () - 2);
+	  else
+	    name = obstack_strdup (&symtab->m_string_obstack,
+				   ada_encode (decoded.c_str ()));
+	}
 
       /* Only add a given psymbol once.  */
       if (psyms_seen.insert (psym).second)
 	{
 	  gdb_index_symbol_kind kind = symbol_kind (psym);
 
-	  add_index_entry (symtab, psym->ginfo.search_name (),
-			   is_static, kind, cu_index);
+	  add_index_entry (symtab, name, is_static, kind, cu_index);
 	}
     }
 }

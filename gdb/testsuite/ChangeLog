@@ -1,3 +1,7 @@
+2020-06-10  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.ada/ptype_union.exp: Remove PR24713 workaround.
+
 2020-06-09  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.base/index-cache.exp (test_cache_disabled): Add test_prefix

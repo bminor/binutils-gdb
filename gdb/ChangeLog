@@ -1,5 +1,13 @@
 2020-06-10  Tom de Vries  <tdevries@suse.de>
 
+	PR ada/24713
+	* dwarf2/index-write.c (struct mapped_symtab): Add m_string_obstack.
+	(write_psymbols): Enable .gdb_index for ada.
+	* dwarf2/read.c: Remove comment stating .gdb_index is unsupported for
+	ada.
+
+2020-06-10  Tom de Vries  <tdevries@suse.de>
+
 	* dwarf2/read.c (dw2_symtab_iter_init_common): Factor out of ...
 	(dw2_symtab_iter_init): ... here.  Add variant with "offset_type
 	namei" instead of "const char *name" argument.

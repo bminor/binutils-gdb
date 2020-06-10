@@ -3778,9 +3778,6 @@ dw2_map_matching_symbols
 
   if (per_objfile->per_bfd->index_table != nullptr)
     {
-      /* Ada currently doesn't support .gdb_index (see PR24713).  We can get
-	 here though if the current language is Ada for a non-Ada objfile
-	 using GNU index.  */
       mapped_index &index = *per_objfile->per_bfd->index_table;
 
       const char *match_name = name.ada ().lookup_name ().c_str ();

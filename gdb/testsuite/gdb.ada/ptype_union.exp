@@ -19,11 +19,6 @@ if {[prepare_for_testing "failed to prepare" ${testfile} ${srcfile}]} {
     return -1
 }
 
-if {[exec_has_index_section $binfile]} {
-    unsupported "Ada is not currently supported by the index (PR 24713)"
-    return -1
-}
-
 # The test case is written in C, because it was easy to make the
 # required type there; but the bug itself only happens in Ada.
 gdb_test "set lang ada" ""
