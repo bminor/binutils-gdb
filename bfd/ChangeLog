@@ -1,3 +1,9 @@
+2020-06-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26094
+	* elflink.c (bfd_elf_define_start_stop): Handle common symbols.
+	Clear verinfo.verdef.
+
 2020-06-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18801

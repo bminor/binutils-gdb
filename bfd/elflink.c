@@ -14802,12 +14802,16 @@ bfd_elf_define_start_stop (struct bfd_link_info *info,
 
   h = elf_link_hash_lookup (elf_hash_table (info), symbol,
 			    FALSE, FALSE, TRUE);
+  /* NB: Common symbols will be turned into definition later.  */
   if (h != NULL
       && (h->root.type == bfd_link_hash_undefined
 	  || h->root.type == bfd_link_hash_undefweak
-	  || ((h->ref_regular || h->def_dynamic) && !h->def_regular)))
+	  || ((h->ref_regular || h->def_dynamic)
+	      && !h->def_regular
+	      && h->root.type != bfd_link_hash_common)))
     {
       bfd_boolean was_dynamic = h->ref_dynamic || h->def_dynamic;
+      h->verinfo.verdef = NULL;
       h->root.type = bfd_link_hash_defined;
       h->root.u.def.section = sec;
       h->root.u.def.value = 0;

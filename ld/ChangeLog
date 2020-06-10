@@ -1,3 +1,14 @@
+2020-06-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26094
+	* testsuite/ld-elf/pr26094-1.ver: New fike.
+	* testsuite/ld-elf/pr26094-1a.c: Likewise.
+	* testsuite/ld-elf/pr26094-1a.rd: Likewise.
+	* testsuite/ld-elf/pr26094-1b.c: Likewise.
+	* testsuite/ld-elf/pr26094-1b.rd: Likewise.
+	* testsuite/ld-elf/pr26094-1c.c: Likewise.
+	* testsuite/ld-elf/shared.exp: Run ld/26094 tests.
+
 2020-06-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/18801
