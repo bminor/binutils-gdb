@@ -1,3 +1,11 @@
+2020-06-10  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf2/read.c (dw2_symtab_iter_init_common): Factor out of ...
+	(dw2_symtab_iter_init): ... here.  Add variant with "offset_type
+	namei" instead of "const char *name" argument.
+	(dw2_map_matching_symbols): Use "offset_type namei" variant of
+	dw2_symtab_iter_init.
+
 2020-06-08  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbtypes.h (TYPE_FIELD_TYPE): Remove.  Change all call sites
