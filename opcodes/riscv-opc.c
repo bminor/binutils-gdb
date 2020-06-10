@@ -987,7 +987,6 @@ struct priv_spec_t
 /* List for all supported privilege versions.  */
 static const struct priv_spec_t priv_specs[] =
 {
-  {"1.9",   PRIV_SPEC_CLASS_1P9},
   {"1.9.1", PRIV_SPEC_CLASS_1P9P1},
   {"1.10",  PRIV_SPEC_CLASS_1P10},
   {"1.11",  PRIV_SPEC_CLASS_1P11},

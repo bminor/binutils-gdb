@@ -1,3 +1,11 @@
+2020-06-12  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv-opc.h: Update the defined versions of CSR from
+	PRIV_SPEC_CLASS_1P9 to PRIV_SPEC_CLASS_1P9P1.  Also, drop the
+	MISA DECLARE_CSR_ALIAS since it's aborted version is v1.9.
+	* opcode/riscv.h (enum riscv_priv_spec_class): Remove
+	PRIV_SPEC_CLASS_1P9.
+
 2020-06-11  Alex Coplan  <alex.coplan@arm.com>
 
 	* opcode/aarch64.h (aarch64_sys_reg): Add required features to struct

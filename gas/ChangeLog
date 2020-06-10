@@ -1,3 +1,9 @@
+2020-06-12  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/gas/riscv/priv-reg-fail-version-1p9.d: Removed.
+	* testsuite/gas/riscv/priv-reg-fail-version-1p9.l: Likewise.
+	* testsuite/gas/riscv/priv-reg-version-1p9.d: Likewise.
+
 2020-06-09  Seth Girvan  <snth@snthhacks.com>
 
 	* doc/c-avr.texi: Improve wording.

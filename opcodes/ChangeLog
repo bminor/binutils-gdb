@@ -1,3 +1,7 @@
+2020-06-12  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-opc.c (priv_specs): Remove v1.9 and PRIV_SPEC_CLASS_1P9.
+
 2020-06-11  Alex Coplan  <alex.coplan@arm.com>
 
 	* aarch64-opc.c (SYSREG): New macro for describing system registers.
