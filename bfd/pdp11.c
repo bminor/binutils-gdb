@@ -336,8 +336,8 @@ static int
 is_stab (int type, const char *name)
 {
   if (type == N_GSYM || type == N_FUN)
-    return (index(name, ':') != NULL);
-  return (type > N_FUN);
+    return strchr (name, ':') != NULL;
+  return type > N_FUN;
 }
 
 static int
