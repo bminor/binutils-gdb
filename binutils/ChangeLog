@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* testsuite/lib/binutils-common.exp (run_dump_test): Add 'cc'
+	option.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* objdump.c (dump_ctf_archive_member): Remove linefeeds.
 	(dump_ctf): Likewise.
 

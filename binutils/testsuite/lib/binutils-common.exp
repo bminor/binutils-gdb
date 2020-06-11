@@ -576,6 +576,7 @@ if ![string length [info proc prune_warnings]] {
 # run_dump_test FILE (optional:) EXTRA_OPTIONS
 #
 # Assemble a .s file, then run some utility on it and check the output.
+# Optionally generate the .s file first by running the compiler.
 #
 # There should be an assembly language file named FILE.s in the test
 # suite directory, and a pattern file called FILE.d.  run_dump_test
@@ -633,6 +634,11 @@ if ![string length [info proc prune_warnings]] {
 #
 #   ld_after_inputfiles: FLAGS
 #	Similar to "ld", but put FLAGS after all input files.
+#
+#   cc: FLAGS
+#       Run the compiler with FLAGS (to which -S is added) to generate assembler
+#       source first.  source: must be provided and should consist of .c files.
+#       Source-specific CC flags are not supported.
 #
 #   objcopy_objects: FLAGS
 #	Run objcopy with the specified flags after assembling any source
@@ -760,8 +766,8 @@ if ![string length [info proc prune_warnings]] {
 # regexps in FILE.d.
 #
 proc run_dump_test { name {extra_options {}} } {
-    global ADDR2LINE ADDR2LINEFLAGS AS ASFLAGS ELFEDIT ELFEDITFLAGS LD LDFLAGS
-    global NM NMFLAGS OBJCOPY OBJCOPYFLAGS OBJDUMP OBJDUMPFLAGS
+    global ADDR2LINE ADDR2LINEFLAGS AS ASFLAGS CC CFLAGS ELFEDIT ELFEDITFLAGS
+    global LD LDFLAGS NM NMFLAGS OBJCOPY OBJCOPYFLAGS OBJDUMP OBJDUMPFLAGS
     global READELF READELFFLAGS STRIP STRIPFLAGS
     global copyfile env runtests srcdir subdir verbose
 
@@ -795,6 +801,7 @@ proc run_dump_test { name {extra_options {}} } {
     set opts(as) {}
     set as_final_flags {}
     set as_additional_flags {}
+    set opts(cc) {}
     set opts(dump) {}
     set opts(elfedit) {}
     set opts(error) {}
@@ -838,10 +845,10 @@ proc run_dump_test { name {extra_options {}} } {
 	    return
 	}
 
-	# Allow more substitutions, including tcl functions, for as and ld.
-	# Not done in general because extra quoting is needed for glob
+	# Allow more substitutions, including tcl functions, for as, ld,
+	# and cc.  Not done in general because extra quoting is needed for glob
 	# args used for example in binutils-all/remove-relocs-04.d.
-	if { $opt_name == "as" || $opt_name == "ld" } {
+	if { $opt_name == "as" || $opt_name == "ld" || $opt_name == "cc" } {
 	    set opt_val [subst $opt_val]
 	} else {
 	    # Just substitute $srcdir and $subdir
@@ -1045,6 +1052,47 @@ proc run_dump_test { name {extra_options {}} } {
 	    unresolved $testname
 	    return
 	}
+    }
+
+    # Possibly compile some of the inputs, and build up a replacement
+    # for opts(source) with the output .s names substituted in as we go.
+    # Set the .s names from the objfile_names to take advantage of the
+    # uniquification that happened earlier.
+    if { $opts(cc) != ""} {
+	set cmdret 0
+	set new_source ""
+
+	foreach cfile $opts(source) ofile $objfile_names {
+	    if { [file extension $cfile] != ".c" } {
+		lappend new_source "$cfile"
+		continue
+	    }
+
+	    if { ! [string match "./*" $cfile] } {
+		set cfile "$srcdir/$subdir/$cfile"
+	    }
+	    # ofile is never absolute, so this always works to protect sfile
+	    # from later absolutization.
+	    set sfile "./[file rootname $ofile].s"
+	    set cmd "$CC $CFLAGS -S $opts(cc) -o $sfile $cfile"
+	    send_log "$cmd\n"
+	    set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "dump.tmp"]
+	    remote_upload host "dump.tmp"
+	    set comp_output [prune_warnings [file_contents "dump.tmp"]]
+	    remote_file host delete "dump.tmp"
+	    remote_file build delete "dump.tmp"
+	    lappend new_source "$sfile"
+	    set cmdret [lindex $cmdret 0]
+
+	    regsub "\n$" $comp_output "" comp_output
+	    if { $cmdret != 0} {
+		send_log "compilation of $cfile failed, exit status $cmdret with <$comp_output>"
+                # Should this be 'unresolved', or is that too silent?
+		fail $testname
+		return 0
+	    }
+	}
+	set opts(source) $new_source
     }
 
     if { $opts(source) == "" } {
