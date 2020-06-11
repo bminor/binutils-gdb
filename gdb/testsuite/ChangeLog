@@ -1,3 +1,8 @@
+2020-06-11  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (with_override): New proc, factored out of ...
+	* gdb.base/dbx.exp: ... here.  Use with_override and save_vars.
+
 2020-06-10  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.ada/ptype_union.exp: Remove PR24713 workaround.

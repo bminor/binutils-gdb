@@ -7200,5 +7200,48 @@ proc hex_in_list { val hexlist } {
     return [expr $index != -1]
 }
 
+# Override proc NAME to proc OVERRIDE for the duration of the execution of
+# BODY.
+
+proc with_override { name override body } {
+    # Implementation note: It's possible to implement the override using
+    # rename, like this:
+    #   rename $name save_$name
+    #   rename $override $name
+    #   set code [catch {uplevel 1 $body} result]
+    #   rename $name $override
+    #   rename save_$name $name
+    # but there are two issues here:
+    # - the save_$name might clash with an existing proc
+    # - the override is no longer available under its original name during
+    #   the override
+    # So, we use this more elaborate but cleaner mechanism.
+
+    # Save the old proc.
+    set old_args [info args $name]
+    set old_body [info body $name]
+
+    # Install the override.
+    set new_args [info args $override]
+    set new_body [info body $override]
+    eval proc $name {$new_args} {$new_body}
+
+    # Execute body.
+    set code [catch {uplevel 1 $body} result]
+
+    # Restore old proc.
+    eval proc $name {$old_args} {$old_body}
+
+    # Return as appropriate.
+    if { $code == 1 } {
+        global errorInfo errorCode
+        return -code error -errorinfo $errorInfo -errorcode $errorCode $result
+    } elseif { $code > 1 } {
+        return -code $code $result
+    }
+
+    return $result
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
