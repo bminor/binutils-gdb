@@ -3700,12 +3700,15 @@ ldlang_open_ctf (void)
 	}
 
       /* Prevent the contents of this section from being written, while
-	 requiring the section itself to be duplicated in the output.  */
+	 requiring the section itself to be duplicated in the output, but only
+	 once.  */
       /* This section must exist if ctf_bfdopen() succeeded.  */
       sect = bfd_get_section_by_name (file->the_bfd, ".ctf");
       sect->size = 0;
       sect->flags |= SEC_NEVER_LOAD | SEC_HAS_CONTENTS | SEC_LINKER_CREATED;
 
+      if (any_ctf)
+	sect->flags |= SEC_EXCLUDE;
       any_ctf = 1;
     }
 

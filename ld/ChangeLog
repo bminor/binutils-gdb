@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ldlang.c (ldlang_open_ctf): Set SEC_EXCLUDE on all but the
+	first input .ctf section.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* configure.ac (enable_libctf): Substitute it.
 	* Makefile.am (enablings.exp): New.
 	(EXTRA_DEJAGNU_SITE_CONFIG): Add it.
