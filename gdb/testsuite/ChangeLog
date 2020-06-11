@@ -1,3 +1,15 @@
+2020-06-11  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/21356
+	* gdb.base/vla-datatypes.c (vla_factory): Add typedef for struct
+	vla_struct.
+	Add new struct vla_typedef and union vla_typedef_union and
+	corresponding instantiation objects.
+	Initialize new objects.
+	* gdb.base/vla-datatypes.exp: Add tests for vla_typedef_struct_object
+	and vla_typedef_union_object.
+	Fixup type for vla_struct_object.
+
 2020-06-11  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (with_override): New proc, factored out of ...

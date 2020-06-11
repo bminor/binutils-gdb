@@ -1,3 +1,9 @@
+2020-06-11  Keith Seitz  <keiths@redhat.com>
+
+	PR gdb/21356
+	* gdbtypes.c (resolve_dynamic_union, resolve_dynamic_struct):
+	Resolve typedefs for type length calculations.
+
 2020-06-10  Tom de Vries  <tdevries@suse.de>
 
 	PR ada/24713

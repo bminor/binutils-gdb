@@ -45,6 +45,10 @@ gdb_test "print vla_struct_object" \
     "\\\{something = 5, vla_field = \\\{0, 2, 4, 6, 8\\\}\\\}"
 gdb_test "print vla_union_object" \
     "\\\{vla_field = \\\{0, 2, 4, 6, 8\\\}\\\}"
+gdb_test "print vla_struct_typedef_struct_member_object" \
+    "\\\{something = 10, vla_object = \\\{something = 15, vla_field = \\\{0, 3, 6, 9, 12\\\}\\\}\\\}"
+gdb_test "print vla_struct_typedef_union_member_object" \
+    "\\\{something = 6, vla_object = \\\{something = 6, vla_field = \\\{-1, 2, 5, 8, 11\\\}\\\}\\\}"
 
 # Check whatis of VLA's.
 gdb_test "whatis int_vla" "type = int \\\[5\\\]"
@@ -61,7 +65,7 @@ gdb_test "whatis unsigned_short_vla" \
 gdb_test "whatis unsigned_char_vla" "type = unsigned char \\\[5\\\]"
 gdb_test "whatis foo_vla" "type = struct foo \\\[5\\\]"
 gdb_test "whatis bar_vla" "type = BAR \\\[5\\\]"
-gdb_test "whatis vla_struct_object" "type = struct vla_struct"
+gdb_test "whatis vla_struct_object" "type = vla_struct_typedef"
 gdb_test "whatis vla_union_object" "type = union vla_union"
 
 # Check ptype of VLA's.

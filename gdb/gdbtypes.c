@@ -2264,8 +2264,10 @@ resolve_dynamic_union (struct type *type,
       t = resolve_dynamic_type_internal (resolved_type->field (i).type (),
 					 addr_stack, 0);
       resolved_type->field (i).set_type (t);
-      if (TYPE_LENGTH (t) > max_len)
-	max_len = TYPE_LENGTH (t);
+
+      struct type *real_type = check_typedef (t);
+      if (TYPE_LENGTH (real_type) > max_len)
+	max_len = TYPE_LENGTH (real_type);
     }
 
   TYPE_LENGTH (resolved_type) = max_len;
@@ -2521,8 +2523,12 @@ resolve_dynamic_struct (struct type *type,
       if (TYPE_FIELD_BITSIZE (resolved_type, i) != 0)
 	new_bit_length += TYPE_FIELD_BITSIZE (resolved_type, i);
       else
-	new_bit_length += (TYPE_LENGTH (resolved_type->field (i).type ())
-			   * TARGET_CHAR_BIT);
+	{
+	  struct type *real_type
+	    = check_typedef (resolved_type->field (i).type ());
+
+	  new_bit_length += (TYPE_LENGTH (real_type) * TARGET_CHAR_BIT);
+	}
 
       /* Normally, we would use the position and size of the last field
 	 to determine the size of the enclosing structure.  But GCC seems
