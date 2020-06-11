@@ -143,7 +143,6 @@ struct elfNN_ia64_link_hash_table
   asection *rel_pltoff_sec;	/* Dynamic relocation section for same.  */
 
   bfd_size_type minplt_entries;	/* Number of minplt entries.  */
-  unsigned reltext : 1;		/* Are there relocs against readonly sections?  */
   unsigned self_dtpmod_done : 1;/* Has self DTPMOD entry been finished?  */
   bfd_vma self_dtpmod_offset;	/* .got offset to self DTPMOD entry.  */
   /* There are maybe R_IA64_GPREL22 relocations, including those
@@ -2951,7 +2950,7 @@ allocate_dynrel_entries (struct elfNN_ia64_dyn_sym_info *dyn_i,
 	  abort ();
 	}
       if (rent->reltext)
-	ia64_info->reltext = 1;
+	x->info->flags |= DF_TEXTREL;
       rent->srel->size += sizeof (ElfNN_External_Rela) * count;
     }
 
@@ -3224,11 +3223,10 @@ elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  || !add_dynamic_entry (DT_RELAENT, sizeof (ElfNN_External_Rela)))
 	return FALSE;
 
-      if (ia64_info->reltext)
+      if ((info->flags & DF_TEXTREL) != 0)
 	{
 	  if (!add_dynamic_entry (DT_TEXTREL, 0))
 	    return FALSE;
-	  info->flags |= DF_TEXTREL;
 	}
     }
 

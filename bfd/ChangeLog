@@ -1,5 +1,12 @@
 2020-06-10  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elfnn-ia64.c (elfNN_ia64_link_hash_table): Remove reltext.
+	(allocate_dynrel_entries): Set DF_TEXTREL instead of reltext.
+	(elfNN_ia64_size_dynamic_sections): Check DF_TEXTREL instead
+	of reltext.
+
+2020-06-10  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/26094
 	* elflink.c (bfd_elf_define_start_stop): Handle common symbols.
 	Clear verinfo.verdef.
