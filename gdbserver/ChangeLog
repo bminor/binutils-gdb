@@ -1,3 +1,9 @@
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tdesc.cc (struct tdesc_compatible_info): New struct.
+	(tdesc_compatible_info_list): New function.
+	(tdesc_compatible_info_arch_name): New function.
+
 2020-06-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	Use std::list to stop pending signal instead of manually-created

@@ -308,6 +308,29 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
   return gdb_type.get_type ();
 }
 
+/* Wrapper around bfd_arch_info_type.  A class with this name is used in
+   the API that is shared between gdb and gdbserver code, but gdbserver
+   doesn't use compatibility information, so its version of this class is
+   empty.  */
+
+class tdesc_compatible_info
+{
+public:
+  /* Constructor.  */
+  explicit tdesc_compatible_info (const bfd_arch_info_type *arch)
+    : m_arch (arch)
+  { /* Nothing.  */ }
+
+  /* Access the contained pointer.  */
+  const bfd_arch_info_type *arch () const
+  { return m_arch; }
+
+private:
+  /* Architecture information looked up from the <compatible> entity within
+     a target description.  */
+  const bfd_arch_info_type *m_arch;
+};
+
 /* A target description.  */
 
 struct target_desc : tdesc_element
@@ -328,7 +351,7 @@ struct target_desc : tdesc_element
   enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
   /* The list of compatible architectures reported by the target.  */
-  std::vector<const bfd_arch_info *> compatible;
+  std::vector<tdesc_compatible_info_up> compatible;
 
   /* Any architecture-specific properties specified by the target.  */
   std::vector<property> properties;
@@ -598,11 +621,11 @@ int
 tdesc_compatible_p (const struct target_desc *target_desc,
 		    const struct bfd_arch_info *arch)
 {
-  for (const bfd_arch_info *compat : target_desc->compatible)
+  for (const tdesc_compatible_info_up &compat : target_desc->compatible)
     {
-      if (compat == arch
-	  || arch->compatible (arch, compat)
-	  || compat->compatible (compat, arch))
+      if (compat->arch () == arch
+	  || arch->compatible (arch, compat->arch ())
+	  || compat->arch ()->compatible (compat->arch (), arch))
 	return 1;
     }
 
@@ -640,6 +663,22 @@ const char *
 tdesc_architecture_name (const struct target_desc *target_desc)
 {
   return target_desc->arch->printable_name;
+}
+
+/* See gdbsupport/tdesc.h.  */
+
+const std::vector<tdesc_compatible_info_up> &
+tdesc_compatible_info_list (const target_desc *target_desc)
+{
+  return target_desc->compatible;
+}
+
+/* See gdbsupport/tdesc.h.  */
+
+const char *
+tdesc_compatible_info_arch_name (const tdesc_compatible_info_up &compatible)
+{
+  return compatible->arch ()->printable_name;
 }
 
 /* Return the OSABI associated with this target description, or
@@ -1158,14 +1197,16 @@ tdesc_add_compatible (struct target_desc *target_desc,
   if (compatible == NULL)
     return;
 
-  for (const bfd_arch_info *compat : target_desc->compatible)
-    if (compat == compatible)
+  for (const tdesc_compatible_info_up &compat : target_desc->compatible)
+    if (compat->arch () == compatible)
       internal_error (__FILE__, __LINE__,
 		      _("Attempted to add duplicate "
 			"compatible architecture \"%s\""),
 		      compatible->printable_name);
 
-  target_desc->compatible.push_back (compatible);
+  target_desc->compatible.push_back
+    (std::unique_ptr<tdesc_compatible_info>
+     (new tdesc_compatible_info (compatible)));
 }
 
 void
@@ -1320,10 +1361,10 @@ public:
 	printf_unfiltered ("\n");
       }
 
-    for (const bfd_arch_info_type *compatible : e->compatible)
+    for (const tdesc_compatible_info_up &compatible : e->compatible)
       printf_unfiltered
 	("  tdesc_add_compatible (result, bfd_scan_arch (\"%s\"));\n",
-	 compatible->printable_name);
+	 compatible->arch ()->printable_name);
 
     if (!e->compatible.empty ())
       printf_unfiltered ("\n");

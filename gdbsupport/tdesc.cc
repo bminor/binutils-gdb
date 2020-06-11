@@ -392,6 +392,12 @@ void print_xml_feature::visit_pre (const target_desc *e)
   const char *osabi = tdesc_osabi_name (e);
   if (osabi != nullptr)
     string_appendf (*m_buffer, "<osabi>%s</osabi>", osabi);
+
+  const std::vector<tdesc_compatible_info_up> &compatible_list
+    = tdesc_compatible_info_list (e);
+  for (const auto &c : compatible_list)
+    string_appendf (*m_buffer, "<compatible>%s</compatible>\n",
+		    tdesc_compatible_info_arch_name (c));
 #endif
 }
 

@@ -1,5 +1,17 @@
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* target-descriptions.c (class tdesc_compatible_info): New class.
+	(struct target_desc): Change type of compatible vector.
+	(tdesc_compatible_p): Update for change in type of
+	target_desc::compatible.
+	(tdesc_compatible_info_list): New function.
+	(tdesc_compatible_info_arch_name): New function.
+	(tdesc_add_compatible): Update for change in type of
+	target_desc::compatible.
+	(print_c_tdesc::visit_pre): Likewise.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* target-descriptions.c (print_c_tdesc::print_c_tdesc): Change
 	whitespace to underscore.
 	(maint_print_c_tdesc_cmd): Use fake filename for target

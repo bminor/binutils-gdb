@@ -122,6 +122,27 @@ current_target_desc (void)
   return current_process ()->tdesc;
 }
 
+/* An empty structure.  */
+
+struct tdesc_compatible_info { };
+
+/* See gdbsupport/tdesc.h.  */
+
+const std::vector<tdesc_compatible_info_up> &
+tdesc_compatible_info_list (const target_desc *target_desc)
+{
+  static std::vector<tdesc_compatible_info_up> empty;
+  return empty;
+}
+
+/* See gdbsupport/tdesc.h.  */
+
+const char *
+tdesc_compatible_info_arch_name (const tdesc_compatible_info_up &c_info)
+{
+  return nullptr;
+}
+
 /* See gdbsupport/tdesc.h.  */
 
 const char *

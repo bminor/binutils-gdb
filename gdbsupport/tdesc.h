@@ -131,6 +131,27 @@ struct tdesc_reg : tdesc_element
 
 typedef std::unique_ptr<tdesc_reg> tdesc_reg_up;
 
+/* Declaration of a structure that holds information about one
+   "compatibility" entry within a target description.  */
+
+struct tdesc_compatible_info;
+
+/* A pointer to a single piece of compatibility information.  */
+
+typedef std::unique_ptr<tdesc_compatible_info> tdesc_compatible_info_up;
+
+/* Return a vector of compatibility information pointers from the target
+   description TARGET_DESC.  */
+
+const std::vector<tdesc_compatible_info_up> &tdesc_compatible_info_list
+	(const target_desc *target_desc);
+
+/* Return the architecture name from a compatibility information
+   COMPATIBLE.  */
+
+const char *tdesc_compatible_info_arch_name
+	(const tdesc_compatible_info_up &compatible);
+
 enum tdesc_type_kind
 {
   /* Predefined types.  */
