@@ -16894,47 +16894,28 @@ process_mips_specific (Filedata * filedata)
                                                 sect->sh_size, _("options"));
       if (eopt)
 	{
-	  Elf_Internal_Options * iopt;
-	  Elf_Internal_Options * option;
-
-	  assert (sizeof (Elf_Internal_Options) == sizeof (Elf_External_Options));
-	  assert (sizeof (Elf32_RegInfo) == sizeof (Elf32_External_RegInfo));
-	  assert (sizeof (Elf64_Internal_RegInfo) == sizeof (Elf64_External_RegInfo));
-	  iopt = (Elf_Internal_Options *) cmalloc (sect->sh_size, 1);
-	  if (iopt == NULL)
-	    {
-	      error (_("Out of memory allocating space for MIPS options\n"));
-	      free (eopt);
-	      return FALSE;
-	    }
+	  Elf_Internal_Options option;
 
 	  offset = cnt = 0;
-	  option = iopt;
-	  
 	  while (offset <= sect->sh_size - sizeof (* eopt))
 	    {
 	      Elf_External_Options * eoption;
+	      unsigned int optsize;
 
 	      eoption = (Elf_External_Options *) ((char *) eopt + offset);
 
-	      option->kind = BYTE_GET (eoption->kind);
-	      option->size = BYTE_GET (eoption->size);
-	      option->section = BYTE_GET (eoption->section);
-	      option->info = BYTE_GET (eoption->info);
+	      optsize = BYTE_GET (eoption->size);
 
 	      /* PR 17531: file: ffa0fa3b.  */
-	      if (option->size < sizeof (* eopt)
-		  || option->size > sect->sh_size - offset)
+	      if (optsize < sizeof (* eopt)
+		  || optsize > sect->sh_size - offset)
 		{
 		  error (_("Invalid size (%u) for MIPS option\n"),
-			 option->size);
-		  free (iopt);
+			 optsize);
 		  free (eopt);
 		  return FALSE;
 		}
-	      offset += option->size;
-
-	      ++option;
+	      offset += optsize;
 	      ++cnt;
 	    }
 
@@ -16947,14 +16928,21 @@ process_mips_specific (Filedata * filedata)
 	  while (cnt-- > 0)
 	    {
 	      size_t len;
+	      Elf_External_Options * eoption;
 
-	      option = (Elf_Internal_Options *) ((char *) iopt + offset);
-	      switch (option->kind)
+	      eoption = (Elf_External_Options *) ((char *) eopt + offset);
+
+	      option.kind = BYTE_GET (eoption->kind);
+	      option.size = BYTE_GET (eoption->size);
+	      option.section = BYTE_GET (eoption->section);
+	      option.info = BYTE_GET (eoption->info);
+
+	      switch (option.kind)
 		{
 		case ODK_NULL:
 		  /* This shouldn't happen.  */
 		  printf (" NULL       %" PRId16 " %" PRIx32,
-			  option->section, option->info);
+			  option.section, option.info);
 		  break;
 
 		case ODK_REGINFO:
@@ -16965,8 +16953,8 @@ process_mips_specific (Filedata * filedata)
 		      Elf32_RegInfo reginfo;
 
 		      /* 32bit form.  */
-		      if (option->size < (sizeof (Elf_External_Options)
-					  + sizeof (Elf32_External_RegInfo)))
+		      if (option.size < (sizeof (Elf_External_Options)
+					 + sizeof (Elf32_External_RegInfo)))
 			{
 			  printf (_("<corrupt>\n"));
 			  error (_("Truncated MIPS REGINFO option\n"));
@@ -16974,7 +16962,7 @@ process_mips_specific (Filedata * filedata)
 			  break;
 			}
 
-		      ereg = (Elf32_External_RegInfo *) (option + 1);
+		      ereg = (Elf32_External_RegInfo *) (eoption + 1);
 
 		      reginfo.ri_gprmask = BYTE_GET (ereg->ri_gprmask);
 		      reginfo.ri_cprmask[0] = BYTE_GET (ereg->ri_cprmask[0]);
@@ -16997,8 +16985,8 @@ process_mips_specific (Filedata * filedata)
 		      Elf64_External_RegInfo * ereg;
 		      Elf64_Internal_RegInfo reginfo;
 
-		      if (option->size < (sizeof (Elf_External_Options)
-					  + sizeof (Elf64_External_RegInfo)))
+		      if (option.size < (sizeof (Elf_External_Options)
+					 + sizeof (Elf64_External_RegInfo)))
 			{
 			  printf (_("<corrupt>\n"));
 			  error (_("Truncated MIPS REGINFO option\n"));
@@ -17006,7 +16994,7 @@ process_mips_specific (Filedata * filedata)
 			  break;
 			}
 
-		      ereg = (Elf64_External_RegInfo *) (option + 1);
+		      ereg = (Elf64_External_RegInfo *) (eoption + 1);
 		      reginfo.ri_gprmask    = BYTE_GET (ereg->ri_gprmask);
 		      reginfo.ri_cprmask[0] = BYTE_GET (ereg->ri_cprmask[0]);
 		      reginfo.ri_cprmask[1] = BYTE_GET (ereg->ri_cprmask[1]);
@@ -17022,45 +17010,45 @@ process_mips_specific (Filedata * filedata)
 			      reginfo.ri_cprmask[0], reginfo.ri_cprmask[1],
 			      reginfo.ri_cprmask[2], reginfo.ri_cprmask[3]);
 		    }
-		  offset += option->size;
+		  offset += option.size;
 		  continue;
 
 		case ODK_EXCEPTIONS:
 		  fputs (" EXCEPTIONS fpe_min(", stdout);
-		  process_mips_fpe_exception (option->info & OEX_FPU_MIN);
+		  process_mips_fpe_exception (option.info & OEX_FPU_MIN);
 		  fputs (") fpe_max(", stdout);
-		  process_mips_fpe_exception ((option->info & OEX_FPU_MAX) >> 8);
+		  process_mips_fpe_exception ((option.info & OEX_FPU_MAX) >> 8);
 		  fputs (")", stdout);
 
-		  if (option->info & OEX_PAGE0)
+		  if (option.info & OEX_PAGE0)
 		    fputs (" PAGE0", stdout);
-		  if (option->info & OEX_SMM)
+		  if (option.info & OEX_SMM)
 		    fputs (" SMM", stdout);
-		  if (option->info & OEX_FPDBUG)
+		  if (option.info & OEX_FPDBUG)
 		    fputs (" FPDBUG", stdout);
-		  if (option->info & OEX_DISMISS)
+		  if (option.info & OEX_DISMISS)
 		    fputs (" DISMISS", stdout);
 		  break;
 
 		case ODK_PAD:
 		  fputs (" PAD       ", stdout);
-		  if (option->info & OPAD_PREFIX)
+		  if (option.info & OPAD_PREFIX)
 		    fputs (" PREFIX", stdout);
-		  if (option->info & OPAD_POSTFIX)
+		  if (option.info & OPAD_POSTFIX)
 		    fputs (" POSTFIX", stdout);
-		  if (option->info & OPAD_SYMBOL)
+		  if (option.info & OPAD_SYMBOL)
 		    fputs (" SYMBOL", stdout);
 		  break;
 
 		case ODK_HWPATCH:
 		  fputs (" HWPATCH   ", stdout);
-		  if (option->info & OHW_R4KEOP)
+		  if (option.info & OHW_R4KEOP)
 		    fputs (" R4KEOP", stdout);
-		  if (option->info & OHW_R8KPFETCH)
+		  if (option.info & OHW_R8KPFETCH)
 		    fputs (" R8KPFETCH", stdout);
-		  if (option->info & OHW_R5KEOP)
+		  if (option.info & OHW_R5KEOP)
 		    fputs (" R5KEOP", stdout);
-		  if (option->info & OHW_R5KCVTL)
+		  if (option.info & OHW_R5KCVTL)
 		    fputs (" R5KCVTL", stdout);
 		  break;
 
@@ -17076,43 +17064,43 @@ process_mips_specific (Filedata * filedata)
 
 		case ODK_HWAND:
 		  fputs (" HWAND     ", stdout);
-		  if (option->info & OHWA0_R4KEOP_CHECKED)
+		  if (option.info & OHWA0_R4KEOP_CHECKED)
 		    fputs (" R4KEOP_CHECKED", stdout);
-		  if (option->info & OHWA0_R4KEOP_CLEAN)
+		  if (option.info & OHWA0_R4KEOP_CLEAN)
 		    fputs (" R4KEOP_CLEAN", stdout);
 		  break;
 
 		case ODK_HWOR:
 		  fputs (" HWOR      ", stdout);
-		  if (option->info & OHWA0_R4KEOP_CHECKED)
+		  if (option.info & OHWA0_R4KEOP_CHECKED)
 		    fputs (" R4KEOP_CHECKED", stdout);
-		  if (option->info & OHWA0_R4KEOP_CLEAN)
+		  if (option.info & OHWA0_R4KEOP_CLEAN)
 		    fputs (" R4KEOP_CLEAN", stdout);
 		  break;
 
 		case ODK_GP_GROUP:
 		  printf (" GP_GROUP  %#06x  self-contained %#06x",
-			  option->info & OGP_GROUP,
-			  (option->info & OGP_SELF) >> 16);
+			  option.info & OGP_GROUP,
+			  (option.info & OGP_SELF) >> 16);
 		  break;
 
 		case ODK_IDENT:
 		  printf (" IDENT     %#06x  self-contained %#06x",
-			  option->info & OGP_GROUP,
-			  (option->info & OGP_SELF) >> 16);
+			  option.info & OGP_GROUP,
+			  (option.info & OGP_SELF) >> 16);
 		  break;
 
 		default:
 		  /* This shouldn't happen.  */
 		  printf (" %3d ???     %" PRId16 " %" PRIx32,
-			  option->kind, option->section, option->info);
+			  option.kind, option.section, option.info);
 		  break;
 		}
 
 	      len = sizeof (* eopt);
-	      while (len < option->size)
+	      while (len < option.size)
 		{
-		  unsigned char datum = * ((unsigned char *) eopt + offset + len);
+		  unsigned char datum = *((unsigned char *) eoption + len);
 
 		  if (ISPRINT (datum))
 		    printf ("%c", datum);
@@ -17122,9 +17110,8 @@ process_mips_specific (Filedata * filedata)
 		}
 	      fputs ("\n", stdout);
 
-	      offset += option->size;
+	      offset += option.size;
 	    }
-	  free (iopt);
 	  free (eopt);
 	}
       else
