@@ -1,3 +1,8 @@
+2020-06-11  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-elf/pr26094-1b.c (main): Change return type to
+	int.
+
 2020-06-10  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/linux-x86.exp: Build tests when non-native.

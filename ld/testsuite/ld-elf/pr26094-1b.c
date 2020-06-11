@@ -1,6 +1,6 @@
 extern void *foo();
 
-void main()
+int main (void)
 {
-    foo();
+  foo(); return 0;
 }
