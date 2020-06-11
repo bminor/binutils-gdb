@@ -1,3 +1,7 @@
+2020-06-11  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Index Files): Reword.  Remove Ada limitation.
+
 2020-06-10  Jonny Grant  <jg@jguk.org>
 
 	* gdb.texinfo: Remove broken links Previous and Up from

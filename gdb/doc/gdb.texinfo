@@ -21286,9 +21286,7 @@ Instead you must do, for example,
 $ gdb -iex "set use-deprecated-index-sections on" <program>
 @end smallexample
 
-There are currently some limitation on indices.  They only work when
-using DWARF debugging information, not stabs.  And, only the
-@code{-dwarf-5} index works for programs using Ada.
+Indices only work when using DWARF debugging information, not stabs.
 
 @subsection Automatic symbol index cache
 
