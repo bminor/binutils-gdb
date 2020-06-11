@@ -1,3 +1,26 @@
+2020-06-11  Alex Coplan  <alex.coplan@arm.com>
+
+	* aarch64-opc.c (SYSREG): New macro for describing system registers.
+	(SR_CORE): Likewise.
+	(SR_FEAT): Likewise.
+	(SR_RNG): Likewise.
+	(SR_V8_1): Likewise.
+	(SR_V8_2): Likewise.
+	(SR_V8_3): Likewise.
+	(SR_V8_4): Likewise.
+	(SR_PAN): Likewise.
+	(SR_RAS): Likewise.
+	(SR_SSBS): Likewise.
+	(SR_SVE): Likewise.
+	(SR_ID_PFR2): Likewise.
+	(SR_PROFILE): Likewise.
+	(SR_MEMTAG): Likewise.
+	(SR_SCXTNUM): Likewise.
+	(aarch64_sys_regs): Refactor to store feature information in the table.
+	(aarch64_sys_reg_supported_p): Collapse logic for system registers
+	that now describe their own features.
+	(aarch64_pstatefield_supported_p): Likewise.
+
 2020-06-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (prefix_table): Fix a typo in comments.

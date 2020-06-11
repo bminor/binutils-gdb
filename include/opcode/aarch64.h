@@ -965,6 +965,10 @@ typedef struct
   const char *  name;
   aarch64_insn	value;
   uint32_t	flags;
+
+  /* A set of features, all of which are required for this system register to be
+     available.  */
+  aarch64_feature_set features;
 } aarch64_sys_reg;
 
 extern const aarch64_sys_reg aarch64_sys_regs [];

@@ -1,3 +1,8 @@
+2020-06-11  Alex Coplan  <alex.coplan@arm.com>
+
+	* opcode/aarch64.h (aarch64_sys_reg): Add required features to struct
+	describing system registers.
+
 2020-06-11  Alan Modra  <amodra@gmail.com>
 
 	* elf/mips.h (Elf32_RegInfo): Use fixed width integer types.
