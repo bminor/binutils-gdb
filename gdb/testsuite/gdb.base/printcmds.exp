@@ -127,15 +127,15 @@ proc test_float_accepted {} {
     gdb_test "p 1.5l" " = 1.5"
 
     # Test hexadecimal floating point.
-    set test "p 0x1.1"
-    gdb_test_multiple $test $test {
-	-re " = 1\\.0625\r\n$gdb_prompt $" {
-	    pass $test
-	}
-	-re "Invalid number \"0x1\\.1\"\\.\r\n$gdb_prompt $" {
-	    # Older glibc does not support hex float, newer does.
-	    xfail $test
-	}
+    foreach {num result} {
+	0x1.1 1.0625
+	0x1.8480000000000p+6 97.125
+	0x1.8480000000000p6 97.125
+	0x00.1p0 0.0625
+	0x00.1p1 0.125
+	0x00.1p-1 0.03125
+    } {
+	gdb_test "p $num" " = [string_to_regexp $result]"
     }
 }
 
