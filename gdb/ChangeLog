@@ -1666,7 +1666,7 @@
 2020-05-20  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (bound_name, MAX_ADA_DIMENS): Remove.
-        (desc_one_bound, desc_index_type): Compute field name.
+	(desc_one_bound, desc_index_type): Compute field name.
 
 2020-05-20  Tom de Vries  <tdevries@suse.de>
 
@@ -2522,8 +2522,8 @@
 
 2020-04-25  Kamil Rytarowski  <n54@gmx.com>
 
-       * inf-ptrace.c (inf_ptrace_target::wait): Remove
-       `PT_GET_PROCESS_STATE' block.
+	* inf-ptrace.c (inf_ptrace_target::wait): Remove
+	`PT_GET_PROCESS_STATE' block.
 
 2020-04-24  Tom Tromey  <tom@tromey.com>
 
