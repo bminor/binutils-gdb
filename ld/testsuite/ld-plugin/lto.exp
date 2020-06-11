@@ -91,9 +91,6 @@ set lto_link_tests [list \
   [list "Compile 5b" \
    "" "-flto $lto_fat" \
    {lto-5b.c} {} ""] \
-  [list "LTO 6" \
-   "-O2 -flto -fuse-linker-plugin" "" \
-   {lto-6.c} {} "lto-6.exe" "c"] \
   [list "Compile PR ld/12365" \
    "" "-flto -O2 $lto_fat" \
    {pr12365a.c pr12365b.c pr12365c.c} {} ""] \
@@ -146,16 +143,6 @@ set lto_link_tests [list \
    "$NOPIE_LDFLAGS -O2 -Wl,-e,foo -nostdlib -flto -fuse-linker-plugin tmpdir/pr12758a.o -Wl,--start-group tmpdir/libpr12758.a -Wl,--end-group" \
    "$NOSANTIZE_CFLAGS" \
    {dummy.c} {} "pr12758.exe"] \
-  [list "Compile PR ld/12760" \
-   "" "-g -O0" \
-   {pr12760a.c} {} ""] \
-  [list "Build libpr12760.a" \
-   "" "-flto -O2 $lto_fat" \
-   {pr12760b.c} {} "libpr12760.a"] \
-  [list "PR ld/12760" \
-   "-O2 -Wl,-e,foo -nostdlib -flto -fuse-linker-plugin tmpdir/pr12760a.o -Wl,--start-group tmpdir/libpr12760.a -Wl,--end-group" "" \
-   {dummy.c} {{warning "pr12760a.c:6: warning: Bad \\.?bar"}} \
-   "pr12760.exe" "c"] \
   [list "Build libpr13183.a" \
    "-T" "-flto -O2 $lto_fat" \
    {pr13183a.c} {} "libpr13183.a"] \
@@ -217,18 +204,6 @@ set lto_link_tests [list \
   [list "Build pr22751.a" \
    "$plug_opt" "-flto $lto_no_fat $INT128_CFLAGS" \
    {pr22751.c} {} "pr22751.a"] \
-  [list "Build libpr23818.so" \
-   "-shared -flto -g -Wl,-version-script,pr23818.t" \
-   "-g -flto $lto_fat" \
-   {pr23818a.c pr23818b.c} \
-   {{"readelf" {-s --wide} "pr23818.d"}} \
-   "libpr23818.so"] \
-  [list "Build libpr23958.so" \
-   "-shared -flto -Wl,-version-script,pr23958.t" \
-   "-g -flto $lto_fat" \
-   {pr23958.c} \
-   "" \
-   "libpr23958.so"] \
   [list "Build pr24406-2b.o" \
    "" "-O2 -fno-lto" \
    {pr24406-2b.c}] \
@@ -273,6 +248,9 @@ set lto_compile_elf_tests [list \
 
 # Generate input files for complex LTO tests for ELF.
 set lto_link_elf_tests [list \
+  [list "LTO 6" \
+   "-O2 -flto -fuse-linker-plugin" "" \
+   {lto-6.c} {} "lto-6.exe" "c"] \
   [list "Build liblto-7.so" \
    "-shared" "-O2 -fpic" \
    {lto-7d.c} {} "liblto-7.so" "c"] \
@@ -285,6 +263,16 @@ set lto_link_elf_tests [list \
   [list "Build liblto-17b.so 2" \
    "-shared -O2 -fpic -flto -fuse-linker-plugin tmpdir/lto-17a.o" "-O2 -fpic -flto" \
    {lto-17b.c} {{"nm" {} "lto-17b-2.d"}} "liblto-17b.so"] \
+  [list "Compile PR ld/12760" \
+   "" "-g -O0" \
+   {pr12760a.c} {} ""] \
+  [list "Build libpr12760.a" \
+   "" "-flto -O2 $lto_fat" \
+   {pr12760b.c} {} "libpr12760.a"] \
+  [list "PR ld/12760" \
+   "-O2 -Wl,-e,foo -nostdlib -flto -fuse-linker-plugin tmpdir/pr12760a.o -Wl,--start-group tmpdir/libpr12760.a -Wl,--end-group" "" \
+   {dummy.c} {{warning "pr12760a.c:6: warning: Bad \\.?bar"}} \
+   "pr12760.exe" "c"] \
   [list "PR ld/12975" \
    "-shared -O2 -fPIC -flto -fuse-linker-plugin -nostdlib -Wl,-version-script,pr12975.t" "-O2 -flto" \
    {pr12975.c} {{"readelf" {-s --wide} "pr12975.d"}} "pr12975.so" "c"] \
@@ -333,6 +321,18 @@ set lto_link_elf_tests [list \
   [list {Build pr22220main.o} \
    {} {-flto} \
    {pr22220main.cc} {} {} {c++}] \
+  [list "Build libpr23818.so" \
+   "-shared -flto -g -Wl,-version-script,pr23818.t" \
+   "-g -flto $lto_fat" \
+   {pr23818a.c pr23818b.c} \
+   {{"readelf" {-s --wide} "pr23818.d"}} \
+   "libpr23818.so"] \
+  [list "Build libpr23958.so" \
+   "-shared -flto -Wl,-version-script,pr23958.t" \
+   "-g -flto $lto_fat" \
+   {pr23958.c} \
+   "" \
+   "libpr23958.so"] \
   [list "Build pr24486a.o" \
    "$plug_opt" "-flto -O2" \
    {pr24486a.c} {} "" "c"] \

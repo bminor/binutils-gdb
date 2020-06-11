@@ -1,3 +1,9 @@
+2020-06-11  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-plugin/lto.exp (lto_link_tests): Move lto-6,
+	pr12760, pr23818 and pr23958 tests to..
+	(lto_link_elf_tests): ..here.
+
 2020-06-11  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-elf/pr26094-1b.c (main): Change return type to
