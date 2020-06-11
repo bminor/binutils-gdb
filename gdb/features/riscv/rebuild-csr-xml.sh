@@ -22,12 +22,12 @@ EOF
 if [ "$bitsize" = "64" ]; then
     grep "^DECLARE_CSR(" ${RISCV_OPC_FILE} \
         | sed /CSR_CLASS_.*_32/d \
-        | sed -e "s!DECLARE_CSR(\(.*\), .*, .*!  <reg name=\"\1\" bitsize=\"$bitsize\"/>!"
+        | sed -e "s!DECLARE_CSR(\(.*\), .*, .*, .*, .*!  <reg name=\"\1\" bitsize=\"$bitsize\"/>!"
 
     echo "</feature>"
 else
     grep "^DECLARE_CSR(" ${RISCV_OPC_FILE} \
-        | sed -e "s!DECLARE_CSR(\(.*\), .*, .*!  <reg name=\"\1\" bitsize=\"$bitsize\"/>!"
+        | sed -e "s!DECLARE_CSR(\(.*\), .*, .*, .*, .*!  <reg name=\"\1\" bitsize=\"$bitsize\"/>!"
 
     echo "</feature>"
 fi

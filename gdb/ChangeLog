@@ -1,3 +1,7 @@
+2020-06-12  Nelson Chu  <nelson.chu@sifive.com>
+
+	* features/riscv/rebuild-csr-xml.sh: Updated.
+
 2020-06-11  Tom Tromey  <tom@tromey.com>
 
 	PR gdb/18318:
