@@ -14,7 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Various tests to check which register names are available after
-# loading a new target description file.
+# loading a new target description file, and which registers show up
+# in the output of the 'info registers' command.
 
 if {![istarget "riscv*-*-*"]} {
     verbose "Skipping ${gdb_test_file_name}."
@@ -79,3 +80,39 @@ gdb_test "info registers \$csr0" "Invalid register `csr0'"
 gdb_test "info registers \$dscratch0" "dscratch0\[ \t\]+.*"
 gdb_test "info registers \$dscratch" "dscratch\[ \t\]+.*"
 
+foreach rgroup {all save restore} {
+    # Now use 'info registers all' to see how many times the floating
+    # point status registers show up in the output.
+    array set reg_counts {}
+    set test "info registers $rgroup"
+    gdb_test_multiple $test $test {
+	-re ".*info registers all\r\n" {
+	    verbose -log "Skip to first register"
+	    exp_continue
+	}
+	-re "^(\[^ \t\]+)\[ \t\]+\[^\r\n\]+\r\n" {
+	    set reg $expect_out(1,string)
+	    incr reg_counts($reg)
+	exp_continue
+	}
+	-re "^$gdb_prompt $" {
+	    # Done.
+	}
+    }
+
+    foreach reg {dscratch} {
+	if { [info exists reg_counts($reg) ] } {
+	    set count $reg_counts($reg)
+	} else {
+	    set count 0
+	}
+	if {$reg == "dscratch" && $rgroup != "all"} {
+	    gdb_assert {$count == 0} \
+		"register $reg not seen in reggroup $rgroup"
+	} else {
+	    gdb_assert {$count == 1} \
+		"register $reg seen once in reggroup $rgroup"
+	}
+    }
+    array unset reg_counts
+}

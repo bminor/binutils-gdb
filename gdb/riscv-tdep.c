@@ -125,6 +125,20 @@ struct riscv_register_feature
      within the target description.  */
   const char *name;
 
+  /* For x-regs and f-regs we always force GDB to use the first name from
+     the REGISTERS.NAMES vector, it is therefore important that we create
+     user-register aliases for all of the remaining names at indexes 1+ in
+     the names vector.
+
+     For CSRs we take a different approach, we prefer whatever name the
+     target description uses, in this case we want to create user-register
+     aliases for any other names that aren't the target description
+     provided name.
+
+     When this flag is true we are dealing with the first case, and when
+     this is false we are dealing with the latter.  */
+  bool prefer_first_name;
+
   /* List of all the registers that we expect that we might find in this
      register set.  */
   std::vector<struct register_info> registers;
@@ -134,7 +148,7 @@ struct riscv_register_feature
 
 static const struct riscv_register_feature riscv_xreg_feature =
 {
- "org.gnu.gdb.riscv.cpu",
+ "org.gnu.gdb.riscv.cpu", true,
  {
    { RISCV_ZERO_REGNUM + 0, { "zero", "x0" }, true },
    { RISCV_ZERO_REGNUM + 1, { "ra", "x1" }, true },
@@ -176,7 +190,7 @@ static const struct riscv_register_feature riscv_xreg_feature =
 
 static const struct riscv_register_feature riscv_freg_feature =
 {
- "org.gnu.gdb.riscv.fpu",
+ "org.gnu.gdb.riscv.fpu", true,
  {
    { RISCV_FIRST_FP_REGNUM + 0, { "ft0", "f0" }, true },
    { RISCV_FIRST_FP_REGNUM + 1, { "ft1", "f1" }, true },
@@ -226,7 +240,7 @@ static const struct riscv_register_feature riscv_freg_feature =
 
 static const struct riscv_register_feature riscv_virtual_feature =
 {
- "org.gnu.gdb.riscv.virtual",
+ "org.gnu.gdb.riscv.virtual", false,
  {
    { RISCV_PRIV_REGNUM, { "priv" }, false }
  }
@@ -238,7 +252,7 @@ static const struct riscv_register_feature riscv_virtual_feature =
 
 static struct riscv_register_feature riscv_csr_feature =
 {
- "org.gnu.gdb.riscv.csr",
+ "org.gnu.gdb.riscv.csr", false,
  {
 #define DECLARE_CSR(NAME,VALUE,CLASS,DEFINE_VER,ABORT_VER) \
   { RISCV_ ## VALUE ## _REGNUM, { # NAME }, false },
@@ -472,7 +486,7 @@ value_of_riscv_user_reg (struct frame_info *frame, const void *baton)
 
 /* Implement the register_name gdbarch method.  This is used instead of
    the function supplied by calling TDESC_USE_REGISTERS so that we can
-   ensure the preferred names are offered.  */
+   ensure the preferred names are offered for x-regs and f-regs.  */
 
 static const char *
 riscv_register_name (struct gdbarch *gdbarch, int regnum)
@@ -484,12 +498,18 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
   if (name == NULL || name[0] == '\0')
     return NULL;
 
+  /* We want GDB to use the ABI names for registers even if the target
+     gives us a target description with the architectural name.  For
+     example we want to see 'ra' instead of 'x1' whatever the target
+     description called it.  */
   if (regnum >= RISCV_ZERO_REGNUM && regnum < RISCV_FIRST_FP_REGNUM)
     {
       gdb_assert (regnum < riscv_xreg_feature.registers.size ());
       return riscv_xreg_feature.registers[regnum].names[0];
     }
 
+  /* Like with the x-regs we prefer the abi names for the floating point
+     registers.  */
   if (regnum >= RISCV_FIRST_FP_REGNUM && regnum <= RISCV_LAST_FP_REGNUM)
     {
       if (riscv_has_fp_regs (gdbarch))
@@ -502,28 +522,18 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
         return NULL;
     }
 
-  /* Check that there's no gap between the set of registers handled above,
-     and the set of registers handled next.  */
-  gdb_assert ((RISCV_LAST_FP_REGNUM + 1) == RISCV_FIRST_CSR_REGNUM);
+  /* The remaining registers are different.  For all other registers on the
+     machine we prefer to see the names that the target description
+     provides.  This is particularly important for CSRs which might be
+     renamed over time.  If GDB keeps track of the "latest" name, but a
+     particular target provides an older name then we don't want to force
+     users to see the newer name in register output.
 
-  if (regnum >= RISCV_FIRST_CSR_REGNUM && regnum <= RISCV_LAST_CSR_REGNUM)
-    {
-#define DECLARE_CSR(NAME,VALUE,CLASS,DEFINE_VER,ABORT_VER) \
-      case RISCV_ ## VALUE ## _REGNUM: return # NAME;
+     The other case that reaches here are any registers that the target
+     provided that GDB is completely unaware of.  For these we have no
+     choice but to accept the target description name.
 
-      switch (regnum)
-	{
-#include "opcode/riscv-opc.h"
-	}
-#undef DECLARE_CSR
-    }
-
-  if (regnum == RISCV_PRIV_REGNUM)
-    return "priv";
-
-  /* It is possible that that the target provides some registers that GDB
-     is unaware of, in that case just return the NAME from the target
-     description.  */
+     Just accept whatever name TDESC_REGISTER_NAME returned.  */
   return name;
 }
 
@@ -3003,8 +3013,8 @@ riscv_check_tdesc_feature (struct tdesc_arch_data *tdesc_data,
 
       for (const char *name : reg.names)
 	{
-	  found =
-	    tdesc_numbered_register (feature, tdesc_data, reg.regnum, name);
+	  found = tdesc_numbered_register (feature, tdesc_data, reg.regnum,
+					   name);
 
 	  if (found)
             {
@@ -3012,8 +3022,15 @@ riscv_check_tdesc_feature (struct tdesc_arch_data *tdesc_data,
                  register.  In RISCV_REGISTER_NAME we ensure that GDB
                  always uses the first name for each register, so here we
                  add aliases for all of the remaining names.  */
-              for (int i = 0; i < reg.names.size (); ++i)
-		aliases->emplace_back (reg.names[i], (void *) &reg.regnum);
+	      bool prefer_first_name = reg_set->prefer_first_name;
+	      int start_index = prefer_first_name ? 1 : 0;
+	      for (int i = start_index; i < reg.names.size (); ++i)
+                {
+		  const char *alias = reg.names[i];
+                  if (alias == name && !prefer_first_name)
+		    continue;
+		  aliases->emplace_back (alias, (void *) &reg.regnum);
+                }
               break;
             }
 	}

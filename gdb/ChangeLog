@@ -1,5 +1,18 @@
 2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c (struct riscv_register_feature::register_info): Fix
+	whitespace error for declaration of names member variable.
+	(struct riscv_register_feature): Add new prefer_first_name member
+	variable, and fix whitespace error in declaration of registers.
+	(riscv_xreg_feature): Initialize prefer_first_name field.
+	(riscv_freg_feature): Likewise.
+	(riscv_virtual_feature): Likewise.
+	(riscv_csr_feature): Likewise.
+	(riscv_register_name): Expand on comments.  Remove register name
+	modifications for CSR and virtual registers.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (struct riscv_register_feature): Fix whitespace
 	errors.
 
