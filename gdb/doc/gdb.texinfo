@@ -108,7 +108,7 @@ ISBN 978-0-9831592-3-0 @*
 @page
 
 @ifnottex
-@node Top, Summary, (dir), (dir)
+@node Top, Summary
 
 @top Debugging with @value{GDBN}
 
