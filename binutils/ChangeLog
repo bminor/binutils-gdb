@@ -1,3 +1,12 @@
+2020-06-11  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (process_mips_specific): Assert size of internal
+	types match size of external types, and simplify allocation of
+	internal buffer.  Catch possible integer overflow when sanity
+	checking option size.  Don't assume options are a regular array.
+	Sanity check reginfo option against option size.  Use PRI macros
+	when printing.
+
 2020-06-10  Ralf Habacker  <ralf.habacker@freenet.de>
 
 	PR 26082

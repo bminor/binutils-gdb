@@ -1,3 +1,8 @@
+2020-06-11  Alan Modra  <amodra@gmail.com>
+
+	* elf/mips.h (Elf32_RegInfo): Use fixed width integer types.
+	(Elf64_Internal_RegInfo, Elf_Internal_Options): Likewise.
+
 2020-06-06  Alan Modra  <amodra@gmail.com>
 
 	* elf/ppc64.h (elf_ppc64_reloc_type): Rename
