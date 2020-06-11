@@ -1,3 +1,11 @@
+2020-06-09  Jonny Grant  <jg@jguk.org>
+2020-06-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* main.c (captured_main_1): Don't print new line after help.
+	(print_gdb_help): add mailing list and IRC channel information
+	to --help.  Add new lines between items in the footer.  Remove
+	quotes around bug url.
+
 2020-06-11  Keith Seitz  <keiths@redhat.com>
 
 	PR gdb/21356
