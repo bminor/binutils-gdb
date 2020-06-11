@@ -1,3 +1,16 @@
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac (enable_libctf): Substitute it.
+	* Makefile.am (enablings.exp): New.
+	(EXTRA_DEJAGNU_SITE_CONFIG): Add it.
+	(DISTCLEANFILES): Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Likewise.
+	* testsuite/lib/ld-lib.exp (compile_one_cc): New.
+	(check_ctf_available): Likewise.
+	(skip_ctf_tests): Likewise.
+	* testsuite/ld-ctf/ctf.exp: Call skip_ctf_tests.
+
 2020-07-22  Egeyar Bagcioglu  <egeyar.bagcioglu@oracle.com>
 
 	* testsuite/ld-ctf/ctf.exp: New file.

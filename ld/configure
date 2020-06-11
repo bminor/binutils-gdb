@@ -678,6 +678,7 @@ WARN_WRITE_STRINGS
 NO_WERROR
 WARN_CFLAGS_FOR_BUILD
 WARN_CFLAGS
+enable_libctf
 ENABLE_LIBCTF_FALSE
 ENABLE_LIBCTF_TRUE
 installed_linker
@@ -12037,7 +12038,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12040 "configure"
+#line 12041 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12143,7 +12144,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12146 "configure"
+#line 12147 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15955,6 +15956,7 @@ else
   ENABLE_LIBCTF_TRUE='#'
   ENABLE_LIBCTF_FALSE=
 fi
+
 
 
 

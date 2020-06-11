@@ -1569,3 +1569,55 @@ proc check_gnu2_tls_available { } {
     }
     return $gnu2_tls_available_saved
 }
+
+# Compile a C source file, with the specified additional_flags.
+proc compile_one_cc { src output additional_flags } {
+    global CC
+    global CFLAGS
+
+    set flags ""
+    if [board_info [target_info name] exists cflags] {
+	append flags " [board_info [target_info name] cflags]"
+    }
+    if [board_info [target_info name] exists ldflags] {
+	append flags " [board_info [target_info name] ldflags]"
+    }
+
+    if [is_remote host] {
+	set src [remote_download host $src]
+    }
+    return [run_host_cmd_yesno "$CC" "$flags $CFLAGS $additional_flags $src -o $output"]
+}
+
+# Returns true if the target compiler supports -gt
+proc check_ctf_available { } {
+    global ctf_available_saved
+
+    if {![info exists ctf_available_saved]} {
+	set basename "tmpdir/ctf_available[pid]"
+	set src ${basename}.c
+	set output ${basename}.o
+	set f [open $src "w"]
+	puts $f "int main() { return 0; }"
+	close $f
+	set ctf_available_saved [compile_one_cc $src $output "-gt -c"]
+	remote_file host delete $src
+	remote_file host delete $output
+	file delete $src
+    }
+    return $ctf_available_saved
+}
+
+proc skip_ctf_tests { } {
+    global enable_libctf
+
+    if {$enable_libctf eq "no"} {
+	return 1
+    }
+
+    if [check_ctf_available] {
+	return 0
+    }
+
+    return 1
+}

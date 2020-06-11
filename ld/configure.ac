@@ -226,6 +226,7 @@ if test "${enable_libctf}" = yes; then
     AC_DEFINE(ENABLE_LIBCTF, 1, [Handle .ctf type-info sections])
 fi
 AM_CONDITIONAL(ENABLE_LIBCTF, test "${enable_libctf}" = yes)
+AC_SUBST(enable_libctf)
 
 AM_BINUTILS_WARNINGS
 

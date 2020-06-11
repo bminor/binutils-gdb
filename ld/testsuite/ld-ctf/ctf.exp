@@ -18,9 +18,19 @@
 # MA 02110-1301, USA.
 #
 
+if [skip_ctf_tests] {
+    unsupported "no CTF format support in the compiler, or CTF disabled"
+    return 0
+}
+
 set ctf_test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 
 foreach ctf_test $ctf_test_list {
+    if [string equal -length [string length "diag-"] "diag-" [file tail $ctf_test]] {
+	if ![is_elf_format] {
+	    continue
+	}
+    }
     verbose [file rootname $ctf_test]
     run_dump_test [file rootname $ctf_test] { { cc "-gt -fPIC" } }
 }
