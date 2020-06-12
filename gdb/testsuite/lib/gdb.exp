@@ -25,6 +25,9 @@ if {$tool == ""} {
     exit 2
 }
 
+# List of procs to run in gdb_finish.
+set gdb_finish_hooks [list]
+
 load_lib libgloss.exp
 load_lib cache.exp
 load_lib gdb-utils.exp
@@ -5241,6 +5244,12 @@ proc gdb_finish { } {
 	}
 	set banned_traced 0
     }
+
+    global gdb_finish_hooks
+    foreach gdb_finish_hook $gdb_finish_hooks {
+	$gdb_finish_hook
+    }
+    set gdb_finish_hooks [list]
 }
 
 global debug_format
@@ -7257,6 +7266,20 @@ proc with_override { name override body } {
     }
 
     return $result
+}
+
+# Setup tuiterm.exp environment.  To be used in test-cases instead of
+# "load_lib tuiterm.exp".  Calls initialization function and schedules
+# finalization function.
+proc tuiterm_env { } {
+    load_lib tuiterm.exp
+
+    # Do initialization.
+    tuiterm_env_init
+
+    # Schedule finalization.
+    global gdb_finish_hooks
+    lappend gdb_finish_hooks tuiterm_env_finish
 }
 
 # Always load compatibility stuff.

@@ -16,7 +16,7 @@
 # Ensure that 'layout asm' can scroll away from the last line of a
 # very short program using a page up sized scroll.
 
-load_lib "tuiterm.exp"
+tuiterm_env
 
 standard_testfile tui-layout-asm-short-prog.S
 

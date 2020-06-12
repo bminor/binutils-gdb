@@ -1,5 +1,31 @@
 2020-06-12  Tom de Vries  <tdevries@suse.de>
 
+	* lib/tuiterm.exp (spawn): Rename to ...
+	(tui_spawn): ... this.
+	(toplevel): Move rename of spawn ...
+	(gdb_init_tuiterm): ... here.  New proc.
+	(gdb_finish_tuiterm): New proc.
+	* lib/gdb.exp (gdb_finish_hooks): New global var.
+	(gdb_finish): Handle gdb_finish_hooks.
+	(tuiterm_env): New proc.
+	* gdb.python/tui-window.exp: Replace load_lib tuiterm.exp with
+	tuiterm_env.
+	* gdb.tui/basic.exp: Same.
+	* gdb.tui/corefile-run.exp: Same.
+	* gdb.tui/empty.exp: Same.
+	* gdb.tui/list-before.exp: Same.
+	* gdb.tui/list.exp: Same.
+	* gdb.tui/main.exp: Same.
+	* gdb.tui/new-layout.exp: Same.
+	* gdb.tui/regs.exp: Same.
+	* gdb.tui/resize.exp: Same.
+	* gdb.tui/tui-layout-asm-short-prog.exp: Same.
+	* gdb.tui/tui-layout-asm.exp: Same.
+	* gdb.tui/tui-missing-src.exp: Same.
+	* gdb.tui/winheight.exp: Same.
+
+2020-06-12  Tom de Vries  <tdevries@suse.de>
+
 	PR testsuite/26110
 	* lib/gdb.exp (gdb_init): Revert dejagnu's override of ::unknown.
 	(gdb_finish): Reinstall dejagnu's override of ::unknown.

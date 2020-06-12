@@ -15,7 +15,7 @@
 
 # Basic TUI tests.
 
-load_lib "tuiterm.exp"
+tuiterm_env
 
 standard_testfile tui-layout.c
 

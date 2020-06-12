@@ -19,8 +19,7 @@
 # array; but dejagnu doesn't export this globally.  So, we have to
 # wrap spawn with our own function, so that we can capture this value.
 # The value is later used in calls to stty.
-rename spawn builtin_spawn
-proc spawn {args} {
+proc tuiterm_spawn { args } {
     set result [uplevel builtin_spawn $args]
     global gdb_spawn_name
     upvar spawn_out spawn_out
@@ -30,6 +29,20 @@ proc spawn {args} {
 	unset gdb_spawn_name
     }
     return $result
+}
+
+# Initialize tuiterm.exp environment.
+proc tuiterm_env_init { } {
+    # Override spawn with tui_spawn.
+    rename spawn builtin_spawn
+    rename tuiterm_spawn spawn
+}
+
+# Finalize tuiterm.exp environment.
+proc tuiterm_env_finish { } {
+    # Restore spawn.
+    rename spawn tuiterm_spawn
+    rename builtin_spawn spawn
 }
 
 namespace eval Term {

@@ -16,7 +16,7 @@
 # Test a TUI window implemented in Python.
 
 load_lib gdb-python.exp
-load_lib tuiterm.exp
+tuiterm_env
 
 # This test doesn't care about the inferior.
 standard_testfile py-arch.c

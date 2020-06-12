@@ -16,7 +16,7 @@
 # Ensure that 'layout asm' before starting the inferior puts us in the
 # asm layout and displays the disassembly for main.
 
-load_lib "tuiterm.exp"
+tuiterm_env
 
 standard_testfile tui-layout.c
 

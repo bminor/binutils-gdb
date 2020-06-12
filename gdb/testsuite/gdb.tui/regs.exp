@@ -15,7 +15,7 @@
 
 # Simple test of TUI register window.
 
-load_lib "tuiterm.exp"
+tuiterm_env
 
 standard_testfile tui-layout.c
 

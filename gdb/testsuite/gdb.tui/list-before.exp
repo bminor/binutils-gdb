@@ -15,7 +15,7 @@
 
 # Ensure that "list" before starting the TUI will affect the view.
 
-load_lib "tuiterm.exp"
+tuiterm_env
 
 standard_testfile tui-layout.c
 
