@@ -86,11 +86,6 @@
 #define PT_TEXT_ADDR 49*4
 #define PT_DATA_ADDR 50*4
 #define PT_TEXT_END_ADDR  51*4
-/* BFIN already defines these since at least 2.6.32 kernels.  */
-#elif defined(BFIN)
-#define PT_TEXT_ADDR 220
-#define PT_TEXT_END_ADDR 224
-#define PT_DATA_ADDR 228
 /* These are still undefined in 3.10 kernels.  */
 #elif defined(__TMS320C6X__)
 #define PT_TEXT_ADDR     (0x10000*4)

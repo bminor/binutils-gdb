@@ -81,11 +81,6 @@ case "${gdbserver_host}" in
 			srv_mingw=yes
 			srv_mingwce=yes
 			;;
-  bfin-*-*linux*)	srv_regobj=reg-bfin.o
-			srv_tgtobj="$srv_linux_obj linux-bfin-low.o"
-			srv_linux_usrregs=yes
-			srv_linux_thread_db=yes
-			;;
   crisv32-*-linux*)	srv_regobj=reg-crisv32.o
 			srv_tgtobj="$srv_linux_obj linux-crisv32-low.o"
 			srv_linux_regsets=yes

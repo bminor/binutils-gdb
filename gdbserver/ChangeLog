@@ -1,5 +1,12 @@
 2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* Makefile.in (SFILES): Remove linux-bfin-low.c.
+	* configure.srv: Remove bfin case.
+	* linux-bfin-low.cc: Remove.
+	* linux-low.cc: Remove BFIN-conditional code.
+
+2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* configure: Re-generate.
 	* configure.ac: Remove srv_qnx test.
 	* configure.srv: Remove nto case.

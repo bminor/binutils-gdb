@@ -180,7 +180,6 @@ SFILES = \
 	$(srcdir)/inferiors.cc \
 	$(srcdir)/linux-aarch64-low.cc \
 	$(srcdir)/linux-arm-low.cc \
-	$(srcdir)/linux-bfin-low.cc \
 	$(srcdir)/linux-cris-low.cc \
 	$(srcdir)/linux-crisv32-low.cc \
 	$(srcdir)/linux-ia64-low.cc \
