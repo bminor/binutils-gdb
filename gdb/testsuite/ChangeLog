@@ -1,3 +1,16 @@
+2020-06-12  Andrew Burgess  <andrew.burgess@embecosm.com>
+	    Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (gdb_known_globals, gdb_persistent_globals): New global.
+	(gdb_persistent_global, gdb_persistent_global_no_decl): New proc.
+	(gdb_setup_known_globals): New proc.
+	(gdb_cleanup_globals): New proc.
+	* lib/gdb.exp (load_lib): New override proc.
+	(gdb_stdin_log_init): Set var in_file as persistent global.
+	* lib/pascal.exp (gdb_stdin_log_init): Set vars
+	pascal_compiler_is_gpc, pascal_compiler_is_fpc, gpc_compiler and
+	fpc_compiler as persistent global.
+
 2020-06-12  Tom de Vries  <tdevries@suse.de>
 
 	* lib/tuiterm.exp (spawn): Rename to ...

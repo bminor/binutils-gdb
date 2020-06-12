@@ -28,6 +28,57 @@ if {$tool == ""} {
 # List of procs to run in gdb_finish.
 set gdb_finish_hooks [list]
 
+# Variable in which we keep track of globals that are allowed to be live
+# across test-cases.
+array set gdb_persistent_globals {}
+
+# Mark variable names in ARG as a persistent global, and declare them as
+# global in the calling context.  Can be used to rewrite "global var_a var_b"
+# into "gdb_persistent_global var_a var_b".
+proc gdb_persistent_global { args } {
+    global gdb_persistent_globals
+    foreach varname $args {
+	uplevel 1 global $varname
+	set gdb_persistent_globals($varname) 1
+    }
+}
+
+# Mark variable names in ARG as a persistent global.
+proc gdb_persistent_global_no_decl { args } {
+    global gdb_persistent_globals
+    foreach varname $args {
+	set gdb_persistent_globals($varname) 1
+    }
+}
+
+# Override proc load_lib.
+rename load_lib saved_load_lib
+# Run the runtest version of load_lib, and mark all variables that were
+# created by this call as persistent.
+proc load_lib { file } {
+    array set known_global {}
+    foreach varname [info globals] {
+       set known_globals($varname) 1
+    }
+
+    set code [catch "saved_load_lib $file" result]
+
+    foreach varname [info globals] {
+       if { ![info exists known_globals($varname)] } {
+           gdb_persistent_global_no_decl $varname
+       }
+    }
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code error -errorinfo $errorInfo -errorcode $errorCode $result
+    } elseif {$code > 1} {
+	return -code $code $result
+    }
+
+    return $result
+}
+
 load_lib libgloss.exp
 load_lib cache.exp
 load_lib gdb-utils.exp
@@ -5094,6 +5145,38 @@ set banned_procedures { strace }
 # if the banned variables and procedures are already traced.
 set banned_traced 0
 
+# Global array that holds the name of all global variables at the time
+# a test script is started.  After the test script has completed any
+# global not in this list is deleted.
+array set gdb_known_globals {}
+
+# Setup the GDB_KNOWN_GLOBALS array with the names of all current
+# global variables.
+proc gdb_setup_known_globals {} {
+    global gdb_known_globals
+
+    array set gdb_known_globals {}
+    foreach varname [info globals] {
+	set gdb_known_globals($varname) 1
+    }
+}
+
+# Cleanup the global namespace.  Any global not in the
+# GDB_KNOWN_GLOBALS array is unset, this ensures we don't "leak"
+# globals from one test script to another.
+proc gdb_cleanup_globals {} {
+    global gdb_known_globals gdb_persistent_globals
+
+    foreach varname [info globals] {
+	if {![info exists gdb_known_globals($varname)]} {
+	    if { [info exists gdb_persistent_globals($varname)] } {
+		continue
+	    }
+	    uplevel #0 unset $varname
+	}
+    }
+}
+
 proc gdb_init { test_file_name } {
     # Reset the timeout value to the default.  This way, any testcase
     # that changes the timeout value without resetting it cannot affect
@@ -5198,6 +5281,8 @@ proc gdb_init { test_file_name } {
 
     set res [default_gdb_init $test_file_name]
 
+    gdb_setup_known_globals
+
     # Dejagnu overrides proc unknown.  The dejagnu version may trigger in a
     # test-case but abort the entire test run.  To fix this, we install a
     # local version here, which reverts dejagnu's override, and restore
@@ -5215,6 +5300,7 @@ proc gdb_finish { } {
     global gdbserver_reconnect_p
     global gdb_prompt
     global cleanfiles
+    global known_globals
 
     # Restore dejagnu's version of proc unknown.
     rename ::unknown ""
@@ -5250,6 +5336,8 @@ proc gdb_finish { } {
 	$gdb_finish_hook
     }
     set gdb_finish_hooks [list]
+
+    gdb_cleanup_globals
 }
 
 global debug_format
@@ -6957,7 +7045,7 @@ proc gdbserver_debug_enabled { } {
 # Open the file for logging gdb input
 
 proc gdb_stdin_log_init { } {
-    global in_file
+    gdb_persistent_global in_file
 
     if {[info exists in_file]} {
       # Close existing file.

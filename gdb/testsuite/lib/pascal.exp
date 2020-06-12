@@ -33,10 +33,10 @@ set pascal_init_done 0
  
 proc pascal_init {} {
     global pascal_init_done
-    global pascal_compiler_is_gpc
-    global pascal_compiler_is_fpc
-    global gpc_compiler
-    global fpc_compiler
+    gdb_persistent_global pascal_compiler_is_gpc
+    gdb_persistent_global pascal_compiler_is_fpc
+    gdb_persistent_global gpc_compiler
+    gdb_persistent_global fpc_compiler
     global env
  
     if { $pascal_init_done == 1 } {
