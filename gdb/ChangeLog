@@ -1,5 +1,22 @@
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
 
+	* corelow.c (solist.h, unordered_map): Include.
+	(class core_target): Add field m_core_file_mappings and
+	method build_file_mappings.
+	(core_target::core_target): Call build_file_mappings.
+	(core_target::~core_target): Free memory associated with
+	m_core_file_mappings.
+	(core_target::build_file_mappings): New method.
+	(core_target::xfer_partial): Use m_core_file_mappings
+	for memory transfers.
+	* linux-tdep.c (linux_read_core_file_mappings): New
+	function.
+	(linux_core_info_proc_mappings): Rewrite to use
+	linux_read_core_file_mappings.
+	(linux_init_abi): Register linux_read_core_file_mappings.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
 	* arch-utils.c (default_read_core_file_mappings): New function.
 	* arch-utils.c (default_read_core_file_mappings): Declare.
 	* gdbarch.sh (read_core_file_mappings): New gdbarch method.

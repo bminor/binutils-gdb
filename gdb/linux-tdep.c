@@ -1018,104 +1018,172 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
     }
 }
 
+/* Implementation of `gdbarch_read_core_file_mappings', as defined in
+   gdbarch.h.
+   
+   This function reads the NT_FILE note (which BFD turns into the
+   section ".note.linuxcore.file").  The format of this note / section
+   is described as follows in the Linux kernel sources in
+   fs/binfmt_elf.c:
+   
+      long count     -- how many files are mapped
+      long page_size -- units for file_ofs
+      array of [COUNT] elements of
+	long start
+	long end
+	long file_ofs
+      followed by COUNT filenames in ASCII: "FILE1" NUL "FILE2" NUL...
+      
+   CBFD is the BFD of the core file.
+
+   PRE_LOOP_CB is the callback function to invoke prior to starting
+   the loop which processes individual entries.  This callback will
+   only be executed after the note has been examined in enough
+   detail to verify that it's not malformed in some way.
+   
+   LOOP_CB is the callback function that will be executed once
+   for each mapping.  */
+
+static void
+linux_read_core_file_mappings (struct gdbarch *gdbarch,
+			       struct bfd *cbfd,
+			       gdb::function_view<void (ULONGEST count)>
+			         pre_loop_cb,
+			       gdb::function_view<void (int num,
+			                                ULONGEST start,
+							ULONGEST end,
+							ULONGEST file_ofs,
+							const char *filename,
+							const void *other)>
+				 loop_cb)
+{
+  /* Ensure that ULONGEST is big enough for reading 64-bit core files.  */
+  gdb_static_assert (sizeof (ULONGEST) >= 8);
+
+  /* It's not required that the NT_FILE note exists, so return silently
+     if it's not found.  Beyond this point though, we'll complain
+     if problems are found.  */
+  asection *section = bfd_get_section_by_name (cbfd, ".note.linuxcore.file");
+  if (section == nullptr)
+    return;
+
+  unsigned int addr_size_bits = gdbarch_addr_bit (gdbarch);
+  unsigned int addr_size = addr_size_bits / 8;
+  size_t note_size = bfd_section_size (section);
+
+  if (note_size < 2 * addr_size)
+    {
+      warning (_("malformed core note - too short for header"));
+      return;
+    }
+
+  gdb::def_vector<gdb_byte> contents (note_size);
+  if (!bfd_get_section_contents (core_bfd, section, contents.data (),
+				 0, note_size))
+    {
+      warning (_("could not get core note contents"));
+      return;
+    }
+
+  gdb_byte *descdata = contents.data ();
+  char *descend = (char *) descdata + note_size;
+
+  if (descdata[note_size - 1] != '\0')
+    {
+      warning (_("malformed note - does not end with \\0"));
+      return;
+    }
+
+  ULONGEST count = bfd_get (addr_size_bits, core_bfd, descdata);
+  descdata += addr_size;
+
+  ULONGEST page_size = bfd_get (addr_size_bits, core_bfd, descdata);
+  descdata += addr_size;
+
+  if (note_size < 2 * addr_size + count * 3 * addr_size)
+    {
+      warning (_("malformed note - too short for supplied file count"));
+      return;
+    }
+
+  char *filenames = (char *) descdata + count * 3 * addr_size;
+
+  /* Make sure that the correct number of filenames exist.  Complain
+     if there aren't enough or are too many.  */
+  char *f = filenames;
+  for (int i = 0; i < count; i++)
+    {
+      if (f >= descend)
+        {
+	  warning (_("malformed note - filename area is too small"));
+	  return;
+	}
+      f += strnlen (f, descend - f) + 1;
+    }
+  /* Complain, but don't return early if the filename area is too big.  */
+  if (f != descend)
+    warning (_("malformed note - filename area is too big"));
+
+  pre_loop_cb (count);
+
+  for (int i = 0; i < count; i++)
+    {
+      ULONGEST start = bfd_get (addr_size_bits, core_bfd, descdata);
+      descdata += addr_size;
+      ULONGEST end = bfd_get (addr_size_bits, core_bfd, descdata);
+      descdata += addr_size;
+      ULONGEST file_ofs
+        = bfd_get (addr_size_bits, core_bfd, descdata) * page_size;
+      descdata += addr_size;
+      char * filename = filenames;
+      filenames += strlen ((char *) filenames) + 1;
+
+      loop_cb (i, start, end, file_ofs, filename, nullptr);
+    }
+}
+
 /* Implement "info proc mappings" for a corefile.  */
 
 static void
 linux_core_info_proc_mappings (struct gdbarch *gdbarch, const char *args)
 {
-  asection *section;
-  ULONGEST count, page_size;
-  unsigned char *descdata, *filenames, *descend;
-  size_t note_size;
-  unsigned int addr_size_bits, addr_size;
-  struct gdbarch *core_gdbarch = gdbarch_from_bfd (core_bfd);
-  /* We assume this for reading 64-bit core files.  */
-  gdb_static_assert (sizeof (ULONGEST) >= 8);
-
-  section = bfd_get_section_by_name (core_bfd, ".note.linuxcore.file");
-  if (section == NULL)
-    {
-      warning (_("unable to find mappings in core file"));
-      return;
-    }
-
-  addr_size_bits = gdbarch_addr_bit (core_gdbarch);
-  addr_size = addr_size_bits / 8;
-  note_size = bfd_section_size (section);
-
-  if (note_size < 2 * addr_size)
-    error (_("malformed core note - too short for header"));
-
-  gdb::def_vector<unsigned char> contents (note_size);
-  if (!bfd_get_section_contents (core_bfd, section, contents.data (),
-				 0, note_size))
-    error (_("could not get core note contents"));
-
-  descdata = contents.data ();
-  descend = descdata + note_size;
-
-  if (descdata[note_size - 1] != '\0')
-    error (_("malformed note - does not end with \\0"));
-
-  count = bfd_get (addr_size_bits, core_bfd, descdata);
-  descdata += addr_size;
-
-  page_size = bfd_get (addr_size_bits, core_bfd, descdata);
-  descdata += addr_size;
-
-  if (note_size < 2 * addr_size + count * 3 * addr_size)
-    error (_("malformed note - too short for supplied file count"));
-
-  printf_filtered (_("Mapped address spaces:\n\n"));
-  if (gdbarch_addr_bit (gdbarch) == 32)
-    {
-      printf_filtered ("\t%10s %10s %10s %10s %s\n",
-		       "Start Addr",
-		       "  End Addr",
-		       "      Size", "    Offset", "objfile");
-    }
-  else
-    {
-      printf_filtered ("  %18s %18s %10s %10s %s\n",
-		       "Start Addr",
-		       "  End Addr",
-		       "      Size", "    Offset", "objfile");
-    }
-
-  filenames = descdata + count * 3 * addr_size;
-  while (--count > 0)
-    {
-      ULONGEST start, end, file_ofs;
-
-      if (filenames == descend)
-	error (_("malformed note - filenames end too early"));
-
-      start = bfd_get (addr_size_bits, core_bfd, descdata);
-      descdata += addr_size;
-      end = bfd_get (addr_size_bits, core_bfd, descdata);
-      descdata += addr_size;
-      file_ofs = bfd_get (addr_size_bits, core_bfd, descdata);
-      descdata += addr_size;
-
-      file_ofs *= page_size;
-
-      if (gdbarch_addr_bit (gdbarch) == 32)
-	printf_filtered ("\t%10s %10s %10s %10s %s\n",
-			 paddress (gdbarch, start),
-			 paddress (gdbarch, end),
-			 hex_string (end - start),
-			 hex_string (file_ofs),
-			 filenames);
-      else
-	printf_filtered ("  %18s %18s %10s %10s %s\n",
-			 paddress (gdbarch, start),
-			 paddress (gdbarch, end),
-			 hex_string (end - start),
-			 hex_string (file_ofs),
-			 filenames);
-
-      filenames += 1 + strlen ((char *) filenames);
-    }
+  linux_read_core_file_mappings (gdbarch, core_bfd,
+    [=] (ULONGEST count)
+      {
+	printf_filtered (_("Mapped address spaces:\n\n"));
+	if (gdbarch_addr_bit (gdbarch) == 32)
+	  {
+	    printf_filtered ("\t%10s %10s %10s %10s %s\n",
+			     "Start Addr",
+			     "  End Addr",
+			     "      Size", "    Offset", "objfile");
+	  }
+	else
+	  {
+	    printf_filtered ("  %18s %18s %10s %10s %s\n",
+			     "Start Addr",
+			     "  End Addr",
+			     "      Size", "    Offset", "objfile");
+	  }
+      },
+    [=] (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs,
+         const char *filename, const void *other)
+      {
+	if (gdbarch_addr_bit (gdbarch) == 32)
+	  printf_filtered ("\t%10s %10s %10s %10s %s\n",
+			   paddress (gdbarch, start),
+			   paddress (gdbarch, end),
+			   hex_string (end - start),
+			   hex_string (file_ofs),
+			   filename);
+	else
+	  printf_filtered ("  %18s %18s %10s %10s %s\n",
+			   paddress (gdbarch, start),
+			   paddress (gdbarch, end),
+			   hex_string (end - start),
+			   hex_string (file_ofs),
+			   filename);
+      });
 }
 
 /* Implement "info proc" for a corefile.  */
@@ -2472,6 +2540,7 @@ linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_info_proc (gdbarch, linux_info_proc);
   set_gdbarch_core_info_proc (gdbarch, linux_core_info_proc);
   set_gdbarch_core_xfer_siginfo (gdbarch, linux_core_xfer_siginfo);
+  set_gdbarch_read_core_file_mappings (gdbarch, linux_read_core_file_mappings);
   set_gdbarch_find_memory_regions (gdbarch, linux_find_memory_regions);
   set_gdbarch_make_corefile_notes (gdbarch, linux_make_corefile_notes);
   set_gdbarch_has_shared_address_space (gdbarch,

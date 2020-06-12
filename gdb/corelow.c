@@ -37,6 +37,7 @@
 #include "exec.h"
 #include "readline/tilde.h"
 #include "solib.h"
+#include "solist.h"
 #include "filenames.h"
 #include "progspace.h"
 #include "objfiles.h"
@@ -45,6 +46,7 @@
 #include "gdbsupport/filestuff.h"
 #include "build-id.h"
 #include "gdbsupport/pathstuff.h"
+#include <unordered_map>
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -121,6 +123,13 @@ private: /* per-core data */
      targets.  */
   target_section_table m_core_section_table {};
 
+  /* File-backed address space mappings: some core files include
+     information about memory mapped files.  */
+  target_section_table m_core_file_mappings {};
+
+  /* Build m_core_file_mappings.  Called from the constructor.  */
+  void build_file_mappings ();
+
   /* FIXME: kettenis/20031023: Eventually this field should
      disappear.  */
   struct gdbarch *m_core_gdbarch = NULL;
@@ -141,11 +150,120 @@ core_target::core_target ()
 			   &m_core_section_table.sections_end))
     error (_("\"%s\": Can't find sections: %s"),
 	   bfd_get_filename (core_bfd), bfd_errmsg (bfd_get_error ()));
+
+  build_file_mappings ();
 }
 
 core_target::~core_target ()
 {
   xfree (m_core_section_table.sections);
+  xfree (m_core_file_mappings.sections);
+}
+
+/* Construct the target_section_table for file-backed mappings if
+   they exist.
+
+   For each unique path in the note, we'll open a BFD with a bfd
+   target of "binary".  This is an unstructured bfd target upon which
+   we'll impose a structure from the mappings in the architecture-specific
+   mappings note.  A BFD section is allocated and initialized for each
+   file-backed mapping.
+
+   We take care to not share already open bfds with other parts of
+   GDB; in particular, we don't want to add new sections to existing
+   BFDs.  We do, however, ensure that the BFDs that we allocate here
+   will go away (be deallocated) when the core target is detached.  */
+
+void
+core_target::build_file_mappings ()
+{
+  std::unordered_map<std::string, struct bfd *> bfd_map;
+
+  /* See linux_read_core_file_mappings() in linux-tdep.c for an example
+     read_core_file_mappings method.  */
+  gdbarch_read_core_file_mappings (m_core_gdbarch, core_bfd,
+
+    /* After determining the number of mappings, read_core_file_mappings
+       will invoke this lambda which allocates target_section storage for
+       the mappings.  */
+    [&] (ULONGEST count)
+      {
+	m_core_file_mappings.sections = XNEWVEC (struct target_section, count);
+	m_core_file_mappings.sections_end = m_core_file_mappings.sections;
+      },
+
+    /* read_core_file_mappings will invoke this lambda for each mapping
+       that it finds.  */
+    [&] (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs,
+         const char *filename, const void *other)
+      {
+	/* Architecture-specific read_core_mapping methods are expected to
+	   weed out non-file-backed mappings.  */
+	gdb_assert (filename != nullptr);
+
+	struct bfd *bfd = bfd_map[filename];
+	if (bfd == nullptr)
+	  {
+	    /* Use exec_file_find() to do sysroot expansion.  It'll
+	       also strip the potential sysroot "target:" prefix.  If
+	       there is no sysroot, an equivalent (possibly more
+	       canonical) pathname will be provided.  */
+	    gdb::unique_xmalloc_ptr<char> expanded_fname
+	      = exec_file_find (filename, NULL);
+	    if (expanded_fname == nullptr)
+	      {
+		warning (_("Can't open file %s during file-backed mapping "
+			   "note processing"),
+			 expanded_fname.get ());
+		return;
+	      }
+
+	    bfd = bfd_map[filename] = bfd_openr (expanded_fname.get (),
+	                                         "binary");
+
+	    if (bfd == nullptr || !bfd_check_format (bfd, bfd_object))
+	      {
+		/* If we get here, there's a good chance that it's due to
+		   an internal error.  We issue a warning instead of an
+		   internal error because of the possibility that the
+		   file was removed in between checking for its
+		   existence during the expansion in exec_file_find()
+		   and the calls to bfd_openr() / bfd_check_format(). 
+		   Output both the path from the core file note along
+		   with its expansion to make debugging this problem
+		   easier.  */
+		warning (_("Can't open file %s which was expanded to %s "
+			   "during file-backed mapping note processing"),
+			 filename, expanded_fname.get ());
+		if (bfd != nullptr)
+		  bfd_close (bfd);
+		return;
+	      }
+	    /* Ensure that the bfd will be closed when core_bfd is closed. 
+	       This can be checked before/after a core file detach via
+	       "maint info bfds".  */
+	    gdb_bfd_record_inclusion (core_bfd, bfd);
+	  }
+
+	/* Make new BFD section.  All sections have the same name,
+	   which is permitted by bfd_make_section_anyway().  */
+	asection *sec = bfd_make_section_anyway (bfd, "load");
+	if (sec == nullptr)
+	  error (_("Can't make section"));
+	sec->filepos = file_ofs;
+	bfd_set_section_flags (sec, SEC_READONLY | SEC_HAS_CONTENTS);
+	bfd_set_section_size (sec, end - start);
+	bfd_set_section_vma (sec, start);
+	bfd_set_section_lma (sec, start);
+	bfd_set_section_alignment (sec, 2);
+
+	/* Set target_section fields.  */
+	struct target_section *ts = m_core_file_mappings.sections_end++;
+	ts->addr = start;
+	ts->endaddr = end;
+	ts->owner = nullptr;
+	ts->the_bfd_section = sec;
+      });
 }
 
 static void add_to_thread_list (bfd *, asection *, void *);
@@ -633,10 +751,21 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	if (xfer_status == TARGET_XFER_OK)
 	  return TARGET_XFER_OK;
 
-	/* Now check the stratum beneath us; this should be file_stratum.  */
-	xfer_status = this->beneath ()->xfer_partial (object, annex, readbuf,
-						      writebuf, offset, len,
-						      xfered_len);
+	/* Check file backed mappings.  If they're available, use
+	   core file provided mappings (e.g. from .note.linuxcore.file
+	   or the like) as this should provide a more accurate
+	   result.  If not, check the stratum beneath us, which should
+	   be the file stratum.  */
+	if (m_core_file_mappings.sections != nullptr)
+	  xfer_status = section_table_xfer_memory_partial
+			  (readbuf, writebuf,
+			   offset, len, xfered_len,
+			   m_core_file_mappings.sections,
+			   m_core_file_mappings.sections_end);
+	else
+	  xfer_status = this->beneath ()->xfer_partial (object, annex, readbuf,
+							writebuf, offset, len,
+							xfered_len);
 	if (xfer_status == TARGET_XFER_OK)
 	  return TARGET_XFER_OK;
 
