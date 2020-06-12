@@ -25,7 +25,7 @@
 static void ax_vdebug (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 
 #ifdef IN_PROCESS_AGENT
-int debug_agent = 0;
+bool debug_agent = 0;
 #endif
 
 static void
