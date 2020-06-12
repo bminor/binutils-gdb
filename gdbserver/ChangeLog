@@ -1,5 +1,11 @@
 2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* Makefile.in (SFILES): Remove linux-m32r-low.cc.
+	* configure.srv: Remove m32r case.
+	* linux-m32r-low.cc: Remove.
+
+2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* Makefile.in (SFILES): Remove linux-cris-low.c.
 	* configure.srv: Remove cris cases.
 	* linux-cris-low.cc, linux-crisv32-low.cc: Remove.

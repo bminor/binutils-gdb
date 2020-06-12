@@ -182,7 +182,6 @@ SFILES = \
 	$(srcdir)/linux-arm-low.cc \
 	$(srcdir)/linux-ia64-low.cc \
 	$(srcdir)/linux-low.cc \
-	$(srcdir)/linux-m32r-low.cc \
 	$(srcdir)/linux-m68k-low.cc \
 	$(srcdir)/linux-mips-low.cc \
 	$(srcdir)/linux-nios2-low.cc \
