@@ -1,5 +1,11 @@
 2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* Makefile.in (SFILES): Remove linux-cris-low.c.
+	* configure.srv: Remove cris cases.
+	* linux-cris-low.cc, linux-crisv32-low.cc: Remove.
+
+2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* Makefile.in (SFILES): Remove linux-bfin-low.c.
 	* configure.srv: Remove bfin case.
 	* linux-bfin-low.cc: Remove.
