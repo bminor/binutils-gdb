@@ -136,10 +136,6 @@ case "${gdbserver_host}" in
 			srv_tgtobj="${srv_tgtobj} arch/i386.o"
 			srv_mingw=yes
 			;;
-  i[34567]86-*-nto*)	srv_regobj=""
-			srv_tgtobj="nto-low.o nto-x86-low.o arch/i386.o"
-			srv_qnx="yes"
-			;;
   ia64-*-linux*)	srv_regobj=reg-ia64.o
 			srv_tgtobj="$srv_linux_obj linux-ia64-low.o"
 			srv_linux_usrregs=yes

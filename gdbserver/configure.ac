@@ -225,8 +225,6 @@ if test "${srv_mingwce}" = "yes"; then
 elif test "${srv_mingw}" = "yes"; then
   # WIN32APILIBS is set by GDB_AC_COMMON.
   LIBS="$LIBS $WIN32APILIBS"
-elif test "${srv_qnx}" = "yes"; then
-  LIBS="$LIBS -lsocket"
 fi
 
 if test "${srv_linux_usrregs}" = "yes"; then

@@ -1,6 +1,14 @@
 2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
 
 	* configure: Re-generate.
+	* configure.ac: Remove srv_qnx test.
+	* configure.srv: Remove nto case.
+	* nto-low.cc, nto-low.h, nto-x86-low.cc: Remove.
+	* remote-utils.c: Remove __QNX__-guarded code.
+
+2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure: Re-generate.
 	* configure.ac: Remove srv_lynxos test.
 	* configure.srv: Remove lynxos cases.
 	* lynx-i386-low.cc, lynx-low.cc, lynx-low.h, lynx-ppc-low.c:
