@@ -1421,69 +1421,39 @@ get_child_debug_event (DWORD *continue_status,
       goto gotevent;
     }
 
-#ifndef _WIN32_WCE
   attaching = 0;
-#else
-  if (attaching)
-    {
-      /* WinCE doesn't set an initial breakpoint automatically.  To
-	 stop the inferior, we flush all currently pending debug
-	 events -- the thread list and the dll list are always
-	 reported immediatelly without delay, then, we suspend all
-	 threads and pretend we saw a trap at the current PC of the
-	 main thread.
+  {
+    gdb::optional<pending_stop> stop = fetch_pending_stop (debug_threads);
+    if (stop.has_value ())
+      {
+	*ourstatus = stop->status;
+	current_event = stop->event;
+	ptid = debug_event_ptid (&current_event);
+	current_thread = find_thread_ptid (ptid);
+	return 1;
+      }
 
-	 Contrary to desktop Windows, Windows CE *does* report the dll
-	 names on LOAD_DLL_DEBUG_EVENTs resulting from a
-	 DebugActiveProcess call.  This limits the way we can detect
-	 if all the dlls have already been reported.  If we get a real
-	 debug event before leaving attaching, the worst that will
-	 happen is the user will see a spurious breakpoint.  */
+    /* Keep the wait time low enough for comfortable remote
+       interruption, but high enough so gdbserver doesn't become a
+       bottleneck.  */
+    if (!wait_for_debug_event (&current_event, 250))
+      {
+	DWORD e  = GetLastError();
 
-      current_event.dwDebugEventCode = 0;
-      if (!wait_for_debug_event (&current_event, 0))
-	{
-	  OUTMSG2(("no attach events left\n"));
-	  fake_breakpoint_event ();
-	  attaching = 0;
-	}
-      else
-	OUTMSG2(("got attach event\n"));
-    }
-  else
-#endif
-    {
-      gdb::optional<pending_stop> stop = fetch_pending_stop (debug_threads);
-      if (stop.has_value ())
-	{
-	  *ourstatus = stop->status;
-	  current_event = stop->event;
-	  ptid = debug_event_ptid (&current_event);
-	  current_thread = find_thread_ptid (ptid);
-	  return 1;
-	}
+	if (e == ERROR_PIPE_NOT_CONNECTED)
+	  {
+	    /* This will happen if the loader fails to succesfully
+	       load the application, e.g., if the main executable
+	       tries to pull in a non-existing export from a
+	       DLL.  */
+	    ourstatus->kind = TARGET_WAITKIND_EXITED;
+	    ourstatus->value.integer = 1;
+	    return 1;
+	  }
 
-      /* Keep the wait time low enough for comfortable remote
-	 interruption, but high enough so gdbserver doesn't become a
-	 bottleneck.  */
-      if (!wait_for_debug_event (&current_event, 250))
-        {
-	  DWORD e  = GetLastError();
-
-	  if (e == ERROR_PIPE_NOT_CONNECTED)
-	    {
-	      /* This will happen if the loader fails to succesfully
-		 load the application, e.g., if the main executable
-		 tries to pull in a non-existing export from a
-		 DLL.  */
-	      ourstatus->kind = TARGET_WAITKIND_EXITED;
-	      ourstatus->value.integer = 1;
-	      return 1;
-	    }
-
-	  return 0;
-        }
-    }
+	return 0;
+      }
+  }
 
  gotevent:
 
@@ -1534,19 +1504,6 @@ get_child_debug_event (DWORD *continue_status,
 			main_thread_id,
 			current_event.u.CreateProcessInfo.hThread,
 			current_event.u.CreateProcessInfo.lpThreadLocalBase);
-
-#ifdef _WIN32_WCE
-      if (!attaching)
-	{
-	  /* Windows CE doesn't set the initial breakpoint
-	     automatically like the desktop versions of Windows do.
-	     We add it explicitly here.	 It will be removed as soon as
-	     it is hit.	 */
-	  set_breakpoint_at ((CORE_ADDR) (long) current_event.u
-			     .CreateProcessInfo.lpStartAddress,
-			     auto_delete_breakpoint);
-	}
-#endif
       break;
 
     case EXIT_PROCESS_DEBUG_EVENT:

@@ -202,10 +202,8 @@ SFILES = \
 	$(srcdir)/target.cc \
 	$(srcdir)/thread-db.cc \
 	$(srcdir)/utils.cc \
-	$(srcdir)/win32-arm-low.cc \
 	$(srcdir)/win32-i386-low.cc \
 	$(srcdir)/win32-low.cc \
-	$(srcdir)/wincecompat.cc \
 	$(srcdir)/x86-low.cc \
 	$(srcdir)/../gdb/alloc.c \
 	$(srcdir)/../gdb/arch/arm.c \

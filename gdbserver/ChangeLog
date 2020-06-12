@@ -1,5 +1,13 @@
 2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* Makefile.in (SFILES): Remove win32-arm-low.cc, wincecompat.cc.
+	* configure.srv: Remove mingw32ce cases.
+	* server.h, win32-low.cc: Remove __MINGW32CE__-guarded code.
+	* win32-low.h (to_back_slashes): Remove.
+	* win32-arm-low.cc, wincecompat.cc, wincecompat.h: Remove.
+
+2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* Makefile.in (SFILES): linux-tile-low.cc.
 	* configure.srv: Remove tilegx case.
 	* linux-tile-low.cc: Remove.

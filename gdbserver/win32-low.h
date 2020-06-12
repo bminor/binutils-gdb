@@ -183,8 +183,4 @@ extern void win32_require_context (windows_nat::windows_thread_info *th);
    of GetLastError.  */
 extern char * strwinerror (DWORD error);
 
-/* in wincecompat.c */
-
-extern void to_back_slashes (char *);
-
 #endif /* GDBSERVER_WIN32_LOW_H */
