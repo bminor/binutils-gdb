@@ -1,3 +1,8 @@
+2020-06-22  Nelson Chu  <nelson.chu@sifive.com>
+
+	* riscv-opc.c: Move the structures and functions to bfd/elfxx-riscv.c.
+	* riscv-dis.c: Include elfxx-riscv.h.
+
 2020-06-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (prefix_table): Revert the last vmgexit change.

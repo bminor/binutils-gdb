@@ -1,3 +1,12 @@
+2020-06-22  Nelson Chu  <nelson.chu@sifive.com>
+
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-01.d: Updated.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-02.d: Updated.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-03.d: Updated.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-04.d: Updated.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-05.d: Updated.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-06.d: Updated.
+
 2020-06-21  Alan Modra  <amodra@gmail.com>
 
 	* ldfile.c: Replace uses of ENABLE_PLUGINS with BFD_SUPPORTS_PLUGINS.

@@ -126,8 +126,6 @@ riscv_set_default_priv_spec (const char *s)
   enum riscv_priv_spec_class class;
   unsigned major, minor, revision;
   obj_attribute *attr;
-  size_t buf_size;
-  char *buf;
 
   /* Find the corresponding priv spec class.  */
   if (riscv_get_priv_spec_class (s, &class))
@@ -149,40 +147,24 @@ riscv_set_default_priv_spec (const char *s)
   minor = (unsigned) attr[Tag_RISCV_priv_spec_minor].i;
   revision = (unsigned) attr[Tag_RISCV_priv_spec_revision].i;
 
-  /* The priv attributes setting 0.0.0 is meaningless.  We should have set
-     the default_priv_spec by md_parse_option and riscv_after_parse_args,
-     so just skip the following setting.  */
-  if (major == 0 && minor == 0 && revision == 0)
-    return 1;
+  if (riscv_get_priv_spec_class_from_numbers (major,
+					      minor,
+					      revision,
+					      &class))
+    {
+      /* The priv attributes setting 0.0.0 is meaningless.  We should have set
+	 the default_priv_spec by md_parse_option and riscv_after_parse_args,
+	 so just skip the following setting.  */
+      if (class == PRIV_SPEC_CLASS_NONE)
+	return 1;
 
-  buf_size = riscv_estimate_digit (major)
-            + 1 /* '.' */
-            + riscv_estimate_digit (minor)
-            + 1; /* string terminator */
-  if (revision != 0)
-    {
-      buf_size += 1 /* '.' */
-                 + riscv_estimate_digit (revision);
-      buf = xmalloc (buf_size);
-      snprintf (buf, buf_size, "%d.%d.%d", major, minor, revision);
-    }
-  else
-    {
-      buf = xmalloc (buf_size);
-      snprintf (buf, buf_size, "%d.%d", major, minor);
-    }
-
-  if (riscv_get_priv_spec_class (buf, &class))
-    {
       default_priv_spec = class;
-      free (buf);
       return 1;
     }
 
   /* Still can not find the priv spec class.  */
   as_bad (_("Unknown default privilege spec `%d.%d.%d' set by  "
            "privilege attributes"),  major, minor, revision);
-  free (buf);
   return 0;
 }
 

@@ -27,6 +27,7 @@
 #include "opintl.h"
 #include "elf-bfd.h"
 #include "elf/riscv.h"
+#include "elfxx-riscv.h"
 
 #include "bfd_stdint.h"
 #include <ctype.h>

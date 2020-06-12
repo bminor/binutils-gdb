@@ -1,3 +1,9 @@
+2020-06-22  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (buf_size, buf): Remove the unused variables.
+	(riscv_set_default_priv_spec): Get the priv spec version from the
+	priv spec attributes by riscv_get_priv_spec_class_from_numbers.
+
 2020-06-20  Alan Modra  <amodra@gmail.com>
 
 	* configure.tgt: Set bfd_gas for all SH targets.

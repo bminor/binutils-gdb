@@ -1,3 +1,9 @@
+2020-06-22  Nelson Chu  <nelson.chu@sifive.com>
+
+	* opcode/riscv.h (riscv_get_priv_spec_class): Move the function
+	forward declarations to bfd/elfxx-riscv.h.
+	(riscv_get_priv_spec_name): Likewise.
+
 2020-06-15  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf/xtensa.h (xtensa_abi_choice): New declaration.

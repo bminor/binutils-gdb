@@ -490,9 +490,5 @@ extern const struct riscv_ext_version riscv_ext_version_table[];
 
 extern int
 riscv_get_isa_spec_class (const char *, enum riscv_isa_spec_class *);
-extern int
-riscv_get_priv_spec_class (const char *, enum riscv_priv_spec_class *);
-extern const char *
-riscv_get_priv_spec_name (enum riscv_priv_spec_class);
 
 #endif /* _RISCV_H_ */
