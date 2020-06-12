@@ -190,7 +190,6 @@ SFILES = \
 	$(srcdir)/linux-s390-low.cc \
 	$(srcdir)/linux-sh-low.cc \
 	$(srcdir)/linux-sparc-low.cc \
-	$(srcdir)/linux-tile-low.cc \
 	$(srcdir)/linux-x86-low.cc \
 	$(srcdir)/linux-xtensa-low.cc \
 	$(srcdir)/mem-break.cc \
