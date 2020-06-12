@@ -1,3 +1,7 @@
+2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* README: Fix a few outdated or incoherent things.
+
 2020-05-27  Hannes Domani  <ssbssa@yahoo.de>
 
 	* win32-low.cc (do_initial_child_stuff): Set open_process_used.
