@@ -1,3 +1,7 @@
+2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* NEWS: Mention removed GDBserver host support.
+
 2020-06-12  Nelson Chu  <nelson.chu@sifive.com>
 
 	* features/riscv/rebuild-csr-xml.sh: Updated.

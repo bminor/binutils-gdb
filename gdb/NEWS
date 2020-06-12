@@ -29,6 +29,19 @@
 
   ** GDBserver is now supported on RISC-V GNU/Linux.
 
+  ** GDBserver no longer supports these host triplets:
+
+    i[34567]86-*-lynxos*
+    powerpc-*-lynxos*
+    i[34567]86-*-nto*
+    bfin-*-*linux*
+    crisv32-*-linux*
+    cris-*-linux*
+    m32r*-*-linux*
+    tilegx-*-linux*
+    arm*-*-mingw32ce*
+    i[34567]86-*-mingw32ce*
+
 * Debugging MS-Windows processes now sets $_exitsignal when the
   inferior is terminated by a signal, instead of setting $_exitcode.
 
