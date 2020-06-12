@@ -227,8 +227,6 @@ elif test "${srv_mingw}" = "yes"; then
   LIBS="$LIBS $WIN32APILIBS"
 elif test "${srv_qnx}" = "yes"; then
   LIBS="$LIBS -lsocket"
-elif test "${srv_lynxos}" = "yes"; then
-  LIBS="$LIBS -lnetinet"
 fi
 
 if test "${srv_linux_usrregs}" = "yes"; then

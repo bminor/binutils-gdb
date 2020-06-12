@@ -1,5 +1,13 @@
 2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* configure: Re-generate.
+	* configure.ac: Remove srv_lynxos test.
+	* configure.srv: Remove lynxos cases.
+	* lynx-i386-low.cc, lynx-low.cc, lynx-low.h, lynx-ppc-low.c:
+	Remove.
+
+2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* README: Fix a few outdated or incoherent things.
 
 2020-05-27  Hannes Domani  <ssbssa@yahoo.de>
