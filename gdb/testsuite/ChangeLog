@@ -1,3 +1,9 @@
+2020-06-12  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/26110
+	* lib/gdb.exp (gdb_init): Revert dejagnu's override of ::unknown.
+	(gdb_finish): Reinstall dejagnu's override of ::unknown.
+
 2020-06-11  Tom Tromey  <tom@tromey.com>
 
 	PR gdb/18318:

@@ -5193,13 +5193,29 @@ proc gdb_init { test_file_name } {
     global gdb_instances
     set gdb_instances 0
 
-    return [default_gdb_init $test_file_name]
+    set res [default_gdb_init $test_file_name]
+
+    # Dejagnu overrides proc unknown.  The dejagnu version may trigger in a
+    # test-case but abort the entire test run.  To fix this, we install a
+    # local version here, which reverts dejagnu's override, and restore
+    # dejagnu's version in gdb_finish.
+    rename ::unknown ::dejagnu_unknown
+    proc unknown { args } {
+	# Dejagnu saves the original version in ::tcl_unknown, use it.
+	return [uplevel 1 ::tcl_unknown $args]
+    }
+
+    return $res
 }
 
 proc gdb_finish { } {
     global gdbserver_reconnect_p
     global gdb_prompt
     global cleanfiles
+
+    # Restore dejagnu's version of proc unknown.
+    rename ::unknown ""
+    rename ::dejagnu_unknown ::unknown
 
     # Exit first, so that the files are no longer in use.
     gdb_exit
