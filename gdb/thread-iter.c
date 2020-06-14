@@ -26,15 +26,18 @@
 all_threads_iterator::all_threads_iterator (begin_t)
 {
   /* Advance M_INF/M_THR to the first thread's position.  */
-  for (m_inf = inferior_list; m_inf != NULL; m_inf = m_inf->next)
+
+  for (inferior &inf : inferior_list)
     {
-      auto thr_iter = m_inf->thread_list.begin ();
-      if (thr_iter != m_inf->thread_list.end ())
+      auto thr_iter = inf.thread_list.begin ();
+      if (thr_iter != inf.thread_list.end ())
 	{
+	  m_inf = &inf;
 	  m_thr = &*thr_iter;
 	  return;
 	}
     }
+  m_inf = nullptr;
   m_thr = nullptr;
 }
 
@@ -43,6 +46,7 @@ all_threads_iterator::all_threads_iterator (begin_t)
 void
 all_threads_iterator::advance ()
 {
+  intrusive_list<inferior>::iterator inf_iter (m_inf);
   intrusive_list<thread_info>::iterator thr_iter (m_thr);
 
   /* The loop below is written in the natural way as-if we'd always
@@ -50,8 +54,9 @@ all_threads_iterator::advance ()
      the algorithm to the actual current position.  */
   goto start;
 
-  for (; m_inf != NULL; m_inf = m_inf->next)
+  for (; inf_iter != inferior_list.end (); ++inf_iter)
     {
+      m_inf = &*inf_iter;
       thr_iter = m_inf->thread_list.begin ();
       while (thr_iter != m_inf->thread_list.end ())
 	{
@@ -86,16 +91,21 @@ all_matching_threads_iterator::all_matching_threads_iterator
   gdb_assert ((filter_target == nullptr && filter_ptid == minus_one_ptid)
 	      || filter_target->stratum () == process_stratum);
 
-  for (m_inf = inferior_list; m_inf != NULL; m_inf = m_inf->next)
-    if (m_inf_matches ())
-      for (auto thr_iter = m_inf->thread_list.begin ();
-	   thr_iter != m_inf->thread_list.end ();
-	   ++thr_iter)
-	if (thr_iter->ptid.matches (m_filter_ptid))
+  for (inferior &inf : inferior_list)
+    {
+      m_inf = &inf;
+      if (m_inf_matches ())
+	for (auto thr_iter = m_inf->thread_list.begin ();
+	     thr_iter != m_inf->thread_list.end ();
+	     ++thr_iter)
 	  {
-	    m_thr = &*thr_iter;
-	    return;
+	    if (thr_iter->ptid.matches (m_filter_ptid))
+	      {
+		m_thr = &*thr_iter;
+		return;
+	      }
 	  }
+    }
 
   m_thr = nullptr;
 }
@@ -105,6 +115,7 @@ all_matching_threads_iterator::all_matching_threads_iterator
 void
 all_matching_threads_iterator::advance ()
 {
+  intrusive_list<inferior>::iterator inf_iter (m_inf);
   intrusive_list<thread_info>::iterator thr_iter (m_thr);
 
   /* The loop below is written in the natural way as-if we'd always
@@ -112,21 +123,24 @@ all_matching_threads_iterator::advance ()
      the algorithm to the actual current position.  */
   goto start;
 
-  for (; m_inf != NULL; m_inf = m_inf->next)
-    if (m_inf_matches ())
-      {
-	thr_iter = m_inf->thread_list.begin ();
-	while (thr_iter != m_inf->thread_list.end ())
-	  {
-	    if (thr_iter->ptid.matches (m_filter_ptid))
-	      {
-		m_thr = &*thr_iter;
-		return;
-	      }
-	  start:
-	    ++thr_iter;
-	  }
-      }
+  for (; inf_iter != inferior_list.end (); ++inf_iter)
+    {
+      m_inf = &*inf_iter;
+      if (m_inf_matches ())
+	{
+	  thr_iter = m_inf->thread_list.begin ();
+	  while (thr_iter != m_inf->thread_list.end ())
+	    {
+	      if (thr_iter->ptid.matches (m_filter_ptid))
+		{
+		  m_thr = &*thr_iter;
+		  return;
+		}
+	    start:
+	      ++thr_iter;
+	    }
+	}
+    }
 
   m_thr = nullptr;
 }

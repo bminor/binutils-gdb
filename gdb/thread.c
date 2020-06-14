@@ -1395,7 +1395,11 @@ show_thread_that_caused_stop (void)
 int
 show_inferior_qualified_tids (void)
 {
-  return (inferior_list->next != NULL || inferior_list->num != 1);
+  auto inf = inferior_list.begin ();
+  if (inf->num != 1)
+    return true;
+  ++inf;
+  return inf != inferior_list.end ();
 }
 
 /* See gdbthread.h.  */

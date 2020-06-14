@@ -2038,7 +2038,6 @@ regcache_thread_ptid_changed ()
   /* Prepare two targets with one thread each, with the same ptid.  */
   scoped_mock_context<test_target_ops> target1 (arch);
   scoped_mock_context<test_target_ops> target2 (arch);
-  target2.mock_inferior.next = &target1.mock_inferior;
 
   ptid_t old_ptid (111, 222);
   ptid_t new_ptid (111, 333);

@@ -3730,18 +3730,28 @@ do_target_wait (execution_control_state *ecs, target_wait_flags options)
      reported the stop to the user, polling for events.  */
   scoped_restore_current_thread restore_thread;
 
-  int inf_num = selected->num;
-  for (inferior *inf = selected; inf != NULL; inf = inf->next)
-    if (inferior_matches (inf))
-      if (do_wait (inf))
-	return true;
+  intrusive_list_iterator<inferior> start
+    = inferior_list.iterator_to (*selected);
 
-  for (inferior *inf = inferior_list;
-       inf != NULL && inf->num < inf_num;
-       inf = inf->next)
-    if (inferior_matches (inf))
-      if (do_wait (inf))
+  for (intrusive_list_iterator<inferior> it = start;
+       it != inferior_list.end ();
+       ++it)
+    {
+      inferior *inf = &*it;
+
+      if (inferior_matches (inf) && do_wait (inf))
 	return true;
+    }
+
+  for (intrusive_list_iterator<inferior> it = inferior_list.begin ();
+       it != start;
+       ++it)
+    {
+      inferior *inf = &*it;
+
+      if (inferior_matches (inf) && do_wait (inf))
+	return true;
+    }
 
   ecs->ws.kind = TARGET_WAITKIND_IGNORE;
   return false;
@@ -9452,7 +9462,6 @@ infrun_thread_ptid_changed ()
 
     scoped_mock_context<test_target_ops> target1 (arch);
     scoped_mock_context<test_target_ops> target2 (arch);
-    target2.mock_inferior.next = &target1.mock_inferior;
 
     ptid_t old_ptid (111, 222);
     ptid_t new_ptid (111, 333);
@@ -9477,7 +9486,6 @@ infrun_thread_ptid_changed ()
 
     scoped_mock_context<test_target_ops> target1 (arch);
     scoped_mock_context<test_target_ops> target2 (arch);
-    target2.mock_inferior.next = &target1.mock_inferior;
 
     ptid_t old_ptid (111, 222);
     ptid_t new_ptid (111, 333);

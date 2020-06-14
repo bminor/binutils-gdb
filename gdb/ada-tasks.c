@@ -1444,8 +1444,6 @@ ada_tasks_normal_stop_observer (struct bpstats *unused_args, int unused_args2)
 static void
 ada_tasks_new_objfile_observer (struct objfile *objfile)
 {
-  struct inferior *inf;
-
   /* Invalidate the relevant data in our program-space data.  */
 
   if (objfile == NULL)
@@ -1468,7 +1466,7 @@ ada_tasks_new_objfile_observer (struct objfile *objfile)
      If all objfiles are being cleared (OBJFILE is NULL), then
      clear the caches for all inferiors.  */
 
-  for (inf = inferior_list; inf != NULL; inf = inf->next)
+  for (inferior *inf : all_inferiors ())
     if (objfile == NULL || inf->pspace == objfile->pspace)
       ada_tasks_invalidate_inferior_data (inf);
 }

@@ -404,7 +404,6 @@ void
 update_address_spaces (void)
 {
   int shared_aspace = gdbarch_has_shared_address_space (target_gdbarch ());
-  struct inferior *inf;
 
   init_address_spaces ();
 
@@ -423,7 +422,7 @@ update_address_spaces (void)
 	pspace->aspace = new_address_space ();
       }
 
-  for (inf = inferior_list; inf; inf = inf->next)
+  for (inferior *inf : all_inferiors ())
     if (gdbarch_has_global_solist (target_gdbarch ()))
       inf->aspace = maybe_new_address_space ();
     else
