@@ -4085,7 +4085,7 @@ serialize, 0, 0x0f01e8, None, 3, CpuSERIALIZE, No_bSuf|No_wSuf|No_lSuf|No_sSuf|N
 
 // TSXLDTRK instructions.
 
-xsuspldtrk, 0, 0xf20f01e8, None, 3, CpuTSXLDTRK, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+xsusldtrk, 0, 0xf20f01e8, None, 3, CpuTSXLDTRK, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 xresldtrk, 0, 0xf20f01e9, None, 3, CpuTSXLDTRK, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
 // TSXLDTRK instructions end.

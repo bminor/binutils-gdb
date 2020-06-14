@@ -1,3 +1,10 @@
+2020-06-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26115
+	* i386-dis.c (prefix_table): Replace xsuspldtrk with xsusldtrk.
+	* i386-opc.tbl: Likewise.
+	* i386-tbl.h: Regenerated.
+
 2020-06-12  Nelson Chu  <nelson.chu@sifive.com>
 
 	* riscv-opc.c (priv_specs): Remove v1.9 and PRIV_SPEC_CLASS_1P9.

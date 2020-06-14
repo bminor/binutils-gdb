@@ -3591,7 +3591,7 @@ static const struct dis386 prefix_table[][4] = {
     { "serialize",	{ Skip_MODRM }, PREFIX_OPCODE },
     { "setssbsy",	{ Skip_MODRM }, PREFIX_OPCODE },
     { Bad_Opcode },
-    { "xsuspldtrk",     { Skip_MODRM }, PREFIX_OPCODE },
+    { "xsusldtrk",	{ Skip_MODRM }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F01_REG_5_MOD_3_RM_1 */
