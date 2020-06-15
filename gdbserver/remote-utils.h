@@ -45,6 +45,8 @@ void prepare_resume_reply (char *buf, ptid_t ptid,
 
 const char *decode_address_to_semicolon (CORE_ADDR *addrp, const char *start);
 void decode_address (CORE_ADDR *addrp, const char *start, int len);
+char *decode_m_packet_params (char *from, CORE_ADDR *mem_addr_ptr,
+			      unsigned int *len_ptr, const char end_marker);
 void decode_m_packet (char *from, CORE_ADDR * mem_addr_ptr,
 		      unsigned int *len_ptr);
 void decode_M_packet (char *from, CORE_ADDR * mem_addr_ptr,

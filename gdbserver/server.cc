@@ -545,12 +545,55 @@ handle_btrace_conf_general_set (char *own_buf)
   return 1;
 }
 
+/* Create the qMemTags packet reply given TAGS.  */
+
+static int
+create_fmemtags_reply (char *reply, const gdb::byte_vector &tags)
+{
+  /* It is an error to pass a zero-sized tag vector.  */
+  if (tags.size () == 0)
+    return 1;
+
+  std::string packet ("m");
+
+  /* Write the tag data.  */
+  packet += bin2hex (tags.data (), tags.size ());
+  strcpy (reply, packet.c_str ());
+
+  return 0;
+}
+
+/* Parse the QMemTags request into ADDR, LEN and TAGS.
+
+   Return 0 if successful, non-zero otherwise.  */
+
+static int
+parse_smemtags_request (char *request, CORE_ADDR *addr, size_t *len,
+			gdb::byte_vector &tags)
+{
+  if (!startswith (request, "QMemTags:"))
+    return 1;
+
+  char *p = request + strlen ("QMemTags:");
+
+  /* Read address and length.  */
+  unsigned int length = 0;
+  p = decode_m_packet_params (p, addr, &length, ':');
+  *len = length;
+
+  /* Read the tag data.  */
+  tags = hex2bin (p);
+
+  return 0;
+}
+
 /* Handle all of the extended 'Q' packets.  */
 
 static void
 handle_general_set (char *own_buf)
 {
   client_state &cs = get_client_state ();
+
   if (startswith (own_buf, "QPassSignals:"))
     {
       int numsigs = (int) GDB_SIGNAL_LAST, i;
@@ -895,6 +938,30 @@ handle_general_set (char *own_buf)
 [Unset the inferior's current directory; will use gdbserver's cwd]\n"));
 	}
       write_ok (own_buf);
+
+      return;
+    }
+
+
+  /* Handle store memory tags packets.  */
+  if (startswith (own_buf, "QMemTags:")
+      && target_supports_memory_tagging ())
+    {
+      gdb::byte_vector tags;
+      CORE_ADDR addr = 0;
+      size_t len = 0;
+
+      require_running_or_return (own_buf);
+
+      int ret = parse_smemtags_request (own_buf, &addr, &len, tags);
+
+      if (ret == 0)
+	ret = the_target->store_memtags (addr, len, tags);
+
+      if (ret)
+	write_enn (own_buf);
+      else
+	write_ok (own_buf);
 
       return;
     }
@@ -2119,6 +2186,26 @@ crc32 (CORE_ADDR base, int len, unsigned int crc)
   return (unsigned long long) crc;
 }
 
+/* Parse the qMemTags packet request into ADDR and LEN.
+
+   Return 0 if successful, non-zero otherwise.  */
+
+static int
+parse_fmemtags_request (char *request, CORE_ADDR *addr, size_t *len)
+{
+  if (!startswith (request, "qMemTags:"))
+    return 1;
+
+  char *p = request + strlen ("qMemTags:");
+
+  /* Read address and length.  */
+  unsigned int length = 0;
+  decode_m_packet (p, addr, &length);
+  *len = length;
+
+  return 0;
+}
+
 /* Add supported btrace packets to BUF.  */
 
 static void
@@ -2344,6 +2431,12 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		     events.  */
 		  report_no_resumed = true;
 		}
+	      else if (strcmp (p, "memory-tagging+") == 0)
+		{
+		  /* GDB supports memory tagging features.  */
+		  if (target_supports_memory_tagging ())
+		    cs.memory_tagging_feature = true;
+		}
 	      else
 		{
 		  /* Move the unknown features all together.  */
@@ -2466,6 +2559,9 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       strcat (own_buf, ";QThreadEvents+");
 
       strcat (own_buf, ";no-resumed+");
+
+      if (target_supports_memory_tagging ())
+	strcat (own_buf, ";memory-tagging+");
 
       /* Reinitialize components as needed for the new connection.  */
       hostio_handle_new_gdb_connection ();
@@ -2658,6 +2754,31 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
   if (target_supports_tracepoints () && handle_tracepoint_query (own_buf))
     return;
+
+  /* Handle fetch memory tags packets.  */
+  if (startswith (own_buf, "qMemTags:")
+      && target_supports_memory_tagging ())
+    {
+      gdb::byte_vector tags;
+      CORE_ADDR addr = 0;
+      size_t len = 0;
+
+      require_running_or_return (own_buf);
+
+      int ret = parse_fmemtags_request (own_buf, &addr, &len);
+
+      if (ret == 0)
+	ret = the_target->fetch_memtags (addr, len, tags);
+
+      if (ret == 0)
+	ret = create_fmemtags_reply (own_buf, tags);
+
+      if (ret)
+	write_enn (own_buf);
+
+      *new_packet_len_p = strlen (own_buf);
+      return;
+    }
 
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
@@ -3865,6 +3986,7 @@ captured_main (int argc, char *argv[])
       cs.swbreak_feature = 0;
       cs.hwbreak_feature = 0;
       cs.vCont_supported = 0;
+      cs.memory_tagging_feature = false;
 
       remote_open (port);
 
