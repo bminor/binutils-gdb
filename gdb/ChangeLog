@@ -1,5 +1,9 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* NEWS: Mention memory tagging changes.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* printcmd.c (decode_format): Handle the 'm' modifier.
 	(do_examine): Display allocation tags when required/supported.
 	(should_validate_memtags): New function.

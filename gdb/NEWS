@@ -3,6 +3,21 @@
 
 *** Changes since GDB 10
 
+* GDB now supports general memory tagging functionality if the underlying
+  architecture supports the proper primitives and hooks.  Currently this is
+  enabled only for AArch64 MTE.
+
+  This includes:
+
+  - Additional information when the inferior crashes with a SIGSEGV caused by
+    a memory tag violation.
+
+  - A new modifier 'm' for the "x" command, which displays allocation tags for a
+    particular memory range.
+
+  - Display of memory tag mismatches by "print", for addresses and
+    pointers, if memory tagging is supported by the architecture.
+
 * Building GDB now requires GMP (The GNU Multiple Precision Arithmetic
   Library).
 
@@ -39,6 +54,12 @@ set debug event-loop
 show debug event-loop
   Control the display of debug output about GDB's event loop.
 
+set print memory-tag-violations
+show print memory-tag-violations
+  Control whether to display additional information about memory tag violations
+  when printing pointers and addresses.  Architecture support for memory
+  tagging is required for this option to have an effect.
+
 maintenance flush symbol-cache
 maintenance flush register-cache
   These new commands are equivalent to the already existing commands
@@ -49,6 +70,17 @@ maintenance flush dcache
 
 maintenance info target-sections
   Print GDB's internal target sections table.
+
+memory-tag show-logical-tag POINTER
+  Print the logical tag for POINTER.
+memory-tag with-logical-tag POINTER TAG
+  Print POINTER with logical tag TAG.
+memory-tag show-allocation-tag ADDRESS
+  Print the allocation tag for ADDRESS.
+memory-tag set-allocation-tag ADDRESS LENGTH TAGS
+  Set the allocation tag for [ADDRESS, ADDRESS + LENGTH) to TAGS.
+memory-tag check POINTER
+  Validate that POINTER's logical tag matches the allocation tag.
 
 * Changed commands
 
@@ -97,6 +129,14 @@ maintenance info sections
 * Removed targets and native configurations
 
 ARM Symbian			arm*-*-symbianelf*
+
+* New remote packets
+
+qMemTags
+  Request the remote to send allocation tags for a particular memory range.
+QMemTags
+  Request the remote to store the specified allocation tags to the requested
+  memory range.
 
 *** Changes in GDB 10
 
