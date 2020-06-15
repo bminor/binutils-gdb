@@ -1,5 +1,11 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* aarch64-linux-tdep.c: Include gdbsupport/selftest.h.
+	(aarch64_linux_ltag_tests): New function.
+	(_initialize_aarch64_linux_tdep): Register aarch64_linux_ltag_tests.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* aarch64-linux-tdep.c: Include target.h, arch-utils.h, value.h.
 	(aarch64_mte_get_atag, aarch64_linux_tagged_address_p)
 	(aarch64_linux_memtag_mismatch_p, aarch64_linux_set_memtags)
