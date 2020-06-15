@@ -1,5 +1,17 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* Makefile.in (SFILES): Add /../gdb/nat/aarch64-mte-linux-ptrace.c.
+	* configure.srv (aarch64*-*-linux*): Add arch/aarch64-mte-linux.o and
+	nat/aarch64-mte-linux-ptrace.o.
+	* linux-aarch64-low.cc: Include nat/aarch64-mte-linux-ptrace.h.
+	(class aarch64_target) <supports_memory_tagging>
+	<fetch_memtags, store_memtags>: New method overrides.
+	(aarch64_target::supports_memory_tagging)
+	(aarch64_target::fetch_memtags)
+	(aarch64_target::store_memtags): New methods.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* linux-aarch64-low.cc (aarch64_fill_mteregset): New function.
 	(aarch64_store_mteregset): New function.
 	(aarch64_regsets): Add MTE register set entry.
