@@ -1,5 +1,10 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* server.cc (test_memory_tagging_functions): New function.
+	(captured_main): Register test_memory_tagging_functions.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* remote-utils.cc (decode_m_packet_params): Renamed from ...
 	(decode_m_packet): ... this, which now calls decode_m_packet_params.
 	Make char * param/return const char *.

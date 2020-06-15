@@ -3653,6 +3653,81 @@ detach_or_kill_for_exit_cleanup ()
     }
 }
 
+#if GDB_SELF_TEST
+
+namespace selftests {
+
+static void
+test_memory_tagging_functions (void)
+{
+  /* Setup testing.  */
+  gdb::char_vector packet;
+  gdb::byte_vector tags, bv;
+  std::string expected;
+  packet.resize (32000);
+  CORE_ADDR addr;
+  size_t len;
+  int type;
+
+  /* Test parsing a qMemTags request.  */
+
+  /* Valid request, addr, len and type updated.  */
+  addr = 0xff;
+  len = 255;
+  type = 255;
+  strcpy (packet.data (), "qMemTags:0,0:0");
+  parse_fetch_memtags_request (packet.data (), &addr, &len, &type);
+  SELF_CHECK (addr == 0 && len == 0 && type == 0);
+
+  /* Valid request, addr, len and type updated.  */
+  addr = 0;
+  len = 0;
+  type = 0;
+  strcpy (packet.data (), "qMemTags:deadbeef,ff:5");
+  parse_fetch_memtags_request (packet.data (), &addr, &len, &type);
+  SELF_CHECK (addr == 0xdeadbeef && len == 255 && type == 5);
+
+  /* Test creating a qMemTags reply.  */
+
+  /* Non-empty tag data.  */
+  bv.resize (0);
+
+  for (int i = 0; i < 5; i++)
+    bv.push_back (i);
+
+  expected = "m0001020304";
+  SELF_CHECK (create_fetch_memtags_reply (packet.data (), bv) == true);
+  SELF_CHECK (strcmp (packet.data (), expected.c_str ()) == 0);
+
+  /* Test parsing a QMemTags request.  */
+
+  /* Valid request and empty tag data: addr, len, type and tags updated.  */
+  addr = 0xff;
+  len = 255;
+  type = 255;
+  tags.resize (5);
+  strcpy (packet.data (), "QMemTags:0,0:0:");
+  SELF_CHECK (parse_store_memtags_request (packet.data (),
+					   &addr, &len, tags, &type) == true);
+  SELF_CHECK (addr == 0 && len == 0 && type == 0 && tags.size () == 0);
+
+  /* Valid request and non-empty tag data: addr, len, type
+     and tags updated.  */
+  addr = 0;
+  len = 0;
+  type = 0;
+  tags.resize (0);
+  strcpy (packet.data (),
+	  "QMemTags:deadbeef,ff:5:0001020304");
+  SELF_CHECK (parse_store_memtags_request (packet.data (), &addr, &len, tags,
+					   &type) == true);
+  SELF_CHECK (addr == 0xdeadbeef && len == 255 && type == 5
+	      && tags.size () == 5);
+}
+
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
+
 /* Main function.  This is called by the real "main" function,
    wrapped in a TRY_CATCH that handles any uncaught exceptions.  */
 
@@ -3670,6 +3745,9 @@ captured_main (int argc, char *argv[])
   bool selftest = false;
 #if GDB_SELF_TEST
   std::vector<const char *> selftest_filters;
+
+  selftests::register_test ("remote_memory_tagging",
+			    selftests::test_memory_tagging_functions);
 #endif
 
   current_directory = getcwd (NULL, 0);
