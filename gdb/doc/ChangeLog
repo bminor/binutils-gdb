@@ -1,5 +1,10 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* gdb.texinfo (Memory Tagging): New subsection and node.
+	(AArch64 Memory Tagging Extension): New subsection.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* gdb.texinfo (General Query Packets): Document qMemTags and
 	QMemTags.  Document the "memory-tagging" feature.
 	(ARM-Specific Protocol Details): Document memory tag types.

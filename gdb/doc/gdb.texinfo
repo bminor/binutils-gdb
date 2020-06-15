@@ -10864,6 +10864,66 @@ target supports computing the CRC checksum of a block of memory
 (@pxref{qCRC packet}).
 @end table
 
+@node Memory Tagging
+@subsection Memory Tagging
+
+Memory tagging is a memory protection technology that uses a pair of tags to
+validate memory accesses through pointers.  The tags are integer values
+usually comprised of a few bits, depending on the architecture.
+
+There are two types of tags that are used in this setup: logical and
+allocation.  A logical tag is stored in the pointers themselves, usually at the
+higher bits of the pointers.  An allocation tag is the tag associated
+with particular ranges of memory in the physical address space, against which
+the logical tags from pointers are compared.
+
+The pointer tag (logical tag) must match the memory tag (allocation tag)
+for the memory access to be valid.  If the logical tag does not match the
+allocation tag, that will raise a memory violation.
+
+Allocation tags cover multiple contiguous bytes of physical memory.  This
+range of bytes is called a memory tag granule and is architecture-specific.
+For example,  AArch64 has a tag granule of 16 bytes, meaning each allocation
+tag spans 16 bytes of memory.
+
+If the underlying architecture supports memory tagging, like AArch64 MTE
+or SPARC ADI do,  @value{GDBN} can make use of it to validate pointers
+against memory allocation tags.
+
+A command prefix of @code{memory-tag} gives access to the various memory tagging
+commands.
+
+The @code{memory-tag} commands are the following:
+
+@table @code
+@kindex memory-tag print-logical-tag
+@item memory-tag print-logical-tag @var{pointer_expression}
+Print the logical tag stored in @var{pointer_expression}.
+@kindex memory-tag with-logical-tag
+@item memory-tag with-logical-tag @var{pointer_expression} @var{tag_bytes}
+Print the pointer given by @var{pointer_expression}, augmented with a logical
+tag of @var{tag_bytes}.
+@kindex memory-tag print-allocation-tag
+@item memory-tag print-allocation-tag @var{address_expression}
+Print the allocation tag associated with the memory address given by
+@var{address_expression}.
+@kindex memory-tag setatag
+@item memory-tag setatag @var{starting_address} @var{length} @var{tag_bytes}
+Set the allocation tag(s) for memory range @r{[}@var{starting_address},
+@var{starting_address} + @var{length}@r{)} to @var{tag_bytes}.
+@kindex memory-tag check
+@item memory-tag check @var{pointer_expression}
+Check if the logical tag in the pointer given by @var{pointer_expression}
+matches the allocation tag for the memory referenced by the pointer.
+
+This essentially emulates the hardware validation that is done when tagged
+memory is accessed through a pointer, but does not cause a memory fault as
+it would during hardware validation.
+
+It can be used to inspect potential memory tagging violations in the running
+process, before any faults get triggered.
+@end table
+
 @node Auto Display
 @section Automatic Display
 @cindex automatic display
@@ -24992,6 +25052,42 @@ register @code{$lr} is pointing to an PAC function its value will be masked.
 When GDB prints a backtrace, any addresses that required unmasking will be
 postfixed with the marker [PAC].  When using the MI, this is printed as part
 of the @code{addr_flags} field.
+
+@subsubsection AArch64 Memory Tagging Extension.
+@cindex AArch64 Memory Tagging Extension.
+
+When @value{GDBN} is debugging the AArch64 architecture, the program is
+using the v8.5-A feature Memory Tagging Extension (MTE) and there is support
+in the kernel for MTE, @value{GDBN} will make memory tagging functionality
+available for inspection and editing of logical and allocation tags.
+@xref{Memory Tagging}.
+
+To aid debugging, @value{GDBN} will output additional information when SIGSEGV
+signals are generated as a result of memory tag failures.
+
+If the tag violation is synchronous, the following will be shown:
+
+@smallexample
+Program received signal SIGSEGV, Segmentation fault
+Memory tag violation while accessing address 0x0500fffff7ff8000
+Allocation tag 0x1
+Logical tag 0x5.
+@end smallexample
+
+If the tag violation is asynchronous, the fault address is not available.
+In this case @value{GDBN} will show the following:
+
+@smallexample
+Program received signal SIGSEGV, Segmentation fault
+Memory tag violation
+Fault address unavailable.
+@end smallexample
+
+A special register, @code{tag_ctl}, is made available through the
+@code{org.gnu.gdb.aarch64.mte} feature.  This register exposes some
+options that can be controlled at runtime and emulates the @code{prctl}
+option @code{PR_SET_TAGGED_ADDR_CTRL}.  For further information, see the
+documentation in the Linux kernel.
 
 @node i386
 @subsection x86 Architecture-specific Issues
