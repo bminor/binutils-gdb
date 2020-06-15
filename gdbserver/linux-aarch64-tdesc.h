@@ -20,6 +20,7 @@
 #ifndef GDBSERVER_LINUX_AARCH64_TDESC_H
 #define GDBSERVER_LINUX_AARCH64_TDESC_H
 
-const target_desc * aarch64_linux_read_description (uint64_t vq, bool pauth_p);
+const target_desc * aarch64_linux_read_description (uint64_t vq, bool pauth_p,
+						    bool mte_p);
 
 #endif /* GDBSERVER_LINUX_AARCH64_TDESC_H */

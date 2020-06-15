@@ -1,5 +1,28 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* aarch64-linux-nat.c
+	(aarch64_linux_nat_target::read_description): Take MTE flag into
+	account.
+	Slight refactor to hwcap flag checking.
+	* aarch64-linux-tdep.c
+	(aarch64_linux_core_read_description): Likewise.
+	* aarch64-tdep.c (tdesc_aarch64_list): Add one more dimension for
+	MTE.
+	(aarch64_read_description): Add mte_p parameter and update to use it.
+	Update the documentation.
+	(aarch64_gdbarch_init): Update call to aarch64_read_description.
+	* aarch64-tdep.h (aarch64_read_description): Add mte_p parameter.
+	* arch/aarch64.c: Include ../features/aarch64-mte.c.
+	(aarch64_create_target_description): Add mte_p parameter and update
+	the code to use it.
+	* arch/aarch64.h (aarch64_create_target_description): Add mte_p
+	parameter.
+	* features/Makefile (FEATURE_XMLFILES): Add aarch64-mte.xml.
+	* features/aarch64-mte.c: New file, generated.
+	* features/aarch64-mte.xml: New file.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* Makefile.in (HFILES_NO_SRCDIR): Add arch/aarch64-mte-linux.h.
 	* aarch64-linux-nat.c: Include arch/aarch64-mte-linux.h.
 	* aarch64-linux-tdep.c: Likewise

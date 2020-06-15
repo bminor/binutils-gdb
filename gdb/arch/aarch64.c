@@ -23,11 +23,12 @@
 #include "../features/aarch64-fpu.c"
 #include "../features/aarch64-sve.c"
 #include "../features/aarch64-pauth.c"
+#include "../features/aarch64-mte.c"
 
 /* See arch/aarch64.h.  */
 
 target_desc *
-aarch64_create_target_description (uint64_t vq, bool pauth_p)
+aarch64_create_target_description (uint64_t vq, bool pauth_p, bool mte_p)
 {
   target_desc_up tdesc = allocate_target_description ();
 
@@ -46,6 +47,10 @@ aarch64_create_target_description (uint64_t vq, bool pauth_p)
 
   if (pauth_p)
     regnum = create_feature_aarch64_pauth (tdesc.get (), regnum);
+
+  /* Memory tagging extension registers.  */
+  if (mte_p)
+    regnum = create_feature_aarch64_mte (tdesc.get (), regnum);
 
   return tdesc.release ();
 }

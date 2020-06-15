@@ -1,5 +1,19 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* linux-aarch64-ipa.cc (get_ipa_tdesc): Update call to
+	aarch64_linux_read_description.
+	(initialize_low_tracepoint): Likewise.
+	* linux-aarch64-low.cc (aarch64_target::low_arch_setup): Take MTE flag
+	into account.
+	* linux-aarch64-tdesc.cc (tdesc_aarch64_list): Add one more dimension
+	for MTE.
+	(aarch64_linux_read_description): Add mte_p parameter and update to
+	use it.
+	* linux-aarch64-tdesc.h (aarch64_linux_read_description): Add mte_p
+	parameter.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* linux-aarch64-low.cc: Include arch/aarch64-mte-linux.h.
 
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
