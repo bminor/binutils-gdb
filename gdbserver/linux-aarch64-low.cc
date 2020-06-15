@@ -44,6 +44,7 @@
 #include "linux-aarch32-tdesc.h"
 #include "linux-aarch64-tdesc.h"
 #include "nat/aarch64-sve-linux-ptrace.h"
+#include "nat/aarch64-mte-linux-ptrace.h"
 #include "tdesc.h"
 
 #ifdef HAVE_SYS_REG_H
@@ -81,6 +82,14 @@ public:
   int get_min_fast_tracepoint_insn_len () override;
 
   struct emit_ops *emit_ops () override;
+
+  bool supports_memory_tagging () override;
+
+  int fetch_memtags (CORE_ADDR address, size_t len,
+		     gdb::byte_vector &tags) override;
+
+  int store_memtags (CORE_ADDR address, size_t len,
+		     const gdb::byte_vector &tags) override;
 
 protected:
 
@@ -3191,6 +3200,36 @@ aarch64_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
     return aarch64_breakpoint_len;
   else
     return arm_breakpoint_kind_from_current_state (pcptr);
+}
+
+/* Returns true if memory tagging is supported.  */
+bool
+aarch64_target::supports_memory_tagging ()
+{
+  if (current_thread == NULL)
+    return false;
+
+  return (linux_get_hwcap2 (8) & HWCAP2_MTE) != 0;
+}
+
+int
+aarch64_target::fetch_memtags (CORE_ADDR address, size_t len,
+			       gdb::byte_vector &tags)
+{
+  /* Allocation tags are per-process, so any tid is fine.  */
+  int tid = lwpid_of (current_thread);
+
+  return aarch64_mte_fetch_memtags (tid, address, len, tags);
+}
+
+int
+aarch64_target::store_memtags (CORE_ADDR address, size_t len,
+			       const gdb::byte_vector &tags)
+{
+  /* Allocation tags are per-process, so any tid is fine.  */
+  int tid = lwpid_of (current_thread);
+
+  return aarch64_mte_store_memtags (tid, address, len, tags);
 }
 
 /* The linux target ops object.  */
