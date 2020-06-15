@@ -176,6 +176,14 @@ static const char *const aarch64_pauth_register_names[] =
   "pauth_cmask"
 };
 
+static const char *const aarch64_mte_register_names[] =
+{
+  /* System Control Top Level Register.  */
+  "sctlr",
+  /* Tag Control Register.  */
+  "gcr"
+};
+
 /* AArch64 prologue cache structure.  */
 struct aarch64_prologue_cache
 {
@@ -3202,12 +3210,19 @@ aarch64_cannot_store_register (struct gdbarch *gdbarch, int regnum)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (!tdep->has_pauth ())
-    return 0;
+  /* Is this a PAC register?  */
+  if (tdep->has_pauth ()
+      && (regnum == AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base)
+	  || regnum == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base)))
+    return 1;
 
-  /* Pointer authentication registers are read-only.  */
-  return (regnum == AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base)
-	  || regnum == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base));
+  /* Is this a MTE register?  */
+  if (tdep->has_mte ()
+      && (regnum == tdep->mte_reg_base || regnum == (tdep->mte_reg_base + 1)))
+    return 1;
+
+  /* No restrictions on register store.  */
+  return 0;
 }
 
 /* Initialize the current architecture based on INFO.  If possible,
@@ -3225,6 +3240,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   bool valid_p = true;
   int i, num_regs = 0, num_pseudo_regs = 0;
   int first_pauth_regnum = -1, pauth_ra_state_offset = -1;
+  int first_mte_regnum = -1;
 
   /* Use the vector length passed via the target info.  Here -1 is used for no
      SVE, and 0 is unset.  If unset then use the vector length from the existing
@@ -3262,6 +3278,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   feature_fpu = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.fpu");
   feature_sve = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.sve");
   feature_pauth = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth");
+  const struct tdesc_feature *feature_mte
+    = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.mte");
 
   if (feature_core == nullptr)
     return nullptr;
@@ -3332,6 +3350,20 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       num_pseudo_regs += 1;	/* Count RA_STATE pseudo register.  */
     }
 
+  /* Add the MTE registers.  */
+  if (feature_mte != NULL)
+    {
+      first_mte_regnum = num_regs;
+      /* Validate the descriptor provides the mandatory MTE registers and
+	 allocate their numbers.  */
+      for (i = 0; i < ARRAY_SIZE (aarch64_mte_register_names); i++)
+	valid_p &= tdesc_numbered_register (feature_mte, tdesc_data,
+					    first_mte_regnum + i,
+					    aarch64_mte_register_names[i]);
+
+      num_regs += i;
+    }
+
   if (!valid_p)
     {
       tdesc_data_cleanup (tdesc_data);
@@ -3352,6 +3384,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->pauth_reg_base = first_pauth_regnum;
   tdep->pauth_ra_state_regnum = (feature_pauth == NULL) ? -1
 				: pauth_ra_state_offset + num_regs;
+  tdep->mte_reg_base = first_mte_regnum;
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);

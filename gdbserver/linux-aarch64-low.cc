@@ -261,6 +261,23 @@ aarch64_store_pauthregset (struct regcache *regcache, const void *buf)
 		   &pauth_regset[1]);
 }
 
+/* Store the MTE registers to regcache.  */
+
+static void
+aarch64_store_mteregset (struct regcache *regcache, const void *buf)
+{
+  uint64_t *mte_regset = (uint64_t *) buf;
+  int mte_base = find_regno (regcache->tdesc, "sctlr");
+
+  if (mte_base == 0)
+    return;
+
+  /* SCTLR register */
+  supply_register (regcache, mte_base, &mte_regset[0]);
+  /* GCR register */
+  supply_register (regcache, mte_base + 1, &mte_regset[1]);
+}
+
 bool
 aarch64_target::low_supports_breakpoints ()
 {
@@ -684,6 +701,8 @@ static struct regset_info aarch64_regsets[] =
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_PAC_MASK,
     AARCH64_PAUTH_REGS_SIZE, OPTIONAL_REGS,
     NULL, aarch64_store_pauthregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_MTE,
+    AARCH64_LINUX_SIZEOF_MTE, OPTIONAL_REGS, NULL, aarch64_store_mteregset },
   NULL_REGSET
 };
 
@@ -713,6 +732,8 @@ static struct regset_info aarch64_sve_regsets[] =
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_PAC_MASK,
     AARCH64_PAUTH_REGS_SIZE, OPTIONAL_REGS,
     NULL, aarch64_store_pauthregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_MTE,
+    AARCH64_LINUX_SIZEOF_MTE, OPTIONAL_REGS, NULL, aarch64_store_mteregset },
   NULL_REGSET
 };
 

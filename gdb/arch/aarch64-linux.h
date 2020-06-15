@@ -25,4 +25,7 @@
 #define HWCAP2_MTE  (1 << 18)
 #endif
 
+/* The MTE regset consists of 2 registers of 64-bit size.  */
+#define AARCH64_LINUX_SIZEOF_MTE (2 * 64)
+
 #endif /* ARCH_AARCH64_LINUX_H */

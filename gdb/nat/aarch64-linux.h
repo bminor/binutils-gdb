@@ -129,6 +129,10 @@ ps_err_e aarch64_ps_get_thread_area (struct ps_prochandle *ph,
 				       lwpid_t lwpid, int idx, void **base,
 				       int is_64bit_p);
 
+/* MTE register set */
+
+#define NT_ARM_MTE 0x407
+
 /* MTE allocation tag access */
 
 #ifndef PTRACE_PEEKMTETAGS
