@@ -461,6 +461,60 @@ fetch_pauth_masks_from_thread (struct regcache *regcache)
 			&pauth_regset[1]);
 }
 
+/* Fill GDB's register array with the MTE register values from
+   the current thread.  */
+
+static void
+fetch_mteregs_from_thread (struct regcache *regcache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  int regno = tdep->mte_reg_base;
+
+  gdb_assert (regno != -1);
+
+  uint64_t tag_ctl = 0;
+  struct iovec iovec;
+
+  iovec.iov_base = &tag_ctl;
+  iovec.iov_len = sizeof (tag_ctl);
+
+  int tid = regcache->ptid ().lwp ();
+  if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_TAGGED_ADDR_CTRL,
+		&iovec) != 0)
+      perror_with_name (_("unable to fetch MTE registers."));
+
+  regcache->raw_supply (regno, &tag_ctl);
+}
+
+/* Store to the current thread the valid MTE register set in the GDB's
+   register array.  */
+
+static void
+store_mteregs_to_thread (struct regcache *regcache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (regcache->arch ());
+  int regno = tdep->mte_reg_base;
+
+  gdb_assert (regno != -1);
+
+  uint64_t tag_ctl = 0;
+
+  if (REG_VALID != regcache->get_register_status (regno))
+    return;
+
+  regcache->raw_collect (regno, (char *) &tag_ctl);
+
+  struct iovec iovec;
+
+  iovec.iov_base = &tag_ctl;
+  iovec.iov_len = sizeof (tag_ctl);
+
+  int tid = regcache->ptid ().lwp ();
+  if (ptrace (PTRACE_SETREGSET, tid, NT_ARM_TAGGED_ADDR_CTRL,
+	      &iovec) != 0)
+    perror_with_name (_("unable to store MTE registers."));
+}
+
 /* Implement the "fetch_registers" target_ops method.  */
 
 void
@@ -479,6 +533,9 @@ aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
 
       if (tdep->has_pauth ())
 	fetch_pauth_masks_from_thread (regcache);
+
+      if (tdep->has_mte ())
+	fetch_mteregs_from_thread (regcache);
     }
   else if (regno < AARCH64_V0_REGNUM)
     fetch_gregs_from_thread (regcache);
@@ -493,6 +550,11 @@ aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
 	  || regno == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base))
 	fetch_pauth_masks_from_thread (regcache);
     }
+
+  /* Fetch individual MTE registers.  */
+  if (tdep->has_mte ()
+      && (regno == tdep->mte_reg_base))
+    fetch_mteregs_from_thread (regcache);
 }
 
 /* Implement the "store_registers" target_ops method.  */
@@ -510,6 +572,9 @@ aarch64_linux_nat_target::store_registers (struct regcache *regcache,
 	store_sveregs_to_thread (regcache);
       else
 	store_fpregs_to_thread (regcache);
+
+      if (tdep->has_mte ())
+	store_mteregs_to_thread (regcache);
     }
   else if (regno < AARCH64_V0_REGNUM)
     store_gregs_to_thread (regcache);
@@ -517,6 +582,11 @@ aarch64_linux_nat_target::store_registers (struct regcache *regcache,
     store_sveregs_to_thread (regcache);
   else
     store_fpregs_to_thread (regcache);
+
+  /* Store MTE registers.  */
+  if (tdep->has_mte ()
+      && (regno == tdep->mte_reg_base))
+    store_mteregs_to_thread (regcache);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
