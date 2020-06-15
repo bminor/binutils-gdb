@@ -40647,6 +40647,77 @@ is a sequence of thread IDs, @var{threadid} (eight hex
 digits), from the target.  See @code{remote.c:parse_threadlist_response()}.
 @end table
 
+@item qMemTags:@var{start address}:@var{length}
+@cindex fetch memory tags
+@cindex @samp{qMemTags} packet
+Fetch memory tags in the address range @r{[}@var{start address},
+@var{start address} + @var{length}@r{)}.  The target is responsible for
+calculating how many tags will be returned, as this is architecture-specific.
+
+@var{start address} is the starting address of the memory range.
+
+@var{length} is the length, in bytes, of the memory range.
+
+Reply:
+@table @samp
+@item @var{mXX}@dots{}
+Hex encoded sequence of uninterpreted bytes representing the tags found in
+the request memory range.
+
+@item E @var{nn}
+An error occured.  This means that fetching of memory tags failed for some
+reason.
+
+@item @w{}
+An empty reply indicates that @samp{qMemTags} is not supported by the stub,
+although this should not happen given @value{GDBN} will only send this packet
+if the stub has advertised support for memory tagging via @samp{qSupported}.
+@end table
+
+@item QMemTags:@var{start address}:@var{length}:@var{tag bytes}
+@cindex store memory tags
+@cindex @samp{QMemTags} packet
+Store memory tags to the address range @r{[}@var{start address},
+@var{start address} + @var{length}@r{)}.  The target is responsible for
+interpreting the tag bytes and modifying the memory tag granules
+accordingly, given this is architecture-specific.
+
+The interpretation of how many tags should be written to how many memory tag
+granules is also architecture-specific.  The behavior is
+implementation-specific, but the following is suggested.
+
+If the number of memory tags, @var{N}, is greater than or equal to the number
+of memory tag granules, @var{G}, only @var{G} tags will be stored.
+
+If @var{N} is less than @var{G}, the behavior is that of a fill operation,
+and the tag bytes will be used as a pattern that will get repeated until
+@var{G} tags are stored.
+
+@var{start address} is the starting address of the memory range.  The address
+does not have any restriction on alignment or size.
+
+@var{length} is the length, in bytes, of the memory range.
+
+@var{tag bytes} is a sequence of hex encoded uninterpreted bytes which will be
+interpreted by the target.  Each pair of hex digits is interpreted as a
+single byte.
+
+Reply:
+@table @samp
+@item OK
+The request was successful and the memory tag granules were modified
+accordingly.
+
+@item E @var{nn}
+An error occured.  This means that modifying the memory tag granules failed
+for some reason.
+
+@item @w{}
+An empty reply indicates that @samp{QMemTags} is not supported by the stub,
+although this should not happen given @value{GDBN} will only send this packet
+if the stub has advertised support for memory tagging via @samp{qSupported}.
+@end table
+
 @item qOffsets
 @cindex section offsets, remote request
 @cindex @samp{qOffsets} packet
@@ -41314,6 +41385,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{memory-tagging}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -41527,6 +41603,14 @@ The remote stub understands the @samp{QThreadEvents} packet.
 
 @item no-resumed
 The remote stub reports the @samp{N} stop reply.
+
+@item memory-tagging
+The remote stub supports and implements the required memory tagging
+functionality and understands the @samp{qMemTags} and @samp{QMemTags} packets.
+
+For AArch64 GNU/Linux systems, this feature also requires access to the smaps
+file in the proc filesystem so memory mapping page flags can be inspected.  This
+is done via the @samp{vFile} requests.
 
 @end table
 
