@@ -754,10 +754,10 @@ ada_value_print_ptr (struct value *val,
   struct type *type = ada_check_typedef (value_type (val));
   if (ada_is_tag_type (type))
     {
-      const char *name = ada_tag_name (val);
+      gdb::unique_xmalloc_ptr<char> name = ada_tag_name (val);
 
       if (name != NULL)
-	fprintf_filtered (stream, " (%s)", name);
+	fprintf_filtered (stream, " (%s)", name.get ());
     }
 }
 

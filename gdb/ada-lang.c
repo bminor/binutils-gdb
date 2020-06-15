@@ -6567,10 +6567,10 @@ value_tag_from_contents_and_address (struct type *type,
 static struct type *
 type_from_tag (struct value *tag)
 {
-  const char *type_name = ada_tag_name (tag);
+  gdb::unique_xmalloc_ptr<char> type_name = ada_tag_name (tag);
 
   if (type_name != NULL)
-    return ada_find_any_type (ada_encode (type_name));
+    return ada_find_any_type (ada_encode (type_name.get ()));
   return NULL;
 }
 
@@ -6718,37 +6718,42 @@ ada_get_tsd_from_tag (struct value *tag)
 /* Given the TSD of a tag (type-specific data), return a string
    containing the name of the associated type.
 
-   The returned value is good until the next call.  May return NULL
-   if we are unable to determine the tag name.  */
+   May return NULL if we are unable to determine the tag name.  */
 
-static char *
+static gdb::unique_xmalloc_ptr<char>
 ada_tag_name_from_tsd (struct value *tsd)
 {
-  static char name[1024];
   char *p;
   struct value *val;
 
   val = ada_value_struct_elt (tsd, "expanded_name", 1);
   if (val == NULL)
     return NULL;
-  read_memory_string (value_as_address (val), name, sizeof (name) - 1);
-  for (p = name; *p != '\0'; p += 1)
-    if (isalpha (*p))
-      *p = tolower (*p);
-  return name;
+  gdb::unique_xmalloc_ptr<char> buffer;
+  int err;
+  if (target_read_string (value_as_address (val), &buffer, INT_MAX, &err) == 0
+      || err != 0)
+    return nullptr;
+
+  for (p = buffer.get (); *p != '\0'; ++p)
+    {
+      if (isalpha (*p))
+	*p = tolower (*p);
+    }
+
+  return buffer;
 }
 
 /* The type name of the dynamic type denoted by the 'tag value TAG, as
    a C string.
 
    Return NULL if the TAG is not an Ada tag, or if we were unable to
-   determine the name of that tag.  The result is good until the next
-   call.  */
+   determine the name of that tag.  */
 
-const char *
+gdb::unique_xmalloc_ptr<char>
 ada_tag_name (struct value *tag)
 {
-  char *name = NULL;
+  gdb::unique_xmalloc_ptr<char> name;
 
   if (!ada_is_tag_type (value_type (tag)))
     return NULL;
@@ -12104,9 +12109,11 @@ ada_exception_message_1 (void)
   if (e_msg_len <= 0)
     return NULL;
 
-  gdb::unique_xmalloc_ptr<char> e_msg ((char *) xmalloc (e_msg_len + 1));
-  read_memory_string (value_address (e_msg_val), e_msg.get (), e_msg_len + 1);
-  e_msg.get ()[e_msg_len] = '\0';
+  gdb::unique_xmalloc_ptr<char> e_msg;
+  int err;
+  if (target_read_string (value_address (e_msg_val), &e_msg, INT_MAX, &err) == 0
+      || err != 0)
+    return nullptr;
 
   return e_msg;
 }

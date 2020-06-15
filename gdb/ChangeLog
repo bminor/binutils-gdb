@@ -1,3 +1,14 @@
+2020-06-15  Tom Tromey  <tromey@adacore.com>
+
+	* corefile.c (read_memory_string): Remove.
+	* ada-valprint.c (ada_value_print_ptr): Update.
+	* ada-lang.h (ada_tag_name): Change return type.
+	* ada-lang.c (type_from_tag): Update.
+	(ada_tag_name_from_tsd): Change return type.  Use
+	target_read_string.
+	(ada_tag_name): Likewise.
+	* gdbcore.h (read_memory_string): Don't declare.
+
 2020-06-14  Hannes Domani  <ssbssa@yahoo.de>
 
 	* symtab.c (rbreak_command): Ignore Windows drive colon.

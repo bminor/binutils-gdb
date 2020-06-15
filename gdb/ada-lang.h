@@ -260,7 +260,7 @@ extern int ada_is_tagged_type (struct type *, int);
 
 extern int ada_is_tag_type (struct type *);
 
-extern const char *ada_tag_name (struct value *);
+extern gdb::unique_xmalloc_ptr<char> ada_tag_name (struct value *);
 
 extern struct value *ada_tag_value_at_base_address (struct value *obj);
 
