@@ -54,6 +54,7 @@
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/gdb_optional.h"
 #include "gdbsupport/rsp-low.h"
+#include "infrun.h"		/* For memtag setting.  */
 
 /* Chain containing all defined mtag subcommands.  */
 
@@ -210,6 +211,7 @@ decode_format (const char **string_ptr, int oformat, int osize)
   val.size = '?';
   val.count = 1;
   val.raw = 0;
+  val.print_tags = false;
 
   if (*p == '-')
     {
@@ -230,6 +232,11 @@ decode_format (const char **string_ptr, int oformat, int osize)
       else if (*p == 'r')
 	{
 	  val.raw = 1;
+	  p++;
+	}
+      else if (*p == 'm')
+	{
+	  val.print_tags = true;
 	  p++;
 	}
       else if (*p >= 'a' && *p <= 'z')
@@ -1105,12 +1112,47 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
       need_to_update_next_address = 1;
     }
 
+  /* Whether we need to print the memory tag information for the current
+     address range.  */
+  bool print_range_tag = true;
+  uint32_t gsize = gdbarch_memtag_granule_size (gdbarch);
+
   /* Print as many objects as specified in COUNT, at most maxelts per line,
      with the address of the next one at the start of each line.  */
 
   while (count > 0)
     {
       QUIT;
+
+      CORE_ADDR tag_laddr = 0, tag_haddr = 0;
+
+      /* Print the memory tag information if requested.  */
+      if (fmt.print_tags && print_range_tag && memtag
+	  && target_supports_memory_tagging ())
+	{
+	  tag_laddr = align_down (next_address, gsize);
+	  tag_haddr = align_down (next_address + gsize, gsize);
+
+	  struct value *v_addr
+	    = value_from_ulongest (builtin_type (gdbarch)->builtin_data_ptr,
+				   tag_laddr);
+
+	  if (gdbarch_tagged_address_p (target_gdbarch (), v_addr))
+	    {
+	      std::string atag = gdbarch_memtag_to_string (gdbarch, v_addr,
+							   tag_allocation);
+
+	      if (!atag.empty ())
+		{
+		  printf_filtered (_("<Allocation Tag %s for range [%s,%s)>\n"),
+				   atag.c_str (),
+				   paddress (gdbarch, tag_laddr),
+				   paddress (gdbarch, tag_haddr));
+		}
+	    }
+	  print_range_tag = false;
+	}
+
       if (format == 'i')
 	fputs_filtered (pc_prefix (next_address), gdb_stdout);
       print_address (next_gdbarch, next_address, gdb_stdout);
@@ -1141,6 +1183,11 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	  /* Display any branch delay slots following the final insn.  */
 	  if (format == 'i' && count == 1)
 	    count += branch_delay_insns;
+
+	  /* Update the tag range based on the current address being
+	     processed.  */
+	  if (tag_haddr <= next_address)
+	      print_range_tag = true;
 	}
       printf_filtered ("\n");
     }
@@ -1213,6 +1260,26 @@ print_value (value *val, const value_print_options &opts)
   annotate_value_history_end ();
 }
 
+/* Returns true if memory tags should be validated.  False otherwise.  */
+
+static bool
+should_validate_memtags (struct value *value)
+{
+  if (memtag && target_supports_memory_tagging ()
+      && gdbarch_tagged_address_p (target_gdbarch (), value))
+    {
+      gdb_assert (value && value_type (value));
+
+      enum type_code code = value_type (value)->code ();
+
+      return (code == TYPE_CODE_PTR
+	      || code == TYPE_CODE_REF
+	      || code == TYPE_CODE_METHODPTR
+	      || code == TYPE_CODE_MEMBERPTR);
+    }
+  return false;
+}
+
 /* Helper for parsing arguments for print_command_1.  */
 
 static struct value *
@@ -1248,7 +1315,21 @@ print_command_1 (const char *args, int voidprint)
 
   if (voidprint || (val && value_type (val) &&
 		    value_type (val)->code () != TYPE_CODE_VOID))
-    print_value (val, print_opts);
+    {
+      /* If memory tagging validation is on, check if the tag is valid.  */
+      if (should_validate_memtags (val)
+	  && gdbarch_memtag_mismatch_p (target_gdbarch (), val))
+	{
+	  std::string ltag = gdbarch_memtag_to_string (target_gdbarch (),
+						       val, tag_logical);
+	  std::string atag = gdbarch_memtag_to_string (target_gdbarch (),
+						       val, tag_allocation);
+	  printf_filtered (_("Logical tag (%s) does not match the "
+			     "allocation tag (%s).\n"),
+			   ltag.c_str (), atag.c_str ());
+	}
+      print_value (val, print_opts);
+    }
 }
 
 /* See valprint.h.  */
