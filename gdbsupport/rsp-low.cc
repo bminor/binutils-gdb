@@ -32,7 +32,7 @@ fromhex (int a)
   else if (a >= 'A' && a <= 'F')
     return a - 'A' + 10;
   else
-    error (_("Reply contains invalid hex digit %d"), a);
+    error (_("Invalid hex digit %d"), a);
 }
 
 /* See rsp-low.h.  */

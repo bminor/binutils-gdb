@@ -53,6 +53,11 @@
 #include "source.h"
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/gdb_optional.h"
+#include "gdbsupport/rsp-low.h"
+
+/* Chain containing all defined mtag subcommands.  */
+
+struct cmd_list_element *mtaglist;
 
 /* Last specified output format.  */
 
@@ -1208,31 +1213,38 @@ print_value (value *val, const value_print_options &opts)
   annotate_value_history_end ();
 }
 
-/* Implementation of the "print" and "call" commands.  */
+/* Helper for parsing arguments for print_command_1.  */
 
-static void
-print_command_1 (const char *args, int voidprint)
+static struct value *
+process_print_command_args (const char *args, value_print_options *print_opts)
 {
-  struct value *val;
-  value_print_options print_opts;
-
-  get_user_print_options (&print_opts);
+  get_user_print_options (print_opts);
   /* Override global settings with explicit options, if any.  */
-  auto group = make_value_print_options_def_group (&print_opts);
+  auto group = make_value_print_options_def_group (print_opts);
   gdb::option::process_options
     (&args, gdb::option::PROCESS_OPTIONS_REQUIRE_DELIMITER, group);
 
-  print_command_parse_format (&args, "print", &print_opts);
+  print_command_parse_format (&args, "print", print_opts);
 
   const char *exp = args;
 
   if (exp != nullptr && *exp)
     {
       expression_up expr = parse_expression (exp);
-      val = evaluate_expression (expr.get ());
+      return evaluate_expression (expr.get ());
     }
-  else
-    val = access_value_history (0);
+
+  return access_value_history (0);
+}
+
+/* Implementation of the "print" and "call" commands.  */
+
+static void
+print_command_1 (const char *args, int voidprint)
+{
+  value_print_options print_opts;
+
+  struct value *val = process_print_command_args (args, &print_opts);
 
   if (voidprint || (val && value_type (val) &&
 		    value_type (val)->code () != TYPE_CODE_VOID))
@@ -2700,6 +2712,273 @@ eval_command (const char *arg, int from_tty)
   execute_command (expanded.c_str (), from_tty);
 }
 
+/* Convenience function for error checking in mtag commands.  */
+
+static void
+show_addr_not_tagged (CORE_ADDR address)
+{
+  error (_("Address %s not in a region mapped with a memory tagging flag."),
+	 paddress (target_gdbarch (), address));
+}
+
+/* Convenience function for error checking in mtag commands.  */
+
+static void
+show_memtag_unsupported (void)
+{
+  error (_("Memory tagging not supported or disabled by the current"
+	   " architecture."));
+}
+
+/* Implement the "mtag" prefix command.  */
+
+static void
+mtag_command (const char *arg, int from_tty)
+{
+  help_list (mtaglist, "mtag ", all_commands, gdb_stdout);
+}
+
+/* Helper for showltag and showatag.  */
+
+static void
+mtag_showtag_command (const char *args, enum memtag_type tag_type)
+{
+  if (args == nullptr)
+    error_no_arg (_("address or pointer"));
+
+  /* Parse args into a value.  If the value is a pointer or an address,
+     then fetch the logical or allocation tag.  */
+  value_print_options print_opts;
+
+  struct value *val = process_print_command_args (args, &print_opts);
+
+  /* If the address is not in a region memory mapped with a memory tagging
+     flag, it is no use trying to access/manipulate its allocation tag.
+
+     It is OK to manipulate the logical tag though.  */
+  if (tag_type == tag_allocation
+      && !gdbarch_tagged_address_p (target_gdbarch (), val))
+    show_addr_not_tagged (value_as_address (val));
+
+  std::string tag = gdbarch_memtag_to_string (target_gdbarch (),
+					      val, tag_type);
+  if (tag.empty ())
+    printf_filtered (_("%s tag unavailable.\n"),
+		     tag_type == tag_logical? "Logical" : "Allocation");
+
+  struct value *v_tag = process_print_command_args (tag.c_str (),
+						    &print_opts);
+  print_opts.output_format = 'x';
+  print_value (v_tag, print_opts);
+}
+
+/* Implement the "mtag showltag" command.  */
+
+static void
+mtag_showltag_command (const char *args, int from_tty)
+{
+  if (!memtag || !target_supports_memory_tagging ())
+    show_memtag_unsupported ();
+
+  mtag_showtag_command (args, tag_logical);
+}
+
+/* Implement the "mtag showatag" command.  */
+
+static void
+mtag_showatag_command (const char *args, int from_tty)
+{
+  if (!memtag || !target_supports_memory_tagging ())
+    show_memtag_unsupported ();
+
+  mtag_showtag_command (args, tag_allocation);
+}
+
+/* Parse ARGS and extract ADDR and TAG.
+   ARGS should have format <expression> <tag bytes>.  */
+
+static void
+parse_setltag_input (const char *args, struct value **val,
+		     gdb::byte_vector &tags, value_print_options *print_opts)
+{
+  /* Given <expression> can be reasonably complex, we parse things backwards
+     so we can isolate the <tag bytes> portion.  */
+
+  /* Fetch the address.  */
+  std::string s_address = extract_string_maybe_quoted (&args);
+
+  /* Parse the address into a value.  */
+  *val = process_print_command_args (s_address.c_str (), print_opts);
+
+  /* Fetch the tag bytes.  */
+  std::string s_tag = extract_string_maybe_quoted (&args);
+
+  /* Validate the input.  */
+  if (s_address.empty () || s_tag.empty ())
+    error (_("Missing arguments."));
+
+  if (s_tag.length () % 2)
+    error (_("Error parsing tags argument. The tag should be 2 digits."));
+
+  tags = hex2bin (s_tag.c_str ());
+}
+
+/* Implement the "mtag setltag" command.  */
+
+static void
+mtag_setltag_command (const char *args, int from_tty)
+{
+  if (!memtag || !target_supports_memory_tagging ())
+    show_memtag_unsupported ();
+
+  if (args == nullptr)
+    error_no_arg (_("<address> <tag>"));
+
+  gdb::byte_vector tags;
+  struct value *val;
+  value_print_options print_opts;
+
+  /* Parse the input.  */
+  parse_setltag_input (args, &val, tags, &print_opts);
+
+  /* Setting the logical tag is just a local operation that does not touch
+     any memory from the target.  Given an input value, we modify the value
+     to include the appropriate tag.
+
+     For this reason we need to cast the argument value to a
+     (void *) pointer.  This is so we have the right the for the gdbarch
+     hook to manipulate the value and insert the tag.
+
+     Otherwise, this would fail if, for example, GDB parsed the argument value
+     into an int-sized value and the pointer value has a type of greater
+     length.  */
+
+  /* Cast to (void *).  */
+  val = value_cast (builtin_type (target_gdbarch ())->builtin_data_ptr,
+		    val);
+
+  if (gdbarch_set_memtags (target_gdbarch (), val, 0, tags,
+			   tag_logical) != 0)
+    printf_filtered (_("Could not update the logical tag data.\n"));
+  else
+    {
+      /* Always print it in hex format.  */
+      print_opts.output_format = 'x';
+      print_value (val, print_opts);
+    }
+}
+
+/* Parse ARGS and extract ADDR, LENGTH and TAGS.  */
+
+static void
+parse_setatag_input (const char *args, struct value **val, size_t *length,
+		     gdb::byte_vector &tags)
+{
+  /* Fetch the address.  */
+  std::string s_address = extract_string_maybe_quoted (&args);
+
+  /* Parse the address into a value.  */
+  value_print_options print_opts;
+  *val = process_print_command_args (s_address.c_str (), &print_opts);
+
+  /* Fetch the length.  */
+  std::string s_length = extract_string_maybe_quoted (&args);
+
+  /* Fetch the tag bytes.  */
+  std::string s_tags = extract_string_maybe_quoted (&args);
+
+  /* Validate the input.  */
+  if (s_address.empty () || s_length.empty () || s_tags.empty ())
+    error (_("Missing arguments."));
+
+  errno = 0;
+  *length = strtoulst (s_length.c_str (), NULL, 10);
+  if (errno != 0)
+    error (_("Error parsing length argument."));
+
+  if (s_tags.length () % 2)
+    error (_("Error parsing tags argument. Tags should be 2 digits per byte."));
+
+  tags = hex2bin (s_tags.c_str ());
+
+  /* If the address is not in a region memory mapped with a memory tagging
+     flag, it is no use trying to access/manipulate its allocation tag.  */
+  if (!gdbarch_tagged_address_p (target_gdbarch (), *val))
+    show_addr_not_tagged (value_as_address (*val));
+}
+
+/* Implement the "mtag setatag" command.
+   ARGS should be in the format <address> <length> <tags>.  */
+
+static void
+mtag_setatag_command (const char *args, int from_tty)
+{
+  if (!memtag || !target_supports_memory_tagging ())
+    show_memtag_unsupported ();
+
+  if (args == nullptr)
+    error_no_arg (_("<starting address> <length> <tag bytes>"));
+
+  gdb::byte_vector tags;
+  size_t length = 0;
+  struct value *val;
+
+  /* Parse the input.  */
+  parse_setatag_input (args, &val, &length, tags);
+
+  if (gdbarch_set_memtags (target_gdbarch (), val, length, tags,
+			   tag_allocation) != 0)
+    printf_filtered (_("Could not update the allocation tag(s).\n"));
+  else
+    printf_filtered (_("Allocation tag(s) updated successfully.\n"));
+}
+
+/* Implement the "mtag check" command.  */
+
+static void
+mtag_check_command (const char *args, int from_tty)
+{
+  if (!memtag || !target_supports_memory_tagging ())
+    show_memtag_unsupported ();
+
+  if (args == nullptr)
+    error (_("Argument required (address or pointer)"));
+
+  /* Parse the expression into a value.  If the value is an address or
+     pointer, then check its logical tag against the allocation tag.  */
+  value_print_options print_opts;
+
+  struct value *val = process_print_command_args (args, &print_opts);
+
+  /* If the address is not in a region memory mapped with a memory tagging
+     flag, it is no use trying to access/manipulate its allocation tag.  */
+  if (!gdbarch_tagged_address_p (target_gdbarch (), val))
+    show_addr_not_tagged (value_as_address (val));
+
+  CORE_ADDR addr = value_as_address (val);
+
+  /* If memory tagging validation is on, check if the tag is valid.  */
+  if (gdbarch_memtag_mismatch_p (target_gdbarch (), val))
+    {
+      std::string ltag = gdbarch_memtag_to_string (target_gdbarch (),
+						   val, tag_logical);
+      std::string atag = gdbarch_memtag_to_string (target_gdbarch (),
+						   val, tag_allocation);
+
+      printf_filtered (_("Logical tag (%s) does not match"
+			 " the allocation tag (%s) for address %s.\n"),
+		       ltag.c_str (), atag.c_str (),
+		       paddress (target_gdbarch (), addr));
+    }
+  else
+    {
+      std::string ltag = gdbarch_memtag_to_string (target_gdbarch (),
+						   val, tag_logical);
+      printf_filtered (_("Memory tags for address %s match (%s).\n"),
+		       paddress (target_gdbarch (), addr), ltag.c_str ());
+    }
+}
+
 void _initialize_printcmd ();
 void
 _initialize_printcmd ()
@@ -2910,4 +3189,60 @@ certain operations have illegal tags."),
 			    NULL,
 			    show_memtag,
 			    &setlist, &showlist);
+
+  /* Memory tagging commands.  */
+  add_prefix_cmd ("mtag", class_vars, mtag_command, _("\
+Generic command for showing and manipulating memory tag properties."),
+		  &mtaglist, "mtag ", 0, &cmdlist);
+  add_cmd ("showltag", class_vars, mtag_showltag_command,
+	   ("Show the logical tag for an address.\n\
+Usage: mtag showltag <address>.\n\
+<address> is an expression that evaluates to a pointer or memory address.\n\
+GDB will show the logical tag associated with <address>.  The tag\n\
+interpretation is architecture-specific."),
+	   &mtaglist);
+  add_cmd ("showatag", class_vars, mtag_showatag_command,
+	   _("Show the allocation tag for an address.\n\
+Usage: mtag showatag <address>.\n\
+<address> is an expression that evaluates to a pointer or memory address.\n\
+GDB will show the allocation tag associated with <address>.  The tag\n\
+interpretation is architecture-specific."),
+	   &mtaglist);
+  add_cmd ("setltag", class_vars, mtag_setltag_command,
+	   _("Set the logical tag for an address.\n\
+Usage: mtag setltag <address> <tag>\n\
+<address> is an expression that evaluates to a pointer or memory address.\n\
+<tag> is a sequence of hex bytes that will be interpreted by the\n\
+architecture as a single memory tag.\n\
+GDB will set the logical tag for <address> to <tag>, and will show the\n\
+resulting address with the updated tag."),
+	   &mtaglist);
+  add_cmd ("setatag", class_vars, mtag_setatag_command,
+	   _("Set the allocation tag for an address.\n\
+Usage: mtag setatag <address> <length> <tag_bytes>\n\
+<address> is an expression that evaluates to a pointer or memory address\n\
+<length> is the number of bytes that will get added to <address> to calculate\n\
+the memory range.\n\
+<tag bytes> is a sequence of hex bytes that will be interpreted by the\n\
+architecture as one or more memory tags.\n\
+Sets the tags of the memory range [<address>, <address> + <length>)\n\
+to the specified tag bytes.\n\
+\n\
+If the number of tags is greater than or equal to the number of tag granules\n\
+in the [<address>, <address> + <length) range, only the tags up to the\n\
+number of tag granules will be stored.\n\
+\n\
+If the number of tags is less than the number of tag granules, then the\n\
+command is a fill operation.  The tag bytes are interpreted as a pattern\n\
+that will get repeated until the number of tag granules in the memory range\n\
+[<address>, <address> + <length>] is stored to."),
+	   &mtaglist);
+  add_cmd ("check", class_vars, mtag_check_command,
+	   _("Validate the logical tag against the allocation tag.\n\
+Usage: mtag check <address>\n\
+<address> is an expression that evaluates to a pointer or memory address\n\
+GDB will fetch the logical and allocation tags for <address> and will\n\
+compare them for equality.  If the tags do not match, GDB will show\n\
+additional information about the mismatch."),
+	   &mtaglist);
 }
