@@ -78,6 +78,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include "async-event.h"
+#include "gdbsupport/selftest.h"
 
 /* The remote target.  */
 
@@ -14507,6 +14508,89 @@ remote_target::store_memtags (CORE_ADDR address, size_t len,
   return 0;
 }
 
+#if GDB_SELF_TEST
+
+namespace selftests {
+
+static void
+test_memory_tagging_functions (void)
+{
+  remote_target remote;
+
+  struct packet_config *config
+    = &remote_protocol_packets[PACKET_memory_tagging_feature];
+
+  /* Test memory tagging packet support.  */
+  config->support = PACKET_SUPPORT_UNKNOWN;
+  SELF_CHECK (remote.supports_memory_tagging () == false);
+  config->support = PACKET_DISABLE;
+  SELF_CHECK (remote.supports_memory_tagging () == false);
+  config->support = PACKET_ENABLE;
+  SELF_CHECK (remote.supports_memory_tagging () == true);
+
+  /* Setup testing.  */
+  gdb::char_vector packet;
+  gdb::byte_vector tags, bv;
+  std::string expected, reply;
+  packet.resize (32000);
+
+  /* Test creating a qMemTags request.  */
+
+  expected = "qMemTags:0,0";
+  create_fmemtags_request (packet, 0x0, 0x0);
+  SELF_CHECK (strcmp (packet.data (), expected.c_str ()) == 0);
+
+  expected = "qMemTags:deadbeef,10";
+  create_fmemtags_request (packet, 0xdeadbeef, 16);
+  SELF_CHECK (strcmp (packet.data (), expected.c_str ()) == 0);
+
+  /* Test parsing a qMemTags reply.  */
+
+  /* Error reply, tags vector unmodified.  */
+  reply = "E00";
+  strcpy (packet.data (), reply.c_str ());
+  tags.resize (0);
+  SELF_CHECK (parse_fmemtags_reply (packet, tags) != 0);
+  SELF_CHECK (tags.size () == 0);
+
+  /* Valid reply, tags vector updated.  */
+  tags.resize (0);
+  bv.resize (0);
+
+  for (int i = 0; i < 5; i++)
+    bv.push_back (i);
+
+  reply = "m" + bin2hex (bv.data (), bv.size ());
+  strcpy (packet.data (), reply.c_str ());
+
+  SELF_CHECK (parse_fmemtags_reply (packet, tags) == 0);
+  SELF_CHECK (tags.size () == 5);
+
+  for (int i = 0; i < 5; i++)
+    SELF_CHECK (tags[i] == i);
+
+  /* Test creating a QMemTags request.  */
+
+  /* Empty tag data.  */
+  tags.resize (0);
+  expected = "QMemTags:0,0:";
+  create_smemtags_request (packet, 0x0, 0x0, tags);
+  SELF_CHECK (memcmp (packet.data (), expected.c_str (),
+		      expected.length ()) == 0);
+
+  /* Non-empty tag data.  */
+  tags.resize (0);
+  for (int i = 0; i < 5; i++)
+    tags.push_back (i);
+  expected = "QMemTags:deadbeef,ff:0001020304";
+  create_smemtags_request (packet, 0xdeadbeef, 255, tags);
+  SELF_CHECK (memcmp (packet.data (), expected.c_str (),
+		      expected.length ()) == 0);
+}
+
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
+
 void _initialize_remote ();
 void
 _initialize_remote ()
@@ -15020,4 +15104,9 @@ Specify \"unlimited\" to display all the characters."),
 
   /* Eventually initialize fileio.  See fileio.c */
   initialize_remote_fileio (&remote_set_cmdlist, &remote_show_cmdlist);
+
+#if GDB_SELF_TEST
+  selftests::register_test ("remote_memory_tagging",
+			    selftests::test_memory_tagging_functions);
+#endif
 }
