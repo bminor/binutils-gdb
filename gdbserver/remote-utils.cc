@@ -1302,31 +1302,12 @@ prepare_resume_reply (char *buf, ptid_t ptid,
     }
 }
 
-void
-decode_m_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr)
-{
-  int i = 0, j = 0;
-  char ch;
-  *mem_addr_ptr = *len_ptr = 0;
+/* Decode ADDR and LEN from a parameter of the form "addr,len<x>", with <x>
+   being an end marker character.  */
 
-  while ((ch = from[i++]) != ',')
-    {
-      *mem_addr_ptr = *mem_addr_ptr << 4;
-      *mem_addr_ptr |= fromhex (ch) & 0x0f;
-    }
-
-  for (j = 0; j < 4; j++)
-    {
-      if ((ch = from[i++]) == 0)
-	break;
-      *len_ptr = *len_ptr << 4;
-      *len_ptr |= fromhex (ch) & 0x0f;
-    }
-}
-
-void
-decode_M_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr,
-		 unsigned char **to_p)
+char *
+decode_m_packet_params (char *from, CORE_ADDR *mem_addr_ptr,
+			unsigned int *len_ptr, const char end_marker)
 {
   int i = 0;
   char ch;
@@ -1338,16 +1319,31 @@ decode_M_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr,
       *mem_addr_ptr |= fromhex (ch) & 0x0f;
     }
 
-  while ((ch = from[i++]) != ':')
+  while ((ch = from[i++]) != end_marker)
     {
       *len_ptr = *len_ptr << 4;
       *len_ptr |= fromhex (ch) & 0x0f;
     }
 
+  return from + i;
+}
+
+void
+decode_m_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr)
+{
+  decode_m_packet_params (from, mem_addr_ptr, len_ptr, '\0');
+}
+
+void
+decode_M_packet (char *from, CORE_ADDR *mem_addr_ptr, unsigned int *len_ptr,
+		 unsigned char **to_p)
+{
+  from = decode_m_packet_params (from, mem_addr_ptr, len_ptr, ':');
+
   if (*to_p == NULL)
     *to_p = (unsigned char *) xmalloc (*len_ptr);
 
-  hex2bin (&from[i++], *to_p, *len_ptr);
+  hex2bin (from, *to_p, *len_ptr);
 }
 
 int
