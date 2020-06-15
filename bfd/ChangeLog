@@ -1,3 +1,15 @@
+2020-06-15  Alan Modra  <amodra@gmail.com>
+
+	PR 26103
+	* elflink.c (elf_link_add_archive_symbols): Exclude undefined
+	symbols that were defined in discarded sections.
+	* cofflink.c (coff_link_check_archive_element): Likewise.
+	(coff_link_add_symbols): Set indx to -3 for symbols defined in
+	discarded sections.
+	(_bfd_coff_write_global_sym): Don't emit such symbols.
+	libcoff-in.h (struct coff_link_hash_entry): Update indx comment.
+	libcoff.h: Regenerate.
+
 2020-06-11  Alan Modra  <amodra@gmail.com>
 
 	PR 26107

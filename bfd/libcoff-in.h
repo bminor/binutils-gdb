@@ -243,8 +243,9 @@ struct coff_link_hash_entry
 {
   struct bfd_link_hash_entry root;
 
-  /* Symbol index in output file.  Set to -1 initially.  Set to -2 if
-     there is a reloc against this symbol.  */
+  /* Symbol index in output file.  This is initialized to -1.  It is
+     set to -2 if the symbol is used by a reloc.  It is set to -3 if
+     this symbol is defined in a discarded section.  */
   long indx;
 
   /* Symbol type.  */
