@@ -1,5 +1,14 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* gdb.texinfo (Data): Document memory tagging changes to the "print"
+	command.
+	(Examining Memory): Document memory tagging changes to the "x"
+	command.
+	(Memory Tagging): Update with more information on changes to the "x"
+	and "print" commands.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* gdb.texinfo (Memory Tagging): New subsection and node.
 	(AArch64 Memory Tagging Extension): New subsection.
 
