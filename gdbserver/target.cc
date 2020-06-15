@@ -464,6 +464,26 @@ process_stratum_target::supports_read_offsets ()
   return false;
 }
 
+bool
+process_stratum_target::supports_memory_tagging ()
+{
+  return false;
+}
+
+bool
+process_stratum_target::fetch_memtags (CORE_ADDR address, size_t len,
+				       gdb::byte_vector &tags, int type)
+{
+  gdb_assert_not_reached ("target op fetch_memtags not supported");
+}
+
+bool
+process_stratum_target::store_memtags (CORE_ADDR address, size_t len,
+				       const gdb::byte_vector &tags, int type)
+{
+  gdb_assert_not_reached ("target op store_memtags not supported");
+}
+
 int
 process_stratum_target::read_offsets (CORE_ADDR *text, CORE_ADDR *data)
 {

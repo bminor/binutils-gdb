@@ -1,3 +1,30 @@
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* remote-utils.cc (decode_m_packet_params): Renamed from ...
+	(decode_m_packet): ... this, which now calls decode_m_packet_params.
+	Make char * param/return const char *.
+	(decode_M_packet): Use decode_m_packet_params and make char * param
+	const char *.
+	* remote-utils.h (decode_m_packet_params): New prototype.
+	(decode_m_packet): Constify char pointers.
+	(decode_M_packet): Likewise.
+	* server.cc (create_fetch_memtags_reply)
+	(parse_store_memtags_request): New
+	functions.
+	(handle_general_set): Handle the QMemTags packet.
+	(parse_fetch_memtags_request): New function.
+	(handle_query): Handle the qMemTags packet and advertise memory
+	tagging support.
+	(captured_main): Initialize memory tagging flag.
+	* server.h (struct client_state): Initialize memory tagging flag.
+	* target.cc (process_stratum_target::supports_memory_tagging)
+	(process_stratum_target::fetch_memtags)
+	(process_stratum_target::store_memtags): New methods.
+	* target.h: Include gdbsupport/byte-vector.h.
+	(class process_stratum_target) <supports_memory_tagging>
+	<fetch_memtags, store_memtags>: New class virtual methods.
+	(target_supports_memory_tagging): Define.
+
 2021-03-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* inferiors.h (struct process_info) <all_dlls, dlls_changed>: New
