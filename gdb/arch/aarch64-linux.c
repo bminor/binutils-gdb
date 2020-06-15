@@ -18,3 +18,17 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "arch/aarch64-linux.h"
+
+/* See arch/aarch64-linux.h */
+
+int
+get_tag_granules (CORE_ADDR addr, size_t len, unsigned int granule_size)
+{
+  /* Start address */
+  CORE_ADDR s_addr = align_down (addr, granule_size);
+  /* End address */
+  CORE_ADDR e_addr = align_down (addr + len, granule_size);
+
+  /* We always have at least 1 granule.  */
+  return 1 + (e_addr - s_addr) / granule_size;
+}

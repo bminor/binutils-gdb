@@ -84,6 +84,24 @@ static CORE_ADDR last_examine_address;
 
 static value_ref_ptr last_examine_value;
 
+/* If TRUE (default), and the architecture supports it, GDB will attempt to use
+   the memory tagging infrastructure to validate certain memory accesses.  It
+   will also report memory tag violations alongside a SIGSEGV signal.
+
+   If FALSE, GDB will not use memory tagging in any way, and debugging will work
+   in the standard way.  */
+static bool memtag;
+
+static void
+show_memtag (struct ui_file *file, int from_tty,
+	     struct cmd_list_element *c,
+	     const char *value)
+{
+  fprintf_filtered (file,
+		    _("Use of memory tagging infrastructure is \"%s\".\n"),
+		    value);
+}
+
 /* Largest offset between a symbolic value and an address, that will be
    printed as `0x1234 <symbol+offset>'.  */
 
@@ -2883,4 +2901,14 @@ Construct a GDB command and then evaluate it.\n\
 Usage: eval \"format string\", ARG1, ARG2, ARG3, ..., ARGN\n\
 Convert the arguments to a string as \"printf\" would, but then\n\
 treat this string as a command line, and evaluate it."));
+
+  add_setshow_boolean_cmd ("memory-tagging", class_support,
+			   &memtag, _("\
+Set whether the debugger should use memory tagging infrastructure."), _("\
+Show whether the debugger should use memory tagging infrastructure."), _("\
+If on, gdb will attempt to validate memory tags and will warn the user if\n\
+certain operations have illegal tags."),
+			    NULL,
+			    show_memtag,
+			    &setlist, &showlist);
 }
