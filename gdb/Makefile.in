@@ -1446,6 +1446,7 @@ HFILES_NO_SRCDIR = \
 	arch/aarch32.h \
 	arch/aarch64.h \
 	arch/aarch64-insn.h \
+	arch/aarch64-mte-linux.h \
 	arch/arc.h \
 	arch/arm.h \
 	arch/i386.h \
