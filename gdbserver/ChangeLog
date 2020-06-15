@@ -1,5 +1,9 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* linux-aarch64-low.cc: Include arch/aarch64-mte-linux.h.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* server.cc (test_memory_tagging_functions): New function.
 	(captured_main): Register test_memory_tagging_functions.
 

@@ -1,5 +1,12 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Add arch/aarch64-mte-linux.h.
+	* aarch64-linux-nat.c: Include arch/aarch64-mte-linux.h.
+	* aarch64-linux-tdep.c: Likewise
+	* arch/aarch64-mte-linux.h: New file.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* remote: Include gdbsupport/selftest.h.
 	(test_memory_tagging_functions): New function.
 	(_initialize_remote): Register test_memory_tagging_functions.
