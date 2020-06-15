@@ -35,6 +35,12 @@
 #define MTE_LOGICAL_TAG_START_BIT   56
 #define MTE_LOGICAL_MAX_VALUE	    0xf
 
+/* Memory tagging definitions.  */
+#ifndef SEGV_MTEAERR
+# define SEGV_MTEAERR 8
+# define SEGV_MTESERR 9
+#endif
+
 /* Return the number of tag granules in the memory range
    [ADDR, ADDR + LEN) given GRANULE_SIZE.  */
 extern int get_tag_granules (CORE_ADDR addr, size_t len,
