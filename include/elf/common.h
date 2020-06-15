@@ -672,6 +672,9 @@
 					/*   note name must be "LINUX".  */
 #define NT_ARM_PAC_MASK	0x406		/* AArch pointer authentication code masks */
 					/*   note name must be "LINUX".  */
+#define NT_ARM_TAGGED_ADDR_CTRL	0x409	/* AArch64 tagged address control
+					   (prctl()) */
+					/*   note name must be "LINUX".  */
 #define NT_ARC_V2	0x600		/* ARC HS accumulator/extra registers.  */
 					/*   note name must be "LINUX".  */
 #define NT_RISCV_CSR    0x900		/* RISC-V Control and Status Registers */

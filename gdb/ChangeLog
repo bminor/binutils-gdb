@@ -1,5 +1,20 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* aarch64-linux-nat.c (fetch_mteregs_from_thread): New function.
+	(store_mteregs_to_thread): New function.
+	(aarch64_linux_nat_target::fetch_registers): Update to call
+	fetch_mteregs_from_thread.
+	(aarch64_linux_nat_target::store_registers): Update to call
+	store_mteregs_to_thread.
+	* aarch64-tdep.c (aarch64_mte_register_names): New struct.
+	(aarch64_cannot_store_register): Handle MTE registers.
+	(aarch64_gdbarch_init): Initialize and setup MTE registers.
+	* aarch64-tdep.h (gdbarch_tdep) <mte_reg_base>: New field.
+	<has_mte>: New method.
+	* arch/aarch64-linux.h (AARCH64_LINUX_SIZEOF_MTE): Define.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* aarch64-linux-nat.c
 	(aarch64_linux_nat_target::read_description): Take MTE flag into
 	account.

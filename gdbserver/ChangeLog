@@ -1,5 +1,12 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* linux-aarch64-low.cc (aarch64_fill_mteregset): New function.
+	(aarch64_store_mteregset): New function.
+	(aarch64_regsets): Add MTE register set entry.
+	(aarch64_sve_regsets): Add MTE register set entry.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* linux-aarch64-ipa.cc (get_ipa_tdesc): Update call to
 	aarch64_linux_read_description.
 	(initialize_low_tracepoint): Likewise.
