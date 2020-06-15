@@ -1,3 +1,10 @@
+2020-06-15  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-linkonce/zeroeh_x.s: Rename from x.s.
+	* testsuite/ld-linkonce/zeroeh_y.s: Rename from y.s.
+	* testsuite/ld-linkonce/zeroehl32.d: Adjust for renaming.  Support
+	big-endian output.  Run for powerpc.
+
 2020-06-11  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-plugin/lto.exp (lto_link_tests): Move lto-6,
