@@ -1,5 +1,9 @@
 2020-06-15  Alan Modra  <amodra@gmail.com>
 
+	* config.bfd: Obsolete powerpcle-*-pe targets.
+
+2020-06-15  Alan Modra  <amodra@gmail.com>
+
 	PR 26103
 	* elflink.c (elf_link_add_archive_symbols): Exclude undefined
 	symbols that were defined in discarded sections.
