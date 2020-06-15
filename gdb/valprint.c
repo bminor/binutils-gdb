@@ -2027,13 +2027,7 @@ partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
 
    Unless an exception is thrown, BUFFER will always be allocated, even on
    failure.  In this case, some characters might have been read before the
-   failure happened.  Check BYTES_READ to recognize this situation.
-
-   Note: There was a FIXME asking to make this code use target_read_string,
-   but this function is more general (can read past null characters, up to
-   given LEN).  Besides, it is used much more often than target_read_string
-   so it is more tested.  Perhaps callers of target_read_string should use
-   this function instead?  */
+   failure happened.  Check BYTES_READ to recognize this situation.  */
 
 int
 read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,

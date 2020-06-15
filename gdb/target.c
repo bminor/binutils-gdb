@@ -50,6 +50,7 @@
 #include "terminal.h"
 #include <unordered_map>
 #include "target-connection.h"
+#include "valprint.h"
 
 static void generic_tls_error (void) ATTRIBUTE_NORETURN;
 
@@ -803,9 +804,6 @@ target_xfer_status_to_string (enum target_xfer_status status)
 };
 
 
-#undef	MIN
-#define MIN(A, B) (((A) <= (B)) ? (A) : (B))
-
 /* target_read_string -- read a null terminated string, up to LEN bytes,
    from MEMADDR in target.  Set *ERRNOP to the errno code, or 0 if successful.
    Set *STRING to a pointer to malloc'd memory containing the data; the caller
@@ -816,68 +814,18 @@ int
 target_read_string (CORE_ADDR memaddr, gdb::unique_xmalloc_ptr<char> *string,
 		    int len, int *errnop)
 {
-  int tlen, offset, i;
-  gdb_byte buf[4];
-  int errcode = 0;
-  char *buffer;
-  int buffer_allocated;
-  char *bufptr;
-  unsigned int nbytes_read = 0;
+  int bytes_read;
+  gdb::unique_xmalloc_ptr<gdb_byte> buffer;
 
-  gdb_assert (string);
+  /* Note that the endian-ness does not matter here.  */
+  int errcode = read_string (memaddr, -1, 1, len, BFD_ENDIAN_LITTLE,
+			     &buffer, &bytes_read);
 
-  /* Small for testing.  */
-  buffer_allocated = 4;
-  buffer = (char *) xmalloc (buffer_allocated);
-  bufptr = buffer;
-
-  while (len > 0)
-    {
-      tlen = MIN (len, 4 - (memaddr & 3));
-      offset = memaddr & 3;
-
-      errcode = target_read_memory (memaddr & ~3, buf, sizeof buf);
-      if (errcode != 0)
-	{
-	  /* The transfer request might have crossed the boundary to an
-	     unallocated region of memory.  Retry the transfer, requesting
-	     a single byte.  */
-	  tlen = 1;
-	  offset = 0;
-	  errcode = target_read_memory (memaddr, buf, 1);
-	  if (errcode != 0)
-	    goto done;
-	}
-
-      if (bufptr - buffer + tlen > buffer_allocated)
-	{
-	  unsigned int bytes;
-
-	  bytes = bufptr - buffer;
-	  buffer_allocated *= 2;
-	  buffer = (char *) xrealloc (buffer, buffer_allocated);
-	  bufptr = buffer + bytes;
-	}
-
-      for (i = 0; i < tlen; i++)
-	{
-	  *bufptr++ = buf[i + offset];
-	  if (buf[i + offset] == '\000')
-	    {
-	      nbytes_read += i + 1;
-	      goto done;
-	    }
-	}
-
-      memaddr += tlen;
-      len -= tlen;
-      nbytes_read += tlen;
-    }
-done:
-  string->reset (buffer);
-  if (errnop != NULL)
+  if (errnop != nullptr)
     *errnop = errcode;
-  return nbytes_read;
+
+  string->reset ((char *) buffer.release ());
+  return bytes_read;
 }
 
 struct target_section_table *
