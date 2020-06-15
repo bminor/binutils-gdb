@@ -1,5 +1,9 @@
 2020-06-15  Tom Tromey  <tromey@adacore.com>
 
+	* linux-tdep.c (dump_mapping_p): Use target_read_memory.
+
+2020-06-15  Tom Tromey  <tromey@adacore.com>
+
 	* valprint.c (read_string): Update comment.
 	* target.c (MIN): Remove.
 	(target_read_string): Rewrite.

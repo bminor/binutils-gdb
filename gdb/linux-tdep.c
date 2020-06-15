@@ -701,22 +701,16 @@ dump_mapping_p (filter_flags filterflags, const struct smaps_vmflags *v,
   if (!dump_p && private_p && offset == 0
       && (filterflags & COREFILTER_ELF_HEADERS) != 0)
     {
-      /* Let's check if we have an ELF header.  */
-      gdb::unique_xmalloc_ptr<char> header;
-      int errcode;
-
       /* Useful define specifying the size of the ELF magical
 	 header.  */
 #ifndef SELFMAG
 #define SELFMAG 4
 #endif
 
-      /* Read the first SELFMAG bytes and check if it is ELFMAG.  */
-      if (target_read_string (addr, &header, SELFMAG, &errcode) == SELFMAG
-	  && errcode == 0)
+      /* Let's check if we have an ELF header.  */
+      gdb_byte h[SELFMAG];
+      if (target_read_memory (addr, h, SELFMAG) == 0)
 	{
-	  const char *h = header.get ();
-
 	  /* The EI_MAG* and ELFMAG* constants come from
 	     <elf/common.h>.  */
 	  if (h[EI_MAG0] == ELFMAG0 && h[EI_MAG1] == ELFMAG1
