@@ -1,5 +1,17 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* linux-tdep.c (struct smaps_vmflags) <memory_tagging>: New flag
+	bit.
+	(struct smaps_data): New struct.
+	(decode_vmflags): Handle the 'mt' flag.
+	(parse_smaps_data): New function, refactored from
+	linux_find_memory_regions_full.
+	(linux_address_in_memtag_page): New function.
+	(linux_find_memory_regions_full): Refactor into parse_smaps_data.
+	* linux-tdep.h (linux_address_in_memtag_page): New prototype.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* linux-tdep.c (linux_find_memory_regions_full): Use std::string
 	instead of char arrays.
 
