@@ -204,6 +204,7 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 FEATURE_XMLFILES = aarch64-core.xml \
 	aarch64-fpu.xml \
 	aarch64-pauth.xml \
+	aarch64-mte.xml \
 	arc/core-v2.xml \
 	arc/aux-v2.xml \
 	arc/core-arcompact.xml \

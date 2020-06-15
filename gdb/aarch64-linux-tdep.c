@@ -654,9 +654,11 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
 				     struct target_ops *target, bfd *abfd)
 {
   CORE_ADDR hwcap = linux_get_hwcap (target);
+  CORE_ADDR hwcap2 = linux_get_hwcap2 (target);
 
+  bool mte_p = (hwcap2 & HWCAP2_MTE)? true : false;
   return aarch64_read_description (aarch64_linux_core_read_vq (gdbarch, abfd),
-				   hwcap & AARCH64_HWCAP_PACA);
+				   hwcap & AARCH64_HWCAP_PACA, mte_p);
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
