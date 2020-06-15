@@ -653,9 +653,12 @@ aarch64_linux_nat_target::read_description ()
     return aarch32_read_description ();
 
   CORE_ADDR hwcap = linux_get_hwcap (this);
+  CORE_ADDR hwcap2 = linux_get_hwcap2 (this);
 
-  return aarch64_read_description (aarch64_sve_get_vq (tid),
-				   hwcap & AARCH64_HWCAP_PACA);
+  bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
+  bool mte_p = hwcap2 & HWCAP2_MTE;
+
+  return aarch64_read_description (aarch64_sve_get_vq (tid), pauth_p, mte_p);
 }
 
 /* Convert a native/host siginfo object, into/from the siginfo in the
