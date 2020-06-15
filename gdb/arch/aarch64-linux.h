@@ -32,6 +32,8 @@
 
 /* We have one tag per 16 bytes of memory.  */
 #define MTE_GRANULE_SIZE 16
+#define MTE_LOGICAL_TAG_START_BIT   56
+#define MTE_LOGICAL_MAX_VALUE	    0xf
 
 /* Return the number of tag granules in the memory range
    [ADDR, ADDR + LEN) given GRANULE_SIZE.  */

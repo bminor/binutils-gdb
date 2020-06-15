@@ -251,6 +251,12 @@ struct gdbarch
   gdbarch_convert_from_func_ptr_addr_ftype *convert_from_func_ptr_addr;
   gdbarch_addr_bits_remove_ftype *addr_bits_remove;
   int significant_addr_bit;
+  gdbarch_memtag_to_string_ftype *memtag_to_string;
+  gdbarch_tagged_address_p_ftype *tagged_address_p;
+  gdbarch_memtag_mismatch_p_ftype *memtag_mismatch_p;
+  gdbarch_set_memtags_ftype *set_memtags;
+  gdbarch_get_memtag_ftype *get_memtag;
+  CORE_ADDR memtag_granule_size;
   gdbarch_software_single_step_ftype *software_single_step;
   gdbarch_single_step_through_delay_ftype *single_step_through_delay;
   gdbarch_print_insn_ftype *print_insn;
@@ -427,6 +433,11 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->stabs_argument_has_addr = default_stabs_argument_has_addr;
   gdbarch->convert_from_func_ptr_addr = convert_from_func_ptr_addr_identity;
   gdbarch->addr_bits_remove = core_addr_identity;
+  gdbarch->memtag_to_string = default_memtag_to_string;
+  gdbarch->tagged_address_p = default_tagged_address_p;
+  gdbarch->memtag_mismatch_p = default_memtag_mismatch_p;
+  gdbarch->set_memtags = default_set_memtags;
+  gdbarch->get_memtag = default_get_memtag;
   gdbarch->print_insn = default_print_insn;
   gdbarch->skip_trampoline_code = generic_skip_trampoline_code;
   gdbarch->skip_solib_resolver = generic_skip_solib_resolver;
@@ -616,6 +627,12 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of convert_from_func_ptr_addr, invalid_p == 0 */
   /* Skip verify of addr_bits_remove, invalid_p == 0 */
   /* Skip verify of significant_addr_bit, invalid_p == 0 */
+  /* Skip verify of memtag_to_string, invalid_p == 0 */
+  /* Skip verify of tagged_address_p, invalid_p == 0 */
+  /* Skip verify of memtag_mismatch_p, invalid_p == 0 */
+  /* Skip verify of set_memtags, invalid_p == 0 */
+  /* Skip verify of get_memtag, invalid_p == 0 */
+  /* Skip verify of memtag_granule_size, invalid_p == 0 */
   /* Skip verify of software_single_step, has predicate.  */
   /* Skip verify of single_step_through_delay, has predicate.  */
   /* Skip verify of print_insn, invalid_p == 0 */
@@ -1056,6 +1073,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: get_longjmp_target = <%s>\n",
                       host_address_to_string (gdbarch->get_longjmp_target));
   fprintf_unfiltered (file,
+                      "gdbarch_dump: get_memtag = <%s>\n",
+                      host_address_to_string (gdbarch->get_memtag));
+  fprintf_unfiltered (file,
                       "gdbarch_dump: get_pc_address_flags = <%s>\n",
                       host_address_to_string (gdbarch->get_pc_address_flags));
   fprintf_unfiltered (file,
@@ -1190,6 +1210,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: memory_remove_breakpoint = <%s>\n",
                       host_address_to_string (gdbarch->memory_remove_breakpoint));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: memtag_granule_size = %s\n",
+                      core_addr_to_string_nz (gdbarch->memtag_granule_size));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: memtag_mismatch_p = <%s>\n",
+                      host_address_to_string (gdbarch->memtag_mismatch_p));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: memtag_to_string = <%s>\n",
+                      host_address_to_string (gdbarch->memtag_to_string));
   fprintf_unfiltered (file,
                       "gdbarch_dump: num_pseudo_regs = %s\n",
                       plongest (gdbarch->num_pseudo_regs));
@@ -1335,6 +1364,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
                       "gdbarch_dump: sdb_reg_to_regnum = <%s>\n",
                       host_address_to_string (gdbarch->sdb_reg_to_regnum));
   fprintf_unfiltered (file,
+                      "gdbarch_dump: set_memtags = <%s>\n",
+                      host_address_to_string (gdbarch->set_memtags));
+  fprintf_unfiltered (file,
                       "gdbarch_dump: short_bit = %s\n",
                       plongest (gdbarch->short_bit));
   fprintf_unfiltered (file,
@@ -1448,6 +1480,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: syscalls_info = %s\n",
                       host_address_to_string (gdbarch->syscalls_info));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: tagged_address_p = <%s>\n",
+                      host_address_to_string (gdbarch->tagged_address_p));
   fprintf_unfiltered (file,
                       "gdbarch_dump: target_desc = %s\n",
                       host_address_to_string (gdbarch->target_desc));
@@ -3218,6 +3253,108 @@ set_gdbarch_significant_addr_bit (struct gdbarch *gdbarch,
                                   int significant_addr_bit)
 {
   gdbarch->significant_addr_bit = significant_addr_bit;
+}
+
+std::string
+gdbarch_memtag_to_string (struct gdbarch *gdbarch, struct value *address, enum memtag_type tag_type)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->memtag_to_string != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_memtag_to_string called\n");
+  return gdbarch->memtag_to_string (gdbarch, address, tag_type);
+}
+
+void
+set_gdbarch_memtag_to_string (struct gdbarch *gdbarch,
+                              gdbarch_memtag_to_string_ftype memtag_to_string)
+{
+  gdbarch->memtag_to_string = memtag_to_string;
+}
+
+bool
+gdbarch_tagged_address_p (struct gdbarch *gdbarch, struct value *address)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->tagged_address_p != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_tagged_address_p called\n");
+  return gdbarch->tagged_address_p (gdbarch, address);
+}
+
+void
+set_gdbarch_tagged_address_p (struct gdbarch *gdbarch,
+                              gdbarch_tagged_address_p_ftype tagged_address_p)
+{
+  gdbarch->tagged_address_p = tagged_address_p;
+}
+
+bool
+gdbarch_memtag_mismatch_p (struct gdbarch *gdbarch, struct value *address)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->memtag_mismatch_p != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_memtag_mismatch_p called\n");
+  return gdbarch->memtag_mismatch_p (gdbarch, address);
+}
+
+void
+set_gdbarch_memtag_mismatch_p (struct gdbarch *gdbarch,
+                               gdbarch_memtag_mismatch_p_ftype memtag_mismatch_p)
+{
+  gdbarch->memtag_mismatch_p = memtag_mismatch_p;
+}
+
+int
+gdbarch_set_memtags (struct gdbarch *gdbarch, struct value *address, size_t length, const gdb::byte_vector &tags, enum memtag_type tag_type)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->set_memtags != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_set_memtags called\n");
+  return gdbarch->set_memtags (gdbarch, address, length, tags, tag_type);
+}
+
+void
+set_gdbarch_set_memtags (struct gdbarch *gdbarch,
+                         gdbarch_set_memtags_ftype set_memtags)
+{
+  gdbarch->set_memtags = set_memtags;
+}
+
+struct value *
+gdbarch_get_memtag (struct gdbarch *gdbarch, struct value *address, enum memtag_type tag_type)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->get_memtag != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_get_memtag called\n");
+  return gdbarch->get_memtag (gdbarch, address, tag_type);
+}
+
+void
+set_gdbarch_get_memtag (struct gdbarch *gdbarch,
+                        gdbarch_get_memtag_ftype get_memtag)
+{
+  gdbarch->get_memtag = get_memtag;
+}
+
+CORE_ADDR
+gdbarch_memtag_granule_size (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  /* Skip verify of memtag_granule_size, invalid_p == 0 */
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_memtag_granule_size called\n");
+  return gdbarch->memtag_granule_size;
+}
+
+void
+set_gdbarch_memtag_granule_size (struct gdbarch *gdbarch,
+                                 CORE_ADDR memtag_granule_size)
+{
+  gdbarch->memtag_granule_size = memtag_granule_size;
 }
 
 int
