@@ -241,6 +241,7 @@ struct format_data
     int count;
     char format;
     char size;
+    bool print_tags;
 
     /* True if the value should be printed raw -- that is, bypassing
        python-based formatters.  */
