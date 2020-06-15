@@ -190,6 +190,9 @@ struct client_state
 
   int current_traceframe = -1;
 
+  /* If true, memory tagging features are supported.  */
+  bool memory_tagging_feature = false;
+
 };
 
 client_state &get_client_state ();

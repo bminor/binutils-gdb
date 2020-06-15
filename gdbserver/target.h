@@ -30,6 +30,7 @@
 #include "gdbsupport/array-view.h"
 #include "gdbsupport/btrace-common.h"
 #include <vector>
+#include "gdbsupport/byte-vector.h"
 
 struct emit_ops;
 struct buffer;
@@ -499,6 +500,19 @@ public:
 
   /* Return tdesc index for IPA.  */
   virtual int get_ipa_tdesc_idx ();
+
+  /* Returns true if the target supports memory tagging facilities.  */
+  virtual bool supports_memory_tagging ();
+
+  /* Return the allocated memory tags associated with
+     [ADDRESS, ADDRESS + LEN) in TAGS.  */
+  virtual int fetch_memtags (CORE_ADDR address, size_t len,
+			     gdb::byte_vector &tags);
+
+  /* Write the allocation tags contained in TAGS to the memory range
+     [ADDRESS, ADDRESS + LEN).  */
+  virtual int store_memtags (CORE_ADDR address, size_t len,
+			     const gdb::byte_vector &tags);
 };
 
 extern process_stratum_target *the_target;
@@ -524,6 +538,9 @@ int kill_inferior (process_info *proc);
 
 #define target_supports_exec_events() \
   the_target->supports_exec_events ()
+
+#define target_supports_memory_tagging() \
+  the_target->supports_memory_tagging ()
 
 #define target_handle_new_gdb_connection()		 \
   the_target->handle_new_gdb_connection ()
