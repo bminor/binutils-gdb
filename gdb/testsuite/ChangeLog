@@ -1,5 +1,13 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* gdb.arch/aarch64-mte.c: New file.
+	* gdb.arch/aarch64-mte.exp: New test.
+	* gdb.base/memtag.c: New file.
+	* gdb.base/memtag.exp: New test.
+	* lib/gdb.exp (supports_memtag): New function.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* gdb.base/options.exp: Adjust for new print options.
 	* gdb.base/with.exp: Likewise.
 
