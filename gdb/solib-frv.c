@@ -376,8 +376,6 @@ frv_current_sos (void)
 	 this in the list of shared objects.  */
       if (got_addr != mgot)
 	{
-	  int errcode;
-	  gdb::unique_xmalloc_ptr<char> name_buf;
 	  struct int_elf32_fdpic_loadmap *loadmap;
 	  struct so_list *sop;
 	  CORE_ADDR addr;
@@ -404,16 +402,15 @@ frv_current_sos (void)
 	  addr = extract_unsigned_integer (lm_buf.l_name,
 					   sizeof (lm_buf.l_name),
 					   byte_order);
-	  target_read_string (addr, &name_buf, SO_NAME_MAX_PATH_SIZE - 1,
-			      &errcode);
+	  gdb::unique_xmalloc_ptr<char> name_buf
+	    = target_read_string (addr, SO_NAME_MAX_PATH_SIZE - 1);
 
 	  if (solib_frv_debug)
 	    fprintf_unfiltered (gdb_stdlog, "current_sos: name = %s\n",
 	                        name_buf.get ());
 	  
-	  if (errcode != 0)
-	    warning (_("Can't read pathname for link map entry: %s."),
-		     safe_strerror (errcode));
+	  if (name_buf == nullptr)
+	    warning (_("Can't read pathname for link map entry."));
 	  else
 	    {
 	      strncpy (sop->so_name, name_buf.get (),

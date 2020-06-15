@@ -865,18 +865,11 @@ ada_main_name (void)
 
   if (msym.minsym != NULL)
     {
-      CORE_ADDR main_program_name_addr;
-      int err_code;
-
-      main_program_name_addr = BMSYMBOL_VALUE_ADDRESS (msym);
+      CORE_ADDR main_program_name_addr = BMSYMBOL_VALUE_ADDRESS (msym);
       if (main_program_name_addr == 0)
         error (_("Invalid address for Ada main program name."));
 
-      target_read_string (main_program_name_addr, &main_program_name,
-                          1024, &err_code);
-
-      if (err_code != 0)
-        return NULL;
+      main_program_name = target_read_string (main_program_name_addr, 1024);
       return main_program_name.get ();
     }
 
@@ -6729,10 +6722,9 @@ ada_tag_name_from_tsd (struct value *tsd)
   val = ada_value_struct_elt (tsd, "expanded_name", 1);
   if (val == NULL)
     return NULL;
-  gdb::unique_xmalloc_ptr<char> buffer;
-  int err;
-  if (target_read_string (value_as_address (val), &buffer, INT_MAX, &err) == 0
-      || err != 0)
+  gdb::unique_xmalloc_ptr<char> buffer
+    = target_read_string (value_as_address (val), INT_MAX);
+  if (buffer == nullptr)
     return nullptr;
 
   for (p = buffer.get (); *p != '\0'; ++p)
@@ -12109,13 +12101,7 @@ ada_exception_message_1 (void)
   if (e_msg_len <= 0)
     return NULL;
 
-  gdb::unique_xmalloc_ptr<char> e_msg;
-  int err;
-  if (target_read_string (value_address (e_msg_val), &e_msg, INT_MAX, &err) == 0
-      || err != 0)
-    return nullptr;
-
-  return e_msg;
+  return target_read_string (value_address (e_msg_val), INT_MAX);
 }
 
 /* Same as ada_exception_message_1, except that all exceptions are

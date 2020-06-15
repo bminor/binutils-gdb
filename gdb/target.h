@@ -1505,8 +1505,13 @@ int target_supports_disable_randomization (void);
 #define target_can_run_breakpoint_commands() \
   (current_top_target ()->can_run_breakpoint_commands) ()
 
-extern int target_read_string (CORE_ADDR, gdb::unique_xmalloc_ptr<char> *,
-			       int, int *);
+/* Read a string from target memory at address MEMADDR.  The string
+   will be at most LEN bytes long (note that excess bytes may be read
+   in some cases -- but these will not be returned).  Returns nullptr
+   on error.  */
+
+extern gdb::unique_xmalloc_ptr<char> target_read_string
+  (CORE_ADDR memaddr, int len, int *bytes_read = nullptr);
 
 /* For target_read_memory see target/target.h.  */
 

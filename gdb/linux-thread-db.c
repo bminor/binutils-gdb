@@ -472,16 +472,17 @@ inferior_has_bug (const char *ver_symbol, int ver_major_min, int ver_minor_min)
 {
   struct bound_minimal_symbol version_msym;
   CORE_ADDR version_addr;
-  gdb::unique_xmalloc_ptr<char> version;
-  int err, got, retval = 0;
+  int got, retval = 0;
 
   version_msym = lookup_minimal_symbol (ver_symbol, NULL, NULL);
   if (version_msym.minsym == NULL)
     return 0;
 
   version_addr = BMSYMBOL_VALUE_ADDRESS (version_msym);
-  got = target_read_string (version_addr, &version, 32, &err);
-  if (err == 0 && memchr (version.get (), 0, got) == version.get () + got - 1)
+  gdb::unique_xmalloc_ptr<char> version
+    = target_read_string (version_addr, 32, &got);
+  if (version != nullptr
+      && memchr (version.get (), 0, got) == version.get () + got - 1)
     {
       int major, minor;
 

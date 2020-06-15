@@ -804,28 +804,24 @@ target_xfer_status_to_string (enum target_xfer_status status)
 };
 
 
-/* target_read_string -- read a null terminated string, up to LEN bytes,
-   from MEMADDR in target.  Set *ERRNOP to the errno code, or 0 if successful.
-   Set *STRING to a pointer to malloc'd memory containing the data; the caller
-   is responsible for freeing it.  Return the number of bytes successfully
-   read.  */
+/* See target.h.  */
 
-int
-target_read_string (CORE_ADDR memaddr, gdb::unique_xmalloc_ptr<char> *string,
-		    int len, int *errnop)
+gdb::unique_xmalloc_ptr<char>
+target_read_string (CORE_ADDR memaddr, int len, int *bytes_read)
 {
-  int bytes_read;
   gdb::unique_xmalloc_ptr<gdb_byte> buffer;
+
+  int ignore;
+  if (bytes_read == nullptr)
+    bytes_read = &ignore;
 
   /* Note that the endian-ness does not matter here.  */
   int errcode = read_string (memaddr, -1, 1, len, BFD_ENDIAN_LITTLE,
-			     &buffer, &bytes_read);
+			     &buffer, bytes_read);
+  if (errcode != 0)
+    return {};
 
-  if (errnop != nullptr)
-    *errnop = errcode;
-
-  string->reset ((char *) buffer.release ());
-  return bytes_read;
+  return gdb::unique_xmalloc_ptr<char> ((char *) buffer.release ());
 }
 
 struct target_section_table *

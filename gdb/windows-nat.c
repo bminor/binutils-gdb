@@ -985,13 +985,13 @@ signal_event_command (const char *args, int from_tty)
 int
 windows_nat::handle_output_debug_string (struct target_waitstatus *ourstatus)
 {
-  gdb::unique_xmalloc_ptr<char> s;
   int retval = 0;
 
-  if (!target_read_string
-	((CORE_ADDR) (uintptr_t) current_event.u.DebugString.lpDebugStringData,
-	 &s, 1024, 0)
-      || !s || !*(s.get ()))
+  gdb::unique_xmalloc_ptr<char> s
+    = (target_read_string
+       ((CORE_ADDR) (uintptr_t) current_event.u.DebugString.lpDebugStringData,
+	1024));
+  if (s == nullptr || !*(s.get ()))
     /* nothing to do */;
   else if (!startswith (s.get (), _CYGWIN_SIGNAL_STRING))
     {
@@ -1216,10 +1216,8 @@ windows_nat::handle_ms_vc_exception (const EXCEPTION_RECORD *rec)
       if (named_thread != NULL)
 	{
 	  int thread_name_len;
-	  gdb::unique_xmalloc_ptr<char> thread_name;
-
-	  thread_name_len = target_read_string (thread_name_target,
-						&thread_name, 1025, NULL);
+	  gdb::unique_xmalloc_ptr<char> thread_name
+	    = target_read_string (thread_name_target, 1025, &thread_name_len);
 	  if (thread_name_len > 0)
 	    {
 	      thread_name.get ()[thread_name_len - 1] = '\0';

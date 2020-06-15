@@ -241,18 +241,14 @@ print_subexp_standard (struct expression *exp, int *pos,
 
     case OP_OBJC_MSGCALL:
       {			/* Objective C message (method) call.  */
-	gdb::unique_xmalloc_ptr<char> selector;
-
 	(*pos) += 3;
 	nargs = longest_to_int (exp->elts[pc + 2].longconst);
 	fprintf_unfiltered (stream, "[");
 	print_subexp (exp, pos, stream, PREC_SUFFIX);
-	if (0 == target_read_string (exp->elts[pc + 1].longconst,
-				     &selector, 1024, NULL))
-	  {
-	    error (_("bad selector"));
-	    return;
-	  }
+	gdb::unique_xmalloc_ptr<char> selector
+	  = target_read_string (exp->elts[pc + 1].longconst, 1024);
+	if (selector == nullptr)
+	  error (_("bad selector"));
 	if (nargs)
 	  {
 	    char *s, *nextS;

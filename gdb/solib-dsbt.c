@@ -681,8 +681,6 @@ dsbt_current_sos (void)
 	 this in the list of shared objects.  */
       if (dsbt_index != 0)
 	{
-	  int errcode;
-	  gdb::unique_xmalloc_ptr<char> name_buf;
 	  struct int_elf32_dsbt_loadmap *loadmap;
 	  struct so_list *sop;
 	  CORE_ADDR addr;
@@ -703,12 +701,11 @@ dsbt_current_sos (void)
 	  addr = extract_unsigned_integer (lm_buf.l_name,
 					   sizeof (lm_buf.l_name),
 					   byte_order);
-	  target_read_string (addr, &name_buf, SO_NAME_MAX_PATH_SIZE - 1,
-			      &errcode);
+	  gdb::unique_xmalloc_ptr<char> name_buf
+	    = target_read_string (addr, SO_NAME_MAX_PATH_SIZE - 1);
 
-	  if (errcode != 0)
-	    warning (_("Can't read pathname for link map entry: %s."),
-		     safe_strerror (errcode));
+	  if (name_buf == nullptr)
+	    warning (_("Can't read pathname for link map entry."));
 	  else
 	    {
 	      if (solib_dsbt_debug)
