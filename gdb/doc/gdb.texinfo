@@ -9893,6 +9893,10 @@ If you omit @var{expr}, @value{GDBN} displays the last value again (from the
 conveniently inspect the same value in an alternative format.
 @end table
 
+If the architecture supports memory tagging, the @code{print} command will
+display pointer/memory tag mismatches if what is being printed is a pointer
+or reference type.
+
 A more low-level way of examining data is with the @code{x} command.
 It examines data in memory at a specified address and prints it in a
 specified format.  @xref{Memory, ,Examining Memory}.
@@ -10660,7 +10664,8 @@ number is specified, memory is examined backward from @var{addr}.
 @item @var{f}, the display format
 The display format is one of the formats used by @code{print}
 (@samp{x}, @samp{d}, @samp{u}, @samp{o}, @samp{t}, @samp{a}, @samp{c},
-@samp{f}, @samp{s}), and in addition @samp{i} (for machine instructions).
+@samp{f}, @samp{s}), @samp{i} (for machine instructions) and
+@samp{m} (for displaying memory tags).
 The default is @samp{x} (hexadecimal) initially.  The default changes
 each time you use either @code{x} or @code{print}.
 
@@ -10755,6 +10760,20 @@ counter is shown with a @code{=>} marker. For example:
    0x804838c <main+24>: call   0x80482d4 <puts@@plt>
 @end smallexample
 
+If the architecture supports memory tagging, the tags can be displayed by
+using @samp{m}.  The information will be displayed once per granule size
+(the amount of bytes a particular memory tag covers).  For example, AArch64
+has a granule size of 16 bytes, so it will display a tag every 16 bytes.
+
+Due to the way @value{GDBN} prints information with the @code{x} command (not
+aligned to a particular boundary), the tag information will refer to the
+initial address displayed on a particular line.  If a memory tag boundary
+is crossed in the middle of a line displayed by the @code{x} command, it
+will be displayed in the next line.
+
+The @samp{m} format doesn't affect any other specified formats that were
+passed to the @code{x} command.
+
 @cindex @code{$_}, @code{$__}, and value history
 The addresses and contents printed by the @code{x} command are not saved
 in the value history because there is often too much of them and they
@@ -10821,8 +10840,17 @@ If the underlying architecture supports memory tagging, like AArch64,
 @value{GDBN} can make use of it to validate addresses and pointers against
 memory allocation tags.
 
-A command prefix of @code{mtag} gives access to the various memory tagging
-commands.
+The @code{print} and @code{x} commands will display tag information when
+appropriate, and a command prefix of @code{mtag} gives access to the
+various memory tagging commands.
+
+The @code{print} command will automatically attempt to validate the logical
+tag against the allocation tag for pointers and addresses, and will display
+a message in case of failure.
+
+The @code{x} command has a @code{m} modifier.  When present, this modifier
+will make the @code{x} command output allocation tag information for a given
+memory region that is being examined.
 
 The @code{mtag} commands are the following:
 
