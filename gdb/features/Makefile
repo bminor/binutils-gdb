@@ -229,10 +229,8 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	i386/64bit-sse.xml \
 	i386/x32-core.xml \
 	riscv/32bit-cpu.xml \
-	riscv/32bit-csr.xml \
 	riscv/32bit-fpu.xml \
 	riscv/64bit-cpu.xml \
-	riscv/64bit-csr.xml \
 	riscv/64bit-fpu.xml \
 	rx.xml \
 	tic6x-c6xp.xml \
@@ -264,10 +262,6 @@ $(FEATURE_CFILES): %.c: %.xml.tmp
 	echo "  <xi:include href=\"$(notdir $<)\"/>" >> $@.tmp
 	echo "</target>" >> $@.tmp
 	sh ../../move-if-change $@.tmp $@
-
-# Regenerate RISC-V CSR feature lists.
-riscv/32bit-csr.xml riscv/64bit-csr.xml: ../../include/opcode/riscv-opc.h
-	./riscv/rebuild-csr-xml.sh ../../include/opcode/riscv-opc.h ./riscv
 
 # 'all' doesn't build the C files, so don't delete them in 'clean'
 # either.

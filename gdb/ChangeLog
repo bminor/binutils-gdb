@@ -1,5 +1,15 @@
 2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* features/Makefile: Remove all references to the deleted files
+	below.
+	* features/riscv/32bit-csr.c: Deleted.
+	* features/riscv/32bit-csr.xml: Deleted.
+	* features/riscv/64bit-csr.c: Deleted.
+	* features/riscv/64bit-csr.xml: Deleted.
+	* features/riscv/rebuild-csr-xml.sh: Deleted.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (struct riscv_register_feature::register_info): Fix
 	whitespace error for declaration of names member variable.
 	(struct riscv_register_feature): Add new prefer_first_name member
