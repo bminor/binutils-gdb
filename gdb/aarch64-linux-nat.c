@@ -50,6 +50,8 @@
 #include "gdb_proc_service.h"
 #include "arch-utils.h"
 
+#include "arch/aarch64-linux.h"
+
 #ifndef TRAP_HWBKPT
 #define TRAP_HWBKPT 0x0004
 #endif

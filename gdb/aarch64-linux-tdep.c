@@ -44,6 +44,8 @@
 #include "record-full.h"
 #include "linux-record.h"
 
+#include "arch/aarch64-linux.h"
+
 /* Signal frame handling.
 
       +------------+  ^

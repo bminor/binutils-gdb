@@ -679,6 +679,7 @@ ALL_64_TARGET_OBS = \
 	amd64-tdep.o \
 	amd64-windows-tdep.o \
 	arch/aarch64.o \
+	arch/aarch64-linux.o \
 	arch/aarch64-insn.o \
 	arch/amd64.o \
 	ia64-linux-tdep.o \
@@ -1443,6 +1444,7 @@ HFILES_NO_SRCDIR = \
 	xtensa-tdep.h \
 	arch/aarch32.h \
 	arch/aarch64.h \
+	arch/aarch64-linux.h \
 	arch/aarch64-insn.h \
 	arch/arc.h \
 	arch/arm.h \
