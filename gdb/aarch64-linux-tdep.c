@@ -1626,6 +1626,61 @@ aarch64_linux_memtag_to_string (struct gdbarch *gdbarch,
   return string_printf ("0x%s", phex_nz (tag, sizeof (tag)));
 }
 
+/* AArch64 Linux implementation of the handle_segmentation_fault gdbarch
+   hook.  Displays information about possible memory tag violations.  */
+
+static void
+aarch64_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
+					 struct ui_out *uiout)
+{
+  CORE_ADDR fault_addr = 0;
+  long si_code = 0;
+
+  try
+    {
+      /* Sigcode tells us if the segfault is actually a memory tag
+	 violation.  */
+      si_code = parse_and_eval_long ("$_siginfo.si_code\n");
+
+      fault_addr
+	= parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
+    }
+  catch (const gdb_exception &exception)
+    {
+      return;
+    }
+
+  /* If this is not a memory tag violation, just return.  */
+  if (si_code != SEGV_MTEAERR && si_code != SEGV_MTESERR)
+    return;
+
+  uiout->text ("\n");
+
+  uiout->field_string ("sigcode-meaning", _("Memory tag violation"));
+
+  /* For synchronous faults, show additional information.  */
+  if (si_code == SEGV_MTESERR)
+    {
+      uiout->text (_(" while accessing address "));
+      uiout->field_core_addr ("fault-addr", gdbarch, fault_addr);
+      uiout->text ("\n");
+
+      CORE_ADDR atag;
+      if (aarch64_linux_get_atag (fault_addr, &atag) != 0)
+	uiout->text (_("Allocation tag unavailable"));
+      else
+	{
+	  uiout->text (_("Allocation tag "));
+	  uiout->field_core_addr ("allocation-tag", gdbarch, atag);
+	}
+    }
+  else
+    {
+      uiout->text ("\n");
+      uiout->text (_("Fault address unavailable"));
+    }
+}
+
 static void
 aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1706,6 +1761,9 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
       /* Register a hook for converting a memory tag to a string.  */
       set_gdbarch_memtag_to_string (gdbarch, aarch64_linux_memtag_to_string);
+
+      set_gdbarch_handle_segmentation_fault (gdbarch,
+				      aarch64_linux_handle_segmentation_fault);
     }
 
   /* Initialize the aarch64_linux_record_tdep.  */
