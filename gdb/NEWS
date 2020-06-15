@@ -3,6 +3,19 @@
 
 *** Changes since GDB 9
 
+* GDB now supports general memory tagging functionality if the underlying
+  architecture supports the proper primitives and hooks.  Currently this is
+  enabled only for AArch64 MTE.
+
+  This includes additional information when the inferior crashes with a
+  SIGSEGV caused by a memory tag violation.
+
+* The "x" command supports the 'm' modifier to display allocation tags for
+  a particular memory range.
+
+* The "print" command will display memory tag mismatches for addresses and
+  pointers, if memory tagging is supported by the architecture.
+
 * Help and apropos commands will now show the documentation of a
   command only once, even if that command has one or more aliases.
   These commands now show the command name, then all of its aliases,
@@ -63,7 +76,26 @@
 * On Windows targets, it is now possible to debug 32-bit programs with a
   64-bit GDB.
 
+* New remote packets
+
+qMemTags
+  Request the remote to send allocation tags for a particular memory range.
+QMemTags
+  Request the remote to store the specified allocation tags to the requested
+  memory range.
+
 * New commands
+
+mtag showltag ADDRESS
+  Show the logical tag for ADDRESS.
+mtag setltag ADDRESS TAG
+  Set the logical tag for ADDRESS to TAG.
+mtag showatag ADDRESS
+  Show the allocation tag for ADDRESS.
+mtag setatag ADDRESS LENGTH TAGS
+  Set the allocation tag for [ADDRESS, ADDRESS + LENGTH) to TAGS.
+mtag check ADDRESS
+  Validate that ADDRESS' logical tag matches the allocation tag.
 
 set exec-file-mismatch -- Set exec-file-mismatch handling (ask|warn|off).
 show exec-file-mismatch -- Show exec-file-mismatch handling (ask|warn|off).
