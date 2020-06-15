@@ -1,0 +1,196 @@
+# Copyright (C) 2020 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test a binary with address signing works regardless of whether the target
+# supports pauth instructions.  On non pauth systems, all pauth instructions
+# are treated as nops.
+
+global hex
+global decimal
+
+# Return TAG in hex format with no leading zeroes.
+proc get_hex_tag { tag } {
+    return [format "%x" $tag]
+}
+
+# Return TAG in the NN format where N is 4 bits of the byte.
+proc get_tag_nn { tag } {
+    return [format "%02x" $tag]
+}
+
+# Return the address of PTR with a tag of TAG.
+proc get_tagged_ptr { tag ptr } {
+  return [get_valueof "/x" \
+	      "${ptr} & (0x00ffffffffffffff) | ((unsigned long) ${tag} << 56)" \
+	      "0" "fetch pointer ${ptr} with tag ${tag}"]
+}
+
+# Return the logical TAG from PTR.
+proc get_ltag_from_ptr { ptr } {
+  return [get_valueof "/x" "$ptr >> 56 & 0xf" -1 "fetch tag from pointer ${ptr}"]
+}
+
+if {![is_aarch64_target]} {
+    verbose "Skipping ${gdb_test_file_name}."
+    return
+}
+
+standard_testfile
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
+    return -1
+}
+
+if ![runto_main] {
+    untested "could not run to main"
+    return -1
+}
+
+# Targets that don't support memory tagging should not execute the
+# runtime memory tagging tests.
+if {![supports_memtag]} {
+    untested "memory tagging unsupported"
+    return -1
+}
+
+with_test_prefix "literals" {
+    set setatag_msg "Allocation tag\\(s\\) updated successfully\."
+    set check_msg "Memory tags match\."
+
+    # Test setting and showing the logical tags.
+    for {set i 0} {$i < 32} {incr i} {
+	set addr [get_tagged_ptr $i 0xdeadbeef]
+	set tag [get_hex_tag [expr $i % 16]]
+	gdb_test "mtag showltag $addr" " = 0x${tag}" "showltag with tag ${i}"
+
+	set tag_nn [get_tag_nn $i]
+	gdb_test "mtag setltag ${addr} ${tag_nn}" " = \\(void \\*\\) ${addr}" \
+		 "setltag with tag ${i}"
+    }
+
+    # Fetch the pointer to a known PROT_MTE-mapped area.
+    set tagged_ptr [get_hexadecimal_valueof "argv" -1]
+
+    if {$tagged_ptr == -1} {
+	untested "unexpected pointer or tag value"
+	return -1
+    }
+
+    # Test setting and showing the allocation tags
+    for {set i 0} {$i < 32} {incr i} {
+
+	set tag_nn [get_tag_nn $i]
+	gdb_test "mtag setatag $tagged_ptr 0 ${tag_nn}" \
+		 $setatag_msg \
+		 "setatag with tag ${i}"
+
+	set tag [get_hex_tag [expr $i % 16]]
+	gdb_test "mtag showatag $tagged_ptr" " = 0x${i}" \
+		 "showatag with tag ${i}"
+    }
+
+    # Test tag mismatches.
+    with_test_prefix "tag mismatches" {
+	for {set i 0} {$i < 32} {incr i} {
+
+	    # Set the allocation tag to a known value.
+	    set tag_nn [get_tag_nn $i]
+	    gdb_test "mtag setatag $tagged_ptr 0 ${tag_nn}" \
+		     $setatag_msg \
+		     "setatag with tag ${i}"
+
+	    # Validate that the logical tag matches against the allocation
+	    # tag.
+	    set addr [get_tagged_ptr $i $tagged_ptr]
+	    gdb_test "mtag check $addr" $check_msg \
+		     "check match with tag ${i}"
+
+	    # Get a pointer with the logical tag that does not match the
+	    # allocation tag.
+	    set ltag [expr $i + 1]
+	    with_test_prefix "fetch mismatch tag" {
+		set addr [get_tagged_ptr $ltag $tagged_ptr]
+	    }
+
+	    # Validate that the logical tag does not match the allocation
+	    # tag.
+	    set ltag [get_hex_tag [expr [expr $i + 1]% 16]]
+	    set atag [get_hex_tag [expr $i % 16]]
+	    gdb_test "mtag check $addr" \
+		     "Logical tag \\(0x${ltag}\\) does not match the allocation tag \\(0x${atag}\\)\." \
+		     "check mismatch with tag ${i}"
+	}
+    }
+
+}
+
+# Test the memory tagging extensions for the "print" command.
+with_test_prefix "print command" {
+    set ptr_name "argv"
+    set tagged_ptr [get_hexadecimal_valueof $ptr_name -1]
+
+    if {$tagged_ptr == -1} {
+	untested "unexpected pointer or tag value"
+	return -1
+    }
+
+    set ltag [get_ltag_from_ptr ${tagged_ptr}]
+
+    if {$ltag == -1} {
+	untested "unexpected tag value"
+	return -1
+    }
+
+    set atag [expr [expr $ltag + 1] % 16]
+    set atag_nn [get_tag_nn $atag]
+
+    gdb_test "mtag setatag $tagged_ptr 0 ${atag_nn}" \
+	     $setatag_msg \
+	     "make atag and ltag different"
+
+    gdb_test "p $ptr_name" \
+	[multi_line \
+	    "Logical tag \\(${ltag}\\) does not match Allocation tag \\(0x${atag}\\)\." \
+	    "\\\$\[0-9\]+ = \\(.*\\) (0|$hex)( <.*>)?\[\r\n\]+"] \
+	"show tag mismatch"
+}
+
+# Test the memory tagging extensions for the "x" command.
+with_test_prefix "x command" {
+    set ptr_name "argv"
+
+    # Check if the allocation tags match what we expect.
+    gdb_test "x/gxm argv" \
+	[multi_line \
+	    "<Allocation Tag $hex for range \\\[$hex,$hex\\)>" \
+	    "$hex:\[ \t\]+$hex"] \
+	"outputs tag information"
+}
+
+# Validate the presence of the MTE registers.
+foreach reg {"sctlr" "gcr"} {
+    gdb_test "info registers $reg" \
+	     "$reg\[ \t\]+$hex\[ \t\]+$decimal" \
+	     "register $reg available"
+}
+
+# Run until a crash and confirm GDB displays memory tag violation
+# information.
+gdb_test "continue" \
+    [multi_line \
+	"Memory tag violation while accessing address $hex" \
+	"Logical tag $hex" \
+	"Allocation tag $hex" \
+	"$hex in main \\(argc=1, argv=0xfffffffff3b8\\) at .*"] \
+	 "display tag violation information"
