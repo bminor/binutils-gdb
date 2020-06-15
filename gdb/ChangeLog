@@ -1,5 +1,11 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* remote: Include gdbsupport/selftest.h.
+	(test_memory_tagging_functions): New function.
+	(_initialize_remote): Register test_memory_tagging_functions.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* remote.c (PACKET_memory_tagging_feature): New enum.
 	(remote_memory_tagging_p): New function.
 	(remote_protocol_features): New "memory-tagging" entry.
