@@ -3689,6 +3689,91 @@ detach_or_kill_for_exit_cleanup ()
     }
 }
 
+#if GDB_SELF_TEST
+
+namespace selftests {
+
+static void
+test_memory_tagging_functions (void)
+{
+  /* Setup testing.  */
+  gdb::char_vector packet;
+  gdb::byte_vector tags, bv;
+  std::string expected;
+  packet.resize (32000);
+  CORE_ADDR addr;
+  size_t len;
+
+  /* Test parsing a qMemTags request.  */
+
+  /* Invalid request, addr and len unchanged.  */
+  addr = 0xff;
+  len = 255;
+  strcpy (packet.data (), "qMemTags_wrong:0,0");
+  SELF_CHECK (parse_fmemtags_request (packet.data (), &addr, &len) != 0);
+  SELF_CHECK (addr == 0xff && len == 255);
+
+  /* Valid request, addr and len updated.  */
+  addr = 0xff;
+  len = 255;
+  strcpy (packet.data (), "qMemTags:0,0");
+  SELF_CHECK (parse_fmemtags_request (packet.data (), &addr, &len) == 0);
+  SELF_CHECK (addr == 0 && len == 0);
+
+  /* Valid request, addr and len updated.  */
+  addr = 0;
+  len = 0;
+  strcpy (packet.data (), "qMemTags:deadbeef,ff");
+  SELF_CHECK (parse_fmemtags_request (packet.data (), &addr, &len) == 0);
+  SELF_CHECK (addr == 0xdeadbeef && len == 255);
+
+  /* Test creating a qMemTags reply.  */
+
+  /* Non-empty tag data.  */
+  bv.resize (0);
+
+  for (int i = 0; i < 5; i++)
+    bv.push_back (i);
+
+  expected = "m0001020304";
+  SELF_CHECK (create_fmemtags_reply (packet.data (), bv) == 0);
+  SELF_CHECK (strcmp (packet.data (), expected.c_str ()) == 0);
+
+  /* Empty tag data (error).  */
+  bv.clear ();
+  SELF_CHECK (create_fmemtags_reply (packet.data (), bv) != 0);
+
+  /* Test parsing a QMemTags request.  */
+
+  /* Invalid request and non-empty tag data: addr, len and tags unchanged.  */
+  addr = 0xff;
+  len = 255;
+  tags.resize (5);
+  strcpy (packet.data (), "QMemTags_wrong:0,0:");
+  SELF_CHECK (parse_smemtags_request (packet.data (), &addr, &len, tags) != 0);
+  SELF_CHECK (addr == 0xff && len == 255 && tags.size () == 5);
+
+  /* Valid request and empty tag data: addr, len and tags updated.  */
+  addr = 0xff;
+  len = 255;
+  tags.resize (5);
+  strcpy (packet.data (), "QMemTags:0,0:");
+  SELF_CHECK (parse_smemtags_request (packet.data (), &addr, &len, tags) == 0);
+  SELF_CHECK (addr == 0 && len == 0 && tags.size () == 0);
+
+  /* Valid request and non-empty tag data: addr, len and tags updated.  */
+  addr = 0;
+  len = 0;
+  tags.resize (0);
+  strcpy (packet.data (),
+	  "QMemTags:deadbeef,ff:0001020304");
+  SELF_CHECK (parse_smemtags_request (packet.data (), &addr, &len, tags) == 0);
+  SELF_CHECK (addr == 0xdeadbeef && len == 255 && tags.size () == 5);
+}
+
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
+
 /* Main function.  This is called by the real "main" function,
    wrapped in a TRY_CATCH that handles any uncaught exceptions.  */
 
@@ -3706,6 +3791,9 @@ captured_main (int argc, char *argv[])
   bool selftest = false;
 #if GDB_SELF_TEST
   const char *selftest_filter = NULL;
+
+  selftests::register_test ("remote_memory_tagging",
+			    selftests::test_memory_tagging_functions);
 #endif
 
   current_directory = getcwd (NULL, 0);
