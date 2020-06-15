@@ -2103,6 +2103,10 @@ enum {
   /* Support TARGET_WAITKIND_NO_RESUMED.  */
   PACKET_no_resumed,
 
+  /* Support for memory tagging, allocation tag fetch/store
+     packets and the tag violation stop replies.  */
+  PACKET_memory_tagging_feature,
+
   PACKET_MAX
 };
 
@@ -2242,6 +2246,14 @@ static int
 remote_exec_event_p (struct remote_state *rs)
 {
   return packet_support (PACKET_exec_event_feature) == PACKET_ENABLE;
+}
+
+/* Returns true if memory tagging is supported.  */
+
+static bool
+remote_memory_tagging_p (void)
+{
+  return packet_support (PACKET_memory_tagging_feature) == PACKET_ENABLE;
 }
 
 /* Insert fork catchpoint target routine.  If fork events are enabled
@@ -5245,6 +5257,8 @@ static const struct protocol_feature remote_protocol_features[] = {
   { "vContSupported", PACKET_DISABLE, remote_supported_packet, PACKET_vContSupported },
   { "QThreadEvents", PACKET_DISABLE, remote_supported_packet, PACKET_QThreadEvents },
   { "no-resumed", PACKET_DISABLE, remote_supported_packet, PACKET_no_resumed },
+  { "memory-tagging", PACKET_DISABLE, remote_supported_packet,
+    PACKET_memory_tagging_feature },
 };
 
 static char *remote_support_xml;
@@ -5338,6 +5352,10 @@ remote_target::remote_query_supported ()
 
       if (packet_set_cmd_state (PACKET_no_resumed) != AUTO_BOOLEAN_FALSE)
 	remote_query_supported_append (&q, "no-resumed+");
+
+      if (packet_set_cmd_state (PACKET_memory_tagging_feature)
+	  != AUTO_BOOLEAN_FALSE)
+	remote_query_supported_append (&q, "memory-tagging+");
 
       /* Keep this one last to work around a gdbserver <= 7.10 bug in
 	 the qSupported:xmlRegisters=i386 handling.  */
@@ -14381,7 +14399,63 @@ set_range_stepping (const char *ignore_args, int from_tty,
 bool
 remote_target::supports_memory_tagging ()
 {
-  return false;
+  return remote_memory_tagging_p ();
+}
+
+/* Create the qMemTags packet given ADDRESS and LEN.
+
+   Return 0 if successful, non-zero otherwise.  */
+
+static void
+create_fmemtags_request(gdb::char_vector &packet, CORE_ADDR address,
+			size_t len)
+{
+  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
+
+  std::string request = string_printf ("qMemTags:%s,%s",
+				       phex_nz (address, addr_size),
+				       phex_nz (len, sizeof (len)));
+
+  strcpy (packet.data (), request.c_str ());
+}
+
+/* Parse the qMemTags packet reply into TAGS.
+
+   Return 0 if successful, non-zero otherwise.  */
+
+static int
+parse_fmemtags_reply (gdb::char_vector &reply, gdb::byte_vector &tags)
+{
+  if (reply.empty () || reply[0] == 'E' || reply[0] != 'm')
+    return 1;
+
+  /* Copy the tag data.  */
+  tags = hex2bin (reply.data () + 1);
+
+  return 0;
+}
+
+/* Create the QMemTags packet given ADDRESS, LEN and TAGS.
+
+   Return 0 if successful, non-zero otherwise.  */
+
+static void
+create_smemtags_request (gdb::char_vector &packet, CORE_ADDR address,
+			 size_t len, const gdb::byte_vector &tags)
+{
+  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
+
+  /* Put together the main packet, address and length.  */
+  std::string request = string_printf ("QMemTags:%s,%s:",
+				       phex_nz (address, addr_size),
+				       phex_nz (len, sizeof (len)));
+  request += bin2hex (tags.data (), tags.size ());
+
+  /* Check if we have exceeded the maximum packet size.  */
+  if (packet.size () < request.length ())
+    error (_("Contents too big for packet QMemTags."));
+
+  strcpy (packet.data (), request.c_str ());
 }
 
 /* Implement the "fetch_memtags" target_ops method.  */
@@ -14390,6 +14464,19 @@ int
 remote_target::fetch_memtags (CORE_ADDR address, size_t len,
 			      gdb::byte_vector &tags)
 {
+  /* Make sure the qMemTags packet is supported.  */
+  if (!remote_memory_tagging_p ())
+    gdb_assert_not_reached ("remote fetch_memtags called with packet disabled");
+
+  struct remote_state *rs = get_remote_state ();
+
+  create_fmemtags_request (rs->buf, address, len);
+
+  putpkt (rs->buf);
+  getpkt (&rs->buf, 0);
+
+  parse_fmemtags_reply (rs->buf, tags);
+
   return 0;
 }
 
@@ -14399,6 +14486,21 @@ int
 remote_target::store_memtags (CORE_ADDR address, size_t len,
 			      const gdb::byte_vector &tags)
 {
+  /* Make sure the QMemTags packet is supported.  */
+  if (!remote_memory_tagging_p ())
+    gdb_assert_not_reached ("remote store_memtags called with packet disabled");
+
+  struct remote_state *rs = get_remote_state ();
+
+  create_smemtags_request (rs->buf, address, len, tags);
+
+  putpkt (rs->buf);
+  getpkt (&rs->buf, 0);
+
+  /* Verify if the request was successful.  */
+  if (packet_check_result (rs->buf.data ()) != PACKET_OK)
+    return 1;
+
   return 0;
 }
 
@@ -14800,6 +14902,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_no_resumed],
 			 "N stop reply", "no-resumed-stop-reply", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_memory_tagging_feature],
+			 "memory-tagging-feature", "memory-tagging-feature", 0);
 
   /* Assert that we've registered "set remote foo-packet" commands
      for all packet configs.  */
