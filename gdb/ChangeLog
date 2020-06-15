@@ -1,5 +1,21 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* printcmd.c: Include gdbsupport/rsp-low.h.
+	(memory_tag_list): New static global.
+	(process_print_command_args): Factored out of
+	print_command_1.
+	(print_command_1): Use process_print_command_args.
+	(show_addr_not_tagged, show_memory_tagging_unsupported)
+	(memory_tag_command, memory_tag_print_tag_command)
+	(memory_tag_print_logical_tag_command)
+	(memory_tag_print_allocation_tag_command, parse_with_logical_tag_input)
+	(memory_tag_with_logical_tag_command, parse_set_allocation_tag_input)
+	(memory_tag_set_allocation_tag_command, memory_tag_check_command): New
+	functions.
+	(_initialize_printcmd): Add "memory-tag" prefix and subcommands.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* aarch64-linux-tdep.c
 	(aarch64_linux_iterate_over_regset_sections): Handle MTE register set.
 	* aarch64-linux-tdep.h (AARCH64_LINUX_SIZEOF_MTE_REGSET): Define.

@@ -1,3 +1,11 @@
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* rsp-low.cc (fromhex, hex2bin): Move to ...
+	* common-utils.cc: ... here.
+	(fromhex) Change error message text to not be RSP-specific.
+	* rsp-low.h (fromhex, hex2bin): Move to ...
+	* common-utils.h: ... here.
+
 2021-03-21  Alan Modra  <amodra@gmail.com>
 
 	* common-utils.h (startswith): Delete version now supplied by bfd.h.

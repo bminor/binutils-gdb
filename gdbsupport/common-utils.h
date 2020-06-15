@@ -22,6 +22,7 @@
 
 #include <string>
 #include <vector>
+#include "gdbsupport/byte-vector.h"
 
 #include "poison.h"
 
@@ -190,5 +191,19 @@ in_inclusive_range (T value, T low, T high)
 
 extern ULONGEST align_up (ULONGEST v, int n);
 extern ULONGEST align_down (ULONGEST v, int n);
+
+/* Convert hex digit A to a number, or throw an exception.  */
+extern int fromhex (int a);
+
+/* HEX is a string of characters representing hexadecimal digits.
+   Convert pairs of hex digits to bytes and store sequentially into
+   BIN.  COUNT is the maximum number of characters to convert.  This
+   will convert fewer characters if the number of hex characters
+   actually seen is odd, or if HEX terminates before COUNT characters.
+   Returns the number of characters actually converted.  */
+extern int hex2bin (const char *hex, gdb_byte *bin, int count);
+
+/* Like the above, but return a gdb::byte_vector.  */
+gdb::byte_vector hex2bin (const char *hex);
 
 #endif /* COMMON_COMMON_UTILS_H */
