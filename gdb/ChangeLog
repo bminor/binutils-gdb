@@ -1,5 +1,20 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* remote.c (PACKET_memory_tagging_feature): New enum.
+	(remote_memory_tagging_p): New function.
+	(remote_protocol_features): New "memory-tagging" entry.
+	(remote_target::remote_query_supported): Handle memory tagging
+	support.
+	(remote_target::supports_memory_tagging): Implement.
+	(create_fetch_memtags_request, parse_fetch_memtags_reply)
+	(create_store_memtags_request): New functions.
+	(remote_target::fetch_memtags): Implement.
+	(remote_target::store_memtags): Implement.
+	(_initialize_remote): Add new "memory-tagging-feature"
+	config command.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* arch-utils.c (default_memtag_to_string, default_tagged_address_p)
 	(default_memtag_matches_p, default_set_memtags)
 	(default_get_memtag): New functions.
