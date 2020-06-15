@@ -22,8 +22,6 @@ if ![is_elf_format] {
     return
 }
 
-load_lib ld-lib.exp
-
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/rgn-at*.d]]
 foreach test_file $test_list {
     set test_name [file rootname $test_file]

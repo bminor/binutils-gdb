@@ -24,8 +24,6 @@ if ![is_elf_format] {
     return
 }
 
-load_lib ld-lib.exp
-
 set testname "PHDRS headers"
 
 set old_ldflags $LDFLAGS

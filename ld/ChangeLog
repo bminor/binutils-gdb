@@ -1,5 +1,14 @@
 2020-06-15  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-scripts/include.exp: Don't load ld-lib.exp.
+	* testsuite/ld-scripts/phdrs3.exp: Likewise.
+	* testsuite/ld-scripts/rgn-at.exp: Likewise.
+	* testsuite/ld-scripts/rgn-over.exp: Likewise.
+	* testsuite/ld-scripts/sort.exp: Likewise.
+	* testsuite/ld-discard/discard.exp: Likewise.  Use is_elf_format.
+
+2020-06-15  Alan Modra  <amodra@gmail.com>
+
 	PR 26103
 	* testsuite/ld-linkonce/ref1.s,
 	* testsuite/ld-linkonce/ref2.s,
