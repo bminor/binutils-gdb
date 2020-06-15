@@ -10806,6 +10806,49 @@ target supports computing the CRC checksum of a block of memory
 (@pxref{qCRC packet}).
 @end table
 
+@subsection Memory Tagging
+
+Memory tagging is a memory protection technology that validates accesses
+through pointers via a tag.  Both the pointer tag and the memory tag in the
+physical address space must match for the memory access to be validated.
+
+There are two types of tags: logical and allocation.  The logical tag is
+stored in the pointers themselves.  The allocation tag is the tag associated
+with the physical address space, against which the logical tags from pointers
+are validated.
+
+If the underlying architecture supports memory tagging, like AArch64,
+@value{GDBN} can make use of it to validate addresses and pointers against
+memory allocation tags.
+
+A command prefix of @code{mtag} gives access to the various memory tagging
+commands.
+
+The @code{mtag} commands are the following:
+
+@table @code
+@kindex mtag showltag
+@item mtag showltag @var{address_expression}
+Show the logical tag contained in the pointer resulting from evaluating the
+argument expression.
+@kindex mtag setltag
+@item mtag setltag @var{address_expression} @var{tag_bytes}
+Print the resulting pointer from evaluating the argument expression with a
+logical tag of @var{tag_bytes}.
+@kindex mtag showatag
+@item mtag showatag @var{address_expression}
+Show the allocation tag from the memory address pointed to by the evaluation
+of the argument expression.
+@kindex mtag setatag
+@item mtag setatag @var{starting_address} @var{length} @var{tag_bytes}
+Set the allocation tag for memory range @r{[}@var{starting_address},
+@var{starting_address} + @var{length}@r{)} to @var{tag_bytes}.
+@kindex mtag check
+@item mtag check @var{address_expression}
+Given the pointer resulting from evaluating the argument expression,  check that
+the logical tag and the allocation tags match.
+@end table
+
 @node Auto Display
 @section Automatic Display
 @cindex automatic display
@@ -24845,6 +24888,23 @@ register @code{$lr} is pointing to an PAC function its value will be masked.
 When GDB prints a backtrace, any addresses that required unmasking will be
 postfixed with the marker [PAC].  When using the MI, this is printed as part
 of the @code{addr_flags} field.
+
+@subsubsection AArch64 Memory Tagging Extension.
+@cindex AArch64 Memory Tagging Extension.
+
+When @value{GDBN} is debugging the AArch64 architecture, the program is
+using the v8.5-A feature Memory Tagging Extension (MTE) and there is support
+in the kernel for MTE, @value{GDBN} will make memory tagging functionality
+available for inspection and editing of logical and allocation tags.
+
+To aid debugging, @value{GDBN} will output additional information when SIGSEGV
+signals are generated as a result of memory tag failures.
+
+A new register, @code{tag_ctl}, is made available through the
+@code{org.gnu.gdb.aarch64.mte} feature.  This register exposes some
+options that can be controlled at runtime and emulates the @code{prctl}
+option @code{PR_SET_TAGGED_ADDR_CTRL}.  For further information, see the
+documentation in the Linux kernel.
 
 @node i386
 @subsection x86 Architecture-specific Issues
