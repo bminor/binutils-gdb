@@ -73,12 +73,12 @@ if {[build_shared_jit] == -1} {
     return
 }
 
-# Built the program that loads the JIT library.
+# Build the program that loads the JIT library.
 set srcfile_dl $testfile-dl.c
 set binfile_dl $binfile-dl
 set options [list debug shlib=${binfile_lib}]
 if {[gdb_compile ${srcdir}/${subdir}/${srcfile_dl} $binfile_dl executable \
-	 [list debug shlib=$binfile_lib]] == -1 } {
+	 $options] == -1 } {
     untested "failed to compile"
     return -1
 }

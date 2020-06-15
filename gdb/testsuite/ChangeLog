@@ -1,3 +1,10 @@
+2020-06-15  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.base/jit-elf-so.exp: Refer to the global main_loader_basename
+	variable.
+	* gdb.base/jit-reader-simple.exp: Fix typo ("Built" -> "Build"),
+	and use the already-defined 'options' variable.
+
 2020-06-12  Andrew Burgess  <andrew.burgess@embecosm.com>
 	    Tom de Vries  <tdevries@suse.de>
 

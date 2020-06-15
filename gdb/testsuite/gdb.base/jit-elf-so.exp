@@ -53,7 +53,7 @@ set jit_solib_srcfile ${srcdir}/${subdir}/${jit_solib_basename}.c
 # On success, return 0.
 # On failure, return -1.
 proc compile_jit_dlmain {options} {
-    global main_loader_srcfile main_loader_binfile
+    global main_loader_srcfile main_loader_binfile main_loader_basename
     set options [concat $options debug]
 
     if { [gdb_compile ${main_loader_srcfile} ${main_loader_binfile} \
