@@ -50,6 +50,8 @@
 #include "arch-utils.h"
 #include "value.h"
 
+#include "gdbsupport/selftest.h"
+
 /* Signal frame handling.
 
       +------------+  ^
@@ -1882,10 +1884,39 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_gcc_target_options (gdbarch, aarch64_linux_gcc_target_options);
 }
 
+#if GDB_SELF_TEST
+
+namespace selftests {
+
+/* Verify functions to read and write logical tags.  */
+
+static void
+aarch64_linux_ltag_tests (void)
+{
+  /* We have 4 bits of tags, but we test writing all the bits of the top
+     byte of address.  */
+  for (int i = 0; i < 1 << 8; i++)
+    {
+      CORE_ADDR addr = ((CORE_ADDR) i << 56) | 0xdeadbeef;
+      SELF_CHECK (aarch64_linux_get_ltag (addr) == (i & 0xf));
+
+      addr = aarch64_linux_set_ltag (0xdeadbeef, i);
+      SELF_CHECK (addr = ((CORE_ADDR) (i & 0xf) << 56) | 0xdeadbeef);
+    }
+}
+
+} // namespace selftests
+#endif /* GDB_SELF_TEST */
+
 void _initialize_aarch64_linux_tdep ();
 void
 _initialize_aarch64_linux_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_aarch64, 0, GDB_OSABI_LINUX,
 			  aarch64_linux_init_abi);
+
+#if GDB_SELF_TEST
+  selftests::register_test ("aarch64-linux-tagged-address",
+			    selftests::aarch64_linux_ltag_tests);
+#endif
 }
