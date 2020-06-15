@@ -35,6 +35,12 @@
 #define AARCH64_MTE_LOGICAL_TAG_START_BIT 56
 #define AARCH64_MTE_LOGICAL_MAX_VALUE 0xf
 
+/* Memory tagging definitions.  */
+#ifndef SEGV_MTEAERR
+# define SEGV_MTEAERR 8
+# define SEGV_MTESERR 9
+#endif
+
 /* Memory tag types for AArch64.  */
 enum class aarch64_memtag_type
 {

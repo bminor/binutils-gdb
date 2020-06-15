@@ -1685,6 +1685,73 @@ aarch64_linux_memtag_to_string (struct gdbarch *gdbarch, struct value *tag_value
   return string_printf ("0x%s", phex_nz (tag, sizeof (tag)));
 }
 
+/* AArch64 Linux implementation of the report_signal_info gdbarch
+   hook.  Displays information about possible memory tag violations.  */
+
+static void
+aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
+				  struct ui_out *uiout,
+				  enum gdb_signal siggnal)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (!tdep->has_mte () || siggnal != GDB_SIGNAL_SEGV)
+    return;
+
+  CORE_ADDR fault_addr = 0;
+  long si_code = 0;
+
+  try
+    {
+      /* Sigcode tells us if the segfault is actually a memory tag
+	 violation.  */
+      si_code = parse_and_eval_long ("$_siginfo.si_code");
+
+      fault_addr
+	= parse_and_eval_long ("$_siginfo._sifields._sigfault.si_addr");
+    }
+  catch (const gdb_exception_error &exception)
+    {
+      exception_print (gdb_stderr, exception);
+      return;
+    }
+
+  /* If this is not a memory tag violation, just return.  */
+  if (si_code != SEGV_MTEAERR && si_code != SEGV_MTESERR)
+    return;
+
+  uiout->text ("\n");
+
+  uiout->field_string ("sigcode-meaning", _("Memory tag violation"));
+
+  /* For synchronous faults, show additional information.  */
+  if (si_code == SEGV_MTESERR)
+    {
+      uiout->text (_(" while accessing address "));
+      uiout->field_core_addr ("fault-addr", gdbarch, fault_addr);
+      uiout->text ("\n");
+
+      gdb::optional<CORE_ADDR> atag = aarch64_mte_get_atag (fault_addr);
+      gdb_byte ltag = aarch64_mte_get_ltag (fault_addr);
+
+      if (!atag.has_value ())
+	uiout->text (_("Allocation tag unavailable"));
+      else
+	{
+	  uiout->text (_("Allocation tag "));
+	  uiout->field_string ("allocation-tag", hex_string (*atag));
+	  uiout->text ("\n");
+	  uiout->text (_("Logical tag "));
+	  uiout->field_string ("logical-tag", hex_string (ltag));
+	}
+    }
+  else
+    {
+      uiout->text ("\n");
+      uiout->text (_("Fault address unavailable"));
+    }
+}
+
 static void
 aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1765,6 +1832,9 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
       /* Register a hook for converting a memory tag to a string.  */
       set_gdbarch_memtag_to_string (gdbarch, aarch64_linux_memtag_to_string);
+
+      set_gdbarch_report_signal_info (gdbarch,
+				      aarch64_linux_report_signal_info);
     }
 
   /* Initialize the aarch64_linux_record_tdep.  */

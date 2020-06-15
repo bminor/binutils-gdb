@@ -1,5 +1,14 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* aarch64-linux-tdep.c
+	(aarch64_linux_report_signal_info): New function.
+	(aarch64_linux_init_abi): Register
+	aarch64_linux_report_signal_info as the report_signal_info hook.
+	* arch/aarch64-linux.h (SEGV_MTEAERR): Define.
+	(SEGV_MTESERR): Define.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* aarch64-linux-tdep.c: Include gdbsupport/selftest.h.
 	(aarch64_linux_ltag_tests): New function.
 	(_initialize_aarch64_linux_tdep): Register aarch64_linux_ltag_tests.
