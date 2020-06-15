@@ -165,6 +165,7 @@ proc_with_prefix test-print {{prefix ""}} {
 	"-array-indexes"
 	"-elements"
 	"-max-depth"
+	"-memory-tag-violations"
 	"-null-stop"
 	"-object"
 	"-pretty"

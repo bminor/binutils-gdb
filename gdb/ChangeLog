@@ -1,5 +1,17 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* printcmd.c (decode_format): Handle the 'm' modifier.
+	(do_examine): Display allocation tags when required/supported.
+	(should_validate_memtags): New function.
+	(print_command_1): Display memory tag mismatches.
+	* valprint.c (show_memory_tag_violations): New function.
+	(value_print_option_defs): Add new option "memory-tag-violations".
+	(user_print_options) <memory_tag_violations>: Initialize to 1.
+	* valprint.h (struct format_data) <print_tags>: New field.
+	(value_print_options) <memory_tag_violations>: New field.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* printcmd.c: Include gdbsupport/rsp-low.h.
 	(memory_tag_list): New static global.
 	(process_print_command_args): Factored out of

@@ -65,6 +65,9 @@ struct value_print_options
      e.g. when the user passes a format to "print".  */
   int format;
 
+  /* Print memory tag violations for pointers.  */
+  bool memory_tag_violations;
+
   /* Stop printing at null character?  */
   bool stop_print_at_null;
 
@@ -252,6 +255,7 @@ struct format_data
     int count;
     char format;
     char size;
+    bool print_tags;
 
     /* True if the value should be printed raw -- that is, bypassing
        python-based formatters.  */

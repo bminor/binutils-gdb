@@ -1,3 +1,8 @@
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* gdb.base/options.exp: Adjust for new print options.
+	* gdb.base/with.exp: Likewise.
+
 2021-03-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.dwarf2/dw2-missing-cu-tag.c: New file.
