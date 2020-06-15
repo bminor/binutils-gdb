@@ -1373,6 +1373,19 @@ Specify a stack size for an ELF @code{PT_GNU_STACK} segment.
 Specifying zero will override any default non-zero sized
 @code{PT_GNU_STACK} segment creation.
 
+@item start-stop-visibility=@var{value}
+@cindex visibility
+@cindex ELF symbol visibility
+Specify the ELF symbol visibility for synthesized
+@code{__start_SECNAME} and @code{__stop_SECNAME} symbols (@pxref{Input
+Section Example}).  @var{value} must be exactly @samp{default},
+@samp{internal}, @samp{hidden}, or @samp{protected}.  If no @samp{-z
+start-stop-visibility} option is given, @samp{protected} is used for
+compatibility with historical practice.  However, it's highly
+recommended to use @samp{-z start-stop-visibility=hidden} in new
+programs and shared libraries so that these symbols are not exported
+between shared objects, which is not usually what's intended.
+
 @item text
 @itemx notext
 @itemx textoff

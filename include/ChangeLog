@@ -1,3 +1,7 @@
+2020-06-12  Roland McGrath  <mcgrathr@google.com>
+
+	* bfdlink.h (struct bfd_link_info): New field start_stop_visibility.
+
 2020-06-12  Nelson Chu  <nelson.chu@sifive.com>
 
 	* opcode/riscv-opc.h: Update the defined versions of CSR from

@@ -1500,6 +1500,11 @@ class General_options
 	      N_("Don't mark variables read-only after relocation"));
   DEFINE_uint64(stack_size, options::DASH_Z, '\0', 0,
 		N_("Set PT_GNU_STACK segment p_memsz to SIZE"), N_("SIZE"));
+  DEFINE_enum(start_stop_visibility, options::DASH_Z, '\0', "protected",
+              N_("ELF symbol visibility for synthesized "
+                 "__start_* and __stop_* symbols"),
+              ("[default,internal,hidden,protected]"),
+              {"default", "internal", "hidden", "protected"});
   DEFINE_bool(text, options::DASH_Z, '\0', false,
 	      N_("Do not permit relocations in read-only segments"),
 	      N_("Permit relocations in read-only segments"));
@@ -1750,6 +1755,10 @@ class General_options
   orphan_handling_enum() const
   { return this->orphan_handling_enum_; }
 
+  elfcpp::STV
+  start_stop_visibility_enum() const
+  { return this->start_stop_visibility_enum_; }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -1808,6 +1817,10 @@ class General_options
   void
   set_orphan_handling_enum(Orphan_handling value)
   { this->orphan_handling_enum_ = value; }
+
+  void
+  set_start_stop_visibility_enum(elfcpp::STV value)
+  { this->start_stop_visibility_enum_ = value; }
 
   // These are called by finalize() to set up the search-path correctly.
   void
@@ -1876,6 +1889,8 @@ class General_options
   std::vector<Position_dependent_options*> options_stack_;
   // Orphan handling option, decoded to an enum value.
   Orphan_handling orphan_handling_enum_;
+  // Symbol visibility for __start_* / __stop_* magic symbols.
+  elfcpp::STV start_stop_visibility_enum_;
 };
 
 // The position-dependent options.  We use this to store the state of

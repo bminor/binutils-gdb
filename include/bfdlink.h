@@ -542,10 +542,10 @@ struct bfd_link_info
      Normally these optimizations are disabled by default but some targets
      prefer to enable them by default.  So this field is a tri-state variable.
      The values are:
-     
+
      zero: Enable the optimizations (either from --relax being specified on
        the command line or the backend's before_allocation emulation function.
-       
+
      positive: The user has requested that these optimizations be disabled.
        (Via the --no-relax command line option).
 
@@ -648,6 +648,9 @@ struct bfd_link_info
 
   /* May be used to set DT_FLAGS_1 for ELF. */
   bfd_vma flags_1;
+
+  /* May be used to set ELF visibility for __start_* / __stop_.  */
+  unsigned int start_stop_visibility;
 
   /* Start and end of RELRO region.  */
   bfd_vma relro_start, relro_end;

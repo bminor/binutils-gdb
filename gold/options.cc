@@ -997,7 +997,8 @@ General_options::General_options()
     fix_v4bx_(FIX_V4BX_NONE),
     endianness_(ENDIANNESS_NOT_SET),
     discard_locals_(DISCARD_SEC_MERGE),
-    orphan_handling_enum_(ORPHAN_PLACE)
+    orphan_handling_enum_(ORPHAN_PLACE),
+    start_stop_visibility_enum_(elfcpp::STV_PROTECTED)
 {
   // Turn off option registration once construction is complete.
   gold::options::ready_to_register = false;
@@ -1167,6 +1168,19 @@ General_options::finalize()
         this->set_orphan_handling_enum(ORPHAN_WARN);
       else if (strcmp(this->orphan_handling(), "error") == 0)
         this->set_orphan_handling_enum(ORPHAN_ERROR);
+    }
+
+  // Parse the -z start-stop-visibility argument.
+  if (this->user_set_start_stop_visibility())
+    {
+      if (strcmp(this->start_stop_visibility(), "default") == 0)
+        this->set_start_stop_visibility_enum(elfcpp::STV_DEFAULT);
+      else if (strcmp(this->start_stop_visibility(), "internal") == 0)
+        this->set_start_stop_visibility_enum(elfcpp::STV_INTERNAL);
+      else if (strcmp(this->start_stop_visibility(), "hidden") == 0)
+        this->set_start_stop_visibility_enum(elfcpp::STV_HIDDEN);
+      else if (strcmp(this->start_stop_visibility(), "protected") == 0)
+        this->set_start_stop_visibility_enum(elfcpp::STV_PROTECTED);
     }
 
   // -M is equivalent to "-Map -".

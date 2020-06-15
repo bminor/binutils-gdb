@@ -25,6 +25,9 @@
   searched relative to the directory of the linker script before other search
   paths.
 
+* Add ELF linker command-line option `-z start-stop-visibility=...' to control
+  the visibility of synthetic `__start_SECNAME` and `__stop_SECNAME` symbols.
+
 Changes in 2.34:
 
 * The ld check for "PHDR segment not covered by LOAD segment" is more

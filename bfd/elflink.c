@@ -14837,7 +14837,8 @@ bfd_elf_define_start_stop (struct bfd_link_info *info,
       else
 	{
 	  if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
-	    h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_PROTECTED;
+	    h->other = ((h->other & ~ELF_ST_VISIBILITY (-1))
+			| info->start_stop_visibility);
 	  if (was_dynamic)
 	    bfd_elf_link_record_dynamic_symbol (info, h);
 	}

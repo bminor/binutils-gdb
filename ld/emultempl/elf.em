@@ -749,6 +749,21 @@ fragment <<EOF
 	{
 	  link_info.flags_1 |= DF_1_GLOBAUDIT;
 	}
+      else if (CONST_STRNEQ (optarg, "start-stop-visibility="))
+	{
+	  if (strcmp (optarg, "start-stop-visibility=default") == 0)
+	    link_info.start_stop_visibility = STV_DEFAULT;
+	  else if (strcmp (optarg, "start-stop-visibility=internal") == 0)
+	    link_info.start_stop_visibility = STV_INTERNAL;
+	  else if (strcmp (optarg, "start-stop-visibility=hidden") == 0)
+	    link_info.start_stop_visibility = STV_HIDDEN;
+	  else if (strcmp (optarg, "start-stop-visibility=protected") == 0)
+	    link_info.start_stop_visibility = STV_PROTECTED;
+	  else
+	    einfo (_("%F%P: invalid visibility in \`-z %s'; "
+		     "must be default, internal, hidden, or protected"),
+		   optarg);
+	}
 EOF
 
 if test x"$GENERATE_SHLIB_SCRIPT" = xyes; then

@@ -1,3 +1,15 @@
+2020-06-15  Roland McGrath  <mcgrathr@google.com>
+
+	Implement -z start-stop-visibility=... option.
+	* options.h (class General_options): Handle -z start-stop-visibility=.
+	(General_options::start_stop_visibility_enum): New public method.
+	(General_options::set_start_stop_visibility_enum): New private method.
+	(General_options::start_stop_visibility_enum_): New private member.
+	* options.cc (General_options::General_options): Add initializer.
+	(General_options::finalize): Set this->start_stop_visibility_enum_
+	from string value.
+	* layout.cc (Layout::define_section_symbols): Use option setting.
+
 2020-06-06  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc: Update throughout for reloc renaming.

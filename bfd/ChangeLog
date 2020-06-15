@@ -1,3 +1,8 @@
+2020-06-15  Roland McGrath  <mcgrathr@google.com>
+
+	* elflink.c (bfd_elf_define_start_stop): Use start_stop_visibility
+	field of bfd_link_info.
+
 2020-06-15  Alan Modra  <amodra@gmail.com>
 
 	* config.bfd: Obsolete powerpcle-*-pe targets.
@@ -346,7 +351,7 @@
 	(aout_link_add_symbols): e517df3dbf7 PR 19629 - Check for out of
 	range string table offsets.
 	531336e3a0b PR 20909 - Fix off-by-one error in check for an
-	illegal string offset. 
+	illegal string offset.
 	(aout_link_includes_newfunc): Add comment.
 	(pdp11_aout_link_input_section): ad756e3f9e6 - Return with an error
 	on unexpected relocation type rather than ASSERT.

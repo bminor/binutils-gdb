@@ -1,3 +1,11 @@
+2020-06-15  Roland McGrath  <mcgrathr@google.com>
+
+	* NEWS: Mention -z start-stop-visibility=... option for ELF.
+	* ld.texi (Options): Document -z start-stop-visibility=... option.
+	* ldmain.c (main): Initialize link_info.start_stop_visibility.
+	* emultempl/elf.em (gld${EMULATION_NAME}_handle_option):
+	Parse -z start-stop-visibility=... option.
+
 2020-06-15  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-scripts/include.exp: Don't load ld-lib.exp.

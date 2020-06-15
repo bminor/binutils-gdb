@@ -27,6 +27,7 @@
 #include "bfdlink.h"
 #include "ctf-api.h"
 #include "filenames.h"
+#include "elf/common.h"
 
 #include "ld.h"
 #include "ldmain.h"
@@ -307,6 +308,7 @@ main (int argc, char **argv)
 #ifdef DEFAULT_NEW_DTAGS
   link_info.new_dtags = DEFAULT_NEW_DTAGS;
 #endif
+  link_info.start_stop_visibility = STV_PROTECTED;
 
   ldfile_add_arch ("");
   emulation = get_emulation (argc, argv);

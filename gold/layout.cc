@@ -2474,6 +2474,7 @@ Layout::create_initial_dynamic_sections(Symbol_table* symtab)
 void
 Layout::define_section_symbols(Symbol_table* symtab)
 {
+  const elfcpp::STV visibility = parameters->options().start_stop_visibility_enum();
   for (Section_list::const_iterator p = this->section_list_.begin();
        p != this->section_list_.end();
        ++p)
@@ -2495,7 +2496,7 @@ Layout::define_section_symbols(Symbol_table* symtab)
 					0, // symsize
 					elfcpp::STT_NOTYPE,
 					elfcpp::STB_GLOBAL,
-					elfcpp::STV_PROTECTED,
+					visibility,
 					0, // nonvis
 					false, // offset_is_from_end
 					true); // only_if_ref
@@ -2508,7 +2509,7 @@ Layout::define_section_symbols(Symbol_table* symtab)
 					0, // symsize
 					elfcpp::STT_NOTYPE,
 					elfcpp::STB_GLOBAL,
-					elfcpp::STV_PROTECTED,
+					visibility,
 					0, // nonvis
 					true, // offset_is_from_end
 					true); // only_if_ref
