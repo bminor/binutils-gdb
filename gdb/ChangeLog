@@ -1,5 +1,13 @@
 2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* target-descriptions.c (tdesc_use_registers): Add new parameter a
+	callback, use the callback (when not null) to help number unknown
+	registers.
+	* target-descriptions.h (tdesc_unknown_register_ftype): New typedef.
+	(tdesc_use_registers): Add extra parameter to declaration.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (value_of_riscv_user_reg): Moved to here from later
 	in the file.
 	(class riscv_pending_register_alias): Likewise.

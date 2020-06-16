@@ -1097,7 +1097,8 @@ set_tdesc_pseudo_register_reggroup_p
 void
 tdesc_use_registers (struct gdbarch *gdbarch,
 		     const struct target_desc *target_desc,
-		     struct tdesc_arch_data *early_data)
+		     struct tdesc_arch_data *early_data,
+		     tdesc_unknown_register_ftype unk_reg_cb)
 {
   int num_regs = gdbarch_num_regs (gdbarch);
   struct tdesc_arch_data *data;
@@ -1146,6 +1147,34 @@ tdesc_use_registers (struct gdbarch *gdbarch,
   while (data->arch_regs.size () < num_regs)
     data->arch_regs.emplace_back (nullptr, nullptr);
 
+  /* First we give the target a chance to number previously unknown
+     registers.  This allows targets to record the numbers assigned based
+     on which feature the register was from.  */
+  if (unk_reg_cb != NULL)
+    {
+      for (const tdesc_feature_up &feature : target_desc->features)
+	for (const tdesc_reg_up &reg : feature->registers)
+	  if (htab_find (reg_hash, reg.get ()) != NULL)
+	    {
+	      int regno = unk_reg_cb (gdbarch, feature.get (),
+				      reg->name.c_str (), num_regs);
+	      gdb_assert (regno == -1 || regno >= num_regs);
+	      if (regno != -1)
+		{
+		  while (regno >= data->arch_regs.size ())
+		    data->arch_regs.emplace_back (nullptr, nullptr);
+		  data->arch_regs[regno] = tdesc_arch_reg (reg.get (), NULL);
+		  num_regs = regno + 1;
+		  htab_remove_elt (reg_hash, reg.get ());
+		}
+	    }
+    }
+
+  /* Ensure the array was sized correctly above.  */
+  gdb_assert (data->arch_regs.size () == num_regs);
+
+  /* Now in a final pass we assign register numbers to any remaining
+     unnumbered registers.  */
   for (const tdesc_feature_up &feature : target_desc->features)
     for (const tdesc_reg_up &reg : feature->registers)
       if (htab_find (reg_hash, reg.get ()) != NULL)
