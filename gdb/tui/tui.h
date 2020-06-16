@@ -49,9 +49,9 @@ extern bool tui_is_window_visible (enum tui_win_type type);
 extern bool tui_get_command_dimension (unsigned int *width,
 				       unsigned int *height);
 
-/* Initialize readline and configure the keymap for the switching
-   key shortcut.  */
-extern void tui_initialize_readline (void);
+/* Initialize readline and configure the keymap for the switching key
+   shortcut.  May be called more than once without issue.  */
+extern void tui_ensure_readline_initialized ();
 
 /* Enter in the tui mode (curses).  */
 extern void tui_enable (void);

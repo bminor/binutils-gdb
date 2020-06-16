@@ -1,5 +1,16 @@
 2020-06-16  Tom Tromey  <tom@tromey.com>
 
+	PR tui/25348:
+	* tui/tui.c (tui_ensure_readline_initialized): Rename from
+	tui_initialize_readline.  Only run once.  Call rl_initialize.
+	* tui/tui.h (tui_ensure_readline_initialized): Rename from
+	tui_initialize_readline.
+	* tui/tui-io.c (tui_setup_io): Call
+	tui_ensure_readline_initialized.
+	* tui/tui-interp.c (tui_interp::init): Update.
+
+2020-06-16  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-layout.c (tui_layout_split::remove_windows): Fix logic.
 	Also preserve the status window.
 

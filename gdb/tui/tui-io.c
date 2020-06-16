@@ -746,6 +746,10 @@ tui_setup_io (int mode)
 
   if (mode)
     {
+      /* Ensure that readline has been initialized before saving any
+	 of its variables.  */
+      tui_ensure_readline_initialized ();
+
       /* Redirect readline to TUI.  */
       tui_old_rl_redisplay_function = rl_redisplay_function;
       tui_old_rl_deprep_terminal = rl_deprep_term_function;
