@@ -1,3 +1,6 @@
+/* Ensure we get syscall declared.  */
+#define _DEFAULT_SOURCE
+
 #include <unistd.h>
 #include <link.h>
 #include <syscall.h>

@@ -1,5 +1,37 @@
 2020-06-16  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/pr23428.c: Define _DEFAULT_SOURCE.
+	* testsuite/ld-elf/indirect1b.c: Replace asm with __asm__.
+	* testsuite/ld-elf/indirect2.c: Likewise.
+	* testsuite/ld-elf/indirect3b.c: Likewise.
+	* testsuite/ld-elf/indirect4b.c: Likewise.
+	* testsuite/ld-elf/pr14323-2.c: Likewise.
+	* testsuite/ld-elf/pr18720b.c: Likewise.
+	* testsuite/ld-elf/pr23428.c: Likewise.
+	* testsuite/ld-elfvsb/common.c: Likewise.
+	* testsuite/ld-elfvsb/main.c: Likewise.
+	* testsuite/ld-elfvsb/sh1.c: Likewise.
+	* testsuite/ld-elfvsb/test.c: Likewise.
+	* testsuite/ld-pe/aligncomm-1.c: Likewise.
+	* testsuite/ld-pe/aligncomm-2.c: Likewise.
+	* testsuite/ld-pe/aligncomm-3.c: Likewise.
+	* testsuite/ld-pe/aligncomm-4.c: Likewise.
+	* testsuite/ld-plugin/pr23958.c: Likewise.
+	* testsuite/ld-size/size-1b.c: Likewise.
+	* testsuite/ld-size/size-2b.c: Likewise.
+	* testsuite/ld-size/size-3a.c: Likewise.
+	* testsuite/ld-size/size-3b.c: Likewise.
+	* testsuite/ld-size/size-3c.c: Likewise.
+	* testsuite/ld-size/size-4b.c: Likewise.
+	* testsuite/ld-size/size-5b.c: Likewise.
+	* testsuite/ld-size/size-6a.c: Likewise.
+	* testsuite/ld-size/size-7a.c: Likewise.
+	* testsuite/ld-size/size-8a.c: Likewise.
+	* testsuite/ld-size/size-9b.c: Likewise.
+	* testsuite/ld-size/size-10b.c: Likewise.
+
+2020-06-16  Alan Modra  <amodra@gmail.com>
+
 	* emulparams/tic30aout.sh: Delete file.
 	* scripttempl/tic30aout.sc: Delete file.
 	* Makefile.am: Remove etic30aout.c from ALL_EMULATION_SOURCES and
