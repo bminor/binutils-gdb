@@ -1,3 +1,8 @@
+2020-09-09  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (remove_extra_symbols): Do not increment when
+	removing an element
+
 2020-09-08  Tom Tromey  <tromey@adacore.com>
 
 	* gdb_bfd.c (gdb_bfd_open): Call bfd_fopen when fstat fails.

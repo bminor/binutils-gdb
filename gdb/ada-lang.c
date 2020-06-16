@@ -5047,8 +5047,8 @@ remove_extra_symbols (std::vector<struct block_symbol> *syms)
       
       if (remove_p)
 	syms->erase (syms->begin () + i);
-
-      i += 1;
+      else
+	i += 1;
     }
 
   /* If all the remaining symbols are identical enumerals, then
