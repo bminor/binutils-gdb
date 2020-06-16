@@ -1,5 +1,19 @@
 2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c (riscv_register_name): Return NULL for duplicate
+	fflags, frm, and fcsr registers.
+	(riscv_register_reggroup_p): Remove unknown CSRs from save and
+	restore groups.
+	(riscv_tdesc_unknown_reg): New function.
+	(riscv_gdbarch_init): Pass riscv_tdesc_unknown_reg to
+	tdesc_use_registers.
+	* riscv-tdep.h (struct gdbarch_tdep): Add
+	unknown_csrs_first_regnum, unknown_csrs_count,
+	duplicate_fflags_regnum, duplicate_frm_regnum, and
+	duplicate_fcsr_regnum fields.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* target-descriptions.c (tdesc_use_registers): Add new parameter a
 	callback, use the callback (when not null) to help number unknown
 	registers.

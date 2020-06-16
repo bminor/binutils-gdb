@@ -100,13 +100,14 @@ foreach rgroup {all save restore} {
 	}
     }
 
-    foreach reg {dscratch} {
+    foreach reg {fflags frm fcsr unknown_csr dscratch} {
 	if { [info exists reg_counts($reg) ] } {
 	    set count $reg_counts($reg)
 	} else {
 	    set count 0
 	}
-	if {$reg == "dscratch" && $rgroup != "all"} {
+	if {($reg == "unknown_csr" || $reg == "dscratch") \
+		&& $rgroup != "all"} {
 	    gdb_assert {$count == 0} \
 		"register $reg not seen in reggroup $rgroup"
 	} else {

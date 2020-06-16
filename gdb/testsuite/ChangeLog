@@ -1,5 +1,9 @@
 2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.arch/riscv-tdesc-regs.exp: Extend test case.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.arch/riscv-tdesc-loading-01.xml: New file.
 	* gdb.arch/riscv-tdesc-loading-02.xml: New file.
 	* gdb.arch/riscv-tdesc-loading-03.xml: New file.

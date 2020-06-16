@@ -617,6 +617,22 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
         return NULL;
     }
 
+  /* Some targets (QEMU) are reporting these three registers twice, once
+     in the FPU feature, and once in the CSR feature.  Both of these read
+     the same underlying state inside the target, but naming the register
+     twice in the target description results in GDB having two registers
+     with the same name, only one of which can ever be accessed, but both
+     will show up in 'info register all'.  Unless, we identify the
+     duplicate copies of these registers (in riscv_tdesc_unknown_reg) and
+     then hide the registers here by giving them no name.  */
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  if (tdep->duplicate_fflags_regnum == regnum)
+    return NULL;
+  if (tdep->duplicate_frm_regnum == regnum)
+    return NULL;
+  if (tdep->duplicate_fcsr_regnum == regnum)
+    return NULL;
+
   /* The remaining registers are different.  For all other registers on the
      machine we prefer to see the names that the target description
      provides.  This is particularly important for CSRs which might be
@@ -968,6 +984,19 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
 
   if (regnum > RISCV_LAST_REGNUM)
     {
+      /* Any extra registers from the CSR tdesc_feature (identified in
+	 riscv_tdesc_unknown_reg) are removed from the save/restore groups
+	 as some targets (QEMU) report CSRs which then can't be read.  */
+      struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+      if ((reggroup == restore_reggroup || reggroup == save_reggroup)
+	  && regnum >= tdep->unknown_csrs_first_regnum
+	  && regnum < (tdep->unknown_csrs_first_regnum
+		       + tdep->unknown_csrs_count))
+	return 0;
+
+      /* This is some other unknown register from the target description.
+	 In this case we trust whatever the target description says about
+	 which groups this register should be in.  */
       int ret = tdesc_register_in_reggroup_p (gdbarch, regnum, reggroup);
       if (ret != -1)
         return ret;
@@ -3166,6 +3195,85 @@ riscv_gcc_target_options (struct gdbarch *gdbarch)
   return target_options;
 }
 
+/* Call back from tdesc_use_registers, called for each unknown register
+   found in the target description.
+
+   See target-description.h (typedef tdesc_unknown_register_ftype) for a
+   discussion of the arguments and return values.  */
+
+static int
+riscv_tdesc_unknown_reg (struct gdbarch *gdbarch, tdesc_feature *feature,
+			 const char *reg_name, int possible_regnum)
+{
+  /* At one point in time GDB had an incorrect default target description
+     that duplicated the fflags, frm, and fcsr registers in both the FPU
+     and CSR register sets.
+
+     Some targets (QEMU) copied these target descriptions into their source
+     tree, and so we're currently stuck working with some targets that
+     declare the same registers twice.
+
+     There's not much we can do about this any more.  Assuming the target
+     will direct a request for either register number to the correct
+     underlying hardware register then it doesn't matter which one GDB
+     uses, so long as we (GDB) are consistent (so that we don't end up with
+     invalid cache misses).
+
+     As we always scan the FPU registers first, then the CSRs, if the
+     target has included the offending registers in both sets then we will
+     always see the FPU copies here, as the CSR versions will replace them
+     in the register list.
+
+     To prevent these duplicates showing up in any of the register list,
+     record their register numbers here.  */
+  if (strcmp (tdesc_feature_name (feature), riscv_freg_feature.name) == 0)
+    {
+      struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+      int *regnum_ptr = nullptr;
+
+      if (strcmp (reg_name, "fflags") == 0)
+	regnum_ptr = &tdep->duplicate_fflags_regnum;
+      else if (strcmp (reg_name, "frm") == 0)
+	regnum_ptr = &tdep->duplicate_frm_regnum;
+      else if (strcmp (reg_name, "fcsr") == 0)
+	regnum_ptr = &tdep->duplicate_fcsr_regnum;
+
+      if (regnum_ptr != nullptr)
+	{
+	  /* This means the register appears more than twice in the target
+	     description.  Just let GDB add this as another register.
+	     We'll have duplicates in the register name list, but there's
+	     not much more we can do.  */
+	  if (*regnum_ptr != -1)
+	    return -1;
+
+	  /* Record the number assigned to this register, then return the
+	     number (so it actually gets assigned to this register).  */
+	  *regnum_ptr = possible_regnum;
+	  return possible_regnum;
+	}
+    }
+
+  /* Any unknown registers in the CSR feature are recorded within a single
+     block so we can easily identify these registers when making choices
+     about register groups in riscv_register_reggroup_p.  */
+  if (strcmp (tdesc_feature_name (feature), riscv_csr_feature.name) == 0)
+    {
+      struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+      if (tdep->unknown_csrs_first_regnum == -1)
+	tdep->unknown_csrs_first_regnum = possible_regnum;
+      gdb_assert (tdep->unknown_csrs_first_regnum
+		  + tdep->unknown_csrs_count == possible_regnum);
+      tdep->unknown_csrs_count++;
+      return possible_regnum;
+    }
+
+  /* Some other unknown register.  Don't assign this a number now, it will
+     be assigned a number automatically later by the target description
+     handling code.  */
+  return -1;
+}
+
 /* Implement the gnu_triplet_regexp method.  A single compiler supports both
    32-bit and 64-bit code, and may be named riscv32 or riscv64 or (not
    recommended) riscv.  */
@@ -3403,7 +3511,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_print_registers_info (gdbarch, riscv_print_registers_info);
 
   /* Finalise the target description registers.  */
-  tdesc_use_registers (gdbarch, tdesc, tdesc_data);
+  tdesc_use_registers (gdbarch, tdesc, tdesc_data, riscv_tdesc_unknown_reg);
 
   /* Override the register type callback setup by the target description
      mechanism.  This allows us to provide special type for floating point
