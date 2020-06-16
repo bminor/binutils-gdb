@@ -1,3 +1,10 @@
+2020-06-16  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/Makefile.am (export_dynamic_plugin.o): Use CXXCOMPILE.
+	(plugin_test_wrap_symbols_1.o): Likewise.
+	(plugin_test_wrap_symbols_2.o): Likewise.
+	* testsuite/Makefile.in: Regenerate.
+
 2020-06-15  Roland McGrath  <mcgrathr@google.com>
 
 	Implement -z start-stop-visibility=... option.

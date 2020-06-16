@@ -2432,7 +2432,7 @@ MOSTLYCLEANFILES += plugin_test_12.err
 export_dynamic_plugin.o.syms: export_dynamic_plugin.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null
 export_dynamic_plugin.o: export_dynamic_plugin.cc
-	$(COMPILE) -c -o $@ $<
+	$(CXXCOMPILE) -c -o $@ $<
 plugin_test_12: export_dynamic_plugin.o gcctestdir/ld plugin_test.so export_dynamic_plugin.o.syms
 	$(CXXLINK) -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z3foov" -Wl,--export-dynamic-symbol,"_Z3foov" export_dynamic_plugin.o.syms 2>plugin_test_12.err
 plugin_test_12.err: plugin_test_12
@@ -2443,9 +2443,9 @@ check_SCRIPTS += plugin_test_wrap_symbols.sh
 check_DATA += plugin_test_wrap_symbols.err
 MOSTLYCLEANFILES += plugin_test_wrap_symbols.err
 plugin_test_wrap_symbols_1.o: plugin_test_wrap_symbols_1.cc
-	$(COMPILE) -c -o $@ $<
+	$(CXXCOMPILE) -c -o $@ $<
 plugin_test_wrap_symbols_2.o: plugin_test_wrap_symbols_2.cc
-	$(COMPILE) -c -o $@ $<
+	$(CXXCOMPILE) -c -o $@ $<
 plugin_test_wrap_symbols: plugin_test_wrap_symbols_1.o plugin_test_wrap_symbols_2.o gcctestdir/ld plugin_test.so
 	$(CXXLINK) -Wl,--plugin,"./plugin_test.so" -Wl,--wrap=hello,--wrap=jello plugin_test_wrap_symbols_1.o plugin_test_wrap_symbols_2.o 2>plugin_test_wrap_symbols.err
 plugin_test_wrap_symbols.err: plugin_test_wrap_symbols
