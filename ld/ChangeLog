@@ -7,7 +7,9 @@
 	* testsuite/ld-elf/indirect4b.c: Likewise.
 	* testsuite/ld-elf/pr14323-2.c: Likewise.
 	* testsuite/ld-elf/pr18720b.c: Likewise.
+	* testsuite/ld-elf/pr19553c.c: Likewise.
 	* testsuite/ld-elf/pr23428.c: Likewise.
+	* testsuite/ld-elfvers/vers27b.c: Likewise.
 	* testsuite/ld-elfvsb/common.c: Likewise.
 	* testsuite/ld-elfvsb/main.c: Likewise.
 	* testsuite/ld-elfvsb/sh1.c: Likewise.
