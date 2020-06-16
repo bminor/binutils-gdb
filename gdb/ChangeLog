@@ -1,5 +1,23 @@
 2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c (value_of_riscv_user_reg): Moved to here from later
+	in the file.
+	(class riscv_pending_register_alias): Likewise.
+	(riscv_register_feature::register_info): Change 'required_p' field
+	to 'required', and change its type.  Add 'check' member function.
+	(riscv_register_feature::register_info::check): Define new member
+	function.
+	(riscv_xreg_feature): Change initialisation of 'required' field.
+	(riscv_freg_feature): Likewise.
+	(riscv_virtual_feature): Likewise.
+	(riscv_csr_feature): Likewise.
+	(riscv_check_tdesc_feature): Take extra parameter, the csr
+	tdesc_feature, rewrite the function to use the new
+	riscv_register_feature::register_info::check function.
+	(riscv_gdbarch_init): Pass the csr tdesc_feature where needed.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* features/Makefile: Remove all references to the deleted files
 	below.
 	* features/riscv/32bit-csr.c: Deleted.

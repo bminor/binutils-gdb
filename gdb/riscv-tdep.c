@@ -101,6 +101,66 @@ struct riscv_unwind_cache
 
 static reggroup *csr_reggroup = NULL;
 
+/* Callback function for user_reg_add.  */
+
+static struct value *
+value_of_riscv_user_reg (struct frame_info *frame, const void *baton)
+{
+  const int *reg_p = (const int *) baton;
+  return value_of_register (*reg_p, frame);
+}
+
+/* Information about a register alias that needs to be set up for this
+   target.  These are collected when the target's XML description is
+   analysed, and then processed later, once the gdbarch has been created.  */
+
+class riscv_pending_register_alias
+{
+public:
+  /* Constructor.  */
+
+  riscv_pending_register_alias (const char *name, const void *baton)
+    : m_name (name),
+      m_baton (baton)
+  { /* Nothing.  */ }
+
+  /* Convert this into a user register for GDBARCH.  */
+
+  void create (struct gdbarch *gdbarch) const
+  {
+    user_reg_add (gdbarch, m_name, value_of_riscv_user_reg, m_baton);
+  }
+
+private:
+  /* The name for this alias.  */
+  const char *m_name;
+
+  /* The baton value for passing to user_reg_add.  This must point to some
+     data that will live for at least as long as the gdbarch object to
+     which the user register is attached.  */
+  const void *m_baton;
+};
+
+/* Registers in the RISCV_REGISTER_FEATURE lists below are either optional,
+   or required.  For example the $pc register is always going to be a
+   required register, you can't do much debugging without that.  In
+   contrast, most of the CSRs are optional, GDB doesn't require them in
+   order to have a useful debug session.  This enum models the difference
+   between these register types.  */
+
+enum riscv_register_required_status
+{
+  /* This register is optional within this feature.  */
+  RISCV_REG_OPTIONAL,
+
+  /* This register is required within this feature.  */
+  RISCV_REG_REQUIRED,
+
+  /* This register is required, the register must either be in this
+     feature, or it could appear within the CSR feature.  */
+  RISCV_REG_REQUIRED_MAYBE_CSR
+};
+
 /* A set of registers that we expect to find in a tdesc_feature.  These
    are use in RISCV_GDBARCH_INIT when processing the target description.  */
 
@@ -117,8 +177,18 @@ struct riscv_register_feature
        register.  */
     std::vector<const char *> names;
 
-    /* When true this register is required in this feature set.  */
-    bool required_p;
+    /* Is this register required within this feature?  In some cases the
+       register could be required, but might also be in the CSR feature.  */
+    riscv_register_required_status required;
+
+    /* Look in FEATURE for a register with a name from this classes names
+       list.  If the register is found then register its number with
+       TDESC_DATA and add all its aliases to the ALIASES list.  REG_SET is
+       used to help create the aliases.  */
+    bool check (struct tdesc_arch_data *tdesc_data,
+		const struct tdesc_feature *feature,
+		const struct riscv_register_feature *reg_set,
+		std::vector<riscv_pending_register_alias> *aliases) const;
   };
 
   /* The name for this feature.  This is the name used to find this feature
@@ -144,45 +214,79 @@ struct riscv_register_feature
   std::vector<struct register_info> registers;
 };
 
+/* See description in the class declaration above.  */
+
+bool
+riscv_register_feature::register_info::check
+	(struct tdesc_arch_data *tdesc_data,
+	 const struct tdesc_feature *feature,
+	 const struct riscv_register_feature *reg_set,
+	 std::vector<riscv_pending_register_alias> *aliases) const
+{
+  for (const char *name : this->names)
+    {
+      bool found = tdesc_numbered_register (feature, tdesc_data,
+					    this->regnum, name);
+      if (found)
+	{
+	  /* We know that the target description mentions this
+	     register.  In RISCV_REGISTER_NAME we ensure that GDB
+	     always uses the first name for each register, so here we
+	     add aliases for all of the remaining names.  */
+	  bool prefer_first_name = reg_set->prefer_first_name;
+	  int start_index = prefer_first_name ? 1 : 0;
+	  for (int i = start_index; i < this->names.size (); ++i)
+	    {
+	      const char *alias = this->names[i];
+	      if (alias == name && !prefer_first_name)
+		continue;
+	      aliases->emplace_back (alias, (void *) &this->regnum);
+	    }
+	  return true;
+	}
+    }
+  return false;
+}
+
 /* The general x-registers feature set.  */
 
 static const struct riscv_register_feature riscv_xreg_feature =
 {
  "org.gnu.gdb.riscv.cpu", true,
  {
-   { RISCV_ZERO_REGNUM + 0, { "zero", "x0" }, true },
-   { RISCV_ZERO_REGNUM + 1, { "ra", "x1" }, true },
-   { RISCV_ZERO_REGNUM + 2, { "sp", "x2" }, true },
-   { RISCV_ZERO_REGNUM + 3, { "gp", "x3" }, true },
-   { RISCV_ZERO_REGNUM + 4, { "tp", "x4" }, true },
-   { RISCV_ZERO_REGNUM + 5, { "t0", "x5" }, true },
-   { RISCV_ZERO_REGNUM + 6, { "t1", "x6" }, true },
-   { RISCV_ZERO_REGNUM + 7, { "t2", "x7" }, true },
-   { RISCV_ZERO_REGNUM + 8, { "fp", "x8", "s0" }, true },
-   { RISCV_ZERO_REGNUM + 9, { "s1", "x9" }, true },
-   { RISCV_ZERO_REGNUM + 10, { "a0", "x10" }, true },
-   { RISCV_ZERO_REGNUM + 11, { "a1", "x11" }, true },
-   { RISCV_ZERO_REGNUM + 12, { "a2", "x12" }, true },
-   { RISCV_ZERO_REGNUM + 13, { "a3", "x13" }, true },
-   { RISCV_ZERO_REGNUM + 14, { "a4", "x14" }, true },
-   { RISCV_ZERO_REGNUM + 15, { "a5", "x15" }, true },
-   { RISCV_ZERO_REGNUM + 16, { "a6", "x16" }, true },
-   { RISCV_ZERO_REGNUM + 17, { "a7", "x17" }, true },
-   { RISCV_ZERO_REGNUM + 18, { "s2", "x18" }, true },
-   { RISCV_ZERO_REGNUM + 19, { "s3", "x19" }, true },
-   { RISCV_ZERO_REGNUM + 20, { "s4", "x20" }, true },
-   { RISCV_ZERO_REGNUM + 21, { "s5", "x21" }, true },
-   { RISCV_ZERO_REGNUM + 22, { "s6", "x22" }, true },
-   { RISCV_ZERO_REGNUM + 23, { "s7", "x23" }, true },
-   { RISCV_ZERO_REGNUM + 24, { "s8", "x24" }, true },
-   { RISCV_ZERO_REGNUM + 25, { "s9", "x25" }, true },
-   { RISCV_ZERO_REGNUM + 26, { "s10", "x26" }, true },
-   { RISCV_ZERO_REGNUM + 27, { "s11", "x27" }, true },
-   { RISCV_ZERO_REGNUM + 28, { "t3", "x28" }, true },
-   { RISCV_ZERO_REGNUM + 29, { "t4", "x29" }, true },
-   { RISCV_ZERO_REGNUM + 30, { "t5", "x30" }, true },
-   { RISCV_ZERO_REGNUM + 31, { "t6", "x31" }, true },
-   { RISCV_ZERO_REGNUM + 32, { "pc" }, true }
+   { RISCV_ZERO_REGNUM + 0, { "zero", "x0" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 1, { "ra", "x1" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 2, { "sp", "x2" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 3, { "gp", "x3" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 4, { "tp", "x4" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 5, { "t0", "x5" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 6, { "t1", "x6" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 7, { "t2", "x7" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 8, { "fp", "x8", "s0" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 9, { "s1", "x9" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 10, { "a0", "x10" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 11, { "a1", "x11" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 12, { "a2", "x12" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 13, { "a3", "x13" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 14, { "a4", "x14" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 15, { "a5", "x15" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 16, { "a6", "x16" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 17, { "a7", "x17" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 18, { "s2", "x18" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 19, { "s3", "x19" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 20, { "s4", "x20" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 21, { "s5", "x21" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 22, { "s6", "x22" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 23, { "s7", "x23" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 24, { "s8", "x24" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 25, { "s9", "x25" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 26, { "s10", "x26" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 27, { "s11", "x27" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 28, { "t3", "x28" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 29, { "t4", "x29" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 30, { "t5", "x30" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 31, { "t6", "x31" }, RISCV_REG_REQUIRED },
+   { RISCV_ZERO_REGNUM + 32, { "pc" }, RISCV_REG_REQUIRED }
  }
 };
 
@@ -192,42 +296,42 @@ static const struct riscv_register_feature riscv_freg_feature =
 {
  "org.gnu.gdb.riscv.fpu", true,
  {
-   { RISCV_FIRST_FP_REGNUM + 0, { "ft0", "f0" }, true },
-   { RISCV_FIRST_FP_REGNUM + 1, { "ft1", "f1" }, true },
-   { RISCV_FIRST_FP_REGNUM + 2, { "ft2", "f2" }, true },
-   { RISCV_FIRST_FP_REGNUM + 3, { "ft3", "f3" }, true },
-   { RISCV_FIRST_FP_REGNUM + 4, { "ft4", "f4" }, true },
-   { RISCV_FIRST_FP_REGNUM + 5, { "ft5", "f5" }, true },
-   { RISCV_FIRST_FP_REGNUM + 6, { "ft6", "f6" }, true },
-   { RISCV_FIRST_FP_REGNUM + 7, { "ft7", "f7" }, true },
-   { RISCV_FIRST_FP_REGNUM + 8, { "fs0", "f8" }, true },
-   { RISCV_FIRST_FP_REGNUM + 9, { "fs1", "f9" }, true },
-   { RISCV_FIRST_FP_REGNUM + 10, { "fa0", "f10" }, true },
-   { RISCV_FIRST_FP_REGNUM + 11, { "fa1", "f11" }, true },
-   { RISCV_FIRST_FP_REGNUM + 12, { "fa2", "f12" }, true },
-   { RISCV_FIRST_FP_REGNUM + 13, { "fa3", "f13" }, true },
-   { RISCV_FIRST_FP_REGNUM + 14, { "fa4", "f14" }, true },
-   { RISCV_FIRST_FP_REGNUM + 15, { "fa5", "f15" }, true },
-   { RISCV_FIRST_FP_REGNUM + 16, { "fa6", "f16" }, true },
-   { RISCV_FIRST_FP_REGNUM + 17, { "fa7", "f17" }, true },
-   { RISCV_FIRST_FP_REGNUM + 18, { "fs2", "f18" }, true },
-   { RISCV_FIRST_FP_REGNUM + 19, { "fs3", "f19" }, true },
-   { RISCV_FIRST_FP_REGNUM + 20, { "fs4", "f20" }, true },
-   { RISCV_FIRST_FP_REGNUM + 21, { "fs5", "f21" }, true },
-   { RISCV_FIRST_FP_REGNUM + 22, { "fs6", "f22" }, true },
-   { RISCV_FIRST_FP_REGNUM + 23, { "fs7", "f23" }, true },
-   { RISCV_FIRST_FP_REGNUM + 24, { "fs8", "f24" }, true },
-   { RISCV_FIRST_FP_REGNUM + 25, { "fs9", "f25" }, true },
-   { RISCV_FIRST_FP_REGNUM + 26, { "fs10", "f26" }, true },
-   { RISCV_FIRST_FP_REGNUM + 27, { "fs11", "f27" }, true },
-   { RISCV_FIRST_FP_REGNUM + 28, { "ft8", "f28" }, true },
-   { RISCV_FIRST_FP_REGNUM + 29, { "ft9", "f29" }, true },
-   { RISCV_FIRST_FP_REGNUM + 30, { "ft10", "f30" }, true },
-   { RISCV_FIRST_FP_REGNUM + 31, { "ft11", "f31" }, true },
+   { RISCV_FIRST_FP_REGNUM + 0, { "ft0", "f0" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 1, { "ft1", "f1" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 2, { "ft2", "f2" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 3, { "ft3", "f3" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 4, { "ft4", "f4" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 5, { "ft5", "f5" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 6, { "ft6", "f6" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 7, { "ft7", "f7" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 8, { "fs0", "f8" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 9, { "fs1", "f9" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 10, { "fa0", "f10" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 11, { "fa1", "f11" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 12, { "fa2", "f12" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 13, { "fa3", "f13" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 14, { "fa4", "f14" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 15, { "fa5", "f15" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 16, { "fa6", "f16" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 17, { "fa7", "f17" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 18, { "fs2", "f18" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 19, { "fs3", "f19" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 20, { "fs4", "f20" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 21, { "fs5", "f21" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 22, { "fs6", "f22" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 23, { "fs7", "f23" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 24, { "fs8", "f24" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 25, { "fs9", "f25" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 26, { "fs10", "f26" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 27, { "fs11", "f27" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 28, { "ft8", "f28" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 29, { "ft9", "f29" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 30, { "ft10", "f30" }, RISCV_REG_REQUIRED },
+   { RISCV_FIRST_FP_REGNUM + 31, { "ft11", "f31" }, RISCV_REG_REQUIRED },
 
-   { RISCV_CSR_FFLAGS_REGNUM, { "fflags" }, true },
-   { RISCV_CSR_FRM_REGNUM, { "frm" }, true },
-   { RISCV_CSR_FCSR_REGNUM, { "fcsr" }, true },
+   { RISCV_CSR_FFLAGS_REGNUM, { "fflags", "csr1" }, RISCV_REG_REQUIRED_MAYBE_CSR },
+   { RISCV_CSR_FRM_REGNUM, { "frm", "csr2" }, RISCV_REG_REQUIRED_MAYBE_CSR },
+   { RISCV_CSR_FCSR_REGNUM, { "fcsr", "csr3" }, RISCV_REG_REQUIRED_MAYBE_CSR },
 
  }
 };
@@ -242,7 +346,7 @@ static const struct riscv_register_feature riscv_virtual_feature =
 {
  "org.gnu.gdb.riscv.virtual", false,
  {
-   { RISCV_PRIV_REGNUM, { "priv" }, false }
+   { RISCV_PRIV_REGNUM, { "priv" }, RISCV_REG_OPTIONAL }
  }
 };
 
@@ -255,7 +359,7 @@ static struct riscv_register_feature riscv_csr_feature =
  "org.gnu.gdb.riscv.csr", false,
  {
 #define DECLARE_CSR(NAME,VALUE,CLASS,DEFINE_VER,ABORT_VER) \
-  { RISCV_ ## VALUE ## _REGNUM, { # NAME }, false },
+  { RISCV_ ## VALUE ## _REGNUM, { # NAME }, RISCV_REG_OPTIONAL },
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
  }
@@ -473,15 +577,6 @@ riscv_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     default:
       gdb_assert_not_reached (_("unhandled breakpoint kind"));
     }
-}
-
-/* Callback function for user_reg_add.  */
-
-static struct value *
-value_of_riscv_user_reg (struct frame_info *frame, const void *baton)
-{
-  const int *reg_p = (const int *) baton;
-  return value_of_register (*reg_p, frame);
 }
 
 /* Implement the register_name gdbarch method.  This is used instead of
@@ -2965,37 +3060,6 @@ riscv_find_default_target_description (const struct gdbarch_info info)
   return riscv_lookup_target_description (features);
 }
 
-/* Information about a register alias that needs to be set up for this
-   target.  These are collected when the target's XML description is
-   analysed, and then processed later, once the gdbarch has been created.  */
-
-class riscv_pending_register_alias
-{
-public:
-  /* Constructor.  */
-
-  riscv_pending_register_alias (const char *name, const void *baton)
-    : m_name (name),
-      m_baton (baton)
-  { /* Nothing.  */ }
-
-  /* Convert this into a user register for GDBARCH.  */
-
-  void create (struct gdbarch *gdbarch) const
-  {
-    user_reg_add (gdbarch, m_name, value_of_riscv_user_reg, m_baton);
-  }
-
-private:
-  /* The name for this alias.  */
-  const char *m_name;
-
-  /* The baton value for passing to user_reg_add.  This must point to some
-     data that will live for at least as long as the gdbarch object to
-     which the user register is attached.  */
-  const void *m_baton;
-};
-
 /* All of the registers in REG_SET are checked for in FEATURE, TDESC_DATA
    is updated with the register numbers for each register as listed in
    REG_SET.  If any register marked as required in REG_SET is not found in
@@ -3003,40 +3067,26 @@ private:
 
 static bool
 riscv_check_tdesc_feature (struct tdesc_arch_data *tdesc_data,
-                           const struct tdesc_feature *feature,
+                           const struct tdesc_feature *main_feature,
+                           const struct tdesc_feature *csr_feature,
                            const struct riscv_register_feature *reg_set,
                            std::vector<riscv_pending_register_alias> *aliases)
 {
   for (const auto &reg : reg_set->registers)
     {
-      bool found = false;
+      bool found = reg.check (tdesc_data, main_feature, reg_set, aliases);
 
-      for (const char *name : reg.names)
+      if (!found && reg.required != RISCV_REG_OPTIONAL)
 	{
-	  found = tdesc_numbered_register (feature, tdesc_data, reg.regnum,
-					   name);
-
-	  if (found)
-            {
-              /* We know that the target description mentions this
-                 register.  In RISCV_REGISTER_NAME we ensure that GDB
-                 always uses the first name for each register, so here we
-                 add aliases for all of the remaining names.  */
-	      bool prefer_first_name = reg_set->prefer_first_name;
-	      int start_index = prefer_first_name ? 1 : 0;
-	      for (int i = start_index; i < reg.names.size (); ++i)
-                {
-		  const char *alias = reg.names[i];
-                  if (alias == name && !prefer_first_name)
-		    continue;
-		  aliases->emplace_back (alias, (void *) &reg.regnum);
-                }
-              break;
-            }
+	  if (reg.required == RISCV_REG_REQUIRED_MAYBE_CSR
+	      && csr_feature != nullptr)
+	    {
+	      gdb_assert (main_feature != csr_feature);
+	      found = reg.check (tdesc_data, csr_feature,  reg_set, aliases);
+	    }
+	  if (!found)
+	    return false;
 	}
-
-      if (!found && reg.required_p)
-	return false;
     }
 
   return true;
@@ -3166,7 +3216,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
   std::vector<riscv_pending_register_alias> pending_aliases;
 
   bool valid_p = riscv_check_tdesc_feature (tdesc_data,
-                                            feature_cpu,
+                                            feature_cpu, feature_csr,
                                             &riscv_xreg_feature,
                                             &pending_aliases);
   if (valid_p)
@@ -3188,6 +3238,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
   if (feature_fpu != NULL)
     {
       valid_p &= riscv_check_tdesc_feature (tdesc_data, feature_fpu,
+					    feature_csr,
                                             &riscv_freg_feature,
                                             &pending_aliases);
 
@@ -3224,12 +3275,12 @@ riscv_gdbarch_init (struct gdbarch_info info,
     }
 
   if (feature_virtual)
-    riscv_check_tdesc_feature (tdesc_data, feature_virtual,
+    riscv_check_tdesc_feature (tdesc_data, feature_virtual, feature_csr,
                                &riscv_virtual_feature,
                                &pending_aliases);
 
   if (feature_csr)
-    riscv_check_tdesc_feature (tdesc_data, feature_csr,
+    riscv_check_tdesc_feature (tdesc_data, feature_csr, nullptr,
                                &riscv_csr_feature,
                                &pending_aliases);
 
