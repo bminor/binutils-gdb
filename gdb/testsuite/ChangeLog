@@ -1,5 +1,12 @@
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdb.base/corefile.exp: Add test "accessing read-only mmapped
+	data in core file".
+	* gdb.base/coremaker.c (buf2ro): New global.
+	(mmapdata): Add a read-only mmap mapping.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
 	PR corefiles/25631
 	* gdb.base/corefile.exp (accessing anonymous, unwritten-to mmap data):
 	New test.

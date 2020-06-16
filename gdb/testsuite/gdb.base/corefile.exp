@@ -34,7 +34,10 @@ if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
     return -1
 }
 
-set corefile [core_find $binfile {coremmap.data}]
+# Do not delete coremap.data when calling core_find.  This file is
+# required for GDB to find mmap'd data in the "accessing read-only
+# mmapped data in core file" test.
+set corefile [core_find $binfile {}]
 if {$corefile == ""} {
     return 0
 }
@@ -164,6 +167,19 @@ gdb_test "x/8bd buf1" ".*:.*0.*1.*2.*3.*4.*5.*6.*7" "accessing original mmap dat
 setup_xfail "*-*-sunos*" "*-*-aix*"
 set test "accessing mmapped data in core file"
 gdb_test_multiple "x/8bd buf2" "$test" {
+    -re ".*:.*0.*1.*2.*3.*4.*5.*6.*7.*$gdb_prompt $" {
+	pass "$test"
+    }
+    -re "0x\[f\]*:.*Cannot access memory at address 0x\[f\]*.*$gdb_prompt $" {
+	fail "$test (mapping failed at runtime)"
+    }
+    -re "0x.*:.*Cannot access memory at address 0x.*$gdb_prompt $" {
+	fail "$test (mapping address not found in core file)"
+    }
+}
+
+set test "accessing read-only mmapped data in core file"
+gdb_test_multiple "x/8bd buf2ro" "$test" {
     -re ".*:.*0.*1.*2.*3.*4.*5.*6.*7.*$gdb_prompt $" {
 	pass "$test"
     }

@@ -38,6 +38,7 @@
 
 char *buf1;
 char *buf2;
+char *buf2ro;
 char *buf3;
 
 int coremaker_data = 1;	/* In Data section */
@@ -90,16 +91,25 @@ mmapdata ()
       return;
     }
 
+  /* Map in another copy, read-only.  We won't write to this copy so it
+     will likely not end up in the core file.  */
+  buf2ro = (char *) mmap (0, MAPSIZE, PROT_READ, MAP_PRIVATE, fd, 0);
+  if (buf2ro == (char *) -1)
+    {
+      perror ("mmap failed");
+      return;
+    }
+
   /* Verify that the original data and the mapped data are identical.
      If not, we'd rather fail now than when trying to access the mapped
      data from the core file. */
 
   for (j = 0; j < MAPSIZE; ++j)
     {
-      if (buf1[j] != buf2[j])
+      if (buf1[j] != buf2[j] || buf1[j] != buf2ro[j])
 	{
 	  fprintf (stderr, "mapped data is incorrect");
-	  buf2 = (char *) -1;
+	  buf2 = buf2ro = (char *) -1;
 	  return;
 	}
     }
