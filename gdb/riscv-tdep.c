@@ -1071,7 +1071,7 @@ riscv_print_registers_info (struct gdbarch *gdbarch,
       else
 	reggroup = general_reggroup;
 
-      for (regnum = 0; regnum <= RISCV_LAST_REGNUM; ++regnum)
+      for (regnum = 0; regnum < gdbarch_num_cooked_regs (gdbarch); ++regnum)
 	{
 	  /* Zero never changes, so might as well hide by default.  */
 	  if (regnum == RISCV_ZERO_REGNUM && !print_all)

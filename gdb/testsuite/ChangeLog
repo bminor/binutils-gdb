@@ -1,5 +1,9 @@
 2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.arch/riscv-tdesc-regs.exp: New test cases.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.arch/riscv-tdesc-regs.exp: Extend test case.
 
 2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>

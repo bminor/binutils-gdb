@@ -80,11 +80,15 @@ gdb_test "info registers \$csr0" "Invalid register `csr0'"
 gdb_test "info registers \$dscratch0" "dscratch0\[ \t\]+.*"
 gdb_test "info registers \$dscratch" "dscratch\[ \t\]+.*"
 
-foreach rgroup {all save restore} {
+foreach rgroup {x_all all save restore} {
     # Now use 'info registers all' to see how many times the floating
     # point status registers show up in the output.
     array set reg_counts {}
-    set test "info registers $rgroup"
+    if {$rgroup == "x_all"} {
+	set test "info all-registers"
+    } else {
+	set test "info registers $rgroup"
+    }
     gdb_test_multiple $test $test {
 	-re ".*info registers all\r\n" {
 	    verbose -log "Skip to first register"
@@ -107,7 +111,7 @@ foreach rgroup {all save restore} {
 	    set count 0
 	}
 	if {($reg == "unknown_csr" || $reg == "dscratch") \
-		&& $rgroup != "all"} {
+		&& $rgroup != "all" && $rgroup != "x_all"} {
 	    gdb_assert {$count == 0} \
 		"register $reg not seen in reggroup $rgroup"
 	} else {

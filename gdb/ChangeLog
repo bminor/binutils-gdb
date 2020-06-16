@@ -1,5 +1,10 @@
 2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c (riscv_print_registers_info): Loop over all
+	registers, not just the known core set of registers.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (riscv_register_name): Return NULL for duplicate
 	fflags, frm, and fcsr registers.
 	(riscv_register_reggroup_p): Remove unknown CSRs from save and
