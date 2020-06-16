@@ -4753,7 +4753,6 @@ md_assemble (char *line)
 	  || i.tm.cpu_flags.bitfield.cpussse3
 	  || i.tm.cpu_flags.bitfield.cpusse4_1
 	  || i.tm.cpu_flags.bitfield.cpusse4_2
-	  || i.tm.cpu_flags.bitfield.cpusse4a
 	  || i.tm.cpu_flags.bitfield.cpupclmul
 	  || i.tm.cpu_flags.bitfield.cpuaes
 	  || i.tm.cpu_flags.bitfield.cpusha

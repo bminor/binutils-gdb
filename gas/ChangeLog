@@ -1,3 +1,13 @@
+2020-06-16  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (md_assemble): Drop SSE4a from SSE check
+	conditional.
+	* testsuite/gas/i386/sse-check.s: Adjust comment.
+	* testsuite/gas/i386/sse-check-error.l,
+	testsuite/gas/i386/sse-check-warn.e,
+	testsuite/gas/i386/x86-64-sse-check-error.l: Adjust
+	expectations.
+
 2020-06-16  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-tic30.h: Remove OBJ_AOUT support.

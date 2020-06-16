@@ -19,7 +19,7 @@ _start:
 	blendvpd %xmm0,%xmm1,%xmm0
 	pcmpgtq %xmm1,%xmm0
 
-# SSE4a instruction
+# SSE4a instruction (no diagnostic)
 	extrq $0, $0, %xmm0
 
 # PCMUL instruction
