@@ -115,7 +115,7 @@ struct riscv_register_feature
     /* List of names for this register.  The first name in this list is the
        preferred name, the name GDB should use when describing this
        register.  */
-    std::vector <const char *> names;
+    std::vector<const char *> names;
 
     /* When true this register is required in this feature set.  */
     bool required_p;
@@ -127,7 +127,7 @@ struct riscv_register_feature
 
   /* List of all the registers that we expect that we might find in this
      register set.  */
-  std::vector <struct register_info> registers;
+  std::vector<struct register_info> registers;
 };
 
 /* The general x-registers feature set.  */

@@ -1,5 +1,10 @@
 2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* riscv-tdep.c (struct riscv_register_feature): Fix whitespace
+	errors.
+
+2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* riscv-tdep.c (riscv_create_csr_aliases): Handle csr aliases from
 	riscv-opc.h.
 	(class riscv_pending_register_alias): New class.
