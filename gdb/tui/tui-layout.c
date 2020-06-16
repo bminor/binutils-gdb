@@ -255,7 +255,7 @@ tui_remove_some_windows ()
 {
   tui_win_info *focus = tui_win_with_focus ();
 
-  if (strcmp (focus->name (), "cmd") == 0)
+  if (strcmp (focus->name (), CMD_NAME) == 0)
     {
       /* Try leaving the source or disassembly window.  If neither
 	 exists, just do nothing.  */
@@ -373,18 +373,18 @@ initialize_known_windows ()
 {
   known_window_types = new std::unordered_map<std::string, window_factory>;
 
-  known_window_types->emplace ("src",
+  known_window_types->emplace (SRC_NAME,
 			       make_standard_window<SRC_WIN,
 						    tui_source_window>);
-  known_window_types->emplace ("cmd",
+  known_window_types->emplace (CMD_NAME,
 			       make_standard_window<CMD_WIN, tui_cmd_window>);
-  known_window_types->emplace ("regs",
+  known_window_types->emplace (DATA_NAME,
 			       make_standard_window<DATA_WIN,
 						    tui_data_window>);
-  known_window_types->emplace ("asm",
+  known_window_types->emplace (DISASSEM_NAME,
 			       make_standard_window<DISASSEM_WIN,
 						    tui_disasm_window>);
-  known_window_types->emplace ("status", get_locator_window);
+  known_window_types->emplace (STATUS_NAME, get_locator_window);
 }
 
 /* See tui-layout.h.  */
@@ -394,8 +394,8 @@ tui_register_window (const char *name, window_factory &&factory)
 {
   std::string name_copy = name;
 
-  if (name_copy == "src" || name_copy == "cmd" || name_copy == "regs"
-      || name_copy == "asm" || name_copy == "status")
+  if (name_copy == SRC_NAME || name_copy == CMD_NAME || name_copy == DATA_NAME
+      || name_copy == DISASSEM_NAME || name_copy == STATUS_NAME)
     error (_("Window type \"%s\" is built-in"), name);
 
   known_window_types->emplace (std::move (name_copy),
@@ -791,8 +791,8 @@ tui_layout_split::remove_windows (const char *name)
       if (this_name == nullptr)
 	m_splits[i].layout->remove_windows (name);
       else if (strcmp (this_name, name) == 0
-	       || strcmp (this_name, "cmd") == 0
-	       || strcmp (this_name, "status") == 0)
+	       || strcmp (this_name, CMD_NAME) == 0
+	       || strcmp (this_name, STATUS_NAME) == 0)
 	{
 	  /* Keep.  */
 	}
@@ -888,37 +888,37 @@ initialize_layouts ()
   tui_layout_split *layout;
 
   layout = new tui_layout_split ();
-  layout->add_window ("src", 2);
-  layout->add_window ("status", 0);
-  layout->add_window ("cmd", 1);
-  add_layout_command ("src", layout);
+  layout->add_window (SRC_NAME, 2);
+  layout->add_window (STATUS_NAME, 0);
+  layout->add_window (CMD_NAME, 1);
+  add_layout_command (SRC_NAME, layout);
 
   layout = new tui_layout_split ();
-  layout->add_window ("asm", 2);
-  layout->add_window ("status", 0);
-  layout->add_window ("cmd", 1);
-  add_layout_command ("asm", layout);
+  layout->add_window (DISASSEM_NAME, 2);
+  layout->add_window (STATUS_NAME, 0);
+  layout->add_window (CMD_NAME, 1);
+  add_layout_command (DISASSEM_NAME, layout);
 
   layout = new tui_layout_split ();
-  layout->add_window ("src", 1);
-  layout->add_window ("asm", 1);
-  layout->add_window ("status", 0);
-  layout->add_window ("cmd", 1);
+  layout->add_window (SRC_NAME, 1);
+  layout->add_window (DISASSEM_NAME, 1);
+  layout->add_window (STATUS_NAME, 0);
+  layout->add_window (CMD_NAME, 1);
   add_layout_command ("split", layout);
 
   layout = new tui_layout_split ();
-  layout->add_window ("regs", 1);
-  layout->add_window ("src", 1);
-  layout->add_window ("status", 0);
-  layout->add_window ("cmd", 1);
+  layout->add_window (DATA_NAME, 1);
+  layout->add_window (SRC_NAME, 1);
+  layout->add_window (STATUS_NAME, 0);
+  layout->add_window (CMD_NAME, 1);
   layouts.emplace_back (layout);
   src_regs_layout = layout;
 
   layout = new tui_layout_split ();
-  layout->add_window ("regs", 1);
-  layout->add_window ("asm", 1);
-  layout->add_window ("status", 0);
-  layout->add_window ("cmd", 1);
+  layout->add_window (DATA_NAME, 1);
+  layout->add_window (DISASSEM_NAME, 1);
+  layout->add_window (STATUS_NAME, 0);
+  layout->add_window (CMD_NAME, 1);
   layouts.emplace_back (layout);
   asm_regs_layout = layout;
 }
@@ -1010,8 +1010,8 @@ tui_new_layout_command (const char *spec, int from_tty)
     error (_("Missing '}' in layout specification"));
   if (seen_windows.empty ())
     error (_("New layout does not contain any windows"));
-  if (seen_windows.find ("cmd") == seen_windows.end ())
-    error (_("New layout does not contain the \"cmd\" window"));
+  if (seen_windows.find (CMD_NAME) == seen_windows.end ())
+    error (_("New layout does not contain the \"" CMD_NAME "\" window"));
 
   gdb::unique_xmalloc_ptr<char> cmd_name
     = make_unique_xstrdup (new_name.c_str ());

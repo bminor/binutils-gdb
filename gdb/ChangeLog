@@ -1,5 +1,13 @@
 2020-06-16  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (STATUS_NAME): New macro.
+	* tui/tui-layout.c (tui_remove_some_windows)
+	(initialize_known_windows, tui_register_window)
+	(tui_layout_split::remove_windows, initialize_layouts)
+	(tui_new_layout_command): Don't use hard-coded window names.
+
+2020-06-16  Tom Tromey  <tom@tromey.com>
+
 	PR tui/25348:
 	* tui/tui.c (tui_ensure_readline_initialized): Rename from
 	tui_initialize_readline.  Only run once.  Call rl_initialize.
