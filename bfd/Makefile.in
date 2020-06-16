@@ -687,7 +687,6 @@ ALL_MACHINES_CFILES = \
 BFD32_BACKENDS = \
 	aout-cris.lo \
 	aout-ns32k.lo \
-	aout-tic30.lo \
 	aout32.lo \
 	cf-i386lynx.lo \
 	coff-go32.lo \
@@ -823,7 +822,6 @@ BFD32_BACKENDS = \
 BFD32_BACKENDS_CFILES = \
 	aout-cris.c \
 	aout-ns32k.c \
-	aout-tic30.c \
 	aout32.c \
 	cf-i386lynx.c \
 	coff-go32.c \
@@ -1295,7 +1293,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aix5ppc-core.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout-cris.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout-ns32k.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout-tic30.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout32.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aout64.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive.Plo@am__quote@

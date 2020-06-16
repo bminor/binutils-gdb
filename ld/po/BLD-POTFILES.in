@@ -287,7 +287,6 @@ eshlelf_nbsd.c
 eshlelf_nto.c
 eshlelf_vxworks.c
 eshpe.c
-etic30aout.c
 etic30coff.c
 etic3xcoff.c
 etic3xcoff_onchip.c

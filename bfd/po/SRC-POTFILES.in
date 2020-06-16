@@ -3,7 +3,6 @@ aix5ppc-core.c
 aout-cris.c
 aout-ns32k.c
 aout-target.h
-aout-tic30.c
 aout32.c
 aout64.c
 aoutx.h

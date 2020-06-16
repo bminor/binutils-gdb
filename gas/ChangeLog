@@ -1,3 +1,8 @@
+2020-06-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-tic30.h: Remove OBJ_AOUT support.
+	* configure.tgt: Delete tic30-*-*aout* entry.
+
 2020-06-15  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* config/tc-xtensa.c (XTHAL_ABI_WINDOWED, XTHAL_ABI_CALL0): New

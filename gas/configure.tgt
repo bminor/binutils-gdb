@@ -397,7 +397,6 @@ case ${generic_target} in
 
   spu-*-elf)				fmt=elf ;;
 
-  tic30-*-*aout*)			fmt=aout bfd_gas=yes ;;
   tic30-*-*coff*)			fmt=coff bfd_gas=yes ;;
   tic4x-*-* | c4x-*-*)			fmt=coff bfd_gas=yes ;;
   tic54x-*-* | c54x*-*-*)		fmt=coff bfd_gas=yes need_libm=yes;;

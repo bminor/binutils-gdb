@@ -1,3 +1,15 @@
+2020-06-16  Alan Modra  <amodra@gmail.com>
+
+	* emulparams/tic30aout.sh: Delete file.
+	* scripttempl/tic30aout.sc: Delete file.
+	* Makefile.am: Remove etic30aout.c from ALL_EMULATION_SOURCES and
+	delete dependency.
+	* configure.tgt: Delete tic30-*-*aout* entry.
+	* testsuite/ld-scripts/sane1.d: Delete tic30-*-aout mention.
+	* testsuite/ld-scripts/segment-start.d: Likewise.
+	* Makefile.in: Regenerate.
+	* po/BLD-POTFILES.in: Regenerate.
+
 2020-06-15  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* emultempl/xtensaelf.em (XSHAL_ABI): Remove macro definition.

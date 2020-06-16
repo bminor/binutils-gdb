@@ -374,7 +374,6 @@ ALL_EMULATION_SOURCES = \
 	eshlelf_nto.c \
 	eshlelf_vxworks.c \
 	eshpe.c \
-	etic30aout.c \
 	etic30coff.c \
 	etic3xcoff.c \
 	etic3xcoff_onchip.c \
@@ -864,7 +863,6 @@ $(ALL_EMULATION_SOURCES) $(ALL_64_EMULATION_SOURCES): $(GEN_DEPENDS)
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eshlelf_nto.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eshlelf_vxworks.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eshpe.Pc@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/etic30aout.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/etic30coff.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/etic3xcoff.Pc@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/etic3xcoff_onchip.Pc@am__quote@

@@ -414,9 +414,6 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-  c30-*-*aout* | tic30-*-*aout*)
-    targ_defvec=tic30_aout_vec
-    ;;
   c30-*-*coff* | tic30-*-*coff*)
     targ_defvec=tic30_coff_vec
     ;;
@@ -1388,6 +1385,10 @@ case "${targ}" in
     targ_selvecs="wasm_vec"
     ;;
 
+  xc16x-*-elf)
+    targ_defvec=xc16x_elf32_vec
+    ;;
+
   xgate-*-*)
     targ_defvec=xgate_elf32_vec
     targ_selvecs="xgate_elf32_vec"
@@ -1400,9 +1401,6 @@ case "${targ}" in
   xtensa*-*-*)
     targ_defvec=xtensa_elf32_le_vec
     targ_selvecs=xtensa_elf32_be_vec
-    ;;
- xc16x-*-elf)
-    targ_defvec=xc16x_elf32_vec
     ;;
 
   z80-*-coff)

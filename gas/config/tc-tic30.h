@@ -24,10 +24,6 @@
 
 #define TC_TIC30 1
 
-#ifdef OBJ_AOUT
-#define TARGET_FORMAT "a.out-tic30"
-#endif
-
 #define TARGET_ARCH		bfd_arch_tic30
 #define TARGET_BYTES_BIG_ENDIAN	1
 #define WORKING_DOT_WORD

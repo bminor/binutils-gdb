@@ -1,3 +1,16 @@
+2020-06-16  Alan Modra  <amodra@gmail.com>
+
+	* aout-tic30.c: Delete file.
+	* Makefile.am (BFD32_BACKENDS): Remove aout-tic30.lo.
+	(BFD32_BACKENDS_CFILES): Remove aout-tic30.c.
+	* config.bfd (c30-*-*aout*, tic30-*-*aout*): Remove entry.
+	(xc16x-*-elf): Sort properly.
+	* configure.ac: Remove tic30_aout_vec.
+	* targets.c: Likewise.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2020-06-15  Max Filippov  <jcmvbkbc@gmail.com>
 
 	* elf32-xtensa.c (XSHAL_ABI, XTHAL_ABI_UNDEFINED)
