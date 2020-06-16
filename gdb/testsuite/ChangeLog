@@ -1,3 +1,9 @@
+2020-06-16  Gary Benson <gbenson@redhat.com>
+
+	* gdb.python/py-nested-maps.c (create_map): Add missing return
+	value.
+	(create_map_map): Likewise.
+
 2020-06-15  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.base/jit-elf-so.exp: Refer to the global main_loader_basename
