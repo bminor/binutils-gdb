@@ -1,3 +1,9 @@
+2020-06-16  Tom Tromey  <tom@tromey.com>
+
+	* gdb.python/tui-window.py (failwin): New function.  Register it
+	as a TUI window type.
+	* gdb.python/tui-window.exp: Create new "fail" layout.  Test it.
+
 2020-06-16  Gary Benson <gbenson@redhat.com>
 
 	* gdb.python/py-nested-maps.c (create_map): Add missing return
