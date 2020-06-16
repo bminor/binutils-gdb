@@ -1,3 +1,10 @@
+2020-06-17  Tom Tromey  <tom@tromey.com>
+
+	* tui/tui-win.h (tui_scroll_forward, tui_scroll_backward)
+	(tui_scroll_left, tui_scroll_right, struct tui_win_info): Don't
+	declare.
+	* tui/tui-data.h (MIN_CMD_WIN_HEIGHT): Remove.
+
 2020-06-15  Simon Marchi  <simon.marchi@efficios.com>
 
 	* dwarf2/read.c (dwarf2_initialize_objfile): Check for presence
