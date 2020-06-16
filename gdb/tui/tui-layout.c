@@ -790,13 +790,14 @@ tui_layout_split::remove_windows (const char *name)
       const char *this_name = m_splits[i].layout->get_name ();
       if (this_name == nullptr)
 	m_splits[i].layout->remove_windows (name);
+      else if (strcmp (this_name, name) == 0
+	       || strcmp (this_name, "cmd") == 0
+	       || strcmp (this_name, "status") == 0)
+	{
+	  /* Keep.  */
+	}
       else
 	{
-	  if (strcmp (this_name, name) == 0
-	      || strcmp (this_name, "cmd") == 0)
-	    {
-	      /* Keep.  */
-	    }
 	  m_splits.erase (m_splits.begin () + i);
 	  --i;
 	}

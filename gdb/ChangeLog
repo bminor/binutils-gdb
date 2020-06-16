@@ -1,5 +1,10 @@
 2020-06-16  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-layout.c (tui_layout_split::remove_windows): Fix logic.
+	Also preserve the status window.
+
+2020-06-16  Tom Tromey  <tom@tromey.com>
+
 	* python/py-tui.c (tui_py_window::~tui_py_window): Handle case
 	where m_window==nullptr.
 
