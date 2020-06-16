@@ -1,5 +1,10 @@
 2020-06-16  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/discard_locals_test.c: Replace uses of asm with __asm__.
+	* testsuite/discard_locals_relocatable_test.c: Likewise.
+
+2020-06-16  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/Makefile.am (export_dynamic_plugin.o): Use CXXCOMPILE.
 	(plugin_test_wrap_symbols_1.o): Likewise.
 	(plugin_test_wrap_symbols_2.o): Likewise.

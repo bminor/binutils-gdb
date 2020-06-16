@@ -25,11 +25,11 @@
    main program should override the shared library symbol.  */
 
 /* Local symbol format for generic ELF target. */
-asm (".Lshould_be_discarded:");
+__asm__ (".Lshould_be_discarded:");
 
 #ifdef __i386__
 /* Additional local symbol format for the i386 target. */
-asm (".Xshould_be_discarded:");
+__asm__ (".Xshould_be_discarded:");
 #endif
 
 int
@@ -37,4 +37,3 @@ main (void)
 {
   return 0;
 }
-
