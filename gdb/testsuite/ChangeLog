@@ -12,7 +12,7 @@
 
 2020-06-17  Keith Seitz  <keiths@redhat.com>
 
-	* gdb.deuginfod/fetch_src_and_symbols.exp: Pass INTERNAL_GDBFLAGS
+	* gdb.debuginfod/fetch_src_and_symbols.exp: Pass INTERNAL_GDBFLAGS
 	when executing "gdb --configuration".
 
 2020-06-17  Tom de Vries  <tdevries@suse.de>
