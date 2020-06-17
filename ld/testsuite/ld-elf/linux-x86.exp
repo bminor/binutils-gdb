@@ -174,7 +174,7 @@ proc check_pr25749a {testname srcfilea srcfileb cflags ldflags lderror} {
 check_pr25749a "pr25749-1a" "pr25749-1.c" "pr25749-1a.c" "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS" ""
 check_pr25749a "pr25749-1a" "pr25749-1.c" "pr25749-1a.c" "-fPIE" "-pie" ""
 check_pr25749a "pr25749-1b" "pr25749-1.c" "pr25749-1b.c" "$NOPIE_CFLAGS" "$NOPIE_LDFLAGS" ""
-if { [istarget "i?86-*-linux*"] } {
+if { [istarget "i?86-*-linux*"] || ![at_least_gcc_version 5 1] } {
     check_pr25749a "pr25749-1b" "pr25749-1.c" "pr25749-1b.c" "-fPIE" "-pie" ""
 } else {
     check_pr25749a "pr25749-1b" "pr25749-1.c" "pr25749-1b.c" "-fPIE" "-pie" "pr25749-1b.err"

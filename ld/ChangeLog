@@ -1,3 +1,8 @@
+2020-06-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/linux-x86.exp: Require GCC 5 for Build
+	pr25749-1b (-pie -fPIE).
+
 2020-06-16  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/pr23428.c: Define _DEFAULT_SOURCE.
