@@ -24,6 +24,11 @@ if [get_compiler_info c++] {
     return -1
 }
 
+# Skip all tests if Python scripting is not enabled.
+gdb_exit
+gdb_start
+if { [skip_python_tests] } { continue }
+
 # Build inferior to language specification.
 proc build_inferior {exefile lang} {
   global srcdir subdir srcfile testfile hex
@@ -44,9 +49,6 @@ proc prepare_gdb {exefile} {
   gdb_start
   gdb_reinitialize_dir $srcdir/$subdir
   gdb_load ${exefile}
-
-  # Skip all tests if Python scripting is not enabled.
-  if { [skip_python_tests] } { continue }
 
   if ![runto_main] then {
       perror "couldn't run to breakpoint"
