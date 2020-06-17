@@ -1,3 +1,8 @@
+2020-06-17  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.in (%-generated.cc: ../gdb/regformats/arm/%.dat):
+	Remove.
+
 2020-06-12  Simon Marchi  <simon.marchi@efficios.com>
 
 	* Makefile.in (SFILES): Remove win32-arm-low.cc, wincecompat.cc.

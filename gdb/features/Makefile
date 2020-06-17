@@ -44,9 +44,7 @@
 #   make GDB=/path/to/gdb XMLTOC="xml files" FEATURE_XMLFILES="xml files" cfiles
 
 # List of .dat files to create in ../regformats/
-WHICH = arm/arm-with-iwmmxt arm/arm-with-vfpv2 arm/arm-with-vfpv3 \
-	arm/arm-with-neon \
-	mips-linux mips-dsp-linux \
+WHICH = mips-linux mips-dsp-linux \
 	microblaze-with-stack-protect \
 	mips64-linux mips64-dsp-linux \
 	nios2-linux \

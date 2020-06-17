@@ -555,9 +555,6 @@ target/%.o: ../gdb/target/%.c
 %-generated.cc: ../gdb/regformats/%.dat $(regdat_sh)
 	$(ECHO_REGDAT) $(SHELL) $(regdat_sh) $< $@
 
-%-generated.cc: ../gdb/regformats/arm/%.dat $(regdat_sh)
-	$(ECHO_REGDAT) $(SHELL) $(regdat_sh) $< $@
-
 %-generated.cc: ../gdb/regformats/rs6000/%.dat $(regdat_sh)
 	$(ECHO_REGDAT) $(SHELL) $(regdat_sh) $< $@
 
