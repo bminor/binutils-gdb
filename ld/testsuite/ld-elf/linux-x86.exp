@@ -124,6 +124,9 @@ proc check_pr25749a {testname srcfilea srcfileb cflags ldflags lderror} {
 	}
     }
 
+    # Suppress warning for unsupported attribute from older GCC.
+    append cflags " -w"
+
     exec cp $srcdir/$subdir/$srcfilea $srcfilea
     exec chmod +w $srcfilea
     set pr25749_bin "$objcopy -B $output_arch -I binary -O $output_target $srcfilea tmpdir/pr25749-bin.o"

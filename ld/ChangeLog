@@ -1,5 +1,10 @@
 2020-06-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* testsuite/ld-elf/linux-x86.exp (check_pr25749a): Append "-w"
+	to cflags.
+
+2020-06-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/ld-elf/linux-x86.exp: Require GCC 5 for Build
 	pr25749-1b (-pie -fPIE).
 
