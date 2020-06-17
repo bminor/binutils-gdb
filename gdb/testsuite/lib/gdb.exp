@@ -5177,6 +5177,17 @@ proc gdb_cleanup_globals {} {
     }
 }
 
+# Create gdb_tcl_unknown, a copy tcl's ::unknown, provided it's present as a
+# proc.
+set temp [interp create]
+if { [interp eval $temp "info procs ::unknown"] != "" } {
+    set old_args [interp eval $temp "info args ::unknown"]
+    set old_body [interp eval $temp "info body ::unknown"]
+    eval proc gdb_tcl_unknown {$old_args} {$old_body}
+}
+interp delete $temp
+unset temp
+
 proc gdb_init { test_file_name } {
     # Reset the timeout value to the default.  This way, any testcase
     # that changes the timeout value without resetting it cannot affect
@@ -5283,14 +5294,16 @@ proc gdb_init { test_file_name } {
 
     gdb_setup_known_globals
 
-    # Dejagnu overrides proc unknown.  The dejagnu version may trigger in a
-    # test-case but abort the entire test run.  To fix this, we install a
-    # local version here, which reverts dejagnu's override, and restore
-    # dejagnu's version in gdb_finish.
-    rename ::unknown ::dejagnu_unknown
-    proc unknown { args } {
-	# Dejagnu saves the original version in ::tcl_unknown, use it.
-	return [uplevel 1 ::tcl_unknown $args]
+    if { [info procs ::gdb_tcl_unknown] != "" } {
+	# Dejagnu overrides proc unknown.  The dejagnu version may trigger in a
+	# test-case but abort the entire test run.  To fix this, we install a
+	# local version here, which reverts dejagnu's override, and restore
+	# dejagnu's version in gdb_finish.
+	rename ::unknown ::dejagnu_unknown
+	proc unknown { args } {
+	    # Use tcl's unknown.
+	    return [uplevel 1 ::gdb_tcl_unknown $args]
+	}
     }
 
     return $res
@@ -5302,9 +5315,11 @@ proc gdb_finish { } {
     global cleanfiles
     global known_globals
 
-    # Restore dejagnu's version of proc unknown.
-    rename ::unknown ""
-    rename ::dejagnu_unknown ::unknown
+    if { [info procs ::gdb_tcl_unknown] != "" } {
+	# Restore dejagnu's version of proc unknown.
+	rename ::unknown ""
+	rename ::dejagnu_unknown ::unknown
+    }
 
     # Exit first, so that the files are no longer in use.
     gdb_exit
