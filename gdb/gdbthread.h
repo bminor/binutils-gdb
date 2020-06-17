@@ -131,28 +131,10 @@ struct thread_control_state
      any inlined frames).  */
   struct frame_id step_stack_frame_id {};
 
-  /* Nonzero if we are presently stepping over a breakpoint.
-
-     If we hit a breakpoint or watchpoint, and then continue, we need
-     to single step the current thread with breakpoints disabled, to
-     avoid hitting the same breakpoint or watchpoint again.  And we
-     should step just a single thread and keep other threads stopped,
-     so that other threads don't miss breakpoints while they are
-     removed.
-
-     So, this variable simultaneously means that we need to single
-     step the current thread, keep other threads stopped, and that
-     breakpoints should be removed while we step.
-
-     This variable is set either:
-     - in proceed, when we resume inferior on user's explicit request
-     - in keep_going, if handle_inferior_event decides we need to
-     step over breakpoint.
-
-     The variable is cleared in normal_stop.  The proceed calls
-     wait_for_inferior, which calls handle_inferior_event in a loop,
-     and until wait_for_inferior exits, this variable is changed only
-     by keep_going.  */
+  /* True if the the thread is presently stepping over a breakpoint or
+     a watchpoint, either with an inline step over or a displaced (out
+     of line) step, and we're now expecting it to report a trap for
+     the finished single step.  */
   int trap_expected = 0;
 
   /* Nonzero if the thread is being proceeded for a "finish" command
