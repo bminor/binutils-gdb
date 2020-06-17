@@ -1,3 +1,8 @@
+2020-06-15  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.base/index-cache-load-twice.c: New.
+	* gdb.base/index-cache-load-twice.exp: New.
+
 2020-06-17  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.deuginfod/fetch_src_and_symbols.exp: Pass INTERNAL_GDBFLAGS

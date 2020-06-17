@@ -6027,6 +6027,14 @@ dwarf2_initialize_objfile (struct objfile *objfile, dw_index_kind *index_kind)
       return true;
     }
 
+  /* There might already be partial symtabs built for this BFD.  This happens
+     when loading the same binary twice with the index-cache enabled.  If so,
+     don't try to read an index.  The objfile / per_objfile initialization will
+     be completed in dwarf2_build_psymtabs, in the standard partial symtabs
+     code path.  */
+  if (per_bfd->partial_symtabs != nullptr)
+    return false;
+
   if (dwarf2_read_debug_names (per_objfile))
     {
       *index_kind = dw_index_kind::DEBUG_NAMES;
