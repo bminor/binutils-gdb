@@ -1,5 +1,9 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* fork-child.c (postfork_hook): Don't write to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* bsd-kvm.c (bsd_kvm_target_open): Switch to thread after adding
 	it, instead of writing to inferior_ptid.
 
