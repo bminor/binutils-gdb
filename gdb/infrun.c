@@ -485,8 +485,8 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  switch_to_no_thread ();
 	  child_inf->symfile_flags = SYMFILE_NO_READ;
 	  push_target (parent_inf->process_target ());
-	  add_thread_silent (child_inf->process_target (), child_ptid);
-	  inferior_ptid = child_ptid;
+	  thread_info *child_thr
+	    = add_thread_silent (child_inf->process_target (), child_ptid);
 
 	  /* If this is a vfork child, then the address-space is
 	     shared with the parent.  */
@@ -504,6 +504,11 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	      child_inf->pending_detach = 0;
 	      parent_inf->vfork_child = child_inf;
 	      parent_inf->pending_detach = 0;
+
+	      /* Now that the inferiors and program spaces are all
+		 wired up, we can switch to the child thread (which
+		 switches inferior and program space too).  */
+	      switch_to_thread (child_thr);
 	    }
 	  else
 	    {
@@ -512,6 +517,10 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	      child_inf->removable = 1;
 	      set_current_program_space (child_inf->pspace);
 	      clone_program_space (child_inf->pspace, parent_inf->pspace);
+
+	      /* solib_create_inferior_hook relies on the current
+		 thread.  */
+	      switch_to_thread (child_thr);
 
 	      /* Let the shared library layer (e.g., solib-svr4) learn
 		 about this new process, relocate the cloned exec, pull
@@ -628,8 +637,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	push_target (target);
       }
 
-      add_thread_silent (target, child_ptid);
-      inferior_ptid = child_ptid;
+      thread_info *child_thr = add_thread_silent (target, child_ptid);
 
       /* If this is a vfork child, then the address-space is shared
 	 with the parent.  If we detached from the parent, then we can
@@ -657,6 +665,8 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	     the core, this wouldn't be required.  */
 	  solib_create_inferior_hook (0);
 	}
+
+      switch_to_thread (child_thr);
     }
 
   return target_follow_fork (follow_child, detach_fork);
@@ -904,22 +914,6 @@ proceed_after_vfork_done (struct thread_info *thread,
   return 0;
 }
 
-/* Save/restore inferior_ptid, current program space and current
-   inferior.  Only use this if the current context points at an exited
-   inferior (and therefore there's no current thread to save).  */
-class scoped_restore_exited_inferior
-{
-public:
-  scoped_restore_exited_inferior ()
-    : m_saved_ptid (&inferior_ptid)
-  {}
-
-private:
-  scoped_restore_tmpl<ptid_t> m_saved_ptid;
-  scoped_restore_current_program_space m_pspace;
-  scoped_restore_current_inferior m_inferior;
-};
-
 /* Called whenever we notice an exec or exit event, to handle
    detaching or resuming a vfork parent.  */
 
@@ -942,7 +936,6 @@ handle_vfork_child_exec_or_exit (int exec)
 	 time.  */
       if (vfork_parent->pending_detach)
 	{
-	  struct thread_info *tp;
 	  struct program_space *pspace;
 	  struct address_space *aspace;
 
@@ -950,20 +943,10 @@ handle_vfork_child_exec_or_exit (int exec)
 
 	  vfork_parent->pending_detach = 0;
 
-	  gdb::optional<scoped_restore_exited_inferior>
-	    maybe_restore_inferior;
-	  gdb::optional<scoped_restore_current_pspace_and_thread>
-	    maybe_restore_thread;
-
-	  /* If we're handling a child exit, then inferior_ptid points
-	     at the inferior's pid, not to a thread.  */
-	  if (!exec)
-	    maybe_restore_inferior.emplace ();
-	  else
-	    maybe_restore_thread.emplace ();
+	  scoped_restore_current_pspace_and_thread restore_thread;
 
 	  /* We're letting loose of the parent.  */
-	  tp = any_live_thread_of_inferior (vfork_parent);
+	  thread_info *tp = any_live_thread_of_inferior (vfork_parent);
 	  switch_to_thread (tp);
 
 	  /* We're about to detach from the parent, which implicitly
@@ -1032,11 +1015,11 @@ handle_vfork_child_exec_or_exit (int exec)
 	     go ahead and create a new one for this exiting
 	     inferior.  */
 
-	  /* Switch to null_ptid while running clone_program_space, so
+	  /* Switch to no-thread while running clone_program_space, so
 	     that clone_program_space doesn't want to read the
 	     selected frame of a dead process.  */
-	  scoped_restore restore_ptid
-	    = make_scoped_restore (&inferior_ptid, null_ptid);
+	  scoped_restore_current_thread restore_thread;
+	  switch_to_no_thread ();
 
 	  inf->pspace = new program_space (maybe_new_address_space ());
 	  inf->aspace = inf->pspace->aspace;
@@ -4622,25 +4605,6 @@ wait_one ()
     }
 }
 
-/* Generate a wrapper for target_stopped_by_REASON that works on PTID
-   instead of the current thread.  */
-#define THREAD_STOPPED_BY(REASON)		\
-static int					\
-thread_stopped_by_ ## REASON (ptid_t ptid)	\
-{						\
-  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid); \
-  inferior_ptid = ptid;				\
-						\
-  return target_stopped_by_ ## REASON ();	\
-}
-
-/* Generate thread_stopped_by_watchpoint.  */
-THREAD_STOPPED_BY (watchpoint)
-/* Generate thread_stopped_by_sw_breakpoint.  */
-THREAD_STOPPED_BY (sw_breakpoint)
-/* Generate thread_stopped_by_hw_breakpoint.  */
-THREAD_STOPPED_BY (hw_breakpoint)
-
 /* Save the thread's event and stop reason to process it later.  */
 
 static void
@@ -4672,19 +4636,22 @@ save_waitstatus (struct thread_info *tp, const target_waitstatus *ws)
 
       adjust_pc_after_break (tp, &tp->suspend.waitstatus);
 
-      if (thread_stopped_by_watchpoint (tp->ptid))
+      scoped_restore_current_thread restore_thread;
+      switch_to_thread (tp);
+
+      if (target_stopped_by_watchpoint ())
 	{
 	  tp->suspend.stop_reason
 	    = TARGET_STOPPED_BY_WATCHPOINT;
 	}
       else if (target_supports_stopped_by_sw_breakpoint ()
-	       && thread_stopped_by_sw_breakpoint (tp->ptid))
+	       && target_stopped_by_sw_breakpoint ())
 	{
 	  tp->suspend.stop_reason
 	    = TARGET_STOPPED_BY_SW_BREAKPOINT;
 	}
       else if (target_supports_stopped_by_hw_breakpoint ()
-	       && thread_stopped_by_hw_breakpoint (tp->ptid))
+	       && target_stopped_by_hw_breakpoint ())
 	{
 	  tp->suspend.stop_reason
 	    = TARGET_STOPPED_BY_HW_BREAKPOINT;
@@ -5338,9 +5305,21 @@ handle_inferior_event (struct execution_control_state *ecs)
 
     case TARGET_WAITKIND_EXITED:
     case TARGET_WAITKIND_SIGNALLED:
-      inferior_ptid = ecs->ptid;
-      set_current_inferior (find_inferior_ptid (ecs->target, ecs->ptid));
-      set_current_program_space (current_inferior ()->pspace);
+      {
+	/* Depending on the system, ecs->ptid may point to a thread or
+	   to a process.  On some targets, target_mourn_inferior may
+	   need to have access to the just-exited thread.  That is the
+	   case of GNU/Linux's "checkpoint" support, for example.
+	   Call the switch_to_xxx routine as appropriate.  */
+	thread_info *thr = find_thread_ptid (ecs->target, ecs->ptid);
+	if (thr != nullptr)
+	  switch_to_thread (thr);
+	else
+	  {
+	    inferior *inf = find_inferior_ptid (ecs->target, ecs->ptid);
+	    switch_to_inferior_no_thread (inf);
+	  }
+      }
       handle_vfork_child_exec_or_exit (0);
       target_terminal::ours ();	/* Must do this before mourn anyway.  */
 

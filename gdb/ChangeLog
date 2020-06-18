@@ -1,5 +1,29 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (generic_mourn_inferior): Use switch_to_thread instead
+	of writing to inferior_ptid.
+	(scoped_restore_exited_inferior): Delete.
+	(handle_vfork_child_exec_or_exit): Simplify using
+	scoped_restore_current_pspace_and_thread.  Use switch_to_thread
+	instead of writing to inferior_ptid.
+	(THREAD_STOPPED_BY): Delete.
+	(thread_stopped_by_watchpoint, thread_stopped_by_sw_breakpoint)
+	(thread_stopped_by_hw_breakpoint): Delete.
+	(save_waitstatus): Use
+	scoped_restore_current_thread+switch_to_thread, and call
+	target_stopped_by_watchpoint instead of
+	thread_stopped_by_watchpoint, target_stopped_by_sw_breakpoint
+	instead of thread_stopped_by_sw_breakpoint, and
+	target_stopped_by_hw_breakpoint instead of
+	thread_stopped_by_hw_breakpoint.
+	(handle_inferior_event)
+	<TARGET_WAITKIND_EXITED/TARGET_WAITKIND_SIGNALLED>: Don't write to
+	inferior_ptid directly, nor
+	set_current_inferior/set_current_program_space.  Use
+	switch_to_thread / switch_to_inferior_no_thread instead.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* target.c (generic_mourn_inferior): Use switch_to_no_thread
 	instead of writing to inferior_ptid.
 
