@@ -1,5 +1,12 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* corelow.c (core_target::close): Use switch_to_no_thread instead
+	of writing to inferior_ptid directly.
+	(add_to_thread_list, core_target_open): Use switch_to_thread
+	instead of writing to inferior_ptid directly.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* darwin-nat.c (darwin_nat_target::decode_message): Don't write to
 	inferior_ptid.
 	(darwin_nat_target::stop_inferior, darwin_nat_target::kill): Avoid

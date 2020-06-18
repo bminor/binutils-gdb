@@ -160,8 +160,8 @@ core_target::close ()
 {
   if (core_bfd)
     {
-      inferior_ptid = null_ptid;    /* Avoid confusion from thread
-				       stuff.  */
+      switch_to_no_thread ();    /* Avoid confusion from thread
+				    stuff.  */
       exit_inferior_silent (current_inferior ());
 
       /* Clear out solib state while the bfd is still open.  See
@@ -182,7 +182,6 @@ core_target::close ()
 static void
 add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
 {
-  ptid_t ptid;
   int core_tid;
   int pid, lwpid;
   asection *reg_sect = (asection *) reg_sect_arg;
@@ -210,15 +209,15 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
       inf->fake_pid_p = fake_pid_p;
     }
 
-  ptid = ptid_t (pid, lwpid, 0);
+  ptid_t ptid (pid, lwpid);
 
-  add_thread (inf->process_target (), ptid);
+  thread_info *thr = add_thread (inf->process_target (), ptid);
 
 /* Warning, Will Robinson, looking at BFD private data! */
 
   if (reg_sect != NULL
       && asect->filepos == reg_sect->filepos)	/* Did we find .reg?  */
-    inferior_ptid = ptid;			/* Yes, make it current.  */
+    switch_to_thread (thr);			/* Yes, make it current.  */
 }
 
 /* Issue a message saying we have no core to debug, if FROM_TTY.  */
@@ -339,7 +338,7 @@ core_target_open (const char *arg, int from_tty)
 
   push_target (std::move (target_holder));
 
-  inferior_ptid = null_ptid;
+  switch_to_no_thread ();
 
   /* Need to flush the register cache (and the frame cache) from a
      previous debug session.  If inferior_ptid ends up the same as the
@@ -368,11 +367,10 @@ core_target_open (const char *arg, int from_tty)
       if (thread == NULL)
 	{
 	  inferior_appeared (current_inferior (), CORELOW_PID);
-	  inferior_ptid = ptid_t (CORELOW_PID);
-	  add_thread_silent (target, inferior_ptid);
+	  thread = add_thread_silent (target, ptid_t (CORELOW_PID));
 	}
-      else
-	switch_to_thread (thread);
+
+      switch_to_thread (thread);
     }
 
   if (exec_bfd == nullptr)
