@@ -902,7 +902,7 @@ pd_update (int set_infpid)
     {
       ptid = thread->ptid;
       if (set_infpid)
-	inferior_ptid = ptid;
+	switch_to_thread (thread);
     }
   return ptid;
 }

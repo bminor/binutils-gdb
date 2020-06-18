@@ -1,5 +1,9 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* aix-thread.c (pd_update): Use switch_to_thread.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* ravenscar-thread.c (ravenscar_thread_target): Update.
 	(ravenscar_thread_target::update_inferior_ptid): Rename to ...
 	(ravenscar_thread_target::add_active_thread): ... this.  Don't
