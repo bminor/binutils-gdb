@@ -393,7 +393,7 @@ nto_procfs_target::update_thread_list ()
 
   prune_threads ();
 
-  pid = inferior_ptid.pid ();
+  pid = current_inferior ()->pid;
 
   status.tid = 1;
 
@@ -712,7 +712,7 @@ nto_procfs_target::attach (const char *args, int from_tty)
 	printf_unfiltered ("Attaching to %s\n",
 			   target_pid_to_str (ptid_t (pid)).c_str ());
     }
-  inferior_ptid = do_attach (ptid_t (pid));
+  ptid_t ptid = do_attach (ptid_t (pid));
   inf = current_inferior ();
   inferior_appeared (inf, pid);
   inf->attach_flag = 1;
@@ -720,7 +720,9 @@ nto_procfs_target::attach (const char *args, int from_tty)
   if (!target_is_pushed (ops))
     push_target (ops);
 
-  procfs_update_thread_list (ops);
+  update_thread_list ();
+
+  switch_to_thread (find_thread_ptid (this, ptid));
 }
 
 void
@@ -1000,19 +1002,16 @@ nto_procfs_target::xfer_partial (enum target_object object,
 void
 nto_procfs_target::detach (inferior *inf, int from_tty)
 {
-  int pid;
-
   target_announce_detach ();
 
   if (siggnal)
-    SignalKill (nto_node (), inferior_ptid.pid (), 0, 0, 0, 0);
+    SignalKill (nto_node (), inf->pid, 0, 0, 0, 0);
 
   close (ctl_fd);
   ctl_fd = -1;
 
-  pid = inferior_ptid.pid ();
-  inferior_ptid = null_ptid;
-  detach_inferior (pid);
+  switch_to_no_thread ();
+  detach_inferior (inf->pid);
   init_thread_list ();
   inf_child_maybe_unpush_target (ops);
 }
@@ -1132,7 +1131,7 @@ nto_procfs_target::mourn_inferior ()
       SignalKill (nto_node (), inferior_ptid.pid (), 0, SIGKILL, 0, 0);
       close (ctl_fd);
     }
-  inferior_ptid = null_ptid;
+  switch_to_no_thread ();
   init_thread_list ();
   inf_child_mourn_inferior (ops);
 }
@@ -1303,8 +1302,9 @@ nto_procfs_target::create_inferior (const char *exec_file,
   if (fds[2] != STDERR_FILENO)
     close (fds[2]);
 
-  inferior_ptid = do_attach (ptid_t (pid));
-  procfs_update_thread_list (ops);
+  ptid_t ptid = do_attach (ptid_t (pid));
+  update_thread_list ();
+  switch_to_thread (find_thread_ptid (this, ptid));
 
   inf = current_inferior ();
   inferior_appeared (inf, pid);

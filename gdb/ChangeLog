@@ -1,5 +1,19 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* nto-procfs.c (nto_procfs_target::update_thread_list): Avoid
+	inferior_ptid.
+	(nto_procfs_target::attach): Avoid inferior_ptid.  Switch to
+	thread.
+	(nto_procfs_target::detach): Avoid referencing
+	inferior_ptid.  Use switch_to_no_thread instead of writing to
+	inferior_ptid directly.
+	(nto_procfs_target::mourn_inferior): Use switch_to_no_thread
+	instead of writing to inferior_ptid directly.
+	(nto_procfs_target::create_inferior): Avoid inferior_ptid.  Switch
+	to thread.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* remote-sim.c (gdbsim_target::create_inferior): Switch to thread
 	after creating it, instead of writing to inferior_ptid.
 	(gdbsim_target_open): Use switch_to_no_thread instead of writing
