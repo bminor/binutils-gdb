@@ -1,3 +1,8 @@
+2020-06-18  Fangrui Song  <i@maskray.me>
+
+	PR gold/26039
+	* elfcpp.h (enum DF_1): New enum member DF_1_PIE.
+
 2020-06-06  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.h: Rename

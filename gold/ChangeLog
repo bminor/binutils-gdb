@@ -1,3 +1,8 @@
+2020-06-18  Fangrui Song  <i@maskray.me>
+
+	PR gold/26039
+	* layout.cc (Layout::finish_dynamic_section): Set DF_1_PIE.
+
 2020-06-16  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/discard_locals_test.c: Replace uses of asm with __asm__.
