@@ -1168,8 +1168,9 @@ ctf_target_open (const char *dirname, int from_tty)
   push_target (&ctf_ops);
 
   inferior_appeared (current_inferior (), CTF_PID);
-  inferior_ptid = ptid_t (CTF_PID);
-  add_thread_silent (&ctf_ops, inferior_ptid);
+
+  thread_info *thr = add_thread_silent (&ctf_ops, ptid_t (CTF_PID));
+  switch_to_thread (thr);
 
   merge_uploaded_trace_state_variables (&uploaded_tsvs);
   merge_uploaded_tracepoints (&uploaded_tps);
@@ -1187,7 +1188,7 @@ ctf_target::close ()
   xfree (trace_dirname);
   trace_dirname = NULL;
 
-  inferior_ptid = null_ptid;	/* Avoid confusion from thread stuff.  */
+  switch_to_no_thread ();	/* Avoid confusion from thread stuff.  */
   exit_inferior_silent (current_inferior ());
 
   trace_reset_local_state ();

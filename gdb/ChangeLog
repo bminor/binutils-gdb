@@ -1,5 +1,12 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* tracectf.c (ctf_target_open): Switch to added thread instead of
+	writing to inferior_ptid directly.
+	(ctf_target::close): Use switch_to_no_thread instead of writing to
+	inferior_ptid directly.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* tracefile-tfile.c (tfile_target_open): Don't write to
 	inferior_ptid directly, instead switch to added thread.
 	(tfile_target::close): Use switch_to_no_thread instead of writing
