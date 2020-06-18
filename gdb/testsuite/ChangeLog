@@ -1,5 +1,10 @@
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdb.base/corefile2.exp: New file.
+	* gdb.base/coremaker2.exp: New file.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
 	* gdb.base/coredump-filter.exp: Add second
 	non-Private-Shared-Anon-File test.
 	(test_disasm): Rename binfile for test which is expected
