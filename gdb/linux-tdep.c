@@ -1612,8 +1612,8 @@ linux_get_siginfo_data (thread_info *thread, struct gdbarch *gdbarch)
   if (!gdbarch_get_siginfo_type_p (gdbarch))
     return gdb::byte_vector ();
 
-  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
-  inferior_ptid = thread->ptid;
+  scoped_restore_current_thread save_current_thread;
+  switch_to_thread (thread);
 
   siginfo_type = gdbarch_get_siginfo_type (gdbarch);
 
