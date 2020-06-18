@@ -1,5 +1,10 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* btrace.c (btrace_fetch): Use switch_to_thread instead of writing
+	to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* bsd-kvm.c (bsd_kvm_target::close): Use switch_to_no_thread
 	instead of writing to inferior_ptid directly.
 

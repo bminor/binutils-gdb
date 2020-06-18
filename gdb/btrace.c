@@ -1910,11 +1910,12 @@ btrace_fetch (struct thread_info *tp, const struct btrace_cpu *cpu)
   if (btinfo->replay != NULL)
     return;
 
-  /* With CLI usage, TP->PTID always equals INFERIOR_PTID here.  Now that we
-     can store a gdb.Record object in Python referring to a different thread
-     than the current one, temporarily set INFERIOR_PTID.  */
-  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
-  inferior_ptid = tp->ptid;
+  /* With CLI usage, TP is always the current thread when we get here.
+     However, since we can also store a gdb.Record object in Python
+     referring to a different thread than the current one, we need to
+     temporarily set the current thread.  */
+  scoped_restore_current_thread restore_thread;
+  switch_to_thread (tp);
 
   /* We should not be called on running or exited threads.  */
   gdb_assert (can_access_registers_thread (tp));
