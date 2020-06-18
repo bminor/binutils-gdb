@@ -1,5 +1,22 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/25412
+	* gdbthread.h (delete_thread, delete_thread_silent)
+	(find_thread_ptid): Update comments.
+	* thread.c (current_thread_): New global.
+	(is_current_thread): Move higher, and reimplement.
+	(inferior_thread): Reimplement.
+	(set_thread_exited): Use bool.  Add assertions.
+	(add_thread_silent): Simplify thread-reuse handling by always
+	calling delete_thread.
+	(delete_thread): Remove intro comment.
+	(find_thread_ptid): Skip exited threads.
+	(switch_to_thread_no_regs): Write to current_thread_.
+	(switch_to_no_thread): Check CURRENT_THREAD_ instead of
+	INFERIOR_PTID.  Clear current_thread_.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* aix-thread.c (pd_update): Use switch_to_thread.
 
 2020-06-18  Pedro Alves  <palves@redhat.com>

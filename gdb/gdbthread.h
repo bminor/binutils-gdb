@@ -415,12 +415,13 @@ extern struct thread_info *add_thread_with_info (process_stratum_target *targ,
 						 ptid_t ptid,
 						 private_thread_info *);
 
-/* Delete an existing thread list entry.  */
+/* Delete thread THREAD and notify of thread exit.  If the thread is
+   currently not deletable, don't actually delete it but still tag it
+   as exited and do the notification.  */
 extern void delete_thread (struct thread_info *thread);
 
-/* Delete an existing thread list entry, and be quiet about it.  Used
-   after the process this thread having belonged to having already
-   exited, for example.  */
+/* Like delete_thread, but be quiet about it.  Used when the process
+   this thread belonged to has already exited, for example.  */
 extern void delete_thread_silent (struct thread_info *thread);
 
 /* Delete a step_resume_breakpoint from the thread database.  */
@@ -460,15 +461,15 @@ extern bool in_thread_list (process_stratum_target *targ, ptid_t ptid);
    global id, not the system's).  */
 extern int valid_global_thread_id (int global_id);
 
-/* Find thread PTID of inferior INF.  */
+/* Find (non-exited) thread PTID of inferior INF.  */
 extern thread_info *find_thread_ptid (inferior *inf, ptid_t ptid);
 
-/* Search function to lookup a thread by 'pid'.  */
+/* Search function to lookup a (non-exited) thread by 'ptid'.  */
 extern struct thread_info *find_thread_ptid (process_stratum_target *targ,
 					     ptid_t ptid);
 
-/* Search function to lookup a thread by 'ptid'.  Only searches in
-   threads of INF.  */
+/* Search function to lookup a (non-exited) thread by 'ptid'.  Only
+   searches in threads of INF.  */
 extern struct thread_info *find_thread_ptid (inferior *inf, ptid_t ptid);
 
 /* Find thread by GDB global thread ID.  */
