@@ -1,5 +1,15 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* gnu-nat.c (gnu_nat_target::create_inferior): Switch to the added
+	thread.
+	(gnu_nat_target::attach): Don't write to inferior_ptid directly.
+	Instead use switch_to_thread.
+	(gnu_nat_target::detach): Use switch_to_no_thread
+	instead of writing to inferior_ptid directly.  Used passed-in
+	inferior instead of looking up the inferior by pid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* go32-nat.c (go32_nat_target::create_inferior): Don't write to
 	inferior_ptid.
 

@@ -2121,7 +2121,8 @@ gnu_nat_target::create_inferior (const char *exec_file,
   /* We have something that executes now.  We'll be running through
      the shell at this point (if startup-with-shell is true), but the
      pid shouldn't change.  */
-  add_thread_silent (this, ptid_t (pid));
+  thread_info *thr = add_thread_silent (this, ptid_t (pid));
+  switch_to_thread (thr);
 
   /* Attach to the now stopped child, which is actually a shell...  */
   inf_debug (inf, "attaching to child: %d", pid);
@@ -2196,7 +2197,9 @@ gnu_nat_target::attach (const char *args, int from_tty)
 
   inf_update_procs (inf);
 
-  inferior_ptid = ptid_t (pid, inf_pick_first_thread (), 0);
+  thread_info *thr
+    = find_thread_ptid (this, ptid_t (pid, inf_pick_first_thread ()));
+  switch_to_thread (thr);
 
   /* We have to initialize the terminal settings now, since the code
      below might try to restore them.  */
@@ -2225,8 +2228,6 @@ gnu_nat_target::attach (const char *args, int from_tty)
 void
 gnu_nat_target::detach (inferior *inf, int from_tty)
 {
-  int pid;
-
   if (from_tty)
     {
       const char *exec_file = get_exec_file (0);
@@ -2238,12 +2239,10 @@ gnu_nat_target::detach (inferior *inf, int from_tty)
 	printf_unfiltered ("Detaching from pid %d\n", gnu_current_inf->pid);
     }
 
-  pid = gnu_current_inf->pid;
-
   inf_detach (gnu_current_inf);
 
-  inferior_ptid = null_ptid;
-  detach_inferior (find_inferior_pid (this, pid));
+  switch_to_no_thread ();
+  detach_inferior (inf);
 
   maybe_unpush_target ();
 }
