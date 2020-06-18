@@ -308,6 +308,25 @@ proc check_pie_support { } {
     return $pie_available_saved
 }
 
+proc check_relro_support { } {
+    global relro_available_saved
+    global ld
+
+    if {![info exists relro_available_saved]} {
+	remote_file host delete norelro
+	set ld_output [remote_exec host $ld "-z norelro"]
+	if { [string first "not supported" $ld_output] >= 0
+	     || [string first "unrecognized option" $ld_output] >= 0
+	     || [string first "-z norelro ignored" $ld_output] >= 0
+	     || [string first "cannot find norelro" $ld_output] >= 0 } {
+	    set relro_available_saved 0
+	} else {
+	    set relro_available_saved 1
+	}
+    }
+    return $relro_available_saved
+}
+
 # Compare two files line-by-line.  FILE_1 is the actual output and FILE_2
 # is the expected output.  Ignore blank lines in either file.
 #
@@ -729,7 +748,7 @@ proc run_dump_test { name {extra_options {}} } {
     global ADDR2LINE ADDR2LINEFLAGS AS ASFLAGS ELFEDIT ELFEDITFLAGS LD LDFLAGS
     global NM NMFLAGS OBJCOPY OBJCOPYFLAGS OBJDUMP OBJDUMPFLAGS
     global READELF READELFFLAGS STRIP STRIPFLAGS
-    global copyfile env ld_elf_shared_opt runtests srcdir subdir verbose
+    global copyfile env runtests srcdir subdir verbose
 
     if [string match "*/*" $name] {
 	set file $name
@@ -1119,9 +1138,9 @@ proc run_dump_test { name {extra_options {}} } {
             set ld_extra_opt ""
             global ld
             set ld "$LD"
-            if { [is_elf_format] && [check_shared_lib_support] } {
-                set ld_extra_opt "$ld_elf_shared_opt"
-            }
+	    if [check_relro_support] {
+		set ld_extra_opt "-z norelro"
+	    }
 
             # Add -L$srcdir/$subdir so that the linker command can use
             # linker scripts in the source directory.

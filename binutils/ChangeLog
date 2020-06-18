@@ -1,3 +1,10 @@
+2020-06-19  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/config/default.exp (ld_elf_shared_opt): Don't set.
+	* testsuite/lib/binutils-common.exp (check_relro_support): New proc.
+	(run_dump_test): Use check_relro_support to decide whether to pass
+	extra ld option "-z norelro".
+
 2020-06-11  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (process_mips_specific): Don't alloc memory for

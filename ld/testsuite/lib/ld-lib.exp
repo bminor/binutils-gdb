@@ -463,12 +463,10 @@ proc run_ld_link_tests { ldtests args } {
     global CFLAGS
     global runtests
     global exec_output
-    global ld_elf_shared_opt
 
-    if { [is_elf_format] && [check_shared_lib_support] } {
-	set ld_extra_opt "$ld_elf_shared_opt"
-    } else {
-	set ld_extra_opt ""
+    set ld_extra_opt ""
+    if [check_relro_support] {
+	set ld_extra_opt "-z norelro"
     }
 
     foreach testitem $ldtests {

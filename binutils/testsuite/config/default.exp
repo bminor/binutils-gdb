@@ -34,8 +34,6 @@ if ![info exists LD] then {
 if ![info exists LDFLAGS] then {
     set LDFLAGS ""
 }
-set ld_elf_shared_opt "-z norelro"
-
 if ![info exists NM] then {
     set NM [findfile $base_dir/nm-new $base_dir/nm-new [transform nm]]
 }

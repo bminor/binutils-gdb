@@ -1,3 +1,21 @@
+2020-06-19  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf.em (gld${EMULATION_NAME}_handle_option): Omit
+	-z relro and -z norelro when target support for GNU_RELRO is lacking.
+	(gld${EMULATION_NAME}_before_parse): Ignore RELRO default too.
+	* emultempl/aarch64elf.em (gld${EMULATION_NAME}_before_parse): Ignore
+	RELRO default when target support for GNU_RELRO is lacking.
+	* emultempl/armelf.em (gld${EMULATION_NAME}_before_parse): Likewise.
+	* emultempl/linux.em (gld${EMULATION_NAME}_before_parse): Likewise.
+	* emultempl/scoreelf.em (gld${EMULATION_NAME}_before_parse): Likewise.
+	* testsuite/config/default.exp (ld_elf_shared_opt): Don't set.
+	* testsuite/ld-elf/pr16322.d: xfail when no relro support.
+	* testsuite/ld-elf/pr22393-1a.d: Likewise.
+	* testsuite/ld-elf/pr22393-1b.d: Likewise.
+	* testsuite/ld-elf/shared.exp (pr20995-2.so, pr20995-2): Likewise.
+	* testsuite/lib/ld-lib.exp (run_ld_link_tests): Use check_relro_support
+	to decide whether to pass extra ld option "-z norelro".
+
 2020-06-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/linux-x86.exp (check_pr25749a): Append "-w"

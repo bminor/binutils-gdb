@@ -52,7 +52,13 @@ gld${EMULATION_NAME}_before_parse (void)
   input_flags.dynamic = TRUE;
   config.has_shared = TRUE;
   link_info.check_relocs_after_open_input = TRUE;
+EOF
+if test -n "$COMMONPAGESIZE"; then
+fragment <<EOF
   link_info.relro = DEFAULT_LD_Z_RELRO;
+EOF
+fi
+fragment <<EOF
 }
 
 /* Try to open a dynamic archive.  This is where we know that Linux

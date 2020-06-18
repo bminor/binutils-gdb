@@ -82,7 +82,13 @@ gld${EMULATION_NAME}_before_parse (void)
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
   link_info.check_relocs_after_open_input = TRUE;
+EOF
+if test -n "$COMMONPAGESIZE"; then
+fragment <<EOF
   link_info.relro = DEFAULT_LD_Z_RELRO;
+EOF
+fi
+fragment <<EOF
   link_info.separate_code = DEFAULT_LD_Z_SEPARATE_CODE;
 }
 
@@ -805,10 +811,16 @@ fragment <<EOF
 	link_info.combreloc = FALSE;
       else if (strcmp (optarg, "nocopyreloc") == 0)
 	link_info.nocopyreloc = TRUE;
+EOF
+if test -n "$COMMONPAGESIZE"; then
+fragment <<EOF
       else if (strcmp (optarg, "relro") == 0)
 	link_info.relro = TRUE;
       else if (strcmp (optarg, "norelro") == 0)
 	link_info.relro = FALSE;
+EOF
+fi
+fragment <<EOF
       else if (strcmp (optarg, "separate-code") == 0)
 	link_info.separate_code = TRUE;
       else if (strcmp (optarg, "noseparate-code") == 0)
