@@ -42,27 +42,6 @@ m2_printchar (int c, struct type *type, struct ui_file *stream)
   fputs_filtered ("'", stream);
 }
 
-/* Return true if TYPE is a string.  */
-
-static bool
-m2_is_string_type_p (struct type *type)
-{
-  type = check_typedef (type);
-  if (type->code () == TYPE_CODE_ARRAY
-      && TYPE_LENGTH (type) > 0
-      && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
-    {
-      struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
-
-      if (TYPE_LENGTH (elttype) == 1
-	  && (elttype->code () == TYPE_CODE_INT
-	      || elttype->code () == TYPE_CODE_CHAR))
-	return true;
-    }
-
-  return false;
-}
-
 static struct value *
 evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
 			 int *pos, enum noside noside)
@@ -235,7 +214,6 @@ extern const struct language_data m2_language_data =
   0,				/* arrays are first-class (not c-style) */
   0,				/* String lower bound */
   &default_varobj_ops,
-  m2_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
@@ -435,6 +413,25 @@ public:
     m2_print_typedef (type, new_symbol, stream);
   }
 
+  /* See language.h.  */
+
+  bool is_string_type_p (struct type *type) const override
+  {
+    type = check_typedef (type);
+    if (type->code () == TYPE_CODE_ARRAY
+	&& TYPE_LENGTH (type) > 0
+	&& TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
+      {
+	struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+
+	if (TYPE_LENGTH (elttype) == 1
+	    && (elttype->code () == TYPE_CODE_INT
+		|| elttype->code () == TYPE_CODE_CHAR))
+	  return true;
+      }
+
+    return false;
+  }
 };
 
 /* Single instance of the M2 language.  */

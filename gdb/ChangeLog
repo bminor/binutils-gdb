@@ -1,5 +1,59 @@
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete la_is_string_type_p
+	initializer.
+	(ada_language::is_string_type_p): New member function.
+	* c-lang.c (c_language_data): Delete la_is_string_type_p
+	initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_is_string_type_p): Delete function, implementation
+	moved to f_language::is_string_type_p.
+	(f_language_data): Delete la_is_string_type_p initializer.
+	(f_language::is_string_type_p): New member function,
+	implementation from f_is_string_type_p.
+	* go-lang.c (go_is_string_type_p): Delete function, implementation
+	moved to go_language::is_string_type_p.
+	(go_language_data): Delete la_is_string_type_p initializer.
+	(go_language::is_string_type_p): New member function,
+	implementation from go_is_string_type_p.
+	* language.c (language_defn::is_string_type_p): Define new member
+	function.
+	(default_is_string_type_p): Make static, add comment copied from
+	header file.
+	(unknown_language_data): Delete la_is_string_type_p initializer.
+	(unknown_language::is_string_type_p): New member function.
+	(auto_language_data): Delete la_is_string_type_p initializer.
+	(auto_language::is_string_type_p): New member function.
+	* language.h (language_data): Delete la_is_string_type_p field.
+	(language_defn::is_string_type_p): Declare new function.
+	(default_is_string_type_p): Delete desclaration, move comment to
+	definition.
+	* m2-lang.c (m2_is_string_type_p): Delete function, implementation
+	moved to m2_language::is_string_type_p.
+	(m2_language_data): Delete la_is_string_type_p initializer.
+	(m2_language::is_string_type_p): New member function,
+	implementation from m2_is_string_type_p.
+	* objc-lang.c (objc_language_data): Delete la_is_string_type_p
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_is_string_type_p): Delete function,
+	implementation moved to pascal_language::is_string_type_p.
+	(pascal_language_data): Delete la_is_string_type_p initializer.
+	(pascal_language::is_string_type_p): New member function,
+	implementation from pascal_is_string_type_p.
+	* rust-lang.c (rust_is_string_type_p): Delete function,
+	implementation moved to rust_language::is_string_type_p.
+	(rust_language_data): Delete la_is_string_type_p initializer.
+	(rust_language::is_string_type_p): New member function,
+	implementation from rust_is_string_type_p.
+	* valprint.c (val_print_scalar_or_string_type_p): Update call to
+	is_string_type_p.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Delete la_print_typedef
 	initializer.
 	(ada_language::print_typedef): New member function.

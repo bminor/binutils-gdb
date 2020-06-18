@@ -690,6 +690,14 @@ language_defn::print_typedef (struct type *type, struct symbol *new_symbol,
   c_print_typedef (type, new_symbol, stream);
 }
 
+/* See language.h.  */
+
+bool
+language_defn::is_string_type_p (struct type *type) const
+{
+  return c_is_string_type_p (type);
+}
+
 /* The default implementation of the get_symbol_name_matcher_inner method
    from the language_defn class.  Matches with strncmp_iw.  */
 
@@ -741,9 +749,10 @@ language_defn::get_symbol_name_matcher_inner
   return default_symbol_name_matcher;
 }
 
-/* See language.h.  */
+/* Return true if TYPE is a string type, otherwise return false.  This
+   default implementation only detects TYPE_CODE_STRING.  */
 
-bool
+static bool
 default_is_string_type_p (struct type *type)
 {
   type = check_typedef (type);
@@ -789,7 +798,6 @@ extern const struct language_data unknown_language_data =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &default_varobj_ops,
-  default_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
@@ -884,6 +892,13 @@ public:
   {
     error (_("unimplemented unknown_language::print_typedef called"));
   }
+
+  /* See language.h.  */
+
+  bool is_string_type_p (struct type *type) const override
+  {
+    return default_is_string_type_p (type);
+  }
 };
 
 /* Single instance of the unknown language class.  */
@@ -909,7 +924,6 @@ extern const struct language_data auto_language_data =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &default_varobj_ops,
-  default_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
@@ -1003,6 +1017,13 @@ public:
 		      struct ui_file *stream) const override
   {
     error (_("unimplemented auto_language::print_typedef called"));
+  }
+
+  /* See language.h.  */
+
+  bool is_string_type_p (struct type *type) const override
+  {
+    return default_is_string_type_p (type);
   }
 };
 

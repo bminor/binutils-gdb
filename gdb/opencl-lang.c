@@ -1022,7 +1022,6 @@ extern const struct language_data opencl_language_data =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &default_varobj_ops,
-  c_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 

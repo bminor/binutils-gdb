@@ -152,16 +152,6 @@ is_pascal_string_type (struct type *type,int *length_pos,
   return 0;
 }
 
-/* This is a wrapper around IS_PASCAL_STRING_TYPE that returns true if TYPE
-   is a string.  */
-
-static bool
-pascal_is_string_type_p (struct type *type)
-{
-  return is_pascal_string_type (type, nullptr, nullptr, nullptr,
-				nullptr, nullptr) > 0;
-}
-
 static void pascal_one_char (int, struct ui_file *, int *);
 
 /* Print the character C on STREAM as part of the contents of a literal
@@ -282,7 +272,6 @@ extern const struct language_data pascal_language_data =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &default_varobj_ops,
-  pascal_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
@@ -502,6 +491,13 @@ public:
     pascal_print_typedef (type, new_symbol, stream);
   }
 
+  /* See language.h.  */
+
+  bool is_string_type_p (struct type *type) const override
+  {
+    return is_pascal_string_type (type, nullptr, nullptr, nullptr,
+				  nullptr, nullptr) > 0;
+  }
 };
 
 /* Single instance of the Pascal language class.  */

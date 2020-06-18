@@ -298,7 +298,7 @@ val_print_scalar_or_string_type_p (struct type *type,
 				   const struct language_defn *language)
 {
   return (val_print_scalar_type_p (type)
-	  || language->la_is_string_type_p (type));
+	  || language->is_string_type_p (type));
 }
 
 /* See its definition in value.h.  */

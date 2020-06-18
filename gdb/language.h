@@ -267,9 +267,6 @@ struct language_data
     /* Various operations on varobj.  */
     const struct lang_varobj_ops *la_varobj_ops;
 
-    /* Return true if TYPE is a string type.  */
-    bool (*la_is_string_type_p) (struct type *type);
-
     /* This string is used by the 'set print max-depth' setting.  When GDB
        replaces a struct or union (during value printing) that is "too
        deep" this string is displayed instead.  */
@@ -553,6 +550,9 @@ struct language_defn : language_data
   virtual void print_typedef (struct type *type, struct symbol *new_symbol,
 			      struct ui_file *stream) const;
 
+  /* Return true if TYPE is a string type.  */
+  virtual bool is_string_type_p (struct type *type) const;
+
 protected:
 
   /* This is the overridable part of the GET_SYMBOL_NAME_MATCHER method.
@@ -683,10 +683,6 @@ extern enum language set_language (enum language);
 /* Type predicates */
 
 extern int pointer_type (struct type *);
-
-/* Return true if TYPE is a string type, otherwise return false.  This
-   default implementation only detects TYPE_CODE_STRING.  */
-extern bool default_is_string_type_p (struct type *type);
 
 /* Error messages */
 

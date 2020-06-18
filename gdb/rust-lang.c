@@ -226,26 +226,6 @@ rust_chartype_p (struct type *type)
 	  && TYPE_UNSIGNED (type));
 }
 
-/* Return true if TYPE is a string type.  */
-
-static bool
-rust_is_string_type_p (struct type *type)
-{
-  LONGEST low_bound, high_bound;
-
-  type = check_typedef (type);
-  return ((type->code () == TYPE_CODE_STRING)
-	  || (type->code () == TYPE_CODE_PTR
-	      && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ARRAY
-		  && rust_u8_type_p (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (type)))
-		  && get_array_bounds (TYPE_TARGET_TYPE (type), &low_bound,
-				       &high_bound)))
-	  || (type->code () == TYPE_CODE_STRUCT
-	      && !rust_enum_p (type)
-	      && rust_slice_type_p (type)
-	      && strcmp (type->name (), "&str") == 0));
-}
-
 /* If VALUE represents a trait object pointer, return the underlying
    pointer with the correct (i.e., runtime) type.  Otherwise, return
    NULL.  */
@@ -1946,7 +1926,6 @@ extern const struct language_data rust_language_data =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &default_varobj_ops,
-  rust_is_string_type_p,
   "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
@@ -2151,6 +2130,25 @@ public:
     fprintf_filtered (stream, "type %s = ", new_symbol->print_name ());
     type_print (type, "", stream, 0);
     fprintf_filtered (stream, ";");
+  }
+
+  /* See language.h.  */
+
+  bool is_string_type_p (struct type *type) const override
+  {
+    LONGEST low_bound, high_bound;
+
+    type = check_typedef (type);
+    return ((type->code () == TYPE_CODE_STRING)
+	    || (type->code () == TYPE_CODE_PTR
+		&& (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ARRAY
+		    && rust_u8_type_p (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (type)))
+		    && get_array_bounds (TYPE_TARGET_TYPE (type), &low_bound,
+					 &high_bound)))
+	    || (type->code () == TYPE_CODE_STRUCT
+		&& !rust_enum_p (type)
+		&& rust_slice_type_p (type)
+		&& strcmp (type->name (), "&str") == 0));
   }
 };
 

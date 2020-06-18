@@ -13687,7 +13687,6 @@ extern const struct language_data ada_language_data =
   0,                            /* c-style arrays */
   1,                            /* String lower bound */
   &ada_varobj_ops,
-  ada_is_string_type,
   "(...)"			/* la_struct_too_deep_ellipsis */
 };
 
@@ -14138,6 +14137,14 @@ public:
   {
     ada_print_typedef (type, new_symbol, stream);
   }
+
+  /* See language.h.  */
+
+  bool is_string_type_p (struct type *type) const override
+  {
+    return ada_is_string_type (type);
+  }
+
 
 protected:
   /* See language.h.  */

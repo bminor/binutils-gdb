@@ -291,17 +291,6 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
   return nullptr;
 }
 
-/* Return true if TYPE is a string.  */
-
-static bool
-f_is_string_type_p (struct type *type)
-{
-  type = check_typedef (type);
-  return (type->code () == TYPE_CODE_STRING
-	  || (type->code () == TYPE_CODE_ARRAY
-	      && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_CHAR));
-}
-
 /* Special expression lengths for Fortran.  */
 
 static void
@@ -519,7 +508,6 @@ extern const struct language_data f_language_data =
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
   &default_varobj_ops,
-  f_is_string_type_p,
   "(...)"			/* la_struct_too_deep_ellipsis */
 };
 
@@ -707,6 +695,16 @@ public:
 		      struct ui_file *stream) const override
   {
     f_print_typedef (type, new_symbol, stream);
+  }
+
+  /* See language.h.  */
+
+  bool is_string_type_p (struct type *type) const override
+  {
+    type = check_typedef (type);
+    return (type->code () == TYPE_CODE_STRING
+	    || (type->code () == TYPE_CODE_ARRAY
+		&& TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_CHAR));
   }
 
 protected:
