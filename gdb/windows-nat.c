@@ -2019,12 +2019,6 @@ do_initial_windows_stuff (struct target_ops *ops, DWORD pid, int attaching)
   inferior_appeared (inf, pid);
   inf->attach_flag = attaching;
 
-  /* Make the new process the current inferior, so terminal handling
-     can rely on it.  When attaching, we don't know about any thread
-     id here, but that's OK --- nothing should be referencing the
-     current thread until we report an event out of windows_wait.  */
-  inferior_ptid = ptid_t (pid);
-
   target_terminal::init ();
   target_terminal::inferior ();
 
