@@ -1,5 +1,25 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* nat/windows-nat.c (current_windows_thread): Remove.
+	* nat/windows-nat.h (current_windows_thread): Remove.
+	* windows-nat.c (windows_nat_target::stopped_by_sw_breakpoint):
+	Adjust.
+	(display_selectors): Adjust to fetch the current
+	windows_thread_info based on inferior_ptid.
+	(fake_create_process): No longer write to current_windows_thread.
+	(windows_nat_target::get_windows_debug_event):
+	Don't set inferior_ptid or current_windows_thread.
+	(windows_nat_target::wait): Adjust to not rely on
+	current_windows_thread.
+	(do_initial_windows_stuff): Now a method of windows_nat_target.
+	Switch to the last_ptid thread.
+	(windows_nat_target::attach): Adjust.
+	(windows_nat_target::detach): Use switch_to_no_thread instead of
+	writing to inferior_ptid directly.
+	(windows_nat_target::create_inferior): Adjust.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* windows-nat.c (do_initial_windows_stuff): No longer set inferior_ptid.
 
 2020-06-18  Pedro Alves  <palves@redhat.com>

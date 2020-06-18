@@ -180,9 +180,6 @@ extern enum gdb_signal last_sig;
    stop.  */
 extern DEBUG_EVENT current_event;
 
-/* Info on currently selected thread */
-extern windows_thread_info *current_windows_thread;
-
 /* The ID of the thread for which we anticipate a stop event.
    Normally this is -1, meaning we'll accept an event in any
    thread.  */

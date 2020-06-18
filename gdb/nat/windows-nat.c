@@ -36,7 +36,6 @@ DEBUG_EVENT current_event;
    ContinueDebugEvent.  */
 static DEBUG_EVENT last_wait_event;
 
-windows_thread_info *current_windows_thread;
 DWORD desired_stop_thread_id = -1;
 std::vector<pending_stop> pending_stops;
 EXCEPTION_RECORD siginfo_er;
