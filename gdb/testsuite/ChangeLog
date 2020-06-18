@@ -1,3 +1,8 @@
+2020-06-18  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (gdb_init): Move all but call to default_gdb_init to ...
+	(default_gdb_init): ... here.
+
 2020-06-17 Sandra Loosemore <sandra@codesourcery.com>
 
 	Fix TUI support checks in gdb.tui tests.

@@ -4902,6 +4902,7 @@ proc gdb_continue { function } {
     return [gdb_test "continue" ".*Breakpoint $decimal, $function .*" "continue to $function"]
 }
 
+# Default implementation of gdb_init.
 proc default_gdb_init { test_file_name } {
     global gdb_wrapper_initialized
     global gdb_wrapper_target
@@ -4909,6 +4910,107 @@ proc default_gdb_init { test_file_name } {
     global cleanfiles
     global pf_prefix
     
+    # Reset the timeout value to the default.  This way, any testcase
+    # that changes the timeout value without resetting it cannot affect
+    # the timeout used in subsequent testcases.
+    global gdb_test_timeout
+    global timeout
+    set timeout $gdb_test_timeout
+
+    if { [regexp ".*gdb\.reverse\/.*" $test_file_name]
+	 && [target_info exists gdb_reverse_timeout] } {
+	set timeout [target_info gdb_reverse_timeout]
+    }
+
+    # If GDB_INOTIFY is given, check for writes to '.'.  This is a
+    # debugging tool to help confirm that the test suite is
+    # parallel-safe.  You need "inotifywait" from the
+    # inotify-tools package to use this.
+    global GDB_INOTIFY inotify_pid
+    if {[info exists GDB_INOTIFY] && ![info exists inotify_pid]} {
+	global outdir tool inotify_log_file
+
+	set exclusions {outputs temp gdb[.](log|sum) cache}
+	set exclusion_re ([join $exclusions |])
+
+	set inotify_log_file [standard_temp_file inotify.out]
+	set inotify_pid [exec inotifywait -r -m -e move,create,delete . \
+			     --exclude $exclusion_re \
+			     |& tee -a $outdir/$tool.log $inotify_log_file &]
+
+	# Wait for the watches; hopefully this is long enough.
+	sleep 2
+
+	# Clear the log so that we don't emit a warning the first time
+	# we check it.
+	set fd [open $inotify_log_file w]
+	close $fd
+    }
+
+    # Block writes to all banned variables, and invocation of all
+    # banned procedures...
+    global banned_variables
+    global banned_procedures
+    global banned_traced
+    if (!$banned_traced) {
+	foreach banned_var $banned_variables {
+            global "$banned_var"
+            trace add variable "$banned_var" write error
+	}
+	foreach banned_proc $banned_procedures {
+	    global "$banned_proc"
+	    trace add execution "$banned_proc" enter error
+	}
+	set banned_traced 1
+    }
+
+    # We set LC_ALL, LC_CTYPE, and LANG to C so that we get the same
+    # messages as expected.
+    setenv LC_ALL C
+    setenv LC_CTYPE C
+    setenv LANG C
+
+    # Don't let a .inputrc file or an existing setting of INPUTRC mess up
+    # the test results.  Even if /dev/null doesn't exist on the particular
+    # platform, the readline library will use the default setting just by
+    # failing to open the file.  OTOH, opening /dev/null successfully will
+    # also result in the default settings being used since nothing will be
+    # read from this file.
+    setenv INPUTRC "/dev/null"
+
+    # This disables style output, which would interfere with many
+    # tests.
+    setenv TERM "dumb"
+
+    # Ensure that GDBHISTFILE and GDBHISTSIZE are removed from the
+    # environment, we don't want these modifications to the history
+    # settings.
+    unset -nocomplain ::env(GDBHISTFILE)
+    unset -nocomplain ::env(GDBHISTSIZE)
+
+    # Initialize GDB's pty with a fixed size, to make sure we avoid pagination
+    # during startup.  See "man expect" for details about stty_init.
+    global stty_init
+    set stty_init "rows 25 cols 80"
+
+    # Some tests (for example gdb.base/maint.exp) shell out from gdb to use
+    # grep.  Clear GREP_OPTIONS to make the behavior predictable,
+    # especially having color output turned on can cause tests to fail.
+    setenv GREP_OPTIONS ""
+
+    # Clear $gdbserver_reconnect_p.
+    global gdbserver_reconnect_p
+    set gdbserver_reconnect_p 1
+    unset gdbserver_reconnect_p
+
+    # Clear $last_loaded_file
+    global last_loaded_file
+    unset -nocomplain last_loaded_file
+
+    # Reset GDB number of instances
+    global gdb_instances
+    set gdb_instances 0
+
     set cleanfiles {}
 
     gdb_clear_suppressed
@@ -4941,6 +5043,20 @@ proc default_gdb_init { test_file_name } {
     global use_gdb_stub
     if [info exists use_gdb_stub] {
 	unset use_gdb_stub
+    }
+
+    gdb_setup_known_globals
+
+    if { [info procs ::gdb_tcl_unknown] != "" } {
+	# Dejagnu overrides proc unknown.  The dejagnu version may trigger in a
+	# test-case but abort the entire test run.  To fix this, we install a
+	# local version here, which reverts dejagnu's override, and restore
+	# dejagnu's version in gdb_finish.
+	rename ::unknown ::dejagnu_unknown
+	proc unknown { args } {
+	    # Use tcl's unknown.
+	    return [uplevel 1 ::gdb_tcl_unknown $args]
+	}
     }
 }
 
@@ -5188,127 +5304,19 @@ if { [interp eval $temp "info procs ::unknown"] != "" } {
 interp delete $temp
 unset temp
 
-proc gdb_init { test_file_name } {
-    # Reset the timeout value to the default.  This way, any testcase
-    # that changes the timeout value without resetting it cannot affect
-    # the timeout used in subsequent testcases.
-    global gdb_test_timeout
-    global timeout
-    set timeout $gdb_test_timeout
-
-    if { [regexp ".*gdb\.reverse\/.*" $test_file_name]
-	 && [target_info exists gdb_reverse_timeout] } {
-	set timeout [target_info gdb_reverse_timeout]
-    }
-
-    # If GDB_INOTIFY is given, check for writes to '.'.  This is a
-    # debugging tool to help confirm that the test suite is
-    # parallel-safe.  You need "inotifywait" from the
-    # inotify-tools package to use this.
-    global GDB_INOTIFY inotify_pid
-    if {[info exists GDB_INOTIFY] && ![info exists inotify_pid]} {
-	global outdir tool inotify_log_file
-
-	set exclusions {outputs temp gdb[.](log|sum) cache}
-	set exclusion_re ([join $exclusions |])
-
-	set inotify_log_file [standard_temp_file inotify.out]
-	set inotify_pid [exec inotifywait -r -m -e move,create,delete . \
-			     --exclude $exclusion_re \
-			     |& tee -a $outdir/$tool.log $inotify_log_file &]
-
-	# Wait for the watches; hopefully this is long enough.
-	sleep 2
-
-	# Clear the log so that we don't emit a warning the first time
-	# we check it.
-	set fd [open $inotify_log_file w]
-	close $fd
-    }
-
-    # Block writes to all banned variables, and invocation of all
-    # banned procedures...
-    global banned_variables
-    global banned_procedures
-    global banned_traced
-    if (!$banned_traced) {
-    	foreach banned_var $banned_variables {
-            global "$banned_var"
-            trace add variable "$banned_var" write error
-	}
-	foreach banned_proc $banned_procedures {
-	    global "$banned_proc"
-	    trace add execution "$banned_proc" enter error
-	}
-	set banned_traced 1
-    }
-
-    # We set LC_ALL, LC_CTYPE, and LANG to C so that we get the same
-    # messages as expected.
-    setenv LC_ALL C
-    setenv LC_CTYPE C
-    setenv LANG C
-
-    # Don't let a .inputrc file or an existing setting of INPUTRC mess up
-    # the test results.  Even if /dev/null doesn't exist on the particular
-    # platform, the readline library will use the default setting just by
-    # failing to open the file.  OTOH, opening /dev/null successfully will
-    # also result in the default settings being used since nothing will be
-    # read from this file.
-    setenv INPUTRC "/dev/null"
-
-    # This disables style output, which would interfere with many
-    # tests.
-    setenv TERM "dumb"
-
-    # Ensure that GDBHISTFILE and GDBHISTSIZE are removed from the
-    # environment, we don't want these modifications to the history
-    # settings.
-    unset -nocomplain ::env(GDBHISTFILE)
-    unset -nocomplain ::env(GDBHISTSIZE)
-
-    # Initialize GDB's pty with a fixed size, to make sure we avoid pagination
-    # during startup.  See "man expect" for details about stty_init.
-    global stty_init
-    set stty_init "rows 25 cols 80"
-
-    # Some tests (for example gdb.base/maint.exp) shell out from gdb to use
-    # grep.  Clear GREP_OPTIONS to make the behavior predictable,
-    # especially having color output turned on can cause tests to fail.
-    setenv GREP_OPTIONS ""
-
-    # Clear $gdbserver_reconnect_p.
-    global gdbserver_reconnect_p
-    set gdbserver_reconnect_p 1
-    unset gdbserver_reconnect_p
-
-    # Clear $last_loaded_file
-    global last_loaded_file
-    unset -nocomplain last_loaded_file
-
-    # Reset GDB number of instances
-    global gdb_instances
-    set gdb_instances 0
-
-    set res [default_gdb_init $test_file_name]
-
-    gdb_setup_known_globals
-
-    if { [info procs ::gdb_tcl_unknown] != "" } {
-	# Dejagnu overrides proc unknown.  The dejagnu version may trigger in a
-	# test-case but abort the entire test run.  To fix this, we install a
-	# local version here, which reverts dejagnu's override, and restore
-	# dejagnu's version in gdb_finish.
-	rename ::unknown ::dejagnu_unknown
-	proc unknown { args } {
-	    # Use tcl's unknown.
-	    return [uplevel 1 ::gdb_tcl_unknown $args]
-	}
-    }
-
-    return $res
+# GDB implementation of ${tool}_init.  Called right before executing the
+# test-case.
+# Overridable function -- you can override this function in your
+# baseboard file.
+proc gdb_init { args } {
+    # A baseboard file overriding this proc and calling the default version
+    # should behave the same as this proc.  So, don't add code here, but to
+    # the default version instead.
+    return [default_gdb_init {*}$args]
 }
 
+# GDB implementation of ${tool}_finish.  Called right after executing the
+# test-case.
 proc gdb_finish { } {
     global gdbserver_reconnect_p
     global gdb_prompt
