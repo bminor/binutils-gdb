@@ -77,8 +77,11 @@ static const target_info ravenscar_target_info = {
 struct ravenscar_thread_target final : public target_ops
 {
   ravenscar_thread_target ()
+    : m_base_ptid (inferior_ptid)
   {
-    update_inferior_ptid ();
+    thread_info *thr = add_active_thread ();
+    if (thr != nullptr)
+      switch_to_thread (thr);
   }
 
   const target_info &info () const override
@@ -126,9 +129,9 @@ private:
   /* PTID of the last thread that received an event.
      This can be useful to determine the associated task that received
      the event, to make it the current task.  */
-  ptid_t m_base_ptid = null_ptid;
+  ptid_t m_base_ptid;
 
-  void update_inferior_ptid ();
+  thread_info *add_active_thread ();
   ptid_t active_task (int cpu);
   bool task_is_currently_active (ptid_t ptid);
   bool runtime_initialized ();
@@ -213,37 +216,36 @@ get_base_thread_from_ravenscar_task (ptid_t ptid)
   return ptid_t (ptid.pid (), base_cpu, 0);
 }
 
-/* Fetch the ravenscar running thread from target memory and
-   update inferior_ptid accordingly.  */
+/* Fetch the ravenscar running thread from target memory, make sure
+   there's a corresponding thread in the thread list, and return it.
+   If the runtime is not initialized, return NULL.  */
 
-void
-ravenscar_thread_target::update_inferior_ptid ()
+thread_info *
+ravenscar_thread_target::add_active_thread ()
 {
   process_stratum_target *proc_target
     = as_process_stratum_target (this->beneath ());
 
   int base_cpu;
 
-  m_base_ptid = inferior_ptid;
-
-  gdb_assert (!is_ravenscar_task (inferior_ptid));
+  gdb_assert (!is_ravenscar_task (m_base_ptid));
   base_cpu = ravenscar_get_thread_base_cpu (m_base_ptid);
 
-  /* If the runtime has not been initialized yet, the inferior_ptid is
-     the only ptid that there is.  */
   if (!runtime_initialized ())
-    return;
+    return nullptr;
 
   /* Make sure we set m_base_ptid before calling active_task
      as the latter relies on it.  */
-  inferior_ptid = active_task (base_cpu);
-  gdb_assert (inferior_ptid != null_ptid);
+  ptid_t active_ptid = active_task (base_cpu);
+  gdb_assert (active_ptid != null_ptid);
 
   /* The running thread may not have been added to
      system.tasking.debug's list yet; so ravenscar_update_thread_list
      may not always add it to the thread list.  Add it here.  */
-  if (!find_thread_ptid (proc_target, inferior_ptid))
-    add_thread (proc_target, inferior_ptid);
+  thread_info *active_thr = find_thread_ptid (proc_target, active_ptid);
+  if (active_thr == nullptr)
+    active_thr = add_thread (proc_target, active_ptid);
+  return active_thr;
 }
 
 /* The Ravenscar Runtime exports a symbol which contains the ID of
@@ -343,12 +345,11 @@ ravenscar_thread_target::wait (ptid_t ptid,
     = as_process_stratum_target (this->beneath ());
   ptid_t event_ptid;
 
-  inferior_ptid = m_base_ptid;
   if (ptid != minus_one_ptid)
     ptid = m_base_ptid;
   event_ptid = beneath->wait (ptid, status, 0);
-  /* Find any new threads that might have been created, and update
-     inferior_ptid to the active thread.
+  /* Find any new threads that might have been created, and return the
+     active thread.
 
      Only do it if the program is still alive, though.  Otherwise,
      this causes problems when debugging through the remote protocol,
@@ -357,13 +358,11 @@ ravenscar_thread_target::wait (ptid_t ptid,
   if (status->kind != TARGET_WAITKIND_EXITED
       && status->kind != TARGET_WAITKIND_SIGNALLED)
     {
-      inferior_ptid = event_ptid;
+      m_base_ptid = event_ptid;
       this->update_thread_list ();
-      this->update_inferior_ptid ();
+      return this->add_active_thread ()->ptid;
     }
-  else
-    inferior_ptid = m_base_ptid;
-  return inferior_ptid;
+  return m_base_ptid;
 }
 
 /* Add the thread associated to the given TASK to the thread list

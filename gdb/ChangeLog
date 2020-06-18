@@ -1,5 +1,13 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* ravenscar-thread.c (ravenscar_thread_target): Update.
+	(ravenscar_thread_target::update_inferior_ptid): Rename to ...
+	(ravenscar_thread_target::add_active_thread): ... this.  Don't
+	set m_base_ptid here.  Update to avoid referencing inferior_ptid.
+	(ravenscar_thread_target::wait): Don't write to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* nat/windows-nat.c (current_windows_thread): Remove.
 	* nat/windows-nat.h (current_windows_thread): Remove.
 	* windows-nat.c (windows_nat_target::stopped_by_sw_breakpoint):
