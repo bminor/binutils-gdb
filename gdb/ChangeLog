@@ -1,5 +1,14 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* inf-ptrace.c (inf_ptrace_target::create_inferior): Switch to the
+	added thread.
+	(inf_ptrace_target::attach): Don't write to inferior_ptid.  Switch
+	to the added thread.
+	(inf_ptrace_target::detach_success): Use switch_to_no_thread
+	instead of writing to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* gdbarch-selftests.c: Include "progspace-and-thread.h".
 	(register_to_value_test): Mock a program_space too.  Heap-allocate
 	the address space.  Don't write to inferior_ptid.  Use

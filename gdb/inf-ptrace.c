@@ -90,9 +90,6 @@ inf_ptrace_target::create_inferior (const char *exec_file,
 				    const std::string &allargs,
 				    char **env, int from_tty)
 {
-  pid_t pid;
-  ptid_t ptid;
-
   /* Do not change either targets above or the same target if already present.
      The reason is the target stack is shared across multiple inferiors.  */
   int ops_already_pushed = target_is_pushed (this);
@@ -105,14 +102,15 @@ inf_ptrace_target::create_inferior (const char *exec_file,
       unpusher.reset (this);
     }
 
-  pid = fork_inferior (exec_file, allargs, env, inf_ptrace_me, NULL,
-		       NULL, NULL, NULL);
+  pid_t pid = fork_inferior (exec_file, allargs, env, inf_ptrace_me, NULL,
+			     NULL, NULL, NULL);
 
-  ptid = ptid_t (pid);
+  ptid_t ptid (pid);
   /* We have something that executes now.  We'll be running through
      the shell at this point (if startup-with-shell is true), but the
      pid shouldn't change.  */
-  add_thread_silent (this, ptid);
+  thread_info *thr = add_thread_silent (this, ptid);
+  switch_to_thread (thr);
 
   unpusher.release ();
 
@@ -190,11 +188,12 @@ inf_ptrace_target::attach (const char *args, int from_tty)
   inf = current_inferior ();
   inferior_appeared (inf, pid);
   inf->attach_flag = 1;
-  inferior_ptid = ptid_t (pid);
 
   /* Always add a main thread.  If some target extends the ptrace
      target, it should decorate the ptid later with more info.  */
-  thread_info *thr = add_thread_silent (this, inferior_ptid);
+  thread_info *thr = add_thread_silent (this, ptid_t (pid));
+  switch_to_thread (thr);
+
   /* Don't consider the thread stopped until we've processed its
      initial SIGSTOP stop.  */
   set_executing (this, thr->ptid, true);
@@ -232,7 +231,7 @@ inf_ptrace_target::detach (inferior *inf, int from_tty)
 void
 inf_ptrace_target::detach_success (inferior *inf)
 {
-  inferior_ptid = null_ptid;
+  switch_to_no_thread ();
   detach_inferior (inf);
 
   maybe_unpush_target ();
