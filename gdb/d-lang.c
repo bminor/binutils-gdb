@@ -142,8 +142,6 @@ extern const struct language_data d_language_data =
   macro_expansion_no,
   d_extensions,
   &exp_descriptor_c,
-  c_print_typedef,		/* Print a typedef using appropriate
-				   syntax.  */
   "this",
   false,			/* la_store_sym_names_in_linkage_form_p */
   d_op_print_tab,		/* Expression operators for printing.  */

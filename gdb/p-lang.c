@@ -276,7 +276,6 @@ extern const struct language_data pascal_language_data =
   macro_expansion_no,
   p_extensions,
   &exp_descriptor_standard,
-  pascal_print_typedef,		/* Print a typedef using appropriate syntax */
   "this",		        /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   pascal_op_print_tab,		/* expression operators for printing */
@@ -494,6 +493,15 @@ public:
     if (force_ellipses || i < length)
       fputs_filtered ("...", stream);
   }
+
+  /* See language.h.  */
+
+  void print_typedef (struct type *type, struct symbol *new_symbol,
+		      struct ui_file *stream) const override
+  {
+    pascal_print_typedef (type, new_symbol, stream);
+  }
+
 };
 
 /* Single instance of the Pascal language class.  */

@@ -13681,7 +13681,6 @@ extern const struct language_data ada_language_data =
   macro_expansion_no,
   ada_extensions,
   &ada_exp_descriptor,
-  ada_print_typedef,            /* Print a typedef using appropriate syntax */
   NULL,                         /* name_of_this */
   true,                         /* la_store_sym_names_in_linkage_form_p */
   ada_op_print_tab,             /* expression operators for printing */
@@ -14130,6 +14129,14 @@ public:
   {
     ada_printstr (stream, elttype, string, length, encoding,
 		  force_ellipses, options);
+  }
+
+  /* See language.h.  */
+
+  void print_typedef (struct type *type, struct symbol *new_symbol,
+		      struct ui_file *stream) const override
+  {
+    ada_print_typedef (type, new_symbol, stream);
   }
 
 protected:

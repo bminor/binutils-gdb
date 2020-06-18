@@ -225,13 +225,6 @@ struct language_data
 
     const struct exp_descriptor *la_exp_desc;
 
-    /* Print a typedef using syntax appropriate for this language.
-       TYPE is the underlying type.  NEW_SYMBOL is the symbol naming
-       the type.  STREAM is the output stream on which to print.  */
-
-    void (*la_print_typedef) (struct type *type, struct symbol *new_symbol,
-			      struct ui_file *stream);
-
     /* Now come some hooks for lookup_symbol.  */
 
     /* If this is non-NULL, specifies the name that of the implicit
@@ -552,6 +545,14 @@ struct language_defn : language_data
 			 const char *encoding, int force_ellipses,
 			 const struct value_print_options *options) const;
 
+
+  /* Print a typedef using syntax appropriate for this language.
+     TYPE is the underlying type.  NEW_SYMBOL is the symbol naming
+     the type.  STREAM is the output stream on which to print.  */
+
+  virtual void print_typedef (struct type *type, struct symbol *new_symbol,
+			      struct ui_file *stream) const;
+
 protected:
 
   /* This is the overridable part of the GET_SYMBOL_NAME_MATCHER method.
@@ -648,7 +649,7 @@ extern enum language set_language (enum language);
   (current_language->print_type(type,varstring,stream,show,level,flags))
 
 #define LA_PRINT_TYPEDEF(type,new_symbol,stream) \
-  (current_language->la_print_typedef(type,new_symbol,stream))
+  (current_language->print_typedef (type,new_symbol,stream))
 
 #define LA_VALUE_PRINT(val,stream,options) \
   (current_language->value_print (val,stream,options))
@@ -714,10 +715,6 @@ extern char *language_demangle (const struct language_defn *current_language,
 /* Return information about whether TYPE should be passed
    (and returned) by reference at the language level.  */
 struct language_pass_by_ref_info language_pass_by_reference (struct type *type);
-
-/* The default implementation of la_print_typedef.  */
-void default_print_typedef (struct type *type, struct symbol *new_symbol,
-			    struct ui_file *stream);
 
 void c_get_string (struct value *value,
 		   gdb::unique_xmalloc_ptr<gdb_byte> *buffer,

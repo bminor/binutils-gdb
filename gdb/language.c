@@ -681,6 +681,15 @@ language_defn::printstr (struct ui_file *stream, struct type *elttype,
 	      options);
 }
 
+/* See language.h.  */
+
+void
+language_defn::print_typedef (struct type *type, struct symbol *new_symbol,
+			      struct ui_file *stream) const
+{
+  c_print_typedef (type, new_symbol, stream);
+}
+
 /* The default implementation of the get_symbol_name_matcher_inner method
    from the language_defn class.  Matches with strncmp_iw.  */
 
@@ -774,7 +783,6 @@ extern const struct language_data unknown_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_standard,
-  default_print_typedef,	/* Print a typedef using appropriate syntax */
   "this",        	    	/* name_of_this */
   true,				/* store_sym_names_in_linkage_form_p */
   unk_op_print_tab,		/* expression operators for printing */
@@ -868,6 +876,14 @@ public:
   {
     error (_("unimplemented unknown_language::printstr called"));
   }
+
+  /* See language.h.  */
+
+  void print_typedef (struct type *type, struct symbol *new_symbol,
+		      struct ui_file *stream) const override
+  {
+    error (_("unimplemented unknown_language::print_typedef called"));
+  }
 };
 
 /* Single instance of the unknown language class.  */
@@ -887,7 +903,6 @@ extern const struct language_data auto_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_standard,
-  default_print_typedef,	/* Print a typedef using appropriate syntax */
   "this",		        /* name_of_this */
   false,			/* store_sym_names_in_linkage_form_p */
   unk_op_print_tab,		/* expression operators for printing */
@@ -980,6 +995,14 @@ public:
 		 const struct value_print_options *options) const override
   {
     error (_("unimplemented auto_language::printstr called"));
+  }
+
+  /* See language.h.  */
+
+  void print_typedef (struct type *type, struct symbol *new_symbol,
+		      struct ui_file *stream) const override
+  {
+    error (_("unimplemented auto_language::print_typedef called"));
   }
 };
 

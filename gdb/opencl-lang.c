@@ -1016,7 +1016,6 @@ extern const struct language_data opencl_language_data =
   macro_expansion_c,
   NULL,
   &exp_descriptor_opencl,
-  c_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,                         /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */

@@ -765,19 +765,6 @@ rust_print_struct_def (struct type *type, const char *varstring,
   fputs_filtered (is_tuple_struct ? ")" : "}", stream);
 }
 
-/* la_print_typedef implementation for Rust.  */
-
-static void
-rust_print_typedef (struct type *type,
-		    struct symbol *new_symbol,
-		    struct ui_file *stream)
-{
-  type = check_typedef (type);
-  fprintf_filtered (stream, "type %s = ", new_symbol->print_name ());
-  type_print (type, "", stream, 0);
-  fprintf_filtered (stream, ";");
-}
-
 /* la_print_type implementation for Rust.  */
 
 static void
@@ -1953,7 +1940,6 @@ extern const struct language_data rust_language_data =
   macro_expansion_no,
   rust_extensions,
   &exp_descriptor_rust,
-  rust_print_typedef,		/* Print a typedef using appropriate syntax */
   NULL,				/* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
@@ -2154,6 +2140,17 @@ public:
   {
     rust_printstr (stream, elttype, string, length, encoding,
 		   force_ellipses, options);
+  }
+
+  /* See language.h.  */
+
+  void print_typedef (struct type *type, struct symbol *new_symbol,
+		      struct ui_file *stream) const override
+  {
+    type = check_typedef (type);
+    fprintf_filtered (stream, "type %s = ", new_symbol->print_name ());
+    type_print (type, "", stream, 0);
+    fprintf_filtered (stream, ";");
   }
 };
 

@@ -368,15 +368,6 @@ typedef_print (struct type *type, struct symbol *newobj, struct ui_file *stream)
   LA_PRINT_TYPEDEF (type, newobj, stream);
 }
 
-/* The default way to print a typedef.  */
-
-void
-default_print_typedef (struct type *type, struct symbol *new_symbol,
-		       struct ui_file *stream)
-{
-  error (_("Language not supported."));
-}
-
 /* Print a description of a type TYPE in the form of a declaration of a
    variable named VARSTRING.  (VARSTRING is demangled if necessary.)
    Output goes to STREAM (via stdio).

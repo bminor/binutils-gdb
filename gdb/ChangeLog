@@ -1,5 +1,44 @@
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete la_print_typedef
+	initializer.
+	(ada_language::print_typedef): New member function.
+	* c-lang.c (c_language_data): Delete la_print_typedef initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	(f_language::print_typedef): New member function.
+	* go-lang.c (go_language_data): Delete la_print_typedef
+	initializer.
+	* language.c (language_defn::print_typedef): Define member
+	function.
+	(unknown_language_data): Delete la_print_typedef initializer.
+	(unknown_language::print_typedef): New member function.
+	(auto_language_data): Delete la_print_typedef initializer.
+	(auto_language::print_typedef): New member function.
+	* language.h (language_data): Delete la_print_typedef field.
+	(language_defn::print_typedef): Declare new member function.
+	(LA_PRINT_TYPEDEF): Update call to print_typedef.
+	(default_print_typedef): Delete declaration.
+	* m2-lang.c (m2_language_data): Delete la_print_typedef
+	initializer.
+	(m2_language::print_typedef): New member function.
+	* objc-lang.c (objc_language_data): Delete la_print_typedef
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	(pascal_language::print_typedef): New member function.
+	* rust-lang.c (rust_print_typedef): Delete function,
+	implementation moved to rust_language::print_typedef.
+	(rust_language): Delete la_print_typedef initializer.
+	(rust_language::print_typedef): New member function,
+	implementation from rust_print_typedef.
+	* typeprint.c (default_print_typedef): Delete.
+
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Delete la_printstr initializer.
 	(ada_language::printstr): New member function.
 	* c-lang.c (c_language_data): Delete la_printstr initializer.
