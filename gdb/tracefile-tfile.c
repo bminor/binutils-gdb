@@ -556,8 +556,9 @@ tfile_target_open (const char *arg, int from_tty)
     }
 
   inferior_appeared (current_inferior (), TFILE_PID);
-  inferior_ptid = ptid_t (TFILE_PID);
-  add_thread_silent (&tfile_ops, inferior_ptid);
+
+  thread_info *thr = add_thread_silent (&tfile_ops, ptid_t (TFILE_PID));
+  switch_to_thread (thr);
 
   if (ts->traceframe_count <= 0)
     warning (_("No traceframes present in this file."));
@@ -618,7 +619,7 @@ tfile_target::close ()
 {
   gdb_assert (trace_fd != -1);
 
-  inferior_ptid = null_ptid;	/* Avoid confusion from thread stuff.  */
+  switch_to_no_thread ();	/* Avoid confusion from thread stuff.  */
   exit_inferior_silent (current_inferior ());
 
   ::close (trace_fd);
