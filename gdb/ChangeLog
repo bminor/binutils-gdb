@@ -1,5 +1,18 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* darwin-nat.c (darwin_nat_target::decode_message): Don't write to
+	inferior_ptid.
+	(darwin_nat_target::stop_inferior, darwin_nat_target::kill): Avoid
+	inferior_ptid.
+	(darwin_attach_pid): Use switch_to_no_thread instead of writing to
+	inferior_ptid directly.
+	(darwin_nat_target::init_thread_list): Switch to thread, instead
+	of writing to inferior_ptid.
+	(darwin_nat_target::attach): Don't write to inferior_ptid.
+	(darwin_nat_target::get_ada_task_ptid): Avoid inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* gnu-nat.c (gnu_nat_target::create_inferior): Switch to the added
 	thread.
 	(gnu_nat_target::attach): Don't write to inferior_ptid directly.
