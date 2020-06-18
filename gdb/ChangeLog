@@ -1,5 +1,15 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* procfs.c (procfs_target::attach): Don't write to inferior_ptid.
+	(procfs_target::detach): Use switch_to_no_thread
+	instead of writing to inferior_ptid directly.
+	(do_attach): Change return type to void.  Switch to the added
+	thread.
+	(procfs_target::create_inferior): Switch to the added thread.
+	(procfs_do_thread_registers): Don't write to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (generic_mourn_inferior): Use switch_to_thread instead
 	of writing to inferior_ptid.
 	(scoped_restore_exited_inferior): Delete.

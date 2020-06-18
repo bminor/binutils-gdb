@@ -1726,7 +1726,7 @@ proc_iterate_over_threads (procinfo *pi,
 /* Here are all of the gdb target vector functions and their
    friends.  */
 
-static ptid_t do_attach (ptid_t ptid);
+static void do_attach (ptid_t ptid);
 static void do_detach ();
 static void proc_trace_syscalls_1 (procinfo *pi, int syscallnum,
 				   int entry_or_exit, int mode, int from_tty);
@@ -1815,7 +1815,7 @@ procfs_target::attach (const char *args, int from_tty)
 
       fflush (stdout);
     }
-  inferior_ptid = do_attach (ptid_t (pid));
+  do_attach (ptid_t (pid));
   if (!target_is_pushed (this))
     push_target (this);
 }
@@ -1839,12 +1839,12 @@ procfs_target::detach (inferior *inf, int from_tty)
 
   do_detach ();
 
-  inferior_ptid = null_ptid;
+  switch_to_no_thread ();
   detach_inferior (inf);
   maybe_unpush_target ();
 }
 
-static ptid_t
+static void
 do_attach (ptid_t ptid)
 {
   procinfo *pi;
@@ -1912,9 +1912,8 @@ do_attach (ptid_t ptid)
 
   /* Add it to gdb's thread list.  */
   ptid = ptid_t (pi->pid, lwpid, 0);
-  add_thread (&the_procfs_target, ptid);
-
-  return ptid;
+  thread_info *thr = add_thread (&the_procfs_target, ptid);
+  switch_to_thread (thr);
 }
 
 static void
@@ -3013,7 +3012,8 @@ procfs_target::create_inferior (const char *exec_file,
   /* We have something that executes now.  We'll be running through
      the shell at this point (if startup-with-shell is true), but the
      pid shouldn't change.  */
-  add_thread_silent (this, ptid_t (pid));
+  thread_info *thr = add_thread_silent (this, ptid_t (pid));
+  switch_to_thread (thr);
 
   procfs_init_inferior (pid);
 }
@@ -3676,8 +3676,6 @@ procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
      once it is implemented in this platform:
      gdbarch_iterate_over_regset_sections().  */
 
-  scoped_restore save_inferior_ptid = make_scoped_restore (&inferior_ptid);
-  inferior_ptid = ptid;
   target_fetch_registers (regcache, -1);
 
   fill_gregset (regcache, &gregs, -1);
