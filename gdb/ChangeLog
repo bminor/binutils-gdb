@@ -1,5 +1,15 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (remote_target::remote_notice_new_inferior): Use
+	switch_to_thread instead of writing to inferior_ptid directly.
+	(remote_target::add_current_inferior_and_thread): Use
+	switch_to_no_thread instead of writing to inferior_ptid directly.
+	(extended_remote_target::attach): Use switch_to_inferior_no_thread
+	and switch_to_thread instead of using set_current_inferior or
+	writing to inferior_ptid directly.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* tracectf.c (ctf_target_open): Switch to added thread instead of
 	writing to inferior_ptid directly.
 	(ctf_target::close): Use switch_to_no_thread instead of writing to

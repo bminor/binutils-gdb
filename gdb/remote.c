@@ -2493,8 +2493,9 @@ remote_target::remote_notice_new_inferior (ptid_t currthread, int executing)
 	    thread_change_ptid (this, inferior_ptid, currthread);
 	  else
 	    {
-	      remote_add_thread (currthread, running, executing);
-	      inferior_ptid = currthread;
+	      thread_info *thr
+		= remote_add_thread (currthread, running, executing);
+	      switch_to_thread (thr);
 	    }
 	  return;
 	}
@@ -4346,9 +4347,10 @@ remote_target::add_current_inferior_and_thread (char *wait_status)
   struct remote_state *rs = get_remote_state ();
   bool fake_pid_p = false;
 
-  inferior_ptid = null_ptid;
+  switch_to_no_thread ();
 
-  /* Now, if we have thread information, update inferior_ptid.  */
+  /* Now, if we have thread information, update the current thread's
+     ptid.  */
   ptid_t curr_ptid = get_current_thread (wait_status);
 
   if (curr_ptid != null_ptid)
@@ -5760,7 +5762,7 @@ remote_target::remote_detach_1 (inferior *inf, int from_tty)
     }
   else
     {
-      inferior_ptid = null_ptid;
+      switch_to_no_thread ();
       detach_inferior (current_inferior ());
     }
 }
@@ -5906,33 +5908,33 @@ extended_remote_target::attach (const char *args, int from_tty)
 	     target_pid_to_str (ptid_t (pid)).c_str ());
     }
 
-  set_current_inferior (remote_add_inferior (false, pid, 1, 0));
+  switch_to_inferior_no_thread (remote_add_inferior (false, pid, 1, 0));
 
   inferior_ptid = ptid_t (pid);
 
   if (target_is_non_stop_p ())
     {
-      struct thread_info *thread;
-
       /* Get list of threads.  */
       update_thread_list ();
 
-      thread = first_thread_of_inferior (current_inferior ());
-      if (thread)
-	inferior_ptid = thread->ptid;
-      else
-	inferior_ptid = ptid_t (pid);
+      thread_info *thread = first_thread_of_inferior (current_inferior ());
+      if (thread != nullptr)
+	switch_to_thread (thread);
 
       /* Invalidate our notion of the remote current thread.  */
       record_currthread (rs, minus_one_ptid);
     }
   else
     {
-      /* Now, if we have thread information, update inferior_ptid.  */
-      inferior_ptid = remote_current_thread (inferior_ptid);
+      /* Now, if we have thread information, update the main thread's
+	 ptid.  */
+      ptid_t curr_ptid = remote_current_thread (ptid_t (pid));
 
       /* Add the main thread to the thread list.  */
-      thread_info *thr = add_thread_silent (this, inferior_ptid);
+      thread_info *thr = add_thread_silent (this, curr_ptid);
+
+      switch_to_thread (thr);
+
       /* Don't consider the thread stopped until we've processed the
 	 saved stop reply.  */
       set_executing (this, thr->ptid, true);
