@@ -27,6 +27,7 @@
 #include "target-float.h"
 #include "gdbsupport/def-vector.h"
 #include "gdbarch.h"
+#include "progspace-and-thread.h"
 
 namespace selftests {
 
@@ -75,11 +76,14 @@ register_to_value_test (struct gdbarch *gdbarch)
 
   test_target_ops mock_target;
   ptid_t mock_ptid (1, 1);
+  program_space mock_pspace (new_address_space ());
   inferior mock_inferior (mock_ptid.pid ());
-  address_space mock_aspace {};
   mock_inferior.gdbarch = gdbarch;
-  mock_inferior.aspace = &mock_aspace;
+  mock_inferior.aspace = mock_pspace.aspace;
+  mock_inferior.pspace = &mock_pspace;
   thread_info mock_thread (&mock_inferior, mock_ptid);
+
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
   scoped_restore restore_thread_list
     = make_scoped_restore (&mock_inferior.thread_list, &mock_thread);
@@ -87,12 +91,10 @@ register_to_value_test (struct gdbarch *gdbarch)
   /* Add the mock inferior to the inferior list so that look ups by
      target+ptid can find it.  */
   scoped_restore restore_inferior_list
-    = make_scoped_restore (&inferior_list);
-  inferior_list = &mock_inferior;
+    = make_scoped_restore (&inferior_list, &mock_inferior);
 
   /* Switch to the mock inferior.  */
-  scoped_restore_current_inferior restore_current_inferior;
-  set_current_inferior (&mock_inferior);
+  switch_to_inferior_no_thread (&mock_inferior);
 
   /* Push the process_stratum target so we can mock accessing
      registers.  */
@@ -102,8 +104,7 @@ register_to_value_test (struct gdbarch *gdbarch)
   SCOPE_EXIT { pop_all_targets_at_and_above (process_stratum); };
 
   /* Switch to the mock thread.  */
-  scoped_restore restore_inferior_ptid
-    = make_scoped_restore (&inferior_ptid, mock_ptid);
+  switch_to_thread (&mock_thread);
 
   struct frame_info *frame = get_current_frame ();
   const int num_regs = gdbarch_num_cooked_regs (gdbarch);

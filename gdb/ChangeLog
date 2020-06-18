@@ -1,5 +1,12 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* gdbarch-selftests.c: Include "progspace-and-thread.h".
+	(register_to_value_test): Mock a program_space too.  Heap-allocate
+	the address space.  Don't write to inferior_ptid.  Use
+	switch_to_thread instead.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* linux-tdep.c (find_signalled_thread(thread_info *,void *)):
 	Delete.
 	(find_signalled_thread()): New, factored out from
