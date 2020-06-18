@@ -1396,18 +1396,6 @@ linux_find_memory_regions (struct gdbarch *gdbarch,
 					 &data);
 }
 
-/* Determine which signal stopped execution.  */
-
-static int
-find_signalled_thread (struct thread_info *info, void *data)
-{
-  if (info->suspend.stop_signal != GDB_SIGNAL_0
-      && info->ptid.pid () == inferior_ptid.pid ())
-    return 1;
-
-  return 0;
-}
-
 /* This is used to pass information from
    linux_make_mappings_corefile_notes through
    linux_find_memory_regions_full.  */
@@ -1855,6 +1843,30 @@ linux_fill_prpsinfo (struct elf_internal_linux_prpsinfo *p)
   return 1;
 }
 
+/* Find the signalled thread.  In case there's more than one signalled
+   thread, prefer the current thread, if it is signalled.  If no
+   thread was signalled, default to the current thread, unless it has
+   exited, in which case return NULL.  */
+
+static thread_info *
+find_signalled_thread ()
+{
+  thread_info *curr_thr = inferior_thread ();
+  if (curr_thr->state != THREAD_EXITED
+      && curr_thr->suspend.stop_signal != GDB_SIGNAL_0)
+    return curr_thr;
+
+  for (thread_info *thr : current_inferior ()->non_exited_threads ())
+    if (thr->suspend.stop_signal != GDB_SIGNAL_0)
+      return thr;
+
+  /* Default to the current thread, unless it has exited.  */
+  if (curr_thr->state != THREAD_EXITED)
+    return curr_thr;
+
+  return nullptr;
+}
+
 /* Build the note section for a corefile, and return it in a malloc
    buffer.  */
 
@@ -1864,7 +1876,6 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
   struct linux_corefile_thread_data thread_args;
   struct elf_internal_linux_prpsinfo prpsinfo;
   char *note_data = NULL;
-  struct thread_info *curr_thr, *signalled_thr;
 
   if (! gdbarch_iterate_over_regset_sections_p (gdbarch))
     return NULL;
@@ -1892,26 +1903,21 @@ linux_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size)
     }
 
   /* Like the kernel, prefer dumping the signalled thread first.
-     "First thread" is what tools use to infer the signalled thread.
-     In case there's more than one signalled thread, prefer the
-     current thread, if it is signalled.  */
-  curr_thr = inferior_thread ();
-  if (curr_thr->suspend.stop_signal != GDB_SIGNAL_0)
-    signalled_thr = curr_thr;
-  else
-    {
-      signalled_thr = iterate_over_threads (find_signalled_thread, NULL);
-      if (signalled_thr == NULL)
-	signalled_thr = curr_thr;
-    }
+     "First thread" is what tools use to infer the signalled
+     thread.  */
+  thread_info *signalled_thr = find_signalled_thread ();
 
   thread_args.gdbarch = gdbarch;
   thread_args.obfd = obfd;
   thread_args.note_data = note_data;
   thread_args.note_size = note_size;
-  thread_args.stop_signal = signalled_thr->suspend.stop_signal;
+  if (signalled_thr != nullptr)
+    thread_args.stop_signal = signalled_thr->suspend.stop_signal;
+  else
+    thread_args.stop_signal = GDB_SIGNAL_0;
 
-  linux_corefile_thread (signalled_thr, &thread_args);
+  if (signalled_thr != nullptr)
+    linux_corefile_thread (signalled_thr, &thread_args);
   for (thread_info *thr : current_inferior ()->non_exited_threads ())
     {
       if (thr == signalled_thr)

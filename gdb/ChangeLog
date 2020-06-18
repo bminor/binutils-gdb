@@ -1,5 +1,14 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* linux-tdep.c (find_signalled_thread(thread_info *,void *)):
+	Delete.
+	(find_signalled_thread()): New, factored out from
+	linux_make_corefile_notes and adjusted to handle exited threads.
+	(linux_make_corefile_notes): Adjust to use the new
+	find_signalled_thread.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* linux-tdep.c (btrace_fetch): Save/restore current thread instead
 	of saving/restoring inferior_ptid.
 
