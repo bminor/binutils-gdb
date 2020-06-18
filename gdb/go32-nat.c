@@ -753,14 +753,14 @@ go32_nat_target::create_inferior (const char *exec_file,
   save_npx ();
 #endif
 
-  inferior_ptid = ptid_t (SOME_PID);
   inf = current_inferior ();
   inferior_appeared (inf, SOME_PID);
 
   if (!target_is_pushed (this))
     push_target (this);
 
-  add_thread_silent (inferior_ptid);
+  thread_info *thr = add_thread_silent (ptid_t (SOME_PID));
+  switch_to_thread (thr);
 
   clear_proceed_status (0);
   insert_breakpoints ();
