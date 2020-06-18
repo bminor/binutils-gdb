@@ -1,3 +1,9 @@
+2020-06-18  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/arch-13.s: Add alternative VMGEXIT case.
+	* testsuite/gas/i386/arch-13.d: Extend -march=. Adjust
+	expectations.
+
 2020-06-16  Lili Cui  <lili.cui@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Correct noavx512_vp2intersect

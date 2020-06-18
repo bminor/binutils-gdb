@@ -3576,6 +3576,8 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "vmmcall",	{ Skip_MODRM }, 0 },
     { "vmgexit",	{ Skip_MODRM }, 0 },
+    { Bad_Opcode },
+    { "vmgexit",	{ Skip_MODRM }, 0 },
   },
 
   /* PREFIX_0F01_REG_5_MOD_0 */
