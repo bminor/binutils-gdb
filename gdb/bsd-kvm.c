@@ -136,8 +136,8 @@ bsd_kvm_target_open (const char *arg, int from_tty)
   core_kd = temp_kd;
   push_target (&bsd_kvm_ops);
 
-  add_thread_silent (&bsd_kvm_ops, bsd_kvm_ptid);
-  inferior_ptid = bsd_kvm_ptid;
+  thread_info *thr = add_thread_silent (&bsd_kvm_ops, bsd_kvm_ptid);
+  switch_to_thread (thr);
 
   target_fetch_registers (get_current_regcache (), -1);
 
