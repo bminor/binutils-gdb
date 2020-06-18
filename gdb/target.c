@@ -3108,7 +3108,7 @@ generic_mourn_inferior (void)
 {
   inferior *inf = current_inferior ();
 
-  inferior_ptid = null_ptid;
+  switch_to_no_thread ();
 
   /* Mark breakpoints uninserted in case something tries to delete a
      breakpoint while we delete the inferior's threads (which would

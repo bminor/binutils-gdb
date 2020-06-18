@@ -1,5 +1,10 @@
 2020-06-18  Pedro Alves  <palves@redhat.com>
 
+	* target.c (generic_mourn_inferior): Use switch_to_no_thread
+	instead of writing to inferior_ptid.
+
+2020-06-18  Pedro Alves  <palves@redhat.com>
+
 	* inf-ptrace.c (inf_ptrace_target::create_inferior): Switch to the
 	added thread.
 	(inf_ptrace_target::attach): Don't write to inferior_ptid.  Switch
