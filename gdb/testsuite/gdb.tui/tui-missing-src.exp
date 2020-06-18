@@ -75,6 +75,7 @@ file delete $mainfile
 Term::clean_restart 24 80 $testfile
 if {![Term::enter_tui]} {
     unsupported "TUI not supported"
+    return
 }
 # There must exist a source layout with the size 80x15 and
 # there should be nothing in it.

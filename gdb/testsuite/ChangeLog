@@ -1,5 +1,24 @@
 2020-06-17 Sandra Loosemore <sandra@codesourcery.com>
 
+	Fix TUI support checks in gdb.tui tests.
+
+	* gdb.tui/basic.exp: Skip test when TUI is unsupported, don't
+	just say UNSUPPORTED.
+	* gdb.tui/corefile-run.exp: Likewise.
+	* gdb.tui/empty.exp: Likewise.
+	* gdb.tui/list-before.exp: Likewise.
+	* gdb.tui/list.exp: Likewise.
+	* gdb.tui/main.exp: Likewise.
+	* gdb.tui/regs.exp: Likewise.
+	* gdb.tui/resize.exp: Likewise.
+	* gdb.tui/tui-layout-asm-short-prog.exp: Likewise.
+	* gdb.tui/tui-layout-asm.exp: Likewise.
+	* gdb.tui/tui-missing-src.exp: Likewise.
+	* gdb.tui/winheight.exp: Likewise.
+	* gdb.tui/new-layout.exp: Likewise.  Also move check earlier.
+
+2020-06-17 Sandra Loosemore <sandra@codesourcery.com>
+
 	Fix TCL error in gdb.python/py-format-string.exp.
 
 	* gdb.python/py-format-string.exp: Move test for python support
