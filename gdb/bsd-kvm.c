@@ -155,7 +155,7 @@ bsd_kvm_target::close ()
       core_kd = NULL;
     }
 
-  inferior_ptid = null_ptid;
+  switch_to_no_thread ();
   exit_inferior_silent (current_inferior ());
 }
 
