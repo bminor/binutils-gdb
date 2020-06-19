@@ -604,6 +604,30 @@ m;CORE_ADDR;addr_bits_remove;CORE_ADDR addr;addr;;core_addr_identity;;0
 # additional data associated with the address.
 v;int;significant_addr_bit;;;;;;0
 
+# Return a string representation of the memory tag TYPE of ADDRESS.
+# If no tag is associated with such an address, return the empty string.
++m;std::string;memtag_to_string;struct value *address, enum memtag_type tag_type;address, tag_type;;default_memtag_to_string;;0
+
+# Return true if ADDRESS contains a tag and false otherwise.
++m;bool;tagged_address_p;struct value *address;address;;default_tagged_address_p;;0
+
+# Return true if the tag from ADDRESS does not match the memory tag for that
+# particular address.  Return false otherwise.
++m;bool;memtag_mismatch_p;struct value *address;address;;default_memtag_mismatch_p;;0
+
+# Set the tags for the address range [ADDRESS, ADDRESS + LENGTH) to TAGS
+# Return 0 if successful and non-zero otherwise.
++m;int;set_memtags;struct value *address, size_t length, const gdb::byte_vector \&tags, enum memtag_type tag_type;address, length, tags, tag_type;;default_set_memtags;;0
+
+# Return the tag portion of ADDRESS, assuming ADDRESS is tagged.
++m;struct value *;get_memtag;struct value *address, enum memtag_type tag_type;address, tag_type;;default_get_memtag;;0
+
+# memtag_granule_size is the size of the allocation tag granule, for
+# architectures that support memory tagging.
+# This is 0 for architectures that do not support memory tagging.
+# For a non-zero value, this represents the number of bytes of memory per tag.
+v;CORE_ADDR;memtag_granule_size;;;;;;0
+
 # FIXME/cagney/2001-01-18: This should be split in two.  A target method that
 # indicates if the target needs software single step.  An ISA method to
 # implement it.
@@ -1351,6 +1375,18 @@ enum function_call_return_method
      on ia64 the first argument is passed in out0 but the hidden
      structure return pointer would normally be passed in r8.  */
   return_method_struct,
+};
+
+enum memtag_type
+{
+  /* Logical tag, the tag that is stored in unused bits of a pointer to a
+     virtual address.  */
+  tag_logical = 0,
+
+  /* Allocation tag, the tag that is associated with every granule of memory in
+     the physical address space.  Allocation tags are used to validate memory
+     accesses via pointers containing logical tags.  */
+  tag_allocation,
 };
 
 EOF
