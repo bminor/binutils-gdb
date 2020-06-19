@@ -1,5 +1,28 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* Makefile.in (ALL_64_TARGET_OBS): Add arch/aarch64-mte-linux.o.
+	(HFILES_NO_SRCDIR): Add arch/aarch64-mte-linux.h and
+	nat/aarch64-mte-linux-ptrace.h.
+	* aarch64-linux-nat.c: Include nat/aarch64-mte-linux-ptrace.h.
+	(aarch64_linux_nat_target) <supports_memory_tagging>: New method
+	override.
+	<fetch_memtags>: New method override.
+	<store_memtags>: New method override.
+	(aarch64_linux_nat_target::supports_memory_tagging): New method.
+	(aarch64_linux_nat_target::fetch_memtags): New method.
+	(aarch64_linux_nat_target::store_memtags): New method.
+	* arch/aarch64-mte-linux.c: New file.
+	* arch/aarch64-mte-linux.h: Include gdbsupport/common-defs.h.
+	(AARCH64_MTE_GRANULE_SIZE): Define.
+	(aarch64_memtag_type): New enum.
+	(aarch64_mte_get_tag_granules): New prototype.
+	* configure.nat (NATDEPFILES): Add nat/aarch64-mte-linux-ptrace.o.
+	* configure.tgt (aarch64*-*-linux*): Add arch/aarch64-mte-linux.o.
+	* nat/aarch64-mte-linux-ptrace.c: New file.
+	* nat/aarch64-mte-linux-ptrace.h: New file.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* Makefile.in (HFILES_NO_SRCDIR): Add nat/aarch64-mte-linux-ptrace.h.
 	* nat/aarch64-mte-linux-ptrace.h: New file.
 

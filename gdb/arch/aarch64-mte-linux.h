@@ -20,6 +20,8 @@
 #ifndef ARCH_AARCH64_LINUX_H
 #define ARCH_AARCH64_LINUX_H
 
+#include "gdbsupport/common-defs.h"
+
 /* Feature check for Memory Tagging Extension.  */
 #ifndef HWCAP2_MTE
 #define HWCAP2_MTE  (1 << 18)
@@ -27,5 +29,22 @@
 
 /* The MTE regset consists of a single 64-bit register.  */
 #define AARCH64_LINUX_SIZEOF_MTE 8
+
+/* We have one tag per 16 bytes of memory.  */
+#define AARCH64_MTE_GRANULE_SIZE 16
+
+/* Memory tag types for AArch64.  */
+enum class aarch64_memtag_type
+{
+  /* MTE logical tag contained in pointers.  */
+  mte_logical = 0,
+  /* MTE allocation tag stored in memory tag granules.  */
+  mte_allocation
+};
+
+/* Return the number of tag granules in the memory range
+   [ADDR, ADDR + LEN) given GRANULE_SIZE.  */
+extern size_t aarch64_mte_get_tag_granules (CORE_ADDR addr, size_t len,
+					    size_t granule_size);
 
 #endif /* ARCH_AARCH64_LINUX_H */
