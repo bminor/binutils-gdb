@@ -685,6 +685,16 @@ public:
   int remove_exec_catchpoint (int) override;
   enum exec_direction_kind execution_direction () override;
 
+  bool supports_memory_tagging () override;
+
+  /* Read memory tags via the qMemTags packet  */
+  int fetch_memtags (CORE_ADDR address, size_t len,
+		     gdb::byte_vector &tags) override;
+
+  /* Write allocation tags via the QMemTags packet.  */
+  int store_memtags (CORE_ADDR address, size_t len,
+		     const gdb::byte_vector &tags) override;
+
 public: /* Remote specific methods.  */
 
   void remote_download_command_source (int num, ULONGEST addr,
@@ -14376,6 +14386,32 @@ set_range_stepping (const char *ignore_args, int from_tty,
 	  || !remote->vcont_r_supported ())
 	warning (_("Range stepping is not supported by the current target"));
     }
+}
+
+/* Implement the "supports_memory_tagging" target_ops method.  */
+
+bool
+remote_target::supports_memory_tagging ()
+{
+  return false;
+}
+
+/* Implement the "fetch_memtags" target_ops method.  */
+
+int
+remote_target::fetch_memtags (CORE_ADDR address, size_t len,
+			      gdb::byte_vector &tags)
+{
+  return 0;
+}
+
+/* Implement the "store_memtags" target_ops method.  */
+
+int
+remote_target::store_memtags (CORE_ADDR address, size_t len,
+			      const gdb::byte_vector &tags)
+{
+  return 0;
 }
 
 void _initialize_remote ();

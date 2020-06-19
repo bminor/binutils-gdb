@@ -171,6 +171,11 @@ struct dummy_target : public target_ops
   const struct frame_unwind *get_tailcall_unwinder () override;
   void prepare_to_generate_core () override;
   void done_generating_core () override;
+  bool supports_memory_tagging () override;
+  int fetch_memtags (CORE_ADDR address, size_t len,
+		     gdb::byte_vector &tags) override;
+  int store_memtags (CORE_ADDR address, size_t len,
+		     const gdb::byte_vector &tags) override;
 };
 
 struct debug_target : public target_ops
@@ -340,6 +345,11 @@ struct debug_target : public target_ops
   const struct frame_unwind *get_tailcall_unwinder () override;
   void prepare_to_generate_core () override;
   void done_generating_core () override;
+  bool supports_memory_tagging () override;
+  int fetch_memtags (CORE_ADDR address, size_t len,
+		     gdb::byte_vector &tags) override;
+  int store_memtags (CORE_ADDR address, size_t len,
+		     const gdb::byte_vector &tags) override;
 };
 
 void
@@ -4363,3 +4373,77 @@ debug_target::done_generating_core ()
   fputs_unfiltered (")\n", gdb_stdlog);
 }
 
+bool
+target_ops::supports_memory_tagging ()
+{
+  return this->beneath ()->supports_memory_tagging ();
+}
+
+int
+target_ops::fetch_memtags (CORE_ADDR address, size_t len,
+			   gdb::byte_vector &tags)
+{
+  return this->beneath ()->fetch_memtags (address, len, tags);
+}
+
+int
+target_ops::store_memtags (CORE_ADDR address, size_t len,
+			   const gdb::byte_vector &tags)
+{
+  return this->beneath ()->store_memtags (address, len, tags);
+}
+
+bool
+dummy_target::supports_memory_tagging ()
+{
+  return false;
+}
+
+int
+dummy_target::fetch_memtags (CORE_ADDR address, size_t len,
+			     gdb::byte_vector &tags)
+{
+  return 0;
+}
+
+int
+dummy_target::store_memtags (CORE_ADDR address, size_t len,
+			     const gdb::byte_vector &tags)
+{
+  return 0;
+}
+
+bool
+debug_target::supports_memory_tagging ()
+{
+  bool result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->supports_memory_tagging (...)\n", this->beneath ()->shortname ());
+  result = this->beneath ()->supports_memory_tagging ();
+  fprintf_unfiltered (gdb_stdlog, "<- %s->supports_memory_tagging (", this->beneath ()->shortname ());
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_bool (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+int
+debug_target::fetch_memtags (CORE_ADDR address, size_t len,
+			     gdb::byte_vector &tags)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->fetch_memtags (...)\n", this->beneath ()->shortname ());
+  int result = this->beneath ()->fetch_memtags (address, len, tags);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->fetch_memtags (", this->beneath ()->shortname ());
+  fputs_unfiltered (")\n", gdb_stdlog);
+  return result;
+}
+
+int
+debug_target::store_memtags (CORE_ADDR address, size_t len,
+			     const gdb::byte_vector &tags)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->store_memtags (...)\n", this->beneath ()->shortname ());
+  int result = this->beneath ()->store_memtags (address, len, tags);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->store_memtags (", this->beneath ()->shortname ());
+  fputs_unfiltered (")\n", gdb_stdlog);
+  return result;
+}
