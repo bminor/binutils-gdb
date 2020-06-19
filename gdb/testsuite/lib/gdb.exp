@@ -7393,5 +7393,11 @@ proc tuiterm_env { } {
     lappend gdb_finish_hooks tuiterm_env_finish
 }
 
+# Dejagnu has a version of note, but usage is not allowed outside of dejagnu.
+# Define a local version.
+proc gdb_note { message } {
+    verbose -- "NOTE: $message" 0
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
