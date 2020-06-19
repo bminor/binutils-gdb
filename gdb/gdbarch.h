@@ -115,6 +115,18 @@ enum function_call_return_method
   return_method_struct,
 };
 
+enum memtag_type
+{
+  /* Logical tag, the tag that is stored in unused bits of a pointer to a
+     virtual address.  */
+  tag_logical = 0,
+
+  /* Allocation tag, the tag that is associated with every granule of memory in
+     the physical address space.  Allocation tags are used to validate memory
+     accesses via pointers containing logical tags.  */
+  tag_allocation,
+};
+
 
 
 /* The following are pre-initialized by GDBARCH.  */
@@ -704,6 +716,47 @@ extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_
 
 extern int gdbarch_significant_addr_bit (struct gdbarch *gdbarch);
 extern void set_gdbarch_significant_addr_bit (struct gdbarch *gdbarch, int significant_addr_bit);
+
+/* Return a string representation of the memory tag TYPE of ADDRESS.
+   If no tag is associated with such an address, return the empty string. */
+
+typedef std::string (gdbarch_memtag_to_string_ftype) (struct gdbarch *gdbarch, struct value *address, enum memtag_type tag_type);
+extern std::string gdbarch_memtag_to_string (struct gdbarch *gdbarch, struct value *address, enum memtag_type tag_type);
+extern void set_gdbarch_memtag_to_string (struct gdbarch *gdbarch, gdbarch_memtag_to_string_ftype *memtag_to_string);
+
+/* Return true if ADDRESS contains a tag and false otherwise. */
+
+typedef bool (gdbarch_tagged_address_p_ftype) (struct gdbarch *gdbarch, struct value *address);
+extern bool gdbarch_tagged_address_p (struct gdbarch *gdbarch, struct value *address);
+extern void set_gdbarch_tagged_address_p (struct gdbarch *gdbarch, gdbarch_tagged_address_p_ftype *tagged_address_p);
+
+/* Return true if the tag from ADDRESS does not match the memory tag for that
+   particular address.  Return false otherwise. */
+
+typedef bool (gdbarch_memtag_mismatch_p_ftype) (struct gdbarch *gdbarch, struct value *address);
+extern bool gdbarch_memtag_mismatch_p (struct gdbarch *gdbarch, struct value *address);
+extern void set_gdbarch_memtag_mismatch_p (struct gdbarch *gdbarch, gdbarch_memtag_mismatch_p_ftype *memtag_mismatch_p);
+
+/* Set the tags for the address range [ADDRESS, ADDRESS + LENGTH) to TAGS
+   Return 0 if successful and non-zero otherwise. */
+
+typedef int (gdbarch_set_memtags_ftype) (struct gdbarch *gdbarch, struct value *address, size_t length, const gdb::byte_vector &tags, enum memtag_type tag_type);
+extern int gdbarch_set_memtags (struct gdbarch *gdbarch, struct value *address, size_t length, const gdb::byte_vector &tags, enum memtag_type tag_type);
+extern void set_gdbarch_set_memtags (struct gdbarch *gdbarch, gdbarch_set_memtags_ftype *set_memtags);
+
+/* Return the tag portion of ADDRESS, assuming ADDRESS is tagged. */
+
+typedef struct value * (gdbarch_get_memtag_ftype) (struct gdbarch *gdbarch, struct value *address, enum memtag_type tag_type);
+extern struct value * gdbarch_get_memtag (struct gdbarch *gdbarch, struct value *address, enum memtag_type tag_type);
+extern void set_gdbarch_get_memtag (struct gdbarch *gdbarch, gdbarch_get_memtag_ftype *get_memtag);
+
+/* memtag_granule_size is the size of the allocation tag granule, for
+   architectures that support memory tagging.
+   This is 0 for architectures that do not support memory tagging.
+   For a non-zero value, this represents the number of bytes of memory per tag. */
+
+extern CORE_ADDR gdbarch_memtag_granule_size (struct gdbarch *gdbarch);
+extern void set_gdbarch_memtag_granule_size (struct gdbarch *gdbarch, CORE_ADDR memtag_granule_size);
 
 /* FIXME/cagney/2001-01-18: This should be split in two.  A target method that
    indicates if the target needs software single step.  An ISA method to
