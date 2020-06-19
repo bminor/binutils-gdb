@@ -52,6 +52,8 @@
 
 #include "arch/aarch64-mte-linux.h"
 
+#include "nat/aarch64-mte-linux-ptrace.h"
+
 #ifndef TRAP_HWBKPT
 #define TRAP_HWBKPT 0x0004
 #endif
@@ -102,6 +104,16 @@ public:
     override;
 
   struct gdbarch *thread_architecture (ptid_t) override;
+
+  bool supports_memory_tagging () override;
+
+  /* Read memory allocation tags from memory via PTRACE.  */
+  int fetch_memtags (CORE_ADDR address, size_t len,
+		     gdb::byte_vector &tags) override;
+
+  /* Write allocation tags to memory via PTRACE.  */
+  int store_memtags (CORE_ADDR address, size_t len,
+		     const gdb::byte_vector &tags) override;
 };
 
 static aarch64_linux_nat_target the_aarch64_linux_nat_target;
@@ -1048,6 +1060,36 @@ aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
   info.bfd_arch_info = bfd_lookup_arch (bfd_arch_aarch64, bfd_mach_aarch64);
   info.id = (int *) (vq == 0 ? -1 : vq);
   return gdbarch_find_by_info (info);
+}
+
+/* Implement the "supports_memory_tagging" target_ops method.  */
+
+bool
+aarch64_linux_nat_target::supports_memory_tagging ()
+{
+  return (linux_get_hwcap2 (this) & HWCAP2_MTE) != 0;
+}
+
+/* Implement the "fetch_memtags" target_ops method.  */
+
+int
+aarch64_linux_nat_target::fetch_memtags (CORE_ADDR address, size_t len,
+					 gdb::byte_vector &tags)
+{
+  int tid = inferior_ptid.lwp ();
+
+  return aarch64_mte_fetch_memtags (tid, address, len, tags);
+}
+
+/* Implement the "store_memtags" target_ops method.  */
+
+int
+aarch64_linux_nat_target::store_memtags (CORE_ADDR address, size_t len,
+					 const gdb::byte_vector &tags)
+{
+  int tid = inferior_ptid.lwp ();
+
+  return aarch64_mte_store_memtags (tid, address, len, tags);
 }
 
 /* Define AArch64 maintenance commands.  */

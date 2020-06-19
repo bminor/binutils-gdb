@@ -1,4 +1,4 @@
-/* Common Linux target-dependent definitions for AArch64 MTE
+/* Common Linux target-dependent functionality for AArch64 MTE
 
    Copyright (C) 2020 Free Software Foundation, Inc.
 
@@ -17,25 +17,18 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ARCH_AARCH64_LINUX_H
-#define ARCH_AARCH64_LINUX_H
+#include "arch/aarch64-mte-linux.h"
 
-#include "gdbsupport/common-defs.h"
+/* See arch/aarch64-mte-linux.h */
 
-/* Feature check for Memory Tagging Extension.  */
-#ifndef HWCAP2_MTE
-#define HWCAP2_MTE  (1 << 18)
-#endif
+size_t
+get_tag_granules (CORE_ADDR addr, size_t len, size_t granule_size)
+{
+  /* Start address */
+  CORE_ADDR s_addr = align_down (addr, granule_size);
+  /* End address */
+  CORE_ADDR e_addr = align_down (addr + len, granule_size);
 
-/* The MTE regset consists of a single 64-bit register.  */
-#define AARCH64_LINUX_SIZEOF_MTE 8
-
-/* We have one tag per 16 bytes of memory.  */
-#define MTE_GRANULE_SIZE 16
-
-/* Return the number of tag granules in the memory range
-   [ADDR, ADDR + LEN) given GRANULE_SIZE.  */
-extern size_t get_tag_granules (CORE_ADDR addr, size_t len,
-				size_t granule_size);
-
-#endif /* ARCH_AARCH64_LINUX_H */
+  /* We always have at least 1 granule.  */
+  return 1 + (e_addr - s_addr) / granule_size;
+}
