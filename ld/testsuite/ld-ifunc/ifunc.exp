@@ -24,6 +24,7 @@
 
 
 if { ![is_elf_format] || ![supports_gnu_osabi]
+     || [istarget alpha-*-*]
      || [istarget arc*-*-*]
      || [istarget am33*-*-*]
      || [istarget bfin-*-*]
