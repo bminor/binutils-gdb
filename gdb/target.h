@@ -1252,6 +1252,22 @@ struct target_ops
     /* Cleanup after generating a core file.  */
     virtual void done_generating_core ()
       TARGET_DEFAULT_IGNORE ();
+
+    /* Returns true if the target supports memory tagging.  */
+    virtual bool supports_memory_tagging ()
+      TARGET_DEFAULT_RETURN (false);
+
+    /* Return the allocated memory tags associated with
+       [ADDRESS, ADDRESS + LEN) in TAGS.  */
+    virtual int fetch_memtags (CORE_ADDR address, size_t len,
+			       gdb::byte_vector &tags)
+      TARGET_DEFAULT_IGNORE ();
+
+    /* Write the allocation tags contained in TAGS to the memory range
+       [ADDRESS, ADDRESS + LEN).  */
+    virtual int store_memtags (CORE_ADDR address, size_t len,
+			       const gdb::byte_vector &tags)
+      TARGET_DEFAULT_IGNORE ();
   };
 
 /* Deleter for std::unique_ptr.  See comments in
@@ -2307,6 +2323,15 @@ extern gdb::unique_xmalloc_ptr<char> target_fileio_read_stralloc
 
 #define target_augmented_libraries_svr4_read() \
   (current_top_target ()->augmented_libraries_svr4_read) ()
+
+#define target_supports_memory_tagging() \
+  ((current_top_target ()->supports_memory_tagging) ())
+
+#define target_fetch_memtags(address, len, tags) \
+  (current_top_target ()->fetch_memtags) ((address), (len), (tags))
+
+#define target_store_memtags(address, len, tags) \
+  (current_top_target ()->store_memtags) ((address), (len), (tags))
 
 /* Command logging facility.  */
 
