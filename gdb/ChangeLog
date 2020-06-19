@@ -1,5 +1,19 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* arch-utils.c (default_memtag_to_string, default_tagged_address_p)
+	(default_memtag_matches_p, default_set_memtags)
+	(default_get_memtag): New functions.
+	* arch-utils.h (default_memtag_to_string, default_tagged_address_p)
+	(default_memtag_matches_p, default_set_memtags)
+	(default_get_memtag): New prototypes.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (memtag_to_string, tagged_address_p, memtag_matches_p)
+	(set_memtags, get_memtag, memtag_granule_size): New gdbarch hooks.
+	(enum memtag_type): New enum.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* remote.c (remote_target) <supports_memory_tagging>: New method
 	override.
 	<fetch_memtags>: New method override.

@@ -77,6 +77,55 @@ legacy_register_sim_regno (struct gdbarch *gdbarch, int regnum)
     return LEGACY_SIM_REGNO_IGNORE;
 }
 
+
+/* See arch-utils.h */
+
+std::string
+default_memtag_to_string (struct gdbarch *gdbarch, struct value *tag)
+{
+  error (_("This architecture has no method to convert a memory tag to"
+	   " a string."));
+}
+
+/* See arch-utils.h */
+
+bool
+default_tagged_address_p (struct gdbarch *gdbarch, struct value *address)
+{
+  /* By default, assume the address is untagged.  */
+  return false;
+}
+
+/* See arch-utils.h */
+
+bool
+default_memtag_matches_p (struct gdbarch *gdbarch, struct value *address)
+{
+  /* By default, assume the tags match.  */
+  return true;
+}
+
+/* See arch-utils.h */
+
+bool
+default_set_memtags (struct gdbarch *gdbarch, struct value *address,
+		     size_t length, const gdb::byte_vector &tags,
+		     memtag_type tag_type)
+{
+  /* By default, return true (successful);  */
+  return true;
+}
+
+/* See arch-utils.h */
+
+struct value *
+default_get_memtag (struct gdbarch *gdbarch, struct value *address,
+		    memtag_type tag_type)
+{
+  /* By default, return no tag.  */
+  return nullptr;
+}
+
 CORE_ADDR
 generic_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
