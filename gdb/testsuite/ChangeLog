@@ -1,3 +1,10 @@
+2020-06-19  Sandra Loosemore  <sandra@codesourcery.com>
+	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* gdb.xml/tdesc-regs.exp (load_description): Correct pathname of
+	file sent to remote host.
+	(top level): Allow int32_t as type of 32-bit register.
+
 2020-06-19  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (gdb_note): New proc.
