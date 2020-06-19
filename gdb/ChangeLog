@@ -1,5 +1,10 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Add nat/aarch64-mte-linux-ptrace.h.
+	* nat/aarch64-mte-linux-ptrace.h: New file.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* aarch64-linux-nat.c (fetch_mteregs_from_thread): New function.
 	(store_mteregs_to_thread): New function.
 	(aarch64_linux_nat_target::fetch_registers): Update to call
