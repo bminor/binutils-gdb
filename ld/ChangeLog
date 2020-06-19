@@ -6,7 +6,10 @@
 	* testsuite/ld-elf/pr9679.rd: Likewise.
 	* testsuite/ld-elfvers/vers30.dsym: Likewise.
 	* testsuite/ld-elfvers/vers31.dsym: Likewise.
+	* testsuite/ld-plugin/pr22983.1.d: Likewise.
+	* testsuite/ld-plugin/pr22983.2.d: Likewise.
 	* testsuite/ld-plugin/pr22983.3.d: Likewise.
+	* testsuite/ld-plugin/pr22983.4.d: Likewise.
 	* testsuite/ld-ifunc/ifunc.exp: Exclude alpha.
 
 2020-06-19  Alan Modra  <amodra@gmail.com>
