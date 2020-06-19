@@ -32,3 +32,39 @@ get_tag_granules (CORE_ADDR addr, size_t len, size_t granule_size)
   /* We always have at least 1 granule.  */
   return 1 + (e_addr - s_addr) / granule_size;
 }
+
+/* See arch/aarch64-mte-linux.h */
+
+CORE_ADDR
+make_ltag_bits (CORE_ADDR value)
+{
+  return value & MTE_LOGICAL_MAX_VALUE;
+}
+
+/* See arch/aarch64-mte-linux.h */
+
+CORE_ADDR
+make_ltag (CORE_ADDR value)
+{
+  return make_ltag_bits (value) << MTE_LOGICAL_TAG_START_BIT;
+}
+
+/* See arch/aarch64-mte-linux.h */
+
+CORE_ADDR
+aarch64_linux_set_ltag (CORE_ADDR address, CORE_ADDR tag)
+{
+  /* Remove the existing tag.  */
+  address &= ~make_ltag (MTE_LOGICAL_MAX_VALUE);
+
+  /* Return the new tagged address.  */
+  return address | make_ltag (tag);
+}
+
+/* See arch/aarch64-mte-linux.h */
+
+CORE_ADDR
+aarch64_linux_get_ltag (CORE_ADDR address)
+{
+  return make_ltag_bits (address >> MTE_LOGICAL_TAG_START_BIT);
+}
