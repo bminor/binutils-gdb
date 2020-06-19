@@ -680,6 +680,7 @@ ALL_64_TARGET_OBS = \
 	amd64-windows-tdep.o \
 	arch/aarch64.o \
 	arch/aarch64-insn.o \
+	arch/aarch64-mte-linux.o \
 	arch/amd64.o \
 	ia64-linux-tdep.o \
 	ia64-tdep.o \

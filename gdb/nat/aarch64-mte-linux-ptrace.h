@@ -30,4 +30,21 @@
 #define PTRACE_POKEMTETAGS	  34
 #endif
 
+/* Maximum number of tags to pass at once to the kernel.  */
+#define TAGS_MAX_SIZE 4096
+
+/* Read the allocation tags from memory range [ADDRESS, ADDRESS + LEN)
+   into TAGS.
+
+   Return 0 if successful and non-zero otherwise.  */
+extern int aarch64_mte_fetch_memtags (int tid, CORE_ADDR address, size_t len,
+				      gdb::byte_vector &tags);
+
+/* Write the TAGS allocation tags to the memory range
+   [ADDRESS, ADDRESS + LEN).
+
+   Return 0 if successful and non-zero otherwise.  */
+extern int aarch64_mte_store_memtags (int tid, CORE_ADDR address, size_t len,
+				      const gdb::byte_vector &tags);
+
 #endif /* NAT_AARCH64_MTE_LINUX_PTRACE_H */
