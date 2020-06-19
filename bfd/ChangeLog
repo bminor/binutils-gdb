@@ -1,3 +1,9 @@
+2020-06-19  Nick Clifton  <nickc@redhat.com>
+
+	* plugin.c (try_load_plugin): Suppress the error message about
+	being unable to open a plugin if creating a list of viable
+	plugins.
+
 2020-06-16  Alan Modra  <amodra@gmail.com>
 
 	* aout-tic30.c: Delete file.

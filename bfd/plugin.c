@@ -249,17 +249,18 @@ try_claim (bfd *abfd)
   return claimed;
 }
 
-static int
-try_load_plugin (const char *pname,
-		 struct plugin_list_entry *plugin_list_iter,
-		 bfd *abfd, bfd_boolean build_list_p)
+static bfd_boolean
+try_load_plugin (const char *                pname,
+		 struct plugin_list_entry *  plugin_list_iter,
+		 bfd *                       abfd,
+		 bfd_boolean                 build_list_p)
 {
   void *plugin_handle;
   struct ld_plugin_tv tv[5];
   int i;
   ld_plugin_onload onload;
   enum ld_plugin_status status;
-  int result = 0;
+  bfd_boolean result = FALSE;
 
   /* NB: Each object is independent.  Reuse the previous plugin from
      the last run will lead to wrong result.  */
@@ -273,15 +274,20 @@ try_load_plugin (const char *pname,
   plugin_handle = dlopen (pname, RTLD_NOW);
   if (!plugin_handle)
     {
-      _bfd_error_handler ("Failed to load plugin '%s', reason: %s\n",
-			  pname, dlerror ());
-      return 0;
+      /* If we are building a list of viable plugins, then
+	 we do not bother the user with the details of any
+	 plugins that cannot be loaded.  */
+      if (! build_list_p)
+	_bfd_error_handler ("Failed to load plugin '%s', reason: %s\n",
+			    pname, dlerror ());
+      return FALSE;
     }
 
   if (plugin_list_iter == NULL)
     {
       size_t length_plugin_name = strlen (pname) + 1;
       char *plugin_name = bfd_malloc (length_plugin_name);
+
       if (plugin_name == NULL)
 	goto short_circuit;
       plugin_list_iter = bfd_malloc (sizeof *plugin_list_iter);
@@ -342,7 +348,7 @@ try_load_plugin (const char *pname,
     goto short_circuit;
 
   abfd->plugin_format = bfd_plugin_yes;
-  result = 1;
+  result = TRUE;
 
  short_circuit:
   dlclose (plugin_handle);
@@ -446,7 +452,7 @@ build_plugin_list (bfd *abfd)
 
 		  full_name = concat (plugin_dir, "/", ent->d_name, NULL);
 		  if (stat (full_name, &st) == 0 && S_ISREG (st.st_mode))
-		    try_load_plugin (full_name, NULL, abfd, TRUE);
+		    (void) try_load_plugin (full_name, NULL, abfd, TRUE);
 		  free (full_name);
 		}
 	      closedir (d);
@@ -458,7 +464,7 @@ build_plugin_list (bfd *abfd)
   has_plugin_list = plugin_list != NULL;
 }
 
-static int
+static bfd_boolean
 load_plugin (bfd *abfd)
 {
   struct plugin_list_entry *plugin_list_iter;
@@ -467,17 +473,17 @@ load_plugin (bfd *abfd)
     return try_load_plugin (plugin_name, plugin_list, abfd, FALSE);
 
   if (plugin_program_name == NULL)
-    return 0;
+    return FALSE;
 
   build_plugin_list (abfd);
 
   for (plugin_list_iter = plugin_list;
        plugin_list_iter;
        plugin_list_iter = plugin_list_iter->next)
-    if (try_load_plugin (NULL, plugin_list_iter, abfd, FALSE))
-      return 1;
+    if (try_load_plugin (NULL, plugin_list_iter, abfd,FALSE))
+      return TRUE;
 
-  return 0;
+  return FALSE;
 }
 
 
