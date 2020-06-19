@@ -1,5 +1,21 @@
 2021-03-24  Luis Machado  <luis.machado@linaro.org>
 
+	* aarch64-linux-tdep.c: Include target.h, arch-utils.h, value.h.
+	(aarch64_mte_get_atag, aarch64_linux_tagged_address_p)
+	(aarch64_linux_memtag_mismatch_p, aarch64_linux_set_memtags)
+	(aarch64_linux_get_memtag, aarch64_linux_memtag_to_string): New
+	functions.
+	(aarch64_linux_init_abi): Initialize MTE-related gdbarch hooks.
+	* arch/aarch64-mte-linux.c (aarch64_mte_make_ltag_bits)
+	(aarch64_mte_make_ltag, aarch64_linux_set_ltag)
+	(aarch64_linux_get_ltag): New functions.
+	* arch/aarch64-mte-linux.h (AARCH64_MTE_LOGICAL_TAG_START_BIT)
+	(AARCH64_MTE_LOGICAL_MAX_VALUE): Define.
+	(aarch64_mte_make_ltag_bits, aarch64_mte_make_ltag)
+	(aarch64_mte_set_ltag, aarch64_mte_get_ltag): New prototypes.
+
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
 	* linux-tdep.c (struct smaps_vmflags) <memory_tagging>: New flag
 	bit.
 	(struct smaps_data): New struct.
