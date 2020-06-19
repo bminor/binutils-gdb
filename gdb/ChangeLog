@@ -1,3 +1,24 @@
+2021-03-24  Luis Machado  <luis.machado@linaro.org>
+
+	* remote.c (remote_target) <supports_memory_tagging>: New method
+	override.
+	<fetch_memtags>: New method override.
+	<store_memtags>: New method override.
+	(remote_target::supports_memory_tagging): New method.
+	(remote_target::fetch_memtags): New method.
+	(remote_target::store_memtags): New method.
+	* target-delegates.c: Regenerate.
+	* target.h (struct target_ops) <supports_memory_tagging>: New virtual
+	method.
+	<fetch_memtags>: New virtual method.
+	<store_memtags>: New virtual method.
+	(target_supports_memory_tagging): Define.
+	(target_fetch_memtags): Define.
+	(target_store_memtags): Define.
+	* target-debug.h (target_debug_print_size_t)
+	(target_debug_print_const_gdb_byte_vector_r)
+	(target_debug_print_gdb_byte_vector_r): New functions.
+
 2021-03-23  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* target.h (target_longname): Remove.

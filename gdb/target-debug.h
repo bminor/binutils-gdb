@@ -212,4 +212,28 @@ target_debug_print_signals (gdb::array_view<const unsigned char> sigs)
   fputs_unfiltered (" }", gdb_stdlog);
 }
 
+static void
+target_debug_print_size_t (size_t size)
+{
+  fprintf_unfiltered (gdb_stdlog, "%s", pulongest (size));
+}
+
+static void
+target_debug_print_const_gdb_byte_vector_r (const gdb::byte_vector &vector)
+{
+  fputs_unfiltered ("{", gdb_stdlog);
+
+  for (size_t i = 0; i < vector.size (); i++)
+    {
+      fprintf_unfiltered (gdb_stdlog, " %s",
+			  phex_nz (vector[i], 1));
+    }
+  fputs_unfiltered (" }", gdb_stdlog);
+}
+
+static void
+target_debug_print_gdb_byte_vector_r (gdb::byte_vector &vector)
+{
+  target_debug_print_const_gdb_byte_vector_r (vector);
+}
 #endif /* TARGET_DEBUG_H */

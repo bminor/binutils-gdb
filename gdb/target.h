@@ -1267,6 +1267,38 @@ struct target_ops
     /* Cleanup after generating a core file.  */
     virtual void done_generating_core ()
       TARGET_DEFAULT_IGNORE ();
+
+    /* Returns true if the target supports memory tagging, false otherwise.  */
+    virtual bool supports_memory_tagging ()
+      TARGET_DEFAULT_RETURN (false);
+
+    /* Return the allocated memory tags of type TYPE associated with
+       [ADDRESS, ADDRESS + LEN) in TAGS.
+
+       LEN is the number of bytes in the memory range.  TAGS is a vector of
+       bytes containing the tags found in the above memory range.
+
+       It is up to the architecture/target to interpret the bytes in the TAGS
+       vector and read the tags appropriately.
+
+       Returns true if fetching the tags succeeded and false otherwise.  */
+    virtual bool fetch_memtags (CORE_ADDR address, size_t len,
+				gdb::byte_vector &tags, int type)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
+
+    /* Write the allocation tags of type TYPE contained in TAGS to the memory
+       range [ADDRESS, ADDRESS + LEN).
+
+       LEN is the number of bytes in the memory range.  TAGS is a vector of
+       bytes containing the tags to be stored to the memory range.
+
+       It is up to the architecture/target to interpret the bytes in the TAGS
+       vector and store them appropriately.
+
+       Returns true if storing the tags succeeded and false otherwise.  */
+    virtual bool store_memtags (CORE_ADDR address, size_t len,
+				const gdb::byte_vector &tags, int type)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
   };
 
 /* Deleter for std::unique_ptr.  See comments in
@@ -2317,6 +2349,15 @@ extern gdb::unique_xmalloc_ptr<char> target_fileio_read_stralloc
 
 #define target_augmented_libraries_svr4_read() \
   (current_top_target ()->augmented_libraries_svr4_read) ()
+
+#define target_supports_memory_tagging() \
+  ((current_top_target ()->supports_memory_tagging) ())
+
+#define target_fetch_memtags(address, len, tags, type) \
+  (current_top_target ()->fetch_memtags) ((address), (len), (tags), (type))
+
+#define target_store_memtags(address, len, tags, type) \
+  (current_top_target ()->store_memtags) ((address), (len), (tags), (type))
 
 /* Command logging facility.  */
 
