@@ -1,3 +1,8 @@
+2020-06-20  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-sh/sh.exp: Don't run relax tests for non-ELF.
+	Fail when ld_assemble fails.  Use elseif to reduce indentation.
+
 2020-06-19  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-elf/dynamic-1.rd: Accept st_other notations.
