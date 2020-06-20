@@ -32,33 +32,25 @@ if [istarget "x86_64-*-mingw*"] then {
   set LDFLAGS "$LDFLAGS --image-base 0"
 }
 
-if ![ld_link $ld tmpdir/def "$LDFLAGS -T $srcdir/$subdir/defined.t tmpdir/def.o"] {
+if { ![ld_link $ld tmpdir/def "$LDFLAGS -T $srcdir/$subdir/defined.t tmpdir/def.o"] } {
+    fail $testname
+} elseif { ![ld_nm $nm "" tmpdir/def] } {
+    fail $testname
+} elseif { ![info exists nm_output(value1)]
+	   || ![info exists nm_output(value2)]} {
+    send_log "bad output from nm\n"
+    verbose "bad output from nm"
+    fail $testname
+} elseif {$nm_output(value1) != 1} {
+    send_log "value1 == $nm_output(value1)\n"
+    verbose "value1 == $nm_output(value1)"
+    fail $testname
+} elseif {$nm_output(value2) != 2} {
+    send_log "value2 == $nm_output(value2)\n"
+    verbose "value2 == $nm_output(value2)"
     fail $testname
 } else {
-    if ![ld_nm $nm "" tmpdir/def] {
-	unresolved $testname
-    } else {
-	if {![info exists nm_output(value1)] \
-	     || ![info exists nm_output(value2)]} {
-	    send_log "bad output from nm\n"
-	    verbose "bad output from nm"
-	    fail $testname
-	} else {
-	    if {$nm_output(value1) != 1} {
-		send_log "value1 == $nm_output(value1)\n"
-		verbose "value1 == $nm_output(value1)"
-		fail $testname
-	    } else {
-		if {$nm_output(value2) != 2} {
-		    send_log "value2 == $nm_output(value2)\n"
-		    verbose "value2 == $nm_output(value2)"
-		    fail $testname
-		} else {
-		    pass $testname
-		}
-	    }
-	}
-    }
+    pass $testname
 }
 
 set saved_ASFLAGS "$ASFLAGS"

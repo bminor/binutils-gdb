@@ -289,7 +289,6 @@ proc default_ld_compile { cc source object } {
 	return 1
     } else {
 	verbose -log "$exec_output"
-	perror "$source: compilation failed"
 	return 0
     }
 }
@@ -310,7 +309,6 @@ proc default_ld_assemble { as in_flags source object } {
     if [string match "" $exec_output] then {
 	return 1
     } else {
-	perror "$source: assembly failed"
 	return 0
     }
 }
@@ -361,7 +359,6 @@ proc default_ld_nm { nm nmflags object } {
 	return 1
     } else {
 	verbose -log "$exec_output"
-	perror "$object: nm failed"
 	return 0
     }
 }
@@ -520,12 +517,17 @@ proc run_ld_link_tests { ldtests args } {
 		set as_file "$srcdir/$subdir/$src_file"
 	    }
 	    if ![ld_assemble $as "$as_options $as_file" $objfile] {
-		set is_unresolved 1
+		set failed 1
 		break
 	    }
 	}
 
 	# Catch assembler errors.
+	if { $failed } {
+	    fail $testname
+	    continue
+	}
+	# Catch compiler errors.
 	if { $is_unresolved } {
 	    unresolved $testname
 	    continue
@@ -1367,11 +1369,7 @@ proc check_as_cfi { } {
     close $as_fh
     remote_download host $as_file
     verbose -log "Checking CFI support:"
-    rename "perror" "check_as_cfi_perror"
-    proc perror { args } { }
     set success [ld_assemble $as $as_file "/dev/null"]
-    rename "perror" ""
-    rename "check_as_cfi_perror" "perror"
     #remote_file host delete $as_file
     set check_as_cfi_result $success
     return $success

@@ -392,10 +392,11 @@ if {![ld_compile "$CC $CFLAGS $picflag" $srcdir/$subdir/foo.c $tmpdir/foo.o]
     || ![ld_compile "$CC $CFLAGS $picflag" $srcdir/$subdir/bar1a.c $tmpdir/bar1a.o]
     || ![ld_compile "$CC $CFLAGS $picflag" $srcdir/$subdir/bar1b.c $tmpdir/bar1b.o]
     || ![ld_compile "$CC $CFLAGS $picflag" $srcdir/$subdir/bar1c.c $tmpdir/bar1c.o]
-    || ![ld_compile "$CC $CFLAGS $picflag" $srcdir/$subdir/main1.c $tmpdir/main1.o]
-    || ![ld_link $CC $tmpdir/libfoo1a.so "$shared $tmpdir/foo1a.o"]
-    || ![ld_link $CC $tmpdir/libfoo1b.so "$shared $tmpdir/foo1b.o"]
-    || ![ld_link $CC $tmpdir/libbar1a.so "$shared $tmpdir/bar1a.o $tmpdir/libfoo1a.so"]} then {
+    || ![ld_compile "$CC $CFLAGS $picflag" $srcdir/$subdir/main1.c $tmpdir/main1.o]} then {
+    unresolved "ELF weak"
+} elseif {![ld_link $CC $tmpdir/libfoo1a.so "$shared $tmpdir/foo1a.o"]
+	  || ![ld_link $CC $tmpdir/libfoo1b.so "$shared $tmpdir/foo1b.o"]
+	  || ![ld_link $CC $tmpdir/libbar1a.so "$shared $tmpdir/bar1a.o $tmpdir/libfoo1a.so"]} then {
     fail "ELF weak"
 } else {
     build_lib "ELF DSO weak func first" libfoo "foo.o bar.o" dso.dsym

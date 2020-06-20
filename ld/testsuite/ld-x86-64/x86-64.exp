@@ -475,32 +475,32 @@ if { ![istarget "x86_64-*-linux*"] && ![istarget "x86_64-*-nacl*"]} {
 }
 
 if ![ld_assemble $as "--x32 $srcdir/$subdir/start.s" tmpdir/startx32.o] {
-    unresolved "Build ILP32 start.o"
+    fail "Build ILP32 start.o"
     return
 }
 
 if ![ld_assemble $as "--32 $srcdir/$subdir/start.s" tmpdir/start32.o] {
-    unresolved "Build ia32 start.o"
+    fail "Build ia32 start.o"
     return
 }
 
 if ![ld_assemble $as "--64 $srcdir/$subdir/start.s" tmpdir/start64.o] {
-    unresolved "Build LP64 start.o"
+    fail "Build LP64 start.o"
     return
 }
 
 if ![ld_assemble $as "--x32 $srcdir/$subdir/foo.s" tmpdir/foox32.o] {
-    unresolved "Build ILP32 foo.o"
+    fail "Build ILP32 foo.o"
     return
 }
 
 if ![ld_assemble $as "--32 $srcdir/$subdir/foo.s" tmpdir/foo32.o] {
-    unresolved "Build ia32 foo.o"
+    fail "Build ia32 foo.o"
     return
 }
 
 if ![ld_assemble $as "--64 $srcdir/$subdir/foo.s" tmpdir/foo64.o] {
-    unresolved "Build LP64 foo.o"
+    fail "Build LP64 foo.o"
     return
 }
 

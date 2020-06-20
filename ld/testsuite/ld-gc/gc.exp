@@ -61,7 +61,7 @@ proc test_gc { testname filename linker ldflags} {
 	return
     }
     if ![ld_nm $nm "" $outfile] {
-	unresolved $testname
+	fail $testname
 	return
     }
     if {![info exists nm_output(used_func)] \

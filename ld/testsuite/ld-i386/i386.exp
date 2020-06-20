@@ -277,22 +277,22 @@ proc iamcu_tests {} {
     global subdir
 
     if ![ld_assemble $as "--32 -march=iamcu $srcdir/$subdir/start.s" tmpdir/startiamcu.o] {
-	unresolved "Build Intel MCU start.o"
+	fail "Build Intel MCU start.o"
 	return
     }
 
     if ![ld_assemble $as "--32 $srcdir/$subdir/start.s" tmpdir/start32.o] {
-	unresolved "Build ia32 start.o"
+	fail "Build ia32 start.o"
 	return
      }
 
     if ![ld_assemble $as "--32 -march=iamcu $srcdir/$subdir/foo.s" tmpdir/fooiamcu.o] {
-	unresolved "Build Intel MCU foo.o"
+	fail "Build Intel MCU foo.o"
 	return
     }
 
     if ![ld_assemble $as "--32 $srcdir/$subdir/foo.s" tmpdir/foo32.o] {
-	unresolved "Build ia32 foo.o"
+	fail "Build ia32 foo.o"
 	return
     }
 

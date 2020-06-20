@@ -1,5 +1,38 @@
 2020-06-20  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/lib/ld-lib.exp (default_ld_compile): Don't perror on
+	a compiler error.
+	(default_ld_assemble): Similarly for an assembler error.
+	(default_ld_nm): Similarly for an nm error.
+	(run_ld_link_tests): Report ld_assemble errors as a fail.
+	(check_as_cfi): Remove now unnecessary perror substitution.
+	* testsuite/ld-elf/exclude.exp: Report ld_nm error return as test
+	fails rather then unresolved.
+	* testsuite/ld-gc/gc.exp: Likewise.
+	* testsuite/ld-scripts/alignof.exp: Likewise.
+	* testsuite/ld-scripts/defined.exp: Likewise.
+	* testsuite/ld-scripts/script.exp: Likewise.
+	* testsuite/ld-scripts/sizeof.exp: Likewise.
+	* testsuite/ld-selective/selective.exp: Likewise.
+	* testsuite/ld-scripts/extern.exp: Likewise.  Return on ld_link
+	failure.
+	* testsuite/ld-elfweak/elfweak.exp: Report compiler errors as
+	test unresolved.
+	* testsuite/ld-fastcall/fastcall.exp: Report assember errors as
+	test fails.
+	* testsuite/ld-i386/i386.exp (iamcu_tests): Likewise.
+	* testsuite/ld-ia64/line.exp: Likewise.
+	* testsuite/ld-mep/mep.exp: Likewise.
+	* testsuite/ld-mips-elf/mips-elf-flags.exp: Likewise.
+	* testsuite/ld-nios2/nios2.exp: Likewise.
+	* testsuite/ld-scripts/alignof.exp: Likewise.
+	* testsuite/ld-x86-64/line.exp: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-scripts/log2.exp: Formatting.
+	* testsuite/ld-tic6x/tic6x.exp: Report ld_link errors as a test fail.
+
+2020-06-20  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-alpha/alpha.exp: Exclude *ecoff targets.
 	* testsuite/ld-elf/binutils.exp: Likewise.
 	* testsuite/ld-elf/tls.exp: Likewise.

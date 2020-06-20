@@ -32,7 +32,7 @@ proc check_script { } {
     global nm_output
 
     if ![ld_nm $nm "" tmpdir/script] {
-	unresolved $testname
+	fail $testname
 	return
     } 
 
