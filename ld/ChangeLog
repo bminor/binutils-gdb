@@ -1,5 +1,13 @@
 2020-06-20  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-alpha/alpha.exp: Exclude *ecoff targets.
+	* testsuite/ld-elf/binutils.exp: Likewise.
+	* testsuite/ld-elf/tls.exp: Likewise.
+	* testsuite/ld-elf/tls_common.exp: Likewise.
+	* testsuite/ld-scripts/phdrs2.exp: Likewise.
+
+2020-06-20  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-sh/sh.exp: Don't run relax tests for non-ELF.
 	Fail when ld_assemble fails.  Use elseif to reduce indentation.
 

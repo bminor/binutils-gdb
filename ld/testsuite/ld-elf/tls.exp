@@ -21,10 +21,10 @@
 
 # Make sure that binutils can correctly handle TLS.
 
-if { ![istarget *-*-linux*]
-     && ![istarget arm*-*-uclinuxfdpiceabi]
-     && ![istarget *-*-nacl*]
-     && ![istarget *-*-gnu*] } {
+if { !([istarget *-*-linux*]
+       || [istarget arm*-*-uclinuxfdpiceabi]
+       || [istarget *-*-nacl*]
+       || [istarget *-*-gnu*]) || [istarget *ecoff] } then {
     return
 }
 
