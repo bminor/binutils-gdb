@@ -1,5 +1,29 @@
 2020-06-21  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	* procfs.c: Cleanup many comments.
+
+	(READ_WATCHFLAG, WRITE_WATCHFLAG, EXEC_WATCHFLAG)
+	(AFTER_WATCHFLAG): Replace by value.
+
+	(MAIN_PROC_NAME_FORMAT): Inline ...
+	(create_procinfo): ... here.
+
+	(procfs_debug_inferior): Remove SYS_exec handling.
+	(syscall_is_exec): Likewise.
+	(procfs_set_exec_trap): Likewise.
+
+	(syscall_is_lwp_exit): Inline in callers.
+	(syscall_is_exit): Likewise.
+	(syscall_is_exec): Likewise.
+	(syscall_is_lwp_create): Likewise.
+
+	(invalidate_cache): Remove #if 0 code.
+
+	(make_signal_thread_runnable):  Remove.
+	(procfs_target::resume): Remove #if 0 code.
+
+2020-06-21  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
 	PR gdb/25939
 	* procfs.c (procfs_target::procfs_init_inferior): Move push_target
 	call ...
