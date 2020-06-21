@@ -315,7 +315,10 @@ validate_exec_file (int from_tty)
 	{
 	  symfile_add_flags add_flags = SYMFILE_MAINLINE;
 	  if (from_tty)
-	    add_flags |= SYMFILE_VERBOSE;
+	    {
+	      add_flags |= SYMFILE_VERBOSE;
+	      add_flags |= SYMFILE_ALWAYS_CONFIRM;
+	    }
 	  try
 	    {
 	      symbol_file_add_main (exec_file_target.c_str (), add_flags);

@@ -44,6 +44,12 @@ enum symfile_add_flag : unsigned
 
     /* The new objfile should be marked OBJF_NOT_FILENAME.  */
     SYMFILE_NOT_FILENAME = 1 << 5,
+
+    /* If SYMFILE_VERBOSE (interpreted as from_tty) and SYMFILE_ALWAYS_CONFIRM,
+       always ask user to confirm loading the symbol file.
+       Without this flag, symbol_file_add_with_addrs asks a confirmation only
+       for a main symbol file replacing a file having symbols.  */
+    SYMFILE_ALWAYS_CONFIRM = 1 << 6,
  };
 
 DEF_ENUM_FLAGS_TYPE (enum symfile_add_flag, symfile_add_flags);

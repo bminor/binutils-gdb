@@ -1,3 +1,11 @@
+2020-06-24  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* symfile-add-flags.h: New flag SYMFILE_ALWAYS_CONFIRM.
+	* exec.c (validate_exec_file): If from_tty, set both
+	SYMFILE_VERBOSE (== from_tty) and SYMFILE_ALWAYS_CONFIRM.
+	* symfile.c (symbol_file_add_with_addrs): if always_confirm
+	and from_tty, unconditionally ask a confirmation.
+
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* target-descriptions.c (tdesc_architecture_name): Protect against
