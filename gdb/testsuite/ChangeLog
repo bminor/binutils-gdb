@@ -1,3 +1,8 @@
+2020-06-20  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/list-missing-source.exp: Correct $srcfile manipulation
+	for remote host.
+
 2020-06-19  Sandra Loosemore  <sandra@codesourcery.com>
 	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
