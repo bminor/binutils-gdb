@@ -1,3 +1,24 @@
+2020-06-21  Alan Modra  <amodra@gmail.com>
+
+	* ldfile.c: Replace uses of ENABLE_PLUGINS with BFD_SUPPORTS_PLUGINS.
+	* ldlang.c: Likewise.
+	* ldlang.h: Likewise.
+	* ldlex.h: Likewise.
+	* ldmain.c: Likewise.
+	* lexsup.c: Likewise.
+	* plugin.c: Wrap body of file in #if BFD_SUPPORTS_PLUGINS.
+	* testplug.c: Likewise.
+	* testplug2.c: Likewise.
+	* testplug3.c: Likewise.
+	* testplug4.c: Likewise.
+	* configure.ac (ENABLE_PLUGINS): Don't define AM_CONTITIONAL.
+	* Makefile.am: Remove ENABLE_PLUGINS conditionals.
+	(PLUGIN_CFLAGS): Don't define.
+	(PLUGIN_C, PLUGIN_H, PLUGIN_OBJECT): Likewise.  Substitute all
+	uses with plugin file name.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2020-06-20  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/ld-lib.exp (default_ld_compile): Don't perror on

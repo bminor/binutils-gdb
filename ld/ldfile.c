@@ -34,10 +34,10 @@
 #include "ldemul.h"
 #include "libiberty.h"
 #include "filenames.h"
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 #include "plugin-api.h"
 #include "plugin.h"
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
 bfd_boolean ldfile_assumed_script = FALSE;
 const char *ldfile_output_machine_name = "";
@@ -148,7 +148,7 @@ ldfile_try_open_bfd (const char *attempt,
   /* This is a linker input BFD.  */
   entry->the_bfd->is_linker_input = 1;
 
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
   if (entry->flags.lto_output)
     entry->the_bfd->lto_output = 1;
 #endif
@@ -302,7 +302,7 @@ ldfile_try_open_bfd (const char *attempt,
 	}
     }
  success:
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
   /* If plugins are active, they get first chance to claim
      any successfully-opened input file.  We skip archives
      here; the plugin wants us to offer it the individual
@@ -316,7 +316,7 @@ ldfile_try_open_bfd (const char *attempt,
       && !no_more_claiming
       && bfd_check_format (entry->the_bfd, bfd_object))
     plugin_maybe_claim (entry);
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
   /* It opened OK, the format checked out, and the plugins have had
      their chance to claim it, so this is success.  */

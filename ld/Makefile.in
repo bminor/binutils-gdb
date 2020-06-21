@@ -138,8 +138,7 @@ CONFIG_CLEAN_FILES = po/Makefile.in
 CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libldtestplug_la_LIBADD =
-@ENABLE_PLUGINS_TRUE@am_libldtestplug_la_OBJECTS =  \
-@ENABLE_PLUGINS_TRUE@	libldtestplug_la-testplug.lo
+am_libldtestplug_la_OBJECTS = libldtestplug_la-testplug.lo
 libldtestplug_la_OBJECTS = $(am_libldtestplug_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -149,44 +148,36 @@ libldtestplug_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(libldtestplug_la_CFLAGS) $(CFLAGS) \
 	$(libldtestplug_la_LDFLAGS) $(LDFLAGS) -o $@
-@ENABLE_PLUGINS_TRUE@am_libldtestplug_la_rpath =
 libldtestplug2_la_LIBADD =
-@ENABLE_PLUGINS_TRUE@am_libldtestplug2_la_OBJECTS =  \
-@ENABLE_PLUGINS_TRUE@	libldtestplug2_la-testplug2.lo
+am_libldtestplug2_la_OBJECTS = libldtestplug2_la-testplug2.lo
 libldtestplug2_la_OBJECTS = $(am_libldtestplug2_la_OBJECTS)
 libldtestplug2_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(libldtestplug2_la_CFLAGS) $(CFLAGS) \
 	$(libldtestplug2_la_LDFLAGS) $(LDFLAGS) -o $@
-@ENABLE_PLUGINS_TRUE@am_libldtestplug2_la_rpath =
 libldtestplug3_la_LIBADD =
-@ENABLE_PLUGINS_TRUE@am_libldtestplug3_la_OBJECTS =  \
-@ENABLE_PLUGINS_TRUE@	libldtestplug3_la-testplug3.lo
+am_libldtestplug3_la_OBJECTS = libldtestplug3_la-testplug3.lo
 libldtestplug3_la_OBJECTS = $(am_libldtestplug3_la_OBJECTS)
 libldtestplug3_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(libldtestplug3_la_CFLAGS) $(CFLAGS) \
 	$(libldtestplug3_la_LDFLAGS) $(LDFLAGS) -o $@
-@ENABLE_PLUGINS_TRUE@am_libldtestplug3_la_rpath =
 libldtestplug4_la_LIBADD =
-@ENABLE_PLUGINS_TRUE@am_libldtestplug4_la_OBJECTS =  \
-@ENABLE_PLUGINS_TRUE@	libldtestplug4_la-testplug4.lo
+am_libldtestplug4_la_OBJECTS = libldtestplug4_la-testplug4.lo
 libldtestplug4_la_OBJECTS = $(am_libldtestplug4_la_OBJECTS)
 libldtestplug4_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
 	$(libldtestplug4_la_CFLAGS) $(CFLAGS) \
 	$(libldtestplug4_la_LDFLAGS) $(LDFLAGS) -o $@
-@ENABLE_PLUGINS_TRUE@am_libldtestplug4_la_rpath =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(infodir)" \
 	"$(DESTDIR)$(man1dir)"
 PROGRAMS = $(bin_PROGRAMS)
-@ENABLE_PLUGINS_TRUE@am__objects_1 = plugin.$(OBJEXT)
 am_ld_new_OBJECTS = ldgram.$(OBJEXT) ldlex-wrapper.$(OBJEXT) \
 	lexsup.$(OBJEXT) ldlang.$(OBJEXT) mri.$(OBJEXT) \
 	ldctor.$(OBJEXT) ldmain.$(OBJEXT) ldwrite.$(OBJEXT) \
 	ldexp.$(OBJEXT) ldemul.$(OBJEXT) ldver.$(OBJEXT) \
 	ldmisc.$(OBJEXT) ldfile.$(OBJEXT) ldcref.$(OBJEXT) \
-	$(am__objects_1) ldbuildid.$(OBJEXT)
+	plugin.$(OBJEXT) ldbuildid.$(OBJEXT)
 ld_new_OBJECTS = $(am_ld_new_OBJECTS)
 am__DEPENDENCIES_1 =
 AM_V_P = $(am__v_P_@AM_V@)
@@ -558,16 +549,6 @@ ELF_CLFAGS = -DELF_LIST_OPTIONS=@elf_list_options@ \
 	   -DELF_PLT_UNWIND_LIST_OPTIONS=@elf_plt_unwind_list_options@
 
 AM_CFLAGS = $(WARN_CFLAGS) $(ELF_CLFAGS)
-@ENABLE_PLUGINS_FALSE@PLUGIN_C = 
-
-# Conditionally enable the plugin interface.
-@ENABLE_PLUGINS_TRUE@PLUGIN_C = plugin.c
-@ENABLE_PLUGINS_FALSE@PLUGIN_H = 
-@ENABLE_PLUGINS_TRUE@PLUGIN_H = plugin.h
-@ENABLE_PLUGINS_FALSE@PLUGIN_OBJECT = 
-@ENABLE_PLUGINS_TRUE@PLUGIN_OBJECT = plugin.@OBJEXT@
-@ENABLE_PLUGINS_FALSE@PLUGIN_CFLAGS = 
-@ENABLE_PLUGINS_TRUE@PLUGIN_CFLAGS = -DENABLE_PLUGINS
 
 # We put the scripts in the directory $(scriptdir)/ldscripts.
 # We can't put the scripts in $(datadir) because the SEARCH_DIR
@@ -642,7 +623,7 @@ TEXI2DVI = texi2dvi -I $(srcdir) -I $(BFDDIR)/doc -I ../bfd/doc \
 		    -I $(top_srcdir)/../libiberty
 
 AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) @zlibinc@ \
-	@INCINTL@ $(HDEFINES) $(CFLAGS) $(PLUGIN_CFLAGS) \
+	@INCINTL@ $(HDEFINES) $(CFLAGS) \
 	-DLOCALEDIR="\"$(datadir)/locale\""
 
 BFDLIB = ../bfd/libbfd.la
@@ -970,12 +951,12 @@ ALL_64_EMUL_EXTRA_OFILES = \
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
 	mri.c ldcref.c pe-dll.c pep-dll.c ldlex-wrapper.c \
-	$(PLUGIN_C) ldbuildid.c ldelf.c ldelfgen.c
+	plugin.c ldbuildid.c ldelf.c ldelfgen.c
 
 HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
 	ldwrite.h mri.h deffile.h pe-dll.h pep-dll.h \
-	elf-hints-local.h $(PLUGIN_H) ldbuildid.h ldelf.h ldelfgen.h
+	elf-hints-local.h plugin.h ldbuildid.h ldelf.h ldelfgen.h
 
 GENERATED_CFILES = ldgram.c ldlex.c deffilep.c
 GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
@@ -984,7 +965,7 @@ GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
 # tracking will not cause them to be built beforehand.
 BUILT_SOURCES = $(GENERATED_HFILES)
 OFILES = ldgram.@OBJEXT@ ldlex-wrapper.@OBJEXT@ lexsup.@OBJEXT@ ldlang.@OBJEXT@ \
-	mri.@OBJEXT@ ldctor.@OBJEXT@ ldmain.@OBJEXT@ $(PLUGIN_OBJECT) \
+	mri.@OBJEXT@ ldctor.@OBJEXT@ ldmain.@OBJEXT@ plugin.@OBJEXT@ \
 	ldwrite.@OBJEXT@ ldexp.@OBJEXT@  ldemul.@OBJEXT@ ldver.@OBJEXT@ ldmisc.@OBJEXT@ \
 	ldfile.@OBJEXT@ ldcref.@OBJEXT@ ${EMULATION_OFILES} ${EMUL_EXTRA_OFILES} \
 	ldbuildid.@OBJEXT@
@@ -1005,7 +986,7 @@ EXTRA_ld_new_SOURCES = deffilep.y ldlex.l pep-dll.c pe-dll.c ldelf.c \
 	ldelfgen.c $(ALL_EMULATION_SOURCES) \
 	$(ALL_64_EMULATION_SOURCES)
 ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
-	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c $(PLUGIN_C) \
+	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c plugin.c \
 	ldbuildid.c
 
 ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) \
@@ -1016,21 +997,21 @@ ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBCTF) $(LI
 #
 # Build a dummy plugin using libtool.
 #
-@ENABLE_PLUGINS_TRUE@noinst_LTLIBRARIES = libldtestplug.la libldtestplug2.la \
-@ENABLE_PLUGINS_TRUE@		     libldtestplug3.la libldtestplug4.la
+noinst_LTLIBRARIES = libldtestplug.la libldtestplug2.la \
+		     libldtestplug3.la libldtestplug4.la
 
-@ENABLE_PLUGINS_TRUE@libldtestplug_la_SOURCES = testplug.c
-@ENABLE_PLUGINS_TRUE@libldtestplug_la_CFLAGS = -g -O2
-@ENABLE_PLUGINS_TRUE@libldtestplug_la_LDFLAGS = -no-undefined -rpath /nowhere
-@ENABLE_PLUGINS_TRUE@libldtestplug2_la_SOURCES = testplug2.c
-@ENABLE_PLUGINS_TRUE@libldtestplug2_la_CFLAGS = -g -O2
-@ENABLE_PLUGINS_TRUE@libldtestplug2_la_LDFLAGS = -no-undefined -rpath /nowhere
-@ENABLE_PLUGINS_TRUE@libldtestplug3_la_SOURCES = testplug3.c
-@ENABLE_PLUGINS_TRUE@libldtestplug3_la_CFLAGS = -g -O2
-@ENABLE_PLUGINS_TRUE@libldtestplug3_la_LDFLAGS = -no-undefined -rpath /nowhere
-@ENABLE_PLUGINS_TRUE@libldtestplug4_la_SOURCES = testplug4.c
-@ENABLE_PLUGINS_TRUE@libldtestplug4_la_CFLAGS = -g -O2
-@ENABLE_PLUGINS_TRUE@libldtestplug4_la_LDFLAGS = -no-undefined -rpath /nowhere
+libldtestplug_la_SOURCES = testplug.c
+libldtestplug_la_CFLAGS = -g -O2
+libldtestplug_la_LDFLAGS = -no-undefined -rpath /nowhere
+libldtestplug2_la_SOURCES = testplug2.c
+libldtestplug2_la_CFLAGS = -g -O2
+libldtestplug2_la_LDFLAGS = -no-undefined -rpath /nowhere
+libldtestplug3_la_SOURCES = testplug3.c
+libldtestplug3_la_CFLAGS = -g -O2
+libldtestplug3_la_LDFLAGS = -no-undefined -rpath /nowhere
+libldtestplug4_la_SOURCES = testplug4.c
+libldtestplug4_la_CFLAGS = -g -O2
+libldtestplug4_la_LDFLAGS = -no-undefined -rpath /nowhere
 MAINTAINERCLEANFILES = configdoc.texi ld.1 ld.info
 
 # We want to reconfigure if configure.host or configure.tgt changes.
@@ -1118,16 +1099,16 @@ clean-noinstLTLIBRARIES:
 	}
 
 libldtestplug.la: $(libldtestplug_la_OBJECTS) $(libldtestplug_la_DEPENDENCIES) $(EXTRA_libldtestplug_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libldtestplug_la_LINK) $(am_libldtestplug_la_rpath) $(libldtestplug_la_OBJECTS) $(libldtestplug_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libldtestplug_la_LINK)  $(libldtestplug_la_OBJECTS) $(libldtestplug_la_LIBADD) $(LIBS)
 
 libldtestplug2.la: $(libldtestplug2_la_OBJECTS) $(libldtestplug2_la_DEPENDENCIES) $(EXTRA_libldtestplug2_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libldtestplug2_la_LINK) $(am_libldtestplug2_la_rpath) $(libldtestplug2_la_OBJECTS) $(libldtestplug2_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libldtestplug2_la_LINK)  $(libldtestplug2_la_OBJECTS) $(libldtestplug2_la_LIBADD) $(LIBS)
 
 libldtestplug3.la: $(libldtestplug3_la_OBJECTS) $(libldtestplug3_la_DEPENDENCIES) $(EXTRA_libldtestplug3_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libldtestplug3_la_LINK) $(am_libldtestplug3_la_rpath) $(libldtestplug3_la_OBJECTS) $(libldtestplug3_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libldtestplug3_la_LINK)  $(libldtestplug3_la_OBJECTS) $(libldtestplug3_la_LIBADD) $(LIBS)
 
 libldtestplug4.la: $(libldtestplug4_la_OBJECTS) $(libldtestplug4_la_DEPENDENCIES) $(EXTRA_libldtestplug4_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libldtestplug4_la_LINK) $(am_libldtestplug4_la_rpath) $(libldtestplug4_la_OBJECTS) $(libldtestplug4_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libldtestplug4_la_LINK)  $(libldtestplug4_la_OBJECTS) $(libldtestplug4_la_LIBADD) $(LIBS)
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \

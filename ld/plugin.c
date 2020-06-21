@@ -21,6 +21,7 @@
 #include "sysdep.h"
 #include "libiberty.h"
 #include "bfd.h"
+#if BFD_SUPPORTS_PLUGINS
 #include "bfdlink.h"
 #include "bfdver.h"
 #include "ctf-api.h"
@@ -1462,3 +1463,4 @@ plugin_notice (struct bfd_link_info *info,
 				      abfd, section, value, flags);
   return TRUE;
 }
+#endif /* BFD_SUPPORTS_PLUGINS */

@@ -40,10 +40,10 @@
 #include "ldfile.h"
 #include "ldemul.h"
 #include "ldctor.h"
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
 #include "plugin-api.h"
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
 /* Somewhere above, sys/stat.h got included.  */
 #if !defined(S_ISDIR) && defined(S_IFDIR)
@@ -164,7 +164,7 @@ static void
 ld_cleanup (void)
 {
   bfd_cache_close_all ();
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
   plugin_call_cleanup ();
 #endif
   if (output_filename && delete_output_file_on_failure)
@@ -323,10 +323,10 @@ main (int argc, char **argv)
   if (config.hash_table_size != 0)
     bfd_hash_set_default_size (config.hash_table_size);
 
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
   /* Now all the plugin arguments have been gathered, we can load them.  */
   plugin_load_plugins ();
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
   ldemul_set_symbols ();
 
@@ -830,7 +830,7 @@ add_archive_element (struct bfd_link_info *info,
      (if enabled) may possibly alter it to point to a replacement
      BFD, but we still want to output the original BFD filename.  */
   orig_input = *input;
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
   if (link_info.lto_plugin_active)
     {
       /* We must offer this archive member to the plugins to claim.  */
@@ -851,7 +851,7 @@ add_archive_element (struct bfd_link_info *info,
 	  *subsbfd = input->the_bfd;
 	}
     }
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
   ldlang_add_file (input);
 

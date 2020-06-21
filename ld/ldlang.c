@@ -42,9 +42,9 @@
 #include "demangle.h"
 #include "hashtab.h"
 #include "elf-bfd.h"
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 #include "plugin.h"
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
@@ -3526,7 +3526,7 @@ enum open_bfd_mode
     OPEN_BFD_FORCE = 1,
     OPEN_BFD_RESCAN = 2
   };
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 static lang_input_statement_type *plugin_insert = NULL;
 static struct bfd_link_hash_entry *plugin_undefs = NULL;
 #endif
@@ -3556,7 +3556,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 	case lang_group_statement_enum:
 	  {
 	    struct bfd_link_hash_entry *undefs;
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 	    lang_input_statement_type *plugin_insert_save;
 #endif
 
@@ -3566,7 +3566,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 
 	    do
 	      {
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 		plugin_insert_save = plugin_insert;
 #endif
 		undefs = link_info.hash->undefs_tail;
@@ -3574,7 +3574,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 				 mode | OPEN_BFD_FORCE);
 	      }
 	    while (undefs != link_info.hash->undefs_tail
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 		   /* Objects inserted by a plugin, which are loaded
 		      before we hit this loop, may have added new
 		      undefs.  */
@@ -3601,7 +3601,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 		 has been loaded already.  Do the same for a rescan.
 		 Likewise reload --as-needed shared libs.  */
 	      if (mode != OPEN_BFD_NORMAL
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 		  && ((mode & OPEN_BFD_RESCAN) == 0
 		      || plugin_insert == NULL)
 #endif
@@ -3648,7 +3648,7 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 		    }
 		}
 	    }
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 	  /* If we have found the point at which a plugin added new
 	     files, clear plugin_insert to enable archive rescan.  */
 	  if (&s->input_statement == plugin_insert)
@@ -6899,11 +6899,11 @@ lang_check (void)
        file != NULL;
        file = file->next)
     {
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
       /* Don't check format of files claimed by plugin.  */
       if (file->flags.claimed)
 	continue;
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
       input_bfd = file->the_bfd;
       compatible
 	= bfd_arch_get_compatible (input_bfd, link_info.output_bfd,
@@ -7438,7 +7438,7 @@ lang_gc_sections (void)
       LANG_FOR_EACH_INPUT_STATEMENT (f)
 	{
 	  asection *sec;
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 	  if (f->flags.claimed)
 	    continue;
 #endif
@@ -7585,7 +7585,7 @@ lang_relax_sections (bfd_boolean need_layout)
     }
 }
 
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
 /* Find the insert point for the plugin's replacement files.  We
    place them after the first claimed real object file, or if the
    first claimed object is an archive member, after the last real
@@ -7728,7 +7728,7 @@ find_next_input_statement (lang_statement_union_type **s)
     }
   return s;
 }
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
 /* Add NAME to the list of garbage collection entry points.  */
 
@@ -7819,7 +7819,7 @@ lang_process (void)
      to symbolic origin/length now.  */
   lang_do_memory_regions ();
 
-#ifdef ENABLE_PLUGINS
+#if BFD_SUPPORTS_PLUGINS
   if (link_info.lto_plugin_active)
     {
       lang_statement_list_type added;
@@ -7922,7 +7922,7 @@ lang_process (void)
 	    }
 	}
     }
-#endif /* ENABLE_PLUGINS */
+#endif /* BFD_SUPPORTS_PLUGINS */
 
   /* Make sure that nobody has tried to add a symbol to this list
      before now.  */
