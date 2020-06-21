@@ -44,6 +44,30 @@ LT_INIT([dlopen])
 # AC_PLUGINS setting $plugins is called by ACX_LARGEFILE.
 ACX_LARGEFILE
 
+changequote(,)dnl
+case "${target}" in
+    vax-*-netbsdelf*) ;;
+    *-*-*aout* | i[3-7]86-*-bsd* | i[3-7]86-*-msdos* | ns32k-*-* | \
+    pdp11-*-* | vax-*-*bsd*)
+changequote([,])dnl
+	if test "$plugins" = "yes"; then
+	    if test "${enable_plugins+set}" = set; then
+		AC_MSG_WARN(Enabling plugins for AOUT is experimental)
+	    else
+		plugins=no
+	    fi
+	fi ;;
+    *-*-*vms* | \
+    powerpc*-*-aix* | powerpc-*-beos* | powerpc-*-macos* | rs6000-*-*)
+	if test "$plugins" = "yes"; then
+	    if test "${enable_plugins+set}" = set; then
+		AC_MSG_WARN(Enabling plugins may result in ar creating non-standard archives for ${target})
+	    else
+		plugins=no
+	    fi
+	fi ;;
+esac
+
 AM_CONDITIONAL(PLUGINS, test "$plugins" = "yes")
 
 AC_ARG_ENABLE(64-bit-bfd,

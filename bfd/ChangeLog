@@ -1,3 +1,10 @@
+2020-06-21  Alan Modra  <amodra@gmail.com>
+
+	PR 26132
+	* configure.ac: Disable plugins by default for some targets.
+	* plugin.c: Comment typo fix.
+	* configure: Regenerate.
+
 2020-06-19  Nick Clifton  <nickc@redhat.com>
 
 	* plugin.c (try_load_plugin): Suppress the error message about

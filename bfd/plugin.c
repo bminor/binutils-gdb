@@ -762,4 +762,4 @@ const bfd_target plugin_vec =
 
   NULL				/* backend_data.  */
 };
-#endif /* BFD_SUPPORTS_PLUGIN */
+#endif /* BFD_SUPPORTS_PLUGINS */
