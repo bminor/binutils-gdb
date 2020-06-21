@@ -222,31 +222,31 @@ with_timeout_factor 2 {
 # Filter functions by name and type.
 set lineno [gdb_get_line_number "f3 (another_int_t arg)" ${srcfile2}]
 mi_gdb_test "116-symbol-info-functions --name ^f3$" \
-    "116\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"39\",name=\"f3\",type=\"int \\(another_int_t\\)\",description=\"int f3\\(another_int_t\\);\"\}\\\]\}\\\]\}" \
+    "116\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]*$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"39\",name=\"f3\",type=\"int \\(another_int_t\\)\",description=\"int f3\\(another_int_t\\);\"\}\\\]\}\\\]\}" \
     "List all functions matching pattern f3"
 
 set lineno [gdb_get_line_number "f4 (int *arg)" ${srcfile}]
 mi_gdb_test "117-symbol-info-functions --type void --name ^f4$" \
-    "117\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile\",fullname=\"\[^\"\]+$srcfile\",symbols=\\\[\{line=\"36\",name=\"f4\",type=\"void \\(int \\*\\)\",description=\"void f4\\(int \\*\\);\"\}\\\]\}\\\]\}" \
+    "117\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]*$srcfile\",fullname=\"\[^\"\]+$srcfile\",symbols=\\\[\{line=\"36\",name=\"f4\",type=\"void \\(int \\*\\)\",description=\"void f4\\(int \\*\\);\"\}\\\]\}\\\]\}" \
     "List all functions matching type void"
 
 # Filter variables by name and type.
 set lineno [gdb_get_line_number "int global_f2;" ${srcfile2}]
 mi_gdb_test "118-symbol-info-variables --name global_f2" \
-    "118\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"21\",name=\"global_f2\",type=\"int\",description=\"int global_f2;\"\}\\\]\}\\\]\}" \
+    "118\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]*$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"21\",name=\"global_f2\",type=\"int\",description=\"int global_f2;\"\}\\\]\}\\\]\}" \
     "List all variables matching pattern global_f2"
 
 set lineno1 [gdb_get_line_number "static float global_f1;" ${srcfile}]
 set lineno2 [gdb_get_line_number "static float global_f1;" ${srcfile2}]
 mi_gdb_test "119-symbol-info-variables --type float --name ^global_" \
-    "119\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile\",fullname=\"\[^\"\]+$srcfile\",symbols=\\\[\{line=\"25\",name=\"global_f1\",type=\"float\",description=\"static float global_f1;\"\}\\\]\},\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"19\",name=\"global_f1\",type=\"float\",description=\"static float global_f1;\"\}\\\]\}\\\]\}" \
+    "119\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]*$srcfile\",fullname=\"\[^\"\]+$srcfile\",symbols=\\\[\{line=\"25\",name=\"global_f1\",type=\"float\",description=\"static float global_f1;\"\}\\\]\},\{filename=\"\[^\"\]*$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"19\",name=\"global_f1\",type=\"float\",description=\"static float global_f1;\"\}\\\]\}\\\]\}" \
     "List all variables matching type float"
 
 # Fetch types, filtering by name.
 set lineno1 [gdb_get_line_number "typedef int my_int_t;" ${srcfile}]
 set lineno2 [gdb_get_line_number "typedef int another_int_t;" ${srcfile2}]
 mi_gdb_test "120-symbol-info-types --name _int_" \
-    "120\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile\",fullname=\"\[^\"\]+$srcfile\",symbols=\\\[\{line=\"27\",name=\"my_int_t\"\}\\\]\},\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"23\",name=\"another_int_t\"\}\\\]\}\\\]\}" \
+    "120\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]*$srcfile\",fullname=\"\[^\"\]+$srcfile\",symbols=\\\[\{line=\"27\",name=\"my_int_t\"\}\\\]\},\{filename=\"\[^\"\]*$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"23\",name=\"another_int_t\"\}\\\]\}\\\]\}" \
     "List all types matching _int_"
 
 # Test the --max-results parameter.
@@ -255,20 +255,20 @@ mi_gdb_test "121-symbol-info-functions --max-results 0" \
     "-symbol-info-functions --max-results 0"
 
 mi_gdb_test "122-symbol-info-functions --max-results 1 --name ^\[^_\]" \
-    "122\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"39\",name=\"f3\",type=\"int \\(another_int_t\\)\",description=\"int f3\\(another_int_t\\);\"\}\\\]\}\\\]\}" \
+    "122\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]*$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"39\",name=\"f3\",type=\"int \\(another_int_t\\)\",description=\"int f3\\(another_int_t\\);\"\}\\\]\}\\\]\}" \
     "-symbol-info-functions --max-results 1"
 
 mi_gdb_test "123-symbol-info-functions --max-results 2 --name ^\[^_\]" \
-    "123\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"33\",name=\"f2\",type=\"float \\(another_float_t\\)\",description=\"float f2\\(another_float_t\\);\"\},\{line=\"39\",name=\"f3\",type=\"int \\(another_int_t\\)\",description=\"int f3\\(another_int_t\\);\"\}\\\]\}\\\]\}" \
+    "123\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]*$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"33\",name=\"f2\",type=\"float \\(another_float_t\\)\",description=\"float f2\\(another_float_t\\);\"\},\{line=\"39\",name=\"f3\",type=\"int \\(another_int_t\\)\",description=\"int f3\\(another_int_t\\);\"\}\\\]\}\\\]\}" \
     "-symbol-info-functions --max-results 2"
 
 mi_gdb_test "124-symbol-info-variables --max-results 3 --name ^\[^_\]" \
-    "124\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"21\",name=\"global_f2\",type=\"int\",description=\"int global_f2;\"\},\{line=\"20\",name=\"global_i2\",type=\"int\",description=\"int global_i2;\"\},\{line=\"19\",name=\"global_f1\",type=\"float\",description=\"static float global_f1;\"\}\\\]\}\\\]\}" \
+    "124\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]*$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[\{line=\"21\",name=\"global_f2\",type=\"int\",description=\"int global_f2;\"\},\{line=\"20\",name=\"global_i2\",type=\"int\",description=\"int global_i2;\"\},\{line=\"19\",name=\"global_f1\",type=\"float\",description=\"static float global_f1;\"\}\\\]\}\\\]\}" \
 
 set s1 "\{line=\"44\",name=\"another_char_t\"\}"
 set s2 "\{line=\"24\",name=\"another_float_t\"\}"
 set s3 "\{line=\"23\",name=\"another_int_t\"\}"
 set s4 "\{line=\"45\",name=\"another_short_t\"\}"
 mi_gdb_test "125-symbol-info-types --max-results 4 --name another_" \
-    "125\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]+$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[$s1,$s2,$s3,$s4\\\]\}\\\]\}" \
+    "125\\^done,symbols=\{debug=\\\[\{filename=\"\[^\"\]*$srcfile2\",fullname=\"\[^\"\]+$srcfile2\",symbols=\\\[$s1,$s2,$s3,$s4\\\]\}\\\]\}" \
     "-symbol-info-types --max-results 4"

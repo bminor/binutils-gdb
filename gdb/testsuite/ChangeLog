@@ -1,5 +1,10 @@
 2020-06-20  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* gdb.mi/mi-sym-info.exp: Adjust filename patterns to make directory
+	prefix optional.
+
+2020-06-20  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* gdb.base/list-missing-source.exp: Correct $srcfile manipulation
 	for remote host.
 
