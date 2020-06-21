@@ -2781,11 +2781,6 @@ procfs_target::procfs_init_inferior (int pid)
   int fail;
   int lwpid;
 
-  /* This routine called on the parent side (GDB side)
-     after GDB forks the inferior.  */
-  if (!target_is_pushed (this))
-    push_target (this);
-
   pi = create_procinfo (pid, 0);
   if (pi == NULL)
     perror (_("procfs: out of memory in 'init_inferior'"));
@@ -3005,6 +3000,9 @@ procfs_target::create_inferior (const char *exec_file,
 
       shell_file = tryname;
     }
+
+  if (!target_is_pushed (this))
+    push_target (this);
 
   pid = fork_inferior (exec_file, allargs, env, procfs_set_exec_trap,
 		       NULL, NULL, shell_file, NULL);

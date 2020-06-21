@@ -1,3 +1,10 @@
+2020-06-21  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR gdb/25939
+	* procfs.c (procfs_target::procfs_init_inferior): Move push_target
+	call ...
+	(procfs_target::create_inferior): ... here.
+
 2020-06-21  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* exec.c (validate_exec_file): Ensure the build-id is up to
