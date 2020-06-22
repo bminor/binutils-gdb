@@ -4548,9 +4548,9 @@ usage (FILE * stream)
   -R --relocated-dump=<number|name>\n\
                          Dump the contents of section <number|name> as relocated bytes\n\
   -z --decompress        Decompress section before dumping it\n\
-  -w[lLiaprmfFsoRtUuTgAckK] or\n\
+  -w[lLiaprmfFsoORtUuTgAckK] or\n\
   --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
-               =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
+               =frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,\n\
                =gdb_index,=trace_info,=trace_abbrev,=trace_aranges,\n\
                =addr,=cu_index,=links,=follow-links]\n\
                          Display the contents of DWARF debug sections\n"));
@@ -6388,7 +6388,7 @@ process_section_headers (Filedata * filedata)
       if ((do_debugging || do_debug_info || do_debug_abbrevs
 	   || do_debug_lines || do_debug_pubnames || do_debug_pubtypes
 	   || do_debug_aranges || do_debug_frames || do_debug_macinfo
-	   || do_debug_str || do_debug_loc || do_debug_ranges
+	   || do_debug_str || do_debug_str_offsets || do_debug_loc || do_debug_ranges
 	   || do_debug_addr || do_debug_cu_index || do_debug_links)
 	  && (const_strneq (name, ".debug_")
 	      || const_strneq (name, ".zdebug_")))
@@ -6415,6 +6415,7 @@ process_section_headers (Filedata * filedata)
 	      || (do_debug_macinfo  && const_strneq (name, "macinfo"))
 	      || (do_debug_macinfo  && const_strneq (name, "macro"))
 	      || (do_debug_str      && const_strneq (name, "str"))
+	      || (do_debug_str_offsets && const_strneq (name, "str_offsets"))
 	      || (do_debug_loc      && const_strneq (name, "loc"))
 	      || (do_debug_loc      && const_strneq (name, "loclists"))
 	      || (do_debug_addr     && const_strneq (name, "addr"))

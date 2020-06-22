@@ -229,9 +229,9 @@ usage (FILE *stream, int status)
   -g, --debugging          Display debug information in object file\n\
   -e, --debugging-tags     Display debug information using ctags style\n\
   -G, --stabs              Display (in raw form) any STABS info in the file\n\
-  -W[lLiaprmfFsoRtUuTgAckK] or\n\
+  -W[lLiaprmfFsoORtUuTgAckK] or\n\
   --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,\n\
-          =frames-interp,=str,=loc,=Ranges,=pubtypes,\n\
+          =frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,\n\
           =gdb_index,=trace_info,=trace_abbrev,=trace_aranges,\n\
           =addr,=cu_index,=links,=follow-links]\n\
                            Display DWARF info in the file\n\

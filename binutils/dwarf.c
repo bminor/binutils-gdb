@@ -88,6 +88,7 @@ int do_debug_frames;
 int do_debug_frames_interp;
 int do_debug_macinfo;
 int do_debug_str;
+int do_debug_str_offsets;
 int do_debug_loc;
 int do_gdb_index;
 int do_trace_info;
@@ -726,28 +727,63 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
   enum dwarf_section_display_enum idx_sec_idx = dwo ? str_index_dwo : str_index;
   struct dwarf_section *index_section = &debug_displays [idx_sec_idx].section;
   struct dwarf_section *str_section = &debug_displays [str_sec_idx].section;
-  dwarf_vma index_offset = idx * offset_size;
+  dwarf_vma index_offset;
   dwarf_vma str_offset;
   const char * ret;
+  unsigned char *curr = index_section->start;
+  const unsigned char *end = curr + index_section->size;
+  dwarf_vma length;
 
   if (index_section->start == NULL)
     return (dwo ? _("<no .debug_str_offsets.dwo section>")
 		: _("<no .debug_str_offsets section>"));
 
-  if (this_set != NULL)
-    index_offset += this_set->section_offsets [DW_SECT_STR_OFFSETS];
-  if (index_offset >= index_section->size)
-    {
-      warn (_("DW_FORM_GNU_str_index offset too big: %s\n"),
-	    dwarf_vmatoa ("x", index_offset));
-      return _("<index offset is too big>");
-    }
-
   if (str_section->start == NULL)
     return (dwo ? _("<no .debug_str.dwo section>")
 		: _("<no .debug_str section>"));
 
-  str_offset = byte_get (index_section->start + index_offset, offset_size);
+  /* FIXME: We should cache the length...  */
+  SAFE_BYTE_GET_AND_INC (length, curr, 4, end);
+  if (length == 0xffffffff)
+    {
+      if (offset_size != 8)
+	warn (_("UGG"));
+      SAFE_BYTE_GET_AND_INC (length, curr, 8, end);
+    }
+  else if (offset_size != 4)
+    {
+      warn (_("ugg"));
+    }
+
+  /* Skip the version and padding bytes.
+     We assume that they are correct.  */
+  curr += 4;
+
+  /* FIXME: The code below assumes that there is only one table
+     in the .debug_str_offsets section, so check that now.  */
+  if ((offset_size == 4 && curr + length < (end - 8))
+      || (offset_size == 8 && curr + length < (end - 16)))
+    {
+      warn (_("index table size is too small %s vs %s\n"),
+	    dwarf_vmatoa ("x", length),
+	    dwarf_vmatoa ("x", index_section->size));
+      return _("<table too small");
+    }
+
+  index_offset = idx * offset_size;
+      
+  if (this_set != NULL)
+    index_offset += this_set->section_offsets [DW_SECT_STR_OFFSETS];
+
+  if (index_offset >= length)
+    {
+      warn (_("DW_FORM_GNU_str_index offset too big: %s vs %s\n"),
+	    dwarf_vmatoa ("x", index_offset),
+	    dwarf_vmatoa ("x", length));
+      return _("<index offset is too big>");
+    }
+
+  str_offset = byte_get (curr + index_offset, offset_size);
   str_offset -= str_section->address;
   if (str_offset >= str_section->size)
     {
@@ -3161,7 +3197,7 @@ process_debug_info (struct dwarf_section *           section,
       load_debug_section_with_follow (str_index_dwo, file);
       load_debug_section_with_follow (debug_addr, file);
     }
-
+  
   load_debug_section_with_follow (abbrev_sec, file);
   if (debug_displays [abbrev_sec].section.start == NULL)
     {
@@ -5382,6 +5418,7 @@ display_debug_macro (struct dwarf_section *section,
 
   load_debug_section_with_follow (str, file);
   load_debug_section_with_follow (line, file);
+  load_debug_section_with_follow (str_index, file);
 
   introduce (section, FALSE);
 
@@ -5488,6 +5525,22 @@ display_debug_macro (struct dwarf_section *section,
 
 	  switch (op)
 	    {
+	    case DW_MACRO_define:
+	      READ_ULEB (lineno, curr, end);
+	      string = curr;
+	      curr += strnlen ((char *) string, end - string) + 1;
+	      printf (_(" DW_MACRO_define - lineno : %d macro : %s\n"),
+		      lineno, string);
+	      break;
+
+	    case DW_MACRO_undef:
+	      READ_ULEB (lineno, curr, end);
+	      string = curr;
+	      curr += strnlen ((char *) string, end - string) + 1;
+	      printf (_(" DW_MACRO_undef - lineno : %d macro : %s\n"),
+		      lineno, string);
+	      break;
+
 	    case DW_MACRO_start_file:
 	      {
 		unsigned int filenum;
@@ -5515,22 +5568,6 @@ display_debug_macro (struct dwarf_section *section,
 
 	    case DW_MACRO_end_file:
 	      printf (_(" DW_MACRO_end_file\n"));
-	      break;
-
-	    case DW_MACRO_define:
-	      READ_ULEB (lineno, curr, end);
-	      string = curr;
-	      curr += strnlen ((char *) string, end - string) + 1;
-	      printf (_(" DW_MACRO_define - lineno : %d macro : %s\n"),
-		      lineno, string);
-	      break;
-
-	    case DW_MACRO_undef:
-	      READ_ULEB (lineno, curr, end);
-	      string = curr;
-	      curr += strnlen ((char *) string, end - string) + 1;
-	      printf (_(" DW_MACRO_undef - lineno : %d macro : %s\n"),
-		      lineno, string);
 	      break;
 
 	    case DW_MACRO_define_strp:
@@ -5575,7 +5612,29 @@ display_debug_macro (struct dwarf_section *section,
 		      (unsigned long) offset);
 	      break;
 
+	    case DW_MACRO_define_strx:
+	    case DW_MACRO_undef_strx:
+	      READ_ULEB (lineno, curr, end);
+	      READ_ULEB (offset, curr, end);
+	      string = (const unsigned char *)
+		fetch_indexed_string (offset, NULL, offset_size, FALSE);
+	      if (op == DW_MACRO_define_strx)
+		printf (" DW_MACRO_define_strx ");
+	      else
+		printf (" DW_MACRO_undef_strx ");
+	      if (do_wide)
+		printf (_("(with offset %s) "), dwarf_vmatoa (NULL, offset));
+	      printf (_("lineno : %d macro : %s\n"),
+		      lineno, string);
+	      break;
+
 	    default:
+	      if (op >= DW_MACRO_lo_user && op <= DW_MACRO_hi_user)
+		{
+		  printf (_(" <Target Specific macro op: %#x - UNHANDLED"), op);
+		  break;
+		}
+
 	      if (extended_ops == NULL || extended_ops[op] == NULL)
 		{
 		  error (_(" Unknown macro opcode %02x seen\n"), op);
@@ -6783,6 +6842,57 @@ display_debug_str_offsets (struct dwarf_section *section,
     {
       printf (_("\nThe %s section is empty.\n"), section->name);
       return 0;
+    }
+
+  unsigned char *start = section->start;
+  unsigned char *end = start + section->size;
+  unsigned char *curr = start;
+
+  load_debug_section_with_follow (str, file);
+
+  introduce (section, FALSE);
+
+  while (curr < end)
+    {
+      dwarf_vma length;
+      dwarf_vma entry_length;
+
+      SAFE_BYTE_GET_AND_INC (length, curr, 4, end);
+      /* FIXME: We assume that this means 64-bit DWARF is being used.  */
+      if (length == 0xffffffff)
+	{
+	  SAFE_BYTE_GET (length, curr, 8, end);
+	  entry_length = 8;
+	}
+      else
+	entry_length = 4;
+
+      int version;
+      SAFE_BYTE_GET_AND_INC (version, curr, 2, end);
+      if (version != 5)
+	warn (_("Unexpected version number in str_offset header: %#x\n"), version);
+
+      int padding;
+      SAFE_BYTE_GET_AND_INC (padding, curr, 2, end);
+      if (padding != 0)
+	warn (_("Unexpected value in str_offset header's padding field: %#x\n"), padding);
+
+      printf (_("    Length: %#lx\n"), (unsigned long) length);
+      printf (_("    Version: %#lx\n"), (unsigned long) version);
+      printf (_("       Index Offset   [String]\n"));
+
+      unsigned long index;
+      for (index = 0; length >= entry_length && curr < end; index ++)
+	{
+	  dwarf_vma offset;
+	  const unsigned char * string;
+
+	  SAFE_BYTE_GET_AND_INC (offset, curr, entry_length, end);
+	  string = fetch_indirect_string (offset);
+	  printf ("    %8lu %s %s\n", index,
+		  dwarf_vmatoa (NULL, offset),
+		  string);
+	}
     }
   /* TODO: Dump the contents.  This is made somewhat difficult by not knowing
      what the offset size is for this section.  */
@@ -10663,6 +10773,7 @@ dwarf_select_sections_by_names (const char *names)
       { "ranges", & do_debug_aranges, 1 },
       { "rawline", & do_debug_lines, FLAG_DEBUG_LINES_RAW },
       { "str", & do_debug_str, 1 },
+      { "str-offsets", & do_debug_str_offsets, 1 },
       /* These trace_* sections are used by Itanium VMS.  */
       { "trace_abbrev", & do_trace_abbrevs, 1 },
       { "trace_aranges", & do_trace_aranges, 1 },
@@ -10729,6 +10840,7 @@ dwarf_select_sections_by_letters (const char *letters)
       case 'l':	do_debug_lines |= FLAG_DEBUG_LINES_RAW;	break;
       case 'L':	do_debug_lines |= FLAG_DEBUG_LINES_DECODED; break;
       case 'm': do_debug_macinfo = 1; break;
+      case 'O':	do_debug_str_offsets = 1; break;
       case 'o':	do_debug_loc = 1; break;
       case 'p':	do_debug_pubnames = 1; break;
       case 'R':	do_debug_ranges = 1; break;
@@ -10767,6 +10879,7 @@ dwarf_select_sections_all (void)
   do_debug_cu_index = 1;
   do_follow_links = 1;
   do_debug_links = 1;
+  do_debug_str_offsets = 1;
 }
 
 #define NO_ABBREVS   NULL, NULL, NULL, 0, 0, 0, NULL, 0, NULL
@@ -10811,8 +10924,8 @@ struct dwarf_section_display debug_displays[] =
   { { ".debug_macro.dwo",   ".zdebug_macro.dwo", NO_ABBREVS },     display_debug_macro,    &do_debug_macinfo,	TRUE },
   { { ".debug_macinfo.dwo", ".zdebug_macinfo.dwo", NO_ABBREVS },   display_debug_macinfo,  &do_debug_macinfo,	FALSE },
   { { ".debug_str.dwo",     ".zdebug_str.dwo",  NO_ABBREVS },      display_debug_str,      &do_debug_str,	TRUE },
-  { { ".debug_str_offsets", ".zdebug_str_offsets", NO_ABBREVS },   display_debug_str_offsets, NULL,		FALSE },
-  { { ".debug_str_offsets.dwo", ".zdebug_str_offsets.dwo", NO_ABBREVS }, display_debug_str_offsets, NULL,	FALSE },
+  { { ".debug_str_offsets", ".zdebug_str_offsets", NO_ABBREVS },   display_debug_str_offsets, &do_debug_str_offsets, TRUE },
+  { { ".debug_str_offsets.dwo", ".zdebug_str_offsets.dwo", NO_ABBREVS }, display_debug_str_offsets, &do_debug_str_offsets, TRUE },
   { { ".debug_addr",	    ".zdebug_addr",     NO_ABBREVS },      display_debug_addr,     &do_debug_addr,	TRUE },
   { { ".debug_cu_index",    "",			NO_ABBREVS },      display_cu_index,       &do_debug_cu_index,	FALSE },
   { { ".debug_tu_index",    "",			NO_ABBREVS },      display_cu_index,       &do_debug_cu_index,	FALSE },

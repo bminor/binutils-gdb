@@ -1,3 +1,11 @@
+2020-06-22  Nick Clifton  <nickc@redhat.com>
+
+	PR 26112
+	* dwarf.c (display_debug_str_offsets): Add code to display the
+	contents of the .debug_str_offsets section.
+	(display_debug_macro): Add support for DW_MACRO_define_strx and
+	DW_MACRO_undef_strx.
+
 2020-06-22  Saagar Jha  <saagar@saagarjha.com>
 
 	* od-macho.c: Dump linkedit data for new load commands.
