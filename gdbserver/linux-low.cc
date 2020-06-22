@@ -315,13 +315,6 @@ lwp_in_step_range (struct lwp_info *lwp)
   return (pc >= lwp->step_range_start && pc < lwp->step_range_end);
 }
 
-struct pending_signals
-{
-  int signal;
-  siginfo_t info;
-  struct pending_signals *prev;
-};
-
 /* The read/write ends of the pipe registered as waitable file in the
    event loop.  */
 static int linux_event_pipe[2] = { -1, -1 };
@@ -397,7 +390,7 @@ linux_process_target::delete_lwp (lwp_info *lwp)
 
   low_delete_thread (lwp->arch_private);
 
-  free (lwp);
+  delete lwp;
 }
 
 void
@@ -914,7 +907,7 @@ linux_process_target::add_lwp (ptid_t ptid)
 {
   struct lwp_info *lwp;
 
-  lwp = XCNEW (struct lwp_info);
+  lwp = new lwp_info {};
 
   lwp->waitstatus.kind = TARGET_WAITKIND_IGNORE;
 
@@ -2119,7 +2112,6 @@ linux_process_target::maybe_move_out_of_jump_pad (lwp_info *lwp, int *wstat)
 static void
 enqueue_one_deferred_signal (struct lwp_info *lwp, int *wstat)
 {
-  struct pending_signals *p_sig;
   struct thread_info *thread = get_lwp_thread (lwp);
 
   if (debug_threads)
@@ -2128,13 +2120,9 @@ enqueue_one_deferred_signal (struct lwp_info *lwp, int *wstat)
 
   if (debug_threads)
     {
-      struct pending_signals *sig;
-
-      for (sig = lwp->pending_signals_to_report;
-	   sig != NULL;
-	   sig = sig->prev)
+      for (const auto &sig : lwp->pending_signals_to_report)
 	debug_printf ("   Already queued %d\n",
-		      sig->signal);
+		      sig.signal);
 
       debug_printf ("   (no more currently queued signals)\n");
     }
@@ -2144,32 +2132,24 @@ enqueue_one_deferred_signal (struct lwp_info *lwp, int *wstat)
      twice)  */
   if (WSTOPSIG (*wstat) < __SIGRTMIN)
     {
-      struct pending_signals *sig;
-
-      for (sig = lwp->pending_signals_to_report;
-	   sig != NULL;
-	   sig = sig->prev)
+      for (const auto &sig : lwp->pending_signals_to_report)
 	{
-	  if (sig->signal == WSTOPSIG (*wstat))
+	  if (sig.signal == WSTOPSIG (*wstat))
 	    {
 	      if (debug_threads)
 		debug_printf ("Not requeuing already queued non-RT signal %d"
 			      " for LWP %ld\n",
-			      sig->signal,
+			      sig.signal,
 			      lwpid_of (thread));
 	      return;
 	    }
 	}
     }
 
-  p_sig = XCNEW (struct pending_signals);
-  p_sig->prev = lwp->pending_signals_to_report;
-  p_sig->signal = WSTOPSIG (*wstat);
+  lwp->pending_signals_to_report.emplace_back (WSTOPSIG (*wstat));
 
   ptrace (PTRACE_GETSIGINFO, lwpid_of (thread), (PTRACE_TYPE_ARG3) 0,
-	  &p_sig->info);
-
-  lwp->pending_signals_to_report = p_sig;
+	  &lwp->pending_signals_to_report.back ().info);
 }
 
 /* Dequeue one signal from the "signals to report later when out of
@@ -2180,20 +2160,16 @@ dequeue_one_deferred_signal (struct lwp_info *lwp, int *wstat)
 {
   struct thread_info *thread = get_lwp_thread (lwp);
 
-  if (lwp->pending_signals_to_report != NULL)
+  if (!lwp->pending_signals_to_report.empty ())
     {
-      struct pending_signals **p_sig;
+      const pending_signal &p_sig = lwp->pending_signals_to_report.front ();
 
-      p_sig = &lwp->pending_signals_to_report;
-      while ((*p_sig)->prev != NULL)
-	p_sig = &(*p_sig)->prev;
-
-      *wstat = W_STOPCODE ((*p_sig)->signal);
-      if ((*p_sig)->info.si_signo != 0)
+      *wstat = W_STOPCODE (p_sig.signal);
+      if (p_sig.info.si_signo != 0)
 	ptrace (PTRACE_SETSIGINFO, lwpid_of (thread), (PTRACE_TYPE_ARG3) 0,
-		&(*p_sig)->info);
-      free (*p_sig);
-      *p_sig = NULL;
+		&p_sig.info);
+
+      lwp->pending_signals_to_report.pop_front ();
 
       if (debug_threads)
 	debug_printf ("Reporting deferred signal %d for LWP %ld.\n",
@@ -2201,13 +2177,9 @@ dequeue_one_deferred_signal (struct lwp_info *lwp, int *wstat)
 
       if (debug_threads)
 	{
-	  struct pending_signals *sig;
-
-	  for (sig = lwp->pending_signals_to_report;
-	       sig != NULL;
-	       sig = sig->prev)
+	  for (const auto &sig : lwp->pending_signals_to_report)
 	    debug_printf ("   Still queued %d\n",
-			  sig->signal);
+			  sig.signal);
 
 	  debug_printf ("   (no more queued signals)\n");
 	}
@@ -4050,15 +4022,11 @@ linux_process_target::stop_all_lwps (int suspend, lwp_info *except)
 static void
 enqueue_pending_signal (struct lwp_info *lwp, int signal, siginfo_t *info)
 {
-  struct pending_signals *p_sig = XNEW (struct pending_signals);
-
-  p_sig->prev = lwp->pending_signals;
-  p_sig->signal = signal;
-  if (info == NULL)
-    memset (&p_sig->info, 0, sizeof (siginfo_t));
+  lwp->pending_signals.emplace_back (signal);
+  if (info == nullptr)
+    memset (&lwp->pending_signals.back ().info, 0, sizeof (siginfo_t));
   else
-    memcpy (&p_sig->info, info, sizeof (siginfo_t));
-  lwp->pending_signals = p_sig;
+    lwp->pending_signals.back ().info = *info;
 }
 
 void
@@ -4154,7 +4122,7 @@ linux_process_target::resume_one_lwp_throw (lwp_info *lwp, int step,
      inferior right now.  */
   if (signal != 0
       && (lwp->status_pending_p
-	  || lwp->pending_signals != NULL
+	  || !lwp->pending_signals.empty ()
 	  || !lwp_signal_can_be_delivered (lwp)))
     {
       enqueue_pending_signal (lwp, signal, info);
@@ -4263,21 +4231,16 @@ linux_process_target::resume_one_lwp_throw (lwp_info *lwp, int step,
 
   /* If we have pending signals, consume one if it can be delivered to
      the inferior.  */
-  if (lwp->pending_signals != NULL && lwp_signal_can_be_delivered (lwp))
+  if (!lwp->pending_signals.empty () && lwp_signal_can_be_delivered (lwp))
     {
-      struct pending_signals **p_sig;
+      const pending_signal &p_sig = lwp->pending_signals.front ();
 
-      p_sig = &lwp->pending_signals;
-      while ((*p_sig)->prev != NULL)
-	p_sig = &(*p_sig)->prev;
-
-      signal = (*p_sig)->signal;
-      if ((*p_sig)->info.si_signo != 0)
+      signal = p_sig.signal;
+      if (p_sig.info.si_signo != 0)
 	ptrace (PTRACE_SETSIGINFO, lwpid_of (thread), (PTRACE_TYPE_ARG3) 0,
-		&(*p_sig)->info);
+		&p_sig.info);
 
-      free (*p_sig);
-      *p_sig = NULL;
+      lwp->pending_signals.pop_front ();
     }
 
   if (debug_threads)
@@ -4570,7 +4533,7 @@ linux_process_target::thread_needs_step_over (thread_info *thread)
   /* On software single step target, resume the inferior with signal
      rather than stepping over.  */
   if (supports_software_single_step ()
-      && lwp->pending_signals != NULL
+      && !lwp->pending_signals.empty ()
       && lwp_signal_can_be_delivered (lwp))
     {
       if (debug_threads)
@@ -4787,7 +4750,7 @@ linux_process_target::resume_one_thread (thread_info *thread,
 	     midway through moving the LWP out of the jumppad, and we
 	     will report the pending signal as soon as that is
 	     finished.  */
-	  if (lwp->pending_signals_to_report == NULL)
+	  if (lwp->pending_signals_to_report.empty ())
 	    send_sigstop (lwp);
 	}
 
@@ -4966,7 +4929,7 @@ linux_process_target::proceed_one_lwp (thread_info *thread, lwp_info *except)
     }
 
   if (thread->last_resume_kind == resume_stop
-      && lwp->pending_signals_to_report == NULL
+      && lwp->pending_signals_to_report.empty ()
       && (lwp->collecting_fast_tracepoint
 	  == fast_tpoint_collect_result::not_collecting))
     {

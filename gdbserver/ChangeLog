@@ -1,3 +1,23 @@
+2020-06-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	Use std::list to stop pending signal instead of manually-created
+	linked list.
+	* linux-low.h: Include <list>.
+	(struct pending_signal): Move here from linux-low.cc.
+	(struct lwp_info) <pending_signals>
+	<pending_signals_to_report>: Update the type.
+	* linux-low.cc (struct pending_signals): Remove.
+	(linux_process_target::delete_lwp)
+	(linux_process_target::add_lwp)
+	(enqueue_one_deferred_signal)
+	(dequeue_one_deferred_signal)
+	(enqueue_pending_signal)
+	(linux_process_target::resume_one_lwp_throw)
+	(linux_process_target::thread_needs_step_over)
+	(linux_process_target::resume_one_thread)
+	(linux_process_target::proceed_one_lwp): Update the use of pending
+	signal list.
+
 2020-06-17  Simon Marchi  <simon.marchi@efficios.com>
 
 	* Makefile.in (%-generated.cc: ../gdb/regformats/arm/%.dat):
