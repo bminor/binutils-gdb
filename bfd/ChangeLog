@@ -1,3 +1,8 @@
+2020-06-22  Saagar Jha  <saagar@saagarjha.com>
+
+	* mach-o.c: Support the new load commands by reading a linkedit
+	data command for them.
+
 2020-06-22  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfxx-riscv.c (struct priv_spec_t priv_specs[]): Move them from

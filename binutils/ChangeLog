@@ -1,3 +1,7 @@
+2020-06-22  Saagar Jha  <saagar@saagarjha.com>
+
+	* od-macho.c: Dump linkedit data for new load commands.
+
 2020-06-19  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/config/default.exp (ld_elf_shared_opt): Don't set.
