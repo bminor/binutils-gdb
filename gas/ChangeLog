@@ -1,3 +1,23 @@
+2020-06-23  Nelson Chu  <nelson.chu@sifive.com>
+
+	* config/tc-riscv.c (explicit_priv_attr): Rename explicit_csr to
+	explicit_priv_attr.  It used to indicate CSR or priv instructions are
+	explictly used.
+	(riscv_is_priv_insn): Return True if it is a privileged instruction.
+	(riscv_ip): Call riscv_is_priv_insn to check whether the instruction
+	is privileged or not.  If it is, then set explicit_priv_attr to TRUE.
+	(riscv_write_out_attrs): Clarification of when to generate the elf
+	priv spec attributes.
+	* testsuite/gas/riscv/attribute-11.s: Add comments.
+	* testsuite/gas/riscv/attribute-14.s: New testcase.  Use symbol
+	`priv_insn_<n>` to decide which priv instruction is expected to used.
+	(<n> is a to e.)
+	* testsuite/gas/riscv/attribute-14a.d: Likewise.
+	* testsuite/gas/riscv/attribute-14b.d: Likewise.
+	* testsuite/gas/riscv/attribute-14c.d: Likewise.
+	* testsuite/gas/riscv/attribute-14d.d: Likewise.
+	* testsuite/gas/riscv/attribute-14e.d: Likewise.
+
 2020-06-22  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c (buf_size, buf): Remove the unused variables.

@@ -356,8 +356,8 @@ static bfd_boolean start_assemble = FALSE;
 /* Indicate ELF attributes are explictly set.  */
 static bfd_boolean explicit_attr = FALSE;
 
-/* Indicate CSR are explictly used.  */
-static bfd_boolean explicit_csr = FALSE;
+/* Indicate CSR or priv instructions are explictly used.  */
+static bfd_boolean explicit_priv_attr = FALSE;
 
 /* Macros for encoding relaxation state for RVC branches and far jumps.  */
 #define RELAX_BRANCH_ENCODE(uncond, rvc, length)	\
@@ -1766,6 +1766,35 @@ riscv_csr_read_only_check (insn_t insn)
   return TRUE;
 }
 
+/* Return True if it is a privileged instruction.  Otherwise, return FALSE.
+
+   uret is actually a N-ext instruction.  So it is better to regard it as
+   an user instruction rather than the priv instruction.
+
+   hret is used to return from traps in H-mode.  H-mode is removed since
+   the v1.10 priv spec, but probably be added in the new hypervisor spec.
+   Therefore, hret should be controlled by the hypervisor spec rather than
+   priv spec in the future.
+
+   dret is defined in the debug spec, so it should be checked in the future,
+   too.  */
+
+static bfd_boolean
+riscv_is_priv_insn (insn_t insn)
+{
+  return (((insn ^ MATCH_SRET) & MASK_SRET) == 0
+	  || ((insn ^ MATCH_MRET) & MASK_MRET) == 0
+	  || ((insn ^ MATCH_SFENCE_VMA) & MASK_SFENCE_VMA) == 0
+	  || ((insn ^ MATCH_WFI) & MASK_WFI) == 0
+  /* The sfence.vm is dropped in the v1.10 priv specs, but we still need to
+     check it here to keep the compatible.  Maybe we should issue warning
+     if sfence.vm is used, but the priv spec newer than v1.10 is chosen.
+     We already have a similar check for CSR, but not yet for instructions.
+     It would be good if we could check the spec versions both for CSR and
+     instructions, but not here.  */
+	  || ((insn ^ MATCH_SFENCE_VM) & MASK_SFENCE_VM) == 0);
+}
+
 /* This routine assembles an instruction into its binary format.  As a
    side effect, it sets the global variable imm_reloc to the type of
    relocation to do if one of the operands is an address expression.  */
@@ -1832,6 +1861,9 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 					 : insn->match) == 2
 		      && !riscv_opts.rvc)
 		    break;
+
+		  if (riscv_is_priv_insn (ip->insn_opcode))
+		    explicit_priv_attr = TRUE;
 
 		  /* Check if we write a read-only CSR by the CSR
 		     instruction.  */
@@ -2197,7 +2229,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 
 	    case 'E':		/* Control register.  */
 	      insn_with_csr = TRUE;
-	      explicit_csr = TRUE;
+	      explicit_priv_attr = TRUE;
 	      if (reg_lookup (&s, RCLASS_CSR, &regno))
 		INSERT_OPERAND (CSR, *ip, regno);
 	      else
@@ -3591,9 +3623,13 @@ riscv_write_out_attrs (void)
       && !riscv_set_default_priv_spec (NULL))
     return;
 
-  /* If we already have set elf priv attributes, then generate them.
-     Otherwise, don't generate them when no CSR are used.  */
-  if (!explicit_csr)
+  /* If we already have set elf priv attributes, then no need to do anything,
+     assembler will generate them according to what you set.  Otherwise, don't
+     generate or update them when no CSR and priv instructions are used.
+     Generate the priv attributes according to default_priv_spec, which can be
+     set by -mpriv-spec and --with-priv-spec, and be updated by the original
+     priv attribute sets.  */
+  if (!explicit_priv_attr)
     return;
 
   /* Re-write priv attributes by default_priv_spec.  */
