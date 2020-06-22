@@ -1,3 +1,8 @@
+2020-06-22  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/source-dir.exp (test_truncated_comp_dir): Skip on
+	remote host.  Fix search path syntax on Windows host.
+
 2020-06-21  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/attach.exp: Test priority of 'exec-file' changed
