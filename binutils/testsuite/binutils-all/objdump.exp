@@ -83,7 +83,7 @@ if [is_remote host] {
 
 # $testarchive exists only if it is supported.
 set testarchive tmpdir/bintest.a
-remote_file host file delete $testarchive
+remote_file host delete $testarchive
 set got [binutils_run $AR "rc tmpdir/bintest.a $testfile2"]
 if ![string match "" $got] then {
     fail "bintest.a"
