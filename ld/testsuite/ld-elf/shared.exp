@@ -379,12 +379,14 @@ run_ld_link_tests [list \
 ]
 
 # bfin does not currently support copy relocs.
+setup_xfail bfin-*-*
+clear_xfail bfin-*-linux*
 run_ld_link_tests [list \
     [list "PR ld/14170" \
 	"$LFLAGS --no-dynamic-linker tmpdir/pr14170a.o tmpdir/pr14170.so" "" \
 	$hpux \
 	 {pr14170c.s} { } "pr14170" ] \
-] "bfin-*-*"
+]
 
 # Targets that use _bfd_generic_link_add_symbols won't pass pr21703 tests
 # Nor will hppa64 with dot-symbols.
@@ -431,22 +433,26 @@ run_ld_link_tests [list \
 ]
 
 # bfin does not currently support copy relocs.
+setup_xfail bfin-*-*
+clear_xfail bfin-*-linux*
 run_ld_link_tests {
     {"pr17068 link --as-needed lib in group"
 	"$LFLAGS --as-needed --no-dynamic-linker"
 	"--start-group tmpdir/pr17068a.a tmpdir/pr17068.so tmpdir/pr17068b.a\
 	 --end-group" ""
 	{start.s pr17068.s} {} "pr17068"}
-} "bfin-*-*"
+}
 
 # Fails on MIPS because ABI trickery means that a NULL reloc is emitted.
 # Fails on bfin because relocations are not created.
+setup_xfail mips*-*-* bfin-*-*
+clear_xfail bfin-*-linux*
 run_ld_link_tests [list \
     [list "-Bsymbolic-functions" \
 	"-shared -Bsymbolic-functions" "" "$AFLAGS_PIC" \
 	{symbolic-func.s} {{readelf {-r --wide} symbolic-func.r}} \
 	"symbolic-func.so"] \
-] "mips*-*-*" "bfin-*-*"
+]
 
 run_ld_link_tests [list \
     [list "Build pr20995.so" \
@@ -485,20 +491,12 @@ run_ld_link_tests [list \
     [list "Build pr22374 shared library" \
 	"-shared" "" "$AFLAGS_PIC" "pr22374b.s" {} "pr22374.so" ] \
 ]
-if { ![istarget "alpha-*-*"]
-     && ![istarget "csky-*-*"]
-     && ![istarget "frv-*-*"]
-     && ![istarget "hppa*-*-*"]
-     && ![istarget "i?86-*-*"]
-     && ![istarget "ia64-*-*"]
-     && ![istarget "microblaze-*-*"]
-     && ![istarget "powerpc*-*-*"]
-     && ![istarget "x86_64-*-*"]
-     && ![istarget "xtensa-*-*"] } {
-    # The next test checks that copy relocs are not used unnecessarily,
-    # but that is just an optimization so don't complain loudly.
-    setup_xfail "*-*-*"
-}
+
+# The next test checks that copy relocs are not used unnecessarily,
+# but that is just an optimization so don't complain loudly.
+setup_xfail *-*-*
+clear_xfail alpha-*-* bfin-*-linux* csky-*-* frv-*-* hppa*-*-* i?86-*-*
+clear_xfail ia64-*-* microblaze-*-* powerpc*-*-* x86_64-*-* xtensa-*-*
 run_ld_link_tests {
     {"pr22374 function pointer initialization"
 	"" "tmpdir/pr22374.so" "" "pr22374a.s"
