@@ -1,3 +1,16 @@
+2020-06-22  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/25939
+	* procfs.c (procfs_target::wait): Don't reference inferior_ptid.
+	Use the current inferior instead.  Don't return
+	TARGET_WAITKIND_SPURIOUS/inferior_ptid -- instead continue and
+	wait again.
+	* sol-thread.c (sol_thread_target::wait): Don't reference
+	inferior_ptid.
+	(ps_lgetregs, ps_lsetregs, ps_lgetfpregs, ps_lsetfpregs)
+	(sol_update_thread_list_callback): Use the current inferior's pid
+	instead of inferior_ptid.
+
 2020-06-21  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* procfs.c: Cleanup many comments.

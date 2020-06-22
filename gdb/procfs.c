@@ -2052,7 +2052,11 @@ wait_again:
   retval   = ptid_t (-1);
 
   /* Find procinfo for main process.  */
-  pi = find_procinfo_or_die (inferior_ptid.pid (), 0);
+
+  /* procfs_target currently only supports one inferior.  */
+  inferior *inf = current_inferior ();
+
+  pi = find_procinfo_or_die (inf->pid, 0);
   if (pi)
     {
       /* We must assume that the status is stale now...  */
@@ -2079,10 +2083,10 @@ wait_again:
 	      wait_retval = ::wait (&wstat); /* "wait" for the child's exit.  */
 
 	      /* Wrong child?  */
-	      if (wait_retval != inferior_ptid.pid ())
+	      if (wait_retval != inf->pid)
 		error (_("procfs: couldn't stop "
 			 "process %d: wait returned %d."),
-		       inferior_ptid.pid (), wait_retval);
+		       inf->pid, wait_retval);
 	      /* FIXME: might I not just use waitpid?
 		 Or try find_procinfo to see if I know about this child?  */
 	      retval = ptid_t (wait_retval);
@@ -2137,13 +2141,11 @@ wait_again:
 		      printf_unfiltered (_("[%s exited]\n"),
 					 target_pid_to_str (retval).c_str ());
 		    delete_thread (find_thread_ptid (this, retval));
-		    status->kind = TARGET_WAITKIND_SPURIOUS;
-		    return retval;
+		    target_continue_no_signal (ptid);
+		    goto wait_again;
 		  }
 		else if (what == SYS_exit)
 		  {
-		    struct inferior *inf;
-
 		    /* Handle SYS_exit call only.  */
 		    /* Stopped at entry to SYS_exit.
 		       Make it runnable, resume it, then use
@@ -2158,14 +2160,13 @@ wait_again:
 		    if (!proc_run_process (pi, 0, 0))
 		      proc_error (pi, "target_wait, run_process", __LINE__);
 
-		    inf = find_inferior_pid (this, pi->pid);
 		    if (inf->attach_flag)
 		      {
 			/* Don't call wait: simulate waiting for exit,
 			   return a "success" exit code.  Bogus: what if
 			   it returns something else?  */
 			wstat = 0;
-			retval = inferior_ptid;  /* ? ? ? */
+			retval = ptid_t (inf->pid);  /* ? ? ? */
 		      }
 		    else
 		      {
@@ -2204,19 +2205,9 @@ wait_again:
 					   i, sysargs[i]);
 		      }
 
-		    if (status)
-		      {
-			/* How to exit gracefully, returning "unknown
-			   event".  */
-			status->kind = TARGET_WAITKIND_SPURIOUS;
-			return inferior_ptid;
-		      }
-		    else
-		      {
-			/* How to keep going without returning to wfi: */
-			target_continue_no_signal (ptid);
-			goto wait_again;
-		      }
+		    /* How to keep going without returning to wfi: */
+		    target_continue_no_signal (ptid);
+		    goto wait_again;
 		  }
 		break;
 	      case PR_SYSEXIT:
@@ -2248,9 +2239,8 @@ wait_again:
 		    if (!in_thread_list (this, temp_ptid))
 		      add_thread (this, temp_ptid);
 
-		    /* Return to WFI, but tell it to immediately resume.  */
-		    status->kind = TARGET_WAITKIND_SPURIOUS;
-		    return inferior_ptid;
+		    target_continue_no_signal (ptid);
+		    goto wait_again;
 		  }
 		else if (what == SYS_lwp_exit)
 		  {
@@ -2281,8 +2271,8 @@ wait_again:
 					   i, sysargs[i]);
 		      }
 
-		    status->kind = TARGET_WAITKIND_SPURIOUS;
-		    return inferior_ptid;
+		    target_continue_no_signal (ptid);
+		    goto wait_again;
 		  }
 		break;
 	      case PR_REQUESTED:
@@ -2333,7 +2323,6 @@ wait_again:
 	      /* Got this far without error: If retval isn't in the
 		 threads database, add it.  */
 	      if (retval.pid () > 0
-		  && retval != inferior_ptid
 		  && !in_thread_list (this, retval))
 		{
 		  /* We have a new thread.  We need to add it both to
