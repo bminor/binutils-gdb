@@ -1,3 +1,12 @@
+2020-06-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* jit.c (jit_read_descriptor): Use bool as the return type.
+	(jit_breakpoint_re_set_internal): Use bool as the return type.
+	Invert the return value logic; return true if the jit breakpoint
+	has been successfully initialized.
+	(jit_inferior_init): Update the call to
+	jit_breakpoint_re_set_internal.
+
 2020-06-22  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/25939
