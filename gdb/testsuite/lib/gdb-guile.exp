@@ -54,26 +54,6 @@ proc gdb_scm_test_silent_cmd { cmd name {report_pass 1} } {
     }
 }
 
-# Usage: gdb_test_multiline NAME INPUT RESULT {INPUT RESULT} ...
-# Run a test named NAME, consisting of multiple lines of input.
-# After each input line INPUT, search for result line RESULT.
-# Succeed if all results are seen; fail otherwise.
-# FIXME: Move to gdb.exp and remove Python's gdb_py_test_multiple.
-
-proc gdb_test_multiline { name args } {
-    global gdb_prompt
-    foreach {input result} $args {
-	if {[gdb_test_multiple $input "$name - $input" {
-	    -re "\[\r\n\]*($result)\[\r\n\]+($gdb_prompt | *>)$" {
-		pass "$name - $input"
-	    }
-	}]} {
-	    return 1
-	}
-    }
-    return 0
-}
-
 # Load Scheme file FILE_NAME.
 # TEST_NAME can be used to specify the name of the test,
 # otherwise a standard test name is provided.

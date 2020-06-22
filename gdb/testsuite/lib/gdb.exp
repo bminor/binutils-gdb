@@ -1236,6 +1236,28 @@ proc gdb_test_multiple { command message args } {
     return $result
 }
 
+# Usage: gdb_test_multiline NAME INPUT RESULT {INPUT RESULT} ...
+# Run a test named NAME, consisting of multiple lines of input.
+# After each input line INPUT, search for result line RESULT.
+# Succeed if all results are seen; fail otherwise.
+
+proc gdb_test_multiline { name args } {
+    global gdb_prompt
+    set inputnr 0
+    foreach {input result} $args {
+	incr inputnr
+	if {[gdb_test_multiple $input "$name: input $inputnr: $input" {
+	    -re "\[\r\n\]*($result)\[\r\n\]+($gdb_prompt | *>)$" {
+		pass $gdb_test_name
+	    }
+	}]} {
+	    return 1
+	}
+    }
+    return 0
+}
+
+
 # gdb_test COMMAND PATTERN MESSAGE QUESTION RESPONSE
 # Send a command to gdb; test the result.
 #
