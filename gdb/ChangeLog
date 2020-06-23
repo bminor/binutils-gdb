@@ -1,3 +1,8 @@
+2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* top.c (print_gdb_configuration): Print --with-python-libdir
+	configuration value.
+
 2020-06-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* NEWS: Mention change to the alias command.

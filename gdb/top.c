@@ -1567,6 +1567,15 @@ This GDB was configured as follows:\n\
              --without-python\n\
 "));
 #endif
+#ifdef WITH_PYTHON_LIBDIR
+  fprintf_filtered (stream, _("\
+             --with-python-libdir=%s%s\n\
+"), WITH_PYTHON_LIBDIR, PYTHON_LIBDIR_RELOCATABLE ? " (relocatable)" : "");
+#else
+  fprintf_filtered (stream, _("\
+             --without-python-libdir\n\
+"));
+#endif
 
 #if HAVE_LIBDEBUGINFOD
   fprintf_filtered (stream, _("\
