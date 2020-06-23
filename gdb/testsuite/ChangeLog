@@ -1,3 +1,14 @@
+2020-06-23  Gary Benson <gbenson@redhat.com>
+
+	* gdb.cp/namespace.cc: Avoid build failure with -Wunused-value.
+	* gdb.cp/nsimport.cc: Likewise.
+	* gdb.cp/nsnested.cc: Likewise.
+	* gdb.cp/nsnoimports.cc: Likewise.
+	* gdb.cp/nsusing.cc: Likewise.
+	* gdb.cp/smartp.cc: Likewise.
+	* gdb.python/py-pp-integral.c: Likewise.
+	* gdb.python/py-pp-re-notag.c: Likewise.
+
 2020-06-22  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/default-args.exp: New test.

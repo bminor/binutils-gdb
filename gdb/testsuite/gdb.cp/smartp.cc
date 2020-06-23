@@ -131,12 +131,12 @@ int main(){
   sp3->foo(1);
   sp3->foo('a');
 
-  sp4->a;
-  sp4->b;
+  int unused1 = sp4->a;
+  int unused2 = sp4->b;
 
   Type4 *mt4p = &mt4;
-  mt4p->a;
-  mt4p->b;
+  int unused3 = mt4p->a;
+  int unused4 = mt4p->b;
 
   A a;
   B b;

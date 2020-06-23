@@ -18,9 +18,9 @@ namespace A
     }
 
     int first(){
-      _a;
-      ab;
-      C::abc;
+      int unused1 = _a;
+      int unused2 = ab;
+      int unused3 = C::abc;
       return C::second();
     }
   }
@@ -30,8 +30,8 @@ namespace A
 int
 main()
 {
-  A::_a;
-  A::B::ab;
-  A::B::C::abc;
+  int unused1 = A::_a;
+  int unused2 = A::B::ab;
+  int unused3 = A::B::C::abc;
   return A::B::first();
 }
