@@ -1,3 +1,11 @@
+2020-06-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 26160
+	* dwarf.c (fetch_indexed_string): Detect and handle old style
+	.debug_str_offset tables.
+	(display_debug_str_offsets): Likewise.  Also add support for
+	.debug_str_offsets.dwo sections.
+
 2020-06-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/26112

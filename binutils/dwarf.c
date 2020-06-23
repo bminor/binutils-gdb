@@ -747,27 +747,37 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
   if (length == 0xffffffff)
     {
       if (offset_size != 8)
-	warn (_("UGG"));
+	warn (_("Expected offset size of 8 but given %s"), dwarf_vmatoa ("x", offset_size));
       SAFE_BYTE_GET_AND_INC (length, curr, 8, end);
     }
   else if (offset_size != 4)
     {
-      warn (_("ugg"));
+      warn (_("Expected offset size of 4 but given %s"), dwarf_vmatoa ("x", offset_size));
     }
 
-  /* Skip the version and padding bytes.
-     We assume that they are correct.  */
-  curr += 4;
-
-  /* FIXME: The code below assumes that there is only one table
-     in the .debug_str_offsets section, so check that now.  */
-  if ((offset_size == 4 && curr + length < (end - 8))
-      || (offset_size == 8 && curr + length < (end - 16)))
+  if (length == 0)
     {
-      warn (_("index table size is too small %s vs %s\n"),
-	    dwarf_vmatoa ("x", length),
-	    dwarf_vmatoa ("x", index_section->size));
-      return _("<table too small");
+      /* This is probably an old style .debug_str_offset section which
+	 just contains offsets and no header (and the first offset is 0).  */
+      curr = index_section->start;
+      length = index_section->size;
+    }
+  else
+    {
+      /* Skip the version and padding bytes.
+	 We assume that they are correct.  */
+      curr += 4;
+
+      /* FIXME: The code below assumes that there is only one table
+	 in the .debug_str_offsets section, so check that now.  */
+      if ((offset_size == 4 && curr + length < (end - 8))
+	  || (offset_size == 8 && curr + length < (end - 16)))
+	{
+	  warn (_("index table size is too small %s vs %s\n"),
+		dwarf_vmatoa ("x", length),
+		dwarf_vmatoa ("x", index_section->size));
+	  return _("<table too small>");
+	}
     }
 
   index_offset = idx * offset_size;
@@ -5623,7 +5633,7 @@ display_debug_macro (struct dwarf_section *section,
 	      else
 		printf (" DW_MACRO_undef_strx ");
 	      if (do_wide)
-		printf (_("(with offset %s) "), dwarf_vmatoa (NULL, offset));
+		printf (_("(with offset %s) "), dwarf_vmatoa ("x", offset));
 	      printf (_("lineno : %d macro : %s\n"),
 		      lineno, string);
 	      break;
@@ -6848,7 +6858,13 @@ display_debug_str_offsets (struct dwarf_section *section,
   unsigned char *end = start + section->size;
   unsigned char *curr = start;
 
-  load_debug_section_with_follow (str, file);
+  const char * suffix = strrchr (section->name, '.');
+  bfd_boolean  dwo = (suffix && strcmp (suffix, ".dwo") == 0) ? TRUE : FALSE;
+
+  if (dwo)
+    load_debug_section_with_follow (str_dwo, file);
+  else
+    load_debug_section_with_follow (str, file);
 
   introduce (section, FALSE);
 
@@ -6867,19 +6883,32 @@ display_debug_str_offsets (struct dwarf_section *section,
       else
 	entry_length = 4;
 
-      int version;
-      SAFE_BYTE_GET_AND_INC (version, curr, 2, end);
-      if (version != 5)
-	warn (_("Unexpected version number in str_offset header: %#x\n"), version);
+      if (length == 0)
+	{
+	  /* This is probably an old style .debug_str_offset section which
+	     just contains offsets and no header (and the first offset is 0).  */
+	  length = section->size;
+	  curr   = section->start;
 
-      int padding;
-      SAFE_BYTE_GET_AND_INC (padding, curr, 2, end);
-      if (padding != 0)
-	warn (_("Unexpected value in str_offset header's padding field: %#x\n"), padding);
+	  printf (_("    Length: %#lx\n"), (unsigned long) length);
+	  printf (_("       Index   Offset [String]\n"));
+	}
+      else
+	{
+	  int version;
+	  SAFE_BYTE_GET_AND_INC (version, curr, 2, end);
+	  if (version != 5)
+	    warn (_("Unexpected version number in str_offset header: %#x\n"), version);
 
-      printf (_("    Length: %#lx\n"), (unsigned long) length);
-      printf (_("    Version: %#lx\n"), (unsigned long) version);
-      printf (_("       Index Offset   [String]\n"));
+	  int padding;
+	  SAFE_BYTE_GET_AND_INC (padding, curr, 2, end);
+	  if (padding != 0)
+	    warn (_("Unexpected value in str_offset header's padding field: %#x\n"), padding);
+
+	  printf (_("    Length: %#lx\n"), (unsigned long) length);
+	  printf (_("    Version: %#lx\n"), (unsigned long) version);
+	  printf (_("       Index   Offset [String]\n"));
+	}
 
       unsigned long index;
       for (index = 0; length >= entry_length && curr < end; index ++)
@@ -6888,14 +6917,17 @@ display_debug_str_offsets (struct dwarf_section *section,
 	  const unsigned char * string;
 
 	  SAFE_BYTE_GET_AND_INC (offset, curr, entry_length, end);
-	  string = fetch_indirect_string (offset);
-	  printf ("    %8lu %s %s\n", index,
-		  dwarf_vmatoa (NULL, offset),
+	  if (dwo)
+	    string = (const unsigned char *)
+	      fetch_indexed_string (index, NULL, entry_length, dwo);
+	  else
+	    string = fetch_indirect_string (offset);
+
+	  printf ("    %8lu %8s %s\n", index, dwarf_vmatoa ("x", offset),
 		  string);
 	}
     }
-  /* TODO: Dump the contents.  This is made somewhat difficult by not knowing
-     what the offset size is for this section.  */
+
   return 1;
 }
 
