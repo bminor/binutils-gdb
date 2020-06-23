@@ -47,10 +47,20 @@ riscv_scan (const struct bfd_arch_info *info, const char *string)
   if (bfd_default_scan (info, string))
     return TRUE;
 
-  /* The string might have extra characters for supported subsets.  So allow
-     a match that ignores trailing characters in string.  */
-  if (strncasecmp (string, info->printable_name,
-		   strlen (info->printable_name)) == 0)
+  /* The incoming STRING might take the form of riscv:rvXXzzz, where XX is
+     32 or 64, and zzz are one or more extension characters.  As we
+     currently only have 3 architectures defined, 'riscv', 'riscv:rv32',
+     and 'riscv:rv64', we would like to ignore the zzz for the purpose of
+     matching here.
+
+     However, we don't want the default 'riscv' to match over a more
+     specific 'riscv:rv32' or 'riscv:rv64', so in the case of the default
+     architecture (with the shorter 'riscv' name) we don't allow any
+     special matching, but for the 'riscv:rvXX' cases, we allow a match
+     with any additional trailing characters being ignored.  */
+  if (!info->the_default
+      && strncasecmp (string, info->printable_name,
+                      strlen (info->printable_name)) == 0)
     return TRUE;
 
   return FALSE;
