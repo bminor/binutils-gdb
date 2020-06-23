@@ -1,3 +1,10 @@
+2020-06-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26160
+	* testsuite/binutils-all/pr26160.dwp.bz2: New file.
+	* testsuite/binutils-all/pr26160.r: Likewise.
+	* testsuite/binutils-all/readelf.exp: Run PR binutils/26160 test.
+
 2020-06-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 26160
