@@ -1,5 +1,10 @@
 2020-06-23  Simon Marchi  <simon.marchi@efficios.com>
 
+	* dwarf2/loc.c (decode_debug_loclists_addresses): Add empty
+	lines.
+
+2020-06-23  Simon Marchi  <simon.marchi@efficios.com>
+
 	* dwarf2/loc.c (decode_debug_loc_dwo_addresses): Add empty
 	lines.
 	(dwarf2_find_location_expression): Likewise.
