@@ -1983,7 +1983,8 @@ do_start_initialization ()
       || gdbpy_initialize_unwind () < 0
       || gdbpy_initialize_membuf () < 0
       || gdbpy_initialize_connection () < 0
-      || gdbpy_initialize_tui () < 0)
+      || gdbpy_initialize_tui () < 0
+      || gdbpy_initialize_micommands () < 0)
     return false;
 
 #define GDB_PY_DEFINE_EVENT_TYPE(name, py_name, doc, base)	\

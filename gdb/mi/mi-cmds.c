@@ -26,10 +26,6 @@
 #include <map>
 #include <string>
 
-/* A command held in the MI_CMD_TABLE.  */
-
-using mi_command_up = std::unique_ptr<struct mi_command>;
-
 /* MI command table (built at run time). */
 
 static std::map<std::string, mi_command_up> mi_cmd_table;
@@ -108,12 +104,9 @@ private:
   bool m_args_p;
 };
 
-/* Insert COMMAND into the global mi_cmd_table.  Return false if
-   COMMAND->name already exists in mi_cmd_table, in which case COMMAND will
-   not have been added to mi_cmd_table.  Otherwise, return true, and
-   COMMAND was added to mi_cmd_table.  */
+/* See mi-cmds.h.  */
 
-static bool
+bool
 insert_mi_cmd_entry (mi_command_up command)
 {
   gdb_assert (command != nullptr);
@@ -124,6 +117,18 @@ insert_mi_cmd_entry (mi_command_up command)
     return false;
 
   mi_cmd_table[name] = std::move (command);
+  return true;
+}
+
+/* See mi-cmds.h.  */
+
+bool
+remove_mi_cmd_entry (const std::string &name)
+{
+  if (mi_cmd_table.find (name) == mi_cmd_table.end ())
+    return false;
+
+  mi_cmd_table.erase (name);
   return true;
 }
 

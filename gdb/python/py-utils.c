@@ -382,6 +382,23 @@ gdb_pymodule_addobject (PyObject *module, const char *name, PyObject *object)
   return result;
 }
 
+/* See python-internal.h.  */
+
+void
+gdbpy_error (const char *fmt, ...)
+{
+  va_list ap;
+  va_start (ap, fmt);
+  std::string str = string_vprintf (fmt, ap);
+  va_end (ap);
+
+  const char *msg = str.c_str ();
+  if (msg != nullptr && *msg != '\0')
+    error (_("Error occurred in Python: %s"), msg);
+  else
+    error (_("Error occurred in Python."));
+}
+
 /* Handle a Python exception when the special gdb.GdbError treatment
    is desired.  This should only be called when an exception is set.
    If the exception is a gdb.GdbError, throw a gdb exception with the

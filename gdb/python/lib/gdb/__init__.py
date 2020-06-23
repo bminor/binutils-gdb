@@ -82,6 +82,10 @@ frame_filters = {}
 # Initial frame unwinders.
 frame_unwinders = []
 
+# Dictionary containing all user created MI commands, the key is the
+# command name, and the value is the gdb.MICommand object.
+_mi_commands = {}
+
 
 def _execute_unwinders(pending_frame):
     """Internal function called from GDB to execute all unwinders.

@@ -199,11 +199,29 @@ private:
   int *m_suppress_notification;
 };
 
+/* A command held in the global mi_cmd_table.  */
+
+using mi_command_up = std::unique_ptr<struct mi_command>;
+
 /* Lookup a command in the MI command table, returns nullptr if COMMAND is
    not found.  */
 
 extern mi_command *mi_cmd_lookup (const char *command);
 
 extern void mi_execute_command (const char *cmd, int from_tty);
+
+/* Insert COMMAND into the global mi_cmd_table.  Return false if
+   COMMAND->name already exists in mi_cmd_table, in which case COMMAND will
+   not have been added to mi_cmd_table.  Otherwise, return true, and
+   COMMAND was added to mi_cmd_table.  */
+
+extern bool insert_mi_cmd_entry (mi_command_up command);
+
+/* Remove the command called NAME from the global mi_cmd_table.  Return
+   true if the removal was a success, otherwise return false, which
+   indicates no command called NAME was found in the mi_cmd_table. */
+
+extern bool remove_mi_cmd_entry (const std::string &name);
+
 
 #endif /* MI_MI_CMDS_H */

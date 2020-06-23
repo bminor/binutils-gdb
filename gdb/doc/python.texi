@@ -95,6 +95,7 @@ containing @code{end}.  For example:
 23
 @end smallexample
 
+@anchor{set_python_print_stack}
 @kindex set python print-stack
 @item set python print-stack
 By default, @value{GDBN} will print only the message component of a
@@ -204,7 +205,8 @@ optional arguments while skipping others.  Example:
 * Events In Python::            Listening for events from @value{GDBN}.
 * Threads In Python::           Accessing inferior threads from Python.
 * Recordings In Python::        Accessing recordings from Python.
-* Commands In Python::          Implementing new commands in Python.
+* CLI Commands In Python::      Implementing new CLI commands in Python.
+* GDB/MI Commands In Python::   Implementing new @sc{GDB/MI} commands in Python.
 * Parameters In Python::        Adding new @value{GDBN} parameters.
 * Functions In Python::         Writing new convenience functions.
 * Progspaces In Python::        Program spaces.
@@ -419,7 +421,8 @@ the current language, evaluate it, and return the result as a
 @code{gdb.Value}.
 
 This function can be useful when implementing a new command
-(@pxref{Commands In Python}), as it provides a way to parse the
+(@pxref{CLI Commands In Python}, @pxref{GDB/MI Commands In Python}),
+as it provides a way to parse the
 command's argument as an expression.  It is also useful simply to
 compute values.
 @end defun
@@ -2162,7 +2165,7 @@ must contain the frames that are being elided wrapped in a suitable
 frame decorator.  If no frames are being elided this function may
 return an empty iterable, or @code{None}.  Elided frames are indented
 from normal frames in a @code{CLI} backtrace, or in the case of
-@code{GDB/MI}, are placed in the @code{children} field of the eliding
+@sc{GDB/MI}, are placed in the @code{children} field of the eliding
 frame.
 
 It is the frame filter's task to also filter out the elided frames from
@@ -3883,11 +3886,12 @@ def countrange (filename, linerange):
     return count
 @end smallexample
 
-@node Commands In Python
-@subsubsection Commands In Python
+@node CLI Commands In Python
+@subsubsection CLI Commands In Python
 
-@cindex commands in python
-@cindex python commands
+@cindex CLI commands in python
+@cindex commands in python, CLI
+@cindex python commands, CLI
 You can implement new @value{GDBN} CLI commands in Python.  A CLI
 command is implemented using an instance of the @code{gdb.Command}
 class, most commonly using a subclass.
@@ -4166,6 +4170,154 @@ registration of the command with @value{GDBN}.  Depending on how the
 Python code is read into @value{GDBN}, you may need to import the
 @code{gdb} module explicitly.
 
+@node GDB/MI Commands In Python
+@subsubsection @sc{GDB/MI} Commands In Python
+
+@cindex MI commands in python
+@cindex commands in python, GDB/MI
+@cindex python commands, GDB/MI
+It is possible to add @sc{GDB/MI} (@pxref{GDB/MI}) commands
+implemented in Python.  A @sc{GDB/MI} command is implemented using an
+instance of the @code{gdb.MICommand} class, most commonly using a
+subclass.
+
+@defun MICommand.__init__ (name)
+The object initializer for @code{MICommand} registers the new command
+with @value{GDBN}.  This initializer is normally invoked from the
+subclass' own @code{__init__} method.
+
+@var{name} is the name of the command.  It must be a valid name of a
+@sc{GDB/MI} command, and in particular must start with a hyphen
+(@code{-}).  Reusing the name of a built-in @sc{GDB/MI} is not
+allowed, and a @code{RuntimeError} will be raised.  Using the name
+of an @sc{GDB/MI} command previously defined in Python is allowed, the
+previous command will be replaced with the new command.
+@end defun
+
+@defun MICommand.invoke (arguments)
+This method is called by @value{GDBN} when the new MI command is
+invoked.
+
+@var{arguments} is a list of strings.  Note, that @code{--thread}
+and @code{--frame} arguments are handled by @value{GDBN} itself therefore
+they do not show up in @code{arguments}.
+
+If this method raises an exception, then it is turned into a
+@sc{GDB/MI} @code{^error} response.  Only @code{gdb.GdbError}
+exceptions (or its sub-classes) should be used for reporting errors to
+users, any other exception type is treated as a failure of the
+@code{invoke} method, and the exception will be printed to the error
+stream according to the @kbd{set python print-stack} setting
+(@pxref{set_python_print_stack,,@kbd{set python print-stack}}).
+
+If this method returns @code{None}, then the @sc{GDB/MI} command will
+return a @code{^done} response with no additional values.
+
+Otherwise, the return value must be a dictionary, which is converted
+to a @sc{GDB/MI} @var{result-record} (@pxref{GDB/MI Output Syntax}).
+The keys of this dictionary must be strings, and are used as
+@var{variable} names in the @var{result-record}, these strings must
+comply with the naming rules detailed below.  The values of this
+dictionary are recursively handled as follows:
+
+@itemize
+@item
+If the value is Python sequence or iterator, it is converted to
+@sc{GDB/MI} @var{list} with elements converted recursively.
+
+@item
+If the value is Python dictionary, it is converted to
+@sc{GDB/MI} @var{tuple}.  Keys in that dictionary must be strings,
+which comply with the @var{variable} naming rules detailed below.
+Values are converted recursively.
+
+@item
+Otherwise, value is first converted to a Python string using
+@code{str ()} and then converted to @sc{GDB/MI} @var{const}.
+@end itemize
+
+The strings used for @var{variable} names in the @sc{GDB/MI} output
+must follow the following rules; the string must be at least one
+character long, the first character must be in the set
+@code{[a-zA-Z]}, while every subsequent character must be in the set
+@code{[-_a-zA-Z0-9]}.
+@end defun
+
+An instance of @code{MICommand} has the following attributes:
+
+@defvar MICommand.name
+A string, the name of this @sc{GDB/MI} command, as was passed to the
+@code{__init__} method.  This attribute is read-only.
+@end defvar
+
+@defvar MICommand.installed
+A boolean value indicating if this command is installed ready for a
+user to call from the command line.  Commands are automatically
+installed when they are instantiated, after which this attribute will
+be @code{True}.
+
+If later, a new command is created with the same name, then the
+original command will become uninstalled, and this attribute will be
+@code{False}.
+
+This attribute is read-write, setting this attribute to @code{False}
+will uninstall the command, removing it from the set of available
+commands.  Setting this attribute to @code{True} will install the
+command for use.  If there is already a Python command with this name
+installed, the currently installed command will be uninstalled, and
+this command installed in its place.
+@end defvar
+
+The following code snippet shows how a two trivial MI command can be
+implemented in Python:
+
+@smallexample
+class MIEcho(gdb.MICommand):
+    """Echo arguments passed to the command."""
+
+    def __init__(self, name, mode):
+        self._mode = mode
+        super(MIEcho, self).__init__(name)
+
+    def invoke(self, argv):
+        if self._mode == 'dict':
+            return @{ 'dict': @{ 'argv' : argv @} @}
+        elif self._mode == 'list':
+            return @{ 'list': argv @}
+        else:
+            return @{ 'string': ", ".join(argv) @}
+
+
+MIEcho("-echo-dict", "dict")
+MIEcho("-echo-list", "list")
+MIEcho("-echo-string", "string")
+@end smallexample
+
+The last three lines instantiate the class three times, creating three
+new @sc{GDB/MI} commands @code{-echo-dict}, @code{-echo-list}, and
+@code{-echo-string}.  Each time a subclass of @code{gdb.MICommand} is
+instantiated, the new command is automatically registered with
+@value{GDBN}.
+
+Depending on how the Python code is read into @value{GDBN}, you may
+need to import the @code{gdb} module explicitly.
+
+The following example shows a @value{GDBN} session in which the above
+commands have been added:
+
+@smallexample
+(@value{GDBP})
+-echo-dict abc def ghi
+^done,dict=@{argv=["abc","def","ghi"]@}
+(@value{GDBP})
+-echo-list abc def ghi
+^done,list=["abc","def","ghi"]
+(@value{GDBP})
+-echo-string abc def ghi
+^done,string="abc, def, ghi"
+(@value{GDBP})
+@end smallexample
+
 @node Parameters In Python
 @subsubsection Parameters In Python
 
@@ -4203,7 +4355,7 @@ If @var{name} consists of multiple words, and no prefix parameter group
 can be found, an exception is raised.
 
 @var{command-class} should be one of the @samp{COMMAND_} constants
-(@pxref{Commands In Python}).  This argument tells @value{GDBN} how to
+(@pxref{CLI Commands In Python}).  This argument tells @value{GDBN} how to
 categorize the new parameter in the help system.
 
 @var{parameter-class} should be one of the @samp{PARAM_} constants

@@ -250,6 +250,8 @@ GNU/Linux/LoongArch    loongarch*-*-linux*
      for signed types, and False for all other types.  Attempting to
      read this attribute for non-scalar types will raise a ValueError.
 
+  ** It is now possible to add GDB/MI commands implemented in Python.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on OpenRISC GNU/Linux.
