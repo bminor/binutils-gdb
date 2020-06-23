@@ -302,6 +302,7 @@ elf64_hppa_hash_table_create (bfd *abfd)
       return NULL;
     }
 
+  htab->root.dt_pltgot_required = TRUE;
   htab->text_segment_base = (bfd_vma) -1;
   htab->data_segment_base = (bfd_vma) -1;
 
@@ -1526,9 +1527,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
   bfd *dynobj;
   bfd *ibfd;
   asection *sec;
-  bfd_boolean plt;
   bfd_boolean relocs;
-  bfd_boolean reltext;
 
   hppa_info = hppa_link_hash_table (info);
   if (hppa_info == NULL)
@@ -1736,9 +1735,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 			    allocate_dynrel_entries, &data);
 
   /* The sizes of all the sections are set.  Allocate memory for them.  */
-  plt = FALSE;
   relocs = FALSE;
-  reltext = FALSE;
   for (sec = dynobj->sections; sec != NULL; sec = sec->next)
     {
       const char *name;
@@ -1753,7 +1750,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
       if (strcmp (name, ".plt") == 0)
 	{
 	  /* Remember whether there is a PLT.  */
-	  plt = sec->size != 0;
+	  ;
 	}
       else if (strcmp (name, ".opd") == 0
 	       || CONST_STRNEQ (name, ".dlt")
@@ -1766,28 +1763,10 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	{
 	  if (sec->size != 0)
 	    {
-	      asection *target;
-
 	      /* Remember whether there are any reloc sections other
 		 than .rela.plt.  */
 	      if (strcmp (name, ".rela.plt") != 0)
-		{
-		  const char *outname;
-
-		  relocs = TRUE;
-
-		  /* If this relocation section applies to a read only
-		     section, then we probably need a DT_TEXTREL
-		     entry.  The entries in the .rela.plt section
-		     really apply to the .got section, which we
-		     created ourselves and so know is not readonly.  */
-		  outname = bfd_section_name (sec->output_section);
-		  target = bfd_get_section_by_name (output_bfd, outname + 4);
-		  if (target != NULL
-		      && (target->flags & SEC_READONLY) != 0
-		      && (target->flags & SEC_ALLOC) != 0)
-		    reltext = TRUE;
-		}
+		relocs = TRUE;
 
 	      /* We use the reloc_count field as a counter if we need
 		 to copy relocs into the output file.  */
@@ -1840,8 +1819,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-      if (!add_dynamic_entry (DT_HP_DLD_FLAGS, 0)
-	  || !add_dynamic_entry (DT_PLTGOT, 0))
+      if (!add_dynamic_entry (DT_HP_DLD_FLAGS, 0))
 	return FALSE;
 
       /* Add some entries to the .dynamic section.  We fill in the
@@ -1851,8 +1829,7 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	 dynamic linker and used by the debugger.  */
       if (! bfd_link_pic (info))
 	{
-	  if (!add_dynamic_entry (DT_DEBUG, 0)
-	      || !add_dynamic_entry (DT_HP_DLD_HOOK, 0)
+	  if (!add_dynamic_entry (DT_HP_DLD_HOOK, 0)
 	      || !add_dynamic_entry (DT_HP_LOAD_MAP, 0))
 	    return FALSE;
 	}
@@ -1861,33 +1838,10 @@ elf64_hppa_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	 Required by HPUX 11.00 patch PHSS_26559.  */
       if (!add_dynamic_entry (DT_FLAGS, (info)->flags))
 	return FALSE;
-
-      if (plt)
-	{
-	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-	}
-
-      if (relocs)
-	{
-	  if (!add_dynamic_entry (DT_RELA, 0)
-	      || !add_dynamic_entry (DT_RELASZ, 0)
-	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf64_External_Rela)))
-	    return FALSE;
-	}
-
-      if (reltext)
-	{
-	  if (!add_dynamic_entry (DT_TEXTREL, 0))
-	    return FALSE;
-	  info->flags |= DF_TEXTREL;
-	}
     }
 #undef add_dynamic_entry
 
-  return TRUE;
+  return _bfd_elf_add_dynamic_tags (output_bfd, info, relocs);
 }
 
 /* Called after we have output the symbol into the dynamic symbol

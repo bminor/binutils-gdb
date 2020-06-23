@@ -295,4 +295,17 @@ elf_vxworks_finish_dynamic_entry (bfd *output_bfd, Elf_Internal_Dyn *dyn)
   return TRUE;
 }
 
+/* Add dynamic tags.  */
 
+bfd_boolean
+_bfd_elf_maybe_vxworks_add_dynamic_tags (bfd *output_bfd,
+					 struct bfd_link_info *info,
+					 bfd_boolean need_dynamic_reloc)
+{
+  struct elf_link_hash_table *htab = elf_hash_table (info);
+  return (_bfd_elf_add_dynamic_tags (output_bfd, info,
+				     need_dynamic_reloc)
+	  && (!htab->dynamic_sections_created
+	      || htab->target_os != is_vxworks
+	      || elf_vxworks_add_dynamic_entries (output_bfd, info)));
+}

@@ -5466,27 +5466,7 @@ elf32_frvfdpic_size_dynamic_sections (bfd *output_bfd,
   if (!_frvfdpic_size_got_plt (output_bfd, &gpinfo))
     return FALSE;
 
-  if (elf_hash_table (info)->dynamic_sections_created)
-    {
-      if (frvfdpic_got_section (info)->size)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0))
-	  return FALSE;
-
-      if (frvfdpic_pltrel_section (info)->size)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_REL)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
-	  return FALSE;
-
-      if (frvfdpic_gotrel_section (info)->size)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_REL, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_RELSZ, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_RELENT,
-					    sizeof (Elf32_External_Rel)))
-	  return FALSE;
-    }
-
-  return TRUE;
+  return _bfd_elf_add_dynamic_tags (output_bfd, info, TRUE);
 }
 
 static bfd_boolean

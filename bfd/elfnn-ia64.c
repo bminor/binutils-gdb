@@ -1473,6 +1473,7 @@ elfNN_ia64_hash_table_create (bfd *abfd)
       return NULL;
     }
   ret->root.root.hash_table_free = elfNN_ia64_link_hash_table_free;
+  ret->root.dt_pltgot_required = TRUE;
 
   return &ret->root.root;
 }
@@ -2994,7 +2995,6 @@ elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   struct elfNN_ia64_link_hash_table *ia64_info;
   asection *sec;
   bfd *dynobj;
-  bfd_boolean relplt = FALSE;
 
   ia64_info = elfNN_ia64_hash_table (info);
   if (ia64_info == NULL)
@@ -3148,7 +3148,7 @@ elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    ia64_info->rel_pltoff_sec = NULL;
 	  else
 	    {
-	      relplt = TRUE;
+	      ia64_info->root.dt_jmprel_required = TRUE;
 	      /* We use the reloc_count field as a counter if we need to
 		 copy relocs into the output file.  */
 	      sec->reloc_count = 0;
@@ -3194,40 +3194,14 @@ elfNN_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	 later (in finish_dynamic_sections) but we must add the entries now
 	 so that we get the correct size for the .dynamic section.  */
 
-      if (bfd_link_executable (info))
-	{
-	  /* The DT_DEBUG entry is filled in by the dynamic linker and used
-	     by the debugger.  */
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-	  if (!add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
-	}
+      if (!_bfd_elf_add_dynamic_tags (output_bfd, info, TRUE))
+	return FALSE;
 
       if (!add_dynamic_entry (DT_IA_64_PLT_RESERVE, 0))
 	return FALSE;
-      if (!add_dynamic_entry (DT_PLTGOT, 0))
-	return FALSE;
-
-      if (relplt)
-	{
-	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-	}
-
-      if (!add_dynamic_entry (DT_RELA, 0)
-	  || !add_dynamic_entry (DT_RELASZ, 0)
-	  || !add_dynamic_entry (DT_RELAENT, sizeof (ElfNN_External_Rela)))
-	return FALSE;
-
-      if ((info->flags & DF_TEXTREL) != 0)
-	{
-	  if (!add_dynamic_entry (DT_TEXTREL, 0))
-	    return FALSE;
-	}
     }
 
   /* ??? Perhaps force __gp local.  */

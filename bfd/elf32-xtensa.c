@@ -766,6 +766,7 @@ elf_xtensa_link_hash_table_create (bfd *abfd)
   tlsbase->root.type = bfd_link_hash_new;
   tlsbase->root.u.undef.abfd = NULL;
   tlsbase->non_elf = 0;
+  ret->elf.dt_pltgot_required = TRUE;
   ret->tlsbase = elf_xtensa_hash_entry (tlsbase);
   ret->tlsbase->tls_type = GOT_UNKNOWN;
 
@@ -1767,30 +1768,11 @@ elf_xtensa_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-      if (bfd_link_executable (info))
-	{
-	  if (!add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
-	}
+      if (!_bfd_elf_add_dynamic_tags (output_bfd, info,
+				      relplt || relgot))
+	return FALSE;
 
-      if (relplt)
-	{
-	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-	}
-
-      if (relgot)
-	{
-	  if (!add_dynamic_entry (DT_RELA, 0)
-	      || !add_dynamic_entry (DT_RELASZ, 0)
-	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
-	    return FALSE;
-	}
-
-      if (!add_dynamic_entry (DT_PLTGOT, 0)
-	  || !add_dynamic_entry (DT_XTENSA_GOT_LOC_OFF, 0)
+      if (!add_dynamic_entry (DT_XTENSA_GOT_LOC_OFF, 0)
 	  || !add_dynamic_entry (DT_XTENSA_GOT_LOC_SZ, 0))
 	return FALSE;
     }

@@ -721,9 +721,6 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
   if (bed->target_id == X86_64_ELF_DATA)
     {
       ret->is_reloc_section = elf_x86_64_is_reloc_section;
-      ret->dt_reloc = DT_RELA;
-      ret->dt_reloc_sz = DT_RELASZ;
-      ret->dt_reloc_ent = DT_RELAENT;
       ret->got_entry_size = 8;
       ret->pcrel_plt = TRUE;
       ret->tls_get_addr = "__tls_get_addr";
@@ -748,9 +745,6 @@ _bfd_x86_elf_link_hash_table_create (bfd *abfd)
       else
 	{
 	  ret->is_reloc_section = elf_i386_is_reloc_section;
-	  ret->dt_reloc = DT_REL;
-	  ret->dt_reloc_sz = DT_RELSZ;
-	  ret->dt_reloc_ent = DT_RELENT;
 	  ret->sizeof_reloc = sizeof (Elf32_External_Rel);
 	  ret->got_entry_size = 4;
 	  ret->pcrel_plt = FALSE;
@@ -1362,76 +1356,8 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 		   + PLT_FDE_LEN_OFFSET));
     }
 
-  if (htab->elf.dynamic_sections_created)
-    {
-      /* Add some entries to the .dynamic section.  We fill in the
-	 values later, in elf_{i386,x86_64}_finish_dynamic_sections,
-	 but we must add the entries now so that we get the correct
-	 size for the .dynamic section.  The DT_DEBUG entry is filled
-	 in by the dynamic linker and used by the debugger.  */
-#define add_dynamic_entry(TAG, VAL) \
-  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
-
-      if (bfd_link_executable (info))
-	{
-	  if (!add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
-	}
-
-      if (htab->elf.splt->size != 0)
-	{
-	  /* DT_PLTGOT is used by prelink even if there is no PLT
-	     relocation.  */
-	  if (!add_dynamic_entry (DT_PLTGOT, 0))
-	    return FALSE;
-	}
-
-      if (htab->elf.srelplt->size != 0)
-	{
-	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, htab->dt_reloc)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-	}
-
-      if (htab->elf.tlsdesc_plt
-	  && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
-	      || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
-	return FALSE;
-
-      if (relocs)
-	{
-	  if (!add_dynamic_entry (htab->dt_reloc, 0)
-	      || !add_dynamic_entry (htab->dt_reloc_sz, 0)
-	      || !add_dynamic_entry (htab->dt_reloc_ent,
-				     htab->sizeof_reloc))
-	    return FALSE;
-
-	  /* If any dynamic relocs apply to a read-only section,
-	     then we need a DT_TEXTREL entry.  */
-	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->elf,
-				    _bfd_elf_maybe_set_textrel, info);
-
-	  if ((info->flags & DF_TEXTREL) != 0)
-	    {
-	      if (htab->elf.ifunc_resolvers)
-		info->callbacks->einfo
-		  (_("%P: warning: GNU indirect functions with DT_TEXTREL "
-		     "may result in a segfault at runtime; recompile with %s\n"),
-		   bfd_link_dll (info) ? "-fPIC" : "-fPIE");
-
-	      if (!add_dynamic_entry (DT_TEXTREL, 0))
-		return FALSE;
-	    }
-	}
-      if (htab->elf.target_os == is_vxworks
-	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
-	return FALSE;
-    }
-#undef add_dynamic_entry
-
-  return TRUE;
+  return _bfd_elf_maybe_vxworks_add_dynamic_tags (output_bfd, info,
+						  relocs);
 }
 
 /* Finish up the x86 dynamic sections.  */

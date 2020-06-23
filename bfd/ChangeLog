@@ -1,3 +1,68 @@
+2020-06-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (elf_link_hash_table): Add dt_pltgot_required and
+	dt_jmprel_required.
+	(_bfd_elf_add_dynamic_tags): New.
+	* elf-m10300.c (_bfd_mn10300_elf_size_dynamic_sections): Call
+	_bfd_elf_add_dynamic_tags.
+	* elf32-arc.c (elf_arc_size_dynamic_sections): Likewise.
+	* elf32-bfin.c (elf32_bfinfdpic_size_dynamic_sections): Likewise.
+	* elf32-cr16.c (_bfd_cr16_elf_size_dynamic_sections): Likewise.
+	* elf32-frv.c (elf32_frvfdpic_size_dynamic_sections): Likewise.
+	* elf32-lm32.c (lm32_elf_size_dynamic_sections): Likewise.
+	* elf32-m32r.c (m32r_elf_size_dynamic_sections): Likewise.
+	* elf32-m68k.c (elf_m68k_size_dynamic_sections): Likewise.
+	* elf32-microblaze.c (microblaze_elf_size_dynamic_sections):
+	Likewise.
+	* elf32-nds32.c (nds32_elf_size_dynamic_sections): Likewise.
+	* elf32-nios2.c (nios2_elf32_size_dynamic_sections): Likewise.
+	* elf32-or1k.c (or1k_elf_size_dynamic_sections): Likewise.
+	* elf32-s390.c (elf_s390_size_dynamic_sections): Likewise.
+	* elf32-tilepro.c (tilepro_elf_size_dynamic_sections): Likewise.
+	* elf32-vax.c (elf_vax_size_dynamic_sections): Likewise.
+	* elf64-alpha.c (elf64_alpha_size_dynamic_sections): Likewise.
+	* elf64-s390.c (elf_s390_size_dynamic_sections): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_size_dynamic_sections):
+	Likewise.
+	* elfnn-riscv.c (riscv_elf_size_dynamic_sections): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_size_dynamic_sections): Likewise.
+	* elf32-arm.c (elf32_arm_size_dynamic_sections): Call
+	_bfd_elf_maybe_vxworks_add_dynamic_tags.
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_size_dynamic_sections):
+	Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_link_hash_table_create): Likewise.
+	(_bfd_x86_elf_size_dynamic_sections): Likewise.
+	* elfxx-x86.h (elf_x86_link_hash_table): Remove dt_reloc,
+	dt_reloc_sz and dt_reloc_ent.
+	* elf-vxworks.c (_bfd_elf_maybe_vxworks_add_dynamic_tags): New.
+	* elf-vxworks.h (_bfd_elf_maybe_vxworks_add_dynamic_tags):
+	Likewise.
+	* elf32-hppa.c (elf32_hppa_link_hash_table_create): Set
+	etab.dt_pltgot_required.
+	(elf32_hppa_size_dynamic_sections): Call
+	_bfd_elf_add_dynamic_tags.
+	* elf32-metag.c (elf_metag_link_hash_table_create): Set
+	etab.dt_pltgot_required.
+	(elf_metag_size_dynamic_sections): Call _bfd_elf_add_dynamic_tags.
+	* elf32-sh.c (sh_elf_link_hash_table_create): Set
+	root.dt_pltgot_required for FDPIC output.
+	(sh_elf_size_dynamic_sections): Call
+	_bfd_elf_maybe_vxworks_add_dynamic_tags.
+	* elf32-xtensa.c (elf_xtensa_link_hash_table_create): Set
+	elf.dt_pltgot_required.
+	(elf_xtensa_size_dynamic_sections): Call
+	_bfd_elf_add_dynamic_tags.
+	* elf64-hppa.c (elf64_hppa_hash_table_create): Set
+	root.dt_pltgot_required.
+	(elf64_hppa_size_dynamic_sections): Call
+	_bfd_elf_add_dynamic_tags.
+	* elfnn-ia64.c (elfNN_ia64_hash_table_create): Set
+	root.dt_pltgot_required.
+	(elfNN_ia64_size_dynamic_sections): Set root.dt_jmprel_required
+	for rel_pltoff_sec.  Call _bfd_elf_add_dynamic_tags.
+	* elflink.c (_bfd_elf_add_dynamic_tags): New.
+
 2020-06-22  Saagar Jha  <saagar@saagarjha.com>
 
 	* mach-o.c: Support the new load commands by reading a linkedit

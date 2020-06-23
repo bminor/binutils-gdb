@@ -2255,7 +2255,11 @@ sh_elf_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-  ret->fdpic_p = fdpic_object_p (abfd);
+  if (fdpic_object_p (abfd))
+    {
+      ret->root.dt_pltgot_required = TRUE;
+      ret->fdpic_p = TRUE;
+    }
 
   return &ret->root.root;
 }
@@ -3196,63 +3200,8 @@ sh_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	return FALSE;
     }
 
-  if (htab->root.dynamic_sections_created)
-    {
-      /* Add some entries to the .dynamic section.  We fill in the
-	 values later, in sh_elf_finish_dynamic_sections, but we
-	 must add the entries now so that we get the correct size for
-	 the .dynamic section.  The DT_DEBUG entry is filled in by the
-	 dynamic linker and used by the debugger.  */
-#define add_dynamic_entry(TAG, VAL) \
-  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
-
-      if (bfd_link_executable (info))
-	{
-	  if (! add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
-	}
-
-      if (htab->root.splt->size != 0)
-	{
-	  if (! add_dynamic_entry (DT_PLTGOT, 0)
-	      || ! add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || ! add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || ! add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-	}
-      else if ((elf_elfheader (output_bfd)->e_flags & EF_SH_FDPIC))
-	{
-	  if (! add_dynamic_entry (DT_PLTGOT, 0))
-	    return FALSE;
-	}
-
-      if (relocs)
-	{
-	  if (! add_dynamic_entry (DT_RELA, 0)
-	      || ! add_dynamic_entry (DT_RELASZ, 0)
-	      || ! add_dynamic_entry (DT_RELAENT,
-				      sizeof (Elf32_External_Rela)))
-	    return FALSE;
-
-	  /* If any dynamic relocs apply to a read-only section,
-	     then we need a DT_TEXTREL entry.  */
-	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->root,
-				    _bfd_elf_maybe_set_textrel, info);
-
-	  if ((info->flags & DF_TEXTREL) != 0)
-	    {
-	      if (! add_dynamic_entry (DT_TEXTREL, 0))
-		return FALSE;
-	    }
-	}
-      if (htab->root.target_os == is_vxworks
-	  && !elf_vxworks_add_dynamic_entries (output_bfd, info))
-	return FALSE;
-    }
-#undef add_dynamic_entry
-
-  return TRUE;
+  return _bfd_elf_maybe_vxworks_add_dynamic_tags (output_bfd, info,
+						  relocs);
 }
 
 /* Add a dynamic relocation to the SRELOC section.  */

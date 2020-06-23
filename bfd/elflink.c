@@ -14897,3 +14897,96 @@ _bfd_elf_maybe_set_textrel (struct elf_link_hash_entry *h, void *inf)
     }
   return TRUE;
 }
+
+/* Add dynamic tags.  */
+
+bfd_boolean
+_bfd_elf_add_dynamic_tags (bfd *output_bfd, struct bfd_link_info *info,
+			   bfd_boolean need_dynamic_reloc)
+{
+  struct elf_link_hash_table *htab = elf_hash_table (info);
+
+  if (htab->dynamic_sections_created)
+    {
+      /* Add some entries to the .dynamic section.  We fill in the
+	 values later, in finish_dynamic_sections, but we must add
+	 the entries now so that we get the correct size for the
+	 .dynamic section.  The DT_DEBUG entry is filled in by the
+	 dynamic linker and used by the debugger.  */
+#define add_dynamic_entry(TAG, VAL) \
+  _bfd_elf_add_dynamic_entry (info, TAG, VAL)
+
+      const struct elf_backend_data *bed
+	= get_elf_backend_data (output_bfd);
+
+      if (bfd_link_executable (info))
+	{
+	  if (!add_dynamic_entry (DT_DEBUG, 0))
+	    return FALSE;
+	}
+
+      if (htab->dt_pltgot_required || htab->splt->size != 0)
+	{
+	  /* DT_PLTGOT is used by prelink even if there is no PLT
+	     relocation.  */
+	  if (!add_dynamic_entry (DT_PLTGOT, 0))
+	    return FALSE;
+	}
+
+      if (htab->dt_jmprel_required || htab->srelplt->size != 0)
+	{
+	  if (!add_dynamic_entry (DT_PLTRELSZ, 0)
+	      || !add_dynamic_entry (DT_PLTREL,
+				     (bed->rela_plts_and_copies_p
+				      ? DT_RELA : DT_REL))
+	      || !add_dynamic_entry (DT_JMPREL, 0))
+	    return FALSE;
+	}
+
+      if (htab->tlsdesc_plt
+	  && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
+	      || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
+	return FALSE;
+
+      if (need_dynamic_reloc)
+	{
+	  if (bed->rela_plts_and_copies_p)
+	    {
+	      if (!add_dynamic_entry (DT_RELA, 0)
+		  || !add_dynamic_entry (DT_RELASZ, 0)
+		  || !add_dynamic_entry (DT_RELAENT,
+					 bed->s->sizeof_rela))
+		return FALSE;
+	    }
+	  else
+	    {
+	      if (!add_dynamic_entry (DT_REL, 0)
+		  || !add_dynamic_entry (DT_RELSZ, 0)
+		  || !add_dynamic_entry (DT_RELENT,
+					 bed->s->sizeof_rel))
+		return FALSE;
+	    }
+
+	  /* If any dynamic relocs apply to a read-only section,
+	     then we need a DT_TEXTREL entry.  */
+	  if ((info->flags & DF_TEXTREL) == 0)
+	    elf_link_hash_traverse (htab, _bfd_elf_maybe_set_textrel,
+				    info);
+
+	  if ((info->flags & DF_TEXTREL) != 0)
+	    {
+	      if (htab->ifunc_resolvers)
+		info->callbacks->einfo
+		  (_("%P: warning: GNU indirect functions with DT_TEXTREL "
+		     "may result in a segfault at runtime; recompile with %s\n"),
+		   bfd_link_dll (info) ? "-fPIC" : "-fPIE");
+
+	      if (!add_dynamic_entry (DT_TEXTREL, 0))
+		return FALSE;
+	    }
+	}
+    }
+#undef add_dynamic_entry
+
+  return TRUE;
+}

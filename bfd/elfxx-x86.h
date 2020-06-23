@@ -510,9 +510,6 @@ struct elf_x86_link_hash_table
   bfd_vma (*r_sym) (bfd_vma);
   bfd_boolean (*is_reloc_section) (const char *);
   unsigned int sizeof_reloc;
-  unsigned int dt_reloc;
-  unsigned int dt_reloc_sz;
-  unsigned int dt_reloc_ent;
   unsigned int got_entry_size;
   unsigned int pointer_r_type;
   int dynamic_interpreter_size;

@@ -573,6 +573,12 @@ struct elf_link_hash_table
   /* TRUE if there are IFUNC resolvers.  */
   bfd_boolean ifunc_resolvers;
 
+  /* TRUE if DT_PLTGOT is a required dynamic tag.  */
+  bfd_boolean dt_pltgot_required;
+
+  /* TRUE if DT_JMPREL is a required dynamic tag.  */
+  bfd_boolean dt_jmprel_required;
+
   /* The BFD used to hold special sections created by the linker.
      This will be the first BFD found which requires these sections to
      be created.  */
@@ -2907,6 +2913,9 @@ extern asection *_bfd_elf_readonly_dynrelocs
   (struct elf_link_hash_entry *);
 extern bfd_boolean _bfd_elf_maybe_set_textrel
   (struct elf_link_hash_entry *, void *);
+
+extern bfd_boolean _bfd_elf_add_dynamic_tags
+  (bfd *, struct bfd_link_info *, bfd_boolean);
 
 /* Large common section.  */
 extern asection _bfd_elf_large_com_section;

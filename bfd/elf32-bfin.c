@@ -4067,26 +4067,6 @@ elf32_bfinfdpic_size_dynamic_sections (bfd *output_bfd,
   if (!_bfinfdpic_size_got_plt (output_bfd, &gpinfo))
       return FALSE;
 
-  if (elf_hash_table (info)->dynamic_sections_created)
-    {
-      if (bfinfdpic_got_section (info)->size)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0))
-	  return FALSE;
-
-      if (bfinfdpic_pltrel_section (info)->size)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_REL)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
-	  return FALSE;
-
-      if (bfinfdpic_gotrel_section (info)->size)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_REL, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_RELSZ, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_RELENT,
-					    sizeof (Elf32_External_Rel)))
-	  return FALSE;
-    }
-
   s = bfd_get_linker_section (dynobj, ".dynbss");
   if (s && s->size == 0)
     s->flags |= SEC_EXCLUDE;
@@ -4095,7 +4075,7 @@ elf32_bfinfdpic_size_dynamic_sections (bfd *output_bfd,
   if (s && s->size == 0)
     s->flags |= SEC_EXCLUDE;
 
-  return TRUE;
+  return _bfd_elf_add_dynamic_tags (output_bfd, info, TRUE);
 }
 
 static bfd_boolean

@@ -9101,27 +9101,13 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 #define add_dynamic_entry(TAG, VAL)			\
       _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-      if (bfd_link_executable (info))
-	{
-	  if (!add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
-	}
+      if (!_bfd_elf_add_dynamic_tags (output_bfd, info, relocs))
+	return FALSE;
 
       if (htab->root.splt->size != 0)
 	{
-	  if (!add_dynamic_entry (DT_PLTGOT, 0)
-	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-
 	  if (htab->variant_pcs
 	      && !add_dynamic_entry (DT_AARCH64_VARIANT_PCS, 0))
-	    return FALSE;
-
-	  if (htab->root.tlsdesc_plt
-	      && (!add_dynamic_entry (DT_TLSDESC_PLT, 0)
-		  || !add_dynamic_entry (DT_TLSDESC_GOT, 0)))
 	    return FALSE;
 
 	  if ((elf_aarch64_tdata (output_bfd)->plt_type == PLT_BTI_PAC)
@@ -9136,26 +9122,6 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  else if ((elf_aarch64_tdata (output_bfd)->plt_type == PLT_PAC)
 		   && !add_dynamic_entry (DT_AARCH64_PAC_PLT, 0))
 	    return FALSE;
-	}
-
-      if (relocs)
-	{
-	  if (!add_dynamic_entry (DT_RELA, 0)
-	      || !add_dynamic_entry (DT_RELASZ, 0)
-	      || !add_dynamic_entry (DT_RELAENT, RELOC_SIZE (htab)))
-	    return FALSE;
-
-	  /* If any dynamic relocs apply to a read-only section,
-	     then we need a DT_TEXTREL entry.  */
-	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->root,
-				    _bfd_elf_maybe_set_textrel, info);
-
-	  if ((info->flags & DF_TEXTREL) != 0)
-	    {
-	      if (!add_dynamic_entry (DT_TEXTREL, 0))
-		return FALSE;
-	    }
 	}
     }
 #undef add_dynamic_entry

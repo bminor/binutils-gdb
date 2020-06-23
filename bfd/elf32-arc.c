@@ -2707,7 +2707,6 @@ elf_arc_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   bfd *dynobj;
   asection *s;
   bfd_boolean relocs_exist = FALSE;
-  bfd_boolean reltext_exist = FALSE;
   struct elf_link_hash_table *htab = elf_hash_table (info);
 
   dynobj = htab->dynobj;
@@ -2762,29 +2761,7 @@ elf_arc_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       else if (strncmp (s->name, ".rela", 5) == 0)
 	{
 	  if (s->size != 0 && s != htab->srelplt)
-	    {
-	      if (!reltext_exist)
-		{
-		  const char *name = s->name + 5;
-		  bfd *ibfd;
-		  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link.next)
-		    if (bfd_get_flavour (ibfd) == bfd_target_elf_flavour
-			&& ibfd->flags & DYNAMIC)
-		      {
-			asection *target = bfd_get_section_by_name (ibfd, name);
-			if (target != NULL
-			    && elf_section_data (target)->sreloc == s
-			    && ((target->output_section->flags
-				 & (SEC_READONLY | SEC_ALLOC))
-				== (SEC_READONLY | SEC_ALLOC)))
-			  {
-			    reltext_exist = TRUE;
-			    break;
-			  }
-		      }
-		}
-	      relocs_exist = TRUE;
-	    }
+	    relocs_exist = TRUE;
 
 	  /* We use the reloc_count field as a counter if we need to
 	     copy relocs into the output file.  */
@@ -2811,33 +2788,7 @@ elf_arc_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	return FALSE;
     }
 
-  if (htab->dynamic_sections_created)
-    {
-      /* TODO: Check if this is needed.  */
-      if (!bfd_link_pic (info))
-	if (!_bfd_elf_add_dynamic_entry (info, DT_DEBUG, 0))
-		return FALSE;
-
-      if (htab->splt && (htab->splt->flags & SEC_EXCLUDE) == 0)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_PLTGOT, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_PLTRELSZ, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_PLTREL, DT_RELA)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_JMPREL, 0))
-	  return FALSE;
-
-      if (relocs_exist)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_RELA, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_RELASZ, 0)
-	    || !_bfd_elf_add_dynamic_entry (info, DT_RELAENT,
-					    sizeof (Elf32_External_Rela)))
-	  return FALSE;
-
-      if (reltext_exist)
-	if (!_bfd_elf_add_dynamic_entry (info, DT_TEXTREL, 0))
-	  return FALSE;
-    }
-
-  return TRUE;
+  return _bfd_elf_add_dynamic_tags (output_bfd, info, relocs_exist);
 }
 
 
