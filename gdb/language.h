@@ -266,12 +266,6 @@ struct language_data
 
     /* Various operations on varobj.  */
     const struct lang_varobj_ops *la_varobj_ops;
-
-    /* This string is used by the 'set print max-depth' setting.  When GDB
-       replaces a struct or union (during value printing) that is "too
-       deep" this string is displayed instead.  */
-    const char *la_struct_too_deep_ellipsis;
-
   };
 
 /* Base class from which all other language classes derive.  */
@@ -552,6 +546,16 @@ struct language_defn : language_data
 
   /* Return true if TYPE is a string type.  */
   virtual bool is_string_type_p (struct type *type) const;
+
+  /* Return a string that is used by the 'set print max-depth' setting.
+     When GDB replaces a struct or union (during value printing) that is
+     "too deep" this string is displayed instead.  The default value here
+     suits most languages.  If overriding then the string here should
+     ideally be similar in style to the default; an opener, three '.', and
+     a closer.  */
+
+  virtual const char *struct_too_deep_ellipsis () const
+  { return "{...}"; }
 
 protected:
 

@@ -508,7 +508,6 @@ extern const struct language_data f_language_data =
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
   &default_varobj_ops,
-  "(...)"			/* la_struct_too_deep_ellipsis */
 };
 
 /* Class representing the Fortran language.  */
@@ -706,6 +705,11 @@ public:
 	    || (type->code () == TYPE_CODE_ARRAY
 		&& TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_CHAR));
   }
+
+  /* See language.h.  */
+
+  const char *struct_too_deep_ellipsis () const override
+  { return "(...)"; }
 
 protected:
 

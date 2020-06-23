@@ -895,7 +895,6 @@ extern const struct language_data c_language_data =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &c_varobj_ops,
-  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 /* Class representing the C language.  */
@@ -996,7 +995,6 @@ extern const struct language_data cplus_language_data =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &cplus_varobj_ops,
-  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 /* A class for the C++ language.  */
@@ -1194,7 +1192,6 @@ extern const struct language_data asm_language_data =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &default_varobj_ops,
-  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 /* A class for the ASM language.  */
@@ -1250,7 +1247,6 @@ extern const struct language_data minimal_language_data =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &default_varobj_ops,
-  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 /* A class for the minimal language.  */

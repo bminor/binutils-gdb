@@ -1021,7 +1021,6 @@ extern const struct language_data opencl_language_data =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &default_varobj_ops,
-  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 /* Class representing the OpenCL language.  */

@@ -214,7 +214,6 @@ extern const struct language_data m2_language_data =
   0,				/* arrays are first-class (not c-style) */
   0,				/* String lower bound */
   &default_varobj_ops,
-  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 /* Class representing the M2 language.  */

@@ -1,3 +1,35 @@
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* ada-lang.c (ada_language_data): Remove
+	la_struct_too_deep_ellipsis initializer.
+	(ada_language::struct_too_deep_ellipsis): New member function.
+	* c-lang.c (c_language_data): Remove la_struct_too_deep_ellipsis
+	initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* cp-valprint.c (cp_print_value): Update call to
+	struct_too_deep_ellipsis.
+	* d-lang.c (d_language_data): Remove la_struct_too_deep_ellipsis
+	initializer.
+	* f-lang.c (f_language_data): Likewise.
+	(f_language::struct_too_deep_ellipsis): New member function.
+	* go-lang.c (go_language_data): Remove la_struct_too_deep_ellipsis
+	initializer.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_struct_too_deep_ellipsis
+	member variable.
+	(language_defn::struct_too_deep_ellipsis): New member function.
+	* m2-lang.c (m2_language_data): Remove la_struct_too_deep_ellipsis
+	initializer.Q
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+	* valprint.c (val_print_check_max_depth): Update call to
+	struct_too_deep_ellipsis.
+
 2020-09-16  Felix Willgerodt  <felix.willgerodt@intel.com>
 
 	* MAINTAINERS (Write After Approval): Add myself.

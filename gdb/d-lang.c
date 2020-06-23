@@ -148,7 +148,6 @@ extern const struct language_data d_language_data =
   1,				/* C-style arrays.  */
   0,				/* String lower bound.  */
   &default_varobj_ops,
-  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 /* Class representing the D language.  */

@@ -499,8 +499,8 @@ cp_print_value (struct value *val, struct ui_file *stream,
 	      && recurse >= options->max_depth)
 	    {
 	      const struct language_defn *language = current_language;
-	      gdb_assert (language->la_struct_too_deep_ellipsis != NULL);
-	      fputs_filtered (language->la_struct_too_deep_ellipsis, stream);
+	      gdb_assert (language->struct_too_deep_ellipsis () != NULL);
+	      fputs_filtered (language->struct_too_deep_ellipsis (), stream);
 	    }
 	  else
 	    {

@@ -798,7 +798,6 @@ extern const struct language_data unknown_language_data =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &default_varobj_ops,
-  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 /* Class representing the unknown language.  */
@@ -924,7 +923,6 @@ extern const struct language_data auto_language_data =
   1,				/* c-style arrays */
   0,				/* String lower bound */
   &default_varobj_ops,
-  "{...}"			/* la_struct_too_deep_ellipsis */
 };
 
 /* Class representing the fake "auto" language.  */

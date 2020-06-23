@@ -13729,7 +13729,6 @@ extern const struct language_data ada_language_data =
   0,                            /* c-style arrays */
   1,                            /* String lower bound */
   &ada_varobj_ops,
-  "(...)"			/* la_struct_too_deep_ellipsis */
 };
 
 /* Class representing the Ada language.  */
@@ -14187,6 +14186,10 @@ public:
     return ada_is_string_type (type);
   }
 
+  /* See language.h.  */
+
+  const char *struct_too_deep_ellipsis () const override
+  { return "(...)"; }
 
 protected:
   /* See language.h.  */
