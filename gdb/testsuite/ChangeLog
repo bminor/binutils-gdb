@@ -1,3 +1,8 @@
+2020-06-23  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* lib/completion-support.exp (test_gdb_completion_offers_commands):
+	Adjust for omitted commands when TUI is disabled.
+
 2020-06-23  Gary Benson <gbenson@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
