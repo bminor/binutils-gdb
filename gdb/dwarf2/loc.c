@@ -271,36 +271,45 @@ decode_debug_loc_dwo_addresses (dwarf2_per_cu_data *per_cu,
     case DW_LLE_GNU_end_of_list_entry:
       *new_ptr = loc_ptr;
       return DEBUG_LOC_END_OF_LIST;
+
     case DW_LLE_GNU_base_address_selection_entry:
       *low = 0;
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &high_index);
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
+
       *high = dwarf2_read_addr_index (per_cu, per_objfile, high_index);
       *new_ptr = loc_ptr;
       return DEBUG_LOC_BASE_ADDRESS;
+
     case DW_LLE_GNU_start_end_entry:
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &low_index);
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
+
       *low = dwarf2_read_addr_index (per_cu, per_objfile, low_index);
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &high_index);
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
+
       *high = dwarf2_read_addr_index (per_cu, per_objfile, high_index);
       *new_ptr = loc_ptr;
       return DEBUG_LOC_START_END;
+
     case DW_LLE_GNU_start_length_entry:
       loc_ptr = gdb_read_uleb128 (loc_ptr, buf_end, &low_index);
       if (loc_ptr == NULL)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
+
       *low = dwarf2_read_addr_index (per_cu, per_objfile, low_index);
       if (loc_ptr + 4 > buf_end)
 	return DEBUG_LOC_BUFFER_OVERFLOW;
+
       *high = *low;
       *high += extract_unsigned_integer (loc_ptr, 4, byte_order);
       *new_ptr = loc_ptr + 4;
       return DEBUG_LOC_START_LENGTH;
+
     default:
       return DEBUG_LOC_INVALID_ENTRY;
     }
@@ -362,17 +371,21 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	case DEBUG_LOC_END_OF_LIST:
 	  *locexpr_length = 0;
 	  return NULL;
+
 	case DEBUG_LOC_BASE_ADDRESS:
 	  base_address = high + base_offset;
 	  continue;
+
 	case DEBUG_LOC_START_END:
 	case DEBUG_LOC_START_LENGTH:
 	case DEBUG_LOC_OFFSET_PAIR:
 	  break;
+
 	case DEBUG_LOC_BUFFER_OVERFLOW:
 	case DEBUG_LOC_INVALID_ENTRY:
 	  error (_("dwarf2_find_location_expression: "
 		   "Corrupted DWARF expression."));
+
 	default:
 	  gdb_assert_not_reached ("bad debug_loc_kind");
 	}
@@ -1279,8 +1292,10 @@ call_site_parameter_matches (struct call_site_parameter *parameter,
       {
       case CALL_SITE_PARAMETER_DWARF_REG:
 	return kind_u.dwarf_reg == parameter->u.dwarf_reg;
+
       case CALL_SITE_PARAMETER_FB_OFFSET:
 	return kind_u.fb_offset == parameter->u.fb_offset;
+
       case CALL_SITE_PARAMETER_PARAM_OFFSET:
 	return kind_u.param_cu_off == parameter->u.param_cu_off;
       }
@@ -3085,38 +3100,47 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  ax_const_l (expr, extract_unsigned_integer (op_ptr, 1, byte_order));
 	  op_ptr += 1;
 	  break;
+
 	case DW_OP_const1s:
 	  ax_const_l (expr, extract_signed_integer (op_ptr, 1, byte_order));
 	  op_ptr += 1;
 	  break;
+
 	case DW_OP_const2u:
 	  ax_const_l (expr, extract_unsigned_integer (op_ptr, 2, byte_order));
 	  op_ptr += 2;
 	  break;
+
 	case DW_OP_const2s:
 	  ax_const_l (expr, extract_signed_integer (op_ptr, 2, byte_order));
 	  op_ptr += 2;
 	  break;
+
 	case DW_OP_const4u:
 	  ax_const_l (expr, extract_unsigned_integer (op_ptr, 4, byte_order));
 	  op_ptr += 4;
 	  break;
+
 	case DW_OP_const4s:
 	  ax_const_l (expr, extract_signed_integer (op_ptr, 4, byte_order));
 	  op_ptr += 4;
 	  break;
+
 	case DW_OP_const8u:
 	  ax_const_l (expr, extract_unsigned_integer (op_ptr, 8, byte_order));
 	  op_ptr += 8;
 	  break;
+
 	case DW_OP_const8s:
 	  ax_const_l (expr, extract_signed_integer (op_ptr, 8, byte_order));
 	  op_ptr += 8;
 	  break;
+
 	case DW_OP_constu:
 	  op_ptr = safe_read_uleb128 (op_ptr, op_end, &uoffset);
 	  ax_const_l (expr, uoffset);
 	  break;
+
 	case DW_OP_consts:
 	  op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
 	  ax_const_l (expr, offset);
@@ -3233,6 +3257,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	      ax_simple (expr, aop_add);
 	    }
 	  break;
+
 	case DW_OP_bregx:
 	  {
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
@@ -3246,6 +3271,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	      }
 	  }
 	  break;
+
 	case DW_OP_fbreg:
 	  {
 	    const gdb_byte *datastart;
@@ -3295,7 +3321,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	  offset = *op_ptr++;
 	  ax_pick (expr, offset);
 	  break;
-	  
+
 	case DW_OP_swap:
 	  ax_simple (expr, aop_swap);
 	  break;
@@ -3941,45 +3967,54 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  data += 1;
 	  fprintf_filtered (stream, " %s", pulongest (ul));
 	  break;
+
 	case DW_OP_const1s:
 	  l = extract_signed_integer (data, 1, gdbarch_byte_order (arch));
 	  data += 1;
 	  fprintf_filtered (stream, " %s", plongest (l));
 	  break;
+
 	case DW_OP_const2u:
 	  ul = extract_unsigned_integer (data, 2, gdbarch_byte_order (arch));
 	  data += 2;
 	  fprintf_filtered (stream, " %s", pulongest (ul));
 	  break;
+
 	case DW_OP_const2s:
 	  l = extract_signed_integer (data, 2, gdbarch_byte_order (arch));
 	  data += 2;
 	  fprintf_filtered (stream, " %s", plongest (l));
 	  break;
+
 	case DW_OP_const4u:
 	  ul = extract_unsigned_integer (data, 4, gdbarch_byte_order (arch));
 	  data += 4;
 	  fprintf_filtered (stream, " %s", pulongest (ul));
 	  break;
+
 	case DW_OP_const4s:
 	  l = extract_signed_integer (data, 4, gdbarch_byte_order (arch));
 	  data += 4;
 	  fprintf_filtered (stream, " %s", plongest (l));
 	  break;
+
 	case DW_OP_const8u:
 	  ul = extract_unsigned_integer (data, 8, gdbarch_byte_order (arch));
 	  data += 8;
 	  fprintf_filtered (stream, " %s", pulongest (ul));
 	  break;
+
 	case DW_OP_const8s:
 	  l = extract_signed_integer (data, 8, gdbarch_byte_order (arch));
 	  data += 8;
 	  fprintf_filtered (stream, " %s", plongest (l));
 	  break;
+
 	case DW_OP_constu:
 	  data = safe_read_uleb128 (data, end, &ul);
 	  fprintf_filtered (stream, " %s", pulongest (ul));
 	  break;
+
 	case DW_OP_consts:
 	  data = safe_read_sleb128 (data, end, &l);
 	  fprintf_filtered (stream, " %s", plongest (l));
@@ -4262,6 +4297,7 @@ disassemble_dwarf_expression (struct ui_file *stream,
 	  ul = dwarf2_read_addr_index (per_cu, per_objfile, ul);
 	  fprintf_filtered (stream, " 0x%s", phex_nz (ul, addr_size));
 	  break;
+
 	case DW_OP_GNU_const_index:
 	  data = safe_read_uleb128 (data, end, &ul);
 	  ul = dwarf2_read_addr_index (per_cu, per_objfile, ul);
@@ -4583,19 +4619,23 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
 	case DEBUG_LOC_END_OF_LIST:
 	  done = 1;
 	  continue;
+
 	case DEBUG_LOC_BASE_ADDRESS:
 	  base_address = high + base_offset;
 	  fprintf_filtered (stream, _("  Base address %s"),
 			    paddress (gdbarch, base_address));
 	  continue;
+
 	case DEBUG_LOC_START_END:
 	case DEBUG_LOC_START_LENGTH:
 	case DEBUG_LOC_OFFSET_PAIR:
 	  break;
+
 	case DEBUG_LOC_BUFFER_OVERFLOW:
 	case DEBUG_LOC_INVALID_ENTRY:
 	  error (_("Corrupted DWARF expression for symbol \"%s\"."),
 		 symbol->print_name ());
+
 	default:
 	  gdb_assert_not_reached ("bad debug_loc_kind");
 	}

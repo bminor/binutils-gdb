@@ -1,3 +1,13 @@
+2020-06-23  Simon Marchi  <simon.marchi@efficios.com>
+
+	* dwarf2/loc.c (decode_debug_loc_dwo_addresses): Add empty
+	lines.
+	(dwarf2_find_location_expression): Likewise.
+	(call_site_parameter_matches): Likewise.
+	(dwarf2_compile_expr_to_ax): Likewise.
+	(disassemble_dwarf_expression): Likewise.
+	(loclist_describe_location): Likewise.
+
 2020-06-23  Pedro Alves  <palves@redhat.com>
 
 	* gdbarch-selftests.c: Don't include inferior.h, gdbthread.h or
