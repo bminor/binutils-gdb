@@ -1,3 +1,13 @@
+2020-06-23  Pedro Alves  <palves@redhat.com>
+
+	* gdbarch-selftests.c: Don't include inferior.h, gdbthread.h or
+	progspace-and-thread.h.  Include scoped-mock-context.h instead.
+	(register_to_value_test): Use scoped_mock_context.
+	* regcache.c: Include "scoped-mock-context.h".
+	(cooked_read_test): Don't error out if a target is already pushed.
+	Use scoped_mock_context.  Adjust.
+	* scoped-mock-context.h: New file.
+
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* ada-lang.c (ada_language_data): Delete la_is_string_type_p
