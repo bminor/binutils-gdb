@@ -286,6 +286,8 @@ typedef struct
   char *map_filename;
   FILE *map_file;
 
+  char *dependency_file;
+
   unsigned int split_by_reloc;
   bfd_size_type split_by_file;
 

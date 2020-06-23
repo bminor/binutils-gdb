@@ -111,6 +111,8 @@ static const struct ld_option ld_options[] =
     'c', N_("FILE"), N_("Read MRI format linker script"), TWO_DASHES },
   { {"dc", no_argument, NULL, 'd'},
     'd', NULL, N_("Force common symbols to be defined"), ONE_DASH },
+  { {"dependency-file", required_argument, NULL, OPTION_DEPENDENCY_FILE},
+    '\0', N_("FILE"), N_("Write dependency file"), TWO_DASHES },
   { {"dp", no_argument, NULL, 'd'},
     '\0', NULL, NULL, ONE_DASH },
   { {"force-group-allocation", no_argument, NULL,
@@ -1441,7 +1443,7 @@ parse_args (unsigned argc, char **argv)
 	      = lang_new_vers_pattern (NULL, xstrdup (optarg), NULL,
 				       FALSE);
 	    lang_append_dynamic_list (&export_list, expr);
-          }
+	  }
 	  break;
 	case OPTION_EXPORT_DYNAMIC_SYMBOL_LIST:
 	  /* This option indicates a small script that only specifies
@@ -1630,6 +1632,10 @@ parse_args (unsigned argc, char **argv)
 
 	case OPTION_PRINT_MAP_DISCARDED:
 	  config.print_map_discarded = TRUE;
+	  break;
+
+	case OPTION_DEPENDENCY_FILE:
+	  config.dependency_file = optarg;
 	  break;
 	}
     }
@@ -1906,14 +1912,14 @@ elf_shlib_list_options (FILE *file)
     }
   fprintf (file, _("\
   -P AUDITLIB, --depaudit=AUDITLIB\n" "\
-                              Specify a library to use for auditing dependencies\n"));
+			      Specify a library to use for auditing dependencies\n"));
   fprintf (file, _("\
   -z combreloc                Merge dynamic relocs into one section and sort\n"));
   fprintf (file, _("\
   -z nocombreloc              Don't merge dynamic relocs into one section\n"));
   fprintf (file, _("\
   -z global                   Make symbols in DSO available for subsequently\n\
-                               loaded objects\n"));
+			       loaded objects\n"));
   fprintf (file, _("\
   -z initfirst                Mark DSO to be initialized first at runtime\n"));
   fprintf (file, _("\
@@ -1936,7 +1942,7 @@ elf_shlib_list_options (FILE *file)
   -z now                      Mark object non-lazy runtime binding\n"));
   fprintf (file, _("\
   -z origin                   Mark object requiring immediate $ORIGIN\n\
-                                processing at runtime\n"));
+				processing at runtime\n"));
 #if DEFAULT_LD_Z_RELRO
   fprintf (file, _("\
   -z relro                    Create RELRO program header (default)\n"));
@@ -1994,13 +2000,13 @@ elf_static_list_options (FILE *file)
   --build-id[=STYLE]          Generate build ID note\n"));
   fprintf (file, _("\
   --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi]\n\
-                              Compress DWARF debug sections using zlib\n"));
+			      Compress DWARF debug sections using zlib\n"));
 #ifdef DEFAULT_FLAG_COMPRESS_DEBUG
   fprintf (file, _("\
-                               Default: zlib-gabi\n"));
+			       Default: zlib-gabi\n"));
 #else
   fprintf (file, _("\
-                               Default: none\n"));
+			       Default: none\n"));
 #endif
   fprintf (file, _("\
   -z common-page-size=SIZE    Set common page size to SIZE\n"));
@@ -2025,7 +2031,7 @@ elf_plt_unwind_list_options (FILE *file)
   --ld-generated-unwind-info  Generate exception handling info for PLT\n"));
   fprintf (file, _("\
   --no-ld-generated-unwind-info\n\
-                              Don't generate exception handling info for PLT\n"));
+			      Don't generate exception handling info for PLT\n"));
 }
 
 static void

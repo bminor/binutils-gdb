@@ -28,6 +28,10 @@
 * Add ELF linker command-line option `-z start-stop-visibility=...' to control
   the visibility of synthetic `__start_SECNAME` and `__stop_SECNAME` symbols.
 
+* Add command-line option --dependency-file to write a Make-style dependency
+  file listing the input files consulted by the linker, like the files written
+  by the compiler's -M -MP options.
+
 Changes in 2.34:
 
 * The ld check for "PHDR segment not covered by LOAD segment" is more

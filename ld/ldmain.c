@@ -160,6 +160,53 @@ static bfd_error_handler_type default_bfd_error_handler;
 
 struct bfd_link_info link_info;
 
+struct dependency_file
+{
+  struct dependency_file *next;
+  char *name;
+};
+
+static struct dependency_file *dependency_files, *dependency_files_tail;
+
+void
+track_dependency_files (const char *filename)
+{
+  struct dependency_file *dep
+    = (struct dependency_file *) xmalloc (sizeof (*dep));
+  dep->name = xstrdup (filename);
+  dep->next = NULL;
+  if (dependency_files == NULL)
+    dependency_files = dep;
+  else
+    dependency_files_tail->next = dep;
+  dependency_files_tail = dep;
+}
+
+static void
+write_dependency_file (void)
+{
+  FILE *out;
+  struct dependency_file *dep;
+
+  out = fopen (config.dependency_file, FOPEN_WT);
+  if (out == NULL)
+    {
+      einfo (_("%F%P: cannot open dependency file %s: %E\n"),
+	     config.dependency_file);
+    }
+
+  fprintf (out, "%s:", output_filename);
+
+  for (dep = dependency_files; dep != NULL; dep = dep->next)
+    fprintf (out, " \\\n  %s", dep->name);
+
+  fprintf (out, "\n");
+  for (dep = dependency_files; dep != NULL; dep = dep->next)
+    fprintf (out, "\n%s:\n", dep->name);
+
+  fclose (out);
+}
+
 static void
 ld_cleanup (void)
 {
@@ -239,7 +286,7 @@ main (int argc, char **argv)
       /* is_sysrooted_pathname() relies on no trailing dirsep.  */
       if (ld_canon_sysroot_len > 0
 	  && IS_DIR_SEPARATOR (ld_canon_sysroot [ld_canon_sysroot_len - 1]))
-        ld_canon_sysroot [--ld_canon_sysroot_len] = '\0';
+	ld_canon_sysroot [--ld_canon_sysroot_len] = '\0';
     }
   else
     ld_canon_sysroot_len = -1;
@@ -480,6 +527,9 @@ main (int argc, char **argv)
 #endif
   ldexp_finish ();
   lang_finish ();
+
+  if (config.dependency_file != NULL)
+    write_dependency_file ();
 
   /* Even if we're producing relocatable output, some non-fatal errors should
      be reported in the exit status.  (What non-fatal errors, if any, do we

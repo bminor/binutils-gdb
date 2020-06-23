@@ -142,6 +142,8 @@ ldfile_try_open_bfd (const char *attempt,
       return FALSE;
     }
 
+  track_dependency_files (attempt);
+
   /* Linker needs to decompress sections.  */
   entry->the_bfd->flags |= BFD_DECOMPRESS;
 
@@ -416,21 +418,21 @@ ldfile_open_file (lang_input_statement_type *entry)
       bfd_boolean found = FALSE;
 
       /* If extra_search_path is set, entry->filename is a relative path.
-         Search the directory of the current linker script before searching
-         other paths. */
+	 Search the directory of the current linker script before searching
+	 other paths. */
       if (entry->extra_search_path)
-        {
-          char *path = concat (entry->extra_search_path, slash, entry->filename,
-                               (const char *)0);
-          if (ldfile_try_open_bfd (path, entry))
-            {
-              entry->filename = path;
-              entry->flags.search_dirs = FALSE;
-              return;
-            }
+	{
+	  char *path = concat (entry->extra_search_path, slash, entry->filename,
+			       (const char *)0);
+	  if (ldfile_try_open_bfd (path, entry))
+	    {
+	      entry->filename = path;
+	      entry->flags.search_dirs = FALSE;
+	      return;
+	    }
 
 	  free (path);
-        }
+	}
 
       /* Try to open <filename><suffix> or lib<filename><suffix>.a.  */
       for (arch = search_arch_head; arch != NULL; arch = arch->next)
@@ -674,6 +676,8 @@ ldfile_open_command_file_1 (const char *name, enum script_open_style open_how)
       einfo (_("%F%P: cannot open linker script file %s: %E\n"), name);
       return;
     }
+
+  track_dependency_files (name);
 
   lex_push_file (ldlex_input_stack, name, sysrooted);
 

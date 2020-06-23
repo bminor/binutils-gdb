@@ -262,6 +262,8 @@ ldelf_try_needed (struct dt_needed *needed, int force, int is_linux)
       return FALSE;
     }
 
+  track_dependency_files (name);
+
   /* Linker needs to decompress sections.  */
   abfd->flags |= BFD_DECOMPRESS;
 
@@ -1065,7 +1067,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 	}
       return;
     }
-  
+
   if (!link_info.traditional_format)
     {
       bfd *elfbfd = NULL;

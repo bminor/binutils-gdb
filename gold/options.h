@@ -472,7 +472,7 @@ struct Struct_special : public Struct_var
   options::String_set::const_iterator					  \
   varname__##_end() const						  \
   { return this->varname__##_.value.end(); }                              \
-                                                                          \
+									  \
   options::String_set::size_type                                          \
   varname__##_size() const                                                \
   { return this->varname__##_.value.size(); }                             \
@@ -799,6 +799,10 @@ class General_options
   DEFINE_bool(no_demangle, options::TWO_DASHES, '\0', false,
 	      N_("Do not demangle C++ symbols in log messages"),
 	      NULL);
+
+  DEFINE_string(dependency_file, options::TWO_DASHES, '\0', NULL,
+		N_("Write a dependency file listing all files read"),
+		N_("FILE"));
 
   DEFINE_bool(detect_odr_violations, options::TWO_DASHES, '\0', false,
 	      N_("Look for violations of the C++ One Definition Rule"),
@@ -1501,10 +1505,10 @@ class General_options
   DEFINE_uint64(stack_size, options::DASH_Z, '\0', 0,
 		N_("Set PT_GNU_STACK segment p_memsz to SIZE"), N_("SIZE"));
   DEFINE_enum(start_stop_visibility, options::DASH_Z, '\0', "protected",
-              N_("ELF symbol visibility for synthesized "
-                 "__start_* and __stop_* symbols"),
-              ("[default,internal,hidden,protected]"),
-              {"default", "internal", "hidden", "protected"});
+	      N_("ELF symbol visibility for synthesized "
+		 "__start_* and __stop_* symbols"),
+	      ("[default,internal,hidden,protected]"),
+	      {"default", "internal", "hidden", "protected"});
   DEFINE_bool(text, options::DASH_Z, '\0', false,
 	      N_("Do not permit relocations in read-only segments"),
 	      N_("Permit relocations in read-only segments"));

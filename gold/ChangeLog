@@ -1,3 +1,16 @@
+2020-06-23  Roland McGrath  <mcgrathr@google.com>
+
+	PR 22843
+	* options.h (class General_options): Add --dependency-file option.
+	* fileread.cc (File_read::files_read): New static variable.
+	(File_read::open): Add the file to the files_read list.
+	(File_read::record_file_read): New static member function.
+	(File_read::write_dependency_file): New static member function.
+	* fileread.h (class File_read): Declare them.
+	* layout.cc (Layout::read_layout_from_file): Call record_file_read.
+	(Close_task_runner::run): Call write_dependency_file if
+	--dependency-file was passed.
+
 2020-06-18  Fangrui Song  <i@maskray.me>
 
 	PR gold/26039

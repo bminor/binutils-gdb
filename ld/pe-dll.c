@@ -3344,6 +3344,8 @@ pe_implied_import_dll (const char *filename)
       return FALSE;
     }
 
+  track_dependency_files (filename);
+
   /* PEI dlls seem to be bfd_objects.  */
   if (!bfd_check_format (dll, bfd_object))
     {

@@ -1,3 +1,21 @@
+2020-06-23  Roland McGrath  <mcgrathr@google.com>
+
+	PR 22843
+	* NEWS: Note --dependency-file.
+	* ld.texi (Options): Document --dependency-file.
+	* ldlex.h (enum option_values): Add OPTION_DEPENDENCY_FILE.
+	* ld.h (ld_config_type): New member dependency_file.
+	* lexsup.c (ld_options, parse_args): Parse --dependency-file.
+	* ldmain.c (struct dependency_file): New type.
+	(dependency_files, dependency_files_tail): New static variables.
+	(track_dependency_files): New function.
+	(write_dependency_file): New function.
+	(main): Call it when --dependency-file was passed.
+	* ldfile.c (ldfile_try_open_bfd): Call track_dependency_files.
+	(ldfile_open_command_file_1): Likewise.
+	* ldelf.c (ldelf_try_needed): Likewise.
+	* pe-dll.c (pe_implied_import_dll): Likewise.
+
 2020-06-23  Alan Modra  <amodra@gmail.com>
 
 	PR 26150
