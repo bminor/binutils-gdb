@@ -337,7 +337,6 @@ extern const struct language_data objc_language_data =
   macro_expansion_c,
   objc_extensions,
   &exp_descriptor_standard,
-  "self",		        /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   objc_op_print_tab,		/* Expression operators for printing */
   1,				/* C-style arrays */
@@ -418,6 +417,11 @@ public:
 
     return real_stop_pc;
   }
+
+  /* See language.h.  */
+
+  const char *name_of_this () const override
+  { return "self"; }
 };
 
 /* Single instance of the class representing the Objective-C language.  */

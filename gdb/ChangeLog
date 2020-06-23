@@ -1,5 +1,42 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Remove la_name_of_this
+	initializer.
+	* ax-gdb.c (gen_expr): Update call to name_of_this.
+	* c-exp.y (classify_name): Likewise.
+	* c-lang.c (c_language_data): Remove la_name_of_this initializer.
+	(cplus_language_data): Likewise.
+	(cplus_language::name_of_this): New member function.
+	(asm_language_data): Remove la_name_of_this initializer.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	(d_language::name_of_this): New member function.
+	* expprint.c (print_subexp_standard): Update call to name_of_this.
+	* f-lang.c (f_language_data): Remove la_name_of_this initializer.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unknown_language_data): Likewise.
+	(unknown_language::name_of_this): New member function.
+	(auto_language_data): Remove la_name_of_this initializer.
+	(auto_language::name_of_this): New member function.
+	* language.h (language_data): Delete la_name_of_this member
+	variable.
+	(language_defn::name_of_this): New member function.
+	* m2-lang.c (m2_language_data): Remove la_name_of_this
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	(objc_language::name_of_this): New member function.
+	* opencl-lang.c (opencl_language_data): Remove la_name_of_this
+	initializer.
+	* p-lang.c (pascal_language_data): Likewise.
+	(pascal_language::name_of_this): New member function.
+	* rust-lang.c (rust_language_data): Remove la_name_of_this
+	initializer.
+	* symtab.c (lookup_language_this): Update call to name_of_this.
+	(lookup_symbol_aux): Likewise.
+	* valops.c (value_of_this): Likewise.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove
 	la_struct_too_deep_ellipsis initializer.
 	(ada_language::struct_too_deep_ellipsis): New member function.

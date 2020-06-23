@@ -2233,7 +2233,7 @@ gen_expr (struct expression *exp, union exp_element **pc,
 
 	sym = lookup_language_this (lang, b).symbol;
 	if (!sym)
-	  error (_("no `%s' found"), lang->la_name_of_this);
+	  error (_("no `%s' found"), lang->name_of_this ());
 
 	gen_var_ref (ax, value, sym);
 

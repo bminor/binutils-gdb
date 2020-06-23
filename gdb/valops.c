@@ -3716,7 +3716,7 @@ value_of_this (const struct language_defn *lang)
   const struct block *b;
   struct frame_info *frame;
 
-  if (!lang->la_name_of_this)
+  if (lang->name_of_this () == NULL)
     error (_("no `this' in current language"));
 
   frame = get_selected_frame (_("no frame selected"));
@@ -3726,7 +3726,7 @@ value_of_this (const struct language_defn *lang)
   sym = lookup_language_this (lang, b);
   if (sym.symbol == NULL)
     error (_("current stack frame does not contain a variable named `%s'"),
-	   lang->la_name_of_this);
+	   lang->name_of_this ());
 
   return read_var_value (sym.symbol, sym.block, frame);
 }

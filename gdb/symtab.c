@@ -1912,7 +1912,7 @@ struct block_symbol
 lookup_language_this (const struct language_defn *lang,
 		      const struct block *block)
 {
-  if (lang->la_name_of_this == NULL || block == NULL)
+  if (lang->name_of_this () == NULL || block == NULL)
     return {};
 
   if (symbol_lookup_debug > 1)
@@ -1929,7 +1929,7 @@ lookup_language_this (const struct language_defn *lang,
     {
       struct symbol *sym;
 
-      sym = block_lookup_symbol (block, lang->la_name_of_this,
+      sym = block_lookup_symbol (block, lang->name_of_this (),
 				 symbol_name_match_type::SEARCH_NAME,
 				 VAR_DOMAIN);
       if (sym != NULL)
@@ -2069,7 +2069,7 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 	  if (t->code () != TYPE_CODE_STRUCT
 	      && t->code () != TYPE_CODE_UNION)
 	    error (_("Internal error: `%s' is not an aggregate"),
-		   langdef->la_name_of_this);
+		   langdef->name_of_this ());
 
 	  if (check_field (t, name, is_a_field_of_this))
 	    {

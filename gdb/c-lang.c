@@ -889,7 +889,6 @@ extern const struct language_data c_language_data =
   macro_expansion_c,
   c_extensions,
   &exp_descriptor_c,
-  NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
@@ -989,7 +988,6 @@ extern const struct language_data cplus_language_data =
   macro_expansion_c,
   cplus_extensions,
   &exp_descriptor_c,
-  "this",                       /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
@@ -1153,6 +1151,11 @@ public:
     return cp_lookup_symbol_nonlocal (this, name, block, domain);
   }
 
+  /* See language.h.  */
+
+  const char *name_of_this () const override
+  { return "this"; }
+
 protected:
 
   /* See language.h.  */
@@ -1186,7 +1189,6 @@ extern const struct language_data asm_language_data =
   macro_expansion_c,
   asm_extensions,
   &exp_descriptor_c,
-  NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
@@ -1241,7 +1243,6 @@ extern const struct language_data minimal_language_data =
   macro_expansion_c,
   NULL,
   &exp_descriptor_c,
-  NULL,				/* name_of_this */
   true,				/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */

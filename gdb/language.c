@@ -792,7 +792,6 @@ extern const struct language_data unknown_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_standard,
-  "this",        	    	/* name_of_this */
   true,				/* store_sym_names_in_linkage_form_p */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
@@ -898,6 +897,11 @@ public:
   {
     return default_is_string_type_p (type);
   }
+
+  /* See language.h.  */
+
+  const char *name_of_this () const override
+  { return "this"; }
 };
 
 /* Single instance of the unknown language class.  */
@@ -917,7 +921,6 @@ extern const struct language_data auto_language_data =
   macro_expansion_no,
   NULL,
   &exp_descriptor_standard,
-  "this",		        /* name_of_this */
   false,			/* store_sym_names_in_linkage_form_p */
   unk_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
@@ -1023,6 +1026,11 @@ public:
   {
     return default_is_string_type_p (type);
   }
+
+  /* See language.h.  */
+
+  const char *name_of_this () const override
+  { return "this"; }
 };
 
 /* Single instance of the fake "auto" language.  */

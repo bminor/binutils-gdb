@@ -504,8 +504,8 @@ print_subexp_standard (struct expression *exp, int *pos,
 
     case OP_THIS:
       ++(*pos);
-      if (exp->language_defn->la_name_of_this)
-	fputs_filtered (exp->language_defn->la_name_of_this, stream);
+      if (exp->language_defn->name_of_this () != NULL)
+	fputs_filtered (exp->language_defn->name_of_this (), stream);
       else
 	fprintf_styled (stream, metadata_style.style (),
 			_("<language %s has no 'this'>"),

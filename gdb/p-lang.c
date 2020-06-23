@@ -266,7 +266,6 @@ extern const struct language_data pascal_language_data =
   macro_expansion_no,
   p_extensions,
   &exp_descriptor_standard,
-  "this",		        /* name_of_this */
   false,			/* la_store_sym_names_in_linkage_form_p */
   pascal_op_print_tab,		/* expression operators for printing */
   1,				/* c-style arrays */
@@ -497,6 +496,11 @@ public:
     return is_pascal_string_type (type, nullptr, nullptr, nullptr,
 				  nullptr, nullptr) > 0;
   }
+
+  /* See language.h.  */
+
+  const char *name_of_this () const override
+  { return "this"; }
 };
 
 /* Single instance of the Pascal language class.  */

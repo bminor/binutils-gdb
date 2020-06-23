@@ -227,11 +227,6 @@ struct language_data
 
     /* Now come some hooks for lookup_symbol.  */
 
-    /* If this is non-NULL, specifies the name that of the implicit
-       local variable that refers to the current object instance.  */
-
-    const char *la_name_of_this;
-
     /* True if the symbols names should be stored in GDB's data structures
        for minimal/partial/full symbols using their linkage (aka mangled)
        form; false if the symbol names should be demangled first.
@@ -556,6 +551,14 @@ struct language_defn : language_data
 
   virtual const char *struct_too_deep_ellipsis () const
   { return "{...}"; }
+
+  /* If this returns non-NULL then the string returned specifies the name
+     of the implicit local variable that refers to the current object
+     instance.  Return NULL (the default) for languages that have no name
+     for the current object instance.  */
+
+  virtual const char *name_of_this () const
+  { return nullptr; }
 
 protected:
 
