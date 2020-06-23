@@ -1,5 +1,13 @@
 2020-06-23  Alan Modra  <amodra@gmail.com>
 
+	PR 26150
+	* ldlang.c (ldlang_add_file): Assert that we aren't adding the
+	current end of link.next list again too.
+	* ldmain.c (add_archive_element): Don't load archive elements
+	again that have already been loaded.
+
+2020-06-23  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/shared.exp (pr14170): Clear xfail for
 	bfin-*-linux*.
 	(pr17068, symbolic-func.so, pr22374): Likewise.

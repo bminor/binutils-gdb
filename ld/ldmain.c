@@ -822,10 +822,6 @@ add_archive_element (struct bfd_link_info *info,
   input->local_sym_name = bfd_get_filename (abfd);
   input->the_bfd = abfd;
 
-  parent = bfd_usrdata (abfd->my_archive);
-  if (parent != NULL && !parent->flags.reload)
-    parent->next = input;
-
   /* Save the original data for trace files/tries below, as plugins
      (if enabled) may possibly alter it to point to a replacement
      BFD, but we still want to output the original BFD filename.  */
@@ -852,6 +848,23 @@ add_archive_element (struct bfd_link_info *info,
 	}
     }
 #endif /* BFD_SUPPORTS_PLUGINS */
+
+  if (link_info.input_bfds_tail == &input->the_bfd->link.next
+      || input->the_bfd->link.next != NULL)
+    {
+      /* We have already loaded this element, and are attempting to
+	 load it again.  This can happen when the archive map doesn't
+	 match actual symbols defined by the element.  */
+      free (input);
+      bfd_set_error (bfd_error_malformed_archive);
+      return FALSE;
+    }
+
+  /* Set the file_chain pointer of archives to the last element loaded
+     from the archive.  See ldlang.c:find_rescan_insertion.  */
+  parent = bfd_usrdata (abfd->my_archive);
+  if (parent != NULL && !parent->flags.reload)
+    parent->next = input;
 
   ldlang_add_file (input);
 
