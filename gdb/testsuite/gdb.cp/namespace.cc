@@ -150,22 +150,22 @@ namespace C
       // plan to have GDB try to print out, just to make sure that the
       // compiler and I agree which ones should be legal!  It's easy
       // to screw up when testing the boundaries of namespace stuff.
-      int unused1 = c;
+      (void) c;
       //cc;
-      int unused2 = C::cc;
-      int unused3 = cd;
+      (void) C::cc;
+      (void) cd;
       //C::D::cd;
-      int unused4 = E::cde;
-      int unused5 = shadow;
+      (void) E::cde;
+      (void) shadow;
       //E::ce;
-      int unused6 = cX;
-      int unused7 = F::cXf;
-      int unused8 = F::cXfX;
-      int unused9 = X;
-      int unusedA = G::Xg;
+      (void) cX;
+      (void) F::cXf;
+      (void) F::cXfX;
+      (void) X;
+      (void) G::Xg;
       //cXOtherFile;
       //XOtherFile;
-      int unusedB = G::XgX;
+      (void) G::XgX;
 
       return;
     }

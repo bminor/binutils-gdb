@@ -17,10 +17,10 @@
 
 typedef long time_t;
 
-static time_t
+static void
 tick_tock (time_t *t)
 {
-  return *t++;
+  (void) *t++;
 }
 
 int

@@ -35,7 +35,7 @@ namespace L
   using namespace J;
   int marker8 ()
   {
-    int unused = jx;
+    (void) jx;
     return K::marker9 ();
   }
 }
@@ -53,7 +53,7 @@ namespace I
   int marker7 ()
   {
     using namespace G::H;
-    int unused = ghx;
+    (void) ghx;
     return L::marker8 ();
   }
 }
@@ -69,7 +69,7 @@ namespace E
 using namespace E::F;
 int marker6 ()
 {
-  int unused = efx;
+  (void) efx;
   return I::marker7 ();
 }
 
@@ -92,7 +92,7 @@ namespace D
 using namespace C;
 int marker5 ()
 {
-  int unused = cc;
+  (void) cc;
   return marker6 ();
 }
 
@@ -110,7 +110,7 @@ int marker3 ()
 int marker2 ()
 {
   namespace B = A;
-  int unused = B::_a;
+  (void) B::_a;
   return marker3 ();
 }
 
@@ -134,6 +134,6 @@ int marker1 ()
 int main ()
 {
   using namespace A;
-  int unused = _a;
+  (void) _a;
   return marker1 ();
 }
