@@ -1921,7 +1921,7 @@ lookup_language_this (const struct language_defn *lang,
 
       fprintf_unfiltered (gdb_stdlog,
 			  "lookup_language_this (%s, %s (objfile %s))",
-			  lang->la_name, host_address_to_string (block),
+			  lang->name (), host_address_to_string (block),
 			  objfile_debug_name (objfile));
     }
 

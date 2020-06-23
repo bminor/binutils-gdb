@@ -13713,8 +13713,6 @@ static const char * const ada_extensions[] =
 
 extern const struct language_data ada_language_data =
 {
-  "ada",                        /* Language name */
-  "Ada",
   language_ada,
   range_check_off,
   case_sensitive_on,            /* Yes, Ada is case-insensitive, but
@@ -13738,6 +13736,16 @@ public:
   ada_language ()
     : language_defn (language_ada, ada_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "ada"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Ada"; }
 
   /* Print an array element index using the Ada syntax.  */
 

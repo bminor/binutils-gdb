@@ -508,8 +508,6 @@ enum go_primitive_types {
 
 extern const struct language_data go_language_data =
 {
-  "go",
-  "Go",
   language_go,
   range_check_off,
   case_sensitive_on,
@@ -532,6 +530,16 @@ public:
   go_language ()
     : language_defn (language_go, go_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "go"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Go"; }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,

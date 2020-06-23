@@ -199,8 +199,6 @@ const struct exp_descriptor exp_descriptor_modula2 =
 
 extern const struct language_data m2_language_data =
 {
-  "modula-2",
-  "Modula-2",
   language_m2,
   range_check_on,
   case_sensitive_on,
@@ -223,6 +221,16 @@ public:
   m2_language ()
     : language_defn (language_m2, m2_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "modula-2"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Modula-2"; }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,

@@ -493,8 +493,6 @@ static const struct exp_descriptor exp_descriptor_f =
 
 extern const struct language_data f_language_data =
 {
-  "fortran",
-  "Fortran",
   language_fortran,
   range_check_on,
   case_sensitive_off,
@@ -517,6 +515,16 @@ public:
   f_language ()
     : language_defn (language_fortran, f_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "fortran"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Fortran"; }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,

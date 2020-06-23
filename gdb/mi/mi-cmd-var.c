@@ -458,7 +458,7 @@ mi_cmd_var_info_expression (const char *command, char **argv, int argc)
 
   lang = varobj_get_language (var);
 
-  uiout->field_string ("lang", lang->la_natural_name);
+  uiout->field_string ("lang", lang->natural_name ());
 
   std::string exp = varobj_get_expression (var);
   uiout->field_string ("exp", exp.c_str ());

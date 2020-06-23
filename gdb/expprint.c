@@ -509,7 +509,7 @@ print_subexp_standard (struct expression *exp, int *pos,
       else
 	fprintf_styled (stream, metadata_style.style (),
 			_("<language %s has no 'this'>"),
-			exp->language_defn->la_name);
+			exp->language_defn->name ());
       return;
 
       /* Modula-2 ops */
@@ -734,7 +734,7 @@ dump_raw_expression (struct expression *exp, struct ui_file *stream,
   if (note)
     fprintf_filtered (stream, ", %s:", note);
   fprintf_filtered (stream, "\n\tLanguage %s, %d elements, %ld bytes each.\n",
-		    exp->language_defn->la_name, exp->nelts,
+		    exp->language_defn->name (), exp->nelts,
 		    (long) sizeof (union exp_element));
   fprintf_filtered (stream, "\t%5s  %20s  %16s  %s\n", "Index", "Opcode",
 		    "Hex Value", "String Value");
@@ -1159,7 +1159,7 @@ dump_prefix_expression (struct expression *exp, struct ui_file *stream)
   fputs_filtered (", after conversion to prefix form:\nExpression: `", stream);
   print_expression (exp, stream);
   fprintf_filtered (stream, "'\n\tLanguage %s, %d elements, %ld bytes each.\n",
-		    exp->language_defn->la_name, exp->nelts,
+		    exp->language_defn->name (), exp->nelts,
 		    (long) sizeof (union exp_element));
   fputs_filtered ("\n", stream);
 

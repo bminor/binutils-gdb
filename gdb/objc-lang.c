@@ -328,8 +328,6 @@ static const char * const objc_extensions[] =
 
 extern const struct language_data objc_language_data =
 {
-  "objective-c",		/* Language name */
-  "Objective-C",
   language_objc,
   range_check_off,
   case_sensitive_on,
@@ -352,6 +350,16 @@ public:
   objc_language ()
     : language_defn (language_objc, objc_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "objective-c"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Objective-C"; }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,

@@ -133,8 +133,6 @@ static const char * const d_extensions[] =
 
 extern const struct language_data d_language_data =
 {
-  "d",
-  "D",
   language_d,
   range_check_off,
   case_sensitive_on,
@@ -157,6 +155,16 @@ public:
   d_language ()
     : language_defn (language_d, d_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "d"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "D"; }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,

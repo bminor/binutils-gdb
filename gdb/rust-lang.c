@@ -1906,8 +1906,6 @@ static const char * const rust_extensions[] =
 
 extern const struct language_data rust_language_data =
 {
-  "rust",
-  "Rust",
   language_rust,
   range_check_on,
   case_sensitive_on,
@@ -1930,6 +1928,16 @@ public:
   rust_language ()
     : language_defn (language_rust, rust_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "rust"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Rust"; }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,

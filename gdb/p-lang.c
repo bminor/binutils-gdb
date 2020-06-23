@@ -257,8 +257,6 @@ static const char * const p_extensions[] =
 
 extern const struct language_data pascal_language_data =
 {
-  "pascal",			/* Language name */
-  "Pascal",
   language_pascal,
   range_check_on,
   case_sensitive_on,
@@ -281,6 +279,17 @@ public:
   pascal_language ()
     : language_defn (language_pascal, pascal_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "pascal"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Pascal"; }
+
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,

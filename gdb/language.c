@@ -98,11 +98,11 @@ show_language_command (struct ui_file *file, int from_tty,
     fprintf_filtered (gdb_stdout,
 		      _("The current source language is "
 			"\"auto; currently %s\".\n"),
-		      current_language->la_name);
+		      current_language->name ());
   else
     fprintf_filtered (gdb_stdout,
 		      _("The current source language is \"%s\".\n"),
-		      current_language->la_name);
+		      current_language->name ());
 
   if (has_stack_frames ())
     {
@@ -131,7 +131,7 @@ set_language_command (const char *ignore,
   /* Search the list of languages for a match.  */
   for (const auto &lang : language_defn::languages)
     {
-      if (strcmp (lang->la_name, language) == 0)
+      if (strcmp (lang->name (), language) == 0)
 	{
 	  /* Found it!  Go into manual mode, and use this language.  */
 	  if (lang->la_language == language_auto)
@@ -442,7 +442,7 @@ enum language
 language_enum (const char *str)
 {
   for (const auto &lang : language_defn::languages)
-    if (strcmp (lang->la_name, str) == 0)
+    if (strcmp (lang->name (), str) == 0)
       return lang->la_language;
 
   if (strcmp (str, "local") == 0)
@@ -466,7 +466,7 @@ language_def (enum language lang)
 const char *
 language_str (enum language lang)
 {
-  return language_def (lang)->la_name;
+  return language_def (lang)->name ();
 }
 
 
@@ -486,9 +486,9 @@ add_set_language_command ()
   /* Display "auto", "local" and "unknown" first, and then the rest,
      alpha sorted.  */
   const char **language_names_p = language_names;
-  *language_names_p++ = language_def (language_auto)->la_name;
+  *language_names_p++ = language_def (language_auto)->name ();
   *language_names_p++ = "local";
-  *language_names_p++ = language_def (language_unknown)->la_name;
+  *language_names_p++ = language_def (language_unknown)->name ();
   const char **sort_begin = language_names_p;
   for (const auto &lang : language_defn::languages)
     {
@@ -496,7 +496,7 @@ add_set_language_command ()
       if (lang->la_language == language_auto
 	  || lang->la_language == language_unknown)
 	continue;
-      *language_names_p++ = lang->la_name;
+      *language_names_p++ = lang->name ();
     }
   *language_names_p = NULL;
   std::sort (sort_begin, language_names_p, compare_cstrings);
@@ -524,15 +524,11 @@ add_set_language_command ()
 	  || lang->la_language == language_auto)
 	continue;
 
-      /* FIXME: i18n: for now assume that the human-readable name is
-	 just a capitalization of the internal name.  */
       /* Note that we add the newline at the front, so we don't wind
 	 up with a trailing newline.  */
-      doc.printf ("\n%-16s Use the %c%s language",
-		  lang->la_name,
-		  /* Capitalize first letter of language name.  */
-		  toupper (lang->la_name[0]),
-		  lang->la_name + 1);
+      doc.printf ("\n%-16s Use the %s language",
+		  lang->name (),
+		  lang->natural_name ());
     }
 
   add_setshow_enum_cmd ("language", class_support,
@@ -783,8 +779,6 @@ unknown_language_arch_info (struct gdbarch *gdbarch,
 
 extern const struct language_data unknown_language_data =
 {
-  "unknown",
-  "Unknown",
   language_unknown,
   range_check_off,
   case_sensitive_on,
@@ -807,6 +801,16 @@ public:
   unknown_language ()
     : language_defn (language_unknown, unknown_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "unknown"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Unknown"; }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,
@@ -912,8 +916,6 @@ static unknown_language unknown_language_defn;
 
 extern const struct language_data auto_language_data =
 {
-  "auto",
-  "Auto",
   language_auto,
   range_check_off,
   case_sensitive_on,
@@ -936,6 +938,16 @@ public:
   auto_language ()
     : language_defn (language_auto, auto_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "auto"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Auto"; }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,
@@ -1209,7 +1221,7 @@ language_lookup_primitive_type_as_symbol (const struct language_defn *la,
       fprintf_unfiltered (gdb_stdlog,
 			  "language_lookup_primitive_type_as_symbol"
 			  " (%s, %s, %s)",
-			  la->la_name, host_address_to_string (gdbarch), name);
+			  la->name (), host_address_to_string (gdbarch), name);
     }
 
   typep = language_lookup_primitive_type_1 (lai, name);

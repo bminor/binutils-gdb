@@ -1,5 +1,91 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Remove la_name and
+	la_natural_name initializers.
+	(ada_language::name): New member function.
+	(ada_language::natural_name): New member function.
+	* c-lang.c (c_language_data): Remove la_name and
+	la_natural_name initializers.
+	(c_language::name): New member function.
+	(c_language::natural_name): New member function.
+	(cplus_language_data): Remove la_name and
+	la_natural_name initializers.
+	(cplus_language::name): New member function.
+	(cplus_language::natural_name): New member function.
+	(asm_language_data): Remove la_name and
+	la_natural_name initializers.
+	(asm_language::name): New member function.
+	(asm_language::natural_name): New member function.
+	(minimal_language_data): Remove la_name and
+	la_natural_name initializers.
+	(minimal_language::name): New member function.
+	(minimal_language::natural_name): New member function.
+	* compile/compile.c (compile_to_object): Update call to
+	lanugage_defn::name.
+	* d-lang.c (d_language_data): Remove la_name and
+	la_natural_name initializers.
+	(d_language::name): New member function.
+	(d_language::natural_name): New member function.
+	* expprint.c (print_subexp_standard): Update call to
+	language_defn::name.
+	(dump_raw_expression): Likewise
+	(dump_prefix_expression): Likewise.
+	* f-lang.c (f_language_data): Remove la_name and
+	la_natural_name initializers.
+	(f_language::name): New member function.
+	(f_language::natural_name): New member function.
+	* go-lang.c (go_language_data): Remove la_name and
+	la_natural_name initializers.
+	(go_language::name): New member function.
+	(go_language::natural_name): New member function.
+	* language.c (show_language_command): Update call to
+	language_defn::name.
+	(set_language_command): Likewise.
+	(language_enum): Likewise.
+	(language_str): Likewise.
+	(add_set_language_command): Likewise, use
+	language_defn::natural_name in the doc string.
+	(unknown_language_data): Remove la_name and
+	la_natural_name initializers.
+	(unknown_language::name): New member function.
+	(unknown_language::natural_name): New member function.
+	(auto_language_data): Remove la_name and
+	la_natural_name initializers.
+	(auto_language::name): New member function.
+	(auto_language::natural_name): New member function.
+	(language_lookup_primitive_type_as_symbol): Update call to
+	language_defn::name.
+	* language.h (language_data): Remove la_name and la_natural_name
+	member variables.
+	(language_defn::name): New member function.
+	(language_defn::natural_name): New member function.
+	* m2-lang.c (m2_language_data): Remove la_name and
+	la_natural_name initializers.
+	(m2_language::name): New member function.
+	(m2_language::natural_name): New member function.
+	* mi/mi-cmd-var.c (mi_cmd_var_info_expression): Update call to
+	language_defn::natural_name.
+	* objc-lang.c (objc_language_data): Remove la_name and
+	la_natural_name initializers.
+	(objc_language::name): New member function.
+	(objc_language::natural_name): New member function.
+	* opencl-lang.c (opencl_language_data): Remove la_name and
+	la_natural_name initializers.
+	(opencl_language::name): New member function.
+	(opencl_language::natural_name): New member function.
+	* p-lang.c (pascal_language_data): Remove la_name and
+	la_natural_name initializers.
+	(pascal_language::name): New member function.
+	(pascal_language::natural_name): New member function.
+	* rust-lang.c (rust_language_data): Remove la_name and
+	la_natural_name initializers.
+	(rust_language::name): New member function.
+	(rust_language::natural_name): New member function.
+	* symtab.c (lookup_language_this): Update call to
+	language_defn::name.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove la_name_of_this
 	initializer.
 	* ax-gdb.c (gen_expr): Update call to name_of_this.

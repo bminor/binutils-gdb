@@ -188,14 +188,6 @@ extern const char *default_word_break_characters (void);
 
 struct language_data
   {
-    /* Name of the language.  */
-
-    const char *la_name;
-
-    /* Natural or official name of the language.  */
-
-    const char *la_natural_name;
-
     /* its symtab language-enum (defs.h).  */
 
     enum language la_language;
@@ -274,6 +266,14 @@ struct language_defn : language_data
     gdb_assert (languages[lang] == nullptr);
     languages[lang] = this;
   }
+
+  /* Name of the language.  */
+
+  virtual const char *name () const = 0;
+
+  /* Natural or official name of the language.  */
+
+  virtual const char *natural_name () const = 0;
 
   /* Print the index of an element of an array.  This default
      implementation prints using C99 syntax.  */

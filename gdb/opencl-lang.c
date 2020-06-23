@@ -1006,8 +1006,6 @@ const struct exp_descriptor exp_descriptor_opencl =
 /* Constant data representing the OpenCL language.  */
 extern const struct language_data opencl_language_data =
 {
-  "opencl",			/* Language name */
-  "OpenCL C",
   language_opencl,
   range_check_off,
   case_sensitive_on,
@@ -1030,6 +1028,16 @@ public:
   opencl_language ()
     : language_defn (language_opencl, opencl_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "opencl"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "OpenCL C"; }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,

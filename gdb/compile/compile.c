@@ -695,7 +695,7 @@ compile_to_object (struct command_line *cmd, const char *cmd_string,
 			(current_language->get_compile_instance ());
   if (compiler == nullptr)
     error (_("No compiler support for language %s."),
-	   current_language->la_name);
+	   current_language->name ());
   compiler->set_print_callback (print_callback, NULL);
   compiler->set_scope (scope);
   compiler->set_block (expr_block);

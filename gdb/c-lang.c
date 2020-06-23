@@ -880,8 +880,6 @@ static const char * const c_extensions[] =
 
 extern const struct language_data c_language_data =
 {
-  "c",				/* Language name */
-  "C",
   language_c,
   range_check_off,
   case_sensitive_on,
@@ -904,6 +902,16 @@ public:
   c_language ()
     : language_defn (language_c, c_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "c"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "C"; }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,
@@ -979,8 +987,6 @@ static const char * const cplus_extensions[] =
 
 extern const struct language_data cplus_language_data =
 {
-  "c++",			/* Language name */
-  "C++",
   language_cplus,
   range_check_off,
   case_sensitive_on,
@@ -1003,6 +1009,16 @@ public:
   cplus_language ()
     : language_defn (language_cplus, cplus_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "c++"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "C++"; }
 
   /* See language.h.  */
 
@@ -1180,8 +1196,6 @@ static const char * const asm_extensions[] =
 
 extern const struct language_data asm_language_data =
 {
-  "asm",			/* Language name */
-  "assembly",
   language_asm,
   range_check_off,
   case_sensitive_on,
@@ -1204,6 +1218,16 @@ public:
   asm_language ()
     : language_defn (language_asm, asm_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "asm"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Assembly"; }
 
   /* See language.h.
 
@@ -1234,8 +1258,6 @@ static asm_language asm_language_defn;
 
 extern const struct language_data minimal_language_data =
 {
-  "minimal",			/* Language name */
-  "Minimal",
   language_minimal,
   range_check_off,
   case_sensitive_on,
@@ -1258,6 +1280,16 @@ public:
   minimal_language ()
     : language_defn (language_minimal, minimal_language_data)
   { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "minimal"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Minimal"; }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,
