@@ -79,4 +79,8 @@ extern std::unique_ptr<struct mi_parse> mi_parse (const char *cmd,
 
 enum print_values mi_parse_print_values (const char *name);
 
+/* Split ARGS into argc/argv and store the result in PARSE.  */
+
+extern void mi_parse_argv (const char *args, struct mi_parse *parse);
+
 #endif /* MI_MI_PARSE_H */

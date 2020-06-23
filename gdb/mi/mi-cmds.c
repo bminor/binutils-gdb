@@ -22,6 +22,7 @@
 #include "top.h"
 #include "mi-cmds.h"
 #include "mi-main.h"
+#include "mi-parse.h"
 #include <map>
 #include <string>
 
@@ -33,6 +34,80 @@ using mi_cmd_up = std::unique_ptr<struct mi_cmd>;
 
 static std::map<std::string, mi_cmd_up> mi_cmd_table;
 
+/* MI command with a pure MI implementation.  */
+
+struct mi_command_mi : public mi_cmd
+{
+  /* Constructor.  For NAME and SUPPRESS_NOTIFICATION see mi_cmd
+     constructor, FUNC is the function called from do_invoke, which
+     implements this MI command.  */
+  mi_command_mi (const char *name, mi_cmd_argv_ftype func,
+                 int *suppress_notification)
+    : mi_cmd (name, suppress_notification),
+      m_argv_function (func)
+  {
+    gdb_assert (func != nullptr);
+  }
+
+protected:
+
+  /* Called when this MI command has been invoked, calls m_argv_function
+     with arguments contained within PARSE.  */
+  void do_invoke (struct mi_parse *parse) const override
+  {
+    mi_parse_argv (parse->args, parse);
+
+    if (parse->argv == nullptr)
+      error (_("Problem parsing arguments: %s %s"), parse->command,
+	     parse->args);
+
+    this->m_argv_function (parse->command, parse->argv, parse->argc);
+  }
+
+private:
+
+  /* The function that implements this MI command.  */
+  mi_cmd_argv_ftype *m_argv_function;
+};
+
+/* MI command implemented on top of a CLI command.  */
+
+struct mi_command_cli : public mi_cmd
+{
+  /* Constructor.  For NAME and SUPPRESS_NOTIFICATION see mi_cmd
+     constructor, CLI_NAME is the name of a CLI command that should be
+     invoked to implement this MI command.  If ARGS_P is true then any
+     arguments from entered by the user as part of the MI command line are
+     forwarded to CLI_NAME as its argument string, otherwise, if ARGS_P is
+     false, nullptr is send to CLI_NAME as its argument string.  */
+  mi_command_cli (const char *name, const char *cli_name, bool args_p,
+                  int *suppress_notification)
+    : mi_cmd (name, suppress_notification),
+      m_cli_name (cli_name),
+      m_args_p (args_p)
+  { /* Nothing.  */ }
+
+protected:
+
+  /* Called when this MI command has been invoked, calls the m_cli_name
+     CLI function.  In m_args_p is true then the argument string from
+     within PARSE is passed through to the CLI function, otherwise nullptr
+     is passed through to the CLI function as its argument string.  */
+  void do_invoke (struct mi_parse *parse) const override
+  {
+    const char *args = m_args_p ? parse->args : nullptr;
+    mi_execute_cli_command (m_cli_name, m_args_p, args);
+  }
+
+private:
+
+  /* The name of the CLI command to execute.  */
+  const char *m_cli_name;
+
+  /* Should we be passing an argument string to the m_cli_name function?  */
+  bool m_args_p;
+};
+
 /* Insert COMMAND into the global mi_cmd_table.  Return false if
    COMMAND->name already exists in mi_cmd_table, in which case COMMAND will
    not have been added to mi_cmd_table.  Otherwise, return true, and
@@ -42,25 +117,14 @@ static bool
 insert_mi_cmd_entry (mi_cmd_up command)
 {
   gdb_assert (command != nullptr);
-  gdb_assert (command->name != nullptr);
 
-  std::string name (command->name);
+  const std::string &name = command->name ();
 
   if (mi_cmd_table.find (name) != mi_cmd_table.end ())
     return false;
 
   mi_cmd_table[name] = std::move (command);
   return true;
-}
-
-/* Create an mi_cmd structure with name NAME.  */
-
-static mi_cmd_up
-create_mi_cmd (const char *name)
-{
-  mi_cmd_up cmd (new mi_cmd ());
-  cmd->name = name;
-  return cmd;
 }
 
 /* Create and register a new MI command with an MI specific implementation.
@@ -71,14 +135,10 @@ static void
 add_mi_cmd_mi (const char *name, mi_cmd_argv_ftype function,
 	       int *suppress_notification = nullptr)
 {
-  mi_cmd_up cmd_up = create_mi_cmd (name);
+  mi_cmd_up command (new mi_command_mi (name, function,
+                                        suppress_notification));
 
-  cmd_up->cli.cmd = nullptr;
-  cmd_up->cli.args_p = 0;
-  cmd_up->argv_func = function;
-  cmd_up->suppress_notification = suppress_notification;
-
-  bool success = insert_mi_cmd_entry (std::move (cmd_up));
+  bool success = insert_mi_cmd_entry (std::move (command));
   gdb_assert (success);
 }
 
@@ -90,18 +150,44 @@ static void
 add_mi_cmd_cli (const char *name, const char *cli_name, int args_p,
 		int *suppress_notification = nullptr)
 {
-  mi_cmd_up cmd_up = create_mi_cmd (name);
+  mi_cmd_up command (new mi_command_cli (name, cli_name, args_p != 0,
+                                         suppress_notification));
 
-  cmd_up->cli.cmd = cli_name;
-  cmd_up->cli.args_p = args_p;
-  cmd_up->argv_func = nullptr;
-  cmd_up->suppress_notification = suppress_notification;
-
-  bool success = insert_mi_cmd_entry (std::move (cmd_up));
+  bool success = insert_mi_cmd_entry (std::move (command));
   gdb_assert (success);
 }
 
-/* Initialize MI_CMD_TABLE, the global map of MI commands.  */
+/* See mi-cmds.h.  */
+
+mi_cmd::mi_cmd (const char *name, int *suppress_notification)
+  : m_name (name),
+    m_suppress_notification (suppress_notification)
+{
+  gdb_assert (m_name != nullptr && m_name[0] != '\0');
+}
+
+/* See mi-cmds.h.  */
+
+void
+mi_cmd::invoke (struct mi_parse *parse) const
+{
+  gdb::optional<scoped_restore_tmpl<int>> restore
+    = do_suppress_notification ();
+  this->do_invoke (parse);
+}
+
+/* See mi-cmds.h.  */
+
+gdb::optional<scoped_restore_tmpl<int>>
+mi_cmd::do_suppress_notification () const
+{
+  if (m_suppress_notification != nullptr)
+    return scoped_restore_tmpl<int> (m_suppress_notification, 1);
+  else
+    return {};
+}
+
+/* Initialize the available MI commands.  */
 
 static void
 build_table ()

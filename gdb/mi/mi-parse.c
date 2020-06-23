@@ -106,7 +106,7 @@ mi_parse_escape (const char **string_ptr)
   return c;
 }
 
-static void
+void
 mi_parse_argv (const char *args, struct mi_parse *parse)
 {
   const char *chp = args;
@@ -363,20 +363,8 @@ mi_parse (const char *cmd, char **token)
       chp = skip_spaces (chp);
     }
 
-  /* For new argv commands, attempt to return the parsed argument
-     list.  */
-  if (parse->cmd->argv_func != NULL)
-    {
-      mi_parse_argv (chp, parse.get ());
-      if (parse->argv == NULL)
-	error (_("Problem parsing arguments: %s %s"), parse->command, chp);
-    }
-
-  /* FIXME: DELETE THIS */
-  /* For CLI commands, also return the remainder of the
-     command line as a single string. */
-  if (parse->cmd->cli.cmd != NULL)
-    parse->args = xstrdup (chp);
+  /* Save the rest of the arguments for the command.  */
+  parse->args = xstrdup (chp);
 
   /* Fully parsed, flag as an MI command.  */
   parse->op = MI_COMMAND;
