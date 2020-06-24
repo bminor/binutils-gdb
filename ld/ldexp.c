@@ -1217,15 +1217,19 @@ exp_fold_tree_1 (etree_type *tree)
 			bfd_link_hide_symbol (link_info.output_bfd,
 					      &link_info, h);
 
-		      /* Copy the symbol type if this is an expression only
+		      /* Copy the symbol type and set non_ir_ref_regular
+			 on the source if this is an expression only
 			 referencing a single symbol.  (If the expression
 			 contains ternary conditions, ignoring symbols on
 			 false branches.)  */
 		      if (expld.assign_src != NULL
 			  && (expld.assign_src
 			      != (struct bfd_link_hash_entry *) -1))
-			bfd_copy_link_hash_symbol_type (link_info.output_bfd,
-							h, expld.assign_src);
+			{
+			  bfd_copy_link_hash_symbol_type (link_info.output_bfd,
+							  h, expld.assign_src);
+			  expld.assign_src->non_ir_ref_regular = TRUE;
+			}
 		    }
 		}
 	    }

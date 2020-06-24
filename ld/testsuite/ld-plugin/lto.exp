@@ -207,6 +207,9 @@ set lto_link_tests [list \
   [list "Build pr24406-2b.o" \
    "" "-O2 -fno-lto" \
    {pr24406-2b.c}] \
+  [list "Build pr26163a.o" \
+   "" "-O2 -fno-lto" \
+   {pr26163a.c}] \
 ]
 
 if { [at_least_gcc_version 10 0] } {
@@ -502,6 +505,11 @@ set lto_run_tests [list \
    {pr24406-2a.c} "pr24406-2" "pass.out" \
    "-flto -O2" "c" "" \
    "tmpdir/pr24406-2b.o -Wl,--wrap=cook"] \
+  [list "Run pr26163" \
+   "-O2 -flto" "" \
+   {pr26163b.c} "pr24406-2" "pass.out" \
+   "-flto -O2" "c" "" \
+   "tmpdir/pr26163a.o -Wl,--defsym,g=real_g"] \
 ]
 
 if { [at_least_gcc_version 4 7] } {

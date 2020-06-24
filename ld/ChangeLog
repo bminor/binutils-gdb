@@ -1,3 +1,12 @@
+2020-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26163
+	* ldexp.c (exp_fold_tree_1): Set non_ir_ref_regular on the source
+	for assignment.
+	* testsuite/ld-plugin/lto.exp: Run ld/26163 test.
+	* testsuite/ld-plugin/pr26163a.c: New file.
+	* testsuite/ld-plugin/pr26163b.c: Likewise.
+
 2020-06-24  Alan Modra  <amodra@gmail.com>
 
 	* lexsup.c (elf_shlib_list_options): Properly format help message.
