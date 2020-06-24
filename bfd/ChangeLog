@@ -1,3 +1,8 @@
+2020-06-24  Alan Modra  <amodra@gmail.com>
+
+	* vms-alpha.c (_bfd_vms_slurp_etir <ETIR__C_OPR_ASH>): Implement
+	shifts without undefined behaviour.
+
 2020-06-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (elf_link_hash_table): Add dt_pltgot_required and

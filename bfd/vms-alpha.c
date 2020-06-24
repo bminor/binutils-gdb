@@ -34,6 +34,7 @@
 */
 
 #include "sysdep.h"
+#include <limits.h>
 #include "bfd.h"
 #include "bfdlink.h"
 #include "libbfd.h"
@@ -71,6 +72,9 @@
 
 
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
 
 /* The r_type field in a reloc is one of the following values.  */
 #define ALPHA_R_IGNORE		0
@@ -2520,10 +2524,27 @@ _bfd_vms_slurp_etir (bfd *abfd, struct bfd_link_info *info)
 				  _bfd_vms_etir_name (cmd));
 	      return FALSE;
 	    }
-	  if ((int)op2 < 0)		/* Shift right.  */
-	    op1 >>= -(int)op2;
-	  else			/* Shift left.  */
-	    op1 <<= (int)op2;
+	  if ((bfd_signed_vma) op2 < 0)
+	    {
+	      /* Shift right.  */
+	      bfd_vma sign;
+	      op2 = -op2;
+	      if (op2 >= CHAR_BIT * sizeof (op1))
+		op2 = CHAR_BIT * sizeof (op1) - 1;
+	      /* op1 = (bfd_signed_vma) op1 >> op2; */
+	      sign = op1 & ((bfd_vma) 1 << (CHAR_BIT * sizeof (op1) - 1));
+	      op1 >>= op2;
+	      sign >>= op2;
+	      op1 = (op1 ^ sign) - sign;
+	    }
+	  else
+	    {
+	      /* Shift left.  */
+	      if (op2 >= CHAR_BIT * sizeof (op1))
+		op1 = 0;
+	      else
+		op1 <<= op2;
+	    }
 	  if (!_bfd_vms_push (abfd, op1, RELC_NONE)) /* FIXME: sym.  */
 	    return FALSE;
 	  break;
