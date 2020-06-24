@@ -1,3 +1,9 @@
+2020-06-24  Alan Modra  <amodra@gmail.com>
+
+	* lexsup.c (elf_shlib_list_options): Properly format help message.
+	(elf_plt_unwind_list_options): Likewise.
+	* emultempl/cskyelf.em (PARSE_AND_LIST_OPTIONS): Likewise.
+
 2020-06-23  Roland McGrath  <mcgrathr@google.com>
 
 	PR 22843

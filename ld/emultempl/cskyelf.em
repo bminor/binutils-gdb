@@ -300,12 +300,14 @@ PARSE_AND_LIST_LONGOPTS='
   {"stub-group-size",	required_argument, NULL, OPTION_STUBGROUP_SIZE},
 '
 PARSE_AND_LIST_OPTIONS='
-  fprintf (file, _("  --[no-]branch-stub\n"));
-  fprintf (file, _("\t\t\tDisable/enable use of stubs to expand branch "
-		   "instructions that cannot reach the target.\n"));
-  fprintf (file, _("  --stub-group-size=N\n"));
-  fprintf (file, _("\t\t\tMaximum size of a group of input sections "
-		   "handled by one stub section."));
+  fprintf (file, _("  --[no-]branch-stub          "
+		   "Disable/enable use of stubs to expand branch\n"
+		   "                              "
+		   "  instructions that cannot reach the target.\n"));
+  fprintf (file, _("  --stub-group-size=N         "
+		   "Maximum size of a group of input sections\n"
+		   "                              "
+		   "  handled by one stub section.\n"));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
