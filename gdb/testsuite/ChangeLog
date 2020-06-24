@@ -1,3 +1,8 @@
+2020-06-24  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (gdb_compile): Update intro comment.  If C/C++ with
+	Clang, add "-Wno-unknown-warning-option" to the options.
+
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.xml/tdesc-reload.c: New file.

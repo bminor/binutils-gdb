@@ -3826,7 +3826,8 @@ set gdb_saved_set_unbuffered_mode_obj ""
 #   - ldflags=flag: Add FLAG to the linker flags.
 #   - incdir=path: Add PATH to the searched include directories.
 #   - libdir=path: Add PATH to the linker searched directories.
-#   - ada, c++, f77: Compile the file as Ada, C++ or Fortran.
+#   - ada, c++, f77, f90, go, rust: Compile the file as Ada, C++,
+#     Fortran 77, Fortran 90, Go or Rust.
 #   - debug: Build with debug information.
 #   - optimize: Build with optimization.
 
@@ -3848,6 +3849,23 @@ proc gdb_compile {source dest type options} {
 	# -fdiagnostics-color is not a rustcc option.
     } else {
 	set new_options [universal_compile_options]
+    }
+
+    # Some C/C++ testcases unconditionally pass -Wno-foo as additional
+    # options to disable some warning.  That is OK with GCC, because
+    # by design, GCC accepts any -Wno-foo option, even if it doesn't
+    # support -Wfoo.  Clang however warns about unknown -Wno-foo by
+    # default, unless you pass -Wno-unknown-warning-option as well.
+    # We do that here, so that individual testcases don't have to
+    # worry about it.
+    if {[lsearch -exact $options getting_compiler_info] == -1
+	&& [lsearch -exact $options rust] == -1
+	&& [lsearch -exact $options ada] == -1
+	&& [lsearch -exact $options f77] == -1
+	&& [lsearch -exact $options f90] == -1
+	&& [lsearch -exact $options go] == -1
+	&& [test_compiler_info "clang-*"]} {
+	lappend new_options "additional_flags=-Wno-unknown-warning-option"
     }
 
     # Place (and look for) Fortran `.mod` files in the output
