@@ -1,5 +1,13 @@
 2020-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/26083
+	* testsuite/ld-cris/libdso-15b.d: Updated.
+	* testsuite/ld-cris/libdso-1c.d: Likewise.
+	* testsuite/ld-cris/libdso-1d.d: Likewise.
+	* testsuite/ld-cris/libdso-15c.d: New file.
+
+2020-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/26163
 	* ldexp.c (exp_fold_tree_1): Set non_ir_ref_regular on the source
 	for assignment.
