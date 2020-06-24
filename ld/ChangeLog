@@ -1,5 +1,10 @@
 2020-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/26165
+	* lexsup.c (ld_options): Correct --dependency-file order.
+
+2020-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/26083
 	* testsuite/ld-csky/tls-ie-v1.d: Updated.
 	* testsuite/ld-csky/tls-ie.d: Likewise.
