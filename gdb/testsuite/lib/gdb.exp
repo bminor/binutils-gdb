@@ -3868,6 +3868,14 @@ proc gdb_compile {source dest type options} {
 	lappend new_options "additional_flags=-Wno-unknown-warning-option"
     }
 
+    # Treating .c input files as C++ is deprecated in Clang, so
+    # explicitly force C++ language.
+    if { [lsearch -exact $options getting_compiler_info] == -1
+	 && [lsearch -exact $options c++] != -1
+	 && [test_compiler_info "clang-*"]} {
+	lappend new_options additional_flags=-x\ c++
+    }
+
     # Place (and look for) Fortran `.mod` files in the output
     # directory for this specific test.
     if {[lsearch -exact $options f77] != -1 \

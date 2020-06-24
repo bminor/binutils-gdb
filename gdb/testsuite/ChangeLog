@@ -1,5 +1,15 @@
 2020-06-24  Pedro Alves  <palves@redhat.com>
 
+	* gdb.arch/amd64-entry-value-paramref.exp: Use
+	prepare_for_testing_full and don't pass "c++" for the .S file
+	build spec.
+	* gdb.compile/compile-cplus.exp: Don't compile $srcfile3 with
+	$options, since it's an assembly file.  Remove -Wno-deprecated.
+	* lib/gdb.exp (gdb_compile): Pass "-x c++" explicitly when
+	compiling C++ programs.
+
+2020-06-24  Pedro Alves  <palves@redhat.com>
+
 	* lib/gdb.exp (gdb_compile): Update intro comment.  If C/C++ with
 	Clang, add "-Wno-unknown-warning-option" to the options.
 

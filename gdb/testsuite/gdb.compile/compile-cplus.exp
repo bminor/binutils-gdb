@@ -24,11 +24,6 @@ if { [test_compiler_info gcc*] || [test_compiler_info clang*] } {
     lappend options additional_flags=-std=gnu++11
     lappend options c++
 }
-if [test_compiler_info clang*] {
-    # Treating C input as C++ is deprecated in Clang, so
-    # the build will fail without disabling -Wdeprecated.
-    lappend options additional_flags=-Wno-deprecated
-}
 
 if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
     verbose "Skipping x86_64 LOC_CONST test."
@@ -37,14 +32,9 @@ if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
 
 set srcfilesoptions [list ${srcfile} ${options}]
 if { $srcfile3 != "" } {
-    lappend srcfilesoptions $srcfile3 ${options}
+    lappend srcfilesoptions $srcfile3 {}
 }
 set srcfile4options "nodebug c++"
-if [test_compiler_info clang*] {
-    # Treating C input as C++ is deprecated in Clang, so
-    # the build will fail without disabling -Wdeprecated.
-    set srcfile4options "$srcfile4options additional_flags=-Wno-deprecated"
-}
 lappend srcfilesoptions $srcfile4 $srcfile4options
 if { [eval build_executable_from_specs ${testfile}.exp $testfile {$options} ${srcfilesoptions}] } {
     return -1
