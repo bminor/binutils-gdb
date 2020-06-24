@@ -2433,7 +2433,7 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
 	  return pc + 4;
 	}
 
-      /* For X32, also check for `movq %esp, %ebp'.  */
+      /* For X32, also check for `movl %esp, %ebp'.  */
       if (gdbarch_ptr_bit (gdbarch) == 32)
 	{
 	  if (memcmp (buf, mov_esp_ebp_1, 2) == 0

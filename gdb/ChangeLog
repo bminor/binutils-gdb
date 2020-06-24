@@ -1,3 +1,7 @@
+2020-08-06  Victor Collod  <vcollod@nvidia.com>
+
+	* amd64-tdep.c (amd64_analyze_prologue): Fix incorrect comment.
+
 2020-08-05  Kevin Buettner  <kevinb@redhat.com>
 
 	* corelow.c (core_target::build_file_mappings): Don't output
