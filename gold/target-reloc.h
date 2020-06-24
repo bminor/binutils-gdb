@@ -258,7 +258,7 @@ issue_discarded_error(
 							     &is_ordinary);
   if (orig_shndx != elfcpp::SHN_UNDEF)
     {
-      unsigned int key_symndx;
+      unsigned int key_symndx = 0;
       Relobj* kept_obj = object->find_kept_section_object(orig_shndx,
 							  &key_symndx);
       if (key_symndx != 0)

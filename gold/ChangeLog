@@ -1,3 +1,8 @@
+2020-06-24  Nick Clifton  <nickc@redhat.com>
+
+	* target-reloc.h (issue_discarded_error): Initialise the
+	key_symndx variable.
+
 2020-06-23  Roland McGrath  <mcgrathr@google.com>
 
 	PR 22843
