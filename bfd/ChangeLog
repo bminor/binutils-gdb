@@ -1,6 +1,12 @@
 2020-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26083
+	* elf32-csky.c (csky_elf_size_dynamic_sections): Call
+	_bfd_elf_add_dynamic_tags.
+
+2020-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26083
 	* elf32-cris.c (elf_cris_size_dynamic_sections): Call
 	_bfd_elf_add_dynamic_tags.
 

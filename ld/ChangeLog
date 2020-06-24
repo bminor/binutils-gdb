@@ -1,6 +1,12 @@
 2020-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26083
+	* testsuite/ld-csky/tls-ie-v1.d: Updated.
+	* testsuite/ld-csky/tls-ie.d: Likewise.
+
+2020-06-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26083
 	* testsuite/ld-cris/libdso-15b.d: Updated.
 	* testsuite/ld-cris/libdso-1c.d: Likewise.
 	* testsuite/ld-cris/libdso-1d.d: Likewise.
