@@ -1,3 +1,7 @@
+2020-06-25  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
 2020-05-21  Alan Modra  <amodra@gmail.com>
 
 	* utils.c (print_name_only): Free demangled without checking
