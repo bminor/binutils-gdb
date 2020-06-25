@@ -1,3 +1,12 @@
+2020-06-25 David Faust  <david.faust@oracle.com>
+
+	* bpf.cpu (f-offset16): Change type from INT to HI.
+	(dxli): Simplify memory access.
+	(dxsi): Likewise.
+	(define-endian-insn): Update c-call in semantics.
+	(dlabs) Likewise.
+	(dlind) Likewise.
+
 2020-06-02  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* bpf.cpu (define-bpf-isa): Set base-insn-bitsize to 64.

@@ -273,7 +273,7 @@
 ;; difficulty: we put them in their own instruction word so the
 ;; byte-endianness will be properly applied.
 
-(dwf f-offset16 "eBPF offset field" (all-isas) 16 16 15 16 INT)
+(dwf f-offset16 "eBPF offset field" (all-isas) 16 16 15 16 HI)
 (dwf f-imm32 "eBPF 32-bit immediate field" (all-isas) 32 32 31 32 INT)
 
 ;; For the disjoint 64-bit signed immediate, however, we need to use a
@@ -488,7 +488,7 @@
        (+  (f-offset16 0) ((.sym f-src x-endian) 0) (.sym dst x-endian) endsize
            OP_CLASS_ALU x-op-src OP_CODE_END)
        (set (.sym dst x-endian)
-            (c-call DI "bpfbf_end" (.sym dst x-endian) endsize))
+            (c-call DI (.str "bpfbf_end" x-suffix) (.sym dst x-endian) endsize))
        ()))
 
 (define-endian-insn "le" OP_SRC_K le)
@@ -538,11 +538,7 @@
                       (mem DI
                            (add DI
                                 (reg DI h-gpr 6) ;; Pointer to struct sk_buff
-                                (const DI 0)))   ;; XXX offsetof
-                      ;; (struct sk_buff, data) XXX but the offset
-                      ;; depends on CONFIG_* options, so this should
-                      ;; be configured in the simulator and driven by
-                      ;; command-line options.  Handle with a c-call.
+                                (c-call "bpfbf_skb_data_offset")))
                       imm32)))
        ;; XXX this clobbers R1-R5
        ()))
@@ -572,11 +568,7 @@
                       (mem DI
                            (add DI
                                 (reg DI h-gpr 6) ;; Pointer to struct sk_buff
-                                (const DI 0)))   ;; XXX offsetof
-                      ;; (struct sk_buff, data) XXX but the offset
-                      ;; depends on CONFIG_* options, so this should
-                      ;; be configured in the simulator and driven by
-                      ;; command-line options.  Handle with a c-call.
+                                (c-call "bpfbf_skb_data_offset")))
                       (add DI
                            (.sym src x-endian)
                            imm32))))
@@ -612,7 +604,7 @@
           OP_CLASS_LDX (.sym OP_SIZE_ x-size) OP_MODE_MEM)
        (set x-mode
             (.sym dst x-endian)
-            (mem x-mode (add DI (.sym src x-endian) (ext DI (trunc HI offset16)))))
+            (mem x-mode (add DI (.sym src x-endian) offset16)))
        ()))
 
 (define-pmacro (dxsi x-basename x-suffix x-size x-endian x-mode)
@@ -623,7 +615,7 @@
        (+ (f-imm32 0) offset16 (.sym src x-endian) (.sym dst x-endian)
           OP_CLASS_STX (.sym OP_SIZE_ x-size) OP_MODE_MEM)
        (set x-mode
-            (mem x-mode (add DI (.sym dst x-endian) (ext DI (trunc HI offset16))))
+            (mem x-mode (add DI (.sym dst x-endian) offset16))
             (.sym src x-endian)) ;; XXX address is section-relative
        ()))
 
