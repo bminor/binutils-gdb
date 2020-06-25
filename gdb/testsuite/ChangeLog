@@ -1,3 +1,15 @@
+2020-07-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/amd64-osabi.exp: Update.
+	* gdb.arch/arm-disassembler-options.exp: Update.
+	* gdb.arch/powerpc-disassembler-options.exp: Update.
+	* gdb.arch/ppc64-symtab-cordic.exp: Update.
+	* gdb.arch/s390-disassembler-options.exp: Update.
+	* gdb.base/all-architectures.exp.tcl: Update.
+	* gdb.base/attach-pie-noexec.exp: Update.
+	* gdb.base/catch-syscall.exp: Update.
+	* gdb.xml/tdesc-arch.exp: Update.
+
 2020-07-14  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.threads/clone-new-thread-event.c (gettid): Rename to ...

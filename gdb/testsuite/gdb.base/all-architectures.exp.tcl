@@ -246,7 +246,7 @@ with_test_prefix "tests" {
 		    set arch_re [string_to_regexp $arch]
 		    set test "set architecture $arch"
 		    gdb_test_multiple $test $test {
-			-re "^set architecture $arch_re\r\n(${osabi_warning})?The target architecture is assumed to be $arch_re\r\n$gdb_prompt $" {
+			-re "^set architecture $arch_re\r\n(${osabi_warning})?The target architecture is set to \"$arch_re\"\\.\r\n$gdb_prompt $" {
 			    internal_pass $test
 			}
 			-re "Architecture .* not recognized.*$gdb_prompt $" {

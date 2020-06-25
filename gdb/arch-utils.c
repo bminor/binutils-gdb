@@ -476,11 +476,11 @@ show_architecture (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
   if (target_architecture_user == NULL)
-    fprintf_filtered (file, _("The target architecture is set "
-			      "automatically (currently %s)\n"),
+    fprintf_filtered (file, _("The target architecture is set to "
+			      "\"auto\" (currently \"%s\").\n"),
 		      gdbarch_bfd_arch_info (get_current_arch ())->printable_name);
   else
-    fprintf_filtered (file, _("The target architecture is assumed to be %s\n"),
+    fprintf_filtered (file, _("The target architecture is set to \"%s\".\n"),
 		      set_architecture_string);
 }
 

@@ -1,3 +1,7 @@
+2020-07-14  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arch-utils.c (show_architecture): Update formatting of messages.
+
 2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbtypes.h (struct type) <bounds>: Handle array and string
