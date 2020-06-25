@@ -1,5 +1,18 @@
 2020-06-25  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (cpu_flags_match): Only match SSE2AVX
+	templates when there's no data size prefix.
+	(md_assemble): Reject data size prefix also for legacy encoded
+	SIMD templates.
+	* testsuite/gas/i386/prefix32.s, testsuite/gas/i386/prefix64.s:
+	Uncomment previously not working line.
+	* testsuite/gas/i386/sse2avx.s: Add ldmxcsr/stmxcsr cases with
+	data16 prefix.
+	* testsuite/gas/i386/prefix32.l, testsuite/gas/i386/prefix64.l,
+	testsuite/gas/i386/sse2avx.d: Adjust expectations.
+
+2020-06-25  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (build_evex_prefix): Drop early setting of
 	vec_length.
 

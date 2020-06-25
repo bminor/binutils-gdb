@@ -1944,7 +1944,8 @@ cpu_flags_match (const insn_template *t)
 	    {
 	      /* We need to check a few extra flags with AVX.  */
 	      if (cpu.bitfield.cpuavx
-		  && (!t->opcode_modifier.sse2avx || sse2avx)
+		  && (!t->opcode_modifier.sse2avx
+		      || (sse2avx && !i.prefix[DATA_PREFIX]))
 		  && (!x.bitfield.cpuaes || cpu.bitfield.cpuaes)
 		  && (!x.bitfield.cpugfni || cpu.bitfield.cpugfni)
 		  && (!x.bitfield.cpupclmul || cpu.bitfield.cpupclmul))
@@ -4787,8 +4788,11 @@ md_assemble (char *line)
       return;
     }
 
-  /* Check for data size prefix on VEX/XOP/EVEX encoded insns.  */
-  if (i.prefix[DATA_PREFIX] && is_any_vex_encoding (&i.tm))
+  /* Check for data size prefix on VEX/XOP/EVEX encoded and SIMD insns.  */
+  if (i.prefix[DATA_PREFIX]
+      && (is_any_vex_encoding (&i.tm)
+	  || i.tm.operand_types[i.imm_operands].bitfield.class >= RegMMX
+	  || i.tm.operand_types[i.imm_operands + 1].bitfield.class >= RegMMX))
     {
       as_bad (_("data size prefix invalid with `%s'"), i.tm.name);
       return;

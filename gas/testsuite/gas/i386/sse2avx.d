@@ -9,6 +9,8 @@ Disassembly of section .text:
 0+ <_start>:
 [ 	]*[a-f0-9]+:	c5 f8 ae 11          	vldmxcsr \(%ecx\)
 [ 	]*[a-f0-9]+:	c5 f8 ae 19          	vstmxcsr \(%ecx\)
+[ 	]*[a-f0-9]+:	66 0f ae 11          	data16 ldmxcsr \(%ecx\)
+[ 	]*[a-f0-9]+:	66 0f ae 19          	data16 stmxcsr \(%ecx\)
 [ 	]*[a-f0-9]+:	c5 f8 5b f4          	vcvtdq2ps %xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c5 f8 5b 21          	vcvtdq2ps \(%ecx\),%xmm4
 [ 	]*[a-f0-9]+:	c5 fb e6 f4          	vcvtpd2dq %xmm4,%xmm6
