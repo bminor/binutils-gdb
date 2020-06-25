@@ -2252,7 +2252,7 @@ struct dis386 {
    'H' => print ",pt" or ",pn" branch hint
    'I' => honor following macro letter even in Intel mode (implemented only
 	  for some of the macro letters)
-   'J' => print 'l'
+   'J' unused.
    'K' => print 'd' or 'q' if rex prefix is present.
    'L' => print 'l' if suffix_always is true
    'M' => print 'r' if intel_mnemonic is false.
@@ -2536,8 +2536,8 @@ static const struct dis386 dis386[] = {
   /* c8 */
   { "enterT",		{ Iw, Ib }, 0 },
   { "leaveT",		{ XX }, 0 },
-  { "Jret{|f}P",	{ Iw }, 0 },
-  { "Jret{|f}P",	{ XX }, 0 },
+  { "{l|}ret{|f}P",	{ Iw }, 0 },
+  { "{l|}ret{|f}P",	{ XX }, 0 },
   { "int3",		{ XX }, 0 },
   { "int",		{ Ib }, 0 },
   { X86_64_TABLE (X86_64_CE) },
@@ -6857,7 +6857,7 @@ static const struct dis386 x86_64_table[][2] = {
 
   /* X86_64_9A */
   {
-    { "Jcall{T|}", { Ap }, 0 },
+    { "{l|}call{T|}", { Ap }, 0 },
   },
 
   /* X86_64_C2 */
@@ -6913,7 +6913,7 @@ static const struct dis386 x86_64_table[][2] = {
 
   /* X86_64_EA */
   {
-    { "Jjmp{T|}", { Ap }, 0 },
+    { "{l|}jmp{T|}", { Ap }, 0 },
   },
 
   /* X86_64_0F01_REG_0 */
@@ -10180,11 +10180,11 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_FF_REG_3 */
-    { "Jcall^", { indirEp }, 0 },
+    { "{l|}call^", { indirEp }, 0 },
   },
   {
     /* MOD_FF_REG_5 */
-    { "Jjmp^", { indirEp }, 0 },
+    { "{l|}jmp^", { indirEp }, 0 },
   },
   {
     /* MOD_0F01_REG_0 */
@@ -12866,11 +12866,6 @@ putop (const char *in_template, int sizeflag)
 	      else
 		*obufp++ = 'n';
 	    }
-	  break;
-	case 'J':
-	  if (intel_syntax)
-	    break;
-	  *obufp++ = 'l';
 	  break;
 	case 'K':
 	  USED_REX (REX_W);

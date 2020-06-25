@@ -1,5 +1,11 @@
 2020-06-25  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c: Adjust description of J macro.
+	(dis386, x86_64_table, mod_table): Replace J.
+	(putop): Remove handling of J.
+
+2020-06-25  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c: (float_mem): Reduce alternatives for fstpt and fldpt.
 
 2020-06-25  Jan Beulich  <jbeulich@suse.com>
