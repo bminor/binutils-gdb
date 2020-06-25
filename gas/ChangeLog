@@ -1,3 +1,10 @@
+2020-06-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 26141
+	* config/tc-arm.c (arm_force_relocation): Force resolution of
+	BFD_RELOC_THUMB_PCREL_BRANCH12 relocations.
+	* testsuite/gas/arm/plt-1.d: Adjust expected disassembly.
+
 2020-06-25  Jan Beulich  <jbeulich@suse.com>
 
 	* config/tc-i386.c (md_assemble): Move call to process_immext()

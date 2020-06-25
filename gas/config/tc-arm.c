@@ -30369,6 +30369,7 @@ arm_force_relocation (struct fix * fixp)
       || fixp->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM
       || fixp->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM_S2
       || fixp->fx_r_type == BFD_RELOC_ARM_THUMB_OFFSET
+      || fixp->fx_r_type == BFD_RELOC_THUMB_PCREL_BRANCH12
       || fixp->fx_r_type == BFD_RELOC_ARM_T32_ADD_IMM
       || fixp->fx_r_type == BFD_RELOC_ARM_T32_IMMEDIATE
       || fixp->fx_r_type == BFD_RELOC_ARM_T32_IMM12
