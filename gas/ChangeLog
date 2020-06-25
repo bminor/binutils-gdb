@@ -1,5 +1,11 @@
 2020-06-25  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (md_assemble): Move call to process_immext()
+	...
+	(process_operands): ... here.
+
+2020-06-25  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (process_suffix): Skip ambiguous operand size
 	diagnostic when there is a sizing prefix.  Switch to word/dword/
 	qword encoding when there is a sizing prefix and no (explicit or

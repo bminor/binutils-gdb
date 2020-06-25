@@ -4867,11 +4867,6 @@ md_assemble (char *line)
 	  && !i.types[j].bitfield.xmmword)
 	i.reg_operands--;
 
-  /* ImmExt should be processed after SSE2AVX.  */
-  if (!i.tm.opcode_modifier.sse2avx
-      && i.tm.opcode_modifier.immext)
-    process_immext ();
-
   /* For insns with operands there are more diddles to do to the opcode.  */
   if (i.operands)
     {
@@ -7450,6 +7445,9 @@ process_operands (void)
       i.prefix[REX_PREFIX] = 0;
       i.rex_encoding = 0;
     }
+  /* ImmExt should be processed after SSE2AVX.  */
+  else if (i.tm.opcode_modifier.immext)
+    process_immext ();
 
   if (i.tm.opcode_modifier.sse2avx && i.tm.opcode_modifier.vexvvvv)
     {
