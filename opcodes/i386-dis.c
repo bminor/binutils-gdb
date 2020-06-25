@@ -12342,9 +12342,9 @@ static const char *float_mem[] = {
   "fist{l|}",
   "fistp{l|}",
   "(bad)",
-  "fld{t||t|}",
+  "fld{t|}",
   "(bad)",
-  "fstp{t||t|}",
+  "fstp{t|}",
   /* dc */
   "fadd{l|}",
   "fmul{l|}",

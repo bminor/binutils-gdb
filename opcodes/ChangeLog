@@ -1,5 +1,9 @@
 2020-06-25  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c: (float_mem): Reduce alternatives for fstpt and fldpt.
+
+2020-06-25  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c: Adjust description of "LQ" macro.
 	(dis386_twobyte): Use LQ for sysret.
 	(putop): Adjust handling of LQ.
