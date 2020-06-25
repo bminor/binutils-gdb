@@ -25,7 +25,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	81 3f 89 00          	cmpw   \$0x89,\(%bx\)
  *[a-f0-9]+:	81 3f 34 12          	cmpw   \$0x1234,\(%bx\)
  *[a-f0-9]+:	a7                   	cmpsw  %es:\(%di\),%ds:\(%si\)
- *[a-f0-9]+:	67 a7                	cmpsw  %es:\(%edi\),%ds:\(%esi\)
+ *[a-f0-9]+:	a7                   	cmpsw  %es:\(%di\),%ds:\(%si\)
  *[a-f0-9]+:	f2 0f 38 f1 07       	crc32w \(%bx\),%eax
  *[a-f0-9]+:	f2 0f 2a 07          	cvtsi2sd \(%bx\),%xmm0
  *[a-f0-9]+:	f3 0f 2a 07          	cvtsi2ss \(%bx\),%xmm0
@@ -60,21 +60,21 @@ Disassembly of section .text:
  *[a-f0-9]+:	ed                   	in     \(%dx\),%ax
  *[a-f0-9]+:	ff 07                	incw   \(%bx\)
  *[a-f0-9]+:	6d                   	insw   \(%dx\),%es:\(%di\)
- *[a-f0-9]+:	67 6d                	insw   \(%dx\),%es:\(%edi\)
+ *[a-f0-9]+:	6d                   	insw   \(%dx\),%es:\(%di\)
  *[a-f0-9]+:	ff 27                	jmp    \*\(%bx\)
  *[a-f0-9]+:	0f 01 17             	lgdtw  \(%bx\)
  *[a-f0-9]+:	0f 01 1f             	lidtw  \(%bx\)
  *[a-f0-9]+:	0f 00 17             	lldt   \(%bx\)
  *[a-f0-9]+:	0f 01 37             	lmsw   \(%bx\)
  *[a-f0-9]+:	ad                   	lods   %ds:\(%si\),%ax
- *[a-f0-9]+:	67 ad                	lods   %ds:\(%esi\),%ax
+ *[a-f0-9]+:	ad                   	lods   %ds:\(%si\),%ax
  *[a-f0-9]+:	0f 00 1f             	ltr    \(%bx\)
  *[a-f0-9]+:	c7 07 12 00          	movw   \$0x12,\(%bx\)
  *[a-f0-9]+:	c7 07 34 12          	movw   \$0x1234,\(%bx\)
  *[a-f0-9]+:	8c 07                	mov    %es,\(%bx\)
  *[a-f0-9]+:	8e 07                	mov    \(%bx\),%es
  *[a-f0-9]+:	a5                   	movsw  %ds:\(%si\),%es:\(%di\)
- *[a-f0-9]+:	67 a5                	movsw  %ds:\(%esi\),%es:\(%edi\)
+ *[a-f0-9]+:	a5                   	movsw  %ds:\(%si\),%es:\(%di\)
  *[a-f0-9]+:	0f be 07             	movsbw \(%bx\),%ax
  *[a-f0-9]+:	66 0f be 07          	movsbl \(%bx\),%eax
  *[a-f0-9]+:	0f b6 07             	movzbw \(%bx\),%ax
@@ -89,7 +89,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	e7 00                	out    %ax,\$0x0
  *[a-f0-9]+:	ef                   	out    %ax,\(%dx\)
  *[a-f0-9]+:	6f                   	outsw  %ds:\(%si\),\(%dx\)
- *[a-f0-9]+:	67 6f                	outsw  %ds:\(%esi\),\(%dx\)
+ *[a-f0-9]+:	6f                   	outsw  %ds:\(%si\),\(%dx\)
  *[a-f0-9]+:	8f 07                	popw   \(%bx\)
  *[a-f0-9]+:	07                   	pop    %es
  *[a-f0-9]+:	f3 0f ae 27          	ptwrite \(%bx\)
@@ -115,7 +115,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	81 1f 89 00          	sbbw   \$0x89,\(%bx\)
  *[a-f0-9]+:	81 1f 34 12          	sbbw   \$0x1234,\(%bx\)
  *[a-f0-9]+:	af                   	scas   %es:\(%di\),%ax
- *[a-f0-9]+:	67 af                	scas   %es:\(%edi\),%ax
+ *[a-f0-9]+:	af                   	scas   %es:\(%di\),%ax
  *[a-f0-9]+:	d1 27                	shlw   \(%bx\)
  *[a-f0-9]+:	c1 27 02             	shlw   \$0x2,\(%bx\)
  *[a-f0-9]+:	d3 27                	shlw   %cl,\(%bx\)
@@ -133,7 +133,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	d3 2f                	shrw   %cl,\(%bx\)
  *[a-f0-9]+:	d1 2f                	shrw   \(%bx\)
  *[a-f0-9]+:	ab                   	stos   %ax,%es:\(%di\)
- *[a-f0-9]+:	67 ab                	stos   %ax,%es:\(%edi\)
+ *[a-f0-9]+:	ab                   	stos   %ax,%es:\(%di\)
  *[a-f0-9]+:	83 2f 01             	subw   \$0x1,\(%bx\)
  *[a-f0-9]+:	81 2f 89 00          	subw   \$0x89,\(%bx\)
  *[a-f0-9]+:	81 2f 34 12          	subw   \$0x1234,\(%bx\)

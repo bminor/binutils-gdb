@@ -1,5 +1,25 @@
 2020-06-25  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (process_suffix): Skip ambiguous operand size
+	diagnostic when there is a sizing prefix.  Switch to word/dword/
+	qword encoding when there is a sizing prefix and no (explicit or
+	derived) suffix.
+	(update_imm): Handle presence of a sizing prefix.
+	* testsuite/gas/i386/noreg16-data32.d,
+	testsuite/gas/i386/noreg32-data16.d,
+	testsuite/gas/i386/noreg32-data16.e,
+	testsuite/gas/i386/noreg64-data16.d,
+	testsuite/gas/i386/noreg64-data16.e,
+	testsuite/gas/i386/noreg64-rex64.d: New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+	* testsuite/gas/i386/noreg32.s, testsuite/gas/i386/noreg64.s:
+	Introduce and use pfx* macros.
+	* testsuite/gas/i386/noreg16.s: Likewise. Replace 32-bit
+	addressing.
+	* testsuite/gas/i386/noreg16.d: Adjust expectations.
+
+2020-06-25  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/avx-16bit.d,
 	testsuite/gas/i386/avx-scalar.d, testsuite/gas/i386/avx.d,
 	testsuite/gas/i386/avx512f-16bit.d,

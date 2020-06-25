@@ -1,144 +1,152 @@
+	.macro pfx insn:vararg
+	.ifdef DATA32
+	data32 \insn
+	.else
+	\insn
+	.endif
+	.endm
+
 	.text
 	.code16
 noreg:
-	adc	$1, (%bx)
-	adc	$0x89, (%bx)
-	adc	$0x1234, (%bx)
-	add	$1, (%bx)
-	add	$0x89, (%bx)
-	add	$0x1234, (%bx)
-	and	$1, (%bx)
-	and	$0x89, (%bx)
-	and	$0x1234, (%bx)
-	bt	$1, (%bx)
-	btc	$1, (%bx)
-	btr	$1, (%bx)
-	bts	$1, (%bx)
-	call	*(%bx)
-	cmp	$1, (%bx)
-	cmp	$0x89, (%bx)
-	cmp	$0x1234, (%bx)
-	cmps
-	cmps	%es:(%edi), (%esi)
-	crc32	(%bx), %eax
-	cvtsi2sd (%bx), %xmm0
-	cvtsi2ss (%bx), %xmm0
-	dec	(%bx)
-	div	(%bx)
-	fadd	(%bx)
-	fcom	(%bx)
-	fcomp	(%bx)
-	fdiv	(%bx)
-	fdivr	(%bx)
-	fiadd	(%bx)
-	ficom	(%bx)
-	ficomp	(%bx)
-	fidiv	(%bx)
-	fidivr	(%bx)
-	fild	(%bx)
-	fimul	(%bx)
-	fist	(%bx)
-	fistp	(%bx)
-	fisttp	(%bx)
-	fisub	(%bx)
-	fisubr	(%bx)
-	fld	(%bx)
-	fmul	(%bx)
-	fst	(%bx)
-	fstp	(%bx)
-	fsub	(%bx)
-	fsubr	(%bx)
-	idiv	(%bx)
-	imul	(%bx)
-	in	$0
-	in	%dx
-	inc	(%bx)
-	ins
-	ins	%dx, %es:(%edi)
-	jmp	*(%bx)
-	lgdt	(%bx)
-	lidt	(%bx)
-	lldt	(%bx)
-	lmsw	(%bx)
-	lods
-	lods	(%esi)
-	ltr	(%bx)
-	mov	$0x12, (%bx)
-	mov	$0x1234, (%bx)
-	mov	%es, (%bx)
-	mov	(%bx), %es
-	movs
-	movs	(%esi), %es:(%edi)
-	movsx	(%bx), %ax
-	movsx	(%bx), %eax
-	movzx	(%bx), %ax
-	movzx	(%bx), %eax
-	mul	(%bx)
-	neg	(%bx)
-	nop	(%bx)
-	not	(%bx)
-	or	$1, (%bx)
-	or	$0x89, (%bx)
-	or	$0x1234, (%bx)
-	out	$0
-	out	%dx
-	outs
-	outs	(%esi), %dx
-	pop	(%bx)
-	pop	%es
-	ptwrite	(%bx)
-	push	(%bx)
-	push	%es
-	rcl	$1, (%bx)
-	rcl	$2, (%bx)
-	rcl	%cl, (%bx)
-	rcl	(%bx)
-	rcr	$1, (%bx)
-	rcr	$2, (%bx)
-	rcr	%cl, (%bx)
-	rcr	(%bx)
-	rol	$1, (%bx)
-	rol	$2, (%bx)
-	rol	%cl, (%bx)
-	rol	(%bx)
-	ror	$1, (%bx)
-	ror	$2, (%bx)
-	ror	%cl, (%bx)
-	ror	(%bx)
-	sbb	$1, (%bx)
-	sbb	$0x89, (%bx)
-	sbb	$0x1234, (%bx)
-	scas
-	scas	%es:(%edi)
-	sal	$1, (%bx)
-	sal	$2, (%bx)
-	sal	%cl, (%bx)
-	sal	(%bx)
-	sar	$1, (%bx)
-	sar	$2, (%bx)
-	sar	%cl, (%bx)
-	sar	(%bx)
-	shl	$1, (%bx)
-	shl	$2, (%bx)
-	shl	%cl, (%bx)
-	shl	(%bx)
-	shr	$1, (%bx)
-	shr	$2, (%bx)
-	shr	%cl, (%bx)
-	shr	(%bx)
-	stos
-	stos	%es:(%edi)
-	sub	$1, (%bx)
-	sub	$0x89, (%bx)
-	sub	$0x1234, (%bx)
-	test	$0x89, (%bx)
-	test	$0x1234, (%bx)
-	vcvtsi2sd (%bx), %xmm0, %xmm0
+	pfx adc		$1, (%bx)
+	pfx adc		$0x89, (%bx)
+	pfx adc		$0x1234, (%bx)
+	pfx add		$1, (%bx)
+	pfx add		$0x89, (%bx)
+	pfx add		$0x1234, (%bx)
+	pfx and		$1, (%bx)
+	pfx and		$0x89, (%bx)
+	pfx and		$0x1234, (%bx)
+	pfx bt		$1, (%bx)
+	pfx btc		$1, (%bx)
+	pfx btr		$1, (%bx)
+	pfx bts		$1, (%bx)
+	pfx call	*(%bx)
+	pfx cmp		$1, (%bx)
+	pfx cmp		$0x89, (%bx)
+	pfx cmp		$0x1234, (%bx)
+	pfx cmps
+	pfx cmps	%es:(%di), (%si)
+	pfx crc32	(%bx), %eax
+	cvtsi2sd	(%bx), %xmm0
+	cvtsi2ss	(%bx), %xmm0
+	pfx dec		(%bx)
+	pfx div		(%bx)
+	pfx fadd	(%bx)
+	pfx fcom	(%bx)
+	pfx fcomp	(%bx)
+	pfx fdiv	(%bx)
+	pfx fdivr	(%bx)
+	pfx fiadd	(%bx)
+	pfx ficom	(%bx)
+	pfx ficomp	(%bx)
+	pfx fidiv	(%bx)
+	pfx fidivr	(%bx)
+	pfx fild	(%bx)
+	pfx fimul	(%bx)
+	pfx fist	(%bx)
+	pfx fistp	(%bx)
+	pfx fisttp	(%bx)
+	pfx fisub	(%bx)
+	pfx fisubr	(%bx)
+	pfx fld		(%bx)
+	pfx fmul	(%bx)
+	pfx fst		(%bx)
+	pfx fstp	(%bx)
+	pfx fsub	(%bx)
+	pfx fsubr	(%bx)
+	pfx idiv	(%bx)
+	pfx imul	(%bx)
+	pfx in		$0
+	pfx in		%dx
+	pfx inc		(%bx)
+	pfx ins
+	pfx ins		%dx, %es:(%di)
+	pfx jmp		*(%bx)
+	pfx lgdt	(%bx)
+	pfx lidt	(%bx)
+	pfx lldt	(%bx)
+	pfx lmsw	(%bx)
+	pfx lods
+	pfx lods	(%si)
+	pfx ltr		(%bx)
+	pfx mov		$0x12, (%bx)
+	pfx mov		$0x1234, (%bx)
+	pfx mov		%es, (%bx)
+	pfx mov		(%bx), %es
+	pfx movs
+	pfx movs	(%si), %es:(%di)
+	pfx movsx	(%bx), %ax
+	movsx		(%bx), %eax
+	pfx movzx	(%bx), %ax
+	movzx		(%bx), %eax
+	pfx mul		(%bx)
+	pfx neg		(%bx)
+	pfx nop		(%bx)
+	pfx not		(%bx)
+	pfx or		$1, (%bx)
+	pfx or		$0x89, (%bx)
+	pfx or		$0x1234, (%bx)
+	pfx out		$0
+	pfx out		%dx
+	pfx outs
+	pfx outs	(%si), %dx
+	pfx pop		(%bx)
+	pfx pop		%es
+	ptwrite		(%bx)
+	pfx push	(%bx)
+	pfx push	%es
+	pfx rcl		$1, (%bx)
+	pfx rcl		$2, (%bx)
+	pfx rcl		%cl, (%bx)
+	pfx rcl		(%bx)
+	pfx rcr		$1, (%bx)
+	pfx rcr		$2, (%bx)
+	pfx rcr		%cl, (%bx)
+	pfx rcr		(%bx)
+	pfx rol		$1, (%bx)
+	pfx rol		$2, (%bx)
+	pfx rol		%cl, (%bx)
+	pfx rol		(%bx)
+	pfx ror		$1, (%bx)
+	pfx ror		$2, (%bx)
+	pfx ror		%cl, (%bx)
+	pfx ror		(%bx)
+	pfx sbb		$1, (%bx)
+	pfx sbb		$0x89, (%bx)
+	pfx sbb		$0x1234, (%bx)
+	pfx scas
+	pfx scas	%es:(%di)
+	pfx sal		$1, (%bx)
+	pfx sal		$2, (%bx)
+	pfx sal		%cl, (%bx)
+	pfx sal		(%bx)
+	pfx sar		$1, (%bx)
+	pfx sar		$2, (%bx)
+	pfx sar		%cl, (%bx)
+	pfx sar		(%bx)
+	pfx shl		$1, (%bx)
+	pfx shl		$2, (%bx)
+	pfx shl		%cl, (%bx)
+	pfx shl		(%bx)
+	pfx shr		$1, (%bx)
+	pfx shr		$2, (%bx)
+	pfx shr		%cl, (%bx)
+	pfx shr		(%bx)
+	pfx stos
+	pfx stos	%es:(%di)
+	pfx sub		$1, (%bx)
+	pfx sub		$0x89, (%bx)
+	pfx sub		$0x1234, (%bx)
+	pfx test	$0x89, (%bx)
+	pfx test	$0x1234, (%bx)
+	vcvtsi2sd	(%bx), %xmm0, %xmm0
 	{evex} vcvtsi2sd (%bx), %xmm0, %xmm0
-	vcvtsi2ss (%bx), %xmm0, %xmm0
+	vcvtsi2ss	(%bx), %xmm0, %xmm0
 	{evex} vcvtsi2ss (%bx), %xmm0, %xmm0
-	vcvtusi2sd (%bx), %xmm0, %xmm0
-	vcvtusi2ss (%bx), %xmm0, %xmm0
-	xor	$1, (%bx)
-	xor	$0x89, (%bx)
-	xor	$0x1234, (%bx)
+	vcvtusi2sd	(%bx), %xmm0, %xmm0
+	vcvtusi2ss	(%bx), %xmm0, %xmm0
+	pfx xor		$1, (%bx)
+	pfx xor		$0x89, (%bx)
+	pfx xor		$0x1234, (%bx)
