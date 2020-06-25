@@ -1,3 +1,8 @@
+2020-06-25  Jan Beulich  <jbeulich@suse.com>
+
+	* config/tc-i386.c (build_evex_prefix): Drop early setting of
+	vec_length.
+
 2020-06-23  Nelson Chu  <nelson.chu@sifive.com>
 
 	* config/tc-riscv.c (explicit_priv_attr): Rename explicit_csr to
