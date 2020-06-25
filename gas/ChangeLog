@@ -1,5 +1,15 @@
 2020-06-25  Jan Beulich  <jbeulich@suse.com>
 
+	* config/tc-i386.c (process_operands): Translate explicit REX
+	prefix into i.rex for SSE2AVX templates.
+	(set_rex_vrex): New helper.
+	(build_modrm_byte): Use it.
+	* testsuite/gas/i386/x86-64-sse2avx.s: Add cases with explict
+	REX prefixes.
+	* testsuite/gas/i386/x86-64-sse2avx.d: Adjust expectations.
+
+2020-06-25  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (cpu_flags_match): Only match SSE2AVX
 	templates when there's no data size prefix.
 	(md_assemble): Reject data size prefix also for legacy encoded

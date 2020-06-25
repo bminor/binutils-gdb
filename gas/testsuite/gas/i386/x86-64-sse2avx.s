@@ -802,6 +802,44 @@ _start:
 # Tests for op imm8, xmm, regl
 	pextrw $100,%xmm4,%ecx
 
+# Tests for REX prefix conversion
+	{rex} addps %xmm0, %xmm0
+	{rex} addps (%rax,%rax), %xmm0
+	rex addps %xmm0, %xmm0
+	rex addps (%rax,%rax), %xmm0
+	rexx addps %xmm0, %xmm0
+	rexx addps (%rax,%rax), %xmm0
+	rexy addps %xmm0, %xmm0
+	rexy addps (%rax,%rax), %xmm0
+	rexz addps %xmm0, %xmm0
+	rexz addps (%rax,%rax), %xmm0
+
+	{load} rexx movss %xmm0, %xmm0
+	{load} rexz movss %xmm0, %xmm0
+
+	{store} rexx movss %xmm0, %xmm0
+	{store} rexz movss %xmm0, %xmm0
+
+	rexz psllw $0, %xmm0
+
+	rexx pextrw $0, %xmm0, %eax
+	rexz pextrw $0, %xmm0, %eax
+
+	rexx pextrb $0, %xmm0, %eax
+	rexz pextrb $0, %xmm0, %eax
+
+	rexx blendvps %xmm0, %xmm0, %xmm0
+	rexz blendvps %xmm0, %xmm0, %xmm0
+
+	rexx blendvps %xmm0, %xmm0
+	rexz blendvps %xmm0, %xmm0
+
+	rex64 cvtsi2sd (%rax), %xmm0
+	rex64 cvtsi2ss (%rax), %xmm0
+
+	rex64 pcmpestri $0, %xmm0, %xmm0
+	rex64 pcmpestrm $0, %xmm0, %xmm0
+
 
 	.intel_syntax noprefix
 # Tests for op mem64
@@ -1505,4 +1543,3 @@ _start:
 
 # Tests for op imm8, xmm, regl
 	pextrw ecx,xmm4,100
-
