@@ -1,3 +1,12 @@
+2020-06-25  Simon Marchi  <simon.marchi@efficios.com>
+
+	* inferior.h (struct inferior) <terminal>: Change type to
+	gdb::unique_xmalloc_ptr<char>.
+	* inferior.c (inferior::~inferior): Don't free inf->terminal.
+	* infcmd.c (set_inferior_io_terminal): Don't free terminal
+	field, adjust to unique pointer.
+	(get_inferior_io_terminal): Adjust to unique pointer.
+
 2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* riscv-tdep.c (riscv_print_registers_info): Loop over all

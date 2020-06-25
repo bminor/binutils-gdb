@@ -108,10 +108,8 @@ int stopped_by_random_signal;
 void 
 set_inferior_io_terminal (const char *terminal_name)
 {
-  xfree (current_inferior ()->terminal);
-
   if (terminal_name != NULL && *terminal_name != '\0')
-    current_inferior ()->terminal = xstrdup (terminal_name);
+    current_inferior ()->terminal.reset (xstrdup (terminal_name));
   else
     current_inferior ()->terminal = NULL;
 }
@@ -119,7 +117,7 @@ set_inferior_io_terminal (const char *terminal_name)
 const char *
 get_inferior_io_terminal (void)
 {
-  return current_inferior ()->terminal;
+  return current_inferior ()->terminal.get ();
 }
 
 static void

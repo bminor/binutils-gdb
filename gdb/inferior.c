@@ -79,7 +79,6 @@ inferior::~inferior ()
   discard_all_inferior_continuations (inf);
   inferior_free_data (inf);
   xfree (inf->args);
-  xfree (inf->terminal);
   target_desc_info_free (inf->tdesc_info);
 }
 

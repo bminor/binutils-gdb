@@ -52,6 +52,7 @@ struct thread_info;
 #include "symfile-add-flags.h"
 #include "gdbsupport/refcounted-object.h"
 #include "gdbsupport/forward-scope-exit.h"
+#include "gdbsupport/gdb_unique_ptr.h"
 
 #include "gdbsupport/common-inferior.h"
 #include "gdbthread.h"
@@ -456,7 +457,7 @@ public:
   gdb::unique_xmalloc_ptr<char> cwd;
 
   /* The name of terminal device to use for I/O.  */
-  char *terminal = NULL;
+  gdb::unique_xmalloc_ptr<char> terminal;
 
   /* The terminal state as set by the last target_terminal::terminal_*
      call.  */
