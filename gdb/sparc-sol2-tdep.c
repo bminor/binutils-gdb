@@ -192,7 +192,7 @@ static const struct frame_unwind sparc32_sol2_sigtramp_frame_unwind =
 
 
 
-void
+static void
 sparc32_sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);

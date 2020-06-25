@@ -1,5 +1,16 @@
 2020-06-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	* configure.tgt <sparc-*-linux*> (gdb_target_obs): Remove
+	sparc-sol2-tdep.o, sol2-tdep.o, sparc64-sol2-tdep.o.
+	<sparc64-*-linux*> (gdb_target_obs): Remove sparc64-sol2-tdep.o,
+	sol2-tdep.o, sparc-sol2-tdep.o.
+	* sparc-sol2-tdep.c (sparc32_sol2_init_abi): Make static.
+	* sparc-tdep.h (sparc32_sol2_init_abi): Remove.
+	* sparc64-sol2-tdep.c (sparc64_sol2_init_abi): Make static.
+	* sparc64-tdep.h (sparc64_sol2_init_abi): Remove.
+
+2020-06-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
 	* amd64-sol2-tdep.c (amd64_sol2_sigtramp_p): Remove.
 	(amd64_sol2_init_abi): Use sol2_sigtramp_p.
 	Call sol2_init_abi.

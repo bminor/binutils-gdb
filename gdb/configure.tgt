@@ -585,20 +585,20 @@ sh*)
 
 sparc-*-linux*)
 	# Target: GNU/Linux SPARC
-	gdb_target_obs="sparc-tdep.o sparc-sol2-tdep.o sol2-tdep.o \
+	gdb_target_obs="sparc-tdep.o \
 			sparc-linux-tdep.o solib-svr4.o symfile-mem.o \
 			linux-tdep.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
 	if test "x$enable_64_bit_bfd" = "xyes"; then
 	    # Target: GNU/Linux UltraSPARC
-	    gdb_target_obs="sparc64-tdep.o sparc64-sol2-tdep.o \
+	    gdb_target_obs="sparc64-tdep.o \
 			    sparc64-linux-tdep.o ${gdb_target_obs}"
 	fi
 	;;
 sparc64-*-linux*)
 	# Target: GNU/Linux UltraSPARC
-	gdb_target_obs="sparc64-tdep.o sparc64-sol2-tdep.o sol2-tdep.o \
-			sparc64-linux-tdep.o sparc-tdep.o sparc-sol2-tdep.o \
+	gdb_target_obs="sparc64-tdep.o \
+			sparc64-linux-tdep.o sparc-tdep.o \
 			sparc-linux-tdep.o solib-svr4.o linux-tdep.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
