@@ -1,3 +1,8 @@
+2020-06-25  Nick Clifton  <nickc@redhat.com>
+
+	* libiberty.h (bsearch_r): Remove use of the register keyword from
+	the prototype.
+
 2020-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Sync with GCC
