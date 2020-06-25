@@ -15368,6 +15368,44 @@ display_gnu_attribute (unsigned char * p,
 }
 
 static unsigned char *
+display_m68k_gnu_attribute (unsigned char * p,
+			    unsigned int tag,
+			    const unsigned char * const end)
+{
+  unsigned int val;
+
+  if (tag == Tag_GNU_M68K_ABI_FP)
+    {
+      printf ("  Tag_GNU_M68K_ABI_FP: ");
+      if (p == end)
+	{
+	  printf (_("<corrupt>\n"));
+	  return p;
+	}
+      READ_ULEB (val, p, end);
+
+      if (val > 3)
+	printf ("(%#x), ", val);
+
+      switch (val & 3)
+	{
+	case 0:
+	  printf (_("unspecified hard/soft float\n"));
+	  break;
+	case 1:
+	  printf (_("hard float\n"));
+	  break;
+	case 2:
+	  printf (_("soft float\n"));
+	  break;
+	}
+      return p;
+    }
+
+  return display_tag_value (tag & 1, p, end);
+}
+
+static unsigned char *
 display_power_gnu_attribute (unsigned char * p,
 			     unsigned int tag,
 			     const unsigned char * const end)
@@ -19927,6 +19965,10 @@ process_arch_specific (Filedata * filedata)
 
     case EM_NDS32:
       return process_nds32_specific (filedata);
+
+    case EM_68K:
+      return process_attributes (filedata, NULL, SHT_GNU_ATTRIBUTES, NULL,
+				 display_m68k_gnu_attribute);
 
     case EM_PPC:
     case EM_PPC64:

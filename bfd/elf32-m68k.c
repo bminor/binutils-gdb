@@ -1122,6 +1122,65 @@ elf32_m68k_set_private_flags (bfd *abfd, flagword flags)
   return TRUE;
 }
 
+/* Merge object attributes from IBFD into OBFD.  Warn if
+   there are conflicting attributes. */
+static bfd_boolean
+m68k_elf_merge_obj_attributes (bfd *ibfd, struct bfd_link_info *info)
+{
+  bfd *obfd = info->output_bfd;
+  obj_attribute *in_attr, *in_attrs;
+  obj_attribute *out_attr, *out_attrs;
+  bfd_boolean ret = TRUE;
+
+  in_attrs = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
+  out_attrs = elf_known_obj_attributes (obfd)[OBJ_ATTR_GNU];
+
+  in_attr = &in_attrs[Tag_GNU_M68K_ABI_FP];
+  out_attr = &out_attrs[Tag_GNU_M68K_ABI_FP];
+
+  if (in_attr->i != out_attr->i)
+    {
+      int in_fp = in_attr->i & 3;
+      int out_fp = out_attr->i & 3;
+      static bfd *last_fp;
+
+      if (in_fp == 0)
+	;
+      else if (out_fp == 0)
+	{
+	  out_attr->type = ATTR_TYPE_FLAG_INT_VAL;
+	  out_attr->i ^= in_fp;
+	  last_fp = ibfd;
+	}
+      else if (out_fp == 1 && in_fp == 2)
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%pB uses hard float, %pB uses soft float"),
+	     last_fp, ibfd);
+	  ret = FALSE;
+	}
+      else if (out_fp == 2 && in_fp == 1)
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%pB uses hard float, %pB uses soft float"),
+	     ibfd, last_fp);
+	  ret = FALSE;
+	}
+    }
+
+  if (!ret)
+    {
+      out_attr->type = ATTR_TYPE_FLAG_INT_VAL | ATTR_TYPE_FLAG_ERROR;
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  /* Merge Tag_compatibility attributes and any common GNU ones.  */
+  return _bfd_elf_merge_object_attributes (ibfd, info);
+}
+
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 static bfd_boolean
@@ -1148,6 +1207,9 @@ elf32_m68k_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
     return FALSE;
 
   bfd_set_arch_mach (obfd, bfd_arch_m68k, arch_info->mach);
+
+  if (!m68k_elf_merge_obj_attributes (ibfd, info))
+    return FALSE;
 
   in_flags = elf_elfheader (ibfd)->e_flags;
   if (!elf_flags_init (obfd))

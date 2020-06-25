@@ -1,3 +1,8 @@
+2020-06-26  Pat Bernardi  <bernardi@adacore.com>
+
+	* elf/m68k.h: Add enum for GNU object attribute with floating point
+	tag name and values.
+
 2020-06-25  Nick Clifton  <nickc@redhat.com>
 
 	* libiberty.h (bsearch_r): Remove use of the register keyword from

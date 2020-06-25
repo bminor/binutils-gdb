@@ -1,3 +1,8 @@
+2020-06-26  Pat Bernardi  <bernardi@adacore.com>
+
+	* readelf.c (display_m68k_gnu_attribute): New function.
+	(process_arch_specific): Call display_m68k_gnu_attribute for EM_68K.
+
 2020-06-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/26160

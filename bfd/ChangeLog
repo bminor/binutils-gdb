@@ -1,3 +1,8 @@
+2020-06-26  Pat Bernardi  <bernardi@adacore.com>
+
+	* elf32-m68k.c (m68k_elf_merge_obj_attributes): New function.
+	(elf32_m68k_merge_private_bfd_data): Merge GNU attributes.
+
 2020-06-26  Alan Modra  <amodra@gmail.com>
 
 	* elfxx-riscv.c (struct priv_spec_t, priv_specs),

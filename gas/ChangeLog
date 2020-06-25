@@ -1,3 +1,9 @@
+2020-06-26  Pat Bernardi  <bernardi@adacore.com>
+
+	* config/tc-m68k.c (m68k_elf_gnu_attribute): New function.
+	(md_pseudo_table): Handle "gnu_attribute".
+	* doc/as.texi: Document GNU attribute for M68K.
+
 2020-06-25  Nick Clifton  <nickc@redhat.com>
 
 	PR 26141

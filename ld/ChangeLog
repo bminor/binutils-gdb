@@ -1,3 +1,19 @@
+2020-06-26  Pat Bernardi  <bernardi@adacore.com>
+
+	* testsuite/ld-m68k/attr-gnu-4-0.s: New file.
+	* testsuite/ld-m68k/attr-gnu-4-1.s: Likewise.
+	* testsuite/ld-m68k/attr-gnu-4-2.s: Likewise.
+	* testsuite/ld-m68k/attr-gnu-4-00.d: Likewise.
+	* testsuite/ld-m68k/attr-gnu-4-01.d: Likewise.
+	* testsuite/ld-m68k/attr-gnu-4-02.d: Likewise.
+	* testsuite/ld-m68k/attr-gnu-4-10.d: Likewise.
+	* testsuite/ld-m68k/attr-gnu-4-11.d: Likewise.
+	* testsuite/ld-m68k/attr-gnu-4-12.d: Likewise.
+	* testsuite/ld-m68k/attr-gnu-4-20.d: Likewise.
+	* testsuite/ld-m68k/attr-gnu-4-21.d: Likewise.
+	* testsuite/ld-m68k/attr-gnu-4-22.d: Likewise.
+	* testsuite/ld-m68k/m68k.exp: Run the new tests.
+
 2020-06-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26165

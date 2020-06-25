@@ -7583,6 +7583,22 @@ than 1, the file can only be processed by other toolchains under some private
 arrangement indicated by the flag value and the vendor name.
 @end table
 
+@subsection M680x0 Attributes
+
+@table @r
+@item Tag_GNU_M68K_ABI_FP (4)
+The floating-point ABI used by this object file.  The value will be:
+
+@itemize @bullet
+@item
+0 for files not affected by the floating-point ABI.
+@item
+1 for files using double-precision hardware floating-point ABI.
+@item
+2 for files using the software floating-point ABI.
+@end itemize
+@end table
+
 @subsection MIPS Attributes
 
 @table @r
