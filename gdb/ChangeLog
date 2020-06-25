@@ -1,5 +1,9 @@
 2020-06-25  Simon Marchi  <simon.marchi@efficios.com>
 
+	* infcmd.c (set_inferior_io_terminal): Use make_unique_xstrdup.
+
+2020-06-25  Simon Marchi  <simon.marchi@efficios.com>
+
 	* inferior.h (struct inferior) <terminal>: Change type to
 	gdb::unique_xmalloc_ptr<char>.
 	* inferior.c (inferior::~inferior): Don't free inf->terminal.

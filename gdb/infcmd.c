@@ -109,7 +109,7 @@ void
 set_inferior_io_terminal (const char *terminal_name)
 {
   if (terminal_name != NULL && *terminal_name != '\0')
-    current_inferior ()->terminal.reset (xstrdup (terminal_name));
+    current_inferior ()->terminal = make_unique_xstrdup (terminal_name);
   else
     current_inferior ()->terminal = NULL;
 }
