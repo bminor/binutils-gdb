@@ -4893,10 +4893,20 @@ md_assemble (char *line)
 	  return;
 	}
 
+      /* Check for explicit REX prefix.  */
+      if (i.prefix[REX_PREFIX] || i.rex_encoding)
+	{
+	  as_bad (_("REX prefix invalid with `%s'"), i.tm.name);
+	  return;
+	}
+
       if (i.tm.opcode_modifier.vex)
 	build_vex_prefix (t);
       else
 	build_evex_prefix ();
+
+      /* The individual REX.RXBW bits got consumed.  */
+      i.rex &= REX_OPCODE;
     }
 
   /* Handle conversion of 'int $3' --> special int3 insn.  XOP or FMA4
@@ -9275,9 +9285,6 @@ output_insn (void)
 	    if (*q)
 	      switch (j)
 		{
-		case REX_PREFIX:
-		  /* REX byte is encoded in VEX prefix.  */
-		  break;
 		case SEG_PREFIX:
 		case ADDR_PREFIX:
 		  FRAG_APPEND_1_CHAR (*q);

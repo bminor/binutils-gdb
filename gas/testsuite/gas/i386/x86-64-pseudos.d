@@ -310,9 +310,6 @@ Disassembly of section .text:
  +[a-f0-9]+:	41 0f 28 10          	movaps \(%r8\),%xmm2
  +[a-f0-9]+:	40 0f 38 01 01       	rex phaddw \(%rcx\),%mm0
  +[a-f0-9]+:	41 0f 38 01 00       	phaddw \(%r8\),%mm0
- +[a-f0-9]+:	c5 f8 28 d7          	vmovaps %xmm7,%xmm2
- +[a-f0-9]+:	62 b1 7c 08 28 d1    	vmovaps %xmm17,%xmm2
- +[a-f0-9]+:	c4 e3 7b f0 d8 07    	rorx   \$0x7,%eax,%ebx
  +[a-f0-9]+:	c4 e1 78 28 d7       	vmovaps %xmm7,%xmm2
  +[a-f0-9]+:	c4 e1 78 28 d7       	vmovaps %xmm7,%xmm2
  +[a-f0-9]+:	c4 e1 78 29 fa       	vmovaps %xmm7,%xmm2
@@ -351,7 +348,4 @@ Disassembly of section .text:
  +[a-f0-9]+:	41 0f 28 10          	movaps \(%r8\),%xmm2
  +[a-f0-9]+:	40 0f 38 01 01       	rex phaddw \(%rcx\),%mm0
  +[a-f0-9]+:	41 0f 38 01 00       	phaddw \(%r8\),%mm0
- +[a-f0-9]+:	c5 f8 28 d7          	vmovaps %xmm7,%xmm2
- +[a-f0-9]+:	62 b1 7c 08 28 d1    	vmovaps %xmm17,%xmm2
- +[a-f0-9]+:	c4 e3 7b f0 d8 07    	rorx   \$0x7,%eax,%ebx
 #pass

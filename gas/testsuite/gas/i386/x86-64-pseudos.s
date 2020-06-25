@@ -314,9 +314,6 @@ _start:
 	{rex} movaps (%r8),%xmm2
 	{rex} phaddw (%rcx),%mm0
 	{rex} phaddw (%r8),%mm0
-	{rex} vmovaps %xmm7,%xmm2
-	{rex} vmovaps %xmm17,%xmm2
-	{rex} rorx $7,%eax,%ebx
 
 	.intel_syntax noprefix
 	{vex3} vmovaps xmm2,xmm7
@@ -357,6 +354,3 @@ _start:
 	{rex} movaps xmm2,XMMWORD PTR [r8]
 	{rex} phaddw mm0,QWORD PTR [rcx]
 	{rex} phaddw mm0,QWORD PTR [r8]
-	{rex} vmovaps xmm2,xmm7
-	{rex} vmovaps xmm2,xmm17
-	{rex} rorx ebx,eax,0x7
