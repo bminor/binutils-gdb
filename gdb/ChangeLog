@@ -1,5 +1,10 @@
 2020-06-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	* procfs.c (procfs_pre_trace): New function.
+	(procfs_target::create_inferior): Pass it to fork_inferior.
+
+2020-06-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
 	* configure.tgt <sparc-*-linux*> (gdb_target_obs): Remove
 	sparc-sol2-tdep.o, sol2-tdep.o, sparc64-sol2-tdep.o.
 	<sparc64-*-linux*> (gdb_target_obs): Remove sparc64-sol2-tdep.o,

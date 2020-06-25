@@ -2759,6 +2759,13 @@ procfs_set_exec_trap (void)
   /*destroy_procinfo (pi);*/
 }
 
+/* Dummy function to be sure fork_inferior uses fork(2) and not vfork(2).
+   This avoids a possible deadlock gdb and its vfork'ed child.  */
+static void
+procfs_pre_trace (void)
+{
+}
+
 /* This function is called BEFORE gdb forks the inferior process.  Its
    only real responsibility is to set things up for the fork, and tell
    GDB which two functions to call after the fork (one for the parent,
@@ -2851,7 +2858,7 @@ procfs_target::create_inferior (const char *exec_file,
     push_target (this);
 
   pid = fork_inferior (exec_file, allargs, env, procfs_set_exec_trap,
-		       NULL, NULL, shell_file, NULL);
+		       NULL, procfs_pre_trace, shell_file, NULL);
 
   /* We have something that executes now.  We'll be running through
      the shell at this point (if startup-with-shell is true), but the
