@@ -1,3 +1,41 @@
+2020-06-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* amd64-sol2-tdep.c (amd64_sol2_sigtramp_p): Remove.
+	(amd64_sol2_init_abi): Use sol2_sigtramp_p.
+	Call sol2_init_abi.
+ 	Remove calls to set_gdbarch_skip_solib_resolver,
+	set_gdbarch_core_pid_to_str.
+	* i386-sol2-tdep.c (i386_sol2_sigtramp_p): Remove.
+	(i386_sol2_static_transform_name): Remove.
+	(i386_sol2_init_abi): Call sol2_init_abi.
+	Remove calls to set_gdbarch_sofun_address_maybe_missing,
+	set_gdbarch_static_transform_name,
+	set_gdbarch_skip_solib_resolver, set_gdbarch_core_pid_to_str.
+	Use sol2_sigtramp_p.
+	* sol2-tdep.c (sol2_pc_in_sigtramp): New function.
+	(sol2_sigtramp_p): New function.
+	(sol2_static_transform_name): New function.
+	(sol2_skip_solib_resolver, sol2_core_pid_to_str): Make static.
+	(sol2_init_abi): New function.
+	* sol2-tdep.h (sol2_sigtramp_p, sol2_init_abi): Declare.
+	(sol2_skip_solib_resolver, sol2_core_pid_to_str): Remove.
+	* sparc-sol2-tdep.c (sparc_sol2_pc_in_sigtramp): Remove.
+	(sparc32_sol2_sigtramp_frame_sniffer): Just call sol2_sigtramp_p.
+	(sparc_sol2_static_transform_name): Remove.
+	(sparc32_sol2_init_abi): Call sol2_init_abi.
+	Remove calls to set_gdbarch_sofun_address_maybe_missing,
+	set_gdbarch_static_transform_name,
+	set_gdbarch_skip_solib_resolver,
+	set_gdbarch_core_pid_to_str.
+	* sparc-tdep.h (sparc_sol2_pc_in_sigtramp)
+	(sparc_sol2_static_transform_name): Remove
+	* sparc64-sol2-tdep.c (sparc64_sol2_sigtramp_frame_sniffer): Just
+	call sol2_sigtramp_p.
+	(sparc64_sol2_init_abi): Call sol2_init_abi.
+	Remove calls to set_gdbarch_sofun_address_maybe_missing,
+	set_gdbarch_static_transform_name,
+	set_gdbarch_skip_solib_resolver, set_gdbarch_core_pid_to_str.
+
 2020-06-24  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* symfile-add-flags.h: New flag SYMFILE_ALWAYS_CONFIRM.
