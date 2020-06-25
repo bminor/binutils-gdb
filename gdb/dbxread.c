@@ -1460,9 +1460,6 @@ read_dbx_symtab (minimal_symbol_reader &reader, struct objfile *objfile)
 	  switch (p[1])
 	    {
 	    case 'S':
-	      if (gdbarch_static_transform_name_p (gdbarch))
-		gdbarch_static_transform_name (gdbarch, namestring);
-
 	      add_psymbol_to_list (gdb::string_view (sym_name, sym_len), true,
 				   VAR_DOMAIN, LOC_STATIC,
 				   data_sect_index,

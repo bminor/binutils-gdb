@@ -3029,10 +3029,6 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 		    switch (p[1])
 		      {
 		      case 'S':
-			if (gdbarch_static_transform_name_p (gdbarch))
-			  namestring = gdbarch_static_transform_name
-					 (gdbarch, namestring);
-
 			add_psymbol_to_list (gdb::string_view (namestring,
 							       p - namestring),
 					     true, VAR_DOMAIN, LOC_STATIC,

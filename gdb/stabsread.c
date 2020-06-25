@@ -723,12 +723,6 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  /* This was an anonymous type that was never fixed up.  */
 	  goto normal;
 
-	case 'X':
-	  /* SunPRO (3.0 at least) static variable encoding.  */
-	  if (gdbarch_static_transform_name_p (gdbarch))
-	    goto normal;
-	  /* fall through */
-
 	default:
 	  complaint (_("Unknown C++ symbol name `%s'"),
 		     string);
@@ -1186,23 +1180,6 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
       SET_SYMBOL_VALUE_ADDRESS (sym, valu);
-      if (gdbarch_static_transform_name_p (gdbarch)
-	  && gdbarch_static_transform_name (gdbarch, sym->linkage_name ())
-	     != sym->linkage_name ())
-	{
-	  struct bound_minimal_symbol msym;
-
-	  msym = lookup_minimal_symbol (sym->linkage_name (), NULL, objfile);
-	  if (msym.minsym != NULL)
-	    {
-	      const char *new_name = gdbarch_static_transform_name
-		(gdbarch, sym->linkage_name ());
-
-	      sym->set_linkage_name (new_name);
-	      SET_SYMBOL_VALUE_ADDRESS (sym,
-					BMSYMBOL_VALUE_ADDRESS (msym));
-	    }
-	}
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, get_file_symbols ());
       break;
@@ -1367,24 +1344,8 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
       SET_SYMBOL_VALUE_ADDRESS (sym, valu);
-      if (gdbarch_static_transform_name_p (gdbarch)
-	  && gdbarch_static_transform_name (gdbarch, sym->linkage_name ())
-	     != sym->linkage_name ())
-	{
-	  struct bound_minimal_symbol msym;
-
-	  msym = lookup_minimal_symbol (sym->linkage_name (), NULL, objfile);
-	  if (msym.minsym != NULL)
-	    {
-	      const char *new_name = gdbarch_static_transform_name
-		(gdbarch, sym->linkage_name ());
-
-	      sym->set_linkage_name (new_name);
-	      SET_SYMBOL_VALUE_ADDRESS (sym, BMSYMBOL_VALUE_ADDRESS (msym));
-	    }
-	}
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-	add_symbol_to_list (sym, get_local_symbols ());
+      add_symbol_to_list (sym, get_local_symbols ());
       break;
 
     case 'v':

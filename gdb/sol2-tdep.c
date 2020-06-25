@@ -61,52 +61,6 @@ sol2_sigtramp_p (struct frame_info *this_frame)
   return sol2_pc_in_sigtramp (pc, name);
 }
 
-/* Unglobalize NAME.  */
-
-static const char *
-sol2_static_transform_name (const char *name)
-{
-  /* The Sun compilers (Sun ONE Studio, Forte Developer, Sun WorkShop,
-     SunPRO) convert file static variables into global values, a
-     process known as globalization.  In order to do this, the
-     compiler will create a unique prefix and prepend it to each file
-     static variable.  For static variables within a function, this
-     globalization prefix is followed by the function name (nested
-     static variables within a function are supposed to generate a
-     warning message, and are left alone).  The procedure is
-     documented in the Stabs Interface Manual, which is distributed
-     with the compilers, although version 4.0 of the manual seems to
-     be incorrect in some places, at least for SPARC.  The
-     globalization prefix is encoded into an N_OPT stab, with the form
-     "G=<prefix>".  The globalization prefix always seems to start
-     with a dollar sign '$' (sparc) resp. a dot '.' (x86); a dot '.'
-     is used as a separator.  So we  simply strip everything up until
-     the last dot.  */
-  int prefix;
-  
-  switch (gdbarch_bfd_arch_info (target_gdbarch ())->arch)
-    {
-    case bfd_arch_i386:
-      prefix = '.';
-      break;
-    case bfd_arch_sparc:
-      prefix = '$';
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, "Unexpected arch");
-      break;
-    }
-
-  if (name[0] == prefix)
-    {
-      const char *p = strrchr (name, '.');
-      if (p)
-        return p + 1;
-    }
-
-  return name;
-}
-
 static CORE_ADDR
 sol2_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
@@ -154,10 +108,6 @@ sol2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      compiler puts out 0 instead of the address in N_SO stabs.  Starting with
      SunPRO 3.0, the compiler does this for N_FUN stabs too.  */
   set_gdbarch_sofun_address_maybe_missing (gdbarch, 1);
-
-  /* The Sun compilers also do "globalization"; see the comment in
-     sol2_static_transform_name for more information.  */
-  set_gdbarch_static_transform_name (gdbarch, sol2_static_transform_name);
 
   /* Solaris uses SVR4-style shared libraries.  */
   set_gdbarch_skip_solib_resolver (gdbarch, sol2_skip_solib_resolver);

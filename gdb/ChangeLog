@@ -1,5 +1,22 @@
 2020-06-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
+	* sol2-tdep.c (sol2_static_transform_name): Remove.
+	(sol2_init_abi): Don't register it.
+	* gdbarch.sh (static_transform_name): Remove.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+	* dbxread.c (read_dbx_symtab) <'S'>: Remove call to
+	gdbarch_static_transform_name.
+	* mdebugread.c (parse_partial_symbols) <'S'>: Likewise.
+	* stabsread.c (define_symbol) <'X'>: Remove.
+	(define_symbol) <'S'>: Remove gdbarch_static_transform_name
+	handling.
+	<'V'>: Likewise.
+	* xcoffread.c (scan_xcoff_symtab): Remove gdbarch.
+	<'S'>: Remove call to gdbarch_static_transform_name.
+
+2020-06-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
 	* procfs.c (procfs_pre_trace): New function.
 	(procfs_target::create_inferior): Pass it to fork_inferior.
 
