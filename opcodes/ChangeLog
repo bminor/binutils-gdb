@@ -1,3 +1,9 @@
+2020-06-25  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c: Adjust description of "LQ" macro.
+	(dis386_twobyte): Use LQ for sysret.
+	(putop): Adjust handling of LQ.
+
 2020-06-22  Nelson Chu  <nelson.chu@sifive.com>
 
 	* riscv-opc.c: Move the structures and functions to bfd/elfxx-riscv.c.

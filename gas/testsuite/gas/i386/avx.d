@@ -1201,9 +1201,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e3 59 22 f1 07    	vpinsrd \$0x7,%ecx,%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 59 22 31 07    	vpinsrd \$0x7,\(%ecx\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c5 db 2a f1          	vcvtsi2sd %ecx,%xmm4,%xmm6
-[ 	]*[a-f0-9]+:	c5 db 2a 31          	vcvtsi2sdl \(%ecx\),%xmm4,%xmm6
+[ 	]*[a-f0-9]+:	c5 db 2a 31          	vcvtsi2sd \(%ecx\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c5 da 2a f1          	vcvtsi2ss %ecx,%xmm4,%xmm6
-[ 	]*[a-f0-9]+:	c5 da 2a 31          	vcvtsi2ssl \(%ecx\),%xmm4,%xmm6
+[ 	]*[a-f0-9]+:	c5 da 2a 31          	vcvtsi2ss \(%ecx\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c5 ca c2 d4 07       	vcmpordss %xmm4,%xmm6,%xmm2
 [ 	]*[a-f0-9]+:	c5 ca c2 11 07       	vcmpordss \(%ecx\),%xmm6,%xmm2
 [ 	]*[a-f0-9]+:	c4 e3 49 21 d4 07    	vinsertps \$0x7,%xmm4,%xmm6,%xmm2
@@ -1262,7 +1262,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 3d 34 12 00 00 	vpavgb 0x1234,%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 05 34 12 00 00 07 	vaeskeygenassist \$0x7,0x1234,%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 05 34 12 00 00 07 	vpextrb \$0x7,%xmm0,0x1234
-[ 	]*[a-f0-9]+:	c5 fb 2a 3d 34 12 00 00 	vcvtsi2sdl 0x1234,%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a 3d 34 12 00 00 	vcvtsi2sd 0x1234,%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 3d 34 12 00 00 07 	vpclmulqdq \$0x7,0x1234,%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a 35 34 12 00 00 00 	vblendvps %xmm0,0x1234,%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 3d 34 12 00 00 07 	vpinsrb \$0x7,0x1234,%xmm0,%xmm7
@@ -1283,7 +1283,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 7d 00       	vpavgb 0x0\(%ebp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 45 00 07 	vaeskeygenassist \$0x7,0x0\(%ebp\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 45 00 07 	vpextrb \$0x7,%xmm0,0x0\(%ebp\)
-[ 	]*[a-f0-9]+:	c5 fb 2a 7d 00       	vcvtsi2sdl 0x0\(%ebp\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a 7d 00       	vcvtsi2sd 0x0\(%ebp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 7d 00 07 	vpclmulqdq \$0x7,0x0\(%ebp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a 75 00 00 	vblendvps %xmm0,0x0\(%ebp\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 7d 00 07 	vpinsrb \$0x7,0x0\(%ebp\),%xmm0,%xmm7
@@ -1304,7 +1304,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 3c 24       	vpavgb \(%esp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 04 24 07 	vaeskeygenassist \$0x7,\(%esp\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 04 24 07 	vpextrb \$0x7,%xmm0,\(%esp\)
-[ 	]*[a-f0-9]+:	c5 fb 2a 3c 24       	vcvtsi2sdl \(%esp\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a 3c 24       	vcvtsi2sd \(%esp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 3c 24 07 	vpclmulqdq \$0x7,\(%esp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a 34 24 00 	vblendvps %xmm0,\(%esp\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 3c 24 07 	vpinsrb \$0x7,\(%esp\),%xmm0,%xmm7
@@ -1325,7 +1325,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 bd 99 00 00 00 	vpavgb 0x99\(%ebp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 85 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(%ebp\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 85 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(%ebp\)
-[ 	]*[a-f0-9]+:	c5 fb 2a bd 99 00 00 00 	vcvtsi2sdl 0x99\(%ebp\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a bd 99 00 00 00 	vcvtsi2sd 0x99\(%ebp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 bd 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(%ebp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a b5 99 00 00 00 00 	vblendvps %xmm0,0x99\(%ebp\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 bd 99 00 00 00 07 	vpinsrb \$0x7,0x99\(%ebp\),%xmm0,%xmm7
@@ -1346,7 +1346,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 3c 25 99 00 00 00 	vpavgb 0x99\(,%eiz,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 04 25 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(,%eiz,1\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 04 25 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(,%eiz,1\)
-[ 	]*[a-f0-9]+:	c5 fb 2a 3c 25 99 00 00 00 	vcvtsi2sdl 0x99\(,%eiz,1\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a 3c 25 99 00 00 00 	vcvtsi2sd 0x99\(,%eiz,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 3c 25 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(,%eiz,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a 34 25 99 00 00 00 00 	vblendvps %xmm0,0x99\(,%eiz,1\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 3c 25 99 00 00 00 07 	vpinsrb \$0x7,0x99\(,%eiz,1\),%xmm0,%xmm7
@@ -1367,7 +1367,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 3c 65 99 00 00 00 	vpavgb 0x99\(,%eiz,2\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 04 65 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(,%eiz,2\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 04 65 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(,%eiz,2\)
-[ 	]*[a-f0-9]+:	c5 fb 2a 3c 65 99 00 00 00 	vcvtsi2sdl 0x99\(,%eiz,2\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a 3c 65 99 00 00 00 	vcvtsi2sd 0x99\(,%eiz,2\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 3c 65 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(,%eiz,2\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a 34 65 99 00 00 00 00 	vblendvps %xmm0,0x99\(,%eiz,2\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 3c 65 99 00 00 00 07 	vpinsrb \$0x7,0x99\(,%eiz,2\),%xmm0,%xmm7
@@ -1388,7 +1388,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 bc 20 99 00 00 00 	vpavgb 0x99\(%eax,%eiz,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 84 20 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(%eax,%eiz,1\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 84 20 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(%eax,%eiz,1\)
-[ 	]*[a-f0-9]+:	c5 fb 2a bc 20 99 00 00 00 	vcvtsi2sdl 0x99\(%eax,%eiz,1\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a bc 20 99 00 00 00 	vcvtsi2sd 0x99\(%eax,%eiz,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 bc 20 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(%eax,%eiz,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a b4 20 99 00 00 00 00 	vblendvps %xmm0,0x99\(%eax,%eiz,1\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 bc 20 99 00 00 00 07 	vpinsrb \$0x7,0x99\(%eax,%eiz,1\),%xmm0,%xmm7
@@ -1409,7 +1409,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 bc 60 99 00 00 00 	vpavgb 0x99\(%eax,%eiz,2\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 84 60 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(%eax,%eiz,2\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 84 60 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(%eax,%eiz,2\)
-[ 	]*[a-f0-9]+:	c5 fb 2a bc 60 99 00 00 00 	vcvtsi2sdl 0x99\(%eax,%eiz,2\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a bc 60 99 00 00 00 	vcvtsi2sd 0x99\(%eax,%eiz,2\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 bc 60 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(%eax,%eiz,2\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a b4 60 99 00 00 00 00 	vblendvps %xmm0,0x99\(%eax,%eiz,2\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 bc 60 99 00 00 00 07 	vpinsrb \$0x7,0x99\(%eax,%eiz,2\),%xmm0,%xmm7
@@ -1430,7 +1430,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 bc 98 99 00 00 00 	vpavgb 0x99\(%eax,%ebx,4\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 84 98 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(%eax,%ebx,4\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 84 98 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(%eax,%ebx,4\)
-[ 	]*[a-f0-9]+:	c5 fb 2a bc 98 99 00 00 00 	vcvtsi2sdl 0x99\(%eax,%ebx,4\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a bc 98 99 00 00 00 	vcvtsi2sd 0x99\(%eax,%ebx,4\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 bc 98 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(%eax,%ebx,4\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a b4 98 99 00 00 00 00 	vblendvps %xmm0,0x99\(%eax,%ebx,4\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 bc 98 99 00 00 00 07 	vpinsrb \$0x7,0x99\(%eax,%ebx,4\),%xmm0,%xmm7
@@ -1451,7 +1451,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 bc cc 99 00 00 00 	vpavgb 0x99\(%esp,%ecx,8\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 84 cc 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(%esp,%ecx,8\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 84 cc 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(%esp,%ecx,8\)
-[ 	]*[a-f0-9]+:	c5 fb 2a bc cc 99 00 00 00 	vcvtsi2sdl 0x99\(%esp,%ecx,8\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a bc cc 99 00 00 00 	vcvtsi2sd 0x99\(%esp,%ecx,8\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 bc cc 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(%esp,%ecx,8\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a b4 cc 99 00 00 00 00 	vblendvps %xmm0,0x99\(%esp,%ecx,8\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 bc cc 99 00 00 00 07 	vpinsrb \$0x7,0x99\(%esp,%ecx,8\),%xmm0,%xmm7
@@ -1472,7 +1472,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 bc 15 99 00 00 00 	vpavgb 0x99\(%ebp,%edx,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 84 15 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(%ebp,%edx,1\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 84 15 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(%ebp,%edx,1\)
-[ 	]*[a-f0-9]+:	c5 fb 2a bc 15 99 00 00 00 	vcvtsi2sdl 0x99\(%ebp,%edx,1\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a bc 15 99 00 00 00 	vcvtsi2sd 0x99\(%ebp,%edx,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 bc 15 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(%ebp,%edx,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a b4 15 99 00 00 00 00 	vblendvps %xmm0,0x99\(%ebp,%edx,1\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 bc 15 99 00 00 00 07 	vpinsrb \$0x7,0x99\(%ebp,%edx,1\),%xmm0,%xmm7
@@ -3104,11 +3104,11 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c4 e3 59 22 31 07    	vpinsrd \$0x7,\(%ecx\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 59 22 31 07    	vpinsrd \$0x7,\(%ecx\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c5 db 2a f1          	vcvtsi2sd %ecx,%xmm4,%xmm6
-[ 	]*[a-f0-9]+:	c5 db 2a 31          	vcvtsi2sdl \(%ecx\),%xmm4,%xmm6
-[ 	]*[a-f0-9]+:	c5 db 2a 31          	vcvtsi2sdl \(%ecx\),%xmm4,%xmm6
+[ 	]*[a-f0-9]+:	c5 db 2a 31          	vcvtsi2sd \(%ecx\),%xmm4,%xmm6
+[ 	]*[a-f0-9]+:	c5 db 2a 31          	vcvtsi2sd \(%ecx\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c5 da 2a f1          	vcvtsi2ss %ecx,%xmm4,%xmm6
-[ 	]*[a-f0-9]+:	c5 da 2a 31          	vcvtsi2ssl \(%ecx\),%xmm4,%xmm6
-[ 	]*[a-f0-9]+:	c5 da 2a 31          	vcvtsi2ssl \(%ecx\),%xmm4,%xmm6
+[ 	]*[a-f0-9]+:	c5 da 2a 31          	vcvtsi2ss \(%ecx\),%xmm4,%xmm6
+[ 	]*[a-f0-9]+:	c5 da 2a 31          	vcvtsi2ss \(%ecx\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c5 ca c2 d4 07       	vcmpordss %xmm4,%xmm6,%xmm2
 [ 	]*[a-f0-9]+:	c5 ca c2 11 07       	vcmpordss \(%ecx\),%xmm6,%xmm2
 [ 	]*[a-f0-9]+:	c5 ca c2 11 07       	vcmpordss \(%ecx\),%xmm6,%xmm2
@@ -3178,7 +3178,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 3d 34 12 00 00 	vpavgb 0x1234,%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 05 34 12 00 00 07 	vaeskeygenassist \$0x7,0x1234,%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 05 34 12 00 00 07 	vpextrb \$0x7,%xmm0,0x1234
-[ 	]*[a-f0-9]+:	c5 fb 2a 3d 34 12 00 00 	vcvtsi2sdl 0x1234,%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a 3d 34 12 00 00 	vcvtsi2sd 0x1234,%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 3d 34 12 00 00 07 	vpclmulqdq \$0x7,0x1234,%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a 35 34 12 00 00 00 	vblendvps %xmm0,0x1234,%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 3d 34 12 00 00 07 	vpinsrb \$0x7,0x1234,%xmm0,%xmm7
@@ -3199,7 +3199,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 7d 00       	vpavgb 0x0\(%ebp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 45 00 07 	vaeskeygenassist \$0x7,0x0\(%ebp\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 45 00 07 	vpextrb \$0x7,%xmm0,0x0\(%ebp\)
-[ 	]*[a-f0-9]+:	c5 fb 2a 7d 00       	vcvtsi2sdl 0x0\(%ebp\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a 7d 00       	vcvtsi2sd 0x0\(%ebp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 7d 00 07 	vpclmulqdq \$0x7,0x0\(%ebp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a 75 00 00 	vblendvps %xmm0,0x0\(%ebp\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 7d 00 07 	vpinsrb \$0x7,0x0\(%ebp\),%xmm0,%xmm7
@@ -3220,7 +3220,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 bd 99 00 00 00 	vpavgb 0x99\(%ebp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 85 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(%ebp\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 85 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(%ebp\)
-[ 	]*[a-f0-9]+:	c5 fb 2a bd 99 00 00 00 	vcvtsi2sdl 0x99\(%ebp\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a bd 99 00 00 00 	vcvtsi2sd 0x99\(%ebp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 bd 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(%ebp\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a b5 99 00 00 00 00 	vblendvps %xmm0,0x99\(%ebp\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 bd 99 00 00 00 07 	vpinsrb \$0x7,0x99\(%ebp\),%xmm0,%xmm7
@@ -3241,7 +3241,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 3c 25 99 00 00 00 	vpavgb 0x99\(,%eiz,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 04 25 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(,%eiz,1\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 04 25 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(,%eiz,1\)
-[ 	]*[a-f0-9]+:	c5 fb 2a 3c 25 99 00 00 00 	vcvtsi2sdl 0x99\(,%eiz,1\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a 3c 25 99 00 00 00 	vcvtsi2sd 0x99\(,%eiz,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 3c 25 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(,%eiz,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a 34 25 99 00 00 00 00 	vblendvps %xmm0,0x99\(,%eiz,1\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 3c 25 99 00 00 00 07 	vpinsrb \$0x7,0x99\(,%eiz,1\),%xmm0,%xmm7
@@ -3262,7 +3262,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 3c 65 99 00 00 00 	vpavgb 0x99\(,%eiz,2\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 04 65 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(,%eiz,2\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 04 65 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(,%eiz,2\)
-[ 	]*[a-f0-9]+:	c5 fb 2a 3c 65 99 00 00 00 	vcvtsi2sdl 0x99\(,%eiz,2\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a 3c 65 99 00 00 00 	vcvtsi2sd 0x99\(,%eiz,2\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 3c 65 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(,%eiz,2\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a 34 65 99 00 00 00 00 	vblendvps %xmm0,0x99\(,%eiz,2\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 3c 65 99 00 00 00 07 	vpinsrb \$0x7,0x99\(,%eiz,2\),%xmm0,%xmm7
@@ -3283,7 +3283,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 bc 20 99 00 00 00 	vpavgb 0x99\(%eax,%eiz,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 84 20 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(%eax,%eiz,1\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 84 20 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(%eax,%eiz,1\)
-[ 	]*[a-f0-9]+:	c5 fb 2a bc 20 99 00 00 00 	vcvtsi2sdl 0x99\(%eax,%eiz,1\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a bc 20 99 00 00 00 	vcvtsi2sd 0x99\(%eax,%eiz,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 bc 20 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(%eax,%eiz,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a b4 20 99 00 00 00 00 	vblendvps %xmm0,0x99\(%eax,%eiz,1\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 bc 20 99 00 00 00 07 	vpinsrb \$0x7,0x99\(%eax,%eiz,1\),%xmm0,%xmm7
@@ -3304,7 +3304,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 bc 60 99 00 00 00 	vpavgb 0x99\(%eax,%eiz,2\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 84 60 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(%eax,%eiz,2\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 84 60 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(%eax,%eiz,2\)
-[ 	]*[a-f0-9]+:	c5 fb 2a bc 60 99 00 00 00 	vcvtsi2sdl 0x99\(%eax,%eiz,2\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a bc 60 99 00 00 00 	vcvtsi2sd 0x99\(%eax,%eiz,2\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 bc 60 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(%eax,%eiz,2\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a b4 60 99 00 00 00 00 	vblendvps %xmm0,0x99\(%eax,%eiz,2\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 bc 60 99 00 00 00 07 	vpinsrb \$0x7,0x99\(%eax,%eiz,2\),%xmm0,%xmm7
@@ -3325,7 +3325,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 bc 98 99 00 00 00 	vpavgb 0x99\(%eax,%ebx,4\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 84 98 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(%eax,%ebx,4\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 84 98 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(%eax,%ebx,4\)
-[ 	]*[a-f0-9]+:	c5 fb 2a bc 98 99 00 00 00 	vcvtsi2sdl 0x99\(%eax,%ebx,4\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a bc 98 99 00 00 00 	vcvtsi2sd 0x99\(%eax,%ebx,4\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 bc 98 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(%eax,%ebx,4\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a b4 98 99 00 00 00 00 	vblendvps %xmm0,0x99\(%eax,%ebx,4\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 bc 98 99 00 00 00 07 	vpinsrb \$0x7,0x99\(%eax,%ebx,4\),%xmm0,%xmm7
@@ -3346,7 +3346,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 bc cc 99 00 00 00 	vpavgb 0x99\(%esp,%ecx,8\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 84 cc 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(%esp,%ecx,8\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 84 cc 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(%esp,%ecx,8\)
-[ 	]*[a-f0-9]+:	c5 fb 2a bc cc 99 00 00 00 	vcvtsi2sdl 0x99\(%esp,%ecx,8\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a bc cc 99 00 00 00 	vcvtsi2sd 0x99\(%esp,%ecx,8\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 bc cc 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(%esp,%ecx,8\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a b4 cc 99 00 00 00 00 	vblendvps %xmm0,0x99\(%esp,%ecx,8\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 bc cc 99 00 00 00 07 	vpinsrb \$0x7,0x99\(%esp,%ecx,8\),%xmm0,%xmm7
@@ -3367,7 +3367,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	c5 f9 e0 bc 15 99 00 00 00 	vpavgb 0x99\(%ebp,%edx,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 df 84 15 99 00 00 00 07 	vaeskeygenassist \$0x7,0x99\(%ebp,%edx,1\),%xmm0
 [ 	]*[a-f0-9]+:	c4 e3 79 14 84 15 99 00 00 00 07 	vpextrb \$0x7,%xmm0,0x99\(%ebp,%edx,1\)
-[ 	]*[a-f0-9]+:	c5 fb 2a bc 15 99 00 00 00 	vcvtsi2sdl 0x99\(%ebp,%edx,1\),%xmm0,%xmm7
+[ 	]*[a-f0-9]+:	c5 fb 2a bc 15 99 00 00 00 	vcvtsi2sd 0x99\(%ebp,%edx,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 79 44 bc 15 99 00 00 00 07 	vpclmulqdq \$0x7,0x99\(%ebp,%edx,1\),%xmm0,%xmm7
 [ 	]*[a-f0-9]+:	c4 e3 59 4a b4 15 99 00 00 00 00 	vblendvps %xmm0,0x99\(%ebp,%edx,1\),%xmm4,%xmm6
 [ 	]*[a-f0-9]+:	c4 e3 79 20 bc 15 99 00 00 00 07 	vpinsrb \$0x7,0x99\(%ebp,%edx,1\),%xmm0,%xmm7

@@ -2290,8 +2290,9 @@ struct dis386 {
    "XZ" => print 'x', 'y', or 'z' if suffix_always is true or no
 	   register operands and no broadcast.
    "XW" => print 's', 'd' depending on the VEX.W bit (for FMA)
-   "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory operand
-	   or suffix_always is true
+   "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory
+	   operand or no operand at all in 64bit mode, or if suffix_always
+	   is true.
    "LB" => print "abs" in 64bit mode and behave as 'B' otherwise
    "LS" => print "abs" in 64bit mode and behave as 'S' otherwise
    "LV" => print "abs" for 64bit operand and behave as 'S' otherwise
@@ -2606,7 +2607,7 @@ static const struct dis386 dis386_twobyte[] = {
   { Bad_Opcode },
   { "syscall",		{ XX }, 0 },
   { "clts",		{ XX }, 0 },
-  { "sysret%LP",		{ XX }, 0 },
+  { "sysret%LQ",		{ XX }, 0 },
   /* 08 */
   { "invd",		{ XX }, 0 },
   { PREFIX_TABLE (PREFIX_0F09) },
@@ -13066,7 +13067,7 @@ putop (const char *in_template, int sizeflag)
 		  SAVE_LAST (*p);
 		  break;
 		}
-	      if (intel_syntax
+	      if ((intel_syntax && need_modrm)
 		  || (modrm.mod == 3 && !(sizeflag & SUFFIX_ALWAYS)))
 		break;
 	      if ((rex & REX_W))
@@ -13074,8 +13075,9 @@ putop (const char *in_template, int sizeflag)
 		  USED_REX (REX_W);
 		  *obufp++ = 'q';
 		}
-	      else
-		*obufp++ = 'l';
+	      else if((address_mode == mode_64bit && need_modrm)
+		      || (sizeflag & SUFFIX_ALWAYS))
+		*obufp++ = intel_syntax? 'd' : 'l';
 	    }
 	  break;
 	case 'R':

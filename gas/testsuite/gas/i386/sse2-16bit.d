@@ -64,7 +64,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 2a d3          	cvtpi2pd %mm3,%xmm2
 [ 	]*[a-f0-9]+:	67 66 0f 2a 1c 24    	cvtpi2pd \(%esp\),%xmm3
 [ 	]*[a-f0-9]+:	f2 0f 2a e5          	cvtsi2sd %ebp,%xmm4
-[ 	]*[a-f0-9]+:	67 f2 0f 2a 2e       	cvtsi2sdl \(%esi\),%xmm5
+[ 	]*[a-f0-9]+:	67 f2 0f 2a 2e       	cvtsi2sd \(%esi\),%xmm5
 [ 	]*[a-f0-9]+:	66 0f 2d f7          	cvtpd2pi %xmm7,%mm6
 [ 	]*[a-f0-9]+:	67 66 0f 2d 38       	cvtpd2pi \(%eax\),%mm7
 [ 	]*[a-f0-9]+:	67 f2 0f 2d 01       	cvtsd2si \(%ecx\),%eax
@@ -178,7 +178,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f c4 d1 00          	pinsrw \$0x0,%ecx,%mm2
 [ 	]*[a-f0-9]+:	66 0f c4 d1 00       	pinsrw \$0x0,%ecx,%xmm2
 [ 	]*[a-f0-9]+:	66 0f d7 d3          	pmovmskb %xmm3,%edx
-[ 	]*[a-f0-9]+:	f3 0f 2a 05          	cvtsi2ssl? \(%di\),%xmm0
+[ 	]*[a-f0-9]+:	f3 0f 2a 05          	cvtsi2ss \(%di\),%xmm0
 [ 	]*[a-f0-9]+:	66 0f 3a 17 0d 00    	extractps \$0x0,%xmm1,\(%di\)
 [ 	]*[a-f0-9]+:	66 0f 3a 21 05 00    	insertps \$0x0,\(%di\),%xmm0
 [ 	]*[a-f0-9]+:	66 0f 3a 16 0d 00    	pextrd \$0x0,%xmm1,\(%di\)

@@ -10,17 +10,17 @@ Disassembly of section .text:
 
 0+ <_start>:
 [ 	]*[a-f0-9]+:	62 f1 fe 08 2a c0    	vcvtsi2ss %eax,%xmm0,%xmm0
-[ 	]*[a-f0-9]+:	62 f1 fe 08 2a 40 01 	vcvtsi2ssl 0x4\(%eax\),%xmm0,%xmm0
+[ 	]*[a-f0-9]+:	62 f1 fe 08 2a 40 01 	vcvtsi2ss 0x4\(%eax\),%xmm0,%xmm0
 [ 	]*[a-f0-9]+:	62 f1 ff 08 2a c0    	vcvtsi2sd %eax,%xmm0,%xmm0
-[ 	]*[a-f0-9]+:	62 f1 ff 08 2a 40 01 	vcvtsi2sdl 0x4\(%eax\),%xmm0,%xmm0
+[ 	]*[a-f0-9]+:	62 f1 ff 08 2a 40 01 	vcvtsi2sd 0x4\(%eax\),%xmm0,%xmm0
 [ 	]*[a-f0-9]+:	62 f1 fe 08 2d c0    	vcvtss2si %xmm0,%eax
 [ 	]*[a-f0-9]+:	62 f1 ff 08 2d c0    	vcvtsd2si %xmm0,%eax
 [ 	]*[a-f0-9]+:	62 f1 fe 08 2c c0    	vcvttss2si %xmm0,%eax
 [ 	]*[a-f0-9]+:	62 f1 ff 08 2c c0    	vcvttsd2si %xmm0,%eax
 [ 	]*[a-f0-9]+:	62 f1 fe 08 7b c0    	vcvtusi2ss %eax,%xmm0,%xmm0
-[ 	]*[a-f0-9]+:	62 f1 fe 08 7b 40 01 	vcvtusi2ssl 0x4\(%eax\),%xmm0,%xmm0
+[ 	]*[a-f0-9]+:	62 f1 fe 08 7b 40 01 	vcvtusi2ss 0x4\(%eax\),%xmm0,%xmm0
 [ 	]*[a-f0-9]+:	62 f1 ff 08 7b c0    	vcvtusi2sd %eax,%xmm0,%xmm0
-[ 	]*[a-f0-9]+:	62 f1 ff 08 7b 40 01 	vcvtusi2sdl 0x4\(%eax\),%xmm0,%xmm0
+[ 	]*[a-f0-9]+:	62 f1 ff 08 7b 40 01 	vcvtusi2sd 0x4\(%eax\),%xmm0,%xmm0
 [ 	]*[a-f0-9]+:	62 f1 fe 08 79 c0    	vcvtss2usi %xmm0,%eax
 [ 	]*[a-f0-9]+:	62 f1 ff 08 79 c0    	vcvtsd2usi %xmm0,%eax
 [ 	]*[a-f0-9]+:	62 f1 fe 08 78 c0    	vcvttss2usi %xmm0,%eax

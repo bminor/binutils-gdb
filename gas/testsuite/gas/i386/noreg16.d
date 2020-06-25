@@ -27,8 +27,8 @@ Disassembly of section .text:
  *[a-f0-9]+:	a7                   	cmpsw  %es:\(%di\),%ds:\(%si\)
  *[a-f0-9]+:	67 a7                	cmpsw  %es:\(%edi\),%ds:\(%esi\)
  *[a-f0-9]+:	f2 0f 38 f1 07       	crc32w \(%bx\),%eax
- *[a-f0-9]+:	f2 0f 2a 07          	cvtsi2sdl \(%bx\),%xmm0
- *[a-f0-9]+:	f3 0f 2a 07          	cvtsi2ssl \(%bx\),%xmm0
+ *[a-f0-9]+:	f2 0f 2a 07          	cvtsi2sd \(%bx\),%xmm0
+ *[a-f0-9]+:	f3 0f 2a 07          	cvtsi2ss \(%bx\),%xmm0
  *[a-f0-9]+:	ff 0f                	decw   \(%bx\)
  *[a-f0-9]+:	f7 37                	divw   \(%bx\)
  *[a-f0-9]+:	d8 07                	fadds  \(%bx\)
@@ -92,7 +92,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	67 6f                	outsw  %ds:\(%esi\),\(%dx\)
  *[a-f0-9]+:	8f 07                	popw   \(%bx\)
  *[a-f0-9]+:	07                   	pop    %es
- *[a-f0-9]+:	f3 0f ae 27          	ptwritel \(%bx\)
+ *[a-f0-9]+:	f3 0f ae 27          	ptwrite \(%bx\)
  *[a-f0-9]+:	ff 37                	pushw  \(%bx\)
  *[a-f0-9]+:	06                   	push   %es
  *[a-f0-9]+:	d1 17                	rclw   \(%bx\)
@@ -139,12 +139,12 @@ Disassembly of section .text:
  *[a-f0-9]+:	81 2f 34 12          	subw   \$0x1234,\(%bx\)
  *[a-f0-9]+:	f7 07 89 00          	testw  \$0x89,\(%bx\)
  *[a-f0-9]+:	f7 07 34 12          	testw  \$0x1234,\(%bx\)
- *[a-f0-9]+:	c5 fb 2a 07          	vcvtsi2sdl \(%bx\),%xmm0,%xmm0
- *[a-f0-9]+:	62 f1 7f 08 2a 07    	vcvtsi2sdl \(%bx\),%xmm0,%xmm0
- *[a-f0-9]+:	c5 fa 2a 07          	vcvtsi2ssl \(%bx\),%xmm0,%xmm0
- *[a-f0-9]+:	62 f1 7e 08 2a 07    	vcvtsi2ssl \(%bx\),%xmm0,%xmm0
- *[a-f0-9]+:	62 f1 7f 08 7b 07    	vcvtusi2sdl \(%bx\),%xmm0,%xmm0
- *[a-f0-9]+:	62 f1 7e 08 7b 07    	vcvtusi2ssl \(%bx\),%xmm0,%xmm0
+ *[a-f0-9]+:	c5 fb 2a 07          	vcvtsi2sd \(%bx\),%xmm0,%xmm0
+ *[a-f0-9]+:	62 f1 7f 08 2a 07    	vcvtsi2sd \(%bx\),%xmm0,%xmm0
+ *[a-f0-9]+:	c5 fa 2a 07          	vcvtsi2ss \(%bx\),%xmm0,%xmm0
+ *[a-f0-9]+:	62 f1 7e 08 2a 07    	vcvtsi2ss \(%bx\),%xmm0,%xmm0
+ *[a-f0-9]+:	62 f1 7f 08 7b 07    	vcvtusi2sd \(%bx\),%xmm0,%xmm0
+ *[a-f0-9]+:	62 f1 7e 08 7b 07    	vcvtusi2ss \(%bx\),%xmm0,%xmm0
  *[a-f0-9]+:	83 37 01             	xorw   \$0x1,\(%bx\)
  *[a-f0-9]+:	81 37 89 00          	xorw   \$0x89,\(%bx\)
  *[a-f0-9]+:	81 37 34 12          	xorw   \$0x1234,\(%bx\)

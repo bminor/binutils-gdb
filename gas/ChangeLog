@@ -1,5 +1,20 @@
 2020-06-25  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/avx-16bit.d,
+	testsuite/gas/i386/avx-scalar.d, testsuite/gas/i386/avx.d,
+	testsuite/gas/i386/avx512f-16bit.d,
+	testsuite/gas/i386/avx512f.d,
+	testsuite/gas/i386/evex-lig256.d,
+	testsuite/gas/i386/evex-lig512.d
+	testsuite/gas/i386/evex-wig1.d, testsuite/gas/i386/katmai.d,
+	testsuite/gas/i386/noreg16.d, testsuite/gas/i386/noreg32.d,
+	testsuite/gas/i386/ptwrite.d, testsuite/gas/i386/simd.d,
+	testsuite/gas/i386/sse2-16bit.d,
+	testsuite/gas/i386/sse2.d, testsuite/gas/i386/sse2avx.d: Adjust
+	expectations.
+
+2020-06-25  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (md_assemble): Also reject explicit REX
 	prefixes with VEX and alike encoded insns. Zap consumed bits
 	from i.rex.
