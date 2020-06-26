@@ -1,3 +1,12 @@
+2020-06-26  Alan Modra  <amodra@gmail.com>
+
+	* elfxx-riscv.c (struct priv_spec_t, priv_specs),
+	(riscv_get_priv_spec_class, riscv_get_priv_spec_class_from_numbers),
+	(riscv_get_priv_spec_name): Move to..
+	* cpu-riscv.c: ..here.
+	(riscv_get_priv_spec_class_from_numbers): Don't xmalloc temp buffer.
+	Use %u to print unsigned numbers.
+
 2020-06-24  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* cpu-riscv.c (riscv_scan): Don't allow shorter matches using the
