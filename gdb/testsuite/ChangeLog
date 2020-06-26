@@ -1,3 +1,12 @@
+2020-06-26  Gary Benson <gbenson@redhat.com>
+
+	* gdb.cp/try_catch.cc: Include string.h.
+	(main): Replace comparison against string literal with
+	strcmp, avoiding build failure with -Wstring-compare.
+	Add "marker test-complete".
+	* gdb.cp/try_catch.exp: Run the test to the above marker,
+	then verify that the value of "test" is still true.
+
 2020-06-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/riscv-tdesc-regs.exp: New test cases.
