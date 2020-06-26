@@ -11851,17 +11851,17 @@ print_insn (bfd_vma pc, disassemble_info *info)
       else if (CONST_STRNEQ (p, "x86-64"))
 	{
 	  address_mode = mode_64bit;
-	  priv.orig_sizeflag = AFLAG | DFLAG;
+	  priv.orig_sizeflag |= AFLAG | DFLAG;
 	}
       else if (CONST_STRNEQ (p, "i386"))
 	{
 	  address_mode = mode_32bit;
-	  priv.orig_sizeflag = AFLAG | DFLAG;
+	  priv.orig_sizeflag |= AFLAG | DFLAG;
 	}
       else if (CONST_STRNEQ (p, "i8086"))
 	{
 	  address_mode = mode_16bit;
-	  priv.orig_sizeflag = 0;
+	  priv.orig_sizeflag &= ~(AFLAG | DFLAG);
 	}
       else if (CONST_STRNEQ (p, "intel"))
 	{

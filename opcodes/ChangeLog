@@ -1,3 +1,8 @@
+2020-06-26  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c: (print_insn): Avoid straight assignment to
+	priv.orig_sizeflag when processing -M sub-options.
+
 2020-06-25  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c: Adjust description of J macro.

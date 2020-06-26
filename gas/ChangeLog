@@ -1,3 +1,8 @@
+2020-06-26  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/nop-1-suffix.d: New.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
 2020-06-26  Pat Bernardi  <bernardi@adacore.com>
 
 	* config/tc-m68k.c (m68k_elf_gnu_attribute): New function.

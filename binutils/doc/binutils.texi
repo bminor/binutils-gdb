@@ -2471,8 +2471,7 @@ option or whether instruction notes should be generated as comments in the
 disasssembly using @option{-M notes}.
 
 For the x86, some of the options duplicate functions of the @option{-m}
-switch, but allow finer grained control.  Multiple selections from the
-following may be specified as a comma separated string.
+switch, but allow finer grained control.
 @table @code
 @item x86-64
 @itemx i386
@@ -2503,8 +2502,10 @@ will be overridden if @code{x86-64}, @code{i386} or @code{i8086}
 appear later in the option string.
 
 @item suffix
-When in AT&T mode, instructs the disassembler to print a mnemonic
-suffix even when the suffix could be inferred by the operands.
+When in AT&T mode and also for a limited set of instructions when in Intel
+mode, instructs the disassembler to print a mnemonic suffix even when the
+suffix could be inferred by the operands or, for certain instructions, the
+execution mode's defaults.
 @end table
 
 For PowerPC, the @option{-M} argument @option{raw} selects
