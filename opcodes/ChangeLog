@@ -10,10 +10,10 @@
 	(VecSIB): Renamed to ...
 	(SIB): This.
 	(i386_opcode_modifier): Replace vecsib with sib.
-	* i386-opc.tbl (VexSIB128): New.
+	* i386-opc.tbl (VecSIB128): New.
 	(VecSIB256): Likewise.
 	(VecSIB512): Likewise.
-	Replace VecSIB=1, VecSIB=2 and VecSIB=3 with VexSIB128, VecSIB256
+	Replace VecSIB=1, VecSIB=2 and VecSIB=3 with VecSIB128, VecSIB256
 	and VecSIB512, respectively.
 
 2020-06-26  Jan Beulich  <jbeulich@suse.com>
