@@ -84,6 +84,7 @@
 #define Vex128 Vex=VEX128
 #define Vex256 Vex=VEX256
 #define VexLIG Vex=VEXScalar
+
 #define VecSIB128 SIB=VECSIB128
 #define VecSIB256 SIB=VECSIB256
 #define VecSIB512 SIB=VECSIB512

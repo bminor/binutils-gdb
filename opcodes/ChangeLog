@@ -1,5 +1,9 @@
 2020-06-26  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-opc.tbl: Add a blank line.
+
+2020-06-26  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (opcode_modifiers): Replace VecSIB with SIB.
 	(VecSIB128): Renamed to ...
 	(VECSIB128): This.
