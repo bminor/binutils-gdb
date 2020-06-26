@@ -5771,7 +5771,7 @@ check_VecOperands (const insn_template *t)
     }
 
   /* Without VSIB byte, we can't have a vector register for index.  */
-  if (!t->opcode_modifier.vecsib
+  if (!t->opcode_modifier.sib
       && i.index_reg
       && (i.index_reg->reg_type.bitfield.xmmword
 	  || i.index_reg->reg_type.bitfield.ymmword
@@ -5791,14 +5791,14 @@ check_VecOperands (const insn_template *t)
 
   /* For VSIB byte, we need a vector register for index, and all vector
      registers must be distinct.  */
-  if (t->opcode_modifier.vecsib)
+  if (t->opcode_modifier.sib)
     {
       if (!i.index_reg
-	  || !((t->opcode_modifier.vecsib == VecSIB128
+	  || !((t->opcode_modifier.sib == VECSIB128
 		&& i.index_reg->reg_type.bitfield.xmmword)
-	       || (t->opcode_modifier.vecsib == VecSIB256
+	       || (t->opcode_modifier.sib == VECSIB256
 		   && i.index_reg->reg_type.bitfield.ymmword)
-	       || (t->opcode_modifier.vecsib == VecSIB512
+	       || (t->opcode_modifier.sib == VECSIB512
 		   && i.index_reg->reg_type.bitfield.zmmword)))
       {
 	i.error = invalid_vsib_address;
@@ -6274,7 +6274,7 @@ match_template (char mnem_suffix)
 	      || (operand_types[j].bitfield.class != RegMMX
 		  && operand_types[j].bitfield.class != RegSIMD
 		  && operand_types[j].bitfield.class != RegMask))
-	  && !t->opcode_modifier.vecsib)
+	  && !t->opcode_modifier.sib)
 	continue;
 
       /* Do not verify operands when there are none.  */
@@ -7967,7 +7967,7 @@ build_modrm_byte (void)
 	      break;
 	  gas_assert (op < i.operands);
 
-	  if (i.tm.opcode_modifier.vecsib)
+	  if (i.tm.opcode_modifier.sib)
 	    {
 	      if (i.index_reg->reg_num == RegIZ)
 		abort ();
@@ -8007,7 +8007,7 @@ build_modrm_byte (void)
 		{
 		  i386_operand_type newdisp;
 
-		  gas_assert (!i.tm.opcode_modifier.vecsib);
+		  gas_assert (!i.tm.opcode_modifier.sib);
 		  /* Operand is just <disp>  */
 		  if (flag_code == CODE_64BIT)
 		    {
@@ -8034,7 +8034,7 @@ build_modrm_byte (void)
 		  i.types[op] = operand_type_and_not (i.types[op], anydisp);
 		  i.types[op] = operand_type_or (i.types[op], newdisp);
 		}
-	      else if (!i.tm.opcode_modifier.vecsib)
+	      else if (!i.tm.opcode_modifier.sib)
 		{
 		  /* !i.base_reg && i.index_reg  */
 		  if (i.index_reg->reg_num == RegIZ)
@@ -8065,7 +8065,7 @@ build_modrm_byte (void)
 	  /* RIP addressing for 64bit mode.  */
 	  else if (i.base_reg->reg_num == RegIP)
 	    {
-	      gas_assert (!i.tm.opcode_modifier.vecsib);
+	      gas_assert (!i.tm.opcode_modifier.sib);
 	      i.rm.regmem = NO_BASE_REGISTER;
 	      i.types[op].bitfield.disp8 = 0;
 	      i.types[op].bitfield.disp16 = 0;
@@ -8078,7 +8078,7 @@ build_modrm_byte (void)
 	    }
 	  else if (i.base_reg->reg_type.bitfield.word)
 	    {
-	      gas_assert (!i.tm.opcode_modifier.vecsib);
+	      gas_assert (!i.tm.opcode_modifier.sib);
 	      switch (i.base_reg->reg_num)
 		{
 		case 3: /* (%bx)  */
@@ -8126,7 +8126,7 @@ build_modrm_byte (void)
 		    }
 		}
 
-	      if (!i.tm.opcode_modifier.vecsib)
+	      if (!i.tm.opcode_modifier.sib)
 		i.rm.regmem = i.base_reg->reg_num;
 	      if ((i.base_reg->reg_flags & RegRex) != 0)
 		i.rex |= REX_B;
@@ -8145,7 +8145,7 @@ build_modrm_byte (void)
 	      i.sib.scale = i.log2_scale_factor;
 	      if (i.index_reg == 0)
 		{
-		  gas_assert (!i.tm.opcode_modifier.vecsib);
+		  gas_assert (!i.tm.opcode_modifier.sib);
 		  /* <disp>(%esp) becomes two byte modrm with no index
 		     register.  We've already stored the code for esp
 		     in i.rm.regmem ie. ESCAPE_TO_TWO_BYTE_ADDRESSING.
@@ -8153,7 +8153,7 @@ build_modrm_byte (void)
 		     extra modrm byte.  */
 		  i.sib.index = NO_INDEX_REGISTER;
 		}
-	      else if (!i.tm.opcode_modifier.vecsib)
+	      else if (!i.tm.opcode_modifier.sib)
 		{
 		  if (i.index_reg->reg_num == RegIZ)
 		    i.sib.index = NO_INDEX_REGISTER;

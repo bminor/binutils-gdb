@@ -566,15 +566,15 @@ enum
 #define XOP2SOURCES	1
 #define VEX3SOURCES	2
   VexSources,
-  /* Instruction with vector SIB byte:
+  /* Instruction with a mandatory SIB byte:
 	1: 128bit vector register.
 	2: 256bit vector register.
 	3: 512bit vector register.
    */
-#define VecSIB128	1
-#define VecSIB256	2
-#define VecSIB512	3
-  VecSIB,
+#define VECSIB128	1
+#define VECSIB256	2
+#define VECSIB512	3
+  SIB,
   /* SSE to AVX support required */
   SSE2AVX,
   /* No AVX equivalent */
@@ -699,7 +699,7 @@ typedef struct i386_opcode_modifier
   unsigned int vexw:2;
   unsigned int vexopcode:3;
   unsigned int vexsources:2;
-  unsigned int vecsib:2;
+  unsigned int sib:2;
   unsigned int sse2avx:1;
   unsigned int noavx:1;
   unsigned int evex:3;

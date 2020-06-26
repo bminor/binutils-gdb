@@ -1,3 +1,21 @@
+2020-06-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Replace VecSIB with SIB.
+	(VecSIB128): Renamed to ...
+	(VECSIB128): This.
+	(VecSIB256): Renamed to ...
+	(VECSIB256): This.
+	(VecSIB512): Renamed to ...
+	(VECSIB512): This.
+	(VecSIB): Renamed to ...
+	(SIB): This.
+	(i386_opcode_modifier): Replace vecsib with sib.
+	* i386-opc.tbl (VexSIB128): New.
+	(VecSIB256): Likewise.
+	(VecSIB512): Likewise.
+	Replace VecSIB=1, VecSIB=2 and VecSIB=3 with VexSIB128, VecSIB256
+	and VecSIB512, respectively.
+
 2020-06-26  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c: Adjust description of I macro.
