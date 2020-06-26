@@ -4873,8 +4873,12 @@ md_assemble (char *line)
       if (!process_operands ())
 	return;
     }
-  else if (!quiet_warnings && i.tm.opcode_modifier.ugh)
+  else
     {
+      if (i.tm.opcode_modifier.immext)
+	process_immext ();
+
+      if (!quiet_warnings && i.tm.opcode_modifier.ugh)
       /* UnixWare fsub no args is alias for fsubp, fadd -> faddp, etc.  */
       as_warn (_("translating to `%sp'"), i.tm.name);
     }

@@ -1,5 +1,10 @@
 2020-06-26  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (md_assemble): Process ImmExt without
+	operands.
+
+2020-06-26  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (check_VecOperands): Replace vecsib with sib.
 	Replace VecSIB128, VecSIB256 and VecSIB512 with VECSIB128,
 	VECSIB256 and VECSIB512, respectively.
