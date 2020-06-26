@@ -2250,8 +2250,7 @@ struct dis386 {
    'F' => print 'w' or 'l' depending on address size prefix (loop insns)
    'G' => print 'w' or 'l' depending on operand size prefix (i/o insns)
    'H' => print ",pt" or ",pn" branch hint
-   'I' => honor following macro letter even in Intel mode (implemented only
-	  for some of the macro letters)
+   'I' unused.
    'J' unused.
    'K' => print 'd' or 'q' if rex prefix is present.
    'L' => print 'l' if suffix_always is true
@@ -6918,13 +6917,13 @@ static const struct dis386 x86_64_table[][2] = {
 
   /* X86_64_0F01_REG_0 */
   {
-    { "sgdt{Q|IQ}", { M }, 0 },
+    { "sgdt{Q|Q}", { M }, 0 },
     { "sgdt", { M }, 0 },
   },
 
   /* X86_64_0F01_REG_1 */
   {
-    { "sidt{Q|IQ}", { M }, 0 },
+    { "sidt{Q|Q}", { M }, 0 },
     { "sidt", { M }, 0 },
   },
 
@@ -12323,9 +12322,9 @@ static const char *float_mem[] = {
   "(bad)",
   "fst{s|}",
   "fstp{s|}",
-  "fldenvIC",
+  "fldenv{C|C}",
   "fldcw",
-  "fNstenvIC",
+  "fNstenv{C|C}",
   "fNstcw",
   /* da */
   "fiadd{l|}",
@@ -12359,9 +12358,9 @@ static const char *float_mem[] = {
   "fisttp{ll|}",
   "fst{l||}",
   "fstp{l|}",
-  "frstorIC",
+  "frstor{C|C}",
   "(bad)",
-  "fNsaveIC",
+  "fNsave{C|C}",
   "fNstsw",
   /* de */
   "fiadd{s|}",
@@ -12735,11 +12734,9 @@ putop (const char *in_template, int sizeflag)
 	      while (*++p != '|')
 		if (*p == '}' || *p == '\0')
 		  abort ();
+	      alt = 1;
 	    }
-	  /* Fall through.  */
-	case 'I':
-	  alt = 1;
-	  continue;
+	  break;
 	case '|':
 	  while (*++p != '}')
 	    {
@@ -12748,6 +12745,7 @@ putop (const char *in_template, int sizeflag)
 	    }
 	  break;
 	case '}':
+	  alt = 0;
 	  break;
 	case 'A':
 	  if (intel_syntax)
@@ -13283,7 +13281,6 @@ putop (const char *in_template, int sizeflag)
 	    }
 	  break;
 	}
-      alt = 0;
     }
   *obufp = 0;
   mnemonicendp = obufp;

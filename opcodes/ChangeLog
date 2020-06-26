@@ -1,5 +1,12 @@
 2020-06-26  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c: Adjust description of I macro.
+	(x86_64_table): Drop use of I.
+	(float_mem): Replace use of I.
+	(putop): Remove handling of I. Adjust setting/clearing of "alt".
+
+2020-06-26  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c: (print_insn): Avoid straight assignment to
 	priv.orig_sizeflag when processing -M sub-options.
 
