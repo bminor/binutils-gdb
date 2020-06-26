@@ -1,3 +1,7 @@
+2020-06-26  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/ld-x86-64/x86-64.exp: Run K1OM tests.
+
 2020-06-26  Pat Bernardi  <bernardi@adacore.com>
 
 	* testsuite/ld-m68k/attr-gnu-4-0.s: New file.
