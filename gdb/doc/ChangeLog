@@ -1,3 +1,8 @@
+2020-06-26  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Shell Commands): More accurate description of use
+	of $SHELL.  Reported by Sandra Loosemore <sandra@codesourcery.com>.
+
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.texinfo (Maintenance Commands): Document new 'maint print
