@@ -1,3 +1,8 @@
+2020-06-27  Simon Marchi  <simon.marchi@efficios.com>
+
+	* tdesc.h (class print_xml_feature) <add_line>: Add
+	ATTRIBUTE_PRINTF.
+
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tdesc.cc (print_xml_feature::visit_pre): Use add_line to add

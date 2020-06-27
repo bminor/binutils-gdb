@@ -438,7 +438,7 @@ private:
      functions appends a newline, so don't include one in the strings being
      passed.  */
   void add_line (const std::string &str);
-  void add_line (const char *fmt, ...);
+  void add_line (const char *fmt, ...) ATTRIBUTE_PRINTF (2, 3);
 
   /* The buffer we are writing too.  */
   std::string *m_buffer;
