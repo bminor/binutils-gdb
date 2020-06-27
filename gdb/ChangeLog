@@ -1,3 +1,7 @@
+2020-07-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* exec.c (_initialize_exec): Update exec-file-mismatch help.
+
 2020-07-10  Pedro Alves  <pedro@palves.net>
 
 	* gdbthread.h (inferior_ref): Define.

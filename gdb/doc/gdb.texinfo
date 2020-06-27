@@ -3016,6 +3016,8 @@ by @value{GDBN} and the executable file used to start the process.  If
 @samp{ask}, the default, display a warning and ask the user whether to
 load the process executable file; if @samp{warn}, just display a
 warning; if @samp{off}, don't attempt to detect a mismatch.
+If the user confirms loading the process executable file, then its symbols
+will be loaded as well.
 
 @cindex show exec-file-mismatch
 @item show exec-file-mismatch

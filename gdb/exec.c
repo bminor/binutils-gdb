@@ -305,7 +305,7 @@ validate_exec_file (int from_tty)
 	exec_file_target = TARGET_SYSROOT_PREFIX + exec_file_target;
 
       warning
-	(_("Mismatch between current exec-file %ps\n"
+	(_("Build ID mismatch between current exec-file %ps\n"
 	   "and automatically determined exec-file %ps\n"
 	   "exec-file-mismatch handling is currently \"%s\""),
 	 styled_string (file_name_style.style (), current_exec_file),
@@ -1269,7 +1269,11 @@ loaded by GDB and the exec-file automatically determined when attaching\n\
 to a process:\n\n\
  ask  - warn the user and ask whether to load the determined exec-file.\n\
  warn - warn the user, but do not change the exec-file.\n\
- off  - do not check for mismatch."),
+ off  - do not check for mismatch.\n\
+\n\
+GDB detects a mismatch by comparing the build IDs of the files.\n\
+If the user confirms loading the determined exec-file, then its symbols\n\
+will be loaded as well."),
 			set_exec_file_mismatch_command,
 			show_exec_file_mismatch_command,
 			&setlist, &showlist);
