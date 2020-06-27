@@ -93,6 +93,21 @@ inferior::inferior (int pid_)
   m_target_stack.push (get_dummy_target ());
 }
 
+void
+inferior::set_tty (const char *terminal_name)
+{
+  if (terminal_name != nullptr && *terminal_name != '\0')
+    m_terminal = make_unique_xstrdup (terminal_name);
+  else
+    m_terminal = NULL;
+}
+
+const char *
+inferior::tty ()
+{
+  return m_terminal.get ();
+}
+
 struct inferior *
 add_inferior_silent (int pid)
 {

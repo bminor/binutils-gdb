@@ -1,3 +1,21 @@
+2020-06-27  Pedro Alves  <palves@redhat.com>
+
+	* fork-child.c (prefork_hook): Adjust.
+	* infcmd.c (set_inferior_io_terminal, get_inferior_io_terminal):
+	Delete.
+	(set_inferior_tty_command, show_inferior_tty_command): Adjust.
+	* inferior.c (inferior::set_tty, inferior::tty): New methods.
+	* inferior.h (set_inferior_io_terminal, get_inferior_io_terminal):
+	Remove declarations.
+	(struct inferior) <set_tty, tty>: New methods.
+	(struct inferior) <terminal>: Rename to ...
+	(struct inferior) <m_terminal>: ... this and make private.
+	* main.c (captured_main_1): Adjust.
+	* mi/mi-cmd-env.c (mi_cmd_inferior_tty_set): Adjust.
+	(mi_cmd_inferior_tty_show): Adjust.
+	* nto-procfs.c (nto_procfs_target::create_inferior): Adjust.
+	* windows-nat.c (windows_nat_target::create_inferior): Adjust.
+
 2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
 
 	* configure.ac: Add --enable-libctf: handle --disable-static

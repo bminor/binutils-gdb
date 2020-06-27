@@ -1171,7 +1171,7 @@ captured_main_1 (struct captured_main_args *context)
     }
 
   if (ttyarg != NULL)
-    set_inferior_io_terminal (ttyarg);
+    current_inferior ()->set_tty (ttyarg);
 
   /* Error messages should no longer be distinguished with extra output.  */
   warning_pre_print = _("warning: ");

@@ -2730,7 +2730,7 @@ windows_nat_target::create_inferior (const char *exec_file,
   PROCESS_INFORMATION pi;
   BOOL ret;
   DWORD flags = 0;
-  const char *inferior_io_terminal = get_inferior_io_terminal ();
+  const char *inferior_tty = current_inferior ()->tty ();
 
   if (!exec_file)
     error (_("No executable specified, use `target exec'."));
@@ -2829,14 +2829,14 @@ windows_nat_target::create_inferior (const char *exec_file,
       w32_env = NULL;
     }
 
-  if (!inferior_io_terminal)
+  if (inferior_tty == nullptr)
     tty = ostdin = ostdout = ostderr = -1;
   else
     {
-      tty = open (inferior_io_terminal, O_RDWR | O_NOCTTY);
+      tty = open (inferior_tty, O_RDWR | O_NOCTTY);
       if (tty < 0)
 	{
-	  print_sys_errmsg (inferior_io_terminal, errno);
+	  print_sys_errmsg (inferior_tty, errno);
 	  ostdin = ostdout = ostderr = -1;
 	}
       else
@@ -2901,19 +2901,19 @@ windows_nat_target::create_inferior (const char *exec_file,
       allargs_len = strlen (allargs_copy);
     }
   /* If not all the standard streams are redirected by the command
-     line, use inferior_io_terminal for those which aren't.  */
-  if (inferior_io_terminal
+     line, use INFERIOR_TTY for those which aren't.  */
+  if (inferior_tty != nullptr
       && !(fd_inp >= 0 && fd_out >= 0 && fd_err >= 0))
     {
       SECURITY_ATTRIBUTES sa;
       sa.nLength = sizeof(sa);
       sa.lpSecurityDescriptor = 0;
       sa.bInheritHandle = TRUE;
-      tty = CreateFileA (inferior_io_terminal, GENERIC_READ | GENERIC_WRITE,
+      tty = CreateFileA (inferior_tty, GENERIC_READ | GENERIC_WRITE,
 			 0, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
       if (tty == INVALID_HANDLE_VALUE)
 	warning (_("Warning: Failed to open TTY %s, error %#x."),
-		 inferior_io_terminal, (unsigned) GetLastError ());
+		 inferior_tty, (unsigned) GetLastError ());
     }
   if (redirected || tty != INVALID_HANDLE_VALUE)
     {
