@@ -1,3 +1,9 @@
+2020-06-27  Alan Modra  <amodra@gmail.com>
+
+	* elfcomm.c (setup_nested_archive): Set nested_arch->file to NULL
+	after freeing.
+	(release_archive): Set fields of arch to NULL after freeing.
+
 2020-06-26  Nick Alcock  <nick.alcock@oracle.com>
 
 	* readelf.c (dump_section_as_ctf): Support .ctf archives using
