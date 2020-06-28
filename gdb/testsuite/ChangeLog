@@ -1,3 +1,8 @@
+2020-07-20  Ludovic Courtès  <ludo@gnu.org>
+
+	* gdb.guile/scm-error.exp ("source $remote_guile_file_1"): Relax
+	error regexp to match on Guile 2.2.
+
 2020-07-20  Gary Benson <gbenson@redhat.com>
 
 	* gdb.cp/align.exp: Fix "alignof (void)" tests when compiling

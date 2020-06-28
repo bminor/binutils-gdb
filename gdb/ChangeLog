@@ -1,3 +1,53 @@
+2020-07-20  Ludovic Courtès  <ludo@gnu.org>
+	    Doug Evans  <dje@google.com>
+
+	PR gdb/21104
+	* guile/scm-ports.c (USING_GUILE_BEFORE_2_2): New macro.
+	(ioscm_memory_port)[read_buf_size, write_buf_size]: Wrap in #if
+	USING_GUILE_BEFORE_2_2.
+	(stdio_port_desc, memory_port_desc) [!USING_GUILE_BEFORE_2_2]:
+	Change type to 'scm_t_port_type *'.
+	(natural_buffer_size) [!USING_GUILE_BEFORE_2_2]: New variable.
+	(ioscm_open_port) [USING_GUILE_BEFORE_2_2]: Add 'stream'
+	parameter and honor it.  Update callers.
+	(ioscm_open_port) [!USING_GUILE_BEFORE_2_2]: New function.
+	(ioscm_read_from_port, ioscm_write) [!USING_GUILE_BEFORE_2_2]: New
+	functions.
+	(ioscm_fill_input, ioscm_input_waiting, ioscm_flush): Wrap in #if
+	USING_GUILE_BEFORE_2_2.
+	(ioscm_init_gdb_stdio_port) [!USING_GUILE_BEFORE_2_2]: Use
+	'ioscm_read_from_port'.  Call 'scm_set_port_read_wait_fd'.
+	(ioscm_init_stdio_buffers) [!USING_GUILE_BEFORE_2_2]: New function.
+	(gdbscm_stdio_port_p) [!USING_GUILE_BEFORE_2_2]: Use 'SCM_PORTP'
+	and 'SCM_PORT_TYPE'.
+	(gdbscm_memory_port_end_input, gdbscm_memory_port_seek)
+	(ioscm_reinit_memory_port): Wrap in #if USING_GUILE_BEFORE_2_2.
+	(gdbscm_memory_port_read, gdbscm_memory_port_write)
+	(gdbscm_memory_port_seek, gdbscm_memory_port_close)
+	[!USING_GUILE_BEFORE_2_2]: New functions.
+	(gdbscm_memory_port_print): Remove use of 'SCM_PTOB_NAME'.
+	(ioscm_init_memory_port_type) [!USING_GUILE_BEFORE_2_2]: Use
+	'gdbscm_memory_port_read'.
+	Wrap 'scm_set_port_end_input', 'scm_set_port_flush', and
+	'scm_set_port_free' calls in #if USING_GUILE_BEFORE_2_2.
+	(gdbscm_get_natural_buffer_sizes) [!USING_GUILE_BEFORE_2_2]: New
+	function.
+	(ioscm_init_memory_port): Remove.
+	(ioscm_init_memory_port_stream): New function
+	(ioscm_init_memory_port_buffers) [USING_GUILE_BEFORE_2_2]: New
+	function.
+	(gdbscm_memory_port_read_buffer_size) [!USING_GUILE_BEFORE_2_2]:
+	Return scm_from_uint (0).
+	(gdbscm_set_memory_port_read_buffer_size_x)
+	[!USING_GUILE_BEFORE_2_2]: Call 'scm_setvbuf'.
+	(gdbscm_memory_port_write_buffer_size) [!USING_GUILE_BEFORE_2_2]:
+	Return scm_from_uint (0).
+	(gdbscm_set_memory_port_write_buffer_size_x)
+	[!USING_GUILE_BEFORE_2_2]: Call 'scm_setvbuf'.
+	* configure.ac (try_guile_versions): Add "guile-2.2".
+	* configure: Regenerate.
+	* NEWS: Add entry.
+
 2020-07-18  Tom Tromey  <tom@tromey.com>
 
 	* linux-nat.c (linux_multi_process): Remove.
