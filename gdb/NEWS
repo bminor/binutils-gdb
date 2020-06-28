@@ -132,7 +132,7 @@ GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*
 
 * Guile API
 
-  ** GDB can now be built with GNU Guile 2.2 in addition to 2.0.
+  ** GDB can now be built with GNU Guile 3.0 and 2.2 in addition to 2.0.
 
   ** Procedures 'memory-port-read-buffer-size',
      'set-memory-port-read-buffer-size!', 'memory-port-write-buffer-size',

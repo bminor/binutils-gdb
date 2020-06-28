@@ -1,3 +1,12 @@
+2020-07-20 Ludovic Courtès  <ludo@gnu.org>
+
+	* guile/scm-math.c (vlscm_integer_fits_p): Use 'uintmax_t'
+	and 'intmax_t' instead of 'scm_t_uintmax' and 'scm_t_intmax',
+	which are deprecated in Guile 3.0.
+	* configure.ac (try_guile_versions): Add "guile-3.0".
+	* configure (try_guile_versions): Regenerate.
+	* NEWS: Update entry.
+
 2020-07-20  Ludovic Courtès  <ludo@gnu.org>
 	    Doug Evans  <dje@google.com>
 

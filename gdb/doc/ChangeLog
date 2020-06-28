@@ -1,5 +1,9 @@
 2020-07-20  Ludovic Courtès  <ludo@gnu.org>
 
+	* doc/guile.texi (Guile Introduction): Mention Guile 3.0.
+
+2020-07-20  Ludovic Courtès  <ludo@gnu.org>
+
 	* guile.texi (Memory Ports in Guile): Mark
 	'memory-port-read-buffer-size',
 	'set-memory-port-read-buffer-size!',

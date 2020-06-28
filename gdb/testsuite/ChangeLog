@@ -1,5 +1,11 @@
 2020-07-20  Ludovic Courtès  <ludo@gnu.org>
 
+	* gdb.guile/source2.scm: Add #f first argument to 'format'.
+	* gdb.guile/types-module.exp: Remove "ERROR:" from
+	regexps since Guile 3.0 no longer prints that.
+
+2020-07-20  Ludovic Courtès  <ludo@gnu.org>
+
 	* gdb.guile/scm-error.exp ("source $remote_guile_file_1"): Relax
 	error regexp to match on Guile 2.2.
 

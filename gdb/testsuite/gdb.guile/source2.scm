@@ -15,5 +15,5 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-(display (format "y~As" "e"))
+(display (format #f "y~As" "e"))
 (newline)
