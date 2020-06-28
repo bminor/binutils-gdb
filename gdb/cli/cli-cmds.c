@@ -2069,7 +2069,7 @@ setting_cmd (const char *fnname, struct cmd_list_element *showlist,
   const char *a0 = (const char *) value_contents (argv[0]);
   cmd_list_element *cmd = lookup_cmd (&a0, showlist, "", NULL, -1, 0);
 
-  if (cmd == nullptr || cmd_type (cmd) != show_cmd)
+  if (cmd == nullptr || cmd->type != show_cmd)
     error (_("First argument of %s must be a "
 	     "valid setting of the 'show' command."), fnname);
 

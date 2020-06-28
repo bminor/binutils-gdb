@@ -71,19 +71,6 @@ enum command_class
   no_set_class
 };
 
-/* FIXME: cagney/2002-03-17: Once cmd_type() has been removed, ``enum
-   cmd_types'' can be moved from "command.h" to "cli-decode.h".  */
-/* Not a set/show command.  Note that some commands which begin with
-   "set" or "show" might be in this category, if their syntax does
-   not fall into one of the following categories.  */
-typedef enum cmd_types
-  {
-    not_set_cmd,
-    set_cmd,
-    show_cmd
-  }
-cmd_types;
-
 /* Types of "set" or "show" command.  */
 typedef enum var_types
   {
@@ -281,9 +268,6 @@ extern void *get_cmd_context (struct cmd_list_element *cmd);
    hook, the call is silently ignored.  */
 extern void execute_cmd_pre_hook (struct cmd_list_element *cmd);
 extern void execute_cmd_post_hook (struct cmd_list_element *cmd);
-
-/* Return the type of the command.  */
-extern enum cmd_types cmd_type (struct cmd_list_element *cmd);
 
 /* Flag for an ambiguous cmd_list result.  */
 #define CMD_LIST_AMBIGUOUS ((struct cmd_list_element *) -1)

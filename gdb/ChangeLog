@@ -1,3 +1,12 @@
+2020-06-28  Tom Tromey  <tom@tromey.com>
+
+	* command.h (cmd_types): Remove.
+	(cmd_type): Don't declare.
+	* cli/cli-decode.h (enum cmd_types): Uncomment.  No longer a
+	typedef.
+	* cli/cli-cmds.c (setting_cmd): Use cmd->type directly.
+	* cli/cli-decode.c (cmd_type): Remove.
+
 2020-06-27  Pedro Alves  <palves@redhat.com>
 
 	* fork-child.c (prefork_hook): Adjust.

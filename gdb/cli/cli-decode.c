@@ -139,12 +139,6 @@ get_cmd_context (struct cmd_list_element *cmd)
   return cmd->context;
 }
 
-enum cmd_types
-cmd_type (struct cmd_list_element *cmd)
-{
-  return cmd->type;
-}
-
 void
 set_cmd_completer (struct cmd_list_element *cmd, completer_ftype *completer)
 {
