@@ -36,7 +36,6 @@ if { ![istarget hppa*64*-*-hpux*] \
      && ![istarget hppa*-*-linux*] \
      && ![istarget i?86-*-linux*] \
      && ![istarget i?86-*-gnu*] \
-     && ![istarget *-*-nacl*] \
      && ![istarget ia64-*-linux*] \
      && ![istarget m68k-*-linux*] \
      && ![istarget mips*-*-linux*] \
@@ -114,7 +113,6 @@ if [istarget arm*-*-linux*] {
 set support_protected "no"
 
 if { [istarget *-*-linux*]
-     || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {
     if [ld_compile "$CC_FOR_TARGET -g -DPROTECTED_CHECK" $srcdir/$subdir/main.c $tmpdir/main.o] {
       if [ld_link $CC_FOR_TARGET $tmpdir/main "$tmpdir/main.o"] {

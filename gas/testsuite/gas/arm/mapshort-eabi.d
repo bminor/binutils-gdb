@@ -2,7 +2,7 @@
 #as:  --generate-missing-build-notes=no
 #name: ARM Mapping Symbols for .short (EABI version)
 # This test is only valid on EABI based ports.
-#target: *-*-*eabi* *-*-linux-* *-*-elf *-*-nacl*
+#target: *-*-*eabi* *-*-linux-* *-*-elf
 #source: mapshort.s
 
 # Test the generation and use of ARM ELF Mapping Symbols

@@ -1,5 +1,7 @@
 -*- text -*-
 
+* NaCl target support is removed.
+
 Changes in 2.45:
 
 * Add support to generate SFrame stack trace information (.sframe)

@@ -1,6 +1,6 @@
 #name: bl local instructions for v4t.
 #objdump: -drw --prefix-addresses --show-raw-insn
-#target: *-*-*eabi* *-*-nacl*
+#target: *-*-*eabi*
 #as:
 
 .*: +file format .*arm.*

@@ -1,6 +1,6 @@
 #ld: --build-id -z separate-code -z relro --rosegment
 #readelf: -l --wide
-#target: *-*-linux-gnu *-*-gnu* *-*-nacl* arm*-*-uclinuxfdpiceabi
+#target: *-*-linux-gnu *-*-gnu* arm*-*-uclinuxfdpiceabi
 #xfail: ![check_relro_support]
 
 #failif

@@ -1,7 +1,7 @@
 # name: EABI attribute - non-null terminated string
 # source: attr-non-null-terminated-string.s
 # This test is only valid on EABI based ports.
-# target: *-*-*eabi* *-*-nacl*
+# target: *-*-*eabi*
 # as:
 # readelf: --silent-truncation -A
 Attribute Section: aeabi

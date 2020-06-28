@@ -1,6 +1,6 @@
 #name: Inter-section branch relocations
 #This test is only valid on EABI based ports.
-#target: *-*-*eabi* *-*-nacl*
+#target: *-*-*eabi*
 #as: -march=armv5t
 #objdump: -rd
 #warning_output: branch-reloc.l

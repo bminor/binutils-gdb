@@ -27,7 +27,6 @@ if ![is_elf_format] {
 
 if { !([istarget *-*-linux*]
        || [istarget arm*-*-uclinuxfdpiceabi]
-       || [istarget *-*-nacl*]
        || [istarget *-*-gnu*]) } then {
     return
 }

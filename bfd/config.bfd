@@ -83,6 +83,7 @@ case $targ in
  *-sony-* | \
  *-tandem-* | \
  *-*-ieee* | \
+ *-*-nacl* | \
  *-*-netbsdpe* | \
  *-*-netware* | \
  *-*-rtemsaout* | \
@@ -375,14 +376,6 @@ case "${targ}" in
   arm*-*-haiku*)
     targ_defvec=arm_elf32_le_vec
     targ_selvecs="arm_elf32_fdpic_le_vec arm_elf32_be_vec arm_elf32_fdpic_be_vec arm_pe_le_vec arm_pe_be_vec arm_pei_le_vec arm_pei_be_vec"
-    ;;
-  arm-*-nacl*)
-    targ_defvec=arm_elf32_nacl_le_vec
-    targ_selvecs="arm_elf32_nacl_be_vec"
-    ;;
-  armeb-*-nacl*)
-    targ_defvec=arm_elf32_nacl_be_vec
-    targ_selvecs="arm_elf32_nacl_le_vec"
     ;;
   armeb-*-netbsd*)
     targ_defvec=arm_elf32_be_vec

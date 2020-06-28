@@ -19,9 +19,7 @@
 # MA 02110-1301, USA.
 #
 
-if { ![istarget *-*-linux*]
-     && ![istarget *-*-nacl*]
-     && ![istarget *-*-gnu*] } {
+if { ![istarget *-*-linux*] && ![istarget *-*-gnu*] } {
     return
 }
 

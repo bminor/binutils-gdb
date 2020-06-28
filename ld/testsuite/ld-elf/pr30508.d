@@ -1,7 +1,7 @@
 #ld: -z separate-code --no-rosegment
 #objcopy_linked_file: -R .foo
 #readelf: -lW
-#target: *-*-linux-gnu *-*-gnu* *-*-nacl* arm*-*-uclinuxfdpiceabi
+#target: *-*-linux-gnu *-*-gnu* arm*-*-uclinuxfdpiceabi
 #xfail: mips*-*-* rx-*-linux*
 
 #...

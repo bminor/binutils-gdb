@@ -3,7 +3,6 @@
 #ld: --enable-non-contiguous-regions -T non-contiguous-arm6.ld -z max-page-size=0x10000
 #objdump: -rdth
 #xfail: [is_generic]
-#skip: arm*nacl
 
 .*:     file format elf32-(little|big)arm
 

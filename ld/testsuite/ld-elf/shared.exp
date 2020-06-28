@@ -516,7 +516,6 @@ run_ld_link_tests {
 
 if { [istarget *-*-linux*]
      || [istarget kvx-*-*]
-     || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {
     run_ld_link_tests {
 	{"Weak symbols in dynamic objects 1 (support)"
@@ -1374,7 +1373,6 @@ run_cc_link_tests $build_cxx_tests
 run_ld_link_exec_tests $run_cxx_tests
 
 if { [istarget *-*-linux*]
-     || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {
     run_cc_link_tests [list \
 	[list \
@@ -1707,7 +1705,6 @@ if [istarget "sparc*-*-*"] {
 }
 
 if { ([istarget "*-*-linux*"]
-      || [istarget "*-*-nacl*"]
       || [istarget "*-*-gnu*"])
      && ![istarget "mips*-*-*"] } {
     run_ld_link_tests [list \

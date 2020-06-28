@@ -54,8 +54,7 @@ if {    ![istarget alpha*-*-linux*]
      && ![istarget sparc*-*-elf]
      && ![istarget sparc*-*-solaris2*]
      && ![istarget sparc*-*-linux*]
-     && ![istarget x86_64-*-linux*]
-     && ![istarget *-*-nacl*] } {
+     && ![istarget x86_64-*-linux*] } {
     return
 }
 

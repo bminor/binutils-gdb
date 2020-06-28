@@ -1,7 +1,7 @@
 #source: ehdr_start-strongref.s
 #ld: -e _start -T ehdr_start-userdef.t
 #readelf: -Ws
-#target: *-*-linux* *-*-gnu* *-*-nacl* arm*-*-uclinuxfdpiceabi
+#target: *-*-linux* *-*-gnu* arm*-*-uclinuxfdpiceabi
 #xfail: bfin-*-* frv-*-*
 
 #...

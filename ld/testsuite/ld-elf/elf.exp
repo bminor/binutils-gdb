@@ -229,7 +229,6 @@ proc target_defaults_to_execstack {} {
 }
 
 if {   [istarget *-*-*linux*]
-    || [istarget *-*-nacl*]
     || [istarget *-*-gnu*] } {
     run_ld_link_tests [list \
 	[list "stack exec" \
@@ -445,7 +444,6 @@ set xfails "*-*-netbsd*"
 run_ld_link_exec_tests $array_tests $xfails
 
 if { [istarget *-*-linux*]
-     || [istarget *-*-nacl*]
      || [istarget *-*-gnu*] } {
     run_ld_link_exec_tests $array_tests_pie $xfails
 

@@ -2,7 +2,7 @@
 # as: -march=armv4t
 # objdump: -dr --prefix-addresses --show-raw-insn
 # EABI targets have their own variant.
-# notarget: *-*-*eabi* *-*-nacl*
+# notarget: *-*-*eabi*
 
 .*: +file format .*arm.*
 

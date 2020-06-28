@@ -171,7 +171,6 @@ ALL_EMULATION_SOURCES = \
 	earmelf_linux.c \
 	earmelf_linux_eabi.c \
 	earmelf_linux_fdpiceabi.c \
-	earmelf_nacl.c \
 	earmelf_nbsd.c \
 	earmelf_phoenix.c \
 	earmelf_vxworks.c \
@@ -181,7 +180,6 @@ ALL_EMULATION_SOURCES = \
 	earmelfb_linux.c \
 	earmelfb_linux_eabi.c \
 	earmelfb_linux_fdpiceabi.c \
-	earmelfb_nacl.c \
 	earmelfb_nbsd.c \
 	earmnto.c \
 	earmpe.c \

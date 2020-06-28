@@ -696,8 +696,6 @@ extern const bfd_target arm_elf32_be_vec;
 extern const bfd_target arm_elf32_le_vec;
 extern const bfd_target arm_elf32_fdpic_be_vec;
 extern const bfd_target arm_elf32_fdpic_le_vec;
-extern const bfd_target arm_elf32_nacl_be_vec;
-extern const bfd_target arm_elf32_nacl_le_vec;
 extern const bfd_target arm_elf32_vxworks_be_vec;
 extern const bfd_target arm_elf32_vxworks_le_vec;
 extern const bfd_target arm_mach_o_vec;

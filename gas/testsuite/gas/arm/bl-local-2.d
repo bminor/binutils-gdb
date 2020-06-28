@@ -1,6 +1,6 @@
 #name: bl local conversion to blx
 #objdump: -drw --prefix-addresses --show-raw-insn
-#target: *-*-*eabi* *-*-nacl*
+#target: *-*-*eabi*
 #as:
 
 

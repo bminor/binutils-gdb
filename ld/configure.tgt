@@ -231,14 +231,6 @@ arm*-*-linux-*)		targ_emul=armelf_linux
 			targ_extra_emuls="armelf armelfb armelfb_linux"
 			targ_extra_libpath="armelfb_linux"
 			;;
-arm*b-*-nacl*)		targ_emul=armelfb_nacl
-			targ_extra_emuls="armelf_nacl"
-			targ_extra_libpath=$targ_extra_emuls
-			;;
-arm*-*-nacl*)		targ_emul=armelf_nacl
-			targ_extra_emuls="armelfb_nacl"
-			targ_extra_libpath=$targ_extra_emuls
-			;;
 arm*-*-uclinux*eabi*)	targ_emul=armelf_linux_eabi
 			targ_extra_emuls=armelfb_linux_eabi
 			targ_extra_libpath=$targ_extra_emuls

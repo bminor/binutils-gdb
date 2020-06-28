@@ -26,7 +26,6 @@
 if {!(([istarget "i?86-*-*"]
        || [istarget "x86_64-*-*"])
       && ([istarget "*-*-elf*"]
-	  || [istarget "*-*-nacl*"]
 	  || [istarget "*-*-linux*"]
 	  || [istarget "*-*-gnu*"])) } {
     verbose "Size relocations tests not run - no target support"
@@ -37,13 +36,6 @@ if {!(([istarget "i?86-*-*"]
 if { ![check_shared_lib_support] } {
     verbose "Size relocation tests not run - shared support disabled"
     return
-}
-
-# So as to avoid rewriting every last test case here in a nacl variant,
-# we use black magic to massage the generic cases into nacl-variant cases.
-if [istarget "*-*-nacl*"] {
-    # Change all the -melf_i386 to -melf_i386_nacl so linking can succeed.
-    set options_regsub(ld) {-m(\\S+) -m\\1_nacl}
 }
 
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]

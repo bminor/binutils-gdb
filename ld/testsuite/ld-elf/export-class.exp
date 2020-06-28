@@ -33,7 +33,6 @@ if { ![is_elf_format] || ![check_shared_lib_support] } {
 # if you like.
 if { ![istarget *-*-linux*]
      && ![istarget arm*-*-uclinuxfdpiceabi]
-     && ![istarget *-*-nacl*]
      && ![istarget *-*-gnu*] } {
     return
 }

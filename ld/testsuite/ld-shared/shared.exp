@@ -42,7 +42,6 @@ if { ![istarget hppa*64*-*-hpux*] \
      && ![istarget i?86-*-elf*] \
      && ![istarget i?86-*-linux*] \
      && ![istarget i?86-*-gnu*] \
-     && ![istarget *-*-nacl*] \
      && ![istarget ia64-*-elf*] \
      && ![istarget ia64-*-linux*] \
      && ![istarget m68k-*-linux*] \
