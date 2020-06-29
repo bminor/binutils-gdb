@@ -1,3 +1,8 @@
+2020-07-01  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* amd64-windows-tdep.c (amd64_cygwin_core_osabi_sniffer): New.
+	(_initialize_amd64_windows_tdep): Register amd64_cygwin_core_osabi_sniffer.
+
 2020-09-18  Pedro Alves  <pedro@palves.net>
 
 	PR gdb/26631

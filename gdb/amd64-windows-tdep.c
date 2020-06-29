@@ -42,6 +42,8 @@ static int amd64_windows_dummy_call_integer_regs[] =
   AMD64_R9_REGNUM            /* %r9 */
 };
 
+#define AMD64_WINDOWS_SIZEOF_GREGSET 1232
+
 /* Return nonzero if an argument of type TYPE should be passed
    via one of the integer registers.  */
 
@@ -1276,6 +1278,24 @@ amd64_windows_osabi_sniffer (bfd *abfd)
   return GDB_OSABI_WINDOWS;
 }
 
+static enum gdb_osabi
+amd64_cygwin_core_osabi_sniffer (bfd *abfd)
+{
+  const char *target_name = bfd_get_target (abfd);
+
+  /* Cygwin uses elf core dumps.  Do not claim all ELF executables,
+     check whether there is a .reg section of proper size.  */
+  if (strcmp (target_name, "elf64-x86-64") == 0)
+    {
+      asection *section = bfd_get_section_by_name (abfd, ".reg");
+      if (section != nullptr
+	  && bfd_section_size (section) == AMD64_WINDOWS_SIZEOF_GREGSET)
+	return GDB_OSABI_CYGWIN;
+    }
+
+  return GDB_OSABI_UNKNOWN;
+}
+
 void _initialize_amd64_windows_tdep ();
 void
 _initialize_amd64_windows_tdep ()
@@ -1287,4 +1307,9 @@ _initialize_amd64_windows_tdep ()
 
   gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_coff_flavour,
 				  amd64_windows_osabi_sniffer);
+
+  /* Cygwin uses elf core dumps.  */
+  gdbarch_register_osabi_sniffer (bfd_arch_i386, bfd_target_elf_flavour,
+				  amd64_cygwin_core_osabi_sniffer);
+
 }
