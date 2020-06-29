@@ -8,6 +8,7 @@
 	Similarly this fixup affects 4 bytes, not 8 and needs its
 	fx_no_overflow set.
 	* config/tc-mmix.h (TC_FX_SIZE_SLACK): Don't define.
+	* testsuite/gas/mmix/pr25331.d, testsuite/gas/mmix/pr25331.s: New test.
 
 2020-06-29  Alan Modra  <amodra@gmail.com>
 
