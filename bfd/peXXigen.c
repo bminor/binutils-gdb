@@ -1147,15 +1147,21 @@ CODEVIEW_INFO *
 _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length, CODEVIEW_INFO *cvinfo)
 {
   char buffer[256+1];
+  bfd_size_type nread;
 
   if (bfd_seek (abfd, where, SEEK_SET) != 0)
     return NULL;
 
-  if (bfd_bread (buffer, 256, abfd) < 4)
+  if (length <= sizeof (CV_INFO_PDB70) && length <= sizeof (CV_INFO_PDB20))
+    return NULL;
+  if (length > 256)
+    length = 256;
+  nread = bfd_bread (buffer, length, abfd);
+  if (length != nread)
     return NULL;
 
   /* Ensure null termination of filename.  */
-  buffer[256] = '\0';
+  memset (buffer + nread, 0, sizeof (buffer) - nread);
 
   cvinfo->CVSignature = H_GET_32 (abfd, buffer);
   cvinfo->Age = 0;

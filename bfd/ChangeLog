@@ -1,5 +1,11 @@
 2020-06-29  Alan Modra  <amodra@gmail.com>
 
+	* peXXigen.c (_bfd_XXi_slurp_codeview_record): Properly check
+	return value of bfd_bread.  Don't read more than requested length.
+	Sanity check length.  Properly terminate file name.
+
+2020-06-29  Alan Modra  <amodra@gmail.com>
+
 	* arc-got.h: Use C style comments.
 	* coff-z80.c: Likewise.
 	* elf32-csky.c: Likewise.
