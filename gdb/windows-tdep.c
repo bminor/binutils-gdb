@@ -105,6 +105,10 @@ enum
   CYGWIN_SIGUSR2 = 31,
 };
 
+/* These constants are defined by Cygwin's core_dump.h */
+static constexpr unsigned int NOTE_INFO_MODULE = 3;
+static constexpr unsigned int NOTE_INFO_MODULE64 = 4;
+
 struct cmd_list_element *info_w32_cmdlist;
 
 typedef struct thread_information_block_32
@@ -1101,8 +1105,10 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
   struct cpms_data *data = (struct cpms_data *) obj;
   enum bfd_endian byte_order = gdbarch_byte_order (data->gdbarch);
 
+  unsigned int data_type;
   char *module_name;
   size_t module_name_size;
+  size_t module_name_offset;
   CORE_ADDR base_addr;
 
   gdb_byte *buf = NULL;
@@ -1123,16 +1129,26 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
 
 
   /* A DWORD (data_type) followed by struct windows_core_module_info.  */
+  data_type = extract_unsigned_integer (buf, 4, byte_order);
 
-  base_addr =
-    extract_unsigned_integer (buf + 4, 4, byte_order);
-
-  module_name_size =
-    extract_unsigned_integer (buf + 8, 4, byte_order);
-
-  if (12 + module_name_size > bfd_section_size (sect))
+  if (data_type == NOTE_INFO_MODULE)
+    {
+      base_addr = extract_unsigned_integer (buf + 4, 4, byte_order);
+      module_name_size = extract_unsigned_integer (buf + 8, 4, byte_order);
+      module_name_offset = 12;
+    }
+  else if (data_type == NOTE_INFO_MODULE64)
+    {
+      base_addr = extract_unsigned_integer (buf + 4, 8, byte_order);
+      module_name_size = extract_unsigned_integer (buf + 12, 4, byte_order);
+      module_name_offset = 16;
+    }
+  else
     goto out;
-  module_name = (char *) buf + 12;
+
+  if (module_name_offset + module_name_size > bfd_section_size (sect))
+    goto out;
+  module_name = (char *) buf + module_name_offset;
 
   /* The first module is the .exe itself.  */
   if (data->module_count != 0)

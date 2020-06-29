@@ -1,5 +1,10 @@
 2020-07-01  Jon Turney  <jon.turney@dronecode.org.uk>
 
+	* windows-tdep.c (NOTE_INFO_MODULE, NOTE_INFO_MODULE64): Define.
+	(core_process_module_section): Handle NOTE_INFO_MODULE64.
+
+2020-07-01  Jon Turney  <jon.turney@dronecode.org.uk>
+
 	* windows-tdep.h: Add prototypes.
 	* i386-windows-tdep.c(windows_core_xfer_shared_libraries): Move.
 	(i386_windows_core_pid_to_str): Move and rename ...
