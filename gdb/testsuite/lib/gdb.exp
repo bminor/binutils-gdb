@@ -5103,6 +5103,8 @@ proc default_gdb_init { test_file_name } {
 	rename ::unknown ::dejagnu_unknown
 	proc unknown { args } {
 	    # Use tcl's unknown.
+	    set cmd [lindex $args 0]
+	    unresolved "testcase aborted due to invalid command name: $cmd"
 	    return [uplevel 1 ::gdb_tcl_unknown $args]
 	}
     }

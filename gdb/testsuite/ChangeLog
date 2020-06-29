@@ -1,5 +1,9 @@
 2020-06-29  Tom de Vries  <tdevries@suse.de>
 
+	* lib/gdb.exp (unknown): Make test-case unresolved.
+
+2020-06-29  Tom de Vries  <tdevries@suse.de>
+
 	PR gdb/25475
 	* gdb.server/solib-list.exp: Verify that the symbol reload
 	confirmation question is asked.
