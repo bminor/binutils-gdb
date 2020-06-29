@@ -22,6 +22,7 @@
 #include "regcache.h"
 
 #ifdef IN_PROCESS_AGENT
+#include "gdbsupport/agent.h"
 #define debug_threads debug_agent
 #endif
 

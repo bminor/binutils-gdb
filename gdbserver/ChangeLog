@@ -1,3 +1,7 @@
+2020-06-29  Tom de Vries  <tdevries@suse.de>
+
+	* ax.h: Include gdbsupport/debug_agent.h.
+
 2020-06-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tdesc.cc (struct tdesc_compatible_info): New struct.
