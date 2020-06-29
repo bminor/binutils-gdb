@@ -1,3 +1,7 @@
+2020-07-01  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* elf.c (elfcore_grok_win32pstatus): Handle NOTE_INFO_MODULE64.
+
 2020-07-11  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* elf.c (elfcore_grok_win32pstatus): Don't apply size constraint

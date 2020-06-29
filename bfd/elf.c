@@ -10132,6 +10132,7 @@ elfcore_grok_lwpstatus (bfd *abfd, Elf_Internal_Note *note)
 #define NOTE_INFO_PROCESS  1
 #define NOTE_INFO_THREAD   2
 #define NOTE_INFO_MODULE   3
+#define NOTE_INFO_MODULE64 4
 
 static bfd_boolean
 elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
@@ -10199,13 +10200,30 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
       break;
 
     case NOTE_INFO_MODULE:
-      if (note->descsz < 12)
-        return FALSE;
-
+    case NOTE_INFO_MODULE64:
       /* Make a ".module/xxxxxxxx" section.  */
-      /* module_info.base_address */
-      base_addr = bfd_get_32 (abfd, note->descdata + 4);
-      sprintf (buf, ".module/%08lx", (unsigned long) base_addr);
+      if (type == NOTE_INFO_MODULE)
+        {
+          if (note->descsz < 12)
+            return FALSE;
+
+          /* module_info.base_address */
+          base_addr = bfd_get_32 (abfd, note->descdata + 4);
+          sprintf (buf, ".module/%08lx", (unsigned long) base_addr);
+          /* module_info.module_name_size */
+          name_size = bfd_get_32 (abfd, note->descdata + 8);
+        }
+      else /* NOTE_INFO_MODULE64 */
+        {
+          if (note->descsz < 16)
+            return FALSE;
+
+          /* module_info.base_address */
+          base_addr = bfd_get_64 (abfd, note->descdata + 4);
+          sprintf (buf, ".module/%016lx", (unsigned long) base_addr);
+          /* module_info.module_name_size */
+          name_size = bfd_get_32 (abfd, note->descdata + 12);
+        }
 
       len = strlen (buf) + 1;
       name = (char *) bfd_alloc (abfd, len);
@@ -10219,8 +10237,6 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
       if (sect == NULL)
 	return FALSE;
 
-      /* module_info.module_name_size */
-      name_size = bfd_get_32 (abfd, note->descdata + 8);
       if (note->descsz < 12 + name_size)
         return FALSE;
 
