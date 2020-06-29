@@ -3664,7 +3664,7 @@ build_vex_prefix (const insn_template *t)
 	  }
     }
 
-  switch ((i.tm.base_opcode >> 8) & 0xff)
+  switch ((i.tm.base_opcode >> (i.tm.opcode_length << 3)) & 0xff)
     {
     case 0:
       implied_prefix = 0;
@@ -4873,12 +4873,8 @@ md_assemble (char *line)
       if (!process_operands ())
 	return;
     }
-  else
+  else if (!quiet_warnings && i.tm.opcode_modifier.ugh)
     {
-      if (i.tm.opcode_modifier.immext)
-	process_immext ();
-
-      if (!quiet_warnings && i.tm.opcode_modifier.ugh)
       /* UnixWare fsub no args is alias for fsubp, fadd -> faddp, etc.  */
       as_warn (_("translating to `%sp'"), i.tm.name);
     }

@@ -1,3 +1,8 @@
+2020-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* tc-i386.c (build_vex_prefix): Support VEX base opcode length > 1.
+	(md_assemble): Don't process ImmExt without operands.
+
 2020-06-29  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	PR gas/25331
