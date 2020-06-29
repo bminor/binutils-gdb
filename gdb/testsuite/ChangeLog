@@ -1,3 +1,9 @@
+2020-06-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* boards/simavr.exp (gdb_load): Catch errors when closing
+	previous connection.  Close connection, wait for process and
+	unset simavr_spawn_id on failure.
+
 2020-06-29  Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (unknown): Make test-case unresolved.
