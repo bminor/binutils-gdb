@@ -10151,15 +10151,16 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
     case 1 /* NOTE_INFO_PROCESS */:
       /* FIXME: need to add ->core->command.  */
       /* process_info.pid */
-      elf_tdata (abfd)->core->pid = bfd_get_32 (abfd, note->descdata + 8);
+      elf_tdata (abfd)->core->pid = bfd_get_32 (abfd, note->descdata + 4);
       /* process_info.signal */
-      elf_tdata (abfd)->core->signal = bfd_get_32 (abfd, note->descdata + 12);
+      elf_tdata (abfd)->core->signal = bfd_get_32 (abfd, note->descdata + 8);
       break;
 
     case 2 /* NOTE_INFO_THREAD */:
-      /* Make a ".reg/999" section.  */
+      /* Make a ".reg/<tid>" section containing the Win32 API thread CONTEXT
+         structure. */
       /* thread_info.tid */
-      sprintf (buf, ".reg/%ld", (long) bfd_get_32 (abfd, note->descdata + 8));
+      sprintf (buf, ".reg/%ld", (long) bfd_get_32 (abfd, note->descdata + 4));
 
       len = strlen (buf) + 1;
       name = (char *) bfd_alloc (abfd, len);

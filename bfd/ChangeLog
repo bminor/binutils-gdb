@@ -1,3 +1,9 @@
+2020-07-01  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* elf.c (elfcore_grok_win32pstatus): Fix the offset used to read
+	the tid from a win32pstatus NOTE_INFO_THREAD ELF note.  Fix
+	offsets used to read NOTE_INFO_PROCESS.
+
 2020-08-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.
