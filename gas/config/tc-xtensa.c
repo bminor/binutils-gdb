@@ -7882,7 +7882,7 @@ dump_litpools (void)
 	  printf("   %ld <%d:%d> (%d) [%d]: ",
 		 lpf->addr, lpf->priority, lpf->original_priority,
 		 lpf->fragP->fr_line, count);
-	  //dump_frag(lpf->fragP);
+	  /* dump_frag(lpf->fragP);  */
 	}
     }
 }

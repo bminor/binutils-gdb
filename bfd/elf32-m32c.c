@@ -2072,7 +2072,6 @@ m32c_elf_relax_delete_bytes
   symcount = (symtab_hdr->sh_size / sizeof (Elf32_External_Sym)
 	      - symtab_hdr->sh_info);
   sym_hashes = elf_sym_hashes (abfd);
-  //  sym_hashes += symtab_hdr->sh_info;
   end_hashes = sym_hashes + symcount;
 
   for (; sym_hashes < end_hashes; sym_hashes ++)

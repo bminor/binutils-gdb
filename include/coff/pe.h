@@ -578,10 +578,10 @@ struct external_IMAGE_DEBUG_DIRECTORY
 /* Extra structures used in codeview debug record.  */
 /* This is not part of the PE specification.  */
 
-#define CVINFO_PDB70_CVSIGNATURE 0x53445352 // "RSDS"
-#define CVINFO_PDB20_CVSIGNATURE 0x3031424e // "NB10"
-#define CVINFO_CV50_CVSIGNATURE  0x3131424e // "NB11"
-#define CVINFO_CV41_CVSIGNATURE  0x3930424e // "NB09"
+#define CVINFO_PDB70_CVSIGNATURE 0x53445352 /* "RSDS" */
+#define CVINFO_PDB20_CVSIGNATURE 0x3031424e /* "NB10" */
+#define CVINFO_CV50_CVSIGNATURE  0x3131424e /* "NB11" */
+#define CVINFO_CV41_CVSIGNATURE  0x3930424e /* "NB09" */
 
 typedef struct _CV_INFO_PDB70
 {

@@ -7034,14 +7034,14 @@ print_simd_imm8 (struct disassemble_info *info, unsigned long given,
       return;
     }
 
-  // printU determines whether the immediate value should be printed as
-  // unsigned.
+  /* printU determines whether the immediate value should be printed as
+     unsigned.  */
   unsigned printU = 0;
   switch (insn->mve_op)
     {
     default:
       break;
-    // We want this for instructions that don't have a 'signed' type
+    /* We want this for instructions that don't have a 'signed' type.  */
     case MVE_VBIC_IMM:
     case MVE_VORR_IMM:
     case MVE_VMVN_IMM:

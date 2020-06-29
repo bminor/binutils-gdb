@@ -9216,10 +9216,10 @@ display_debug_names (struct dwarf_section *section, void *file)
 
 	  unsigned char *entryptr = entry_pool + entry_offset;
 
-	  // We need to scan first whether there is a single or multiple
-	  // entries.  TAGNO is -2 for the first entry, it is -1 for the
-	  // initial tag read of the second entry, then it becomes 0 for the
-	  // first entry for real printing etc.
+	  /* We need to scan first whether there is a single or multiple
+	     entries.  TAGNO is -2 for the first entry, it is -1 for the
+	     initial tag read of the second entry, then it becomes 0 for the
+	     first entry for real printing etc.  */
 	  int tagno = -2;
 	  /* Initialize it due to a false compiler warning.  */
 	  dwarf_vma second_abbrev_tag = -1;

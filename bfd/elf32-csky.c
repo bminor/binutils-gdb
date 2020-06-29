@@ -3738,8 +3738,8 @@ csky_relocate_contents (reloc_howto_type *howto,
 
   /* FIXME: these macros should be defined at file head or head file head.  */
 #define CSKY_INSN_ADDI_TO_SUBI        0x04000000
-#define CSKY_INSN_MOV_RTB             0xc41d4820   // mov32 rx, r29, 0
-#define CSKY_INSN_MOV_RDB             0xc41c4820   // mov32 rx, r28, 0
+#define CSKY_INSN_MOV_RTB             0xc41d4820   /* mov32 rx, r29, 0 */
+#define CSKY_INSN_MOV_RDB             0xc41c4820   /* mov32 rx, r28, 0 */
 #define CSKY_INSN_GET_ADDI_RZ(x)      (((x) & 0x03e00000) >> 21)
 #define CSKY_INSN_SET_MOV_RZ(x)       ((x) & 0x0000001f)
 #define CSKY_INSN_JSRI_TO_LRW         0xea9a0000

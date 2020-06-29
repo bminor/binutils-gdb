@@ -373,7 +373,7 @@ extra_case (bfd *in_abfd,
     case R_IMM8:
       if (reloc->howto->partial_inplace)
         val += bfd_get_8 ( in_abfd, data+*src_ptr) & reloc->howto->src_mask;
-      //fallthrough
+      /* Fall through.  */
     case R_BYTE0:
       bfd_put_8 (in_abfd, val, data + *dst_ptr);
       (*dst_ptr) += 1;
@@ -389,7 +389,7 @@ extra_case (bfd *in_abfd,
     case R_IMM16:
       if (reloc->howto->partial_inplace)
         val += bfd_get_16 ( in_abfd, data+*src_ptr) & reloc->howto->src_mask;
-      //fallthrough
+      /* Fall through.  */
     case R_WORD0:
       bfd_put_16 (in_abfd, val, data + *dst_ptr);
       (*dst_ptr) += 2;

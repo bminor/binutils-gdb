@@ -1,3 +1,9 @@
+2020-06-29  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-s12z.c: Use C style comments.
+	* config/tc-z80.c: Likewise.
+	* config/tc-xtensa.c (emit_ld_r_n): Remove commented out code.
+
 2020-06-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_assemble): Process ImmExt without

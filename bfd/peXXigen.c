@@ -1176,7 +1176,7 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
       memcpy (&(cvinfo->Signature[8]), &(cvinfo70->Signature[8]), 8);
 
       cvinfo->SignatureLength = CV_INFO_SIGNATURE_LENGTH;
-      // cvinfo->PdbFileName = cvinfo70->PdbFileName;
+      /* cvinfo->PdbFileName = cvinfo70->PdbFileName;  */
 
       return cvinfo;
     }
@@ -1187,7 +1187,7 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
       cvinfo->Age = H_GET_32(abfd, cvinfo20->Age);
       memcpy (cvinfo->Signature, cvinfo20->Signature, 4);
       cvinfo->SignatureLength = 4;
-      // cvinfo->PdbFileName = cvinfo20->PdbFileName;
+      /* cvinfo->PdbFileName = cvinfo20->PdbFileName;  */
 
       return cvinfo;
     }
@@ -2929,7 +2929,7 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
     case IMAGE_SUBSYSTEM_WINDOWS_CE_GUI:
       subsystem_name = "Wince CUI";
       break;
-    // These are from UEFI Platform Initialization Specification 1.1.
+    /* These are from UEFI Platform Initialization Specification 1.1.  */
     case IMAGE_SUBSYSTEM_EFI_APPLICATION:
       subsystem_name = "EFI application";
       break;
@@ -2942,11 +2942,11 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
     case IMAGE_SUBSYSTEM_SAL_RUNTIME_DRIVER:
       subsystem_name = "SAL runtime driver";
       break;
-    // This is from revision 8.0 of the MS PE/COFF spec
+    /* This is from revision 8.0 of the MS PE/COFF spec  */
     case IMAGE_SUBSYSTEM_XBOX:
       subsystem_name = "XBOX";
       break;
-    // Added default case for clarity - subsystem_name is NULL anyway.
+    /* Added default case for clarity - subsystem_name is NULL anyway.  */
     default:
       subsystem_name = NULL;
     }

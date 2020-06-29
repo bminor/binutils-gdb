@@ -1,3 +1,13 @@
+2020-06-29  Alan Modra  <amodra@gmail.com>
+
+	* arm-dis.c: Use C style comments.
+	* cr16-opc.c: Likewise.
+	* ft32-dis.c: Likewise.
+	* moxie-opc.c: Likewise.
+	* tic54x-dis.c: Likewise.
+	* s12z-opc.c: Remove useless comment.
+	* xgate-dis.c: Likewise.
+
 2020-06-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Add a blank line.

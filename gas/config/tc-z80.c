@@ -2390,7 +2390,6 @@ emit_ld_r_n (expressionS *dst, expressionS *src)
       break;
     default:
       ill_op ();
-//      return;
     }
 
   q = frag_more (prefix ? 2 : 1);

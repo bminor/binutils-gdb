@@ -1,3 +1,12 @@
+2020-06-29  Alan Modra  <amodra@gmail.com>
+
+	* arc-got.h: Use C style comments.
+	* coff-z80.c: Likewise.
+	* elf32-csky.c: Likewise.
+	* peXXigen.c: Likewise.
+	* elf32-m32c.c (m32c_elf_relax_delete_bytes): Remove commented out
+	code.
+
 2020-06-26  Pat Bernardi  <bernardi@adacore.com>
 
 	* elf32-m68k.c (m68k_elf_merge_obj_attributes): New function.

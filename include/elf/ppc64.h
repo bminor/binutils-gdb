@@ -256,14 +256,14 @@ END_RELOC_NUMBERS (R_PPC64_max)
 #define STO_PPC64_LOCAL_BIT		5
 #define STO_PPC64_LOCAL_MASK		(7 << STO_PPC64_LOCAL_BIT)
 
-// 3 bit other field to bytes.
+/* 3 bit other field to bytes.  */
 static inline unsigned int
 ppc64_decode_local_entry(unsigned int other)
 {
   return ((1 << other) >> 2) << 2;
 }
 
-// bytes to field value.
+/* bytes to field value.  */
 static inline unsigned int
 ppc64_encode_local_entry(unsigned int val)
 {
