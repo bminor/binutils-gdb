@@ -1,3 +1,8 @@
+2020-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-tic6x.c (elf32_tic6x_size_dynamic_sections): Call
+	_bfd_elf_add_dynamic_tags.
+
 2020-06-29  Alan Modra  <amodra@gmail.com>
 
 	* peXXigen.c (_bfd_XXi_slurp_codeview_record): Properly check

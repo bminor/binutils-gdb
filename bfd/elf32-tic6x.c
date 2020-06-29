@@ -3352,11 +3352,8 @@ elf32_tic6x_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 #define add_dynamic_entry(TAG, VAL) \
   _bfd_elf_add_dynamic_entry (info, TAG, VAL)
 
-      if (bfd_link_executable (info))
-	{
-	  if (!add_dynamic_entry (DT_DEBUG, 0))
-	    return FALSE;
-	}
+      if (!_bfd_elf_add_dynamic_tags (output_bfd, info, relocs))
+	return FALSE;
 
       if (!add_dynamic_entry (DT_C6000_DSBT_BASE, 0)
 	  || !add_dynamic_entry (DT_C6000_DSBT_SIZE, htab->params.dsbt_size)
@@ -3364,34 +3361,6 @@ elf32_tic6x_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 				 htab->params.dsbt_index))
 	return FALSE;
 
-      if (htab->elf.splt->size != 0)
-	{
-	  if (!add_dynamic_entry (DT_PLTGOT, 0)
-	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
-	      || !add_dynamic_entry (DT_PLTREL, DT_RELA)
-	      || !add_dynamic_entry (DT_JMPREL, 0))
-	    return FALSE;
-	}
-
-      if (relocs)
-	{
-	  if (!add_dynamic_entry (DT_RELA, 0)
-	      || !add_dynamic_entry (DT_RELASZ, 0)
-	      || !add_dynamic_entry (DT_RELAENT, sizeof (Elf32_External_Rela)))
-	    return FALSE;
-
-	  /* If any dynamic relocs apply to a read-only section,
-	     then we need a DT_TEXTREL entry.  */
-	  if ((info->flags & DF_TEXTREL) == 0)
-	    elf_link_hash_traverse (&htab->elf,
-				    _bfd_elf_maybe_set_textrel, info);
-
-	  if ((info->flags & DF_TEXTREL) != 0)
-	    {
-	      if (!add_dynamic_entry (DT_TEXTREL, 0))
-		return FALSE;
-	    }
-	}
     }
 #undef add_dynamic_entry
 

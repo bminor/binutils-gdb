@@ -1,3 +1,20 @@
+2020-06-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-tic6x/shlib-1.rd: Move C6000_DSBT_BASE,
+	C6000_DSBT_SIZE and C6000_DSBT_INDEX dynamic tags to the last.
+	* testsuite/ld-tic6x/shlib-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-app-1rb.rd: Likewise.
+	* testsuite/ld-tic6x/shlib-noindex.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1b.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1r.rd: Likewise.
+	* testsuite/ld-tic6x/static-app-1rb.rd: Likewise.
+
 2020-06-29  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-x86-64/abs-k1om.d: Run only on x86_64-*-linux*.
