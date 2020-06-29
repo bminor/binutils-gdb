@@ -4,6 +4,7 @@
 #as: --64 -march=k1om
 #ld: -m elf_k1om -z noseparate-code
 #objdump: -rs -j .text
+#target: x86_64-*-linux*
 
 .*:     file format .*
 
