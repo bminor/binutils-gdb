@@ -1007,9 +1007,7 @@ extern void set_gdbarch_max_insn_length (struct gdbarch *gdbarch, ULONGEST max_i
    not the copy at TO.  The caller should update it to point at TO later.
   
    Return a pointer to data of the architecture's choice to be passed
-   to gdbarch_displaced_step_fixup.  Or, return NULL to indicate that
-   the instruction's effects have been completely simulated, with the
-   resulting state written back to REGS.
+   to gdbarch_displaced_step_fixup.
   
    For a general explanation of displaced stepping and how GDB uses it,
    see the comments in infrun.c.

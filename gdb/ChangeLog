@@ -1,3 +1,8 @@
+2020-06-29  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbarch.sh (displaced_step_copy_insn): Update doc.
+	* gdbarch.h: Re-generate.
+
 2020-06-28  Tom Tromey  <tom@tromey.com>
 
 	* command.h (cmd_types): Remove.
