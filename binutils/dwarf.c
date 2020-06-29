@@ -6848,6 +6848,8 @@ static int
 display_debug_str_offsets (struct dwarf_section *section,
 			   void *file ATTRIBUTE_UNUSED)
 {
+  unsigned long idx;
+
   if (section->size == 0)
     {
       printf (_("\nThe %s section is empty.\n"), section->name);
@@ -6910,8 +6912,7 @@ display_debug_str_offsets (struct dwarf_section *section,
 	  printf (_("       Index   Offset [String]\n"));
 	}
 
-      unsigned long index;
-      for (index = 0; length >= entry_length && curr < end; index ++)
+      for (idx = 0; length >= entry_length && curr < end; idx++)
 	{
 	  dwarf_vma offset;
 	  const unsigned char * string;
@@ -6919,11 +6920,11 @@ display_debug_str_offsets (struct dwarf_section *section,
 	  SAFE_BYTE_GET_AND_INC (offset, curr, entry_length, end);
 	  if (dwo)
 	    string = (const unsigned char *)
-	      fetch_indexed_string (index, NULL, entry_length, dwo);
+	      fetch_indexed_string (idx, NULL, entry_length, dwo);
 	  else
 	    string = fetch_indirect_string (offset);
 
-	  printf ("    %8lu %8s %s\n", index, dwarf_vmatoa ("x", offset),
+	  printf ("    %8lu %8s %s\n", idx, dwarf_vmatoa ("x", offset),
 		  string);
 	}
     }
