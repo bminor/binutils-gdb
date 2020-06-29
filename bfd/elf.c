@@ -10178,7 +10178,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 	return FALSE;
 
       /* sizeof (thread_info.thread_context) */
-      sect->size = 716;
+      sect->size = note->descsz - 12;
       /* offsetof (thread_info.thread_context) */
       sect->filepos = note->descpos + 12;
       sect->alignment_power = 2;
