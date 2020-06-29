@@ -1332,6 +1332,7 @@ md_assemble (char *str)
       if (n_operands == 2)
 	{
 	  symbolS *sym;
+	  fixS *tmpfixP;
 
 	  /* The last operand is immediate whenever we see just two
 	     operands.  */
@@ -1380,8 +1381,13 @@ md_assemble (char *str)
 	  /* Now we know it can be a "base address plus offset".  Add
 	     proper fixup types so we can handle this later, when we've
 	     parsed everything.  */
-	  fix_new (opc_fragP, opcodep - opc_fragP->fr_literal + 2,
-		   8, sym, 0, 0, BFD_RELOC_MMIX_BASE_PLUS_OFFSET);
+	  tmpfixP
+	    = fix_new (opc_fragP, opcodep - opc_fragP->fr_literal + 2,
+		       1, sym, 0, 0, BFD_RELOC_MMIX_BASE_PLUS_OFFSET);
+	  /* This is a non-trivial fixup: the ->fx_offset will not
+	     reflect the stored value, so the generic overflow test
+	     doesn't apply. */
+	  tmpfixP->fx_no_overflow = 1;
 	  break;
 	}
 
@@ -2332,11 +2338,18 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec ATTRIBUTE_UNUSED,
     case ENCODE_RELAX (STATE_PUSHJSTUB, STATE_ZERO):
       /* Setting the unknown bits to 0 seems the most appropriate.  */
       mmix_set_geta_branch_offset (opcodep, 0);
-      tmpfixP = fix_new (opc_fragP, opcodep - opc_fragP->fr_literal, 8,
+      tmpfixP = fix_new (opc_fragP, opcodep - opc_fragP->fr_literal, 4,
 			 fragP->fr_symbol, fragP->fr_offset, 1,
 			 BFD_RELOC_MMIX_PUSHJ_STUBBABLE);
       COPY_FR_WHERE_TO_FX (fragP, tmpfixP);
       var_part_size = 0;
+
+      /* This is a non-trivial fixup; we'll be calling a generated
+	 stub, whose address fits into the fixup.  The actual target,
+	 as reflected by the fixup value, is further away than fits
+	 into the fixup, so the generic overflow test doesn't
+	 apply. */
+      tmpfixP->fx_no_overflow = 1;
       break;
 
     case ENCODE_RELAX (STATE_GETA, STATE_ZERO):

@@ -1,3 +1,14 @@
+2020-06-29  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	PR gas/25331
+	* config/tc-mmix.c (md_assemble) <fixup for
+	BFD_RELOC_MMIX_BASE_PLUS_OFFSET>: This fixup affects 1 byte, not 8.
+	Also, set its fx_no_overflow.
+	(md_convert_frag) <case ENCODE_RELAX (STATE_PUSHJSTUB, STATE_ZERO)>: 
+	Similarly this fixup affects 4 bytes, not 8 and needs its
+	fx_no_overflow set.
+	* config/tc-mmix.h (TC_FX_SIZE_SLACK): Don't define.
+
 2020-06-29  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-s12z.c: Use C style comments.
