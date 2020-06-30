@@ -245,13 +245,6 @@ namespace gdb {
 	  return { this->_M_str, this->_M_len };
 	}
 
-      template<typename _Allocator = std::allocator<_CharT>>
-	std::basic_string<_CharT, _Traits, _Allocator>
-	to_string(const _Allocator& __alloc = _Allocator()) const
-	{
-	  return { this->_M_str, this->_M_len, __alloc };
-	}
-
       size_type
       copy(_CharT* __str, size_type __n, size_type __pos = 0) const
       {
@@ -559,5 +552,15 @@ namespace gdb {
 #include "gdb_string_view.tcc"
 
 #endif // __cplusplus < 201703L
+
+namespace gdb {
+
+static inline std::string
+to_string(const gdb::string_view &view)
+{
+  return { view.data (), view.size () };
+}
+
+}
 
 #endif /* COMMON_GDB_STRING_VIEW_H */

@@ -1,3 +1,9 @@
+2020-06-30  Tom Tromey  <tromey@adacore.com>
+
+	PR build/26183:
+	* gdb_string_view.h (basic_string_view::to_string): Remove.
+	(gdb::to_string): New function.
+
 2020-06-27  Simon Marchi  <simon.marchi@efficios.com>
 
 	* tdesc.h (class print_xml_feature) <add_line>: Add

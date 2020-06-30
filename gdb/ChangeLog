@@ -1,3 +1,9 @@
+2020-06-30  Tom Tromey  <tromey@adacore.com>
+
+	PR build/26183:
+	* ada-lang.c (ada_lookup_name_info::ada_lookup_name_info): Use
+	gdb::to_string.
+
 2020-06-29  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbarch.sh (displaced_step_copy_insn): Update doc.

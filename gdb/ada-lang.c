@@ -13553,10 +13553,10 @@ ada_lookup_name_info::ada_lookup_name_info (const lookup_name_info &lookup_name)
     {
       if (user_name.back () == '>')
 	m_encoded_name
-	  = user_name.substr (1, user_name.size () - 2).to_string ();
+	  = gdb::to_string (user_name.substr (1, user_name.size () - 2));
       else
 	m_encoded_name
-	  = user_name.substr (1, user_name.size () - 1).to_string ();
+	  = gdb::to_string (user_name.substr (1, user_name.size () - 1));
       m_encoded_p = true;
       m_verbatim_p = true;
       m_wild_match_p = false;
@@ -13575,10 +13575,10 @@ ada_lookup_name_info::ada_lookup_name_info (const lookup_name_info &lookup_name)
 	  if (encoded != NULL)
 	    m_encoded_name = encoded;
 	  else
-	    m_encoded_name = user_name.to_string ();
+	    m_encoded_name = gdb::to_string (user_name);
 	}
       else
-	m_encoded_name = user_name.to_string ();
+	m_encoded_name = gdb::to_string (user_name);
 
       /* Handle the 'package Standard' special case.  See description
 	 of m_standard_p.  */
