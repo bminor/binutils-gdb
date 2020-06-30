@@ -1,3 +1,8 @@
+2020-06-30  Alan Modra  <amodra@gmail.com>
+
+	* scripttempl/elfmicroblaze.sc (.data): Add .data.* entry.
+	* testsuite/ld-elf/var1.d: Don't xfail microblaze.
+
 2020-06-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-tic6x/shlib-1.rd: Move C6000_DSBT_BASE,
