@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	ctf-decls.h (ctf_qsort_compar_thunk): Fix arg passing.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_next_hkv_t): New, kv-pairs passed to
 	sorting functions.
 	(ctf_next_t) <u.ctn_sorted_hkv>: New, sorted kv-pairs for

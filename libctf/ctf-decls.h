@@ -46,7 +46,7 @@ ctf_qsort_compar_thunk (void *arg, const void *a, const void *b)
 {
   struct ctf_qsort_arg *qsort_arg = (struct ctf_qsort_arg *) arg;
 
-  return qsort_arg->compar (a, b, arg);
+  return qsort_arg->compar (a, b, qsort_arg->arg);
 }
 
 static inline void
