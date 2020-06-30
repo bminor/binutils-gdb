@@ -1,5 +1,10 @@
 2020-06-30  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/group1.d: Don't xfail all solaris targets, just
+	ix86 and x86_64.
+
+2020-06-30  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elf/reloc-discard.d: Don't xfail nds32.
 
 2020-06-30  Alan Modra  <amodra@gmail.com>
