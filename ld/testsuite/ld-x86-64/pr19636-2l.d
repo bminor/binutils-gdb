@@ -3,7 +3,6 @@
 #ld: -pie -m elf_x86_64 --no-dynamic-linker --hash-style=sysv -z dynamic-undefined-weak -z max-page-size=0x200000 -z noseparate-code
 #objdump: -dw
 #warning: -z dynamic-undefined-weak ignored
-#notarget: x86_64-*-nacl*
 
 .*: +file format .*
 

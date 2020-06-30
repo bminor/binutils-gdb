@@ -736,7 +736,6 @@ extern const bfd_target i386_coff_go32stubbed_vec;
 extern const bfd_target i386_coff_lynx_vec;
 extern const bfd_target i386_elf32_vec;
 extern const bfd_target i386_elf32_fbsd_vec;
-extern const bfd_target i386_elf32_nacl_vec;
 extern const bfd_target i386_elf32_sol2_vec;
 extern const bfd_target i386_elf32_vxworks_vec;
 extern const bfd_target i386_mach_o_vec;
@@ -918,11 +917,9 @@ extern const bfd_target wasm_vec;
 extern const bfd_target wasm32_elf32_vec;
 extern const bfd_target x86_64_coff_vec;
 extern const bfd_target x86_64_elf32_vec;
-extern const bfd_target x86_64_elf32_nacl_vec;
 extern const bfd_target x86_64_elf64_vec;
 extern const bfd_target x86_64_elf64_cloudabi_vec;
 extern const bfd_target x86_64_elf64_fbsd_vec;
-extern const bfd_target x86_64_elf64_nacl_vec;
 extern const bfd_target x86_64_elf64_sol2_vec;
 extern const bfd_target x86_64_mach_o_vec;
 extern const bfd_target x86_64_pe_vec;
@@ -1085,7 +1082,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&i386_coff_lynx_vec,
 	&i386_elf32_vec,
 	&i386_elf32_fbsd_vec,
-	&i386_elf32_nacl_vec,
 	&i386_elf32_sol2_vec,
 	&i386_elf32_vxworks_vec,
 	&i386_mach_o_vec,
@@ -1335,11 +1331,9 @@ static const bfd_target * const _bfd_target_vector[] =
 #ifdef BFD64
 	&x86_64_coff_vec,
 	&x86_64_elf32_vec,
-	&x86_64_elf32_nacl_vec,
 	&x86_64_elf64_vec,
 	&x86_64_elf64_cloudabi_vec,
 	&x86_64_elf64_fbsd_vec,
-	&x86_64_elf64_nacl_vec,
 	&x86_64_elf64_sol2_vec,
 	&x86_64_mach_o_vec,
 	&x86_64_pe_vec,

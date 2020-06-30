@@ -3,7 +3,6 @@
 #objdump: -dw --insn-width=7
 #name: l1om
 #warning_output: x86_64.e
-#notarget: *-*-nacl*
 
 .*: +file format elf64-l1om.*
 

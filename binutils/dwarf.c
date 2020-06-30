@@ -7639,10 +7639,8 @@ init_dwarf_regnames_by_bfd_arch_and_mach (enum bfd_architecture arch,
 	{
 	case bfd_mach_x86_64:
 	case bfd_mach_x86_64_intel_syntax:
-	case bfd_mach_x86_64_nacl:
 	case bfd_mach_x64_32:
 	case bfd_mach_x64_32_intel_syntax:
-	case bfd_mach_x64_32_nacl:
 	  init_dwarf_regnames_x86_64 ();
 	  break;
 

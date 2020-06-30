@@ -107,9 +107,7 @@ if [istarget "*-*-go32*"] {
 if { !([istarget "i?86-*-elf*"]
        || [istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
-       || [istarget "i?86-*-nacl*"]
        || [istarget "x86_64-*-elf*"]
-       || [istarget "x86_64-*-nacl*"]
        || [istarget "x86_64-*-linux*"]
        || [istarget "amd64-*-linux*"]) } {
     return
@@ -249,29 +247,7 @@ set i386tests {
      { pr19827a.S }  {{readelf {-rW} pr19827.rd}} "pr19827.so"}
 }
 
-# So as to avoid rewriting every last test case here in a nacl variant,
-# we use black magic to massage the generic cases into nacl-variant cases.
-if [istarget "*-*-nacl*"] {
-    # Change all the -melf_i386 to -melf_i386_nacl so linking can succeed.
-    regsub -all elf_i386 $i386tests elf_i386_nacl i386tests
-
-    # Same, applied to all the run_dump_test cases.
-    set options_regsub(ld) {elf_i386 elf_i386_nacl}
-
-    # The section/segment layout differs too much for the vanilla
-    # readelf output files to match.  So massage the cases so that
-    # they refer to a foo-nacl.rd file instead of a foo.rd file.
-    regsub -all {([a-z0-9]+)\.rd} $i386tests {\1-nacl.rd} i386tests
-
-    # Likewise for PLTs.
-    regsub -all -- {([a-z0-9]+)\.pd} $i386tests {\1-nacl.pd} i386tests
-}
-
 proc iamcu_tests {} {
-    if {[istarget "*-*-nacl*"]} then {
-	return
-    }
-
     global as
     global srcdir
     global subdir
@@ -367,7 +343,6 @@ run_dump_test "call3h"
 run_dump_test "jmp1"
 run_dump_test "jmp2"
 run_dump_test "load1"
-run_dump_test "load1-nacl"
 run_dump_test "load2"
 run_dump_test "load3"
 run_dump_test "load4a"
@@ -382,7 +357,6 @@ run_dump_test "pr19636-1a"
 run_dump_test "pr19636-1b"
 run_dump_test "pr19636-1c"
 run_dump_test "pr19636-1d"
-run_dump_test "pr19636-1d-nacl"
 run_dump_test "pr19636-1e"
 run_dump_test "pr19636-1f"
 run_dump_test "pr19636-1g"
@@ -394,11 +368,8 @@ run_dump_test "pr19636-1l"
 run_dump_test "pr19636-2a"
 run_dump_test "pr19636-2b"
 run_dump_test "pr19636-2c"
-run_dump_test "pr19636-2c-nacl"
 run_dump_test "pr19636-2d"
-run_dump_test "pr19636-2d-nacl"
 run_dump_test "pr19636-2e"
-run_dump_test "pr19636-2e-nacl"
 run_dump_test "pr19636-3a"
 run_dump_test "pr19636-3b"
 run_dump_test "pr19636-3c"
@@ -474,9 +445,7 @@ run_dump_test "property-x86-cet5a"
 run_dump_test "property-x86-cet5b"
 run_dump_test "property-x86-cet6"
 run_dump_test "pie1"
-run_dump_test "pie1-nacl"
 run_dump_test "pr21884"
-run_dump_test "pr21884-nacl"
 run_dump_test "pr22115-1a"
 run_dump_test "pr22115-1b"
 run_dump_test "pr22115-1c"
@@ -503,8 +472,6 @@ run_dump_test "pr26018"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
-       || [istarget "i?86-*-nacl*"]
-       || [istarget "x86_64-*-nacl*"]
        || [istarget "x86_64-*-linux*"]) } {
     set ASFLAGS "$saved_ASFLAGS"
     return

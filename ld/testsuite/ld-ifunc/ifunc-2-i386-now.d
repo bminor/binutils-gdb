@@ -3,7 +3,7 @@
 #as: --32
 #objdump: -dw
 #target: x86_64-*-* i?86-*-*
-#notarget: *-*-lynxos *-*-nacl* *-*-nto*
+#notarget: *-*-lynxos *-*-nto*
 
 .*: +file format .*
 

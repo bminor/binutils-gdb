@@ -597,8 +597,6 @@ if { [at_least_gcc_version 4 7] } {
     if { ([istarget "i?86-*-elf*"]
 	   || [istarget "i?86-*-linux*"]
 	   || [istarget "i?86-*-gnu*"]
-	   || [istarget "i?86-*-nacl*"]
-	   || [istarget "x86_64-*-nacl*"]
 	   || [istarget "x86_64-*-linux*"]
 	   || [istarget "amd64-*-linux*"]) } {
 	set testname "PR ld/12365"

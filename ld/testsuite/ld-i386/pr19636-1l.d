@@ -3,7 +3,6 @@
 #ld: -pie -m elf_i386 --no-dynamic-linker -z dynamic-undefined-weak
 #objdump: -dw
 #warning: -z dynamic-undefined-weak ignored
-#notarget: i?86-*-nacl* x86_64-*-nacl*
 
 .*: +file format .*
 

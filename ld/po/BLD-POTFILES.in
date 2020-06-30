@@ -82,7 +82,6 @@ eelf32_tic6x_le.c
 eelf32_tic6x_linux_be.c
 eelf32_tic6x_linux_le.c
 eelf32_x86_64.c
-eelf32_x86_64_nacl.c
 eelf32am33lin.c
 eelf32b4300.c
 eelf32bfin.c
@@ -193,7 +192,6 @@ eelf_i386.c
 eelf_i386_be.c
 eelf_i386_fbsd.c
 eelf_i386_ldso.c
-eelf_i386_nacl.c
 eelf_i386_sol2.c
 eelf_i386_vxworks.c
 eelf_iamcu.c
@@ -205,7 +203,6 @@ eelf_s390.c
 eelf_x86_64.c
 eelf_x86_64_cloudabi.c
 eelf_x86_64_fbsd.c
-eelf_x86_64_nacl.c
 eelf_x86_64_sol2.c
 eh8300elf.c
 eh8300elf_linux.c

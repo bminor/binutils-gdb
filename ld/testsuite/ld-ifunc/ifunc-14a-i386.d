@@ -4,7 +4,7 @@
 #as: --32
 #readelf: -d --wide
 #target: x86_64-*-* i?86-*-*
-#notarget: *-*-lynxos *-*-nacl* *-*-nto*
+#notarget: *-*-lynxos *-*-nto*
 
 #failif
 #...

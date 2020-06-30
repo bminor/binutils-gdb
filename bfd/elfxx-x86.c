@@ -2795,9 +2795,6 @@ _bfd_x86_elf_link_setup_gnu_properties
 	  htab->interp = s;
 	}
 
-      /* Don't change PLT section alignment for NaCl since it uses
-	 64-byte PLT entry and sets PLT section alignment to 32
-	 bytes.  Don't create additional PLT sections for NaCl.  */
       if (normal_target)
 	{
 	  flagword pltflags = (bed->dynamic_sec_flags
@@ -2831,8 +2828,7 @@ _bfd_x86_elf_link_setup_gnu_properties
 	      if (use_ibt_plt)
 		{
 		  /* Create the second PLT for Intel IBT support.  IBT
-		     PLT is supported only for non-NaCl target and is
-		     is needed only for lazy binding.  */
+		     PLT is needed only for lazy binding.  */
 		  sec = bfd_make_section_anyway_with_flags (dynobj,
 							    ".plt.sec",
 							    pltflags);
@@ -2845,8 +2841,8 @@ _bfd_x86_elf_link_setup_gnu_properties
 	      else if (htab->params->bndplt && ABI_64_P (dynobj))
 		{
 		  /* Create the second PLT for Intel MPX support.  MPX
-		     PLT is supported only for non-NaCl target in 64-bit
-		     mode and is needed only for lazy binding.  */
+		     PLT is supported only in 64-bit mode and is needed
+		     only for lazy binding.  */
 		  sec = bfd_make_section_anyway_with_flags (dynobj,
 							    ".plt.sec",
 							    pltflags);

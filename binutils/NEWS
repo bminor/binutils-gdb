@@ -1,5 +1,7 @@
 -*- text -*-
 
+* X86 NaCl target support is removed.
+
 * The readelf tool now has a -L or --lint or --enable-checks option which turns
   on warning messages about possible problems with the file(s) being examined.
   These checks include things like zero-sized sections, which are allowed by

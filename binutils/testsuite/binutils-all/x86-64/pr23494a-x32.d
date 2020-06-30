@@ -3,7 +3,6 @@
 #as: --x32 -mx86-used-note=yes
 #objcopy: -O elf64-x86-64
 #readelf: -n
-#notarget: x86_64-*-nacl*
 
 Displaying notes found in: .note.gnu.property
 [ 	]+Owner[ 	]+Data size[ 	]+Description

@@ -3,7 +3,6 @@
 #objdump: -dw
 #name: k1om
 #warning_output: x86_64.e
-#notarget: *-*-nacl*
 
 .*: +file format elf64-k1om.*
 

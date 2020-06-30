@@ -479,7 +479,6 @@ const char extra_symbol_chars[] = "*%-([{}"
      || ((defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF))	\
 	 && !defined (TE_GNU)				\
 	 && !defined (TE_LINUX)				\
-	 && !defined (TE_NACL)				\
 	 && !defined (TE_FreeBSD)			\
 	 && !defined (TE_DragonFly)			\
 	 && !defined (TE_NetBSD)))

@@ -1,3 +1,42 @@
+2020-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* archures.c (bfd_mach_i386_nacl): Removed.
+	(bfd_mach_i386_i386_nacl): Likewise.
+	(bfd_mach_x86_64_nacl): Likewise.
+	(bfd_mach_x64_32_nacl): Likewise.
+	* config.bfd: Remove *-*-nacl* targets.
+	* configure.ac: Remove x86 NaCl target vectors.
+	* cpu-i386.c (bfd_arch_i386_onebyte_nop_fill): Removed.
+	(bfd_x64_32_nacl_arch): Likewise.
+	(bfd_x86_64_nacl_arch): Likewise.
+	(bfd_i386_nacl_arch): Likewise.
+	(bfd_x64_32_arch_intel_syntax): Updated.
+	* elf32-i386.c: Don't include "elf-nacl.h".
+	(elf_i386_nacl_plt): Removed.
+	(elf_i386_nacl_plt0_entry): Likewise.
+	(elf_i386_nacl_plt_entry): Likewise.
+	(elf_i386_nacl_pic_plt0_entry): Likewise.
+	(elf_i386_nacl_pic_plt_entry): Likewise.
+	(elf_i386_nacl_eh_frame_plt): Likewise.
+	(elf_i386_nacl_plt): Likewise.
+	(elf32_i386_nacl_elf_object_p): Likewise.
+	(elf_i386_get_synthetic_symtab): Updated.
+	(elf_i386_link_setup_gnu_properties): Likewise.
+	* elf64-x86-64.c: Don't include "elf-nacl.h".
+	(elf_x86_64_nacl_plt): Removed.
+	(elf64_x86_64_nacl_elf_object_p): Likewise.
+	(elf_x86_64_nacl_plt0_entry): Likewise.
+	(elf_x86_64_nacl_plt_entry): Likewise.
+	(elf_x86_64_nacl_eh_frame_plt): Likewise.
+	(elf_x86_64_nacl_plt): Likewise.
+	(elf32_x86_64_nacl_elf_object_p): Likewise.
+	(elf_x86_64_get_synthetic_symtab): Updated.
+	(elf_x86_64_link_setup_gnu_properties): Likewise.
+	* elfxx-x86.c (_bfd_x86_elf_link_setup_gnu_properties): Likewise.
+	* targets.c: Remove x86 NaCl target vectors.
+	* bfd-in2.h: Regenerated.
+	* configure: Likewise.
+
 2020-06-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-tic6x.c (elf32_tic6x_size_dynamic_sections): Call

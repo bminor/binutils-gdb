@@ -1,5 +1,7 @@
 -*- text -*-
 
+* X86 NaCl target support is removed.
+
 * Extend .symver directive to update visibility of the original symbol
   and assign one original symbol to different versioned symbols.
 

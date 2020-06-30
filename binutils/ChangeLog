@@ -1,3 +1,23 @@
+2020-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention x86 NaCl target support removal.
+	* dwarf.c (init_dwarf_regnames_by_bfd_arch_and_mach): Remove
+	x86 NaCl target support.
+	* testsuite/binutils-all/elfedit-1.d: Likewise.
+	* testsuite/binutils-all/i386/i386.exp: Likewise.
+	* testsuite/binutils-all/x86-64/objects.exp: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494a-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494a.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494b-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494b.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494c-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494c.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494d-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494d.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494e-x32.d: Likewise.
+	* testsuite/binutils-all/x86-64/pr23494e.d: Likewise.
+	* testsuite/binutils-all/x86-64/x86-64.exp: Likewise.
+
 2020-06-30  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (read_and_display_attr_value): Support
