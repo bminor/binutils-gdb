@@ -2574,6 +2574,9 @@ read_and_display_attr_value (unsigned long           attribute,
 	      case DW_FORM_strp:
 		add_dwo_name ((const char *) fetch_indirect_string (uvalue));
 		break;
+	      case DW_FORM_GNU_strp_alt:
+		add_dwo_name ((const char *) fetch_alt_indirect_string (uvalue));
+		break;
 	      case DW_FORM_GNU_str_index:
 		add_dwo_name (fetch_indexed_string (uvalue, this_set, offset_size, FALSE));
 		break;
@@ -2594,6 +2597,9 @@ read_and_display_attr_value (unsigned long           attribute,
 	      {
 	      case DW_FORM_strp:
 		add_dwo_dir ((const char *) fetch_indirect_string (uvalue));
+		break;
+	      case DW_FORM_GNU_strp_alt:
+		add_dwo_dir (fetch_alt_indirect_string (uvalue));
 		break;
 	      case DW_FORM_line_strp:
 		add_dwo_dir ((const char *) fetch_indirect_line_string (uvalue));

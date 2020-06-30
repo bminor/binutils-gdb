@@ -1,3 +1,9 @@
+2020-06-30  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (read_and_display_attr_value): Support
+	DW_FORM_GNU_strp_alt when used with DW_AT_dwo_name and
+	DW_AT_comp_dir.
+
 2020-06-30  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/binutils-all/readelf.exp (readelf_dump_test): Remove
