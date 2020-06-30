@@ -1,3 +1,8 @@
+2020-07-01  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/all/eqv-dot.d: xfail targets that set linkrelax
+	in data sections, and mep.
+
 2020-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention x86 NaCl target support removal.
