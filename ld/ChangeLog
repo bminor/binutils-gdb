@@ -1,5 +1,9 @@
 2020-06-30  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-elf/reloc-discard.d: Don't xfail nds32.
+
+2020-06-30  Alan Modra  <amodra@gmail.com>
+
 	* scripttempl/elfmicroblaze.sc (.data): Add .data.* entry.
 	* testsuite/ld-elf/var1.d: Don't xfail microblaze.
 
