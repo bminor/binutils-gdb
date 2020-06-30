@@ -320,7 +320,7 @@ proc_with_prefix test_bkpt_eval_funcs { } {
     }
     delete_breakpoints
 
-    gdb_py_test_multiple "Sub-class a breakpoint" \
+    gdb_test_multiline "Sub-class a breakpoint" \
 	"python" "" \
 	"class bp_eval (gdb.Breakpoint):" "" \
 	"   inf_i = 0" "" \
@@ -333,7 +333,7 @@ proc_with_prefix test_bkpt_eval_funcs { } {
 	"      return False" "" \
 	"end" ""
 
-    gdb_py_test_multiple "Sub-class a second breakpoint" \
+    gdb_test_multiline "Sub-class a second breakpoint" \
 	"python" "" \
 	"class bp_also_eval (gdb.Breakpoint):" "" \
 	"   count = 0" "" \
@@ -344,7 +344,7 @@ proc_with_prefix test_bkpt_eval_funcs { } {
 	"      return False" "" \
 	"end" ""
 
-    gdb_py_test_multiple "Sub-class a third breakpoint" \
+    gdb_test_multiline "Sub-class a third breakpoint" \
 	"python" "" \
 	"class basic (gdb.Breakpoint):" "" \
 	"   count = 0" "" \
@@ -381,7 +381,7 @@ proc_with_prefix test_bkpt_eval_funcs { } {
 	"Set breakpoint" 0
     gdb_py_test_silent_cmd "python eval_bp2.condition = \"1==1\"" \
 	"Set a condition" 0
-    gdb_py_test_multiple "Construct an eval function" \
+    gdb_test_multiline "Construct an eval function" \
 	"python" "" \
 	"def stop_func ():" "" \
 	"   return True" "" \
@@ -402,7 +402,7 @@ proc_with_prefix test_bkpt_eval_funcs { } {
     gdb_test "python print (check_eval.count)" "1" \
 	"Test that evaluate function is run when location also has normal bp"
 
-    gdb_py_test_multiple "Sub-class a watchpoint" \
+    gdb_test_multiline "Sub-class a watchpoint" \
 	"python" "" \
 	"class wp_eval (gdb.Breakpoint):" "" \
 	"   def stop (self):" "" \
@@ -434,7 +434,7 @@ proc_with_prefix test_bkpt_temporary { } {
     }
     delete_breakpoints
 
-    gdb_py_test_multiple "Sub-class and check temporary breakpoint" \
+    gdb_test_multiline "Sub-class and check temporary breakpoint" \
 	"python" "" \
 	"class temp_bp (gdb.Breakpoint):" "" \
 	"   count = 0" "" \
@@ -521,7 +521,7 @@ proc_with_prefix test_bkpt_events {} {
 
     clean_restart ${testfile}
 
-    gdb_py_test_multiple "Create event handler" \
+    gdb_test_multiline "Create event handler" \
 	"python" "" \
 	"def note_event(arg):" "" \
 	"  global last_bp_event" "" \

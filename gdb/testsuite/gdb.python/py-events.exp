@@ -213,13 +213,13 @@ dir ok: True.*" "Inferior 2 terminated."
 
 
 # Test before_prompt event.
-gdb_py_test_multiple "define new user command" \
+gdb_test_multiline "define new user command" \
     "define xxz" "End with a line saying just .end.." \
     "set variable \$x = 72" "" \
     "set variable \$y = 93" "" \
     "end" ""
 
-gdb_py_test_multiple "add before_prompt listener" \
+gdb_test_multiline "add before_prompt listener" \
     "python" "" \
     "count = 0" "" \
     "def listener():" "" \

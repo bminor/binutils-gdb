@@ -172,7 +172,7 @@ proc test_value_numeric_ops {} {
 
 proc test_value_boolean {} {
   # First, define a useful function to test booleans.
-  gdb_py_test_multiple "define function to test booleans" \
+  gdb_test_multiline "define function to test booleans" \
     "python" "" \
     "def test_bool (val):" "" \
     "  if val:" "" \
@@ -506,7 +506,7 @@ proc test_parse_and_eval {} {
 
 # Test that values are hashable.
 proc test_value_hash {} {
-  gdb_py_test_multiple "Simple Python value dictionary" \
+  gdb_test_multiline "Simple Python value dictionary" \
     "python" "" \
     "one = gdb.Value(1)" "" \
     "two = gdb.Value(2)" "" \

@@ -1,3 +1,16 @@
+2020-06-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.python/py-breakpoint.exp: use gdb_test_multiline instead
+	of gdb_py_test_multiple.
+	* gdb.python/py-cmd.exp: Likewise.
+	* gdb.python/py-events.exp: Likewise.
+	* gdb.python/py-function.exp: Likewise.
+	* gdb.python/py-inferior.exp: Likewise.
+	* gdb.python/py-infthread.exp: Likewise.
+	* gdb.python/py-linetable.exp: Likewise.
+	* gdb.python/py-parameter.exp: Likewise.
+	* gdb.python/py-value.exp: Likewise.
+
 2020-06-30  Tom de Vries  <tdevries@suse.de>
 
 	PR testsuite/26175
