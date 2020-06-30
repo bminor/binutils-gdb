@@ -634,25 +634,28 @@ proc gdb_default_target_compile_1 {source destfile type options} {
 proc gdb_default_target_compile {source destfile type options} {
     global use_gdb_compile
 
-    set need_local 0
+    set need_local_lang 0
+    set need_local_early_flags 0
     foreach i $options {
 
 	if { $i == "ada" || $i == "d" || $i == "go" || $i == "rust" } {
-	    set need_local [info exists use_gdb_compile($i)]
-	    break
+	    set need_local_lang [info exists use_gdb_compile($i)]
 	}
 
 	if { $i == "c++" } {
-	    break
+	    set need_local_lang 0
 	}
 
 	if { $i == "f77" || $i == "f90" } {
-	    set need_local [info exists use_gdb_compile(fortran)]
-	    break
+	    set need_local_lang [info exists use_gdb_compile(fortran)]
+	}
+
+	if { [regexp "^early_flags=" $i] } {
+	    set need_local_early_flags 1
 	}
     }
 
-    if { $need_local } {
+    if { $need_local_lang || $need_local_early_flags } {
 	return [gdb_default_target_compile_1 $source $destfile $type $options]
     }
 
