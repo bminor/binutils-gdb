@@ -42,6 +42,69 @@ static int amd64_windows_dummy_call_integer_regs[] =
   AMD64_R9_REGNUM            /* %r9 */
 };
 
+/* This vector maps GDB's idea of a register's number into an offset into
+   the Windows API CONTEXT structure.  */
+static int amd64_windows_gregset_reg_offset[] =
+{
+  120, /* Rax */
+  144, /* Rbx */
+  128, /* Rcx */
+  136, /* Rdx */
+  168, /* Rsi */
+  176, /* Rdi */
+  160, /* Rbp */
+  152, /* Rsp */
+  184, /* R8 */
+  192, /* R9 */
+  200, /* R10 */
+  208, /* R11 */
+  216, /* R12 */
+  224, /* R13 */
+  232, /* R14 */
+  240, /* R15 */
+  248, /* Rip */
+  68,  /* EFlags */
+  56,  /* SegCs */
+  66,  /* SegSs */
+  58,  /* SegDs */
+  60,  /* SegEs */
+  62,  /* SegFs */
+  64,  /* SegGs */
+  288, /* FloatSave.FloatRegisters[0] */
+  304, /* FloatSave.FloatRegisters[1] */
+  320, /* FloatSave.FloatRegisters[2] */
+  336, /* FloatSave.FloatRegisters[3] */
+  352, /* FloatSave.FloatRegisters[4] */
+  368, /* FloatSave.FloatRegisters[5] */
+  384, /* FloatSave.FloatRegisters[6] */
+  400, /* FloatSave.FloatRegisters[7] */
+  256, /* FloatSave.ControlWord */
+  258, /* FloatSave.StatusWord */
+  260, /* FloatSave.TagWord */
+  268, /* FloatSave.ErrorSelector */
+  264, /* FloatSave.ErrorOffset */
+  276, /* FloatSave.DataSelector */
+  272, /* FloatSave.DataOffset */
+  268, /* FloatSave.ErrorSelector */
+  416, /* Xmm0 */
+  432, /* Xmm1 */
+  448, /* Xmm2 */
+  464, /* Xmm3 */
+  480, /* Xmm4 */
+  496, /* Xmm5 */
+  512, /* Xmm6 */
+  528, /* Xmm7 */
+  544, /* Xmm8 */
+  560, /* Xmm9 */
+  576, /* Xmm10 */
+  592, /* Xmm11 */
+  608, /* Xmm12 */
+  624, /* Xmm13 */
+  640, /* Xmm14 */
+  656, /* Xmm15 */
+  280, /* FloatSave.MxCsr */
+};
+
 #define AMD64_WINDOWS_SIZEOF_GREGSET 1232
 
 /* Return nonzero if an argument of type TYPE should be passed
@@ -1215,6 +1278,8 @@ amd64_windows_auto_wide_charset (void)
 static void
 amd64_windows_init_abi_common (gdbarch_info info, struct gdbarch *gdbarch)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   /* The dwarf2 unwinder (appended very early by i386_gdbarch_init) is
      preferred over the SEH one.  The reasons are:
      - binaries without SEH but with dwarf2 debug info are correctly handled
@@ -1239,6 +1304,11 @@ amd64_windows_init_abi_common (gdbarch_info info, struct gdbarch *gdbarch)
 				    amd64_windows_skip_trampoline_code);
 
   set_gdbarch_skip_prologue (gdbarch, amd64_windows_skip_prologue);
+
+  tdep->gregset_reg_offset = amd64_windows_gregset_reg_offset;
+  tdep->gregset_num_regs = ARRAY_SIZE (amd64_windows_gregset_reg_offset);
+  tdep->sizeof_gregset = AMD64_WINDOWS_SIZEOF_GREGSET;
+  tdep->sizeof_fpregset = 0;
 
   set_gdbarch_auto_wide_charset (gdbarch, amd64_windows_auto_wide_charset);
 }

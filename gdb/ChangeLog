@@ -1,5 +1,10 @@
 2020-07-01  Jon Turney  <jon.turney@dronecode.org.uk>
 
+	* amd64-windows-tdep.c(amd64_windows_gregset_reg_offset): Add.
+	(amd64_windows_init_abi_common): ... and register.
+
+2020-07-01  Jon Turney  <jon.turney@dronecode.org.uk>
+
 	* amd64-windows-tdep.c (amd64_cygwin_core_osabi_sniffer): New.
 	(_initialize_amd64_windows_tdep): Register amd64_cygwin_core_osabi_sniffer.
 
