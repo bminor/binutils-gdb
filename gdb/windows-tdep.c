@@ -1088,6 +1088,104 @@ range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
   return false;
 }
 
+struct cpms_data
+{
+  struct gdbarch *gdbarch;
+  struct obstack *obstack;
+  int module_count;
+};
+
+static void
+core_process_module_section (bfd *abfd, asection *sect, void *obj)
+{
+  struct cpms_data *data = (struct cpms_data *) obj;
+  enum bfd_endian byte_order = gdbarch_byte_order (data->gdbarch);
+
+  char *module_name;
+  size_t module_name_size;
+  CORE_ADDR base_addr;
+
+  gdb_byte *buf = NULL;
+
+  if (!startswith (sect->name, ".module"))
+    return;
+
+  buf = (gdb_byte *) xmalloc (bfd_section_size (sect) + 1);
+  if (!buf)
+    {
+      printf_unfiltered ("memory allocation failed for %s\n", sect->name);
+      goto out;
+    }
+  if (!bfd_get_section_contents (abfd, sect,
+				 buf, 0, bfd_section_size (sect)))
+    goto out;
+
+
+
+  /* A DWORD (data_type) followed by struct windows_core_module_info.  */
+
+  base_addr =
+    extract_unsigned_integer (buf + 4, 4, byte_order);
+
+  module_name_size =
+    extract_unsigned_integer (buf + 8, 4, byte_order);
+
+  if (12 + module_name_size > bfd_section_size (sect))
+    goto out;
+  module_name = (char *) buf + 12;
+
+  /* The first module is the .exe itself.  */
+  if (data->module_count != 0)
+    windows_xfer_shared_library (module_name, base_addr,
+				 NULL, data->gdbarch, data->obstack);
+  data->module_count++;
+
+out:
+  xfree (buf);
+  return;
+}
+
+ULONGEST
+windows_core_xfer_shared_libraries (struct gdbarch *gdbarch,
+				  gdb_byte *readbuf,
+				  ULONGEST offset, ULONGEST len)
+{
+  struct obstack obstack;
+  const char *buf;
+  ULONGEST len_avail;
+  struct cpms_data data = { gdbarch, &obstack, 0 };
+
+  obstack_init (&obstack);
+  obstack_grow_str (&obstack, "<library-list>\n");
+  bfd_map_over_sections (core_bfd,
+			 core_process_module_section,
+			 &data);
+  obstack_grow_str0 (&obstack, "</library-list>\n");
+
+  buf = (const char *) obstack_finish (&obstack);
+  len_avail = strlen (buf);
+  if (offset >= len_avail)
+    return 0;
+
+  if (len > len_avail - offset)
+    len = len_avail - offset;
+  memcpy (readbuf, buf + offset, len);
+
+  obstack_free (&obstack, NULL);
+  return len;
+}
+
+/* This is how we want PTIDs from core files to be printed.  */
+
+std::string
+windows_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
+{
+  if (ptid.lwp () != 0)
+    return string_printf ("Thread 0x%lx", ptid.lwp ());
+
+  return normal_pid_to_str (ptid);
+}
+
 void _initialize_windows_tdep ();
 void
 _initialize_windows_tdep ()

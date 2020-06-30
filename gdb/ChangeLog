@@ -1,5 +1,13 @@
 2020-07-01  Jon Turney  <jon.turney@dronecode.org.uk>
 
+	* windows-tdep.h: Add prototypes.
+	* i386-windows-tdep.c(windows_core_xfer_shared_libraries): Move.
+	(i386_windows_core_pid_to_str): Move and rename ...
+	* windows-tdep.c (windows_core_xfer_shared_libraries): ... to here
+	(windows_core_pid_to_str): ... and here.
+	* amd64-windows-tdep.c (amd64_windows_init_abi_common): Register here.
+
+2020-07-01  Jon Turney  <jon.turney@dronecode.org.uk>
 	* amd64-windows-tdep.c(amd64_windows_gregset_reg_offset): Add.
 	(amd64_windows_init_abi_common): ... and register.
 

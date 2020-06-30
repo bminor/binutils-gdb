@@ -1310,6 +1310,11 @@ amd64_windows_init_abi_common (gdbarch_info info, struct gdbarch *gdbarch)
   tdep->sizeof_gregset = AMD64_WINDOWS_SIZEOF_GREGSET;
   tdep->sizeof_fpregset = 0;
 
+  /* Core file support.  */
+  set_gdbarch_core_xfer_shared_libraries
+    (gdbarch, windows_core_xfer_shared_libraries);
+  set_gdbarch_core_pid_to_str (gdbarch, windows_core_pid_to_str);
+
   set_gdbarch_auto_wide_charset (gdbarch, amd64_windows_auto_wide_charset);
 }
 
