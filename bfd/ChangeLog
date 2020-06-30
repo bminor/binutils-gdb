@@ -1,3 +1,7 @@
+2020-07-01  Alan Modra  <amodra@gmail.com>
+
+	* config.bfd: Obsolete xc16x.
+
 2020-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* archures.c (bfd_mach_i386_nacl): Removed.

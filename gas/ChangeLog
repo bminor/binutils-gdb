@@ -1,5 +1,9 @@
 2020-07-01  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-xc16x.c (md_apply_fix): Add FIXME.
+
+2020-07-01  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/gas/all/eqv-dot.d: xfail targets that set linkrelax
 	in data sections, and mep.
 

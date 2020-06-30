@@ -54,6 +54,7 @@ case $targ in
     exit 1
     ;;
  powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin* | \
+ xc16x-*-* | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
