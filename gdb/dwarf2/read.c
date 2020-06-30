@@ -9691,7 +9691,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	}
 
       /* Indicate that this is a variant type.  */
-      alloc_rust_variant (&objfile->objfile_obstack, type, 0, 1,
+      alloc_rust_variant (&objfile->objfile_obstack, type, 0, -1,
 			  gdb::array_view<discriminant_range> (ranges,
 							       n_fields - 1));
     }

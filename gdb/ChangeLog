@@ -1,5 +1,10 @@
 2020-06-30  Tom Tromey  <tromey@adacore.com>
 
+	* dwarf2/read.c (quirk_rust_enum): Correctly call
+	alloc_rust_variant for default-less enum.
+
+2020-06-30  Tom Tromey  <tromey@adacore.com>
+
 	PR build/26183:
 	* ada-lang.c (ada_lookup_name_info::ada_lookup_name_info): Use
 	gdb::to_string.
