@@ -448,7 +448,7 @@ if ![istarget "riscv*-*-*"] then {
 	readelf_find_size $tempfile 2
 
 	# Make sure that readelf can decode the contents.
-	readelf_test -wiaoRlL $tempfile dw5.W { nds32*-elf }
+	readelf_test -wiaoRlL $tempfile dw5.W {}
     }
 }
 
