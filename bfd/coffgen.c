@@ -2435,11 +2435,15 @@ coff_find_nearest_line_with_names (bfd *abfd,
 
 		  /* In XCOFF a debugging symbol can follow the
 		     function symbol.  */
-		  if (s->u.syment.n_scnum == N_DEBUG)
+		  if (((size_t) ((char *) s - (char *) obj_raw_syments (abfd))
+		       < obj_raw_syment_count (abfd) * sizeof (*s))
+		      && s->u.syment.n_scnum == N_DEBUG)
 		    s = s + 1 + s->u.syment.n_numaux;
 
 		  /* S should now point to the .bf of the function.  */
-		  if (s->u.syment.n_numaux)
+		  if (((size_t) ((char *) s - (char *) obj_raw_syments (abfd))
+		       < obj_raw_syment_count (abfd) * sizeof (*s))
+		      && s->u.syment.n_numaux)
 		    {
 		      /* The linenumber is stored in the auxent.  */
 		      union internal_auxent *a = &((s + 1)->u.auxent);

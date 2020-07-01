@@ -1,5 +1,11 @@
 2020-07-01  Alan Modra  <amodra@gmail.com>
 
+	PR 26188
+	* coffgen.c (coff_find_nearest_line_with_names): Sanity check
+	raw syment index before dereferencing.
+
+2020-07-01  Alan Modra  <amodra@gmail.com>
+
 	* elf32-i386.c (elf_backend_object_p): Undef for vxworks.
 
 2020-07-01  Alan Modra  <amodra@gmail.com>
