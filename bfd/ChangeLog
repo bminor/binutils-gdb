@@ -1,5 +1,9 @@
 2020-07-01  Alan Modra  <amodra@gmail.com>
 
+	* elf32-i386.c (elf_backend_object_p): Undef for vxworks.
+
+2020-07-01  Alan Modra  <amodra@gmail.com>
+
 	* config.bfd: Obsolete xc16x.
 
 2020-06-30  H.J. Lu  <hongjiu.lu@intel.com>

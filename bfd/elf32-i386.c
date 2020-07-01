@@ -4576,6 +4576,7 @@ elf32_iamcu_elf_object_p (bfd *abfd)
 #define ELF_ARCH			bfd_arch_i386
 #undef	ELF_MACHINE_CODE
 #define ELF_MACHINE_CODE		EM_386
+#undef	elf_backend_object_p
 
 /* VxWorks support.  */
 
