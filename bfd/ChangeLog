@@ -1,3 +1,9 @@
+2020-07-11  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* elf.c (elfcore_grok_win32pstatus): Don't apply size constraint
+	for NOTE_INFO_THREAD to all win32pstatus ELF notes, instead apply
+	appropriate size constraint for each win32pstatus note type.
+
 2020-07-01  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* elf.c (elfcore_grok_win32pstatus): Don't hardcode the size of

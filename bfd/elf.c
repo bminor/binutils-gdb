@@ -10139,12 +10139,13 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
   char buf[30];
   char *name;
   size_t len;
+  size_t name_size;
   asection *sect;
   int type;
   int is_active_thread;
   bfd_vma base_addr;
 
-  if (note->descsz < 728)
+  if (note->descsz < 4)
     return TRUE;
 
   if (! CONST_STRNEQ (note->namedata, "win32"))
@@ -10155,12 +10156,18 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
   switch (type)
     {
     case NOTE_INFO_PROCESS:
+      if (note->descsz < 12)
+        return FALSE;
+
       /* FIXME: need to add ->core->command.  */
       elf_tdata (abfd)->core->pid = bfd_get_32 (abfd, note->descdata + 4);
       elf_tdata (abfd)->core->signal = bfd_get_32 (abfd, note->descdata + 8);
       break;
 
     case NOTE_INFO_THREAD:
+      if (note->descsz < 12)
+        return FALSE;
+
       /* Make a ".reg/<tid>" section containing the Win32 API thread CONTEXT
          structure. */
       /* thread_info.tid */
@@ -10192,6 +10199,9 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
       break;
 
     case NOTE_INFO_MODULE:
+      if (note->descsz < 12)
+        return FALSE;
+
       /* Make a ".module/xxxxxxxx" section.  */
       /* module_info.base_address */
       base_addr = bfd_get_32 (abfd, note->descdata + 4);
@@ -10208,6 +10218,11 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 
       if (sect == NULL)
 	return FALSE;
+
+      /* module_info.module_name_size */
+      name_size = bfd_get_32 (abfd, note->descdata + 8);
+      if (note->descsz < 12 + name_size)
+        return FALSE;
 
       sect->size = note->descsz;
       sect->filepos = note->descpos;
