@@ -1,5 +1,10 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-archive.c (ctf_arc_bufopen): Endian-swap the archive magic
+	number if needed.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-impl.h (ctf_list_splice): New.
 	* ctf-util.h (ctf_list_splice): Likewise.
 	* ctf-link.c (link_sort_inputs_cb_arg_t): Likewise.

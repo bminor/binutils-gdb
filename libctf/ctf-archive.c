@@ -386,7 +386,7 @@ ctf_arc_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
   ctf_file_t *fp = NULL;
 
   if (ctfsect->cts_size > sizeof (uint64_t) &&
-      ((*(uint64_t *) ctfsect->cts_data) == CTFA_MAGIC))
+      (le64toh ((*(uint64_t *) ctfsect->cts_data)) == CTFA_MAGIC))
     {
       /* The archive is mmappable, so this operation is trivial.
 
