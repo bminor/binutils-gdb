@@ -23859,32 +23859,20 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 
   /* Read DW_AT_allocated and set in type.  */
   attr = dwarf2_attr (die, DW_AT_allocated, cu);
-  if (attr != NULL && attr->form_is_block ())
+  if (attr != NULL)
     {
       struct type *prop_type = cu->addr_sized_int_type (false);
       if (attr_to_dynamic_prop (attr, die, cu, &prop, prop_type))
         type->add_dyn_prop (DYN_PROP_ALLOCATED, prop);
     }
-  else if (attr != NULL)
-    {
-      complaint (_("DW_AT_allocated has the wrong form (%s) at DIE %s"),
-		 (attr != NULL ? dwarf_form_name (attr->form) : "n/a"),
-		 sect_offset_str (die->sect_off));
-    }
 
   /* Read DW_AT_associated and set in type.  */
   attr = dwarf2_attr (die, DW_AT_associated, cu);
-  if (attr != NULL && attr->form_is_block ())
+  if (attr != NULL)
     {
       struct type *prop_type = cu->addr_sized_int_type (false);
       if (attr_to_dynamic_prop (attr, die, cu, &prop, prop_type))
         type->add_dyn_prop (DYN_PROP_ASSOCIATED, prop);
-    }
-  else if (attr != NULL)
-    {
-      complaint (_("DW_AT_associated has the wrong form (%s) at DIE %s"),
-		 (attr != NULL ? dwarf_form_name (attr->form) : "n/a"),
-		 sect_offset_str (die->sect_off));
     }
 
   /* Read DW_AT_data_location and set in type.  */

@@ -1,3 +1,9 @@
+2020-07-01  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* dwarf2/read.c (set_die_type): Removed conditions to restrict
+	forms for DW_AT_associated and DW_AT_allocated attributes,
+	which is already checked in function attr_to_dynamic_prop.
+
 2020-06-30  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf2/read.c (quirk_rust_enum): Correctly call
