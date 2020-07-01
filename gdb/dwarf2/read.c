@@ -19983,7 +19983,7 @@ public:
      we're processing the end of a sequence.  */
   void record_line (bool end_sequence);
 
-  /* Check ADDRESS is zero and less than UNRELOCATED_LOWPC and if true
+  /* Check ADDRESS is -1, or zero and less than UNRELOCATED_LOWPC, and if true
      nop-out rest of the lines in this sequence.  */
   void check_line_address (struct dwarf2_cu *cu,
 			   const gdb_byte *line_ptr,
@@ -20377,12 +20377,13 @@ lnp_state_machine::check_line_address (struct dwarf2_cu *cu,
 				       const gdb_byte *line_ptr,
 				       CORE_ADDR unrelocated_lowpc, CORE_ADDR address)
 {
-  /* If ADDRESS < UNRELOCATED_LOWPC then it's not a usable value, it's outside
-     the pc range of the CU.  However, we restrict the test to only ADDRESS
-     values of zero to preserve GDB's previous behaviour which is to handle
-     the specific case of a function being GC'd by the linker.  */
+  /* Linkers resolve a symbolic relocation referencing a GC'd function to 0 or
+     -1.  If ADDRESS is 0, ignoring the opcode will err if the text section is
+     located at 0x0.  In this case, additionally check that if
+     ADDRESS < UNRELOCATED_LOWPC.  */
 
-  if (address == 0 && address < unrelocated_lowpc)
+  if ((address == 0 && address < unrelocated_lowpc)
+      || address == (CORE_ADDR) -1)
     {
       /* This line table is for a function which has been
 	 GCd by the linker.  Ignore it.  PR gdb/12528 */

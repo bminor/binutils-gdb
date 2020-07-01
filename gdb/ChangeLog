@@ -1,3 +1,7 @@
+2020-07-01  Fangrui Song  <maskray@google.com>
+
+	* dwarf2/read.c (lnp_state_machine::check_line_address): Test -1.
+
 2020-07-01  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
 
 	* dwarf2/read.c (set_die_type): Removed conditions to restrict
