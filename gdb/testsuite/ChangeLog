@@ -1,3 +1,8 @@
+2020-07-16  Caroline Tice  <cmtice@google.com>
+
+	* gdb.dwarf2/dw5-rnglist-test.cc: New file.
+	* gdb.dwarf2/dw5-rnglist-test.exp: New file.
+
 2020-07-16  Tom de Vries  <tdevries@suse.de>
 
 	* lib/dwarf.exp (program): Initialize _line.

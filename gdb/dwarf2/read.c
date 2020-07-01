@@ -132,6 +132,12 @@ static int dwarf2_loclist_block_index;
 /* Size of .debug_loclists section header for 64-bit DWARF format.  */
 #define LOCLIST_HEADER_SIZE64 20
 
+/* Size of .debug_rnglists section header for 32-bit DWARF format.  */
+#define RNGLIST_HEADER_SIZE32 12
+
+/* Size of .debug_rnglists section header for 64-bit DWARF format.  */
+#define RNGLIST_HEADER_SIZE64 20
+
 /* An index into a (C++) symbol name component in a symbol name as
    recorded in the mapped_index's symbol table.  For each C++ symbol
    in the symbol table, we record one entry for the start of each
@@ -340,6 +346,7 @@ static const struct dwop_section_names
   struct dwarf2_section_names loclists_dwo;
   struct dwarf2_section_names macinfo_dwo;
   struct dwarf2_section_names macro_dwo;
+  struct dwarf2_section_names rnglists_dwo;
   struct dwarf2_section_names str_dwo;
   struct dwarf2_section_names str_offsets_dwo;
   struct dwarf2_section_names types_dwo;
@@ -355,6 +362,7 @@ dwop_section_names =
   { ".debug_loclists.dwo", ".zdebug_loclists.dwo" },
   { ".debug_macinfo.dwo", ".zdebug_macinfo.dwo" },
   { ".debug_macro.dwo", ".zdebug_macro.dwo" },
+  { ".debug_rnglists.dwo", ".zdebug_rnglists.dwo" },
   { ".debug_str.dwo", ".zdebug_str.dwo" },
   { ".debug_str_offsets.dwo", ".zdebug_str_offsets.dwo" },
   { ".debug_types.dwo", ".zdebug_types.dwo" },
@@ -364,9 +372,9 @@ dwop_section_names =
 
 /* local data types */
 
-/* The location list section (.debug_loclists) begins with a header,
-   which contains the following information.  */
-struct loclist_header
+/* The location list and range list sections (.debug_loclists & .debug_rnglists)
+   begin with a header,  which contains the following information.  */
+struct loclists_rnglists_header
 {
   /* A 4-byte or 12-byte length containing the length of the
      set of entries for this compilation unit, not including the
@@ -650,6 +658,7 @@ struct dwo_sections
   struct dwarf2_section_info loclists;
   struct dwarf2_section_info macinfo;
   struct dwarf2_section_info macro;
+  struct dwarf2_section_info rnglists;
   struct dwarf2_section_info str;
   struct dwarf2_section_info str_offsets;
   /* In the case of a virtual DWO file, these two are unused.  */
@@ -1274,7 +1283,7 @@ static const gdb_byte *read_attribute (const struct die_reader_specs *,
 				       const gdb_byte *, bool *need_reprocess);
 
 static void read_attribute_reprocess (const struct die_reader_specs *reader,
-				      struct attribute *attr);
+				      struct attribute *attr, dwarf_tag tag);
 
 static CORE_ADDR read_addr_index (struct dwarf2_cu *cu, unsigned int addr_index);
 
@@ -1378,11 +1387,12 @@ static void read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu);
 
 static void read_variable (struct die_info *die, struct dwarf2_cu *cu);
 
-static int dwarf2_ranges_read (unsigned, CORE_ADDR *, CORE_ADDR *,
-			       struct dwarf2_cu *, dwarf2_psymtab *);
-
 /* Return the .debug_loclists section to use for cu.  */
 static struct dwarf2_section_info *cu_debug_loc_section (struct dwarf2_cu *cu);
+
+/* Return the .debug_rnglists section to use for cu.  */
+static struct dwarf2_section_info *cu_debug_rnglists_section
+  (struct dwarf2_cu *cu, dwarf_tag tag);
 
 /* How dwarf2_get_pc_bounds constructed its *LOWPC and *HIGHPC return
    values.  Keep the items ordered with increasing constraints compliance.  */
@@ -12447,6 +12457,11 @@ dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp, void *dwo_sections_ptr)
       dwo_sections->macro.s.section = sectp;
       dwo_sections->macro.size = bfd_section_size (sectp);
     }
+  else if (section_is_p (sectp->name, &names->rnglists_dwo))
+    {
+      dwo_sections->rnglists.s.section = sectp;
+      dwo_sections->rnglists.size = bfd_section_size (sectp);
+    }
   else if (section_is_p (sectp->name, &names->str_dwo))
     {
       dwo_sections->str.s.section = sectp;
@@ -13791,7 +13806,7 @@ read_variable (struct die_info *die, struct dwarf2_cu *cu)
 template <typename Callback>
 static bool
 dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
-			 Callback &&callback)
+			 dwarf_tag tag, Callback &&callback)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
@@ -13801,17 +13816,20 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
   const gdb_byte *buffer;
   CORE_ADDR baseaddr;
   bool overflow = false;
+  ULONGEST addr_index;
+  struct dwarf2_section_info *rnglists_section;
 
   base = cu->base_address;
+  rnglists_section = cu_debug_rnglists_section (cu, tag);
+  rnglists_section->read (objfile);
 
-  per_objfile->per_bfd->rnglists.read (objfile);
-  if (offset >= per_objfile->per_bfd->rnglists.size)
+  if (offset >= rnglists_section->size)
     {
       complaint (_("Offset %d out of bounds for DW_AT_ranges attribute"),
 		 offset);
       return false;
     }
-  buffer = per_objfile->per_bfd->rnglists.buffer + offset;
+  buffer = rnglists_section->buffer + offset;
 
   baseaddr = objfile->text_section_offset ();
 
@@ -13819,8 +13837,8 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
     {
       /* Initialize it due to a false compiler warning.  */
       CORE_ADDR range_beginning = 0, range_end = 0;
-      const gdb_byte *buf_end = (per_objfile->per_bfd->rnglists.buffer
-				 + per_objfile->per_bfd->rnglists.size);
+      const gdb_byte *buf_end = (rnglists_section->buffer
+				 + rnglists_section->size);
       unsigned int bytes_read;
 
       if (buffer == buf_end)
@@ -13842,6 +13860,11 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 	  base = cu->header.read_address (obfd, buffer, &bytes_read);
 	  buffer += bytes_read;
 	  break;
+        case DW_RLE_base_addressx:
+          addr_index = read_unsigned_leb128 (obfd, buffer, &bytes_read);
+          buffer += bytes_read;
+          base = read_addr_index (cu, addr_index);
+          break;
 	case DW_RLE_start_length:
 	  if (buffer + cu->header.addr_size > buf_end)
 	    {
@@ -13860,6 +13883,19 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 	      break;
 	    }
 	  break;
+	case DW_RLE_startx_length:
+          addr_index = read_unsigned_leb128 (obfd, buffer, &bytes_read);
+          buffer += bytes_read;
+          range_beginning = read_addr_index (cu, addr_index);
+          if (buffer > buf_end)
+            {
+              overflow = true;
+              break;
+            }
+          range_end = (range_beginning
+                       + read_unsigned_leb128 (obfd, buffer, &bytes_read));
+          buffer += bytes_read;
+          break;
 	case DW_RLE_offset_pair:
 	  range_beginning = read_unsigned_leb128 (obfd, buffer, &bytes_read);
 	  buffer += bytes_read;
@@ -13888,6 +13924,19 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 	  range_end = cu->header.read_address (obfd, buffer, &bytes_read);
 	  buffer += bytes_read;
 	  break;
+	case DW_RLE_startx_endx:
+          addr_index = read_unsigned_leb128 (obfd, buffer, &bytes_read);
+          buffer += bytes_read;
+          range_beginning = read_addr_index (cu, addr_index);
+          if (buffer > buf_end)
+            {
+              overflow = true;
+              break;
+            }
+          addr_index = read_unsigned_leb128 (obfd, buffer, &bytes_read);
+          buffer += bytes_read;
+          range_end = read_addr_index (cu, addr_index);
+          break;
 	default:
 	  complaint (_("Invalid .debug_rnglists data (no base address)"));
 	  return false;
@@ -13896,14 +13945,6 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 	break;
       if (rlet == DW_RLE_base_address)
 	continue;
-
-      if (!base.has_value ())
-	{
-	  /* We have no valid base address for the ranges
-	     data.  */
-	  complaint (_("Invalid .debug_rnglists data (no base address)"));
-	  return false;
-	}
 
       if (range_beginning > range_end)
 	{
@@ -13916,8 +13957,20 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
       if (range_beginning == range_end)
 	continue;
 
-      range_beginning += *base;
-      range_end += *base;
+      /* Only DW_RLE_offset_pair needs the base address added.  */
+      if (rlet == DW_RLE_offset_pair)
+	{
+	  if (!base.has_value ())
+	    {
+	      /* We have no valid base address for the DW_RLE_offset_pair.  */
+	      complaint (_("Invalid .debug_rnglists data (no base address for "
+			   "DW_RLE_offset_pair)"));
+	      return false;
+	    }
+
+	  range_beginning += *base;
+	  range_end += *base;
+	}
 
       /* A not-uncommon case of bad debug info.
 	 Don't pollute the addrmap with bad data.  */
@@ -13950,7 +14003,7 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 
 template <typename Callback>
 static int
-dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu,
+dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
 		       Callback &&callback)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
@@ -13966,7 +14019,7 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu,
   CORE_ADDR baseaddr;
 
   if (cu_header->version >= 5)
-    return dwarf2_rnglists_process (offset, cu, callback);
+    return dwarf2_rnglists_process (offset, cu, tag, callback);
 
   base = cu->base_address;
 
@@ -14052,7 +14105,7 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu,
 static int
 dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 		    CORE_ADDR *high_return, struct dwarf2_cu *cu,
-		    dwarf2_psymtab *ranges_pst)
+		    dwarf2_psymtab *ranges_pst, dwarf_tag tag)
 {
   struct objfile *objfile = cu->per_objfile->objfile;
   struct gdbarch *gdbarch = objfile->arch ();
@@ -14062,7 +14115,7 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
   CORE_ADDR high = 0;
   int retval;
 
-  retval = dwarf2_ranges_process (offset, cu,
+  retval = dwarf2_ranges_process (offset, cu, tag,
     [&] (CORE_ADDR range_beginning, CORE_ADDR range_end)
     {
       if (ranges_pst != NULL)
@@ -14154,8 +14207,14 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 	{
 	  /* DW_AT_rnglists_base does not apply to DIEs from the DWO skeleton.
 	     We take advantage of the fact that DW_AT_ranges does not appear
-	     in DW_TAG_compile_unit of DWO files.  */
-	  int need_ranges_base = die->tag != DW_TAG_compile_unit;
+	     in DW_TAG_compile_unit of DWO files.
+
+	     Attributes of the form DW_FORM_rnglistx have already had their
+	     value changed by read_rnglist_index and already include
+	     DW_AT_rnglists_base, so don't need to add the ranges base,
+	     either.  */
+	  int need_ranges_base = (die->tag != DW_TAG_compile_unit
+				  && attr->form != DW_FORM_rnglistx);
 	  unsigned int ranges_offset = (DW_UNSND (attr)
 					+ (need_ranges_base
 					   ? cu->ranges_base
@@ -14163,7 +14222,8 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 
 	  /* Value of the DW_AT_ranges attribute is the offset in the
 	     .debug_ranges section.  */
-	  if (!dwarf2_ranges_read (ranges_offset, &low, &high, cu, pst))
+	  if (!dwarf2_ranges_read (ranges_offset, &low, &high, cu, pst,
+				   die->tag))
 	    return PC_BOUNDS_INVALID;
 	  /* Found discontinuous range of addresses.  */
 	  ret = PC_BOUNDS_RANGES;
@@ -14325,8 +14385,14 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
     {
       /* DW_AT_rnglists_base does not apply to DIEs from the DWO skeleton.
 	 We take advantage of the fact that DW_AT_ranges does not appear
-	 in DW_TAG_compile_unit of DWO files.  */
-      int need_ranges_base = die->tag != DW_TAG_compile_unit;
+	 in DW_TAG_compile_unit of DWO files.
+
+	 Attributes of the form DW_FORM_rnglistx have already had their
+	 value changed by read_rnglist_index and already include
+	 DW_AT_rnglists_base, so don't need to add the ranges base,
+	 either.  */
+      int need_ranges_base = (die->tag != DW_TAG_compile_unit
+			      && attr->form != DW_FORM_rnglistx);
 
       /* The value of the DW_AT_ranges attribute is the offset of the
          address range list in the .debug_ranges section.  */
@@ -14334,7 +14400,7 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 			      + (need_ranges_base ? cu->ranges_base : 0));
 
       std::vector<blockrange> blockvec;
-      dwarf2_ranges_process (offset, cu,
+      dwarf2_ranges_process (offset, cu, die->tag,
 	[&] (CORE_ADDR start, CORE_ADDR end)
 	{
 	  start += baseaddr;
@@ -18154,8 +18220,13 @@ read_full_die_1 (const struct die_reader_specs *reader,
   auto maybe_addr_base = die->addr_base ();
   if (maybe_addr_base.has_value ())
     cu->addr_base = *maybe_addr_base;
+
+  attr = die->attr (DW_AT_rnglists_base);
+  if (attr != nullptr)
+    cu->ranges_base = DW_UNSND (attr);
+
   for (int index : indexes_that_need_reprocess)
-    read_attribute_reprocess (reader, &die->attrs[index]);
+    read_attribute_reprocess (reader, &die->attrs[index], die->tag);
   *diep = die;
   return info_ptr;
 }
@@ -18524,7 +18595,7 @@ partial_die_info::read (const struct die_reader_specs *reader,
          already been read at this point, so there is no need to wait until
 	 the loop terminates to do the reprocessing.  */
       if (need_reprocess)
-	read_attribute_reprocess (reader, &attr);
+	read_attribute_reprocess (reader, &attr, tag);
       /* Store the data if it is of an attribute we want to keep in a
          partial symbol table.  */
       switch (attr.name)
@@ -18670,10 +18741,16 @@ partial_die_info::read (const struct die_reader_specs *reader,
 
 	case DW_AT_ranges:
 	  {
-	    /* It would be nice to reuse dwarf2_get_pc_bounds here,
-	       but that requires a full DIE, so instead we just
-	       reimplement it.  */
-	    int need_ranges_base = tag != DW_TAG_compile_unit;
+	    /* DW_AT_rnglists_base does not apply to DIEs from the DWO
+	       skeleton.  We take advantage of the fact the DW_AT_ranges
+	       does not appear in DW_TAG_compile_unit of DWO files.
+
+	       Attributes of the form DW_FORM_rnglistx have already had
+               their value changed by read_rnglist_index and already
+	       include DW_AT_rnglists_base, so don't need to add the ranges
+	       base, either.  */
+	    int need_ranges_base = (tag != DW_TAG_compile_unit
+				    && attr.form != DW_FORM_rnglistx);
 	    unsigned int ranges_offset = (DW_UNSND (&attr)
 					  + (need_ranges_base
 					     ? cu->ranges_base
@@ -18682,7 +18759,7 @@ partial_die_info::read (const struct die_reader_specs *reader,
 	    /* Value of the DW_AT_ranges attribute is the offset in the
 	       .debug_ranges section.  */
 	    if (dwarf2_ranges_read (ranges_offset, &lowpc, &highpc, cu,
-				    nullptr))
+				    nullptr, tag))
 	      has_pc_info = 1;
 	  }
 	  break;
@@ -19006,11 +19083,11 @@ partial_die_info::fixup (struct dwarf2_cu *cu)
   fixup_called = 1;
 }
 
-/* Read the .debug_loclists header contents from the given SECTION in the
-   HEADER.  */
+/* Read the .debug_loclists or .debug_rnglists header (they are the same format)
+   contents from the given SECTION in the HEADER.  */
 static void
-read_loclist_header (struct loclist_header *header,
-		      struct dwarf2_section_info *section)
+read_loclists_rnglists_header (struct loclists_rnglists_header *header,
+			       struct dwarf2_section_info *section)
 {
   unsigned int bytes_read;
   bfd *abfd = section->get_bfd_owner ();
@@ -19063,8 +19140,8 @@ read_loclist_index (struct dwarf2_cu *cu, ULONGEST loclist_index)
   if (section->buffer == NULL)
     complaint (_("DW_FORM_loclistx used without .debug_loclists "
 	        "section [in module %s]"), objfile_name (objfile));
-  struct loclist_header header;
-  read_loclist_header (&header, section);
+  struct loclists_rnglists_header header;
+  read_loclists_rnglists_header (&header, section);
   if (loclist_index >= header.offset_entry_count)
     complaint (_("DW_FORM_loclistx pointing outside of "
 	        ".debug_loclists offset array [in module %s]"),
@@ -19083,13 +19160,68 @@ read_loclist_index (struct dwarf2_cu *cu, ULONGEST loclist_index)
     return bfd_get_64 (abfd, info_ptr) + loclist_base;
 }
 
+/* Given a DW_FORM_rnglistx value RNGLIST_INDEX, fetch the offset from the
+   array of offsets in the .debug_rnglists section.  */
+static CORE_ADDR
+read_rnglist_index (struct dwarf2_cu *cu, ULONGEST rnglist_index,
+		    dwarf_tag tag)
+{
+  struct dwarf2_per_objfile *dwarf2_per_objfile = cu->per_objfile;
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  bfd *abfd = objfile->obfd;
+  ULONGEST rnglist_header_size =
+    (cu->header.initial_length_size == 4 ? RNGLIST_HEADER_SIZE32
+     : RNGLIST_HEADER_SIZE64);
+  ULONGEST rnglist_base =
+      (cu->dwo_unit != nullptr) ? rnglist_header_size : cu->ranges_base;
+  ULONGEST start_offset =
+    rnglist_base + rnglist_index * cu->header.offset_size;
+
+  /* Get rnglists section.  */
+  struct dwarf2_section_info *section = cu_debug_rnglists_section (cu, tag);
+
+  /* Read the rnglists section content.  */
+  section->read (objfile);
+  if (section->buffer == nullptr)
+    error (_("DW_FORM_rnglistx used without .debug_rnglists section "
+	     "[in module %s]"),
+	   objfile_name (objfile));
+
+  /* Verify the rnglist index is valid.  */
+  struct loclists_rnglists_header header;
+  read_loclists_rnglists_header (&header, section);
+  if (rnglist_index >= header.offset_entry_count)
+    error (_("DW_FORM_rnglistx index pointing outside of "
+	     ".debug_rnglists offset array [in module %s]"),
+	   objfile_name (objfile));
+
+  /* Validate that the offset is within the section's range.  */
+  if (start_offset >= section->size)
+    error (_("DW_FORM_rnglistx pointing outside of "
+             ".debug_rnglists section [in module %s]"),
+	   objfile_name (objfile));
+
+  /* Validate that reading won't go beyond the end of the section.  */
+  if (start_offset + cu->header.offset_size > rnglist_base + section->size)
+    error (_("Reading DW_FORM_rnglistx index beyond end of"
+	     ".debug_rnglists section [in module %s]"),
+	   objfile_name (objfile));
+
+  const gdb_byte *info_ptr = section->buffer + start_offset;
+
+  if (cu->header.offset_size == 4)
+    return read_4_bytes (abfd, info_ptr) + rnglist_base;
+  else
+    return read_8_bytes (abfd, info_ptr) + rnglist_base;
+}
+
 /* Process the attributes that had to be skipped in the first round. These
    attributes are the ones that need str_offsets_base or addr_base attributes.
    They could not have been processed in the first round, because at the time
    the values of str_offsets_base or addr_base may not have been known.  */
 static void
 read_attribute_reprocess (const struct die_reader_specs *reader,
-			  struct attribute *attr)
+			  struct attribute *attr, dwarf_tag tag)
 {
   struct dwarf2_cu *cu = reader->cu;
   switch (attr->form)
@@ -19101,6 +19233,9 @@ read_attribute_reprocess (const struct die_reader_specs *reader,
       case DW_FORM_loclistx:
 	 DW_UNSND (attr) = read_loclist_index (cu, DW_UNSND (attr));
 	 break;
+      case DW_FORM_rnglistx:
+        DW_UNSND (attr) = read_rnglist_index (cu, DW_UNSND (attr), tag);
+        break;
       case DW_FORM_strx:
       case DW_FORM_strx1:
       case DW_FORM_strx2:
@@ -19282,8 +19417,10 @@ read_attribute_value (const struct die_reader_specs *reader,
       DW_SND (attr) = read_signed_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
-    case DW_FORM_udata:
     case DW_FORM_rnglistx:
+      *need_reprocess = true;
+      /* FALLTHROUGH */
+    case DW_FORM_udata:
       DW_UNSND (attr) = read_unsigned_leb128 (abfd, info_ptr, &bytes_read);
       info_ptr += bytes_read;
       break;
@@ -23370,6 +23507,34 @@ cu_debug_loc_section (struct dwarf2_cu *cu)
     }
   return (cu->header.version >= 5 ? &per_objfile->per_bfd->loclists
 				  : &per_objfile->per_bfd->loc);
+}
+
+/* Return the .debug_rnglists section to use for CU.  */
+static struct dwarf2_section_info *
+cu_debug_rnglists_section (struct dwarf2_cu *cu, dwarf_tag tag)
+{
+  if (cu->header.version < 5)
+    error (_(".debug_rnglists section cannot be used in DWARF %d"),
+	   cu->header.version);
+  struct dwarf2_per_objfile *dwarf2_per_objfile = cu->per_objfile;
+
+  /* Make sure we read the .debug_rnglists section from the file that
+     contains the DW_AT_ranges attribute we are reading.  Normally that
+     would be the .dwo file, if there is one.  However for DW_TAG_compile_unit
+     or DW_TAG_skeleton unit, we always want to read from objfile/linked
+     program.  */
+  if (cu->dwo_unit != nullptr
+      && tag != DW_TAG_compile_unit
+      && tag != DW_TAG_skeleton_unit)
+    {
+      struct dwo_sections *sections = &cu->dwo_unit->dwo_file->sections;
+
+      if (sections->rnglists.size > 0)
+	return &sections->rnglists;
+      else
+	error (_(".debug_rnglists section is missing from .dwo file."));
+    }
+  return &dwarf2_per_objfile->per_bfd->rnglists;
 }
 
 /* A helper function that fills in a dwarf2_loclist_baton.  */

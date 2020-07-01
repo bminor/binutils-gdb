@@ -1,3 +1,46 @@
+2020-07-16  Caroline Tice  <cmtice@google.com>
+
+	* dwarf2/read.c (RNGLIST_HEADER_SIZE32) New constant definition.
+	(RNGLIST_HEADER_SIZE64): New constant definition.
+	(struct dwop_section_names): Add rnglists_dwo.
+	(dwop_section_names): Add .debug_rnglists.dwo, .zdebug_rnglists.dwo.
+	(struct loclist_header): Rename to 'loclists_rnglists_header'.
+	(struct dwo_sections): Add rnglists field.
+	(read_attribut_reprocess): Add tag parameter.
+	(dwarf2_ranges_read): Add tag parameter & remove forward function decl.
+	(cu_debug_rnglists_section): New function (decl & definition).
+	(dwarf2_locate_dwo_sections): Add code to read rnglists_dwo section.
+	(dwarf2_rnglists_process): Add a dwarf_tag parameter, for the kind of
+	die whose range is being checked; get rnglist section from
+	cu_debug_rnglists_section, to get from either objfile or dwo file as
+	appropriate.  Add cases for DW_RLE_base_addressx,
+	DW_RLE_startx_length, DW_RLE_startx_endx.  Also, update to only add
+	the base address to DW_RLE_offset_pairs (not to all ranges), moving
+	test inside if-condition and updating complaint message.
+	(dwarf2_ranges_process): Add dwarf tag parameter and pass it to
+	dwarf2_rnglists_process.
+	(dwarf2_ranges_read): Add dwarf tag parameter and pass it to
+	dwarf2_ranges_process.
+	(dwarf2_get_pc_bounds): Check for DW_FORM_rnglistx when setting
+	need_ranges_base and update comment appropriately.  Also pass die tag
+	to dwarf2_ranges_read.
+	(dwarf2_record_block_ranges): Check for DW_FORM_rnglistx when setting
+	need_ranges_base and update comment appropriately.  Also pass die tag
+	to dwarf2_ranges_process.
+	(read_full_die_1): Add code to read DW_AT_rnglists_base and assign to
+	cu->ranges_base.  Also pass die tag to read_attribute_reprocess.
+	(partial_die_info::read): Check for DW_FORM_rnglistx when setting
+	need_ranges_base and update comment appropriately.  Also pass die tag
+	to read_attribute_reprocess and dwarf2_ranges_read.
+	(read_loclist_header): Rename function to read_loclists_rnglists_header,
+	and update function comment appropriately.
+	(read_loclist_index): Call read_loclists_rnglists_header instead of
+	read_loclist_header.
+	(read_rnglist_index): New function.
+	(read_attribute_reprocess):  Add tag parameter. Add code for
+	DW_FORM_rnglistx, passing tag to read_rnglist_index.
+	(read_attribute_value): Mark DW_FORM_rnglistx with need_reprocess.
+
 2020-07-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* f-typeprint.c (f_type_print_base): Allow for dynamic types not
