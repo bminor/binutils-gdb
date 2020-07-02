@@ -1,3 +1,8 @@
+2020-07-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (build_modrm_byte): Check vexswapsources to
+	swap two source operands.
+
 2020-07-02  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/gas/all/fill-1.d: Skip for MeP targets.

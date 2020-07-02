@@ -635,6 +635,9 @@ enum
    */
   ImplicitQuadGroup,
 
+  /* Two source operands are swapped.  */
+  SwapSources,
+
   /* Support encoding optimization.  */
   Optimize,
 
@@ -710,6 +713,7 @@ typedef struct i386_opcode_modifier
   unsigned int disp8memshift:3;
   unsigned int nodefmask:1;
   unsigned int implicitquadgroup:1;
+  unsigned int swapsources:1;
   unsigned int optimize:1;
   unsigned int attmnemonic:1;
   unsigned int attsyntax:1;
