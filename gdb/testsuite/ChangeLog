@@ -1,3 +1,7 @@
+2020-09-18  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.fortran/array-slices.exp: Add missing message data.
+
 2020-09-17  Pedro Alves  <pedro@palves.net>
 
 	* gdb.cp/call-c-1.c (foo) [__cplusplus]: Add extern "C".

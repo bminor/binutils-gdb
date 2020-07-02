@@ -53,7 +53,10 @@ set message_strings \
 	 " = 'array \\(1:5,1:5\\)'" \
 	 " = 'array \\(1:10:2,1:10:2\\)'" \
 	 " = 'array \\(1:10:3,1:10:2\\)'" \
-	 " = 'array \\(1:10:5,1:10:3\\)'" ]
+	 " = 'array \\(1:10:5,1:10:3\\)'" \
+	 " = 'other'" \
+	 " = 'other \\(-5:0, -2:0\\)'" \
+	 " = 'other \\(-5:4:2, -2:7:3\\)'" ]
 
 set i 0
 foreach result $array_contents msg $message_strings {
