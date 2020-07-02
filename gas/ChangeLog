@@ -1,3 +1,10 @@
+2020-07-02  Alex Coplan  <alex.coplan@arm.com>
+
+	* config/tc-aarch64.c (reg_name_p): Fix cast so that we don't
+	segfault on negative chars.
+	* testsuite/gas/aarch64/reglike-label-unicode-segv.d: New test.
+	* testsuite/gas/aarch64/reglike-label-unicode-segv.s: Input.
+
 2020-07-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 26028

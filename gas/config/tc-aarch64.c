@@ -2190,7 +2190,7 @@ reg_name_p (char *str, aarch64_reg_type reg_type)
     return FALSE;
 
   skip_whitespace (str);
-  if (*str == ',' || is_end_of_line[(unsigned int) *str])
+  if (*str == ',' || is_end_of_line[(unsigned char) *str])
     return TRUE;
 
   return FALSE;
