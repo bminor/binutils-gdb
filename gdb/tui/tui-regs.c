@@ -262,7 +262,6 @@ tui_data_window::show_register_group (struct reggroup *group,
 	  if (!refresh_values_only)
 	    {
 	      data_item_win->item_no = regnum;
-	      data_item_win->name = name;
 	      data_item_win->highlight = false;
 	    }
 	  tui_get_register (frame, data_item_win, regnum, 0);
