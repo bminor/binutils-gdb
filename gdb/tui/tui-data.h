@@ -62,10 +62,7 @@ public:
   virtual void make_visible (bool visible);
 
   /* Return the name of this type of window.  */
-  virtual const char *name () const
-  {
-    return "";
-  }
+  virtual const char *name () const = 0;
 
   /* Compute the maximum height of this window.  */
   virtual int max_height () const;

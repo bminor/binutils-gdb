@@ -32,6 +32,11 @@ struct tui_locator_window : public tui_win_info
 {
   tui_locator_window () = default;
 
+  const char *name () const override
+  {
+    return STATUS_NAME;
+  }
+
   int max_height () const override
   {
     return 1;

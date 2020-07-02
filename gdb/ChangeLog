@@ -1,5 +1,10 @@
 2020-07-01  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-data.h (struct tui_win_info) <name>: Now pure virtual.
+	* tui/tui-stack.h (struct tui_locator_window) <name>: New method.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-wingeneral.c (tui_win_info::refresh_window): Move from
 	tui_gen_win_info.
 	(tui_win_info::make_window): Merge with
