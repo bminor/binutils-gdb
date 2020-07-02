@@ -1,5 +1,11 @@
 2020-07-03  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/structs2.c (main): Adjust second parem_reg call to
+	explicitly write negative numbers.
+	* gdb.base/structs2.exp: Adjust expected output.
+
+2020-07-03  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/charset.c (init_string): Change all char parameters to
 	unsigned char parameters.
 

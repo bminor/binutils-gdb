@@ -49,5 +49,5 @@ if [test_compiler_info gcc-3-*] {
   setup_xfail hppa*-* gcc/15860
 }
 gdb_test "continue" \
-    ".*pr_char=-126.*pr_uchar=120.*pr_short=-32536.*pr_ushort=32000.*bkpt = 1.*" \
+    ".*pr_char=-120.*pr_uchar=130.*pr_short=-32000.*pr_ushort=33000.*bkpt = 1.*" \
     "structs2 continue2"
