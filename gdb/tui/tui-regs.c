@@ -42,15 +42,55 @@
 
 #include "gdb_curses.h"
 
+/* A subclass of string_file that expands tab characters.  */
+class tab_expansion_file : public string_file
+{
+public:
+
+  tab_expansion_file () = default;
+
+  void write (const char *buf, long length_buf) override;
+
+private:
+
+  int m_column = 0;
+};
+
+void
+tab_expansion_file::write (const char *buf, long length_buf)
+{
+  for (long i = 0; i < length_buf; ++i)
+    {
+      if (buf[i] == '\t')
+	{
+	  do
+	    {
+	      string_file::write (" ", 1);
+	      ++m_column;
+	    }
+	  while ((m_column % 8) != 0);
+	}
+      else
+	{
+	  string_file::write (&buf[i], 1);
+	  if (buf[i] == '\n')
+	    m_column = 0;
+	  else
+	    ++m_column;
+	}
+    }
+}
+
 /* Get the register from the frame and return a printable
    representation of it.  */
 
-static gdb::unique_xmalloc_ptr<char>
+static std::string
 tui_register_format (struct frame_info *frame, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
-  string_file stream;
+  /* Expand tabs into spaces, since ncurses on MS-Windows doesn't.  */
+  tab_expansion_file stream;
 
   scoped_restore save_pagination
     = make_scoped_restore (&pagination_enabled, 0);
@@ -64,8 +104,7 @@ tui_register_format (struct frame_info *frame, int regnum)
   if (!str.empty () && str.back () == '\n')
     str.resize (str.size () - 1);
 
-  /* Expand tabs into spaces, since ncurses on MS-Windows doesn't.  */
-  return tui_expand_tabs (str.c_str ());
+  return str;
 }
 
 /* Get the register value from the given frame and format it for the
@@ -80,11 +119,9 @@ tui_get_register (struct frame_info *frame,
     *changedp = false;
   if (target_has_registers)
     {
-      gdb::unique_xmalloc_ptr<char> new_content
-	= tui_register_format (frame, regnum);
+      std::string new_content = tui_register_format (frame, regnum);
 
-      if (changedp != NULL
-	  && strcmp (data->content.get (), new_content.get ()) != 0)
+      if (changedp != NULL && data->content != new_content)
 	*changedp = true;
 
       data->content = std::move (new_content);
@@ -244,13 +281,7 @@ tui_data_window::display_registers_from (int start_element_no)
   int max_len = 0;
   for (auto &&data_item_win : m_regs_content)
     {
-      const char *p;
-      int len;
-
-      len = 0;
-      p = data_item_win.content.get ();
-      if (p != 0)
-	len = strlen (p);
+      int len = data_item_win.content.size ();
 
       if (len > max_len)
 	max_len = len;
@@ -488,8 +519,7 @@ tui_data_item_window::rerender ()
   for (i = 1; i < width; i++)
     waddch (handle.get (), ' ');
   wmove (handle.get (), 0, 0);
-  if (content)
-    waddstr (handle.get (), content.get ());
+  waddstr (handle.get (), content.c_str ());
 
   if (highlight)
     /* We ignore the return value, casting it to void in order to avoid

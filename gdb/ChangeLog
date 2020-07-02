@@ -1,5 +1,18 @@
 2020-07-01  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.h (struct tui_data_item_window) <content>: Now a
+	std::string.
+	* tui/tui-regs.c (class tab_expansion_file): New.
+	(tab_expansion_file::write): New method.
+	(tui_register_format): Change return type.  Use
+	tab_expansion_file.
+	(tui_get_register, tui_data_window::display_registers_from)
+	(tui_data_item_window::rerender): Update.
+	* tui/tui-io.h (tui_expand_tabs): Don't declare.
+	* tui/tui-io.c (tui_expand_tabs): Remove.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_reggroup_completer): Use complete_on_enum.
 
 2020-07-01  Fangrui Song  <maskray@google.com>

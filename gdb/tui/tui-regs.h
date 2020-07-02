@@ -52,7 +52,7 @@ struct tui_data_item_window : public tui_gen_win_info
   /* The register number, or data display number.  */
   int item_no = -1;
   bool highlight = false;
-  gdb::unique_xmalloc_ptr<char> content;
+  std::string content;
 };
 
 /* The TUI registers window.  */
