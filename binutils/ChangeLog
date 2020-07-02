@@ -1,3 +1,14 @@
+2020-07-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 26028
+	* readelf.c (print_symbol): Handle truncation of symbol names.
+	(options): Add -T/--silent-truncation option.
+	(parse_args): Handle the option.
+	(print_dynamic_symbol): Correct calculation of width available to
+	display symbol name.
+	* doc/binutils.texi: Document the -T option to readelf.
+	* NEWS: Mention the new feature.
+
 2020-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention x86 NaCl target support removal.

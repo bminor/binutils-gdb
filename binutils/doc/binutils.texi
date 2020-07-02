@@ -4726,6 +4726,7 @@ readelf [@option{-a}|@option{--all}]
         [@option{-I}|@option{--histogram}]
         [@option{-v}|@option{--version}]
         [@option{-W}|@option{--wide}]
+        [@option{-T}|@option{--silent-truncation}]
         [@option{-H}|@option{--help}]
         @var{elffile}@dots{}
 @c man end
@@ -4938,6 +4939,15 @@ Don't break output lines to fit into 80 columns. By default
 64-bit ELF files, so that they fit into 80 columns. This option causes
 @command{readelf} to print each section header resp. each segment one a
 single line, which is far more readable on terminals wider than 80 columns.
+
+@item -T
+@itemx --silent-truncation
+Normally when readelf is displaying a symbol name, and it has to
+truncate the name to fit into an 80 column display, it will add a
+suffix of @code{[...]} to the name.  This command line option
+disables this behaviour, allowing 5 more characters of the name to be
+displayed and restoring the old behaviour of readelf (prior to release
+2.35).
 
 @item -H
 @itemx --help

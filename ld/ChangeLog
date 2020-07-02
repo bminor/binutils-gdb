@@ -1,3 +1,16 @@
+2020-07-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 26028
+	* testsuite/ld-powerpc/powerpc.exp: Add -T option to readelf
+	command line when running some tests.
+	* testsuite/ld-arm/arm-elf.exp: Likewise.
+	* testsuite/ld-mips-elf/mips-elf.exp: Likewise.
+	* testsuite/ld-mmix/local1.d: Likewise.
+	* testsuite/ld-mmix/local3.d: Likewise.
+	* testsuite/ld-mmix/local5.d: Likewise.
+	* testsuite/ld-mmix/local7.d: Likewise.
+	* testsuite/ld-powerpc/powerpc.exp: Likewise.
+
 2020-06-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Remove eelf_i386_nacl.c,

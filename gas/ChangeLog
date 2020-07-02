@@ -1,3 +1,14 @@
+2020-07-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 26028
+	* testsuite/gas/ia64/group-2.d: Add -T option to readelf
+	command line.
+	* testsuite/gas/ia64/unwind.d: Likewise.
+	* testsuite/gas/mmix/bspec-1.d: Likewise.
+	* testsuite/gas/mmix/bspec-2.d: Likewise.
+	* testsuite/gas/mmix/comment-1.d: Likewise.
+	* testsuite/gas/tic6x/scomm-directive-4.d: Likewise.
+
 2020-07-01  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-xc16x.c (md_apply_fix): Add FIXME.

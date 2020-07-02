@@ -32,13 +32,13 @@ if {[istarget "*-*-vxworks"]} {
 	{"VxWorks shared library test 1"
 	 "-shared --hash-style=sysv -Tvxworks1.ld" ""
 	 "-mregnames" {vxworks1-lib.s}
-	 {{readelf --relocs vxworks1-lib.rd} {objdump -dr vxworks1-lib.dd}
+         {{readelf {--relocs -T} vxworks1-lib.rd} {objdump -dr vxworks1-lib.dd}
 	  {readelf --symbols vxworks1-lib.nd} {readelf -d vxworks1-lib.td}}
 	 "libvxworks1.so"}
 	{"VxWorks executable test 1 (dynamic)" \
 	 "tmpdir/libvxworks1.so -Tvxworks1.ld -q --force-dynamic --hash-style=sysv" ""
 	 "-mregnames" {vxworks1.s}
-	 {{readelf --relocs vxworks1.rd} {objdump -dr vxworks1.dd}}
+         {{readelf {--relocs -T} vxworks1.rd} {objdump -dr vxworks1.dd}}
 	 "vxworks1"}
 	{"VxWorks executable test 2 (dynamic)" \
 	 "-Tvxworks1.ld -q --force-dynamic --hash-style=sysv" ""
@@ -58,7 +58,7 @@ if {[istarget "*-*-vxworks"]} {
 	{"VxWorks relocatable relax test"
 	 "-Tvxworks1.ld -r --relax -q --hash-style=sysv" ""
 	 "-mregnames" {vxworks-relax-2.s}
-	 {{readelf --relocs vxworks-relax-2.rd}}
+         {{readelf {--relocs -T} vxworks-relax-2.rd}}
 	 "vxworks-relax-2"}
     }
     run_ld_link_tests $ppcvxtests

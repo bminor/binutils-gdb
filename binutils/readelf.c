@@ -234,6 +234,7 @@ static bfd_boolean do_archive_index = FALSE;
 static bfd_boolean check_all = FALSE;
 static bfd_boolean is_32bit_elf = FALSE;
 static bfd_boolean decompress_dumps = FALSE;
+static bfd_boolean do_not_show_symbol_truncation = FALSE;
 
 static char *dump_ctf_parent_name;
 static char *dump_ctf_symtab_name;
@@ -533,15 +534,19 @@ print_vma (bfd_vma vma, print_mode mode)
 
    Display at most abs(WIDTH) characters, truncating as necessary, unless do_wide is true.
 
+   If truncation will happen and do_not_show_symbol_truncation is FALSE then display
+   abs(WIDTH) - 5 characters followed by "[...]".
+
    If WIDTH is negative then ensure that the output is at least (- WIDTH) characters,
    padding as necessary.
 
    Returns the number of emitted characters.  */
 
 static unsigned int
-print_symbol (signed int width, const char *symbol)
+print_symbol (signed int width, const char * symbol)
 {
   bfd_boolean extra_padding = FALSE;
+  bfd_boolean do_dots = FALSE;
   signed int num_printed = 0;
 #ifdef HAVE_MBSTATE_T
   mbstate_t state;
@@ -562,7 +567,17 @@ print_symbol (signed int width, const char *symbol)
        This simplifies the code below.  */
     width_remaining = INT_MAX;
   else
-    width_remaining = width;
+    {
+      width_remaining = width;
+      if (! do_not_show_symbol_truncation
+	  && (int) strlen (symbol) > width)
+	{
+	  width_remaining -= 5;
+	  if ((int) width_remaining < 0)
+	    width_remaining = 0;
+	  do_dots = TRUE;
+	}
+    }
 
 #ifdef HAVE_MBSTATE_T
   /* Initialise the multibyte conversion state.  */
@@ -617,6 +632,9 @@ print_symbol (signed int width, const char *symbol)
 	    symbol += (n - 1);
 	}
     }
+
+  if (do_dots)
+    num_printed += printf ("[...]");
 
   if (extra_padding && num_printed < width)
     {
@@ -4512,6 +4530,7 @@ static struct option options[] =
 
   {"version",	       no_argument, 0, 'v'},
   {"wide",	       no_argument, 0, 'W'},
+  {"silent-truncation",no_argument, 0, 'T'},
   {"help",	       no_argument, 0, 'H'},
   {0,		       no_argument, 0, 0}
 };
@@ -4579,6 +4598,7 @@ usage (FILE * stream)
   fprintf (stream, _("\
   -I --histogram         Display histogram of bucket list lengths\n\
   -W --wide              Allow output width to exceed 80 characters\n\
+  -T --silent-truncation If a symbol name is truncated, do not add a suffix [...]\n\
   @<file>                Read options from <file>\n\
   -H --help              Display this information\n\
   -v --version           Display the version number of readelf\n"));
@@ -4673,7 +4693,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
     usage (stderr);
 
   while ((c = getopt_long
-	  (argc, argv, "ADHILNR:SVWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
+	  (argc, argv, "ADHILNR:STVWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
     {
       switch (c)
 	{
@@ -4831,6 +4851,9 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  break;
 	case 'W':
 	  do_wide = TRUE;
+	  break;
+	case 'T':
+	  do_not_show_symbol_truncation = TRUE;
 	  break;
 	default:
 	  /* xgettext:c-format */
@@ -12032,7 +12055,7 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
   enum versioned_symbol_info sym_info;
   unsigned short vna_other;
   Elf_Internal_Sym *psym = symtab + si;
-
+  
   printf ("%6ld: ", si);
   print_vma (psym->st_value, LONG_HEX);
   putchar (' ');
@@ -12053,9 +12076,10 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
 	printf (" [%s] ", get_symbol_other (filedata, psym->st_other ^ vis));
     }
   printf (" %4s ", get_symbol_index_type (filedata, psym->st_shndx));
-  print_symbol (25, VALID_SYMBOL_NAME (strtab, strtab_size,
-				       psym->st_name)
-		? strtab + psym->st_name : _("<corrupt>"));
+
+  bfd_boolean is_valid = VALID_SYMBOL_NAME (strtab, strtab_size,
+					    psym->st_name);
+  const char * sstr = is_valid  ? strtab + psym->st_name : _("<corrupt>");
 
   version_string
     = get_symbol_version_string (filedata,
@@ -12063,6 +12087,22 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
 				  || section->sh_type == SHT_DYNSYM),
 				 strtab, strtab_size, si,
 				 psym, &sym_info, &vna_other);
+  
+  int len_avail = 21;
+  if (! do_wide && version_string != NULL)
+    {
+      char buffer[256];
+
+      len_avail -= sprintf (buffer, "@%s", version_string);
+
+      if (sym_info == symbol_undefined)
+	len_avail -= sprintf (buffer," (%d)", vna_other);
+      else if (sym_info != symbol_hidden)
+	len_avail -= 1;
+    }
+
+  print_symbol (len_avail, sstr);
+    
   if (version_string)
     {
       if (sym_info == symbol_undefined)

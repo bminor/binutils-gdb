@@ -1,5 +1,11 @@
 -*- text -*-
 
+* Changed readelf's display of symbol names when wide mode is not enabled.
+  If the name is too long it will be truncated and the last five characters
+  replaced with "[...]".  The old behaviour of displaying 5 more characters but
+  not indicating that truncation has happened can be restored by the use of the
+  -T or --silent-truncation options.
+
 * X86 NaCl target support is removed.
 
 * The readelf tool now has a -L or --lint or --enable-checks option which turns
