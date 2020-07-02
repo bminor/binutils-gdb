@@ -26,11 +26,6 @@
 #include "gdb_curses.h"	/* For WINDOW.  */
 #include "observable.h"
 
-struct tui_cmd_window;
-struct tui_source_window_base;
-struct tui_source_window;
-struct tui_disasm_window;
-
 /* A deleter that calls delwin.  */
 struct curses_deleter
 {
@@ -125,33 +120,12 @@ public:
 };
 
 /* Constant definitions.  */
-#define DEFAULT_TAB_LEN         8
 #define SRC_NAME                "src"
 #define CMD_NAME                "cmd"
 #define DATA_NAME               "regs"
 #define DISASSEM_NAME           "asm"
 #define STATUS_NAME		"status"
 #define MIN_WIN_HEIGHT          3
-
-/* Strings to display in the TUI status line.  */
-#define SINGLE_KEY              "(SingleKey)"
-
-enum tui_line_or_address_kind
-{
-  LOA_LINE,
-  LOA_ADDRESS
-};
-
-/* Structure describing source line or line address.  */
-struct tui_line_or_address
-{
-  enum tui_line_or_address_kind loa;
-  union
-    {
-      int line_no;
-      CORE_ADDR addr;
-    } u;
-};
 
 /* This defines information about each logical window.  */
 struct tui_win_info : public tui_gen_win_info

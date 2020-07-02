@@ -25,6 +25,23 @@
 #include "tui/tui-data.h"
 #include "symtab.h"
 
+enum tui_line_or_address_kind
+{
+  LOA_LINE,
+  LOA_ADDRESS
+};
+
+/* Structure describing source line or line address.  */
+struct tui_line_or_address
+{
+  enum tui_line_or_address_kind loa;
+  union
+    {
+      int line_no;
+      CORE_ADDR addr;
+    } u;
+};
+
 /* Flags to tell what kind of breakpoint is at current line.  */
 enum tui_bp_flag
 {

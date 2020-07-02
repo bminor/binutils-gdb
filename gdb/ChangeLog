@@ -1,5 +1,18 @@
 2020-07-01  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-stack.c (SINGLE_KEY): Move from tui-data.h
+	* tui/tui-winsource.h (enum tui_line_or_address_kind)
+	(struct tui_line_or_address): Move from tui-data.h.
+	* tui/tui-win.c (DEFAULT_TAB_LEN): Move from tui-data.h.
+	* tui/tui-data.h (DEFAULT_TAB_LEN): Move to tui-win.c.
+	(tui_cmd_window, tui_source_window_base, tui_source_window)
+	(tui_disasm_window): Don't declare.
+	(enum tui_line_or_address_kind, struct tui_line_or_address): Move
+	to tui-winsource.h.
+	(SINGLE_KEY): Move to tui-stack.c.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.h (struct tui_data_item_window) <content>: Now a
 	std::string.
 	* tui/tui-regs.c (class tab_expansion_file): New.
