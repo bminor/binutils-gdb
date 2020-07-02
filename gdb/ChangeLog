@@ -1,3 +1,19 @@
+2020-07-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* inf-loop.c (inferior_event_handler): Remove client_data param.
+	* inf-loop.h (inferior_event_handler): Likewise.
+	* infcmd.c (step_1): Adjust.
+	* infrun.c (proceed): Adjust.
+	(fetch_inferior_event): Remove client_data param.
+	(infrun_async_inferior_event_handler): Adjust.
+	* infrun.h (fetch_inferior_event): Remove `void *` param.
+	* linux-nat.c (handle_target_event): Adjust.
+	* record-btrace.c (record_btrace_handle_async_inferior_event):
+	Adjust.
+	* record-full.c (record_full_async_inferior_event_handler):
+	Adjust.
+	* remote.c (remote_async_inferior_event_handler): Adjust.
+
 2020-07-01  Tom Tromey  <tom@tromey.com>
 
 	* tui/tui-data.h (struct tui_win_info) <name>: Now pure virtual.

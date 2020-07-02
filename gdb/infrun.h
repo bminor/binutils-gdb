@@ -130,7 +130,7 @@ extern void stop_all_threads (void);
 
 extern void prepare_for_detach (void);
 
-extern void fetch_inferior_event (void *);
+extern void fetch_inferior_event ();
 
 extern void init_wait_for_inferior (void);
 

@@ -2968,7 +2968,7 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal)
       /* The target for some reason decided not to resume.  */
       normal_stop ();
       if (target_can_async_p ())
-	inferior_event_handler (INF_EXEC_COMPLETE, NULL);
+	inferior_event_handler (INF_EXEC_COMPLETE);
       return;
     }
 
@@ -3933,7 +3933,7 @@ all_uis_on_sync_execution_starting (void)
    necessary cleanups.  */
 
 void
-fetch_inferior_event (void *client_data)
+fetch_inferior_event ()
 {
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
@@ -4050,7 +4050,7 @@ fetch_inferior_event (void *client_data)
 
 	    if (!proceeded)
 	      {
-		inferior_event_handler (INF_EXEC_COMPLETE, NULL);
+		inferior_event_handler (INF_EXEC_COMPLETE);
 		cmd_done = 1;
 	      }
 
@@ -9422,7 +9422,7 @@ static const struct internalvar_funcs siginfo_funcs =
 static void
 infrun_async_inferior_event_handler (gdb_client_data data)
 {
-  inferior_event_handler (INF_REG_EVENT, NULL);
+  inferior_event_handler (INF_REG_EVENT);
 }
 
 void _initialize_infrun ();
