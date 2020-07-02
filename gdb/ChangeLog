@@ -1,5 +1,12 @@
 2020-07-01  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-stack.h (struct tui_locator_window): Derive from
+	tui_win_info.
+	<do_scroll_horizontal, do_scroll_vertical>: New methods.
+	<can_box>: New method.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.h (struct tui_locator_window): Remove body.
 
 2020-07-01  Tom Tromey  <tom@tromey.com>
