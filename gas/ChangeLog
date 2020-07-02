@@ -1,3 +1,7 @@
+2020-07-02  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/all/fill-1.d: Skip for MeP targets.
+
 2020-07-02  Alex Coplan  <alex.coplan@arm.com>
 
 	* config/tc-aarch64.c (reg_name_p): Fix cast so that we don't
