@@ -259,7 +259,7 @@ tui_data_window::show_register_group (struct reggroup *group,
       data_item_win = &m_regs_content[pos];
       if (!refresh_values_only)
 	{
-	  data_item_win->item_no = regnum;
+	  data_item_win->regno = regnum;
 	  data_item_win->highlight = false;
 	}
       tui_get_register (frame, data_item_win, regnum, 0);
@@ -486,7 +486,7 @@ tui_data_window::check_register_values (struct frame_info *frame)
 	  was_hilighted = data_item_win.highlight;
 
 	  tui_get_register (frame, &data_item_win,
-			    data_item_win.item_no,
+			    data_item_win.regno,
 			    &data_item_win.highlight);
 
 	  if (data_item_win.highlight || was_hilighted)
