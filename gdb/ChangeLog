@@ -1,5 +1,10 @@
 2020-07-01  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_data_window::show_register_group): Remove
+	useless "if".
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_data_window::show_register_group): Update.
 	* tui/tui-regs.h (struct tui_data_item_window) <name>: Remove.
 

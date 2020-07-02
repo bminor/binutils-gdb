@@ -257,15 +257,12 @@ tui_data_window::show_register_group (struct reggroup *group,
 	continue;
 
       data_item_win = &m_regs_content[pos];
-      if (data_item_win)
+      if (!refresh_values_only)
 	{
-	  if (!refresh_values_only)
-	    {
-	      data_item_win->item_no = regnum;
-	      data_item_win->highlight = false;
-	    }
-	  tui_get_register (frame, data_item_win, regnum, 0);
+	  data_item_win->item_no = regnum;
+	  data_item_win->highlight = false;
 	}
+      tui_get_register (frame, data_item_win, regnum, 0);
       pos++;
     }
 }
