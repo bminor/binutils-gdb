@@ -1,5 +1,9 @@
 2020-07-01  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-stack.h (struct tui_locator_window): Remove body.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_data_window::display_registers_from)
 	(tui_data_window::display_registers_from)
 	(tui_data_window::first_data_item_displayed)

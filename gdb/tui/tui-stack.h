@@ -30,11 +30,7 @@ struct frame_info;
 
 struct tui_locator_window : public tui_gen_win_info
 {
-  tui_locator_window ()
-  {
-    full_name[0] = 0;
-    proc_name[0] = 0;
-  }
+  tui_locator_window () = default;
 
   int max_height () const override
   {
