@@ -272,8 +272,6 @@ tui_data_window::show_register_group (struct reggroup *group,
 void
 tui_data_window::display_registers_from (int start_element_no)
 {
-  int j, item_win_width, cur_y;
-
   int max_len = 0;
   for (auto &&data_item_win : m_regs_content)
     {
@@ -282,26 +280,28 @@ tui_data_window::display_registers_from (int start_element_no)
       if (len > max_len)
 	max_len = len;
     }
-  item_win_width = max_len + 1;
+  m_item_width = max_len + 1;
   int i = start_element_no;
 
-  m_regs_column_count = (width - 2) / item_win_width;
+  m_regs_column_count = (width - 2) / m_item_width;
   if (m_regs_column_count == 0)
     m_regs_column_count = 1;
-  item_win_width = (width - 2) / m_regs_column_count;
+  m_item_width = (width - 2) / m_regs_column_count;
 
   /* Now create each data "sub" window, and write the display into
      it.  */
-  cur_y = 1;
+  int cur_y = 1;
   while (i < m_regs_content.size () && cur_y <= height - 2)
     {
-      for (j = 0;
+      for (int j = 0;
 	   j < m_regs_column_count && i < m_regs_content.size ();
 	   j++)
 	{
 	  /* Create the window if necessary.  */
-	  m_regs_content[i].resize (1, item_win_width,
-				    x + (item_win_width * j) + 1, y + cur_y);
+	  m_regs_content[i].x = (m_item_width * j) + 1;
+	  m_regs_content[i].y = cur_y;
+	  m_regs_content[i].visible = true;
+	  m_regs_content[i].rerender (handle.get (), m_item_width);
 	  i++;		/* Next register.  */
 	}
       cur_y++;		/* Next row.  */
@@ -372,10 +372,7 @@ tui_data_window::first_data_item_displayed ()
 {
   for (int i = 0; i < m_regs_content.size (); i++)
     {
-      struct tui_gen_win_info *data_item_win;
-
-      data_item_win = &m_regs_content[i];
-      if (data_item_win->is_visible ())
+      if (m_regs_content[i].visible)
 	return i;
     }
 
@@ -387,8 +384,8 @@ tui_data_window::first_data_item_displayed ()
 void
 tui_data_window::delete_data_content_windows ()
 {
-  for (auto &&win : m_regs_content)
-    win.handle.reset (nullptr);
+  for (auto &win : m_regs_content)
+    win.visible = false;
 }
 
 
@@ -451,24 +448,6 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
     }
 }
 
-/* See tui-regs.h.  */
-
-void
-tui_data_window::refresh_window ()
-{
-  tui_gen_win_info::refresh_window ();
-  for (auto &&win : m_regs_content)
-    win.refresh_window ();
-}
-
-void
-tui_data_window::no_refresh ()
-{
-  tui_gen_win_info::no_refresh ();
-  for (auto &&win : m_regs_content)
-    win.no_refresh ();
-}
-
 /* This function check all displayed registers for changes in values,
    given a particular frame.  If the values have changed, they are
    updated with the new value and highlighted.  */
@@ -490,32 +469,28 @@ tui_data_window::check_register_values (struct frame_info *frame)
 			    &data_item_win.highlight);
 
 	  if (data_item_win.highlight || was_hilighted)
-	    data_item_win.rerender ();
+	    data_item_win.rerender (handle.get (), m_item_width);
 	}
     }
+
+  tui_wrefresh (handle.get ());
 }
 
 /* Display a register in a window.  If hilite is TRUE, then the value
    will be displayed in reverse video.  */
 void
-tui_data_item_window::rerender ()
+tui_data_item_window::rerender (WINDOW *handle, int field_width)
 {
-  int i;
-
-  scrollok (handle.get (), FALSE);
   if (highlight)
     /* We ignore the return value, casting it to void in order to avoid
        a compiler warning.  The warning itself was introduced by a patch
        to ncurses 5.7 dated 2009-08-29, changing this macro to expand
        to code that causes the compiler to generate an unused-value
        warning.  */
-    (void) wstandout (handle.get ());
+    (void) wstandout (handle);
       
-  wmove (handle.get (), 0, 0);
-  for (i = 1; i < width; i++)
-    waddch (handle.get (), ' ');
-  wmove (handle.get (), 0, 0);
-  waddstr (handle.get (), content.c_str ());
+  mvwaddnstr (handle, y, x, content.c_str (), field_width - 1);
+  waddstr (handle, n_spaces (field_width - content.size ()));
 
   if (highlight)
     /* We ignore the return value, casting it to void in order to avoid
@@ -523,21 +498,7 @@ tui_data_item_window::rerender ()
        to ncurses 5.7 dated 2009-08-29, changing this macro to expand
        to code that causes the compiler to generate an unused-value
        warning.  */
-    (void) wstandend (handle.get ());
-  refresh_window ();
-}
-
-void
-tui_data_item_window::refresh_window ()
-{
-  if (handle != nullptr)
-    {
-      /* This seems to be needed because the data items are nested
-	 windows, which according to the ncurses man pages aren't well
-	 supported.  */
-      touchwin (handle.get ());
-      tui_wrefresh (handle.get ());
-    }
+    (void) wstandend (handle);
 }
 
 /* Helper for "tui reg next", wraps a call to REGGROUP_NEXT, but adds wrap

@@ -1,5 +1,26 @@
 2020-07-01  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-regs.c (tui_data_window::display_registers_from)
+	(tui_data_window::display_registers_from)
+	(tui_data_window::first_data_item_displayed)
+	(tui_data_window::delete_data_content_windows): Update.
+	(tui_data_window::refresh_window, tui_data_window::no_refresh):
+	Remove.
+	(tui_data_window::check_register_values): Update.
+	(tui_data_item_window::rerender): Add parameters.  Update.
+	(tui_data_item_window::refresh_window): Remove.
+	* tui/tui-data.h (struct tui_gen_win_info) <no_refresh>: No longer
+	virtual.
+	* tui/tui-regs.h (struct tui_data_item_window): Don't derive from
+	tui_gen_win_info.
+	<refresh_window, max_height, min_height>: Remove.
+	<rerender>: Add parameters.
+	<x, y, visible>: New members.
+	(struct tui_data_window) <refresh_window, no_refresh>: Remove.
+	<m_item_width>: New member.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-regs.c (tui_data_window::show_register_group)
 	(tui_data_window::check_register_values): Update.
 	* tui/tui-regs.h (struct tui_data_item_window) <regno>: Rename

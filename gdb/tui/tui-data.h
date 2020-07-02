@@ -102,7 +102,7 @@ public:
   }
 
   /* Disable output until the next call to doupdate.  */
-  virtual void no_refresh ()
+  void no_refresh ()
   {
     if (handle != nullptr)
       wnoutrefresh (handle.get ());
