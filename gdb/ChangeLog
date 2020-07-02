@@ -1,5 +1,26 @@
 2020-07-01  Tom Tromey  <tom@tromey.com>
 
+	* tui/tui-wingeneral.c (tui_win_info::refresh_window): Move from
+	tui_gen_win_info.
+	(tui_win_info::make_window): Merge with
+	tui_gen_win_info::make_window.
+	(tui_win_info::make_visible): Move from tui_gen_win_info.
+	* tui/tui-win.c (tui_win_info::max_width): Move from
+	tui_gen_win_info.
+	* tui/tui-layout.h (class tui_layout_window) <m_window>: Change
+	type.
+	<window_factory>: Likewise.
+	* tui/tui-layout.c (tui_win_info::resize): Move from
+	tui_gen_win_info.
+	(make_standard_window): Change return type.
+	(get_locator_window, tui_get_window_by_name): Likewise.
+	(tui_layout_window::apply): Remove a cast.
+	* tui/tui-data.h (MIN_WIN_HEIGHT): Move earlier.
+	(struct tui_win_info): Merge with tui_gen_win_info.
+	(struct tui_gen_win_info): Remove.
+
+2020-07-01  Tom Tromey  <tom@tromey.com>
+
 	* tui/tui-stack.h (struct tui_locator_window): Derive from
 	tui_win_info.
 	<do_scroll_horizontal, do_scroll_vertical>: New methods.

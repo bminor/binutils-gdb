@@ -921,7 +921,7 @@ tui_win_info::max_height () const
 /* See tui-data.h.  */
 
 int
-tui_gen_win_info::max_width () const
+tui_win_info::max_width () const
 {
   return tui_term_width () - 2;
 }

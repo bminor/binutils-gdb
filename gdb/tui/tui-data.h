@@ -35,27 +35,25 @@ struct curses_deleter
   }
 };
 
+#define MIN_WIN_HEIGHT          3
+
 /* Generic window information.  */
-struct tui_gen_win_info
+struct tui_win_info
 {
 protected:
 
-  tui_gen_win_info () = default;
+  tui_win_info () = default;
+  DISABLE_COPY_AND_ASSIGN (tui_win_info);
 
   /* This is called after the window is resized, and should update the
      window's contents.  */
-  virtual void rerender ()
-  {
-  }
+  virtual void rerender ();
 
   virtual void make_window ();
 
 public:
-  tui_gen_win_info (tui_gen_win_info &&) = default;
-
-  virtual ~tui_gen_win_info ()
-  {
-  }
+  tui_win_info (tui_win_info &&) = default;
+  virtual ~tui_win_info () = default;
 
   /* Call to refresh this window.  */
   virtual void refresh_window ();
@@ -70,10 +68,13 @@ public:
   }
 
   /* Compute the maximum height of this window.  */
-  virtual int max_height () const = 0;
+  virtual int max_height () const;
 
   /* Compute the minimum height of this window.  */
-  virtual int min_height () const = 0;
+  virtual int min_height () const
+  {
+    return MIN_WIN_HEIGHT;
+  }
 
   /* Compute the maximum width of this window.  */
   int max_width () const;
@@ -87,7 +88,7 @@ public:
   /* Return true if this window can be boxed.  */
   virtual bool can_box () const
   {
-    return false;
+    return true;
   }
 
   /* Resize this window.  The parameters are used to set the window's
@@ -106,58 +107,6 @@ public:
   {
     if (handle != nullptr)
       wnoutrefresh (handle.get ());
-  }
-
-  /* Window handle.  */
-  std::unique_ptr<WINDOW, curses_deleter> handle;
-  /* Window width.  */
-  int width = 0;
-  /* Window height.  */
-  int height = 0;
-  /* Origin of window.  */
-  int x = 0;
-  int y = 0;
-};
-
-/* Constant definitions.  */
-#define SRC_NAME                "src"
-#define CMD_NAME                "cmd"
-#define DATA_NAME               "regs"
-#define DISASSEM_NAME           "asm"
-#define STATUS_NAME		"status"
-#define MIN_WIN_HEIGHT          3
-
-/* This defines information about each logical window.  */
-struct tui_win_info : public tui_gen_win_info
-{
-protected:
-
-  tui_win_info () = default;
-  DISABLE_COPY_AND_ASSIGN (tui_win_info);
-
-  /* Scroll the contents vertically.  This is only called via
-     forward_scroll and backward_scroll.  */
-  virtual void do_scroll_vertical (int num_to_scroll) = 0;
-
-  /* Scroll the contents horizontally.  This is only called via
-     left_scroll and right_scroll.  */
-  virtual void do_scroll_horizontal (int num_to_scroll) = 0;
-
-  void rerender () override;
-
-  void make_window () override;
-
-public:
-
-  ~tui_win_info () override
-  {
-  }
-
-  int max_height () const override;
-
-  int min_height () const override
-  {
-    return MIN_WIN_HEIGHT;
   }
 
   /* Called after the tab width has been changed.  */
@@ -185,20 +134,41 @@ public:
     return true;
   }
 
-  bool can_box () const override
-  {
-    return true;
-  }
-
   void check_and_display_highlight_if_needed ();
+
+  /* Window handle.  */
+  std::unique_ptr<WINDOW, curses_deleter> handle;
+  /* Window width.  */
+  int width = 0;
+  /* Window height.  */
+  int height = 0;
+  /* Origin of window.  */
+  int x = 0;
+  int y = 0;
 
   /* Window title to display.  */
   std::string title;
 
   /* Is this window highlighted?  */
   bool is_highlighted = false;
+
+protected:
+
+  /* Scroll the contents vertically.  This is only called via
+     forward_scroll and backward_scroll.  */
+  virtual void do_scroll_vertical (int num_to_scroll) = 0;
+
+  /* Scroll the contents horizontally.  This is only called via
+     left_scroll and right_scroll.  */
+  virtual void do_scroll_horizontal (int num_to_scroll) = 0;
 };
 
+/* Constant definitions.  */
+#define SRC_NAME                "src"
+#define CMD_NAME                "cmd"
+#define DATA_NAME               "regs"
+#define DISASSEM_NAME           "asm"
+#define STATUS_NAME		"status"
 
 /* Global Data.  */
 extern struct tui_win_info *tui_win_list[MAX_MAJOR_WINDOWS];

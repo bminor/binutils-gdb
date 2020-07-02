@@ -71,7 +71,7 @@ tui_wrefresh (WINDOW *win)
 /* See tui-data.h.  */
 
 void
-tui_gen_win_info::refresh_window ()
+tui_win_info::refresh_window ()
 {
   if (handle != NULL)
     tui_wrefresh (handle.get ());
@@ -166,9 +166,8 @@ tui_win_info::check_and_display_highlight_if_needed ()
     }
 }
 
-
 void
-tui_gen_win_info::make_window ()
+tui_win_info::make_window ()
 {
   handle.reset (newwin (height, width, y, x));
   if (handle != NULL)
@@ -176,22 +175,16 @@ tui_gen_win_info::make_window ()
       if (suppress_output)
 	wnoutrefresh (handle.get ());
       scrollok (handle.get (), TRUE);
+      if (can_box ())
+	box_win (this, false);
     }
-}
-
-void
-tui_win_info::make_window ()
-{
-  tui_gen_win_info::make_window ();
-  if (handle != NULL && can_box ())
-    box_win (this, false);
 }
 
 /* We can't really make windows visible, or invisible.  So we have to
    delete the entire window when making it visible, and create it
    again when making it visible.  */
 void
-tui_gen_win_info::make_visible (bool visible)
+tui_win_info::make_visible (bool visible)
 {
   if (is_visible () == visible)
     return;

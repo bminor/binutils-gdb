@@ -152,7 +152,7 @@ private:
 
   /* When a layout is applied, this is updated to point to the window
      object.  */
-  tui_gen_win_info *m_window = nullptr;
+  tui_win_info *m_window = nullptr;
 };
 
 /* A TUI layout that holds other layouts.  */
@@ -251,7 +251,7 @@ extern void tui_adjust_window_height (struct tui_win_info *win,
 
 /* The type of a function that is used to create a TUI window.  */
 
-typedef std::function<tui_gen_win_info * (const char *name)> window_factory;
+typedef std::function<tui_win_info * (const char *name)> window_factory;
 
 /* Register a new TUI window type.  NAME is the name of the window
    type.  FACTORY is a function that can be called to instantiate the

@@ -285,8 +285,8 @@ extract_display_start_addr (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 }
 
 void
-tui_gen_win_info::resize (int height_, int width_,
-			  int origin_x_, int origin_y_)
+tui_win_info::resize (int height_, int width_,
+		      int origin_x_, int origin_y_)
 {
   if (width == width_ && height == height_
       && x == origin_x_ && y == origin_y_
@@ -321,7 +321,7 @@ tui_gen_win_info::resize (int height_, int width_,
    windows.  */
 
 template<enum tui_win_type V, class T>
-static tui_gen_win_info *
+static tui_win_info *
 make_standard_window (const char *)
 {
   if (tui_win_list[V] == nullptr)
@@ -332,7 +332,7 @@ make_standard_window (const char *)
 /* Helper function to wrap tui_locator_win_info_ptr for
    tui_get_window_by_name.  */
 
-static tui_gen_win_info *
+static tui_win_info *
 get_locator_window (const char *)
 {
   return tui_locator_win_info_ptr ();
@@ -349,7 +349,7 @@ static std::unordered_map<std::string, window_factory> *known_window_types;
 
 /* Helper function that returns a TUI window, given its name.  */
 
-static tui_gen_win_info *
+static tui_win_info *
 tui_get_window_by_name (const std::string &name)
 {
   for (tui_win_info *window : saved_tui_windows)
@@ -360,7 +360,7 @@ tui_get_window_by_name (const std::string &name)
   if (iter == known_window_types->end ())
     error (_("Unknown window type \"%s\""), name.c_str ());
 
-  tui_gen_win_info *result = iter->second (name.c_str ());
+  tui_win_info *result = iter->second (name.c_str ());
   if (result == nullptr)
     error (_("Could not create window \"%s\""), name.c_str ());
   return result;
@@ -422,8 +422,7 @@ tui_layout_window::apply (int x_, int y_, int width_, int height_)
   height = height_;
   gdb_assert (m_window != nullptr);
   m_window->resize (height, width, x, y);
-  if (dynamic_cast<tui_win_info *> (m_window) != nullptr)
-    tui_windows.push_back ((tui_win_info *) m_window);
+  tui_windows.push_back (m_window);
 }
 
 /* See tui-layout.h.  */
