@@ -1,5 +1,10 @@
 2020-07-03  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/charset.c (init_string): Change all char parameters to
+	unsigned char parameters.
+
+2020-07-03  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/call-sc.exp (start_scalars_test): Use
 	prepare_for_testing and don't try compiling with -DNO_PROTOTYPES.
 	* gdb.base/overlays.c: Remove references to PARAMS.
