@@ -54,6 +54,8 @@ extern lf *lf_open
    lf_file_references file_references,
    lf_file_type type, const char *program);
 
+extern lf_file_type lf_get_file_type (const lf *file);
+
 extern void lf_close (lf *file);
 
 
