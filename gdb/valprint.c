@@ -46,6 +46,8 @@
 #include "gdbsupport/selftest.h"
 #include "selftest-arch.h"
 
+#include "gdbsupport/capability.h"
+
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
 
@@ -491,6 +493,29 @@ generic_value_print_ptr (struct value *val, struct ui_file *stream,
     }
 }
 
+/* generic_value_print helper for TYPE_CODE_CAPABILITY.  */
+
+static void
+generic_value_print_capability (struct value *val, struct ui_file *stream,
+				const struct value_print_options *options)
+{
+  struct type *type = check_typedef (value_type (val));
+  int length = TYPE_LENGTH (type);
+  const gdb_byte *contents = value_contents_for_printing (val).data ();
+  enum bfd_endian byte_order = type_byte_order (type);
+
+  if (options->format && options->format == 'x')
+      print_hex_chars (stream, contents, length, byte_order, 0);
+  else
+    {
+      uint128_t dummy_cap;
+      memcpy (&dummy_cap, contents, length);
+      capability cap (dummy_cap, false);
+      fprintf_filtered (stream, "%s", cap.to_str ().c_str ());
+    }
+
+  return;
+}
 
 /* Print '@' followed by the address contained in ADDRESS_BUFFER.  */
 
@@ -909,6 +934,10 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
 
     case TYPE_CODE_PTR:
       generic_value_print_ptr (val, stream, options);
+      break;
+
+    case TYPE_CODE_CAPABILITY:
+      generic_value_print_capability (val, stream, options);
       break;
 
     case TYPE_CODE_REF:
