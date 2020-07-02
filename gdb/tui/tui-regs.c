@@ -631,18 +631,11 @@ tui_reggroup_completer (struct cmd_list_element *ignore,
 			completion_tracker &tracker,
 			const char *text, const char *word)
 {
-  static const char *extra[] = { "next", "prev", NULL };
-  size_t len = strlen (word);
-  const char **tmp;
+  static const char * const extra[] = { "next", "prev", NULL };
 
   reggroup_completer (ignore, tracker, text, word);
 
-  /* XXXX use complete_on_enum instead?  */
-  for (tmp = extra; *tmp != NULL; ++tmp)
-    {
-      if (strncmp (word, *tmp, len) == 0)
-	tracker.add_completion (make_unique_xstrdup (*tmp));
-    }
+  complete_on_enum (tracker, extra, text, word);
 }
 
 void _initialize_tui_regs ();
