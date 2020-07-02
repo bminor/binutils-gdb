@@ -2214,6 +2214,8 @@ extern struct type *init_decfloat_type (struct objfile *, int, const char *);
 extern struct type *init_complex_type (const char *, struct type *);
 extern struct type *init_pointer_type (struct objfile *, int, const char *,
 				       struct type *);
+extern struct type *init_capability_type (struct objfile *objfile, int bit,
+					  bool unsigned_p, const char *name);
 
 /* Helper functions to construct architecture-owned types.  */
 extern struct type *arch_type (struct gdbarch *, enum type_code, int,
@@ -2229,6 +2231,8 @@ extern struct type *arch_float_type (struct gdbarch *, int, const char *,
 extern struct type *arch_decfloat_type (struct gdbarch *, int, const char *);
 extern struct type *arch_pointer_type (struct gdbarch *, int, const char *,
 				       struct type *);
+extern struct type *arch_capability_type (struct gdbarch *gdbarch, int bit,
+					  bool unsigned_p, const char *name);
 
 /* Helper functions to construct a struct or record type.  An
    initially empty type is created using arch_composite_type().

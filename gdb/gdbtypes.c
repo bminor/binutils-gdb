@@ -3341,6 +3341,22 @@ init_pointer_type (struct objfile *objfile,
   return t;
 }
 
+/* Allocate a TYPE_CODE_CAPABILITY type structure associated with OBJFILE.
+   BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
+   the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
+
+struct type *
+init_capability_type (struct objfile *objfile,
+		      int bit, bool unsigned_p, const char *name)
+{
+  struct type *t;
+
+  t = init_type (objfile, TYPE_CODE_CAPABILITY, bit, name);
+  t->set_is_unsigned (unsigned_p);
+
+  return t;
+}
+
 /* See gdbtypes.h.  */
 
 unsigned
@@ -3370,6 +3386,7 @@ type_align (struct type *type)
   switch (type->code ())
     {
     case TYPE_CODE_PTR:
+    case TYPE_CODE_CAPABILITY:
     case TYPE_CODE_FUNC:
     case TYPE_CODE_FLAGS:
     case TYPE_CODE_INT:
@@ -5014,6 +5031,9 @@ recursive_dump_type (struct type *type, int spaces)
     case TYPE_CODE_NAMESPACE:
       printf_filtered ("(TYPE_CODE_NAMESPACE)");
       break;
+    case TYPE_CODE_CAPABILITY:
+      printf_filtered ("(TYPE_CODE_CAPABILITY)");
+      break;
     default:
       printf_filtered ("(UNKNOWN TYPE CODE)");
       break;
@@ -5603,6 +5623,21 @@ arch_pointer_type (struct gdbarch *gdbarch,
   return t;
 }
 
+/* Allocate a TYPE_CODE_CAPABILITY type structure associated with GDBARCH.
+   BIT is the type size in bits.  If UNSIGNED_P is non-zero, set
+   the type's TYPE_UNSIGNED flag.  NAME is the type name.  */
+
+struct type *
+arch_capability_type (struct gdbarch *gdbarch,
+		      int bit, bool unsigned_p, const char *name)
+{
+  struct type *t;
+
+  t = arch_type (gdbarch, TYPE_CODE_CAPABILITY, bit, name);
+  t->set_is_unsigned (unsigned_p);
+  return t;
+}
+
 /* Allocate a TYPE_CODE_FLAGS type structure associated with GDBARCH.
    NAME is the type name.  BIT is the size of the flag word in bits.  */
 
@@ -5890,9 +5925,9 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 
   /* Capability types.  */
   builtin_type->builtin_intcap_t
-    = arch_integer_type (gdbarch, 128, 0, "__intcap_t");
+    = arch_capability_type (gdbarch, 128, 0, "__intcap_t");
   builtin_type->builtin_uintcap_t
-    = arch_integer_type (gdbarch, 128, 1, "__uintcap_t");
+    = arch_capability_type (gdbarch, 128, 1, "__uintcap_t");
 
   /* Capability pointer types.  */
   builtin_type->builtin_data_addr_capability

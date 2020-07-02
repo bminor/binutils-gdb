@@ -1,5 +1,23 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* c-typeprint.c (c_type_print_varspec_prefix)
+	(c_type_print_varspec_suffix): Handle capability type.
+	* dwarf2/read.c (read_base_type): Call init_capability_type for
+	capabilities.
+	* gdbtypes.c (init_capability_type): New function.
+	(type_align): Handle capability type.
+	(recursive_dump_type): Likewise.
+	(arch_capability_type): New function.
+	(gdbtypes_post_init): Call arch_capability_type for capability
+	types.
+	* gdbtypes.h (init_capability_type, arch_capability_type):  New
+	prototypes.
+	* valprint.c: Include gdbsupport/capability.h.
+	(generic_value_print_capability): New function.
+	(generic_value_print): Handle capability types.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* aarch64-tdep.c (aarch64_address_class_type_flags)
 	(aarch64_address_class_type_flags_to_name)
 	(aarch64_address_class_name_to_type_flags): New functions.
