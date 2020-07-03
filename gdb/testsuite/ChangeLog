@@ -1,3 +1,8 @@
+2020-07-03  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/m32rovly.c: Delete.
+	* gdb.base/ovlymgr.c: Remove all code guarded by __D10V__.
+
 2020-06-30  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.python/py-breakpoint.exp: use gdb_test_multiline instead
