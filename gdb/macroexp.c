@@ -128,15 +128,14 @@ struct macro_buffer
       xfree (text);
   }
 
-  /* Release the text of the buffer to the caller, which is now
-     responsible for freeing it.  */
-  ATTRIBUTE_UNUSED_RESULT char *release ()
+  /* Release the text of the buffer to the caller.  */
+  gdb::unique_xmalloc_ptr<char> release ()
   {
     gdb_assert (! shared);
     gdb_assert (size);
     char *result = text;
     text = NULL;
-    return result;
+    return gdb::unique_xmalloc_ptr<char> (result);
   }
 
   /* Resize the buffer to be at least N bytes long.  Raise an error if
@@ -708,7 +707,7 @@ macro_stringify (const char *str)
   stringify (&buffer, str, len);
   buffer.appendc ('\0');
 
-  return buffer.release ();
+  return buffer.release ().release ();
 }
 
 
@@ -1429,7 +1428,7 @@ macro_expand (const char *source, const macro_scope &scope)
 
   dest.appendc ('\0');
 
-  return gdb::unique_xmalloc_ptr<char> (dest.release ());
+  return dest.release ();
 }
 
 
@@ -1439,8 +1438,7 @@ macro_expand_once (const char *source, const macro_scope &scope)
   error (_("Expand-once not implemented yet."));
 }
 
-
-char *
+gdb::unique_xmalloc_ptr<char>
 macro_expand_next (const char **lexptr, const macro_scope &scope)
 {
   struct macro_buffer tok;
@@ -1454,7 +1452,7 @@ macro_expand_next (const char **lexptr, const macro_scope &scope)
 
   /* Get the text's first preprocessing token.  */
   if (! get_token (&tok, &src))
-    return 0;
+    return nullptr;
 
   /* If it's a macro invocation, expand it.  */
   if (maybe_expand (&dest, &tok, &src, 0, scope))
@@ -1469,6 +1467,6 @@ macro_expand_next (const char **lexptr, const macro_scope &scope)
   else
     {
       /* It wasn't a macro invocation.  */
-      return 0;
+      return nullptr;
     }
 }

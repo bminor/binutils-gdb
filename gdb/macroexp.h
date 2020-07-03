@@ -68,7 +68,8 @@ gdb::unique_xmalloc_ptr<char> macro_expand_once (const char *source,
    much have to do tokenization to find the end of the string that
    needs to be macro-expanded.  Our C/C++ tokenizer isn't really
    designed to be called by anything but the yacc parser engine.  */
-char *macro_expand_next (const char **lexptr, const macro_scope &scope);
+gdb::unique_xmalloc_ptr<char> macro_expand_next (const char **lexptr,
+						 const macro_scope &scope);
 
 /* Functions to classify characters according to cpp rules.  */
 

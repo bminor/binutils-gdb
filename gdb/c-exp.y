@@ -2551,17 +2551,13 @@ static const struct token ident_tokens[] =
 
 
 static void
-scan_macro_expansion (char *expansion)
+scan_macro_expansion (const char *expansion)
 {
-  const char *copy;
-
   /* We'd better not be trying to push the stack twice.  */
   gdb_assert (! cpstate->macro_original_text);
 
-  /* Copy to the obstack, and then free the intermediate
-     expansion.  */
-  copy = obstack_strdup (&cpstate->expansion_obstack, expansion);
-  xfree (expansion);
+  /* Copy to the obstack.  */
+  const char *copy = obstack_strdup (&cpstate->expansion_obstack, expansion);
 
   /* Save the old lexptr value, so we can return to it when we're done
      parsing the expanded text.  */
@@ -2631,11 +2627,11 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
   /* Check if this is a macro invocation that we need to expand.  */
   if (! scanning_macro_expansion ())
     {
-      char *expanded = macro_expand_next (&pstate->lexptr,
-					  *expression_macro_scope);
+      gdb::unique_xmalloc_ptr<char> expanded
+	= macro_expand_next (&pstate->lexptr, *expression_macro_scope);
 
-      if (expanded)
-        scan_macro_expansion (expanded);
+      if (expanded != nullptr)
+        scan_macro_expansion (expanded.get ());
     }
 
   pstate->prev_lexptr = pstate->lexptr;
