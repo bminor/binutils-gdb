@@ -319,11 +319,6 @@ static const struct op_print objc_op_print_tab[] =
     {NULL, OP_NULL, PREC_NULL, 0}
 };
 
-static const char * const objc_extensions[] =
-{
-  ".m", NULL
-};
-
 /* Constant data representing the Objective-C language.  */
 
 extern const struct language_data objc_language_data =
@@ -333,7 +328,6 @@ extern const struct language_data objc_language_data =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
-  objc_extensions,
   &exp_descriptor_standard,
   false,			/* la_store_sym_names_in_linkage_form_p */
   objc_op_print_tab,		/* Expression operators for printing */
@@ -360,6 +354,14 @@ public:
 
   const char *natural_name () const override
   { return "Objective-C"; }
+
+  /* See language.h.  */
+
+  const std::vector<const char *> &filename_extensions () const override
+  {
+    static const std::vector<const char *> extensions = { ".m" };
+    return extensions;
+  }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,

@@ -13704,11 +13704,6 @@ ada_get_symbol_name_matcher (const lookup_name_info &lookup_name)
     }
 }
 
-static const char * const ada_extensions[] =
-{
-  ".adb", ".ads", ".a", ".ada", ".dg", NULL
-};
-
 /* Constant data that describes the Ada language.  */
 
 extern const struct language_data ada_language_data =
@@ -13719,7 +13714,6 @@ extern const struct language_data ada_language_data =
                                    that's not quite what this means.  */
   array_row_major,
   macro_expansion_no,
-  ada_extensions,
   &ada_exp_descriptor,
   true,                         /* la_store_sym_names_in_linkage_form_p */
   ada_op_print_tab,             /* expression operators for printing */
@@ -13746,6 +13740,15 @@ public:
 
   const char *natural_name () const override
   { return "Ada"; }
+
+  /* See language.h.  */
+
+  const std::vector<const char *> &filename_extensions () const override
+  {
+    static const std::vector<const char *> extensions
+      = { ".adb", ".ads", ".a", ".ada", ".dg" };
+    return extensions;
+  }
 
   /* Print an array element index using the Ada syntax.  */
 

@@ -1897,11 +1897,6 @@ static const struct exp_descriptor exp_descriptor_rust =
   rust_evaluate_subexp
 };
 
-static const char * const rust_extensions[] =
-{
-  ".rs", NULL
-};
-
 /* Constant data representing the Rust language.  */
 
 extern const struct language_data rust_language_data =
@@ -1911,7 +1906,6 @@ extern const struct language_data rust_language_data =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
-  rust_extensions,
   &exp_descriptor_rust,
   false,			/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
@@ -1938,6 +1932,14 @@ public:
 
   const char *natural_name () const override
   { return "Rust"; }
+
+  /* See language.h.  */
+
+  const std::vector<const char *> &filename_extensions () const override
+  {
+    static const std::vector<const char *> extensions = { ".rs" };
+    return extensions;
+  }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,

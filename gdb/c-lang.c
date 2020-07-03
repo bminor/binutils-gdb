@@ -871,11 +871,6 @@ const struct exp_descriptor exp_descriptor_c =
   evaluate_subexp_c
 };
 
-static const char * const c_extensions[] =
-{
-  ".c", NULL
-};
-
 /* Constant data that describes the C language.  */
 
 extern const struct language_data c_language_data =
@@ -885,7 +880,6 @@ extern const struct language_data c_language_data =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
-  c_extensions,
   &exp_descriptor_c,
   true,				/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
@@ -912,6 +906,14 @@ public:
 
   const char *natural_name () const override
   { return "C"; }
+
+  /* See language.h.  */
+
+  const std::vector<const char *> &filename_extensions () const override
+  {
+    static const std::vector<const char *> extensions = { ".c" };
+    return extensions;
+  }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,
@@ -978,11 +980,6 @@ enum cplus_primitive_types {
   nr_cplus_primitive_types
 };
 
-static const char * const cplus_extensions[] =
-{
-  ".C", ".cc", ".cp", ".cpp", ".cxx", ".c++", NULL
-};
-
 /* Constant data that describes the C++ language.  */
 
 extern const struct language_data cplus_language_data =
@@ -992,7 +989,6 @@ extern const struct language_data cplus_language_data =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
-  cplus_extensions,
   &exp_descriptor_c,
   false,			/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
@@ -1019,6 +1015,15 @@ public:
 
   const char *natural_name () const override
   { return "C++"; }
+
+  /* See language.h.  */
+
+  const std::vector<const char *> &filename_extensions () const override
+  {
+    static const std::vector<const char *> extensions
+      = { ".C", ".cc", ".cp", ".cpp", ".cxx", ".c++" };
+    return extensions;
+  }
 
   /* See language.h.  */
 
@@ -1187,11 +1192,6 @@ protected:
 
 static cplus_language cplus_language_defn;
 
-static const char * const asm_extensions[] =
-{
-  ".s", ".sx", ".S", NULL
-};
-
 /* Constant data that describes the ASM language.  */
 
 extern const struct language_data asm_language_data =
@@ -1201,7 +1201,6 @@ extern const struct language_data asm_language_data =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
-  asm_extensions,
   &exp_descriptor_c,
   true,				/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
@@ -1228,6 +1227,15 @@ public:
 
   const char *natural_name () const override
   { return "Assembly"; }
+
+  /* See language.h.  */
+
+  const std::vector<const char *> &filename_extensions () const override
+  {
+    static const std::vector<const char *> extensions
+      = { ".s", ".sx", ".S" };
+    return extensions;
+  }
 
   /* See language.h.
 
@@ -1263,7 +1271,6 @@ extern const struct language_data minimal_language_data =
   case_sensitive_on,
   array_row_major,
   macro_expansion_c,
-  NULL,
   &exp_descriptor_c,
   true,				/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */

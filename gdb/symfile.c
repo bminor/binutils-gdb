@@ -2672,6 +2672,7 @@ static std::vector<filename_language> filename_language_table;
 void
 add_filename_language (const char *ext, enum language lang)
 {
+  gdb_assert (ext != nullptr);
   filename_language_table.emplace_back (ext, lang);
 }
 

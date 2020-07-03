@@ -248,11 +248,6 @@ enum pascal_primitive_types {
   nr_pascal_primitive_types
 };
 
-static const char * const p_extensions[] =
-{
-  ".pas", ".p", ".pp", NULL
-};
-
 /* Constant data representing the Pascal language.  */
 
 extern const struct language_data pascal_language_data =
@@ -262,7 +257,6 @@ extern const struct language_data pascal_language_data =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
-  p_extensions,
   &exp_descriptor_standard,
   false,			/* la_store_sym_names_in_linkage_form_p */
   pascal_op_print_tab,		/* expression operators for printing */
@@ -290,6 +284,14 @@ public:
   const char *natural_name () const override
   { return "Pascal"; }
 
+  /* See language.h.  */
+
+  const std::vector<const char *> &filename_extensions () const override
+  {
+    static const std::vector<const char *> extensions
+      = { ".pas", ".p", ".pp" };
+    return extensions;
+  }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,

@@ -503,12 +503,8 @@ add_set_language_command ()
 
   /* Add the filename extensions.  */
   for (const auto &lang : language_defn::languages)
-    if (lang->la_filename_extensions != NULL)
-      {
-	for (size_t i = 0; lang->la_filename_extensions[i] != NULL; ++i)
-	  add_filename_language (lang->la_filename_extensions[i],
-				 lang->la_language);
-      }
+    for (const char * const &ext : lang->filename_extensions ())
+      add_filename_language (ext, lang->la_language);
 
   /* Build the "help set language" docs.  */
   string_file doc;
@@ -784,7 +780,6 @@ extern const struct language_data unknown_language_data =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
-  NULL,
   &exp_descriptor_standard,
   true,				/* store_sym_names_in_linkage_form_p */
   unk_op_print_tab,		/* expression operators for printing */
@@ -921,7 +916,6 @@ extern const struct language_data auto_language_data =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
-  NULL,
   &exp_descriptor_standard,
   false,			/* store_sym_names_in_linkage_form_p */
   unk_op_print_tab,		/* expression operators for printing */

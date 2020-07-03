@@ -471,13 +471,6 @@ operator_check_f (struct expression *exp, int pos,
   return 0;
 }
 
-static const char * const f_extensions[] =
-{
-  ".f", ".F", ".for", ".FOR", ".ftn", ".FTN", ".fpp", ".FPP",
-  ".f90", ".F90", ".f95", ".F95", ".f03", ".F03", ".f08", ".F08",
-  NULL
-};
-
 /* Expression processing for Fortran.  */
 static const struct exp_descriptor exp_descriptor_f =
 {
@@ -498,7 +491,6 @@ extern const struct language_data f_language_data =
   case_sensitive_off,
   array_column_major,
   macro_expansion_no,
-  f_extensions,
   &exp_descriptor_f,
   false,			/* la_store_sym_names_in_linkage_form_p */
   f_op_print_tab,		/* expression operators for printing */
@@ -525,6 +517,17 @@ public:
 
   const char *natural_name () const override
   { return "Fortran"; }
+
+  /* See language.h.  */
+
+  const std::vector<const char *> &filename_extensions () const override
+  {
+    static const std::vector<const char *> extensions = {
+      ".f", ".F", ".for", ".FOR", ".ftn", ".FTN", ".fpp", ".FPP",
+      ".f90", ".F90", ".f95", ".F95", ".f03", ".F03", ".f08", ".F08"
+    };
+    return extensions;
+  }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,

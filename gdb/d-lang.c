@@ -124,11 +124,6 @@ enum d_primitive_types {
   nr_d_primitive_types
 };
 
-static const char * const d_extensions[] =
-{
-  ".d", NULL
-};
-
 /* Constant data that describes the D language.  */
 
 extern const struct language_data d_language_data =
@@ -138,7 +133,6 @@ extern const struct language_data d_language_data =
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
-  d_extensions,
   &exp_descriptor_c,
   false,			/* la_store_sym_names_in_linkage_form_p */
   d_op_print_tab,		/* Expression operators for printing.  */
@@ -165,6 +159,14 @@ public:
 
   const char *natural_name () const override
   { return "D"; }
+
+  /* See language.h.  */
+
+  const std::vector<const char *> &filename_extensions () const override
+  {
+    static const std::vector<const char *> extensions = { ".d" };
+    return extensions;
+  }
 
   /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,

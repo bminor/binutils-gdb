@@ -205,13 +205,6 @@ struct language_data
     /* Style of macro expansion, if any, supported by this language.  */
     enum macro_expansion la_macro_expansion;
 
-    /* A NULL-terminated array of file extensions for this language.
-       The extension must include the ".", like ".c".  If this
-       language doesn't need to provide any filename extensions, this
-       may be NULL.  */
-
-    const char *const *la_filename_extensions;
-
     /* Definitions related to expression printing, prefixifying, and
        dumping.  */
 
@@ -274,6 +267,17 @@ struct language_defn : language_data
   /* Natural or official name of the language.  */
 
   virtual const char *natural_name () const = 0;
+
+  /* Return a vector of file extensions for this language.  The extension
+     must include the ".", like ".c".  If this language doesn't need to
+     provide any filename extensions, this may be an empty vector (which is
+     the default).  */
+
+  virtual const std::vector<const char *> &filename_extensions () const
+  {
+    static const std::vector<const char *> no_extensions;
+    return no_extensions;
+  }
 
   /* Print the index of an element of an array.  This default
      implementation prints using C99 syntax.  */

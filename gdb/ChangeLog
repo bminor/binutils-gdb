@@ -1,5 +1,60 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_extensions): Delete, moved into
+	ada_language::filename_extensions.
+	(ada_language_data): Remove la_filename_extensions initializer.
+	(ada_language::filename_extensions): New member function.
+	* c-lang.c (c_extensions): Delete, moved into
+	c_language::filename_extensions.
+	(c_language_data): Remove la_filename_extensions initializer.
+	(c_language::filename_extensions): New member function.
+	(cplus_extensions): Delete, moved into
+	cplus_language::filename_extensions.
+	(cplus_language_data): Remove la_filename_extensions initializer.
+	(cplus_language::filename_extensions): New member function.
+	(asm_extensions): Delete, moved into
+	asm_language::filename_extensions.
+	(asm_language_data): Remove la_filename_extensions initializer.
+	(asm_language::filename_extensions): New member function.
+	(minimal_language_data): Remove la_filename_extensions
+	initializer.
+	* d-lang.c (d_extensions): Delete, moved into
+	d_language::filename_extensions.
+	(d_language_data): Remove la_filename_extensions initializer.
+	(d_language::filename_extensions): New member function.
+	* f-lang.c (f_extensions): Delete, moved into
+	f_language::filename_extensions.
+	(f_language_data): Remove la_filename_extensions initializer.
+	(f_language::filename_extensions): New member function.
+	* go-lang.c (go_language_data): Remove la_filename_extensions
+	initializer.
+	* language.c (add_set_language_command): Update now that
+	filename_extensions returns a vector.
+	(unknown_language_data): Remove la_filename_extensions
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Remove la_filename_extensions field.
+	(language_defn::filename_extensions): New member function.
+	* m2-lang.c (m2_language_data): Remove la_filename_extensions
+	initializer.
+	* objc-lang.c (objc_extensions): Delete, moved into
+	objc_language::filename_extensions.
+	(objc_language_data): Remove la_filename_extensions initializer.
+	(objc_language::filename_extensions): New member function.
+	* opencl-lang.c (opencl_language_data): Remove
+	la_filename_extensions initializer.
+	* p-lang.c (pascal_extensions): Delete, moved into
+	pascal_language::filename_extensions.
+	(pascal_language_data): Remove la_filename_extensions initializer.
+	(pascal_language::filename_extensions): New member function.
+	* rust-lang.c (rust_extensions): Delete, moved into
+	rust_language::filename_extensions.
+	(rust_language_data): Remove la_filename_extensions initializer.
+	(rust_language::filename_extensions): New member function.
+	* symfile.c (add_filename_language): Add new assert.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove la_name and
 	la_natural_name initializers.
 	(ada_language::name): New member function.
