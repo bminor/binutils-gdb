@@ -698,7 +698,7 @@ stringify (struct macro_buffer *dest, const char *arg, int len)
 
 /* See macroexp.h.  */
 
-char *
+gdb::unique_xmalloc_ptr<char>
 macro_stringify (const char *str)
 {
   int len = strlen (str);
@@ -707,7 +707,7 @@ macro_stringify (const char *str)
   stringify (&buffer, str, len);
   buffer.appendc ('\0');
 
-  return buffer.release ().release ();
+  return buffer.release ();
 }
 
 

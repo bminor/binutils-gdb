@@ -1,5 +1,12 @@
 2020-07-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* macroexp.h (macro_stringify): Return
+	gdb::unique_xmalloc_ptr<char>.
+	* macroexp.c (macro_stringify): Likewise.
+	* macrotab.c (fixup_definition): Update.
+
+2020-07-02  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* c-exp.y (scan_macro_expansion): Don't free `expansion`.
 	(lex_one_token): Update.
 	* macroexp.c (struct macro_buffer) <release>: Return
