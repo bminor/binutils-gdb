@@ -317,17 +317,17 @@ show_endian (struct ui_file *file, int from_tty, struct cmd_list_element *c,
   if (target_byte_order_user == BFD_ENDIAN_UNKNOWN)
     if (gdbarch_byte_order (get_current_arch ()) == BFD_ENDIAN_BIG)
       fprintf_unfiltered (file, _("The target endianness is set automatically "
-				  "(currently big endian)\n"));
+				  "(currently big endian).\n"));
     else
       fprintf_unfiltered (file, _("The target endianness is set automatically "
-				  "(currently little endian)\n"));
+				  "(currently little endian).\n"));
   else
     if (target_byte_order_user == BFD_ENDIAN_BIG)
       fprintf_unfiltered (file,
-			  _("The target is assumed to be big endian\n"));
+			  _("The target is set to big endian.\n"));
     else
       fprintf_unfiltered (file,
-			  _("The target is assumed to be little endian\n"));
+			  _("The target is set to little endian.\n"));
 }
 
 static void
