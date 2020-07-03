@@ -1,3 +1,17 @@
+2020-07-02  Simon Marchi  <simon.marchi@efficios.com>
+
+	* macroexp.h (macro_lookup_ftype): Remove.
+	(macro_expand, macro_expand_once, macro_expand_next): Remove
+	lookup function parameters, add scope parameter.
+	* macroexp.c (scan, substitute_args, expand, maybe_expand,
+	macro_expand, macro_expand_once, macro_expand_next): Likewise.
+	* macroscope.h (standard_macro_lookup): Change parameter type
+	to macro_scope.
+	* macroscope.c (standard_macro_lookup): Likewise.
+	* c-exp.y (lex_one_token): Update.
+	* macrocmd.c (macro_expand_command): Likewise.
+	(macro_expand_once_command): Likewise.
+
 2020-07-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* inf-loop.c (inferior_event_handler): Remove client_data param.

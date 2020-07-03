@@ -47,9 +47,6 @@ macro_inform_no_debuginfo (void)
 static void
 macro_expand_command (const char *exp, int from_tty)
 {
-  gdb::unique_xmalloc_ptr<struct macro_scope> ms;
-  gdb::unique_xmalloc_ptr<char> expanded;
-
   /* You know, when the user doesn't specify any expression, it would be
      really cool if this defaulted to the last expression evaluated.
      Then it would be easy to ask, "Hey, what did I just evaluate?"  But
@@ -60,10 +57,12 @@ macro_expand_command (const char *exp, int from_tty)
            " expression you\n"
            "want to expand."));
 
-  ms = default_macro_scope ();
-  if (ms)
+  gdb::unique_xmalloc_ptr<macro_scope> ms = default_macro_scope ();
+
+  if (ms != nullptr)
     {
-      expanded = macro_expand (exp, standard_macro_lookup, ms.get ());
+      gdb::unique_xmalloc_ptr<char> expanded = macro_expand (exp, *ms);
+
       fputs_filtered ("expands to: ", gdb_stdout);
       fputs_filtered (expanded.get (), gdb_stdout);
       fputs_filtered ("\n", gdb_stdout);
@@ -76,9 +75,6 @@ macro_expand_command (const char *exp, int from_tty)
 static void
 macro_expand_once_command (const char *exp, int from_tty)
 {
-  gdb::unique_xmalloc_ptr<struct macro_scope> ms;
-  gdb::unique_xmalloc_ptr<char> expanded;
-
   /* You know, when the user doesn't specify any expression, it would be
      really cool if this defaulted to the last expression evaluated.
      And it should set the once-expanded text as the new `last
@@ -89,10 +85,12 @@ macro_expand_once_command (const char *exp, int from_tty)
            " the expression\n"
            "you want to expand."));
 
-  ms = default_macro_scope ();
-  if (ms)
+  gdb::unique_xmalloc_ptr<macro_scope> ms = default_macro_scope ();
+
+  if (ms != nullptr)
     {
-      expanded = macro_expand_once (exp, standard_macro_lookup, ms.get ());
+      gdb::unique_xmalloc_ptr<char> expanded = macro_expand_once (exp, *ms);
+
       fputs_filtered ("expands to: ", gdb_stdout);
       fputs_filtered (expanded.get (), gdb_stdout);
       fputs_filtered ("\n", gdb_stdout);

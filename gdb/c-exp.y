@@ -2632,8 +2632,7 @@ lex_one_token (struct parser_state *par_state, bool *is_quoted_name)
   if (! scanning_macro_expansion ())
     {
       char *expanded = macro_expand_next (&pstate->lexptr,
-                                          standard_macro_lookup,
-                                          expression_macro_scope);
+					  *expression_macro_scope);
 
       if (expanded)
         scan_macro_expansion (expanded);
