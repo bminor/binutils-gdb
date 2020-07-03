@@ -348,6 +348,7 @@ struct gdbarch
   const disasm_options_and_args_t * valid_disassembler_options;
   gdbarch_type_align_ftype *type_align;
   gdbarch_get_pc_address_flags_ftype *get_pc_address_flags;
+  gdbarch_read_core_file_mappings_ftype *read_core_file_mappings;
 };
 
 /* Create a new ``struct gdbarch'' based on information provided by
@@ -464,6 +465,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->addressable_memory_unit_size = default_addressable_memory_unit_size;
   gdbarch->type_align = default_type_align;
   gdbarch->get_pc_address_flags = default_get_pc_address_flags;
+  gdbarch->read_core_file_mappings = default_read_core_file_mappings;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -712,6 +714,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of valid_disassembler_options, invalid_p == 0 */
   /* Skip verify of type_align, invalid_p == 0 */
   /* Skip verify of get_pc_address_flags, invalid_p == 0 */
+  /* Skip verify of read_core_file_mappings, invalid_p == 0 */
   if (!log.empty ())
     internal_error (__FILE__, __LINE__,
                     _("verify_gdbarch: the following are invalid ...%s"),
@@ -1275,6 +1278,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: ravenscar_ops = %s\n",
                       host_address_to_string (gdbarch->ravenscar_ops));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: read_core_file_mappings = <%s>\n",
+                      host_address_to_string (gdbarch->read_core_file_mappings));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_read_pc_p() = %d\n",
                       gdbarch_read_pc_p (gdbarch));
@@ -5135,6 +5141,23 @@ set_gdbarch_get_pc_address_flags (struct gdbarch *gdbarch,
                                   gdbarch_get_pc_address_flags_ftype get_pc_address_flags)
 {
   gdbarch->get_pc_address_flags = get_pc_address_flags;
+}
+
+void
+gdbarch_read_core_file_mappings (struct gdbarch *gdbarch, struct bfd *cbfd,gdb::function_view<void (ULONGEST count)> pre_loop_cb,gdb::function_view<void (int num, ULONGEST start, ULONGEST end, ULONGEST file_ofs, const char *filename, const void *other)> loop_cb)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->read_core_file_mappings != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_read_core_file_mappings called\n");
+  gdbarch->read_core_file_mappings (gdbarch, cbfd, pre_loop_cb, loop_cb);
+}
+
+void
+set_gdbarch_read_core_file_mappings (struct gdbarch *gdbarch,
+                                     gdbarch_read_core_file_mappings_ftype read_core_file_mappings)
+{
+  gdbarch->read_core_file_mappings = read_core_file_mappings;
 }
 
 

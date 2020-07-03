@@ -1036,6 +1036,22 @@ default_get_pc_address_flags (frame_info *frame, CORE_ADDR pc)
   return "";
 }
 
+/* See arch-utils.h.  */
+void
+default_read_core_file_mappings (struct gdbarch *gdbarch,
+                                 struct bfd *cbfd,
+				 gdb::function_view<void (ULONGEST count)>
+				   pre_loop_cb,
+				 gdb::function_view<void (int num,
+				                          ULONGEST start,
+							  ULONGEST end,
+							  ULONGEST file_ofs,
+							  const char *filename,
+							  const void *other)>
+				   loop_cb)
+{
+}
+
 void _initialize_gdbarch_utils ();
 void
 _initialize_gdbarch_utils ()

@@ -280,4 +280,16 @@ extern ULONGEST default_type_align (struct gdbarch *gdbarch,
 extern std::string default_get_pc_address_flags (frame_info *frame,
 						 CORE_ADDR pc);
 
+/* Default implementation of gdbarch read_core_file_mappings method.  */
+extern void default_read_core_file_mappings (struct gdbarch *gdbarch,
+					     struct bfd *cbfd,
+					     gdb::function_view<void (ULONGEST count)>
+					       pre_loop_cb,
+					     gdb::function_view<void (int num,
+								      ULONGEST start,
+								      ULONGEST end,
+								      ULONGEST file_ofs,
+								      const char *filename,
+								      const void *other)>
+					       loop_cb);
 #endif /* ARCH_UTILS_H */

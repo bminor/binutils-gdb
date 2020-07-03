@@ -1,5 +1,12 @@
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
 
+	* arch-utils.c (default_read_core_file_mappings): New function.
+	* arch-utils.c (default_read_core_file_mappings): Declare.
+	* gdbarch.sh (read_core_file_mappings): New gdbarch method.
+	* gdbarch.h, gdbarch.c: Regenerate.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
 	PR corefiles/25631
 	* corelow.c (core_target:xfer_partial):  Revise
 	TARGET_OBJECT_MEMORY case to consider non-SEC_HAS_CONTENTS
