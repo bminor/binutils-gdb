@@ -1479,7 +1479,7 @@ file_in_many_sections.o: file_in_many_sections.c many_sections_define.h
 file_in_many_sections: file_in_many_sections.o gcctestdir/ld
 	$(LINK) file_in_many_sections.o -Wl,--gc-sections
 file_in_many_sections.stdout: file_in_many_sections
-	$(TEST_READELF) -s $< > $@
+	$(TEST_READELF) -sW $< > $@
 
 check_PROGRAMS += initpri1
 initpri1_SOURCES = initpri1.c

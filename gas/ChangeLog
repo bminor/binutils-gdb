@@ -1,3 +1,8 @@
+2020-07-03  Alan Modra  <amodra@gmail.com>
+
+	PR 26028
+	* testsuite/gas/ia64/unwind-ilp32.d: Add -T to readelf options.
+
 2020-07-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_modrm_byte): Check vexswapsources to

@@ -8521,7 +8521,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@file_in_many_sections: file_in_many_sections.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) file_in_many_sections.o -Wl,--gc-sections
 @GCC_TRUE@@NATIVE_LINKER_TRUE@file_in_many_sections.stdout: file_in_many_sections
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -s $< > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -sW $< > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg.o: debug_msg.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/debug_msg.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@odr_violation1.o: odr_violation1.cc

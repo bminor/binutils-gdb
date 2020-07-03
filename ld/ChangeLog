@@ -1,3 +1,16 @@
+2020-07-03  Alan Modra  <amodra@gmail.com>
+
+	PR 26028
+	* testsuite/ld-arm/arm-elf.exp (vxworks1): Pass --wide to readelf
+	when dumping relocs.
+	* testsuite/ld-i386/i386.exp (vxworks1): Likewise.
+	* testsuite/ld-sh/sh-vxworks.exp (vxworks1): Likewise.
+	* testsuite/ld-sparc/sparc.exp (vxworks1): Likewise.
+	* testsuite/ld-arm/vxworks1.rd: Adjust to suit.
+	* testsuite/ld-i386/vxworks1.rd: Adjust.
+	* testsuite/ld-sh/vxworks1.rd: Adjust.
+	* testsuite/ld-sparc/vxworks1.rd: Adjust.
+
 2020-07-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 26028
