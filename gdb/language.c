@@ -775,7 +775,6 @@ unknown_language_arch_info (struct gdbarch *gdbarch,
 
 extern const struct language_data unknown_language_data =
 {
-  language_unknown,
   range_check_off,
   case_sensitive_on,
   array_row_major,
@@ -911,7 +910,6 @@ static unknown_language unknown_language_defn;
 
 extern const struct language_data auto_language_data =
 {
-  language_auto,
   range_check_off,
   case_sensitive_on,
   array_row_major,

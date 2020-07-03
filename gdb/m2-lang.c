@@ -199,7 +199,6 @@ const struct exp_descriptor exp_descriptor_modula2 =
 
 extern const struct language_data m2_language_data =
 {
-  language_m2,
   range_check_on,
   case_sensitive_on,
   array_row_major,

@@ -486,7 +486,6 @@ static const struct exp_descriptor exp_descriptor_f =
 
 extern const struct language_data f_language_data =
 {
-  language_fortran,
   range_check_on,
   case_sensitive_off,
   array_column_major,

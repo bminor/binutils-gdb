@@ -188,10 +188,6 @@ extern const char *default_word_break_characters (void);
 
 struct language_data
   {
-    /* its symtab language-enum (defs.h).  */
-
-    enum language la_language;
-
     /* Default range checking.  */
 
     enum range_check la_range_check;
@@ -253,12 +249,17 @@ struct language_data
 struct language_defn : language_data
 {
   language_defn (enum language lang, const language_data &init_data)
-    : language_data (init_data)
+    : language_data (init_data),
+      la_language (lang)
   {
     /* We should only ever create one instance of each language.  */
     gdb_assert (languages[lang] == nullptr);
     languages[lang] = this;
   }
+
+  /* Which language this is.  */
+
+  const enum language la_language;
 
   /* Name of the language.  */
 

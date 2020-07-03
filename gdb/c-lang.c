@@ -875,7 +875,6 @@ const struct exp_descriptor exp_descriptor_c =
 
 extern const struct language_data c_language_data =
 {
-  language_c,
   range_check_off,
   case_sensitive_on,
   array_row_major,
@@ -984,7 +983,6 @@ enum cplus_primitive_types {
 
 extern const struct language_data cplus_language_data =
 {
-  language_cplus,
   range_check_off,
   case_sensitive_on,
   array_row_major,
@@ -1196,7 +1194,6 @@ static cplus_language cplus_language_defn;
 
 extern const struct language_data asm_language_data =
 {
-  language_asm,
   range_check_off,
   case_sensitive_on,
   array_row_major,
@@ -1266,7 +1263,6 @@ static asm_language asm_language_defn;
 
 extern const struct language_data minimal_language_data =
 {
-  language_minimal,
   range_check_off,
   case_sensitive_on,
   array_row_major,

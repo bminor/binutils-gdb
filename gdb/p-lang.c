@@ -252,7 +252,6 @@ enum pascal_primitive_types {
 
 extern const struct language_data pascal_language_data =
 {
-  language_pascal,
   range_check_on,
   case_sensitive_on,
   array_row_major,

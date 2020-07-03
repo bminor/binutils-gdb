@@ -508,7 +508,6 @@ enum go_primitive_types {
 
 extern const struct language_data go_language_data =
 {
-  language_go,
   range_check_off,
   case_sensitive_on,
   array_row_major,

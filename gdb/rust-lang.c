@@ -1901,7 +1901,6 @@ static const struct exp_descriptor exp_descriptor_rust =
 
 extern const struct language_data rust_language_data =
 {
-  language_rust,
   range_check_on,
   case_sensitive_on,
   array_row_major,

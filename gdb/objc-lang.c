@@ -323,7 +323,6 @@ static const struct op_print objc_op_print_tab[] =
 
 extern const struct language_data objc_language_data =
 {
-  language_objc,
   range_check_off,
   case_sensitive_on,
   array_row_major,
