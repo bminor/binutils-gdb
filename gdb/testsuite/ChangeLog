@@ -1,5 +1,20 @@
 2020-07-03  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/call-sc.exp (start_scalars_test): Use
+	prepare_for_testing and don't try compiling with -DNO_PROTOTYPES.
+	* gdb.base/overlays.c: Remove references to PARAMS.
+	* gdb.base/ovlymgr.h (PARAMS): Delete, and remove all references.
+	* gdb.base/reread.exp: Don't set 'prototypes' global.
+	* gdb.base/structs.exp (start_structs_test): Use
+	prepare_for_testing and don't try compiling with -DNO_PROTOTYPES.
+	* gdb.base/structs2.exp: Don't set 'prototypes' global.  Use
+	prepare_for_testing and don't try compiling with -DNO_PROTOTYPES.
+	Don't issue "set width 0".  Remove gdb_stop_suppressing_tests
+	call.
+	* gdb.base/varargs.exp: Don't set 'prototypes' global.
+
+2020-07-03  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/m32rovly.c: Delete.
 	* gdb.base/ovlymgr.c: Remove all code guarded by __D10V__.
 

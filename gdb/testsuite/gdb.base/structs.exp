@@ -66,20 +66,9 @@ proc start_structs_test { types } {
     }
 
     set binfile [standard_output_file ${testfile}]
-    if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "${flags}"] != "" } {
-	# built the second test case since we can't use prototypes
-	warning "Prototypes not supported, rebuilding with -DNO_PROTOTYPES"
-	if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "${flags} additional_flags=-DNO_PROTOTYPES"] != "" } {
-	    untested "failed to compile"
-	    return -1
-	}
+    if { [prepare_for_testing "failed to prepare" $binfile $srcfile $flags] } {
+	return -1
     }
-
-    # Start with a fresh gdb.
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
-    gdb_load ${binfile}
 
     # Make certain that the output is consistent
     with_test_prefix "types=$types" {
