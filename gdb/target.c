@@ -3274,7 +3274,7 @@ target_pass_ctrlc (void)
       if (proc_target == NULL)
 	continue;
 
-      for (thread_info *thr : inf->threads ())
+      for (thread_info *thr : inf->non_exited_threads ())
 	{
 	  /* A thread can be THREAD_STOPPED and executing, while
 	     running an infcall.  */

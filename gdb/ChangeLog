@@ -1,6 +1,12 @@
 2020-07-10  Pedro Alves  <pedro@palves.net>
 
 	PR gdb/26199
+	* target.c (target_pass_ctrlc): Look at the inferior's non-exited
+	threads, not all threads.
+
+2020-07-10  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26199
 	* remote.c (remote_target::open_1): Pass remote target pointer as
 	data to create_async_event_handler.
 	(remote_async_inferior_event_handler): Mark async event handler
