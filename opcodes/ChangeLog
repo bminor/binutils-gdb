@@ -1,5 +1,10 @@
 2020-07-04  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
+2020-07-04  Nick Clifton  <nickc@redhat.com>
+
 	Binutils 2.35 branch created.
 
 2020-07-02  H.J. Lu  <hongjiu.lu@intel.com>

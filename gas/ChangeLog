@@ -1,5 +1,16 @@
 2020-07-04  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/gas.pot: Regenerate.
+
+2020-07-04  Nick Clifton  <nickc@redhat.com>
+
+	* version.m4: Change version number to 2.35.50.
+	* configure: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+2020-07-04  Nick Clifton  <nickc@redhat.com>
+
 	Binutils 2.35 branch created.
 
 2020-07-03  Alan Modra  <amodra@gmail.com>
