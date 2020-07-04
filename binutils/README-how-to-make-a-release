@@ -39,8 +39,8 @@ How to perform a release.
 
   4. Create the release branch using:
 
-	git branch binutils-2_34-branch
-        git push origin binutils-2_34-branch
+	git branch binutils-2_36-branch
+        git push origin binutils-2_36-branch
 
      If you get a message like:
      
@@ -50,7 +50,7 @@ How to perform a release.
 
   5. Make sure that the branch is there.  IE check out the branch sources:
   
-        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_34-branch 2.34
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_36-branch 2.36
 
      If you get a message about being in a "detached head" state, something
      has gone wrong...
@@ -72,7 +72,7 @@ How to perform a release.
      ask Joel Brobecker <brobecker AT adacore DOT com>.
 
   7. Rename the current HEAD version entry in Bugzilla, and create a
-     new one.  E.g. rename "2.34 (HEAD)" to 2.34, and create "2.34
+     new one.  E.g. rename "2.36 (HEAD)" to 2.36, and create "2.37
      (HEAD)":
      
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
@@ -80,13 +80,13 @@ How to perform a release.
   8. Update bfd/version.m4 on HEAD to indicate that is now a snapshot
      of the next release:
      
-       m4_define([BFD_VERSION], [2.34.50])
+       m4_define([BFD_VERSION], [2.36.50])
        
      Update the release number in bfd/version.m4 for the BRANCH.
      The branch only needs the point value set to 90 as the release
      has not actually happened yet.
 
-       m4_define([BFD_VERSION], [2.33.90])
+       m4_define([BFD_VERSION], [2.35.90])
 
      Regenerate various files on both branch and HEAD by configuring
      with "--enable-maintainer-mode --enable-gold" and then building
