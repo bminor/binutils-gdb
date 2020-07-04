@@ -1,4 +1,15 @@
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+    
+	* linux-tdep.c (dump_note_entry_p): New function.
+	(linux_dump_mapping_p_ftype): New typedef.
+	(linux_find_memory_regions_full): Add new parameter,
+	should_dump_mapping_p.
+	(linux_find_memory_regions): Adjust call to
+	linux_find_memory_regions_full.
+	(linux_make_mappings_core_file_notes): Use dump_note_entry_p in
+	call to linux_find_memory_regions_full.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* corelow.c (solist.h, unordered_map): Include.
 	(class core_target): Add field m_core_file_mappings and

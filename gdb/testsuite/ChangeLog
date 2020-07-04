@@ -1,5 +1,12 @@
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdb.base/coredump-filter.exp: Add second
+	non-Private-Shared-Anon-File test.
+	(test_disasm): Rename binfile for test which is expected
+	to fail.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
 	* gdb.base/corefile.exp: Add test "accessing read-only mmapped
 	data in core file".
 	* gdb.base/coremaker.c (buf2ro): New global.
