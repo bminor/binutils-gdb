@@ -60,7 +60,8 @@ pub mod mod1 {
 
                 let f2 = || println!("lambda f2");
 
-                let copy = ::TWENTY_THREE;
+                // Prevent linker from discarding symbol
+                let ptr: *const u16 = &::TWENTY_THREE;
 
                 f2();           // set breakpoint here
                 f3();

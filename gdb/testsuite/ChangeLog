@@ -1,3 +1,9 @@
+2020-07-11  Daniel Xu  <dxu@dxuuu.xyz>
+
+	PR rust/26121
+	* gdb.rust/modules.rs: Prevent linker from discarding test
+	symbol.
+
 2020-07-10  Pedro Alves  <pedro@palves.net>
 
 	PR gdb/26199
