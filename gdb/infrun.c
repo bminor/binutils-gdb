@@ -3601,23 +3601,9 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
   return event_ptid;
 }
 
-/* Returns true if INF has any resumed thread with a status
-   pending.  */
-
-static bool
-threads_are_resumed_pending_p (inferior *inf)
-{
-  for (thread_info *tp : inf->non_exited_threads ())
-    if (tp->resumed
-	&& tp->suspend.waitstatus_pending_p)
-      return true;
-
-  return false;
-}
-
 /* Wrapper for target_wait that first checks whether threads have
    pending statuses to report before actually asking the target for
-   more events. Polls for events from all inferiors/targets.  */
+   more events.  Polls for events from all inferiors/targets.  */
 
 static bool
 do_target_wait (ptid_t wait_ptid, execution_control_state *ecs, int options)
@@ -3625,20 +3611,18 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs, int options)
   int num_inferiors = 0;
   int random_selector;
 
-  /* For fairness, we pick the first inferior/target to poll at
-     random, and then continue polling the rest of the inferior list
-     starting from that one in a circular fashion until the whole list
-     is polled once.  */
+  /* For fairness, we pick the first inferior/target to poll at random
+     out of all inferiors that may report events, and then continue
+     polling the rest of the inferior list starting from that one in a
+     circular fashion until the whole list is polled once.  */
 
   auto inferior_matches = [&wait_ptid] (inferior *inf)
     {
       return (inf->process_target () != NULL
-	      && (threads_are_executing (inf->process_target ())
-		  || threads_are_resumed_pending_p (inf))
 	      && ptid_t (inf->pid).matches (wait_ptid));
     };
 
-  /* First see how many resumed inferiors we have.  */
+  /* First see how many matching inferiors we have.  */
   for (inferior *inf : all_inferiors ())
     if (inferior_matches (inf))
       num_inferiors++;
@@ -3649,7 +3633,7 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs, int options)
       return false;
     }
 
-  /* Now randomly pick an inferior out of those that were resumed.  */
+  /* Now randomly pick an inferior out of those that matched.  */
   random_selector = (int)
     ((num_inferiors * (double) rand ()) / (RAND_MAX + 1.0));
 
@@ -3658,7 +3642,7 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs, int options)
 			"infrun: Found %d inferiors, starting at #%d\n",
 			num_inferiors, random_selector);
 
-  /* Select the Nth inferior that was resumed.  */
+  /* Select the Nth inferior that matched.  */
 
   inferior *selected = nullptr;
 
@@ -3670,7 +3654,7 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs, int options)
 	  break;
 	}
 
-  /* Now poll for events out of each of the resumed inferior's
+  /* Now poll for events out of each of the matching inferior's
      targets, starting from the selected one.  */
 
   auto do_wait = [&] (inferior *inf)
@@ -3680,8 +3664,8 @@ do_target_wait (ptid_t wait_ptid, execution_control_state *ecs, int options)
     return (ecs->ws.kind != TARGET_WAITKIND_IGNORE);
   };
 
-  /* Needed in all-stop+target-non-stop mode, because we end up here
-     spuriously after the target is all stopped and we've already
+  /* Needed in 'all-stop + target-non-stop' mode, because we end up
+     here spuriously after the target is all stopped and we've already
      reported the stop to the user, polling for events.  */
   scoped_restore_current_thread restore_thread;
 

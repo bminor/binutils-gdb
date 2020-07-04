@@ -1,3 +1,12 @@
+2020-07-10  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26199
+	* infrun.c (threads_are_resumed_pending_p): Delete.
+	(do_target_wait): Remove threads_are_executing and
+	threads_are_resumed_pending_p checks from the inferior_matches
+	lambda.  Update comments.
+
 2020-07-10  Pedro Alves  <pedro@palves.net>
 
 	PR gdb/26199
