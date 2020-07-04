@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.35:
+
 * Changed readelf's display of symbol names when wide mode is not enabled.
   If the name is too long it will be truncated and the last five characters
   replaced with "[...]".  The old behaviour of displaying 5 more characters but
