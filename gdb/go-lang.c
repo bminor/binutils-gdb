@@ -515,7 +515,6 @@ extern const struct language_data go_language_data =
   &exp_descriptor_c,
   false,			/* la_store_sym_names_in_linkage_form_p */
   go_op_print_tab,		/* Expression operators for printing.  */
-  1,				/* C-style arrays.  */
   0,				/* String lower bound.  */
   &default_varobj_ops,
 };

@@ -13716,7 +13716,6 @@ extern const struct language_data ada_language_data =
   &ada_exp_descriptor,
   true,                         /* la_store_sym_names_in_linkage_form_p */
   ada_op_print_tab,             /* expression operators for printing */
-  0,                            /* c-style arrays */
   1,                            /* String lower bound */
   &ada_varobj_ops,
 };
@@ -14199,6 +14198,11 @@ public:
 
   const char *struct_too_deep_ellipsis () const override
   { return "(...)"; }
+
+  /* See language.h.  */
+
+  bool c_style_arrays_p () const override
+  { return false; }
 
 protected:
   /* See language.h.  */

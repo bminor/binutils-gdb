@@ -206,7 +206,6 @@ extern const struct language_data m2_language_data =
   &exp_descriptor_modula2,
   false,			/* la_store_sym_names_in_linkage_form_p */
   m2_op_print_tab,		/* expression operators for printing */
-  0,				/* arrays are first-class (not c-style) */
   0,				/* String lower bound */
   &default_varobj_ops,
 };
@@ -436,6 +435,11 @@ public:
 
     return false;
   }
+
+  /* See language.h.  */
+
+  bool c_style_arrays_p () const override
+  { return false; }
 };
 
 /* Single instance of the M2 language.  */

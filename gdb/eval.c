@@ -622,7 +622,7 @@ ptrmath_type_p (const struct language_defn *lang, struct type *type)
       return 1;
 
     case TYPE_CODE_ARRAY:
-      return type->is_vector () ? 0 : lang->c_style_arrays;
+      return type->is_vector () ? 0 : lang->c_style_arrays_p ();
 
     default:
       return 0;

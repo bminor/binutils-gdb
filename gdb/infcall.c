@@ -219,7 +219,7 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
       /* Arrays are coerced to pointers to their first element, unless
          they are vectors, in which case we want to leave them alone,
          because they are passed by value.  */
-      if (current_language->c_style_arrays)
+      if (current_language->c_style_arrays_p ())
 	if (!type->is_vector ())
 	  type = lookup_pointer_type (TYPE_TARGET_TYPE (type));
       break;

@@ -882,7 +882,6 @@ extern const struct language_data c_language_data =
   &exp_descriptor_c,
   true,				/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
-  1,				/* c-style arrays */
   0,				/* String lower bound */
   &c_varobj_ops,
 };
@@ -990,7 +989,6 @@ extern const struct language_data cplus_language_data =
   &exp_descriptor_c,
   false,			/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
-  1,				/* c-style arrays */
   0,				/* String lower bound */
   &cplus_varobj_ops,
 };
@@ -1201,7 +1199,6 @@ extern const struct language_data asm_language_data =
   &exp_descriptor_c,
   true,				/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
-  1,				/* c-style arrays */
   0,				/* String lower bound */
   &default_varobj_ops,
 };
@@ -1270,7 +1267,6 @@ extern const struct language_data minimal_language_data =
   &exp_descriptor_c,
   true,				/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
-  1,				/* c-style arrays */
   0,				/* String lower bound */
   &default_varobj_ops,
 };

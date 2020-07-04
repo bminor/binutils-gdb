@@ -3687,7 +3687,7 @@ coerce_array (struct value *arg)
   switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
-      if (!type->is_vector () && current_language->c_style_arrays)
+      if (!type->is_vector () && current_language->c_style_arrays_p ())
 	arg = value_coerce_array (arg);
       break;
     case TYPE_CODE_FUNC:

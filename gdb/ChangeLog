@@ -1,5 +1,39 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Remove c_style_arrays
+	initializer.
+	(ada_language::c_style_arrays_p): New member fuction.
+	* c-lang.c (c_language_data): Remove c_style_arrays
+	initializer.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* eval.c (ptrmath_type_p): Update call to c_style_arrays_p.
+	* f-lang.c (f_language_data): Remove c_style_arrays initializer.
+	(f_language::c_style_arrays_p): New member function.
+	* go-lang.c (go_language_data): Remove c_style_arrays initializer.
+	* infcall.c (value_arg_coerce): Update call to c_style_arrays_p.
+	* language.c (unknown_language_data): Remove c_style_arrays
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Remove c_style_arrays field.
+	(language_defn::c_style_arrays_p): New member function.
+	* m2-lang.c (m2_language_data): Remove c_style_arrays initializer.
+	(m2_language::c_style_arrays_p): New member function.
+	* objc-lang.c (objc_language_data): Remove c_style_arrays
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+	* valarith.c (value_subscript): Update call to c_style_arrays_p,
+	and update local variable to a bool.
+	* valops.c (value_cast): Update call to c_style_arrays_p.
+	(value_array): Likewise.
+	* value.c (coerce_array): Likewise.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove la_language initializer.
 	* c-lang.c (c_language_data): Likewise.
 	(cplus_language_data): Likewise.

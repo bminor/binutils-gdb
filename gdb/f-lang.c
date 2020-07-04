@@ -493,7 +493,6 @@ extern const struct language_data f_language_data =
   &exp_descriptor_f,
   false,			/* la_store_sym_names_in_linkage_form_p */
   f_op_print_tab,		/* expression operators for printing */
-  0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
   &default_varobj_ops,
 };
@@ -719,6 +718,11 @@ public:
 
   const char *struct_too_deep_ellipsis () const override
   { return "(...)"; }
+
+  /* See language.h.  */
+
+  bool c_style_arrays_p () const override
+  { return false; }
 
 protected:
 

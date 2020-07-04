@@ -414,7 +414,7 @@ value_cast (struct type *type, struct value *arg2)
 	}
     }
 
-  if (current_language->c_style_arrays
+  if (current_language->c_style_arrays_p ()
       && type2->code () == TYPE_CODE_ARRAY
       && !type2->is_vector ())
     arg2 = value_coerce_array (arg2);
@@ -1622,7 +1622,7 @@ value_array (int lowbound, int highbound, struct value **elemvec)
   arraytype = lookup_array_range_type (value_enclosing_type (elemvec[0]),
 				       lowbound, highbound);
 
-  if (!current_language->c_style_arrays)
+  if (!current_language->c_style_arrays_p ())
     {
       val = allocate_value (arraytype);
       for (idx = 0; idx < nelem; idx++)

@@ -232,11 +232,6 @@ struct language_data
 
     const struct op_print *la_op_print_tab;
 
-    /* Zero if the language has first-class arrays.  True if there are no
-       array values, and array objects decay to pointers, as in C.  */
-
-    char c_style_arrays;
-
     /* Index to use for extracting the first element of a string.  */
     char string_lower_bound;
 
@@ -564,6 +559,14 @@ struct language_defn : language_data
 
   virtual const char *name_of_this () const
   { return nullptr; }
+
+  /* Return false if the language has first-class arrays.  Return true if
+     there are no array values, and array objects decay to pointers, as in
+     C.  The default is true as currently most supported languages behave
+     in this manor.  */
+
+  virtual bool c_style_arrays_p () const
+  { return true; }
 
 protected:
 

@@ -140,7 +140,7 @@ value_ptrdiff (struct value *arg1, struct value *arg2)
 struct value *
 value_subscript (struct value *array, LONGEST index)
 {
-  int c_style = current_language->c_style_arrays;
+  bool c_style = current_language->c_style_arrays_p ();
   struct type *tarray;
 
   array = coerce_ref (array);
@@ -156,7 +156,7 @@ value_subscript (struct value *array, LONGEST index)
       if (VALUE_LVAL (array) != lval_memory)
 	return value_subscripted_rvalue (array, index, lowerbound);
 
-      if (c_style == 0)
+      if (!c_style)
 	{
 	  if (index >= lowerbound && index <= upperbound)
 	    return value_subscripted_rvalue (array, index, lowerbound);
@@ -165,7 +165,7 @@ value_subscript (struct value *array, LONGEST index)
 	  if (upperbound > -1)
 	    warning (_("array or string index out of range"));
 	  /* fall doing C stuff */
-	  c_style = 1;
+	  c_style = true;
 	}
 
       index -= lowerbound;
