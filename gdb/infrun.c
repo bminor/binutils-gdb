@@ -5071,20 +5071,52 @@ handle_no_resumed (struct execution_control_state *ecs)
      the synchronous command and show "no unwaited-for " to the
      user.  */
 
-  {
-    scoped_restore_current_thread restore_thread;
+  inferior *curr_inf = current_inferior ();
 
-    for (auto *target : all_non_exited_process_targets ())
-      {
-	switch_to_target_no_thread (target);
-	update_thread_list ();
-      }
-  }
+  scoped_restore_current_thread restore_thread;
+
+  for (auto *target : all_non_exited_process_targets ())
+    {
+      switch_to_target_no_thread (target);
+      update_thread_list ();
+    }
+
+  /* If:
+
+       - the current target has no thread executing, and
+       - the current inferior is native, and
+       - the current inferior is the one which has the terminal, and
+       - we did nothing,
+
+     then a Ctrl-C from this point on would remain stuck in the
+     kernel, until a thread resumes and dequeues it.  That would
+     result in the GDB CLI not reacting to Ctrl-C, not able to
+     interrupt the program.  To address this, if the current inferior
+     no longer has any thread executing, we give the terminal to some
+     other inferior that has at least one thread executing.  */
+  bool swap_terminal = true;
+
+  /* Whether to ignore this TARGET_WAITKIND_NO_RESUMED event, or
+     whether to report it to the user.  */
+  bool ignore_event = false;
 
   for (thread_info *thread : all_non_exited_threads ())
     {
-      if (thread->executing
-	  || thread->suspend.waitstatus_pending_p)
+      if (swap_terminal && thread->executing)
+	{
+	  if (thread->inf != curr_inf)
+	    {
+	      target_terminal::ours ();
+
+	      switch_to_thread (thread);
+	      target_terminal::inferior ();
+	    }
+	  swap_terminal = false;
+	}
+
+      if (!ignore_event
+	  && (thread->executing
+	      || thread->suspend.waitstatus_pending_p))
 	{
 	  /* Either there were no unwaited-for children left in the
 	     target at some point, but there are now, or some target
@@ -5094,9 +5126,19 @@ handle_no_resumed (struct execution_control_state *ecs)
 	    fprintf_unfiltered (gdb_stdlog,
 				"infrun: TARGET_WAITKIND_NO_RESUMED "
 				"(ignoring: found resumed)\n");
-	  prepare_to_wait (ecs);
-	  return 1;
+
+	  ignore_event = true;
 	}
+
+      if (ignore_event && !swap_terminal)
+	break;
+    }
+
+  if (ignore_event)
+    {
+      switch_to_inferior_no_thread (curr_inf);
+      prepare_to_wait (ecs);
+      return 1;
     }
 
   /* Go ahead and report the event.  */
