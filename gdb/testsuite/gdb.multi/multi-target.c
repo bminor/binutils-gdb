@@ -26,12 +26,14 @@
 
 static pthread_barrier_t barrier;
 
+volatile int exit_thread;
+
 static void *
 thread_start (void *arg)
 {
   pthread_barrier_wait (&barrier);
 
-  while (1)
+  while (!exit_thread)
     sleep (1);
   return NULL;
 }

@@ -1,3 +1,11 @@
+2020-07-10  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26199
+	* gdb.multi/multi-target.c (exit_thread): New.
+	(thread_start): Break loop if EXIT_THREAD.
+	* gdb.multi/multi-target.exp (test_no_unwaited_for): New proc.
+	(top level) Call test_no_resumed.
+
 2020-07-08  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/catch_ex/foo.adb: Pass string to raise.
