@@ -1,4 +1,13 @@
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* corelow.c (gdbcmd.h): Include.
+	(core_target::info_proc_mappings): New method.
+	(get_current_core_target): New function.
+	(maintenance_print_core_file_backed_mappings): New function.
+	(_initialize_corelow): Add core-file-backed-mappings to
+	"maint print" commands.
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
     
 	* linux-tdep.c (dump_note_entry_p): New function.
 	(linux_dump_mapping_p_ftype): New typedef.

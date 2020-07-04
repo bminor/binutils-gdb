@@ -47,6 +47,7 @@
 #include "build-id.h"
 #include "gdbsupport/pathstuff.h"
 #include <unordered_map>
+#include "gdbcmd.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -112,6 +113,9 @@ public:
 				  int section_min_size,
 				  const char *human_name,
 				  bool required);
+
+  /* See definition.  */
+  void info_proc_mappings (struct gdbarch *gdbarch);
 
 private: /* per-core data */
 
@@ -1029,9 +1033,92 @@ core_target::info_proc (const char *args, enum info_proc_what request)
   return true;
 }
 
+/* Get a pointer to the current core target.  If not connected to a
+   core target, return NULL.  */
+
+static core_target *
+get_current_core_target ()
+{
+  target_ops *proc_target = current_inferior ()->process_target ();
+  return dynamic_cast<core_target *> (proc_target);
+}
+
+/* Display file backed mappings from core file.  */
+
+void
+core_target::info_proc_mappings (struct gdbarch *gdbarch)
+{
+  if (m_core_file_mappings.sections != m_core_file_mappings.sections_end)
+    {
+      printf_filtered (_("Mapped address spaces:\n\n"));
+      if (gdbarch_addr_bit (gdbarch) == 32)
+	{
+	  printf_filtered ("\t%10s %10s %10s %10s %s\n",
+			   "Start Addr",
+			   "  End Addr",
+			   "      Size", "    Offset", "objfile");
+	}
+      else
+	{
+	  printf_filtered ("  %18s %18s %10s %10s %s\n",
+			   "Start Addr",
+			   "  End Addr",
+			   "      Size", "    Offset", "objfile");
+	}
+    }
+
+  for (const struct target_section *tsp = m_core_file_mappings.sections;
+       tsp < m_core_file_mappings.sections_end;
+       tsp++)
+    {
+      ULONGEST start = tsp->addr;
+      ULONGEST end = tsp->endaddr;
+      ULONGEST file_ofs = tsp->the_bfd_section->filepos;
+      const char *filename = bfd_get_filename (tsp->the_bfd_section->owner);
+
+      if (gdbarch_addr_bit (gdbarch) == 32)
+	printf_filtered ("\t%10s %10s %10s %10s %s\n",
+			 paddress (gdbarch, start),
+			 paddress (gdbarch, end),
+			 hex_string (end - start),
+			 hex_string (file_ofs),
+			 filename);
+      else
+	printf_filtered ("  %18s %18s %10s %10s %s\n",
+			 paddress (gdbarch, start),
+			 paddress (gdbarch, end),
+			 hex_string (end - start),
+			 hex_string (file_ofs),
+			 filename);
+    }
+}
+
+/* Implement "maintenance print core-file-backed-mappings" command.  
+
+   If mappings are loaded, the results should be similar to the
+   mappings shown by "info proc mappings".  This command is mainly a
+   debugging tool for GDB developers to make sure that the expected
+   mappings are present after loading a core file.  For Linux, the
+   output provided by this command will be very similar (if not
+   identical) to that provided by "info proc mappings".  This is not
+   necessarily the case for other OSes which might provide
+   more/different information in the "info proc mappings" output.  */
+
+static void
+maintenance_print_core_file_backed_mappings (const char *args, int from_tty)
+{
+  core_target *targ = get_current_core_target ();
+  if (targ != nullptr)
+    targ->info_proc_mappings (targ->core_gdbarch ());
+}
+
 void _initialize_corelow ();
 void
 _initialize_corelow ()
 {
   add_target (core_target_info, core_target_open, filename_completer);
+  add_cmd ("core-file-backed-mappings", class_maintenance,
+           maintenance_print_core_file_backed_mappings,
+	   _("Print core file's file-backed mappings"),
+	   &maintenanceprintlist);
 }
