@@ -85,6 +85,10 @@ maintenance print xml-tdesc [FILE]
   the target description is read from FILE into GDB, and then
   reprinted.
 
+maintenance print core-file-backed-mappings
+  Prints file-backed mappings loaded from a core file's note section.
+  Output is expected to be similar to that of "info proc mappings".
+
 * Changed commands
 
 alias [-a] [--] ALIAS = COMMAND [DEFAULT-ARGS...]

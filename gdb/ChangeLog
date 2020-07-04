@@ -1,5 +1,10 @@
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
 
+	* NEWS (New commands): Mention new command
+	"maintenance print core-file-backed-mappings".
+
+2020-07-22  Kevin Buettner  <kevinb@redhat.com>
+
 	* corelow.c (gdbcmd.h): Include.
 	(core_target::info_proc_mappings): New method.
 	(get_current_core_target): New function.

@@ -38532,6 +38532,14 @@ library.  This exercises all @code{libthread_db} functionality used by
 @code{libthread_db} uses.  Note that parts of the test may be skipped
 on some platforms when debugging core files.
 
+@kindex maint print core-file-backed-mappings
+@cindex memory address space mappings
+@item maint print core-file-backed-mappings
+Print the file-backed mappings which were loaded from a core file note.
+This output represents state internal to @value{GDBN} and should be
+similar to the mappings displayed by the @code{info proc mappings}
+command.
+
 @kindex maint print dummy-frames
 @item maint print dummy-frames
 Prints the contents of @value{GDBN}'s internal dummy-frame stack.
