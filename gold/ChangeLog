@@ -1,5 +1,9 @@
 2020-07-04  Nick Clifton  <nickc@redhat.com>
 
+	* po/gold.pot: Regenerate.
+
+2020-07-04  Nick Clifton  <nickc@redhat.com>
+
 	Binutils 2.35 branch created.
 
 2020-07-03  Alan Modra  <amodra@gmail.com>
