@@ -1,5 +1,9 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* valops.c (value_repeat): Fix incorrect argument name in comment.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove c_style_arrays
 	initializer.
 	(ada_language::c_style_arrays_p): New member fuction.

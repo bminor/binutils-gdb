@@ -1258,7 +1258,7 @@ value_assign (struct value *toval, struct value *fromval)
   return val;
 }
 
-/* Extend a value VAL to COUNT repetitions of its type.  */
+/* Extend a value ARG1 to COUNT repetitions of its type.  */
 
 struct value *
 value_repeat (struct value *arg1, int count)
