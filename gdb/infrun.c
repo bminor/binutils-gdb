@@ -5068,16 +5068,28 @@ handle_no_resumed (struct execution_control_state *ecs)
      have resumed threads _now_.  In the example above, this removes
      thread 3 from the thread list.  If thread 2 was re-resumed, we
      ignore this event.  If we find no thread resumed, then we cancel
-     the synchronous command show "no unwaited-for " to the user.  */
-  update_thread_list ();
+     the synchronous command and show "no unwaited-for " to the
+     user.  */
 
-  for (thread_info *thread : all_non_exited_threads (ecs->target))
+  {
+    scoped_restore_current_thread restore_thread;
+
+    for (auto *target : all_non_exited_process_targets ())
+      {
+	switch_to_target_no_thread (target);
+	update_thread_list ();
+      }
+  }
+
+  for (thread_info *thread : all_non_exited_threads ())
     {
       if (thread->executing
 	  || thread->suspend.waitstatus_pending_p)
 	{
-	  /* There were no unwaited-for children left in the target at
-	     some point, but there are now.  Just ignore.  */
+	  /* Either there were no unwaited-for children left in the
+	     target at some point, but there are now, or some target
+	     other than the eventing one has unwaited-for children
+	     left.  Just ignore.  */
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog,
 				"infrun: TARGET_WAITKIND_NO_RESUMED "
