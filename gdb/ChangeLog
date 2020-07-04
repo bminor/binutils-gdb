@@ -1,6 +1,12 @@
 2020-07-10  Pedro Alves  <pedro@palves.net>
 
 	PR gdb/26199
+	* infrun.c (handle_no_resumed): Transfer terminal to inferior with
+	executing threads.
+
+2020-07-10  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26199
 	* infrun.c (handle_no_resumed): Handle multiple targets.
 
 2020-07-10  Pedro Alves  <pedro@palves.net>
