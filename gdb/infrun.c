@@ -8116,7 +8116,11 @@ prepare_to_wait (struct execution_control_state *ecs)
 
   ecs->wait_some_more = 1;
 
-  if (!target_is_async_p ())
+  /* If the target can't async, emulate it by marking the infrun event
+     handler such that as soon as we get back to the event-loop, we
+     immediately end up in fetch_inferior_event again calling
+     target_wait.  */
+  if (!target_can_async_p ())
     mark_infrun_async_event_handler ();
 }
 
