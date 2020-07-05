@@ -12091,9 +12091,9 @@ print_dynamic_symbol (Filedata *filedata, unsigned long si,
   int len_avail = 21;
   if (! do_wide && version_string != NULL)
     {
-      char buffer[256];
+      char buffer[16];
 
-      len_avail -= sprintf (buffer, "@%s", version_string);
+      len_avail -= 1 + strlen (version_string);
 
       if (sym_info == symbol_undefined)
 	len_avail -= sprintf (buffer," (%d)", vna_other);
