@@ -266,6 +266,38 @@ get_standard_temp_dir ()
 #endif
 }
 
+/* See pathstuff.h.  */
+
+std::string
+get_standard_config_dir ()
+{
+#ifdef __APPLE__
+#define HOME_CONFIG_DIR "Library/Preferences"
+#else
+#define HOME_CONFIG_DIR ".config"
+#endif
+
+#ifndef __APPLE__
+  const char *xdg_config_home = getenv ("XDG_CONFIG_HOME");
+  if (xdg_config_home != NULL)
+    {
+      /* Make sure the path is absolute and tilde-expanded.  */
+      gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (xdg_config_home));
+      return string_printf ("%s/gdb", abs.get ());
+    }
+#endif
+
+  const char *home = getenv ("HOME");
+  if (home != NULL)
+    {
+      /* Make sure the path is absolute and tilde-expanded.  */
+      gdb::unique_xmalloc_ptr<char> abs (gdb_abspath (home));
+      return string_printf ("%s/" HOME_CONFIG_DIR "/gdb", abs.get ());
+    }
+
+  return {};
+}
+
 /* See gdbsupport/pathstuff.h.  */
 
 const char *

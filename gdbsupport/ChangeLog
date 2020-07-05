@@ -1,3 +1,8 @@
+2020-11-02  Tom Tromey  <tom@tromey.com>
+
+	* pathstuff.h (get_standard_config_dir): Declare.
+	* pathstuff.cc (get_standard_config_dir): New function.
+
 2020-11-02  Simon Marchi  <simon.marchi@efficios.com>
 
 	* common-exceptions.h: Fix indentation.

@@ -85,6 +85,20 @@ extern std::string get_standard_cache_dir ();
 
 extern std::string get_standard_temp_dir ();
 
+/* Get the usual user config directory for the current platform.
+
+   On Linux, it follows the XDG Base Directory specification: use
+   $XDG_CONFIG_HOME/gdb if the XDG_CONFIG_HOME environment variable is
+   defined, otherwise $HOME/.config.
+
+   On macOS, it follows the local convention and uses
+   ~/Library/Preferences/gdb.
+
+  The return value is absolute and tilde-expanded.  Return an empty
+  string if neither XDG_CONFIG_HOME (on Linux) or HOME are defined.  */
+
+extern std::string get_standard_config_dir ();
+
 /* Return the file name of the user's shell.  Normally this comes from
    the SHELL environment variable.  */
 
