@@ -782,7 +782,6 @@ extern const struct language_data unknown_language_data =
   &exp_descriptor_standard,
   true,				/* store_sym_names_in_linkage_form_p */
   unk_op_print_tab,		/* expression operators for printing */
-  0,				/* String lower bound */
   &default_varobj_ops,
 };
 
@@ -916,7 +915,6 @@ extern const struct language_data auto_language_data =
   &exp_descriptor_standard,
   false,			/* store_sym_names_in_linkage_form_p */
   unk_op_print_tab,		/* expression operators for printing */
-  0,				/* String lower bound */
   &default_varobj_ops,
 };
 

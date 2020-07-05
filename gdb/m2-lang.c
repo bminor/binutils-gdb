@@ -206,7 +206,6 @@ extern const struct language_data m2_language_data =
   &exp_descriptor_modula2,
   false,			/* la_store_sym_names_in_linkage_form_p */
   m2_op_print_tab,		/* expression operators for printing */
-  0,				/* String lower bound */
   &default_varobj_ops,
 };
 
@@ -440,6 +439,12 @@ public:
 
   bool c_style_arrays_p () const override
   { return false; }
+
+  /* See language.h.  Despite not having C-style arrays, Modula-2 uses 0
+     for its string lower bounds.  */
+
+  char string_lower_bound () const override
+  { return 0; }
 };
 
 /* Single instance of the M2 language.  */

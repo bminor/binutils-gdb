@@ -13716,7 +13716,6 @@ extern const struct language_data ada_language_data =
   &ada_exp_descriptor,
   true,                         /* la_store_sym_names_in_linkage_form_p */
   ada_op_print_tab,             /* expression operators for printing */
-  1,                            /* String lower bound */
   &ada_varobj_ops,
 };
 

@@ -493,7 +493,6 @@ extern const struct language_data f_language_data =
   &exp_descriptor_f,
   false,			/* la_store_sym_names_in_linkage_form_p */
   f_op_print_tab,		/* expression operators for printing */
-  1,				/* String lower bound */
   &default_varobj_ops,
 };
 

@@ -1644,7 +1644,7 @@ struct value *
 value_cstring (const char *ptr, ssize_t len, struct type *char_type)
 {
   struct value *val;
-  int lowbound = current_language->string_lower_bound;
+  int lowbound = current_language->string_lower_bound ();
   ssize_t highbound = len / TYPE_LENGTH (char_type);
   struct type *stringtype
     = lookup_array_range_type (char_type, lowbound, highbound + lowbound - 1);
@@ -1667,7 +1667,7 @@ struct value *
 value_string (const char *ptr, ssize_t len, struct type *char_type)
 {
   struct value *val;
-  int lowbound = current_language->string_lower_bound;
+  int lowbound = current_language->string_lower_bound ();
   ssize_t highbound = len / TYPE_LENGTH (char_type);
   struct type *stringtype
     = lookup_string_range_type (char_type, lowbound, highbound + lowbound - 1);

@@ -232,9 +232,6 @@ struct language_data
 
     const struct op_print *la_op_print_tab;
 
-    /* Index to use for extracting the first element of a string.  */
-    char string_lower_bound;
-
     /* Various operations on varobj.  */
     const struct lang_varobj_ops *la_varobj_ops;
   };
@@ -567,6 +564,14 @@ struct language_defn : language_data
 
   virtual bool c_style_arrays_p () const
   { return true; }
+
+  /* Return the index to use for extracting the first element of a string,
+     or as the lower bound when creating a new string.  The default of
+     choosing 0 or 1 based on C_STYLE_ARRAYS_P works for all currently
+     supported languages except Modula-2.  */
+
+  virtual char string_lower_bound () const
+  { return c_style_arrays_p () ? 0 : 1; }
 
 protected:
 

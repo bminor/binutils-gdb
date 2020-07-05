@@ -1041,7 +1041,10 @@ allocate_value (struct type *type)
 struct value *
 allocate_repeat_value (struct type *type, int count)
 {
-  int low_bound = current_language->string_lower_bound;		/* ??? */
+  /* Despite the fact that we are really creating an array of TYPE here, we
+     use the string lower bound as the array lower bound.  This seems to
+     work fine for now.  */
+  int low_bound = current_language->string_lower_bound ();
   /* FIXME-type-allocation: need a way to free this type when we are
      done with it.  */
   struct type *array_type

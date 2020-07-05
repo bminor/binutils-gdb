@@ -259,7 +259,6 @@ extern const struct language_data pascal_language_data =
   &exp_descriptor_standard,
   false,			/* la_store_sym_names_in_linkage_form_p */
   pascal_op_print_tab,		/* expression operators for printing */
-  0,				/* String lower bound */
   &default_varobj_ops,
 };
 
