@@ -1,3 +1,10 @@
+2020-07-05  Tom de Vries  <tdevries@suse.de>
+
+	PR build/26187
+	* inferior.h (struct infcall_suspend_state_deleter): If available, use
+	std::uncaught_exceptions instead of deprecated
+	std::uncaught_exception.
+
 2020-07-02  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* macroexp.h (macro_stringify): Return
