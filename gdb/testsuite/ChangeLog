@@ -1,5 +1,9 @@
 2021-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.base/startup-file.exp: Add more tests.
+
+2021-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	PR cli/25956
 	* gdb.base/early-init-file.c: New file.
 	* gdb.base/early-init-file.exp: New file.

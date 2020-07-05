@@ -94,6 +94,13 @@ memory-tag set-allocation-tag ADDRESS LENGTH TAGS
 memory-tag check POINTER
   Validate that POINTER's logical tag matches the allocation tag.
 
+set startup-quietly on|off
+show startup-quietly
+  When 'on', this causes GDB to act as if "-silent" were passed on the
+  command line.  This command needs to be added to an early
+  initialization file (e.g. ~/.config/gdb/gdbearlyinit) in order to
+  affect GDB.
+
 * Changed commands
 
 break [PROBE_MODIFIER] [LOCATION] [thread THREADNUM]

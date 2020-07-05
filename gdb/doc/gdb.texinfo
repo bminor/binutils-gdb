@@ -1112,6 +1112,14 @@ are still loaded.
 ``Quiet''.  Do not print the introductory and copyright messages.  These
 messages are also suppressed in batch mode.
 
+@kindex set startup-quietly
+@kindex show startup-quietly
+This can also be enabled using @code{set startup-quietly on}.  The
+default is @code{off}.  Use @code{show startup-quietly} to see the
+current setting.  Place @code{set startup-quietly on} into your early
+initialization file (@pxref{Initialization Files,,Initialization
+Files}) to have future @value{GDBN} sessions startup quietly.
+
 @item -batch
 @cindex @code{--batch}
 Run in batch mode.  Exit with status @code{0} after processing all the

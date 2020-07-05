@@ -1,3 +1,14 @@
+2021-04-15  Tom Tromey  <tom@tromey.com>
+	    Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* NEWS: Add entry.
+	* main.c (captured_main_1): Call check_quiet_mode.
+	* top.c (startup_quiet): New global.
+	(check_quiet_mode): New function.
+	(show_startup_quiet): New function.
+	(init_main): Register new command.
+	* top.h (check_quiet_mode): Declare.
+
 2021-04-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR cli/25956
