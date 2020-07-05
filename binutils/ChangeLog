@@ -1,3 +1,11 @@
+2020-11-22  Alan Modra  <amodra@gmail.com>
+
+	PR 26929
+	Apply from mainline
+	2020-07-06  Alan Modra  <amodra@gmail.com>
+	* readelf.c (print_dynamic_symbol): Don't sprintf to buffer to
+	find string length.
+
 2020-11-16  Mark Wielaard  <mark@klomp.org>
 
 	Backport from the mainline:
