@@ -1,5 +1,62 @@
 2020-07-07  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-scripts/align.exp: Don't exclude xcoff.  Pass
+	-bnogc ld option for xcoff.
+	* testsuite/ld-scripts/provide.exp: Likewise.
+	* testsuite/ld-scripts/data.exp: Pass -bnogc ld option for xcoff.
+	* testsuite/ld-scripts/default-script.exp: Likewise.
+	* testsuite/ld-scripts/defined.exp: Likewise.
+	* testsuite/ld-scripts/empty-address.exp: Likewise.
+	* testsuite/ld-scripts/expr.exp: Likewise.
+	* testsuite/ld-scripts/include.exp: Likewise.
+	* testsuite/ld-scripts/script.exp: Likewise.
+	* testsuite/ld-scripts/assign-loc.d: Don't exclude xcoff.
+	* testsuite/ld-scripts/defined3.d: Likewise.
+	* testsuite/ld-scripts/defined4.d: Likewise.
+	* testsuite/ld-scripts/pr18963.d: Likewise.
+	* testsuite/ld-scripts/sane1.d: Likewise.
+	* testsuite/ld-scripts/segment-start.d: Likewise.
+	* testsuite/ld-scripts/include-1.d: Likewise, and relax text vma.
+	* testsuite/ld-scripts/defined5.d: Update xfail and comment.
+	* testsuite/ld-scripts/defined5.s: Tweak "defined" to be at
+	non-zero section offset.
+	* testsuite/ld-scripts/fill16.d: xfail for xcoff.
+	* testsuite/ld-scripts/provide-2.d: Accept more symbols.
+	* testsuite/ld-scripts/provide-4.d: Likewise.
+	* testsuite/ld-scripts/provide-5.d: Likewise.
+	* testsuite/ld-scripts/provide-6.d: Likewise.
+	* testsuite/ld-scripts/provide-7.d: Likewise.
+	* testsuite/ld-scripts/align.t: Accept xcoff mapped .text and .data.
+	* testsuite/ld-scripts/defined3.t: Likewise.
+	* testsuite/ld-scripts/defined4.t: Likewise.
+	* testsuite/ld-scripts/defined5.t: Likewise.
+	* testsuite/ld-scripts/fill.t: Likewise.
+	* testsuite/ld-scripts/include-subdata.t: Likewise.
+	* testsuite/ld-scripts/provide-1.t: Likewise.
+	* testsuite/ld-scripts/provide-2.t: Likewise.
+	* testsuite/ld-scripts/provide-3.t: Likewise.
+	* testsuite/ld-scripts/provide-4.t: Likewise.
+	* testsuite/ld-scripts/provide-5.t: Likewise.
+	* testsuite/ld-scripts/provide-6.t: Likewise.
+	* testsuite/ld-scripts/provide-7.t: Likewise.
+	* testsuite/ld-scripts/provide-8.t: Likewise.
+	* testsuite/ld-scripts/assign-loc.t: Add required xcoff sections.
+	* testsuite/ld-scripts/sizeof.t: Likewise.
+	* testsuite/ld-scripts/align2.t: Likewise, and mapped sections.
+	* testsuite/ld-scripts/align5.t: Likewise.
+	* testsuite/ld-scripts/default-script.t: Likewise.
+	* testsuite/ld-scripts/empty-address-1.t: Likewise.
+	* testsuite/ld-scripts/empty-address-2a.t: Likewise.
+	* testsuite/ld-scripts/empty-address-2b.t: Likewise.
+	* testsuite/ld-scripts/empty-address-3a.t: Likewise.
+	* testsuite/ld-scripts/empty-address-3b.t: Likewise.
+	* testsuite/ld-scripts/empty-address-3c.t: Likewise.
+	* testsuite/ld-scripts/include-sections.t: Likewise.
+	* testsuite/ld-scripts/pr14962.t: Likewise.
+	* testsuite/ld-scripts/sane1.t: Likewise.
+
+2020-07-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-scripts/align.exp: Use is_pecoff_format.
 	* testsuite/ld-scripts/defined.exp: Likewise.
 	* testsuite/ld-scripts/provide.exp: Likewise.

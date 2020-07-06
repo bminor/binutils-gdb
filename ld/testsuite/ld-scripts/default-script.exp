@@ -21,6 +21,8 @@
 set old_ldflags $LDFLAGS
 if { [istarget spu*-*-*] } {
     set LDFLAGS "$LDFLAGS --local-store 0:0"
+} elseif { [is_xcoff_format] } {
+    set LDFLAGS "$LDFLAGS -bnogc"
 }
 
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/default-script*.d]]

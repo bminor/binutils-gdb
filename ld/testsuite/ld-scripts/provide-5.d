@@ -4,3 +4,4 @@
 #map: provide-5.map
 #...
 0+10 A foo
+#pass

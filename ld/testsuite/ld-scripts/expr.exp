@@ -24,6 +24,8 @@ if { [istarget spu*-*-*] } then {
     set LDFLAGS "$LDFLAGS --no-overlays --local-store 0:0"
 } elseif { [is_pecoff_format] } then {
     set LDFLAGS "$LDFLAGS --image-base 0"
+} elseif { [is_xcoff_format] } then {
+    set LDFLAGS "$LDFLAGS -bnogc"
 }
 
 run_dump_test expr1

@@ -1,9 +1,8 @@
 # source: data.s
 # ld: -T pr18963.t
 # nm: -B -n
-# notarget: *-*-aix* *-*-vms
-# Skip on AIX targets because they require non-empty sections.
-# Plus skip for VMS based targets as the linker automatically adds extra libraries that may not be present in a cross build.
+# notarget: *-*-vms
+# Skip for VMS based targets as the linker automatically adds extra libraries that may not be present in a cross build.
 # 64-bit Cygwin targets always start their sections at 0x200000000 which is why the regexps include a 2.
 
 #...

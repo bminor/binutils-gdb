@@ -27,6 +27,13 @@ if {[is_aout_format]} {
 	return
 }
 
+set old_LDFLAGS $LDFLAGS
+if { [is_xcoff_format] } then {
+    set LDFLAGS "$LDFLAGS -bnogc"
+}
+
 run_dump_test data
 run_dump_test fill
 run_dump_test fill16
+
+set LDFLAGS $old_LDFLAGS
