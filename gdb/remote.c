@@ -429,6 +429,7 @@ public:
   void commit_resumed () override;
   void resume (ptid_t, int, enum gdb_signal) override;
   ptid_t wait (ptid_t, struct target_waitstatus *, target_wait_flags) override;
+  bool has_pending_events () override;
 
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
@@ -6818,6 +6819,26 @@ remote_target::commit_resumed ()
     }
 
   vcont_builder.flush ();
+}
+
+/* Implementation of target_has_pending_events.  */
+
+bool
+remote_target::has_pending_events ()
+{
+  if (target_can_async_p ())
+    {
+      remote_state *rs = get_remote_state ();
+
+      if (async_event_handler_marked (rs->remote_async_inferior_event_token))
+	return true;
+
+      /* Note that BUFCNT can be negative, indicating sticky
+	 error.  */
+      if (rs->remote_desc->bufcnt != 0)
+	return true;
+    }
+  return false;
 }
 
 

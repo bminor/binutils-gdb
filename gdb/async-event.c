@@ -308,6 +308,14 @@ clear_async_event_handler (async_event_handler *async_handler_ptr)
   async_handler_ptr->ready = 0;
 }
 
+/* See event-loop.h.  */
+
+bool
+async_event_handler_marked (async_event_handler *handler)
+{
+  return handler->ready;
+}
+
 /* Check if asynchronous event handlers are ready, and call the
    handler function for one that is.  */
 

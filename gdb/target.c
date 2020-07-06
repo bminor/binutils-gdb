@@ -2679,6 +2679,14 @@ target_commit_resumed ()
   current_inferior ()->top_target ()->commit_resumed ();
 }
 
+/* See target.h.  */
+
+bool
+target_has_pending_events ()
+{
+  return current_inferior ()->top_target ()->has_pending_events ();
+}
+
 void
 target_pass_signals (gdb::array_view<const unsigned char> pass_signals)
 {

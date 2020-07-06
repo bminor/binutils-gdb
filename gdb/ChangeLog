@@ -1,6 +1,21 @@
 2021-03-26  Simon Marchi  <simon.marchi@efficios.com>
 	    Pedro Alves  <pedro@palves.net>
 
+	* async-event.c: Include "infrun.h".
+	(async_event_handler_marked): New.
+	* async-event.h (async_event_handler_marked): Declare.
+	* infrun.c (maybe_set_commit_resumed_all_targets): Switch to
+	inferior before calling target method.  Don't commit-resumed if
+	target_has_pending_events is true.
+	* remote.c (remote_target::has_pending_events): New.
+	* target-delegates.c: Regenerate.
+	* target.c (target_has_pending_events): New.
+	* target.h (target_ops::has_pending_events): New target method.
+	(target_has_pending_events): New.
+
+2021-03-26  Simon Marchi  <simon.marchi@efficios.com>
+	    Pedro Alves  <pedro@palves.net>
+
 	* infcmd.c (run_command_1, attach_command, detach_command)
 	(interrupt_target_1): Use scoped_disable_commit_resumed.
 	* infrun.c (do_target_resume): Remove

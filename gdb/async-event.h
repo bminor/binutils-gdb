@@ -78,6 +78,9 @@ extern void
    loop.  */
 extern void mark_async_event_handler (struct async_event_handler *handler);
 
+/* Return true if HANDLER is marked.  */
+extern bool async_event_handler_marked (async_event_handler *handler);
+
 /* Mark the handler (ASYNC_HANDLER_PTR) as NOT ready.  */
 
 extern void clear_async_event_handler (struct async_event_handler *handler);

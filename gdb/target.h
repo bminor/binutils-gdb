@@ -719,6 +719,15 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
     virtual int async_wait_fd ()
       TARGET_DEFAULT_NORETURN (noprocess ());
+    /* Return true if the target has pending events to report to the
+       core.  If true, then GDB avoids resuming the target until all
+       pending events are consumed, so that multiple resumptions can
+       be coalesced as an optimization.  Most targets can't tell
+       whether they have pending events without calling target_wait,
+       so we default to returning false.  The only downside is that a
+       potential optimization is missed.  */
+    virtual bool has_pending_events ()
+      TARGET_DEFAULT_RETURN (false);
     virtual void thread_events (int)
       TARGET_DEFAULT_IGNORE ();
     /* This method must be implemented in some situations.  See the
@@ -1484,6 +1493,11 @@ extern ptid_t default_target_wait (struct target_ops *ops,
 				   ptid_t ptid,
 				   struct target_waitstatus *status,
 				   target_wait_flags options);
+
+/* Return true if the target has pending events to report to the core.
+   See target_ops::has_pending_events().  */
+
+extern bool target_has_pending_events ();
 
 /* Fetch at least register REGNO, or all regs if regno == -1.  No result.  */
 
