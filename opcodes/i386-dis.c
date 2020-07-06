@@ -2071,26 +2071,19 @@ enum
   EVEX_W_0F3835_P_1,
   EVEX_W_0F3835_P_2,
   EVEX_W_0F3837_P_2,
-  EVEX_W_0F3838_P_1,
-  EVEX_W_0F3839_P_1,
   EVEX_W_0F383A_P_1,
-  EVEX_W_0F3840_P_2,
   EVEX_W_0F3852_P_1,
   EVEX_W_0F3854_P_2,
-  EVEX_W_0F3855_P_2,
   EVEX_W_0F3859_P_2,
   EVEX_W_0F385A_P_2,
   EVEX_W_0F385B_P_2,
   EVEX_W_0F3862_P_2,
   EVEX_W_0F3863_P_2,
   EVEX_W_0F3866_P_2,
-  EVEX_W_0F3868_P_3,
   EVEX_W_0F3870_P_2,
-  EVEX_W_0F3871_P_2,
   EVEX_W_0F3872_P_1,
   EVEX_W_0F3872_P_2,
   EVEX_W_0F3872_P_3,
-  EVEX_W_0F3873_P_2,
   EVEX_W_0F3875_P_2,
   EVEX_W_0F387A_P_2,
   EVEX_W_0F387B_P_2,
@@ -2127,16 +2120,8 @@ enum
   EVEX_W_0F3A3F_P_2,
   EVEX_W_0F3A42_P_2,
   EVEX_W_0F3A43_P_2,
-  EVEX_W_0F3A50_P_2,
-  EVEX_W_0F3A51_P_2,
-  EVEX_W_0F3A56_P_2,
-  EVEX_W_0F3A57_P_2,
-  EVEX_W_0F3A66_P_2,
-  EVEX_W_0F3A67_P_2,
   EVEX_W_0F3A70_P_2,
-  EVEX_W_0F3A71_P_2,
   EVEX_W_0F3A72_P_2,
-  EVEX_W_0F3A73_P_2,
 };
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
@@ -12626,17 +12611,18 @@ putop (const char *in_template, int sizeflag)
   const char *p;
   int alt = 0;
   int cond = 1;
-  unsigned int l = 0, len = 1;
+  unsigned int l = 0, len = 0;
   char last[4];
-
-#define SAVE_LAST(c)			\
-  if (l < len && l < sizeof (last))	\
-    last[l++] = c;			\
-  else					\
-    abort ();
 
   for (p = in_template; *p; p++)
     {
+      if (len > l)
+	{
+	  if (l >= sizeof (last) || !ISUPPER (*p))
+	    abort ();
+	  last[l++] = *p;
+	  continue;
+	}
       switch (*p)
 	{
 	default:
@@ -12674,7 +12660,7 @@ putop (const char *in_template, int sizeflag)
 	    *obufp++ = 'b';
 	  break;
 	case 'B':
-	  if (l == 0 && len == 1)
+	  if (l == 0)
 	    {
 	    case_B:
 	      if (intel_syntax)
@@ -12682,16 +12668,8 @@ putop (const char *in_template, int sizeflag)
 	      if (sizeflag & SUFFIX_ALWAYS)
 		*obufp++ = 'b';
 	    }
-	  else
+	  else if (l == 1 && last[0] == 'L')
 	    {
-	      if (l != 1
-		  || len != 2
-		  || last[0] != 'L')
-		{
-		  SAVE_LAST (*p);
-		  break;
-		}
-
 	      if (address_mode == mode_64bit
 		  && !(prefixes & PREFIX_ADDR))
 		{
@@ -12702,6 +12680,8 @@ putop (const char *in_template, int sizeflag)
 
 	      goto case_B;
 	    }
+	  else
+	    abort ();
 	  break;
 	case 'C':
 	  if (intel_syntax && !alt)
@@ -12793,13 +12773,10 @@ putop (const char *in_template, int sizeflag)
 	    *obufp++ = 'd';
 	  break;
 	case 'Z':
-	  if (l != 0 || len != 1)
+	  if (l != 0)
 	    {
-	      if (l != 1 || len != 2 || last[0] != 'X')
-		{
-		  SAVE_LAST (*p);
-		  break;
-		}
+	      if (l != 1 || last[0] != 'X')
+		abort ();
 	      if (!need_vex || !vex.evex)
 		abort ();
 	      if (intel_syntax
@@ -12831,11 +12808,8 @@ putop (const char *in_template, int sizeflag)
 	  /* Fall through.  */
 	  goto case_L;
 	case 'L':
-	  if (l != 0 || len != 1)
-	    {
-	      SAVE_LAST (*p);
-	      break;
-	    }
+	  if (l != 0)
+	    abort ();
 	case_L:
 	  if (intel_syntax)
 	    break;
@@ -12883,7 +12857,7 @@ putop (const char *in_template, int sizeflag)
 	  /* Fall through.  */
 	  goto case_P;
 	case 'P':
-	  if (l == 0 && len == 1)
+	  if (l == 0)
 	    {
 	    case_P:
 	      if (intel_syntax)
@@ -12914,14 +12888,8 @@ putop (const char *in_template, int sizeflag)
 		    }
 		}
 	    }
-	  else
+	  else if (l == 1 && last[0] == 'L')
 	    {
-	      if (l != 1 || len != 2 || last[0] != 'L')
-		{
-		  SAVE_LAST (*p);
-		  break;
-		}
-
 	      if ((prefixes & PREFIX_DATA)
 		  || (rex & REX_W)
 		  || (sizeflag & SUFFIX_ALWAYS))
@@ -12939,6 +12907,8 @@ putop (const char *in_template, int sizeflag)
 		    }
 		}
 	    }
+	  else
+	    abort ();
 	  break;
 	case 'U':
 	  if (intel_syntax)
@@ -12953,7 +12923,7 @@ putop (const char *in_template, int sizeflag)
 	  /* Fall through.  */
 	  goto case_Q;
 	case 'Q':
-	  if (l == 0 && len == 1)
+	  if (l == 0)
 	    {
 	    case_Q:
 	      if (intel_syntax && !alt)
@@ -12973,13 +12943,8 @@ putop (const char *in_template, int sizeflag)
 		    }
 		}
 	    }
-	  else
+	  else if (l == 1 && last[0] == 'L')
 	    {
-	      if (l != 1 || len != 2 || last[0] != 'L')
-		{
-		  SAVE_LAST (*p);
-		  break;
-		}
 	      if ((intel_syntax && need_modrm)
 		  || (modrm.mod == 3 && !(sizeflag & SUFFIX_ALWAYS)))
 		break;
@@ -12992,6 +12957,8 @@ putop (const char *in_template, int sizeflag)
 		      || (sizeflag & SUFFIX_ALWAYS))
 		*obufp++ = intel_syntax? 'd' : 'l';
 	    }
+	  else
+	    abort ();
 	  break;
 	case 'R':
 	  USED_REX (REX_W);
@@ -13013,7 +12980,7 @@ putop (const char *in_template, int sizeflag)
 	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
 	case 'V':
-	  if (l == 0 && len == 1)
+	  if (l == 0)
 	    {
 	      if (intel_syntax)
 		break;
@@ -13025,16 +12992,8 @@ putop (const char *in_template, int sizeflag)
 		  break;
 		}
 	    }
-	  else
+	  else if (l == 1 && last[0] == 'L')
 	    {
-	      if (l != 1
-		  || len != 2
-		  || last[0] != 'L')
-		{
-		  SAVE_LAST (*p);
-		  break;
-		}
-
 	      if (rex & REX_W)
 		{
 		  *obufp++ = 'a';
@@ -13042,10 +13001,12 @@ putop (const char *in_template, int sizeflag)
 		  *obufp++ = 's';
 		}
 	    }
+	  else
+	    abort ();
 	  /* Fall through.  */
 	  goto case_S;
 	case 'S':
-	  if (l == 0 && len == 1)
+	  if (l == 0)
 	    {
 	    case_S:
 	      if (intel_syntax)
@@ -13064,16 +13025,8 @@ putop (const char *in_template, int sizeflag)
 		    }
 		}
 	    }
-	  else
+	  else if (l == 1 && last[0] == 'L')
 	    {
-	      if (l != 1
-		  || len != 2
-		  || last[0] != 'L')
-		{
-		  SAVE_LAST (*p);
-		  break;
-		}
-
 	      if (address_mode == mode_64bit
 		  && !(prefixes & PREFIX_ADDR))
 		{
@@ -13084,13 +13037,12 @@ putop (const char *in_template, int sizeflag)
 
 	      goto case_S;
 	    }
+	  else
+	    abort ();
 	  break;
 	case 'X':
-	  if (l != 0 || len != 1)
-	    {
-	      SAVE_LAST (*p);
-	      break;
-	    }
+	  if (l != 0)
+	    abort ();
 	  if (need_vex
 	      ? vex.prefix == DATA_PREFIX_OPCODE
 	      : prefixes & PREFIX_DATA)
@@ -13102,15 +13054,8 @@ putop (const char *in_template, int sizeflag)
 	    *obufp++ = 's';
 	  break;
 	case 'Y':
-	  if (l == 0 && len == 1)
-	    abort ();
-	  else
+	  if (l == 1 && last[0] == 'X')
 	    {
-	      if (l != 1 || len != 2 || last[0] != 'X')
-		{
-		  SAVE_LAST (*p);
-		  break;
-		}
 	      if (!need_vex)
 		abort ();
 	      if (intel_syntax
@@ -13130,9 +13075,11 @@ putop (const char *in_template, int sizeflag)
 		    abort ();
 		}
 	    }
+	  else
+	    abort ();
 	  break;
 	case 'W':
-	  if (l == 0 && len == 1)
+	  if (l == 0)
 	    {
 	      /* operand size flag for cwtl, cbtw */
 	      USED_REX (REX_W);
@@ -13150,23 +13097,19 @@ putop (const char *in_template, int sizeflag)
 	      if (!(rex & REX_W))
 		used_prefixes |= (prefixes & PREFIX_DATA);
 	    }
-	  else
+	  else if (l == 1)
 	    {
-	      if (l != 1
-		  || len != 2
-		  || (last[0] != 'X'
-		      && last[0] != 'L'))
-		{
-		  SAVE_LAST (*p);
-		  break;
-		}
 	      if (!need_vex)
 		abort ();
 	      if (last[0] == 'X')
 		*obufp++ = vex.w ? 'd': 's';
-	      else
+	      else if (last[0] == 'L')
 		*obufp++ = vex.w ? 'q': 'd';
+	      else
+		abort ();
 	    }
+	  else
+	    abort ();
 	  break;
 	case '^':
 	  if (intel_syntax)
@@ -13201,6 +13144,9 @@ putop (const char *in_template, int sizeflag)
 	    }
 	  break;
 	}
+
+      if (len == l)
+	len = l = 0;
     }
   *obufp = 0;
   mnemonicendp = obufp;

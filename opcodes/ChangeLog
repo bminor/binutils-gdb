@@ -1,5 +1,19 @@
 2020-07-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (EVEX_W_0F3838_P_1,
+	EVEX_W_0F3839_P_1, EVEX_W_0F3840_P_2, EVEX_W_0F3855_P_2,
+	EVEX_W_0F3868_P_3, EVEX_W_0F3871_P_2, EVEX_W_0F3873_P_2,
+	EVEX_W_0F3A50_P_2, EVEX_W_0F3A51_P_2, EVEX_W_0F3A56_P_2,
+	EVEX_W_0F3A57_P_2, EVEX_W_0F3A66_P_2, EVEX_W_0F3A67_P_2,
+	EVEX_W_0F3A71_P_2, EVEX_W_0F3A73_P_2): Delete.
+	(putop): Centralize management of last[]. Delete SAVE_LAST.
+	* i386-dis-evex-w.h: Move entries for opcodes 0F3838, 0F3839,
+	0F3840, 0F3855, 0F3868, 0F3871, 0F3873, 0F3A50, 0F3A51, 0F3A56,
+	0F3A57, 0F3A66, 0F3A67,	0F3A71, and 0F3A73 ...
+	* i386-dis-evex-prefix.h: here.
+
+2020-07-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (MOD_EVEX_0F381A_P_2_W_0, MOD_EVEX_0F381A_P_2_W_1,
 	MOD_EVEX_0F381B_P_2_W_0, MOD_EVEX_0F381B_P_2_W_1,
 	MOD_EVEX_0F385A_P_2_W_0, MOD_EVEX_0F385A_P_2_W_1,
