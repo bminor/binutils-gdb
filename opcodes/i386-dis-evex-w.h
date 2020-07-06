@@ -1,11 +1,11 @@
   /* EVEX_W_0F10_P_1 */
   {
-    { "vmovss",	{ XMVexScalar, VexScalar, EXdScalar }, 0 },
+    { "vmovss",	{ XMVexScalar, VexScalar, EXxmm_md }, 0 },
   },
   /* EVEX_W_0F10_P_3 */
   {
     { Bad_Opcode },
-    { "vmovsd",	{ XMVexScalar, VexScalar, EXqScalar }, 0 },
+    { "vmovsd",	{ XMVexScalar, VexScalar, EXxmm_mq }, 0 },
   },
   /* EVEX_W_0F11_P_1 */
   {

@@ -37,6 +37,7 @@
 #include "opintl.h"
 #include "opcode/i386.h"
 #include "libiberty.h"
+#include "safe-ctype.h"
 
 #include <setjmp.h>
 
@@ -383,10 +384,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EXw { OP_EX, w_mode }
 #define EXwScalar { OP_EX, w_scalar_mode }
 #define EXd { OP_EX, d_mode }
-#define EXdScalar { OP_EX, d_scalar_mode }
 #define EXdS { OP_EX, d_swap_mode }
 #define EXq { OP_EX, q_mode }
-#define EXqScalar { OP_EX, q_scalar_mode }
 #define EXqScalarS { OP_EX, q_scalar_swap_mode }
 #define EXqS { OP_EX, q_swap_mode }
 #define EXx { OP_EX, x_mode }
@@ -604,12 +603,8 @@ enum
   b_scalar_mode,
   /* like w_mode, ignore vector length.  */
   w_scalar_mode,
-  /* like d_mode, ignore vector length.  */
-  d_scalar_mode,
   /* like d_swap_mode, ignore vector length.  */
   d_scalar_swap_mode,
-  /* like q_mode, ignore vector length.  */
-  q_scalar_mode,
   /* like q_swap_mode, ignore vector length.  */
   q_scalar_swap_mode,
   /* like vex_mode, ignore vector length.  */
@@ -4633,9 +4628,9 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0F10 */
   {
     { "vmovups",	{ XM, EXx }, 0 },
-    { "vmovss",		{ XMVexScalar, VexScalar, EXdScalar }, 0 },
+    { "vmovss",		{ XMVexScalar, VexScalar, EXxmm_md }, 0 },
     { "vmovupd",	{ XM, EXx }, 0 },
-    { "vmovsd",		{ XMVexScalar, VexScalar, EXqScalar }, 0 },
+    { "vmovsd",		{ XMVexScalar, VexScalar, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F11 */
@@ -4672,31 +4667,31 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0F2C */
   {
     { Bad_Opcode },
-    { "vcvttss2si",	{ Gdq, EXdScalar }, 0 },
+    { "vcvttss2si",	{ Gdq, EXxmm_md }, 0 },
     { Bad_Opcode },
-    { "vcvttsd2si",	{ Gdq, EXqScalar }, 0 },
+    { "vcvttsd2si",	{ Gdq, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F2D */
   {
     { Bad_Opcode },
-    { "vcvtss2si",	{ Gdq, EXdScalar }, 0 },
+    { "vcvtss2si",	{ Gdq, EXxmm_md }, 0 },
     { Bad_Opcode },
-    { "vcvtsd2si",	{ Gdq, EXqScalar }, 0 },
+    { "vcvtsd2si",	{ Gdq, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F2E */
   {
-    { "vucomiss",	{ XMScalar, EXdScalar }, 0 },
+    { "vucomiss",	{ XMScalar, EXxmm_md }, 0 },
     { Bad_Opcode },
-    { "vucomisd",	{ XMScalar, EXqScalar }, 0 },
+    { "vucomisd",	{ XMScalar, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F2F */
   {
-    { "vcomiss",	{ XMScalar, EXdScalar }, 0 },
+    { "vcomiss",	{ XMScalar, EXxmm_md }, 0 },
     { Bad_Opcode },
-    { "vcomisd",	{ XMScalar, EXqScalar }, 0 },
+    { "vcomisd",	{ XMScalar, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F41 */
@@ -4758,45 +4753,45 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0F51 */
   {
     { "vsqrtps",	{ XM, EXx }, 0 },
-    { "vsqrtss",	{ XMScalar, VexScalar, EXdScalar }, 0 },
+    { "vsqrtss",	{ XMScalar, VexScalar, EXxmm_md }, 0 },
     { "vsqrtpd",	{ XM, EXx }, 0 },
-    { "vsqrtsd",	{ XMScalar, VexScalar, EXqScalar }, 0 },
+    { "vsqrtsd",	{ XMScalar, VexScalar, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F52 */
   {
     { "vrsqrtps",	{ XM, EXx }, 0 },
-    { "vrsqrtss",	{ XMScalar, VexScalar, EXdScalar }, 0 },
+    { "vrsqrtss",	{ XMScalar, VexScalar, EXxmm_md }, 0 },
   },
 
   /* PREFIX_VEX_0F53 */
   {
     { "vrcpps",		{ XM, EXx }, 0 },
-    { "vrcpss",		{ XMScalar, VexScalar, EXdScalar }, 0 },
+    { "vrcpss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
   },
 
   /* PREFIX_VEX_0F58 */
   {
     { "vaddps",		{ XM, Vex, EXx }, 0 },
-    { "vaddss",		{ XMScalar, VexScalar, EXdScalar }, 0 },
+    { "vaddss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
     { "vaddpd",		{ XM, Vex, EXx }, 0 },
-    { "vaddsd",		{ XMScalar, VexScalar, EXqScalar }, 0 },
+    { "vaddsd",		{ XMScalar, VexScalar, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F59 */
   {
     { "vmulps",		{ XM, Vex, EXx }, 0 },
-    { "vmulss",		{ XMScalar, VexScalar, EXdScalar }, 0 },
+    { "vmulss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
     { "vmulpd",		{ XM, Vex, EXx }, 0 },
-    { "vmulsd",		{ XMScalar, VexScalar, EXqScalar }, 0 },
+    { "vmulsd",		{ XMScalar, VexScalar, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F5A */
   {
     { "vcvtps2pd",	{ XM, EXxmmq }, 0 },
-    { "vcvtss2sd",	{ XMScalar, VexScalar, EXdScalar }, 0 },
+    { "vcvtss2sd",	{ XMScalar, VexScalar, EXxmm_md }, 0 },
     { "vcvtpd2ps%XY",{ XMM, EXx }, 0 },
-    { "vcvtsd2ss",	{ XMScalar, VexScalar, EXqScalar }, 0 },
+    { "vcvtsd2ss",	{ XMScalar, VexScalar, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F5B */
@@ -4809,33 +4804,33 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0F5C */
   {
     { "vsubps",		{ XM, Vex, EXx }, 0 },
-    { "vsubss",		{ XMScalar, VexScalar, EXdScalar }, 0 },
+    { "vsubss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
     { "vsubpd",		{ XM, Vex, EXx }, 0 },
-    { "vsubsd",		{ XMScalar, VexScalar, EXqScalar }, 0 },
+    { "vsubsd",		{ XMScalar, VexScalar, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F5D */
   {
     { "vminps",		{ XM, Vex, EXx }, 0 },
-    { "vminss",		{ XMScalar, VexScalar, EXdScalar }, 0 },
+    { "vminss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
     { "vminpd",		{ XM, Vex, EXx }, 0 },
-    { "vminsd",		{ XMScalar, VexScalar, EXqScalar }, 0 },
+    { "vminsd",		{ XMScalar, VexScalar, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F5E */
   {
     { "vdivps",		{ XM, Vex, EXx }, 0 },
-    { "vdivss",		{ XMScalar, VexScalar, EXdScalar }, 0 },
+    { "vdivss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
     { "vdivpd",		{ XM, Vex, EXx }, 0 },
-    { "vdivsd",		{ XMScalar, VexScalar, EXqScalar }, 0 },
+    { "vdivsd",		{ XMScalar, VexScalar, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F5F */
   {
     { "vmaxps",		{ XM, Vex, EXx }, 0 },
-    { "vmaxss",		{ XMScalar, VexScalar, EXdScalar }, 0 },
+    { "vmaxss",		{ XMScalar, VexScalar, EXxmm_md }, 0 },
     { "vmaxpd",		{ XM, Vex, EXx }, 0 },
-    { "vmaxsd",		{ XMScalar, VexScalar, EXqScalar }, 0 },
+    { "vmaxsd",		{ XMScalar, VexScalar, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F60 */
@@ -5131,9 +5126,9 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0FC2 */
   {
     { "vcmpps",		{ XM, Vex, EXx, VCMP }, 0 },
-    { "vcmpss",		{ XMScalar, VexScalar, EXdScalar, VCMP }, 0 },
+    { "vcmpss",		{ XMScalar, VexScalar, EXxmm_md, VCMP }, 0 },
     { "vcmppd",		{ XM, Vex, EXx, VCMP }, 0 },
-    { "vcmpsd",		{ XMScalar, VexScalar, EXqScalar, VCMP }, 0 },
+    { "vcmpsd",		{ XMScalar, VexScalar, EXxmm_mq, VCMP }, 0 },
   },
 
   /* PREFIX_VEX_0FC4 */
@@ -6336,14 +6331,14 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vroundss",	{ XMScalar, VexScalar, EXdScalar, Ib }, 0 },
+    { "vroundss",	{ XMScalar, VexScalar, EXxmm_md, Ib }, 0 },
   },
 
   /* PREFIX_VEX_0F3A0B */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vroundsd",	{ XMScalar, VexScalar, EXqScalar, Ib }, 0 },
+    { "vroundsd",	{ XMScalar, VexScalar, EXxmm_mq, Ib }, 0 },
   },
 
   /* PREFIX_VEX_0F3A0C */
@@ -9403,7 +9398,7 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F7E_P_1 */
   {
-    { "vmovq",		{ XMScalar, EXqScalar }, 0 },
+    { "vmovq",		{ XMScalar, EXxmm_mq }, 0 },
   },
 
   /* VEX_LEN_0F7E_P_2 */
@@ -13513,14 +13508,12 @@ intel_operand_size (int bytemode, int sizeflag)
       used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     case d_mode:
-    case d_scalar_mode:
     case d_scalar_swap_mode:
     case d_swap_mode:
     case dqd_mode:
       oappend ("DWORD PTR ");
       break;
     case q_mode:
-    case q_scalar_mode:
     case q_scalar_swap_mode:
     case q_swap_mode:
       oappend ("QWORD PTR ");
@@ -14016,7 +14009,6 @@ OP_E_memory (int bytemode, int sizeflag)
 	  break;
 	case xmm_mq_mode:
 	case q_mode:
-	case q_scalar_mode:
 	case q_swap_mode:
 	case q_scalar_swap_mode:
 	  shift = 3;
@@ -14024,7 +14016,6 @@ OP_E_memory (int bytemode, int sizeflag)
 	case dqd_mode:
 	case xmm_md_mode:
 	case d_mode:
-	case d_scalar_mode:
 	case d_swap_mode:
 	case d_scalar_swap_mode:
 	  shift = 2;
@@ -15334,9 +15325,7 @@ OP_EX (int bytemode, int sizeflag)
       && bytemode != xmmq_mode
       && bytemode != evex_half_bcst_xmmq_mode
       && bytemode != ymm_mode
-      && bytemode != d_scalar_mode
       && bytemode != d_scalar_swap_mode
-      && bytemode != q_scalar_mode
       && bytemode != q_scalar_swap_mode
       && bytemode != vex_scalar_w_dq_mode)
     {

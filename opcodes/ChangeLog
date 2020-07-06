@@ -1,3 +1,15 @@
+2020-07-06  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (safe-ctype.h): Include.
+	(EXdScalar, EXqScalar): Delete.
+	(d_scalar_mode, q_scalar_mode): Delete.
+	(prefix_table, vex_len_table): Use EXxmm_md in place of
+	EXdScalar and EXxmm_mq in place of EXqScalar.
+	(intel_operand_size, OP_E_memory, OP_EX): Remove uses of
+	d_scalar_mode and q_scalar_mode.
+	* i386-dis-evex-w.h (vmovss): Use EXxmm_md.
+	(vmovsd): Use EXxmm_mq.
+
 2020-07-06  Yuri Chornoivan  <yurchor@ukr.net>
 
 	PR 26204
