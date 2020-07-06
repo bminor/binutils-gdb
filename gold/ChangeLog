@@ -1,5 +1,15 @@
 2020-07-06  Nick Clifton  <nickc@redhat.com>
 
+	* target-reloc.h (Default_comdat_behaviour:get): Ignore discarded
+	relocs that refer to the .gnu.build.attributes section.
+	* testsuite/script_test_7.sh: Adjust expected address of the .bss
+	section.
+	* testsuite/script_test_9.sh: Do not expect the .init section to
+	immediately follow the .text section in the mapping of sections to
+	segments.
+
+2020-07-06  Nick Clifton  <nickc@redhat.com>
+
 	* po/fr.po: Updated French translation.
 	* po/uk.po: Updated Ukranian translation.
 
