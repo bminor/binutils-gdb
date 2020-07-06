@@ -1,5 +1,13 @@
 2020-07-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis-evex-len.h (vbroadcastf32x8, vbroadcasti32x8,
+	vinsertf32x8, vinsertf64x4, vextractf32x8, vextractf64x4): Use
+	EXymm.
+	(vinserti32x8, vinserti64x4, vextracti32x8, vextracti64x4):
+	Likewise. Mark 256-bit entries invalid.
+
+2020-07-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (PREFIX_EVEX_0F62, PREFIX_EVEX_0F6A,
 	PREFIX_EVEX_0F6B, PREFIX_EVEX_0F6C, PREFIX_EVEX_0F6D,
 	PREFIX_EVEX_0FD2, PREFIX_EVEX_0FD3, PREFIX_EVEX_0FD4,

@@ -68,7 +68,7 @@ static const struct dis386 evex_len_table[][3] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vbroadcastf32x8",	{ XM, EXxmmq }, 0 },
+    { "vbroadcastf32x8",	{ XM, EXymm }, 0 },
   },
 
   /* EVEX_LEN_0F381B_P_2_W_1 */
@@ -103,7 +103,7 @@ static const struct dis386 evex_len_table[][3] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vbroadcasti32x8",	{ XM, EXxmmq }, 0 },
+    { "vbroadcasti32x8",	{ XM, EXymm }, 0 },
   },
 
   /* EVEX_LEN_0F385B_P_2_W_1 */
@@ -263,28 +263,28 @@ static const struct dis386 evex_len_table[][3] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vinsertf32x8",	{ XM, Vex, EXxmmq, Ib }, 0 },
+    { "vinsertf32x8",	{ XM, Vex, EXymm, Ib }, 0 },
   },
 
   /* EVEX_LEN_0F3A1A_P_2_W_1 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vinsertf64x4",	{ XM, Vex, EXxmmq, Ib }, 0 },
+    { "vinsertf64x4",	{ XM, Vex, EXymm, Ib }, 0 },
   },
 
   /* EVEX_LEN_0F3A1B_P_2_W_0 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vextractf32x8",	{ EXxmmq, XM, Ib }, 0 },
+    { "vextractf32x8",	{ EXymm, XM, Ib }, 0 },
   },
 
   /* EVEX_LEN_0F3A1B_P_2_W_1 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vextractf64x4",	{ EXxmmq, XM, Ib }, 0 },
+    { "vextractf64x4",	{ EXymm, XM, Ib }, 0 },
   },
 
   /* EVEX_LEN_0F3A20_P_2 */
@@ -347,29 +347,29 @@ static const struct dis386 evex_len_table[][3] = {
   /* EVEX_LEN_0F3A3A_P_2_W_0 */
   {
     { Bad_Opcode },
-    { "vinserti32x8",	{ XM, Vex, EXxmmq, Ib }, 0 },
-    { "vinserti32x8",	{ XM, Vex, EXxmmq, Ib }, 0 },
+    { Bad_Opcode },
+    { "vinserti32x8",	{ XM, Vex, EXymm, Ib }, 0 },
   },
 
   /* EVEX_LEN_0F3A3A_P_2_W_1 */
   {
     { Bad_Opcode },
-    { "vinserti64x4",	{ XM, Vex, EXxmmq, Ib }, 0 },
-    { "vinserti64x4",	{ XM, Vex, EXxmmq, Ib }, 0 },
+    { Bad_Opcode },
+    { "vinserti64x4",	{ XM, Vex, EXymm, Ib }, 0 },
   },
 
   /* EVEX_LEN_0F3A3B_P_2_W_0 */
   {
     { Bad_Opcode },
-    { "vextracti32x8",	{ EXxmmq, XM, Ib }, 0 },
-    { "vextracti32x8",	{ EXxmmq, XM, Ib }, 0 },
+    { Bad_Opcode },
+    { "vextracti32x8",	{ EXymm, XM, Ib }, 0 },
   },
 
   /* EVEX_LEN_0F3A3B_P_2_W_1 */
   {
     { Bad_Opcode },
-    { "vextracti64x4",	{ EXxmmq, XM, Ib }, 0 },
-    { "vextracti64x4",	{ EXxmmq, XM, Ib }, 0 },
+    { Bad_Opcode },
+    { "vextracti64x4",	{ EXymm, XM, Ib }, 0 },
   },
 
   /* EVEX_LEN_0F3A43_P_2_W_0 */
