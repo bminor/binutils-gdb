@@ -1,3 +1,8 @@
+2020-07-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-sh/vxworks1-lib.rd: Update expected output.
+	* testsuite/ld-sh/vxworks4.d: Likewise.
+
 2020-07-06  Yuri Chornoivan  <yurchor@ukr.net>
 
 	PR 26204
