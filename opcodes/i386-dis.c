@@ -1431,16 +1431,10 @@ enum
   PREFIX_EVEX_0F5D,
   PREFIX_EVEX_0F5E,
   PREFIX_EVEX_0F5F,
-  PREFIX_EVEX_0F60,
-  PREFIX_EVEX_0F61,
   PREFIX_EVEX_0F62,
-  PREFIX_EVEX_0F63,
   PREFIX_EVEX_0F64,
   PREFIX_EVEX_0F65,
   PREFIX_EVEX_0F66,
-  PREFIX_EVEX_0F67,
-  PREFIX_EVEX_0F68,
-  PREFIX_EVEX_0F69,
   PREFIX_EVEX_0F6A,
   PREFIX_EVEX_0F6B,
   PREFIX_EVEX_0F6C,
@@ -1472,53 +1466,23 @@ enum
   PREFIX_EVEX_0FC2,
   PREFIX_EVEX_0FC4,
   PREFIX_EVEX_0FC5,
-  PREFIX_EVEX_0FD1,
   PREFIX_EVEX_0FD2,
   PREFIX_EVEX_0FD3,
   PREFIX_EVEX_0FD4,
-  PREFIX_EVEX_0FD5,
   PREFIX_EVEX_0FD6,
-  PREFIX_EVEX_0FD8,
-  PREFIX_EVEX_0FD9,
-  PREFIX_EVEX_0FDA,
   PREFIX_EVEX_0FDB,
-  PREFIX_EVEX_0FDC,
-  PREFIX_EVEX_0FDD,
-  PREFIX_EVEX_0FDE,
   PREFIX_EVEX_0FDF,
-  PREFIX_EVEX_0FE0,
-  PREFIX_EVEX_0FE1,
   PREFIX_EVEX_0FE2,
-  PREFIX_EVEX_0FE3,
-  PREFIX_EVEX_0FE4,
-  PREFIX_EVEX_0FE5,
   PREFIX_EVEX_0FE6,
   PREFIX_EVEX_0FE7,
-  PREFIX_EVEX_0FE8,
-  PREFIX_EVEX_0FE9,
-  PREFIX_EVEX_0FEA,
   PREFIX_EVEX_0FEB,
-  PREFIX_EVEX_0FEC,
-  PREFIX_EVEX_0FED,
-  PREFIX_EVEX_0FEE,
   PREFIX_EVEX_0FEF,
-  PREFIX_EVEX_0FF1,
   PREFIX_EVEX_0FF2,
   PREFIX_EVEX_0FF3,
   PREFIX_EVEX_0FF4,
-  PREFIX_EVEX_0FF5,
-  PREFIX_EVEX_0FF6,
-  PREFIX_EVEX_0FF8,
-  PREFIX_EVEX_0FF9,
   PREFIX_EVEX_0FFA,
   PREFIX_EVEX_0FFB,
-  PREFIX_EVEX_0FFC,
-  PREFIX_EVEX_0FFD,
   PREFIX_EVEX_0FFE,
-  PREFIX_EVEX_0F3800,
-  PREFIX_EVEX_0F3804,
-  PREFIX_EVEX_0F380B,
-  PREFIX_EVEX_0F380C,
   PREFIX_EVEX_0F380D,
   PREFIX_EVEX_0F3810,
   PREFIX_EVEX_0F3811,
@@ -1527,12 +1491,9 @@ enum
   PREFIX_EVEX_0F3814,
   PREFIX_EVEX_0F3815,
   PREFIX_EVEX_0F3816,
-  PREFIX_EVEX_0F3818,
   PREFIX_EVEX_0F3819,
   PREFIX_EVEX_0F381A,
   PREFIX_EVEX_0F381B,
-  PREFIX_EVEX_0F381C,
-  PREFIX_EVEX_0F381D,
   PREFIX_EVEX_0F381E,
   PREFIX_EVEX_0F381F,
   PREFIX_EVEX_0F3820,
@@ -1561,9 +1522,7 @@ enum
   PREFIX_EVEX_0F3839,
   PREFIX_EVEX_0F383A,
   PREFIX_EVEX_0F383B,
-  PREFIX_EVEX_0F383C,
   PREFIX_EVEX_0F383D,
-  PREFIX_EVEX_0F383E,
   PREFIX_EVEX_0F383F,
   PREFIX_EVEX_0F3840,
   PREFIX_EVEX_0F3842,
@@ -1582,7 +1541,6 @@ enum
   PREFIX_EVEX_0F3853,
   PREFIX_EVEX_0F3854,
   PREFIX_EVEX_0F3855,
-  PREFIX_EVEX_0F3858,
   PREFIX_EVEX_0F3859,
   PREFIX_EVEX_0F385A,
   PREFIX_EVEX_0F385B,
@@ -1599,8 +1557,6 @@ enum
   PREFIX_EVEX_0F3875,
   PREFIX_EVEX_0F3876,
   PREFIX_EVEX_0F3877,
-  PREFIX_EVEX_0F3878,
-  PREFIX_EVEX_0F3879,
   PREFIX_EVEX_0F387A,
   PREFIX_EVEX_0F387B,
   PREFIX_EVEX_0F387C,
@@ -1618,42 +1574,16 @@ enum
   PREFIX_EVEX_0F3891,
   PREFIX_EVEX_0F3892,
   PREFIX_EVEX_0F3893,
-  PREFIX_EVEX_0F3896,
-  PREFIX_EVEX_0F3897,
-  PREFIX_EVEX_0F3898,
-  PREFIX_EVEX_0F3899,
   PREFIX_EVEX_0F389A,
   PREFIX_EVEX_0F389B,
-  PREFIX_EVEX_0F389C,
-  PREFIX_EVEX_0F389D,
-  PREFIX_EVEX_0F389E,
-  PREFIX_EVEX_0F389F,
   PREFIX_EVEX_0F38A0,
   PREFIX_EVEX_0F38A1,
   PREFIX_EVEX_0F38A2,
   PREFIX_EVEX_0F38A3,
-  PREFIX_EVEX_0F38A6,
-  PREFIX_EVEX_0F38A7,
-  PREFIX_EVEX_0F38A8,
-  PREFIX_EVEX_0F38A9,
   PREFIX_EVEX_0F38AA,
   PREFIX_EVEX_0F38AB,
-  PREFIX_EVEX_0F38AC,
-  PREFIX_EVEX_0F38AD,
-  PREFIX_EVEX_0F38AE,
-  PREFIX_EVEX_0F38AF,
   PREFIX_EVEX_0F38B4,
   PREFIX_EVEX_0F38B5,
-  PREFIX_EVEX_0F38B6,
-  PREFIX_EVEX_0F38B7,
-  PREFIX_EVEX_0F38B8,
-  PREFIX_EVEX_0F38B9,
-  PREFIX_EVEX_0F38BA,
-  PREFIX_EVEX_0F38BB,
-  PREFIX_EVEX_0F38BC,
-  PREFIX_EVEX_0F38BD,
-  PREFIX_EVEX_0F38BE,
-  PREFIX_EVEX_0F38BF,
   PREFIX_EVEX_0F38C4,
   PREFIX_EVEX_0F38C6_REG_1,
   PREFIX_EVEX_0F38C6_REG_2,
@@ -1668,22 +1598,15 @@ enum
   PREFIX_EVEX_0F38CB,
   PREFIX_EVEX_0F38CC,
   PREFIX_EVEX_0F38CD,
-  PREFIX_EVEX_0F38CF,
-  PREFIX_EVEX_0F38DC,
-  PREFIX_EVEX_0F38DD,
-  PREFIX_EVEX_0F38DE,
-  PREFIX_EVEX_0F38DF,
 
   PREFIX_EVEX_0F3A00,
   PREFIX_EVEX_0F3A01,
   PREFIX_EVEX_0F3A03,
-  PREFIX_EVEX_0F3A04,
   PREFIX_EVEX_0F3A05,
   PREFIX_EVEX_0F3A08,
   PREFIX_EVEX_0F3A09,
   PREFIX_EVEX_0F3A0A,
   PREFIX_EVEX_0F3A0B,
-  PREFIX_EVEX_0F3A0F,
   PREFIX_EVEX_0F3A14,
   PREFIX_EVEX_0F3A15,
   PREFIX_EVEX_0F3A16,
@@ -1710,7 +1633,6 @@ enum
   PREFIX_EVEX_0F3A3F,
   PREFIX_EVEX_0F3A42,
   PREFIX_EVEX_0F3A43,
-  PREFIX_EVEX_0F3A44,
   PREFIX_EVEX_0F3A50,
   PREFIX_EVEX_0F3A51,
   PREFIX_EVEX_0F3A54,
@@ -1723,8 +1645,6 @@ enum
   PREFIX_EVEX_0F3A71,
   PREFIX_EVEX_0F3A72,
   PREFIX_EVEX_0F3A73,
-  PREFIX_EVEX_0F3ACE,
-  PREFIX_EVEX_0F3ACF
 };
 
 enum
@@ -2104,7 +2024,6 @@ enum
   EVEX_W_0FFA_P_2,
   EVEX_W_0FFB_P_2,
   EVEX_W_0FFE_P_2,
-  EVEX_W_0F380C_P_2,
   EVEX_W_0F380D_P_2,
   EVEX_W_0F3810_P_1,
   EVEX_W_0F3810_P_2,
@@ -2116,7 +2035,6 @@ enum
   EVEX_W_0F3813_P_2,
   EVEX_W_0F3814_P_1,
   EVEX_W_0F3815_P_1,
-  EVEX_W_0F3818_P_2,
   EVEX_W_0F3819_P_2,
   EVEX_W_0F381A_P_2,
   EVEX_W_0F381B_P_2,
@@ -2153,7 +2071,6 @@ enum
   EVEX_W_0F3852_P_1,
   EVEX_W_0F3854_P_2,
   EVEX_W_0F3855_P_2,
-  EVEX_W_0F3858_P_2,
   EVEX_W_0F3859_P_2,
   EVEX_W_0F385A_P_2,
   EVEX_W_0F385B_P_2,
@@ -2168,8 +2085,6 @@ enum
   EVEX_W_0F3872_P_3,
   EVEX_W_0F3873_P_2,
   EVEX_W_0F3875_P_2,
-  EVEX_W_0F3878_P_2,
-  EVEX_W_0F3879_P_2,
   EVEX_W_0F387A_P_2,
   EVEX_W_0F387B_P_2,
   EVEX_W_0F387D_P_2,
@@ -2186,7 +2101,6 @@ enum
 
   EVEX_W_0F3A00_P_2,
   EVEX_W_0F3A01_P_2,
-  EVEX_W_0F3A04_P_2,
   EVEX_W_0F3A05_P_2,
   EVEX_W_0F3A08_P_2,
   EVEX_W_0F3A09_P_2,
@@ -2217,8 +2131,6 @@ enum
   EVEX_W_0F3A71_P_2,
   EVEX_W_0F3A72_P_2,
   EVEX_W_0F3A73_P_2,
-  EVEX_W_0F3ACE_P_2,
-  EVEX_W_0F3ACF_P_2
 };
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
@@ -5977,28 +5889,28 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmaddsub132p%XW", { XM, Vex, EXx }, 0 },
+    { "vfmaddsub132p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F3897 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmsubadd132p%XW", { XM, Vex, EXx }, 0 },
+    { "vfmsubadd132p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F3898 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmadd132p%XW", { XM, Vex, EXx }, 0 },
+    { "vfmadd132p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F3899 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmadd132s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, 0 },
+    { "vfmadd132s%XW", { XMScalar, VexScalar, EXVexWdqScalar, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F389A */
@@ -6019,35 +5931,35 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmadd132p%XW", { XM, Vex, EXx }, 0 },
+    { "vfnmadd132p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F389D */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmadd132s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, 0 },
+    { "vfnmadd132s%XW", { XMScalar, VexScalar, EXVexWdqScalar, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F389E */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmsub132p%XW", { XM, Vex, EXx }, 0 },
+    { "vfnmsub132p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F389F */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmsub132s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, 0 },
+    { "vfnmsub132s%XW", { XMScalar, VexScalar, EXVexWdqScalar, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38A6 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmaddsub213p%XW", { XM, Vex, EXx }, 0 },
+    { "vfmaddsub213p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
     { Bad_Opcode },
   },
 
@@ -6055,21 +5967,21 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmsubadd213p%XW", { XM, Vex, EXx }, 0 },
+    { "vfmsubadd213p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38A8 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmadd213p%XW", { XM, Vex, EXx }, 0 },
+    { "vfmadd213p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38A9 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmadd213s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, 0 },
+    { "vfmadd213s%XW", { XMScalar, VexScalar, EXVexWdqScalar, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38AA */
@@ -6090,98 +6002,98 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmadd213p%XW", { XM, Vex, EXx }, 0 },
+    { "vfnmadd213p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38AD */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmadd213s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, 0 },
+    { "vfnmadd213s%XW", { XMScalar, VexScalar, EXVexWdqScalar, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38AE */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmsub213p%XW", { XM, Vex, EXx }, 0 },
+    { "vfnmsub213p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38AF */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmsub213s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, 0 },
+    { "vfnmsub213s%XW", { XMScalar, VexScalar, EXVexWdqScalar, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38B6 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmaddsub231p%XW", { XM, Vex, EXx }, 0 },
+    { "vfmaddsub231p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38B7 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmsubadd231p%XW", { XM, Vex, EXx }, 0 },
+    { "vfmsubadd231p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38B8 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmadd231p%XW", { XM, Vex, EXx }, 0 },
+    { "vfmadd231p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38B9 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmadd231s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, 0 },
+    { "vfmadd231s%XW", { XMScalar, VexScalar, EXVexWdqScalar, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38BA */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmsub231p%XW", { XM, Vex, EXx }, 0 },
+    { "vfmsub231p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38BB */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfmsub231s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, 0 },
+    { "vfmsub231s%XW", { XMScalar, VexScalar, EXVexWdqScalar, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38BC */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmadd231p%XW", { XM, Vex, EXx }, 0 },
+    { "vfnmadd231p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38BD */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmadd231s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, 0 },
+    { "vfnmadd231s%XW", { XMScalar, VexScalar, EXVexWdqScalar, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38BE */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmsub231p%XW", { XM, Vex, EXx }, 0 },
+    { "vfnmsub231p%XW", { XM, Vex, EXx, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38BF */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vfnmsub231s%XW", { XMScalar, VexScalar, EXVexWdqScalar }, 0 },
+    { "vfnmsub231s%XW", { XMScalar, VexScalar, EXVexWdqScalar, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F38CF */
@@ -16641,11 +16553,6 @@ OP_Mask (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 static void
 OP_Rounding (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 {
-  if (!vex.evex
-      || (bytemode != evex_rounding_mode
-	  && bytemode != evex_rounding_64_mode
-	  && bytemode != evex_sae_mode))
-    abort ();
   if (modrm.mod == 3 && vex.b)
     switch (bytemode)
       {
@@ -16663,6 +16570,7 @@ OP_Rounding (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	oappend ("{sae}");
 	break;
       default:
+	abort ();
 	break;
       }
 }
