@@ -1,5 +1,17 @@
 2020-07-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (VEX_LEN_0FXOP_09_80, VEX_LEN_0FXOP_09_81): Delete.
+	(VEX_LEN_0FXOP_09_82_W_0, VEX_LEN_0FXOP_09_83_W_0,
+	VEX_W_0FXOP_09_80, VEX_W_0FXOP_09_81, VEX_W_0FXOP_09_82,
+	VEX_W_0FXOP_09_83): New enumerators.
+	(xop_table): Reference the above.
+	(vex_len_table): Replace vfrczp* entries by vfrczs* ones.
+	(vex_w_table): New VEX_W_0FXOP_09_80, VEX_W_0FXOP_09_81,
+	VEX_W_0FXOP_09_82, and VEX_W_0FXOP_09_83 entries.
+	(get_valid_dis386): Return bad_opcode for XOP.PP != 0.
+
+2020-07-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (EVEX_W_0F3838_P_1,
 	EVEX_W_0F3839_P_1, EVEX_W_0F3840_P_2, EVEX_W_0F3855_P_2,
 	EVEX_W_0F3868_P_3, EVEX_W_0F3871_P_2, EVEX_W_0F3873_P_2,

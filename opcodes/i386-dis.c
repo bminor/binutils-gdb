@@ -1814,8 +1814,8 @@ enum
   VEX_LEN_0FXOP_08_ED,
   VEX_LEN_0FXOP_08_EE,
   VEX_LEN_0FXOP_08_EF,
-  VEX_LEN_0FXOP_09_80,
-  VEX_LEN_0FXOP_09_81
+  VEX_LEN_0FXOP_09_82_W_0,
+  VEX_LEN_0FXOP_09_83_W_0,
 };
 
 enum
@@ -1955,6 +1955,11 @@ enum
   VEX_W_0F3A4C_P_2,
   VEX_W_0F3ACE_P_2,
   VEX_W_0F3ACF_P_2,
+
+  VEX_W_0FXOP_09_80,
+  VEX_W_0FXOP_09_81,
+  VEX_W_0FXOP_09_82,
+  VEX_W_0FXOP_09_83,
 
   EVEX_W_0F10_P_1,
   EVEX_W_0F10_P_3,
@@ -7862,10 +7867,10 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 80 */
-    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_80) },
-    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_81) },
-    { "vfrczss", 	{ XM, EXd }, 0 },
-    { "vfrczsd", 	{ XM, EXq }, 0 },
+    { VEX_W_TABLE (VEX_W_0FXOP_09_80) },
+    { VEX_W_TABLE (VEX_W_0FXOP_09_81) },
+    { VEX_W_TABLE (VEX_W_0FXOP_09_82) },
+    { VEX_W_TABLE (VEX_W_0FXOP_09_83) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -9726,16 +9731,14 @@ static const struct dis386 vex_len_table[][2] = {
      { "vpcomuq",	{ XM, Vex128, EXx, VPCOM }, 0 },
   },
 
-  /* VEX_LEN_0FXOP_09_80 */
+  /* VEX_LEN_0FXOP_09_82_W_0 */
   {
-    { "vfrczps",	{ XM, EXxmm }, 0 },
-    { "vfrczps",	{ XM, EXymmq }, 0 },
+    { "vfrczss", 	{ XM, EXd }, 0 },
   },
 
-  /* VEX_LEN_0FXOP_09_81 */
+  /* VEX_LEN_0FXOP_09_83_W_0 */
   {
-    { "vfrczpd",	{ XM, EXxmm }, 0 },
-    { "vfrczpd",	{ XM, EXymmq }, 0 },
+    { "vfrczsd", 	{ XM, EXq }, 0 },
   },
 };
 
@@ -10062,6 +10065,22 @@ static const struct dis386 vex_w_table[][2] = {
     /* VEX_W_0F3ACF_P_2 */
     { Bad_Opcode },
     { "vgf2p8affineinvqb",  { XM, Vex, EXx, Ib }, 0 },
+  },
+  /* VEX_W_0FXOP_09_80 */
+  {
+    { "vfrczps",	{ XM, EXx }, 0 },
+  },
+  /* VEX_W_0FXOP_09_81 */
+  {
+    { "vfrczpd",	{ XM, EXx }, 0 },
+  },
+  /* VEX_W_0FXOP_09_82 */
+  {
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_82_W_0) },
+  },
+  /* VEX_W_0FXOP_09_83 */
+  {
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_83_W_0) },
   },
 
 #include "i386-dis-evex-w.h"
@@ -11475,6 +11494,11 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
       modrm.mod = (*codep >> 6) & 3;
       modrm.reg = (*codep >> 3) & 7;
       modrm.rm = *codep & 7;
+
+      /* No XOP encoding so far allows for a non-zero embedded prefix. Avoid
+	 having to decode the bits for every otherwise valid encoding.  */
+      if (vex.prefix)
+	return &bad_opcode;
       break;
 
     case USE_VEX_C4_TABLE:
