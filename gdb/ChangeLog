@@ -1,5 +1,12 @@
 2020-07-06  Tom de Vries  <tdevries@suse.de>
 
+	* buildsym.c (buildsym_compunit::end_symtab_with_blockvector): Handle
+	End-Of-Sequence in lte_is_less_than.
+	* symtab.c (find_pc_sect_line): Revert change from commit 3d92a3e313
+	"gdb: Don't reorder line table entries too much when sorting".
+
+2020-07-06  Tom de Vries  <tdevries@suse.de>
+
 	PR tui/26205
 	* tui/tui-win.c (tui_partial_win_by_name): Don't test for NULL name.
 

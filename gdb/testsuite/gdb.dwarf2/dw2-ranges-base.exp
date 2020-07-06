@@ -144,12 +144,26 @@ gdb_test "info line frame3" \
 
 # Ensure that the line table correctly tracks the end of sequence markers.
 set end_seq_count 0
+set prev -1
+set seq_count 0
 gdb_test_multiple "maint info line-table gdb.dwarf2/dw2-ranges-base.c" \
     "count END markers in line table" {
 	-re "^$decimal\[ \t\]+$decimal\[ \t\]+$hex\(\[ \t\]+Y\)? *\r\n" {
+	    if { $prev != -1 } {
+		gdb_assert "$prev == 1" \
+		    "prev of normal entry at $seq_count is end marker"
+	    }
+	    set prev 0
+	    incr seq_count
 	    exp_continue
 	}
 	-re "^$decimal\[ \t\]+END\[ \t\]+$hex\(\[ \t\]+Y\)? *\r\n" {
+	    if { $prev != -1 } {
+		gdb_assert "$prev == 0" \
+		    "prev of end marker at $seq_count is normal entry"
+	    }
+	    set prev 1
+	    incr seq_count
 	    incr end_seq_count
 	    exp_continue
 	}

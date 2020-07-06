@@ -1,3 +1,7 @@
+2020-07-06  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/dw2-ranges-base.exp: Test line-table order.
+
 2020-07-03  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/structs2.c (main): Adjust second parem_reg call to

@@ -943,6 +943,10 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
 	    = [] (const linetable_entry &ln1,
 		  const linetable_entry &ln2) -> bool
 	      {
+		if (ln1.pc == ln2.pc
+		    && ((ln1.line == 0) != (ln2.line == 0)))
+		  return ln1.line == 0;
+
 		return (ln1.pc < ln2.pc);
 	      };
 
