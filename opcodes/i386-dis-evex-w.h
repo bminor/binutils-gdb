@@ -738,10 +738,6 @@
     { EVEX_LEN_TABLE (EVEX_LEN_0F3A1B_P_2_W_0) },
     { EVEX_LEN_TABLE (EVEX_LEN_0F3A1B_P_2_W_1) },
   },
-  /* EVEX_W_0F3A1D_P_2 */
-  {
-    { "vcvtps2ph",	{ EXxmmq, XM, EXxEVexS, Ib }, 0 },
-  },
   /* EVEX_W_0F3A21_P_2 */
   {
     { "vinsertps",	{ XMM, Vex, EXxmm_md, Ib }, 0 },

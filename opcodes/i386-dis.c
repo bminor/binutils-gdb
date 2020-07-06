@@ -1615,7 +1615,6 @@ enum
   PREFIX_EVEX_0F3A19,
   PREFIX_EVEX_0F3A1A,
   PREFIX_EVEX_0F3A1B,
-  PREFIX_EVEX_0F3A1D,
   PREFIX_EVEX_0F3A1E,
   PREFIX_EVEX_0F3A1F,
   PREFIX_EVEX_0F3A20,
@@ -1910,6 +1909,7 @@ enum
   VEX_W_0F380D_P_2,
   VEX_W_0F380E_P_2,
   VEX_W_0F380F_P_2,
+  VEX_W_0F3813_P_2,
   VEX_W_0F3816_P_2,
   VEX_W_0F3818_P_2,
   VEX_W_0F3819_P_2,
@@ -1934,6 +1934,7 @@ enum
   VEX_W_0F3A06_P_2,
   VEX_W_0F3A18_P_2,
   VEX_W_0F3A19_P_2,
+  VEX_W_0F3A1D_P_2,
   VEX_W_0F3A30_P_2_LEN_0,
   VEX_W_0F3A31_P_2_LEN_0,
   VEX_W_0F3A32_P_2_LEN_0,
@@ -2110,7 +2111,6 @@ enum
   EVEX_W_0F3A19_P_2,
   EVEX_W_0F3A1A_P_2,
   EVEX_W_0F3A1B_P_2,
-  EVEX_W_0F3A1D_P_2,
   EVEX_W_0F3A21_P_2,
   EVEX_W_0F3A23_P_2,
   EVEX_W_0F3A38_P_2,
@@ -5504,7 +5504,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vcvtph2ps", { XM, EXxmmq }, 0 },
+    { VEX_W_TABLE (VEX_W_0F3813_P_2) },
   },
 
   /* PREFIX_VEX_0F3816 */
@@ -6326,7 +6326,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vcvtps2ph", { EXxmmq, XM, Ib }, 0 },
+    { VEX_W_TABLE (VEX_W_0F3A1D_P_2) },
   },
 
   /* PREFIX_VEX_0F3A20 */
@@ -9903,6 +9903,10 @@ static const struct dis386 vex_w_table[][2] = {
     { "vtestpd",	{ XM, EXx }, 0 },
   },
   {
+    /* VEX_W_0F3813_P_2 */
+    { "vcvtph2ps", { XM, EXxmmq }, 0 },
+  },
+  {
     /* VEX_W_0F3816_P_2  */
     { "vpermps",	{ XM, Vex, EXx }, 0 },
   },
@@ -9999,6 +10003,10 @@ static const struct dis386 vex_w_table[][2] = {
   {
     /* VEX_W_0F3A19_P_2 */
     { "vextractf128",	{ EXxmm, XM, Ib }, 0 },
+  },
+  {
+    /* VEX_W_0F3A1D_P_2 */
+    { "vcvtps2ph", { EXxmmq, XM, EXxEVexS, Ib }, 0 },
   },
   {
     /* VEX_W_0F3A30_P_2_LEN_0 */

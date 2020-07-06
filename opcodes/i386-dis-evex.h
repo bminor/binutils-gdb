@@ -616,7 +616,7 @@ static const struct dis386 evex_table[][256] = {
     { PREFIX_TABLE (PREFIX_EVEX_0F3A1A) },
     { PREFIX_TABLE (PREFIX_EVEX_0F3A1B) },
     { Bad_Opcode },
-    { PREFIX_TABLE (PREFIX_EVEX_0F3A1D) },
+    { PREFIX_TABLE (PREFIX_VEX_0F3A1D) },
     { PREFIX_TABLE (PREFIX_EVEX_0F3A1E) },
     { PREFIX_TABLE (PREFIX_EVEX_0F3A1F) },
     /* 20 */

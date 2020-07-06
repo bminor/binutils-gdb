@@ -1,5 +1,19 @@
 2020-07-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (PREFIX_EVEX_0F3A1D, EVEX_W_0F3A1D_P_2): Delete.
+	(VEX_W_0F3813_P_2, VEX_W_0F3A1D_P_2): New enumerators.
+	(prefix_table): Reference VEX_W_0F3813_P_2 and VEX_W_0F3A1D_P_2
+	respectively.
+	(vex_w_table): New VEX_W_0F3813_P_2 and VEX_W_0F3A1D_P_2 table
+	entries.
+	* i386-dis-evex.h (evex_table): Reference VEX table entry for
+	opcode 0F3A1D.
+	* i386-dis-evex-prefix.h (PREFIX_EVEX_0F3A1D): Delete table
+	entry.
+	* i386-dis-evex-w.h (EVEX_W_0F3A1D_P_2): Likewise.
+
+2020-07-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (PREFIX_EVEX_0F60, PREFIX_EVEX_0F61,
 	PREFIX_EVEX_0F63, PREFIX_EVEX_0F67, PREFIX_EVEX_0F68,
 	PREFIX_EVEX_0F69, PREFIX_EVEX_0FD1, PREFIX_EVEX_0FD5,

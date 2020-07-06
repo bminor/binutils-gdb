@@ -1235,12 +1235,6 @@
     { Bad_Opcode },
     { VEX_W_TABLE (EVEX_W_0F3A1B_P_2) },
   },
-  /* PREFIX_EVEX_0F3A1D */
-  {
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { VEX_W_TABLE (EVEX_W_0F3A1D_P_2) },
-  },
   /* PREFIX_EVEX_0F3A1E */
   {
     { Bad_Opcode },
