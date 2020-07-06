@@ -136,7 +136,8 @@ class Default_comdat_behavior
     if (Layout::is_debug_info_section(name))
       return CB_PRETEND;
     if (strcmp(name, ".eh_frame") == 0
-	|| strncmp(name, ".gnu.build.attributes", 21) == 0
+#define ATTR_SECTION_PREFIX ".gnu.build.attributes"
+	|| strncmp(name, ATTR_SECTION_PREFIX, sizeof (ATTR_SECTION_PREFIX) - 1) == 0
 	|| strcmp(name, ".gcc_except_table") == 0)
       return CB_IGNORE;
     return CB_ERROR;
