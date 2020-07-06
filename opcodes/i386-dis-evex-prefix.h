@@ -487,7 +487,7 @@
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpermp%XW",	{ XM, Vex, EXx }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3816_P_2) },
   },
   /* PREFIX_EVEX_0F3819 */
   {
@@ -643,7 +643,7 @@
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vperm%LW",	{ XM, Vex, EXx }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3836_P_2) },
   },
   /* PREFIX_EVEX_0F3837 */
   {

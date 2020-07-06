@@ -1,5 +1,16 @@
 2020-07-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (EVEX_LEN_0F3816_P_2, EVEX_LEN_0F3836_P_2,
+	EVEX_LEN_0F3A00_P_2_W_1, EVEX_LEN_0F3A01_P_2_W_1): New
+	enumerators.
+	* i386-dis-evex-len.h (evex_len_table): New EVEX_LEN_0F3816_P_2,
+	EVEX_LEN_0F3836_P_2, EVEX_LEN_0F3A00_P_2_W_1, and
+	EVEX_LEN_0F3A01_P_2_W_1 table entries.
+	* i386-dis-evex-prefix.h, i386-dis-evex-w.h: Reference the above
+	entries.
+
+2020-07-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (EVEX_LEN_0FC4_P_2, EVEX_LEN_0FC5_P_2,
 	EVEX_LEN_0F3A14_P_2, EVEX_LEN_0F3A15_P_2, EVEX_LEN_0F3A16_P_2,
 	EVEX_LEN_0F3A17_P_2, EVEX_LEN_0F3A20_P_2,

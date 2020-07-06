@@ -688,12 +688,12 @@
   /* EVEX_W_0F3A00_P_2 */
   {
     { Bad_Opcode },
-    { "vpermq",	{ XM, EXx, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A00_P_2_W_1) },
   },
   /* EVEX_W_0F3A01_P_2 */
   {
     { Bad_Opcode },
-    { "vpermpd",	{ XM, EXx, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A01_P_2_W_1) },
   },
   /* EVEX_W_0F3A05_P_2 */
   {
