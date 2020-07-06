@@ -386,7 +386,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EXd { OP_EX, d_mode }
 #define EXdS { OP_EX, d_swap_mode }
 #define EXq { OP_EX, q_mode }
-#define EXqScalarS { OP_EX, q_scalar_swap_mode }
 #define EXqS { OP_EX, q_swap_mode }
 #define EXx { OP_EX, x_mode }
 #define EXxS { OP_EX, x_swap_mode }
@@ -9498,7 +9497,7 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0FD6_P_2 */
   {
-    { "vmovq",		{ EXqScalarS, XMScalar }, 0 },
+    { "vmovq",		{ EXqVexScalarS, XMScalar }, 0 },
   },
 
   /* VEX_LEN_0FF7_P_2 */

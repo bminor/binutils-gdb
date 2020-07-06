@@ -1,5 +1,11 @@
 2020-07-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (EXqScalarS): Delete.
+	(vex_len_table): Replace EXqScalarS by EXqVexScalarS.
+	* i386-dis-evex-w.h (vmovq): Use EXqVexScalarS.
+
+2020-07-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (safe-ctype.h): Include.
 	(EXdScalar, EXqScalar): Delete.
 	(d_scalar_mode, q_scalar_mode): Delete.

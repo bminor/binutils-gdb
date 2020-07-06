@@ -294,7 +294,7 @@
   /* EVEX_W_0FD6_P_2 */
   {
     { Bad_Opcode },
-    { "vmovq",	{ EXxmm_mq, XMScalar }, 0 },
+    { "vmovq",	{ EXqVexScalarS, XMScalar }, 0 },
   },
   /* EVEX_W_0FE6_P_1 */
   {
