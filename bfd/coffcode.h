@@ -4904,6 +4904,12 @@ coff_classify_symbol (bfd *abfd,
     case C_THUMBEXT:
     case C_THUMBEXTFUNC:
 #endif
+#ifdef RS6000COFF_C
+    case C_HIDEXT:
+#if ! defined _AIX52 && ! defined AIX_WEAK_SUPPORT
+    case C_AIX_WEAKEXT:
+#endif
+#endif
 #ifdef C_SYSTEM
     case C_SYSTEM:
 #endif
@@ -4917,6 +4923,10 @@ coff_classify_symbol (bfd *abfd,
 	  else
 	    return COFF_SYMBOL_COMMON;
 	}
+#ifdef RS6000COFF_C
+      if (syment->n_sclass == C_HIDEXT)
+	return COFF_SYMBOL_LOCAL;
+#endif
       return COFF_SYMBOL_GLOBAL;
 
     default:

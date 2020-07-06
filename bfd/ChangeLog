@@ -1,3 +1,8 @@
+2020-07-07  Alan Modra  <amodra@gmail.com>
+
+	* coffcode.h (coff_classify_symbol): Handle C_HIDEXT and
+	C_AIX_WEAKEXT.
+
 2020-07-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt.po: Updated Portuguese translation.
