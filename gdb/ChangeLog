@@ -1,3 +1,8 @@
+2020-07-06  Tom de Vries  <tdevries@suse.de>
+
+	PR tui/26205
+	* tui/tui-win.c (tui_partial_win_by_name): Don't test for NULL name.
+
 2020-07-05  Tom de Vries  <tdevries@suse.de>
 
 	PR build/26187
