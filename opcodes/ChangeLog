@@ -1,5 +1,18 @@
 2020-07-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (EVEX_LEN_0FC4_P_2, EVEX_LEN_0FC5_P_2,
+	EVEX_LEN_0F3A14_P_2, EVEX_LEN_0F3A15_P_2, EVEX_LEN_0F3A16_P_2,
+	EVEX_LEN_0F3A17_P_2, EVEX_LEN_0F3A20_P_2,
+	EVEX_LEN_0F3A21_P_2_W_0, EVEX_LEN_0F3A22_P_2): New enumerators.
+	* i386-dis-evex-len.h (evex_len_table): New EVEX_LEN_0FC4_P_2,
+	EVEX_LEN_0FC5_P_2, EVEX_LEN_0F3A14_P_2, EVEX_LEN_0F3A15_P_2,
+	EVEX_LEN_0F3A16_P_2, EVEX_LEN_0F3A17_P_2, EVEX_LEN_0F3A20_P_2,
+	EVEX_LEN_0F3A21_P_2_W_0, and EVEX_LEN_0F3A22_P_2 table entries.
+	* i386-dis-evex-prefix.h, i386-dis-evex-w.h: Reference the above
+	entries.
+
+2020-07-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (PREFIX_EVEX_0F3A1D, EVEX_W_0F3A1D_P_2): Delete.
 	(VEX_W_0F3813_P_2, VEX_W_0F3A1D_P_2): New enumerators.
 	(prefix_table): Reference VEX_W_0F3813_P_2 and VEX_W_0F3A1D_P_2

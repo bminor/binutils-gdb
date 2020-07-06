@@ -14,6 +14,16 @@ static const struct dis386 evex_len_table[][3] = {
     { "vmovK",	{ Edq, XMScalar }, 0 },
   },
 
+  /* EVEX_LEN_0FC4_P_2 */
+  {
+    { "vpinsrw",	{ XM, Vex128, Edqw, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0FC5_P_2 */
+  {
+    { "vpextrw",	{ Gdq, XS, Ib }, 0 },
+  },
+
   /* EVEX_LEN_0FD6_P_2 */
   {
     { VEX_W_TABLE (EVEX_W_0FD6_P_2) },
@@ -173,6 +183,26 @@ static const struct dis386 evex_len_table[][3] = {
     { "vscatterpf1qpd",  { MVexVSIBQWpX }, 0 },
   },
 
+  /* EVEX_LEN_0F3A14_P_2 */
+  {
+    { "vpextrb",	{ Edqb, XM, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0F3A15_P_2 */
+  {
+    { "vpextrw",	{ Edqw, XM, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0F3A16_P_2 */
+  {
+    { "vpextrK",	{ Edq, XM, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0F3A17_P_2 */
+  {
+    { "vextractps",	{ Edqd, XMM, Ib }, 0 },
+  },
+
   /* EVEX_LEN_0F3A18_P_2_W_0 */
   {
     { Bad_Opcode },
@@ -227,6 +257,21 @@ static const struct dis386 evex_len_table[][3] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { "vextractf64x4",	{ EXxmmq, XM, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0F3A20_P_2 */
+  {
+    { "vpinsrb",	{ XM, Vex128, Edqb, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0F3A21_P_2_W_0 */
+  {
+    { "vinsertps",	{ XMM, Vex, EXxmm_md, Ib }, 0 },
+  },
+
+  /* EVEX_LEN_0F3A22_P_2 */
+  {
+    { "vpinsrK",	{ XM, Vex128, Edq, Ib }, 0 },
   },
 
   /* EVEX_LEN_0F3A23_P_2_W_0 */

@@ -330,13 +330,13 @@
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpinsrw",	{ XM, Vex128, Edw, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0FC4_P_2) },
   },
   /* PREFIX_EVEX_0FC5 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpextrw",	{ Gdq, XS, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0FC5_P_2) },
   },
   /* PREFIX_EVEX_0FD2 */
   {
@@ -1191,25 +1191,25 @@
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpextrb",	{ Edqb, XM, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A14_P_2) },
   },
   /* PREFIX_EVEX_0F3A15 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpextrw",	{ Edqw, XM, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A15_P_2) },
   },
   /* PREFIX_EVEX_0F3A16 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpextrK",	{ Edq, XM, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A16_P_2) },
   },
   /* PREFIX_EVEX_0F3A17 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vextractps",	{ Edqd, XMM, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A17_P_2) },
   },
   /* PREFIX_EVEX_0F3A18 */
   {
@@ -1251,7 +1251,7 @@
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpinsrb",	{ XM, Vex128, Edb, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A20_P_2) },
   },
   /* PREFIX_EVEX_0F3A21 */
   {
@@ -1263,7 +1263,7 @@
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpinsrK",	{ XM, Vex128, Edq, Ib }, 0 },
+    { EVEX_LEN_TABLE (EVEX_LEN_0F3A22_P_2) },
   },
   /* PREFIX_EVEX_0F3A23 */
   {
