@@ -50,28 +50,28 @@ static const struct dis386 evex_len_table[][3] = {
     { "vbroadcastsd",	{ XM, EXxmm_mq }, 0 },
   },
 
-  /* EVEX_LEN_0F381A_P_2_W_0 */
+  /* EVEX_LEN_0F381A_P_2_W_0_M_0 */
   {
     { Bad_Opcode },
     { "vbroadcastf32x4",	{ XM, EXxmm }, 0 },
     { "vbroadcastf32x4",	{ XM, EXxmm }, 0 },
   },
 
-  /* EVEX_LEN_0F381A_P_2_W_1 */
+  /* EVEX_LEN_0F381A_P_2_W_1_M_0 */
   {
     { Bad_Opcode },
     { "vbroadcastf64x2",	{ XM, EXxmm }, 0 },
     { "vbroadcastf64x2",	{ XM, EXxmm }, 0 },
   },
 
-  /* EVEX_LEN_0F381B_P_2_W_0 */
+  /* EVEX_LEN_0F381B_P_2_W_0_M_0 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
     { "vbroadcastf32x8",	{ XM, EXymm }, 0 },
   },
 
-  /* EVEX_LEN_0F381B_P_2_W_1 */
+  /* EVEX_LEN_0F381B_P_2_W_1_M_0 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
@@ -85,28 +85,28 @@ static const struct dis386 evex_len_table[][3] = {
     { "vperm%LW",	{ XM, Vex, EXx }, 0 },
   },
 
-  /* EVEX_LEN_0F385A_P_2_W_0 */
+  /* EVEX_LEN_0F385A_P_2_W_0_M_0 */
   {
     { Bad_Opcode },
     { "vbroadcasti32x4",	{ XM, EXxmm }, 0 },
     { "vbroadcasti32x4",	{ XM, EXxmm }, 0 },
   },
 
-  /* EVEX_LEN_0F385A_P_2_W_1 */
+  /* EVEX_LEN_0F385A_P_2_W_1_M_0 */
   {
     { Bad_Opcode },
     { "vbroadcasti64x2",	{ XM, EXxmm }, 0 },
     { "vbroadcasti64x2",	{ XM, EXxmm }, 0 },
   },
 
-  /* EVEX_LEN_0F385B_P_2_W_0 */
+  /* EVEX_LEN_0F385B_P_2_W_0_M_0 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
     { "vbroadcasti32x8",	{ XM, EXymm }, 0 },
   },
 
-  /* EVEX_LEN_0F385B_P_2_W_1 */
+  /* EVEX_LEN_0F385B_P_2_W_1_M_0 */
   {
     { Bad_Opcode },
     { Bad_Opcode },

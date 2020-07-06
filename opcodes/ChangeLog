@@ -1,5 +1,31 @@
 2020-07-06  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (MOD_EVEX_0F381A_P_2_W_0, MOD_EVEX_0F381A_P_2_W_1,
+	MOD_EVEX_0F381B_P_2_W_0, MOD_EVEX_0F381B_P_2_W_1,
+	MOD_EVEX_0F385A_P_2_W_0, MOD_EVEX_0F385A_P_2_W_1,
+	MOD_EVEX_0F385B_P_2_W_0, MOD_EVEX_0F385B_P_2_W_1): New
+	enumerators.
+	(EVEX_LEN_0F381A_P_2_W_0, EVEX_LEN_0F381A_P_2_W_1,
+	EVEX_LEN_0F381B_P_2_W_0, EVEX_LEN_0F381B_P_2_W_1,
+	EVEX_LEN_0F385A_P_2_W_0, EVEX_LEN_0F385A_P_2_W_1,
+	EVEX_LEN_0F385B_P_2_W_0, EVEX_LEN_0F385B_P_2_W_1): Rename to ...
+	(EVEX_LEN_0F381A_P_2_W_0_M_0, EVEX_LEN_0F381A_P_2_W_1_M_0,
+	EVEX_LEN_0F381B_P_2_W_0_M_0, EVEX_LEN_0F381B_P_2_W_1_M_0,
+	EVEX_LEN_0F385A_P_2_W_0_M_0, EVEX_LEN_0F385A_P_2_W_1_M_0,
+	EVEX_LEN_0F385B_P_2_W_0_M_0, EVEX_LEN_0F385B_P_2_W_1_M_0): ...
+	these, respectively.
+	* i386-dis-evex-len.h: Adjust comments.
+	* i386-dis-evex-mod.h: New MOD_EVEX_0F381A_P_2_W_0,
+	MOD_EVEX_0F381A_P_2_W_1, MOD_EVEX_0F381B_P_2_W_0,
+	MOD_EVEX_0F381B_P_2_W_1, MOD_EVEX_0F385A_P_2_W_0,
+	MOD_EVEX_0F385A_P_2_W_1, MOD_EVEX_0F385B_P_2_W_0, and
+	MOD_EVEX_0F385B_P_2_W_1 table entries.
+	* i386-dis-evex-w.h: Reference mod_table[] for
+	EVEX_W_0F381A_P_2, EVEX_W_0F381B_P_2, EVEX_W_0F385A_P_2, and
+	EVEX_W_0F385B_P_2.
+
+2020-07-06  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis-evex-len.h (vbroadcastf32x8, vbroadcasti32x8,
 	vinsertf32x8, vinsertf64x4, vextractf32x8, vextractf64x4): Use
 	EXymm.
