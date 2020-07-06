@@ -1,3 +1,9 @@
+2020-07-06  Yuri Chornoivan  <yurchor@ukr.net>
+
+	PR 26204
+	* arc-dis.c: Fix spelling mistake.
+	* po/opcodes.pot: Regenerate.
+
 2020-07-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt_BR.po: Updated Brazilian Portugugese translation.

@@ -1,3 +1,11 @@
+2020-07-06  Yuri Chornoivan  <yurchor@ukr.net>
+
+	PR 26204
+	* config/tc-arm.c: Fix spelling mistake.
+	* config/tc-riscv.c: Likewise.
+	* config/tc-z80.c: Likewise.
+	* po/gas.pot: Regenerate.
+
 2020-07-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/uk.po: Updated Ukranian translation.

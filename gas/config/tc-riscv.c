@@ -163,7 +163,7 @@ riscv_set_default_priv_spec (const char *s)
     }
 
   /* Still can not find the priv spec class.  */
-  as_bad (_("Unknown default privilege spec `%d.%d.%d' set by  "
+  as_bad (_("Unknown default privilege spec `%d.%d.%d' set by "
            "privilege attributes"),  major, minor, revision);
   return 0;
 }

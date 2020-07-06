@@ -216,7 +216,7 @@ setup_march (const char *name, int *ok, int *err, int *mode)
 	    break;
 	  }
       if (i >= ARRAY_SIZE (match_ext_table))
-	as_fatal (_("Invalid EXTENTION is specified: %s"), name);
+	as_fatal (_("Invalid EXTENSION is specified: %s"), name);
     }
 }
 
@@ -409,8 +409,8 @@ Compatibility options:\n\
   -local-prefix=TEXT\t  treat labels prefixed by TEXT as local\n\
   -colonless\t\t  permit colonless labels\n\
   -sdcc\t\t\t  accept SDCC specific instruction syntax\n\
-  -fp-s=FORMAT\t\t  set single precission FP numbers format\n\
-  -fp-d=FORMAT\t\t  set double precission FP numbers format\n\
+  -fp-s=FORMAT\t\t  set single precision FP numbers format\n\
+  -fp-d=FORMAT\t\t  set double precision FP numbers format\n\
 Where FORMAT one of:\n\
   ieee754\t\t  IEEE754 compatible (depends on directive)\n\
   half\t\t\t  IEEE754 half precision (16 bit)\n\
@@ -3887,7 +3887,7 @@ str_to_broken_float (bfd_boolean *signP, bfd_uint64_t *mantissaP, int *expP)
   if (*p == '.')
     {
       p++;
-      if (!exponent) /* If no precission overflow.  */
+      if (!exponent) /* If no precision overflow.  */
 	{
 	  for (; ISDIGIT (*p); ++p, --exponent)
 	    {

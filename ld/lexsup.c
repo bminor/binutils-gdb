@@ -530,9 +530,9 @@ static const struct ld_option ld_options[] =
   { {"warn-textrel", no_argument, NULL, OPTION_WARN_TEXTREL},
     '\0', NULL,
 #if DEFAULT_LD_TEXTREL_CHECK_WARNING
-    N_("Warn if outpout has DT_TEXTREL (default)"),
+    N_("Warn if output has DT_TEXTREL (default)"),
 #else
-    N_("Warn if outpout has DT_TEXTREL"),
+    N_("Warn if output has DT_TEXTREL"),
 #endif
     TWO_DASHES },
   { {"warn-shared-textrel", no_argument, NULL, OPTION_WARN_TEXTREL},

@@ -22025,7 +22025,7 @@ vcx_handle_common_checks (unsigned num_args, enum neon_shape rs)
 		  && mark_feature_used (&armv8m_fp))
 		&& !mark_feature_used (&mve_ext),
 		_("vcx instructions with S or D registers require either MVE"
-		  " or Armv8-M floating point etension."));
+		  " or Armv8-M floating point extension."));
 }
 
 static void

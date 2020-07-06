@@ -437,7 +437,7 @@ find_format (bfd_vma                       memaddr,
 	  if (opcode == NULL)
 	    {
 	      (*info->fprintf_func) (info->stream,
-				     _("An error occured while generating the "
+				     _("An error occurred while generating the "
 				       "extension instruction operations"));
 	      *opcode_result = NULL;
 	      return FALSE;

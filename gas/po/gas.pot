@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2020-07-04 10:27+0100\n"
+"POT-Creation-Date: 2020-07-06 10:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4711,7 +4711,7 @@ msgstr ""
 #: config/tc-arm.c:22027
 msgid ""
 "vcx instructions with S or D registers require either MVE or Armv8-M "
-"floating point etension."
+"floating point extension."
 msgstr ""
 
 #: config/tc-arm.c:22043
@@ -15500,7 +15500,7 @@ msgstr ""
 #. Still can not find the priv spec class.
 #: config/tc-riscv.c:166
 #, c-format
-msgid "Unknown default privilege spec `%d.%d.%d' set by  privilege attributes"
+msgid "Unknown default privilege spec `%d.%d.%d' set by privilege attributes"
 msgstr ""
 
 #: config/tc-riscv.c:576 config/tc-riscv.c:637
@@ -20258,7 +20258,7 @@ msgstr ""
 
 #: config/tc-z80.c:219
 #, c-format
-msgid "Invalid EXTENTION is specified: %s"
+msgid "Invalid EXTENSION is specified: %s"
 msgstr ""
 
 #: config/tc-z80.c:274
@@ -20293,8 +20293,8 @@ msgid ""
 "  -local-prefix=TEXT\t  treat labels prefixed by TEXT as local\n"
 "  -colonless\t\t  permit colonless labels\n"
 "  -sdcc\t\t\t  accept SDCC specific instruction syntax\n"
-"  -fp-s=FORMAT\t\t  set single precission FP numbers format\n"
-"  -fp-d=FORMAT\t\t  set double precission FP numbers format\n"
+"  -fp-s=FORMAT\t\t  set single precision FP numbers format\n"
+"  -fp-d=FORMAT\t\t  set double precision FP numbers format\n"
 "Where FORMAT one of:\n"
 "  ieee754\t\t  IEEE754 compatible (depends on directive)\n"
 "  half\t\t\t  IEEE754 half precision (16 bit)\n"
