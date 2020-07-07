@@ -1,3 +1,8 @@
+2020-07-07  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/arm/cde-missing-fp.l: Fix spelling mistake in
+	expected output.
+
 2020-07-06  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/x86-64-avx512bw-wig1.d,
