@@ -727,7 +727,7 @@ if { [file exists $base_dir/bfdtest1] && [file exists $base_dir/bfdtest2] } {
     long_filenames $bfdtests
 
     # xcoff, ecoff, and vms archive support doesn't handle thin archives
-    if { ![istarget "*-*-aix*"]
+    if { ![is_xcoff_format]
 	 && ![istarget "*-*-*ecoff"]
 	 && ![istarget "*-*-vms"] } {
 	thin_archive $bfdtests

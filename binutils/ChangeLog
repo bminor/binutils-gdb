@@ -1,5 +1,14 @@
 2020-07-07  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/binutils-all/ar.exp: Use is_xcoff_format.
+	* testsuite/binutils-all/nm.exp: Likewise.
+	* testsuite/binutils-all/copy-2.d: Run only for elf and pe targets.
+	* testsuite/binutils-all/copy-3.d: Run only for elf targets.
+	* testsuite/binutils-all/set-section-alignment.d: Likewise.
+	* testsuite/binutils-all/copy-4.d: Don't run for xcoff.
+
+2020-07-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/lib/binutils-common.exp (is_xcoff_format): New.
 	* testsuite/binutils-all/objcopy.exp (pr25662): Exclude xcoff.
 
