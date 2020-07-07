@@ -1,5 +1,9 @@
 2020-07-07  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-scripts/section-match-1.d: xfail h8300.
+
+2020-07-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-scripts/align.exp: Don't exclude xcoff.  Pass
 	-bnogc ld option for xcoff.
 	* testsuite/ld-scripts/provide.exp: Likewise.
