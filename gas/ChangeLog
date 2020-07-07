@@ -1,3 +1,9 @@
+2020-07-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/all/gas.exp: Use is_xcoff_format.
+	* testsuite/gas/ppc/ppc.exp: Likewise.
+	* testsuite/gas/all/weakref1l.d: Likewise.
+
 2020-07-07  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/gas/arm/cde-missing-fp.l: Fix spelling mistake in

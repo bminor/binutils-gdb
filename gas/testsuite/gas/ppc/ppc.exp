@@ -44,9 +44,7 @@ run_dump_test "altivec_and_spe"
 run_list_test "range" "-a32"
 run_dump_test "cell"
 
-if { [istarget "*-*-aix*"]
-     || [istarget "*-*-macos*"]
-     || [istarget "*-*-beos*"] } then {
+if { [is_xcoff_format] } then {
     run_dump_test "test1xcoff32"
     run_dump_test "test2xcoff32"
     run_dump_test "altivec_xcoff"
