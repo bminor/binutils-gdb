@@ -1,3 +1,8 @@
+2020-07-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26212
+	* doc/c-i386.texi: Remove an incorrect AVX2 entry.
+
 2020-07-07  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/all/gas.exp: Use is_xcoff_format.

@@ -1054,16 +1054,6 @@ available in 32-bit mode).  The bottom 128 bits are overlaid with the
 
 @end itemize
 
-The AVX2 extensions made in 64-bit mode more registers available:
-
-@itemize @bullet
-
-@item
-the 16 128-bit registers @samp{%xmm16}--@samp{%xmm31} and the 16 256-bit
-registers @samp{%ymm16}--@samp{%ymm31}.
-
-@end itemize
-
 The AVX512 extensions added the following registers:
 
 @itemize @bullet
