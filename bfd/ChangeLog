@@ -1,5 +1,12 @@
 2020-07-07  Alan Modra  <amodra@gmail.com>
 
+	* xcofflink.c (xcoff_mark): Don't mark const sections.
+	(bfd_xcoff_record_link_assignment): Add FIXME.
+	(_bfd_xcoff_bfd_final_link): Don't segfault on assorted magic
+	sections being discarded by linker script.
+
+2020-07-07  Alan Modra  <amodra@gmail.com>
+
 	* coff-rs6000.c (xcoff_write_archive_contents_old): Set default
 	time, uid, gid and mode for deterministic archive.
 	(xcoff_write_archive_contents_big): Likewise.
