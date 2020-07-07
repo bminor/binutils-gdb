@@ -2101,6 +2101,13 @@ xcoff_write_archive_contents_old (bfd *abfd)
 	      bfd_set_error (bfd_error_system_call);
 	      return FALSE;
 	    }
+	  if ((abfd->flags & BFD_DETERMINISTIC_OUTPUT) != 0)
+	    {
+	      s.st_mtime = 0;
+	      s.st_uid = 0;
+	      s.st_gid = 0;
+	      s.st_mode = 0644;
+	    }
 
 	  ahdrp = bfd_zalloc (sub, sizeof (*ahdrp));
 	  if (ahdrp == NULL)
@@ -2320,6 +2327,13 @@ xcoff_write_archive_contents_big (bfd *abfd)
 	    {
 	      bfd_set_error (bfd_error_system_call);
 	      return FALSE;
+	    }
+	  if ((abfd->flags & BFD_DETERMINISTIC_OUTPUT) != 0)
+	    {
+	      s.st_mtime = 0;
+	      s.st_uid = 0;
+	      s.st_gid = 0;
+	      s.st_mode = 0644;
 	    }
 
 	  ahdrp = bfd_zalloc (current_bfd, sizeof (*ahdrp));

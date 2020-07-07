@@ -1,5 +1,11 @@
 2020-07-07  Alan Modra  <amodra@gmail.com>
 
+	* coff-rs6000.c (xcoff_write_archive_contents_old): Set default
+	time, uid, gid and mode for deterministic archive.
+	(xcoff_write_archive_contents_big): Likewise.
+
+2020-07-07  Alan Modra  <amodra@gmail.com>
+
 	* coffcode.h (coff_classify_symbol): Handle C_HIDEXT and
 	C_AIX_WEAKEXT.
 
