@@ -103,6 +103,19 @@ insert_rcd (unsigned long long  insn,
   return insn | ((value & 0x3F) << 6);
 }
 
+static unsigned long long
+insert_rbd (unsigned long long  insn,
+	    long long           value,
+	    const char **       errmsg)
+{
+  if (value & 0x01)
+    *errmsg = _("cannot use odd number source register");
+  if (value == 60)
+    *errmsg = _("LP_COUNT register cannot be used as destination register");
+
+  return insn | ((value & 0x07) << 24) | (((value >> 3) & 0x07) << 12);
+}
+
 /* Dummy insert ZERO operand function.  */
 
 static unsigned long long
@@ -1826,11 +1839,16 @@ const struct arc_operand arc_operands[] =
   { 6, 0, 0, ARC_OPERAND_IR | ARC_OPERAND_TRUNCATE, insert_rad, 0 },
 #define RCD		(RAD_CHK + 1)
   { 6, 6, 0, ARC_OPERAND_IR | ARC_OPERAND_TRUNCATE, insert_rcd, 0 },
+#define RBD		(RCD + 1)
+  { 6, 6, 0, ARC_OPERAND_IR | ARC_OPERAND_TRUNCATE, insert_rbd, extract_rb },
+#define RBDdup		(RBD + 1)
+  { 6, 12, 0, ARC_OPERAND_IR | ARC_OPERAND_DUPLICATE | ARC_OPERAND_TRUNCATE,
+    insert_rbd, extract_rb },
 
   /* The plain integer register fields.  Used by short
      instructions.  */
-#define RA16		(RCD + 1)
-#define RA_S		(RCD + 1)
+#define RA16		(RBDdup + 1)
+#define RA_S		(RBDdup + 1)
   { 4, 0, 0, ARC_OPERAND_IR, insert_ras, extract_ras },
 #define RB16		(RA16 + 1)
 #define RB_S		(RA16 + 1)
