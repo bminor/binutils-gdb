@@ -1,5 +1,10 @@
 2020-07-07  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/aix.em (gld${EMULATION_NAME}_find_exp_assignment): Handle
+	etree_provided.
+
+2020-07-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-sh/vxworks1-lib.rd: Update expected output.
 	* testsuite/ld-sh/vxworks4.d: Likewise.
 

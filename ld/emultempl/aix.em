@@ -1364,6 +1364,7 @@ gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
   switch (exp->type.node_class)
     {
     case etree_provide:
+    case etree_provided:
       h = bfd_link_hash_lookup (link_info.hash, exp->assign.dst,
 				FALSE, FALSE, FALSE);
       if (h == NULL)
