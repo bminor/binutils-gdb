@@ -23,6 +23,7 @@
 #include "disasm.h"
 #include "reggroups.h"
 #include "python-internal.h"
+#include <unordered_map>
 
 /* Token to access per-gdbarch data related to register descriptors.  */
 static struct gdbarch_data *gdbpy_register_object_data = NULL;
@@ -95,18 +96,36 @@ gdbpy_register_object_data_init (struct gdbarch *gdbarch)
   return (void *) vec;
 }
 
-/* Create a new gdb.RegisterGroup object wrapping REGGROUP.  */
+/* Return a gdb.RegisterGroup object wrapping REGGROUP.  The register
+   group objects are cached, and the same Python object will always be
+   returned for the same REGGROUP pointer.  */
 
-static PyObject *
-gdbpy_new_reggroup (struct reggroup *reggroup)
+static gdbpy_ref<>
+gdbpy_get_reggroup (struct reggroup *reggroup)
 {
-  /* Create a new object and fill in its details.  */
-  reggroup_object *group
-    = PyObject_New (reggroup_object, &reggroup_object_type);
-  if (group == NULL)
-    return NULL;
-  group->reggroup = reggroup;
-  return (PyObject *) group;
+  /* Map from GDB's internal reggroup objects to the Python representation.
+     GDB's reggroups are global, and are never deleted, so using a map like
+     this is safe.  */
+  static std::unordered_map<struct reggroup *,gdbpy_ref<>>
+    gdbpy_reggroup_object_map;
+
+  /* If there is not already a suitable Python object in the map then
+     create a new one, and add it to the map.  */
+  if (gdbpy_reggroup_object_map[reggroup] == nullptr)
+    {
+      /* Create a new object and fill in its details.  */
+      gdbpy_ref<reggroup_object> group
+	(PyObject_New (reggroup_object, &reggroup_object_type));
+      if (group == NULL)
+	return NULL;
+      group->reggroup = reggroup;
+      gdbpy_reggroup_object_map[reggroup]
+	= gdbpy_ref<> ((PyObject *) group.release ());
+    }
+
+  /* Fetch the Python object wrapping REGGROUP from the map, increasing
+     the reference count is handled by the gdbpy_ref class.  */
+  return gdbpy_reggroup_object_map[reggroup];
 }
 
 /* Convert a gdb.RegisterGroup to a string, it just returns the name of
@@ -215,7 +234,7 @@ gdbpy_reggroup_iter_next (PyObject *self)
     }
 
   iter_obj->reggroup = next_group;
-  return gdbpy_new_reggroup (iter_obj->reggroup);
+  return gdbpy_get_reggroup (iter_obj->reggroup).release ();
 }
 
 /* Return a new gdb.RegisterGroupsIterator over all the register groups in

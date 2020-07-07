@@ -85,3 +85,22 @@ for { set i 0 } { $i < [llength $groups] } { incr i } {
     }
 }
 gdb_assert { $found_non_match == 0 } "all register groups match"
+
+# Check that we get the same register group descriptors from two
+# different iterators.
+gdb_py_test_silent_cmd \
+    "python iter1 = arch.register_groups ()" \
+    "get first all register group iterator" 0
+gdb_py_test_silent_cmd \
+    "python iter2 = arch.register_groups ()" \
+    "get second all register group iterator" 0
+gdb_py_test_silent_cmd \
+    [multi_line_input \
+	 "python" \
+	 "for r1, r2 in zip(iter1, iter2):" \
+	 "  if (r1.name != r2.name):"\
+	 "    raise gdb.GdbError (\"miss-matched names\")" \
+	 "  if (r1 != r2):" \
+	 "    raise gdb.GdbError (\"miss-matched objects\")" \
+	 "\004" ] \
+    "check names and objects match" 1

@@ -1,5 +1,9 @@
 2020-07-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-arch-reg-groups.exp: Additional tests.
+
+2020-07-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-arch-reg-names.exp: Additional tests.
 
 2020-07-21  Tom de Vries  <tdevries@suse.de>

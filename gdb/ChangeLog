@@ -1,5 +1,13 @@
 2020-07-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python/py-registers.c : Add 'unordered_map' include.
+	(gdbpy_new_reggroup): Renamed to...
+	(gdbpy_get_reggroup): ...this.  Update to only create register
+	group descriptors when needed.
+	(gdbpy_reggroup_iter_next): Update.
+
+2020-07-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* python/py-registers.c (gdbpy_register_object_data): New static
 	global.
 	(gdbpy_register_object_data_init): New function.
