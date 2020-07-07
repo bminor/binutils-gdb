@@ -1,3 +1,12 @@
+2020-07-07  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (find_opcode_match): Add error messages.
+	* testsuite/gas/arc/add_s-err.s: Update test.
+	* testsuite/gas/arc/asm-errors.err: Likewise.
+	* testsuite/gas/arc/cpu-em-err.s: Likewise.
+	* testsuite/gas/arc/hregs-err.s: Likewise.
+	* testsuite/gas/arc/warn.s: Likewise.
+
 2020-07-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26212

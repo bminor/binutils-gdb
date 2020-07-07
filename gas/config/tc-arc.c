@@ -1758,8 +1758,9 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
   int ntok = *pntok;
   int got_cpu_match = 0;
   expressionS bktok[MAX_INSN_ARGS];
-  int bkntok;
+  int bkntok, maxerridx = 0;
   expressionS emptyE;
+  const char *tmpmsg = NULL;
 
   arc_opcode_hash_entry_iterator_init (&iter);
   memset (&emptyE, 0, sizeof (emptyE));
@@ -1806,7 +1807,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 	    {
             case ARC_OPERAND_ADDRTYPE:
 	      {
-		*errmsg = NULL;
+		tmpmsg = NULL;
 
 		/* Check to be an address type.  */
 		if (tok[tokidx].X_op != O_addrtype)
@@ -1817,8 +1818,8 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		   address type.  */
 		gas_assert (operand->insert != NULL);
 		(*operand->insert) (0, tok[tokidx].X_add_number,
-				    errmsg);
-		if (*errmsg != NULL)
+				    &tmpmsg);
+		if (tmpmsg != NULL)
 		  goto match_failed;
 	      }
               break;
@@ -1844,11 +1845,11 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 	      /* Special handling?  */
 	      if (operand->insert)
 		{
-		  *errmsg = NULL;
+		  tmpmsg = NULL;
 		  (*operand->insert)(0,
 				     regno (tok[tokidx].X_add_number),
-				     errmsg);
-		  if (*errmsg)
+				     &tmpmsg);
+		  if (tmpmsg)
 		    {
 		      if (operand->flags & ARC_OPERAND_IGNORE)
 			{
@@ -1957,26 +1958,35 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 			}
 
 		      if (val < min || val > max)
-			goto match_failed;
+			{
+			  tmpmsg = _("immediate is out of bounds");
+			  goto match_failed;
+			}
 
 		      /* Check alignments.  */
 		      if ((operand->flags & ARC_OPERAND_ALIGNED32)
 			  && (val & 0x03))
-			goto match_failed;
+			{
+			  tmpmsg = _("immediate is not 32bit aligned");
+			  goto match_failed;
+			}
 
 		      if ((operand->flags & ARC_OPERAND_ALIGNED16)
 			  && (val & 0x01))
-			goto match_failed;
+			{
+			  tmpmsg = _("immediate is not 16bit aligned");
+			  goto match_failed;
+			}
 		    }
 		  else if (operand->flags & ARC_OPERAND_NCHK)
 		    {
 		      if (operand->insert)
 			{
-			  *errmsg = NULL;
+			  tmpmsg = NULL;
 			  (*operand->insert)(0,
 					     tok[tokidx].X_add_number,
-					     errmsg);
-			  if (*errmsg)
+					     &tmpmsg);
+			  if (tmpmsg)
 			    goto match_failed;
 			}
 		      else if (!(operand->flags & ARC_OPERAND_IGNORE))
@@ -1997,11 +2007,11 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		      regs |= get_register (tok[tokidx].X_op_symbol);
 		      if (operand->insert)
 			{
-			  *errmsg = NULL;
+			  tmpmsg = NULL;
 			  (*operand->insert)(0,
 					     regs,
-					     errmsg);
-			  if (*errmsg)
+					     &tmpmsg);
+			  if (tmpmsg)
 			    goto match_failed;
 			}
 		      else
@@ -2044,7 +2054,11 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		      || t->X_op == O_absent
 		      || t->X_op == O_register
 		      || (t->X_add_number != tok[tokidx].X_add_number))
-		    goto match_failed;
+		    {
+		      tmpmsg = _("operand is not duplicate of the "
+				 "previous one");
+		      goto match_failed;
+		    }
 		}
 	      t = &tok[tokidx];
 	      break;
@@ -2060,7 +2074,10 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 
       /* Setup ready for flag parsing.  */
       if (!parse_opcode_flags (opcode, nflgs, first_pflag))
-	goto match_failed;
+	{
+	  tmpmsg = _("flag mismatch");
+	  goto match_failed;
+	}
 
       pr_debug ("flg");
       /* Possible match -- did we use all of our input?  */
@@ -2070,12 +2087,19 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 	  pr_debug ("\n");
 	  return opcode;
 	}
+      tmpmsg = _("too many arguments");
 
     match_failed:;
       pr_debug ("\n");
       /* Restore the original parameters.  */
       memcpy (tok, bktok, MAX_INSN_ARGS * sizeof (*tok));
       ntok = bkntok;
+      if (tokidx >= maxerridx
+	  && tmpmsg)
+	{
+	  maxerridx = tokidx;
+	  *errmsg = tmpmsg;
+	}
     }
 
   if (*pcpumatch)
