@@ -1,3 +1,9 @@
+2020-09-03  Kito Cheng  <kito.cheng@sifive.com>
+
+	* testsuite/ld-riscv-elf/attr-merge-arch-failed-01.d: Updated.
+	* testsuite/ld-riscv-elf/attr-merge-arch-failed-01a.s: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-arch-failed-01b.s: Likewise.
+
 2020-09-03  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-scripts/sysroot-prefix.exp (single_sysroot_prefix_test):

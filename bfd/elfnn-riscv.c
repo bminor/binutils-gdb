@@ -2724,7 +2724,7 @@ riscv_merge_std_ext (bfd *ibfd,
 	  && ((find_in->major_version != find_out->major_version)
 	      || (find_in->minor_version != find_out->minor_version)))
 	{
-	  riscv_version_mismatch (ibfd, in, out);
+	  riscv_version_mismatch (ibfd, find_in, find_out);
 	  return FALSE;
 	}
 
