@@ -2059,11 +2059,7 @@ enum
   EVEX_W_0F3824_P_1,
   EVEX_W_0F3825_P_1,
   EVEX_W_0F3825_P_2,
-  EVEX_W_0F3826_P_1,
-  EVEX_W_0F3826_P_2,
-  EVEX_W_0F3828_P_1,
   EVEX_W_0F3828_P_2,
-  EVEX_W_0F3829_P_1,
   EVEX_W_0F3829_P_2,
   EVEX_W_0F382A_P_1,
   EVEX_W_0F382A_P_2,
@@ -2078,23 +2074,18 @@ enum
   EVEX_W_0F3837_P_2,
   EVEX_W_0F383A_P_1,
   EVEX_W_0F3852_P_1,
-  EVEX_W_0F3854_P_2,
   EVEX_W_0F3859_P_2,
   EVEX_W_0F385A_P_2,
   EVEX_W_0F385B_P_2,
   EVEX_W_0F3862_P_2,
   EVEX_W_0F3863_P_2,
-  EVEX_W_0F3866_P_2,
   EVEX_W_0F3870_P_2,
   EVEX_W_0F3872_P_1,
   EVEX_W_0F3872_P_2,
   EVEX_W_0F3872_P_3,
-  EVEX_W_0F3875_P_2,
   EVEX_W_0F387A_P_2,
   EVEX_W_0F387B_P_2,
-  EVEX_W_0F387D_P_2,
   EVEX_W_0F3883_P_2,
-  EVEX_W_0F388D_P_2,
   EVEX_W_0F3891_P_2,
   EVEX_W_0F3893_P_2,
   EVEX_W_0F38A1_P_2,
@@ -2121,8 +2112,6 @@ enum
   EVEX_W_0F3A39_P_2,
   EVEX_W_0F3A3A_P_2,
   EVEX_W_0F3A3B_P_2,
-  EVEX_W_0F3A3E_P_2,
-  EVEX_W_0F3A3F_P_2,
   EVEX_W_0F3A42_P_2,
   EVEX_W_0F3A43_P_2,
   EVEX_W_0F3A70_P_2,
@@ -2198,6 +2187,7 @@ struct dis386 {
    "LS" => print "abs" in 64bit mode and behave as 'S' otherwise
    "LV" => print "abs" for 64bit operand and behave as 'S' otherwise
    "LW" => print 'd', 'q' depending on the VEX.W bit
+   "BW" => print 'b' or 'w' depending on the EVEX.W bit
    "LP" => print 'w' or 'l' ('d' in Intel mode) if instruction has
 	   an operand size prefix, or suffix_always is true.  print
 	   'q' if rex prefix is present.
@@ -13129,6 +13119,8 @@ putop (const char *in_template, int sizeflag)
 		*obufp++ = vex.w ? 'd': 's';
 	      else if (last[0] == 'L')
 		*obufp++ = vex.w ? 'q': 'd';
+	      else if (last[0] == 'B')
+		*obufp++ = vex.w ? 'w': 'b';
 	      else
 		abort ();
 	    }

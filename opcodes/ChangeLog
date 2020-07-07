@@ -1,3 +1,16 @@
+2020-07-07  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (EVEX_W_0F3826_P_1, EVEX_W_0F3826_P_2,
+	EVEX_W_0F3828_P_1, EVEX_W_0F3829_P_1, EVEX_W_0F3854_P_2,
+	EVEX_W_0F3866_P_2, EVEX_W_0F3875_P_2, EVEX_W_0F387D_P_2,
+	EVEX_W_0F388D_P_2, EVEX_W_0F3A3E_P_2, EVEX_W_0F3A3F_P_2):
+	Delete.
+	(putop): Handle "BW".
+	* i386-dis-evex-w.h: Move entries for opcodes 0F3826, 0F3826,
+	0F3828, 0F3829, 0F3854, 0F3866, 0F3875, 0F387D, 0F388D, 0F3A3E,
+	and 0F3A3F ...
+	* i386-dis-evex-prefix.h: ... here.
+
 2020-07-06  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (VEX_LEN_0FXOP_09_80, VEX_LEN_0FXOP_09_81): Delete.

@@ -442,30 +442,10 @@
   {
     { "vpmovsxdq",	{ XM, EXxmmq }, 0 },
   },
-  /* EVEX_W_0F3826_P_1 */
-  {
-    { "vptestnmb",	{ XMask, Vex, EXx }, 0 },
-    { "vptestnmw",	{ XMask, Vex, EXx }, 0 },
-  },
-  /* EVEX_W_0F3826_P_2 */
-  {
-    { "vptestmb",	{ XMask, Vex, EXx }, 0 },
-    { "vptestmw",	{ XMask, Vex, EXx }, 0 },
-  },
-  /* EVEX_W_0F3828_P_1 */
-  {
-    { "vpmovm2b",	{ XM, MaskR }, 0 },
-    { "vpmovm2w",	{ XM, MaskR }, 0 },
-  },
   /* EVEX_W_0F3828_P_2 */
   {
     { Bad_Opcode },
     { "vpmuldq",	{ XM, Vex, EXx }, 0 },
-  },
-  /* EVEX_W_0F3829_P_1 */
-  {
-    { "vpmovb2m",	{ XMask, EXx }, 0 },
-    { "vpmovw2m",	{ XMask, EXx }, 0 },
   },
   /* EVEX_W_0F3829_P_2 */
   {
@@ -527,11 +507,6 @@
     { "vdpbf16ps",	{ XM, Vex, EXx }, 0 },
     { Bad_Opcode },
   },
-  /* EVEX_W_0F3854_P_2 */
-  {
-    { "vpopcntb",	{ XM, EXx }, 0 },
-    { "vpopcntw",	{ XM, EXx }, 0 },
-  },
   /* EVEX_W_0F3859_P_2 */
   {
     { "vbroadcasti32x2",	{ XM, EXxmm_mq }, 0 },
@@ -557,11 +532,6 @@
     { "vpcompressb",   { EXbScalar, XM }, 0 },
     { "vpcompressw",   { EXwScalar, XM }, 0 },
   },
-  /* EVEX_W_0F3866_P_2 */
-  {
-    { "vpblendmb",	{ XM, Vex, EXx }, 0 },
-    { "vpblendmw",	{ XM, Vex, EXx }, 0 },
-  },
   /* EVEX_W_0F3870_P_2 */
   {
     { Bad_Opcode },
@@ -582,11 +552,6 @@
     { "vcvtne2ps2bf16", { XM, Vex, EXx}, 0 },
     { Bad_Opcode },
   },
-  /* EVEX_W_0F3875_P_2 */
-  {
-    { "vpermi2b",	{ XM, Vex, EXx }, 0 },
-    { "vpermi2w",	{ XM, Vex, EXx }, 0 },
-  },
   /* EVEX_W_0F387A_P_2 */
   {
     { "vpbroadcastb",	{ XM, Rd }, 0 },
@@ -595,20 +560,10 @@
   {
     { "vpbroadcastw",	{ XM, Rd }, 0 },
   },
-  /* EVEX_W_0F387D_P_2 */
-  {
-    { "vpermt2b",	{ XM, Vex, EXx }, 0 },
-    { "vpermt2w",	{ XM, Vex, EXx }, 0 },
-  },
   /* EVEX_W_0F3883_P_2 */
   {
     { Bad_Opcode },
     { "vpmultishiftqb",	{ XM, Vex, EXx }, 0 },
-  },
-  /* EVEX_W_0F388D_P_2 */
-  {
-    { "vpermb",	{ XM, Vex, EXx }, 0 },
-    { "vpermw",	{ XM, Vex, EXx }, 0 },
   },
   /* EVEX_W_0F3891_P_2 */
   {
@@ -731,16 +686,6 @@
   {
     { EVEX_LEN_TABLE (EVEX_LEN_0F3A3B_P_2_W_0) },
     { EVEX_LEN_TABLE (EVEX_LEN_0F3A3B_P_2_W_1) },
-  },
-  /* EVEX_W_0F3A3E_P_2 */
-  {
-    { "vpcmpub",	{ XMask, Vex, EXx, VPCMP }, 0 },
-    { "vpcmpuw",	{ XMask, Vex, EXx, VPCMP }, 0 },
-  },
-  /* EVEX_W_0F3A3F_P_2 */
-  {
-    { "vpcmpb",	{ XMask, Vex, EXx, VPCMP }, 0 },
-    { "vpcmpw",	{ XMask, Vex, EXx, VPCMP }, 0 },
   },
   /* EVEX_W_0F3A42_P_2 */
   {
