@@ -1,3 +1,14 @@
+2020-07-21  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/py-registers.c (gdbpy_register_object_data): New static
+	global.
+	(gdbpy_register_object_data_init): New function.
+	(gdbpy_new_register_descriptor): Renamed to...
+	(gdbpy_get_register_descriptor): ...this, and update to reuse
+	existing register descriptors where possible.
+	(gdbpy_register_descriptor_iter_next): Update.
+	(gdbpy_initialize_registers): Register new gdbarch data.
+
 2020-07-21  Simon Marchi  <simon.marchi@efficios.com>
 
 	* linux-nat.c (stopped_pids): Make static.

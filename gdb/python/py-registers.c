@@ -24,6 +24,9 @@
 #include "reggroups.h"
 #include "python-internal.h"
 
+/* Token to access per-gdbarch data related to register descriptors.  */
+static struct gdbarch_data *gdbpy_register_object_data = NULL;
+
 /* Structure for iterator over register descriptors.  */
 typedef struct {
   PyObject_HEAD
@@ -81,6 +84,17 @@ typedef struct {
 extern PyTypeObject reggroup_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("reggroup_object");
 
+/* Associates a vector of gdb.RegisterDescriptor objects with GDBARCH as
+   gdbarch_data via the gdbarch post init registration mechanism
+   (gdbarch_data_register_post_init).  */
+
+static void *
+gdbpy_register_object_data_init (struct gdbarch *gdbarch)
+{
+  std::vector<gdbpy_ref<>> *vec = new (std::vector<gdbpy_ref<>>);
+  return (void *) vec;
+}
+
 /* Create a new gdb.RegisterGroup object wrapping REGGROUP.  */
 
 static PyObject *
@@ -117,20 +131,38 @@ gdbpy_reggroup_name (PyObject *self, void *closure)
   return gdbpy_reggroup_to_string (self);
 }
 
-/* Create an return a new gdb.RegisterDescriptor object.  */
-static PyObject *
-gdbpy_new_register_descriptor (struct gdbarch *gdbarch,
+/* Return a gdb.RegisterDescriptor object for REGNUM from GDBARCH.  For
+   each REGNUM (in GDBARCH) only one descriptor is ever created, which is
+   then cached on the GDBARCH.  */
+
+static gdbpy_ref<>
+gdbpy_get_register_descriptor (struct gdbarch *gdbarch,
 			       int regnum)
 {
-  /* Create a new object and fill in its details.  */
-  register_descriptor_object *reg
-    = PyObject_New (register_descriptor_object,
-		    &register_descriptor_object_type);
-  if (reg == NULL)
-    return NULL;
-  reg->regnum = regnum;
-  reg->gdbarch = gdbarch;
-  return (PyObject *) reg;
+  auto vec = (std::vector<gdbpy_ref<>> *) gdbarch_data
+    (gdbarch, gdbpy_register_object_data);
+
+  /* Ensure that we have enough entries in the vector.  */
+  if (vec->size () <= regnum)
+    vec->resize ((regnum + 1), nullptr);
+
+  /* If we don't already have a descriptor for REGNUM in GDBARCH then
+     create one now.  */
+  if (vec->at (regnum) == nullptr)
+    {
+      gdbpy_ref <register_descriptor_object> reg
+	(PyObject_New (register_descriptor_object,
+		       &register_descriptor_object_type));
+      if (reg == NULL)
+	return NULL;
+      reg->regnum = regnum;
+      reg->gdbarch = gdbarch;
+      vec->at (regnum) = gdbpy_ref<> ((PyObject *) reg.release ());
+    }
+
+  /* Grab the register descriptor from the vector, the reference count is
+     automatically incremented thanks to gdbpy_ref.  */
+  return vec->at (regnum);
 }
 
 /* Convert the register descriptor to a string.  */
@@ -281,7 +313,7 @@ gdbpy_register_descriptor_iter_next (PyObject *self)
       iter_obj->regnum++;
 
       if (name != nullptr && *name != '\0')
-	return gdbpy_new_register_descriptor (gdbarch, regnum);
+	return gdbpy_get_register_descriptor (gdbarch, regnum).release ();
     }
   while (true);
 }
@@ -291,6 +323,9 @@ gdbpy_register_descriptor_iter_next (PyObject *self)
 int
 gdbpy_initialize_registers ()
 {
+  gdbpy_register_object_data
+    = gdbarch_data_register_post_init (gdbpy_register_object_data_init);
+
   register_descriptor_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&register_descriptor_object_type) < 0)
     return -1;
