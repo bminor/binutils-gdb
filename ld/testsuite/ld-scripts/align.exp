@@ -31,10 +31,10 @@ if ![ld_assemble $as $srcdir/$subdir/align.s tmpdir/align.o] {
     return
 }
 
-# mingw on x86_64 targets need to set the image base to 0 to avoid auto image-basing.
+# Avoid auto image-basing.
 set saved_LDFLAGS "$LDFLAGS"
-if [istarget "x86_64-*-mingw*"] then {
-  set LDFLAGS "$LDFLAGS --image-base 0"
+if { [is_pecoff_format] } then {
+    set LDFLAGS "$LDFLAGS --image-base 0"
 }
 
 if ![ld_link $ld tmpdir/align "$LDFLAGS -T $srcdir/$subdir/align.t tmpdir/align.o"] {

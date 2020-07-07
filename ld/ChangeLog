@@ -1,5 +1,19 @@
 2020-07-07  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-scripts/align.exp: Use is_pecoff_format.
+	* testsuite/ld-scripts/defined.exp: Likewise.
+	* testsuite/ld-scripts/provide.exp: Likewise.
+	* testsuite/ld-scripts/weak.exp: Likewise.
+	* testsuite/ld-scripts/empty-address.exp: Likewise.  Reset LDFLAGS
+	on exit.
+	* testsuite/ld-scripts/expr.exp: Set LDFLAGS earlier, and with
+	--image-base for PE.
+	* testsuite/ld-scripts/include.exp: Set LDFLAGS for PE.
+	* testsuite/ld-scripts/script.exp: Use is_pecoff_format, and
+	set LDFLAGS as well as flags.
+
+2020-07-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-checks/checks.exp: Use is_xcoff_format.
 	* testsuite/ld-powerpc/powerpc.exp: Likewise.
 	* testsuite/ld-scripts/print-memory-usage.exp: Likewise.

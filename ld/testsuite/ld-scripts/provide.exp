@@ -31,8 +31,8 @@ if {[istarget "powerpc*-*-aix*"] || [istarget "rs6000-*-aix*"] || [is_aout_forma
 }
 
 set saved_LDFLAGS "$LDFLAGS"
-if [istarget "x86_64-*-mingw*"] then {
-  set LDFLAGS "$LDFLAGS --image-base 0"
+if { [is_pecoff_format] } then {
+    set LDFLAGS "$LDFLAGS --image-base 0"
 }
 
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/provide-*.d]]

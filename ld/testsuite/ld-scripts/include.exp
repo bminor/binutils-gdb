@@ -23,8 +23,10 @@ if [is_aout_format] {
 }
 
 set old_ldflags $LDFLAGS
-if { [istarget spu*-*-*] } {
+if { [istarget spu*-*-*] } then {
     set LDFLAGS "$LDFLAGS --local-store 0:0 --no-overlays"
+} elseif { [is_pecoff_format] } then {
+    set LDFLAGS "$LDFLAGS --image-base 0"
 }
 
 set test_list [lsort [glob -nocomplain $srcdir/$subdir/include*.d]]
