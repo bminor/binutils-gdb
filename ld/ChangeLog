@@ -1,5 +1,18 @@
 2020-07-07  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-checks/checks.exp: Use is_xcoff_format.
+	* testsuite/ld-powerpc/powerpc.exp: Likewise.
+	* testsuite/ld-scripts/print-memory-usage.exp: Likewise.
+	* testsuite/ld-srec/srec.exp: Likewise.
+	* testsuite/ld-undefined/require-defined.exp: Likewise.
+	* testsuite/ld-scripts/expr2.d: Likewise.
+	* testsuite/ld-scripts/section-match-1.d: Only run for ELF.
+	* testsuite/ld-elfvers/vers.exp: Delete dead code.
+	* testsuite/ld-elfvsb/elfvsb.exp: Likewise.
+	* testsuite/ld-elfweak/elfweak.exp: Likewise.
+
+2020-07-07  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/aix.em (gld${EMULATION_NAME}_find_exp_assignment): Handle
 	etree_provided.
 

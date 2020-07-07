@@ -70,10 +70,10 @@ if {[istarget "*-*-vxworks"]} {
 # is ELF, because we pass -melf32ppc to ld and powerpc-nto-ld wants
 # -melf32ppcnto.
 
-if { [istarget "*-*-macos*"]
+if { [is_xcoff_format]
      || [istarget "*-*-pe"] || [istarget "*-*-winnt*"]
-     || [istarget "*-*-cygwin*"] || [istarget "*-*-aix*"]
-     || [istarget "*-*-beos*"] || [istarget "*-*-lynxos*"]
+     || [istarget "*-*-cygwin*"]
+     || [istarget "*-*-lynxos*"]
      || [istarget "*-*-nto*"] } {
     return
 }

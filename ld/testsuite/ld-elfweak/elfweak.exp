@@ -55,9 +55,6 @@ if {    ![istarget alpha*-*-linux*]
      && ![istarget *-*-nacl*] } {
     return
 }
-if { [istarget rs6000*-*-aix*] || [istarget powerpc*-*-aix*] } {
-    return
-}
 
 set diff diff
 set tmpdir tmpdir
