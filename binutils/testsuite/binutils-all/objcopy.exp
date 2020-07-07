@@ -1354,4 +1354,7 @@ if { [istarget pdp11-*-*] } {
     set src "pr25662.s"
 }
 
-objcopy_test "pr25662" $src executable "" "-T$srcdir/$subdir/pr25662.ld"
+#xcoff doesn't support arbitrary sections
+if { ![is_xcoff_format] } {
+    objcopy_test "pr25662" $src executable "" "-T$srcdir/$subdir/pr25662.ld"
+}
