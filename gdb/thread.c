@@ -1433,15 +1433,17 @@ scoped_restore_current_thread::~scoped_restore_current_thread ()
 
 scoped_restore_current_thread::scoped_restore_current_thread ()
 {
-  m_thread = NULL;
   m_inf = current_inferior ();
+  m_inf->incref ();
 
   if (inferior_ptid != null_ptid)
     {
-      thread_info *tp = inferior_thread ();
+      m_thread = inferior_thread ();
+      m_thread->incref ();
+
       struct frame_info *frame;
 
-      m_was_stopped = tp->state == THREAD_STOPPED;
+      m_was_stopped = m_thread->state == THREAD_STOPPED;
       if (m_was_stopped
 	  && target_has_registers
 	  && target_has_stack
@@ -1466,13 +1468,18 @@ scoped_restore_current_thread::scoped_restore_current_thread ()
 	{
 	  m_selected_frame_id = null_frame_id;
 	  m_selected_frame_level = -1;
+
+	  /* Better let this propagate.  */
+	  if (ex.error == TARGET_CLOSE_ERROR)
+	    {
+	      m_thread->decref ();
+	      m_inf->decref ();
+	      throw;
+	    }
 	}
-
-      tp->incref ();
-      m_thread = tp;
     }
-
-  m_inf->incref ();
+  else
+    m_thread = NULL;
 }
 
 /* See gdbthread.h.  */
