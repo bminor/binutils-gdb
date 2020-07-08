@@ -1,3 +1,9 @@
+2020-07-08  Jan Beulich  <jbeulich@suse.com>
+
+	* testsuite/gas/i386/fma4-lig.d, testsuite/gas/i386/xop-lig.d:
+	New.
+	* testsuite/gas/i386/i386.exp: Run new tests.
+
 2020-07-07  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* config/tc-arc.c (find_opcode_match): Add error messages.

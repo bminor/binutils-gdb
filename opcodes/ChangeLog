@@ -1,5 +1,17 @@
 2020-07-08  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (XMVexScalarI4): Define.
+	(VEX_LEN_0F3A6A_P_2, VEX_LEN_0F3A6B_P_2, VEX_LEN_0F3A6E_P_2,
+	VEX_LEN_0F3A6F_P_2, VEX_LEN_0F3A7A_P_2, VEX_LEN_0F3A7B_P_2,
+	VEX_LEN_0F3A7E_P_2, VEX_LEN_0F3A7F_P_2): Delete.
+	(vex_len_table): Move scalar FMA4 entries ...
+	(prefix_table): ... here.
+	(OP_REG_VexI4): Handle scalar_mode.
+	* i386-opc.tbl: Use VexLIG for scalar FMA4 insns.
+	* i386-tbl.h: Re-generate.
+
+2020-07-08  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (OP_Vex_2src_1, OP_Vex_2src_2, Vex_2src_1,
 	Vex_2src_2): Delete.
 	(OP_VexW, VexW): New.

@@ -421,6 +421,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EXqVexScalarS { OP_EX_Vex, q_scalar_swap_mode }
 #define XMVexScalar { OP_XMM_Vex, scalar_mode }
 #define XMVexI4 { OP_REG_VexI4, x_mode }
+#define XMVexScalarI4 { OP_REG_VexI4, scalar_mode }
 #define VexI4 { OP_VexI4, 0 }
 #define PCLMUL { PCLMUL_Fixup, 0 }
 #define VCMP { VCMP_Fixup, 0 }
@@ -1788,14 +1789,6 @@ enum
   VEX_LEN_0F3A61_P_2,
   VEX_LEN_0F3A62_P_2,
   VEX_LEN_0F3A63_P_2,
-  VEX_LEN_0F3A6A_P_2,
-  VEX_LEN_0F3A6B_P_2,
-  VEX_LEN_0F3A6E_P_2,
-  VEX_LEN_0F3A6F_P_2,
-  VEX_LEN_0F3A7A_P_2,
-  VEX_LEN_0F3A7B_P_2,
-  VEX_LEN_0F3A7E_P_2,
-  VEX_LEN_0F3A7F_P_2,
   VEX_LEN_0F3ADF_P_2,
   VEX_LEN_0F3AF0_P_3,
   VEX_LEN_0FXOP_08_CC,
@@ -6512,14 +6505,14 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F3A6A_P_2) },
+    { "vfmaddss",	{ XMScalar, VexScalar, EXxmm_md, XMVexScalarI4 }, 0 },
   },
 
   /* PREFIX_VEX_0F3A6B */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F3A6B_P_2) },
+    { "vfmaddsd",	{ XMScalar, VexScalar, EXxmm_mq, XMVexScalarI4 }, 0 },
   },
 
   /* PREFIX_VEX_0F3A6C */
@@ -6540,14 +6533,14 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F3A6E_P_2) },
+    { "vfmsubss",	{ XMScalar, VexScalar, EXxmm_md, XMVexScalarI4 }, 0 },
   },
 
   /* PREFIX_VEX_0F3A6F */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F3A6F_P_2) },
+    { "vfmsubsd",	{ XMScalar, VexScalar, EXxmm_mq, XMVexScalarI4 }, 0 },
   },
 
   /* PREFIX_VEX_0F3A78 */
@@ -6568,14 +6561,14 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F3A7A_P_2) },
+    { "vfnmaddss",	{ XMScalar, VexScalar, EXxmm_md, XMVexScalarI4 }, 0 },
   },
 
   /* PREFIX_VEX_0F3A7B */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F3A7B_P_2) },
+    { "vfnmaddsd",	{ XMScalar, VexScalar, EXxmm_mq, XMVexScalarI4 }, 0 },
   },
 
   /* PREFIX_VEX_0F3A7C */
@@ -6597,14 +6590,14 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F3A7E_P_2) },
+    { "vfnmsubss",	{ XMScalar, VexScalar, EXxmm_md, XMVexScalarI4 }, 0 },
   },
 
   /* PREFIX_VEX_0F3A7F */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_LEN_TABLE (VEX_LEN_0F3A7F_P_2) },
+    { "vfnmsubsd",	{ XMScalar, VexScalar, EXxmm_mq, XMVexScalarI4 }, 0 },
   },
 
   /* PREFIX_VEX_0F3ACE */
@@ -9618,46 +9611,6 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_0F3A63_P_2 */
   {
     { "vpcmpistri",	{ XM, EXx, Ib }, 0 },
-  },
-
-  /* VEX_LEN_0F3A6A_P_2 */
-  {
-    { "vfmaddss",	{ XMScalar, VexScalar, EXxmm_md, XMVexI4 }, 0 },
-  },
-
-  /* VEX_LEN_0F3A6B_P_2 */
-  {
-    { "vfmaddsd",	{ XMScalar, VexScalar, EXxmm_mq, XMVexI4 }, 0 },
-  },
-
-  /* VEX_LEN_0F3A6E_P_2 */
-  {
-    { "vfmsubss",	{ XMScalar, VexScalar, EXxmm_md, XMVexI4 }, 0 },
-  },
-
-  /* VEX_LEN_0F3A6F_P_2 */
-  {
-    { "vfmsubsd",	{ XMScalar, VexScalar, EXxmm_mq, XMVexI4 }, 0 },
-  },
-
-  /* VEX_LEN_0F3A7A_P_2 */
-  {
-    { "vfnmaddss",	{ XMScalar, VexScalar, EXxmm_md, XMVexI4 }, 0 },
-  },
-
-  /* VEX_LEN_0F3A7B_P_2 */
-  {
-    { "vfnmaddsd",	{ XMScalar, VexScalar, EXxmm_mq, XMVexI4 }, 0 },
-  },
-
-  /* VEX_LEN_0F3A7E_P_2 */
-  {
-    { "vfnmsubss",	{ XMScalar, VexScalar, EXxmm_md, XMVexI4 }, 0 },
-  },
-
-  /* VEX_LEN_0F3A7F_P_2 */
-  {
-    { "vfnmsubsd",	{ XMScalar, VexScalar, EXxmm_mq, XMVexI4 }, 0 },
   },
 
   /* VEX_LEN_0F3ADF_P_2 */
@@ -15865,29 +15818,21 @@ static void
 OP_REG_VexI4 (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 {
   int reg;
-  const char **names;
+  const char **names = names_xmm;
 
   FETCH_DATA (the_info, codep + 1);
   reg = *codep++;
 
-  if (bytemode != x_mode)
+  if (bytemode != x_mode && bytemode != scalar_mode)
     abort ();
 
   reg >>= 4;
   if (address_mode != mode_64bit)
     reg &= 7;
 
-  switch (vex.length)
-    {
-    case 128:
-      names = names_xmm;
-      break;
-    case 256:
-      names = names_ymm;
-      break;
-    default:
-      abort ();
-    }
+  if (bytemode == x_mode && vex.length == 256)
+    names = names_ymm;
+
   oappend (names[reg]);
 
   if (vex.w)
