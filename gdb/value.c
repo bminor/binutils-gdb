@@ -1412,7 +1412,18 @@ value_optimized_out (struct value *value)
 	}
       catch (const gdb_exception_error &ex)
 	{
-	  /* Fall back to checking value->optimized_out.  */
+	  switch (ex.error)
+	    {
+	    case MEMORY_ERROR:
+	    case OPTIMIZED_OUT_ERROR:
+	    case NOT_AVAILABLE_ERROR:
+	      /* These can normally happen when we try to access an
+		 optimized out or unavailable register, either in a
+		 physical register or spilled to memory.  */
+	      break;
+	    default:
+	      throw;
+	    }
 	}
     }
 

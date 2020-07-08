@@ -1,3 +1,11 @@
+2020-07-10  Pedro Alves  <pedro@palves.net>
+
+	* frame-tailcall.c (dwarf2_tailcall_sniffer_first): Only swallow
+	NO_ENTRY_VALUE_ERROR / MEMORY_ERROR / OPTIMIZED_OUT_ERROR /
+	NOT_AVAILABLE_ERROR.
+	* value.c (value_optimized_out): Only swallow MEMORY_ERROR /
+	OPTIMIZED_OUT_ERROR / NOT_AVAILABLE_ERROR.
+
 2020-07-10  Simon Marchi  <simon.marchi@polymtl.ca>
 	    Pedro Alves  <pedro@palves.net>
 

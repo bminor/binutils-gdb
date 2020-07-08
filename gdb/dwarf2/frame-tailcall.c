@@ -377,7 +377,6 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
      get_frame_address_in_block will decrease it by 1 in such case.  */
   this_pc = get_frame_address_in_block (this_frame);
 
-  /* Catch any unwinding errors.  */
   try
     {
       int sp_regnum;
@@ -404,7 +403,22 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
     {
       if (entry_values_debug)
 	exception_print (gdb_stdout, except);
-      return;
+
+      switch (except.error)
+	{
+	case NO_ENTRY_VALUE_ERROR:
+	  /* Thrown by call_site_find_chain.  */
+	case MEMORY_ERROR:
+	case OPTIMIZED_OUT_ERROR:
+	case NOT_AVAILABLE_ERROR:
+	  /* These can normally happen when we try to access an
+	     optimized out or unavailable register, either in a
+	     physical register or spilled to memory.  */
+	  return;
+	}
+
+      /* Let unexpected errors propagate.  */
+      throw;
     }
 
   /* Ambiguous unwind or unambiguous unwind verified as matching.  */
