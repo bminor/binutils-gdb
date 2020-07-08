@@ -638,6 +638,10 @@ public:
 	    && go_classify_struct_type (type) == GO_TYPE_STRING);
   }
 
+  /* See language.h.  */
+
+  bool store_sym_names_in_linkage_form_p () const override
+  { return true; }
 };
 
 /* Single instance of the Go language class.  */

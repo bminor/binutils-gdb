@@ -10639,12 +10639,6 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  /* Do nothing (do not demangle the symbol name).  */
 	}
-      else if (cu->language == language_go)
-	{
-	  /* This is a lie, but we already lie to the caller new_symbol.
-	     new_symbol assumes we return the mangled name.
-	     This just undoes that lie until things are cleaned up.  */
-	}
       else
 	{
 	  /* Use DMGL_RET_DROP for C++ template functions to suppress

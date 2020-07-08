@@ -1,5 +1,12 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* dwarf2/read.c (dwarf2_physname): Remove special case for
+	language_go.
+	* go-lang.c (go_language::store_sym_names_in_linkage_form_p): New
+	member function.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove
 	la_store_sym_names_in_linkage_form_p initializer.
 	(ada_language::store_sym_names_in_linkage_form_p): New member
