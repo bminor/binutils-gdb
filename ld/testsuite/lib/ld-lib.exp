@@ -411,7 +411,7 @@ proc ld_link_defsyms {} {
 proc ar_simple_create { ar aropts target objects } {
     remote_file host delete $target
 
-    set exec_output [run_host_cmd "$ar" "-rc $aropts $target $objects"]
+    set exec_output [run_host_cmd "$ar" "$aropts rc $target $objects"]
     set exec_output [prune_warnings $exec_output]
 
     if [string match "" $exec_output] then {

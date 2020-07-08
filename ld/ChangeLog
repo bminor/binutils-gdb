@@ -1,3 +1,103 @@
+2020-07-08  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/ld-lib.exp (ar_simple_create): Pass options before
+	ar command.
+	* testsuite/ld-powerpc/aix52.exp: Run for rs6000-aix5.2.  Update
+	match files.
+	* testsuite/ld-powerpc/aix-abs-branch-1.dd: Update.
+	* testsuite/ld-powerpc/aix-core-sec-1.hd: Update.
+	* testsuite/ld-powerpc/aix-gc-1-32.dd: Update.
+	* testsuite/ld-powerpc/aix-gc-1-64.dd: Update.
+	* testsuite/ld-powerpc/aix-glink-1-32.dd: Update.
+	* testsuite/ld-powerpc/aix-glink-1-64.dd: Update.
+	* testsuite/ld-powerpc/aix-glink-2-32.dd: Update.
+	* testsuite/ld-powerpc/aix-glink-2-64.dd: Update.
+	* testsuite/ld-powerpc/aix-no-dup-syms-1-rel.rd: Update.
+	* testsuite/ld-powerpc/aix-ref-1-32.od: Update.
+	* testsuite/ld-powerpc/aix-ref-1-64.od: Update.
+	* testsuite/ld-powerpc/aix-toc-1-32.dd: Update.
+	* testsuite/ld-powerpc/aix-toc-1-64.dd: Update.
+	* testsuite/ld-powerpc/aix-weak-3-32.dd: Update.
+	* testsuite/ld-powerpc/aix-weak-3-64.dd: Update.
+	* testsuite/ld-powerpc/aix-abs-branch-1.nd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-abs-branch-1-32.nd,
+	* testsuite/ld-powerpc/aix-abs-branch-1-64.nd: ..these new files.
+	* testsuite/ld-powerpc/aix-abs-reloc-1.nd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-abs-reloc-1-32.nd,
+	* testsuite/ld-powerpc/aix-abs-reloc-1-64.nd: ..these new files.
+	* testsuite/ld-powerpc/aix-abs-reloc-1.od: Delete, replace with..
+	* testsuite/ld-powerpc/aix-abs-reloc-1-32.od,
+	* testsuite/ld-powerpc/aix-abs-reloc-1-64.od: ..these new files.
+	* testsuite/ld-powerpc/aix-export-1-all.dd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-export-1-all-32.dd,
+	* testsuite/ld-powerpc/aix-export-1-all-64.dd: ..these new files.
+	* testsuite/ld-powerpc/aix-export-1-full.dd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-export-1-full-32.dd,
+	* testsuite/ld-powerpc/aix-export-1-full-64.dd: ..these new files.
+	* testsuite/ld-powerpc/aix-export-2.nd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-export-2-32.nd,
+	* testsuite/ld-powerpc/aix-export-2-64.nd: ..these new files.
+	* testsuite/ld-powerpc/aix-gc-1.nd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-gc-1-32.nd,
+	* testsuite/ld-powerpc/aix-gc-1-64.nd: ..these new files.
+	* testsuite/ld-powerpc/aix-glink-3.dd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-glink-3-32.dd,
+	* testsuite/ld-powerpc/aix-glink-3-64.dd: ..these new files.
+	* testsuite/ld-powerpc/aix-lineno-1a.dd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-lineno-1a-32.dd,
+	* testsuite/ld-powerpc/aix-lineno-1a-64.dd: ..these new files.
+	* testsuite/ld-powerpc/aix-lineno-1a.nd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-lineno-1a-32.nd,
+	* testsuite/ld-powerpc/aix-lineno-1a-64.nd: ..these new files.
+	* testsuite/ld-powerpc/aix-lineno-1b.dd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-lineno-1b-32.dd,
+	* testsuite/ld-powerpc/aix-lineno-1b-64.dd: ..these new files.
+	* testsuite/ld-powerpc/aix-lineno-1b.nd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-lineno-1b-32.nd,
+	* testsuite/ld-powerpc/aix-lineno-1b-64.nd: ..these new files.
+	* testsuite/ld-powerpc/aix-no-dup-syms-1-dso.dnd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-no-dup-syms-1-dso-32.dnd,
+	* testsuite/ld-powerpc/aix-no-dup-syms-1-dso-64.dnd: ..these new files.
+	* testsuite/ld-powerpc/aix-no-dup-syms-1-dso.drd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-no-dup-syms-1-dso-32.drd,
+	* testsuite/ld-powerpc/aix-no-dup-syms-1-dso-64.drd: ..these new files.
+	* testsuite/ld-powerpc/aix-no-dup-syms-1-dso.nd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-no-dup-syms-1-dso-32.nd,
+	* testsuite/ld-powerpc/aix-no-dup-syms-1-dso-64.nd: ..these new files.
+	* testsuite/ld-powerpc/aix-no-dup-syms-1-dso.rd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-no-dup-syms-1-dso-32.rd,
+	* testsuite/ld-powerpc/aix-no-dup-syms-1-dso-64.rd: ..these new files.
+	* testsuite/ld-powerpc/aix-weak-1-dso.dnd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-weak-1-dso-32.dnd,
+	* testsuite/ld-powerpc/aix-weak-1-dso-64.dnd: ..these new files.
+	* testsuite/ld-powerpc/aix-weak-1-dso.hd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-weak-1-dso-32.hd,
+	* testsuite/ld-powerpc/aix-weak-1-dso-64.hd: ..these new files.
+	* testsuite/ld-powerpc/aix-weak-1-dso.nd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-weak-1-dso-32.nd,
+	* testsuite/ld-powerpc/aix-weak-1-dso-64.nd: ..these new files.
+	* testsuite/ld-powerpc/aix-weak-1-gcdso.dnd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-weak-1-gcdso-32.dnd,
+	* testsuite/ld-powerpc/aix-weak-1-gcdso-64.dnd: ..these new files.
+	* testsuite/ld-powerpc/aix-weak-1-gcdso.hd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-weak-1-gcdso-32.hd,
+	* testsuite/ld-powerpc/aix-weak-1-gcdso-64.hd: ..these new files.
+	* testsuite/ld-powerpc/aix-weak-1-gcdso.nd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-weak-1-gcdso-32.nd,
+	* testsuite/ld-powerpc/aix-weak-1-gcdso-64.nd: ..these new files.
+	* testsuite/ld-powerpc/aix-weak-2a.nd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-weak-2a-32.nd,
+	* testsuite/ld-powerpc/aix-weak-2a-64.nd: ..these new files.
+	* testsuite/ld-powerpc/aix-weak-2b.nd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-weak-2b-32.nd,
+	* testsuite/ld-powerpc/aix-weak-2b-64.nd: ..these new files.
+	* testsuite/ld-powerpc/aix-weak-2c.nd: Delete, replace with..
+	* testsuite/ld-powerpc/aix-weak-2c-32.nd,
+	* testsuite/ld-powerpc/aix-weak-2c-64.nd: ..these new files.
+	* testsuite/ld-powerpc/aix-weak-2c.od: Delete, replace with..
+	* testsuite/ld-powerpc/aix-weak-2c-32.od,
+	* testsuite/ld-powerpc/aix-weak-2c-64.od: ..these new files.
+
 2020-07-07  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-scripts/section-match-1.d: xfail h8300.
