@@ -1,3 +1,8 @@
+2020-07-08  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/catch_ex/foo.adb: Pass string to raise.
+	* gdb.ada/catch_ex.exp: Examine catchpoint text.
+
 2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR python/22748

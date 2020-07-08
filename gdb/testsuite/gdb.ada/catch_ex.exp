@@ -62,7 +62,7 @@ gdb_test "info break" \
          "info break, catch all Ada exceptions"
 
 set catchpoint_msg \
-  "Catchpoint $any_nb, CONSTRAINT_ERROR (\\\(foo\\.adb:$decimal explicit raise\\\) )?at $any_addr in foo \\\(\\\).*at .*foo.adb:$any_nb"
+  "Catchpoint $any_nb, CONSTRAINT_ERROR (\\\(ignore C_E\\\) )?at $any_addr in foo \\\(\\\).*at .*foo.adb:$any_nb"
 gdb_test "continue" \
          "Continuing\.$eol$catchpoint_msg$eol.*SPOT1" \
          "continuing to first exception"

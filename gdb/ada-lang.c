@@ -11894,7 +11894,12 @@ ada_exception_message_1 (void)
   if (e_msg_len <= 0)
     return NULL;
 
-  return target_read_string (value_address (e_msg_val), INT_MAX);
+  gdb::unique_xmalloc_ptr<char> e_msg ((char *) xmalloc (e_msg_len + 1));
+  read_memory (value_address (e_msg_val), (gdb_byte *) e_msg.get (),
+	       e_msg_len);
+  e_msg.get ()[e_msg_len] = '\0';
+
+  return e_msg;
 }
 
 /* Same as ada_exception_message_1, except that all exceptions are

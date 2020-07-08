@@ -1,3 +1,7 @@
+2020-07-08  Tom Tromey  <tromey@adacore.com>
+
+	* ada-lang.c (ada_exception_message_1): Use read_memory.
+
 2020-07-06  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR python/22748
