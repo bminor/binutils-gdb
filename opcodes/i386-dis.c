@@ -89,11 +89,10 @@ static void OP_XS (int, int);
 static void OP_M (int, int);
 static void OP_VEX (int, int);
 static void OP_EX_Vex (int, int);
-static void OP_EX_VexImmW (int, int);
 static void OP_XMM_Vex (int, int);
-static void OP_XMM_VexW (int, int);
 static void OP_Rounding (int, int);
 static void OP_REG_VexI4 (int, int);
+static void OP_VexI4 (int, int);
 static void PCLMUL_Fixup (int, int);
 static void VCMP_Fixup (int, int);
 static void VPCMP_Fixup (int, int);
@@ -422,10 +421,9 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define VexGdq { OP_VEX, dq_mode }
 #define EXdVexScalarS { OP_EX_Vex, d_scalar_swap_mode }
 #define EXqVexScalarS { OP_EX_Vex, q_scalar_swap_mode }
-#define EXVexImmW { OP_EX_VexImmW, x_mode }
 #define XMVexScalar { OP_XMM_Vex, scalar_mode }
-#define XMVexW { OP_XMM_VexW, 0 }
 #define XMVexI4 { OP_REG_VexI4, x_mode }
+#define VexI4 { OP_VexI4, 0 }
 #define PCLMUL { PCLMUL_Fixup, 0 }
 #define VCMP { VCMP_Fixup, 0 }
 #define VPCMP { VPCMP_Fixup, 0 }
@@ -1944,8 +1942,6 @@ enum
   VEX_W_0F3A38_P_2,
   VEX_W_0F3A39_P_2,
   VEX_W_0F3A46_P_2,
-  VEX_W_0F3A48_P_2,
-  VEX_W_0F3A49_P_2,
   VEX_W_0F3A4A_P_2,
   VEX_W_0F3A4B_P_2,
   VEX_W_0F3A4C_P_2,
@@ -2877,7 +2873,6 @@ static struct
 vex;
 static unsigned char need_vex;
 static unsigned char need_vex_reg;
-static unsigned char vex_w_done;
 
 struct op
   {
@@ -6413,14 +6408,14 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F3A48_P_2) },
+    { "vpermil2ps",	{ XM, Vex, EXx, XMVexI4, VexI4 }, 0 },
   },
 
   /* PREFIX_VEX_0F3A49 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_W_TABLE (VEX_W_0F3A49_P_2) },
+    { "vpermil2pd",	{ XM, Vex, EXx, XMVexI4, VexI4 }, 0 },
   },
 
   /* PREFIX_VEX_0F3A4A */
@@ -10021,16 +10016,6 @@ static const struct dis386 vex_w_table[][2] = {
     { "vperm2i128",	{ XM, Vex256, EXx, Ib }, 0 },
   },
   {
-    /* VEX_W_0F3A48_P_2 */
-    { "vpermil2ps",	{ XMVexW, Vex, EXVexImmW, EXVexImmW, EXVexImmW }, 0 },
-    { "vpermil2ps",	{ XMVexW, Vex, EXVexImmW, EXVexImmW, EXVexImmW }, 0 },
-  },
-  {
-    /* VEX_W_0F3A49_P_2 */
-    { "vpermil2pd",	{ XMVexW, Vex, EXVexImmW, EXVexImmW, EXVexImmW }, 0 },
-    { "vpermil2pd",	{ XMVexW, Vex, EXVexImmW, EXVexImmW, EXVexImmW }, 0 },
-  },
-  {
     /* VEX_W_0F3A4A_P_2 */
     { "vblendvps",	{ XM, Vex, EXx, XMVexI4 }, 0 },
   },
@@ -11992,7 +11977,6 @@ print_insn (bfd_vma pc, disassemble_info *info)
 
   need_vex = 0;
   need_vex_reg = 0;
-  vex_w_done = 0;
   memset (&vex, 0, sizeof (vex));
 
   if (dp->name == NULL && dp->op[0].bytemode == FLOATCODE)
@@ -15865,175 +15849,6 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   oappend (names[reg]);
 }
 
-/* Get the VEX immediate byte without moving codep.  */
-
-static unsigned char
-get_vex_imm8 (int sizeflag, int opnum)
-{
-  int bytes_before_imm = 0;
-
-  if (modrm.mod != 3)
-    {
-      /* There are SIB/displacement bytes.  */
-      if ((sizeflag & AFLAG) || address_mode == mode_64bit)
-	{
-	  /* 32/64 bit address mode */
-	  int base = modrm.rm;
-
-	  /* Check SIB byte.  */
-	  if (base == 4)
-	    {
-	      FETCH_DATA (the_info, codep + 1);
-	      base = *codep & 7;
-	      /* When decoding the third source, don't increase
-		 bytes_before_imm as this has already been incremented
-		 by one in OP_E_memory while decoding the second
-		 source operand.  */
-	      if (opnum == 0)
-		bytes_before_imm++;
-	    }
-
-	  /* Don't increase bytes_before_imm when decoding the third source,
-	     it has already been incremented by OP_E_memory while decoding
-	     the second source operand.  */
-	  if (opnum == 0)
-	    {
-	      switch (modrm.mod)
-		{
-		  case 0:
-		    /* When modrm.rm == 5 or modrm.rm == 4 and base in
-		       SIB == 5, there is a 4 byte displacement.  */
-		    if (base != 5)
-		      /* No displacement. */
-		      break;
-		    /* Fall through.  */
-		  case 2:
-		    /* 4 byte displacement.  */
-		    bytes_before_imm += 4;
-		    break;
-		  case 1:
-		    /* 1 byte displacement.  */
-		    bytes_before_imm++;
-		    break;
-		}
-	    }
-	}
-      else
-	{
-	  /* 16 bit address mode */
-	  /* Don't increase bytes_before_imm when decoding the third source,
-	     it has already been incremented by OP_E_memory while decoding
-	     the second source operand.  */
-	  if (opnum == 0)
-	    {
-	      switch (modrm.mod)
-		{
-		case 0:
-		  /* When modrm.rm == 6, there is a 2 byte displacement.  */
-		  if (modrm.rm != 6)
-		    /* No displacement. */
-		    break;
-		  /* Fall through.  */
-		case 2:
-		  /* 2 byte displacement.  */
-		  bytes_before_imm += 2;
-		  break;
-		case 1:
-		  /* 1 byte displacement: when decoding the third source,
-		     don't increase bytes_before_imm as this has already
-		     been incremented by one in OP_E_memory while decoding
-		     the second source operand.  */
-		  if (opnum == 0)
-		    bytes_before_imm++;
-
-		  break;
-		}
-	    }
-	}
-    }
-
-  FETCH_DATA (the_info, codep + bytes_before_imm + 1);
-  return codep [bytes_before_imm];
-}
-
-static void
-OP_EX_VexReg (int bytemode, int sizeflag, int reg)
-{
-  const char **names;
-
-  if (reg == -1 && modrm.mod != 3)
-    {
-      OP_E_memory (bytemode, sizeflag);
-      return;
-    }
-  else
-    {
-      if (reg == -1)
-	{
-	  reg = modrm.rm;
-	  USED_REX (REX_B);
-	  if (rex & REX_B)
-	    reg += 8;
-	}
-      if (address_mode != mode_64bit)
-	reg &= 7;
-    }
-
-  switch (vex.length)
-    {
-    case 128:
-      names = names_xmm;
-      break;
-    case 256:
-      names = names_ymm;
-      break;
-    default:
-      abort ();
-    }
-  oappend (names[reg]);
-}
-
-static void
-OP_EX_VexImmW (int bytemode, int sizeflag)
-{
-  int reg = -1;
-  static unsigned char vex_imm8;
-
-  if (vex_w_done == 0)
-    {
-      vex_w_done = 1;
-
-      /* Skip mod/rm byte.  */
-      MODRM_CHECK;
-      codep++;
-
-      vex_imm8 = get_vex_imm8 (sizeflag, 0);
-
-      if (vex.w)
-	  reg = vex_imm8 >> 4;
-
-      OP_EX_VexReg (bytemode, sizeflag, reg);
-    }
-  else if (vex_w_done == 1)
-    {
-      vex_w_done = 2;
-
-      if (!vex.w)
-	  reg = vex_imm8 >> 4;
-
-      OP_EX_VexReg (bytemode, sizeflag, reg);
-    }
-  else
-    {
-      /* Output the imm8 directly.  */
-      scratchbuf[0] = '$';
-      print_operand_value (scratchbuf + 1, 1, vex_imm8 & 0xf);
-      oappend_maybe_intel (scratchbuf);
-      scratchbuf[0] = '\0';
-      codep++;
-    }
-}
-
 static void
 OP_Vex_2src (int bytemode, int sizeflag)
 {
@@ -16135,12 +15950,12 @@ OP_REG_VexI4 (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 }
 
 static void
-OP_XMM_VexW (int bytemode, int sizeflag)
+OP_VexI4 (int bytemode ATTRIBUTE_UNUSED,
+	  int sizeflag ATTRIBUTE_UNUSED)
 {
-  /* Turn off the REX.W bit since it is used for swapping operands
-     now.  */
-  rex &= ~REX_W;
-  OP_XMM (bytemode, sizeflag);
+  scratchbuf[0] = '$';
+  print_operand_value (scratchbuf + 1, 1, codep[-1] & 0xf);
+  oappend_maybe_intel (scratchbuf);
 }
 
 static void

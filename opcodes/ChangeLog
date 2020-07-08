@@ -1,5 +1,15 @@
 2020-07-08  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (OP_EX_VexImmW, OP_XMM_VexW, EXVexImmW, XMVexW,
+	VEX_W_0F3A48_P_2, VEX_W_0F3A49_P_2, vex_w_done, get_vex_imm8,
+	OP_EX_VexReg): Delete.
+	(OP_VexI4, VexI4): New.
+	(vex_w_table): Move vpermil2ps and vpermil2pd entries ...
+	(prefix_table): ... here.
+	(print_insn): Drop setting of vex_w_done.
+
+2020-07-08  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (OP_EX_VexW, EXVexW, EXdVexW, EXqVexW): Delete.
 	(prefix_table, vex_len_table): Replace operands for FMA4 insns.
 	(xop_table): Replace operands of 4-operand insns.
