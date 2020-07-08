@@ -1,3 +1,9 @@
+2020-07-09  Alan Modra  <amodra@gmail.com>
+
+	* dlltool.c: Remove powerpc PE support and comments.
+	* configure.ac: Remove powerpc PE dlltool config.
+	* configure: Regenerate.
+
 2020-07-09  Nick Clifton  <nickc@redhat.com>
 
 	* rclex.c: Add OWNERDRAW keyword.

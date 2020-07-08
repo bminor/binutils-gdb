@@ -314,7 +314,6 @@ pe-arm-wince.c
 pe-arm.c
 pe-i386.c
 pe-mcore.c
-pe-ppc.c
 pe-sh.c
 pe-x86_64.c
 pef-traceback.h
@@ -325,7 +324,6 @@ pei-arm.c
 pei-i386.c
 pei-ia64.c
 pei-mcore.c
-pei-ppc.c
 pei-sh.c
 pei-x86_64.c
 peicode.h

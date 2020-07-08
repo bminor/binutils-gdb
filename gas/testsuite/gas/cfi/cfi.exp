@@ -127,8 +127,7 @@ if { ![istarget "hppa64*-*"] } then {
     run_dump_test "cfi-common-5"
   }
   # Some targets don't support PC relative cfi directives
-  if { ![istarget "mips*-*"] &&
-       !([istarget powerpc*-*-*] && [is_pecoff_format]) } then {
+  if { ![istarget "mips*-*"] } then {
     run_dump_test "cfi-common-6"
   }
   run_dump_test "cfi-common-7"

@@ -2136,11 +2136,6 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
   machine = 0;
   switch (internal_f->f_magic)
     {
-#ifdef PPCMAGIC
-    case PPCMAGIC:
-      arch = bfd_arch_powerpc;
-      break;
-#endif
 #ifdef I386MAGIC
     case I386MAGIC:
     case I386PTXMAGIC:
@@ -2790,12 +2785,6 @@ coff_set_flags (bfd * abfd,
       return TRUE;
 #endif
 
-#ifdef PPCMAGIC
-    case bfd_arch_powerpc:
-      *magicp = PPCMAGIC;
-      return TRUE;
-#endif
-
 #if defined(I386MAGIC) || defined(AMD64MAGIC)
     case bfd_arch_i386:
 #if defined(I386MAGIC)
@@ -2848,9 +2837,7 @@ coff_set_flags (bfd * abfd,
 
 #ifdef RS6000COFF_C
     case bfd_arch_rs6000:
-#ifndef PPCMAGIC
     case bfd_arch_powerpc:
-#endif
       BFD_ASSERT (bfd_get_flavour (abfd) == bfd_target_xcoff_flavour);
       *magicp = bfd_xcoff_magic_number (abfd);
       return TRUE;
@@ -3890,11 +3877,6 @@ coff_write_object_contents (bfd * abfd)
     internal_a.magic = ZMAGIC;
 #endif
 
-#if defined(PPC_PE)
-#define __A_MAGIC_SET__
-    internal_a.magic = IMAGE_NT_OPTIONAL_HDR_MAGIC;
-#endif
-
 #if defined MCORE_PE
 #define __A_MAGIC_SET__
     internal_a.magic = IMAGE_NT_OPTIONAL_HDR_MAGIC;
@@ -3976,24 +3958,6 @@ coff_write_object_contents (bfd * abfd)
 	return FALSE;
     }
 #endif
-#ifdef COFF_IMAGE_WITH_PE
-#ifdef PPC_PE
-  else if ((abfd->flags & EXEC_P) != 0)
-    {
-      bfd_byte b;
-
-      /* PowerPC PE appears to require that all executable files be
-	 rounded up to the page size.  */
-      b = 0;
-      if (bfd_seek (abfd,
-		    (file_ptr) BFD_ALIGN (sym_base, COFF_PAGE_SIZE) - 1,
-		    SEEK_SET) != 0
-	  || bfd_bwrite (&b, (bfd_size_type) 1, abfd) != 1)
-	return FALSE;
-    }
-#endif
-#endif
-
   /* If bfd_get_symcount (abfd) != 0, then we are not using the COFF
      backend linker, and obj_raw_syment_count is not valid until after
      coff_write_symbols is called.  */

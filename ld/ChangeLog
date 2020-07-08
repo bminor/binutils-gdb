@@ -1,5 +1,17 @@
 2020-07-09  Alan Modra  <amodra@gmail.com>
 
+	* emulparams/ppcpe.sh: Delete.
+	* scripttempl/ppcpe.sc: Delete.
+	* emulparams/ppclynx.sh: Delete.
+	* Makefile.am (ALL_EMULATION_SOURCES): Remove ppc PE and lynxos.
+	* configure.tgt: Likewise.
+	* emultempl/beos.em: Remove powerpc PE support.
+	* emultempl/pe.em: Likewise.
+	* po/BLD-POTFILES.in: Regenerate.
+	* Makefile.in: Regenerate.
+
+2020-07-09  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-gc/gc.exp: Don't set -mminimal-toc for powerpc64,
 	and remove powerpc64 xfail.  Use -fno-PIE for ppc32.
 

@@ -370,14 +370,12 @@ BFD32_BACKENDS = \
 	pe-arm.lo \
 	pe-i386.lo \
 	pe-mcore.lo \
-	pe-ppc.lo \
 	pe-sh.lo \
 	pef.lo \
 	pei-arm-wince.lo \
 	pei-arm.lo \
 	pei-i386.lo \
 	pei-mcore.lo \
-	pei-ppc.lo \
 	pei-sh.lo \
 	peigen.lo \
 	plugin.lo \
@@ -505,14 +503,12 @@ BFD32_BACKENDS_CFILES = \
 	pe-arm.c \
 	pe-i386.c \
 	pe-mcore.c \
-	pe-ppc.c \
 	pe-sh.c \
 	pef.c \
 	pei-arm-wince.c \
 	pei-arm.c \
 	pei-i386.c \
 	pei-mcore.c \
-	pei-ppc.c \
 	pei-sh.c \
 	plugin.c \
 	ppcboot.c \

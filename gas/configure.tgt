@@ -342,8 +342,6 @@ case ${generic_target} in
 
   pj*)					fmt=elf ;;
 
-  ppc-*-pe | ppc-*-cygwin*)		fmt=coff em=pe ;;
-  ppc-*-winnt*)				fmt=coff em=pe ;;
   ppc-*-aix5.[01])			fmt=coff em=aix5 ;;
   ppc-*-aix[5-9].*)			fmt=coff em=aix5 ;;
   ppc-*-aix*)				fmt=coff em=aix ;;
@@ -355,7 +353,6 @@ case ${generic_target} in
   ppc-*-macos*)				fmt=coff em=macos ;;
   ppc-*-nto*)				fmt=elf ;;
   ppc-*-kaos*)				fmt=elf ;;
-  ppc-*-lynxos*)			fmt=elf em=lynx ;;
 
   pru-*-*)				fmt=elf ;;
 

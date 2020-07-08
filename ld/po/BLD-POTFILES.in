@@ -262,9 +262,7 @@ epc532macha.c
 epdp11.c
 epjelf.c
 epjlelf.c
-eppclynx.c
 eppcmacos.c
-eppcpe.c
 epruelf.c
 escore3_elf.c
 escore7_elf.c

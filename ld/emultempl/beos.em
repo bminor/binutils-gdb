@@ -608,22 +608,6 @@ sort_sections (lang_statement_union_type *s)
 static void
 gld_${EMULATION_NAME}_before_allocation (void)
 {
-#ifdef TARGET_IS_ppcpe
-  /* Here we rummage through the found bfds to collect toc information */
-  {
-    LANG_FOR_EACH_INPUT_STATEMENT (is)
-    {
-      if (!ppc_process_before_allocation(is->the_bfd, &link_info))
-	{
-	  einfo (_("%P: errors encountered processing file %s\n"),
-		 is->filename);
-	}
-    }
-  }
-
-  /* We have seen it all. Allocate it, and carry on */
-  ppc_allocate_toc_section (&link_info);
-#else
 #ifdef TARGET_IS_armpe
   /* FIXME: we should be able to set the size of the interworking stub
      section.
@@ -645,7 +629,6 @@ gld_${EMULATION_NAME}_before_allocation (void)
   /* We have seen it all. Allocate it, and carry on */
   arm_allocate_interworking_sections (& link_info);
 #endif /* TARGET_IS_armpe */
-#endif /* TARGET_IS_ppcpe */
 
   sort_sections (stat_ptr->head);
 
@@ -698,9 +681,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
   os = lang_output_section_statement_lookup (output_secname, constraint, TRUE);
 
   /* Find the '\$' wild statement for this section.  We currently require the
-     linker script to explicitly mention "*(.foo\$)".
-     FIXME: ppcpe.sc has .CRT\$foo in the .rdata section.  According to the
-     Microsoft docs this isn't correct so it's not (currently) handled.  */
+     linker script to explicitly mention "*(.foo\$)".  */
 
   ps[0] = '\$';
   ps[1] = 0;

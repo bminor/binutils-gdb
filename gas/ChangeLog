@@ -1,3 +1,13 @@
+2020-07-09  Alan Modra  <amodra@gmail.com>
+
+	* config/obj-coff.h: Remove TE_PE support.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-ppc.h: Likewise.
+	* configure.tgt: Remove powerpc PE and powerpc lynxos.
+	* testsuite/gas/cfi/cfi.exp (cfi-common-6): Remove powerpc PE
+	condition.
+	* testsuite/gas/macros/macros.exp: Don't xfail powerpc PE.
+
 2020-07-08  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/gas/i386/fma4-lig.d, testsuite/gas/i386/xop-lig.d:

@@ -1741,23 +1741,6 @@ gld_${EMULATION_NAME}_after_open (void)
 static void
 gld_${EMULATION_NAME}_before_allocation (void)
 {
-#ifdef TARGET_IS_ppcpe
-  /* Here we rummage through the found bfds to collect toc information.  */
-  {
-    LANG_FOR_EACH_INPUT_STATEMENT (is)
-      {
-	if (!ppc_process_before_allocation (is->the_bfd, &link_info))
-	  {
-	    /* xgettext:c-format */
-	    einfo (_("%P: errors encountered processing file %s\n"), is->filename);
-	  }
-      }
-  }
-
-  /* We have seen it all. Allocate it, and carry on.  */
-  ppc_allocate_toc_section (&link_info);
-#endif /* TARGET_IS_ppcpe */
-
 #if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_wince_pe)
   /* FIXME: we should be able to set the size of the interworking stub
      section.

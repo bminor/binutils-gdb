@@ -1,3 +1,23 @@
+2020-07-09  Alan Modra  <amodra@gmail.com>
+
+	* coff-ppc.c: Delete.
+	* pe-ppc.c: Delete.
+	* pei-ppc.c: Delete.
+	* Makefile.am (BFD32_BACKENDS, BFD32_BACKENDS_CFILES): Remove PE PPC.
+	* coffcode.h (coff_set_arch_mach_hook, coff_set_flags): Remove
+	PPCMAGIC code.
+	(coff_write_object_contents): Remove PPC_PE code.
+	* config.bfd: Move powerpcle-pe to removed targets.
+	* configure.ac: Remove powerpc PE entries.
+	* libcoff-in.h (ppc_allocate_toc_section): Delete.
+	(ppc_process_before_allocation): Delete.
+	* peXXigen.c: Remove POWERPC_LE_PE code and comments.
+	* targets.c: Remove powerpc PE vectors.
+	* po/SRC-POTFILES.in: Regenerate.
+	* libcoff.h: Regenerate.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2020-07-09  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

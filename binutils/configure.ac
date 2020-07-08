@@ -330,15 +330,6 @@ changequote(,)dnl
 changequote([,])dnl
 	  OBJDUMP_DEFS="-DAIX_WEAK_SUPPORT"
 	  ;;
-	powerpc*-*-pe* | powerpc*-*-cygwin*)
-  	  BUILD_DLLTOOL='$(DLLTOOL_PROG)$(EXEEXT)'
-	  if test -z "$DLLTOOL_DEFAULT"; then
-	    DLLTOOL_DEFAULT="-DDLLTOOL_DEFAULT_PPC"
-	  fi
-	  DLLTOOL_DEFS="$DLLTOOL_DEFS -DDLLTOOL_PPC"
-	  BUILD_WINDRES='$(WINDRES_PROG)$(EXEEXT)'
-	  BUILD_WINDMC='$(WINDMC_PROG)$(EXEEXT)'
-	  ;;
 	powerpc*-*-linux* | powerpc*-*-elf* | powerpc*-*-eabi*)
 	  case "$BUILD_INSTALL_MISC" in
 	    *embedspu*) ;;

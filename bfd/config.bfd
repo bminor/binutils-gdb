@@ -53,7 +53,6 @@ case $targ in
     echo "*** Use or1k-*-elf or or1k-*-linux as the target instead" >&2
     exit 1
     ;;
- powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin* | \
  xc16x-*-* | \
  null)
     if test "x$enable_obsolete" != xyes; then
@@ -143,6 +142,7 @@ case $targ in
  mips*-sgi-* | \
  mips*el-*-rtems* | \
  powerpc-*-lynxos* | powerpc-*-windiss* | \
+ powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin* | \
  sh*-*-symbianelf* | sh5*-*-* | sh64*-*-* | \
  sparc*-*-*aout* | \
  sparc*-*-chorus* | \
@@ -1144,10 +1144,6 @@ case "${targ}" in
     targ_defvec=powerpc_elf32_le_vec
     targ_selvecs="rs6000_xcoff_vec powerpc_elf32_vec powerpc_boot_vec"
     targ64_selvecs="powerpc_elf64_vec powerpc_elf64_le_vec"
-    ;;
-  powerpcle-*-pe | powerpcle-*-winnt* | powerpcle-*-cygwin*)
-    targ_defvec=powerpc_pe_le_vec
-    targ_selvecs="powerpc_pei_le_vec powerpc_pei_vec powerpc_pe_le_vec powerpc_pe_vec"
     ;;
 
   pru-*-*)

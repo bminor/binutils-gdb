@@ -41,11 +41,7 @@
 #endif
 
 #ifdef TC_PPC
-#ifdef TE_PE
-#include "coff/powerpc.h"
-#else
 #include "coff/rs6000.h"
-#endif
 #endif
 
 #ifdef TC_I386

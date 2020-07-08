@@ -105,12 +105,6 @@
 #define HighBitSet(val)      ((val) & 0x80000000)
 #define SetHighBit(val)      ((val) | 0x80000000)
 #define WithoutHighBit(val)  ((val) & 0x7fffffff)
-
-/* FIXME: This file has various tests of POWERPC_LE_PE.  Those tests
-   worked when the code was in peicode.h, but no longer work now that
-   the code is in peigen.c.  PowerPC NT is said to be dead.  If
-   anybody wants to revive the code, you will have to figure out how
-   to handle those issues.  */
 
 void
 _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
@@ -221,12 +215,6 @@ _bfd_XXi_swap_sym_in (bfd * abfd, void * ext1, void * in1)
 	}
       in->n_sclass = C_STAT;
     }
-#endif
-
-#ifdef coff_swap_sym_in_hook
-  /* This won't work in peigen.c, but since it's for PPC PE, it's not
-     worth fixing.  */
-  coff_swap_sym_in_hook (abfd, ext1, in1);
 #endif
 }
 
@@ -591,15 +579,6 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
       aouthdr_int->data_start += a->ImageBase;
       aouthdr_int->data_start &= 0xffffffff;
     }
-#endif
-
-#ifdef POWERPC_LE_PE
-  /* These three fields are normally set up by ppc_relocate_section.
-     In the case of reading a file in, we can pick them up from the
-     DataDirectory.  */
-  first_thunk_address = a->DataDirectory[PE_IMPORT_ADDRESS_TABLE].VirtualAddress;
-  thunk_size = a->DataDirectory[PE_IMPORT_ADDRESS_TABLE].Size;
-  import_table_size = a->DataDirectory[PE_IMPORT_TABLE].Size;
 #endif
 }
 
@@ -1010,7 +989,7 @@ _bfd_XXi_swap_scnhdr_out (bfd * abfd, void * in, void * out)
        (0x02000000).  Also, the resource data should also be read and
        writable.  */
 
-    /* FIXME: Alignment is also encoded in this field, at least on PPC and
+    /* FIXME: Alignment is also encoded in this field, at least on
        ARM-WINCE.  Although - how do we get the original alignment field
        back ?  */
 
@@ -1256,14 +1235,6 @@ static char * dir_names[IMAGE_NUMBEROF_DIRECTORY_ENTRIES] =
   N_("Reserved")
 };
 
-#ifdef POWERPC_LE_PE
-/* The code for the PPC really falls in the "architecture dependent"
-   category.  However, it's not clear that anyone will ever care, so
-   we're ignoring the issue for now; if/when PPC matters, some of this
-   may need to go into peicode.h, or arguments passed to enable the
-   PPC- specific code.  */
-#endif
-
 static bfd_boolean
 pe_print_idata (bfd * abfd, void * vfile)
 {
@@ -1271,11 +1242,6 @@ pe_print_idata (bfd * abfd, void * vfile)
   bfd_byte *data;
   asection *section;
   bfd_signed_vma adj;
-
-#ifdef POWERPC_LE_PE
-  asection *rel_section = bfd_get_section_by_name (abfd, ".reldata");
-#endif
-
   bfd_size_type datasize = 0;
   bfd_size_type dataoff;
   bfd_size_type i;
@@ -1330,56 +1296,6 @@ pe_print_idata (bfd * abfd, void * vfile)
 	   section->name, (unsigned long) addr);
 
   dataoff = addr - section->vma;
-
-#ifdef POWERPC_LE_PE
-  if (rel_section != 0 && rel_section->size != 0)
-    {
-      /* The toc address can be found by taking the starting address,
-	 which on the PPC locates a function descriptor. The
-	 descriptor consists of the function code starting address
-	 followed by the address of the toc. The starting address we
-	 get from the bfd, and the descriptor is supposed to be in the
-	 .reldata section.  */
-
-      bfd_vma loadable_toc_address;
-      bfd_vma toc_address;
-      bfd_vma start_address;
-      bfd_byte *data;
-      bfd_vma offset;
-
-      if (!bfd_malloc_and_get_section (abfd, rel_section, &data))
-	{
-	  free (data);
-	  return FALSE;
-	}
-
-      offset = abfd->start_address - rel_section->vma;
-
-      if (offset >= rel_section->size || offset + 8 > rel_section->size)
-	{
-	  free (data);
-	  return FALSE;
-	}
-
-      start_address = bfd_get_32 (abfd, data + offset);
-      loadable_toc_address = bfd_get_32 (abfd, data + offset + 4);
-      toc_address = loadable_toc_address - 32768;
-
-      fprintf (file,
-	       _("\nFunction descriptor located at the start address: %04lx\n"),
-	       (unsigned long int) (abfd->start_address));
-      fprintf (file,
-	       /* xgettext:c-format */
-	       _("\tcode-base %08lx toc (loadable/actual) %08lx/%08lx\n"),
-	       start_address, loadable_toc_address, toc_address);
-      free (data);
-    }
-  else
-    {
-      fprintf (file,
-	       _("\nNo reldata section! Function descriptor not decoded.\n"));
-    }
-#endif
 
   fprintf (file,
 	   _("\nThe Import Tables (interpreted %s section contents)\n"),
@@ -1984,33 +1900,6 @@ pe_print_pdata (bfd * abfd, void * vfile)
       bfd_fprintf_vma (abfd, file, eh_data); fputc (' ', file);
       bfd_fprintf_vma (abfd, file, prolog_end_addr);
       fprintf (file, "   %x", em_data);
-#endif
-
-#ifdef POWERPC_LE_PE
-      if (eh_handler == 0 && eh_data != 0)
-	{
-	  /* Special bits here, although the meaning may be a little
-	     mysterious. The only one I know for sure is 0x03
-	     Code Significance
-	     0x00 None
-	     0x01 Register Save Millicode
-	     0x02 Register Restore Millicode
-	     0x03 Glue Code Sequence.  */
-	  switch (eh_data)
-	    {
-	    case 0x01:
-	      fprintf (file, _(" Register save millicode"));
-	      break;
-	    case 0x02:
-	      fprintf (file, _(" Register restore millicode"));
-	      break;
-	    case 0x03:
-	      fprintf (file, _(" Glue code sequence"));
-	      break;
-	    default:
-	      break;
-	    }
-	}
 #endif
       fprintf (file, "\n");
     }
