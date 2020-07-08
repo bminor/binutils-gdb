@@ -1011,7 +1011,6 @@ extern const struct language_data opencl_language_data =
   array_row_major,
   macro_expansion_c,
   &exp_descriptor_opencl,
-  false,			/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
   &default_varobj_ops,
 };

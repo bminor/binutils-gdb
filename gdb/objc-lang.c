@@ -328,7 +328,6 @@ extern const struct language_data objc_language_data =
   array_row_major,
   macro_expansion_c,
   &exp_descriptor_standard,
-  false,			/* la_store_sym_names_in_linkage_form_p */
   objc_op_print_tab,		/* Expression operators for printing */
   &default_varobj_ops,
 };

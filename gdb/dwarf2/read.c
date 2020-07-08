@@ -10635,7 +10635,7 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
   if (mangled != NULL)
     {
 
-      if (language_def (cu->language)->la_store_sym_names_in_linkage_form_p)
+      if (language_def (cu->language)->store_sym_names_in_linkage_form_p ())
 	{
 	  /* Do nothing (do not demangle the symbol name).  */
 	}

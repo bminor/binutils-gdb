@@ -13714,7 +13714,6 @@ extern const struct language_data ada_language_data =
   array_row_major,
   macro_expansion_no,
   &ada_exp_descriptor,
-  true,                         /* la_store_sym_names_in_linkage_form_p */
   ada_op_print_tab,             /* expression operators for printing */
   &ada_varobj_ops,
 };
@@ -14202,6 +14201,11 @@ public:
 
   bool c_style_arrays_p () const override
   { return false; }
+
+  /* See language.h.  */
+
+  bool store_sym_names_in_linkage_form_p () const override
+  { return true; }
 
 protected:
   /* See language.h.  */

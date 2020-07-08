@@ -780,7 +780,6 @@ extern const struct language_data unknown_language_data =
   array_row_major,
   macro_expansion_no,
   &exp_descriptor_standard,
-  true,				/* store_sym_names_in_linkage_form_p */
   unk_op_print_tab,		/* expression operators for printing */
   &default_varobj_ops,
 };
@@ -898,6 +897,11 @@ public:
 
   const char *name_of_this () const override
   { return "this"; }
+
+  /* See language.h.  */
+
+  bool store_sym_names_in_linkage_form_p () const override
+  { return true; }
 };
 
 /* Single instance of the unknown language class.  */
@@ -913,7 +917,6 @@ extern const struct language_data auto_language_data =
   array_row_major,
   macro_expansion_no,
   &exp_descriptor_standard,
-  false,			/* store_sym_names_in_linkage_form_p */
   unk_op_print_tab,		/* expression operators for printing */
   &default_varobj_ops,
 };

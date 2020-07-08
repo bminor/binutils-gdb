@@ -1,5 +1,51 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Remove
+	la_store_sym_names_in_linkage_form_p initializer.
+	(ada_language::store_sym_names_in_linkage_form_p): New member
+	function.
+	* c-lang.c (c_language_data): Remove
+	la_store_sym_names_in_linkage_form_p initializer.
+	(c_language::store_sym_names_in_linkage_form_p): New member
+	function.
+	(cplus_language_data): Remove la_store_sym_names_in_linkage_form_p
+	initializer.
+	(asm_language_data): Likewise.
+	(asm_language::store_sym_names_in_linkage_form_p): New member
+	function.
+	(minimal_language_data): Remove
+	la_store_sym_names_in_linkage_form_p initializer.
+	(minimal_language::store_sym_names_in_linkage_form_p): New member
+	function.
+	* d-lang.c (d_language_data): Remove
+	la_store_sym_names_in_linkage_form_p initializer.
+	* dwarf2/read.c (dwarf2_physname): Update call to
+	store_sym_names_in_linkage_form_p.
+	* f-lang.c (f_language_data): Remove
+	la_store_sym_names_in_linkage_form_p initializer.
+	* go-lang.c (go_language_data): Remove
+	la_store_sym_names_in_linkage_form_p initializer.
+	* language.c (unknown_language_data): Remove
+	la_store_sym_names_in_linkage_form_p initializer.
+	(unknown_language::store_sym_names_in_linkage_form_p): New member
+	function.
+	(auto_language_data): Remove la_store_sym_names_in_linkage_form_p
+	initializer.
+	(auto_language::store_sym_names_in_linkage_form_p): New member
+	function.
+	* language.h (language_data): Remove
+	la_store_sym_names_in_linkage_form_p member variable.
+	(language_defn::store_sym_names_in_linkage_form_p): New member
+	function.
+	* m2-lang.c (m2_language_data): Remove
+	la_store_sym_names_in_linkage_form_p initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove string_lower_bound
 	initializer.
 	* c-lang.c (c_language_data): Likewise.

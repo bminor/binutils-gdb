@@ -880,7 +880,6 @@ extern const struct language_data c_language_data =
   array_row_major,
   macro_expansion_c,
   &exp_descriptor_c,
-  true,				/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
   &c_varobj_ops,
 };
@@ -943,6 +942,11 @@ public:
   {
     c_print_type (type, varstring, stream, show, level, flags);
   }
+
+  /* See language.h.  */
+
+  bool store_sym_names_in_linkage_form_p () const override
+  { return true; }
 };
 
 /* Single instance of the C language class.  */
@@ -986,7 +990,6 @@ extern const struct language_data cplus_language_data =
   array_row_major,
   macro_expansion_c,
   &exp_descriptor_c,
-  false,			/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
   &cplus_varobj_ops,
 };
@@ -1195,7 +1198,6 @@ extern const struct language_data asm_language_data =
   array_row_major,
   macro_expansion_c,
   &exp_descriptor_c,
-  true,				/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
   &default_varobj_ops,
 };
@@ -1245,6 +1247,11 @@ public:
   {
     c_print_type (type, varstring, stream, show, level, flags);
   }
+
+  /* See language.h.  */
+
+  bool store_sym_names_in_linkage_form_p () const override
+  { return true; }
 };
 
 /* The single instance of the ASM language class.  */
@@ -1262,7 +1269,6 @@ extern const struct language_data minimal_language_data =
   array_row_major,
   macro_expansion_c,
   &exp_descriptor_c,
-  true,				/* la_store_sym_names_in_linkage_form_p */
   c_op_print_tab,		/* expression operators for printing */
   &default_varobj_ops,
 };
@@ -1301,6 +1307,11 @@ public:
   {
     c_print_type (type, varstring, stream, show, level, flags);
   }
+
+  /* See language.h.  */
+
+  bool store_sym_names_in_linkage_form_p () const override
+  { return true; }
 };
 
 /* The single instance of the minimal language class.  */
