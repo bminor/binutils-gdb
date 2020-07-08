@@ -1,3 +1,11 @@
+2020-07-08  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/script_test_7.sh: Adjust expected address of the .bss
+	section.
+	* testsuite/script_test_9.sh: Do not expect the .init section to
+	immediately follow the .text section in the mapping of sections to
+	segments.
+
 2020-07-07  Nick Clifton  <nickc@redhat.com>
 
 	* target-reloc.h: (Default_comdat_behaviour:get): Ignore discarded
