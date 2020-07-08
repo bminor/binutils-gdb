@@ -88,6 +88,7 @@ static void OP_MS (int, int);
 static void OP_XS (int, int);
 static void OP_M (int, int);
 static void OP_VEX (int, int);
+static void OP_VexW (int, int);
 static void OP_EX_Vex (int, int);
 static void OP_XMM_Vex (int, int);
 static void OP_Rounding (int, int);
@@ -119,8 +120,6 @@ static void FXSAVE_Fixup (int, int);
 static void PCMPESTR_Fixup (int, int);
 static void OP_LWPCB_E (int, int);
 static void OP_LWP_E (int, int);
-static void OP_Vex_2src_1 (int, int);
-static void OP_Vex_2src_2 (int, int);
 
 static void MOVBE_Fixup (int, int);
 static void MOVSXD_Fixup (int, int);
@@ -410,10 +409,9 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define CMP { CMP_Fixup, 0 }
 #define XMM0 { XMM_Fixup, 0 }
 #define FXSAVE { FXSAVE_Fixup, 0 }
-#define Vex_2src_1 { OP_Vex_2src_1, 0 }
-#define Vex_2src_2 { OP_Vex_2src_2, 0 }
 
 #define Vex { OP_VEX, vex_mode }
+#define VexW { OP_VexW, vex_mode }
 #define VexScalar { OP_VEX, vex_scalar_mode }
 #define VexGatherQ { OP_VEX, vex_vsib_q_w_dq_mode }
 #define Vex128 { OP_VEX, vex128_mode }
@@ -7629,10 +7627,10 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* c0 */
-    { "vprotb", 	{ XM, Vex_2src_1, Ib }, 0 },
-    { "vprotw", 	{ XM, Vex_2src_1, Ib }, 0 },
-    { "vprotd", 	{ XM, Vex_2src_1, Ib }, 0 },
-    { "vprotq", 	{ XM, Vex_2src_1, Ib }, 0 },
+    { "vprotb", 	{ XM, EXx, Ib }, 0 },
+    { "vprotw", 	{ XM, EXx, Ib }, 0 },
+    { "vprotd", 	{ XM, EXx, Ib }, 0 },
+    { "vprotq", 	{ XM, EXx, Ib }, 0 },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -7866,19 +7864,19 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 90 */
-    { "vprotb",		{ XM, Vex_2src_1, Vex_2src_2 }, 0 },
-    { "vprotw",		{ XM, Vex_2src_1, Vex_2src_2 }, 0 },
-    { "vprotd",		{ XM, Vex_2src_1, Vex_2src_2 }, 0 },
-    { "vprotq",		{ XM, Vex_2src_1, Vex_2src_2 }, 0 },
-    { "vpshlb",		{ XM, Vex_2src_1, Vex_2src_2 }, 0 },
-    { "vpshlw",		{ XM, Vex_2src_1, Vex_2src_2 }, 0 },
-    { "vpshld",		{ XM, Vex_2src_1, Vex_2src_2 }, 0 },
-    { "vpshlq",		{ XM, Vex_2src_1, Vex_2src_2 }, 0 },
+    { "vprotb",		{ XM, EXx, VexW }, 0 },
+    { "vprotw",		{ XM, EXx, VexW }, 0 },
+    { "vprotd",		{ XM, EXx, VexW }, 0 },
+    { "vprotq",		{ XM, EXx, VexW }, 0 },
+    { "vpshlb",		{ XM, EXx, VexW }, 0 },
+    { "vpshlw",		{ XM, EXx, VexW }, 0 },
+    { "vpshld",		{ XM, EXx, VexW }, 0 },
+    { "vpshlq",		{ XM, EXx, VexW }, 0 },
     /* 98 */
-    { "vpshab",		{ XM, Vex_2src_1, Vex_2src_2 }, 0 },
-    { "vpshaw",		{ XM, Vex_2src_1, Vex_2src_2 }, 0 },
-    { "vpshad",		{ XM, Vex_2src_1, Vex_2src_2 }, 0 },
-    { "vpshaq",		{ XM, Vex_2src_1, Vex_2src_2 }, 0 },
+    { "vpshab",		{ XM, EXx, VexW }, 0 },
+    { "vpshaw",		{ XM, EXx, VexW }, 0 },
+    { "vpshad",		{ XM, EXx, VexW }, 0 },
+    { "vpshaq",		{ XM, EXx, VexW }, 0 },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -15850,64 +15848,16 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 }
 
 static void
-OP_Vex_2src (int bytemode, int sizeflag)
+OP_VexW (int bytemode, int sizeflag)
 {
-  if (modrm.mod == 3)
-    {
-      int reg = modrm.rm;
-      USED_REX (REX_B);
-      if (rex & REX_B)
-	reg += 8;
-      oappend (names_xmm[reg]);
-    }
-  else
-    {
-      if (intel_syntax
-	  && (bytemode == v_mode || bytemode == v_swap_mode))
-	{
-	  bytemode = (prefixes & PREFIX_DATA) ? x_mode : q_mode;
-	  used_prefixes |= (prefixes & PREFIX_DATA);
-	}
-      OP_E (bytemode, sizeflag);
-    }
-}
-
-static void
-OP_Vex_2src_1 (int bytemode, int sizeflag)
-{
-  if (modrm.mod == 3)
-    {
-      /* Skip mod/rm byte.   */
-      MODRM_CHECK;
-      codep++;
-    }
+  OP_VEX (bytemode, sizeflag);
 
   if (vex.w)
     {
-      unsigned int reg = vex.register_specifier;
-      vex.register_specifier = 0;
-
-      if (address_mode != mode_64bit)
-	reg &= 7;
-      oappend (names_xmm[reg]);
-    }
-  else
-    OP_Vex_2src (bytemode, sizeflag);
-}
-
-static void
-OP_Vex_2src_2 (int bytemode, int sizeflag)
-{
-  if (vex.w)
-    OP_Vex_2src (bytemode, sizeflag);
-  else
-    {
-      unsigned int reg = vex.register_specifier;
-      vex.register_specifier = 0;
-
-      if (address_mode != mode_64bit)
-	reg &= 7;
-      oappend (names_xmm[reg]);
+      /* Swap 2nd and 3rd operands.  */
+      strcpy (scratchbuf, op_out[2]);
+      strcpy (op_out[2], op_out[1]);
+      strcpy (op_out[1], scratchbuf);
     }
 }
 

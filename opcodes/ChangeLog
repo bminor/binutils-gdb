@@ -1,5 +1,13 @@
 2020-07-08  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (OP_Vex_2src_1, OP_Vex_2src_2, Vex_2src_1,
+	Vex_2src_2): Delete.
+	(OP_VexW, VexW): New.
+	(xop_table): Use EXx for rotates by immediate. Use EXx and VexW
+	for shifts and rotates by register.
+
+2020-07-08  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (OP_EX_VexImmW, OP_XMM_VexW, EXVexImmW, XMVexW,
 	VEX_W_0F3A48_P_2, VEX_W_0F3A49_P_2, vex_w_done, get_vex_imm8,
 	OP_EX_VexReg): Delete.
