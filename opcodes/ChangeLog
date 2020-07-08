@@ -1,3 +1,10 @@
+2020-07-08  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (OP_EX_VexW, EXVexW, EXdVexW, EXqVexW): Delete.
+	(prefix_table, vex_len_table): Replace operands for FMA4 insns.
+	(xop_table): Replace operands of 4-operand insns.
+	(OP_REG_VexI4): Move VEX.W based operand swaping here.
+
 2020-07-07  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* arc-opc.c (insert_rbd): New function.
