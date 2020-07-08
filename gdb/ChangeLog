@@ -1,3 +1,8 @@
+2020-07-08  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.c (fbsd_nat_target::find_memory_regions): Rename 'obfd'
+	argument to 'data'.
+
 2020-07-08  Tom Tromey  <tromey@adacore.com>
 
 	* ada-lang.c (ada_exception_message_1): Use read_memory.
