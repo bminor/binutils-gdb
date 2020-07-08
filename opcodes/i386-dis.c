@@ -118,8 +118,6 @@ static void XMM_Fixup (int, int);
 static void CRC32_Fixup (int, int);
 static void FXSAVE_Fixup (int, int);
 static void PCMPESTR_Fixup (int, int);
-static void OP_LWPCB_E (int, int);
-static void OP_LWP_E (int, int);
 
 static void MOVBE_Fixup (int, int);
 static void MOVSXD_Fixup (int, int);
@@ -737,10 +735,11 @@ enum
   REG_VEX_0F73,
   REG_VEX_0FAE,
   REG_VEX_0F38F3,
-  REG_XOP_LWPCB,
-  REG_XOP_LWP,
-  REG_XOP_TBM_01,
-  REG_XOP_TBM_02,
+
+  REG_0FXOP_09_01_L_0,
+  REG_0FXOP_09_02_L_0,
+  REG_0FXOP_09_12_M_1_L_0,
+  REG_0FXOP_0A_12_L_0,
 
   REG_EVEX_0F71,
   REG_EVEX_0F72,
@@ -917,6 +916,8 @@ enum
   MOD_VEX_W_1_0F3A32_P_2_LEN_0,
   MOD_VEX_W_0_0F3A33_P_2_LEN_0,
   MOD_VEX_W_1_0F3A33_P_2_LEN_0,
+
+  MOD_VEX_0FXOP_09_12,
 
   MOD_EVEX_0F12_PREFIX_0,
   MOD_EVEX_0F12_PREFIX_2,
@@ -1791,6 +1792,23 @@ enum
   VEX_LEN_0F3A63_P_2,
   VEX_LEN_0F3ADF_P_2,
   VEX_LEN_0F3AF0_P_3,
+  VEX_LEN_0FXOP_08_85,
+  VEX_LEN_0FXOP_08_86,
+  VEX_LEN_0FXOP_08_87,
+  VEX_LEN_0FXOP_08_8E,
+  VEX_LEN_0FXOP_08_8F,
+  VEX_LEN_0FXOP_08_95,
+  VEX_LEN_0FXOP_08_96,
+  VEX_LEN_0FXOP_08_97,
+  VEX_LEN_0FXOP_08_9E,
+  VEX_LEN_0FXOP_08_9F,
+  VEX_LEN_0FXOP_08_A3,
+  VEX_LEN_0FXOP_08_A6,
+  VEX_LEN_0FXOP_08_B6,
+  VEX_LEN_0FXOP_08_C0,
+  VEX_LEN_0FXOP_08_C1,
+  VEX_LEN_0FXOP_08_C2,
+  VEX_LEN_0FXOP_08_C3,
   VEX_LEN_0FXOP_08_CC,
   VEX_LEN_0FXOP_08_CD,
   VEX_LEN_0FXOP_08_CE,
@@ -1799,8 +1817,39 @@ enum
   VEX_LEN_0FXOP_08_ED,
   VEX_LEN_0FXOP_08_EE,
   VEX_LEN_0FXOP_08_EF,
+  VEX_LEN_0FXOP_09_01,
+  VEX_LEN_0FXOP_09_02,
+  VEX_LEN_0FXOP_09_12_M_1,
   VEX_LEN_0FXOP_09_82_W_0,
   VEX_LEN_0FXOP_09_83_W_0,
+  VEX_LEN_0FXOP_09_90,
+  VEX_LEN_0FXOP_09_91,
+  VEX_LEN_0FXOP_09_92,
+  VEX_LEN_0FXOP_09_93,
+  VEX_LEN_0FXOP_09_94,
+  VEX_LEN_0FXOP_09_95,
+  VEX_LEN_0FXOP_09_96,
+  VEX_LEN_0FXOP_09_97,
+  VEX_LEN_0FXOP_09_98,
+  VEX_LEN_0FXOP_09_99,
+  VEX_LEN_0FXOP_09_9A,
+  VEX_LEN_0FXOP_09_9B,
+  VEX_LEN_0FXOP_09_C1,
+  VEX_LEN_0FXOP_09_C2,
+  VEX_LEN_0FXOP_09_C3,
+  VEX_LEN_0FXOP_09_C6,
+  VEX_LEN_0FXOP_09_C7,
+  VEX_LEN_0FXOP_09_CB,
+  VEX_LEN_0FXOP_09_D1,
+  VEX_LEN_0FXOP_09_D2,
+  VEX_LEN_0FXOP_09_D3,
+  VEX_LEN_0FXOP_09_D6,
+  VEX_LEN_0FXOP_09_D7,
+  VEX_LEN_0FXOP_09_DB,
+  VEX_LEN_0FXOP_09_E1,
+  VEX_LEN_0FXOP_09_E2,
+  VEX_LEN_0FXOP_09_E3,
+  VEX_LEN_0FXOP_0A_12,
 };
 
 enum
@@ -1939,10 +1988,50 @@ enum
   VEX_W_0F3ACE_P_2,
   VEX_W_0F3ACF_P_2,
 
+  VEX_W_0FXOP_08_85_L_0,
+  VEX_W_0FXOP_08_86_L_0,
+  VEX_W_0FXOP_08_87_L_0,
+  VEX_W_0FXOP_08_8E_L_0,
+  VEX_W_0FXOP_08_8F_L_0,
+  VEX_W_0FXOP_08_95_L_0,
+  VEX_W_0FXOP_08_96_L_0,
+  VEX_W_0FXOP_08_97_L_0,
+  VEX_W_0FXOP_08_9E_L_0,
+  VEX_W_0FXOP_08_9F_L_0,
+  VEX_W_0FXOP_08_A6_L_0,
+  VEX_W_0FXOP_08_B6_L_0,
+  VEX_W_0FXOP_08_C0_L_0,
+  VEX_W_0FXOP_08_C1_L_0,
+  VEX_W_0FXOP_08_C2_L_0,
+  VEX_W_0FXOP_08_C3_L_0,
+  VEX_W_0FXOP_08_CC_L_0,
+  VEX_W_0FXOP_08_CD_L_0,
+  VEX_W_0FXOP_08_CE_L_0,
+  VEX_W_0FXOP_08_CF_L_0,
+  VEX_W_0FXOP_08_EC_L_0,
+  VEX_W_0FXOP_08_ED_L_0,
+  VEX_W_0FXOP_08_EE_L_0,
+  VEX_W_0FXOP_08_EF_L_0,
+
   VEX_W_0FXOP_09_80,
   VEX_W_0FXOP_09_81,
   VEX_W_0FXOP_09_82,
   VEX_W_0FXOP_09_83,
+  VEX_W_0FXOP_09_C1_L_0,
+  VEX_W_0FXOP_09_C2_L_0,
+  VEX_W_0FXOP_09_C3_L_0,
+  VEX_W_0FXOP_09_C6_L_0,
+  VEX_W_0FXOP_09_C7_L_0,
+  VEX_W_0FXOP_09_CB_L_0,
+  VEX_W_0FXOP_09_D1_L_0,
+  VEX_W_0FXOP_09_D2_L_0,
+  VEX_W_0FXOP_09_D3_L_0,
+  VEX_W_0FXOP_09_D6_L_0,
+  VEX_W_0FXOP_09_D7_L_0,
+  VEX_W_0FXOP_09_DB_L_0,
+  VEX_W_0FXOP_09_E1_L_0,
+  VEX_W_0FXOP_09_E2_L_0,
+  VEX_W_0FXOP_09_E3_L_0,
 
   EVEX_W_0F10_P_1,
   EVEX_W_0F10_P_3,
@@ -3402,36 +3491,36 @@ static const struct dis386 reg_table[][8] = {
     { PREFIX_TABLE (PREFIX_VEX_0F38F3_REG_2) },
     { PREFIX_TABLE (PREFIX_VEX_0F38F3_REG_3) },
   },
-  /* REG_XOP_LWPCB */
+  /* REG_0FXOP_09_01_L_0 */
   {
-    { "llwpcb", { { OP_LWPCB_E, 0 } }, 0 },
-    { "slwpcb",	{ { OP_LWPCB_E, 0 } }, 0 },
+    { Bad_Opcode },
+    { "blcfill",	{ VexGdq, Edq }, 0 },
+    { "blsfill",	{ VexGdq, Edq }, 0 },
+    { "blcs",	{ VexGdq, Edq }, 0 },
+    { "tzmsk",	{ VexGdq, Edq }, 0 },
+    { "blcic",	{ VexGdq, Edq }, 0 },
+    { "blsic",	{ VexGdq, Edq }, 0 },
+    { "t1mskc",	{ VexGdq, Edq }, 0 },
   },
-  /* REG_XOP_LWP */
+  /* REG_0FXOP_09_02_L_0 */
   {
-    { "lwpins", { { OP_LWP_E, 0 }, Ed, Id }, 0 },
-    { "lwpval",	{ { OP_LWP_E, 0 }, Ed, Id }, 0 },
+    { Bad_Opcode },
+    { "blcmsk",	{ VexGdq, Edq }, 0 },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { Bad_Opcode },
+    { "blci",	{ VexGdq, Edq }, 0 },
   },
-  /* REG_XOP_TBM_01 */
+  /* REG_0FXOP_09_12_M_1_L_0 */
   {
-    { Bad_Opcode },
-    { "blcfill",	{ { OP_LWP_E, 0 }, Edq }, 0 },
-    { "blsfill",	{ { OP_LWP_E, 0 }, Edq }, 0 },
-    { "blcs",	{ { OP_LWP_E, 0 }, Edq }, 0 },
-    { "tzmsk",	{ { OP_LWP_E, 0 }, Edq }, 0 },
-    { "blcic",	{ { OP_LWP_E, 0 }, Edq }, 0 },
-    { "blsic",	{ { OP_LWP_E, 0 }, Edq }, 0 },
-    { "t1mskc",	{ { OP_LWP_E, 0 }, Edq }, 0 },
+    { "llwpcb",	{ Edq }, 0 },
+    { "slwpcb",	{ Edq }, 0 },
   },
-  /* REG_XOP_TBM_02 */
+  /* REG_0FXOP_0A_12_L_0 */
   {
-    { Bad_Opcode },
-    { "blcmsk",	{ { OP_LWP_E, 0 }, Edq }, 0 },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { "blci",	{ { OP_LWP_E, 0 }, Edq }, 0 },
+    { "lwpins",	{ VexGdq, Ed, Id }, 0 },
+    { "lwpval",	{ VexGdq, Ed, Id }, 0 },
   },
 
 #include "i386-dis-evex-reg.h"
@@ -7553,9 +7642,9 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpmacssww", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
-    { "vpmacsswd", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
-    { "vpmacssdql", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_85) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_86) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_87) },
     /* 88 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -7563,17 +7652,17 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpmacssdd", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
-    { "vpmacssdqh", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_8E) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_8F) },
     /* 90 */
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpmacsww", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
-    { "vpmacswd", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
-    { "vpmacsdql", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_95) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_96) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_97) },
     /* 98 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -7581,16 +7670,16 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpmacsdd", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
-    { "vpmacsdqh", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_9E) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_9F) },
     /* a0 */
     { Bad_Opcode },
     { Bad_Opcode },
     { "vpcmov", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
-    { "vpperm", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_A3) },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpmadcsswd", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_A6) },
     { Bad_Opcode },
     /* a8 */
     { Bad_Opcode },
@@ -7608,7 +7697,7 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpmadcswd", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_B6) },
     { Bad_Opcode },
     /* b8 */
     { Bad_Opcode },
@@ -7620,10 +7709,10 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* c0 */
-    { "vprotb", 	{ XM, EXx, Ib }, 0 },
-    { "vprotw", 	{ XM, EXx, Ib }, 0 },
-    { "vprotd", 	{ XM, EXx, Ib }, 0 },
-    { "vprotq", 	{ XM, EXx, Ib }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_C0) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_C1) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_C2) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_08_C3) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -7696,8 +7785,8 @@ static const struct dis386 xop_table[][256] = {
   {
     /* 00 */
     { Bad_Opcode },
-    { REG_TABLE (REG_XOP_TBM_01) },
-    { REG_TABLE (REG_XOP_TBM_02) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_01) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_02) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -7715,7 +7804,7 @@ static const struct dis386 xop_table[][256] = {
     /* 10 */
     { Bad_Opcode },
     { Bad_Opcode },
-    { REG_TABLE (REG_XOP_LWPCB) },
+    { MOD_TABLE (MOD_VEX_0FXOP_09_12) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -7857,19 +7946,19 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* 90 */
-    { "vprotb",		{ XM, EXx, VexW }, 0 },
-    { "vprotw",		{ XM, EXx, VexW }, 0 },
-    { "vprotd",		{ XM, EXx, VexW }, 0 },
-    { "vprotq",		{ XM, EXx, VexW }, 0 },
-    { "vpshlb",		{ XM, EXx, VexW }, 0 },
-    { "vpshlw",		{ XM, EXx, VexW }, 0 },
-    { "vpshld",		{ XM, EXx, VexW }, 0 },
-    { "vpshlq",		{ XM, EXx, VexW }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_90) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_91) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_92) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_93) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_94) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_95) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_96) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_97) },
     /* 98 */
-    { "vpshab",		{ XM, EXx, VexW }, 0 },
-    { "vpshaw",		{ XM, EXx, VexW }, 0 },
-    { "vpshad",		{ XM, EXx, VexW }, 0 },
-    { "vpshaq",		{ XM, EXx, VexW }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_98) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_99) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_9A) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_9B) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -7912,45 +8001,45 @@ static const struct dis386 xop_table[][256] = {
     { Bad_Opcode },
     /* c0 */
     { Bad_Opcode },
-    { "vphaddbw",	{ XM, EXxmm }, 0 },
-    { "vphaddbd",	{ XM, EXxmm }, 0 },
-    { "vphaddbq",	{ XM, EXxmm }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_C1) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_C2) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_C3) },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vphaddwd",	{ XM, EXxmm }, 0 },
-    { "vphaddwq",	{ XM, EXxmm }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_C6) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_C7) },
     /* c8 */
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vphadddq",	{ XM, EXxmm }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_CB) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
     /* d0 */
     { Bad_Opcode },
-    { "vphaddubw",	{ XM, EXxmm }, 0 },
-    { "vphaddubd",	{ XM, EXxmm }, 0 },
-    { "vphaddubq",	{ XM, EXxmm }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_D1) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_D2) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_D3) },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vphadduwd",	{ XM, EXxmm }, 0 },
-    { "vphadduwq",	{ XM, EXxmm }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_D6) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_D7) },
     /* d8 */
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vphaddudq",	{ XM, EXxmm }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_DB) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
     /* e0 */
     { Bad_Opcode },
-    { "vphsubbw",	{ XM, EXxmm }, 0 },
-    { "vphsubwd",	{ XM, EXxmm }, 0 },
-    { "vphsubdq",	{ XM, EXxmm }, 0 },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_E1) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_E2) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_E3) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -8006,7 +8095,7 @@ static const struct dis386 xop_table[][256] = {
     /* 10 */
     { "bextrS",	{ Gdq, Edq, Id }, 0 },
     { Bad_Opcode },
-    { REG_TABLE (REG_XOP_LWP) },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_0A_12) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -9623,44 +9712,144 @@ static const struct dis386 vex_len_table[][2] = {
     { "rorxS",		{ Gdq, Edq, Ib }, 0 },
   },
 
+  /* VEX_LEN_0FXOP_08_85 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_85_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_86 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_86_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_87 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_87_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_8E */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_8E_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_8F */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_8F_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_95 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_95_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_96 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_96_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_97 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_97_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_9E */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_9E_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_9F */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_9F_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_A3 */
+  {
+    { "vpperm", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_08_A6 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_A6_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_B6 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_B6_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_C0 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_C0_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_C1 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_C1_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_C2 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_C2_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_08_C3 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_08_C3_L_0) },
+  },
+
   /* VEX_LEN_0FXOP_08_CC */
   {
-     { "vpcomb",	{ XM, Vex128, EXx, VPCOM }, 0 },
+    { VEX_W_TABLE (VEX_W_0FXOP_08_CC_L_0) },
   },
 
   /* VEX_LEN_0FXOP_08_CD */
   {
-     { "vpcomw",	{ XM, Vex128, EXx, VPCOM }, 0 },
+    { VEX_W_TABLE (VEX_W_0FXOP_08_CD_L_0) },
   },
 
   /* VEX_LEN_0FXOP_08_CE */
   {
-     { "vpcomd",	{ XM, Vex128, EXx, VPCOM }, 0 },
+    { VEX_W_TABLE (VEX_W_0FXOP_08_CE_L_0) },
   },
 
   /* VEX_LEN_0FXOP_08_CF */
   {
-     { "vpcomq",	{ XM, Vex128, EXx, VPCOM }, 0 },
+    { VEX_W_TABLE (VEX_W_0FXOP_08_CF_L_0) },
   },
 
   /* VEX_LEN_0FXOP_08_EC */
   {
-     { "vpcomub",	{ XM, Vex128, EXx, VPCOM }, 0 },
+    { VEX_W_TABLE (VEX_W_0FXOP_08_EC_L_0) },
   },
 
   /* VEX_LEN_0FXOP_08_ED */
   {
-     { "vpcomuw",	{ XM, Vex128, EXx, VPCOM }, 0 },
+    { VEX_W_TABLE (VEX_W_0FXOP_08_ED_L_0) },
   },
 
   /* VEX_LEN_0FXOP_08_EE */
   {
-     { "vpcomud",	{ XM, Vex128, EXx, VPCOM }, 0 },
+    { VEX_W_TABLE (VEX_W_0FXOP_08_EE_L_0) },
   },
 
   /* VEX_LEN_0FXOP_08_EF */
   {
-     { "vpcomuq",	{ XM, Vex128, EXx, VPCOM }, 0 },
+    { VEX_W_TABLE (VEX_W_0FXOP_08_EF_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_01 */
+  {
+    { REG_TABLE (REG_0FXOP_09_01_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_02 */
+  {
+    { REG_TABLE (REG_0FXOP_09_02_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_12_M_1 */
+  {
+    { REG_TABLE (REG_0FXOP_09_12_M_1_L_0) },
   },
 
   /* VEX_LEN_0FXOP_09_82_W_0 */
@@ -9671,6 +9860,146 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_0FXOP_09_83_W_0 */
   {
     { "vfrczsd", 	{ XM, EXq }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_09_90 */
+  {
+    { "vprotb",		{ XM, EXx, VexW }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_09_91 */
+  {
+    { "vprotw",		{ XM, EXx, VexW }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_09_92 */
+  {
+    { "vprotd",		{ XM, EXx, VexW }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_09_93 */
+  {
+    { "vprotq",		{ XM, EXx, VexW }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_09_94 */
+  {
+    { "vpshlb",		{ XM, EXx, VexW }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_09_95 */
+  {
+    { "vpshlw",		{ XM, EXx, VexW }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_09_96 */
+  {
+    { "vpshld",		{ XM, EXx, VexW }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_09_97 */
+  {
+    { "vpshlq",		{ XM, EXx, VexW }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_09_98 */
+  {
+    { "vpshab",		{ XM, EXx, VexW }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_09_99 */
+  {
+    { "vpshaw",		{ XM, EXx, VexW }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_09_9A */
+  {
+    { "vpshad",		{ XM, EXx, VexW }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_09_9B */
+  {
+    { "vpshaq",		{ XM, EXx, VexW }, 0 },
+  },
+
+  /* VEX_LEN_0FXOP_09_C1 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_C1_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_C2 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_C2_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_C3 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_C3_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_C6 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_C6_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_C7 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_C7_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_CB */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_CB_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_D1 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_D1_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_D2 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_D2_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_D3 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_D3_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_D6 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_D6_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_D7 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_D7_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_DB */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_DB_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_E1 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_E1_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_E2 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_E2_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_09_E3 */
+  {
+    { VEX_W_TABLE (VEX_W_0FXOP_09_E3_L_0) },
+  },
+
+  /* VEX_LEN_0FXOP_0A_12 */
+  {
+    { REG_TABLE (REG_0FXOP_0A_12_L_0) },
   },
 };
 
@@ -9988,6 +10317,102 @@ static const struct dis386 vex_w_table[][2] = {
     { Bad_Opcode },
     { "vgf2p8affineinvqb",  { XM, Vex, EXx, Ib }, 0 },
   },
+  /* VEX_W_0FXOP_08_85_L_0 */
+  {
+    { "vpmacssww", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+  },
+  /* VEX_W_0FXOP_08_86_L_0 */
+  {
+    { "vpmacsswd", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+  },
+  /* VEX_W_0FXOP_08_87_L_0 */
+  {
+    { "vpmacssdql", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+  },
+  /* VEX_W_0FXOP_08_8E_L_0 */
+  {
+    { "vpmacssdd", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+  },
+  /* VEX_W_0FXOP_08_8F_L_0 */
+  {
+    { "vpmacssdqh", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+  },
+  /* VEX_W_0FXOP_08_95_L_0 */
+  {
+    { "vpmacsww", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+  },
+  /* VEX_W_0FXOP_08_96_L_0 */
+  {
+    { "vpmacswd", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+  },
+  /* VEX_W_0FXOP_08_97_L_0 */
+  {
+    { "vpmacsdql", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+  },
+  /* VEX_W_0FXOP_08_9E_L_0 */
+  {
+    { "vpmacsdd", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+  },
+  /* VEX_W_0FXOP_08_9F_L_0 */
+  {
+    { "vpmacsdqh", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+  },
+  /* VEX_W_0FXOP_08_A6_L_0 */
+  {
+    { "vpmadcsswd", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+  },
+  /* VEX_W_0FXOP_08_B6_L_0 */
+  {
+    { "vpmadcswd", 	{ XM, Vex, EXx, XMVexI4 }, 0 },
+  },
+  /* VEX_W_0FXOP_08_C0_L_0 */
+  {
+    { "vprotb", 	{ XM, EXx, Ib }, 0 },
+  },
+  /* VEX_W_0FXOP_08_C1_L_0 */
+  {
+    { "vprotw", 	{ XM, EXx, Ib }, 0 },
+  },
+  /* VEX_W_0FXOP_08_C2_L_0 */
+  {
+    { "vprotd", 	{ XM, EXx, Ib }, 0 },
+  },
+  /* VEX_W_0FXOP_08_C3_L_0 */
+  {
+    { "vprotq", 	{ XM, EXx, Ib }, 0 },
+  },
+  /* VEX_W_0FXOP_08_CC_L_0 */
+  {
+     { "vpcomb",	{ XM, Vex128, EXx, VPCOM }, 0 },
+  },
+  /* VEX_W_0FXOP_08_CD_L_0 */
+  {
+     { "vpcomw",	{ XM, Vex128, EXx, VPCOM }, 0 },
+  },
+  /* VEX_W_0FXOP_08_CE_L_0 */
+  {
+     { "vpcomd",	{ XM, Vex128, EXx, VPCOM }, 0 },
+  },
+  /* VEX_W_0FXOP_08_CF_L_0 */
+  {
+     { "vpcomq",	{ XM, Vex128, EXx, VPCOM }, 0 },
+  },
+  /* VEX_W_0FXOP_08_EC_L_0 */
+  {
+     { "vpcomub",	{ XM, Vex128, EXx, VPCOM }, 0 },
+  },
+  /* VEX_W_0FXOP_08_ED_L_0 */
+  {
+     { "vpcomuw",	{ XM, Vex128, EXx, VPCOM }, 0 },
+  },
+  /* VEX_W_0FXOP_08_EE_L_0 */
+  {
+     { "vpcomud",	{ XM, Vex128, EXx, VPCOM }, 0 },
+  },
+  /* VEX_W_0FXOP_08_EF_L_0 */
+  {
+     { "vpcomuq",	{ XM, Vex128, EXx, VPCOM }, 0 },
+  },
   /* VEX_W_0FXOP_09_80 */
   {
     { "vfrczps",	{ XM, EXx }, 0 },
@@ -10003,6 +10428,66 @@ static const struct dis386 vex_w_table[][2] = {
   /* VEX_W_0FXOP_09_83 */
   {
     { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_83_W_0) },
+  },
+  /* VEX_W_0FXOP_09_C1_L_0 */
+  {
+    { "vphaddbw",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_C2_L_0 */
+  {
+    { "vphaddbd",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_C3_L_0 */
+  {
+    { "vphaddbq",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_C6_L_0 */
+  {
+    { "vphaddwd",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_C7_L_0 */
+  {
+    { "vphaddwq",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_CB_L_0 */
+  {
+    { "vphadddq",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_D1_L_0 */
+  {
+    { "vphaddubw",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_D2_L_0 */
+  {
+    { "vphaddubd",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_D3_L_0 */
+  {
+    { "vphaddubq",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_D6_L_0 */
+  {
+    { "vphadduwd",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_D7_L_0 */
+  {
+    { "vphadduwq",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_DB_L_0 */
+  {
+    { "vphaddudq",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_E1_L_0 */
+  {
+    { "vphsubbw",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_E2_L_0 */
+  {
+    { "vphsubwd",	{ XM, EXxmm }, 0 },
+  },
+  /* VEX_W_0FXOP_09_E3_L_0 */
+  {
+    { "vphsubdq",	{ XM, EXxmm }, 0 },
   },
 
 #include "i386-dis-evex-w.h"
@@ -10785,6 +11270,11 @@ static const struct dis386 mod_table[][2] = {
     /* MOD_VEX_W_1_0F3A33_P_2_LEN_0 */
     { Bad_Opcode },
     { "kshiftlq",       { MaskG, MaskR, Ib }, 0 },
+  },
+  {
+    /* MOD_VEX_0FXOP_09_12 */
+    { Bad_Opcode },
+    { VEX_LEN_TABLE (VEX_LEN_0FXOP_09_12_M_1) },
   },
 
 #include "i386-dis-evex-mod.h"
@@ -16154,46 +16644,6 @@ MOVSXD_Fixup (int bytemode, int sizeflag)
   mnemonicendp = p;
   *p = '\0';
   OP_E (bytemode, sizeflag);
-}
-
-static void
-OP_LWPCB_E (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
-{
-  int reg;
-  const char **names;
-
-  /* Skip mod/rm byte.  */
-  MODRM_CHECK;
-  codep++;
-
-  if (rex & REX_W)
-    names = names64;
-  else
-    names = names32;
-
-  reg = modrm.rm;
-  USED_REX (REX_B);
-  if (rex & REX_B)
-    reg += 8;
-
-  oappend (names[reg]);
-}
-
-static void
-OP_LWP_E (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
-{
-  const char **names;
-  unsigned int reg = vex.register_specifier;
-  vex.register_specifier = 0;
-
-  if (rex & REX_W)
-    names = names64;
-  else
-    names = names32;
-
-  if (address_mode != mode_64bit)
-    reg &= 7;
-  oappend (names[reg]);
 }
 
 static void
