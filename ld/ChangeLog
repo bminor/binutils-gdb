@@ -2,6 +2,10 @@
 
 	Apply from master
 	2020-07-09  Alan Modra  <amodra@gmail.com>
+	* testsuite/ld-gc/gc.exp: Don't set -mminimal-toc for powerpc64,
+	and remove powerpc64 xfail.  Use -fno-PIE for ppc32.
+
+	2020-07-09  Alan Modra  <amodra@gmail.com>
 	PR 18841
 	* testsuite/ld-ifunc/ifunc.exp: Run pr18841 tests non-pie.
 
