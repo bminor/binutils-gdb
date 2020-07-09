@@ -1,3 +1,13 @@
+2020-07-09  Nick Clifton  <nickc@redhat.com>
+
+	* rclex.c: Add OWNERDRAW keyword.
+	* rcparse.y: Add OWNERDRAW token.
+	(menuitem_flag) Add BITMAP and OWNERDRAW entries.
+	* resrc.c (write_rc_menuitems): Add support for OWNERDRAW and
+	BITMAP flags.
+	* windres.c (extended_menuitems): Likewise.
+	* testsuite/binutils-all/windres/menuitem_flags.rc: New test.
+
 2020-07-09  Alan Modra  <amodra@gmail.com>
 
 	* readelf (slurp_hppa_unwind_table): Set table_len before use

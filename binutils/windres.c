@@ -527,6 +527,8 @@ extended_menuitems (const rc_menuitem *menuitems)
 		| MENUITEM_HELP
 		| MENUITEM_INACTIVE
 		| MENUITEM_MENUBARBREAK
+		| MENUITEM_BITMAP
+		| MENUITEM_OWNERDRAW
 		| MENUITEM_MENUBREAK))
 	  != 0)
 	return 1;

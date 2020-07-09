@@ -2841,6 +2841,10 @@ write_rc_menuitems (FILE *e, const rc_menuitem *menuitems, int menuex,
 	    fprintf (e, ", MENUBARBREAK");
 	  if ((mi->type & MENUITEM_MENUBREAK) != 0)
 	    fprintf (e, ", MENUBREAK");
+	  if ((mi->type & MENUITEM_OWNERDRAW) != 0)
+	    fprintf (e, ", OWNERDRAW");
+	  if ((mi->type & MENUITEM_BITMAP) != 0)
+	    fprintf (e, ", BITMAP");
 	}
       else
 	{
