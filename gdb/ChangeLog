@@ -1,5 +1,10 @@
 2020-10-30  Pedro Alves  <pedro@palves.net>
 
+	* thread.c (lookup_selected_frame): Move ...
+	* frame.c (lookup_selected_frame): ... here.
+
+2020-10-30  Pedro Alves  <pedro@palves.net>
+
 	* blockframe.c (block_innermost_frame): Use get_selected_frame.
 	* frame.c
 	(scoped_restore_selected_frame::scoped_restore_selected_frame):

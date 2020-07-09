@@ -1740,6 +1740,72 @@ restore_selected_frame (frame_id frame_id, int frame_level)
   selected_frame = nullptr;
 }
 
+/* See frame.h.  */
+
+void
+lookup_selected_frame (struct frame_id a_frame_id, int frame_level)
+{
+  struct frame_info *frame = NULL;
+  int count;
+
+  /* This either means there was no selected frame, or the selected
+     frame was the current frame.  In either case, select the current
+     frame.  */
+  if (frame_level == -1)
+    {
+      select_frame (get_current_frame ());
+      return;
+    }
+
+  /* select_frame never saves 0 in SELECTED_FRAME_LEVEL, so we
+     shouldn't see it here.  */
+  gdb_assert (frame_level > 0);
+
+  /* Restore by level first, check if the frame id is the same as
+     expected.  If that fails, try restoring by frame id.  If that
+     fails, nothing to do, just warn the user.  */
+
+  count = frame_level;
+  frame = find_relative_frame (get_current_frame (), &count);
+  if (count == 0
+      && frame != NULL
+      /* The frame ids must match - either both valid or both
+	 outer_frame_id.  The latter case is not failsafe, but since
+	 it's highly unlikely the search by level finds the wrong
+	 frame, it's 99.9(9)% of the time (for all practical purposes)
+	 safe.  */
+      && frame_id_eq (get_frame_id (frame), a_frame_id))
+    {
+      /* Cool, all is fine.  */
+      select_frame (frame);
+      return;
+    }
+
+  frame = frame_find_by_id (a_frame_id);
+  if (frame != NULL)
+    {
+      /* Cool, refound it.  */
+      select_frame (frame);
+      return;
+    }
+
+  /* Nothing else to do, the frame layout really changed.  Select the
+     innermost stack frame.  */
+  select_frame (get_current_frame ());
+
+  /* Warn the user.  */
+  if (frame_level > 0 && !current_uiout->is_mi_like_p ())
+    {
+      warning (_("Couldn't restore frame #%d in "
+		 "current thread.  Bottom (innermost) frame selected:"),
+	       frame_level);
+      /* For MI, we should probably have a notification about current
+	 frame change.  But this error is not very likely, so don't
+	 bother for now.  */
+      print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
+    }
+}
+
 bool
 has_stack_frames ()
 {
