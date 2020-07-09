@@ -1,3 +1,10 @@
+2020-07-13  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2020-07-09  Alan Modra  <amodra@gmail.com>
+	PR 18841
+	* testsuite/ld-ifunc/ifunc.exp: Run pr18841 tests non-pie.
+
 2020-07-13  Nick Clifton  <nickc@redhat.com>
 
 	* ldelf.c (ldelf_after_open): Change fatal errors about linking in
