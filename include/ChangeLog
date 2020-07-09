@@ -1,3 +1,8 @@
+2020-07-09  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf/common.h (AT_FREEBSD_ARGC, AT_FREEBSD_ARGV, AT_FREEBSD_ENVC)
+	(AT_FREEBSD_ENVV, AT_FREEBSD_PS_STRINGS): Define.
+
 2020-07-09  Alan Modra  <amodra@gmail.com>
 
 	* coff/powerpc.h: Delete.

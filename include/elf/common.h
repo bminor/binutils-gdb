@@ -1255,6 +1255,11 @@
 #define AT_FREEBSD_HWCAP        25      /* CPU feature flags. */
 #define AT_FREEBSD_HWCAP2       26      /* CPU feature flags 2. */
 #define AT_FREEBSD_BSDFLAGS     27      /* ELF BSD Flags. */
+#define AT_FREEBSD_ARGC         28      /* Argument count. */
+#define AT_FREEBSD_ARGV         29      /* Argument vector. */
+#define AT_FREEBSD_ENVC         30      /* Environment count. */
+#define AT_FREEBSD_ENVV         31      /* Environment vvector. */
+#define AT_FREEBSD_PS_STRINGS   32      /* struct ps_strings. */
 
 #define AT_SUN_UID      2000    /* Effective user ID.  */
 #define AT_SUN_RUID     2001    /* Real user ID.  */

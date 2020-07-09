@@ -1,3 +1,9 @@
+2020-07-09  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_print_auxv_entry): Handle AT_FREEBSD_ARGC,
+	AT_FREEBSD_ARGV, AT_FREEBSD_ENVC, AT_FREEBSD_ENVV,
+	AT_FREEBSD_PS_STRINGS.
+
 2020-07-08  Hannes Domani  <ssbssa@yahoo.de>
 
 	* auto-load.c (auto_load_objfile_script_1): Convert drive part
