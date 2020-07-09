@@ -8253,6 +8253,7 @@ slurp_hppa_unwind_table (Filedata *                  filedata,
   nentries = size / unw_ent_size;
   size = unw_ent_size * nentries;
 
+  aux->table_len = nentries;
   tep = aux->table = (struct hppa_unw_table_entry *)
       xcmalloc (nentries, sizeof (aux->table[0]));
 
@@ -8371,8 +8372,6 @@ slurp_hppa_unwind_table (Filedata *                  filedata,
 
       free (rela);
     }
-
-  aux->table_len = nentries;
 
   return TRUE;
 }
