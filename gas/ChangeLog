@@ -1,3 +1,10 @@
+2020-07-09  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention --enable-x86-used-note.
+	* configure.ac: Configure with --enable-x86-used-note by default
+	for Linux/x86.
+	* configure: Regenerated.
+
 2020-07-09  Alan Modra  <amodra@gmail.com>
 
 	* config/obj-coff.h: Remove TE_PE support.
