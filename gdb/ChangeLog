@@ -1,5 +1,10 @@
 2020-07-09  John Baldwin  <jhb@FreeBSD.org>
 
+	* inf-ptrace.c (inf_ptrace_target::wait): Don't compare against
+	inferior_ptid.
+
+2020-07-09  John Baldwin  <jhb@FreeBSD.org>
+
 	* fbsd-tdep.c (fbsd_print_auxv_entry): Handle AT_FREEBSD_ARGC,
 	AT_FREEBSD_ARGV, AT_FREEBSD_ENVC, AT_FREEBSD_ENVV,
 	AT_FREEBSD_PS_STRINGS.

@@ -347,7 +347,7 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	}
 
       /* Ignore terminated detached child processes.  */
-      if (!WIFSTOPPED (status) && pid != inferior_ptid.pid ())
+      if (!WIFSTOPPED (status) && find_inferior_pid (this, pid) == nullptr)
 	pid = -1;
     }
   while (pid == -1);
