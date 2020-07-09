@@ -559,7 +559,7 @@ run_cc_link_tests [list \
     [list \
 	"Build pr18841a.o" \
 	"" \
-	"" \
+	"$NOPIE_CFLAGS" \
 	{ pr18841a.c } \
 	"" \
 	"" \
@@ -687,32 +687,32 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run pr18841 with libpr18841b.so" \
-	"-Wl,--no-as-needed tmpdir/pr18841a.o tmpdir/libpr18841b.so" \
-	"" \
+	"$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr18841a.o tmpdir/libpr18841b.so" \
+	"$NOPIE_CFLAGS" \
 	{ dummy.c } \
 	"pr18841b" \
 	"pr18841.out" \
     ] \
     [list \
 	"Run pr18841 with libpr18841c.so" \
-	"-Wl,--as-needed tmpdir/pr18841a.o tmpdir/libpr18841c.so" \
-	"" \
+	"$NOPIE_LDFLAGS -Wl,--as-needed tmpdir/pr18841a.o tmpdir/libpr18841c.so" \
+	"$NOPIE_CFLAGS" \
 	{ dummy.c } \
 	"pr18841c" \
 	"pr18841.out" \
     ] \
     [list \
 	"Run pr18841 with libpr18841bn.so (-z now)" \
-	"-Wl,-z,now -Wl,--no-as-needed tmpdir/pr18841a.o tmpdir/libpr18841bn.so" \
-	"" \
+	"$NOPIE_LDFLAGS -Wl,-z,now -Wl,--no-as-needed tmpdir/pr18841a.o tmpdir/libpr18841bn.so" \
+	"$NOPIE_CFLAGS" \
 	{ dummy.c } \
 	"pr18841bn" \
 	"pr18841.out" \
     ] \
     [list \
 	"Run pr18841 with libpr18841cn.so (-z now)" \
-	"-Wl,-z,now -Wl,--as-needed tmpdir/pr18841a.o tmpdir/libpr18841cn.so" \
-	"" \
+	"$NOPIE_LDFLAGS -Wl,-z,now -Wl,--as-needed tmpdir/pr18841a.o tmpdir/libpr18841cn.so" \
+	"$NOPIE_CFLAGS" \
 	{ dummy.c } \
 	"pr18841cn" \
 	"pr18841.out" \
