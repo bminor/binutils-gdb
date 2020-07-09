@@ -45265,40 +45265,41 @@ it should contain registers @samp{pauth_dmask} and @samp{pauth_cmask}.
 @subsection ARC Features
 @cindex target descriptions, ARC Features
 
-ARC processors are highly configurable, so even core registers and their number
-are not completely predetermined.  In addition flags and PC registers which are
-important to @value{GDBN} are not ``core'' registers in ARC.  It is required
-that one of the core registers features is present.
-@samp{org.gnu.gdb.arc.aux-minimal} feature is mandatory.
+ARC processors are so configurable that even core registers and their numbers
+are not predetermined completely.  Moreover, @emph{flags} and @emph{PC}
+registers, which are important to @value{GDBN}, are not ``core'' registers in
+ARC.  Therefore, there are two features that their presence is mandatory:
+@samp{org.gnu.gdb.arc.core} and @samp{org.gnu.gdb.arc.aux}.
 
-The @samp{org.gnu.gdb.arc.core.v2} feature is required for ARC EM and ARC HS
-targets with a normal register file.  It should contain registers @samp{r0}
-through @samp{r25}, @samp{gp}, @samp{fp}, @samp{sp}, @samp{r30}, @samp{blink},
-@samp{lp_count} and @samp{pcl}.  This feature may contain register @samp{ilink}
-and any of extension core registers @samp{r32} through @samp{r59/acch}.
-@samp{ilink} and extension core registers are not available to read/write, when
-debugging GNU/Linux applications, thus @samp{ilink} is made optional.
+The @samp{org.gnu.gdb.arc.core} feature is required for all targets.  It must
+contain registers:
 
-The @samp{org.gnu.gdb.arc.core-reduced.v2} feature is required for ARC EM and
-ARC HS targets with a reduced register file.  It should contain registers
-@samp{r0} through @samp{r3}, @samp{r10} through @samp{r15}, @samp{gp},
-@samp{fp}, @samp{sp}, @samp{r30}, @samp{blink}, @samp{lp_count} and @samp{pcl}.
-This feature may contain register @samp{ilink} and any of extension core
-registers @samp{r32} through @samp{r59/acch}.
+@itemize @minus
+@item
+@samp{r0} through @samp{r25} for normal register file targets.
+@item
+@samp{r0} through @samp{r3}, and @samp{r10} through @samp{r15} for reduced
+register file targets.
+@item
+@samp{gp}, @samp{fp}, @samp{sp}, @samp{r30}@footnote{Not necessary for ARCv1.},
+@samp{blink}, @samp{lp_count}, @samp{pcl}.
+@end itemize
 
-The @samp{org.gnu.gdb.arc.core.arcompact} feature is required for ARCompact
-targets with a normal register file.  It should contain registers @samp{r0}
-through @samp{r25}, @samp{gp}, @samp{fp}, @samp{sp}, @samp{r30}, @samp{blink},
-@samp{lp_count} and @samp{pcl}.  This feature may contain registers
-@samp{ilink1}, @samp{ilink2} and any of extension core registers @samp{r32}
-through @samp{r59/acch}.  @samp{ilink1} and @samp{ilink2} and extension core
-registers are not available when debugging GNU/Linux applications.  The only
-difference with @samp{org.gnu.gdb.arc.core.v2} feature is in the names of
-@samp{ilink1} and @samp{ilink2} registers and that @samp{r30} is mandatory in
-ARC v2, but @samp{ilink2} is optional on ARCompact.
+In case of an ARCompact target (ARCv1 ISA), the @samp{org.gnu.gdb.arc.core}
+feature may contain registers @samp{ilink1} and @samp{ilink2}.  While in case
+of ARC EM and ARC HS targets (ARCv2 ISA), register @samp{ilink} may be present.
+The difference between ARCv1 and ARCv2 is the naming of registers @emph{29th}
+and @emph{30th}.  They are called @samp{ilink1} and @samp{ilink2} for ARCv1 and
+are optional.  For ARCv2, they are called @samp{ilink} and @samp{r30} and only
+@samp{ilink} is optional.  The optionality of @samp{ilink*} registers is
+because of their inaccessibility during user space debugging sessions.
 
-The @samp{org.gnu.gdb.arc.aux-minimal} feature is required for all ARC
-targets.  It should contain registers @samp{pc} and @samp{status32}.
+Extension core registers @samp{r32} through @samp{r59} are optional and their
+existence depends on the configuration.  When debugging GNU/Linux applications,
+i.e.@: user space debugging, these core registers are not available.
+
+The @samp{org.gnu.gdb.arc.aux} feature is required for all ARC targets.  It
+should at least contain @samp{pc} and @samp{status32} registers.
 
 @node ARM Features
 @subsection ARM Features

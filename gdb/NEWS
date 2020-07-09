@@ -3,6 +3,11 @@
 
 *** Changes since GDB 9
 
+* There are new feature names for ARC targets: "org.gnu.gdb.arc.core"
+  and "org.gnu.gdb.arc.aux".  The old names are still supported but
+  must be considered obsolete.  They will be deprecated after some
+  grace period.
+
 * Help and apropos commands will now show the documentation of a
   command only once, even if that command has one or more aliases.
   These commands now show the command name, then all of its aliases,

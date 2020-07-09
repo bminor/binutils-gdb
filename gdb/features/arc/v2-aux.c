@@ -1,14 +1,14 @@
 /* THIS FILE IS GENERATED.  -*- buffer-read-only: t -*- vi:set ro:
-  Original: aux-v2.xml */
+  Original: v2-aux.xml */
 
 #include "gdbsupport/tdesc.h"
 
 static int
-create_feature_arc_aux_v2 (struct target_desc *result, long regnum)
+create_feature_arc_v2_aux (struct target_desc *result, long regnum)
 {
   struct tdesc_feature *feature;
 
-  feature = tdesc_create_feature (result, "org.gnu.gdb.arc.aux-minimal");
+  feature = tdesc_create_feature (result, "org.gnu.gdb.arc.aux");
   tdesc_type_with_fields *type_with_fields;
   type_with_fields = tdesc_create_flags (feature, "status32_type", 4);
   tdesc_add_flag (type_with_fields, 0, "H");
@@ -31,5 +31,8 @@ create_feature_arc_aux_v2 (struct target_desc *result, long regnum)
 
   tdesc_create_reg (feature, "pc", regnum++, 1, NULL, 32, "code_ptr");
   tdesc_create_reg (feature, "status32", regnum++, 1, NULL, 32, "status32_type");
+  tdesc_create_reg (feature, "lp_start", regnum++, 1, NULL, 32, "code_ptr");
+  tdesc_create_reg (feature, "lp_end", regnum++, 1, NULL, 32, "code_ptr");
+  tdesc_create_reg (feature, "bta", regnum++, 1, NULL, 32, "code_ptr");
   return regnum;
 }

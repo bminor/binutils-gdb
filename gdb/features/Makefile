@@ -201,10 +201,10 @@ $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 FEATURE_XMLFILES = aarch64-core.xml \
 	aarch64-fpu.xml \
 	aarch64-pauth.xml \
-	arc/core-v2.xml \
-	arc/aux-v2.xml \
-	arc/core-arcompact.xml \
-	arc/aux-arcompact.xml \
+	arc/v1-core.xml \
+	arc/v1-aux.xml \
+	arc/v2-core.xml \
+	arc/v2-aux.xml \
 	arm/arm-core.xml \
 	arm/arm-fpa.xml \
 	arm/arm-m-profile.xml \

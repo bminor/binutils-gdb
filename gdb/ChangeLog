@@ -1,3 +1,35 @@
+2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
+
+	* arch/arc.h
+	(arc_gdbarch_features): New class to stir the selection of target XML.
+	(arc_create_target_description): Use FEATURES to choose XML target.
+	(arc_lookup_target_description): Use arc_create_target_description
+	to create _new_ target descriptions or return the already created
+	ones if the FEATURES is the same.
+	* arch/arc.c: Implementation of prototypes described above.
+	* gdb/arc-tdep.h (arc_regnum enum): Add more registers.
+	(arc_gdbarch_features_init): Initialize the FEATURES struct.
+	* arc-tdep.c (*_feature_name): Make feature names consistent.
+	(arc_register_feature): A new struct to hold information about
+	registers of a particular target/feature.
+	(arc_check_tdesc_feature): Check if XML provides registers in
+	compliance with ARC_REGISTER_FEATURE structs.
+	(arc_update_acc_reg_names): Add aliases for r58 and r59.
+	(determine_*_reg_feature_set): Which feature name to look for.
+	(arc_gdbarch_features_init): Given MACH and ABFD, initialize FEATURES.
+	(mach_type_to_arc_isa): Convert from a set of binutils machine types
+	to expected ISA enums to be used in arc_gdbarch_features structs.
+	* features/Makefile (FEATURE_XMLFILES): Add new files.
+	* gdb/features/arc/v1-aux.c: New file.
+	* gdb/features/arc/v1-aux.xml: Likewise.
+	* gdb/features/arc/v1-core.c: Likewise.
+	* gdb/features/arc/v1-core.xml: Likewise.
+	* gdb/features/arc/v2-aux.c: Likewise.
+	* gdb/features/arc/v2-aux.xml: Likewise.
+	* gdb/features/arc/v2-core.c: Likewise.
+	* gdb/features/arc/v2-core.xml: Likewise.
+	* NEWS (Changes since GDB 9): Announce obsolence of old feature names.
+
 2020-08-25  Gaius Mulley  <gaiusmod2@gmail.com>
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 

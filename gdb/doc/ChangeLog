@@ -1,3 +1,8 @@
+2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
+
+	* gdb.texinfo (Synopsys ARC): Update the documentation for ARC
+	Features.
+
 2020-08-07  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.texinfo (Ravenscar Profile): Add examples.
