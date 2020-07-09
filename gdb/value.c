@@ -3629,10 +3629,20 @@ coerce_ref_if_computed (const struct value *arg)
 struct value *
 readjust_indirect_value_type (struct value *value, struct type *enc_type,
 			      const struct type *original_type,
-			      const struct value *original_value)
+			      struct value *original_value,
+			      CORE_ADDR original_value_address)
 {
+  gdb_assert (original_type->code () == TYPE_CODE_PTR
+	      || TYPE_IS_REFERENCE (original_type));
+
+  struct type *original_target_type = TYPE_TARGET_TYPE (original_type);
+  gdb::array_view<const gdb_byte> view;
+  struct type *resolved_original_target_type
+    = resolve_dynamic_type (original_target_type, view,
+			    original_value_address);
+
   /* Re-adjust type.  */
-  deprecated_set_value_type (value, TYPE_TARGET_TYPE (original_type));
+  deprecated_set_value_type (value, resolved_original_target_type);
 
   /* Add embedding info.  */
   set_value_enclosing_type (value, enc_type);
@@ -3659,12 +3669,11 @@ coerce_ref (struct value *arg)
   enc_type = check_typedef (value_enclosing_type (arg));
   enc_type = TYPE_TARGET_TYPE (enc_type);
 
-  retval = value_at_lazy (enc_type,
-                          unpack_pointer (value_type (arg),
-                                          value_contents (arg)));
+  CORE_ADDR addr = unpack_pointer (value_type (arg), value_contents (arg));
+  retval = value_at_lazy (enc_type, addr);
   enc_type = value_type (retval);
-  return readjust_indirect_value_type (retval, enc_type,
-                                       value_type_arg_tmp, arg);
+  return readjust_indirect_value_type (retval, enc_type, value_type_arg_tmp,
+				       arg, addr);
 }
 
 struct value *

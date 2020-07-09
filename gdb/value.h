@@ -488,7 +488,9 @@ extern struct value *coerce_ref_if_computed (const struct value *arg);
 
 /* Setup a new value type and enclosing value type for dereferenced value VALUE.
    ENC_TYPE is the new enclosing type that should be set.  ORIGINAL_TYPE and
-   ORIGINAL_VAL are the type and value of the original reference or pointer.
+   ORIGINAL_VAL are the type and value of the original reference or
+   pointer.  ORIGINAL_VALUE_ADDRESS is the address within VALUE, that is
+   the address that was dereferenced.
 
    Note, that VALUE is modified by this function.
 
@@ -497,7 +499,8 @@ extern struct value *coerce_ref_if_computed (const struct value *arg);
 extern struct value * readjust_indirect_value_type (struct value *value,
 						    struct type *enc_type,
 						    const struct type *original_type,
-						    const struct value *original_val);
+						    struct value *original_val,
+						    CORE_ADDR original_value_address);
 
 /* Convert a REF to the object referenced.  */
 

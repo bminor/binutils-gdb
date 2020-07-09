@@ -1559,20 +1559,24 @@ value_ind (struct value *arg1)
       enc_type = check_typedef (value_enclosing_type (arg1));
       enc_type = TYPE_TARGET_TYPE (enc_type);
 
+      CORE_ADDR base_addr;
       if (check_typedef (enc_type)->code () == TYPE_CODE_FUNC
 	  || check_typedef (enc_type)->code () == TYPE_CODE_METHOD)
-	/* For functions, go through find_function_addr, which knows
-	   how to handle function descriptors.  */
-	arg2 = value_at_lazy (enc_type, 
-			      find_function_addr (arg1, NULL));
+	{
+	  /* For functions, go through find_function_addr, which knows
+	     how to handle function descriptors.  */
+	  base_addr = find_function_addr (arg1, NULL);
+	}
       else
-	/* Retrieve the enclosing object pointed to.  */
-	arg2 = value_at_lazy (enc_type, 
-			      (value_as_address (arg1)
-			       - value_pointed_to_offset (arg1)));
-
+	{
+	  /* Retrieve the enclosing object pointed to.  */
+	  base_addr = (value_as_address (arg1)
+		       - value_pointed_to_offset (arg1));
+	}
+      arg2 = value_at_lazy (enc_type, base_addr);
       enc_type = value_type (arg2);
-      return readjust_indirect_value_type (arg2, enc_type, base_type, arg1);
+      return readjust_indirect_value_type (arg2, enc_type, base_type,
+					   arg1, base_addr);
     }
 
   error (_("Attempt to take contents of a non-pointer value."));
