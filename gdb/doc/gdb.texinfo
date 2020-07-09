@@ -45298,8 +45298,15 @@ Extension core registers @samp{r32} through @samp{r59} are optional and their
 existence depends on the configuration.  When debugging GNU/Linux applications,
 i.e.@: user space debugging, these core registers are not available.
 
-The @samp{org.gnu.gdb.arc.aux} feature is required for all ARC targets.  It
-should at least contain @samp{pc} and @samp{status32} registers.
+The @samp{org.gnu.gdb.arc.aux} feature is required for all ARC targets.  Here
+is the list of registers pertinent to this feature:
+
+@itemize @minus
+@item
+mandatory: @samp{pc} and @samp{status32}.
+@item
+optional: @samp{lp_start}, @samp{lp_end}, and @samp{bta}.
+@end itemize
 
 @node ARM Features
 @subsection ARM Features

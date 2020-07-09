@@ -1,5 +1,9 @@
 2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
 
+	* gdb.texinfo (Synopsys ARC): Document LP_START, LP_END and BTA.
+
+2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
+
 	* gdb.texinfo (Synopsys ARC): Update the documentation for ARC
 	Features.
 

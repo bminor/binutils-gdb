@@ -2041,6 +2041,35 @@ arc_check_tdesc_feature (struct tdesc_arch_data *tdesc_data,
   return true;
 }
 
+/* Check for the existance of "lp_start" and "lp_end" in target description.
+   If both are present, assume there is hardware loop support in the target.
+   This can be improved by looking into "lpc_size" field of "isa_config"
+   auxiliary register.  */
+
+static bool
+arc_check_for_hw_loops (const struct target_desc *tdesc,
+			struct tdesc_arch_data *data)
+{
+  const auto feature_aux = tdesc_find_feature (tdesc, ARC_AUX_FEATURE_NAME);
+  const auto aux_regset = determine_aux_reg_feature_set ();
+
+  if (feature_aux == nullptr)
+    return false;
+
+  bool hw_loop_p = false;
+  const auto lp_start_name =
+    aux_regset->registers[ARC_LP_START_REGNUM - ARC_FIRST_AUX_REGNUM].names[0];
+  const auto lp_end_name =
+    aux_regset->registers[ARC_LP_END_REGNUM - ARC_FIRST_AUX_REGNUM].names[0];
+
+  hw_loop_p = tdesc_numbered_register (feature_aux, data,
+				       ARC_LP_START_REGNUM, lp_start_name);
+  hw_loop_p &= tdesc_numbered_register (feature_aux, data,
+				       ARC_LP_END_REGNUM, lp_end_name);
+
+  return hw_loop_p;
+}
+
 /* Initialize target description for the ARC.
 
    Returns true if input TDESC was valid and in this case it will assign TDESC
@@ -2163,13 +2192,15 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     debug_printf ("arc: Architecture initialization.\n");
 
   if (!arc_tdesc_init (info, &tdesc, &tdesc_data))
-    return NULL;
+    return nullptr;
 
   /* Allocate the ARC-private target-dependent information structure, and the
      GDB target-independent information structure.  */
-  struct gdbarch_tdep *tdep = XCNEW (struct gdbarch_tdep);
+  gdb::unique_xmalloc_ptr<struct gdbarch_tdep> tdep
+    (XCNEW (struct gdbarch_tdep));
   tdep->jb_pc = -1; /* No longjmp support by default.  */
-  struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
+  tdep->has_hw_loops = arc_check_for_hw_loops (tdesc, tdesc_data);
+  struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep.release ());
 
   /* Data types.  */
   set_gdbarch_short_bit (gdbarch, 16);
@@ -2250,7 +2281,7 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      It can override functions set earlier.  */
   gdbarch_init_osabi (info, gdbarch);
 
-  if (tdep->jb_pc >= 0)
+  if (gdbarch_tdep (gdbarch)->jb_pc >= 0)
     set_gdbarch_get_longjmp_target (gdbarch, arc_get_longjmp_target);
 
   /* Disassembler options.  Enforce CPU if it was specified in XML target
