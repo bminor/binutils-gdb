@@ -9120,9 +9120,14 @@ output_insn (void)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MMX;
       if (i.has_regxmm)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XMM;
-      if (i.has_regymm)
+      if (i.has_regymm
+	  || (i.has_regxmm
+	      && (i.tm.opcode_modifier.vex
+		  || i.tm.opcode_modifier.evex)))
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_YMM;
-      if (i.has_regzmm)
+      if (i.has_regzmm
+	  || ((i.has_regxmm || i.has_regymm)
+	      && i.tm.opcode_modifier.evex))
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_ZMM;
       if (i.tm.cpu_flags.bitfield.cpufxsr)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_FXSR;

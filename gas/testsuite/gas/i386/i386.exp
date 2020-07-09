@@ -622,6 +622,8 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	run_dump_test "property-1"
 	run_dump_test "property-2"
 	run_dump_test "property-3"
+	run_dump_test "property-4"
+	run_dump_test "property-5"
 
 	if {[istarget "*-*-linux*"]} then {
 	    run_dump_test "align-branch-3"
@@ -1207,6 +1209,8 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
 	run_dump_test "x86-64-property-1"
 	run_dump_test "x86-64-property-2"
 	run_dump_test "x86-64-property-3"
+	run_dump_test "x86-64-property-4"
+	run_dump_test "x86-64-property-5"
 
 	if {[istarget "*-*-linux*"]} then {
 	    run_dump_test "x86-64-align-branch-3"
