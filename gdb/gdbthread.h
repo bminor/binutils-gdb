@@ -395,6 +395,13 @@ public:
 using thread_info_ref
   = gdb::ref_ptr<struct thread_info, refcounted_object_ref_policy>;
 
+/* A gdb::ref_ptr pointer to an inferior.  This would ideally be in
+   inferior.h, but it can't due to header dependencies (inferior.h
+   includes gdbthread.h).  */
+
+using inferior_ref
+  = gdb::ref_ptr<struct inferior, refcounted_object_ref_policy>;
+
 /* Create an empty thread list, or empty the existing one.  */
 extern void init_thread_list (void);
 
@@ -660,10 +667,9 @@ private:
   void restore ();
 
   bool m_dont_restore = false;
-  /* Use the "class" keyword here, because of a clash with a "thread_info"
-     function in the Darwin API.  */
-  class thread_info *m_thread;
-  inferior *m_inf;
+  thread_info_ref m_thread;
+  inferior_ref m_inf;
+
   frame_id m_selected_frame_id;
   int m_selected_frame_level;
   bool m_was_stopped;

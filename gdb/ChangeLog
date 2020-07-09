@@ -1,5 +1,21 @@
 2020-07-10  Pedro Alves  <pedro@palves.net>
 
+	* gdbthread.h (inferior_ref): Define.
+	(scoped_restore_current_thread) <m_thread>: Now a thread_info_ref.
+	(scoped_restore_current_thread) <m_inf>: Now an inferior_ref.
+	* thread.c
+	(scoped_restore_current_thread::restore):
+	Adjust to gdb::ref_ptr.
+	(scoped_restore_current_thread::~scoped_restore_current_thread):
+	Remove manual decref handling.
+	(scoped_restore_current_thread::scoped_restore_current_thread):
+	Adjust to use
+	inferior_ref::new_reference/thread_info_ref::new_reference.
+	Incref the thread before calling get_frame_id instead of after.
+	Let TARGET_CLOSE_ERROR propagate.
+
+2020-07-10  Pedro Alves  <pedro@palves.net>
+
 	* frame-tailcall.c (dwarf2_tailcall_sniffer_first): Only swallow
 	NO_ENTRY_VALUE_ERROR / MEMORY_ERROR / OPTIMIZED_OUT_ERROR /
 	NOT_AVAILABLE_ERROR.

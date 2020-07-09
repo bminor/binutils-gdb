@@ -1396,9 +1396,9 @@ scoped_restore_current_thread::restore ()
 	 in the mean time exited (or killed, detached, etc.), then don't revert
 	 back to it, but instead simply drop back to no thread selected.  */
       && m_inf->pid != 0)
-    switch_to_thread (m_thread);
+    switch_to_thread (m_thread.get ());
   else
-    switch_to_inferior_no_thread (m_inf);
+    switch_to_inferior_no_thread (m_inf.get ());
 
   /* The running state of the originally selected thread may have
      changed, so we have to recheck it here.  */
@@ -1425,23 +1425,19 @@ scoped_restore_current_thread::~scoped_restore_current_thread ()
 	     but swallow the exception.  */
 	}
     }
-
-  if (m_thread != NULL)
-    m_thread->decref ();
-  m_inf->decref ();
 }
 
 scoped_restore_current_thread::scoped_restore_current_thread ()
 {
-  m_thread = NULL;
-  m_inf = current_inferior ();
+  m_inf = inferior_ref::new_reference (current_inferior ());
 
   if (inferior_ptid != null_ptid)
     {
-      thread_info *tp = inferior_thread ();
+      m_thread = thread_info_ref::new_reference (inferior_thread ());
+
       struct frame_info *frame;
 
-      m_was_stopped = tp->state == THREAD_STOPPED;
+      m_was_stopped = m_thread->state == THREAD_STOPPED;
       if (m_was_stopped
 	  && target_has_registers
 	  && target_has_stack
@@ -1466,13 +1462,12 @@ scoped_restore_current_thread::scoped_restore_current_thread ()
 	{
 	  m_selected_frame_id = null_frame_id;
 	  m_selected_frame_level = -1;
+
+	  /* Better let this propagate.  */
+	  if (ex.error == TARGET_CLOSE_ERROR)
+	    throw;
 	}
-
-      tp->incref ();
-      m_thread = tp;
     }
-
-  m_inf->incref ();
 }
 
 /* See gdbthread.h.  */
