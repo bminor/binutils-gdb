@@ -181,8 +181,14 @@ public:
 
 private:
 
-  /* The ID of the previously selected frame.  */
+  /* The ID and level of the previously selected frame.  */
   struct frame_id m_fid;
+  int m_level;
+
+  /* Save/restore the language as well, because selecting a frame
+     changes the current language to the frame's language if "set
+     language auto".  */
+  enum language m_lang;
 };
 
 /* Methods for constructing and comparing Frame IDs.  */
@@ -329,12 +335,32 @@ extern void reinit_frame_cache (void);
    and then return that thread's previously selected frame.  */
 extern struct frame_info *get_selected_frame (const char *message);
 
-/* If there is a selected frame, return it.  Otherwise, return NULL.  */
-extern struct frame_info *get_selected_frame_if_set (void);
-
-/* Select a specific frame.  NULL, apparently implies re-select the
-   inner most frame.  */
+/* Select a specific frame.  NULL implies re-select the inner most
+   frame.  */
 extern void select_frame (struct frame_info *);
+
+/* Save the frame ID and frame level of the selected frame in FRAME_ID
+   and FRAME_LEVEL, to be restored later with restore_selected_frame.
+   This is preferred over getting the same info out of
+   get_selected_frame directly because this function does not create
+   the selected-frame's frame_info object if it hasn't been created
+   yet, and thus doesn't throw.  */
+extern void save_selected_frame (frame_id *frame_id, int *frame_level)
+  noexcept;
+
+/* Restore selected frame as saved with save_selected_frame.  Does not
+   try to find the corresponding frame_info object.  Instead the next
+   call to get_selected_frame will look it up and cache the result.
+   This function does not throw, it is designed to be safe to called
+   from the destructors of RAII types.  */
+extern void restore_selected_frame (frame_id frame_id, int frame_level)
+  noexcept;
+
+/* Lookup the frame_info object for the selected frame FRAME_ID /
+   FRAME_LEVEL and cache the result.  If FRAME_LEVEL > 0 and the
+   originally selected frame isn't found, warn and select the
+   innermost (current) frame.  */
+extern void lookup_selected_frame (frame_id frame_id, int frame_level);
 
 /* Given a FRAME, return the next (more inner, younger) or previous
    (more outer, older) frame.  */
