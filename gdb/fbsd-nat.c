@@ -1669,6 +1669,12 @@ fbsd_nat_target::set_syscall_catchpoint (int pid, bool needed,
 #endif
 #endif
 
+bool
+fbsd_nat_target::supports_multi_process ()
+{
+  return true;
+}
+
 void _initialize_fbsd_nat ();
 void
 _initialize_fbsd_nat ()

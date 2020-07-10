@@ -94,6 +94,8 @@ public:
     override;
 #endif
 #endif /* PT_LWPINFO */
+
+  bool supports_multi_process () override;
 };
 
 #endif /* fbsd-nat.h */

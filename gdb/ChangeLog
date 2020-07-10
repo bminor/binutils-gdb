@@ -1,3 +1,10 @@
+2020-07-10  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.h (fbsd_nat_target::supports_multi_process): New
+	declaration.
+	* fbsd-nat.c (fbsd_nat_target::supports_multi_process): New
+	function.
+
 2020-07-09  John Baldwin  <jhb@FreeBSD.org>
 
 	* inf-ptrace.c (inf_ptrace_target::wait): Don't compare against
