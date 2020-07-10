@@ -1,3 +1,31 @@
+2020-07-10  Lili Cui  <lili.cui@intel.com>
+
+	* NEWS: Mention support for Intel AMX instructions.
+	* config/tc-i386.c (i386_error): Add invalid_sib_address.
+	(cpu_arch): Add .amx_int8, .amx_bf16 and .amx_tile.
+	(cpu_noarch): Add noamx_int8, noamx_bf16 and noamx_tile.
+	(match_simd_size): Add tmmword check.
+	(operand_type_match): Add tmmword.
+	(type_names): Add rTMM.
+	(i386_error): Add invalid_tmm_register_set.
+	(check_VecOperands): Handle invalid_sib_address and
+	invalid_tmm_register_set.
+	(match_template): Handle invalid_sib_address.
+	(build_modrm_byte): Handle non-vector SIB and zmmword.
+	(i386_index_check): Disallow RegIP for non-vector SIB.
+	(check_register): Handle zmmword.
+	* doc/c-i386.texi: Document amx_int8, amx_bf16 and amx_tile.
+	* testsuite/gas/i386/i386.exp: Add AMX new tests.
+	* testsuite/gas/i386/intel-regs.d: Add tmm.
+	* testsuite/gas/i386/intel-regs.s: Add tmm.
+	* testsuite/gas/i386/x86-64-amx-intel.d: New.
+	* testsuite/gas/i386/x86-64-amx-inval.l: New.
+	* testsuite/gas/i386/x86-64-amx-inval.s: New.
+	* testsuite/gas/i386/x86-64-amx.d: New.
+	* testsuite/gas/i386/x86-64-amx.s: New.
+	* testsuite/gas/i386/x86-64-amx-bad.d: New.
+	* testsuite/gas/i386/x86-64-amx-bad.s: New.
+
 2020-07-10  Tom de Vries  <tdevries@suse.de>
 
 	* testsuite/gas/elf/dwarf2-11.d: Update expected output from

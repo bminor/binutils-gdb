@@ -223,6 +223,12 @@ enum
   /* CET instructions support required */
   CpuIBT,
   CpuSHSTK,
+  /* AMX-INT8 instructions required */
+  CpuAMX_INT8,
+  /* AMX-BF16 instructions required */
+  CpuAMX_BF16,
+  /* AMX-TILE instructions required */
+  CpuAMX_TILE,
   /* GFNI instructions required */
   CpuGFNI,
   /* VAES instructions required */
@@ -372,6 +378,9 @@ typedef union i386_cpu_flags
       unsigned int cpuptwrite:1;
       unsigned int cpuibt:1;
       unsigned int cpushstk:1;
+      unsigned int cpuamx_int8:1;
+      unsigned int cpuamx_bf16:1;
+      unsigned int cpuamx_tile:1;
       unsigned int cpugfni:1;
       unsigned int cpuvaes:1;
       unsigned int cpuvpclmulqdq:1;
@@ -574,7 +583,9 @@ enum
 #define VECSIB128	1
 #define VECSIB256	2
 #define VECSIB512	3
+#define SIBMEM		4
   SIB,
+
   /* SSE to AVX support required */
   SSE2AVX,
   /* No AVX equivalent */
@@ -702,7 +713,7 @@ typedef struct i386_opcode_modifier
   unsigned int vexw:2;
   unsigned int vexopcode:3;
   unsigned int vexsources:2;
-  unsigned int sib:2;
+  unsigned int sib:3;
   unsigned int sse2avx:1;
   unsigned int noavx:1;
   unsigned int evex:3;
@@ -807,6 +818,8 @@ enum
   Ymmword,
   /* ZMMWORD size.  */
   Zmmword,
+  /* TMMWORD size.  */
+  Tmmword,
   /* Unspecified memory size.  */
   Unspecified,
 
@@ -851,6 +864,7 @@ typedef union i386_operand_type
       unsigned int xmmword:1;
       unsigned int ymmword:1;
       unsigned int zmmword:1;
+      unsigned int tmmword:1;
       unsigned int unspecified:1;
 #ifdef OTUnused
       unsigned int unused:(OTNumOfBits - OTUnused);

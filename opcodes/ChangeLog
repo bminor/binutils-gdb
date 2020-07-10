@@ -1,3 +1,81 @@
+2020-07-10  Lili Cui  <lili.cui@intel.com>
+
+	* i386-dis.c (TMM): New.
+	(EXtmm): Likewise.
+	(VexTmm): Likewise.
+	(MVexSIBMEM): Likewise.
+	(tmm_mode): Likewise.
+	(vex_sibmem_mode): Likewise.
+	(REG_VEX_0F3849_X86_64_P_0_W_0_M_1): Likewise.
+	(MOD_VEX_0F3849_X86_64_P_0_W_0): Likewise.
+	(MOD_VEX_0F3849_X86_64_P_2_W_0): Likewise.
+	(MOD_VEX_0F3849_X86_64_P_3_W_0): Likewise.
+	(MOD_VEX_0F384B_X86_64_P_1_W_0): Likewise.
+	(MOD_VEX_0F384B_X86_64_P_2_W_0): Likewise.
+	(MOD_VEX_0F384B_X86_64_P_3_W_0): Likewise.
+	(MOD_VEX_0F385C_X86_64_P_1_W_0): Likewise.
+	(MOD_VEX_0F385E_X86_64_P_0_W_0): Likewise.
+	(MOD_VEX_0F385E_X86_64_P_1_W_0): Likewise.
+	(MOD_VEX_0F385E_X86_64_P_2_W_0): Likewise.
+	(MOD_VEX_0F385E_X86_64_P_3_W_0): Likewise.
+	(RM_VEX_0F3849_X86_64_P_0_W_0_M_1_R_0): Likewise.
+	(PREFIX_VEX_0F3849_X86_64): Likewise.
+	(PREFIX_VEX_0F384B_X86_64): Likewise.
+	(PREFIX_VEX_0F385C_X86_64): Likewise.
+	(PREFIX_VEX_0F385E_X86_64): Likewise.
+	(X86_64_VEX_0F3849): Likewise.
+	(X86_64_VEX_0F384B): Likewise.
+	(X86_64_VEX_0F385C): Likewise.
+	(X86_64_VEX_0F385E): Likewise.
+	(VEX_LEN_0F3849_X86_64_P_0_W_0_M_0): Likewise.
+	(VEX_LEN_0F3849_X86_64_P_0_W_0_M_1_REG_0_RM_0): Likewise.
+	(VEX_LEN_0F3849_X86_64_P_2_W_0_M_0): Likewise.
+	(VEX_LEN_0F3849_X86_64_P_3_W_0_M_0): Likewise.
+	(VEX_LEN_0F384B_X86_64_P_1_W_0_M_0): Likewise.
+	(VEX_LEN_0F384B_X86_64_P_2_W_0_M_0): Likewise.
+	(VEX_LEN_0F384B_X86_64_P_3_W_0_M_0): Likewise.
+	(VEX_LEN_0F385C_X86_64_P_1_W_0_M_0): Likewise.
+	(VEX_LEN_0F385E_X86_64_P_0_W_0_M_0): Likewise.
+	(VEX_LEN_0F385E_X86_64_P_1_W_0_M_0): Likewise.
+	(VEX_LEN_0F385E_X86_64_P_2_W_0_M_0): Likewise.
+	(VEX_LEN_0F385E_X86_64_P_3_W_0_M_0): Likewise.
+	(VEX_W_0F3849_X86_64_P_0): Likewise.
+	(VEX_W_0F3849_X86_64_P_2): Likewise.
+	(VEX_W_0F3849_X86_64_P_3): Likewise.
+	(VEX_W_0F384B_X86_64_P_1): Likewise.
+	(VEX_W_0F384B_X86_64_P_2): Likewise.
+	(VEX_W_0F384B_X86_64_P_3): Likewise.
+	(VEX_W_0F385C_X86_64_P_1): Likewise.
+	(VEX_W_0F385E_X86_64_P_0): Likewise.
+	(VEX_W_0F385E_X86_64_P_1): Likewise.
+	(VEX_W_0F385E_X86_64_P_2): Likewise.
+	(VEX_W_0F385E_X86_64_P_3): Likewise.
+	(names_tmm): Likewise.
+	(att_names_tmm): Likewise.
+	(intel_operand_size): Handle void_mode.
+	(OP_XMM): Handle tmm_mode.
+	(OP_EX): Likewise.
+	(OP_VEX): Likewise.
+	* i386-gen.c (cpu_flag_init): Add entries for CpuAMX_INT8,
+	CpuAMX_BF16 and CpuAMX_TILE.
+	(operand_type_shorthands): Add RegTMM.
+	(operand_type_init): Likewise.
+	(operand_types): Add Tmmword.
+	(cpu_flag_init): Add CPU_AMX_INT8, CpuAMX_BF16 and CpuAMX_TILE.
+	(cpu_flags): Add CpuAMX_INT8, CpuAMX_BF16 and CpuAMX_TILE.
+	* i386-opc.h (CpuAMX_INT8): New.
+	(CpuAMX_BF16): Likewise.
+	(CpuAMX_TILE): Likewise.
+	(SIBMEM): Likewise.
+	(Tmmword): Likewise.
+	(i386_cpu_flags): Add cpuamx_int8, cpuamx_bf16 and cpuamx_tile.
+	(i386_opcode_modifier): Extend width of fields vexvvvv and sib.
+	(i386_operand_type): Add tmmword.
+	* i386-opc.tbl: Add AMX instructions.
+	* i386-reg.tbl: Add AMX registers.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2020-07-08  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (OP_LWPCB_E, OP_LWP_E): Delete.

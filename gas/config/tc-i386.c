@@ -290,8 +290,10 @@ enum i386_error
     unsupported_with_intel_mnemonic,
     unsupported_syntax,
     unsupported,
+    invalid_sib_address,
     invalid_vsib_address,
     invalid_vector_register_set,
+    invalid_tmm_register_set,
     unsupported_vector_index_register,
     unsupported_broadcast,
     broadcast_needed,
@@ -371,6 +373,9 @@ struct _i386_insn
 
     /* Has ZMM register operands.  */
     bfd_boolean has_regzmm;
+
+    /* Has TMM register operands.  */
+    bfd_boolean has_regtmm;
 
     /* Has GOTPC or TLS relocation.  */
     bfd_boolean has_gotpc_tls_reloc;
@@ -1201,6 +1206,12 @@ static const arch_entry cpu_arch[] =
     CPU_WAITPKG_FLAGS, 0 },
   { STRING_COMMA_LEN (".cldemote"), PROCESSOR_UNKNOWN,
     CPU_CLDEMOTE_FLAGS, 0 },
+  { STRING_COMMA_LEN (".amx_int8"), PROCESSOR_UNKNOWN,
+    CPU_AMX_INT8_FLAGS, 0 },
+  { STRING_COMMA_LEN (".amx_bf16"), PROCESSOR_UNKNOWN,
+    CPU_AMX_BF16_FLAGS, 0 },
+  { STRING_COMMA_LEN (".amx_tile"), PROCESSOR_UNKNOWN,
+    CPU_AMX_TILE_FLAGS, 0 },
   { STRING_COMMA_LEN (".movdiri"), PROCESSOR_UNKNOWN,
     CPU_MOVDIRI_FLAGS, 0 },
   { STRING_COMMA_LEN (".movdir64b"), PROCESSOR_UNKNOWN,
@@ -1259,6 +1270,9 @@ static const noarch_entry cpu_noarch[] =
   { STRING_COMMA_LEN ("noavx512_bitalg"), CPU_ANY_AVX512_BITALG_FLAGS },
   { STRING_COMMA_LEN ("noibt"), CPU_ANY_IBT_FLAGS },
   { STRING_COMMA_LEN ("noshstk"), CPU_ANY_SHSTK_FLAGS },
+  { STRING_COMMA_LEN ("noamx_int8"), CPU_ANY_AMX_INT8_FLAGS },
+  { STRING_COMMA_LEN ("noamx_bf16"), CPU_ANY_AMX_BF16_FLAGS },
+  { STRING_COMMA_LEN ("noamx_tile"), CPU_ANY_AMX_TILE_FLAGS },
   { STRING_COMMA_LEN ("nomovdiri"), CPU_ANY_MOVDIRI_FLAGS },
   { STRING_COMMA_LEN ("nomovdir64b"), CPU_ANY_MOVDIR64B_FLAGS },
   { STRING_COMMA_LEN ("noavx512_bf16"), CPU_ANY_AVX512_BF16_FLAGS },
@@ -2159,7 +2173,9 @@ match_simd_size (const insn_template *t, unsigned int wanted,
 	   || (i.types[given].bitfield.ymmword
 	       && !t->operand_types[wanted].bitfield.ymmword)
 	   || (i.types[given].bitfield.zmmword
-	       && !t->operand_types[wanted].bitfield.zmmword));
+	       && !t->operand_types[wanted].bitfield.zmmword)
+	   || (i.types[given].bitfield.tmmword
+	       && !t->operand_types[wanted].bitfield.tmmword));
 }
 
 /* Return 1 if there is no conflict in any size between operand GIVEN
@@ -2296,6 +2312,7 @@ operand_type_match (i386_operand_type overlap,
   temp.bitfield.xmmword = 0;
   temp.bitfield.ymmword = 0;
   temp.bitfield.zmmword = 0;
+  temp.bitfield.tmmword = 0;
   if (operand_type_all_zero (&temp))
     goto mismatch;
 
@@ -3304,6 +3321,7 @@ const type_names[] =
   { OPERAND_TYPE_REGXMM, "rXMM" },
   { OPERAND_TYPE_REGYMM, "rYMM" },
   { OPERAND_TYPE_REGZMM, "rZMM" },
+  { OPERAND_TYPE_REGTMM, "rTMM" },
   { OPERAND_TYPE_REGMASK, "Mask reg" },
 };
 
@@ -5790,7 +5808,7 @@ check_VecOperands (const insn_template *t)
 
   /* For VSIB byte, we need a vector register for index, and all vector
      registers must be distinct.  */
-  if (t->opcode_modifier.sib)
+  if (t->opcode_modifier.sib && t->opcode_modifier.sib != SIBMEM)
     {
       if (!i.index_reg
 	  || !((t->opcode_modifier.sib == VECSIB128
@@ -5846,6 +5864,23 @@ check_VecOperands (const insn_template *t)
 	      if (operand_check != check_none)
 		as_warn (_("index and destination registers should be distinct"));
 	    }
+	}
+    }
+
+  /* For AMX instructions with three tmmword operands, all tmmword operand must be
+     distinct */
+  if (t->operand_types[0].bitfield.tmmword
+      && i.reg_operands == 3)
+    {
+      if (register_number (i.op[0].regs)
+          == register_number (i.op[1].regs)
+          || register_number (i.op[0].regs)
+             == register_number (i.op[2].regs)
+          || register_number (i.op[1].regs)
+             == register_number (i.op[2].regs))
+	{
+	  i.error = invalid_tmm_register_set;
+	  return 1;
 	}
     }
 
@@ -6584,11 +6619,17 @@ match_template (char mnem_suffix)
 	  as_bad (_("unsupported instruction `%s'"),
 		  current_templates->start->name);
 	  return NULL;
+	case invalid_sib_address:
+	  err_msg = _("invalid SIB address");
+	  break;
 	case invalid_vsib_address:
 	  err_msg = _("invalid VSIB address");
 	  break;
 	case invalid_vector_register_set:
 	  err_msg = _("mask, index, and destination registers must be distinct");
+	  break;
+	case invalid_tmm_register_set:
+	  err_msg = _("all tmm registers must be distinct");
 	  break;
 	case unsupported_vector_index_register:
 	  err_msg = _("unsupported vector index register");
@@ -7923,8 +7964,11 @@ build_modrm_byte (void)
 	  else if (i.op[dest].regs->reg_type.bitfield.class == RegSIMD
 		   || i.op[source].regs->reg_type.bitfield.class == RegSIMD)
 	    {
-	      if (i.types[dest].bitfield.zmmword
-		  || i.types[source].bitfield.zmmword)
+	      if (i.types[dest].bitfield.tmmword
+		  || i.types[source].bitfield.tmmword)
+		i.has_regtmm = TRUE;
+	      else if (i.types[dest].bitfield.zmmword
+		       || i.types[source].bitfield.zmmword)
 		i.has_regzmm = TRUE;
 	      else if (i.types[dest].bitfield.ymmword
 		       || i.types[source].bitfield.ymmword)
@@ -7966,7 +8010,9 @@ build_modrm_byte (void)
 
 	  if (i.tm.opcode_modifier.sib)
 	    {
-	      if (i.index_reg->reg_num == RegIZ)
+	      /* The index register of VSIB shouldn't be RegIZ.  */
+	      if (i.tm.opcode_modifier.sib != SIBMEM
+		  && i.index_reg->reg_num == RegIZ)
 		abort ();
 
 	      i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
@@ -7989,8 +8035,19 @@ build_modrm_byte (void)
 		      i.types[op].bitfield.disp32s = 1;
 		    }
 		}
-	      i.sib.index = i.index_reg->reg_num;
-	      set_rex_vrex (i.index_reg, REX_X, FALSE);
+
+	      /* Since the mandatory SIB always has index register, so
+		 the code logic remains unchanged. The non-mandatory SIB
+		 without index register is allowed and will be handled
+		 later.  */
+	      if (i.index_reg)
+		{
+		  if (i.index_reg->reg_num == RegIZ)
+		    i.sib.index = NO_INDEX_REGISTER;
+		  else
+		    i.sib.index = i.index_reg->reg_num;
+		  set_rex_vrex (i.index_reg, REX_X, FALSE);
+		}
 	    }
 
 	  default_seg = &ds;
@@ -8004,7 +8061,9 @@ build_modrm_byte (void)
 		{
 		  i386_operand_type newdisp;
 
-		  gas_assert (!i.tm.opcode_modifier.sib);
+		  /* Both check for VSIB and mandatory non-vector SIB. */
+		  gas_assert (!i.tm.opcode_modifier.sib
+			      || i.tm.opcode_modifier.sib == SIBMEM);
 		  /* Operand is just <disp>  */
 		  if (flag_code == CODE_64BIT)
 		    {
@@ -8142,7 +8201,11 @@ build_modrm_byte (void)
 	      i.sib.scale = i.log2_scale_factor;
 	      if (i.index_reg == 0)
 		{
-		  gas_assert (!i.tm.opcode_modifier.sib);
+		  /* Only check for VSIB. */
+		  gas_assert (i.tm.opcode_modifier.sib != VECSIB128
+			      && i.tm.opcode_modifier.sib != VECSIB256
+			      && i.tm.opcode_modifier.sib != VECSIB512);
+
 		  /* <disp>(%esp) becomes two byte modrm with no index
 		     register.  We've already stored the code for esp
 		     in i.rm.regmem ie. ESCAPE_TO_TWO_BYTE_ADDRESSING.
@@ -8267,7 +8330,9 @@ build_modrm_byte (void)
 		break;
 	      if (i.types[op].bitfield.class == RegSIMD)
 		{
-		  if (i.types[op].bitfield.zmmword)
+		  if (i.types[op].bitfield.tmmword)
+		    i.has_regtmm = TRUE;
+		  else if (i.types[op].bitfield.zmmword)
 		    i.has_regzmm = TRUE;
 		  else if (i.types[op].bitfield.ymmword)
 		    i.has_regymm = TRUE;
@@ -10931,9 +10996,10 @@ i386_index_check (const char *operand_string)
 		      || !i.index_reg->reg_type.bitfield.baseindex)))
 	    goto bad_address;
 
-	  /* bndmk, bndldx, and bndstx have special restrictions. */
+	  /* bndmk, bndldx, bndstx and mandatory non-vector SIB have special restrictions. */
 	  if (current_templates->start->base_opcode == 0xf30f1b
-	      || (current_templates->start->base_opcode & ~1) == 0x0f1a)
+	      || (current_templates->start->base_opcode & ~1) == 0x0f1a
+	      || current_templates->start->opcode_modifier.sib == SIBMEM)
 	    {
 	      /* They cannot use RIP-relative addressing. */
 	      if (i.base_reg && i.base_reg->reg_num == RegIP)
@@ -10943,7 +11009,7 @@ i386_index_check (const char *operand_string)
 		}
 
 	      /* bndldx and bndstx ignore their scale factor. */
-	      if (current_templates->start->base_opcode != 0xf30f1b
+	      if ((current_templates->start->base_opcode & ~1) == 0x0f1a
 		  && i.log2_scale_factor)
 		as_warn (_("register scaling is being ignored here"));
 	    }
@@ -12444,6 +12510,11 @@ static bfd_boolean check_register (const reg_entry *r)
 	    return FALSE;
 	}
     }
+
+  if (r->reg_type.bitfield.tmmword
+      && (!cpu_arch_flags.bitfield.cpuamx_tile
+          || flag_code != CODE_64BIT))
+    return FALSE;
 
   if (r->reg_type.bitfield.class == RegBND && !cpu_arch_flags.bitfield.cpumpx)
     return FALSE;

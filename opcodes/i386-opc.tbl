@@ -52,6 +52,7 @@
 #define RegXMM Class=RegSIMD|Xmmword
 #define RegYMM Class=RegSIMD|Ymmword
 #define RegZMM Class=RegSIMD|Zmmword
+#define RegTMM Class=RegSIMD|Tmmword
 
 #define RegMask Class=RegMask
 
@@ -88,6 +89,7 @@
 #define VecSIB128 SIB=VECSIB128
 #define VecSIB256 SIB=VECSIB256
 #define VecSIB512 SIB=VECSIB512
+#define Sibmem SIB=SIBMEM|Modrm
 
 #define EVex128 EVex=EVEX128
 #define EVex256 EVex=EVEX256
@@ -4093,3 +4095,24 @@ xsusldtrk, 0, 0xf20f01e8, None, 3, CpuTSXLDTRK, No_bSuf|No_wSuf|No_lSuf|No_sSuf|
 xresldtrk, 0, 0xf20f01e9, None, 3, CpuTSXLDTRK, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
 // TSXLDTRK instructions end.
+
+// AMX instructions.
+
+ldtilecfg, 1, 0x49, None, 1, CpuAMX_TILE|Cpu64, Modrm|Vex128|VexOpcode=1|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
+sttilecfg, 1, 0x6649, None, 1, CpuAMX_TILE|Cpu64, Modrm|Vex128|VexOpcode=1|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
+
+tdpbf16ps, 3, 0xf35c, None, 1, CpuAMX_BF16|Cpu64, Modrm|Vex128|VexOpcode=1|VexVVVV=1|VexW0|SwapSources|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegTMM, RegTMM, RegTMM }
+tdpbssd, 3, 0xf25e, None, 1, CpuAMX_INT8|Cpu64, Modrm|Vex128|VexOpcode=1|VexVVVV=1|VexW0|SwapSources|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegTMM, RegTMM, RegTMM }
+tdpbuud, 3, 0x5e,   None, 1, CpuAMX_INT8|Cpu64, Modrm|Vex128|VexOpcode=1|VexVVVV=1|VexW0|SwapSources|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegTMM, RegTMM, RegTMM }
+tdpbusd, 3, 0x665e, None, 1, CpuAMX_INT8|Cpu64, Modrm|Vex128|VexOpcode=1|VexVVVV=1|VexW0|SwapSources|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegTMM, RegTMM, RegTMM }
+tdpbsud, 3, 0xf35e, None, 1, CpuAMX_INT8|Cpu64, Modrm|Vex128|VexOpcode=1|VexVVVV=1|VexW0|SwapSources|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegTMM, RegTMM, RegTMM }
+
+tileloadd, 2, 0xf24b, None, 1, CpuAMX_TILE|Cpu64, Sibmem|Vex128|VexOpcode=1|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex, RegTMM }
+tileloaddt1, 2, 0x664b, None, 1, CpuAMX_TILE|Cpu64, Sibmem|Vex128|VexOpcode=1|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex, RegTMM }
+tilestored, 2, 0xf34b, None, 1, CpuAMX_TILE|Cpu64, Sibmem|Vex128|VexOpcode=1|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegTMM, Unspecified|BaseIndex }
+
+tilerelease, 0, 0x49c0, None, 2, CpuAMX_TILE|Cpu64, Vex128|VexOpcode=1|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+
+tilezero, 1, 0xf249, None, 1, CpuAMX_TILE|Cpu64, Modrm|Vex128|VexOpcode=1|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegTMM }
+
+// AMX instructions end.
