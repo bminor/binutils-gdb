@@ -362,20 +362,20 @@ struct _i386_insn
     /* The operand to a branch insn indicates an absolute branch.  */
     bfd_boolean jumpabsolute;
 
-    /* Has MMX register operands.  */
-    bfd_boolean has_regmmx;
-
-    /* Has XMM register operands.  */
-    bfd_boolean has_regxmm;
-
-    /* Has YMM register operands.  */
-    bfd_boolean has_regymm;
-
-    /* Has ZMM register operands.  */
-    bfd_boolean has_regzmm;
-
-    /* Has TMM register operands.  */
-    bfd_boolean has_regtmm;
+    /* Extended states.  */
+    enum
+      {
+	/* Use MMX state.  */
+	xstate_mmx = 1 << 0,
+	/* Use XMM state.  */
+	xstate_xmm = 1 << 1,
+	/* Use YMM state.  */
+	xstate_ymm = 1 << 2 | xstate_xmm,
+	/* Use ZMM state.  */
+	xstate_zmm = 1 << 3 | xstate_ymm,
+	/* Use TMM state.  */
+	xstate_tmm = 1 << 4
+      } xstate;
 
     /* Has GOTPC or TLS relocation.  */
     bfd_boolean has_gotpc_tls_reloc;
@@ -4864,9 +4864,32 @@ md_assemble (char *line)
   if (!process_suffix ())
     return;
 
-  /* Update operand types.  */
+  /* Update operand types and check extended states.  */
   for (j = 0; j < i.operands; j++)
-    i.types[j] = operand_type_and (i.types[j], i.tm.operand_types[j]);
+    {
+      i.types[j] = operand_type_and (i.types[j], i.tm.operand_types[j]);
+      switch (i.tm.operand_types[j].bitfield.class)
+	{
+	default:
+	  break;
+	case RegMMX:
+	  i.xstate |= xstate_mmx;
+	  break;
+	case RegMask:
+	  i.xstate |= xstate_zmm;
+	  break;
+	case RegSIMD:
+	  if (i.tm.operand_types[j].bitfield.tmmword)
+	    i.xstate |= xstate_tmm;
+	  else if (i.tm.operand_types[j].bitfield.zmmword)
+	    i.xstate |= xstate_zmm;
+	  else if (i.tm.operand_types[j].bitfield.ymmword)
+	    i.xstate |= xstate_ymm;
+	  else if (i.tm.operand_types[j].bitfield.xmmword)
+	    i.xstate |= xstate_xmm;
+	  break;
+	}
+    }
 
   /* Make still unresolved immediate matches conform to size of immediate
      given in i.suffix.  */
@@ -7958,24 +7981,6 @@ build_modrm_byte (void)
 	{
 	  i.rm.reg = i.op[dest].regs->reg_num;
 	  i.rm.regmem = i.op[source].regs->reg_num;
-	  if (i.op[dest].regs->reg_type.bitfield.class == RegMMX
-	       || i.op[source].regs->reg_type.bitfield.class == RegMMX)
-	    i.has_regmmx = TRUE;
-	  else if (i.op[dest].regs->reg_type.bitfield.class == RegSIMD
-		   || i.op[source].regs->reg_type.bitfield.class == RegSIMD)
-	    {
-	      if (i.types[dest].bitfield.tmmword
-		  || i.types[source].bitfield.tmmword)
-		i.has_regtmm = TRUE;
-	      else if (i.types[dest].bitfield.zmmword
-		       || i.types[source].bitfield.zmmword)
-		i.has_regzmm = TRUE;
-	      else if (i.types[dest].bitfield.ymmword
-		       || i.types[source].bitfield.ymmword)
-		i.has_regymm = TRUE;
-	      else
-		i.has_regxmm = TRUE;
-	    }
 	  set_rex_vrex (i.op[dest].regs, REX_R, i.tm.opcode_modifier.sse2avx);
 	  set_rex_vrex (i.op[source].regs, REX_B, FALSE);
 	}
@@ -8319,33 +8324,16 @@ build_modrm_byte (void)
 	  unsigned int vex_reg = ~0;
 
 	  for (op = 0; op < i.operands; op++)
-	    {
-	      if (i.types[op].bitfield.class == Reg
-		  || i.types[op].bitfield.class == RegBND
-		  || i.types[op].bitfield.class == RegMask
-		  || i.types[op].bitfield.class == SReg
-		  || i.types[op].bitfield.class == RegCR
-		  || i.types[op].bitfield.class == RegDR
-		  || i.types[op].bitfield.class == RegTR)
-		break;
-	      if (i.types[op].bitfield.class == RegSIMD)
-		{
-		  if (i.types[op].bitfield.tmmword)
-		    i.has_regtmm = TRUE;
-		  else if (i.types[op].bitfield.zmmword)
-		    i.has_regzmm = TRUE;
-		  else if (i.types[op].bitfield.ymmword)
-		    i.has_regymm = TRUE;
-		  else
-		    i.has_regxmm = TRUE;
-		  break;
-		}
-	      if (i.types[op].bitfield.class == RegMMX)
-		{
-		  i.has_regmmx = TRUE;
-		  break;
-		}
-	    }
+	    if (i.types[op].bitfield.class == Reg
+		|| i.types[op].bitfield.class == RegBND
+		|| i.types[op].bitfield.class == RegMask
+		|| i.types[op].bitfield.class == SReg
+		|| i.types[op].bitfield.class == RegCR
+		|| i.types[op].bitfield.class == RegDR
+		|| i.types[op].bitfield.class == RegTR
+		|| i.types[op].bitfield.class == RegSIMD
+		|| i.types[op].bitfield.class == RegMMX)
+	      break;
 
 	  if (vex_3_sources)
 	    op = dest;
@@ -9177,22 +9165,15 @@ output_insn (void)
 	  || i.tm.cpu_flags.bitfield.cpu687
 	  || i.tm.cpu_flags.bitfield.cpufisttp)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_X87;
-      if (i.has_regmmx
+      if ((i.xstate & xstate_mmx)
 	  || i.tm.base_opcode == 0xf77 /* emms */
-	  || i.tm.base_opcode == 0xf0e /* femms */
-	  || i.tm.base_opcode == 0xf2a /* cvtpi2ps */
-	  || i.tm.base_opcode == 0x660f2a /* cvtpi2pd */)
+	  || i.tm.base_opcode == 0xf0e /* femms */)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_MMX;
-      if (i.has_regxmm)
+      if ((i.xstate & xstate_xmm))
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_XMM;
-      if (i.has_regymm
-	  || (i.has_regxmm
-	      && (i.tm.opcode_modifier.vex
-		  || i.tm.opcode_modifier.evex)))
+      if ((i.xstate & xstate_ymm) == xstate_ymm)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_YMM;
-      if (i.has_regzmm
-	  || ((i.has_regxmm || i.has_regymm)
-	      && i.tm.opcode_modifier.evex))
+      if ((i.xstate & xstate_zmm) == xstate_zmm)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_ZMM;
       if (i.tm.cpu_flags.bitfield.cpufxsr)
 	x86_feature_2_used |= GNU_PROPERTY_X86_FEATURE_2_FXSR;
