@@ -16,4 +16,4 @@ File name +Line number +Starting address +View  +Stmt
 dwarf2-17\.c +1 +0 +x
 dwarf2-17\.c +2 +0x8 +x
 dwarf2-17\.c +3 +0x10 +x
-dwarf2-17\.c +3 +0x18 +x
+dwarf2-17\.c +- +0x18

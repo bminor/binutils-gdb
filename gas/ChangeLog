@@ -1,3 +1,19 @@
+2020-07-10  Tom de Vries  <tdevries@suse.de>
+
+	* testsuite/gas/elf/dwarf2-11.d: Update expected output from
+	readelf's line table decoding.
+	* testsuite/gas/elf/dwarf2-12.d: Likewise.
+	* testsuite/gas/elf/dwarf2-13.d: Likewise.
+	* testsuite/gas/elf/dwarf2-14.d: Likewise.
+	* testsuite/gas/elf/dwarf2-15.d: Likewise.
+	* testsuite/gas/elf/dwarf2-16.d: Likewise.
+	* testsuite/gas/elf/dwarf2-17.d: Likewise.
+	* testsuite/gas/elf/dwarf2-18.d: Likewise.
+	* testsuite/gas/elf/dwarf2-19.d: Likewise.
+	* testsuite/gas/elf/dwarf2-5.d: Likewise.
+	* testsuite/gas/elf/dwarf2-6.d: Likewise.
+	* testsuite/gas/elf/dwarf2-7.d: Likewise.
+
 2020-07-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (output_insn): Set YMM/ZMM features for

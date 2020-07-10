@@ -11,4 +11,4 @@ CU: dwarf2-11\.c:
 File name +Line number +Starting address +View +Stmt
 dwarf2-11\.c +1 +0x8 +x
 dwarf2-11\.c +2 +0x10 +x
-dwarf2-11\.c +2 +0x10 +1 +x
+dwarf2-11\.c +- +0x10

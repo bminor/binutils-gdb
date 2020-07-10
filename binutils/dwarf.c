@@ -4988,38 +4988,75 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		  strncpy (newFileName, fileName, fileNameLength + 1);
 		}
 
+	      /* A row with end_seq set to true has a meaningful address, but
+		 the other information in the same row is not significant.
+		 In such a row, print line as "-", and don't print
+		 view/is_stmt.  */
 	      if (!do_wide || (fileNameLength <= MAX_FILENAME_LENGTH))
 		{
 		  if (linfo.li_max_ops_per_insn == 1)
-		    printf ("%-35s  %11d  %#18" DWARF_VMA_FMT "x",
-			    newFileName, state_machine_regs.line,
-			    state_machine_regs.address);
+		    {
+		      if (xop == -DW_LNE_end_sequence)
+			printf ("%-35s  %11s  %#18" DWARF_VMA_FMT "x",
+				newFileName, "-",
+				state_machine_regs.address);
+		      else
+			printf ("%-35s  %11d  %#18" DWARF_VMA_FMT "x",
+				newFileName, state_machine_regs.line,
+				state_machine_regs.address);
+		    }
 		  else
-		    printf ("%-35s  %11d  %#18" DWARF_VMA_FMT "x[%d]",
-			    newFileName, state_machine_regs.line,
-			    state_machine_regs.address,
-			    state_machine_regs.op_index);
+		    {
+		      if (xop == -DW_LNE_end_sequence)
+			printf ("%-35s  %11s  %#18" DWARF_VMA_FMT "x[%d]",
+				newFileName, "-",
+				state_machine_regs.address,
+				state_machine_regs.op_index);
+		      else
+			printf ("%-35s  %11d  %#18" DWARF_VMA_FMT "x[%d]",
+				newFileName, state_machine_regs.line,
+				state_machine_regs.address,
+				state_machine_regs.op_index);
+		    }
 		}
 	      else
 		{
 		  if (linfo.li_max_ops_per_insn == 1)
-		    printf ("%s  %11d  %#18" DWARF_VMA_FMT "x",
-			    newFileName, state_machine_regs.line,
-			    state_machine_regs.address);
+		    {
+		      if (xop == -DW_LNE_end_sequence)
+			printf ("%s  %11s  %#18" DWARF_VMA_FMT "x",
+				newFileName, "-",
+				state_machine_regs.address);
+		      else
+			printf ("%s  %11d  %#18" DWARF_VMA_FMT "x",
+				newFileName, state_machine_regs.line,
+				state_machine_regs.address);
+		    }			
 		  else
-		    printf ("%s  %11d  %#18" DWARF_VMA_FMT "x[%d]",
-			    newFileName, state_machine_regs.line,
-			    state_machine_regs.address,
-			    state_machine_regs.op_index);
+		    {
+		      if (xop == -DW_LNE_end_sequence)
+			printf ("%s  %11s  %#18" DWARF_VMA_FMT "x[%d]",
+				newFileName, "-",
+				state_machine_regs.address,
+				state_machine_regs.op_index);
+		      else
+			printf ("%s  %11d  %#18" DWARF_VMA_FMT "x[%d]",
+				newFileName, state_machine_regs.line,
+				state_machine_regs.address,
+				state_machine_regs.op_index);
+		    }
 		}
 
-	      if (state_machine_regs.view)
-		printf ("  %6u", state_machine_regs.view);
-	      else
-		printf ("        ");
+	      if (xop != -DW_LNE_end_sequence)
+		{
+		  if (state_machine_regs.view)
+		    printf ("  %6u", state_machine_regs.view);
+		  else
+		    printf ("        ");
 
-	      if (state_machine_regs.is_stmt)
-		printf ("       x");
+		  if (state_machine_regs.is_stmt)
+		    printf ("       x");
+		}
 
 	      putchar ('\n');
 	      state_machine_regs.view++;

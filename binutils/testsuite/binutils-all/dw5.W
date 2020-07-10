@@ -350,10 +350,10 @@ CU: ./main.c:
 File name                            Line number    Starting address    View    Stmt
 main.c                                         6              0x1234               x
 main.c                                         6             0x12346               x
-main.c                                         6              0x1234               x
+main.c                                         -              0x1234
 
 main.c                                         5              0x1234               x
 main.c                                         5              0x1234               x
-main.c                                         5              0x1234               x
+main.c                                         -              0x1234
 
 

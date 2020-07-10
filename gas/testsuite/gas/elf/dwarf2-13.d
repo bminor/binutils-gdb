@@ -15,4 +15,4 @@ File name +Line number +Starting address +View +Stmt
 dwarf2-13\.c +1 +0x8 +x
 dwarf2-13\.c +2 +0x10 +x
 dwarf2-13\.c +3 +0x10 +1 +x
-dwarf2-13\.c +3 +0x18 +x
+dwarf2-13\.c +- +0x18

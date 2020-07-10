@@ -1,3 +1,10 @@
+2020-07-10  Tom de Vries  <tdevries@suse.de>
+
+	* dwarf.c (display_debug_lines_decoded): Don't emit meaningless
+	information in the end_sequence row.
+	* testsuite/binutils-all/dw5.W: Update.
+	* testsuite/binutils-all/objdump.WL: Update.
+
 2020-07-09  Alan Modra  <amodra@gmail.com>
 
 	* dlltool.c: Remove powerpc PE support and comments.

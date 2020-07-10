@@ -75,4 +75,4 @@ dwarf2-6\.c  *2  *0x3  *2 +x
 dwarf2-6\.c  *3  *0x4 +x
 dwarf2-6\.c  *3  *0x4  *1 +x
 dwarf2-6\.c  *3  *0xf3 +x
-dwarf2-6\.c  *3  *0x100 +x
+dwarf2-6\.c  *-  *0x100
