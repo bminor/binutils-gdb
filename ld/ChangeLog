@@ -1,5 +1,10 @@
 2020-07-10  Alan Modra  <amodra@gmail.com>
 
+	* ld.texi (PowerPC64 ELF64): Document --no-inline-optimize,
+	--power10-stubs and --no-power10-stubs.
+
+2020-07-10  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/ppc64elf.em (params): Init new field.
 	(enum ppc64_opt): Add OPTION_POWER10_STUBS and OPTION_NO_POWER10_STUBS.
 	(PARSE_AND_LIST_LONGOPTS): Support --power10-stubs and

@@ -7823,6 +7823,16 @@ reliably for compiler generated code, but may be incorrect if assembly
 code is used to insert TOC entries.  Use this option to disable the
 optimization.
 
+@cindex PowerPC64 inline PLT call optimization
+@kindex --no-inline-optimize
+@item --no-inline-optimize
+PowerPC64 @command{ld} normally replaces inline PLT call sequences
+marked with @code{R_PPC64_PLTSEQ}, @code{R_PPC64_PLTCALL},
+@code{R_PPC64_PLT16_HA} and @code{R_PPC64_PLT16_LO_DS} relocations by
+a number of @code{nop}s and a direct call when the function is defined
+locally and can't be overridden by some other definition.  This option
+disables that optimization.
+
 @cindex PowerPC64 multi-TOC
 @kindex --no-multi-toc
 @item --no-multi-toc
@@ -7904,6 +7914,23 @@ including system libraries, can cause a function that was localentry:0
 to become localentry:8.  This will result in a dynamic loader
 complaint and failure to run.  The option is experimental, use with
 care.  @option{--no-plt-localentry} is the default.
+
+@cindex PowerPC64 Power10 stubs
+@kindex --power10-stubs
+@kindex --no-power10-stubs
+@item --power10-stubs
+@itemx --no-power10-stubs
+When PowerPC64 @command{ld} links input object files containing
+relocations used on power10 prefixed instructions it normally creates
+linkage stubs (PLT call and long branch) using power10 instructions.
+In particular for @code{@@notoc} PLT calls where @code{r2} is not
+known the power10 stubs are smaller and faster, so are preferred for
+power10.  @option{--power10-stubs} and @option{--no-power10-stubs}
+allow you to override the linker's selection of stub instructions.
+For example, when linking a shared library that contains cpu-optimized
+versions of functions for both power9 and power10, you might use
+@option{--no-power10-stubs} so that power9 code making calls doesn't
+attempt to execute power10 instructions.
 @end table
 
 @ifclear GENERIC
