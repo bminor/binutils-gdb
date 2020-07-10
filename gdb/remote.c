@@ -5605,7 +5605,7 @@ remote_target::open_1 (const char *name, int from_tty, int extended_p)
 
   /* Register extra event sources in the event loop.  */
   rs->remote_async_inferior_event_token
-    = create_async_event_handler (remote_async_inferior_event_handler, NULL);
+    = create_async_event_handler (remote_async_inferior_event_handler, remote);
   rs->notif_state = remote_notif_state_allocate (remote);
 
   /* Reset the target state; these things will be queried either by
@@ -14164,6 +14164,19 @@ static void
 remote_async_inferior_event_handler (gdb_client_data data)
 {
   inferior_event_handler (INF_REG_EVENT);
+
+  remote_target *remote = (remote_target *) data;
+  remote_state *rs = remote->get_remote_state ();
+
+  /* inferior_event_handler may have consumed an event pending on the
+     infrun side without calling target_wait on the REMOTE target, or
+     may have pulled an event out of a different target.  Keep trying
+     for this remote target as long it still has either pending events
+     or unacknowledged notifications.  */
+
+  if (rs->notif_state->pending_event[notif_client_stop.id] != NULL
+      || !rs->stop_reply_queue.empty ())
+    mark_async_event_handler (rs->remote_async_inferior_event_token);
 }
 
 int
