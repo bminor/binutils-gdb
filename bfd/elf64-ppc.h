@@ -54,6 +54,9 @@ struct ppc64_elf_params
   /* Set if PLT call stubs for localentry:0 functions should omit r2 save.  */
   int plt_localentry0;
 
+  /* Whether to use power10 instructions in linkage stubs.  */
+  int power10_stubs;
+
   /* Whether to canonicalize .opd so that there are no overlapping
      .opd entries.  */
   int non_overlapping_opd;
