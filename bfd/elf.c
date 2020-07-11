@@ -10127,6 +10127,12 @@ elfcore_grok_lwpstatus (bfd *abfd, Elf_Internal_Note *note)
 }
 #endif /* defined (HAVE_LWPSTATUS_T) */
 
+/* These constants, and the structure offsets used below, are defined by
+   Cygwin's core_dump.h */
+#define NOTE_INFO_PROCESS  1
+#define NOTE_INFO_THREAD   2
+#define NOTE_INFO_MODULE   3
+
 static bfd_boolean
 elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 {
@@ -10148,15 +10154,13 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 
   switch (type)
     {
-    case 1 /* NOTE_INFO_PROCESS */:
+    case NOTE_INFO_PROCESS:
       /* FIXME: need to add ->core->command.  */
-      /* process_info.pid */
       elf_tdata (abfd)->core->pid = bfd_get_32 (abfd, note->descdata + 4);
-      /* process_info.signal */
       elf_tdata (abfd)->core->signal = bfd_get_32 (abfd, note->descdata + 8);
       break;
 
-    case 2 /* NOTE_INFO_THREAD */:
+    case NOTE_INFO_THREAD:
       /* Make a ".reg/<tid>" section containing the Win32 API thread CONTEXT
          structure. */
       /* thread_info.tid */
@@ -10187,7 +10191,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 	  return FALSE;
       break;
 
-    case 3 /* NOTE_INFO_MODULE */:
+    case NOTE_INFO_MODULE:
       /* Make a ".module/xxxxxxxx" section.  */
       /* module_info.base_address */
       base_addr = bfd_get_32 (abfd, note->descdata + 4);
