@@ -18183,6 +18183,9 @@ decode_x86_feature_2 (unsigned int bitmask)
 	case GNU_PROPERTY_X86_FEATURE_2_ZMM:
 	  printf ("ZMM");
 	  break;
+	case GNU_PROPERTY_X86_FEATURE_2_TMM:
+	  printf ("TMM");
+	  break;
 	case GNU_PROPERTY_X86_FEATURE_2_FXSR:
 	  printf ("FXSR");
 	  break;

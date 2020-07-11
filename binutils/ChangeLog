@@ -1,3 +1,8 @@
+2020-07-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (decode_x86_feature_2): Handle
+	GNU_PROPERTY_X86_FEATURE_2_TMM.
+
 2020-07-10  Tom de Vries  <tdevries@suse.de>
 
 	* dwarf.c (display_debug_lines_decoded): Don't emit meaningless
