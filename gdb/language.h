@@ -42,16 +42,6 @@ class innermost_block_tracker;
 
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims.  */
 
-/* range_mode ==
-   range_mode_auto:   range_check set automatically to default of language.
-   range_mode_manual: range_check set manually by user.  */
-
-extern enum range_mode
-  {
-    range_mode_auto, range_mode_manual
-  }
-range_mode;
-
 /* range_check ==
    range_check_on:    Ranges are checked in GDB expressions, producing errors.
    range_check_warn:  Ranges are checked, producing warnings.
@@ -188,10 +178,6 @@ extern const char *default_word_break_characters (void);
 
 struct language_data
   {
-    /* Default range checking.  */
-
-    enum range_check la_range_check;
-
     /* Default case sensitivity.  */
     enum case_sensitivity la_case_sensitivity;
 
@@ -570,6 +556,13 @@ struct language_defn : language_data
      through an unrelated language's demangler.  */
 
   virtual bool store_sym_names_in_linkage_form_p () const
+  { return false; }
+
+  /* Default range checking preference.  The return value from this
+     function provides the automatic setting for 'set check range'.  As a
+     consequence a user is free to override this setting if they want.  */
+
+  virtual bool range_checking_on_by_default () const
   { return false; }
 
 protected:

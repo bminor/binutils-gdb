@@ -486,7 +486,6 @@ static const struct exp_descriptor exp_descriptor_f =
 
 extern const struct language_data f_language_data =
 {
-  range_check_on,
   case_sensitive_off,
   array_column_major,
   macro_expansion_no,
@@ -721,6 +720,11 @@ public:
 
   bool c_style_arrays_p () const override
   { return false; }
+
+  /* See language.h.  */
+
+  bool range_checking_on_by_default () const override
+  { return true; }
 
 protected:
 

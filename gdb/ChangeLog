@@ -1,5 +1,43 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Remove la_range_check
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	(f_language::range_checking_on_by_default): New member function.
+	* go-lang.c (go_language_data): Remove la_range_check initializer.
+	* language.c (enum range_mode): Moved here from language.h.
+	(range_mode): Made static.
+	(show_range_command): Update to use
+	range_checking_on_by_default.
+	(set_range_command): Likewise.
+	(set_range_case): Likewise.
+	(unknown_language_data): Remove la_range_check initializer.
+	(auto_language_data): Likewise.
+	* language.h (range_mode): Delete.  Enum definition moved to
+	language.c.
+	(language_data): Remove la_range_check field.
+	(language_defn::range_checking_on_by_default): New member
+	function.
+	* m2-lang.c (m2_language_data): Remove la_range_check initializer.
+	(m2_language::range_checking_on_by_default): New member function.
+	* objc-lang.c (objc_language_data): Remove la_range_check
+	initializer.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	(pascal_language::range_checking_on_by_default): New member
+	function.
+	* rust-lang.c (rust_language_data): Remove la_range_check
+	initializer.
+	(rust_language::range_checking_on_by_default): New member
+	function.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* dwarf2/read.c (dwarf2_physname): Remove special case for
 	language_go.
 	* go-lang.c (go_language::store_sym_names_in_linkage_form_p): New

@@ -252,7 +252,6 @@ enum pascal_primitive_types {
 
 extern const struct language_data pascal_language_data =
 {
-  range_check_on,
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
@@ -508,6 +507,11 @@ public:
 
   const char *name_of_this () const override
   { return "this"; }
+
+  /* See language.h.  */
+
+  bool range_checking_on_by_default () const override
+  { return true; }
 };
 
 /* Single instance of the Pascal language class.  */

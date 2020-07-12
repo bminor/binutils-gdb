@@ -49,12 +49,21 @@
 
 static void set_range_case (void);
 
+/* range_mode ==
+   range_mode_auto:   range_check set automatically to default of language.
+   range_mode_manual: range_check set manually by user.  */
+
+enum range_mode
+  {
+    range_mode_auto, range_mode_manual
+  };
+
 /* The current (default at startup) state of type and range checking.
    (If the modes are set to "auto", though, these are changed based
    on the default language at startup, and then again based on the
    language of the first source file.  */
 
-enum range_mode range_mode = range_mode_auto;
+static enum range_mode range_mode = range_mode_auto;
 enum range_check range_check = range_check_off;
 enum case_mode case_mode = case_mode_auto;
 enum case_sensitivity case_sensitivity = case_sensitive_on;
@@ -209,7 +218,9 @@ show_range_command (struct ui_file *file, int from_tty,
     fprintf_filtered (gdb_stdout, _("Range checking is \"%s\".\n"),
 		      value);
 
-  if (range_check != current_language->la_range_check)
+  if (range_check == range_check_warn
+      || ((range_check == range_check_on)
+	  != current_language->range_checking_on_by_default ()))
     warning (_("the current range check setting "
 	       "does not match the language.\n"));
 }
@@ -245,7 +256,9 @@ set_range_command (const char *ignore,
       internal_error (__FILE__, __LINE__,
 		      _("Unrecognized range check setting: \"%s\""), range);
     }
-  if (range_check != current_language->la_range_check)
+  if (range_check == range_check_warn
+      || ((range_check == range_check_on)
+	  != current_language->range_checking_on_by_default ()))
     warning (_("the current range check setting "
 	       "does not match the language.\n"));
 }
@@ -329,7 +342,8 @@ static void
 set_range_case (void)
 {
   if (range_mode == range_mode_auto)
-    range_check = current_language->la_range_check;
+    range_check = (current_language->range_checking_on_by_default ()
+		   ? range_check_on : range_check_off);
 
   if (case_mode == case_mode_auto)
     case_sensitivity = current_language->la_case_sensitivity;
@@ -775,7 +789,6 @@ unknown_language_arch_info (struct gdbarch *gdbarch,
 
 extern const struct language_data unknown_language_data =
 {
-  range_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
@@ -912,7 +925,6 @@ static unknown_language unknown_language_defn;
 
 extern const struct language_data auto_language_data =
 {
-  range_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,

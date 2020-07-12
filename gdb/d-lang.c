@@ -128,7 +128,6 @@ enum d_primitive_types {
 
 extern const struct language_data d_language_data =
 {
-  range_check_off,
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,

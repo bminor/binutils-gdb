@@ -199,7 +199,6 @@ const struct exp_descriptor exp_descriptor_modula2 =
 
 extern const struct language_data m2_language_data =
 {
-  range_check_on,
   case_sensitive_on,
   array_row_major,
   macro_expansion_no,
@@ -444,6 +443,11 @@ public:
 
   char string_lower_bound () const override
   { return 0; }
+
+  /* See language.h.  */
+
+  bool range_checking_on_by_default () const override
+  { return true; }
 };
 
 /* Single instance of the M2 language.  */
