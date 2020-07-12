@@ -875,7 +875,6 @@ const struct exp_descriptor exp_descriptor_c =
 
 extern const struct language_data c_language_data =
 {
-  array_row_major,
   macro_expansion_c,
   &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
@@ -983,7 +982,6 @@ enum cplus_primitive_types {
 
 extern const struct language_data cplus_language_data =
 {
-  array_row_major,
   macro_expansion_c,
   &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
@@ -1189,7 +1187,6 @@ static cplus_language cplus_language_defn;
 
 extern const struct language_data asm_language_data =
 {
-  array_row_major,
   macro_expansion_c,
   &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
@@ -1258,7 +1255,6 @@ static asm_language asm_language_defn;
 
 extern const struct language_data minimal_language_data =
 {
-  array_row_major,
   macro_expansion_c,
   &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */

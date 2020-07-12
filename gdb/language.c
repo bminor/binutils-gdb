@@ -798,7 +798,6 @@ unknown_language_arch_info (struct gdbarch *gdbarch,
 
 extern const struct language_data unknown_language_data =
 {
-  array_row_major,
   macro_expansion_no,
   &exp_descriptor_standard,
   unk_op_print_tab,		/* expression operators for printing */
@@ -933,7 +932,6 @@ static unknown_language unknown_language_defn;
 
 extern const struct language_data auto_language_data =
 {
-  array_row_major,
   macro_expansion_no,
   &exp_descriptor_standard,
   unk_op_print_tab,		/* expression operators for printing */

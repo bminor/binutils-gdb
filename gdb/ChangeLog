@@ -1,5 +1,32 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Remove la_array_ordering
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* dwarf2/read.c (read_array_order): Update for call to
+	array_ordering.
+	* f-lang.c (f_language_data): Remove la_array_ordering
+	initializer.
+	(f_language::array_ordering): New member function.
+	* go-lang.c (go_language_data): Remove la_array_ordering
+	initializer.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Delete la_array_ordering field.
+	(language_defn::array_ordering): New member function.
+	* m2-lang.c (m2_language_data): Remove la_array_ordering
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove la_case_sensitivity
 	initializer.
 	* c-lang.c (c_language_data): Likewise.

@@ -199,7 +199,6 @@ const struct exp_descriptor exp_descriptor_modula2 =
 
 extern const struct language_data m2_language_data =
 {
-  array_row_major,
   macro_expansion_no,
   &exp_descriptor_modula2,
   m2_op_print_tab,		/* expression operators for printing */

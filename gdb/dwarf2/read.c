@@ -16883,7 +16883,7 @@ read_array_order (struct die_info *die, struct dwarf2_cu *cu)
       return DW_ORD_row_major;
     }
 
-  switch (cu->language_defn->la_array_ordering)
+  switch (cu->language_defn->array_ordering ())
     {
     case array_column_major:
       return DW_ORD_col_major;

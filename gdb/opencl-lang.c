@@ -1006,7 +1006,6 @@ const struct exp_descriptor exp_descriptor_opencl =
 /* Constant data representing the OpenCL language.  */
 extern const struct language_data opencl_language_data =
 {
-  array_row_major,
   macro_expansion_c,
   &exp_descriptor_opencl,
   c_op_print_tab,		/* expression operators for printing */

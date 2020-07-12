@@ -486,7 +486,6 @@ static const struct exp_descriptor exp_descriptor_f =
 
 extern const struct language_data f_language_data =
 {
-  array_column_major,
   macro_expansion_no,
   &exp_descriptor_f,
   f_op_print_tab,		/* expression operators for printing */
@@ -729,6 +728,11 @@ public:
 
   enum case_sensitivity case_sensitivity () const override
   { return case_sensitive_off; }
+
+  /* See language.h.  */
+
+  enum array_ordering array_ordering () const override
+  { return array_column_major; }
 
 protected:
 

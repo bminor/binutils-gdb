@@ -252,7 +252,6 @@ enum pascal_primitive_types {
 
 extern const struct language_data pascal_language_data =
 {
-  array_row_major,
   macro_expansion_no,
   &exp_descriptor_standard,
   pascal_op_print_tab,		/* expression operators for printing */

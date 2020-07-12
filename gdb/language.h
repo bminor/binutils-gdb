@@ -168,9 +168,6 @@ extern const char *default_word_break_characters (void);
 
 struct language_data
   {
-    /* Multi-dimensional array ordering.  */
-    enum array_ordering la_array_ordering;
-
     /* Style of macro expansion, if any, supported by this language.  */
     enum macro_expansion la_macro_expansion;
 
@@ -558,6 +555,12 @@ struct language_defn : language_data
 
   virtual enum case_sensitivity case_sensitivity () const
   { return case_sensitive_on; }
+
+
+  /* Multi-dimensional array ordering.  */
+
+  virtual enum array_ordering array_ordering () const
+  { return array_row_major; }
 
 protected:
 
