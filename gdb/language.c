@@ -58,6 +58,15 @@ enum range_mode
     range_mode_auto, range_mode_manual
   };
 
+/* case_mode ==
+   case_mode_auto:   case_sensitivity set upon selection of scope.
+   case_mode_manual: case_sensitivity set only by user.  */
+
+enum case_mode
+  {
+    case_mode_auto, case_mode_manual
+  };
+
 /* The current (default at startup) state of type and range checking.
    (If the modes are set to "auto", though, these are changed based
    on the default language at startup, and then again based on the
@@ -65,7 +74,7 @@ enum range_mode
 
 static enum range_mode range_mode = range_mode_auto;
 enum range_check range_check = range_check_off;
-enum case_mode case_mode = case_mode_auto;
+static enum case_mode case_mode = case_mode_auto;
 enum case_sensitivity case_sensitivity = case_sensitive_on;
 
 /* The current language and language_mode (see language.h).  */
@@ -296,7 +305,7 @@ show_case_command (struct ui_file *file, int from_tty,
 		      _("Case sensitivity in name search is \"%s\".\n"),
 		      value);
 
-  if (case_sensitivity != current_language->la_case_sensitivity)
+  if (case_sensitivity != current_language->case_sensitivity ())
     warning (_("the current case sensitivity setting does not match "
 	       "the language.\n"));
 }
@@ -329,7 +338,7 @@ set_case_command (const char *ignore, int from_tty, struct cmd_list_element *c)
 		       case_sensitive);
      }
 
-   if (case_sensitivity != current_language->la_case_sensitivity)
+   if (case_sensitivity != current_language->case_sensitivity ())
      warning (_("the current case sensitivity setting does not match "
 		"the language.\n"));
 }
@@ -346,7 +355,7 @@ set_range_case (void)
 		   ? range_check_on : range_check_off);
 
   if (case_mode == case_mode_auto)
-    case_sensitivity = current_language->la_case_sensitivity;
+    case_sensitivity = current_language->case_sensitivity ();
 }
 
 /* Set current language to (enum language) LANG.  Returns previous
@@ -789,7 +798,6 @@ unknown_language_arch_info (struct gdbarch *gdbarch,
 
 extern const struct language_data unknown_language_data =
 {
-  case_sensitive_on,
   array_row_major,
   macro_expansion_no,
   &exp_descriptor_standard,
@@ -925,7 +933,6 @@ static unknown_language unknown_language_defn;
 
 extern const struct language_data auto_language_data =
 {
-  case_sensitive_on,
   array_row_major,
   macro_expansion_no,
   &exp_descriptor_standard,

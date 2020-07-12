@@ -1,5 +1,36 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Remove la_case_sensitivity
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(cplus_language_data): Likewise.
+	(asm_language_data): Likewise.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	(f_language::case_sensitivity): New member function.
+	* go-lang.c (go_language_data): Remove la_case_sensitivity
+	initializer.
+	* language.c (enum case_mode): Moved here from language.h.
+	(case_mode): Make static.
+	(show_case_command): Update for case_sensitivity being a method.
+	(set_case_command): Likewise.
+	(set_range_case): Likewise.
+	(unknown_language_data): Remove la_case_sensitivity initializer.
+	(auto_language_data): Likewise.
+	* language.h (case_mode): Delete, move enum declaration to
+	language.c.
+	(language_data): Delete la_case_sensitivity field.
+	(language_defn::case_sensitivity): New member function.
+	* m2-lang.c (m2_language_data): Remove la_case_sensitivity
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove la_range_check
 	initializer.
 	* c-lang.c (c_language_data): Likewise.

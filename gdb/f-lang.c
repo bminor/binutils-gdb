@@ -486,7 +486,6 @@ static const struct exp_descriptor exp_descriptor_f =
 
 extern const struct language_data f_language_data =
 {
-  case_sensitive_off,
   array_column_major,
   macro_expansion_no,
   &exp_descriptor_f,
@@ -725,6 +724,11 @@ public:
 
   bool range_checking_on_by_default () const override
   { return true; }
+
+  /* See language.h.  */
+
+  enum case_sensitivity case_sensitivity () const override
+  { return case_sensitive_off; }
 
 protected:
 

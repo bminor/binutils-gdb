@@ -53,16 +53,6 @@ extern enum range_check
   }
 range_check;
 
-/* case_mode ==
-   case_mode_auto:   case_sensitivity set upon selection of scope.
-   case_mode_manual: case_sensitivity set only by user.  */
-
-extern enum case_mode
-  {
-    case_mode_auto, case_mode_manual
-  }
-case_mode;
-
 /* array_ordering ==
    array_row_major:     Arrays are in row major order.
    array_column_major:  Arrays are in column major order.  */
@@ -178,9 +168,6 @@ extern const char *default_word_break_characters (void);
 
 struct language_data
   {
-    /* Default case sensitivity.  */
-    enum case_sensitivity la_case_sensitivity;
-
     /* Multi-dimensional array ordering.  */
     enum array_ordering la_array_ordering;
 
@@ -564,6 +551,13 @@ struct language_defn : language_data
 
   virtual bool range_checking_on_by_default () const
   { return false; }
+
+  /* Is this language case sensitive?  The return value from this function
+     provides the automativ setting for 'set case-sensitive', as a
+     consequence, a user is free to override this setting if they want.  */
+
+  virtual enum case_sensitivity case_sensitivity () const
+  { return case_sensitive_on; }
 
 protected:
 

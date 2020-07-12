@@ -13708,8 +13708,6 @@ ada_get_symbol_name_matcher (const lookup_name_info &lookup_name)
 
 extern const struct language_data ada_language_data =
 {
-  case_sensitive_on,            /* Yes, Ada is case-insensitive, but
-                                   that's not quite what this means.  */
   array_row_major,
   macro_expansion_no,
   &ada_exp_descriptor,
