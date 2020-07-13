@@ -757,6 +757,14 @@ struct field
 
 struct range_bounds
 {
+  ULONGEST bit_stride () const
+  {
+    if (this->flag_is_byte_stride)
+      return this->stride.const_val () * 8;
+    else
+      return this->stride.const_val ();
+  }
+
   /* * Low bound of range.  */
 
   struct dynamic_prop low;
@@ -1043,6 +1051,11 @@ struct type
     gdb_assert (this->code () == TYPE_CODE_RANGE);
 
     this->main_type->flds_bnds.bounds = bounds;
+  }
+
+  ULONGEST bit_stride () const
+  {
+    return this->bounds ()->bit_stride ();
   }
 
   /* * Return the dynamic property of the requested KIND from this type's
@@ -1594,10 +1607,6 @@ extern unsigned type_align (struct type *);
    space in struct type.  */
 extern bool set_type_align (struct type *, ULONGEST);
 
-#define TYPE_BIT_STRIDE(range_type) \
-  ((range_type)->bounds ()->stride.const_val () \
-   * ((range_type)->bounds ()->flag_is_byte_stride ? 8 : 1))
-
 /* Property accessors for the type data location.  */
 #define TYPE_DATA_LOCATION(thistype) \
   ((thistype)->dyn_prop (DYN_PROP_DATA_LOCATION))
@@ -1629,7 +1638,7 @@ extern bool set_type_align (struct type *, ULONGEST);
    index type.  */
 
 #define TYPE_ARRAY_BIT_STRIDE(arraytype) \
-  (TYPE_BIT_STRIDE(((arraytype)->index_type ())))
+  ((arraytype)->index_type ()->bounds ()->bit_stride ())
 
 /* C++ */
 

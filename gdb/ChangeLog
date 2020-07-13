@@ -1,5 +1,12 @@
 2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (struct range_bounds) <bit_stride>: New method.
+	(struct type) <bit_stride>: New method.
+	(TYPE_BIT_STRIDE): Remove.
+	* gdbtypes.c (update_static_array_size): Use type::bit_stride.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (TYPE_ARRAY_LOWER_BOUND_VALUE,
 	TYPE_ARRAY_UPPER_BOUND_VALUE): Remove.  Update all
 	callers to use the equivalent accessor methods instead.
