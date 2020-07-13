@@ -223,7 +223,7 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 	  /* Make sure that, if we have an assumed size array, we
 	       print out a warning and print the upperbound as '*'.  */
 
-	  if (TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
+	  if (type->index_type ()->bounds ()->high.kind () == PROP_UNDEFINED)
 	    fprintf_filtered (stream, "*");
 	  else
 	    {
@@ -408,7 +408,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
     case TYPE_CODE_STRING:
       /* Strings may have dynamic upperbounds (lengths) like arrays.  */
 
-      if (TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
+      if (type->index_type ()->bounds ()->high.kind () == PROP_UNDEFINED)
 	fprintfi_filtered (level, stream, "character*(*)");
       else
 	{

@@ -1628,11 +1628,6 @@ extern bool set_type_align (struct type *, ULONGEST);
 /* Accessors for struct range_bounds data attached to an array type's
    index type.  */
 
-#define TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED(arraytype) \
-   ((arraytype)->index_type ()->bounds ()->high.kind () == PROP_UNDEFINED)
-#define TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED(arraytype) \
-   ((arraytype)->index_type ()->bounds ()->low.kind () == PROP_UNDEFINED)
-
 #define TYPE_ARRAY_UPPER_BOUND_VALUE(arraytype) \
    ((arraytype)->index_type ()->bounds ()->high.const_val ())
 

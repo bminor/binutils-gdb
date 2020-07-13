@@ -46,7 +46,7 @@ int f77_array_offset_tbl[MAX_FORTRAN_DIMS + 1][2];
 LONGEST
 f77_get_lowerbound (struct type *type)
 {
-  if (TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED (type))
+  if (type->index_type ()->bounds ()->low.kind () == PROP_UNDEFINED)
     error (_("Lower bound may not be '*' in F77"));
 
   return TYPE_ARRAY_LOWER_BOUND_VALUE (type);
@@ -55,7 +55,7 @@ f77_get_lowerbound (struct type *type)
 LONGEST
 f77_get_upperbound (struct type *type)
 {
-  if (TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
+  if (type->index_type ()->bounds ()->high.kind () == PROP_UNDEFINED)
     {
       /* We have an assumed size array on our hands.  Assume that
 	 upper_bound == lower_bound so that we show at least 1 element.
