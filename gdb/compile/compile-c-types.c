@@ -47,7 +47,7 @@ convert_array (compile_c_instance *context, struct type *type)
   if (TYPE_LOW_BOUND_KIND (range) != PROP_CONST)
     return context->plugin ().error (_("array type with non-constant"
 				       " lower bound is not supported"));
-  if (TYPE_LOW_BOUND (range) != 0)
+  if (range->bounds ()->low.const_val () != 0)
     return context->plugin ().error (_("cannot convert array type with "
 				       "non-zero lower bound to C"));
 

@@ -1,3 +1,9 @@
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (TYPE_LOW_BOUND, TYPE_HIGH_BOUND): Remove.  Update
+	all callers to use type::range_bounds followed by
+	dynamic_prop::{low,high}.
+
 2020-07-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbtypes.h (struct dynamic_prop) <kind, set_undefined,

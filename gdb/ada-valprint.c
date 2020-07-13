@@ -42,7 +42,7 @@ static void
 adjust_type_signedness (struct type *type)
 {
   if (type != NULL && type->code () == TYPE_CODE_RANGE
-      && TYPE_LOW_BOUND (type) >= 0)
+      && type->bounds ()->low.const_val () >= 0)
     TYPE_UNSIGNED (type) = 1;
 }
 

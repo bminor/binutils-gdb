@@ -384,12 +384,12 @@ value_f90_subarray (struct value *array,
   *pos += 3;
 
   if (range_type == LOW_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
-    low_bound = TYPE_LOW_BOUND (range);
+    low_bound = range->bounds ()->low.const_val ();
   else
     low_bound = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
 
   if (range_type == HIGH_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
-    high_bound = TYPE_HIGH_BOUND (range);
+    high_bound = range->bounds ()->high.const_val ();
   else
     high_bound = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
 

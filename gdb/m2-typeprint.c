@@ -188,7 +188,7 @@ void
 m2_range (struct type *type, struct ui_file *stream, int show,
 	  int level, const struct type_print_options *flags)
 {
-  if (TYPE_HIGH_BOUND (type) == TYPE_LOW_BOUND (type))
+  if (type->bounds ()->high.const_val () == type->bounds ()->low.const_val ())
     {
       /* FIXME: TYPE_TARGET_TYPE used to be TYPE_DOMAIN_TYPE but that was
 	 wrong.  Not sure if TYPE_TARGET_TYPE is correct though.  */
@@ -200,9 +200,9 @@ m2_range (struct type *type, struct ui_file *stream, int show,
       struct type *target = TYPE_TARGET_TYPE (type);
 
       fprintf_filtered (stream, "[");
-      print_type_scalar (target, TYPE_LOW_BOUND (type), stream);
+      print_type_scalar (target, type->bounds ()->low.const_val (), stream);
       fprintf_filtered (stream, "..");
-      print_type_scalar (target, TYPE_HIGH_BOUND (type), stream);
+      print_type_scalar (target, type->bounds ()->high.const_val (), stream);
       fprintf_filtered (stream, "]");
     }
 }
@@ -315,9 +315,9 @@ m2_print_bounds (struct type *type,
     return;
 
   if (print_high)
-    print_type_scalar (target, TYPE_HIGH_BOUND (type), stream);
+    print_type_scalar (target, type->bounds ()->high.const_val (), stream);
   else
-    print_type_scalar (target, TYPE_LOW_BOUND (type), stream);
+    print_type_scalar (target, type->bounds ()->low.const_val (), stream);
 }
 
 static void
@@ -358,9 +358,9 @@ m2_is_long_set (struct type *type)
 	    return 0;
 	  range = type->field (i).type ()->index_type ();
 	  if ((i > TYPE_N_BASECLASSES (type))
-	      && previous_high + 1 != TYPE_LOW_BOUND (range))
+	      && previous_high + 1 != range->bounds ()->low.const_val ())
 	    return 0;
-	  previous_high = TYPE_HIGH_BOUND (range);
+	  previous_high = range->bounds ()->high.const_val ();
 	}
       return len>0;
     }
@@ -416,8 +416,8 @@ m2_is_long_set_of_type (struct type *type, struct type **of_type)
       range = type->field (i).type ()->index_type ();
       target = TYPE_TARGET_TYPE (range);
 
-      l1 = TYPE_LOW_BOUND (type->field (i).type ()->index_type ());
-      h1 = TYPE_HIGH_BOUND (type->field (len - 1).type ()->index_type ());
+      l1 = type->field (i).type ()->index_type ()->bounds ()->low.const_val ();
+      h1 = type->field (len - 1).type ()->index_type ()->bounds ()->high.const_val ();
       *of_type = target;
       if (m2_get_discrete_bounds (target, &l2, &h2) >= 0)
 	return (l1 == l2 && h1 == h2);

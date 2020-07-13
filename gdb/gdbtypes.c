@@ -1041,8 +1041,8 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 	  || type->bounds ()->high.kind () != PROP_CONST)
 	return -1;
 
-      *lowp = TYPE_LOW_BOUND (type);
-      *highp = TYPE_HIGH_BOUND (type);
+      *lowp = type->bounds ()->low.const_val ();
+      *highp = type->bounds ()->high.const_val ();
 
       if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ENUM)
 	{
@@ -5116,9 +5116,9 @@ recursive_dump_type (struct type *type, int spaces)
   if (type->code () == TYPE_CODE_RANGE)
     {
       printfi_filtered (spaces, "low %s%s  high %s%s\n",
-			plongest (TYPE_LOW_BOUND (type)), 
+			plongest (type->bounds ()->low.const_val ()),
 			TYPE_LOW_BOUND_UNDEFINED (type) ? " (undefined)" : "",
-			plongest (TYPE_HIGH_BOUND (type)),
+			plongest (type->bounds ()->high.const_val ()),
 			TYPE_HIGH_BOUND_UNDEFINED (type) 
 			? " (undefined)" : "");
     }

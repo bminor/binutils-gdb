@@ -725,7 +725,7 @@ ada_discrete_type_high_bound (struct type *type)
   switch (type->code ())
     {
     case TYPE_CODE_RANGE:
-      return TYPE_HIGH_BOUND (type);
+      return type->bounds ()->high.const_val ();
     case TYPE_CODE_ENUM:
       return TYPE_FIELD_ENUMVAL (type, type->num_fields () - 1);
     case TYPE_CODE_BOOL:
@@ -746,7 +746,7 @@ ada_discrete_type_low_bound (struct type *type)
   switch (type->code ())
     {
     case TYPE_CODE_RANGE:
-      return TYPE_LOW_BOUND (type);
+      return type->bounds ()->low.const_val ();
     case TYPE_CODE_ENUM:
       return TYPE_FIELD_ENUMVAL (type, 0);
     case TYPE_CODE_BOOL:
@@ -2250,7 +2250,7 @@ has_negatives (struct type *type)
     case TYPE_CODE_INT:
       return !TYPE_UNSIGNED (type);
     case TYPE_CODE_RANGE:
-      return TYPE_LOW_BOUND (type) - type->bounds ()->bias < 0;
+      return type->bounds ()->low.const_val () - type->bounds ()->bias < 0;
     }
 }
 
@@ -8283,13 +8283,13 @@ ada_is_redundant_range_encoding (struct type *range_type,
   n = 8; /* Skip "___XDLU_".  */
   if (!ada_scan_number (bounds_str, n, &lo, &n))
     return 0;
-  if (TYPE_LOW_BOUND (range_type) != lo)
+  if (range_type->bounds ()->low.const_val () != lo)
     return 0;
 
   n += 2; /* Skip the "__" separator between the two bounds.  */
   if (!ada_scan_number (bounds_str, n, &hi, &n))
     return 0;
-  if (TYPE_HIGH_BOUND (range_type) != hi)
+  if (range_type->bounds ()->high.const_val () != hi)
     return 0;
 
   return 1;
@@ -10604,8 +10604,10 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	  return value_from_longest (type, (LONGEST) 1);
 
         case TYPE_CODE_RANGE:
-	  arg2 = value_from_longest (type, TYPE_LOW_BOUND (type));
-	  arg3 = value_from_longest (type, TYPE_HIGH_BOUND (type));
+	  arg2 = value_from_longest (type,
+				     type->bounds ()->low.const_val ());
+	  arg3 = value_from_longest (type,
+				     type->bounds ()->high.const_val ());
 	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
 	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg3);
 	  type = language_bool_type (exp->language_defn, exp->gdbarch);
@@ -11422,7 +11424,7 @@ ada_is_modular_type (struct type *type)
 ULONGEST
 ada_modulus (struct type *type)
 {
-  return (ULONGEST) TYPE_HIGH_BOUND (type) + 1;
+  return (ULONGEST) type->bounds ()->high.const_val () + 1;
 }
 
 

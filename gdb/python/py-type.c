@@ -592,12 +592,12 @@ typy_range (PyObject *self, PyObject *args)
     {
     case TYPE_CODE_ARRAY:
     case TYPE_CODE_STRING:
-      low = TYPE_LOW_BOUND (type->index_type ());
-      high = TYPE_HIGH_BOUND (type->index_type ());
+      low = type->index_type ()->bounds ()->low.const_val ();
+      high = type->index_type ()->bounds ()->high.const_val ();
       break;
     case TYPE_CODE_RANGE:
-      low = TYPE_LOW_BOUND (type);
-      high = TYPE_HIGH_BOUND (type);
+      low = type->bounds ()->low.const_val ();
+      high = type->bounds ()->high.const_val ();;
       break;
     }
 

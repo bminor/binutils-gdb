@@ -797,9 +797,9 @@ pascal_type_print_base (struct type *type, struct ui_file *stream, int show,
       {
 	struct type *target = TYPE_TARGET_TYPE (type);
 
-	print_type_scalar (target, TYPE_LOW_BOUND (type), stream);
+	print_type_scalar (target, type->bounds ()->low.const_val (), stream);
 	fputs_filtered ("..", stream);
-	print_type_scalar (target, TYPE_HIGH_BOUND (type), stream);
+	print_type_scalar (target, type->bounds ()->high.const_val (), stream);
       }
       break;
 

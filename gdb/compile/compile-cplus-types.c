@@ -464,7 +464,7 @@ compile_cplus_convert_array (compile_cplus_instance *instance,
       return instance->plugin ().error (s);
     }
 
-  if (TYPE_LOW_BOUND (range) != 0)
+  if (range->bounds ()->low.const_val () != 0)
     {
       const char *s = _("cannot convert array type with "
 			"non-zero lower bound to C");

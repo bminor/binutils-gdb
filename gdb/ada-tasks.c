@@ -901,7 +901,8 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
 	    {
 	      data->known_tasks_element = eltype;
 	      data->known_tasks_length =
-		TYPE_HIGH_BOUND (idxtype) - TYPE_LOW_BOUND (idxtype) + 1;
+		(idxtype->bounds ()->high.const_val ()
+		 - idxtype->bounds ()->low.const_val () + 1);
 	      return;
 	    }
 	}
