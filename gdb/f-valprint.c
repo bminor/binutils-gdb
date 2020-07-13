@@ -124,7 +124,8 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
       struct gdbarch *gdbarch = get_type_arch (type);
       size_t dim_size = type_length_units (TYPE_TARGET_TYPE (type));
       int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
-      size_t byte_stride = TYPE_ARRAY_BIT_STRIDE (type) / (unit_size * 8);
+      size_t byte_stride
+	= type->index_type ()->bounds ()->bit_stride () / (unit_size * 8);
       if (byte_stride == 0)
 	byte_stride = dim_size;
       size_t offs = 0;

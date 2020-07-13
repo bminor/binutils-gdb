@@ -191,7 +191,7 @@ value_subscripted_rvalue (struct value *array, LONGEST index, LONGEST lowerbound
 
   /* Fetch the bit stride and convert it to a byte stride, assuming 8 bits
      in a byte.  */
-  LONGEST stride = TYPE_ARRAY_BIT_STRIDE (array_type);
+  LONGEST stride = array_type->index_type ()->bounds ()->bit_stride ();
   if (stride != 0)
     {
       struct gdbarch *arch = get_type_arch (elt_type);

@@ -1,5 +1,10 @@
 2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.c (TYPE_ARRAY_BIT_STRIDE): Remove.  Update all
+	callers to use the equivalent accessor methods.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (struct range_bounds) <bit_stride>: New method.
 	(struct type) <bit_stride>: New method.
 	(TYPE_BIT_STRIDE): Remove.

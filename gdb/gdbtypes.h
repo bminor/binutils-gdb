@@ -1633,13 +1633,6 @@ extern bool set_type_align (struct type *, ULONGEST);
 #define TYPE_DYN_PROP_KIND(dynprop) \
   (dynprop->kind ())
 
-
-/* Accessors for struct range_bounds data attached to an array type's
-   index type.  */
-
-#define TYPE_ARRAY_BIT_STRIDE(arraytype) \
-  ((arraytype)->index_type ()->bounds ()->bit_stride ())
-
 /* C++ */
 
 #define TYPE_SELF_TYPE(thistype) internal_type_self_type (thistype)
