@@ -456,7 +456,7 @@ compile_cplus_convert_array (compile_cplus_instance *instance,
   struct type *range = type->index_type ();
   gcc_type element_type = instance->convert_type (TYPE_TARGET_TYPE (type));
 
-  if (TYPE_LOW_BOUND_KIND (range) != PROP_CONST)
+  if (range->bounds ()->low.kind () != PROP_CONST)
     {
       const char *s = _("array type with non-constant"
 			" lower bound is not supported");
@@ -472,8 +472,8 @@ compile_cplus_convert_array (compile_cplus_instance *instance,
       return instance->plugin ().error (s);
     }
 
-  if (TYPE_HIGH_BOUND_KIND (range) == PROP_LOCEXPR
-      || TYPE_HIGH_BOUND_KIND (range) == PROP_LOCLIST)
+  if (range->bounds ()->high.kind () == PROP_LOCEXPR
+      || range->bounds ()->high.kind () == PROP_LOCLIST)
     {
       if (TYPE_VECTOR (type))
 	{

@@ -780,8 +780,8 @@ c_type_print_varspec_suffix (struct type *type,
 	fprintf_filtered (stream, (is_vector ?
 				   " __attribute__ ((vector_size(" : "["));
 	/* Bounds are not yet resolved, print a bounds placeholder instead.  */
-	if (TYPE_HIGH_BOUND_KIND (type->index_type ()) == PROP_LOCEXPR
-	    || TYPE_HIGH_BOUND_KIND (type->index_type ()) == PROP_LOCLIST)
+	if (type->index_type ()->bounds ()->high.kind () == PROP_LOCEXPR
+	    || type->index_type ()->bounds ()->high.kind () == PROP_LOCLIST)
 	  fprintf_filtered (stream, "variable length");
 	else if (get_array_bounds (type, &low_bound, &high_bound))
 	  fprintf_filtered (stream, "%s", 

@@ -44,15 +44,15 @@ convert_array (compile_c_instance *context, struct type *type)
 
   element_type = context->convert_type (TYPE_TARGET_TYPE (type));
 
-  if (TYPE_LOW_BOUND_KIND (range) != PROP_CONST)
+  if (range->bounds ()->low.kind () != PROP_CONST)
     return context->plugin ().error (_("array type with non-constant"
 				       " lower bound is not supported"));
   if (range->bounds ()->low.const_val () != 0)
     return context->plugin ().error (_("cannot convert array type with "
 				       "non-zero lower bound to C"));
 
-  if (TYPE_HIGH_BOUND_KIND (range) == PROP_LOCEXPR
-      || TYPE_HIGH_BOUND_KIND (range) == PROP_LOCLIST)
+  if (range->bounds ()->high.kind () == PROP_LOCEXPR
+      || range->bounds ()->high.kind () == PROP_LOCLIST)
     {
       gcc_type result;
 

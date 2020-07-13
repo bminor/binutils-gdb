@@ -1594,10 +1594,6 @@ extern unsigned type_align (struct type *);
    space in struct type.  */
 extern bool set_type_align (struct type *, ULONGEST);
 
-#define TYPE_HIGH_BOUND_KIND(range_type) \
-  ((range_type)->bounds ()->high.kind ())
-#define TYPE_LOW_BOUND_KIND(range_type) \
-  ((range_type)->bounds ()->low.kind ())
 #define TYPE_BIT_STRIDE(range_type) \
   ((range_type)->bounds ()->stride.const_val () \
    * ((range_type)->bounds ()->flag_is_byte_stride ? 8 : 1))

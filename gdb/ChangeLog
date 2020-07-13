@@ -1,5 +1,11 @@
 2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_LOW_BOUND_KIND,
+	TYPE_HIGH_BOUND_KIND): Remove.  Update all callers
+	to use dynamic_prop::kind.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (TYPE_LOW_BOUND_UNDEFINED,
 	TYPE_HIGH_BOUND_UNDEFINED): Remove.  Update all callers
 	to get the bound property's kind and check against
