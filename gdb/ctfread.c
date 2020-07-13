@@ -774,7 +774,7 @@ read_array_type (struct ctf_context *ccp, ctf_id_t tid)
   type = create_array_type (NULL, element_type, range_type);
   if (ar.ctr_nelems <= 1)	/* Check if undefined upper bound.  */
     {
-      TYPE_HIGH_BOUND_KIND (range_type) = PROP_UNDEFINED;
+      range_type->bounds ()->high.set_undefined ();
       TYPE_LENGTH (type) = 0;
       TYPE_TARGET_STUB (type) = 1;
     }

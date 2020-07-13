@@ -511,11 +511,87 @@ union dynamic_prop_data
 
 struct dynamic_prop
 {
+  dynamic_prop_kind kind () const
+  {
+    return m_kind;
+  }
+
+  void set_undefined ()
+  {
+    m_kind = PROP_UNDEFINED;
+  }
+
+  LONGEST const_val () const
+  {
+    gdb_assert (m_kind == PROP_CONST);
+
+    return m_data.const_val;
+  }
+
+  void set_const_val (LONGEST const_val)
+  {
+    m_kind = PROP_CONST;
+    m_data.const_val = const_val;
+  }
+
+  void *baton () const
+  {
+    gdb_assert (m_kind == PROP_LOCEXPR
+		|| m_kind == PROP_LOCLIST
+		|| m_kind == PROP_ADDR_OFFSET);
+
+    return m_data.baton;
+  }
+
+  void set_locexpr (void *baton)
+  {
+    m_kind = PROP_LOCEXPR;
+    m_data.baton = baton;
+  }
+
+  void set_loclist (void *baton)
+  {
+    m_kind = PROP_LOCLIST;
+    m_data.baton = baton;
+  }
+
+  void set_addr_offset (void *baton)
+  {
+    m_kind = PROP_ADDR_OFFSET;
+    m_data.baton = baton;
+  }
+
+  const gdb::array_view<variant_part> *variant_parts () const
+  {
+    gdb_assert (m_kind == PROP_VARIANT_PARTS);
+
+    return m_data.variant_parts;
+  }
+
+  void set_variant_parts (gdb::array_view<variant_part> *variant_parts)
+  {
+    m_kind = PROP_VARIANT_PARTS;
+    m_data.variant_parts = variant_parts;
+  }
+
+  struct type *original_type () const
+  {
+    gdb_assert (m_kind == PROP_TYPE);
+
+    return m_data.original_type;
+  }
+
+  void set_original_type (struct type *original_type)
+  {
+    m_kind = PROP_TYPE;
+    m_data.original_type = original_type;
+  }
+
   /* Determine which field of the union dynamic_prop.data is used.  */
-  enum dynamic_prop_kind kind;
+  enum dynamic_prop_kind m_kind;
 
   /* Storage for dynamic or static value.  */
-  union dynamic_prop_data data;
+  union dynamic_prop_data m_data;
 };
 
 /* Compare two dynamic_prop objects for equality.  dynamic_prop
@@ -1519,19 +1595,19 @@ extern unsigned type_align (struct type *);
 extern bool set_type_align (struct type *, ULONGEST);
 
 #define TYPE_LOW_BOUND(range_type) \
-  ((range_type)->bounds ()->low.data.const_val)
+  ((range_type)->bounds ()->low.const_val ())
 #define TYPE_HIGH_BOUND(range_type) \
-  ((range_type)->bounds ()->high.data.const_val)
+  ((range_type)->bounds ()->high.const_val ())
 #define TYPE_LOW_BOUND_UNDEFINED(range_type) \
   (TYPE_LOW_BOUND_KIND(range_type) == PROP_UNDEFINED)
 #define TYPE_HIGH_BOUND_UNDEFINED(range_type) \
   (TYPE_HIGH_BOUND_KIND(range_type) == PROP_UNDEFINED)
 #define TYPE_HIGH_BOUND_KIND(range_type) \
-  ((range_type)->bounds ()->high.kind)
+  ((range_type)->bounds ()->high.kind ())
 #define TYPE_LOW_BOUND_KIND(range_type) \
-  ((range_type)->bounds ()->low.kind)
+  ((range_type)->bounds ()->low.kind ())
 #define TYPE_BIT_STRIDE(range_type) \
-  ((range_type)->bounds ()->stride.data.const_val \
+  ((range_type)->bounds ()->stride.const_val () \
    * ((range_type)->bounds ()->flag_is_byte_stride ? 8 : 1))
 
 /* Property accessors for the type data location.  */
@@ -1540,9 +1616,9 @@ extern bool set_type_align (struct type *, ULONGEST);
 #define TYPE_DATA_LOCATION_BATON(thistype) \
   TYPE_DATA_LOCATION (thistype)->data.baton
 #define TYPE_DATA_LOCATION_ADDR(thistype) \
-  TYPE_DATA_LOCATION (thistype)->data.const_val
+  (TYPE_DATA_LOCATION (thistype)->const_val ())
 #define TYPE_DATA_LOCATION_KIND(thistype) \
-  TYPE_DATA_LOCATION (thistype)->kind
+  (TYPE_DATA_LOCATION (thistype)->kind ())
 #define TYPE_DYNAMIC_LENGTH(thistype) \
   ((thistype)->dyn_prop (DYN_PROP_BYTE_SIZE))
 
@@ -1556,9 +1632,9 @@ extern bool set_type_align (struct type *, ULONGEST);
 #define TYPE_DYN_PROP_BATON(dynprop) \
   dynprop->data.baton
 #define TYPE_DYN_PROP_ADDR(dynprop) \
-  dynprop->data.const_val
+  (dynprop->const_val ())
 #define TYPE_DYN_PROP_KIND(dynprop) \
-  dynprop->kind
+  (dynprop->kind ())
 
 
 /* Accessors for struct range_bounds data attached to an array type's

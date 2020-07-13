@@ -653,8 +653,8 @@ rust_print_struct_def (struct type *type, const char *varstring,
 	{
 	  fputs_filtered ("enum ", stream);
 	  dynamic_prop *prop = type->dyn_prop (DYN_PROP_VARIANT_PARTS);
-	  if (prop != nullptr && prop->kind == PROP_TYPE)
-	    type = prop->data.original_type;
+	  if (prop != nullptr && prop->kind () == PROP_TYPE)
+	    type = prop->original_type ();
 	}
       else if (type->code () == TYPE_CODE_STRUCT)
 	fputs_filtered ("struct ", stream);

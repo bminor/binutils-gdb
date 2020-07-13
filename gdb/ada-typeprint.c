@@ -779,13 +779,13 @@ print_record_field_types (struct type *type, struct type *outer_type,
   struct dynamic_prop *prop = type->dyn_prop (DYN_PROP_VARIANT_PARTS);
   if (prop != nullptr)
     {
-      if (prop->kind == PROP_TYPE)
+      if (prop->kind () == PROP_TYPE)
 	{
-	  type = prop->data.original_type;
+	  type = prop->original_type ();
 	  prop = type->dyn_prop (DYN_PROP_VARIANT_PARTS);
 	}
-      gdb_assert (prop->kind == PROP_VARIANT_PARTS);
-      print_record_field_types_dynamic (*prop->data.variant_parts,
+      gdb_assert (prop->kind () == PROP_VARIANT_PARTS);
+      print_record_field_types_dynamic (*prop->variant_parts (),
 					0, type->num_fields (),
 					type, stream, show, level, flags);
       return type->num_fields ();

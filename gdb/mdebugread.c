@@ -1736,9 +1736,9 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
       tp->set_num_fields (0);
       tp->set_bounds (((struct range_bounds *)
 			TYPE_ZALLOC (tp, sizeof (struct range_bounds))));
-      TYPE_LOW_BOUND (tp) = AUX_GET_DNLOW (bigend, ax);
+      tp->bounds ()->low.set_const_val (AUX_GET_DNLOW (bigend, ax));
       ax++;
-      TYPE_HIGH_BOUND (tp) = AUX_GET_DNHIGH (bigend, ax);
+      tp->bounds ()->high.set_const_val (AUX_GET_DNHIGH (bigend, ax));
       ax++;
     }
 

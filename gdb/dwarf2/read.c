@@ -9464,8 +9464,7 @@ alloc_rust_variant (struct obstack *obstack, struct type *type,
     = new (storage) gdb::array_view<variant_part> (part, 1);
 
   struct dynamic_prop prop;
-  prop.kind = PROP_VARIANT_PARTS;
-  prop.data.variant_parts = prop_value;
+  prop.set_variant_parts (prop_value);
 
   type->add_dyn_prop (DYN_PROP_VARIANT_PARTS, prop);
 }
@@ -14959,10 +14958,9 @@ add_variant_property (struct field_info *fip, struct type *type,
 			    fip->variant_parts);
 
   struct dynamic_prop prop;
-  prop.kind = PROP_VARIANT_PARTS;
-  prop.data.variant_parts
-    = ((gdb::array_view<variant_part> *)
-       obstack_copy (&objfile->objfile_obstack, &parts, sizeof (parts)));
+  prop.set_variant_parts ((gdb::array_view<variant_part> *)
+			  obstack_copy (&objfile->objfile_obstack, &parts,
+					sizeof (parts)));
 
   type->add_dyn_prop (DYN_PROP_VARIANT_PARTS, prop);
 }
@@ -17138,8 +17136,7 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct dynamic_prop low_bound;
 
-      low_bound.kind = PROP_CONST;
-      low_bound.data.const_val = 1;
+      low_bound.set_const_val (1);
       range_type = create_range_type (NULL, index_type, &low_bound, &prop, 0);
     }
   char_type = language_string_char_type (cu->language_defn, gdbarch);
@@ -17646,9 +17643,9 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 	  baton->locexpr.is_reference = false;
 	  break;
 	}
-      prop->data.baton = baton;
-      prop->kind = PROP_LOCEXPR;
-      gdb_assert (prop->data.baton != NULL);
+
+      prop->set_locexpr (baton);
+      gdb_assert (prop->baton () != NULL);
     }
   else if (attr->form_is_ref ())
     {
@@ -17672,9 +17669,8 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 		baton = XOBNEW (obstack, struct dwarf2_property_baton);
 		baton->property_type = die_type (target_die, target_cu);
 		fill_in_loclist_baton (cu, &baton->loclist, target_attr);
-		prop->data.baton = baton;
-		prop->kind = PROP_LOCLIST;
-		gdb_assert (prop->data.baton != NULL);
+		prop->set_loclist (baton);
+		gdb_assert (prop->baton () != NULL);
 	      }
 	    else if (target_attr->form_is_block ())
 	      {
@@ -17685,9 +17681,8 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 		baton->locexpr.size = DW_BLOCK (target_attr)->size;
 		baton->locexpr.data = DW_BLOCK (target_attr)->data;
 		baton->locexpr.is_reference = true;
-		prop->data.baton = baton;
-		prop->kind = PROP_LOCEXPR;
-		gdb_assert (prop->data.baton != NULL);
+		prop->set_locexpr (baton);
+		gdb_assert (prop->baton () != NULL);
 	      }
 	    else
 	      {
@@ -17709,17 +17704,13 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
 						      target_cu);
 	      baton->offset_info.offset = offset;
 	      baton->offset_info.type = die_type (target_die, target_cu);
-	      prop->data.baton = baton;
-	      prop->kind = PROP_ADDR_OFFSET;
+	      prop->set_addr_offset (baton);
 	      break;
 	    }
 	}
     }
   else if (attr->form_is_constant ())
-    {
-      prop->data.const_val = attr->constant_value (0);
-      prop->kind = PROP_CONST;
-    }
+    prop->set_const_val (attr->constant_value (0));
   else
     {
       dwarf2_invalid_attrib_class_complaint (dwarf_form_name (attr->form),
@@ -17819,9 +17810,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   if (range_type)
     return range_type;
 
-  low.kind = PROP_CONST;
-  high.kind = PROP_CONST;
-  high.data.const_val = 0;
+  high.set_const_val (0);
 
   /* Set LOW_DEFAULT_IS_VALID if current language and DWARF version allow
      omitting DW_AT_lower_bound.  */
@@ -17829,27 +17818,27 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
     {
     case language_c:
     case language_cplus:
-      low.data.const_val = 0;
+      low.set_const_val (0);
       low_default_is_valid = 1;
       break;
     case language_fortran:
-      low.data.const_val = 1;
+      low.set_const_val (1);
       low_default_is_valid = 1;
       break;
     case language_d:
     case language_objc:
     case language_rust:
-      low.data.const_val = 0;
+      low.set_const_val (0);
       low_default_is_valid = (cu->header.version >= 4);
       break;
     case language_ada:
     case language_m2:
     case language_pascal:
-      low.data.const_val = 1;
+      low.set_const_val (1);
       low_default_is_valid = (cu->header.version >= 4);
       break;
     default:
-      low.data.const_val = 0;
+      low.set_const_val (0);
       low_default_is_valid = 0;
       break;
     }
@@ -17871,8 +17860,8 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
       if (attr_to_dynamic_prop (attr, die, cu, &high, base_type))
 	{
 	  /* If bounds are constant do the final calculation here.  */
-	  if (low.kind == PROP_CONST && high.kind == PROP_CONST)
-	    high.data.const_val = low.data.const_val + high.data.const_val - 1;
+	  if (low.kind () == PROP_CONST && high.kind () == PROP_CONST)
+	    high.set_const_val (low.const_val () + high.const_val () - 1);
 	  else
 	    high_bound_is_count = 1;
 	}
@@ -17905,12 +17894,12 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
      the base type is signed.  */
   negative_mask =
     -((ULONGEST) 1 << (TYPE_LENGTH (base_type) * TARGET_CHAR_BIT - 1));
-  if (low.kind == PROP_CONST
-      && !TYPE_UNSIGNED (base_type) && (low.data.const_val & negative_mask))
-    low.data.const_val |= negative_mask;
-  if (high.kind == PROP_CONST
-      && !TYPE_UNSIGNED (base_type) && (high.data.const_val & negative_mask))
-    high.data.const_val |= negative_mask;
+  if (low.kind () == PROP_CONST
+      && !TYPE_UNSIGNED (base_type) && (low.const_val () & negative_mask))
+    low.set_const_val (low.const_val () | negative_mask);
+  if (high.kind () == PROP_CONST
+      && !TYPE_UNSIGNED (base_type) && (high.const_val () & negative_mask))
+    high.set_const_val (high.const_val () | negative_mask);
 
   /* Check for bit and byte strides.  */
   struct dynamic_prop byte_stride_prop;
@@ -17962,7 +17951,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 
   /* Ada expects an empty array on no boundary attributes.  */
   if (attr == NULL && cu->language != language_ada)
-    TYPE_HIGH_BOUND_KIND (range_type) = PROP_UNDEFINED;
+    range_type->bounds ()->high.set_undefined ();
 
   name = dwarf2_name (die, cu);
   if (name)

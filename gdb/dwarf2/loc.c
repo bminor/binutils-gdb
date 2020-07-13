@@ -2589,12 +2589,12 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
   if (frame == NULL && has_stack_frames ())
     frame = get_selected_frame (NULL);
 
-  switch (prop->kind)
+  switch (prop->kind ())
     {
     case PROP_LOCEXPR:
       {
 	const struct dwarf2_property_baton *baton
-	  = (const struct dwarf2_property_baton *) prop->data.baton;
+	  = (const struct dwarf2_property_baton *) prop->baton ();
 	gdb_assert (baton->property_type != NULL);
 
 	if (dwarf2_locexpr_baton_eval (&baton->locexpr, frame, addr_stack,
@@ -2636,7 +2636,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
     case PROP_LOCLIST:
       {
 	struct dwarf2_property_baton *baton
-	  = (struct dwarf2_property_baton *) prop->data.baton;
+	  = (struct dwarf2_property_baton *) prop->baton ();
 	CORE_ADDR pc;
 	const gdb_byte *data;
 	struct value *val;
@@ -2662,13 +2662,13 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
       break;
 
     case PROP_CONST:
-      *value = prop->data.const_val;
+      *value = prop->const_val ();
       return true;
 
     case PROP_ADDR_OFFSET:
       {
 	struct dwarf2_property_baton *baton
-	  = (struct dwarf2_property_baton *) prop->data.baton;
+	  = (struct dwarf2_property_baton *) prop->baton ();
 	const struct property_addr_info *pinfo;
 	struct value *val;
 
@@ -2708,13 +2708,13 @@ dwarf2_compile_property_to_c (string_file *stream,
 			      struct symbol *sym)
 {
   struct dwarf2_property_baton *baton
-    = (struct dwarf2_property_baton *) prop->data.baton;
+    = (struct dwarf2_property_baton *) prop->baton ();
   const gdb_byte *data;
   size_t size;
   dwarf2_per_cu_data *per_cu;
   dwarf2_per_objfile *per_objfile;
 
-  if (prop->kind == PROP_LOCEXPR)
+  if (prop->kind () == PROP_LOCEXPR)
     {
       data = baton->locexpr.data;
       size = baton->locexpr.size;
@@ -2723,7 +2723,7 @@ dwarf2_compile_property_to_c (string_file *stream,
     }
   else
     {
-      gdb_assert (prop->kind == PROP_LOCLIST);
+      gdb_assert (prop->kind () == PROP_LOCLIST);
 
       data = dwarf2_find_location_expression (&baton->loclist, &size, pc);
       per_cu = baton->loclist.per_cu;

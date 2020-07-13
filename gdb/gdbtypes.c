@@ -874,23 +874,23 @@ allocate_stub_method (struct type *type)
 bool
 operator== (const dynamic_prop &l, const dynamic_prop &r)
 {
-  if (l.kind != r.kind)
+  if (l.kind () != r.kind ())
     return false;
 
-  switch (l.kind)
+  switch (l.kind ())
     {
     case PROP_UNDEFINED:
       return true;
     case PROP_CONST:
-      return l.data.const_val == r.data.const_val;
+      return l.const_val () == r.const_val ();
     case PROP_ADDR_OFFSET:
     case PROP_LOCEXPR:
     case PROP_LOCLIST:
-      return l.data.baton == r.data.baton;
+      return l.baton () == r.baton ();
     case PROP_VARIANT_PARTS:
-      return l.data.variant_parts == r.data.variant_parts;
+      return l.variant_parts () == r.variant_parts ();
     case PROP_TYPE:
-      return l.data.original_type == r.data.original_type;
+      return l.original_type () == r.original_type ();
     }
 
   gdb_assert_not_reached ("unhandled dynamic_prop kind");
@@ -940,21 +940,18 @@ create_range_type (struct type *result_type, struct type *index_type,
   bounds->low = *low_bound;
   bounds->high = *high_bound;
   bounds->bias = bias;
-
-  /* Initialize the stride to be a constant, the value will already be zero
-     thanks to the use of TYPE_ZALLOC above.  */
-  bounds->stride.kind = PROP_CONST;
+  bounds->stride.set_const_val (0);
 
   result_type->set_bounds (bounds);
 
-  if (low_bound->kind == PROP_CONST && low_bound->data.const_val >= 0)
+  if (low_bound->kind () == PROP_CONST && low_bound->const_val () >= 0)
     TYPE_UNSIGNED (result_type) = 1;
 
   /* Ada allows the declaration of range types whose upper bound is
      less than the lower bound, so checking the lower bound is not
      enough.  Make sure we do not mark a range type whose upper bound
      is negative as unsigned.  */
-  if (high_bound->kind == PROP_CONST && high_bound->data.const_val < 0)
+  if (high_bound->kind () == PROP_CONST && high_bound->const_val () < 0)
     TYPE_UNSIGNED (result_type) = 0;
 
   TYPE_ENDIANITY_NOT_DEFAULT (result_type)
@@ -1002,11 +999,8 @@ create_static_range_type (struct type *result_type, struct type *index_type,
 {
   struct dynamic_prop low, high;
 
-  low.kind = PROP_CONST;
-  low.data.const_val = low_bound;
-
-  high.kind = PROP_CONST;
-  high.data.const_val = high_bound;
+  low.set_const_val (low_bound);
+  high.set_const_val (high_bound);
 
   result_type = create_range_type (result_type, index_type, &low, &high, 0);
 
@@ -1021,9 +1015,9 @@ has_static_range (const struct range_bounds *bounds)
 {
   /* If the range doesn't have a defined stride then its stride field will
      be initialized to the constant 0.  */
-  return (bounds->low.kind == PROP_CONST
-	  && bounds->high.kind == PROP_CONST
-	  && bounds->stride.kind == PROP_CONST);
+  return (bounds->low.kind () == PROP_CONST
+	  && bounds->high.kind () == PROP_CONST
+	  && bounds->stride.kind () == PROP_CONST);
 }
 
 
@@ -1273,13 +1267,13 @@ create_array_type_with_stride (struct type *result_type,
 			       unsigned int bit_stride)
 {
   if (byte_stride_prop != NULL
-      && byte_stride_prop->kind == PROP_CONST)
+      && byte_stride_prop->kind () == PROP_CONST)
     {
       /* The byte stride is actually not dynamic.  Pretend we were
 	 called with bit_stride set instead of byte_stride_prop.
 	 This will give us the same result type, while avoiding
 	 the need to handle this as a special case.  */
-      bit_stride = byte_stride_prop->data.const_val * 8;
+      bit_stride = byte_stride_prop->const_val () * 8;
       byte_stride_prop = NULL;
     }
 
@@ -1967,7 +1961,7 @@ array_type_has_dynamic_stride (struct type *type)
 {
   struct dynamic_prop *prop = type->dyn_prop (DYN_PROP_BYTE_STRIDE);
 
-  return (prop != NULL && prop->kind != PROP_CONST);
+  return (prop != NULL && prop->kind () != PROP_CONST);
 }
 
 /* Worker for is_dynamic_type.  */
@@ -1999,7 +1993,7 @@ is_dynamic_type_internal (struct type *type, int top_level)
     return 1;
 
   struct dynamic_prop *prop = type->dyn_prop (DYN_PROP_VARIANT_PARTS);
-  if (prop != nullptr && prop->kind != PROP_TYPE)
+  if (prop != nullptr && prop->kind () != PROP_TYPE)
     return 1;
 
   if (TYPE_HAS_DYNAMIC_LENGTH (type))
@@ -2097,38 +2091,27 @@ resolve_dynamic_range (struct type *dyn_range_type,
 
   const struct dynamic_prop *prop = &dyn_range_type->bounds ()->low;
   if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
-    {
-      low_bound.kind = PROP_CONST;
-      low_bound.data.const_val = value;
-    }
+    low_bound.set_const_val (value);
   else
-    {
-      low_bound.kind = PROP_UNDEFINED;
-      low_bound.data.const_val = 0;
-    }
+    low_bound.set_undefined ();
 
   prop = &dyn_range_type->bounds ()->high;
   if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
     {
-      high_bound.kind = PROP_CONST;
-      high_bound.data.const_val = value;
+      high_bound.set_const_val (value);
 
       if (dyn_range_type->bounds ()->flag_upper_bound_is_count)
-	high_bound.data.const_val
-	  = low_bound.data.const_val + high_bound.data.const_val - 1;
+	high_bound.set_const_val
+	  (low_bound.const_val () + high_bound.const_val () - 1);
     }
   else
-    {
-      high_bound.kind = PROP_UNDEFINED;
-      high_bound.data.const_val = 0;
-    }
+    high_bound.set_undefined ();
 
   bool byte_stride_p = dyn_range_type->bounds ()->flag_is_byte_stride;
   prop = &dyn_range_type->bounds ()->stride;
   if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
     {
-      stride.kind = PROP_CONST;
-      stride.data.const_val = value;
+      stride.set_const_val (value);
 
       /* If we have a bit stride that is not an exact number of bytes then
 	 I really don't think this is going to work with current GDB, the
@@ -2142,8 +2125,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
     }
   else
     {
-      stride.kind = PROP_UNDEFINED;
-      stride.data.const_val = 0;
+      stride.set_undefined ();
       byte_stride_p = true;
     }
 
@@ -2188,16 +2170,11 @@ resolve_dynamic_array_or_string (struct type *type,
      will update the length of the array accordingly.  */
   prop = TYPE_ALLOCATED_PROP (type);
   if (prop != NULL && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
-    {
-      TYPE_DYN_PROP_ADDR (prop) = value;
-      TYPE_DYN_PROP_KIND (prop) = PROP_CONST;
-    }
+    prop->set_const_val (value);
+
   prop = TYPE_ASSOCIATED_PROP (type);
   if (prop != NULL && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
-    {
-      TYPE_DYN_PROP_ADDR (prop) = value;
-      TYPE_DYN_PROP_KIND (prop) = PROP_CONST;
-    }
+    prop->set_const_val (value);
 
   ary_dim = check_typedef (TYPE_TARGET_TYPE (elt_type));
 
@@ -2447,14 +2424,13 @@ resolve_dynamic_struct (struct type *type,
   resolved_type = copy_type (type);
 
   dynamic_prop *variant_prop = resolved_type->dyn_prop (DYN_PROP_VARIANT_PARTS);
-  if (variant_prop != nullptr && variant_prop->kind == PROP_VARIANT_PARTS)
+  if (variant_prop != nullptr && variant_prop->kind () == PROP_VARIANT_PARTS)
     {
       compute_variant_fields (type, resolved_type, addr_stack,
-			      *variant_prop->data.variant_parts);
+			      *variant_prop->variant_parts ());
       /* We want to leave the property attached, so that the Rust code
 	 can tell whether the type was originally an enum.  */
-      variant_prop->kind = PROP_TYPE;
-      variant_prop->data.original_type = type;
+      variant_prop->set_original_type (type);
     }
   else
     {
@@ -2483,8 +2459,7 @@ resolve_dynamic_struct (struct type *type,
 	  baton.locexpr = *TYPE_FIELD_DWARF_BLOCK (resolved_type, i);
 
 	  struct dynamic_prop prop;
-	  prop.kind = PROP_LOCEXPR;
-	  prop.data.baton = &baton;
+	  prop.set_locexpr (&baton);
 
 	  CORE_ADDR addr;
 	  if (dwarf2_evaluate_property (&prop, nullptr, addr_stack, &addr,
@@ -2642,10 +2617,7 @@ resolve_dynamic_type_internal (struct type *type,
   prop = TYPE_DATA_LOCATION (resolved_type);
   if (prop != NULL
       && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
-    {
-      TYPE_DYN_PROP_ADDR (prop) = value;
-      TYPE_DYN_PROP_KIND (prop) = PROP_CONST;
-    }
+    prop->set_const_val (value);
 
   return resolved_type;
 }

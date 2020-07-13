@@ -1,3 +1,16 @@
+2020-07-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.h (struct dynamic_prop) <kind, set_undefined,
+	const_val, set_const_val, baton, set_locexpr, set_loclist,
+	set_addr_offset, variant_parts, set_variant_parts,
+	original_type, set_original_type>: New methods.
+	<kind>: Rename to...
+	<m_kind>: ... this.  Update all users to use the new methods
+	instead.
+	<data>: Rename to...
+	<m_data>: ... this.  Update all users to use the new methods
+	instead.
+
 2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbtypes.c (get_discrete_bounds): Return failure if

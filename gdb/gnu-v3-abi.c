@@ -471,8 +471,7 @@ gnuv3_baseclass_offset (struct type *type, int index,
       baton.locexpr = *TYPE_FIELD_DWARF_BLOCK (type, index);
 
       struct dynamic_prop prop;
-      prop.kind = PROP_LOCEXPR;
-      prop.data.baton = &baton;
+      prop.set_locexpr (&baton);
 
       struct property_addr_info addr_stack;
       addr_stack.type = type;
