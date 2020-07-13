@@ -1047,7 +1047,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 	  && elf_tdata (abfd)->elf_header != NULL
 	  /* FIXME: Maybe check for other non-supportable types as well ?  */
 	  && elf_tdata (abfd)->elf_header->e_type == ET_EXEC)
-	einfo (_("%F%P: cannot use executable file '%pB' as input to a link\n"),
+	einfo (_("%P: Using an executable file (%pB) as input to a link is deprecated - support is likely to be removed in the future\n"),
 	       abfd);
     }
 
@@ -1081,7 +1081,7 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 	  if (bfd_link_executable (& link_info)
 	      && elf_tdata (abfd)->elf_header->e_type == ET_EXEC)
 	    {
-	      einfo (_("%F%P: cannot use executable file '%pB' as input to a link\n"),
+	      einfo (_("%P: Using an executable file (%pB) as input to a link is deprecated - support is likely to be removed in the future\n"),
 		     abfd);
 	    }
 

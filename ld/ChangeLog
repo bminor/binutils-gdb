@@ -1,3 +1,8 @@
+2020-07-13  Nick Clifton  <nickc@redhat.com>
+
+	* ldelf.c (ldelf_after_open): Change fatal errors about linking in
+	executable files to simple warnings.
+
 2020-07-10  Alan Modra  <amodra@gmail.com>
 
 	* ld.texi (PowerPC64 ELF64): Document --no-inline-optimize,
