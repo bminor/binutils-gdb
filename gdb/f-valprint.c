@@ -49,7 +49,7 @@ f77_get_lowerbound (struct type *type)
   if (type->index_type ()->bounds ()->low.kind () == PROP_UNDEFINED)
     error (_("Lower bound may not be '*' in F77"));
 
-  return TYPE_ARRAY_LOWER_BOUND_VALUE (type);
+  return type->index_type ()->bounds ()->low.const_val ();
 }
 
 LONGEST
@@ -65,7 +65,7 @@ f77_get_upperbound (struct type *type)
       return f77_get_lowerbound (type);
     }
 
-  return TYPE_ARRAY_UPPER_BOUND_VALUE (type);
+  return type->index_type ()->bounds ()->high.const_val ();
 }
 
 /* Obtain F77 adjustable array dimensions.  */

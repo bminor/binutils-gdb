@@ -1,5 +1,11 @@
 2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_ARRAY_LOWER_BOUND_VALUE,
+	TYPE_ARRAY_UPPER_BOUND_VALUE): Remove.  Update all
+	callers to use the equivalent accessor methods instead.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED,
 	TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED): Remove.  Update all
 	callers to use the equivalent accessor methods instead.
