@@ -1,3 +1,10 @@
+2020-07-13  Tom de Vries  <tdevries@suse.de>
+
+	* lib/gdb.exp (have_fuse_ld_gold): New caching proc.
+	* gdb.base/gcore-tls-pie.exp: Use have_fuse_ld_gold.
+	* gdb.base/gold-gdb-index.exp: Same.
+	* gdb.base/morestack.exp: Same.
+
 2020-07-11  Daniel Xu  <dxu@dxuuu.xyz>
 
 	PR rust/26121

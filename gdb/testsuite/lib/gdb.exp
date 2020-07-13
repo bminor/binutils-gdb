@@ -7456,5 +7456,13 @@ proc gdb_note { message } {
     verbose -- "NOTE: $message" 0
 }
 
+# Return 1 if compiler supports -fuse-ld=gold, otherwise return 0.
+gdb_caching_proc have_fuse_ld_gold {
+    set me "have_fuse_ld_gold"
+    set flags "additional_flags=-fuse-ld=gold"
+    set src { int main() { return 0; } }
+    return [gdb_simple_compile $me $src executable $flags]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
