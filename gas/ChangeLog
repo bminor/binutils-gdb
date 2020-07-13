@@ -1,3 +1,9 @@
+2020-07-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26237
+	* config/tc-i386.c (offset_in_range): Remove 32-bit sign
+	extension.
+
 2020-07-15  Nick Clifton  <nickc@redhat.com>
 
 	* write.c (create_note_reloc): Add desc2_size parameter.  Zero out
