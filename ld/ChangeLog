@@ -1,3 +1,14 @@
+2020-07-13  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-scripts/default-script1.d: Don't skip, xfail
+	using is_pecoff_format.
+	* testsuite/ld-scripts/default-script2.d: Likewise.
+	* testsuite/ld-scripts/default-script3.d: Likewise.
+	* testsuite/ld-scripts/default-script4.d: Likewise.
+	* testsuite/ld-scripts/pr20302.d: Remove x86_64-*-cygwin from notarget.
+	* testsuite/ld-scripts/provide-6.d: Remove x86_64-*-cygwin from xfail.
+	* testsuite/ld-scripts/provide-8.d: Likewise.
+
 2020-07-10  Alan Modra  <amodra@gmail.com>
 
 	* ld.texi (PowerPC64 ELF64): Document --no-inline-optimize,

@@ -1,3 +1,8 @@
+2020-07-13  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/lib/binutils-common.exp (is_pecoff_format): Accept
+	optional machine-os arg.
+
 2020-07-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (decode_x86_feature_2): Handle
