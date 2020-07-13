@@ -226,7 +226,7 @@ static void m2_array (struct type *type, struct ui_file *stream,
 {
   fprintf_filtered (stream, "ARRAY [");
   if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
-      && type->index_type ()->bounds ()->high.kind () != PROP_UNDEFINED)
+      && type->bounds ()->high.kind () != PROP_UNDEFINED)
     {
       if (type->index_type () != 0)
 	{
@@ -416,8 +416,8 @@ m2_is_long_set_of_type (struct type *type, struct type **of_type)
       range = type->field (i).type ()->index_type ();
       target = TYPE_TARGET_TYPE (range);
 
-      l1 = type->field (i).type ()->index_type ()->bounds ()->low.const_val ();
-      h1 = type->field (len - 1).type ()->index_type ()->bounds ()->high.const_val ();
+      l1 = type->field (i).type ()->bounds ()->low.const_val ();
+      h1 = type->field (len - 1).type ()->bounds ()->high.const_val ();
       *of_type = target;
       if (m2_get_discrete_bounds (target, &l2, &h2) >= 0)
 	return (l1 == l2 && h1 == h2);

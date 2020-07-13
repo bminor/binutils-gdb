@@ -55,9 +55,8 @@ get_long_set_bounds (struct type *type, LONGEST *low, LONGEST *high)
       i = TYPE_N_BASECLASSES (type);
       if (len == 0)
 	return 0;
-      *low = type->field (i).type ()->index_type ()->bounds ()->low.const_val ();
-      *high = (type->field (len - 1).type ()->index_type ()->bounds ()
-	       ->high.const_val ());
+      *low = type->field (i).type ()->bounds ()->low.const_val ();
+      *high = type->field (len - 1).type ()->bounds ()->high.const_val ();
       return 1;
     }
   error (_("expecting long_set"));

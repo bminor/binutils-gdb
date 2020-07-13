@@ -274,10 +274,10 @@ pascal_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
 	fprintf_filtered (stream, "(");
       fprintf_filtered (stream, "array ");
       if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
-	  && type->index_type ()->bounds ()->high.kind () != PROP_UNDEFINED)
+	  && type->bounds ()->high.kind () != PROP_UNDEFINED)
 	fprintf_filtered (stream, "[%s..%s] ",
-			  plongest (type->index_type ()->bounds ()->low.const_val ()),
-			  plongest (type->index_type ()->bounds ()->high.const_val ()));
+			  plongest (type->bounds ()->low.const_val ()),
+			  plongest (type->bounds ()->high.const_val ()));
       fprintf_filtered (stream, "of ");
       break;
 

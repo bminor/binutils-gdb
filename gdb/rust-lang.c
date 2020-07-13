@@ -813,8 +813,8 @@ rust_internal_print_type (struct type *type, const char *varstring,
 				  stream, show - 1, level, flags, false,
 				  podata);
 
-	if (type->index_type ()->bounds ()->high.kind () == PROP_LOCEXPR
-	    || type->index_type ()->bounds ()->high.kind () == PROP_LOCLIST)
+	if (type->bounds ()->high.kind () == PROP_LOCEXPR
+	    || type->bounds ()->high.kind () == PROP_LOCLIST)
 	  fprintf_filtered (stream, "; variable length");
 	else if (get_array_bounds (type, &low_bound, &high_bound))
 	  fprintf_filtered (stream, "; %s",

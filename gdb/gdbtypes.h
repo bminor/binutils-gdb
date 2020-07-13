@@ -1040,9 +1040,19 @@ struct type
   /* Get the bounds bounds of this type.  The type must be a range type.  */
   range_bounds *bounds () const
   {
-    gdb_assert (this->code () == TYPE_CODE_RANGE);
+    switch (this->code ())
+      {
+      case TYPE_CODE_RANGE:
+	return this->main_type->flds_bnds.bounds;
 
-    return this->main_type->flds_bnds.bounds;
+      case TYPE_CODE_ARRAY:
+      case TYPE_CODE_STRING:
+	return this->index_type ()->bounds ();
+
+      default:
+	gdb_assert_not_reached
+	  ("type::bounds called on type with invalid code");
+      }
   }
 
   /* Set the bounds of this type.  The type must be a range type.  */

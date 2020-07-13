@@ -9492,8 +9492,8 @@ assign_aggregate (struct value *container,
     {
       lhs = ada_coerce_to_simple_array (lhs);
       lhs_type = check_typedef (value_type (lhs));
-      low_index = lhs_type->index_type ()->bounds ()->low.const_val ();
-      high_index = lhs_type->index_type ()->bounds ()->high.const_val ();
+      low_index = lhs_type->bounds ()->low.const_val ();
+      high_index = lhs_type->bounds ()->high.const_val ();
     }
   else if (lhs_type->code () == TYPE_CODE_STRUCT)
     {

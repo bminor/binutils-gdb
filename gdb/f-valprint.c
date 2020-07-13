@@ -46,16 +46,16 @@ int f77_array_offset_tbl[MAX_FORTRAN_DIMS + 1][2];
 LONGEST
 f77_get_lowerbound (struct type *type)
 {
-  if (type->index_type ()->bounds ()->low.kind () == PROP_UNDEFINED)
+  if (type->bounds ()->low.kind () == PROP_UNDEFINED)
     error (_("Lower bound may not be '*' in F77"));
 
-  return type->index_type ()->bounds ()->low.const_val ();
+  return type->bounds ()->low.const_val ();
 }
 
 LONGEST
 f77_get_upperbound (struct type *type)
 {
-  if (type->index_type ()->bounds ()->high.kind () == PROP_UNDEFINED)
+  if (type->bounds ()->high.kind () == PROP_UNDEFINED)
     {
       /* We have an assumed size array on our hands.  Assume that
 	 upper_bound == lower_bound so that we show at least 1 element.
@@ -65,7 +65,7 @@ f77_get_upperbound (struct type *type)
       return f77_get_lowerbound (type);
     }
 
-  return type->index_type ()->bounds ()->high.const_val ();
+  return type->bounds ()->high.const_val ();
 }
 
 /* Obtain F77 adjustable array dimensions.  */
@@ -124,8 +124,7 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
       struct gdbarch *gdbarch = get_type_arch (type);
       size_t dim_size = type_length_units (TYPE_TARGET_TYPE (type));
       int unit_size = gdbarch_addressable_memory_unit_size (gdbarch);
-      size_t byte_stride
-	= type->index_type ()->bounds ()->bit_stride () / (unit_size * 8);
+      size_t byte_stride = type->bit_stride () / (unit_size * 8);
       if (byte_stride == 0)
 	byte_stride = dim_size;
       size_t offs = 0;

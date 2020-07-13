@@ -388,8 +388,7 @@ value_cast (struct type *type, struct value *arg2)
       struct type *element_type = TYPE_TARGET_TYPE (type);
       unsigned element_length = TYPE_LENGTH (check_typedef (element_type));
 
-      if (element_length > 0
-	  && type->index_type ()->bounds ()->high.kind () == PROP_UNDEFINED)
+      if (element_length > 0 && type->bounds ()->high.kind () == PROP_UNDEFINED)
 	{
 	  struct type *range_type = type->index_type ();
 	  int val_length = TYPE_LENGTH (type2);

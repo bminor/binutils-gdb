@@ -192,7 +192,7 @@ c_number_of_children (const struct varobj *var)
     {
     case TYPE_CODE_ARRAY:
       if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (target) > 0
-	  && (type->index_type ()->bounds ()->high.kind () != PROP_UNDEFINED))
+	  && (type->bounds ()->high.kind () != PROP_UNDEFINED))
 	children = TYPE_LENGTH (type) / TYPE_LENGTH (target);
       else
 	/* If we don't know how many elements there are, don't display
@@ -306,14 +306,13 @@ c_describe_child (const struct varobj *parent, int index,
     {
     case TYPE_CODE_ARRAY:
       if (cname)
-	*cname = int_string (index
-			     + type->index_type ()->bounds ()->low.const_val (),
+	*cname = int_string (index + type->bounds ()->low.const_val (),
 			     10, 1, 0, 0);
 
       if (cvalue && value)
 	{
 	  int real_index
-	    = index + type->index_type ()->bounds ()->low.const_val ();
+	    = index + type->bounds ()->low.const_val ();
 
 	  try
 	    {
@@ -330,7 +329,7 @@ c_describe_child (const struct varobj *parent, int index,
       if (cfull_expression)
 	*cfull_expression = string_printf
 	  ("(%s)[%s]", parent_expression.c_str (),
-	   int_string (index + type->index_type ()->bounds ()->low.const_val (),
+	   int_string (index + type->bounds ()->low.const_val (),
 		       10, 1, 0, 0));
 
       break;

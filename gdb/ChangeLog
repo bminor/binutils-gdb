@@ -1,5 +1,31 @@
 2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (struct type) <bounds>: Handle array and string
+	types.
+	* ada-lang.c (assign_aggregate): Use type::bounds on
+	array/string type.
+	* c-typeprint.c (c_type_print_varspec_suffix): Likewise.
+	* c-varobj.c (c_number_of_children): Likewise.
+	(c_describe_child): Likewise.
+	* eval.c (evaluate_subexp_for_sizeof): Likewise.
+	* f-typeprint.c (f_type_print_varspec_suffix): Likewise.
+	(f_type_print_base): Likewise.
+	* f-valprint.c (f77_array_offset_tbl): Likewise.
+	(f77_get_upperbound): Likewise.
+	(f77_print_array_1): Likewise.
+	* guile/scm-type.c (gdbscm_type_range): Likewise.
+	* m2-typeprint.c (m2_array): Likewise.
+	(m2_is_long_set_of_type): Likewise.
+	* m2-valprint.c (get_long_set_bounds): Likewise.
+	* p-typeprint.c (pascal_type_print_varspec_prefix): Likewise.
+	* python/py-type.c (typy_range): Likewise.
+	* rust-lang.c (rust_internal_print_type): Likewise.
+	* type-stack.c (type_stack::follow_types): Likewise.
+	* valarith.c (value_subscripted_rvalue): Likewise.
+	* valops.c (value_cast): Likewise.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.c (TYPE_ARRAY_BIT_STRIDE): Remove.  Update all
 	callers to use the equivalent accessor methods.
 
