@@ -267,5 +267,5 @@ main ()
   /* Push everything out to disk.  */
 
   print_string ("Dump core ....\n");
-  *(char*)0 = 0;
+  *(volatile char*)0 = 0;
 }

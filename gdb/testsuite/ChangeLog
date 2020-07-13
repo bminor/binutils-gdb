@@ -1,5 +1,14 @@
 2020-07-13  Gary Benson <gbenson@redhat.com>
 
+	* gdb.base/bigcore.c (main): Use a volatile pointer when
+	attempting to trigger a SIGSEGV.
+	* gdb.base/gcore-relro-pie.c (break_here): Likewise.
+	* gdb.base/gcore-tls-pie.c (break_here): Likewise.
+	* gdb.base/savedregs.c (thrower): Likewise.
+	* gdb.mi/mi-syn-frame.c (bar): Likewise.
+
+2020-07-13  Gary Benson <gbenson@redhat.com>
+
 	* gdb.base/vla-datatypes.c (vla_factory): Factor out sections
 	defining and using VLA structure fields into...
 	* gdb.base/vla-struct-fields.c: New file.

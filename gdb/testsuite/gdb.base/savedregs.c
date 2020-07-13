@@ -46,7 +46,7 @@ static void
 thrower (void)
 {
   /* Trigger a SIGSEGV.  */
-  *(char *)0 = 0;
+  *(volatile char *)0 = 0;
 
   /* On MMU-less system, previous memory access to address zero doesn't
      trigger a SIGSEGV.  Trigger a SIGILL.  Each arch should define its
