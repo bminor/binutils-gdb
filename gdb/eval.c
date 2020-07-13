@@ -3212,7 +3212,8 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 	  type = value_type (val);
 	  if (type->code () == TYPE_CODE_ARRAY
               && is_dynamic_type (type->index_type ())
-              && TYPE_HIGH_BOUND_UNDEFINED (type->index_type ()))
+              && (type->index_type ()->bounds ()->high.kind ()
+		  == PROP_UNDEFINED))
 	    return allocate_optimized_out_value (size_type);
 	}
       else

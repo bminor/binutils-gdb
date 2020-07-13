@@ -5117,10 +5117,11 @@ recursive_dump_type (struct type *type, int spaces)
     {
       printfi_filtered (spaces, "low %s%s  high %s%s\n",
 			plongest (type->bounds ()->low.const_val ()),
-			TYPE_LOW_BOUND_UNDEFINED (type) ? " (undefined)" : "",
+			(type->bounds ()->low.kind () == PROP_UNDEFINED
+			 ? " (undefined)" : ""),
 			plongest (type->bounds ()->high.const_val ()),
-			TYPE_HIGH_BOUND_UNDEFINED (type) 
-			? " (undefined)" : "");
+			(type->bounds ()->high.kind () == PROP_UNDEFINED
+			 ? " (undefined)" : ""));
     }
 
   switch (TYPE_SPECIFIC_FIELD (type))

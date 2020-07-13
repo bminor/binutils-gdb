@@ -1594,10 +1594,6 @@ extern unsigned type_align (struct type *);
    space in struct type.  */
 extern bool set_type_align (struct type *, ULONGEST);
 
-#define TYPE_LOW_BOUND_UNDEFINED(range_type) \
-  (TYPE_LOW_BOUND_KIND(range_type) == PROP_UNDEFINED)
-#define TYPE_HIGH_BOUND_UNDEFINED(range_type) \
-  (TYPE_HIGH_BOUND_KIND(range_type) == PROP_UNDEFINED)
 #define TYPE_HIGH_BOUND_KIND(range_type) \
   ((range_type)->bounds ()->high.kind ())
 #define TYPE_LOW_BOUND_KIND(range_type) \
@@ -1637,9 +1633,9 @@ extern bool set_type_align (struct type *, ULONGEST);
    index type.  */
 
 #define TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED(arraytype) \
-   TYPE_HIGH_BOUND_UNDEFINED((arraytype)->index_type ())
+   ((arraytype)->index_type ()->bounds ()->high.kind () == PROP_UNDEFINED)
 #define TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED(arraytype) \
-   TYPE_LOW_BOUND_UNDEFINED((arraytype)->index_type ())
+   ((arraytype)->index_type ()->bounds ()->low.kind () == PROP_UNDEFINED)
 
 #define TYPE_ARRAY_UPPER_BOUND_VALUE(arraytype) \
    ((arraytype)->index_type ()->bounds ()->high.const_val ())

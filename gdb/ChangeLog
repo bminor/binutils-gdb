@@ -1,5 +1,12 @@
 2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdbtypes.h (TYPE_LOW_BOUND_UNDEFINED,
+	TYPE_HIGH_BOUND_UNDEFINED): Remove.  Update all callers
+	to get the bound property's kind and check against
+	PROP_UNDEFINED.
+
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (TYPE_LOW_BOUND, TYPE_HIGH_BOUND): Remove.  Update
 	all callers to use type::range_bounds followed by
 	dynamic_prop::{low,high}.
