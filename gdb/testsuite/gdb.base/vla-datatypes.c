@@ -46,49 +46,6 @@ vla_factory (int n)
   BAR             bar_vla[n];
   int i;
 
-  struct vla_struct
-  {
-    int something;
-    int vla_field[n];
-  };
-  /* Define a typedef for a VLA structure.  */
-  typedef struct vla_struct vla_struct_typedef;
-  vla_struct_typedef vla_struct_object;
-
-  struct inner_vla_struct
-  {
-    int something;
-    int vla_field[n];
-    int after;
-  } inner_vla_struct_object;
-
-  /* Define a structure which uses a typedef for the VLA field
-     to make sure that GDB creates the proper type for this field,
-     preventing a possible assertion failure (see gdb/21356).  */
-  struct vla_struct_typedef_struct_member
-  {
-    int something;
-    vla_struct_typedef vla_object;
-  } vla_struct_typedef_struct_member_object;
-
-  union vla_union
-  {
-    int vla_field[n];
-  } vla_union_object;
-
-  /* Like vla_struct_typedef_struct_member but a union type.  */
-  union vla_struct_typedef_union_member
-  {
-    int something;
-    vla_struct_typedef vla_object;
-  } vla_struct_typedef_union_member_object;
-
-  vla_struct_object.something = n;
-  inner_vla_struct_object.something = n;
-  inner_vla_struct_object.after = n;
-  vla_struct_typedef_struct_member_object.something = n * 2;
-  vla_struct_typedef_struct_member_object.vla_object.something = n * 3;
-  vla_struct_typedef_union_member_object.vla_object.something = n + 1;
   for (i = 0; i < n; i++)
     {
       int_vla[i] = i*2;
@@ -104,13 +61,6 @@ vla_factory (int n)
       foo_vla[i].a = i*2;
       bar_vla[i].x = i*2;
       bar_vla[i].y.a = i*2;
-      vla_struct_object.vla_field[i] = i*2;
-      vla_union_object.vla_field[i] = i*2;
-      inner_vla_struct_object.vla_field[i] = i*2;
-      vla_struct_typedef_struct_member_object.vla_object.vla_field[i]
-	= i * 3;
-      vla_struct_typedef_union_member_object.vla_object.vla_field[i]
-	= i * 3 - 1;
     }
 
   size_t int_size        = sizeof(int_vla);     /* vlas_filled */
@@ -124,9 +74,6 @@ vla_factory (int n)
   size_t uchar_size      = sizeof(unsigned_char_vla);
   size_t foo_size        = sizeof(foo_vla);
   size_t bar_size        = sizeof(bar_vla);
-  size_t vla_struct_object_size = sizeof(vla_struct_object);
-  size_t vla_union_object_size = sizeof(vla_union_object);
-  size_t inner_vla_struct_object_size = sizeof(inner_vla_struct_object);
 
   return;                                 /* break_end_of_vla_factory */
 }
