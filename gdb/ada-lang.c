@@ -2250,7 +2250,7 @@ has_negatives (struct type *type)
     case TYPE_CODE_INT:
       return !TYPE_UNSIGNED (type);
     case TYPE_CODE_RANGE:
-      return TYPE_LOW_BOUND (type) - TYPE_RANGE_DATA (type)->bias < 0;
+      return TYPE_LOW_BOUND (type) - type->bounds ()->bias < 0;
     }
 }
 

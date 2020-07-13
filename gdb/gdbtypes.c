@@ -978,8 +978,8 @@ create_range_type_with_stride (struct type *result_type,
 				   high_bound, bias);
 
   gdb_assert (stride != nullptr);
-  TYPE_RANGE_DATA (result_type)->stride = *stride;
-  TYPE_RANGE_DATA (result_type)->flag_is_byte_stride = byte_stride_p;
+  result_type->bounds ()->stride = *stride;
+  result_type->bounds ()->flag_is_byte_stride = byte_stride_p;
 
   return result_type;
 }
@@ -1200,7 +1200,7 @@ update_static_array_size (struct type *type)
   struct type *range_type = type->index_type ();
 
   if (type->dyn_prop (DYN_PROP_BYTE_STRIDE) == nullptr
-      && has_static_range (TYPE_RANGE_DATA (range_type))
+      && has_static_range (range_type->bounds ())
       && (!type_not_associated (type)
 	  && !type_not_allocated (type)))
     {
@@ -2017,7 +2017,7 @@ is_dynamic_type_internal (struct type *type, int top_level)
 	   dynamic when its subtype is dynamic, even if the bounds
 	   of the range type are static.  It allows us to assume that
 	   the subtype of a static range type is also static.  */
-	return (!has_static_range (TYPE_RANGE_DATA (type))
+	return (!has_static_range (type->bounds ())
 		|| is_dynamic_type_internal (TYPE_TARGET_TYPE (type), 0));
       }
 
@@ -2094,12 +2094,11 @@ resolve_dynamic_range (struct type *dyn_range_type,
 {
   CORE_ADDR value;
   struct type *static_range_type, *static_target_type;
-  const struct dynamic_prop *prop;
   struct dynamic_prop low_bound, high_bound, stride;
 
   gdb_assert (dyn_range_type->code () == TYPE_CODE_RANGE);
 
-  prop = &TYPE_RANGE_DATA (dyn_range_type)->low;
+  const struct dynamic_prop *prop = &dyn_range_type->bounds ()->low;
   if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
     {
       low_bound.kind = PROP_CONST;
@@ -2111,13 +2110,13 @@ resolve_dynamic_range (struct type *dyn_range_type,
       low_bound.data.const_val = 0;
     }
 
-  prop = &TYPE_RANGE_DATA (dyn_range_type)->high;
+  prop = &dyn_range_type->bounds ()->high;
   if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
     {
       high_bound.kind = PROP_CONST;
       high_bound.data.const_val = value;
 
-      if (TYPE_RANGE_DATA (dyn_range_type)->flag_upper_bound_is_count)
+      if (dyn_range_type->bounds ()->flag_upper_bound_is_count)
 	high_bound.data.const_val
 	  = low_bound.data.const_val + high_bound.data.const_val - 1;
     }
@@ -2127,8 +2126,8 @@ resolve_dynamic_range (struct type *dyn_range_type,
       high_bound.data.const_val = 0;
     }
 
-  bool byte_stride_p = TYPE_RANGE_DATA (dyn_range_type)->flag_is_byte_stride;
-  prop = &TYPE_RANGE_DATA (dyn_range_type)->stride;
+  bool byte_stride_p = dyn_range_type->bounds ()->flag_is_byte_stride;
+  prop = &dyn_range_type->bounds ()->stride;
   if (dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
     {
       stride.kind = PROP_CONST;
@@ -2154,11 +2153,11 @@ resolve_dynamic_range (struct type *dyn_range_type,
   static_target_type
     = resolve_dynamic_type_internal (TYPE_TARGET_TYPE (dyn_range_type),
 				     addr_stack, 0);
-  LONGEST bias = TYPE_RANGE_DATA (dyn_range_type)->bias;
+  LONGEST bias = dyn_range_type->bounds ()->bias;
   static_range_type = create_range_type_with_stride
     (copy_type (dyn_range_type), static_target_type,
      &low_bound, &high_bound, bias, &stride, byte_stride_p);
-  TYPE_RANGE_DATA (static_range_type)->flag_bound_evaluated = 1;
+  static_range_type->bounds ()->flag_bound_evaluated = 1;
   return static_range_type;
 }
 
@@ -4036,7 +4035,7 @@ check_types_equal (struct type *type1, struct type *type2,
 
   if (type1->code () == TYPE_CODE_RANGE)
     {
-      if (*TYPE_RANGE_DATA (type1) != *TYPE_RANGE_DATA (type2))
+      if (*type1->bounds () != *type2->bounds ())
 	return false;
     }
   else

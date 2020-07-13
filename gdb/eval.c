@@ -3255,7 +3255,7 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos,
 		  type = type->index_type ();
 		  /* Only re-evaluate the right hand side if the resulting type
 		     is a variable length type.  */
-		  if (TYPE_RANGE_DATA (type)->flag_bound_evaluated)
+		  if (type->bounds ()->flag_bound_evaluated)
 		    {
 		      val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_NORMAL);
 		      return value_from_longest

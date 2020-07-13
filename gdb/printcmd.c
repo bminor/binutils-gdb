@@ -418,8 +418,7 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 	   || options->format == 'z'
 	   || options->format == 'd'
 	   || options->format == 'u'))
-      || (type->code () == TYPE_CODE_RANGE
-	  && TYPE_RANGE_DATA (type)->bias != 0))
+      || (type->code () == TYPE_CODE_RANGE && type->bounds ()->bias != 0))
     {
       val_long.emplace (unpack_long (type, valaddr));
       converted_bytes.resize (TYPE_LENGTH (type));

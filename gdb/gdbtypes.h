@@ -1518,22 +1518,21 @@ extern unsigned type_align (struct type *);
    space in struct type.  */
 extern bool set_type_align (struct type *, ULONGEST);
 
-#define TYPE_RANGE_DATA(thistype) ((thistype)->bounds ())
 #define TYPE_LOW_BOUND(range_type) \
-  TYPE_RANGE_DATA(range_type)->low.data.const_val
+  ((range_type)->bounds ()->low.data.const_val)
 #define TYPE_HIGH_BOUND(range_type) \
-  TYPE_RANGE_DATA(range_type)->high.data.const_val
+  ((range_type)->bounds ()->high.data.const_val)
 #define TYPE_LOW_BOUND_UNDEFINED(range_type) \
-  (TYPE_RANGE_DATA(range_type)->low.kind == PROP_UNDEFINED)
+  (TYPE_LOW_BOUND_KIND(range_type) == PROP_UNDEFINED)
 #define TYPE_HIGH_BOUND_UNDEFINED(range_type) \
-  (TYPE_RANGE_DATA(range_type)->high.kind == PROP_UNDEFINED)
+  (TYPE_HIGH_BOUND_KIND(range_type) == PROP_UNDEFINED)
 #define TYPE_HIGH_BOUND_KIND(range_type) \
-  TYPE_RANGE_DATA(range_type)->high.kind
+  ((range_type)->bounds ()->high.kind)
 #define TYPE_LOW_BOUND_KIND(range_type) \
-  TYPE_RANGE_DATA(range_type)->low.kind
+  ((range_type)->bounds ()->low.kind)
 #define TYPE_BIT_STRIDE(range_type) \
-  (TYPE_RANGE_DATA(range_type)->stride.data.const_val \
-   * (TYPE_RANGE_DATA(range_type)->flag_is_byte_stride ? 8 : 1))
+  ((range_type)->bounds ()->stride.data.const_val \
+   * ((range_type)->bounds ()->flag_is_byte_stride ? 8 : 1))
 
 /* Property accessors for the type data location.  */
 #define TYPE_DATA_LOCATION(thistype) \

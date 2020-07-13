@@ -504,7 +504,7 @@ generate_vla_size (compile_instance *compiler,
 	if (TYPE_HIGH_BOUND_KIND (type) == PROP_LOCEXPR
 	    || TYPE_HIGH_BOUND_KIND (type) == PROP_LOCLIST)
 	  {
-	    const struct dynamic_prop *prop = &TYPE_RANGE_DATA (type)->high;
+	    const struct dynamic_prop *prop = &type->bounds ()->high;
 	    std::string name = c_get_range_decl_name (prop);
 
 	    dwarf2_compile_property_to_c (stream, name.c_str (),

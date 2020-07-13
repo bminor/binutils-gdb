@@ -17958,7 +17958,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
     range_type = create_range_type (NULL, orig_base_type, &low, &high, bias);
 
   if (high_bound_is_count)
-    TYPE_RANGE_DATA (range_type)->flag_upper_bound_is_count = 1;
+    range_type->bounds ()->flag_upper_bound_is_count = 1;
 
   /* Ada expects an empty array on no boundary attributes.  */
   if (attr == NULL && cu->language != language_ada)

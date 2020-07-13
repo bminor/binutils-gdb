@@ -483,7 +483,7 @@ compile_cplus_convert_array (compile_cplus_instance *instance,
 	}
 
       std::string upper_bound
-	= c_get_range_decl_name (&TYPE_RANGE_DATA (range)->high);
+	= c_get_range_decl_name (&range->bounds ()->high);
       return instance->plugin ().build_vla_array_type (element_type,
 					     upper_bound.c_str ());
     }

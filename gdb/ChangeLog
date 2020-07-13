@@ -1,3 +1,8 @@
+2020-07-12  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.h (TYPE_RANGE_DATA): Remove.  Update callers to use
+	the type::bounds method directly.
+
 2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
 
 	* gdbtypes.h (struct type) <bounds, set_bounds>: New methods.

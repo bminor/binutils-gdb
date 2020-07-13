@@ -2781,7 +2781,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
 	else
 	  result = extract_signed_integer (valaddr, len, byte_order);
 	if (code == TYPE_CODE_RANGE)
-	  result += TYPE_RANGE_DATA (type)->bias;
+	  result += type->bounds ()->bias;
 	return result;
       }
 
@@ -3331,7 +3331,7 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
   switch (type->code ())
     {
     case TYPE_CODE_RANGE:
-      num -= TYPE_RANGE_DATA (type)->bias;
+      num -= type->bounds ()->bias;
       /* Fall through.  */
     case TYPE_CODE_INT:
     case TYPE_CODE_CHAR:

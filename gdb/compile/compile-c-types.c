@@ -61,7 +61,7 @@ convert_array (compile_c_instance *context, struct type *type)
 					   " is not supported"));
 
       std::string upper_bound
-	= c_get_range_decl_name (&TYPE_RANGE_DATA (range)->high);
+	= c_get_range_decl_name (&range->bounds ()->high);
       result = context->plugin ().build_vla_array_type (element_type,
 							upper_bound.c_str ());
       return result;
