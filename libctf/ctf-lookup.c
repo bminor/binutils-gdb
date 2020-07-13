@@ -83,7 +83,7 @@ ctf_lookup_by_name (ctf_file_t *fp, const char *name)
 
   for (p = name, end = name + strlen (name); *p != '\0'; p = q)
     {
-      while (isspace (*p))
+      while (isspace ((int) *p))
 	p++;			/* Skip leading whitespace.  */
 
       if (p == end)
@@ -133,13 +133,13 @@ ctf_lookup_by_name (ctf_file_t *fp, const char *name)
 	       strncmp (p, lp->ctl_prefix, (size_t) (q - p)) == 0) &&
 	      (size_t) (q - p) >= lp->ctl_len)
 	    {
-	      for (p += lp->ctl_len; isspace (*p); p++)
+	      for (p += lp->ctl_len; isspace ((int) *p); p++)
 		continue;	/* Skip prefix and next whitespace.  */
 
 	      if ((q = strchr (p, '*')) == NULL)
 		q = end;	/* Compare until end.  */
 
-	      while (isspace (q[-1]))
+	      while (isspace ((int) q[-1]))
 		q--;		/* Exclude trailing whitespace.  */
 
 	      /* Expand and/or allocate storage for a slice of the name, then

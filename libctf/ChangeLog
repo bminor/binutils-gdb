@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-lookup.c (ctf_lookup_by_name): Adjust.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-archive.c (ctf_arc_bufopen): Endian-swap the archive magic
 	number if needed.
 
