@@ -1,3 +1,8 @@
+2020-07-13  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/info_sources.exp: Skip directory match tests on
+	remote hosts.
+
 2020-07-13  Gary Benson <gbenson@redhat.com>
 
 	* gdb.base/savedregs.exp (caller): Use parentheses to
