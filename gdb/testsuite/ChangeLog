@@ -1,5 +1,10 @@
 2020-07-13  Gary Benson <gbenson@redhat.com>
 
+	* gdb.base/savedregs.exp (caller): Use parentheses to
+	make expected expression evaluation ordering explicit.
+
+2020-07-13  Gary Benson <gbenson@redhat.com>
+
 	* gdb.arch/i386-sse.c (have_sse) <edx>: Make unsigned.
 
 2020-07-13  Gary Benson <gbenson@redhat.com>
