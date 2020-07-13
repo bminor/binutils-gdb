@@ -3693,7 +3693,7 @@ is, using:
 @end smallexample
 
 The @code{tfaas} command accepts the same options as the @code{frame
-apply} command.  @xref{frame apply}.
+apply} command.  @xref{Frame Apply,,frame apply}.
 
 @kindex thread name
 @cindex name a thread
@@ -8451,7 +8451,6 @@ tfaas i lo -q -t lock_something_t
 
 @node Frame Apply
 @section Applying a Command to Several Frames.
-@anchor{frame apply}
 @kindex frame apply
 @cindex apply command to several frames
 @table @code
@@ -8583,7 +8582,7 @@ is, using:
 @end smallexample
 
 The @code{faas} command accepts the same options as the @code{frame
-apply} command.  @xref{frame apply}.
+apply} command.  @xref{Frame Apply,,frame apply}.
 
 Note that the command @code{tfaas @var{command}} applies @var{command}
 on all frames of all threads.  See @xref{Threads,,Threads}.
