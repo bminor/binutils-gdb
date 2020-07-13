@@ -1,3 +1,9 @@
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.h (struct type) <bounds, set_bounds>: New methods.
+	(TYPE_RANGE_DATA): Use type::bounds.  Change all uses that
+	are used to set the range type's bounds to use set_bounds.
+
 2020-07-11  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* exec.c (_initialize_exec): Update exec-file-mismatch help.

@@ -953,6 +953,22 @@ struct type
     this->field (0).set_type (index_type);
   }
 
+  /* Get the bounds bounds of this type.  The type must be a range type.  */
+  range_bounds *bounds () const
+  {
+    gdb_assert (this->code () == TYPE_CODE_RANGE);
+
+    return this->main_type->flds_bnds.bounds;
+  }
+
+  /* Set the bounds of this type.  The type must be a range type.  */
+  void set_bounds (range_bounds *bounds)
+  {
+    gdb_assert (this->code () == TYPE_CODE_RANGE);
+
+    this->main_type->flds_bnds.bounds = bounds;
+  }
+
   /* * Return the dynamic property of the requested KIND from this type's
      list of dynamic properties.  */
   dynamic_prop *dyn_prop (dynamic_prop_node_kind kind) const;
@@ -1502,7 +1518,7 @@ extern unsigned type_align (struct type *);
    space in struct type.  */
 extern bool set_type_align (struct type *, ULONGEST);
 
-#define TYPE_RANGE_DATA(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.bounds
+#define TYPE_RANGE_DATA(thistype) ((thistype)->bounds ())
 #define TYPE_LOW_BOUND(range_type) \
   TYPE_RANGE_DATA(range_type)->low.data.const_val
 #define TYPE_HIGH_BOUND(range_type) \
