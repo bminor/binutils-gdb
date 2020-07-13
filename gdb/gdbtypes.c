@@ -1028,8 +1028,11 @@ has_static_range (const struct range_bounds *bounds)
 
 
 /* Set *LOWP and *HIGHP to the lower and upper bounds of discrete type
-   TYPE.  Return 1 if type is a range type, 0 if it is discrete (and
-   bounds will fit in LONGEST), or -1 otherwise.  */
+   TYPE.
+
+   Return 1 if type is a range type with two defined, constant bounds.
+   Else, return 0 if it is discrete (and bounds will fit in LONGEST).
+   Else, return -1.  */
 
 int
 get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
@@ -1038,8 +1041,15 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
   switch (type->code ())
     {
     case TYPE_CODE_RANGE:
+      /* This function currently only works for ranges with two defined,
+         constant bounds.  */
+      if (type->bounds ()->low.kind () != PROP_CONST
+	  || type->bounds ()->high.kind () != PROP_CONST)
+	return -1;
+
       *lowp = TYPE_LOW_BOUND (type);
       *highp = TYPE_HIGH_BOUND (type);
+
       if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ENUM)
 	{
 	  if (!discrete_position (TYPE_TARGET_TYPE (type), *lowp, lowp)
@@ -1107,14 +1117,7 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
    Save the high bound into HIGH_BOUND if not NULL.
 
    Return 1 if the operation was successful.  Return zero otherwise,
-   in which case the values of LOW_BOUND and HIGH_BOUNDS are unmodified.
-
-   We now simply use get_discrete_bounds call to get the values
-   of the low and high bounds.
-   get_discrete_bounds can return three values:
-   1, meaning that index is a range,
-   0, meaning that index is a discrete type,
-   or -1 for failure.  */
+   in which case the values of LOW_BOUND and HIGH_BOUNDS are unmodified.  */
 
 int
 get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
@@ -1129,12 +1132,6 @@ get_array_bounds (struct type *type, LONGEST *low_bound, LONGEST *high_bound)
 
   res = get_discrete_bounds (index, &low, &high);
   if (res == -1)
-    return 0;
-
-  /* Check if the array bounds are undefined.  */
-  if (res == 1
-      && ((low_bound && TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED (type))
-	  || (high_bound && TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))))
     return 0;
 
   if (low_bound)

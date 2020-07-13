@@ -1,3 +1,10 @@
+2020-07-12  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdbtypes.c (get_discrete_bounds): Return failure if
+	the range type's bounds are not both defined and constant
+	values.
+	(get_array_bounds): Update comment.  Remove undefined bound check.
+
 2020-07-12  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdbtypes.h (TYPE_RANGE_DATA): Remove.  Update callers to use
