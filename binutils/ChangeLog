@@ -1,3 +1,7 @@
+2020-07-13  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
 2020-07-13  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/lib/binutils-common.exp (is_pecoff_format): Accept
