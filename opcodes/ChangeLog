@@ -1,3 +1,9 @@
+2020-07-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26237
+	* i386-dis.c (OP_E_memory): Without base nor index registers,
+	32-bit displacement to 64 bits.
+
 2020-07-14  Claudiu Zissulescu  <claziss@gmail.com>
 
 	* arc-dis.c (print_insn_arc): Detect and emit a warning when a

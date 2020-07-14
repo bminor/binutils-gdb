@@ -11877,8 +11877,13 @@ OP_E_memory (int bytemode, int sizeflag)
 	{
 	  if (address_mode == mode_64bit)
 	    {
-	      /* Display eiz instead of addr32.  */
-	      needindex = addr32flag;
+	      if (addr32flag)
+		{
+		  /* Without base nor index registers, zero-extend the
+		     lower 32-bit displacement to 64 bits.  */
+		  disp = (unsigned int) disp;
+		  needindex = 1;
+		}
 	      needaddr32 = 1;
 	    }
 	  else
