@@ -63,6 +63,10 @@ program test
      integer function fun2 (x)
        integer :: x
      end function fun2
+
+     subroutine say_array (arr)
+       integer, dimension (:,:) :: arr
+     end subroutine say_array
   end interface
 
   type (Number) :: n1
@@ -70,7 +74,12 @@ program test
 
   procedure(fun1), pointer:: fun_ptr => NULL()
 
+  integer, dimension (5,5) :: array
+  array = 0
+
   call say_numbers (1,2,3)	! stop here
+  call say_string ('hello world')
+  call say_array (array (2:3, 2:4))
   print *, fun_ptr (3)
 
 end program test
@@ -87,3 +96,17 @@ integer function fun2 (x)
   fun2 = x + 2
 end function fun2
 
+subroutine say_string (str)
+  character(len=*) :: str
+  print *, str
+end subroutine say_string
+
+subroutine say_array (arr)
+  integer, dimension (:,:) :: arr
+  do i=LBOUND (arr, 2), UBOUND (arr, 2), 1
+     do j=LBOUND (arr, 1), UBOUND (arr, 1), 1
+        write(*, fmt="(i4)", advance="no") arr (j, i)
+     end do
+     print *, ""
+  end do
+end subroutine say_array
