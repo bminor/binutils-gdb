@@ -1,5 +1,22 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (Vex128, Vex256, vex128_mode, vex256_mode): Delete.
+	(VEX_W_0F381A_P_2_M_0, VEX_W_0F385A_P_2_M_0, VEX_W_0F3A06_P_2,
+	VEX_W_0F3A18_P_2, VEX_W_0F3A19_P_2, VEX_W_0F3A38_P_2,
+	VEX_W_0F3A39_P_2, VEX_W_0F3A46_P_2): Rename to ...
+	(VEX_W_0F381A_P_2_M_0_L_0, VEX_W_0F385A_P_2_M_0_L_0,
+	VEX_W_0F3A06_P_2_L_0, VEX_W_0F3A18_P_2_L_0,
+	VEX_W_0F3A19_P_2_L_0, VEX_W_0F3A38_P_2_L_0,
+	VEX_W_0F3A39_P_2_L_0, VEX_W_0F3A46_P_2_L_0): ... respectively.
+	(vex_table): Replace Vex128 by Vex.
+	(vex_len_table): Likewise. Adjust referenced enum names.
+	(vex_w_table): Replace Vex128 and Vex256 by Vex. Adjust
+	referenced enum names.
+	(OP_VEX): Drop vex128_mode and vex256_mode cases.
+	* i386-dis-evex-len.h (evex_len_table): Replace Vex128 by Vex.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (dis386): "LW" description now applies to "DQ".
 	(putop): Handle "DQ". Don't handle "LW" anymore.
 	(prefix_table, mod_table): Replace %LW by %DQ.

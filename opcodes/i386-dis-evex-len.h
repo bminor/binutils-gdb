@@ -16,7 +16,7 @@ static const struct dis386 evex_len_table[][3] = {
 
   /* EVEX_LEN_0FC4_P_2 */
   {
-    { "vpinsrw",	{ XM, Vex128, Edqw, Ib }, 0 },
+    { "vpinsrw",	{ XM, Vex, Edqw, Ib }, 0 },
   },
 
   /* EVEX_LEN_0FC5_P_2 */
@@ -289,7 +289,7 @@ static const struct dis386 evex_len_table[][3] = {
 
   /* EVEX_LEN_0F3A20_P_2 */
   {
-    { "vpinsrb",	{ XM, Vex128, Edqb, Ib }, 0 },
+    { "vpinsrb",	{ XM, Vex, Edqb, Ib }, 0 },
   },
 
   /* EVEX_LEN_0F3A21_P_2_W_0 */
@@ -299,7 +299,7 @@ static const struct dis386 evex_len_table[][3] = {
 
   /* EVEX_LEN_0F3A22_P_2 */
   {
-    { "vpinsrK",	{ XM, Vex128, Edq, Ib }, 0 },
+    { "vpinsrK",	{ XM, Vex, Edq, Ib }, 0 },
   },
 
   /* EVEX_LEN_0F3A23_P_2_W_0 */
