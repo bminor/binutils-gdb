@@ -1,3 +1,9 @@
+2020-07-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26237
+	* i386-dis.c (OP_E_memory): Without base nor index registers,
+	zero-extend lower 32-bit displacement to 64 bits.
+
 2020-07-06  Nick Clifton  <nickc@redhat.com>
 
 	* po/pt_BR.po: Updated Brazilian Portugugese translation.
