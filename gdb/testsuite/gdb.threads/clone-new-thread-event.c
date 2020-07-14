@@ -43,7 +43,7 @@ tkill (int lwpid, int signo)
 }
 
 static pid_t
-gettid (void)
+local_gettid (void)
 {
   return syscall (__NR_gettid);
 }
@@ -51,7 +51,7 @@ gettid (void)
 static int
 fn (void *unused)
 {
-  tkill (gettid (), SIGUSR1);
+  tkill (local_gettid (), SIGUSR1);
   return 0;
 }
 

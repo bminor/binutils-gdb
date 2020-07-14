@@ -1,3 +1,9 @@
+2020-07-14  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.threads/clone-new-thread-event.c (gettid): Rename to ...
+	(local_gettid): ... this.
+	(fn): Update.
+
 2020-07-13  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.base/info_sources.exp: Skip directory match tests on
