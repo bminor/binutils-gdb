@@ -95,7 +95,6 @@ static void OP_Rounding (int, int);
 static void OP_REG_VexI4 (int, int);
 static void OP_VexI4 (int, int);
 static void PCLMUL_Fixup (int, int);
-static void VCMP_Fixup (int, int);
 static void VPCMP_Fixup (int, int);
 static void VPCOM_Fixup (int, int);
 static void OP_0f07 (int, int);
@@ -409,7 +408,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define XMVexScalarI4 { OP_REG_VexI4, scalar_mode }
 #define VexI4 { OP_VexI4, 0 }
 #define PCLMUL { PCLMUL_Fixup, 0 }
-#define VCMP { VCMP_Fixup, 0 }
 #define VPCMP { VPCMP_Fixup, 0 }
 #define VPCOM { VPCOM_Fixup, 0 }
 
@@ -5144,10 +5142,10 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_VEX_0FC2 */
   {
-    { "vcmpps",		{ XM, Vex, EXx, VCMP }, 0 },
-    { "vcmpss",		{ XMScalar, VexScalar, EXxmm_md, VCMP }, 0 },
-    { "vcmppd",		{ XM, Vex, EXx, VCMP }, 0 },
-    { "vcmpsd",		{ XMScalar, VexScalar, EXxmm_mq, VCMP }, 0 },
+    { "vcmpps",		{ XM, Vex, EXx, CMP }, 0 },
+    { "vcmpss",		{ XMScalar, VexScalar, EXxmm_md, CMP }, 0 },
+    { "vcmppd",		{ XM, Vex, EXx, CMP }, 0 },
+    { "vcmpsd",		{ XMScalar, VexScalar, EXxmm_mq, CMP }, 0 },
   },
 
   /* PREFIX_VEX_0FC4 */
@@ -16111,7 +16109,7 @@ OP_3DNowSuffix (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
   mnemonicendp = obufp;
 }
 
-static struct op simd_cmp_op[] =
+static const struct op simd_cmp_op[] =
 {
   { STRING_COMMA_LEN ("eq") },
   { STRING_COMMA_LEN ("lt") },
@@ -16121,6 +16119,34 @@ static struct op simd_cmp_op[] =
   { STRING_COMMA_LEN ("nlt") },
   { STRING_COMMA_LEN ("nle") },
   { STRING_COMMA_LEN ("ord") }
+};
+
+static const struct op vex_cmp_op[] =
+{
+  { STRING_COMMA_LEN ("eq_uq") },
+  { STRING_COMMA_LEN ("nge") },
+  { STRING_COMMA_LEN ("ngt") },
+  { STRING_COMMA_LEN ("false") },
+  { STRING_COMMA_LEN ("neq_oq") },
+  { STRING_COMMA_LEN ("ge") },
+  { STRING_COMMA_LEN ("gt") },
+  { STRING_COMMA_LEN ("true") },
+  { STRING_COMMA_LEN ("eq_os") },
+  { STRING_COMMA_LEN ("lt_oq") },
+  { STRING_COMMA_LEN ("le_oq") },
+  { STRING_COMMA_LEN ("unord_s") },
+  { STRING_COMMA_LEN ("neq_us") },
+  { STRING_COMMA_LEN ("nlt_uq") },
+  { STRING_COMMA_LEN ("nle_uq") },
+  { STRING_COMMA_LEN ("ord_s") },
+  { STRING_COMMA_LEN ("eq_us") },
+  { STRING_COMMA_LEN ("nge_uq") },
+  { STRING_COMMA_LEN ("ngt_uq") },
+  { STRING_COMMA_LEN ("false_os") },
+  { STRING_COMMA_LEN ("neq_os") },
+  { STRING_COMMA_LEN ("ge_oq") },
+  { STRING_COMMA_LEN ("gt_oq") },
+  { STRING_COMMA_LEN ("true_us") },
 };
 
 static void
@@ -16139,6 +16165,18 @@ CMP_Fixup (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
       suffix[2] = '\0';
       sprintf (p, "%s%s", simd_cmp_op[cmp_type].name, suffix);
       mnemonicendp += simd_cmp_op[cmp_type].len;
+    }
+  else if (need_vex
+	   && cmp_type < ARRAY_SIZE (simd_cmp_op) + ARRAY_SIZE (vex_cmp_op))
+    {
+      char suffix [3];
+      char *p = mnemonicendp - 2;
+      suffix[0] = p[0];
+      suffix[1] = p[1];
+      suffix[2] = '\0';
+      cmp_type -= ARRAY_SIZE (simd_cmp_op);
+      sprintf (p, "%s%s", vex_cmp_op[cmp_type].name, suffix);
+      mnemonicendp += vex_cmp_op[cmp_type].len;
     }
   else
     {
@@ -16595,69 +16633,6 @@ OP_XMM_Vex (int bytemode, int sizeflag)
   if (modrm.mod != 3)
     need_vex_reg = 0;
   OP_XMM (bytemode, sizeflag);
-}
-
-static struct op vex_cmp_op[] =
-{
-  { STRING_COMMA_LEN ("eq") },
-  { STRING_COMMA_LEN ("lt") },
-  { STRING_COMMA_LEN ("le") },
-  { STRING_COMMA_LEN ("unord") },
-  { STRING_COMMA_LEN ("neq") },
-  { STRING_COMMA_LEN ("nlt") },
-  { STRING_COMMA_LEN ("nle") },
-  { STRING_COMMA_LEN ("ord") },
-  { STRING_COMMA_LEN ("eq_uq") },
-  { STRING_COMMA_LEN ("nge") },
-  { STRING_COMMA_LEN ("ngt") },
-  { STRING_COMMA_LEN ("false") },
-  { STRING_COMMA_LEN ("neq_oq") },
-  { STRING_COMMA_LEN ("ge") },
-  { STRING_COMMA_LEN ("gt") },
-  { STRING_COMMA_LEN ("true") },
-  { STRING_COMMA_LEN ("eq_os") },
-  { STRING_COMMA_LEN ("lt_oq") },
-  { STRING_COMMA_LEN ("le_oq") },
-  { STRING_COMMA_LEN ("unord_s") },
-  { STRING_COMMA_LEN ("neq_us") },
-  { STRING_COMMA_LEN ("nlt_uq") },
-  { STRING_COMMA_LEN ("nle_uq") },
-  { STRING_COMMA_LEN ("ord_s") },
-  { STRING_COMMA_LEN ("eq_us") },
-  { STRING_COMMA_LEN ("nge_uq") },
-  { STRING_COMMA_LEN ("ngt_uq") },
-  { STRING_COMMA_LEN ("false_os") },
-  { STRING_COMMA_LEN ("neq_os") },
-  { STRING_COMMA_LEN ("ge_oq") },
-  { STRING_COMMA_LEN ("gt_oq") },
-  { STRING_COMMA_LEN ("true_us") },
-};
-
-static void
-VCMP_Fixup (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
-{
-  unsigned int cmp_type;
-
-  FETCH_DATA (the_info, codep + 1);
-  cmp_type = *codep++ & 0xff;
-  if (cmp_type < ARRAY_SIZE (vex_cmp_op))
-    {
-      char suffix [3];
-      char *p = mnemonicendp - 2;
-      suffix[0] = p[0];
-      suffix[1] = p[1];
-      suffix[2] = '\0';
-      sprintf (p, "%s%s", vex_cmp_op[cmp_type].name, suffix);
-      mnemonicendp += vex_cmp_op[cmp_type].len;
-    }
-  else
-    {
-      /* We have a reserved extension byte.  Output it directly.  */
-      scratchbuf[0] = '$';
-      print_operand_value (scratchbuf + 1, 1, cmp_type);
-      oappend_maybe_intel (scratchbuf);
-      scratchbuf[0] = '\0';
-    }
 }
 
 static void

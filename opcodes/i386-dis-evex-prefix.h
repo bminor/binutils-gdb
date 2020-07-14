@@ -291,9 +291,9 @@
   },
   /* PREFIX_EVEX_0FC2 */
   {
-    { "vcmppX",	{ XMask, Vex, EXx, EXxEVexS, VCMP }, PREFIX_OPCODE },
+    { "vcmppX",	{ XMask, Vex, EXx, EXxEVexS, CMP }, PREFIX_OPCODE },
     { VEX_W_TABLE (EVEX_W_0FC2_P_1) },
-    { "vcmppX",	{ XMask, Vex, EXx, EXxEVexS, VCMP }, PREFIX_OPCODE },
+    { "vcmppX",	{ XMask, Vex, EXx, EXxEVexS, CMP }, PREFIX_OPCODE },
     { VEX_W_TABLE (EVEX_W_0FC2_P_3) },
   },
   /* PREFIX_EVEX_0FC4 */

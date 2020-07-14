@@ -1,5 +1,14 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (VCMP_Fixup, VCMP): Delete.
+	(simd_cmp_op): Add const.
+	(vex_cmp_op): Move up and drop initial 8 entries. Add const.
+	(CMP_Fixup): Handle VEX case.
+	(prefix_table): Replace VCMP by CMP.
+	* i386-dis-evex-prefix.h, i386-dis-evex-w.h: Likewise.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (MOVBE_Fixup): Delete.
 	(Mv): Define.
 	(prefix_table): Use Mv for movbe entries.

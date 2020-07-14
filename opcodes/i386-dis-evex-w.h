@@ -270,12 +270,12 @@
   },
   /* EVEX_W_0FC2_P_1 */
   {
-    { "vcmpss",	{ XMask, VexScalar, EXxmm_md, EXxEVexS, VCMP }, 0 },
+    { "vcmpss",	{ XMask, VexScalar, EXxmm_md, EXxEVexS, CMP }, 0 },
   },
   /* EVEX_W_0FC2_P_3 */
   {
     { Bad_Opcode },
-    { "vcmpsd",	{ XMask, VexScalar, EXxmm_mq, EXxEVexS, VCMP }, 0 },
+    { "vcmpsd",	{ XMask, VexScalar, EXxmm_mq, EXxEVexS, CMP }, 0 },
   },
   /* EVEX_W_0FD2 */
   {
