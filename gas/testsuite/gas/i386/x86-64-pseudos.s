@@ -305,6 +305,8 @@ _start:
 	{disp8} movaps 128(%rax),%xmm2
 	{disp32} movaps 128(%rax),%xmm2
 	{rex} mov %al,%ah
+	{rex} shl %cl, %eax
+	{rex} movabs 1, %al
 	{rex} movl %eax,%ebx
 	{rex} movl %eax,%r14d
 	{rex} movl %eax,(%r8)

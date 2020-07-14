@@ -326,23 +326,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define RMDX { OP_REG, dx_reg }
 
 #define eAX { OP_IMREG, eAX_reg }
-#define eBX { OP_IMREG, eBX_reg }
-#define eCX { OP_IMREG, eCX_reg }
-#define eDX { OP_IMREG, eDX_reg }
-#define eSP { OP_IMREG, eSP_reg }
-#define eBP { OP_IMREG, eBP_reg }
-#define eSI { OP_IMREG, eSI_reg }
-#define eDI { OP_IMREG, eDI_reg }
 #define AL { OP_IMREG, al_reg }
 #define CL { OP_IMREG, cl_reg }
-#define DL { OP_IMREG, dl_reg }
-#define BL { OP_IMREG, bl_reg }
-#define AH { OP_IMREG, ah_reg }
-#define CH { OP_IMREG, ch_reg }
-#define DH { OP_IMREG, dh_reg }
-#define BH { OP_IMREG, bh_reg }
-#define AX { OP_IMREG, ax_reg }
-#define DX { OP_IMREG, dx_reg }
 #define zAX { OP_IMREG, z_mode_ax_reg }
 #define indirDX { OP_IMREG, indir_dx_reg }
 
@@ -15285,36 +15270,17 @@ OP_IMREG (int code, int sizeflag)
       else
 	s = "(%dx)";
       break;
-    case ax_reg: case cx_reg: case dx_reg: case bx_reg:
-    case sp_reg: case bp_reg: case si_reg: case di_reg:
-      s = names16[code - ax_reg];
+    case al_reg: case cl_reg:
+      s = names8[code - al_reg];
       break;
-    case es_reg: case ss_reg: case cs_reg:
-    case ds_reg: case fs_reg: case gs_reg:
-      s = names_seg[code - es_reg];
-      break;
-    case al_reg: case ah_reg: case cl_reg: case ch_reg:
-    case dl_reg: case dh_reg: case bl_reg: case bh_reg:
-      USED_REX (0);
-      if (rex)
-	s = names8rex[code - al_reg];
-      else
-	s = names8[code - al_reg];
-      break;
-    case eAX_reg: case eCX_reg: case eDX_reg: case eBX_reg:
-    case eSP_reg: case eBP_reg: case eSI_reg: case eDI_reg:
+    case eAX_reg:
       USED_REX (REX_W);
       if (rex & REX_W)
-	s = names64[code - eAX_reg];
-      else
 	{
-	  if (sizeflag & DFLAG)
-	    s = names32[code - eAX_reg];
-	  else
-	    s = names16[code - eAX_reg];
-	  used_prefixes |= (prefixes & PREFIX_DATA);
+	  s = *names64;
+	  break;
 	}
-      break;
+      /* Fall through.  */
     case z_mode_ax_reg:
       if ((rex & REX_W) || (sizeflag & DFLAG))
 	s = *names32;

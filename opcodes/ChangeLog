@@ -1,3 +1,11 @@
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (eBX, eCX, eDX, eSP, eBP, eSI, eDI, DL, BL, AH,
+	CH, DH, BH, AX, DX): Delete.
+	(OP_IMREG): Drop handling of eBX_reg, eCX_reg, eDX_reg, eSP_reg,
+	eBP_reg, eSI_reg, eDI_reg, dl_reg, bl_reg, ah_reg, ch_reg,
+	dh_reg, bh_reg, ax_reg, and dx_reg. Simplify what's left.
+
 2020-07-10  Lili Cui  <lili.cui@intel.com>
 
 	* i386-dis.c (TMM): New.

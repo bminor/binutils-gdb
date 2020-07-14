@@ -301,6 +301,8 @@ Disassembly of section .text:
  +[a-f0-9]+:	0f 28 90 80 00 00 00 	movaps 0x80\(%rax\),%xmm2
  +[a-f0-9]+:	0f 28 90 80 00 00 00 	movaps 0x80\(%rax\),%xmm2
  +[a-f0-9]+:	88 c4                	mov    %al,%ah
+ +[a-f0-9]+:	40 d3 e0             	rex shl %cl,%eax
+ +[a-f0-9]+:	40 a0 01 00 00 00 00 00 00 00 	rex movabs 0x1,%al
  +[a-f0-9]+:	40 89 c3             	rex mov %eax,%ebx
  +[a-f0-9]+:	41 89 c6             	mov    %eax,%r14d
  +[a-f0-9]+:	41 89 00             	mov    %eax,\(%r8\)
