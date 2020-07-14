@@ -115,7 +115,6 @@ static void HLE_Fixup2 (int, int);
 static void HLE_Fixup3 (int, int);
 static void CMPXCHG8B_Fixup (int, int);
 static void XMM_Fixup (int, int);
-static void CRC32_Fixup (int, int);
 static void FXSAVE_Fixup (int, int);
 static void PCMPESTR_Fixup (int, int);
 
@@ -4426,7 +4425,7 @@ static const struct dis386 prefix_table[][4] = {
     { "movbeS",	{ Gv, { MOVBE_Fixup, v_mode } }, PREFIX_OPCODE },
     { Bad_Opcode },
     { "movbeS",	{ Gv, { MOVBE_Fixup, v_mode } }, PREFIX_OPCODE },
-    { "crc32",	{ Gdq, { CRC32_Fixup, b_mode } }, PREFIX_OPCODE },
+    { "crc32A",	{ Gdq, Eb }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F38F1 */
@@ -4434,7 +4433,7 @@ static const struct dis386 prefix_table[][4] = {
     { "movbeS",	{ { MOVBE_Fixup, v_mode }, Gv }, PREFIX_OPCODE },
     { Bad_Opcode },
     { "movbeS",	{ { MOVBE_Fixup, v_mode }, Gv }, PREFIX_OPCODE },
-    { "crc32",	{ Gdq, { CRC32_Fixup, v_mode } }, PREFIX_OPCODE },
+    { "crc32Q",	{ Gdq, Ev }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F38F5 */
@@ -16367,78 +16366,6 @@ XMM_Fixup (int reg, int sizeflag ATTRIBUTE_UNUSED)
   else
     names = names_xmm;
   oappend (names[reg]);
-}
-
-static void
-CRC32_Fixup (int bytemode, int sizeflag)
-{
-  /* Add proper suffix to "crc32".  */
-  char *p = mnemonicendp;
-
-  switch (bytemode)
-    {
-    case b_mode:
-      if (intel_syntax)
-	goto skip;
-
-      *p++ = 'b';
-      break;
-    case v_mode:
-      if (intel_syntax)
-	goto skip;
-
-      USED_REX (REX_W);
-      if (rex & REX_W)
-	*p++ = 'q';
-      else
-	{
-	  if (sizeflag & DFLAG)
-	    *p++ = 'l';
-	  else
-	    *p++ = 'w';
-	  used_prefixes |= (prefixes & PREFIX_DATA);
-	}
-      break;
-    default:
-      oappend (INTERNAL_DISASSEMBLER_ERROR);
-      break;
-    }
-  mnemonicendp = p;
-  *p = '\0';
-
- skip:
-  if (modrm.mod == 3)
-    {
-      int add;
-
-      /* Skip mod/rm byte.  */
-      MODRM_CHECK;
-      codep++;
-
-      USED_REX (REX_B);
-      add = (rex & REX_B) ? 8 : 0;
-      if (bytemode == b_mode)
-	{
-	  if (modrm.rm & 4)
-	    USED_REX (0);
-	  if (rex)
-	    oappend (names8rex[modrm.rm + add]);
-	  else
-	    oappend (names8[modrm.rm + add]);
-	}
-      else
-	{
-	  USED_REX (REX_W);
-	  if (rex & REX_W)
-	    oappend (names64[modrm.rm + add]);
-	  else if ((prefixes & PREFIX_DATA))
-	    oappend (names16[modrm.rm + add]);
-	  else
-	    oappend (names32[modrm.rm + add]);
-	}
-    }
-  else
-    OP_E (bytemode, sizeflag);
 }
 
 static void

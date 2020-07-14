@@ -1,5 +1,10 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (CRC32_Fixup): Delete.
+	(prefix_table): Use Eb/Ev for crc32 entries.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (OP_E_register, OP_G, OP_REG, CRC32_Fixup):
 	Conditionalize invocations of "USED_REX (0)".
 
