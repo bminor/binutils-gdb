@@ -1,5 +1,12 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (dis386): "LW" description now applies to "DQ".
+	(putop): Handle "DQ". Don't handle "LW" anymore.
+	(prefix_table, mod_table): Replace %LW by %DQ.
+	* i386-dis-evex-len.h, i386-dis-evex-prefix.h: Likewise.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (OP_E_memory): Move xmm_mw_mode, xmm_mb_mode,
 	dqd_mode, xmm_md_mode, d_mode, d_swap_mode, and
 	d_scalar_swap_mode case handling. Move shift adjsutment into

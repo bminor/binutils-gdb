@@ -2287,7 +2287,7 @@ struct dis386 {
    "LB" => print "abs" in 64bit mode and behave as 'B' otherwise
    "LS" => print "abs" in 64bit mode and behave as 'S' otherwise
    "LV" => print "abs" for 64bit operand and behave as 'S' otherwise
-   "LW" => print 'd', 'q' depending on the VEX.W bit
+   "DQ" => print 'd' or 'q' depending on the VEX.W bit
    "BW" => print 'b' or 'w' depending on the EVEX.W bit
    "LP" => print 'w' or 'l' ('d' in Intel mode) if instruction has
 	   an operand size prefix, or suffix_always is true.  print
@@ -5891,7 +5891,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpsrlv%LW", { XM, Vex, EXx }, 0 },
+    { "vpsrlv%DQ", { XM, Vex, EXx }, 0 },
   },
 
   /* PREFIX_VEX_0F3846 */
@@ -5905,7 +5905,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpsllv%LW", { XM, Vex, EXx }, 0 },
+    { "vpsllv%DQ", { XM, Vex, EXx }, 0 },
   },
 
   /* PREFIX_VEX_0F3849_X86_64 */
@@ -5992,14 +5992,14 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpgatherd%LW", { XM, MVexVSIBDWpX, Vex }, 0 },
+    { "vpgatherd%DQ", { XM, MVexVSIBDWpX, Vex }, 0 },
   },
 
   /* PREFIX_VEX_0F3891 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpgatherq%LW", { XMGatherQ, MVexVSIBQWpX, VexGatherQ }, 0 },
+    { "vpgatherq%DQ", { XMGatherQ, MVexVSIBQWpX, VexGatherQ }, 0 },
   },
 
   /* PREFIX_VEX_0F3892 */
@@ -11477,11 +11477,11 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_VEX_0F388C_PREFIX_2 */
-    { "vpmaskmov%LW",	{ XM, Vex, Mx }, 0 },
+    { "vpmaskmov%DQ",	{ XM, Vex, Mx }, 0 },
   },
   {
     /* MOD_VEX_0F388E_PREFIX_2 */
-    { "vpmaskmov%LW",	{ Mx, Vex, XM }, 0 },
+    { "vpmaskmov%DQ",	{ Mx, Vex, XM }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F3A30_P_2_LEN_0 */
@@ -13636,6 +13636,8 @@ putop (const char *in_template, int sizeflag)
 		    }
 		}
 	    }
+	  else if (l == 1 && last[0] == 'D')
+	    *obufp++ = vex.w ? 'q' : 'd';
 	  else if (l == 1 && last[0] == 'L')
 	    {
 	      if (cond ? modrm.mod == 3 && !(sizeflag & SUFFIX_ALWAYS)
@@ -13796,8 +13798,6 @@ putop (const char *in_template, int sizeflag)
 		abort ();
 	      if (last[0] == 'X')
 		*obufp++ = vex.w ? 'd': 's';
-	      else if (last[0] == 'L')
-		*obufp++ = vex.w ? 'q': 'd';
 	      else if (last[0] == 'B')
 		*obufp++ = vex.w ? 'w': 'b';
 	      else
