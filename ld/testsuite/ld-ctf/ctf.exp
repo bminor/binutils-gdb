@@ -23,6 +23,11 @@ if [skip_ctf_tests] {
     return 0
 }
 
+if ![is_elf_format] {
+    unsupported "CTF needs bfd changes to be emitted on non-ELF"
+    return 0
+}
+
 set ctf_test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 
 foreach ctf_test $ctf_test_list {

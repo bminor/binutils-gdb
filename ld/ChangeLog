@@ -1,5 +1,9 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* testsuite/ld-ctf/ctf.exp: Skip on non-ELF for now.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ldlang.c (ldlang_open_ctf): Set SEC_EXCLUDE on all but the
 	first input .ctf section.
 
