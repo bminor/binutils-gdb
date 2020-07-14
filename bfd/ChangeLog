@@ -1,3 +1,11 @@
+2020-07-15  Markus Böck  <markus.boeck02@gmail.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	PR 26198
+	* coffgen.c (_bfd_coff_section_already_linked): Allow for plugin
+	objects both before and after normal object files.
+	* elflink.c (_bfd_elf_section_already_linked): Likewise.
+
 2020-07-10  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.h (struct ppc64_elf_params): Add power10_stubs.

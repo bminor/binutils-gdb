@@ -14534,7 +14534,8 @@ _bfd_elf_section_already_linked (bfd *abfd,
       if (((flags & SEC_GROUP) == (l->sec->flags & SEC_GROUP)
 	   && ((flags & SEC_GROUP) != 0
 	       || strcmp (name, l->sec->name) == 0))
-	  || (l->sec->owner->flags & BFD_PLUGIN) != 0)
+	  || (l->sec->owner->flags & BFD_PLUGIN) != 0
+	  || (sec->owner->flags & BFD_PLUGIN) != 0)
 	{
 	  /* The section has already been linked.  See if we should
 	     issue a warning.  */

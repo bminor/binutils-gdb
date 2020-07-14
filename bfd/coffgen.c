@@ -2662,7 +2662,8 @@ _bfd_coff_section_already_linked (bfd *abfd,
 	 .gnu.linkonce.*.<key>.  */
       if (((s_comdat != NULL) == (l_comdat != NULL)
 	   && strcmp (name, l->sec->name) == 0)
-	  || (l->sec->owner->flags & BFD_PLUGIN) != 0)
+	  || (l->sec->owner->flags & BFD_PLUGIN) != 0
+	  || (sec->owner->flags & BFD_PLUGIN) != 0)
 	{
 	  /* The section has already been linked.  See if we should
 	     issue a warning.  */
