@@ -1,5 +1,18 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (OP_R, Rm): Delete.
+	(MOD_0F24, MOD_0F26): Rename to ...
+	(X86_64_0F24, X86_64_0F26): ... respectively.
+	(dis386): Update 'L' and 'Z' comments.
+	(dis386_twobyte): Replace Rm by Em. Change opcode 0F24 and 0F26
+	table references.
+	(mod_table): Move opcode 0F24 and 0F26 entries ...
+	(x86_64_table): ... here.
+	(putop): Drop handling of 'L'. Set modrm.mod to 3 for 'Z'. Move
+	'Z' case block.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (Rd, Rdq, MaskR): Delete.
 	(MOD_EVEX_0F3828_P_1, MOD_EVEX_0F382A_P_1_W_1,
 	MOD_EVEX_0F3838_P_1, MOD_EVEX_0F383A_P_1_W_0,

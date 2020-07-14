@@ -77,7 +77,6 @@ static void OP_DSreg (int, int);
 static void OP_C (int, int);
 static void OP_D (int, int);
 static void OP_T (int, int);
-static void OP_R (int, int);
 static void OP_MMX (int, int);
 static void OP_XMM (int, int);
 static void OP_EM (int, int);
@@ -274,7 +273,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Gm { OP_G, m_mode }
 #define Gva { OP_G, va_mode }
 #define Gw { OP_G, w_mode }
-#define Rm { OP_R, m_mode }
 #define Ib { OP_I, b_mode }
 #define sIb { OP_sI, b_mode }	/* sign extened byte */
 #define sIbT { OP_sI, b_T_mode } /* sign extened byte like 'T' */
@@ -752,8 +750,6 @@ enum
   MOD_0F1B_PREFIX_1,
   MOD_0F1C_PREFIX_0,
   MOD_0F1E_PREFIX_1,
-  MOD_0F24,
-  MOD_0F26,
   MOD_0F2B_PREFIX_0,
   MOD_0F2B_PREFIX_1,
   MOD_0F2B_PREFIX_2,
@@ -1167,6 +1163,8 @@ enum
   X86_64_0F01_REG_1,
   X86_64_0F01_REG_2,
   X86_64_0F01_REG_3,
+  X86_64_0F24,
+  X86_64_0F26,
   X86_64_VEX_0F3849,
   X86_64_VEX_0F384B,
   X86_64_VEX_0F385C,
@@ -1736,7 +1734,7 @@ struct dis386 {
    'I' unused.
    'J' unused.
    'K' => print 'd' or 'q' if rex prefix is present.
-   'L' => print 'l' if suffix_always is true
+   'L' unused.
    'M' => print 'r' if intel_mnemonic is false.
    'N' => print 'n' if instruction has no wait "prefix"
    'O' => print 'd' or 'o' (or 'q' in Intel mode)
@@ -1755,7 +1753,7 @@ struct dis386 {
    'W' => print 'b', 'w' or 'l' ('d' in Intel mode)
    'X' => print 's', 'd' depending on data16 prefix (for XMM)
    'Y' unused.
-   'Z' => print 'q' in 64bit mode and behave as 'L' otherwise
+   'Z' => print 'q' in 64bit mode and 'l' otherwise, if suffix_always is true.
    '!' => change condition from true to false or from false to true.
    '%' => add 1 upper case letter to the macro.
    '^' => print 'w', 'l', or 'q' (Intel64 ISA only) depending on operand size
@@ -2119,13 +2117,13 @@ static const struct dis386 dis386_twobyte[] = {
   { PREFIX_TABLE (PREFIX_0F1E) },
   { "nopQ",		{ Ev }, 0 },
   /* 20 */
-  { "movZ",		{ Rm, Cm }, 0 },
-  { "movZ",		{ Rm, Dm }, 0 },
-  { "movZ",		{ Cm, Rm }, 0 },
-  { "movZ",		{ Dm, Rm }, 0 },
-  { MOD_TABLE (MOD_0F24) },
+  { "movZ",		{ Em, Cm }, 0 },
+  { "movZ",		{ Em, Dm }, 0 },
+  { "movZ",		{ Cm, Em }, 0 },
+  { "movZ",		{ Dm, Em }, 0 },
+  { X86_64_TABLE (X86_64_0F24) },
   { Bad_Opcode },
-  { MOD_TABLE (MOD_0F26) },
+  { X86_64_TABLE (X86_64_0F26) },
   { Bad_Opcode },
   /* 28 */
   { "movapX",		{ XM, EXx }, PREFIX_OPCODE },
@@ -4155,6 +4153,16 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { "lidt{Q|Q}", { M }, 0 },
     { "lidt", { M }, 0 },
+  },
+
+  {
+    /* X86_64_0F24 */
+    { "movZ",		{ Em, Td }, 0 },
+  },
+
+  {
+    /* X86_64_0F26 */
+    { "movZ",		{ Td, Em }, 0 },
   },
 
   /* X86_64_VEX_0F3849 */
@@ -7992,16 +8000,6 @@ static const struct dis386 mod_table[][2] = {
     { REG_TABLE (REG_0F1E_P_1_MOD_3) },
   },
   {
-    /* MOD_0F24 */
-    { Bad_Opcode },
-    { "movL",		{ Rm, Td }, 0 },
-  },
-  {
-    /* MOD_0F26 */
-    { Bad_Opcode },
-    { "movL",		{ Td, Rm }, 0 },
-  },
-  {
     /* MOD_0F2B_PREFIX_0 */
     {"movntps",		{ Mx, XM }, PREFIX_OPCODE },
   },
@@ -10616,50 +10614,8 @@ putop (const char *in_template, int sizeflag)
 	  else
 	    *obufp++ = 'd';
 	  break;
-	case 'Z':
-	  if (l != 0)
-	    {
-	      if (l != 1 || last[0] != 'X')
-		abort ();
-	      if (!need_vex || !vex.evex)
-		abort ();
-	      if (intel_syntax
-		  || ((modrm.mod == 3 || vex.b) && !(sizeflag & SUFFIX_ALWAYS)))
-		break;
-	      switch (vex.length)
-		{
-		case 128:
-		  *obufp++ = 'x';
-		  break;
-		case 256:
-		  *obufp++ = 'y';
-		  break;
-		case 512:
-		  *obufp++ = 'z';
-		  break;
-		default:
-		  abort ();
-		}
-	      break;
-	    }
-	  if (intel_syntax)
-	    break;
-	  if (address_mode == mode_64bit && (sizeflag & SUFFIX_ALWAYS))
-	    {
-	      *obufp++ = 'q';
-	      break;
-	    }
-	  /* Fall through.  */
-	  goto case_L;
 	case 'L':
-	  if (l != 0)
-	    abort ();
-	case_L:
-	  if (intel_syntax)
-	    break;
-	  if (sizeflag & SUFFIX_ALWAYS)
-	    *obufp++ = 'l';
-	  break;
+	  abort ();
 	case 'M':
 	  if (intel_mnemonic != cond)
 	    *obufp++ = 'r';
@@ -10919,6 +10875,39 @@ putop (const char *in_template, int sizeflag)
 		  if (!vex.evex)
 		default:
 		    abort ();
+		}
+	    }
+	  else
+	    abort ();
+	  break;
+	case 'Z':
+	  if (l == 0)
+	    {
+	      /* These insns ignore ModR/M.mod: Force it to 3 for OP_E().  */
+	      modrm.mod = 3;
+	      if (!intel_syntax && (sizeflag & SUFFIX_ALWAYS))
+		*obufp++ = address_mode == mode_64bit ? 'q' : 'l';
+	    }
+	  else if (l == 1 && last[0] == 'X')
+	    {
+	      if (!need_vex || !vex.evex)
+		abort ();
+	      if (intel_syntax
+		  || ((modrm.mod == 3 || vex.b) && !(sizeflag & SUFFIX_ALWAYS)))
+		break;
+	      switch (vex.length)
+		{
+		case 128:
+		  *obufp++ = 'x';
+		  break;
+		case 256:
+		  *obufp++ = 'y';
+		  break;
+		case 512:
+		  *obufp++ = 'z';
+		  break;
+		default:
+		  abort ();
 		}
 	    }
 	  else
@@ -12809,15 +12798,6 @@ OP_T (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
 {
   sprintf (scratchbuf, "%%tr%d", modrm.reg);
   oappend_maybe_intel (scratchbuf);
-}
-
-static void
-OP_R (int bytemode, int sizeflag)
-{
-  /* Skip mod/rm byte.  */
-  MODRM_CHECK;
-  codep++;
-  OP_E_register (bytemode, sizeflag);
 }
 
 static void
