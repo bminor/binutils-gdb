@@ -1,20 +1,20 @@
   /* EVEX_W_0F10_P_1 */
   {
-    { "vmovss",	{ XMVexScalar, VexScalar, EXxmm_md }, 0 },
+    { "vmovss",	{ XMScalar, VexScalarR, EXxmm_md }, 0 },
   },
   /* EVEX_W_0F10_P_3 */
   {
     { Bad_Opcode },
-    { "vmovsd",	{ XMVexScalar, VexScalar, EXxmm_mq }, 0 },
+    { "vmovsd",	{ XMScalar, VexScalarR, EXxmm_mq }, 0 },
   },
   /* EVEX_W_0F11_P_1 */
   {
-    { "vmovss",	{ EXdVexScalarS, VexScalar, XMScalar }, 0 },
+    { "vmovss",	{ EXdS, VexScalarR, XMScalar }, 0 },
   },
   /* EVEX_W_0F11_P_3 */
   {
     { Bad_Opcode },
-    { "vmovsd",	{ EXqVexScalarS, VexScalar, XMScalar }, 0 },
+    { "vmovsd",	{ EXqS, VexScalarR, XMScalar }, 0 },
   },
   /* EVEX_W_0F12_P_0_M_1 */
   {
@@ -294,7 +294,7 @@
   /* EVEX_W_0FD6_P_2 */
   {
     { Bad_Opcode },
-    { "vmovq",	{ EXqVexScalarS, XMScalar }, 0 },
+    { "vmovq",	{ EXqS, XMScalar }, 0 },
   },
   /* EVEX_W_0FE6_P_1 */
   {

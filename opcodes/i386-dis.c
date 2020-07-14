@@ -88,9 +88,8 @@ static void OP_MS (int, int);
 static void OP_XS (int, int);
 static void OP_M (int, int);
 static void OP_VEX (int, int);
+static void OP_VexR (int, int);
 static void OP_VexW (int, int);
-static void OP_EX_Vex (int, int);
-static void OP_XMM_Vex (int, int);
 static void OP_Rounding (int, int);
 static void OP_REG_VexI4 (int, int);
 static void OP_VexI4 (int, int);
@@ -394,12 +393,10 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Vex { OP_VEX, vex_mode }
 #define VexW { OP_VexW, vex_mode }
 #define VexScalar { OP_VEX, vex_scalar_mode }
+#define VexScalarR { OP_VexR, vex_scalar_mode }
 #define VexGatherQ { OP_VEX, vex_vsib_q_w_dq_mode }
 #define VexGdq { OP_VEX, dq_mode }
 #define VexTmm { OP_VEX, tmm_mode }
-#define EXdVexScalarS { OP_EX_Vex, d_scalar_swap_mode }
-#define EXqVexScalarS { OP_EX_Vex, q_scalar_swap_mode }
-#define XMVexScalar { OP_XMM_Vex, scalar_mode }
 #define XMVexI4 { OP_REG_VexI4, x_mode }
 #define XMVexScalarI4 { OP_REG_VexI4, scalar_mode }
 #define VexI4 { OP_VexI4, 0 }
@@ -574,10 +571,6 @@ enum
 
   /* scalar, ignore vector length.  */
   scalar_mode,
-  /* like d_swap_mode, ignore vector length.  */
-  d_scalar_swap_mode,
-  /* like q_swap_mode, ignore vector length.  */
-  q_scalar_swap_mode,
   /* like vex_mode, ignore vector length.  */
   vex_scalar_mode,
   /* Operand size depends on the VEX.W bit, ignore vector length.  */
@@ -2975,7 +2968,6 @@ static struct
   }
 vex;
 static unsigned char need_vex;
-static unsigned char need_vex_reg;
 
 struct op
   {
@@ -4633,17 +4625,17 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0F10 */
   {
     { "vmovups",	{ XM, EXx }, 0 },
-    { "vmovss",		{ XMVexScalar, VexScalar, EXxmm_md }, 0 },
+    { "vmovss",		{ XMScalar, VexScalarR, EXxmm_md }, 0 },
     { "vmovupd",	{ XM, EXx }, 0 },
-    { "vmovsd",		{ XMVexScalar, VexScalar, EXxmm_mq }, 0 },
+    { "vmovsd",		{ XMScalar, VexScalarR, EXxmm_mq }, 0 },
   },
 
   /* PREFIX_VEX_0F11 */
   {
     { "vmovups",	{ EXxS, XM }, 0 },
-    { "vmovss",		{ EXdVexScalarS, VexScalar, XMScalar }, 0 },
+    { "vmovss",		{ EXdS, VexScalarR, XMScalar }, 0 },
     { "vmovupd",	{ EXxS, XM }, 0 },
-    { "vmovsd",		{ EXqVexScalarS, VexScalar, XMScalar }, 0 },
+    { "vmovsd",		{ EXqS, VexScalarR, XMScalar }, 0 },
   },
 
   /* PREFIX_VEX_0F12 */
@@ -9558,7 +9550,7 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0FD6_P_2 */
   {
-    { "vmovq",		{ EXqVexScalarS, XMScalar }, 0 },
+    { "vmovq",		{ EXqS, XMScalar }, 0 },
   },
 
   /* VEX_LEN_0FF7_P_2 */
@@ -12146,7 +12138,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	  break;
 	}
       need_vex = 1;
-      need_vex_reg = 1;
       codep++;
       vindex = *codep++;
       dp = &xop_table[vex_table_index][vindex];
@@ -12213,7 +12204,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	  break;
 	}
       need_vex = 1;
-      need_vex_reg = 1;
       codep++;
       vindex = *codep++;
       dp = &vex_table[vex_table_index][vindex];
@@ -12252,7 +12242,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	  break;
 	}
       need_vex = 1;
-      need_vex_reg = 1;
       codep++;
       vindex = *codep++;
       dp = &vex_table[dp->op[1].bytemode][vindex];
@@ -12344,7 +12333,6 @@ get_valid_dis386 (const struct dis386 *dp, disassemble_info *info)
 	}
 
       need_vex = 1;
-      need_vex_reg = 1;
       codep++;
       vindex = *codep++;
       dp = &evex_table[vex_table_index][vindex];
@@ -12669,7 +12657,6 @@ print_insn (bfd_vma pc, disassemble_info *info)
     }
 
   need_vex = 0;
-  need_vex_reg = 0;
   memset (&vex, 0, sizeof (vex));
 
   if (dp->name == NULL && dp->op[0].bytemode == FLOATCODE)
@@ -14068,13 +14055,11 @@ intel_operand_size (int bytemode, int sizeflag)
       used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     case d_mode:
-    case d_scalar_swap_mode:
     case d_swap_mode:
     case dqd_mode:
       oappend ("DWORD PTR ");
       break;
     case q_mode:
-    case q_scalar_swap_mode:
     case q_swap_mode:
       oappend ("QWORD PTR ");
       break;
@@ -14526,7 +14511,6 @@ OP_E_memory (int bytemode, int sizeflag)
 	case xmm_md_mode:
 	case d_mode:
 	case d_swap_mode:
-	case d_scalar_swap_mode:
 	      shift = 2;
 	      break;
 	    }
@@ -14586,7 +14570,6 @@ OP_E_memory (int bytemode, int sizeflag)
 	case xmm_mq_mode:
 	case q_mode:
 	case q_swap_mode:
-	case q_scalar_swap_mode:
 	  shift = 3;
 	  break;
 	case bw_unit_mode:
@@ -15860,9 +15843,7 @@ OP_EX (int bytemode, int sizeflag)
   if ((sizeflag & SUFFIX_ALWAYS)
       && (bytemode == x_swap_mode
 	  || bytemode == d_swap_mode
-	  || bytemode == d_scalar_swap_mode
-	  || bytemode == q_swap_mode
-	  || bytemode == q_scalar_swap_mode))
+	  || bytemode == q_swap_mode))
     swap_operand ();
 
   if (need_vex
@@ -15877,8 +15858,6 @@ OP_EX (int bytemode, int sizeflag)
       && bytemode != evex_half_bcst_xmmq_mode
       && bytemode != ymm_mode
       && bytemode != tmm_mode
-      && bytemode != d_scalar_swap_mode
-      && bytemode != q_scalar_swap_mode
       && bytemode != vex_scalar_w_dq_mode)
     {
       switch (vex.length)
@@ -16409,9 +16388,6 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   if (!need_vex)
     abort ();
 
-  if (!need_vex_reg)
-    return;
-
   reg = vex.register_specifier;
   vex.register_specifier = 0;
   if (address_mode != mode_64bit)
@@ -16519,6 +16495,13 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 }
 
 static void
+OP_VexR (int bytemode, int sizeflag)
+{
+  if (modrm.mod == 3)
+    OP_VEX (bytemode, sizeflag);
+}
+
+static void
 OP_VexW (int bytemode, int sizeflag)
 {
   OP_VEX (bytemode, sizeflag);
@@ -16569,22 +16552,6 @@ OP_VexI4 (int bytemode ATTRIBUTE_UNUSED,
   scratchbuf[0] = '$';
   print_operand_value (scratchbuf + 1, 1, codep[-1] & 0xf);
   oappend_maybe_intel (scratchbuf);
-}
-
-static void
-OP_EX_Vex (int bytemode, int sizeflag)
-{
-  if (modrm.mod != 3)
-    need_vex_reg = 0;
-  OP_EX (bytemode, sizeflag);
-}
-
-static void
-OP_XMM_Vex (int bytemode, int sizeflag)
-{
-  if (modrm.mod != 3)
-    need_vex_reg = 0;
-  OP_XMM (bytemode, sizeflag);
 }
 
 static void

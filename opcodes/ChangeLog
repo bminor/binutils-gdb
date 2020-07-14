@@ -1,5 +1,26 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (OP_VexR, VexScalarR): New.
+	(OP_EX_Vex, OP_XMM_Vex, EXdVexScalarS, EXqVexScalarS,
+	XMVexScalar, d_scalar_swap_mode, q_scalar_swap_mode,
+	need_vex_reg): Delete.
+	(prefix_table): Replace VexScalar by VexScalarR and
+	XMVexScalar by XMScalar for vmovss and vmovsd. Replace
+	EXdVexScalarS by EXdS and EXqVexScalarS by EXqS.
+	(vex_len_table): Replace EXqVexScalarS by EXqS.
+	(get_valid_dis386): Don't set need_vex_reg.
+	(print_insn): Don't initialize need_vex_reg.
+	(intel_operand_size, OP_E_memory): Drop d_scalar_swap_mode and
+	q_scalar_swap_mode cases.
+	(OP_EX): Don't check for d_scalar_swap_mode and
+	q_scalar_swap_mode.
+	(OP_VEX): Done check need_vex_reg.
+	* i386-dis-evex-w.h: Replace VexScalar by VexScalarR and
+	XMVexScalar by XMScalar for vmovss and vmovsd. Replace
+	EXdVexScalarS by EXdS and EXqVexScalarS by EXqS.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (Vex128, Vex256, vex128_mode, vex256_mode): Delete.
 	(VEX_W_0F381A_P_2_M_0, VEX_W_0F385A_P_2_M_0, VEX_W_0F3A06_P_2,
 	VEX_W_0F3A18_P_2, VEX_W_0F3A19_P_2, VEX_W_0F3A38_P_2,
