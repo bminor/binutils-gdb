@@ -1,5 +1,9 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/prefix.d: Adjust expectations.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/x86-64-avx-intel.d,
 	testsuite/gas/i386/x86-64-sse4_2-intel.d: Adjust expectations.
 
