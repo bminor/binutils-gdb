@@ -1,5 +1,18 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (PREFIX_EVEX_0F2C, PREFIX_EVEX_0F2D,
+	PREFIX_EVEX_0F2E, PREFIX_EVEX_0F2F): Delete.
+	(prefix_table): Add EXxEVexS operand to vcvttss2si, vcvttsd2si,
+	vcvtss2si, vcvtsd2si, vucomiss, and vucomisd table entries.
+	Retain X macro and PREFIX_OPCODE use from tjhe EVEX table for
+	the latter two.
+	* i386-dis-evex.h (evex_table): Reference VEX table for opcodes
+	0F2C, 0F2D, 0F2E, and 0F2F.
+	* i386-dis-evex-prefix.h: Delete opcode 0F2C, 0F2D, 0F2E, and
+	0F2F table entries.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (OP_VexR, VexScalarR): New.
 	(OP_EX_Vex, OP_XMM_Vex, EXdVexScalarS, EXqVexScalarS,
 	XMVexScalar, d_scalar_swap_mode, q_scalar_swap_mode,

@@ -32,32 +32,6 @@
     { Bad_Opcode },
     { VEX_W_TABLE (EVEX_W_0F2A_P_3) },
   },
-  /* PREFIX_EVEX_0F2C */
-  {
-    { Bad_Opcode },
-    { "vcvttss2si",	{ Gdq, EXxmm_md, EXxEVexS }, 0 },
-    { Bad_Opcode },
-    { "vcvttsd2si",	{ Gdq, EXxmm_mq, EXxEVexS }, 0 },
-  },
-  /* PREFIX_EVEX_0F2D */
-  {
-    { Bad_Opcode },
-    { "vcvtss2si",	{ Gdq, EXxmm_md, EXxEVexR }, 0 },
-    { Bad_Opcode },
-    { "vcvtsd2si",	{ Gdq, EXxmm_mq, EXxEVexR }, 0 },
-  },
-  /* PREFIX_EVEX_0F2E */
-  {
-    { "vucomisX",	{ XMScalar, EXxmm_md, EXxEVexS }, PREFIX_OPCODE },
-    { Bad_Opcode },
-    { "vucomisX",	{ XMScalar, EXxmm_mq, EXxEVexS }, PREFIX_OPCODE },
-  },
-  /* PREFIX_EVEX_0F2F */
-  {
-    { "vcomisX",	{ XMScalar, EXxmm_md, EXxEVexS }, PREFIX_OPCODE },
-    { Bad_Opcode },
-    { "vcomisX",	{ XMScalar, EXxmm_mq, EXxEVexS }, PREFIX_OPCODE },
-  },
   /* PREFIX_EVEX_0F51 */
   {
     { "vsqrtpX",	{ XM, EXx, EXxEVexR }, PREFIX_OPCODE },

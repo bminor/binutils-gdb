@@ -1411,10 +1411,6 @@ enum
   PREFIX_EVEX_0F12,
   PREFIX_EVEX_0F16,
   PREFIX_EVEX_0F2A,
-  PREFIX_EVEX_0F2C,
-  PREFIX_EVEX_0F2D,
-  PREFIX_EVEX_0F2E,
-  PREFIX_EVEX_0F2F,
   PREFIX_EVEX_0F51,
   PREFIX_EVEX_0F58,
   PREFIX_EVEX_0F59,
@@ -4664,31 +4660,31 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0F2C */
   {
     { Bad_Opcode },
-    { "vcvttss2si",	{ Gdq, EXxmm_md }, 0 },
+    { "vcvttss2si",	{ Gdq, EXxmm_md, EXxEVexS }, 0 },
     { Bad_Opcode },
-    { "vcvttsd2si",	{ Gdq, EXxmm_mq }, 0 },
+    { "vcvttsd2si",	{ Gdq, EXxmm_mq, EXxEVexS }, 0 },
   },
 
   /* PREFIX_VEX_0F2D */
   {
     { Bad_Opcode },
-    { "vcvtss2si",	{ Gdq, EXxmm_md }, 0 },
+    { "vcvtss2si",	{ Gdq, EXxmm_md, EXxEVexR }, 0 },
     { Bad_Opcode },
-    { "vcvtsd2si",	{ Gdq, EXxmm_mq }, 0 },
+    { "vcvtsd2si",	{ Gdq, EXxmm_mq, EXxEVexR }, 0 },
   },
 
   /* PREFIX_VEX_0F2E */
   {
-    { "vucomiss",	{ XMScalar, EXxmm_md }, 0 },
+    { "vucomisX",	{ XMScalar, EXxmm_md, EXxEVexS }, PREFIX_OPCODE },
     { Bad_Opcode },
-    { "vucomisd",	{ XMScalar, EXxmm_mq }, 0 },
+    { "vucomisX",	{ XMScalar, EXxmm_mq, EXxEVexS }, PREFIX_OPCODE },
   },
 
   /* PREFIX_VEX_0F2F */
   {
-    { "vcomiss",	{ XMScalar, EXxmm_md }, 0 },
+    { "vcomisX",	{ XMScalar, EXxmm_md, EXxEVexS }, PREFIX_OPCODE },
     { Bad_Opcode },
-    { "vcomisd",	{ XMScalar, EXxmm_mq }, 0 },
+    { "vcomisX",	{ XMScalar, EXxmm_mq, EXxEVexS }, PREFIX_OPCODE },
   },
 
   /* PREFIX_VEX_0F41 */
