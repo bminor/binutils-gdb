@@ -1,5 +1,24 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (PREFIX_0F01_REG_7_MOD_3_RM_3,
+	PREFIX_0FAE_REG_5_MOD_0, PREFIX_0FC3_MOD_0, PREFIX_0F38C8,
+	PREFIX_0F38C9, PREFIX_0F38CA, PREFIX_0F38CB, PREFIX_0F38CC,
+	PREFIX_0F38CD, PREFIX_0F38F9, PREFIX_0F3ACC, PREFIX_VEX_0F77,
+	PREFIX_VEX_0F38F2, PREFIX_VEX_0F38F3_REG_1,
+	PREFIX_VEX_0F38F3_REG_2, PREFIX_VEX_0F38F3_REG_3): Delete.
+	(MOD_0F38F9_PREFIX_0, VEX_LEN_0F77_P_0, VEX_LEN_0F38F2_P_0,
+	VEX_LEN_0F38F3_R_1_P_0, VEX_LEN_0F38F3_R_2_P_0,
+	VEX_LEN_0F38F3_R_3_P_0): Rename to ...
+	(MOD_0F38F9, VEX_LEN_0F77, VEX_LEN_0F38F2, VEX_LEN_0F38F3_R_1,
+	VEX_LEN_0F38F3_R_2, VEX_LEN_0F38F3_R_3): ... these respectively.
+	(reg_table, prefix_table, three_byte_table, vex_table,
+	vex_len_table, mod_table, rm_table): Replace / remove respective
+	entries.
+	(intel_operand_size, OP_E_register, OP_G): Avoid undue setting
+	of PREFIX_DATA in used_prefixes.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (MOD_VEX_0F3A30_L_0_W_0, MOD_VEX_0F3A30_L_0_W_1,
 	MOD_VEX_0F3A31_L_0_W_0, MOD_VEX_0F3A31_L_0_W_1,
 	MOD_VEX_0F3A32_L_0_W_0, MOD_VEX_0F3A32_L_0_W_1,

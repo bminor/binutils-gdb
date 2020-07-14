@@ -809,7 +809,7 @@ enum
   MOD_0F38F8_PREFIX_1,
   MOD_0F38F8_PREFIX_2,
   MOD_0F38F8_PREFIX_3,
-  MOD_0F38F9_PREFIX_0,
+  MOD_0F38F9,
   MOD_62_32BIT,
   MOD_C4_32BIT,
   MOD_C5_32BIT,
@@ -951,7 +951,6 @@ enum
   PREFIX_0F01_REG_5_MOD_3_RM_1,
   PREFIX_0F01_REG_5_MOD_3_RM_2,
   PREFIX_0F01_REG_7_MOD_3_RM_2,
-  PREFIX_0F01_REG_7_MOD_3_RM_3,
   PREFIX_0F09,
   PREFIX_0F10,
   PREFIX_0F11,
@@ -995,7 +994,6 @@ enum
   PREFIX_0FAE_REG_3_MOD_3,
   PREFIX_0FAE_REG_4_MOD_0,
   PREFIX_0FAE_REG_4_MOD_3,
-  PREFIX_0FAE_REG_5_MOD_0,
   PREFIX_0FAE_REG_5_MOD_3,
   PREFIX_0FAE_REG_6_MOD_0,
   PREFIX_0FAE_REG_6_MOD_3,
@@ -1004,7 +1002,6 @@ enum
   PREFIX_0FBC,
   PREFIX_0FBD,
   PREFIX_0FC2,
-  PREFIX_0FC3_MOD_0,
   PREFIX_0FC7_REG_6_MOD_0,
   PREFIX_0FC7_REG_6_MOD_3,
   PREFIX_0FC7_REG_7_MOD_3,
@@ -1014,18 +1011,10 @@ enum
   PREFIX_0FE7,
   PREFIX_0FF0,
   PREFIX_0FF7,
-  PREFIX_0F38C8,
-  PREFIX_0F38C9,
-  PREFIX_0F38CA,
-  PREFIX_0F38CB,
-  PREFIX_0F38CC,
-  PREFIX_0F38CD,
   PREFIX_0F38F0,
   PREFIX_0F38F1,
   PREFIX_0F38F6,
   PREFIX_0F38F8,
-  PREFIX_0F38F9,
-  PREFIX_0F3ACC,
   PREFIX_VEX_0F10,
   PREFIX_VEX_0F11,
   PREFIX_VEX_0F12,
@@ -1056,7 +1045,6 @@ enum
   PREFIX_VEX_0F5F,
   PREFIX_VEX_0F6F,
   PREFIX_VEX_0F70,
-  PREFIX_VEX_0F77,
   PREFIX_VEX_0F7C,
   PREFIX_VEX_0F7D,
   PREFIX_VEX_0F7E,
@@ -1075,10 +1063,6 @@ enum
   PREFIX_VEX_0F384B_X86_64,
   PREFIX_VEX_0F385C_X86_64,
   PREFIX_VEX_0F385E_X86_64,
-  PREFIX_VEX_0F38F2,
-  PREFIX_VEX_0F38F3_REG_1,
-  PREFIX_VEX_0F38F3_REG_2,
-  PREFIX_VEX_0F38F3_REG_3,
   PREFIX_VEX_0F38F5,
   PREFIX_VEX_0F38F6,
   PREFIX_VEX_0F38F7,
@@ -1239,7 +1223,7 @@ enum
   VEX_LEN_0F4B_P_0,
   VEX_LEN_0F4B_P_2,
   VEX_LEN_0F6E,
-  VEX_LEN_0F77_P_0,
+  VEX_LEN_0F77,
   VEX_LEN_0F7E_P_1,
   VEX_LEN_0F7E_P_2,
   VEX_LEN_0F90_P_0,
@@ -1281,10 +1265,10 @@ enum
   VEX_LEN_0F385E_X86_64_P_2_W_0_M_0,
   VEX_LEN_0F385E_X86_64_P_3_W_0_M_0,
   VEX_LEN_0F38DB,
-  VEX_LEN_0F38F2_P_0,
-  VEX_LEN_0F38F3_R_1_P_0,
-  VEX_LEN_0F38F3_R_2_P_0,
-  VEX_LEN_0F38F3_R_3_P_0,
+  VEX_LEN_0F38F2,
+  VEX_LEN_0F38F3_R_1,
+  VEX_LEN_0F38F3_R_2,
+  VEX_LEN_0F38F3_R_3,
   VEX_LEN_0F38F5_P_0,
   VEX_LEN_0F38F5_P_1,
   VEX_LEN_0F38F5_P_3,
@@ -3032,9 +3016,9 @@ static const struct dis386 reg_table[][8] = {
   /* REG_VEX_0F38F3 */
   {
     { Bad_Opcode },
-    { PREFIX_TABLE (PREFIX_VEX_0F38F3_REG_1) },
-    { PREFIX_TABLE (PREFIX_VEX_0F38F3_REG_2) },
-    { PREFIX_TABLE (PREFIX_VEX_0F38F3_REG_3) },
+    { VEX_LEN_TABLE (VEX_LEN_0F38F3_R_1) },
+    { VEX_LEN_TABLE (VEX_LEN_0F38F3_R_2) },
+    { VEX_LEN_TABLE (VEX_LEN_0F38F3_R_3) },
   },
   /* REG_0FXOP_09_01_L_0 */
   {
@@ -3120,11 +3104,6 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "monitorx",	{ { OP_Monitor, 0 } }, 0  },
     { "mcommit",	{ Skip_MODRM }, 0 },
-  },
-
-  /* PREFIX_0F01_REG_7_MOD_3_RM_3 */
-  {
-    { "mwaitx",		{ { OP_Mwait, eBX_reg } }, 0  },
   },
 
   /* PREFIX_0F09 */
@@ -3443,11 +3422,6 @@ static const struct dis386 prefix_table[][4] = {
     { "ptwrite{%LQ|}", { Edq }, 0 },
   },
 
-  /* PREFIX_0FAE_REG_5_MOD_0 */
-  {
-    { "xrstor",		{ FXSAVE }, PREFIX_OPCODE },
-  },
-
   /* PREFIX_0FAE_REG_5_MOD_3 */
   {
     { "lfence",		{ Skip_MODRM }, 0 },
@@ -3502,11 +3476,6 @@ static const struct dis386 prefix_table[][4] = {
     { "cmpss",	{ XM, EXd, CMP }, PREFIX_OPCODE },
     { "cmppd",	{ XM, EXx, CMP }, PREFIX_OPCODE },
     { "cmpsd",	{ XM, EXq, CMP }, PREFIX_OPCODE },
-  },
-
-  /* PREFIX_0FC3_MOD_0 */
-  {
-    { "movntiS", { Edq, Gdq }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0FC7_REG_6_MOD_0 */
@@ -3576,36 +3545,6 @@ static const struct dis386 prefix_table[][4] = {
     { "maskmovdqu", { XM, XS }, PREFIX_OPCODE },
   },
 
-  /* PREFIX_0F38C8 */
-  {
-    { "sha1nexte", { XM, EXxmm }, PREFIX_OPCODE },
-  },
-
-  /* PREFIX_0F38C9 */
-  {
-    { "sha1msg1", { XM, EXxmm }, PREFIX_OPCODE },
-  },
-
-  /* PREFIX_0F38CA */
-  {
-    { "sha1msg2", { XM, EXxmm }, PREFIX_OPCODE },
-  },
-
-  /* PREFIX_0F38CB */
-  {
-    { "sha256rnds2", { XM, EXxmm, XMM0 }, PREFIX_OPCODE },
-  },
-
-  /* PREFIX_0F38CC */
-  {
-    { "sha256msg1", { XM, EXxmm }, PREFIX_OPCODE },
-  },
-
-  /* PREFIX_0F38CD */
-  {
-    { "sha256msg2", { XM, EXxmm }, PREFIX_OPCODE },
-  },
-
   /* PREFIX_0F38F0 */
   {
     { "movbeS",	{ Gv, Mv }, PREFIX_OPCODE },
@@ -3636,16 +3575,6 @@ static const struct dis386 prefix_table[][4] = {
     { MOD_TABLE (MOD_0F38F8_PREFIX_1) },
     { MOD_TABLE (MOD_0F38F8_PREFIX_2) },
     { MOD_TABLE (MOD_0F38F8_PREFIX_3) },
-  },
-
-  /* PREFIX_0F38F9 */
-  {
-    { MOD_TABLE (MOD_0F38F9_PREFIX_0) },
-  },
-
-  /* PREFIX_0F3ACC */
-  {
-    { "sha1rnds4", { XM, EXxmm, Ib }, PREFIX_OPCODE },
   },
 
   /* PREFIX_VEX_0F10 */
@@ -3871,11 +3800,6 @@ static const struct dis386 prefix_table[][4] = {
     { "vpshuflw",	{ XM, EXx, Ib }, 0 },
   },
 
-  /* PREFIX_VEX_0F77 */
-  {
-    { VEX_LEN_TABLE (VEX_LEN_0F77_P_0) },
-  },
-
   /* PREFIX_VEX_0F7C */
   {
     { Bad_Opcode },
@@ -4011,26 +3935,6 @@ static const struct dis386 prefix_table[][4] = {
     { VEX_W_TABLE (VEX_W_0F385E_X86_64_P_1) },
     { VEX_W_TABLE (VEX_W_0F385E_X86_64_P_2) },
     { VEX_W_TABLE (VEX_W_0F385E_X86_64_P_3) },
-  },
-
-  /* PREFIX_VEX_0F38F2 */
-  {
-    { VEX_LEN_TABLE (VEX_LEN_0F38F2_P_0) },
-  },
-
-  /* PREFIX_VEX_0F38F3_REG_1 */
-  {
-    { VEX_LEN_TABLE (VEX_LEN_0F38F3_R_1_P_0) },
-  },
-
-  /* PREFIX_VEX_0F38F3_REG_2 */
-  {
-    { VEX_LEN_TABLE (VEX_LEN_0F38F3_R_2_P_0) },
-  },
-
-  /* PREFIX_VEX_0F38F3_REG_3 */
-  {
-    { VEX_LEN_TABLE (VEX_LEN_0F38F3_R_3_P_0) },
   },
 
   /* PREFIX_VEX_0F38F5 */
@@ -4504,12 +4408,12 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* c8 */
-    { PREFIX_TABLE (PREFIX_0F38C8) },
-    { PREFIX_TABLE (PREFIX_0F38C9) },
-    { PREFIX_TABLE (PREFIX_0F38CA) },
-    { PREFIX_TABLE (PREFIX_0F38CB) },
-    { PREFIX_TABLE (PREFIX_0F38CC) },
-    { PREFIX_TABLE (PREFIX_0F38CD) },
+    { "sha1nexte", { XM, EXxmm }, PREFIX_OPCODE },
+    { "sha1msg1", { XM, EXxmm }, PREFIX_OPCODE },
+    { "sha1msg2", { XM, EXxmm }, PREFIX_OPCODE },
+    { "sha256rnds2", { XM, EXxmm, XMM0 }, PREFIX_OPCODE },
+    { "sha256msg1", { XM, EXxmm }, PREFIX_OPCODE },
+    { "sha256msg2", { XM, EXxmm }, PREFIX_OPCODE },
     { Bad_Opcode },
     { "gf2p8mulb", { XM, EXxmm }, PREFIX_DATA },
     /* d0 */
@@ -4559,7 +4463,7 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     /* f8 */
     { PREFIX_TABLE (PREFIX_0F38F8) },
-    { PREFIX_TABLE (PREFIX_0F38F9) },
+    { MOD_TABLE (MOD_0F38F9) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -4799,7 +4703,7 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { PREFIX_TABLE (PREFIX_0F3ACC) },
+    { "sha1rnds4", { XM, EXxmm, Ib }, PREFIX_OPCODE },
     { Bad_Opcode },
     { "gf2p8affineqb", { XM, EXxmm, Ib }, PREFIX_DATA },
     { "gf2p8affineinvqb", { XM, EXxmm, Ib }, PREFIX_DATA },
@@ -5873,7 +5777,7 @@ static const struct dis386 vex_table[][256] = {
     { "vpcmpeqb",	{ XM, Vex, EXx }, PREFIX_DATA },
     { "vpcmpeqw",	{ XM, Vex, EXx }, PREFIX_DATA },
     { "vpcmpeqd",	{ XM, Vex, EXx }, PREFIX_DATA },
-    { PREFIX_TABLE (PREFIX_VEX_0F77) },
+    { VEX_LEN_TABLE (VEX_LEN_0F77) },
     /* 78 */
     { Bad_Opcode },
     { Bad_Opcode },
@@ -6303,7 +6207,7 @@ static const struct dis386 vex_table[][256] = {
     /* f0 */
     { Bad_Opcode },
     { Bad_Opcode },
-    { PREFIX_TABLE (PREFIX_VEX_0F38F2) },
+    { VEX_LEN_TABLE (VEX_LEN_0F38F2) },
     { REG_TABLE (REG_VEX_0F38F3) },
     { Bad_Opcode },
     { PREFIX_TABLE (PREFIX_VEX_0F38F5) },
@@ -6729,7 +6633,7 @@ static const struct dis386 vex_len_table[][2] = {
     { "vmovK",		{ XMScalar, Edq }, PREFIX_DATA },
   },
 
-  /* VEX_LEN_0F77_P_1 */
+  /* VEX_LEN_0F77 */
   {
     { "vzeroupper",	{ XX }, 0 },
     { "vzeroall",	{ XX }, 0 },
@@ -6944,24 +6848,24 @@ static const struct dis386 vex_len_table[][2] = {
     { "vaesimc",	{ XM, EXx }, PREFIX_DATA },
   },
 
-  /* VEX_LEN_0F38F2_P_0 */
+  /* VEX_LEN_0F38F2 */
   {
-    { "andnS",		{ Gdq, VexGdq, Edq }, 0 },
+    { "andnS",		{ Gdq, VexGdq, Edq }, PREFIX_OPCODE },
   },
 
-  /* VEX_LEN_0F38F3_R_1_P_0 */
+  /* VEX_LEN_0F38F3_R_1 */
   {
-    { "blsrS",		{ VexGdq, Edq }, 0 },
+    { "blsrS",		{ VexGdq, Edq }, PREFIX_OPCODE },
   },
 
-  /* VEX_LEN_0F38F3_R_2_P_0 */
+  /* VEX_LEN_0F38F3_R_2 */
   {
-    { "blsmskS",	{ VexGdq, Edq }, 0 },
+    { "blsmskS",	{ VexGdq, Edq }, PREFIX_OPCODE },
   },
 
-  /* VEX_LEN_0F38F3_R_3_P_0 */
+  /* VEX_LEN_0F38F3_R_3 */
   {
-    { "blsiS",		{ VexGdq, Edq }, 0 },
+    { "blsiS",		{ VexGdq, Edq }, PREFIX_OPCODE },
   },
 
   /* VEX_LEN_0F38F5_P_0 */
@@ -8191,7 +8095,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0FAE_REG_5 */
-    { PREFIX_TABLE (PREFIX_0FAE_REG_5_MOD_0) },
+    { "xrstor",		{ FXSAVE }, PREFIX_OPCODE },
     { PREFIX_TABLE (PREFIX_0FAE_REG_5_MOD_3) },
   },
   {
@@ -8218,7 +8122,7 @@ static const struct dis386 mod_table[][2] = {
   },
   {
     /* MOD_0FC3 */
-    { PREFIX_TABLE (PREFIX_0FC3_MOD_0) },
+    { "movntiS", { Edq, Gdq }, PREFIX_OPCODE },
   },
   {
     /* MOD_0FC7_REG_3 */
@@ -8331,8 +8235,8 @@ static const struct dis386 mod_table[][2] = {
     { "enqcmd",		{ Gva, M }, PREFIX_OPCODE },
   },
   {
-    /* MOD_0F38F9_PREFIX_0 */
-    { "movdiri",	{ Ev, Gv }, PREFIX_OPCODE },
+    /* MOD_0F38F9 */
+    { "movdiri",	{ Edq, Gdq }, PREFIX_OPCODE },
   },
   {
     /* MOD_62_32BIT */
@@ -8832,7 +8736,7 @@ static const struct dis386 rm_table[][8] = {
     { "swapgs",		{ Skip_MODRM }, 0  },
     { "rdtscp",		{ Skip_MODRM }, 0  },
     { PREFIX_TABLE (PREFIX_0F01_REG_7_MOD_3_RM_2) },
-    { PREFIX_TABLE (PREFIX_0F01_REG_7_MOD_3_RM_3) },
+    { "mwaitx",		{ { OP_Mwait, eBX_reg } }, PREFIX_OPCODE },
     { "clzero",		{ Skip_MODRM }, 0  },
     { "rdpru",		{ Skip_MODRM }, 0  },
   },
@@ -11286,9 +11190,11 @@ intel_operand_size (int bytemode, int sizeflag)
       USED_REX (REX_W);
       if (rex & REX_W)
 	oappend ("QWORD PTR ");
+      else if (bytemode == dq_mode)
+	oappend ("DWORD PTR ");
       else
 	{
-	  if ((sizeflag & DFLAG) || bytemode == dq_mode)
+	  if (sizeflag & DFLAG)
 	    oappend ("DWORD PTR ");
 	  else
 	    oappend ("WORD PTR ");
@@ -11684,11 +11590,11 @@ OP_E_register (int bytemode, int sizeflag)
       USED_REX (REX_W);
       if (rex & REX_W)
 	names = names64;
+      else if (bytemode != v_mode && bytemode != v_swap_mode)
+	names = names32;
       else
 	{
-	  if ((sizeflag & DFLAG)
-	      || (bytemode != v_mode
-		  && bytemode != v_swap_mode))
+	  if (sizeflag & DFLAG)
 	    names = names32;
 	  else
 	    names = names16;
@@ -12280,10 +12186,11 @@ OP_G (int bytemode, int sizeflag)
       USED_REX (REX_W);
       if (rex & REX_W)
 	oappend (names64[modrm.reg + add]);
+      else if (bytemode != v_mode && bytemode != movsxd_mode)
+	oappend (names32[modrm.reg + add]);
       else
 	{
-	  if ((sizeflag & DFLAG)
-	      || (bytemode != v_mode && bytemode != movsxd_mode))
+	  if (sizeflag & DFLAG)
 	    oappend (names32[modrm.reg + add]);
 	  else
 	    oappend (names16[modrm.reg + add]);
