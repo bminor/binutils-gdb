@@ -1,5 +1,12 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/intel.s: Use dr<N> instead of db<N>.
+	* testsuite/gas/i386/intel-intel.d: Disambiguate name.
+	* testsuite/gas/i386/intel.d,
+	testsuite/gas/i386/opcode-intel.d: Adjust expectations.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/prefix.d: Adjust expectations.
 
 2020-07-14  Jan Beulich  <jbeulich@suse.com>

@@ -1,6 +1,6 @@
 #as: -J
 #objdump: -dw
-#name: i386 intel
+#name: i386 intel (AT&T disassembly)
 #warning_output: intel.e
 
 .*: +file format .*

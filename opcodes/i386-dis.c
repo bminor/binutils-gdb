@@ -12787,7 +12787,7 @@ OP_D (int dummy ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
   else
     add = 0;
   if (intel_syntax)
-    sprintf (scratchbuf, "db%d", modrm.reg + add);
+    sprintf (scratchbuf, "dr%d", modrm.reg + add);
   else
     sprintf (scratchbuf, "%%db%d", modrm.reg + add);
   oappend (scratchbuf);
