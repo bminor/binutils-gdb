@@ -1,5 +1,10 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (OP_E_register, OP_G, OP_REG, CRC32_Fixup):
+	Conditionalize invocations of "USED_REX (0)".
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (eBX, eCX, eDX, eSP, eBP, eSI, eDI, DL, BL, AH,
 	CH, DH, BH, AX, DX): Delete.
 	(OP_IMREG): Drop handling of eBX_reg, eCX_reg, eDX_reg, eSP_reg,

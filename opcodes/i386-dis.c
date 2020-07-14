@@ -14398,7 +14398,8 @@ OP_E_register (int bytemode, int sizeflag)
     {
     case b_mode:
     case b_swap_mode:
-      USED_REX (0);
+      if (reg & 4)
+	USED_REX (0);
       if (rex)
 	names = names8rex;
       else
@@ -15027,7 +15028,8 @@ OP_G (int bytemode, int sizeflag)
   switch (bytemode)
     {
     case b_mode:
-      USED_REX (0);
+      if (modrm.reg & 4)
+	USED_REX (0);
       if (rex)
 	oappend (names8rex[modrm.reg + add]);
       else
@@ -15218,9 +15220,10 @@ OP_REG (int code, int sizeflag)
     case sp_reg: case bp_reg: case si_reg: case di_reg:
       s = names16[code - ax_reg + add];
       break;
-    case al_reg: case ah_reg: case cl_reg: case ch_reg:
-    case dl_reg: case dh_reg: case bl_reg: case bh_reg:
+    case ah_reg: case ch_reg: case dh_reg: case bh_reg:
       USED_REX (0);
+      /* Fall through.  */
+    case al_reg: case cl_reg: case dl_reg: case bl_reg:
       if (rex)
 	s = names8rex[code - al_reg + add];
       else
@@ -16416,7 +16419,8 @@ CRC32_Fixup (int bytemode, int sizeflag)
       add = (rex & REX_B) ? 8 : 0;
       if (bytemode == b_mode)
 	{
-	  USED_REX (0);
+	  if (modrm.rm & 4)
+	    USED_REX (0);
 	  if (rex)
 	    oappend (names8rex[modrm.rm + add]);
 	  else

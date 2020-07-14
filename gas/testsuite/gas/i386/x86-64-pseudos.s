@@ -307,6 +307,9 @@ _start:
 	{rex} mov %al,%ah
 	{rex} shl %cl, %eax
 	{rex} movabs 1, %al
+	{rex} cmp %cl, %dl
+	{rex} mov $1, %bl
+	{rex} crc32 %cl, %eax
 	{rex} movl %eax,%ebx
 	{rex} movl %eax,%r14d
 	{rex} movl %eax,(%r8)
