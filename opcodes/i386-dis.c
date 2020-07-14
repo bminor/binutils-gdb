@@ -894,14 +894,10 @@ enum
   MOD_VEX_0F385A,
   MOD_VEX_0F388C,
   MOD_VEX_0F388E,
-  MOD_VEX_0F3A30_L_0_W_0,
-  MOD_VEX_0F3A30_L_0_W_1,
-  MOD_VEX_0F3A31_L_0_W_0,
-  MOD_VEX_0F3A31_L_0_W_1,
-  MOD_VEX_0F3A32_L_0_W_0,
-  MOD_VEX_0F3A32_L_0_W_1,
-  MOD_VEX_0F3A33_L_0_W_0,
-  MOD_VEX_0F3A33_L_0_W_1,
+  MOD_VEX_0F3A30_L_0,
+  MOD_VEX_0F3A31_L_0,
+  MOD_VEX_0F3A32_L_0,
+  MOD_VEX_0F3A33_L_0,
 
   MOD_VEX_0FXOP_09_12,
 
@@ -1517,10 +1513,6 @@ enum
   VEX_W_0F3A18_L_1,
   VEX_W_0F3A19_L_1,
   VEX_W_0F3A1D,
-  VEX_W_0F3A30_L_0,
-  VEX_W_0F3A31_L_0,
-  VEX_W_0F3A32_L_0,
-  VEX_W_0F3A33_L_0,
   VEX_W_0F3A38_L_1,
   VEX_W_0F3A39_L_1,
   VEX_W_0F3A46_L_1,
@@ -1799,7 +1791,7 @@ struct dis386 {
    "LS" => print "abs" in 64bit mode and behave as 'S' otherwise
    "LV" => print "abs" for 64bit operand and behave as 'S' otherwise
    "DQ" => print 'd' or 'q' depending on the VEX.W bit
-   "BW" => print 'b' or 'w' depending on the EVEX.W bit
+   "BW" => print 'b' or 'w' depending on the VEX.W bit
    "LP" => print 'w' or 'l' ('d' in Intel mode) if instruction has
 	   an operand size prefix, or suffix_always is true.  print
 	   'q' if rex prefix is present.
@@ -7079,22 +7071,22 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3A30 */
   {
-    { VEX_W_TABLE (VEX_W_0F3A30_L_0) },
+    { MOD_TABLE (MOD_VEX_0F3A30_L_0) },
   },
 
   /* VEX_LEN_0F3A31 */
   {
-    { VEX_W_TABLE (VEX_W_0F3A31_L_0) },
+    { MOD_TABLE (MOD_VEX_0F3A31_L_0) },
   },
 
   /* VEX_LEN_0F3A32 */
   {
-    { VEX_W_TABLE (VEX_W_0F3A32_L_0) },
+    { MOD_TABLE (MOD_VEX_0F3A32_L_0) },
   },
 
   /* VEX_LEN_0F3A33 */
   {
-    { VEX_W_TABLE (VEX_W_0F3A33_L_0) },
+    { MOD_TABLE (MOD_VEX_0F3A33_L_0) },
   },
 
   /* VEX_LEN_0F3A38 */
@@ -7744,26 +7736,6 @@ static const struct dis386 vex_w_table[][2] = {
   {
     /* VEX_W_0F3A1D */
     { "vcvtps2ph", { EXxmmq, XM, EXxEVexS, Ib }, PREFIX_DATA },
-  },
-  {
-    /* VEX_W_0F3A30_L_0 */
-    { MOD_TABLE (MOD_VEX_0F3A30_L_0_W_0) },
-    { MOD_TABLE (MOD_VEX_0F3A30_L_0_W_1) },
-  },
-  {
-    /* VEX_W_0F3A31_L_0 */
-    { MOD_TABLE (MOD_VEX_0F3A31_L_0_W_0) },
-    { MOD_TABLE (MOD_VEX_0F3A31_L_0_W_1) },
-  },
-  {
-    /* VEX_W_0F3A32_L_0 */
-    { MOD_TABLE (MOD_VEX_0F3A32_L_0_W_0) },
-    { MOD_TABLE (MOD_VEX_0F3A32_L_0_W_1) },
-  },
-  {
-    /* VEX_W_0F3A33_L_0 */
-    { MOD_TABLE (MOD_VEX_0F3A33_L_0_W_0) },
-    { MOD_TABLE (MOD_VEX_0F3A33_L_0_W_1) },
   },
   {
     /* VEX_W_0F3A38_L_1 */
@@ -8765,44 +8737,24 @@ static const struct dis386 mod_table[][2] = {
     { "vpmaskmov%DQ",	{ Mx, Vex, XM }, PREFIX_DATA },
   },
   {
-    /* MOD_VEX_0F3A30_L_0_W_0 */
+    /* MOD_VEX_0F3A30_L_0 */
     { Bad_Opcode },
-    { "kshiftrb",       { MaskG, MaskR, Ib }, PREFIX_DATA },
+    { "kshiftr%BW",	{ MaskG, MaskR, Ib }, PREFIX_DATA },
   },
   {
-    /* MOD_VEX_0F3A30_L_0_W_1 */
+    /* MOD_VEX_0F3A31_L_0 */
     { Bad_Opcode },
-    { "kshiftrw",       { MaskG, MaskR, Ib }, PREFIX_DATA },
+    { "kshiftr%DQ",	{ MaskG, MaskR, Ib }, PREFIX_DATA },
   },
   {
-    /* MOD_VEX_0F3A31_L_0_W_0 */
+    /* MOD_VEX_0F3A32_L_0 */
     { Bad_Opcode },
-    { "kshiftrd",       { MaskG, MaskR, Ib }, PREFIX_DATA },
+    { "kshiftl%BW",	{ MaskG, MaskR, Ib }, PREFIX_DATA },
   },
   {
-    /* MOD_VEX_0F3A31_L_0_W_1 */
+    /* MOD_VEX_0F3A33_L_0 */
     { Bad_Opcode },
-    { "kshiftrq",       { MaskG, MaskR, Ib }, PREFIX_DATA },
-  },
-  {
-    /* MOD_VEX_0F3A32_L_0_W_0 */
-    { Bad_Opcode },
-    { "kshiftlb",       { MaskG, MaskR, Ib }, PREFIX_DATA },
-  },
-  {
-    /* MOD_VEX_0F3A32_L_0_W_1 */
-    { Bad_Opcode },
-    { "kshiftlw",       { MaskG, MaskR, Ib }, PREFIX_DATA },
-  },
-  {
-    /* MOD_VEX_0F3A33_L_0_W_0 */
-    { Bad_Opcode },
-    { "kshiftld",       { MaskG, MaskR, Ib }, PREFIX_DATA },
-  },
-  {
-    /* MOD_VEX_0F3A33_L_0_W_1 */
-    { Bad_Opcode },
-    { "kshiftlq",       { MaskG, MaskR, Ib }, PREFIX_DATA },
+    { "kshiftl%DQ",	{ MaskG, MaskR, Ib }, PREFIX_DATA },
   },
   {
     /* MOD_VEX_0FXOP_09_12 */

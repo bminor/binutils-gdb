@@ -1,5 +1,23 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (MOD_VEX_0F3A30_L_0_W_0, MOD_VEX_0F3A30_L_0_W_1,
+	MOD_VEX_0F3A31_L_0_W_0, MOD_VEX_0F3A31_L_0_W_1,
+	MOD_VEX_0F3A32_L_0_W_0, MOD_VEX_0F3A32_L_0_W_1,
+	MOD_VEX_0F3A33_L_0_W_0, MOD_VEX_0F3A33_L_0_W_1): Replace by ...
+	(MOD_VEX_0F3A30_L_0, MOD_VEX_0F3A31_L_0,
+	MOD_VEX_0F3A32_L_0, MOD_VEX_0F3A33_L_0): ... these.
+	(VEX_W_0F3A30_L_0, VEX_W_0F3A31_L_0, VEX_W_0F3A32_L_0,
+	VEX_W_0F3A33_L_0): Delete.
+	(dis386): Adjust "BW" description.
+	(vex_len_table): Refer to mod_table[] for opcodes 0F3A30,
+	0F3A31, 0F3A32, and 0F3A33.
+	(vex_w_table): Delete opcode 0F3A30, 0F3A31, 0F3A32, and 0F3A33
+	entries.
+	(mod_table): Replace opcode 0F3A30, 0F3A31, 0F3A32, and 0F3A33
+	entries.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (PREFIX_0F6C, PREFIX_0F6D, PREFIX_0F73_REG_3,
 	PREFIX_0F73_REG_7, PREFIX_0F3810, PREFIX_0F3814, PREFIX_0F3815,
 	PREFIX_0F3817, PREFIX_0F3820, PREFIX_0F3821, PREFIX_0F3822,
