@@ -599,7 +599,8 @@ process_stratum_target::read_loadmap (const char *annex,
 }
 
 void
-process_stratum_target::process_qsupported (char **features, int count)
+process_stratum_target::process_qsupported
+  (gdb::array_view<const char * const> features)
 {
   /* Nop.  */
 }

@@ -2269,10 +2269,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	 ';'.  */
       if (*p == ':')
 	{
-	  char **qsupported = NULL;
-	  int count = 0;
-	  int unknown = 0;
-	  int i;
+	  std::vector<std::string> qsupported;
+	  std::vector<const char *> unknowns;
 
 	  /* Two passes, to avoid nested strtok calls in
 	     target_process_qsupported.  */
@@ -2280,28 +2278,23 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  for (p = strtok_r (p + 1, ";", &saveptr);
 	       p != NULL;
 	       p = strtok_r (NULL, ";", &saveptr))
-	    {
-	      count++;
-	      qsupported = XRESIZEVEC (char *, qsupported, count);
-	      qsupported[count - 1] = xstrdup (p);
-	    }
+	    qsupported.emplace_back (p);
 
-	  for (i = 0; i < count; i++)
+	  for (const std::string &feature : qsupported)
 	    {
-	      p = qsupported[i];
-	      if (strcmp (p, "multiprocess+") == 0)
+	      if (feature == "multiprocess+")
 		{
 		  /* GDB supports and wants multi-process support if
 		     possible.  */
 		  if (target_supports_multi_process ())
 		    cs.multi_process = 1;
 		}
-	      else if (strcmp (p, "qRelocInsn+") == 0)
+	      else if (feature == "qRelocInsn+")
 		{
 		  /* GDB supports relocate instruction requests.  */
 		  gdb_supports_qRelocInsn = 1;
 		}
-	      else if (strcmp (p, "swbreak+") == 0)
+	      else if (feature == "swbreak+")
 		{
 		  /* GDB wants us to report whether a trap is caused
 		     by a software breakpoint and for us to handle PC
@@ -2309,36 +2302,36 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 		  if (target_supports_stopped_by_sw_breakpoint ())
 		    cs.swbreak_feature = 1;
 		}
-	      else if (strcmp (p, "hwbreak+") == 0)
+	      else if (feature == "hwbreak+")
 		{
 		  /* GDB wants us to report whether a trap is caused
 		     by a hardware breakpoint.  */
 		  if (target_supports_stopped_by_hw_breakpoint ())
 		    cs.hwbreak_feature = 1;
 		}
-	      else if (strcmp (p, "fork-events+") == 0)
+	      else if (feature == "fork-events+")
 		{
 		  /* GDB supports and wants fork events if possible.  */
 		  if (target_supports_fork_events ())
 		    cs.report_fork_events = 1;
 		}
-	      else if (strcmp (p, "vfork-events+") == 0)
+	      else if (feature == "vfork-events+")
 		{
 		  /* GDB supports and wants vfork events if possible.  */
 		  if (target_supports_vfork_events ())
 		    cs.report_vfork_events = 1;
 		}
-	      else if (strcmp (p, "exec-events+") == 0)
+	      else if (feature == "exec-events+")
 		{
 		  /* GDB supports and wants exec events if possible.  */
 		  if (target_supports_exec_events ())
 		    cs.report_exec_events = 1;
 		}
-	      else if (strcmp (p, "vContSupported+") == 0)
+	      else if (feature == "vContSupported+")
 		cs.vCont_supported = 1;
-	      else if (strcmp (p, "QThreadEvents+") == 0)
+	      else if (feature == "QThreadEvents+")
 		;
-	      else if (strcmp (p, "no-resumed+") == 0)
+	      else if (feature == "no-resumed+")
 		{
 		  /* GDB supports and wants TARGET_WAITKIND_NO_RESUMED
 		     events.  */
@@ -2347,19 +2340,13 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	      else
 		{
 		  /* Move the unknown features all together.  */
-		  qsupported[i] = NULL;
-		  qsupported[unknown] = p;
-		  unknown++;
+		  unknowns.push_back (feature.c_str ());
 		}
 	    }
 
 	  /* Give the target backend a chance to process the unknown
 	     features.  */
-	  target_process_qsupported (qsupported, unknown);
-
-	  for (i = 0; i < count; i++)
-	    free (qsupported[i]);
-	  free (qsupported);
+	  target_process_qsupported (unknowns);
 	}
 
       sprintf (own_buf,

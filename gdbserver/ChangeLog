@@ -1,3 +1,16 @@
+2020-07-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* server.cc (handle_query): Use std::vector of
+	std::string for `qsupported` vector.  Use separate
+	vector for unknowns.
+	* target.h (class process_stratum_target) <process_qsupported>:
+	Change parameters to array_view of const char *.
+	(target_process_qsupported): Remove `count` parameter.
+	* target.cc (process_stratum_target::process_qsupported): Change
+	parameters to array_view of const char *.
+	* linux-x86-low.cc (class x86_target) <process_qsupported>:
+	Likewise.
+
 2020-06-29  Tom de Vries  <tdevries@suse.de>
 
 	* ax.h: Include gdbsupport/debug_agent.h.

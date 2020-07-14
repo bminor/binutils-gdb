@@ -27,6 +27,7 @@
 #include "target/wait.h"
 #include "target/waitstatus.h"
 #include "mem-break.h"
+#include "gdbsupport/array-view.h"
 #include "gdbsupport/btrace-common.h"
 #include <vector>
 
@@ -315,8 +316,9 @@ public:
 			    unsigned char *myaddr, unsigned int len);
 
   /* Target specific qSupported support.  FEATURES is an array of
-     features with COUNT elements.  */
-  virtual void process_qsupported (char **features, int count);
+     features unsupported by the core of GDBserver.  */
+  virtual void process_qsupported
+    (gdb::array_view<const char * const> features);
 
   /* Return true if the target supports tracepoints, false otherwise.  */
   virtual bool supports_tracepoints ();
@@ -547,8 +549,8 @@ int kill_inferior (process_info *proc);
 #define target_async(enable) \
   the_target->async (enable)
 
-#define target_process_qsupported(features, count)	\
-  the_target->process_qsupported (features, count)
+#define target_process_qsupported(features) \
+  the_target->process_qsupported (features)
 
 #define target_supports_catch_syscall()              	\
   the_target->supports_catch_syscall ()
