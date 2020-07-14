@@ -1,5 +1,25 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (Rd, Rdq, MaskR): Delete.
+	(MOD_EVEX_0F3828_P_1, MOD_EVEX_0F382A_P_1_W_1,
+	MOD_EVEX_0F3838_P_1, MOD_EVEX_0F383A_P_1_W_0,
+	MOD_EVEX_0F387A_W_0, MOD_EVEX_0F387B_W_0,
+	MOD_EVEX_0F387C): New enumerators.
+	(reg_table): Use Edq for rdssp.
+	(prefix_table): Use Edq for incssp.
+	(mod_table): Use Rm for move to/from %tr. Use MaskE for kand*,
+	kandn*, knot*, kor*, kxnor*, kxor*, kadd*, kunpck*, kortest*,
+	ktest*, and kshift*. Use Edq / MaskE for kmov*.
+	* i386-dis-evex.h: Reference mod_table[] for opcode 0F387C.
+	* i386-dis-evex-mod.h: New entries for opcodes 0F3828, 0F382A,
+	0F3838, 0F383A, 0F387A, 0F387B, and 0F387C.
+	* i386-dis-evex-prefix.h: Reference mod_table[] for opcodes
+	0F3828_P_1 and 0F3838_P_1.
+	* i386-dis-evex-w.h: Reference mod_table[] for opcodes
+	0F382A_P_1, 0F383A_P_1, 0F387A, and 0F387B.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (PREFIX_0F01_REG_7_MOD_3_RM_3,
 	PREFIX_0FAE_REG_5_MOD_0, PREFIX_0FC3_MOD_0, PREFIX_0F38C8,
 	PREFIX_0F38C9, PREFIX_0F38CA, PREFIX_0F38CB, PREFIX_0F38CC,

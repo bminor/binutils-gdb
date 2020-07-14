@@ -432,7 +432,7 @@ static const struct dis386 evex_table[][256] = {
     { VEX_W_TABLE (VEX_W_0F3879) },
     { VEX_W_TABLE (EVEX_W_0F387A) },
     { VEX_W_TABLE (EVEX_W_0F387B) },
-    { "vpbroadcastK",	{ XM, Rdq }, PREFIX_DATA },
+    { MOD_TABLE (MOD_EVEX_0F387C) },
     { "vpermt2%BW",	{ XM, Vex, EXx }, PREFIX_DATA },
     { "vpermt2%DQ",	{ XM, Vex, EXx }, PREFIX_DATA },
     { "vpermt2p%XW",	{ XM, Vex, EXx }, PREFIX_DATA },

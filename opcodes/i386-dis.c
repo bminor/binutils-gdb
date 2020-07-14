@@ -274,8 +274,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Gm { OP_G, m_mode }
 #define Gva { OP_G, va_mode }
 #define Gw { OP_G, w_mode }
-#define Rd { OP_R, d_mode }
-#define Rdq { OP_R, dq_mode }
 #define Rm { OP_R, m_mode }
 #define Ib { OP_I, b_mode }
 #define sIb { OP_sI, b_mode }	/* sign extened byte */
@@ -412,7 +410,6 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define MaskG { OP_G, mask_mode }
 #define MaskE { OP_E, mask_mode }
 #define MaskBDE { OP_E, mask_bd_mode }
-#define MaskR { OP_R, mask_mode }
 #define MaskVex { OP_VEX, mask_mode }
 
 #define MVexVSIBDWpX { OP_M, vex_vsib_d_w_dq_mode }
@@ -912,10 +909,17 @@ enum
   MOD_EVEX_0F381A_W_1,
   MOD_EVEX_0F381B_W_0,
   MOD_EVEX_0F381B_W_1,
+  MOD_EVEX_0F3828_P_1,
+  MOD_EVEX_0F382A_P_1_W_1,
+  MOD_EVEX_0F3838_P_1,
+  MOD_EVEX_0F383A_P_1_W_0,
   MOD_EVEX_0F385A_W_0,
   MOD_EVEX_0F385A_W_1,
   MOD_EVEX_0F385B_W_0,
   MOD_EVEX_0F385B_W_1,
+  MOD_EVEX_0F387A_W_0,
+  MOD_EVEX_0F387B_W_0,
+  MOD_EVEX_0F387C,
   MOD_EVEX_0F38C6_REG_1,
   MOD_EVEX_0F38C6_REG_2,
   MOD_EVEX_0F38C6_REG_5,
@@ -2884,7 +2888,7 @@ static const struct dis386 reg_table[][8] = {
   /* REG_0F1E_P_1_MOD_3 */
   {
     { "nopQ",		{ Ev }, 0 },
-    { "rdsspK",		{ Rdq }, PREFIX_OPCODE },
+    { "rdsspK",		{ Edq }, PREFIX_OPCODE },
     { "nopQ",		{ Ev }, 0 },
     { "nopQ",		{ Ev }, 0 },
     { "nopQ",		{ Ev }, 0 },
@@ -3425,7 +3429,7 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0FAE_REG_5_MOD_3 */
   {
     { "lfence",		{ Skip_MODRM }, 0 },
-    { "incsspK",	{ Rdq }, PREFIX_OPCODE },
+    { "incsspK",	{ Edq }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0FAE_REG_6_MOD_0 */
@@ -7990,12 +7994,12 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0F24 */
     { Bad_Opcode },
-    { "movL",		{ Rd, Td }, 0 },
+    { "movL",		{ Rm, Td }, 0 },
   },
   {
     /* MOD_0F26 */
     { Bad_Opcode },
-    { "movL",		{ Td, Rd }, 0 },
+    { "movL",		{ Td, Rm }, 0 },
   },
   {
     /* MOD_0F2B_PREFIX_0 */
@@ -8286,157 +8290,157 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_VEX_W_0_0F41_P_0_LEN_1 */
     { Bad_Opcode },
-    { "kandw",          { MaskG, MaskVex, MaskR }, 0 },
+    { "kandw",          { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F41_P_0_LEN_1 */
     { Bad_Opcode },
-    { "kandq",          { MaskG, MaskVex, MaskR }, 0 },
+    { "kandq",          { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F41_P_2_LEN_1 */
     { Bad_Opcode },
-    { "kandb",          { MaskG, MaskVex, MaskR }, 0 },
+    { "kandb",          { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F41_P_2_LEN_1 */
     { Bad_Opcode },
-    { "kandd",          { MaskG, MaskVex, MaskR }, 0 },
+    { "kandd",          { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F42_P_0_LEN_1 */
     { Bad_Opcode },
-    { "kandnw",         { MaskG, MaskVex, MaskR }, 0 },
+    { "kandnw",         { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F42_P_0_LEN_1 */
     { Bad_Opcode },
-    { "kandnq",         { MaskG, MaskVex, MaskR }, 0 },
+    { "kandnq",         { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F42_P_2_LEN_1 */
     { Bad_Opcode },
-    { "kandnb",         { MaskG, MaskVex, MaskR }, 0 },
+    { "kandnb",         { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F42_P_2_LEN_1 */
     { Bad_Opcode },
-    { "kandnd",         { MaskG, MaskVex, MaskR }, 0 },
+    { "kandnd",         { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F44_P_0_LEN_0 */
     { Bad_Opcode },
-    { "knotw",          { MaskG, MaskR }, 0 },
+    { "knotw",          { MaskG, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F44_P_0_LEN_0 */
     { Bad_Opcode },
-    { "knotq",          { MaskG, MaskR }, 0 },
+    { "knotq",          { MaskG, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F44_P_2_LEN_0 */
     { Bad_Opcode },
-    { "knotb",          { MaskG, MaskR }, 0 },
+    { "knotb",          { MaskG, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F44_P_2_LEN_0 */
     { Bad_Opcode },
-    { "knotd",          { MaskG, MaskR }, 0 },
+    { "knotd",          { MaskG, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F45_P_0_LEN_1 */
     { Bad_Opcode },
-    { "korw",       { MaskG, MaskVex, MaskR }, 0 },
+    { "korw",       { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F45_P_0_LEN_1 */
     { Bad_Opcode },
-    { "korq",       { MaskG, MaskVex, MaskR }, 0 },
+    { "korq",       { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F45_P_2_LEN_1 */
     { Bad_Opcode },
-    { "korb",       { MaskG, MaskVex, MaskR }, 0 },
+    { "korb",       { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F45_P_2_LEN_1 */
     { Bad_Opcode },
-    { "kord",       { MaskG, MaskVex, MaskR }, 0 },
+    { "kord",       { MaskG, MaskVex, MaskE }, 0 },
   },
  {
     /* MOD_VEX_W_0_0F46_P_0_LEN_1 */
     { Bad_Opcode },
-    { "kxnorw",     { MaskG, MaskVex, MaskR }, 0 },
+    { "kxnorw",     { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F46_P_0_LEN_1 */
     { Bad_Opcode },
-    { "kxnorq",     { MaskG, MaskVex, MaskR }, 0 },
+    { "kxnorq",     { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F46_P_2_LEN_1 */
     { Bad_Opcode },
-    { "kxnorb",     { MaskG, MaskVex, MaskR }, 0 },
+    { "kxnorb",     { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F46_P_2_LEN_1 */
     { Bad_Opcode },
-    { "kxnord",     { MaskG, MaskVex, MaskR }, 0 },
+    { "kxnord",     { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F47_P_0_LEN_1 */
     { Bad_Opcode },
-    { "kxorw",      { MaskG, MaskVex, MaskR }, 0 },
+    { "kxorw",      { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F47_P_0_LEN_1 */
     { Bad_Opcode },
-    { "kxorq",      { MaskG, MaskVex, MaskR }, 0 },
+    { "kxorq",      { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F47_P_2_LEN_1 */
     { Bad_Opcode },
-    { "kxorb",      { MaskG, MaskVex, MaskR }, 0 },
+    { "kxorb",      { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F47_P_2_LEN_1 */
     { Bad_Opcode },
-    { "kxord",      { MaskG, MaskVex, MaskR }, 0 },
+    { "kxord",      { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F4A_P_0_LEN_1 */
     { Bad_Opcode },
-    { "kaddw",          { MaskG, MaskVex, MaskR }, 0 },
+    { "kaddw",          { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F4A_P_0_LEN_1 */
     { Bad_Opcode },
-    { "kaddq",          { MaskG, MaskVex, MaskR }, 0 },
+    { "kaddq",          { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F4A_P_2_LEN_1 */
     { Bad_Opcode },
-    { "kaddb",          { MaskG, MaskVex, MaskR }, 0 },
+    { "kaddb",          { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F4A_P_2_LEN_1 */
     { Bad_Opcode },
-    { "kaddd",          { MaskG, MaskVex, MaskR }, 0 },
+    { "kaddd",          { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F4B_P_0_LEN_1 */
     { Bad_Opcode },
-    { "kunpckwd",   { MaskG, MaskVex, MaskR }, 0 },
+    { "kunpckwd",   { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F4B_P_0_LEN_1 */
     { Bad_Opcode },
-    { "kunpckdq",   { MaskG, MaskVex, MaskR }, 0 },
+    { "kunpckdq",   { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F4B_P_2_LEN_1 */
     { Bad_Opcode },
-    { "kunpckbw",   { MaskG, MaskVex, MaskR }, 0 },
+    { "kunpckbw",   { MaskG, MaskVex, MaskE }, 0 },
   },
   {
     /* MOD_VEX_0F50 */
@@ -8516,72 +8520,72 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_VEX_W_0_0F92_P_0_LEN_0 */
     { Bad_Opcode },
-    { "kmovw",		{ MaskG, Rdq }, 0 },
+    { "kmovw",		{ MaskG, Edq }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F92_P_2_LEN_0 */
     { Bad_Opcode },
-    { "kmovb",		{ MaskG, Rdq }, 0 },
+    { "kmovb",		{ MaskG, Edq }, 0 },
   },
   {
     /* MOD_VEX_0F92_P_3_LEN_0 */
     { Bad_Opcode },
-    { "kmovK",		{ MaskG, Rdq }, 0 },
+    { "kmovK",		{ MaskG, Edq }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F93_P_0_LEN_0 */
     { Bad_Opcode },
-    { "kmovw",		{ Gdq, MaskR }, 0 },
+    { "kmovw",		{ Gdq, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F93_P_2_LEN_0 */
     { Bad_Opcode },
-    { "kmovb",		{ Gdq, MaskR }, 0 },
+    { "kmovb",		{ Gdq, MaskE }, 0 },
   },
   {
     /* MOD_VEX_0F93_P_3_LEN_0 */
     { Bad_Opcode },
-    { "kmovK",		{ Gdq, MaskR }, 0 },
+    { "kmovK",		{ Gdq, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F98_P_0_LEN_0 */
     { Bad_Opcode },
-    { "kortestw", { MaskG, MaskR }, 0 },
+    { "kortestw", { MaskG, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F98_P_0_LEN_0 */
     { Bad_Opcode },
-    { "kortestq", { MaskG, MaskR }, 0 },
+    { "kortestq", { MaskG, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F98_P_2_LEN_0 */
     { Bad_Opcode },
-    { "kortestb", { MaskG, MaskR }, 0 },
+    { "kortestb", { MaskG, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F98_P_2_LEN_0 */
     { Bad_Opcode },
-    { "kortestd", { MaskG, MaskR }, 0 },
+    { "kortestd", { MaskG, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F99_P_0_LEN_0 */
     { Bad_Opcode },
-    { "ktestw", { MaskG, MaskR }, 0 },
+    { "ktestw", { MaskG, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F99_P_0_LEN_0 */
     { Bad_Opcode },
-    { "ktestq", { MaskG, MaskR }, 0 },
+    { "ktestq", { MaskG, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_0_0F99_P_2_LEN_0 */
     { Bad_Opcode },
-    { "ktestb", { MaskG, MaskR }, 0 },
+    { "ktestb", { MaskG, MaskE }, 0 },
   },
   {
     /* MOD_VEX_W_1_0F99_P_2_LEN_0 */
     { Bad_Opcode },
-    { "ktestd", { MaskG, MaskR }, 0 },
+    { "ktestd", { MaskG, MaskE }, 0 },
   },
   {
     /* MOD_VEX_0FAE_REG_2 */
@@ -8643,22 +8647,22 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_VEX_0F3A30_L_0 */
     { Bad_Opcode },
-    { "kshiftr%BW",	{ MaskG, MaskR, Ib }, PREFIX_DATA },
+    { "kshiftr%BW",	{ MaskG, MaskE, Ib }, PREFIX_DATA },
   },
   {
     /* MOD_VEX_0F3A31_L_0 */
     { Bad_Opcode },
-    { "kshiftr%DQ",	{ MaskG, MaskR, Ib }, PREFIX_DATA },
+    { "kshiftr%DQ",	{ MaskG, MaskE, Ib }, PREFIX_DATA },
   },
   {
     /* MOD_VEX_0F3A32_L_0 */
     { Bad_Opcode },
-    { "kshiftl%BW",	{ MaskG, MaskR, Ib }, PREFIX_DATA },
+    { "kshiftl%BW",	{ MaskG, MaskE, Ib }, PREFIX_DATA },
   },
   {
     /* MOD_VEX_0F3A33_L_0 */
     { Bad_Opcode },
-    { "kshiftl%DQ",	{ MaskG, MaskR, Ib }, PREFIX_DATA },
+    { "kshiftl%DQ",	{ MaskG, MaskE, Ib }, PREFIX_DATA },
   },
   {
     /* MOD_VEX_0FXOP_09_12 */

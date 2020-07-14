@@ -250,7 +250,7 @@
   /* PREFIX_EVEX_0F3828 */
   {
     { Bad_Opcode },
-    { "vpmovm2%BW",	{ XM, MaskR }, 0 },
+    { MOD_TABLE (MOD_EVEX_0F3828_P_1) },
     { VEX_W_TABLE (EVEX_W_0F3828_P_2) },
   },
   /* PREFIX_EVEX_0F3829 */
@@ -304,7 +304,7 @@
   /* PREFIX_EVEX_0F3838 */
   {
     { Bad_Opcode },
-    { "vpmovm2%DQ",	{ XM, MaskR }, 0 },
+    { MOD_TABLE (MOD_EVEX_0F3838_P_1) },
     { "vpminsb",	{ XM, Vex, EXx }, 0 },
   },
   /* PREFIX_EVEX_0F3839 */
