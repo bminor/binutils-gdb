@@ -1,3 +1,8 @@
+2020-07-14  Claudiu Zissulescu  <claziss@gmail.com>
+
+	* arc-dis.c (print_insn_arc): Detect and emit a warning when a
+	faulty double register pair is detected.
+
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (OP_D): Print dr<N> instead of db<N> in Intel mode.

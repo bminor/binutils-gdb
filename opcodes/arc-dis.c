@@ -1269,11 +1269,19 @@ print_insn_arc (bfd_vma memaddr,
 	  if (!rname)
 	    rname = regnames[value];
 	  (*info->fprintf_func) (info->stream, "%s", rname);
+
+	  /* Check if we have a double register to print.  */
 	  if (operand->flags & ARC_OPERAND_TRUNCATE)
 	    {
-	      rname = arcExtMap_coreRegName (value + 1);
-	      if (!rname)
-		rname = regnames[value + 1];
+	      if ((value & 0x01) == 0)
+		{
+		  rname = arcExtMap_coreRegName (value + 1);
+		  if (!rname)
+		    rname = regnames[value + 1];
+		}
+	      else
+		rname = _("\nWarning: illegal use of double register "
+			  "pair.\n");
 	      (*info->fprintf_func) (info->stream, "%s", rname);
 	    }
 	  if (value == 63)
