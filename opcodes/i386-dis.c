@@ -14517,15 +14517,22 @@ OP_E_memory (int bytemode, int sizeflag)
 	{
 	case dqw_mode:
 	case dw_mode:
+	case xmm_mw_mode:
 	  shift = 1;
 	  break;
 	case dqb_mode:
 	case db_mode:
+	case xmm_mb_mode:
 	  shift = 0;
 	  break;
 	case dq_mode:
 	  if (address_mode != mode_64bit)
 	    {
+	case dqd_mode:
+	case xmm_md_mode:
+	case d_mode:
+	case d_swap_mode:
+	case d_scalar_swap_mode:
 	      shift = 2;
 	      break;
 	    }
@@ -14566,6 +14573,15 @@ OP_E_memory (int bytemode, int sizeflag)
 	    default:
 	      abort ();
 	    }
+	  /* Make necessary corrections to shift for modes that need it.  */
+	  if (bytemode == xmmq_mode
+	      || bytemode == evex_half_bcst_xmmq_mode
+	      || (bytemode == ymmq_mode && vex.length == 128))
+	    shift -= 1;
+	  else if (bytemode == xmmqd_mode)
+	    shift -= 2;
+	  else if (bytemode == xmmdw_mode)
+	    shift -= 3;
 	  break;
 	case ymm_mode:
 	  shift = 5;
@@ -14579,41 +14595,12 @@ OP_E_memory (int bytemode, int sizeflag)
 	case q_scalar_swap_mode:
 	  shift = 3;
 	  break;
-	case dqd_mode:
-	case xmm_md_mode:
-	case d_mode:
-	case d_swap_mode:
-	case d_scalar_swap_mode:
-	  shift = 2;
-	  break;
 	case bw_unit_mode:
 	  shift = vex.w ? 1 : 0;
-	  break;
-	case xmm_mw_mode:
-	  shift = 1;
-	  break;
-	case xmm_mb_mode:
-	  shift = 0;
 	  break;
 	default:
 	  abort ();
 	}
-      /* Make necessary corrections to shift for modes that need it.
-	 For these modes we currently have shift 4, 5 or 6 depending on
-	 vex.length (it corresponds to xmmword, ymmword or zmmword
-	 operand).  We might want to make it 3, 4 or 5 (e.g. for
-	 xmmq_mode).  In case of broadcast enabled the corrections
-	 aren't needed, as element size is always 32 or 64 bits.  */
-      if (!vex.b
-	  && (bytemode == xmmq_mode
-	      || bytemode == evex_half_bcst_xmmq_mode))
-	shift -= 1;
-      else if (bytemode == xmmqd_mode)
-	shift -= 2;
-      else if (bytemode == xmmdw_mode)
-	shift -= 3;
-      else if (bytemode == ymmq_mode && vex.length == 128)
-	shift -= 1;
     }
   else
     shift = 0;

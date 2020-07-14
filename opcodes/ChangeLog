@@ -1,5 +1,12 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (OP_E_memory): Move xmm_mw_mode, xmm_mb_mode,
+	dqd_mode, xmm_md_mode, d_mode, d_swap_mode, and
+	d_scalar_swap_mode case handling. Move shift adjsutment into
+	the case its applicable to.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (EVEX_W_0F3862_P_2, EVEX_W_0F3863_P_2): Delete.
 	(EXbScalar, EXwScalar): Fold to ...
 	(EXbwUnit): ... this.
