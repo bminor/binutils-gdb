@@ -358,9 +358,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define EMS { OP_EM, v_swap_mode }
 #define EMd { OP_EM, d_mode }
 #define EMx { OP_EM, x_mode }
-#define EXbScalar { OP_EX, b_scalar_mode }
+#define EXbwUnit { OP_EX, bw_unit_mode }
 #define EXw { OP_EX, w_mode }
-#define EXwScalar { OP_EX, w_scalar_mode }
 #define EXd { OP_EX, d_mode }
 #define EXdS { OP_EX, d_swap_mode }
 #define EXq { OP_EX, q_mode }
@@ -488,6 +487,8 @@ enum
   x_mode,
   /* Similar to x_mode, but with different EVEX mem shifts.  */
   evex_x_gscat_mode,
+  /* Similar to x_mode, but with yet different EVEX mem shifts.  */
+  bw_unit_mode,
   /* Similar to x_mode, but with disabled broadcast.  */
   evex_x_nobcst_mode,
   /* Similar to x_mode, but with operands swapped and disabled broadcast
@@ -579,10 +580,6 @@ enum
 
   /* scalar, ignore vector length.  */
   scalar_mode,
-  /* like b_mode, ignore vector length.  */
-  b_scalar_mode,
-  /* like w_mode, ignore vector length.  */
-  w_scalar_mode,
   /* like d_swap_mode, ignore vector length.  */
   d_scalar_swap_mode,
   /* like q_swap_mode, ignore vector length.  */
@@ -2183,8 +2180,6 @@ enum
   EVEX_W_0F3859_P_2,
   EVEX_W_0F385A_P_2,
   EVEX_W_0F385B_P_2,
-  EVEX_W_0F3862_P_2,
-  EVEX_W_0F3863_P_2,
   EVEX_W_0F3870_P_2,
   EVEX_W_0F3872_P_1,
   EVEX_W_0F3872_P_2,
@@ -14109,8 +14104,7 @@ intel_operand_size (int bytemode, int sizeflag)
     case x_swap_mode:
     case evex_x_gscat_mode:
     case evex_x_nobcst_mode:
-    case b_scalar_mode:
-    case w_scalar_mode:
+    case bw_unit_mode:
       if (need_vex)
 	{
 	  switch (vex.length)
@@ -14592,11 +14586,12 @@ OP_E_memory (int bytemode, int sizeflag)
 	case d_scalar_swap_mode:
 	  shift = 2;
 	  break;
-	case w_scalar_mode:
+	case bw_unit_mode:
+	  shift = vex.w ? 1 : 0;
+	  break;
 	case xmm_mw_mode:
 	  shift = 1;
 	  break;
-	case b_scalar_mode:
 	case xmm_mb_mode:
 	  shift = 0;
 	  break;

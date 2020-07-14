@@ -522,16 +522,6 @@
     { MOD_TABLE (MOD_EVEX_0F385B_P_2_W_0) },
     { MOD_TABLE (MOD_EVEX_0F385B_P_2_W_1) },
   },
-  /* EVEX_W_0F3862_P_2 */
-  {
-    { "vpexpandb", { XM, EXbScalar }, 0 },
-    { "vpexpandw", { XM, EXwScalar }, 0 },
-  },
-  /* EVEX_W_0F3863_P_2 */
-  {
-    { "vpcompressb",   { EXbScalar, XM }, 0 },
-    { "vpcompressw",   { EXwScalar, XM }, 0 },
-  },
   /* EVEX_W_0F3870_P_2 */
   {
     { Bad_Opcode },

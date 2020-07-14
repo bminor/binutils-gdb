@@ -723,13 +723,13 @@
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_W_TABLE (EVEX_W_0F3862_P_2) },
+    { "vpexpand%BW", { XM, EXbwUnit }, 0 },
   },
   /* PREFIX_EVEX_0F3863 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { VEX_W_TABLE (EVEX_W_0F3863_P_2) },
+    { "vpcompress%BW",   { EXbwUnit, XM }, 0 },
   },
   /* PREFIX_EVEX_0F3864 */
   {

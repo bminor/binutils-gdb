@@ -1,5 +1,18 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (EVEX_W_0F3862_P_2, EVEX_W_0F3863_P_2): Delete.
+	(EXbScalar, EXwScalar): Fold to ...
+	(EXbwUnit): ... this.
+	(b_scalar_mode, w_scalar_mode): Fold to ...
+	(bw_unit_mode): ... this.
+	(intel_operand_size, OP_E_memory): Replace b_scalar_mode /
+	w_scalar_mode handling by bw_unit_mode one.
+	* i386-dis-evex-w.h: Move entries for opcodes 0F3862 and 0F3863
+	...
+	* i386-dis-evex-prefix.h: ... here.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (PCMPESTR_Fixup): Delete.
 	(dis386): Adjust "LQ" description.
 	(prefix_table): Make %LQ apply to AT&T case only for cvtsi2ss,
