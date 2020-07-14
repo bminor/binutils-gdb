@@ -115,7 +115,6 @@ static void HLE_Fixup3 (int, int);
 static void CMPXCHG8B_Fixup (int, int);
 static void XMM_Fixup (int, int);
 static void FXSAVE_Fixup (int, int);
-static void PCMPESTR_Fixup (int, int);
 
 static void MOVSXD_Fixup (int, int);
 
@@ -2287,8 +2286,8 @@ struct dis386 {
    "XZ" => print 'x', 'y', or 'z' if suffix_always is true or no
 	   register operands and no broadcast.
    "XW" => print 's', 'd' depending on the VEX.W bit (for FMA)
-   "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory
-	   operand or no operand at all in 64bit mode, or if suffix_always
+   "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory operand, cond
+	   being false, or no operand at all in 64bit mode, or if suffix_always
 	   is true.
    "LB" => print "abs" in 64bit mode and behave as 'B' otherwise
    "LS" => print "abs" in 64bit mode and behave as 'S' otherwise
@@ -3703,9 +3702,9 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0F2A */
   {
     { "cvtpi2ps", { XM, EMCq }, PREFIX_OPCODE },
-    { "cvtsi2ss%LQ", { XM, Edq }, PREFIX_OPCODE },
+    { "cvtsi2ss{%LQ|}", { XM, Edq }, PREFIX_OPCODE },
     { "cvtpi2pd", { XM, EMCq }, PREFIX_OPCODE },
-    { "cvtsi2sd%LQ", { XM, Edq }, 0 },
+    { "cvtsi2sd{%LQ|}", { XM, Edq }, 0 },
   },
 
   /* PREFIX_0F2B */
@@ -3966,13 +3965,13 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_0FAE_REG_4_MOD_0 */
   {
     { "xsave",	{ FXSAVE }, 0 },
-    { "ptwrite%LQ", { Edq }, 0 },
+    { "ptwrite{%LQ|}", { Edq }, 0 },
   },
 
   /* PREFIX_0FAE_REG_4_MOD_3 */
   {
     { Bad_Opcode },
-    { "ptwrite%LQ", { Edq }, 0 },
+    { "ptwrite{%LQ|}", { Edq }, 0 },
   },
 
   /* PREFIX_0FAE_REG_5_MOD_0 */
@@ -4592,14 +4591,14 @@ static const struct dis386 prefix_table[][4] = {
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "pcmpestrm", { XM, { PCMPESTR_Fixup, x_mode }, Ib }, PREFIX_OPCODE },
+    { "pcmpestrm!%LQ", { XM, EXx, Ib }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F3A61 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "pcmpestri", { XM, { PCMPESTR_Fixup, x_mode }, Ib }, PREFIX_OPCODE },
+    { "pcmpestri!%LQ", { XM, EXx, Ib }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F3A62 */
@@ -4676,9 +4675,9 @@ static const struct dis386 prefix_table[][4] = {
   /* PREFIX_VEX_0F2A */
   {
     { Bad_Opcode },
-    { "vcvtsi2ss%LQ",	{ XMScalar, VexScalar, Edq }, 0 },
+    { "vcvtsi2ss{%LQ|}",	{ XMScalar, VexScalar, Edq }, 0 },
     { Bad_Opcode },
-    { "vcvtsi2sd%LQ",	{ XMScalar, VexScalar, Edq }, 0 },
+    { "vcvtsi2sd{%LQ|}",	{ XMScalar, VexScalar, Edq }, 0 },
   },
 
   /* PREFIX_VEX_0F2C */
@@ -9847,12 +9846,12 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_0F3A60_P_2 */
   {
-    { "vpcmpestrm",	{ XM, { PCMPESTR_Fixup, x_mode }, Ib }, 0 },
+    { "vpcmpestrm!%LQ",	{ XM, EXx, Ib }, 0 },
   },
 
   /* VEX_LEN_0F3A61_P_2 */
   {
-    { "vpcmpestri",	{ XM, { PCMPESTR_Fixup, x_mode }, Ib }, 0 },
+    { "vpcmpestri!%LQ",	{ XM, EXx, Ib }, 0 },
   },
 
   /* VEX_LEN_0F3A62_P_2 */
@@ -13644,15 +13643,15 @@ putop (const char *in_template, int sizeflag)
 	    }
 	  else if (l == 1 && last[0] == 'L')
 	    {
-	      if ((intel_syntax && need_modrm)
-		  || (modrm.mod == 3 && !(sizeflag & SUFFIX_ALWAYS)))
+	      if (cond ? modrm.mod == 3 && !(sizeflag & SUFFIX_ALWAYS)
+		       : address_mode != mode_64bit)
 		break;
 	      if ((rex & REX_W))
 		{
 		  USED_REX (REX_W);
 		  *obufp++ = 'q';
 		}
-	      else if((address_mode == mode_64bit && need_modrm)
+	      else if((address_mode == mode_64bit && need_modrm && cond)
 		      || (sizeflag & SUFFIX_ALWAYS))
 		*obufp++ = intel_syntax? 'd' : 'l';
 	    }
@@ -16420,27 +16419,6 @@ FXSAVE_Fixup (int bytemode, int sizeflag)
       mnemonicendp = p;
     }
   OP_M (bytemode, sizeflag);
-}
-
-static void
-PCMPESTR_Fixup (int bytemode, int sizeflag)
-{
-  /* Add proper suffix to "{,v}pcmpestr{i,m}".  */
-  if (!intel_syntax)
-    {
-      char *p = mnemonicendp;
-
-      USED_REX (REX_W);
-      if (rex & REX_W)
-	*p++ = 'q';
-      else if (sizeflag & SUFFIX_ALWAYS)
-	*p++ = 'l';
-
-      *p = '\0';
-      mnemonicendp = p;
-    }
-
-  OP_EX (bytemode, sizeflag);
 }
 
 /* Display the destination register operand for instructions with

@@ -1,5 +1,19 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (PCMPESTR_Fixup): Delete.
+	(dis386): Adjust "LQ" description.
+	(prefix_table): Make %LQ apply to AT&T case only for cvtsi2ss,
+	cvtsi2sd, ptwrite, vcvtsi2ss, and vcvtsi2sd. Replace use of
+	PCMPESTR_Fixup by !%LQ and EXx for pcmpestrm, pcmpestri,
+	vpcmpestrm, and vpcmpestri.
+	(putop): Honor "cond" when handling LQ.
+	* i386-dis-evex-prefix.h: Make %LQ apply to AT&T case only for
+	vcvtsi2ss and vcvtusi2ss.
+	* i386-dis-evex-w.h: Make %LQ apply to AT&T case only for
+	vcvtsi2sd and vcvtusi2sd.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (VCMP_Fixup, VCMP): Delete.
 	(simd_cmp_op): Add const.
 	(vex_cmp_op): Move up and drop initial 8 entries. Add const.
