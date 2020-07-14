@@ -118,7 +118,6 @@ static void XMM_Fixup (int, int);
 static void FXSAVE_Fixup (int, int);
 static void PCMPESTR_Fixup (int, int);
 
-static void MOVBE_Fixup (int, int);
 static void MOVSXD_Fixup (int, int);
 
 static void OP_Mask (int, int);
@@ -266,6 +265,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Mo { OP_M, o_mode }
 #define Mp { OP_M, f_mode }		/* 32 or 48 bit memory operand for LDS, LES etc */
 #define Mq { OP_M, q_mode }
+#define Mv { OP_M, v_mode }
 #define Mv_bnd { OP_M, v_bndmk_mode }
 #define Mx { OP_M, x_mode }
 #define Mxmm { OP_M, xmm_mode }
@@ -4422,17 +4422,17 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_0F38F0 */
   {
-    { "movbeS",	{ Gv, { MOVBE_Fixup, v_mode } }, PREFIX_OPCODE },
+    { "movbeS",	{ Gv, Mv }, PREFIX_OPCODE },
     { Bad_Opcode },
-    { "movbeS",	{ Gv, { MOVBE_Fixup, v_mode } }, PREFIX_OPCODE },
+    { "movbeS",	{ Gv, Mv }, PREFIX_OPCODE },
     { "crc32A",	{ Gdq, Eb }, PREFIX_OPCODE },
   },
 
   /* PREFIX_0F38F1 */
   {
-    { "movbeS",	{ { MOVBE_Fixup, v_mode }, Gv }, PREFIX_OPCODE },
+    { "movbeS",	{ Mv, Gv }, PREFIX_OPCODE },
     { Bad_Opcode },
-    { "movbeS",	{ { MOVBE_Fixup, v_mode }, Gv }, PREFIX_OPCODE },
+    { "movbeS",	{ Mv, Gv }, PREFIX_OPCODE },
     { "crc32Q",	{ Gdq, Ev }, PREFIX_OPCODE },
   },
 
@@ -16805,44 +16805,6 @@ PCLMUL_Fixup (int bytemode ATTRIBUTE_UNUSED,
       oappend_maybe_intel (scratchbuf);
       scratchbuf[0] = '\0';
     }
-}
-
-static void
-MOVBE_Fixup (int bytemode, int sizeflag)
-{
-  /* Add proper suffix to "movbe".  */
-  char *p = mnemonicendp;
-
-  switch (bytemode)
-    {
-    case v_mode:
-      if (intel_syntax)
-	goto skip;
-
-      USED_REX (REX_W);
-      if (sizeflag & SUFFIX_ALWAYS)
-	{
-	  if (rex & REX_W)
-	    *p++ = 'q';
-	  else
-	    {
-	      if (sizeflag & DFLAG)
-		*p++ = 'l';
-	      else
-		*p++ = 'w';
-	      used_prefixes |= (prefixes & PREFIX_DATA);
-	    }
-	}
-      break;
-    default:
-      oappend (INTERNAL_DISASSEMBLER_ERROR);
-      break;
-    }
-  mnemonicendp = p;
-  *p = '\0';
-
- skip:
-  OP_M (bytemode, sizeflag);
 }
 
 static void

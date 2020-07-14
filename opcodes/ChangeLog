@@ -1,5 +1,11 @@
 2020-07-14  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (MOVBE_Fixup): Delete.
+	(Mv): Define.
+	(prefix_table): Use Mv for movbe entries.
+
+2020-07-14  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (CRC32_Fixup): Delete.
 	(prefix_table): Use Eb/Ev for crc32 entries.
 
