@@ -1,3 +1,9 @@
+2020-07-15  Nick Clifton  <nickc@redhat.com>
+
+	* write.c (create_note_reloc): Add desc2_size parameter.  Zero out
+	the addend field of REL relocations.  Store the full addend into
+	the note for REL relocations.
+
 2020-07-13  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
