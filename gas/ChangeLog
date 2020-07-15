@@ -1,5 +1,13 @@
 2020-07-15  Jan Beulich  <jbeulich@suse.com>
 
+	* testsuite/gas/i386/x86-64-stack.s: Adjust 32-bit push
+	immediate.
+	* testsuite/gas/i386/x86-64-stack-intel.d,
+	testsuite/gas/i386/x86-64-stack-suffix.d,
+	testsuite/gas/i386/x86-64-stack.d: Adjust expectations.
+
+2020-07-15  Jan Beulich  <jbeulich@suse.com>
+
 	* testsuite/gas/i386/disassem.d,
 	testsuite/gas/i386/ilp32/x86-64-branch.d,
 	testsuite/gas/i386/intel.d, testsuite/gas/i386/jump16.d,
