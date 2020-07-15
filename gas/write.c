@@ -1897,6 +1897,7 @@ create_note_reloc (segT           sec,
 		   symbolS *      sym,
 		   bfd_size_type  note_offset,
 		   bfd_size_type  desc2_offset,
+		   offsetT        desc2_size,
 		   int            reloc_type,
 		   bfd_vma        addend,
 		   char *         note)
@@ -1931,15 +1932,21 @@ create_note_reloc (segT           sec,
 	 but still stores the addend in the word being relocated.  */
       || strstr (bfd_get_target (stdoutput), "-sh") != NULL)
     {
+      offsetT i;
+
+      /* Zero out the addend, since it is now stored in the note.  */
+      reloc->u.b.r.addend = 0;
+
       if (target_big_endian)
 	{
-	  if (bfd_arch_bits_per_address (stdoutput) <= 32)
-	    note[desc2_offset + 3] = addend;
-	  else
-	    note[desc2_offset + 7] = addend;
+	  for (i = desc2_size; addend != 0 && i > 0; addend >>= 8, i--)
+	    note[desc2_offset + i - 1] = (addend & 0xff);
 	}
       else
-	note[desc2_offset] = addend;
+	{
+	  for (i = 0; addend != 0 && i < desc2_size; addend >>= 8, i++)
+	    note[desc2_offset + i] = (addend & 0xff);
+	}
     }
 }
 
@@ -2025,14 +2032,14 @@ maybe_generate_build_notes (void)
 	if (target_big_endian)
 	  {
 	    note[3] = 8; /* strlen (name) + 1.  */
-	    note[7] = desc_size; /* Two 8-byte offsets.  */
+	    note[7] = desc_size; /* Two N-byte offsets.  */
 	    note[10] = NT_GNU_BUILD_ATTRIBUTE_OPEN >> 8;
 	    note[11] = NT_GNU_BUILD_ATTRIBUTE_OPEN & 0xff;
 	  }
 	else
 	  {
 	    note[0] = 8; /* strlen (name) + 1.  */
-	    note[4] = desc_size; /* Two 8-byte offsets.  */
+	    note[4] = desc_size; /* Two N-byte offsets.  */
 	    note[8] = NT_GNU_BUILD_ATTRIBUTE_OPEN & 0xff;
 	    note[9] = NT_GNU_BUILD_ATTRIBUTE_OPEN >> 8;
 	  }
@@ -2042,10 +2049,12 @@ maybe_generate_build_notes (void)
 	memcpy (note + 12, "GA$3a1", 8);
 
 	/* Create a relocation to install the start address of the note...  */
-	create_note_reloc (sec, sym, total_size, 20, desc_reloc, 0, note);
+	create_note_reloc (sec, sym, total_size, 20, desc_size / 2, desc_reloc, 0, note);
 
 	/* ...and another one to install the end address.  */
-	create_note_reloc (sec, sym, total_size, desc2_offset, desc_reloc,
+	create_note_reloc (sec, sym, total_size, desc2_offset,
+			   desc_size / 2,
+			   desc_reloc,
 			   bfd_section_size (bsym->section),
 			   note);
 
