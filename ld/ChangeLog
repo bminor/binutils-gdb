@@ -1,3 +1,10 @@
+2020-07-15  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* testsuite/ld-mmix/undef-1.d, testsuite/ld-mmix/undef-1m.d,
+	testsuite/ld-mmix/undef-2.d, testsuite/ld-mmix/undef-2m.d: Add
+	start- and end-anchors to error-string to match just a
+	single-line error-message.
+
 2020-07-13  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-scripts/default-script1.d: Don't skip, xfail
