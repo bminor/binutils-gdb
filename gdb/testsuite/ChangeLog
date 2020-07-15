@@ -1,3 +1,8 @@
+2020-07-15  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.trace/entry-values.exp: Expect "call" instead of "callq" if
+	is_amd64_regs_target.
+
 2020-07-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/ptype-on-functions.exp: Add more tests.
