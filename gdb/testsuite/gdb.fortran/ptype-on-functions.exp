@@ -45,7 +45,7 @@ gdb_test "ptype fun_ptr" \
     "type = PTR TO -> \\( integer\\(kind=4\\) \\(\\) \\(REF TO -> \\( integer\\(kind=4\\) \\)\\) \\)"
 
 gdb_test "ptype say_string" \
-    "type = void \\(character\\*\\(\\*\\), integer\\(kind=8\\)\\)"
+    "type = void \\(character\\*\\(\\*\\), integer\\(kind=\\d+\\)\\)"
 
 gdb_test "ptype say_array" \
     "type = void \\(integer\\(kind=4\\) \\(:,:\\)\\)"
