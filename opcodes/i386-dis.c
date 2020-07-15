@@ -11818,7 +11818,7 @@ OP_E_memory (int bytemode, int sizeflag)
 		  /* Without base nor index registers, zero-extend the
 		     lower 32-bit displacement to 64 bits.  */
 		  disp = (unsigned int) disp;
-		  needindex = 1;
+		  needindex = scale;
 		}
 	      needaddr32 = 1;
 	    }

@@ -1,3 +1,11 @@
+2020-07-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26237
+	* testsuite/gas/i386/evex-no-scale-64.d: Updated.
+	* testsuite/gas/i386/addr32.d: Likewise.
+	* testsuite/gas/i386/x86-64-addr32-intel.d: Likewise.
+	* testsuite/gas/i386/x86-64-addr32.d: Likewise.
+
 2020-07-15  Nick Clifton  <nickc@redhat.com>
 
 	* write.c (create_note_reloc): Add desc2_size parameter.  Zero out

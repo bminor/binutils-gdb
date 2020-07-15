@@ -1,3 +1,9 @@
+2020-07-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26237
+	* i386-dis.c (OP_E_memory): Don't display eiz with no scale
+	without base nor index registers.
+
 2020-07-15  Jan Beulich  <jbeulich@suse.com>
 
 	* i386-dis.c (putop): Move 'V' and 'W' handling.
