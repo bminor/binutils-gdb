@@ -10742,22 +10742,6 @@ putop (const char *in_template, int sizeflag)
 	  if (!(rex & REX_W))
 	    used_prefixes |= (prefixes & PREFIX_DATA);
 	  break;
-	case 'V':
-	  if (l == 0)
-	    abort ();
-	  else if (l == 1 && last[0] == 'L')
-	    {
-	      if (rex & REX_W)
-		{
-		  *obufp++ = 'a';
-		  *obufp++ = 'b';
-		  *obufp++ = 's';
-		}
-	    }
-	  else
-	    abort ();
-	  /* Fall through.  */
-	  goto case_S;
 	case 'S':
 	  if (l == 0)
 	    {
@@ -10789,6 +10773,54 @@ putop (const char *in_template, int sizeflag)
 		}
 
 	      goto case_S;
+	    }
+	  else
+	    abort ();
+	  break;
+	case 'V':
+	  if (l == 0)
+	    abort ();
+	  else if (l == 1 && last[0] == 'L')
+	    {
+	      if (rex & REX_W)
+		{
+		  *obufp++ = 'a';
+		  *obufp++ = 'b';
+		  *obufp++ = 's';
+		}
+	    }
+	  else
+	    abort ();
+	  goto case_S;
+	case 'W':
+	  if (l == 0)
+	    {
+	      /* operand size flag for cwtl, cbtw */
+	      USED_REX (REX_W);
+	      if (rex & REX_W)
+		{
+		  if (intel_syntax)
+		    *obufp++ = 'd';
+		  else
+		    *obufp++ = 'l';
+		}
+	      else if (sizeflag & DFLAG)
+		*obufp++ = 'w';
+	      else
+		*obufp++ = 'b';
+	      if (!(rex & REX_W))
+		used_prefixes |= (prefixes & PREFIX_DATA);
+	    }
+	  else if (l == 1)
+	    {
+	      if (!need_vex)
+		abort ();
+	      if (last[0] == 'X')
+		*obufp++ = vex.w ? 'd': 's';
+	      else if (last[0] == 'B')
+		*obufp++ = vex.w ? 'w': 'b';
+	      else
+		abort ();
 	    }
 	  else
 	    abort ();
@@ -10860,39 +10892,6 @@ putop (const char *in_template, int sizeflag)
 		default:
 		  abort ();
 		}
-	    }
-	  else
-	    abort ();
-	  break;
-	case 'W':
-	  if (l == 0)
-	    {
-	      /* operand size flag for cwtl, cbtw */
-	      USED_REX (REX_W);
-	      if (rex & REX_W)
-		{
-		  if (intel_syntax)
-		    *obufp++ = 'd';
-		  else
-		    *obufp++ = 'l';
-		}
-	      else if (sizeflag & DFLAG)
-		*obufp++ = 'w';
-	      else
-		*obufp++ = 'b';
-	      if (!(rex & REX_W))
-		used_prefixes |= (prefixes & PREFIX_DATA);
-	    }
-	  else if (l == 1)
-	    {
-	      if (!need_vex)
-		abort ();
-	      if (last[0] == 'X')
-		*obufp++ = vex.w ? 'd': 's';
-	      else if (last[0] == 'B')
-		*obufp++ = vex.w ? 'w': 'b';
-	      else
-		abort ();
 	    }
 	  else
 	    abort ();
