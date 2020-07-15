@@ -1,3 +1,8 @@
+2020-07-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* lib/dwarf.exp (Dwarf::cu, Dwarf::tu, Dwarf::lines): Change valid
+	values in documentation for addr_size to 4 and 8.
+
 2020-07-14  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/amd64-osabi.exp: Update.

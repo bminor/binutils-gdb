@@ -1026,7 +1026,7 @@ namespace eval Dwarf {
     #                default = 0 (32-bit)
     # version n    - DWARF version number to emit
     #                default = 4
-    # addr_size n  - the size of addresses, 32, 64, or default
+    # addr_size n  - the size of addresses in bytes: 4, 8, or default
     #                default = default
     # fission 0|1  - boolean indicating if generating Fission debug info
     #                default = 0
@@ -1117,7 +1117,7 @@ namespace eval Dwarf {
     #                default = 0 (32-bit)
     # version n    - DWARF version number to emit
     #                default = 4
-    # addr_size n  - the size of addresses, 32, 64, or default
+    # addr_size n  - the size of addresses in bytes: 4, 8, or default
     #                default = default
     # fission 0|1  - boolean indicating if generating Fission debug info
     #                default = 0
@@ -1298,7 +1298,7 @@ namespace eval Dwarf {
     #                default = 0 (32-bit)
     # version n    - DWARF version number to emit
     #                default = 4
-    # addr_size n  - the size of addresses, 32, 64, or default
+    # addr_size n  - the size of addresses in bytes: 4, 8, or default
     #                default = default
     #
     # LABEL is the label of the current unit (which is probably
