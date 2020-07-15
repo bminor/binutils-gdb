@@ -1,3 +1,8 @@
+2020-07-15  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* elf64-mmix.c (mmix_elf_relax_section): Improve accounting for
+	R_MMIX_PUSHJ_STUBBABLE relocs against undefined symbols.
+
 2020-07-15  Nick Clifton  <nickc@redhat.com>
 
 	PR26240

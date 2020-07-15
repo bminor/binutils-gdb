@@ -2538,6 +2538,7 @@ mmix_elf_relax_section (bfd *abfd,
      spot a missing actual initialization.  */
   size_t bpono = (size_t) -1;
   size_t pjsno = 0;
+  size_t pjsno_undefs = 0;
   Elf_Internal_Sym *isymbuf = NULL;
   bfd_size_type size = sec->rawsize ? sec->rawsize : sec->size;
 
@@ -2703,6 +2704,11 @@ mmix_elf_relax_section (bfd *abfd,
 		  gregdata->n_remaining_bpo_relocs_this_relaxation_round--;
 		  bpono++;
 		}
+
+	      /* Similarly, keep accounting consistent for PUSHJ
+		 referring to an undefined symbol.  */
+	      if (ELF64_R_TYPE (irel->r_info) == R_MMIX_PUSHJ_STUBBABLE)
+		pjsno_undefs++;
 	      continue;
 	    }
 	}
@@ -2842,7 +2848,8 @@ mmix_elf_relax_section (bfd *abfd,
 	}
     }
 
-  BFD_ASSERT(pjsno == mmix_elf_section_data (sec)->pjs.n_pushj_relocs);
+  BFD_ASSERT(pjsno + pjsno_undefs
+	     == mmix_elf_section_data (sec)->pjs.n_pushj_relocs);
 
   if (elf_section_data (sec)->relocs != internal_relocs)
     free (internal_relocs);
