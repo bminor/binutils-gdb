@@ -1,5 +1,12 @@
 2020-07-15  Jan Beulich  <jbeulich@suse.com>
 
+	* i386-dis.c (dis386): Adjust 'V' description. Use P-based
+	construct for push/pop of register.
+	(putop): Honor cond when handling 'P'. Drop handling of plain
+	'V'.
+
+2020-07-15  Jan Beulich  <jbeulich@suse.com>
+
 	* i386-dis.c (dis386): Adjust 'P', 'T', 'U', and '@'
 	description. Drop '&' description. Use P for push of immediate,
 	pushf/popf, enter, and leave. Use %LP for lret/retf.

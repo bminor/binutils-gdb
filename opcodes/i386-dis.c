@@ -1747,8 +1747,7 @@ struct dis386 {
    'T' => print 'w', 'l'/'d', or 'q' if instruction has an operand size
 	  prefix or if suffix_always is true.
    'U' unused.
-   'V' => print 'q' in 64bit mode if instruction has no operand size
-	  prefix and behave as 'S' otherwise
+   'V' unused.
    'W' => print 'b', 'w' or 'l' ('d' in Intel mode)
    'X' => print 's', 'd' depending on data16 prefix (for XMM)
    'Y' unused.
@@ -1877,23 +1876,23 @@ static const struct dis386 dis386[] = {
   { "dec{S|}",		{ RMeSI }, 0 },
   { "dec{S|}",		{ RMeDI }, 0 },
   /* 50 */
-  { "pushV",		{ RMrAX }, 0 },
-  { "pushV",		{ RMrCX }, 0 },
-  { "pushV",		{ RMrDX }, 0 },
-  { "pushV",		{ RMrBX }, 0 },
-  { "pushV",		{ RMrSP }, 0 },
-  { "pushV",		{ RMrBP }, 0 },
-  { "pushV",		{ RMrSI }, 0 },
-  { "pushV",		{ RMrDI }, 0 },
+  { "push{!P|}",		{ RMrAX }, 0 },
+  { "push{!P|}",		{ RMrCX }, 0 },
+  { "push{!P|}",		{ RMrDX }, 0 },
+  { "push{!P|}",		{ RMrBX }, 0 },
+  { "push{!P|}",		{ RMrSP }, 0 },
+  { "push{!P|}",		{ RMrBP }, 0 },
+  { "push{!P|}",		{ RMrSI }, 0 },
+  { "push{!P|}",		{ RMrDI }, 0 },
   /* 58 */
-  { "popV",		{ RMrAX }, 0 },
-  { "popV",		{ RMrCX }, 0 },
-  { "popV",		{ RMrDX }, 0 },
-  { "popV",		{ RMrBX }, 0 },
-  { "popV",		{ RMrSP }, 0 },
-  { "popV",		{ RMrBP }, 0 },
-  { "popV",		{ RMrSI }, 0 },
-  { "popV",		{ RMrDI }, 0 },
+  { "pop{!P|}",		{ RMrAX }, 0 },
+  { "pop{!P|}",		{ RMrCX }, 0 },
+  { "pop{!P|}",		{ RMrDX }, 0 },
+  { "pop{!P|}",		{ RMrBX }, 0 },
+  { "pop{!P|}",		{ RMrSP }, 0 },
+  { "pop{!P|}",		{ RMrBP }, 0 },
+  { "pop{!P|}",		{ RMrSI }, 0 },
+  { "pop{!P|}",		{ RMrDI }, 0 },
   /* 60 */
   { X86_64_TABLE (X86_64_60) },
   { X86_64_TABLE (X86_64_61) },
@@ -10647,7 +10646,8 @@ putop (const char *in_template, int sizeflag)
 	case 'P':
 	  if (l == 0)
 	    {
-	      if (need_modrm && modrm.mod == 3 && !(sizeflag & SUFFIX_ALWAYS))
+	      if (((need_modrm && modrm.mod == 3) || !cond)
+		  && !(sizeflag & SUFFIX_ALWAYS))
 		break;
 	  /* Fall through.  */
 	case 'T':
@@ -10744,17 +10744,7 @@ putop (const char *in_template, int sizeflag)
 	  break;
 	case 'V':
 	  if (l == 0)
-	    {
-	      if (intel_syntax)
-		break;
-	      if (address_mode == mode_64bit
-		  && ((sizeflag & DFLAG) || (rex & REX_W)))
-		{
-		  if (sizeflag & SUFFIX_ALWAYS)
-		    *obufp++ = 'q';
-		  break;
-		}
-	    }
+	    abort ();
 	  else if (l == 1 && last[0] == 'L')
 	    {
 	      if (rex & REX_W)
