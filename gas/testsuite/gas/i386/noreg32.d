@@ -96,10 +96,10 @@ Disassembly of section .text:
  *[a-f0-9]+:	ef                   	out    %eax,\(%dx\)
  *[a-f0-9]+:	6f                   	outsl  %ds:\(%esi\),\(%dx\)
  *[a-f0-9]+:	6f                   	outsl  %ds:\(%esi\),\(%dx\)
- *[a-f0-9]+:	8f 00                	popl   \(%eax\)
+ *[a-f0-9]+:	8f 00                	pop    \(%eax\)
  *[a-f0-9]+:	07                   	pop    %es
  *[a-f0-9]+:	f3 0f ae 20          	ptwrite \(%eax\)
- *[a-f0-9]+:	ff 30                	pushl  \(%eax\)
+ *[a-f0-9]+:	ff 30                	push   \(%eax\)
  *[a-f0-9]+:	06                   	push   %es
  *[a-f0-9]+:	d1 10                	rcll   \(%eax\)
  *[a-f0-9]+:	c1 10 02             	rcll   \$0x2,\(%eax\)

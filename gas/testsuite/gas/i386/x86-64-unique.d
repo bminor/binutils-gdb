@@ -8,26 +8,26 @@ Disassembly of section .text:
 
 0+ <foo>:
  +[a-f0-9]+:	89 c3                	mov    %eax,%ebx
- +[a-f0-9]+:	c3                   	retq   
+ +[a-f0-9]+:	c3                   	ret *
 
 Disassembly of section .text:
 
 0+ <bar>:
  +[a-f0-9]+:	31 c3                	xor    %eax,%ebx
- +[a-f0-9]+:	c3                   	retq   
+ +[a-f0-9]+:	c3                   	ret *
 
 Disassembly of section .text:
 
 0+ <foo1>:
  +[a-f0-9]+:	89 c3                	mov    %eax,%ebx
- +[a-f0-9]+:	c3                   	retq   
+ +[a-f0-9]+:	c3                   	ret *
 
 Disassembly of section .text:
 
 0+ <bar1>:
  +[a-f0-9]+:	01 c3                	add    %eax,%ebx
  +[a-f0-9]+:	90                   	nop
- +[a-f0-9]+:	c3                   	retq   
+ +[a-f0-9]+:	c3                   	ret *
 
 Disassembly of section .text:
 
@@ -36,7 +36,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	90                   	nop
  +[a-f0-9]+:	90                   	nop
  +[a-f0-9]+:	90                   	nop
- +[a-f0-9]+:	c3                   	retq   
+ +[a-f0-9]+:	c3                   	ret *
 
 Disassembly of section .text:
 
@@ -44,5 +44,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	31 c3                	xor    %eax,%ebx
  +[a-f0-9]+:	90                   	nop
  +[a-f0-9]+:	90                   	nop
- +[a-f0-9]+:	c3                   	retq   
+ +[a-f0-9]+:	c3                   	ret *
 #pass

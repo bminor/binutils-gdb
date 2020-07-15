@@ -24,7 +24,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	48 0f ba 38 01       	btcq   \$0x1,\(%rax\)
  *[a-f0-9]+:	48 0f ba 30 01       	btrq   \$0x1,\(%rax\)
  *[a-f0-9]+:	48 0f ba 28 01       	btsq   \$0x1,\(%rax\)
- *[a-f0-9]+:	48 ff 10             	rex\.W callq \*\(%rax\)
+ *[a-f0-9]+:	48 ff 10             	rex\.W call \*\(%rax\)
  *[a-f0-9]+:	48 83 38 01          	cmpq   \$0x1,\(%rax\)
  *[a-f0-9]+:	48 81 38 89 00 00 00 	cmpq   \$0x89,\(%rax\)
  *[a-f0-9]+:	48 81 38 34 12 00 00 	cmpq   \$0x1234,\(%rax\)
@@ -65,7 +65,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	48 6d                	rex\.W insl \(%dx\),%es:\(%rdi\)
  *[a-f0-9]+:	48 6d                	rex\.W insl \(%dx\),%es:\(%rdi\)
  *[a-f0-9]+:	48 cf                	iretq *
- *[a-f0-9]+:	48 ff 20             	rex\.W jmpq \*\(%rax\)
+ *[a-f0-9]+:	48 ff 20             	rex\.W jmp \*\(%rax\)
  *[a-f0-9]+:	48 ff 18             	rex\.W lcall \*\(%rax\)
  *[a-f0-9]+:	48 0f 01 10          	rex\.W lgdt \(%rax\)
  *[a-f0-9]+:	48 0f 01 18          	rex\.W lidt \(%rax\)
@@ -100,11 +100,11 @@ Disassembly of section .text:
  *[a-f0-9]+:	48 ef                	rex\.W out %eax,\(%dx\)
  *[a-f0-9]+:	48 6f                	rex\.W outsl %ds:\(%rsi\),\(%dx\)
  *[a-f0-9]+:	48 6f                	rex\.W outsl %ds:\(%rsi\),\(%dx\)
- *[a-f0-9]+:	48 8f 00             	rex\.W popq \(%rax\)
- *[a-f0-9]+:	48 0f a1             	rex\.W popq %fs
+ *[a-f0-9]+:	48 8f 00             	rex\.W pop \(%rax\)
+ *[a-f0-9]+:	48 0f a1             	rex\.W pop %fs
  *[a-f0-9]+:	f3 48 0f ae 20       	ptwriteq \(%rax\)
- *[a-f0-9]+:	48 ff 30             	rex\.W pushq \(%rax\)
- *[a-f0-9]+:	48 0f a0             	rex\.W pushq %fs
+ *[a-f0-9]+:	48 ff 30             	rex\.W push \(%rax\)
+ *[a-f0-9]+:	48 0f a0             	rex\.W push %fs
  *[a-f0-9]+:	48 d1 10             	rclq   \(%rax\)
  *[a-f0-9]+:	48 c1 10 02          	rclq   \$0x2,\(%rax\)
  *[a-f0-9]+:	48 d3 10             	rclq   %cl,\(%rax\)

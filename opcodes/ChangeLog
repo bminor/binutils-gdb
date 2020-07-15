@@ -1,3 +1,17 @@
+2020-07-15  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (dis386): Adjust 'P', 'T', 'U', and '@'
+	description. Drop '&' description. Use P for push of immediate,
+	pushf/popf, enter, and leave. Use %LP for lret/retf.
+	(dis386_twobyte): Use P for push/pop of fs/gs.
+	(reg_table): Use P for push/pop. Use @ for near call/jmp.
+	(x86_64_table): Use P for far call/jmp.
+	(putop): Drop handling of 'U' and '&'. Move and adjust handling
+	of '@'. Adjust handling of 'P' and 'T'. Drop case_P and case_Q
+	labels.
+	(OP_J): Drop marking of REX_W as used for v_mode (ISA-dependent)
+	and dqw_mode (unconditional).
+
 2020-07-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26237

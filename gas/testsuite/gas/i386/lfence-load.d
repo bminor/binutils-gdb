@@ -79,7 +79,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	0f ae e8             	lfence 
  +[a-f0-9]+:	0f 0f 66 02 b0       	pfcmpeq 0x2\(%esi\),%mm4
  +[a-f0-9]+:	0f ae e8             	lfence 
- +[a-f0-9]+:	8f 00                	popl   \(%eax\)
+ +[a-f0-9]+:	8f 00                	pop    \(%eax\)
  +[a-f0-9]+:	0f ae e8             	lfence 
  +[a-f0-9]+:	58                   	pop    %eax
  +[a-f0-9]+:	0f ae e8             	lfence 

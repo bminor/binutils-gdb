@@ -90,10 +90,10 @@ Disassembly of section .text:
  *[a-f0-9]+:	ef                   	out    %ax,\(%dx\)
  *[a-f0-9]+:	6f                   	outsw  %ds:\(%si\),\(%dx\)
  *[a-f0-9]+:	6f                   	outsw  %ds:\(%si\),\(%dx\)
- *[a-f0-9]+:	8f 07                	popw   \(%bx\)
+ *[a-f0-9]+:	8f 07                	pop    \(%bx\)
  *[a-f0-9]+:	07                   	pop    %es
  *[a-f0-9]+:	f3 0f ae 27          	ptwrite \(%bx\)
- *[a-f0-9]+:	ff 37                	pushw  \(%bx\)
+ *[a-f0-9]+:	ff 37                	push   \(%bx\)
  *[a-f0-9]+:	06                   	push   %es
  *[a-f0-9]+:	d1 17                	rclw   \(%bx\)
  *[a-f0-9]+:	c1 17 02             	rclw   \$0x2,\(%bx\)
