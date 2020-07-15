@@ -1814,7 +1814,7 @@ coff_get_normalized_symtab (bfd *abfd)
       internal_ptr->is_sym = TRUE;
 
       /* PR 17512: Prevent buffer overrun.  */
-      if (symbol_ptr->u.syment.n_numaux > (raw_end - raw_src) / symesz)
+      if (symbol_ptr->u.syment.n_numaux > ((raw_end - 1) - raw_src) / symesz)
 	{
 	  bfd_release (abfd, internal);
 	  return NULL;
