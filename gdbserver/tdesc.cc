@@ -93,10 +93,20 @@ init_target_desc (struct target_desc *tdesc,
 #endif
 }
 
+/* See gdbsupport/tdesc.h.  */
+
 struct target_desc *
 allocate_target_description (void)
 {
   return new target_desc ();
+}
+
+/* See gdbsupport/tdesc.h.  */
+
+void
+target_desc_deleter::operator() (struct target_desc *target_desc) const
+{
+  delete target_desc;
 }
 
 #ifndef IN_PROCESS_AGENT

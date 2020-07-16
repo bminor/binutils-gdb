@@ -1206,11 +1206,15 @@ tdesc_create_feature (struct target_desc *tdesc, const char *name)
   return new_feature;
 }
 
+/* See gdbsupport/tdesc.h.  */
+
 struct target_desc *
 allocate_target_description (void)
 {
   return new target_desc ();
 }
+
+/* See gdbsupport/tdesc.h.  */
 
 void
 target_desc_deleter::operator() (struct target_desc *target_desc) const

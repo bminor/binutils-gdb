@@ -225,18 +225,6 @@ struct type *tdesc_find_type (struct gdbarch *gdbarch, const char *id);
 int tdesc_register_in_reggroup_p (struct gdbarch *gdbarch, int regno,
 				  struct reggroup *reggroup);
 
-
-/* A deleter adapter for a target desc.  */
-
-struct target_desc_deleter
-{
-  void operator() (struct target_desc *desc) const;
-};
-
-/* A unique pointer specialization that holds a target_desc.  */
-
-typedef std::unique_ptr<target_desc, target_desc_deleter> target_desc_up;
-
 /* Methods for constructing a target description.  */
 
 void set_tdesc_architecture (struct target_desc *,

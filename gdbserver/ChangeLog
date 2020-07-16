@@ -1,3 +1,9 @@
+2020-07-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* tdesc.cc (allocate_target_description): Add header comment.
+	(target_desc_deleter::operator()): New function.
+	* tdesc.h (struct target_desc): Declare as final.
+
 2020-07-13  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* server.cc (handle_query): Use std::vector of

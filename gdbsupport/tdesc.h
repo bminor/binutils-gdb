@@ -312,6 +312,20 @@ struct tdesc_feature : tdesc_element
 
 typedef std::unique_ptr<tdesc_feature> tdesc_feature_up;
 
+/* A deleter adapter for a target_desc.  There are different
+   implementations of this deleter class in gdb and gdbserver because even
+   though the target_desc name is shared between the two projects, the
+   actual implementations of target_desc are completely different.  */
+
+struct target_desc_deleter
+{
+  void operator() (struct target_desc *desc) const;
+};
+
+/* A unique pointer specialization that holds a target_desc.  */
+
+typedef std::unique_ptr<target_desc, target_desc_deleter> target_desc_up;
+
 /* Allocate a new target_desc.  */
 target_desc *allocate_target_description (void);
 

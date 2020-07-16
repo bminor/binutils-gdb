@@ -1,3 +1,15 @@
+2020-07-17  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arch/riscv.c (riscv_tdesc_cache): Change map type.
+	(riscv_lookup_target_description): Return pointer out of
+	unique_ptr.
+	* target-descriptions.c (allocate_target_description): Add
+	comment.
+	(target_desc_deleter::operator()): Likewise.
+	* target-descriptions.h (struct target_desc_deleter): Moved to
+	gdbsupport/tdesc.h.
+	(target_desc_up): Likewise.
+
 2020-07-17  Tom Tromey  <tromey@adacore.com>
 
 	* linux-nat.c (linux_nat_target::supports_non_stop)
