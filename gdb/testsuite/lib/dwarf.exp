@@ -1423,6 +1423,9 @@ namespace eval Dwarf {
 	proc program {statements} {
 	    variable _line_saw_program
 	    variable _line_header_end_label
+	    variable _line
+
+	    set _line 1
 
 	    if "! $_line_saw_program" {
 		# Terminate the file list.
@@ -1447,9 +1450,11 @@ namespace eval Dwarf {
 	    }
 
 	    proc DW_LNE_end_sequence {} {
+		variable _line
 		_op .byte 0
 		_op .uleb128 1
 		_op .byte 1
+		set _line 1
 	    }
 
 	    proc DW_LNS_copy {} {
@@ -1466,8 +1471,25 @@ namespace eval Dwarf {
 	    }
 
 	    proc DW_LNS_advance_line {offset} {
+		variable _line
 		_op .byte 3
 		_op .sleb128 ${offset}
+		set _line [expr $_line + $offset]
+	    }
+
+	    # A pseudo line number program instruction, that can be used instead
+	    # of DW_LNS_advance_line.  Rather than writing:
+	    #   {DW_LNS_advance_line [expr $line1 - 1]}
+	    #   {DW_LNS_advance_line [expr $line2 - $line1]}
+	    #   {DW_LNS_advance_line [expr $line3 - $line2]}
+	    # we can just write:
+	    #   {line $line1}
+	    #   {line $line2}
+	    #   {line $line3}
+	    proc line {line} {
+		variable _line
+		set offset [expr $line - $_line]
+		DW_LNS_advance_line $offset
 	    }
 
 	    proc DW_LNS_set_file {num} {

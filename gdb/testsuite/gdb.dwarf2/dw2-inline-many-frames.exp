@@ -188,91 +188,91 @@ Dwarf::assemble $asm_file {
 
 	program {
 	    {DW_LNE_set_address $main_start}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "main prologue"] - 1]}
+	    {line [gdb_get_line_number "main prologue"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address main_label}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "main set global_var"] - [gdb_get_line_number "main prologue"]]}
+	    {line [gdb_get_line_number "main set global_var"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address main_label2}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "main call aaa"] - [gdb_get_line_number "main set global_var"]]}
+	    {line [gdb_get_line_number "main call aaa"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address main_label2}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "aaa return"] - [gdb_get_line_number "main call aaa"]]}
+	    {line [gdb_get_line_number "aaa return"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address main_label2}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "bbb return"] - [gdb_get_line_number "aaa return"]]}
+	    {line [gdb_get_line_number "bbb return"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address main_label2}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "ccc return"] - [gdb_get_line_number "bbb return"]]}
+	    {line [gdb_get_line_number "ccc return"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address main_label3}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "main end"] - [gdb_get_line_number "ccc return"]]}
+	    {line [gdb_get_line_number "main end"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address $main_end}
 	    {DW_LNE_end_sequence}
 
 	    {DW_LNE_set_address $ddd_start}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "ddd prologue"] - 1]}
+	    {line [gdb_get_line_number "ddd prologue"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address ddd_label}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "ddd return"] - [gdb_get_line_number "ddd prologue"]]}
+	    {line [gdb_get_line_number "ddd return"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address ddd_label2}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "ddd end"] - [gdb_get_line_number "ddd return"]]}
+	    {line [gdb_get_line_number "ddd end"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address $ddd_end}
 	    {DW_LNE_end_sequence}
 
 	    {DW_LNE_set_address $eee_start}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "eee prologue"] - 1]}
+	    {line [gdb_get_line_number "eee prologue"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address eee_label}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "eee return"] - [gdb_get_line_number "eee prologue"]]}
+	    {line [gdb_get_line_number "eee return"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address eee_label2}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "eee end"] - [gdb_get_line_number "eee return"]]}
+	    {line [gdb_get_line_number "eee end"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address $eee_end}
 	    {DW_LNE_end_sequence}
 
 	    {DW_LNE_set_address $fff_start}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "fff prologue"] - 1]}
+	    {line [gdb_get_line_number "fff prologue"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address fff_label}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "fff return"] - [gdb_get_line_number "fff prologue"]]}
+	    {line [gdb_get_line_number "fff return"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address fff_label}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "ggg return"] - [gdb_get_line_number "fff return"]]}
+	    {line [gdb_get_line_number "ggg return"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address fff_label}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "hhh return"] - [gdb_get_line_number "ggg return"]]}
+	    {line [gdb_get_line_number "hhh return"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address fff_label}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "iii return"] - [gdb_get_line_number "hhh return"]]}
+	    {line [gdb_get_line_number "iii return"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address fff_label2}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "fff end"] - [gdb_get_line_number "fff return"]]}
+	    {line [gdb_get_line_number "fff end"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address $fff_end}
 	    {DW_LNE_end_sequence}
 
 	    {DW_LNE_set_address $jjj_start}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "jjj prologue"] - 1]}
+	    {line [gdb_get_line_number "jjj prologue"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address jjj_label}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "jjj return"] - [gdb_get_line_number "jjj prologue"]]}
+	    {line [gdb_get_line_number "jjj return"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address jjj_label2}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "jjj end"] - [gdb_get_line_number "jjj return"]]}
+	    {line [gdb_get_line_number "jjj end"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address $jjj_end}
 	    {DW_LNE_end_sequence}
 
 	    {DW_LNE_set_address $kkk_start}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "kkk prologue"] - 1]}
+	    {line [gdb_get_line_number "kkk prologue"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address kkk_label}
-	    {DW_LNS_advance_line [expr [gdb_get_line_number "kkk return"] - [gdb_get_line_number "kkk prologue"]]}
+	    {line [gdb_get_line_number "kkk return"]}
 	    {DW_LNS_copy}
 	    {DW_LNE_set_address $kkk_end}
 	    {DW_LNE_end_sequence}

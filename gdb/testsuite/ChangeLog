@@ -1,3 +1,16 @@
+2020-07-16  Tom de Vries  <tdevries@suse.de>
+
+	* lib/dwarf.exp (program): Initialize _line.
+	(DW_LNE_end_sequence): Reinitialize _line.
+	(DW_LNS_advance_line): Update _line.
+	(line): New proc.
+	* gdb.dwarf2/dw2-inline-many-frames.exp: Use line.
+	* gdb.dwarf2/dw2-inline-small-func.exp: Same.
+	* gdb.dwarf2/dw2-inline-stepping.exp: Same.
+	* gdb.dwarf2/dw2-is-stmt-2.exp: Same.
+	* gdb.dwarf2/dw2-is-stmt.exp: Same.
+	* gdb.dwarf2/dw2-ranges-func.exp: Same.
+
 2020-07-15  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.fortran/ptype-on-functions.exp: Make the result pattern more
