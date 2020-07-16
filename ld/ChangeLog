@@ -1,3 +1,8 @@
+2020-07-17  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* scripttempt/mmo.sc: Move .init first in .text output section.
+	* testsuite/ld-mmix/bpo-9m.d: Adjust accordingly.
+
 2020-07-15  Jan Beulich  <jbeulich@suse.com>
 
 	* testsuite/ld-i386/ibt-plt-1.d, testsuite/ld-i386/ibt-plt-2a.d,
