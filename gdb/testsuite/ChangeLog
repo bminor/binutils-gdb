@@ -1,3 +1,8 @@
+2020-07-16  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.base/shell.exp: Skip pipe tests dependent on sh on Windows host.
+	Use double quotes instead of single quotes.
+
 2020-07-16  Caroline Tice  <cmtice@google.com>
 
 	* gdb.dwarf2/dw5-rnglist-test.cc: New file.

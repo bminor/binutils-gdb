@@ -34,9 +34,12 @@ gdb_test_no_output "! exit 1"
 gdb_test "p \$_shell_exitcode" " = 1" "shell fail exitcode"
 gdb_test "p \$_shell_exitsignal" " = void" "shell fail exitsignal"
 
-gdb_test_no_output "! kill -2 $$"
-gdb_test "p \$_shell_exitcode" " = void" "shell interrupt exitcode"
-gdb_test "p \$_shell_exitsignal" " = 2" "shell interrupt exitsignal"
+# This test will not work when the shell is CMD.EXE.
+if { ! [ishost *-*-mingw*] } {
+    gdb_test_no_output "! kill -2 $$"
+    gdb_test "p \$_shell_exitcode" " = void" "shell interrupt exitcode"
+    gdb_test "p \$_shell_exitsignal" " = 2" "shell interrupt exitsignal"
+}
 
 # Define the user command "foo", used to test "pipe" command.
 gdb_test_multiple "define foo" "define foo" {
@@ -67,16 +70,16 @@ gdb_test "|foo|grep truc|wc -l" "1" "no space around pipe char"
 gdb_test "echo coucou\\n" "coucou" "echo coucou"
 gdb_test "||wc -l" "1" "repeat previous command"
 
-gdb_test "| -d ! echo this contains a | character\\n ! sed -e 's/|/PIPE/'" \
+gdb_test "| -d ! echo this contains a | character\\n ! sed -e \"s/|/PIPE/\"" \
     "this contains a PIPE character" "alternate 1char delim"
 
-gdb_test "|-d ! echo this contains a | character\\n!sed -e 's/|/PIPE/'" \
+gdb_test "|-d ! echo this contains a | character\\n!sed -e \"s/|/PIPE/\"" \
     "this contains a PIPE character" "alternate 1char delim, no space"
 
-gdb_test "| -d !!! echo this contains a | character\\n !!! sed -e 's/|/PIPE/'" \
+gdb_test "| -d !!! echo this contains a | character\\n !!! sed -e \"s/|/PIPE/\"" \
     "this contains a PIPE character" "alternate 3char delim"
 
-gdb_test "|-d !!! echo this contains a | character\\n!!!sed -e 's/|/PIPE/'" \
+gdb_test "|-d !!! echo this contains a | character\\n!!!sed -e \"s/|/PIPE/\"" \
     "this contains a PIPE character" "alternate 3char delim, no space"
 
 # Convenience variables with pipe command.
@@ -88,9 +91,12 @@ gdb_test "|p 123| exit 1" ""
 gdb_test "p \$_shell_exitcode" " = 1" "pipe fail exitcode"
 gdb_test "p \$_shell_exitsignal" " = void" "pipe fail exitsignal"
 
-gdb_test "|p 123| kill -2 $$" ""
-gdb_test "p \$_shell_exitcode" " = void" "pipe interrupt exitcode"
-gdb_test "p \$_shell_exitsignal" " = 2" "pipe interrupt exitsignal"
+# This test will not work when the shell is CMD.EXE.
+if { ! [ishost *-*-mingw*] } {
+    gdb_test "|p 123| kill -2 $$" ""
+    gdb_test "p \$_shell_exitcode" " = void" "pipe interrupt exitcode"
+    gdb_test "p \$_shell_exitsignal" " = 2" "pipe interrupt exitsignal"
+}
 
 # Error handling verifications.
 gdb_test "|" "Missing COMMAND" "all missing"
