@@ -30,8 +30,6 @@ standard_testfile watch-loc.c watch-loc-dw.S
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
-    global srcdir subdir srcfile
-
     cu {} {
 	compile_unit {
 	    {language @DW_LANG_D}
@@ -56,7 +54,7 @@ Dwarf::assemble $asm_file {
 		}
 
 		subprogram {
-		    {MACRO_AT_func { "_Dmain" "${srcdir}/${subdir}/${srcfile}" }}
+		    {MACRO_AT_func { "_Dmain" }}
 		    {external 1 flag_present}
 		}
 	    }

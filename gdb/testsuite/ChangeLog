@@ -1,5 +1,25 @@
 2020-07-17  Tom de Vries  <tdevries@suse.de>
 
+	* lib/dwarf.exp (Dwarf::MACRO_AT_func, Dwarf::MACRO_AT_range): Drop
+	src parameter.
+	* gdb.dlang/watch-loc.exp: Update MACRO_AT_{func,range} calls.
+	* gdb.dwarf2/bitfield-parent-optimized-out.exp: Same.
+	* gdb.dwarf2/dw2-ifort-parameter.exp: Same.
+	* gdb.dwarf2/dw2-opt-structptr.exp: Same.
+	* gdb.dwarf2/dwz.exp: Same.
+	* gdb.dwarf2/implptr-optimized-out.exp: Same.
+	* gdb.dwarf2/implref-array.exp: Same.
+	* gdb.dwarf2/implref-const.exp: Same.
+	* gdb.dwarf2/implref-global.exp: Same.
+	* gdb.dwarf2/implref-struct.exp: Same.
+	* gdb.dwarf2/info-locals-optimized-out.exp: Same.
+	* gdb.dwarf2/opaque-type-lookup.exp: Same.
+	* gdb.dwarf2/var-access.exp: Same.
+	* gdb.dwarf2/varval.exp: Same.
+	* gdb.trace/entry-values.exp: Same.
+
+2020-07-17  Tom de Vries  <tdevries@suse.de>
+
 	* lib/dwarf.exp (Dwarf::extern): Remove.
 	* gdb.compile/compile-ops.exp: Remove use of Dwarf::extern.
 	* gdb.dlang/circular.exp: Same.

@@ -219,11 +219,11 @@ proc get_func_info { name {options {debug}} } {
 # which will be substituted by one or more standard or macro attributes.
 # supported macro attributes are:
 #
-#  - MACRO_AT_range { FUNC FILE }
+#  - MACRO_AT_range { FUNC }
 #  It is substituted by DW_AT_low_pc and DW_AT_high_pc with the start and
-#  end address of function FUNC in file FILE.
+#  end address of function FUNC in file $srcdir/$subdir/$srcfile.
 #
-#  - MACRO_AT_func { FUNC FILE }
+#  - MACRO_AT_func { FUNC }
 #  It is substituted by DW_AT_name with FUNC and MACRO_AT_range.
 #
 # If FORM is given, it should name a DW_FORM_ constant.
@@ -621,12 +621,13 @@ namespace eval Dwarf {
     # Handle macro attribute MACRO_AT_range.
 
     proc _handle_macro_at_range { attr_value } {
-	if {[llength $attr_value] != 2} {
-	    error "usage: MACRO_AT_range { func file }"
+	if {[llength $attr_value] != 1} {
+	    error "usage: MACRO_AT_range { func }"
 	}
 
 	set func [lindex $attr_value 0]
-	set src [lindex $attr_value 1]
+	global srcdir subdir srcfile
+	set src ${srcdir}/${subdir}/${srcfile}
 	set result [function_range $func $src]
 
 	_handle_attribute DW_AT_low_pc [lindex $result 0] \
@@ -638,7 +639,7 @@ namespace eval Dwarf {
     # Handle macro attribute MACRO_AT_func.
 
     proc _handle_macro_at_func { attr_value } {
-	if {[llength $attr_value] != 2} {
+	if {[llength $attr_value] != 1} {
 	    error "usage: MACRO_AT_func { func file }"
 	}
 	_handle_attribute DW_AT_name [lindex $attr_value 0] DW_FORM_string

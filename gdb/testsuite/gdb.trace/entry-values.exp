@@ -108,7 +108,7 @@ Dwarf::assemble $asm_file {
 
 	    foo_label: subprogram {
 		{decl_file 0 udata}
-		{MACRO_AT_func { foo ${srcdir}/${subdir}/${srcfile} }}
+		{MACRO_AT_func { foo }}
 	    } {
 		formal_parameter {
 		    {type :$int_label}

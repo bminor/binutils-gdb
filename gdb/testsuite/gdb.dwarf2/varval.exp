@@ -48,7 +48,7 @@ proc setup_exec { arg_bad } {
 
     # Create the DWARF.  
     Dwarf::assemble ${asm_file} {
-	global srcdir subdir srcfile bad int_size addr_size
+	global bad int_size addr_size
 
 	cu {} {
 	    DW_TAG_compile_unit {
@@ -198,7 +198,7 @@ proc setup_exec { arg_bad } {
 		}
 
 		DW_TAG_subprogram {
-		    {MACRO_AT_func { "main" "${srcdir}/${subdir}/${srcfile}" }}
+		    {MACRO_AT_func { "main" }}
 		    {DW_AT_type :${int_label}}
 		    {DW_AT_external 1 DW_FORM_flag}
 		} {
