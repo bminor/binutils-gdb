@@ -43,6 +43,7 @@
 #include "gdbarch.h"
 #include "cli/cli-style.h"
 #include "async-event.h"
+#include <forward_list>
 
 static const target_info record_btrace_target_info = {
   "record-btrace",
