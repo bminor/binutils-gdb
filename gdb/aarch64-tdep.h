@@ -67,9 +67,24 @@ struct regset;
    single-stepped instruction.  */
 #define AARCH64_DISPLACED_MODIFIED_INSNS 1
 
+/* AArch64 ABI used by the inferior.  */
+enum aarch64_abi_kind
+{
+  AARCH64_ABI_AUTO,
+  /* Procedure Call Standard for the Arm 64-bit Architecture.  */
+  AARCH64_ABI_AAPCS64,
+  /* The pure capability Procedure Call Standard for the Arm 64-bit
+     Architecture (AArch64).  */
+  AARCH64_ABI_AAPCS64_CAP,
+  AARCH64_ABI_LAST
+};
+
 /* Target-dependent structure in gdbarch.  */
 struct aarch64_gdbarch_tdep : gdbarch_tdep
 {
+  /* The current ABI.  */
+  aarch64_abi_kind abi;
+
   /* Lowest address at which instructions will appear.  */
   CORE_ADDR lowest_pc = 0;
 
