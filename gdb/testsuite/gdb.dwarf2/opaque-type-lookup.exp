@@ -34,8 +34,6 @@ Dwarf::assemble $asm_file {
     declare_labels char_type1_label char_type2_label
     global srcdir subdir srcfile
 
-    extern main
-
     # The partial units are laid out so we're not dependent on the order that
     # they appear in compunit_symtab.includes.  We need the one with the
     # opaque definition to appear first to gdb, so we put it in the middle.

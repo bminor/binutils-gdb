@@ -56,9 +56,6 @@ Dwarf::assemble $asm_file {
 
     global srcdir subdir srcfile
 
-    extern main
-    extern doit
-
     set main_range [function_range main ${srcdir}/${subdir}/${srcfile}]
     set main_start [lindex $main_range 0]
     set main_length [lindex $main_range 1]

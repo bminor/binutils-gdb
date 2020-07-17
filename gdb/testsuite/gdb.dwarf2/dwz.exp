@@ -28,8 +28,6 @@ Dwarf::assemble $asm_file {
     declare_labels partial_label int_label int_label2
     global srcdir subdir srcfile
 
-    extern main
-
     cu {} {
 	partial_label: partial_unit {} {
 	    subprogram {

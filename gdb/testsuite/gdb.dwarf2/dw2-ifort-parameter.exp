@@ -29,7 +29,6 @@ set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     declare_labels int_label
 
-    extern func_start func_end ptr
     global srcdir subdir srcfile
 
     cu {} {

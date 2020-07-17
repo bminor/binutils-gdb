@@ -1,3 +1,17 @@
+2020-07-17  Tom de Vries  <tdevries@suse.de>
+
+	* lib/dwarf.exp (Dwarf::extern): Remove.
+	* gdb.compile/compile-ops.exp: Remove use of Dwarf::extern.
+	* gdb.dlang/circular.exp: Same.
+	* gdb.dwarf2/comp-unit-lang.exp: Same.
+	* gdb.dwarf2/dw2-ifort-parameter.exp: Same.
+	* gdb.dwarf2/dw2-symtab-includes.exp: Same.
+	* gdb.dwarf2/dwz.exp: Same.
+	* gdb.dwarf2/imported-unit-abstract-const-value.exp: Same.
+	* gdb.dwarf2/imported-unit-runto-main.exp: Same.
+	* gdb.dwarf2/imported-unit.exp: Same.
+	* gdb.dwarf2/opaque-type-lookup.exp: Same.
+
 2020-07-16  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.base/shell.exp: Skip pipe tests dependent on sh on Windows host.

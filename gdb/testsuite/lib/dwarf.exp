@@ -822,15 +822,6 @@ namespace eval Dwarf {
 	_emit "${name}:"
     }
 
-    # Declare a global label.  This is typically used to refer to
-    # labels defined in other files, for example a function defined in
-    # a .c file.
-    proc extern {args} {
-	foreach name $args {
-	    _op .global $name
-	}
-    }
-
     # A higher-level interface to label handling.
     #
     # ARGS is a list of label descriptors.  Each one is either a
