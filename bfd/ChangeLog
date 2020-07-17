@@ -1,3 +1,9 @@
+2020-07-21  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* elf.c (elfcore_grok_win32pstatus): Warn on malformed
+	win32pstatus notes, and return TRUE so we continue rather than
+	stopping as if it was an error.
+
 2020-07-01  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* elf.c (elfcore_grok_win32pstatus): Handle NOTE_INFO_MODULE64.

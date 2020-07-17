@@ -10154,21 +10154,36 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 
   type = bfd_get_32 (abfd, note->descdata);
 
+  struct {
+    const char *type_name;
+    unsigned long min_size;
+  } size_check[] =
+      {
+       { "NOTE_INFO_PROCESS", 12 },
+       { "NOTE_INFO_THREAD", 12 },
+       { "NOTE_INFO_MODULE", 12 },
+       { "NOTE_INFO_MODULE64", 16 },
+      };
+
+  if (type > (sizeof(size_check)/sizeof(size_check[0])))
+      return TRUE;
+
+  if (note->descsz < size_check[type - 1].min_size)
+    {
+      _bfd_error_handler (_("%pB: warning: win32pstatus %s of size %lu bytes is too small"),
+                          abfd, size_check[type - 1].type_name, note->descsz);
+      return TRUE;
+    }
+
   switch (type)
     {
     case NOTE_INFO_PROCESS:
-      if (note->descsz < 12)
-        return FALSE;
-
       /* FIXME: need to add ->core->command.  */
       elf_tdata (abfd)->core->pid = bfd_get_32 (abfd, note->descdata + 4);
       elf_tdata (abfd)->core->signal = bfd_get_32 (abfd, note->descdata + 8);
       break;
 
     case NOTE_INFO_THREAD:
-      if (note->descsz < 12)
-        return FALSE;
-
       /* Make a ".reg/<tid>" section containing the Win32 API thread CONTEXT
          structure. */
       /* thread_info.tid */
@@ -10204,9 +10219,6 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
       /* Make a ".module/xxxxxxxx" section.  */
       if (type == NOTE_INFO_MODULE)
         {
-          if (note->descsz < 12)
-            return FALSE;
-
           /* module_info.base_address */
           base_addr = bfd_get_32 (abfd, note->descdata + 4);
           sprintf (buf, ".module/%08lx", (unsigned long) base_addr);
@@ -10215,9 +10227,6 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
         }
       else /* NOTE_INFO_MODULE64 */
         {
-          if (note->descsz < 16)
-            return FALSE;
-
           /* module_info.base_address */
           base_addr = bfd_get_64 (abfd, note->descdata + 4);
           sprintf (buf, ".module/%016lx", (unsigned long) base_addr);
@@ -10238,7 +10247,11 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 	return FALSE;
 
       if (note->descsz < 12 + name_size)
-        return FALSE;
+        {
+          _bfd_error_handler (_("%pB: win32pstatus NOTE_INFO_MODULE of size %lu is too small to contain a name of size %zu"),
+                              abfd, note->descsz, name_size);
+          return TRUE;
+        }
 
       sect->size = note->descsz;
       sect->filepos = note->descpos;
