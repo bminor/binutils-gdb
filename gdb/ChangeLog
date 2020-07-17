@@ -1,5 +1,17 @@
 2020-10-20  Luis Machado  <luis.machado@arm.com>
 
+	* aarch64-tdep.c (set_aarch64_cmdlist, show_aarch64_cmdlist,
+	aarch64_abi_strings, aarch64_current_abi_global)
+	(aarch64_current_abi_string): New static globals.
+	(aarch64_update_current_architecture, aarch64_set_abi)
+	(aarch64_show_abi): New functions.
+	(aarch64_gdbarch_init): Handle ABI identification.
+	(_initialize_aarch64_tdep): Add new ABI commands.
+	* aarch64-tdep.h (aarch64_abi_kind): New enum.
+	(struct gdbarch_tdep) <abi>: New field.
+
+2020-10-20  Luis Machado  <luis.machado@arm.com>
+
 	* c-typeprint.c (c_type_print_varspec_prefix)
 	(c_type_print_varspec_suffix): Handle capability type.
 	* dwarf2/read.c (read_base_type): Call init_capability_type for
