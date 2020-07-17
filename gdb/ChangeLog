@@ -1,3 +1,10 @@
+2020-07-17  Tom Tromey  <tromey@adacore.com>
+
+	* linux-nat.c (linux_nat_target::supports_non_stop)
+	(linux_nat_target::always_non_stop_p): Use "true".
+	(linux_nat_target::supports_disable_randomization): Use "true" and
+	"false".
+
 2020-07-16  Caroline Tice  <cmtice@google.com>
 
 	* dwarf2/read.c (RNGLIST_HEADER_SIZE32) New constant definition.
