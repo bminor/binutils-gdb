@@ -1,5 +1,11 @@
 2020-07-17  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/valgrind-infcall-2.c: New test.
+	* gdb.base/valgrind-infcall-2.exp: New file.
+	* lib/valgrind.exp (vgdb_start): Add and handle active_at_startup.
+
+2020-07-17  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.dlang/circular.c (found): Use found_label as label name.
 	* gdb.dwarf2/arr-subrange.c (main): Use main_label as label name.
 	* gdb.dwarf2/comp-unit-lang.c (func): Use func_label as label name.
