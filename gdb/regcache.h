@@ -402,7 +402,7 @@ protected:
   regcache (process_stratum_target *target, gdbarch *gdbarch,
 	    const address_space *aspace);
 
-  static std::forward_list<regcache *> current_regcache;
+  static std::forward_list<regcache *> regcaches;
 
 private:
 
