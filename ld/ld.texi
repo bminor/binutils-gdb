@@ -7922,15 +7922,13 @@ care.  @option{--no-plt-localentry} is the default.
 @itemx --no-power10-stubs
 When PowerPC64 @command{ld} links input object files containing
 relocations used on power10 prefixed instructions it normally creates
-linkage stubs (PLT call and long branch) using power10 instructions.
-In particular for @code{@@notoc} PLT calls where @code{r2} is not
-known the power10 stubs are smaller and faster, so are preferred for
+linkage stubs (PLT call and long branch) using power10 instructions
+for @code{@@notoc} PLT calls where @code{r2} is not known.  The
+power10 notoc stubs are smaller and faster, so are preferred for
 power10.  @option{--power10-stubs} and @option{--no-power10-stubs}
 allow you to override the linker's selection of stub instructions.
-For example, when linking a shared library that contains cpu-optimized
-versions of functions for both power9 and power10, you might use
-@option{--no-power10-stubs} so that power9 code making calls doesn't
-attempt to execute power10 instructions.
+@option{--power10-stubs=auto} allows the user to select the default
+auto mode.
 @end table
 
 @ifclear GENERIC

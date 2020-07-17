@@ -716,7 +716,7 @@ PARSE_AND_LIST_LONGOPTS=${PARSE_AND_LIST_LONGOPTS}'
   { "no-plt-align", no_argument, NULL, OPTION_NO_PLT_ALIGN },
   { "plt-localentry", optional_argument, NULL, OPTION_PLT_LOCALENTRY },
   { "no-plt-localentry", no_argument, NULL, OPTION_NO_PLT_LOCALENTRY },
-  { "power10-stubs", no_argument, NULL, OPTION_POWER10_STUBS },
+  { "power10-stubs", optional_argument, NULL, OPTION_POWER10_STUBS },
   { "no-power10-stubs", no_argument, NULL, OPTION_NO_POWER10_STUBS },
   { "emit-stub-syms", no_argument, NULL, OPTION_STUBSYMS },
   { "no-emit-stub-syms", no_argument, NULL, OPTION_NO_STUBSYMS },
@@ -773,7 +773,7 @@ PARSE_AND_LIST_OPTIONS=${PARSE_AND_LIST_OPTIONS}'
   --no-plt-localentry         Don'\''t optimize ELFv2 calls\n"
 		   ));
   fprintf (file, _("\
-  --power10-stubs             Use Power10 PLT call stubs (default auto)\n"
+  --power10-stubs [=auto]     Use Power10 PLT call stubs (default auto)\n"
 		   ));
   fprintf (file, _("\
   --no-power10-stubs          Don'\''t use Power10 PLT call stubs\n"
@@ -889,7 +889,20 @@ PARSE_AND_LIST_ARGS_CASES=${PARSE_AND_LIST_ARGS_CASES}'
       break;
 
     case OPTION_POWER10_STUBS:
-      params.power10_stubs = 1;
+      if (optarg != NULL)
+	{
+	  if (strcasecmp (optarg, "auto") == 0)
+	    params.power10_stubs = -1;
+	  else if (strcasecmp (optarg, "yes") == 0)
+	    params.power10_stubs = 1;
+	  else if (strcasecmp (optarg, "no") == 0)
+	    params.power10_stubs = 0;
+	  else
+	    einfo (_("%F%P: invalid --power10-stubs argument `%s'\''\n"),
+		   optarg);
+	}
+      else
+	params.power10_stubs = 1;
       break;
 
     case OPTION_NO_POWER10_STUBS:

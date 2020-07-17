@@ -1,3 +1,17 @@
+2020-07-19  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (power10-stubs): Accept optional "auto" arg.
+	* ld.texi (power10-stubs): Update.
+	* testsuite/ld-powerpc/callstub-1.d: Force --power10-stubs.
+	* testsuite/ld-powerpc/callstub-2.d: Relax branch offset comparison.
+	* testsuite/ld-powerpc/callstub-4.d: New test.
+	* testsuite/ld-powerpc/notoc.d: Force --no-power10-stubs.
+	* testsuite/ld-powerpc/notoc3.d,
+	* testsuite/ld-powerpc/notoc3.s,
+	* testsuite/ld-powerpc/notoc3.wf: New test.
+	* testsuite/ld-powerpc/powerpc.exp: Run new tests.  Pass
+	--no-power10-stubs for notoc link.
+
 2020-07-15  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* testsuite/ld-mmix/undef-1.d, testsuite/ld-mmix/undef-1m.d,
