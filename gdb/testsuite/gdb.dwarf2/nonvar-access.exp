@@ -27,12 +27,6 @@ standard_testfile main.c nonvar-access-dw.S
 set asm_file [standard_output_file $srcfile2]
 
 Dwarf::assemble $asm_file {
-    global srcdir subdir srcfile
-
-    set range [function_range main ${srcdir}/${subdir}/${srcfile}]
-    set main_start [lindex $range 0]
-    set main_length [lindex $range 1]
-
     cu {} {
 	compile_unit {
 	    {DW_AT_name main.c}
@@ -101,10 +95,8 @@ Dwarf::assemble $asm_file {
 	    }
 
 	    DW_TAG_subprogram {
-		{name main}
+		{MACRO_AT_func {main}}
 		{DW_AT_external 1 flag}
-		{low_pc [gdb_target_symbol main] DW_FORM_addr}
-		{high_pc "$main_start + $main_length" DW_FORM_addr}
 	    } {
 		# Simple variable without location.
 		DW_TAG_variable {

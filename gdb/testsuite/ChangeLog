@@ -1,5 +1,30 @@
 2020-07-17  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.dlang/circular.c (found): Use found_label as label name.
+	* gdb.dwarf2/arr-subrange.c (main): Use main_label as label name.
+	* gdb.dwarf2/comp-unit-lang.c (func): Use func_label as label name.
+	* gdb.dlang/circular.exp: Use MACRO_AT_func and MACRO_AT_range.
+	* gdb.dwarf2/ada-linkage-name.exp: Same.
+	* gdb.dwarf2/arr-subrange.exp: Same.
+	* gdb.dwarf2/atomic-type.exp: Same.
+	* gdb.dwarf2/comp-unit-lang.exp: Same.
+	* gdb.dwarf2/cpp-linkage-name.exp: Same.
+	* gdb.dwarf2/dw2-bad-mips-linkage-name.exp: Same.
+	* gdb.dwarf2/dw2-lexical-block-bare.exp: Same.
+	* gdb.dwarf2/dw2-regno-invalid.exp: Same.
+	* gdb.dwarf2/implptr-64bit.exp: Same.
+	* gdb.dwarf2/imported-unit-abstract-const-value.exp: Same.
+	* gdb.dwarf2/imported-unit-runto-main.exp: Same.
+	* gdb.dwarf2/imported-unit.exp: Same.
+	* gdb.dwarf2/main-subprogram.exp: Same.
+	* gdb.dwarf2/missing-type-name.exp: Same.
+	* gdb.dwarf2/nonvar-access.exp: Same.
+	* gdb.dwarf2/struct-with-sig.exp: Same.
+	* gdb.dwarf2/typedef-void-finish.exp: Same.
+	* gdb.dwarf2/void-type.exp: Same.
+
+2020-07-17  Tom de Vries  <tdevries@suse.de>
+
 	* lib/dwarf.exp (Dwarf::MACRO_AT_func, Dwarf::MACRO_AT_range): Drop
 	src parameter.
 	* gdb.dlang/watch-loc.exp: Update MACRO_AT_{func,range} calls.

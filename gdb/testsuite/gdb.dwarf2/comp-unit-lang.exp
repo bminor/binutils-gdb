@@ -45,14 +45,11 @@ proc do_test {cu_lang gdb_lang} {
 	    compile_unit {
 		{name file1.txt}
 		{language @$cu_lang}
-		{low_pc func_start addr}
-		{high_pc func_end addr}
+		{MACRO_AT_range {func}}
 	    } {
 		subprogram {
 		    {external 1 flag}
-		    {name func}
-		    {low_pc func_start addr}
-		    {high_pc func_end addr}
+		    {MACRO_AT_func {func}}
 		} {
 		}
 	    }

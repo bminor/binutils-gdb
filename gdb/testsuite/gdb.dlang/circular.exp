@@ -54,10 +54,8 @@ Dwarf::assemble $asm_file {
 		}
 
 		subprogram {
-		    {name found}
 		    {external 1 flag_present}
-		    {low_pc circular1_found_start addr}
-		    {high_pc circular1_found_end addr}
+		    {MACRO_AT_func {found}}
 		}
 	    }
 

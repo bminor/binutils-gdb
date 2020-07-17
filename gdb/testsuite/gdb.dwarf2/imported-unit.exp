@@ -54,16 +54,6 @@ Dwarf::assemble $asm_file {
     set int_size [get_sizeof "int" 4]
     set addr_size [get_sizeof "void *" 8]
 
-    global srcdir subdir srcfile
-
-    set main_range [function_range main ${srcdir}/${subdir}/${srcfile}]
-    set main_start [lindex $main_range 0]
-    set main_length [lindex $main_range 1]
-
-    set doit_range [function_range doit ${srcdir}/${subdir}/${srcfile}]
-    set doit_start [lindex $doit_range 0]
-    set doit_length [lindex $doit_range 1]
-
     cu {} {
 	compile_unit {
 	    {language @DW_LANG_C_plus_plus}
@@ -74,13 +64,11 @@ Dwarf::assemble $asm_file {
 	    }
 	    subprogram {
 		{abstract_origin %$main_label}
-		{low_pc $main_start addr}
-		{high_pc "$main_start + $main_length" addr}
+		{MACRO_AT_range {main}}
 	    } {
 		subprogram {
 		    {abstract_origin %$doit_label}
-		    {low_pc $doit_start addr}
-		    {high_pc "$doit_start + $doit_length" addr}
+		    {MACRO_AT_range {doit}}
 		} {
 		    formal_parameter {
 			{abstract_origin %$doit_self_label}
