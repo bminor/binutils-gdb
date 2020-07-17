@@ -317,10 +317,14 @@ set ppc64elftests {
     {"ambig shared v1" "-shared -melf64ppc" "" "-a64" {funv1.s} {} "funv1.so"}
     {"ambig shared v2" "-shared -melf64ppc" "" "-a64" {funv2.s} {} "funv2.so"}
     {"notoc ext" "" "" "-a64" {ext.s} {} ""}
-    {"notoc" "-melf64ppc --no-plt-localentry -T ext.lnk" "" "-a64" {notoc.s}
+    {"notoc" "-melf64ppc --no-plt-localentry --no-power10-stubs -T ext.lnk"
+	"" "-a64" {notoc.s}
 	{{objdump -d notoc.d} {readelf {-wf -W} notoc.wf}} "notoc"}
     {"notoc2" "-melf64ppc -shared" "" "-a64 -mpower10" {notoc2.s}
 	{{objdump {-d -Mpower10} notoc2.d}} "notoc2"}
+    {"notoc3" "-melf64ppc --no-plt-localentry -T ext.lnk" ""
+	"-a64 -mpower10" {notoc3.s}
+	{{objdump -d notoc3.d} {readelf {-wf -W} notoc3.wf}} "notoc3"}
     {"pcrelopt" "-melf64ppc --hash-style=gnu" "tmpdir/symtocbase.so"
 	"-a64 -mpower10" {pcrelopt.s}
 	{{objdump {-d -Mpower10} pcrelopt.d}
@@ -403,6 +407,7 @@ if [ supports_ppc64 ] then {
     run_dump_test "callstub-1"
     run_dump_test "callstub-2"
     run_dump_test "callstub-3"
+    run_dump_test "callstub-4"
     run_dump_test "tlsgd"
     run_dump_test "tlsld"
     run_dump_test "tlsie"

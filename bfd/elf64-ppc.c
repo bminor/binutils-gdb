@@ -3245,6 +3245,9 @@ struct ppc_link_hash_table
   /* Whether calls are made via the PLT from NOTOC functions.  */
   unsigned int notoc_plt:1;
 
+  /* Whether any code linked seems to be Power10.  */
+  unsigned int has_power10_relocs:1;
+
   /* Incremented every time we size stubs.  */
   unsigned int stub_iteration;
 
@@ -3679,6 +3682,37 @@ ppc_stub_name (const asection *input_section,
   return stub_name;
 }
 
+/* If mixing power10 with non-power10 code and --power10-stubs is not
+   specified (or is auto) then calls using @notoc relocations that
+   need a stub will utilize power10 instructions in the stub, and
+   calls without @notoc relocations will not use power10 instructions.
+   The two classes of stubs are stored in separate stub_hash_table
+   entries having the same key string.  The two entries will always be
+   adjacent on entry->root.next chain, even if hash table resizing
+   occurs.  This function selects the correct entry to use.  */
+
+static struct ppc_stub_hash_entry *
+select_alt_stub (struct ppc_stub_hash_entry *entry, bfd_boolean notoc)
+{
+  bfd_boolean have_notoc;
+
+  have_notoc = (entry->stub_type == ppc_stub_plt_call_notoc
+		|| entry->stub_type == ppc_stub_plt_branch_notoc
+		|| entry->stub_type == ppc_stub_long_branch_notoc);
+
+  if (have_notoc != notoc)
+    {
+      const char *stub_name = entry->root.string;
+
+      entry = (struct ppc_stub_hash_entry *) entry->root.next;
+      if (entry != NULL
+	  && entry->root.string != stub_name)
+	entry = NULL;
+    }
+
+  return entry;
+}
+
 /* Look up an entry in the stub hash.  Stub entries are cached because
    creating the stub name takes a bit of time.  */
 
@@ -3721,6 +3755,13 @@ ppc_get_stub_entry (const asection *input_section,
 	h->u.stub_cache = stub_entry;
 
       free (stub_name);
+    }
+
+  if (stub_entry != NULL && htab->params->power10_stubs == -1)
+    {
+      bfd_boolean notoc = ELF64_R_TYPE (rel->r_info) == R_PPC64_REL24_NOTOC;
+
+      stub_entry = select_alt_stub (stub_entry, notoc);
     }
 
   return stub_entry;
@@ -4599,8 +4640,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_PLT_PCREL34:
 	case R_PPC64_PLT_PCREL34_NOTOC:
 	case R_PPC64_PCREL28:
-	  if (htab->params->power10_stubs < 0)
-	    htab->params->power10_stubs = 1;
+	  htab->has_power10_relocs = 1;
 	  break;
 	default:
 	  break;
@@ -10761,7 +10801,7 @@ plt_stub_size (struct ppc_link_hash_table *htab,
 
   if (stub_entry->stub_type >= ppc_stub_plt_call_notoc)
     {
-      if (htab->params->power10_stubs > 0)
+      if (htab->params->power10_stubs != 0)
 	{
 	  bfd_vma start = (stub_entry->stub_offset
 			   + stub_entry->group->stub_sec->output_offset
@@ -11602,7 +11642,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       relp = p;
       num_rel = 0;
-      if (htab->params->power10_stubs > 0)
+      if (htab->params->power10_stubs != 0)
 	{
 	  bfd_boolean load = stub_entry->stub_type >= ppc_stub_plt_call_notoc;
 	  p = build_power10_offset (htab->params->stub_bfd, p, off, odd, load);
@@ -11641,7 +11681,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (info->emitrelocations)
 	{
 	  bfd_vma roff = relp - stub_entry->group->stub_sec->contents;
-	  if (htab->params->power10_stubs > 0)
+	  if (htab->params->power10_stubs != 0)
 	    num_rel += num_relocs_for_power10_offset (off, odd);
 	  else
 	    {
@@ -11651,7 +11691,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  r = get_relocs (stub_entry->group->stub_sec, num_rel);
 	  if (r == NULL)
 	    return FALSE;
-	  if (htab->params->power10_stubs > 0)
+	  if (htab->params->power10_stubs != 0)
 	    r = emit_relocs_for_power10_offset (info, r, roff, targ, off, odd);
 	  else
 	    r = emit_relocs_for_offset (info, r, roff, targ, off);
@@ -11669,7 +11709,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    }
 	}
 
-      if (htab->params->power10_stubs <= 0
+      if (htab->params->power10_stubs == 0
 	  && htab->glink_eh_frame != NULL
 	  && htab->glink_eh_frame->size != 0)
 	{
@@ -12017,7 +12057,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (info->emitrelocations)
 	{
 	  unsigned int num_rel;
-	  if (htab->params->power10_stubs > 0)
+	  if (htab->params->power10_stubs != 0)
 	    num_rel = num_relocs_for_power10_offset (off, odd);
 	  else
 	    num_rel = num_relocs_for_offset (off - 8);
@@ -12025,7 +12065,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  stub_entry->group->stub_sec->flags |= SEC_RELOC;
 	}
 
-      if (htab->params->power10_stubs > 0)
+      if (htab->params->power10_stubs != 0)
 	extra = size_power10_offset (off, odd);
       else
 	extra = size_offset (off - 8);
@@ -12036,7 +12076,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	 calculated.  */
       off -= extra;
 
-      if (htab->params->power10_stubs <= 0)
+      if (htab->params->power10_stubs == 0)
 	{
 	  /* After the bcl, lr has been modified so we need to emit
 	     .eh_frame info saying the return address is in r12.  */
@@ -12099,7 +12139,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (info->emitrelocations)
 	{
 	  unsigned int num_rel;
-	  if (htab->params->power10_stubs > 0)
+	  if (htab->params->power10_stubs != 0)
 	    num_rel = num_relocs_for_power10_offset (off, odd);
 	  else
 	    num_rel = num_relocs_for_offset (off - 8);
@@ -12109,7 +12149,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       size = plt_stub_size (htab, stub_entry, off);
 
-      if (htab->params->power10_stubs <= 0)
+      if (htab->params->power10_stubs == 0)
 	{
 	  /* After the bcl, lr has been modified so we need to emit
 	     .eh_frame info saying the return address is in r12.  */
@@ -13034,6 +13074,9 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
   if (htab == NULL)
     return FALSE;
 
+  if (htab->params->power10_stubs == -1 && !htab->has_power10_relocs)
+    htab->params->power10_stubs = 0;
+
   if (htab->params->plt_thread_safe == -1 && !bfd_link_executable (info))
     htab->params->plt_thread_safe = 1;
   if (!htab->opd_abi)
@@ -13409,6 +13452,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 		  if (stub_entry != NULL)
 		    {
 		      enum ppc_stub_type old_type;
+
 		      /* A stub has already been created, but it may
 			 not be the required type.  We shouldn't be
 			 transitioning from plt_call to long_branch
@@ -13416,6 +13460,39 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 			 upgrading from plt_call to plt_call_r2save or
 			 from long_branch to long_branch_r2off.  */
 		      free (stub_name);
+		      if (htab->params->power10_stubs == -1)
+			{
+			  /* For --power10-stubs=auto, don't merge _notoc
+			     and other varieties of stubs.  (The _both
+			     variety won't be created.)  */
+			  bfd_boolean notoc = r_type == R_PPC64_REL24_NOTOC;
+			  struct ppc_stub_hash_entry *alt_stub
+			    = select_alt_stub (stub_entry, notoc);
+
+			  if (alt_stub == NULL)
+			    {
+			      alt_stub = (struct ppc_stub_hash_entry *)
+				stub_hash_newfunc (NULL,
+						   &htab->stub_hash_table,
+						   stub_entry->root.string);
+			      if (alt_stub == NULL)
+				{
+				  /* xgettext:c-format */
+				  _bfd_error_handler
+				    (_("%pB: cannot create stub entry %s"),
+				     section->owner, stub_entry->root.string);
+				  goto error_ret_free_internal;
+				}
+			      *alt_stub = *stub_entry;
+			      stub_entry->root.next = &alt_stub->root;
+			      if (notoc)
+				/* Sort notoc stubs first, for no good
+				   reason.  */
+				alt_stub = stub_entry;
+			      alt_stub->stub_type = stub_type;
+			    }
+			  stub_entry = alt_stub;
+			}
 		      old_type = stub_entry->stub_type;
 		      switch (old_type)
 			{
