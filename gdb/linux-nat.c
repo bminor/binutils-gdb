@@ -4185,15 +4185,10 @@ linux_nat_target::always_non_stop_p ()
   return true;
 }
 
-/* True if we want to support multi-process.  To be removed when GDB
-   supports multi-exec.  */
-
-int linux_multi_process = 1;
-
 bool
 linux_nat_target::supports_multi_process ()
 {
-  return linux_multi_process;
+  return true;
 }
 
 bool

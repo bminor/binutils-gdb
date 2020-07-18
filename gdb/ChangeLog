@@ -1,3 +1,8 @@
+2020-07-18  Tom Tromey  <tom@tromey.com>
+
+	* linux-nat.c (linux_multi_process): Remove.
+	(linux_nat_target::supports_multi_process): Return true.
+
 2020-07-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* arch/riscv.c (riscv_tdesc_cache): Change map type.
