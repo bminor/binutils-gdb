@@ -1,3 +1,12 @@
+2020-07-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26263
+	* testsuite/ld-i386/i386.exp: Run PR gas/26263 test.
+	* testsuite/ld-x86-64/x86-64.exp: Likewise.
+	* testsuite/ld-i386/pr26263.d: New file.
+	* testsuite/ld-x86-64/pr26263.d: Likewise.
+	* testsuite/ld-x86-64/pr26263.s: Likewise.
+
 2020-07-19  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (power10-stubs): Accept optional "auto" arg.

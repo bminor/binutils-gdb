@@ -13788,11 +13788,22 @@ i386_validate_fix (fixS *fixp)
 	}
     }
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  else if (!object_64bit)
+  else
     {
-      if (fixp->fx_r_type == BFD_RELOC_386_GOT32
-	  && fixp->fx_tcbit2)
-	fixp->fx_r_type = BFD_RELOC_386_GOT32X;
+      /* NB: Commit 292676c1 resolved PLT32 reloc aganst local symbol
+	 to section.  Since PLT32 relocation must be against symbols,
+	 turn such PLT32 relocation into PC32 relocation.  */
+      if (fixp->fx_addsy
+	  && (fixp->fx_r_type == BFD_RELOC_386_PLT32
+	      || fixp->fx_r_type == BFD_RELOC_X86_64_PLT32)
+	  && symbol_section_p (fixp->fx_addsy))
+	fixp->fx_r_type = BFD_RELOC_32_PCREL;
+      if (!object_64bit)
+	{
+	  if (fixp->fx_r_type == BFD_RELOC_386_GOT32
+	      && fixp->fx_tcbit2)
+	    fixp->fx_r_type = BFD_RELOC_386_GOT32X;
+	}
     }
 #endif
 }

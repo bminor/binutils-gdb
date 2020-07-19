@@ -469,6 +469,7 @@ run_dump_test "pr24322a"
 run_dump_test "pr24322b"
 run_dump_test "align-branch-1"
 run_dump_test "pr26018"
+run_dump_test "pr26263"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
