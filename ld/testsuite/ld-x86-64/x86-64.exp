@@ -640,6 +640,7 @@ run_dump_test "pr20253-5b"
 run_dump_test "tlsdesc2"
 run_dump_test "pr22048"
 run_dump_test "pr22929"
+run_dump_test "pr26263"
 
 proc undefined_weak {cflags ldflags} {
     set testname "Undefined weak symbol"

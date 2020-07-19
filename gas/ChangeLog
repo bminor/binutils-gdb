@@ -1,3 +1,11 @@
+2020-07-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26263
+	* config/tc-i386.c (i386_validate_fix): Change PLT32 reloc
+	against section to PC32 reloc.
+	* testsuite/gas/i386/relax-5.d: Updated.
+	* testsuite/gas/i386/x86-64-relax-4.d: Likewise.
+
 2020-07-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26237
