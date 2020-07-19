@@ -1,3 +1,9 @@
+2020-07-19  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* scripttempl/elf.sc (ETEXT_LAST_IN_RODATA_SEGMENT): New variable.
+	* emulparams/elf64mmix.sh (ETEXT_LAST_IN_RODATA_SEGMENT): Define.
+	* testsuite/ld-mmix/sec-1.d: Adjust.
+
 2020-07-19  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (power10-stubs): Accept optional "auto" arg.

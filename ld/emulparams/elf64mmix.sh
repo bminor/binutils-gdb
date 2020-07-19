@@ -44,6 +44,10 @@ ${RELOCATING+
  PROVIDE (Main = DEFINED (Main) ? Main : (DEFINED (_start) ? _start : _start.));
 }"
 
+# We need a symbol at the end of the read-only data, which is
+# colocated with the code.  We make __etext fit.
+ETEXT_LAST_IN_RODATA_SEGMENT=" "
+
 OTHER_SECTIONS='
  .MMIX.reg_contents :
  {
