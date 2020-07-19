@@ -2,6 +2,7 @@
 
 	* testsuite/bnd_ifunc_1.sh: Updated.
 	* testsuite/bnd_plt_1.sh: Likewise.
+	* testsuite/split_x32.sh: Likewise.
 	* testsuite/split_x86_64.sh: Likewise.
 	* testsuite/x86_64_indirect_call_to_direct.sh: Likewise.
 
