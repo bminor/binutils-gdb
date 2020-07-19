@@ -25,5 +25,5 @@
 
 set -e
 
-grep -q "callq[ ]\+[a-f0-9]\+ <foo>" x86_64_indirect_call_to_direct1.stdout
-grep -q "jmpq[ ]\+[a-f0-9]\+ <foo>" x86_64_indirect_jump_to_direct1.stdout
+grep -q "call[ ]\+[a-f0-9]\+ <foo>" x86_64_indirect_call_to_direct1.stdout
+grep -q "jmp[ ]\+[a-f0-9]\+ <foo>" x86_64_indirect_jump_to_direct1.stdout

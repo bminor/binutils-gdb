@@ -1,3 +1,10 @@
+2020-07-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/bnd_ifunc_1.sh: Updated.
+	* testsuite/bnd_plt_1.sh: Likewise.
+	* testsuite/split_x86_64.sh: Likewise.
+	* testsuite/x86_64_indirect_call_to_direct.sh: Likewise.
+
 2020-07-08  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/script_test_7.sh: Adjust expected address of the .bss
