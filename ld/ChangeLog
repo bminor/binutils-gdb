@@ -1,3 +1,11 @@
+2020-07-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26263
+	* testsuite/ld-i386/pr26263.d: Updated.
+	* testsuite/ld-x86-64/pr26263.d: Likewise.
+	* testsuite/ld-x86-64/x86-64.exp: Run gas/26263 test for all ELF
+	targets.
+
 2020-07-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26263

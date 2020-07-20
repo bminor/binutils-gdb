@@ -431,6 +431,7 @@ run_dump_test "pr25416-2b"
 run_dump_test "pr25416-3"
 run_dump_test "pr25416-4"
 run_dump_test "pr26018"
+run_dump_test "pr26263"
 
 if ![istarget "x86_64-*-linux*"] {
     return
@@ -640,7 +641,6 @@ run_dump_test "pr20253-5b"
 run_dump_test "tlsdesc2"
 run_dump_test "pr22048"
 run_dump_test "pr22929"
-run_dump_test "pr26263"
 
 proc undefined_weak {cflags ldflags} {
     set testname "Undefined weak symbol"
