@@ -1,3 +1,89 @@
+2020-10-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* arch/aarch32.c (aarch32_create_target_description): Release
+	unique_ptr returned from allocate_target_description.
+	* arch/aarch64.c (aarch64_create_target_description): Likewise.
+	* arch/amd64.c (amd64_create_target_description): Likewise.
+	* arch/arc.c (arc_create_target_description): Likewise.
+	* arch/arm.c (arm_create_target_description): Likewise.
+	* arch/i386.c (i386_create_target_description): Likewise.
+	* arch/riscv.c (riscv_create_target_description): Update return
+	type.  Handle allocate_target_description returning a unique_ptr.
+	(riscv_lookup_target_description): Update to handle unique_ptr.
+	* arch/tic6x.c (tic6x_create_target_description): Release
+	unique_ptr returned from allocate_target_description.
+	* features/microblaze-with-stack-protect.c: Regenerate.
+	* features/microblaze.c: Regenerate.
+	* features/mips-dsp-linux.c: Regenerate.
+	* features/mips-linux.c: Regenerate.
+	* features/mips64-dsp-linux.c: Regenerate.
+	* features/mips64-linux.c: Regenerate.
+	* features/nds32.c: Regenerate.
+	* features/nios2.c: Regenerate.
+	* features/or1k.c: Regenerate.
+	* features/rs6000/powerpc-32.c: Regenerate.
+	* features/rs6000/powerpc-32l.c: Regenerate.
+	* features/rs6000/powerpc-403.c: Regenerate.
+	* features/rs6000/powerpc-403gc.c: Regenerate.
+	* features/rs6000/powerpc-405.c: Regenerate.
+	* features/rs6000/powerpc-505.c: Regenerate.
+	* features/rs6000/powerpc-601.c: Regenerate.
+	* features/rs6000/powerpc-602.c: Regenerate.
+	* features/rs6000/powerpc-603.c: Regenerate.
+	* features/rs6000/powerpc-604.c: Regenerate.
+	* features/rs6000/powerpc-64.c: Regenerate.
+	* features/rs6000/powerpc-64l.c: Regenerate.
+	* features/rs6000/powerpc-7400.c: Regenerate.
+	* features/rs6000/powerpc-750.c: Regenerate.
+	* features/rs6000/powerpc-860.c: Regenerate.
+	* features/rs6000/powerpc-altivec32.c: Regenerate.
+	* features/rs6000/powerpc-altivec32l.c: Regenerate.
+	* features/rs6000/powerpc-altivec64.c: Regenerate.
+	* features/rs6000/powerpc-altivec64l.c: Regenerate.
+	* features/rs6000/powerpc-e500.c: Regenerate.
+	* features/rs6000/powerpc-e500l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-32l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-64l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-altivec32l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-altivec64l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-ppr-dscr-vsx32l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-ppr-dscr-vsx64l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-vsx32l.c: Regenerate.
+	* features/rs6000/powerpc-isa205-vsx64l.c: Regenerate.
+	* features/rs6000/powerpc-isa207-htm-vsx32l.c: Regenerate.
+	* features/rs6000/powerpc-isa207-htm-vsx64l.c: Regenerate.
+	* features/rs6000/powerpc-isa207-vsx32l.c: Regenerate.
+	* features/rs6000/powerpc-isa207-vsx64l.c: Regenerate.
+	* features/rs6000/powerpc-vsx32.c: Regenerate.
+	* features/rs6000/powerpc-vsx32l.c: Regenerate.
+	* features/rs6000/powerpc-vsx64.c: Regenerate.
+	* features/rs6000/powerpc-vsx64l.c: Regenerate.
+	* features/rs6000/rs6000.c: Regenerate.
+	* features/rx.c: Regenerate.
+	* features/s390-gs-linux64.c: Regenerate.
+	* features/s390-linux32.c: Regenerate.
+	* features/s390-linux32v1.c: Regenerate.
+	* features/s390-linux32v2.c: Regenerate.
+	* features/s390-linux64.c: Regenerate.
+	* features/s390-linux64v1.c: Regenerate.
+	* features/s390-linux64v2.c: Regenerate.
+	* features/s390-te-linux64.c: Regenerate.
+	* features/s390-tevx-linux64.c: Regenerate.
+	* features/s390-vx-linux64.c: Regenerate.
+	* features/s390x-gs-linux64.c: Regenerate.
+	* features/s390x-linux64.c: Regenerate.
+	* features/s390x-linux64v1.c: Regenerate.
+	* features/s390x-linux64v2.c: Regenerate.
+	* features/s390x-te-linux64.c: Regenerate.
+	* features/s390x-tevx-linux64.c: Regenerate.
+	* features/s390x-vx-linux64.c: Regenerate.
+	* mips-tdep.c (_initialize_mips_tdep): Release unique_ptr returned
+	from allocate_target_description.
+	* target-descriptions.c (allocate_target_description): Update
+	return type.
+	(print_c_tdesc::visit_pre): Release unique_ptr returned from
+	allocate_target_description.
+
 2020-10-07  Tom Tromey  <tromey@adacore.com>
 
 	* unittests/search-memory-selftests.c: New file.

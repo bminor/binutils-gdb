@@ -8938,10 +8938,10 @@ _initialize_mips_tdep ()
 
   /* Create feature sets with the appropriate properties.  The values
      are not important.  */
-  mips_tdesc_gp32 = allocate_target_description ();
+  mips_tdesc_gp32 = allocate_target_description ().release ();
   set_tdesc_property (mips_tdesc_gp32, PROPERTY_GP32, "");
 
-  mips_tdesc_gp64 = allocate_target_description ();
+  mips_tdesc_gp64 = allocate_target_description ().release ();
   set_tdesc_property (mips_tdesc_gp64, PROPERTY_GP64, "");
 
   /* Add root prefix command for all "set mips"/"show mips" commands.  */

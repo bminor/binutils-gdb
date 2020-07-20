@@ -48,9 +48,9 @@
 #include "linux-x86-tdesc.h"
 
 #ifdef __x86_64__
-static struct target_desc *tdesc_amd64_linux_no_xml;
+static target_desc_up tdesc_amd64_linux_no_xml;
 #endif
-static struct target_desc *tdesc_i386_linux_no_xml;
+static target_desc_up tdesc_i386_linux_no_xml;
 
 
 static unsigned char jump_insn[] = { 0xe9, 0, 0, 0, 0 };
@@ -899,10 +899,10 @@ x86_linux_read_description (void)
       /* Don't use XML.  */
 #ifdef __x86_64__
       if (machine == EM_X86_64)
-	return tdesc_amd64_linux_no_xml;
+	return tdesc_amd64_linux_no_xml.get ();
       else
 #endif
-	return tdesc_i386_linux_no_xml;
+	return tdesc_i386_linux_no_xml.get ();
     }
 
   if (have_ptrace_getregset == -1)
@@ -2955,7 +2955,7 @@ x86_target::get_ipa_tdesc_idx ()
   return amd64_get_ipa_tdesc_idx (tdesc);
 #endif
 
-  if (tdesc == tdesc_i386_linux_no_xml)
+  if (tdesc == tdesc_i386_linux_no_xml.get ())
     return X86_TDESC_SSE;
 
   return i386_get_ipa_tdesc_idx (tdesc);
@@ -2971,14 +2971,14 @@ initialize_low_arch (void)
   /* Initialize the Linux target descriptions.  */
 #ifdef __x86_64__
   tdesc_amd64_linux_no_xml = allocate_target_description ();
-  copy_target_description (tdesc_amd64_linux_no_xml,
+  copy_target_description (tdesc_amd64_linux_no_xml.get (),
 			   amd64_linux_read_description (X86_XSTATE_SSE_MASK,
 							 false));
   tdesc_amd64_linux_no_xml->xmltarget = xmltarget_amd64_linux_no_xml;
 #endif
 
   tdesc_i386_linux_no_xml = allocate_target_description ();
-  copy_target_description (tdesc_i386_linux_no_xml,
+  copy_target_description (tdesc_i386_linux_no_xml.get (),
 			   i386_linux_read_description (X86_XSTATE_SSE_MASK));
   tdesc_i386_linux_no_xml->xmltarget = xmltarget_i386_linux_no_xml;
 

@@ -28,7 +28,7 @@
 target_desc *
 tic6x_create_target_description (enum c6x_feature feature)
 {
-  target_desc *tdesc = allocate_target_description ();
+  target_desc *tdesc = allocate_target_description ().release ();
 
   set_tdesc_architecture (tdesc, "tic6x");
   set_tdesc_osabi (tdesc, "GNU/Linux");

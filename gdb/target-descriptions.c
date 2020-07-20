@@ -1207,10 +1207,10 @@ tdesc_create_feature (struct target_desc *tdesc, const char *name)
 
 /* See gdbsupport/tdesc.h.  */
 
-struct target_desc *
+target_desc_up
 allocate_target_description (void)
 {
-  return new target_desc ();
+  return target_desc_up (new target_desc ());
 }
 
 /* See gdbsupport/tdesc.h.  */
@@ -1377,12 +1377,12 @@ public:
     printf_unfiltered ("initialize_tdesc_%s (void)\n", m_function);
     printf_unfiltered ("{\n");
     printf_unfiltered
-      ("  struct target_desc *result = allocate_target_description ();\n");
+      ("  target_desc_up result = allocate_target_description ();\n");
 
     if (tdesc_architecture (e) != NULL)
       {
 	printf_unfiltered
-	  ("  set_tdesc_architecture (result, bfd_scan_arch (\"%s\"));\n",
+	  ("  set_tdesc_architecture (result.get (), bfd_scan_arch (\"%s\"));\n",
 	   tdesc_architecture (e)->printable_name);
 	printf_unfiltered ("\n");
       }
@@ -1390,21 +1390,21 @@ public:
 	&& tdesc_osabi (e) < GDB_OSABI_INVALID)
       {
 	printf_unfiltered
-	  ("  set_tdesc_osabi (result, osabi_from_tdesc_string (\"%s\"));\n",
+	  ("  set_tdesc_osabi (result.get (), osabi_from_tdesc_string (\"%s\"));\n",
 	   gdbarch_osabi_name (tdesc_osabi (e)));
 	printf_unfiltered ("\n");
       }
 
     for (const tdesc_compatible_info_up &compatible : e->compatible)
       printf_unfiltered
-	("  tdesc_add_compatible (result, bfd_scan_arch (\"%s\"));\n",
+	("  tdesc_add_compatible (result.get (), bfd_scan_arch (\"%s\"));\n",
 	 compatible->arch ()->printable_name);
 
     if (!e->compatible.empty ())
       printf_unfiltered ("\n");
 
     for (const property &prop : e->properties)
-      printf_unfiltered ("  set_tdesc_property (result, \"%s\", \"%s\");\n",
+      printf_unfiltered ("  set_tdesc_property (result.get (), \"%s\", \"%s\");\n",
 			 prop.key.c_str (), prop.value.c_str ());
 
     printf_unfiltered ("  struct tdesc_feature *feature;\n");
@@ -1412,7 +1412,7 @@ public:
 
   void visit_pre (const tdesc_feature *e) override
   {
-    printf_unfiltered ("\n  feature = tdesc_create_feature (result, \"%s\");\n",
+    printf_unfiltered ("\n  feature = tdesc_create_feature (result.get (), \"%s\");\n",
 		       e->name.c_str ());
   }
 
@@ -1421,7 +1421,7 @@ public:
 
   void visit_post (const target_desc *e) override
   {
-    printf_unfiltered ("\n  tdesc_%s = result;\n", m_function);
+    printf_unfiltered ("\n  tdesc_%s = result.release ();\n", m_function);
     printf_unfiltered ("}\n");
   }
 

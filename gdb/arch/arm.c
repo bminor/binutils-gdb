@@ -374,7 +374,7 @@ shifted_reg_val (struct regcache *regcache, unsigned long inst,
 target_desc *
 arm_create_target_description (arm_fp_type fp_type)
 {
-  target_desc *tdesc = allocate_target_description ();
+  target_desc *tdesc = allocate_target_description ().release ();
 
 #ifndef IN_PROCESS_AGENT
   if (fp_type == ARM_FP_TYPE_IWMMXT)
@@ -416,7 +416,7 @@ arm_create_target_description (arm_fp_type fp_type)
 target_desc *
 arm_create_mprofile_target_description (arm_m_profile_type m_type)
 {
-  target_desc *tdesc = allocate_target_description ();
+  target_desc *tdesc = allocate_target_description ().release ();
 
 #ifndef IN_PROCESS_AGENT
   set_tdesc_architecture (tdesc, "arm");

@@ -35,7 +35,7 @@
 target_desc *
 i386_create_target_description (uint64_t xcr0, bool is_linux, bool segments)
 {
-  target_desc *tdesc = allocate_target_description ();
+  target_desc *tdesc = allocate_target_description ().release ();
 
 #ifndef IN_PROCESS_AGENT
   set_tdesc_architecture (tdesc, "i386");

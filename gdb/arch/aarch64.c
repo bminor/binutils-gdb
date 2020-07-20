@@ -29,7 +29,7 @@
 target_desc *
 aarch64_create_target_description (uint64_t vq, bool pauth_p)
 {
-  target_desc *tdesc = allocate_target_description ();
+  target_desc *tdesc = allocate_target_description ().release ();
 
 #ifndef IN_PROCESS_AGENT
   set_tdesc_architecture (tdesc, "aarch64");

@@ -1,3 +1,16 @@
+2020-10-08  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* linux-low.cc (linux_process_target::handle_extended_wait):
+	Release the unique_ptr returned from allocate_target_description.
+	* linux-riscv-low.cc (riscv_target::low_arch_setup): Likewise.
+	* linux-x86-low.cc (tdesc_amd64_linux_no_xml): Change type.
+	(tdesc_i386_linux_no_xml): Change type.
+	(x86_linux_read_description): Borrow pointer from unique_ptr
+	object.
+	(x86_target::get_ipa_tdesc_idx): Likewise.
+	(initialize_low_arch): Likewise.
+	* tdesc.cc (allocate_target_description): Update return type.
+
 2020-10-07  Tom Tromey  <tromey@adacore.com>
 
 	* server.cc (handle_search_memory): Remove dead code.

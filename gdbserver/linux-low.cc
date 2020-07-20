@@ -497,7 +497,6 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 	  struct process_info *child_proc;
 	  struct lwp_info *child_lwp;
 	  struct thread_info *child_thr;
-	  struct target_desc *tdesc;
 
 	  ptid = ptid_t (new_pid, new_pid, 0);
 
@@ -553,9 +552,9 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 
 	  clone_all_breakpoints (child_thr, event_thr);
 
-	  tdesc = allocate_target_description ();
-	  copy_target_description (tdesc, parent_proc->tdesc);
-	  child_proc->tdesc = tdesc;
+	  target_desc_up tdesc = allocate_target_description ();
+	  copy_target_description (tdesc.get (), parent_proc->tdesc);
+	  child_proc->tdesc = tdesc.release ();
 
 	  /* Clone arch-specific process data.  */
 	  low_new_fork (parent_proc, child_proc);

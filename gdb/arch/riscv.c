@@ -33,11 +33,11 @@
 
 /* See arch/riscv.h.  */
 
-STATIC_IN_GDB target_desc *
+STATIC_IN_GDB target_desc_up
 riscv_create_target_description (const struct riscv_gdbarch_features features)
 {
   /* Now we should create a new target description.  */
-  target_desc *tdesc = allocate_target_description ();
+  target_desc_up tdesc = allocate_target_description ();
 
 #ifndef IN_PROCESS_AGENT
   std::string arch_name = "riscv";
@@ -56,22 +56,22 @@ riscv_create_target_description (const struct riscv_gdbarch_features features)
   else if (features.flen == 16)
     arch_name.append ("q");
 
-  set_tdesc_architecture (tdesc, arch_name.c_str ());
+  set_tdesc_architecture (tdesc.get (), arch_name.c_str ());
 #endif
 
   long regnum = 0;
 
   /* For now we only support creating 32-bit or 64-bit x-registers.  */
   if (features.xlen == 4)
-    regnum = create_feature_riscv_32bit_cpu (tdesc, regnum);
+    regnum = create_feature_riscv_32bit_cpu (tdesc.get (), regnum);
   else if (features.xlen == 8)
-    regnum = create_feature_riscv_64bit_cpu (tdesc, regnum);
+    regnum = create_feature_riscv_64bit_cpu (tdesc.get (), regnum);
 
   /* For now we only support creating 32-bit or 64-bit f-registers.  */
   if (features.flen == 4)
-    regnum = create_feature_riscv_32bit_fpu (tdesc, regnum);
+    regnum = create_feature_riscv_32bit_fpu (tdesc.get (), regnum);
   else if (features.flen == 8)
-    regnum = create_feature_riscv_64bit_fpu (tdesc, regnum);
+    regnum = create_feature_riscv_64bit_fpu (tdesc.get (), regnum);
 
   return tdesc;
 }
@@ -106,13 +106,14 @@ riscv_lookup_target_description (const struct riscv_gdbarch_features features)
   if (it != riscv_tdesc_cache.end ())
     return it->second.get ();
 
-  target_desc *tdesc = riscv_create_target_description (features);
+  target_desc_up tdesc (riscv_create_target_description (features));
 
-  /* Add to the cache.  Work around a problem with g++ 4.8 (PR96537):
-     Call the target_desc_up constructor explictly instead of implicitly.  */
-  riscv_tdesc_cache.emplace (features, target_desc_up (tdesc));
-
-  return tdesc;
+  /* Add to the cache, and return a pointer borrowed from the
+     target_desc_up.  This is safe as the cache (and the pointers
+     contained within it) are not deleted until GDB exits.  */
+  target_desc *ptr = tdesc.get ();
+  riscv_tdesc_cache.emplace (features, std::move (tdesc));
+  return ptr;
 }
 
 #endif /* !GDBSERVER */

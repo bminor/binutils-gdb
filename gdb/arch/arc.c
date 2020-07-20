@@ -38,7 +38,7 @@ STATIC_IN_GDB target_desc *
 arc_create_target_description (const struct arc_arch_features &features)
 {
   /* Create a new target description.  */
-  target_desc *tdesc = allocate_target_description ();
+  target_desc *tdesc = allocate_target_description ().release ();
 
 #ifndef IN_PROCESS_AGENT
   std::string arch_name;
