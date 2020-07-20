@@ -8426,6 +8426,15 @@ build_modrm_byte (void)
   return default_seg;
 }
 
+static INLINE void
+frag_opcode_byte (unsigned char byte)
+{
+  if (now_seg != absolute_section)
+    FRAG_APPEND_1_CHAR (byte);
+  else
+    ++abs_section_offset;
+}
+
 static unsigned int
 flip_code16 (unsigned int code16)
 {
@@ -8448,6 +8457,12 @@ output_branch (void)
   relax_substateT subtype;
   symbolS *sym;
   offsetT off;
+
+  if (now_seg == absolute_section)
+    {
+      as_bad (_("relaxable branches not supported in absolute section"));
+      return;
+    }
 
   code16 = flag_code == CODE_16BIT ? CODE16 : 0;
   size = i.disp_encoding == disp_encoding_32bit ? BIG : SMALL;
@@ -8578,14 +8593,14 @@ output_jump (void)
       size = 1;
       if (i.prefix[ADDR_PREFIX] != 0)
 	{
-	  FRAG_APPEND_1_CHAR (ADDR_PREFIX_OPCODE);
+	  frag_opcode_byte (ADDR_PREFIX_OPCODE);
 	  i.prefixes -= 1;
 	}
       /* Pentium4 branch hints.  */
       if (i.prefix[SEG_PREFIX] == CS_PREFIX_OPCODE /* not taken */
 	  || i.prefix[SEG_PREFIX] == DS_PREFIX_OPCODE /* taken */)
 	{
-	  FRAG_APPEND_1_CHAR (i.prefix[SEG_PREFIX]);
+	  frag_opcode_byte (i.prefix[SEG_PREFIX]);
 	  i.prefixes--;
 	}
     }
@@ -8599,7 +8614,7 @@ output_jump (void)
 
       if (i.prefix[DATA_PREFIX] != 0)
 	{
-	  FRAG_APPEND_1_CHAR (DATA_PREFIX_OPCODE);
+	  frag_opcode_byte (DATA_PREFIX_OPCODE);
 	  i.prefixes -= 1;
 	  code16 ^= flip_code16(code16);
 	}
@@ -8612,18 +8627,24 @@ output_jump (void)
   /* BND prefixed jump.  */
   if (i.prefix[BND_PREFIX] != 0)
     {
-      FRAG_APPEND_1_CHAR (i.prefix[BND_PREFIX]);
+      frag_opcode_byte (i.prefix[BND_PREFIX]);
       i.prefixes -= 1;
     }
 
   if (i.prefix[REX_PREFIX] != 0)
     {
-      FRAG_APPEND_1_CHAR (i.prefix[REX_PREFIX]);
+      frag_opcode_byte (i.prefix[REX_PREFIX]);
       i.prefixes -= 1;
     }
 
   if (i.prefixes != 0)
     as_warn (_("skipping prefixes on `%s'"), i.tm.name);
+
+  if (now_seg == absolute_section)
+    {
+      abs_section_offset += i.tm.opcode_length + size;
+      return;
+    }
 
   p = frag_more (i.tm.opcode_length + size);
   switch (i.tm.opcode_length)
@@ -8685,6 +8706,12 @@ output_interseg_jump (void)
 
   if (i.prefixes != 0)
     as_warn (_("skipping prefixes on `%s'"), i.tm.name);
+
+  if (now_seg == absolute_section)
+    {
+      abs_section_offset += prefix + 1 + 2 + size;
+      return;
+    }
 
   /* 1 opcode; 2 segment; offset  */
   p = frag_more (prefix + 1 + 2 + size);
@@ -9098,7 +9125,7 @@ output_insn (void)
   enum mf_jcc_kind mf_jcc = mf_jcc_jo;
 
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  if (IS_ELF && x86_used_note)
+  if (IS_ELF && x86_used_note && now_seg != absolute_section)
     {
       if (i.tm.cpu_flags.bitfield.cpucmov)
 	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_CMOV;
@@ -9237,14 +9264,20 @@ output_insn (void)
 	  && (i.tm.base_opcode == 0xfaee8
 	      || i.tm.base_opcode == 0xfaef0
 	      || i.tm.base_opcode == 0xfaef8))
-        {
-          /* Encode lfence, mfence, and sfence as
-             f0 83 04 24 00   lock addl $0x0, (%{re}sp).  */
-          offsetT val = 0x240483f0ULL;
-          p = frag_more (5);
-          md_number_to_chars (p, val, 5);
-          return;
-        }
+	{
+	  /* Encode lfence, mfence, and sfence as
+	     f0 83 04 24 00   lock addl $0x0, (%{re}sp).  */
+	  if (now_seg != absolute_section)
+	    {
+	      offsetT val = 0x240483f0ULL;
+
+	      p = frag_more (5);
+	      md_number_to_chars (p, val, 5);
+	    }
+	  else
+	    abs_section_offset += 5;
+	  return;
+	}
 
       /* Some processors fail on LOCK prefix. This options makes
 	 assembler ignore LOCK prefix and serves as a workaround.  */
@@ -9343,7 +9376,7 @@ output_insn (void)
 	  /* The prefix bytes.  */
 	  for (j = ARRAY_SIZE (i.prefix), q = i.prefix; j > 0; j--, q++)
 	    if (*q)
-	      FRAG_APPEND_1_CHAR (*q);
+	      frag_opcode_byte (*q);
 	}
       else
 	{
@@ -9353,7 +9386,7 @@ output_insn (void)
 		{
 		case SEG_PREFIX:
 		case ADDR_PREFIX:
-		  FRAG_APPEND_1_CHAR (*q);
+		  frag_opcode_byte (*q);
 		  break;
 		default:
 		  /* There should be no other prefixes for instructions
@@ -9367,13 +9400,20 @@ output_insn (void)
 	  if (i.vrex)
 	    abort ();
 	  /* Now the VEX prefix.  */
-	  p = frag_more (i.vex.length);
-	  for (j = 0; j < i.vex.length; j++)
-	    p[j] = i.vex.bytes[j];
+	  if (now_seg != absolute_section)
+	    {
+	      p = frag_more (i.vex.length);
+	      for (j = 0; j < i.vex.length; j++)
+		p[j] = i.vex.bytes[j];
+	    }
+	  else
+	    abs_section_offset += i.vex.length;
 	}
 
       /* Now the opcode; be careful about word order here!  */
-      if (i.tm.opcode_length == 1)
+      if (now_seg == absolute_section)
+	abs_section_offset += i.tm.opcode_length;
+      else if (i.tm.opcode_length == 1)
 	{
 	  FRAG_APPEND_1_CHAR (i.tm.base_opcode);
 	}
@@ -9406,9 +9446,9 @@ output_insn (void)
       /* Now the modrm byte and sib byte (if present).  */
       if (i.tm.opcode_modifier.modrm)
 	{
-	  FRAG_APPEND_1_CHAR ((i.rm.regmem << 0
-			       | i.rm.reg << 3
-			       | i.rm.mode << 6));
+	  frag_opcode_byte ((i.rm.regmem << 0)
+			     | (i.rm.reg << 3)
+			     | (i.rm.mode << 6));
 	  /* If i.rm.regmem == ESP (4)
 	     && i.rm.mode != (Register mode)
 	     && not 16 bit
@@ -9416,9 +9456,9 @@ output_insn (void)
 	  if (i.rm.regmem == ESCAPE_TO_TWO_BYTE_ADDRESSING
 	      && i.rm.mode != 3
 	      && !(i.base_reg && i.base_reg->reg_type.bitfield.word))
-	    FRAG_APPEND_1_CHAR ((i.sib.base << 0
-				 | i.sib.index << 3
-				 | i.sib.scale << 6));
+	    frag_opcode_byte ((i.sib.base << 0)
+			      | (i.sib.index << 3)
+			      | (i.sib.scale << 6));
 	}
 
       if (i.disp_operands)
@@ -9586,9 +9626,12 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
     {
       if (operand_type_check (i.types[n], disp))
 	{
-	  if (i.op[n].disps->X_op == O_constant)
+	  int size = disp_size (n);
+
+	  if (now_seg == absolute_section)
+	    abs_section_offset += size;
+	  else if (i.op[n].disps->X_op == O_constant)
 	    {
-	      int size = disp_size (n);
 	      offsetT val = i.op[n].disps->X_add_number;
 
 	      val = offset_in_range (val >> (size == 1 ? i.memshift : 0),
@@ -9599,7 +9642,6 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 	  else
 	    {
 	      enum bfd_reloc_code_real reloc_type;
-	      int size = disp_size (n);
 	      int sign = i.types[n].bitfield.disp32s;
 	      int pcrel = (i.flags[n] & Operand_PCrel) != 0;
 	      fixS *fixP;
@@ -9732,9 +9774,12 @@ output_imm (fragS *insn_start_frag, offsetT insn_start_off)
 
       if (operand_type_check (i.types[n], imm))
 	{
-	  if (i.op[n].imms->X_op == O_constant)
+	  int size = imm_size (n);
+
+	  if (now_seg == absolute_section)
+	    abs_section_offset += size;
+	  else if (i.op[n].imms->X_op == O_constant)
 	    {
-	      int size = imm_size (n);
 	      offsetT val;
 
 	      val = offset_in_range (i.op[n].imms->X_add_number,
@@ -9749,7 +9794,6 @@ output_imm (fragS *insn_start_frag, offsetT insn_start_off)
 		 non-absolute imms).  Try to support other
 		 sizes ...  */
 	      enum bfd_reloc_code_real reloc_type;
-	      int size = imm_size (n);
 	      int sign;
 
 	      if (i.types[n].bitfield.imm32s
