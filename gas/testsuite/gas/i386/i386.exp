@@ -692,6 +692,14 @@ if [expr [istarget "i*86-*-*"] || [istarget "x86_64-*-*"]] then {
 	run_dump_test "dw2-compressed-1"
 	run_dump_test "dw2-compressed-3a"
 	run_dump_test "dw2-compressed-3b"
+
+	if {![istarget "*-*-dragonfly*"]
+	    && ![istarget "*-*-gnu*"]
+	    && ![istarget "*-*-freebsd*"]
+	    && ![istarget "*-*-linux*"]
+	    && ![istarget "*-*-netbsd*"]} then {
+	    run_dump_test "svr4"
+	}
     }
 }
 
