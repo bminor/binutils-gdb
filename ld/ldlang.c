@@ -123,7 +123,6 @@ struct bfd_sym_chain entry_symbol = { NULL, NULL };
 const char *entry_section = ".text";
 struct lang_input_statement_flags input_flags;
 bfd_boolean entry_from_cmdline;
-bfd_boolean undef_from_cmdline;
 bfd_boolean lang_has_input_file = FALSE;
 bfd_boolean had_output_filename = FALSE;
 bfd_boolean lang_float_flag = FALSE;
@@ -3895,11 +3894,10 @@ typedef struct bfd_sym_chain ldlang_undef_chain_list_type;
 #define ldlang_undef_chain_list_head entry_symbol.next
 
 void
-ldlang_add_undef (const char *const name, bfd_boolean cmdline)
+ldlang_add_undef (const char *const name, bfd_boolean cmdline ATTRIBUTE_UNUSED)
 {
   ldlang_undef_chain_list_type *new_undef;
 
-  undef_from_cmdline = undef_from_cmdline || cmdline;
   new_undef = stat_alloc (sizeof (*new_undef));
   new_undef->next = ldlang_undef_chain_list_head;
   ldlang_undef_chain_list_head = new_undef;
@@ -6839,10 +6837,24 @@ lang_end (void)
      --gc-sections, unless --gc-keep-exported was also given.  */
   if (bfd_link_relocatable (&link_info)
       && link_info.gc_sections
-      && !link_info.gc_keep_exported
-      && !(entry_from_cmdline || undef_from_cmdline))
-    einfo (_("%F%P: gc-sections requires either an entry or "
-	     "an undefined symbol\n"));
+      && !link_info.gc_keep_exported)
+    {
+      struct bfd_sym_chain *sym;
+
+      for (sym = link_info.gc_sym_list; sym != NULL; sym = sym->next)
+	{
+	  h = bfd_link_hash_lookup (link_info.hash, sym->name,
+				    FALSE, FALSE, FALSE);
+	  if (h != NULL
+	      && (h->type == bfd_link_hash_defined
+		  || h->type == bfd_link_hash_defweak)
+	      && !bfd_is_const_section (h->u.def.section))
+	    break;
+	}
+      if (!sym)
+	einfo (_("%F%P: --gc-sections requires a defined symbol root "
+		 "specified by -e or -u\n"));
+    }
 
   if (entry_symbol.name == NULL)
     {

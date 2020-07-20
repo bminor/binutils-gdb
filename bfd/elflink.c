@@ -13779,8 +13779,7 @@ _bfd_elf_gc_keep (struct bfd_link_info *info)
       if (h != NULL
 	  && (h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
-	  && !bfd_is_abs_section (h->root.u.def.section)
-	  && !bfd_is_und_section (h->root.u.def.section))
+	  && !bfd_is_const_section (h->root.u.def.section))
 	h->root.u.def.section->flags |= SEC_KEEP;
     }
 }
