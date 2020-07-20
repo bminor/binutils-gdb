@@ -1,3 +1,12 @@
+2020-07-20  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-tdep.c (fbsd_skip_solib_resolver): New function.
+	(fbsd_init_abi): Install gdbarch "skip_solib_resolver" method.
+	* fbsd-tdep.h (fbsd_skip_solib_resolver): New prototype.
+	* mips-fbsd-tdep.c (mips_fbsd_skip_solib_resolver): New function.
+	(mips_fbsd_init_abi): Install gdbarch "skip_solib_resolver"
+	method.
+
 2020-07-20 Ludovic Courtès  <ludo@gnu.org>
 
 	* guile/scm-math.c (vlscm_integer_fits_p): Use 'uintmax_t'
