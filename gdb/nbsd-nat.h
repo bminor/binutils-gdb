@@ -48,6 +48,7 @@ struct nbsd_nat_target : public inf_ptrace_target
 			      gdb::array_view<const int> syscall_counts)
     override;
 
+  bool supports_multi_process () override;
 };
 
 #endif /* nbsd-nat.h */

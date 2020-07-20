@@ -837,3 +837,11 @@ nbsd_nat_target::set_syscall_catchpoint (int pid, bool needed,
      are filtered by GDB rather than the kernel.  */
   return 0;
 }
+
+/* Implement the "supports_multi_process" target_ops method. */
+
+bool
+nbsd_nat_target::supports_multi_process ()
+{
+  return true;
+}

@@ -1,3 +1,10 @@
+2020-07-21  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.h (nbsd_nat_target::supports_multi_process): New
+	declaration.
+	* nbsd-nat.c (nbsd_nat_target::supports_multi_process): New
+	function.
+
 2020-07-20  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-tdep.c (fbsd_skip_solib_resolver): New function.
