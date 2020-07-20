@@ -1,5 +1,15 @@
 2020-07-20  Jan Beulich  <jbeulich@suse.com>
 
+	PR gas/4572
+	* app.c (last_char): Drop TC_ARM conditional around it.
+	(struct app_save): Drop TC_ARM conditional around last_char.
+	(app_push, app_pop): Drop TC_ARM conditional from last_char
+	accesses.
+	(do_scrub_chars): Likewise. Drop TC_ARM conditional from
+	backslash-precedes-comment-character check.
+
+2020-07-20  Jan Beulich  <jbeulich@suse.com>
+
 	* config/tc-i386.c (frag_opcode_byte): New.
 	(output_branch): Emit error when in absolute section.
 	(output_jump, output_insn): Use frag_opcode_byte. Handle being
