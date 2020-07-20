@@ -414,11 +414,12 @@ regcache_observer_target_changed (struct target_ops *target)
 
 /* Update regcaches related to OLD_PTID to now use NEW_PTID.  */
 static void
-regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
+regcache_thread_ptid_changed (process_stratum_target *target,
+			      ptid_t old_ptid, ptid_t new_ptid)
 {
   for (auto &regcache : regcaches)
     {
-      if (regcache->ptid () == old_ptid)
+      if (regcache->ptid () == old_ptid && regcache->target () == target)
 	regcache->set_ptid (new_ptid);
     }
 }
@@ -1817,6 +1818,64 @@ cooked_write_test (struct gdbarch *gdbarch)
     }
 }
 
+/* Verify that when two threads with the same ptid exist (from two different
+   targets) and one of them changes ptid, we only update the appropriate
+   regcaches.  */
+
+static void
+regcache_thread_ptid_changed ()
+{
+  /* Any arch will do.  */
+  gdbarch *arch = current_inferior ()->gdbarch;
+
+  /* Prepare two targets with one thread each, with the same ptid.  */
+  scoped_mock_context<test_target_ops> target1 (arch);
+  scoped_mock_context<test_target_ops> target2 (arch);
+  target2.mock_inferior.next = &target1.mock_inferior;
+
+  ptid_t old_ptid (111, 222);
+  ptid_t new_ptid (111, 333);
+
+  target1.mock_inferior.pid = old_ptid.pid ();
+  target1.mock_thread.ptid = old_ptid;
+  target2.mock_inferior.pid = old_ptid.pid ();
+  target2.mock_thread.ptid = old_ptid;
+
+  gdb_assert (regcaches.empty ());
+
+  /* Populate the regcaches container.  */
+  get_thread_arch_aspace_regcache (&target1.mock_target, old_ptid, arch,
+				   nullptr);
+  get_thread_arch_aspace_regcache (&target2.mock_target, old_ptid, arch,
+				   nullptr);
+
+  /* Return whether a regcache for (TARGET, PTID) exists in REGCACHES.  */
+  auto regcache_exists = [] (process_stratum_target *target, ptid_t ptid)
+    {
+      for (regcache *rc : regcaches)
+	{
+	  if (rc->target () == target && rc->ptid () == ptid)
+	    return true;
+	}
+
+      return false;
+    };
+
+  gdb_assert (regcaches_size () == 2);
+  gdb_assert (regcache_exists (&target1.mock_target, old_ptid));
+  gdb_assert (!regcache_exists (&target1.mock_target, new_ptid));
+  gdb_assert (regcache_exists (&target2.mock_target, old_ptid));
+  gdb_assert (!regcache_exists (&target2.mock_target, new_ptid));
+
+  thread_change_ptid (&target1.mock_target, old_ptid, new_ptid);
+
+  gdb_assert (regcaches_size () == 2);
+  gdb_assert (!regcache_exists (&target1.mock_target, old_ptid));
+  gdb_assert (regcache_exists (&target1.mock_target, new_ptid));
+  gdb_assert (regcache_exists (&target2.mock_target, old_ptid));
+  gdb_assert (!regcache_exists (&target2.mock_target, new_ptid));
+}
+
 } // namespace selftests
 #endif /* GDB_SELF_TEST */
 
@@ -1840,5 +1899,7 @@ _initialize_regcache ()
 					 selftests::cooked_read_test);
   selftests::register_test_foreach_arch ("regcache::cooked_write_test",
 					 selftests::cooked_write_test);
+  selftests::register_test ("regcache_thread_ptid_changed",
+			    selftests::regcache_thread_ptid_changed);
 #endif
 }

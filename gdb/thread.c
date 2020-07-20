@@ -775,7 +775,7 @@ thread_change_ptid (process_stratum_target *targ,
   tp = find_thread_ptid (inf, old_ptid);
   tp->ptid = new_ptid;
 
-  gdb::observers::thread_ptid_changed.notify (old_ptid, new_ptid);
+  gdb::observers::thread_ptid_changed.notify (targ, old_ptid, new_ptid);
 }
 
 /* See gdbthread.h.  */

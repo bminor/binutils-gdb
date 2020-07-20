@@ -27,6 +27,7 @@ struct so_list;
 struct objfile;
 struct thread_info;
 struct inferior;
+struct process_stratum_target;
 struct trace_state_variable;
 
 namespace gdb
@@ -165,8 +166,9 @@ extern observable<struct gdbarch */* newarch */> architecture_changed;
 
 /* The thread's ptid has changed.  The OLD_PTID parameter specifies
    the old value, and NEW_PTID specifies the new value.  */
-extern observable<ptid_t /* old_ptid */, ptid_t /* new_ptid */>
-    thread_ptid_changed;
+extern observable<process_stratum_target * /* target */,
+		  ptid_t /* old_ptid */, ptid_t /* new_ptid */>
+  thread_ptid_changed;
 
 /* The inferior INF has been added to the list of inferiors.  At
    this point, it might not be associated with any process.  */
