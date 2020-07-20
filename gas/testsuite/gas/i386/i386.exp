@@ -550,7 +550,10 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 
     # These tests require support for 8 and 16 bit relocs,
     # so we only run them for ELF and COFF targets.
-    if {[is_elf_format] || [istarget "*-*-coff*"]} then {
+    if {[is_elf_format]
+	|| [istarget "*-*-vxworks*"]
+	|| [istarget "*-*-coff*"]
+    } then {
 	run_dump_test "reloc"
 	run_dump_test "jump16"
 	run_list_test "white" "-al --listing-lhs-width=3"
@@ -566,7 +569,7 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     }
 
     # ELF specific tests
-    if [is_elf_format] then {
+    if {[is_elf_format] || [istarget "*-*-vxworks*"]} then {
 	# PIC is only supported on ELF targets.
 	run_dump_test "intelpic"
 
@@ -641,12 +644,14 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
 	    run_list_test "code64-inval" "-I${srcdir}/$subdir -al"
 	}
 
-	run_dump_test "iamcu-1"
-	run_dump_test "iamcu-2"
-	run_dump_test "iamcu-3"
-	run_dump_test "iamcu-4"
-	run_dump_test "iamcu-5"
-	run_list_test "iamcu-inval-1" "-march=iamcu -al"
+	if {![istarget "*-*-vxworks*"]} then {
+	    run_dump_test "iamcu-1"
+	    run_dump_test "iamcu-2"
+	    run_dump_test "iamcu-3"
+	    run_dump_test "iamcu-4"
+	    run_dump_test "iamcu-5"
+	    run_list_test "iamcu-inval-1" "-march=iamcu -al"
+	}
     }
 
     # This is a PE specific test.
@@ -676,7 +681,7 @@ if [expr [istarget "i*86-*-*"] || [istarget "x86_64-*-*"]] then {
     run_dump_test pr19498
     run_list_test "nop-bad-1" ""
     run_list_test "unspec" ""
-    if [is_elf_format] then {
+    if {[is_elf_format] || [istarget "*-*-vxworks*"]} then {
 	run_list_test_stdin "list-1" "-al"
 	run_list_test_stdin "list-2" "-al"
 	run_list_test_stdin "list-3" "-al"
