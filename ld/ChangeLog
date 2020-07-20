@@ -1,3 +1,8 @@
+2020-07-20  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/ld-powerpc/powerpc.exp (ppcelftests): Use section name
+	.PPC.EMB.apuinfo instead of section number 2 in apuinfo tests.
+
 2020-07-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26263
