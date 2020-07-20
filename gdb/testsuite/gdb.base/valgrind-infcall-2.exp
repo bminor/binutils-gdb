@@ -60,7 +60,7 @@ gdb_test_multiple "bt 1" "do printf" {
 	# Thread status is VgTs_WaitSys
 	# '
 	# (gdb)
-	gdb_test "p printf (\"bla\")" \
+	gdb_test "p (int)printf (\"bla\")" \
 	    "can only be accepted if the thread is .*" \
 	    $gdb_test_name
     }

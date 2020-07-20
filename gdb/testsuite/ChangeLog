@@ -1,5 +1,9 @@
 2020-07-20  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.base/valgrind-infcall-2.exp: Handle printf unknown return type.
+
+2020-07-20  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.threads/attach-slow-waitpid.exp: Bail out if gdb_start fails.
 
 2020-07-17  Tom de Vries  <tdevries@suse.de>
