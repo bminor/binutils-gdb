@@ -1,5 +1,13 @@
 2020-07-20  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.threads/omp-par-scope.c (lock, lock2): New variable.
+	(omp_set_lock_in_order): New function.
+	(single_scope, multi_scope, nested_func, nested_parallel): Use
+	omp_set_lock_in_order and omp_unset_lock.
+	(main): Init and destroy lock and lock2.
+
+2020-07-20  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.base/valgrind-infcall-2.exp: Handle printf unknown return type.
 
 2020-07-20  Tom de Vries  <tdevries@suse.de>
