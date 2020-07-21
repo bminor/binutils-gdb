@@ -117,9 +117,9 @@ GDBInfoModuleSymbols::check_entry "${srcfile2}" "mod2" "19" \
     "${integer4} mod2::mod2_var_1;"
 GDBInfoModuleSymbols::check_entry "${srcfile2}" "mod2" "20" \
     "${real4} mod2::mod2_var_2;"
-GDBInfoModuleSymbols::check_entry "${srcfile}" "mod1" "35" \
+GDBInfoModuleSymbols::check_entry "${srcfile}" "mod1" "(35)?" \
     "Type m1t1 mod1::__def_init_mod1_M1t1;"
-GDBInfoModuleSymbols::check_entry "${srcfile}" "mod1" "35" \
+GDBInfoModuleSymbols::check_entry "${srcfile}" "mod1" "(35)?" \
     "Type __vtype_mod1_M1t1 mod1::__vtab_mod1_M1t1;"
 GDBInfoModuleSymbols::check_entry "${srcfile}" "mod1" "21" \
     "${real4} mod1::mod1_var_1;"
