@@ -1,3 +1,7 @@
+2020-07-21  Simon Marchi  <simon.marchi@efficios.com>
+
+	* linux-low.cc (stopped_pids): Make static.
+
 2020-07-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tdesc.cc (allocate_target_description): Add header comment.

@@ -204,7 +204,7 @@ struct simple_pid_list
   int status;
   struct simple_pid_list *next;
 };
-struct simple_pid_list *stopped_pids;
+static struct simple_pid_list *stopped_pids;
 
 /* Whether target_thread_events is in effect.  */
 static int report_thread_events;

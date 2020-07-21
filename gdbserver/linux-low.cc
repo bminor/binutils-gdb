@@ -206,7 +206,7 @@ struct simple_pid_list
   /* Next in chain.  */
   struct simple_pid_list *next;
 };
-struct simple_pid_list *stopped_pids;
+static struct simple_pid_list *stopped_pids;
 
 /* Trivial list manipulation functions to keep track of a list of new
    stopped processes.  */

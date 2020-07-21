@@ -1,3 +1,7 @@
+2020-07-21  Simon Marchi  <simon.marchi@efficios.com>
+
+	* linux-nat.c (stopped_pids): Make static.
+
 2020-07-21  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR ada/26235
