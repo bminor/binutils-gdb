@@ -1181,9 +1181,11 @@ md_begin (void)
 
   if (mach_flag != 0)
     {
-      if ((mach_flag & CSKY_ARCH_MASK) != arch_flag && arch_flag != 0)
+      if (((mach_flag & CSKY_ARCH_MASK) != (arch_flag & CSKY_ARCH_MASK))
+          && arch_flag != 0)
 	as_warn (_("-mcpu conflict with -march option, using -mcpu"));
-      if ((mach_flag & ~CSKY_ARCH_MASK) != flags && flags != 0)
+      if (((mach_flag & ~CSKY_ARCH_MASK) != (flags & ~CSKY_ARCH_MASK))
+	  && flags != 0)
 	as_warn (_("-mcpu conflict with other model parameters, using -mcpu"));
     }
   else if (arch_flag != 0)
