@@ -1,5 +1,11 @@
 2020-07-21  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.reverse/solib-precsave.exp: Handle additional "recommended
+	breakpoint locations".
+	* gdb.reverse/solib-reverse.exp: Same.
+
+2020-07-21  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.reverse/step-reverse.c (callee): Merge statements.
 
 2020-07-21  Tom de Vries  <tdevries@suse.de>
