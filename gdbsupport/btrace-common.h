@@ -117,6 +117,12 @@ struct btrace_config_pt
      This is unsigned int and not size_t since it is registered as
      control variable for "set record btrace pt buffer-size".  */
   unsigned int size;
+
+  /* Configuration bit for ptwrite packets.
+
+     If both gdb and gdbserver support this, gdb will try to enable ptwrite
+     packets when tracing is started.  */
+  bool ptwrite;
 };
 
 /* A branch tracing configuration.

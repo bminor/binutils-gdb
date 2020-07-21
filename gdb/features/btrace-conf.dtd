@@ -12,3 +12,4 @@
 
 <!ELEMENT pt	EMPTY>
 <!ATTLIST pt	size	CDATA	#IMPLIED>
+<!ATTLIST pt	ptwrite	(yes | no) #IMPLIED>

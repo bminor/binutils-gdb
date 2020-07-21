@@ -361,6 +361,9 @@ enum {
   /* Support for the Qbtrace-conf:pt:size packet.  */
   PACKET_Qbtrace_conf_pt_size,
 
+  /* Support for the Qbtrace-conf:pt:ptwrite packet.  */
+  PACKET_Qbtrace_conf_pt_ptwrite,
+
   /* Support for exec events.  */
   PACKET_exec_event_feature,
 
@@ -5810,6 +5813,8 @@ static const struct protocol_feature remote_protocol_features[] = {
     PACKET_exec_event_feature },
   { "Qbtrace-conf:pt:size", PACKET_DISABLE, remote_supported_packet,
     PACKET_Qbtrace_conf_pt_size },
+  { "Qbtrace-conf:pt:ptwrite", PACKET_DISABLE, remote_supported_packet,
+    PACKET_Qbtrace_conf_pt_ptwrite },
   { "vContSupported", PACKET_DISABLE, remote_supported_packet, PACKET_vContSupported },
   { "QThreadEvents", PACKET_DISABLE, remote_supported_packet, PACKET_QThreadEvents },
   { "QThreadOptions", PACKET_DISABLE, remote_supported_thread_options,
@@ -14736,7 +14741,7 @@ parse_xml_btrace_conf_pt (struct gdb_xml_parser *parser,
 			  std::vector<gdb_xml_value> &attributes)
 {
   struct btrace_config *conf;
-  struct gdb_xml_value *size;
+  struct gdb_xml_value *size, *ptwrite;
 
   conf = (struct btrace_config *) user_data;
   conf->format = BTRACE_FORMAT_PT;
@@ -14745,10 +14750,16 @@ parse_xml_btrace_conf_pt (struct gdb_xml_parser *parser,
   size = xml_find_attribute (attributes, "size");
   if (size != NULL)
     conf->pt.size = (unsigned int) *(ULONGEST *) size->value.get ();
+
+  ptwrite = xml_find_attribute (attributes, "ptwrite");
+  if (ptwrite != nullptr)
+    conf->pt.ptwrite = (bool) *(ULONGEST *) ptwrite->value.get ();
 }
 
 static const struct gdb_xml_attribute btrace_conf_pt_attributes[] = {
   { "size", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_ulongest, NULL },
+  { "ptwrite", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_enum,
+    gdb_xml_enums_boolean },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
 
@@ -14853,6 +14864,32 @@ remote_target::btrace_sync_conf (const btrace_config *conf)
 	error (_("Failed to configure the trace buffer size: %s"), result.err_msg ());
 
       rs->btrace_config.pt.size = conf->pt.size;
+    }
+
+  if ((m_features.packet_support (PACKET_Qbtrace_conf_pt_ptwrite)
+       == PACKET_ENABLE)
+	&& conf->pt.ptwrite != rs->btrace_config.pt.ptwrite)
+    {
+      pos = buf;
+      const char *ptw = conf->pt.ptwrite ? "yes" : "no";
+      const char *name
+	= packets_descriptions[PACKET_Qbtrace_conf_pt_ptwrite].name;
+      pos += xsnprintf (pos, endbuf - pos, "%s=\"%s\"", name, ptw);
+
+      putpkt (buf);
+      getpkt (&rs->buf, 0);
+
+      packet_result result
+	= m_features.packet_ok (buf, PACKET_Qbtrace_conf_pt_ptwrite);
+      if (result.status () == PACKET_ERROR)
+	{
+	  if (buf[0] == 'E' && buf[1] == '.')
+	    error (_("Failed to sync ptwrite config: %s"), buf + 2);
+	  else
+	    error (_("Failed to sync ptwrite config."));
+	}
+
+      rs->btrace_config.pt.ptwrite = conf->pt.ptwrite;
     }
 }
 
@@ -16307,6 +16344,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (PACKET_Qbtrace_conf_pt_size, "Qbtrace-conf:pt:size",
 			 "btrace-conf-pt-size", 0);
+
+  add_packet_config_cmd (PACKET_Qbtrace_conf_pt_ptwrite, "Qbtrace-conf:pt:ptwrite",
+			 "btrace-conf-pt-ptwrite", 0);
 
   add_packet_config_cmd (PACKET_vContSupported, "vContSupported",
 			 "verbose-resume-supported", 0);
