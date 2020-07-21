@@ -1,3 +1,8 @@
+2020-07-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* disasm.c (do_mixed_source_and_assembly_deprecated): Don't
+	exclude non-statement entries.
+
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* NEWS (New commands): Mention new command
