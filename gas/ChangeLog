@@ -1,3 +1,8 @@
+2020-07-21  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* config/tc-mips.c (prev_reloc_op_frag): Remove variable.
+	(my_getSmallExpression): Adjust accordingly.
+
 2020-07-20  Jan Beulich  <jbeulich@suse.com>
 
 	PR gas/4572

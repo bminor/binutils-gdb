@@ -889,11 +889,6 @@ struct mips_hi_fixup
 
 static struct mips_hi_fixup *mips_hi_fixup_list;
 
-/* The frag containing the last explicit relocation operator.
-   Null if explicit relocations have not been used.  */
-
-static fragS *prev_reloc_op_frag;
-
 /* Map mips16 register numbers to normal MIPS register numbers.  */
 
 static const unsigned int mips16_to_32_reg_map[] =
@@ -14720,12 +14715,8 @@ my_getSmallExpression (expressionS *ep, bfd_reloc_code_real_type *reloc,
 
   expr_end = str;
 
-  if (reloc_index != 0)
-    {
-      prev_reloc_op_frag = frag_now;
-      for (i = 0; i < reloc_index; i++)
-	reloc[i] = reversed_reloc[reloc_index - 1 - i];
-    }
+  for (i = 0; i < reloc_index; i++)
+    reloc[i] = reversed_reloc[reloc_index - 1 - i];
 
   return reloc_index;
 }
