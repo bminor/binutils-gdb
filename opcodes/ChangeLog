@@ -1,3 +1,7 @@
+2020-10-07  Jan Beulich  <jbeulich@suse.com>
+
+	* i386-dis.c (OP_E_memory): Revert previous change.
+
 2020-09-24  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
