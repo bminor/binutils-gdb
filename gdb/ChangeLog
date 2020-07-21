@@ -1,3 +1,9 @@
+2020-07-21  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR ada/26235
+	* gdbtypes.c (ada_discrete_type_low_bound,
+	ada_discrete_type_high_bound): Handle undefined bounds.
+
 2020-07-21  Kamil Rytarowski  <n54@gmx.com>
 
 	* nbsd-nat.h (nbsd_nat_target::supports_multi_process): New

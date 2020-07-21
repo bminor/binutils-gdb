@@ -725,7 +725,21 @@ ada_discrete_type_high_bound (struct type *type)
   switch (type->code ())
     {
     case TYPE_CODE_RANGE:
-      return type->bounds ()->high.const_val ();
+      {
+	const dynamic_prop &high = type->bounds ()->high;
+
+	if (high.kind () == PROP_CONST)
+	  return high.const_val ();
+	else
+	  {
+	    gdb_assert (high.kind () == PROP_UNDEFINED);
+
+	    /* This happens when trying to evaluate a type's dynamic bound
+	       without a live target.  There is nothing relevant for us to
+	       return here, so return 0.  */
+	    return 0;
+	  }
+      }
     case TYPE_CODE_ENUM:
       return TYPE_FIELD_ENUMVAL (type, type->num_fields () - 1);
     case TYPE_CODE_BOOL:
@@ -746,7 +760,21 @@ ada_discrete_type_low_bound (struct type *type)
   switch (type->code ())
     {
     case TYPE_CODE_RANGE:
-      return type->bounds ()->low.const_val ();
+      {
+	const dynamic_prop &low = type->bounds ()->low;
+
+	if (low.kind () == PROP_CONST)
+	  return low.const_val ();
+	else
+	  {
+	    gdb_assert (low.kind () == PROP_UNDEFINED);
+
+	    /* This happens when trying to evaluate a type's dynamic bound
+	       without a live target.  There is nothing relevant for us to
+	       return here, so return 0.  */
+	    return 0;
+	  }
+      }
     case TYPE_CODE_ENUM:
       return TYPE_FIELD_ENUMVAL (type, 0);
     case TYPE_CODE_BOOL:
