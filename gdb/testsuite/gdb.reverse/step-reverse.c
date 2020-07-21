@@ -23,7 +23,7 @@
 int myglob = 0;
 
 int callee() {		/* ENTER CALLEE */
-  myglob++; return 0;	/* ARRIVED IN CALLEE */
+  return myglob++;	/* ARRIVED IN CALLEE */
 }			/* RETURN FROM CALLEE */
 
 /* A structure which, we hope, will need to be passed using memcpy.  */

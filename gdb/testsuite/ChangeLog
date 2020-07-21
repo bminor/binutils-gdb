@@ -1,5 +1,9 @@
 2020-07-21  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.reverse/step-reverse.c (callee): Merge statements.
+
+2020-07-21  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.fortran/info-modules.exp (info module variables): Allow missing
 	line numbers for some variables.
 
