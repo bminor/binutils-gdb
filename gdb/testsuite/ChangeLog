@@ -1,5 +1,11 @@
 2020-07-21  Tom de Vries  <tdevries@suse.de>
 
+	* gdb.opt/inline-locals.c (init_array): New func.
+	(func1): Use init_array.
+	* gdb.opt/inline-locals.exp: Update pattern.
+
+2020-07-21  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.debuginfod/fetch_src_and_symbols.exp: Use save_vars for env
 	vars.  Fix PATH and DUPLICATE errors.  Cleanup whitespace.
 
