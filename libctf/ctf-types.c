@@ -658,7 +658,7 @@ ctf_id_t ctf_lookup_by_rawhash (ctf_file_t *fp, ctf_names_t *np, const char *nam
   ctf_id_t id;
 
   if (fp->ctf_flags & LCTF_RDWR)
-    id = (ctf_id_t) ctf_dynhash_lookup (np->ctn_writable, name);
+    id = (ctf_id_t) (uintptr_t) ctf_dynhash_lookup (np->ctn_writable, name);
   else
     id = ctf_hash_lookup_type (np->ctn_readonly, fp, name);
   return id;

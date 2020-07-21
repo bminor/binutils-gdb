@@ -617,16 +617,19 @@ int
 ctf_dtd_insert (ctf_file_t *fp, ctf_dtdef_t *dtd, int flag, int kind)
 {
   const char *name;
-  if (ctf_dynhash_insert (fp->ctf_dthash, (void *) dtd->dtd_type, dtd) < 0)
+  if (ctf_dynhash_insert (fp->ctf_dthash, (void *) (uintptr_t) dtd->dtd_type,
+			  dtd) < 0)
     return -1;
 
   if (flag == CTF_ADD_ROOT && dtd->dtd_data.ctt_name
       && (name = ctf_strraw (fp, dtd->dtd_data.ctt_name)) != NULL)
     {
       if (ctf_dynhash_insert (ctf_name_table (fp, kind)->ctn_writable,
-			      (char *) name, (void *) dtd->dtd_type) < 0)
+			      (char *) name, (void *) (uintptr_t)
+			      dtd->dtd_type) < 0)
 	{
-	  ctf_dynhash_remove (fp->ctf_dthash, (void *) dtd->dtd_type);
+	  ctf_dynhash_remove (fp->ctf_dthash, (void *) (uintptr_t)
+			      dtd->dtd_type);
 	  return -1;
 	}
     }
@@ -642,7 +645,7 @@ ctf_dtd_delete (ctf_file_t *fp, ctf_dtdef_t *dtd)
   int name_kind = kind;
   const char *name;
 
-  ctf_dynhash_remove (fp->ctf_dthash, (void *) dtd->dtd_type);
+  ctf_dynhash_remove (fp->ctf_dthash, (void *) (uintptr_t) dtd->dtd_type);
 
   switch (kind)
     {
@@ -682,7 +685,8 @@ ctf_dtd_delete (ctf_file_t *fp, ctf_dtdef_t *dtd)
 ctf_dtdef_t *
 ctf_dtd_lookup (const ctf_file_t *fp, ctf_id_t type)
 {
-  return (ctf_dtdef_t *) ctf_dynhash_lookup (fp->ctf_dthash, (void *) type);
+  return (ctf_dtdef_t *)
+    ctf_dynhash_lookup (fp->ctf_dthash, (void *) (uintptr_t) type);
 }
 
 ctf_dtdef_t *
@@ -794,7 +798,7 @@ ctf_rollback (ctf_file_t *fp, ctf_snapshot_id_t id)
 	  ctf_str_remove_ref (fp, name, &dtd->dtd_data.ctt_name);
 	}
 
-      ctf_dynhash_remove (fp->ctf_dthash, (void *) dtd->dtd_type);
+      ctf_dynhash_remove (fp->ctf_dthash, (void *) (uintptr_t) dtd->dtd_type);
       ctf_dtd_delete (fp, dtd);
     }
 

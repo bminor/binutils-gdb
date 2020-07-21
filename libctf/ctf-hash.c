@@ -829,7 +829,7 @@ ctf_hash_lookup_type (ctf_hash_t *hp, ctf_file_t *fp __attribute__ ((__unused__)
   slot = ctf_hashtab_lookup ((struct htab *) hp, key, NO_INSERT);
 
   if (slot)
-    return (ctf_id_t) ((*slot)->value);
+    return (ctf_id_t) (uintptr_t) ((*slot)->value);
 
   return 0;
 }

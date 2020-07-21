@@ -1,5 +1,14 @@
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-create.c (ctf_dtd_insert): Add uintptr_t casts.
+	(ctf_dtd_delete): Likewise.
+	(ctf_dtd_lookup): Likewise.
+	(ctf_rollback): Likewise.
+	* ctf-hash.c (ctf_hash_lookup_type): Likewise.
+	* ctf-types.c (ctf_lookup_by_rawhash): Likewise.
+
+2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ctf-lookup.c (ctf_lookup_by_name): Adjust.
 
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
