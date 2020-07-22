@@ -48,6 +48,7 @@
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/scope-exit.h"
 #include "gdbsupport/gdb_select.h"
+#include "gdbsupport/scoped_restore.h"
 
 #define require_running_or_return(BUF)		\
   if (!target_running ())			\
@@ -1678,19 +1679,54 @@ handle_qxfer_threads_worker (thread_info *thread, struct buffer *buffer)
   buffer_xml_printf (buffer, "/>\n");
 }
 
-/* Helper for handle_qxfer_threads.  */
+/* Helper for handle_qxfer_threads.  Return true on success, false
+   otherwise.  */
 
-static void
+static bool
 handle_qxfer_threads_proper (struct buffer *buffer)
 {
+  client_state &cs = get_client_state ();
+
+  scoped_restore save_current_thread
+    = make_scoped_restore (&current_thread);
+  scoped_restore save_current_general_thread
+    = make_scoped_restore (&cs.general_thread);
+
   buffer_grow_str (buffer, "<threads>\n");
 
-  for_each_thread ([&] (thread_info *thread)
+  process_info *error_proc = find_process ([&] (process_info *process)
     {
-      handle_qxfer_threads_worker (thread, buffer);
+      /* The target may need to access memory and registers (e.g. via
+	 libthread_db) to fetch thread properties.  Prepare for memory
+	 access here, so that we potentially pause threads just once
+	 for all accesses.  Note that even if someday we stop needing
+	 to pause threads to access memory, we will need to be able to
+	 access registers, or other ptrace accesses like
+	 PTRACE_GET_THREAD_AREA.  */
+
+      /* Need to switch to each process in turn, because
+	 prepare_to_access_memory prepares for an access in the
+	 current process pointed to by general_thread.  */
+      switch_to_process (process);
+      cs.general_thread = current_thread->id;
+
+      int res = prepare_to_access_memory ();
+      if (res == 0)
+	{
+	  for_each_thread (process->pid, [&] (thread_info *thread)
+	    {
+	      handle_qxfer_threads_worker (thread, buffer);
+	    });
+
+	  done_accessing_memory ();
+	  return false;
+	}
+      else
+	return true;
     });
 
   buffer_grow_str0 (buffer, "</threads>\n");
+  return error_proc == nullptr;
 }
 
 /* Handle qXfer:threads:read.  */
@@ -1719,11 +1755,14 @@ handle_qxfer_threads (const char *annex,
 
       buffer_init (&buffer);
 
-      handle_qxfer_threads_proper (&buffer);
+      bool res = handle_qxfer_threads_proper (&buffer);
 
       result = buffer_finish (&buffer);
       result_length = strlen (result);
       buffer_free (&buffer);
+
+      if (!res)
+	return -1;
     }
 
   if (offset >= result_length)

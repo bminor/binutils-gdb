@@ -223,6 +223,16 @@ switch_to_thread (process_stratum_target *ops, ptid_t ptid)
   current_thread = find_thread_ptid (ptid);
 }
 
+/* See inferiors.h.  */
+
+void
+switch_to_process (process_info *proc)
+{
+  int pid = pid_of (proc);
+
+  current_thread = find_any_thread_of_pid (pid);
+}
+
 /* See gdbsupport/common-inferior.h.  */
 
 const char *

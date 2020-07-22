@@ -1,3 +1,14 @@
+2020-07-22  Pedro Alves  <pedro@palves.net>
+
+	* inferiors.cc (switch_to_process): New, moved here from
+	thread-db.cc, and made extern.
+	* inferiors.h (switch_to_process): Declare.
+	* server.cc: Include "gdbsupport/scoped_restore.h".
+	(handle_qxfer_threads_proper): Now returns bool.  Prepare to
+	access memory around target calls.
+	(handle_qxfer_threads): Handle errors.
+	* thread-db.cc (switch_to_process): Moved to inferiors.cc.
+
 2020-07-21  Simon Marchi  <simon.marchi@efficios.com>
 
 	* linux-low.cc (stopped_pids): Make static.

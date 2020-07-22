@@ -767,14 +767,6 @@ thread_db_init (void)
   return 0;
 }
 
-static void
-switch_to_process (struct process_info *proc)
-{
-  int pid = pid_of (proc);
-
-  current_thread = find_any_thread_of_pid (pid);
-}
-
 /* Disconnect from libthread_db and free resources.  */
 
 static void
