@@ -763,10 +763,11 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "24k-triple-stores-11" \
 	    				[mips_arch_list_matching mips1]
 
-    run_dump_test_arches "jal-svr4pic"	[mips_arch_list_matching mips1]
-    run_dump_test_arches "jal-svr4pic-noreorder" \
+    run_dump_test_arches "jal-svr4pic${imips}" \
 					[mips_arch_list_matching mips1]
-    run_dump_test_arches "jal-svr4pic-local" \
+    run_dump_test_arches "jal-svr4pic-noreorder${imips}" \
+					[mips_arch_list_matching mips1]
+    run_dump_test_arches "jal-svr4pic-local${imips}" \
 					[mips_arch_list_matching mips1]
     if $has_newabi {
 	run_dump_test_arches "jal-svr4pic-local-n32" \
@@ -774,7 +775,7 @@ if { [istarget mips*-*-vxworks*] } {
 	run_dump_test_arches "jal-svr4pic-local-n64" \
 					[mips_arch_list_matching mips3]
     }
-    run_dump_test "jal-xgot"
+    run_dump_test "jal-xgot${imips}"
     run_list_test_arches "jal-range" "-32" [mips_arch_list_matching mips1]
     if $has_newabi { run_dump_test "jal-newabi" }
     run_dump_test "la"
@@ -1163,7 +1164,7 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "mips-abi32"
     run_dump_test "mips-abi32-pic"
-    run_dump_test "mips-abi32-pic2"
+    run_dump_test "mips-abi32-pic2${imips}"
 
     run_dump_test "elf${el}-rel"
     run_dump_test_arches "elf${el}-rel2" \
@@ -1247,7 +1248,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_list_test "tls-ill" "-32"
     run_dump_test "tls-o32"
     run_dump_test "tls-relw"
-    run_dump_test "jalr2"
+    run_dump_test "jalr2${imips}"
     run_dump_test_arches "jalr3"	[mips_arch_list_matching mips1 \
 					    !micromips]
     run_dump_test_arches "jalr4"	[mips_arch_list_matching mips1 \
@@ -1529,9 +1530,9 @@ if { [istarget mips*-*-vxworks*] } {
 	"-32 -march=mips64 -mmicromips" "microMIPS instruction size 0"
     run_dump_test "micromips-size-1"
     run_dump_test "micromips-branch-relax"
-    run_dump_test "micromips-branch-relax-pic"
+    run_dump_test "micromips-branch-relax-pic${imips}"
     run_dump_test "micromips-branch-relax-insn32"
-    run_dump_test "micromips-branch-relax-insn32-pic"
+    run_dump_test "micromips-branch-relax-insn32-pic${imips}"
     run_dump_test "micromips-branch-delay"
     run_dump_test "micromips-warn-branch-delay"
     run_dump_test "micromips-warn-branch-delay-1"

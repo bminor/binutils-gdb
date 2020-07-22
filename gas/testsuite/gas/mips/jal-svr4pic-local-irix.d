@@ -19,7 +19,6 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> 27390040 	addiu	t9,t9,64
 [ 	]*[0-9a-f]+: R_MIPS_LO16	\.text
 [0-9a-f]+ <[^>]*> 0320f809 	jalr	t9
-[ 	]*[0-9a-f]+: R_MIPS_JALR	bar
 [0-9a-f]+ <[^>]*> 00000000 	nop
 [0-9a-f]+ <[^>]*> 8fbc0010 	lw	gp,16\(sp\)
 [0-9a-f]+ <[^>]*> 8fbf001c 	lw	ra,28\(sp\)

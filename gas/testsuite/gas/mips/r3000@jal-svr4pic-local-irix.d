@@ -2,4 +2,4 @@
 #name: MIPS JALR relocation against local symbol
 #as: -32
 #source: jal-svr4pic-local.s
-#dump: mips1@jal-svr4pic-local.d
+#dump: mips1@jal-svr4pic-local-irix.d
