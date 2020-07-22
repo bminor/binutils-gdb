@@ -20,6 +20,8 @@
 #ifndef JIT_H
 #define JIT_H
 
+struct objfile;
+
 /* When the JIT breakpoint fires, the inferior wants us to take one of
    these actions.  These values are used by the inferior, so the
    values of these enums cannot be changed.  */
@@ -76,8 +78,9 @@ extern void jit_inferior_created_hook (void);
 extern void jit_breakpoint_re_set (void);
 
 /* This function is called by handle_inferior_event when it decides
-   that the JIT event breakpoint has fired.  */
+   that the JIT event breakpoint has fired.  JITER is the objfile
+   whose JIT event breakpoint has been hit.  */
 
-extern void jit_event_handler (struct gdbarch *gdbarch);
+extern void jit_event_handler (gdbarch *gdbarch, objfile *jiter);
 
 #endif /* JIT_H */

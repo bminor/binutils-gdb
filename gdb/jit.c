@@ -332,9 +332,9 @@ get_jit_program_space_data ()
    memory.  Returns true if all went well, false otherwise.  */
 
 static bool
-jit_read_descriptor (struct gdbarch *gdbarch,
-		     struct jit_descriptor *descriptor,
-		     struct jit_program_space_data *ps_data)
+jit_read_descriptor (gdbarch *gdbarch,
+		     jit_descriptor *descriptor,
+		     objfile *jiter)
 {
   int err;
   struct type *ptr_type;
@@ -344,16 +344,16 @@ jit_read_descriptor (struct gdbarch *gdbarch,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct jit_objfile_data *objf_data;
 
-  if (ps_data->objfile == NULL)
-    return false;
-  objf_data = get_jit_objfile_data (ps_data->objfile);
+  gdb_assert (jiter != nullptr);
+  objf_data = get_jit_objfile_data (jiter);
+
   if (objf_data->descriptor == NULL)
     return false;
 
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"jit_read_descriptor, descriptor_addr = %s\n",
-			paddress (gdbarch, MSYMBOL_VALUE_ADDRESS (ps_data->objfile,
+			paddress (gdbarch, MSYMBOL_VALUE_ADDRESS (jiter,
 								  objf_data->descriptor)));
 
   /* Figure out how big the descriptor is on the remote and how to read it.  */
@@ -363,7 +363,7 @@ jit_read_descriptor (struct gdbarch *gdbarch,
   desc_buf = (gdb_byte *) alloca (desc_size);
 
   /* Read the descriptor.  */
-  err = target_read_memory (MSYMBOL_VALUE_ADDRESS (ps_data->objfile,
+  err = target_read_memory (MSYMBOL_VALUE_ADDRESS (jiter,
 						   objf_data->descriptor),
 			    desc_buf, desc_size);
   if (err)
@@ -1255,9 +1255,13 @@ jit_inferior_init (struct gdbarch *gdbarch)
   if (!jit_breakpoint_re_set_internal (gdbarch, ps_data))
     return;
 
+  /* There must be a JITer registered, otherwise we would exit early
+     above.  */
+  objfile *jiter = ps_data->objfile;
+
   /* Read the descriptor so we can check the version number and load
      any already JITed functions.  */
-  if (!jit_read_descriptor (gdbarch, &descriptor, ps_data))
+  if (!jit_read_descriptor (gdbarch, &descriptor, jiter))
     return;
 
   /* Check that the version number agrees with that we support.  */
@@ -1330,7 +1334,7 @@ jit_inferior_exit_hook (struct inferior *inf)
 }
 
 void
-jit_event_handler (struct gdbarch *gdbarch)
+jit_event_handler (gdbarch *gdbarch, objfile *jiter)
 {
   struct jit_descriptor descriptor;
   struct jit_code_entry code_entry;
@@ -1338,8 +1342,7 @@ jit_event_handler (struct gdbarch *gdbarch)
   struct objfile *objf;
 
   /* Read the descriptor from remote memory.  */
-  if (!jit_read_descriptor (gdbarch, &descriptor,
-			    get_jit_program_space_data ()))
+  if (!jit_read_descriptor (gdbarch, &descriptor, jiter))
     return;
   entry_addr = descriptor.relevant_entry;
 

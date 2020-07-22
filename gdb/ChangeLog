@@ -1,3 +1,15 @@
+2020-07-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* jit.h: Forward-declare `struct objfile`.
+	(jit_event_handler): Add a second parameter, the JITer objfile.
+	* jit.c (jit_read_descriptor): Change the signature to take the
+	JITer objfile as an argument instead of the jit_program_space_data.
+	(jit_inferior_init): Update the call to jit_read_descriptor.
+	(jit_event_handler): Use the new JITer objfile argument when calling
+	jit_read_descriptor.
+	* breakpoint.c (handle_jit_event): Update the call to
+	jit_event_handler to pass the JITer objfile.
+
 2020-07-21  John Baldwin  <jhb@FreeBSD.org>
 
 	* gdbarch.c: Regenerate.
