@@ -5989,13 +5989,13 @@ map_removed_literal (removed_literal_list *removed_list)
 static int
 removed_literal_compare (const void *a, const void *b)
 {
-  const removed_literal_map_entry *pa = a;
-  const removed_literal_map_entry *pb = b;
+  const bfd_vma *key = a;
+  const removed_literal_map_entry *memb = b;
 
-  if (pa->addr == pb->addr)
+  if (*key == memb->addr)
     return 0;
   else
-    return pa->addr < pb->addr ? -1 : 1;
+    return *key < memb->addr ? -1 : 1;
 }
 
 /* Check if the list of removed literals contains an entry for the
