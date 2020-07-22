@@ -1,3 +1,12 @@
+2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/py-registers.c: Add 'user-regs.h' include.
+	(register_descriptor_iter_find): New function.
+	(register_descriptor_iterator_object_methods): New static global
+	methods array.
+	(register_descriptor_iterator_object_type): Add pointer to methods
+	array.
+
 2020-07-27  John Baldwin  <jhb@FreeBSD.org>
 
 	* fbsd-nat.h: Include <osreldate.h>.  Define USE_SIGTRAP_SIGINFO

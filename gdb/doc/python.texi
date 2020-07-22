@@ -5755,6 +5755,15 @@ A @code{gdb.RegisterDescriptor} has the following read-only properties:
 The name of this register.
 @end defvar
 
+It is also possible to lookup a register descriptor based on its name
+using the following @code{gdb.RegisterDescriptorIterator} function:
+
+@defun RegisterDescriptorIterator.find (@var{name})
+Takes @var{name} as an argument, which must be a string, and returns a
+@code{gdb.RegisterDescriptor} for the register with that name, or
+@code{None} if there is no register with that name.
+@end defun
+
 Python code can also request from a @code{gdb.Architecture}
 information about the set of register groups available on a given
 architecture

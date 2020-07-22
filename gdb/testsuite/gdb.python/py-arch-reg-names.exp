@@ -104,3 +104,18 @@ gdb_py_test_silent_cmd \
 	 "    raise gdb.GdbError (\"miss-matched objects\")" \
 	 "\004" ] \
     "check names and objects match" 1
+
+# Ensure that the '.find' method on the iterator returns the same
+# Python object as we got from the iterator's list of descriptors.
+gdb_py_test_silent_cmd \
+    [multi_line \
+	 "python" \
+	 "def check_regs (arch, regs):" \
+	 "   for r in (regs):" \
+	 "     if (arch.registers ().find (r.name) != r):" \
+	 "       raise gdb.GdbError (\"object miss-match\")" \
+	 "end" ] \
+    "build check_obj function" 0
+gdb_py_test_silent_cmd \
+    "python check_regs (arch, arch.registers (\"general\"))" \
+    "ensure find gets expected descriptors" 1

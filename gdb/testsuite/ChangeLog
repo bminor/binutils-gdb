@@ -1,3 +1,7 @@
+2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-arch-reg-names.exp: Add additional tests.
+
 2020-07-25  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR fortran/23051

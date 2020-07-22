@@ -23,6 +23,7 @@
 #include "disasm.h"
 #include "reggroups.h"
 #include "python-internal.h"
+#include "user-regs.h"
 #include <unordered_map>
 
 /* Token to access per-gdbarch data related to register descriptors.  */
@@ -337,6 +338,38 @@ gdbpy_register_descriptor_iter_next (PyObject *self)
   while (true);
 }
 
+/* Implement:
+
+   gdb.RegisterDescriptorIterator.find (self, name) -> gdb.RegisterDescriptor
+
+   Look up a descriptor for register with NAME.  If no matching register is
+   found then return None.  */
+
+static PyObject *
+register_descriptor_iter_find (PyObject *self, PyObject *args, PyObject *kw)
+{
+  static const char *keywords[] = { "name", NULL };
+  const char *register_name = NULL;
+
+  register_descriptor_iterator_object *iter_obj
+    = (register_descriptor_iterator_object *) self;
+  struct gdbarch *gdbarch = iter_obj->gdbarch;
+
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "s", keywords,
+					&register_name))
+    return NULL;
+
+  if (register_name != NULL && *register_name != '\0')
+    {
+      int regnum = user_reg_map_name_to_regnum (gdbarch, register_name,
+						strlen (register_name));
+      if (regnum >= 0)
+	return gdbpy_get_register_descriptor (gdbarch, regnum).release ();
+    }
+
+  Py_RETURN_NONE;
+}
+
 /* Initializes the new Python classes from this file in the gdb module.  */
 
 int
@@ -377,6 +410,15 @@ gdbpy_initialize_registers ()
 	   (PyObject *) &register_descriptor_iterator_object_type));
 }
 
+static PyMethodDef register_descriptor_iterator_object_methods [] = {
+  { "find", (PyCFunction) register_descriptor_iter_find,
+    METH_VARARGS | METH_KEYWORDS,
+    "registers (name) -> gdb.RegisterDescriptor.\n\
+Return a register descriptor for the register NAME, or None if no register\n\
+with that name exists in this iterator." },
+  {NULL}  /* Sentinel */
+};
+
 PyTypeObject register_descriptor_iterator_object_type = {
   PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.RegisterDescriptorIterator",	  	/*tp_name*/
@@ -405,7 +447,7 @@ PyTypeObject register_descriptor_iterator_object_type = {
   0,				  /*tp_weaklistoffset */
   gdbpy_register_descriptor_iter,	  /*tp_iter */
   gdbpy_register_descriptor_iter_next,  /*tp_iternext */
-  0				  /*tp_methods */
+  register_descriptor_iterator_object_methods		/*tp_methods */
 };
 
 static gdb_PyGetSetDef gdbpy_register_descriptor_getset[] = {
