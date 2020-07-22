@@ -575,6 +575,7 @@ if { [istarget mips*-*-vxworks*] } {
     } {
 	set el ""
     }
+    set imips [expr [istarget *-*-irix*] ? {"-irix"} : {""}]
 
     run_dump_test_arches "dot-1"	[mips_arch_list_matching mips1]
     run_dump_test_arches "abs"		[mips_arch_list_matching mips1]
@@ -2088,10 +2089,6 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "llpscp-32" [mips_arch_list_matching mips32r6]
     run_dump_test_arch "llpscp-64" "" mips64r6
 
-    if [istarget *-*-irix*] {
-	run_dump_test "pr14798-irix"
-    } else {
-	run_dump_test "pr14798"
-    }
+    run_dump_test "pr14798${imips}"
     run_dump_test "insn-isa-mode"
 }
