@@ -1,4 +1,17 @@
 2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* jit.c (jit_read_descriptor): Define the descriptor address once,
+	use twice.
+	(jit_breakpoint_deleted): Move the declaration of the loop variable
+	`iter` into the loop header.
+	(jit_breakpoint_re_set_internal): Move the declaration of the local
+	variable `objf_data` to the first point of definition.
+	(jit_event_handler): Move the declaration of local variables
+	`code_entry`, `entry_addr`, and `objf` to their first point of use.
+	Rename `objf` to `jited`.
+
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* jit.h (struct jiter_objfile_data) <jiter_objfile_data, objfile>:
 	Remove.

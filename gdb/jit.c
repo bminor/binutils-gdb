@@ -289,11 +289,12 @@ jit_read_descriptor (gdbarch *gdbarch,
   jiter_objfile_data *objf_data = jiter->jiter_data.get ();
   gdb_assert (objf_data != nullptr);
 
+  CORE_ADDR addr = MSYMBOL_VALUE_ADDRESS (jiter, objf_data->descriptor);
+
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"jit_read_descriptor, descriptor_addr = %s\n",
-			paddress (gdbarch, MSYMBOL_VALUE_ADDRESS (jiter,
-								  objf_data->descriptor)));
+			paddress (gdbarch, addr));
 
   /* Figure out how big the descriptor is on the remote and how to read it.  */
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
@@ -302,9 +303,7 @@ jit_read_descriptor (gdbarch *gdbarch,
   desc_buf = (gdb_byte *) alloca (desc_size);
 
   /* Read the descriptor.  */
-  err = target_read_memory (MSYMBOL_VALUE_ADDRESS (jiter,
-						   objf_data->descriptor),
-			    desc_buf, desc_size);
+  err = target_read_memory (addr, desc_buf, desc_size);
   if (err)
     {
       printf_unfiltered (_("Unable to read JIT descriptor from "
@@ -867,12 +866,10 @@ jit_find_objf_with_entry_addr (CORE_ADDR entry_addr)
 static void
 jit_breakpoint_deleted (struct breakpoint *b)
 {
-  struct bp_location *iter;
-
   if (b->type != bp_jit_event)
     return;
 
-  for (iter = b->loc; iter != NULL; iter = iter->next)
+  for (bp_location *iter = b->loc; iter != nullptr; iter = iter->next)
     {
       for (objfile *objf : iter->pspace->objfiles ())
 	{
@@ -894,8 +891,6 @@ jit_breakpoint_deleted (struct breakpoint *b)
 static void
 jit_breakpoint_re_set_internal (struct gdbarch *gdbarch, program_space *pspace)
 {
-  jiter_objfile_data *objf_data;
-
   for (objfile *the_objfile : pspace->objfiles ())
     {
       /* Lookup the registration symbol.  If it is missing, then we
@@ -912,7 +907,8 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch, program_space *pspace)
 	  || BMSYMBOL_VALUE_ADDRESS (desc_symbol) == 0)
 	continue;
 
-      objf_data = get_jiter_objfile_data (reg_symbol.objfile);
+      jiter_objfile_data *objf_data
+	= get_jiter_objfile_data (reg_symbol.objfile);
       objf_data->register_code = reg_symbol.minsym;
       objf_data->descriptor = desc_symbol.minsym;
 
@@ -1265,9 +1261,6 @@ void
 jit_event_handler (gdbarch *gdbarch, objfile *jiter)
 {
   struct jit_descriptor descriptor;
-  struct jit_code_entry code_entry;
-  CORE_ADDR entry_addr;
-  struct objfile *objf;
 
   /* If we get a JIT breakpoint event for this objfile, it is necessarily a
      JITer.  */
@@ -1276,27 +1269,35 @@ jit_event_handler (gdbarch *gdbarch, objfile *jiter)
   /* Read the descriptor from remote memory.  */
   if (!jit_read_descriptor (gdbarch, &descriptor, jiter))
     return;
-  entry_addr = descriptor.relevant_entry;
+  CORE_ADDR entry_addr = descriptor.relevant_entry;
 
   /* Do the corresponding action.  */
   switch (descriptor.action_flag)
     {
     case JIT_NOACTION:
       break;
-    case JIT_REGISTER:
-      jit_read_code_entry (gdbarch, entry_addr, &code_entry);
-      jit_register_code (gdbarch, entry_addr, &code_entry);
-      break;
-    case JIT_UNREGISTER:
-      objf = jit_find_objf_with_entry_addr (entry_addr);
-      if (objf == NULL)
-	printf_unfiltered (_("Unable to find JITed code "
-			     "entry at address: %s\n"),
-			   paddress (gdbarch, entry_addr));
-      else
-	objf->unlink ();
 
-      break;
+    case JIT_REGISTER:
+      {
+	jit_code_entry code_entry;
+	jit_read_code_entry (gdbarch, entry_addr, &code_entry);
+	jit_register_code (gdbarch, entry_addr, &code_entry);
+	break;
+      }
+
+    case JIT_UNREGISTER:
+      {
+	objfile *jited = jit_find_objf_with_entry_addr (entry_addr);
+	if (jited == nullptr)
+	  printf_unfiltered (_("Unable to find JITed code "
+			       "entry at address: %s\n"),
+			     paddress (gdbarch, entry_addr));
+	else
+	  jited->unlink ();
+
+	break;
+      }
+
     default:
       error (_("Unknown action_flag value in JIT descriptor!"));
       break;
