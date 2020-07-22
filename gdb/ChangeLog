@@ -1,3 +1,8 @@
+2020-07-22  Tom Tromey  <tromey@adacore.com>
+
+	* mi/mi-cmd-stack.c (list_args_or_locals): Use
+	lookup_symbol_search_name.
+
 2020-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python/py-registers.c (gdbpy_register_object_data_init): Remove

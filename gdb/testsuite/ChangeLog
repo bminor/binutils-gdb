@@ -1,3 +1,10 @@
+2020-07-22  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/mi_prot.exp: New file.
+	* gdb.ada/mi_prot/pkg.adb: New file.
+	* gdb.ada/mi_prot/pkg.ads: New file.
+	* gdb.ada/mi_prot/prot.adb: New file.
+
 2020-07-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.base/jit-reader-simple.exp: Add a scenario for a binary that
