@@ -8243,20 +8243,6 @@ print_exited_reason (struct ui_out *uiout, int exitstatus)
     }
 }
 
-/* Some targets/architectures can do extra processing/display of
-   segmentation faults.  E.g., Intel MPX boundary faults.
-   Call the architecture dependent function to handle the fault.  */
-
-static void
-handle_segmentation_fault (struct ui_out *uiout)
-{
-  struct regcache *regcache = get_current_regcache ();
-  struct gdbarch *gdbarch = regcache->arch ();
-
-  if (gdbarch_handle_segmentation_fault_p (gdbarch))
-    gdbarch_handle_segmentation_fault (gdbarch, uiout);
-}
-
 void
 print_signal_received_reason (struct ui_out *uiout, enum gdb_signal siggnal)
 {
@@ -8303,9 +8289,6 @@ print_signal_received_reason (struct ui_out *uiout, enum gdb_signal siggnal)
       struct gdbarch *gdbarch = regcache->arch ();
       if (gdbarch_report_signal_info_p (gdbarch))
 	gdbarch_report_signal_info (gdbarch, uiout, siggnal);
-
-      if (siggnal == GDB_SIGNAL_SEGV)
-	handle_segmentation_fault (uiout);
 
       annotate_signal_string_end ();
     }

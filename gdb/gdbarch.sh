@@ -414,12 +414,6 @@ M;int;ax_pseudo_register_collect;struct agent_expr *ax, int reg;ax, reg
 # Return -1 if something goes wrong, 0 otherwise.
 M;int;ax_pseudo_register_push_stack;struct agent_expr *ax, int reg;ax, reg
 
-# Some targets/architectures can do extra processing/display of
-# segmentation faults.  E.g., Intel MPX boundary faults.
-# Call the architecture dependent function to handle the fault.
-# UIOUT is the output stream where the handler will place information.
-M;void;handle_segmentation_fault;struct ui_out *uiout;uiout
-
 # Some architectures can display additional information for specific
 # signals.
 # UIOUT is the output stream where the handler will place information.

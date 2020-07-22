@@ -1,5 +1,14 @@
 2020-07-21  John Baldwin  <jhb@FreeBSD.org>
 
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Regenerate.
+	* gdbarch.sh (handle_segmentation_fault): Remove method.
+	* infrun.c (handle_segmentation_fault): Remove.
+	(print_signal_received_reason): Remove call to
+	handle_segmentation_fault.
+
+2020-07-21  John Baldwin  <jhb@FreeBSD.org>
+
 	* sparc64-linux-tdep.c (sparc64_linux_handle_segmentation_fault):
 	Rename to sparc64_linux_report_signal_info and add siggnal
 	argument.
