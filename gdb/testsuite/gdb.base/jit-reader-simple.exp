@@ -34,6 +34,7 @@ standard_testfile
 set libname $testfile-jit
 set srcfile_lib $srcdir/$subdir/$libname.c
 set binfile_lib [standard_output_file $libname.so]
+set binfile_lib2 [standard_output_file ${libname}2.so]
 
 # Build a standalone JIT binary.
 
@@ -53,10 +54,13 @@ proc build_standalone_jit {{options ""}} {
 
 proc build_shared_jit {{options ""}} {
     global testfile
-    global srcfile_lib binfile_lib
+    global srcfile_lib binfile_lib binfile_lib2
 
     lappend options "debug additional_flags=-fPIC"
     if { [gdb_compile_shlib $srcfile_lib $binfile_lib $options] != "" } {
+	return -1
+    }
+    if { [gdb_compile_shlib $srcfile_lib $binfile_lib2 $options] != "" } {
 	return -1
     }
 
@@ -80,6 +84,15 @@ set options [list debug shlib=${binfile_lib}]
 if {[gdb_compile ${srcdir}/${subdir}/${srcfile_dl} $binfile_dl executable \
 	 $options] == -1 } {
     untested "failed to compile"
+    return -1
+}
+
+# Build the program that loads *two* JIT libraries.
+set binfile_dl2 $binfile-dl2
+set options [list debug shlib=${binfile_lib} shlib=${binfile_lib2}]
+if {[gdb_compile ${srcdir}/${subdir}/${srcfile_dl} $binfile_dl2 executable \
+	 $options] == -1 } {
+    untested "failed to compile two-jitter binary"
     return -1
 }
 
@@ -157,6 +170,34 @@ foreach standalone {1 0} {
 	}
 	with_test_prefix "same addr" {
 	    jit_test_reread $standalone 0
+	}
+    }
+}
+
+# Now start the program that loads two JITer libraries and expect to
+# see JIT breakpoints defined for both.
+
+with_test_prefix "two JITers" {
+    clean_restart $binfile_dl2
+
+    if {![runto_main]} {
+	untested "could not run to main"
+	return -1
+    }
+
+    set num_bps 0
+    set ws "\[ \t\]+"
+    gdb_test_multiple "maint info breakpoints" "have two jit breakpoints" {
+	-re "jit events${ws}keep y${ws}$hex <__jit_debug_register_code> inf 1\r\n" {
+	    incr num_bps
+	    exp_continue
+	}
+	-re "$gdb_prompt $" {
+	    if {$num_bps == 2} {
+		pass $gdb_test_name
+	    } else {
+		fail $gdb_test_name
+	    }
 	}
     }
 }

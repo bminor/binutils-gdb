@@ -1,3 +1,19 @@
+2020-07-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+	    Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.c (struct jit_program_space_data): Remove.
+	(jit_program_space_key): Remove.
+	(jiter_objfile_data::~jiter_objfile_data): Remove program space
+	stuff.
+	(get_jit_program_space_data): Remove.
+	(jit_breakpoint_deleted): Iterate on all of the program space's
+	objfiles.
+	(jit_inferior_init): Likewise.
+	(jit_breakpoint_re_set_internal): Likewise.  Also change return
+	type to void.
+	(jit_breakpoint_re_set): Pass current_program_space to
+	jit_breakpoint_re_set_internal.
+
 2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* jit.h (struct jiter_objfile_data) <cached_code_address,

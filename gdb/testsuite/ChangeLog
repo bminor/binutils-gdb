@@ -1,3 +1,8 @@
+2020-07-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.base/jit-reader-simple.exp: Add a scenario for a binary that
+	loads two JITers.
+
 2020-07-21  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.python/py-arch-reg-groups.exp: Additional tests.
