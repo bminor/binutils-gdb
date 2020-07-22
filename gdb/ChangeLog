@@ -1,3 +1,9 @@
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.h (struct jiter_objfile_data) <jiter_objfile_data, objfile>:
+	Remove.
+	* jit.c (get_jiter_objfile_data): Update.
+
 2020-07-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 	    Simon Marchi  <simon.marchi@polymtl.ca>
 

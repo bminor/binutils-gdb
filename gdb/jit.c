@@ -254,7 +254,7 @@ static jiter_objfile_data *
 get_jiter_objfile_data (objfile *objf)
 {
   if (objf->jiter_data == nullptr)
-    objf->jiter_data.reset (new jiter_objfile_data (objf));
+    objf->jiter_data.reset (new jiter_objfile_data ());
 
   return objf->jiter_data.get ();
 }
