@@ -706,6 +706,12 @@ public:
   /* JIT-related data for this objfile, if the objfile is JITed;
      that is, it was produced by a JITer.  */
   std::unique_ptr<jited_objfile_data> jited_data = nullptr;
+
+  /* A flag that is set to true if the JIT interface symbols are not
+     found in this objfile, so that we can skip the symbol lookup the
+     next time.  If an objfile does not have the symbols, it will
+     never have them.  */
+  bool skip_jit_symbol_lookup = false;
 };
 
 /* A deleter for objfile.  */

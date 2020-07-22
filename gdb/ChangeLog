@@ -1,6 +1,13 @@
 2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
 	    Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* objfiles.h (struct objfile) <skip_jit_symbol_lookup>: New field.
+	* jit.c (jit_breakpoint_re_set_internal): Use the
+	`skip_jit_symbol_lookup` field.
+
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+	    Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* jit.c (jit_read_descriptor): Define the descriptor address once,
 	use twice.
 	(jit_breakpoint_deleted): Move the declaration of the loop variable

@@ -893,19 +893,30 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch, program_space *pspace)
 {
   for (objfile *the_objfile : pspace->objfiles ())
     {
+      if (the_objfile->skip_jit_symbol_lookup)
+	continue;
+
       /* Lookup the registration symbol.  If it is missing, then we
 	 assume we are not attached to a JIT.  */
       bound_minimal_symbol reg_symbol
 	= lookup_minimal_symbol (jit_break_name, nullptr, the_objfile);
       if (reg_symbol.minsym == NULL
 	  || BMSYMBOL_VALUE_ADDRESS (reg_symbol) == 0)
-	continue;
+	{
+	  /* No need to repeat the lookup the next time.  */
+	  the_objfile->skip_jit_symbol_lookup = true;
+	  continue;
+	}
 
       bound_minimal_symbol desc_symbol
 	= lookup_minimal_symbol (jit_descriptor_name, NULL, the_objfile);
       if (desc_symbol.minsym == NULL
 	  || BMSYMBOL_VALUE_ADDRESS (desc_symbol) == 0)
-	continue;
+	{
+	  /* No need to repeat the lookup the next time.  */
+	  the_objfile->skip_jit_symbol_lookup = true;
+	  continue;
+	}
 
       jiter_objfile_data *objf_data
 	= get_jiter_objfile_data (reg_symbol.objfile);
