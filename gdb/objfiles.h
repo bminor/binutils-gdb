@@ -36,6 +36,7 @@
 #include "bcache.h"
 #include "gdbarch.h"
 #include "gdbsupport/refcounted-object.h"
+#include "jit.h"
 
 struct htab;
 struct objfile_data;
@@ -697,6 +698,9 @@ public:
      store these here rather than in struct block.  Static links must be
      allocated on the objfile's obstack.  */
   htab_up static_links;
+
+  /* JIT-related data for this objfile.  */
+  std::unique_ptr<jit_objfile_data> jit_data = nullptr;
 };
 
 /* A deleter for objfile.  */

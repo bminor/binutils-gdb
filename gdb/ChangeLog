@@ -1,3 +1,20 @@
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* jit.h: Forward-declare `struct minimal_symbol`.
+	(struct jit_objfile_data): Migrate to here from jit.c; also add a
+	constructor, destructor, and an objfile* field.
+	* jit.c (jit_objfile_data): Remove.
+	(struct jit_objfile_data): Migrate from here to jit.h.
+	(jit_objfile_data::~jit_objfile_data): New destructor
+	implementation with code moved from free_objfile_data.
+	(free_objfile_data): Delete.
+	(get_jit_objfile_data): Update to use the jit_data field of objfile.
+	(jit_find_objf_with_entry_addr): Ditto.
+	(jit_inferior_exit_hook): Ditto.
+	(_initialize_jit): Remove the call to
+	register_objfile_data_with_cleanup.
+	* objfiles.h (struct objfile) <jit_data>: New field.
+
 2020-07-22  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* jit.h: Forward-declare `struct objfile`.

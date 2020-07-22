@@ -21,6 +21,7 @@
 #define JIT_H
 
 struct objfile;
+struct minimal_symbol;
 
 /* When the JIT breakpoint fires, the inferior wants us to take one of
    these actions.  These values are used by the inferior, so the
@@ -64,6 +65,34 @@ struct jit_descriptor
   uint32_t action_flag;
   CORE_ADDR relevant_entry;
   CORE_ADDR first_entry;
+};
+
+/* Per-objfile structure recording the addresses in the program space.
+   This object serves two purposes: for ordinary objfiles, it may
+   cache some symbols related to the JIT interface; and for
+   JIT-created objfiles, it holds some information about the
+   jit_code_entry.  */
+
+struct jit_objfile_data
+{
+  jit_objfile_data (struct objfile *objfile)
+    : objfile (objfile)
+  {}
+
+  ~jit_objfile_data ();
+
+  /* Back-link to the objfile. */
+  struct objfile *objfile;
+
+  /* Symbol for __jit_debug_register_code.  */
+  minimal_symbol *register_code = nullptr;
+
+  /* Symbol for __jit_debug_descriptor.  */
+  minimal_symbol *descriptor = nullptr;
+
+  /* Address of struct jit_code_entry in this objfile.  This is only
+     non-zero for objfiles that represent code created by the JIT.  */
+  CORE_ADDR addr = 0;
 };
 
 /* Looks for the descriptor and registration symbols and breakpoints

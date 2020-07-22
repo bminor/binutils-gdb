@@ -45,8 +45,6 @@
 
 static std::string jit_reader_dir;
 
-static const struct objfile_data *jit_objfile_data;
-
 static const char *const jit_break_name = "__jit_debug_register_code";
 
 static const char *const jit_descriptor_name = "__jit_debug_descriptor";
@@ -265,24 +263,25 @@ struct jit_program_space_data
 
 static program_space_key<jit_program_space_data> jit_program_space_key;
 
-/* Per-objfile structure recording the addresses in the program space.
-   This object serves two purposes: for ordinary objfiles, it may
-   cache some symbols related to the JIT interface; and for
-   JIT-created objfiles, it holds some information about the
-   jit_code_entry.  */
+/* Destructor for jit_objfile_data.  */
 
-struct jit_objfile_data
+jit_objfile_data::~jit_objfile_data ()
 {
-  /* Symbol for __jit_debug_register_code.  */
-  struct minimal_symbol *register_code;
+  /* Free the data allocated in the jit_program_space_data slot.  */
+  if (this->register_code != NULL)
+    {
+      struct jit_program_space_data *ps_data;
 
-  /* Symbol for __jit_debug_descriptor.  */
-  struct minimal_symbol *descriptor;
-
-  /* Address of struct jit_code_entry in this objfile.  This is only
-     non-zero for objfiles that represent code created by the JIT.  */
-  CORE_ADDR addr;
-};
+      ps_data = jit_program_space_key.get (this->objfile->pspace);
+      if (ps_data != NULL && ps_data->objfile == this->objfile)
+	{
+	  ps_data->objfile = NULL;
+	  if (ps_data->jit_breakpoint != NULL)
+	    delete_breakpoint (ps_data->jit_breakpoint);
+	  ps_data->cached_code_address = 0;
+	}
+    }
+}
 
 /* Fetch the jit_objfile_data associated with OBJF.  If no data exists
    yet, make a new structure and attach it.  */
@@ -290,16 +289,10 @@ struct jit_objfile_data
 static struct jit_objfile_data *
 get_jit_objfile_data (struct objfile *objf)
 {
-  struct jit_objfile_data *objf_data;
+  if (objf->jit_data == nullptr)
+    objf->jit_data.reset (new jit_objfile_data (objf));
 
-  objf_data = (struct jit_objfile_data *) objfile_data (objf, jit_objfile_data);
-  if (objf_data == NULL)
-    {
-      objf_data = XCNEW (struct jit_objfile_data);
-      set_objfile_data (objf, jit_objfile_data, objf_data);
-    }
-
-  return objf_data;
+  return objf->jit_data.get ();
 }
 
 /* Remember OBJFILE has been created for struct jit_code_entry located
@@ -915,13 +908,10 @@ jit_find_objf_with_entry_addr (CORE_ADDR entry_addr)
 {
   for (objfile *objf : current_program_space->objfiles ())
     {
-      struct jit_objfile_data *objf_data;
-
-      objf_data
-	= (struct jit_objfile_data *) objfile_data (objf, jit_objfile_data);
-      if (objf_data != NULL && objf_data->addr == entry_addr)
+      if (objf->jit_data != nullptr && objf->jit_data->addr == entry_addr)
 	return objf;
     }
+
   return NULL;
 }
 
@@ -1325,10 +1315,7 @@ jit_inferior_exit_hook (struct inferior *inf)
 {
   for (objfile *objf : current_program_space->objfiles_safe ())
     {
-      struct jit_objfile_data *objf_data
-	= (struct jit_objfile_data *) objfile_data (objf, jit_objfile_data);
-
-      if (objf_data != NULL && objf_data->addr != 0)
+      if (objf->jit_data != nullptr && objf->jit_data->addr != 0)
 	objf->unlink ();
     }
 }
@@ -1371,30 +1358,6 @@ jit_event_handler (gdbarch *gdbarch, objfile *jiter)
     }
 }
 
-/* Called to free the data allocated to the jit_program_space_data slot.  */
-
-static void
-free_objfile_data (struct objfile *objfile, void *data)
-{
-  struct jit_objfile_data *objf_data = (struct jit_objfile_data *) data;
-
-  if (objf_data->register_code != NULL)
-    {
-      struct jit_program_space_data *ps_data;
-
-      ps_data = jit_program_space_key.get (objfile->pspace);
-      if (ps_data != NULL && ps_data->objfile == objfile)
-	{
-	  ps_data->objfile = NULL;
-	  if (ps_data->jit_breakpoint != NULL)
-	    delete_breakpoint (ps_data->jit_breakpoint);
-	  ps_data->cached_code_address = 0;
-	}
-    }
-
-  xfree (data);
-}
-
 /* Initialize the jit_gdbarch_data slot with an instance of struct
    jit_gdbarch_data_type */
 
@@ -1427,8 +1390,6 @@ _initialize_jit ()
   gdb::observers::inferior_exit.attach (jit_inferior_exit_hook);
   gdb::observers::breakpoint_deleted.attach (jit_breakpoint_deleted);
 
-  jit_objfile_data =
-    register_objfile_data_with_cleanup (NULL, free_objfile_data);
   jit_gdbarch_data = gdbarch_data_register_pre_init (jit_gdbarch_data_init);
   if (is_dl_available ())
     {
