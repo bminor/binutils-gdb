@@ -86,6 +86,14 @@ struct jiter_objfile_data
 
   /* Symbol for __jit_debug_descriptor.  */
   minimal_symbol *descriptor = nullptr;
+
+  /* This is the relocated address of the __jit_debug_register_code function
+     provided by this objfile.  This is used to detect relocations changes
+     requiring the breakpoint to be re-created.  */
+  CORE_ADDR cached_code_address = 0;
+
+  /* This is the JIT event breakpoint, or nullptr if it has been deleted.  */
+  breakpoint *jit_breakpoint = nullptr;
 };
 
 /* An objfile that is the product of JIT compilation and was registered

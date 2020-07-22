@@ -248,17 +248,6 @@ struct jit_program_space_data
      symbols.  */
 
   struct objfile *objfile = nullptr;
-
-  /* If this program space has __jit_debug_register_code, this is the
-     cached address from the minimal symbol.  This is used to detect
-     relocations requiring the breakpoint to be re-created.  */
-
-  CORE_ADDR cached_code_address = 0;
-
-  /* This is the JIT event breakpoint, or NULL if it has not been
-     set.  */
-
-  struct breakpoint *jit_breakpoint = nullptr;
 };
 
 static program_space_key<jit_program_space_data> jit_program_space_key;
@@ -273,11 +262,9 @@ jiter_objfile_data::~jiter_objfile_data ()
   gdb_assert (ps_data != nullptr);
   gdb_assert (ps_data->objfile == this->objfile);
 
-  ps_data->objfile = NULL;
-  if (ps_data->jit_breakpoint != NULL)
-    delete_breakpoint (ps_data->jit_breakpoint);
-
-  ps_data->cached_code_address = 0;
+  ps_data->objfile = nullptr;
+  if (this->jit_breakpoint != nullptr)
+    delete_breakpoint (this->jit_breakpoint);
 }
 
 /* Fetch the jiter_objfile_data associated with OBJF.  If no data exists
@@ -924,10 +911,16 @@ jit_breakpoint_deleted (struct breakpoint *b)
       struct jit_program_space_data *ps_data;
 
       ps_data = jit_program_space_key.get (iter->pspace);
-      if (ps_data != NULL && ps_data->jit_breakpoint == iter->owner)
+      if (ps_data != nullptr && ps_data->objfile != nullptr)
 	{
-	  ps_data->cached_code_address = 0;
-	  ps_data->jit_breakpoint = NULL;
+	  objfile *objf = ps_data->objfile;
+	  jiter_objfile_data *jiter_data = objf->jiter_data.get ();
+
+	  if (jiter_data->jit_breakpoint == iter->owner)
+	    {
+	      jiter_data->cached_code_address = 0;
+	      jiter_data->jit_breakpoint = nullptr;
+	    }
 	}
     }
 }
@@ -976,16 +969,16 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
 			"breakpoint_addr = %s\n",
 			paddress (gdbarch, addr));
 
-  if (ps_data->cached_code_address == addr)
+  if (objf_data->cached_code_address == addr)
     return true;
 
   /* Delete the old breakpoint.  */
-  if (ps_data->jit_breakpoint != NULL)
-    delete_breakpoint (ps_data->jit_breakpoint);
+  if (objf_data->jit_breakpoint != nullptr)
+    delete_breakpoint (objf_data->jit_breakpoint);
 
   /* Put a breakpoint in the registration symbol.  */
-  ps_data->cached_code_address = addr;
-  ps_data->jit_breakpoint = create_jit_event_breakpoint (gdbarch, addr);
+  objf_data->cached_code_address = addr;
+  objf_data->jit_breakpoint = create_jit_event_breakpoint (gdbarch, addr);
 
   return true;
 }

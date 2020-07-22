@@ -1,5 +1,14 @@
 2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* jit.h (struct jiter_objfile_data) <cached_code_address,
+	jit_breakpoint>: Move to here from ...
+	* jit.c (jit_program_space_data): ... here.
+	(jiter_objfile_data::~jiter_objfile_data): Update.
+	(jit_breakpoint_deleted): Update.
+	(jit_breakpoint_re_set_internal): Update.
+
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* jit.c (jiter_objfile_data::~jiter_objfile_data): Remove some
 	checks.
 	(jit_read_descriptor): Remove NULL check.
