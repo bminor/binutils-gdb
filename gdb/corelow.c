@@ -416,8 +416,11 @@ core_target_open (const char *arg, int from_tty)
 							       siggy)
 			     : gdb_signal_from_host (siggy));
 
-      printf_filtered (_("Program terminated with signal %s, %s.\n"),
+      printf_filtered (_("Program terminated with signal %s, %s"),
 		       gdb_signal_to_name (sig), gdb_signal_to_string (sig));
+      if (gdbarch_report_signal_info_p (core_gdbarch))
+	gdbarch_report_signal_info (core_gdbarch, current_uiout, sig);
+      printf_filtered (_(".\n"));
 
       /* Set the value of the internal variable $_exitsignal,
 	 which holds the signal uncaught by the inferior.  */

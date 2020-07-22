@@ -1,5 +1,10 @@
 2020-07-21  John Baldwin  <jhb@FreeBSD.org>
 
+	* corelow.c (core_target_open): Invoke gdbarch report_signal_info
+	hook if present.
+
+2020-07-21  John Baldwin  <jhb@FreeBSD.org>
+
 	* gdbarch.c: Regenerate.
 	* gdbarch.h: Regenerate.
 	* gdbarch.sh (report_signal_info): New method.
