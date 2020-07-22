@@ -1,3 +1,10 @@
+2020-07-22  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* python/py-registers.c (gdbpy_register_object_data_init): Remove
+	redundant local variable.
+	(gdbpy_get_register_descriptor): Extract descriptor vector as a
+	reference, not pointer, update code accordingly.
+
 2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
 	    Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 

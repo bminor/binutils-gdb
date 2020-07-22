@@ -92,8 +92,7 @@ extern PyTypeObject reggroup_object_type
 static void *
 gdbpy_register_object_data_init (struct gdbarch *gdbarch)
 {
-  std::vector<gdbpy_ref<>> *vec = new (std::vector<gdbpy_ref<>>);
-  return (void *) vec;
+  return new std::vector<gdbpy_ref<>>;
 }
 
 /* Return a gdb.RegisterGroup object wrapping REGGROUP.  The register
@@ -158,16 +157,17 @@ static gdbpy_ref<>
 gdbpy_get_register_descriptor (struct gdbarch *gdbarch,
 			       int regnum)
 {
-  auto vec = (std::vector<gdbpy_ref<>> *) gdbarch_data
-    (gdbarch, gdbpy_register_object_data);
+  auto &vec
+    = *(std::vector<gdbpy_ref<>> *) gdbarch_data (gdbarch,
+						  gdbpy_register_object_data);
 
   /* Ensure that we have enough entries in the vector.  */
-  if (vec->size () <= regnum)
-    vec->resize ((regnum + 1), nullptr);
+  if (vec.size () <= regnum)
+    vec.resize ((regnum + 1), nullptr);
 
   /* If we don't already have a descriptor for REGNUM in GDBARCH then
      create one now.  */
-  if (vec->at (regnum) == nullptr)
+  if (vec[regnum] == nullptr)
     {
       gdbpy_ref <register_descriptor_object> reg
 	(PyObject_New (register_descriptor_object,
@@ -176,12 +176,12 @@ gdbpy_get_register_descriptor (struct gdbarch *gdbarch,
 	return NULL;
       reg->regnum = regnum;
       reg->gdbarch = gdbarch;
-      vec->at (regnum) = gdbpy_ref<> ((PyObject *) reg.release ());
+      vec[regnum] = gdbpy_ref<> ((PyObject *) reg.release ());
     }
 
   /* Grab the register descriptor from the vector, the reference count is
      automatically incremented thanks to gdbpy_ref.  */
-  return vec->at (regnum);
+  return vec[regnum];
 }
 
 /* Convert the register descriptor to a string.  */
