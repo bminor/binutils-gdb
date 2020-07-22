@@ -39134,12 +39134,15 @@ For any @var{command} not supported by the stub, an empty response
 protocol.  A newer @value{GDBN} can tell if a packet is supported based
 on that response.
 
-At a minimum, a stub is required to support the @samp{g} and @samp{G}
+At a minimum, a stub is required to support the @samp{?} command to
+tell @value{GDBN} the reason for halting, @samp{g} and @samp{G}
 commands for register access, and the @samp{m} and @samp{M} commands
 for memory access.  Stubs that only control single-threaded targets
-can implement run control with the @samp{c} (continue), and @samp{s}
-(step) commands.  Stubs that support multi-threading targets should
-support the @samp{vCont} command.  All other commands are optional.
+can implement run control with the @samp{c} (continue) command, and if
+the target architecture supports hardware-assisted single-stepping,
+the @samp{s} (step) command.  Stubs that support multi-threading
+targets should support the @samp{vCont} command.  All other commands
+are optional.
 
 @node Packets
 @section Packets

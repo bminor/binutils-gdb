@@ -1,3 +1,9 @@
+2020-07-22  Reuben Thomas  <rrt@sc3d.org>
+
+	* gdb.texinfo (Remote Protocol, Overview): Correct the description
+	of which remote protocol commands are mandatory for a stub to
+	implement.
+
 2020-07-20  Ludovic Courtès  <ludo@gnu.org>
 
 	* doc/guile.texi (Guile Introduction): Mention Guile 3.0.
