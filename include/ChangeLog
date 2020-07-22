@@ -1,3 +1,9 @@
+2020-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26262
+	PR ld/26267
+	* bfdlink.h (bfd_link_info): Add lto_all_symbols_read.
+
 2020-07-04  Nick Clifton  <nickc@redhat.com>
 
 	Binutils 2.35 branch created.

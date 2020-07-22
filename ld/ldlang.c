@@ -7874,6 +7874,7 @@ lang_process (void)
       if (plugin_call_all_symbols_read ())
 	einfo (_("%F%P: %s: plugin reported error after all symbols read\n"),
 	       plugin_error_plugin ());
+      link_info.lto_all_symbols_read = TRUE;
       /* Open any newly added files, updating the file chains.  */
       plugin_undefs = link_info.hash->undefs_tail;
       open_input_bfds (*added.tail, OPEN_BFD_NORMAL);

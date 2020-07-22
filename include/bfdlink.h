@@ -361,6 +361,9 @@ struct bfd_link_info
   /* TRUE if the LTO plugin is active.  */
   unsigned int lto_plugin_active: 1;
 
+  /* TRUE if all LTO IR symbols have been read.  */
+  unsigned int lto_all_symbols_read : 1;
+
   /* TRUE if global symbols in discarded sections should be stripped.  */
   unsigned int strip_discarded: 1;
 
