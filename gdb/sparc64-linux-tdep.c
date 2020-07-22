@@ -116,15 +116,16 @@ sparc64_linux_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_id (this_cache, frame_id_build (base, func));
 }
 
-/* sparc64 GNU/Linux implementation of the handle_segmentation_fault
+/* sparc64 GNU/Linux implementation of the report_signal_info
    gdbarch hook.
    Displays information related to ADI memory corruptions.  */
 
 static void
-sparc64_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
-				      struct ui_out *uiout)
+sparc64_linux_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout,
+				  enum gdb_signal siggnal)
 {
-  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word != 64)
+  if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word != 64
+      || siggnal != GDB_SIGNAL_SEGV)
     return;
 
   CORE_ADDR addr = 0;
@@ -404,8 +405,7 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_xml_syscall_file_name (gdbarch, XML_SYSCALL_FILENAME_SPARC64);
   set_gdbarch_get_syscall_number (gdbarch,
                                   sparc64_linux_get_syscall_number);
-  set_gdbarch_handle_segmentation_fault (gdbarch,
-					 sparc64_linux_handle_segmentation_fault);
+  set_gdbarch_report_signal_info (gdbarch, sparc64_linux_report_signal_info);
 }
 
 void _initialize_sparc64_linux_tdep ();

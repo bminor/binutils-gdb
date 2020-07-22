@@ -1,5 +1,13 @@
 2020-07-21  John Baldwin  <jhb@FreeBSD.org>
 
+	* sparc64-linux-tdep.c (sparc64_linux_handle_segmentation_fault):
+	Rename to sparc64_linux_report_signal_info and add siggnal
+	argument.
+	(sparc64_linux_init_abi): Use sparc64_linux_report_signal_info
+	instead of sparc64_linux_handle_segmentation_fault.
+
+2020-07-21  John Baldwin  <jhb@FreeBSD.org>
+
 	* amd64-linux-tdep.c (amd64_linux_init_abi_common): Use
 	i386_linux_report_signal_info instead of
 	i386_linux_handle_segmentation_fault.
