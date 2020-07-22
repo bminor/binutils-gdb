@@ -1,5 +1,12 @@
 2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* jit.c (jiter_objfile_data::~jiter_objfile_data): Remove some
+	checks.
+	(jit_read_descriptor): Remove NULL check.
+	(jit_event_handler): Add an assertion.
+
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* jit.h (struct jit_objfile_data):  Split into...
 	(struct jiter_objfile_data): ... this ...
 	(struct jited_objfile_data): ... and this.

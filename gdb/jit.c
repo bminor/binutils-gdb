@@ -267,20 +267,17 @@ static program_space_key<jit_program_space_data> jit_program_space_key;
 
 jiter_objfile_data::~jiter_objfile_data ()
 {
-  /* Free the data allocated in the jit_program_space_data slot.  */
-  if (this->register_code != NULL)
-    {
-      struct jit_program_space_data *ps_data;
+  jit_program_space_data *ps_data
+    = jit_program_space_key.get (this->objfile->pspace);
 
-      ps_data = jit_program_space_key.get (this->objfile->pspace);
-      if (ps_data != NULL && ps_data->objfile == this->objfile)
-	{
-	  ps_data->objfile = NULL;
-	  if (ps_data->jit_breakpoint != NULL)
-	    delete_breakpoint (ps_data->jit_breakpoint);
-	  ps_data->cached_code_address = 0;
-	}
-    }
+  gdb_assert (ps_data != nullptr);
+  gdb_assert (ps_data->objfile == this->objfile);
+
+  ps_data->objfile = NULL;
+  if (ps_data->jit_breakpoint != NULL)
+    delete_breakpoint (ps_data->jit_breakpoint);
+
+  ps_data->cached_code_address = 0;
 }
 
 /* Fetch the jiter_objfile_data associated with OBJF.  If no data exists
@@ -336,10 +333,8 @@ jit_read_descriptor (gdbarch *gdbarch,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   gdb_assert (jiter != nullptr);
-  jiter_objfile_data *objf_data = get_jiter_objfile_data (jiter);
-
-  if (objf_data->descriptor == NULL)
-    return false;
+  jiter_objfile_data *objf_data = jiter->jiter_data.get ();
+  gdb_assert (objf_data != nullptr);
 
   if (jit_debug)
     fprintf_unfiltered (gdb_stdlog,
@@ -1325,6 +1320,10 @@ jit_event_handler (gdbarch *gdbarch, objfile *jiter)
   struct jit_code_entry code_entry;
   CORE_ADDR entry_addr;
   struct objfile *objf;
+
+  /* If we get a JIT breakpoint event for this objfile, it is necessarily a
+     JITer.  */
+  gdb_assert (jiter->jiter_data != nullptr);
 
   /* Read the descriptor from remote memory.  */
   if (!jit_read_descriptor (gdbarch, &descriptor, jiter))
