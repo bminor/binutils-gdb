@@ -699,8 +699,13 @@ public:
      allocated on the objfile's obstack.  */
   htab_up static_links;
 
-  /* JIT-related data for this objfile.  */
-  std::unique_ptr<jit_objfile_data> jit_data = nullptr;
+  /* JIT-related data for this objfile, if the objfile is a JITer;
+     that is, it produces JITed objfiles.  */
+  std::unique_ptr<jiter_objfile_data> jiter_data = nullptr;
+
+  /* JIT-related data for this objfile, if the objfile is JITed;
+     that is, it was produced by a JITer.  */
+  std::unique_ptr<jited_objfile_data> jited_data = nullptr;
 };
 
 /* A deleter for objfile.  */

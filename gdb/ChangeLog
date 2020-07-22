@@ -1,5 +1,22 @@
 2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* jit.h (struct jit_objfile_data):  Split into...
+	(struct jiter_objfile_data): ... this ...
+	(struct jited_objfile_data): ... and this.
+	* objfiles.h (struct objfile) <jit_data>: Remove.
+	<jiter_data, jited_data>: New fields.
+	* jit.c (jit_objfile_data::~jit_objfile_data): Rename to ...
+	(jiter_objfile_data::~jiter_objfile_data): ... this.
+	(get_jit_objfile_data): Rename to ...
+	(get_jiter_objfile_data): ... this.
+	(add_objfile_entry): Update.
+	(jit_read_descriptor): Use get_jiter_objfile_data.
+	(jit_find_objf_with_entry_addr): Use objfile's jited_data field.
+	(jit_breakpoint_re_set_internal): Use get_jiter_objfile_data.
+	(jit_inferior_exit_hook): Use objfile's jited_data field.
+
+2020-07-22  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* jit.h: Forward-declare `struct minimal_symbol`.
 	(struct jit_objfile_data): Migrate to here from jit.c; also add a
 	constructor, destructor, and an objfile* field.
