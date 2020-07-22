@@ -27,7 +27,6 @@
 #include "python-internal.h"
 #include "regcache.h"
 #include "valprint.h"
-#include "user-regs.h"
 
 #define TRACE_PY_UNWIND(level, args...) if (pyuw_debug >= level)  \
   { fprintf_unfiltered (gdb_stdlog, args); }
@@ -100,37 +99,6 @@ extern PyTypeObject unwind_info_object_type
 static unsigned int pyuw_debug = 0;
 
 static struct gdbarch_data *pyuw_gdbarch_data;
-
-/* Parses register id, which can be either a number or a name.
-   Returns 1 on success, 0 otherwise.  */
-
-static int
-pyuw_parse_register_id (struct gdbarch *gdbarch, PyObject *pyo_reg_id,
-                        int *reg_num)
-{
-  if (pyo_reg_id == NULL)
-    return 0;
-  if (gdbpy_is_string (pyo_reg_id))
-    {
-      gdb::unique_xmalloc_ptr<char> reg_name (gdbpy_obj_to_string (pyo_reg_id));
-
-      if (reg_name == NULL)
-        return 0;
-      *reg_num = user_reg_map_name_to_regnum (gdbarch, reg_name.get (),
-                                              strlen (reg_name.get ()));
-      return *reg_num >= 0;
-    }
-  else if (PyInt_Check (pyo_reg_id))
-    {
-      long value;
-      if (gdb_py_int_as_long (pyo_reg_id, &value) && (int) value == value)
-        {
-          *reg_num = (int) value;
-          return user_reg_map_regnum_to_name (gdbarch, *reg_num) != NULL;
-        }
-    }
-  return 0;
-}
 
 /* Convert gdb.Value instance to inferior's pointer.  Return 1 on success,
    0 on failure.  */
@@ -275,7 +243,7 @@ unwind_infopy_add_saved_register (PyObject *self, PyObject *args)
   if (!PyArg_UnpackTuple (args, "previous_frame_register", 2, 2,
                           &pyo_reg_id, &pyo_reg_value))
     return NULL;
-  if (!pyuw_parse_register_id (pending_frame->gdbarch, pyo_reg_id, &regnum))
+  if (!gdbpy_parse_register_id (pending_frame->gdbarch, pyo_reg_id, &regnum))
     {
       PyErr_SetString (PyExc_ValueError, "Bad register");
       return NULL;
@@ -376,7 +344,7 @@ pending_framepy_read_register (PyObject *self, PyObject *args)
     }
   if (!PyArg_UnpackTuple (args, "read_register", 1, 1, &pyo_reg_id))
     return NULL;
-  if (!pyuw_parse_register_id (pending_frame->gdbarch, pyo_reg_id, &regnum))
+  if (!gdbpy_parse_register_id (pending_frame->gdbarch, pyo_reg_id, &regnum))
     {
       PyErr_SetString (PyExc_ValueError, "Bad register");
       return NULL;

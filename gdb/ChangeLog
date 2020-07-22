@@ -1,5 +1,20 @@
 2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python/py-frame.c: Remove 'user-regs.h' include.
+	(frapy_read_register): Rewrite to make use of
+	gdbpy_parse_register_id.
+	* python/py-registers.c (gdbpy_parse_register_id): New function,
+	moved here from python/py-unwind.c.  Updated the return type, and
+	also accepts register descriptor objects.
+	* python/py-unwind.c: Remove 'user-regs.h' include.
+	(pyuw_parse_register_id): Moved to python/py-registers.c.
+	(unwind_infopy_add_saved_register): Update to use
+	gdbpy_parse_register_id.
+	(pending_framepy_read_register): Likewise.
+	* python/python-internal.h (gdbpy_parse_register_id): Declare.
+
+2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* python/py-registers.c: Add 'user-regs.h' include.
 	(register_descriptor_iter_find): New function.
 	(register_descriptor_iterator_object_methods): New static global

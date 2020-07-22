@@ -1,5 +1,10 @@
 2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* gdb.python/py-unwind.py: Update to make use of a register
+	descriptor.
+
+2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* gdb.python/py-arch-reg-names.exp: Add additional tests.
 
 2020-07-25  Andrew Burgess  <andrew.burgess@embecosm.com>

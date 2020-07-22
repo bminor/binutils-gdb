@@ -1,5 +1,12 @@
 2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* python.texi (Unwinding Frames in Python): Update descriptions
+	for PendingFrame.read_register and
+	gdb.UnwindInfo.add_saved_register.
+	(Frames In Python): Update description of Frame.read_register.
+
+2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* python.texi (Registers In Python): Document new find function.
 
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>

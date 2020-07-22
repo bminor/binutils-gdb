@@ -370,6 +370,59 @@ register_descriptor_iter_find (PyObject *self, PyObject *args, PyObject *kw)
   Py_RETURN_NONE;
 }
 
+/* See python-internal.h.  */
+
+bool
+gdbpy_parse_register_id (struct gdbarch *gdbarch, PyObject *pyo_reg_id,
+			 int *reg_num)
+{
+  gdb_assert (pyo_reg_id != NULL);
+
+  /* The register could be a string, its name.  */
+  if (gdbpy_is_string (pyo_reg_id))
+    {
+      gdb::unique_xmalloc_ptr<char> reg_name (gdbpy_obj_to_string (pyo_reg_id));
+
+      if (reg_name != NULL)
+	{
+	  *reg_num = user_reg_map_name_to_regnum (gdbarch, reg_name.get (),
+						  strlen (reg_name.get ()));
+	  return *reg_num >= 0;
+	}
+    }
+  /* The register could be its internal GDB register number.  */
+  else if (PyInt_Check (pyo_reg_id))
+    {
+      long value;
+      if (gdb_py_int_as_long (pyo_reg_id, &value) && (int) value == value)
+        {
+	  if (user_reg_map_regnum_to_name (gdbarch, value) != NULL)
+	    {
+	      *reg_num = (int) value;
+	      return true;
+	    }
+        }
+    }
+  /* The register could be a gdb.RegisterDescriptor object.  */
+  else if (PyObject_IsInstance (pyo_reg_id,
+			   (PyObject *) &register_descriptor_object_type))
+    {
+      register_descriptor_object *reg
+	= (register_descriptor_object *) pyo_reg_id;
+      if (reg->gdbarch == gdbarch)
+	{
+	  *reg_num = reg->regnum;
+	  return true;
+	}
+      else
+	PyErr_SetString (PyExc_ValueError,
+			 _("Invalid Architecture in RegisterDescriptor"));
+    }
+
+  gdb_assert (PyErr_Occurred ());
+  return false;
+}
+
 /* Initializes the new Python classes from this file in the gdb module.  */
 
 int

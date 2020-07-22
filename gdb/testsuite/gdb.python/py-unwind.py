@@ -33,12 +33,19 @@ class FrameId(object):
 class TestUnwinder(Unwinder):
     AMD64_RBP = 6
     AMD64_RSP = 7
-    AMD64_RIP = 16
+    AMD64_RIP = None
 
     def __init__(self):
         Unwinder.__init__(self, "test unwinder")
         self.char_ptr_t = gdb.lookup_type("unsigned char").pointer()
         self.char_ptr_ptr_t = self.char_ptr_t.pointer()
+        self._last_arch = None
+
+    # Update the register descriptor AMD64_RIP based on ARCH.
+    def _update_register_descriptors (self, arch):
+        if (self._last_arch != arch):
+            TestUnwinder.AMD64_RIP = arch.registers ().find ("rip")
+            self._last_arch = arch
 
     def _read_word(self, address):
         return address.cast(self.char_ptr_ptr_t).dereference()
@@ -76,6 +83,8 @@ class TestUnwinder(Unwinder):
         frame_arch = pending_frame.architecture ()
         if (inf_arch != frame_arch):
             raise gdb.GdbError ("architecture mismatch")
+
+        self._update_register_descriptors (frame_arch)
 
         try:
             # NOTE: the registers in Unwinder API can be referenced

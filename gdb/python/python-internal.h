@@ -776,4 +776,23 @@ struct Py_buffer_deleter
 /* A unique_ptr specialization for Py_buffer.  */
 typedef std::unique_ptr<Py_buffer, Py_buffer_deleter> Py_buffer_up;
 
+/* Parse a register number from PYO_REG_ID and place the register number
+   into *REG_NUM.  The register is a register for GDBARCH.
+
+   If a register is parsed successfully then *REG_NUM will have been
+   updated, and true is returned.  Otherwise the contents of *REG_NUM are
+   undefined, and false is returned.
+
+   The PYO_REG_ID object can be a string, the name of the register.  This
+   is the slowest approach as GDB has to map the name to a number for each
+   call.  Alternatively PYO_REG_ID can be an internal GDB register
+   number.  This is quick but should not be encouraged as this means
+   Python scripts are now dependent on GDB's internal register numbering.
+   Final PYO_REG_ID can be a gdb.RegisterDescriptor object, these objects
+   can be looked up by name once, and then cache the register number so
+   should be as quick as using a register number.  */
+
+extern bool gdbpy_parse_register_id (struct gdbarch *gdbarch,
+				     PyObject *pyo_reg_id, int *reg_num);
+
 #endif /* PYTHON_PYTHON_INTERNAL_H */
