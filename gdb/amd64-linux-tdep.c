@@ -1846,8 +1846,7 @@ amd64_linux_init_abi_common(struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_process_record_signal (gdbarch, amd64_linux_record_signal);
 
   set_gdbarch_get_siginfo_type (gdbarch, x86_linux_get_siginfo_type);
-  set_gdbarch_handle_segmentation_fault (gdbarch,
-					 i386_linux_handle_segmentation_fault);
+  set_gdbarch_report_signal_info (gdbarch, i386_linux_report_signal_info);
 }
 
 static void

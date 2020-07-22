@@ -388,19 +388,19 @@ i386_canonicalize_syscall (int syscall)
 
 #define SIG_CODE_BONDARY_FAULT 3
 
-/* i386 GNU/Linux implementation of the handle_segmentation_fault
+/* i386 GNU/Linux implementation of the report_signal_info
    gdbarch hook.  Displays information related to MPX bound
    violations.  */
 void
-i386_linux_handle_segmentation_fault (struct gdbarch *gdbarch,
-				      struct ui_out *uiout)
+i386_linux_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout,
+			       enum gdb_signal siggnal)
 {
   /* -Wmaybe-uninitialized  */
   CORE_ADDR lower_bound = 0, upper_bound = 0, access = 0;
   int is_upper;
   long sig_code = 0;
 
-  if (!i386_mpx_enabled ())
+  if (!i386_mpx_enabled () || siggnal != GDB_SIGNAL_SEGV)
     return;
 
   try
@@ -1073,8 +1073,7 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                   i386_linux_get_syscall_number);
 
   set_gdbarch_get_siginfo_type (gdbarch, x86_linux_get_siginfo_type);
-  set_gdbarch_handle_segmentation_fault (gdbarch,
-					 i386_linux_handle_segmentation_fault);
+  set_gdbarch_report_signal_info (gdbarch, i386_linux_report_signal_info);
 }
 
 void _initialize_i386_linux_tdep ();
