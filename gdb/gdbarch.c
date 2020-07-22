@@ -192,6 +192,7 @@ struct gdbarch
   gdbarch_ax_pseudo_register_collect_ftype *ax_pseudo_register_collect;
   gdbarch_ax_pseudo_register_push_stack_ftype *ax_pseudo_register_push_stack;
   gdbarch_handle_segmentation_fault_ftype *handle_segmentation_fault;
+  gdbarch_report_signal_info_ftype *report_signal_info;
   int sp_regnum;
   int pc_regnum;
   int ps_regnum;
@@ -556,6 +557,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of ax_pseudo_register_collect, has predicate.  */
   /* Skip verify of ax_pseudo_register_push_stack, has predicate.  */
   /* Skip verify of handle_segmentation_fault, has predicate.  */
+  /* Skip verify of report_signal_info, has predicate.  */
   /* Skip verify of sp_regnum, invalid_p == 0 */
   /* Skip verify of pc_regnum, invalid_p == 0 */
   /* Skip verify of ps_regnum, invalid_p == 0 */
@@ -1320,6 +1322,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: remote_register_number = <%s>\n",
                       host_address_to_string (gdbarch->remote_register_number));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_report_signal_info_p() = %d\n",
+                      gdbarch_report_signal_info_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: report_signal_info = <%s>\n",
+                      host_address_to_string (gdbarch->report_signal_info));
   fprintf_unfiltered (file,
                       "gdbarch_dump: return_in_first_hidden_param_p = <%s>\n",
                       host_address_to_string (gdbarch->return_in_first_hidden_param_p));
@@ -2111,6 +2119,30 @@ set_gdbarch_handle_segmentation_fault (struct gdbarch *gdbarch,
                                        gdbarch_handle_segmentation_fault_ftype handle_segmentation_fault)
 {
   gdbarch->handle_segmentation_fault = handle_segmentation_fault;
+}
+
+int
+gdbarch_report_signal_info_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->report_signal_info != NULL;
+}
+
+void
+gdbarch_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout, enum gdb_signal siggnal)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->report_signal_info != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_report_signal_info called\n");
+  gdbarch->report_signal_info (gdbarch, uiout, siggnal);
+}
+
+void
+set_gdbarch_report_signal_info (struct gdbarch *gdbarch,
+                                gdbarch_report_signal_info_ftype report_signal_info)
+{
+  gdbarch->report_signal_info = report_signal_info;
 }
 
 int

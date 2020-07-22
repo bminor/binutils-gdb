@@ -332,6 +332,16 @@ typedef void (gdbarch_handle_segmentation_fault_ftype) (struct gdbarch *gdbarch,
 extern void gdbarch_handle_segmentation_fault (struct gdbarch *gdbarch, struct ui_out *uiout);
 extern void set_gdbarch_handle_segmentation_fault (struct gdbarch *gdbarch, gdbarch_handle_segmentation_fault_ftype *handle_segmentation_fault);
 
+/* Some architectures can display additional information for specific
+   signals.
+   UIOUT is the output stream where the handler will place information. */
+
+extern int gdbarch_report_signal_info_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_report_signal_info_ftype) (struct gdbarch *gdbarch, struct ui_out *uiout, enum gdb_signal siggnal);
+extern void gdbarch_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout, enum gdb_signal siggnal);
+extern void set_gdbarch_report_signal_info (struct gdbarch *gdbarch, gdbarch_report_signal_info_ftype *report_signal_info);
+
 /* GDB's standard (or well known) register numbers.  These can map onto
    a real register or a pseudo (computed) register or not be defined at
    all (-1).

@@ -420,6 +420,11 @@ M;int;ax_pseudo_register_push_stack;struct agent_expr *ax, int reg;ax, reg
 # UIOUT is the output stream where the handler will place information.
 M;void;handle_segmentation_fault;struct ui_out *uiout;uiout
 
+# Some architectures can display additional information for specific
+# signals.
+# UIOUT is the output stream where the handler will place information.
+M;void;report_signal_info;struct ui_out *uiout, enum gdb_signal siggnal;uiout, siggnal
+
 # GDB's standard (or well known) register numbers.  These can map onto
 # a real register or a pseudo (computed) register or not be defined at
 # all (-1).
