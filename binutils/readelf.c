@@ -4827,12 +4827,15 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  request_dump (dumpdata, CTF_DUMP);
 	  break;
 	case OPTION_CTF_SYMBOLS:
+	  free (dump_ctf_symtab_name);
 	  dump_ctf_symtab_name = strdup (optarg);
 	  break;
 	case OPTION_CTF_STRINGS:
+	  free (dump_ctf_strtab_name);
 	  dump_ctf_strtab_name = strdup (optarg);
 	  break;
 	case OPTION_CTF_PARENT:
+	  free (dump_ctf_parent_name);
 	  dump_ctf_parent_name = strdup (optarg);
 	  break;
 	case OPTION_DYN_SYMS:
@@ -14296,7 +14299,7 @@ dump_section_as_ctf (Elf_Internal_Shdr * section, Filedata * filedata)
       symsectp = shdr_to_ctf_sect (&symsect, symtab_sec, filedata);
       symsect.cts_data = symdata;
     }
-  if (dump_ctf_strtab_name && dump_ctf_symtab_name[0] != 0)
+  if (dump_ctf_strtab_name && dump_ctf_strtab_name[0] != 0)
     {
       if ((strtab_sec = find_section (filedata, dump_ctf_strtab_name)) == NULL)
 	{
