@@ -1433,12 +1433,16 @@ plugin_notice (struct bfd_link_info *info,
 	 new value from a real BFD.  Weak symbols are not normally
 	 overridden by a new weak definition, and strong symbols
 	 will normally cause multiple definition errors.  Avoid
-	 this by making the symbol appear to be undefined.  */
-      else if (((h->type == bfd_link_hash_defweak
-		 || h->type == bfd_link_hash_defined)
-		&& is_ir_dummy_bfd (sym_bfd = h->u.def.section->owner))
-	       || (h->type == bfd_link_hash_common
-		   && is_ir_dummy_bfd (sym_bfd = h->u.c.p->section->owner)))
+	 this by making the symbol appear to be undefined.
+
+	 NB: We change the previous definition in the IR object to
+	 undefweak only after all LTO symbols have been read.  */
+      else if (info->lto_all_symbols_read
+	       && (((h->type == bfd_link_hash_defweak
+		     || h->type == bfd_link_hash_defined)
+		    && is_ir_dummy_bfd (sym_bfd = h->u.def.section->owner))
+		   || (h->type == bfd_link_hash_common
+		       && is_ir_dummy_bfd (sym_bfd = h->u.c.p->section->owner))))
 	{
 	  h->type = bfd_link_hash_undefweak;
 	  h->u.undef.abfd = sym_bfd;

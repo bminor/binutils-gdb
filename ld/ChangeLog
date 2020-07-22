@@ -1,3 +1,22 @@
+2020-07-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26262
+	PR ld/26267
+	* ldlang.c (lang_process): Set lto_all_symbols_read after all
+	LTO IR symbols have been read.
+	* plugin.c (plugin_notice): Override the IR definition only if
+	all LTO IR symbols have been read or the new definition is
+	non-weak and the the IR definition is weak
+	* testsuite/ld-plugin/lto.exp: Run PR ld/26262 and ld/26267
+	tests.
+	* testsuite/ld-plugin/pr26262a.c: New file.
+	* testsuite/ld-plugin/pr26262b.c: Likewise.
+	* testsuite/ld-plugin/pr26262c.c: Likewise.
+	* testsuite/ld-plugin/pr26267.err: Likewise.
+	* testsuite/ld-plugin/pr26267a.c: Likewise.
+	* testsuite/ld-plugin/pr26267b.c: Likewise.
+	* testsuite/ld-plugin/pr26267c.c: Likewise.
+
 2020-07-20  Nick Clifton  <nickc@redhat.com>
 
 	* testsuite/ld-powerpc/powerpc.exp (ppcelftests): Use section name
