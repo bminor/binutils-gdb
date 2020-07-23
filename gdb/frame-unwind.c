@@ -121,6 +121,8 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
 {
   int res = 0;
 
+  unsigned int entry_generation = get_frame_cache_generation ();
+
   frame_prepare_for_sniffer (this_frame, unwinder);
 
   try
@@ -130,9 +132,14 @@ frame_unwind_try_unwinder (struct frame_info *this_frame, void **this_cache,
   catch (const gdb_exception &ex)
     {
       /* Catch all exceptions, caused by either interrupt or error.
-	 Reset *THIS_CACHE.  */
-      *this_cache = NULL;
-      frame_cleanup_after_sniffer (this_frame);
+	 Reset *THIS_CACHE, unless something reinitialized the frame
+	 cache meanwhile, in which case THIS_FRAME/THIS_CACHE are now
+	 dangling.  */
+      if (get_frame_cache_generation () == entry_generation)
+	{
+	  *this_cache = NULL;
+	  frame_cleanup_after_sniffer (this_frame);
+	}
 
       if (ex.error == NOT_AVAILABLE_ERROR)
 	{

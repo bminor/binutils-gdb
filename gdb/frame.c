@@ -53,6 +53,17 @@
 
 static struct frame_info *sentinel_frame;
 
+/* Number of calls to reinit_frame_cache.  */
+static unsigned int frame_cache_generation = 0;
+
+/* See frame.h.  */
+
+unsigned int
+get_frame_cache_generation ()
+{
+  return frame_cache_generation;
+}
+
 /* The values behind the global "set backtrace ..." settings.  */
 set_backtrace_options user_set_backtrace_options;
 
@@ -1843,6 +1854,8 @@ reinit_frame_cache (void)
 {
   struct frame_info *fi;
 
+  ++frame_cache_generation;
+
   /* Tear down all frame caches.  */
   for (fi = sentinel_frame; fi != NULL; fi = fi->prev)
     {
@@ -1922,6 +1935,8 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
   if (prev_frame->level == 0)
     return prev_frame;
 
+  unsigned int entry_generation = get_frame_cache_generation ();
+
   try
     {
       compute_frame_id (prev_frame);
@@ -1944,8 +1959,11 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
     }
   catch (const gdb_exception &ex)
     {
-      prev_frame->next = NULL;
-      this_frame->prev = NULL;
+      if (get_frame_cache_generation () == entry_generation)
+	{
+	  prev_frame->next = NULL;
+	  this_frame->prev = NULL;
+	}
 
       throw;
     }

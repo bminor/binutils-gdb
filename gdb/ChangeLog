@@ -1,3 +1,15 @@
+2020-07-23  Pedro Alves  <pedro@palves.net>
+
+	* frame-unwind.c (frame_unwind_try_unwinder): On exception, don't
+	touch THIS_CACHE/THIS_FRAME if the frame cache was cleared
+	meanwhile.
+	* frame.c (frame_cache_generation, get_frame_cache_generation):
+	New.
+	(reinit_frame_cache): Increment FRAME_CACHE_GENERATION.
+	(get_prev_frame_if_no_cycle): On exception, don't touch
+	PREV_FRAME/THIS_FRAME if the frame cache was cleared meanwhile.
+	* frame.h (get_frame_cache_generation): Declare.
+
 2020-07-23  Tom de Vries  <tdevries@suse.de>
 
 	PR tui/26282

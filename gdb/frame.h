@@ -949,6 +949,10 @@ extern const gdb::option::option_def set_backtrace_option_defs[2];
 /* The values behind the global "set backtrace ..." settings.  */
 extern set_backtrace_options user_set_backtrace_options;
 
+/* Get the number of calls to reinit_frame_cache.  */
+
+unsigned int get_frame_cache_generation ();
+
 /* Mark that the PC value is masked for the previous frame.  */
 
 extern void set_frame_previous_pc_masked (struct frame_info *frame);
