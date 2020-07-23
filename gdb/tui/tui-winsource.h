@@ -233,6 +233,11 @@ private:
 
 struct tui_source_windows
 {
+  /* Work around Wmaybe-uninitalized warning with g++ 11.0.0, see also
+     PR gcc/96295.  Note that "tui_source_windows () = default" doesn't work
+     around the warning.  */
+  tui_source_windows () {}
+
   tui_source_window_iterator begin () const
   {
     return tui_source_window_iterator (tui_windows.begin (),

@@ -1,3 +1,9 @@
+2020-07-23  Tom de Vries  <tdevries@suse.de>
+
+	PR tui/26282
+	* tui/tui-winsource.h (struct tui_source_windows::tui_source_windows):
+	New default constructor.
+
 2020-07-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* disasm.c (do_mixed_source_and_assembly_deprecated): Don't
