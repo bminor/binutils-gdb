@@ -1,3 +1,14 @@
+2020-07-22  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* lib/gdb.exp (gdb_wrapper_file, gdb_wrapper_flags):
+	Initialize to empty string at top level.
+	(gdb_wrapper_init): Revert check for file existence on build.
+	Build the wrapper in its default place, not a build-specific
+	location.  When host == build, make the pathname absolute.
+	(gdb_compile): Delete leftover declaration of
+	gdb_wrapper_initialized.  Check gdb_wrapper_file being an empty
+	string instead of uninitialized.
+
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/corefile2.exp: New file.
