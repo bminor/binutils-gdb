@@ -465,6 +465,14 @@ General_options::parse_plugin_opt(const char*, const char* arg,
 }
 
 void
+General_options::parse_no_power10_stubs(const char*, const char*,
+					Command_line*)
+{
+  this->set_power10_stubs("no");
+  this->set_user_set_power10_stubs();
+}
+
+void
 General_options::parse_R(const char* option, const char* arg,
 			 Command_line* cmdline)
 {
@@ -1181,6 +1189,27 @@ General_options::finalize()
         this->set_start_stop_visibility_enum(elfcpp::STV_HIDDEN);
       else if (strcmp(this->start_stop_visibility(), "protected") == 0)
         this->set_start_stop_visibility_enum(elfcpp::STV_PROTECTED);
+    }
+
+  // Parse the --power10-stubs argument.
+  if (!this->user_set_power10_stubs())
+    {
+      // --power10-stubs without an arg is equivalent to --power10-stubs=yes
+      // but not specifying --power10-stubs at all should be equivalent to
+      // --power10-stubs=auto.  This doesn't fit into the notion of
+      // "default_value", used both as a static initializer and to provide
+      // a missing optional arg.  Fix it here.
+      this->set_power10_stubs("auto");
+      this->set_power10_stubs_enum(POWER10_STUBS_AUTO);
+    }
+  else
+    {
+      if (strcmp(this->power10_stubs(), "auto") == 0)
+	this->set_power10_stubs_enum(POWER10_STUBS_AUTO);
+      else if (strcmp(this->power10_stubs(), "no") == 0)
+	this->set_power10_stubs_enum(POWER10_STUBS_NO);
+      else if (strcmp(this->power10_stubs(), "yes") == 0)
+	this->set_power10_stubs_enum(POWER10_STUBS_YES);
     }
 
   // -M is equivalent to "-Map -".
