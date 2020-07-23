@@ -1,3 +1,9 @@
+2020-07-23  Kevin Buettner  <kevinb@redhat.com>
+
+	PR corefiles/26294
+	* corelow.c (_initialize_corelow): Add period to help text
+	for "maintenance print core-file-backed-mappings".
+
 2020-07-23  Pedro Alves  <pedro@palves.net>
 
 	* frame-unwind.c (frame_unwind_try_unwinder): On exception, don't

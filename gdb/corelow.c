@@ -1119,6 +1119,6 @@ _initialize_corelow ()
   add_target (core_target_info, core_target_open, filename_completer);
   add_cmd ("core-file-backed-mappings", class_maintenance,
            maintenance_print_core_file_backed_mappings,
-	   _("Print core file's file-backed mappings"),
+	   _("Print core file's file-backed mappings."),
 	   &maintenanceprintlist);
 }
