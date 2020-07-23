@@ -1,0 +1,57 @@
+# Expect script for ld --just-symbols tests.
+#   Copyright (C) 2020 Free Software Foundation, Inc.
+#
+# This file is part of the GNU Binutils.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+# MA 02110-1301, USA.
+#
+
+# SH/PE targets complain about zero VMA.
+# x86_64/PE targets hardcode VMA to 0x100000000.
+if { [istarget sh-*-pe] \
+     || [istarget x86_64-*-cygwin] \
+     || [istarget x86_64-*-mingw*] \
+     || [istarget x86_64-*-pe] \
+     || [istarget x86_64-*-pep] } {
+    return
+}
+
+run_ld_link_tests {
+    {"Object for --just-symbols test"
+     "-r -T just-symbols.ld" ""
+     ""
+     {just-symbols-0.s}
+     {}
+     "just-symbols-0.o"}
+    {"Executable for --just-symbols test"
+     "-e 0 -T just-symbols.ld" ""
+     ""
+     {just-symbols-0.s}
+     {}
+     "just-symbols-0"}
+    {"Object with --just-symbols test"
+     "-e 0 -T just-symbols.ld --just-symbols=tmpdir/just-symbols-0.o" ""
+     ""
+     {just-symbols-1.s}
+     {{objdump {-s -j .data} just-symbols-1.dd}}
+     "just-symbols-1obj"}
+    {"Executable with --just-symbols test"
+     "-e 0 -T just-symbols.ld --just-symbols=tmpdir/just-symbols-0" ""
+     ""
+     {just-symbols-1.s}
+     {{objdump {-s -j .data} just-symbols-1.dd}}
+     "just-symbols-1exe"}
+}
