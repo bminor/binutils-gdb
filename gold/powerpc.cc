@@ -1085,7 +1085,16 @@ class Target_powerpc : public Sized_target<size, big_endian>
   void
   set_power10_stubs()
   {
-    this->power10_stubs_ = true;
+    if (parameters->options().power10_stubs_enum()
+	!= General_options::POWER10_STUBS_NO)
+      this->power10_stubs_ = true;
+  }
+
+  bool
+  power10_stubs_auto() const
+  {
+    return (parameters->options().power10_stubs_enum()
+	    == General_options::POWER10_STUBS_AUTO);
   }
 
   bool
@@ -4621,26 +4630,32 @@ class Stub_table : public Output_relaxed_input_section
   struct Plt_stub_ent
   {
     Plt_stub_ent(unsigned int off, unsigned int indx)
-      : off_(off), indx_(indx), iter_(0), notoc_(0), r2save_(0), localentry0_(0)
+      : off_(off), indx_(indx), iter_(0), notoc_(0), toc_(0),
+	r2save_(0), localentry0_(0), tocoff_(0)
     { }
 
     unsigned int off_;
-    unsigned int indx_ : 28;
+    unsigned int indx_;
     unsigned int iter_ : 1;
     unsigned int notoc_ : 1;
+    unsigned int toc_ : 1;
     unsigned int r2save_ : 1;
     unsigned int localentry0_ : 1;
+    unsigned int tocoff_ : 8;
   };
   struct Branch_stub_ent
   {
     Branch_stub_ent(unsigned int off, bool notoc, bool save_res)
-      : off_(off), iter_(false), notoc_(notoc), save_res_(save_res)
+      : off_(off), iter_(0), notoc_(notoc), toc_(0), save_res_(save_res),
+	tocoff_(0)
     { }
 
     unsigned int off_;
-    bool iter_;
-    bool notoc_;
-    bool save_res_;
+    unsigned int iter_ : 1;
+    unsigned int notoc_ : 1;
+    unsigned int toc_ : 1;
+    unsigned int save_res_ : 1;
+    unsigned int tocoff_ : 8;
   };
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
   static const Address invalid_address = static_cast<Address>(0) - 1;
@@ -4888,7 +4903,7 @@ class Stub_table : public Output_relaxed_input_section
 
   // Size of a given plt call stub.
   unsigned int
-  plt_call_size(typename Plt_stub_entries::const_iterator p) const;
+  plt_call_size(typename Plt_stub_entries::iterator p) const;
 
   unsigned int
   plt_call_align(unsigned int bytes) const
@@ -4899,16 +4914,14 @@ class Stub_table : public Output_relaxed_input_section
 
   // Return long branch stub size.
   unsigned int
-  branch_stub_size(typename Branch_stub_entries::const_iterator p,
+  branch_stub_size(typename Branch_stub_entries::iterator p,
 		   bool* need_lt);
 
-  bool
-  build_tls_opt_head(unsigned char** pp,
-		     typename Plt_stub_entries::const_iterator cs);
+  void
+  build_tls_opt_head(unsigned char** pp,  bool save_lr);
 
-  bool
-  build_tls_opt_tail(unsigned char* p,
-		     typename Plt_stub_entries::const_iterator cs);
+  void
+  build_tls_opt_tail(unsigned char* p);
 
   void
   plt_error(const Plt_stub_key& p);
@@ -5073,15 +5086,22 @@ Stub_table<size, big_endian>::add_plt_call_entry(
       if (r_type == elfcpp::R_PPC64_REL24_NOTOC)
 	{
 	  if (!p.second && !p.first->second.notoc_
-	      && !this->targ_->power10_stubs())
+	      && (!this->targ_->power10_stubs()
+		  || this->targ_->power10_stubs_auto()))
 	    this->need_resize_ = true;
 	  p.first->second.notoc_ = 1;
 	}
-      else if (!tocsave && !p.first->second.localentry0_)
+      else
 	{
-	  if (!p.second && !p.first->second.r2save_)
+	  if (!p.second && !p.first->second.toc_)
 	    this->need_resize_ = true;
-	  p.first->second.r2save_ = 1;
+	  p.first->second.toc_ = 1;
+	  if (!tocsave && !p.first->second.localentry0_)
+	    {
+	      if (!p.second && !p.first->second.r2save_)
+		this->need_resize_ = true;
+	      p.first->second.r2save_ = 1;
+	    }
 	}
     }
   if (p.second || (this->resizing_ && !p.first->second.iter_))
@@ -5124,15 +5144,22 @@ Stub_table<size, big_endian>::add_plt_call_entry(
       if (r_type == elfcpp::R_PPC64_REL24_NOTOC)
 	{
 	  if (!p.second && !p.first->second.notoc_
-	      && !this->targ_->power10_stubs())
+	      && (!this->targ_->power10_stubs()
+		  || this->targ_->power10_stubs_auto()))
 	    this->need_resize_ = true;
 	  p.first->second.notoc_ = 1;
 	}
-      else if (!tocsave && !p.first->second.localentry0_)
+      else
 	{
-	  if (!p.second && !p.first->second.r2save_)
+	  if (!p.second && !p.first->second.toc_)
 	    this->need_resize_ = true;
-	  p.first->second.r2save_ = 1;
+	  p.first->second.toc_ = 1;
+	  if (!tocsave && !p.first->second.localentry0_)
+	    {
+	      if (!p.second && !p.first->second.r2save_)
+		this->need_resize_ = true;
+	      p.first->second.r2save_ = 1;
+	    }
 	}
     }
   if (p.second || (this->resizing_ && !p.first->second.iter_))
@@ -5221,10 +5248,17 @@ Stub_table<size, big_endian>::add_long_branch_entry(
   Branch_stub_ent ent(this->branch_size_, notoc, save_res);
   std::pair<typename Branch_stub_entries::iterator, bool> p
     = this->long_branch_stubs_.insert(std::make_pair(key, ent));
-  if (notoc && !p.first->second.notoc_)
+  if (notoc)
     {
-      this->need_resize_ = true;
+      if (!p.second && !p.first->second.notoc_)
+	this->need_resize_ = true;
       p.first->second.notoc_ = true;
+    }
+  else
+    {
+      if (!p.second && !p.first->second.toc_)
+	this->need_resize_ = true;
+      p.first->second.toc_ = true;
     }
   gold_assert(save_res == p.first->second.save_res_);
   if (p.second || (this->resizing_ && !p.first->second.iter_))
@@ -5320,7 +5354,7 @@ Stub_table<size, big_endian>::add_eh_frame(Layout* layout)
   if (!this->targ_->has_glink())
     return;
 
-  typedef typename Plt_stub_entries::const_iterator plt_iter;
+  typedef typename Plt_stub_entries::iterator plt_iter;
   std::vector<plt_iter> calls;
   if (!this->plt_call_stubs_.empty())
     for (plt_iter cs = this->plt_call_stubs_.begin();
@@ -5622,7 +5656,7 @@ Stub_table<size, big_endian>::define_stub_syms(Symbol_table* symtab)
       // output .symtab ordering depends on the order in which symbols
       // are added to the linker symtab.  We want reproducible output
       // so must sort the call stub symbols.
-      typedef typename Plt_stub_entries::const_iterator plt_iter;
+      typedef typename Plt_stub_entries::iterator plt_iter;
       std::vector<plt_iter> sorted;
       sorted.resize(this->plt_call_stubs_.size());
 
@@ -5666,7 +5700,7 @@ Stub_table<size, big_endian>::define_stub_syms(Symbol_table* symtab)
 	}
     }
 
-  typedef typename Branch_stub_entries::const_iterator branch_iter;
+  typedef typename Branch_stub_entries::iterator branch_iter;
   for (branch_iter bs = this->long_branch_stubs_.begin();
        bs != this->long_branch_stubs_.end();
        ++bs)
@@ -5688,88 +5722,72 @@ Stub_table<size, big_endian>::define_stub_syms(Symbol_table* symtab)
 // Emit the start of a __tls_get_addr_opt plt call stub.
 
 template<int size, bool big_endian>
-bool
-Stub_table<size, big_endian>::build_tls_opt_head(
-     unsigned char** pp,
-     typename Plt_stub_entries::const_iterator cs)
+void
+Stub_table<size, big_endian>::build_tls_opt_head(unsigned char** pp,
+						 bool save_lr)
 {
-  if (this->targ_->is_tls_get_addr_opt(cs->first.sym_))
+  unsigned char* p = *pp;
+  if (size == 64)
     {
-      unsigned char* p = *pp;
-      if (size == 64)
+      write_insn<big_endian>(p, ld_11_3 + 0);
+      p += 4;
+      write_insn<big_endian>(p, ld_12_3 + 8);
+      p += 4;
+      write_insn<big_endian>(p, mr_0_3);
+      p += 4;
+      write_insn<big_endian>(p, cmpdi_11_0);
+      p += 4;
+      write_insn<big_endian>(p, add_3_12_13);
+      p += 4;
+      write_insn<big_endian>(p, beqlr);
+      p += 4;
+      write_insn<big_endian>(p, mr_3_0);
+      p += 4;
+      if (save_lr)
 	{
-	  write_insn<big_endian>(p, ld_11_3 + 0);
+	  write_insn<big_endian>(p, mflr_11);
 	  p += 4;
-	  write_insn<big_endian>(p, ld_12_3 + 8);
-	  p += 4;
-	  write_insn<big_endian>(p, mr_0_3);
-	  p += 4;
-	  write_insn<big_endian>(p, cmpdi_11_0);
-	  p += 4;
-	  write_insn<big_endian>(p, add_3_12_13);
-	  p += 4;
-	  write_insn<big_endian>(p, beqlr);
-	  p += 4;
-	  write_insn<big_endian>(p, mr_3_0);
-	  p += 4;
-	  if (cs->second.r2save_ && !cs->second.localentry0_)
-	    {
-	      write_insn<big_endian>(p, mflr_11);
-	      p += 4;
-	      write_insn<big_endian>(p, (std_11_1 + this->targ_->stk_linker()));
-	      p += 4;
-	    }
-	}
-      else
-	{
-	  write_insn<big_endian>(p, lwz_11_3 + 0);
-	  p += 4;
-	  write_insn<big_endian>(p, lwz_12_3 + 4);
-	  p += 4;
-	  write_insn<big_endian>(p, mr_0_3);
-	  p += 4;
-	  write_insn<big_endian>(p, cmpwi_11_0);
-	  p += 4;
-	  write_insn<big_endian>(p, add_3_12_2);
-	  p += 4;
-	  write_insn<big_endian>(p, beqlr);
-	  p += 4;
-	  write_insn<big_endian>(p, mr_3_0);
-	  p += 4;
-	  write_insn<big_endian>(p, nop);
+	  write_insn<big_endian>(p, (std_11_1 + this->targ_->stk_linker()));
 	  p += 4;
 	}
-      *pp = p;
-      return true;
     }
-  return false;
+  else
+    {
+      write_insn<big_endian>(p, lwz_11_3 + 0);
+      p += 4;
+      write_insn<big_endian>(p, lwz_12_3 + 4);
+      p += 4;
+      write_insn<big_endian>(p, mr_0_3);
+      p += 4;
+      write_insn<big_endian>(p, cmpwi_11_0);
+      p += 4;
+      write_insn<big_endian>(p, add_3_12_2);
+      p += 4;
+      write_insn<big_endian>(p, beqlr);
+      p += 4;
+      write_insn<big_endian>(p, mr_3_0);
+      p += 4;
+      write_insn<big_endian>(p, nop);
+      p += 4;
+    }
+  *pp = p;
 }
 
 // Emit the tail of a __tls_get_addr_opt plt call stub.
 
 template<int size, bool big_endian>
-bool
-Stub_table<size, big_endian>::build_tls_opt_tail(
-     unsigned char* p,
-     typename Plt_stub_entries::const_iterator cs)
+void
+Stub_table<size, big_endian>::build_tls_opt_tail(unsigned char* p)
 {
-  if (size == 64
-      && cs->second.r2save_
-      && !cs->second.localentry0_
-      && this->targ_->is_tls_get_addr_opt(cs->first.sym_))
-    {
-      write_insn<big_endian>(p, bctrl);
-      p += 4;
-      write_insn<big_endian>(p, ld_2_1 + this->targ_->stk_toc());
-      p += 4;
-      write_insn<big_endian>(p, ld_11_1 + this->targ_->stk_linker());
-      p += 4;
-      write_insn<big_endian>(p, mtlr_11);
-      p += 4;
-      write_insn<big_endian>(p, blr);
-      return true;
-    }
-  return false;
+  write_insn<big_endian>(p, bctrl);
+  p += 4;
+  write_insn<big_endian>(p, ld_2_1 + this->targ_->stk_toc());
+  p += 4;
+  write_insn<big_endian>(p, ld_11_1 + this->targ_->stk_linker());
+  p += 4;
+  write_insn<big_endian>(p, mtlr_11);
+  p += 4;
+  write_insn<big_endian>(p, blr);
 }
 
 // Emit pc-relative plt call stub code.
@@ -5939,7 +5957,7 @@ build_notoc_offset(unsigned char* p, uint64_t off, bool load)
 template<int size, bool big_endian>
 unsigned int
 Stub_table<size, big_endian>::plt_call_size(
-    typename Plt_stub_entries::const_iterator p) const
+    typename Plt_stub_entries::iterator p) const
 {
   if (size == 32)
     {
@@ -5951,77 +5969,122 @@ Stub_table<size, big_endian>::plt_call_size(
   const Output_data_plt_powerpc<size, big_endian>* plt;
   uint64_t plt_addr = this->plt_off(p, &plt);
   plt_addr += plt->address();
-  unsigned int bytes = 0;
-  const Symbol* gsym = p->first.sym_;
-  if (this->targ_->is_tls_get_addr_opt(gsym))
+  if (this->targ_->power10_stubs()
+      && this->targ_->power10_stubs_auto())
     {
-      if (p->second.r2save_ && !p->second.localentry0_)
-	bytes = 13 * 4;
-      else
-	bytes = 7 * 4;
-    }
-
-  if (p->second.r2save_)
-    bytes += 4;
-
-  if (this->targ_->power10_stubs())
-    {
-      uint64_t from = this->stub_address() + p->second.off_ + bytes;
-      if (bytes > 8 * 4)
-	from -= 4 * 4;
-      uint64_t odd = from & 4;
-      uint64_t off = plt_addr - from;
-      if (off - odd + (1ULL << 33) < 1ULL << 34)
-	bytes += odd + 4 * 4;
-      else if (off - (8 - odd) + (0x20002ULL << 32) < 0x40004ULL << 32)
-	bytes += 7 * 4;
-      else
-	bytes += 8 * 4;
-      return bytes;
-    }
-
-  if (p->second.notoc_)
-    {
-      uint64_t from = this->stub_address() + p->second.off_ + bytes + 2 * 4;
-      if (bytes > 32)
-	from -= 4 * 4;
-      uint64_t off = plt_addr - from;
-      if (off + 0x8000 < 0x10000)
-	bytes += 7 * 4;
-      else if (off + 0x80008000ULL < 0x100000000ULL)
-	bytes += 8 * 4;
-      else
+      unsigned int bytes = 0;
+      if (p->second.notoc_)
 	{
-	  bytes += 8 * 4;
-	  if (off + 0x800000000000ULL >= 0x1000000000000ULL
-	      && ((off >> 32) & 0xffff) != 0)
-	    bytes += 4;
-	  if (((off >> 32) & 0xffffffffULL) != 0)
-	    bytes += 4;
-	  if (hi(off) != 0)
-	    bytes += 4;
-	  if (l(off) != 0)
-	    bytes += 4;
+	  if (this->targ_->is_tls_get_addr_opt(p->first.sym_))
+	    bytes = 7 * 4;
+	  uint64_t from = this->stub_address() + p->second.off_ + bytes;
+	  uint64_t odd = from & 4;
+	  uint64_t off = plt_addr - from;
+	  if (off - odd + (1ULL << 33) < 1ULL << 34)
+	    bytes += odd + 4 * 4;
+	  else if (off - (8 - odd) + (0x20002ULL << 32) < 0x40004ULL << 32)
+	    bytes += 7 * 4;
+	  else
+	    bytes += 8 * 4;
+	  bytes = this->plt_call_align(bytes);
 	}
-      return bytes;
+      unsigned int tail = 0;
+      if (p->second.toc_)
+	{
+	  p->second.tocoff_ = bytes;
+	  if (this->targ_->is_tls_get_addr_opt(p->first.sym_))
+	    {
+	      bytes += 7 * 4;
+	      if (p->second.r2save_ && !p->second.localentry0_)
+		{
+		  bytes += 2 * 4;
+		  tail = 4 * 4;
+		}
+	    }
+	  if (p->second.r2save_)
+	    bytes += 4;
+	  uint64_t got_addr
+	    = this->targ_->got_section()->output_section()->address();
+	  const Powerpc_relobj<size, big_endian>* ppcobj = static_cast
+	    <const Powerpc_relobj<size, big_endian>*>(p->first.object_);
+	  got_addr += ppcobj->toc_base_offset();
+	  uint64_t off = plt_addr - got_addr;
+	  bytes += 3 * 4 + 4 * (ha(off) != 0);
+	}
+      return bytes + tail;
     }
-
-  uint64_t got_addr = this->targ_->got_section()->output_section()->address();
-  const Powerpc_relobj<size, big_endian>* ppcobj = static_cast
-    <const Powerpc_relobj<size, big_endian>*>(p->first.object_);
-  got_addr += ppcobj->toc_base_offset();
-  uint64_t off = plt_addr - got_addr;
-  bytes += 3 * 4 + 4 * (ha(off) != 0);
-  if (this->targ_->abiversion() < 2)
+  else
     {
-      bool static_chain = parameters->options().plt_static_chain();
-      bool thread_safe = this->targ_->plt_thread_safe();
-      bytes += (4
-		+ 4 * static_chain
-		+ 8 * thread_safe
-		+ 4 * (ha(off + 8 + 8 * static_chain) != ha(off)));
+      unsigned int bytes = 0;
+      unsigned int tail = 0;
+      if (this->targ_->is_tls_get_addr_opt(p->first.sym_))
+	{
+	  bytes = 7 * 4;
+	  if (p->second.r2save_ && !p->second.localentry0_)
+	    {
+	      bytes = 9 * 4;
+	      tail = 4 * 4;
+	    }
+	}
+
+      if (p->second.r2save_)
+	bytes += 4;
+
+      if (this->targ_->power10_stubs())
+	{
+	  uint64_t from = this->stub_address() + p->second.off_ + bytes;
+	  uint64_t odd = from & 4;
+	  uint64_t off = plt_addr - from;
+	  if (off - odd + (1ULL << 33) < 1ULL << 34)
+	    bytes += odd + 4 * 4;
+	  else if (off - (8 - odd) + (0x20002ULL << 32) < 0x40004ULL << 32)
+	    bytes += 7 * 4;
+	  else
+	    bytes += 8 * 4;
+	  return bytes + tail;
+	}
+
+      if (p->second.notoc_)
+	{
+	  uint64_t from = this->stub_address() + p->second.off_ + bytes + 2 * 4;
+	  uint64_t off = plt_addr - from;
+	  if (off + 0x8000 < 0x10000)
+	    bytes += 7 * 4;
+	  else if (off + 0x80008000ULL < 0x100000000ULL)
+	    bytes += 8 * 4;
+	  else
+	    {
+	      bytes += 8 * 4;
+	      if (off + 0x800000000000ULL >= 0x1000000000000ULL
+		  && ((off >> 32) & 0xffff) != 0)
+		bytes += 4;
+	      if (((off >> 32) & 0xffffffffULL) != 0)
+		bytes += 4;
+	      if (hi(off) != 0)
+		bytes += 4;
+	      if (l(off) != 0)
+		bytes += 4;
+	    }
+	  return bytes + tail;
+	}
+
+      uint64_t got_addr = this->targ_->got_section()->output_section()->address();
+      const Powerpc_relobj<size, big_endian>* ppcobj = static_cast
+	<const Powerpc_relobj<size, big_endian>*>(p->first.object_);
+      got_addr += ppcobj->toc_base_offset();
+      uint64_t off = plt_addr - got_addr;
+      bytes += 3 * 4 + 4 * (ha(off) != 0);
+      if (this->targ_->abiversion() < 2)
+	{
+	  bool static_chain = parameters->options().plt_static_chain();
+	  bool thread_safe = this->targ_->plt_thread_safe();
+	  bytes += (4
+		    + 4 * static_chain
+		    + 8 * thread_safe
+		    + 4 * (ha(off + 8 + 8 * static_chain) != ha(off)));
+	}
+      return bytes + tail;
     }
-  return bytes;
 }
 
 // Return long branch stub size.
@@ -6029,7 +6092,7 @@ Stub_table<size, big_endian>::plt_call_size(
 template<int size, bool big_endian>
 unsigned int
 Stub_table<size, big_endian>::branch_stub_size(
-     typename Branch_stub_entries::const_iterator p,
+     typename Branch_stub_entries::iterator p,
      bool* need_lt)
 {
   Address loc = this->stub_address() + this->last_plt_size_ + p->second.off_;
@@ -6043,46 +6106,56 @@ Stub_table<size, big_endian>::branch_stub_size(
     }
 
   uint64_t off = p->first.dest_ - loc;
+  unsigned int bytes = 0;
   if (p->second.notoc_)
     {
       if (this->targ_->power10_stubs())
 	{
 	  Address odd = loc & 4;
 	  if (off + (1 << 25) < 2 << 25)
-	    return odd + 12;
-	  if (off - odd + (1ULL << 33) < 1ULL << 34)
-	    return odd + 16;
-	  if (off - (8 - odd) + (0x20002ULL << 32) < 0x40004ULL << 32)
-	    return 28;
-	  return 32;
+	    bytes = odd + 12;
+	  else if (off - odd + (1ULL << 33) < 1ULL << 34)
+	    bytes = odd + 16;
+	  else if (off - (8 - odd) + (0x20002ULL << 32) < 0x40004ULL << 32)
+	    bytes = 28;
+	  else
+	    bytes = 32;
+	  if (!(p->second.toc_ && this->targ_->power10_stubs_auto()))
+	    return bytes;
+	  p->second.tocoff_ = bytes;
 	}
-      off -= 8;
-      if (off + 0x8000 < 0x10000)
-	return 24;
-      if (off + 0x80008000ULL < 0x100000000ULL)
+      else
 	{
-	  if (off + 24 + (1 << 25) < 2 << 25)
-	    return 28;
-	  return 32;
+	  off -= 8;
+	  if (off + 0x8000 < 0x10000)
+	    return 24;
+	  if (off + 0x80008000ULL < 0x100000000ULL)
+	    {
+	      if (off + 24 + (1 << 25) < 2 << 25)
+		return 28;
+	      return 32;
+	    }
+
+	  bytes = 32;
+	  if (off + 0x800000000000ULL >= 0x1000000000000ULL
+	      && ((off >> 32) & 0xffff) != 0)
+	    bytes += 4;
+	  if (((off >> 32) & 0xffffffffULL) != 0)
+	    bytes += 4;
+	  if (hi(off) != 0)
+	    bytes += 4;
+	  if (l(off) != 0)
+	    bytes += 4;
+	  return bytes;
 	}
-      unsigned int bytes = 32;
-      if (off + 0x800000000000ULL >= 0x1000000000000ULL
-	  && ((off >> 32) & 0xffff) != 0)
-	bytes += 4;
-      if (((off >> 32) & 0xffffffffULL) != 0)
-	bytes += 4;
-      if (hi(off) != 0)
-	bytes += 4;
-      if (l(off) != 0)
-	bytes += 4;
-      return bytes;
     }
 
   if (off + (1 << 25) < 2 << 25)
-    return 4;
-  if (!this->targ_->power10_stubs())
+    return bytes + 4;
+  if (!this->targ_->power10_stubs()
+      || (p->second.toc_ && this->targ_->power10_stubs_auto()))
     *need_lt = true;
-  return 16;
+  return bytes + 16;
 }
 
 template<int size, bool big_endian>
@@ -6118,6 +6191,10 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
   if (size == 64
       && this->targ_->power10_stubs())
     {
+      const Output_data_got_powerpc<size, big_endian>* got
+	= this->targ_->got_section();
+      Address got_os_addr = got->output_section()->address();
+
       if (!this->plt_call_stubs_.empty())
 	{
 	  // Write out plt call stubs.
@@ -6127,22 +6204,94 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	       ++cs)
 	    {
 	      p = oview + cs->second.off_;
-	      this->build_tls_opt_head(&p, cs);
-	      if (cs->second.r2save_)
-		{
-		  write_insn<big_endian>(p, std_2_1 + this->targ_->stk_toc());
-		  p += 4;
-		}
 	      const Output_data_plt_powerpc<size, big_endian>* plt;
 	      Address pltoff = this->plt_off(cs, &plt);
 	      Address plt_addr = pltoff + plt->address();
-	      Address from = this->stub_address() + (p - oview);
-	      Address delta = plt_addr - from;
-	      p = build_power10_offset<big_endian>(p, delta, from & 4, true);
-	      write_insn<big_endian>(p, mtctr_12);
-	      p += 4;
-	      if (!this->build_tls_opt_tail(p, cs))
-		write_insn<big_endian>(p, bctr);
+	      if (this->targ_->power10_stubs_auto())
+		{
+		  if (cs->second.notoc_)
+		    {
+		      if (this->targ_->is_tls_get_addr_opt(cs->first.sym_))
+			this->build_tls_opt_head(&p, false);
+		      Address from = this->stub_address() + (p - oview);
+		      Address delta = plt_addr - from;
+		      p = build_power10_offset<big_endian>(p, delta, from & 4,
+							   true);
+		      write_insn<big_endian>(p, mtctr_12);
+		      p += 4;
+		      write_insn<big_endian>(p, bctr);
+		      p += 4;
+		      p = oview + this->plt_call_align(p - oview);
+		    }
+		  if (cs->second.toc_)
+		    {
+		      if (this->targ_->is_tls_get_addr_opt(cs->first.sym_))
+			{
+			  bool save_lr
+			    = cs->second.r2save_ && !cs->second.localentry0_;
+			  this->build_tls_opt_head(&p, save_lr);
+			}
+		      const Powerpc_relobj<size, big_endian>* ppcobj
+			= static_cast<const Powerpc_relobj<size, big_endian>*>(
+			    cs->first.object_);
+		      Address got_addr = got_os_addr + ppcobj->toc_base_offset();
+		      Address off = plt_addr - got_addr;
+
+		      if (off + 0x80008000 > 0xffffffff || (off & 7) != 0)
+			this->plt_error(cs->first);
+
+		      if (cs->second.r2save_)
+			{
+			  write_insn<big_endian>(p, std_2_1 + this->targ_->stk_toc());
+			  p += 4;
+			}
+		      if (ha(off) != 0)
+			{
+			  write_insn<big_endian>(p, addis_12_2 + ha(off));
+			  p += 4;
+			  write_insn<big_endian>(p, ld_12_12 + l(off));
+			  p += 4;
+			}
+		      else
+			{
+			  write_insn<big_endian>(p, ld_12_2 + l(off));
+			  p += 4;
+			}
+		      write_insn<big_endian>(p, mtctr_12);
+		      p += 4;
+		      if (cs->second.r2save_
+			  && !cs->second.localentry0_
+			  && this->targ_->is_tls_get_addr_opt(cs->first.sym_))
+			this->build_tls_opt_tail(p);
+		      else
+			write_insn<big_endian>(p, bctr);
+		    }
+		}
+	      else
+		{
+		  if (this->targ_->is_tls_get_addr_opt(cs->first.sym_))
+		    {
+		      bool save_lr
+			= cs->second.r2save_ && !cs->second.localentry0_;
+		      this->build_tls_opt_head(&p, save_lr);
+		    }
+		  if (cs->second.r2save_)
+		    {
+		      write_insn<big_endian>(p, std_2_1 + this->targ_->stk_toc());
+		      p += 4;
+		    }
+		  Address from = this->stub_address() + (p - oview);
+		  Address delta = plt_addr - from;
+		  p = build_power10_offset<big_endian>(p, delta, from & 4, true);
+		  write_insn<big_endian>(p, mtctr_12);
+		  p += 4;
+		  if (cs->second.r2save_
+		      && !cs->second.localentry0_
+		      && this->targ_->is_tls_get_addr_opt(cs->first.sym_))
+		    this->build_tls_opt_tail(p);
+		  else
+		    write_insn<big_endian>(p, bctr);
+		}
 	    }
 	}
 
@@ -6158,19 +6307,76 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	  p = oview + off;
 	  Address loc = this->stub_address() + off;
 	  Address delta = bs->first.dest_ - loc;
-	  if (bs->second.notoc_ || delta + (1 << 25) >= 2 << 25)
+	  if (this->targ_->power10_stubs_auto())
 	    {
-	      unsigned char* startp = p;
-	      p = build_power10_offset<big_endian>(p, delta, loc & 4, false);
-	      delta -= p - startp;
+	      if (bs->second.notoc_)
+		{
+		  unsigned char* startp = p;
+		  p = build_power10_offset<big_endian>(p, delta,
+						       loc & 4, false);
+		  delta -= p - startp;
+		  startp = p;
+		  if (delta + (1 << 25) < 2 << 25)
+		    write_insn<big_endian>(p, b | (delta & 0x3fffffc));
+		  else
+		    {
+		      write_insn<big_endian>(p, mtctr_12);
+		      p += 4;
+		      write_insn<big_endian>(p, bctr);
+		    }
+		  p += 4;
+		  delta -= p - startp;
+		}
+	      if (bs->second.toc_)
+		{
+		  if (delta + (1 << 25) >= 2 << 25)
+		    {
+		      Address brlt_addr
+			= this->targ_->find_branch_lookup_table(bs->first.dest_);
+		      gold_assert(brlt_addr != invalid_address);
+		      brlt_addr += this->targ_->brlt_section()->address();
+		      Address got_addr = got_os_addr + bs->first.toc_base_off_;
+		      Address brltoff = brlt_addr - got_addr;
+		      if (ha(brltoff) == 0)
+			{
+			  write_insn<big_endian>(p, ld_12_2 + l(brltoff));
+			  p += 4;
+			}
+		      else
+			{
+			  write_insn<big_endian>(p, addis_12_2 + ha(brltoff));
+			  p += 4;
+			  write_insn<big_endian>(p, ld_12_12 + l(brltoff));
+			  p += 4;
+			}
+		    }
+		  if (delta + (1 << 25) < 2 << 25)
+		    write_insn<big_endian>(p, b | (delta & 0x3fffffc));
+		  else
+		    {
+		      write_insn<big_endian>(p, mtctr_12);
+		      p += 4;
+		      write_insn<big_endian>(p, bctr);
+		    }
+		}
 	    }
-	  if (delta + (1 << 25) < 2 << 25)
-	    write_insn<big_endian>(p, b | (delta & 0x3fffffc));
 	  else
 	    {
-	      write_insn<big_endian>(p, mtctr_12);
-	      p += 4;
-	      write_insn<big_endian>(p, bctr);
+	      if (bs->second.notoc_ || delta + (1 << 25) >= 2 << 25)
+		{
+		  unsigned char* startp = p;
+		  p = build_power10_offset<big_endian>(p, delta,
+						       loc & 4, false);
+		  delta -= p - startp;
+		}
+	      if (delta + (1 << 25) < 2 << 25)
+		write_insn<big_endian>(p, b | (delta & 0x3fffffc));
+	      else
+		{
+		  write_insn<big_endian>(p, mtctr_12);
+		  p += 4;
+		  write_insn<big_endian>(p, bctr);
+		}
 	    }
 	}
     }
@@ -6194,7 +6400,11 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	      Address plt_addr = pltoff + plt->address();
 
 	      p = oview + cs->second.off_;
-	      this->build_tls_opt_head(&p, cs);
+	      if (this->targ_->is_tls_get_addr_opt(cs->first.sym_))
+		{
+		  bool save_lr = cs->second.r2save_ && !cs->second.localentry0_;
+		  this->build_tls_opt_head(&p, save_lr);
+		}
 	      if (cs->second.r2save_)
 		{
 		  write_insn<big_endian>(p, std_2_1 + this->targ_->stk_toc());
@@ -6231,7 +6441,11 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		}
 	      write_insn<big_endian>(p, mtctr_12);
 	      p += 4;
-	      if (!this->build_tls_opt_tail(p, cs))
+	      if (cs->second.r2save_
+		  && !cs->second.localentry0_
+		  && this->targ_->is_tls_get_addr_opt(cs->first.sym_))
+		this->build_tls_opt_tail(p);
+	      else
 		write_insn<big_endian>(p, bctr);
 	    }
 	}
@@ -6282,8 +6496,12 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		}
 
 	      p = oview + cs->second.off_;
-	      if (this->build_tls_opt_head(&p, cs))
-		use_fake_dep = thread_safe;
+	      if (this->targ_->is_tls_get_addr_opt(cs->first.sym_))
+		{
+		  bool save_lr = cs->second.r2save_ && !cs->second.localentry0_;
+		  this->build_tls_opt_head(&p, save_lr);
+		  use_fake_dep = thread_safe;
+		}
 	      if (cs->second.r2save_)
 		{
 		  write_insn<big_endian>(p, std_2_1 + this->targ_->stk_toc());
@@ -6345,8 +6563,10 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 		  write_insn<big_endian>(p, ld_2_2 + l(off + 8));
 		  p += 4;
 		}
-	      if (this->build_tls_opt_tail(p, cs))
-		;
+	      if (cs->second.r2save_
+		  && !cs->second.localentry0_
+		  && this->targ_->is_tls_get_addr_opt(cs->first.sym_))
+		this->build_tls_opt_tail(p);
 	      else if (thread_safe && !use_fake_dep)
 		{
 		  write_insn<big_endian>(p, cmpldi_2_0);
@@ -6427,7 +6647,8 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	      plt_addr += plt->address();
 
 	      p = oview + cs->second.off_;
-	      this->build_tls_opt_head(&p, cs);
+	      if (this->targ_->is_tls_get_addr_opt(cs->first.sym_))
+		this->build_tls_opt_head(&p, false);
 	      if (parameters->options().output_is_position_independent())
 		{
 		  Address got_addr;
@@ -10088,9 +10309,16 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		  elfcpp::Shdr<size, big_endian> shdr(relinfo->reloc_shdr);
 		  size_t reloc_count = shdr.get_sh_size() / reloc_size;
 		  if (size == 64
+		      && r_type != elfcpp::R_PPC64_REL24_NOTOC)
+		    value += ent->tocoff_;
+		  if (size == 64
 		      && ent->r2save_
 		      && r_type == elfcpp::R_PPC64_REL24_NOTOC)
-		    value += 4;
+		    {
+		      if (!(target->power10_stubs()
+			    && target->power10_stubs_auto()))
+			value += 4;
+		    }
 		  else if (size == 64
 			   && ent->r2save_
 			   && relnum < reloc_count - 1)
@@ -10707,8 +10935,14 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		    value = (value - target->savres_section()->address()
 			     + stub_table->branch_size());
 		  else
-		    value = (stub_table->stub_address() + stub_table->plt_size()
-			     + ent->off_);
+		    {
+		      value = (stub_table->stub_address()
+			       + stub_table->plt_size()
+			       + ent->off_);
+		      if (size == 64
+			  && r_type != elfcpp::R_PPC64_REL24_NOTOC)
+			value += ent->tocoff_;
+		    }
 		  has_stub_value = true;
 		}
 	    }

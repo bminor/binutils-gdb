@@ -1,3 +1,28 @@
+2020-07-27  Alan Modra  <amodra@gmail.com>
+
+	* options.h (DEFINE_enum): Add optional_arg__ param, adjust
+	all uses.
+	(General_options): Add --power10-stubs and --no-power10-stubs.
+	* options.cc (General_options::parse_no_power10_stubs): New.
+	(General_options::finalize): Handle --power10-stubs.
+	* powerpc.cc (set_power10_stubs): Don't set when --power10-stubs=no.
+	(power10_stubs_auto): New.
+	(struct Plt_stub_ent): Add toc_ and tocoff_.  Don't use a bitfield
+	for indx_.
+	(struct Branch_stub_ent): Add toc_and tocoff_.  Use bitfields for
+	iter_, notoc_ and save_res_.
+	(add_plt_call_entry): Set toc_.  Adjust resizing conditions for
+	--power10-stubs=auto.
+	(add_long_branch_entry): Set toc_.
+	(add_eh_frame, define_stub_syms): No longer use const_iterators
+	for plt and long branch stub iteration.
+	(build_tls_opt_head, build_tls_opt_tail): Change parameters and
+	return value.  Move tests for __tls_get_addr to callers.
+	(plt_call_size): Handle --power10-stubs=auto.
+	(branch_stub_size): Likewise.
+	(Stub_table::do_write): Likewise.
+	(relocate): Likewise.
+
 2020-07-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/bnd_ifunc_1.sh: Updated.
