@@ -1,6 +1,17 @@
 2020-07-23  Maciej W. Rozycki  <macro@wdc.com>
 
 	PR ld/26288
+	* ldelf.c (ldelf_after_open): Do not reject ET_EXEC input
+	supplied with `--just-symbols'.
+	* testsuite/ld-misc/just-symbols.exp: New test script.
+	* testsuite/ld-misc/just-symbols-1.dd: New test dump.
+	* testsuite/ld-misc/just-symbols.ld: New test linker script.
+	* testsuite/ld-misc/just-symbols-0.s: New test source.
+	* testsuite/ld-misc/just-symbols-1.s: New test source.
+
+2020-07-23  Maciej W. Rozycki  <macro@wdc.com>
+
+	PR ld/26288
 
 	Revert:
 	PR 26047
