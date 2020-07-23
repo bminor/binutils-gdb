@@ -1,3 +1,12 @@
+2020-07-23  Maciej W. Rozycki  <macro@wdc.com>
+
+	PR ld/26288
+
+	Revert:
+	PR 26047
+	* ldelf.c (ldelf_after_open): Fail if attempting to link one
+	executable into another.
+
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
 	* testsuite/ld-ctf/ctf.exp: Skip on non-ELF for now.
