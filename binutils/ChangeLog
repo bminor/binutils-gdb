@@ -1,3 +1,8 @@
+2020-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Various small updates whilst
+	creating the 2.35 release.
+
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
 	* testsuite/lib/binutils-common.exp (run_dump_test): Add 'cc'
