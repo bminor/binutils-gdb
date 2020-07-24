@@ -1,3 +1,7 @@
+2020-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd: Move xc16x target to the obsolete list.
+
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* binary.c (binary_get_section_contents): Seek using offset
@@ -6,7 +10,7 @@
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
 
 	* elf.c (_bfd_elf_make_section_from_phdr): Remove hack for GDB.
-	
+
 2020-07-22  Max Filippov  <jcmvbkbc@gmail.com>
 
 	PR 26246

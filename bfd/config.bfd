@@ -53,7 +53,6 @@ case $targ in
     echo "*** Use or1k-*-elf or or1k-*-linux as the target instead" >&2
     exit 1
     ;;
- xc16x-*-* | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -153,6 +152,7 @@ case $targ in
  vax-*-bsd* | vax-*-ultrix* | vax-*-vms* | \
  w65-*-* | \
  we32k-*-* | \
+ xc16x-*-* | \
  null)
     echo "*** Configuration $targ is obsolete." >&2
     echo "*** Support has been REMOVED." >&2
