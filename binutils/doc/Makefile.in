@@ -130,7 +130,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
 	$(top_srcdir)/../ltversion.m4 $(top_srcdir)/../lt~obsolete.m4 \
 	$(top_srcdir)/../bfd/version.m4 \
 	$(top_srcdir)/../config/debuginfod.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/../config/pkg.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
@@ -256,6 +256,8 @@ CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DATADIRNAME = @DATADIRNAME@
+DEBUGINFOD_CFLAGS = @DEBUGINFOD_CFLAGS@
+DEBUGINFOD_LIBS = @DEBUGINFOD_LIBS@
 DEFS = @DEFS@
 DEMANGLER_NAME = @DEMANGLER_NAME@
 DEPDIR = @DEPDIR@
@@ -287,7 +289,6 @@ LDFLAGS = @LDFLAGS@
 LEX = @LEX@
 LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
-LIBDEBUGINFOD = @LIBDEBUGINFOD@
 LIBICONV = @LIBICONV@
 LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@
@@ -321,6 +322,9 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
 SED = @SED@

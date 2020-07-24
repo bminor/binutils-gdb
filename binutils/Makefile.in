@@ -141,7 +141,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
 	$(top_srcdir)/../ltversion.m4 $(top_srcdir)/../lt~obsolete.m4 \
 	$(top_srcdir)/../bfd/version.m4 \
 	$(top_srcdir)/../config/debuginfod.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/../config/pkg.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -423,6 +423,8 @@ CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DATADIRNAME = @DATADIRNAME@
+DEBUGINFOD_CFLAGS = @DEBUGINFOD_CFLAGS@
+DEBUGINFOD_LIBS = @DEBUGINFOD_LIBS@
 DEFS = @DEFS@
 DEMANGLER_NAME = @DEMANGLER_NAME@
 DEPDIR = @DEPDIR@
@@ -454,7 +456,6 @@ LDFLAGS = @LDFLAGS@
 LEX = `if [ -f ../flex/flex ]; then echo ../flex/flex; else echo @LEX@; fi`
 LEXLIB = @LEXLIB@
 LEX_OUTPUT_ROOT = @LEX_OUTPUT_ROOT@
-LIBDEBUGINFOD = @LIBDEBUGINFOD@
 LIBICONV = @LIBICONV@
 LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@
@@ -490,6 +491,9 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
 SED = @SED@
@@ -714,14 +718,14 @@ size_SOURCES = size.c $(BULIBS)
 objcopy_SOURCES = objcopy.c not-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 strings_SOURCES = strings.c $(BULIBS)
 readelf_SOURCES = readelf.c version.c unwind-ia64.c dwarf.c $(ELFLIBS)
-readelf_LDADD = $(LIBINTL) $(LIBCTF_NOBFD) $(LIBIBERTY) $(ZLIB) $(LIBDEBUGINFOD)
+readelf_LDADD = $(LIBINTL) $(LIBCTF_NOBFD) $(LIBIBERTY) $(ZLIB) $(DEBUGINFOD_LIBS)
 elfedit_SOURCES = elfedit.c version.c $(ELFLIBS)
 elfedit_LDADD = $(LIBINTL) $(LIBIBERTY)
 strip_new_SOURCES = objcopy.c is-strip.c rename.c $(WRITE_DEBUG_SRCS) $(BULIBS)
 nm_new_SOURCES = nm.c $(BULIBS)
 objdump_SOURCES = objdump.c dwarf.c prdbg.c $(DEBUG_SRCS) $(BULIBS) $(ELFLIBS)
 EXTRA_objdump_SOURCES = od-xcoff.c
-objdump_LDADD = $(OBJDUMP_PRIVATE_OFILES) $(OPCODES) $(LIBCTF) $(BFDLIB) $(LIBIBERTY) $(LIBINTL) $(LIBDEBUGINFOD)
+objdump_LDADD = $(OBJDUMP_PRIVATE_OFILES) $(OPCODES) $(LIBCTF) $(BFDLIB) $(LIBIBERTY) $(LIBINTL) $(DEBUGINFOD_LIBS)
 cxxfilt_SOURCES = cxxfilt.c $(BULIBS)
 ar_SOURCES = arparse.y arlex.l ar.c not-ranlib.c arsup.c rename.c binemul.c \
 	emul_$(EMULATION).c $(BULIBS)

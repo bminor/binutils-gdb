@@ -23,7 +23,6 @@ m4_include(config/acx.m4)
 m4_include(config/override.m4)
 m4_include(config/proginstall.m4)
 m4_include(config/elf.m4)
-m4_include(config/debuginfod.m4)
 m4_include([libtool.m4])
 m4_include([ltoptions.m4])
 m4_include([ltsugar.m4])
@@ -1382,9 +1381,6 @@ _LT_CHECK_OBJDIR
 gmplibs="-lmpc -lmpfr -lgmp"
 gmpinc=
 have_gmp=no
-
-# Check for debuginfod
-AC_DEBUGINFOD
 
 # Specify a location for mpc
 # check for this first so it ends up on the link line before mpfr.
