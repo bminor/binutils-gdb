@@ -20437,8 +20437,9 @@ lnp_state_machine::record_line (bool end_sequence)
 	  bool file_changed
 	    = m_last_subfile != m_cu->get_builder ()->get_current_subfile ();
 	  bool ignore_this_line
-	    = (file_changed && !end_sequence && m_last_address == m_address
-	       && !m_is_stmt && m_stmt_at_address);
+           = ((file_changed && !end_sequence && m_last_address == m_address
+               && !m_is_stmt && m_stmt_at_address)
+              || (!end_sequence && m_line == 0));
 
 	  if ((file_changed && !ignore_this_line) || end_sequence)
 	    {
