@@ -1,5 +1,11 @@
 2020-07-24  Nick Clifton  <nickc@redhat.com>
 
+	* version.m4: Set to 2.35.0
+	* development.sh (development): Set to true.
+	* configure: Regenerate.
+
+2020-07-24  Nick Clifton  <nickc@redhat.com>
+
 	2.35 Release:
 	* version.m4: Set to 2.35
 	* development.sh (development): Set to false.
