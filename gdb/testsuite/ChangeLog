@@ -1,3 +1,8 @@
+2020-07-24  Tom de Vries  <tdevries@suse.de>
+
+	PR testsuite/26293
+	* gdb.ada/mi_prot.exp: Require gnatmake-8.
+
 2020-07-23  Pedro Alves  <pedro@palves.net>
 
 	* gdb.server/server-kill.exp (prepare): New, factored out from the
