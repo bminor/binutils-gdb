@@ -1,5 +1,11 @@
 2020-07-24  Nick Clifton  <nickc@redhat.com>
 
+	2.35 Release:
+	* configure: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
+2020-07-24  Nick Clifton  <nickc@redhat.com>
+
 	* po/de.po: Updated German translation.
 
 2020-07-15  H.J. Lu  <hongjiu.lu@intel.com>

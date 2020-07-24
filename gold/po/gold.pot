@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2020-07-04 10:28+0100\n"
+"POT-Creation-Date: 2020-07-24 10:23+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -4168,48 +4168,48 @@ msgstr ""
 msgid "  %s from %s\n"
 msgstr ""
 
-#: target-reloc.h:155
+#: target-reloc.h:157
 msgid "internal"
 msgstr ""
 
-#: target-reloc.h:158
+#: target-reloc.h:160
 msgid "hidden"
 msgstr ""
 
-#: target-reloc.h:161
+#: target-reloc.h:163
 msgid "protected"
 msgstr ""
 
-#: target-reloc.h:166
+#: target-reloc.h:168
 #, c-format
 msgid "%s symbol '%s' is not defined locally"
 msgstr ""
 
-#: target-reloc.h:242
+#: target-reloc.h:244
 #, c-format
 msgid ""
 "relocation refers to local symbol \"%s\" [%u], which is defined in a "
 "discarded section"
 msgstr ""
 
-#: target-reloc.h:250
+#: target-reloc.h:252
 #, c-format
 msgid ""
 "relocation refers to global symbol \"%s\", which is defined in a discarded "
 "section"
 msgstr ""
 
-#: target-reloc.h:265
+#: target-reloc.h:267
 #, c-format
 msgid "  section group signature: \"%s\""
 msgstr ""
 
-#: target-reloc.h:268
+#: target-reloc.h:270
 #, c-format
 msgid "  prevailing definition is from %s"
 msgstr ""
 
-#: target-reloc.h:455
+#: target-reloc.h:457
 #, c-format
 msgid "reloc has bad offset %zu"
 msgstr ""
