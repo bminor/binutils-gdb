@@ -1,3 +1,13 @@
+2020-07-28  Kamil Rytarowski  <n54@gmx.com>
+
+	* nbsd-nat.h (nbsd_nat_target::xfer_partial): New declaration.
+	* nbsd-nat.c (nbsd_nat_target::xfer_partial): New function.
+	* nbsd-tdep.c (nbsd_gdbarch_data_handle, struct nbsd_gdbarch_data)
+	(init_nbsd_gdbarch_data, get_nbsd_gdbarch_data)
+	(nbsd_get_siginfo_type): New.
+	(nbsd_init_abi): Install gdbarch "get_siginfo_type" method.
+	(_initialize_nbsd_tdep): New.
+
 2020-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/26301

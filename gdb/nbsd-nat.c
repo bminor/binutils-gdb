@@ -845,3 +845,48 @@ nbsd_nat_target::supports_multi_process ()
 {
   return true;
 }
+
+/* Implement the "xfer_partial" target_ops method.  */
+
+enum target_xfer_status
+nbsd_nat_target::xfer_partial (enum target_object object,
+			       const char *annex, gdb_byte *readbuf,
+			       const gdb_byte *writebuf,
+			       ULONGEST offset, ULONGEST len,
+			       ULONGEST *xfered_len)
+{
+  pid_t pid = inferior_ptid.pid ();
+
+  switch (object)
+    {
+    case TARGET_OBJECT_SIGNAL_INFO:
+      {
+	ptrace_siginfo_t psi;
+
+	if (offset > sizeof (siginfo_t))
+	  return TARGET_XFER_E_IO;
+
+	if (ptrace (PT_GET_SIGINFO, pid, &psi, sizeof (psi)) == -1)
+	  return TARGET_XFER_E_IO;
+
+	if (offset + len > sizeof (siginfo_t))
+	  len = sizeof (siginfo_t) - offset;
+
+	if (readbuf != NULL)
+	  memcpy (readbuf, ((gdb_byte *) &psi.psi_siginfo) + offset, len);
+	else
+	  {
+	    memcpy (((gdb_byte *) &psi.psi_siginfo) + offset, writebuf, len);
+
+	    if (ptrace (PT_SET_SIGINFO, pid, &psi, sizeof (psi)) == -1)
+	      return TARGET_XFER_E_IO;
+	  }
+	*xfered_len = len;
+	return TARGET_XFER_OK;
+      }
+    default:
+      return inf_ptrace_target::xfer_partial (object, annex,
+					      readbuf, writebuf, offset,
+					      len, xfered_len);
+    }
+}

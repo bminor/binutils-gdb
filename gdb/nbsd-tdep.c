@@ -373,6 +373,153 @@ nbsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
     return find_solib_trampoline_target (get_current_frame (), pc);
 }
 
+static struct gdbarch_data *nbsd_gdbarch_data_handle;
+
+struct nbsd_gdbarch_data
+{
+  struct type *siginfo_type;
+};
+
+static void *
+init_nbsd_gdbarch_data (struct gdbarch *gdbarch)
+{
+  return GDBARCH_OBSTACK_ZALLOC (gdbarch, struct nbsd_gdbarch_data);
+}
+
+static struct nbsd_gdbarch_data *
+get_nbsd_gdbarch_data (struct gdbarch *gdbarch)
+{
+  return ((struct nbsd_gdbarch_data *)
+	  gdbarch_data (gdbarch, nbsd_gdbarch_data_handle));
+}
+
+/* Implement the "get_siginfo_type" gdbarch method.  */
+
+static struct type *
+nbsd_get_siginfo_type (struct gdbarch *gdbarch)
+{
+  nbsd_gdbarch_data *nbsd_gdbarch_data = get_nbsd_gdbarch_data (gdbarch);
+  if (nbsd_gdbarch_data->siginfo_type != NULL)
+    return nbsd_gdbarch_data->siginfo_type;
+
+  type *char_type = builtin_type (gdbarch)->builtin_char;
+  type *int_type = builtin_type (gdbarch)->builtin_int;
+  type *long_type = builtin_type (gdbarch)->builtin_long;
+
+  type *void_ptr_type
+    = lookup_pointer_type (builtin_type (gdbarch)->builtin_void);
+
+  type *int32_type = builtin_type (gdbarch)->builtin_int32;
+  type *uint32_type = builtin_type (gdbarch)->builtin_uint32;
+  type *uint64_type = builtin_type (gdbarch)->builtin_uint64;
+
+  bool lp64 = TYPE_LENGTH (void_ptr_type) == 8;
+  size_t char_bits = gdbarch_addressable_memory_unit_size (gdbarch) * 8;
+
+  /* pid_t */
+  type *pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
+			      TYPE_LENGTH (int32_type) * char_bits, "pid_t");
+  TYPE_TARGET_TYPE (pid_type) = int32_type;
+
+  /* uid_t */
+  type *uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
+			      TYPE_LENGTH (uint32_type) * char_bits, "uid_t");
+  TYPE_TARGET_TYPE (uid_type) = uint32_type;
+
+  /* clock_t */
+  type *clock_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
+				TYPE_LENGTH (int_type) * char_bits, "clock_t");
+  TYPE_TARGET_TYPE (clock_type) = int_type;
+
+  /* lwpid_t */
+  type *lwpid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
+				TYPE_LENGTH (int32_type) * char_bits,
+				"lwpid_t");
+  TYPE_TARGET_TYPE (lwpid_type) = int32_type;
+
+  /* union sigval */
+  type *sigval_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
+  sigval_type->set_name (gdbarch_obstack_strdup (gdbarch, "sigval"));
+  append_composite_type_field (sigval_type, "sival_int", int_type);
+  append_composite_type_field (sigval_type, "sival_ptr", void_ptr_type);
+
+  /* union _option */
+  type *option_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
+  option_type->set_name (gdbarch_obstack_strdup (gdbarch, "_option"));
+  append_composite_type_field (option_type, "_pe_other_pid", pid_type);
+  append_composite_type_field (option_type, "_pe_lwp", lwpid_type);
+
+  /* union _reason */
+  type *reason_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
+
+  /* _rt */
+  type *t = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+  append_composite_type_field (t, "_pid", pid_type);
+  append_composite_type_field (t, "_uid", uid_type);
+  append_composite_type_field (t, "_value", sigval_type);
+  append_composite_type_field (reason_type, "_rt", t);
+
+  /* _child */
+  t = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+  append_composite_type_field (t, "_pid", pid_type);
+  append_composite_type_field (t, "_uid", uid_type);
+  append_composite_type_field (t, "_status", int_type);
+  append_composite_type_field (t, "_utime", clock_type);
+  append_composite_type_field (t, "_stime", clock_type);
+  append_composite_type_field (reason_type, "_child", t);
+
+  /* _fault */
+  t = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+  append_composite_type_field (t, "_addr", void_ptr_type);
+  append_composite_type_field (t, "_trap", int_type);
+  append_composite_type_field (t, "_trap2", int_type);
+  append_composite_type_field (t, "_trap3", int_type);
+  append_composite_type_field (reason_type, "_fault", t);
+
+  /* _poll */
+  t = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+  append_composite_type_field (t, "_band", long_type);
+  append_composite_type_field (t, "_fd", int_type);
+  append_composite_type_field (reason_type, "_poll", t);
+
+  /* _syscall */
+  t = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+  append_composite_type_field (t, "_sysnum", int_type);
+  append_composite_type_field (t, "_retval",
+			       init_vector_type (int_type, 2));
+  append_composite_type_field (t, "_error", int_type);
+  append_composite_type_field (t, "_args",
+			       init_vector_type (uint64_type, 8));
+  append_composite_type_field (reason_type, "_syscall", t);
+
+  /* _ptrace_state */
+  t = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+  append_composite_type_field (t, "_pe_report_event", int_type);
+  append_composite_type_field (t, "_option", option_type);
+  append_composite_type_field (reason_type, "_ptrace_state", t);
+
+  /* struct _ksiginfo */
+  type *ksiginfo_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_STRUCT);
+  ksiginfo_type->set_name (gdbarch_obstack_strdup (gdbarch, "_ksiginfo"));
+  append_composite_type_field (ksiginfo_type, "_signo", int_type);
+  append_composite_type_field (ksiginfo_type, "_code", int_type);
+  append_composite_type_field (ksiginfo_type, "_errno", int_type);
+  if (lp64)
+    append_composite_type_field (ksiginfo_type, "_pad", int_type);
+  append_composite_type_field (ksiginfo_type, "_reason", reason_type);
+
+  /* union siginfo */
+  type *siginfo_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);
+  siginfo_type->set_name (gdbarch_obstack_strdup (gdbarch, "siginfo"));
+  append_composite_type_field (siginfo_type, "si_pad",
+			       init_vector_type (char_type, 128));
+  append_composite_type_field (siginfo_type, "_info", ksiginfo_type);
+
+  nbsd_gdbarch_data->siginfo_type = siginfo_type;
+
+  return siginfo_type;
+}
+
 /* See nbsd-tdep.h.  */
 
 void
@@ -469,8 +616,17 @@ nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_gdb_signal_to_target (gdbarch, nbsd_gdb_signal_to_target);
   set_gdbarch_skip_solib_resolver (gdbarch, nbsd_skip_solib_resolver);
   set_gdbarch_auxv_parse (gdbarch, svr4_auxv_parse);
+  set_gdbarch_get_siginfo_type (gdbarch, nbsd_get_siginfo_type);
 
   /* `catch syscall' */
   set_xml_syscall_file_name (gdbarch, "syscalls/netbsd.xml");
   set_gdbarch_get_syscall_number (gdbarch, nbsd_get_syscall_number);
+}
+
+void _initialize_nbsd_tdep ();
+void
+_initialize_nbsd_tdep ()
+{
+  nbsd_gdbarch_data_handle
+    = gdbarch_data_register_post_init (init_nbsd_gdbarch_data);
 }
