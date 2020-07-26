@@ -9148,7 +9148,7 @@ else CCDEPMODE=depmode=$am_cv_CC_dependencies_compiler_type
 fi
 
 
-for ac_header in termios.h sys/reg.h string.h 		 sys/procfs.h linux/elf.h 		 fcntl.h signal.h sys/file.h 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h 		 netinet/tcp.h arpa/inet.h
+for ac_header in termios.h sys/reg.h string.h 		 sys/procfs.h linux/elf.h 		 fcntl.h signal.h sys/file.h 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h 		 netinet/tcp.h arpa/inet.h ws2tcpip.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -10044,7 +10044,11 @@ _ACEOF
 
 
 ac_fn_c_check_type "$LINENO" "socklen_t" "ac_cv_type_socklen_t" "#include <sys/types.h>
-#include <sys/socket.h>
+#if HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#elif HAVE_WS2TCPIP_H
+# include <ws2tcpip.h>
+#endif
 
 "
 if test "x$ac_cv_type_socklen_t" = xyes; then :

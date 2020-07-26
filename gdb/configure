@@ -11844,6 +11844,31 @@ fi
 done
 
 
+for ac_header in sys/sockets.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/sockets.h" "ac_cv_header_sys_sockets_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_sockets_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SYS_SOCKETS_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_header in ws2tcpip.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "ws2tcpip.h" "ac_cv_header_ws2tcpip_h" "$ac_includes_default"
+if test "x$ac_cv_header_ws2tcpip_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_WS2TCPIP_H 1
+_ACEOF
+
+fi
+
+done
+
+
 # ------------------------- #
 # Checks for declarations.  #
 # ------------------------- #
@@ -12059,7 +12084,11 @@ $as_echo "#define HAVE_LC_MESSAGES 1" >>confdefs.h
 # ------------------ #
 
 ac_fn_c_check_type "$LINENO" "socklen_t" "ac_cv_type_socklen_t" "#include <sys/types.h>
-#include <sys/socket.h>
+#if HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#elif HAVE_WS2TCPIP_H
+# include <ws2tcpip.h>
+#endif
 
 "
 if test "x$ac_cv_type_socklen_t" = xyes; then :

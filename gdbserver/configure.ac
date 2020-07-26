@@ -75,7 +75,7 @@ AC_CHECK_HEADERS(termios.h sys/reg.h string.h dnl
 		 sys/procfs.h linux/elf.h dnl
 		 fcntl.h signal.h sys/file.h dnl
 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h dnl
-		 netinet/tcp.h arpa/inet.h)
+		 netinet/tcp.h arpa/inet.h ws2tcpip.h)
 AC_FUNC_FORK
 AC_CHECK_FUNCS(pread pwrite pread64)
 
@@ -147,7 +147,11 @@ AC_CHECK_DECLS([perror, vasprintf, vsnprintf])
 
 AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>
-#include <sys/socket.h>
+#if HAVE_SYS_SOCKET_H
+# include <sys/socket.h>
+#elif HAVE_WS2TCPIP_H
+# include <ws2tcpip.h>
+#endif
 ])
 
 case "${target}" in

@@ -1,3 +1,11 @@
+2020-07-26  Eli Zaretskii  <eliz@gnu.org>
+
+	* configure.ac (AC_CHECK_HEADERS): Add ws2tcpip.h.
+	When checking whether socklen_t type is defined, use ws2tcpip.h if
+	it is available and sys/socket.h isn't.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2020-07-22  Pedro Alves  <pedro@palves.net>
 
 	* inferiors.cc (switch_to_process): New, moved here from
