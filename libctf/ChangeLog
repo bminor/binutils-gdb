@@ -1,3 +1,10 @@
+2020-07-26  Eli Zaretskii  <eliz@gnu.org>
+
+	PR binutils/25155:
+	* ctf-create.c (EOVERFLOW): If not defined by system header,
+	redirect to ERANGE as a poor man's substitute.
+	* ctf-subr.c (ENOTSUP): If not defined, use ENOSYS instead.
+
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-create.c (ctf_dtd_insert): Add uintptr_t casts.
