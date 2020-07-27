@@ -1,3 +1,8 @@
+2020-07-27  John Baldwin  <jhb@FreeBSD.org>
+
+	* fbsd-nat.h: Include <osreldate.h>.  Define USE_SIGTRAP_SIGINFO
+	for all architectures on FreeBSD 11.3 and later.
+
 2020-07-27  Tom Tromey  <tromey@adacore.com>
 
 	* gcore.h (load_corefile): Don't declare.
