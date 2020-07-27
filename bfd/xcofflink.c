@@ -2685,9 +2685,17 @@ xcoff_need_ldrel_p (struct bfd_link_info *info, struct internal_reloc *rel,
     case R_RLA:
       /* Absolute relocations against absolute symbols can be
 	 resolved statically.  */
-      if (h != NULL && bfd_is_abs_symbol (&h->root))
-	return FALSE;
-
+      if (h != NULL
+	  && (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	  && !h->root.rel_from_abs)
+	{
+	  asection *sec = h->root.u.def.section;
+	  if (bfd_is_abs_section (sec)
+	      || (sec != NULL
+		  && bfd_is_abs_section (sec->output_section)))
+	    return FALSE;
+	}
       return TRUE;
     }
 }
@@ -3118,9 +3126,7 @@ bfd_xcoff_import_symbol (bfd *output_bfd,
 
   if (val != (bfd_vma) -1)
     {
-      if (h->root.type == bfd_link_hash_defined
-	  && (!bfd_is_abs_symbol (&h->root)
-	      || h->root.u.def.value != val))
+      if (h->root.type == bfd_link_hash_defined)
 	(*info->callbacks->multiple_definition) (info, &h->root, output_bfd,
 						 bfd_abs_section_ptr, val);
 
