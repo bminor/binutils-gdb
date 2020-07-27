@@ -1,3 +1,7 @@
+2020-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/as.texi: Replace preceeded with preceded.
+
 2020-07-22  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* testsuite/gas/mips/jal-svr4pic-irix.d: New file.

@@ -1132,10 +1132,10 @@ default since they are not part of the binary's original source code.
 
 @item --with-symbol-versions
 Enables the display of symbol version information if any exists.  The
-version string is displayed as a suffix to the symbol name, preceeded by
+version string is displayed as a suffix to the symbol name, preceded by
 an @@ character.  For example @samp{foo@@VER_1}.  If the version is
 the default version to be used when resolving unversioned references
-to the symbol then it is displayed as a suffix preceeded by two @@
+to the symbol then it is displayed as a suffix preceded by two @@
 characters.  For example @samp{foo@@@@VER_2}.
 
 @item --target=@var{bfdname}
@@ -4805,10 +4805,10 @@ Displays the detailed section information. Implies @option{-S}.
 Displays the entries in symbol table section of the file, if it has one.
 If a symbol has version information associated with it then this is
 displayed as well.  The version string is displayed as a suffix to the
-symbol name, preceeded by an @@ character.  For example
+symbol name, preceded by an @@ character.  For example
 @samp{foo@@VER_1}.  If the version is the default version to be used
 when resolving unversioned references to the symbol then it is
-displayed as a suffix preceeded by two @@ characters.  For example
+displayed as a suffix preceded by two @@ characters.  For example
 @samp{foo@@@@VER_2}.
 
 @item --dyn-syms

@@ -2958,7 +2958,7 @@ of a file is not a possible symbol delimiter).  @xref{Symbols}.
 
 Symbol names may also be enclosed in double quote @code{"} characters.  In such
 cases any characters are allowed, except for the NUL character.  If a double
-quote character is to be included in the symbol name it must be preceeded by a
+quote character is to be included in the symbol name it must be preceded by a
 backslash @code{\} character.
 @cindex length of symbols
 

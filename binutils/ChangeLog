@@ -1,3 +1,7 @@
+2020-07-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/binutils.texi: Replace preceeded with preceded.
+
 2020-07-26  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* testsuite/binutils-all/mips/mips.exp (run_dump_test_abi)
