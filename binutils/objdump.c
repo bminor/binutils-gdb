@@ -4283,10 +4283,10 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
   int count;
   int width;
 
-  if ((section->flags & SEC_HAS_CONTENTS) == 0)
+  if (! process_section_p (section))
     return;
 
-  if (! process_section_p (section))
+  if ((section->flags & SEC_HAS_CONTENTS) == 0)
     return;
 
   if ((datasize = bfd_section_size (section)) == 0)

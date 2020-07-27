@@ -1,3 +1,8 @@
+2020-07-27  Alan Modra  <amodra@gmail.com>
+
+	* objdump.c (dump_section): Don't return without calling
+	process_section_p.
+
 2020-07-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/binutils.texi: Replace preceeded with preceded.
