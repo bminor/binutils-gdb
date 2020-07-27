@@ -1594,16 +1594,20 @@ proc check_ctf_available { } {
     global ctf_available_saved
 
     if {![info exists ctf_available_saved]} {
-	set basename "tmpdir/ctf_available[pid]"
-	set src ${basename}.c
-	set output ${basename}.o
-	set f [open $src "w"]
-	puts $f "int main() { return 0; }"
-	close $f
-	set ctf_available_saved [compile_one_cc $src $output "-gt -c"]
-	remote_file host delete $src
-	remote_file host delete $output
-	file delete $src
+	if { ![check_compiler_available] } {
+	    set ctf_available_saved 0
+	} else {
+	    set basename "tmpdir/ctf_available[pid]"
+	    set src ${basename}.c
+	    set output ${basename}.o
+	    set f [open $src "w"]
+	    puts $f "int main() { return 0; }"
+	    close $f
+	    set ctf_available_saved [compile_one_cc $src $output "-gt -c"]
+	    remote_file host delete $src
+	    remote_file host delete $output
+	    file delete $src
+	}
     }
     return $ctf_available_saved
 }
