@@ -11844,12 +11844,12 @@ fi
 done
 
 
-for ac_header in sys/sockets.h
+for ac_header in sys/socket.h
 do :
-  ac_fn_c_check_header_mongrel "$LINENO" "sys/sockets.h" "ac_cv_header_sys_sockets_h" "$ac_includes_default"
-if test "x$ac_cv_header_sys_sockets_h" = xyes; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "sys/socket.h" "ac_cv_header_sys_socket_h" "$ac_includes_default"
+if test "x$ac_cv_header_sys_socket_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_SYS_SOCKETS_H 1
+#define HAVE_SYS_SOCKET_H 1
 _ACEOF
 
 fi

@@ -1248,7 +1248,7 @@ AC_CHECK_HEADERS(term.h, [], [],
 #endif
 ])
 
-AC_CHECK_HEADERS([sys/sockets.h])
+AC_CHECK_HEADERS([sys/socket.h])
 AC_CHECK_HEADERS([ws2tcpip.h])
 
 # ------------------------- #

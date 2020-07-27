@@ -1,3 +1,9 @@
+2020-07-27  Tom de Vries  <tdevries@suse.de>
+
+	* configure.ac: Fix sys/sockets.h -> sys/socket.h typo.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2020-07-26  Eli Zaretskii  <eliz@gnu.org>
 
 	* configure.ac (AC_CHECK_HEADERS): Check for sys/socket.h and
