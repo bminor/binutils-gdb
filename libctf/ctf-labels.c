@@ -80,8 +80,10 @@ ctf_label_iter (ctf_file_t *fp, ctf_label_f *func, void *arg)
     {
       if ((lname = ctf_strraw (fp, ctlp->ctl_label)) == NULL)
 	{
-	  ctf_dprintf ("failed to decode label %u with "
-		       "type %u\n", ctlp->ctl_label, ctlp->ctl_type);
+	  /* Not marked for translation: label code not used yet.  */
+	  ctf_err_warn (fp, 0, ECTF_CORRUPT,
+			"failed to decode label %u with type %u",
+			ctlp->ctl_label, ctlp->ctl_type);
 	  return (ctf_set_errno (fp, ECTF_CORRUPT));
 	}
 

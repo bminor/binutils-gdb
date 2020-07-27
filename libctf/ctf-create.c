@@ -1596,6 +1596,13 @@ ctf_add_variable (ctf_file_t *fp, const char *name, ctf_id_t ref)
   return 0;
 }
 
+typedef struct ctf_bundle
+{
+  ctf_file_t *ctb_file;		/* CTF container handle.  */
+  ctf_id_t ctb_type;		/* CTF type identifier.  */
+  ctf_dtdef_t *ctb_dtd;		/* CTF dynamic type definition (if any).  */
+} ctf_bundle_t;
+
 static int
 enumcmp (const char *name, int value, void *arg)
 {
@@ -1604,14 +1611,15 @@ enumcmp (const char *name, int value, void *arg)
 
   if (ctf_enum_value (ctb->ctb_file, ctb->ctb_type, name, &bvalue) < 0)
     {
-      ctf_dprintf ("Conflict due to member %s iteration error: %s.\n", name,
-		   ctf_errmsg (ctf_errno (ctb->ctb_file)));
+      ctf_err_warn (ctb->ctb_file, 0, 0,
+		    _("conflict due to enum %s iteration error"), name);
       return 1;
     }
   if (value != bvalue)
     {
-      ctf_dprintf ("Conflict due to value change: %i versus %i\n",
-		   value, bvalue);
+      ctf_err_warn (ctb->ctb_file, 1, ECTF_CONFLICT,
+		    _("conflict due to enum value change: %i versus %i"),
+		    value, bvalue);
       return 1;
     }
   return 0;
@@ -1640,14 +1648,17 @@ membcmp (const char *name, ctf_id_t type _libctf_unused_, unsigned long offset,
 
   if (ctf_member_info (ctb->ctb_file, ctb->ctb_type, name, &ctm) < 0)
     {
-      ctf_dprintf ("Conflict due to member %s iteration error: %s.\n", name,
-		   ctf_errmsg (ctf_errno (ctb->ctb_file)));
+      ctf_err_warn (ctb->ctb_file, 0, 0,
+		    _("conflict due to struct member %s iteration error"),
+		    name);
       return 1;
     }
   if (ctm.ctm_offset != offset)
     {
-      ctf_dprintf ("Conflict due to member %s offset change: "
-		   "%lx versus %lx\n", name, ctm.ctm_offset, offset);
+      ctf_err_warn (ctb->ctb_file, 1, ECTF_CONFLICT,
+		    _("conflict due to struct member %s offset change: "
+		      "%lx versus %lx"),
+		    name, ctm.ctm_offset, offset);
       return 1;
     }
   return 0;
@@ -1791,8 +1802,10 @@ ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type
 	  || (kind != CTF_K_ENUM && kind != CTF_K_STRUCT
 	      && kind != CTF_K_UNION))
 	{
-	  ctf_dprintf ("Conflict for type %s: kinds differ, new: %i; "
-		       "old (ID %lx): %i\n", name, kind, dst_type, dst_kind);
+	  ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
+			_("ctf_add_file(): conflict for type %s: "
+			  "kinds differ, new: %i; old (ID %lx): %i"),
+			name, kind, dst_type, dst_kind);
 	  return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
 	}
     }
@@ -1937,12 +1950,13 @@ ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type
 
 	  if (memcmp (&src_ar, &dst_ar, sizeof (ctf_arinfo_t)))
 	    {
-	      ctf_dprintf ("Conflict for type %s against ID %lx: "
-			   "array info differs, old %lx/%lx/%x; "
-			   "new: %lx/%lx/%x\n", name, dst_type,
-			   src_ar.ctr_contents, src_ar.ctr_index,
-			   src_ar.ctr_nelems, dst_ar.ctr_contents,
-			   dst_ar.ctr_index, dst_ar.ctr_nelems);
+	      ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
+			    _("conflict for type %s against ID %lx: array info "
+			      "differs, old %lx/%lx/%x; new: %lx/%lx/%x"),
+			    name, dst_type, src_ar.ctr_contents,
+			    src_ar.ctr_index, src_ar.ctr_nelems,
+			    dst_ar.ctr_contents, dst_ar.ctr_index,
+			    dst_ar.ctr_nelems);
 	      return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
 	    }
 	}
@@ -1986,18 +2000,19 @@ ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type
 	    if (ctf_type_size (src_fp, src_type) !=
 		ctf_type_size (dst_fp, dst_type))
 	      {
-		ctf_dprintf ("Conflict for type %s against ID %lx: "
-			     "union size differs, old %li, new %li\n",
-			     name, dst_type,
-			     (long) ctf_type_size (src_fp, src_type),
-			     (long) ctf_type_size (dst_fp, dst_type));
+		ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
+			      _("conflict for type %s against ID %lx: union "
+				"size differs, old %li, new %li"), name,
+			      dst_type, (long) ctf_type_size (src_fp, src_type),
+			      (long) ctf_type_size (dst_fp, dst_type));
 		return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
 	      }
 
 	    if (ctf_member_iter (src_fp, src_type, membcmp, &dst))
 	      {
-		ctf_dprintf ("Conflict for type %s against ID %lx: "
-			     "members differ, see above\n", name, dst_type);
+		ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
+			      _("conflict for type %s against ID %lx: members "
+				"differ, see above"), name, dst_type);
 		return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
 	      }
 
@@ -2076,8 +2091,9 @@ ctf_add_type_internal (ctf_file_t *dst_fp, ctf_file_t *src_fp, ctf_id_t src_type
 	  if (ctf_enum_iter (src_fp, src_type, enumcmp, &dst)
 	      || ctf_enum_iter (dst_fp, dst_type, enumcmp, &src))
 	    {
-	      ctf_dprintf ("Conflict for enum %s against ID %lx: "
-			   "members differ, see above\n", name, dst_type);
+	      ctf_err_warn (dst_fp, 1, ECTF_CONFLICT,
+			    _("conflict for enum %s against ID %lx: members "
+			      "differ, see above"), name, dst_type);
 	      return (ctf_set_errno (dst_fp, ECTF_CONFLICT));
 	    }
 	}
@@ -2200,13 +2216,17 @@ ctf_compress_write (ctf_file_t *fp, int fd)
   compress_len = compressBound (fp->ctf_size);
 
   if ((buf = malloc (compress_len)) == NULL)
-    return (ctf_set_errno (fp, ECTF_ZALLOC));
+    {
+      ctf_err_warn (fp, 0, 0, _("ctf_compress_write: cannot allocate %li bytes"),
+		    (unsigned long) compress_len);
+      return (ctf_set_errno (fp, ECTF_ZALLOC));
+    }
 
   if ((rc = compress (buf, (uLongf *) &compress_len,
 		      fp->ctf_buf, fp->ctf_size)) != Z_OK)
     {
-      ctf_dprintf ("zlib deflate err: %s\n", zError (rc));
       err = ctf_set_errno (fp, ECTF_COMPRESS);
+      ctf_err_warn (fp, 0, 0, _("zlib deflate err: %s"), zError (rc));
       goto ret;
     }
 
@@ -2215,6 +2235,7 @@ ctf_compress_write (ctf_file_t *fp, int fd)
       if ((len = write (fd, hp, header_len)) < 0)
 	{
 	  err = ctf_set_errno (fp, errno);
+	  ctf_err_warn (fp, 0, 0, _("ctf_compress_write: error writing header"));
 	  goto ret;
 	}
       header_len -= len;
@@ -2227,6 +2248,7 @@ ctf_compress_write (ctf_file_t *fp, int fd)
       if ((len = write (fd, bp, compress_len)) < 0)
 	{
 	  err = ctf_set_errno (fp, errno);
+	  ctf_err_warn (fp, 0, 0, _("ctf_compress_write: error writing"));
 	  goto ret;
 	}
       compress_len -= len;
@@ -2260,6 +2282,8 @@ ctf_write_mem (ctf_file_t *fp, size_t *size, size_t threshold)
 		     + sizeof (struct ctf_header))) == NULL)
     {
       ctf_set_errno (fp, ENOMEM);
+      ctf_err_warn (fp, 0, 0, _("ctf_write_mem: cannot allocate %li bytes"),
+		    (unsigned long) (compress_len + sizeof (struct ctf_header)));
       return NULL;
     }
 
@@ -2280,8 +2304,8 @@ ctf_write_mem (ctf_file_t *fp, size_t *size, size_t threshold)
       if ((rc = compress (bp, (uLongf *) &compress_len,
 			  fp->ctf_buf, fp->ctf_size)) != Z_OK)
 	{
-	  ctf_dprintf ("zlib deflate err: %s\n", zError (rc));
 	  ctf_set_errno (fp, ECTF_COMPRESS);
+	  ctf_err_warn (fp, 0, 0, _("zlib deflate err: %s"), zError (rc));
 	  free (buf);
 	  return NULL;
 	}
@@ -2306,7 +2330,10 @@ ctf_write (ctf_file_t *fp, int fd)
   while (resid != 0)
     {
       if ((len = write (fd, buf, resid)) <= 0)
-	return (ctf_set_errno (fp, errno));
+	{
+	  ctf_err_warn (fp, 0, errno, _("ctf_write: error writing header"));
+	  return (ctf_set_errno (fp, errno));
+	}
       resid -= len;
       buf += len;
     }
@@ -2316,7 +2343,10 @@ ctf_write (ctf_file_t *fp, int fd)
   while (resid != 0)
     {
       if ((len = write (fd, buf, resid)) <= 0)
-	return (ctf_set_errno (fp, errno));
+	{
+	  ctf_err_warn (fp, 0, errno, _("ctf_write: error writing"));
+	  return (ctf_set_errno (fp, errno));
+	}
       resid -= len;
       buf += len;
     }

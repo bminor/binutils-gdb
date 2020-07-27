@@ -82,19 +82,19 @@ ctf_arc_write_fd (int fd, ctf_file_t **ctf_files, size_t ctf_file_cnt,
   ctf_startoffs = headersz;
   if (lseek (fd, ctf_startoffs - 1, SEEK_SET) < 0)
     {
-      errmsg = "ctf_arc_write(): cannot extend file while writing: %s\n";
+      errmsg = N_("ctf_arc_write(): cannot extend file while writing");
       goto err;
     }
 
   if (write (fd, &dummy, 1) < 0)
     {
-      errmsg = "ctf_arc_write(): cannot extend file while writing: %s\n";
+      errmsg = N_("ctf_arc_write(): cannot extend file while writing");
       goto err;
     }
 
   if ((archdr = arc_mmap_header (fd, headersz)) == NULL)
     {
-      errmsg = "ctf_arc_write(): Cannot mmap(): %s\n";
+      errmsg = N_("ctf_arc_write(): cannot mmap");
       goto err;
     }
 
@@ -128,7 +128,7 @@ ctf_arc_write_fd (int fd, ctf_file_t **ctf_files, size_t ctf_file_cnt,
   nametbl = malloc (namesz);
   if (nametbl == NULL)
     {
-      errmsg = "Error writing named CTF to archive: %s\n";
+      errmsg = N_("ctf_arc_write(): error writing named CTF to archive");
       goto err_unmap;
     }
 
@@ -144,13 +144,13 @@ ctf_arc_write_fd (int fd, ctf_file_t **ctf_files, size_t ctf_file_cnt,
       off = arc_write_one_ctf (ctf_files[i], fd, threshold);
       if ((off < 0) && (off > -ECTF_BASE))
 	{
-	  errmsg = "ctf_arc_write(): Cannot determine file "
-	    "position while writing to archive: %s";
+	  errmsg = N_("ctf_arc_write(): cannot determine file "
+		      "position while writing to archive");
 	  goto err_free;
 	}
       if (off < 0)
 	{
-	  errmsg = "ctf_arc_write(): Cannot write CTF file to archive: %s\n";
+	  errmsg = N_("ctf_arc_write(): cannot write CTF file to archive");
 	  errno = off * -1;
 	  goto err_free;
 	}
@@ -171,8 +171,8 @@ ctf_arc_write_fd (int fd, ctf_file_t **ctf_files, size_t ctf_file_cnt,
 
   if ((nameoffs = lseek (fd, 0, SEEK_CUR)) < 0)
     {
-      errmsg = "ctf_arc_write(): Cannot get current file position "
-	"in archive: %s\n";
+      errmsg = N_("ctf_arc_write(): cannot get current file position "
+		  "in archive");
       goto err_free;
     }
   archdr->ctfa_names = htole64 (nameoffs);
@@ -182,7 +182,7 @@ ctf_arc_write_fd (int fd, ctf_file_t **ctf_files, size_t ctf_file_cnt,
       ssize_t len;
       if ((len = write (fd, np, namesz)) < 0)
 	{
-	  errmsg = "ctf_arc_write(): Cannot write name table to archive: %s\n";
+	  errmsg = N_("ctf_arc_write(): cannot write name table to archive");
 	  goto err_free;
 	}
       namesz -= len;
@@ -201,8 +201,11 @@ err_free:
 err_unmap:
   arc_mmap_unmap (archdr, headersz, NULL);
 err:
-  ctf_dprintf (errmsg, errno < ECTF_BASE ? strerror (errno) :
-	       ctf_errmsg (errno));
+  /* We report errors into the first file in the archive, if any: if this is a
+     zero-file archive, put it in the open-errors stream for lack of anywhere
+     else for it to go.  */
+  ctf_err_warn (ctf_file_cnt > 0 ? ctf_files[0] : NULL, 0, errno, "%s",
+		gettext (errmsg));
   return errno;
 }
 
@@ -213,7 +216,7 @@ err:
 
    Returns 0 on success, or an errno, or an ECTF_* value.  */
 int
-ctf_arc_write (const char *file, ctf_file_t ** ctf_files, size_t ctf_file_cnt,
+ctf_arc_write (const char *file, ctf_file_t **ctf_files, size_t ctf_file_cnt,
 	       const char **names, size_t threshold)
 {
   int err;
@@ -221,8 +224,8 @@ ctf_arc_write (const char *file, ctf_file_t ** ctf_files, size_t ctf_file_cnt,
 
   if ((fd = open (file, O_RDWR | O_CREAT | O_TRUNC | O_CLOEXEC, 0666)) < 0)
     {
-      ctf_dprintf ("ctf_arc_write(): cannot create %s: %s\n", file,
-		   strerror (errno));
+      ctf_err_warn (ctf_file_cnt > 0 ? ctf_files[0] : NULL, 0, errno,
+		    _("ctf_arc_write(): cannot create %s"), file);
       return errno;
     }
 
@@ -231,8 +234,8 @@ ctf_arc_write (const char *file, ctf_file_t ** ctf_files, size_t ctf_file_cnt,
     goto err_close;
 
   if ((err = close (fd)) < 0)
-    ctf_dprintf ("ctf_arc_write(): Cannot close after writing to archive: "
-		 "%s\n", strerror (errno));
+    ctf_err_warn (ctf_file_cnt > 0 ? ctf_files[0] : NULL, 0, errno,
+		  _("ctf_arc_write(): cannot close after writing to archive"));
   goto err;
 
  err_close:
@@ -404,8 +407,7 @@ ctf_arc_bufopen (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
       is_archive = 0;
       if ((fp = ctf_bufopen (ctfsect, symsect, strsect, errp)) == NULL)
 	{
-	  ctf_dprintf ("ctf_arc_bufopen(): cannot open CTF: %s\n",
-		       ctf_errmsg (*errp));
+	  ctf_err_warn (NULL, 0, *errp, _("ctf_arc_bufopen(): cannot open CTF"));
 	  return NULL;
 	}
     }
@@ -426,24 +428,24 @@ ctf_arc_open_internal (const char *filename, int *errp)
   libctf_init_debug();
   if ((fd = open (filename, O_RDONLY)) < 0)
     {
-      errmsg = "ctf_arc_open(): cannot open %s: %s\n";
+      errmsg = N_("ctf_arc_open(): cannot open %s");
       goto err;
     }
   if (fstat (fd, &s) < 0)
     {
-      errmsg = "ctf_arc_open(): cannot stat %s: %s\n";
+      errmsg = N_("ctf_arc_open(): cannot stat %s");
       goto err_close;
     }
 
   if ((arc = arc_mmap_file (fd, s.st_size)) == NULL)
     {
-      errmsg = "ctf_arc_open(): Cannot read in %s: %s\n";
+      errmsg = N_("ctf_arc_open(): cannot read in %s");
       goto err_close;
     }
 
   if (le64toh (arc->ctfa_magic) != CTFA_MAGIC)
     {
-      errmsg = "ctf_arc_open(): Invalid magic number";
+      errmsg = N_("ctf_arc_open(): %s: invalid magic number");
       errno = ECTF_FMT;
       goto err_unmap;
     }
@@ -462,8 +464,7 @@ err_close:
 err:
   if (errp)
     *errp = errno;
-  ctf_dprintf (errmsg, filename, errno < ECTF_BASE ? strerror (errno) :
-	       ctf_errmsg (errno));
+  ctf_err_warn (NULL, 0, errno, gettext (errmsg), filename);
   return NULL;
 }
 
@@ -872,7 +873,8 @@ static int arc_mmap_writeout (int fd _libctf_unused_, void *header,
     if (msync (header, headersz, MS_ASYNC) < 0)
     {
       if (errmsg)
-	*errmsg = "arc_mmap_writeout(): Cannot sync after writing to %s: %s\n";
+	*errmsg = N_("arc_mmap_writeout(): cannot sync after writing "
+		     "to %s: %s");
       return -1;
     }
     return 0;
@@ -884,7 +886,8 @@ static int arc_mmap_unmap (void *header, size_t headersz, const char **errmsg)
   if (munmap (header, headersz) < 0)
     {
       if (errmsg)
-	*errmsg = "arc_mmap_munmap(): Cannot unmap after writing to %s: %s\n";
+	*errmsg = N_("arc_mmap_munmap(): cannot unmap after writing "
+		     "to %s: %s");
       return -1;
     }
     return 0;
@@ -928,8 +931,8 @@ static int arc_mmap_writeout (int fd, void *header, size_t headersz,
   if ((lseek (fd, 0, SEEK_SET)) < 0)
     {
       if (errmsg)
-	*errmsg = "arc_mmap_writeout(): Cannot seek while writing header to "
-	  "%s: %s\n";
+	*errmsg = N_("arc_mmap_writeout(): cannot seek while writing header to "
+		     "%s: %s");
       return -1;
     }
 
@@ -938,7 +941,7 @@ static int arc_mmap_writeout (int fd, void *header, size_t headersz,
       if ((len = write (fd, data, count)) < 0)
 	{
 	  if (errmsg)
-	    *errmsg = "arc_mmap_writeout(): Cannot write header to %s: %s\n";
+	    *errmsg = N_("arc_mmap_writeout(): cannot write header to %s: %s");
 	  return len;
 	}
       if (len == EINTR)

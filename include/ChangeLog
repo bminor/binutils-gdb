@@ -1,3 +1,7 @@
+2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ctf-api.h (ctf_errwarning_next): New err parameter.
+
 2020-08-26  Nick Clifton  <nickc@redhat.com>
 
 	PR 26405

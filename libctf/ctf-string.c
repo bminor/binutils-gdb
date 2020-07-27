@@ -427,7 +427,7 @@ ctf_str_write_strtab (ctf_file_t *fp)
   nullstr = ctf_dynhash_lookup (fp->ctf_str_atoms, "");
   if (!nullstr)
     {
-      ctf_dprintf ("Internal error: null string not found in strtab.\n");
+      ctf_err_warn (fp, 0, ECTF_INTERNAL, _("null string not found in strtab"));
       strtab.cts_strs = NULL;
       return strtab;
     }

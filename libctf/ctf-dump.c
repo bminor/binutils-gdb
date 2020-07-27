@@ -174,8 +174,7 @@ ctf_dump_format_type (ctf_file_t *fp, ctf_id_t id, int flag)
  oom:
   ctf_set_errno (fp, errno);
  err:
-  ctf_err_warn (fp, 1, "Cannot format name dumping type 0x%lx: %s", id,
-		ctf_errmsg (ctf_errno (fp)));
+  ctf_err_warn (fp, 1, 0, _("cannot format name dumping type 0x%lx"), id);
   free (buf);
   free (str);
   free (bit);
@@ -405,7 +404,6 @@ ctf_dump_funcs (ctf_file_t *fp, ctf_dump_state_t *state)
     {
       char *str;
       char *bit = NULL;
-      const char *err;
       const char *sym_name;
       ctf_funcinfo_t fi;
       ctf_id_t type;
@@ -427,8 +425,11 @@ ctf_dump_funcs (ctf_file_t *fp, ctf_dump_state_t *state)
       /* Return type and all args.  */
       if ((bit = ctf_type_aname (state->cds_fp, type)) == NULL)
 	{
-	  err = "look up return type";
-	  goto err;
+	  ctf_err_warn (fp, 1, ctf_errno (state->cds_fp),
+			_("cannot look up return type dumping function type "
+			  "for symbol 0x%li"), (unsigned long) i);
+	  free (bit);
+	  return -1;			/* errno is set for us.  */
 	}
 
       /* Replace in the returned string, dropping in the function name.  */
@@ -468,13 +469,6 @@ ctf_dump_funcs (ctf_file_t *fp, ctf_dump_state_t *state)
 
       ctf_dump_append (state, str);
       continue;
-
-    err:
-      ctf_err_warn (fp, 1, "Cannot %s dumping function type for "
-		    "symbol 0x%li: %s", err, (unsigned long) i,
-		    ctf_errmsg (ctf_errno (state->cds_fp)));
-      free (bit);
-      return -1;		/* errno is set for us.  */
 
     oom:
       free (bit);
@@ -597,13 +591,12 @@ static int
 ctf_dump_type (ctf_id_t id, int flag, void *arg)
 {
   char *str;
-  const char *err;
   ctf_dump_state_t *state = arg;
   ctf_dump_membstate_t membstate = { &str, state->cds_fp };
   size_t len;
 
   if ((str = ctf_dump_format_type (state->cds_fp, id, flag)) == NULL)
-    goto err_nomsg;		/* Error already logged for us.  */
+    goto err;
 
   str = str_append (str, "\n");
   if ((ctf_type_visit (state->cds_fp, id, ctf_dump_member, &membstate)) < 0)
@@ -613,7 +606,8 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
 	  ctf_dump_append (state, str);
 	  return 0;
 	}
-      err = "visit members";
+      ctf_err_warn (state->cds_fp, 1, ctf_errno (state->cds_fp),
+		    _("cannot visit members dumping type 0x%lx"), id);
       goto err;
     }
 
@@ -626,9 +620,6 @@ ctf_dump_type (ctf_id_t id, int flag, void *arg)
   return 0;
 
  err:
-  ctf_err_warn (state->cds_fp, 1, "Cannot %s dumping type 0x%lx: %s",
-		err, id, ctf_errmsg (ctf_errno (state->cds_fp)));
- err_nomsg:
   free (str);
   return 0;				/* Swallow the error.  */
 }

@@ -1,5 +1,90 @@
 2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ctf-subr.c (open_errors): New list.
+	(ctf_err_warn): Calls with NULL fp append to open_errors.  Add err
+	parameter, and use it to decorate the debug stream with errmsgs.
+	(ctf_err_warn_to_open): Splice errors from a CTF dict into the
+	open_errors.
+	(ctf_errwarning_next): Calls with NULL fp report from open_errors.
+	New err param to report iteration errors (including end-of-iteration)
+	when fp is NULL.
+	(ctf_assert_fail_internal): Adjust ctf_err_warn call for new err
+	parameter: gettextize.
+	* ctf-impl.h (ctfo_get_vbytes): Add ctf_file_t parameter.
+	(LCTF_VBYTES): Adjust.
+	(ctf_err_warn_to_open): New.
+	(ctf_err_warn): Adjust.
+	(ctf_bundle): Used in only one place: move...
+	* ctf-create.c: ... here.
+	(enumcmp): Use ctf_err_warn, not ctf_dprintf, passing the err number
+	down as needed.  Don't emit the errmsg.  Gettextize.
+	(membcmp): Likewise.
+	(ctf_add_type_internal): Likewise.
+	(ctf_write_mem): Likewise.
+	(ctf_compress_write): Likewise.  Report errors writing the header or
+	body.
+	(ctf_write): Likewise.
+	* ctf-archive.c (ctf_arc_write_fd): Use ctf_err_warn, not
+	ctf_dprintf, and gettextize, as above.
+	(ctf_arc_write): Likewise.
+	(ctf_arc_bufopen): Likewise.
+	(ctf_arc_open_internal): Likewise.
+	* ctf-labels.c (ctf_label_iter): Likewise.
+	* ctf-open-bfd.c (ctf_bfdclose): Likewise.
+	(ctf_bfdopen): Likewise.
+	(ctf_bfdopen_ctfsect): Likewise.
+	(ctf_fdopen): Likewise.
+	* ctf-string.c (ctf_str_write_strtab): Likewise.
+	* ctf-types.c (ctf_type_resolve): Likewise.
+	* ctf-open.c (get_vbytes_common): Likewise. Pass down the ctf dict.
+	(get_vbytes_v1): Pass down the ctf dict.
+	(get_vbytes_v2): Likewise.
+	(flip_ctf): Likewise.
+	(flip_types): Likewise. Use ctf_err_warn, not ctf_dprintf, and
+	gettextize, as above.
+	(upgrade_types_v1): Adjust calls.
+	(init_types): Use ctf_err_warn, not ctf_dprintf, as above.
+	(ctf_bufopen_internal): Likewise. Adjust calls. Transplant errors
+	emitted into individual dicts into the open errors if this turns
+	out to be a failed open in the end.
+	* ctf-dump.c (ctf_dump_format_type): Adjust ctf_err_warn for new err
+	argument.  Gettextize.  Don't emit the errmsg.
+	(ctf_dump_funcs): Likewise.  Collapse err label into its only case.
+	(ctf_dump_type): Likewise.
+	* ctf-link.c (ctf_create_per_cu): Adjust ctf_err_warn for new err
+	argument.  Gettextize.  Don't emit the errmsg.
+	(ctf_link_one_type): Likewise.
+	(ctf_link_lazy_open): Likewise.
+	(ctf_link_one_input_archive): Likewise.
+	(ctf_link_deduplicating_count_inputs): Likewise.
+	(ctf_link_deduplicating_open_inputs): Likewise.
+	(ctf_link_deduplicating_close_inputs): Likewise.
+	(ctf_link_deduplicating): Likewise.
+	(ctf_link): Likewise.
+	(ctf_link_deduplicating_per_cu): Likewise. Add some missed
+	ctf_set_errnos to obscure error cases.
+	* ctf-dedup.c (ctf_dedup_rhash_type): Adjust ctf_err_warn for new
+	err argument.  Gettextize.  Don't emit the errmsg.
+	(ctf_dedup_populate_mappings): Likewise.
+	(ctf_dedup_detect_name_ambiguity): Likewise.
+	(ctf_dedup_init): Likewise.
+	(ctf_dedup_multiple_input_dicts): Likewise.
+	(ctf_dedup_conflictify_unshared): Likewise.
+	(ctf_dedup): Likewise.
+	(ctf_dedup_rwalk_one_output_mapping): Likewise.
+	(ctf_dedup_id_to_target): Likewise.
+	(ctf_dedup_emit_type): Likewise.
+	(ctf_dedup_emit_struct_members): Likewise.
+	(ctf_dedup_populate_type_mapping): Likewise.
+	(ctf_dedup_populate_type_mappings): Likewise.
+	(ctf_dedup_emit): Likewise.
+	(ctf_dedup_hash_type): Likewise. Fix a bit of messed-up error
+	status setting.
+	(ctf_dedup_rwalk_one_output_mapping): Likewise. Don't hide
+	unknown-type-kind messages (which signify file corruption).
+
+2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
+
 	* configure.ac: Adjust package name to simply 'libctf': arbitrarily
 	declare this to be version 1.2.0.
 	* Makefile.am (AM_CPPFLAGS): Add @INCINTL@.

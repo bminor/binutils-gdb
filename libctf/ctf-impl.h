@@ -130,7 +130,7 @@ typedef struct ctf_fileops
   uint32_t (*ctfo_get_vlen) (uint32_t);
   ssize_t (*ctfo_get_ctt_size) (const ctf_file_t *, const ctf_type_t *,
 				ssize_t *, ssize_t *);
-  ssize_t (*ctfo_get_vbytes) (unsigned short, ssize_t, size_t);
+  ssize_t (*ctfo_get_vbytes) (ctf_file_t *, unsigned short, ssize_t, size_t);
 } ctf_fileops_t;
 
 typedef struct ctf_list
@@ -198,13 +198,6 @@ typedef struct ctf_dvdef
   ctf_id_t dvd_type;		/* Type of variable.  */
   unsigned long dvd_snapshots;	/* Snapshot count when inserted.  */
 } ctf_dvdef_t;
-
-typedef struct ctf_bundle
-{
-  ctf_file_t *ctb_file;		/* CTF container handle.  */
-  ctf_id_t ctb_type;		/* CTF type identifier.  */
-  ctf_dtdef_t *ctb_dtd;		/* CTF dynamic type definition (if any).  */
-} ctf_bundle_t;
 
 typedef struct ctf_err_warning
 {
@@ -546,7 +539,7 @@ struct ctf_next
 #define LCTF_INFO_ISROOT(fp, info)	((fp)->ctf_fileops->ctfo_get_root(info))
 #define LCTF_INFO_VLEN(fp, info)	((fp)->ctf_fileops->ctfo_get_vlen(info))
 #define LCTF_VBYTES(fp, kind, size, vlen) \
-  ((fp)->ctf_fileops->ctfo_get_vbytes(kind, size, vlen))
+  ((fp)->ctf_fileops->ctfo_get_vbytes(fp, kind, size, vlen))
 
 #define LCTF_CHILD	0x0001	/* CTF container is a child */
 #define LCTF_RDWR	0x0002	/* CTF container is writable */
@@ -718,8 +711,10 @@ _libctf_printflike_ (1, 2)
 extern void ctf_dprintf (const char *, ...);
 extern void libctf_init_debug (void);
 
-_libctf_printflike_ (3, 4)
-extern void ctf_err_warn (ctf_file_t *, int is_warning, const char *, ...);
+_libctf_printflike_ (4, 5)
+extern void ctf_err_warn (ctf_file_t *, int is_warning, int err,
+			  const char *, ...);
+extern void ctf_err_warn_to_open (ctf_file_t *);
 extern void ctf_assert_fail_internal (ctf_file_t *, const char *,
 				      size_t, const char *);
 extern const char *ctf_link_input_name (ctf_file_t *);

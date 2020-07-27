@@ -3671,6 +3671,34 @@ open_input_bfds (lang_statement_union_type *s, enum open_bfd_mode mode)
 }
 
 #ifdef ENABLE_LIBCTF
+/* Emit CTF errors and warnings.  fp can be NULL to report errors/warnings
+   that happened specifically at CTF open time.  */
+static void
+lang_ctf_errs_warnings (ctf_file_t *fp)
+{
+  ctf_next_t *i = NULL;
+  char *text;
+  int is_warning;
+  int err;
+
+  while ((text = ctf_errwarning_next (fp, &i, &is_warning, &err)) != NULL)
+    {
+      einfo (_("%s: `%s'\n"), is_warning ? _("CTF warning"): _("CTF error"),
+	     text);
+      free (text);
+    }
+  if (err != ECTF_NEXT_END)
+    {
+      einfo (_("CTF error: cannot get CTF errors: `%s'\n"),
+	     ctf_errmsg (err));
+    }
+
+  /* `err' returns errors from the error/warning iterator in particular.
+     These never assert.  But if we have an fp, that could have recorded
+     an assertion failure: assert if it has done so.  */
+  ASSERT (!fp || ctf_errno (fp) != ECTF_INTERNAL);
+}
+
 /* Open the CTF sections in the input files with libctf: if any were opened,
    create a fake input file that we'll write the merged CTF data to later
    on.  */
@@ -3693,9 +3721,12 @@ ldlang_open_ctf (void)
       if ((file->the_ctf = ctf_bfdopen (file->the_bfd, &err)) == NULL)
 	{
 	  if (err != ECTF_NOCTFDATA)
-	    einfo (_("%P: warning: CTF section in %pB not loaded; "
-		     "its types will be discarded: `%s'\n"), file->the_bfd,
+	    {
+	      lang_ctf_errs_warnings (NULL);
+	      einfo (_("%P: warning: CTF section in %pB not loaded; "
+		       "its types will be discarded: `%s'\n"), file->the_bfd,
 		     ctf_errmsg (err));
+	    }
 	  continue;
 	}
 
@@ -3726,29 +3757,6 @@ ldlang_open_ctf (void)
 
   LANG_FOR_EACH_INPUT_STATEMENT (errfile)
     ctf_close (errfile->the_ctf);
-}
-
-/* Emit CTF errors and warnings.  */
-static void
-lang_ctf_errs_warnings (ctf_file_t *fp)
-{
-  ctf_next_t *i = NULL;
-  char *text;
-  int is_warning;
-
-  while ((text = ctf_errwarning_next (fp, &i, &is_warning)) != NULL)
-    {
-      einfo (_("%s: `%s'\n"), is_warning ? _("CTF warning"): _("CTF error"),
-	     text);
-      free (text);
-    }
-  if (ctf_errno (fp) != ECTF_NEXT_END)
-    {
-      einfo (_("CTF error: cannot get CTF errors: `%s'\n"),
-	     ctf_errmsg (ctf_errno (fp)));
-    }
-
-  ASSERT (ctf_errno (fp) != ECTF_INTERNAL);
 }
 
 /* Merge together CTF sections.  After this, only the symtab-dependent
@@ -3804,6 +3812,7 @@ lang_merge_ctf (void)
 
   if (ctf_link (ctf_output, flags) < 0)
     {
+      lang_ctf_errs_warnings (ctf_output);
       einfo (_("%P: warning: CTF linking failed; "
 	       "output will have no CTF section: `%s'\n"),
 	     ctf_errmsg (ctf_errno (ctf_output)));
@@ -3813,6 +3822,7 @@ lang_merge_ctf (void)
 	  output_sect->flags |= SEC_EXCLUDE;
 	}
     }
+  /* Output any lingering errors that didn't come from ctf_link.  */
   lang_ctf_errs_warnings (ctf_output);
 }
 
@@ -3860,6 +3870,7 @@ lang_write_ctf (int late)
       output_sect->size = output_size;
       output_sect->flags |= SEC_IN_MEMORY | SEC_KEEP;
 
+      lang_ctf_errs_warnings (ctf_output);
       if (!output_sect->contents)
 	{
 	  einfo (_("%P: warning: CTF section emission failed; "
@@ -3868,8 +3879,6 @@ lang_write_ctf (int late)
 	  output_sect->size = 0;
 	  output_sect->flags |= SEC_EXCLUDE;
 	}
-
-      lang_ctf_errs_warnings (ctf_output);
     }
 
   /* This also closes every CTF input file used in the link.  */

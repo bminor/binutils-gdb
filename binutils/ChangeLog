@@ -1,5 +1,18 @@
 2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
 
+	* objdump.c (dump_ctf_archive_member): Move error-
+	reporting...
+	(dump_ctf_errs): ... into this separate function.
+	(dump_ctf): Call it on open errors.
+	* readelf.c (dump_ctf_archive_member): Move error-
+	reporting...
+	(dump_ctf_errs): ... into this separate function.  Support
+	calls with NULL fp. Adjust for new err parameter to
+	ctf_errwarning_next.
+	(dump_section_as_ctf): Call it on open errors.
+
+2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
+
 	* Makefile.am (readelf_LDADD): Move $(LIBINTL) after $(LIBCTF_NOBFD).
 	* Makefile.in: Regenerated.
 

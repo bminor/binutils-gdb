@@ -4071,6 +4071,29 @@ make_ctfsect (const char *name, bfd_byte *data,
   return ctfsect;
 }
 
+/* Dump CTF errors/warnings.  */
+static void
+dump_ctf_errs (ctf_file_t *fp)
+{
+  ctf_next_t *it = NULL;
+  char *errtext;
+  int is_warning;
+  int err;
+
+  /* Dump accumulated errors and warnings.  */
+  while ((errtext = ctf_errwarning_next (fp, &it, &is_warning, &err)) != NULL)
+    {
+      non_fatal (_("%s: `%s'"), is_warning ? _("warning"): _("error"),
+		 errtext);
+      free (errtext);
+    }
+  if (err != ECTF_NEXT_END)
+    {
+      non_fatal (_("CTF error: cannot get CTF errors: `%s'"),
+		 ctf_errmsg (err));
+    }
+}
+
 /* Dump one CTF archive member.  */
 
 static int
@@ -4081,9 +4104,6 @@ dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
 			  "Function objects", "Variables", "Types", "Strings",
 			  ""};
   const char **thing;
-  ctf_next_t *it = NULL;
-  char *errtext;
-  int is_warning;
   size_t i;
 
   /* Only print out the name of non-default-named archive members.
@@ -4121,18 +4141,7 @@ dump_ctf_archive_member (ctf_file_t *ctf, const char *name, void *arg)
 	}
     }
 
-  /* Dump accumulated errors and warnings.  */
-  while ((errtext = ctf_errwarning_next (ctf, &it, &is_warning)) != NULL)
-    {
-      non_fatal (_("%s: `%s'"), is_warning ? _("warning"): _("error"),
-		 errtext);
-      free (errtext);
-    }
-  if (ctf_errno (ctf) != ECTF_NEXT_END)
-    {
-      non_fatal (_("CTF error: cannot get CTF errors: `%s'"),
-		 ctf_errmsg (ctf_errno (ctf)));
-    }
+  dump_ctf_errs (ctf);
 
   return 0;
 }
@@ -4162,6 +4171,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
   ctfsect = make_ctfsect (sect_name, ctfdata, ctfsize);
   if ((ctfa = ctf_bfdopen_ctfsect (abfd, &ctfsect, &err)) == NULL)
     {
+      dump_ctf_errs (NULL);
       non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));
       bfd_fatal (bfd_get_filename (abfd));
     }
@@ -4171,6 +4181,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
       ctfsect = make_ctfsect (parent_name, parentdata, parentsize);
       if ((parenta = ctf_bfdopen_ctfsect (abfd, &ctfsect, &err)) == NULL)
 	{
+	  dump_ctf_errs (NULL);
 	  non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));
 	  bfd_fatal (bfd_get_filename (abfd));
 	}
@@ -4185,6 +4196,7 @@ dump_ctf (bfd *abfd, const char *sect_name, const char *parent_name)
      put CTFs and their parents in archives together.)  */
   if ((parent = ctf_arc_open_by_name (lookparent, NULL, &err)) == NULL)
     {
+      dump_ctf_errs (NULL);
       non_fatal (_("CTF open failure: %s"), ctf_errmsg (err));
       bfd_fatal (bfd_get_filename (abfd));
     }

@@ -411,7 +411,7 @@ extern char *ctf_dump (ctf_file_t *, ctf_dump_state_t **state,
    the error/warning list, in order of emission.  Errors and warnings are popped
    after return: the caller must free the returned error-text pointer.  */
 extern char *ctf_errwarning_next (ctf_file_t *, ctf_next_t **,
-				  int *is_warning);
+				  int *is_warning, int *errp);
 
 extern ctf_id_t ctf_add_array (ctf_file_t *, uint32_t,
 			       const ctf_arinfo_t *);

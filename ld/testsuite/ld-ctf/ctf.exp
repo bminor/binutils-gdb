@@ -28,6 +28,11 @@ if ![is_elf_format] {
     return 0
 }
 
+if {[info exists env(LC_ALL)]} {
+    set old_lc_all $env(LC_ALL)
+}
+set env(LC_ALL) "C"
+
 set ctf_test_list [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
 
 foreach ctf_test $ctf_test_list {
@@ -38,4 +43,10 @@ foreach ctf_test $ctf_test_list {
     }
     verbose [file rootname $ctf_test]
     run_dump_test [file rootname $ctf_test] { { cc "-gt -fPIC" } }
+}
+
+if {[info exists old_lc_all]} {
+    set env(LC_ALL) $old_lc_all
+} else {
+    unset env(LC_ALL)
 }

@@ -1,3 +1,12 @@
+2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* ldlang.c (lang_ctf_errs_warnings): Support calls with NULL fp.
+	Adjust for new err parameter to ctf_errwarning_next.  Only
+	check for assertion failures when fp is non-NULL.
+	(ldlang_open_ctf): Call it on open errors.
+	* testsuite/ld-ctf/ctf.exp: Always use the C locale to avoid
+	breaking the diags tests.
+
 2020-08-27  Jeremy Drake  <sourceware-bugzilla@jdrake.com>
 
 	PR 19011

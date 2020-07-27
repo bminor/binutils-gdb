@@ -606,7 +606,8 @@ ctf_type_resolve (ctf_file_t *fp, ctf_id_t type)
 	  if (tp->ctt_type == type || tp->ctt_type == otype
 	      || tp->ctt_type == prev)
 	    {
-	      ctf_dprintf ("type %ld cycle detected\n", otype);
+	      ctf_err_warn (ofp, 0, ECTF_CORRUPT, _("type %lx cycle detected"),
+			    otype);
 	      return (ctf_set_errno (ofp, ECTF_CORRUPT));
 	    }
 	  prev = type;
