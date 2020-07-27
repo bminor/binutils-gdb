@@ -20,38 +20,43 @@
 #
 
 # SH/PE targets complain about zero VMA.
-# x86_64/PE targets hardcode VMA to 0x100000000.
-if { [istarget sh-*-pe] \
-     || [istarget x86_64-*-cygwin] \
-     || [istarget x86_64-*-mingw*] \
-     || [istarget x86_64-*-pe] \
-     || [istarget x86_64-*-pep] } {
+if { [istarget sh-*-pe] } {
     return
 }
 
-run_ld_link_tests {
-    {"Object for --just-symbols test"
-     "-r -T just-symbols.ld" ""
-     ""
-     {just-symbols-0.s}
-     {}
-     "just-symbols-0.o"}
-    {"Executable for --just-symbols test"
-     "-e 0 -T just-symbols.ld" ""
-     ""
-     {just-symbols-0.s}
-     {}
-     "just-symbols-0"}
-    {"Object with --just-symbols test"
-     "-e 0 -T just-symbols.ld --just-symbols=tmpdir/just-symbols-0.o" ""
-     ""
-     {just-symbols-1.s}
-     {{objdump {-s -j .data} just-symbols-1.dd}}
-     "just-symbols-1obj"}
-    {"Executable with --just-symbols test"
-     "-e 0 -T just-symbols.ld --just-symbols=tmpdir/just-symbols-0" ""
-     ""
-     {just-symbols-1.s}
-     {{objdump {-s -j .data} just-symbols-1.dd}}
-     "just-symbols-1exe"}
+set saved_LDFLAGS "$LDFLAGS"
+if { [is_pecoff_format] } then {
+    # Avoid auto image-basing.
+    set LDFLAGS "$LDFLAGS --image-base 0"
+} elseif { [is_xcoff_format] } then {
+    set LDFLAGS "$LDFLAGS -bnogc"
 }
+
+run_ld_link_tests [list \
+    [list "Object for --just-symbols test" \
+     "$LDFLAGS -r -T just-symbols.ld" "" \
+     "" \
+     {just-symbols-0.s} \
+     {} \
+     "just-symbols-0.o"] \
+    [list "Executable for --just-symbols test" \
+     "$LDFLAGS -e 0 -T just-symbols.ld" "" \
+     "" \
+     {just-symbols-0.s} \
+     {} \
+     "just-symbols-0"] \
+    [list "Object with --just-symbols test" \
+     "$LDFLAGS -e 0 -T just-symbols.ld --just-symbols=tmpdir/just-symbols-0.o" "" \
+     "" \
+     {just-symbols-1.s} \
+     {{objdump -s just-symbols-1.dd}} \
+     "just-symbols-1obj"] \
+    [list "Executable with --just-symbols test" \
+     "$LDFLAGS -e 0 -T just-symbols.ld --just-symbols=tmpdir/just-symbols-0" "" \
+     "" \
+     {just-symbols-1.s} \
+     {{objdump -s just-symbols-1.dd}} \
+     "just-symbols-1exe"] \
+]
+
+set LDFLAGS "$saved_LDFLAGS"

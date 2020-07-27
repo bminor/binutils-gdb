@@ -1,5 +1,11 @@
 2020-07-27  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-misc/just-symbols.exp: Run for x86_64 PE too.
+	Set LDFLAGS for PE and XCOFF.
+	* testsuite/ld-misc/just-symbols.ld: Accept XCOFF mapped .data.
+
+2020-07-27  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/lib/ld-lib.exp (check_ctf_available): Check first that
 	target compiler is available.
 
