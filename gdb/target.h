@@ -881,6 +881,14 @@ struct target_ops
     virtual bool supports_evaluation_of_breakpoint_conditions ()
       TARGET_DEFAULT_RETURN (false);
 
+    /* Does this target support native dumpcore API?  */
+    virtual bool supports_dumpcore ()
+      TARGET_DEFAULT_RETURN (false);
+
+    /* Generate the core file with native target API.  */
+    virtual void dumpcore (const char *filename)
+      TARGET_DEFAULT_IGNORE ();
+
     /* Does this target support evaluation of breakpoint commands on its
        end?  */
     virtual bool can_run_breakpoint_commands ()
@@ -1498,6 +1506,16 @@ int target_supports_disable_randomization (void);
 
 #define target_supports_evaluation_of_breakpoint_conditions() \
   (current_top_target ()->supports_evaluation_of_breakpoint_conditions) ()
+
+/* Does this target support dumpcore API?  */
+
+#define target_supports_dumpcore() \
+  (current_top_target ()->supports_dumpcore) ()
+
+/* Generate the core file with target API.  */
+
+#define target_dumpcore(x) \
+  (current_top_target ()->dumpcore (x))
 
 /* Returns true if this target can handle breakpoint commands
    on its end.  */

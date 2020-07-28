@@ -108,6 +108,8 @@ struct dummy_target : public target_ops
   bool supports_disable_randomization () override;
   bool supports_string_tracing () override;
   bool supports_evaluation_of_breakpoint_conditions () override;
+  bool supports_dumpcore () override;
+  void dumpcore (const char *arg0) override;
   bool can_run_breakpoint_commands () override;
   struct gdbarch *thread_architecture (ptid_t arg0) override;
   struct address_space *thread_address_space (ptid_t arg0) override;
@@ -277,6 +279,8 @@ struct debug_target : public target_ops
   bool supports_disable_randomization () override;
   bool supports_string_tracing () override;
   bool supports_evaluation_of_breakpoint_conditions () override;
+  bool supports_dumpcore () override;
+  void dumpcore (const char *arg0) override;
   bool can_run_breakpoint_commands () override;
   struct gdbarch *thread_architecture (ptid_t arg0) override;
   struct address_space *thread_address_space (ptid_t arg0) override;
@@ -2823,6 +2827,52 @@ debug_target::supports_evaluation_of_breakpoint_conditions ()
   target_debug_print_bool (result);
   fputs_unfiltered ("\n", gdb_stdlog);
   return result;
+}
+
+bool
+target_ops::supports_dumpcore ()
+{
+  return this->beneath ()->supports_dumpcore ();
+}
+
+bool
+dummy_target::supports_dumpcore ()
+{
+  return false;
+}
+
+bool
+debug_target::supports_dumpcore ()
+{
+  bool result;
+  fprintf_unfiltered (gdb_stdlog, "-> %s->supports_dumpcore (...)\n", this->beneath ()->shortname ());
+  result = this->beneath ()->supports_dumpcore ();
+  fprintf_unfiltered (gdb_stdlog, "<- %s->supports_dumpcore (", this->beneath ()->shortname ());
+  fputs_unfiltered (") = ", gdb_stdlog);
+  target_debug_print_bool (result);
+  fputs_unfiltered ("\n", gdb_stdlog);
+  return result;
+}
+
+void
+target_ops::dumpcore (const char *arg0)
+{
+  this->beneath ()->dumpcore (arg0);
+}
+
+void
+dummy_target::dumpcore (const char *arg0)
+{
+}
+
+void
+debug_target::dumpcore (const char *arg0)
+{
+  fprintf_unfiltered (gdb_stdlog, "-> %s->dumpcore (...)\n", this->beneath ()->shortname ());
+  this->beneath ()->dumpcore (arg0);
+  fprintf_unfiltered (gdb_stdlog, "<- %s->dumpcore (", this->beneath ()->shortname ());
+  target_debug_print_const_char_p (arg0);
+  fputs_unfiltered (")\n", gdb_stdlog);
 }
 
 bool
