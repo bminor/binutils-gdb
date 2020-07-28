@@ -8084,7 +8084,12 @@ build_modrm_byte (void)
 		      if (operand_type_check (i.types[op], disp) == 0)
 			{
 			  /* fake (%bp) into 0(%bp)  */
-			  i.types[op].bitfield.disp8 = 1;
+			  if (i.disp_encoding == disp_encoding_32bit)
+			    /* NB: Use disp16 since there is no disp32
+			       in 16-bit mode.  */
+			    i.types[op].bitfield.disp16 = 1;
+			  else
+			    i.types[op].bitfield.disp8 = 1;
 			  fake_zero_displacement = 1;
 			}
 		    }
@@ -8129,7 +8134,10 @@ build_modrm_byte (void)
 	      if (i.base_reg->reg_num == 5 && i.disp_operands == 0)
 		{
 		  fake_zero_displacement = 1;
-		  i.types[op].bitfield.disp8 = 1;
+		  if (i.disp_encoding == disp_encoding_32bit)
+		    i.types[op].bitfield.disp32 = 1;
+		  else
+		    i.types[op].bitfield.disp8 = 1;
 		}
 	      i.sib.scale = i.log2_scale_factor;
 	      if (i.index_reg == 0)

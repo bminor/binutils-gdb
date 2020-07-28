@@ -315,6 +315,14 @@ _start:
 	{rex} phaddw (%rcx),%mm0
 	{rex} phaddw (%r8),%mm0
 
+	movb (%rbp),%al
+	{disp8} movb (%rbp),%al
+	{disp32} movb (%rbp),%al
+
+	movb (%ebp),%al
+	{disp8} movb (%ebp),%al
+	{disp32} movb (%ebp),%al
+
 	.intel_syntax noprefix
 	{vex3} vmovaps xmm2,xmm7
 	{vex3} {load} vmovaps xmm2,xmm7
@@ -354,3 +362,11 @@ _start:
 	{rex} movaps xmm2,XMMWORD PTR [r8]
 	{rex} phaddw mm0,QWORD PTR [rcx]
 	{rex} phaddw mm0,QWORD PTR [r8]
+
+	mov al, BYTE PTR [rbp]
+	{disp8} mov al, BYTE PTR [rbp]
+	{disp32} mov al, BYTE PTR [rbp]
+
+	mov al, BYTE PTR [ebp]
+	{disp8} mov al, BYTE PTR [ebp]
+	{disp32} mov al, BYTE PTR [ebp]
