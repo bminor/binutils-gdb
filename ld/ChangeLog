@@ -1,8 +1,14 @@
+2020-07-28  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-misc/just-symbols-1.dd: Revert last change.
+
 2020-07-27  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-misc/just-symbols.exp: Run for x86_64 PE too.
 	Set LDFLAGS for PE and XCOFF.
 	* testsuite/ld-misc/just-symbols.ld: Accept XCOFF mapped .data.
+	* testsuite/ld-misc/just-symbols-1.dd: Don't check format or
+	"Contents of section" lines.
 
 2020-07-27  Alan Modra  <amodra@gmail.com>
 
