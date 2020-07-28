@@ -3704,7 +3704,8 @@ elf_get_reloc_section (asection *reloc_sec)
 
 /* Assign all ELF section numbers.  The dummy first section is handled here
    too.  The link/info pointers for the standard section types are filled
-   in here too, while we're at it.  */
+   in here too, while we're at it.  LINK_INFO will be 0 when arriving
+   here for objcopy, and when using the generic ELF linker.  */
 
 static bfd_boolean
 assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
@@ -3889,48 +3890,37 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	  s = elf_linked_to_section (sec);
 	  if (s)
 	    {
-	      /* elf_linked_to_section points to the input section.  */
-	      if (link_info != NULL)
+	      /* Check discarded linkonce section.  */
+	      if (discarded_section (s))
 		{
-		  /* Check discarded linkonce section.  */
-		  if (discarded_section (s))
+		  asection *kept;
+		  _bfd_error_handler
+		    /* xgettext:c-format */
+		    (_("%pB: sh_link of section `%pA' points to"
+		       " discarded section `%pA' of `%pB'"),
+		     abfd, d->this_hdr.bfd_section, s, s->owner);
+		  /* Point to the kept section if it has the same
+		     size as the discarded one.  */
+		  kept = _bfd_elf_check_kept_section (s, link_info);
+		  if (kept == NULL)
 		    {
-		      asection *kept;
-		      _bfd_error_handler
-			/* xgettext:c-format */
-			(_("%pB: sh_link of section `%pA' points to"
-			   " discarded section `%pA' of `%pB'"),
-			 abfd, d->this_hdr.bfd_section,
-			 s, s->owner);
-		      /* Point to the kept section if it has the same
-			 size as the discarded one.  */
-		      kept = _bfd_elf_check_kept_section (s, link_info);
-		      if (kept == NULL)
-			{
-			  bfd_set_error (bfd_error_bad_value);
-			  return FALSE;
-			}
-		      s = kept;
-		    }
-
-		  s = s->output_section;
-		  BFD_ASSERT (s != NULL);
-		}
-	      else
-		{
-		  /* Handle objcopy. */
-		  if (s->output_section == NULL)
-		    {
-		      _bfd_error_handler
-			/* xgettext:c-format */
-			(_("%pB: sh_link of section `%pA' points to"
-			   " removed section `%pA' of `%pB'"),
-			 abfd, d->this_hdr.bfd_section, s, s->owner);
 		      bfd_set_error (bfd_error_bad_value);
 		      return FALSE;
 		    }
-		  s = s->output_section;
+		  s = kept;
 		}
+	      /* Handle objcopy. */
+	      else if (s->output_section == NULL)
+		{
+		  _bfd_error_handler
+		    /* xgettext:c-format */
+		    (_("%pB: sh_link of section `%pA' points to"
+		       " removed section `%pA' of `%pB'"),
+		     abfd, d->this_hdr.bfd_section, s, s->owner);
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
+	      s = s->output_section;
 	      d->this_hdr.sh_link = elf_section_data (s)->this_idx;
 	    }
 	  else

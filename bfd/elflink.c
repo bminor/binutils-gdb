@@ -8179,7 +8179,7 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
       if (isymbuf1 == NULL)
 	goto done;
 
-      if (!info->reduce_memory_overheads)
+      if (info != NULL && !info->reduce_memory_overheads)
 	{
 	  ssymbuf1 = elf_create_symbuf (symcount1, isymbuf1);
 	  elf_tdata (bfd1)->symbuf = ssymbuf1;
@@ -8193,7 +8193,7 @@ bfd_elf_match_symbols_in_sections (asection *sec1, asection *sec2,
       if (isymbuf2 == NULL)
 	goto done;
 
-      if (ssymbuf1 != NULL && !info->reduce_memory_overheads)
+      if (ssymbuf1 != NULL && info != NULL && !info->reduce_memory_overheads)
 	{
 	  ssymbuf2 = elf_create_symbuf (symcount2, isymbuf2);
 	  elf_tdata (bfd2)->symbuf = ssymbuf2;
