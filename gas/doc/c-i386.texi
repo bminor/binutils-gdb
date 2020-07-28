@@ -822,7 +822,7 @@ Different encoding options can be specified via pseudo prefixes:
 @samp{@{disp8@}} -- prefer 8-bit displacement.
 
 @item
-@samp{@{disp32@}} -- prefer 32-bit displacement.
+@samp{@{disp32@}} -- prefer 32-bit (16-bit in 16-bit mode) displacement.
 
 @item
 @samp{@{load@}} -- prefer load-form instruction.
