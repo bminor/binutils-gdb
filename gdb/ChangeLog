@@ -1,5 +1,10 @@
 2020-07-28  Tom Tromey  <tromey@adacore.com>
 
+	* cli/cli-cmds.c (_initialize_cli_cmds): Rearrange "disassemble"
+	help.  Add usage.
+
+2020-07-28  Tom Tromey  <tromey@adacore.com>
+
 	* dwarf2/expr.c (dwarf_expr_context::execute_stack_op)
 	<DW_OP_GNU_variable_value>: Cast to address type.
 
