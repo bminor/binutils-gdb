@@ -12439,27 +12439,29 @@ fi
     pkg_failed=untried
 fi
 
-pkg_save_LDFLAGS="$LDFLAGS"
-LDFLAGS="$LDFLAGS $pkg_cv_DEBUGINFOD_LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+if test $pkg_failed = no; then
+  pkg_save_LDFLAGS="$LDFLAGS"
+  LDFLAGS="$LDFLAGS $pkg_cv_DEBUGINFOD_LIBS"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 int
 main ()
 {
-return 0;
+
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
-  pkg_failed=no
+
 else
   pkg_failed=yes
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-LDFLAGS=$pkg_save_LDFLAGS
+  LDFLAGS=$pkg_save_LDFLAGS
+fi
 
 
 

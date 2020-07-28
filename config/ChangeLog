@@ -1,6 +1,12 @@
 2020-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/26301
+	* pkg.m4 (PKG_CHECK_MODULES): Use AC_TRY_LINK only if
+	$pkg_failed = no.
+
+2020-07-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26301
 	* pkg.m4 (PKG_CHECK_MODULES): Add AC_TRY_LINK to check if
 	$pkg_cv_[]$1[]_LIBS works.
 

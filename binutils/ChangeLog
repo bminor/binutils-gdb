@@ -3,6 +3,11 @@
 	PR binutils/26301
 	* configure: Regenerated.
 
+2020-07-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26301
+	* configure: Regenerated.
+
 2020-07-27  Alan Modra  <amodra@gmail.com>
 
 	* objdump.c (dump_section): Don't return without calling

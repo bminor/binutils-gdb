@@ -3,6 +3,11 @@
 	PR binutils/26301
 	* configure: Regenerated.
 
+2020-07-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26301
+	* configure: Regenerated.
+
 2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python/py-frame.c: Remove 'user-regs.h' include.
