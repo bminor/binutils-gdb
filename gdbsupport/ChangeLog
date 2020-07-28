@@ -1,3 +1,9 @@
+2020-07-28  Tom de Vries  <tdevries@suse.de>
+
+	PR build/26281
+	* gdb_optional.h (class optional): Add volatile member to union
+	contaning m_dummy and m_item.
+
 2020-07-17  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* tdesc.h (struct target_desc_deleter): Moved here
