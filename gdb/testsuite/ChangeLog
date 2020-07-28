@@ -1,3 +1,9 @@
+2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	PR symtab/26270:
+	* gdb.cp/disasm-func-name.cc: New file.
+	* gdb.cp/disasm-func-name.exp: New file.
+
 2020-07-28  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.dwarf2/varval.exp (setup_exec): Add 'or' instruction to

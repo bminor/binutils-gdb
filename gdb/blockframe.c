@@ -191,7 +191,7 @@ find_pc_sect_containing_function (CORE_ADDR pc, struct obj_section *section)
 
 static CORE_ADDR cache_pc_function_low = 0;
 static CORE_ADDR cache_pc_function_high = 0;
-static const char *cache_pc_function_name = 0;
+static const general_symbol_info *cache_pc_function_sym = nullptr;
 static struct obj_section *cache_pc_function_section = NULL;
 static const struct block *cache_pc_function_block = nullptr;
 
@@ -202,7 +202,7 @@ clear_pc_function_cache (void)
 {
   cache_pc_function_low = 0;
   cache_pc_function_high = 0;
-  cache_pc_function_name = (char *) 0;
+  cache_pc_function_sym = nullptr;
   cache_pc_function_section = NULL;
   cache_pc_function_block = nullptr;
 }
@@ -210,8 +210,10 @@ clear_pc_function_cache (void)
 /* See symtab.h.  */
 
 bool
-find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
-			  CORE_ADDR *endaddr, const struct block **block)
+find_pc_partial_function_sym (CORE_ADDR pc,
+			      const struct general_symbol_info **sym,
+			      CORE_ADDR *address, CORE_ADDR *endaddr,
+			      const struct block **block)
 {
   struct obj_section *section;
   struct symbol *f;
@@ -257,7 +259,7 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
 	{
 	  const struct block *b = SYMBOL_BLOCK_VALUE (f);
 
-	  cache_pc_function_name = f->linkage_name ();
+	  cache_pc_function_sym = f;
 	  cache_pc_function_section = section;
 	  cache_pc_function_block = b;
 
@@ -313,8 +315,8 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
   if (msymbol.minsym == NULL)
     {
       /* No available symbol.  */
-      if (name != NULL)
-	*name = 0;
+      if (sym != nullptr)
+	*sym = 0;
       if (address != NULL)
 	*address = 0;
       if (endaddr != NULL)
@@ -325,7 +327,7 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
     }
 
   cache_pc_function_low = BMSYMBOL_VALUE_ADDRESS (msymbol);
-  cache_pc_function_name = msymbol.minsym->linkage_name ();
+  cache_pc_function_sym = msymbol.minsym;
   cache_pc_function_section = section;
   cache_pc_function_high = minimal_symbol_upper_bound (msymbol);
   cache_pc_function_block = nullptr;
@@ -340,8 +342,8 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
 	*address = cache_pc_function_low;
     }
 
-  if (name)
-    *name = cache_pc_function_name;
+  if (sym != nullptr)
+    *sym = cache_pc_function_sym;
 
   if (endaddr)
     {
@@ -364,6 +366,20 @@ find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
 
   return true;
 }
+
+/* See symtab.h.  */
+
+bool
+find_pc_partial_function (CORE_ADDR pc, const char **name, CORE_ADDR *address,
+			  CORE_ADDR *endaddr, const struct block **block)
+{
+  const general_symbol_info *gsi;
+  bool r = find_pc_partial_function_sym (pc, &gsi, address, endaddr, block);
+  if (name != nullptr)
+    *name = r ? gsi->linkage_name () : nullptr;
+  return r;
+}
+
 
 /* See symtab.h.  */
 

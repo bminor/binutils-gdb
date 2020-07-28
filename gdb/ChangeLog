@@ -1,5 +1,19 @@
 2020-07-28  Tom Tromey  <tromey@adacore.com>
 
+	PR symtab/26270:
+	* symtab.h (find_pc_partial_function_sym): Declare.
+	* cli/cli-cmds.c (disassemble_command): Use
+	find_pc_partial_function_sym.  Check asm_demangle.
+	* blockframe.c (cache_pc_function_sym): New global.
+	(cache_pc_function_name): Remove.
+	(clear_pc_function_cache): Update.
+	(find_pc_partial_function_sym): New function, from
+	find_pc_partial_function.
+	(find_pc_partial_function): Rewrite using
+	find_pc_partial_function_sym.
+
+2020-07-28  Tom Tromey  <tromey@adacore.com>
+
 	* cli/cli-cmds.c (_initialize_cli_cmds): Rearrange "disassemble"
 	help.  Add usage.
 

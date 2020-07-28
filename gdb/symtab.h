@@ -1769,6 +1769,14 @@ extern bool find_pc_partial_function (CORE_ADDR pc, const char **name,
 				      CORE_ADDR *address, CORE_ADDR *endaddr,
 				      const struct block **block = nullptr);
 
+/* Like find_pc_partial_function, above, but returns the underlying
+   general_symbol_info (rather than the name) as an out parameter.  */
+
+extern bool find_pc_partial_function_sym
+  (CORE_ADDR pc, const general_symbol_info **sym,
+   CORE_ADDR *address, CORE_ADDR *endaddr,
+   const struct block **block = nullptr);
+
 /* Like find_pc_partial_function, above, but *ADDRESS and *ENDADDR are
    set to start and end addresses of the range containing the entry pc.
 

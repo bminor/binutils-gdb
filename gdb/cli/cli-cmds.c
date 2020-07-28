@@ -1482,6 +1482,7 @@ disassemble_command (const char *arg, int from_tty)
 {
   struct gdbarch *gdbarch = get_current_arch ();
   CORE_ADDR low, high;
+  const general_symbol_info *symbol = nullptr;
   const char *name;
   CORE_ADDR pc;
   gdb_disassembly_flags flags;
@@ -1537,8 +1538,14 @@ disassemble_command (const char *arg, int from_tty)
   if (p[0] == '\0')
     {
       /* One argument.  */
-      if (find_pc_partial_function (pc, &name, &low, &high, &block) == 0)
+      if (!find_pc_partial_function_sym (pc, &symbol, &low, &high, &block))
 	error (_("No function contains specified address."));
+
+      if (asm_demangle)
+	name = symbol->print_name ();
+      else
+	name = symbol->linkage_name ();
+
 #if defined(TUI)
       /* NOTE: cagney/2003-02-13 The `tui_active' was previously
 	 `tui_version'.  */
