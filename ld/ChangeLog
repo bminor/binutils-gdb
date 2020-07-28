@@ -1,5 +1,12 @@
 2020-07-28  Alan Modra  <amodra@gmail.com>
 
+	* ldlang.c (lang_check): Don't complain about relocs or merge
+	attributes from --just-symbols input.
+	* testsuite/ld-misc/just-symbols.exp: Just dump .data section.
+	Don't run test on a number of targets.
+
+2020-07-28  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-misc/just-symbols-1.dd: Revert last change.
 
 2020-07-27  Alan Modra  <amodra@gmail.com>

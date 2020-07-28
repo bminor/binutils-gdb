@@ -20,7 +20,13 @@
 #
 
 # SH/PE targets complain about zero VMA.
-if { [istarget sh-*-pe] } {
+# i386-msdos doesn't have .data
+# tic30-coff has a weird 32-bit reloc that divides sym value by four
+# alpha-dec-vms wants a bunch of libs to link
+if { [istarget sh-*-pe]
+     || [istarget *-*-msdos]
+     || [istarget *c30-*-*]
+     || [istarget alpha-*-vms] } {
     return
 }
 
@@ -49,13 +55,13 @@ run_ld_link_tests [list \
      "$LDFLAGS -e 0 -T just-symbols.ld --just-symbols=tmpdir/just-symbols-0.o" "" \
      "" \
      {just-symbols-1.s} \
-     {{objdump -s just-symbols-1.dd}} \
+     {{objdump {-s -j .data} just-symbols-1.dd}} \
      "just-symbols-1obj"] \
     [list "Executable with --just-symbols test" \
      "$LDFLAGS -e 0 -T just-symbols.ld --just-symbols=tmpdir/just-symbols-0" "" \
      "" \
      {just-symbols-1.s} \
-     {{objdump -s just-symbols-1.dd}} \
+     {{objdump {-s -j .data} just-symbols-1.dd}} \
      "just-symbols-1exe"] \
 ]
 

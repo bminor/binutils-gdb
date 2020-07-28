@@ -7001,8 +7001,9 @@ lang_check (void)
 	 input format may not have equivalent representations in
 	 the output format (and besides BFD does not translate
 	 relocs for other link purposes than a final link).  */
-      if ((bfd_link_relocatable (&link_info)
-	   || link_info.emitrelocations)
+      if (!file->flags.just_syms
+	  && (bfd_link_relocatable (&link_info)
+	      || link_info.emitrelocations)
 	  && (compatible == NULL
 	      || (bfd_get_flavour (input_bfd)
 		  != bfd_get_flavour (link_info.output_bfd)))
@@ -7026,8 +7027,9 @@ lang_check (void)
 
       /* If the input bfd has no contents, it shouldn't set the
 	 private data of the output bfd.  */
-      else if ((input_bfd->flags & DYNAMIC) != 0
-	       || bfd_count_sections (input_bfd) != 0)
+      else if (!file->flags.just_syms
+	       && ((input_bfd->flags & DYNAMIC) != 0
+		   || bfd_count_sections (input_bfd) != 0))
 	{
 	  bfd_error_handler_type pfn = NULL;
 
