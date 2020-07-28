@@ -1,3 +1,14 @@
+2020-07-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26301
+	* pkg.m4 (PKG_CHECK_MODULES): Add AC_TRY_LINK to check if
+	$pkg_cv_[]$1[]_LIBS works.
+
+2020-07-24  Aaron Merey  <amerey@redhat.com>
+
+	* debuginfod.m4: use PKG_CHECK_MODULES.
+	* pkg.m4: New file.
+
 2020-07-04  Nick Clifton  <nickc@redhat.com>
 
 	Binutils 2.35 branch created.

@@ -1,7 +1,5 @@
 2020-07-24  Aaron Merey  <amerey@redhat.com>
 
-	* config/debuginfod.m4: use PKG_CHECK_MODULES.
-	* config/pkg.m4: New file.
 	* configure: Rebuild.
 	* configure.ac: Remove AC_DEBUGINFOD.
 
