@@ -207,6 +207,8 @@ proc setup_exec { arg_bad } {
 			{DW_AT_type :${int_label}}
 			{DW_AT_location {
 			    DW_OP_GNU_variable_value ${var_a_label}
+			    DW_OP_const1s 0
+			    DW_OP_or
 			    DW_OP_stack_value
 			} SPECIAL_expr}
 		    }

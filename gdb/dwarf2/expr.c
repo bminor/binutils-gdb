@@ -1270,7 +1270,8 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	                                                this->ref_addr_size,
 							byte_order);
 	    op_ptr += this->ref_addr_size;
-	    result_val = this->dwarf_variable_value (sect_off);
+	    result_val = value_cast (address_type,
+				     this->dwarf_variable_value (sect_off));
 	  }
 	  break;
 	

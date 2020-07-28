@@ -1,3 +1,8 @@
+2020-07-28  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf2/expr.c (dwarf_expr_context::execute_stack_op)
+	<DW_OP_GNU_variable_value>: Cast to address type.
+
 2020-07-28  Kamil Rytarowski  <n54@gmx.com>
 
 	* nbsd-nat.h (nbsd_nat_target::xfer_partial): New declaration.
