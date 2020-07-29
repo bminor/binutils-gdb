@@ -2192,6 +2192,7 @@ ldelf_before_place_orphans (void)
 	      if (discarded_section (linked_to_sec))
 		{
 		  isec->output_section = bfd_abs_section_ptr;
+		  isec->flags |= SEC_EXCLUDE;
 		  break;
 		}
 	  }
