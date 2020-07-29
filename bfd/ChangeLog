@@ -1,3 +1,8 @@
+2020-07-29  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (bfd_elf_final_link): Don't segfault on local dynsyms
+	defined in excluded sections.
+
 2020-07-28  Alan Modra  <amodra@gmail.com>
 
 	* elf.c (assign_section_numbers): Comment.  Don't segfault on

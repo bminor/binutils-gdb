@@ -12599,10 +12599,13 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		 the original st_name with the dynstr_index.  */
 	      sym = e->isym;
 	      sym.st_other &= ~ELF_ST_VISIBILITY (-1);
+	      sym.st_shndx = SHN_UNDEF;
 
 	      s = bfd_section_from_elf_index (e->input_bfd,
 					      e->isym.st_shndx);
-	      if (s != NULL)
+	      if (s != NULL
+		  && s->output_section != NULL
+		  && elf_section_data (s->output_section) != NULL)
 		{
 		  sym.st_shndx =
 		    elf_section_data (s->output_section)->this_idx;
