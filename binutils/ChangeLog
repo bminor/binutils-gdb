@@ -1,5 +1,27 @@
 2020-07-29  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* testsuite/binutils-all/mips/global-local-symtab-sort-o32.d:
+	New test.
+	* testsuite/binutils-all/mips/global-local-symtab-sort-o32t.d:
+	New test.
+	* testsuite/binutils-all/mips/global-local-symtab-sort-n32.d:
+	New test.
+	* testsuite/binutils-all/mips/global-local-symtab-sort-n32t.d:
+	New test.
+	* testsuite/binutils-all/mips/global-local-symtab-sort-n64.d:
+	New test.
+	* testsuite/binutils-all/mips/global-local-symtab-sort-n64t.d:
+	New test.
+	* testsuite/binutils-all/mips/global-local-symtab-final-o32.d:
+	New test.
+	* testsuite/binutils-all/mips/global-local-symtab-final-n32.d:
+	New test.
+	* testsuite/binutils-all/mips/global-local-symtab-final-n64.d:
+	New test.
+	* testsuite/binutils-all/mips/mips.exp: Run the new tests.
+
+2020-07-29  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* testsuite/binutils-all/mips/global-local-symtab-o32.d: New
 	test.
 	* testsuite/binutils-all/mips/global-local-symtab-o32t.d: New

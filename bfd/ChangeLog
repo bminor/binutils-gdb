@@ -1,5 +1,12 @@
 2020-07-29  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* elflink.c (bfd_elf_final_link): Give local symbols a name if
+	so requested.
+	* elfxx-mips.c (_bfd_mips_elf_name_local_section_symbols): Only
+	return TRUE if making ET_REL output.
+
+2020-07-29  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* elf-bfd.h (elf_backend_data): Add
 	`elf_backend_elfsym_local_is_section' member.
 	* elfxx-target.h (elf_backend_elfsym_local_is_section): New

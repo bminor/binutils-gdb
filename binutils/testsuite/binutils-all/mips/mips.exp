@@ -252,3 +252,9 @@ run_dump_test_n32 "mips-reginfo-n32"
 run_dump_test_o32 "global-local-symtab-o32${tmips}"
 run_dump_test_n32 "global-local-symtab-n32${tmips}"
 run_dump_test_n64 "global-local-symtab-n64"
+run_dump_test_o32 "global-local-symtab-sort-o32${tmips}"
+run_dump_test_n32 "global-local-symtab-sort-n32${tmips}"
+run_dump_test_n64 "global-local-symtab-sort-n64${tmips}"
+run_dump_test_o32 "global-local-symtab-final-o32" useld
+run_dump_test_n32 "global-local-symtab-final-n32" useld
+run_dump_test_n64 "global-local-symtab-final-n64" useld

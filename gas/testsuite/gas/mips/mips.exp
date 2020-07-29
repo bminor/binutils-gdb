@@ -2094,8 +2094,11 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "insn-isa-mode"
     run_dump_test "insn-isa-mode"
     run_dump_test "global-local-symtab-o32${tmips}"
+    run_dump_test "global-local-symtab-sort-o32${tmips}"
     if $has_newabi {
 	run_dump_test "global-local-symtab-n32${tmips}"
 	run_dump_test "global-local-symtab-n64"
+	run_dump_test "global-local-symtab-sort-n32${tmips}"
+	run_dump_test "global-local-symtab-sort-n64${tmips}"
     }
 }
