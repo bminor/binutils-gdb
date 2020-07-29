@@ -1402,6 +1402,14 @@ struct elf_backend_data
   bfd_boolean (*elf_backend_write_section)
     (bfd *, struct bfd_link_info *, asection *, bfd_byte *);
 
+  /* This function, if defined, returns TRUE if it is section symbols
+     only that are considered local for the purpose of partitioning the
+     symbol table into local and global symbols.  This should be NULL
+     for most targets, in which case the correct thing will be done.
+     MIPS ELF, at least on the Irix 5, has special requirements.  */
+  bfd_boolean (*elf_backend_elfsym_local_is_section)
+    (bfd *);
+
   /* The level of IRIX compatibility we're striving for.
      MIPS ELF specific function.  */
   irix_compat_t (*elf_backend_mips_irix_compat)

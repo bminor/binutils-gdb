@@ -2092,4 +2092,10 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "pr14798${imips}"
     run_dump_test "insn-isa-mode"
+    run_dump_test "insn-isa-mode"
+    run_dump_test "global-local-symtab-o32${tmips}"
+    if $has_newabi {
+	run_dump_test "global-local-symtab-n32${tmips}"
+	run_dump_test "global-local-symtab-n64"
+    }
 }

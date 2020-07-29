@@ -1,3 +1,13 @@
+2020-07-29  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* testsuite/gas/mips/global-local-symtab-o32.d: New test.
+	* testsuite/gas/mips/global-local-symtab-o32t.d: New test.
+	* testsuite/gas/mips/global-local-symtab-n32.d: New test.
+	* testsuite/gas/mips/global-local-symtab-n32t.d: New test.
+	* testsuite/gas/mips/global-local-symtab-n64.d: New test.
+	* testsuite/gas/mips/global-local-symtab.s: New test source.
+	* testsuite/gas/mips/mips.exp: Run the new tests.
+
 2020-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26305

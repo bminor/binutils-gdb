@@ -248,6 +248,7 @@ if {[istarget *-*-openbsd*] } {
     set abi_asflags(o32) -32
     set irixemul 1
 }
+set tmips [expr $irixemul ? {""} : {"t"}]
 
 if { $linux_gnu } {
     run_ld_link_tests [list \
@@ -1657,3 +1658,8 @@ run_dump_test_n64 "pic-reloc-7" [list [list name (microMIPS)] \
 				      [list as "-mmicromips"]]
 
 run_dump_test_o32 "reloc-pcrel-r6"
+
+# Global/local symbol table split tests.
+run_dump_test_o32 "global-local-symtab-o32${tmips}"
+run_dump_test_n32 "global-local-symtab-n32${tmips}"
+run_dump_test_n64 "global-local-symtab-n64"

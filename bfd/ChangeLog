@@ -1,3 +1,20 @@
+2020-07-29  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* elf-bfd.h (elf_backend_data): Add
+	`elf_backend_elfsym_local_is_section' member.
+	* elfxx-target.h (elf_backend_elfsym_local_is_section): New
+	macro.
+	(elfNN_bed): Add `elf_backend_elfsym_local_is_section' member.
+	* elflink.c (bfd_elf_final_link): Use it to determine whether
+	set the `.symtab' section's `sh_info' value to the index of the
+	first non-local or non-section symbol.
+	* elf32-mips.c (mips_elf32_elfsym_local_is_section): New
+	function.
+	(elf_backend_elfsym_local_is_section): New macro.
+	* elfn32-mips.c (mips_elf_n32_elfsym_local_is_section): New
+	function.
+	(elf_backend_elfsym_local_is_section): New macro.
+
 2020-07-29  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (bfd_elf_final_link): Don't segfault on local dynsyms

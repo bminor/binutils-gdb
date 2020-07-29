@@ -12315,6 +12315,13 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	}
     }
 
+  /* On some targets like Irix 5 the symbol split between local and global
+     ones recorded in the sh_info field needs to be done between section
+     and all other symbols.  */
+  if (bed->elf_backend_elfsym_local_is_section
+      && bed->elf_backend_elfsym_local_is_section (abfd))
+    symtab_hdr->sh_info = bfd_get_symcount (abfd);
+
   /* Allocate some memory to hold information read in from the input
      files.  */
   if (max_contents_size != 0)
@@ -12541,7 +12548,8 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
      converted to local in a version script.  */
 
   /* The sh_info field records the index of the first non local symbol.  */
-  symtab_hdr->sh_info = bfd_get_symcount (abfd);
+  if (!symtab_hdr->sh_info)
+    symtab_hdr->sh_info = bfd_get_symcount (abfd);
 
   if (dynamic
       && htab->dynsym != NULL
