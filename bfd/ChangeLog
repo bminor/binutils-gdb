@@ -1,3 +1,10 @@
+2020-07-30  Szabolcs Nagy  <szabolcs.nagy@arm.com>
+
+	PR ld/26312
+	* elfnn-aarch64.c (elfNN_aarch64_init_small_plt0_entry): Set sh_entsize
+	to 0.
+	(elfNN_aarch64_finish_dynamic_sections): Remove sh_entsize setting.
+
 2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* bfd.m4 (BFD_SYS_PROCFS_H): New macro.
