@@ -115,13 +115,13 @@ if ![runto_main] {
     return -1
 }
 
-gdb_breakpoint "bar1"
+gdb_breakpoint "$srcfile:27"
 gdb_continue_to_breakpoint "bar1" "\[^\r\n\]*:27\r\n.*"
 
 gdb_test "n" "foo \\(2\\);" "bar1, 1st next"
 gdb_test "n" "foo \\(4\\);" "bar1, 2nd next"
 
-gdb_breakpoint "bar2"
+gdb_breakpoint "$srcfile:41"
 gdb_continue_to_breakpoint "bar2" "\[^\r\n\]*:41\r\n.*"
 
 gdb_test "n" "foo \\(2\\);" "bar2, 1st next"

@@ -1,3 +1,8 @@
+2020-07-29  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.dwarf2/dw2-line-number-zero.exp: Set breakpoints on lines
+	rather than function name.
+
 2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR symtab/26270:
