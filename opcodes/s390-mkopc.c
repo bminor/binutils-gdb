@@ -240,7 +240,8 @@ insertExpandedMnemonic (char *opcode, char *mnemonic, char *format,
       ext_table = s390_crb_extensions;
       ext_table_length = NUM_CRB_EXTENSIONS;
       break;
-    default: fprintf (stderr, "Unknown tag char: %c\n", *tag);
+    default:
+      abort ();			/* Should be unreachable.  */
     }
 
   for (i = 0; i < ext_table_length; i++)

@@ -1,3 +1,9 @@
+2020-07-29  Andreas Arnez  <arnez@linux.ibm.com>
+
+	* s390-mkopc.c (insertExpandedMnemonic): Handle unreachable
+	default case with abort() instead of printing an error message and
+	continuing, to avoid a maybe-uninitialized warning.
+
 2020-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/de.po: Updated German translation.
