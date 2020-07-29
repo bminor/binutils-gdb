@@ -76,9 +76,10 @@ proc selftest_setup { executable function } {
 	return -1
     }
 
-    # Set a breakpoint at main
+    # Set a breakpoint at main.  Allow more than one location, as
+    # workaround for PR26096 - "gdb sets breakpoint at cold clone".
     gdb_test "break $function" \
-            "Breakpoint.*at.* file.*, line.*" \
+            "Breakpoint.*at.* (file.*, line|locations).*" \
             "breakpoint in $function"
 
     # run yourself
