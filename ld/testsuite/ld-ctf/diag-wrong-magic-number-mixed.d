@@ -3,7 +3,7 @@
 #source: B.c
 #ld: -shared --ctf-variables
 #name: Diagnostics - Wrong magic number mixed with valid CTF sections
-#warning: CTF section in .* not loaded; its types will be discarded: .Buffer does not contain CTF data.
+#warning: CTF section in .* not loaded; its types will be discarded: Buffer does not contain CTF data
 
 .*: +file format .*
 

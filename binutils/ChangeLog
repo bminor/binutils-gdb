@@ -1,5 +1,10 @@
 2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
 
+	* objdump.c (dump_ctf_errs): Unquote CTF error messages.
+	* readelf.c (dump_ctf_errs): Likewise.
+
+2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
+
 	* objdump.c (dump_ctf_archive_member): Move error-
 	reporting...
 	(dump_ctf_errs): ... into this separate function.

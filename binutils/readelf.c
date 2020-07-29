@@ -14249,7 +14249,7 @@ dump_ctf_errs (ctf_file_t *fp)
   /* Dump accumulated errors and warnings.  */
   while ((errtext = ctf_errwarning_next (fp, &it, &is_warning, &err)) != NULL)
     {
-      error (_("%s: `%s'"), is_warning ? _("warning"): _("error"),
+      error (_("%s: %s"), is_warning ? _("warning"): _("error"),
 	     errtext);
       free (errtext);
     }

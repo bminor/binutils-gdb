@@ -1,5 +1,19 @@
 2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
 
+	* ldlang.c (dump_ctf_errs): Unquote CTF error messages.
+	(ldlang_open_ctf): Likewise.
+	(lang_merge_ctf): Likewise.
+	(lang_write_ctf): Likewise.
+	* testsuite/ld-ctf/diag-ctf-version-f.d: Adjust.
+	* testsuite/ld-ctf/diag-cttname-invalid.d: Adjust.
+	* testsuite/ld-ctf/diag-decompression-failure.d: Adjust.
+	* testsuite/ld-ctf/diag-parname.d: Adjust.
+	* testsuite/ld-ctf/diag-unsupported-flag.d: Adjust.
+	* testsuite/ld-ctf/diag-wrong-magic-number-mixed.d: Adjust.
+	* testsuite/ld-ctf/diag-wrong-magic-number.d: Adjust.
+
+2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
+
 	* ldlang.c (lang_ctf_errs_warnings): Support calls with NULL fp.
 	Adjust for new err parameter to ctf_errwarning_next.  Only
 	check for assertion failures when fp is non-NULL.

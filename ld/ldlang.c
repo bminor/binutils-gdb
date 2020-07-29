@@ -3683,7 +3683,7 @@ lang_ctf_errs_warnings (ctf_file_t *fp)
 
   while ((text = ctf_errwarning_next (fp, &i, &is_warning, &err)) != NULL)
     {
-      einfo (_("%s: `%s'\n"), is_warning ? _("CTF warning"): _("CTF error"),
+      einfo (_("%s: %s\n"), is_warning ? _("CTF warning"): _("CTF error"),
 	     text);
       free (text);
     }
@@ -3724,7 +3724,7 @@ ldlang_open_ctf (void)
 	    {
 	      lang_ctf_errs_warnings (NULL);
 	      einfo (_("%P: warning: CTF section in %pB not loaded; "
-		       "its types will be discarded: `%s'\n"), file->the_bfd,
+		       "its types will be discarded: %s\n"), file->the_bfd,
 		     ctf_errmsg (err));
 	    }
 	  continue;
@@ -3814,7 +3814,7 @@ lang_merge_ctf (void)
     {
       lang_ctf_errs_warnings (ctf_output);
       einfo (_("%P: warning: CTF linking failed; "
-	       "output will have no CTF section: `%s'\n"),
+	       "output will have no CTF section: %s\n"),
 	     ctf_errmsg (ctf_errno (ctf_output)));
       if (output_sect)
 	{
@@ -3874,7 +3874,7 @@ lang_write_ctf (int late)
       if (!output_sect->contents)
 	{
 	  einfo (_("%P: warning: CTF section emission failed; "
-		   "output will have no CTF section: `%s'\n"),
+		   "output will have no CTF section: %s\n"),
 		 ctf_errmsg (ctf_errno (ctf_output)));
 	  output_sect->size = 0;
 	  output_sect->flags |= SEC_EXCLUDE;
