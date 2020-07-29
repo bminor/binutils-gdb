@@ -9512,8 +9512,11 @@ elfNN_aarch64_init_small_plt0_entry (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   memcpy (htab->root.splt->contents, htab->plt0_entry,
 	  htab->plt_header_size);
-  elf_section_data (htab->root.splt->output_section)->this_hdr.sh_entsize =
-    htab->plt_header_size;
+
+  /* PR 26312: Explicitly set the sh_entsize to 0 so that
+     consumers do not think that the section contains fixed
+     sized objects.  */
+  elf_section_data (htab->root.splt->output_section)->this_hdr.sh_entsize = 0;
 
   plt_got_2nd_ent = (htab->root.sgotplt->output_section->vma
 		  + htab->root.sgotplt->output_offset
@@ -9614,10 +9617,6 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
   if (htab->root.splt && htab->root.splt->size > 0)
     {
       elfNN_aarch64_init_small_plt0_entry (output_bfd, htab);
-
-      elf_section_data (htab->root.splt->output_section)->
-	this_hdr.sh_entsize = htab->plt_entry_size;
-
 
       if (htab->root.tlsdesc_plt && !(info->flags & DF_BIND_NOW))
 	{
