@@ -1,3 +1,8 @@
+2020-07-29  Alan Modra  <amodra@gmail.com>
+
+	* ldelf.c (ldelf_before_place_orphans): Set SEC_EXCLUDE for
+	discarded sections.
+
 2020-07-28  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (lang_check): Don't complain about relocs or merge
