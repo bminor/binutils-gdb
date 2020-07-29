@@ -1,3 +1,8 @@
+2020-07-28  Caroline Tice  <cmtice@google.com>
+
+        * dwarf2.h (enum dwarf_sect_v5): A new enum section for	the
+	sections in a DWARF 5 DWP file (DWP version 5).
+
 2020-07-22  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-api.h (CTF_LINK_NONDEDUP): New, turn off the
