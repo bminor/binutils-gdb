@@ -518,14 +518,15 @@ s390_displaced_step_fixup (struct gdbarch *gdbarch,
 			paddress (gdbarch, pc), insnlen, (int) amode);
 
   /* Handle absolute branch and save instructions.  */
-  if (is_rr (insn, op_basr, &r1, &r2)
+  int op_basr_p = is_rr (insn, op_basr, &r1, &r2);
+  if (op_basr_p
       || is_rx (insn, op_bas, &r1, &d2, &x2, &b2))
     {
       /* Recompute saved return address in R1.  */
       regcache_cooked_write_unsigned (regs, S390_R0_REGNUM + r1,
 				      amode | (from + insnlen));
       /* Update PC iff the instruction doesn't actually branch.  */
-      if (insn[0] == op_basr && r2 == 0)
+      if (op_basr_p && r2 == 0)
 	regcache_write_pc (regs, from + insnlen);
     }
 
