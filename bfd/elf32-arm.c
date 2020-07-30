@@ -3390,9 +3390,6 @@ struct elf32_arm_link_hash_table
     bfd_vma offset;
   } tls_ldm_got;
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   /* For convenience in allocate_dynrelocs.  */
   bfd * obfd;
 
@@ -15316,7 +15313,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (r_symndx < symtab_hdr->sh_info)
 	    {
 	      /* A local symbol.  */
-	      isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	      isym = bfd_sym_from_r_symndx (&htab->root.sym_cache,
 					    abfd, r_symndx);
 	      if (isym == NULL)
 		return FALSE;
@@ -16871,7 +16868,8 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 		  s->size += 4;
 		}
 
-	      isym = bfd_sym_from_r_symndx (&htab->sym_cache, ibfd, symndx);
+	      isym = bfd_sym_from_r_symndx (&htab->root.sym_cache, ibfd,
+					    symndx);
 	      if (isym == NULL)
 		return FALSE;
 

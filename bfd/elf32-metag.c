@@ -823,9 +823,6 @@ struct elf_metag_link_hash_table
   asection **input_list;
   Elf_Internal_Sym **all_local_syms;
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   /* Data for LDM relocations.  */
   union
   {
@@ -2098,7 +2095,7 @@ elf_metag_check_relocs (bfd *abfd,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	  isym = bfd_sym_from_r_symndx (&htab->etab.sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
 	    return FALSE;

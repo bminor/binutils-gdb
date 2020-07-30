@@ -286,9 +286,6 @@ struct elf32_hppa_link_hash_table
   /* Set if we need a .plt stub to support lazy dynamic linking.  */
   unsigned int need_plt_stub:1;
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   /* Data for LDM relocations.  */
   union
   {
@@ -1465,7 +1462,7 @@ elf32_hppa_check_relocs (bfd *abfd,
 		  void *vpp;
 		  Elf_Internal_Sym *isym;
 
-		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		  isym = bfd_sym_from_r_symndx (&htab->etab.sym_cache,
 						abfd, r_symndx);
 		  if (isym == NULL)
 		    return FALSE;
@@ -4038,7 +4035,7 @@ elf32_hppa_relocate_section (bfd *output_bfd,
 		else
 		  {
 		    Elf_Internal_Sym *isym
-		      = bfd_sym_from_r_symndx (&htab->sym_cache,
+		      = bfd_sym_from_r_symndx (&htab->etab.sym_cache,
 					       input_bfd, r_symndx);
 		    if (isym == NULL)
 		      return FALSE;

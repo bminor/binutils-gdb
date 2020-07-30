@@ -663,9 +663,6 @@ struct elf_s390_link_hash_table
     bfd_vma offset;
   } tls_ldm_got;
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   /* Options passed from the linker.  */
   struct s390_elf_params *params;
 };
@@ -852,7 +849,7 @@ elf_s390_check_relocs (bfd *abfd,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
 	    return FALSE;
@@ -1216,7 +1213,7 @@ elf_s390_check_relocs (bfd *abfd,
 		  asection *s;
 		  void *vpp;
 
-		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 						abfd, r_symndx);
 		  if (isym == NULL)
 		    return FALSE;
@@ -2258,7 +2255,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 				  & 0xff00f000) == 0xe300c000
 			      && bfd_get_8 (input_bfd,
 					    contents + rel->r_offset + 3) == 0x04))
-		      && (isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		      && (isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 							input_bfd, r_symndx))
 		      && isym->st_shndx != SHN_ABS
 		      && h != htab->elf.hdynamic
@@ -3572,7 +3569,7 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 	    if (local_plt[i].plt.offset != (bfd_vma) -1)
 	      {
 		asection *sec = local_plt[i].sec;
-		isym = bfd_sym_from_r_symndx (&htab->sym_cache, ibfd, i);
+		isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache, ibfd, i);
 		if (isym == NULL)
 		  return FALSE;
 

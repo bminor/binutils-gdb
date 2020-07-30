@@ -468,9 +468,6 @@ struct elf_x86_link_hash_table
   /* The amount of space used by the jump slots in the GOT.  */
   bfd_vma sgotplt_jump_table_size;
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   /* _TLS_MODULE_BASE_ symbol.  */
   struct bfd_link_hash_entry *tls_module_base;
 

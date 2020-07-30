@@ -3696,8 +3696,6 @@ nds32_elf_link_hash_table_create (bfd *abfd)
       return NULL;
     }
 
-  ret->sdynbss = NULL;
-  ret->srelbss = NULL;
   ret->sym_ld_script = NULL;
 
   return &ret->root.root;
@@ -3833,7 +3831,7 @@ nds32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	 initialize them at run time.  The linker script puts the .dynbss
 	 section into the .bss section of the final image.  */
       s = bfd_make_section (abfd, ".dynbss");
-      htab->sdynbss = s;
+      htab->root.sdynbss = s;
       if (s == NULL
 	  || !bfd_set_section_flags (s, SEC_ALLOC | SEC_LINKER_CREATED))
 	return FALSE;
@@ -3852,7 +3850,7 @@ nds32_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	{
 	  s = bfd_make_section (abfd, (bed->default_use_rela_p
 				       ? ".rela.bss" : ".rel.bss"));
-	  htab->srelbss = s;
+	  htab->root.srelbss = s;
 	  if (s == NULL
 	      || !bfd_set_section_flags (s, flags | SEC_READONLY)
 	      || !bfd_set_section_alignment (s, ptralign))
@@ -3988,7 +3986,7 @@ nds32_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
      same memory location for the variable.  */
 
   htab = nds32_elf_hash_table (info);
-  s = htab->sdynbss;
+  s = htab->root.sdynbss;
   BFD_ASSERT (s != NULL);
 
   /* We must generate a R_NDS32_COPY reloc to tell the dynamic linker
@@ -3999,7 +3997,7 @@ nds32_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
     {
       asection *srel;
 
-      srel = htab->srelbss;
+      srel = htab->root.srelbss;
       BFD_ASSERT (srel != NULL);
       srel->size += sizeof (Elf32_External_Rela);
       h->needs_copy = 1;
@@ -7277,7 +7275,8 @@ nds32_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  void *vpp;
 
 		  Elf_Internal_Sym *isym;
-		  isym = bfd_sym_from_r_symndx (&htab->sym_cache, abfd, r_symndx);
+		  isym = bfd_sym_from_r_symndx (&htab->root.sym_cache,
+						abfd, r_symndx);
 		  if (isym == NULL)
 		    return FALSE;
 

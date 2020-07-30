@@ -889,9 +889,6 @@ struct elf_m68k_link_hash_table
 {
   struct elf_link_hash_table root;
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   /* The PLT format used by this link, or NULL if the format has not
      yet been chosen.  */
   const struct elf_m68k_plt_info *plt_info;
@@ -2836,7 +2833,7 @@ elf_m68k_check_relocs (bfd *abfd,
 		      void *vpp;
 		      Elf_Internal_Sym *isym;
 
-		      isym = bfd_sym_from_r_symndx (&elf_m68k_hash_table (info)->sym_cache,
+		      isym = bfd_sym_from_r_symndx (&elf_m68k_hash_table (info)->root.sym_cache,
 						    abfd, r_symndx);
 		      if (isym == NULL)
 			return FALSE;

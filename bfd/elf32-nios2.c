@@ -1808,9 +1808,6 @@ struct elf32_nios2_link_hash_table
       bfd_vma offset;
     } tls_ldm_got;
 
-    /* Small local sym cache.  */
-    struct sym_cache sym_cache;
-
     bfd_vma res_n_size;
   };
 
@@ -4902,7 +4899,7 @@ nios2_elf32_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  void *vpp;
 		  Elf_Internal_Sym *isym;
 
-		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		  isym = bfd_sym_from_r_symndx (&htab->root.sym_cache,
 						abfd, r_symndx);
 		  if (isym == NULL)
 		    return FALSE;

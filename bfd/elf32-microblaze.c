@@ -744,9 +744,6 @@ struct elf32_mb_link_hash_table
 {
   struct elf_link_hash_table elf;
 
-  /* Small local sym to section mapping cache.  */
-  struct sym_cache sym_sec;
-
   /* TLS Local Dynamic GOT Entry */
   union {
     bfd_signed_vma refcount;
@@ -2523,7 +2520,7 @@ microblaze_elf_check_relocs (bfd * abfd,
 		    Elf_Internal_Sym *isym;
 		    void *vpp;
 
-		    isym = bfd_sym_from_r_symndx (&htab->sym_sec,
+		    isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 						  abfd, r_symndx);
 		    if (isym == NULL)
 		      return FALSE;

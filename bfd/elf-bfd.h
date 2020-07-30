@@ -549,6 +549,16 @@ enum elf_target_os
   is_nacl	/* Native Client.  */
 };
 
+/* Used by bfd_sym_from_r_symndx to cache a small number of local
+   symbols.  */
+#define LOCAL_SYM_CACHE_SIZE 32
+struct sym_cache
+{
+  bfd *abfd;
+  unsigned long indx[LOCAL_SYM_CACHE_SIZE];
+  Elf_Internal_Sym sym[LOCAL_SYM_CACHE_SIZE];
+};
+
 /* ELF linker hash table.  */
 
 struct elf_link_hash_table
@@ -676,6 +686,9 @@ struct elf_link_hash_table
   /* A linked list of dynamic BFD's loaded in the link.  */
   struct elf_link_loaded_list *dyn_loaded;
 
+  /* Small local sym cache.  */
+  struct sym_cache sym_cache;
+
   /* Short-cuts to get to dynamic linker sections.  */
   asection *sgot;
   asection *sgotplt;
@@ -717,16 +730,6 @@ struct elf_link_hash_table
 /* Returns TRUE if the hash table is a struct elf_link_hash_table.  */
 #define is_elf_hash_table(htab)						\
   (((struct bfd_link_hash_table *) (htab))->type == bfd_link_elf_hash_table)
-
-/* Used by bfd_sym_from_r_symndx to cache a small number of local
-   symbols.  */
-#define LOCAL_SYM_CACHE_SIZE 32
-struct sym_cache
-{
-  bfd *abfd;
-  unsigned long indx[LOCAL_SYM_CACHE_SIZE];
-  Elf_Internal_Sym sym[LOCAL_SYM_CACHE_SIZE];
-};
 
 /* Constant information held for an ELF backend.  */
 

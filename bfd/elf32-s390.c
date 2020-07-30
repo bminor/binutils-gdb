@@ -746,9 +746,6 @@ struct elf_s390_link_hash_table
     bfd_signed_vma refcount;
     bfd_vma offset;
   } tls_ldm_got;
-
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
 };
 
 /* Get the s390 ELF linker hash table from a link_info structure.  */
@@ -930,7 +927,7 @@ elf_s390_check_relocs (bfd *abfd,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
 	    return FALSE;
@@ -1281,7 +1278,7 @@ elf_s390_check_relocs (bfd *abfd,
 		  asection *s;
 		  void *vpp;
 
-		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 						abfd, r_symndx);
 		  if (isym == NULL)
 		    return FALSE;
@@ -3722,7 +3719,7 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 	    if (local_plt[i].plt.offset != (bfd_vma) -1)
 	      {
 		asection *sec = local_plt[i].sec;
-		isym = bfd_sym_from_r_symndx (&htab->sym_cache, ibfd, i);
+		isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache, ibfd, i);
 		if (isym == NULL)
 		  return FALSE;
 

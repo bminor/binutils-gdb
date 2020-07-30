@@ -122,13 +122,6 @@ struct elf_nds32_link_hash_table
 {
   struct elf_link_hash_table root;
 
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *sdynbss;
-  asection *srelbss;
-
-  /* Small local sym to section mapping cache.  */
-  struct sym_cache sym_cache;
-
   /* Target dependent options.  */
   int relax_fp_as_gp;		/* --mrelax-omit-fp.  */
   int eliminate_gc_relocs;	/* --meliminate-gc-relocs.  */

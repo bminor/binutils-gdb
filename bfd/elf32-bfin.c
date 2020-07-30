@@ -4791,16 +4791,6 @@ struct bfin_link_hash_entry
   struct bfin_pcrel_relocs_copied *pcrel_relocs_copied;
 };
 
-/* bfin ELF linker hash table.  */
-
-struct bfin_link_hash_table
-{
-  struct elf_link_hash_table root;
-
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-};
-
 #define bfin_hash_entry(ent) ((struct bfin_link_hash_entry *) (ent))
 
 static struct bfd_hash_entry *
@@ -4829,15 +4819,14 @@ bfin_link_hash_newfunc (struct bfd_hash_entry *entry,
 static struct bfd_link_hash_table *
 bfin_link_hash_table_create (bfd * abfd)
 {
-  struct bfin_link_hash_table *ret;
-  size_t amt = sizeof (struct bfin_link_hash_table);
+  struct elf_link_hash_table *ret;
+  size_t amt = sizeof (struct elf_link_hash_table);
 
   ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
-  if (!_bfd_elf_link_hash_table_init (&ret->root, abfd,
-				      bfin_link_hash_newfunc,
+  if (!_bfd_elf_link_hash_table_init (ret, abfd, bfin_link_hash_newfunc,
 				      sizeof (struct elf_link_hash_entry),
 				      BFIN_ELF_DATA))
     {
@@ -4845,9 +4834,7 @@ bfin_link_hash_table_create (bfd * abfd)
       return NULL;
     }
 
-  ret->sym_cache.abfd = NULL;
-
-  return &ret->root.root;
+  return &ret->root;
 }
 
 /* The size in bytes of an entry in the procedure linkage table.  */
@@ -5418,10 +5405,6 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 
 #define bfd_elf32_bfd_is_local_label_name \
 					bfin_is_local_label_name
-#define bfin_hash_table(p) \
-  ((struct bfin_link_hash_table *) (p)->hash)
-
-
 
 #define elf_backend_create_dynamic_sections \
 					_bfd_elf_create_dynamic_sections

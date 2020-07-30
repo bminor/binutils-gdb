@@ -1208,9 +1208,6 @@ struct csky_elf_link_hash_table
 {
   struct elf_link_hash_table elf;
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   /* Data for R_CKCORE_TLS_LDM32 relocations.  */
   union
   {
@@ -2477,7 +2474,7 @@ csky_elf_check_relocs (bfd * abfd,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
 	    return FALSE;
@@ -2584,7 +2581,7 @@ csky_elf_check_relocs (bfd * abfd,
 		  asection *s;
 		  Elf_Internal_Sym *loc_isym;
 
-		  loc_isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		  loc_isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 						    abfd, r_symndx);
 		  if (loc_isym == NULL)
 		    return FALSE;

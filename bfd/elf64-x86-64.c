@@ -1371,7 +1371,7 @@ elf_x86_64_tls_transition (struct bfd_link_info *info, bfd *abfd,
 	    {
 	      Elf_Internal_Sym *isym;
 
-	      isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	      isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 					    abfd, r_symndx);
 	      name = bfd_elf_sym_name (abfd, symtab_hdr, isym, NULL);
 	    }
@@ -1559,7 +1559,7 @@ elf_x86_64_convert_load_reloc (bfd *abfd,
   if (h == NULL)
     {
       Elf_Internal_Sym *isym
-	= bfd_sym_from_r_symndx (&htab->sym_cache, abfd, r_symndx);
+	= bfd_sym_from_r_symndx (&htab->elf.sym_cache, abfd, r_symndx);
 
       /* Skip relocation against undefined symbols.  */
       if (isym->st_shndx == SHN_UNDEF)
@@ -1907,7 +1907,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
 	    goto error_return;
@@ -2308,7 +2308,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  asection *s;
 		  void **vpp;
 
-		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 						abfd, r_symndx);
 		  if (isym == NULL)
 		    goto error_return;

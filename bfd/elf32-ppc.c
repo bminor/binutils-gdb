@@ -2212,9 +2212,6 @@ struct ppc_elf_link_hash_table
   int plt_slot_size;
   /* The size of the first PLT entry.  */
   int plt_initial_entry_size;
-
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
 };
 
 /* Rename some of the generic section flags to better document how they
@@ -2952,7 +2949,7 @@ ppc_elf_check_relocs (bfd *abfd,
       ifunc = NULL;
       if (h == NULL && htab->elf.target_os != is_vxworks)
 	{
-	  Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	  Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 							  abfd, r_symndx);
 	  if (isym == NULL)
 	    return FALSE;
@@ -3335,7 +3332,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	      asection *s;
 	      Elf_Internal_Sym *isym;
 
-	      isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	      isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 					    abfd, r_symndx);
 	      if (isym == NULL)
 		return FALSE;
@@ -3495,7 +3492,7 @@ ppc_elf_check_relocs (bfd *abfd,
 		  void *vpp;
 		  Elf_Internal_Sym *isym;
 
-		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 						abfd, r_symndx);
 		  if (isym == NULL)
 		    return FALSE;

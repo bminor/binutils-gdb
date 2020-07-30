@@ -1,3 +1,95 @@
+2020-07-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (sym_cache): Moved before elf_link_hash_table.
+	(elf_link_hash_table): Add sym_cache.
+	* elf32-arm.c (elf32_arm_link_hash_table): Remove sym_cache.
+	(elf32_arm_check_relocs): Updated.
+	(elf32_arm_size_dynamic_sections): Likewise.
+	* elf32-bfin.c (bfin_link_hash_table): Removed.
+	(bfin_link_hash_newfunc): Updated.
+	(bfin_hash_table): Removed.
+	* elf32-csky.c (csky_elf_link_hash_table): Remove sym_cache.
+	(csky_elf_check_relocs): Updated.
+	* elf32-hppa.c (elf32_hppa_link_hash_table): Remove sym_cache.
+	(elf32_hppa_check_relocs): Updated.
+	* elf32-i386.c (elf_i386_tls_transition): Updated.
+	(elf_i386_convert_load_reloc): Likewise.
+	(elf_i386_check_relocs): Likewise.
+	* elf32-m32r.c (elf_m32r_link_hash_table): Removed.
+	(m32r_elf_hash_table): Updated.
+	(m32r_elf_link_hash_table_create): Likewise.
+	(m32r_elf_create_dynamic_sections): Likewise.
+	(m32r_elf_adjust_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(m32r_elf_size_dynamic_sections): Likewise.
+	(m32r_elf_relocate_section): Likewise.
+	(m32r_elf_finish_dynamic_symbol): Likewise.
+	(m32r_elf_check_relocs): Likewise.
+	* elf32-m68hc1x.h (m68hc11_elf_link_hash_table): Remove
+	sym_cache.
+	* elf32-m68k.c (elf_m68k_link_hash_table): Likewise.
+	(elf_m68k_check_relocs): Updated.
+	* elf32-metag.c (elf_metag_link_hash_table): Remove sym_cache.
+	(elf_metag_check_relocs): Updated.
+	* elf32-microblaze.c (elf32_mb_link_hash_table): Remove sym_sec.
+	(microblaze_elf_check_relocs): Updated.
+	* elf32-nds32.c (nds32_elf_link_hash_table_create): Likewise.
+	(nds32_elf_create_dynamic_sections): Likewise.
+	(nds32_elf_adjust_dynamic_symbol): Likewise.
+	(nds32_elf_check_relocs): Likewise.
+	* elf32-nds32.h (elf_nds32_link_hash_table): Remove sdynbss,
+	srelbss and aym_cache.
+	* elf32-nios2.c (elf32_nios2_link_hash_table): Remove sym_cache.
+	(nios2_elf32_check_relocs): Updated.
+	* elf32-or1k.c (elf_or1k_link_hash_table): Remove sym_sec.
+	(or1k_elf_check_relocs): Updated.
+	* elf32-ppc.c (ppc_elf_check_relocs): Remove sym_cache.
+	(ppc_elf_check_relocs): Updated.
+	* elf32-s390.c (elf_s390_link_hash_table): Remove sym_cache.
+	(elf_s390_check_relocs): Updated.
+	(elf_s390_finish_dynamic_sections): Likewise.
+	* elf32-sh.c (elf_sh_link_hash_table): Remove sdynbss, srelbss
+	and aym_cache.
+	(sh_elf_create_dynamic_sections): Updated.
+	(sh_elf_adjust_dynamic_symbol): Likewise.
+	(sh_elf_size_dynamic_sections): Likewise.
+	(sh_elf_check_relocs): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_link_hash_table): Remove sym_cache.
+	(elf32_tic6x_check_relocs): Updated.
+	* elf32-tilepro.c (tilepro_elf_link_hash_table): Removed.
+	(tilepro_elf_hash_table): Updated.
+	(tilepro_elf_link_hash_table_create): Likewise.
+	(tilepro_elf_check_relocs): Likewise.
+	(tilepro_elf_adjust_dynamic_symbol): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(tilepro_elf_size_dynamic_sections): Likewise.
+	(tilepro_elf_relocate_section): Likewise.
+	(tilepro_elf_finish_dynamic_symbol): Likewise.
+	(tilepro_finish_dyn): Likewise.
+	(tilepro_elf_finish_dynamic_sections): Likewise.
+	* elf64-ppc.c (ppc_link_hash_table): Remove sym_cache.
+	(ppc64_elf_before_check_relocs): Updated.
+	(ppc64_elf_check_relocs): Likewise.
+	* elf64-s390.c (elf_s390_link_hash_table): Remove sym_cache.
+	(elf_s390_check_relocs): Updated.
+	(elf_s390_relocate_section): Likewise.
+	(elf_s390_finish_dynamic_sections): Likewise.
+	* elf64-x86-64.c (elf_x86_64_tls_transition): Likewise.
+	(elf_x86_64_check_relocs): Likewise.
+	* elfnn-aarch64.c (elf_aarch64_link_hash_table): Remove
+	sym_cache.
+	(elfNN_aarch64_check_relocs): Updated.
+	* elfnn-riscv.c (riscv_elf_link_hash_table): Remove sym_cache.
+	(riscv_elf_check_relocs): Updated.
+	* elfxx-mips.c (mips_elf_link_hash_table): Remove sym_cache.
+	(mips_elf_resolve_got_page_ref): Updated.
+	* elfxx-sparc.c (_bfd_sparc_elf_check_relocs): Likewise.
+	* elfxx-sparc.h (_bfd_sparc_elf_link_hash_table): Remove
+	sym_cache.
+	* elfxx-tilegx.c (tilegx_elf_link_hash_table): Likewise.
+	(tilegx_elf_check_relocs): Updated.
+	* elfxx-x86.h (elf_x86_link_hash_table): Remove sym_cache.
+
 2020-07-29  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* elflink.c (bfd_elf_final_link): Give local symbols a name if

@@ -835,9 +835,6 @@ struct tilegx_elf_link_hash_table
   /* Whether LE transition has been disabled for some of the
      sections.  */
   bfd_boolean disable_le_transition;
-
-  /* Small local sym to section mapping cache.  */
-  struct sym_cache sym_cache;
 };
 
 
@@ -1979,7 +1976,7 @@ tilegx_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  void *vpp;
 		  Elf_Internal_Sym *isym;
 
-		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 						abfd, r_symndx);
 		  if (isym == NULL)
 		    return FALSE;

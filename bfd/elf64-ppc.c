@@ -3250,9 +3250,6 @@ struct ppc_link_hash_table
 
   /* Incremented every time we size stubs.  */
   unsigned int stub_iteration;
-
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
 };
 
 /* Rename some of the generic section flags to better document how they
@@ -4383,7 +4380,8 @@ ppc64_elf_before_check_relocs (bfd *ibfd, struct bfd_link_info *info)
 	      Elf_Internal_Sym *isym;
 	      asection *s;
 
-	      isym = bfd_sym_from_r_symndx (&htab->sym_cache, ibfd, r_symndx);
+	      isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache, ibfd,
+					    r_symndx);
 	      if (isym == NULL)
 		{
 		  if (elf_section_data (opd)->relocs != relocs)
@@ -4684,7 +4682,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	}
       else
 	{
-	  Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	  Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 							  abfd, r_symndx);
 	  if (isym == NULL)
 	    return FALSE;
@@ -4955,7 +4953,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      {
 		Elf_Internal_Sym *isym;
 
-		isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 					      abfd, r_symndx);
 		if (isym == NULL)
 		  return FALSE;
@@ -5231,7 +5229,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  void *vpp;
 		  Elf_Internal_Sym *isym;
 
-		  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 						abfd, r_symndx);
 		  if (isym == NULL)
 		    return FALSE;

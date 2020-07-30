@@ -46,9 +46,6 @@ struct elf32_tic6x_link_hash_table
   /* C6X specific command line arguments.  */
   struct elf32_tic6x_params params;
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   /* The output BFD, for convenience.  */
   bfd *obfd;
 
@@ -2729,7 +2726,7 @@ elf32_tic6x_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
 	    return FALSE;

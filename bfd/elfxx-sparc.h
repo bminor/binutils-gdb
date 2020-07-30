@@ -55,9 +55,6 @@ struct _bfd_sparc_elf_link_hash_table
     bfd_vma offset;
   } tls_ldm_got;
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   /* Used by local STT_GNU_IFUNC symbols.  */
   htab_t loc_hash_table;
   void *loc_hash_memory;

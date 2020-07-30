@@ -2643,9 +2643,6 @@ struct elf_aarch64_link_hash_table
   /* The bytes of the subsequent PLT entry.  */
   const bfd_byte *plt_entry;
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   /* For convenience in allocate_dynrelocs.  */
   bfd *obfd;
 
@@ -7610,7 +7607,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  /* A local symbol.  */
-	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+	  isym = bfd_sym_from_r_symndx (&htab->root.sym_cache,
 					abfd, r_symndx);
 	  if (isym == NULL)
 	    return FALSE;
@@ -7837,7 +7834,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		asection *s;
 		void **vpp;
 
-		isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+		isym = bfd_sym_from_r_symndx (&htab->root.sym_cache,
 					      abfd, r_symndx);
 		if (isym == NULL)
 		  return FALSE;

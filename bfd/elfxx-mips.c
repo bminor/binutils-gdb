@@ -527,9 +527,6 @@ struct mips_elf_link_hash_table
      returns null.  */
   asection *(*add_stub_section) (const char *, asection *, asection *);
 
-  /* Small local sym cache.  */
-  struct sym_cache sym_cache;
-
   /* Is the PLT header compressed?  */
   unsigned int plt_header_is_comp : 1;
 };
@@ -4401,7 +4398,7 @@ mips_elf_resolve_got_page_ref (void **refp, void *data)
       Elf_Internal_Sym *isym;
 
       /* Read in the symbol.  */
-      isym = bfd_sym_from_r_symndx (&htab->sym_cache, ref->u.abfd,
+      isym = bfd_sym_from_r_symndx (&htab->root.sym_cache, ref->u.abfd,
 				    ref->symndx);
       if (isym == NULL)
 	{
