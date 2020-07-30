@@ -1199,6 +1199,7 @@ enum
   PREFIX_EVEX_0F3A0A,
   PREFIX_EVEX_0F3A26,
   PREFIX_EVEX_0F3A27,
+  PREFIX_EVEX_0F3A42_W_0,
   PREFIX_EVEX_0F3A56,
   PREFIX_EVEX_0F3A57,
   PREFIX_EVEX_0F3A66,
@@ -3987,18 +3988,18 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_VEX_0F3850_W_0 */
   {
-    { "vpdpbuud",	{ XM, Vex, EXx }, 0 },
-    { "vpdpbsud",	{ XM, Vex, EXx }, 0 },
+    { "%XEvpdpbuud",	{ XM, Vex, EXx }, 0 },
+    { "%XEvpdpbsud",	{ XM, Vex, EXx }, 0 },
     { "%XVvpdpbusd",	{ XM, Vex, EXx }, 0 },
-    { "vpdpbssd",	{ XM, Vex, EXx }, 0 },
+    { "%XEvpdpbssd",	{ XM, Vex, EXx }, 0 },
   },
 
   /* PREFIX_VEX_0F3851_W_0 */
   {
-    { "vpdpbuuds",	{ XM, Vex, EXx }, 0 },
-    { "vpdpbsuds",	{ XM, Vex, EXx }, 0 },
+    { "%XEvpdpbuuds",	{ XM, Vex, EXx }, 0 },
+    { "%XEvpdpbsuds",	{ XM, Vex, EXx }, 0 },
     { "%XVvpdpbusds",	{ XM, Vex, EXx }, 0 },
-    { "vpdpbssds",	{ XM, Vex, EXx }, 0 },
+    { "%XEvpdpbssds",	{ XM, Vex, EXx }, 0 },
   },
   /* PREFIX_VEX_0F385C_X86_64_L_0_W_0 */
   {
@@ -4046,16 +4047,16 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_VEX_0F38D2_W_0 */
   {
-    { "vpdpwuud",	{ XM, Vex, EXx }, 0 },
-    { "vpdpwsud",	{ XM, Vex, EXx }, 0 },
-    { "vpdpwusd",	{ XM, Vex, EXx }, 0 },
+    { "%XEvpdpwuud",	{ XM, Vex, EXx }, 0 },
+    { "%XEvpdpwsud",	{ XM, Vex, EXx }, 0 },
+    { "%XEvpdpwusd",	{ XM, Vex, EXx }, 0 },
   },
 
   /* PREFIX_VEX_0F38D3_W_0 */
   {
-    { "vpdpwuuds",	{ XM, Vex, EXx }, 0 },
-    { "vpdpwsuds",	{ XM, Vex, EXx }, 0 },
-    { "vpdpwusds",	{ XM, Vex, EXx }, 0 },
+    { "%XEvpdpwuuds",	{ XM, Vex, EXx }, 0 },
+    { "%XEvpdpwsuds",	{ XM, Vex, EXx }, 0 },
+    { "%XEvpdpwusds",	{ XM, Vex, EXx }, 0 },
   },
 
   /* PREFIX_VEX_0F38CB */

@@ -529,8 +529,8 @@ static const struct dis386 evex_table[][256] = {
     /* D0 */
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { VEX_W_TABLE (VEX_W_0F38D2) },
+    { VEX_W_TABLE (VEX_W_0F38D3) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },

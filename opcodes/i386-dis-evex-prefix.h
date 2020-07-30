@@ -231,8 +231,8 @@
   },
   /* PREFIX_EVEX_0F3852 */
   {
-    { Bad_Opcode },
-    { "vdpbf16p%XS", { XM, Vex, EXx }, 0 },
+    { "vdpphp%XS",	{ XM, Vex, EXx }, 0 },
+    { "vdpbf16p%XS",	{ XM, Vex, EXx }, 0 },
     { VEX_W_TABLE (VEX_W_0F3852) },
     { "vp4dpws%XSd",	{ XM, Vex, Mxmm }, 0 },
   },
@@ -308,6 +308,12 @@
     { "vgetmants%XH",     { XMScalar, VexScalar, EXw, EXxEVexS, Ib }, 0 },
     { Bad_Opcode },
     { "vgetmants%XW",	{ XMScalar, VexScalar, EXdq, EXxEVexS, Ib }, 0 },
+  },
+  /* PREFIX_EVEX_0F3A42_W_0 */
+  {
+    { Bad_Opcode },
+    { "%XEvmpsadbw",	{ XM, Vex, EXx, Ib }, 0 },
+    { "vdbpsadbw",	{ XM, Vex, EXx, Ib }, 0 },
   },
   /* PREFIX_EVEX_0F3A56 */
   {

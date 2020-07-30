@@ -425,7 +425,7 @@
   },
   /* EVEX_W_0F3A42 */
   {
-    { "vdbpsadbw",	{ XM, Vex, EXx, Ib }, 0 },
+    { PREFIX_TABLE (PREFIX_EVEX_0F3A42_W_0) },
   },
   /* EVEX_W_0F3A43_L_n */
   {

@@ -2930,11 +2930,15 @@ vpdpwssd<vnni><sat>, 0x6652|<sat:opc>, <vnni:avx>_VNNI, Modrm|Space0F38|Src1VVVV
 
 // {AVX512,AVX}_VNNI instructions end
 
+<vnni:int8:int16:attr:reg:mem, +
+  $y:_VNNI_INT8:_VNNI_INT16:Vex::, +
+  $z:10_2:10_2:Masking|Broadcast|Disp8ShiftVL:RegZMM:Dword>
+
 // AVX-VNNI-INT8 instructions.
 
 <dpb:pfx, uu:, ss:f2, su:f3>
 
-vpdpb<dpb>d<sat>, 0x<dpb:pfx>50|<sat:opc>, AVX_VNNI_INT8, Modrm|Vex|Space0F38|Src1VVVV|VexW0|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+vpdpb<dpb>d<vnni><sat>, 0x<dpb:pfx>50|<sat:opc>, AVX<vnni:int8>, Modrm|Space0F38|Src1VVVV|VexW0|<vnni:attr>|CheckOperandSize|NoSuf, { RegXMM|RegYMM|<vnni:reg>|<vnni:mem>|Unspecified|BaseIndex, RegXMM|RegYMM|<vnni:reg>, RegXMM|RegYMM|<vnni:reg> }
 
 // AVX-VNNI-INT8 instructions end.
 
@@ -2942,12 +2946,13 @@ vpdpb<dpb>d<sat>, 0x<dpb:pfx>50|<sat:opc>, AVX_VNNI_INT8, Modrm|Vex|Space0F38|Sr
 
 <dpw:pfx, uu:, us:66, su:f3>
 
-vpdpw<dpw>d<sat>, 0x<dpw:pfx>d2|<sat:opc>, AVX_VNNI_INT16, Modrm|Vex|Space0F38|Src1VVVV|VexW0|CheckOperandSize|NoSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+vpdpw<dpw>d<vnni><sat>, 0x<dpw:pfx>d2|<sat:opc>, AVX<vnni:int16>, Modrm|Space0F38|Src1VVVV|VexW0|<vnni:attr>|CheckOperandSize|NoSuf, { RegXMM|RegYMM|<vnni:reg>|<vnni:mem>|Unspecified|BaseIndex, RegXMM|RegYMM|<vnni:reg>, RegXMM|RegYMM|<vnni:reg> }
 
 // AVX-VNNI-INT16 instructions end.
 
 <dpw>
 <dpb>
+<vnni>
 <sat>
 
 // AVX512_BITALG instructions
@@ -3422,3 +3427,10 @@ pop2, 0x8f/0, APX_F, Modrm|VexW0|EVexMap4|DstVVVV|ImplicitStackOp|No_bSuf|No_wSu
 pop2p, 0x8f/0, APX_F, Modrm|VexW1|EVexMap4|DstVVVV|ImplicitStackOp|No_bSuf|No_wSuf|No_lSuf|No_sSuf, { Reg64, Reg64 }
 
 // APX Push2/Pop2 instructions end.
+
+// AVX10.2 instructions.
+
+vdpphps, 0x52, AVX10_2, Modrm|Space0F38|Src1VVVV|VexW0|Masking|Broadcast|Disp8ShiftVL|CheckOperandSize|NoSuf, { RegXMM|RegYMM|RegZMM|Dword|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+vmpsadbw, 0xf342, AVX10_2, Modrm|Space0F3A|Src1VVVV|VexW0|Masking|Disp8ShiftVL|CheckOperandSize|NoSuf, { Imm8, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
+
+// AVX10.2 instructions end.
