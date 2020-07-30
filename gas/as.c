@@ -103,7 +103,7 @@ int verbose = 0;
 int flag_dwarf_cie_version = -1;
 
 /* The maximum level of DWARF DEBUG information we should manufacture.  */
-unsigned int dwarf_level = 0;
+unsigned int dwarf_level = 4;
 
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
 int flag_use_elf_stt_common = DEFAULT_GENERATE_ELF_STT_COMMON;
