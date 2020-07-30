@@ -1,3 +1,8 @@
+2020-07-31  Shahab Vahedi  <shahab@synopsys.com>
+
+	* scripttempl/elfarc.sc (.init_array): Keep ".init_array.*".
+	(.fini_array): Keep ".fini_array.*".
+
 2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* Makefile.am (AM_CPPFLAGS): Add LARGEFILE_CPPFLAGS.
