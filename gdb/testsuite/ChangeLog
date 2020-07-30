@@ -1,5 +1,14 @@
 2020-07-30  Tom de Vries  <tdevries@suse.de>
 
+	* lib/sym-info-cmds.exp (GDBInfoModuleSymbols::check_entry_1): Factor
+	out of ...
+	(GDBInfoModuleSymbols::check_entry): ... here.
+	(GDBInfoModuleSymbols::check_optional_entry): New proc.
+	* gdb.fortran/info-modules.exp: Use check_optional_entry for entries
+	related to __def_init_mod1_M1t1 / __vtype_mod1_M1t1 / __copy_mod1_M1t1.
+
+2020-07-30  Tom de Vries  <tdevries@suse.de>
+
 	* gdb.fortran/ptype-on-functions.exp: Make "_t" suffix on
 	"__class_some_module_Number_t" optional.
 

@@ -76,7 +76,7 @@ GDBInfoModuleSymbols::check_entry "${srcfile2}" "mod2" "22" \
     "void mod2::sub_m2_a\\(${integer4}, ${logical4}\\);"
 GDBInfoModuleSymbols::check_entry "${srcfile2}" "mod2" "30" \
     "${logical4} mod2::sub_m2_b\\(${real4}\\);"
-GDBInfoModuleSymbols::check_entry "${srcfile}" "mod1" "35" \
+GDBInfoModuleSymbols::check_optional_entry "${srcfile}" "mod1" "35" \
     "void mod1::__copy_mod1_M1t1\\(Type m1t1, Type m1t1\\);"
 GDBInfoModuleSymbols::check_entry "${srcfile}" "mod1" "25" \
     "void mod1::sub_m1_a\\(${integer4}\\);"
@@ -88,7 +88,7 @@ GDBInfoModuleSymbols::check_no_entry "${srcfile2}" ".*"
 GDBInfoModuleSymbols::run_command "info module functions -m mod1"
 GDBInfoModuleSymbols::check_header \
     "All functions in all modules matching regular expression \"mod1\":"
-GDBInfoModuleSymbols::check_entry "${srcfile}" "mod1" "35" \
+GDBInfoModuleSymbols::check_optional_entry "${srcfile}" "mod1" "35" \
     "void mod1::__copy_mod1_M1t1\\(Type m1t1, Type m1t1\\);"
 GDBInfoModuleSymbols::check_entry "${srcfile}" "mod1" "25" \
     "void mod1::sub_m1_a\\(${integer4}\\);"
@@ -117,9 +117,9 @@ GDBInfoModuleSymbols::check_entry "${srcfile2}" "mod2" "19" \
     "${integer4} mod2::mod2_var_1;"
 GDBInfoModuleSymbols::check_entry "${srcfile2}" "mod2" "20" \
     "${real4} mod2::mod2_var_2;"
-GDBInfoModuleSymbols::check_entry "${srcfile}" "mod1" "(35)?" \
+GDBInfoModuleSymbols::check_optional_entry "${srcfile}" "mod1" "(35)?" \
     "Type m1t1 mod1::__def_init_mod1_M1t1;"
-GDBInfoModuleSymbols::check_entry "${srcfile}" "mod1" "(35)?" \
+GDBInfoModuleSymbols::check_optional_entry "${srcfile}" "mod1" "(35)?" \
     "Type __vtype_mod1_M1t1 mod1::__vtab_mod1_M1t1;"
 GDBInfoModuleSymbols::check_entry "${srcfile}" "mod1" "21" \
     "${real4} mod1::mod1_var_1;"

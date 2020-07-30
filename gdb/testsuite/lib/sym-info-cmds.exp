@@ -421,7 +421,10 @@ namespace eval GDBInfoModuleSymbols {
     # If a matching entry is found then it is removed from the
     # _entries list, this allows us to check for duplicates using the
     # check_no_entry call.
-    proc check_entry { filename module lineno text { testname "" } } {
+    #
+    # If OPTIONAL, don't generate a FAIL for a mismatch, but use UNSUPPORTED
+    # instead.
+    proc check_entry_1 { filename module lineno text optional testname } {
 	variable _entries
 	variable _last_command
 
@@ -458,7 +461,21 @@ namespace eval GDBInfoModuleSymbols {
 	}
 
 	set _entries $new_entries
-	gdb_assert { $found_match } $testname
+	if { $optional && ! $found_match } {
+	    unsupported $testname
+	} else {
+	    gdb_assert { $found_match } $testname
+	}
+    }
+
+    # Call check_entry_1 with OPTIONAL == 0.
+    proc check_entry { filename module lineno text { testname "" } } {
+	check_entry_1 $filename $module $lineno $text 0 $testname
+    }
+
+    # Call check_entry_1 with OPTIONAL == 1.
+    proc check_optional_entry { filename module lineno text { testname "" } } {
+	check_entry_1 $filename $module $lineno $text 1 $testname
     }
 
     # Check that there is no entry in the _entries list matching
