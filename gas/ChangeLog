@@ -15,7 +15,7 @@
 
 2020-07-30  Nick Clifton  <nickc@redhat.com>
 
-	* as.c (dwarf_level): Initialise to 4 in case this is not set on
+	* as.c (dwarf_level): Initialise to 3 in case this is not set on
 	the command line.
 
 2020-07-29  Maciej W. Rozycki  <macro@linux-mips.org>
