@@ -875,6 +875,18 @@ typedef struct insn_template
 #define Opcode_SIMD_FloatD 0x1 /* Direction bit for SIMD fp insns. */
 #define Opcode_SIMD_IntD 0x10 /* Direction bit for SIMD int insns. */
 
+/* Pseudo prefixes.  */
+#define Prefix_Disp8		0	/* {disp8} */
+#define Prefix_Disp16		1	/* {disp16} */
+#define Prefix_Disp32		2	/* {disp32} */
+#define Prefix_Load		3	/* {load} */
+#define Prefix_Store		4	/* {store} */
+#define Prefix_VEX		5	/* {vex} */
+#define Prefix_VEX3		6	/* {vex3} */
+#define Prefix_EVEX		7	/* {evex} */
+#define Prefix_REX		8	/* {rex} */
+#define Prefix_NoOptimize	9	/* {nooptimize} */
+
   /* extension_opcode is the 3 bit extension for group <n> insns.
      This field is also used to store the 8-bit opcode suffix for the
      AMD 3DNow! instructions.
