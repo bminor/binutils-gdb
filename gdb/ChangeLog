@@ -1,3 +1,9 @@
+2020-07-30  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	PR ada/26318
+	* ada-lang.c (ada_modulus): Return 0 if property is not of const
+	kind.
+
 2020-07-30  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* breakpoint.c (set_breakpoint_condition): Do minor refactoring.

@@ -11452,7 +11452,14 @@ ada_is_modular_type (struct type *type)
 ULONGEST
 ada_modulus (struct type *type)
 {
-  return (ULONGEST) type->bounds ()->high.const_val () + 1;
+  const dynamic_prop &high = type->bounds ()->high;
+
+  if (high.kind () == PROP_CONST)
+    return (ULONGEST) high.const_val () + 1;
+
+  /* If TYPE is unresolved, the high bound might be a location list.  Return
+     0, for lack of a better value to return.  */
+  return 0;
 }
 
 
