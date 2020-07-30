@@ -30,10 +30,10 @@ if ![fortran_runto_main] then {
 }
 
 gdb_test "ptype some_module::get_number" \
-    "type = integer\\(kind=4\\) \\(Type __class_some_module_Number_t\\)"
+    "type = integer\\(kind=4\\) \\(Type __class_some_module_Number(_t)?\\)"
 
 gdb_test "ptype some_module::set_number" \
-    "type = void \\(Type __class_some_module_Number_t, integer\\(kind=4\\)\\)"
+    "type = void \\(Type __class_some_module_Number(_t)?, integer\\(kind=4\\)\\)"
 
 gdb_test "ptype is_bigger" \
     "type = logical\\(kind=4\\) \\(integer\\(kind=4\\), integer\\(kind=4\\)\\)"

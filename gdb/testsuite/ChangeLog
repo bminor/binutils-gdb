@@ -1,3 +1,8 @@
+2020-07-30  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.fortran/ptype-on-functions.exp: Make "_t" suffix on
+	"__class_some_module_Number_t" optional.
+
 2020-07-29  Tom de Vries  <tdevries@suse.de>
 
 	* lib/selftest-support.exp (selftest_setup): Allow breakpoint at
