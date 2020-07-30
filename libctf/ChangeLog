@@ -1,3 +1,15 @@
+2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
+
+	* configure.ac: Adjust package name to simply 'libctf': arbitrarily
+	declare this to be version 1.2.0.
+	* Makefile.am (AM_CPPFLAGS): Add @INCINTL@.
+	* Makefile.in: Regenerated.
+	* configure: Regenerated.
+	* ctf-intl.h: New file, lightly modified from opcodes/opintl.h.
+	* ctf-impl.h: Include it.
+	* ctf-error.r (_ctf_errlist_t): Mark strings as noop-translatable.
+	(ctf_errmsg): Actually translate them.
+
 2020-07-26  Eli Zaretskii  <eliz@gnu.org>
 
 	PR binutils/25155:

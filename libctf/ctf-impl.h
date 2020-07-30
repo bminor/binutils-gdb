@@ -36,6 +36,7 @@
 #include <elf.h>
 #include <bfd.h>
 #include "hashtab.h"
+#include "ctf-intl.h"
 
 #ifdef	__cplusplus
 extern "C"

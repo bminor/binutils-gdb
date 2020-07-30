@@ -45,7 +45,7 @@ static const union _ctf_errlist_t
 } _ctf_errlist =
   {
    {
-#define _CTF_STR(n, s) s,
+#define _CTF_STR(n, s) N_(s),
 #include "ctf-error.h"
 #undef _CTF_STR
    }
@@ -70,7 +70,7 @@ ctf_errmsg (int error)
   else
     str = (const char *) strerror (error);
 
-  return (str ? str : "Unknown error");
+  return (str ? gettext (str) : _("Unknown error"));
 }
 
 int

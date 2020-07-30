@@ -19,7 +19,7 @@ dnl <http://www.gnu.org/licenses/>.
 dnl
 
 AC_PREREQ(2.64)
-AC_INIT([libctf library], 1.2.0-pre)
+AC_INIT([libctf], 1.2.0)
 AC_CONFIG_SRCDIR(ctf-impl.h)
 AC_CONFIG_MACRO_DIR(../config)
 AC_CONFIG_MACRO_DIR(../bfd)
