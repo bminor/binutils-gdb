@@ -1,0 +1,40 @@
+# Copyright 2020 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test defining bad conditions for breakpoints.
+
+standard_testfile
+
+if {[prepare_for_testing "failed to prepare" ${binfile} ${srcfile}]} {
+    return
+}
+
+set bp_location [gdb_get_line_number "break-here"]
+gdb_breakpoint "$bp_location"
+set bpnum [get_integer_valueof "\$bpnum" 0 "get bpnum"]
+
+# Define a 'bad' condition.  The breakpoint should stay unconditional.
+gdb_test "cond $bpnum gibberish" \
+    "No symbol \"gibberish\" in current context." \
+    "attempt a bad condition"
+
+set fill "\[^\r\n\]*"
+
+gdb_test "info break" \
+    [multi_line \
+	 "Num${fill}What" \
+	 "${decimal}${fill}breakpoint${fill}keep y${fill}:${bp_location}"] \
+    "breakpoint is unconditional"
+

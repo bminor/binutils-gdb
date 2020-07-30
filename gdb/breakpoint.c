@@ -834,9 +834,6 @@ void
 set_breakpoint_condition (struct breakpoint *b, const char *exp,
 			  int from_tty)
 {
-  xfree (b->cond_string);
-  b->cond_string = NULL;
-
   if (is_watchpoint (b))
     {
       struct watchpoint *w = (struct watchpoint *) b;
@@ -859,17 +856,15 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
 
   if (*exp == 0)
     {
+      xfree (b->cond_string);
+      b->cond_string = nullptr;
+
       if (from_tty)
 	printf_filtered (_("Breakpoint %d now unconditional.\n"), b->number);
     }
   else
     {
       const char *arg = exp;
-
-      /* I don't know if it matters whether this is the string the user
-	 typed in or the decompiled expression.  */
-      b->cond_string = xstrdup (arg);
-      b->condition_not_parsed = 0;
 
       if (is_watchpoint (b))
 	{
@@ -896,6 +891,12 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
 		error (_("Junk at end of expression"));
 	    }
 	}
+
+      /* We know that the new condition parsed successfully.  The
+	 condition string of the breakpoint can be safely updated.  */
+      xfree (b->cond_string);
+      b->cond_string = xstrdup (exp);
+      b->condition_not_parsed = 0;
     }
   mark_breakpoint_modified (b);
 

@@ -1,3 +1,8 @@
+2020-07-30  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.base/condbreak-bad.c: New test.
+	* gdb.base/condbreak-bad.exp: New file.
+
 2020-07-30  Tom de Vries  <tdevries@suse.de>
 
 	* lib/sym-info-cmds.exp (GDBInfoModuleSymbols::check_entry_1): Factor
