@@ -1,3 +1,11 @@
+2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* largefile.m4 (ACX_LARGEFILE) <sparc-*-solaris*|i?86-*-solaris*>:
+	Check for <sys/procfs.h> incompatilibity with large-file support
+	on Solaris.
+	Only disable large-file support and perhaps plugins if needed.
+	Set, substitute LARGEFILE_CPPFLAGS if so.
+
 2020-07-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/26301

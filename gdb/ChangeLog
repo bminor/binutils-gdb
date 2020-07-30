@@ -1,3 +1,14 @@
+2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* proc-api.c (_STRUCTURED_PROC): Don't define.
+	* proc-events.c: Likewise.
+	* proc-flags.c: Likewise.
+	* proc-why.c: Likewise.
+	* procfs.c: Likewise.
+
+	* Makefile.in (INTERNAL_CPPFLAGS): Add LARGEFILE_CPPFLAGS.
+	* configure, config.in: Regenerate.
+
 2020-07-30  Tom de Vries  <tdevries@suse.de>
 
 	PR build/26320

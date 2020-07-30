@@ -1,3 +1,9 @@
+2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* Makefile.am (AM_CPPFLAGS): Add LARGEFILE_CPPFLAGS.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2020-07-29  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* testsuite/ld-elf/sec64k.exp: Also accept a section symbol with

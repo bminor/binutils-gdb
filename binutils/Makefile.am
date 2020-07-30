@@ -116,6 +116,7 @@ INCDIR	= $(BASEDIR)/include
 AM_CPPFLAGS = -I. -I$(srcdir) -I../bfd -I$(BFDDIR) -I$(INCDIR) \
 	 @HDEFINES@ \
 	 @INCINTL@ \
+	 @LARGEFILE_CPPFLAGS@ \
 	 -DLOCALEDIR="\"$(datadir)/locale\"" \
 	 -Dbin_dummy_emulation=$(EMULATION_VECTOR)
 

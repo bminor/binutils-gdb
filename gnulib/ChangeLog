@@ -1,3 +1,8 @@
+2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* configure.ac: Run ACX_LARGEFILE before gl_EARLY.
+	* configure: Regenerate.
+
 2020-02-22  Simon Marchi  <simon.marchi@efficios.com>
 
 	* update-gnulib.sh (GNULIB_COMMIT_SHA1): Bump to

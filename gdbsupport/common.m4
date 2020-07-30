@@ -46,7 +46,7 @@ AC_DEFUN([GDB_AC_COMMON], [
 		   thread_db.h wait.h dnl
 		   termios.h dnl
 		   dlfcn.h dnl
-		   linux/elf.h sys/procfs.h proc_service.h dnl
+		   linux/elf.h proc_service.h dnl
 		   poll.h sys/poll.h sys/select.h)
 
   AC_FUNC_MMAP
@@ -173,6 +173,7 @@ AC_DEFUN([GDB_AC_COMMON], [
     fi
   fi
 
+  BFD_SYS_PROCFS_H
   if test "$ac_cv_header_sys_procfs_h" = yes; then
     BFD_HAVE_SYS_PROCFS_TYPE(gregset_t)
     BFD_HAVE_SYS_PROCFS_TYPE(fpregset_t)

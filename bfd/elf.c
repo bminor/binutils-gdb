@@ -9453,8 +9453,6 @@ _bfd_elf_rel_vtable_reloc_fn
    out details about the corefile.  */
 
 #ifdef HAVE_SYS_PROCFS_H
-/* Needed for new procfs interface on sparc-solaris.  */
-# define _STRUCTURED_PROC 1
 # include <sys/procfs.h>
 #endif
 

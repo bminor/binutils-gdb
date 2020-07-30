@@ -1039,7 +1039,7 @@ changequote([,])dnl
 
   # ELF corefile support has several flavors, but all of
   # them use something called <sys/procfs.h>
-  AC_CHECK_HEADERS(sys/procfs.h)
+  BFD_SYS_PROCFS_H
   if test "$ac_cv_header_sys_procfs_h" = yes; then
     BFD_HAVE_SYS_PROCFS_TYPE(prstatus_t)
     BFD_HAVE_SYS_PROCFS_TYPE(prstatus32_t)

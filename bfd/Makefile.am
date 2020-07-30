@@ -53,7 +53,7 @@ ZLIBINC = @zlibinc@
 WARN_CFLAGS = @WARN_CFLAGS@
 NO_WERROR = @NO_WERROR@
 AM_CFLAGS = $(WARN_CFLAGS) $(ZLIBINC)
-AM_CPPFLAGS = -DBINDIR='"$(bindir)"' -DLIBDIR='"$(libdir)"'
+AM_CPPFLAGS = -DBINDIR='"$(bindir)"' -DLIBDIR='"$(libdir)"' @LARGEFILE_CPPFLAGS@
 if PLUGINS
 bfdinclude_HEADERS += $(INCDIR)/plugin-api.h
 LIBDL = @lt_cv_dlopen_libs@

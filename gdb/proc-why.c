@@ -20,8 +20,6 @@
 
 #include "defs.h"
 
-#define _STRUCTURED_PROC 1
-
 #include <sys/types.h>
 #include <sys/procfs.h>
 

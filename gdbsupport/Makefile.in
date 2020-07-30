@@ -257,6 +257,7 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTOBJEXT = @INSTOBJEXT@
+LARGEFILE_CPPFLAGS = @LARGEFILE_CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@
@@ -351,7 +352,8 @@ AUTOMAKE_OPTIONS = no-dist foreign
 ACLOCAL_AMFLAGS = -I . -I ../config
 AM_CPPFLAGS = -I$(srcdir)/../include -I$(srcdir)/../gdb \
     -I../gnulib/import -I$(srcdir)/../gnulib/import \
-    -I.. -I$(srcdir)/.. $(INCINTL) -I../bfd -I$(srcdir)/../bfd
+    -I.. -I$(srcdir)/.. $(INCINTL) -I../bfd -I$(srcdir)/../bfd \
+    @LARGEFILE_CPPFLAGS@
 
 AM_CXXFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS)
 noinst_LIBRARIES = libgdbsupport.a

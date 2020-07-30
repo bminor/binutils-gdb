@@ -1,3 +1,9 @@
+2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* Makefile.am (AM_CPPFLAGS): Add LARGEFILE_CPPFLAGS.
+	* Makefile.in, doc/Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2020-07-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/binutils-all/i386/compressed-1a.d: Pass --gdwarf-3

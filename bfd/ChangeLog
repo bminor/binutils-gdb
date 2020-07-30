@@ -1,3 +1,15 @@
+2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	* bfd.m4 (BFD_SYS_PROCFS_H): New macro.
+	(BFD_HAVE_SYS_PROCFS_TYPE): Require BFD_SYS_PROCFS_H.
+	Don't define _STRUCTURED_PROC.
+	(BFD_HAVE_SYS_PROCFS_TYPE_MEMBER): Likewise.
+	* elf.c [HAVE_SYS_PROCFS_H] (_STRUCTURED_PROC): Don't define.
+	* configure.ac: Use BFD_SYS_PROCFS_H to check for <sys/procfs.h>.
+	* configure, config.in: Regenerate.
+	* Makefile.am (AM_CPPFLAGS): Add LARGEFILE_CPPFLAGS.
+	* Makefile.in, doc/Makefile.in: Regenerate.
+
 2020-07-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-bfd.h (sym_cache): Moved before elf_link_hash_table.

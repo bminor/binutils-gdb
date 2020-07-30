@@ -416,3 +416,6 @@
 
 /* Define to 1 if you need to in order for `stat' and other things to work. */
 #undef _POSIX_SOURCE
+
+/* Use structured /proc on Solaris. */
+#undef _STRUCTURED_PROC
