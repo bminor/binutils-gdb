@@ -1,5 +1,11 @@
 2020-07-30  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* breakpoint.c (set_breakpoint_condition): Update the condition
+	expressions after checking that the input condition string parses
+	successfully and does not contain junk at the end.
+
+2020-07-30  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* breakpoint.c (set_breakpoint_condition): Update the
 	condition string after parsing the new condition successfully.
 

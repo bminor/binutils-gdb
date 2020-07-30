@@ -834,30 +834,30 @@ void
 set_breakpoint_condition (struct breakpoint *b, const char *exp,
 			  int from_tty)
 {
-  if (is_watchpoint (b))
-    {
-      struct watchpoint *w = (struct watchpoint *) b;
-
-      w->cond_exp.reset ();
-    }
-  else
-    {
-      struct bp_location *loc;
-
-      for (loc = b->loc; loc; loc = loc->next)
-	{
-	  loc->cond.reset ();
-
-	  /* No need to free the condition agent expression
-	     bytecode (if we have one).  We will handle this
-	     when we go through update_global_location_list.  */
-	}
-    }
-
   if (*exp == 0)
     {
       xfree (b->cond_string);
       b->cond_string = nullptr;
+
+      if (is_watchpoint (b))
+	{
+	  struct watchpoint *w = (struct watchpoint *) b;
+
+	  w->cond_exp.reset ();
+	}
+      else
+	{
+	  struct bp_location *loc;
+
+	  for (loc = b->loc; loc; loc = loc->next)
+	    {
+	      loc->cond.reset ();
+
+	      /* No need to free the condition agent expression
+		 bytecode (if we have one).  We will handle this
+		 when we go through update_global_location_list.  */
+	    }
+	}
 
       if (from_tty)
 	printf_filtered (_("Breakpoint %d now unconditional.\n"), b->number);
@@ -872,23 +872,40 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
 
 	  innermost_block_tracker tracker;
 	  arg = exp;
-	  w->cond_exp = parse_exp_1 (&arg, 0, 0, 0, &tracker);
+	  expression_up new_exp = parse_exp_1 (&arg, 0, 0, 0, &tracker);
 	  if (*arg)
 	    error (_("Junk at end of expression"));
+	  w->cond_exp = std::move (new_exp);
 	  w->cond_exp_valid_block = tracker.block ();
 	}
       else
 	{
 	  struct bp_location *loc;
 
+	  /* Parse and set condition expressions.  We make two passes.
+	     In the first, we parse the condition string to see if it
+	     is valid in all locations.  If so, the condition would be
+	     accepted.  So we go ahead and set the locations'
+	     conditions.  In case a failing case is found, we throw
+	     the error and the condition string will be rejected.
+	     This two-pass approach is taken to avoid setting the
+	     state of locations in case of a reject.  */
+	  for (loc = b->loc; loc; loc = loc->next)
+	    {
+	      arg = exp;
+	      parse_exp_1 (&arg, loc->address,
+			   block_for_pc (loc->address), 0);
+	      if (*arg != 0)
+		error (_("Junk at end of expression"));
+	    }
+
+	  /* If we reach here, the condition is valid at all locations.  */
 	  for (loc = b->loc; loc; loc = loc->next)
 	    {
 	      arg = exp;
 	      loc->cond =
 		parse_exp_1 (&arg, loc->address,
 			     block_for_pc (loc->address), 0);
-	      if (*arg)
-		error (_("Junk at end of expression"));
 	    }
 	}
 

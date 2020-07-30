@@ -1,5 +1,12 @@
 2020-07-30  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
+	* gdb.base/condbreak-bad.exp: Extend the test with scenarios
+	that attempt to overwrite an existing condition with a condition
+	that fails parsing and also with a condition that parses fine
+	but contains junk at the end.
+
+2020-07-30  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
 	* gdb.base/condbreak-bad.c: New test.
 	* gdb.base/condbreak-bad.exp: New file.
 
