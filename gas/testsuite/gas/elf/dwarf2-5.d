@@ -1,4 +1,4 @@
-#as:
+#as: --gdwarf-3
 #readelf: -x.rodata -wlL
 #name: DWARF2 5
 # The am33 cr16 crx ft32 mn10 msp430 nds32 rl78 and rx targets do not evaluate the subtraction of symbols at assembly time.

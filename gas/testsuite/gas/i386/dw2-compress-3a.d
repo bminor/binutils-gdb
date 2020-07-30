@@ -1,5 +1,5 @@
 #source: dw2-compress-3.s
-#as: --compress-debug-sections --elf-stt-common=no
+#as: --compress-debug-sections --elf-stt-common=no --gdwarf-3
 #readelf: -w
 #name: DWARF2 debugging information 3 w/o STT_COMMON
 

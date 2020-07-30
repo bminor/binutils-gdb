@@ -1,3 +1,13 @@
+2020-07-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/binutils-all/i386/compressed-1a.d: Pass --gdwarf-3
+	to assembler.
+	* testsuite/binutils-all/i386/compressed-1b.d: Likewise.
+	* testsuite/binutils-all/i386/compressed-1c.d: Likewise.
+	* testsuite/binutils-all/x86-64/compressed-1a.d: Likewise.
+	* testsuite/binutils-all/x86-64/compressed-1b.d: Likewise.
+	* testsuite/binutils-all/x86-64/compressed-1c.d: Likewise.
+
 2020-07-29  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* testsuite/binutils-all/mips/global-local-symtab-sort-o32.d:
