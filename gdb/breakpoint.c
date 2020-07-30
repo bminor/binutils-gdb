@@ -840,16 +840,10 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
       b->cond_string = nullptr;
 
       if (is_watchpoint (b))
-	{
-	  struct watchpoint *w = (struct watchpoint *) b;
-
-	  w->cond_exp.reset ();
-	}
+	static_cast<watchpoint *> (b)->cond_exp.reset ();
       else
 	{
-	  struct bp_location *loc;
-
-	  for (loc = b->loc; loc; loc = loc->next)
+	  for (bp_location *loc = b->loc; loc != nullptr; loc = loc->next)
 	    {
 	      loc->cond.reset ();
 
@@ -864,24 +858,19 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
     }
   else
     {
-      const char *arg = exp;
-
       if (is_watchpoint (b))
 	{
-	  struct watchpoint *w = (struct watchpoint *) b;
-
 	  innermost_block_tracker tracker;
-	  arg = exp;
+	  const char *arg = exp;
 	  expression_up new_exp = parse_exp_1 (&arg, 0, 0, 0, &tracker);
-	  if (*arg)
+	  if (*arg != 0)
 	    error (_("Junk at end of expression"));
+	  watchpoint *w = static_cast<watchpoint *> (b);
 	  w->cond_exp = std::move (new_exp);
 	  w->cond_exp_valid_block = tracker.block ();
 	}
       else
 	{
-	  struct bp_location *loc;
-
 	  /* Parse and set condition expressions.  We make two passes.
 	     In the first, we parse the condition string to see if it
 	     is valid in all locations.  If so, the condition would be
@@ -890,9 +879,9 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
 	     the error and the condition string will be rejected.
 	     This two-pass approach is taken to avoid setting the
 	     state of locations in case of a reject.  */
-	  for (loc = b->loc; loc; loc = loc->next)
+	  for (bp_location *loc = b->loc; loc != nullptr; loc = loc->next)
 	    {
-	      arg = exp;
+	      const char *arg = exp;
 	      parse_exp_1 (&arg, loc->address,
 			   block_for_pc (loc->address), 0);
 	      if (*arg != 0)
@@ -900,9 +889,9 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
 	    }
 
 	  /* If we reach here, the condition is valid at all locations.  */
-	  for (loc = b->loc; loc; loc = loc->next)
+	  for (bp_location *loc = b->loc; loc != nullptr; loc = loc->next)
 	    {
-	      arg = exp;
+	      const char *arg = exp;
 	      loc->cond =
 		parse_exp_1 (&arg, loc->address,
 			     block_for_pc (loc->address), 0);
