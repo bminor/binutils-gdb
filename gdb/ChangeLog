@@ -1,3 +1,9 @@
+2020-07-30  Tom de Vries  <tdevries@suse.de>
+
+	PR build/26320
+	* ui-style.h (struct ui_file_style::color): Wrap m_value and
+	m_red/m_green/m_blue in a union.
+
 2020-07-29  Tom de Vries  <tdevries@suse.de>
 
 	PR tdep/26280
