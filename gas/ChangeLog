@@ -1,3 +1,28 @@
+2020-07-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26305
+	* config/tc-i386.c (_i386_insn::disp_encoding): Add
+	disp_encoding_16bit.
+	(parse_insn): Check Prefix_XXX for pseudo prefixes.  Handle
+	{disp16}.
+	(build_modrm_byte): Handle {disp16}.
+	(i386_index_check): Check invalid {disp16} and {disp32} pseudo
+	prefixes.
+	* doc/c-i386.texi: Update {disp32} documentation and document
+	{disp16}.
+	* testsuite/gas/i386/i386.exp: Run x86-64-inval-pseudo.
+	* testsuite/gas/i386/inval-pseudo.s: Add {disp32}/{disp16}
+	tests.
+	* testsuite/gas/i386/pseudos.s: Add {disp8}/{disp32} vmovaps
+	tests with 128-byte displacement.  Add {disp16} tests.
+	* testsuite/gas/i386/x86-64-pseudos.s: Add {disp8}/{disp32}
+	vmovaps test.  Add (%r13)/(%r13d) tests.
+	* testsuite/gas/i386/x86-64-inval-pseudo.l: New file.
+	* testsuite/gas/i386/x86-64-inval-pseudo.s: Likewise.
+	* testsuite/gas/i386/inval-pseudo.l: Updated.
+	* testsuite/gas/i386/pseudos.d: Likewise.
+	* testsuite/gas/i386/x86-64-pseudos.d: Likewise.
+
 2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* Makefile.am (AM_CPPFLAGS): Add LARGEFILE_CPPFLAGS.

@@ -1,3 +1,19 @@
+2020-07-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/26305
+	* i386-opc.h (Prefix_Disp8): New.
+	(Prefix_Disp16): Likewise.
+	(Prefix_Disp32): Likewise.
+	(Prefix_Load): Likewise.
+	(Prefix_Store): Likewise.
+	(Prefix_VEX): Likewise.
+	(Prefix_VEX3): Likewise.
+	(Prefix_EVEX): Likewise.
+	(Prefix_REX): Likewise.
+	(Prefix_NoOptimize): Likewise.
+	* i386-opc.tbl: Use Prefix_XXX on pseudo prefixes.  Add {disp16}.
+	* i386-tbl.h: Regenerated.
+
 2020-07-29  Andreas Arnez  <arnez@linux.ibm.com>
 
 	* s390-mkopc.c (insertExpandedMnemonic): Handle unreachable
