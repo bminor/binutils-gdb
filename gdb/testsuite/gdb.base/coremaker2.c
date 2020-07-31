@@ -47,12 +47,8 @@ unsigned long long addr;
 char *mbuf_ro;
 char *mbuf_rw;
 
-/* 24 KiB buffer.  */
-char buf_rw[24 * 1024];
-
-/* 24 KiB worth of data.  For this test case, we can't allocate a
-   buffer and then fill it; we want GDB to have to read this data
-   from the executable; it should NOT find it in the core file.  */
+/* 256 KiB buffer.  */
+char buf_rw[256 * 1024];
 
 #define C5_16 \
   0xc5, 0xc5, 0xc5, 0xc5, \
@@ -69,15 +65,22 @@ char buf_rw[24 * 1024];
 #define C5_1k \
   C5_256, C5_256, C5_256, C5_256
 
-#define C5_24k \
-  C5_1k, C5_1k, C5_1k, C5_1k, \
-  C5_1k, C5_1k, C5_1k, C5_1k, \
-  C5_1k, C5_1k, C5_1k, C5_1k, \
-  C5_1k, C5_1k, C5_1k, C5_1k, \
+#define C5_8k \
   C5_1k, C5_1k, C5_1k, C5_1k, \
   C5_1k, C5_1k, C5_1k, C5_1k
 
-const char buf_ro[] = { C5_24k };
+#define C5_64k \
+  C5_8k, C5_8k, C5_8k, C5_8k, \
+  C5_8k, C5_8k, C5_8k, C5_8k
+
+#define C5_256k \
+  C5_64k, C5_64k, C5_64k, C5_64k
+
+/* 256 KiB worth of data.  For this test case, we can't allocate a
+   buffer and then fill it; we want GDB to have to read this data
+   from the executable; it should NOT find it in the core file.  */
+
+const char buf_ro[] = { C5_256k };
 
 int
 main (int argc, char **argv)
