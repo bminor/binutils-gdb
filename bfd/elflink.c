@@ -505,6 +505,16 @@ bfd_elf_link_record_dynamic_symbol (struct bfd_link_info *info,
       const char *name;
       size_t indx;
 
+      if (h->root.type == bfd_link_hash_defined
+	  || h->root.type == bfd_link_hash_defweak)
+	{
+	  /* An IR symbol should not be made dynamic.  */
+	  if (h->root.u.def.section != NULL
+	      && h->root.u.def.section->owner != NULL
+	      && (h->root.u.def.section->owner->flags & BFD_PLUGIN) != 0)
+	    return TRUE;
+	}
+
       /* XXX: The ABI draft says the linker must turn hidden and
 	 internal symbols into STB_LOCAL symbols when producing the
 	 DSO. However, if ld.so honors st_other in the dynamic table,
@@ -5199,15 +5209,11 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		break;
 	      }
 
-	  /* Don't add DT_NEEDED for references from the dummy bfd nor
-	     for unmatched symbol.  */
 	  if (!add_needed
 	      && matched
 	      && definition
 	      && ((dynsym
-		   && h->ref_regular_nonweak
-		   && (old_bfd == NULL
-		       || (old_bfd->flags & BFD_PLUGIN) == 0))
+		   && h->ref_regular_nonweak)
 		  || (h->ref_dynamic_nonweak
 		      && (elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0
 		      && !on_needed_list (elf_dt_name (abfd),

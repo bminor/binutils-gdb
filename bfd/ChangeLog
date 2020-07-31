@@ -1,3 +1,11 @@
+2020-07-31  Alan Modra  <amodra@gmail.com>
+
+	PR 26314
+	* elflink.c (bfd_elf_link_record_dynamic_symbol): Don't allow
+	IR symbols to become dynamic.
+	(elf_link_add_object_symbols): Don't exclude IR symbols when
+	deciding whether an as-needed shared library is needed.
+
 2020-07-30  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	PR ld/26312
