@@ -1,5 +1,37 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Remove la_macro_expansion
+	initializer.
+	* c-lang.c (c_language_data): Likewise.
+	(c_language::macro_expansion): New member function.
+	(cplus_language_data): Likewise.
+	(cplus_language::macro_expansion): New member function.
+	(asm_language_data): Likewise.
+	(asm_language::macro_expansion): New member function.
+	(minimal_language_data): Likewise.
+	(minimal_language::macro_expansion): New member function.
+	* d-lang.c (d_language_data): Remove la_macro_expansion
+	initializer.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (unknown_language_data): Likewise.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Remove la_macro_expansion field.
+	(language_defn::macro_expansion): New member function.
+	* m2-lang.c (m2_language_data): Remove la_macro_expansion
+	initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	(objc_language::macro_expansion): New member function.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	(opencl_language::macro_expansion): New member function.
+	* p-lang.c (pascal_language_data): Remove la_macro_expansion
+	initializer.
+	* rust-lang.c (rust_language_data): Likewise.
+	* symtab.c (default_collect_symbol_completion_matches_break_on):
+	Update call to macro_expansion.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove la_array_ordering
 	initializer.
 	* c-lang.c (c_language_data): Likewise.

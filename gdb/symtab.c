@@ -5768,7 +5768,7 @@ default_collect_symbol_completion_matches_break_on
 
   /* Skip macros if we are completing a struct tag -- arguable but
      usually what is expected.  */
-  if (current_language->la_macro_expansion == macro_expansion_c
+  if (current_language->macro_expansion () == macro_expansion_c
       && code == TYPE_CODE_UNDEF)
     {
       gdb::unique_xmalloc_ptr<struct macro_scope> scope;

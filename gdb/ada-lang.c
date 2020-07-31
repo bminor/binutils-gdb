@@ -13708,7 +13708,6 @@ ada_get_symbol_name_matcher (const lookup_name_info &lookup_name)
 
 extern const struct language_data ada_language_data =
 {
-  macro_expansion_no,
   &ada_exp_descriptor,
   ada_op_print_tab,             /* expression operators for printing */
   &ada_varobj_ops,

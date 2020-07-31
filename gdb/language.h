@@ -168,9 +168,6 @@ extern const char *default_word_break_characters (void);
 
 struct language_data
   {
-    /* Style of macro expansion, if any, supported by this language.  */
-    enum macro_expansion la_macro_expansion;
-
     /* Definitions related to expression printing, prefixifying, and
        dumping.  */
 
@@ -561,6 +558,12 @@ struct language_defn : language_data
 
   virtual enum array_ordering array_ordering () const
   { return array_row_major; }
+
+  /* Style of macro expansion, if any, supported by this language.  The
+     default is no macro expansion.  */
+
+  virtual enum macro_expansion macro_expansion () const
+  { return macro_expansion_no; }
 
 protected:
 

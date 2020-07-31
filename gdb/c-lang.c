@@ -875,7 +875,6 @@ const struct exp_descriptor exp_descriptor_c =
 
 extern const struct language_data c_language_data =
 {
-  macro_expansion_c,
   &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
   &c_varobj_ops,
@@ -944,6 +943,11 @@ public:
 
   bool store_sym_names_in_linkage_form_p () const override
   { return true; }
+
+  /* See language.h.  */
+
+  enum macro_expansion macro_expansion () const override
+  { return macro_expansion_c; }
 };
 
 /* Single instance of the C language class.  */
@@ -982,7 +986,6 @@ enum cplus_primitive_types {
 
 extern const struct language_data cplus_language_data =
 {
-  macro_expansion_c,
   &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
   &cplus_varobj_ops,
@@ -1168,6 +1171,11 @@ public:
   const char *name_of_this () const override
   { return "this"; }
 
+  /* See language.h.  */
+
+  enum macro_expansion macro_expansion () const override
+  { return macro_expansion_c; }
+
 protected:
 
   /* See language.h.  */
@@ -1187,7 +1195,6 @@ static cplus_language cplus_language_defn;
 
 extern const struct language_data asm_language_data =
 {
-  macro_expansion_c,
   &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
   &default_varobj_ops,
@@ -1243,6 +1250,11 @@ public:
 
   bool store_sym_names_in_linkage_form_p () const override
   { return true; }
+
+  /* See language.h.  */
+
+  enum macro_expansion macro_expansion () const override
+  { return macro_expansion_c; }
 };
 
 /* The single instance of the ASM language class.  */
@@ -1255,7 +1267,6 @@ static asm_language asm_language_defn;
 
 extern const struct language_data minimal_language_data =
 {
-  macro_expansion_c,
   &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
   &default_varobj_ops,
@@ -1300,6 +1311,11 @@ public:
 
   bool store_sym_names_in_linkage_form_p () const override
   { return true; }
+
+  /* See language.h.  */
+
+  enum macro_expansion macro_expansion () const override
+  { return macro_expansion_c; }
 };
 
 /* The single instance of the minimal language class.  */

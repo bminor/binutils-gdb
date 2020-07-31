@@ -1901,7 +1901,6 @@ static const struct exp_descriptor exp_descriptor_rust =
 
 extern const struct language_data rust_language_data =
 {
-  macro_expansion_no,
   &exp_descriptor_rust,
   c_op_print_tab,		/* expression operators for printing */
   &default_varobj_ops,

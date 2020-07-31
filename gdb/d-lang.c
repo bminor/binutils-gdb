@@ -128,7 +128,6 @@ enum d_primitive_types {
 
 extern const struct language_data d_language_data =
 {
-  macro_expansion_no,
   &exp_descriptor_c,
   d_op_print_tab,		/* Expression operators for printing.  */
   &default_varobj_ops,
