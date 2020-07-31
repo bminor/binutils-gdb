@@ -37,7 +37,9 @@ proc at_least_gcc_version { major minor } {
     if { $CC == "" } {
 	return 0
     }
-    set state [remote_exec host $CC --version]
+    # Filter out -Wl, options.
+    regsub -all -- "-Wl,\[^ ^\t\]+" $CC "" cc_cmd
+    set state [remote_exec host $cc_cmd --version]
     if { [lindex $state 0] != 0 } {
 	return 0;
     }
@@ -693,6 +695,11 @@ proc run_ld_link_exec_tests { ldtests args } {
 	    continue
 	}
 
+	# Add -fno-lto.  LTO should be tested explicitly by $cflags.
+	if {[check_lto_available]} {
+	    set cflags "-fno-lto $cflags"
+	}
+
 	foreach target $args {
 	    if [match_target $target] {
 		setup_xfail "*-*-*"
@@ -850,6 +857,11 @@ proc run_cc_link_tests { ldtests } {
 	if { ![check_compiler_available] } {
 	    unsupported $testname
 	    continue
+	}
+
+	# Add -fno-lto.  LTO should be tested explicitly by $cflags.
+	if {[check_lto_available]} {
+	    set cflags "-fno-lto $cflags"
 	}
 
 	#verbose -log "testname  is $testname"
@@ -1209,7 +1221,9 @@ proc check_gcc_plugin_enabled { } {
     if { $CC == ""} {
 	return 0
     }
-    set state [remote_exec host $CC -v]
+    # Filter out -Wl, options.
+    regsub -all -- "-Wl,\[^ ^\t\]+" $CC "" cc_cmd
+    set state [remote_exec host $cc_cmd -v]
     if { [lindex $state 0] != 0 } {
 	return 0;
     }

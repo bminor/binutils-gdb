@@ -1,3 +1,17 @@
+2020-07-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/indirect.exp: Append -fno-lto to CC.
+	* testsuite/ld-elfvers/vers.exp: Likewise.
+	* testsuite/ld-elfweak/elfweak.exp: Likewise.
+	* testsuite/ld-ifunc/ifunc.exp: Likewise.
+	* testsuite/ld-plugin/lto.exp (no_lto): New.
+	Add $no_lto to build pr15146c.so.
+	* testsuite/lib/ld-lib.exp (at_least_gcc_version): Filter out
+	-Wl,xxx options.
+	(check_gcc_plugin_enabled): Likewise.
+	(run_ld_link_exec_tests): Prepend -fno-lto to $cflags.
+	(run_cc_link_tests): Likewise.
+
 2020-07-31  Shahab Vahedi  <shahab@synopsys.com>
 
 	* scripttempl/elfarc.sc (.init_array): Keep ".init_array.*".

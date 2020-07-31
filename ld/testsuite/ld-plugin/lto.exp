@@ -62,6 +62,7 @@ set lto_no_fat ""
 if { [check_lto_fat_available] } {
   set lto_fat "-ffat-lto-objects"
   set lto_no_fat "-fno-fat-lto-objects"
+  set no_lto "-fno-lto"
 }
 
 # Simple LTO tests and generate input files for complex LTO tests.
@@ -322,7 +323,7 @@ set lto_link_elf_tests [list \
    "-shared" "-O2 -fpic" \
    {pr15146b.c} {} "pr15146b.so" "c"] \
   [list "Build pr15146c.so" \
-   "-shared -Wl,--no-as-needed tmpdir/pr15146b.so" "-O2 -fpic" \
+   "-shared -Wl,--no-as-needed tmpdir/pr15146b.so" "-O2 -fpic $no_lto" \
    {pr15146c.c} {} "pr15146c.so" "c"] \
   [list "PR ld/15146 (1)" \
    "-O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries -Wl,--no-as-needed tmpdir/pr15146a.o tmpdir/pr15146c.so" "" \

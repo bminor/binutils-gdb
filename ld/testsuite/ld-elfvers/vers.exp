@@ -708,7 +708,14 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
 
     set shared "--shared --no-undefined-version"
     set script --version-script
-    if ![ld_compile "$CC -S $CFLAGS" $srcdir/$subdir/$source $tmpdir/$execname.s]     {
+
+    # Disable LTO for these tests.
+    set cc_cmd "$CC -S $CFLAGS"
+    if {[check_lto_available]} {
+	append cc_cmd " -fno-lto"
+    }
+
+    if ![ld_compile $cc_cmd $srcdir/$subdir/$source $tmpdir/$execname.s]     {
 	unresolved "$test"
 	return
     }
