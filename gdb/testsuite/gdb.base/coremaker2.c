@@ -39,11 +39,12 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <inttypes.h>
 
 /* These are globals so that we can find them easily when debugging
    the core file.  */
 long pagesize;
-unsigned long long addr;
+uintptr_t addr;
 char *mbuf_ro;
 char *mbuf_rw;
 
@@ -106,10 +107,10 @@ main (int argc, char **argv)
     }
 
   /* Compute an address that should be within buf_ro.  Complain if not.  */
-  addr = ((unsigned long long) buf_ro + pagesize) & ~(pagesize - 1);
+  addr = ((uintptr_t) buf_ro + pagesize) & ~(pagesize - 1);
 
-  if (addr <= (unsigned long long) buf_ro
-      || addr >= (unsigned long long) buf_ro + sizeof (buf_ro))
+  if (addr <= (uintptr_t) buf_ro
+      || addr >= (uintptr_t) buf_ro + sizeof (buf_ro))
     {
       fprintf (stderr, "Unable to compute a suitable address within buf_ro.\n");
       exit (1);
@@ -130,10 +131,10 @@ main (int argc, char **argv)
 
   /* Compute an mmap address within buf_rw.  Complain if it's somewhere
      else.  */
-  addr = ((unsigned long long) buf_rw + pagesize) & ~(pagesize - 1);
+  addr = ((uintptr_t) buf_rw + pagesize) & ~(pagesize - 1);
 
-  if (addr <= (unsigned long long) buf_rw
-      || addr >= (unsigned long long) buf_rw + sizeof (buf_rw))
+  if (addr <= (uintptr_t) buf_rw
+      || addr >= (uintptr_t) buf_rw + sizeof (buf_rw))
     {
       fprintf (stderr, "Unable to compute a suitable address within buf_rw.\n");
       exit (1);

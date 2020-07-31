@@ -1,5 +1,11 @@
 2020-07-31  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdb.base/coremaker2.c: Change all uses of 'unsigned long long'
+	to 'uintptr_t'
+	(inttypes.h): Include.
+
+2020-07-31  Kevin Buettner  <kevinb@redhat.com>
+
 	* gdb.base/coremaker2.c (buf_rw): Increase size to 256 KiB.
 	(C5_24k): Delete.
 	(C5_8k, C5_64k, C5_256k): New macros.
