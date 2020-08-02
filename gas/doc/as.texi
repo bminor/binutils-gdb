@@ -768,21 +768,21 @@ option is only supported by some targets, not all of them.
 This option is the same as the @option{--gdwarf-2} option, except that it
 allows for the possibility of the generation of extra debug information as per
 version 3 of the DWARF specification.  Note - enabling this option does not
-guarantee the generation of any extra infortmation, the choice to do so is on a
+guarantee the generation of any extra information, the choice to do so is on a
 per target basis.
 
 @item --gdwarf-4
 This option is the same as the @option{--gdwarf-2} option, except that it
 allows for the possibility of the generation of extra debug information as per
 version 4 of the DWARF specification.  Note - enabling this option does not
-guarantee the generation of any extra infortmation, the choice to do so is on a
+guarantee the generation of any extra information, the choice to do so is on a
 per target basis.
 
 @item --gdwarf-5
 This option is the same as the @option{--gdwarf-2} option, except that it
 allows for the possibility of the generation of extra debug information as per
 version 5 of the DWARF specification.  Note - enabling this option does not
-guarantee the generation of any extra infortmation, the choice to do so is on a
+guarantee the generation of any extra information, the choice to do so is on a
 per target basis.
 
 @item --gdwarf-sections

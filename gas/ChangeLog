@@ -1,3 +1,7 @@
+2020-08-02  Mark Wielaard  <mark@klomp.org>
+
+	* doc/as.texi (--gdwarf-[345]): Fix typo.
+
 2020-08-03  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* config/tc-msp430.c (OPTION_MOVE_DATA): Remove.
