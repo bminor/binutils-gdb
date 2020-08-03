@@ -8446,14 +8446,24 @@ _bfd_elf_get_symtab_upper_bound (bfd *abfd)
   Elf_Internal_Shdr *hdr = &elf_tdata (abfd)->symtab_hdr;
 
   symcount = hdr->sh_size / get_elf_backend_data (abfd)->s->sizeof_sym;
-  if (symcount >= LONG_MAX / sizeof (asymbol *))
+  if (symcount > LONG_MAX / sizeof (asymbol *))
     {
       bfd_set_error (bfd_error_file_too_big);
       return -1;
     }
-  symtab_size = (symcount + 1) * (sizeof (asymbol *));
-  if (symcount > 0)
-    symtab_size -= sizeof (asymbol *);
+  symtab_size = symcount * (sizeof (asymbol *));
+  if (symcount == 0)
+    symtab_size = sizeof (asymbol *);
+  else if (!bfd_write_p (abfd))
+    {
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+
+      if (filesize != 0 && (unsigned long) symtab_size > filesize)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return -1;
+	}
+    }
 
   return symtab_size;
 }
@@ -8472,14 +8482,24 @@ _bfd_elf_get_dynamic_symtab_upper_bound (bfd *abfd)
     }
 
   symcount = hdr->sh_size / get_elf_backend_data (abfd)->s->sizeof_sym;
-  if (symcount >= LONG_MAX / sizeof (asymbol *))
+  if (symcount > LONG_MAX / sizeof (asymbol *))
     {
       bfd_set_error (bfd_error_file_too_big);
       return -1;
     }
-  symtab_size = (symcount + 1) * (sizeof (asymbol *));
-  if (symcount > 0)
-    symtab_size -= sizeof (asymbol *);
+  symtab_size = symcount * (sizeof (asymbol *));
+  if (symcount == 0)
+    symtab_size = sizeof (asymbol *);
+  else if (!bfd_write_p (abfd))
+    {
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+
+      if (filesize != 0 && (unsigned long) symtab_size > filesize)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return -1;
+	}
+    }
 
   return symtab_size;
 }
@@ -8487,7 +8507,7 @@ _bfd_elf_get_dynamic_symtab_upper_bound (bfd *abfd)
 long
 _bfd_elf_get_reloc_upper_bound (bfd *abfd, sec_ptr asect)
 {
-  if (asect->reloc_count != 0)
+  if (asect->reloc_count != 0 && !bfd_write_p (abfd))
     {
       /* Sanity check reloc section size.  */
       struct bfd_elf_section_data *d = elf_section_data (asect);
@@ -8596,7 +8616,7 @@ _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
 	    return -1;
 	  }
       }
-  if (count > 1)
+  if (count > 1 && !bfd_write_p (abfd))
     {
       /* Sanity check reloc section sizes.  */
       ufile_ptr filesize = bfd_get_file_size (abfd);

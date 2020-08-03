@@ -4810,15 +4810,8 @@ elf_x86_64_get_synthetic_symtab (bfd *abfd,
 	continue;
 
       /* Get the PLT section contents.  */
-      plt_contents = (bfd_byte *) bfd_malloc (plt->size);
-      if (plt_contents == NULL)
+      if (!bfd_malloc_and_get_section (abfd, plt, &plt_contents))
 	break;
-      if (!bfd_get_section_contents (abfd, (asection *) plt,
-				     plt_contents, 0, plt->size))
-	{
-	  free (plt_contents);
-	  break;
-	}
 
       /* Check what kind of PLT it is.  */
       plt_type = plt_unknown;
