@@ -1,3 +1,10 @@
+2020-08-03  Alan Modra  <amodra@gmail.com>
+
+	PR 26328
+	* configure.ac: AC_CHECK_DECLS asprintf.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
 2020-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.

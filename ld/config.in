@@ -49,6 +49,10 @@
 /* Define to 1 if you have the `close' function. */
 #undef HAVE_CLOSE
 
+/* Define to 1 if you have the declaration of `asprintf', and to 0 if you
+   don't. */
+#undef HAVE_DECL_ASPRINTF
+
 /* Define to 1 if you have the declaration of `environ', and to 0 if you
    don't. */
 #undef HAVE_DECL_ENVIRON
