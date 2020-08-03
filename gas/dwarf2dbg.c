@@ -1992,18 +1992,29 @@ out_dir_and_file_list (void)
 	 the .debug_line_str section and reference them here.  */
       out_uleb128 (DW_FORM_string);
 
-      /* Now state how many rows there are in the table.  */
-      out_uleb128 (dirs_in_use);
+      /* Now state how many rows there are in the table.  We need at
+	 least 1 if there is one or more file names to store the
+	 "working directory".  */
+      if (dirs_in_use == 0 && files_in_use > 0)
+	out_uleb128 (1);
+      else
+	out_uleb128 (dirs_in_use);
     }
       
   /* Emit directory list.  */
-  if (DWARF2_LINE_VERSION >= 5 && dirs_in_use > 0)
+  if (DWARF2_LINE_VERSION >= 5 && (dirs_in_use > 0 || files_in_use > 0))
     {
-      if (dirs == NULL || dirs[0] == NULL)
-	dir = remap_debug_filename (".");
-      else
+      /* DWARF5 uses slot zero, but that is only set explicitly
+	 using a .file 0 directive.  If that isn't used, but dir
+	 one is used, then use that as main file directory.
+	 Otherwise use pwd as main file directory.  */
+      if (dirs_in_use > 0 && dirs != NULL && dirs[0] != NULL)
 	dir = remap_debug_filename (dirs[0]);
-	
+      else if (dirs_in_use > 1 && dirs != NULL && dirs[1] != NULL)
+	dir = remap_debug_filename (dirs[1]);
+      else
+	dir = remap_debug_filename (getpwd ());
+
       size = strlen (dir) + 1;
       cp = frag_more (size);
       memcpy (cp, dir, size);
@@ -2089,8 +2100,14 @@ out_dir_and_file_list (void)
 
       if (files[i].filename == NULL)
 	{
-	  /* Prevent a crash later, particularly for file 1.  */
-	  files[i].filename = "";
+	  /* Prevent a crash later, particularly for file 1.  DWARF5
+	     uses slot zero, but that is only set explicitly using a
+	     .file 0 directive.  If that isn't used, but file 1 is,
+	     then use that as main file name.  */
+	  if (DWARF2_LINE_VERSION >= 5 && i == 0 && files_in_use >= 1)
+	      files[0].filename = files[1].filename;
+	  else
+	    files[i].filename = "";
 	  if (DWARF2_LINE_VERSION < 5 || i != 0)
 	    {
 	      as_bad (_("unassigned file number %ld"), (long) i);

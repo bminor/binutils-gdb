@@ -1,5 +1,13 @@
 2020-08-02  Mark Wielaard  <mark@klomp.org>
 
+	* gas/dwarf2dbg.c (out_dir_and_file_list): For DWARF5 emit at
+	least one directory if there is at least one file. Use dirs[1]
+	if dirs[0] is not set, or if there is no dirs[1] the current
+	working directory. Use files[1] filename, when files[0] filename
+	isn't set.
+
+2020-08-02  Mark Wielaard  <mark@klomp.org>
+
 	* dwarf2dbg.c (out_debug_info): Emit unit type and abbrev offset
 	for DWARF5.
 	* gas/testsuite/gas/elf/dwarf-4-cu.d: New file.
