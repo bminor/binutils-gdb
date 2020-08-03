@@ -1,3 +1,8 @@
+2020-08-07  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* msp430-sim.c (sim_open): Increase the size of the main memory region
+	to 0xFAC0.
+
 2020-08-05  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* msp430-sim.c (put_op): For unsigned multiplication, explicitly cast

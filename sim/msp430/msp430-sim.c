@@ -138,7 +138,7 @@ sim_open (SIM_OPEN_KIND kind,
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x2, 1) == 0)
     sim_do_commandf (sd, "memory-region 0,0x20"); /* Needed by the GDB testsuite.  */
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x500, 1) == 0)
-    sim_do_commandf (sd, "memory-region 0x500,0xfa00");  /* RAM and/or ROM */
+    sim_do_commandf (sd, "memory-region 0x500,0xfac0");  /* RAM and/or ROM */
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0xfffe, 1) == 0)
     sim_do_commandf (sd, "memory-region 0xffc0,0x40"); /* VECTORS.  */
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x10000, 1) == 0)
