@@ -1,5 +1,12 @@
 2020-08-03  Alan Modra  <amodra@gmail.com>
 
+	PR 26328
+	* configure.ac: AC_CHECK_DECLS asprintf.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2020-08-03  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-elfvers/vers.exp (objdump_symstuff): Remove unused
 	variable.  Init list_a and list_b to empty.
 	(objdump_dynsymstuff): Likewise, and remove undefined list_a

@@ -306,7 +306,7 @@ fi
 
 BFD_BINARY_FOPEN
 
-AC_CHECK_DECLS([strstr, free, sbrk, getenv, environ])
+AC_CHECK_DECLS([asprintf, environ, free, getenv, sbrk, strstr])
 
 # Link in zlib if we can.  This allows us to read and write
 # compressed CTF sections.

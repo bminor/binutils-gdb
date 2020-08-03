@@ -17416,15 +17416,25 @@ $as_echo "#define USE_BINARY_FOPEN 1" >>confdefs.h
  ;;
 esac
 
-ac_fn_c_check_decl "$LINENO" "strstr" "ac_cv_have_decl_strstr" "$ac_includes_default"
-if test "x$ac_cv_have_decl_strstr" = xyes; then :
+ac_fn_c_check_decl "$LINENO" "asprintf" "ac_cv_have_decl_asprintf" "$ac_includes_default"
+if test "x$ac_cv_have_decl_asprintf" = xyes; then :
   ac_have_decl=1
 else
   ac_have_decl=0
 fi
 
 cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_STRSTR $ac_have_decl
+#define HAVE_DECL_ASPRINTF $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "environ" "ac_cv_have_decl_environ" "$ac_includes_default"
+if test "x$ac_cv_have_decl_environ" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_ENVIRON $ac_have_decl
 _ACEOF
 ac_fn_c_check_decl "$LINENO" "free" "ac_cv_have_decl_free" "$ac_includes_default"
 if test "x$ac_cv_have_decl_free" = xyes; then :
@@ -17436,16 +17446,6 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_FREE $ac_have_decl
 _ACEOF
-ac_fn_c_check_decl "$LINENO" "sbrk" "ac_cv_have_decl_sbrk" "$ac_includes_default"
-if test "x$ac_cv_have_decl_sbrk" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_SBRK $ac_have_decl
-_ACEOF
 ac_fn_c_check_decl "$LINENO" "getenv" "ac_cv_have_decl_getenv" "$ac_includes_default"
 if test "x$ac_cv_have_decl_getenv" = xyes; then :
   ac_have_decl=1
@@ -17456,15 +17456,25 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_GETENV $ac_have_decl
 _ACEOF
-ac_fn_c_check_decl "$LINENO" "environ" "ac_cv_have_decl_environ" "$ac_includes_default"
-if test "x$ac_cv_have_decl_environ" = xyes; then :
+ac_fn_c_check_decl "$LINENO" "sbrk" "ac_cv_have_decl_sbrk" "$ac_includes_default"
+if test "x$ac_cv_have_decl_sbrk" = xyes; then :
   ac_have_decl=1
 else
   ac_have_decl=0
 fi
 
 cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_ENVIRON $ac_have_decl
+#define HAVE_DECL_SBRK $ac_have_decl
+_ACEOF
+ac_fn_c_check_decl "$LINENO" "strstr" "ac_cv_have_decl_strstr" "$ac_includes_default"
+if test "x$ac_cv_have_decl_strstr" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_STRSTR $ac_have_decl
 _ACEOF
 
 
