@@ -1,5 +1,10 @@
 2020-08-03  Alan Modra  <amodra@gmail.com>
 
+	* vms-lib.c (vms_traverse_index): Sanity check size remaining
+	before accessing vms_idx or vms_elfidx.
+
+2020-08-03  Alan Modra  <amodra@gmail.com>
+
 	PR 26330
 	* elf.c (_bfd_elf_get_symtab_upper_bound): Sanity check symbol table
 	size against file size.  Correct LONG_MAX limit check.
