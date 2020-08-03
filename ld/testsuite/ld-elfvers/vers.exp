@@ -261,7 +261,8 @@ proc objdump_symstuff { objdump object expectfile } {
 	verbose "# Diff'ing: $expectfile $tmpdir/objdump.out" 2
 
 	set eof -1
-	set differences 0
+	set list_a {}
+	set list_b {}
 
 	while { [gets $file_a line] != $eof } {
 	    if [regexp "^#.*$" $line] then {
@@ -286,7 +287,6 @@ proc objdump_symstuff { objdump object expectfile } {
 	    set line_a [lindex $list_a $i]
 	    set line_b [lindex $list_b $i]
 
-
 	    verbose "\t$expectfile: $i: $line_a" 3
 	    verbose "\t/tmp/objdump.out: $i: $line_b" 3
 	    if [regexp $line_a $line_b] then {
@@ -303,17 +303,12 @@ proc objdump_symstuff { objdump object expectfile } {
 	    verbose -log "Line count"
 	    return 0
 	}
+	return 1
 
-	if $differences<1 then {
-	    return 1
-	}
-
-	return 0
     } else {
 	verbose -log "$exec_output"
 	return 0
     }
-
 }
 
 #
@@ -357,7 +352,8 @@ proc objdump_dynsymstuff { objdump object expectfile } {
 	verbose "# Diff'ing: $expectfile $tmpdir/objdump.out" 2
 
 	set eof -1
-	set differences 0
+	set list_a {}
+	set list_b {}
 
 	while { [gets $file_a line] != $eof } {
 	    if [regexp "^#.*$" $line] then {
@@ -377,15 +373,6 @@ proc objdump_dynsymstuff { objdump object expectfile } {
 	    }
 	}
 	close $file_b
-
-	# Support empty files.
-	if { ![info exists list_a] } then {
-	    if { ![info exists list_b] } then {
-		return 1
-	    }
-	    verbose -log "\t$tmpdir/objdump.out: $list_b"
-	    return 0
-	}
 
 	for { set i 0 } { $i < [llength $list_b] } { incr i } {
 	    set line_b [lindex $list_b $i]
@@ -423,17 +410,12 @@ proc objdump_dynsymstuff { objdump object expectfile } {
 	    verbose -log "Line count"
 	    return 0
 	}
+	return 1
 
-	if $differences<1 then {
-	    return 1
-	}
-
-	return 0
     } else {
 	verbose -log "$exec_output"
 	return 0
     }
-
 }
 
 #
