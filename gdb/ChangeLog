@@ -1,3 +1,7 @@
+2020-08-03  John Baldwin  <jhb@FreeBSD.org>
+
+	* syscalls/update-freebsd.sh: Fix usage and year range.
+
 2020-08-03  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/26333
