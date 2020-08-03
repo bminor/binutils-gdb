@@ -1449,6 +1449,22 @@ namespace eval Dwarf {
 		set _line 1
 	    }
 
+	    proc DW_LNE_user { len opcode } {
+		set DW_LNE_lo_usr 0x80
+		set DW_LNE_hi_usr 0xff
+		if { $DW_LNE_lo_usr <= $opcode
+		     && $opcode <= $DW_LNE_hi_usr } {
+		    _op .byte 0
+		    _op .uleb128 $len
+		    _op .byte $opcode
+		    for {set i 1} {$i < $len} {incr i} {
+			_op .byte 0
+		    }
+		} else {
+		    error "unknown vendor specific extended opcode: $opcode"
+		}
+	    }
+
 	    proc DW_LNS_copy {} {
 		_op .byte 1
 	    }

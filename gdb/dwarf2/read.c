@@ -20591,6 +20591,13 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
 	      extended_end = line_ptr + extended_len;
 	      extended_op = read_1_byte (abfd, line_ptr);
 	      line_ptr += 1;
+	      if (DW_LNE_lo_user <= extended_op
+		  && extended_op <= DW_LNE_hi_user)
+		{
+		  /* Vendor extension, ignore.  */
+		  line_ptr = extended_end;
+		  break;
+		}
 	      switch (extended_op)
 		{
 		case DW_LNE_end_sequence:

@@ -1,3 +1,9 @@
+2020-08-03  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/26333
+	* dwarf2/read.c (dwarf_decode_lines_1): Ignore
+	DW_LNE_lo_user/DW_LNE_hi_user range.
+
 2020-07-30  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	PR ada/26318

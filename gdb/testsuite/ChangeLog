@@ -1,3 +1,10 @@
+2020-08-03  Tom de Vries  <tdevries@suse.de>
+
+	PR symtab/26333
+	* lib/dwarf.exp (DW_LNE_user): New proc.
+	* gdb.dwarf2/dw2-vendor-extended-opcode.c: New test.
+	* gdb.dwarf2/dw2-vendor-extended-opcode.exp: New file.
+
 2020-07-31  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/coremaker2.c: Change all uses of 'unsigned long long'
