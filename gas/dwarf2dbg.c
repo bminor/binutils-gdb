@@ -2464,11 +2464,25 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg,
   /* DWARF version.  */
   out_two (DWARF2_VERSION);
 
-  /* .debug_abbrev offset */
-  TC_DWARF2_EMIT_OFFSET (section_symbol (abbrev_seg), sizeof_offset);
+  if (DWARF2_VERSION < 5)
+    {
+      /* .debug_abbrev offset */
+      TC_DWARF2_EMIT_OFFSET (section_symbol (abbrev_seg), sizeof_offset);
+    }
+  else
+    {
+      /* unit (header) type */
+      out_byte (DW_UT_compile);
+    }
 
   /* Target address size.  */
   out_byte (sizeof_address);
+
+  if (DWARF2_VERSION >= 5)
+    {
+      /* .debug_abbrev offset */
+      TC_DWARF2_EMIT_OFFSET (section_symbol (abbrev_seg), sizeof_offset);
+    }
 
   /* DW_TAG_compile_unit DIE abbrev */
   out_uleb128 (1);

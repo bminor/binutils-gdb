@@ -1,5 +1,15 @@
 2020-08-02  Mark Wielaard  <mark@klomp.org>
 
+	* dwarf2dbg.c (out_debug_info): Emit unit type and abbrev offset
+	for DWARF5.
+	* gas/testsuite/gas/elf/dwarf-4-cu.d: New file.
+	* gas/testsuite/gas/elf/dwarf-4-cu.s: Likewise.
+	* gas/testsuite/gas/elf/dwarf-5-cu.d: Likewise.
+	* gas/testsuite/gas/elf/dwarf-5-cu.s: Likewise.
+	* testsuite/gas/elf/elf.exp: Run dwarf-4-cu and dwarf-5-cu.
+
+2020-08-02  Mark Wielaard  <mark@klomp.org>
+
 	* doc/as.texi (--gdwarf-[345]): Fix typo.
 
 2020-08-03  Jozef Lawrynowicz  <jozef.l@mittosystems.com>

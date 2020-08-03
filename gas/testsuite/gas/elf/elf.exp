@@ -274,6 +274,8 @@ if { [is_elf_format] } then {
     run_dump_test "dwarf2-18" $dump_opts
     run_dump_test "dwarf2-19" $dump_opts
     run_dump_test "dwarf-5-file0" $dump_opts
+    run_dump_test "dwarf-4-cu" $dump_opts
+    run_dump_test "dwarf-5-cu" $dump_opts
     run_dump_test "pr25917"
     run_dump_test "bss"
     run_dump_test "bad-bss"
