@@ -23,6 +23,7 @@
 
 /* Need disassemble_info.  */
 #include "dis-asm.h"
+#include "gdbarch.h"
 #include "arch/arc.h"
 
 /* To simplify GDB code this enum assumes that internal regnums should be same

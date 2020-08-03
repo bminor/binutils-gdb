@@ -1,5 +1,9 @@
 2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
 
+	* arc-tdep.h: Include "gdbarch.h".
+
+2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
+
 	* arch/arc.h
 	(arc_gdbarch_features): New class to stir the selection of target XML.
 	(arc_create_target_description): Use FEATURES to choose XML target.
