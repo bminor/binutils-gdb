@@ -605,7 +605,7 @@ parse_args (unsigned argc, char **argv)
   longopts = (struct option *)
       xmalloc (sizeof (*longopts) * (OPTION_COUNT + 1));
   really_longopts = (struct option *)
-      malloc (sizeof (*really_longopts) * (OPTION_COUNT + 1));
+      xmalloc (sizeof (*really_longopts) * (OPTION_COUNT + 1));
 
   /* Starting the short option string with '-' is for programs that
      expect options and other ARGV-elements in any order and that care about

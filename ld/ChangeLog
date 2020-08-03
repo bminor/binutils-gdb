@@ -1,5 +1,10 @@
 2020-08-03  Alan Modra  <amodra@gmail.com>
 
+	* ldlex.l (yy_create_string_buffer): Use xmalloc rather than malloc.
+	* lexsup.c (parse_args): Likewise.
+
+2020-08-03  Alan Modra  <amodra@gmail.com>
+
 	PR 26328
 	* configure.ac: AC_CHECK_DECLS asprintf.
 	* configure: Regenerate.
