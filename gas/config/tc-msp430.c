@@ -685,8 +685,6 @@ static bfd_boolean warn_interrupt_nops = TRUE;
 #define OPTION_NO_UNKNOWN_INTR_NOPS 'U'
 static bfd_boolean do_unknown_interrupt_nops = TRUE;
 #define OPTION_MCPU 'c'
-#define OPTION_MOVE_DATA 'd'
-static bfd_boolean move_data = FALSE;
 #define OPTION_DATA_REGION 'r'
 static bfd_boolean upper_data_region_in_use = FALSE;
 /* The default is to use the lower region only.  */
@@ -1467,10 +1465,6 @@ md_parse_option (int c, const char * arg)
       do_unknown_interrupt_nops = FALSE;
       return 1;
 
-    case OPTION_MOVE_DATA:
-      move_data = TRUE;
-      return 1;
-
     case OPTION_DATA_REGION:
       if (strcmp (arg, "upper") == 0
 	  || strcmp (arg, "either") == 0)
@@ -1756,7 +1750,6 @@ struct option md_longopts[] =
   {"my", no_argument, NULL, OPTION_WARN_INTR_NOPS},
   {"mu", no_argument, NULL, OPTION_UNKNOWN_INTR_NOPS},
   {"mU", no_argument, NULL, OPTION_NO_UNKNOWN_INTR_NOPS},
-  {"md", no_argument, NULL, OPTION_MOVE_DATA},
   {"mdata-region", required_argument, NULL, OPTION_DATA_REGION},
   {NULL, no_argument, NULL, 0}
 };
@@ -1794,8 +1787,6 @@ md_show_usage (FILE * stream)
 	   _("  -mu - for an instruction which changes interrupt state, but where it is not\n"
 	     "        known how the state is changed, warn/insert NOPs (default)\n"
 	     "        -mn and/or -my are required for this to have any effect\n"));
-  fprintf (stream,
-	   _("  -md - Force copying of data from ROM to RAM at startup\n"));
   fprintf (stream,
 	   _("  -mdata-region={none|lower|upper|either} - select region data will be\n"
 	     "    placed in.\n"));

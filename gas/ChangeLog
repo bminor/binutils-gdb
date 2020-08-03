@@ -1,3 +1,10 @@
+2020-08-03  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* config/tc-msp430.c (OPTION_MOVE_DATA): Remove.
+	(md_parse_option): Remove case for OPTION_MOVE_DATA.
+	(md_longopts): Remove "md" entry.
+	(md_show_usage): Likewise.
+
 2020-07-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/26305
