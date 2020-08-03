@@ -1,3 +1,12 @@
+2020-08-04  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf2dbg.c (out_debug_abbrev): When DWARF2_VERSION >= 4, use
+	DW_FORM_udata for DW_AT_high_pc.
+	(out_debug_info): Use emit_leb128_expr for DW_AT_high_pc, when
+	DWARF2_VERSION >= 4.
+	* read.c (emit_leb128_exp): No longer static.
+	* read.h (emit_leb128_exp): Define.
+
 2020-08-02  Mark Wielaard  <mark@klomp.org>
 
 	* gas/dwarf2dbg.c (out_dir_and_file_list): For DWARF5 emit at

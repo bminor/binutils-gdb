@@ -2444,8 +2444,7 @@ out_debug_abbrev (segT abbrev_seg,
       if (DWARF2_VERSION < 4)
 	out_abbrev (DW_AT_high_pc, DW_FORM_addr);
       else
-	out_abbrev (DW_AT_high_pc, (sizeof_address == 4
-				    ? DW_FORM_data4 : DW_FORM_data8));
+	out_abbrev (DW_AT_high_pc, DW_FORM_udata);
     }
   else
     {
@@ -2528,7 +2527,10 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg,
 	}
       exp.X_add_symbol = all_segs->text_end;
       exp.X_add_number = 0;
-      emit_expr (&exp, sizeof_address);
+      if (DWARF2_VERSION < 4)
+	emit_expr (&exp, sizeof_address);
+      else
+	emit_leb128_expr (&exp, 0);
     }
   else
     {
