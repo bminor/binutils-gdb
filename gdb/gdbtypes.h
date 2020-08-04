@@ -1635,10 +1635,6 @@ extern bool set_type_align (struct type *, ULONGEST);
 #define TYPE_ASSOCIATED_PROP(thistype) \
   ((thistype)->dyn_prop (DYN_PROP_ASSOCIATED))
 
-/* Attribute accessors for dynamic properties.  */
-#define TYPE_DYN_PROP_ADDR(dynprop) \
-  (dynprop->const_val ())
-
 /* C++ */
 
 #define TYPE_SELF_TYPE(thistype) internal_type_self_type (thistype)

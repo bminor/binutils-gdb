@@ -1,5 +1,10 @@
 2020-08-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* gdbtypes.h (TYPE_DYN_PROP_ADDR): Remove, replace uses with
+	dynamic_prop::const_val.
+
+2020-08-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* gdbtypes.h (TYPE_DYN_PROP_KIND): Remove, replace uses with
 	dynamic_prop::kind.
 
