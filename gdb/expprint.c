@@ -50,7 +50,8 @@ void
 print_subexp (struct expression *exp, int *pos,
 	      struct ui_file *stream, enum precedence prec)
 {
-  exp->language_defn->la_exp_desc->print_subexp (exp, pos, stream, prec);
+  exp->language_defn->expression_ops ()->print_subexp (exp, pos, stream,
+						       prec);
 }
 
 /* Standard implementation of print_subexp for use in language_defn
@@ -692,7 +693,7 @@ op_name (struct expression *exp, enum exp_opcode opcode)
 		 unsigned (opcode));
       return cell;
     }
-  return exp->language_defn->la_exp_desc->op_name (opcode);
+  return exp->language_defn->expression_ops ()->op_name (opcode);
 }
 
 /* Default name for the standard operator OPCODE (i.e., one defined in
@@ -793,7 +794,8 @@ dump_subexp (struct expression *exp, struct ui_file *stream, int elt)
 static int
 dump_subexp_body (struct expression *exp, struct ui_file *stream, int elt)
 {
-  return exp->language_defn->la_exp_desc->dump_subexp_body (exp, stream, elt);
+  return exp->language_defn->expression_ops ()->dump_subexp_body (exp, stream,
+								  elt);
 }
 
 /* Default value for subexp_body in exp_descriptor vector.  */

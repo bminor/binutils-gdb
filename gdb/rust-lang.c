@@ -1901,7 +1901,6 @@ static const struct exp_descriptor exp_descriptor_rust =
 
 extern const struct language_data rust_language_data =
 {
-  &exp_descriptor_rust,
   c_op_print_tab,		/* expression operators for printing */
 };
 
@@ -2149,6 +2148,11 @@ public:
 
   bool range_checking_on_by_default () const override
   { return true; }
+
+  /* See language.h.  */
+
+  const struct exp_descriptor *expression_ops () const override
+  { return &exp_descriptor_rust; }
 };
 
 /* Single instance of the Rust language class.  */

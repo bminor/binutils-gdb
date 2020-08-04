@@ -74,7 +74,7 @@ evaluate_subexp (struct type *expect_type, struct expression *exp,
       && !thread_stack_temporaries_enabled_p (inferior_thread ()))
     stack_temporaries.emplace (inferior_thread ());
 
-  retval = (*exp->language_defn->la_exp_desc->evaluate_exp)
+  retval = (*exp->language_defn->expression_ops ()->evaluate_exp)
     (expect_type, exp, pos, noside);
 
   if (stack_temporaries.has_value ()

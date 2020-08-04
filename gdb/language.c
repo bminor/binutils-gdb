@@ -774,6 +774,14 @@ language_defn::varobj_ops () const
   return &c_varobj_ops;
 }
 
+/* See language.h.  */
+
+const struct exp_descriptor *
+language_defn::expression_ops () const
+{
+  return &exp_descriptor_standard;
+}
+
 /* Return true if TYPE is a string type, otherwise return false.  This
    default implementation only detects TYPE_CODE_STRING.  */
 
@@ -808,7 +816,6 @@ unknown_language_arch_info (struct gdbarch *gdbarch,
 
 extern const struct language_data unknown_language_data =
 {
-  &exp_descriptor_standard,
   unk_op_print_tab,		/* expression operators for printing */
 };
 
@@ -940,7 +947,6 @@ static unknown_language unknown_language_defn;
 
 extern const struct language_data auto_language_data =
 {
-  &exp_descriptor_standard,
   unk_op_print_tab,		/* expression operators for printing */
 };
 

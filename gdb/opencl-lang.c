@@ -1006,7 +1006,6 @@ const struct exp_descriptor exp_descriptor_opencl =
 /* Constant data representing the OpenCL language.  */
 extern const struct language_data opencl_language_data =
 {
-  &exp_descriptor_opencl,
   c_op_print_tab,		/* expression operators for printing */
 };
 
@@ -1070,6 +1069,11 @@ public:
 
   enum macro_expansion macro_expansion () const override
   { return macro_expansion_c; }
+
+  /* See language.h.  */
+
+  const struct exp_descriptor *expression_ops () const override
+  { return &exp_descriptor_opencl; }
 };
 
 /* Single instance of the OpenCL language class.  */

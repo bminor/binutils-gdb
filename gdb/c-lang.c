@@ -875,7 +875,6 @@ const struct exp_descriptor exp_descriptor_c =
 
 extern const struct language_data c_language_data =
 {
-  &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
 };
 
@@ -947,6 +946,11 @@ public:
 
   enum macro_expansion macro_expansion () const override
   { return macro_expansion_c; }
+
+  /* See language.h.  */
+
+  const struct exp_descriptor *expression_ops () const override
+  { return &exp_descriptor_c; }
 };
 
 /* Single instance of the C language class.  */
@@ -985,7 +989,6 @@ enum cplus_primitive_types {
 
 extern const struct language_data cplus_language_data =
 {
-  &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
 };
 
@@ -1179,6 +1182,11 @@ public:
   const struct lang_varobj_ops *varobj_ops () const override
   { return &cplus_varobj_ops; }
 
+  /* See language.h.  */
+
+  const struct exp_descriptor *expression_ops () const override
+  { return &exp_descriptor_c; }
+
 protected:
 
   /* See language.h.  */
@@ -1198,7 +1206,6 @@ static cplus_language cplus_language_defn;
 
 extern const struct language_data asm_language_data =
 {
-  &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
 };
 
@@ -1257,6 +1264,11 @@ public:
 
   enum macro_expansion macro_expansion () const override
   { return macro_expansion_c; }
+
+  /* See language.h.  */
+
+  const struct exp_descriptor *expression_ops () const override
+  { return &exp_descriptor_c; }
 };
 
 /* The single instance of the ASM language class.  */
@@ -1269,7 +1281,6 @@ static asm_language asm_language_defn;
 
 extern const struct language_data minimal_language_data =
 {
-  &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
 };
 
@@ -1317,6 +1328,11 @@ public:
 
   enum macro_expansion macro_expansion () const override
   { return macro_expansion_c; }
+
+  /* See language.h.  */
+
+  const struct exp_descriptor *expression_ops () const override
+  { return &exp_descriptor_c; }
 };
 
 /* The single instance of the minimal language class.  */

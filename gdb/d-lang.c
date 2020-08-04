@@ -128,7 +128,6 @@ enum d_primitive_types {
 
 extern const struct language_data d_language_data =
 {
-  &exp_descriptor_c,
   d_op_print_tab,		/* Expression operators for printing.  */
 };
 
@@ -276,6 +275,11 @@ public:
 
   const char *name_of_this () const override
   { return "this"; }
+
+  /* See language.h.  */
+
+  const struct exp_descriptor *expression_ops () const override
+  { return &exp_descriptor_c; }
 };
 
 /* Single instance of the D language class.  */

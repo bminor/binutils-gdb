@@ -13708,7 +13708,6 @@ ada_get_symbol_name_matcher (const lookup_name_info &lookup_name)
 
 extern const struct language_data ada_language_data =
 {
-  &ada_exp_descriptor,
   ada_op_print_tab,             /* expression operators for printing */
 };
 
@@ -14205,6 +14204,11 @@ public:
 
   const struct lang_varobj_ops *varobj_ops () const override
   { return &ada_varobj_ops; }
+
+  /* See language.h.  */
+
+  const struct exp_descriptor *expression_ops () const override
+  { return &ada_exp_descriptor; }
 
 protected:
   /* See language.h.  */

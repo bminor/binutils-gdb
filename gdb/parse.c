@@ -762,8 +762,8 @@ void
 operator_length (const struct expression *expr, int endpos, int *oplenp,
 		 int *argsp)
 {
-  expr->language_defn->la_exp_desc->operator_length (expr, endpos,
-						     oplenp, argsp);
+  expr->language_defn->expression_ops ()->operator_length (expr, endpos,
+							   oplenp, argsp);
 }
 
 /* Default value for operator_length in exp_descriptor vectors.  */
@@ -1374,8 +1374,9 @@ exp_iterate (struct expression *exp,
       gdb_assert (oplen > 0);
 
       pos = endpos - oplen;
-      if (exp->language_defn->la_exp_desc->operator_check (exp, pos,
-							   objfile_func, data))
+      if (exp->language_defn->expression_ops ()->operator_check (exp, pos,
+								 objfile_func,
+								 data))
 	return 1;
 
       endpos = pos;

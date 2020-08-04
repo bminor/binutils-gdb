@@ -323,7 +323,6 @@ static const struct op_print objc_op_print_tab[] =
 
 extern const struct language_data objc_language_data =
 {
-  &exp_descriptor_standard,
   objc_op_print_tab,		/* Expression operators for printing */
 };
 

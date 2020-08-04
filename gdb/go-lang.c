@@ -508,7 +508,6 @@ enum go_primitive_types {
 
 extern const struct language_data go_language_data =
 {
-  &exp_descriptor_c,
   go_op_print_tab,		/* Expression operators for printing.  */
 };
 
@@ -637,6 +636,11 @@ public:
 
   bool store_sym_names_in_linkage_form_p () const override
   { return true; }
+
+  /* See language.h.  */
+
+  const struct exp_descriptor *expression_ops () const override
+  { return &exp_descriptor_c; }
 };
 
 /* Single instance of the Go language class.  */

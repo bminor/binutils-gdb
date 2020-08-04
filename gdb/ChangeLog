@@ -1,5 +1,46 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Remove la_exp_desc initializer.
+	(ada_language::expression_ops): New member function.
+	* c-lang.c (c_language_data): Remove la_exp_desc initializer.
+	(c_language::expression_ops): New member function.
+	(cplus_language_data): Remove la_exp_desc initializer.
+	(cplus_language::expression_ops): New member function.
+	(asm_language_data): Remove la_exp_desc initializer.
+	(asm_language::expression_ops): New member function.
+	(minimal_language_data): Remove la_exp_desc initializer.
+	(minimal_language::expression_ops): New member function.
+	* d-lang.c (d_language_data): Remove la_exp_desc initializer.
+	(d_language::expression_ops): New member function.
+	* eval.c (evaluate_subexp): Update call to expression_ops.
+	* expprint.c (print_subexp): Likewise.
+	(op_name): Likewise.
+	(dump_subexp_body): Likewise.
+	* f-lang.c (f_language_data): Remove la_exp_desc initializer.
+	(f_language::expression_ops): New member function.
+	* go-lang.c (go_language_data): Remove la_exp_desc initializer.
+	(go_language::expression_ops): New member function.
+	* language.c (language_defn::expression_ops): New function.
+	(unknown_language_data): Remove la_exp_desc initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Remove la_exp_desc field.
+	(language_defn::expression_ops): Declare new member function.
+	* m2-lang.c (m2_language_data): Remove la_exp_desc initializer.
+	(m2_language::expression_ops): New member function.
+	* objc-lang.c (objc_language_data): Remove la_exp_desc
+	initializer.
+	* opencl-lang.c (opencl_language_data): Remove la_exp_desc
+	initializer.
+	(opencl_language::expression_ops): New member function.
+	* p-lang.c (pascal_language_data): Remove la_exp_desc initializer.
+	* parse.c (operator_length): Update call to expression_ops.
+	(exp_iterate): Likewise.
+	* rust-lang.c (rust_language_data): Remove la_exp_desc
+	initializer.
+	(ruse_language::expression_ops): New member function.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove la_varobj_ops
 	initializer.
 	(ada_language::varobj_ops): New member function.

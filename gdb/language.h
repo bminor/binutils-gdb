@@ -168,11 +168,6 @@ extern const char *default_word_break_characters (void);
 
 struct language_data
   {
-    /* Definitions related to expression printing, prefixifying, and
-       dumping.  */
-
-    const struct exp_descriptor *la_exp_desc;
-
     /* Table for printing expressions.  */
 
     const struct op_print *la_op_print_tab;
@@ -566,6 +561,11 @@ struct language_defn : language_data
      for this language.  */
 
   virtual const struct lang_varobj_ops *varobj_ops () const;
+
+  /* Definitions related to expression printing, prefixifying, and
+     dumping.  */
+
+  virtual const struct exp_descriptor *expression_ops () const;
 
 protected:
 

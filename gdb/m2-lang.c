@@ -199,7 +199,6 @@ const struct exp_descriptor exp_descriptor_modula2 =
 
 extern const struct language_data m2_language_data =
 {
-  &exp_descriptor_modula2,
   m2_op_print_tab,		/* expression operators for printing */
 };
 
@@ -444,6 +443,11 @@ public:
 
   bool range_checking_on_by_default () const override
   { return true; }
+
+  /* See language.h.  */
+
+  const struct exp_descriptor *expression_ops () const override
+  { return &exp_descriptor_modula2; }
 };
 
 /* Single instance of the M2 language.  */

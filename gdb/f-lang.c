@@ -486,7 +486,6 @@ static const struct exp_descriptor exp_descriptor_f =
 
 extern const struct language_data f_language_data =
 {
-  &exp_descriptor_f,
   f_op_print_tab,		/* expression operators for printing */
 };
 
@@ -731,6 +730,11 @@ public:
 
   enum array_ordering array_ordering () const override
   { return array_column_major; }
+
+  /* See language.h.  */
+
+  const struct exp_descriptor *expression_ops () const override
+  { return &exp_descriptor_f; }
 
 protected:
 
