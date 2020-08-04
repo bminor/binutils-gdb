@@ -816,7 +816,6 @@ unknown_language_arch_info (struct gdbarch *gdbarch,
 
 extern const struct language_data unknown_language_data =
 {
-  unk_op_print_tab,		/* expression operators for printing */
 };
 
 /* Class representing the unknown language.  */
@@ -937,6 +936,11 @@ public:
 
   bool store_sym_names_in_linkage_form_p () const override
   { return true; }
+
+  /* See language.h.  */
+
+  const struct op_print *opcode_print_table () const override
+  { return unk_op_print_tab; }
 };
 
 /* Single instance of the unknown language class.  */
@@ -947,7 +951,6 @@ static unknown_language unknown_language_defn;
 
 extern const struct language_data auto_language_data =
 {
-  unk_op_print_tab,		/* expression operators for printing */
 };
 
 /* Class representing the fake "auto" language.  */
@@ -1063,6 +1066,11 @@ public:
 
   const char *name_of_this () const override
   { return "this"; }
+
+  /* See language.h.  */
+
+  const struct op_print *opcode_print_table () const override
+  { return unk_op_print_tab; }
 };
 
 /* Single instance of the fake "auto" language.  */

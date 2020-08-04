@@ -1006,7 +1006,6 @@ const struct exp_descriptor exp_descriptor_opencl =
 /* Constant data representing the OpenCL language.  */
 extern const struct language_data opencl_language_data =
 {
-  c_op_print_tab,		/* expression operators for printing */
 };
 
 /* Class representing the OpenCL language.  */
@@ -1074,6 +1073,11 @@ public:
 
   const struct exp_descriptor *expression_ops () const override
   { return &exp_descriptor_opencl; }
+
+  /* See language.h.  */
+
+  const struct op_print *opcode_print_table () const override
+  { return c_op_print_tab; }
 };
 
 /* Single instance of the OpenCL language class.  */

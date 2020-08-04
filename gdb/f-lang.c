@@ -486,7 +486,6 @@ static const struct exp_descriptor exp_descriptor_f =
 
 extern const struct language_data f_language_data =
 {
-  f_op_print_tab,		/* expression operators for printing */
 };
 
 /* Class representing the Fortran language.  */
@@ -735,6 +734,11 @@ public:
 
   const struct exp_descriptor *expression_ops () const override
   { return &exp_descriptor_f; }
+
+  /* See language.h.  */
+
+  const struct op_print *opcode_print_table () const override
+  { return f_op_print_tab; }
 
 protected:
 

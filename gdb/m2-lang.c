@@ -199,7 +199,6 @@ const struct exp_descriptor exp_descriptor_modula2 =
 
 extern const struct language_data m2_language_data =
 {
-  m2_op_print_tab,		/* expression operators for printing */
 };
 
 /* Class representing the M2 language.  */
@@ -448,6 +447,11 @@ public:
 
   const struct exp_descriptor *expression_ops () const override
   { return &exp_descriptor_modula2; }
+
+  /* See language.h.  */
+
+  const struct op_print *opcode_print_table () const override
+  { return m2_op_print_tab; }
 };
 
 /* Single instance of the M2 language.  */

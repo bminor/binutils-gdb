@@ -73,7 +73,7 @@ print_subexp_standard (struct expression *exp, int *pos,
   struct value *val;
   char *tempstr = NULL;
 
-  op_print_tab = exp->language_defn->la_op_print_tab;
+  op_print_tab = exp->language_defn->opcode_print_table ();
   pc = (*pos)++;
   opcode = exp->elts[pc].opcode;
   switch (opcode)
@@ -669,7 +669,7 @@ op_string (enum exp_opcode op)
   int tem;
   const struct op_print *op_print_tab;
 
-  op_print_tab = current_language->la_op_print_tab;
+  op_print_tab = current_language->opcode_print_table ();
   for (tem = 0; op_print_tab[tem].opcode != OP_NULL; tem++)
     if (op_print_tab[tem].opcode == op)
       return op_print_tab[tem].string;

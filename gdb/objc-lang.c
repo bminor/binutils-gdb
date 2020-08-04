@@ -323,7 +323,6 @@ static const struct op_print objc_op_print_tab[] =
 
 extern const struct language_data objc_language_data =
 {
-  objc_op_print_tab,		/* Expression operators for printing */
 };
 
 /* Class representing the Objective-C language.  */
@@ -427,6 +426,11 @@ public:
 
   enum macro_expansion macro_expansion () const override
   { return macro_expansion_c; }
+
+  /* See language.h.  */
+
+  const struct op_print *opcode_print_table () const override
+  { return c_op_print_tab; }
 };
 
 /* Single instance of the class representing the Objective-C language.  */

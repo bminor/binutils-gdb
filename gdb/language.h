@@ -168,9 +168,6 @@ extern const char *default_word_break_characters (void);
 
 struct language_data
   {
-    /* Table for printing expressions.  */
-
-    const struct op_print *la_op_print_tab;
   };
 
 /* Base class from which all other language classes derive.  */
@@ -566,6 +563,10 @@ struct language_defn : language_data
      dumping.  */
 
   virtual const struct exp_descriptor *expression_ops () const;
+
+  /* Table for printing expressions.  */
+
+  virtual const struct op_print *opcode_print_table () const = 0;
 
 protected:
 

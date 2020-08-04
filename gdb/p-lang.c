@@ -252,7 +252,6 @@ enum pascal_primitive_types {
 
 extern const struct language_data pascal_language_data =
 {
-  pascal_op_print_tab,		/* expression operators for printing */
 };
 
 /* Class representing the Pascal language.  */
@@ -507,6 +506,11 @@ public:
 
   bool range_checking_on_by_default () const override
   { return true; }
+
+  /* See language.h.  */
+
+  const struct op_print *opcode_print_table () const override
+  { return pascal_op_print_tab; }
 };
 
 /* Single instance of the Pascal language class.  */

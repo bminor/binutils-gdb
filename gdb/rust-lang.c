@@ -1901,7 +1901,6 @@ static const struct exp_descriptor exp_descriptor_rust =
 
 extern const struct language_data rust_language_data =
 {
-  c_op_print_tab,		/* expression operators for printing */
 };
 
 /* Class representing the Rust language.  */
@@ -2153,6 +2152,11 @@ public:
 
   const struct exp_descriptor *expression_ops () const override
   { return &exp_descriptor_rust; }
+
+  /* See language.h.  */
+
+  const struct op_print *opcode_print_table () const override
+  { return c_op_print_tab; }
 };
 
 /* Single instance of the Rust language class.  */

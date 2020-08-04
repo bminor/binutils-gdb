@@ -1,5 +1,51 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Remove la_op_print_tab
+	initializer.
+	(ada_language::opcode_print_table): New member function.
+	* c-lang.c (c_language_data): Remove la_op_print_tab initializer.
+	(c_language::opcode_print_table): New member function.
+	(cplus_language_data): Remove la_op_print_tab initializer.
+	(cplus_language::opcode_print_table): New member function.
+	(asm_language_data): Remove la_op_print_tab initializer.
+	(asm_language::opcode_print_table): New member function.
+	(minimal_language_data): Remove la_op_print_tab initializer.
+	(minimal_language::opcode_print_table): New member function.
+	* d-lang.c (d_language_data): Remove la_op_print_tab initializer.
+	(d_language::opcode_print_table): New member function.
+	* expprint.c (print_subexp_standard): Update call to
+	opcode_print_table.
+	(op_string): Likewise.
+	* f-lang.c (f_language_data): Remove la_op_print_tab initializer.
+	(f_language::opcode_print_table): New member function.
+	* go-lang.c (go_language_data): Remove la_op_print_tab
+	initializer.
+	(go_language::opcode_print_table): New member function.
+	* language.c (unknown_language_data): Remove la_op_print_tab
+	initializer.
+	(unknown_language::opcode_print_table): New member function.
+	(auto_language_data): Remove la_op_print_tab initializer.
+	(auto_language::opcode_print_table): New member function.
+	* language.h (language_data): Remove la_op_print_tab field.
+	(language_defn::opcode_print_table): Declare new member function.
+	* m2-lang.c (m2_language_data): Remove la_op_print_tab
+	initializer.
+	(m2_language::opcode_print_table): New member function.
+	* objc-lang.c (objc_language_data): Remove la_op_print_tab
+	initializer.
+	(objc_language::opcode_print_table): New member function.
+	* opencl-lang.c (opencl_language_data): Remove la_op_print_tab
+	initializer.
+	(opencl_language::opcode_print_table): New member function.
+	* p-lang.c (pascal_language_data): Remove la_op_print_tab
+	initializer.
+	(pascal_language::opcode_print_table): New member function.
+	* rust-lang.c (rust_language_data): Remove la_op_print_tab
+	initializer.
+	(rust_language::opcode_print_table): New member function.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove la_exp_desc initializer.
 	(ada_language::expression_ops): New member function.
 	* c-lang.c (c_language_data): Remove la_exp_desc initializer.

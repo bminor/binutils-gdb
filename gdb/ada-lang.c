@@ -13708,7 +13708,6 @@ ada_get_symbol_name_matcher (const lookup_name_info &lookup_name)
 
 extern const struct language_data ada_language_data =
 {
-  ada_op_print_tab,             /* expression operators for printing */
 };
 
 /* Class representing the Ada language.  */
@@ -14209,6 +14208,11 @@ public:
 
   const struct exp_descriptor *expression_ops () const override
   { return &ada_exp_descriptor; }
+
+  /* See language.h.  */
+
+  const struct op_print *opcode_print_table () const override
+  { return ada_op_print_tab; }
 
 protected:
   /* See language.h.  */
