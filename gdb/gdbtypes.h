@@ -1638,8 +1638,6 @@ extern bool set_type_align (struct type *, ULONGEST);
 /* Attribute accessors for dynamic properties.  */
 #define TYPE_DYN_PROP_ADDR(dynprop) \
   (dynprop->const_val ())
-#define TYPE_DYN_PROP_KIND(dynprop) \
-  (dynprop->kind ())
 
 /* C++ */
 

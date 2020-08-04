@@ -196,11 +196,11 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
       else if (type_not_allocated (type))
 	print_rank_only = true;
       else if ((TYPE_ASSOCIATED_PROP (type)
-		&& PROP_CONST != TYPE_DYN_PROP_KIND (TYPE_ASSOCIATED_PROP (type)))
+		&& PROP_CONST != TYPE_ASSOCIATED_PROP (type)->kind ())
 	       || (TYPE_ALLOCATED_PROP (type)
-		   && PROP_CONST != TYPE_DYN_PROP_KIND (TYPE_ALLOCATED_PROP (type)))
+		   && PROP_CONST != TYPE_ALLOCATED_PROP (type)->kind ())
 	       || (TYPE_DATA_LOCATION (type)
-		   && PROP_CONST != TYPE_DYN_PROP_KIND (TYPE_DATA_LOCATION (type))))
+		   && PROP_CONST != TYPE_DATA_LOCATION (type)->kind ()))
 	{
 	  /* This case exist when we ptype a typename which has the dynamic
 	     properties but cannot be resolved as there is no object.  */
