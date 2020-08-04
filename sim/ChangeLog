@@ -1,3 +1,26 @@
+2020-08-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+	    David Faust <david.faust@oracle.com>
+
+	* configure.tgt (sim_arch): Add entry for bpf-*-*.
+	* configure: Regenerate.
+	* MAINTAINERS: Add maintainer for the BPF simulator.
+	* bpf/Makefile.in: New file.
+	* bpf/bpf-helpers.c: Likewise.
+	* bpf/bpf-helpers.def: Likewise.
+	* bpf/bpf-helpers.h: Likewise.
+	* bpf/bpf-sim.h: Likewise.
+	* bpf/bpf.c: Likewise.
+	* bpf/config.in: Likewise.
+	* bpf/configure.ac: Likewise.
+	* bpf/decode.h: Likewise.
+	* bpf/eng.h: Likewise.
+	* bpf/mloop.in: Likewise.
+	* bpf/sim-if.c: Likewise.
+	* bpf/sim-main.h: Likewise.
+	* bpf/traps.c: Likewise.
+	* bpf/configure: Generate.
+	* bpf/aclocal.m4: Likewise.
+
 2019-12-19  Tom Tromey  <tromey@adacore.com>
 
 	PR build/24572:

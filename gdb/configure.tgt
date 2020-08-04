@@ -208,6 +208,7 @@ bfin-*-*)
 bpf-*-*)
 	# Target: eBPF
 	gdb_target_obs="bpf-tdep.o"
+	gdb_sim=../sim/bpf/libsim.a
 	;;
 
 cris*)

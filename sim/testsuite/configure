@@ -1875,6 +1875,9 @@ case "${target}" in
    bfin-*-*)
        sim_arch=bfin
        ;;
+   bpf-*-*)
+       sim_arch=bpf
+       ;;
    cr16*-*-*)
        sim_arch=cr16
        ;;

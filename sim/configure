@@ -669,6 +669,7 @@ ac_subdirs_all='aarch64
 arm
 avr
 bfin
+bpf
 cr16
 cris
 d10v
@@ -3715,6 +3716,13 @@ subdirs="$subdirs aarch64"
 
   sim_arch=bfin
   subdirs="$subdirs bfin"
+
+
+       ;;
+   bpf-*-*)
+
+  sim_arch=bpf
+  subdirs="$subdirs bpf"
 
 
        ;;
