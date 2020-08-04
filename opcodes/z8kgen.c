@@ -458,8 +458,8 @@ static struct op opt[] =
   {"CZS---", 13, 8, "1011 0010 dddd 0001 iiii iiii 0000 imm4", "sllb rbd,imm4", 0},
   {"CZS---", 13, 32, "1011 0011 dddd 0101 0000 0000 imm8", "slll rrd,imm8", 0},
 
-  {"------", 12, 16, "0011 1011 ssss 0110 imm16", "sout imm16,rs", 0},
-  {"------", 12, 8, "0011 1010 ssss 0110 imm16", "soutb imm16,rbs", 0},
+  {"------", 12, 16, "0011 1011 ssss 0111 imm16", "sout imm16,rs", 0},
+  {"------", 12, 8, "0011 1010 ssss 0111 imm16", "soutb imm16,rbs", 0},
   {"---V--", 21, 16, "0011 1011 ssN0 1011 0000 aaaa dddd 1000", "soutd @ro,@rs,ra", 0},
   {"---V--", 21, 8, "0011 1010 ssN0 1011 0000 aaaa dddd 1000", "soutdb @ro,@rs,ra", 0},
   {"---V--", 11, 16, "0011 1011 ssN0 1011 0000 aaaa dddd 0000", "sotdr @ro,@rs,ra", 0},
