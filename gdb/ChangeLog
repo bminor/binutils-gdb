@@ -1,3 +1,7 @@
+2020-08-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdbtypes.h (TYPE_DYN_PROP_BATON): Remove.
+
 2020-08-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* configure.tgt: Set gdb_sim for bpf-*-* targets.
