@@ -1,6 +1,23 @@
 2020-08-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
 	    David Faust <david.faust@oracle.com>
 
+	* bpf/arch.c: Likewise.
+	* bpf/arch.h: Likewise.
+	* bpf/cpu.c: Likewise.
+	* bpf/cpu.h: Likewise.
+	* bpf/cpuall.h: Likewise.
+	* bpf/decode-be.c: Likewise.
+	* bpf/decode-be.h: Likewise.
+	* bpf/decode-le.c: Likewise.
+	* bpf/decode-le.h: Likewise.
+	* bpf/defs-be.h: Likewise.
+	* bpf/defs-le.h: Likewise.
+	* bpf/sem-be.c: Likewise.
+	* bpf/sem-le.c: Likewise.
+
+2020-08-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+	    David Faust <david.faust@oracle.com>
+
 	* configure.tgt (sim_arch): Add entry for bpf-*-*.
 	* configure: Regenerate.
 	* MAINTAINERS: Add maintainer for the BPF simulator.
