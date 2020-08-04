@@ -13704,19 +13704,13 @@ ada_get_symbol_name_matcher (const lookup_name_info &lookup_name)
     }
 }
 
-/* Constant data that describes the Ada language.  */
-
-extern const struct language_data ada_language_data =
-{
-};
-
 /* Class representing the Ada language.  */
 
 class ada_language : public language_defn
 {
 public:
   ada_language ()
-    : language_defn (language_ada, ada_language_data)
+    : language_defn (language_ada)
   { /* Nothing.  */ }
 
   /* See language.h.  */

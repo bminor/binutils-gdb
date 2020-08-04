@@ -482,19 +482,13 @@ static const struct exp_descriptor exp_descriptor_f =
   evaluate_subexp_f
 };
 
-/* Constant data that describes the Fortran language.  */
-
-extern const struct language_data f_language_data =
-{
-};
-
 /* Class representing the Fortran language.  */
 
 class f_language : public language_defn
 {
 public:
   f_language ()
-    : language_defn (language_fortran, f_language_data)
+    : language_defn (language_fortran)
   { /* Nothing.  */ }
 
   /* See language.h.  */

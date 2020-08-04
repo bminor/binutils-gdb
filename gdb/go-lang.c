@@ -504,19 +504,13 @@ enum go_primitive_types {
   nr_go_primitive_types
 };
 
-/* Constant data that describes the Go language.  */
-
-extern const struct language_data go_language_data =
-{
-};
-
 /* Class representing the Go language.  */
 
 class go_language : public language_defn
 {
 public:
   go_language ()
-    : language_defn (language_go, go_language_data)
+    : language_defn (language_go)
   { /* Nothing.  */ }
 
   /* See language.h.  */

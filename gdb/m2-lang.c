@@ -195,19 +195,13 @@ const struct exp_descriptor exp_descriptor_modula2 =
   evaluate_subexp_modula2
 };
 
-/* Constant data describing the M2 language.  */
-
-extern const struct language_data m2_language_data =
-{
-};
-
 /* Class representing the M2 language.  */
 
 class m2_language : public language_defn
 {
 public:
   m2_language ()
-    : language_defn (language_m2, m2_language_data)
+    : language_defn (language_m2)
   { /* Nothing.  */ }
 
   /* See language.h.  */

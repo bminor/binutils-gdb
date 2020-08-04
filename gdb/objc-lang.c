@@ -319,19 +319,13 @@ static const struct op_print objc_op_print_tab[] =
     {NULL, OP_NULL, PREC_NULL, 0}
 };
 
-/* Constant data representing the Objective-C language.  */
-
-extern const struct language_data objc_language_data =
-{
-};
-
 /* Class representing the Objective-C language.  */
 
 class objc_language : public language_defn
 {
 public:
   objc_language ()
-    : language_defn (language_objc, objc_language_data)
+    : language_defn (language_objc)
   { /* Nothing.  */ }
 
   /* See language.h.  */

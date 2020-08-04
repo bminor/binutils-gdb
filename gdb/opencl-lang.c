@@ -1003,18 +1003,13 @@ const struct exp_descriptor exp_descriptor_opencl =
   evaluate_subexp_opencl
 };
 
-/* Constant data representing the OpenCL language.  */
-extern const struct language_data opencl_language_data =
-{
-};
-
 /* Class representing the OpenCL language.  */
 
 class opencl_language : public language_defn
 {
 public:
   opencl_language ()
-    : language_defn (language_opencl, opencl_language_data)
+    : language_defn (language_opencl)
   { /* Nothing.  */ }
 
   /* See language.h.  */

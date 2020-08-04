@@ -248,19 +248,13 @@ enum pascal_primitive_types {
   nr_pascal_primitive_types
 };
 
-/* Constant data representing the Pascal language.  */
-
-extern const struct language_data pascal_language_data =
-{
-};
-
 /* Class representing the Pascal language.  */
 
 class pascal_language : public language_defn
 {
 public:
   pascal_language ()
-    : language_defn (language_pascal, pascal_language_data)
+    : language_defn (language_pascal)
   { /* Nothing.  */ }
 
   /* See language.h.  */

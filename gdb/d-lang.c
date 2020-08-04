@@ -124,19 +124,13 @@ enum d_primitive_types {
   nr_d_primitive_types
 };
 
-/* Constant data that describes the D language.  */
-
-extern const struct language_data d_language_data =
-{
-};
-
 /* Class representing the D language.  */
 
 class d_language : public language_defn
 {
 public:
   d_language ()
-    : language_defn (language_d, d_language_data)
+    : language_defn (language_d)
   { /* Nothing.  */ }
 
   /* See language.h.  */

@@ -812,19 +812,13 @@ unknown_language_arch_info (struct gdbarch *gdbarch,
 						       struct type *);
 }
 
-/* Constant data that describes the unknown language.  */
-
-extern const struct language_data unknown_language_data =
-{
-};
-
 /* Class representing the unknown language.  */
 
 class unknown_language : public language_defn
 {
 public:
   unknown_language ()
-    : language_defn (language_unknown, unknown_language_data)
+    : language_defn (language_unknown)
   { /* Nothing.  */ }
 
   /* See language.h.  */
@@ -947,19 +941,13 @@ public:
 
 static unknown_language unknown_language_defn;
 
-/* Constant data for the fake "auto" language.  */
-
-extern const struct language_data auto_language_data =
-{
-};
-
 /* Class representing the fake "auto" language.  */
 
 class auto_language : public language_defn
 {
 public:
   auto_language ()
-    : language_defn (language_auto, auto_language_data)
+    : language_defn (language_auto)
   { /* Nothing.  */ }
 
   /* See language.h.  */

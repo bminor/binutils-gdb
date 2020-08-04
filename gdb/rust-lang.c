@@ -1897,19 +1897,13 @@ static const struct exp_descriptor exp_descriptor_rust =
   rust_evaluate_subexp
 };
 
-/* Constant data representing the Rust language.  */
-
-extern const struct language_data rust_language_data =
-{
-};
-
 /* Class representing the Rust language.  */
 
 class rust_language : public language_defn
 {
 public:
   rust_language ()
-    : language_defn (language_rust, rust_language_data)
+    : language_defn (language_rust)
   { /* Nothing.  */ }
 
   /* See language.h.  */

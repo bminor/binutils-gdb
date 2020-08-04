@@ -152,31 +152,12 @@ struct language_pass_by_ref_info
 /* Splitting strings into words.  */
 extern const char *default_word_break_characters (void);
 
-/* Structure tying together assorted information about a language.
-
-   As we move over from the old structure based languages to a class
-   hierarchy of languages this structure will continue to contain a
-   mixture of both data and function pointers.
-
-   Once the class hierarchy of languages in place the first task is to
-   remove the function pointers from this structure and convert them into
-   member functions on the different language classes.
-
-   The current plan it to keep the constant data that describes a language
-   in this structure, and have each language pass in an instance of this
-   structure at construction time.  */
-
-struct language_data
-  {
-  };
-
 /* Base class from which all other language classes derive.  */
 
-struct language_defn : language_data
+struct language_defn
 {
-  language_defn (enum language lang, const language_data &init_data)
-    : language_data (init_data),
-      la_language (lang)
+  language_defn (enum language lang)
+    : la_language (lang)
   {
     /* We should only ever create one instance of each language.  */
     gdb_assert (languages[lang] == nullptr);

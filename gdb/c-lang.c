@@ -871,19 +871,13 @@ const struct exp_descriptor exp_descriptor_c =
   evaluate_subexp_c
 };
 
-/* Constant data that describes the C language.  */
-
-extern const struct language_data c_language_data =
-{
-};
-
 /* Class representing the C language.  */
 
 class c_language : public language_defn
 {
 public:
   c_language ()
-    : language_defn (language_c, c_language_data)
+    : language_defn (language_c)
   { /* Nothing.  */ }
 
   /* See language.h.  */
@@ -989,19 +983,13 @@ enum cplus_primitive_types {
   nr_cplus_primitive_types
 };
 
-/* Constant data that describes the C++ language.  */
-
-extern const struct language_data cplus_language_data =
-{
-};
-
 /* A class for the C++ language.  */
 
 class cplus_language : public language_defn
 {
 public:
   cplus_language ()
-    : language_defn (language_cplus, cplus_language_data)
+    : language_defn (language_cplus)
   { /* Nothing.  */ }
 
   /* See language.h.  */
@@ -1210,19 +1198,13 @@ protected:
 
 static cplus_language cplus_language_defn;
 
-/* Constant data that describes the ASM language.  */
-
-extern const struct language_data asm_language_data =
-{
-};
-
 /* A class for the ASM language.  */
 
 class asm_language : public language_defn
 {
 public:
   asm_language ()
-    : language_defn (language_asm, asm_language_data)
+    : language_defn (language_asm)
   { /* Nothing.  */ }
 
   /* See language.h.  */
@@ -1286,22 +1268,16 @@ public:
 /* The single instance of the ASM language class.  */
 static asm_language asm_language_defn;
 
-/* The following language_defn does not represent a real language.
-   It just provides a minimal support a-la-C that should allow users
-   to do some simple operations when debugging applications that use
+/* A class for the minimal language.  This does not represent a real
+   language.  It just provides a minimal support a-la-C that should allow
+   users to do some simple operations when debugging applications that use
    a language currently not supported by GDB.  */
-
-extern const struct language_data minimal_language_data =
-{
-};
-
-/* A class for the minimal language.  */
 
 class minimal_language : public language_defn
 {
 public:
   minimal_language ()
-    : language_defn (language_minimal, minimal_language_data)
+    : language_defn (language_minimal)
   { /* Nothing.  */ }
 
   /* See language.h.  */

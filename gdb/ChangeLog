@@ -1,5 +1,40 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Delete.
+	(ada_language): Remove references to ada_language_data.
+	* c-lang.c (c_language_data): Delete.
+	(c_language): Remove references to c_language_data.
+	(cplus_language_data): Delete.
+	(cplus_language): Remove references to cplus_language_data.
+	(asm_language_data): Delete.
+	(asm_language): Remove references to asm_language_data.
+	(minimal_language_data): Delete.
+	(minimal_language): Remove references to minimal_language_data.
+	* d-lang.c (d_language_data): Delete.
+	(d_language): Remove references to d_language_data.
+	* f-lang.c (f_language_data): Delete.
+	(f_language): Remove references to f_language_data.
+	* go-lang.c (go_language_data): Delete.
+	(go_language): Remove references to go_language_data.
+	* language.c (unknown_language_data): Delete.
+	(unknown_language): Remove references to unknown_language_data.
+	(auto_language_data): Delete.
+	(auto_language): Remove references to auto_language_data.
+	* language.h (language_data): Delete struct.
+	(language_defn): No longer inherit from language_data.
+	* m2-lang.c (m2_language_data): Delete.
+	(m2_language): Remove references to m2_language_data.
+	* objc-lang.c (objc_language_data): Delete.
+	(objc_language): Remove references to objc_language_data.
+	* opencl-lang.c (opencl_language_data): Delete.
+	(opencl_language): Remove references to opencl_language_data.
+	* p-lang.c (pascal_language_data): Delete.
+	(pascal_language): Remove references to pascal_language_data.
+	* rust-lang.c (rust_language_data): Delete.
+	(rust_language): Remove references to rust_language_data.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove la_op_print_tab
 	initializer.
 	(ada_language::opcode_print_table): New member function.
