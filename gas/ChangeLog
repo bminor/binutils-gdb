@@ -1,5 +1,9 @@
 2020-08-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* NEWS: Mention {disp16} pseudo prefix.
+
+2020-08-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* testsuite/gas/i386/x86-64-pseudos.d: Revert an accidental
 	change.
 
