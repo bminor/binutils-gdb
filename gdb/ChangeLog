@@ -1,3 +1,11 @@
+2020-08-04  Simon Marchi  <simon.marchi@efficios.com>
+
+	* frame.c (frame_info) <prev_func> <p>: Rename to status, change
+	type to cached_copy_status.
+	(fprintf_frame): Adjust.
+	(get_frame_func_if_available): Adjust.
+	(frame_cleanup_after_sniffer): Adjust.
+
 2020-08-04  Mark Wielaard  <mark@klomp.org>
 
 	* MAINTAINERS (Write After Approval): Update email address.

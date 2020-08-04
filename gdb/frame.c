@@ -133,7 +133,7 @@ struct frame_info
 
   /* Cached copy of the previous frame's resume address.  */
   struct {
-    enum cached_copy_status status;
+    cached_copy_status status;
     /* Did VALUE require unmasking when being read.  */
     bool masked;
     CORE_ADDR value;
@@ -143,7 +143,7 @@ struct frame_info
   struct
   {
     CORE_ADDR addr;
-    int p;
+    cached_copy_status status;
   } prev_func;
   
   /* This frame's ID.  */
@@ -478,7 +478,7 @@ fprint_frame (struct ui_file *file, struct frame_info *fi)
     fprintf_unfiltered (file, "<unknown>");
   fprintf_unfiltered (file, ",");
   fprintf_unfiltered (file, "func=");
-  if (fi->next != NULL && fi->next->prev_func.p)
+  if (fi->next != NULL && fi->next->prev_func.status == CC_VALUE)
     fprintf_unfiltered (file, "%s", hex_string (fi->next->prev_func.addr));
   else
     fprintf_unfiltered (file, "<unknown>");
@@ -1008,7 +1008,7 @@ get_frame_func_if_available (struct frame_info *this_frame, CORE_ADDR *pc)
 {
   struct frame_info *next_frame = this_frame->next;
 
-  if (!next_frame->prev_func.p)
+  if (next_frame->prev_func.status == CC_UNKNOWN)
     {
       CORE_ADDR addr_in_block;
 
@@ -1016,7 +1016,7 @@ get_frame_func_if_available (struct frame_info *this_frame, CORE_ADDR *pc)
          found.  */
       if (!get_frame_address_in_block_if_available (this_frame, &addr_in_block))
 	{
-	  next_frame->prev_func.p = -1;
+	  next_frame->prev_func.status = CC_UNAVAILABLE;
 	  if (frame_debug)
 	    fprintf_unfiltered (gdb_stdlog,
 				"{ get_frame_func (this_frame=%d)"
@@ -1025,7 +1025,7 @@ get_frame_func_if_available (struct frame_info *this_frame, CORE_ADDR *pc)
 	}
       else
 	{
-	  next_frame->prev_func.p = 1;
+	  next_frame->prev_func.status = CC_VALUE;
 	  next_frame->prev_func.addr = get_pc_function_start (addr_in_block);
 	  if (frame_debug)
 	    fprintf_unfiltered (gdb_stdlog,
@@ -1035,13 +1035,15 @@ get_frame_func_if_available (struct frame_info *this_frame, CORE_ADDR *pc)
 	}
     }
 
-  if (next_frame->prev_func.p < 0)
+  if (next_frame->prev_func.status == CC_UNAVAILABLE)
     {
       *pc = -1;
       return 0;
     }
   else
     {
+      gdb_assert (next_frame->prev_func.status == CC_VALUE);
+
       *pc = next_frame->prev_func.addr;
       return 1;
     }
@@ -2908,7 +2910,7 @@ frame_cleanup_after_sniffer (struct frame_info *frame)
 
      The previous PC is independent of the unwinder, but the previous
      function is not (see get_frame_address_in_block).  */
-  frame->prev_func.p = 0;
+  frame->prev_func.status = CC_UNKNOWN;
   frame->prev_func.addr = 0;
 
   /* Discard the unwinder last, so that we can easily find it if an assertion
