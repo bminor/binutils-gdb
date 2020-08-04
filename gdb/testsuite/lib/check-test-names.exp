@@ -150,7 +150,7 @@ namespace eval ::CheckTestNames {
 
 	CheckTestNames::reset_vars
 
-	unset all_test_names
+	array unset all_test_names
 	foreach nm {paths duplicates} {
 	    set counts($nm,count) 0
 	}

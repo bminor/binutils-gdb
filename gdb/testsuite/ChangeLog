@@ -1,3 +1,8 @@
+2020-08-04  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* lib/check-test-names.exp (do_reset_vars): Use 'array unset' to
+	unset the array variable.
+
 2020-08-03  Tom de Vries  <tdevries@suse.de>
 
 	PR symtab/26333
