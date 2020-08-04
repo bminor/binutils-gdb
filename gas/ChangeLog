@@ -1,5 +1,9 @@
 2020-08-04  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* NEWS: Mention {disp16} pseudo prefix.
+
+2020-08-04  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/26305
 	* config/tc-i386.c (_i386_insn::disp_encoding): Add
 	disp_encoding_16bit.

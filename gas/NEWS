@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add {disp16} pseudo prefix to x86 assembler.
+
 Changes in 2.35:
 
 * X86 NaCl target support is removed.
