@@ -247,6 +247,9 @@ the native maintainer when resolving ABI issues.
 
 	avr		--target=avr ,-Werror
 
+	bpf		--target=bpf-unknown-none
+			Jose E. Marchesi	jose.marchesi@oracle.com
+
 	cris		--target=cris-elf ,-Werror ,
 			(sim does not build with -Werror)
 

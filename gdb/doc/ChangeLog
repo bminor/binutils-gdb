@@ -1,3 +1,9 @@
+2020-08-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gdb.texinfo (Contributors): Add information for the eBPF
+	support.
+	(BPF): New section.
+
 2020-07-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* python.texi (Unwinding Frames in Python): Update descriptions

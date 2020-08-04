@@ -719,6 +719,7 @@ ALL_TARGET_OBS = \
 	avr-tdep.o \
 	bfin-linux-tdep.o \
 	bfin-tdep.o \
+	bpf-tdep.o \
 	bsd-uthread.o \
 	cris-linux-tdep.o \
 	cris-tdep.o \
@@ -2147,6 +2148,7 @@ ALLDEPFILES = \
 	avr-tdep.c \
 	bfin-linux-tdep.c \
 	bfin-tdep.c \
+	bpf-tdep.c \
 	bsd-kvm.c \
 	bsd-uthread.c \
 	csky-linux-tdep.c \

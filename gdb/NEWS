@@ -107,6 +107,7 @@ alias [-a] [--] ALIAS = COMMAND [DEFAULT-ARGS...]
 * New targets
 
 GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*
+BPF				bpf-unknown-none
 
 * Python API
 
