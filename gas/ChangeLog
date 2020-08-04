@@ -1,3 +1,8 @@
+2020-08-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/gas/i386/x86-64-pseudos.d: Revert an accidental
+	change.
+
 2020-08-04  Mark Wielaard  <mark@klomp.org>
 
 	* dwarf2dbg.c (out_debug_abbrev): When DWARF2_VERSION >= 4, use

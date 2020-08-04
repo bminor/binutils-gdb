@@ -308,7 +308,7 @@ Disassembly of section .text:
  +[a-f0-9]+:	40 d3 e0             	rex shl %cl,%eax
  +[a-f0-9]+:	40 a0 01 00 00 00 00 00 00 00 	rex movabs 0x1,%al
  +[a-f0-9]+:	40 38 ca             	rex cmp %cl,%dl
- +[a-f0-9]+:	40 b3 01             	rex mov \$(0x)1,%bl
+ +[a-f0-9]+:	40 b3 01             	rex mov \$(0x)?1,%bl
  +[a-f0-9]+:	f2 40 0f 38 f0 c1    	rex crc32 %cl,%eax
  +[a-f0-9]+:	40 89 c3             	rex mov %eax,%ebx
  +[a-f0-9]+:	41 89 c6             	mov    %eax,%r14d
