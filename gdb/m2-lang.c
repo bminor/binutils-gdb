@@ -201,7 +201,6 @@ extern const struct language_data m2_language_data =
 {
   &exp_descriptor_modula2,
   m2_op_print_tab,		/* expression operators for printing */
-  &default_varobj_ops,
 };
 
 /* Class representing the M2 language.  */

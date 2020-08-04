@@ -877,7 +877,6 @@ extern const struct language_data c_language_data =
 {
   &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
-  &c_varobj_ops,
 };
 
 /* Class representing the C language.  */
@@ -988,7 +987,6 @@ extern const struct language_data cplus_language_data =
 {
   &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
-  &cplus_varobj_ops,
 };
 
 /* A class for the C++ language.  */
@@ -1176,6 +1174,11 @@ public:
   enum macro_expansion macro_expansion () const override
   { return macro_expansion_c; }
 
+  /* See language.h.  */
+
+  const struct lang_varobj_ops *varobj_ops () const override
+  { return &cplus_varobj_ops; }
+
 protected:
 
   /* See language.h.  */
@@ -1197,7 +1200,6 @@ extern const struct language_data asm_language_data =
 {
   &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
-  &default_varobj_ops,
 };
 
 /* A class for the ASM language.  */
@@ -1269,7 +1271,6 @@ extern const struct language_data minimal_language_data =
 {
   &exp_descriptor_c,
   c_op_print_tab,		/* expression operators for printing */
-  &default_varobj_ops,
 };
 
 /* A class for the minimal language.  */

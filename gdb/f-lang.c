@@ -488,7 +488,6 @@ extern const struct language_data f_language_data =
 {
   &exp_descriptor_f,
   f_op_print_tab,		/* expression operators for printing */
-  &default_varobj_ops,
 };
 
 /* Class representing the Fortran language.  */

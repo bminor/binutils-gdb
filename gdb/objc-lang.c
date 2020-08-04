@@ -325,7 +325,6 @@ extern const struct language_data objc_language_data =
 {
   &exp_descriptor_standard,
   objc_op_print_tab,		/* Expression operators for printing */
-  &default_varobj_ops,
 };
 
 /* Class representing the Objective-C language.  */

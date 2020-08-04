@@ -1,5 +1,33 @@
 2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language_data): Remove la_varobj_ops
+	initializer.
+	(ada_language::varobj_ops): New member function.
+	* c-lang.c (c_language_data): Remove la_varobj_ops
+	initializer.
+	(cplus_language_data): Likewise.
+	(cplus_language::varobj_ops): New member function.
+	(asm_language_data): Remove la_varobj_ops initializer.
+	(minimal_language_data): Likewise.
+	* d-lang.c (d_language_data): Likewise.
+	* f-lang.c (f_language_data): Likewise.
+	* go-lang.c (go_language_data): Likewise.
+	* language.c (language_defn::varobj_ops): New function.
+	(unknown_language_data): Remove la_varobj_ops
+	initializer.
+	(auto_language_data): Likewise.
+	* language.h (language_data): Remove la_varobj_ops field.
+	(language_defn::varobj_ops): Declare new member function.
+	* m2-lang.c (m2_language_data): Remove la_varobj_ops initializer.
+	* objc-lang.c (objc_language_data): Likewise.
+	* opencl-lang.c (opencl_language_data): Likewise.
+	* p-lang.c (pascal_language_data): Likewise.
+	* rust-lang.c (rust_language_data): Likewise.
+	* varobj.c (varobj_create): Update call to varobj_ops.
+	* varobj.h (default_varobj_ops): Delete define.
+
+2020-09-16  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language_data): Remove la_macro_expansion
 	initializer.
 	* c-lang.c (c_language_data): Likewise.

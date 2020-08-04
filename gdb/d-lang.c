@@ -130,7 +130,6 @@ extern const struct language_data d_language_data =
 {
   &exp_descriptor_c,
   d_op_print_tab,		/* Expression operators for printing.  */
-  &default_varobj_ops,
 };
 
 /* Class representing the D language.  */

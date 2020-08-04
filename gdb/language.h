@@ -176,9 +176,6 @@ struct language_data
     /* Table for printing expressions.  */
 
     const struct op_print *la_op_print_tab;
-
-    /* Various operations on varobj.  */
-    const struct lang_varobj_ops *la_varobj_ops;
   };
 
 /* Base class from which all other language classes derive.  */
@@ -564,6 +561,11 @@ struct language_defn : language_data
 
   virtual enum macro_expansion macro_expansion () const
   { return macro_expansion_no; }
+
+  /* Return a structure containing various operations on varobj specific
+     for this language.  */
+
+  virtual const struct lang_varobj_ops *varobj_ops () const;
 
 protected:
 

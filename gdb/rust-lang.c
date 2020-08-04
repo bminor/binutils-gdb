@@ -1903,7 +1903,6 @@ extern const struct language_data rust_language_data =
 {
   &exp_descriptor_rust,
   c_op_print_tab,		/* expression operators for printing */
-  &default_varobj_ops,
 };
 
 /* Class representing the Rust language.  */

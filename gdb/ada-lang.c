@@ -13710,7 +13710,6 @@ extern const struct language_data ada_language_data =
 {
   &ada_exp_descriptor,
   ada_op_print_tab,             /* expression operators for printing */
-  &ada_varobj_ops,
 };
 
 /* Class representing the Ada language.  */
@@ -14201,6 +14200,11 @@ public:
 
   bool store_sym_names_in_linkage_form_p () const override
   { return true; }
+
+  /* See language.h.  */
+
+  const struct lang_varobj_ops *varobj_ops () const override
+  { return &ada_varobj_ops; }
 
 protected:
   /* See language.h.  */

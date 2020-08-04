@@ -233,8 +233,6 @@ extern const struct lang_varobj_ops c_varobj_ops;
 extern const struct lang_varobj_ops cplus_varobj_ops;
 extern const struct lang_varobj_ops ada_varobj_ops;
 
-#define default_varobj_ops c_varobj_ops
-
 /* Non-zero if we want to see trace of varobj level stuff.  */
 
 extern unsigned int varobjdebug;

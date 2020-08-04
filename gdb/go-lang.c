@@ -510,7 +510,6 @@ extern const struct language_data go_language_data =
 {
   &exp_descriptor_c,
   go_op_print_tab,		/* Expression operators for printing.  */
-  &default_varobj_ops,
 };
 
 /* Class representing the Go language.  */

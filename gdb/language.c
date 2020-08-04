@@ -764,6 +764,16 @@ language_defn::get_symbol_name_matcher_inner
   return default_symbol_name_matcher;
 }
 
+/* See language.h.  */
+
+const struct lang_varobj_ops *
+language_defn::varobj_ops () const
+{
+  /* The ops for the C language are suitable for the vast majority of the
+     supported languages.  */
+  return &c_varobj_ops;
+}
+
 /* Return true if TYPE is a string type, otherwise return false.  This
    default implementation only detects TYPE_CODE_STRING.  */
 
@@ -800,7 +810,6 @@ extern const struct language_data unknown_language_data =
 {
   &exp_descriptor_standard,
   unk_op_print_tab,		/* expression operators for printing */
-  &default_varobj_ops,
 };
 
 /* Class representing the unknown language.  */
@@ -933,7 +942,6 @@ extern const struct language_data auto_language_data =
 {
   &exp_descriptor_standard,
   unk_op_print_tab,		/* expression operators for printing */
-  &default_varobj_ops,
 };
 
 /* Class representing the fake "auto" language.  */

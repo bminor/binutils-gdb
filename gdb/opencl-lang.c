@@ -1008,7 +1008,6 @@ extern const struct language_data opencl_language_data =
 {
   &exp_descriptor_opencl,
   c_op_print_tab,		/* expression operators for printing */
-  &default_varobj_ops,
 };
 
 /* Class representing the OpenCL language.  */

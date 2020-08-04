@@ -386,7 +386,7 @@ varobj_create (const char *objname,
 	}
 
       /* Set language info */
-      var->root->lang_ops = var->root->exp->language_defn->la_varobj_ops;
+      var->root->lang_ops = var->root->exp->language_defn->varobj_ops ();
 
       install_new_value (var.get (), value, 1 /* Initial assignment */);
 
