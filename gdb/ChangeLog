@@ -1,3 +1,7 @@
+2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
+
+	* MAINTAINERS: Add ARC target and maintainer.
+
 2020-08-25  Anton Kolesov  <anton.kolesov@synopsys.com>
 
 	* configure.tgt: ARC support for GNU/Linux.

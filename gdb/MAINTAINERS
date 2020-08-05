@@ -242,6 +242,9 @@ the native maintainer when resolving ABI issues.
 
 	alpha		--target=alpha-elf ,-Werror
 
+	arc		--target=arc-elf
+			Shahab Vahedi		shahab@synopsys.com
+
 	arm		--target=arm-elf ,-Werror
 			Alan Hayward		alan.hayward@arm.com
 
