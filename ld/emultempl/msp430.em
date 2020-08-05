@@ -339,9 +339,10 @@ fi
 fragment <<EOF
 
 static bfd_boolean
-change_output_section (lang_statement_union_type ** head,
+change_output_section (lang_statement_union_type **head,
 		       asection *s,
-		       lang_output_section_statement_type * new_output_section)
+		       lang_output_section_statement_type *new_os,
+		       lang_output_section_statement_type *old_os)
 {
   asection *is;
   lang_statement_union_type * prev = NULL;
@@ -356,20 +357,27 @@ change_output_section (lang_statement_union_type ** head,
 	  is = curr->input_section.section;
 	  if (is == s)
 	    {
+	      lang_statement_list_type *old_list
+		= (lang_statement_list_type *) &old_os->children;
 	      s->output_section = NULL;
-	      lang_add_section (& (new_output_section->children), s, NULL,
-				new_output_section);
+	      lang_add_section (&new_os->children, s, NULL, new_os);
+
 	      /* Remove the section from the old output section.  */
 	      if (prev == NULL)
 		*head = curr->header.next;
 	      else
 		prev->header.next = curr->header.next;
+	      /* If the input section we just moved is the tail of the old
+		 output section, then we also need to adjust that tail.  */
+	      if (old_list->tail == (lang_statement_union_type **) curr)
+		old_list->tail = (lang_statement_union_type **) prev;
+
 	      return TRUE;
 	    }
 	  break;
 	case lang_wild_statement_enum:
 	  if (change_output_section (&(curr->wild_statement.children.head),
-				     s, new_output_section))
+				     s, new_os, old_os))
 	    return TRUE;
 	  break;
 	default:
@@ -606,11 +614,15 @@ eval_upper_either_sections (bfd *abfd ATTRIBUTE_UNUSED,
       upper_size = &upper_size_ram;
     }
 
-  /* Move sections in the upper region that would fit in the lower
-     region to the lower region.  */
-  if (*lower_size + s->size < lower->region->length)
+  /* If the upper region is overflowing, try moving sections to the lower
+     region.
+     Note that there isn't any general benefit to using lower memory over upper
+     memory, so we only move sections around with the goal of making the program
+     fit.  */
+  if (*upper_size > upper->region->length
+      && *lower_size + s->size < lower->region->length)
     {
-      if (change_output_section (&(upper->children.head), s, lower))
+      if (change_output_section (&(upper->children.head), s, lower, upper))
 	{
 	  *upper_size -= s->size;
 	  *lower_size += s->size;
@@ -700,7 +712,7 @@ eval_lower_either_sections (bfd *abfd ATTRIBUTE_UNUSED,
     }
   /* Move sections that cause the lower region to overflow to the upper region.  */
   if (*lower_size + s->size > output_sec->region->length)
-    change_output_section (&(output_sec->children.head), s, upper);
+    change_output_section (&(output_sec->children.head), s, upper, output_sec);
   else
     *lower_size += s->size;
  end:

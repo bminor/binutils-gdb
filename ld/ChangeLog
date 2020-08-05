@@ -1,3 +1,12 @@
+2020-08-06  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* emultempl/msp430.em (change_output_section): Update the tail
+	of the output section statement list when moving the original
+	tail to a different output section.
+	(eval_upper_either_sections): Don't move sections from the upper
+	region to the lower region unless the upper region is
+	overflowing.
+
 2020-08-03  Alan Modra  <amodra@gmail.com>
 
 	* ldlex.l (yy_create_string_buffer): Use xmalloc rather than malloc.
