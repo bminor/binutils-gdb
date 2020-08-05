@@ -4134,7 +4134,7 @@ type_not_allocated (const struct type *type)
   struct dynamic_prop *prop = TYPE_ALLOCATED_PROP (type);
 
   return (prop != nullptr && prop->kind () == PROP_CONST
-	  && prop->const_val () != 0);
+	  && prop->const_val () == 0);
 }
 
 /* Associated status of type TYPE.  Return zero if type TYPE is associated.
@@ -4146,7 +4146,7 @@ type_not_associated (const struct type *type)
   struct dynamic_prop *prop = TYPE_ASSOCIATED_PROP (type);
 
   return (prop != nullptr && prop->kind () == PROP_CONST
-	  && prop->const_val () != 0);
+	  && prop->const_val () == 0);
 }
 
 /* rank_one_type helper for when PARM's type code is TYPE_CODE_PTR.  */

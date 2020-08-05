@@ -1,3 +1,8 @@
+2020-08-05  Tom de Vries  <tdevries@suse.de>
+
+	* gdbtypes.c (type_not_allocated, type_not_associated): Use
+	"prop->const_val () == 0" instead of "prop->const_val () != 0".
+
 2020-08-04  Simon Marchi  <simon.marchi@efficios.com>
 
 	* frame.h (frame_id_p): Return bool.
