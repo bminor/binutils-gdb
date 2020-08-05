@@ -1,3 +1,10 @@
+2020-08-05  Tom Tromey  <tromey@adacore.com>
+
+	PR rust/26197:
+	* dwarf2/read.c (alloc_rust_variant): Handle univariant case.
+	(quirk_rust_enum): Call alloc_rust_variant for univariant case.
+	Fix off-by-one and type size errors in ordinary case.
+
 2020-08-05  Tom de Vries  <tdevries@suse.de>
 
 	* gdbtypes.c (type_not_allocated, type_not_associated): Use

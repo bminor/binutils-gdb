@@ -9416,7 +9416,8 @@ rust_fully_qualify (struct obstack *obstack, const char *p1, const char *p2)
 /* A helper that allocates a variant part to attach to a Rust enum
    type.  OBSTACK is where the results should be allocated.  TYPE is
    the type we're processing.  DISCRIMINANT_INDEX is the index of the
-   discriminant.  It must be the index of one of the fields of TYPE.
+   discriminant.  It must be the index of one of the fields of TYPE,
+   or -1 to mean there is no discriminant (univariant enum).
    DEFAULT_INDEX is the index of the default field; or -1 if there is
    no default.  RANGES is indexed by "effective" field number (the
    field index, but omitting the discriminant and default fields) and
@@ -9429,15 +9430,17 @@ alloc_rust_variant (struct obstack *obstack, struct type *type,
 		    int discriminant_index, int default_index,
 		    gdb::array_view<discriminant_range> ranges)
 {
-  /* When DISCRIMINANT_INDEX == -1, we have a univariant enum.  Those
-     must be handled by the caller.  */
-  gdb_assert (discriminant_index >= 0
-	      && discriminant_index < type->num_fields ());
+  /* When DISCRIMINANT_INDEX == -1, we have a univariant enum.  */
+  gdb_assert (discriminant_index == -1
+	      || (discriminant_index >= 0
+		  && discriminant_index < type->num_fields ()));
   gdb_assert (default_index == -1
 	      || (default_index >= 0 && default_index < type->num_fields ()));
 
   /* We have one variant for each non-discriminant field.  */
-  int n_variants = type->num_fields () - 1;
+  int n_variants = type->num_fields ();
+  if (discriminant_index != -1)
+    --n_variants;
 
   variant *variants = new (obstack) variant[n_variants];
   int var_idx = 0;
@@ -9466,7 +9469,12 @@ alloc_rust_variant (struct obstack *obstack, struct type *type,
 
   variant_part *part = new (obstack) variant_part;
   part->discriminant_index = discriminant_index;
-  part->is_unsigned = TYPE_UNSIGNED (type->field (discriminant_index).type ());
+  /* If there is no discriminant, then whether it is signed is of no
+     consequence.  */
+  part->is_unsigned
+    = (discriminant_index == -1
+       ? false
+       : TYPE_UNSIGNED (type->field (discriminant_index).type ()));
   part->variants = gdb::array_view<variant> (variants, n_variants);
 
   void *storage = obstack_alloc (obstack, sizeof (gdb::array_view<variant_part>));
@@ -9594,6 +9602,8 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       field_type->set_name
 	(rust_fully_qualify (&objfile->objfile_obstack,
 			     type->name (), variant_name));
+
+      alloc_rust_variant (&objfile->objfile_obstack, type, -1, 0, {});
     }
   else
     {
@@ -9682,9 +9692,13 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	  auto iter = discriminant_map.find (variant_name);
 	  if (iter != discriminant_map.end ())
 	    {
-	      ranges[i].low = iter->second;
-	      ranges[i].high = iter->second;
+	      ranges[i - 1].low = iter->second;
+	      ranges[i - 1].high = iter->second;
 	    }
+
+	  /* In Rust, each element should have the size of the
+	     enclosing enum.  */
+	  TYPE_LENGTH (type->field (i).type ()) = TYPE_LENGTH (type);
 
 	  /* Remove the discriminant field, if it exists.  */
 	  struct type *sub_type = type->field (i).type ();
