@@ -1,3 +1,9 @@
+2020-08-05  Alan Modra  <amodra@gmail.com>
+
+	PR 26337
+	* objdump.c (load_specific_debug_section): Don't malloc space for
+	section contents, use bfd_malloc_and_get_section.
+
 2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* Makefile.am (AM_CPPFLAGS): Add LARGEFILE_CPPFLAGS.

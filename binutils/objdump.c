@@ -3545,6 +3545,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
       if (streq (section->filename, bfd_get_filename (abfd)))
 	return TRUE;
       free (section->start);
+      section->start = NULL;
     }
 
   section->filename = bfd_get_filename (abfd);
@@ -3557,22 +3558,20 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
   alloced = amt = section->size + 1;
   if (alloced != amt || alloced == 0)
     {
-      section->start = NULL;
       free_debug_section (debug);
       printf (_("\nSection '%s' has an invalid size: %#llx.\n"),
 	      sanitize_string (section->name),
 	      (unsigned long long) section->size);
       return FALSE;
     }
-  section->start = contents = malloc (alloced);
-  if (section->start == NULL
-      || !bfd_get_full_section_contents (abfd, sec, &contents))
+  if (!bfd_malloc_and_get_section (abfd, sec, &contents))
     {
       free_debug_section (debug);
       printf (_("\nCan't get contents for section '%s'.\n"),
 	      sanitize_string (section->name));
       return FALSE;
     }
+  section->start = contents;
   /* Ensure any string section has a terminating NUL.  */
   section->start[section->size] = 0;
 
