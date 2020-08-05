@@ -28,7 +28,8 @@ if {![istarget x86_64-*] || ![is_lp64_target]} {
     return 0
 }
 
-if { [prepare_for_testing "failed to prepare" "${test}" ${test}.S {nodebug additional_flags=-nostdlib}] } {
+if { [prepare_for_testing "failed to prepare" "${test}" ${test}.S \
+      {nodebug nopie additional_flags=-nostdlib}] } {
     return -1
 }
 

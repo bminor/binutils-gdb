@@ -1,3 +1,10 @@
+2020-08-05  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb.dwarf2/clztest.exp, gdb.dwarf2/dw2-common-block.exp,
+	gdb.dwarf2/dw2-dup-frame.exp, gdb.dwarf2/dw2-reg-undefined.exp,
+	gdb.dwarf2/dw2-single-line-discriminators.exp,
+	dw2-undefined-ret-addr.exp: Pass nopie to compilation options.
+
 2020-08-05  Tom Tromey  <tromey@adacore.com>
 
 	PR rust/26197:

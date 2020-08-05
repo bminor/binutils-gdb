@@ -33,7 +33,7 @@ if {[skip_fortran_tests]} {
 standard_testfile .S
 
 if { [prepare_for_testing "failed to prepare" "${testfile}" $srcfile \
-	  {nodebug f90}] } {
+      {nodebug nopie f90}] } {
     return -1
 }
 
