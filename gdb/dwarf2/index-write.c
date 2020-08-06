@@ -41,6 +41,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <forward_list>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
