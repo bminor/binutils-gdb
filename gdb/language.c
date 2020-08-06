@@ -782,60 +782,25 @@ language_defn::expression_ops () const
   return &exp_descriptor_standard;
 }
 
-/* Return true if TYPE is a string type, otherwise return false.  This
-   default implementation only detects TYPE_CODE_STRING.  */
+/* Parent class for both the "auto" and "unknown" languages.  These two
+   pseudo-languages are very similar so merging their implementations like
+   this makes sense.  */
 
-static bool
-default_is_string_type_p (struct type *type)
+class auto_or_unknown_language : public language_defn
 {
-  type = check_typedef (type);
-  while (type->code () == TYPE_CODE_REF)
-    {
-      type = TYPE_TARGET_TYPE (type);
-      type = check_typedef (type);
-    }
-  return (type->code ()  == TYPE_CODE_STRING);
-}
+public:
+  auto_or_unknown_language (enum language lang)
+    : language_defn (lang)
+  { /* Nothing.  */ }
 
-static const struct op_print unk_op_print_tab[] =
-{
-  {NULL, OP_NULL, PREC_NULL, 0}
-};
-
-static void
-unknown_language_arch_info (struct gdbarch *gdbarch,
-			    struct language_arch_info *lai)
-{
-  lai->string_char_type = builtin_type (gdbarch)->builtin_char;
-  lai->bool_type_default = builtin_type (gdbarch)->builtin_int;
-  lai->primitive_type_vector = GDBARCH_OBSTACK_CALLOC (gdbarch, 1,
+  /* See language.h.  */
+  void language_arch_info (struct gdbarch *gdbarch,
+			   struct language_arch_info *lai) const override
+  {
+    lai->string_char_type = builtin_type (gdbarch)->builtin_char;
+    lai->bool_type_default = builtin_type (gdbarch)->builtin_int;
+    lai->primitive_type_vector = GDBARCH_OBSTACK_CALLOC (gdbarch, 1,
 						       struct type *);
-}
-
-/* Class representing the unknown language.  */
-
-class unknown_language : public language_defn
-{
-public:
-  unknown_language ()
-    : language_defn (language_unknown)
-  { /* Nothing.  */ }
-
-  /* See language.h.  */
-
-  const char *name () const override
-  { return "unknown"; }
-
-  /* See language.h.  */
-
-  const char *natural_name () const override
-  { return "Unknown"; }
-
-  /* See language.h.  */
-  void language_arch_info (struct gdbarch *gdbarch,
-			   struct language_arch_info *lai) const override
-  {
-    unknown_language_arch_info (gdbarch, lai);
   }
 
   /* See language.h.  */
@@ -844,136 +809,8 @@ public:
 		   struct ui_file *stream, int show, int level,
 		   const struct type_print_options *flags) const override
   {
-    error (_("unimplemented unknown_language::print_type called"));
-  }
-
-  /* See language.h.  */
-
-  char *demangle (const char *mangled, int options) const override
-  {
-    /* The unknown language just uses the C++ demangler.  */
-    return gdb_demangle (mangled, options);
-  }
-
-  /* See language.h.  */
-
-  void value_print (struct value *val, struct ui_file *stream,
-		    const struct value_print_options *options) const override
-  {
-    error (_("unimplemented unknown_language::value_print called"));
-  }
-
-  /* See language.h.  */
-
-  void value_print_inner
-	(struct value *val, struct ui_file *stream, int recurse,
-	 const struct value_print_options *options) const override
-  {
-    error (_("unimplemented unknown_language::value_print_inner called"));
-  }
-
-  /* See language.h.  */
-
-  int parser (struct parser_state *ps) const override
-  {
-    /* No parsing is done, just claim success.  */
-    return 1;
-  }
-
-  /* See language.h.  */
-
-  void emitchar (int ch, struct type *chtype,
-		 struct ui_file *stream, int quoter) const override
-  {
-    error (_("unimplemented unknown_language::emitchar called"));
-  }
-
-  /* See language.h.  */
-
-  void printchar (int ch, struct type *chtype,
-		  struct ui_file *stream) const override
-  {
-    error (_("unimplemented unknown_language::printchar called"));
-  }
-
-  /* See language.h.  */
-
-  void printstr (struct ui_file *stream, struct type *elttype,
-		 const gdb_byte *string, unsigned int length,
-		 const char *encoding, int force_ellipses,
-		 const struct value_print_options *options) const override
-  {
-    error (_("unimplemented unknown_language::printstr called"));
-  }
-
-  /* See language.h.  */
-
-  void print_typedef (struct type *type, struct symbol *new_symbol,
-		      struct ui_file *stream) const override
-  {
-    error (_("unimplemented unknown_language::print_typedef called"));
-  }
-
-  /* See language.h.  */
-
-  bool is_string_type_p (struct type *type) const override
-  {
-    return default_is_string_type_p (type);
-  }
-
-  /* See language.h.  */
-
-  const char *name_of_this () const override
-  { return "this"; }
-
-  /* See language.h.  */
-
-  bool store_sym_names_in_linkage_form_p () const override
-  { return true; }
-
-  /* See language.h.  */
-
-  const struct op_print *opcode_print_table () const override
-  { return unk_op_print_tab; }
-};
-
-/* Single instance of the unknown language class.  */
-
-static unknown_language unknown_language_defn;
-
-/* Class representing the fake "auto" language.  */
-
-class auto_language : public language_defn
-{
-public:
-  auto_language ()
-    : language_defn (language_auto)
-  { /* Nothing.  */ }
-
-  /* See language.h.  */
-
-  const char *name () const override
-  { return "auto"; }
-
-  /* See language.h.  */
-
-  const char *natural_name () const override
-  { return "Auto"; }
-
-  /* See language.h.  */
-  void language_arch_info (struct gdbarch *gdbarch,
-			   struct language_arch_info *lai) const override
-  {
-    unknown_language_arch_info (gdbarch, lai);
-  }
-
-  /* See language.h.  */
-
-  void print_type (struct type *type, const char *varstring,
-		   struct ui_file *stream, int show, int level,
-		   const struct type_print_options *flags) const override
-  {
-    error (_("unimplemented auto_language::print_type called"));
+    error (_("type printing not implemented for language \"%s\""),
+	   natural_name ());
   }
 
   /* See language.h.  */
@@ -989,7 +826,8 @@ public:
   void value_print (struct value *val, struct ui_file *stream,
 		    const struct value_print_options *options) const override
   {
-    error (_("unimplemented auto_language::value_print called"));
+    error (_("value printing not implemented for language \"%s\""),
+	   natural_name ());
   }
 
   /* See language.h.  */
@@ -998,7 +836,8 @@ public:
 	(struct value *val, struct ui_file *stream, int recurse,
 	 const struct value_print_options *options) const override
   {
-    error (_("unimplemented auto_language::value_print_inner called"));
+    error (_("inner value printing not implemented for language \"%s\""),
+	   natural_name ());
   }
 
   /* See language.h.  */
@@ -1014,7 +853,8 @@ public:
   void emitchar (int ch, struct type *chtype,
 		 struct ui_file *stream, int quoter) const override
   {
-    error (_("unimplemented auto_language::emitchar called"));
+    error (_("emit character not implemented for language \"%s\""),
+	   natural_name ());
   }
 
   /* See language.h.  */
@@ -1022,7 +862,8 @@ public:
   void printchar (int ch, struct type *chtype,
 		  struct ui_file *stream) const override
   {
-    error (_("unimplemented auto_language::printchar called"));
+    error (_("print character not implemented for language \"%s\""),
+	   natural_name ());
   }
 
   /* See language.h.  */
@@ -1032,7 +873,8 @@ public:
 		 const char *encoding, int force_ellipses,
 		 const struct value_print_options *options) const override
   {
-    error (_("unimplemented auto_language::printstr called"));
+    error (_("print string not implemented for language \"%s\""),
+	   natural_name ());
   }
 
   /* See language.h.  */
@@ -1040,14 +882,21 @@ public:
   void print_typedef (struct type *type, struct symbol *new_symbol,
 		      struct ui_file *stream) const override
   {
-    error (_("unimplemented auto_language::print_typedef called"));
+    error (_("print typedef not implemented for language \"%s\""),
+	   natural_name ());
   }
 
   /* See language.h.  */
 
   bool is_string_type_p (struct type *type) const override
   {
-    return default_is_string_type_p (type);
+    type = check_typedef (type);
+    while (type->code () == TYPE_CODE_REF)
+      {
+	type = TYPE_TARGET_TYPE (type);
+	type = check_typedef (type);
+      }
+    return (type->code () == TYPE_CODE_STRING);
   }
 
   /* See language.h.  */
@@ -1058,12 +907,68 @@ public:
   /* See language.h.  */
 
   const struct op_print *opcode_print_table () const override
-  { return unk_op_print_tab; }
+  {
+    static const struct op_print unk_op_print_tab[] =
+      {
+	{NULL, OP_NULL, PREC_NULL, 0}
+      };
+
+    return unk_op_print_tab;
+  }
+};
+
+/* Class representing the fake "auto" language.  */
+
+class auto_language : public auto_or_unknown_language
+{
+public:
+  auto_language ()
+    : auto_or_unknown_language (language_auto)
+  { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "auto"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Auto"; }
 };
 
 /* Single instance of the fake "auto" language.  */
 
 static auto_language auto_language_defn;
+
+/* Class representing the unknown language.  */
+
+class unknown_language : public auto_or_unknown_language
+{
+public:
+  unknown_language ()
+    : auto_or_unknown_language (language_unknown)
+  { /* Nothing.  */ }
+
+  /* See language.h.  */
+
+  const char *name () const override
+  { return "unknown"; }
+
+  /* See language.h.  */
+
+  const char *natural_name () const override
+  { return "Unknown"; }
+
+  /* See language.h.  */
+
+  bool store_sym_names_in_linkage_form_p () const override
+  { return true; }
+};
+
+/* Single instance of the unknown language class.  */
+
+static unknown_language unknown_language_defn;
 
 
 /* Per-architecture language information.  */

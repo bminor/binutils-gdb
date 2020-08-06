@@ -1,3 +1,19 @@
+2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* language.c (default_is_string_type_p): Delete, implementation
+	moved into auto_or_unknown_language::is_string_type_p.
+	(unk_op_print_tab): Moved into
+	auto_or_unknown_language::opcode_print_table.
+	(unknown_language_arch_info): Delete, implementation moved into
+	auto_or_unknown_language::language_arch_info.
+	(class auto_or_unknown_language): New class, member functions
+	copied from unknown_language class, with some updates.
+	(class unknown_language): Most member functions moved into
+	auto_or_unknown_language class.  Inherit from
+	auto_or_unknown_language class.
+	(class auto_language): Inherit from auto_or_unknown_language.
+	Delete most member functions.
+
 2020-10-22  Hannes Domani  <ssbssa@yahoo.de>
 
 	* stabsread.c (read_member_functions): Remove gdb_assert.
