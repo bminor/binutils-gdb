@@ -218,7 +218,7 @@ core_target::build_file_mappings ()
 	      {
 		warning (_("Can't open file %s during file-backed mapping "
 			   "note processing"),
-			 expanded_fname.get ());
+			 filename);
 		return;
 	      }
 

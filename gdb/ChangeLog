@@ -1,3 +1,8 @@
+2020-08-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* corelow.c (core_target::build_file_mappings): Don't output
+	null pathname in warning.
+
 2020-08-05  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb.dwarf2/clztest.exp, gdb.dwarf2/dw2-common-block.exp,
