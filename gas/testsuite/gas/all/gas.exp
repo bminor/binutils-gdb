@@ -102,6 +102,7 @@ if { ![istarget "bfin-*-*"] } then {
 }
 gas_test_error "assign-bad.s" "" "== assignment for symbol already set"
 run_dump_test assign-bad-recursive
+run_dump_test local-label-overflow
 
 run_dump_test simple-forward
 run_dump_test forward

@@ -40,6 +40,8 @@
 #include "dw2gencfi.h"
 #include "wchar.h"
 
+#include <limits.h>
+
 #ifndef TC_START_LABEL
 #define TC_START_LABEL(STR, NUL_CHAR, NEXT_CHAR) (NEXT_CHAR == ':')
 #endif
@@ -816,7 +818,7 @@ read_a_source_file (const char *name)
   char nul_char;
   char next_char;
   char *s;		/* String of symbol, '\0' appended.  */
-  int temp;
+  long temp;
   pseudo_typeS *pop;
 
 #ifdef WARN_COMMENTS
@@ -1212,9 +1214,20 @@ read_a_source_file (const char *name)
 	      /* Read the whole number.  */
 	      while (ISDIGIT (*input_line_pointer))
 		{
-		  temp = (temp * 10) + *input_line_pointer - '0';
+		  const long digit = *input_line_pointer - '0';
+		  if (temp > (LONG_MAX - digit) / 10)
+		    {
+		      as_bad (_("local label too large near %s"), backup);
+		      temp = -1;
+		      break;
+		    }
+		  temp = temp * 10 + digit;
 		  ++input_line_pointer;
 		}
+
+	      /* Overflow: stop processing the label.  */
+	      if (temp == -1)
+		continue;
 
 	      if (LOCAL_LABELS_DOLLAR
 		  && *input_line_pointer == '$'
@@ -1224,7 +1237,7 @@ read_a_source_file (const char *name)
 
 		  if (dollar_label_defined (temp))
 		    {
-		      as_fatal (_("label \"%d$\" redefined"), temp);
+		      as_fatal (_("label \"%ld$\" redefined"), temp);
 		    }
 
 		  define_dollar_label (temp);
