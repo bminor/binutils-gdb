@@ -1,3 +1,20 @@
+2020-08-05  David Faust  <david.faust@oracle.com>
+
+	* testsuite/ld-bpf/call-2.s: New file.
+	* testsuite/ld-bpf/call-2.d: Likewise.
+	* testsuite/ld-bpf/reloc-data-be.d: Likewise.
+	* testsuite/ld-bpf/reloc-data-le.d: Likewise.
+	* testsuite/ld-bpf/reloc-data.s: Likewise.
+	* testsuite/ld-bpf/reloc-insn-external-be.d: Likewise.
+	* testsuite/ld-bpf/reloc-insn-external-le.d: Likewise.
+	* testsuite/ld-bpf/reloc-insn-external.s: Likewise.
+	* testsuite/ld-bpf/reloc-insn32-be.d: Likewise.
+	* testsuite/ld-bpf/reloc-insn32-le.d: Likewise.
+	* testsuite/ld-bpf/reloc-insn32.s: Likewise.
+	* testsuite/ld-bpf/reloc-insn64-be.d: Likewise.
+	* testsuite/ld-bpf/reloc-insn64-le.d: Likewise.
+	* testsuite/ld-bpf/reloc-insn64.s: Likewise.
+
 2020-08-06  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* emultempl/msp430.em (change_output_section): Update the tail
