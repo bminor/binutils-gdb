@@ -109,8 +109,6 @@ struct ravenscar_thread_target final : public target_ops
 
   void update_thread_list () override;
 
-  const char *extra_thread_info (struct thread_info *) override;
-
   std::string pid_to_str (ptid_t) override;
 
   ptid_t get_ada_task_ptid (long lwp, long thread) override;
@@ -414,12 +412,6 @@ ravenscar_thread_target::active_task (int cpu)
     return ptid_t (m_base_ptid.pid (), 0, tid);
 }
 
-const char *
-ravenscar_thread_target::extra_thread_info (thread_info *tp)
-{
-  return "Ravenscar task";
-}
-
 bool
 ravenscar_thread_target::thread_alive (ptid_t ptid)
 {
@@ -430,7 +422,10 @@ ravenscar_thread_target::thread_alive (ptid_t ptid)
 std::string
 ravenscar_thread_target::pid_to_str (ptid_t ptid)
 {
-  return string_printf ("Thread %#x", (int) ptid.tid ());
+  if (!is_ravenscar_task (ptid))
+    return beneath ()->pid_to_str (ptid);
+
+  return string_printf ("Ravenscar Thread %#x", (int) ptid.tid ());
 }
 
 void
