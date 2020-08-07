@@ -1,3 +1,18 @@
+2020-08-07  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* regcache.c (ptid_regcache_map): New type.
+	(target_ptid_regcache_map): New type.
+	(regcaches): Change type to target_ptid_regcache_map.
+	(get_thread_arch_aspace_regcache): Update to regcaches' new
+	type.
+	(regcache_thread_ptid_changed): Likewise.
+	(registers_changed_ptid): Likewise.
+	(regcaches_size): Likewise.
+	(regcaches_test): Update.
+	(regcache_thread_ptid_changed): Update.
+	* regcache.h (regcache_up): New type.
+	* gdbsupport/ptid.h (hash_ptid): New struct.
+
 2020-08-07  Simon Marchi  <simon.marchi@efficios.com>
 
 	* observable.h (thread_ptid_changed): Add parameter
