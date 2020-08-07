@@ -1227,7 +1227,10 @@ read_a_source_file (const char *name)
 
 	      /* Overflow: stop processing the label.  */
 	      if (temp == -1)
-		continue;
+		{
+		  ignore_rest_of_line ();
+		  continue;
+		}
 
 	      if (LOCAL_LABELS_DOLLAR
 		  && *input_line_pointer == '$'
