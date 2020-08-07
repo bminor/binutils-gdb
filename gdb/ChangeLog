@@ -1,5 +1,15 @@
 2020-08-07  Tom Tromey  <tromey@adacore.com>
 
+	* ravenscar-thread.c (ravenscar_thread_target::wait): Call
+	update_inferior_ptid before update_thread_list.
+	(temporarily_change_regcache_ptid): New class.
+	(ravenscar_thread_target::fetch_registers)
+	(ravenscar_thread_target::store_registers)
+	(ravenscar_thread_target::prepare_to_store): Use base thread when
+	forwarding operation.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
 	* ravenscar-thread.c (ravenscar_thread_target::resume): Handle
 	"is_pid" case.
 

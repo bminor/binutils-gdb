@@ -457,20 +457,55 @@ ravenscar_thread_target::pid_to_str (ptid_t ptid)
   return string_printf ("Ravenscar Thread %#x", (int) ptid.tid ());
 }
 
+/* Temporarily set the ptid of a regcache to some other value.  When
+   this object is destroyed, the regcache's original ptid is
+   restored.  */
+
+class temporarily_change_regcache_ptid
+{
+public:
+
+  temporarily_change_regcache_ptid (struct regcache *regcache, ptid_t new_ptid)
+    : m_regcache (regcache),
+      m_save_ptid (regcache->ptid ())
+  {
+    m_regcache->set_ptid (new_ptid);
+  }
+
+  ~temporarily_change_regcache_ptid ()
+  {
+    m_regcache->set_ptid (m_save_ptid);
+  }
+
+private:
+
+  /* The regcache.  */
+  struct regcache *m_regcache;
+  /* The saved ptid.  */
+  ptid_t m_save_ptid;
+};
+
 void
 ravenscar_thread_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   ptid_t ptid = regcache->ptid ();
 
-  if (runtime_initialized ()
-      && is_ravenscar_task (ptid)
-      && !task_is_currently_active (ptid))
+  if (runtime_initialized () && is_ravenscar_task (ptid))
     {
-      struct gdbarch *gdbarch = regcache->arch ();
-      struct ravenscar_arch_ops *arch_ops
-	= gdbarch_ravenscar_ops (gdbarch);
+      if (task_is_currently_active (ptid))
+	{
+	  ptid_t base = get_base_thread_from_ravenscar_task (ptid);
+	  temporarily_change_regcache_ptid changer (regcache, base);
+	  beneath ()->fetch_registers (regcache, regnum);
+	}
+      else
+	{
+	  struct gdbarch *gdbarch = regcache->arch ();
+	  struct ravenscar_arch_ops *arch_ops
+	    = gdbarch_ravenscar_ops (gdbarch);
 
-      arch_ops->fetch_registers (regcache, regnum);
+	  arch_ops->fetch_registers (regcache, regnum);
+	}
     }
   else
     beneath ()->fetch_registers (regcache, regnum);
@@ -482,15 +517,22 @@ ravenscar_thread_target::store_registers (struct regcache *regcache,
 {
   ptid_t ptid = regcache->ptid ();
 
-  if (runtime_initialized ()
-      && is_ravenscar_task (ptid)
-      && !task_is_currently_active (ptid))
+  if (runtime_initialized () && is_ravenscar_task (ptid))
     {
-      struct gdbarch *gdbarch = regcache->arch ();
-      struct ravenscar_arch_ops *arch_ops
-	= gdbarch_ravenscar_ops (gdbarch);
+      if (task_is_currently_active (ptid))
+	{
+	  ptid_t base = get_base_thread_from_ravenscar_task (ptid);
+	  temporarily_change_regcache_ptid changer (regcache, base);
+	  beneath ()->store_registers (regcache, regnum);
+	}
+      else
+	{
+	  struct gdbarch *gdbarch = regcache->arch ();
+	  struct ravenscar_arch_ops *arch_ops
+	    = gdbarch_ravenscar_ops (gdbarch);
 
-      arch_ops->store_registers (regcache, regnum);
+	  arch_ops->store_registers (regcache, regnum);
+	}
     }
   else
     beneath ()->store_registers (regcache, regnum);
@@ -501,11 +543,18 @@ ravenscar_thread_target::prepare_to_store (struct regcache *regcache)
 {
   ptid_t ptid = regcache->ptid ();
 
-  if (runtime_initialized ()
-      && is_ravenscar_task (ptid)
-      && !task_is_currently_active (ptid))
+  if (runtime_initialized () && is_ravenscar_task (ptid))
     {
-      /* Nothing.  */
+      if (task_is_currently_active (ptid))
+	{
+	  ptid_t base = get_base_thread_from_ravenscar_task (ptid);
+	  temporarily_change_regcache_ptid changer (regcache, base);
+	  beneath ()->prepare_to_store (regcache);
+	}
+      else
+	{
+	  /* Nothing.  */
+	}
     }
   else
     beneath ()->prepare_to_store (regcache);
