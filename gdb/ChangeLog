@@ -1,5 +1,9 @@
 2020-08-07  Tom Tromey  <tromey@adacore.com>
 
+	* ravenscar-thread.c (update_thread_list): Set inferior_ptid.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
 	* ravenscar-thread.c (ravenscar_thread_target::wait): Call
 	update_inferior_ptid before update_thread_list.
 	(temporarily_change_regcache_ptid): New class.

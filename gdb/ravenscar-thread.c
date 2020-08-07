@@ -419,6 +419,12 @@ ravenscar_thread_target::add_thread (struct ada_task_info *task)
 void
 ravenscar_thread_target::update_thread_list ()
 {
+  /* iterate_over_live_ada_tasks requires that inferior_ptid be set,
+     but this isn't always the case in target methods.  So, we ensure
+     it here.  */
+  scoped_restore save_ptid = make_scoped_restore (&inferior_ptid,
+						  m_base_ptid);
+
   /* Do not clear the thread list before adding the Ada task, to keep
      the thread that the process stratum has included into it
      (m_base_ptid) and the running thread, that may not have been included
