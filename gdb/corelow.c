@@ -47,6 +47,7 @@
 #include "build-id.h"
 #include "gdbsupport/pathstuff.h"
 #include <unordered_map>
+#include <unordered_set>
 #include "gdbcmd.h"
 
 #ifndef O_LARGEFILE
@@ -131,8 +132,20 @@ private: /* per-core data */
      information about memory mapped files.  */
   target_section_table m_core_file_mappings {};
 
+  /* Unavailable mappings.  These correspond to pathnames which either
+     weren't found or could not be opened.  Knowing these addresses can
+     still be useful.  */
+  std::vector<mem_range> m_core_unavailable_mappings;
+
   /* Build m_core_file_mappings.  Called from the constructor.  */
   void build_file_mappings ();
+
+  /* Helper method for xfer_partial.  */
+  enum target_xfer_status xfer_memory_via_mappings (gdb_byte *readbuf,
+						    const gdb_byte *writebuf,
+						    ULONGEST offset,
+						    ULONGEST len,
+						    ULONGEST *xfered_len);
 
   /* FIXME: kettenis/20031023: Eventually this field should
      disappear.  */
@@ -182,6 +195,7 @@ void
 core_target::build_file_mappings ()
 {
   std::unordered_map<std::string, struct bfd *> bfd_map;
+  std::unordered_set<std::string> unavailable_paths;
 
   /* See linux_read_core_file_mappings() in linux-tdep.c for an example
      read_core_file_mappings method.  */
@@ -216,9 +230,12 @@ core_target::build_file_mappings ()
 	      = exec_file_find (filename, NULL);
 	    if (expanded_fname == nullptr)
 	      {
-		warning (_("Can't open file %s during file-backed mapping "
-			   "note processing"),
-			 filename);
+		m_core_unavailable_mappings.emplace_back (start, end - start);
+		/* Print just one warning per path.  */
+		if (unavailable_paths.insert (filename).second)
+		  warning (_("Can't open file %s during file-backed mapping "
+			     "note processing"),
+			   filename);
 		return;
 	      }
 
@@ -227,6 +244,7 @@ core_target::build_file_mappings ()
 
 	    if (bfd == nullptr || !bfd_check_format (bfd, bfd_object))
 	      {
+		m_core_unavailable_mappings.emplace_back (start, end - start);
 		/* If we get here, there's a good chance that it's due to
 		   an internal error.  We issue a warning instead of an
 		   internal error because of the possibility that the
@@ -268,6 +286,8 @@ core_target::build_file_mappings ()
 	ts->owner = nullptr;
 	ts->the_bfd_section = sec;
       });
+
+  normalize_mem_ranges (&m_core_unavailable_mappings);
 }
 
 static void add_to_thread_list (bfd *, asection *, void *);
@@ -728,6 +748,57 @@ core_target::files_info ()
   print_section_info (&m_core_section_table, core_bfd);
 }
 
+/* Helper method for core_target::xfer_partial.  */
+
+enum target_xfer_status
+core_target::xfer_memory_via_mappings (gdb_byte *readbuf,
+				       const gdb_byte *writebuf,
+				       ULONGEST offset, ULONGEST len,
+				       ULONGEST *xfered_len)
+{
+  enum target_xfer_status xfer_status;
+
+  xfer_status = (section_table_xfer_memory_partial
+		   (readbuf, writebuf,
+		    offset, len, xfered_len,
+		    m_core_file_mappings.sections,
+		    m_core_file_mappings.sections_end));
+
+  if (xfer_status == TARGET_XFER_OK || m_core_unavailable_mappings.empty ())
+    return xfer_status;
+
+  /* There are instances - e.g. when debugging within a docker
+     container using the AUFS storage driver - where the pathnames
+     obtained from the note section are incorrect.  Despite the path
+     being wrong, just knowing the start and end addresses of the
+     mappings is still useful; we can attempt an access of the file
+     stratum constrained to the address ranges corresponding to the
+     unavailable mappings.  */
+
+  ULONGEST memaddr = offset;
+  ULONGEST memend = offset + len;
+
+  for (const auto &mr : m_core_unavailable_mappings)
+    {
+      if (address_in_mem_range (memaddr, &mr))
+        {
+	  if (!address_in_mem_range (memend, &mr))
+	    len = mr.start + mr.length - memaddr;
+
+	  xfer_status = this->beneath ()->xfer_partial (TARGET_OBJECT_MEMORY,
+							NULL,
+							readbuf,
+							writebuf,
+							offset,
+							len,
+							xfered_len);
+	  break;
+	}
+    }
+
+  return xfer_status;
+}
+
 enum target_xfer_status
 core_target::xfer_partial (enum target_object object, const char *annex,
 			   gdb_byte *readbuf, const gdb_byte *writebuf,
@@ -761,11 +832,8 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 	   result.  If not, check the stratum beneath us, which should
 	   be the file stratum.  */
 	if (m_core_file_mappings.sections != nullptr)
-	  xfer_status = section_table_xfer_memory_partial
-			  (readbuf, writebuf,
-			   offset, len, xfered_len,
-			   m_core_file_mappings.sections,
-			   m_core_file_mappings.sections_end);
+	  xfer_status = xfer_memory_via_mappings (readbuf, writebuf, offset,
+						  len, xfered_len);
 	else
 	  xfer_status = this->beneath ()->xfer_partial (object, annex, readbuf,
 							writebuf, offset, len,

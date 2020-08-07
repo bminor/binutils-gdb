@@ -1,3 +1,13 @@
+2020-08-31  Kevin Buettner  <kevinb@redhat.com>
+
+	* corelow.c (unordered_set): Include.
+	(class core_target): Add field 'm_core_unavailable_mappings'.
+	(core_target::build_file_mappings): Print only one warning
+	per inaccessible file.  Add unavailable/broken mappings
+	to m_core_unavailable_mappings.
+	(core_target::xfer_partial): Call...
+	(core_target::xfer_memory_via_mappings): New method.
+
 2020-08-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* dwarf2/read.c (struct field_info) <non_public_fields>: Change
