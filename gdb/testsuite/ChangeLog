@@ -512,7 +512,7 @@
 
 	* lib/gdb.exp (gdb_test_multiline): New, moved from gdb-guile.exp,
 	have a input seq nr in each pass message.
-        * lib/gdb-guile.exp (gdb_test_multiline): Move to gdb.exp.
+	* lib/gdb-guile.exp (gdb_test_multiline): Move to gdb.exp.
 	* lib/gdb-python.exp (gdb_py_test_multiple): Remove.
 	* gdb.python/python.exp: Make test names unique,
 	use gdb_test_multiline instead of gdb_py_test_multiple,

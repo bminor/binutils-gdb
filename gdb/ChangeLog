@@ -124,35 +124,35 @@
 
 2020-08-06  Caroline Tice <cmtice@google.com>
 
-        * dwarf2/read.c (struct dwo_file): Update comment on 'sections' field.
-        (struct dwp_sections): Update field comments.  Add loclists and
-        rnglists fields.
-        (struct virtual_v2_dwo_sections): Rename struct to
-        'virtual_v2_or_v5_dwo_sections'; update comments at top of struct; add
-        size & offset fields for loclists and rnglists.
-        (struct dwp_hash_table): Add a 'v5' struct field to the union section.
-        (create_debug_type_hash_table): Add 'DW_UT_split_type' to the check for
-        skipping dummy type units.
-        (create_dwp_hash_table): Update the large comment above the function to
-        discuss Version 5 DWP files as well, with references.  Update all the
-        version checks in the function to check for version 5 as well.  Add new
-        section at the end to create dwp hash table for version 5.
-        (create_dwp_v2_section): Rename function to
-        'create_dwp_v2_or_v5_section'.  Update function comment appropriately.
-        Add V5 to error message text.
-        (create_dwo_unit_in_dwp_v2): Change calls to create_dwp_v2_section
-        into calls to create_dwp_v2_or_v5_section.
-        (create_dwo_unit_in_dwp_v5): New function.
-        (lookup_dwo_unit_in_dwp): Update conditional statement to explicitly
-        check for version2; add else clause to handle version 5.
-        (open_and_init_dwo_file): Add code to check dwarf version & only call
-        create_debug_types_hash_table (with sections.types) if version is not 5;
-        else call create_debug_type_hash_table, with sections.info.
-        (dwarf2_locate_v2_dwp_sections): Update function comment to mention
-        version 5.
-        (dwarf2_locate_v5_dwp_sections): New function.
-        (open_and_init_dwp_file): Add else-if clause for version 5 to call
-        bfd_map_over_sections with dwarf2_locate_v5_dwp_sections.
+	* dwarf2/read.c (struct dwo_file): Update comment on 'sections' field.
+	(struct dwp_sections): Update field comments.  Add loclists and
+	rnglists fields.
+	(struct virtual_v2_dwo_sections): Rename struct to
+	'virtual_v2_or_v5_dwo_sections'; update comments at top of struct; add
+	size & offset fields for loclists and rnglists.
+	(struct dwp_hash_table): Add a 'v5' struct field to the union section.
+	(create_debug_type_hash_table): Add 'DW_UT_split_type' to the check for
+	skipping dummy type units.
+	(create_dwp_hash_table): Update the large comment above the function to
+	discuss Version 5 DWP files as well, with references.  Update all the
+	version checks in the function to check for version 5 as well.  Add new
+	section at the end to create dwp hash table for version 5.
+	(create_dwp_v2_section): Rename function to
+	'create_dwp_v2_or_v5_section'.  Update function comment appropriately.
+	Add V5 to error message text.
+	(create_dwo_unit_in_dwp_v2): Change calls to create_dwp_v2_section
+	into calls to create_dwp_v2_or_v5_section.
+	(create_dwo_unit_in_dwp_v5): New function.
+	(lookup_dwo_unit_in_dwp): Update conditional statement to explicitly
+	check for version2; add else clause to handle version 5.
+	(open_and_init_dwo_file): Add code to check dwarf version & only call
+	create_debug_types_hash_table (with sections.types) if version is not 5;
+	else call create_debug_type_hash_table, with sections.info.
+	(dwarf2_locate_v2_dwp_sections): Update function comment to mention
+	version 5.
+	(dwarf2_locate_v5_dwp_sections): New function.
+	(open_and_init_dwp_file): Add else-if clause for version 5 to call
+	bfd_map_over_sections with dwarf2_locate_v5_dwp_sections.
 
 2020-08-06  Simon Marchi  <simon.marchi@efficios.com>
 
@@ -516,7 +516,7 @@
 	"maint print" commands.
 
 2020-07-22  Kevin Buettner  <kevinb@redhat.com>
-    
+
 	* linux-tdep.c (dump_note_entry_p): New function.
 	(linux_dump_mapping_p_ftype): New typedef.
 	(linux_find_memory_regions_full): Add new parameter,
