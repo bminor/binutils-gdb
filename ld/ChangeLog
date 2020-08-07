@@ -1,3 +1,8 @@
+2020-08-07  David Faust  <david.faust@oracle.com>
+
+	* testsuite/ld-bpf/call-3.s: New file.
+	* testsuite/ld-bpf/call-3.d: Likewise.
+
 2020-08-05  David Faust  <david.faust@oracle.com>
 
 	* testsuite/ld-bpf/call-2.s: New file.

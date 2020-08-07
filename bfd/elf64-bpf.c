@@ -442,10 +442,11 @@ bpf_elf_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
         case R_BPF_INSN_DISP32:
           {
             /* Make the relocation PC-relative, and change its unit to
-               64-bit words.  */
-            relocation -= sec_addr (input_section) + rel->r_offset;
-            /* Make it 64-bit words.  */
-            relocation = relocation / 8;
+               64-bit words.  Note we need *signed* arithmetic
+               here.  */
+            relocation = ((bfd_signed_vma) relocation
+			  - (sec_addr (input_section) + rel->r_offset));
+            relocation = (bfd_signed_vma) relocation / 8;
             
             /* Get the addend from the instruction and apply it.  */
             addend = bfd_get (howto->bitsize, input_bfd,
