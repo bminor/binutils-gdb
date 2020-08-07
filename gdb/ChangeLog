@@ -1,5 +1,13 @@
 2020-08-07  Tom Tromey  <tromey@adacore.com>
 
+	* ada-lang.h (ada_task_list_iterator_ftype): Now a
+	gdb::function_view.
+	(iterate_over_live_ada_tasks): Change type of argument.
+	* ada-tasks.c (iterate_over_live_ada_tasks): Change type
+	of argument.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
 	* ravenscar-thread.c (ravenscar_thread_target) <extra_thread_info>:
 	Remove.
 	(ravenscar_thread_target::extra_thread_info): Remove.

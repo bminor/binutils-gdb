@@ -375,9 +375,10 @@ extern struct ada_task_info *ada_get_task_info_from_ptid (ptid_t ptid);
 
 extern int ada_get_task_number (thread_info *thread);
 
-typedef void (ada_task_list_iterator_ftype) (struct ada_task_info *task);
+typedef gdb::function_view<void (struct ada_task_info *task)>
+  ada_task_list_iterator_ftype;
 extern void iterate_over_live_ada_tasks
-  (ada_task_list_iterator_ftype *iterator);
+  (ada_task_list_iterator_ftype iterator);
 
 extern const char *ada_get_tcb_types_info (void);
 
