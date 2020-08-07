@@ -361,7 +361,7 @@ ravenscar_thread_target::wait (ptid_t ptid,
       this->update_thread_list ();
       return this->add_active_thread ()->ptid;
     }
-  return m_base_ptid;
+  return event_ptid;
 }
 
 /* Add the thread associated to the given TASK to the thread list

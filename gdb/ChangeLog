@@ -1,5 +1,10 @@
 2020-08-07  Tom Tromey  <tromey@adacore.com>
 
+	* ravenscar-thread.c (ravenscar_thread_target::wait): Return
+	event_ptid.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
 	* ravenscar-thread.c (ravenscar_thread_target::wait): Check
 	runtime_initialized.
 
