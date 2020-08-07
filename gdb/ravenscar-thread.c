@@ -103,6 +103,13 @@ struct ravenscar_thread_target final : public target_ops
 
   bool stopped_data_address (CORE_ADDR *) override;
 
+  enum target_xfer_status xfer_partial (enum target_object object,
+					const char *annex,
+					gdb_byte *readbuf,
+					const gdb_byte *writebuf,
+					ULONGEST offset, ULONGEST len,
+					ULONGEST *xfered_len) override;
+
   bool thread_alive (ptid_t ptid) override;
 
   int core_of_thread (ptid_t ptid) override;
@@ -112,6 +119,14 @@ struct ravenscar_thread_target final : public target_ops
   std::string pid_to_str (ptid_t) override;
 
   ptid_t get_ada_task_ptid (long lwp, long thread) override;
+
+  struct btrace_target_info *enable_btrace (ptid_t ptid,
+					    const struct btrace_config *conf)
+    override
+  {
+    ptid = get_base_thread_from_ravenscar_task (ptid);
+    return beneath ()->enable_btrace (ptid, conf);
+  }
 
   void mourn_inferior () override;
 
@@ -134,6 +149,7 @@ private:
   bool runtime_initialized ();
   int get_thread_base_cpu (ptid_t ptid);
   ptid_t get_base_thread_from_ravenscar_task (ptid_t ptid);
+  void add_thread (struct ada_task_info *task);
 
   /* This maps a TID to the CPU on which it was running.  This is
      needed because sometimes the runtime will report an active task
@@ -170,16 +186,18 @@ ravenscar_thread_target::get_thread_base_cpu (ptid_t ptid)
 
   if (is_ravenscar_task (ptid))
     {
-      struct ada_task_info *task_info = ada_get_task_info_from_ptid (ptid);
+      /* Prefer to not read inferior memory if possible, to avoid
+	 reentrancy problems with xfer_partial.  */
+      auto iter = m_cpu_map.find (ptid.tid ());
 
-      if (task_info != NULL)
-	base_cpu = task_info->base_cpu;
+      if (iter != m_cpu_map.end ())
+	base_cpu = iter->second;
       else
 	{
-	  auto iter = m_cpu_map.find (ptid.tid ());
+	  struct ada_task_info *task_info = ada_get_task_info_from_ptid (ptid);
 
-	  gdb_assert (iter != m_cpu_map.end ());
-	  base_cpu = iter->second;
+	  gdb_assert (task_info != NULL);
+	  base_cpu = task_info->base_cpu;
 	}
     }
   else
@@ -383,11 +401,14 @@ ravenscar_thread_target::wait (ptid_t ptid,
 /* Add the thread associated to the given TASK to the thread list
    (if the thread has already been added, this is a no-op).  */
 
-static void
-ravenscar_add_thread (struct ada_task_info *task)
+void
+ravenscar_thread_target::add_thread (struct ada_task_info *task)
 {
   if (find_thread_ptid (current_inferior (), task->ptid) == NULL)
-    add_thread (current_inferior ()->process_target (), task->ptid);
+    {
+      ::add_thread (current_inferior ()->process_target (), task->ptid);
+      m_cpu_map[task->ptid.tid ()] = task->base_cpu;
+    }
 }
 
 void
@@ -398,7 +419,10 @@ ravenscar_thread_target::update_thread_list ()
      (m_base_ptid) and the running thread, that may not have been included
      to system.tasking.debug's list yet.  */
 
-  iterate_over_live_ada_tasks (ravenscar_add_thread);
+  iterate_over_live_ada_tasks ([=] (struct ada_task_info *task)
+			       {
+				 this->add_thread (task);
+			       });
 }
 
 ptid_t
@@ -539,6 +563,26 @@ ravenscar_thread_target::core_of_thread (ptid_t ptid)
   scoped_restore save_ptid = make_scoped_restore (&inferior_ptid);
   inferior_ptid = get_base_thread_from_ravenscar_task (inferior_ptid);
   return beneath ()->core_of_thread (inferior_ptid);
+}
+
+/* Implement the target xfer_partial method.  */
+
+enum target_xfer_status
+ravenscar_thread_target::xfer_partial (enum target_object object,
+				       const char *annex,
+				       gdb_byte *readbuf,
+				       const gdb_byte *writebuf,
+				       ULONGEST offset, ULONGEST len,
+				       ULONGEST *xfered_len)
+{
+  scoped_restore save_ptid = make_scoped_restore (&inferior_ptid);
+  /* Calling get_base_thread_from_ravenscar_task can read memory from
+     the inferior.  However, that function is written to prefer our
+     internal map, so it should not result in recursive calls in
+     practice.  */
+  inferior_ptid = get_base_thread_from_ravenscar_task (inferior_ptid);
+  return beneath ()->xfer_partial (object, annex, readbuf, writebuf,
+				   offset, len, xfered_len);
 }
 
 /* Observer on inferior_created: push ravenscar thread stratum if needed.  */

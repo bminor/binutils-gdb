@@ -1,5 +1,16 @@
 2020-08-07  Tom Tromey  <tromey@adacore.com>
 
+	* ravenscar-thread.c (xfer_partial, enable_btrace, add_thread):
+	New methods.
+	(ravenscar_thread_target::get_thread_base_cpu): Check m_cpu_map
+	first.
+	(ravenscar_thread_target::add_thread): Rename from
+	ravenscar_add_thread.
+	(ravenscar_thread_target::update_thread_list): Use a lambda.
+	(ravenscar_thread_target::xfer_partial): New method.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
 	* ada-lang.h (ada_task_list_iterator_ftype): Now a
 	gdb::function_view.
 	(iterate_over_live_ada_tasks): Change type of argument.
