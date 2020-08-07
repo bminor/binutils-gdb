@@ -1,5 +1,18 @@
 2020-08-07  Tom Tromey  <tromey@adacore.com>
 
+	* ravenscar-thread.c (ravenscar_thread_target) <get_base_cpu,
+	get_base_thread_from_ravenscar_task>: Now methods.
+	<m_cpu_map>: New member.
+	(ravenscar_thread_target::get_thread_base_cpu): Rename from
+	ravenscar_get_thread_base_cpu.  Check m_cpu_map.
+	(ravenscar_thread_target::task_is_currently_active): Update.
+	(ravenscar_thread_target::get_base_thread_from_ravenscar_task):
+	Now a method.
+	(ravenscar_thread_target::add_active_thread): Put initial thread
+	into the m_cpu_map.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
 	* ravenscar-thread.c (ravenscar_thread_target::wait): Return
 	event_ptid.
 

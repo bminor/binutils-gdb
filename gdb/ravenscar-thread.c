@@ -30,6 +30,7 @@
 #include "top.h"
 #include "regcache.h"
 #include "objfiles.h"
+#include <unordered_map>
 
 /* This module provides support for "Ravenscar" tasks (Ada) when
    debugging on bare-metal targets.
@@ -133,6 +134,14 @@ private:
   ptid_t active_task (int cpu);
   bool task_is_currently_active (ptid_t ptid);
   bool runtime_initialized ();
+  int get_thread_base_cpu (ptid_t ptid);
+  ptid_t get_base_thread_from_ravenscar_task (ptid_t ptid);
+
+  /* This maps a TID to the CPU on which it was running.  This is
+     needed because sometimes the runtime will report an active task
+     that hasn't yet been put on the list of tasks that is read by
+     ada-tasks.c.  */
+  std::unordered_map<long, int> m_cpu_map;
 };
 
 /* Return true iff PTID corresponds to a ravenscar task.  */
@@ -156,8 +165,8 @@ is_ravenscar_task (ptid_t ptid)
    This assume that PTID is a valid ptid_t.  Otherwise, a gdb_assert
    will be triggered.  */
 
-static int
-ravenscar_get_thread_base_cpu (ptid_t ptid)
+int
+ravenscar_thread_target::get_thread_base_cpu (ptid_t ptid)
 {
   int base_cpu;
 
@@ -165,8 +174,15 @@ ravenscar_get_thread_base_cpu (ptid_t ptid)
     {
       struct ada_task_info *task_info = ada_get_task_info_from_ptid (ptid);
 
-      gdb_assert (task_info != NULL);
-      base_cpu = task_info->base_cpu;
+      if (task_info != NULL)
+	base_cpu = task_info->base_cpu;
+      else
+	{
+	  auto iter = m_cpu_map.find (ptid.tid ());
+
+	  gdb_assert (iter != m_cpu_map.end ());
+	  base_cpu = iter->second;
+	}
     }
   else
     {
@@ -190,8 +206,7 @@ ravenscar_get_thread_base_cpu (ptid_t ptid)
 bool
 ravenscar_thread_target::task_is_currently_active (ptid_t ptid)
 {
-  ptid_t active_task_ptid
-    = active_task (ravenscar_get_thread_base_cpu (ptid));
+  ptid_t active_task_ptid = active_task (get_thread_base_cpu (ptid));
 
   return ptid == active_task_ptid;
 }
@@ -202,15 +217,15 @@ ravenscar_thread_target::task_is_currently_active (ptid_t ptid)
    This is the thread that corresponds to the CPU on which the task
    is running.  */
 
-static ptid_t
-get_base_thread_from_ravenscar_task (ptid_t ptid)
+ptid_t
+ravenscar_thread_target::get_base_thread_from_ravenscar_task (ptid_t ptid)
 {
   int base_cpu;
 
   if (!is_ravenscar_task (ptid))
     return ptid;
 
-  base_cpu = ravenscar_get_thread_base_cpu (ptid);
+  base_cpu = get_thread_base_cpu (ptid);
   return ptid_t (ptid.pid (), base_cpu, 0);
 }
 
@@ -227,7 +242,7 @@ ravenscar_thread_target::add_active_thread ()
   int base_cpu;
 
   gdb_assert (!is_ravenscar_task (m_base_ptid));
-  base_cpu = ravenscar_get_thread_base_cpu (m_base_ptid);
+  base_cpu = get_thread_base_cpu (m_base_ptid);
 
   if (!runtime_initialized ())
     return nullptr;
@@ -242,7 +257,10 @@ ravenscar_thread_target::add_active_thread ()
      may not always add it to the thread list.  Add it here.  */
   thread_info *active_thr = find_thread_ptid (proc_target, active_ptid);
   if (active_thr == nullptr)
-    active_thr = add_thread (proc_target, active_ptid);
+    {
+      active_thr = ::add_thread (proc_target, active_ptid);
+      m_cpu_map[active_ptid.tid ()] = base_cpu;
+    }
   return active_thr;
 }
 
