@@ -1,5 +1,21 @@
 2020-08-07  Tom Tromey  <tromey@adacore.com>
 
+	* ravenscar-thread.c
+	(ravenscar_thread_target::set_base_thread_from_ravenscar_task):
+	New method.
+	(ravenscar_thread_target::wait): Check
+	runtime_initialized.
+	(ravenscar_thread_target::prepare_to_store)
+	(ravenscar_thread_target::stopped_by_sw_breakpoint)
+	(ravenscar_thread_target::stopped_by_hw_breakpoint)
+	(ravenscar_thread_target::stopped_by_watchpoint)
+	(ravenscar_thread_target::stopped_data_address)
+	(ravenscar_thread_target::core_of_thread): Use
+	scoped_restore_current_thread and
+	set_base_thread_from_ravenscar_task.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
 	* ravenscar-thread.c (update_thread_list): Set inferior_ptid.
 
 2020-08-07  Tom Tromey  <tromey@adacore.com>
