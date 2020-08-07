@@ -1,3 +1,8 @@
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.texinfo (Ravenscar Profile): Add examples.
+	Document runtime initialization limitation.
+
 2020-08-04  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* gdb.texinfo (Contributors): Add information for the eBPF

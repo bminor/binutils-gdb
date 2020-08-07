@@ -18320,6 +18320,34 @@ using the Ravenscar Profile.
 
 @end table
 
+@cindex Ravenscar thread
+When Ravenscar task-switching is enabled, Ravenscar tasks are
+announced by @value{GDBN} as if they were threads:
+
+@smallexample
+(gdb) continue
+[New Ravenscar Thread 0x2b8f0]
+@end smallexample
+
+Both Ravenscar tasks and the underlying CPU threads will show up in
+the output of @code{info threads}:
+
+@smallexample
+(gdb) info threads
+  Id   Target Id                  Frame
+  1    Thread 1 (CPU#0 [running]) simple () at simple.adb:10
+  2    Thread 2 (CPU#1 [running]) 0x0000000000003d34 in __gnat_initialize_cpu_devices ()
+  3    Thread 3 (CPU#2 [running]) 0x0000000000003d28 in __gnat_initialize_cpu_devices ()
+  4    Thread 4 (CPU#3 [halted ]) 0x000000000000c6ec in system.task_primitives.operations.idle ()
+* 5    Ravenscar Thread 0x2b8f0   simple () at simple.adb:10
+  6    Ravenscar Thread 0x2f150   0x000000000000c6ec in system.task_primitives.operations.idle ()
+@end smallexample
+
+One known limitation of the Ravenscar support in @value{GDBN} is that
+it isn't currently possible to single-step through the runtime
+initialization sequence.  If you need to debug this code, you should
+use @code{set ravenscar task-switching off}.
+
 @node Ada Settings
 @subsubsection Ada Settings
 @cindex Ada settings
