@@ -1,5 +1,10 @@
 2020-08-07  Tom Tromey  <tromey@adacore.com>
 
+	* ravenscar-thread.c (ravenscar_thread_target::wait): Check
+	runtime_initialized.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
 	* ravenscar-thread.c (ravenscar_thread_target): Don't call
 	add_active_thread.
 	(ravenscar_thread_target::add_active_thread): Now public.
