@@ -1,5 +1,10 @@
 2020-08-07  Tom Tromey  <tromey@adacore.com>
 
+	* ravenscar-thread.c (ravenscar_thread_target::resume): Handle
+	"is_pid" case.
+
+2020-08-07  Tom Tromey  <tromey@adacore.com>
+
 	* ravenscar-thread.c (xfer_partial, enable_btrace, add_thread):
 	New methods.
 	(ravenscar_thread_target::get_thread_base_cpu): Check m_cpu_map

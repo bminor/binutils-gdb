@@ -363,7 +363,12 @@ ravenscar_thread_target::resume (ptid_t ptid, int step,
   /* If we see a wildcard resume, we simply pass that on.  Otherwise,
      arrange to resume the base ptid.  */
   inferior_ptid = m_base_ptid;
-  if (ptid != minus_one_ptid)
+  if (ptid.is_pid ())
+    {
+      /* We only have one process, so resume all threads of it.  */
+      ptid = minus_one_ptid;
+    }
+  else if (ptid != minus_one_ptid)
     ptid = m_base_ptid;
   beneath ()->resume (ptid, step, siggnal);
 }
