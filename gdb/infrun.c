@@ -67,6 +67,9 @@
 #include "gdbsupport/gdb_select.h"
 #include <unordered_map>
 #include "async-event.h"
+#include "gdbsupport/selftest.h"
+#include "scoped-mock-context.h"
+#include "test-target.h"
 
 /* Prototypes for local functions */
 
@@ -2068,9 +2071,11 @@ start_step_over (void)
 /* Update global variables holding ptids to hold NEW_PTID if they were
    holding OLD_PTID.  */
 static void
-infrun_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
+infrun_thread_ptid_changed (process_stratum_target *target,
+			    ptid_t old_ptid, ptid_t new_ptid)
 {
-  if (inferior_ptid == old_ptid)
+  if (inferior_ptid == old_ptid
+      && current_inferior ()->process_target () == target)
     inferior_ptid = new_ptid;
 }
 
@@ -9455,6 +9460,70 @@ infrun_async_inferior_event_handler (gdb_client_data data)
   inferior_event_handler (INF_REG_EVENT);
 }
 
+namespace selftests
+{
+
+/* Verify that when two threads with the same ptid exist (from two different
+   targets) and one of them changes ptid, we only update inferior_ptid if
+   it is appropriate.  */
+
+static void
+infrun_thread_ptid_changed ()
+{
+  gdbarch *arch = current_inferior ()->gdbarch;
+
+  /* The thread which inferior_ptid represents changes ptid.  */
+  {
+    scoped_restore_current_pspace_and_thread restore;
+
+    scoped_mock_context<test_target_ops> target1 (arch);
+    scoped_mock_context<test_target_ops> target2 (arch);
+    target2.mock_inferior.next = &target1.mock_inferior;
+
+    ptid_t old_ptid (111, 222);
+    ptid_t new_ptid (111, 333);
+
+    target1.mock_inferior.pid = old_ptid.pid ();
+    target1.mock_thread.ptid = old_ptid;
+    target2.mock_inferior.pid = old_ptid.pid ();
+    target2.mock_thread.ptid = old_ptid;
+
+    auto restore_inferior_ptid = make_scoped_restore (&inferior_ptid, old_ptid);
+    set_current_inferior (&target1.mock_inferior);
+
+    thread_change_ptid (&target1.mock_target, old_ptid, new_ptid);
+
+    gdb_assert (inferior_ptid == new_ptid);
+  }
+
+  /* A thread with the same ptid as inferior_ptid, but from another target,
+     changes ptid.  */
+  {
+    scoped_restore_current_pspace_and_thread restore;
+
+    scoped_mock_context<test_target_ops> target1 (arch);
+    scoped_mock_context<test_target_ops> target2 (arch);
+    target2.mock_inferior.next = &target1.mock_inferior;
+
+    ptid_t old_ptid (111, 222);
+    ptid_t new_ptid (111, 333);
+
+    target1.mock_inferior.pid = old_ptid.pid ();
+    target1.mock_thread.ptid = old_ptid;
+    target2.mock_inferior.pid = old_ptid.pid ();
+    target2.mock_thread.ptid = old_ptid;
+
+    auto restore_inferior_ptid = make_scoped_restore (&inferior_ptid, old_ptid);
+    set_current_inferior (&target2.mock_inferior);
+
+    thread_change_ptid (&target1.mock_target, old_ptid, new_ptid);
+
+    gdb_assert (inferior_ptid == old_ptid);
+  }
+}
+
+} /* namespace selftests */
+
 void _initialize_infrun ();
 void
 _initialize_infrun ()
@@ -9756,4 +9825,9 @@ or signalled."),
 			   show_observer_mode,
 			   &setlist,
 			   &showlist);
+
+#if GDB_SELF_TEST
+  selftests::register_test ("infrun_thread_ptid_changed",
+			    selftests::infrun_thread_ptid_changed);
+#endif
 }

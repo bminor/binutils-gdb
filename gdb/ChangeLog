@@ -1,3 +1,19 @@
+2020-08-07  Simon Marchi  <simon.marchi@efficios.com>
+
+	* observable.h (thread_ptid_changed): Add parameter
+	`process_stratum_target *`.
+	* infrun.c (infrun_thread_ptid_changed): Add parameter
+	`process_stratum_target *` and use it.
+	(selftests): New namespace.
+	(infrun_thread_ptid_changed): New function.
+	(_initialize_infrun): Register selftest.
+	* regcache.c (regcache_thread_ptid_changed): Add parameter
+	`process_stratum_target *` and use it.
+	(regcache_thread_ptid_changed): New function.
+	(_initialize_regcache): Register selftest.
+	* thread.c (thread_change_ptid): Pass target to
+	thread_ptid_changed observable.
+
 2020-08-06  Caroline Tice <cmtice@google.com>
 
         * dwarf2/read.c (struct dwo_file): Update comment on 'sections' field.
