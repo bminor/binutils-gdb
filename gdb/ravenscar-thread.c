@@ -79,9 +79,6 @@ struct ravenscar_thread_target final : public target_ops
   ravenscar_thread_target ()
     : m_base_ptid (inferior_ptid)
   {
-    thread_info *thr = add_active_thread ();
-    if (thr != nullptr)
-      switch_to_thread (thr);
   }
 
   const target_info &info () const override
@@ -124,6 +121,8 @@ struct ravenscar_thread_target final : public target_ops
     delete this;
   }
 
+  thread_info *add_active_thread ();
+
 private:
 
   /* PTID of the last thread that received an event.
@@ -131,7 +130,6 @@ private:
      the event, to make it the current task.  */
   ptid_t m_base_ptid;
 
-  thread_info *add_active_thread ();
   ptid_t active_task (int cpu);
   bool task_is_currently_active (ptid_t ptid);
   bool runtime_initialized ();
@@ -548,8 +546,11 @@ ravenscar_inferior_created (struct target_ops *target, int from_tty)
       return;
     }
 
-  target_ops_up target_holder (new ravenscar_thread_target ());
-  push_target (std::move (target_holder));
+  ravenscar_thread_target *rtarget = new ravenscar_thread_target ();
+  push_target (target_ops_up (rtarget));
+  thread_info *thr = rtarget->add_active_thread ();
+  if (thr != nullptr)
+    switch_to_thread (thr);
 }
 
 ptid_t
