@@ -108,8 +108,9 @@ riscv_lookup_target_description (const struct riscv_gdbarch_features features)
 
   target_desc *tdesc = riscv_create_target_description (features);
 
-  /* Add to the cache.  */
-  riscv_tdesc_cache.emplace (features, tdesc);
+  /* Add to the cache.  Work around a problem with g++ 4.8 (PR96537):
+     Call the target_desc_up constructor explictly instead of implicitly.  */
+  riscv_tdesc_cache.emplace (features, target_desc_up (tdesc));
 
   return tdesc;
 }
