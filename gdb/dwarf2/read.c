@@ -22973,8 +22973,8 @@ struct dwarf2_locexpr_baton
 dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
 			       dwarf2_per_cu_data *per_cu,
 			       dwarf2_per_objfile *per_objfile,
-			       CORE_ADDR (*get_frame_pc) (void *baton),
-			       void *baton, bool resolve_abstract_p)
+			       gdb::function_view<CORE_ADDR ()> get_frame_pc,
+			       bool resolve_abstract_p)
 {
   struct die_info *die;
   struct attribute *attr;
@@ -23003,7 +23003,7 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
       && (per_objfile->per_bfd->abstract_to_concrete.find (die->sect_off)
 	  != per_objfile->per_bfd->abstract_to_concrete.end ()))
     {
-      CORE_ADDR pc = (*get_frame_pc) (baton);
+      CORE_ADDR pc = get_frame_pc ();
       CORE_ADDR baseaddr = objfile->text_section_offset ();
       struct gdbarch *gdbarch = objfile->arch ();
 
@@ -23044,7 +23044,7 @@ dwarf2_fetch_die_loc_sect_off (sect_offset sect_off,
   else if (attr->form_is_section_offset ())
     {
       struct dwarf2_loclist_baton loclist_baton;
-      CORE_ADDR pc = (*get_frame_pc) (baton);
+      CORE_ADDR pc = get_frame_pc ();
       size_t size;
 
       fill_in_loclist_baton (cu, &loclist_baton, attr);
@@ -23077,13 +23077,12 @@ struct dwarf2_locexpr_baton
 dwarf2_fetch_die_loc_cu_off (cu_offset offset_in_cu,
 			     dwarf2_per_cu_data *per_cu,
 			     dwarf2_per_objfile *per_objfile,
-			     CORE_ADDR (*get_frame_pc) (void *baton),
-			     void *baton)
+			     gdb::function_view<CORE_ADDR ()> get_frame_pc)
 {
   sect_offset sect_off = per_cu->sect_off + to_underlying (offset_in_cu);
 
   return dwarf2_fetch_die_loc_sect_off (sect_off, per_cu, per_objfile,
-					get_frame_pc, baton);
+					get_frame_pc);
 }
 
 /* Write a constant of a given type as target-ordered bytes into

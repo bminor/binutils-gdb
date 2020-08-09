@@ -1,3 +1,17 @@
+2020-08-09  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* read.h (dwarf2_fetch_die_loc_sect_off,
+	dwarf2_fetch_die_loc_cu_off): Replace function pointer +
+	`void *` parameter with function_view.
+	* read.c (dwarf2_fetch_die_loc_sect_off,
+	dwarf2_fetch_die_loc_cu_off): Likewise.
+	* loc.c (get_frame_pc_for_per_cu_dwarf_call): Remove.
+	(per_cu_dwarf_call): Adjust.
+	(get_frame_address_in_block_wrapper): Remove.
+	(indirect_synthetic_pointer): Adjust.
+	(get_ax_pc): Remove.
+	(dwarf2_compile_expr_to_ax): Adjust.
+
 2020-08-08  Tom de Vries  <tdevries@suse.de>
 
 	PR build/26344

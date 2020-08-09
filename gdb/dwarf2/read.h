@@ -28,6 +28,7 @@
 #include "filename-seen-cache.h"
 #include "gdb_obstack.h"
 #include "gdbsupport/hash_enum.h"
+#include "gdbsupport/function-view.h"
 #include "psympriv.h"
 
 /* Hold 'maintenance (set|show) dwarf' commands.  */
@@ -662,8 +663,8 @@ CORE_ADDR dwarf2_read_addr_index (dwarf2_per_cu_data *per_cu,
 struct dwarf2_locexpr_baton dwarf2_fetch_die_loc_sect_off
   (sect_offset sect_off, dwarf2_per_cu_data *per_cu,
    dwarf2_per_objfile *per_objfile,
-   CORE_ADDR (*get_frame_pc) (void *baton),
-   void *baton, bool resolve_abstract_p = false);
+   gdb::function_view<CORE_ADDR ()> get_frame_pc,
+   bool resolve_abstract_p = false);
 
 /* Like dwarf2_fetch_die_loc_sect_off, but take a CU
    offset.  */
@@ -671,8 +672,7 @@ struct dwarf2_locexpr_baton dwarf2_fetch_die_loc_sect_off
 struct dwarf2_locexpr_baton dwarf2_fetch_die_loc_cu_off
   (cu_offset offset_in_cu, dwarf2_per_cu_data *per_cu,
    dwarf2_per_objfile *per_objfile,
-   CORE_ADDR (*get_frame_pc) (void *baton),
-   void *baton);
+   gdb::function_view<CORE_ADDR ()> get_frame_pc);
 
 /* If the DIE at SECT_OFF in PER_CU has a DW_AT_const_value, return a
    pointer to the constant bytes and set LEN to the length of the

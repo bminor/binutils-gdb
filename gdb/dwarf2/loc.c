@@ -600,23 +600,19 @@ func_get_frame_base_dwarf_block (struct symbol *framefunc, CORE_ADDR pc,
 	   framefunc->natural_name ());
 }
 
-static CORE_ADDR
-get_frame_pc_for_per_cu_dwarf_call (void *baton)
-{
-  dwarf_expr_context *ctx = (dwarf_expr_context *) baton;
-
-  return ctx->get_frame_pc ();
-}
-
 static void
 per_cu_dwarf_call (struct dwarf_expr_context *ctx, cu_offset die_offset,
 		   dwarf2_per_cu_data *per_cu, dwarf2_per_objfile *per_objfile)
 {
   struct dwarf2_locexpr_baton block;
 
+  auto get_frame_pc_from_ctx = [ctx] ()
+    {
+      return ctx->get_frame_pc ();
+    };
+
   block = dwarf2_fetch_die_loc_cu_off (die_offset, per_cu, per_objfile,
-				       get_frame_pc_for_per_cu_dwarf_call,
-				       ctx);
+				       get_frame_pc_from_ctx);
 
   /* DW_OP_call_ref is currently not supported.  */
   gdb_assert (block.per_cu == per_cu);
@@ -2001,14 +1997,6 @@ check_pieced_synthetic_pointer (const struct value *value, LONGEST bit_offset,
   return 1;
 }
 
-/* A wrapper function for get_frame_address_in_block.  */
-
-static CORE_ADDR
-get_frame_address_in_block_wrapper (void *baton)
-{
-  return get_frame_address_in_block ((struct frame_info *) baton);
-}
-
 /* Fetch a DW_AT_const_value through a synthetic pointer.  */
 
 static struct value *
@@ -2052,9 +2040,13 @@ indirect_synthetic_pointer (sect_offset die, LONGEST byte_offset,
 			    bool resolve_abstract_p)
 {
   /* Fetch the location expression of the DIE we're pointing to.  */
+  auto get_frame_address_in_block_wrapper = [frame] ()
+    {
+     return get_frame_address_in_block (frame);
+    };
   struct dwarf2_locexpr_baton baton
     = dwarf2_fetch_die_loc_sect_off (die, per_cu, per_objfile,
-				     get_frame_address_in_block_wrapper, frame,
+				     get_frame_address_in_block_wrapper,
 				     resolve_abstract_p);
 
   /* Get type of pointed-to DIE.  */
@@ -2994,16 +2986,6 @@ access_memory (struct gdbarch *arch, struct agent_expr *expr, ULONGEST nbits)
     }
 }
 
-/* A helper function to return the frame's PC.  */
-
-static CORE_ADDR
-get_ax_pc (void *baton)
-{
-  struct agent_expr *expr = (struct agent_expr *) baton;
-
-  return expr->scope;
-}
-
 /* Compile a DWARF location expression to an agent expression.
    
    EXPR is the agent expression we are building.
@@ -3655,9 +3637,13 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	    uoffset = extract_unsigned_integer (op_ptr, size, byte_order);
 	    op_ptr += size;
 
+	    auto get_frame_pc_from_expr = [expr] ()
+	      {
+		return expr->scope;
+	      };
 	    cu_offset cuoffset = (cu_offset) uoffset;
 	    block = dwarf2_fetch_die_loc_cu_off (cuoffset, per_cu, per_objfile,
-						 get_ax_pc, expr);
+						 get_frame_pc_from_expr);
 
 	    /* DW_OP_call_ref is currently not supported.  */
 	    gdb_assert (block.per_cu == per_cu);
