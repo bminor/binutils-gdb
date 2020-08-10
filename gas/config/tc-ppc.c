@@ -3176,6 +3176,15 @@ md_assemble (char *str)
     }
 
   insn = opcode->opcode;
+  if (!target_big_endian
+      && ((insn & ~(1 << 26)) == 46u << 26
+	  || (insn & ~(0xc0 << 1)) == (31u << 26 | 533 << 1)))
+    {
+       /* lmw, stmw, lswi, lswx, stswi, stswx */
+      as_bad (_("`%s' invalid when little-endian"), str);
+      ppc_clear_labels ();
+      return;
+    }
 
   str = s;
   while (ISSPACE (*str))
