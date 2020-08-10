@@ -1,3 +1,23 @@
+	* include/opcode/aarch64.h (aarch64_sys_reg_deprecated_p): Functions
+	paramaters changed.
+	(aarch64_sys_reg_supported_p): Function removed.
+	(aarch64_sys_ins_reg_supported_p): Functions paramaters changed.
+	* opcodes/aarch64-opc.c (aarch64_print_operand):
+	(aarch64_sys_reg_deprecated_p): Functions paramaters changed.
+	(aarch64_sys_reg_supported_p): Function removed.
+	(aarch64_sys_ins_reg_supported_p): Functions paramaters changed.
+	(aarch64_sys_ins_reg_supported_p): Merged aarch64_sys_reg_supported_p
+	into this function.
+2020-08-10  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* config/tc-aarch64.c (parse_sys_reg): Call to
+	aarch64_sys_ins_reg_supported_p instead of
+	aarch64_sys_reg_supported_p.
+	(parse_sys_ins_reg): Add aarch64_sys_reg_deprecated_p check.
+	* testsuite/gas/aarch64/illegal-sysreg-5.d: New test.
+	* testsuite/gas/aarch64/illegal-sysreg-5.l: New test.
+	* testsuite/gas/aarch64/sysreg-5.s: New test.
+
 2020-08-10  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/ppc/power8.d,

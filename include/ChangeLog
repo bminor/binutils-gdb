@@ -1,3 +1,10 @@
+2020-08-10  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* opcode/aarch64.h (aarch64_sys_reg_deprecated_p): Functions
+	paramaters changed.
+	(aarch64_sys_reg_supported_p): Function removed.
+	(aarch64_sys_ins_reg_supported_p): Functions paramaters changed.
+
 2020-07-28  Caroline Tice  <cmtice@google.com>
 
         * dwarf2.h (enum dwarf_sect_v5): A new enum section for	the

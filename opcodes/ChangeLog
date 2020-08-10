@@ -1,3 +1,12 @@
+2020-08-10  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
+
+	* aarch64-opc.c (aarch64_print_operand):
+	(aarch64_sys_reg_deprecated_p): Functions paramaters changed.
+	(aarch64_sys_reg_supported_p): Function removed.
+	(aarch64_sys_ins_reg_supported_p): Functions paramaters changed.
+	(aarch64_sys_ins_reg_supported_p): Merged aarch64_sys_reg_supported_p
+	into this function.
+
 2020-08-10  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (powerpc_opcodes): Add many mtspr and mfspr extended

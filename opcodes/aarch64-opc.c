@@ -3695,7 +3695,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	  /* Try and find an exact match, But if that fails, return the first
 	     partial match that was found.  */
 	  if (aarch64_sys_regs[i].value == opnd->sysreg.value
-	      && ! aarch64_sys_reg_deprecated_p (&aarch64_sys_regs[i])
+	      && ! aarch64_sys_reg_deprecated_p (aarch64_sys_regs[i].flags)
 	      && (name == NULL || exact_match))
 	    {
 	      name = aarch64_sys_regs[i].name;
@@ -4245,72 +4245,9 @@ const aarch64_sys_reg aarch64_sys_regs [] =
 };
 
 bfd_boolean
-aarch64_sys_reg_deprecated_p (const aarch64_sys_reg *reg)
+aarch64_sys_reg_deprecated_p (const uint32_t reg_flags)
 {
-  return (reg->flags & F_DEPRECATED) != 0;
-}
-
-bfd_boolean
-aarch64_sys_reg_supported_p (const aarch64_feature_set features,
-			     const aarch64_sys_reg *reg)
-{
-  if (!(reg->flags & F_ARCHEXT))
-    return TRUE;
-
-  if (!AARCH64_CPU_HAS_ALL_FEATURES (features, reg->features))
-    return FALSE;
-
-  /* ARMv8.4 TLB instructions.  */
-  if ((reg->value == CPENS (0, C8, C1, 0)
-       || reg->value == CPENS (0, C8, C1, 1)
-       || reg->value == CPENS (0, C8, C1, 2)
-       || reg->value == CPENS (0, C8, C1, 3)
-       || reg->value == CPENS (0, C8, C1, 5)
-       || reg->value == CPENS (0, C8, C1, 7)
-       || reg->value == CPENS (4, C8, C4, 0)
-       || reg->value == CPENS (4, C8, C4, 4)
-       || reg->value == CPENS (4, C8, C1, 1)
-       || reg->value == CPENS (4, C8, C1, 5)
-       || reg->value == CPENS (4, C8, C1, 6)
-       || reg->value == CPENS (6, C8, C1, 1)
-       || reg->value == CPENS (6, C8, C1, 5)
-       || reg->value == CPENS (4, C8, C1, 0)
-       || reg->value == CPENS (4, C8, C1, 4)
-       || reg->value == CPENS (6, C8, C1, 0)
-       || reg->value == CPENS (0, C8, C6, 1)
-       || reg->value == CPENS (0, C8, C6, 3)
-       || reg->value == CPENS (0, C8, C6, 5)
-       || reg->value == CPENS (0, C8, C6, 7)
-       || reg->value == CPENS (0, C8, C2, 1)
-       || reg->value == CPENS (0, C8, C2, 3)
-       || reg->value == CPENS (0, C8, C2, 5)
-       || reg->value == CPENS (0, C8, C2, 7)
-       || reg->value == CPENS (0, C8, C5, 1)
-       || reg->value == CPENS (0, C8, C5, 3)
-       || reg->value == CPENS (0, C8, C5, 5)
-       || reg->value == CPENS (0, C8, C5, 7)
-       || reg->value == CPENS (4, C8, C0, 2)
-       || reg->value == CPENS (4, C8, C0, 6)
-       || reg->value == CPENS (4, C8, C4, 2)
-       || reg->value == CPENS (4, C8, C4, 6)
-       || reg->value == CPENS (4, C8, C4, 3)
-       || reg->value == CPENS (4, C8, C4, 7)
-       || reg->value == CPENS (4, C8, C6, 1)
-       || reg->value == CPENS (4, C8, C6, 5)
-       || reg->value == CPENS (4, C8, C2, 1)
-       || reg->value == CPENS (4, C8, C2, 5)
-       || reg->value == CPENS (4, C8, C5, 1)
-       || reg->value == CPENS (4, C8, C5, 5)
-       || reg->value == CPENS (6, C8, C6, 1)
-       || reg->value == CPENS (6, C8, C6, 5)
-       || reg->value == CPENS (6, C8, C2, 1)
-       || reg->value == CPENS (6, C8, C2, 5)
-       || reg->value == CPENS (6, C8, C5, 1)
-       || reg->value == CPENS (6, C8, C5, 5))
-      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_4))
-    return FALSE;
-
-  return TRUE;
+  return (reg_flags & F_DEPRECATED) != 0;
 }
 
 /* The CPENC below is fairly misleading, the fields
@@ -4508,55 +4445,112 @@ aarch64_sys_ins_reg_has_xt (const aarch64_sys_ins_reg *sys_ins_reg)
 
 extern bfd_boolean
 aarch64_sys_ins_reg_supported_p (const aarch64_feature_set features,
-				 const aarch64_sys_ins_reg *reg)
+                 aarch64_insn reg_value,
+                 uint32_t reg_flags,
+                 aarch64_feature_set reg_features)
 {
-  if (!(reg->flags & F_ARCHEXT))
+
+  if (!(reg_flags & F_ARCHEXT))
+    return TRUE;
+
+  if (reg_features
+      && AARCH64_CPU_HAS_ALL_FEATURES (features, reg_features))
+    return TRUE;
+
+  /* ARMv8.4 TLB instructions.  */
+  if ((reg_value == CPENS (0, C8, C1, 0)
+       || reg_value == CPENS (0, C8, C1, 1)
+       || reg_value == CPENS (0, C8, C1, 2)
+       || reg_value == CPENS (0, C8, C1, 3)
+       || reg_value == CPENS (0, C8, C1, 5)
+       || reg_value == CPENS (0, C8, C1, 7)
+       || reg_value == CPENS (4, C8, C4, 0)
+       || reg_value == CPENS (4, C8, C4, 4)
+       || reg_value == CPENS (4, C8, C1, 1)
+       || reg_value == CPENS (4, C8, C1, 5)
+       || reg_value == CPENS (4, C8, C1, 6)
+       || reg_value == CPENS (6, C8, C1, 1)
+       || reg_value == CPENS (6, C8, C1, 5)
+       || reg_value == CPENS (4, C8, C1, 0)
+       || reg_value == CPENS (4, C8, C1, 4)
+       || reg_value == CPENS (6, C8, C1, 0)
+       || reg_value == CPENS (0, C8, C6, 1)
+       || reg_value == CPENS (0, C8, C6, 3)
+       || reg_value == CPENS (0, C8, C6, 5)
+       || reg_value == CPENS (0, C8, C6, 7)
+       || reg_value == CPENS (0, C8, C2, 1)
+       || reg_value == CPENS (0, C8, C2, 3)
+       || reg_value == CPENS (0, C8, C2, 5)
+       || reg_value == CPENS (0, C8, C2, 7)
+       || reg_value == CPENS (0, C8, C5, 1)
+       || reg_value == CPENS (0, C8, C5, 3)
+       || reg_value == CPENS (0, C8, C5, 5)
+       || reg_value == CPENS (0, C8, C5, 7)
+       || reg_value == CPENS (4, C8, C0, 2)
+       || reg_value == CPENS (4, C8, C0, 6)
+       || reg_value == CPENS (4, C8, C4, 2)
+       || reg_value == CPENS (4, C8, C4, 6)
+       || reg_value == CPENS (4, C8, C4, 3)
+       || reg_value == CPENS (4, C8, C4, 7)
+       || reg_value == CPENS (4, C8, C6, 1)
+       || reg_value == CPENS (4, C8, C6, 5)
+       || reg_value == CPENS (4, C8, C2, 1)
+       || reg_value == CPENS (4, C8, C2, 5)
+       || reg_value == CPENS (4, C8, C5, 1)
+       || reg_value == CPENS (4, C8, C5, 5)
+       || reg_value == CPENS (6, C8, C6, 1)
+       || reg_value == CPENS (6, C8, C6, 5)
+       || reg_value == CPENS (6, C8, C2, 1)
+       || reg_value == CPENS (6, C8, C2, 5)
+       || reg_value == CPENS (6, C8, C5, 1)
+       || reg_value == CPENS (6, C8, C5, 5))
+      && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_4))
     return TRUE;
 
   /* DC CVAP.  Values are from aarch64_sys_regs_dc.  */
-  if (reg->value == CPENS (3, C7, C12, 1)
-      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
-    return FALSE;
+  if (reg_value == CPENS (3, C7, C12, 1)
+      && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
+    return TRUE;
 
   /* DC CVADP.  Values are from aarch64_sys_regs_dc.  */
-  if (reg->value == CPENS (3, C7, C13, 1)
-      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_CVADP))
-    return FALSE;
+  if (reg_value == CPENS (3, C7, C13, 1)
+      && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_CVADP))
+    return TRUE;
 
   /* DC <dc_op> for ARMv8.5-A Memory Tagging Extension.  */
-  if ((reg->value == CPENS (0, C7, C6, 3)
-       || reg->value == CPENS (0, C7, C6, 4)
-       || reg->value == CPENS (0, C7, C10, 4)
-       || reg->value == CPENS (0, C7, C14, 4)
-       || reg->value == CPENS (3, C7, C10, 3)
-       || reg->value == CPENS (3, C7, C12, 3)
-       || reg->value == CPENS (3, C7, C13, 3)
-       || reg->value == CPENS (3, C7, C14, 3)
-       || reg->value == CPENS (3, C7, C4, 3)
-       || reg->value == CPENS (0, C7, C6, 5)
-       || reg->value == CPENS (0, C7, C6, 6)
-       || reg->value == CPENS (0, C7, C10, 6)
-       || reg->value == CPENS (0, C7, C14, 6)
-       || reg->value == CPENS (3, C7, C10, 5)
-       || reg->value == CPENS (3, C7, C12, 5)
-       || reg->value == CPENS (3, C7, C13, 5)
-       || reg->value == CPENS (3, C7, C14, 5)
-       || reg->value == CPENS (3, C7, C4, 4))
-      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_MEMTAG))
-    return FALSE;
+  if ((reg_value == CPENS (0, C7, C6, 3)
+       || reg_value == CPENS (0, C7, C6, 4)
+       || reg_value == CPENS (0, C7, C10, 4)
+       || reg_value == CPENS (0, C7, C14, 4)
+       || reg_value == CPENS (3, C7, C10, 3)
+       || reg_value == CPENS (3, C7, C12, 3)
+       || reg_value == CPENS (3, C7, C13, 3)
+       || reg_value == CPENS (3, C7, C14, 3)
+       || reg_value == CPENS (3, C7, C4, 3)
+       || reg_value == CPENS (0, C7, C6, 5)
+       || reg_value == CPENS (0, C7, C6, 6)
+       || reg_value == CPENS (0, C7, C10, 6)
+       || reg_value == CPENS (0, C7, C14, 6)
+       || reg_value == CPENS (3, C7, C10, 5)
+       || reg_value == CPENS (3, C7, C12, 5)
+       || reg_value == CPENS (3, C7, C13, 5)
+       || reg_value == CPENS (3, C7, C14, 5)
+       || reg_value == CPENS (3, C7, C4, 4))
+      && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_MEMTAG))
+    return TRUE;
 
   /* AT S1E1RP, AT S1E1WP.  Values are from aarch64_sys_regs_at.  */
-  if ((reg->value == CPENS (0, C7, C9, 0)
-       || reg->value == CPENS (0, C7, C9, 1))
-      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
-    return FALSE;
+  if ((reg_value == CPENS (0, C7, C9, 0)
+       || reg_value == CPENS (0, C7, C9, 1))
+      && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_V8_2))
+    return TRUE;
 
   /* CFP/DVP/CPP RCTX : Value are from aarch64_sys_regs_sr. */
-  if (reg->value == CPENS (3, C7, C3, 0)
-      && !AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_PREDRES))
-    return FALSE;
+  if (reg_value == CPENS (3, C7, C3, 0)
+      && AARCH64_CPU_HAS_FEATURE (features, AARCH64_FEATURE_PREDRES))
+    return TRUE;
 
-  return TRUE;
+  return FALSE;
 }
 
 #undef C0

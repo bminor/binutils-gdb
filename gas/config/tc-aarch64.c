@@ -4137,10 +4137,12 @@ parse_sys_reg (char **str, struct hash_control *sys_regs,
       if (pstatefield_p && !aarch64_pstatefield_supported_p (cpu_variant, o))
 	as_bad (_("selected processor does not support PSTATE field "
 		  "name '%s'"), buf);
-      if (!pstatefield_p && !aarch64_sys_reg_supported_p (cpu_variant, o))
+      if (!pstatefield_p
+	  && !aarch64_sys_ins_reg_supported_p (cpu_variant, o->value,
+					       o->flags, o->features))
 	as_bad (_("selected processor does not support system register "
 		  "name '%s'"), buf);
-      if (aarch64_sys_reg_deprecated_p (o))
+      if (aarch64_sys_reg_deprecated_p (o->flags))
 	as_warn (_("system register name '%s' is deprecated and may be "
 		   "removed in a future release"), buf);
       value = o->value;
@@ -4172,9 +4174,12 @@ parse_sys_ins_reg (char **str, struct hash_control *sys_ins_regs)
   if (!o)
     return NULL;
 
-  if (!aarch64_sys_ins_reg_supported_p (cpu_variant, o))
+  if (!aarch64_sys_ins_reg_supported_p (cpu_variant, o->value, o->flags, 0))
     as_bad (_("selected processor does not support system register "
 	      "name '%s'"), buf);
+  if (aarch64_sys_reg_deprecated_p (o->flags))
+    as_warn (_("system register name '%s' is deprecated and may be "
+          "removed in a future release"), buf);
 
   *str = q;
   return o;
@@ -4328,7 +4333,10 @@ reencode_movzn_to_movn (uint32_t opcode)
 static fixS *
 fix_new_aarch64 (fragS * frag,
 		 int where,
-		 short int size, expressionS * exp, int pc_rel, int reloc)
+		 short int size,
+		 expressionS * exp,
+		 int pc_rel,
+		 int reloc)
 {
   fixS *new_fix;
 
