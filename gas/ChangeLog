@@ -2,6 +2,10 @@
 
 	Apply from master
 	2020-08-10  Alan Modra  <amodra@gmail.com>
+	* testsuite/gas/ppc/power8.d: Update.
+	* testsuite/gas/ppc/vsx2.d: Update.
+
+	2020-08-10  Alan Modra  <amodra@gmail.com>
 	* config/tc-ppc.c (md_assemble): Error for lmw, stmw, lswi, lswx,
 	stswi, or stswx in little-endian mode.
 	* testsuite/gas/ppc/476.d,
