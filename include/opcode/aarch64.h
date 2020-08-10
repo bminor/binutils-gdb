@@ -943,6 +943,8 @@ extern const struct aarch64_name_value_pair aarch64_barrier_options [16];
 extern const struct aarch64_name_value_pair aarch64_prfops [32];
 extern const struct aarch64_name_value_pair aarch64_hint_options [];
 
+#define AARCH64_MAX_SYSREG_NAME_LEN 32
+
 typedef struct
 {
   const char *  name;

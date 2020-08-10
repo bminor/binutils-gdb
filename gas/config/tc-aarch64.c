@@ -4100,17 +4100,21 @@ parse_sys_reg (char **str, struct hash_control *sys_regs,
 	       uint32_t* flags)
 {
   char *p, *q;
-  char buf[32];
+  char buf[AARCH64_MAX_SYSREG_NAME_LEN];
   const aarch64_sys_reg *o;
   int value;
 
   p = buf;
   for (q = *str; ISALNUM (*q) || *q == '_'; q++)
-    if (p < buf + 31)
+    if (p < buf + (sizeof (buf) - 1))
       *p++ = TOLOWER (*q);
   *p = '\0';
-  /* Assert that BUF be large enough.  */
-  gas_assert (p - buf == q - *str);
+
+  /* If the name is longer than AARCH64_MAX_SYSREG_NAME_LEN then it cannot be a
+     valid system register.  This is enforced by construction of the hash
+     table.  */
+  if (p - buf != q - *str)
+    return PARSE_FAIL;
 
   o = hash_find (sys_regs, buf);
   if (!o)
@@ -4161,14 +4165,20 @@ static const aarch64_sys_ins_reg *
 parse_sys_ins_reg (char **str, struct hash_control *sys_ins_regs)
 {
   char *p, *q;
-  char buf[32];
+  char buf[AARCH64_MAX_SYSREG_NAME_LEN];
   const aarch64_sys_ins_reg *o;
 
   p = buf;
   for (q = *str; ISALNUM (*q) || *q == '_'; q++)
-    if (p < buf + 31)
+    if (p < buf + (sizeof (buf) - 1))
       *p++ = TOLOWER (*q);
   *p = '\0';
+
+  /* If the name is longer than AARCH64_MAX_SYSREG_NAME_LEN then it cannot be a
+     valid system register.  This is enforced by construction of the hash
+     table.  */
+  if (p - buf != q - *str)
+    return NULL;
 
   o = hash_find (sys_ins_regs, buf);
   if (!o)
@@ -8621,6 +8631,13 @@ checked_hash_insert (struct hash_control *table, const char *key, void *value)
 }
 
 static void
+sysreg_hash_insert (struct hash_control *table, const char *key, void *value)
+{
+  gas_assert (strlen (key) < AARCH64_MAX_SYSREG_NAME_LEN);
+  checked_hash_insert (table, key, value);
+}
+
+static void
 fill_instruction_hash_table (void)
 {
   aarch64_opcode *opcode = aarch64_opcode_table;
@@ -8694,36 +8711,36 @@ md_begin (void)
   fill_instruction_hash_table ();
 
   for (i = 0; aarch64_sys_regs[i].name != NULL; ++i)
-    checked_hash_insert (aarch64_sys_regs_hsh, aarch64_sys_regs[i].name,
+    sysreg_hash_insert (aarch64_sys_regs_hsh, aarch64_sys_regs[i].name,
 			 (void *) (aarch64_sys_regs + i));
 
   for (i = 0; aarch64_pstatefields[i].name != NULL; ++i)
-    checked_hash_insert (aarch64_pstatefield_hsh,
+    sysreg_hash_insert (aarch64_pstatefield_hsh,
 			 aarch64_pstatefields[i].name,
 			 (void *) (aarch64_pstatefields + i));
 
   for (i = 0; aarch64_sys_regs_ic[i].name != NULL; i++)
-    checked_hash_insert (aarch64_sys_regs_ic_hsh,
+    sysreg_hash_insert (aarch64_sys_regs_ic_hsh,
 			 aarch64_sys_regs_ic[i].name,
 			 (void *) (aarch64_sys_regs_ic + i));
 
   for (i = 0; aarch64_sys_regs_dc[i].name != NULL; i++)
-    checked_hash_insert (aarch64_sys_regs_dc_hsh,
+    sysreg_hash_insert (aarch64_sys_regs_dc_hsh,
 			 aarch64_sys_regs_dc[i].name,
 			 (void *) (aarch64_sys_regs_dc + i));
 
   for (i = 0; aarch64_sys_regs_at[i].name != NULL; i++)
-    checked_hash_insert (aarch64_sys_regs_at_hsh,
+    sysreg_hash_insert (aarch64_sys_regs_at_hsh,
 			 aarch64_sys_regs_at[i].name,
 			 (void *) (aarch64_sys_regs_at + i));
 
   for (i = 0; aarch64_sys_regs_tlbi[i].name != NULL; i++)
-    checked_hash_insert (aarch64_sys_regs_tlbi_hsh,
+    sysreg_hash_insert (aarch64_sys_regs_tlbi_hsh,
 			 aarch64_sys_regs_tlbi[i].name,
 			 (void *) (aarch64_sys_regs_tlbi + i));
 
   for (i = 0; aarch64_sys_regs_sr[i].name != NULL; i++)
-    checked_hash_insert (aarch64_sys_regs_sr_hsh,
+    sysreg_hash_insert (aarch64_sys_regs_sr_hsh,
 			 aarch64_sys_regs_sr[i].name,
 			 (void *) (aarch64_sys_regs_sr + i));
 

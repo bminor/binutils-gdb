@@ -1,3 +1,7 @@
+2020-08-10  Alex Coplan  <alex.coplan@arm.com>
+
+	* opcode/aarch64.h (AARCH64_MAX_SYSREG_NAME_LEN): New.
+
 2020-08-10  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* opcode/aarch64.h (aarch64_sys_reg_deprecated_p): Functions
