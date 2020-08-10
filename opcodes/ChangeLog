@@ -2,6 +2,10 @@
 
 	Apply from master
 	2020-08-10  Alan Modra  <amodra@gmail.com>
+	* ppc-opc.c (powerpc_opcodes): Add many mtspr and mfspr extended
+	instructions.
+
+	2020-08-10  Alan Modra  <amodra@gmail.com>
 	* ppc-opc.c (powerpc_opcodes): Add exser, msgsndu, msgclru.
 	Enable icbt for power5, miso for power8.
 
