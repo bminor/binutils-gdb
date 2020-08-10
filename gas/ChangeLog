@@ -1,3 +1,19 @@
+2020-09-24  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2020-08-10  Alan Modra  <amodra@gmail.com>
+	* config/tc-ppc.c (md_assemble): Error for lmw, stmw, lswi, lswx,
+	stswi, or stswx in little-endian mode.
+	* testsuite/gas/ppc/476.d,
+	* testsuite/gas/ppc/476.s: Delete lmw, stmw, lswi, lswx, stswi, stswx.
+	* testsuite/gas/ppc/a2.d,
+	* testsuite/gas/ppc/a2.s: Move lmw, stmw, lswi, lswx, stswi, stswx..
+	* testsuite/gas/ppc/be.d,
+	* testsuite/gas/ppc/be.s: ..to here, new big-endian only test.
+	* testsuite/gas/ppc/le_error.d,
+	* testsuite/gas/ppc/le_error.l: New little-endian test.
+	* testsuite/gas/ppc/ppc.exp: Run new tests.
+
 2020-09-19  Nick Clifton  <nickc@redhat.com>
 
 	This is the 2.35.1 point release.

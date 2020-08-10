@@ -76,6 +76,8 @@ if { [istarget powerpc64*-*-*] || [istarget *-*-elf64*]} then {
 run_dump_test "common"
 run_dump_test "476"
 run_dump_test "a2"
+run_dump_test "be"
+run_dump_test "le_error"
 run_dump_test "pr21303"
 run_dump_test "vle"
 run_dump_test "vle-reloc"
