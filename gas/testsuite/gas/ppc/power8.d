@@ -310,4 +310,6 @@ Disassembly of section \.text:
 .*:	(4d 89 04 61|61 04 89 4d) 	bgttarl cr2
 .*:	(4d 89 04 61|61 04 89 4d) 	bgttarl cr2
 .*:	(4d 89 1c 61|61 1c 89 4d) 	bctarl  12,4\*cr2\+gt,3
+.*:	(7f 5a d3 78|78 d3 5a 7f) 	miso
+.*:	(7f 5a d3 78|78 d3 5a 7f) 	miso
 #pass

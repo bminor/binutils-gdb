@@ -302,3 +302,5 @@ power8:
 	bctarl       0b01100,4*cr2+gt
 	bctarl       0b01100,4*cr2+gt,0
 	bctarl       0b01100,4*cr2+gt,3
+	or	     26,26,26
+	miso
