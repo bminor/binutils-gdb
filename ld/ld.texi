@@ -2030,7 +2030,7 @@ This option is only supported on a few targets.
 @xref{PowerPC ELF32,,@command{ld} and PowerPC 32-bit ELF Support}.
 @end ifset
 
-On some platforms the @samp{--relax} option performs target-specific,
+On some platforms the @option{--relax} option performs target specific,
 global optimizations that become possible when the linker resolves
 addressing in the program, such as relaxing address modes,
 synthesizing new instructions, selecting shorter version of current
@@ -2043,14 +2043,12 @@ This is known to be the case for the Matsushita MN10200 and MN10300
 family of processors.
 @end ifset
 
-@ifset GENERIC
-On platforms where this is not supported, @samp{--relax} is accepted,
-but ignored.
-@end ifset
+On platforms where the feature is supported, the option
+@option{--no-relax} will disable it.
 
-On platforms where @samp{--relax} is accepted the option
-@samp{--no-relax} can be used to disable the feature.
-
+On platforms where the feature is not supported, both @option{--relax}
+and @option{--no-relax} are accepted, but ignored.
+ 
 @cindex retaining specified symbols
 @cindex stripping all but some symbols
 @cindex symbols, retaining selectively
