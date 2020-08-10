@@ -1,3 +1,12 @@
+2020-08-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26302
+	* testsuite/ld-elf/pr26302.nd: New file.
+	* testsuite/ld-elf/pr26302.ver: Likewise.
+	* testsuite/ld-elf/pr26302a.c: Likewise.
+	* testsuite/ld-elf/pr26302b.c: Likewise.
+	* testsuite/ld-elf/shared.exp: Run binutils/26302 tests.
+
 2020-08-07  David Faust  <david.faust@oracle.com>
 
 	* testsuite/ld-bpf/call-3.s: New file.

@@ -843,6 +843,24 @@ run_cc_link_tests [list \
 	{{readelf {--dyn-syms --wide} pr26094-1b.rd}} \
 	"pr26094-1" \
     ] \
+    [list \
+	"Build pr26302a.so" \
+	"-shared -Wl,--version-script=pr26302.ver" \
+	"-fPIC" \
+	{pr26302a.c} \
+	{} \
+	"pr26302a.so"
+    ] \
+    [list \
+	"Build pr26302b.so" \
+	"-shared -Wl,--no-as-needed tmpdir/pr26302a.so" \
+	"-fPIC" \
+	{pr26302b.c} \
+	{{nm {-u} pr26302.nd} \
+	 {nm {-u -D} pr26302.nd} \
+	 {nm {-u -D --with-symbol-versions} pr26302.nd}} \
+	"pr26302b.so" \
+    ] \
 ]
 
 run_ld_link_tests [list \

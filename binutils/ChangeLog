@@ -1,3 +1,14 @@
+2020-08-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26302
+	* nm.c (with_symbol_versions): Removed.
+	(long_option_values): Add OPTION_WITH_SYMBOL_VERSIONS.
+	(long_options): Update --with-symbol-versions entry.
+	(print_symbol): Remove the with_symbol_versions check.
+	(main): Add OPTION_WITH_SYMBOL_VERSIONS for backward
+	compatibility.
+	* doc/binutils.texi: Remove --with-symbol-versions.
+
 2020-08-05  Alan Modra  <amodra@gmail.com>
 
 	PR 26337
