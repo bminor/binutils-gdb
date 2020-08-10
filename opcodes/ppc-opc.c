@@ -6114,6 +6114,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"rlnm.",	M(23,1),	M_MASK,	     PWRCOM,	PPCVLE,		{RA, RS, RB, MBE, ME}},
 
 {"nop",		OP(24),		0xffffffff,  PPCCOM,	PPCVLE,		{0}},
+{"exser",	0x63ff0000,	0xffffffff,  POWER9,	PPCVLE,		{0}},
 {"ori",		OP(24),		OP_MASK,     PPCCOM,	PPCVLE,		{RA, RS, UI}},
 {"oril",	OP(24),		OP_MASK,     PWRCOM,	PPCVLE,		{RA, RS, UI}},
 
@@ -6236,7 +6237,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"ldx",		X(31,21),	X_MASK,	     PPC64,	0,		{RT, RA0, RB}},
 
-{"icbt",	X(31,22),  X_MASK, BOOKE|PPCE300|PPCA2|PPC476, 0,	{CT, RA0, RB}},
+{"icbt",	X(31,22), X_MASK, POWER5|BOOKE|PPCE300, 0,		{CT, RA0, RB}},
 
 {"lwzx",	X(31,23),	X_MASK,	     PPCCOM,	0,		{RT, RA0, RB}},
 {"lx",		X(31,23),	X_MASK,	     PWRCOM,	0,		{RT, RA, RB}},
@@ -6354,6 +6355,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mulhw",	XO(31,75,0,0),	XO_MASK,     PPC,	0,		{RT, RA, RB}},
 {"mulhw.",	XO(31,75,0,1),	XO_MASK,     PPC,	0,		{RT, RA, RB}},
 
+{"msgsndu",	XRTRA(31,78,0,0), XRTRA_MASK, POWER9,	0,		{RB}},
 {"dlmzb",	XRC(31,78,0), X_MASK, PPC403|PPC440|PPC476|TITAN, 0,	{RA, RS, RB}},
 {"dlmzb.",	XRC(31,78,1), X_MASK, PPC403|PPC440|PPC476|TITAN, 0,	{RA, RS, RB}},
 
@@ -6387,6 +6389,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"lxvrdx",	X(31,109),	XX1_MASK,    POWER10,	0,		{XT6, RA0, RB}},
 
+{"msgclru",	XRTRA(31,110,0,0), XRTRA_MASK, POWER9,	0,		{RB}},
 {"mvidsplt",	X(31,110),	X_MASK,	     E6500,	0,		{VD, RA, RB}},
 
 {"mtsrdin",	X(31,114),	XRA_MASK,    PPC64,	0,		{RS, RB}},
@@ -7051,14 +7054,15 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"sthux",	X(31,439),	X_MASK,	     COM,	0,		{RS, RAS, RB}},
 
-{"mdors",	0x7f9ce378,	0xffffffff,  E500MC,	0,		{0}},
-
-{"miso",	0x7f5ad378,	0xffffffff,  E6500,	0,		{0}},
-
-/* The "yield", "mdoio" and "mdoom" instructions are extended mnemonics for
-   "or rX,rX,rX", with rX being r27, r29 and r30 respectively.	*/
+/* or 26,26,26 */
+{"miso",	0x7f5ad378,   0xffffffff, POWER8|E6500,	0,		{0}},
+/* or 27,27,27 */
 {"yield",	0x7f7bdb78,	0xffffffff,  POWER7,	0,		{0}},
+/* or 28,28,28 */
+{"mdors",	0x7f9ce378,	0xffffffff,  E500MC,	0,		{0}},
+/* or 29,29,29 */
 {"mdoio",	0x7fbdeb78,	0xffffffff,  POWER7,	0,		{0}},
+/* or 30,30,30 */
 {"mdoom",	0x7fdef378,	0xffffffff,  POWER7,	0,		{0}},
 {"mr",		XRC(31,444,0),	X_MASK,	     COM,	0,		{RA, RSB}},
 {"or",		XRC(31,444,0),	X_MASK,	     COM,	0,		{RA, RS, RB}},
