@@ -6302,9 +6302,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"subf.",	XO(31,40,0,1),	XO_MASK,     PPC,	0,		{RT, RA, RB}},
 {"sub.",	XO(31,40,0,1),	XO_MASK,     PPC,	0,		{RT, RB, RA}},
 
-{"mfvsrd",	X(31,51),	XX1RB_MASK,   PPCVSX2,	0,		{RA, XS6}},
 {"mffprd",	X(31,51),	XX1RB_MASK|1, PPCVSX2,	0,		{RA, FRS}},
 {"mfvrd",	X(31,51)|1,	XX1RB_MASK|1, PPCVSX2,	0,		{RA, VS}},
+{"mfvsrd",	X(31,51),	XX1RB_MASK,   PPCVSX2,	0,		{RA, XS6}},
 {"eratilx",	X(31,51),	X_MASK,	     PPCA2,	0,		{ERAT_T, RA, RB}},
 
 {"lbarx",	X(31,52),	XEH_MASK, POWER8|E6500, 0,		{RT, RA0, RB, EH}},
@@ -6489,9 +6489,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"mtmsrd",	X(31,178),	XRLARB_MASK, PPC64,	0,		{RS, A_L}},
 
-{"mtvsrd",	X(31,179),	XX1RB_MASK,   PPCVSX2,	0,		{XT6, RA}},
 {"mtfprd",	X(31,179),	XX1RB_MASK|1, PPCVSX2,	0,		{FRT, RA}},
 {"mtvrd",	X(31,179)|1,	XX1RB_MASK|1, PPCVSX2,	0,		{VD, RA}},
+{"mtvsrd",	X(31,179),	XX1RB_MASK,   PPCVSX2,	0,		{XT6, RA}},
 {"eratre",	X(31,179),	X_MASK,	     PPCA2,	0,		{RT, RA, WS}},
 
 {"stdux",	X(31,181),	X_MASK,	     PPC64,	0,		{RS, RAS, RB}},
