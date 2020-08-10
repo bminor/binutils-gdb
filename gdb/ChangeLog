@@ -1,5 +1,14 @@
 2020-08-10  Luis Machado  <luis.machado@linaro.org>
 
+	PR gdb/26310
+
+	* aarch64-tdep.c (aarch64_analyze_prologue): Track use of SP/FP and
+	act accordingly.
+	(aarch64_analyze_prologue_test): Add more unit tests to exercise
+	movz/str/stur/stp skipping behavior.
+
+2020-08-10  Luis Machado  <luis.machado@linaro.org>
+
 	* nat/aarch64-sve-linux-sigcontext.h (SVE_PT_REGS_OFFSET): Use
 	struct user_sve_header instead of struct sve_context.
 

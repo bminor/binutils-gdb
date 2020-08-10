@@ -287,6 +287,12 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   int i;
+
+  /* Whether the stack has been set.  This should be true when we notice a SP
+     to FP move or if we are using the SP as the base register for storing
+     data, in case the FP is ommitted.  */
+  bool seen_stack_set = false;
+
   /* Track X registers and D registers in prologue.  */
   pv_t regs[AARCH64_X_REGISTER_COUNT + AARCH64_D_REGISTER_COUNT];
 
@@ -326,6 +332,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	      regs[rd] = pv_add_constant (regs[rn],
 					  -inst.operands[2].imm.value);
 	    }
+
+	  /* Did we move SP to FP?  */
+	  if (rn == AARCH64_SP_REGNUM && rd == AARCH64_FP_REGNUM)
+	    seen_stack_set = true;
 	}
       else if (inst.opcode->iclass == pcreladdr
 	       && inst.operands[1].type == AARCH64_OPND_ADDR_ADRP)
@@ -358,6 +368,12 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
       else if (inst.opcode->op == OP_MOVZ)
 	{
 	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rd);
+
+	  /* If this shows up before we set the stack, keep going.  Otherwise
+	     stop the analysis.  */
+	  if (seen_stack_set)
+	    break;
+
 	  regs[inst.operands[0].reg.regno] = pv_unknown ();
 	}
       else if (inst.opcode->iclass == log_shift
@@ -399,6 +415,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  stack.store
 	    (pv_add_constant (regs[rn], inst.operands[1].addr.offset.imm),
 	     size, regs[rt]);
+
+	  /* Are we storing with SP as a base?  */
+	  if (rn == AARCH64_SP_REGNUM)
+	    seen_stack_set = true;
 	}
       else if ((inst.opcode->iclass == ldstpair_off
 		|| (inst.opcode->iclass == ldstpair_indexed
@@ -442,6 +462,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  if (inst.operands[2].addr.writeback)
 	    regs[rn] = pv_add_constant (regs[rn], imm);
 
+	  /* Ignore the instruction that allocates stack space and sets
+	     the SP.  */
+	  if (rn == AARCH64_SP_REGNUM && !inst.operands[2].addr.writeback)
+	    seen_stack_set = true;
 	}
       else if ((inst.opcode->iclass == ldst_imm9 /* Signed immediate.  */
 		|| (inst.opcode->iclass == ldst_pos /* Unsigned immediate.  */
@@ -464,6 +488,10 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  stack.store (pv_add_constant (regs[rn], imm), size, regs[rt]);
 	  if (inst.operands[1].addr.writeback)
 	    regs[rn] = pv_add_constant (regs[rn], imm);
+
+	  /* Are we storing with SP as a base?  */
+	  if (rn == AARCH64_SP_REGNUM)
+	    seen_stack_set = true;
 	}
       else if (inst.opcode->iclass == testbranch)
 	{
@@ -688,6 +716,117 @@ aarch64_analyze_prologue_test (void)
 	  SELF_CHECK (cache.saved_regs[i + regnum + AARCH64_D0_REGNUM].addr
 		      == -1);
       }
+  }
+
+  /* Test handling of movz before setting the frame pointer.  */
+  {
+    static const uint32_t insns[] = {
+      0xa9bf7bfd, /* stp     x29, x30, [sp, #-16]! */
+      0x52800020, /* mov     w0, #0x1 */
+      0x910003fd, /* mov     x29, sp */
+      0x528000a2, /* mov     w2, #0x5 */
+      0x97fffff8, /* bl      6e4 */
+    };
+
+    instruction_reader_test reader (insns);
+
+    trad_frame_reset_saved_regs (gdbarch, cache.saved_regs);
+    CORE_ADDR end = aarch64_analyze_prologue (gdbarch, 0, 128, &cache, reader);
+
+    /* We should stop at the 4th instruction.  */
+    SELF_CHECK (end == (4 - 1) * 4);
+    SELF_CHECK (cache.framereg == AARCH64_FP_REGNUM);
+    SELF_CHECK (cache.framesize == 16);
+  }
+
+  /* Test handling of movz/stp when using the stack pointer as frame
+     pointer.  */
+  {
+    static const uint32_t insns[] = {
+      0xa9bc7bfd, /* stp     x29, x30, [sp, #-64]! */
+      0x52800020, /* mov     w0, #0x1 */
+      0x290207e0, /* stp     w0, w1, [sp, #16] */
+      0xa9018fe2, /* stp     x2, x3, [sp, #24] */
+      0x528000a2, /* mov     w2, #0x5 */
+      0x97fffff8, /* bl      6e4 */
+    };
+
+    instruction_reader_test reader (insns);
+
+    trad_frame_reset_saved_regs (gdbarch, cache.saved_regs);
+    CORE_ADDR end = aarch64_analyze_prologue (gdbarch, 0, 128, &cache, reader);
+
+    /* We should stop at the 5th instruction.  */
+    SELF_CHECK (end == (5 - 1) * 4);
+    SELF_CHECK (cache.framereg == AARCH64_SP_REGNUM);
+    SELF_CHECK (cache.framesize == 64);
+  }
+
+  /* Test handling of movz/str when using the stack pointer as frame
+     pointer  */
+  {
+    static const uint32_t insns[] = {
+      0xa9bc7bfd, /* stp     x29, x30, [sp, #-64]! */
+      0x52800020, /* mov     w0, #0x1 */
+      0xb9002be4, /* str     w4, [sp, #40] */
+      0xf9001be5, /* str     x5, [sp, #48] */
+      0x528000a2, /* mov     w2, #0x5 */
+      0x97fffff8, /* bl      6e4 */
+    };
+
+    instruction_reader_test reader (insns);
+
+    trad_frame_reset_saved_regs (gdbarch, cache.saved_regs);
+    CORE_ADDR end = aarch64_analyze_prologue (gdbarch, 0, 128, &cache, reader);
+
+    /* We should stop at the 5th instruction.  */
+    SELF_CHECK (end == (5 - 1) * 4);
+    SELF_CHECK (cache.framereg == AARCH64_SP_REGNUM);
+    SELF_CHECK (cache.framesize == 64);
+  }
+
+  /* Test handling of movz/stur when using the stack pointer as frame
+     pointer.  */
+  {
+    static const uint32_t insns[] = {
+      0xa9bc7bfd, /* stp     x29, x30, [sp, #-64]! */
+      0x52800020, /* mov     w0, #0x1 */
+      0xb80343e6, /* stur    w6, [sp, #52] */
+      0xf80383e7, /* stur    x7, [sp, #56] */
+      0x528000a2, /* mov     w2, #0x5 */
+      0x97fffff8, /* bl      6e4 */
+    };
+
+    instruction_reader_test reader (insns);
+
+    trad_frame_reset_saved_regs (gdbarch, cache.saved_regs);
+    CORE_ADDR end = aarch64_analyze_prologue (gdbarch, 0, 128, &cache, reader);
+
+    /* We should stop at the 5th instruction.  */
+    SELF_CHECK (end == (5 - 1) * 4);
+    SELF_CHECK (cache.framereg == AARCH64_SP_REGNUM);
+    SELF_CHECK (cache.framesize == 64);
+  }
+
+  /* Test handling of movz when there is no frame pointer set or no stack
+     pointer used.  */
+  {
+    static const uint32_t insns[] = {
+      0xa9bf7bfd, /* stp     x29, x30, [sp, #-16]! */
+      0x52800020, /* mov     w0, #0x1 */
+      0x528000a2, /* mov     w2, #0x5 */
+      0x97fffff8, /* bl      6e4 */
+    };
+
+    instruction_reader_test reader (insns);
+
+    trad_frame_reset_saved_regs (gdbarch, cache.saved_regs);
+    CORE_ADDR end = aarch64_analyze_prologue (gdbarch, 0, 128, &cache, reader);
+
+    /* We should stop at the 4th instruction.  */
+    SELF_CHECK (end == (4 - 1) * 4);
+    SELF_CHECK (cache.framereg == AARCH64_SP_REGNUM);
+    SELF_CHECK (cache.framesize == 16);
   }
 
   /* Test a prologue in which there is a return address signing instruction.  */
