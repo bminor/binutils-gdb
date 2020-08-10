@@ -1,3 +1,9 @@
+2020-09-02  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/mi_var_access.exp: Test children of access variable.
+	* gdb.ada/mi_var_access/mi_access.adb: Add new stop markers.
+	* gdb.ada/mi_var_array.exp: Update.
+
 2020-08-31  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/corefile.exp (warning-free): XFAIL test when running

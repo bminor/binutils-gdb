@@ -52,14 +52,6 @@ foreach_with_prefix scenario {none all minimal} {
 	"stop at start of main Ada procedure"
 
     mi_gdb_test "-var-create vta * vta" \
-	"\\^done,name=\"vta\",numchild=\"2\",.*" \
+	"\\^done,name=\"vta\",numchild=\"0\",.*" \
 	"create bt varobj"
-
-    # In the "minimal" mode, we don't currently have the ability to
-    # print the subrange type properly.  So, we just allow anything
-    # for the array range here.  The correct result would be to fix
-    # this to read "(1 .. n)".
-    mi_gdb_test "-var-list-children vta" \
-	"\\^done,numchild=\"2\",children=\\\[child={name=\"vta.n\",exp=\"n\",numchild=\"0\",type=\"bar\\.int\",thread-id=\"$decimal\"},child={name=\"vta.f\",exp=\"f\",numchild=\"0\",type=\"array .* of character\",thread-id=\"$decimal\"}\\\],.*" \
-	"list vta's children"
 }

@@ -1,3 +1,9 @@
+2020-09-02  Tom Tromey  <tromey@adacore.com>
+
+	* ada-varobj.c (ada_varobj_get_ptr_number_of_children): Return 0
+	for null pointers.
+	(ada_varobj_adjust_for_child_access): Special-case null pointers.
+
 2020-09-01  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* bcache.h (struct bcache) <insert>: Change type of `added` to

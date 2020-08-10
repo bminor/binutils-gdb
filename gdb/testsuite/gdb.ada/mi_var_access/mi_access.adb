@@ -24,7 +24,7 @@ begin
    A_String (4) := '6';
    A_String_Access := Copy (A_String);
    A_Pointer.P := A_String_Access;
-   Do_Nothing (A_String_Access'Address);
+   Do_Nothing (A_String_Access'Address); -- STOP2
    A_String_Access (4) := 'a';
    Do_Nothing (A_Pointer'Address);
    A_String_Access := Copy("Hi");
@@ -32,6 +32,6 @@ begin
    Do_Nothing (A_String_Access'Address);
    A_String_Access := null;
    A_Pointer.P := null;
-   Do_Nothing (A_Pointer'Address);
+   Do_Nothing (A_Pointer'Address); -- STOP3
    Do_Nothing (A_String'Address);
 end Mi_Access;
