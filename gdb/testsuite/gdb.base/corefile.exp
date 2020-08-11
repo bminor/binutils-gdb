@@ -324,11 +324,18 @@ corefile_test_attach
 # Test warning-free core file load.  E.g., a Linux vDSO used to
 # trigger this warning:
 #     warning: Can't read pathname for load map: Input/output error.
+#
+# When testing in a docker container using the AUFS storage driver,
+# the kernel places host paths in the core file's NT_FILE note.  XFAIL
+# this case since these paths make no sense in the container.
 
 clean_restart ${testfile}
 
 set test "core-file warning-free"
 gdb_test_multiple "core-file $corefile" $test {
+    -re "warning: Can\'t open file.*\/docker\/aufs\/.*\r\n$gdb_prompt $" {
+	xfail $test
+    }
     -re "warning: .*\r\n.*\r\n$gdb_prompt $" {
 	fail $test
     }

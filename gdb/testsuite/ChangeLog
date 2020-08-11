@@ -1,5 +1,10 @@
 2020-08-31  Kevin Buettner  <kevinb@redhat.com>
 
+	* gdb.base/corefile.exp (warning-free): XFAIL test when running
+	on docker w/ AUFS storage driver.
+
+2020-08-31  Kevin Buettner  <kevinb@redhat.com>
+
 	* gdb.base/corefile2.exp (renamed binfile): New tests.
 
 2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
