@@ -1,3 +1,7 @@
+2020-08-11  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes): Move cctpl, cctpm and cctph.
+
 2020-08-10  Przemyslaw Wirkus  <przemyslaw.wirkus@arm.com>
 
 	* aarch64-opc.c (aarch64_print_operand):

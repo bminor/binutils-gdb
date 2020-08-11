@@ -7127,6 +7127,12 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"sthux",	X(31,439),	X_MASK,	     COM,	0,		{RS, RAS, RB}},
 
+/* or 1,1,1 */
+{"cctpl",	0x7c210b78,	0xffffffff,  CELL,	0,		{0}},
+/* or 2,2,2 */
+{"cctpm",	0x7c421378,	0xffffffff,  CELL,	0,		{0}},
+/* or 3,3,3 */
+{"cctph",	0x7c631b78,	0xffffffff,  CELL,	0,		{0}},
 /* or 26,26,26 */
 {"miso",	0x7f5ad378,   0xffffffff, POWER8|E6500,	0,		{0}},
 /* or 27,27,27 */
@@ -7137,6 +7143,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mdoio",	0x7fbdeb78,	0xffffffff,  POWER7,	0,		{0}},
 /* or 30,30,30 */
 {"mdoom",	0x7fdef378,	0xffffffff,  POWER7,	0,		{0}},
+
 {"mr",		XRC(31,444,0),	X_MASK,	     COM,	0,		{RA, RSB}},
 {"or",		XRC(31,444,0),	X_MASK,	     COM,	0,		{RA, RS, RB}},
 {"mr.",		XRC(31,444,1),	X_MASK,	     COM,	0,		{RA, RSB}},
@@ -8024,10 +8031,6 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"dcbzep",	XRT(31,1023,0),	XRT_MASK,    E500MC|PPCA2, 0,		{RA0, RB}},
 
 {"dcbzl",	XOPL(31,1014,1), XRT_MASK,   POWER4|E500MC, PPC476,	{RA0, RB}},
-
-{"cctpl",	0x7c210b78,	0xffffffff,  CELL,	0,		{0}},
-{"cctpm",	0x7c421378,	0xffffffff,  CELL,	0,		{0}},
-{"cctph",	0x7c631b78,	0xffffffff,  CELL,	0,		{0}},
 
 {"dstt",	XDSS(31,342,1),	XDSS_MASK,   PPCVEC,	0,		{RA, RB, STRM}},
 {"dststt",	XDSS(31,374,1),	XDSS_MASK,   PPCVEC,	0,		{RA, RB, STRM}},
