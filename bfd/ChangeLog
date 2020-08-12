@@ -3,6 +3,13 @@
 	* po/ru.po: Updated Russian translation.
 	* po/sr.po: Updated Serbian translation.
 
+2020-08-05  David Faust  <david.faust@oracle.com>
+
+	* elf64-bpf.c (bpf_elf_generic_reloc): New function.
+	(bpf_elf_howto_table): Use it here.
+	(bpf_elf_relocate_section): Use addends recorded in input_bfd for
+	instruction and data relocations.
+
 2020-07-30  Szabolcs Nagy  <szabolcs.nagy@arm.com>
 
 	PR ld/26312
