@@ -1,3 +1,7 @@
+2020-08-12  Gary Benson <gbenson@redhat.com>
+
+	* gdb.dwarf2/dw2-op-out-param.S (.Ltext5): Fix duplicate label.
+
 2020-08-04  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* lib/check-test-names.exp (do_reset_vars): Use 'array unset' to
