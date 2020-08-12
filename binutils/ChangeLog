@@ -1,3 +1,9 @@
+2020-08-12  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf-mode.el (Version): Now 1.6.
+	(dwarf-die-button-action): Tighten DIE reference regexp.
+	(dwarf-font-lock-keywords): Update name regexp.
+
 2020-08-12  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/26331
