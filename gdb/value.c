@@ -997,16 +997,16 @@ show_max_value_size (struct ui_file *file, int from_tty,
 static void
 check_type_length_before_alloc (const struct type *type)
 {
-  unsigned int length = TYPE_LENGTH (type);
+  ULONGEST length = TYPE_LENGTH (type);
 
   if (max_value_size > -1 && length > max_value_size)
     {
       if (type->name () != NULL)
-	error (_("value of type `%s' requires %u bytes, which is more "
-		 "than max-value-size"), type->name (), length);
+	error (_("value of type `%s' requires %s bytes, which is more "
+		 "than max-value-size"), type->name (), pulongest (length));
       else
-	error (_("value requires %u bytes, which is more than "
-		 "max-value-size"), length);
+	error (_("value requires %s bytes, which is more than "
+		 "max-value-size"), pulongest (length));
     }
 }
 
