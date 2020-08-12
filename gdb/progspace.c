@@ -198,6 +198,12 @@ program_space::add_objfile (std::shared_ptr<objfile> &&objfile,
 void
 program_space::remove_objfile (struct objfile *objfile)
 {
+  /* Removing an objfile from the objfile list invalidates any frame
+     that was built using frame info found in the objfile.  Reinit the
+     frame cache to get rid of any frame that might otherwise
+     reference stale info.  */
+  reinit_frame_cache ();
+
   auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
 			    [=] (const std::shared_ptr<::objfile> &objf)
 			    {
