@@ -1,5 +1,10 @@
 2020-08-12  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Move "Multi-target debugging support" item to the
+	"Changes since GDB 9" section.
+
+2020-08-12  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/26336
 	* progspace.c (program_space::remove_objfile): Invalidate the
 	frame cache.

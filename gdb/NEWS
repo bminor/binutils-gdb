@@ -25,6 +25,21 @@
 
   You can get the latest version from https://sourceware.org/elfutils.
 
+* Multi-target debugging support
+
+  GDB now supports debugging multiple target connections
+  simultaneously.  For example, you can now have each inferior
+  connected to different remote servers running in different machines,
+  or have one inferior debugging a local native process, an inferior
+  debugging a core dump, etc.
+
+  This support is experimental and comes with some limitations -- you
+  can only resume multiple targets simultaneously if all targets
+  support non-stop mode, and all remote stubs or servers must support
+  the same set of remote protocol features exactly.  See also "info
+  connections" and "add-inferior -no-connection" below, and "maint set
+  target-non-stop" in the user manual.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on RISC-V GNU/Linux.
@@ -211,21 +226,6 @@ BPF				bpf-unknown-none
 * GDB now supports multithreaded symbol loading for higher performance.
   This feature is still in testing, so it is disabled by default.  You
   can turn it on using 'maint set worker-threads unlimited'.
-
-* Multi-target debugging support
-
-  GDB now supports debugging multiple target connections
-  simultaneously.  For example, you can now have each inferior
-  connected to different remote servers running in different machines,
-  or have one inferior debugging a local native process, an inferior
-  debugging a core dump, etc.
-
-  This support is experimental and comes with some limitations -- you
-  can only resume multiple targets simultaneously if all targets
-  support non-stop mode, and all remote stubs or servers must support
-  the same set of remote protocol features exactly.  See also "info
-  connections" and "add-inferior -no-connection" below, and "maint set
-  target-non-stop" in the user manual.
 
 * Python API
 
