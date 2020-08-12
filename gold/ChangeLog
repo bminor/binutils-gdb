@@ -1,3 +1,7 @@
+2020-08-12  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
 2020-07-27  Alan Modra  <amodra@gmail.com>
 
 	* options.h (DEFINE_enum): Add optional_arg__ param, adjust

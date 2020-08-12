@@ -1,3 +1,8 @@
+2020-08-12  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: Updated Russian translation.
+	* po/sr.po: Updated Serbian translation.
+
 2020-08-07  David Faust  <david.faust@oracle.com>
 
 	* elf64-bpf.c (bpf_elf_relocate_section): Ensure signed division for
