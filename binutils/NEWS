@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Readelf now accepts the -C command line option to enable the demangling of
+  symbol names.  In addition the --demangle=<style>, --no-demangle,
+  --recurse-limit and --no-recurse-limit options are also now availale.
+
 Changes in 2.35:
 
 * Changed readelf's display of symbol names when wide mode is not enabled.

@@ -61,6 +61,7 @@
 #include "elfcomm.h"
 #include "dwarf.h"
 #include "ctf-api.h"
+#include "demangle.h"
 
 #include "elf/common.h"
 #include "elf/external.h"
@@ -235,6 +236,8 @@ static bfd_boolean check_all = FALSE;
 static bfd_boolean is_32bit_elf = FALSE;
 static bfd_boolean decompress_dumps = FALSE;
 static bfd_boolean do_not_show_symbol_truncation = FALSE;
+static bfd_boolean do_demangle = FALSE;	/* Pretty print C++ symbol names.  */
+static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
 
 static char *dump_ctf_parent_name;
 static char *dump_ctf_symtab_name;
@@ -552,6 +555,7 @@ print_symbol (signed int width, const char * symbol)
   mbstate_t state;
 #endif
   unsigned int width_remaining;
+  const void * alloced_symbol = NULL;
 
   if (width < 0)
     {
@@ -583,6 +587,14 @@ print_symbol (signed int width, const char * symbol)
   /* Initialise the multibyte conversion state.  */
   memset (& state, 0, sizeof (state));
 #endif
+
+  if (do_demangle && *symbol)
+    {
+      const char * res = cplus_demangle (symbol, demangle_flags);
+
+      if (res != NULL)
+	alloced_symbol = symbol = res;
+    }
 
   while (width_remaining)
     {
@@ -643,6 +655,7 @@ print_symbol (signed int width, const char * symbol)
       num_printed = width;
     }
 
+  free ((void *) alloced_symbol);
   return num_printed;
 }
 
@@ -4471,67 +4484,76 @@ get_section_type_name (Filedata * filedata, unsigned int sh_type)
     }
 }
 
-#define OPTION_DEBUG_DUMP	512
-#define OPTION_DYN_SYMS		513
-#define OPTION_DWARF_DEPTH	514
-#define OPTION_DWARF_START	515
-#define OPTION_DWARF_CHECK	516
-#define OPTION_CTF_DUMP		517
-#define OPTION_CTF_PARENT	518
-#define OPTION_CTF_SYMBOLS	519
-#define OPTION_CTF_STRINGS	520
+enum long_option_values
+{
+  OPTION_DEBUG_DUMP = 512,
+  OPTION_DYN_SYMS,
+  OPTION_DWARF_DEPTH,
+  OPTION_DWARF_START,
+  OPTION_DWARF_CHECK,
+  OPTION_CTF_DUMP,
+  OPTION_CTF_PARENT,
+  OPTION_CTF_SYMBOLS,
+  OPTION_CTF_STRINGS,
+  OPTION_WITH_SYMBOL_VERSIONS,
+  OPTION_RECURSE_LIMIT,
+  OPTION_NO_RECURSE_LIMIT,
+  OPTION_NO_DEMANGLING
+};
 
 static struct option options[] =
 {
+ /* Note - This table is alpha-sorted on the 'val'
+    field in order to make adding new options easier.  */
+  {"arch-specific",    no_argument, 0, 'A'},
   {"all",	       no_argument, 0, 'a'},
-  {"file-header",      no_argument, 0, 'h'},
-  {"program-headers",  no_argument, 0, 'l'},
-  {"headers",	       no_argument, 0, 'e'},
-  {"histogram",	       no_argument, 0, 'I'},
-  {"segments",	       no_argument, 0, 'l'},
-  {"sections",	       no_argument, 0, 'S'},
-  {"section-headers",  no_argument, 0, 'S'},
-  {"section-groups",   no_argument, 0, 'g'},
-  {"section-details",  no_argument, 0, 't'},
-  {"full-section-name",no_argument, 0, 'N'},
-  {"symbols",	       no_argument, 0, 's'},
-  {"syms",	       no_argument, 0, 's'},
-  {"dyn-syms",	       no_argument, 0, OPTION_DYN_SYMS},
-  {"relocs",	       no_argument, 0, 'r'},
-  {"notes",	       no_argument, 0, 'n'},
+  {"demangle",         optional_argument, 0, 'C'},
+  {"archive-index",    no_argument, 0, 'c'},
+  {"use-dynamic",      no_argument, 0, 'D'},
   {"dynamic",	       no_argument, 0, 'd'},
+  {"headers",	       no_argument, 0, 'e'},
+  {"section-groups",   no_argument, 0, 'g'},
+  {"help",	       no_argument, 0, 'H'},
+  {"file-header",      no_argument, 0, 'h'},
+  {"histogram",	       no_argument, 0, 'I'},
   {"lint",             no_argument, 0, 'L'},
   {"enable-checks",    no_argument, 0, 'L'},
-  {"arch-specific",    no_argument, 0, 'A'},
-  {"version-info",     no_argument, 0, 'V'},
-  {"use-dynamic",      no_argument, 0, 'D'},
-  {"unwind",	       no_argument, 0, 'u'},
-  {"archive-index",    no_argument, 0, 'c'},
-  {"hex-dump",	       required_argument, 0, 'x'},
-  {"relocated-dump",   required_argument, 0, 'R'},
+  {"program-headers",  no_argument, 0, 'l'},
+  {"segments",	       no_argument, 0, 'l'},
+  {"full-section-name",no_argument, 0, 'N'},
+  {"notes",	       no_argument, 0, 'n'},
   {"string-dump",      required_argument, 0, 'p'},
+  {"relocated-dump",   required_argument, 0, 'R'},
+  {"relocs",	       no_argument, 0, 'r'},
+  {"section-headers",  no_argument, 0, 'S'},
+  {"sections",	       no_argument, 0, 'S'},
+  {"symbols",	       no_argument, 0, 's'},
+  {"syms",	       no_argument, 0, 's'},
+  {"silent-truncation",no_argument, 0, 'T'},
+  {"section-details",  no_argument, 0, 't'},
+  {"unwind",	       no_argument, 0, 'u'},
+  {"version-info",     no_argument, 0, 'V'},
+  {"version",	       no_argument, 0, 'v'},
+  {"wide",	       no_argument, 0, 'W'},
+  {"hex-dump",	       required_argument, 0, 'x'},
   {"decompress",       no_argument, 0, 'z'},
-#ifdef SUPPORT_DISASSEMBLY
-  {"instruction-dump", required_argument, 0, 'i'},
-#endif
-  {"debug-dump",       optional_argument, 0, OPTION_DEBUG_DUMP},
 
+  {"no-demangle",      no_argument, 0, OPTION_NO_DEMANGLING},
+  {"recurse-limit",    no_argument, NULL, OPTION_RECURSE_LIMIT},
+  {"no-recurse-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
+  {"no-recursion-limit", no_argument, NULL, OPTION_NO_RECURSE_LIMIT},
+  {"dyn-syms",	       no_argument, 0, OPTION_DYN_SYMS},
+  {"debug-dump",       optional_argument, 0, OPTION_DEBUG_DUMP},
   {"dwarf-depth",      required_argument, 0, OPTION_DWARF_DEPTH},
   {"dwarf-start",      required_argument, 0, OPTION_DWARF_START},
   {"dwarf-check",      no_argument, 0, OPTION_DWARF_CHECK},
-
 #ifdef ENABLE_LIBCTF
   {"ctf",	       required_argument, 0, OPTION_CTF_DUMP},
-
   {"ctf-symbols",      required_argument, 0, OPTION_CTF_SYMBOLS},
   {"ctf-strings",      required_argument, 0, OPTION_CTF_STRINGS},
   {"ctf-parent",       required_argument, 0, OPTION_CTF_PARENT},
 #endif
 
-  {"version",	       no_argument, 0, 'v'},
-  {"wide",	       no_argument, 0, 'W'},
-  {"silent-truncation",no_argument, 0, 'T'},
-  {"help",	       no_argument, 0, 'H'},
   {0,		       no_argument, 0, 0}
 };
 
@@ -4553,6 +4575,13 @@ usage (FILE * stream)
   -s --syms              Display the symbol table\n\
      --symbols           An alias for --syms\n\
      --dyn-syms          Display the dynamic symbol table\n\
+  -C --demangle[=STYLE]  Decode low-level symbol names into user-level names\n\
+                          The STYLE, if specified, can be `auto' (the default),\n\
+                          `gnu', `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
+                          or `gnat'\n\
+     --no-demangle       Do not demangle low-level symbol names.  (This is the default)\n\
+     --recurse-limit     Enable a demangling recursion limit.  (This is the default)\n\
+     --no-recurse-limit  Disable a demangling recursion limit\n\
   -n --notes             Display the core notes (if present)\n\
   -r --relocs            Display the relocations (if present)\n\
   -u --unwind            Display the unwind info (if present)\n\
@@ -4693,7 +4722,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
     usage (stderr);
 
   while ((c = getopt_long
-	  (argc, argv, "ADHILNR:STVWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
+	  (argc, argv, "ACDHILNR:STVWacdeghi:lnp:rstuvw::x:z", options, NULL)) != EOF)
     {
       switch (c)
 	{
@@ -4718,6 +4747,7 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  do_arch = TRUE;
 	  do_notes = TRUE;
 	  break;
+
 	case 'g':
 	  do_section_groups = TRUE;
 	  break;
@@ -4858,6 +4888,32 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	case 'T':
 	  do_not_show_symbol_truncation = TRUE;
 	  break;
+	case 'C':
+	  do_demangle = TRUE;
+	  if (optarg != NULL)
+	    {
+	      enum demangling_styles style;
+
+	      style = cplus_demangle_name_to_style (optarg);
+	      if (style == unknown_demangling)
+		error (_("unknown demangling style `%s'"), optarg);
+
+	      cplus_demangle_set_style (style);
+	    }
+	  break;
+	case OPTION_NO_DEMANGLING:
+	  do_demangle = FALSE;
+	  break;
+	case OPTION_RECURSE_LIMIT:
+	  demangle_flags &= ~ DMGL_NO_RECURSE_LIMIT;
+	  break;
+	case OPTION_NO_RECURSE_LIMIT:
+	  demangle_flags |= DMGL_NO_RECURSE_LIMIT;
+	  break;
+	case OPTION_WITH_SYMBOL_VERSIONS:
+	  /* Ignored for backward compatibility.  */
+	  break;
+	  
 	default:
 	  /* xgettext:c-format */
 	  error (_("Invalid option '-%c'\n"), c);

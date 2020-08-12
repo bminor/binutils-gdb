@@ -1,5 +1,22 @@
 2020-08-12  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/26331
+	* readelf.c (do_demangle): New option flag.
+	(print_symbol): If do_demangle is enabled, demangle the symbol.
+	(enum long_option_values): New enum to hold long option values.
+	(options): Add demangle, no-demangle, recursion-limit and
+	no-recursion-limit options.  Alpha sort the table.
+	(usage): Describe the new options.
+	(parse_args): Handle the new options.
+	* NEWS: Mention the new feature.
+	* doc/binutils.texi: Document the new feature.
+	* testsuite/binutils-all/readelf.exp: Test the new feature.
+	* testsuite/binutils-all/mangled.s: New file - assembler source.
+	* testsuite/binutils-all/readelf.demangled: New file - expected
+	output from readelf.
+
+2020-08-12  Nick Clifton  <nickc@redhat.com>
+
 	* po/sr.po: Updated Serbian translation.
 
 2020-08-10  H.J. Lu  <hongjiu.lu@intel.com>

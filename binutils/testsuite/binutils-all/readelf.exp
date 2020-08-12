@@ -345,11 +345,27 @@ if {![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o]} then {
     readelf_test -r $tempfile readelf.r  {}
 }
 
+# Test demangling symbol names.
+if {![binutils_assemble $srcdir/$subdir/mangled.s tmpdir/mangled.o]} then {
+    unresolved "readelf -s -C bintest (failed to assemble)"
+} else {
+
+    if ![is_remote host] {
+	set tempfile tmpdir/mangled.o
+    } else {
+	set tempfile [remote_download host tmpdir/mangled.o]
+    }
+
+    # Run the test.
+    readelf_test {--syms --demangle --wide} $tempfile readelf.demangled {}
+}
+
 readelf_wi_test
 readelf_compressed_wa_test
 
 readelf_dump_test
 run_dump_test "pr25543"
+
 
 # PR 13482 - Check for off-by-one errors when dumping .note sections.
 if {![binutils_assemble $srcdir/$subdir/version.s tmpdir/version.o]} then {
