@@ -10142,7 +10142,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
   size_t len;
   size_t name_size;
   asection *sect;
-  int type;
+  unsigned int type;
   int is_active_thread;
   bfd_vma base_addr;
 

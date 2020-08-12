@@ -1,3 +1,8 @@
+2020-08-12  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* elf.c (elfcore_grok_win32pstatus): Use unsigned int for
+	win32pstatus note type to avoid signedness comparison warning.
+
 2020-07-21  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* elf.c (elfcore_grok_win32pstatus): Warn on malformed
