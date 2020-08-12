@@ -1,3 +1,9 @@
+2020-08-13  Alan Modra  <amodra@gmail.com>
+
+	PR 26348
+	* objcopy.c (copy_object): Report file name with endian error.
+	Error and return on abfd->read_only.
+
 2020-08-12  Tom Tromey  <tromey@adacore.com>
 
 	* dwarf-mode.el (Version): Now 1.6.

@@ -2604,7 +2604,15 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
     {
       /* PR 17636: Call non-fatal so that we return to our parent who
 	 may need to tidy temporary files.  */
-      non_fatal (_("Unable to change endianness of input file(s)"));
+      non_fatal (_("unable to change endianness of '%s'"),
+		 bfd_get_archive_filename (ibfd));
+      return FALSE;
+    }
+
+  if (ibfd->read_only)
+    {
+      non_fatal (_("unable to modify '%s' due to errors"),
+		 bfd_get_archive_filename (ibfd));
       return FALSE;
     }
 

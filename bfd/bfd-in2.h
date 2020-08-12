@@ -6678,6 +6678,10 @@ struct bfd
   /* Set if this is a slim LTO object not loaded with a compiler plugin.  */
   unsigned int lto_slim_object : 1;
 
+  /* Do not attempt to modify this file.  Set when detecting errors
+     that BFD is not prepared to handle for objcopy/strip.  */
+  unsigned int read_only : 1;
+
   /* Set to dummy BFD created when claimed by a compiler plug-in
      library.  */
   bfd *plugin_dummy_bfd;

@@ -321,11 +321,14 @@ elf_swap_shdr_in (bfd *abfd,
     {
       ufile_ptr filesize = bfd_get_file_size (abfd);
 
-      if (filesize != 0 && dst->sh_size > filesize)
-	_bfd_error_handler
-	  (_("warning: %pB has a corrupt section with a size (%"
-	     BFD_VMA_FMT "x) larger than the file size"),
-	   abfd, dst->sh_size);
+      if (filesize != 0
+	  && ((ufile_ptr) dst->sh_offset > filesize
+	      || dst->sh_size > filesize - dst->sh_offset))
+	{
+	  abfd->read_only = 1;
+	  _bfd_error_handler (_("warning: %pB has a section "
+				"extending past end of file"), abfd);
+	}
     }
   dst->sh_link = H_GET_32 (abfd, src->sh_link);
   dst->sh_info = H_GET_32 (abfd, src->sh_info);
@@ -764,6 +767,7 @@ elf_object_p (bfd *abfd)
 	     So we are kind, and reset the string index value to 0
 	     so that at least some processing can be done.  */
 	  i_ehdrp->e_shstrndx = SHN_UNDEF;
+	  abfd->read_only = 1;
 	  _bfd_error_handler
 	    (_("warning: %pB has a corrupt string table index - ignoring"),
 	     abfd);
@@ -804,6 +808,14 @@ elf_object_p (bfd *abfd)
 	  if (bfd_bread (&x_phdr, sizeof x_phdr, abfd) != sizeof x_phdr)
 	    goto got_no_match;
 	  elf_swap_phdr_in (abfd, &x_phdr, i_phdr);
+	  /* Too much code in BFD relies on alignment being a power of
+	     two, as required by the ELF spec.  */
+	  if (i_phdr->p_align != (i_phdr->p_align & -i_phdr->p_align))
+	    {
+	      abfd->read_only = 1;
+	      _bfd_error_handler (_("warning: %pB has a program header "
+				    "with invalid alignment"), abfd);
+	    }
 	}
     }
 

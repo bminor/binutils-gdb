@@ -1,3 +1,13 @@
+2020-08-13  Alan Modra  <amodra@gmail.com>
+
+	PR 26348
+	* bfd.c (struct bfd): Add read_only.
+	* elfcode.h (elf_swap_shdr_in): Test both sh_offset and sh_size.
+	Set read_only on warning.
+	(elf_object_p): Sanity check program header alignment.  Set
+	read_only on warning.
+	* bfd-in2.h: Regenerate.
+
 2020-08-12  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* elf.c (elfcore_grok_win32pstatus): Use unsigned int for
