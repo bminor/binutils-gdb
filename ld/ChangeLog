@@ -1,3 +1,10 @@
+2020-08-13  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em (params): Init new field.
+	(enum ppc64_opt): Add OPTION_NO_PCREL_OPT.
+	(PARSE_AND_LIST_LONGOPTS, PARSE_AND_LIST_OPTIONS),
+	(PARSE_AND_LIST_ARGS_CASES): Support --no-pcrel-optimize.
+
 2020-08-10  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/21351

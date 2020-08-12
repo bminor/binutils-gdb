@@ -15903,7 +15903,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_PPC64_GOT16_DS:
-	  if ((h ? h->elf.type : ELF_ST_TYPE (sym->st_info)) == STT_GNU_IFUNC)
+	  if ((h ? h->elf.type : ELF_ST_TYPE (sym->st_info)) == STT_GNU_IFUNC
+	      || !htab->do_toc_opt)
 	    break;
 	  from = TOCstart + htab->sec_info[input_section->id].toc_off;
 	  if (relocation + addend - from + 0x8000 < 0x10000
@@ -15922,7 +15923,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	case R_PPC64_GOT16_LO_DS:
 	case R_PPC64_GOT16_HA:
-	  if ((h ? h->elf.type : ELF_ST_TYPE (sym->st_info)) == STT_GNU_IFUNC)
+	  if ((h ? h->elf.type : ELF_ST_TYPE (sym->st_info)) == STT_GNU_IFUNC
+	      || !htab->do_toc_opt)
 	    break;
 	  from = TOCstart + htab->sec_info[input_section->id].toc_off;
 	  if (relocation + addend - from + 0x80008000ULL < 0x100000000ULL
@@ -15945,34 +15947,38 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_PPC64_GOT_PCREL34:
-	  if ((h ? h->elf.type : ELF_ST_TYPE (sym->st_info)) == STT_GNU_IFUNC)
+	  if ((h ? h->elf.type : ELF_ST_TYPE (sym->st_info)) == STT_GNU_IFUNC
+	      || !htab->do_toc_opt)
 	    break;
 	  from = (rel->r_offset
 		  + input_section->output_section->vma
 		  + input_section->output_offset);
-	  if (relocation - from + (1ULL << 33) < 1ULL << 34
-	      && SYMBOL_REFERENCES_LOCAL (info, &h->elf))
-	    {
-	      offset = rel->r_offset;
-	      pinsn = bfd_get_32 (input_bfd, contents + offset);
-	      pinsn <<= 32;
-	      pinsn |= bfd_get_32 (input_bfd, contents + offset + 4);
-	      if ((pinsn & ((-1ULL << 50) | (63ULL << 26)))
-		   == ((1ULL << 58) | (1ULL << 52) | (57ULL << 26) /* pld */))
-		{
-		  /* Replace with paddi.  */
-		  pinsn += (2ULL << 56) + (14ULL << 26) - (57ULL << 26);
-		  r_type = R_PPC64_PCREL34;
-		  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
-		  bfd_put_32 (input_bfd, pinsn >> 32, contents + offset);
-		  bfd_put_32 (input_bfd, pinsn, contents + offset + 4);
-		  goto pcrelopt;
-		}
-	    }
-	  break;
+	  if (!(relocation - from + (1ULL << 33) < 1ULL << 34
+		&& SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
+	    break;
+
+	  offset = rel->r_offset;
+	  pinsn = bfd_get_32 (input_bfd, contents + offset);
+	  pinsn <<= 32;
+	  pinsn |= bfd_get_32 (input_bfd, contents + offset + 4);
+	  if ((pinsn & ((-1ULL << 50) | (63ULL << 26)))
+	      != ((1ULL << 58) | (1ULL << 52) | (57ULL << 26) /* pld */))
+	    break;
+
+	  /* Replace with paddi.  */
+	  pinsn += (2ULL << 56) + (14ULL << 26) - (57ULL << 26);
+	  r_type = R_PPC64_PCREL34;
+	  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
+	  bfd_put_32 (input_bfd, pinsn >> 32, contents + offset);
+	  bfd_put_32 (input_bfd, pinsn, contents + offset + 4);
+	  /* Fall through.  */
 
 	case R_PPC64_PCREL34:
-	  if (SYMBOL_REFERENCES_LOCAL (info, &h->elf))
+	  if (!htab->params->no_pcrel_opt
+	      && rel + 1 < relend
+	      && rel[1].r_offset == rel->r_offset
+	      && rel[1].r_info == ELF64_R_INFO (0, R_PPC64_PCREL_OPT)
+	      && SYMBOL_REFERENCES_LOCAL (info, &h->elf))
 	    {
 	      offset = rel->r_offset;
 	      pinsn = bfd_get_32 (input_bfd, contents + offset);
@@ -15982,43 +15988,37 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		   == ((1ULL << 58) | (2ULL << 56) | (1ULL << 52)
 		       | (14ULL << 26) /* paddi */))
 		{
-		pcrelopt:
-		  if (rel + 1 < relend
-		      && rel[1].r_offset == offset
-		      && rel[1].r_info == ELF64_R_INFO (0, R_PPC64_PCREL_OPT))
+		  bfd_vma off2 = rel[1].r_addend;
+		  if (off2 == 0)
+		    /* zero means next insn.  */
+		    off2 = 8;
+		  off2 += offset;
+		  if (off2 + 4 <= input_section->size)
 		    {
-		      bfd_vma off2 = rel[1].r_addend;
-		      if (off2 == 0)
-			/* zero means next insn.  */
-			off2 = 8;
-		      off2 += offset;
-		      if (off2 + 4 <= input_section->size)
+		      uint64_t pinsn2;
+		      bfd_signed_vma addend_off;
+		      pinsn2 = bfd_get_32 (input_bfd, contents + off2);
+		      pinsn2 <<= 32;
+		      if ((pinsn2 & (63ULL << 58)) == 1ULL << 58)
 			{
-			  uint64_t pinsn2;
-			  bfd_signed_vma addend_off;
-			  pinsn2 = bfd_get_32 (input_bfd, contents + off2);
-			  pinsn2 <<= 32;
+			  if (off2 + 8 > input_section->size)
+			    break;
+			  pinsn2 |= bfd_get_32 (input_bfd,
+						contents + off2 + 4);
+			}
+		      if (xlate_pcrel_opt (&pinsn, &pinsn2, &addend_off))
+			{
+			  addend += addend_off;
+			  rel->r_addend = addend;
+			  bfd_put_32 (input_bfd, pinsn >> 32,
+				      contents + offset);
+			  bfd_put_32 (input_bfd, pinsn,
+				      contents + offset + 4);
+			  bfd_put_32 (input_bfd, pinsn2 >> 32,
+				      contents + off2);
 			  if ((pinsn2 & (63ULL << 58)) == 1ULL << 58)
-			    {
-			      if (off2 + 8 > input_section->size)
-				break;
-			      pinsn2 |= bfd_get_32 (input_bfd,
-						    contents + off2 + 4);
-			    }
-			  if (xlate_pcrel_opt (&pinsn, &pinsn2, &addend_off))
-			    {
-			      addend += addend_off;
-			      rel->r_addend = addend;
-			      bfd_put_32 (input_bfd, pinsn >> 32,
-					  contents + offset);
-			      bfd_put_32 (input_bfd, pinsn,
-					  contents + offset + 4);
-			      bfd_put_32 (input_bfd, pinsn2 >> 32,
-					  contents + off2);
-			      if ((pinsn2 & (63ULL << 58)) == 1ULL << 58)
-				bfd_put_32 (input_bfd, pinsn2,
-					    contents + off2 + 4);
-			    }
+			    bfd_put_32 (input_bfd, pinsn2,
+					contents + off2 + 4);
 			}
 		    }
 		}

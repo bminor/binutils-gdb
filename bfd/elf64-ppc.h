@@ -57,6 +57,9 @@ struct ppc64_elf_params
   /* Whether to use power10 instructions in linkage stubs.  */
   int power10_stubs;
 
+  /* Whether R_PPC64_PCREL_OPT should be ignored.  */
+  int no_pcrel_opt;
+
   /* Whether to canonicalize .opd so that there are no overlapping
      .opd entries.  */
   int non_overlapping_opd;

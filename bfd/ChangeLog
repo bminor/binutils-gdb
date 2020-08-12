@@ -1,5 +1,12 @@
 2020-08-13  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.h (struct ppc64_elf_params): Add no_pcrel_opt.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Disable GOT reloc
+	optimizations when --no-toc-optimize.  Disable R_PPC64_PCREL_OPT
+	optimization when --no-pcrel-optimize.
+
+2020-08-13  Alan Modra  <amodra@gmail.com>
+
 	PR 26348
 	* bfd.c (struct bfd): Add read_only.
 	* elfcode.h (elf_swap_shdr_in): Test both sh_offset and sh_size.
