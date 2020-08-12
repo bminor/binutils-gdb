@@ -3,6 +3,11 @@
 	* po/ru.po: Updated Russian translation.
 	* po/sr.po: Updated Serbian translation.
 
+2020-08-07  David Faust  <david.faust@oracle.com>
+
+	* elf64-bpf.c (bpf_elf_relocate_section): Ensure signed division for
+	DISP16 and DISP32 relocations.
+
 2020-08-05  David Faust  <david.faust@oracle.com>
 
 	* elf64-bpf.c (bpf_elf_generic_reloc): New function.
