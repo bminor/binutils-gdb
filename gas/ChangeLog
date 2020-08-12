@@ -1,3 +1,11 @@
+2020-08-12  Alex Coplan  <alex.coplan@arm.com>
+
+	* testsuite/gas/aarch64/mpam-bad.d: New test.
+	* testsuite/gas/aarch64/mpam-bad.l: Error output.
+	* testsuite/gas/aarch64/mpam-bad.s: Input.
+	* testsuite/gas/aarch64/mpam.d: New test.
+	* testsuite/gas/aarch64/mpam.s: Input.
+
 2020-08-12  Nick Clifton  <nickc@redhat.com>
 
 	PR 26346

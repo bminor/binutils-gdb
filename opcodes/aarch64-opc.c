@@ -4241,6 +4241,23 @@ const aarch64_sys_reg aarch64_sys_regs [] =
   SR_V8_4 ("sder32_el2",	CPENC (3,4,C1,C3,1),	0),
   SR_V8_4 ("vncr_el2",		CPENC (3,4,C2,C2,0),	0),
 
+  SR_CORE ("mpam0_el1",		CPENC (3,0,C10,C5,1),	0),
+  SR_CORE ("mpam1_el1",		CPENC (3,0,C10,C5,0),	0),
+  SR_CORE ("mpam1_el12",	CPENC (3,5,C10,C5,0),	0),
+  SR_CORE ("mpam2_el2",		CPENC (3,4,C10,C5,0),	0),
+  SR_CORE ("mpam3_el3",		CPENC (3,6,C10,C5,0),	0),
+  SR_CORE ("mpamhcr_el2",	CPENC (3,4,C10,C4,0),	0),
+  SR_CORE ("mpamidr_el1",	CPENC (3,0,C10,C4,4),	F_REG_READ),
+  SR_CORE ("mpamvpm0_el2",	CPENC (3,4,C10,C6,0),	0),
+  SR_CORE ("mpamvpm1_el2",	CPENC (3,4,C10,C6,1),	0),
+  SR_CORE ("mpamvpm2_el2",	CPENC (3,4,C10,C6,2),	0),
+  SR_CORE ("mpamvpm3_el2",	CPENC (3,4,C10,C6,3),	0),
+  SR_CORE ("mpamvpm4_el2",	CPENC (3,4,C10,C6,4),	0),
+  SR_CORE ("mpamvpm5_el2",	CPENC (3,4,C10,C6,5),	0),
+  SR_CORE ("mpamvpm6_el2",	CPENC (3,4,C10,C6,6),	0),
+  SR_CORE ("mpamvpm7_el2",	CPENC (3,4,C10,C6,7),	0),
+  SR_CORE ("mpamvpmv_el2",	CPENC (3,4,C10,C4,1),	0),
+
   { 0, CPENC (0,0,0,0,0), 0, 0 }
 };
 
