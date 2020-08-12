@@ -19087,6 +19087,16 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
       return;
     }
 
+  if ((rs == NS_FD || rs == NS_QQI) && mode == neon_cvt_mode_n
+      && ARM_CPU_HAS_FEATURE (cpu_variant, mve_ext))
+    {
+      /* We are dealing with vcvt with the 'ne' condition.  */
+      inst.cond = 0x1;
+      inst.instruction = N_MNEM_vcvt;
+      do_neon_cvt_1 (neon_cvt_mode_z);
+      return;
+    }
+
   /* VFP rather than Neon conversions.  */
   if (flavour >= neon_cvt_flavour_first_fp)
     {
@@ -19114,14 +19124,6 @@ do_neon_cvt_1 (enum neon_cvt_mode mode)
 	  if (!check_simd_pred_availability (TRUE,
 					     NEON_CHECK_CC | NEON_CHECK_ARCH))
 	    return;
-	}
-      else if (mode == neon_cvt_mode_n)
-	{
-	  /* We are dealing with vcvt with the 'ne' condition.  */
-	  inst.cond = 0x1;
-	  inst.instruction = N_MNEM_vcvt;
-	  do_neon_cvt_1 (neon_cvt_mode_z);
-	  return;
 	}
       /* fall through.  */
     case NS_DDI:
