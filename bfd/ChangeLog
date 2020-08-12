@@ -1,3 +1,12 @@
+2020-09-24  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2020-08-13  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.h (struct ppc64_elf_params): Add no_pcrel_opt.
+	* elf64-ppc.c (ppc64_elf_relocate_section): Disable GOT reloc
+	optimizations when --no-toc-optimize.  Disable R_PPC64_PCREL_OPT
+	optimization when --no-pcrel-optimize.
+
 2020-09-19  Nick Clifton  <nickc@redhat.com>
 
 	* development.sh (development): Set to true.
