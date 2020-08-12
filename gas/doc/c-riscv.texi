@@ -98,7 +98,7 @@ read-only CSR can not be written by the CSR instructions.
 
 @cindex @samp{-mno-csr-check} option, RISC-V
 @item -mno-csr-check
-Don't do CSR cheching.
+Don't do CSR checking.
 @end table
 @c man end
 

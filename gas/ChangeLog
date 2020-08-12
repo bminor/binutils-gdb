@@ -1,5 +1,11 @@
 2020-08-12  Nick Clifton  <nickc@redhat.com>
 
+	PR 26346
+	* doc/c-riscv.texi (RISC-V-Options): Fix typo in the description
+	of the -mno-csr-check option.
+
+2020-08-12  Nick Clifton  <nickc@redhat.com>
+
 	* po/ru.po: Updated Russian translation.
 
 2020-08-10  Alex Coplan  <alex.coplan@arm.com>
