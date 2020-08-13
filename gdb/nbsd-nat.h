@@ -55,6 +55,8 @@ struct nbsd_nat_target : public inf_ptrace_target
 					const gdb_byte *writebuf,
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
+  bool supports_dumpcore () override;
+  void dumpcore (const char *filename) override;
 };
 
 #endif /* nbsd-nat.h */

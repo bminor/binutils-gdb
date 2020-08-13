@@ -890,3 +890,23 @@ nbsd_nat_target::xfer_partial (enum target_object object,
 					      len, xfered_len);
     }
 }
+
+/* Implement the "supports_dumpcore" target_ops method.  */
+
+bool
+nbsd_nat_target::supports_dumpcore ()
+{
+  return true;
+}
+
+/* Implement the "dumpcore" target_ops method.  */
+
+void
+nbsd_nat_target::dumpcore (const char *filename)
+{
+  pid_t pid = inferior_ptid.pid ();
+
+  if (ptrace (PT_DUMPCORE, pid, const_cast<char *>(filename),
+	      strlen (filename)) == -1)
+    perror_with_name (("ptrace"));
+}
