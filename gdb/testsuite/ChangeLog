@@ -1,5 +1,25 @@
 2020-08-13  Pedro Alves  <pedro@palves.net>
 
+	* gdb.fortran/complex.exp: Check skip_fortran_tests.
+	* gdb.fortran/library-module.exp: Likewise.
+	* gdb.fortran/logical.exp: Likewise.
+	* gdb.fortran/module.exp: Likewise.
+	* gdb.fortran/print_type.exp: Likewise.
+	* gdb.fortran/vla-alloc-assoc.exp: Likewise.
+	* gdb.fortran/vla-datatypes.exp: Likewise.
+	* gdb.fortran/vla-history.exp: Likewise.
+	* gdb.fortran/vla-ptr-info.exp: Likewise.
+	* gdb.fortran/vla-ptype-sub.exp: Likewise.
+	* gdb.fortran/vla-ptype.exp: Likewise.
+	* gdb.fortran/vla-sizeof.exp: Likewise.
+	* gdb.fortran/vla-type.exp: Likewise.
+	* gdb.fortran/vla-value-sub-arbitrary.exp: Likewise.
+	* gdb.fortran/vla-value-sub-finish.exp: Likewise.
+	* gdb.fortran/vla-value-sub.exp: Likewise.
+	* gdb.fortran/vla-value.exp: Likewise.
+
+2020-08-13  Pedro Alves  <pedro@palves.net>
+
 	* gdb.ada/access_tagged_param.exp: Check skip_ada_tests.
 	* gdb.ada/access_to_packed_array.exp: Likewise.
 	* gdb.ada/access_to_unbounded_array.exp: Likewise.
