@@ -1,6 +1,6 @@
 2020-08-13  Alan Modra  <amodra@gmail.com>
 
-	* config.bfd: Obsolete arm*-*-symbianelf*.
+	* config.bfd: Obsolete arm*-*-symbianelf*, and ia64*-*-*.
 
 2020-08-13  Alan Modra  <amodra@gmail.com>
 
