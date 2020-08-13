@@ -1,3 +1,9 @@
+2020-08-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* selftest.h (run_tests): Change parameter to array_view.
+	* selftest.c (run_tests): Change parameter to array_view and use
+	it.
+
 2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* Makefile.am (AM_CPPFLAGS): Add LARGEFILE_CPPFLAGS.

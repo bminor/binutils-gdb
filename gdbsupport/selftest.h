@@ -19,6 +19,8 @@
 #ifndef COMMON_SELFTEST_H
 #define COMMON_SELFTEST_H
 
+#include "gdbsupport/array-view.h"
+
 /* A test is just a function that does some checks and throws an
    exception if something has gone wrong.  */
 
@@ -47,10 +49,10 @@ extern void register_test (const std::string &name,
 /* Run all the self tests.  This print a message describing the number
    of test and the number of failures.
 
-   If FILTER is not NULL and not empty, only tests with names containing FILTER
-   will be ran.  */
+   If FILTERS is not empty, only run tests with names containing one of the
+   element of FILTERS.  */
 
-extern void run_tests (const char *filter);
+extern void run_tests (gdb::array_view<const char *const> filters);
 
 /* Reset GDB or GDBserver's internal state.  */
 extern void reset ();

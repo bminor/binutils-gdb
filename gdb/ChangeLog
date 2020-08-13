@@ -1,3 +1,8 @@
+2020-08-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* maint.c (maintenance_selftest): Split args and pass array_view
+	to run_tests.
+
 2020-08-12  Luis Machado  <luis.machado@linaro.org>
 
 	* value.c (check_type_length_before_alloc): Use ULONGEST to store a

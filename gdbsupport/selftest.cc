@@ -68,7 +68,7 @@ register_test (const std::string &name, self_test_function *function)
 /* See selftest.h.  */
 
 void
-run_tests (const char *filter)
+run_tests (gdb::array_view<const char *const> filters)
 {
   int ran = 0, failed = 0;
 
@@ -76,9 +76,20 @@ run_tests (const char *filter)
     {
       const std::string &name = pair.first;
       const std::unique_ptr<selftest> &test = pair.second;
+      bool run = false;
 
-      if (filter != NULL && *filter != '\0'
-	  && name.find (filter) == std::string::npos)
+      if (filters.empty ())
+	run = true;
+      else
+	{
+	  for (const char *filter : filters)
+	    {
+	      if (name.find (filter) != std::string::npos)
+		run = true;
+	    }
+	}
+
+      if (!run)
 	continue;
 
       try

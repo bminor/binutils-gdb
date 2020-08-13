@@ -1,3 +1,8 @@
+2020-08-13  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* server.cc (captured_main): Accept multiple `--selftest=`
+	options.  Pass all `--selftest=` arguments to run_tests.
+
 2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* configure, config.in: Regenerate.

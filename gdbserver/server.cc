@@ -3610,7 +3610,7 @@ captured_main (int argc, char *argv[])
   int was_running;
   bool selftest = false;
 #if GDB_SELF_TEST
-  const char *selftest_filter = NULL;
+  std::vector<const char *> selftest_filters;
 #endif
 
   current_directory = getcwd (NULL, 0);
@@ -3747,8 +3747,16 @@ captured_main (int argc, char *argv[])
       else if (startswith (*next_arg, "--selftest="))
 	{
 	  selftest = true;
+
 #if GDB_SELF_TEST
-	  selftest_filter = *next_arg + strlen ("--selftest=");
+	  const char *filter = *next_arg + strlen ("--selftest=");
+	  if (*filter == '\0')
+	    {
+	      fprintf (stderr, _("Error: selftest filter is empty.\n"));
+	      exit (1);
+	    }
+
+	  selftest_filters.push_back (filter);
 #endif
 	}
       else
@@ -3825,7 +3833,7 @@ captured_main (int argc, char *argv[])
   if (selftest)
     {
 #if GDB_SELF_TEST
-      selftests::run_tests (selftest_filter);
+      selftests::run_tests (selftest_filters);
 #else
       printf (_("Selftests have been disabled for this build.\n"));
 #endif

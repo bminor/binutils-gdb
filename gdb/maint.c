@@ -1041,7 +1041,8 @@ static void
 maintenance_selftest (const char *args, int from_tty)
 {
 #if GDB_SELF_TEST
-  selftests::run_tests (args);
+  gdb_argv argv (args);
+  selftests::run_tests (gdb::array_view<char *> (argv.get (), argv.count ()));
 #else
   printf_filtered (_("\
 Selftests have been disabled for this build.\n"));
