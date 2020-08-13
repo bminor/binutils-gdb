@@ -211,8 +211,12 @@ obj_som_init_stab_section (segT seg)
   segT space;
   subsegT saved_subseg = now_subseg;
   char *p;
- const char * file;
+  const char * file;
   unsigned int stroff;
+
+  /* Nothing to do if the section has already been created.  */
+  if (bfd_get_section_by_name (stdoutput, "$GDB_DEBUG$"))
+    return;
 
   /* Make the space which will contain the debug subspaces.  */
   space = bfd_make_section_old_way (stdoutput, "$GDB_DEBUG$");

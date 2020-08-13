@@ -1,3 +1,9 @@
+2020-08-13  Nick Clifton  <nickc@redhat.com>
+
+	PR 26359
+	* config/obj-som.c (obj_som_init_stab_section): Do nothing if the
+	$GDB_DEBUG$ section has already been created.
+
 2020-08-12  Joe Ramsay  <joe.ramsay@.arm.com>
 
 	* config/tc-arm.c (do_neon_cvt_1): Parse vcvtne as vcvt-ne for
