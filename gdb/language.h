@@ -652,10 +652,6 @@ extern enum language set_language (enum language);
 #define LA_EMIT_CHAR(ch, type, stream, quoter) \
   (current_language->emitchar (ch, type, stream, quoter))
 
-#define LA_PRINT_ARRAY_INDEX(index_type, index_value, stream, options)	\
-  (current_language->print_array_index(index_type, index_value, stream, \
-				       options))
-
 #define LA_ITERATE_OVER_SYMBOLS(BLOCK, NAME, DOMAIN, CALLBACK) \
   (current_language->iterate_over_symbols (BLOCK, NAME, DOMAIN, CALLBACK))
 

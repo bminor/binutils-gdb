@@ -1,5 +1,11 @@
 2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* language.h (LA_PRINT_ARRAY_INDEX): Delete.
+	* valprint.c (maybe_print_array_index): Replace use of macro with
+	the macros definition.
+
+2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* ada-lang.c (ada_language::print_array_index): Call value_print
 	directly.
 	* language.c (language_defn::print_array_index): Likewise.

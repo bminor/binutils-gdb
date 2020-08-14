@@ -1866,8 +1866,8 @@ maybe_print_array_index (struct type *index_type, LONGEST index,
 {
   if (!options->print_array_indexes)
     return; 
-    
-  LA_PRINT_ARRAY_INDEX (index_type, index, stream, options);
+
+  current_language->print_array_index (index_type, index, stream, options);
 }
 
 /* See valprint.h.  */
