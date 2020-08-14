@@ -622,7 +622,7 @@ language_defn::print_array_index (struct type *index_type, LONGEST index,
   struct value *index_value = value_from_longest (index_type, index);
 
   fprintf_filtered (stream, "[");
-  LA_VALUE_PRINT (index_value, stream, options);
+  value_print (index_value, stream, options);
   fprintf_filtered (stream, "] = ");
 }
 

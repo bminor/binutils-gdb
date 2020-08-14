@@ -644,9 +644,6 @@ extern enum language set_language (enum language);
 #define LA_PRINT_TYPE(type,varstring,stream,show,level,flags)		\
   (current_language->print_type(type,varstring,stream,show,level,flags))
 
-#define LA_VALUE_PRINT(val,stream,options) \
-  (current_language->value_print (val,stream,options))
-
 #define LA_PRINT_CHAR(ch, type, stream) \
   (current_language->printchar (ch, type, stream))
 #define LA_PRINT_STRING(stream, elttype, string, length, encoding, force_ellipses, options) \

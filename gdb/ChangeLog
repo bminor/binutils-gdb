@@ -1,5 +1,14 @@
 2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* ada-lang.c (ada_language::print_array_index): Call value_print
+	directly.
+	* language.c (language_defn::print_array_index): Likewise.
+	* language.h (LA_VALUE_PRINT): Delete.
+	* valprint.c (value_print): Call value_print on the
+	current_language directly.
+
+2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* language.h (LA_PRINT_TYPEDEF): Delete.
 	* typeprint.c (typedef_print): Call print_typedef directly on the
 	current_language object.

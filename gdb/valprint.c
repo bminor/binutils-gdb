@@ -1138,7 +1138,7 @@ value_print (struct value *val, struct ui_file *stream,
 	return;
     }
 
-  LA_VALUE_PRINT (val, stream, options);
+  current_language->value_print (val, stream, options);
 }
 
 static void

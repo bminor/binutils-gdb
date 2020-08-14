@@ -13721,7 +13721,7 @@ public:
   {
     struct value *index_value = val_atr (index_type, index);
 
-    LA_VALUE_PRINT (index_value, stream, options);
+    value_print (index_value, stream, options);
     fprintf_filtered (stream, " => ");
   }
 
