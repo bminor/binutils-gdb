@@ -14,10 +14,10 @@ Disassembly of section \.plt:
  112:	f8df e008 	ldr.w	lr, \[pc, #8\]	; 11c <\.plt\+0xc>
  116:	44fe      	add	lr, pc
  118:	f85e ff08 	ldr.w	pc, \[lr, #8\]!
- 11c:	0001009c 	\.word	0x0001009c
+ 11c:	000100(.+) 	\.word	0x000100\1
 
 00000120 <foo@plt>:
- 120:	f240 0c98 	movw	ip, #152	; 0x98
+ 120:	f240 0c.+ 	movw	ip, #[0-9]+	; 0x.+
  124:	f2c0 0c01 	movt	ip, #1
  128:	44fc      	add	ip, pc
  12a:	f8dc f000 	ldr.w	pc, \[ip\]
