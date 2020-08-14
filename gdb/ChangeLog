@@ -1,5 +1,11 @@
 2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* language.h (LA_ITERATE_OVER_SYMBOLS): Delete.
+	(iterate_over_file_blocks): Replace use of macro with the macros
+	definition.
+
+2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* language.h (LA_PRINT_ARRAY_INDEX): Delete.
 	* valprint.c (maybe_print_array_index): Replace use of macro with
 	the macros definition.

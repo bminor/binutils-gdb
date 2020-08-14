@@ -1209,7 +1209,7 @@ iterate_over_file_blocks
   for (block = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab), STATIC_BLOCK);
        block != NULL;
        block = BLOCK_SUPERBLOCK (block))
-    LA_ITERATE_OVER_SYMBOLS (block, name, domain, callback);
+    current_language->iterate_over_symbols (block, name, domain, callback);
 }
 
 /* A helper for find_method.  This finds all methods in type T of

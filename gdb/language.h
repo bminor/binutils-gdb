@@ -652,9 +652,6 @@ extern enum language set_language (enum language);
 #define LA_EMIT_CHAR(ch, type, stream, quoter) \
   (current_language->emitchar (ch, type, stream, quoter))
 
-#define LA_ITERATE_OVER_SYMBOLS(BLOCK, NAME, DOMAIN, CALLBACK) \
-  (current_language->iterate_over_symbols (BLOCK, NAME, DOMAIN, CALLBACK))
-
 /* Test a character to decide whether it can be printed in literal form
    or needs to be printed in another representation.  For example,
    in C the literal form of the character with octal value 141 is 'a'
