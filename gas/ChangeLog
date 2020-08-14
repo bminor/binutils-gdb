@@ -1,3 +1,16 @@
+2020-08-14  Joe Ramsay  <joe.ramsay@arm.com>
+
+	Backported from master
+	2020-08-04  Joe Ramsay <joe.ramsay@.arm.com>
+
+	* config/tc-arm.c (do_neon_cvt_1): Parse vcvtne as vcvt-ne for
+	NS_FD shape when MVE is present
+	* testsuite/gas/arm/mve-vcvtne-it-bad.d: New test.
+	* testsuite/gas/arm/mve-vcvtne-it-bad.l: New test.
+	* testsuite/gas/arm/mve-vcvtne-it-bad.s: New test.
+	* testsuite/gas/arm/mve-vcvtne-it.d: New test.
+	* testsuite/gas/arm/mve-vcvtne-it.s: New test.
+
 2020-08-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.
