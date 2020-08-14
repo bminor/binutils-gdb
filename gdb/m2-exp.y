@@ -1031,7 +1031,7 @@ yylex (void)
 }
 
 int
-m2_parse (struct parser_state *par_state)
+m2_language::parser (struct parser_state *par_state) const
 {
   /* Setting up the parser state.  */
   scoped_restore pstate_restore = make_scoped_restore (&pstate);

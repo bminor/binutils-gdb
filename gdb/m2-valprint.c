@@ -298,8 +298,9 @@ static const struct generic_val_print_decorations m2_decorations =
 /* See m2-lang.h.  */
 
 void
-m2_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
-		      const struct value_print_options *options)
+m2_language::value_print_inner (struct value *val, struct ui_file *stream,
+				int recurse,
+				const struct value_print_options *options) const
 {
   unsigned len;
   struct type *elttype;
@@ -336,8 +337,8 @@ m2_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
 		  len = temp_len;
 		}
 
-	      LA_PRINT_STRING (stream, TYPE_TARGET_TYPE (type),
-			       valaddr, len, NULL, 0, options);
+	      printstr (stream, TYPE_TARGET_TYPE (type), valaddr, len,
+			NULL, 0, options);
 	    }
 	  else
 	    {
@@ -445,7 +446,7 @@ m2_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
       if (TYPE_LENGTH (type) == TYPE_LENGTH (TYPE_TARGET_TYPE (type)))
 	{
 	  struct value *v = value_cast (TYPE_TARGET_TYPE (type), val);
-	  m2_value_print_inner (v, stream, recurse, options);
+	  value_print_inner (v, stream, recurse, options);
 	  break;
 	}
       /* FALLTHROUGH */

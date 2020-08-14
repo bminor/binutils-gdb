@@ -1,5 +1,34 @@
 2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* m2-exp.y (m2_parse): Rename to...
+	(m2_language::parser): ...this.  Update function signature.
+	* m2-lang.c (m2_printchar): Renamed to m2_language::printchar.
+	(m2_op_print): Rename to...
+	(m2_language::op_print_tab): ...this, and make const.
+	(exp_descriptor_modula2): Rename to...
+	(m2_language::exp_descriptor_modula2): ...this.
+	(class m2_language): Move to m2-lang.h.
+	(m2_language::language_arch_info): New function, moved out of
+	class declaration.
+	(m2_language::printchar): New function, body from m2_printchar.
+	(m2_language::printstr): New function, moved out of class
+	declaration.
+	(m2_language::emitchar): Likewise.
+	* m2-lang.h (m2_parse): Delete declaration.
+	(m2_print_typedef): Delete declaration.
+	(m2_value_print_inner): Delete declaration.
+	(class m2_language): Class declaration moved from m2-lang.c,
+	larger functions are left in m2-lang.c.
+	* m2-typeprint.c (m2_print_typedef): Rename to...
+	(m2_language::print_typedef): ...this, and update function
+	signature.
+	* m2-valprint.c (m2_value_print_inner): Rename to...
+	(m2_language::value_print_inner): ...this, replace use of
+	LA_PRINT_STRING with a direct call to printstr member function,
+	and update recursive call.
+
+2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* language.c (default_is_string_type_p): Delete, implementation
 	moved into auto_or_unknown_language::is_string_type_p.
 	(unk_op_print_tab): Moved into

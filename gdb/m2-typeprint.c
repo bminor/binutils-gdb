@@ -158,8 +158,8 @@ m2_print_type (struct type *type, const char *varstring,
    which to print.  */
 
 void
-m2_print_typedef (struct type *type, struct symbol *new_symbol,
-		  struct ui_file *stream)
+m2_language::print_typedef (struct type *type, struct symbol *new_symbol,
+			    struct ui_file *stream) const
 {
   type = check_typedef (type);
   fprintf_filtered (stream, "TYPE ");
