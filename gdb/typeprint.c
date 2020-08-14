@@ -358,7 +358,7 @@ typedef_hash_table::find_typedef (const struct type_print_options *flags,
 void
 typedef_print (struct type *type, struct symbol *newobj, struct ui_file *stream)
 {
-  LA_PRINT_TYPEDEF (type, newobj, stream);
+  current_language->print_typedef (type, newobj, stream);
 }
 
 /* Print a description of a type TYPE in the form of a declaration of a

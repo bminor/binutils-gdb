@@ -1,5 +1,11 @@
 2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* language.h (LA_PRINT_TYPEDEF): Delete.
+	* typeprint.c (typedef_print): Call print_typedef directly on the
+	current_language object.
+
+2020-10-23  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* m2-exp.y (m2_parse): Rename to...
 	(m2_language::parser): ...this.  Update function signature.
 	* m2-lang.c (m2_printchar): Renamed to m2_language::printchar.
