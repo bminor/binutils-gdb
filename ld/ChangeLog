@@ -1,3 +1,11 @@
+2020-08-14  Tamar Christina  <tamar.christina@arm.com>
+
+	Backport from master.
+	2020-08-14  Tamar Christina  <tamar.christina@arm.com>
+
+	* testsuite/ld-arm/thumb-plt-got.d: Relax regexpr.
+	* testsuite/ld-arm/thumb-plt.d: Likewise.
+
 2020-08-07  David Faust  <david.faust@oracle.com>
 
 	* testsuite/ld-bpf/call-3.s: New file.
