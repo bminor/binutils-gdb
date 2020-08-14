@@ -10777,18 +10777,15 @@ free_debug_memory (void)
 
   if (debug_information != NULL)
     {
-      if (num_debug_info_entries != DEBUG_INFO_UNAVAILABLE)
+      for (i = 0; i < alloc_num_debug_info_entries; i++)
 	{
-	  for (i = 0; i < num_debug_info_entries; i++)
+	  if (debug_information [i].max_loc_offsets)
 	    {
-	      if (!debug_information [i].max_loc_offsets)
-		{
-		  free (debug_information [i].loc_offsets);
-		  free (debug_information [i].have_frame_base);
-		}
-	      if (!debug_information [i].max_range_lists)
-		free (debug_information [i].range_lists);
+	      free (debug_information [i].loc_offsets);
+	      free (debug_information [i].have_frame_base);
 	    }
+	  if (debug_information [i].max_range_lists)
+	    free (debug_information [i].range_lists);
 	}
       free (debug_information);
       debug_information = NULL;
