@@ -22,6 +22,7 @@
 #define UTILS_H
 
 #include "exceptions.h"
+#include "gdbsupport/array-view.h"
 #include "gdbsupport/scoped_restore.h"
 #include <chrono>
 
@@ -208,6 +209,13 @@ public:
   {
     gdb_assert (m_argv != NULL);
     return m_argv[arg];
+  }
+
+  /* Return the arguments array as an array view.  */
+
+  gdb::array_view<char *> as_array_view ()
+  {
+    return gdb::array_view<char *> (this->get (), this->count ());
   }
 
   /* The iterator type.  */

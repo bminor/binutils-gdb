@@ -1,3 +1,10 @@
+2020-08-14  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* utils.h (class gdb_argv) <as_array_view>: New method.
+	* utils.c (gdb_argv_as_array_view_test): New.
+	(_initialize_utils): Register selftest.
+	* maint.c (maintenance_selftest): Use the new method.
+
 2020-08-13  Kamil Rytarowski  <n54@gmx.com>
 
 	* target.h (supports_dumpcore, dumpcore): New
