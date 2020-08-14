@@ -1,3 +1,9 @@
+2020-08-14  Alan Modra  <amodra@gmail.com>
+
+	* hash.c (bfd_hash_set_default_size): Use higher_prime_number
+	rather than another copy of primes.  Increase maximum default
+	size allowed.
+
 2020-08-13  Alan Modra  <amodra@gmail.com>
 
 	* config.bfd: Obsolete arm*-*-symbianelf*, and ia64*-*-*.
