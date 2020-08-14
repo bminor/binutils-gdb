@@ -1,5 +1,11 @@
 2020-08-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
+	PR breakpoints/26385
+	* ppc-linux-nat.c (ppc_linux_nat_target::low_prepare_to_resume):
+	Always clear watchpoint with PTRACE_SET_DEBUGREG.
+
+2020-08-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
 	* ppc-linux-nat.c (ppc_linux_dreg_interface::detect)
 	(ppc_linux_nat_target::low_prepare_to_resume): Use ptrace () < 0
 	and >= to check return value instead of == -1 and != -1.
