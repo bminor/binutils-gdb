@@ -1,3 +1,9 @@
+2020-08-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_dreg_interface::detect)
+	(ppc_linux_nat_target::low_prepare_to_resume): Use ptrace () < 0
+	and >= to check return value instead of == -1 and != -1.
+
 2020-08-14  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* utils.h (class gdb_argv) <as_array_view>: New method.
