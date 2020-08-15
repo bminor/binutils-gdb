@@ -22,8 +22,16 @@ struct some_struct
   float a, b;
 };
 
+/* See https://gcc.gnu.org/onlinedocs/gfortran/\
+     Argument-passing-conventions.html.  */
+#if !defined (__GNUC__) || __GNUC__ > 7
+typedef size_t fortran_charlen_t;
+#else
+typedef int fortran_charlen_t;
+#endif
+
 extern void mixed_func_1d_ (int *, float *, double *, complex float *,
-			    char *, size_t);
+			    char *, fortran_charlen_t);
 
 void
 mixed_func_1c (int a, float b, double c, complex float d, char *f,
