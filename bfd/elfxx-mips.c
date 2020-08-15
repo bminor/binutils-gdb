@@ -7116,7 +7116,7 @@ _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	{
 	  /* Initialize the small common section.  */
 	  mips_elf_scom_section.name = ".scommon";
-	  mips_elf_scom_section.flags = SEC_IS_COMMON;
+	  mips_elf_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
 	  mips_elf_scom_section.output_section = &mips_elf_scom_section;
 	  mips_elf_scom_section.symbol = &mips_elf_scom_symbol;
 	  mips_elf_scom_section.symbol_ptr_ptr = &mips_elf_scom_symbol_ptr;

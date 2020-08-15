@@ -3001,7 +3001,8 @@ v850_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	{
 	  /* Initialize the small common section.  */
 	  v850_elf_scom_section.name	       = ".scommon";
-	  v850_elf_scom_section.flags	       = SEC_IS_COMMON | SEC_ALLOC | SEC_DATA;
+	  v850_elf_scom_section.flags
+	    = SEC_IS_COMMON | SEC_SMALL_DATA | SEC_ALLOC | SEC_DATA;
 	  v850_elf_scom_section.output_section = & v850_elf_scom_section;
 	  v850_elf_scom_section.symbol	       = & v850_elf_scom_symbol;
 	  v850_elf_scom_section.symbol_ptr_ptr = & v850_elf_scom_symbol_ptr;
@@ -3019,7 +3020,7 @@ v850_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	{
 	  /* Initialize the tcommon section.  */
 	  v850_elf_tcom_section.name	       = ".tcommon";
-	  v850_elf_tcom_section.flags	       = SEC_IS_COMMON;
+	  v850_elf_tcom_section.flags	       = SEC_IS_COMMON | SEC_SMALL_DATA;
 	  v850_elf_tcom_section.output_section = & v850_elf_tcom_section;
 	  v850_elf_tcom_section.symbol	       = & v850_elf_tcom_symbol;
 	  v850_elf_tcom_section.symbol_ptr_ptr = & v850_elf_tcom_symbol_ptr;
@@ -3037,7 +3038,7 @@ v850_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	{
 	  /* Initialize the zcommon section.  */
 	  v850_elf_zcom_section.name	       = ".zcommon";
-	  v850_elf_zcom_section.flags	       = SEC_IS_COMMON;
+	  v850_elf_zcom_section.flags	       = SEC_IS_COMMON | SEC_SMALL_DATA;
 	  v850_elf_zcom_section.output_section = & v850_elf_zcom_section;
 	  v850_elf_zcom_section.symbol	       = & v850_elf_zcom_symbol;
 	  v850_elf_zcom_section.symbol_ptr_ptr = & v850_elf_zcom_symbol_ptr;

@@ -2977,7 +2977,7 @@ elf32_tic6x_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED, asymbol *asym)
 	{
 	  /* Initialize the small common section.  */
 	  tic6x_elf_scom_section.name = ".scommon";
-	  tic6x_elf_scom_section.flags = SEC_IS_COMMON;
+	  tic6x_elf_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
 	  tic6x_elf_scom_section.output_section = &tic6x_elf_scom_section;
 	  tic6x_elf_scom_section.symbol = &tic6x_elf_scom_symbol;
 	  tic6x_elf_scom_section.symbol_ptr_ptr = &tic6x_elf_scom_symbol_ptr;

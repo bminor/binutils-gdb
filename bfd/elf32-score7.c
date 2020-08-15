@@ -2840,7 +2840,7 @@ s7_bfd_score_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	{
 	  /* Initialize the small common section.  */
 	  score_elf_scom_section.name = ".scommon";
-	  score_elf_scom_section.flags = SEC_IS_COMMON;
+	  score_elf_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
 	  score_elf_scom_section.output_section = &score_elf_scom_section;
 	  score_elf_scom_section.symbol = &score_elf_scom_symbol;
 	  score_elf_scom_section.symbol_ptr_ptr = &score_elf_scom_symbol_ptr;

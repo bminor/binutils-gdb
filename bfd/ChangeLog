@@ -1,3 +1,17 @@
+2020-08-15  Alan Modra  <amodra@gmail.com>
+
+	PR 26389
+	* syms.c (bfd_decode_symclass): Choose 'c' for commons only when
+	SEC_SMALL_DATA.
+	* elf32-m32r.c (_bfd_m32r_elf_symbol_processing): Set SEC_SMALL_DATA
+	on small common section.
+	* elf32-score.c (s3_bfd_score_elf_symbol_processing): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_symbol_processing): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_symbol_processing): Likewise.
+	* elf32-v850.c (v850_elf_symbol_processing): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_symbol_processing): Likewise.
+	* ecoff.c (ecoff_set_symbol_info, ecoff_link_add_externals): Likewise.
+
 2020-08-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/ru.po: Updated Russian translation.
