@@ -85,4 +85,12 @@ extern void hash_traverse (struct hash_control *,
 extern void hash_print_statistics (FILE *, const char *name,
 				   struct hash_control *);
 
+/* Insert ELEMENT into HTAB.  If the element exists, it is overwritten.  */
+
+extern void htab_insert (htab_t, void *);
+
+/* Print statistics about a hash table.  */
+
+extern void htab_print_statistics (FILE *f, const char *name, htab_t table);
+
 #endif /* HASH_H */

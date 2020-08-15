@@ -1,3 +1,11 @@
+2020-08-20  Martin Liska  <mliska@suse.cz>
+
+	* as.h: Include hashtab.h.
+	* hash.c (htab_insert): New.
+	(htab_print_statistics): Likewise.
+	* hash.h (htab_insert): Likewise.
+	(htab_print_statistics): Likewise.
+
 2020-08-19  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/ppc/int128.s: Correct vcmpuq.
