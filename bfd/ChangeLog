@@ -1,5 +1,24 @@
 2020-08-15  Alan Modra  <amodra@gmail.com>
 
+	* elf32-frv.c (elf32_frv_add_symbol_hook): Set SEC_SMALL_DATA on
+	small common section.
+	* elf32-m32r.c (m32r_elf_add_symbol_hook): Likewise.
+	* elf32-microblaze.c (microblaze_elf_add_symbol_hook): Likewise.
+	* elf32-nds32.c (nds32_elf_add_symbol_hook): Likewise.
+	* elf32-nios2.c (nios2_elf_add_symbol_hook): Likewise.
+	* elf32-ppc.c (ppc_elf_add_symbol_hook): Likewise.
+	* elf32-score.c (s3_bfd_score_elf_add_symbol_hook): Likewise.
+	* elf32-score7.c (s7_bfd_score_elf_add_symbol_hook): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_add_symbol_hook): Likewise.
+	* elf32-v850.c (v850_elf_check_relocs): Likewise.
+	(v850_elf_add_symbol_hook): Likewise.
+	* elf64-alpha.c (elf64_alpha_add_symbol_hook): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_add_symbol_hook): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_add_symbol_hook): Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_add_symbol_hook): Likewise.
+
+2020-08-15  Alan Modra  <amodra@gmail.com>
+
 	PR 26389
 	* syms.c (bfd_decode_symclass): Choose 'c' for commons only when
 	SEC_SMALL_DATA.

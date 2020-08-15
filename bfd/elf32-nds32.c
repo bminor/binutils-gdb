@@ -3368,7 +3368,7 @@ nds32_elf_add_symbol_hook (bfd *abfd,
 	  || ELF_ST_TYPE (sym->st_info) == STT_TLS)
 	break;
 
-      /* st_value is the alignemnt constraint.
+      /* st_value is the alignment constraint.
 	 That might be its actual size if it is an array or structure.  */
       switch (sym->st_value)
 	{
@@ -3388,7 +3388,7 @@ nds32_elf_add_symbol_hook (bfd *abfd,
 	  return TRUE;
 	}
 
-      (*secp)->flags |= SEC_IS_COMMON;
+      (*secp)->flags |= SEC_IS_COMMON | SEC_SMALL_DATA;
       *valp = sym->st_size;
       break;
     }

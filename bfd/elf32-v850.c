@@ -183,7 +183,7 @@ v850_elf_check_relocs (bfd *abfd,
 	      asection * section;
 
 	      section = h->root.u.c.p->section = bfd_make_section_old_way (abfd, common);
-	      section->flags |= SEC_IS_COMMON;
+	      section->flags |= SEC_IS_COMMON | SEC_SMALL_DATA;
 	    }
 
 #ifdef DEBUG
@@ -3096,19 +3096,19 @@ v850_elf_add_symbol_hook (bfd *abfd,
     {
     case SHN_V850_SCOMMON:
       *secp = bfd_make_section_old_way (abfd, ".scommon");
-      (*secp)->flags |= SEC_IS_COMMON;
+      (*secp)->flags |= SEC_IS_COMMON | SEC_SMALL_DATA;
       *valp = sym->st_size;
       break;
 
     case SHN_V850_TCOMMON:
       *secp = bfd_make_section_old_way (abfd, ".tcommon");
-      (*secp)->flags |= SEC_IS_COMMON;
+      (*secp)->flags |= SEC_IS_COMMON | SEC_SMALL_DATA;
       *valp = sym->st_size;
       break;
 
     case SHN_V850_ZCOMMON:
       *secp = bfd_make_section_old_way (abfd, ".zcommon");
-      (*secp)->flags |= SEC_IS_COMMON;
+      (*secp)->flags |= SEC_IS_COMMON | SEC_SMALL_DATA;
       *valp = sym->st_size;
       break;
     }

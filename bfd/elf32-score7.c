@@ -2815,7 +2815,7 @@ s7_bfd_score_elf_add_symbol_hook (bfd *abfd,
       /* Fall through.  */
     case SHN_SCORE_SCOMMON:
       *secp = bfd_make_section_old_way (abfd, ".scommon");
-      (*secp)->flags |= SEC_IS_COMMON;
+      (*secp)->flags |= SEC_IS_COMMON | SEC_SMALL_DATA;
       *valp = sym->st_size;
       break;
     }
