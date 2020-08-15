@@ -1,3 +1,9 @@
+2020-08-15  Tom de Vries  <tdevries@suse.de>
+
+	PR backtrace/26390
+	* gdb.fortran/mixed-lang-stack.exp: Call bt with -frame-arguments all.
+	Update expected pattern.
+
 2020-08-13  Pedro Alves  <pedro@palves.net>
 
 	* gdb.fortran/complex.exp: Check skip_fortran_tests.

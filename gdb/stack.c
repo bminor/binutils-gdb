@@ -744,6 +744,12 @@ print_frame_args (const frame_print_options &fp_opts,
     = (print_names
        && fp_opts.print_frame_arguments != print_frame_arguments_none);
 
+  /* Temporarily change the selected frame to the given FRAME.
+     This allows routines that rely on the selected frame instead
+     of being given a frame as parameter to use the correct frame.  */
+  scoped_restore_selected_frame restore_selected_frame;
+  select_frame (frame);
+
   if (func)
     {
       const struct block *b = SYMBOL_BLOCK_VALUE (func);

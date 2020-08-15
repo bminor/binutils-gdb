@@ -1,3 +1,9 @@
+2020-08-15  Tom de Vries  <tdevries@suse.de>
+
+	PR backtrace/26390
+	* stack.c (print_frame_args): Temporarily set the selected
+	frame to FRAME while printing the frame's arguments.
+
 2020-08-14  Pedro Franco de Carvalho  <pedromfc@linux.ibm.com>
 
 	PR breakpoints/26385
