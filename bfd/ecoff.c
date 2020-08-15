@@ -791,7 +791,7 @@ ecoff_set_symbol_info (bfd *abfd,
 	{
 	  /* Initialize the small common section.  */
 	  ecoff_scom_section.name = SCOMMON;
-	  ecoff_scom_section.flags = SEC_IS_COMMON;
+	  ecoff_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
 	  ecoff_scom_section.output_section = &ecoff_scom_section;
 	  ecoff_scom_section.symbol = &ecoff_scom_symbol;
 	  ecoff_scom_section.symbol_ptr_ptr = &ecoff_scom_symbol_ptr;
@@ -3404,7 +3404,7 @@ ecoff_link_add_externals (bfd *abfd,
 	    {
 	      /* Initialize the small common section.  */
 	      ecoff_scom_section.name = SCOMMON;
-	      ecoff_scom_section.flags = SEC_IS_COMMON;
+	      ecoff_scom_section.flags = SEC_IS_COMMON | SEC_SMALL_DATA;
 	      ecoff_scom_section.output_section = &ecoff_scom_section;
 	      ecoff_scom_section.symbol = &ecoff_scom_symbol;
 	      ecoff_scom_section.symbol_ptr_ptr = &ecoff_scom_symbol_ptr;
