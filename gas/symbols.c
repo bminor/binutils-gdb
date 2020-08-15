@@ -151,6 +151,57 @@ struct local_symbol
 #endif
 };
 
+struct symbol_entry
+{
+  const char *symbol_name;
+  hashval_t hash;
+  void *symbol;
+};
+
+typedef struct symbol_entry symbol_entry_t;
+
+/* Hash function for a symbol_entry.  */
+
+static hashval_t
+hash_symbol_entry (const void *e)
+{
+  symbol_entry_t *entry = (symbol_entry_t *) e;
+  if (entry->hash == 0)
+    entry->hash = htab_hash_string (entry->symbol_name);
+
+  return entry->hash;
+}
+
+/* Equality function for a symbol_entry.  */
+
+static int
+eq_symbol_entry (const void *a, const void *b)
+{
+  const symbol_entry_t *ea = (const symbol_entry_t *) a;
+  const symbol_entry_t *eb = (const symbol_entry_t *) b;
+
+  return strcmp (ea->symbol_name, eb->symbol_name) == 0;
+}
+
+static symbol_entry_t *
+symbol_entry_alloc (const char *symbol_name, void *symbol)
+{
+  symbol_entry_t *entry = XNEW (symbol_entry_t);
+  entry->symbol_name = symbol_name;
+  entry->hash = 0;
+  entry->symbol = symbol;
+  return entry;
+}
+
+static void *
+symbol_entry_find (htab_t table, const char *symbol_name)
+{
+  symbol_entry_t needle = { symbol_name, 0, NULL };
+  symbol_entry_t *entry = htab_find (table, &needle);
+  return entry != NULL ? entry->symbol : NULL;
+}
+
+
 #define local_symbol_converted_p(l) ((l)->lsy_section == reg_section)
 #define local_symbol_mark_converted(l) ((l)->lsy_section = reg_section)
 #define local_symbol_resolved_p(l) ((l)->lsy_flags.sy_resolved)
@@ -169,10 +220,10 @@ extern int new_broken_words;
 #endif
 
 /* symbol-name => struct symbol pointer */
-static struct hash_control *sy_hash;
+static htab_t sy_hash;
 
 /* Table of local symbols.  */
-static struct hash_control *local_hash;
+static htab_t local_hash;
 
 /* Below are commented in "symbols.h".  */
 symbolS *symbol_rootP;
@@ -340,7 +391,7 @@ local_symbol_make (const char *name, segT section, valueT val, fragS *frag)
   local_symbol_set_frag (ret, frag);
   ret->lsy_value = val;
 
-  hash_jam (local_hash, name_copy, (void *) ret);
+  htab_insert (local_hash, symbol_entry_alloc (name_copy, ret));
 
   return ret;
 }
@@ -377,7 +428,7 @@ local_symbol_convert (struct local_symbol *locsym)
   local_symbol_mark_converted (locsym);
   local_symbol_set_real_symbol (locsym, ret);
 
-  hash_jam (local_hash, locsym->lsy_name, NULL);
+  htab_insert (local_hash, symbol_entry_alloc (locsym->lsy_name, NULL));
 
   return ret;
 }
@@ -616,26 +667,16 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 void
 symbol_table_insert (symbolS *symbolP)
 {
-  const char *error_string;
-
   know (symbolP);
   know (S_GET_NAME (symbolP));
 
   if (LOCAL_SYMBOL_CHECK (symbolP))
-    {
-      error_string = hash_jam (local_hash, S_GET_NAME (symbolP),
-			       (void *) symbolP);
-      if (error_string != NULL)
-	as_fatal (_("inserting \"%s\" into symbol table failed: %s"),
-		  S_GET_NAME (symbolP), error_string);
-      return;
-    }
-
-  if ((error_string = hash_jam (sy_hash, S_GET_NAME (symbolP), (void *) symbolP)))
-    {
-      as_fatal (_("inserting \"%s\" into symbol table failed: %s"),
-		S_GET_NAME (symbolP), error_string);
-    }				/* on error  */
+    htab_insert (local_hash,
+		 symbol_entry_alloc (S_GET_NAME (symbolP),
+				     (struct local_symbol *)symbolP));
+  else
+    htab_insert (sy_hash, symbol_entry_alloc (S_GET_NAME (symbolP),
+					      (struct local_symbol *)symbolP));
 }
 
 /* If a symbol name does not exist, create it as undefined, and insert
@@ -869,14 +910,11 @@ symbol_find_exact (const char *name)
 symbolS *
 symbol_find_exact_noref (const char *name, int noref)
 {
-  struct local_symbol *locsym;
-  symbolS* sym;
+  symbolS *sym = symbol_entry_find (local_hash, name);
+  if (sym)
+    return sym;
 
-  locsym = (struct local_symbol *) hash_find (local_hash, name);
-  if (locsym != NULL)
-    return (symbolS *) locsym;
-
-  sym = ((symbolS *) hash_find (sy_hash, name));
+  sym = symbol_entry_find (sy_hash, name);
 
   /* Any references to the symbol, except for the reference in
      .weakref, must clear this flag, such that the symbol does not
@@ -1670,15 +1708,16 @@ resolve_symbol_value (symbolS *symp)
   return final_val;
 }
 
-static void resolve_local_symbol (const char *, void *);
-
 /* A static function passed to hash_traverse.  */
 
-static void
-resolve_local_symbol (const char *key ATTRIBUTE_UNUSED, void *value)
+static int
+resolve_local_symbol (void **slot, void *arg ATTRIBUTE_UNUSED)
 {
-  if (value != NULL)
-    resolve_symbol_value ((symbolS *) value);
+  symbol_entry_t *entry = *((symbol_entry_t **) slot);
+  if (entry->symbol != NULL)
+    resolve_symbol_value ((symbolS *) entry->symbol);
+
+  return 1;
 }
 
 /* Resolve all local symbols.  */
@@ -1686,7 +1725,7 @@ resolve_local_symbol (const char *key ATTRIBUTE_UNUSED, void *value)
 void
 resolve_local_symbol_values (void)
 {
-  hash_traverse (local_hash, resolve_local_symbol);
+  htab_traverse (local_hash, resolve_local_symbol, NULL);
 }
 
 /* Obtain the current value of a symbol without changing any
@@ -2988,8 +3027,10 @@ symbol_begin (void)
 {
   symbol_lastP = NULL;
   symbol_rootP = NULL;		/* In case we have 0 symbols (!!)  */
-  sy_hash = hash_new ();
-  local_hash = hash_new ();
+  sy_hash = htab_create_alloc (16, hash_symbol_entry, eq_symbol_entry,
+			       NULL, xcalloc, free);
+  local_hash = htab_create_alloc (16, hash_symbol_entry, eq_symbol_entry,
+				  NULL, xcalloc, free);
 
   memset ((char *) (&abs_symbol), '\0', sizeof (abs_symbol));
 #if defined (EMIT_SECTION_SYMBOLS) || !defined (RELOC_REQUIRES_SYMBOL)
@@ -3244,8 +3285,8 @@ print_expr (expressionS *exp)
 void
 symbol_print_statistics (FILE *file)
 {
-  hash_print_statistics (file, "symbol table", sy_hash);
-  hash_print_statistics (file, "mini local symbol table", local_hash);
+  htab_print_statistics (file, "symbol table", sy_hash);
+  htab_print_statistics (file, "mini local symbol table", local_hash);
   fprintf (file, "%lu mini local symbols created, %lu converted\n",
 	   local_symbol_count, local_symbol_conversion_count);
 }

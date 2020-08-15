@@ -1,5 +1,21 @@
 2020-08-20  Martin Liska  <mliska@suse.cz>
 
+	* symbols.c (struct symbol_entry): New.
+	(hash_symbol_entry): Likewise.
+	(eq_symbol_entry): Likewise.
+	(symbol_entry_alloc): Likewise.
+	(symbol_entry_find): Likewise.
+	(local_symbol_make): Use htab hash table.
+	(local_symbol_convert): Likewise.
+	(symbol_table_insert): Likewise.
+	(symbol_find_exact_noref): Likewise.
+	(resolve_local_symbol): Likewise.
+	(resolve_local_symbol_values): Likewise.
+	(symbol_begin): Likewise.
+	(symbol_print_statistics): Likewise.
+
+2020-08-20  Martin Liska  <mliska@suse.cz>
+
 	* read.c (struct po_entry): New.
 	(hash_po_entry): Likewise.
 	(eq_po_entry): Likewise.
