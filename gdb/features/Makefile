@@ -47,6 +47,7 @@
 WHICH = mips-linux mips-dsp-linux \
 	mips64-linux mips64-dsp-linux \
 	nios2-linux \
+	or1k-linux \
 	rs6000/powerpc-32 \
 	rs6000/powerpc-32l rs6000/powerpc-altivec32l rs6000/powerpc-e500l \
 	rs6000/powerpc-64l rs6000/powerpc-altivec64l rs6000/powerpc-vsx32l \

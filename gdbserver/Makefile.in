@@ -180,6 +180,7 @@ SFILES = \
 	$(srcdir)/linux-m68k-low.cc \
 	$(srcdir)/linux-mips-low.cc \
 	$(srcdir)/linux-nios2-low.cc \
+	$(srcdir)/linux-or1k-low.cc \
 	$(srcdir)/linux-ppc-low.cc \
 	$(srcdir)/linux-riscv-low.cc \
 	$(srcdir)/linux-s390-low.cc \
