@@ -1,5 +1,30 @@
 2020-08-20  Martin Liska  <mliska@suse.cz>
 
+	* config/tc-iq2000.c (iq2000_add_macro): Use htab hash table.
+	* macro.c (struct hash_control): Use htab.
+	(macro_init): Likewise.
+	(do_formals): Likewise.
+	(free_macro): Likewise.
+	(define_macro): Likewise.
+	(sub_actual): Likewise.
+	(macro_expand_body): Likewise.
+	(macro_expand): Likewise.
+	(check_macro): Likewise.
+	(delete_macro): Likewise.
+	(expand_irp): Likewise.
+	* macro.h (struct macro_hash_entry): New struct.
+	(hash_macro_entry): New.
+	(eq_macro_entry): Likewise.
+	(macro_entry_alloc): Likewise.
+	(macro_entry_find): Likewise.
+	(struct formal_hash_entry): Likewise.
+	(hash_formal_entry): Likewise.
+	(eq_formal_entry): Likewise.
+	(formal_entry_alloc): Likewise.
+	(formal_entry_find): Likewise.
+
+2020-08-20  Martin Liska  <mliska@suse.cz>
+
 	* as.h: Include hashtab.h.
 	* hash.c (htab_insert): New.
 	(htab_print_statistics): Likewise.
