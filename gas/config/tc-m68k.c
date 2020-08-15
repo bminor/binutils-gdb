@@ -5560,7 +5560,7 @@ s_proc (int ignore ATTRIBUTE_UNUSED)
    alignment is needed.  */
 
 int
-m68k_conditional_pseudoop (pseudo_typeS *pop)
+m68k_conditional_pseudoop (const pseudo_typeS *pop)
 {
   return (pop->poc_handler == s_mri_if
 	  || pop->poc_handler == s_mri_else);

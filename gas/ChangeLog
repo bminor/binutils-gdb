@@ -1,5 +1,20 @@
 2020-08-20  Martin Liska  <mliska@suse.cz>
 
+	* read.c (struct po_entry): New.
+	(hash_po_entry): Likewise.
+	(eq_po_entry): Likewise.
+	(po_entry_alloc): Likewise.
+	(po_entry_find): Likewise.
+	(pop_insert): Likewise.
+	(pobegin): Use htab hash table.
+	(read_a_source_file): Likewise.
+	(s_macro): Likewise.
+	(read_print_statistics): Likewise.
+	* config/tc-m68k.c (m68k_conditional_pseudoop): Add const qualifier.
+	* config/tc-m68k.h (m68k_conditional_pseudoop): Likewise.
+
+2020-08-20  Martin Liska  <mliska@suse.cz>
+
 	* config/tc-iq2000.c (iq2000_add_macro): Use htab hash table.
 	* macro.c (struct hash_control): Use htab.
 	(macro_init): Likewise.

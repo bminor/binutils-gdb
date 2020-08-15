@@ -47,7 +47,7 @@ extern const char *m68k_comment_chars;
 extern void m68k_mri_mode_change (int);
 #define MRI_MODE_CHANGE(i) m68k_mri_mode_change (i)
 
-extern int m68k_conditional_pseudoop (pseudo_typeS *);
+extern int m68k_conditional_pseudoop (const pseudo_typeS *);
 #define tc_conditional_pseudoop(pop) m68k_conditional_pseudoop (pop)
 
 extern void m68k_frob_label (symbolS *);

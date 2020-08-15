@@ -295,7 +295,53 @@ address_bytes (void)
 
 /* Set up pseudo-op tables.  */
 
-static struct hash_control *po_hash;
+struct po_entry
+{
+  const char *poc_name;
+
+  const pseudo_typeS *pop;
+};
+
+typedef struct po_entry po_entry_t;
+
+/* Hash function for a po_entry.  */
+
+static hashval_t
+hash_po_entry (const void *e)
+{
+  const po_entry_t *entry = (const po_entry_t *) e;
+  return htab_hash_string (entry->poc_name);
+}
+
+/* Equality function for a po_entry.  */
+
+static int
+eq_po_entry (const void *a, const void *b)
+{
+  const po_entry_t *ea = (const po_entry_t *) a;
+  const po_entry_t *eb = (const po_entry_t *) b;
+
+  return strcmp (ea->poc_name, eb->poc_name) == 0;
+}
+
+static po_entry_t *
+po_entry_alloc (const char *poc_name, const pseudo_typeS *pop)
+{
+  po_entry_t *entry = XNEW (po_entry_t);
+  entry->poc_name = poc_name;
+  entry->pop = pop;
+  return entry;
+}
+
+static const pseudo_typeS *
+po_entry_find (htab_t table, const char *poc_name)
+{
+  po_entry_t needle = { poc_name, NULL };
+  po_entry_t *entry = htab_find (table, &needle);
+  return entry != NULL ? entry->pop : NULL;
+}
+
+static struct htab *po_hash;
 
 static const pseudo_typeS potable[] = {
   {"abort", s_abort, 0},
@@ -514,14 +560,14 @@ static const char *pop_table_name;
 void
 pop_insert (const pseudo_typeS *table)
 {
-  const char *errtxt;
   const pseudo_typeS *pop;
   for (pop = table; pop->poc_name; pop++)
     {
-      errtxt = hash_insert (po_hash, pop->poc_name, (char *) pop);
-      if (errtxt && (!pop_override_ok || strcmp (errtxt, "exists")))
-	as_fatal (_("error constructing %s pseudo-op table: %s"), pop_table_name,
-		  errtxt);
+      int exists = po_entry_find (po_hash, pop->poc_name) != NULL;
+      if (!pop_override_ok && exists)
+	as_fatal (_("error constructing %s pseudo-op table"), pop_table_name);
+      else if (!exists)
+	htab_insert (po_hash, po_entry_alloc (pop->poc_name, pop));
     }
 }
 
@@ -540,7 +586,8 @@ pop_insert (const pseudo_typeS *table)
 static void
 pobegin (void)
 {
-  po_hash = hash_new ();
+  po_hash = htab_create_alloc (16, hash_po_entry, eq_po_entry, NULL,
+			       xcalloc, xfree);
 
   /* Do the target-specific pseudo ops.  */
   pop_table_name = "md";
@@ -819,7 +866,7 @@ read_a_source_file (const char *name)
   char next_char;
   char *s;		/* String of symbol, '\0' appended.  */
   long temp;
-  pseudo_typeS *pop;
+  const pseudo_typeS *pop;
 
 #ifdef WARN_COMMENTS
   found_comment = 0;
@@ -1069,7 +1116,7 @@ read_a_source_file (const char *name)
 		    {
 		      /* The MRI assembler uses pseudo-ops without
 			 a period.  */
-		      pop = (pseudo_typeS *) hash_find (po_hash, s);
+		      pop = po_entry_find (po_hash, s);
 		      if (pop != NULL && pop->poc_handler == NULL)
 			pop = NULL;
 		    }
@@ -1084,7 +1131,7 @@ read_a_source_file (const char *name)
 			 already know that the pseudo-op begins with a '.'.  */
 
 		      if (pop == NULL)
-			pop = (pseudo_typeS *) hash_find (po_hash, s + 1);
+			pop = po_entry_find (po_hash, s + 1);
 		      if (pop && !pop->poc_handler)
 			pop = NULL;
 
@@ -2739,10 +2786,10 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
 	}
 
       if (((NO_PSEUDO_DOT || flag_m68k_mri)
-	   && hash_find (po_hash, name) != NULL)
+	   && po_entry_find (po_hash, name) != NULL)
 	  || (!flag_m68k_mri
 	      && *name == '.'
-	      && hash_find (po_hash, name + 1) != NULL))
+	      && po_entry_find (po_hash, name + 1) != NULL))
 	as_warn_where (file,
 		 line,
 		 _("attempt to redefine pseudo-op `%s' ignored"),
@@ -6128,7 +6175,7 @@ s_ignore (int arg ATTRIBUTE_UNUSED)
 void
 read_print_statistics (FILE *file)
 {
-  hash_print_statistics (file, "pseudo-op table", po_hash);
+  htab_print_statistics (file, "pseudo-op table", po_hash);
 }
 
 /* Inserts the given line into the input stream.
