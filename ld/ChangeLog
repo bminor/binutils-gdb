@@ -1,3 +1,16 @@
+2020-08-16  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-powerpc/inline.s,
+	* testsuite/ld-powerpc/inline-1.d,
+	* testsuite/ld-powerpc/inline-2.d,
+	* testsuite/ld-powerpc/inline-3.d,
+	* testsuite/ld-powerpc/inline-4.d,
+	* testsuite/ld-powerpc/inlinepcrel.s,
+	* testsuite/ld-powerpc/inlinepcrel-1.d,
+	* testsuite/ld-powerpc/inlinepcrel-2.d,
+	* testsuite/ld-powerpc/inlinepcrel-3.d: New tests.
+	* testsuite/ld-powerpc/powerpc.exp: Run them.
+
 2020-08-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/26389
