@@ -240,6 +240,10 @@ set lto_link_tests [list \
    {dummy.c} \
    {{error_output "pr26267.err"}} \
    "pr26267b"] \
+  [list "Build pr26389.o" \
+   "$plug_opt" "-flto $lto_no_fat -fcommon" \
+   {pr26389.c} \
+   [list [list "nm" "$plug_opt" "pr26389.d"]]] \
 ]
 
 if { [at_least_gcc_version 10 0] } {

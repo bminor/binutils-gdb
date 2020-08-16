@@ -1,3 +1,10 @@
+2020-08-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/26389
+	* testsuite/ld-plugin/lto.exp: Run PR binutils/26389 test.
+	* testsuite/ld-plugin/pr26389.c: New file.
+	* testsuite/ld-plugin/pr26389.d: Likewise.
+
 2020-08-14  Tamar Christina  <tamar.christina@arm.com>
 
 	Backport from master.
