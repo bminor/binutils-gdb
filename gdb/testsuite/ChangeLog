@@ -1,3 +1,9 @@
+2020-08-16  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/25350
+	* gdb.base/eh_return.c: New test.
+	* gdb.base/eh_return.exp: New file.
+
 2020-08-15  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.fortran/mixed-lang-stack.c (fortran_charlen_t): New type.
