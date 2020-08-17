@@ -1,3 +1,13 @@
+2020-08-17  Tom Tromey  <tromey@adacore.com>
+
+	* python/py-inferior.c (infpy_search_memory): Use
+	gdb_py_object_from_ulongest.
+	* python/py-infevents.c (create_inferior_call_event_object)
+	(create_memory_changed_event_object): Use
+	gdb_py_object_from_ulongest.
+	* python/py-linetable.c (ltpy_entry_get_pc): Use
+	gdb_py_object_from_ulongest.
+
 2020-08-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* loc.c (class symbol_needs_eval_context): Fix indentation.
