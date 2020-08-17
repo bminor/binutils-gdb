@@ -1,3 +1,9 @@
+2020-08-17  Tom de Vries  <tdevries@suse.de>
+	    Tom Tromey  <tromey@adacore.com>
+
+	PR rust/26197:
+	* gdb.rust/simple.exp (xfail_pattern): Update for new failure.
+
 2020-08-17  Tom Tromey  <tromey@adacore.com>
 
 	* gdb.ada/mi_var_access.exp: New file.

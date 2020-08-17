@@ -239,7 +239,8 @@ gdb_test "print .." " = .*::ops::RangeFull"
 
 set pass_pattern \
     " = core::option::Option<\[a-z\]+::string::String>::Some\\(\[a-z\]+::string::String .*"
-set xfail_pattern " = <error reading variable>"
+set xfail_pattern \
+    "( = <error reading variable>|That operation is not available on .*)"
 gdb_test_multiple "print str_some" "" {
     -re "\[\r\n\]*(?:$pass_pattern)\[\r\n\]+$gdb_prompt $" {
 	pass $gdb_test_name
