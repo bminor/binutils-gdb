@@ -1,3 +1,9 @@
+2020-08-17  Tom de Vries  <tdevries@suse.de>
+
+	PR gdb/26393
+	* gdbtypes.c (dump_dynamic_prop): New function.
+	(recursive_dump_type): Use dump_dynamic_prop for TYPE_CODE_RANGE.
+
 2020-08-15  Tom de Vries  <tdevries@suse.de>
 
 	PR backtrace/26390

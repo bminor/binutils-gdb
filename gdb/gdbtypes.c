@@ -4856,6 +4856,29 @@ print_gnat_stuff (struct type *type, int spaces)
 
 static struct obstack dont_print_type_obstack;
 
+/* Print the dynamic_prop PROP.  */
+
+static void
+dump_dynamic_prop (dynamic_prop const& prop)
+{
+  switch (prop.kind ())
+    {
+    case PROP_CONST:
+      printf_filtered ("%s", plongest (prop.const_val ()));
+      break;
+    case PROP_UNDEFINED:
+      printf_filtered ("(undefined)");
+      break;
+    case PROP_LOCEXPR:
+    case PROP_LOCLIST:
+      printf_filtered ("(dynamic)");
+      break;
+    default:
+      gdb_assert_not_reached ("unhandled prop kind");
+      break;
+    }
+}
+
 void
 recursive_dump_type (struct type *type, int spaces)
 {
@@ -5115,13 +5138,11 @@ recursive_dump_type (struct type *type, int spaces)
     }
   if (type->code () == TYPE_CODE_RANGE)
     {
-      printfi_filtered (spaces, "low %s%s  high %s%s\n",
-			plongest (type->bounds ()->low.const_val ()),
-			(type->bounds ()->low.kind () == PROP_UNDEFINED
-			 ? " (undefined)" : ""),
-			plongest (type->bounds ()->high.const_val ()),
-			(type->bounds ()->high.kind () == PROP_UNDEFINED
-			 ? " (undefined)" : ""));
+      printfi_filtered (spaces, "low ");
+      dump_dynamic_prop (type->bounds ()->low);
+      printf_filtered ("  high ");
+      dump_dynamic_prop (type->bounds ()->high);
+      printf_filtered ("\n");
     }
 
   switch (TYPE_SPECIFIC_FIELD (type))
