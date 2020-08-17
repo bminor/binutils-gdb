@@ -2849,8 +2849,6 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
 				       dwarf2_per_cu_data *per_cu,
 				       dwarf2_per_objfile *per_objfile)
 {
-  int in_reg;
-
   scoped_value_mark free_values;
 
   symbol_needs_eval_context ctx (per_objfile);
@@ -2863,16 +2861,17 @@ dwarf2_loc_desc_get_symbol_read_needs (const gdb_byte *data, size_t size,
 
   ctx.eval (data, size);
 
-  in_reg = ctx.location == DWARF_VALUE_REGISTER;
+  bool in_reg = ctx.location == DWARF_VALUE_REGISTER;
 
   /* If the location has several pieces, and any of them are in
      registers, then we will need a frame to fetch them from.  */
   for (dwarf_expr_piece &p : ctx.pieces)
     if (p.location == DWARF_VALUE_REGISTER)
-      in_reg = 1;
+      in_reg = true;
 
   if (in_reg)
     ctx.needs = SYMBOL_NEEDS_FRAME;
+
   return ctx.needs;
 }
 
