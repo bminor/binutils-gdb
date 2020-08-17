@@ -2826,19 +2826,19 @@ public:
 
   /* DW_OP_addrx and DW_OP_GNU_addr_index doesn't require a frame.  */
 
-   CORE_ADDR get_addr_index (unsigned int index) override
-   {
-     /* Nothing to do.  */
-     return 1;
-   }
+  CORE_ADDR get_addr_index (unsigned int index) override
+  {
+    /* Nothing to do.  */
+    return 1;
+  }
 
-   /* DW_OP_push_object_address has a frame already passed through.  */
+  /* DW_OP_push_object_address has a frame already passed through.  */
 
-   CORE_ADDR get_object_address () override
-   {
-     /* Nothing to do.  */
-     return 1;
-   }
+  CORE_ADDR get_object_address () override
+  {
+    /* Nothing to do.  */
+    return 1;
+  }
 };
 
 /* Compute the correct symbol_needs_kind value for the location

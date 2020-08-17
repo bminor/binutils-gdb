@@ -1,5 +1,9 @@
 2020-08-17  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* loc.c (class symbol_needs_eval_context): Fix indentation.
+
+2020-08-17  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2/loc.c (dwarf2_loc_desc_get_symbol_read_needs): Use
 	bool.
 
