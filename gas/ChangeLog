@@ -1,3 +1,12 @@
+2020-08-17  Alex Coplan  <alex.coplan@arm.com>
+
+	* config/obj-elf.c (obj_elf_change_section): When repurposing an
+	existing symbol, ensure that we set sy_value as per other (fresh)
+	section symbols.
+	* testsuite/gas/elf/elf.exp: Add new test.
+	* testsuite/gas/elf/section-symbol-redef.d: New test.
+	* testsuite/gas/elf/section-symbol-redef.s: Input for test.
+
 2020-08-13  Nick Clifton  <nickc@redhat.com>
 
 	PR 26359

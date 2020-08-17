@@ -305,6 +305,7 @@ if { [is_elf_format] } then {
     run_dump_test "strtab"
 
     run_dump_test "bignums"
+    run_dump_test "section-symbol-redef"
     
     load_lib gas-dg.exp
     dg-init

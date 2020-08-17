@@ -759,7 +759,14 @@ obj_elf_change_section (const char *name,
       /* Add a symbol for this section to the symbol table.  */
       secsym = symbol_find (name);
       if (secsym != NULL)
-	symbol_set_bfdsym (secsym, sec->symbol);
+	{
+	  /* We could be repurposing an undefined symbol here: make sure we
+	     reset sy_value to look like other section symbols in order to avoid
+	     trying to incorrectly resolve this section symbol later on.  */
+	  static const expressionS expr = { .X_op = O_constant };
+	  symbol_set_value_expression (secsym, &expr);
+	  symbol_set_bfdsym (secsym, sec->symbol);
+	}
       else
 	symbol_table_insert (section_symbol (sec));
     }
