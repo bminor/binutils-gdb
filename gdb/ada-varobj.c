@@ -63,10 +63,10 @@ static void
 ada_varobj_decode_var (struct value **value_ptr, struct type **type_ptr)
 {
   if (*value_ptr)
-    {
-      *value_ptr = ada_get_decoded_value (*value_ptr);
-      *type_ptr = ada_check_typedef (value_type (*value_ptr));
-    }
+    *value_ptr = ada_get_decoded_value (*value_ptr);
+
+  if (*value_ptr != nullptr)
+    *type_ptr = ada_check_typedef (value_type (*value_ptr));
   else
     *type_ptr = ada_get_decoded_type (*type_ptr);
 }

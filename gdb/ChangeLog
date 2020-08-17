@@ -1,5 +1,10 @@
 2020-08-17  Tom Tromey  <tromey@adacore.com>
 
+	* ada-varobj.c (ada_varobj_decode_var): Handle case where
+	ada_get_decoded_value returns NULL.
+
+2020-08-17  Tom Tromey  <tromey@adacore.com>
+
 	* python/py-inferior.c (infpy_search_memory): Use
 	gdb_py_object_from_ulongest.
 	* python/py-infevents.c (create_inferior_call_event_object)

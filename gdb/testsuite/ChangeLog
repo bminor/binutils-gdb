@@ -1,3 +1,10 @@
+2020-08-17  Tom Tromey  <tromey@adacore.com>
+
+	* gdb.ada/mi_var_access.exp: New file.
+	* gdb.ada/mi_var_access/mi_access.adb: New file.
+	* gdb.ada/mi_var_access/pck.adb: New file.
+	* gdb.ada/mi_var_access/pck.ads: New file.
+
 2020-08-16  Tom de Vries  <tdevries@suse.de>
 
 	PR gdb/25350
