@@ -1,5 +1,12 @@
 2020-08-20  Martin Liska  <mliska@suse.cz>
 
+	* dw2gencfi.c (dwcfi_hash_insert): Use htab_t and str_hash_*
+	functions.
+	(dwcfi_hash_find): Likewise.
+	(dwcfi_hash_find_or_make): Likewise.
+
+2020-08-20  Martin Liska  <mliska@suse.cz>
+
 	* ecoff.c (INIT_VARRAY): Use htab_t.
 	(add_string): Likewise.
 	(ecoff_read_begin_hook): Use new str_htab_create.
