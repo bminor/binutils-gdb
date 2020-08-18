@@ -43,7 +43,7 @@
 #define RELOC_DLX_VTENTRY   BFD_RELOC_VTABLE_ENTRY
 
 /* handle of the OPCODE hash table */
-static struct hash_control *op_hash = NULL;
+static htab_t op_hash = NULL;
 
 struct machine_it
 {
@@ -276,30 +276,17 @@ s_proc (int end_p)
 void
 md_begin (void)
 {
-  const char *retval = NULL;
-  int lose = 0;
   unsigned int i;
 
   /* Create a new hash table.  */
-  op_hash = hash_new ();
+  op_hash = str_htab_create ();
 
   /* Hash up all the opcodes for fast use later.  */
   for (i = 0; i < num_dlx_opcodes; i++)
     {
       const char *name = machine_opcodes[i].name;
-
-      retval = hash_insert (op_hash, name, (void *) &machine_opcodes[i]);
-
-      if (retval != NULL)
-	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   machine_opcodes[i].name, retval);
-	  lose = 1;
-	}
+      str_hash_insert (op_hash, name, (void *) &machine_opcodes[i]);
     }
-
-  if (lose)
-    as_fatal (_("Broken assembler.  No assembly attempted."));
 
   define_some_regs ();
 }
@@ -694,7 +681,7 @@ machine_ip (char *str)
     }
 
   /* Hash the opcode, insn will have the string from opcode table.  */
-  if ((insn = (struct machine_opcode *) hash_find (op_hash, str)) == NULL)
+  if ((insn = (struct machine_opcode *) str_hash_find (op_hash, str)) == NULL)
     {
       /* Handle the ret and return macro here.  */
       if ((strcmp (str, "ret") == 0) || (strcmp (str, "return") == 0))

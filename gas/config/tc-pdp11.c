@@ -82,7 +82,7 @@ const pseudo_typeS md_pseudo_table[] =
   { 0, 0, 0 },
 };
 
-static struct hash_control *insn_hash = NULL;
+static htab_t insn_hash = NULL;
 
 static int
 set_option (const char *arg)
@@ -188,14 +188,14 @@ md_begin (void)
 
   init_defaults ();
 
-  insn_hash = hash_new ();
+  insn_hash = str_htab_create ();
   if (insn_hash == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
   for (i = 0; i < pdp11_num_opcodes; i++)
-    hash_insert (insn_hash, pdp11_opcodes[i].name, (void *) (pdp11_opcodes + i));
+    str_hash_insert (insn_hash, pdp11_opcodes[i].name, (void *) (pdp11_opcodes + i));
   for (i = 0; i < pdp11_num_aliases; i++)
-    hash_insert (insn_hash, pdp11_aliases[i].name, (void *) (pdp11_aliases + i));
+    str_hash_insert (insn_hash, pdp11_aliases[i].name, (void *) (pdp11_aliases + i));
 }
 
 void
@@ -713,7 +713,7 @@ md_assemble (char *instruction_string)
 
   c = *p;
   *p = '\0';
-  op = (struct pdp11_opcode *)hash_find (insn_hash, str);
+  op = (struct pdp11_opcode *)str_hash_find (insn_hash, str);
   *p = c;
   if (op == 0)
     {

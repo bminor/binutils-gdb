@@ -451,21 +451,21 @@ get_reg_expected_msg (aarch64_reg_type reg_type)
 /* Instructions take 4 bytes in the object file.  */
 #define INSN_SIZE	4
 
-static struct hash_control *aarch64_ops_hsh;
-static struct hash_control *aarch64_cond_hsh;
-static struct hash_control *aarch64_shift_hsh;
-static struct hash_control *aarch64_sys_regs_hsh;
-static struct hash_control *aarch64_pstatefield_hsh;
-static struct hash_control *aarch64_sys_regs_ic_hsh;
-static struct hash_control *aarch64_sys_regs_dc_hsh;
-static struct hash_control *aarch64_sys_regs_at_hsh;
-static struct hash_control *aarch64_sys_regs_tlbi_hsh;
-static struct hash_control *aarch64_sys_regs_sr_hsh;
-static struct hash_control *aarch64_reg_hsh;
-static struct hash_control *aarch64_barrier_opt_hsh;
-static struct hash_control *aarch64_nzcv_hsh;
-static struct hash_control *aarch64_pldop_hsh;
-static struct hash_control *aarch64_hint_opt_hsh;
+static htab_t aarch64_ops_hsh;
+static htab_t aarch64_cond_hsh;
+static htab_t aarch64_shift_hsh;
+static htab_t aarch64_sys_regs_hsh;
+static htab_t aarch64_pstatefield_hsh;
+static htab_t aarch64_sys_regs_ic_hsh;
+static htab_t aarch64_sys_regs_dc_hsh;
+static htab_t aarch64_sys_regs_at_hsh;
+static htab_t aarch64_sys_regs_tlbi_hsh;
+static htab_t aarch64_sys_regs_sr_hsh;
+static htab_t aarch64_reg_hsh;
+static htab_t aarch64_barrier_opt_hsh;
+static htab_t aarch64_nzcv_hsh;
+static htab_t aarch64_pldop_hsh;
+static htab_t aarch64_hint_opt_hsh;
 
 /* Stuff needed to resolve the label ambiguity
    As:
@@ -764,7 +764,7 @@ parse_reg (char **ccp)
     p++;
   while (ISALPHA (*p) || ISDIGIT (*p) || *p == '_');
 
-  reg = (reg_entry *) hash_find_n (aarch64_reg_hsh, start, p - start);
+  reg = (reg_entry *) str_hash_find_n (aarch64_reg_hsh, start, p - start);
 
   if (!reg)
     return NULL;
@@ -1315,7 +1315,7 @@ insert_reg_alias (char *str, int number, aarch64_reg_type type)
   reg_entry *new;
   const char *name;
 
-  if ((new = hash_find (aarch64_reg_hsh, str)) != 0)
+  if ((new = str_hash_find (aarch64_reg_hsh, str)) != 0)
     {
       if (new->builtin)
 	as_warn (_("ignoring attempt to redefine built-in register '%s'"),
@@ -1337,8 +1337,7 @@ insert_reg_alias (char *str, int number, aarch64_reg_type type)
   new->type = type;
   new->builtin = FALSE;
 
-  if (hash_insert (aarch64_reg_hsh, name, (void *) new))
-    abort ();
+  str_hash_insert (aarch64_reg_hsh, name, (void *) new);
 
   return new;
 }
@@ -1367,7 +1366,7 @@ create_register_alias (char *newname, char *p)
   if (*oldname == '\0')
     return FALSE;
 
-  old = hash_find (aarch64_reg_hsh, oldname);
+  old = str_hash_find (aarch64_reg_hsh, oldname);
   if (!old)
     {
       as_warn (_("unknown register '%s' -- .req ignored"), oldname);
@@ -1456,7 +1455,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
     as_bad (_("invalid syntax for .unreq directive"));
   else
     {
-      reg_entry *reg = hash_find (aarch64_reg_hsh, name);
+      reg_entry *reg = str_hash_find (aarch64_reg_hsh, name);
 
       if (!reg)
 	as_bad (_("unknown register alias '%s'"), name);
@@ -1468,7 +1467,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	  char *p;
 	  char *nbuf;
 
-	  hash_delete (aarch64_reg_hsh, name, FALSE);
+	  str_hash_delete (aarch64_reg_hsh, name);
 	  free ((char *) reg->name);
 	  free (reg);
 
@@ -1479,20 +1478,20 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	  nbuf = strdup (name);
 	  for (p = nbuf; *p; p++)
 	    *p = TOUPPER (*p);
-	  reg = hash_find (aarch64_reg_hsh, nbuf);
+	  reg = str_hash_find (aarch64_reg_hsh, nbuf);
 	  if (reg)
 	    {
-	      hash_delete (aarch64_reg_hsh, nbuf, FALSE);
+	      str_hash_delete (aarch64_reg_hsh, nbuf);
 	      free ((char *) reg->name);
 	      free (reg);
 	    }
 
 	  for (p = nbuf; *p; p++)
 	    *p = TOLOWER (*p);
-	  reg = hash_find (aarch64_reg_hsh, nbuf);
+	  reg = str_hash_find (aarch64_reg_hsh, nbuf);
 	  if (reg)
 	    {
-	      hash_delete (aarch64_reg_hsh, nbuf, FALSE);
+	      str_hash_delete (aarch64_reg_hsh, nbuf);
 	      free ((char *) reg->name);
 	      free (reg);
 	    }
@@ -3122,7 +3121,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
       return FALSE;
     }
 
-  shift_op = hash_find_n (aarch64_shift_hsh, *str, p - *str);
+  shift_op = str_hash_find_n (aarch64_shift_hsh, *str, p - *str);
 
   if (shift_op == NULL)
     {
@@ -3979,7 +3978,7 @@ parse_pldop (char **str)
   while (ISALNUM (*q))
     q++;
 
-  o = hash_find_n (aarch64_pldop_hsh, p, q - p);
+  o = str_hash_find_n (aarch64_pldop_hsh, p, q - p);
   if (!o)
     return PARSE_FAIL;
 
@@ -4000,7 +3999,7 @@ parse_barrier (char **str)
   while (ISALPHA (*q))
     q++;
 
-  o = hash_find_n (aarch64_barrier_opt_hsh, p, q - p);
+  o = str_hash_find_n (aarch64_barrier_opt_hsh, p, q - p);
   if (!o)
     return PARSE_FAIL;
 
@@ -4022,7 +4021,7 @@ parse_barrier_psb (char **str,
   while (ISALPHA (*q))
     q++;
 
-  o = hash_find_n (aarch64_hint_opt_hsh, p, q - p);
+  o = str_hash_find_n (aarch64_hint_opt_hsh, p, q - p);
   if (!o)
     {
       set_fatal_syntax_error
@@ -4057,7 +4056,7 @@ parse_bti_operand (char **str,
   while (ISALPHA (*q))
     q++;
 
-  o = hash_find_n (aarch64_hint_opt_hsh, p, q - p);
+  o = str_hash_find_n (aarch64_hint_opt_hsh, p, q - p);
   if (!o)
     {
       set_fatal_syntax_error
@@ -4095,7 +4094,7 @@ parse_bti_operand (char **str,
 */
 
 static int
-parse_sys_reg (char **str, struct hash_control *sys_regs,
+parse_sys_reg (char **str, htab_t sys_regs,
 	       int imple_defined_p, int pstatefield_p,
 	       uint32_t* flags)
 {
@@ -4116,7 +4115,7 @@ parse_sys_reg (char **str, struct hash_control *sys_regs,
   if (p - buf != q - *str)
     return PARSE_FAIL;
 
-  o = hash_find (sys_regs, buf);
+  o = str_hash_find (sys_regs, buf);
   if (!o)
     {
       if (!imple_defined_p)
@@ -4162,7 +4161,7 @@ parse_sys_reg (char **str, struct hash_control *sys_regs,
    for the option, or NULL.  */
 
 static const aarch64_sys_ins_reg *
-parse_sys_ins_reg (char **str, struct hash_control *sys_ins_regs)
+parse_sys_ins_reg (char **str, htab_t sys_ins_regs)
 {
   char *p, *q;
   char buf[AARCH64_MAX_SYSREG_NAME_LEN];
@@ -4180,7 +4179,7 @@ parse_sys_ins_reg (char **str, struct hash_control *sys_ins_regs)
   if (p - buf != q - *str)
     return NULL;
 
-  o = hash_find (sys_ins_regs, buf);
+  o = str_hash_find (sys_ins_regs, buf);
   if (!o)
     return NULL;
 
@@ -5096,7 +5095,7 @@ lookup_mnemonic (const char *start, int len)
 {
   templates *templ = NULL;
 
-  templ = hash_find_n (aarch64_ops_hsh, start, len);
+  templ = str_hash_find_n (aarch64_ops_hsh, start, len);
   return templ;
 }
 
@@ -5127,7 +5126,7 @@ opcode_lookup (char **str)
   /* Handle a possible condition.  */
   if (dot)
     {
-      cond = hash_find_n (aarch64_cond_hsh, dot + 1, end - dot - 1);
+      cond = str_hash_find_n (aarch64_cond_hsh, dot + 1, end - dot - 1);
       if (cond)
 	{
 	  inst.cond = cond->value;
@@ -6178,7 +6177,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 
 	case AARCH64_OPND_NZCV:
 	  {
-	    const asm_nzcv *nzcv = hash_find_n (aarch64_nzcv_hsh, str, 4);
+	    const asm_nzcv *nzcv = str_hash_find_n (aarch64_nzcv_hsh, str, 4);
 	    if (nzcv != NULL)
 	      {
 		str += 4;
@@ -6197,7 +6196,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    do
 	      str++;
 	    while (ISALPHA (*str));
-	    info->cond = hash_find_n (aarch64_cond_hsh, start, str - start);
+	    info->cond = str_hash_find_n (aarch64_cond_hsh, start, str - start);
 	    if (info->cond == NULL)
 	      {
 		set_syntax_error (_("invalid condition"));
@@ -8621,17 +8620,13 @@ aarch64_adjust_symtab (void)
 }
 
 static void
-checked_hash_insert (struct hash_control *table, const char *key, void *value)
+checked_hash_insert (htab_t table, const char *key, void *value)
 {
-  const char *hash_err;
-
-  hash_err = hash_insert (table, key, value);
-  if (hash_err)
-    printf ("Internal Error:  Can't hash %s\n", key);
+  str_hash_insert (table, key, value);
 }
 
 static void
-sysreg_hash_insert (struct hash_control *table, const char *key, void *value)
+sysreg_hash_insert (htab_t table, const char *key, void *value)
 {
   gas_assert (strlen (key) < AARCH64_MAX_SYSREG_NAME_LEN);
   checked_hash_insert (table, key, value);
@@ -8645,7 +8640,7 @@ fill_instruction_hash_table (void)
   while (opcode->name != NULL)
     {
       templates *templ, *new_templ;
-      templ = hash_find (aarch64_ops_hsh, opcode->name);
+      templ = str_hash_find (aarch64_ops_hsh, opcode->name);
 
       new_templ = XNEW (templates);
       new_templ->opcode = opcode;
@@ -8691,21 +8686,21 @@ md_begin (void)
   unsigned mach;
   unsigned int i;
 
-  if ((aarch64_ops_hsh = hash_new ()) == NULL
-      || (aarch64_cond_hsh = hash_new ()) == NULL
-      || (aarch64_shift_hsh = hash_new ()) == NULL
-      || (aarch64_sys_regs_hsh = hash_new ()) == NULL
-      || (aarch64_pstatefield_hsh = hash_new ()) == NULL
-      || (aarch64_sys_regs_ic_hsh = hash_new ()) == NULL
-      || (aarch64_sys_regs_dc_hsh = hash_new ()) == NULL
-      || (aarch64_sys_regs_at_hsh = hash_new ()) == NULL
-      || (aarch64_sys_regs_tlbi_hsh = hash_new ()) == NULL
-      || (aarch64_sys_regs_sr_hsh = hash_new ()) == NULL
-      || (aarch64_reg_hsh = hash_new ()) == NULL
-      || (aarch64_barrier_opt_hsh = hash_new ()) == NULL
-      || (aarch64_nzcv_hsh = hash_new ()) == NULL
-      || (aarch64_pldop_hsh = hash_new ()) == NULL
-      || (aarch64_hint_opt_hsh = hash_new ()) == NULL)
+  if ((aarch64_ops_hsh = str_htab_create ()) == NULL
+      || (aarch64_cond_hsh = str_htab_create ()) == NULL
+      || (aarch64_shift_hsh = str_htab_create ()) == NULL
+      || (aarch64_sys_regs_hsh = str_htab_create ()) == NULL
+      || (aarch64_pstatefield_hsh = str_htab_create ()) == NULL
+      || (aarch64_sys_regs_ic_hsh = str_htab_create ()) == NULL
+      || (aarch64_sys_regs_dc_hsh = str_htab_create ()) == NULL
+      || (aarch64_sys_regs_at_hsh = str_htab_create ()) == NULL
+      || (aarch64_sys_regs_tlbi_hsh = str_htab_create ()) == NULL
+      || (aarch64_sys_regs_sr_hsh = str_htab_create ()) == NULL
+      || (aarch64_reg_hsh = str_htab_create ()) == NULL
+      || (aarch64_barrier_opt_hsh = str_htab_create ()) == NULL
+      || (aarch64_nzcv_hsh = str_htab_create ()) == NULL
+      || (aarch64_pldop_hsh = str_htab_create ()) == NULL
+      || (aarch64_hint_opt_hsh = str_htab_create ()) == NULL)
     as_fatal (_("virtual memory exhausted"));
 
   fill_instruction_hash_table ();

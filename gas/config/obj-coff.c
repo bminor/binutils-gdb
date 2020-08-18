@@ -117,28 +117,24 @@ stack_pop (stack *st)
 
 /* Maintain a list of the tagnames of the structures.  */
 
-static struct hash_control *tag_hash;
+static htab_t tag_hash;
 
 static void
 tag_init (void)
 {
-  tag_hash = hash_new ();
+  tag_hash = str_htab_create ();
 }
 
 static void
 tag_insert (const char *name, symbolS *symbolP)
 {
-  const char *error_string;
-
-  if ((error_string = hash_jam (tag_hash, name, (char *) symbolP)))
-    as_fatal (_("Inserting \"%s\" into structure table failed: %s"),
-	      name, error_string);
+  str_hash_insert (tag_hash, name, (char *) symbolP);
 }
 
 static symbolS *
 tag_find (char *name)
 {
-  return (symbolS *) hash_find (tag_hash, name);
+  return (symbolS *) str_hash_find (tag_hash, name);
 }
 
 static symbolS *

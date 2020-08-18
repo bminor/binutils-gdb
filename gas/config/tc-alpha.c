@@ -297,10 +297,10 @@ static unsigned alpha_target = AXP_OPCODE_BASE;
 static const char *alpha_target_name = "<all>";
 
 /* The hash table of instruction opcodes.  */
-static struct hash_control *alpha_opcode_hash;
+static htab_t alpha_opcode_hash;
 
 /* The hash table of macro opcodes.  */
-static struct hash_control *alpha_macro_hash;
+static htab_t alpha_macro_hash;
 
 #ifdef OBJ_ECOFF
 /* The $gp relocation symbol.  */
@@ -514,7 +514,7 @@ struct alpha_reloc_tag
 };
 
 /* Hash table to link up literals with the appropriate lituse.  */
-static struct hash_control *alpha_literal_hash;
+static htab_t alpha_literal_hash;
 
 /* Sequence numbers for internal use by macros.  */
 static long next_sequence_num = -1;
@@ -589,11 +589,10 @@ get_alpha_reloc_tag (long sequence)
 
   sprintf (buffer, "!%ld", sequence);
 
-  info = (struct alpha_reloc_tag *) hash_find (alpha_literal_hash, buffer);
+  info = (struct alpha_reloc_tag *) str_hash_find (alpha_literal_hash, buffer);
   if (! info)
     {
       size_t len = strlen (buffer);
-      const char *errmsg;
 
       info = (struct alpha_reloc_tag *)
           xcalloc (sizeof (struct alpha_reloc_tag) + len, 1);
@@ -601,9 +600,7 @@ get_alpha_reloc_tag (long sequence)
       info->segment = now_seg;
       info->sequence = sequence;
       strcpy (info->string, buffer);
-      errmsg = hash_insert (alpha_literal_hash, info->string, (void *) info);
-      if (errmsg)
-	as_fatal ("%s", errmsg);
+      str_hash_insert (alpha_literal_hash, info->string, (void *) info);
 #ifdef OBJ_EVAX
       info->sym = 0;
       info->psym = 0;
@@ -1171,7 +1168,7 @@ assemble_tokens_to_insn (const char *opname,
   const struct alpha_opcode *opcode;
 
   /* Search opcodes.  */
-  opcode = (const struct alpha_opcode *) hash_find (alpha_opcode_hash, opname);
+  opcode = (const struct alpha_opcode *) str_hash_find (alpha_opcode_hash, opname);
   if (opcode)
     {
       int cpumatch;
@@ -3319,7 +3316,7 @@ assemble_tokens (const char *opname,
   if (local_macros_on)
     {
       macro = ((const struct alpha_macro *)
-	       hash_find (alpha_macro_hash, opname));
+	       str_hash_find (alpha_macro_hash, opname));
       if (macro)
 	{
 	  found_something = 1;
@@ -3333,7 +3330,7 @@ assemble_tokens (const char *opname,
     }
 
   /* Search opcodes.  */
-  opcode = (const struct alpha_opcode *) hash_find (alpha_opcode_hash, opname);
+  opcode = (const struct alpha_opcode *) str_hash_find (alpha_opcode_hash, opname);
   if (opcode)
     {
       found_something = 1;
@@ -5419,17 +5416,14 @@ md_begin (void)
   }
 
   /* Create the opcode hash table.  */
-  alpha_opcode_hash = hash_new ();
+  alpha_opcode_hash = str_htab_create ();
 
   for (i = 0; i < alpha_num_opcodes;)
     {
-      const char *name, *retval, *slash;
+      const char *name, *slash;
 
       name = alpha_opcodes[i].name;
-      retval = hash_insert (alpha_opcode_hash, name, (void *) &alpha_opcodes[i]);
-      if (retval)
-	as_fatal (_("internal error: can't hash opcode `%s': %s"),
-		  name, retval);
+      str_hash_insert (alpha_opcode_hash, name, (void *) &alpha_opcodes[i]);
 
       /* Some opcodes include modifiers of various sorts with a "/mod"
 	 syntax, like the architecture manual suggests.  However, for
@@ -5443,7 +5437,7 @@ md_begin (void)
 	  memcpy (p, name, slash - name);
 	  strcpy (p + (slash - name), slash + 1);
 
-	  (void) hash_insert (alpha_opcode_hash, p, (void *) &alpha_opcodes[i]);
+	  (void) str_hash_insert (alpha_opcode_hash, p, (void *) &alpha_opcodes[i]);
 	  /* Ignore failures -- the opcode table does duplicate some
 	     variants in different forms, like "hw_stq" and "hw_st/q".  */
 	}
@@ -5455,17 +5449,14 @@ md_begin (void)
     }
 
   /* Create the macro hash table.  */
-  alpha_macro_hash = hash_new ();
+  alpha_macro_hash = str_htab_create ();
 
   for (i = 0; i < alpha_num_macros;)
     {
-      const char *name, *retval;
+      const char *name;
 
       name = alpha_macros[i].name;
-      retval = hash_insert (alpha_macro_hash, name, (void *) &alpha_macros[i]);
-      if (retval)
-	as_fatal (_("internal error: can't hash macro `%s': %s"),
-		  name, retval);
+      str_hash_insert (alpha_macro_hash, name, (void *) &alpha_macros[i]);
 
       while (++i < alpha_num_macros
 	     && (alpha_macros[i].name == name
@@ -5520,7 +5511,7 @@ md_begin (void)
 #endif
 
   /* Create literal lookup hash table.  */
-  alpha_literal_hash = hash_new ();
+  alpha_literal_hash = str_htab_create ();
 
   subseg_set (text_section, 0);
 }

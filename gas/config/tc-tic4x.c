@@ -53,10 +53,10 @@
 #define TIC4X_ALT_SYNTAX
 
 /* Handle of the inst mnemonic hash table.  */
-static struct hash_control *tic4x_op_hash = NULL;
+static htab_t tic4x_op_hash = NULL;
 
 /* Handle asg pseudo.  */
-static struct hash_control *tic4x_asg_hash = NULL;
+static htab_t tic4x_asg_hash = NULL;
 
 static unsigned int tic4x_cpu = 0;        /* Default to TMS320C40.  */
 static unsigned int tic4x_revision = 0;   /* CPU revision */
@@ -727,10 +727,7 @@ tic4x_asg (int x ATTRIBUTE_UNUSED)
   c = get_symbol_name (&name);	/* Get terminator.  */
   str = xstrdup (str);
   name = xstrdup (name);
-  if (hash_find (tic4x_asg_hash, name))
-    hash_replace (tic4x_asg_hash, name, (void *) str);
-  else
-    hash_insert (tic4x_asg_hash, name, (void *) str);
+  str_hash_insert (tic4x_asg_hash, name, str);
   (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
 }
@@ -1209,23 +1206,17 @@ tic4x_init_symbols (void)
 }
 
 /* Insert a new instruction template into hash table.  */
-static int
+static void
 tic4x_inst_insert (const tic4x_inst_t *inst)
 {
   static char prev_name[16];
-  const char *retval = NULL;
 
   /* Only insert the first name if have several similar entries.  */
   if (!strcmp (inst->name, prev_name) || inst->name[0] == '\0')
-    return 1;
+    return;
 
-  retval = hash_insert (tic4x_op_hash, inst->name, (void *) inst);
-  if (retval != NULL)
-    fprintf (stderr, "internal error: can't hash `%s': %s\n",
-	     inst->name, retval);
-  else
-    strcpy (prev_name, inst->name);
-  return retval == NULL;
+  str_hash_insert (tic4x_op_hash, inst->name, (void *) inst);
+  strcpy (prev_name, inst->name);
 }
 
 /* Make a new instruction template.  */
@@ -1258,13 +1249,12 @@ tic4x_inst_make (const char *name, unsigned long opcode, const char *args)
 }
 
 /* Add instruction template, creating dynamic templates as required.  */
-static int
+static void
 tic4x_inst_add (const tic4x_inst_t *insts)
 {
   const char *s = insts->name;
   char *d;
   unsigned int i;
-  int ok = 1;
   char name[16];
 
   d = name;
@@ -1272,7 +1262,7 @@ tic4x_inst_add (const tic4x_inst_t *insts)
   /* We do not care about INSNs that is not a part of our
      oplevel setting.  */
   if ((insts->oplevel & tic4x_oplevel) == 0)
-    return ok;
+    return;
 
   while (1)
     {
@@ -1296,8 +1286,8 @@ tic4x_inst_add (const tic4x_inst_t *insts)
 	      *e = '\0';
 
 	      /* If instruction found then have already processed it.  */
-	      if (hash_find (tic4x_op_hash, name))
-		return 1;
+	      if (str_hash_find (tic4x_op_hash, name))
+		return;
 
 	      do
 		{
@@ -1306,18 +1296,17 @@ tic4x_inst_add (const tic4x_inst_t *insts)
 					 (*s == 'B' ? 16 : 23)),
 					insts[k].args);
 		  if (k == 0)	/* Save strcmp() with following func.  */
-		    ok &= tic4x_inst_insert (inst);
+		    tic4x_inst_insert (inst);
 		  k++;
 		}
 	      while (!strcmp (insts->name,
 			      insts[k].name));
 	    }
-	  return ok;
-	  break;
+	  return;
 
 	case '\0':
-	  return tic4x_inst_insert (insts);
-	  break;
+	  tic4x_inst_insert (insts);
+	  return;
 
 	default:
 	  *d++ = *s++;
@@ -1332,7 +1321,6 @@ tic4x_inst_add (const tic4x_inst_t *insts)
 void
 md_begin (void)
 {
-  int ok = 1;
   unsigned int i;
 
   /* Setup the proper opcode level according to the
@@ -1364,20 +1352,17 @@ md_begin (void)
     tic4x_oplevel |= OP_IDLE2;
 
   /* Create hash table for mnemonics.  */
-  tic4x_op_hash = hash_new ();
+  tic4x_op_hash = str_htab_create ();
 
   /* Create hash table for asg pseudo.  */
-  tic4x_asg_hash = hash_new ();
+  tic4x_asg_hash = str_htab_create ();
 
   /* Add mnemonics to hash table, expanding conditional mnemonics on fly.  */
   for (i = 0; i < tic4x_num_insts; i++)
-    ok &= tic4x_inst_add (tic4x_insts + i);
+    tic4x_inst_add (tic4x_insts + i);
 
   /* Create dummy inst to avoid errors accessing end of table.  */
   tic4x_inst_make ("", 0, "");
-
-  if (!ok)
-    as_fatal ("Broken assembler.  No assembly attempted.");
 
   /* Add registers to symbol table.  */
   tic4x_init_regtable ();
@@ -1509,7 +1494,7 @@ tic4x_operand_parse (char *s, tic4x_operand_t *operand)
 
   c = get_symbol_name (&str);	/* Get terminator.  */
   new_pointer = input_line_pointer;
-  if (strlen (str) && (entry = hash_find (tic4x_asg_hash, str)) != NULL)
+  if (strlen (str) && (entry = str_hash_find (tic4x_asg_hash, str)) != NULL)
     {
       (void) restore_line_pointer (c);
       input_line_pointer = (char *) entry;
@@ -2444,7 +2429,7 @@ md_assemble (char *str)
       /* Skip past instruction mnemonic.  */
       while (*s && *s != ' ')
 	s++;
-      if (*s)			/* Null terminate for hash_find.  */
+      if (*s)			/* Null terminate for str_hash_find.  */
 	*s++ = '\0';		/* and skip past null.  */
       len = strlen (insn->name);
       snprintf (insn->name + len, TIC4X_NAME_MAX - len, "_%s", str);
@@ -2465,7 +2450,7 @@ md_assemble (char *str)
   if (insn->in_use)
     {
       if ((insn->inst = (struct tic4x_inst *)
-	   hash_find (tic4x_op_hash, insn->name)) == NULL)
+	   str_hash_find (tic4x_op_hash, insn->name)) == NULL)
 	{
 	  as_bad (_("Unknown opcode `%s'."), insn->name);
 	  insn->parallel = 0;
@@ -2508,7 +2493,7 @@ md_assemble (char *str)
       s = str;
       while (*s && *s != ' ')	/* Skip past instruction mnemonic.  */
 	s++;
-      if (*s)			/* Null terminate for hash_find.  */
+      if (*s)			/* Null terminate for str_hash_find.  */
 	*s++ = '\0';		/* and skip past null.  */
       strncpy (insn->name, str, TIC4X_NAME_MAX - 1);
       insn->name[TIC4X_NAME_MAX - 1] = '\0';

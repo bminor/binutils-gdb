@@ -754,8 +754,8 @@ size_t md_longopts_size = sizeof (md_longopts);
 
 static struct csky_insn_info csky_insn;
 
-static struct hash_control *csky_opcodes_hash;
-static struct hash_control *csky_macros_hash;
+static htab_t csky_opcodes_hash;
+static htab_t csky_macros_hash;
 
 static struct csky_macro_info v1_macros_table[] =
 {
@@ -1356,16 +1356,16 @@ md_begin (void)
     }
 
   /* Establish hash table for opcodes and macros.  */
-  csky_macros_hash = hash_new ();
-  csky_opcodes_hash = hash_new ();
+  csky_macros_hash = str_htab_create ();
+  csky_opcodes_hash = str_htab_create ();
   for ( ; opcode->mnemonic != NULL; opcode++)
     if ((isa_flag & (opcode->isa_flag16 | opcode->isa_flag32)) != 0)
-      hash_insert (csky_opcodes_hash, opcode->mnemonic, (char *)opcode);
+      str_hash_insert (csky_opcodes_hash, opcode->mnemonic, (char *)opcode);
   for ( ; macro->name != NULL; macro++)
     if ((isa_flag & macro->isa_flag) != 0)
-      hash_insert (csky_macros_hash, macro->name, (char *)macro);
+      str_hash_insert (csky_macros_hash, macro->name, (char *)macro);
   if (do_nolrw && (isa_flag & CSKYV2_ISA_1E2) != 0)
-    hash_insert (csky_macros_hash,
+    str_hash_insert (csky_macros_hash,
 		 v2_lrw_macro_opcode.name,
 		 (char *)&v2_lrw_macro_opcode);
   /* Set e_flag to ELF Head.  */
@@ -2933,9 +2933,9 @@ parse_opcode (char *str)
   csky_insn.number = csky_count_operands (opcode_end);
 
   /* Find hash by name in csky_macros_hash and csky_opcodes_hash.  */
-  csky_insn.macro = (struct csky_macro_info *) hash_find (csky_macros_hash,
+  csky_insn.macro = (struct csky_macro_info *) str_hash_find (csky_macros_hash,
 							  macro_name);
-  csky_insn.opcode = (struct csky_opcode *) hash_find (csky_opcodes_hash,
+  csky_insn.opcode = (struct csky_opcode *) str_hash_find (csky_opcodes_hash,
 							name);
 
   if (csky_insn.macro == NULL && csky_insn.opcode == NULL)
@@ -3157,7 +3157,7 @@ get_operand_value (struct csky_opcode_info *op,
 	    {
 	      const char *name = "movi";
 	      csky_insn.opcode = (struct csky_opcode *)
-		hash_find (csky_opcodes_hash, name);
+		str_hash_find (csky_opcodes_hash, name);
 	      csky_insn.val[csky_insn.idx - 1] = 1 << val;
 	    }
 	  return TRUE;
@@ -3191,7 +3191,7 @@ get_operand_value (struct csky_opcode_info *op,
 	      {
 		const char *name = "movi";
 		csky_insn.opcode = (struct csky_opcode *)
-		  hash_find (csky_opcodes_hash, name);
+		  str_hash_find (csky_opcodes_hash, name);
 		as_warn (_("translating mgeni to movi"));
 	      }
 	    else
@@ -3225,7 +3225,7 @@ get_operand_value (struct csky_opcode_info *op,
 	    {
 	      const char *op_movi = "movi";
 	      csky_insn.opcode = (struct csky_opcode *)
-		hash_find (csky_opcodes_hash, op_movi);
+		str_hash_find (csky_opcodes_hash, op_movi);
 	      if (csky_insn.opcode == NULL)
 		return FALSE;
 	      csky_insn.val[csky_insn.idx - 1] = (1 << mask_val) - 1;
@@ -3275,7 +3275,7 @@ get_operand_value (struct csky_opcode_info *op,
 	    {
 	      const char *op_movi = "movi";
 	      csky_insn.opcode = (struct csky_opcode *)
-		hash_find (csky_opcodes_hash, op_movi);
+		str_hash_find (csky_opcodes_hash, op_movi);
 	      if (csky_insn.opcode == NULL)
 		return FALSE;
 	      csky_insn.val[csky_insn.idx - 1] = (1 << (mask_val + 1)) - 1;
@@ -5955,7 +5955,7 @@ v1_work_jbsr (void)
       /* Using jsri instruction.  */
       const char *name = "jsri";
       csky_insn.opcode = (struct csky_opcode *)
-	hash_find (csky_opcodes_hash, name);
+	str_hash_find (csky_opcodes_hash, name);
       csky_insn.opcode_idx = 0;
       csky_insn.isize = 2;
 
@@ -6293,7 +6293,7 @@ v2_work_rotlc (void)
 {
   const char *name = "addc";
   csky_insn.opcode
-    = (struct csky_opcode *) hash_find (csky_opcodes_hash, name);
+    = (struct csky_opcode *) str_hash_find (csky_opcodes_hash, name);
   csky_insn.opcode_idx = 0;
   if (csky_insn.isize == 2)
     {
@@ -6331,7 +6331,7 @@ v2_work_bgeni (void)
       val >>= 16;
     }
   csky_insn.opcode
-    = (struct csky_opcode *) hash_find (csky_opcodes_hash, name);
+    = (struct csky_opcode *) str_hash_find (csky_opcodes_hash, name);
   csky_insn.opcode_idx = 0;
   csky_insn.val[1] = val;
 
@@ -6349,7 +6349,7 @@ v2_work_not (void)
 {
   const char *name = "nor";
   csky_insn.opcode
-    = (struct csky_opcode *) hash_find (csky_opcodes_hash, name);
+    = (struct csky_opcode *) str_hash_find (csky_opcodes_hash, name);
   csky_insn.opcode_idx = 0;
   if (csky_insn.number == 1)
     {

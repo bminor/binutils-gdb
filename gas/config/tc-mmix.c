@@ -217,7 +217,7 @@ struct option md_longopts[] =
 
 size_t md_longopts_size = sizeof (md_longopts);
 
-static struct hash_control *mmix_opcode_hash;
+static htab_t mmix_opcode_hash;
 
 /* We use these when implementing the PREFIX pseudo.  */
 char *mmix_current_prefix;
@@ -769,13 +769,13 @@ mmix_md_begin (void)
      only way to make ':' part of a name, and a name beginner.  */
   lex_type[':'] = (LEX_NAME | LEX_BEGIN_NAME);
 
-  mmix_opcode_hash = hash_new ();
+  mmix_opcode_hash = str_htab_create ();
 
   real_reg_section
     = bfd_make_section_old_way (stdoutput, MMIX_REG_SECTION_NAME);
 
   for (opcode = mmix_opcodes; opcode->name; opcode++)
-    hash_insert (mmix_opcode_hash, opcode->name, (char *) opcode);
+    str_hash_insert (mmix_opcode_hash, opcode->name, (char *) opcode);
 
   /* We always insert the ordinary registers 0..255 as registers.  */
   for (i = 0; i < 256; i++)
@@ -843,7 +843,7 @@ md_assemble (char *str)
       *operands++ = '\0';
     }
 
-  instruction = (struct mmix_opcode *) hash_find (mmix_opcode_hash, str);
+  instruction = (struct mmix_opcode *) str_hash_find (mmix_opcode_hash, str);
   if (instruction == NULL)
     {
       as_bad (_("unknown opcode: `%s'"), str);

@@ -599,7 +599,7 @@ const pseudo_typeS md_pseudo_table[] =
 };
 
 /* Opcode hash table.  */
-static struct hash_control *v850_hash;
+static htab_t v850_hash;
 
 /* This table is sorted.  Suitable for searching by a binary search.  */
 static const struct reg_name pre_defined_registers[] =
@@ -1952,7 +1952,7 @@ md_begin (void)
   if (soft_float == -1)
     soft_float = machine < bfd_mach_v850e2v3;
 
-  v850_hash = hash_new ();
+  v850_hash = str_htab_create ();
 
   /* Insert unique names into hash table.  The V850 instruction set
      has many identical opcode names that have different opcodes based
@@ -1964,7 +1964,8 @@ md_begin (void)
       if (strcmp (prev_name, op->name))
 	{
 	  prev_name = (char *) op->name;
-	  hash_insert (v850_hash, op->name, (char *) op);
+	  if (str_hash_find (v850_hash, op->name) == NULL)
+	    str_hash_insert (v850_hash, op->name, (char *) op);
 	}
       op++;
     }
@@ -2321,7 +2322,7 @@ md_assemble (char *str)
     *s++ = '\0';
 
   /* Find the first opcode with the proper name.  */
-  opcode = (struct v850_opcode *) hash_find (v850_hash, str);
+  opcode = (struct v850_opcode *) str_hash_find (v850_hash, str);
   if (opcode == NULL)
     {
       /* xgettext:c-format  */

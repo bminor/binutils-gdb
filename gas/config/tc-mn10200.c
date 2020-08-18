@@ -101,7 +101,7 @@ const pseudo_typeS md_pseudo_table[] =
 };
 
 /* Opcode hash table.  */
-static struct hash_control *mn10200_hash;
+static htab_t mn10200_hash;
 
 /* This table is sorted. Suitable for searching by a binary search.  */
 static const struct reg_name data_registers[] =
@@ -685,7 +685,7 @@ md_begin (void)
   const char *prev_name = "";
   const struct mn10200_opcode *op;
 
-  mn10200_hash = hash_new ();
+  mn10200_hash = str_htab_create ();
 
   /* Insert unique names into hash table.  The MN10200 instruction set
      has many identical opcode names that have different opcodes based
@@ -698,7 +698,7 @@ md_begin (void)
       if (strcmp (prev_name, op->name))
 	{
 	  prev_name = (char *) op->name;
-	  hash_insert (mn10200_hash, op->name, (char *) op);
+	  str_hash_insert (mn10200_hash, op->name, (char *) op);
 	}
       op++;
     }
@@ -890,7 +890,7 @@ md_assemble (char *str)
     *s++ = '\0';
 
   /* Find the first opcode with the proper name.  */
-  opcode = (struct mn10200_opcode *) hash_find (mn10200_hash, str);
+  opcode = (struct mn10200_opcode *) str_hash_find (mn10200_hash, str);
   if (opcode == NULL)
     {
       as_bad (_("Unrecognized opcode: `%s'"), str);

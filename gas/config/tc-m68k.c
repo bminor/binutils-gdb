@@ -1320,7 +1320,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
 
 /* Handle of the OPCODE hash table.  NULL means any use before
    m68k_ip_begin() will crash.  */
-static struct hash_control *op_hash;
+static htab_t op_hash;
 
 /* Assemble an m68k instruction.  */
 
@@ -1375,7 +1375,7 @@ m68k_ip (char *instring)
 
   c = *p;
   *p = '\0';
-  opcode = (const struct m68k_incant *) hash_find (op_hash, instring);
+  opcode = (const struct m68k_incant *) str_hash_find (op_hash, instring);
   *p = c;
 
   if (pdot != NULL)
@@ -4496,7 +4496,6 @@ md_begin (void)
 {
   const struct m68k_opcode *ins;
   struct m68k_incant *hack, *slak;
-  const char *retval = 0;	/* Empty string, or error msg text.  */
   int i;
 
   /* Set up hash tables with 68000 instructions.
@@ -4527,7 +4526,7 @@ md_begin (void)
   qsort (m68k_sorted_opcodes, m68k_numopcodes,
 	 sizeof (m68k_sorted_opcodes[0]), m68k_compare_opcode);
 
-  op_hash = hash_new ();
+  op_hash = str_htab_create ();
 
   obstack_begin (&robyn, 4000);
   for (i = 0; i < m68k_numopcodes; i++)
@@ -4571,22 +4570,18 @@ md_begin (void)
 	}
       while (slak);
 
-      retval = hash_insert (op_hash, ins->name, (char *) hack);
-      if (retval)
-	as_fatal (_("Internal Error:  Can't hash %s: %s"), ins->name, retval);
+      str_hash_insert (op_hash, ins->name, (char *) hack);
     }
 
   for (i = 0; i < m68k_numaliases; i++)
     {
       const char *name = m68k_opcode_aliases[i].primary;
       const char *alias = m68k_opcode_aliases[i].alias;
-      void *val = hash_find (op_hash, name);
+      void *val = (void *)str_hash_find (op_hash, name);
 
       if (!val)
 	as_fatal (_("Internal Error: Can't find %s in hash table"), name);
-      retval = hash_insert (op_hash, alias, val);
-      if (retval)
-	as_fatal (_("Internal Error: Can't hash %s: %s"), alias, retval);
+      str_hash_insert (op_hash, alias, val);
     }
 
   /* In MRI mode, all unsized branches are variable sized.  Normally,
@@ -4619,13 +4614,11 @@ md_begin (void)
 	{
 	  const char *name = mri_aliases[i].primary;
 	  const char *alias = mri_aliases[i].alias;
-	  void *val = hash_find (op_hash, name);
+	  void *val = (void *)str_hash_find (op_hash, name);
 
 	  if (!val)
 	    as_fatal (_("Internal Error: Can't find %s in hash table"), name);
-	  retval = hash_jam (op_hash, alias, val);
-	  if (retval)
-	    as_fatal (_("Internal Error: Can't hash %s: %s"), alias, retval);
+	  str_hash_insert (op_hash, alias, val);
 	}
     }
 
@@ -4680,7 +4673,7 @@ md_begin (void)
     while (mote_pseudo_table[n].poc_name)
       {
 	hack = XOBNEW (&robyn, struct m68k_incant);
-	hash_insert (op_hash,
+	str_hash_insert (op_hash,
 		     mote_pseudo_table[n].poc_name, (char *) hack);
 	hack->m_operands = 0;
 	hack->m_opnum = n;

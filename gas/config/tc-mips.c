@@ -675,13 +675,13 @@ static int g_switch_seen = 0;
 static int nopic_need_relax (symbolS *, int);
 
 /* Handle of the OPCODE hash table.  */
-static struct hash_control *op_hash = NULL;
+static htab_t op_hash = NULL;
 
 /* The opcode hash table we use for the mips16.  */
-static struct hash_control *mips16_op_hash = NULL;
+static htab_t mips16_op_hash = NULL;
 
 /* The opcode hash table we use for the microMIPS ASE.  */
-static struct hash_control *micromips_op_hash = NULL;
+static htab_t micromips_op_hash = NULL;
 
 /* This array holds the chars that always start a comment.  If the
     pre-processor is disabled, these aren't very useful.  */
@@ -3668,7 +3668,6 @@ validate_micromips_insn (const struct mips_opcode *opc,
 void
 md_begin (void)
 {
-  const char *retval = NULL;
   int i = 0;
   int broken = 0;
 
@@ -3688,21 +3687,14 @@ md_begin (void)
   if (! bfd_set_arch_mach (stdoutput, bfd_arch_mips, file_mips_opts.arch))
     as_warn (_("could not set architecture and machine"));
 
-  op_hash = hash_new ();
+  op_hash = str_htab_create ();
 
   mips_operands = XCNEWVEC (struct mips_operand_array, NUMOPCODES);
   for (i = 0; i < NUMOPCODES;)
     {
       const char *name = mips_opcodes[i].name;
 
-      retval = hash_insert (op_hash, name, (void *) &mips_opcodes[i]);
-      if (retval != NULL)
-	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   mips_opcodes[i].name, retval);
-	  /* Probably a memory allocation problem?  Give up now.  */
-	  as_fatal (_("broken assembler, no assembly attempted"));
-	}
+      str_hash_insert (op_hash, name, (void *) &mips_opcodes[i]);
       do
 	{
 	  if (!validate_mips_insn (&mips_opcodes[i], 0xffffffff,
@@ -3725,7 +3717,7 @@ md_begin (void)
       while ((i < NUMOPCODES) && !strcmp (mips_opcodes[i].name, name));
     }
 
-  mips16_op_hash = hash_new ();
+  mips16_op_hash = str_htab_create ();
   mips16_operands = XCNEWVEC (struct mips_operand_array,
 			      bfd_mips16_num_opcodes);
 
@@ -3734,10 +3726,7 @@ md_begin (void)
     {
       const char *name = mips16_opcodes[i].name;
 
-      retval = hash_insert (mips16_op_hash, name, (void *) &mips16_opcodes[i]);
-      if (retval != NULL)
-	as_fatal (_("internal: can't hash `%s': %s"),
-		  mips16_opcodes[i].name, retval);
+      str_hash_insert (mips16_op_hash, name, (void *) &mips16_opcodes[i]);
       do
 	{
 	  if (!validate_mips16_insn (&mips16_opcodes[i], &mips16_operands[i]))
@@ -3753,7 +3742,7 @@ md_begin (void)
 	     && strcmp (mips16_opcodes[i].name, name) == 0);
     }
 
-  micromips_op_hash = hash_new ();
+  micromips_op_hash = str_htab_create ();
   micromips_operands = XCNEWVEC (struct mips_operand_array,
 				 bfd_micromips_num_opcodes);
 
@@ -3762,11 +3751,8 @@ md_begin (void)
     {
       const char *name = micromips_opcodes[i].name;
 
-      retval = hash_insert (micromips_op_hash, name,
+      str_hash_insert (micromips_op_hash, name,
 			    (void *) &micromips_opcodes[i]);
-      if (retval != NULL)
-	as_fatal (_("internal: can't hash `%s': %s"),
-		  micromips_opcodes[i].name, retval);
       do
 	{
 	  struct mips_cl_insn *micromips_nop_insn;
@@ -9022,7 +9008,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
   bfd_reloc_code_real_type r[3];
   const struct mips_opcode *amo;
   const struct mips_operand *operand;
-  struct hash_control *hash;
+  htab_t hash;
   struct mips_cl_insn insn;
   va_list args;
   unsigned int uval;
@@ -9040,7 +9026,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
   r[1] = BFD_RELOC_UNUSED;
   r[2] = BFD_RELOC_UNUSED;
   hash = mips_opts.micromips ? micromips_op_hash : op_hash;
-  amo = (struct mips_opcode *) hash_find (hash, name);
+  amo = (struct mips_opcode *) str_hash_find (hash, name);
   gas_assert (amo);
   gas_assert (strcmp (name, amo->name) == 0);
 
@@ -9198,7 +9184,7 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
   bfd_reloc_code_real_type r[3]
     = {BFD_RELOC_UNUSED, BFD_RELOC_UNUSED, BFD_RELOC_UNUSED};
 
-  mo = (struct mips_opcode *) hash_find (mips16_op_hash, name);
+  mo = (struct mips_opcode *) str_hash_find (mips16_op_hash, name);
   gas_assert (mo);
   gas_assert (strcmp (name, mo->name) == 0);
 
@@ -14258,7 +14244,7 @@ mips16_macro (struct mips_cl_insn *ip)
    opcode bits in *OPCODE_EXTRA.  */
 
 static struct mips_opcode *
-mips_lookup_insn (struct hash_control *hash, const char *start,
+mips_lookup_insn (htab_t hash, const char *start,
 		  ssize_t length, unsigned int *opcode_extra)
 {
   char *name, *dot, *p;
@@ -14270,7 +14256,7 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
   name = xstrndup (start, length);
 
   /* Look up the instruction as-is.  */
-  insn = (struct mips_opcode *) hash_find (hash, name);
+  insn = (struct mips_opcode *) str_hash_find (hash, name);
   if (insn)
     goto end;
 
@@ -14282,7 +14268,7 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
       if (*p == 0 && mask != 0)
 	{
 	  *dot = 0;
-	  insn = (struct mips_opcode *) hash_find (hash, name);
+	  insn = (struct mips_opcode *) str_hash_find (hash, name);
 	  *dot = '.';
 	  if (insn && (insn->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX) != 0)
 	    {
@@ -14308,7 +14294,7 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
       if (suffix)
 	{
 	  memmove (name + opend - 2, name + opend, length - opend + 1);
-	  insn = (struct mips_opcode *) hash_find (hash, name);
+	  insn = (struct mips_opcode *) str_hash_find (hash, name);
 	  if (insn)
 	    {
 	      forced_insn_length = suffix;
@@ -14333,7 +14319,7 @@ static void
 mips_ip (char *str, struct mips_cl_insn *insn)
 {
   const struct mips_opcode *first, *past;
-  struct hash_control *hash;
+  htab_t hash;
   char format;
   size_t end;
   struct mips_operand_token *tokens;
@@ -14429,7 +14415,7 @@ mips16_ip (char *str, struct mips_cl_insn *insn)
   forced_insn_length = l;
 
   *end = 0;
-  first = (struct mips_opcode *) hash_find (mips16_op_hash, str);
+  first = (struct mips_opcode *) str_hash_find (mips16_op_hash, str);
   *end = c;
 
   if (!first)

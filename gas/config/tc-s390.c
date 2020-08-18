@@ -197,10 +197,10 @@ register_name (expressionS *expressionP)
 /* Local variables.  */
 
 /* Opformat hash table.  */
-static struct hash_control *s390_opformat_hash;
+static htab_t s390_opformat_hash;
 
 /* Opcode hash table.  */
-static struct hash_control *s390_opcode_hash = NULL;
+static htab_t s390_opcode_hash = NULL;
 
 /* Flags to set in the elf header */
 static flagword s390_flags = 0;
@@ -494,13 +494,12 @@ s390_setup_opcodes (void)
   const struct s390_opcode *op;
   const struct s390_opcode *op_end;
   bfd_boolean dup_insn = FALSE;
-  const char *retval;
 
   if (s390_opcode_hash != NULL)
-    hash_die (s390_opcode_hash);
+    htab_delete (s390_opcode_hash);
 
   /* Insert the opcodes into a hash table.  */
-  s390_opcode_hash = hash_new ();
+  s390_opcode_hash = str_htab_create ();
 
   op_end = s390_opcodes + s390_num_opcodes;
   for (op = s390_opcodes; op < op_end; op++)
@@ -532,15 +531,7 @@ s390_setup_opcodes (void)
 	  use_opcode = ((f & current_flags) == f);
 	}
       if (use_opcode)
-	{
-	  retval = hash_insert (s390_opcode_hash, op->name, (void *) op);
-	  if (retval != (const char *) NULL)
-	    {
-	      as_bad (_("Internal assembler error for instruction %s"),
-		      op->name);
-	      dup_insn = TRUE;
-	    }
-	}
+	str_hash_insert (s390_opcode_hash, op->name, (void *) op);
 
       while (op < op_end - 1 && strcmp (op->name, op[1].name) == 0)
 	op++;
@@ -559,7 +550,6 @@ md_begin (void)
 {
   const struct s390_opcode *op;
   const struct s390_opcode *op_end;
-  const char *retval;
 
   /* Give a warning if the combination -m64-bit and -Aesa is used.  */
   if (s390_arch_size == 64 && current_cpu < S390_OPCODE_Z900)
@@ -572,16 +562,11 @@ md_begin (void)
     bfd_set_private_flags (stdoutput, s390_flags);
 
   /* Insert the opcode formats into a hash table.  */
-  s390_opformat_hash = hash_new ();
+  s390_opformat_hash = str_htab_create ();
 
   op_end = s390_opformats + s390_num_opformats;
   for (op = s390_opformats; op < op_end; op++)
-    {
-      retval = hash_insert (s390_opformat_hash, op->name, (void *) op);
-      if (retval != (const char *) NULL)
-	as_bad (_("Internal assembler error for instruction format %s"),
-		op->name);
-    }
+    str_hash_insert (s390_opformat_hash, op->name, (void *) op);
 
   s390_setup_opcodes ();
 
@@ -1693,7 +1678,7 @@ md_assemble (char *str)
     *s++ = '\0';
 
   /* Look up the opcode in the hash table.  */
-  opcode = (struct s390_opcode *) hash_find (s390_opcode_hash, str);
+  opcode = (struct s390_opcode *) str_hash_find (s390_opcode_hash, str);
   if (opcode == (const struct s390_opcode *) NULL)
     {
       as_bad (_("Unrecognized opcode: `%s'"), str);
@@ -1761,7 +1746,7 @@ s390_insn (int ignore ATTRIBUTE_UNUSED)
 
   /* Look up the opcode in the hash table.  */
   opformat = (struct s390_opcode *)
-    hash_find (s390_opformat_hash, input_line_pointer);
+    str_hash_find (s390_opformat_hash, input_line_pointer);
   if (opformat == (const struct s390_opcode *) NULL)
     {
       as_bad (_("Unrecognized opcode format: `%s'"), input_line_pointer);

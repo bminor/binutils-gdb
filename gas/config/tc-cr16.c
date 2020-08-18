@@ -53,15 +53,15 @@ typedef enum
 op_err;
 
 /* Opcode mnemonics hash table.  */
-static struct hash_control *cr16_inst_hash;
+static htab_t cr16_inst_hash;
 /* CR16 registers hash table.  */
-static struct hash_control *reg_hash;
+static htab_t reg_hash;
 /* CR16 register pair hash table.  */
-static struct hash_control *regp_hash;
+static htab_t regp_hash;
 /* CR16 processor registers hash table.  */
-static struct hash_control *preg_hash;
+static htab_t preg_hash;
 /* CR16 processor registers 32 bit hash table.  */
-static struct hash_control *pregp_hash;
+static htab_t pregp_hash;
 /* Current instruction we're assembling.  */
 const inst *instruction;
 
@@ -324,7 +324,7 @@ get_register (char *reg_name)
 {
   const reg_entry *rreg;
 
-  rreg = (const reg_entry *) hash_find (reg_hash, reg_name);
+  rreg = (const reg_entry *) str_hash_find (reg_hash, reg_name);
 
   if (rreg != NULL)
     return rreg->value.reg_val;
@@ -345,10 +345,10 @@ get_register_pair (char *reg_name)
       tmp_rp[0] = '(';
       strcat (tmp_rp, reg_name);
       strcat (tmp_rp,")");
-      rreg = (const reg_entry *) hash_find (regp_hash, tmp_rp);
+      rreg = (const reg_entry *) str_hash_find (regp_hash, tmp_rp);
     }
   else
-    rreg = (const reg_entry *) hash_find (regp_hash, reg_name);
+    rreg = (const reg_entry *) str_hash_find (regp_hash, reg_name);
 
   if (rreg != NULL)
     return rreg->value.reg_val;
@@ -363,7 +363,7 @@ get_index_register (char *reg_name)
 {
   const reg_entry *rreg;
 
-  rreg = (const reg_entry *) hash_find (reg_hash, reg_name);
+  rreg = (const reg_entry *) str_hash_find (reg_hash, reg_name);
 
   if ((rreg != NULL)
       && ((rreg->value.reg_val == 12) || (rreg->value.reg_val == 13)))
@@ -378,7 +378,7 @@ get_index_register_pair (char *reg_name)
 {
   const reg_entry *rreg;
 
-  rreg = (const reg_entry *) hash_find (regp_hash, reg_name);
+  rreg = (const reg_entry *) str_hash_find (regp_hash, reg_name);
 
   if (rreg != NULL)
     {
@@ -399,7 +399,7 @@ get_pregister (char *preg_name)
 {
   const reg_entry *prreg;
 
-  prreg = (const reg_entry *) hash_find (preg_hash, preg_name);
+  prreg = (const reg_entry *) str_hash_find (preg_hash, preg_name);
 
   if (prreg != NULL)
     return prreg->value.preg_val;
@@ -414,7 +414,7 @@ get_pregisterp (char *preg_name)
 {
   const reg_entry *prreg;
 
-  prreg = (const reg_entry *) hash_find (pregp_hash, preg_name);
+  prreg = (const reg_entry *) str_hash_find (pregp_hash, preg_name);
 
   if (prreg != NULL)
     return prreg->value.preg_val;
@@ -794,25 +794,18 @@ md_pcrel_from (fixS *fixp)
 }
 
 static void
-initialise_reg_hash_table (struct hash_control ** hash_table,
+initialise_reg_hash_table (htab_t * hash_table,
                            const reg_entry * register_table,
                            const unsigned int num_entries)
 {
   const reg_entry * rreg;
-  const char *hashret;
-
-  if ((* hash_table = hash_new ()) == NULL)
+  if ((* hash_table = str_htab_create ()) == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
   for (rreg = register_table;
        rreg < (register_table + num_entries);
        rreg++)
-    {
-      hashret = hash_insert (* hash_table, rreg->name, (char *) rreg);
-      if (hashret)
-        as_fatal (_("Internal Error:  Can't hash %s: %s"),
-                  rreg->name, hashret);
-    }
+    str_hash_insert (* hash_table, rreg->name, (char *) rreg);
 }
 
 /* This function is called once, at assembler startup time.  This should
@@ -824,21 +817,15 @@ md_begin (void)
   int i = 0;
 
   /* Set up a hash table for the instructions.  */
-  if ((cr16_inst_hash = hash_new ()) == NULL)
+  if ((cr16_inst_hash = str_htab_create ()) == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
   while (cr16_instruction[i].mnemonic != NULL)
     {
-      const char *hashret;
       const char *mnemonic = cr16_instruction[i].mnemonic;
 
-      hashret = hash_insert (cr16_inst_hash, mnemonic,
-                             (char *)(cr16_instruction + i));
-
-      if (hashret != NULL && *hashret != '\0')
-        as_fatal (_("Can't hash `%s': %s\n"), cr16_instruction[i].mnemonic,
-                  *hashret == 0 ? _("(unknown reason)") : hashret);
-
+      str_hash_insert (cr16_inst_hash, mnemonic,
+		       (char *)(cr16_instruction + i));
       /* Insert unique names into hash table.  The CR16 instruction set
          has many identical opcode names that have different opcodes based
          on the operands.  This hash table then provides a quick index to
@@ -2505,7 +2492,7 @@ cr16_assemble (const char *op, char *param)
   ins cr16_ins;
 
   /* Find the instruction.  */
-  instruction = (const inst *) hash_find (cr16_inst_hash, op);
+  instruction = (const inst *) str_hash_find (cr16_inst_hash, op);
   if (instruction == NULL)
     {
       as_bad (_("Unknown opcode: `%s'"), op);
@@ -2575,7 +2562,7 @@ md_assemble (char *op)
     {
       strcpy (param1, param);
       /* Find the instruction.  */
-      instruction = (const inst *) hash_find (cr16_inst_hash, op);
+      instruction = (const inst *) str_hash_find (cr16_inst_hash, op);
        parse_operands (&cr16_ins, param1);
       if (((&cr16_ins)->arg[0].type == arg_ic)
           && ((&cr16_ins)->arg[0].constant >= 0))

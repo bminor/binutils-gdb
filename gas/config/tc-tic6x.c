@@ -742,7 +742,7 @@ const pseudo_typeS md_pseudo_table[] =
 /* Hash table of opcodes.  For each opcode name, this stores a pointer
    to a tic6x_opcode_list listing (in an arbitrary order) all opcode
    table entries with that name.  */
-static struct hash_control *opcode_hash;
+static htab_t opcode_hash;
 
 /* Initialize the assembler (called once at assembler startup).  */
 
@@ -757,17 +757,14 @@ md_begin (void)
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, 0);
 
   /* Insert opcodes into the hash table.  */
-  opcode_hash = hash_new ();
+  opcode_hash = str_htab_create ();
   for (id = 0; id < tic6x_opcode_max; id++)
     {
-      const char *errmsg;
       tic6x_opcode_list *opc = XNEW (tic6x_opcode_list);
 
       opc->id = id;
-      opc->next = hash_find (opcode_hash, tic6x_opcode_table[id].name);
-      if ((errmsg = hash_jam (opcode_hash, tic6x_opcode_table[id].name, opc))
-	  != NULL)
-	as_fatal ("%s", _(errmsg));
+      opc->next = str_hash_find (opcode_hash, tic6x_opcode_table[id].name);
+      str_hash_insert (opcode_hash, tic6x_opcode_table[id].name, opc);
     }
 
   /* Save the current subseg so we can restore it [it's the default one and
@@ -3187,7 +3184,7 @@ md_assemble (char *str)
   this_insn_label_list = seginfo->tc_segment_info_data.label_list;
   seginfo->tc_segment_info_data.label_list = NULL;
 
-  opc_list = hash_find_n (opcode_hash, str, p - str);
+  opc_list = str_hash_find_n (opcode_hash, str, p - str);
   if (opc_list == NULL)
     {
       char c = *p;

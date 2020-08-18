@@ -459,7 +459,7 @@ struct s3_reg_map
 {
   const struct s3_reg_entry *names;
   int max_regno;
-  struct hash_control *htab;
+  htab_t htab;
   const char *expected;
 };
 
@@ -470,8 +470,8 @@ static struct s3_reg_map s3_all_reg_maps[] =
   {s3_score_crn_table, 31, NULL, N_("S+core co-processor register expected")},
 };
 
-static struct hash_control *s3_score_ops_hsh = NULL;
-static struct hash_control *s3_dependency_insn_hsh = NULL;
+static htab_t s3_score_ops_hsh = NULL;
+static htab_t s3_dependency_insn_hsh = NULL;
 
 
 struct s3_datafield_range
@@ -1027,7 +1027,7 @@ s3_end_of_line (char *str)
 }
 
 static int
-s3_score_reg_parse (char **ccp, struct hash_control *htab)
+s3_score_reg_parse (char **ccp, htab_t htab)
 {
   char *start = *ccp;
   char c;
@@ -1044,7 +1044,7 @@ s3_score_reg_parse (char **ccp, struct hash_control *htab)
     c = *p++;
 
   *--p = 0;
-  reg = (struct s3_reg_entry *) hash_find (htab, start);
+  reg = (struct s3_reg_entry *) str_hash_find (htab, start);
   *p = c;
 
   if (reg)
@@ -2203,7 +2203,7 @@ s3_dependency_type_from_insn (char *insn_name)
   const struct s3_insn_to_dependency *tmp;
 
   strcpy (name, insn_name);
-  tmp = (const struct s3_insn_to_dependency *) hash_find (s3_dependency_insn_hsh, name);
+  tmp = (const struct s3_insn_to_dependency *) str_hash_find (s3_dependency_insn_hsh, name);
 
   if (tmp)
     return tmp->type;
@@ -2662,7 +2662,7 @@ s3_parse_16_32_inst (char *insnstr, bfd_boolean gen_frag_p)
   c = *p;
   *p = '\0';
 
-  opcode = (const struct s3_asm_opcode *) hash_find (s3_score_ops_hsh, operator);
+  opcode = (const struct s3_asm_opcode *) str_hash_find (s3_score_ops_hsh, operator);
   *p = c;
 
   memset (&s3_inst, '\0', sizeof (s3_inst));
@@ -2708,7 +2708,7 @@ s3_parse_48_inst (char *insnstr, bfd_boolean gen_frag_p)
   c = *p;
   *p = '\0';
 
-  opcode = (const struct s3_asm_opcode *) hash_find (s3_score_ops_hsh, operator);
+  opcode = (const struct s3_asm_opcode *) str_hash_find (s3_score_ops_hsh, operator);
   *p = c;
 
   memset (&s3_inst, '\0', sizeof (s3_inst));
@@ -6251,7 +6251,7 @@ s3_s_score_lcomm (int bytes_p)
 }
 
 static void
-s3_insert_reg (const struct s3_reg_entry *r, struct hash_control *htab)
+s3_insert_reg (const struct s3_reg_entry *r, htab_t htab)
 {
   int i = 0;
   int len = strlen (r->name) + 2;
@@ -6265,8 +6265,8 @@ s3_insert_reg (const struct s3_reg_entry *r, struct hash_control *htab)
     }
   buf2[i] = '\0';
 
-  hash_insert (htab, buf, (void *) r);
-  hash_insert (htab, buf2, (void *) r);
+  str_hash_insert (htab, buf, (void *) r);
+  str_hash_insert (htab, buf2, (void *) r);
 }
 
 static void
@@ -6274,7 +6274,7 @@ s3_build_reg_hsh (struct s3_reg_map *map)
 {
   const struct s3_reg_entry *r;
 
-  if ((map->htab = hash_new ()) == NULL)
+  if ((map->htab = str_htab_create ()) == NULL)
     {
       as_fatal (_("virtual memory exhausted"));
     }
@@ -6309,7 +6309,7 @@ s3_build_score_ops_hsh (void)
       new_opcode->relax_value = insn->relax_value;
       new_opcode->type = insn->type;
       new_opcode->bitmask = insn->bitmask;
-      hash_insert (s3_score_ops_hsh, new_opcode->template_name,
+      str_hash_insert (s3_score_ops_hsh, new_opcode->template_name,
                    (void *) new_opcode);
     }
 }
@@ -6336,7 +6336,7 @@ s3_build_dependency_insn_hsh (void)
       strcpy (buf, tmp->insn_name);
       new_i2n->insn_name = buf;
       new_i2n->type = tmp->type;
-      hash_insert (s3_dependency_insn_hsh, new_i2n->insn_name,
+      str_hash_insert (s3_dependency_insn_hsh, new_i2n->insn_name,
                    (void *) new_i2n);
     }
 }
@@ -6505,12 +6505,12 @@ s3_begin (void)
   segT seg;
   subsegT subseg;
 
-  if ((s3_score_ops_hsh = hash_new ()) == NULL)
+  if ((s3_score_ops_hsh = str_htab_create ()) == NULL)
     as_fatal (_("virtual memory exhausted"));
 
   s3_build_score_ops_hsh ();
 
-  if ((s3_dependency_insn_hsh = hash_new ()) == NULL)
+  if ((s3_dependency_insn_hsh = str_htab_create ()) == NULL)
     as_fatal (_("virtual memory exhausted"));
 
   s3_build_dependency_insn_hsh ();

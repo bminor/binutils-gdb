@@ -550,7 +550,7 @@ static struct call_info *last_call_info;
 static struct call_desc last_call_desc;
 
 /* handle of the OPCODE hash table */
-static struct hash_control *op_hash = NULL;
+static htab_t op_hash = NULL;
 
 /* These characters can be suffixes of opcode names and they may be
    followed by meaningful whitespace.  We don't include `,' and `!'
@@ -3214,7 +3214,7 @@ pa_ip (char *str)
     }
 
   /* Look up the opcode in the hash table.  */
-  if ((insn = (struct pa_opcode *) hash_find (op_hash, str)) == NULL)
+  if ((insn = (struct pa_opcode *) str_hash_find (op_hash, str)) == NULL)
     {
       as_bad (_("Unknown opcode: `%s'"), str);
       return;
@@ -8215,7 +8215,6 @@ pa_lsym (int unused ATTRIBUTE_UNUSED)
 void
 md_begin (void)
 {
-  const char *retval = NULL;
   int lose = 0;
   unsigned int i = 0;
 
@@ -8238,18 +8237,13 @@ md_begin (void)
   pa_spaces_begin ();
 #endif
 
-  op_hash = hash_new ();
+  op_hash = str_htab_create ();
 
   while (i < NUMOPCODES)
     {
       const char *name = pa_opcodes[i].name;
 
-      retval = hash_insert (op_hash, name, (struct pa_opcode *) &pa_opcodes[i]);
-      if (retval != NULL && *retval != '\0')
-	{
-	  as_fatal (_("Internal error: can't hash `%s': %s\n"), name, retval);
-	  lose = 1;
-	}
+      str_hash_insert (op_hash, name, (void *)&pa_opcodes[i]);
 
       do
 	{

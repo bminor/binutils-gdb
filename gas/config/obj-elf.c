@@ -2594,7 +2594,7 @@ struct group_list
 {
   asection **head;		/* Section lists.  */
   unsigned int num_group;	/* Number of lists.  */
-  struct hash_control *indexes; /* Maps group name to index in head array.  */
+  htab_t indexes; /* Maps group name to index in head array.  */
 };
 
 static struct group_list groups;
@@ -2632,7 +2632,7 @@ build_additional_section_info (bfd *abfd ATTRIBUTE_UNUSED,
 
   /* If this group already has a list, add the section to the head of
      the list.  */
-  elem_idx = (unsigned int *) hash_find (list->indexes, group_name);
+  elem_idx = (unsigned int *) str_hash_find (list->indexes, group_name);
   if (elem_idx != NULL)
     {
       elf_next_in_group (sec) = list->head[*elem_idx];
@@ -2654,12 +2654,15 @@ build_additional_section_info (bfd *abfd ATTRIBUTE_UNUSED,
   /* Add index to hash.  */
   idx_ptr = XNEW (unsigned int);
   *idx_ptr = i;
-  hash_insert (list->indexes, group_name, idx_ptr);
+  str_hash_insert (list->indexes, group_name, (char *)idx_ptr);
 }
 
-static void free_section_idx (const char *key ATTRIBUTE_UNUSED, void *val)
+static int
+free_section_idx (void **slot, void *arg ATTRIBUTE_UNUSED)
 {
-  free ((unsigned int *) val);
+  string_tuple_t *tuple = *((string_tuple_t **) slot);
+  free ((char *)tuple->value);
+  return 1;
 }
 
 /* Create symbols for group signature.  */
@@ -2672,7 +2675,7 @@ elf_adjust_symtab (void)
   /* Go find section groups.  */
   groups.num_group = 0;
   groups.head = NULL;
-  groups.indexes = hash_new ();
+  groups.indexes = str_htab_create ();
   bfd_map_over_sections (stdoutput, build_additional_section_info,
 			 &groups);
 
@@ -2844,8 +2847,8 @@ elf_frob_file_after_relocs (void)
     }
 
   /* Cleanup hash.  */
-  hash_traverse (groups.indexes, free_section_idx);
-  hash_die (groups.indexes);
+  htab_traverse (groups.indexes, free_section_idx, NULL);
+  htab_delete (groups.indexes);
 
 #ifdef NEED_ECOFF_DEBUG
   if (ECOFF_DEBUGGING)

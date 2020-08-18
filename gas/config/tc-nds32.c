@@ -82,8 +82,8 @@ static int vec_size = 0;
    ".flag verbatim" at beginning of the content.  We have
    'nds32_flag' to parse it and set this field to be non-zero.  */
 static int verbatim = 0;
-static struct hash_control *nds32_gprs_hash;
-static struct hash_control *nds32_hint_hash;
+static htab_t nds32_gprs_hash;
+static htab_t nds32_hint_hash;
 #define TLS_REG "$r27"
 #define GOT_NAME "_GLOBAL_OFFSET_TABLE_"
 
@@ -109,7 +109,7 @@ enum ict_option {
 static enum ict_option ict_flag = ICT_NONE;
 
 
-static struct hash_control *nds32_relax_info_hash;
+static htab_t nds32_relax_info_hash;
 
 /* Branch patterns.  */
 static relax_info_t relax_table[] =
@@ -2569,12 +2569,12 @@ struct nds32_pseudo_opcode
 };
 #define PV_DONT_CARE 0
 
-static struct hash_control *nds32_pseudo_opcode_hash = NULL;
+static htab_t nds32_pseudo_opcode_hash = NULL;
 
 static int
 builtin_isreg (const char *s, const char *x ATTRIBUTE_UNUSED)
 {
-  if (s [0] == '$' && hash_find (nds32_gprs_hash, (s + 1)))
+  if (s [0] == '$' && str_hash_find (nds32_gprs_hash, (s + 1)))
     return 1;
   return 0;
 }
@@ -2586,7 +2586,7 @@ builtin_regnum (const char *s, const char *x ATTRIBUTE_UNUSED)
   if (*s != '$')
     return -1;
   s++;
-  k = hash_find (nds32_gprs_hash, s);
+  k = str_hash_find (nds32_gprs_hash, s);
 
   if (k == NULL)
     return -1;
@@ -3434,18 +3434,18 @@ nds32_init_nds32_pseudo_opcodes (void)
 {
   struct nds32_pseudo_opcode *opcode = nds32_pseudo_opcode_table;
 
-  nds32_pseudo_opcode_hash = hash_new ();
+  nds32_pseudo_opcode_hash = str_htab_create ();
   for ( ; opcode->opcode; opcode++)
     {
       void *op;
 
-      op = hash_find (nds32_pseudo_opcode_hash, opcode->opcode);
+      op = str_hash_find (nds32_pseudo_opcode_hash, opcode->opcode);
       if (op != NULL)
 	{
 	  as_warn (_("Duplicated pseudo-opcode %s."), opcode->opcode);
 	  continue;
 	}
-      hash_insert (nds32_pseudo_opcode_hash, opcode->opcode, opcode);
+      str_hash_insert (nds32_pseudo_opcode_hash, opcode->opcode, opcode);
     }
 }
 
@@ -3466,7 +3466,7 @@ nds32_lookup_pseudo_opcode (const char *str)
     }
   op[i] = '\0';
 
-  result = hash_find (nds32_pseudo_opcode_hash, op);
+  result = str_hash_find (nds32_pseudo_opcode_hash, op);
   free (op);
   return result;
 }
@@ -4291,12 +4291,12 @@ nds32_relax_hint (int mode ATTRIBUTE_UNUSED)
 
   /* Find relax hint entry for next instruction, and all member will be
      initialized at that time.  */
-  relocs = hash_find (nds32_hint_hash, name);
+  relocs = str_hash_find (nds32_hint_hash, name);
   if (relocs == NULL)
     {
       relocs = XNEW (struct nds32_relocs_pattern);
       memset (relocs, 0, sizeof (struct nds32_relocs_pattern));
-      hash_insert (nds32_hint_hash, name, relocs);
+      str_hash_insert (nds32_hint_hash, name, relocs);
     }
   else
     {
@@ -4623,17 +4623,17 @@ md_begin (void)
   nds32_asm_init (&asm_desc, flags);
 
   /* Initial general purpose registers hash table.  */
-  nds32_gprs_hash = hash_new ();
+  nds32_gprs_hash = str_htab_create ();
   for (k = keyword_gpr; k->name; k++)
-    hash_insert (nds32_gprs_hash, k->name, k);
+    str_hash_insert (nds32_gprs_hash, k->name, k);
 
   /* Initial branch hash table.  */
-  nds32_relax_info_hash = hash_new ();
+  nds32_relax_info_hash = str_htab_create ();
   for (relax_info = relax_table; relax_info->opcode; relax_info++)
-    hash_insert (nds32_relax_info_hash, relax_info->opcode, relax_info);
+    str_hash_insert (nds32_relax_info_hash, relax_info->opcode, relax_info);
 
   /* Initial relax hint hash table.  */
-  nds32_hint_hash = hash_new ();
+  nds32_hint_hash = str_htab_create ();
   enable_16bit = nds32_16bit_ext;
 }
 
@@ -5813,7 +5813,7 @@ nds32_find_reloc_table (struct nds32_relocs_pattern *relocs_pattern,
   if (opc)
     {
       /* Branch relax pattern.  */
-      relax_info = hash_find (nds32_relax_info_hash, opc);
+      relax_info = str_hash_find (nds32_relax_info_hash, opc);
       if (!relax_info)
 	return FALSE;
       fixup_info = relax_info->relax_fixup[range];
@@ -6271,6 +6271,15 @@ nds32_elf_append_relax_relocs (const char *key, void *value)
   now_seg = seg_bak;
   frchain_now = frchain_bak;
 }
+
+static int
+nds32_elf_append_relax_relocs_traverse (void **slot, void *arg ATTRIBUTE_UNUSED)
+{
+  string_tuple_t *tuple = *((string_tuple_t **) slot);
+  nds32_elf_append_relax_relocs (tuple->key, tuple->value);
+  return 1;
+}
+
 
 static void
 nds32_str_tolower (const char *src, char *dest)
@@ -6757,7 +6766,7 @@ nds32_relax_branch_instructions (segT segment, fragS *fragP,
 	return 0;
     }
 
-  relax_info = hash_find (nds32_relax_info_hash, opcode->opcode);
+  relax_info = str_hash_find (nds32_relax_info_hash, opcode->opcode);
 
   if (relax_info == NULL)
     return adjust;
@@ -7046,7 +7055,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec, fragS *fragP)
 
   if (fragP->tc_frag_data.flag & NDS32_FRAG_RELAXABLE_BRANCH)
     {
-      relax_info = hash_find (nds32_relax_info_hash, opcode->opcode);
+      relax_info = str_hash_find (nds32_relax_info_hash, opcode->opcode);
 
       if (relax_info == NULL)
 	return;
@@ -7106,7 +7115,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec, fragS *fragP)
   else if (fragP->tc_frag_data.flag & NDS32_FRAG_BRANCH)
     {
       /* Branch instruction adjust and append relocations.  */
-      relax_info = hash_find (nds32_relax_info_hash, opcode->opcode);
+      relax_info = str_hash_find (nds32_relax_info_hash, opcode->opcode);
 
       if (relax_info == NULL)
 	return;
@@ -7481,7 +7490,7 @@ nds32_insert_relax_entry (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
 static void
 nds32_elf_analysis_relax_hint (void)
 {
-  hash_traverse (nds32_hint_hash, nds32_elf_append_relax_relocs);
+  htab_traverse (nds32_hint_hash, nds32_elf_append_relax_relocs_traverse, NULL);
 }
 
 static void
@@ -7966,7 +7975,7 @@ nds32_parse_name (char const *name, expressionS *exprP,
 int
 tc_nds32_regname_to_dw2regnum (char *regname)
 {
-  struct nds32_keyword *sym = hash_find (nds32_gprs_hash, regname);
+  struct nds32_keyword *sym = str_hash_find (nds32_gprs_hash, regname);
 
   if (!sym)
     return -1;

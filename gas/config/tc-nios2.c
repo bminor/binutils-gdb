@@ -184,20 +184,20 @@ typedef struct nios2_ps_insn_info
 } nios2_ps_insn_infoS;
 
 /* Opcode hash table.  */
-static struct hash_control *nios2_opcode_hash = NULL;
+static htab_t nios2_opcode_hash = NULL;
 #define nios2_opcode_lookup(NAME) \
-  ((struct nios2_opcode *) hash_find (nios2_opcode_hash, (NAME)))
+  ((struct nios2_opcode *) str_hash_find (nios2_opcode_hash, (NAME)))
 
 /* Register hash table.  */
-static struct hash_control *nios2_reg_hash = NULL;
+static htab_t nios2_reg_hash = NULL;
 #define nios2_reg_lookup(NAME) \
-  ((struct nios2_reg *) hash_find (nios2_reg_hash, (NAME)))
+  ((struct nios2_reg *) str_hash_find (nios2_reg_hash, (NAME)))
 
 
 /* Pseudo-op hash table.  */
-static struct hash_control *nios2_ps_hash = NULL;
+static htab_t nios2_ps_hash = NULL;
 #define nios2_ps_lookup(NAME) \
-  ((nios2_ps_insn_infoS *) hash_find (nios2_ps_hash, (NAME)))
+  ((nios2_ps_insn_infoS *) str_hash_find (nios2_ps_hash, (NAME)))
 
 /* The known current alignment of the current section.  */
 static int nios2_current_align;
@@ -3603,7 +3603,6 @@ void
 md_begin (void)
 {
   int i;
-  const char *inserted;
 
   switch (nios2_architecture)
     {
@@ -3620,52 +3619,21 @@ md_begin (void)
 
   /* Create and fill a hashtable for the Nios II opcodes, registers and
      arguments.  */
-  nios2_opcode_hash = hash_new ();
-  nios2_reg_hash = hash_new ();
-  nios2_ps_hash = hash_new ();
+  nios2_opcode_hash = str_htab_create ();
+  nios2_reg_hash = str_htab_create ();
+  nios2_ps_hash = str_htab_create ();
 
   for (i = 0; i < nios2_num_opcodes; ++i)
-    {
-      inserted
-	= hash_insert (nios2_opcode_hash, nios2_opcodes[i].name,
-		       (PTR) & nios2_opcodes[i]);
-      if (inserted != NULL)
-	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   nios2_opcodes[i].name, inserted);
-	  /* Probably a memory allocation problem?  Give up now.  */
-	  as_fatal (_("Broken assembler.  No assembly attempted."));
-	}
-    }
+    str_hash_insert (nios2_opcode_hash, nios2_opcodes[i].name,
+		     (PTR) & nios2_opcodes[i]);
 
   for (i = 0; i < nios2_num_regs; ++i)
-    {
-      inserted
-	= hash_insert (nios2_reg_hash, nios2_regs[i].name,
-		       (PTR) & nios2_regs[i]);
-      if (inserted != NULL)
-	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   nios2_regs[i].name, inserted);
-	  /* Probably a memory allocation problem?  Give up now.  */
-	  as_fatal (_("Broken assembler.  No assembly attempted."));
-	}
-
-    }
+    str_hash_insert (nios2_reg_hash, nios2_regs[i].name,
+		     (PTR) & nios2_regs[i]);
 
   for (i = 0; i < nios2_num_ps_insn_info_structs; ++i)
-    {
-      inserted
-	= hash_insert (nios2_ps_hash, nios2_ps_insn_info_structs[i].pseudo_insn,
-		       (PTR) & nios2_ps_insn_info_structs[i]);
-      if (inserted != NULL)
-	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   nios2_ps_insn_info_structs[i].pseudo_insn, inserted);
-	  /* Probably a memory allocation problem?  Give up now.  */
-	  as_fatal (_("Broken assembler.  No assembly attempted."));
-	}
-    }
+    str_hash_insert (nios2_ps_hash, nios2_ps_insn_info_structs[i].pseudo_insn,
+		     (PTR) & nios2_ps_insn_info_structs[i]);
 
   /* Assembler option defaults.  */
   nios2_as_options.noat = FALSE;

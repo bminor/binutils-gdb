@@ -1,5 +1,302 @@
 2020-08-20  Martin Liska  <mliska@suse.cz>
 
+	* config/obj-coff-seh.c (seh_hash_insert): Port to use new
+	str_htab type.
+	(seh_hash_find): Likewise.
+	(seh_hash_find_or_make): Likewise.
+	* config/obj-coff.c (tag_init): Likewise.
+	(tag_insert): Likewise.
+	(tag_find): Likewise.
+	* config/obj-elf.c (struct group_list): Likewise.
+	(build_additional_section_info): Likewise.
+	(free_section_idx): Likewise.
+	(elf_adjust_symtab): Likewise.
+	(elf_frob_file_after_relocs): Likewise.
+	* config/tc-aarch64.c (INSN_SIZE): Likewise.
+	(parse_reg): Likewise.
+	(insert_reg_alias): Likewise.
+	(create_register_alias): Likewise.
+	(s_unreq): Likewise.
+	(parse_shift): Likewise.
+	(parse_pldop): Likewise.
+	(parse_barrier): Likewise.
+	(parse_barrier_psb): Likewise.
+	(parse_bti_operand): Likewise.
+	(parse_sys_reg): Likewise.
+	(parse_sys_ins_reg): Likewise.
+	(lookup_mnemonic): Likewise.
+	(opcode_lookup): Likewise.
+	(parse_operands): Likewise.
+	(checked_hash_insert): Likewise.
+	(sysreg_hash_insert): Likewise.
+	(fill_instruction_hash_table): Likewise.
+	(md_begin): Likewise.
+	* config/tc-alpha.c (struct alpha_reloc_tag): Likewise.
+	(get_alpha_reloc_tag): Likewise.
+	(assemble_tokens_to_insn): Likewise.
+	(assemble_tokens): Likewise.
+	(md_begin): Likewise.
+	* config/tc-arc.c (arc_find_opcode): Likewise.
+	(arc_insert_opcode): Likewise.
+	(find_opcode_match): Likewise.
+	(declare_register): Likewise.
+	(declare_addrtype): Likewise.
+	(md_begin): Likewise.
+	(arc_parse_name): Likewise.
+	(tc_arc_regname_to_dw2regnum): Likewise.
+	(arc_extcorereg): Likewise.
+	* config/tc-arm.c (MVE_BAD_QREG): Likewise.
+	(arm_reg_parse_multi): Likewise.
+	(parse_reloc): Likewise.
+	(insert_reg_alias): Likewise.
+	(create_register_alias): Likewise.
+	(s_unreq): Likewise.
+	(parse_shift): Likewise.
+	(parse_psr): Likewise.
+	(parse_cond): Likewise.
+	(parse_barrier): Likewise.
+	(do_vfp_nsyn_opcode): Likewise.
+	(opcode_lookup): Likewise.
+	(arm_tc_equal_in_insn): Likewise.
+	(md_begin): Likewise.
+	* config/tc-avr.c (md_begin): Likewise.
+	(avr_ldi_expression): Likewise.
+	(md_assemble): Likewise.
+	(avr_update_gccisr): Likewise.
+	(avr_emit_insn): Likewise.
+	* config/tc-cr16.c (get_register): Likewise.
+	(get_register_pair): Likewise.
+	(get_index_register): Likewise.
+	(get_index_register_pair): Likewise.
+	(get_pregister): Likewise.
+	(get_pregisterp): Likewise.
+	(initialise_reg_hash_table): Likewise.
+	(md_begin): Likewise.
+	(cr16_assemble): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-cris.c (cris_insn_first_word_frag): Likewise.
+	(md_begin): Likewise.
+	(cris_process_instruction): Likewise.
+	* config/tc-crx.c (get_register): Likewise.
+	(get_copregister): Likewise.
+	(md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-csky.c (md_begin): Likewise.
+	(parse_opcode): Likewise.
+	(get_operand_value): Likewise.
+	(v1_work_jbsr): Likewise.
+	(v2_work_rotlc): Likewise.
+	(v2_work_bgeni): Likewise.
+	(v2_work_not): Likewise.
+	* config/tc-d10v.c (sizeof): Likewise.
+	(md_begin): Likewise.
+	(do_assemble): Likewise.
+	(md_apply_fix): Likewise.
+	* config/tc-d30v.c (sizeof): Likewise.
+	(md_begin): Likewise.
+	(do_assemble): Likewise.
+	* config/tc-dlx.c (RELOC_DLX_VTENTRY): Likewise.
+	(md_begin): Likewise.
+	(machine_ip): Likewise.
+	* config/tc-ft32.c (md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-h8300.c (md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-hppa.c (pa_ip): Likewise.
+	(md_begin): Likewise.
+	* config/tc-i386.c (md_begin): Likewise.
+	(i386_print_statistics): Likewise.
+	(parse_insn): Likewise.
+	(process_operands): Likewise.
+	(i386_index_check): Likewise.
+	(parse_real_register): Likewise.
+	* config/tc-ia64.c (dot_rot): Likewise.
+	(dot_entry): Likewise.
+	(declare_register): Likewise.
+	(md_begin): Likewise.
+	(ia64_parse_name): Likewise.
+	(md_assemble): Likewise.
+	(dot_alias): Likewise.
+	(do_alias): Likewise.
+	(ia64_adjust_symtab): Likewise.
+	(do_secalias): Likewise.
+	(ia64_frob_file): Likewise.
+	* config/tc-m68hc11.c (m68hc11_print_statistics): Likewise.
+	(md_begin): Likewise.
+	(print_insn_format): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-m68k.c (tc_gen_reloc): Likewise.
+	(m68k_ip): Likewise.
+	(md_begin): Likewise.
+	* config/tc-mcore.c (md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-microblaze.c (md_begin): Likewise.
+	(md_assemble): Likewise.
+	(md_apply_fix): Likewise.
+	* config/tc-mips.c (nopic_need_relax): Likewise.
+	(md_begin): Likewise.
+	(macro_build): Likewise.
+	(mips16_macro_build): Likewise.
+	(mips_lookup_insn): Likewise.
+	(mips_ip): Likewise.
+	(mips16_ip): Likewise.
+	* config/tc-mmix.c (sizeof): Likewise.
+	(mmix_md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-mn10200.c (md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-mn10300.c (HAVE_AM30): Likewise.
+	(md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-moxie.c (md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-msp430.c (md_begin): Likewise.
+	(msp430_operands): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-nds32.c (PV_DONT_CARE): Likewise.
+	(builtin_isreg): Likewise.
+	(builtin_regnum): Likewise.
+	(nds32_init_nds32_pseudo_opcodes): Likewise.
+	(nds32_lookup_pseudo_opcode): Likewise.
+	(nds32_relax_hint): Likewise.
+	(md_begin): Likewise.
+	(nds32_find_reloc_table): Likewise.
+	(nds32_elf_append_relax_relocs_traverse): Likewise.
+	(nds32_relax_branch_instructions): Likewise.
+	(md_convert_frag): Likewise.
+	(nds32_elf_analysis_relax_hint): Likewise.
+	(tc_nds32_regname_to_dw2regnum): Likewise.
+	* config/tc-nios2.c (nios2_opcode_lookup): Likewise.
+	(nios2_reg_lookup): Likewise.
+	(nios2_ps_lookup): Likewise.
+	(md_begin): Likewise.
+	* config/tc-ns32k.c (struct hash_control): Likewise.
+	(parse): Likewise.
+	(md_begin): Likewise.
+	* config/tc-pdp11.c (md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-pj.c (fake_opcode): Likewise.
+	(alias): Likewise.
+	(md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-ppc.c (ppc_setup_opcodes): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-pru.c (pru_opcode_lookup): Likewise.
+	(pru_reg_lookup): Likewise.
+	(md_begin): Likewise.
+	(md_end): Likewise.
+	* config/tc-riscv.c (init_ext_version_hash): Likewise.
+	(riscv_get_default_ext_version): Likewise.
+	(riscv_set_arch): Likewise.
+	(init_opcode_names_hash): Likewise.
+	(opcode_name_lookup): Likewise.
+	(enum reg_class): Likewise.
+	(hash_reg_name): Likewise.
+	(riscv_init_csr_hash): Likewise.
+	(reg_csr_lookup_internal): Likewise.
+	(reg_lookup_internal): Likewise.
+	(init_opcode_hash): Likewise.
+	(md_begin): Likewise.
+	(DECLARE_CSR): Likewise.
+	(macro_build): Likewise.
+	(riscv_ip): Likewise.
+	* config/tc-s390.c (register_name): Likewise.
+	(s390_setup_opcodes): Likewise.
+	(md_begin): Likewise.
+	(md_assemble): Likewise.
+	(s390_insn): Likewise.
+	* config/tc-score.c (struct s3_reg_map): Likewise.
+	(s3_score_reg_parse): Likewise.
+	(s3_dependency_type_from_insn): Likewise.
+	(s3_parse_16_32_inst): Likewise.
+	(s3_parse_48_inst): Likewise.
+	(s3_insert_reg): Likewise.
+	(s3_build_reg_hsh): Likewise.
+	(s3_build_score_ops_hsh): Likewise.
+	(s3_build_dependency_insn_hsh): Likewise.
+	(s3_begin): Likewise.
+	* config/tc-score7.c (struct s7_reg_map): Likewise.
+	(s7_score_reg_parse): Likewise.
+	(s7_dependency_type_from_insn): Likewise.
+	(s7_parse_16_32_inst): Likewise.
+	(s7_build_score_ops_hsh): Likewise.
+	(s7_build_dependency_insn_hsh): Likewise.
+	(s7_insert_reg): Likewise.
+	(s7_build_reg_hsh): Likewise.
+	(s7_begin): Likewise.
+	* config/tc-sh.c (EMPTY): Likewise.
+	(md_begin): Likewise.
+	(find_cooked_opcode): Likewise.
+	* config/tc-sparc.c (md_begin): Likewise.
+	(sparc_ip): Likewise.
+	* config/tc-spu.c (md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-tic30.c (md_begin): Likewise.
+	(tic30_operand): Likewise.
+	(tic30_parallel_insn): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-tic4x.c (TIC4X_ALT_SYNTAX): Likewise.
+	(tic4x_asg): Likewise.
+	(tic4x_inst_insert): Likewise.
+	(tic4x_inst_add): Likewise.
+	(md_begin): Likewise.
+	(tic4x_operand_parse): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-tic54x.c (MAX_SUBSYM_HASH): Likewise.
+	(stag_add_field_symbols): Likewise.
+	(tic54x_endstruct): Likewise.
+	(tic54x_tag): Likewise.
+	(tic54x_remove_local_label): Likewise.
+	(tic54x_clear_local_labels): Likewise.
+	(tic54x_var): Likewise.
+	(tic54x_macro_start): Likewise.
+	(tic54x_macro_info): Likewise.
+	(tic54x_macro_end): Likewise.
+	(subsym_isreg): Likewise.
+	(subsym_structsz): Likewise.
+	(md_begin): Likewise.
+	(is_mmreg): Likewise.
+	(is_type): Likewise.
+	(encode_condition): Likewise.
+	(encode_cc3): Likewise.
+	(encode_cc2): Likewise.
+	(encode_operand): Likewise.
+	(tic54x_parse_insn): Likewise.
+	(tic54x_parse_parallel_insn_firstline): Likewise.
+	(subsym_create_or_replace): Likewise.
+	(subsym_lookup): Likewise.
+	(subsym_substitute): Likewise.
+	(tic54x_undefined_symbol): Likewise.
+	* config/tc-tic6x.c (md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-tilegx.c (O_hw2_last_plt): Likewise.
+	(INSERT_SPECIAL_OP): Likewise.
+	(md_begin): Likewise.
+	(tilegx_parse_name): Likewise.
+	(parse_reg_expression): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-tilepro.c (O_tls_ie_load): Likewise.
+	(INSERT_SPECIAL_OP): Likewise.
+	(tilepro_parse_name): Likewise.
+	(parse_reg_expression): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-v850.c (md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-vax.c (md_ri_to_chars): Likewise.
+	(vip_begin): Likewise.
+	(vip): Likewise.
+	(main): Likewise.
+	(md_begin): Likewise.
+	* config/tc-wasm32.c (md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-xgate.c (xgate_parse_operand): Likewise.
+	(md_begin): Likewise.
+	(md_assemble): Likewise.
+	* config/tc-z8k.c (md_begin): Likewise.
+	(md_assemble): Likewise.
+
+2020-08-20  Martin Liska  <mliska@suse.cz>
+
 	* dw2gencfi.c (dwcfi_hash_insert): Use htab_t and str_hash_*
 	functions.
 	(dwcfi_hash_find): Likewise.

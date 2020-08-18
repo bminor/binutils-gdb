@@ -945,15 +945,15 @@ struct asm_opcode
 #define BAD_EL_TYPE	_("bad element type for instruction")
 #define MVE_BAD_QREG	_("MVE vector register Q[0..7] expected")
 
-static struct hash_control * arm_ops_hsh;
-static struct hash_control * arm_cond_hsh;
-static struct hash_control * arm_vcond_hsh;
-static struct hash_control * arm_shift_hsh;
-static struct hash_control * arm_psr_hsh;
-static struct hash_control * arm_v7m_psr_hsh;
-static struct hash_control * arm_reg_hsh;
-static struct hash_control * arm_reloc_hsh;
-static struct hash_control * arm_barrier_opt_hsh;
+static htab_t  arm_ops_hsh;
+static htab_t  arm_cond_hsh;
+static htab_t  arm_vcond_hsh;
+static htab_t  arm_shift_hsh;
+static htab_t  arm_psr_hsh;
+static htab_t  arm_v7m_psr_hsh;
+static htab_t  arm_reg_hsh;
+static htab_t  arm_reloc_hsh;
+static htab_t  arm_barrier_opt_hsh;
 
 /* Stuff needed to resolve the label ambiguity
    As:
@@ -1427,7 +1427,7 @@ arm_reg_parse_multi (char **ccp)
     p++;
   while (ISALPHA (*p) || ISDIGIT (*p) || *p == '_');
 
-  reg = (struct reg_entry *) hash_find_n (arm_reg_hsh, start, p - start);
+  reg = (struct reg_entry *) str_hash_find_n (arm_reg_hsh, start, p - start);
 
   if (!reg)
     return NULL;
@@ -2546,7 +2546,7 @@ parse_reloc (char **str)
     return -1;
 
   if ((r = (struct reloc_entry *)
-       hash_find_n (arm_reloc_hsh, p, q - p)) == NULL)
+       str_hash_find_n (arm_reloc_hsh, p, q - p)) == NULL)
     return -1;
 
   *str = q + 1;
@@ -2561,7 +2561,7 @@ insert_reg_alias (char *str, unsigned number, int type)
   struct reg_entry *new_reg;
   const char *name;
 
-  if ((new_reg = (struct reg_entry *) hash_find (arm_reg_hsh, str)) != 0)
+  if ((new_reg = (struct reg_entry *) str_hash_find (arm_reg_hsh, str)) != 0)
     {
       if (new_reg->builtin)
 	as_warn (_("ignoring attempt to redefine built-in register '%s'"), str);
@@ -2583,8 +2583,7 @@ insert_reg_alias (char *str, unsigned number, int type)
   new_reg->builtin = FALSE;
   new_reg->neon = NULL;
 
-  if (hash_insert (arm_reg_hsh, name, (void *) new_reg))
-    abort ();
+  str_hash_insert (arm_reg_hsh, name, new_reg);
 
   return new_reg;
 }
@@ -2632,7 +2631,7 @@ create_register_alias (char * newname, char *p)
   if (*oldname == '\0')
     return FALSE;
 
-  old = (struct reg_entry *) hash_find (arm_reg_hsh, oldname);
+  old = (struct reg_entry *) str_hash_find (arm_reg_hsh, oldname);
   if (!old)
     {
       as_warn (_("unknown register '%s' -- .req ignored"), oldname);
@@ -2884,7 +2883,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
     as_bad (_("invalid syntax for .unreq directive"));
   else
     {
-      struct reg_entry *reg = (struct reg_entry *) hash_find (arm_reg_hsh,
+      struct reg_entry *reg = (struct reg_entry *) str_hash_find (arm_reg_hsh,
 							      name);
 
       if (!reg)
@@ -2897,7 +2896,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	  char * p;
 	  char * nbuf;
 
-	  hash_delete (arm_reg_hsh, name, FALSE);
+	  str_hash_delete (arm_reg_hsh, name);
 	  free ((char *) reg->name);
 	  free (reg->neon);
 	  free (reg);
@@ -2909,10 +2908,10 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	  nbuf = strdup (name);
 	  for (p = nbuf; *p; p++)
 	    *p = TOUPPER (*p);
-	  reg = (struct reg_entry *) hash_find (arm_reg_hsh, nbuf);
+	  reg = (struct reg_entry *) str_hash_find (arm_reg_hsh, nbuf);
 	  if (reg)
 	    {
-	      hash_delete (arm_reg_hsh, nbuf, FALSE);
+	      str_hash_delete (arm_reg_hsh, nbuf);
 	      free ((char *) reg->name);
 	      free (reg->neon);
 	      free (reg);
@@ -2920,10 +2919,10 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 
 	  for (p = nbuf; *p; p++)
 	    *p = TOLOWER (*p);
-	  reg = (struct reg_entry *) hash_find (arm_reg_hsh, nbuf);
+	  reg = (struct reg_entry *) str_hash_find (arm_reg_hsh, nbuf);
 	  if (reg)
 	    {
-	      hash_delete (arm_reg_hsh, nbuf, FALSE);
+	      str_hash_delete (arm_reg_hsh, nbuf);
 	      free ((char *) reg->name);
 	      free (reg->neon);
 	      free (reg);
@@ -5537,7 +5536,7 @@ parse_shift (char **str, int i, enum parse_shift_mode mode)
       return FAIL;
     }
 
-  shift_name = (const struct asm_shift_name *) hash_find_n (arm_shift_hsh, *str,
+  shift_name = (const struct asm_shift_name *) str_hash_find_n (arm_shift_hsh, *str,
 							    p - *str);
 
   if (shift_name == NULL)
@@ -6338,7 +6337,7 @@ parse_psr (char **str, bfd_boolean lhs)
 	  || strncasecmp (start, "psr", 3) == 0)
 	p = start + strcspn (start, "rR") + 1;
 
-      psr = (const struct asm_psr *) hash_find_n (arm_v7m_psr_hsh, start,
+      psr = (const struct asm_psr *) str_hash_find_n (arm_v7m_psr_hsh, start,
 						  p - start);
 
       if (!psr)
@@ -6441,7 +6440,7 @@ parse_psr (char **str, bfd_boolean lhs)
 	}
       else
 	{
-	  psr = (const struct asm_psr *) hash_find_n (arm_psr_hsh, start,
+	  psr = (const struct asm_psr *) str_hash_find_n (arm_psr_hsh, start,
 						      p - start);
 	  if (!psr)
 	    goto error;
@@ -6633,7 +6632,7 @@ parse_cond (char **str)
       n++;
     }
 
-  c = (const struct asm_cond *) hash_find_n (arm_cond_hsh, cond, n);
+  c = (const struct asm_cond *) str_hash_find_n (arm_cond_hsh, cond, n);
   if (!c)
     {
       inst.error = _("condition required");
@@ -6656,7 +6655,7 @@ parse_barrier (char **str)
   while (ISALPHA (*q))
     q++;
 
-  o = (const struct asm_barrier_opt *) hash_find_n (arm_barrier_opt_hsh, p,
+  o = (const struct asm_barrier_opt *) str_hash_find_n (arm_barrier_opt_hsh, p,
 						    q - p);
   if (!o)
     return FAIL;
@@ -15606,7 +15605,7 @@ do_vfp_nsyn_opcode (const char *opname)
 {
   const struct asm_opcode *opcode;
 
-  opcode = (const struct asm_opcode *) hash_find (arm_ops_hsh, opname);
+  opcode = (const struct asm_opcode *) str_hash_find (arm_ops_hsh, opname);
 
   if (!opcode)
     abort ();
@@ -22620,7 +22619,7 @@ opcode_lookup (char **str)
     *str = end;
 
   /* Look for unaffixed or special-case affixed mnemonic.  */
-  opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
+  opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
 						    end - base);
   if (opcode)
     {
@@ -22634,7 +22633,7 @@ opcode_lookup (char **str)
       if (warn_on_deprecated && unified_syntax)
 	as_tsktsk (_("conditional infixes are deprecated in unified syntax"));
       affix = base + (opcode->tag - OT_odd_infix_0);
-      cond = (const struct asm_cond *) hash_find_n (arm_cond_hsh, affix, 2);
+      cond = (const struct asm_cond *) str_hash_find_n (arm_cond_hsh, affix, 2);
       gas_assert (cond);
 
       inst.cond = cond->value;
@@ -22647,8 +22646,8 @@ opcode_lookup (char **str)
     if (end - base < 2)
       return NULL;
      affix = end - 1;
-     cond = (const struct asm_cond *) hash_find_n (arm_vcond_hsh, affix, 1);
-     opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
+     cond = (const struct asm_cond *) str_hash_find_n (arm_vcond_hsh, affix, 1);
+     opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
 						      affix - base);
      /* If this opcode can not be vector predicated then don't accept it with a
 	vector predication code.  */
@@ -22664,8 +22663,8 @@ opcode_lookup (char **str)
 
       /* Look for suffixed mnemonic.  */
       affix = end - 2;
-      cond = (const struct asm_cond *) hash_find_n (arm_cond_hsh, affix, 2);
-      opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
+      cond = (const struct asm_cond *) str_hash_find_n (arm_cond_hsh, affix, 2);
+      opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
 							affix - base);
     }
 
@@ -22715,13 +22714,13 @@ opcode_lookup (char **str)
 
   /* Look for infixed mnemonic in the usual position.  */
   affix = base + 3;
-  cond = (const struct asm_cond *) hash_find_n (arm_cond_hsh, affix, 2);
+  cond = (const struct asm_cond *) str_hash_find_n (arm_cond_hsh, affix, 2);
   if (!cond)
     return NULL;
 
   memcpy (save, affix, 2);
   memmove (affix, affix + 2, (end - affix) - 2);
-  opcode = (const struct asm_opcode *) hash_find_n (arm_ops_hsh, base,
+  opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
 						    (end - base) - 2);
   memmove (affix + 2, affix, (end - affix) - 2);
   memcpy (affix, save, 2);
@@ -27989,16 +27988,19 @@ arm_tc_equal_in_insn (int c ATTRIBUTE_UNUSED, char * name)
 
       for (p = nbuf; *p; p++)
 	*p = TOLOWER (*p);
-      if (hash_find (arm_ops_hsh, nbuf) != NULL)
+      if (str_hash_find (arm_ops_hsh, nbuf) != NULL)
 	{
-	  static struct hash_control * already_warned = NULL;
+	  static htab_t  already_warned = NULL;
 
 	  if (already_warned == NULL)
-	    already_warned = hash_new ();
+	    already_warned = str_htab_create ();
 	  /* Only warn about the symbol once.  To keep the code
-	     simple we let hash_insert do the lookup for us.  */
-	  if (hash_insert (already_warned, nbuf, NULL) == NULL)
-	    as_warn (_("[-mwarn-syms]: Assignment makes a symbol match an ARM instruction: %s"), name);
+	     simple we let str_hash_insert do the lookup for us.  */
+	  if (str_hash_find (already_warned, nbuf) == NULL)
+	    {
+	      as_warn (_("[-mwarn-syms]: Assignment makes a symbol match an ARM instruction: %s"), name);
+	      str_hash_insert (already_warned, nbuf, NULL);
+	    }
 	}
       else
 	free (nbuf);
@@ -30716,36 +30718,37 @@ md_begin (void)
   unsigned mach;
   unsigned int i;
 
-  if (	 (arm_ops_hsh = hash_new ()) == NULL
-      || (arm_cond_hsh = hash_new ()) == NULL
-      || (arm_vcond_hsh = hash_new ()) == NULL
-      || (arm_shift_hsh = hash_new ()) == NULL
-      || (arm_psr_hsh = hash_new ()) == NULL
-      || (arm_v7m_psr_hsh = hash_new ()) == NULL
-      || (arm_reg_hsh = hash_new ()) == NULL
-      || (arm_reloc_hsh = hash_new ()) == NULL
-      || (arm_barrier_opt_hsh = hash_new ()) == NULL)
+  if (	 (arm_ops_hsh = str_htab_create ()) == NULL
+      || (arm_cond_hsh = str_htab_create ()) == NULL
+      || (arm_vcond_hsh = str_htab_create ()) == NULL
+      || (arm_shift_hsh = str_htab_create ()) == NULL
+      || (arm_psr_hsh = str_htab_create ()) == NULL
+      || (arm_v7m_psr_hsh = str_htab_create ()) == NULL
+      || (arm_reg_hsh = str_htab_create ()) == NULL
+      || (arm_reloc_hsh = str_htab_create ()) == NULL
+      || (arm_barrier_opt_hsh = str_htab_create ()) == NULL)
     as_fatal (_("virtual memory exhausted"));
 
   for (i = 0; i < sizeof (insns) / sizeof (struct asm_opcode); i++)
-    hash_insert (arm_ops_hsh, insns[i].template_name, (void *) (insns + i));
+    if (str_hash_find (arm_ops_hsh, insns[i].template_name) == NULL)
+      str_hash_insert (arm_ops_hsh, insns[i].template_name, (void *) (insns + i));
   for (i = 0; i < sizeof (conds) / sizeof (struct asm_cond); i++)
-    hash_insert (arm_cond_hsh, conds[i].template_name, (void *) (conds + i));
+    str_hash_insert (arm_cond_hsh, conds[i].template_name, (void *) (conds + i));
   for (i = 0; i < sizeof (vconds) / sizeof (struct asm_cond); i++)
-    hash_insert (arm_vcond_hsh, vconds[i].template_name, (void *) (vconds + i));
+    str_hash_insert (arm_vcond_hsh, vconds[i].template_name, (void *) (vconds + i));
   for (i = 0; i < sizeof (shift_names) / sizeof (struct asm_shift_name); i++)
-    hash_insert (arm_shift_hsh, shift_names[i].name, (void *) (shift_names + i));
+    str_hash_insert (arm_shift_hsh, shift_names[i].name, (void *) (shift_names + i));
   for (i = 0; i < sizeof (psrs) / sizeof (struct asm_psr); i++)
-    hash_insert (arm_psr_hsh, psrs[i].template_name, (void *) (psrs + i));
+    str_hash_insert (arm_psr_hsh, psrs[i].template_name, (void *) (psrs + i));
   for (i = 0; i < sizeof (v7m_psrs) / sizeof (struct asm_psr); i++)
-    hash_insert (arm_v7m_psr_hsh, v7m_psrs[i].template_name,
+    str_hash_insert (arm_v7m_psr_hsh, v7m_psrs[i].template_name,
 		 (void *) (v7m_psrs + i));
   for (i = 0; i < sizeof (reg_names) / sizeof (struct reg_entry); i++)
-    hash_insert (arm_reg_hsh, reg_names[i].name, (void *) (reg_names + i));
+    str_hash_insert (arm_reg_hsh, reg_names[i].name, (void *) (reg_names + i));
   for (i = 0;
        i < sizeof (barrier_opt_names) / sizeof (struct asm_barrier_opt);
        i++)
-    hash_insert (arm_barrier_opt_hsh, barrier_opt_names[i].template_name,
+    str_hash_insert (arm_barrier_opt_hsh, barrier_opt_names[i].template_name,
 		 (void *) (barrier_opt_names + i));
 #ifdef OBJ_ELF
   for (i = 0; i < ARRAY_SIZE (reloc_names); i++)
@@ -30756,7 +30759,7 @@ md_begin (void)
 	/* This makes encode_branch() use the EABI versions of this relocation.  */
 	entry->reloc = BFD_RELOC_UNUSED;
 
-      hash_insert (arm_reloc_hsh, entry->name, (void *) entry);
+      str_hash_insert (arm_reloc_hsh, entry->name, (void *) entry);
     }
 #endif
 

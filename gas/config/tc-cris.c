@@ -160,7 +160,7 @@ static void cris_sym_no_leading_underscore (void);
 static char *cris_insn_first_word_frag (void);
 
 /* Handle to the opcode hash table.  */
-static struct hash_control *op_hash = NULL;
+static htab_t op_hash = NULL;
 
 /* If we target cris-axis-linux-gnu (as opposed to generic cris-axis-elf),
    we default to no underscore and required register-prefixes.  The
@@ -1186,11 +1186,10 @@ cris_insn_first_word_frag (void)
 void
 md_begin (void)
 {
-  const char *hashret = NULL;
   int i = 0;
 
   /* Set up a hash table for the instructions.  */
-  op_hash = hash_new ();
+  op_hash = str_htab_create ();
   if (op_hash == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
@@ -1222,12 +1221,8 @@ md_begin (void)
 	  continue;
 	}
 
-      /* Need to cast to get rid of "const".  FIXME: Fix hash_insert instead.  */
-      hashret = hash_insert (op_hash, name, (void *) &cris_opcodes[i]);
-
-      if (hashret != NULL && *hashret != '\0')
-	as_fatal (_("Can't hash `%s': %s\n"), cris_opcodes[i].name,
-		  *hashret == 0 ? _("(unknown reason)") : hashret);
+      /* Need to cast to get rid of "const".  FIXME: Fix str_hash_insert instead.  */
+      str_hash_insert (op_hash, name, (void *) &cris_opcodes[i]);
       do
 	{
 	  if (cris_opcodes[i].match & cris_opcodes[i].lose)
@@ -1558,7 +1553,7 @@ cris_process_instruction (char *insn_text, struct cris_instruction *out_insnp,
     }
 
   /* Find the instruction.  */
-  instruction = (struct cris_opcode *) hash_find (op_hash, insn_text);
+  instruction = (struct cris_opcode *) str_hash_find (op_hash, insn_text);
   if (instruction == NULL)
     {
       as_bad (_("Unknown opcode: `%s'"), insn_text);

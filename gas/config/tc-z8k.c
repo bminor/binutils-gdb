@@ -137,7 +137,7 @@ const char EXP_CHARS[] = "eE";
 const char FLT_CHARS[] = "rRsSfFdDxXpP";
 
 /* Opcode mnemonics.  */
-static struct hash_control *opcode_hash_control;
+static htab_t opcode_hash_control;
 
 void
 md_begin (void)
@@ -145,13 +145,13 @@ md_begin (void)
   const opcode_entry_type *opcode;
   unsigned int idx = -1u;
 
-  opcode_hash_control = hash_new ();
+  opcode_hash_control = str_htab_create ();
 
   for (opcode = z8k_table; opcode->name; opcode++)
     {
       /* Only enter unique codes into the table.  */
       if (idx != opcode->idx)
-	hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+	str_hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
       idx = opcode->idx;
     }
 
@@ -166,7 +166,7 @@ md_begin (void)
       fake_opcode->name = md_pseudo_table[idx].poc_name;
       fake_opcode->func = (void *) (md_pseudo_table + idx);
       fake_opcode->opcode = 250;
-      hash_insert (opcode_hash_control, fake_opcode->name, fake_opcode);
+      str_hash_insert (opcode_hash_control, fake_opcode->name, fake_opcode);
     }
 }
 
@@ -1224,9 +1224,9 @@ md_assemble (char *str)
     }
   c = *op_end;
 
-  *op_end = 0;  /* Zero-terminate op code string for hash_find() call.  */
+  *op_end = 0;  /* Zero-terminate op code string for str_hash_find() call.  */
 
-  opcode = (opcode_entry_type *) hash_find (opcode_hash_control, op_start);
+  opcode = (opcode_entry_type *) str_hash_find (opcode_hash_control, op_start);
 
   if (opcode == NULL)
     {

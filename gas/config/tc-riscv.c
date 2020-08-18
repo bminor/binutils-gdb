@@ -242,28 +242,18 @@ riscv_multi_subset_supports (enum riscv_insn_class insn_class)
 }
 
 /* Handle of the extension with version hash table.  */
-static struct hash_control *ext_version_hash = NULL;
+static htab_t ext_version_hash = NULL;
 
-static struct hash_control *
+static htab_t
 init_ext_version_hash (const struct riscv_ext_version *table)
 {
   int i = 0;
-  struct hash_control *hash = hash_new ();
+  htab_t hash = str_htab_create ();
 
   while (table[i].name)
     {
       const char *name = table[i].name;
-      const char *hash_error =
-       hash_insert (hash, name, (void *) &table[i]);
-
-      if (hash_error != NULL)
-       {
-         fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-                  table[i].name, hash_error);
-         /* Probably a memory allocation problem?  Give up now.  */
-         as_fatal (_("Broken assembler.  No assembly attempted."));
-         return NULL;
-       }
+      str_hash_insert (hash, name, (void *) &table[i]);
 
       i++;
       while (table[i].name
@@ -287,7 +277,7 @@ riscv_get_default_ext_version (const char *name,
   if (name == NULL || default_isa_spec == ISA_SPEC_CLASS_NONE)
     return;
 
-  ext = (struct riscv_ext_version *) hash_find (ext_version_hash, name);
+  ext = (struct riscv_ext_version *) str_hash_find (ext_version_hash, name);
   while (ext
         && ext->name
         && strcmp (ext->name, name) == 0)
@@ -321,10 +311,10 @@ riscv_set_arch (const char *s)
 }
 
 /* Handle of the OPCODE hash table.  */
-static struct hash_control *op_hash = NULL;
+static htab_t op_hash = NULL;
 
 /* Handle of the type of .insn hash table.  */
-static struct hash_control *insn_type_hash = NULL;
+static htab_t insn_type_hash = NULL;
 
 /* This array holds the chars that always start a comment.  If the
     pre-processor is disabled, these aren't very useful */
@@ -559,23 +549,16 @@ static const struct opcode_name_t opcode_name_list[] =
 };
 
 /* Hash table for lookup opcode name.  */
-static struct hash_control *opcode_names_hash = NULL;
+static htab_t opcode_names_hash = NULL;
 
 /* Initialization for hash table of opcode name.  */
 static void
 init_opcode_names_hash (void)
 {
-  const char *retval;
   const struct opcode_name_t *opcode;
 
   for (opcode = &opcode_name_list[0]; opcode->name != NULL; ++opcode)
-    {
-      retval = hash_insert (opcode_names_hash, opcode->name, (void *)opcode);
-
-      if (retval != NULL)
-	as_fatal (_("internal error: can't hash `%s': %s"),
-		  opcode->name, retval);
-    }
+    str_hash_insert (opcode_names_hash, opcode->name, (void *)opcode);
 }
 
 /* Find `s` is a valid opcode name or not,
@@ -598,7 +581,7 @@ opcode_name_lookup (char **s)
   save_c = *e;
   *e = '\0';
 
-  o = (struct opcode_name_t *) hash_find (opcode_names_hash, *s);
+  o = (struct opcode_name_t *) str_hash_find (opcode_names_hash, *s);
 
   /* Advance to next token if one was recognized.  */
   if (o)
@@ -619,8 +602,8 @@ enum reg_class
   RCLASS_CSR
 };
 
-static struct hash_control *reg_names_hash = NULL;
-static struct hash_control *csr_extra_hash = NULL;
+static htab_t reg_names_hash = NULL;
+static htab_t csr_extra_hash = NULL;
 
 #define ENCODE_REG_HASH(cls, n) \
   ((void *)(uintptr_t)((n) * RCLASS_MAX + (cls) + 1))
@@ -631,10 +614,7 @@ static void
 hash_reg_name (enum reg_class class, const char *name, unsigned n)
 {
   void *hash = ENCODE_REG_HASH (class, n);
-  const char *retval = hash_insert (reg_names_hash, name, hash);
-
-  if (retval != NULL)
-    as_fatal (_("internal error: can't hash `%s': %s"), name, retval);
+  str_hash_insert (reg_names_hash, name, hash);
 }
 
 static void
@@ -655,11 +635,10 @@ riscv_init_csr_hash (const char *name,
                     enum riscv_priv_spec_class abort_version)
 {
   struct riscv_csr_extra *entry, *pre_entry;
-  const char *hash_error = NULL;
   bfd_boolean need_enrty = TRUE;
 
   pre_entry = NULL;
-  entry = (struct riscv_csr_extra *) hash_find (csr_extra_hash, name);
+  entry = (struct riscv_csr_extra *) str_hash_find (csr_extra_hash, name);
   while (need_enrty && entry != NULL)
     {
       if (entry->csr_class == class
@@ -686,16 +665,7 @@ riscv_init_csr_hash (const char *name,
      Otherwise, attach the extra information to the entry which is already
      in the hash table.  */
   if (pre_entry == NULL)
-    {
-      hash_error = hash_insert (csr_extra_hash, name, (void *) entry);
-      if (hash_error != NULL)
-       {
-         fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-                  name, hash_error);
-         /* Probably a memory allocation problem?  Give up now.  */
-         as_fatal (_("Broken assembler.  No assembly attempted."));
-       }
-    }
+    str_hash_insert (csr_extra_hash, name, (void *) entry);
   else
     pre_entry->next = entry;
 }
@@ -772,7 +742,7 @@ static unsigned int
 reg_csr_lookup_internal (const char *s)
 {
   struct riscv_csr_extra *r =
-    (struct riscv_csr_extra *) hash_find (csr_extra_hash, s);
+    (struct riscv_csr_extra *) str_hash_find (csr_extra_hash, s);
 
   if (r == NULL)
     return -1U;
@@ -794,7 +764,7 @@ reg_lookup_internal (const char *s, enum reg_class class)
   if (class == RCLASS_CSR)
     return reg_csr_lookup_internal (s);
 
-  r = hash_find (reg_names_hash, s);
+  r = str_hash_find (reg_names_hash, s);
   if (r == NULL || DECODE_REG_CLASS (r) != class)
     return -1;
 
@@ -1018,26 +988,17 @@ struct percent_op_match
 
 /* Common hash table initialization function for
    instruction and .insn directive.  */
-static struct hash_control *
+static htab_t
 init_opcode_hash (const struct riscv_opcode *opcodes,
 		  bfd_boolean insn_directive_p)
 {
   int i = 0;
   int length;
-  struct hash_control *hash = hash_new ();
+  htab_t hash = str_htab_create ();
   while (opcodes[i].name)
     {
       const char *name = opcodes[i].name;
-      const char *hash_error =
-	hash_insert (hash, name, (void *) &opcodes[i]);
-
-      if (hash_error != NULL)
-	{
-	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),
-		   opcodes[i].name, hash_error);
-	  /* Probably a memory allocation problem?  Give up now.  */
-	  as_fatal (_("Broken assembler.  No assembly attempted."));
-	}
+      str_hash_insert (hash, name, (void *) &opcodes[i]);
 
       do
 	{
@@ -1074,7 +1035,7 @@ md_begin (void)
   op_hash = init_opcode_hash (riscv_opcodes, FALSE);
   insn_type_hash = init_opcode_hash (riscv_insn_types, TRUE);
 
-  reg_names_hash = hash_new ();
+  reg_names_hash = str_htab_create ();
   hash_reg_names (RCLASS_GPR, riscv_gpr_names_numeric, NGPR);
   hash_reg_names (RCLASS_GPR, riscv_gpr_names_abi, NGPR);
   hash_reg_names (RCLASS_FPR, riscv_fpr_names_numeric, NFPR);
@@ -1083,7 +1044,7 @@ md_begin (void)
   hash_reg_name (RCLASS_GPR, "fp", 8);
 
   /* Create and insert CSR hash tables.  */
-  csr_extra_hash = hash_new ();
+  csr_extra_hash = str_htab_create ();
 #define DECLARE_CSR(name, num, class, define_version, abort_version) \
   riscv_init_csr_hash (#name, num, class, define_version, abort_version);
 #define DECLARE_CSR_ALIAS(name, num, class, define_version, abort_version) \
@@ -1091,7 +1052,7 @@ md_begin (void)
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
 
-  opcode_names_hash = hash_new ();
+  opcode_names_hash = str_htab_create ();
   init_opcode_names_hash ();
 
   /* Set the default alignment for the text section.  */
@@ -1196,7 +1157,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
   va_start (args, fmt);
 
   r = BFD_RELOC_UNUSED;
-  mo = (struct riscv_opcode *) hash_find (op_hash, name);
+  mo = (struct riscv_opcode *) str_hash_find (op_hash, name);
   gas_assert (mo);
 
   /* Find a non-RVC variant of the instruction.  append_insn will compress
@@ -1796,7 +1757,7 @@ riscv_is_priv_insn (insn_t insn)
 
 static const char *
 riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
-	  bfd_reloc_code_real_type *imm_reloc, struct hash_control *hash)
+	  bfd_reloc_code_real_type *imm_reloc, htab_t hash)
 {
   char *s;
   const char *args;
@@ -1812,7 +1773,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
   bfd_boolean insn_with_csr = FALSE;
 
   /* Parse the name of the instruction.  Terminate the string if whitespace
-     is found so that hash_find only sees the name part of the string.  */
+     is found so that str_hash_find only sees the name part of the string.  */
   for (s = str; *s != '\0'; ++s)
     if (ISSPACE (*s))
       {
@@ -1821,7 +1782,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	break;
       }
 
-  insn = (struct riscv_opcode *) hash_find (hash, str);
+  insn = (struct riscv_opcode *) str_hash_find (hash, str);
 
   argsStart = s;
   for ( ; insn && insn->name && strcmp (insn->name, str) == 0; insn++)

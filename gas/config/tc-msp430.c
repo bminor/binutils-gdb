@@ -194,7 +194,7 @@ const char FLT_CHARS[] = "dD";
 /* Handle  long expressions.  */
 extern LITTLENUM_TYPE generic_bignum[];
 
-static struct hash_control *msp430_hash;
+static htab_t msp430_hash;
 
 /* Relaxations.  */
 #define STATE_UNCOND_BRANCH	1	/* jump */
@@ -1825,10 +1825,11 @@ void
 md_begin (void)
 {
   struct msp430_opcode_s * opcode;
-  msp430_hash = hash_new ();
+  msp430_hash = str_htab_create ();
 
   for (opcode = msp430_opcodes; opcode->name; opcode++)
-    hash_insert (msp430_hash, opcode->name, (char *) opcode);
+    if (str_hash_find (msp430_hash, opcode->name) == NULL)
+      str_hash_insert (msp430_hash, opcode->name, (char *) opcode);
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH,
 		     target_is_430x () ? bfd_mach_msp430x : bfd_mach_msp11);
@@ -2862,7 +2863,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
       char real_name[32];
 
       sprintf (real_name, "%sa", old_name);
-      opcode = hash_find (msp430_hash, real_name);
+      opcode = str_hash_find (msp430_hash, real_name);
       if (opcode == NULL)
 	{
 	  as_bad (_("instruction %s.a does not exist"), old_name);
@@ -4346,7 +4347,7 @@ md_assemble (char * str)
       return;
     }
 
-  opcode = (struct msp430_opcode_s *) hash_find (msp430_hash, cmd);
+  opcode = (struct msp430_opcode_s *) str_hash_find (msp430_hash, cmd);
 
   if (opcode == NULL)
     {

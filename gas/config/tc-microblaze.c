@@ -114,7 +114,7 @@ const relax_typeS md_relax_table[] =
   { 0x7fffffff, 0x80000000, INST_WORD_SIZE*2, 0 }   /* 18: TEXT_PC_OFFSET.  */
 };
 
-static struct hash_control * opcode_hash_control;	/* Opcode mnemonics.  */
+static htab_t  opcode_hash_control;	/* Opcode mnemonics.  */
 
 static segT sbss_segment = 0; 	/* Small bss section.  */
 static segT sbss2_segment = 0; 	/* Section not used.  */
@@ -413,11 +413,11 @@ md_begin (void)
 {
   struct op_code_struct * opcode;
 
-  opcode_hash_control = hash_new ();
+  opcode_hash_control = str_htab_create ();
 
   /* Insert unique names into hash table.  */
   for (opcode = opcodes; opcode->name; opcode ++)
-    hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+    str_hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
 }
 
 /* Try to parse a reg name.  */
@@ -942,7 +942,7 @@ md_assemble (char * str)
       return;
     }
 
-  opcode = (struct op_code_struct *) hash_find (opcode_hash_control, name);
+  opcode = (struct op_code_struct *) str_hash_find (opcode_hash_control, name);
   if (opcode == NULL)
     {
       as_bad (_("unknown opcode \"%s\""), name);
@@ -1072,9 +1072,9 @@ md_assemble (char * str)
 
           count = 32 - reg1;
           if (streq (name, "lmi"))
-            opcode = (struct op_code_struct *) hash_find (opcode_hash_control, "lwi");
+            opcode = (struct op_code_struct *) str_hash_find (opcode_hash_control, "lwi");
           else
-            opcode = (struct op_code_struct *) hash_find (opcode_hash_control, "swi");
+            opcode = (struct op_code_struct *) str_hash_find (opcode_hash_control, "swi");
           if (opcode == NULL)
             {
               as_bad (_("unknown opcode \"%s\""), "lwi");
@@ -1106,7 +1106,7 @@ md_assemble (char * str)
           if ((temp != 0) && (temp != 0xFFFF8000))
 	    {
               /* Needs an immediate inst.  */
-              opcode1 = (struct op_code_struct *) hash_find (opcode_hash_control, "imm");
+              opcode1 = (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
               if (opcode1 == NULL)
                 {
                   as_bad (_("unknown opcode \"%s\""), "imm");
@@ -1559,7 +1559,7 @@ md_assemble (char * str)
       if ((temp != 0) && (temp != 0xFFFF8000))
 	{
           /* Needs an immediate inst.  */
-          opcode1 = (struct op_code_struct *) hash_find (opcode_hash_control, "imm");
+          opcode1 = (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
           if (opcode1 == NULL)
             {
               as_bad (_("unknown opcode \"%s\""), "imm");
@@ -1625,7 +1625,7 @@ md_assemble (char * str)
       if ((temp != 0) && (temp != 0xFFFF8000))
 	{
           /* Needs an immediate inst.  */
-          opcode1 = (struct op_code_struct *) hash_find (opcode_hash_control, "imm");
+          opcode1 = (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
           if (opcode1 == NULL)
             {
               as_bad (_("unknown opcode \"%s\""), "imm");
@@ -1698,7 +1698,7 @@ md_assemble (char * str)
       if ((temp != 0) && (temp != 0xFFFF8000))
 	{
           /* Needs an immediate inst.  */
-          opcode1 = (struct op_code_struct *) hash_find (opcode_hash_control, "imm");
+          opcode1 = (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
           if (opcode1 == NULL)
             {
               as_bad (_("unknown opcode \"%s\""), "imm");
@@ -2119,7 +2119,7 @@ md_apply_fix (fixS *   fixP,
 	buf[i + INST_WORD_SIZE] = buf[i];
 
       /* Generate the imm instruction.  */
-      opcode1 = (struct op_code_struct *) hash_find (opcode_hash_control, "imm");
+      opcode1 = (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
       if (opcode1 == NULL)
 	{
 	  as_bad (_("unknown opcode \"%s\""), "imm");
@@ -2167,7 +2167,7 @@ md_apply_fix (fixS *   fixP,
 	buf[i + INST_WORD_SIZE] = buf[i];
 
       /* Generate the imm instruction.  */
-      opcode1 = (struct op_code_struct *) hash_find (opcode_hash_control, "imm");
+      opcode1 = (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
       if (opcode1 == NULL)
 	{
 	  as_bad (_("unknown opcode \"%s\""), "imm");

@@ -1376,10 +1376,10 @@ const pseudo_typeS md_pseudo_table[] =
 extern char *input_line_pointer;
 
 /* Hash table for instruction mnemonic lookup.  */
-static struct hash_control *op_hash;
+static htab_t op_hash;
 
 /* Hash table for register lookup.  */
-static struct hash_control *reg_hash;
+static htab_t reg_hash;
 
   /* Various efficient no-op patterns for aligning code labels.
      Note: Don't try to assemble the instructions in the comments.
@@ -3026,13 +3026,11 @@ i386_mach (void)
 void
 md_begin (void)
 {
-  const char *hash_err;
-
   /* Support pseudo prefixes like {disp32}.  */
   lex_type ['{'] = LEX_BEGIN_NAME;
 
   /* Initialize op_hash hash table.  */
-  op_hash = hash_new ();
+  op_hash = str_htab_create ();
 
   {
     const insn_template *optab;
@@ -3052,15 +3050,7 @@ md_begin (void)
 	    /* different name --> ship out current template list;
 	       add to hash table; & begin anew.  */
 	    core_optab->end = optab;
-	    hash_err = hash_insert (op_hash,
-				    (optab - 1)->name,
-				    (void *) core_optab);
-	    if (hash_err)
-	      {
-		as_fatal (_("can't hash %s: %s"),
-			  (optab - 1)->name,
-			  hash_err);
-	      }
+	    str_hash_insert (op_hash, (optab - 1)->name, (void *) core_optab);
 	    if (optab->name == NULL)
 	      break;
 	    core_optab = XNEW (templates);
@@ -3070,19 +3060,13 @@ md_begin (void)
   }
 
   /* Initialize reg_hash hash table.  */
-  reg_hash = hash_new ();
+  reg_hash = str_htab_create ();
   {
     const reg_entry *regtab;
     unsigned int regtab_size = i386_regtab_size;
 
     for (regtab = i386_regtab; regtab_size--; regtab++)
-      {
-	hash_err = hash_insert (reg_hash, regtab->reg_name, (void *) regtab);
-	if (hash_err)
-	  as_fatal (_("can't hash %s: %s"),
-		    regtab->reg_name,
-		    hash_err);
-      }
+      str_hash_insert (reg_hash, regtab->reg_name, (void *) regtab);
   }
 
   /* Fill in lexical tables:  mnemonic_chars, operand_chars.  */
@@ -3173,8 +3157,8 @@ md_begin (void)
 void
 i386_print_statistics (FILE *file)
 {
-  hash_print_statistics (file, "i386 opcode", op_hash);
-  hash_print_statistics (file, "i386 register", reg_hash);
+  htab_print_statistics (file, "i386 opcode", op_hash);
+  htab_print_statistics (file, "i386 register", reg_hash);
 }
 
 #ifdef DEBUG386
@@ -5088,7 +5072,7 @@ parse_insn (char *line, char *mnemonic)
 	}
 
       /* Look up instruction (or prefix) via hash table.  */
-      current_templates = (const templates *) hash_find (op_hash, mnemonic);
+      current_templates = (const templates *) str_hash_find (op_hash, mnemonic);
 
       if (*l != END_OF_INSN
 	  && (!is_space_char (*l) || l[1] != END_OF_INSN)
@@ -5214,7 +5198,7 @@ parse_insn (char *line, char *mnemonic)
 	goto check_suffix;
       mnem_p = dot_p;
       *dot_p = '\0';
-      current_templates = (const templates *) hash_find (op_hash, mnemonic);
+      current_templates = (const templates *) str_hash_find (op_hash, mnemonic);
     }
 
   if (!current_templates)
@@ -5234,7 +5218,7 @@ parse_insn (char *line, char *mnemonic)
 	      case QWORD_MNEM_SUFFIX:
 		i.suffix = mnem_p[-1];
 	      mnem_p[-1] = '\0';
-	      current_templates = (const templates *) hash_find (op_hash,
+	      current_templates = (const templates *) str_hash_find (op_hash,
 								 mnemonic);
 	      break;
 	    case SHORT_MNEM_SUFFIX:
@@ -5243,7 +5227,7 @@ parse_insn (char *line, char *mnemonic)
 		{
 		  i.suffix = mnem_p[-1];
 		  mnem_p[-1] = '\0';
-		  current_templates = (const templates *) hash_find (op_hash,
+		  current_templates = (const templates *) str_hash_find (op_hash,
 								     mnemonic);
 		}
 	      break;
@@ -5257,7 +5241,7 @@ parse_insn (char *line, char *mnemonic)
 		  else
 		    i.suffix = LONG_MNEM_SUFFIX;
 		  mnem_p[-1] = '\0';
-		  current_templates = (const templates *) hash_find (op_hash,
+		  current_templates = (const templates *) str_hash_find (op_hash,
 								     mnemonic);
 		}
 	      break;
@@ -7564,7 +7548,7 @@ process_operands (void)
 	      i.flags[j] = i.flags[j - 1];
 	    }
 	  i.op[0].regs
-	    = (const reg_entry *) hash_find (reg_hash, "xmm0");
+	    = (const reg_entry *) str_hash_find (reg_hash, "xmm0");
 	  i.types[0] = regxmm;
 	  i.tm.operand_types[0] = regxmm;
 
@@ -10984,10 +10968,10 @@ i386_index_check (const char *operand_string)
 		  && current_templates->end[-1].operand_types[1]
 		     .bitfield.baseindex))
 	    op = 1;
-	  expected_reg = hash_find (reg_hash, di_si[addr_mode][op == es_op]);
+	  expected_reg = (const reg_entry *)str_hash_find (reg_hash, di_si[addr_mode][op == es_op]);
 	}
       else
-	expected_reg = hash_find (reg_hash, bx[addr_mode]);
+	expected_reg = (const reg_entry *)str_hash_find (reg_hash, bx[addr_mode]);
 
       if (i.base_reg != expected_reg
 	  || i.index_reg
@@ -12638,7 +12622,7 @@ parse_real_register (char *reg_string, char **end_op)
 
   *end_op = s;
 
-  r = (const reg_entry *) hash_find (reg_hash, reg_name_given);
+  r = (const reg_entry *) str_hash_find (reg_hash, reg_name_given);
 
   /* Handle floating point regs, allowing spaces in the (i) part.  */
   if (r == i386_regtab /* %st is first entry of table  */)
@@ -12665,7 +12649,7 @@ parse_real_register (char *reg_string, char **end_op)
 	      if (*s == ')')
 		{
 		  *end_op = s + 1;
-		  r = (const reg_entry *) hash_find (reg_hash, "st(0)");
+		  r = (const reg_entry *) str_hash_find (reg_hash, "st(0)");
 		  know (r);
 		  return r + fpr;
 		}

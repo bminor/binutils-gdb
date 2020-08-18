@@ -966,10 +966,10 @@ ppc_optimize_expr (expressionS *left, operatorT op, expressionS *right)
 static unsigned int ppc_obj64 = BFD_DEFAULT_TARGET_SIZE == 64;
 
 /* Opcode hash table.  */
-static struct hash_control *ppc_hash;
+static htab_t ppc_hash;
 
 /* Macro hash table.  */
-static struct hash_control *ppc_macro_hash;
+static htab_t ppc_macro_hash;
 
 #ifdef OBJ_ELF
 /* What type of shared library support to use.  */
@@ -1601,12 +1601,12 @@ ppc_setup_opcodes (void)
   bfd_boolean bad_insn = FALSE;
 
   if (ppc_hash != NULL)
-    hash_die (ppc_hash);
+    htab_delete (ppc_hash);
   if (ppc_macro_hash != NULL)
-    hash_die (ppc_macro_hash);
+    htab_delete (ppc_macro_hash);
 
   /* Insert the opcodes into a hash table.  */
-  ppc_hash = hash_new ();
+  ppc_hash = str_htab_create ();
 
   if (ENABLE_CHECKING)
     {
@@ -1683,22 +1683,12 @@ ppc_setup_opcodes (void)
 
       if ((ppc_cpu & op->flags) != 0
 	  && !(ppc_cpu & op->deprecated))
-	{
-	  const char *retval;
-
-	  retval = hash_insert (ppc_hash, op->name, (void *) op);
-	  if (retval != NULL)
-	    {
-	      as_bad (_("duplicate instruction %s"),
-		      op->name);
-	      bad_insn = TRUE;
-	    }
-	}
+	str_hash_insert (ppc_hash, op->name, (void *) op);
     }
 
   if ((ppc_cpu & PPC_OPCODE_ANY) != 0)
     for (op = powerpc_opcodes; op < op_end; op++)
-      hash_insert (ppc_hash, op->name, (void *) op);
+      str_hash_insert (ppc_hash, op->name, (void *) op);
 
   op_end = prefix_opcodes + prefix_num_opcodes;
   for (op = prefix_opcodes; op < op_end; op++)
@@ -1727,22 +1717,12 @@ ppc_setup_opcodes (void)
 
       if ((ppc_cpu & op->flags) != 0
 	  && !(ppc_cpu & op->deprecated))
-	{
-	  const char *retval;
-
-	  retval = hash_insert (ppc_hash, op->name, (void *) op);
-	  if (retval != NULL)
-	    {
-	      as_bad (_("duplicate instruction %s"),
-		      op->name);
-	      bad_insn = TRUE;
-	    }
-	}
+	str_hash_insert (ppc_hash, op->name, (void *) op);
     }
 
   if ((ppc_cpu & PPC_OPCODE_ANY) != 0)
     for (op = prefix_opcodes; op < op_end; op++)
-      hash_insert (ppc_hash, op->name, (void *) op);
+      str_hash_insert (ppc_hash, op->name, (void *) op);
 
   op_end = vle_opcodes + vle_num_opcodes;
   for (op = vle_opcodes; op < op_end; op++)
@@ -1772,17 +1752,7 @@ ppc_setup_opcodes (void)
 
       if ((ppc_cpu & op->flags) != 0
 	  && !(ppc_cpu & op->deprecated))
-	{
-	  const char *retval;
-
-	  retval = hash_insert (ppc_hash, op->name, (void *) op);
-	  if (retval != NULL)
-	    {
-	      as_bad (_("duplicate instruction %s"),
-		      op->name);
-	      bad_insn = TRUE;
-	    }
-	}
+	str_hash_insert (ppc_hash, op->name, (void *) op);
     }
 
   /* SPE2 instructions */
@@ -1816,40 +1786,21 @@ ppc_setup_opcodes (void)
 	    }
 
 	  if ((ppc_cpu & op->flags) != 0 && !(ppc_cpu & op->deprecated))
-	    {
-	      const char *retval;
-
-	      retval = hash_insert (ppc_hash, op->name, (void *) op);
-	      if (retval != NULL)
-		{
-		  as_bad (_("duplicate instruction %s"),
-			  op->name);
-		  bad_insn = TRUE;
-		}
-	    }
+	    str_hash_insert (ppc_hash, op->name, (void *) op);
 	}
 
       for (op = spe2_opcodes; op < op_end; op++)
-	hash_insert (ppc_hash, op->name, (void *) op);
+	str_hash_insert (ppc_hash, op->name, (void *) op);
     }
 
   /* Insert the macros into a hash table.  */
-  ppc_macro_hash = hash_new ();
+  ppc_macro_hash = str_htab_create ();
 
   macro_end = powerpc_macros + powerpc_num_macros;
   for (macro = powerpc_macros; macro < macro_end; macro++)
     {
       if ((macro->flags & ppc_cpu) != 0 || (ppc_cpu & PPC_OPCODE_ANY) != 0)
-	{
-	  const char *retval;
-
-	  retval = hash_insert (ppc_macro_hash, macro->name, (void *) macro);
-	  if (retval != (const char *) NULL)
-	    {
-	      as_bad (_("duplicate macro %s"), macro->name);
-	      bad_insn = TRUE;
-	    }
-	}
+	str_hash_insert (ppc_macro_hash, macro->name, (void *) macro);
     }
 
   if (bad_insn)
@@ -3160,12 +3111,12 @@ md_assemble (char *str)
     *s++ = '\0';
 
   /* Look up the opcode in the hash table.  */
-  opcode = (const struct powerpc_opcode *) hash_find (ppc_hash, str);
+  opcode = (const struct powerpc_opcode *) str_hash_find (ppc_hash, str);
   if (opcode == (const struct powerpc_opcode *) NULL)
     {
       const struct powerpc_macro *macro;
 
-      macro = (const struct powerpc_macro *) hash_find (ppc_macro_hash, str);
+      macro = (const struct powerpc_macro *) str_hash_find (ppc_macro_hash, str);
       if (macro == (const struct powerpc_macro *) NULL)
 	as_bad (_("unrecognized opcode: `%s'"), str);
       else

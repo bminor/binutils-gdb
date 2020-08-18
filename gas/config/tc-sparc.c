@@ -126,7 +126,7 @@ int sparc_cie_data_alignment;
 #endif
 
 /* Handle of the OPCODE hash table.  */
-static struct hash_control *op_hash;
+static htab_t op_hash;
 
 static void s_data1 (void);
 static void s_seg (int);
@@ -941,7 +941,6 @@ cmp_perc_entry (const void *parg, const void *qarg)
 void
 md_begin (void)
 {
-  const char *retval = NULL;
   int lose = 0;
   unsigned int i = 0;
 
@@ -952,18 +951,12 @@ md_begin (void)
     init_default_arch ();
 
   sparc_cie_data_alignment = sparc_arch_size == 64 ? -8 : -4;
-  op_hash = hash_new ();
+  op_hash = str_htab_create ();
 
   while (i < (unsigned int) sparc_num_opcodes)
     {
       const char *name = sparc_opcodes[i].name;
-      retval = hash_insert (op_hash, name, (void *) &sparc_opcodes[i]);
-      if (retval != NULL)
-	{
-	  as_bad (_("Internal error: can't hash `%s': %s\n"),
-		  sparc_opcodes[i].name, retval);
-	  lose = 1;
-	}
+      str_hash_insert (op_hash, name, (void *) &sparc_opcodes[i]);
       do
 	{
 	  if (sparc_opcodes[i].match & sparc_opcodes[i].lose)
@@ -984,7 +977,7 @@ md_begin (void)
       const char *name = ((sparc_arch_size == 32)
 		    ? native_op_table[i].name32
 		    : native_op_table[i].name64);
-      insn = (struct sparc_opcode *) hash_find (op_hash, name);
+      insn = (struct sparc_opcode *) str_hash_find (op_hash, name);
       if (insn == NULL)
 	{
 	  as_bad (_("Internal error: can't find opcode `%s' for `%s'\n"),
@@ -992,16 +985,8 @@ md_begin (void)
 	  lose = 1;
 	}
       else
-	{
-	  retval = hash_insert (op_hash, native_op_table[i].name,
-				(void *) insn);
-	  if (retval != NULL)
-	    {
-	      as_bad (_("Internal error: can't hash `%s': %s\n"),
-		      sparc_opcodes[i].name, retval);
-	      lose = 1;
-	    }
-	}
+	str_hash_insert (op_hash, native_op_table[i].name,
+			 (void *) insn);
     }
 
   if (lose)
@@ -1759,7 +1744,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
       *pinsn = NULL;
       return special_case;
     }
-  insn = (struct sparc_opcode *) hash_find (op_hash, str);
+  insn = (struct sparc_opcode *) str_hash_find (op_hash, str);
   *pinsn = insn;
   if (insn == NULL)
     {

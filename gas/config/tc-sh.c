@@ -240,7 +240,7 @@ const relax_typeS md_relax_table[C (END, 0)] = {
 
 #undef EMPTY
 
-static struct hash_control *opcode_hash_control;	/* Opcode mnemonics */
+static htab_t opcode_hash_control;	/* Opcode mnemonics */
 
 
 #ifdef OBJ_ELF
@@ -564,7 +564,7 @@ md_begin (void)
     = preset_target_arch ? preset_target_arch : arch_sh_up & ~arch_sh_has_dsp;
   valid_arch = target_arch;
 
-  opcode_hash_control = hash_new ();
+  opcode_hash_control = str_htab_create ();
 
   /* Insert unique names into hash table.  */
   for (opcode = sh_table; opcode->name; opcode++)
@@ -574,7 +574,7 @@ md_begin (void)
 	  if (!SH_MERGE_ARCH_SET_VALID (opcode->arch, target_arch))
 	    continue;
 	  prev_name = opcode->name;
-	  hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+	  str_hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
 	}
     }
 }
@@ -2196,7 +2196,7 @@ find_cooked_opcode (char **str_p)
   if (nlen == 0)
     as_bad (_("can't find opcode "));
 
-  return (sh_opcode_info *) hash_find (opcode_hash_control, name);
+  return (sh_opcode_info *) str_hash_find (opcode_hash_control, name);
 }
 
 /* Assemble a parallel processing insn.  */

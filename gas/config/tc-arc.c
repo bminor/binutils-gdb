@@ -428,16 +428,16 @@ enum mach_selection_type
 static enum mach_selection_type mach_selection_mode = MACH_SELECTION_NONE;
 
 /* The hash table of instruction opcodes.  */
-static struct hash_control *arc_opcode_hash;
+static htab_t arc_opcode_hash;
 
 /* The hash table of register symbols.  */
-static struct hash_control *arc_reg_hash;
+static htab_t arc_reg_hash;
 
 /* The hash table of aux register symbols.  */
-static struct hash_control *arc_aux_hash;
+static htab_t arc_aux_hash;
 
 /* The hash table of address types.  */
-static struct hash_control *arc_addrtype_hash;
+static htab_t arc_addrtype_hash;
 
 #define ARC_CPU_TYPE_A6xx(NAME,EXTRA)			\
   { #NAME, ARC_OPCODE_ARC600, bfd_mach_arc_arc600,	\
@@ -704,7 +704,7 @@ arc_find_opcode (const char *name)
 {
   const struct arc_opcode_hash_entry *entry;
 
-  entry = hash_find (arc_opcode_hash, name);
+  entry = str_hash_find (arc_opcode_hash, name);
   return entry;
 }
 
@@ -754,21 +754,18 @@ arc_opcode_hash_entry_iterator_next (const struct arc_opcode_hash_entry *entry,
 static void
 arc_insert_opcode (const struct arc_opcode *opcode)
 {
-  const char *name, *retval;
+  const char *name;
   struct arc_opcode_hash_entry *entry;
   name = opcode->name;
 
-  entry = hash_find (arc_opcode_hash, name);
+  entry = str_hash_find (arc_opcode_hash, name);
   if (entry == NULL)
     {
       entry = XNEW (struct arc_opcode_hash_entry);
       entry->count = 0;
       entry->opcode = NULL;
 
-      retval = hash_insert (arc_opcode_hash, name, (void *) entry);
-      if (retval)
-	as_fatal (_("internal error: can't hash opcode '%s': %s"),
-		  name, retval);
+      str_hash_insert (arc_opcode_hash, name, (void *) entry);
     }
 
   entry->opcode = XRESIZEVEC (const struct arc_opcode *, entry->opcode,
@@ -1921,7 +1918,7 @@ find_opcode_match (const struct arc_opcode_hash_entry *entry,
 		    tmpp = strdup (p);
 		    for (pp = tmpp; *pp; ++pp) *pp = TOLOWER (*pp);
 
-		    auxr = hash_find (arc_aux_hash, tmpp);
+		    auxr = str_hash_find (arc_aux_hash, tmpp);
 		    if (auxr)
 		      {
 			/* We modify the token array here, safe in the
@@ -2552,14 +2549,10 @@ md_assemble (char *str)
 static void
 declare_register (const char *name, int number)
 {
-  const char *err;
   symbolS *regS = symbol_create (name, reg_section,
 				 number, &zero_address_frag);
 
-  err = hash_insert (arc_reg_hash, S_GET_NAME (regS), (void *) regS);
-  if (err)
-    as_fatal (_("Inserting \"%s\" into register table failed: %s"),
-	      name, err);
+  str_hash_insert (arc_reg_hash, S_GET_NAME (regS), (void *) regS);
 }
 
 /* Construct symbols for each of the general registers.  */
@@ -2587,15 +2580,11 @@ declare_register_set (void)
 static void
 declare_addrtype (const char *name, int number)
 {
-  const char *err;
   symbolS *addrtypeS = symbol_create (name, undefined_section,
                                       number, &zero_address_frag);
 
-  err = hash_insert (arc_addrtype_hash, S_GET_NAME (addrtypeS),
-                     (void *) addrtypeS);
-  if (err)
-    as_fatal (_("Inserting \"%s\" into address type table failed: %s"),
-              name, err);
+  str_hash_insert (arc_addrtype_hash, S_GET_NAME (addrtypeS),
+		   (void *) addrtypeS);
 }
 
 /* Port-specific assembler initialization.  This function is called
@@ -2619,7 +2608,7 @@ md_begin (void)
   bfd_set_private_flags (stdoutput, selected_cpu.eflags);
 
   /* Set up a hash table for the instructions.  */
-  arc_opcode_hash = hash_new ();
+  arc_opcode_hash = str_htab_create ();
   if (arc_opcode_hash == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
@@ -2637,7 +2626,7 @@ md_begin (void)
     }while (opcode->name);
 
   /* Register declaration.  */
-  arc_reg_hash = hash_new ();
+  arc_reg_hash = str_htab_create ();
   if (arc_reg_hash == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
@@ -2690,7 +2679,7 @@ md_begin (void)
   memset (&arc_last_insns[0], 0, sizeof (arc_last_insns));
 
   /* Aux register declaration.  */
-  arc_aux_hash = hash_new ();
+  arc_aux_hash = str_htab_create ();
   if (arc_aux_hash == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
@@ -2698,8 +2687,6 @@ md_begin (void)
   unsigned int i;
   for (i = 0; i < arc_num_aux_regs; i++, auxr++)
     {
-      const char *retval;
-
       if (!(auxr->cpu & selected_cpu.flags))
 	continue;
 
@@ -2707,14 +2694,11 @@ md_begin (void)
 	  && !check_cpu_feature (auxr->subclass))
 	continue;
 
-      retval = hash_insert (arc_aux_hash, auxr->name, (void *) auxr);
-      if (retval)
-	as_fatal (_("internal error: can't hash aux register '%s': %s"),
-		  auxr->name, retval);
+      str_hash_insert (arc_aux_hash, auxr->name, (void *) auxr);
     }
 
   /* Address type declaration.  */
-  arc_addrtype_hash = hash_new ();
+  arc_addrtype_hash = str_htab_create ();
   if (arc_addrtype_hash == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
@@ -3420,7 +3404,7 @@ arc_parse_name (const char *name,
       && e->X_md == O_absent)
     return FALSE;
 
-  sym = hash_find (arc_reg_hash, name);
+  sym = str_hash_find (arc_reg_hash, name);
   if (sym)
     {
       e->X_op = O_register;
@@ -3428,7 +3412,7 @@ arc_parse_name (const char *name,
       return TRUE;
     }
 
-  sym = hash_find (arc_addrtype_hash, name);
+  sym = str_hash_find (arc_addrtype_hash, name);
   if (sym)
     {
       e->X_op = O_addrtype;
@@ -4393,7 +4377,7 @@ tc_arc_regname_to_dw2regnum (char *regname)
 {
   struct symbol *sym;
 
-  sym = hash_find (arc_reg_hash, regname);
+  sym = str_hash_find (arc_reg_hash, regname);
   if (sym)
     return S_GET_VALUE (sym);
 
@@ -4883,7 +4867,6 @@ arc_extcorereg (int opertype)
 {
   extRegister_t ereg;
   struct arc_aux_reg *auxr;
-  const char *retval;
   struct arc_flag_operand *ccode;
 
   memset (&ereg, 0, sizeof (ereg));
@@ -4906,10 +4889,7 @@ arc_extcorereg (int opertype)
       auxr->cpu = selected_cpu.flags;
       auxr->subclass = NONE;
       auxr->address = ereg.number;
-      retval = hash_insert (arc_aux_hash, auxr->name, (void *) auxr);
-      if (retval)
-	as_fatal (_("internal error: can't hash aux register '%s': %s"),
-		  auxr->name, retval);
+      str_hash_insert (arc_aux_hash, auxr->name, (void *) auxr);
       break;
     case EXT_COND_CODE:
       /* Condition code.  */

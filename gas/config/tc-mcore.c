@@ -135,7 +135,7 @@ static unsigned long poolspan;
 #define SPANEXIT	(600)
 static symbolS * poolsym;		/* Label for current pool.  */
 static char poolname[8];
-static struct hash_control * opcode_hash_control;	/* Opcode mnemonics.  */
+static htab_t  opcode_hash_control;	/* Opcode mnemonics.  */
 
 #define POOL_END_LABEL   ".LE"
 #define POOL_START_LABEL ".LS"
@@ -457,7 +457,7 @@ md_begin (void)
   const char * prev_name = "";
   unsigned int i;
 
-  opcode_hash_control = hash_new ();
+  opcode_hash_control = str_htab_create ();
 
   /* Insert unique names into hash table.  */
   for (i = 0; i < ARRAY_SIZE (mcore_table); i++)
@@ -465,7 +465,7 @@ md_begin (void)
       if (! streq (prev_name, mcore_table[i].name))
 	{
 	  prev_name = mcore_table[i].name;
-	  hash_insert (opcode_hash_control, mcore_table[i].name, (char *) &mcore_table[i]);
+	  str_hash_insert (opcode_hash_control, mcore_table[i].name, (char *) &mcore_table[i]);
 	}
     }
 }
@@ -881,7 +881,7 @@ md_assemble (char * str)
       return;
     }
 
-  opcode = (mcore_opcode_info *) hash_find (opcode_hash_control, name);
+  opcode = (mcore_opcode_info *) str_hash_find (opcode_hash_control, name);
   if (opcode == NULL)
     {
       as_bad (_("unknown opcode \"%s\""), name);

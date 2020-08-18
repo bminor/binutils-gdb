@@ -99,78 +99,56 @@ debug (const char *string, ...)
 }
 
 /* Hash table for opcode lookup.  */
-static struct hash_control *op_hash;
+static htab_t op_hash;
 /* Hash table for parallel opcode lookup.  */
-static struct hash_control *parop_hash;
+static htab_t parop_hash;
 /* Hash table for register lookup.  */
-static struct hash_control *reg_hash;
+static htab_t reg_hash;
 /* Hash table for indirect addressing lookup.  */
-static struct hash_control *ind_hash;
+static htab_t ind_hash;
 
 void
 md_begin (void)
 {
-  const char *hash_err;
-
   debug ("In md_begin()\n");
-  op_hash = hash_new ();
+  op_hash = str_htab_create ();
 
   {
     const insn_template *current_optab = tic30_optab;
 
     for (; current_optab < tic30_optab_end; current_optab++)
-      {
-	hash_err = hash_insert (op_hash, current_optab->name,
-				(char *) current_optab);
-	if (hash_err)
-	  as_fatal ("Internal Error: Can't Hash %s: %s",
-		    current_optab->name, hash_err);
-      }
+      str_hash_insert (op_hash, current_optab->name,
+		       (char *) current_optab);
   }
 
-  parop_hash = hash_new ();
+  parop_hash = str_htab_create ();
 
   {
     const partemplate *current_parop = tic30_paroptab;
 
     for (; current_parop < tic30_paroptab_end; current_parop++)
-      {
-	hash_err = hash_insert (parop_hash, current_parop->name,
-				(char *) current_parop);
-	if (hash_err)
-	  as_fatal ("Internal Error: Can't Hash %s: %s",
-		    current_parop->name, hash_err);
-      }
+      str_hash_insert (parop_hash, current_parop->name,
+		       (char *) current_parop);
   }
 
-  reg_hash = hash_new ();
+  reg_hash = str_htab_create ();
 
   {
     const reg *current_reg = tic30_regtab;
 
     for (; current_reg < tic30_regtab_end; current_reg++)
-      {
-	hash_err = hash_insert (reg_hash, current_reg->name,
-				(char *) current_reg);
-	if (hash_err)
-	  as_fatal ("Internal Error: Can't Hash %s: %s",
-		    current_reg->name, hash_err);
-      }
+      str_hash_insert (reg_hash, current_reg->name,
+		       (char *) current_reg);
   }
 
-  ind_hash = hash_new ();
+  ind_hash = str_htab_create ();
 
   {
     const ind_addr_type *current_ind = tic30_indaddr_tab;
 
     for (; current_ind < tic30_indaddrtab_end; current_ind++)
-      {
-	hash_err = hash_insert (ind_hash, current_ind->syntax,
-				(char *) current_ind);
-	if (hash_err)
-	  as_fatal ("Internal Error: Can't Hash %s: %s",
-		    current_ind->syntax, hash_err);
-      }
+      str_hash_insert (ind_hash, current_ind->syntax,
+		       (char *) current_ind);
   }
 
   /* Fill in lexical tables:  opcode_chars, operand_chars, space_chars.  */
@@ -476,7 +454,7 @@ tic30_operand (char *token)
 	      && (*(token + count) == 'r' || *(token + count) == 'R'))
 	    {
 	      /* AR reference is found, so get its number and remove
-		 it from the buffer so it can pass through hash_find().  */
+		 it from the buffer so it can pass through str_hash_find().  */
 	      if (found_ar)
 		{
 		  as_bad (_("More than one AR register found in indirect reference"));
@@ -538,7 +516,7 @@ tic30_operand (char *token)
 	  return NULL;
 	}
 
-      ind_addr_op = (ind_addr_type *) hash_find (ind_hash, ind_buffer);
+      ind_addr_op = (ind_addr_type *) str_hash_find (ind_hash, ind_buffer);
       if (ind_addr_op)
 	{
 	  debug ("Found indirect reference: %s\n", ind_addr_op->syntax);
@@ -577,7 +555,7 @@ tic30_operand (char *token)
     }
   else
     {
-      reg *regop = (reg *) hash_find (reg_hash, token);
+      reg *regop = (reg *) str_hash_find (reg_hash, token);
 
       if (regop)
 	{
@@ -674,7 +652,7 @@ tic30_parallel_insn (char *token)
     /* Find instruction.  */
     save_char = *current_posn;
     *current_posn = '\0';
-    p_opcode = (partemplate *) hash_find (parop_hash, token);
+    p_opcode = (partemplate *) str_hash_find (parop_hash, token);
     if (p_opcode)
       {
 	debug ("Found instruction %s\n", p_opcode->name);
@@ -719,7 +697,7 @@ tic30_parallel_insn (char *token)
 	debug ("first_opcode = %s\n", first_opcode);
 	debug ("second_opcode = %s\n", second_opcode);
 	sprintf (token, "q_%s_%s", second_opcode, first_opcode);
-	p_opcode = (partemplate *) hash_find (parop_hash, token);
+	p_opcode = (partemplate *) str_hash_find (parop_hash, token);
 
 	if (p_opcode)
 	  {
@@ -1466,7 +1444,7 @@ md_assemble (char *line)
     /* Find instruction.  */
     save_char = *current_posn;
     *current_posn = '\0';
-    op = (insn_template *) hash_find (op_hash, token_start);
+    op = (insn_template *) str_hash_find (op_hash, token_start);
     if (op)
       {
 	debug ("Found instruction %s\n", op->name);

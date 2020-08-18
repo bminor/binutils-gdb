@@ -63,11 +63,11 @@ typedef enum
 op_err;
 
 /* Opcode mnemonics hash table.  */
-static struct hash_control *crx_inst_hash;
+static htab_t crx_inst_hash;
 /* CRX registers hash table.  */
-static struct hash_control *reg_hash;
+static htab_t reg_hash;
 /* CRX coprocessor registers hash table.  */
-static struct hash_control *copreg_hash;
+static htab_t copreg_hash;
 /* Current instruction we're assembling.  */
 static const inst *instruction;
 
@@ -208,7 +208,7 @@ get_register (char *reg_name)
 {
   const reg_entry *rreg;
 
-  rreg = (const reg_entry *) hash_find (reg_hash, reg_name);
+  rreg = (const reg_entry *) str_hash_find (reg_hash, reg_name);
 
   if (rreg != NULL)
     return rreg->value.reg_val;
@@ -223,7 +223,7 @@ get_copregister (char *copreg_name)
 {
   const reg_entry *coreg;
 
-  coreg = (const reg_entry *) hash_find (copreg_hash, copreg_name);
+  coreg = (const reg_entry *) str_hash_find (copreg_hash, copreg_name);
 
   if (coreg != NULL)
     return coreg->value.copreg_val;
@@ -527,23 +527,18 @@ md_pcrel_from (fixS *fixp)
 void
 md_begin (void)
 {
-  const char *hashret = NULL;
   int i = 0;
 
   /* Set up a hash table for the instructions.  */
-  if ((crx_inst_hash = hash_new ()) == NULL)
+  if ((crx_inst_hash = str_htab_create ()) == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
   while (crx_instruction[i].mnemonic != NULL)
     {
       const char *mnemonic = crx_instruction[i].mnemonic;
 
-      hashret = hash_insert (crx_inst_hash, mnemonic,
+      str_hash_insert (crx_inst_hash, mnemonic,
 			     (void *) &crx_instruction[i]);
-
-      if (hashret != NULL && *hashret != '\0')
-	as_fatal (_("Can't hash `%s': %s\n"), crx_instruction[i].mnemonic,
-		  *hashret == 0 ? _("(unknown reason)") : hashret);
 
       /* Insert unique names into hash table.  The CRX instruction set
 	 has many identical opcode names that have different opcodes based
@@ -558,7 +553,7 @@ md_begin (void)
     }
 
   /* Initialize reg_hash hash table.  */
-  if ((reg_hash = hash_new ()) == NULL)
+  if ((reg_hash = str_htab_create ()) == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
   {
@@ -566,17 +561,11 @@ md_begin (void)
 
     for (regtab = crx_regtab;
 	 regtab < (crx_regtab + NUMREGS); regtab++)
-      {
-	hashret = hash_insert (reg_hash, regtab->name, (void *) regtab);
-	if (hashret)
-	  as_fatal (_("Internal error: Can't hash %s: %s"),
-		    regtab->name,
-		    hashret);
-      }
+      str_hash_insert (reg_hash, regtab->name, (void *) regtab);
   }
 
   /* Initialize copreg_hash hash table.  */
-  if ((copreg_hash = hash_new ()) == NULL)
+  if ((copreg_hash = str_htab_create ()) == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
   {
@@ -584,14 +573,8 @@ md_begin (void)
 
     for (copregtab = crx_copregtab; copregtab < (crx_copregtab + NUMCOPREGS);
 	 copregtab++)
-      {
-	hashret = hash_insert (copreg_hash, copregtab->name,
-			       (void *) copregtab);
-	if (hashret)
-	  as_fatal (_("Internal error: Can't hash %s: %s"),
-		    copregtab->name,
-		    hashret);
-      }
+      str_hash_insert (copreg_hash, copregtab->name,
+		       (void *) copregtab);
   }
   /*  Set linkrelax here to avoid fixups in most sections.  */
   linkrelax = 1;
@@ -1989,7 +1972,7 @@ md_assemble (char *op)
   *param++ = '\0';
 
   /* Find the instruction.  */
-  instruction = (const inst *) hash_find (crx_inst_hash, op);
+  instruction = (const inst *) str_hash_find (crx_inst_hash, op);
   if (instruction == NULL)
     {
       as_bad (_("Unknown opcode: `%s'"), op);
