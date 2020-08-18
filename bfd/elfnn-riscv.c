@@ -2618,19 +2618,42 @@ riscv_std_ext_p (const char *name)
   return (strlen (name) == 1) && (name[0] != 'x') && (name[0] != 's');
 }
 
-/* Error handler when version mis-match.  */
+/* Check if the versions are compatible.  */
 
-static void
+static bfd_boolean
 riscv_version_mismatch (bfd *ibfd,
 			struct riscv_subset_t *in,
 			struct riscv_subset_t *out)
 {
-  _bfd_error_handler
-    (_("error: %pB: Mis-matched ISA version for '%s' extension. "
-       "%d.%d vs %d.%d"),
-       ibfd, in->name,
-       in->major_version, in->minor_version,
-       out->major_version, out->minor_version);
+  if (in == NULL || out == NULL)
+    return TRUE;
+
+  /* Since there are no version conflicts for now, we just report
+     warning when the versions are mis-matched.  */
+  if (in->major_version != out->major_version
+      || in->minor_version != out->minor_version)
+    {
+      _bfd_error_handler
+	(_("warning: %pB: mis-matched ISA version %d.%d for '%s' "
+	   "extension, the output version is %d.%d"),
+	 ibfd,
+	 in->major_version,
+	 in->minor_version,
+	 in->name,
+	 out->major_version,
+	 out->minor_version);
+
+      /* Update the output ISA versions to the newest ones.  */
+      if ((in->major_version > out->major_version)
+	  || (in->major_version == out->major_version
+	      && in->minor_version > out->minor_version))
+	{
+	  out->major_version = in->major_version;
+	  out->minor_version = in->minor_version;
+	}
+    }
+
+  return TRUE;
 }
 
 /* Return true if subset is 'i' or 'e'.  */
@@ -2692,16 +2715,11 @@ riscv_merge_std_ext (bfd *ibfd,
 	 ibfd, in->name, out->name);
       return FALSE;
     }
-  else if ((in->major_version != out->major_version) ||
-	   (in->minor_version != out->minor_version))
-    {
-      /* TODO: Allow different merge policy.  */
-      riscv_version_mismatch (ibfd, in, out);
-      return FALSE;
-    }
+  else if (!riscv_version_mismatch (ibfd, in, out))
+    return FALSE;
   else
     riscv_add_subset (&merged_subsets,
-		      in->name, in->major_version, in->minor_version);
+		      out->name, out->major_version, out->minor_version);
 
   in = in->next;
   out = out->next;
@@ -2718,17 +2736,10 @@ riscv_merge_std_ext (bfd *ibfd,
       if (find_in == NULL && find_out == NULL)
 	continue;
 
-      /* Check version is same or not.  */
-      /* TODO: Allow different merge policy.  */
-      if ((find_in != NULL && find_out != NULL)
-	  && ((find_in->major_version != find_out->major_version)
-	      || (find_in->minor_version != find_out->minor_version)))
-	{
-	  riscv_version_mismatch (ibfd, find_in, find_out);
-	  return FALSE;
-	}
+      if (!riscv_version_mismatch (ibfd, find_in, find_out))
+	return FALSE;
 
-      struct riscv_subset_t *merged = find_in ? find_in : find_out;
+      struct riscv_subset_t *merged = find_out ? find_out : find_in;
       riscv_add_subset (&merged_subsets, merged->name,
 			merged->major_version, merged->minor_version);
     }
@@ -2812,12 +2823,8 @@ riscv_merge_multi_letter_ext (bfd *ibfd,
       else
 	{
 	  /* Both present, check version and increment both.  */
-	  if ((in->major_version != out->major_version)
-	      || (in->minor_version != out->minor_version))
-	    {
-	      riscv_version_mismatch (ibfd, in, out);
-	      return FALSE;
-	    }
+	  if (!riscv_version_mismatch (ibfd, in, out))
+	    return FALSE;
 
 	  riscv_add_subset (&merged_subsets, out->name, out->major_version,
 			    out->minor_version);

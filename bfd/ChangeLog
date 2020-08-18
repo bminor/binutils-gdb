@@ -1,3 +1,15 @@
+2020-09-03  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c (riscv_version_mismatch): Change the return type
+	from void to bfd_boolean.  Report warnings rather than errors
+	when the ISA versions are mis-matched.  Afterwards, remember to
+	update the output ISA versions to the newest ones.
+	(riscv_merge_std_ext): Allow to link objects with different
+	standard ISA versions.  Try to add output ISA versions to
+	merged_subsets first.
+	(riscv_merge_multi_letter_ext): Likewise.  But for standard additional
+	ISA and non-standard ISA versions.
+
 2020-09-03  Kito Cheng  <kito.cheng@sifive.com>
 
 	* elfnn-riscv.c (riscv_merge_std_ext): Fix to report the correct
