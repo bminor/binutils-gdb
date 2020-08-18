@@ -1,3 +1,9 @@
+2020-08-19  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/gas/ppc/int128.s: Correct vcmpuq.
+	* testsuite/gas/ppc/int128.d: Update.
+	* testsuite/gas/ppc/xvtlsbb.d: Update.
+
 2020-08-18  Peter Bergner  <bergner@linux.ibm.com>
 
 	* testsuite/gas/ppc/vsx4.s: Update test to use new mnemonic.
