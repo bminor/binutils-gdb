@@ -346,10 +346,6 @@ Options:\n\
   fprintf (stream, _("\
   --gdwarf-sections       generate per-function section names for DWARF line information\n"));
   fprintf (stream, _("\
-  --hash-size=<value>     set the hash table size close to <value>\n"));
-  fprintf (stream, _("\
-  --help                  show this message and exit\n"));
-  fprintf (stream, _("\
   --target-help           show target specific options\n"));
   fprintf (stream, _("\
   -I DIR                  add DIR to search list for .include directives\n"));
@@ -371,10 +367,6 @@ Options:\n\
   -o OBJFILE              name the object-file output OBJFILE (default a.out)\n"));
   fprintf (stream, _("\
   -R                      fold data section into text section\n"));
-  fprintf (stream, _("\
-  --reduce-memory-overheads \n\
-                          prefer smaller memory use at the cost of longer\n\
-                          assembly times\n"));
   fprintf (stream, _("\
   --statistics            print various measured statistics from execution\n"));
   fprintf (stream, _("\
@@ -1100,22 +1092,10 @@ This program has absolutely no warranty.\n"));
 	  break;
 
 	case OPTION_REDUCE_MEMORY_OVERHEADS:
-	  /* The only change we make at the moment is to reduce
-	     the size of the hash tables that we use.  */
-	  set_gas_hash_table_size (4051);
 	  break;
 
 	case OPTION_HASH_TABLE_SIZE:
-	  {
-	    unsigned long new_size;
-
-            new_size = strtoul (optarg, NULL, 0);
-            if (new_size)
-              set_gas_hash_table_size (new_size);
-            else
-              as_fatal (_("--hash-size needs a numeric argument"));
-	    break;
-	  }
+	  break;
 	}
     }
 

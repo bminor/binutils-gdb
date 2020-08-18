@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Removed --reduce-memory-overheads and --hash-size as gas now
+  uses hash tables that can be expand and shrink automatically.
+
 * Add {disp16} pseudo prefix to x86 assembler.
 
 * Add support for Intel AMX instructions.

@@ -1,5 +1,48 @@
 2020-08-20  Martin Liska  <mliska@suse.cz>
 
+	* NEWS: Mention --reduce-memory-overheads and --hash-size arguments
+	options.
+	* as.c: Remove the options from help.
+	* doc/as.texi: Remove options.
+	* doc/internals.texi: Remove hash from documentation.
+	* hash.c (struct hash_entry): Remove.
+	(struct hash_control): Likewise.
+	(set_gas_hash_table_size): Likewise.
+	(hash_new_sized): Likewise.
+	(hash_new): Likewise.
+	(hash_die): Likewise.
+	(hash_lookup): Likewise.
+	(hash_insert): Likewise.
+	(hash_jam): Likewise.
+	(hash_replace): Likewise.
+	(hash_find): Likewise.
+	(hash_find_n): Likewise.
+	(hash_delete): Likewise.
+	(hash_traverse): Likewise.
+	(hash_print_statistics): Likewise.
+	(TABLES): Likewise.
+	(STATBUFSIZE): Likewise.
+	(main): Likewise.
+	(what): Likewise.
+	(destroy): Likewise.
+	(applicatee): Likewise.
+	(whattable): Likewise.
+	* hash.h (struct hash_control): Likewise.
+	(set_gas_hash_table_size): Likewise.
+	(hash_new): Likewise.
+	(hash_new_sized): Likewise.
+	(hash_die): Likewise.
+	(hash_insert): Likewise.
+	(hash_jam): Likewise.
+	(hash_replace): Likewise.
+	(hash_find): Likewise.
+	(hash_find_n): Likewise.
+	(hash_delete): Likewise.
+	(hash_traverse): Likewise.
+	(hash_print_statistics): Likewise.
+
+2020-08-20  Martin Liska  <mliska@suse.cz>
+
 	* config/obj-coff-seh.c (seh_hash_insert): Port to use new
 	str_htab type.
 	(seh_hash_find): Likewise.

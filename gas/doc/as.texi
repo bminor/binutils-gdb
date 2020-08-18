@@ -238,7 +238,6 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--listing-cont-lines}=@var{NUM}] [@b{--keep-locals}]
  [@b{--no-pad-sections}]
  [@b{-o} @var{objfile}] [@b{-R}]
- [@b{--hash-size}=@var{NUM}] [@b{--reduce-memory-overheads}]
  [@b{--statistics}]
  [@b{-v}] [@b{-version}] [@b{--version}]
  [@b{-W}] [@b{--warn}] [@b{--fatal-warnings}] [@b{-w}] [@b{-x}]
@@ -874,18 +873,6 @@ Name the object-file output from @command{@value{AS}} @var{objfile}.
 
 @item -R
 Fold the data section into the text section.
-
-@item --hash-size=@var{number}
-Set the default size of GAS's hash tables to a prime number close to
-@var{number}.  Increasing this value can reduce the length of time it takes the
-assembler to perform its tasks, at the expense of increasing the assembler's
-memory requirements.  Similarly reducing this value can reduce the memory
-requirements at the expense of speed.
-
-@item --reduce-memory-overheads
-This option reduces GAS's memory requirements, at the expense of making the
-assembly processes slower.  Currently this switch is a synonym for
-@samp{--hash-size=4051}, but in the future it may have other effects as well.
 
 @ifset ELF
 @item --sectname-subst
