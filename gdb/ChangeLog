@@ -1,3 +1,9 @@
+2020-08-18  Aaron Merey  <amerey@redhat.com>
+
+	* Makefile.in (DEBUGINFOD_CFLAGS, DEBUGINFOD_LIBS): New variables.
+	(INTERNAL_CFLAGS_BASE): Add DEBUGINFOD_CFLAGS.
+	(CLIBS): Add DEBUGINFOD_LIBS.
+
 2020-08-17  Sergei Trofimovich  <siarheit@google.com>
 
 	* ia64-linux-nat.c: Include "gdbarch.h" to declare used
