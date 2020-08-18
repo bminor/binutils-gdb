@@ -728,6 +728,26 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	  AARCH64_LINUX_SIZEOF_PAUTH, &aarch64_linux_pauth_regset,
 	  "pauth registers", cb_data);
     }
+
+  /* Handle MTE registers.  */
+  if (tdep->has_mte ())
+    {
+      /* Create this on the fly in order to handle the variable location.  */
+      const struct regcache_map_entry mte_regmap[] =
+	{
+	  { 1, tdep->mte_reg_base, 4},
+	  { 0 }
+	};
+
+      const struct regset aarch64_linux_mte_regset =
+	{
+	  mte_regmap, regcache_supply_regset, regcache_collect_regset
+	};
+
+      cb (".reg-aarch-mte", AARCH64_LINUX_SIZEOF_MTE_REGSET,
+	  AARCH64_LINUX_SIZEOF_MTE_REGSET, &aarch64_linux_mte_regset,
+	  "MTE registers", cb_data);
+    }
 }
 
 /* Implement the "core_read_description" gdbarch method.  */
