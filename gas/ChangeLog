@@ -1,6 +1,11 @@
 2020-09-24  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2020-08-19  Alan Modra  <amodra@gmail.com>
+	* testsuite/gas/ppc/int128.s: Correct vcmpuq.
+	* testsuite/gas/ppc/int128.d: Update.
+	* testsuite/gas/ppc/xvtlsbb.d: Update.
+
 	2020-08-10  Alan Modra  <amodra@gmail.com>
 	* testsuite/gas/ppc/power8.d,
 	* testsuite/gas/ppc/power8.s: Add miso.

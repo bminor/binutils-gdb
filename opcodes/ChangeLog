@@ -1,6 +1,10 @@
 2020-09-24  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2020-08-19  Alan Modra  <amodra@gmail.com>
+	* ppc-opc.c (powerpc_opcodes): Replace OBF with BF for vcmpsq,
+	vcmpuq and xvtlsbb.
+
 	2020-08-10  Alan Modra  <amodra@gmail.com>
 	* ppc-opc.c (powerpc_opcodes): Add many mtspr and mfspr extended
 	instructions.
