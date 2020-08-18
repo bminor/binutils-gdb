@@ -946,7 +946,7 @@ typedef struct efdr {
   varray_t	 aux_syms;	/* auxiliary symbols */
   struct efdr	*next_file;	/* next file descriptor */
 				/* string/type hash tables */
-  struct hash_control *str_hash;	/* string hash table */
+  htab_t	str_hash;	/* string hash table */
   thash_t	*thash_head[THASH_SIZE];
 } efdr_t;
 
@@ -994,7 +994,7 @@ static const efdr_t init_file = {
 
   (struct efdr *)0,	/* next_file:	next file structure */
 
-  (struct hash_control *)0,	/* str_hash:	string hash table */
+  (htab_t)0,		/* str_hash:	string hash table */
   { 0 },		/* thash_head:	type hash table */
 };
 
@@ -1111,7 +1111,7 @@ static const type_info_t type_info_init = {
 
 static varray_t file_desc = INIT_VARRAY (efdr_t);
 
-static struct hash_control *tag_hash;
+static htab_t tag_hash;
 
 /* Static types for int and void.  Also, remember the last function's
    type (which is set up when we encounter the declaration for the
@@ -1408,7 +1408,7 @@ static char stabs_symbol[] = STABS_SYMBOL;
 
 static void add_varray_page (varray_t *vp);
 static symint_t add_string (varray_t *vp,
-			    struct hash_control *hash_tbl,
+			    htab_t hash_tbl,
 			    const char *str,
 			    shash_t **ret_hash);
 static localsym_t *add_ecoff_symbol (const char *str, st_t type,
@@ -1475,7 +1475,7 @@ static lineno_list_t *allocate_lineno_list (void);
 void
 ecoff_read_begin_hook (void)
 {
-  tag_hash = hash_new ();
+  tag_hash = str_htab_create ();
   top_tag_head = allocate_thead ();
   top_tag_head->first_tag = (tag_t *) NULL;
   top_tag_head->free = (thead_t *) NULL;
@@ -1548,7 +1548,7 @@ add_varray_page (varray_t *vp /* varray to add page to */)
 
 static symint_t
 add_string (varray_t *vp,			/* string obstack */
-	    struct hash_control *hash_tbl,	/* ptr to hash table */
+	    htab_t hash_tbl,			/* ptr to hash table */
 	    const char *str,			/* string */
 	    shash_t **ret_hash			/* return hash pointer */)
 {
@@ -1558,11 +1558,9 @@ add_string (varray_t *vp,			/* string obstack */
   if (len >= PAGE_USIZE)
     as_fatal (_("string too big (%lu bytes)"), len);
 
-  hash_ptr = (shash_t *) hash_find (hash_tbl, str);
+  hash_ptr = (shash_t *) str_hash_find (hash_tbl, str);
   if (hash_ptr == (shash_t *) NULL)
     {
-      const char *err;
-
       if (vp->objects_last_page + len >= PAGE_USIZE)
 	{
 	  vp->num_allocated =
@@ -1580,10 +1578,7 @@ add_string (varray_t *vp,			/* string obstack */
 
       strcpy (hash_ptr->string, str);
 
-      err = hash_insert (hash_tbl, str, (char *) hash_ptr);
-      if (err)
-	as_fatal (_("inserting \"%s\" into string hash table: %s"),
-		  str, err);
+      str_hash_insert (hash_tbl, str, (char *) hash_ptr);
     }
 
   if (ret_hash != (shash_t **) NULL)
@@ -2009,13 +2004,12 @@ get_tag (const char *tag,	/* tag name */
 	 bt_t basic_type	/* bt_Struct, bt_Union, or bt_Enum */)
 {
   shash_t *hash_ptr;
-  const char *err;
   tag_t *tag_ptr;
 
   if (cur_file_ptr == (efdr_t *) NULL)
     as_fatal (_("no current file pointer"));
 
-  hash_ptr = (shash_t *) hash_find (tag_hash, tag);
+  hash_ptr = (shash_t *) str_hash_find (tag_hash, tag);
 
   if (hash_ptr != (shash_t *) NULL
       && hash_ptr->tag_ptr != (tag_t *) NULL)
@@ -2036,10 +2030,7 @@ get_tag (const char *tag,	/* tag name */
 
       perm = xstrdup (tag);
       hash_ptr = allocate_shash ();
-      err = hash_insert (tag_hash, perm, (char *) hash_ptr);
-      if (err)
-	as_fatal (_("inserting \"%s\" into tag hash table: %s"),
-		  tag, err);
+      str_hash_insert (tag_hash, perm, (char *) hash_ptr);
       hash_ptr->string = perm;
     }
 
@@ -2281,7 +2272,7 @@ add_file (const char *file_name, int indx ATTRIBUTE_UNUSED, int fake)
       fil_ptr->fake = fake;
 
       /* Allocate the string hash table.  */
-      fil_ptr->str_hash = hash_new ();
+      fil_ptr->str_hash = str_htab_create ();
 
       /* Make sure 0 byte in string table is null  */
       add_string (&fil_ptr->strings,

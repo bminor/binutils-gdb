@@ -1,5 +1,13 @@
 2020-08-20  Martin Liska  <mliska@suse.cz>
 
+	* ecoff.c (INIT_VARRAY): Use htab_t.
+	(add_string): Likewise.
+	(ecoff_read_begin_hook): Use new str_htab_create.
+	(get_tag): Use htab_t.
+	(add_file): Likewise.
+
+2020-08-20  Martin Liska  <mliska@suse.cz>
+
 	* hash.h (struct string_tuple): New.
 	(hash_string_tuple): Likewise.
 	(eq_string_tuple): Likewise.
