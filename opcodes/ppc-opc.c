@@ -8306,7 +8306,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"xvxexpsp",	XX2VA(60,475,8),XX2_MASK,    PPCVSX3,	PPCVLE,		{XT6, XB6}},
 {"xvxsigsp",	XX2VA(60,475,9),XX2_MASK,    PPCVSX3,	PPCVLE,		{XT6, XB6}},
 {"xxbrw",	XX2VA(60,475,15),XX2_MASK,   PPCVSX3,	PPCVLE,		{XT6, XB6}},
-{"xvcvbf16sp",	XX2VA(60,475,16),XX2_MASK,   PPCVSX4,	PPCVLE,		{XT6, XB6}},
+{"xvcvbf16spn",	XX2VA(60,475,16),XX2_MASK,   PPCVSX4,	PPCVLE,		{XT6, XB6}},
 {"xvcvspbf16",	XX2VA(60,475,17),XX2_MASK,   PPCVSX4,	PPCVLE,		{XT6, XB6}},
 {"xxbrd",	XX2VA(60,475,23),XX2_MASK,   PPCVSX3,	PPCVLE,		{XT6, XB6}},
 {"xvcvhpsp",	XX2VA(60,475,24),XX2_MASK,   PPCVSX3,	PPCVLE,		{XT6, XB6}},
