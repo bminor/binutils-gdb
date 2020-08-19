@@ -3,8 +3,8 @@
 #source: attr-merge-priv-spec-a.s
 #as:
 #ld: -r
-#warning: .*warning: .*use privilege spec version 1.9.1 but the output use version 1.11.0.
-#warning: .*warning: .*privilege spec version 1.9.1 can not be linked with other spec versions.
+#warning: .*use privilege spec version 1.9.1 but the output use version 1.11.0
+#warning: .*privilege spec version 1.9.1 can not be linked with other spec versions
 #readelf: -A
 
 Attribute Section: riscv

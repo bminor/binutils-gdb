@@ -2667,8 +2667,8 @@ riscv_i_or_e_p (bfd *ibfd,
       && (strcasecmp (subset->name, "i") != 0))
     {
       _bfd_error_handler
-	(_("error: %pB: corrupted ISA string '%s'. "
-	   "First letter should be 'i' or 'e' but got '%s'."),
+	(_("error: %pB: corrupted ISA string '%s'.  "
+	   "First letter should be 'i' or 'e' but got '%s'"),
 	   ibfd, arch, subset->name);
       return FALSE;
     }
@@ -2711,7 +2711,7 @@ riscv_merge_std_ext (bfd *ibfd,
     {
       /* TODO: We might allow merge 'i' with 'e'.  */
       _bfd_error_handler
-	(_("error: %pB: Mis-matched ISA string to merge '%s' and '%s'."),
+	(_("error: %pB: mis-matched ISA string to merge '%s' and '%s'"),
 	 ibfd, in->name, out->name);
       return FALSE;
     }
@@ -2897,7 +2897,7 @@ riscv_merge_arch_attr_info (bfd *ibfd, char *in_arch, char *out_arch)
     {
       _bfd_error_handler
 	(_("error: %pB: ISA string of input (%s) doesn't match "
-	   "output (%s)."), ibfd, in_arch, out_arch);
+	   "output (%s)"), ibfd, in_arch, out_arch);
       return NULL;
     }
 
@@ -2917,15 +2917,15 @@ riscv_merge_arch_attr_info (bfd *ibfd, char *in_arch, char *out_arch)
     {
       _bfd_error_handler
 	(_("error: %pB: XLEN of input (%u) doesn't match "
-	   "output (%u)."), ibfd, xlen_in, xlen_out);
+	   "output (%u)"), ibfd, xlen_in, xlen_out);
       return NULL;
     }
 
   if (xlen_in != ARCH_SIZE)
     {
       _bfd_error_handler
-	(_("error: %pB: Unsupported XLEN (%u), you might be "
-	   "using wrong emulation."), ibfd, xlen_in);
+	(_("error: %pB: unsupported XLEN (%u), you might be "
+	   "using wrong emulation"), ibfd, xlen_in);
       return NULL;
     }
 
@@ -3039,7 +3039,7 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	      {
 		_bfd_error_handler
 		  (_("warning: %pB use privilege spec version %u.%u.%u but "
-		     "the output use version %u.%u.%u."),
+		     "the output use version %u.%u.%u"),
 		   ibfd,
 		   in_attr[Tag_a].i,
 		   in_attr[Tag_b].i,
@@ -3048,7 +3048,7 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 		   out_attr[Tag_b].i,
 		   out_attr[Tag_c].i);
 
-		/* The priv spec v1.9.1 can be linked with other spec
+		/* The priv spec v1.9.1 can not be linked with other spec
 		   versions since the conflicts.  We plan to drop the
 		   v1.9.1 in a year or two, so this confict should be
 		   removed in the future.  */
@@ -3057,10 +3057,10 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 		  {
 		    _bfd_error_handler
 		      (_("warning: privilege spec version 1.9.1 can not be "
-			 "linked with other spec versions."));
+			 "linked with other spec versions"));
 		  }
 
-		/* Update the output priv attributes to the newest.  */
+		/* Update the output priv spec to the newest one.  */
 		if (in_priv_spec > out_priv_spec)
 		  {
 		    out_attr[Tag_a].i = in_attr[Tag_a].i;
@@ -3085,7 +3085,7 @@ riscv_merge_attributes (bfd *ibfd, struct bfd_link_info *info)
 	  {
 	    _bfd_error_handler
 	      (_("error: %pB use %u-byte stack aligned but the output "
-		 "use %u-byte stack aligned."),
+		 "use %u-byte stack aligned"),
 	       ibfd, in_attr[i].i, out_attr[i].i);
 	    result = FALSE;
 	  }

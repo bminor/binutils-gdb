@@ -1,5 +1,12 @@
 2020-09-03  Nelson Chu  <nelson.chu@sifive.com>
 
+	* elfnn-riscv.c (riscv_i_or_e_p): Minor cleanup for warnings/errors.
+	(riscv_merge_std_ext): Likewise.
+	(riscv_merge_arch_attr_info): Likewise.
+	(riscv_merge_attributes): Likewise and fix comment typos.
+
+2020-09-03  Nelson Chu  <nelson.chu@sifive.com>
+
 	* elfnn-riscv.c (riscv_version_mismatch): Change the return type
 	from void to bfd_boolean.  Report warnings rather than errors
 	when the ISA versions are mis-matched.  Afterwards, remember to

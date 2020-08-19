@@ -1,5 +1,15 @@
 2020-09-03  Nelson Chu  <nelson.chu@sifive.com>
 
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-01.d: Remove
+	the useless `warnings` keywords.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-02.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-03.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-04.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-05.d: Likewise.
+	* testsuite/ld-riscv-elf/attr-merge-priv-spec-failed-06.d: Likewise.
+
+2020-09-03  Nelson Chu  <nelson.chu@sifive.com>
+
 	* testsuite/ld-riscv-elf/attr-merge-arch-failed-01.d: Update the
 	message from error to warning.
 	* testsuite/ld-riscv-elf/attr-merge-arch-failed-02.d: New testcases.
