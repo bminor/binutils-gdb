@@ -1281,32 +1281,10 @@ dump_relocations (Filedata *          filedata,
 	}
       else
 	{
-#if BFD_HOST_64BIT_LONG
 	  printf (do_wide
-		  ? "%16.16lx  %16.16lx "
-		  : "%12.12lx  %12.12lx ",
+		  ? "%16.16" BFD_VMA_FMT "x  %16.16" BFD_VMA_FMT "x "
+		  : "%12.12" BFD_VMA_FMT "x  %12.12" BFD_VMA_FMT "x ",
 		  offset, inf);
-#elif BFD_HOST_64BIT_LONG_LONG
-#ifndef __MSVCRT__
-	  printf (do_wide
-		  ? "%16.16llx  %16.16llx "
-		  : "%12.12llx  %12.12llx ",
-		  offset, inf);
-#else
-	  printf (do_wide
-		  ? "%16.16I64x  %16.16I64x "
-		  : "%12.12I64x  %12.12I64x ",
-		  offset, inf);
-#endif
-#else
-	  printf (do_wide
-		  ? "%8.8lx%8.8lx  %8.8lx%8.8lx "
-		  : "%4.4lx%8.8lx  %4.4lx%8.8lx ",
-		  _bfd_int64_high (offset),
-		  _bfd_int64_low (offset),
-		  _bfd_int64_high (inf),
-		  _bfd_int64_low (inf));
-#endif
 	}
 
       switch (filedata->file_header.e_machine)
@@ -13985,13 +13963,7 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 	    }
 	  else
 	    {
-#ifndef __MSVCRT__
-	      /* PR 11128: Use two separate invocations in order to work
-		 around bugs in the Solaris 8 implementation of printf.  */
-	      printf ("  [%6tx]  ", data - start);
-#else
-	      printf ("  [%6Ix]  ", (size_t) (data - start));
-#endif
+	      printf ("  [%6lx]  ", (unsigned long) (data - start));
 	    }
 
 	  if (maxlen > 0)

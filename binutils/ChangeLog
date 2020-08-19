@@ -1,3 +1,10 @@
+2020-08-19  Alan Modra  <amodra@gmail.com>
+
+	PR 26349
+	* readelf.c (dump_relocations): Use BFD_VMA_FMT to print offset
+	and info fields.
+	(dump_section_as_strings): Don't use %tx to display offset.
+
 2020-08-14  Alan Modra  <amodra@gmail.com>
 
 	PR 26388
