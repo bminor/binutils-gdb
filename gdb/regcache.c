@@ -1506,7 +1506,8 @@ test_get_thread_arch_aspace_regcache (process_stratum_target *target,
 static void
 regcaches_test ()
 {
-  /* It is empty at the start.  */
+  /* Ensure the regcaches container is empty at the start.  */
+  registers_changed ();
   SELF_CHECK (regcaches_size () == 0);
 
   ptid_t ptid1 (1), ptid2 (2), ptid3 (3);
@@ -1565,6 +1566,9 @@ regcaches_test ()
      clears REGCACHES.  */
   registers_changed_ptid (nullptr, minus_one_ptid);
   SELF_CHECK (regcaches_size () == 0);
+
+  /* Make sure to leave the global regcaches container empty.  */
+  registers_changed ();
 }
 
 class target_ops_no_register : public test_target_ops
