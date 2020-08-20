@@ -6670,7 +6670,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_STOP_NOISY\n");
       stop_print_frame = 1;
 
-      /* Assume the thread stopped for a breapoint.  We'll still check
+      /* Assume the thread stopped for a breakpoint.  We'll still check
 	 whether a/the breakpoint is there when the thread is next
 	 resumed.  */
       ecs->event_thread->stepping_over_breakpoint = 1;
@@ -6683,7 +6683,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_STOP_SILENT\n");
       stop_print_frame = 0;
 
-      /* Assume the thread stopped for a breapoint.  We'll still check
+      /* Assume the thread stopped for a breakpoint.  We'll still check
 	 whether a/the breakpoint is there when the thread is next
 	 resumed.  */
       ecs->event_thread->stepping_over_breakpoint = 1;

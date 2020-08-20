@@ -1,3 +1,8 @@
+2020-08-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
+
+	* gdb.base/print-file-var.exp: Fix typo "breapoint".
+	* gdb.trace/strace.exp: Ditto.
+
 2020-08-19  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
 
 	* gdb.fortran/vla-type.exp: Skip commands not required for

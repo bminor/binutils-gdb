@@ -106,7 +106,7 @@ proc test {hidden dlopen version_id_main lang} {
 	[gdb_get_line_number "STOP" "${main}.c"]
     gdb_test "break $main.c:$bp_location" \
 	"Breakpoint \[0-9\]+ at 0x\[0-9a-fA-F\]+: .*" \
-	"breapoint at STOP marker"
+	"breakpoint at STOP marker"
 
     gdb_test "continue" \
 	"Breakpoint \[0-9\]+, main \\(\\) at.*STOP.*" \
