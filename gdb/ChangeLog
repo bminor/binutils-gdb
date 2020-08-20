@@ -1,5 +1,19 @@
 2020-08-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* regcache.c (pid_ptid_regcache_map): New type.
+	(target_ptid_regcache_map): Remove.
+	(target_pid_ptid_regcache_map): New type.
+	(regcaches): Change type to target_pid_ptid_regcache_map.
+	(get_thread_arch_aspace_regcache): Update.
+	(regcache_thread_ptid_changed): Update, handle pid-like ptid
+	case.
+	(regcaches_size): Update.
+	(regcache_count): Update.
+	(registers_changed_ptid_target_pid_test): New.
+	(_initialize_regcache): Register new test.
+
+2020-08-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* regcache.c (regcache_count): New.
 	(struct regcache_test_data): New.
 	(regcache_test_data_up): New.
