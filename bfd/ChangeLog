@@ -1,5 +1,11 @@
 2020-08-20  Nick Clifton  <nickc@redhat.com>
 
+	PR 26428
+	* bfd.c (bfd_update_compression_header): Also set the sh_addralign
+	field in the ELF header of the compressed sections.
+
+2020-08-20  Nick Clifton  <nickc@redhat.com>
+
 	PR 26406
 	* elf-bfd.h (struct bfd_elf_section_data): Add
 	has_secondary_relocs field.

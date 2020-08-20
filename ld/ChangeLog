@@ -1,3 +1,9 @@
+2020-08-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 26428
+	* testsuite/ld-elf/zlibbegin.rS: Update expected output.
+	* testsuite/ld-elf/zlibnormal.rS: Likewise.
+
 2020-08-16  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-powerpc/inline.s,

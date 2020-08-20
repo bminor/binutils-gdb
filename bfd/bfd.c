@@ -2558,6 +2558,7 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
       if ((abfd->flags & BFD_COMPRESS_GABI) != 0)
 	{
 	  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+	  struct bfd_elf_section_data * esd = elf_section_data (sec);
 
 	  /* Set the SHF_COMPRESSED bit.  */
 	  elf_section_flags (sec) |= SHF_COMPRESSED;
@@ -2571,6 +2572,7 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 			  &echdr->ch_addralign);
 	      /* bfd_log2 (alignof (Elf32_Chdr)) */
 	      bfd_set_section_alignment (sec, 2);
+	      esd->this_hdr.sh_addralign = 4;
 	    }
 	  else
 	    {
@@ -2582,6 +2584,7 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 			  &echdr->ch_addralign);
 	      /* bfd_log2 (alignof (Elf64_Chdr)) */
 	      bfd_set_section_alignment (sec, 3);
+	      esd->this_hdr.sh_addralign = 8;
 	    }
 	  break;
 	}
