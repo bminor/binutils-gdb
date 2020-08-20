@@ -60,6 +60,8 @@
 #include "record-full.h"
 #include <algorithm>
 
+#include "producer.h"
+
 #if GDB_SELF_TEST
 #include "gdbsupport/selftest.h"
 #endif
@@ -1351,7 +1353,7 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	  && (cust == NULL
 	      || COMPUNIT_PRODUCER (cust) == NULL
 	      || startswith (COMPUNIT_PRODUCER (cust), "GNU ")
-	      || startswith (COMPUNIT_PRODUCER (cust), "clang ")))
+	      || producer_is_llvm (COMPUNIT_PRODUCER (cust))))
 	return post_prologue_pc;
 
       if (post_prologue_pc != 0)

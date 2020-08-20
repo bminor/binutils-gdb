@@ -33,8 +33,12 @@ set int [fortran_int4]
 
 # Check if not allocated VLA in type does not break
 # the debugger when accessing it.
-gdb_breakpoint [gdb_get_line_number "before-allocated"]
-gdb_continue_to_breakpoint "before-allocated"
+# break main for Flang compiler already breaks here
+if ![test_compiler_info "clang-*"] {
+    gdb_breakpoint [gdb_get_line_number "before-allocated"]
+    gdb_continue_to_breakpoint "before-allocated"
+}
+
 gdb_test "print twov" " = \\\( ivla1 = <not allocated>, ivla2 = <not allocated> \\\)" \
   "print twov before allocated"
 gdb_test "print twov%ivla1" " = <not allocated>" \

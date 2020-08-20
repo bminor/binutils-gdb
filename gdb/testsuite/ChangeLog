@@ -1,3 +1,8 @@
+2020-08-19  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* gdb.fortran/vla-type.exp: Skip commands not required for
+	the Flang compiled binaries after prologue fix.
+
 2020-08-17  Tom de Vries  <tdevries@suse.de>
 	    Tom Tromey  <tromey@adacore.com>
 

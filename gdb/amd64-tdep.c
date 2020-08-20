@@ -2547,12 +2547,13 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	= skip_prologue_using_sal (gdbarch, func_addr);
       struct compunit_symtab *cust = find_pc_compunit_symtab (func_addr);
 
-      /* Clang always emits a line note before the prologue and another
-	 one after.  We trust clang to emit usable line notes.  */
+      /* LLVM backend (Clang/Flang) always emits a line note before the
+         prologue and another one after.  We trust clang to emit usable
+         line notes.  */
       if (post_prologue_pc
 	  && (cust != NULL
 	      && COMPUNIT_PRODUCER (cust) != NULL
-	      && startswith (COMPUNIT_PRODUCER (cust), "clang ")))
+	      && producer_is_llvm (COMPUNIT_PRODUCER (cust))))
         return std::max (start_pc, post_prologue_pc);
     }
 

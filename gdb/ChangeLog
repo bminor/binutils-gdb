@@ -1,3 +1,13 @@
+2020-08-19  Alok Kumar Sharma  <AlokKumar.Sharma@amd.com>
+
+	* amd64-tdep.c (amd64_skip_prologue): Using symbol table
+	to find the end of prologue for flang compiled binaries.
+	* arm-tdep.c (arm_skip_prologue): Likewise.
+	* i386-tdep.c (i386_skip_prologue): Likewise.
+	* producer.c (producer_is_llvm): New function.
+	(producer_parsing_tests): Added new tests for clang/flang.
+	* producer.h (producer_is_llvm): New declaration.
+
 2020-08-18  Simon Marchi  <simon.marchi@efficios.com>
 
 	* linux-nat.c (linux_nat_debug_printf): New function.
