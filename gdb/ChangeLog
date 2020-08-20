@@ -1,5 +1,13 @@
 2020-08-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* regcache.c (test_get_thread_arch_aspace_regcache): Rename to...
+	(get_thread_arch_aspace_regcache_and_check): ... this.  Remove
+	gdbarch and aspace parameter.  Use current inferior's aspace.
+	Validate regcache's arch value.
+	(regcaches_test): Update.
+
+2020-08-20  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* regcache.c (regcaches_test): Call registers_changed.
 
 2020-08-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>

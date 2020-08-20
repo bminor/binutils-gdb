@@ -1491,15 +1491,21 @@ regcaches_size ()
 /* Wrapper around get_thread_arch_aspace_regcache that does some self checks.  */
 
 static void
-test_get_thread_arch_aspace_regcache (process_stratum_target *target,
-				      ptid_t ptid, struct gdbarch *gdbarch,
-				      address_space *aspace)
+get_thread_arch_aspace_regcache_and_check (process_stratum_target *target,
+					   ptid_t ptid)
 {
-  struct regcache *regcache
-    = get_thread_arch_aspace_regcache (target, ptid, gdbarch, aspace);
+  /* We currently only test with a single gdbarch.  Any gdbarch will do, so use
+     the current inferior's gdbarch.  Also use the current inferior's address
+     space.  */
+  gdbarch *arch = current_inferior ()->gdbarch;
+  address_space *aspace = current_inferior ()->aspace;
+  regcache *regcache
+    = get_thread_arch_aspace_regcache (target, ptid, arch, aspace);
+
   SELF_CHECK (regcache != NULL);
   SELF_CHECK (regcache->target () == target);
   SELF_CHECK (regcache->ptid () == ptid);
+  SELF_CHECK (regcache->arch () == arch);
   SELF_CHECK (regcache->aspace () == aspace);
 }
 
@@ -1517,37 +1523,27 @@ regcaches_test ()
 
   /* Get regcache from (target1,ptid1), a new regcache is added to
      REGCACHES.  */
-  test_get_thread_arch_aspace_regcache (&test_target1, ptid1,
-					target_gdbarch (),
-					NULL);
+  get_thread_arch_aspace_regcache_and_check (&test_target1, ptid1);
   SELF_CHECK (regcaches_size () == 1);
 
   /* Get regcache from (target1,ptid2), a new regcache is added to
      REGCACHES.  */
-  test_get_thread_arch_aspace_regcache (&test_target1, ptid2,
-					target_gdbarch (),
-					NULL);
+  get_thread_arch_aspace_regcache_and_check (&test_target1, ptid2);
   SELF_CHECK (regcaches_size () == 2);
 
   /* Get regcache from (target1,ptid3), a new regcache is added to
      REGCACHES.  */
-  test_get_thread_arch_aspace_regcache (&test_target1, ptid3,
-					target_gdbarch (),
-					NULL);
+  get_thread_arch_aspace_regcache_and_check (&test_target1, ptid3);
   SELF_CHECK (regcaches_size () == 3);
 
   /* Get regcache from (target1,ptid2) again, nothing is added to
      REGCACHES.  */
-  test_get_thread_arch_aspace_regcache (&test_target1, ptid2,
-					target_gdbarch (),
-					NULL);
+  get_thread_arch_aspace_regcache_and_check (&test_target1, ptid2);
   SELF_CHECK (regcaches_size () == 3);
 
   /* Get regcache from (target2,ptid2), a new regcache is added to
      REGCACHES, since this time we're using a different target.  */
-  test_get_thread_arch_aspace_regcache (&test_target2, ptid2,
-					target_gdbarch (),
-					NULL);
+  get_thread_arch_aspace_regcache_and_check (&test_target2, ptid2);
   SELF_CHECK (regcaches_size () == 4);
 
   /* Mark that (target1,ptid2) changed.  The regcache of (target1,
@@ -1557,9 +1553,7 @@ regcaches_test ()
 
   /* Get the regcache from (target2,ptid2) again, confirming the
      registers_changed_ptid call above did not delete it.  */
-  test_get_thread_arch_aspace_regcache (&test_target2, ptid2,
-					target_gdbarch (),
-					NULL);
+  get_thread_arch_aspace_regcache_and_check (&test_target2, ptid2);
   SELF_CHECK (regcaches_size () == 3);
 
   /* Confirm that marking all regcaches of all targets as changed
