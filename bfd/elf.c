@@ -12714,6 +12714,7 @@ _bfd_elf_copy_special_section_fields (const bfd *   ibfd ATTRIBUTE_UNUSED,
 {
   asection * isec;
   asection * osec;
+  struct bfd_elf_section_data * esd;
 
   if (isection == NULL)
     return FALSE;
@@ -12729,8 +12730,9 @@ _bfd_elf_copy_special_section_fields (const bfd *   ibfd ATTRIBUTE_UNUSED,
   if (osec == NULL)
     return FALSE;
 
-  BFD_ASSERT (elf_section_data (osec)->sec_info == NULL);
-  elf_section_data (osec)->sec_info = elf_section_data (isec)->sec_info;
+  esd = elf_section_data (osec);
+  BFD_ASSERT (esd->sec_info == NULL);
+  esd->sec_info = elf_section_data (isec)->sec_info;
   osection->sh_type = SHT_RELA;
   osection->sh_link = elf_onesymtab (obfd);
   if (osection->sh_link == 0)
@@ -12770,18 +12772,26 @@ _bfd_elf_copy_special_section_fields (const bfd *   ibfd ATTRIBUTE_UNUSED,
       return FALSE;
     }
 
-  osection->sh_info =
-    elf_section_data (isection->bfd_section->output_section)->this_idx;
-
+  esd = elf_section_data (isection->bfd_section->output_section);
+  BFD_ASSERT (esd != NULL);
+  osection->sh_info = esd->this_idx;
+  esd->has_secondary_relocs = TRUE;
 #if DEBUG_SECONDARY_RELOCS
   fprintf (stderr, "update header of %s, sh_link = %u, sh_info = %u\n",
 	   osec->name, osection->sh_link, osection->sh_info);
+  fprintf (stderr, "mark section %s as having secondary relocs\n",
+	   bfd_section_name (isection->bfd_section->output_section));
 #endif
 
   return TRUE;
 }
 
-/* Write out a secondary reloc section.  */
+/* Write out a secondary reloc section.
+
+   FIXME: Currently this function can result in a serious performance penalty
+   for files with secondary relocs and lots of sections.  The proper way to
+   fix this is for _bfd_elf_copy_special_section_fields() to chain secondary
+   relocs together and then to have this function just walk that chain.  */
 
 bfd_boolean
 _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)

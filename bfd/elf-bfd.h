@@ -1756,6 +1756,11 @@ struct bfd_elf_section_data
   /* Link from a text section to its .eh_frame_entry section.  */
   asection *eh_frame_entry;
 
+  /* TRUE if the section has secondary reloc sections associated with it.
+     FIXME: In the future it might be better to change this into a list
+     of secondary reloc sections, making lookup easier and faster.  */
+  bfd_boolean has_secondary_relocs;
+
   /* A pointer used for various section optimizations.  */
   void *sec_info;
 };

@@ -1,3 +1,14 @@
+2020-08-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 26406
+	* elf-bfd.h (struct bfd_elf_section_data): Add
+	has_secondary_relocs field.
+	* elf.c (_bfd_elf_copy_special_section_fields): Set the
+	has_secondary_relocs field for sections which have associated
+	secondary relocs.
+	* elfcode.h (elf_write_relocs): Only call write_secondary_relocs
+	on sections which have associated secondary relocs.
+
 2020-08-15  Alan Modra  <amodra@gmail.com>
 
 	* elf32-frv.c (elf32_frv_add_symbol_hook): Set SEC_SMALL_DATA on

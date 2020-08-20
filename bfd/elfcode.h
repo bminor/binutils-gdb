@@ -999,7 +999,8 @@ elf_write_relocs (bfd *abfd, asection *sec, void *data)
       (*swap_out) (abfd, &src_rela, dst_rela);
     }
 
-  if (!bed->write_secondary_relocs (abfd, sec))
+  if (elf_section_data (sec)->has_secondary_relocs
+      && !bed->write_secondary_relocs (abfd, sec))
     {
       *failedp = TRUE;
       return;
