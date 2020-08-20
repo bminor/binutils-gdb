@@ -621,14 +621,14 @@ tic4x_insert_reg (const char *regname, int regnum)
   char buf[32];
   int i;
 
-  symbol_table_insert (symbol_new (regname, reg_section, (valueT) regnum,
-				   &zero_address_frag));
+  symbol_table_insert (symbol_new (regname, reg_section,
+				   &zero_address_frag, regnum));
   for (i = 0; regname[i]; i++)
     buf[i] = ISLOWER (regname[i]) ? TOUPPER (regname[i]) : regname[i];
   buf[i] = '\0';
 
-  symbol_table_insert (symbol_new (buf, reg_section, (valueT) regnum,
-				   &zero_address_frag));
+  symbol_table_insert (symbol_new (buf, reg_section,
+				   &zero_address_frag, regnum));
 }
 
 static void
@@ -637,7 +637,7 @@ tic4x_insert_sym (const char *symname, int value)
   symbolS *symbolP;
 
   symbolP = symbol_new (symname, absolute_section,
-			(valueT) value, &zero_address_frag);
+			&zero_address_frag, value);
   SF_SET_LOCAL (symbolP);
   symbol_table_insert (symbolP);
 }

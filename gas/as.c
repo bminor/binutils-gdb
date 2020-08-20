@@ -1368,7 +1368,7 @@ main (int argc, char ** argv)
   dwarf2_init ();
 
   local_symbol_make (".gasversion.", absolute_section,
-		     BFD_VERSION / 10000UL, &predefined_address_frag);
+		     &predefined_address_frag, BFD_VERSION / 10000UL);
 
   /* Now that we have fully initialized, and have created the output
      file, define any symbols requested by --defsym command line
@@ -1378,8 +1378,8 @@ main (int argc, char ** argv)
       symbolS *sym;
       struct defsym_list *next;
 
-      sym = symbol_new (defsyms->name, absolute_section, defsyms->value,
-			&zero_address_frag);
+      sym = symbol_new (defsyms->name, absolute_section,
+			&zero_address_frag, defsyms->value);
       /* Make symbols defined on the command line volatile, so that they
 	 can be redefined inside a source file.  This makes this assembler's
 	 behaviour compatible with earlier versions, but it may not be

@@ -61,7 +61,7 @@ cgen_asm_record_register (char *name, int number)
   /* Use symbol_create here instead of symbol_new so we don't try to
      output registers into the object file's symbol table.  */
   symbol_table_insert (symbol_create (name, reg_section,
-				      number, &zero_address_frag));
+				      &zero_address_frag, number));
 }
 
 /* We need to keep a list of fixups.  We can't simply generate them as
@@ -437,8 +437,8 @@ gas_cgen_parse_operand (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
 		 prematurely dives into the symbol evaluator, and in this
 		 case it gets a bad answer, so we manually create the
 		 expression symbol we want here.  */
-	      stmp = symbol_create (FAKE_LABEL_NAME, expr_section, 0,
-				    & zero_address_frag);
+	      stmp = symbol_create (FAKE_LABEL_NAME, expr_section,
+				    &zero_address_frag, 0);
 	      symbol_set_value_expression (stmp, & exp);
 	    }
 	  else

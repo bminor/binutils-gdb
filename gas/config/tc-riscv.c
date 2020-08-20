@@ -1266,8 +1266,8 @@ check_absolute_expr (struct riscv_cl_insn *ip, expressionS *ex,
 static symbolS *
 make_internal_label (void)
 {
-  return (symbolS *) local_symbol_make (FAKE_LABEL_NAME, now_seg,
-					(valueT) frag_now_fix (), frag_now);
+  return (symbolS *) local_symbol_make (FAKE_LABEL_NAME, now_seg, frag_now,
+					frag_now_fix ());
 }
 
 /* Load an entry from the GOT.  */

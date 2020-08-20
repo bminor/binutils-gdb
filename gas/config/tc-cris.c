@@ -1196,19 +1196,19 @@ md_begin (void)
   /* Enable use of ".if ..asm.arch.cris.v32"
      and ".if ..asm.arch.cris.common_v10_v32" and a few others.  */
   symbol_table_insert (symbol_new ("..asm.arch.cris.v32", absolute_section,
-				   (cris_arch == arch_crisv32),
-				   &zero_address_frag));
+				   &zero_address_frag,
+				   cris_arch == arch_crisv32));
   symbol_table_insert (symbol_new ("..asm.arch.cris.v10", absolute_section,
-				   (cris_arch == arch_crisv10),
-				   &zero_address_frag));
+				   &zero_address_frag,
+				   cris_arch == arch_crisv10));
   symbol_table_insert (symbol_new ("..asm.arch.cris.common_v10_v32",
 				   absolute_section,
-				   (cris_arch == arch_cris_common_v10_v32),
-				   &zero_address_frag));
+				   &zero_address_frag,
+				   cris_arch == arch_cris_common_v10_v32));
   symbol_table_insert (symbol_new ("..asm.arch.cris.any_v0_v10",
 				   absolute_section,
-				   (cris_arch == arch_cris_any_v0_v10),
-				   &zero_address_frag));
+				   &zero_address_frag,
+				   cris_arch == arch_cris_any_v0_v10));
 
   while (cris_opcodes[i].name != NULL)
     {

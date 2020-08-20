@@ -574,7 +574,7 @@ debug_sym (int ignore ATTRIBUTE_UNUSED)
 
   if ((symbolP = symbol_find (name)) == NULL
       && (symbolP = md_undefined_symbol (name)) == NULL)
-    symbolP = symbol_new (name, undefined_section, 0, &zero_address_frag);
+    symbolP = symbol_new (name, undefined_section, &zero_address_frag, 0);
 
   symbol_table_insert (symbolP);
   if (S_IS_DEFINED (symbolP) && (S_GET_SEGMENT (symbolP) != reg_section

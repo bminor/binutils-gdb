@@ -416,8 +416,7 @@ tic54x_eval (int x ATTRIBUTE_UNUSED)
       ignore_rest_of_line ();
       return;
     }
-  symbolP = symbol_new (name, absolute_section,
-			(valueT) value, &zero_address_frag);
+  symbolP = symbol_new (name, absolute_section, &zero_address_frag, value);
   SF_SET_LOCAL (symbolP);
   symbol_table_insert (symbolP);
 
@@ -556,10 +555,9 @@ stag_add_field_symbols (struct stag *stag,
       if (rootsym == NULL)
 	{
 	  symbolS *sym;
-	  sym = symbol_new (name, absolute_section,
-			    (field->stag ? field->offset :
-			     (valueT) (base_offset + field->offset)),
-			    &zero_address_frag);
+	  sym = symbol_new (name, absolute_section, &zero_address_frag,
+			    (field->stag ? field->offset
+			     : base_offset + field->offset));
 	  SF_SET_LOCAL (sym);
 	  symbol_table_insert (sym);
 	}
@@ -611,8 +609,8 @@ stag_add_field (struct stag *parent,
   /* Only create a symbol for this field if the parent has no name.  */
   if (!strncmp (".fake", parent->name, 5))
     {
-      symbolS *sym = symbol_new (name, absolute_section,
-				 (valueT) offset, &zero_address_frag);
+      symbolS *sym = symbol_new (name, absolute_section, &zero_address_frag,
+				 offset);
       SF_SET_LOCAL (sym);
       symbol_table_insert (sym);
     }
@@ -675,16 +673,16 @@ tic54x_struct (int arg)
       char fake[] = ".fake_stagNNNNNNN";
       sprintf (fake, ".fake_stag%d", struct_count++);
       current_stag->sym = symbol_new (fake, absolute_section,
-				      (valueT) abs_section_offset,
-				      &zero_address_frag);
+				      &zero_address_frag,
+				      abs_section_offset);
     }
   else
     {
       char * label = xstrdup (S_GET_NAME (line_label));
       current_stag->sym = symbol_new (label,
 				      absolute_section,
-				      (valueT) abs_section_offset,
-				      &zero_address_frag);
+				      &zero_address_frag,
+				      abs_section_offset);
       free (label);
     }
   current_stag->name = S_GET_NAME (current_stag->sym);
@@ -1459,7 +1457,7 @@ set_cpu (enum cpu_version version)
   if (version == V545LP || version == V546LP)
     {
       symbolS *symbolP = symbol_new ("__allow_lp", absolute_section,
-				     (valueT) 1, &zero_address_frag);
+				     &zero_address_frag, 1);
       SF_SET_LOCAL (symbolP);
       symbol_table_insert (symbolP);
     }
@@ -2016,7 +2014,7 @@ tic54x_mmregs (int ignored ATTRIBUTE_UNUSED)
   for (sym = (tic54x_symbol *) mmregs; sym->name; sym++)
     {
       symbolS *symbolP = symbol_new (sym->name, absolute_section,
-				     (valueT) sym->value, &zero_address_frag);
+				     &zero_address_frag, sym->value);
       SF_SET_LOCAL (symbolP);
       symbol_table_insert (symbolP);
     }
@@ -2070,7 +2068,7 @@ set_address_mode (int mode)
   if (mode == far_mode)
     {
       symbolS *symbolP = symbol_new ("__allow_far", absolute_section,
-				     (valueT) 1, &zero_address_frag);
+				     &zero_address_frag, 1);
       SF_SET_LOCAL (symbolP);
       symbol_table_insert (symbolP);
     }
@@ -2176,7 +2174,7 @@ tic54x_set (int ignore ATTRIBUTE_UNUSED)
   if ((symbolP = symbol_find (name)) == NULL
       && (symbolP = md_undefined_symbol (name)) == NULL)
     {
-      symbolP = symbol_new (name, absolute_section, 0, &zero_address_frag);
+      symbolP = symbol_new (name, absolute_section, &zero_address_frag, 0);
       S_SET_STORAGE_CLASS (symbolP, C_STAT);
     }
   free (name);
@@ -3010,7 +3008,7 @@ md_begin (void)
     {
       /* Add basic registers to the symbol table.  */
       symbolS *symbolP = symbol_new (sym->name, absolute_section,
-				     (valueT) sym->value, &zero_address_frag);
+				     &zero_address_frag, sym->value);
       SF_SET_LOCAL (symbolP);
       symbol_table_insert (symbolP);
       str_hash_insert (reg_hash, sym->name, (char *) sym);
@@ -5015,18 +5013,15 @@ tic54x_undefined_symbol (char *name)
       (sym = (tic54x_symbol *) str_hash_find (misc_symbol_hash, name)) != NULL ||
       (sym = (tic54x_symbol *) str_hash_find (sbit_hash, name)) != NULL)
     {
-      return symbol_new (name, reg_section,
-			 (valueT) sym->value,
-			 &zero_address_frag);
+      return symbol_new (name, reg_section, &zero_address_frag, sym->value);
     }
 
   if ((sym = (tic54x_symbol *) str_hash_find (reg_hash, name)) != NULL ||
       (sym = (tic54x_symbol *) str_hash_find (mmreg_hash, name)) != NULL ||
       !strcasecmp (name, "a") || !strcasecmp (name, "b"))
     {
-      return symbol_new (name, reg_section,
-			 (valueT) sym ? sym->value : 0,
-			 &zero_address_frag);
+      return symbol_new (name, reg_section, &zero_address_frag,
+			 sym ? sym->value : 0);
     }
 
   return NULL;

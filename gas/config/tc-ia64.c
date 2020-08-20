@@ -4435,9 +4435,10 @@ dot_endp (int dummy ATTRIBUTE_UNUSED)
       e.X_add_number = 0;
       if (!S_IS_LOCAL (unwind.proc_pending.sym)
 	  && S_IS_DEFINED (unwind.proc_pending.sym))
-	e.X_add_symbol = symbol_temp_new (S_GET_SEGMENT (unwind.proc_pending.sym),
-					  S_GET_VALUE (unwind.proc_pending.sym),
-					  symbol_get_frag (unwind.proc_pending.sym));
+	e.X_add_symbol
+	  = symbol_temp_new (S_GET_SEGMENT (unwind.proc_pending.sym),
+			     symbol_get_frag (unwind.proc_pending.sym),
+			     S_GET_VALUE (unwind.proc_pending.sym));
       else
 	e.X_add_symbol = unwind.proc_pending.sym;
       ia64_cons_fix_new (frag_now, where, bytes_per_address, &e,
@@ -4487,7 +4488,7 @@ dot_endp (int dummy ATTRIBUTE_UNUSED)
 		      symbol_get_obj (sym)->size->X_op = O_subtract;
 		      symbol_get_obj (sym)->size->X_add_symbol
 			= symbol_new (FAKE_LABEL_NAME, now_seg,
-				      frag_now_fix (), frag_now);
+				      frag_now, frag_now_fix ());
 		      symbol_get_obj (sym)->size->X_op_symbol = sym;
 		      symbol_get_obj (sym)->size->X_add_number = 0;
 		    }
@@ -5371,7 +5372,7 @@ declare_register (const char *name, unsigned int regnum)
 {
   symbolS *sym;
 
-  sym = symbol_create (name, reg_section, regnum, &zero_address_frag);
+  sym = symbol_create (name, reg_section, &zero_address_frag, regnum);
 
   str_hash_insert (md.reg_hash, S_GET_NAME (sym), (void *) sym);
 
@@ -7244,77 +7245,77 @@ md_begin (void)
   secalias_name_hash = str_htab_create ();
 
   pseudo_func[FUNC_DTP_MODULE].u.sym =
-    symbol_new (".<dtpmod>", undefined_section, FUNC_DTP_MODULE,
-		&zero_address_frag);
+    symbol_new (".<dtpmod>", undefined_section,
+		&zero_address_frag, FUNC_DTP_MODULE);
 
   pseudo_func[FUNC_DTP_RELATIVE].u.sym =
-    symbol_new (".<dtprel>", undefined_section, FUNC_DTP_RELATIVE,
-		&zero_address_frag);
+    symbol_new (".<dtprel>", undefined_section,
+		&zero_address_frag, FUNC_DTP_RELATIVE);
 
   pseudo_func[FUNC_FPTR_RELATIVE].u.sym =
-    symbol_new (".<fptr>", undefined_section, FUNC_FPTR_RELATIVE,
-		&zero_address_frag);
+    symbol_new (".<fptr>", undefined_section,
+		&zero_address_frag, FUNC_FPTR_RELATIVE);
 
   pseudo_func[FUNC_GP_RELATIVE].u.sym =
-    symbol_new (".<gprel>", undefined_section, FUNC_GP_RELATIVE,
-		&zero_address_frag);
+    symbol_new (".<gprel>", undefined_section,
+		&zero_address_frag, FUNC_GP_RELATIVE);
 
   pseudo_func[FUNC_LT_RELATIVE].u.sym =
-    symbol_new (".<ltoff>", undefined_section, FUNC_LT_RELATIVE,
-		&zero_address_frag);
+    symbol_new (".<ltoff>", undefined_section,
+		&zero_address_frag, FUNC_LT_RELATIVE);
 
   pseudo_func[FUNC_LT_RELATIVE_X].u.sym =
-    symbol_new (".<ltoffx>", undefined_section, FUNC_LT_RELATIVE_X,
-		&zero_address_frag);
+    symbol_new (".<ltoffx>", undefined_section,
+		&zero_address_frag, FUNC_LT_RELATIVE_X);
 
   pseudo_func[FUNC_PC_RELATIVE].u.sym =
-    symbol_new (".<pcrel>", undefined_section, FUNC_PC_RELATIVE,
-		&zero_address_frag);
+    symbol_new (".<pcrel>", undefined_section,
+		&zero_address_frag, FUNC_PC_RELATIVE);
 
   pseudo_func[FUNC_PLT_RELATIVE].u.sym =
-    symbol_new (".<pltoff>", undefined_section, FUNC_PLT_RELATIVE,
-		&zero_address_frag);
+    symbol_new (".<pltoff>", undefined_section,
+		&zero_address_frag, FUNC_PLT_RELATIVE);
 
   pseudo_func[FUNC_SEC_RELATIVE].u.sym =
-    symbol_new (".<secrel>", undefined_section, FUNC_SEC_RELATIVE,
-		&zero_address_frag);
+    symbol_new (".<secrel>", undefined_section,
+		&zero_address_frag, FUNC_SEC_RELATIVE);
 
   pseudo_func[FUNC_SEG_RELATIVE].u.sym =
-    symbol_new (".<segrel>", undefined_section, FUNC_SEG_RELATIVE,
-		&zero_address_frag);
+    symbol_new (".<segrel>", undefined_section,
+		&zero_address_frag, FUNC_SEG_RELATIVE);
 
   pseudo_func[FUNC_TP_RELATIVE].u.sym =
-    symbol_new (".<tprel>", undefined_section, FUNC_TP_RELATIVE,
-		&zero_address_frag);
+    symbol_new (".<tprel>", undefined_section,
+		&zero_address_frag, FUNC_TP_RELATIVE);
 
   pseudo_func[FUNC_LTV_RELATIVE].u.sym =
-    symbol_new (".<ltv>", undefined_section, FUNC_LTV_RELATIVE,
-		&zero_address_frag);
+    symbol_new (".<ltv>", undefined_section,
+		&zero_address_frag, FUNC_LTV_RELATIVE);
 
   pseudo_func[FUNC_LT_FPTR_RELATIVE].u.sym =
-    symbol_new (".<ltoff.fptr>", undefined_section, FUNC_LT_FPTR_RELATIVE,
-		&zero_address_frag);
+    symbol_new (".<ltoff.fptr>", undefined_section,
+		&zero_address_frag, FUNC_LT_FPTR_RELATIVE);
 
   pseudo_func[FUNC_LT_DTP_MODULE].u.sym =
-    symbol_new (".<ltoff.dtpmod>", undefined_section, FUNC_LT_DTP_MODULE,
-		&zero_address_frag);
+    symbol_new (".<ltoff.dtpmod>", undefined_section,
+		&zero_address_frag, FUNC_LT_DTP_MODULE);
 
   pseudo_func[FUNC_LT_DTP_RELATIVE].u.sym =
-    symbol_new (".<ltoff.dptrel>", undefined_section, FUNC_LT_DTP_RELATIVE,
-		&zero_address_frag);
+    symbol_new (".<ltoff.dptrel>", undefined_section,
+		&zero_address_frag, FUNC_LT_DTP_RELATIVE);
 
   pseudo_func[FUNC_LT_TP_RELATIVE].u.sym =
-    symbol_new (".<ltoff.tprel>", undefined_section, FUNC_LT_TP_RELATIVE,
-		&zero_address_frag);
+    symbol_new (".<ltoff.tprel>", undefined_section,
+		&zero_address_frag, FUNC_LT_TP_RELATIVE);
 
   pseudo_func[FUNC_IPLT_RELOC].u.sym =
-    symbol_new (".<iplt>", undefined_section, FUNC_IPLT_RELOC,
-		&zero_address_frag);
+    symbol_new (".<iplt>", undefined_section,
+		&zero_address_frag, FUNC_IPLT_RELOC);
 
 #ifdef TE_VMS
   pseudo_func[FUNC_SLOTCOUNT_RELOC].u.sym =
-    symbol_new (".<slotcount>", undefined_section, FUNC_SLOTCOUNT_RELOC,
-		&zero_address_frag);
+    symbol_new (".<slotcount>", undefined_section,
+		&zero_address_frag, FUNC_SLOTCOUNT_RELOC);
 #endif
 
  if (md.tune != itanium1)
@@ -11964,7 +11965,7 @@ ia64_vms_note (void)
   /* This symbol should be passed on the command line and be variable
      according to language.  */
   sym = symbol_new ("__gnat_vms_display_name@gnat_demangler_rtl",
-		    absolute_section, 0, &zero_address_frag);
+		    absolute_section, &zero_address_frag, 0);
   symbol_table_insert (sym);
   symbol_get_bfdsym (sym)->flags |= BSF_DEBUGGING | BSF_DYNAMIC;
 

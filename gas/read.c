@@ -1002,8 +1002,7 @@ read_a_source_file (const char *name)
 		      else
 			line_label = symbol_create (line_start,
 						    absolute_section,
-						    (valueT) 0,
-						    &zero_address_frag);
+						    &zero_address_frag, 0);
 
 		      next_char = restore_line_pointer (nul_char);
 		      if (next_char == ':')

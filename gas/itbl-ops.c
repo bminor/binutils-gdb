@@ -272,7 +272,7 @@ itbl_init (void)
 	for (e = *es; e; e = e->next)
 	  {
 	    symbol_table_insert (symbol_create (e->name, reg_section,
-						e->value, &zero_address_frag));
+						&zero_address_frag, e->value));
 	  }
       }
   append_insns_as_macros ();

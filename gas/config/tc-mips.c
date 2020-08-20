@@ -3789,18 +3789,18 @@ md_begin (void)
      helps us detect invalid uses of them.  */
   for (i = 0; reg_names[i].name; i++)
     symbol_table_insert (symbol_new (reg_names[i].name, reg_section,
-				     reg_names[i].num, /* & RNUM_MASK, */
-				     &zero_address_frag));
+				     &zero_address_frag,
+				     reg_names[i].num));
   if (HAVE_NEWABI)
     for (i = 0; reg_names_n32n64[i].name; i++)
       symbol_table_insert (symbol_new (reg_names_n32n64[i].name, reg_section,
-				       reg_names_n32n64[i].num, /* & RNUM_MASK, */
-				       &zero_address_frag));
+				       &zero_address_frag,
+				       reg_names_n32n64[i].num));
   else
     for (i = 0; reg_names_o32[i].name; i++)
       symbol_table_insert (symbol_new (reg_names_o32[i].name, reg_section,
-				       reg_names_o32[i].num, /* & RNUM_MASK, */
-				       &zero_address_frag));
+				       &zero_address_frag,
+				       reg_names_o32[i].num));
 
   for (i = 0; i < 32; i++)
     {
@@ -3809,17 +3809,17 @@ md_begin (void)
       /* R5900 VU0 floating-point register.  */
       sprintf (regname, "$vf%d", i);
       symbol_table_insert (symbol_new (regname, reg_section,
-				       RTYPE_VF | i, &zero_address_frag));
+				       &zero_address_frag, RTYPE_VF | i));
 
       /* R5900 VU0 integer register.  */
       sprintf (regname, "$vi%d", i);
       symbol_table_insert (symbol_new (regname, reg_section,
-				       RTYPE_VI | i, &zero_address_frag));
+				       &zero_address_frag, RTYPE_VI | i));
 
       /* MSA register.  */
       sprintf (regname, "$w%d", i);
       symbol_table_insert (symbol_new (regname, reg_section,
-				       RTYPE_MSA | i, &zero_address_frag));
+				       &zero_address_frag, RTYPE_MSA | i));
     }
 
   obstack_init (&mips_operand_tokens);
@@ -18876,7 +18876,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	    }
 
 	  /* Make a label at the end for use with the branch.  */
-	  l = symbol_new (micromips_label_name (), asec, fragp->fr_fix, fragp);
+	  l = symbol_new (micromips_label_name (), asec, fragp, fragp->fr_fix);
 	  micromips_label_inc ();
 	  S_SET_OTHER (l, ELF_ST_SET_MICROMIPS (S_GET_OTHER (l)));
 

@@ -2550,7 +2550,7 @@ static void
 declare_register (const char *name, int number)
 {
   symbolS *regS = symbol_create (name, reg_section,
-				 number, &zero_address_frag);
+				 &zero_address_frag, number);
 
   str_hash_insert (arc_reg_hash, S_GET_NAME (regS), (void *) regS);
 }
@@ -2581,7 +2581,7 @@ static void
 declare_addrtype (const char *name, int number)
 {
   symbolS *addrtypeS = symbol_create (name, undefined_section,
-                                      number, &zero_address_frag);
+				      &zero_address_frag, number);
 
   str_hash_insert (arc_addrtype_hash, S_GET_NAME (addrtypeS),
 		   (void *) addrtypeS);
@@ -3350,7 +3350,7 @@ md_undefined_symbol (char *name)
 	    as_bad ("GOT already in symbol table");
 
 	  GOT_symbol = symbol_new (GLOBAL_OFFSET_TABLE_NAME, undefined_section,
-				   (valueT) 0, &zero_address_frag);
+				   &zero_address_frag, 0);
 	};
       return GOT_symbol;
     }

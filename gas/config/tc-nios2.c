@@ -3907,7 +3907,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 	    as_bad ("GOT already in the symbol table");
 
 	  GOT_symbol = symbol_new (name, undefined_section,
-				   (valueT) 0, &zero_address_frag);
+				   &zero_address_frag, 0);
 	}
 
       return GOT_symbol;

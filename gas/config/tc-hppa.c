@@ -5989,8 +5989,8 @@ pa_build_unwind_subspace (struct call_info *call_info)
   else
     {
       symbolP = symbol_new (name, now_seg,
-			    S_GET_VALUE (call_info->start_symbol),
-			    symbol_get_frag (call_info->start_symbol));
+			    symbol_get_frag (call_info->start_symbol),
+			    S_GET_VALUE (call_info->start_symbol));
       gas_assert (symbolP);
       S_CLEAR_EXTERNAL (symbolP);
       symbol_table_insert (symbolP);
@@ -6439,8 +6439,7 @@ hppa_elf_mark_end_of_function (void)
     {
       /* symbol value should be the offset of the
 	 last instruction of the function */
-      symbolP = symbol_new (name, now_seg, (valueT) (frag_now_fix () - 4),
-			    frag_now);
+      symbolP = symbol_new (name, now_seg, frag_now, frag_now_fix () - 4);
 
       gas_assert (symbolP);
       S_CLEAR_EXTERNAL (symbolP);

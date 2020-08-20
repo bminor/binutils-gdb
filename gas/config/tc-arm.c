@@ -2971,7 +2971,7 @@ make_mapping_symbol (enum mstate state, valueT value, fragS *frag)
       abort ();
     }
 
-  symbolP = symbol_new (symname, now_seg, value, frag);
+  symbolP = symbol_new (symname, now_seg, frag, value);
   symbol_get_bfdsym (symbolP)->flags |= type | BSF_LOCAL;
 
   switch (state)
@@ -3310,12 +3310,12 @@ s_thumb_set (int equiv)
 	  memset (dummy_frag, 0, sizeof (fragS));
 	  dummy_frag->fr_type = rs_fill;
 	  dummy_frag->line = listing_tail;
-	  symbolP = symbol_new (name, undefined_section, 0, dummy_frag);
+	  symbolP = symbol_new (name, undefined_section, dummy_frag, 0);
 	  dummy_frag->fr_symbol = symbolP;
 	}
       else
 #endif
-	symbolP = symbol_new (name, undefined_section, 0, &zero_address_frag);
+	symbolP = symbol_new (name, undefined_section, &zero_address_frag, 0);
 
 #ifdef OBJ_COFF
       /* "set" symbols are local unless otherwise specified.  */
@@ -3543,7 +3543,7 @@ find_or_make_literal_pool (void)
   if (pool->symbol == NULL)
     {
       pool->symbol = symbol_create (FAKE_LABEL_NAME, undefined_section,
-				    (valueT) 0, &zero_address_frag);
+				    &zero_address_frag, 0);
       pool->id = latest_pool_num ++;
     }
 
@@ -28025,7 +28025,7 @@ md_undefined_symbol (char * name ATTRIBUTE_UNUSED)
 	    as_bad (_("GOT already in the symbol table"));
 
 	  GOT_symbol = symbol_new (name, undefined_section,
-				   (valueT) 0, & zero_address_frag);
+				   &zero_address_frag, 0);
 	}
 
       return GOT_symbol;

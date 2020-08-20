@@ -3403,8 +3403,7 @@ add_to_link_pool (symbolS *sym, offsetT addend)
 
   /* Not found, add a new entry.  */
   subseg_set (alpha_link_section, 0);
-  linksym = symbol_new
-    (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
+  linksym = symbol_new (FAKE_LABEL_NAME, now_seg, frag_now, frag_now_fix ());
   p = frag_more (8);
   memset (p, 0, 8);
 
@@ -3903,8 +3902,8 @@ s_alpha_prologue (int ignore ATTRIBUTE_UNUSED)
 
   arg = get_absolute_expression ();
   demand_empty_rest_of_line ();
-  alpha_prologue_label = symbol_new
-    (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
+  alpha_prologue_label = symbol_new (FAKE_LABEL_NAME, now_seg, frag_now,
+				     frag_now_fix ());
 
   if (ECOFF_DEBUGGING)
     sym = ecoff_get_cur_proc_sym ();
@@ -4055,8 +4054,8 @@ alpha_elf_md_end (void)
 	/* Create a temporary symbol at the same location as our
 	   function symbol.  This prevents problems with globals.  */
 	cfi_new_fde (symbol_temp_new (S_GET_SEGMENT (p->func_sym),
-				      S_GET_VALUE (p->func_sym),
-				      symbol_get_frag (p->func_sym)));
+				      symbol_get_frag (p->func_sym),
+				      S_GET_VALUE (p->func_sym)));
 
 	cfi_set_sections ();
 	cfi_set_return_column (p->ra_regno);
@@ -4469,8 +4468,8 @@ static void
 s_alpha_prologue (int ignore ATTRIBUTE_UNUSED)
 {
   demand_empty_rest_of_line ();
-  alpha_prologue_label = symbol_new
-    (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
+  alpha_prologue_label = symbol_new (FAKE_LABEL_NAME, now_seg, frag_now,
+				     frag_now_fix ());
 }
 
 /* Parse .pdesc <entry_name>,{null|stack|reg}
@@ -4705,8 +4704,8 @@ s_alpha_linkage (int ignore ATTRIBUTE_UNUSED)
 	 BFD_RELOC_ALPHA_LINKAGE);
 
       if (alpha_insn_label == NULL)
-	alpha_insn_label = symbol_new
-	  (FAKE_LABEL_NAME, now_seg, (valueT) frag_now_fix (), frag_now);
+	alpha_insn_label = symbol_new (FAKE_LABEL_NAME, now_seg, frag_now,
+				       frag_now_fix ());
 
       /* Create a linkage element.  */
       linkage_fixup = XNEW (struct alpha_linkage_fixups);
@@ -5470,8 +5469,8 @@ md_begin (void)
       char name[4];
 
       sprintf (name, "$%d", i);
-      alpha_register_table[i] = symbol_create (name, reg_section, i,
-					       &zero_address_frag);
+      alpha_register_table[i] = symbol_create (name, reg_section,
+					       &zero_address_frag, i);
     }
 
   for (; i < 64; ++i)
@@ -5479,8 +5478,8 @@ md_begin (void)
       char name[5];
 
       sprintf (name, "$f%d", i - 32);
-      alpha_register_table[i] = symbol_create (name, reg_section, i,
-					       &zero_address_frag);
+      alpha_register_table[i] = symbol_create (name, reg_section,
+					       &zero_address_frag, i);
     }
 
   /* Create the special symbols and sections we'll be using.  */
@@ -5493,8 +5492,8 @@ md_begin (void)
 
   /* For handling the GP, create a symbol that won't be output in the
      symbol table.  We'll edit it out of relocs later.  */
-  alpha_gp_symbol = symbol_create ("<GP value>", alpha_lita_section, 0x8000,
-				   &zero_address_frag);
+  alpha_gp_symbol = symbol_create ("<GP value>", alpha_lita_section,
+				   &zero_address_frag, 0x8000);
 #endif
 
 #ifdef OBJ_EVAX

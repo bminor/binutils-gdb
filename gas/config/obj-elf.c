@@ -271,8 +271,7 @@ elf_file_symbol (const char *s, int appfile)
       symbolS *sym;
       size_t name_length;
 
-      sym = symbol_new (s, absolute_section, 0, NULL);
-      symbol_set_frag (sym, &zero_address_frag);
+      sym = symbol_new (s, absolute_section, &zero_address_frag, 0);
 
       name_length = strlen (s);
       if (name_length > strlen (S_GET_NAME (sym)))
@@ -2724,7 +2723,7 @@ elf_adjust_symtab (void)
       if (!sy || !symbol_on_chain (sy, symbol_rootP, symbol_lastP))
 	{
 	  /* Create the symbol now.  */
-	  sy = symbol_new (group_name, now_seg, (valueT) 0, frag_now);
+	  sy = symbol_new (group_name, now_seg, frag_now, 0);
 #ifdef TE_SOLARIS
 	  /* Before Solaris 11 build 154, Sun ld rejects local group
 	     signature symbols, so make them weak hidden instead.  */

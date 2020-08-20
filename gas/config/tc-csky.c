@@ -1399,7 +1399,7 @@ make_mapping_symbol (map_state state, valueT value, fragS *frag)
       abort ();
     }
 
-  symbolP = symbol_new (symname, now_seg, value, frag);
+  symbolP = symbol_new (symname, now_seg, frag, value);
   symbol_get_bfdsym (symbolP)->flags |= type | BSF_LOCAL;
 }
 

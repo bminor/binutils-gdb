@@ -4902,8 +4902,9 @@ ppc_function (int ignore ATTRIBUTE_UNUSED)
 	    {
 	      /* The fifth argument is the function size.  */
 	      ++input_line_pointer;
-	      symbol_get_tc (ext_sym)->u.size = symbol_new
-                ("L0\001", absolute_section,(valueT) 0, &zero_address_frag);
+	      symbol_get_tc (ext_sym)->u.size
+		= symbol_new ("L0\001", absolute_section,
+			      &zero_address_frag, 0);
 	      pseudo_set (symbol_get_tc (ext_sym)->u.size);
 	    }
 	}
@@ -5877,7 +5878,7 @@ ppc_adjust_symtab (void)
 	continue;
 
       csect = symbol_create (".abs[XO]", absolute_section,
-			     S_GET_VALUE (sym), &zero_address_frag);
+			     &zero_address_frag, S_GET_VALUE (sym));
       symbol_get_bfdsym (csect)->value = S_GET_VALUE (sym);
       S_SET_STORAGE_CLASS (csect, C_HIDEXT);
       i = S_GET_NUMBER_AUXILIARY (csect);

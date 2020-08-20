@@ -1,3 +1,48 @@
+2020-08-21  Alan Modra  <amodra@gmail.com>
+
+	* symbols.h (symbol_new, symbol_create, local_symbol_make),
+	(symbol_temp_new): Arrange params as section, frag, offset.
+	* symbols.c: Adjust to suit.
+	* as.c: Likewise.
+	* cgen.c: Likewise.
+	* dwarf2dbg.c: Likewise.
+	* ecoff.c: Likewise.
+	* expr.c: Likewise.
+	* itbl-ops.c: Likewise.
+	* read.c: Likewise.
+	* stabs.c: Likewise.
+	* subsegs.c: Likewise.
+	* config/obj-coff.c: Likewise.
+	* config/obj-elf.c: Likewise.
+	* config/obj-macho.c: Likewise.
+	* config/tc-aarch64.c: Likewise.
+	* config/tc-alpha.c: Likewise.
+	* config/tc-arc.c: Likewise.
+	* config/tc-arm.c: Likewise.
+	* config/tc-avr.c: Likewise.
+	* config/tc-cr16.c: Likewise.
+	* config/tc-cris.c: Likewise.
+	* config/tc-csky.c: Likewise.
+	* config/tc-dlx.c: Likewise.
+	* config/tc-hppa.c: Likewise.
+	* config/tc-i386.c: Likewise.
+	* config/tc-ia64.c: Likewise.
+	* config/tc-m32r.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-mips.c: Likewise.
+	* config/tc-mmix.c: Likewise.
+	* config/tc-mn10200.c: Likewise.
+	* config/tc-mn10300.c: Likewise.
+	* config/tc-nds32.c: Likewise.
+	* config/tc-nios2.c: Likewise.
+	* config/tc-ppc.c: Likewise.
+	* config/tc-riscv.c: Likewise.
+	* config/tc-s390.c: Likewise.
+	* config/tc-sh.c: Likewise.
+	* config/tc-tic4x.c: Likewise.
+	* config/tc-tic54x.c: Likewise.
+	* config/tc-xtensa.c: Likewise.
+
 2020-08-21  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* config/tc-csky.c (csky_insn_info): Add member last_isize.

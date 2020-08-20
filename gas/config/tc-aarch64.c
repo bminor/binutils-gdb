@@ -1535,7 +1535,7 @@ make_mapping_symbol (enum mstate state, valueT value, fragS * frag)
       abort ();
     }
 
-  symbolP = symbol_new (symname, now_seg, value, frag);
+  symbolP = symbol_new (symname, now_seg, frag, value);
   symbol_get_bfdsym (symbolP)->flags |= type | BSF_LOCAL;
 
   /* Save the mapping symbols for future reference.  Also check that
@@ -1742,7 +1742,7 @@ find_or_make_literal_pool (int size)
   if (pool->symbol == NULL)
     {
       pool->symbol = symbol_create (FAKE_LABEL_NAME, undefined_section,
-				    (valueT) 0, &zero_address_frag);
+				    &zero_address_frag, 0);
       pool->id = latest_pool_num++;
     }
 
@@ -7562,7 +7562,7 @@ md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 	    as_bad (_("GOT already in the symbol table"));
 
 	  GOT_symbol = symbol_new (name, undefined_section,
-				   (valueT) 0, &zero_address_frag);
+				   &zero_address_frag, 0);
 	}
 
       return GOT_symbol;

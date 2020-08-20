@@ -785,8 +785,8 @@ mmix_md_begin (void)
       /* Alternatively, we could diddle with '$' and the following number,
 	 but keeping the registers as symbols helps keep parsing simple.  */
       sprintf (buf, "$%d", i);
-      symbol_table_insert (symbol_new (buf, reg_section, i,
-				       &zero_address_frag));
+      symbol_table_insert (symbol_new (buf, reg_section,
+				       &zero_address_frag, i));
     }
 
   /* Insert mmixal built-in names if allowed.  */
@@ -795,21 +795,21 @@ mmix_md_begin (void)
       for (i = 0; mmix_spec_regs[i].name != NULL; i++)
 	symbol_table_insert (symbol_new (mmix_spec_regs[i].name,
 					 reg_section,
-					 mmix_spec_regs[i].number + 256,
-					 &zero_address_frag));
+					 &zero_address_frag,
+					 mmix_spec_regs[i].number + 256));
 
       /* FIXME: Perhaps these should be recognized as specials; as field
 	 names for those instructions.  */
-      symbol_table_insert (symbol_new ("ROUND_CURRENT", reg_section, 512,
-				       &zero_address_frag));
-      symbol_table_insert (symbol_new ("ROUND_OFF", reg_section, 512 + 1,
-				       &zero_address_frag));
-      symbol_table_insert (symbol_new ("ROUND_UP", reg_section, 512 + 2,
-				       &zero_address_frag));
-      symbol_table_insert (symbol_new ("ROUND_DOWN", reg_section, 512 + 3,
-				       &zero_address_frag));
-      symbol_table_insert (symbol_new ("ROUND_NEAR", reg_section, 512 + 4,
-				       &zero_address_frag));
+      symbol_table_insert (symbol_new ("ROUND_CURRENT", reg_section,
+				       &zero_address_frag, 512));
+      symbol_table_insert (symbol_new ("ROUND_OFF", reg_section,
+				       &zero_address_frag, 512 + 1));
+      symbol_table_insert (symbol_new ("ROUND_UP", reg_section,
+				       &zero_address_frag, 512 + 2));
+      symbol_table_insert (symbol_new ("ROUND_DOWN", reg_section,
+				       &zero_address_frag, 512 + 3));
+      symbol_table_insert (symbol_new ("ROUND_NEAR", reg_section,
+				       &zero_address_frag, 512 + 4));
     }
 }
 
@@ -3520,8 +3520,8 @@ mmix_md_end (void)
       sprintf (locsymbol, ":%s%s", MMIX_LOC_SECTION_START_SYMBOL_PREFIX,
 	       ".text");
       symbolP
-	= symbol_new (locsymbol, absolute_section, lowest_text_loc,
-		      &zero_address_frag);
+	= symbol_new (locsymbol, absolute_section, &zero_address_frag,
+		      lowest_text_loc);
       S_SET_EXTERNAL (symbolP);
     }
 
@@ -3536,8 +3536,8 @@ mmix_md_end (void)
       sprintf (locsymbol, ":%s%s", MMIX_LOC_SECTION_START_SYMBOL_PREFIX,
 	       ".data");
       symbolP
-	= symbol_new (locsymbol, absolute_section, lowest_data_loc,
-		      &zero_address_frag);
+	= symbol_new (locsymbol, absolute_section, &zero_address_frag,
+		      lowest_data_loc);
       S_SET_EXTERNAL (symbolP);
     }
 
@@ -3845,9 +3845,8 @@ mmix_parse_predefined_name (char *name, expressionS *expP)
 	 script.  */
       symp = symbol_find (name);
       if (symp == NULL)
-	symp = symbol_new (name, text_section,
-			   0x10 * (handler_charp + 1 - handler_chars),
-			   &zero_address_frag);
+	symp = symbol_new (name, text_section, &zero_address_frag,
+			   0x10 * (handler_charp + 1 - handler_chars));
     }
   else
     {
@@ -3906,8 +3905,8 @@ mmix_parse_predefined_name (char *name, expressionS *expP)
 	  {
 	    symbol_table_insert (symbol_new (predefined_abs_syms[i].name,
 					     absolute_section,
-					     predefined_abs_syms[i].val,
-					     &zero_address_frag));
+					     &zero_address_frag,
+					     predefined_abs_syms[i].val));
 
 	    /* Let gas find the symbol we just created, through its
                ordinary lookup.  */

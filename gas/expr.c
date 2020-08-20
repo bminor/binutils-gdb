@@ -102,7 +102,7 @@ make_expr_symbol (expressionS *expressionP)
 			    : expressionP->X_op == O_register
 			      ? reg_section
 			      : expr_section),
-			   0, &zero_address_frag);
+			   &zero_address_frag, 0);
   symbol_set_value_expression (symbolP, expressionP);
 
   if (expressionP->X_op == O_constant)

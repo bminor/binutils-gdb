@@ -144,8 +144,7 @@ tag_find_or_make (char *name)
 
   if ((symbolP = tag_find (name)) == NULL)
     {
-      symbolP = symbol_new (name, undefined_section,
-			    0, &zero_address_frag);
+      symbolP = symbol_new (name, undefined_section, &zero_address_frag, 0);
 
       tag_insert (S_GET_NAME (symbolP), symbolP);
       symbol_table_insert (symbolP);
@@ -324,7 +323,7 @@ c_dot_file_symbol (const char *filename, int appfile ATTRIBUTE_UNUSED)
 
   /* BFD converts filename to a .file symbol with an aux entry.  It
      also handles chaining.  */
-  symbolP = symbol_new (filename, bfd_abs_section_ptr, 0, &zero_address_frag);
+  symbolP = symbol_new (filename, bfd_abs_section_ptr, &zero_address_frag, 0);
 
   S_SET_STORAGE_CLASS (symbolP, C_FILE);
   S_SET_NUMBER_AUXILIARY (symbolP, 1);

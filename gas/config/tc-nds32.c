@@ -4002,7 +4002,7 @@ make_mapping_symbol (enum mstate state, valueT value, fragS * frag, unsigned int
       abort ();
     }
 
-  symbol_p = symbol_new (symbol_name, now_seg, value, frag);
+  symbol_p = symbol_new (symbol_name, now_seg, frag, value);
   /* local scope attribute  */
   symbol_get_bfdsym (symbol_p)->flags |= BSF_NO_FLAGS | BSF_LOCAL;
 }
@@ -6088,8 +6088,9 @@ nds32_elf_append_relax_relocs (const char *key, void *value)
 		    {
 		      ptr_offset =
 			pattern_temp->where - pattern_temp->frag->fr_literal;
-		      exp.X_add_symbol = symbol_temp_new (now_seg, ptr_offset,
-							  pattern_temp->frag);
+		      exp.X_add_symbol = symbol_temp_new (now_seg,
+							  pattern_temp->frag,
+							  ptr_offset);
 		      exp.X_add_number = 0;
 		      fixP =
 			fix_new_exp (fragP, where - fragP->fr_literal,
@@ -6186,8 +6187,9 @@ nds32_elf_append_relax_relocs (const char *key, void *value)
 		    {
 		      ptr_offset = next_pattern->where
 			- next_pattern->frag->fr_literal;
-		      exp.X_add_symbol = symbol_temp_new (now_seg, ptr_offset,
-							  next_pattern->frag);
+		      exp.X_add_symbol = symbol_temp_new (now_seg,
+							  next_pattern->frag,
+							  ptr_offset);
 		      exp.X_add_number = 0;
 		      fixP = fix_new_exp (fragP, where - fragP->fr_literal,
 					  fixup_size, &exp, 0,
@@ -6218,8 +6220,8 @@ nds32_elf_append_relax_relocs (const char *key, void *value)
 			      ptr_offset = next_insn->where
 				- next_insn->frag->fr_literal;
 			      exp.X_add_symbol = symbol_temp_new (now_seg,
-								  ptr_offset,
-								  next_insn->frag);
+								  next_insn->frag,
+								  ptr_offset);
 			      exp.X_add_number = 0;
 			      fixP = fix_new_exp (fragP,
 						  where - fragP->fr_literal,
@@ -7191,14 +7193,14 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT sec, fragS *fragP)
 	  if ((fixup_info[i].ramp & NDS32_CREATE_LABEL) != 0)
 	    {
 	      /* This is a reverse branch.  */
-	      exp.X_add_symbol = symbol_temp_new (sec, 0, fragP->fr_next);
+	      exp.X_add_symbol = symbol_temp_new (sec, fragP->fr_next, 0);
 	      exp.X_add_number = 0;
 	    }
 	  else if ((fixup_info[i].ramp & NDS32_PTR) != 0)
 	    {
 	      /* This relocation has to point to another instruction.  */
 	      branch_size = fr_where + code_size - 4;
-	      exp.X_add_symbol = symbol_temp_new (sec, branch_size, fragP);
+	      exp.X_add_symbol = symbol_temp_new (sec, fragP, branch_size);
 	      exp.X_add_number = 0;
 	    }
 	  else if ((fixup_info[i].ramp & NDS32_ABS) != 0)

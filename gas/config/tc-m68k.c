@@ -3959,15 +3959,15 @@ insert_reg (const char *regname, int regnum)
     }
 #endif
 
-  symbol_table_insert (symbol_new (regname, reg_section, regnum,
-				   &zero_address_frag));
+  symbol_table_insert (symbol_new (regname, reg_section,
+				   &zero_address_frag, regnum));
 
   for (i = 0; regname[i]; i++)
     buf[i] = TOUPPER (regname[i]);
   buf[i] = '\0';
 
-  symbol_table_insert (symbol_new (buf, reg_section, regnum,
-				   &zero_address_frag));
+  symbol_table_insert (symbol_new (buf, reg_section,
+				   &zero_address_frag, regnum));
 }
 
 struct init_entry

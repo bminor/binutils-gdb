@@ -4193,12 +4193,12 @@ xtensa_create_literal_symbol (segT sec, fragS *frag)
      symbol will be in the output file.  */
   if (get_is_linkonce_section (stdoutput, sec))
     {
-      symbolP = symbol_new (name, sec, 0, frag);
+      symbolP = symbol_new (name, sec, frag, 0);
       S_CLEAR_EXTERNAL (symbolP);
       /* symbolP->local = 1; */
     }
   else
-    symbolP = symbol_new (name, sec, 0, frag);
+    symbolP = symbol_new (name, sec, frag, 0);
 
   xtensa_add_literal_sym (symbolP);
 
@@ -10210,7 +10210,7 @@ init_trampoline_frag (fragS *fp)
       char label[10 + 2 * sizeof(fp)];
 
       sprintf (label, ".L0_TR_%p", fp);
-      lsym = (symbolS *)local_symbol_make (label, now_seg, 0, fp);
+      lsym = (symbolS *) local_symbol_make (label, now_seg, fp, 0);
       fp->fr_symbol = lsym;
       if (fp->tc_frag_data.needs_jump_around)
         {
@@ -10832,9 +10832,9 @@ convert_frag_immed (segT segP,
 		  target_offset += unreach->tc_frag_data.text_expansion[0];
 		}
 	      gas_assert (gen_label == NULL);
-	      gen_label = symbol_new (FAKE_LABEL_NAME, now_seg,
+	      gen_label = symbol_new (FAKE_LABEL_NAME, now_seg, fragP,
 				      fr_opcode - fragP->fr_literal
-				      + target_offset, fragP);
+				      + target_offset);
 	      break;
 
 	    case ITYPE_INSN:
@@ -11137,8 +11137,7 @@ xg_promote_candidate_litpool (struct litpool_seg *lps,
   /* Create a local symbol pointing to the
      end of the pool.  */
   sprintf (label, ".L0_LT_%p", poolbeg);
-  lsym = (symbolS *)local_symbol_make (label, lps->seg,
-				       0, poolend);
+  lsym = (symbolS *) local_symbol_make (label, lps->seg, poolend, 0);
   poolbeg->fr_symbol = lsym;
   /* Rest is done in xtensa_relax_frag.  */
 }

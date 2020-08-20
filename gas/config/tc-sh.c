@@ -1920,7 +1920,7 @@ insert_loop_bounds (char *output, sh_operand_info *operand)
       /* A REPEAT takes 6 bytes.  The SH has a 32 bit address space.
 	 Hence a 9 digit number should be enough to count all REPEATs.  */
       sprintf (name, "_R%x", count++ & 0x3fffffff);
-      end_sym = symbol_new (name, undefined_section, 0, &zero_address_frag);
+      end_sym = symbol_new (name, undefined_section, &zero_address_frag, 0);
       /* Make this a local symbol.  */
 #ifdef OBJ_COFF
       SF_SET_LOCAL (end_sym);

@@ -780,7 +780,7 @@ avr_undefined_symbol (char *name)
 	  char xname[30];
 	  sprintf (xname, "%s.%03u", name, (++suffix) % 1000);
 	  avr_isr.sym_n_pushed = symbol_new (xname, undefined_section,
-					     (valueT) 0, &zero_address_frag);
+					     &zero_address_frag, (valueT) 0);
 	}
       return avr_isr.sym_n_pushed;
     }

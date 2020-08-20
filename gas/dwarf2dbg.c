@@ -546,10 +546,10 @@ dwarf2_gen_line_info (addressT ofs, struct dwarf2_line_info *loc)
       /* Use a non-fake name for the line number location,
 	 so that it can be referred to by relocations.  */
       sprintf (name, ".Loc.%u.%u", line, filenum);
-      sym = symbol_new (name, now_seg, ofs, frag_now);
+      sym = symbol_new (name, now_seg, frag_now, ofs);
     }
   else
-    sym = symbol_temp_new (now_seg, ofs, frag_now);
+    sym = symbol_temp_new (now_seg, frag_now, ofs);
   dwarf2_gen_line_info_1 (sym, loc);
 }
 
@@ -1245,8 +1245,8 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 		sym = force_reset_view;
 	      else
 		{
-		  sym = symbol_temp_new (absolute_section, value,
-					 &zero_address_frag);
+		  sym = symbol_temp_new (absolute_section, &zero_address_frag,
+					 value);
 		  if (force_reset)
 		    force_reset_view = sym;
 		}
@@ -1962,7 +1962,7 @@ process_entries (segT seg, struct line_entry *e)
     out_inc_line_addr (INT_MAX, frag_ofs - last_frag_ofs);
   else
     {
-      lab = symbol_temp_new (seg, frag_ofs, frag);
+      lab = symbol_temp_new (seg, frag, frag_ofs);
       relax_inc_line_addr (INT_MAX, lab, last_lab);
     }
 }
@@ -2326,11 +2326,11 @@ out_debug_ranges (segT ranges_seg)
       symbolS *beg, *end;
 
       frag = first_frag_for_seg (s->seg);
-      beg = symbol_temp_new (s->seg, 0, frag);
+      beg = symbol_temp_new (s->seg, frag, 0);
       s->text_start = beg;
 
       frag = last_frag_for_seg (s->seg);
-      end = symbol_temp_new (s->seg, get_frag_fix (frag, s->seg), frag);
+      end = symbol_temp_new (s->seg, frag, get_frag_fix (frag, s->seg));
       s->text_end = end;
 
       exp.X_op = O_symbol;
@@ -2395,11 +2395,11 @@ out_debug_aranges (segT aranges_seg, segT info_seg)
       symbolS *beg, *end;
 
       frag = first_frag_for_seg (s->seg);
-      beg = symbol_temp_new (s->seg, 0, frag);
+      beg = symbol_temp_new (s->seg, frag, 0);
       s->text_start = beg;
 
       frag = last_frag_for_seg (s->seg);
-      end = symbol_temp_new (s->seg, get_frag_fix (frag, s->seg), frag);
+      end = symbol_temp_new (s->seg, frag, get_frag_fix (frag, s->seg));
       s->text_end = end;
 
       exp.X_op = O_symbol;

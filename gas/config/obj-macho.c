@@ -1522,15 +1522,15 @@ obj_mach_o_process_stab (int what, const char *string,
   switch (what)
     {
       case 'd':
-	symbolP = symbol_new ("", now_seg, frag_now_fix (), frag_now);
+	symbolP = symbol_new ("", now_seg, frag_now, frag_now_fix ());
 	/* Special stabd NULL name indicator.  */
 	S_SET_NAME (symbolP, NULL);
 	break;
 
       case 'n':
       case 's':
-	symbolP = symbol_new (string, undefined_section, (valueT) 0,
-			      &zero_address_frag);
+	symbolP = symbol_new (string, undefined_section,
+			      &zero_address_frag, 0);
 	pseudo_set (symbolP);
 	break;
 

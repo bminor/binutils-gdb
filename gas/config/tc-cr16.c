@@ -689,16 +689,16 @@ md_undefined_symbol (char *name)
 {
   if (*name == '_' && *(name + 1) == 'G'
       && strcmp (name, "_GLOBAL_OFFSET_TABLE_") == 0)
-   {
-     if (!GOT_symbol)
-       {
-         if (symbol_find (name))
-             as_bad (_("GOT already in symbol table"));
-          GOT_symbol = symbol_new (name, undefined_section,
-                                   (valueT) 0, &zero_address_frag);
-       }
-     return GOT_symbol;
-   }
+    {
+      if (!GOT_symbol)
+	{
+	  if (symbol_find (name))
+	    as_bad (_("GOT already in symbol table"));
+	  GOT_symbol = symbol_new (name, undefined_section,
+				   &zero_address_frag, 0);
+	}
+      return GOT_symbol;
+    }
   return 0;
 }
 

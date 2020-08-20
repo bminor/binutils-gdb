@@ -2219,8 +2219,7 @@ add_file (const char *file_name, int indx ATTRIBUTE_UNUSED, int fake)
     {
       (void) add_ecoff_symbol (file_name, st_Nil, sc_Nil,
 			       symbol_new (FAKE_LABEL_NAME, now_seg,
-					   (valueT) frag_now_fix (),
-					   frag_now),
+					   frag_now, frag_now_fix ()),
 			       (bfd_vma) 0, 0, ECOFF_MARK_STAB (N_SOL));
       return;
     }
@@ -3010,8 +3009,7 @@ ecoff_directive_end (int ignore ATTRIBUTE_UNUSED)
   else
     (void) add_ecoff_symbol ((const char *) NULL, st_End, sc_Text,
 			     symbol_new (FAKE_LABEL_NAME, now_seg,
-					 (valueT) frag_now_fix (),
-					 frag_now),
+					 frag_now, frag_now_fix ()),
 			     (bfd_vma) 0, (symint_t) 0, (symint_t) 0);
 
 #ifdef md_flush_pending_output
@@ -3254,8 +3252,7 @@ ecoff_directive_loc (int ignore ATTRIBUTE_UNUSED)
     {
       (void) add_ecoff_symbol ((char *) NULL, st_Label, sc_Text,
 			       symbol_new (FAKE_LABEL_NAME, now_seg,
-					   (valueT) frag_now_fix (),
-					   frag_now),
+					   frag_now, frag_now_fix ()),
 			       (bfd_vma) 0, 0, lineno);
       return;
     }

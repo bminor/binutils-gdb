@@ -268,9 +268,9 @@ static void print_binary (FILE *, const char *, expressionS *);
    output file, you can call symbol_create.  */
 
 symbolS *
-symbol_new (const char *name, segT segment, valueT valu, fragS *frag)
+symbol_new (const char *name, segT segment, fragS *frag, valueT valu)
 {
-  symbolS *symbolP = symbol_create (name, segment, valu, frag);
+  symbolS *symbolP = symbol_create (name, segment, frag, valu);
 
   /* Link to end of symbol chain.  */
   {
@@ -312,11 +312,10 @@ save_symbol_name (const char *name)
   return ret;
 }
 
+/* Create a symbol.  NAME is copied, the caller can destroy/modify.  */
+
 symbolS *
-symbol_create (const char *name, /* It is copied, the caller can destroy/modify.  */
-	       segT segment,	/* Segment identifier (SEG_<something>).  */
-	       valueT valu,	/* Symbol value.  */
-	       fragS *frag	/* Associated fragment.  */)
+symbol_create (const char *name, segT segment, fragS *frag, valueT valu)
 {
   const char *preserved_copy_of_name;
   symbolS *symbolP;
@@ -374,7 +373,7 @@ static unsigned long local_symbol_conversion_count;
 /* Create a local symbol and insert it into the local hash table.  */
 
 struct local_symbol *
-local_symbol_make (const char *name, segT section, valueT val, fragS *frag)
+local_symbol_make (const char *name, segT section, fragS *frag, valueT val)
 {
   const char *name_copy;
   struct local_symbol *ret;
@@ -410,8 +409,8 @@ local_symbol_convert (struct local_symbol *locsym)
 
   ++local_symbol_conversion_count;
 
-  ret = symbol_new (locsym->lsy_name, locsym->lsy_section, locsym->lsy_value,
-		    local_symbol_get_frag (locsym));
+  ret = symbol_new (locsym->lsy_name, locsym->lsy_section,
+		    local_symbol_get_frag (locsym), locsym->lsy_value);
 
   if (local_symbol_resolved_p (locsym))
     ret->sy_flags.sy_resolved = 1;
@@ -626,14 +625,12 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
     }
   else if (! flag_keep_locals && bfd_is_local_label_name (stdoutput, sym_name))
     {
-      symbolP = (symbolS *) local_symbol_make (sym_name, now_seg,
-					       (valueT) frag_now_fix (),
-					       frag_now);
+      symbolP = (symbolS *) local_symbol_make (sym_name, now_seg, frag_now,
+					       frag_now_fix ());
     }
   else
     {
-      symbolP = symbol_new (sym_name, now_seg, (valueT) frag_now_fix (),
-			    frag_now);
+      symbolP = symbol_new (sym_name, now_seg, frag_now, frag_now_fix ());
 
       symbol_table_insert (symbolP);
     }
@@ -698,8 +695,7 @@ symbol_find_or_make (const char *name)
 	    return symbolP;
 
 	  symbolP = (symbolS *) local_symbol_make (name, undefined_section,
-						   (valueT) 0,
-						   &zero_address_frag);
+						   &zero_address_frag, 0);
 	  return symbolP;
 	}
 
@@ -720,7 +716,7 @@ symbol_make (const char *name)
   symbolP = md_undefined_symbol ((char *) name);
 
   if (!symbolP)
-    symbolP = symbol_new (name, undefined_section, (valueT) 0, &zero_address_frag);
+    symbolP = symbol_new (name, undefined_section, &zero_address_frag, 0);
 
   return (symbolP);
 }
@@ -873,21 +869,21 @@ symbol_clone_if_forward_ref (symbolS *symbolP, int is_forward)
 }
 
 symbolS *
-symbol_temp_new (segT seg, valueT ofs, fragS *frag)
+symbol_temp_new (segT seg, fragS *frag, valueT ofs)
 {
-  return symbol_new (FAKE_LABEL_NAME, seg, ofs, frag);
+  return symbol_new (FAKE_LABEL_NAME, seg, frag, ofs);
 }
 
 symbolS *
 symbol_temp_new_now (void)
 {
-  return symbol_temp_new (now_seg, frag_now_fix (), frag_now);
+  return symbol_temp_new (now_seg, frag_now, frag_now_fix ());
 }
 
 symbolS *
 symbol_temp_new_now_octets (void)
 {
-  return symbol_temp_new (now_seg, frag_now_fix_octets (), frag_now);
+  return symbol_temp_new (now_seg, frag_now, frag_now_fix_octets ());
 }
 
 symbolS *
@@ -1322,7 +1318,7 @@ resolve_symbol_value (symbolS *symp)
 
       if (relc_symbol_name != NULL)
 	relc_symbol = symbol_new (relc_symbol_name, undefined_section,
-				  0, & zero_address_frag);
+				  &zero_address_frag, 0);
 
       if (relc_symbol == NULL)
 	{
