@@ -4397,7 +4397,7 @@ cleanup_undefined_types_noname (struct objfile *objfile)
              and needs to be copied over from the reference type.
              Since replace_type expects them to be identical, we need
              to set these flags manually before hand.  */
-          TYPE_INSTANCE_FLAGS (nat.type) = TYPE_INSTANCE_FLAGS (*type);
+          SET_TYPE_INSTANCE_FLAGS (nat.type, TYPE_INSTANCE_FLAGS (*type));
           replace_type (nat.type, *type);
         }
     }

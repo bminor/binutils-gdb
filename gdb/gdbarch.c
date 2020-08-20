@@ -3501,7 +3501,7 @@ gdbarch_address_class_type_flags_p (struct gdbarch *gdbarch)
   return gdbarch->address_class_type_flags != NULL;
 }
 
-int
+type_instance_flags
 gdbarch_address_class_type_flags (struct gdbarch *gdbarch, int byte_size, int dwarf2_addr_class)
 {
   gdb_assert (gdbarch != NULL);
@@ -3566,8 +3566,8 @@ gdbarch_address_class_name_to_type_flags_p (struct gdbarch *gdbarch)
   return gdbarch->address_class_name_to_type_flags != NULL;
 }
 
-int
-gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, const char *name, int *type_flags_ptr)
+bool
+gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, const char *name, type_instance_flags *type_flags_ptr)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->address_class_name_to_type_flags != NULL);

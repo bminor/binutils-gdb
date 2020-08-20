@@ -848,8 +848,8 @@ extern void set_gdbarch_have_nonsteppable_watchpoint (struct gdbarch *gdbarch, i
 
 extern int gdbarch_address_class_type_flags_p (struct gdbarch *gdbarch);
 
-typedef int (gdbarch_address_class_type_flags_ftype) (int byte_size, int dwarf2_addr_class);
-extern int gdbarch_address_class_type_flags (struct gdbarch *gdbarch, int byte_size, int dwarf2_addr_class);
+typedef type_instance_flags (gdbarch_address_class_type_flags_ftype) (int byte_size, int dwarf2_addr_class);
+extern type_instance_flags gdbarch_address_class_type_flags (struct gdbarch *gdbarch, int byte_size, int dwarf2_addr_class);
 extern void set_gdbarch_address_class_type_flags (struct gdbarch *gdbarch, gdbarch_address_class_type_flags_ftype *address_class_type_flags);
 
 extern int gdbarch_address_class_type_flags_to_name_p (struct gdbarch *gdbarch);
@@ -866,13 +866,13 @@ extern bool gdbarch_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_by
 extern void set_gdbarch_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdbarch_execute_dwarf_cfa_vendor_op_ftype *execute_dwarf_cfa_vendor_op);
 
 /* Return the appropriate type_flags for the supplied address class.
-   This function should return 1 if the address class was recognized and
-   type_flags was set, zero otherwise. */
+   This function should return true if the address class was recognized and
+   type_flags was set, false otherwise. */
 
 extern int gdbarch_address_class_name_to_type_flags_p (struct gdbarch *gdbarch);
 
-typedef int (gdbarch_address_class_name_to_type_flags_ftype) (struct gdbarch *gdbarch, const char *name, int *type_flags_ptr);
-extern int gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, const char *name, int *type_flags_ptr);
+typedef bool (gdbarch_address_class_name_to_type_flags_ftype) (struct gdbarch *gdbarch, const char *name, type_instance_flags *type_flags_ptr);
+extern bool gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, const char *name, type_instance_flags *type_flags_ptr);
 extern void set_gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch, gdbarch_address_class_name_to_type_flags_ftype *address_class_name_to_type_flags);
 
 /* Is a register in a group */

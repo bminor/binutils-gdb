@@ -1585,7 +1585,10 @@ extern void allocate_gnat_aux_type (struct type *);
      TYPE_ZALLOC (type,							       \
 		  sizeof (*TYPE_MAIN_TYPE (type)->type_specific.func_stuff)))
 
-#define TYPE_INSTANCE_FLAGS(thistype) (thistype)->instance_flags
+#define TYPE_INSTANCE_FLAGS(thistype) \
+  type_instance_flags ((enum type_instance_flag_value) (thistype)->instance_flags)
+#define SET_TYPE_INSTANCE_FLAGS(thistype, flags) \
+  (thistype)->instance_flags = flags
 #define TYPE_MAIN_TYPE(thistype) (thistype)->main_type
 #define TYPE_TARGET_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->target_type
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
@@ -2117,12 +2120,14 @@ extern struct type *make_atomic_type (struct type *);
 
 extern void replace_type (struct type *, struct type *);
 
-extern int address_space_name_to_int (struct gdbarch *, const char *);
+extern type_instance_flags address_space_name_to_int (struct gdbarch *,
+						      const char *);
 
-extern const char *address_space_int_to_name (struct gdbarch *, int);
+extern const char *address_space_int_to_name (struct gdbarch *,
+					      type_instance_flags);
 
-extern struct type *make_type_with_address_space (struct type *type, 
-						  int space_identifier);
+extern struct type *make_type_with_address_space
+  (struct type *type, type_instance_flags space_identifier);
 
 extern struct type *lookup_memberptr_type (struct type *, struct type *);
 
