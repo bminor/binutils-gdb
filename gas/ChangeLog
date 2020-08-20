@@ -1,5 +1,43 @@
 2020-08-21  Alan Modra  <amodra@gmail.com>
 
+	* symbols.c (struct local_symbol): Add "hash" entry.  Reorder fields.
+	Delete union.  Adjust code throughout file.
+	(struct symbol): Add "hash", "name" and "x" entries.  Reorder fields.
+	Split off some to..
+	(struct xsymbol): ..this.  New struct.  Adjust code throughout file
+	accessing these fields.
+	(struct symbol_entry): Delete.
+	(union symbol_entry): New.
+	(hash_symbol_entry): Adjust for symbol_entry_t change.
+	(symbol_entry_find): Likewise.
+	(eq_symbol_entry): Compare hash values too.
+	(symbol_entry_alloc): Delete.
+	(local_symbol_converted_p, local_symbol_mark_converted): Delete.
+	(local_symbol_get_real_symbol, local_symbol_set_real_symbol): Delete.
+	(local_hash): Delete.
+	(abs_symbol_x, dot_symbol_x): New static var.
+	(symbol_init): New function.
+	(symbol_create): Rewrite.
+	(LOCAL_SYMBOL_CHECK): Delete.  Replace uses throughout with simple
+	test of flags.local_symbol.
+	(local_symbol_make): Adjust for struct local_symbol changes.
+	(local_symbol_convert): Rewrite.  Adjust all callers.
+	(symbol_table_insert): Simplify.
+	(symbol_clone): Comment on local sym cloning.  Handle split symbol
+	struct.
+	(get_real_sym): Delete.  Remove all uses.
+	(symbol_find_exact_noref): Simplify.
+	(resolve_local_symbol): Don't resolve non-locals.
+	(S_SET_SEGMENT): Don't special case reg_section.
+	(S_SET_NAME): Set both name and bsym->name.
+	(symbol_mark_resolved, symbol_resolved_p): Simplify.
+	(symbol_symbolS): Update comment.
+	(symbol_begin): Don't create local_hash.  Adjust abs_symbol setup.
+	(dot_symbol_init): Adjust dot_symbol setup.
+	(symbol_print_statistics): Delete local_hash stats.
+
+2020-08-21  Alan Modra  <amodra@gmail.com>
+
 	* symbols.c (struct symbol_flags): Rename sy_volatile to volatil,
 	and remove sy_ from other field names.  Update throughout.
 	(struct symbol): Remove sy_ from field names.  Delete unused
