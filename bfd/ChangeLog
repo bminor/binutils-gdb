@@ -1,3 +1,8 @@
+2020-08-21  Jan Beulich  <jbeulich@suse.com>
+
+	* peXXigen.c (_bfd_XX_bfd_copy_private_bfd_data_common): Check
+	last byte of debug dir, not first.
+
 2020-08-20  Nick Clifton  <nickc@redhat.com>
 
 	PR 26428

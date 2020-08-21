@@ -2943,28 +2943,32 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
     {
       bfd_vma addr = ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].VirtualAddress
 	+ ope->pe_opthdr.ImageBase;
-      asection *section = find_section_by_vma (obfd, addr);
+      /* In particular a .buildid section may overlap (in VA space) with
+	 whatever section comes ahead of it (largely because of section->size
+	 representing s_size, not virt_size).  Therefore don't look for the
+	 section containing the first byte, but for that covering the last
+	 one.  */
+      bfd_vma last = addr + ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size - 1;
+      asection *section = find_section_by_vma (obfd, last);
       bfd_byte *data;
+
+      /* PR 17512: file: 0f15796a.  */
+      if (section && addr < section->vma)
+	{
+	  /* xgettext:c-format */
+	  _bfd_error_handler
+	    (_("%pB: Data Directory (%lx bytes at %" PRIx64 ") "
+	       "extends across section boundary at %" PRIx64),
+	     obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
+	     (uint64_t) addr, (uint64_t) section->vma);
+	  return FALSE;
+	}
 
       if (section && bfd_malloc_and_get_section (obfd, section, &data))
 	{
 	  unsigned int i;
 	  struct external_IMAGE_DEBUG_DIRECTORY *dd =
 	    (struct external_IMAGE_DEBUG_DIRECTORY *)(data + (addr - section->vma));
-
-	  /* PR 17512: file: 0f15796a.  */
-	  if ((unsigned long) ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
-	      > section->size - (addr - section->vma))
-	    {
-	      /* xgettext:c-format */
-	      _bfd_error_handler
-		(_("%pB: Data Directory size (%lx) "
-		   "exceeds space left in section (%" PRIx64 ")"),
-		 obfd, ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size,
-		 (uint64_t) (section->size - (addr - section->vma)));
-	      free (data);
-	      return FALSE;
-	    }
 
 	  for (i = 0; i < ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
 		 / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
