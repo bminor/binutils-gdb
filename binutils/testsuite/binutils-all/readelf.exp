@@ -188,7 +188,7 @@ proc readelf_wi_test {} {
 	".*DW_TAG_subprogram.*"
 	".*DW_TAG_base_type.*"
 	".*DW_AT_producer.*(GNU C|indirect string).*"
-	".*DW_AT_language.*ANSI C.*"
+	".*DW_AT_language.*(ANSI C|C11).*"
 	".*DW_AT_name.*(testprog.c|indirect string).*"
 	".*DW_AT_name.*fn.*"
 	".*DW_AT_name.*(main|indirect string).*"
