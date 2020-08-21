@@ -91,4 +91,19 @@
 			ESC_PARENS (T1, T2, T3, T4),			\
 			VALID, EXPR_TYPE, EXPR)
 
+#define CHECK_VALID_EXPR_5(T1, T2, T3, T4, T5, VALID, EXPR_TYPE, EXPR)	\
+  CHECK_VALID_EXPR_INT (ESC_PARENS (typename T1, typename T2,		\
+				    typename T3, typename T4,		\
+				    typename T5),			\
+			ESC_PARENS (T1, T2, T3, T4, T5),		\
+			VALID, EXPR_TYPE, EXPR)
+
+#define CHECK_VALID_EXPR_6(T1, T2, T3, T4, T5, T6,			\
+			   VALID, EXPR_TYPE, EXPR)			\
+  CHECK_VALID_EXPR_INT (ESC_PARENS (typename T1, typename T2,		\
+				    typename T3, typename T4,		\
+				    typename T5, typename T6),		\
+			ESC_PARENS (T1, T2, T3, T4, T5, T6),		\
+			VALID, EXPR_TYPE, EXPR)
+
 #endif /* COMMON_VALID_EXPR_H */

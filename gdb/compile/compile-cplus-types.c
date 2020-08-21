@@ -668,7 +668,7 @@ compile_cplus_convert_method (compile_cplus_instance *instance,
      type and corresponding qualifier flags.  */
   gcc_type func_type = compile_cplus_convert_func (instance, method_type, true);
   gcc_type class_type = instance->convert_type (parent_type);
-  gcc_cp_qualifiers_flags quals = (enum gcc_cp_qualifiers) 0;
+  gcc_cp_qualifiers_flags quals = 0;
 
   if (TYPE_CONST (method_type))
     quals |= GCC_CP_QUALIFIER_CONST;
@@ -681,7 +681,7 @@ compile_cplus_convert_method (compile_cplus_instance *instance,
   gcc_cp_ref_qualifiers_flags rquals = GCC_CP_REF_QUAL_NONE;
 
   return instance->plugin ().build_method_type
-    (class_type, func_type, quals, rquals);
+    (class_type, func_type, quals.raw (), rquals.raw ());
 }
 
 /* Convert a member or method pointer represented by TYPE.  */
@@ -745,7 +745,7 @@ compile_cplus_convert_struct_or_union_methods (compile_cplus_instance *instance,
 		     (sym_kind
 		      | get_method_access_flag (type, i, j)
 		      | GCC_CP_FLAG_VIRTUAL_FUNCTION
-		      | GCC_CP_FLAG_PURE_VIRTUAL_FUNCTION),
+		      | GCC_CP_FLAG_PURE_VIRTUAL_FUNCTION).raw (),
 		     method_type, nullptr, 0, nullptr, 0);
 		  continue;
 		}
@@ -787,7 +787,7 @@ compile_cplus_convert_struct_or_union_methods (compile_cplus_instance *instance,
 
 	  instance->plugin ().build_decl
 	    (kind, overloaded_name.get (),
-	     sym_kind | get_method_access_flag (type, i, j),
+	     (sym_kind | get_method_access_flag (type, i, j)).raw (),
 	     method_type, nullptr, address, filename, line);
 	}
     }
@@ -1060,7 +1060,7 @@ compile_cplus_instance::convert_qualified_base (gcc_type base,
   gcc_type result = base;
 
   if (quals != 0)
-    result = plugin ().build_qualified_type (base, quals);
+    result = plugin ().build_qualified_type (base, quals.raw ());
 
   return result;
 }
