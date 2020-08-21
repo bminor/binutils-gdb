@@ -4565,12 +4565,19 @@ const struct csky_opcode csky_v2_opcodes[] =
 	       OPCODE_INFO1 (0xe8400000,
 			     (0_15, COND16b, OPRND_SHIFT_1_BIT)),
 	       CSKYV2_ISA_1E2),
+#undef _RELAX
+#undef _RELOC16
+#define _RELAX      0
+#define _RELOC16    0
+    OP32 ("bnezad",
+	  OPCODE_INFO2 (0xe8200000,
+			(16_20, AREG, OPRND_SHIFT_0_BIT),
+			(0_15, COND16b, OPRND_SHIFT_1_BIT)),
+	  CSKYV2_ISA_3E3R2),
 #undef _RELOC16
 #undef _RELOC32
-#undef _RELAX
 #define _RELOC16    0
 #define _RELOC32    0
-#define _RELAX      0
 #undef _TRANSFER
 #define _TRANSFER   1
     OP16_WITH_WORK ("jbr",

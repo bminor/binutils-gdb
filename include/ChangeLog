@@ -1,3 +1,7 @@
+2020-08-21  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* csky.h (CSKYV2_ISA_3E3R2): New.
+
 2020-08-21  Mark Wielaard  <mark@klomp.org>
 
 	* diagnostics.h (DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER): Also define

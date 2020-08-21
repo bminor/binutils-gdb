@@ -1,3 +1,12 @@
+2020-08-21  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* config/tc-csky.c (CSKY_ISA_803R2): New.
+	(csky_archs): Add ck803r2 series.
+	(md_begin): Fix warning about -medsp.
+	(csky_get_freg_val): Support lowercase of fpu register name.
+	* testsuite/gas/csky/cskyv2_ck803r2.s: New file.
+	* testsuite/gas/csky/cskyv2_ck803r2.d: New file.
+
 2020-08-23  Alan Modra  <amodra@gmail.com>
 
 	PR 26513

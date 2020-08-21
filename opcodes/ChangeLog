@@ -1,3 +1,7 @@
+2020-08-21  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* csky-opc.h (csky_v2_opcodes): Add instruction bnezad.
+
 2020-08-21  Nick Clifton  <nickc@redhat.com>
 
 	* aarch64-dis.c (get_sym_code_type): Return FALSE for non-ELF

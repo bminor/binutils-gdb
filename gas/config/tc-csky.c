@@ -604,6 +604,7 @@ const struct csky_cpu_info csky_cpus[] =
   /* CK803 series.  */
 #define CSKY_ISA_803    (CSKY_ISA_802 | CSKYV2_ISA_2E3 | CSKY_ISA_MP)
 #define CSKY_ISA_803R1  (CSKY_ISA_803 | CSKYV2_ISA_3E3R1)
+#define CSKY_ISA_803R2  (CSKY_ISA_803 | CSKYV2_ISA_3E3R1 | CSKYV2_ISA_3E3R2)
 #define CSKY_ISA_FLOAT_803 (CSKY_ISA_FLOAT_E1 | CSKY_ISA_FLOAT_1E3)
   {"ck803", CSKY_ARCH_803, CSKY_ISA_803 },
   {"ck803h", CSKY_ARCH_803, CSKY_ISA_803 },
@@ -635,6 +636,22 @@ const struct csky_cpu_info csky_cpus[] =
   {"ck803ftr1", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803R1 | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
   {"ck803eftr1", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R1 | CSKY_ISA_DSP_ENHANCE | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
   {"ck803ehftr1", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R1 | CSKY_ISA_DSP_ENHANCE | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
+
+  {"ck803r2", CSKY_ARCH_803, CSKY_ISA_803R2},
+  {"ck803hr2", CSKY_ARCH_803, CSKY_ISA_803R2},
+  {"ck803tr2", CSKY_ARCH_803, CSKY_ISA_803R2 | CSKY_ISA_TRUST},
+  {"ck803htr2", CSKY_ARCH_803, CSKY_ISA_803R2 | CSKY_ISA_TRUST},
+  {"ck803fr2", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_FLOAT_803},
+  {"ck803fhr2", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_FLOAT_803},
+  {"ck803er2", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R2 | CSKY_ISA_DSP_ENHANCE},
+  {"ck803ehr2", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R2 | CSKY_ISA_DSP_ENHANCE},
+  {"ck803etr2", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R2 | CSKY_ISA_DSP_ENHANCE | CSKY_ISA_TRUST},
+  {"ck803ehtr2", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R2 | CSKY_ISA_DSP_ENHANCE | CSKY_ISA_TRUST},
+  {"ck803efr2", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_DSP_ENHANCE | CSKY_ISA_FLOAT_803},
+  {"ck803efhr2", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_DSP_ENHANCE | CSKY_ISA_FLOAT_803},
+  {"ck803ftr2", CSKY_ARCH_803 | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
+  {"ck803eftr2", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_DSP_ENHANCE | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
+  {"ck803efhtr2", CSKY_ARCH_803 | CSKY_ARCH_DSP | CSKY_ARCH_FLOAT, CSKY_ISA_803R2 | CSKY_ISA_DSP_ENHANCE | CSKY_ISA_FLOAT_803 | CSKY_ISA_TRUST},
 
   {"ck803s", CSKY_ARCH_803, CSKY_ISA_803R1 },
   {"ck803se", CSKY_ARCH_803 | CSKY_ARCH_DSP, CSKY_ISA_803R1 | CSKYV2_ISA_DSP},
@@ -1250,16 +1267,34 @@ md_begin (void)
     {
       if (IS_CSKY_ARCH_803 (mach_flag))
 	{
-	  /* In 803, dspv1 is conflict with dspv2. We keep dspv2.  */
-	  if ((dsp_flag & CSKY_DSP_FLAG_V1) && (dsp_flag & CSKY_DSP_FLAG_V2))
-	    as_warn (_("option -mdsp conflicts with -medsp, only enabling -medsp"));
-	  isa_flag &= ~(CSKY_ISA_MAC_DSP | CSKY_ISA_DSP);
-	  isa_flag |= CSKY_ISA_DSP_ENHANCE;
+	  if ((dsp_flag & CSKY_DSP_FLAG_V1))
+	    {
+	      isa_flag |= (CSKY_ISA_MAC_DSP | CSKY_ISA_DSP);
+	      isa_flag &= ~CSKY_ISA_DSP_ENHANCE;
+	    }
+
+	  if ((dsp_flag & CSKY_DSP_FLAG_V2))
+	    {
+	      isa_flag &= ~(CSKY_ISA_MAC_DSP | CSKY_ISA_DSP);
+	      isa_flag |= CSKY_ISA_DSP_ENHANCE;
+	    }
+
+	  if ((dsp_flag & CSKY_DSP_FLAG_V1)
+	      && (dsp_flag & CSKY_DSP_FLAG_V2))
+	    {
+	      /* In 803, dspv1 is conflict with dspv2. We keep dspv2.  */
+	      as_warn ("option -mdsp conflicts with -medsp, only enabling -medsp");
+	      isa_flag &= ~(CSKY_ISA_MAC_DSP | CSKY_ISA_DSP);
+	      isa_flag |= CSKY_ISA_DSP_ENHANCE;
+	    }
 	}
       else
 	{
-	  isa_flag &= ~CSKY_ISA_DSP_ENHANCE;
-	  as_warn (_("-medsp option is only supported by ck803s, ignoring -medsp"));
+	  if (dsp_flag & CSKY_DSP_FLAG_V2)
+	    {
+	      isa_flag &= ~CSKY_ISA_DSP_ENHANCE;
+	      as_warn ("-medsp option is only supported by ck803s, ignoring -medsp");
+	    }
 	}
       ;
     }
@@ -2330,7 +2365,8 @@ csky_get_freg_val (char *str, int *len)
 {
   int reg = 0;
   char *s = NULL;
-  if ((str[0] == 'v' || str[0] == 'f') && (str[1] == 'r'))
+  if ((TOLOWER(str[0]) == 'v' || TOLOWER(str[0]) == 'f')
+      && (TOLOWER(str[1]) == 'r'))
     {
       /* It is fpu register.  */
       s = &str[2];
