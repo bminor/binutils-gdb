@@ -13,6 +13,8 @@
     equivalent of the CLI's "break -qualified" and "dprintf
     -qualified".
 
+* GDB now supports core file debugging for x86_64 Cygwin programs.
+
 *** Changes in GDB 10
 
 * There are new feature names for ARC targets: "org.gnu.gdb.arc.core"

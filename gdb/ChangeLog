@@ -1,3 +1,7 @@
+2020-08-21  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* NEWS: Mention x86_64 Cygwin core file support.
+
 2020-07-01  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* windows-tdep.c (NOTE_INFO_MODULE, NOTE_INFO_MODULE64): Define.
