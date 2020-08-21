@@ -1,3 +1,8 @@
+2020-08-21  Mark Wielaard  <mark@klomp.org>
+
+	* diagnostics.h (DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER): Also define
+	for GCC 7.0 or higher.
+
 2020-08-10  Alex Coplan  <alex.coplan@arm.com>
 
 	* opcode/aarch64.h (AARCH64_MAX_SYSREG_NAME_LEN): New.

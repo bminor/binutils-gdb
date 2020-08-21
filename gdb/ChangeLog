@@ -1,3 +1,7 @@
+2020-08-21  Mark Wielaard  <mark@klomp.org>
+
+	* ada-lex.l: Extend register warnings diagnostics comment for g++.
+
 2020-08-22  Simon Marchi  <simon.marchi@efficios.com>
 
 	* frame.c (enum class frame_id_status): New.
