@@ -10140,7 +10140,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
   char buf[30];
   char *name;
   size_t len;
-  size_t name_size;
+  unsigned int name_size;
   asection *sect;
   unsigned int type;
   int is_active_thread;
@@ -10248,7 +10248,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
 
       if (note->descsz < 12 + name_size)
         {
-          _bfd_error_handler (_("%pB: win32pstatus NOTE_INFO_MODULE of size %lu is too small to contain a name of size %zu"),
+          _bfd_error_handler (_("%pB: win32pstatus NOTE_INFO_MODULE of size %lu is too small to contain a name of size %u"),
                               abfd, note->descsz, name_size);
           return TRUE;
         }

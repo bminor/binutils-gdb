@@ -1,3 +1,8 @@
+2020-08-21  Jon Turney  <jon.turney@dronecode.org.uk>
+
+	* elf.c (elfcore_grok_win32pstatus): Change name_size to unsigned
+	int. Use '%u' format with  _bfd_error_handler to render it.
+
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
 	PR 26489
