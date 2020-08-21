@@ -1,5 +1,23 @@
 2020-08-21  Alan Modra  <amodra@gmail.com>
 
+	* symbols.c (struct symbol_flags): Rename sy_volatile to volatil,
+	and remove sy_ from other field names.  Update throughout.
+	(struct symbol): Remove sy_ from field names.  Delete unused
+	TARGET_SYMBOL_FIELDS.  Update throughout file.  Move after..
+	(struct local_symbol): ..here.  Remove lsy_ from field names.
+	Delete unused TC_LOCAL_SYMFIELD_TYPE.  Update throughout file.
+	(local_symbol_resolved_p, local_symbol_mark_resolved): Delete.
+	Expand uses throughout file.
+	(local_symbol_get_frag, local_symbol_set_frag): Likewise.
+	(symbol_new): Move symbol_table_frozen test to..
+	(symbol_append): ..here, and..
+	(symbol_insert): ..here.
+	(resolve_symbol_value, symbol_relc_make_expr): White space fixes.
+	(HANDLE_XADD_OPT1, HANDLE_XADD_OPT2): Likewise.
+	* config/obj-coff.h (RESOLVE_SYMBOL_REDEFINITION): Update.
+
+2020-08-21  Alan Modra  <amodra@gmail.com>
+
 	* symbols.h (symbol_new, symbol_create, local_symbol_make),
 	(symbol_temp_new): Arrange params as section, frag, offset.
 	* symbols.c: Adjust to suit.

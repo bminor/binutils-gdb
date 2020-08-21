@@ -29,90 +29,54 @@
 struct symbol_flags
 {
   /* Whether the symbol is a local_symbol.  */
-  unsigned int sy_local_symbol : 1;
+  unsigned int local_symbol : 1;
 
   /* Weather symbol has been written.  */
-  unsigned int sy_written : 1;
+  unsigned int written : 1;
 
   /* Whether symbol value has been completely resolved (used during
      final pass over symbol table).  */
-  unsigned int sy_resolved : 1;
+  unsigned int resolved : 1;
 
   /* Whether the symbol value is currently being resolved (used to
      detect loops in symbol dependencies).  */
-  unsigned int sy_resolving : 1;
+  unsigned int resolving : 1;
 
   /* Whether the symbol value is used in a reloc.  This is used to
      ensure that symbols used in relocs are written out, even if they
      are local and would otherwise not be.  */
-  unsigned int sy_used_in_reloc : 1;
+  unsigned int used_in_reloc : 1;
 
   /* Whether the symbol is used as an operand or in an expression.
      NOTE:  Not all the backends keep this information accurate;
      backends which use this bit are responsible for setting it when
      a symbol is used in backend routines.  */
-  unsigned int sy_used : 1;
+  unsigned int used : 1;
 
   /* Whether the symbol can be re-defined.  */
-  unsigned int sy_volatile : 1;
+  unsigned int volatil : 1;
 
   /* Whether the symbol is a forward reference.  */
-  unsigned int sy_forward_ref : 1;
+  unsigned int forward_ref : 1;
 
   /* This is set if the symbol is defined in an MRI common section.
      We handle such sections as single common symbols, so symbols
      defined within them must be treated specially by the relocation
      routines.  */
-  unsigned int sy_mri_common : 1;
+  unsigned int mri_common : 1;
 
   /* This is set if the symbol is set with a .weakref directive.  */
-  unsigned int sy_weakrefr : 1;
+  unsigned int weakrefr : 1;
 
   /* This is set when the symbol is referenced as part of a .weakref
      directive, but only if the symbol was not in the symbol table
      before.  It is cleared as soon as any direct reference to the
      symbol is present.  */
-  unsigned int sy_weakrefd : 1;
-};
-
-/* The information we keep for a symbol.  Note that the symbol table
-   holds pointers both to this and to local_symbol structures.  See
-   below.  */
-
-struct symbol
-{
-  /* Symbol flags.  */
-  struct symbol_flags sy_flags;
-
-  /* BFD symbol */
-  asymbol *bsym;
-
-  /* The value of the symbol.  */
-  expressionS sy_value;
-
-  /* Forwards and (optionally) backwards chain pointers.  */
-  struct symbol *sy_next;
-  struct symbol *sy_previous;
-
-  /* Pointer to the frag this symbol is attached to, if any.
-     Otherwise, NULL.  */
-  struct frag *sy_frag;
-
-#ifdef OBJ_SYMFIELD_TYPE
-  OBJ_SYMFIELD_TYPE sy_obj;
-#endif
-
-#ifdef TC_SYMFIELD_TYPE
-  TC_SYMFIELD_TYPE sy_tc;
-#endif
-
-#ifdef TARGET_SYMBOL_FIELDS
-  TARGET_SYMBOL_FIELDS
-#endif
+  unsigned int weakrefd : 1;
 };
 
 /* A pointer in the symbol may point to either a complete symbol
-   (struct symbol above) or to a local symbol (struct local_symbol
+   (struct symbol below) or to a local symbol (struct local_symbol
    defined here).  The symbol code can detect the case by examining
    the first field which is present in both structs.
 
@@ -124,30 +88,57 @@ struct symbol
 
 struct local_symbol
 {
-  /* Symbol flags.  Only sy_local_symbol and sy_resolved are relevant.  */
-  struct symbol_flags lsy_flags;
+  /* Symbol flags.  Only local_symbol and resolved are relevant.  */
+  struct symbol_flags flags;
 
   /* The symbol section.  This also serves as a flag.  If this is
      reg_section, then this symbol has been converted into a regular
-     symbol, and lsy_sym points to it.  */
-  segT lsy_section;
+     symbol, and sym points to it.  */
+  segT section;
 
   /* The symbol name.  */
-  const char *lsy_name;
+  const char *name;
 
   /* The symbol frag or the real symbol, depending upon the value in
-     lsy_section.  */
+     section.  */
   union
   {
-    fragS *lsy_frag;
-    symbolS *lsy_sym;
+    fragS *frag;
+    symbolS *sym;
   } u;
 
   /* The value of the symbol.  */
-  valueT lsy_value;
+  valueT value;
+};
 
-#ifdef TC_LOCAL_SYMFIELD_TYPE
-  TC_LOCAL_SYMFIELD_TYPE lsy_tc;
+/* The information we keep for a symbol.  Note that the symbol table
+   holds pointers both to this and to local_symbol structures.  */
+
+struct symbol
+{
+  /* Symbol flags.  */
+  struct symbol_flags flags;
+
+  /* BFD symbol */
+  asymbol *bsym;
+
+  /* The value of the symbol.  */
+  expressionS value;
+
+  /* Forwards and backwards chain pointers.  */
+  struct symbol *next;
+  struct symbol *previous;
+
+  /* Pointer to the frag this symbol is attached to, if any.
+     Otherwise, NULL.  */
+  struct frag *frag;
+
+#ifdef OBJ_SYMFIELD_TYPE
+  OBJ_SYMFIELD_TYPE obj;
+#endif
+
+#ifdef TC_SYMFIELD_TYPE
+  TC_SYMFIELD_TYPE tc;
 #endif
 };
 
@@ -202,14 +193,10 @@ symbol_entry_find (htab_t table, const char *symbol_name)
 }
 
 
-#define local_symbol_converted_p(l) ((l)->lsy_section == reg_section)
-#define local_symbol_mark_converted(l) ((l)->lsy_section = reg_section)
-#define local_symbol_resolved_p(l) ((l)->lsy_flags.sy_resolved)
-#define local_symbol_mark_resolved(l) ((l)->lsy_flags.sy_resolved = 1)
-#define local_symbol_get_frag(l) ((l)->u.lsy_frag)
-#define local_symbol_set_frag(l, f) ((l)->u.lsy_frag = (f))
-#define local_symbol_get_real_symbol(l) ((l)->u.lsy_sym)
-#define local_symbol_set_real_symbol(l, s) ((l)->u.lsy_sym = (s))
+#define local_symbol_converted_p(l) ((l)->section == reg_section)
+#define local_symbol_mark_converted(l) ((l)->section = reg_section)
+#define local_symbol_get_real_symbol(l) ((l)->u.sym)
+#define local_symbol_set_real_symbol(l, s) ((l)->u.sym = (s))
 
 /* This is non-zero if symbols are case sensitive, which is the
    default.  */
@@ -273,11 +260,6 @@ symbol_new (const char *name, segT segment, fragS *frag, valueT valu)
   symbolS *symbolP = symbol_create (name, segment, frag, valu);
 
   /* Link to end of symbol chain.  */
-  {
-    extern int symbol_table_frozen;
-    if (symbol_table_frozen)
-      abort ();
-  }
   symbol_append (symbolP, symbol_lastP, &symbol_rootP, &symbol_lastP);
 
   return symbolP;
@@ -336,7 +318,7 @@ symbol_create (const char *name, segT segment, fragS *frag, valueT valu)
   S_SET_VALUE (symbolP, valu);
   symbol_clear_list_pointers (symbolP);
 
-  symbolP->sy_frag = frag;
+  symbolP->frag = frag;
 
   obj_symbol_new_hook (symbolP);
 
@@ -363,7 +345,7 @@ static unsigned long local_symbol_conversion_count;
    changes its argument to the real symbol.  */
 
 #define LOCAL_SYMBOL_CHECK(s)						\
-  (s->sy_flags.sy_local_symbol 						\
+  (s->flags.local_symbol						\
    ? (local_symbol_converted_p ((struct local_symbol *) s)		\
       ? (s = local_symbol_get_real_symbol ((struct local_symbol *) s),	\
 	 0)								\
@@ -377,18 +359,18 @@ local_symbol_make (const char *name, segT section, fragS *frag, valueT val)
 {
   const char *name_copy;
   struct local_symbol *ret;
-  struct symbol_flags flags = { .sy_local_symbol = 1, .sy_resolved = 0 };
+  struct symbol_flags flags = { .local_symbol = 1, .resolved = 0 };
 
   ++local_symbol_count;
 
   name_copy = save_symbol_name (name);
 
   ret = (struct local_symbol *) obstack_alloc (&notes, sizeof *ret);
-  ret->lsy_flags = flags;
-  ret->lsy_name = name_copy;
-  ret->lsy_section = section;
-  local_symbol_set_frag (ret, frag);
-  ret->lsy_value = val;
+  ret->flags = flags;
+  ret->name = name_copy;
+  ret->section = section;
+  ret->u.frag = frag;
+  ret->value = val;
 
   htab_insert (local_hash, symbol_entry_alloc (name_copy, ret));
 
@@ -403,20 +385,20 @@ local_symbol_convert (struct local_symbol *locsym)
 {
   symbolS *ret;
 
-  gas_assert (locsym->lsy_flags.sy_local_symbol);
+  gas_assert (locsym->flags.local_symbol);
   if (local_symbol_converted_p (locsym))
     return local_symbol_get_real_symbol (locsym);
 
   ++local_symbol_conversion_count;
 
-  ret = symbol_new (locsym->lsy_name, locsym->lsy_section,
-		    local_symbol_get_frag (locsym), locsym->lsy_value);
+  ret = symbol_new (locsym->name, locsym->section,
+		    locsym->u.frag, locsym->value);
 
-  if (local_symbol_resolved_p (locsym))
-    ret->sy_flags.sy_resolved = 1;
+  if (locsym->flags.resolved)
+    ret->flags.resolved = 1;
 
   /* Local symbols are always either defined or used.  */
-  ret->sy_flags.sy_used = 1;
+  ret->flags.used = 1;
 
 #ifdef TC_LOCAL_SYMFIELD_CONVERT
   TC_LOCAL_SYMFIELD_CONVERT (locsym, ret);
@@ -427,7 +409,7 @@ local_symbol_convert (struct local_symbol *locsym)
   local_symbol_mark_converted (locsym);
   local_symbol_set_real_symbol (locsym, ret);
 
-  htab_insert (local_hash, symbol_entry_alloc (locsym->lsy_name, NULL));
+  htab_insert (local_hash, symbol_entry_alloc (locsym->name, NULL));
 
   return ret;
 }
@@ -435,7 +417,7 @@ local_symbol_convert (struct local_symbol *locsym)
 static void
 define_sym_at_dot (symbolS *symbolP)
 {
-  symbolP->sy_frag = frag_now;
+  symbolP->frag = frag_now;
   S_SET_VALUE (symbolP, (valueT) frag_now_fix ());
   S_SET_SEGMENT (symbolP, now_seg);
 }
@@ -516,18 +498,18 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 	{
 	  struct local_symbol *locsym = (struct local_symbol *) symbolP;
 
-	  if (locsym->lsy_section != undefined_section
-	      && (local_symbol_get_frag (locsym) != frag_now
-		  || locsym->lsy_section != now_seg
-		  || locsym->lsy_value != frag_now_fix ()))
+	  if (locsym->section != undefined_section
+	      && (locsym->u.frag != frag_now
+		  || locsym->section != now_seg
+		  || locsym->value != frag_now_fix ()))
 	    {
 	      as_bad (_("symbol `%s' is already defined"), sym_name);
 	      return symbolP;
 	    }
 
-	  locsym->lsy_section = now_seg;
-	  local_symbol_set_frag (locsym, frag_now);
-	  locsym->lsy_value = frag_now_fix ();
+	  locsym->section = now_seg;
+	  locsym->u.frag = frag_now;
+	  locsym->value = frag_now_fix ();
 	}
       else if (!(S_IS_DEFINED (symbolP) || symbol_equated_p (symbolP))
 	       || S_IS_COMMON (symbolP)
@@ -612,7 +594,7 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
       else
 	{
 	  /* Don't blow up if the definition is the same.  */
-	  if (!(frag_now == symbolP->sy_frag
+	  if (!(frag_now == symbolP->frag
 		&& S_GET_VALUE (symbolP) == frag_now_fix ()
 		&& S_GET_SEGMENT (symbolP) == now_seg))
 	    {
@@ -641,12 +623,12 @@ colon (/* Just seen "x:" - rattle symbols & frags.  */
 	 section.  This requires special handling.  */
       if (LOCAL_SYMBOL_CHECK (symbolP))
 	symbolP = local_symbol_convert ((struct local_symbol *) symbolP);
-      symbolP->sy_value.X_op = O_symbol;
-      symbolP->sy_value.X_add_symbol = mri_common_symbol;
-      symbolP->sy_value.X_add_number = S_GET_VALUE (mri_common_symbol);
-      symbolP->sy_frag = &zero_address_frag;
+      symbolP->value.X_op = O_symbol;
+      symbolP->value.X_add_symbol = mri_common_symbol;
+      symbolP->value.X_add_number = S_GET_VALUE (mri_common_symbol);
+      symbolP->frag = &zero_address_frag;
       S_SET_SEGMENT (symbolP, expr_section);
-      symbolP->sy_flags.sy_mri_common = 1;
+      symbolP->flags.mri_common = 1;
     }
 
 #ifdef tc_frob_label
@@ -762,19 +744,19 @@ symbol_clone (symbolS *orgsymP, int replace)
     {
       if (symbol_rootP == orgsymP)
 	symbol_rootP = newsymP;
-      else if (orgsymP->sy_previous)
+      else if (orgsymP->previous)
 	{
-	  orgsymP->sy_previous->sy_next = newsymP;
-	  orgsymP->sy_previous = NULL;
+	  orgsymP->previous->next = newsymP;
+	  orgsymP->previous = NULL;
 	}
       if (symbol_lastP == orgsymP)
 	symbol_lastP = newsymP;
-      else if (orgsymP->sy_next)
-	orgsymP->sy_next->sy_previous = newsymP;
+      else if (orgsymP->next)
+	orgsymP->next->previous = newsymP;
 
       /* Symbols that won't be output can't be external.  */
       S_CLEAR_EXTERNAL (orgsymP);
-      orgsymP->sy_previous = orgsymP->sy_next = orgsymP;
+      orgsymP->previous = orgsymP->next = orgsymP;
       debug_verify_symchain (symbol_rootP, symbol_lastP);
 
       symbol_table_insert (newsymP);
@@ -783,7 +765,7 @@ symbol_clone (symbolS *orgsymP, int replace)
     {
       /* Symbols that won't be output can't be external.  */
       S_CLEAR_EXTERNAL (newsymP);
-      newsymP->sy_previous = newsymP->sy_next = newsymP;
+      newsymP->previous = newsymP->next = newsymP;
     }
 
   return newsymP;
@@ -796,7 +778,7 @@ static inline symbolS *
 get_real_sym (symbolS *s)
 {
   if (s != NULL
-      && s->sy_flags.sy_local_symbol
+      && s->flags.local_symbol
       && local_symbol_converted_p ((struct local_symbol *) s))
     s = local_symbol_get_real_symbol ((struct local_symbol *) s);
   return s;
@@ -812,12 +794,12 @@ symbol_clone_if_forward_ref (symbolS *symbolP, int is_forward)
 {
   if (symbolP && !LOCAL_SYMBOL_CHECK (symbolP))
     {
-      symbolS *orig_add_symbol = get_real_sym (symbolP->sy_value.X_add_symbol);
-      symbolS *orig_op_symbol = get_real_sym (symbolP->sy_value.X_op_symbol);
+      symbolS *orig_add_symbol = get_real_sym (symbolP->value.X_add_symbol);
+      symbolS *orig_op_symbol = get_real_sym (symbolP->value.X_op_symbol);
       symbolS *add_symbol = orig_add_symbol;
       symbolS *op_symbol = orig_op_symbol;
 
-      if (symbolP->sy_flags.sy_forward_ref)
+      if (symbolP->flags.forward_ref)
 	is_forward = 1;
 
       if (is_forward)
@@ -831,26 +813,26 @@ symbol_clone_if_forward_ref (symbolS *symbolP, int is_forward)
 	    op_symbol = symbol_find_exact (S_GET_NAME (op_symbol));
 	}
 
-      /* Re-using sy_resolving here, as this routine cannot get called from
+      /* Re-using resolving here, as this routine cannot get called from
 	 symbol resolution code.  */
       if ((symbolP->bsym->section == expr_section
-           || symbolP->sy_flags.sy_forward_ref)
-	  && !symbolP->sy_flags.sy_resolving)
+	   || symbolP->flags.forward_ref)
+	  && !symbolP->flags.resolving)
 	{
-	  symbolP->sy_flags.sy_resolving = 1;
+	  symbolP->flags.resolving = 1;
 	  add_symbol = symbol_clone_if_forward_ref (add_symbol, is_forward);
 	  op_symbol = symbol_clone_if_forward_ref (op_symbol, is_forward);
-	  symbolP->sy_flags.sy_resolving = 0;
+	  symbolP->flags.resolving = 0;
 	}
 
-      if (symbolP->sy_flags.sy_forward_ref
+      if (symbolP->flags.forward_ref
 	  || add_symbol != orig_add_symbol
 	  || op_symbol != orig_op_symbol)
 	{
 	  if (symbolP != &dot_symbol)
 	    {
 	      symbolP = symbol_clone (symbolP, 0);
-	      symbolP->sy_flags.sy_resolving = 0;
+	      symbolP->flags.resolving = 0;
 	    }
 	  else
 	    {
@@ -861,8 +843,8 @@ symbol_clone_if_forward_ref (symbolS *symbolP, int is_forward)
 	    }
 	}
 
-      symbolP->sy_value.X_add_symbol = add_symbol;
-      symbolP->sy_value.X_op_symbol = op_symbol;
+      symbolP->value.X_add_symbol = add_symbol;
+      symbolP->value.X_op_symbol = op_symbol;
     }
 
   return symbolP;
@@ -978,6 +960,9 @@ void
 symbol_append (symbolS *addme, symbolS *target,
 	       symbolS **rootPP, symbolS **lastPP)
 {
+  extern int symbol_table_frozen;
+  if (symbol_table_frozen)
+    abort ();
   if (LOCAL_SYMBOL_CHECK (addme))
     abort ();
   if (target != NULL && LOCAL_SYMBOL_CHECK (target))
@@ -987,16 +972,16 @@ symbol_append (symbolS *addme, symbolS *target,
     {
       know (*rootPP == NULL);
       know (*lastPP == NULL);
-      addme->sy_next = NULL;
-      addme->sy_previous = NULL;
+      addme->next = NULL;
+      addme->previous = NULL;
       *rootPP = addme;
       *lastPP = addme;
       return;
     }				/* if the list is empty  */
 
-  if (target->sy_next != NULL)
+  if (target->next != NULL)
     {
-      target->sy_next->sy_previous = addme;
+      target->next->previous = addme;
     }
   else
     {
@@ -1004,9 +989,9 @@ symbol_append (symbolS *addme, symbolS *target,
       *lastPP = addme;
     }				/* if we have a next  */
 
-  addme->sy_next = target->sy_next;
-  target->sy_next = addme;
-  addme->sy_previous = target;
+  addme->next = target->next;
+  target->next = addme;
+  addme->previous = target;
 
   debug_verify_symchain (symbol_rootP, symbol_lastP);
 }
@@ -1018,8 +1003,8 @@ symbol_clear_list_pointers (symbolS *symbolP)
 {
   if (LOCAL_SYMBOL_CHECK (symbolP))
     abort ();
-  symbolP->sy_next = NULL;
-  symbolP->sy_previous = NULL;
+  symbolP->next = NULL;
+  symbolP->previous = NULL;
 }
 
 /* Remove SYMBOLP from the list.  */
@@ -1032,22 +1017,22 @@ symbol_remove (symbolS *symbolP, symbolS **rootPP, symbolS **lastPP)
 
   if (symbolP == *rootPP)
     {
-      *rootPP = symbolP->sy_next;
+      *rootPP = symbolP->next;
     }				/* if it was the root  */
 
   if (symbolP == *lastPP)
     {
-      *lastPP = symbolP->sy_previous;
+      *lastPP = symbolP->previous;
     }				/* if it was the tail  */
 
-  if (symbolP->sy_next != NULL)
+  if (symbolP->next != NULL)
     {
-      symbolP->sy_next->sy_previous = symbolP->sy_previous;
+      symbolP->next->previous = symbolP->previous;
     }				/* if not last  */
 
-  if (symbolP->sy_previous != NULL)
+  if (symbolP->previous != NULL)
     {
-      symbolP->sy_previous->sy_next = symbolP->sy_next;
+      symbolP->previous->next = symbolP->next;
     }				/* if not first  */
 
   debug_verify_symchain (*rootPP, *lastPP);
@@ -1059,14 +1044,17 @@ void
 symbol_insert (symbolS *addme, symbolS *target,
 	       symbolS **rootPP, symbolS **lastPP ATTRIBUTE_UNUSED)
 {
+  extern int symbol_table_frozen;
+  if (symbol_table_frozen)
+    abort ();
   if (LOCAL_SYMBOL_CHECK (addme))
     abort ();
   if (LOCAL_SYMBOL_CHECK (target))
     abort ();
 
-  if (target->sy_previous != NULL)
+  if (target->previous != NULL)
     {
-      target->sy_previous->sy_next = addme;
+      target->previous->next = addme;
     }
   else
     {
@@ -1074,9 +1062,9 @@ symbol_insert (symbolS *addme, symbolS *target,
       *rootPP = addme;
     }				/* if not first  */
 
-  addme->sy_previous = target->sy_previous;
-  target->sy_previous = addme;
-  addme->sy_next = target;
+  addme->previous = target->previous;
+  target->previous = addme;
+  addme->next = target;
 
   debug_verify_symchain (*rootPP, *lastPP);
 }
@@ -1092,8 +1080,8 @@ verify_symbol_chain (symbolS *rootP, symbolS *lastP)
   for (; symbol_next (symbolP) != NULL; symbolP = symbol_next (symbolP))
     {
       gas_assert (symbolP->bsym != NULL);
-      gas_assert (symbolP->sy_flags.sy_local_symbol == 0);
-      gas_assert (symbolP->sy_next->sy_previous == symbolP);
+      gas_assert (symbolP->flags.local_symbol == 0);
+      gas_assert (symbolP->next->previous == symbolP);
     }
 
   gas_assert (lastP == symbolP);
@@ -1103,13 +1091,13 @@ int
 symbol_on_chain (symbolS *s, symbolS *rootPP, symbolS *lastPP)
 {
   return (!LOCAL_SYMBOL_CHECK (s)
-	  && ((s->sy_next != s
-	       && s->sy_next != NULL
-	       && s->sy_next->sy_previous == s)
+	  && ((s->next != s
+	       && s->next != NULL
+	       && s->next->previous == s)
 	      || s == lastPP)
-	  && ((s->sy_previous != s
-	       && s->sy_previous != NULL
-	       && s->sy_previous->sy_next == s)
+	  && ((s->previous != s
+	       && s->previous != NULL
+	       && s->previous->next == s)
 	      || s == rootPP));
 }
 
@@ -1118,7 +1106,7 @@ symbol_on_chain (symbolS *s, symbolS *rootPP, symbolS *lastPP)
 static int
 use_complex_relocs_for (symbolS * symp)
 {
-  switch (symp->sy_value.X_op)
+  switch (symp->value.X_op)
     {
     case O_constant:
       return 0;
@@ -1142,20 +1130,20 @@ use_complex_relocs_for (symbolS * symp)
     case O_gt:
     case O_logical_and:
     case O_logical_or:
-      if ((S_IS_COMMON (symp->sy_value.X_op_symbol)
-	   || S_IS_LOCAL (symp->sy_value.X_op_symbol))
-	  && S_IS_DEFINED (symp->sy_value.X_op_symbol)
-	  && S_GET_SEGMENT (symp->sy_value.X_op_symbol) != expr_section)
+      if ((S_IS_COMMON (symp->value.X_op_symbol)
+	   || S_IS_LOCAL (symp->value.X_op_symbol))
+	  && S_IS_DEFINED (symp->value.X_op_symbol)
+	  && S_GET_SEGMENT (symp->value.X_op_symbol) != expr_section)
 	{
 	case O_symbol:
 	case O_symbol_rva:
 	case O_uminus:
 	case O_bit_not:
 	case O_logical_not:
-	  if ((S_IS_COMMON (symp->sy_value.X_add_symbol)
-	       || S_IS_LOCAL (symp->sy_value.X_add_symbol))
-	      && S_IS_DEFINED (symp->sy_value.X_add_symbol)
-	      && S_GET_SEGMENT (symp->sy_value.X_add_symbol) != expr_section)
+	  if ((S_IS_COMMON (symp->value.X_add_symbol)
+	       || S_IS_LOCAL (symp->value.X_add_symbol))
+	      && S_IS_DEFINED (symp->value.X_add_symbol)
+	      && S_GET_SEGMENT (symp->value.X_add_symbol) != expr_section)
 	    return 0;
 	}
       break;
@@ -1245,45 +1233,44 @@ resolve_symbol_value (symbolS *symp)
     {
       struct local_symbol *locsym = (struct local_symbol *) symp;
 
-      final_val = locsym->lsy_value;
-      if (local_symbol_resolved_p (locsym))
+      final_val = locsym->value;
+      if (locsym->flags.resolved)
 	return final_val;
 
       /* Symbols whose section has SEC_ELF_OCTETS set,
 	 resolve to octets instead of target bytes. */
-      if (locsym->lsy_section->flags & SEC_OCTETS)
-	final_val += local_symbol_get_frag (locsym)->fr_address;
+      if (locsym->section->flags & SEC_OCTETS)
+	final_val += locsym->u.frag->fr_address;
       else
-	final_val += (local_symbol_get_frag (locsym)->fr_address
-		      / OCTETS_PER_BYTE);
+	final_val += locsym->u.frag->fr_address / OCTETS_PER_BYTE;
 
       if (finalize_syms)
 	{
-	  locsym->lsy_value = final_val;
-	  local_symbol_mark_resolved (locsym);
+	  locsym->value = final_val;
+	  locsym->flags.resolved = 1;
 	}
 
       return final_val;
     }
 
-  if (symp->sy_flags.sy_resolved)
+  if (symp->flags.resolved)
     {
       final_val = 0;
-      while (symp->sy_value.X_op == O_symbol)
+      while (symp->value.X_op == O_symbol)
 	{
-	  final_val += symp->sy_value.X_add_number;
-	  symp = symp->sy_value.X_add_symbol;
+	  final_val += symp->value.X_add_number;
+	  symp = symp->value.X_add_symbol;
 	  if (LOCAL_SYMBOL_CHECK (symp))
 	    {
 	      struct local_symbol *locsym = (struct local_symbol *) symp;
-	      final_val += locsym->lsy_value;
+	      final_val += locsym->value;
 	      return final_val;
 	    }
-	  if (!symp->sy_flags.sy_resolved)
+	  if (!symp->flags.resolved)
 	    return 0;
 	}
-      if (symp->sy_value.X_op == O_constant)
-	final_val += symp->sy_value.X_add_number;
+      if (symp->value.X_op == O_constant)
+	final_val += symp->value.X_add_number;
       else
 	final_val = 0;
       return final_val;
@@ -1292,7 +1279,7 @@ resolve_symbol_value (symbolS *symp)
   resolved = 0;
   final_seg = S_GET_SEGMENT (symp);
 
-  if (symp->sy_flags.sy_resolving)
+  if (symp->flags.resolving)
     {
       if (finalize_syms)
 	as_bad (_("symbol definition loop encountered at `%s'"),
@@ -1307,11 +1294,11 @@ resolve_symbol_value (symbolS *symp)
       symbolS * relc_symbol = NULL;
       char * relc_symbol_name = NULL;
 
-      relc_symbol_name = symbol_relc_make_expr (& symp->sy_value);
+      relc_symbol_name = symbol_relc_make_expr (& symp->value);
 
       /* For debugging, print out conversion input & output.  */
 #ifdef DEBUG_SYMS
-      print_expr (& symp->sy_value);
+      print_expr (& symp->value);
       if (relc_symbol_name)
 	fprintf (stderr, "-> relc symbol: %s\n", relc_symbol_name);
 #endif
@@ -1330,16 +1317,16 @@ resolve_symbol_value (symbolS *symp)
 	{
 	  symbol_table_insert (relc_symbol);
 
- 	  /* S_CLEAR_EXTERNAL (relc_symbol); */
+	  /* S_CLEAR_EXTERNAL (relc_symbol); */
 	  if (symp->bsym->flags & BSF_SRELC)
 	    relc_symbol->bsym->flags |= BSF_SRELC;
 	  else
 	    relc_symbol->bsym->flags |= BSF_RELC;
 	  /* symp->bsym->flags |= BSF_RELC; */
 	  copy_symbol_attributes (symp, relc_symbol);
-	  symp->sy_value.X_op = O_symbol;
-	  symp->sy_value.X_add_symbol = relc_symbol;
-	  symp->sy_value.X_add_number = 0;
+	  symp->value.X_op = O_symbol;
+	  symp->value.X_add_symbol = relc_symbol;
+	  symp->value.X_add_number = 0;
 	  resolved = 1;
 	}
 
@@ -1356,13 +1343,13 @@ resolve_symbol_value (symbolS *symp)
       operatorT op;
       int move_seg_ok;
 
-      symp->sy_flags.sy_resolving = 1;
+      symp->flags.resolving = 1;
 
       /* Help out with CSE.  */
-      add_symbol = symp->sy_value.X_add_symbol;
-      op_symbol = symp->sy_value.X_op_symbol;
-      final_val = symp->sy_value.X_add_number;
-      op = symp->sy_value.X_op;
+      add_symbol = symp->value.X_add_symbol;
+      op_symbol = symp->value.X_op_symbol;
+      final_val = symp->value.X_add_number;
+      op = symp->value.X_op;
 
       switch (op)
 	{
@@ -1378,9 +1365,9 @@ resolve_symbol_value (symbolS *symp)
 	  /* Symbols whose section has SEC_ELF_OCTETS set,
 	     resolve to octets instead of target bytes. */
 	  if (symp->bsym->section->flags & SEC_OCTETS)
-	    final_val += symp->sy_frag->fr_address;
+	    final_val += symp->frag->fr_address;
 	  else
-	    final_val += symp->sy_frag->fr_address / OCTETS_PER_BYTE;
+	    final_val += symp->frag->fr_address / OCTETS_PER_BYTE;
 	  if (final_seg == expr_section)
 	    final_seg = absolute_section;
 	  /* Fall through.  */
@@ -1394,7 +1381,7 @@ resolve_symbol_value (symbolS *symp)
 	  left = resolve_symbol_value (add_symbol);
 	  seg_left = S_GET_SEGMENT (add_symbol);
 	  if (finalize_syms)
-	    symp->sy_value.X_op_symbol = NULL;
+	    symp->value.X_op_symbol = NULL;
 
 	do_symbol:
 	  if (S_IS_WEAKREFR (symp))
@@ -1402,15 +1389,15 @@ resolve_symbol_value (symbolS *symp)
 	      gas_assert (final_val == 0);
 	      if (S_IS_WEAKREFR (add_symbol))
 		{
-		  gas_assert (add_symbol->sy_value.X_op == O_symbol
-			  && add_symbol->sy_value.X_add_number == 0);
-		  add_symbol = add_symbol->sy_value.X_add_symbol;
+		  gas_assert (add_symbol->value.X_op == O_symbol
+			  && add_symbol->value.X_add_number == 0);
+		  add_symbol = add_symbol->value.X_add_symbol;
 		  gas_assert (! S_IS_WEAKREFR (add_symbol));
-		  symp->sy_value.X_add_symbol = add_symbol;
+		  symp->value.X_add_symbol = add_symbol;
 		}
 	    }
 
-	  if (symp->sy_flags.sy_mri_common)
+	  if (symp->flags.mri_common)
 	    {
 	      /* This is a symbol inside an MRI common section.  The
 		 relocation routines are going to handle it specially.
@@ -1422,7 +1409,7 @@ resolve_symbol_value (symbolS *symp)
 	  /* Don't leave symbol loops.  */
 	  if (finalize_syms
 	      && !LOCAL_SYMBOL_CHECK (add_symbol)
-	      && add_symbol->sy_flags.sy_resolving)
+	      && add_symbol->flags.resolving)
 	    break;
 
 	  if (finalize_syms && final_val == 0)
@@ -1452,21 +1439,21 @@ resolve_symbol_value (symbolS *symp)
 	    {
 	      if (finalize_syms)
 		{
-		  symp->sy_value.X_op = O_symbol;
-		  symp->sy_value.X_add_symbol = add_symbol;
-		  symp->sy_value.X_add_number = final_val;
+		  symp->value.X_op = O_symbol;
+		  symp->value.X_add_symbol = add_symbol;
+		  symp->value.X_add_number = final_val;
 		  /* Use X_op_symbol as a flag.  */
-		  symp->sy_value.X_op_symbol = add_symbol;
+		  symp->value.X_op_symbol = add_symbol;
 		}
 	      final_seg = seg_left;
-	      final_val += symp->sy_frag->fr_address + left;
+	      final_val += symp->frag->fr_address + left;
 	      resolved = symbol_resolved_p (add_symbol);
-	      symp->sy_flags.sy_resolving = 0;
+	      symp->flags.resolving = 0;
 	      goto exit_dont_set_value;
 	    }
 	  else
 	    {
-	      final_val += symp->sy_frag->fr_address + left;
+	      final_val += symp->frag->fr_address + left;
 	      if (final_seg == expr_section || final_seg == undefined_section)
 		final_seg = seg_left;
 	    }
@@ -1474,7 +1461,7 @@ resolve_symbol_value (symbolS *symp)
 	  resolved = symbol_resolved_p (add_symbol);
 	  if (S_IS_WEAKREFR (symp))
 	    {
-	      symp->sy_flags.sy_resolving = 0;
+	      symp->flags.resolving = 0;
 	      goto exit_dont_set_value;
 	    }
 	  break;
@@ -1486,9 +1473,9 @@ resolve_symbol_value (symbolS *symp)
 	  seg_left = S_GET_SEGMENT (add_symbol);
 
 	  /* By reducing these to the relevant dyadic operator, we get
-	     	!S -> S == 0 	permitted on anything,
-		-S -> 0 - S 	only permitted on absolute
-		~S -> S ^ ~0 	only permitted on absolute  */
+		!S -> S == 0	permitted on anything,
+		-S -> 0 - S	only permitted on absolute
+		~S -> S ^ ~0	only permitted on absolute  */
 	  if (op != O_logical_not && seg_left != absolute_section
 	      && finalize_syms)
 	    report_op_error (symp, NULL, op, add_symbol);
@@ -1503,7 +1490,7 @@ resolve_symbol_value (symbolS *symp)
 	  else
 	    left = ~left;
 
-	  final_val += left + symp->sy_frag->fr_address;
+	  final_val += left + symp->frag->fr_address;
 
 	  resolved = symbol_resolved_p (add_symbol);
 	  break;
@@ -1612,7 +1599,7 @@ resolve_symbol_value (symbolS *symp)
 	      right = 1;
 	    }
 
-	  switch (symp->sy_value.X_op)
+	  switch (symp->value.X_op)
 	    {
 	    case O_multiply:		left *= right; break;
 	    case O_divide:		left /= right; break;
@@ -1631,7 +1618,7 @@ resolve_symbol_value (symbolS *symp)
 		      && (seg_left != undefined_section
 			  || add_symbol == op_symbol)
 		      ? ~ (offsetT) 0 : 0);
-	      if (symp->sy_value.X_op == O_ne)
+	      if (symp->value.X_op == O_ne)
 		left = ~left;
 	      break;
 	    case O_lt:	left = left <  right ? ~ (offsetT) 0 : 0; break;
@@ -1652,7 +1639,7 @@ resolve_symbol_value (symbolS *symp)
 	      abort ();
 	    }
 
-	  final_val += symp->sy_frag->fr_address + left;
+	  final_val += symp->frag->fr_address + left;
 	  if (final_seg == expr_section || final_seg == undefined_section)
 	    {
 	      if (seg_left == undefined_section
@@ -1677,7 +1664,7 @@ resolve_symbol_value (symbolS *symp)
 	  break;
 	}
 
-      symp->sy_flags.sy_resolving = 0;
+      symp->flags.resolving = 0;
     }
 
   if (finalize_syms)
@@ -1692,12 +1679,12 @@ resolve_symbol_value (symbolS *symp)
   if (finalize_syms)
     {
       if (resolved)
-	symp->sy_flags.sy_resolved = 1;
+	symp->flags.resolved = 1;
       else if (S_GET_SEGMENT (symp) != expr_section)
 	{
 	  as_bad (_("can't resolve value for symbol `%s'"),
 		  S_GET_NAME (symp));
-	  symp->sy_flags.sy_resolved = 1;
+	  symp->flags.resolved = 1;
 	}
     }
 
@@ -1736,23 +1723,23 @@ snapshot_symbol (symbolS **symbolPP, valueT *valueP, segT *segP, fragS **fragPP)
     {
       struct local_symbol *locsym = (struct local_symbol *) symbolP;
 
-      *valueP = locsym->lsy_value;
-      *segP = locsym->lsy_section;
-      *fragPP = local_symbol_get_frag (locsym);
+      *valueP = locsym->value;
+      *segP = locsym->section;
+      *fragPP = locsym->u.frag;
     }
   else
     {
-      expressionS exp = symbolP->sy_value;
+      expressionS exp = symbolP->value;
 
-      if (!symbolP->sy_flags.sy_resolved && exp.X_op != O_illegal)
+      if (!symbolP->flags.resolved && exp.X_op != O_illegal)
 	{
 	  int resolved;
 
-	  if (symbolP->sy_flags.sy_resolving)
+	  if (symbolP->flags.resolving)
 	    return 0;
-	  symbolP->sy_flags.sy_resolving = 1;
+	  symbolP->flags.resolving = 1;
 	  resolved = resolve_expression (&exp);
-	  symbolP->sy_flags.sy_resolving = 0;
+	  symbolP->flags.resolving = 0;
 	  if (!resolved)
 	    return 0;
 
@@ -1780,15 +1767,15 @@ snapshot_symbol (symbolS **symbolPP, valueT *valueP, segT *segP, fragS **fragPP)
 	{
 	  struct local_symbol *locsym = (struct local_symbol *) symbolP;
 
-	  *valueP = locsym->lsy_value;
-	  *segP = locsym->lsy_section;
-	  *fragPP = local_symbol_get_frag (locsym);
+	  *valueP = locsym->value;
+	  *segP = locsym->section;
+	  *fragPP = locsym->u.frag;
 	}
       else
 	{
 	  *valueP = exp.X_add_number;
 	  *segP = symbolP->bsym->section;
-	  *fragPP = symbolP->sy_frag;
+	  *fragPP = symbolP->frag;
 	}
 
       if (*segP == expr_section)
@@ -2170,24 +2157,24 @@ S_GET_VALUE (symbolS *s)
   if (LOCAL_SYMBOL_CHECK (s))
     return resolve_symbol_value (s);
 
-  if (!s->sy_flags.sy_resolved)
+  if (!s->flags.resolved)
     {
       valueT val = resolve_symbol_value (s);
       if (!finalize_syms)
 	return val;
     }
   if (S_IS_WEAKREFR (s))
-    return S_GET_VALUE (s->sy_value.X_add_symbol);
+    return S_GET_VALUE (s->value.X_add_symbol);
 
-  if (s->sy_value.X_op != O_constant)
+  if (s->value.X_op != O_constant)
     {
-      if (! s->sy_flags.sy_resolved
-	  || s->sy_value.X_op != O_symbol
+      if (! s->flags.resolved
+	  || s->value.X_op != O_symbol
 	  || (S_IS_DEFINED (s) && ! S_IS_COMMON (s)))
 	as_bad (_("attempt to get value of unresolved symbol `%s'"),
 		S_GET_NAME (s));
     }
-  return (valueT) s->sy_value.X_add_number;
+  return (valueT) s->value.X_add_number;
 }
 
 /* Set the value of a symbol.  */
@@ -2197,13 +2184,13 @@ S_SET_VALUE (symbolS *s, valueT val)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     {
-      ((struct local_symbol *) s)->lsy_value = val;
+      ((struct local_symbol *) s)->value = val;
       return;
     }
 
-  s->sy_value.X_op = O_constant;
-  s->sy_value.X_add_number = (offsetT) val;
-  s->sy_value.X_unsigned = 0;
+  s->value.X_op = O_constant;
+  s->value.X_add_number = (offsetT) val;
+  s->value.X_unsigned = 0;
   S_CLEAR_WEAKREFR (s);
 }
 
@@ -2270,7 +2257,7 @@ S_IS_WEAK (symbolS *s)
      the referenced symbol has lost its weak status, there's no reason
      to keep handling the weakrefr as if it was weak.  */
   if (S_IS_WEAKREFR (s))
-    return S_IS_WEAK (s->sy_value.X_add_symbol);
+    return S_IS_WEAK (s->value.X_add_symbol);
   return (s->bsym->flags & BSF_WEAK) != 0;
 }
 
@@ -2279,7 +2266,7 @@ S_IS_WEAKREFR (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return 0;
-  return s->sy_flags.sy_weakrefr != 0;
+  return s->flags.weakrefr != 0;
 }
 
 int
@@ -2287,7 +2274,7 @@ S_IS_WEAKREFD (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return 0;
-  return s->sy_flags.sy_weakrefd != 0;
+  return s->flags.weakrefd != 0;
 }
 
 int
@@ -2302,7 +2289,7 @@ int
 S_IS_DEFINED (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
-    return ((struct local_symbol *) s)->lsy_section != undefined_section;
+    return ((struct local_symbol *) s)->section != undefined_section;
   return s->bsym->section != undefined_section;
 }
 
@@ -2319,7 +2306,7 @@ S_FORCE_RELOC (symbolS *s, int strict)
 {
   segT sec;
   if (LOCAL_SYMBOL_CHECK (s))
-    sec = ((struct local_symbol *) s)->lsy_section;
+    sec = ((struct local_symbol *) s)->section;
   else
     {
       if ((strict
@@ -2394,7 +2381,7 @@ int
 S_CAN_BE_REDEFINED (const symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
-    return (local_symbol_get_frag ((struct local_symbol *) s)
+    return (((struct local_symbol *) s)->u.frag
 	    == &predefined_address_frag);
   /* Permit register names to be redefined.  */
   return s->bsym->section == reg_section;
@@ -2405,7 +2392,7 @@ S_IS_VOLATILE (const symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return 0;
-  return s->sy_flags.sy_volatile;
+  return s->flags.volatil;
 }
 
 int
@@ -2413,14 +2400,14 @@ S_IS_FORWARD_REF (const symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return 0;
-  return s->sy_flags.sy_forward_ref;
+  return s->flags.forward_ref;
 }
 
 const char *
 S_GET_NAME (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
-    return ((struct local_symbol *) s)->lsy_name;
+    return ((struct local_symbol *) s)->name;
   return s->bsym->name;
 }
 
@@ -2428,7 +2415,7 @@ segT
 S_GET_SEGMENT (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
-    return ((struct local_symbol *) s)->lsy_section;
+    return ((struct local_symbol *) s)->section;
   return s->bsym->section;
 }
 
@@ -2445,7 +2432,7 @@ S_SET_SEGMENT (symbolS *s, segT seg)
 	s = local_symbol_convert ((struct local_symbol *) s);
       else
 	{
-	  ((struct local_symbol *) s)->lsy_section = seg;
+	  ((struct local_symbol *) s)->section = seg;
 	  return;
 	}
     }
@@ -2523,15 +2510,15 @@ S_SET_WEAKREFR (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  s->sy_flags.sy_weakrefr = 1;
+  s->flags.weakrefr = 1;
   /* If the alias was already used, make sure we mark the target as
      used as well, otherwise it might be dropped from the symbol
      table.  This may have unintended side effects if the alias is
      later redirected to another symbol, such as keeping the unused
      previous target in the symbol table.  Since it will be weak, it's
      not a big deal.  */
-  if (s->sy_flags.sy_used)
-    symbol_mark_used (s->sy_value.X_add_symbol);
+  if (s->flags.used)
+    symbol_mark_used (s->value.X_add_symbol);
 }
 
 void
@@ -2539,7 +2526,7 @@ S_CLEAR_WEAKREFR (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return;
-  s->sy_flags.sy_weakrefr = 0;
+  s->flags.weakrefr = 0;
 }
 
 void
@@ -2547,7 +2534,7 @@ S_SET_WEAKREFD (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  s->sy_flags.sy_weakrefd = 1;
+  s->flags.weakrefd = 1;
   S_SET_WEAK (s);
 }
 
@@ -2556,9 +2543,9 @@ S_CLEAR_WEAKREFD (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return;
-  if (s->sy_flags.sy_weakrefd)
+  if (s->flags.weakrefd)
     {
-      s->sy_flags.sy_weakrefd = 0;
+      s->flags.weakrefd = 0;
       /* If a weakref target symbol is weak, then it was never
 	 referenced directly before, not even in a .global directive,
 	 so decay it to local.  If it remains undefined, it will be
@@ -2598,7 +2585,7 @@ S_SET_NAME (symbolS *s, const char *name)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     {
-      ((struct local_symbol *) s)->lsy_name = name;
+      ((struct local_symbol *) s)->name = name;
       return;
     }
   s->bsym->name = name;
@@ -2609,14 +2596,14 @@ S_SET_VOLATILE (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  s->sy_flags.sy_volatile = 1;
+  s->flags.volatil = 1;
 }
 
 void
 S_CLEAR_VOLATILE (symbolS *s)
 {
   if (!LOCAL_SYMBOL_CHECK (s))
-    s->sy_flags.sy_volatile = 0;
+    s->flags.volatil = 0;
 }
 
 void
@@ -2624,7 +2611,7 @@ S_SET_FORWARD_REF (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  s->sy_flags.sy_forward_ref = 1;
+  s->flags.forward_ref = 1;
 }
 
 /* Return the previous symbol in a chain.  */
@@ -2634,7 +2621,7 @@ symbol_previous (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     abort ();
-  return s->sy_previous;
+  return s->previous;
 }
 
 /* Return the next symbol in a chain.  */
@@ -2644,7 +2631,7 @@ symbol_next (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     abort ();
-  return s->sy_next;
+  return s->next;
 }
 
 /* Return a pointer to the value of a symbol as an expression.  */
@@ -2654,7 +2641,7 @@ symbol_get_value_expression (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  return &s->sy_value;
+  return &s->value;
 }
 
 /* Set the value of a symbol to an expression.  */
@@ -2664,7 +2651,7 @@ symbol_set_value_expression (symbolS *s, const expressionS *exp)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  s->sy_value = *exp;
+  s->value = *exp;
   S_CLEAR_WEAKREFR (s);
 }
 
@@ -2684,9 +2671,9 @@ offsetT *
 symbol_X_add_number (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
-    return (offsetT *) &((struct local_symbol *) s)->lsy_value;
+    return (offsetT *) &((struct local_symbol *) s)->value;
 
-  return &s->sy_value.X_add_number;
+  return &s->value.X_add_number;
 }
 
 /* Set the value of SYM to the current position in the current segment.  */
@@ -2706,10 +2693,10 @@ symbol_set_frag (symbolS *s, fragS *f)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     {
-      local_symbol_set_frag ((struct local_symbol *) s, f);
+      ((struct local_symbol *) s)->u.frag = f;
       return;
     }
-  s->sy_frag = f;
+  s->frag = f;
   S_CLEAR_WEAKREFR (s);
 }
 
@@ -2719,8 +2706,8 @@ fragS *
 symbol_get_frag (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
-    return local_symbol_get_frag ((struct local_symbol *) s);
-  return s->sy_frag;
+    return ((struct local_symbol *) s)->u.frag;
+  return s->frag;
 }
 
 /* Mark a symbol as having been used.  */
@@ -2730,9 +2717,9 @@ symbol_mark_used (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return;
-  s->sy_flags.sy_used = 1;
+  s->flags.used = 1;
   if (S_IS_WEAKREFR (s))
-    symbol_mark_used (s->sy_value.X_add_symbol);
+    symbol_mark_used (s->value.X_add_symbol);
 }
 
 /* Clear the mark of whether a symbol has been used.  */
@@ -2742,7 +2729,7 @@ symbol_clear_used (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  s->sy_flags.sy_used = 0;
+  s->flags.used = 0;
 }
 
 /* Return whether a symbol has been used.  */
@@ -2752,7 +2739,7 @@ symbol_used_p (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return 1;
-  return s->sy_flags.sy_used;
+  return s->flags.used;
 }
 
 /* Mark a symbol as having been used in a reloc.  */
@@ -2762,7 +2749,7 @@ symbol_mark_used_in_reloc (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  s->sy_flags.sy_used_in_reloc = 1;
+  s->flags.used_in_reloc = 1;
 }
 
 /* Clear the mark of whether a symbol has been used in a reloc.  */
@@ -2772,7 +2759,7 @@ symbol_clear_used_in_reloc (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return;
-  s->sy_flags.sy_used_in_reloc = 0;
+  s->flags.used_in_reloc = 0;
 }
 
 /* Return whether a symbol has been used in a reloc.  */
@@ -2782,7 +2769,7 @@ symbol_used_in_reloc_p (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return 0;
-  return s->sy_flags.sy_used_in_reloc;
+  return s->flags.used_in_reloc;
 }
 
 /* Mark a symbol as an MRI common symbol.  */
@@ -2792,7 +2779,7 @@ symbol_mark_mri_common (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  s->sy_flags.sy_mri_common = 1;
+  s->flags.mri_common = 1;
 }
 
 /* Clear the mark of whether a symbol is an MRI common symbol.  */
@@ -2802,7 +2789,7 @@ symbol_clear_mri_common (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return;
-  s->sy_flags.sy_mri_common = 0;
+  s->flags.mri_common = 0;
 }
 
 /* Return whether a symbol is an MRI common symbol.  */
@@ -2812,7 +2799,7 @@ symbol_mri_common_p (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return 0;
-  return s->sy_flags.sy_mri_common;
+  return s->flags.mri_common;
 }
 
 /* Mark a symbol as having been written.  */
@@ -2822,7 +2809,7 @@ symbol_mark_written (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return;
-  s->sy_flags.sy_written = 1;
+  s->flags.written = 1;
 }
 
 /* Clear the mark of whether a symbol has been written.  */
@@ -2832,7 +2819,7 @@ symbol_clear_written (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return;
-  s->sy_flags.sy_written = 0;
+  s->flags.written = 0;
 }
 
 /* Return whether a symbol has been written.  */
@@ -2842,7 +2829,7 @@ symbol_written_p (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return 0;
-  return s->sy_flags.sy_written;
+  return s->flags.written;
 }
 
 /* Mark a symbol has having been resolved.  */
@@ -2852,10 +2839,10 @@ symbol_mark_resolved (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     {
-      local_symbol_mark_resolved ((struct local_symbol *) s);
+      ((struct local_symbol *) s)->flags.resolved = 1;
       return;
     }
-  s->sy_flags.sy_resolved = 1;
+  s->flags.resolved = 1;
 }
 
 /* Return whether a symbol has been resolved.  */
@@ -2864,8 +2851,8 @@ int
 symbol_resolved_p (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
-    return local_symbol_resolved_p ((struct local_symbol *) s);
-  return s->sy_flags.sy_resolved;
+    return ((struct local_symbol *) s)->flags.resolved;
+  return s->flags.resolved;
 }
 
 /* Return whether a symbol is a section symbol.  */
@@ -2885,7 +2872,7 @@ symbol_equated_p (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return 0;
-  return s->sy_value.X_op == O_symbol;
+  return s->value.X_op == O_symbol;
 }
 
 /* Return whether a symbol is equated to another symbol, and should be
@@ -2899,11 +2886,11 @@ symbol_equated_reloc_p (symbolS *s)
   /* X_op_symbol, normally not used for O_symbol, is set by
      resolve_symbol_value to flag expression syms that have been
      equated.  */
-  return (s->sy_value.X_op == O_symbol
+  return (s->value.X_op == O_symbol
 #if defined (OBJ_COFF) && defined (TE_PE)
 	  && ! S_IS_WEAK (s)
 #endif
-	  && ((s->sy_flags.sy_resolved && s->sy_value.X_op_symbol != NULL)
+	  && ((s->flags.resolved && s->value.X_op_symbol != NULL)
 	      || ! S_IS_DEFINED (s)
 	      || S_IS_COMMON (s)));
 }
@@ -2915,7 +2902,7 @@ symbol_constant_p (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return 1;
-  return s->sy_value.X_op == O_constant;
+  return s->value.X_op == O_constant;
 }
 
 /* Return whether a symbol was cloned and thus removed from the global
@@ -2926,7 +2913,7 @@ symbol_shadow_p (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return 0;
-  return s->sy_next == s;
+  return s->next == s;
 }
 
 /* If S was created as a struct symbol, return S, otherwise if S is a
@@ -2979,7 +2966,7 @@ symbol_get_obj (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  return &s->sy_obj;
+  return &s->obj;
 }
 
 /* Set the object format information for a symbol.  */
@@ -2989,7 +2976,7 @@ symbol_set_obj (symbolS *s, OBJ_SYMFIELD_TYPE *o)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  s->sy_obj = *o;
+  s->obj = *o;
 }
 
 #endif /* OBJ_SYMFIELD_TYPE */
@@ -3003,7 +2990,7 @@ symbol_get_tc (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  return &s->sy_tc;
+  return &s->tc;
 }
 
 /* Set the processor information for a symbol.  */
@@ -3013,7 +3000,7 @@ symbol_set_tc (symbolS *s, TC_SYMFIELD_TYPE *o)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  s->sy_tc = *o;
+  s->tc = *o;
 }
 
 #endif /* TC_SYMFIELD_TYPE */
@@ -3032,8 +3019,8 @@ symbol_begin (void)
 #if defined (EMIT_SECTION_SYMBOLS) || !defined (RELOC_REQUIRES_SYMBOL)
   abs_symbol.bsym = bfd_abs_section_ptr->symbol;
 #endif
-  abs_symbol.sy_value.X_op = O_constant;
-  abs_symbol.sy_frag = &zero_address_frag;
+  abs_symbol.value.X_op = O_constant;
+  abs_symbol.frag = &zero_address_frag;
 
   if (LOCAL_LABELS_FB)
     fb_label_init ();
@@ -3046,8 +3033,8 @@ dot_symbol_init (void)
   if (dot_symbol.bsym == NULL)
     as_fatal ("bfd_make_empty_symbol: %s", bfd_errmsg (bfd_get_error ()));
   dot_symbol.bsym->name = ".";
-  dot_symbol.sy_flags.sy_forward_ref = 1;
-  dot_symbol.sy_value.X_op = O_constant;
+  dot_symbol.flags.forward_ref = 1;
+  dot_symbol.value.X_op = O_constant;
 }
 
 int indent_level;
@@ -3070,32 +3057,32 @@ print_symbol_value_1 (FILE *file, symbolS *sym)
     {
       struct local_symbol *locsym = (struct local_symbol *) sym;
 
-      if (local_symbol_get_frag (locsym) != & zero_address_frag
-	  && local_symbol_get_frag (locsym) != NULL)
+      if (locsym->u.frag != & zero_address_frag
+	  && locsym->u.frag != NULL)
 	{
 	  fprintf (file, " frag ");
-	  fprintf_vma (file, (bfd_vma) ((bfd_hostptr_t) local_symbol_get_frag (locsym)));
-        }
-      if (local_symbol_resolved_p (locsym))
+	  fprintf_vma (file, (bfd_vma) ((bfd_hostptr_t) locsym->u.frag));
+	}
+      if (locsym->flags.resolved)
 	fprintf (file, " resolved");
       fprintf (file, " local");
     }
   else
     {
-      if (sym->sy_frag != &zero_address_frag)
+      if (sym->frag != &zero_address_frag)
 	{
 	  fprintf (file, " frag ");
-	  fprintf_vma (file, (bfd_vma) ((bfd_hostptr_t) sym->sy_frag));
+	  fprintf_vma (file, (bfd_vma) ((bfd_hostptr_t) sym->frag));
 	}
-      if (sym->sy_flags.sy_written)
+      if (sym->flags.written)
 	fprintf (file, " written");
-      if (sym->sy_flags.sy_resolved)
+      if (sym->flags.resolved)
 	fprintf (file, " resolved");
-      else if (sym->sy_flags.sy_resolving)
+      else if (sym->flags.resolving)
 	fprintf (file, " resolving");
-      if (sym->sy_flags.sy_used_in_reloc)
+      if (sym->flags.used_in_reloc)
 	fprintf (file, " used-in-reloc");
-      if (sym->sy_flags.sy_used)
+      if (sym->flags.used)
 	fprintf (file, " used");
       if (S_IS_LOCAL (sym))
 	fprintf (file, " local");
@@ -3128,9 +3115,9 @@ print_symbol_value_1 (FILE *file, symbolS *sym)
       fprintf (file, "\n%*s<", indent_level * 4, "");
       if (LOCAL_SYMBOL_CHECK (sym))
 	fprintf (file, "constant %lx",
-		 (unsigned long) ((struct local_symbol *) sym)->lsy_value);
+		 (unsigned long) ((struct local_symbol *) sym)->value);
       else
-	print_expr_1 (file, &sym->sy_value);
+	print_expr_1 (file, &sym->value);
       fprintf (file, ">");
       indent_level--;
     }
@@ -3294,7 +3281,7 @@ symbol_print_statistics (FILE *file)
    nodes (plain symbols) in the expression tree.  The caller owns the
    returning string, so should free it eventually.  Errors are
    indicated via as_bad and a NULL return value.  The given symbol
-   is marked with sy_used_in_reloc.  */
+   is marked with used_in_reloc.  */
 
 char *
 symbol_relc_make_sym (symbolS * sym)
@@ -3403,64 +3390,64 @@ symbol_relc_make_expr (expressionS * exp)
 
       /* Helper macros for nesting nodes.  */
 
-#define HANDLE_XADD_OPT1(str_) 						\
+#define HANDLE_XADD_OPT1(str_)						\
       if (exp->X_add_number)						\
-        {								\
-          arity = 2;							\
-          opstr = "+:" str_;						\
-          operands[0] = symbol_relc_make_sym (exp->X_add_symbol);	\
-          operands[1] = symbol_relc_make_value (exp->X_add_number);	\
-          break;							\
-        }								\
+	{								\
+	  arity = 2;							\
+	  opstr = "+:" str_;						\
+	  operands[0] = symbol_relc_make_sym (exp->X_add_symbol);	\
+	  operands[1] = symbol_relc_make_value (exp->X_add_number);	\
+	  break;							\
+	}								\
       else								\
-        {								\
-          arity = 1;							\
-          opstr = str_;							\
-          operands[0] = symbol_relc_make_sym (exp->X_add_symbol);	\
-        }								\
+	{								\
+	  arity = 1;							\
+	  opstr = str_;							\
+	  operands[0] = symbol_relc_make_sym (exp->X_add_symbol);	\
+	}								\
       break
 
-#define HANDLE_XADD_OPT2(str_) 						\
+#define HANDLE_XADD_OPT2(str_)						\
       if (exp->X_add_number)						\
-        {								\
-          arity = 3;							\
-          opstr = "+:" str_;						\
-          operands[0] = symbol_relc_make_sym (exp->X_add_symbol);	\
-          operands[1] = symbol_relc_make_sym (exp->X_op_symbol);	\
-          operands[2] = symbol_relc_make_value (exp->X_add_number);	\
-        }								\
+	{								\
+	  arity = 3;							\
+	  opstr = "+:" str_;						\
+	  operands[0] = symbol_relc_make_sym (exp->X_add_symbol);	\
+	  operands[1] = symbol_relc_make_sym (exp->X_op_symbol);	\
+	  operands[2] = symbol_relc_make_value (exp->X_add_number);	\
+	}								\
       else								\
-        {								\
-          arity = 2;							\
-          opstr = str_;							\
-          operands[0] = symbol_relc_make_sym (exp->X_add_symbol);	\
-          operands[1] = symbol_relc_make_sym (exp->X_op_symbol);	\
-        } 								\
+	{								\
+	  arity = 2;							\
+	  opstr = str_;							\
+	  operands[0] = symbol_relc_make_sym (exp->X_add_symbol);	\
+	  operands[1] = symbol_relc_make_sym (exp->X_op_symbol);	\
+	}								\
       break
 
       /* Nesting nodes.  */
 
-    case O_uminus:       	HANDLE_XADD_OPT1 ("0-");
-    case O_bit_not:      	HANDLE_XADD_OPT1 ("~");
-    case O_logical_not:  	HANDLE_XADD_OPT1 ("!");
-    case O_multiply:     	HANDLE_XADD_OPT2 ("*");
-    case O_divide:       	HANDLE_XADD_OPT2 ("/");
-    case O_modulus:      	HANDLE_XADD_OPT2 ("%");
-    case O_left_shift:   	HANDLE_XADD_OPT2 ("<<");
-    case O_right_shift:  	HANDLE_XADD_OPT2 (">>");
+    case O_uminus:		HANDLE_XADD_OPT1 ("0-");
+    case O_bit_not:		HANDLE_XADD_OPT1 ("~");
+    case O_logical_not:		HANDLE_XADD_OPT1 ("!");
+    case O_multiply:		HANDLE_XADD_OPT2 ("*");
+    case O_divide:		HANDLE_XADD_OPT2 ("/");
+    case O_modulus:		HANDLE_XADD_OPT2 ("%");
+    case O_left_shift:		HANDLE_XADD_OPT2 ("<<");
+    case O_right_shift:		HANDLE_XADD_OPT2 (">>");
     case O_bit_inclusive_or:	HANDLE_XADD_OPT2 ("|");
     case O_bit_exclusive_or:	HANDLE_XADD_OPT2 ("^");
-    case O_bit_and:      	HANDLE_XADD_OPT2 ("&");
-    case O_add:          	HANDLE_XADD_OPT2 ("+");
-    case O_subtract:     	HANDLE_XADD_OPT2 ("-");
-    case O_eq:           	HANDLE_XADD_OPT2 ("==");
-    case O_ne:           	HANDLE_XADD_OPT2 ("!=");
-    case O_lt:           	HANDLE_XADD_OPT2 ("<");
-    case O_le:           	HANDLE_XADD_OPT2 ("<=");
-    case O_ge:           	HANDLE_XADD_OPT2 (">=");
-    case O_gt:           	HANDLE_XADD_OPT2 (">");
-    case O_logical_and:  	HANDLE_XADD_OPT2 ("&&");
-    case O_logical_or:   	HANDLE_XADD_OPT2 ("||");
+    case O_bit_and:		HANDLE_XADD_OPT2 ("&");
+    case O_add:			HANDLE_XADD_OPT2 ("+");
+    case O_subtract:		HANDLE_XADD_OPT2 ("-");
+    case O_eq:			HANDLE_XADD_OPT2 ("==");
+    case O_ne:			HANDLE_XADD_OPT2 ("!=");
+    case O_lt:			HANDLE_XADD_OPT2 ("<");
+    case O_le:			HANDLE_XADD_OPT2 ("<=");
+    case O_ge:			HANDLE_XADD_OPT2 (">=");
+    case O_gt:			HANDLE_XADD_OPT2 (">");
+    case O_logical_and:		HANDLE_XADD_OPT2 ("&&");
+    case O_logical_or:		HANDLE_XADD_OPT2 ("||");
     }
 
   /* Validate & reject early.  */
