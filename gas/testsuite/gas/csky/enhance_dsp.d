@@ -11,6 +11,7 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*d0038802\s*ldbi.w\s*r2,\s*\(r3\)
 #...
 \s*[0-9a-f]*:\s*e9c20ffa\s*bloop\s*r2,\s*0x0,\s*0xc.*
+\s*[0-9a-f]*:\s*e9c2eff8\s*bloop\s*r2,\s*0x0,\s*0xc.*
 \s*[0-9a-f]*:\s*d0038c02\s*pldbi.d\s*r2,\s*\(r3\)
 \s*[0-9a-f]*:\s*d0039002\s*ldbi.hs\s*r2,\s*\(r3\)
 \s*[0-9a-f]*:\s*d0039402\s*ldbi.bs\s*r2,\s*\(r3\)

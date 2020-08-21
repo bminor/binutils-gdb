@@ -272,6 +272,7 @@ struct csky_insn_info
   struct csky_macro_info *macro;
   /* Insn size for check_literal.  */
   unsigned int isize;
+  unsigned int last_isize;
   /* Max size of insn for relax frag_var.  */
   unsigned int max;
   /* Indicates which element is in csky_opcode_info op[] array.  */
@@ -4145,6 +4146,7 @@ md_assemble (char *str)
 	check_literals (csky_insn.opcode->transfer, csky_insn.max);
     }
 
+  csky_insn.last_isize = csky_insn.isize;
   insn_reloc = BFD_RELOC_NONE;
 }
 
@@ -6900,7 +6902,8 @@ dsp_work_bloop (void)
   csky_insn.inst = csky_insn.opcode->op32[0].opcode | (reg << 16);
   csky_insn.isize = 4;
 
-  if (csky_insn.e1.X_op == O_symbol
+  if (csky_insn.number == 3
+      && csky_insn.e1.X_op == O_symbol
       && csky_insn.e2.X_op == O_symbol)
     {
 	fix_new_exp (frag_now, csky_insn.output - frag_now->fr_literal,
@@ -6909,6 +6912,23 @@ dsp_work_bloop (void)
 	fix_new_exp (frag_now, csky_insn.output - frag_now->fr_literal,
 		     4, &csky_insn.e2, 1,
 		     BFD_RELOC_CKCORE_PCREL_BLOOP_IMM4BY4);
+    }
+  else if (csky_insn.number == 2
+	   && csky_insn.e1.X_op == O_symbol)
+    {
+      fix_new_exp (frag_now, csky_insn.output-frag_now->fr_literal,
+		   4, &csky_insn.e1, 1,
+		   BFD_RELOC_CKCORE_PCREL_BLOOP_IMM12BY4);
+      if (csky_insn.last_isize == 2)
+	csky_insn.inst |= (0xf << 12);
+      else if (csky_insn.last_isize != 0)
+	csky_insn.inst |= (0xe << 12);
+      else
+	{
+	  void *arg = (void *)"bloop can not be the first instruction"\
+		      "when the end label is not specified.\n";
+	  csky_show_error (ERROR_UNDEFINE, 0, arg, NULL);
+	}
     }
 
   csky_write_insn (csky_insn.output, csky_insn.inst, csky_insn.isize);

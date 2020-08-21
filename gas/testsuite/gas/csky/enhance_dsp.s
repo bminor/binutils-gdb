@@ -7,6 +7,7 @@ hello:
     ldbi.w r2, (r3)
 .loop_end:
     bloop r2, .loop_start, .loop_end
+    bloop r2, .loop_start
     pldbi.d r2, (r3)
     ldbi.hs r2, (r3)
     ldbi.bs r2, (r3)

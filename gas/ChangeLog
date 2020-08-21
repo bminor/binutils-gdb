@@ -1,3 +1,10 @@
+2020-08-21  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* config/tc-csky.c (csky_insn_info): Add member last_isize.
+	(md_assemble): Assign value to csky_insn.last_isize.
+	* testsuite/gas/csky/enhance_dsp.d: Test bloop's two operands form.
+	* testsuite/gas/csky/enhance_dsp.s: Likewise.
+
 2020-08-20  Martin Liska  <mliska@suse.cz>
 
 	* NEWS: Mention --reduce-memory-overheads and --hash-size arguments

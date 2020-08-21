@@ -1,3 +1,7 @@
+2020-08-21  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* csky-opc.h (csky_v2_opcodes): Add two operands form for bloop.
+
 2020-08-19  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (powerpc_opcodes): Replace OBF with BF for vcmpsq,

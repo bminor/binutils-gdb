@@ -4675,13 +4675,16 @@ const struct csky_opcode csky_v2_opcodes[] =
 #define _RELAX      0
 
     /* The followings are enhance DSP instructions.  */
-    OP32_WITH_WORK ("bloop",
-		    OPCODE_INFO3 (0xe9c00000,
+    DOP32_WITH_WORK ("bloop",
+		     OPCODE_INFO3 (0xe9c00000,
 				  (16_20, AREG, OPRND_SHIFT_0_BIT),
 				  (0_11, BLOOP_OFF12b, OPRND_SHIFT_1_BIT),
 				  (12_15, BLOOP_OFF4b, OPRND_SHIFT_1_BIT)),
-		    CSKY_ISA_DSP_ENHANCE,
-		    dsp_work_bloop),
+		     OPCODE_INFO2 (0xe9c00000,
+				  (16_20, AREG, OPRND_SHIFT_0_BIT),
+				  (0_11, BLOOP_OFF12b, OPRND_SHIFT_1_BIT)),
+		     CSKY_ISA_DSP_ENHANCE,
+		     dsp_work_bloop),
     /* The followings are ld/st instructions.  */
     OP32 ("ldbi.b",
 	  OPCODE_INFO2 (0xd0008000,
