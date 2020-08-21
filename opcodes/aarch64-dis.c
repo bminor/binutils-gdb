@@ -3321,6 +3321,7 @@ static int
 get_sym_code_type (struct disassemble_info *info, int n,
 		   enum map_type *map_type)
 {
+  asymbol * as;
   elf_symbol_type *es;
   unsigned int type;
   const char *name;
@@ -3329,7 +3330,14 @@ get_sym_code_type (struct disassemble_info *info, int n,
   if (info->section != NULL && info->section != info->symtab[n]->section)
     return FALSE;
 
-  es = *(elf_symbol_type **)(info->symtab + n);
+  if (n >= info->symtab_size)
+    return FALSE;
+
+  as = info->symtab[n];
+  if (bfd_asymbol_flavour (as) != bfd_target_elf_flavour)
+    return FALSE;
+  es = (elf_symbol_type *) as;
+
   type = ELF_ST_TYPE (es->internal_elf_sym.st_info);
 
   /* If the symbol has function type then use that.  */

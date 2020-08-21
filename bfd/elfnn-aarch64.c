@@ -3925,8 +3925,9 @@ _bfd_aarch64_erratum_835769_scan (bfd *input_bfd,
 
       sec_data = elf_aarch64_section_data (section);
 
-      qsort (sec_data->map, sec_data->mapcount,
-	     sizeof (elf_aarch64_section_map), elf_aarch64_compare_mapping);
+      if (sec_data->mapcount)
+	qsort (sec_data->map, sec_data->mapcount,
+	       sizeof (elf_aarch64_section_map), elf_aarch64_compare_mapping);
 
       for (span = 0; span < sec_data->mapcount; span++)
 	{
@@ -4209,8 +4210,9 @@ _bfd_aarch64_erratum_843419_scan (bfd *input_bfd, asection *section,
 
       sec_data = elf_aarch64_section_data (section);
 
-      qsort (sec_data->map, sec_data->mapcount,
-	     sizeof (elf_aarch64_section_map), elf_aarch64_compare_mapping);
+      if (sec_data->mapcount)
+	qsort (sec_data->map, sec_data->mapcount,
+	       sizeof (elf_aarch64_section_map), elf_aarch64_compare_mapping);
 
       for (span = 0; span < sec_data->mapcount; span++)
 	{
