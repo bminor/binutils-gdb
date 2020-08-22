@@ -1,3 +1,16 @@
+2020-08-22  Simon Marchi  <simon.marchi@efficios.com>
+
+	* frame.c (enum class frame_id_status): New.
+	(struct frame_info) <this_id::p>: Change type to frame_id_status.
+	(fprintf_frame): Update.
+	(compute_frame_id): Set frame id status to "computing" on entry.
+	Set it back to "not_computed" on failure and to "computed" on
+	success.
+	(get_frame_id): Assert the frame id is not being computed.
+	(create_sentinel_frame): Use frame_id_status::COMPUTED.
+	(create_new_frame): Likewise.
+	(frame_cleanup_after_sniffer): Update assert.
+
 2020-08-20  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* regcache.c (pid_ptid_regcache_map): New type.

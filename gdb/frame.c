@@ -87,6 +87,18 @@ enum cached_copy_status
   CC_UNAVAILABLE
 };
 
+enum class frame_id_status
+{
+  /* Frame id is not computed.  */
+  NOT_COMPUTED = 0,
+
+  /* Frame id is being computed (compute_frame_id is active).  */
+  COMPUTING,
+
+  /* Frame id has been computed.  */
+  COMPUTED,
+};
+
 /* We keep a cache of stack frames, each of which is a "struct
    frame_info".  The innermost one gets allocated (in
    wait_for_inferior) each time the inferior stops; sentinel_frame
@@ -149,7 +161,7 @@ struct frame_info
   /* This frame's ID.  */
   struct
   {
-    bool p;
+    frame_id_status p;
     struct frame_id value;
   } this_id;
 
@@ -439,21 +451,25 @@ fprint_frame (struct ui_file *file, struct frame_info *fi)
       fprintf_unfiltered (file, "<NULL frame>");
       return;
     }
+
   fprintf_unfiltered (file, "{");
   fprintf_unfiltered (file, "level=%d", fi->level);
   fprintf_unfiltered (file, ",");
+
   fprintf_unfiltered (file, "type=");
   if (fi->unwind != NULL)
     fprint_frame_type (file, fi->unwind->type);
   else
     fprintf_unfiltered (file, "<unknown>");
   fprintf_unfiltered (file, ",");
+
   fprintf_unfiltered (file, "unwind=");
   if (fi->unwind != NULL)
     gdb_print_host_address (fi->unwind, file);
   else
     fprintf_unfiltered (file, "<unknown>");
   fprintf_unfiltered (file, ",");
+
   fprintf_unfiltered (file, "pc=");
   if (fi->next == NULL || fi->next->prev_pc.status == CC_UNKNOWN)
     fprintf_unfiltered (file, "<unknown>");
@@ -468,12 +484,16 @@ fprint_frame (struct ui_file *file, struct frame_info *fi)
   else if (fi->next->prev_pc.status == CC_UNAVAILABLE)
     val_print_unavailable (file);
   fprintf_unfiltered (file, ",");
+
   fprintf_unfiltered (file, "id=");
-  if (fi->this_id.p)
-    fprint_frame_id (file, fi->this_id.value);
+  if (fi->this_id.p == frame_id_status::NOT_COMPUTED)
+    fprintf_unfiltered (file, "<not computed>");
+  else if (fi->this_id.p == frame_id_status::COMPUTING)
+    fprintf_unfiltered (file, "<computing>");
   else
-    fprintf_unfiltered (file, "<unknown>");
+    fprint_frame_id (file, fi->this_id.value);
   fprintf_unfiltered (file, ",");
+
   fprintf_unfiltered (file, "func=");
   if (fi->next != NULL && fi->next->prev_func.status == CC_VALUE)
     fprintf_unfiltered (file, "%s", hex_string (fi->next->prev_func.addr));
@@ -544,25 +564,48 @@ skip_tailcall_frames (struct frame_info *frame)
 static void
 compute_frame_id (struct frame_info *fi)
 {
-  gdb_assert (!fi->this_id.p);
+  gdb_assert (fi->this_id.p == frame_id_status::NOT_COMPUTED);
 
-  if (frame_debug)
-    fprintf_unfiltered (gdb_stdlog, "{ compute_frame_id (fi=%d) ",
-			fi->level);
-  /* Find the unwinder.  */
-  if (fi->unwind == NULL)
-    frame_unwind_find_by_frame (fi, &fi->prologue_cache);
-  /* Find THIS frame's ID.  */
-  /* Default to outermost if no ID is found.  */
-  fi->this_id.value = outer_frame_id;
-  fi->unwind->this_id (fi, &fi->prologue_cache, &fi->this_id.value);
-  gdb_assert (frame_id_p (fi->this_id.value));
-  fi->this_id.p = true;
-  if (frame_debug)
+  unsigned int entry_generation = get_frame_cache_generation ();
+
+  try
     {
-      fprintf_unfiltered (gdb_stdlog, "-> ");
-      fprint_frame_id (gdb_stdlog, fi->this_id.value);
-      fprintf_unfiltered (gdb_stdlog, " }\n");
+      /* Mark this frame's id as "being computed.  */
+      fi->this_id.p = frame_id_status::COMPUTING;
+
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog, "{ compute_frame_id (fi=%d) ",
+			    fi->level);
+
+      /* Find the unwinder.  */
+      if (fi->unwind == NULL)
+	frame_unwind_find_by_frame (fi, &fi->prologue_cache);
+
+      /* Find THIS frame's ID.  */
+      /* Default to outermost if no ID is found.  */
+      fi->this_id.value = outer_frame_id;
+      fi->unwind->this_id (fi, &fi->prologue_cache, &fi->this_id.value);
+      gdb_assert (frame_id_p (fi->this_id.value));
+
+      /* Mark this frame's id as "computed".  */
+      fi->this_id.p = frame_id_status::COMPUTED;
+
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame_id (gdb_stdlog, fi->this_id.value);
+	  fprintf_unfiltered (gdb_stdlog, " }\n");
+	}
+    }
+  catch (const gdb_exception &ex)
+    {
+      /* On error, revert the frame id status to not computed.  If the frame
+         cache generation changed, the frame object doesn't exist anymore, so
+	 don't touch it.  */
+      if (get_frame_cache_generation () == entry_generation)
+	fi->this_id.p = frame_id_status::NOT_COMPUTED;
+
+      throw;
     }
 }
 
@@ -575,7 +618,11 @@ get_frame_id (struct frame_info *fi)
   if (fi == NULL)
     return null_frame_id;
 
-  if (!fi->this_id.p)
+  /* It's always invalid to try to get a frame's id while it is being
+     computed.  */
+  gdb_assert (fi->this_id.p != frame_id_status::COMPUTING);
+
+  if (fi->this_id.p == frame_id_status::NOT_COMPUTED)
     {
       /* If we haven't computed the frame id yet, then it must be that
 	 this is the current frame.  Compute it now, and stash the
@@ -1577,7 +1624,7 @@ create_sentinel_frame (struct program_space *pspace, struct regcache *regcache)
      (the unwound PC is the same as the pc), so make it so.  */
   frame->next = frame;
   /* The sentinel frame has a special ID.  */
-  frame->this_id.p = true;
+  frame->this_id.p = frame_id_status::COMPUTED;
   frame->this_id.value = sentinel_frame_id;
   if (frame_debug)
     {
@@ -1797,7 +1844,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
      based on the PC.  */
   frame_unwind_find_by_frame (fi, &fi->prologue_cache);
 
-  fi->this_id.p = true;
+  fi->this_id.p = frame_id_status::COMPUTED;
   fi->this_id.value = frame_id_build (addr, pc);
 
   if (frame_debug)
@@ -2908,7 +2955,7 @@ frame_cleanup_after_sniffer (struct frame_info *frame)
   gdb_assert (!frame->prev_p);
 
   /* The sniffer should not check the frame's ID; that's circular.  */
-  gdb_assert (!frame->this_id.p);
+  gdb_assert (frame->this_id.p != frame_id_status::COMPUTED);
 
   /* Clear cached fields dependent on the unwinder.
 
