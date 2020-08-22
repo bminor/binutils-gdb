@@ -1,5 +1,13 @@
 2020-09-13  Pedro Alves  <pedro@palves.net>
 
+	* gdb.cp/inherit.exp: No longer pass -Wno-deprecated-register.
+	* gdb.cp/misc.exp: No longer pass -Wno-deprecated-register.
+	* gdb.cp/misc.cc (class small, small::method, marker_reg1)
+	(register_class): Delete.
+	(main): Don't call register_class.
+
+2020-09-13  Pedro Alves  <pedro@palves.net>
+
 	* gdb.cp/classes.exp: No longer pass -Wno-deprecated-register.
 	(do_tests): Remove "calling method for small class" test.
 	* gdb.cp/classes.cc (class small, small::method, marker_reg1)
