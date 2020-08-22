@@ -1,6 +1,12 @@
 2021-01-01  Alan Modra  <amodra@gmail.com>
 
 	Apply from master
+	2020-08-22  H.J. Lu  <hongjiu.lu@intel.com>
+	PR ld/26382
+	* nm.c (print_symname): Display only one '@' for undefined
+	versioned symbols.
+	* doc/binutils.texi: Update nm version information.
+
 	2020-08-10  H.J. Lu  <hongjiu.lu@intel.com>
 	PR binutils/26302
 	* nm.c (with_symbol_versions): Removed.

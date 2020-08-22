@@ -421,7 +421,10 @@ print_symname (const char *form, struct extended_symbol_info *info,
 	= bfd_get_symbol_version_string (abfd, &info->elfinfo->symbol,
 					 FALSE, &hidden);
       if (version_string && version_string[0])
-	printf ("%s%s", hidden ? "@" : "@@", version_string);
+	printf ("%s%s",
+	       (hidden || bfd_is_und_section (info->elfinfo->symbol.section)
+		? "@" : "@@"),
+	       version_string);
     }
 }
 
