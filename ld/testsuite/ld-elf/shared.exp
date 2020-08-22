@@ -856,7 +856,8 @@ run_cc_link_tests [list \
 	"-shared -Wl,--no-as-needed tmpdir/pr26302a.so" \
 	"-fPIC" \
 	{pr26302b.c} \
-	{{nm {-u} pr26302.nd} \
+	{{readelf {-sW} pr26302.rd} \
+	 {nm {-u} pr26302.nd} \
 	 {nm {-u -D} pr26302.nd} \
 	 {nm {-u -D --with-symbol-versions} pr26302.nd}} \
 	"pr26302b.so" \

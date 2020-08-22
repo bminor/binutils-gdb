@@ -1,3 +1,10 @@
+2020-08-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26382
+	* testsuite/ld-elf/pr26302.nd: Updated.
+	* testsuite/ld-elf/pr26302.rd: New file.
+	* testsuite/ld-elf/shared.exp: Add a test for readelf -sW.
+
 2020-08-20  Nick Clifton  <nickc@redhat.com>
 
 	PR 26428

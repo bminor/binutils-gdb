@@ -924,7 +924,13 @@ The symbol type is unknown, or object file format specific.
 @end table
 
 @item
-The symbol name.
+The symbol name.  If a symbol has version information associated with it,
+then the version information is displayed as well.  If the versioned
+symbol is undefined or hidden from linker, the version string is displayed
+as a suffix to the symbol name, preceded by an @@ character.  For example
+@samp{foo@@VER_1}.  If the version is the default version to be used when
+resolving unversioned references to the symbol, then it is displayed as a
+suffix preceded by two @@ characters.  For example @samp{foo@@@@VER_2}.
 @end itemize
 
 @c man end

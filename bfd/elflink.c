@@ -9642,9 +9642,29 @@ elf_link_output_symstrtab (struct elf_final_link_info *flinfo,
     {
       /* Call _bfd_elf_strtab_offset after _bfd_elf_strtab_finalize
 	 to get the final offset for st_name.  */
+      char *versioned_name = (char *) name;
+      if (h != NULL && h->versioned == versioned && h->def_dynamic)
+	{
+	  /* Keep only one '@' for versioned symbols defined in shared
+	     objects.  */
+	  char *version = strrchr (name, ELF_VER_CHR);
+	  char *base_end = strchr (name, ELF_VER_CHR);
+	  if (version != base_end)
+	    {
+	      size_t base_len;
+	      size_t len = strlen (name);
+	      versioned_name = bfd_alloc (flinfo->output_bfd, len);
+	      if (versioned_name == NULL)
+		return 0;
+	      base_len = base_end - name;
+	      memcpy (versioned_name, name, base_len);
+	      memcpy (versioned_name + base_len, version,
+		      len - base_len);
+	    }
+	}
       elfsym->st_name
 	= (unsigned long) _bfd_elf_strtab_add (flinfo->symstrtab,
-					       name, FALSE);
+					       versioned_name, FALSE);
       if (elfsym->st_name == (unsigned long) -1)
 	return 0;
     }

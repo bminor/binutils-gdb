@@ -1,3 +1,10 @@
+2020-08-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/26382
+	* nm.c (print_symname): Display only one '@' for undefined
+	versioned symbols.
+	* doc/binutils.texi: Update nm version information.
+
 2020-08-21  Mark Wielaard  <mark@klomp.org>
 
 	* testsuite/binutils-all/readelf.exp (readelf_wi_test): Also
