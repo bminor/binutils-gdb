@@ -342,8 +342,7 @@ md_begin (void)
 	    j++;
 	  op_handles[j].name = xgate_opcode_ptr->name;
 	  op_handles[j].opc0[0] = xgate_opcode_ptr;
-	  str_hash_insert (xgate_hash, (char *) op_handles[j].name,
-		       (char *) &(op_handles[j]));
+	  str_hash_insert (xgate_hash, op_handles[j].name, &op_handles[j], 0);
 	}
       op_handles[j].number_of_modes = handle_enum;
       prev_op_name = op_handles[j].name;
@@ -492,11 +491,10 @@ md_assemble (char *input_line)
   if (!op_name[0])
     as_bad (_("opcode missing or not found on input line"));
 
-  if (!(opcode_handle = (struct xgate_opcode_handle *) str_hash_find (xgate_hash,
-								  op_name)))
-    {
-      as_bad (_("opcode %s not found in opcode hash table"), op_name);
-    }
+  opcode_handle = (struct xgate_opcode_handle *) str_hash_find (xgate_hash,
+								op_name);
+  if (!opcode_handle)
+    as_bad (_("opcode %s not found in opcode hash table"), op_name);
   else
     {
       /* Parse operands so we can find the proper opcode bin.  */
@@ -543,8 +541,10 @@ md_assemble (char *input_line)
 	      input_line = macro_inline; /* Rewind.  */
 	      p = extract_word (p, op_name, 10);
 
-	      if (!(opcode_handle = (struct xgate_opcode_handle *)
-		    str_hash_find (xgate_hash, op_name)))
+	      opcode_handle
+		= (struct xgate_opcode_handle *) str_hash_find (xgate_hash,
+								op_name);
+	      if (!opcode_handle)
 		{
 		  as_bad (_(": processing macro, real opcode handle"
 			    " not found in hash"));

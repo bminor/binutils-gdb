@@ -348,7 +348,7 @@ dwcfi_hash_find_or_make (segT cseg, const char *base_name, int flags)
     {
       item = alloc_debugseg_item (make_debug_seg (cseg, name, flags), 0, name);
 
-      str_hash_insert (dwcfi_hash, item->seg_name, (char *) item);
+      str_hash_insert (dwcfi_hash, item->seg_name, item, 0);
     }
   else
     free (name);

@@ -574,7 +574,7 @@ md_begin (void)
 	  if (!SH_MERGE_ARCH_SET_VALID (opcode->arch, target_arch))
 	    continue;
 	  prev_name = opcode->name;
-	  str_hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+	  str_hash_insert (opcode_hash_control, opcode->name, opcode, 0);
 	}
     }
 }

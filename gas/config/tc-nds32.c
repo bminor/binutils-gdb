@@ -3432,21 +3432,12 @@ static struct nds32_pseudo_opcode nds32_pseudo_opcode_table[] =
 static void
 nds32_init_nds32_pseudo_opcodes (void)
 {
-  struct nds32_pseudo_opcode *opcode = nds32_pseudo_opcode_table;
+  struct nds32_pseudo_opcode *opcode;
 
   nds32_pseudo_opcode_hash = str_htab_create ();
-  for ( ; opcode->opcode; opcode++)
-    {
-      void *op;
-
-      op = str_hash_find (nds32_pseudo_opcode_hash, opcode->opcode);
-      if (op != NULL)
-	{
-	  as_warn (_("Duplicated pseudo-opcode %s."), opcode->opcode);
-	  continue;
-	}
-      str_hash_insert (nds32_pseudo_opcode_hash, opcode->opcode, opcode);
-    }
+  for (opcode = nds32_pseudo_opcode_table; opcode->opcode; opcode++)
+    if (str_hash_insert (nds32_pseudo_opcode_hash, opcode->opcode, opcode, 0))
+      as_fatal (_("duplicate %s"), opcode->opcode);
 }
 
 static struct nds32_pseudo_opcode *
@@ -4296,7 +4287,7 @@ nds32_relax_hint (int mode ATTRIBUTE_UNUSED)
     {
       relocs = XNEW (struct nds32_relocs_pattern);
       memset (relocs, 0, sizeof (struct nds32_relocs_pattern));
-      str_hash_insert (nds32_hint_hash, name, relocs);
+      str_hash_insert (nds32_hint_hash, name, relocs, 0);
     }
   else
     {
@@ -4625,12 +4616,12 @@ md_begin (void)
   /* Initial general purpose registers hash table.  */
   nds32_gprs_hash = str_htab_create ();
   for (k = keyword_gpr; k->name; k++)
-    str_hash_insert (nds32_gprs_hash, k->name, k);
+    str_hash_insert (nds32_gprs_hash, k->name, k, 0);
 
   /* Initial branch hash table.  */
   nds32_relax_info_hash = str_htab_create ();
   for (relax_info = relax_table; relax_info->opcode; relax_info++)
-    str_hash_insert (nds32_relax_info_hash, relax_info->opcode, relax_info);
+    str_hash_insert (nds32_relax_info_hash, relax_info->opcode, relax_info, 0);
 
   /* Initial relax hint hash table.  */
   nds32_hint_hash = str_htab_create ();
@@ -5940,7 +5931,7 @@ nds32_match_hint_insn (struct nds32_opcode *opcode, uint32_t seq)
 /* Append relax relocation for link time relaxing.  */
 
 static void
-nds32_elf_append_relax_relocs (const char *key, void *value)
+nds32_elf_append_relax_relocs (const char *key, const void *value)
 {
   struct nds32_relocs_pattern *relocs_pattern =
     (struct nds32_relocs_pattern *) value;

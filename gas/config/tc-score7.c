@@ -2321,7 +2321,8 @@ s7_dependency_type_from_insn (char *insn_name)
   const struct s7_insn_to_dependency *tmp;
 
   strcpy (name, insn_name);
-  tmp = (const struct s7_insn_to_dependency *) str_hash_find (s7_dependency_insn_hsh, name);
+  tmp = (const struct s7_insn_to_dependency *)
+    str_hash_find (s7_dependency_insn_hsh, name);
 
   if (tmp)
     return tmp->type;
@@ -2789,7 +2790,8 @@ s7_parse_16_32_inst (char *insnstr, bfd_boolean gen_frag_p)
   c = *p;
   *p = '\0';
 
-  opcode = (const struct s7_asm_opcode *) str_hash_find (s7_score_ops_hsh, operator);
+  opcode = (const struct s7_asm_opcode *) str_hash_find (s7_score_ops_hsh,
+							 operator);
   *p = c;
 
   memset (&s7_inst, '\0', sizeof (s7_inst));
@@ -5104,7 +5106,7 @@ s7_build_score_ops_hsh (void)
       new_opcode->type = insn->type;
       new_opcode->bitmask = insn->bitmask;
       str_hash_insert (s7_score_ops_hsh, new_opcode->template_name,
-                   (void *) new_opcode);
+		       new_opcode, 0);
     }
 }
 
@@ -5130,8 +5132,7 @@ s7_build_dependency_insn_hsh (void)
       strcpy (insn_name, tmp->insn_name);
       new_i2d->insn_name = insn_name;
       new_i2d->type = tmp->type;
-      str_hash_insert (s7_dependency_insn_hsh, new_i2d->insn_name,
-                   (void *) new_i2d);
+      str_hash_insert (s7_dependency_insn_hsh, new_i2d->insn_name, new_i2d, 0);
     }
 }
 
@@ -5359,8 +5360,8 @@ s7_insert_reg (const struct s7_reg_entry *r, htab_t htab)
     }
   buf2[i] = '\0';
 
-  str_hash_insert (htab, buf, (void *) r);
-  str_hash_insert (htab, buf2, (void *) r);
+  str_hash_insert (htab, buf, r, 0);
+  str_hash_insert (htab, buf2, r, 0);
 }
 
 static void

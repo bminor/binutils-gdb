@@ -956,7 +956,11 @@ md_begin (void)
   while (i < (unsigned int) sparc_num_opcodes)
     {
       const char *name = sparc_opcodes[i].name;
-      str_hash_insert (op_hash, name, (void *) &sparc_opcodes[i]);
+      if (str_hash_insert (op_hash, name, &sparc_opcodes[i], 0) != NULL)
+	{
+	  as_bad (_("duplicate %s"), name);
+	  lose = 1;
+	}
       do
 	{
 	  if (sparc_opcodes[i].match & sparc_opcodes[i].lose)
@@ -984,9 +988,11 @@ md_begin (void)
 		  name, native_op_table[i].name);
 	  lose = 1;
 	}
-      else
-	str_hash_insert (op_hash, native_op_table[i].name,
-			 (void *) insn);
+      else if (str_hash_insert (op_hash, native_op_table[i].name, insn, 0))
+	{
+	  as_bad (_("duplicate %s"), native_op_table[i].name);
+	  lose = 1;
+	}
     }
 
   if (lose)

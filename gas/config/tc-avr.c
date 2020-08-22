@@ -814,8 +814,7 @@ md_begin (void)
      quick index to the first opcode with a particular name in the opcode
      table.  */
   for (opcode = avr_opcodes; opcode->name; opcode++)
-    if (str_hash_find (avr_hash, opcode->name) == NULL)
-      str_hash_insert (avr_hash, opcode->name, (char *) opcode);
+    str_hash_insert (avr_hash, opcode->name, opcode, 0);
 
   avr_mod_hash = str_htab_create ();
 
@@ -824,8 +823,7 @@ md_begin (void)
       mod_index m;
 
       m.index = i + 10;
-      str_hash_find (avr_mod_hash, EXP_MOD_NAME (i));
-      str_hash_insert (avr_mod_hash, EXP_MOD_NAME (i), m.ptr);
+      str_hash_insert (avr_mod_hash, EXP_MOD_NAME (i), m.ptr, 0);
     }
 
   avr_no_sreg_hash = str_htab_create ();
@@ -833,10 +831,12 @@ md_begin (void)
   for (i = 0; i < ARRAY_SIZE (avr_no_sreg); ++i)
     {
       gas_assert (str_hash_find (avr_hash, avr_no_sreg[i]));
-      str_hash_insert (avr_no_sreg_hash, avr_no_sreg[i], (char*) 4 /* dummy */);
+      str_hash_insert (avr_no_sreg_hash, avr_no_sreg[i],
+		       (void *) 4 /* dummy */, 0);
     }
 
-  avr_gccisr_opcode = (struct avr_opcodes_s*) str_hash_find (avr_hash, "__gcc_isr");
+  avr_gccisr_opcode = (struct avr_opcodes_s*) str_hash_find (avr_hash,
+							     "__gcc_isr");
   gas_assert (avr_gccisr_opcode);
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, avr_mcu->mach);

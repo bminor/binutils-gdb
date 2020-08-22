@@ -727,7 +727,7 @@ tic4x_asg (int x ATTRIBUTE_UNUSED)
   c = get_symbol_name (&name);	/* Get terminator.  */
   str = xstrdup (str);
   name = xstrdup (name);
-  str_hash_insert (tic4x_asg_hash, name, str);
+  str_hash_insert (tic4x_asg_hash, name, str, 1);
   (void) restore_line_pointer (c);
   demand_empty_rest_of_line ();
 }
@@ -1215,7 +1215,9 @@ tic4x_inst_insert (const tic4x_inst_t *inst)
   if (!strcmp (inst->name, prev_name) || inst->name[0] == '\0')
     return;
 
-  str_hash_insert (tic4x_op_hash, inst->name, (void *) inst);
+  if (str_hash_insert (tic4x_op_hash, inst->name, inst, 0) != NULL)
+    as_fatal (_("duplicate %s"), inst->name);
+
   strcpy (prev_name, inst->name);
 }
 

@@ -961,11 +961,13 @@ vip_begin (int synthetic_too,		/* 1 means include jXXX op-codes.  */
   op_hash = str_htab_create ();
 
   for (vP = votstrs; *vP->vot_name; vP++)
-    str_hash_insert (op_hash, vP->vot_name, (void *) &vP->vot_detail);
+    if (str_hash_insert (op_hash, vP->vot_name, &vP->vot_detail, 0) != NULL)
+      as_fatal (_("duplicate %s"), vP->vot_name);
 
   if (synthetic_too)
     for (vP = synthetic_votstrs; *vP->vot_name; vP++)
-      str_hash_insert (op_hash, vP->vot_name, (void *) &vP->vot_detail);
+      if (str_hash_insert (op_hash, vP->vot_name, &vP->vot_detail, 0) != NULL)
+	as_fatal (_("duplicate %s"), vP->vot_name);
 
 #ifndef CONST_TABLE
   vip_op_defaults (immediate, indirect, displen);

@@ -1337,7 +1337,7 @@ insert_reg_alias (char *str, int number, aarch64_reg_type type)
   new->type = type;
   new->builtin = FALSE;
 
-  str_hash_insert (aarch64_reg_hsh, name, (void *) new);
+  str_hash_insert (aarch64_reg_hsh, name, new, 0);
 
   return new;
 }
@@ -8622,7 +8622,7 @@ aarch64_adjust_symtab (void)
 static void
 checked_hash_insert (htab_t table, const char *key, void *value)
 {
-  str_hash_insert (table, key, value);
+  str_hash_insert (table, key, value, 0);
 }
 
 static void

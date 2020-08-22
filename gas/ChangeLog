@@ -1,3 +1,146 @@
+2020-08-23  Alan Modra  <amodra@gmail.com>
+
+	PR 26513
+	* hash.h (htab_insert): Update prototype and comment.
+	(struct string_tuple): Make "value" a const void*.
+	(string_tuple_alloc): Likewise.
+	(str_hash_find, str_hash_find_n): Cast returned value.
+	(str_hash_insert): Add "replace" parameter, and return slot pointer.
+	Free alloc'd element when not inserted.
+	* hash.c (htab_insert): Likewise.  Return slot when element exists,
+	otherwise return NULL.
+	* read.c (pop_insert): Insert into hash table without first searching.
+	* config/tc-avr.c (md_begin): Likewise.
+	* config/tc-msp430.c (md_begin): Likewise.
+	* config/tc-nds32.c (nds32_init_nds32_pseudo_opcodes): Likewise.
+	* config/tc-v850.c (md_begin): Likewise.
+	* macro.c (do_formals, define_macro, macro_expand_body): Likewise.
+	(delete_macro): Delete from hash table.
+	* config/tc-tic54x.c (subsym_create_or_replace): Correct logic.
+
+	* symbols.c (local_symbol_make, symbol_table_insert): Allow
+	replacement of hash table entries.
+	* config/obj-coff-seh.c (seh_hash_insert): Likewise.
+	* config/obj-coff.c (tag_insert): Likewise.
+	* config/tc-iq2000.c (iq2000_add_macro): Likewise.
+	* config/tc-m68k.c (md_begin): Likewise for aliases.
+	* config/tc-tic4x.c (tic4x_asg): Likewise.
+	* config/tc-tic6x.c (md_begin): Likewise.
+
+	* dw2gencfi.c (dwcfi_hash_find_or_make): Disallow replacement of
+	hash table entries.
+	* ecoff.c (add_string, get_tag): Likewise.
+	* macro.c (expand_irp): Likewise.
+	* config/obj-elf.c (build_additional_section_info): Likewise.
+	* config/tc-aarch64.c (insert_reg_alias): Likewise.
+	(checked_hash_insert): Likewise.
+	* config/tc-alpha.c (get_alpha_reloc_tag, md_begin): Likewise.
+	* config/tc-arc.c (arc_insert_opcode, declare_register): Likewise.
+	(declare_addrtype, md_begin, arc_extcorereg): Likewise.
+	* config/tc-arm.c (insert_reg_alias): Likewise.
+	(arm_tc_equal_in_insn, md_begin): Likewise.
+	* config/tc-cr16.c (initialise_reg_hash_table, md_begin): Likewise.
+	* config/tc-cris.c (md_begin): Likewise.
+	* config/tc-crx.c (md_begin): Likewise.
+	* config/tc-csky.c (md_begin): Likewise.
+	* config/tc-d10v.c (md_begin): Likewise.
+	* config/tc-dlx.c (md_begin): Likewise.
+	* config/tc-ft32.c (md_begin): Likewise.
+	* config/tc-h8300.c (md_begin): Likewise.
+	* config/tc-hppa.c (md_begin): Likewise.
+	* config/tc-i386.c (md_begin): Likewise.
+	* config/tc-ia64.c (dot_rot, dot_entry, declare_register): Likewise.
+	(md_begin, dot_alias): Likewise.
+	* config/tc-m68hc11.c (md_begin): Likewise.
+	* config/tc-m68k.c (md_begin): Likewise.
+	* config/tc-mcore.c (md_begin): Likewise.
+	* config/tc-microblaze.c (md_begin): Likewise.
+	* config/tc-mips.c (md_begin): Likewise.
+	* config/tc-mmix.c (md_begin): Likewise.
+	* config/tc-mn10200.c (md_begin): Likewise.
+	* config/tc-mn10300.c (md_begin): Likewise.
+	* config/tc-moxie.c (md_begin): Likewise.
+	* config/tc-nds32.c (nds32_relax_hint, md_begin): Likewise.
+	* config/tc-nios2.c (md_begin): Likewise.
+	* config/tc-ns32k.c (md_begin): Likewise.
+	* config/tc-pdp11.c (md_begin): Likewise.
+	* config/tc-pj.c (fake_opcode, md_begin): Likewise.
+	* config/tc-ppc.c (ppc_setup_opcodes): Likewise.
+	* config/tc-pru.c (md_begin): Likewise.
+	* config/tc-riscv.c (init_ext_version_hash): Likewise.
+	(init_opcode_names_hash, hash_reg_name, init_opcode_hash): Likewise.
+	(riscv_init_csr_hash): Likewise.
+	* config/tc-s390.c (s390_setup_opcodes, md_begin): Likewise.
+	* config/tc-score.c (s3_insert_reg): Likewise.
+	(s3_build_score_ops_hsh, s3_build_dependency_insn_hsh): Likewise.
+	* config/tc-score7.c (s7_build_score_ops_hsh): Likewise.
+	(s7_build_dependency_insn_hsh, s7_insert_reg): Likewise.
+	* config/tc-sh.c (md_begin): Likewise.
+	* config/tc-sparc.c (md_begin): Likewise.
+	* config/tc-spu.c (md_begin): Likewise.
+	* config/tc-tic30.c (md_begin): Likewise.
+	* config/tc-tic4x.c (tic4x_inst_insert): Likewise.
+	* config/tc-tic54x.c (stag_add_field_symbols, md_begin): Likewise.
+	(tic54x_endstruct, tic54x_var, tic54x_macro_info): Likewise.
+	(subsym_substitute): Likewise.
+	* config/tc-tilegx.c (md_begin): Likewise.
+	* config/tc-tilepro.c (md_begin): Likewise.
+	* config/tc-vax.c (vip_begin): Likewise.
+	* config/tc-wasm32.c (md_begin): Likewise.
+	* config/tc-xgate.c (md_begin): Likewise.
+	* config/tc-z8k.c (md_begin): Likewise.
+	* testsuite/gas/ppc/dcbt.d,
+	* testsuite/gas/ppc/dcbt.s: New test.
+	* testsuite/gas/ppc/ppc.exp: Run it.
+
+	* ecoff.c (add_string): Report fatal error on duplicates.
+	* config/tc-alpha.c (md_begin): Likewise.
+	* config/tc-arc.c (arc_insert_opcode, declare_register): Likewise.
+	(declare_addrtype, md_begin, arc_extcorereg): Likewise.
+	* config/tc-cr16.c (initialise_reg_hash_table, md_begin): Likewise.
+	* config/tc-cris.c (md_begin): Likewise.
+	* config/tc-crx.c (md_begin): Likewise.
+	* config/tc-dlx.c (md_begin): Likewise.
+	* config/tc-hppa.c (md_begin): Likewise.
+	* config/tc-i386.c (md_begin): Likewise.
+	* config/tc-ia64.c (dot_rot, dot_entry, declare_register): Likewise.
+	(md_begin): Likewise.
+	* config/tc-m68k.c (md_begin): Likewise.
+	* config/tc-mips.c (md_begin): Likewise.
+	* config/tc-nios2.c (md_begin): Likewise.
+	* config/tc-ns32k.c (md_begin): Likewise.
+	* config/tc-ppc.c (ppc_setup_opcodes): Likewise.
+	* config/tc-pru.c (md_begin): Likewise.
+	* config/tc-riscv.c (init_ext_version_hash): Likewise.
+	(init_opcode_names_hash, hash_reg_name, init_opcode_hash): Likewise.
+	* config/tc-s390.c (s390_setup_opcodes, md_begin): Likewise.
+	* config/tc-sparc.c (md_begin): Likewise.
+	* config/tc-tic30.c (md_begin): Likewise.
+	* config/tc-tic4x.c (tic4x_inst_insert): Likewise.
+	* config/tc-tilegx.c (md_begin): Likewise.
+	* config/tc-tilepro.c (md_begin): Likewise.
+	* config/tc-vax.c (vip_begin): Likewise.
+
+	* config/tc-alpha.c,
+	* config/tc-arm.c,
+	* config/tc-avr.c,
+	* config/tc-cr16.c,
+	* config/tc-csky.c,
+	* config/tc-i386.c,
+	* config/tc-m68hc11.c,
+	* config/tc-m68k.c,
+	* config/tc-microblaze.c,
+	* config/tc-ns32k.c,
+	* config/tc-pj.c,
+	* config/tc-ppc.c,
+	* config/tc-score.c,
+	* config/tc-score7.c,
+	* config/tc-tic4x.c,
+	* config/tc-tic54x.c,
+	* config/tc-tilegx.c,
+	* config/tc-tilepro.c,
+	* config/tc-xgate.c: Formatting.
+
 2020-08-21  Alan Modra  <amodra@gmail.com>
 
 	* symbols.c (struct local_symbol): Add "hash" entry.  Reorder fields.

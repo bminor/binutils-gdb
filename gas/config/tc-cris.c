@@ -1221,8 +1221,9 @@ md_begin (void)
 	  continue;
 	}
 
-      /* Need to cast to get rid of "const".  FIXME: Fix str_hash_insert instead.  */
-      str_hash_insert (op_hash, name, (void *) &cris_opcodes[i]);
+      if (str_hash_insert (op_hash, name, &cris_opcodes[i], 0) != NULL)
+	as_fatal (_("duplicate %s"), name);
+
       do
 	{
 	  if (cris_opcodes[i].match & cris_opcodes[i].lose)

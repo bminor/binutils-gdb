@@ -465,7 +465,8 @@ md_begin (void)
       if (! streq (prev_name, mcore_table[i].name))
 	{
 	  prev_name = mcore_table[i].name;
-	  str_hash_insert (opcode_hash_control, mcore_table[i].name, (char *) &mcore_table[i]);
+	  str_hash_insert (opcode_hash_control, mcore_table[i].name,
+			   &mcore_table[i], 0);
 	}
     }
 }

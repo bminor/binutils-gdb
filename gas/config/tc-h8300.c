@@ -283,7 +283,7 @@ md_begin (void)
       len = dst - buffer;
       if (cmplen == 0)
 	cmplen = len;
-      str_hash_insert (opcode_hash_control, buffer, (char *) pi);
+      str_hash_insert (opcode_hash_control, buffer, pi, 0);
       strcpy (prev_buffer, buffer);
       idx++;
 

@@ -364,7 +364,7 @@ local_symbol_make (const char *name, segT section, fragS *frag, valueT val)
   ret->section = section;
   ret->value = val;
 
-  htab_insert (sy_hash, ret);
+  htab_insert (sy_hash, ret, 1);
 
   return ret;
 }
@@ -630,7 +630,7 @@ symbol_table_insert (symbolS *symbolP)
 {
   know (symbolP);
 
-  htab_insert (sy_hash, symbolP);
+  htab_insert (sy_hash, symbolP, 1);
 }
 
 /* If a symbol name does not exist, create it as undefined, and insert

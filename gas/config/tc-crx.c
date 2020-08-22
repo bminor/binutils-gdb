@@ -537,8 +537,8 @@ md_begin (void)
     {
       const char *mnemonic = crx_instruction[i].mnemonic;
 
-      str_hash_insert (crx_inst_hash, mnemonic,
-			     (void *) &crx_instruction[i]);
+      if (str_hash_insert (crx_inst_hash, mnemonic, &crx_instruction[i], 0))
+	as_fatal (_("duplicate %s"), mnemonic);
 
       /* Insert unique names into hash table.  The CRX instruction set
 	 has many identical opcode names that have different opcodes based
@@ -561,7 +561,8 @@ md_begin (void)
 
     for (regtab = crx_regtab;
 	 regtab < (crx_regtab + NUMREGS); regtab++)
-      str_hash_insert (reg_hash, regtab->name, (void *) regtab);
+      if (str_hash_insert (reg_hash, regtab->name, regtab, 0) != NULL)
+	as_fatal (_("duplicate %s"), regtab->name);
   }
 
   /* Initialize copreg_hash hash table.  */
@@ -573,8 +574,8 @@ md_begin (void)
 
     for (copregtab = crx_copregtab; copregtab < (crx_copregtab + NUMCOPREGS);
 	 copregtab++)
-      str_hash_insert (copreg_hash, copregtab->name,
-		       (void *) copregtab);
+      if (str_hash_insert (copreg_hash, copregtab->name, copregtab, 0) != NULL)
+	as_fatal (_("duplicate %s"), copregtab->name);
   }
   /*  Set linkrelax here to avoid fixups in most sections.  */
   linkrelax = 1;

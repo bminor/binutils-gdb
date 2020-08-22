@@ -505,6 +505,7 @@ do_formals (macro_entry *macro, size_t idx, sb *in)
     {
       formal_entry *formal = new_formal ();
       size_t cidx;
+      formal_hash_entry_t *elt;
 
       idx = get_token (idx, in, &formal->name);
       if (formal->name.len == 0)
@@ -567,14 +568,15 @@ do_formals (macro_entry *macro, size_t idx, sb *in)
 	}
 
       /* Add to macro's hash table.  */
-      if (formal_entry_find (macro->formal_hash, name) == NULL)
-	htab_insert (macro->formal_hash, formal_entry_alloc (name, formal));
-      else
-	as_bad_where (macro->file,
-		      macro->line,
-		      _("A parameter named `%s' already exists for macro `%s'"),
-		      name,
-		      macro->name);
+      elt = formal_entry_alloc (name, formal);
+      if (htab_insert (macro->formal_hash, elt, 0) != NULL)
+	{
+	  free (elt);
+	  as_bad_where (macro->file, macro->line,
+			_("A parameter named `%s' "
+			  "already exists for macro `%s'"),
+			name, macro->name);
+	}
 
       formal->index = macro->formal_count++;
       *p = formal;
@@ -593,6 +595,7 @@ do_formals (macro_entry *macro, size_t idx, sb *in)
   if (macro_mri)
     {
       formal_entry *formal = new_formal ();
+      formal_hash_entry_t *elt;
 
       /* Add a special NARG formal, which macro_expand will set to the
 	 number of arguments.  */
@@ -606,13 +609,14 @@ do_formals (macro_entry *macro, size_t idx, sb *in)
       sb_add_string (&formal->name, name);
 
       /* Add to macro's hash table.  */
-      if (formal_entry_find (macro->formal_hash, name))
-	as_bad_where (macro->file,
-		      macro->line,
-		      _("Reserved word `%s' used as parameter in macro `%s'"),
-		      name,
-		      macro->name);
-      htab_insert (macro->formal_hash, formal_entry_alloc (name, formal));
+      elt = formal_entry_alloc (name, formal);
+      if (htab_insert (macro->formal_hash, elt, 0) != NULL)
+	{
+	  free (elt);
+	  as_bad_where (macro->file, macro->line,
+			_("Reserved word `%s' used as parameter in macro `%s'"),
+			name, macro->name);
+	}
 
       formal->index = NARG_INDEX;
       *p = formal;
@@ -709,10 +713,15 @@ define_macro (size_t idx, sb *in, sb *label,
   /* And stick it in the macro hash table.  */
   for (idx = 0; idx < name.len; idx++)
     name.ptr[idx] = TOLOWER (name.ptr[idx]);
-  if (macro_entry_find (macro_hash, macro->name))
-    error = _("Macro `%s' was already defined");
   if (!error)
-    htab_insert (macro_hash, macro_entry_alloc (macro->name, macro));
+    {
+      macro_hash_entry_t *elt = macro_entry_alloc (macro->name, macro);
+      if (htab_insert (macro_hash, elt, 0) != NULL)
+	{
+	  free (elt);
+	  error = _("Macro `%s' was already defined");
+	}
+    }
 
   if (namep != NULL)
     *namep = macro->name;
@@ -911,10 +920,20 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 		{
 		  const char *name;
 		  formal_entry *f = new_formal ();
+		  formal_hash_entry_t *elt;
 
 		  src = get_token (src, in, &f->name);
 		  name = sb_terminate (&f->name);
-		  if (formal_entry_find (formal_hash, name) == NULL)
+		  elt = formal_entry_alloc (name, f);
+		  if (htab_insert (formal_hash, elt, 0) != NULL)
+		    {
+		      free (elt);
+		      as_bad_where (macro->file, macro->line + macro_line,
+				    _("`%s' was already used as parameter "
+				      "(or another local) name"), name);
+		      del_formal (f);
+		    }
+		  else
 		    {
 		      static int loccnt;
 		      char buf[20];
@@ -925,16 +944,6 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
 
 		      sprintf (buf, IS_ELF ? ".LL%04x" : "LL%04x", ++loccnt);
 		      sb_add_string (&f->actual, buf);
-
-		      htab_insert (formal_hash, formal_entry_alloc (name, f));
-		    }
-		  else
-		    {
-		      as_bad_where (macro->file,
-				    macro->line + macro_line,
-				    _("`%s' was already used as parameter (or another local) name"),
-				    name);
-		      del_formal (f);
 		    }
 
 		  src = sb_skip_comma (src, in);
@@ -1284,7 +1293,8 @@ delete_macro (const char *name)
 {
   char *copy;
   size_t i, len;
-  macro_entry *macro;
+  void **slot;
+  macro_hash_entry_t needle;
 
   len = strlen (name);
   copy = XNEWVEC (char, len + 1);
@@ -1292,17 +1302,17 @@ delete_macro (const char *name)
     copy[i] = TOLOWER (name[i]);
   copy[i] = '\0';
 
-  /* We can only ask hash_delete to free memory if we are deleting
-     macros in reverse order to their definition.
-     So just clear out the entry.  */
-  macro = macro_entry_find (macro_hash, copy);
-  if (macro)
+  needle.name = copy;
+  needle.macro = NULL;
+  slot = htab_find_slot (macro_hash, &needle, NO_INSERT);
+  if (slot)
     {
-      htab_insert (macro_hash, macro_entry_alloc (copy, NULL));
-      free_macro (macro);
+      free_macro (((macro_hash_entry_t *) *slot)->macro);
+      htab_clear_slot (macro_hash, slot);
     }
   else
     as_warn (_("Attempt to purge non-existing macro `%s'"), copy);
+  free (copy);
 }
 
 /* Handle the MRI IRP and IRPC pseudo-ops.  These are handled as a
@@ -1334,7 +1344,7 @@ expand_irp (int irpc, size_t idx, sb *in, sb *out, size_t (*get_line) (sb *))
   h = htab_create_alloc (16, hash_formal_entry, eq_formal_entry,
 			 NULL, xcalloc, free);
 
-  htab_insert (h, formal_entry_alloc (sb_terminate (&f.name), &f));
+  htab_insert (h, formal_entry_alloc (sb_terminate (&f.name), &f), 0);
 
   f.index = 1;
   f.next = NULL;

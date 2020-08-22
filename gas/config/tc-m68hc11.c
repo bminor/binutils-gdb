@@ -664,7 +664,7 @@ md_begin (void)
 	  opc->nb_modes = 0;
 	  opc->opcode = opcodes;
 	  opc->used = 0;
-	  str_hash_insert (m68hc11_hash, opcodes->name, opc);
+	  str_hash_insert (m68hc11_hash, opcodes->name, opc, 0);
 	}
       opc->nb_modes++;
       opc->format |= opcodes->format;
@@ -3477,7 +3477,8 @@ md_assemble (char *str)
      is given.  */
   if (opc == NULL && name[0] == 'j' && name[1] == 'b')
     {
-      opc = (struct m68hc11_opcode_def *) str_hash_find (m68hc11_hash, &name[1]);
+      opc = (struct m68hc11_opcode_def *) str_hash_find (m68hc11_hash,
+							 &name[1]);
       if (opc
 	  && (!(opc->format & M6811_OP_JUMP_REL)
 	      || (opc->format & M6811_OP_BITMASK)))
@@ -3509,7 +3510,7 @@ md_assemble (char *str)
 	      name[nlen++] = TOLOWER (*op_end++);
 	      name[nlen] = 0;
 	      opc = (struct m68hc11_opcode_def *) str_hash_find (m68hc11_hash,
-							     name);
+								 name);
 	    }
 	}
     }

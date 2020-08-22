@@ -2583,7 +2583,7 @@ insert_reg_alias (char *str, unsigned number, int type)
   new_reg->builtin = FALSE;
   new_reg->neon = NULL;
 
-  str_hash_insert (arm_reg_hsh, name, new_reg);
+  str_hash_insert (arm_reg_hsh, name, new_reg, 0);
 
   return new_reg;
 }
@@ -2883,8 +2883,8 @@ s_unreq (int a ATTRIBUTE_UNUSED)
     as_bad (_("invalid syntax for .unreq directive"));
   else
     {
-      struct reg_entry *reg = (struct reg_entry *) str_hash_find (arm_reg_hsh,
-							      name);
+      struct reg_entry *reg
+	= (struct reg_entry *) str_hash_find (arm_reg_hsh, name);
 
       if (!reg)
 	as_bad (_("unknown register alias '%s'"), name);
@@ -5536,8 +5536,9 @@ parse_shift (char **str, int i, enum parse_shift_mode mode)
       return FAIL;
     }
 
-  shift_name = (const struct asm_shift_name *) str_hash_find_n (arm_shift_hsh, *str,
-							    p - *str);
+  shift_name
+    = (const struct asm_shift_name *) str_hash_find_n (arm_shift_hsh, *str,
+						       p - *str);
 
   if (shift_name == NULL)
     {
@@ -6338,7 +6339,7 @@ parse_psr (char **str, bfd_boolean lhs)
 	p = start + strcspn (start, "rR") + 1;
 
       psr = (const struct asm_psr *) str_hash_find_n (arm_v7m_psr_hsh, start,
-						  p - start);
+						      p - start);
 
       if (!psr)
 	return FAIL;
@@ -6441,7 +6442,7 @@ parse_psr (char **str, bfd_boolean lhs)
       else
 	{
 	  psr = (const struct asm_psr *) str_hash_find_n (arm_psr_hsh, start,
-						      p - start);
+							  p - start);
 	  if (!psr)
 	    goto error;
 
@@ -6656,7 +6657,7 @@ parse_barrier (char **str)
     q++;
 
   o = (const struct asm_barrier_opt *) str_hash_find_n (arm_barrier_opt_hsh, p,
-						    q - p);
+							q - p);
   if (!o)
     return FAIL;
 
@@ -22620,7 +22621,7 @@ opcode_lookup (char **str)
 
   /* Look for unaffixed or special-case affixed mnemonic.  */
   opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
-						    end - base);
+							end - base);
   if (opcode)
     {
       /* step U */
@@ -22648,7 +22649,7 @@ opcode_lookup (char **str)
      affix = end - 1;
      cond = (const struct asm_cond *) str_hash_find_n (arm_vcond_hsh, affix, 1);
      opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
-						      affix - base);
+							   affix - base);
      /* If this opcode can not be vector predicated then don't accept it with a
 	vector predication code.  */
      if (opcode && !opcode->mayBeVecPred)
@@ -22665,7 +22666,7 @@ opcode_lookup (char **str)
       affix = end - 2;
       cond = (const struct asm_cond *) str_hash_find_n (arm_cond_hsh, affix, 2);
       opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
-							affix - base);
+							    affix - base);
     }
 
   if (opcode && cond)
@@ -22721,7 +22722,7 @@ opcode_lookup (char **str)
   memcpy (save, affix, 2);
   memmove (affix, affix + 2, (end - affix) - 2);
   opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
-						    (end - base) - 2);
+							(end - base) - 2);
   memmove (affix + 2, affix, (end - affix) - 2);
   memcpy (affix, save, 2);
 
@@ -27999,7 +28000,7 @@ arm_tc_equal_in_insn (int c ATTRIBUTE_UNUSED, char * name)
 	  if (str_hash_find (already_warned, nbuf) == NULL)
 	    {
 	      as_warn (_("[-mwarn-syms]: Assignment makes a symbol match an ARM instruction: %s"), name);
-	      str_hash_insert (already_warned, nbuf, NULL);
+	      str_hash_insert (already_warned, nbuf, NULL, 0);
 	    }
 	}
       else
@@ -30731,25 +30732,25 @@ md_begin (void)
 
   for (i = 0; i < sizeof (insns) / sizeof (struct asm_opcode); i++)
     if (str_hash_find (arm_ops_hsh, insns[i].template_name) == NULL)
-      str_hash_insert (arm_ops_hsh, insns[i].template_name, (void *) (insns + i));
+      str_hash_insert (arm_ops_hsh, insns[i].template_name, insns + i, 0);
   for (i = 0; i < sizeof (conds) / sizeof (struct asm_cond); i++)
-    str_hash_insert (arm_cond_hsh, conds[i].template_name, (void *) (conds + i));
+    str_hash_insert (arm_cond_hsh, conds[i].template_name, conds + i, 0);
   for (i = 0; i < sizeof (vconds) / sizeof (struct asm_cond); i++)
-    str_hash_insert (arm_vcond_hsh, vconds[i].template_name, (void *) (vconds + i));
+    str_hash_insert (arm_vcond_hsh, vconds[i].template_name, vconds + i, 0);
   for (i = 0; i < sizeof (shift_names) / sizeof (struct asm_shift_name); i++)
-    str_hash_insert (arm_shift_hsh, shift_names[i].name, (void *) (shift_names + i));
+    str_hash_insert (arm_shift_hsh, shift_names[i].name, shift_names + i, 0);
   for (i = 0; i < sizeof (psrs) / sizeof (struct asm_psr); i++)
-    str_hash_insert (arm_psr_hsh, psrs[i].template_name, (void *) (psrs + i));
+    str_hash_insert (arm_psr_hsh, psrs[i].template_name, psrs + i, 0);
   for (i = 0; i < sizeof (v7m_psrs) / sizeof (struct asm_psr); i++)
     str_hash_insert (arm_v7m_psr_hsh, v7m_psrs[i].template_name,
-		 (void *) (v7m_psrs + i));
+		     v7m_psrs + i, 0);
   for (i = 0; i < sizeof (reg_names) / sizeof (struct reg_entry); i++)
-    str_hash_insert (arm_reg_hsh, reg_names[i].name, (void *) (reg_names + i));
+    str_hash_insert (arm_reg_hsh, reg_names[i].name, reg_names + i, 0);
   for (i = 0;
        i < sizeof (barrier_opt_names) / sizeof (struct asm_barrier_opt);
        i++)
     str_hash_insert (arm_barrier_opt_hsh, barrier_opt_names[i].template_name,
-		 (void *) (barrier_opt_names + i));
+		     barrier_opt_names + i, 0);
 #ifdef OBJ_ELF
   for (i = 0; i < ARRAY_SIZE (reloc_names); i++)
     {
@@ -30759,7 +30760,7 @@ md_begin (void)
 	/* This makes encode_branch() use the EABI versions of this relocation.  */
 	entry->reloc = BFD_RELOC_UNUSED;
 
-      str_hash_insert (arm_reloc_hsh, entry->name, (void *) entry);
+      str_hash_insert (arm_reloc_hsh, entry->name, entry, 0);
     }
 #endif
 

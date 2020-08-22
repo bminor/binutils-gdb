@@ -3050,7 +3050,9 @@ md_begin (void)
 	    /* different name --> ship out current template list;
 	       add to hash table; & begin anew.  */
 	    core_optab->end = optab;
-	    str_hash_insert (op_hash, (optab - 1)->name, (void *) core_optab);
+	    if (str_hash_insert (op_hash, (optab - 1)->name, core_optab, 0))
+	      as_fatal (_("duplicate %s"), (optab - 1)->name);
+
 	    if (optab->name == NULL)
 	      break;
 	    core_optab = XNEW (templates);
@@ -3066,7 +3068,8 @@ md_begin (void)
     unsigned int regtab_size = i386_regtab_size;
 
     for (regtab = i386_regtab; regtab_size--; regtab++)
-      str_hash_insert (reg_hash, regtab->reg_name, (void *) regtab);
+      if (str_hash_insert (reg_hash, regtab->reg_name, regtab, 0) != NULL)
+	as_fatal (_("duplicate %s"), regtab->reg_name);
   }
 
   /* Fill in lexical tables:  mnemonic_chars, operand_chars.  */
@@ -5218,8 +5221,8 @@ parse_insn (char *line, char *mnemonic)
 	      case QWORD_MNEM_SUFFIX:
 		i.suffix = mnem_p[-1];
 	      mnem_p[-1] = '\0';
-	      current_templates = (const templates *) str_hash_find (op_hash,
-								 mnemonic);
+	      current_templates
+		= (const templates *) str_hash_find (op_hash, mnemonic);
 	      break;
 	    case SHORT_MNEM_SUFFIX:
 	    case LONG_MNEM_SUFFIX:
@@ -5227,8 +5230,8 @@ parse_insn (char *line, char *mnemonic)
 		{
 		  i.suffix = mnem_p[-1];
 		  mnem_p[-1] = '\0';
-		  current_templates = (const templates *) str_hash_find (op_hash,
-								     mnemonic);
+		  current_templates
+		    = (const templates *) str_hash_find (op_hash, mnemonic);
 		}
 	      break;
 
@@ -5241,8 +5244,8 @@ parse_insn (char *line, char *mnemonic)
 		  else
 		    i.suffix = LONG_MNEM_SUFFIX;
 		  mnem_p[-1] = '\0';
-		  current_templates = (const templates *) str_hash_find (op_hash,
-								     mnemonic);
+		  current_templates
+		    = (const templates *) str_hash_find (op_hash, mnemonic);
 		}
 	      break;
 	    }
@@ -10968,10 +10971,13 @@ i386_index_check (const char *operand_string)
 		  && current_templates->end[-1].operand_types[1]
 		     .bitfield.baseindex))
 	    op = 1;
-	  expected_reg = (const reg_entry *)str_hash_find (reg_hash, di_si[addr_mode][op == es_op]);
+	  expected_reg
+	    = (const reg_entry *) str_hash_find (reg_hash,
+						 di_si[addr_mode][op == es_op]);
 	}
       else
-	expected_reg = (const reg_entry *)str_hash_find (reg_hash, bx[addr_mode]);
+	expected_reg
+	  = (const reg_entry *)str_hash_find (reg_hash, bx[addr_mode]);
 
       if (i.base_reg != expected_reg
 	  || i.index_reg

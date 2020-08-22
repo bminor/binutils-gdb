@@ -277,7 +277,8 @@ iq2000_add_macro (const char *  name,
 	  /* Add to macro's hash table.  */
 	  htab_insert (macro->formal_hash,
 		       formal_entry_alloc (sb_terminate (& formal->name),
-					   formal));
+					   formal),
+		       1);
 	  formal->index = macro->formal_count;
 	  macro->formal_count++;
 	  *p = formal;
@@ -289,7 +290,7 @@ iq2000_add_macro (const char *  name,
 
   sb_add_string (&macro_name, name);
   namestr = sb_terminate (&macro_name);
-  htab_insert (macro_hash, macro_entry_alloc (namestr, macro));
+  htab_insert (macro_hash, macro_entry_alloc (namestr, macro), 1);
 
   macro_defined = 1;
 }

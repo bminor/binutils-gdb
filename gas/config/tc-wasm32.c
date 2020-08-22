@@ -164,7 +164,7 @@ md_begin (void)
      provides a quick index to the first opcode with a particular name
      in the opcode table.  */
   for (opcode = wasm32_opcodes; opcode->name; opcode++)
-    str_hash_insert (wasm32_hash, opcode->name, (char *) opcode);
+    str_hash_insert (wasm32_hash, opcode->name, opcode, 0);
 
   linkrelax = 0;
   flag_sectname_subst = 1;

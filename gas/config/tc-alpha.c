@@ -600,7 +600,7 @@ get_alpha_reloc_tag (long sequence)
       info->segment = now_seg;
       info->sequence = sequence;
       strcpy (info->string, buffer);
-      str_hash_insert (alpha_literal_hash, info->string, (void *) info);
+      str_hash_insert (alpha_literal_hash, info->string, info, 0);
 #ifdef OBJ_EVAX
       info->sym = 0;
       info->psym = 0;
@@ -1168,7 +1168,8 @@ assemble_tokens_to_insn (const char *opname,
   const struct alpha_opcode *opcode;
 
   /* Search opcodes.  */
-  opcode = (const struct alpha_opcode *) str_hash_find (alpha_opcode_hash, opname);
+  opcode = (const struct alpha_opcode *) str_hash_find (alpha_opcode_hash,
+							opname);
   if (opcode)
     {
       int cpumatch;
@@ -3315,8 +3316,8 @@ assemble_tokens (const char *opname,
 #endif
   if (local_macros_on)
     {
-      macro = ((const struct alpha_macro *)
-	       str_hash_find (alpha_macro_hash, opname));
+      macro = (const struct alpha_macro *) str_hash_find (alpha_macro_hash,
+							  opname);
       if (macro)
 	{
 	  found_something = 1;
@@ -3330,7 +3331,8 @@ assemble_tokens (const char *opname,
     }
 
   /* Search opcodes.  */
-  opcode = (const struct alpha_opcode *) str_hash_find (alpha_opcode_hash, opname);
+  opcode = (const struct alpha_opcode *) str_hash_find (alpha_opcode_hash,
+							opname);
   if (opcode)
     {
       found_something = 1;
@@ -5422,7 +5424,8 @@ md_begin (void)
       const char *name, *slash;
 
       name = alpha_opcodes[i].name;
-      str_hash_insert (alpha_opcode_hash, name, (void *) &alpha_opcodes[i]);
+      if (str_hash_insert (alpha_opcode_hash, name, &alpha_opcodes[i], 0))
+	as_fatal (_("duplicate %s"), name);
 
       /* Some opcodes include modifiers of various sorts with a "/mod"
 	 syntax, like the architecture manual suggests.  However, for
@@ -5436,7 +5439,7 @@ md_begin (void)
 	  memcpy (p, name, slash - name);
 	  strcpy (p + (slash - name), slash + 1);
 
-	  (void) str_hash_insert (alpha_opcode_hash, p, (void *) &alpha_opcodes[i]);
+	  (void) str_hash_insert (alpha_opcode_hash, p, &alpha_opcodes[i], 0);
 	  /* Ignore failures -- the opcode table does duplicate some
 	     variants in different forms, like "hw_stq" and "hw_st/q".  */
 	}
@@ -5455,7 +5458,8 @@ md_begin (void)
       const char *name;
 
       name = alpha_macros[i].name;
-      str_hash_insert (alpha_macro_hash, name, (void *) &alpha_macros[i]);
+      if (str_hash_insert (alpha_macro_hash, name, &alpha_macros[i], 0))
+	as_fatal (_("duplicate %s"), name);
 
       while (++i < alpha_num_macros
 	     && (alpha_macros[i].name == name

@@ -764,7 +764,7 @@ md_begin (void)
 
       opc->id = id;
       opc->next = str_hash_find (opcode_hash, tic6x_opcode_table[id].name);
-      str_hash_insert (opcode_hash, tic6x_opcode_table[id].name, opc);
+      str_hash_insert (opcode_hash, tic6x_opcode_table[id].name, opc, 1);
     }
 
   /* Save the current subseg so we can restore it [it's the default one and

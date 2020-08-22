@@ -176,7 +176,7 @@ fake_opcode (const char *name,
   fake->opcode = -1;
   fake->opcode_next = -1;
   fake->u.func = func;
-  str_hash_insert (opcode_hash_control, name, (char *) fake);
+  str_hash_insert (opcode_hash_control, name, fake, 0);
 }
 
 /* Enter another entry into the opcode hash table so the same opcode
@@ -186,7 +186,7 @@ static void
 alias (const char *new_name, const char *old)
 {
   str_hash_insert (opcode_hash_control, new_name,
-	       (char *) str_hash_find (opcode_hash_control, old));
+		   str_hash_find (opcode_hash_control, old), 0);
 }
 
 /* This function is called once, at assembler startup time.  It sets
@@ -201,7 +201,7 @@ md_begin (void)
 
   /* Insert names into hash table.  */
   for (opcode = pj_opc_info; opcode->u.name; opcode++)
-    str_hash_insert (opcode_hash_control, opcode->u.name, (char *) opcode);
+    str_hash_insert (opcode_hash_control, opcode->u.name, opcode, 0);
 
   /* Insert the only fake opcode.  */
   fake_opcode ("ipush", ipush_code);

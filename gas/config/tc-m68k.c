@@ -4570,18 +4570,20 @@ md_begin (void)
 	}
       while (slak);
 
-      str_hash_insert (op_hash, ins->name, (char *) hack);
+      if (str_hash_insert (op_hash, ins->name, hack, 0) != NULL)
+	as_fatal (_("duplicate %s"), ins->name);
     }
 
   for (i = 0; i < m68k_numaliases; i++)
     {
       const char *name = m68k_opcode_aliases[i].primary;
       const char *alias = m68k_opcode_aliases[i].alias;
-      void *val = (void *)str_hash_find (op_hash, name);
+      void *val = (void *) str_hash_find (op_hash, name);
 
       if (!val)
 	as_fatal (_("Internal Error: Can't find %s in hash table"), name);
-      str_hash_insert (op_hash, alias, val);
+      if (str_hash_insert (op_hash, alias, val, 0) != NULL)
+	as_fatal (_("duplicate %s"), alias);
     }
 
   /* In MRI mode, all unsized branches are variable sized.  Normally,
@@ -4614,11 +4616,11 @@ md_begin (void)
 	{
 	  const char *name = mri_aliases[i].primary;
 	  const char *alias = mri_aliases[i].alias;
-	  void *val = (void *)str_hash_find (op_hash, name);
+	  void *val = (void *) str_hash_find (op_hash, name);
 
 	  if (!val)
 	    as_fatal (_("Internal Error: Can't find %s in hash table"), name);
-	  str_hash_insert (op_hash, alias, val);
+	  str_hash_insert (op_hash, alias, val, 1);
 	}
     }
 
@@ -4674,7 +4676,7 @@ md_begin (void)
       {
 	hack = XOBNEW (&robyn, struct m68k_incant);
 	str_hash_insert (op_hash,
-		     mote_pseudo_table[n].poc_name, (char *) hack);
+			 mote_pseudo_table[n].poc_name, hack, 0);
 	hack->m_operands = 0;
 	hack->m_opnum = n;
 	n++;

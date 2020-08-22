@@ -765,7 +765,8 @@ arc_insert_opcode (const struct arc_opcode *opcode)
       entry->count = 0;
       entry->opcode = NULL;
 
-      str_hash_insert (arc_opcode_hash, name, (void *) entry);
+      if (str_hash_insert (arc_opcode_hash, name, entry, 0) != NULL)
+	as_fatal (_("duplicate %s"), name);
     }
 
   entry->opcode = XRESIZEVEC (const struct arc_opcode *, entry->opcode,
@@ -2552,7 +2553,8 @@ declare_register (const char *name, int number)
   symbolS *regS = symbol_create (name, reg_section,
 				 &zero_address_frag, number);
 
-  str_hash_insert (arc_reg_hash, S_GET_NAME (regS), (void *) regS);
+  if (str_hash_insert (arc_reg_hash, S_GET_NAME (regS), regS, 0) != NULL)
+    as_fatal (_("duplicate %s"), name);
 }
 
 /* Construct symbols for each of the general registers.  */
@@ -2583,8 +2585,8 @@ declare_addrtype (const char *name, int number)
   symbolS *addrtypeS = symbol_create (name, undefined_section,
 				      &zero_address_frag, number);
 
-  str_hash_insert (arc_addrtype_hash, S_GET_NAME (addrtypeS),
-		   (void *) addrtypeS);
+  if (str_hash_insert (arc_addrtype_hash, S_GET_NAME (addrtypeS), addrtypeS, 0))
+    as_fatal (_("duplicate %s"), name);
 }
 
 /* Port-specific assembler initialization.  This function is called
@@ -2694,7 +2696,8 @@ md_begin (void)
 	  && !check_cpu_feature (auxr->subclass))
 	continue;
 
-      str_hash_insert (arc_aux_hash, auxr->name, (void *) auxr);
+      if (str_hash_insert (arc_aux_hash, auxr->name, auxr, 0) != 0)
+	as_fatal (_("duplicate %s"), auxr->name);
     }
 
   /* Address type declaration.  */
@@ -4889,7 +4892,8 @@ arc_extcorereg (int opertype)
       auxr->cpu = selected_cpu.flags;
       auxr->subclass = NONE;
       auxr->address = ereg.number;
-      str_hash_insert (arc_aux_hash, auxr->name, (void *) auxr);
+      if (str_hash_insert (arc_aux_hash, auxr->name, auxr, 0) != NULL)
+	as_bad (_("duplicate aux register %s"), auxr->name);
       break;
     case EXT_COND_CODE:
       /* Condition code.  */

@@ -20,16 +20,26 @@
 
 #include "as.h"
 
-/* Insert ELEMENT into HTAB.  If the element exists, it is overwritten.  */
+/* Insert ELEMENT into HTAB.  If REPLACE is non-zero existing elements
+   are overwritten.  If ELEMENT already exists, a pointer to the slot
+   is returned.  Otherwise NULL is returned.  */
 
-void
-htab_insert (htab_t htab, PTR element)
+void **
+htab_insert (htab_t htab, void *element, int replace)
 {
   void **slot = htab_find_slot (htab, element, INSERT);
-  if (slot != NULL && htab->del_f)
-    (*htab->del_f) (*slot);
-
+  if (*slot != NULL)
+    {
+      if (replace)
+	{
+	  if (htab->del_f)
+	    (*htab->del_f) (*slot);
+	  *slot = element;
+	}
+      return slot;
+    }
   *slot = element;
+  return NULL;
 }
 
 /* Print statistics about a hash table.  */

@@ -253,7 +253,8 @@ init_ext_version_hash (const struct riscv_ext_version *table)
   while (table[i].name)
     {
       const char *name = table[i].name;
-      str_hash_insert (hash, name, (void *) &table[i]);
+      if (str_hash_insert (hash, name, &table[i], 0) != NULL)
+	as_fatal (_("duplicate %s"), name);
 
       i++;
       while (table[i].name
@@ -558,7 +559,8 @@ init_opcode_names_hash (void)
   const struct opcode_name_t *opcode;
 
   for (opcode = &opcode_name_list[0]; opcode->name != NULL; ++opcode)
-    str_hash_insert (opcode_names_hash, opcode->name, (void *)opcode);
+    if (str_hash_insert (opcode_names_hash, opcode->name, opcode, 0) != NULL)
+      as_fatal (_("duplicate %s"), opcode->name);
 }
 
 /* Find `s` is a valid opcode name or not,
@@ -614,7 +616,8 @@ static void
 hash_reg_name (enum reg_class class, const char *name, unsigned n)
 {
   void *hash = ENCODE_REG_HASH (class, n);
-  str_hash_insert (reg_names_hash, name, hash);
+  if (str_hash_insert (reg_names_hash, name, hash, 0) != NULL)
+    as_fatal (_("duplicate %s"), name);
 }
 
 static void
@@ -665,7 +668,7 @@ riscv_init_csr_hash (const char *name,
      Otherwise, attach the extra information to the entry which is already
      in the hash table.  */
   if (pre_entry == NULL)
-    str_hash_insert (csr_extra_hash, name, (void *) entry);
+    str_hash_insert (csr_extra_hash, name, entry, 0);
   else
     pre_entry->next = entry;
 }
@@ -998,7 +1001,8 @@ init_opcode_hash (const struct riscv_opcode *opcodes,
   while (opcodes[i].name)
     {
       const char *name = opcodes[i].name;
-      str_hash_insert (hash, name, (void *) &opcodes[i]);
+      if (str_hash_insert (hash, name, &opcodes[i], 0) != NULL)
+	as_fatal (_("duplicate %s"), name);
 
       do
 	{

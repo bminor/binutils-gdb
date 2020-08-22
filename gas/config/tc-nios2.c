@@ -3624,16 +3624,20 @@ md_begin (void)
   nios2_ps_hash = str_htab_create ();
 
   for (i = 0; i < nios2_num_opcodes; ++i)
-    str_hash_insert (nios2_opcode_hash, nios2_opcodes[i].name,
-		     (PTR) & nios2_opcodes[i]);
+    if (str_hash_insert (nios2_opcode_hash, nios2_opcodes[i].name,
+			 &nios2_opcodes[i], 0) != NULL)
+      as_fatal (_("duplicate %s"), nios2_opcodes[i].name);
 
   for (i = 0; i < nios2_num_regs; ++i)
-    str_hash_insert (nios2_reg_hash, nios2_regs[i].name,
-		     (PTR) & nios2_regs[i]);
+    if (str_hash_insert (nios2_reg_hash, nios2_regs[i].name,
+			 &nios2_regs[i], 0) != NULL)
+      as_fatal (_("duplicate %s"), nios2_regs[i].name);
 
   for (i = 0; i < nios2_num_ps_insn_info_structs; ++i)
-    str_hash_insert (nios2_ps_hash, nios2_ps_insn_info_structs[i].pseudo_insn,
-		     (PTR) & nios2_ps_insn_info_structs[i]);
+    if (str_hash_insert (nios2_ps_hash,
+			 nios2_ps_insn_info_structs[i].pseudo_insn,
+			 &nios2_ps_insn_info_structs[i], 0) != NULL)
+      as_fatal (_("duplicate %s"), nios2_ps_insn_info_structs[i].pseudo_insn);
 
   /* Assembler option defaults.  */
   nios2_as_options.noat = FALSE;

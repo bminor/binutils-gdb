@@ -567,7 +567,7 @@ stag_add_field_symbols (struct stag *stag,
 
 	  replacement = concat (S_GET_NAME (rootsym), "+", root_stag_name,
 				name + strlen (S_GET_NAME (rootsym)), NULL);
-	  str_hash_insert (subsym_hash[0], name, replacement);
+	  str_hash_insert (subsym_hash[0], name, replacement, 0);
 	}
 
       /* Recurse if the field is a structure.
@@ -738,7 +738,7 @@ tic54x_endstruct (int is_union)
   /* Nested .structs don't get put in the stag table.  */
   if (current_stag->outer == NULL)
     {
-      str_hash_insert (stag_hash, current_stag->name, current_stag);
+      str_hash_insert (stag_hash, current_stag->name, current_stag, 0);
       stag_add_field_symbols (current_stag, path,
 			      S_GET_VALUE (current_stag->sym),
 			      NULL, NULL);
@@ -2236,7 +2236,7 @@ tic54x_var (int ignore ATTRIBUTE_UNUSED)
       c = get_symbol_name (&name);
       /* .var symbols start out with a null string.  */
       name = xstrdup (name);
-      str_hash_insert (subsym_hash[macro_level], name, empty);
+      str_hash_insert (subsym_hash[macro_level], name, empty, 0);
       c = restore_line_pointer (c);
       if (c == ',')
 	{
@@ -2521,7 +2521,7 @@ tic54x_macro_info (const macro_entry *macro)
 
       name[entry->name.len] = '\0';
       value[entry->actual.len] = '\0';
-      str_hash_insert (subsym_hash[macro_level], name, value);
+      str_hash_insert (subsym_hash[macro_level], name, value, 0);
     }
 }
 
@@ -2991,18 +2991,12 @@ md_begin (void)
 
   op_hash = str_htab_create ();
   for (tm = (insn_template *) tic54x_optab; tm->name; tm++)
-    {
-      if (str_hash_find (op_hash, tm->name))
-	continue;
-      str_hash_insert (op_hash, tm->name, (char *) tm);
-    }
+    str_hash_insert (op_hash, tm->name, tm, 0);
+
   parop_hash = str_htab_create ();
   for (tm = (insn_template *) tic54x_paroptab; tm->name; tm++)
-    {
-      if (str_hash_find (parop_hash, tm->name))
-	continue;
-      str_hash_insert (parop_hash, tm->name, (char *) tm);
-    }
+    str_hash_insert (parop_hash, tm->name, tm, 0);
+
   reg_hash = str_htab_create ();
   for (sym = (tic54x_symbol *) regs; sym->name; sym++)
     {
@@ -3011,51 +3005,48 @@ md_begin (void)
 				     &zero_address_frag, sym->value);
       SF_SET_LOCAL (symbolP);
       symbol_table_insert (symbolP);
-      str_hash_insert (reg_hash, sym->name, (char *) sym);
+      str_hash_insert (reg_hash, sym->name, sym, 0);
     }
   for (sym = (tic54x_symbol *) mmregs; sym->name; sym++)
-    str_hash_insert (reg_hash, sym->name, (char *) sym);
+    str_hash_insert (reg_hash, sym->name, sym, 0);
   mmreg_hash = str_htab_create ();
   for (sym = (tic54x_symbol *) mmregs; sym->name; sym++)
-    str_hash_insert (mmreg_hash, sym->name, (char *) sym);
+    str_hash_insert (mmreg_hash, sym->name, sym, 0);
 
   cc_hash = str_htab_create ();
   for (sym = (tic54x_symbol *) condition_codes; sym->name; sym++)
-    str_hash_insert (cc_hash, sym->name, (char *) sym);
+    str_hash_insert (cc_hash, sym->name, sym, 0);
 
   cc2_hash = str_htab_create ();
   for (sym = (tic54x_symbol *) cc2_codes; sym->name; sym++)
-    str_hash_insert (cc2_hash, sym->name, (char *) sym);
+    str_hash_insert (cc2_hash, sym->name, sym, 0);
 
   cc3_hash = str_htab_create ();
   for (sym = (tic54x_symbol *) cc3_codes; sym->name; sym++)
-    str_hash_insert (cc3_hash, sym->name, (char *) sym);
+    str_hash_insert (cc3_hash, sym->name, sym, 0);
 
   sbit_hash = str_htab_create ();
   for (sym = (tic54x_symbol *) status_bits; sym->name; sym++)
-    str_hash_insert (sbit_hash, sym->name, (char *) sym);
+    str_hash_insert (sbit_hash, sym->name, sym, 0);
 
   misc_symbol_hash = str_htab_create ();
   for (symname = (char **) misc_symbols; *symname; symname++)
-    str_hash_insert (misc_symbol_hash, *symname, *symname);
+    str_hash_insert (misc_symbol_hash, *symname, *symname, 0);
 
   /* Only the base substitution table and local label table are initialized;
      the others (for local macro substitution) get instantiated as needed.  */
   local_label_hash[0] = str_htab_create ();
   subsym_hash[0] = str_htab_create ();
   for (subsym_proc = subsym_procs; subsym_proc->name; subsym_proc++)
-    str_hash_insert (subsym_hash[0], subsym_proc->name,
-		     (char *) subsym_proc);
+    str_hash_insert (subsym_hash[0], subsym_proc->name, subsym_proc, 0);
 
   math_hash = str_htab_create ();
   for (math_proc = math_procs; math_proc->name; math_proc++)
     {
       /* Insert into the main subsym hash for recognition; insert into
 	 the math hash to actually store information.  */
-      str_hash_insert (subsym_hash[0], math_proc->name,
-		       (char *) math_proc);
-      str_hash_insert (math_hash, math_proc->name,
-		       (char *) math_proc);
+      str_hash_insert (subsym_hash[0], math_proc->name, math_proc, 0);
+      str_hash_insert (math_hash, math_proc->name, math_proc, 0);
     }
   subsym_recurse_hash = str_htab_create ();
   stag_hash = str_htab_create ();
@@ -4170,7 +4161,7 @@ tic54x_parse_insn (tic54x_insn *insn, char *line)
 	  if (optimize_insn (insn))
 	    {
 	      insn->tm = (insn_template *) str_hash_find (op_hash,
-                                                      insn->mnemonic);
+							  insn->mnemonic);
 	      continue;
 	    }
 
@@ -4335,8 +4326,12 @@ subsym_create_or_replace (char *name, char *value)
   int i;
 
   for (i = macro_level; i > 0; i--)
-    str_hash_insert (subsym_hash[i], name, value);
-  str_hash_insert (subsym_hash[0], name, value);
+    if (str_hash_find (subsym_hash[i], name))
+      {
+	str_hash_insert (subsym_hash[i], name, value, 1);
+	return;
+      }
+  str_hash_insert (subsym_hash[0], name, value, 1);
 }
 
 /* Look up the substitution string replacement for the given symbol.
@@ -4495,7 +4490,8 @@ subsym_substitute (char *line, int forced)
 		    value[strlen (value) - 1] = '\0';
 		  sprintf (digit, ".%d", local_label_id++);
 		  strcat (value, digit);
-		  str_hash_insert (local_label_hash[macro_level], namecopy, value);
+		  str_hash_insert (local_label_hash[macro_level],
+				   namecopy, value, 0);
 		}
 	      /* Indicate where to continue looking for substitutions.  */
 	      ptr = tail;
@@ -4616,7 +4612,7 @@ subsym_substitute (char *line, int forced)
 		 try to replace a symbol once.  */
 	      if (recurse)
 		{
-		  str_hash_insert (subsym_recurse_hash, name, name);
+		  str_hash_insert (subsym_recurse_hash, name, name, 0);
 		  value = subsym_substitute (value, macro_level > 0);
 		  str_hash_delete (subsym_recurse_hash, name);
 		}
@@ -5007,18 +5003,20 @@ tic54x_undefined_symbol (char *name)
   tic54x_symbol *sym;
 
   /* Not sure how to handle predefined symbols.  */
-  if ((sym = (tic54x_symbol *) str_hash_find (cc_hash, name)) != NULL ||
-      (sym = (tic54x_symbol *) str_hash_find (cc2_hash, name)) != NULL ||
-      (sym = (tic54x_symbol *) str_hash_find (cc3_hash, name)) != NULL ||
-      (sym = (tic54x_symbol *) str_hash_find (misc_symbol_hash, name)) != NULL ||
-      (sym = (tic54x_symbol *) str_hash_find (sbit_hash, name)) != NULL)
+  if ((sym = (tic54x_symbol *) str_hash_find (cc_hash, name)) != NULL
+      || (sym = (tic54x_symbol *) str_hash_find (cc2_hash, name)) != NULL
+      || (sym = (tic54x_symbol *) str_hash_find (cc3_hash, name)) != NULL
+      || (sym = (tic54x_symbol *) str_hash_find (misc_symbol_hash,
+						 name)) != NULL
+      || (sym = (tic54x_symbol *) str_hash_find (sbit_hash, name)) != NULL)
     {
       return symbol_new (name, reg_section, &zero_address_frag, sym->value);
     }
 
-  if ((sym = (tic54x_symbol *) str_hash_find (reg_hash, name)) != NULL ||
-      (sym = (tic54x_symbol *) str_hash_find (mmreg_hash, name)) != NULL ||
-      !strcasecmp (name, "a") || !strcasecmp (name, "b"))
+  if ((sym = (tic54x_symbol *) str_hash_find (reg_hash, name)) != NULL
+      || (sym = (tic54x_symbol *) str_hash_find (mmreg_hash, name)) != NULL
+      || !strcasecmp (name, "a")
+      || !strcasecmp (name, "b"))
     {
       return symbol_new (name, reg_section, &zero_address_frag,
 			 sym ? sym->value : 0);

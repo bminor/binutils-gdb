@@ -1103,7 +1103,8 @@ parse (const char *line, int recursive_level)
       c = *lineptr;
       *(char *) lineptr = '\0';
 
-      if (!(desc = (struct ns32k_opcode *) str_hash_find (inst_hash_handle, line)))
+      desc = (struct ns32k_opcode *) str_hash_find (inst_hash_handle, line);
+      if (!desc)
 	as_fatal (_("No such opcode"));
 
       *(char *) lineptr = c;
@@ -1901,7 +1902,8 @@ md_begin (void)
 
   endop = ns32k_opcodes + sizeof (ns32k_opcodes) / sizeof (ns32k_opcodes[0]);
   for (ptr = ns32k_opcodes; ptr < endop; ptr++)
-    str_hash_insert (inst_hash_handle, ptr->name, (char *) ptr);
+    if (str_hash_insert (inst_hash_handle, ptr->name, ptr, 0) != NULL)
+      as_fatal (_("duplicate %s"), ptr->name);
 
   /* Some private space please!  */
   freeptr_static = XNEWVEC (char, PRIVATE_SIZE);

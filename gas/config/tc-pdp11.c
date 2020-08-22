@@ -193,9 +193,9 @@ md_begin (void)
     as_fatal (_("Virtual memory exhausted"));
 
   for (i = 0; i < pdp11_num_opcodes; i++)
-    str_hash_insert (insn_hash, pdp11_opcodes[i].name, (void *) (pdp11_opcodes + i));
+    str_hash_insert (insn_hash, pdp11_opcodes[i].name, pdp11_opcodes + i, 0);
   for (i = 0; i < pdp11_num_aliases; i++)
-    str_hash_insert (insn_hash, pdp11_aliases[i].name, (void *) (pdp11_aliases + i));
+    str_hash_insert (insn_hash, pdp11_aliases[i].name, pdp11_aliases + i, 0);
 }
 
 void

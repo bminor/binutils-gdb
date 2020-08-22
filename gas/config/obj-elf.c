@@ -2653,7 +2653,7 @@ build_additional_section_info (bfd *abfd ATTRIBUTE_UNUSED,
   /* Add index to hash.  */
   idx_ptr = XNEW (unsigned int);
   *idx_ptr = i;
-  str_hash_insert (list->indexes, group_name, (char *)idx_ptr);
+  str_hash_insert (list->indexes, group_name, idx_ptr, 0);
 }
 
 static int

@@ -4684,7 +4684,12 @@ dot_rot (int type)
       drpp = &dr->next;
       base_reg += num_regs;
 
-      str_hash_insert (md.dynreg_hash, name, dr);
+      if (str_hash_insert (md.dynreg_hash, name, dr, 0) != NULL)
+	{
+	  as_bad (_("Attempt to redefine register set `%s'"), name);
+	  obstack_free (&notes, name);
+	  goto err;
+	}
 
       if (*input_line_pointer != ',')
 	break;
@@ -5171,7 +5176,8 @@ dot_entry (int dummy ATTRIBUTE_UNUSED)
       c = get_symbol_name (&name);
       symbolP = symbol_find_or_make (name);
 
-      str_hash_insert (md.entry_hash, S_GET_NAME (symbolP), (void *) symbolP);
+      if (str_hash_insert (md.entry_hash, S_GET_NAME (symbolP), symbolP, 0))
+	as_bad (_("duplicate entry hint %s"), name);
 
       *input_line_pointer = c;
       SKIP_WHITESPACE_AFTER_NAME ();
@@ -5374,7 +5380,8 @@ declare_register (const char *name, unsigned int regnum)
 
   sym = symbol_create (name, reg_section, &zero_address_frag, regnum);
 
-  str_hash_insert (md.reg_hash, S_GET_NAME (sym), (void *) sym);
+  if (str_hash_insert (md.reg_hash, S_GET_NAME (sym), sym, 0) != NULL)
+    as_fatal (_("duplicate %s"), name);
 
   return sym;
 }
@@ -7393,8 +7400,9 @@ md_begin (void)
 
   md.pseudo_hash = str_htab_create ();
   for (i = 0; i < NELEMS (pseudo_opcode); ++i)
-    str_hash_insert (md.pseudo_hash, pseudo_opcode[i].name,
-		     (void *) (pseudo_opcode + i));
+    if (str_hash_insert (md.pseudo_hash, pseudo_opcode[i].name,
+			 pseudo_opcode + i, 0) != NULL)
+      as_fatal (_("duplicate %s"), pseudo_opcode[i].name);
 
   md.reg_hash = str_htab_create ();
   md.dynreg_hash = str_htab_create ();
@@ -7452,8 +7460,8 @@ md_begin (void)
   declare_register ("psp", REG_PSP);
 
   for (i = 0; i < NELEMS (const_bits); ++i)
-    str_hash_insert (md.const_hash, const_bits[i].name,
-		     (void *) (const_bits + i));
+    if (str_hash_insert (md.const_hash, const_bits[i].name, const_bits + i, 0))
+      as_fatal (_("duplicate %s"), const_bits[i].name);
 
   /* Set the architecture and machine depending on defaults and command line
      options.  */
@@ -11812,8 +11820,8 @@ dot_alias (int section)
   h->file = as_where (&h->line);
   h->name = name;
 
-  str_hash_insert (ahash, alias, (void *) h);
-  str_hash_insert (nhash, name, (void *) alias);
+  str_hash_insert (ahash, alias, h, 0);
+  str_hash_insert (nhash, name, alias, 0);
 
 out:
   demand_empty_rest_of_line ();

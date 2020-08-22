@@ -117,8 +117,8 @@ md_begin (void)
     const insn_template *current_optab = tic30_optab;
 
     for (; current_optab < tic30_optab_end; current_optab++)
-      str_hash_insert (op_hash, current_optab->name,
-		       (char *) current_optab);
+      if (str_hash_insert (op_hash, current_optab->name, current_optab, 0))
+	as_fatal (_("duplicate %s"), current_optab->name);
   }
 
   parop_hash = str_htab_create ();
@@ -127,8 +127,8 @@ md_begin (void)
     const partemplate *current_parop = tic30_paroptab;
 
     for (; current_parop < tic30_paroptab_end; current_parop++)
-      str_hash_insert (parop_hash, current_parop->name,
-		       (char *) current_parop);
+      if (str_hash_insert (parop_hash, current_parop->name, current_parop, 0))
+	as_fatal (_("duplicate %s"), current_parop->name);
   }
 
   reg_hash = str_htab_create ();
@@ -137,8 +137,8 @@ md_begin (void)
     const reg *current_reg = tic30_regtab;
 
     for (; current_reg < tic30_regtab_end; current_reg++)
-      str_hash_insert (reg_hash, current_reg->name,
-		       (char *) current_reg);
+      if (str_hash_insert (reg_hash, current_reg->name, current_reg, 0))
+	as_fatal (_("duplicate %s"), current_reg->name);
   }
 
   ind_hash = str_htab_create ();
@@ -147,8 +147,8 @@ md_begin (void)
     const ind_addr_type *current_ind = tic30_indaddr_tab;
 
     for (; current_ind < tic30_indaddrtab_end; current_ind++)
-      str_hash_insert (ind_hash, current_ind->syntax,
-		       (char *) current_ind);
+      if (str_hash_insert (ind_hash, current_ind->syntax, current_ind, 0))
+	as_fatal (_("duplicate %s"), current_ind->syntax);
   }
 
   /* Fill in lexical tables:  opcode_chars, operand_chars, space_chars.  */

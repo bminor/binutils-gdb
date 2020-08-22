@@ -66,13 +66,13 @@ md_begin (void)
 
   /* Insert names into hash table.  */
   for (count = 0, opcode = moxie_form1_opc_info; count++ < 64; opcode++)
-    str_hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+    str_hash_insert (opcode_hash_control, opcode->name, opcode, 0);
 
   for (count = 0, opcode = moxie_form2_opc_info; count++ < 4; opcode++)
-    str_hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+    str_hash_insert (opcode_hash_control, opcode->name, opcode, 0);
 
   for (count = 0, opcode = moxie_form3_opc_info; count++ < 10; opcode++)
-    str_hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+    str_hash_insert (opcode_hash_control, opcode->name, opcode, 0);
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, 0);
 }

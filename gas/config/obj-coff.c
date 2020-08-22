@@ -128,7 +128,7 @@ tag_init (void)
 static void
 tag_insert (const char *name, symbolS *symbolP)
 {
-  str_hash_insert (tag_hash, name, (char *) symbolP);
+  str_hash_insert (tag_hash, name, symbolP, 1);
 }
 
 static symbolS *

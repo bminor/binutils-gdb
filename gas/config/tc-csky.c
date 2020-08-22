@@ -1361,14 +1361,13 @@ md_begin (void)
   csky_opcodes_hash = str_htab_create ();
   for ( ; opcode->mnemonic != NULL; opcode++)
     if ((isa_flag & (opcode->isa_flag16 | opcode->isa_flag32)) != 0)
-      str_hash_insert (csky_opcodes_hash, opcode->mnemonic, (char *)opcode);
+      str_hash_insert (csky_opcodes_hash, opcode->mnemonic, opcode, 0);
   for ( ; macro->name != NULL; macro++)
     if ((isa_flag & macro->isa_flag) != 0)
-      str_hash_insert (csky_macros_hash, macro->name, (char *)macro);
+      str_hash_insert (csky_macros_hash, macro->name, macro, 0);
   if (do_nolrw && (isa_flag & CSKYV2_ISA_1E2) != 0)
     str_hash_insert (csky_macros_hash,
-		 v2_lrw_macro_opcode.name,
-		 (char *)&v2_lrw_macro_opcode);
+		     v2_lrw_macro_opcode.name, &v2_lrw_macro_opcode, 0);
   /* Set e_flag to ELF Head.  */
   bfd_set_private_flags (stdoutput, mach_flag);
   /* Set bfd_mach to bfd backend data.  */
@@ -2935,9 +2934,9 @@ parse_opcode (char *str)
 
   /* Find hash by name in csky_macros_hash and csky_opcodes_hash.  */
   csky_insn.macro = (struct csky_macro_info *) str_hash_find (csky_macros_hash,
-							  macro_name);
+							      macro_name);
   csky_insn.opcode = (struct csky_opcode *) str_hash_find (csky_opcodes_hash,
-							name);
+							   name);
 
   if (csky_insn.macro == NULL && csky_insn.opcode == NULL)
     return FALSE;

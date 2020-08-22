@@ -530,8 +530,12 @@ s390_setup_opcodes (void)
 	  f = (op->flags & S390_INSTR_FLAG_FACILITY_MASK);
 	  use_opcode = ((f & current_flags) == f);
 	}
-      if (use_opcode)
-	str_hash_insert (s390_opcode_hash, op->name, (void *) op);
+      if (use_opcode
+	  && str_hash_insert (s390_opcode_hash, op->name, op, 0) != NULL)
+	{
+	  as_bad (_("duplicate %s"), op->name);
+	  dup_insn = TRUE;
+	}
 
       while (op < op_end - 1 && strcmp (op->name, op[1].name) == 0)
 	op++;
@@ -566,7 +570,8 @@ md_begin (void)
 
   op_end = s390_opformats + s390_num_opformats;
   for (op = s390_opformats; op < op_end; op++)
-    str_hash_insert (s390_opformat_hash, op->name, (void *) op);
+    if (str_hash_insert (s390_opformat_hash, op->name, op, 0) != NULL)
+      as_fatal (_("duplicate %s"), op->name);
 
   s390_setup_opcodes ();
 

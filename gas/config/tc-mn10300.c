@@ -924,7 +924,7 @@ md_begin (void)
       if (strcmp (prev_name, op->name))
 	{
 	  prev_name = (char *) op->name;
-	  str_hash_insert (mn10300_hash, op->name, (char *) op);
+	  str_hash_insert (mn10300_hash, op->name, op, 0);
 	}
       op++;
     }

@@ -151,7 +151,7 @@ md_begin (void)
     {
       /* Only enter unique codes into the table.  */
       if (idx != opcode->idx)
-	str_hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+	str_hash_insert (opcode_hash_control, opcode->name, opcode, 0);
       idx = opcode->idx;
     }
 
@@ -166,7 +166,7 @@ md_begin (void)
       fake_opcode->name = md_pseudo_table[idx].poc_name;
       fake_opcode->func = (void *) (md_pseudo_table + idx);
       fake_opcode->opcode = 250;
-      str_hash_insert (opcode_hash_control, fake_opcode->name, fake_opcode);
+      str_hash_insert (opcode_hash_control, fake_opcode->name, fake_opcode, 0);
     }
 }
 

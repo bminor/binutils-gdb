@@ -417,7 +417,7 @@ md_begin (void)
 
   /* Insert unique names into hash table.  */
   for (opcode = opcodes; opcode->name; opcode ++)
-    str_hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+    str_hash_insert (opcode_hash_control, opcode->name, opcode, 0);
 }
 
 /* Try to parse a reg name.  */
@@ -1072,9 +1072,13 @@ md_assemble (char * str)
 
           count = 32 - reg1;
           if (streq (name, "lmi"))
-            opcode = (struct op_code_struct *) str_hash_find (opcode_hash_control, "lwi");
+	    opcode
+	      = (struct op_code_struct *) str_hash_find (opcode_hash_control,
+							 "lwi");
           else
-            opcode = (struct op_code_struct *) str_hash_find (opcode_hash_control, "swi");
+	    opcode
+	      = (struct op_code_struct *) str_hash_find (opcode_hash_control,
+							 "swi");
           if (opcode == NULL)
             {
               as_bad (_("unknown opcode \"%s\""), "lwi");
@@ -1106,7 +1110,9 @@ md_assemble (char * str)
           if ((temp != 0) && (temp != 0xFFFF8000))
 	    {
               /* Needs an immediate inst.  */
-              opcode1 = (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
+	      opcode1
+		= (struct op_code_struct *) str_hash_find (opcode_hash_control,
+							   "imm");
               if (opcode1 == NULL)
                 {
                   as_bad (_("unknown opcode \"%s\""), "imm");
@@ -1559,7 +1565,9 @@ md_assemble (char * str)
       if ((temp != 0) && (temp != 0xFFFF8000))
 	{
           /* Needs an immediate inst.  */
-          opcode1 = (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
+	  opcode1
+	    = (struct op_code_struct *) str_hash_find (opcode_hash_control,
+						       "imm");
           if (opcode1 == NULL)
             {
               as_bad (_("unknown opcode \"%s\""), "imm");
@@ -1625,7 +1633,9 @@ md_assemble (char * str)
       if ((temp != 0) && (temp != 0xFFFF8000))
 	{
           /* Needs an immediate inst.  */
-          opcode1 = (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
+          opcode1
+	    = (struct op_code_struct *) str_hash_find (opcode_hash_control,
+						       "imm");
           if (opcode1 == NULL)
             {
               as_bad (_("unknown opcode \"%s\""), "imm");
@@ -1698,7 +1708,9 @@ md_assemble (char * str)
       if ((temp != 0) && (temp != 0xFFFF8000))
 	{
           /* Needs an immediate inst.  */
-          opcode1 = (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
+          opcode1
+	    = (struct op_code_struct *) str_hash_find (opcode_hash_control,
+						       "imm");
           if (opcode1 == NULL)
             {
               as_bad (_("unknown opcode \"%s\""), "imm");
@@ -2119,7 +2131,8 @@ md_apply_fix (fixS *   fixP,
 	buf[i + INST_WORD_SIZE] = buf[i];
 
       /* Generate the imm instruction.  */
-      opcode1 = (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
+      opcode1
+	= (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
       if (opcode1 == NULL)
 	{
 	  as_bad (_("unknown opcode \"%s\""), "imm");
@@ -2167,7 +2180,8 @@ md_apply_fix (fixS *   fixP,
 	buf[i + INST_WORD_SIZE] = buf[i];
 
       /* Generate the imm instruction.  */
-      opcode1 = (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
+      opcode1
+	= (struct op_code_struct *) str_hash_find (opcode_hash_control, "imm");
       if (opcode1 == NULL)
 	{
 	  as_bad (_("unknown opcode \"%s\""), "imm");

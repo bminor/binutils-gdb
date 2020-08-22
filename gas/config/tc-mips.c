@@ -3694,7 +3694,8 @@ md_begin (void)
     {
       const char *name = mips_opcodes[i].name;
 
-      str_hash_insert (op_hash, name, (void *) &mips_opcodes[i]);
+      if (str_hash_insert (op_hash, name, &mips_opcodes[i], 0) != NULL)
+	as_fatal (_("duplicate %s"), name);
       do
 	{
 	  if (!validate_mips_insn (&mips_opcodes[i], 0xffffffff,
@@ -3726,7 +3727,8 @@ md_begin (void)
     {
       const char *name = mips16_opcodes[i].name;
 
-      str_hash_insert (mips16_op_hash, name, (void *) &mips16_opcodes[i]);
+      if (str_hash_insert (mips16_op_hash, name, &mips16_opcodes[i], 0))
+	as_fatal (_("duplicate %s"), name);
       do
 	{
 	  if (!validate_mips16_insn (&mips16_opcodes[i], &mips16_operands[i]))
@@ -3751,8 +3753,8 @@ md_begin (void)
     {
       const char *name = micromips_opcodes[i].name;
 
-      str_hash_insert (micromips_op_hash, name,
-			    (void *) &micromips_opcodes[i]);
+      if (str_hash_insert (micromips_op_hash, name, &micromips_opcodes[i], 0))
+	as_fatal (_("duplicate %s"), name);
       do
 	{
 	  struct mips_cl_insn *micromips_nop_insn;

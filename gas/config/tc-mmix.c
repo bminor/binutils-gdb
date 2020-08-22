@@ -775,7 +775,7 @@ mmix_md_begin (void)
     = bfd_make_section_old_way (stdoutput, MMIX_REG_SECTION_NAME);
 
   for (opcode = mmix_opcodes; opcode->name; opcode++)
-    str_hash_insert (mmix_opcode_hash, opcode->name, (char *) opcode);
+    str_hash_insert (mmix_opcode_hash, opcode->name, opcode, 0);
 
   /* We always insert the ordinary registers 0..255 as registers.  */
   for (i = 0; i < 256; i++)

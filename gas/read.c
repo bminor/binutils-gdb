@@ -563,11 +563,14 @@ pop_insert (const pseudo_typeS *table)
   const pseudo_typeS *pop;
   for (pop = table; pop->poc_name; pop++)
     {
-      int exists = po_entry_find (po_hash, pop->poc_name) != NULL;
-      if (!pop_override_ok && exists)
-	as_fatal (_("error constructing %s pseudo-op table"), pop_table_name);
-      else if (!exists)
-	htab_insert (po_hash, po_entry_alloc (pop->poc_name, pop));
+      po_entry_t *elt = po_entry_alloc (pop->poc_name, pop);
+      if (htab_insert (po_hash, elt, 0) != NULL)
+	{
+	  free (elt);
+	  if (!pop_override_ok)
+	    as_fatal (_("error constructing %s pseudo-op table"),
+		      pop_table_name);
+	}
     }
 }
 

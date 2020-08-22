@@ -275,7 +275,7 @@ md_begin (void)
   /* Initialize special operator hash table.  */
   special_operator_hash = str_htab_create ();
 #define INSERT_SPECIAL_OP(name)					\
-  str_hash_insert (special_operator_hash, #name, (void *)O_##name)
+  str_hash_insert (special_operator_hash, #name, (void *) O_##name, 0)
 
   INSERT_SPECIAL_OP (hw0);
   INSERT_SPECIAL_OP (hw1);
@@ -285,7 +285,7 @@ md_begin (void)
   INSERT_SPECIAL_OP (hw1_last);
   INSERT_SPECIAL_OP (hw2_last);
   /* hw3_last is a convenience alias for the equivalent hw3.  */
-  str_hash_insert (special_operator_hash, "hw3_last", (void*)O_hw3);
+  str_hash_insert (special_operator_hash, "hw3_last", (void *) O_hw3, 0);
   INSERT_SPECIAL_OP (hw0_got);
   INSERT_SPECIAL_OP (hw0_last_got);
   INSERT_SPECIAL_OP (hw1_last_got);
@@ -312,14 +312,14 @@ md_begin (void)
   /* Initialize op_hash hash table.  */
   op_hash = str_htab_create ();
   for (op = &tilegx_opcodes[0]; op->name != NULL; op++)
-    str_hash_insert (op_hash, op->name, (void *)op);
+    if (str_hash_insert (op_hash, op->name, op, 0) != NULL)
+      as_fatal (_("duplicate %s"), op->name);
 
   /* Initialize the spr hash table.  */
   parsing_spr = 0;
   spr_hash = str_htab_create ();
   for (i = 0; i < tilegx_num_sprs; i++)
-    str_hash_insert (spr_hash, tilegx_sprs[i].name,
-                 (void *) &tilegx_sprs[i]);
+    str_hash_insert (spr_hash, tilegx_sprs[i].name, &tilegx_sprs[i], 0);
 
   /* Set up the main_reg_hash table. We use this instead of
      creating a symbol in the register section to avoid ambiguities
@@ -330,13 +330,13 @@ md_begin (void)
       char buf[64];
 
       str_hash_insert (main_reg_hash, tilegx_register_names[i],
-		   (void *) (long) (i | CANONICAL_REG_NAME_FLAG));
+		       (void *) (long) (i | CANONICAL_REG_NAME_FLAG), 0);
 
       /* See if we should insert a noncanonical alias, like r63.  */
       sprintf (buf, "r%d", i);
       if (strcmp (buf, tilegx_register_names[i]) != 0)
 	str_hash_insert (main_reg_hash, xstrdup (buf),
-		     (void *) (long) (i | NONCANONICAL_REG_NAME_FLAG));
+			 (void *) (long) (i | NONCANONICAL_REG_NAME_FLAG), 0);
     }
 }
 
@@ -1239,7 +1239,7 @@ md_assemble (char *str)
   old_char = str[opname_len];
   str[opname_len] = '\0';
 
-  op = str_hash_find(op_hash, str);
+  op = str_hash_find (op_hash, str);
   str[opname_len] = old_char;
   if (op == NULL)
     {

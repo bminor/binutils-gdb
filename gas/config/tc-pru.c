@@ -1564,12 +1564,13 @@ md_begin (void)
   pru_reg_hash = str_htab_create ();
 
   for (i = 0; i < NUMOPCODES; ++i)
-    str_hash_insert (pru_opcode_hash, pru_opcodes[i].name,
-		     (PTR) & pru_opcodes[i]);
+    if (str_hash_insert (pru_opcode_hash, pru_opcodes[i].name,
+			 &pru_opcodes[i], 0) != NULL)
+      as_fatal (_("duplicate %s"), pru_opcodes[i].name);
 
   for (i = 0; i < pru_num_regs; ++i)
-    str_hash_insert (pru_reg_hash, pru_regs[i].name,
-		     (PTR) & pru_regs[i]);
+    if (str_hash_insert (pru_reg_hash, pru_regs[i].name, &pru_regs[i], 0))
+      as_fatal (_("duplicate %s"), pru_regs[i].name);
 
   linkrelax = pru_opt.link_relax;
   /* Initialize the alignment data.  */

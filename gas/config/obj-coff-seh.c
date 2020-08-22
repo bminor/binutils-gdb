@@ -116,7 +116,7 @@ make_pxdata_seg (segT cseg, char *name)
 static void
 seh_hash_insert (const char *name, struct seh_seg_list *item)
 {
-  str_hash_insert (seh_hash, name, (char *) item);
+  str_hash_insert (seh_hash, name, item, 1);
 }
 
 static struct seh_seg_list *

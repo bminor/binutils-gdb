@@ -21,9 +21,11 @@
 #ifndef HASH_H
 #define HASH_H
 
-/* Insert ELEMENT into HTAB.  If the element exists, it is overwritten.  */
+/* Insert ELEMENT into HTAB.  If REPLACE is non-zero existing elements
+   are overwritten.  If ELEMENT already exists, a pointer to the slot
+   is returned.  Otherwise NULL is returned.  */
 
-extern void htab_insert (htab_t, void *);
+extern void **htab_insert (htab_t, void * /* element */, int /* replace */);
 
 /* Print statistics about a hash table.  */
 
@@ -34,7 +36,7 @@ extern void htab_print_statistics (FILE *f, const char *name, htab_t table);
 struct string_tuple
 {
   const char *key;
-  char *value;
+  const void *value;
 };
 
 typedef struct string_tuple string_tuple_t;
@@ -60,7 +62,7 @@ eq_string_tuple (const void *a, const void *b)
 }
 
 static inline string_tuple_t *
-string_tuple_alloc (const char *key, char *value)
+string_tuple_alloc (const char *key, const void *value)
 {
   string_tuple_t *tuple = XNEW (string_tuple_t);
   tuple->key = key;
@@ -73,7 +75,7 @@ str_hash_find (htab_t table, const char *key)
 {
   string_tuple_t needle = { key, NULL };
   string_tuple_t *tuple = htab_find (table, &needle);
-  return tuple != NULL ? tuple->value : NULL;
+  return tuple != NULL ? (void *) tuple->value : NULL;
 }
 
 static inline void *
@@ -85,7 +87,7 @@ str_hash_find_n (htab_t table, const char *key, size_t n)
   string_tuple_t needle = { tmp, NULL };
   string_tuple_t *tuple = htab_find (table, &needle);
   free (tmp);
-  return tuple != NULL ? tuple->value : NULL;
+  return tuple != NULL ? (void *) tuple->value : NULL;
 }
 
 static inline void
@@ -95,10 +97,14 @@ str_hash_delete (htab_t table, const char *key)
   htab_remove_elt (table, &needle);
 }
 
-static inline void
-str_hash_insert (htab_t table, const char *key, void *value)
+static inline void **
+str_hash_insert (htab_t table, const char *key, const void *value, int replace)
 {
-  htab_insert (table, string_tuple_alloc (key, value));
+  string_tuple_t *elt = string_tuple_alloc (key, value);
+  void **slot = htab_insert (table, elt, replace);
+  if (slot && !replace)
+    free (elt);
+  return slot;
 }
 
 static inline htab_t

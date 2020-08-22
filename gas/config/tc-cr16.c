@@ -794,18 +794,21 @@ md_pcrel_from (fixS *fixp)
 }
 
 static void
-initialise_reg_hash_table (htab_t * hash_table,
-                           const reg_entry * register_table,
-                           const unsigned int num_entries)
+initialise_reg_hash_table (htab_t *hash_table,
+			   const reg_entry *register_table,
+			   const unsigned int num_entries)
 {
-  const reg_entry * rreg;
-  if ((* hash_table = str_htab_create ()) == NULL)
+  const reg_entry *rreg;
+
+  *hash_table = str_htab_create ();
+  if (*hash_table == NULL)
     as_fatal (_("Virtual memory exhausted"));
 
   for (rreg = register_table;
        rreg < (register_table + num_entries);
        rreg++)
-    str_hash_insert (* hash_table, rreg->name, (char *) rreg);
+    if (str_hash_insert (*hash_table, rreg->name, rreg, 0) != NULL)
+      as_fatal (_("duplicate %s"), rreg->name);
 }
 
 /* This function is called once, at assembler startup time.  This should
@@ -824,8 +827,9 @@ md_begin (void)
     {
       const char *mnemonic = cr16_instruction[i].mnemonic;
 
-      str_hash_insert (cr16_inst_hash, mnemonic,
-		       (char *)(cr16_instruction + i));
+      if (str_hash_insert (cr16_inst_hash, mnemonic, cr16_instruction + i, 0))
+	as_fatal (_("duplicate %s"), mnemonic);
+
       /* Insert unique names into hash table.  The CR16 instruction set
          has many identical opcode names that have different opcodes based
          on the operands.  This hash table then provides a quick index to

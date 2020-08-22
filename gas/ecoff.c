@@ -1578,7 +1578,8 @@ add_string (varray_t *vp,			/* string obstack */
 
       strcpy (hash_ptr->string, str);
 
-      str_hash_insert (hash_tbl, str, (char *) hash_ptr);
+      if (str_hash_insert (hash_tbl, str, hash_ptr, 0) != NULL)
+	as_fatal (_("duplicate %s"), str);
     }
 
   if (ret_hash != (shash_t **) NULL)
@@ -2030,7 +2031,7 @@ get_tag (const char *tag,	/* tag name */
 
       perm = xstrdup (tag);
       hash_ptr = allocate_shash ();
-      str_hash_insert (tag_hash, perm, (char *) hash_ptr);
+      str_hash_insert (tag_hash, perm, hash_ptr, 0);
       hash_ptr->string = perm;
     }
 

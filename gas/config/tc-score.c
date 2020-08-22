@@ -2203,7 +2203,8 @@ s3_dependency_type_from_insn (char *insn_name)
   const struct s3_insn_to_dependency *tmp;
 
   strcpy (name, insn_name);
-  tmp = (const struct s3_insn_to_dependency *) str_hash_find (s3_dependency_insn_hsh, name);
+  tmp = (const struct s3_insn_to_dependency *)
+    str_hash_find (s3_dependency_insn_hsh, name);
 
   if (tmp)
     return tmp->type;
@@ -2662,7 +2663,8 @@ s3_parse_16_32_inst (char *insnstr, bfd_boolean gen_frag_p)
   c = *p;
   *p = '\0';
 
-  opcode = (const struct s3_asm_opcode *) str_hash_find (s3_score_ops_hsh, operator);
+  opcode = (const struct s3_asm_opcode *) str_hash_find (s3_score_ops_hsh,
+							 operator);
   *p = c;
 
   memset (&s3_inst, '\0', sizeof (s3_inst));
@@ -2708,7 +2710,8 @@ s3_parse_48_inst (char *insnstr, bfd_boolean gen_frag_p)
   c = *p;
   *p = '\0';
 
-  opcode = (const struct s3_asm_opcode *) str_hash_find (s3_score_ops_hsh, operator);
+  opcode = (const struct s3_asm_opcode *) str_hash_find (s3_score_ops_hsh,
+							 operator);
   *p = c;
 
   memset (&s3_inst, '\0', sizeof (s3_inst));
@@ -6265,8 +6268,8 @@ s3_insert_reg (const struct s3_reg_entry *r, htab_t htab)
     }
   buf2[i] = '\0';
 
-  str_hash_insert (htab, buf, (void *) r);
-  str_hash_insert (htab, buf2, (void *) r);
+  str_hash_insert (htab, buf, r, 0);
+  str_hash_insert (htab, buf2, r, 0);
 }
 
 static void
@@ -6310,7 +6313,7 @@ s3_build_score_ops_hsh (void)
       new_opcode->type = insn->type;
       new_opcode->bitmask = insn->bitmask;
       str_hash_insert (s3_score_ops_hsh, new_opcode->template_name,
-                   (void *) new_opcode);
+		       new_opcode, 0);
     }
 }
 
@@ -6336,8 +6339,7 @@ s3_build_dependency_insn_hsh (void)
       strcpy (buf, tmp->insn_name);
       new_i2n->insn_name = buf;
       new_i2n->type = tmp->type;
-      str_hash_insert (s3_dependency_insn_hsh, new_i2n->insn_name,
-                   (void *) new_i2n);
+      str_hash_insert (s3_dependency_insn_hsh, new_i2n->insn_name, new_i2n, 0);
     }
 }
 

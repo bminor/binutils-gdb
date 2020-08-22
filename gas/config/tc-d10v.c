@@ -289,7 +289,7 @@ md_begin (void)
       if (strcmp (prev_name, opcode->name))
 	{
 	  prev_name = (char *) opcode->name;
-	  str_hash_insert (d10v_hash, opcode->name, (char *) opcode);
+	  str_hash_insert (d10v_hash, opcode->name, opcode, 0);
 	}
     }
 

@@ -285,7 +285,8 @@ md_begin (void)
   for (i = 0; i < num_dlx_opcodes; i++)
     {
       const char *name = machine_opcodes[i].name;
-      str_hash_insert (op_hash, name, (void *) &machine_opcodes[i]);
+      if (str_hash_insert (op_hash, name, &machine_opcodes[i], 0) != NULL)
+	as_fatal (_("duplicate %s"), name);
     }
 
   define_some_regs ();

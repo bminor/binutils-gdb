@@ -314,7 +314,7 @@ md_begin (void)
 
   /* Insert opcode names into a hash table.  */
   for (opcode = (struct d30v_opcode *) d30v_opcode_table; opcode->name; opcode++)
-      str_hash_insert (d30v_hash, opcode->name, (char *) opcode);
+      str_hash_insert (d30v_hash, opcode->name, opcode, 0);
 
   fixups = &FixUps[0];
   FixUps[0].next = &FixUps[1];

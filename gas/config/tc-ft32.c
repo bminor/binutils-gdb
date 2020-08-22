@@ -58,7 +58,7 @@ md_begin (void)
 
   /* Insert names into hash table.  */
   for (opcode = ft32_opc_info; opcode->name; opcode++)
-    str_hash_insert (opcode_hash_control, opcode->name, (char *) opcode);
+    str_hash_insert (opcode_hash_control, opcode->name, opcode, 0);
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, 0);
   if (!norelax)

@@ -112,17 +112,12 @@ md_begin (void)
 {
   int i;
 
-  /* initialize hash table */
-
   op_hash = str_htab_create ();
 
-  /* loop until you see the end of the list */
-
+  /* Hash each mnemonic and record its position.  There are
+     duplicates, keep just the first.  */
   for (i = 0; i < spu_num_opcodes; i++)
-    /* hash each mnemonic and record its position */
-    if (str_hash_find (op_hash, spu_opcodes[i].mnemonic) == NULL)
-      str_hash_insert (op_hash, spu_opcodes[i].mnemonic,
-		       (void *) &spu_opcodes[i]);
+    str_hash_insert (op_hash, spu_opcodes[i].mnemonic, &spu_opcodes[i], 0);
 }
 
 const char *md_shortopts = "";

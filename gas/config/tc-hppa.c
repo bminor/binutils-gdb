@@ -8242,7 +8242,8 @@ md_begin (void)
     {
       const char *name = pa_opcodes[i].name;
 
-      str_hash_insert (op_hash, name, (void *)&pa_opcodes[i]);
+      if (str_hash_insert (op_hash, name, &pa_opcodes[i], 0) != NULL)
+	as_fatal (_("duplicate %s"), name);
 
       do
 	{

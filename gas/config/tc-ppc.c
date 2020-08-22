@@ -1682,13 +1682,17 @@ ppc_setup_opcodes (void)
 	}
 
       if ((ppc_cpu & op->flags) != 0
-	  && !(ppc_cpu & op->deprecated))
-	str_hash_insert (ppc_hash, op->name, (void *) op);
+	  && !(ppc_cpu & op->deprecated)
+	  && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
+	{
+	  as_bad (_("duplicate %s"), op->name);
+	  bad_insn = TRUE;
+	}
     }
 
   if ((ppc_cpu & PPC_OPCODE_ANY) != 0)
     for (op = powerpc_opcodes; op < op_end; op++)
-      str_hash_insert (ppc_hash, op->name, (void *) op);
+      str_hash_insert (ppc_hash, op->name, op, 0);
 
   op_end = prefix_opcodes + prefix_num_opcodes;
   for (op = prefix_opcodes; op < op_end; op++)
@@ -1716,13 +1720,17 @@ ppc_setup_opcodes (void)
 	}
 
       if ((ppc_cpu & op->flags) != 0
-	  && !(ppc_cpu & op->deprecated))
-	str_hash_insert (ppc_hash, op->name, (void *) op);
+	  && !(ppc_cpu & op->deprecated)
+	  && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
+	{
+	  as_bad (_("duplicate %s"), op->name);
+	  bad_insn = TRUE;
+	}
     }
 
   if ((ppc_cpu & PPC_OPCODE_ANY) != 0)
     for (op = prefix_opcodes; op < op_end; op++)
-      str_hash_insert (ppc_hash, op->name, (void *) op);
+      str_hash_insert (ppc_hash, op->name, op, 0);
 
   op_end = vle_opcodes + vle_num_opcodes;
   for (op = vle_opcodes; op < op_end; op++)
@@ -1751,8 +1759,12 @@ ppc_setup_opcodes (void)
 	}
 
       if ((ppc_cpu & op->flags) != 0
-	  && !(ppc_cpu & op->deprecated))
-	str_hash_insert (ppc_hash, op->name, (void *) op);
+	  && !(ppc_cpu & op->deprecated)
+	  && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
+	{
+	  as_bad (_("duplicate %s"), op->name);
+	  bad_insn = TRUE;
+	}
     }
 
   /* SPE2 instructions */
@@ -1785,12 +1797,17 @@ ppc_setup_opcodes (void)
 	      bad_insn |= insn_validate (op);
 	    }
 
-	  if ((ppc_cpu & op->flags) != 0 && !(ppc_cpu & op->deprecated))
-	    str_hash_insert (ppc_hash, op->name, (void *) op);
+	  if ((ppc_cpu & op->flags) != 0
+	      && !(ppc_cpu & op->deprecated)
+	      && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
+	    {
+	      as_bad (_("duplicate %s"), op->name);
+	      bad_insn = TRUE;
+	    }
 	}
 
       for (op = spe2_opcodes; op < op_end; op++)
-	str_hash_insert (ppc_hash, op->name, (void *) op);
+	str_hash_insert (ppc_hash, op->name, op, 0);
     }
 
   /* Insert the macros into a hash table.  */
@@ -1798,10 +1815,13 @@ ppc_setup_opcodes (void)
 
   macro_end = powerpc_macros + powerpc_num_macros;
   for (macro = powerpc_macros; macro < macro_end; macro++)
-    {
-      if ((macro->flags & ppc_cpu) != 0 || (ppc_cpu & PPC_OPCODE_ANY) != 0)
-	str_hash_insert (ppc_macro_hash, macro->name, (void *) macro);
-    }
+    if (((macro->flags & ppc_cpu) != 0
+	 || (ppc_cpu & PPC_OPCODE_ANY) != 0)
+	&& str_hash_insert (ppc_macro_hash, macro->name, macro, 0) != NULL)
+      {
+	as_bad (_("duplicate %s"), macro->name);
+	bad_insn = TRUE;
+      }
 
   if (bad_insn)
     abort ();
@@ -3116,7 +3136,8 @@ md_assemble (char *str)
     {
       const struct powerpc_macro *macro;
 
-      macro = (const struct powerpc_macro *) str_hash_find (ppc_macro_hash, str);
+      macro = (const struct powerpc_macro *) str_hash_find (ppc_macro_hash,
+							    str);
       if (macro == (const struct powerpc_macro *) NULL)
 	as_bad (_("unrecognized opcode: `%s'"), str);
       else
