@@ -1,3 +1,9 @@
+2020-08-23  John David Anglin  <danglin@gcc.gnu.org>
+
+	PR binutils/26357
+	* configure.ac: Disable plugins by default on 32-bit hppa*-*-hpux*.
+	* configure: Regenerate.
+
 2020-08-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26382

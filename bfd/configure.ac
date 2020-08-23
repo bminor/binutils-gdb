@@ -46,7 +46,7 @@ ACX_LARGEFILE
 
 changequote(,)dnl
 case "${target}" in
-    vax-*-netbsdelf*) ;;
+    hppa*64*-*-* | vax-*-netbsdelf*) ;;
     *-*-*aout* | i[3-7]86-*-bsd* | i[3-7]86-*-msdos* | ns32k-*-* | \
     pdp11-*-* | vax-*-*bsd*)
 changequote([,])dnl
@@ -57,7 +57,7 @@ changequote([,])dnl
 		plugins=no
 	    fi
 	fi ;;
-    *-*-*vms* | \
+    hppa*-*-hpux* | *-*-*vms* | \
     powerpc*-*-aix* | powerpc-*-beos* | powerpc-*-macos* | rs6000-*-*)
 	if test "$plugins" = "yes"; then
 	    if test "${enable_plugins+set}" = set; then
