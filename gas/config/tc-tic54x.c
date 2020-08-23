@@ -551,6 +551,7 @@ stag_add_field_symbols (struct stag *stag,
   while (field != NULL)
     {
       char *name = concat (prefix, field->name, NULL);
+      char *freename = name;
 
       if (rootsym == NULL)
 	{
@@ -568,6 +569,7 @@ stag_add_field_symbols (struct stag *stag,
 	  replacement = concat (S_GET_NAME (rootsym), "+", root_stag_name,
 				name + strlen (S_GET_NAME (rootsym)), NULL);
 	  str_hash_insert (subsym_hash[0], name, replacement, 0);
+	  freename = NULL;
 	}
 
       /* Recurse if the field is a structure.
@@ -577,7 +579,7 @@ stag_add_field_symbols (struct stag *stag,
 				field->offset,
 				rootsym, root_stag_name);
       field = field->next;
-      free (name);
+      free (freename);
     }
   free (prefix);
 }

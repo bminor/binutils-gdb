@@ -35,6 +35,8 @@
 #define MAX_OPERANDS 4
 #define PARALLEL_SEPARATOR '|'
 #define LABELS_WITHOUT_COLONS 1
+#undef LOCAL_LABELS_FB
+
 /* accept 0FFFFh, 1010b, etc.  */
 #define NUMBERS_WITH_SUFFIX 1
 /* $ is section program counter */

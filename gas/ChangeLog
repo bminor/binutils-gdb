@@ -1,5 +1,14 @@
 2020-08-24  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-tic54x.c (stag_add_field_symbols): Don't free "name"
+	in case where it isn't copied.
+	* config/tc-tic54x.h (LOCAL_LABELS_FB): Undef.
+	* testsuite/gas/tic54x/field.d: Dump section contents and symbols
+	rather than disassembling.
+	* testsuite/gas/tic54x/set.d: Adjust for newer disassembly.
+
+2020-08-24  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-aarch64.c (md_begin): Don't bother checking for
 	out of memory failure from str_htab_create.
 	* config/tc-arc.c (arc_insert_opcode, md_begin): Likewise.
