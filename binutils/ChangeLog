@@ -1,3 +1,8 @@
+2020-08-24  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (dump_section_as_strings) Avoid false positive
+	"may be used uninitialised".
+
 2020-08-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/26382

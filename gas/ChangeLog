@@ -1,5 +1,11 @@
 2020-08-24  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-arm.c (move_or_literal_pool): Avoid false positive
+	"may be used uninitialised".
+	(opcode_lookup): Likewise.
+
+2020-08-24  Alan Modra  <amodra@gmail.com>
+
 	PR 26526
 	* symbols.c (local_symbol_convert): Clear out xtra.
 

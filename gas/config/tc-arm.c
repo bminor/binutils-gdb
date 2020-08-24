@@ -8898,16 +8898,13 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 		  /* Check if on thumb2 it can be done with a mov.w, mvn or
 		     movw instruction.  */
 		  unsigned int newimm;
-		  bfd_boolean isNegated;
+		  bfd_boolean isNegated = FALSE;
 
 		  newimm = encode_thumb32_immediate (v);
-		  if (newimm != (unsigned int) FAIL)
-		    isNegated = FALSE;
-		  else
+		  if (newimm == (unsigned int) FAIL)
 		    {
 		      newimm = encode_thumb32_immediate (~v);
-		      if (newimm != (unsigned int) FAIL)
-			isNegated = TRUE;
+		      isNegated = TRUE;
 		    }
 
 		  /* The number can be loaded with a mov.w or mvn
@@ -22622,6 +22619,7 @@ opcode_lookup (char **str)
   /* Look for unaffixed or special-case affixed mnemonic.  */
   opcode = (const struct asm_opcode *) str_hash_find_n (arm_ops_hsh, base,
 							end - base);
+  cond = NULL;
   if (opcode)
     {
       /* step U */
