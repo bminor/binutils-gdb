@@ -1,3 +1,19 @@
+2020-08-24  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* config/tc-csky.c (csky_archs): Add item for CK860,
+	change ck810 and ck807's arch_flag.
+	(csky_cpus): Add item for CK860.
+	(md_begin): Enable DSP for CK810 and CK807 by default.
+	(md_apply_fix): Fix CKCORE_TLS_IE32 relocation failure.
+	* gas/testsuite/gas/csky/cskyv2_all.d: Change 'sync 0'
+	to 'sync'.
+	* gas/testsuite/gas/csky/cskyv2_all.s: Likewise.
+	* gas/testsuite/gas/csky/cskyv2_ck860.d: New.
+	* gas/testsuite/gas/csky/cskyv2_ck860.s: New.
+	* gas/testsuite/gas/csky/enhance_dsp.d: Change plsli.u16
+	to plsli.16.
+	* gas/testsuite/gas/csky/enhance_dsp.s: Likewise.
+
 2020-08-24  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-tic54x.c (stag_add_field_symbols): Don't free "name"

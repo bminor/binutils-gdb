@@ -1,3 +1,10 @@
+2020-08-24  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* csky-dis.c (csky_find_inst_info): Skip CK860's instructions
+	in other CPUs to speed up disassembling.
+	* csky-opc.h (csky_v2_opcodes): Add CK860's instructions,
+	Change plsli.u16 to plsli.16, change sync's operand format.
+
 2020-08-21  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* csky-opc.h (csky_v2_opcodes): Add instruction bnezad.

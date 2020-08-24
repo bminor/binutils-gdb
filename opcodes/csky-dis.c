@@ -159,6 +159,15 @@ csky_find_inst_info (struct csky_opcode_info const **pinfo,
   p = g_opcodeP;
   while (p->mnemonic)
     {
+      /* FIXME: Skip 860's instruction in other CPUs. It is not suitable.
+	 These codes need to be optimized.  */
+      if (((CSKY_ARCH_MASK & mach_flag) != CSKY_ARCH_860)
+	  && (p->isa_flag32 & CSKYV2_ISA_10E60))
+	{
+	  p++;
+	  continue;
+	}
+
       /* Get the opcode mask.  */
       for (i = 0; i < OP_TABLE_NUM; i++)
 	if (length == 2)

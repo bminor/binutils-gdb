@@ -30,6 +30,7 @@
 #define CSKYV2_ISA_7E10     (1 << 5)
 #define CSKYV2_ISA_3E3R1    (1 << 6)
 #define CSKYV2_ISA_3E3R2    (1 << 7)
+#define CSKYV2_ISA_10E60    (1 << 8)
 
 #define CSKY_ISA_TRUST      (1 << 11)
 #define CSKY_ISA_CACHE      (1 << 12)
@@ -70,6 +71,7 @@
 #define CSKY_ARCH_803       0x9
 #define CSKY_ARCH_807       0x6
 #define CSKY_ARCH_810       0x8
+#define CSKY_ARCH_860       0xb
 
 #define CSKY_ARCH_MAC       (1 << 15)
 #define CSKY_ARCH_DSP       (1 << 14)

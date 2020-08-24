@@ -1,3 +1,8 @@
+2020-08-24  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* bfd-in2.h (bfd_mach_ck860): New.
+	* cpu-csky.c (arch_info_struct): Add item for CK860.
+
 2020-08-24  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Set has_tls_reloc for

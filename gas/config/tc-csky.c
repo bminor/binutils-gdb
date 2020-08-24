@@ -564,12 +564,14 @@ const struct csky_arch_info csky_archs[] =
   {"ck801",  CSKY_ARCH_801,  bfd_mach_ck801},
   {"ck802",  CSKY_ARCH_802,  bfd_mach_ck802},
   {"ck803",  CSKY_ARCH_803,  bfd_mach_ck803},
-#define CSKY_ARCH_807_BASE    CSKY_ARCH_807 | CSKY_ARCH_DSP
-#define CSKY_ARCH_810_BASE    CSKY_ARCH_810 | CSKY_ARCH_DSP
-  {"ck807",  CSKY_ARCH_807_BASE,  bfd_mach_ck807},
-  {"ck810",  CSKY_ARCH_810_BASE,  bfd_mach_ck810},
+  {"ck807",  CSKY_ARCH_807,  bfd_mach_ck807},
+  {"ck810",  CSKY_ARCH_810,  bfd_mach_ck810},
+  {"ck860",  CSKY_ARCH_860,  bfd_mach_ck860},
   {NULL, 0, 0}
 };
+
+#define CSKY_ARCH_807_BASE    CSKY_ARCH_807 | CSKY_ARCH_DSP
+#define CSKY_ARCH_810_BASE    CSKY_ARCH_810 | CSKY_ARCH_DSP
 
 /* C-SKY cpus table.  */
 const struct csky_cpu_info csky_cpus[] =
@@ -682,6 +684,11 @@ const struct csky_cpu_info csky_cpus[] =
   {"ck810tv", CSKY_ARCH_810_BASE, CSKY_ISA_810 | CSKYV2_ISA_DSP | CSKY_ISA_TRUST},
   {"ck810ft", CSKY_ARCH_810_BASE | CSKY_ARCH_FLOAT, CSKY_ISA_810 | CSKYV2_ISA_DSP | CSKY_ISA_VDSP | CSKY_ISA_FLOAT_810 | CSKY_ISA_TRUST},
   {"ck810ftv", CSKY_ARCH_810_BASE | CSKY_ARCH_FLOAT, CSKY_ISA_810 | CSKYV2_ISA_DSP | CSKY_ISA_VDSP | CSKY_ISA_FLOAT_810 | CSKY_ISA_TRUST},
+
+  /* CK860 Series.  */
+#define CSKY_ISA_860    (CSKY_ISA_810 | CSKYV2_ISA_10E60)
+#define CSKY_ISA_FLOAT_860 (CSKY_ISA_FLOAT_810)
+  {"ck860", CSKY_ARCH_860, CSKY_ISA_860},
 
   {NULL, 0, 0}
 };
@@ -1207,7 +1214,14 @@ md_begin (void)
 	as_warn (_("-mcpu conflict with other model parameters, using -mcpu"));
     }
   else if (arch_flag != 0)
-    mach_flag |= arch_flag | flags;
+    {
+      if ((arch_flag & CSKY_ARCH_MASK) == CSKY_ARCH_810
+	  || ((arch_flag & CSKY_ARCH_MASK) == CSKY_ARCH_807)) {
+	  /* CK807 and CK810 have DSP instruction by default.  */
+	  mach_flag |= CSKY_ARCH_DSP;
+      }
+      mach_flag |= arch_flag | flags;
+    }
   else
     {
 #ifdef TARGET_WITH_CPU
@@ -4941,6 +4955,7 @@ md_apply_fix (fixS   *fixP,
 	   struct tls_addend *ta = &(fixP->tc_fix_data);
 	   fixP->fx_offset = (fixP->fx_frag->fr_address + fixP->fx_where
 			      - (ta->frag->fr_address + ta->offset));
+	   *valP = fixP->fx_offset;
 	 }
 	 /* Fall through.  */
        case BFD_RELOC_CKCORE_TLS_LE32:
@@ -5002,6 +5017,7 @@ md_apply_fix (fixS   *fixP,
 	struct tls_addend *ta = &(fixP->tc_fix_data);
 	fixP->fx_offset = (fixP->fx_frag->fr_address + fixP->fx_where
 			   - (ta->frag->fr_address + ta->offset));
+	*valP = fixP->fx_offset;
       }
       /* Fall through.  */
     case BFD_RELOC_CKCORE_TLS_LE32:
