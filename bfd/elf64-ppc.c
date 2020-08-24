@@ -5073,19 +5073,21 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    ppc64_sec->u.toc.symndx[rel->r_offset / 8 + 1] = -2;
 	  goto dodyn;
 
-	case R_PPC64_TPREL16:
-	case R_PPC64_TPREL16_LO:
 	case R_PPC64_TPREL16_HI:
 	case R_PPC64_TPREL16_HA:
-	case R_PPC64_TPREL16_DS:
-	case R_PPC64_TPREL16_LO_DS:
 	case R_PPC64_TPREL16_HIGH:
 	case R_PPC64_TPREL16_HIGHA:
 	case R_PPC64_TPREL16_HIGHER:
 	case R_PPC64_TPREL16_HIGHERA:
 	case R_PPC64_TPREL16_HIGHEST:
 	case R_PPC64_TPREL16_HIGHESTA:
+	  sec->has_tls_reloc = 1;
+	  /* Fall through.  */
 	case R_PPC64_TPREL34:
+	case R_PPC64_TPREL16:
+	case R_PPC64_TPREL16_DS:
+	case R_PPC64_TPREL16_LO:
+	case R_PPC64_TPREL16_LO_DS:
 	  if (bfd_link_dll (info))
 	    info->flags |= DF_STATIC_TLS;
 	  goto dodyn;
@@ -7936,6 +7938,8 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
   if (htab == NULL)
     return FALSE;
 
+  htab->do_tls_opt = 1;
+
   /* Make two passes over the relocs.  On the first pass, mark toc
      entries involved with tls relocs, and check that tls relocs
      involved in setting up a tls_get_addr call are indeed followed by
@@ -8240,6 +8244,42 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
 			}
 		      break;
 
+		    case R_PPC64_TPREL16_HA:
+		      if (pass == 0)
+			{
+			  unsigned char buf[4];
+			  unsigned int insn;
+			  bfd_vma off = rel->r_offset & ~3;
+			  if (!bfd_get_section_contents (ibfd, sec, buf,
+							 off, 4))
+			    goto err_free_rel;
+			  insn = bfd_get_32 (ibfd, buf);
+			  /* addis rt,13,imm */
+			  if ((insn & ((0x3fu << 26) | 0x1f << 16))
+			      != ((15u << 26) | (13 << 16)))
+			    {
+			      /* xgettext:c-format */
+			      info->callbacks->minfo
+				(_("%H: warning: %s unexpected insn %#x.\n"),
+				 ibfd, sec, off, "R_PPC64_TPREL16_HA", insn);
+			      htab->do_tls_opt = 0;
+			    }
+			}
+		      continue;
+
+		    case R_PPC64_TPREL16_HI:
+		    case R_PPC64_TPREL16_HIGH:
+		    case R_PPC64_TPREL16_HIGHA:
+		    case R_PPC64_TPREL16_HIGHER:
+		    case R_PPC64_TPREL16_HIGHERA:
+		    case R_PPC64_TPREL16_HIGHEST:
+		    case R_PPC64_TPREL16_HIGHESTA:
+		      /* These can all be used in sequences along with
+			 TPREL16_LO or TPREL16_LO_DS in ways we aren't
+			 able to verify easily.  */
+		      htab->do_tls_opt = 0;
+		      continue;
+
 		    default:
 		      continue;
 		    }
@@ -8406,7 +8446,6 @@ ppc64_elf_tls_optimize (struct bfd_link_info *info)
       }
 
   free (toc_ref);
-  htab->do_tls_opt = 1;
   return TRUE;
 }
 
@@ -16913,19 +16952,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
 	    {
 	      bfd_byte *p = contents + (rel->r_offset & ~3);
-	      insn = bfd_get_32 (input_bfd, p);
-	      if ((insn & ((0x3fu << 26) | 0x1f << 16))
-		  != ((15u << 26) | (13 << 16)) /* addis rt,13,imm */)
-		/* xgettext:c-format */
-		info->callbacks->minfo
-		  (_("%H: warning: %s unexpected insn %#x.\n"),
-		   input_bfd, input_section, rel->r_offset,
-		   ppc64_elf_howto_table[r_type]->name, insn);
-	      else
-		{
-		  bfd_put_32 (input_bfd, NOP, p);
-		  goto copy_reloc;
-		}
+	      bfd_put_32 (input_bfd, NOP, p);
+	      goto copy_reloc;
 	    }
 	  break;
 

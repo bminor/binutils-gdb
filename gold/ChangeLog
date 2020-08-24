@@ -1,3 +1,11 @@
+2020-08-24  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc): Add tprel_opt_ and accessors.
+	(Target_powerpc::Scan::local): Sanity check tprel high relocs.
+	(Target_powerpc::Scan::global): Likewise.
+	(Target_powerpc::Relocate::relocate): Control tprel optimisation
+	with tprel_opt_ and enable for 32-bit.
+
 2020-08-12  Nick Clifton  <nickc@redhat.com>
 
 	* po/sr.po: Updated Serbian translation.
