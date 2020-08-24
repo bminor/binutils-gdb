@@ -1,5 +1,10 @@
 2020-08-24  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ld-sparc/tlssunbin32.rd: Update for new readelf output.
+	* testsuite/ld-sparc/tlssunbin64.rd: Likewise.
+
+2020-08-24  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ld-powerpc/tls32.d: Update for TPREL_HA/LO optimisation.
 	* testsuite/ld-powerpc/tlsexe32.d: Likewise.
 	* testsuite/ld-powerpc/tlsldopt32.d: Likewise.
