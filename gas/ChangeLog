@@ -1,3 +1,8 @@
+2020-08-24  Alan Modra  <amodra@gmail.com>
+
+	PR 26526
+	* symbols.c (local_symbol_convert): Clear out xtra.
+
 2020-08-21  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* config/tc-csky.c (CSKY_ISA_803R2): New.

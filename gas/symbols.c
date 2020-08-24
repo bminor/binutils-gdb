@@ -382,7 +382,8 @@ local_symbol_convert (void *sym)
 
   ++local_symbol_conversion_count;
 
-  xtra = (struct xsymbol *) obstack_alloc (&notes, sizeof *xtra);
+  xtra = (struct xsymbol *) obstack_alloc (&notes, sizeof (*xtra));
+  memset (xtra, 0, sizeof (*xtra));
   val = ent->lsy.value;
   ent->sy.x = xtra;
 
