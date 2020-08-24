@@ -371,8 +371,9 @@ struct got_entry
 };
 
 #define spu_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == SPU_ELF_DATA ? ((struct spu_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == SPU_ELF_DATA)		\
+   ? (struct spu_link_hash_table *) (p)->hash : NULL)
 
 struct call_info
 {

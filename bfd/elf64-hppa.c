@@ -145,8 +145,9 @@ struct elf64_hppa_link_hash_table
 };
 
 #define hppa_link_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == HPPA64_ELF_DATA ? ((struct elf64_hppa_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == HPPA64_ELF_DATA)	\
+   ? (struct elf64_hppa_link_hash_table *) (p)->hash : NULL)
 
 #define hppa_elf_hash_entry(ent) \
   ((struct elf64_hppa_link_hash_entry *)(ent))

@@ -67,8 +67,9 @@ struct elf_lm32_link_hash_table
 /* Get the lm32 ELF linker hash table from a link_info structure.  */
 
 #define lm32_elf_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == LM32_ELF_DATA ? ((struct elf_lm32_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == LM32_ELF_DATA)		\
+   ? (struct elf_lm32_link_hash_table *) (p)->hash : NULL)
 
 #define lm32fdpic_got_section(info) \
   (lm32_elf_hash_table (info)->root.sgot)

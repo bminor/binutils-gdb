@@ -106,9 +106,9 @@ struct elf32_avr_link_hash_table
 
 /* Various hash macros and functions.  */
 #define avr_link_hash_table(p) \
-  /* PR 3874: Check that we have an AVR style hash table before using it.  */\
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == AVR_ELF_DATA ? ((struct elf32_avr_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == AVR_ELF_DATA)		\
+   ? (struct elf32_avr_link_hash_table *) (p)->hash : NULL)
 
 #define avr_stub_hash_entry(ent) \
   ((struct elf32_avr_stub_hash_entry *)(ent))

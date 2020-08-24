@@ -837,8 +837,9 @@ struct elf_cris_link_hash_table
 /* Get the CRIS ELF linker hash table from a link_info structure.  */
 
 #define elf_cris_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == CRIS_ELF_DATA ? ((struct elf_cris_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == CRIS_ELF_DATA)		\
+   ? (struct elf_cris_link_hash_table *) (p)->hash : NULL)
 
 /* Get the CRIS ELF linker hash entry from a regular hash entry (the
    "parent class").  The .root reference is just a simple type

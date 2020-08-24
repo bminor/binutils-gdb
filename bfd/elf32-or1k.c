@@ -921,8 +921,9 @@ struct elf_or1k_link_hash_table
 
 /* Get the ELF linker hash table from a link_info structure.  */
 #define or1k_elf_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-   == OR1K_ELF_DATA ? ((struct elf_or1k_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == OR1K_ELF_DATA)		\
+   ? (struct elf_or1k_link_hash_table *) (p)->hash : NULL)
 
 static bfd_boolean
 elf_or1k_mkobject (bfd *abfd)

@@ -1,3 +1,38 @@
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
+	* elf-m10300.c (elf32_mn10300_hash_table): Test is_elf_hash_table
+	before accessing elf_hash_table_id.
+	* elf32-arc.c (elf_arc_hash_table): Likewise.
+	* elf32-arm.c (elf32_arm_hash_table): Likewise.
+	* elf32-avr.c (avr_link_hash_table): Likewise.
+	* elf32-bfin.c (bfinfdpic_hash_table): Likewise.
+	* elf32-cris.c (elf_cris_hash_table): Likewise.
+	* elf32-csky.c (csky_elf_hash_table): Likewise.
+	* elf32-frv.c (frvfdpic_hash_table): Likewise.
+	* elf32-hppa.c (hppa_link_hash_table): Likewise.
+	* elf32-lm32.c (lm32_elf_hash_table): Likewise.
+	* elf32-m32r.c (m32r_elf_hash_table): Likewise.
+	* elf32-m68hc1x.h (m68hc11_elf_hash_table): Likewise.
+	* elf32-m68k.c (elf_m68k_hash_table): Likewise.
+	* elf32-metag.c (metag_link_hash_table): Likewise.
+	* elf32-microblaze.c (elf32_mb_hash_table): Likewise.
+	* elf32-nds32.h (nds32_elf_hash_table): Likewise.
+	* elf32-or1k.c (or1k_elf_hash_table): Likewise.
+	* elf32-s390.c (elf_s390_hash_table): Likewise.
+	* elf32-sh.c (sh_elf_hash_table): Likewise.
+	* elf32-spu.c (spu_hash_table): Likewise.
+	* elf32-tilepro.c (tilepro_elf_hash_table): Likewise.
+	* elf32-xtensa.c (elf_xtensa_hash_table): Likewise.
+	* elf64-alpha.c (alpha_elf_hash_table): Likewise.
+	* elf64-hppa.c (hppa_link_hash_table): Likewise.
+	* elf64-ia64-vms.c (elf64_ia64_hash_table): Likewise.
+	* elf64-s390.c (elf_s390_hash_table): Likewise.
+	* elfnn-ia64.c (elfNN_ia64_hash_table): Likewise.
+	* elfnn-riscv.c (riscv_elf_hash_table): Likewise.
+	* elfxx-mips.c (mips_elf_hash_table): Likewise.
+	* elfxx-sparc.h (_bfd_sparc_elf_hash_table): Likewise.
+	* elfxx-tilegx.c (tilegx_elf_hash_table): Likewise.
+
 2020-08-21  Jon Turney  <jon.turney@dronecode.org.uk>
 
 	* elf.c (elfcore_grok_win32pstatus): Change name_size to unsigned

@@ -756,9 +756,10 @@ struct elf32_mb_link_hash_table
 
 /* Get the ELF linker hash table from a link_info structure.  */
 
-#define elf32_mb_hash_table(p)				\
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == MICROBLAZE_ELF_DATA ? ((struct elf32_mb_link_hash_table *) ((p)->hash)) : NULL)
+#define elf32_mb_hash_table(p) \
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == MICROBLAZE_ELF_DATA)	\
+   ? (struct elf32_mb_link_hash_table *) (p)->hash : NULL)
 
 /* Create an entry in a microblaze ELF linker hash table.  */
 

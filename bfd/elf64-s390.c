@@ -670,8 +670,9 @@ struct elf_s390_link_hash_table
 /* Get the s390 ELF linker hash table from a link_info structure.  */
 
 #define elf_s390_hash_table(p)						\
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash))	\
-   == S390_ELF_DATA ? ((struct elf_s390_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == S390_ELF_DATA)		\
+   ? (struct elf_s390_link_hash_table *) (p)->hash : NULL)
 
 #define ELF64 1
 #include "elf-s390-common.c"

@@ -1939,8 +1939,9 @@ elf_arc_relocate_section (bfd *			  output_bfd,
 }
 
 #define elf_arc_hash_table(p) \
-    (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == ARC_ELF_DATA ? ((struct elf_arc_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == ARC_ELF_DATA)		\
+   ? (struct elf_arc_link_hash_table *) (p)->hash : NULL)
 
 static bfd_boolean
 elf_arc_check_relocs (bfd *			 abfd,

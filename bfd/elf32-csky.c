@@ -1184,11 +1184,10 @@ struct csky_elf_link_hash_entry
     (info)))
 
 /* Get the C-SKY ELF linker hash table from a link_info structure.  */
-#define csky_elf_hash_table(info) \
-  ((elf_hash_table_id  ((struct elf_link_hash_table *) ((info)->hash))	\
-    == CSKY_ELF_DATA)							\
-   ? ((struct csky_elf_link_hash_table *) ((info)->hash))		\
-   : NULL)
+#define csky_elf_hash_table(p) \
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == CSKY_ELF_DATA)		\
+   ? (struct csky_elf_link_hash_table *) (p)->hash : NULL)
 
 #define csky_elf_hash_entry(ent)  ((struct csky_elf_link_hash_entry*)(ent))
 

@@ -104,10 +104,10 @@ extern void	   bfd_elf32_nds32_set_target_option (struct bfd_link_info *,
 						      int, int, FILE *,
 						      int, int, int);
 
-#define nds32_elf_hash_table(info) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((info)->hash)) \
-   == NDS32_ELF_DATA ? \
-   ((struct elf_nds32_link_hash_table *) ((info)->hash)) : NULL)
+#define nds32_elf_hash_table(p) \
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == NDS32_ELF_DATA)	\
+   ? (struct elf_nds32_link_hash_table *) (p)->hash : NULL)
 
 #define elf32_nds32_compute_jump_table_size(htab) \
   ((htab)->next_tls_desc_index * 4)

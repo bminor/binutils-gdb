@@ -826,8 +826,9 @@ struct frvfdpic_elf_link_hash_table
 /* Get the FRV ELF linker hash table from a link_info structure.  */
 
 #define frvfdpic_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == FRV_ELF_DATA ? ((struct frvfdpic_elf_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == FRV_ELF_DATA)		\
+   ? (struct frvfdpic_elf_link_hash_table *) (p)->hash : NULL)
 
 #define frvfdpic_got_section(info) \
   (frvfdpic_hash_table (info)->elf.sgot)

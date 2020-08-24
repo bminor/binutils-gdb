@@ -296,8 +296,9 @@ struct elf32_hppa_link_hash_table
 
 /* Various hash macros and functions.  */
 #define hppa_link_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == HPPA32_ELF_DATA ? ((struct elf32_hppa_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == HPPA32_ELF_DATA)	\
+   ? (struct elf32_hppa_link_hash_table *) (p)->hash : NULL)
 
 #define hppa_elf_hash_entry(ent) \
   ((struct elf32_hppa_link_hash_entry *)(ent))

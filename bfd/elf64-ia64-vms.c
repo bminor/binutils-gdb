@@ -170,8 +170,9 @@ struct elf64_ia64_allocate_data
 };
 
 #define elf64_ia64_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == IA64_ELF_DATA ? ((struct elf64_ia64_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == IA64_ELF_DATA)		\
+   ? (struct elf64_ia64_link_hash_table *) (p)->hash : NULL)
 
 struct elf64_ia64_vms_obj_tdata
 {
