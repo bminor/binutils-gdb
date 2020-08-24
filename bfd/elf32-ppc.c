@@ -2230,8 +2230,9 @@ struct ppc_elf_link_hash_table
 /* Get the PPC ELF linker hash table from a link_info structure.  */
 
 #define ppc_elf_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == PPC32_ELF_DATA ? ((struct ppc_elf_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == PPC32_ELF_DATA)	\
+   ? (struct ppc_elf_link_hash_table *) (p)->hash : NULL)
 
 /* Create an entry in a PPC ELF linker hash table.  */
 
