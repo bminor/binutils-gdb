@@ -1,3 +1,8 @@
+2020-08-24  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf2.c (read_attribute_value): Handle DW_FORM_data16.
+	(read_formatted_entries): Likewise. And skip zero entry.
+
 2020-08-24  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* bfd-in2.h (bfd_mach_ck860): New.

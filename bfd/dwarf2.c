@@ -1329,6 +1329,17 @@ read_attribute_value (struct attribute *  attr,
       attr->form = DW_FORM_sdata;
       attr->u.sval = implicit_const;
       break;
+    case DW_FORM_data16:
+      /* This is really a "constant", but there is no way to store that
+         so pretend it is a 16 byte block instead.  */
+      amt = sizeof (struct dwarf_block);
+      blk = (struct dwarf_block *) bfd_alloc (abfd, amt);
+      if (blk == NULL)
+	return NULL;
+      blk->size = 16;
+      info_ptr = read_n_bytes (info_ptr, info_ptr_end, blk);
+      attr->u.blk = blk;
+      break;
     default:
       _bfd_error_handler (_("DWARF error: invalid or unhandled FORM value: %#x"),
 			  form);
@@ -2069,11 +2080,17 @@ read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
 	    case DW_FORM_udata:
 	      *uintp = attr.u.val;
 	      break;
+
+	    case DW_FORM_data16:
+	      /* MD5 data is in the attr.blk, but we are ignoring those.  */
+	      break;
 	    }
 	}
 
-      if (!callback (table, fe.name, fe.dir, fe.time, fe.size))
-	return FALSE;
+      /* Skip the first "zero entry", which is the compilation dir/file.  */
+      if (datai != 0)
+	if (!callback (table, fe.name, fe.dir, fe.time, fe.size))
+	  return FALSE;
     }
 
   *bufp = buf;
