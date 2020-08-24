@@ -3304,12 +3304,14 @@ ppc_elf_check_relocs (bfd *abfd,
 	    return FALSE;
 	  break;
 
+	case R_PPC_TPREL16_HI:
+	case R_PPC_TPREL16_HA:
+	  sec->has_tls_reloc = 1;
+	  /* Fall through.  */
 	  /* We shouldn't really be seeing TPREL32.  */
 	case R_PPC_TPREL32:
 	case R_PPC_TPREL16:
 	case R_PPC_TPREL16_LO:
-	case R_PPC_TPREL16_HI:
-	case R_PPC_TPREL16_HA:
 	  if (bfd_link_dll (info))
 	    info->flags |= DF_STATIC_TLS;
 	  goto dodyn;
@@ -4419,6 +4421,8 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
   if (htab == NULL)
     return FALSE;
 
+  htab->do_tls_opt = 1;
+
   /* Make two passes through the relocs.  First time check that tls
      relocs involved in setting up a tls_get_addr call are indeed
      followed by such a call.  If they are not, don't do any tls
@@ -4584,6 +4588,37 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		      tls_clear = 0;
 		      break;
 
+		    case R_PPC_TPREL16_HA:
+		      if (pass == 0)
+			{
+			  unsigned char buf[4];
+			  unsigned int insn;
+			  bfd_vma off = rel->r_offset & ~3;
+			  if (!bfd_get_section_contents (ibfd, sec, buf,
+							 off, 4))
+			    {
+			      if (elf_section_data (sec)->relocs != relstart)
+				free (relstart);
+			      return FALSE;
+			    }
+			  insn = bfd_get_32 (ibfd, buf);
+			  /* addis rt,2,imm */
+			  if ((insn & ((0x3fu << 26) | 0x1f << 16))
+			      != ((15u << 26) | (2 << 16)))
+			    {
+			      /* xgettext:c-format */
+			      info->callbacks->minfo
+				(_("%H: warning: %s unexpected insn %#x.\n"),
+				 ibfd, sec, off, "R_PPC_TPREL16_HA", insn);
+			      htab->do_tls_opt = 0;
+			    }
+			}
+		      continue;
+
+		    case R_PPC_TPREL16_HI:
+		      htab->do_tls_opt = 0;
+		      continue;
+
 		    default:
 		      continue;
 		    }
@@ -4678,7 +4713,6 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
 		free (relstart);
 	    }
       }
-  htab->do_tls_opt = 1;
   return TRUE;
 }
 
@@ -7555,39 +7589,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
       if (r_type < R_PPC_max)
 	howto = ppc_elf_howto_table[r_type];
 
-      switch (r_type)
-	{
-	default:
-	  break;
-
-	case R_PPC_TPREL16_HA:
-	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
-	    {
-	      bfd_byte *p = contents + (rel->r_offset & ~3);
-	      unsigned int insn = bfd_get_32 (input_bfd, p);
-	      if ((insn & ((0x3fu << 26) | 0x1f << 16))
-		  != ((15u << 26) | (2 << 16)) /* addis rt,2,imm */)
-		/* xgettext:c-format */
-		info->callbacks->minfo
-		  (_("%H: warning: %s unexpected insn %#x.\n"),
-		   input_bfd, input_section, rel->r_offset, howto->name, insn);
-	      else
-		bfd_put_32 (input_bfd, NOP, p);
-	    }
-	  break;
-
-	case R_PPC_TPREL16_LO:
-	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
-	    {
-	      bfd_byte *p = contents + (rel->r_offset & ~3);
-	      unsigned int insn = bfd_get_32 (input_bfd, p);
-	      insn &= ~(0x1f << 16);
-	      insn |= 2 << 16;
-	      bfd_put_32 (input_bfd, insn, p);
-	    }
-	  break;
-	}
-
       tls_type = 0;
       switch (r_type)
 	{
@@ -8750,6 +8751,31 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  bfd_set_error (bfd_error_invalid_operation);
 	  ret = FALSE;
 	  goto copy_reloc;
+	}
+
+      switch (r_type)
+	{
+	default:
+	  break;
+
+	case R_PPC_TPREL16_HA:
+	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
+	    {
+	      bfd_byte *p = contents + (rel->r_offset & ~3);
+	      bfd_put_32 (input_bfd, NOP, p);
+	    }
+	  break;
+
+	case R_PPC_TPREL16_LO:
+	  if (htab->do_tls_opt && relocation + addend + 0x8000 < 0x10000)
+	    {
+	      bfd_byte *p = contents + (rel->r_offset & ~3);
+	      unsigned int insn = bfd_get_32 (input_bfd, p);
+	      insn &= ~(0x1f << 16);
+	      insn |= 2 << 16;
+	      bfd_put_32 (input_bfd, insn, p);
+	    }
+	  break;
 	}
 
       switch (r_type)

@@ -1,3 +1,19 @@
+2020-09-10  Alan Modra  <amodra@gmail.com>
+
+	Apply from master
+	2020-08-24  Alan Modra  <amodra@gmail.com>
+	* testsuite/ld-powerpc/tls32.d: Update for TPREL_HA/LO optimisation.
+	* testsuite/ld-powerpc/tlsexe32.d: Likewise.
+	* testsuite/ld-powerpc/tlsldopt32.d: Likewise.
+	* testsuite/ld-powerpc/tlsmark32.d: Likewise.
+	* testsuite/ld-powerpc/tlsopt4_32.d: Likewise.
+	* testsuite/ld-powerpc/tprel.s,
+	* testsuite/ld-powerpc/tprel.d,
+	* testsuite/ld-powerpc/tprel32.d: New tests.
+	* testsuite/ld-powerpc/tprelbad.s,
+	* testsuite/ld-powerpc/tprelbad.d: New test.
+	* testsuite/ld-powerpc/powerpc.exp: Run them.
+
 2020-08-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/26389
