@@ -3276,8 +3276,9 @@ struct ppc_link_hash_table
 /* Get the ppc64 ELF linker hash table from a link_info structure.  */
 
 #define ppc_hash_table(p) \
-  (elf_hash_table_id ((struct elf_link_hash_table *) ((p)->hash)) \
-  == PPC64_ELF_DATA ? ((struct ppc_link_hash_table *) ((p)->hash)) : NULL)
+  ((is_elf_hash_table ((p)->hash)					\
+    && elf_hash_table_id (elf_hash_table (p)) == PPC64_ELF_DATA)	\
+   ? (struct ppc_link_hash_table *) (p)->hash : NULL)
 
 #define ppc_stub_hash_lookup(table, string, create, copy) \
   ((struct ppc_stub_hash_entry *) \
