@@ -13504,10 +13504,10 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 			 fact a call needing a TOC adjustment.  */
 		      if ((code_sec != NULL
 			   && code_sec->output_section != NULL
-			   && (htab->sec_info[code_sec->id].toc_off
-			       != htab->sec_info[section->id].toc_off)
 			   && (code_sec->has_toc_reloc
-			       || code_sec->makes_toc_func_call))
+			       || code_sec->makes_toc_func_call)
+			   && (htab->sec_info[code_sec->id].toc_off
+			       != htab->sec_info[section->id].toc_off))
 			  || (((hash ? hash->elf.other : sym->st_other)
 			       & STO_PPC64_LOCAL_MASK)
 			      == 1 << STO_PPC64_LOCAL_BIT))
