@@ -652,9 +652,9 @@ proc runto { function args } {
 	    return 0
 	}
 	-re ".*A problem internal to GDB has been detected" {
-	    if { $print_fail } {
-		fail "$test_name (GDB internal error)"
-	    }
+	    # Always emit a FAIL if we encounter an internal error: internal
+	    # errors are never expected.
+	    fail "$test_name (GDB internal error)"
 	    gdb_internal_error_resync
 	    return 0
 	}
