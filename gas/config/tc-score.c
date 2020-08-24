@@ -6277,14 +6277,9 @@ s3_build_reg_hsh (struct s3_reg_map *map)
 {
   const struct s3_reg_entry *r;
 
-  if ((map->htab = str_htab_create ()) == NULL)
-    {
-      as_fatal (_("virtual memory exhausted"));
-    }
+  map->htab = str_htab_create ();
   for (r = map->names; r->name != NULL; r++)
-    {
-      s3_insert_reg (r, map->htab);
-    }
+    s3_insert_reg (r, map->htab);
 }
 
 /* Iterate over the base tables to create the instruction patterns.  */
@@ -6507,13 +6502,11 @@ s3_begin (void)
   segT seg;
   subsegT subseg;
 
-  if ((s3_score_ops_hsh = str_htab_create ()) == NULL)
-    as_fatal (_("virtual memory exhausted"));
+  s3_score_ops_hsh = str_htab_create ();
 
   s3_build_score_ops_hsh ();
 
-  if ((s3_dependency_insn_hsh = str_htab_create ()) == NULL)
-    as_fatal (_("virtual memory exhausted"));
+  s3_dependency_insn_hsh = str_htab_create ();
 
   s3_build_dependency_insn_hsh ();
 

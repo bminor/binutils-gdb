@@ -801,8 +801,6 @@ initialise_reg_hash_table (htab_t *hash_table,
   const reg_entry *rreg;
 
   *hash_table = str_htab_create ();
-  if (*hash_table == NULL)
-    as_fatal (_("Virtual memory exhausted"));
 
   for (rreg = register_table;
        rreg < (register_table + num_entries);
@@ -820,8 +818,7 @@ md_begin (void)
   int i = 0;
 
   /* Set up a hash table for the instructions.  */
-  if ((cr16_inst_hash = str_htab_create ()) == NULL)
-    as_fatal (_("Virtual memory exhausted"));
+  cr16_inst_hash = str_htab_create ();
 
   while (cr16_instruction[i].mnemonic != NULL)
     {

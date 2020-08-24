@@ -530,8 +530,7 @@ md_begin (void)
   int i = 0;
 
   /* Set up a hash table for the instructions.  */
-  if ((crx_inst_hash = str_htab_create ()) == NULL)
-    as_fatal (_("Virtual memory exhausted"));
+  crx_inst_hash = str_htab_create ();
 
   while (crx_instruction[i].mnemonic != NULL)
     {
@@ -553,9 +552,7 @@ md_begin (void)
     }
 
   /* Initialize reg_hash hash table.  */
-  if ((reg_hash = str_htab_create ()) == NULL)
-    as_fatal (_("Virtual memory exhausted"));
-
+  reg_hash = str_htab_create ();
   {
     const reg_entry *regtab;
 
@@ -566,9 +563,7 @@ md_begin (void)
   }
 
   /* Initialize copreg_hash hash table.  */
-  if ((copreg_hash = str_htab_create ()) == NULL)
-    as_fatal (_("Virtual memory exhausted"));
-
+  copreg_hash = str_htab_create ();
   {
     const reg_entry *copregtab;
 

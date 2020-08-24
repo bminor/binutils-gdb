@@ -772,9 +772,6 @@ arc_insert_opcode (const struct arc_opcode *opcode)
   entry->opcode = XRESIZEVEC (const struct arc_opcode *, entry->opcode,
 			      entry->count + 1);
 
-  if (entry->opcode == NULL)
-    as_fatal (_("Virtual memory exhausted"));
-
   entry->opcode[entry->count] = opcode;
   entry->count++;
 }
@@ -2611,8 +2608,6 @@ md_begin (void)
 
   /* Set up a hash table for the instructions.  */
   arc_opcode_hash = str_htab_create ();
-  if (arc_opcode_hash == NULL)
-    as_fatal (_("Virtual memory exhausted"));
 
   /* Initialize the hash table with the insns.  */
   do
@@ -2629,8 +2624,6 @@ md_begin (void)
 
   /* Register declaration.  */
   arc_reg_hash = str_htab_create ();
-  if (arc_reg_hash == NULL)
-    as_fatal (_("Virtual memory exhausted"));
 
   declare_register_set ();
   declare_register ("gp", 26);
@@ -2682,8 +2675,6 @@ md_begin (void)
 
   /* Aux register declaration.  */
   arc_aux_hash = str_htab_create ();
-  if (arc_aux_hash == NULL)
-    as_fatal (_("Virtual memory exhausted"));
 
   const struct arc_aux_reg *auxr = &arc_aux_regs[0];
   unsigned int i;
@@ -2702,8 +2693,6 @@ md_begin (void)
 
   /* Address type declaration.  */
   arc_addrtype_hash = str_htab_create ();
-  if (arc_addrtype_hash == NULL)
-    as_fatal (_("Virtual memory exhausted"));
 
   declare_addrtype ("bd", ARC_NPS400_ADDRTYPE_BD);
   declare_addrtype ("jid", ARC_NPS400_ADDRTYPE_JID);
@@ -4904,8 +4893,6 @@ arc_extcorereg (int opertype)
       ext_condcode.arc_ext_condcode =
 	XRESIZEVEC (struct arc_flag_operand, ext_condcode.arc_ext_condcode,
 		    ext_condcode.size + 1);
-      if (ext_condcode.arc_ext_condcode == NULL)
-	as_fatal (_("Virtual memory exhausted"));
 
       ccode = ext_condcode.arc_ext_condcode + ext_condcode.size - 1;
       ccode->name   = ereg.name;
@@ -4971,8 +4958,6 @@ arc_stralloc (char * s1, const char * s2)
   len += strlen (s2) + 1;
 
   p = (char *) xmalloc (len);
-  if (p == NULL)
-    as_fatal (_("Virtual memory exhausted"));
 
   if (s1)
     {

@@ -30717,16 +30717,15 @@ md_begin (void)
   unsigned mach;
   unsigned int i;
 
-  if (	 (arm_ops_hsh = str_htab_create ()) == NULL
-      || (arm_cond_hsh = str_htab_create ()) == NULL
-      || (arm_vcond_hsh = str_htab_create ()) == NULL
-      || (arm_shift_hsh = str_htab_create ()) == NULL
-      || (arm_psr_hsh = str_htab_create ()) == NULL
-      || (arm_v7m_psr_hsh = str_htab_create ()) == NULL
-      || (arm_reg_hsh = str_htab_create ()) == NULL
-      || (arm_reloc_hsh = str_htab_create ()) == NULL
-      || (arm_barrier_opt_hsh = str_htab_create ()) == NULL)
-    as_fatal (_("virtual memory exhausted"));
+  arm_ops_hsh = str_htab_create ();
+  arm_cond_hsh = str_htab_create ();
+  arm_vcond_hsh = str_htab_create ();
+  arm_shift_hsh = str_htab_create ();
+  arm_psr_hsh = str_htab_create ();
+  arm_v7m_psr_hsh = str_htab_create ();
+  arm_reg_hsh = str_htab_create ();
+  arm_reloc_hsh = str_htab_create ();
+  arm_barrier_opt_hsh = str_htab_create ();
 
   for (i = 0; i < sizeof (insns) / sizeof (struct asm_opcode); i++)
     if (str_hash_find (arm_ops_hsh, insns[i].template_name) == NULL)

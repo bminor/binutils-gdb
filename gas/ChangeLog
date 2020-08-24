@@ -1,5 +1,19 @@
 2020-08-24  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-aarch64.c (md_begin): Don't bother checking for
+	out of memory failure from str_htab_create.
+	* config/tc-arc.c (arc_insert_opcode, md_begin): Likewise.
+	(arc_extcorereg, arc_stralloc): Likewise.
+	* config/tc-arm.c (md_begin): Likewise.
+	* config/tc-cr16.c (initialise_reg_hash_table, md_begin): Likewise.
+	* config/tc-cris.c (md_begin): Likewise.
+	* config/tc-crx.c (md_begin): Likewise.
+	* config/tc-pdp11.c (md_begin): Likewise.
+	* config/tc-score.c (s3_build_reg_hsh, s3_begin): Likewise.
+	* config/tc-score7.c (s7_build_reg_hsh, s7_begin): Likewise.
+
+2020-08-24  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-arm.c (move_or_literal_pool): Avoid false positive
 	"may be used uninitialised".
 	(opcode_lookup): Likewise.

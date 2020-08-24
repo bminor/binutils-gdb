@@ -189,8 +189,6 @@ md_begin (void)
   init_defaults ();
 
   insn_hash = str_htab_create ();
-  if (insn_hash == NULL)
-    as_fatal (_("Virtual memory exhausted"));
 
   for (i = 0; i < pdp11_num_opcodes; i++)
     str_hash_insert (insn_hash, pdp11_opcodes[i].name, pdp11_opcodes + i, 0);

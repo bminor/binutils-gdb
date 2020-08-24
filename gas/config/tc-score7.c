@@ -5369,14 +5369,9 @@ s7_build_reg_hsh (struct s7_reg_map *map)
 {
   const struct s7_reg_entry *r;
 
-  if ((map->htab = str_htab_create ()) == NULL)
-    {
-      as_fatal (_("virtual memory exhausted"));
-    }
+  map->htab = str_htab_create ();
   for (r = map->names; r->name != NULL; r++)
-    {
-      s7_insert_reg (r, map->htab);
-    }
+    s7_insert_reg (r, map->htab);
 }
 
 
@@ -6116,13 +6111,11 @@ s7_begin (void)
   segT seg;
   subsegT subseg;
 
-  if ((s7_score_ops_hsh = str_htab_create ()) == NULL)
-    as_fatal (_("virtual memory exhausted"));
+  s7_score_ops_hsh = str_htab_create ();
 
   s7_build_score_ops_hsh ();
 
-  if ((s7_dependency_insn_hsh = str_htab_create ()) == NULL)
-    as_fatal (_("virtual memory exhausted"));
+  s7_dependency_insn_hsh = str_htab_create ();
 
   s7_build_dependency_insn_hsh ();
 

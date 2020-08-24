@@ -8686,22 +8686,21 @@ md_begin (void)
   unsigned mach;
   unsigned int i;
 
-  if ((aarch64_ops_hsh = str_htab_create ()) == NULL
-      || (aarch64_cond_hsh = str_htab_create ()) == NULL
-      || (aarch64_shift_hsh = str_htab_create ()) == NULL
-      || (aarch64_sys_regs_hsh = str_htab_create ()) == NULL
-      || (aarch64_pstatefield_hsh = str_htab_create ()) == NULL
-      || (aarch64_sys_regs_ic_hsh = str_htab_create ()) == NULL
-      || (aarch64_sys_regs_dc_hsh = str_htab_create ()) == NULL
-      || (aarch64_sys_regs_at_hsh = str_htab_create ()) == NULL
-      || (aarch64_sys_regs_tlbi_hsh = str_htab_create ()) == NULL
-      || (aarch64_sys_regs_sr_hsh = str_htab_create ()) == NULL
-      || (aarch64_reg_hsh = str_htab_create ()) == NULL
-      || (aarch64_barrier_opt_hsh = str_htab_create ()) == NULL
-      || (aarch64_nzcv_hsh = str_htab_create ()) == NULL
-      || (aarch64_pldop_hsh = str_htab_create ()) == NULL
-      || (aarch64_hint_opt_hsh = str_htab_create ()) == NULL)
-    as_fatal (_("virtual memory exhausted"));
+  aarch64_ops_hsh = str_htab_create ();
+  aarch64_cond_hsh = str_htab_create ();
+  aarch64_shift_hsh = str_htab_create ();
+  aarch64_sys_regs_hsh = str_htab_create ();
+  aarch64_pstatefield_hsh = str_htab_create ();
+  aarch64_sys_regs_ic_hsh = str_htab_create ();
+  aarch64_sys_regs_dc_hsh = str_htab_create ();
+  aarch64_sys_regs_at_hsh = str_htab_create ();
+  aarch64_sys_regs_tlbi_hsh = str_htab_create ();
+  aarch64_sys_regs_sr_hsh = str_htab_create ();
+  aarch64_reg_hsh = str_htab_create ();
+  aarch64_barrier_opt_hsh = str_htab_create ();
+  aarch64_nzcv_hsh = str_htab_create ();
+  aarch64_pldop_hsh = str_htab_create ();
+  aarch64_hint_opt_hsh = str_htab_create ();
 
   fill_instruction_hash_table ();
 

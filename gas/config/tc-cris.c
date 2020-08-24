@@ -1190,8 +1190,6 @@ md_begin (void)
 
   /* Set up a hash table for the instructions.  */
   op_hash = str_htab_create ();
-  if (op_hash == NULL)
-    as_fatal (_("Virtual memory exhausted"));
 
   /* Enable use of ".if ..asm.arch.cris.v32"
      and ".if ..asm.arch.cris.common_v10_v32" and a few others.  */
