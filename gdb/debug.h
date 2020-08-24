@@ -1,6 +1,6 @@
-/* Debug printing functions.
+/* Helpers to format and print debug statements
 
-   Copyright (C) 2014-2020 Free Software Foundation, Inc.
+   Copyright (C) 2020 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,25 +17,16 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "defs.h"
+#ifndef DEBUG_H
+#define DEBUG_H
 
-#include "debug.h"
+/* Print a debug statement prefixed with the module and function name, and
+   with a newline at the end.  */
 
-/* See gdbsupport/common-debug.h.  */
-
-void
-debug_vprintf (const char *fmt, va_list ap)
-{
-  vfprintf_unfiltered (gdb_stdlog, fmt, ap);
-}
-
-/* See debug.h.  */
-
-void
+void ATTRIBUTE_PRINTF (3, 0)
 debug_prefixed_vprintf (const char *module, const char *func, const char *format,
-			va_list args)
-{
-  debug_printf ("[%s] %s: ", module, func);
-  debug_vprintf (format, args);
-  debug_printf ("\n");
-}
+			va_list args);
+
+#endif /* DEBUG_H */
+
+

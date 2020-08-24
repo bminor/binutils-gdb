@@ -68,6 +68,7 @@
 #include "gdbsupport/fileio.h"
 #include "gdbsupport/scope-exit.h"
 #include "gdbsupport/gdb-sigmask.h"
+#include "debug.h"
 
 /* This comment documents high-level logic of this file.
 
@@ -203,14 +204,10 @@ show_debug_linux_nat (struct ui_file *file, int from_tty,
 static void ATTRIBUTE_PRINTF (2, 3)
 linux_nat_debug_printf_1 (const char *func_name, const char *fmt, ...)
 {
-  debug_printf ("[linux-nat] %s: ", func_name);
-
   va_list ap;
   va_start (ap, fmt);
-  debug_vprintf (fmt, ap);
+  debug_prefixed_vprintf ("linux-nat", func_name, fmt, ap);
   va_end (ap);
-
-  debug_printf ("\n");
 }
 
 #define linux_nat_debug_printf(fmt, ...) \

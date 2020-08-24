@@ -70,6 +70,7 @@
 #include "gdbsupport/selftest.h"
 #include "scoped-mock-context.h"
 #include "test-target.h"
+#include "debug.h"
 
 /* Prototypes for local functions */
 
@@ -106,14 +107,10 @@ static int infrun_is_async = -1;
 void
 infrun_debug_printf_1 (const char *func_name, const char *fmt, ...)
 {
-  debug_printf ("[infrun] %s: ", func_name);
-
   va_list ap;
   va_start (ap, fmt);
-  debug_vprintf (fmt, ap);
+  debug_prefixed_vprintf ("infrun", func_name, fmt, ap);
   va_end (ap);
-
-  debug_printf ("\n");
 }
 
 /* See infrun.h.  */
