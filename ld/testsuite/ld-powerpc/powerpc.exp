@@ -372,6 +372,7 @@ if [ supports_ppc64 ] then {
     run_dump_test "tlsgd"
     run_dump_test "tlsld"
     run_dump_test "tlsie"
+    run_dump_test "tprel"
 }
 
 run_dump_test "localgot"
@@ -410,3 +411,6 @@ run_dump_test "vle-multiseg-6"
 
 run_dump_test "ppc476-shared"
 run_dump_test "ppc476-shared2"
+
+run_dump_test "tprel32"
+run_dump_test "tprelbad"
