@@ -2035,13 +2035,8 @@ should_be_inserted (struct bp_location *bl)
       && !(bl->owner->type == bp_single_step
 	   && thread_is_stepping_over_breakpoint (bl->owner->thread)))
     {
-      if (debug_infrun)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "infrun: skipping breakpoint: "
-			      "stepping past insn at: %s\n",
-			      paddress (bl->gdbarch, bl->address));
-	}
+      infrun_debug_printf ("skipping breakpoint: stepping past insn at: %s",
+			   paddress (bl->gdbarch, bl->address));
       return 0;
     }
 
@@ -2050,14 +2045,9 @@ should_be_inserted (struct bp_location *bl)
   if ((bl->loc_type == bp_loc_hardware_watchpoint)
       && stepping_past_nonsteppable_watchpoint ())
     {
-      if (debug_infrun)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "infrun: stepping past non-steppable watchpoint. "
-			      "skipping watchpoint at %s:%d\n",
-			      paddress (bl->gdbarch, bl->address),
-			      bl->length);
-	}
+      infrun_debug_printf ("stepping past non-steppable watchpoint. "
+			   "skipping watchpoint at %s:%d\n",
+			   paddress (bl->gdbarch, bl->address), bl->length);
       return 0;
     }
 
@@ -5446,8 +5436,7 @@ handle_jit_event (void)
   struct frame_info *frame;
   struct gdbarch *gdbarch;
 
-  if (debug_infrun)
-    fprintf_unfiltered (gdb_stdlog, "handling bp_jit_event\n");
+  infrun_debug_printf ("handling bp_jit_event");
 
   /* Switch terminal for any messages produced by
      breakpoint_re_set.  */

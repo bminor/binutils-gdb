@@ -1,3 +1,13 @@
+2020-08-24  Simon Marchi  <simon.marchi@efficios.com>
+
+	* infrun.h (infrun_debug_printf_1): New function declaration.
+	(infrun_debug_printf): New macro.
+	* infrun.c (infrun_debug_printf_1): Use infrun_debug_printf
+	throughout.
+	(infrun_debug_printf): New function.
+	* breakpoint.c (should_be_inserted): Use infrun_debug_printf.
+	(handle_jit_event): Likewise.
+
 2020-08-21  Mark Wielaard  <mark@klomp.org>
 
 	* ada-lex.l: Extend register warnings diagnostics comment for g++.

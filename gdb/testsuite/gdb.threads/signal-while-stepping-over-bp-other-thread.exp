@@ -104,7 +104,7 @@ gdb_test "set debug infrun 1"
 set test "step"
 gdb_test_sequence $test $test {
     "need to step-over"
-    "resume \\(step=1"
+    "resume_1: step=1,"
     "signal arrived while stepping over breakpoint"
     "stepped to a different line"
     "callme"

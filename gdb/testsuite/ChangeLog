@@ -1,3 +1,10 @@
+2020-08-24  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.base/gdb-sigterm.exp (do_test): Update expected regexp.
+	* gdb.threads/signal-while-stepping-over-bp-other-thread.exp:
+	Likewise.
+	* gdb.threads/stepi-random-signal.exp: Likewise.
+
 2020-08-20  Tankut Baris Aktemur  <tankut.baris.aktemur@intel.com>
 
 	* gdb.base/print-file-var.exp: Fix typo "breapoint".
