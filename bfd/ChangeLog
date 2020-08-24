@@ -2,6 +2,11 @@
 
 	Apply from master
 	2020-08-25  Alan Modra  <amodra@gmail.com>
+	PR 26492
+	* elf64-ppc.c (ppc_hash_table): Test is_elf_hash_table before
+	accessing elf_hash_table_id.
+
+	2020-08-25  Alan Modra  <amodra@gmail.com>
 	PR 26483
 	* elf32-ppc.c (ppc_elf_hash_table): Test is_elf_hash_table before
 	accessing elf_hash_table_id.
