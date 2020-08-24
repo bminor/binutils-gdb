@@ -2,6 +2,7 @@
 #source: include.s
 #ld: -T include-1.t
 #objdump: -w -h
+#xfail: tic4x-*-* tic54x-*-*
 
 .*:     file format .*
 

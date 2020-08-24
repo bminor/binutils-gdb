@@ -19,6 +19,13 @@
 # MA 02110-1301, USA.
 #
 
+if { [istarget sh*-*-pe]
+     || [istarget tic30-*-*]
+     || [istarget tic54x-*-*] } {
+    # These all complain about a zero vma .text and other sections
+    return
+}
+
 file mkdir tmpdir/libtmp
 
 # Check that -l: works.  The first "test" just creates an object file

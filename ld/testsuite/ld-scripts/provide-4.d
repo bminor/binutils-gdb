@@ -2,6 +2,8 @@
 #ld: -T provide-4.t
 #nm: -B
 #map: provide-4.map
+#xfail: tic54x-*-*
+
 #...
 0+3 A baz
 #...

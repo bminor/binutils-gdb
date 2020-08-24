@@ -1,3 +1,14 @@
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/ld-libs/libs.exp: Don't run on sh-pe, tic30 or tic54x.
+	* testsuite/ld-scripts/data.d: xfail tic4x and tic54x.
+	* testsuite/ld-scripts/empty-address-2a.d: xfail tic54x.
+	* testsuite/ld-scripts/empty-address-2b.d: Likewise.
+	* testsuite/ld-scripts/include-1.d: xfail tic4x and tic54x.
+	* testsuite/ld-scripts/provide-1.d: xfail tic54x.
+	* testsuite/ld-scripts/provide-2.d: Likewise.
+	* testsuite/ld-scripts/provide-4.d: Likewise.
+
 2020-08-24  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-sparc/tlssunbin32.rd: Update for new readelf output.
