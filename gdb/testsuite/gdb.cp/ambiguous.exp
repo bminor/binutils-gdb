@@ -30,12 +30,20 @@ if { [skip_cplus_tests] } { continue }
 standard_testfile .cc
 
 if [get_compiler_info "c++"] {
+    unsupported "couldn't find a valid c++ compiler"
     return -1
 }
 
-if { [test_compiler_info gcc-*] } then { continue }
+set additional_flags ""
+if {[test_compiler_info {gcc-[0-9]-*}]} {
+    # GCCs prior to 10.1 do not support -Wno-inaccessible-base.
+    set additional_flags "additional_flags=-w"
+} elseif {[test_compiler_info gcc*] || [test_compiler_info clang*]} {
+    set additional_flags "additional_flags=-Wno-inaccessible-base"
+}
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+     [list debug c++ $additional_flags]]} {
     return -1
 }
 
