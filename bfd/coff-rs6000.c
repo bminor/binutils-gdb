@@ -2580,11 +2580,13 @@ _bfd_xcoff_sizeof_headers (bfd *abfd,
       /* Sum.  */
       for (sub = info->input_bfds; sub != NULL; sub = sub->link.next)
 	for (s = sub->sections; s != NULL; s = s->next)
-	  {
-	    struct nbr_reloc_lineno *e = &n_rl[s->output_section->index];
-	    e->reloc_count += s->reloc_count;
-	    e->lineno_count += s->lineno_count;
-	  }
+	  if (s->output_section->owner == abfd
+	      && !bfd_section_removed_from_list (abfd, s->output_section))
+	    {
+	      struct nbr_reloc_lineno *e = &n_rl[s->output_section->index];
+	      e->reloc_count += s->reloc_count;
+	      e->lineno_count += s->lineno_count;
+	    }
 
       /* Add the size of a section for each section with an overflow.  */
       for (s = abfd->sections; s != NULL; s = s->next)
