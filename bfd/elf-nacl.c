@@ -156,13 +156,13 @@ nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 		  secdata->this_hdr.sh_addr = sec->vma;
 		  secdata->this_hdr.sh_size = sec->size;
 
-		  newseg = bfd_alloc (abfd,
-				      sizeof *newseg + ((seg->count + 1)
-							* sizeof (asection *)));
+		  newseg
+		    = bfd_alloc (abfd, (sizeof (*newseg)
+					+ seg->count * sizeof (asection *)));
 		  if (newseg == NULL)
 		    return FALSE;
-		  memcpy (newseg, seg,
-			  sizeof *newseg + (seg->count * sizeof (asection *)));
+		  memcpy (newseg, seg, (sizeof (*newseg) - sizeof (asection *)
+					+ seg->count * sizeof (asection *)));
 		  newseg->sections[newseg->count++] = sec;
 		  *m = seg = newseg;
 		}

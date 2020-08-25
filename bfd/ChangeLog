@@ -1,5 +1,12 @@
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
+	PR 26430
+	* elf-nacl.c (nacl_modify_segment_map): Correct alloc size and
+	amount copied for elf_segment_map defined with one element
+	sections array.
+
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
 	PR 26422
 	* elf32-arm.c (elf32_arm_final_link_relocate): Use the appropriate
 	bfd_get_x size function to read addends out of fields.  Apply
