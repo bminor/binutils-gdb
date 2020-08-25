@@ -1,5 +1,11 @@
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
+	PR 26463
+	* elf32-m32c.c (m32c_elf_relax_section): Check is_elf_hash_table
+	before accessing elf fields.
+
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
 	PR 26452
 	* som.c (som_compute_checksum): XOR 32-bit words in header,
 	not unsigned long sized words.

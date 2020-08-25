@@ -1445,7 +1445,8 @@ m32c_elf_relax_section
   bfd_byte *shndx_buf = NULL;
   int machine;
 
-  if (abfd == elf_hash_table (link_info)->dynobj
+  if (is_elf_hash_table (link_info->hash)
+      && abfd == elf_hash_table (link_info)->dynobj
       && (sec->flags & SEC_LINKER_CREATED) != 0
       && strcmp (sec->name, ".plt") == 0)
     return m32c_elf_relax_plt_section (sec, link_info, again);
