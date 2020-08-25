@@ -1,3 +1,9 @@
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
+	PR 26504
+	* vax-dis.c (parse_disassembler_options): Always add at least one
+	to entry_addr_total_slots.
+
 2020-08-24  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* csky-dis.c (csky_find_inst_info): Skip CK860's instructions
