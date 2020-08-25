@@ -1,5 +1,15 @@
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
+	PR 26422
+	* elf32-arm.c (elf32_arm_final_link_relocate): Use the appropriate
+	bfd_get_x size function to read addends out of fields.  Apply
+	rightshift adjustment too.  Don't apply the now unnecessary
+	howto->size shift to branch REL addends.  Don't refetch R_ARM_ABS8
+	and R_ARM_ABS16 addends.  Don't refetch thumb branch addends.
+	Correct R_ARM_THM_JUMP6 addend.
+
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
 	PR 26419
 	* elf-m10300.c (mn10300_elf_relax_section): Don't attempt access
 	before start of section.
