@@ -588,7 +588,8 @@ xstormy16_elf_relax_section (bfd *dynobj,
   /* Assume nothing changes.  */
   *again = FALSE;
 
-  if (bfd_link_relocatable (info))
+  if (bfd_link_relocatable (info)
+      || !is_elf_hash_table (info->hash))
     return TRUE;
 
   /* We only relax the .plt section at the moment.  */

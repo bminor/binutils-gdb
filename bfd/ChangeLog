@@ -1,5 +1,11 @@
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
+	PR 26505
+	* elf32-xstormy16.c (xstormy16_elf_relax_section): Check
+	is_elf_hash_table before accessing elf fields.
+
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
 	PR 26482
 	* coff-rs6000.c (_bfd_xcoff_sizeof_headers): Ignore sections that
 	won't be output.
