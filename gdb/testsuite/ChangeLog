@@ -1,5 +1,11 @@
 2020-08-25  Gary Benson <gbenson@redhat.com>
 
+	* gdb.dwarf2/dw2-dir-file-name.exp: Use system assembler
+	when compiling with clang.
+	* gdb.dwarf2/dw2-restore.exp: Likewise
+
+2020-08-25  Gary Benson <gbenson@redhat.com>
+
 	* gdb.cp/ambiguous.exp: Enable test when compiling with GCC.
 	Add additional_flags=-Wno-inaccessible-base when compiling
 	with GCC >= 10.1 or clang.  Add additional_flags=-w when
