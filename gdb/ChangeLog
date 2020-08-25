@@ -1,3 +1,9 @@
+2020-08-25  Gaius Mulley  <gaiusmod2@gmail.com>
+
+	PR m2/26372
+	* m2-exp.y: Rewrite array subscript rules to support multidimension
+	array access.  (ArgumentList) replaces non_empty_arglist.
+
 2020-08-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* value.h (valprint_check_validity): Move declaration from

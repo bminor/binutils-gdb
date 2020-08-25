@@ -1,3 +1,9 @@
+2020-08-25  Gaius Mulley  <gaiusmod2@gmail.com>
+
+	PR m2/26372
+	* testsuite/gdb.modula2/multidim.exp: New file.
+	* testsuite/gdb.modula2/multidim.c: New file.
+
 2020-08-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* lib/gdb.exp (runto): Always emit fail on internal error.

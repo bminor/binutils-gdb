@@ -293,21 +293,18 @@ set	:	'{' arglist '}'
 	;
 
 
-/* Modula-2 array subscript notation [a,b,c...] */
-exp     :       exp '['
-                        /* This function just saves the number of arguments
-			   that follow in the list.  It is *not* specific to
-			   function types */
-                        { pstate->start_arglist(); }
-                non_empty_arglist ']'  %prec DOT
-                        { write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT);
-			  write_exp_elt_longcst (pstate,
-						 pstate->end_arglist());
-			  write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT); }
-        ;
-
-exp	:	exp '[' exp ']'
-			{ write_exp_elt_opcode (pstate, BINOP_SUBSCRIPT); }
+/* Modula-2 array subscript notation [a,b,c...].  */
+exp     :       exp '[' ArgumentList ']' %prec DOT
+                {
+                    if (pstate->arglist_len > 1)
+		      {
+			write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT);
+			write_exp_elt_longcst (pstate, pstate->arglist_len);
+			write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT);
+		      }
+		    else
+		      write_exp_elt_opcode (pstate, BINOP_SUBSCRIPT);
+		}
 	;
 
 exp	:	exp '('
@@ -321,24 +318,22 @@ exp	:	exp '('
 			  write_exp_elt_opcode (pstate, OP_FUNCALL); }
 	;
 
+/* Non empty argument list.  */
+ArgumentList:
+	exp
+			{ pstate->arglist_len = 1; }
+|	ArgumentList ',' exp
+		{ pstate->arglist_len++; }
+	;
+
 arglist	:
 	;
 
 arglist	:	exp
-			{ pstate->arglist_len = 1; }
-	;
-
-arglist	:	arglist ',' exp   %prec ABOVE_COMMA
-			{ pstate->arglist_len++; }
-	;
-
-non_empty_arglist
-        :       exp
                         { pstate->arglist_len = 1; }
 	;
 
-non_empty_arglist
-        :       non_empty_arglist ',' exp %prec ABOVE_COMMA
+arglist	:	arglist ',' exp   %prec ABOVE_COMMA
      	       	    	{ pstate->arglist_len++; }
      	;
 
