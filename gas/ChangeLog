@@ -1,3 +1,13 @@
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-arc.c (declare_register_set): Avoid false positive
+	format-overflow warning.
+	* config/tc-epiphany.c (md_assemble): Likewise.
+	* config/tc-mips.c (md_begin): Likewise.
+	* config/tc-mmix.c (mmix_md_begin): Likewise.
+	* config/tc-nds32.c (nds32_elf_append_relax_relocs): Avoid false
+	positive "may be used uninitialized" warning.
+
 2020-08-24  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* config/tc-csky.c (csky_archs): Add item for CK860,

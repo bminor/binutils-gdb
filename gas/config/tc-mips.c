@@ -3806,7 +3806,7 @@ md_begin (void)
 
   for (i = 0; i < 32; i++)
     {
-      char regname[6];
+      char regname[16];
 
       /* R5900 VU0 floating-point register.  */
       sprintf (regname, "$vf%d", i);

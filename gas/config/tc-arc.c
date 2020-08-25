@@ -2562,7 +2562,7 @@ declare_register_set (void)
   int i;
   for (i = 0; i < 64; ++i)
     {
-      char name[7];
+      char name[32];
 
       sprintf (name, "r%d", i);
       declare_register (name, i);

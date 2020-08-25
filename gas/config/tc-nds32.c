@@ -6053,6 +6053,7 @@ nds32_elf_append_relax_relocs (const char *key, const void *value)
       fixup_size = fixup_now->size;
 
       /* Insert all fixup.  */
+      pcrel = 0;
       while (fixup_size != 0 && fixup_now->offset == offset)
 	{
 	  /* Set the real instruction size in element.  */

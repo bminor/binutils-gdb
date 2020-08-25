@@ -780,7 +780,7 @@ mmix_md_begin (void)
   /* We always insert the ordinary registers 0..255 as registers.  */
   for (i = 0; i < 256; i++)
     {
-      char buf[5];
+      char buf[16];
 
       /* Alternatively, we could diddle with '$' and the following number,
 	 but keeping the registers as symbols helps keep parsing simple.  */
