@@ -5008,14 +5008,9 @@ tic54x_undefined_symbol (char *name)
   if ((sym = (tic54x_symbol *) str_hash_find (cc_hash, name)) != NULL
       || (sym = (tic54x_symbol *) str_hash_find (cc2_hash, name)) != NULL
       || (sym = (tic54x_symbol *) str_hash_find (cc3_hash, name)) != NULL
-      || (sym = (tic54x_symbol *) str_hash_find (misc_symbol_hash,
-						 name)) != NULL
-      || (sym = (tic54x_symbol *) str_hash_find (sbit_hash, name)) != NULL)
-    {
-      return symbol_new (name, reg_section, &zero_address_frag, sym->value);
-    }
-
-  if ((sym = (tic54x_symbol *) str_hash_find (reg_hash, name)) != NULL
+      || str_hash_find (misc_symbol_hash, name) != NULL
+      || (sym = (tic54x_symbol *) str_hash_find (sbit_hash, name)) != NULL
+      || (sym = (tic54x_symbol *) str_hash_find (reg_hash, name)) != NULL
       || (sym = (tic54x_symbol *) str_hash_find (mmreg_hash, name)) != NULL
       || !strcasecmp (name, "a")
       || !strcasecmp (name, "b"))

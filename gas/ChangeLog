@@ -1,5 +1,11 @@
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
+	PR26501
+	* gas/config/tc-tic54x.c (tic54x_undefined_symbol): Properly treat
+	misc_symbol_hash entries without values.
+
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
 	PR 26500
 	* tc-tic4x.c (tic4x_inst_make): Don't die on terminating insn
 	with name = "".
