@@ -1,5 +1,11 @@
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
+	PR 26419
+	* elf-m10300.c (mn10300_elf_relax_section): Don't attempt access
+	before start of section.
+
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
 	* elf-m10300.c (elf32_mn10300_hash_table): Test is_elf_hash_table
 	before accessing elf_hash_table_id.
 	* elf32-arc.c (elf_arc_hash_table): Likewise.

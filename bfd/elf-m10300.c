@@ -3932,7 +3932,7 @@ mn10300_elf_relax_section (bfd *abfd,
 	  /* See if the value will fit in 24 bits.
 	     We allow any 16bit match here.  We prune those we can't
 	     handle below.  */
-	  if ((long) value < 0x7fffff && (long) value > -0x800000)
+	  if (value + 0x800000 < 0x1000000 && irel->r_offset >= 3)
 	    {
 	      unsigned char code;
 
@@ -4003,7 +4003,7 @@ mn10300_elf_relax_section (bfd *abfd,
 	  /* See if the value will fit in 16 bits.
 	     We allow any 16bit match here.  We prune those we can't
 	     handle below.  */
-	  if ((long) value < 0x7fff && (long) value > -0x8000)
+	  if (value + 0x8000 < 0x10000 && irel->r_offset >= 2)
 	    {
 	      unsigned char code;
 
