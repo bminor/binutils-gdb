@@ -130,6 +130,12 @@ struct dwarf2_debug_file
   /* Length of the loaded .debug_ranges section.  */
   bfd_size_type dwarf_ranges_size;
 
+  /* Pointer to the .debug_rnglists section loaded into memory.  */
+  bfd_byte *dwarf_rnglists_buffer;
+
+  /* Length of the loaded .debug_rnglists section.  */
+  bfd_size_type dwarf_rnglists_size;
+
   /* A list of all previously read comp_units.  */
   struct comp_unit *all_comp_units;
 
@@ -327,6 +333,7 @@ const struct dwarf_debug_section dwarf_debug_sections[] =
   { ".debug_pubnames",		".zdebug_pubnames" },
   { ".debug_pubtypes",		".zdebug_pubtypes" },
   { ".debug_ranges",		".zdebug_ranges" },
+  { ".debug_rnglists",		".zdebug_rnglist" },
   { ".debug_static_func",	".zdebug_static_func" },
   { ".debug_static_vars",	".zdebug_static_vars" },
   { ".debug_str",		".zdebug_str", },
@@ -360,6 +367,7 @@ enum dwarf_debug_section_enum
   debug_pubnames,
   debug_pubtypes,
   debug_ranges,
+  debug_rnglists,
   debug_static_func,
   debug_static_vars,
   debug_str,
@@ -2634,6 +2642,19 @@ read_debug_ranges (struct comp_unit * unit)
 		       &file->dwarf_ranges_buffer, &file->dwarf_ranges_size);
 }
 
+/* Read in the .debug_rnglists section for future reference.  */
+
+static bfd_boolean
+read_debug_rnglists (struct comp_unit * unit)
+{
+  struct dwarf2_debug *stash = unit->stash;
+  struct dwarf2_debug_file *file = unit->file;
+
+  return read_section (unit->abfd, &stash->debug_sections[debug_rnglists],
+		       file->syms, 0,
+		       &file->dwarf_rnglists_buffer, &file->dwarf_rnglists_size);
+}
+
 /* Function table functions.  */
 
 static int
@@ -3124,8 +3145,8 @@ find_abstract_instance (struct comp_unit *unit,
 }
 
 static bfd_boolean
-read_rangelist (struct comp_unit *unit, struct arange *arange,
-		bfd_uint64_t offset)
+read_ranges (struct comp_unit *unit, struct arange *arange,
+	     bfd_uint64_t offset)
 {
   bfd_byte *ranges_ptr;
   bfd_byte *ranges_end;
@@ -3168,6 +3189,107 @@ read_rangelist (struct comp_unit *unit, struct arange *arange,
 	}
     }
   return TRUE;
+}
+
+static bfd_boolean
+read_rnglists (struct comp_unit *unit, struct arange *arange,
+	       bfd_uint64_t offset)
+{
+  bfd_byte *rngs_ptr;
+  bfd_byte *rngs_end;
+  bfd_vma base_address = unit->base_address;
+  bfd_vma low_pc;
+  bfd_vma high_pc;
+  bfd *abfd = unit->abfd;
+
+  if (! unit->file->dwarf_rnglists_buffer)
+    {
+      if (! read_debug_rnglists (unit))
+	return FALSE;
+    }
+
+  rngs_ptr = unit->file->dwarf_rnglists_buffer + offset;
+  if (rngs_ptr < unit->file->dwarf_rnglists_buffer)
+    return FALSE;
+  rngs_end = unit->file->dwarf_rnglists_buffer;
+  rngs_end +=  unit->file->dwarf_rnglists_size;
+
+  for (;;)
+    {
+      enum dwarf_range_list_entry rlet;
+      unsigned int bytes_read;
+
+      if (rngs_ptr + 1 > rngs_end)
+	return FALSE;
+
+      rlet = read_1_byte (abfd, rngs_ptr, rngs_end);
+      rngs_ptr++;
+
+      switch (rlet)
+	{
+	case DW_RLE_end_of_list:
+	  return TRUE;
+
+	case DW_RLE_base_address:
+	  if (rngs_ptr + unit->addr_size > rngs_end)
+	    return FALSE;
+	  base_address = read_address (unit, rngs_ptr, rngs_end);
+	  rngs_ptr += unit->addr_size;
+	  continue;
+
+	case DW_RLE_start_length:
+	  if (rngs_ptr + unit->addr_size > rngs_end)
+	    return FALSE;
+	  low_pc = read_address (unit, rngs_ptr, rngs_end);
+	  rngs_ptr += unit->addr_size;
+	  high_pc = low_pc;
+	  high_pc += _bfd_safe_read_leb128 (abfd, rngs_ptr, &bytes_read,
+					    FALSE, rngs_end);
+	  rngs_ptr += bytes_read;
+	  break;
+
+	case DW_RLE_offset_pair:
+	  low_pc = base_address;
+	  low_pc += _bfd_safe_read_leb128 (abfd, rngs_ptr, &bytes_read,
+					   FALSE, rngs_end);
+	  high_pc = base_address;
+	  high_pc += _bfd_safe_read_leb128 (abfd, rngs_ptr, &bytes_read,
+					    FALSE, rngs_end);
+	  break;
+
+	case DW_RLE_start_end:
+	  if (rngs_ptr + 2 * unit->addr_size > rngs_end)
+	    return FALSE;
+	  low_pc = read_address (unit, rngs_ptr, rngs_end);
+	  rngs_ptr += unit->addr_size;
+	  high_pc = read_address (unit, rngs_ptr, rngs_end);
+	  rngs_ptr += unit->addr_size;
+	  break;
+
+	/* TODO x-variants need .debug_addr support used for split-dwarf.  */
+	case DW_RLE_base_addressx:
+	case DW_RLE_startx_endx:
+	case DW_RLE_startx_length:
+	default:
+	  return FALSE;
+	}
+
+      if ((low_pc == 0 && high_pc == 0) || low_pc == high_pc)
+	return FALSE;
+
+      if (!arange_add (unit, arange, low_pc, high_pc))
+	return FALSE;
+    }
+}
+
+static bfd_boolean
+read_rangelist (struct comp_unit *unit, struct arange *arange,
+		bfd_uint64_t offset)
+{
+  if (unit->version <= 4)
+    return read_ranges (unit, arange, offset);
+  else
+    return read_rnglists (unit, arange, offset);
 }
 
 static struct varinfo *
