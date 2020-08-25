@@ -37,7 +37,7 @@ static bfd_boolean som_mkobject (bfd *);
 static bfd_boolean som_is_space (asection *);
 static bfd_boolean som_is_subspace (asection *);
 static int compare_subspaces (const void *, const void *);
-static unsigned long som_compute_checksum (struct som_external_header *);
+static uint32_t som_compute_checksum (struct som_external_header *);
 static bfd_boolean som_build_and_write_symbol_table (bfd *);
 static unsigned int som_slurp_symbol_table (bfd *);
 
@@ -4281,14 +4281,15 @@ som_finish_writing (bfd *abfd)
 
 /* Compute and return the checksum for a SOM file header.  */
 
-static unsigned long
+static uint32_t
 som_compute_checksum (struct som_external_header *hdr)
 {
-  unsigned long checksum, count, i;
-  unsigned long *buffer = (unsigned long *) hdr;
+  size_t count, i;
+  uint32_t checksum;
+  uint32_t *buffer = (uint32_t *) hdr;
 
   checksum = 0;
-  count = sizeof (struct som_external_header) / 4;
+  count = sizeof (*hdr) / sizeof (*buffer);
   for (i = 0; i < count; i++)
     checksum ^= *(buffer + i);
 

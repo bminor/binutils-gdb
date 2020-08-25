@@ -1,5 +1,11 @@
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
+	PR 26452
+	* som.c (som_compute_checksum): XOR 32-bit words in header,
+	not unsigned long sized words.
+
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
 	PR 26430
 	* elf-nacl.c (nacl_modify_segment_map): Correct alloc size and
 	amount copied for elf_segment_map defined with one element
