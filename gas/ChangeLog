@@ -1,5 +1,11 @@
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
+	PR 26441
+	* config/tc-cr16.c (get_b_cc): Return NULL early if op isn't
+	two or three chars, and don't bother copying.
+
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
 	PR 26426
 	* config/tc-arm.c (do_neon_mvn, do_neon_swp): Bail out on
 	NS_NULL shape.
