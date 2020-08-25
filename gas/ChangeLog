@@ -1,5 +1,11 @@
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
+	PR 26500
+	* tc-tic4x.c (tic4x_inst_make): Don't die on terminating insn
+	with name = "".
+
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
 	PR 26441
 	* config/tc-cr16.c (get_b_cc): Return NULL early if op isn't
 	two or three chars, and don't bother copying.

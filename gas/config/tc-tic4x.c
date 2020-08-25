@@ -1242,9 +1242,8 @@ tic4x_inst_make (const char *name, unsigned long opcode, const char *args)
   insts[iindex].args = args;
   iindex++;
 
-  do
+  while (*name)
     *names++ = *name++;
-  while (*name);
   *names++ = '\0';
 
   return &insts[iindex - 1];
