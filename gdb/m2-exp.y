@@ -293,21 +293,20 @@ set	:	'{' arglist '}'
 	;
 
 
-/* Modula-2 array subscript notation [a,b,c...] */
+/* Modula-2 array subscript notation [a,b,c...].  */
 exp     :       exp '['
                         /* This function just saves the number of arguments
 			   that follow in the list.  It is *not* specific to
 			   function types */
                         { pstate->start_arglist(); }
                 non_empty_arglist ']'  %prec DOT
-                        { write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT);
+			{
+			  gdb_assert (pstate->arglist_len > 0);
+			  write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT);
 			  write_exp_elt_longcst (pstate,
 						 pstate->end_arglist());
-			  write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT); }
-        ;
-
-exp	:	exp '[' exp ']'
-			{ write_exp_elt_opcode (pstate, BINOP_SUBSCRIPT); }
+			  write_exp_elt_opcode (pstate, MULTI_SUBSCRIPT);
+			}
 	;
 
 exp	:	exp '('
