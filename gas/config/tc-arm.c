@@ -19555,6 +19555,9 @@ do_neon_mvn (void)
       else
 	rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
 
+      if (rs == NS_NULL)
+	return;
+
       NEON_ENCODE (INTEGER, inst);
       inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
       inst.instruction |= HI1 (inst.operands[0].reg) << 22;
@@ -20634,6 +20637,8 @@ static void
 do_neon_swp (void)
 {
   enum neon_shape rs = neon_select_shape (NS_DD, NS_QQ, NS_NULL);
+  if (rs == NS_NULL)
+    return;
   neon_two_same (neon_quad (rs), 1, -1);
 }
 

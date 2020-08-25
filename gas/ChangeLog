@@ -1,5 +1,11 @@
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
+	PR 26426
+	* config/tc-arm.c (do_neon_mvn, do_neon_swp): Bail out on
+	NS_NULL shape.
+
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
 	PR 26410
 	* symbols.c (dollar_label_count, dollar_label_max): Make size_t.
 	(dollar_label_clear): Don't call memset with NULL pointer.
