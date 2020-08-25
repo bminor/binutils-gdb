@@ -2,7 +2,7 @@
 
 	* gdb.dwarf2/dw2-dir-file-name.exp: Use system assembler
 	when compiling with clang.
-	* gdb.dwarf2/dw2-restore.exp: Likewise
+	* gdb.dwarf2/dw2-restore.exp: Likewise.
 
 2020-08-25  Gary Benson <gbenson@redhat.com>
 
