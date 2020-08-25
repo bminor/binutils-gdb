@@ -1,3 +1,23 @@
+2020-08-25  Nick Clifton  <nickc@redhat.com>
+
+	Backport from the mainline:
+	2020-08-25  Mark Wielaard  <mark@klomp.org>
+
+	*  dwarf2.c (struct dwarf2_debug_file): Add dwarf_rnglists_buffer
+	and dwarf_rnglists_size fields.
+	(dwarf_debug_sections): Add debug_rnglists.
+	(dwarf_debug_section_enum): Likewise.
+	(read_debug_rnglists): New function.
+	(read_rangelist): New function to call either read_ranges or
+	read_rnglists. Rename original function to...
+	(read_ranges): ...this.
+	(read_rnglists): New function.
+
+	2020-08-24  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf2.c (read_attribute_value): Handle DW_FORM_data16.
+	(read_formatted_entries): Likewise. And skip zero entry.
+
 2020-08-15  Alan Modra  <amodra@gmail.com>
 
 	PR 26389
