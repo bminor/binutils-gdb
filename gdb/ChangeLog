@@ -1,3 +1,9 @@
+2020-08-24  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* value.h (valprint_check_validity): Move declaration from
+	here...
+	* valprint.h (valprint_check_validity): ... to here.
+
 2020-08-24  Simon Marchi  <simon.marchi@efficios.com>
 
 	* debug.h: New file.

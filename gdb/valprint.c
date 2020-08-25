@@ -301,7 +301,7 @@ val_print_scalar_or_string_type_p (struct type *type,
 	  || language->is_string_type_p (type));
 }
 
-/* See its definition in value.h.  */
+/* See valprint.h.  */
 
 int
 valprint_check_validity (struct ui_file *stream,
