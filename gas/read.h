@@ -132,6 +132,7 @@ extern void emit_expr_with_reloc (expressionS *exp, unsigned int nbytes,
 				  TC_PARSE_CONS_RETURN_TYPE);
 extern void emit_expr_fix (expressionS *, unsigned int, fragS *, char *,
 			   TC_PARSE_CONS_RETURN_TYPE);
+extern void emit_leb128_expr (expressionS *, int);
 extern void equals (char *, int);
 extern void float_cons (int);
 extern void ignore_rest_of_line (void);

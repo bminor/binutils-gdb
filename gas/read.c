@@ -5138,7 +5138,7 @@ output_big_leb128 (char *p, LITTLENUM_TYPE *bignum, unsigned int size, int sign)
 /* Generate the appropriate fragments for a given expression to emit a
    leb128 value.  SIGN is 1 for sleb, 0 for uleb.  */
 
-static void
+void
 emit_leb128_expr (expressionS *exp, int sign)
 {
   operatorT op = exp->X_op;

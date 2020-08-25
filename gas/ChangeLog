@@ -1,3 +1,33 @@
+2020-08-25  Nick Clifton  <nickc@redhat.com>
+
+	Backport from mainline:
+	2020-08-04  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf2dbg.c (out_debug_abbrev): When DWARF2_VERSION >= 4, use
+	DW_FORM_udata for DW_AT_high_pc.
+	(out_debug_info): Use emit_leb128_expr for DW_AT_high_pc, when
+	DWARF2_VERSION >= 4.
+	* read.c (emit_leb128_exp): No longer static.
+	* read.h (emit_leb128_exp): Define.
+
+	2020-08-02  Mark Wielaard  <mark@klomp.org>
+
+	* gas/dwarf2dbg.c (out_dir_and_file_list): For DWARF5 emit at
+	least one directory if there is at least one file. Use dirs[1]
+	if dirs[0] is not set, or if there is no dirs[1] the current
+	working directory. Use files[1] filename, when files[0] filename
+	isn't set.
+
+	2020-08-02  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf2dbg.c (out_debug_info): Emit unit type and abbrev offset
+	for DWARF5.
+	* gas/testsuite/gas/elf/dwarf-4-cu.d: New file.
+	* gas/testsuite/gas/elf/dwarf-4-cu.s: Likewise.
+	* gas/testsuite/gas/elf/dwarf-5-cu.d: Likewise.
+	* gas/testsuite/gas/elf/dwarf-5-cu.s: Likewise.
+	* testsuite/gas/elf/elf.exp: Run dwarf-4-cu and dwarf-5-cu.
+
 2020-08-18  Peter Bergner  <bergner@linux.ibm.com>
 
 	Backported from master:
