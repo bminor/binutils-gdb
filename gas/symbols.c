@@ -1761,8 +1761,8 @@ snapshot_symbol (symbolS **symbolPP, valueT *valueP, segT *segP, fragS **fragPP)
 static long *dollar_labels;
 static long *dollar_label_instances;
 static char *dollar_label_defines;
-static unsigned long dollar_label_count;
-static unsigned long dollar_label_max;
+static size_t dollar_label_count;
+static size_t dollar_label_max;
 
 int
 dollar_label_defined (long label)
@@ -1798,7 +1798,8 @@ dollar_label_instance (long label)
 void
 dollar_label_clear (void)
 {
-  memset (dollar_label_defines, '\0', (unsigned int) dollar_label_count);
+  if (dollar_label_count)
+    memset (dollar_label_defines, '\0', dollar_label_count);
 }
 
 #define DOLLAR_LABEL_BUMP_BY 10

@@ -1,5 +1,11 @@
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
+	PR 26410
+	* symbols.c (dollar_label_count, dollar_label_max): Make size_t.
+	(dollar_label_clear): Don't call memset with NULL pointer.
+
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-arc.c (declare_register_set): Avoid false positive
 	format-overflow warning.
 	* config/tc-epiphany.c (md_assemble): Likewise.
