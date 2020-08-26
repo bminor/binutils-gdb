@@ -565,8 +565,9 @@ auto_export (bfd *abfd, def_file *d, const char *n)
   key.name = key.its_name = (char *) n;
 
   /* Return false if n is in the d->exports table.  */
-  if (bsearch (&key, d->exports, d->num_exports,
-	       sizeof (pe_def_file->exports[0]), pe_export_sort))
+  if (d->num_exports != 0
+      && bsearch (&key, d->exports, d->num_exports,
+		  sizeof (pe_def_file->exports[0]), pe_export_sort))
     return 0;
 
   if (pe_dll_do_default_excludes)

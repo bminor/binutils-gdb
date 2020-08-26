@@ -1,3 +1,8 @@
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
+	PR 26431
+	* pe-dll.c (auto_export): Don't call bsearch with zero count.
+
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/ld-libs/libs.exp: Don't run on sh-pe, tic30 or tic54x.
