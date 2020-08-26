@@ -1,3 +1,10 @@
+2020-08-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 26405
+	* elf/common.h (PT_OPENBSD_BOOTDATA): Define.
+	(PT_OPENBSD_RANDOMIZE): Define.
+	(PT_OPENBSD_WXNEEDED): Define.
+
 2020-08-26  Alan Modra  <amodra@gmail.com>
 
 	PR 26458

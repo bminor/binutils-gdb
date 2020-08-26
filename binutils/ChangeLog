@@ -1,3 +1,8 @@
+2020-08-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 26405
+	* readelf.c (get_segment_type): Handle OpenBSD segment types.
+
 2020-08-26  Alan Modra  <amodra@gmail.com>
 
 	PR 26412

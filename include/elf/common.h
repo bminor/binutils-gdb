@@ -472,6 +472,11 @@
 #define PT_GNU_RELRO	(PT_LOOS + 0x474e552) /* Read-only after relocation */
 #define PT_GNU_PROPERTY	(PT_LOOS + 0x474e553) /* GNU property */
 
+/* OpenBSD segment types.  */
+#define PT_OPENBSD_RANDOMIZE (PT_LOOS + 0x5a3dbe6)  /* Fill with random data.  */
+#define PT_OPENBSD_WXNEEDED  (PT_LOOS + 0x5a3dbe7)  /* Program does W^X violations.  */
+#define PT_OPENBSD_BOOTDATA  (PT_LOOS + 0x5a41be6)  /* Section for boot arguments.  */
+
 /* Mbind segments */
 #define PT_GNU_MBIND_NUM 4096
 #define PT_GNU_MBIND_LO (PT_LOOS + 0x474e555)
