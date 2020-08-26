@@ -26,6 +26,13 @@
 #include "subsegs.h"
 #include "write.h"
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
+
 struct symbol_flags
 {
   /* Whether the symbol is a local_symbol.  */
@@ -1559,14 +1566,24 @@ resolve_symbol_value (symbolS *symp)
 
 	      right = 1;
 	    }
+	  if ((op == O_left_shift || op == O_right_shift)
+	      && (valueT) right >= sizeof (valueT) * CHAR_BIT)
+	    {
+	      as_warn_value_out_of_range (_("shift count"), right, 0,
+					  sizeof (valueT) * CHAR_BIT - 1,
+					  NULL, 0);
+	      left = right = 0;
+	    }
 
 	  switch (symp->x->value.X_op)
 	    {
 	    case O_multiply:		left *= right; break;
 	    case O_divide:		left /= right; break;
 	    case O_modulus:		left %= right; break;
-	    case O_left_shift:		left <<= right; break;
-	    case O_right_shift:		left >>= right; break;
+	    case O_left_shift:
+	      left = (valueT) left << (valueT) right; break;
+	    case O_right_shift:
+	      left = (valueT) left >> (valueT) right; break;
 	    case O_bit_inclusive_or:	left |= right; break;
 	    case O_bit_or_not:		left |= ~right; break;
 	    case O_bit_exclusive_or:	left ^= right; break;

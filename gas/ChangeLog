@@ -1,5 +1,12 @@
 2020-08-26  Alan Modra  <amodra@gmail.com>
 
+	PR 26448
+	* symbols.c: Include limits.h.
+	(resolve_symbol_value <O_left_shift, O_right_shift>): Do an
+	unsigned shift.  Warn if shift count larger than valueT size.
+
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
 	PR 26447
 	* expr.c (expr <O_left_shift>): Do an unsigned shift.
 
