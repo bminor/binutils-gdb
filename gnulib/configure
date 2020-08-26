@@ -711,6 +711,9 @@ WINDOWS_STAT_INODES
 WINDOWS_64_BIT_OFF_T
 NEXT_AS_FIRST_DIRECTIVE_SYS_TYPES_H
 NEXT_SYS_TYPES_H
+HAVE_SYS_RANDOM_H
+NEXT_AS_FIRST_DIRECTIVE_SYS_RANDOM_H
+NEXT_SYS_RANDOM_H
 NEXT_AS_FIRST_DIRECTIVE_STRING_H
 NEXT_STRING_H
 NEXT_AS_FIRST_DIRECTIVE_STDLIB_H
@@ -924,108 +927,12 @@ GNULIB_MEMCHR
 GNULIB_FFSLL
 GNULIB_FFSL
 GNULIB_EXPLICIT_BZERO
-LOCALE_FR
 HAVE_VISIBILITY
 CFLAG_VISIBILITY
 LIB_MBRTOWC
 LOCALE_ZH_CN
 LOCALE_FR_UTF8
 LOCALE_JA
-REPLACE_WCSTOK
-REPLACE_WCSFTIME
-REPLACE_WCSWIDTH
-REPLACE_WCWIDTH
-REPLACE_WCSNRTOMBS
-REPLACE_WCSRTOMBS
-REPLACE_WCRTOMB
-REPLACE_MBSNRTOWCS
-REPLACE_MBSRTOWCS
-REPLACE_MBRLEN
-REPLACE_MBRTOWC
-REPLACE_MBSINIT
-REPLACE_WCTOB
-REPLACE_BTOWC
-REPLACE_MBSTATE_T
-HAVE_DECL_WCWIDTH
-HAVE_DECL_WCTOB
-HAVE_WCSFTIME
-HAVE_WCSWIDTH
-HAVE_WCSTOK
-HAVE_WCSSTR
-HAVE_WCSPBRK
-HAVE_WCSSPN
-HAVE_WCSCSPN
-HAVE_WCSRCHR
-HAVE_WCSCHR
-HAVE_WCSDUP
-HAVE_WCSXFRM
-HAVE_WCSCOLL
-HAVE_WCSNCASECMP
-HAVE_WCSCASECMP
-HAVE_WCSNCMP
-HAVE_WCSCMP
-HAVE_WCSNCAT
-HAVE_WCSCAT
-HAVE_WCPNCPY
-HAVE_WCSNCPY
-HAVE_WCPCPY
-HAVE_WCSCPY
-HAVE_WCSNLEN
-HAVE_WCSLEN
-HAVE_WMEMSET
-HAVE_WMEMMOVE
-HAVE_WMEMCPY
-HAVE_WMEMCMP
-HAVE_WMEMCHR
-HAVE_WCSNRTOMBS
-HAVE_WCSRTOMBS
-HAVE_WCRTOMB
-HAVE_MBSNRTOWCS
-HAVE_MBSRTOWCS
-HAVE_MBRLEN
-HAVE_MBRTOWC
-HAVE_MBSINIT
-HAVE_BTOWC
-GNULIB_WCSFTIME
-GNULIB_WCSWIDTH
-GNULIB_WCSTOK
-GNULIB_WCSSTR
-GNULIB_WCSPBRK
-GNULIB_WCSSPN
-GNULIB_WCSCSPN
-GNULIB_WCSRCHR
-GNULIB_WCSCHR
-GNULIB_WCSDUP
-GNULIB_WCSXFRM
-GNULIB_WCSCOLL
-GNULIB_WCSNCASECMP
-GNULIB_WCSCASECMP
-GNULIB_WCSNCMP
-GNULIB_WCSCMP
-GNULIB_WCSNCAT
-GNULIB_WCSCAT
-GNULIB_WCPNCPY
-GNULIB_WCSNCPY
-GNULIB_WCPCPY
-GNULIB_WCSCPY
-GNULIB_WCSNLEN
-GNULIB_WCSLEN
-GNULIB_WMEMSET
-GNULIB_WMEMMOVE
-GNULIB_WMEMCPY
-GNULIB_WMEMCMP
-GNULIB_WMEMCHR
-GNULIB_WCWIDTH
-GNULIB_WCSNRTOMBS
-GNULIB_WCSRTOMBS
-GNULIB_WCRTOMB
-GNULIB_MBSNRTOWCS
-GNULIB_MBSRTOWCS
-GNULIB_MBRLEN
-GNULIB_MBRTOWC
-GNULIB_MBSINIT
-GNULIB_WCTOB
-GNULIB_BTOWC
 NEXT_AS_FIRST_DIRECTIVE_MATH_H
 NEXT_MATH_H
 LTLIBMULTITHREAD
@@ -1184,6 +1091,10 @@ HAVE_GETTIMEOFDAY
 GNULIB_GETTIMEOFDAY
 LTLIBINTL
 LIBINTL
+LIB_GETRANDOM
+REPLACE_GETRANDOM
+HAVE_GETRANDOM
+GNULIB_GETRANDOM
 LIB_GETLOGIN
 WINDOWS_64_BIT_ST_SIZE
 WINDOWS_STAT_TIMESPEC
@@ -1195,7 +1106,6 @@ REPLACE_MKNOD
 REPLACE_MKFIFO
 REPLACE_MKDIR
 REPLACE_LSTAT
-REPLACE_LCHMOD
 REPLACE_FUTIMENS
 REPLACE_FSTATAT
 REPLACE_FSTAT
@@ -1540,6 +1450,10 @@ NEXT_ERRNO_H
 HAVE_DIRENT_H
 NEXT_AS_FIRST_DIRECTIVE_DIRENT_H
 NEXT_DIRENT_H
+NEXT_AS_FIRST_DIRECTIVE_CTYPE_H
+NEXT_CTYPE_H
+HAVE_ISBLANK
+GNULIB_ISBLANK
 REPLACE_FDOPENDIR
 REPLACE_DIRFD
 REPLACE_CLOSEDIR
@@ -1565,6 +1479,7 @@ HAVE_WINSOCK2_H
 HAVE_MSVC_INVALID_PARAMETER_HANDLER
 UNISTD_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS
 UNISTD_H_HAVE_WINSOCK2_H
+UNISTD_H_HAVE_SYS_RANDOM_H
 REPLACE_WRITE
 REPLACE_USLEEP
 REPLACE_UNLINKAT
@@ -1634,6 +1549,7 @@ HAVE_GETPAGESIZE
 HAVE_GETLOGIN
 HAVE_GETHOSTNAME
 HAVE_GETGROUPS
+HAVE_GETENTROPY
 HAVE_GETDTABLESIZE
 HAVE_FTRUNCATE
 HAVE_FSYNC
@@ -1680,6 +1596,7 @@ GNULIB_GETLOGIN_R
 GNULIB_GETLOGIN
 GNULIB_GETHOSTNAME
 GNULIB_GETGROUPS
+GNULIB_GETENTROPY
 GNULIB_GETDTABLESIZE
 GNULIB_GETDOMAINNAME
 GNULIB_GETCWD
@@ -1791,6 +1708,104 @@ GNULIB_CANONICALIZE_FILE_NAME
 GNULIB_CALLOC_POSIX
 GNULIB_ATOLL
 GNULIB__EXIT
+LOCALE_FR
+REPLACE_WCSTOK
+REPLACE_WCSFTIME
+REPLACE_WCSWIDTH
+REPLACE_WCWIDTH
+REPLACE_WCSNRTOMBS
+REPLACE_WCSRTOMBS
+REPLACE_WCRTOMB
+REPLACE_MBSNRTOWCS
+REPLACE_MBSRTOWCS
+REPLACE_MBRLEN
+REPLACE_MBRTOWC
+REPLACE_MBSINIT
+REPLACE_WCTOB
+REPLACE_BTOWC
+REPLACE_MBSTATE_T
+HAVE_DECL_WCWIDTH
+HAVE_DECL_WCTOB
+HAVE_WCSFTIME
+HAVE_WCSWIDTH
+HAVE_WCSTOK
+HAVE_WCSSTR
+HAVE_WCSPBRK
+HAVE_WCSSPN
+HAVE_WCSCSPN
+HAVE_WCSRCHR
+HAVE_WCSCHR
+HAVE_WCSDUP
+HAVE_WCSXFRM
+HAVE_WCSCOLL
+HAVE_WCSNCASECMP
+HAVE_WCSCASECMP
+HAVE_WCSNCMP
+HAVE_WCSCMP
+HAVE_WCSNCAT
+HAVE_WCSCAT
+HAVE_WCPNCPY
+HAVE_WCSNCPY
+HAVE_WCPCPY
+HAVE_WCSCPY
+HAVE_WCSNLEN
+HAVE_WCSLEN
+HAVE_WMEMSET
+HAVE_WMEMPCPY
+HAVE_WMEMMOVE
+HAVE_WMEMCPY
+HAVE_WMEMCMP
+HAVE_WMEMCHR
+HAVE_WCSNRTOMBS
+HAVE_WCSRTOMBS
+HAVE_WCRTOMB
+HAVE_MBSNRTOWCS
+HAVE_MBSRTOWCS
+HAVE_MBRLEN
+HAVE_MBRTOWC
+HAVE_MBSINIT
+HAVE_BTOWC
+GNULIB_WCSFTIME
+GNULIB_WCSWIDTH
+GNULIB_WCSTOK
+GNULIB_WCSSTR
+GNULIB_WCSPBRK
+GNULIB_WCSSPN
+GNULIB_WCSCSPN
+GNULIB_WCSRCHR
+GNULIB_WCSCHR
+GNULIB_WCSDUP
+GNULIB_WCSXFRM
+GNULIB_WCSCOLL
+GNULIB_WCSNCASECMP
+GNULIB_WCSCASECMP
+GNULIB_WCSNCMP
+GNULIB_WCSCMP
+GNULIB_WCSNCAT
+GNULIB_WCSCAT
+GNULIB_WCPNCPY
+GNULIB_WCSNCPY
+GNULIB_WCPCPY
+GNULIB_WCSCPY
+GNULIB_WCSNLEN
+GNULIB_WCSLEN
+GNULIB_WMEMSET
+GNULIB_WMEMPCPY
+GNULIB_WMEMMOVE
+GNULIB_WMEMCPY
+GNULIB_WMEMCMP
+GNULIB_WMEMCHR
+GNULIB_WCWIDTH
+GNULIB_WCSNRTOMBS
+GNULIB_WCSRTOMBS
+GNULIB_WCRTOMB
+GNULIB_MBSNRTOWCS
+GNULIB_MBSRTOWCS
+GNULIB_MBRLEN
+GNULIB_MBRTOWC
+GNULIB_MBSINIT
+GNULIB_WCTOB
+GNULIB_BTOWC
 MKDIR_P
 HAVE_WS2TCPIP_H
 HAVE_FEATURES_H
@@ -3606,6 +3621,7 @@ fi
 as_fn_append ac_header_list " arpa/inet.h"
 as_fn_append ac_header_list " features.h"
 as_fn_append ac_header_list " sys/socket.h"
+as_fn_append ac_func_list " btowc"
 as_fn_append ac_func_list " canonicalize_file_name"
 as_fn_append ac_func_list " getcwd"
 as_fn_append ac_func_list " readlink"
@@ -3621,14 +3637,7 @@ as_fn_append ac_func_list " fdopendir"
 as_fn_append ac_func_list " mempcpy"
 as_fn_append ac_header_list " fnmatch.h"
 as_fn_append ac_func_list " fnmatch"
-as_fn_append ac_func_list " btowc"
-as_fn_append ac_func_list " isblank"
-as_fn_append ac_func_list " iswctype"
 as_fn_append ac_func_list " mbsrtowcs"
-as_fn_append ac_func_list " wmemchr"
-as_fn_append ac_func_list " wmemcpy"
-as_fn_append ac_func_list " wmempcpy"
-as_fn_append ac_header_list " wctype.h"
 gl_fnmatch_required=GNU
 as_fn_append ac_header_list " sys/stat.h"
 as_fn_append ac_func_list " fstatat"
@@ -3636,6 +3645,7 @@ as_fn_append ac_func_list " getdtablesize"
 as_fn_append ac_func_list " getlogin_r"
 as_fn_append ac_func_list " getprogname"
 as_fn_append ac_func_list " getexecname"
+as_fn_append ac_func_list " getrandom"
 as_fn_append ac_header_list " sys/time.h"
 as_fn_append ac_func_list " gettimeofday"
 as_fn_append ac_header_list " glob.h"
@@ -3649,6 +3659,7 @@ as_fn_append ac_header_list " limits.h"
 as_fn_append ac_header_list " wchar.h"
 as_fn_append ac_header_list " stdint.h"
 as_fn_append ac_header_list " inttypes.h"
+as_fn_append ac_func_list " isblank"
 as_fn_append ac_header_list " xlocale.h"
 as_fn_append ac_func_list " lstat"
 as_fn_append ac_header_list " math.h"
@@ -3665,11 +3676,14 @@ as_fn_append ac_func_list " strerror_r"
 as_fn_append ac_func_list " __xpg_strerror_r"
 as_fn_append ac_func_list " catgets"
 as_fn_append ac_func_list " snprintf"
+as_fn_append ac_header_list " sys/random.h"
 as_fn_append ac_header_list " sys/uio.h"
 as_fn_append ac_func_list " localtime_r"
 as_fn_append ac_func_list " pipe"
 as_fn_append ac_header_list " crtdefs.h"
 as_fn_append ac_func_list " iswcntrl"
+as_fn_append ac_header_list " wctype.h"
+as_fn_append ac_func_list " wmempcpy"
 # Check that the precious variables saved in the cache have kept the same
 # value.
 ac_cache_corrupted=false
@@ -6184,10 +6198,6 @@ _ACEOF
 esac
 rm -rf conftest*
   fi
-
-
-$as_echo "#define _DARWIN_USE_64_BIT_INODE 1" >>confdefs.h
-
 fi
 
 
@@ -6544,6 +6554,8 @@ fi
   # Code from module arpa_inet:
   # Code from module assure:
   # Code from module at-internal:
+  # Code from module attribute:
+  # Code from module btowc:
   # Code from module builtin-expect:
   # Code from module c99:
   # Code from module canonicalize-lgpl:
@@ -6553,12 +6565,12 @@ fi
   # Code from module close:
   # Code from module closedir:
   # Code from module count-one-bits:
+  # Code from module ctype:
   # Code from module d-ino:
   # Code from module d-type:
   # Code from module dirent:
   # Code from module dirfd:
   # Code from module dirname-lgpl:
-  # Code from module dosname:
   # Code from module double-slash-root:
   # Code from module dup:
   # Code from module dup2:
@@ -6593,6 +6605,7 @@ fi
   # Code from module getdtablesize:
   # Code from module getlogin_r:
   # Code from module getprogname:
+  # Code from module getrandom:
   # Code from module gettext-h:
   # Code from module gettimeofday:
   # Code from module glob:
@@ -6603,6 +6616,7 @@ fi
   # Code from module intprops:
   # Code from module inttypes:
   # Code from module inttypes-incomplete:
+  # Code from module isblank:
   # Code from module isnand-nolibm:
   # Code from module isnanl-nolibm:
   # Code from module largefile:
@@ -6620,11 +6634,13 @@ fi
   # Code from module mbrtowc:
   # Code from module mbsinit:
   # Code from module mbsrtowcs:
+  # Code from module mbtowc:
   # Code from module memchr:
   # Code from module memmem:
   # Code from module memmem-simple:
   # Code from module mempcpy:
   # Code from module memrchr:
+  # Code from module minmax:
   # Code from module mkdir:
   # Code from module mkdtemp:
   # Code from module mkostemp:
@@ -6674,10 +6690,12 @@ fi
   # Code from module strerror-override:
   # Code from module strerror_r-posix:
   # Code from module string:
+  # Code from module strnlen:
   # Code from module strnlen1:
   # Code from module strstr:
   # Code from module strstr-simple:
   # Code from module strtok_r:
+  # Code from module sys_random:
   # Code from module sys_socket:
   # Code from module sys_stat:
   # Code from module sys_time:
@@ -6701,6 +6719,8 @@ fi
   # Code from module windows-once:
   # Code from module windows-recmutex:
   # Code from module windows-rwlock:
+  # Code from module wmemchr:
+  # Code from module wmempcpy:
   # Code from module xalloc-oversized:
 
 
@@ -6734,6 +6754,7 @@ fi
 ac_config_guess="$SHELL $ac_aux_dir/config.guess"  # Please don't use this var.
 ac_config_sub="$SHELL $ac_aux_dir/config.sub"  # Please don't use this var.
 ac_configure="$SHELL $ac_aux_dir/configure"  # Please don't use this var.
+
 
 
 
@@ -7181,6 +7202,376 @@ fi
 $as_echo "$MKDIR_P" >&6; }
 
 
+  GNULIB_BTOWC=0;
+  GNULIB_WCTOB=0;
+  GNULIB_MBSINIT=0;
+  GNULIB_MBRTOWC=0;
+  GNULIB_MBRLEN=0;
+  GNULIB_MBSRTOWCS=0;
+  GNULIB_MBSNRTOWCS=0;
+  GNULIB_WCRTOMB=0;
+  GNULIB_WCSRTOMBS=0;
+  GNULIB_WCSNRTOMBS=0;
+  GNULIB_WCWIDTH=0;
+  GNULIB_WMEMCHR=0;
+  GNULIB_WMEMCMP=0;
+  GNULIB_WMEMCPY=0;
+  GNULIB_WMEMMOVE=0;
+  GNULIB_WMEMPCPY=0;
+  GNULIB_WMEMSET=0;
+  GNULIB_WCSLEN=0;
+  GNULIB_WCSNLEN=0;
+  GNULIB_WCSCPY=0;
+  GNULIB_WCPCPY=0;
+  GNULIB_WCSNCPY=0;
+  GNULIB_WCPNCPY=0;
+  GNULIB_WCSCAT=0;
+  GNULIB_WCSNCAT=0;
+  GNULIB_WCSCMP=0;
+  GNULIB_WCSNCMP=0;
+  GNULIB_WCSCASECMP=0;
+  GNULIB_WCSNCASECMP=0;
+  GNULIB_WCSCOLL=0;
+  GNULIB_WCSXFRM=0;
+  GNULIB_WCSDUP=0;
+  GNULIB_WCSCHR=0;
+  GNULIB_WCSRCHR=0;
+  GNULIB_WCSCSPN=0;
+  GNULIB_WCSSPN=0;
+  GNULIB_WCSPBRK=0;
+  GNULIB_WCSSTR=0;
+  GNULIB_WCSTOK=0;
+  GNULIB_WCSWIDTH=0;
+  GNULIB_WCSFTIME=0;
+    HAVE_BTOWC=1;
+  HAVE_MBSINIT=1;
+  HAVE_MBRTOWC=1;
+  HAVE_MBRLEN=1;
+  HAVE_MBSRTOWCS=1;
+  HAVE_MBSNRTOWCS=1;
+  HAVE_WCRTOMB=1;
+  HAVE_WCSRTOMBS=1;
+  HAVE_WCSNRTOMBS=1;
+  HAVE_WMEMCHR=1;
+  HAVE_WMEMCMP=1;
+  HAVE_WMEMCPY=1;
+  HAVE_WMEMMOVE=1;
+  HAVE_WMEMPCPY=1;
+  HAVE_WMEMSET=1;
+  HAVE_WCSLEN=1;
+  HAVE_WCSNLEN=1;
+  HAVE_WCSCPY=1;
+  HAVE_WCPCPY=1;
+  HAVE_WCSNCPY=1;
+  HAVE_WCPNCPY=1;
+  HAVE_WCSCAT=1;
+  HAVE_WCSNCAT=1;
+  HAVE_WCSCMP=1;
+  HAVE_WCSNCMP=1;
+  HAVE_WCSCASECMP=1;
+  HAVE_WCSNCASECMP=1;
+  HAVE_WCSCOLL=1;
+  HAVE_WCSXFRM=1;
+  HAVE_WCSDUP=1;
+  HAVE_WCSCHR=1;
+  HAVE_WCSRCHR=1;
+  HAVE_WCSCSPN=1;
+  HAVE_WCSSPN=1;
+  HAVE_WCSPBRK=1;
+  HAVE_WCSSTR=1;
+  HAVE_WCSTOK=1;
+  HAVE_WCSWIDTH=1;
+  HAVE_WCSFTIME=1;
+  HAVE_DECL_WCTOB=1;
+  HAVE_DECL_WCWIDTH=1;
+  REPLACE_MBSTATE_T=0;
+  REPLACE_BTOWC=0;
+  REPLACE_WCTOB=0;
+  REPLACE_MBSINIT=0;
+  REPLACE_MBRTOWC=0;
+  REPLACE_MBRLEN=0;
+  REPLACE_MBSRTOWCS=0;
+  REPLACE_MBSNRTOWCS=0;
+  REPLACE_WCRTOMB=0;
+  REPLACE_WCSRTOMBS=0;
+  REPLACE_WCSNRTOMBS=0;
+  REPLACE_WCWIDTH=0;
+  REPLACE_WCSWIDTH=0;
+  REPLACE_WCSFTIME=0;
+  REPLACE_WCSTOK=0;
+
+
+            { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <wchar.h> uses 'inline' correctly" >&5
+$as_echo_n "checking whether <wchar.h> uses 'inline' correctly... " >&6; }
+if ${gl_cv_header_wchar_h_correct_inline+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  gl_cv_header_wchar_h_correct_inline=yes
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+       #define wcstod renamed_wcstod
+/* Tru64 with Desktop Toolkit C has a bug: <stdio.h> must be included before
+   <wchar.h>.
+   BSD/OS 4.0.1 has a bug: <stddef.h>, <stdio.h> and <time.h> must be
+   included before <wchar.h>.  */
+#include <stddef.h>
+#include <stdio.h>
+#include <time.h>
+#include <wchar.h>
+extern int zero (void);
+int main () { return zero(); }
+
+_ACEOF
+                              save_ac_compile="$ac_compile"
+     ac_compile=`echo "$save_ac_compile" | sed s/conftest/conftest1/`
+     if echo '#include "conftest.c"' >conftest1.c &&
+        { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+         #define wcstod renamed_wcstod
+/* Tru64 with Desktop Toolkit C has a bug: <stdio.h> must be included before
+   <wchar.h>.
+   BSD/OS 4.0.1 has a bug: <stddef.h>, <stdio.h> and <time.h> must be
+   included before <wchar.h>.  */
+#include <stddef.h>
+#include <stdio.h>
+#include <time.h>
+#include <wchar.h>
+int zero (void) { return 0; }
+
+_ACEOF
+              ac_compile=`echo "$save_ac_compile" | sed s/conftest/conftest2/`
+       if echo '#include "conftest.c"' >conftest2.c &&
+          { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
+  (eval $ac_compile) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+         if $CC -o conftest$ac_exeext $CFLAGS $LDFLAGS conftest1.$ac_objext conftest2.$ac_objext $LIBS >&5 2>&1; then
+           :
+         else
+           gl_cv_header_wchar_h_correct_inline=no
+         fi
+       fi
+     fi
+     ac_compile="$save_ac_compile"
+     rm -f conftest12.c conftest12.$ac_objext conftest$ac_exeext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_header_wchar_h_correct_inline" >&5
+$as_echo "$gl_cv_header_wchar_h_correct_inline" >&6; }
+  if test $gl_cv_header_wchar_h_correct_inline = no; then
+    as_fn_error $? "<wchar.h> cannot be used with this compiler ($CC $CFLAGS $CPPFLAGS).
+This is a known interoperability problem of glibc <= 2.5 with gcc >= 4.3 in
+C99 mode. You have four options:
+  - Add the flag -fgnu89-inline to CC and reconfigure, or
+  - Fix your include files, using parts of
+    <https://sourceware.org/git/?p=glibc.git;a=commitdiff;h=b037a293a48718af30d706c2e18c929d0e69a621>, or
+  - Use a gcc version older than 4.3, or
+  - Don't use the flags -std=c99 or -std=gnu99.
+Configuration aborted." "$LINENO" 5
+  fi
+
+
+
+
+  for ac_func in $ac_func_list
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for nl_langinfo and CODESET" >&5
+$as_echo_n "checking for nl_langinfo and CODESET... " >&6; }
+if ${am_cv_langinfo_codeset+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <langinfo.h>
+int
+main ()
+{
+char* cs = nl_langinfo(CODESET); return !cs;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  am_cv_langinfo_codeset=yes
+else
+  am_cv_langinfo_codeset=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_langinfo_codeset" >&5
+$as_echo "$am_cv_langinfo_codeset" >&6; }
+  if test $am_cv_langinfo_codeset = yes; then
+
+$as_echo "#define HAVE_LANGINFO_CODESET 1" >>confdefs.h
+
+  fi
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for a traditional french locale" >&5
+$as_echo_n "checking for a traditional french locale... " >&6; }
+if ${gt_cv_locale_fr+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <locale.h>
+#include <time.h>
+#if HAVE_LANGINFO_CODESET
+# include <langinfo.h>
+#endif
+#include <stdlib.h>
+#include <string.h>
+struct tm t;
+char buf[16];
+int main () {
+  /* On BeOS and Haiku, locales are not implemented in libc.  Rather, libintl
+     imitates locale dependent behaviour by looking at the environment
+     variables, and all locales use the UTF-8 encoding.  */
+#if defined __BEOS__ || defined __HAIKU__
+  return 1;
+#else
+  /* Check whether the given locale name is recognized by the system.  */
+# if defined _WIN32 && !defined __CYGWIN__
+  /* On native Windows, setlocale(category, "") looks at the system settings,
+     not at the environment variables.  Also, when an encoding suffix such
+     as ".65001" or ".54936" is specified, it succeeds but sets the LC_CTYPE
+     category of the locale to "C".  */
+  if (setlocale (LC_ALL, getenv ("LC_ALL")) == NULL
+      || strcmp (setlocale (LC_CTYPE, NULL), "C") == 0)
+    return 1;
+# else
+  if (setlocale (LC_ALL, "") == NULL) return 1;
+# endif
+  /* Check whether nl_langinfo(CODESET) is nonempty and not "ASCII" or "646".
+     On Mac OS X 10.3.5 (Darwin 7.5) in the fr_FR locale, nl_langinfo(CODESET)
+     is empty, and the behaviour of Tcl 8.4 in this locale is not useful.
+     On OpenBSD 4.0, when an unsupported locale is specified, setlocale()
+     succeeds but then nl_langinfo(CODESET) is "646". In this situation,
+     some unit tests fail.
+     On MirBSD 10, when an unsupported locale is specified, setlocale()
+     succeeds but then nl_langinfo(CODESET) is "UTF-8".  */
+# if HAVE_LANGINFO_CODESET
+  {
+    const char *cs = nl_langinfo (CODESET);
+    if (cs[0] == '\0' || strcmp (cs, "ASCII") == 0 || strcmp (cs, "646") == 0
+        || strcmp (cs, "UTF-8") == 0)
+      return 1;
+  }
+# endif
+# ifdef __CYGWIN__
+  /* On Cygwin, avoid locale names without encoding suffix, because the
+     locale_charset() function relies on the encoding suffix.  Note that
+     LC_ALL is set on the command line.  */
+  if (strchr (getenv ("LC_ALL"), '.') == NULL) return 1;
+# endif
+  /* Check whether in the abbreviation of the second month, the second
+     character (should be U+00E9: LATIN SMALL LETTER E WITH ACUTE) is only
+     one byte long. This excludes the UTF-8 encoding.  */
+  t.tm_year = 1975 - 1900; t.tm_mon = 2 - 1; t.tm_mday = 4;
+  if (strftime (buf, sizeof (buf), "%b", &t) < 3 || buf[2] != 'v') return 1;
+# if !defined __BIONIC__ /* Bionic libc's 'struct lconv' is just a dummy.  */
+  /* Check whether the decimal separator is a comma.
+     On NetBSD 3.0 in the fr_FR.ISO8859-1 locale, localeconv()->decimal_point
+     are nl_langinfo(RADIXCHAR) are both ".".  */
+  if (localeconv () ->decimal_point[0] != ',') return 1;
+# endif
+  return 0;
+#endif
+}
+
+_ACEOF
+    if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_link\""; } >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && test -s conftest$ac_exeext; then
+      case "$host_os" in
+        # Handle native Windows specially, because there setlocale() interprets
+        # "ar" as "Arabic" or "Arabic_Saudi Arabia.1256",
+        # "fr" or "fra" as "French" or "French_France.1252",
+        # "ge"(!) or "deu"(!) as "German" or "German_Germany.1252",
+        # "ja" as "Japanese" or "Japanese_Japan.932",
+        # and similar.
+        mingw*)
+          # Test for the native Windows locale name.
+          if (LC_ALL=French_France.1252 LC_TIME= LC_CTYPE= ./conftest; exit) 2>/dev/null; then
+            gt_cv_locale_fr=French_France.1252
+          else
+            # None found.
+            gt_cv_locale_fr=none
+          fi
+          ;;
+        *)
+          # Setting LC_ALL is not enough. Need to set LC_TIME to empty, because
+          # otherwise on Mac OS X 10.3.5 the LC_TIME=C from the beginning of the
+          # configure script would override the LC_ALL setting. Likewise for
+          # LC_CTYPE, which is also set at the beginning of the configure script.
+          # Test for the usual locale name.
+          if (LC_ALL=fr_FR LC_TIME= LC_CTYPE= ./conftest; exit) 2>/dev/null; then
+            gt_cv_locale_fr=fr_FR
+          else
+            # Test for the locale name with explicit encoding suffix.
+            if (LC_ALL=fr_FR.ISO-8859-1 LC_TIME= LC_CTYPE= ./conftest; exit) 2>/dev/null; then
+              gt_cv_locale_fr=fr_FR.ISO-8859-1
+            else
+              # Test for the AIX, OSF/1, FreeBSD, NetBSD, OpenBSD locale name.
+              if (LC_ALL=fr_FR.ISO8859-1 LC_TIME= LC_CTYPE= ./conftest; exit) 2>/dev/null; then
+                gt_cv_locale_fr=fr_FR.ISO8859-1
+              else
+                # Test for the HP-UX locale name.
+                if (LC_ALL=fr_FR.iso88591 LC_TIME= LC_CTYPE= ./conftest; exit) 2>/dev/null; then
+                  gt_cv_locale_fr=fr_FR.iso88591
+                else
+                  # Test for the Solaris 7 locale name.
+                  if (LC_ALL=fr LC_TIME= LC_CTYPE= ./conftest; exit) 2>/dev/null; then
+                    gt_cv_locale_fr=fr
+                  else
+                    # None found.
+                    gt_cv_locale_fr=none
+                  fi
+                fi
+              fi
+            fi
+          fi
+          ;;
+      esac
+    fi
+    rm -fr conftest*
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gt_cv_locale_fr" >&5
+$as_echo "$gt_cv_locale_fr" >&6; }
+  LOCALE_FR=$gt_cv_locale_fr
+
+
+
   GNULIB__EXIT=0;
   GNULIB_ATOLL=0;
   GNULIB_CALLOC_POSIX=0;
@@ -7273,21 +7664,6 @@ $as_echo "$MKDIR_P" >&6; }
   REPLACE_STRTOLD=0;
   REPLACE_UNSETENV=0;
   REPLACE_WCTOMB=0;
-
-
-
-
-  for ac_func in $ac_func_list
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-done
 
 
 
@@ -7569,6 +7945,7 @@ $as_echo "#define FUNC_REALPATH_WORKS 1" >>confdefs.h
   GNULIB_GETCWD=0;
   GNULIB_GETDOMAINNAME=0;
   GNULIB_GETDTABLESIZE=0;
+  GNULIB_GETENTROPY=0;
   GNULIB_GETGROUPS=0;
   GNULIB_GETHOSTNAME=0;
   GNULIB_GETLOGIN=0;
@@ -7615,6 +7992,7 @@ $as_echo "#define FUNC_REALPATH_WORKS 1" >>confdefs.h
   HAVE_FSYNC=1;
   HAVE_FTRUNCATE=1;
   HAVE_GETDTABLESIZE=1;
+  HAVE_GETENTROPY=1;
   HAVE_GETGROUPS=1;
   HAVE_GETHOSTNAME=1;
   HAVE_GETLOGIN=1;
@@ -7684,6 +8062,7 @@ $as_echo "#define FUNC_REALPATH_WORKS 1" >>confdefs.h
   REPLACE_UNLINKAT=0;
   REPLACE_USLEEP=0;
   REPLACE_WRITE=0;
+  UNISTD_H_HAVE_SYS_RANDOM_H=0;
   UNISTD_H_HAVE_WINSOCK2_H=0;
   UNISTD_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS=0;
 
@@ -7731,6 +8110,10 @@ $as_echo "#define HAVE_MSVC_INVALID_PARAMETER_HANDLER 1" >>confdefs.h
   REPLACE_CLOSEDIR=0;
   REPLACE_DIRFD=0;
   REPLACE_FDOPENDIR=0;
+
+
+  GNULIB_ISBLANK=0;
+    HAVE_ISBLANK=1;
 
 
 
@@ -8632,20 +9015,6 @@ $as_echo "#define mbstate_t int" >>confdefs.h
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   GNULIB_ACOSF=0;
   GNULIB_ACOSL=0;
   GNULIB_ASINF=0;
@@ -9446,7 +9815,6 @@ $as_echo "#define HAVE_FREXPL 1" >>confdefs.h
   REPLACE_FSTAT=0;
   REPLACE_FSTATAT=0;
   REPLACE_FUTIMENS=0;
-  REPLACE_LCHMOD=0;
   REPLACE_LSTAT=0;
   REPLACE_MKDIR=0;
   REPLACE_MKFIFO=0;
@@ -9576,6 +9944,54 @@ $as_echo "$gl_cv_member_st_size_64" >&6; }
       ;;
   esac
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for C/C++ restrict keyword" >&5
+$as_echo_n "checking for C/C++ restrict keyword... " >&6; }
+if ${ac_cv_c_restrict+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_cv_c_restrict=no
+   # The order here caters to the fact that C++ does not require restrict.
+   for ac_kw in __restrict __restrict__ _Restrict restrict; do
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+typedef int *int_ptr;
+           int foo (int_ptr $ac_kw ip) { return ip[0]; }
+           int bar (int [$ac_kw]); /* Catch GCC bug 14050.  */
+           int bar (int ip[$ac_kw]) { return ip[0]; }
+
+int
+main ()
+{
+int s[1];
+           int *$ac_kw t = s;
+           t[0] = 0;
+           return foo (t) + bar (t);
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  ac_cv_c_restrict=$ac_kw
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+     test "$ac_cv_c_restrict" != no && break
+   done
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_restrict" >&5
+$as_echo "$ac_cv_c_restrict" >&6; }
+
+ case $ac_cv_c_restrict in
+   restrict) ;;
+   no) $as_echo "#define restrict /**/" >>confdefs.h
+ ;;
+   *)  cat >>confdefs.h <<_ACEOF
+#define restrict $ac_cv_c_restrict
+_ACEOF
+ ;;
+ esac
+
 
 
 
@@ -9682,6 +10098,8 @@ else
 $as_echo "#define nlink_t int" >>confdefs.h
 
 fi
+
+
 
 
 
@@ -9928,60 +10346,19 @@ _ACEOF
 
 
 
+  GNULIB_GETRANDOM=0;
+    HAVE_GETRANDOM=1;
+  REPLACE_GETRANDOM=0;
+
+
+
+
   GNULIB_GETTIMEOFDAY=0;
     HAVE_GETTIMEOFDAY=1;
   HAVE_STRUCT_TIMEVAL=1;
   HAVE_SYS_TIME_H=1;
   REPLACE_GETTIMEOFDAY=0;
   REPLACE_STRUCT_TIMEVAL=0;
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for C/C++ restrict keyword" >&5
-$as_echo_n "checking for C/C++ restrict keyword... " >&6; }
-if ${ac_cv_c_restrict+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_cv_c_restrict=no
-   # The order here caters to the fact that C++ does not require restrict.
-   for ac_kw in __restrict __restrict__ _Restrict restrict; do
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-typedef int *int_ptr;
-           int foo (int_ptr $ac_kw ip) { return ip[0]; }
-           int bar (int [$ac_kw]); /* Catch GCC bug 14050.  */
-           int bar (int ip[$ac_kw]) { return ip[0]; }
-
-int
-main ()
-{
-int s[1];
-           int *$ac_kw t = s;
-           t[0] = 0;
-           return foo (t) + bar (t);
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  ac_cv_c_restrict=$ac_kw
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-     test "$ac_cv_c_restrict" != no && break
-   done
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_c_restrict" >&5
-$as_echo "$ac_cv_c_restrict" >&6; }
-
- case $ac_cv_c_restrict in
-   restrict) ;;
-   no) $as_echo "#define restrict /**/" >>confdefs.h
- ;;
-   *)  cat >>confdefs.h <<_ACEOF
-#define restrict $ac_cv_c_restrict
-_ACEOF
- ;;
- esac
 
 
 
@@ -11192,6 +11569,8 @@ done
 
 
 
+
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for IPv4 sockets" >&5
 $as_echo_n "checking for IPv4 sockets... " >&6; }
 if ${gl_cv_socket_ipv4+:} false; then :
@@ -11464,7 +11843,7 @@ else
 # include <time.h>
 #endif
 #include <wchar.h>
-              int verify[sizeof (wint_t) < sizeof (int) ? -1 : 1];
+            int verify[sizeof (wint_t) < sizeof (int) ? -1 : 1];
 
 int
 main ()
@@ -12508,6 +12887,8 @@ $as_echo "$gl_cv_next_inttypes_h" >&6; }
 
 
 
+
+
   for ac_header in inttypes.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "inttypes.h" "ac_cv_header_inttypes_h" "$ac_includes_default"
@@ -12564,6 +12945,8 @@ _ACEOF
   else
     PRI_MACROS_BROKEN=0
   fi
+
+
 
 
 
@@ -13137,40 +13520,6 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
  presetting ac_cv_c_bigendian=no (or yes) will help" "$LINENO" 5 ;;
  esac
 
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for nl_langinfo and CODESET" >&5
-$as_echo_n "checking for nl_langinfo and CODESET... " >&6; }
-if ${am_cv_langinfo_codeset+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <langinfo.h>
-int
-main ()
-{
-char* cs = nl_langinfo(CODESET); return !cs;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  am_cv_langinfo_codeset=yes
-else
-  am_cv_langinfo_codeset=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $am_cv_langinfo_codeset" >&5
-$as_echo "$am_cv_langinfo_codeset" >&6; }
-  if test $am_cv_langinfo_codeset = yes; then
-
-$as_echo "#define HAVE_LANGINFO_CODESET 1" >>confdefs.h
-
-  fi
 
 
   GNULIB_LOCALECONV=0;
@@ -14471,103 +14820,6 @@ _ACEOF
 
 
 
-  GNULIB_BTOWC=0;
-  GNULIB_WCTOB=0;
-  GNULIB_MBSINIT=0;
-  GNULIB_MBRTOWC=0;
-  GNULIB_MBRLEN=0;
-  GNULIB_MBSRTOWCS=0;
-  GNULIB_MBSNRTOWCS=0;
-  GNULIB_WCRTOMB=0;
-  GNULIB_WCSRTOMBS=0;
-  GNULIB_WCSNRTOMBS=0;
-  GNULIB_WCWIDTH=0;
-  GNULIB_WMEMCHR=0;
-  GNULIB_WMEMCMP=0;
-  GNULIB_WMEMCPY=0;
-  GNULIB_WMEMMOVE=0;
-  GNULIB_WMEMSET=0;
-  GNULIB_WCSLEN=0;
-  GNULIB_WCSNLEN=0;
-  GNULIB_WCSCPY=0;
-  GNULIB_WCPCPY=0;
-  GNULIB_WCSNCPY=0;
-  GNULIB_WCPNCPY=0;
-  GNULIB_WCSCAT=0;
-  GNULIB_WCSNCAT=0;
-  GNULIB_WCSCMP=0;
-  GNULIB_WCSNCMP=0;
-  GNULIB_WCSCASECMP=0;
-  GNULIB_WCSNCASECMP=0;
-  GNULIB_WCSCOLL=0;
-  GNULIB_WCSXFRM=0;
-  GNULIB_WCSDUP=0;
-  GNULIB_WCSCHR=0;
-  GNULIB_WCSRCHR=0;
-  GNULIB_WCSCSPN=0;
-  GNULIB_WCSSPN=0;
-  GNULIB_WCSPBRK=0;
-  GNULIB_WCSSTR=0;
-  GNULIB_WCSTOK=0;
-  GNULIB_WCSWIDTH=0;
-  GNULIB_WCSFTIME=0;
-    HAVE_BTOWC=1;
-  HAVE_MBSINIT=1;
-  HAVE_MBRTOWC=1;
-  HAVE_MBRLEN=1;
-  HAVE_MBSRTOWCS=1;
-  HAVE_MBSNRTOWCS=1;
-  HAVE_WCRTOMB=1;
-  HAVE_WCSRTOMBS=1;
-  HAVE_WCSNRTOMBS=1;
-  HAVE_WMEMCHR=1;
-  HAVE_WMEMCMP=1;
-  HAVE_WMEMCPY=1;
-  HAVE_WMEMMOVE=1;
-  HAVE_WMEMSET=1;
-  HAVE_WCSLEN=1;
-  HAVE_WCSNLEN=1;
-  HAVE_WCSCPY=1;
-  HAVE_WCPCPY=1;
-  HAVE_WCSNCPY=1;
-  HAVE_WCPNCPY=1;
-  HAVE_WCSCAT=1;
-  HAVE_WCSNCAT=1;
-  HAVE_WCSCMP=1;
-  HAVE_WCSNCMP=1;
-  HAVE_WCSCASECMP=1;
-  HAVE_WCSNCASECMP=1;
-  HAVE_WCSCOLL=1;
-  HAVE_WCSXFRM=1;
-  HAVE_WCSDUP=1;
-  HAVE_WCSCHR=1;
-  HAVE_WCSRCHR=1;
-  HAVE_WCSCSPN=1;
-  HAVE_WCSSPN=1;
-  HAVE_WCSPBRK=1;
-  HAVE_WCSSTR=1;
-  HAVE_WCSTOK=1;
-  HAVE_WCSWIDTH=1;
-  HAVE_WCSFTIME=1;
-  HAVE_DECL_WCTOB=1;
-  HAVE_DECL_WCWIDTH=1;
-  REPLACE_MBSTATE_T=0;
-  REPLACE_BTOWC=0;
-  REPLACE_WCTOB=0;
-  REPLACE_MBSINIT=0;
-  REPLACE_MBRTOWC=0;
-  REPLACE_MBRLEN=0;
-  REPLACE_MBSRTOWCS=0;
-  REPLACE_MBSNRTOWCS=0;
-  REPLACE_WCRTOMB=0;
-  REPLACE_WCSRTOMBS=0;
-  REPLACE_WCSNRTOMBS=0;
-  REPLACE_WCWIDTH=0;
-  REPLACE_WCSWIDTH=0;
-  REPLACE_WCSFTIME=0;
-  REPLACE_WCSTOK=0;
-
-
 
 
 
@@ -15034,148 +15286,6 @@ esac
 
 
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for a traditional french locale" >&5
-$as_echo_n "checking for a traditional french locale... " >&6; }
-if ${gt_cv_locale_fr+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <locale.h>
-#include <time.h>
-#if HAVE_LANGINFO_CODESET
-# include <langinfo.h>
-#endif
-#include <stdlib.h>
-#include <string.h>
-struct tm t;
-char buf[16];
-int main () {
-  /* On BeOS and Haiku, locales are not implemented in libc.  Rather, libintl
-     imitates locale dependent behaviour by looking at the environment
-     variables, and all locales use the UTF-8 encoding.  */
-#if defined __BEOS__ || defined __HAIKU__
-  return 1;
-#else
-  /* Check whether the given locale name is recognized by the system.  */
-# if defined _WIN32 && !defined __CYGWIN__
-  /* On native Windows, setlocale(category, "") looks at the system settings,
-     not at the environment variables.  Also, when an encoding suffix such
-     as ".65001" or ".54936" is specified, it succeeds but sets the LC_CTYPE
-     category of the locale to "C".  */
-  if (setlocale (LC_ALL, getenv ("LC_ALL")) == NULL
-      || strcmp (setlocale (LC_CTYPE, NULL), "C") == 0)
-    return 1;
-# else
-  if (setlocale (LC_ALL, "") == NULL) return 1;
-# endif
-  /* Check whether nl_langinfo(CODESET) is nonempty and not "ASCII" or "646".
-     On Mac OS X 10.3.5 (Darwin 7.5) in the fr_FR locale, nl_langinfo(CODESET)
-     is empty, and the behaviour of Tcl 8.4 in this locale is not useful.
-     On OpenBSD 4.0, when an unsupported locale is specified, setlocale()
-     succeeds but then nl_langinfo(CODESET) is "646". In this situation,
-     some unit tests fail.
-     On MirBSD 10, when an unsupported locale is specified, setlocale()
-     succeeds but then nl_langinfo(CODESET) is "UTF-8".  */
-# if HAVE_LANGINFO_CODESET
-  {
-    const char *cs = nl_langinfo (CODESET);
-    if (cs[0] == '\0' || strcmp (cs, "ASCII") == 0 || strcmp (cs, "646") == 0
-        || strcmp (cs, "UTF-8") == 0)
-      return 1;
-  }
-# endif
-# ifdef __CYGWIN__
-  /* On Cygwin, avoid locale names without encoding suffix, because the
-     locale_charset() function relies on the encoding suffix.  Note that
-     LC_ALL is set on the command line.  */
-  if (strchr (getenv ("LC_ALL"), '.') == NULL) return 1;
-# endif
-  /* Check whether in the abbreviation of the second month, the second
-     character (should be U+00E9: LATIN SMALL LETTER E WITH ACUTE) is only
-     one byte long. This excludes the UTF-8 encoding.  */
-  t.tm_year = 1975 - 1900; t.tm_mon = 2 - 1; t.tm_mday = 4;
-  if (strftime (buf, sizeof (buf), "%b", &t) < 3 || buf[2] != 'v') return 1;
-# if !defined __BIONIC__ /* Bionic libc's 'struct lconv' is just a dummy.  */
-  /* Check whether the decimal separator is a comma.
-     On NetBSD 3.0 in the fr_FR.ISO8859-1 locale, localeconv()->decimal_point
-     are nl_langinfo(RADIXCHAR) are both ".".  */
-  if (localeconv () ->decimal_point[0] != ',') return 1;
-# endif
-  return 0;
-#endif
-}
-
-_ACEOF
-    if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_link\""; } >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && test -s conftest$ac_exeext; then
-      case "$host_os" in
-        # Handle native Windows specially, because there setlocale() interprets
-        # "ar" as "Arabic" or "Arabic_Saudi Arabia.1256",
-        # "fr" or "fra" as "French" or "French_France.1252",
-        # "ge"(!) or "deu"(!) as "German" or "German_Germany.1252",
-        # "ja" as "Japanese" or "Japanese_Japan.932",
-        # and similar.
-        mingw*)
-          # Test for the native Windows locale name.
-          if (LC_ALL=French_France.1252 LC_TIME= LC_CTYPE= ./conftest; exit) 2>/dev/null; then
-            gt_cv_locale_fr=French_France.1252
-          else
-            # None found.
-            gt_cv_locale_fr=none
-          fi
-          ;;
-        *)
-          # Setting LC_ALL is not enough. Need to set LC_TIME to empty, because
-          # otherwise on Mac OS X 10.3.5 the LC_TIME=C from the beginning of the
-          # configure script would override the LC_ALL setting. Likewise for
-          # LC_CTYPE, which is also set at the beginning of the configure script.
-          # Test for the usual locale name.
-          if (LC_ALL=fr_FR LC_TIME= LC_CTYPE= ./conftest; exit) 2>/dev/null; then
-            gt_cv_locale_fr=fr_FR
-          else
-            # Test for the locale name with explicit encoding suffix.
-            if (LC_ALL=fr_FR.ISO-8859-1 LC_TIME= LC_CTYPE= ./conftest; exit) 2>/dev/null; then
-              gt_cv_locale_fr=fr_FR.ISO-8859-1
-            else
-              # Test for the AIX, OSF/1, FreeBSD, NetBSD, OpenBSD locale name.
-              if (LC_ALL=fr_FR.ISO8859-1 LC_TIME= LC_CTYPE= ./conftest; exit) 2>/dev/null; then
-                gt_cv_locale_fr=fr_FR.ISO8859-1
-              else
-                # Test for the HP-UX locale name.
-                if (LC_ALL=fr_FR.iso88591 LC_TIME= LC_CTYPE= ./conftest; exit) 2>/dev/null; then
-                  gt_cv_locale_fr=fr_FR.iso88591
-                else
-                  # Test for the Solaris 7 locale name.
-                  if (LC_ALL=fr LC_TIME= LC_CTYPE= ./conftest; exit) 2>/dev/null; then
-                    gt_cv_locale_fr=fr
-                  else
-                    # None found.
-                    gt_cv_locale_fr=none
-                  fi
-                fi
-              fi
-            fi
-          fi
-          ;;
-      esac
-    fi
-    rm -fr conftest*
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gt_cv_locale_fr" >&5
-$as_echo "$gt_cv_locale_fr" >&6; }
-  LOCALE_FR=$gt_cv_locale_fr
-
-
-
-
-
 
 
   GNULIB_EXPLICIT_BZERO=0;
@@ -15523,7 +15633,7 @@ main ()
     /* Check for empty needle behavior.  */
     {
       const char *haystack = "AAA";
-      if (memmem (haystack, 3, NULL, 0) != haystack)
+      if (memmem (haystack, 3, (const char *) 1, 0) != haystack)
         result |= 2;
     }
     return result;
@@ -15564,6 +15674,82 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_MEMRCHR $ac_have_decl
 _ACEOF
+
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <limits.h> defines MIN and MAX" >&5
+$as_echo_n "checking whether <limits.h> defines MIN and MAX... " >&6; }
+if ${gl_cv_minmax_in_limits_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <limits.h>
+            int x = MIN (42, 17);
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_minmax_in_limits_h=yes
+else
+  gl_cv_minmax_in_limits_h=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_minmax_in_limits_h" >&5
+$as_echo "$gl_cv_minmax_in_limits_h" >&6; }
+  if test $gl_cv_minmax_in_limits_h = yes; then
+
+$as_echo "#define HAVE_MINMAX_IN_LIMITS_H 1" >>confdefs.h
+
+  fi
+
+
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <sys/param.h> defines MIN and MAX" >&5
+$as_echo_n "checking whether <sys/param.h> defines MIN and MAX... " >&6; }
+if ${gl_cv_minmax_in_sys_param_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/param.h>
+            int x = MIN (42, 17);
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_minmax_in_sys_param_h=yes
+else
+  gl_cv_minmax_in_sys_param_h=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_minmax_in_sys_param_h" >&5
+$as_echo "$gl_cv_minmax_in_sys_param_h" >&6; }
+  if test $gl_cv_minmax_in_sys_param_h = yes; then
+
+$as_echo "#define HAVE_MINMAX_IN_SYS_PARAM_H 1" >>confdefs.h
+
+  fi
+
+
+
 
 
 
@@ -16230,7 +16416,6 @@ _ACEOF
 
 
 
-
      if test $gl_cv_have_include_next = yes; then
        gl_cv_next_string_h='<'string.h'>'
      else
@@ -16298,6 +16483,19 @@ $as_echo "$gl_cv_next_string_h" >&6; }
 
 
 
+
+
+
+ac_fn_c_check_decl "$LINENO" "strnlen" "ac_cv_have_decl_strnlen" "$ac_includes_default"
+if test "x$ac_cv_have_decl_strnlen" = xyes; then :
+  ac_have_decl=1
+else
+  ac_have_decl=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DECL_STRNLEN $ac_have_decl
+_ACEOF
 
 
 
@@ -16394,6 +16592,8 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_STRTOK_R $ac_have_decl
 _ACEOF
+
+
 
 
 
@@ -16707,6 +16907,8 @@ $as_echo "$gl_cv_next_time_h" >&6; }
 
 
 
+
+
 ac_fn_c_check_decl "$LINENO" "unsetenv" "ac_cv_have_decl_unsetenv" "$ac_includes_default"
 if test "x$ac_cv_have_decl_unsetenv" = xyes; then :
   ac_have_decl=1
@@ -16717,84 +16919,6 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_UNSETENV $ac_have_decl
 _ACEOF
-
-
-            { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether <wchar.h> uses 'inline' correctly" >&5
-$as_echo_n "checking whether <wchar.h> uses 'inline' correctly... " >&6; }
-if ${gl_cv_header_wchar_h_correct_inline+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  gl_cv_header_wchar_h_correct_inline=yes
-     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-       #define wcstod renamed_wcstod
-/* Tru64 with Desktop Toolkit C has a bug: <stdio.h> must be included before
-   <wchar.h>.
-   BSD/OS 4.0.1 has a bug: <stddef.h>, <stdio.h> and <time.h> must be
-   included before <wchar.h>.  */
-#include <stddef.h>
-#include <stdio.h>
-#include <time.h>
-#include <wchar.h>
-extern int zero (void);
-int main () { return zero(); }
-
-_ACEOF
-                              save_ac_compile="$ac_compile"
-     ac_compile=`echo "$save_ac_compile" | sed s/conftest/conftest1/`
-     if echo '#include "conftest.c"' >conftest1.c &&
-        { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
-  (eval $ac_compile) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-         #define wcstod renamed_wcstod
-/* Tru64 with Desktop Toolkit C has a bug: <stdio.h> must be included before
-   <wchar.h>.
-   BSD/OS 4.0.1 has a bug: <stddef.h>, <stdio.h> and <time.h> must be
-   included before <wchar.h>.  */
-#include <stddef.h>
-#include <stdio.h>
-#include <time.h>
-#include <wchar.h>
-int zero (void) { return 0; }
-
-_ACEOF
-              ac_compile=`echo "$save_ac_compile" | sed s/conftest/conftest2/`
-       if echo '#include "conftest.c"' >conftest2.c &&
-          { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
-  (eval $ac_compile) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-         if $CC -o conftest$ac_exeext $CFLAGS $LDFLAGS conftest1.$ac_objext conftest2.$ac_objext $LIBS >&5 2>&1; then
-           :
-         else
-           gl_cv_header_wchar_h_correct_inline=no
-         fi
-       fi
-     fi
-     ac_compile="$save_ac_compile"
-     rm -f conftest12.c conftest12.$ac_objext conftest$ac_exeext
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_header_wchar_h_correct_inline" >&5
-$as_echo "$gl_cv_header_wchar_h_correct_inline" >&6; }
-  if test $gl_cv_header_wchar_h_correct_inline = no; then
-    as_fn_error $? "<wchar.h> cannot be used with this compiler ($CC $CFLAGS $CPPFLAGS).
-This is a known interoperability problem of glibc <= 2.5 with gcc >= 4.3 in
-C99 mode. You have four options:
-  - Add the flag -fgnu89-inline to CC and reconfigure, or
-  - Fix your include files, using parts of
-    <https://sourceware.org/git/?p=glibc.git;a=commitdiff;h=b037a293a48718af30d706c2e18c929d0e69a621>, or
-  - Use a gcc version older than 4.3, or
-  - Don't use the flags -std=c99 or -std=gnu99.
-Configuration aborted." "$LINENO" 5
-  fi
 
 
 
@@ -16821,6 +16945,10 @@ Configuration aborted." "$LINENO" 5
   REPLACE_ISWBLANK=0;
   REPLACE_ISWDIGIT=0;
   REPLACE_ISWXDIGIT=0;
+
+
+
+
 
 
 
@@ -17017,6 +17145,167 @@ $as_echo "$gl_cv_next_arpa_inet_h" >&6; }
 
 
 
+
+
+
+
+
+
+
+
+
+
+  if test $ac_cv_func_btowc = no; then
+    HAVE_BTOWC=0
+  else
+
+
+
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether btowc(0) is correct" >&5
+$as_echo_n "checking whether btowc(0) is correct... " >&6; }
+if ${gl_cv_func_btowc_nul+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+        if test "$cross_compiling" = yes; then :
+
+           case "$host_os" in
+                      # Guess no on Cygwin.
+             cygwin*) gl_cv_func_btowc_nul="guessing no" ;;
+                      # Guess yes on native Windows.
+             mingw*)  gl_cv_func_btowc_nul="guessing yes" ;;
+                      # Guess yes otherwise.
+             *)       gl_cv_func_btowc_nul="guessing yes" ;;
+           esac
+
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <string.h>
+/* Tru64 with Desktop Toolkit C has a bug: <stdio.h> must be included before
+   <wchar.h>.
+   BSD/OS 4.0.1 has a bug: <stddef.h>, <stdio.h> and <time.h> must be
+   included before <wchar.h>.  */
+#include <stddef.h>
+#include <stdio.h>
+#include <time.h>
+#include <wchar.h>
+int main ()
+{
+  if (btowc ('\0') != 0)
+    return 1;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  gl_cv_func_btowc_nul=yes
+else
+  gl_cv_func_btowc_nul=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_func_btowc_nul" >&5
+$as_echo "$gl_cv_func_btowc_nul" >&6; }
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether btowc(EOF) is correct" >&5
+$as_echo_n "checking whether btowc(EOF) is correct... " >&6; }
+if ${gl_cv_func_btowc_eof+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+                        case "$host_os" in
+                  # Guess no on IRIX.
+          irix*)  gl_cv_func_btowc_eof="guessing no" ;;
+                  # Guess yes on native Windows.
+          mingw*) gl_cv_func_btowc_eof="guessing yes" ;;
+                  # Guess yes otherwise.
+          *)      gl_cv_func_btowc_eof="guessing yes" ;;
+        esac
+        if test $LOCALE_FR != none; then
+          if test "$cross_compiling" = yes; then :
+  :
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+#include <locale.h>
+#include <string.h>
+/* Tru64 with Desktop Toolkit C has a bug: <stdio.h> must be included before
+   <wchar.h>.
+   BSD/OS 4.0.1 has a bug: <stddef.h>, <stdio.h> and <time.h> must be
+   included before <wchar.h>.  */
+#include <stddef.h>
+#include <stdio.h>
+#include <time.h>
+#include <wchar.h>
+int main ()
+{
+  if (setlocale (LC_ALL, "$LOCALE_FR") != NULL)
+    {
+      if (btowc (EOF) != WEOF)
+        return 1;
+    }
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  gl_cv_func_btowc_eof=yes
+else
+  gl_cv_func_btowc_eof=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+        fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_func_btowc_eof" >&5
+$as_echo "$gl_cv_func_btowc_eof" >&6; }
+
+    case "$gl_cv_func_btowc_nul" in
+      *yes) ;;
+      *) REPLACE_BTOWC=1 ;;
+    esac
+    case "$gl_cv_func_btowc_eof" in
+      *yes) ;;
+      *) REPLACE_BTOWC=1 ;;
+    esac
+  fi
+
+  if test $HAVE_BTOWC = 0 || test $REPLACE_BTOWC = 1; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS btowc.$ac_objext"
+
+
+  :
+
+  fi
+
+
+
+
+
+          GNULIB_BTOWC=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_BTOWC 1" >>confdefs.h
 
 
 
@@ -17366,6 +17655,85 @@ done
 
 
 $as_echo "#define GNULIB_TEST_CLOSEDIR 1" >>confdefs.h
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_ctype_h='<'ctype.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <ctype.h>" >&5
+$as_echo_n "checking absolute name of <ctype.h>... " >&6; }
+if ${gl_cv_next_ctype_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <ctype.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'ctype.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_ctype_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+           gl_header=$gl_cv_absolute_ctype_h
+           gl_cv_next_ctype_h='"'$gl_header'"'
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_ctype_h" >&5
+$as_echo "$gl_cv_next_ctype_h" >&6; }
+     fi
+     NEXT_CTYPE_H=$gl_cv_next_ctype_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'ctype.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_ctype_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_CTYPE_H=$gl_next_as_first_directive
+
+
+
+
+
+
 
 
 
@@ -19050,19 +19418,6 @@ fi
 
 
 
-  ac_fn_c_check_decl "$LINENO" "isblank" "ac_cv_have_decl_isblank" "#include <ctype.h>
-"
-if test "x$ac_cv_have_decl_isblank" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_ISBLANK $ac_have_decl
-_ACEOF
-
-
 
 
   fi
@@ -19097,19 +19452,6 @@ $as_echo "#define GNULIB_TEST_FNMATCH 1" >>confdefs.h
 
   gl_LIBOBJS="$gl_LIBOBJS fnmatch.$ac_objext"
 
-
-
-  ac_fn_c_check_decl "$LINENO" "isblank" "ac_cv_have_decl_isblank" "#include <ctype.h>
-"
-if test "x$ac_cv_have_decl_isblank" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_ISBLANK $ac_have_decl
-_ACEOF
 
 
 
@@ -20231,6 +20573,135 @@ $as_echo "#define HAVE_VAR___PROGNAME 1" >>confdefs.h
 
 
 
+  if test "$ac_cv_func_getrandom" != yes; then
+    HAVE_GETRANDOM=0
+  else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether getrandom is compatible with its GNU+BSD signature" >&5
+$as_echo_n "checking whether getrandom is compatible with its GNU+BSD signature... " >&6; }
+if ${gl_cv_func_getrandom_ok+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+/* Additional includes are needed before <sys/random.h> on Mac OS X.  */
+              #include <sys/types.h>
+              #include <stdlib.h>
+              #include <sys/random.h>
+              ssize_t getrandom (void *, size_t, unsigned int);
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_func_getrandom_ok=yes
+else
+  gl_cv_func_getrandom_ok=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_func_getrandom_ok" >&5
+$as_echo "$gl_cv_func_getrandom_ok" >&6; }
+    if test $gl_cv_func_getrandom_ok = no; then
+      REPLACE_GETRANDOM=1
+    fi
+  fi
+
+  case "$host_os" in
+    mingw*)
+      for ac_header in bcrypt.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "bcrypt.h" "ac_cv_header_bcrypt_h" "$ac_includes_default"
+if test "x$ac_cv_header_bcrypt_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_BCRYPT_H 1
+_ACEOF
+
+fi
+
+done
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the bcrypt library is guaranteed to be present" >&5
+$as_echo_n "checking whether the bcrypt library is guaranteed to be present... " >&6; }
+if ${gl_cv_lib_assume_bcrypt+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <windows.h>
+int
+main ()
+{
+#if !(_WIN32_WINNT >= _WIN32_WINNT_WIN7)
+                  cannot assume it
+                #endif
+
+  ;
+  return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_lib_assume_bcrypt=yes
+else
+  gl_cv_lib_assume_bcrypt=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_lib_assume_bcrypt" >&5
+$as_echo "$gl_cv_lib_assume_bcrypt" >&6; }
+      if test $gl_cv_lib_assume_bcrypt = yes; then
+
+$as_echo "#define HAVE_LIB_BCRYPT 1" >>confdefs.h
+
+        LIB_GETRANDOM='-lbcrypt'
+      else
+        LIB_GETRANDOM='-ladvapi32'
+      fi
+      ;;
+    *)
+      LIB_GETRANDOM= ;;
+  esac
+
+
+  if test $HAVE_GETRANDOM = 0 || test $REPLACE_GETRANDOM = 1; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS getrandom.$ac_objext"
+
+  fi
+
+
+
+
+
+          GNULIB_GETRANDOM=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_GETRANDOM 1" >>confdefs.h
+
+
+
+
+
+
+
 
 
 
@@ -20477,6 +20948,7 @@ main ()
 glob_t found;
                     if (glob ("conf*-globtest", 0, NULL, &found) == GLOB_NOMATCH)
                       return 1;
+                    globfree (&found);
 
   ;
   return 0;
@@ -21020,6 +21492,44 @@ $as_echo "$gl_cv_test_UINT64_MAX_EQ_ULONG_MAX" >&6; }
 
 
 
+
+
+
+  if test $ac_cv_func_isblank = no; then
+    HAVE_ISBLANK=0
+  fi
+
+  if test $HAVE_ISBLANK = 0; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS isblank.$ac_objext"
+
+  fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define GNULIB_ISBLANK 1
+_ACEOF
+
+
+
+
+
+
+
+          GNULIB_ISBLANK=1
+
+
+
+
+
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether isnan(double) can be used without linking with libm" >&5
 $as_echo_n "checking whether isnan(double) can be used without linking with libm... " >&6; }
 if ${gl_cv_func_isnand_no_libm+:} false; then :
@@ -21090,7 +21600,10 @@ else
       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <math.h>
-             #if __GNUC__ >= 4
+             #ifndef __has_builtin
+             # define __has_builtin(name) 0
+             #endif
+             #if __GNUC__ >= 4 && (!defined __clang__ || __has_builtin (__builtin_isnanl))
              # undef isnanl
              # define isnanl(x) __builtin_isnanl ((long double)(x))
              #elif defined isnan
@@ -21160,7 +21673,10 @@ else
 #include <float.h>
 #include <limits.h>
 #include <math.h>
-#if __GNUC__ >= 4
+#ifndef __has_builtin
+# define __has_builtin(name) 0
+#endif
+#if __GNUC__ >= 4 && (!defined __clang__ || __has_builtin (__builtin_isnanl))
 # undef isnanl
 # define isnanl(x) __builtin_isnanl ((long double)(x))
 #elif defined isnan
@@ -21363,14 +21879,14 @@ typedef union { long double value; unsigned int word[NWORDS]; }
         memory_long_double;
 static unsigned int ored_words[NWORDS];
 static unsigned int anded_words[NWORDS];
-static void add_to_ored_words (long double x)
+static void add_to_ored_words (long double *x)
 {
   memory_long_double m;
   size_t i;
   /* Clear it first, in case
      sizeof (long double) < sizeof (memory_long_double).  */
   memset (&m, 0, sizeof (memory_long_double));
-  m.value = x;
+  m.value = *x;
   for (i = 0; i < NWORDS; i++)
     {
       ored_words[i] |= m.word[i];
@@ -21379,17 +21895,15 @@ static void add_to_ored_words (long double x)
 }
 int main ()
 {
+  static long double samples[5] = { 0.25L, 0.5L, 1.0L, 2.0L, 4.0L };
   size_t j;
   FILE *fp = fopen ("conftest.out", "w");
   if (fp == NULL)
     return 1;
   for (j = 0; j < NWORDS; j++)
     anded_words[j] = ~ (unsigned int) 0;
-  add_to_ored_words (0.25L);
-  add_to_ored_words (0.5L);
-  add_to_ored_words (1.0L);
-  add_to_ored_words (2.0L);
-  add_to_ored_words (4.0L);
+  for (j = 0; j < 5; j++)
+    add_to_ored_words (&samples[j]);
   /* Remove bits that are common (e.g. if representation of the first mantissa
      bit is explicit).  */
   for (j = 0; j < NWORDS; j++)
@@ -23940,6 +24454,58 @@ $as_echo "#define GNULIB_TEST_MBSRTOWCS 1" >>confdefs.h
 
 
 
+
+
+  for ac_func in mbtowc
+do :
+  ac_fn_c_check_func "$LINENO" "mbtowc" "ac_cv_func_mbtowc"
+if test "x$ac_cv_func_mbtowc" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_MBTOWC 1
+_ACEOF
+
+fi
+done
+
+  if test $ac_cv_func_mbtowc = no; then
+    HAVE_MBTOWC=0
+  else
+    if false; then
+      REPLACE_MBTOWC=1
+    fi
+  fi
+
+  if test $HAVE_MBTOWC = 0 || test $REPLACE_MBTOWC = 1; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS mbtowc.$ac_objext"
+
+
+  :
+
+  fi
+
+
+
+
+
+          GNULIB_MBTOWC=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_MBTOWC 1" >>confdefs.h
+
+
+
+
   if test $HAVE_MEMCHR = 0 || test $REPLACE_MEMCHR = 1; then
 
 
@@ -24170,7 +24736,7 @@ main ()
     /* Check for empty needle behavior.  */
     {
       const char *haystack = "AAA";
-      if (memmem (haystack, 3, NULL, 0) != haystack)
+      if (memmem (haystack, 3, (const char *) 1, 0) != haystack)
         result |= 2;
     }
     return result;
@@ -24325,6 +24891,9 @@ done
 
 
 $as_echo "#define GNULIB_TEST_MEMRCHR 1" >>confdefs.h
+
+
+
 
 
 
@@ -26235,6 +26804,8 @@ fi
 
 
 
+
+
      ac_fn_c_check_type "$LINENO" "socklen_t" "ac_cv_type_socklen_t" "
 /* <sys/types.h> is not needed according to POSIX, but the
    <sys/socket.h> in i386-unknown-freebsd4.10 and
@@ -27032,6 +27603,8 @@ _ACEOF
 
 
 
+
+
      if test $gl_cv_have_include_next = yes; then
        gl_cv_next_stdlib_h='<'stdlib.h'>'
      else
@@ -27091,6 +27664,8 @@ $as_echo "$gl_cv_next_stdlib_h" >&6; }
        gl_next_as_first_directive=$gl_cv_next_stdlib_h
      fi
      NEXT_AS_FIRST_DIRECTIVE_STDLIB_H=$gl_next_as_first_directive
+
+
 
 
 
@@ -27459,6 +28034,102 @@ _ACEOF
 
 
 
+
+
+
+
+  if test $ac_cv_have_decl_strnlen = no; then
+    HAVE_DECL_STRNLEN=0
+  else
+
+         { $as_echo "$as_me:${as_lineno-$LINENO}: checking for working strnlen" >&5
+$as_echo_n "checking for working strnlen... " >&6; }
+if ${ac_cv_func_strnlen_working+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  # Guess no on AIX systems, yes otherwise.
+		case "$host_os" in
+		  aix*) ac_cv_func_strnlen_working=no;;
+		  *)    ac_cv_func_strnlen_working=yes;;
+		esac
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+$ac_includes_default
+int
+main ()
+{
+
+#define S "foobar"
+#define S_LEN (sizeof S - 1)
+
+  /* At least one implementation is buggy: that of AIX 4.3 would
+     give strnlen (S, 1) == 3.  */
+
+  int i;
+  for (i = 0; i < S_LEN + 1; ++i)
+    {
+      int expected = i <= S_LEN ? i : S_LEN;
+      if (strnlen (S, i) != expected)
+	return 1;
+    }
+  return 0;
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  ac_cv_func_strnlen_working=yes
+else
+  ac_cv_func_strnlen_working=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_func_strnlen_working" >&5
+$as_echo "$ac_cv_func_strnlen_working" >&6; }
+test $ac_cv_func_strnlen_working = no && :
+
+
+    if test $ac_cv_func_strnlen_working = no; then
+      REPLACE_STRNLEN=1
+    fi
+  fi
+
+  if test $HAVE_DECL_STRNLEN = 0 || test $REPLACE_STRNLEN = 1; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS strnlen.$ac_objext"
+
+    :
+  fi
+
+
+
+
+
+          GNULIB_STRNLEN=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_STRNLEN 1" >>confdefs.h
+
+
+
+
+
   if test $REPLACE_STRSTR = 0; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether strstr works in linear time" >&5
 $as_echo_n "checking whether strstr works in linear time... " >&6; }
@@ -27813,6 +28484,103 @@ $as_echo "#define GNULIB_TEST_STRTOK_R 1" >>confdefs.h
 
 
 
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_sys_random_h='<'sys/random.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <sys/random.h>" >&5
+$as_echo_n "checking absolute name of <sys/random.h>... " >&6; }
+if ${gl_cv_next_sys_random_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+             if test $ac_cv_header_sys_random_h = yes; then
+
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/random.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'sys/random.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_sys_random_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+           gl_header=$gl_cv_absolute_sys_random_h
+           gl_cv_next_sys_random_h='"'$gl_header'"'
+          else
+               gl_cv_next_sys_random_h='<'sys/random.h'>'
+             fi
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_sys_random_h" >&5
+$as_echo "$gl_cv_next_sys_random_h" >&6; }
+     fi
+     NEXT_SYS_RANDOM_H=$gl_cv_next_sys_random_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'sys/random.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_sys_random_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_SYS_RANDOM_H=$gl_next_as_first_directive
+
+
+
+
+  if test $ac_cv_header_sys_random_h = yes; then
+    HAVE_SYS_RANDOM_H=1
+  else
+    HAVE_SYS_RANDOM_H=0
+  fi
+
+
+
+  if test $ac_cv_header_sys_random_h = yes; then
+    UNISTD_H_HAVE_SYS_RANDOM_H=1
+  fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -27910,6 +28678,8 @@ else
 $as_echo "#define nlink_t int" >>confdefs.h
 
 fi
+
+
 
 
 
@@ -28275,6 +29045,8 @@ $as_echo "$gl_cv_next_unistd_h" >&6; }
 
 
 
+
+
   if test $ac_cv_have_decl_unsetenv = no; then
     HAVE_DECL_UNSETENV=0
   fi
@@ -28526,6 +29298,8 @@ $as_echo "$gl_cv_next_wchar_h" >&6; }
   else
     HAVE_WINT_T=0
   fi
+
+
 
 
 
@@ -28913,6 +29687,115 @@ $as_echo "$gl_cv_type_wctrans_t" >&6; }
 
       ;;
   esac
+
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wmemchr" >&5
+$as_echo_n "checking for wmemchr... " >&6; }
+if ${gl_cv_func_wmemchr+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Tru64 with Desktop Toolkit C has a bug: <stdio.h> must be included before
+   <wchar.h>.
+   BSD/OS 4.0.1 has a bug: <stddef.h>, <stdio.h> and <time.h> must be included
+   before <wchar.h>.  */
+#include <stddef.h>
+#include <stdio.h>
+#include <time.h>
+#include <wchar.h>
+
+int
+main ()
+{
+return ! wmemchr ((const wchar_t *) 0, (wchar_t) ' ', 0);
+  ;
+  return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  gl_cv_func_wmemchr=yes
+else
+  gl_cv_func_wmemchr=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_func_wmemchr" >&5
+$as_echo "$gl_cv_func_wmemchr" >&6; }
+  if test $gl_cv_func_wmemchr = no; then
+    HAVE_WMEMCHR=0
+  fi
+
+  if test $HAVE_WMEMCHR = 0; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS wmemchr.$ac_objext"
+
+  fi
+
+
+
+
+
+          GNULIB_WMEMCHR=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_WMEMCHR 1" >>confdefs.h
+
+
+
+
+
+
+
+
+
+
+
+  if test $ac_cv_func_wmempcpy = no; then
+    HAVE_WMEMPCPY=0
+  fi
+
+  if test $HAVE_WMEMPCPY = 0; then
+
+
+
+
+
+
+
+
+  gl_LIBOBJS="$gl_LIBOBJS wmempcpy.$ac_objext"
+
+  fi
+
+
+
+
+
+          GNULIB_WMEMPCPY=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_WMEMPCPY 1" >>confdefs.h
+
+
+
   # End of code from modules
 
 

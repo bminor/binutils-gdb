@@ -39,6 +39,7 @@ IMPORTED_GNULIB_MODULES="\
     fnmatch-gnu \
     frexpl \
     getcwd \
+    gettimeofday \
     glob \
     inet_ntop
     inttypes \
@@ -69,7 +70,7 @@ IMPORTED_GNULIB_MODULES="\
 "
 
 # The gnulib commit ID to use for the update.
-GNULIB_COMMIT_SHA1="e22cd2677a4b7beacbf30b93bb0559f7b89f96ce"
+GNULIB_COMMIT_SHA1="4e3f2d4cfdba14e1d89479362061a9280f2f22b6"
 
 # The expected version number for the various auto tools we will
 # use after the import.

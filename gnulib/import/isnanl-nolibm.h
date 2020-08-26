@@ -17,7 +17,10 @@
 #if HAVE_ISNANL_IN_LIBC
 /* Get declaration of isnan macro or (older) isnanl function.  */
 # include <math.h>
-# if __GNUC__ >= 4
+# ifndef __has_builtin
+#  define __has_builtin(name) 0
+# endif
+# if __GNUC__ >= 4 && (!defined __clang__ || __has_builtin (__builtin_isnanl))
    /* GCC 4.0 and newer provides three built-ins for isnan.  */
 #  undef isnanl
 #  define isnanl(x) __builtin_isnanl ((long double)(x))

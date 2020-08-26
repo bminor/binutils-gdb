@@ -1,3 +1,251 @@
+2020-08-26  Christian Biesinger  <cbiesinger@google.com>
+	    Pedro Alves  <palves@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* import/Makefile.am: Update.
+	* import/Makefile.in: Regenerate.
+	* import/alloca.in.h (if): Update.
+	* import/assure.h (affirm): Update.
+	* import/at-func.c: Update.
+	* import/attribute.h: New file.
+	* import/btowc.c: New file.
+	* import/canonicalize-lgpl.c: Update.
+	* import/count-one-bits.h (COUNT_ONE_BITS_GENERIC): Update.
+	(COUNT_ONE_BITS): Update.
+	(intrinsic): Update.
+	(__popcnt64): Update.
+	(popcount_supported): Update.
+	* import/ctype.in.h: New file.
+	* import/dirent-private.h (WIN32_FIND_DATA): Update.
+	* import/dirent.in.h (_GL_ATTRIBUTE_PURE): Update.
+	* import/dirname.h: Update.
+	* import/dosname.h: Remove.
+	* import/error.h (_GL_ATTRIBUTE_FORMAT): Update.
+	* import/extra/update-copyright: Update.
+	* import/fchdir.c: Update.
+	* import/fcntl.in.h (GNULIB_defined_rpl_fcntl): Update.
+	(GNULIB_defined_fcntl): Update.
+	* import/filename.h (HAS_DEVICE): Update.
+	(IS_ABSOLUTE_PATH): Update.
+	(IS_PATH_WITH_DIR): Update.
+	(FILE_SYSTEM_PREFIX_LEN): Update.
+	(_IS_DRIVE_LETTER): Update.
+	(FILE_SYSTEM_DRIVE_PREFIX_CAN_BE_RELATIVE): Update.
+	(IS_ABSOLUTE_FILE_NAME): Update.
+	(IS_RELATIVE_FILE_NAME): Update.
+	(IS_FILE_NAME_WITH_DIR): Update.
+	* import/filenamecat-lgpl.c (mfile_name_concat): Update.
+	* import/fnmatch.c (WIDE_CHAR_SUPPORT): Update.
+	(btowc): Update.
+	(iswctype): Update.
+	(mempcpy): Update.
+	(strnlen): Update.
+	(towlower): Update.
+	(wcscat): Update.
+	(wcslen): Update.
+	(wctype): Update.
+	(wmemchr): Update.
+	(wmempcpy): Update.
+	(SIZE_MAX): Update.
+	(isblank): Update.
+	(__libc_use_alloca): Update.
+	(alloca): Update.
+	(alloca_account): Update.
+	(STREQ): Update.
+	(CHAR_CLASS_MAX_LENGTH): Update.
+	(IS_CHAR_CLASS): Update.
+	(ISWCTYPE): Update.
+	(if): Update.
+	(HANDLE_MULTIBYTE): Update.
+	(internal_function): Update.
+	(FOLD): Update.
+	(CHAR): Update.
+	(UCHAR): Update.
+	(INT): Update.
+	(FCT): Update.
+	(EXT): Update.
+	(END): Update.
+	(L_): Update.
+	(BTOWC): Update.
+	(STRLEN): Update.
+	(STRCAT): Update.
+	(MEMPCPY): Update.
+	(MEMCHR): Update.
+	(WIDE_CHAR_VERSION): Update.
+	(STRUCT): Update.
+	(FINDIDX): Update.
+	(findidx): Update.
+	(ALLOCA_LIMIT): Update.
+	(SHLIB_COMPAT): Update.
+	* import/fnmatch_loop.c (struct STRUCT): Update.
+	(FCT): Update.
+	(EXT): Update.
+	(END): Update.
+	(str): Update.
+	(NEW_PATTERN): Update.
+	* import/getcwd.c: Update.
+	* import/getlogin_r.c (GetUserName): Update.
+	* import/getprogname.c (getprogname): Update.
+	* import/getrandom.c: New file.
+	* import/gettimeofday.c: Remove.
+	* import/glob.in.h (_Restrict_): Update.
+	* import/inttypes.in.h (_GL_FUNCDECL_RPL): Update.
+	(_GL_CXXALIAS_RPL): Update.
+	(_GL_FUNCDECL_SYS): Update.
+	(_GL_CXXALIAS_SYS): Update.
+	* import/isblank.c: New file.
+	* import/isnanl-nolibm.h (__has_builtin): Update.
+	* import/libc-config.h (versioned_symbol): Update.
+	(compat_symbol): Update.
+	* import/limits.in.h (_GL_ALREADY_INCLUDING_LIMITS_H): Update.
+	* import/m4/btowc.m4: New file.
+	* import/m4/ctype.m4: New file.
+	* import/m4/exponentl.m4: Update.
+	* import/m4/fnmatch.m4: Update.
+	* import/m4/getrandom.m4: New file.
+	* import/m4/glob.m4: Update.
+	* import/m4/gnulib-cache.m4: Update.
+	* import/m4/gnulib-common.m4: Update.
+	* import/m4/gnulib-comp.m4: Update.
+	* import/m4/inttypes.m4: Update.
+	* import/m4/isblank.m4: New file.
+	* import/m4/isnanl.m4: Update.
+	* import/m4/largefile.m4: Update.
+	* import/m4/mbtowc.m4: New file.
+	* import/m4/memmem.m4: Update.
+	* import/m4/minmax.m4: New file.
+	* import/m4/signal_h.m4: Update.
+	* import/m4/stdio_h.m4: Update.
+	* import/m4/stdlib_h.m4: Update.
+	* import/m4/string_h.m4: Update.
+	* import/m4/strnlen.m4: New file.
+	* import/m4/sys_random_h.m4: New file.
+	* import/m4/sys_socket_h.m4: Update.
+	* import/m4/sys_stat_h.m4: Update.
+	* import/m4/time_h.m4: Update.
+	* import/m4/unistd_h.m4: Update.
+	* import/m4/wchar_h.m4: Update.
+	* import/m4/wint_t.m4: Update.
+	* import/m4/wmemchr.m4: New file.
+	* import/m4/wmempcpy.m4: New file.
+	* import/math.in.h (__has_builtin): Update.
+	* import/mbrtowc.c (FALLTHROUGH): Update.
+	* import/mbtowc-impl.h: New file.
+	* import/mbtowc.c: New file.
+	* import/minmax.h: New file.
+	* import/open.c (open): Update.
+	* import/openat-proc.c (openat_proc_name): Update.
+	* import/openat.c (rpl_openat): Update.
+	(openat_needs_fchdir): Update.
+	* import/openat.h (FCHOWNAT_INLINE): Update.
+	(CHOWNAT_INLINE): Update.
+	(FCHMODAT_INLINE): Update.
+	(CHMODAT_INLINE): Update.
+	* import/opendir.c (WIN32_FIND_DATA): Update.
+	(GetFullPathName): Update.
+	(FindFirstFile): Update.
+	* import/readdir.c (FindNextFile): Update.
+	* import/rename.c (MoveFileEx): Update.
+	* import/rewinddir.c (FindFirstFile): Update.
+	* import/rmdir.c: Update.
+	* import/signal.in.h (_GL_FUNCDECL_RPL): Update.
+	(_GL_CXXALIAS_RPL): Update.
+	(_GL_FUNCDECL_SYS): Update.
+	(_GL_CXXALIAS_SYS): Update.
+	* import/stat-w32.c (_WIN32_WINNT): Update.
+	(LoadLibrary): Update.
+	(GetFinalPathNameByHandle): Update.
+	(GetProcAddress): Update.
+	(DWORD): Update.
+	(GetFileInformationByHandleExFunc): Update.
+	(GetFinalPathNameByHandleFunc): Update.
+	* import/stat.c (WIN32_FIND_DATA): Update.
+	(CreateFile): Update.
+	(FindFirstFile): Update.
+	* import/stdio.in.h (_GL_ATTRIBUTE_FORMAT): Update.
+	(_GL_FUNCDECL_RPL): Update.
+	(_GL_CXXALIAS_RPL): Update.
+	(_GL_FUNCDECL_SYS): Update.
+	(_GL_CXXALIAS_SYS): Update.
+	(_GL_FUNCDECL_RPL_1): Update.
+	(_GL_CXXALIAS_RPL_1): Update.
+	(_GL_CXXALIAS_SYS_CAST): Update.
+	* import/stdlib.in.h (_GL_ATTRIBUTE_PURE): Update.
+	(_GL_FUNCDECL_RPL): Update.
+	(_GL_CXXALIAS_RPL): Update.
+	(_GL_FUNCDECL_SYS): Update.
+	(_GL_CXXALIAS_SYS): Update.
+	* import/string.in.h (_GL_ATTRIBUTE_PURE): Update.
+	(_GL_WARN_ON_USE): Update.
+	(_GL_WARN_ON_USE_CXX): Update.
+	(_GL_FUNCDECL_RPL): Update.
+	(_GL_CXXALIAS_RPL): Update.
+	(_GL_CXXALIAS_SYS): Update.
+	(mbstok_r): Update.
+	* import/strnlen.c: New file.
+	* import/sys_random.in.h: New file.
+	* import/sys_socket.in.h (GNULIB_defined_socklen_t): Update.
+	(_GL_FUNCDECL_RPL): Update.
+	(_GL_CXXALIAS_RPL): Update.
+	(_GL_CXXALIAS_SYS_CAST): Update.
+	* import/sys_stat.in.h (_GL_FUNCDECL_RPL): Update.
+	(_GL_CXXALIAS_RPL): Update.
+	(_GL_FUNCDECL_SYS): Update.
+	(_GL_CXXALIAS_SYS): Update.
+	(lchmod): Update.
+	(_GL_CXXALIAS_RPL_1): Update.
+	(stat): Update.
+	* import/tempname.c (__set_errno): Update.
+	(__secure_getenv): Update.
+	(__try_tempname): Update.
+	(__getpid): Update.
+	(__gettimeofday): Update.
+	(RANDOM_BITS): Update.
+	(uint64_t): Update.
+	(RANDOM_VALUE_MAX): Update.
+	(BASE_62_DIGITS): Update.
+	(BASE_62_POWER): Update.
+	(try_tempname_len): Update.
+	(try_file): Update.
+	(try_dir): Update.
+	(try_nocreate): Update.
+	(gen_tempname_len): Update.
+	(__gen_tempname): Update.
+	(try_tempname): Update.
+	* import/tempname.h (gen_tempname_len): Update.
+	(try_tempname_len): Update.
+	* import/time.in.h (_GL_FUNCDECL_RPL): Update.
+	(_GL_CXXALIAS_RPL): Update.
+	(_GL_CXXALIAS_SYS): Update.
+	* import/unistd.in.h (if): Update.
+	(_GL_FUNCDECL_SYS): Update.
+	(_GL_CXXALIAS_SYS): Update.
+	(_GL_CXXALIASWARN): Update.
+	(_GL_WARN_ON_USE): Update.
+	(_GL_FUNCDECL_RPL): Update.
+	(_GL_CXXALIAS_RPL): Update.
+	* import/verify.h: Update.
+	* import/warn-on-use.h (_GL_WARN_ON_USE_CXX): Update.
+	* import/wchar.in.h (_GL_ATTRIBUTE_PURE): Update.
+	(_GL_FUNCDECL_RPL): Update.
+	(_GL_CXXALIAS_RPL): Update.
+	(_GL_FUNCDECL_SYS): Update.
+	(_GL_CXXALIAS_SYS): Update.
+	(_GL_CXXALIASWARN): Update.
+	(_GL_WARN_ON_USE): Update.
+	(_GL_CXXALIAS_SYS_CAST2): Update.
+	(_GL_CXXALIASWARN1): Update.
+	* import/windows-rwlock.c (CreateEvent): Update.
+	* import/wmemchr-impl.h: New file.
+	* import/wmemchr.c: New file.
+	* import/wmempcpy.c: New file.
+	* update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add gettimeofday.
+	(GNULIB_COMMIT_SHA1): Update gnulib revision.
+
 2020-07-30  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	* configure.ac: Run ACX_LARGEFILE before gl_EARLY.

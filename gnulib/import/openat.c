@@ -100,7 +100,9 @@ rpl_openat (int dfd, char const *filename, int flags, ...)
          directories,
        - if O_WRONLY or O_RDWR is specified, open() must fail because the
          file does not contain a '.' directory.  */
-  if (flags & (O_CREAT | O_WRONLY | O_RDWR))
+  if ((flags & O_CREAT)
+      || (flags & O_ACCMODE) == O_RDWR
+      || (flags & O_ACCMODE) == O_WRONLY)
     {
       size_t len = strlen (filename);
       if (len > 0 && filename[len - 1] == '/')
@@ -112,7 +114,7 @@ rpl_openat (int dfd, char const *filename, int flags, ...)
 # endif
 
   fd = orig_openat (dfd, filename,
-                    flags & ~(have_cloexec <= 0 ? O_CLOEXEC : 0), mode);
+                    flags & ~(have_cloexec < 0 ? O_CLOEXEC : 0), mode);
 
   if (flags & O_CLOEXEC)
     {
@@ -165,7 +167,7 @@ rpl_openat (int dfd, char const *filename, int flags, ...)
 
 #else /* !HAVE_OPENAT */
 
-# include "dosname.h" /* solely for definition of IS_ABSOLUTE_FILE_NAME */
+# include "filename.h" /* solely for definition of IS_ABSOLUTE_FILE_NAME */
 # include "openat-priv.h"
 # include "save-cwd.h"
 
@@ -289,7 +291,7 @@ bool
 openat_needs_fchdir (void)
 {
   bool needs_fchdir = true;
-  int fd = open ("/", O_SEARCH);
+  int fd = open ("/", O_SEARCH | O_CLOEXEC);
 
   if (0 <= fd)
     {

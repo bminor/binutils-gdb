@@ -47,6 +47,7 @@
 #  fnmatch-gnu \
 #  frexpl \
 #  getcwd \
+#  gettimeofday \
 #  glob \
 #  inet_ntop \
 #  inttypes \
@@ -87,6 +88,7 @@ gl_MODULES([
   fnmatch-gnu
   frexpl
   getcwd
+  gettimeofday
   glob
   inet_ntop
   inttypes

@@ -39,6 +39,10 @@
 
 # include "dirname.h"
 
+/* Don't assume that UNICODE is not defined.  */
+# undef MoveFileEx
+# define MoveFileEx MoveFileExA
+
 /* Rename the file SRC to DST.  This replacement is necessary on
    Windows, on which the system rename function will not replace
    an existing DST.  */

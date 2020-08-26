@@ -133,10 +133,10 @@ getcwd_nothrow (char *buf, size_t size)
 #endif
 
 /* Get the name of the current working directory, and put it in SIZE
-   bytes of BUF.  Returns NULL if the directory couldn't be determined or
-   SIZE was too small.  If successful, returns BUF.  In GNU, if BUF is
-   NULL, an array is allocated with 'malloc'; the array is SIZE bytes long,
-   unless SIZE == 0, in which case it is as big as necessary.  */
+   bytes of BUF.  Returns NULL with errno set if the directory couldn't be
+   determined or SIZE was too small.  If successful, returns BUF.  In GNU,
+   if BUF is NULL, an array is allocated with 'malloc'; the array is SIZE
+   bytes long, unless SIZE == 0, in which case it is as big as necessary.  */
 
 char *
 __getcwd (char *buf, size_t size)

@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 
 #include "assure.h"
-#include "dosname.h"
+#include "filename.h"
 #include "filenamecat.h"
 
 #ifndef REPLACE_OPEN_DIRECTORY
@@ -84,7 +84,8 @@ ensure_dirs_slot (size_t fd)
   return true;
 }
 
-/* Return an absolute name of DIR in malloc'd storage.  */
+/* Return an absolute name of DIR in malloc'd storage.
+   Upon failure, return NULL with errno set.  */
 static char *
 get_name (char const *dir)
 {
@@ -125,8 +126,8 @@ _gl_unregister_fd (int fd)
 /* Mark FD as visiting FILENAME.  FD must be non-negative, and refer
    to an open file descriptor.  If REPLACE_OPEN_DIRECTORY is non-zero,
    this should only be called if FD is visiting a directory.  Close FD
-   and return -1 if there is insufficient memory to track the
-   directory name; otherwise return FD.  */
+   and return -1 with errno set if there is insufficient memory to track
+   the directory name; otherwise return FD.  */
 int
 _gl_register_fd (int fd, const char *filename)
 {

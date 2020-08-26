@@ -23,6 +23,10 @@
 
 #include "dirent-private.h"
 
+/* Don't assume that UNICODE is not defined.  */
+#undef FindFirstFile
+#define FindFirstFile FindFirstFileA
+
 void
 rewinddir (DIR *dirp)
 {

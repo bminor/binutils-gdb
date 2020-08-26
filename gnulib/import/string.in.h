@@ -54,10 +54,12 @@
 
 /* The __attribute__ feature is available in gcc versions 2.5 and later.
    The attribute __pure__ was added in gcc 2.96.  */
-#if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96)
-# define _GL_ATTRIBUTE_PURE __attribute__ ((__pure__))
-#else
-# define _GL_ATTRIBUTE_PURE /* empty */
+#ifndef _GL_ATTRIBUTE_PURE
+# if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 96)
+#  define _GL_ATTRIBUTE_PURE __attribute__ ((__pure__))
+# else
+#  define _GL_ATTRIBUTE_PURE /* empty */
+# endif
 #endif
 
 /* NetBSD 5.0 declares strsignal in <unistd.h>, not in <string.h>.  */
@@ -332,9 +334,10 @@ _GL_WARN_ON_USE (stpncpy, "stpncpy is unportable - "
    GB18030 and the character to be searched is a digit.  */
 # undef strchr
 /* Assume strchr is always declared.  */
-_GL_WARN_ON_USE (strchr, "strchr cannot work correctly on character strings "
-                 "in some multibyte locales - "
-                 "use mbschr if you care about internationalization");
+_GL_WARN_ON_USE_CXX (strchr, const char *, (const char *, int),
+                     "strchr cannot work correctly on character strings "
+                     "in some multibyte locales - "
+                     "use mbschr if you care about internationalization");
 #endif
 
 /* Find the first occurrence of C in S or the final NUL byte.  */
@@ -411,11 +414,14 @@ _GL_WARN_ON_USE (strdup, "strdup is unportable - "
 #   undef strncat
 #   define strncat rpl_strncat
 #  endif
-_GL_FUNCDECL_RPL (strncat, char *, (char *dest, const char *src, size_t n)
-                                   _GL_ARG_NONNULL ((1, 2)));
-_GL_CXXALIAS_RPL (strncat, char *, (char *dest, const char *src, size_t n));
+_GL_FUNCDECL_RPL (strncat, char *,
+                  (char *restrict dest, const char *restrict src, size_t n)
+                  _GL_ARG_NONNULL ((1, 2)));
+_GL_CXXALIAS_RPL (strncat, char *,
+                  (char *restrict dest, const char *restrict src, size_t n));
 # else
-_GL_CXXALIAS_SYS (strncat, char *, (char *dest, const char *src, size_t n));
+_GL_CXXALIAS_SYS (strncat, char *,
+                  (char *restrict dest, const char *restrict src, size_t n));
 # endif
 # if __GLIBC__ >= 2
 _GL_CXXALIASWARN (strncat);
@@ -523,15 +529,17 @@ _GL_CXXALIASWARN (strpbrk);
    locale encoding is GB18030 and one of the characters to be searched is a
    digit.  */
 #  undef strpbrk
-_GL_WARN_ON_USE (strpbrk, "strpbrk cannot work correctly on character strings "
-                 "in multibyte locales - "
-                 "use mbspbrk if you care about internationalization");
+_GL_WARN_ON_USE_CXX (strpbrk, const char *, (const char *, const char *),
+                     "strpbrk cannot work correctly on character strings "
+                     "in multibyte locales - "
+                     "use mbspbrk if you care about internationalization");
 # endif
 #elif defined GNULIB_POSIXCHECK
 # undef strpbrk
 # if HAVE_RAW_DECL_STRPBRK
-_GL_WARN_ON_USE (strpbrk, "strpbrk is unportable - "
-                 "use gnulib module strpbrk for portability");
+_GL_WARN_ON_USE_CXX (strpbrk, const char *, (const char *, const char *),
+                     "strpbrk is unportable - "
+                     "use gnulib module strpbrk for portability");
 # endif
 #endif
 
@@ -550,9 +558,10 @@ _GL_WARN_ON_USE (strspn, "strspn cannot work correctly on character strings "
    GB18030 and the character to be searched is a digit.  */
 # undef strrchr
 /* Assume strrchr is always declared.  */
-_GL_WARN_ON_USE (strrchr, "strrchr cannot work correctly on character strings "
-                 "in some multibyte locales - "
-                 "use mbsrchr if you care about internationalization");
+_GL_WARN_ON_USE_CXX (strrchr, const char *, (const char *, int),
+                     "strrchr cannot work correctly on character strings "
+                     "in some multibyte locales - "
+                     "use mbsrchr if you care about internationalization");
 #endif
 
 /* Search the next delimiter (char listed in DELIM) starting at *STRINGP.
@@ -966,7 +975,8 @@ _GL_EXTERN_C char * mbssep (char **stringp, const char *delim)
    Caveat: The identity of the delimiting character is lost.
 
    See also mbssep().  */
-_GL_EXTERN_C char * mbstok_r (char *string, const char *delim, char **save_ptr)
+_GL_EXTERN_C char * mbstok_r (char *restrict string, const char *delim,
+                              char **save_ptr)
      _GL_ARG_NONNULL ((2, 3));
 #endif
 
