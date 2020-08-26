@@ -1,5 +1,10 @@
 2020-08-26  Alan Modra  <amodra@gmail.com>
 
+	PR 26418
+	* ecofflink.c (WRITE): Don't write size 0 chunks.
+
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
 	* bfdio.c (bfd_get_file_size): Don't segv on NULL adata.
 
 2020-08-26  Alan Modra  <amodra@gmail.com>
