@@ -1,3 +1,10 @@
+2020-08-28  Nelson Chu  <nelson.chu@sifive.com>
+
+	testsuite/ld-riscv-elf/lib-nopic-01a.s: Use R_RISCV_JAL rather
+	than R_RISCV_CALL.
+	testsuite/ld-riscv-elf/lib-nopic-01b.d: Likewise.
+	testsuite/ld-riscv-elf/lib-nopic-01b.s: Likewise.
+
 2020-08-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* emultempl/msp430.em: Remove unused variable "buf".

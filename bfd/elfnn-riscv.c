@@ -557,21 +557,23 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    return FALSE;
 	  break;
 
+	case R_RISCV_CALL:
 	case R_RISCV_CALL_PLT:
-	  /* This symbol requires a procedure linkage table entry.  We
+	  /* These symbol requires a procedure linkage table entry.  We
 	     actually build the entry in adjust_dynamic_symbol,
-	     because this might be a case of linking PIC code without
+	     because these might be a case of linking PIC code without
 	     linking in any dynamic objects, in which case we don't
 	     need to generate a procedure linkage table after all.  */
 
-	  if (h != NULL)
-	    {
-	      h->needs_plt = 1;
-	      h->plt.refcount += 1;
-	    }
+	  /* If it is a local symbol, then we resolve it directly
+	     without creating a PLT entry.  */
+	  if (h == NULL)
+	    continue;
+
+	  h->needs_plt = 1;
+	  h->plt.refcount += 1;
 	  break;
 
-	case R_RISCV_CALL:
 	case R_RISCV_JAL:
 	case R_RISCV_BRANCH:
 	case R_RISCV_RVC_BRANCH:
@@ -2189,7 +2191,6 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	{
 	  switch (r_type)
 	    {
-	    case R_RISCV_CALL:
 	    case R_RISCV_JAL:
 	    case R_RISCV_RVC_JUMP:
 	      if (asprintf (&msg_buf,

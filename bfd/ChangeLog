@@ -1,3 +1,10 @@
+2020-08-28  Nelson Chu  <nelson.chu@sifive.com>
+
+	* elfnn-riscv.c (riscv_elf_check_relocs): Treat R_RISCV_CALL
+	and R_RISCV_CALL_PLT as the same in the riscv_elf_check_relocs.
+	(riscv_elf_relocate_section): Remove the R_RISCV_CALL for the
+	unresolved reloc checks.
+
 2020-08-27  John David Anglin  <danglin@gcc.gnu.org>
 
 	PR 26356
