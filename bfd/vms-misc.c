@@ -592,8 +592,8 @@ vms_time_to_time_t (unsigned int hi, unsigned int lo)
 void
 vms_time_t_to_vms_time (time_t ut, unsigned int *hi, unsigned int *lo)
 {
-  unsigned short val[4];
-  unsigned short tmp[4];
+  unsigned int val[4];
+  unsigned int tmp[4];
   unsigned int carry;
   int i;
 
