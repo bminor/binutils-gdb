@@ -1,5 +1,11 @@
 2020-08-26  Alan Modra  <amodra@gmail.com>
 
+	PR 26506
+	* elf32-xtensa.c (elf_xtensa_combine_prop_entries): Return early
+	when section is empty.
+
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
 	PR 26498
 	* elf32-spu.c (find_function_stack_adjust): Use unsigned vars to
 	avoid UB left shift.

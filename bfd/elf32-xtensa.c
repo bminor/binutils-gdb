@@ -3117,6 +3117,9 @@ elf_xtensa_combine_prop_entries (bfd *output_bfd,
   int n, m, num;
 
   section_size = sxtlit->size;
+  if (section_size == 0)
+    return 0;
+
   BFD_ASSERT (section_size % 8 == 0);
   num = section_size / 8;
 
