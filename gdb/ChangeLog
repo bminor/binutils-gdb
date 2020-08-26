@@ -1,5 +1,11 @@
 2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* main.c (captured_main_1): Add a call to
+	finish_ext_lang_initialization.
+	* top.c (gdb_init): Remove call to finish_ext_lang_initialization.
+
+2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* guile/guile.c (gdbscm_set_backtrace): Add declaration.
 	(gdbscm_finish_initialization): Add code moved from
 	_initialize_guile.

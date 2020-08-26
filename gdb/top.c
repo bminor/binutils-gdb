@@ -2408,12 +2408,6 @@ gdb_init ()
   set_language (language_c);
   expected_language = current_language;	/* Don't warn about the change.  */
 
-  /* Python initialization, for example, can require various commands to be
-     installed.  For example "info pretty-printer" needs the "info"
-     prefix to be installed.  Keep things simple and just do final
-     script initialization here.  */
-  finish_ext_lang_initialization ();
-
   /* Create $_gdb_major and $_gdb_minor convenience variables.  */
   init_gdb_version_vars ();
 }
