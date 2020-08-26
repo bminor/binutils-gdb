@@ -39,3 +39,4 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*c0000420\s*sync
 \s*[0-9a-f]*:\s*d8437000\s*ldex.w\s*r2,\s*\(r3,\s*0x0\)
 \s*[0-9a-f]*:\s*dc437000\s*stex.w\s*r2,\s*\(r3,\s*0x0\)
+#...

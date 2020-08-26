@@ -11,3 +11,5 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   .*
   1 .tbss         .*
                   .*
+  2 .csky.attributes .*
+                  .*

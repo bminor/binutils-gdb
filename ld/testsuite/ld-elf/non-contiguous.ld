@@ -23,6 +23,7 @@ SECTIONS
 	     *(.note.renesas)
 	     *(.MIPS.abiflags)
 	     *(.MSP430.attributes)
+	     *(.csky.attributes)
 	     *(.gnu.attributes)
    }
 

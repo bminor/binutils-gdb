@@ -413,6 +413,10 @@ enum SHT
   // AARCH64-specific section type.
   SHT_AARCH64_ATTRIBUTES = 0x70000003,
 
+  // CSKY-specific section types.
+  // Object file compatibility attributes.
+  SHT_CSKY_ATTRIBUTES = 0x70000001,
+
   // Link editor is to sort the entries in this section based on the
   // address specified in the associated symbol table entry.
   SHT_ORDERED = 0x7fffffff

@@ -1,3 +1,12 @@
+2020-08-28  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* readelf.c (get_csky_section_type_name): New.
+	(get_section_type_name): Add handler for CSKY.
+	(display_csky_attribute): New.
+	(process_arch_specific): Add handler for CSKY.
+	* testsuite/binutils-all/strip-3.d: Remove .csky.attributes
+	section.
+
 2020-08-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* readelf.c (get_msp430x_section_type_name): Rename to ...

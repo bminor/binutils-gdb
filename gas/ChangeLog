@@ -1,3 +1,32 @@
+2020-08-28  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* gas/config/tc-csky.c (md_begin): Set attributes.
+	(isa_flag): Change type to unsigned 64 bits.
+	(struct csky_cpu_info): Likewise.
+	(struct csky_macro_info): Likewise.
+	(set_csky_attribute): New.
+	* testsuite/gas/csky/802j.d: Ignore .csky.attributes section.
+	* testsuite/gas/csky/all.d: Likewise.
+	* testsuite/gas/csky/bsr1.d: Likewise.
+	* testsuite/gas/csky/csky_vdsp.d: Likewise.
+	* testsuite/gas/csky/cskyv2_all.d: Likewise.
+	* testsuite/gas/csky/cskyv2_ck803r2.d: Likewise.
+	* testsuite/gas/csky/cskyv2_ck860.d: Likewise.
+	* testsuite/gas/csky/cskyv2_dsp.d: Likewise.
+	* testsuite/gas/csky/cskyv2_elrw.d: Likewise.
+	* testsuite/gas/csky/cskyv2_float.d: Likewise.
+	* testsuite/gas/csky/enhance_dsp.d: Likewise.
+	* testsuite/gas/csky/java.d: Likewise.
+	* testsuite/gas/csky/v1_float.d: Likewise.
+	* testsuite/gas/csky/v2_float_part1.d: Likewise.
+	* testsuite/gas/csky/v2_float_part2.d: Likewise.
+	* testsuite/gas/csky/v2_tls_gd.d: Likewise.
+	* testsuite/gas/csky/v2_tls_ie.d: Likewise.
+	* testsuite/gas/csky/v2_tls_ld.d: Likewise.
+	* testsuite/gas/csky/v2_tls_le.d: Likewise.
+	* testsuite/gas/elf/elf.exp: Add handler for CSKY.
+	* testsuite/gas/elf/section2.e-csky: New.
+
 2020-08-27  Alan Modra  <amodra@gmail.com>
 
 	PR 26467

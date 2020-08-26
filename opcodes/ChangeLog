@@ -1,3 +1,15 @@
+2020-08-28  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* csky-dis.c (CSKY_DEFAULT_ISA): Define.
+	(csky_dis_info): Add member isa.
+	(csky_find_inst_info): Skip instructions that do not belong to
+	current CPU.
+	(csky_get_disassembler): Get infomation from attribute section.
+	(print_insn_csky): Set defualt ISA flag.
+	* csky.h (CSKY_ISA_VDSP_2): Rename from CSKY_ISA_VDSP_V2.
+	* csky-opc.h (struct csky_opcode): Change isa_flag16 and
+	isa_flag32'type to unsigned 64 bits.
+
 2020-08-26  Jose E. Marchesi  <jemarch@gnu.org>
 
 	* disassemble.c (enum epbf_isa_attr): Add ISA_XBPFBE, ISA_EBPFMAX.

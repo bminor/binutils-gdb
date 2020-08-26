@@ -1,3 +1,17 @@
+2020-08-28  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* elf32-csky.c (csky_archs): Fix arch names.
+	(csky_find_arch_with_name): New.
+	(elf32_csky_merge_attributes): New.
+	(csky_elf_merge_private_bfd_data): Add process of merge
+	attribute section.
+	(elf32_csky_obj_attrs_arg_type): New.
+	(elf32_csky_obj_attrs_handle_unknown): New.
+	(elf_backend_obj_attrs_vendor): Define.
+	(elf_backend_obj_attrs_section): Define.
+	(elf_backend_obj_attrs_arg_type): Define.
+	(elf_backend_obj_attrs_section_type): Define.
+
 2020-08-28  Nick Clifton  <nickc@redhat.com>
 
 	PR19011

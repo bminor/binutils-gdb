@@ -65,6 +65,9 @@ if { [is_elf_format] } then {
     if {[istarget "avr*-*-*"]} {
 	set dump_opts {{as -mno-link-relax}}
     }
+    if {[istarget "csky*-*-*"]} {
+	set target_machine -csky
+    }
     if {[istarget "m32r*-*-*"]} then {
 	set target_machine -m32r
     }

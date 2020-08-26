@@ -18,3 +18,4 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*4048f5c3\s*\.long\s*0x4048f5c3
 \s*[0-9a-f]*:\s*51eb851f\s*\.long\s*0x51eb851f
 \s*[0-9a-f]*:\s*40091eb8\s*\.long\s*0x40091eb8
+#...

@@ -4315,6 +4315,16 @@ get_riscv_section_type_name (unsigned int sh_type)
 }
 
 static const char *
+get_csky_section_type_name (unsigned int sh_type)
+{
+  switch (sh_type)
+    {
+    case SHT_CSKY_ATTRIBUTES:  return "CSKY_ATTRIBUTES";
+    default:  return NULL;
+    }
+}
+
+static const char *
 get_section_type_name (Filedata * filedata, unsigned int sh_type)
 {
   static char buff[32];
@@ -4396,6 +4406,9 @@ get_section_type_name (Filedata * filedata, unsigned int sh_type)
 	      break;
 	    case EM_RISCV:
 	      result = get_riscv_section_type_name (sh_type);
+	      break;
+	    case EM_CSKY:
+	      result = get_csky_section_type_name (sh_type);
 	      break;
 	    default:
 	      result = NULL;
@@ -16358,6 +16371,110 @@ display_riscv_attribute (unsigned char *p,
   return p;
 }
 
+static unsigned char *
+display_csky_attribute (unsigned char * p,
+			const unsigned char * const end)
+{
+  unsigned int tag;
+  unsigned int val;
+  READ_ULEB (tag, p, end);
+
+  if (tag >= Tag_CSKY_MAX)
+    {
+      return display_tag_value (-1, p, end);
+    }
+
+  switch (tag)
+    {
+    case Tag_CSKY_ARCH_NAME:
+      printf ("  Tag_CSKY_ARCH_NAME:\t\t");
+      return display_tag_value (-1, p, end);
+    case Tag_CSKY_CPU_NAME:
+      printf ("  Tag_CSKY_CPU_NAME:\t\t");
+      return display_tag_value (-1, p, end);
+
+    case Tag_CSKY_ISA_FLAGS:
+      printf ("  Tag_CSKY_ISA_FLAGS:\t\t");
+      return display_tag_value (0, p, end);
+    case Tag_CSKY_ISA_EXT_FLAGS:
+      printf ("  Tag_CSKY_ISA_EXT_FLAGS:\t");
+      return display_tag_value (0, p, end);
+
+    case Tag_CSKY_DSP_VERSION:
+      printf ("  Tag_CSKY_DSP_VERSION:\t\t");
+      READ_ULEB (val, p, end);
+      if (val == VAL_CSKY_DSP_VERSION_EXTENSION)
+	printf ("DSP Extension\n");
+      else if (val == VAL_CSKY_DSP_VERSION_2)
+	printf ("DSP 2.0\n");
+      break;
+
+    case Tag_CSKY_VDSP_VERSION:
+      printf ("  Tag_CSKY_VDSP_VERSION:\t");
+      READ_ULEB (val, p, end);
+      printf ("VDSP Version %d\n", val);
+      break;
+
+    case Tag_CSKY_FPU_VERSION:
+      printf ("  Tag_CSKY_FPU_VERSION:\t\t");
+      READ_ULEB (val, p, end);
+      if (val == VAL_CSKY_FPU_VERSION_1)
+	printf ("ABIV1 FPU Version 1\n");
+      else if (val == VAL_CSKY_FPU_VERSION_2)
+	printf ("FPU Version 2\n");
+      break;
+
+    case Tag_CSKY_FPU_ABI:
+      printf ("  Tag_CSKY_FPU_ABI:\t\t");
+      READ_ULEB (val, p, end);
+      if (val == VAL_CSKY_FPU_ABI_HARD)
+	printf ("Hard\n");
+      else if (val == VAL_CSKY_FPU_ABI_SOFTFP)
+	printf ("SoftFP\n");
+      else if (val == VAL_CSKY_FPU_ABI_SOFT)
+	printf ("Soft\n");
+      break;
+    case Tag_CSKY_FPU_ROUNDING:
+      READ_ULEB (val, p, end);
+      if (val == 1) {
+	printf ("  Tag_CSKY_FPU_ROUNDING:\t");
+	printf ("Needed\n");
+      }
+      break;
+    case Tag_CSKY_FPU_DENORMAL:
+      READ_ULEB (val, p, end);
+      if (val == 1) {
+	printf ("  Tag_CSKY_FPU_DENORMAL:\t");
+	printf ("Needed\n");
+      }
+      break;
+    case Tag_CSKY_FPU_Exception:
+      READ_ULEB (val, p, end);
+      if (val == 1) {
+	printf ("  Tag_CSKY_FPU_Exception:\t");
+	printf ("Needed\n");
+      }
+      break;
+    case Tag_CSKY_FPU_NUMBER_MODULE:
+      printf ("  Tag_CSKY_FPU_NUMBER_MODULE:\t");
+      return display_tag_value (-1, p, end);
+    case Tag_CSKY_FPU_HARDFP:
+      printf ("  Tag_CSKY_FPU_HARDFP:\t\t");
+      READ_ULEB (val, p, end);
+      if (val & VAL_CSKY_FPU_HARDFP_HALF)
+	printf (" Half");
+      if (val & VAL_CSKY_FPU_HARDFP_SINGLE)
+	printf (" Single");
+      if (val & VAL_CSKY_FPU_HARDFP_DOUBLE)
+	printf (" Double");
+      printf ("\n");
+      break;
+    default:
+      return display_tag_value (tag, p, end);
+     }
+  return p;
+}
+
 static bfd_boolean
 process_attributes (Filedata * filedata,
 		    const char * public_name,
@@ -20145,6 +20262,10 @@ process_arch_specific (Filedata * filedata)
       return process_attributes (filedata, "c6xabi", SHT_C6000_ATTRIBUTES,
 				 display_tic6x_attribute,
 				 display_generic_attribute);
+
+    case EM_CSKY:
+      return process_attributes (filedata, "csky", SHT_CSKY_ATTRIBUTES,
+				 display_csky_attribute, NULL);
 
     default:
       return process_attributes (filedata, "gnu", SHT_GNU_ATTRIBUTES,

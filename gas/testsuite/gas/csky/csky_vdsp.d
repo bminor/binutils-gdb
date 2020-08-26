@@ -362,3 +362,4 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*f8830fa2\s*vicl\.8\s*vr2,\s*vr3,\s*vr4
 \s*[0-9a-f]*:\s*f8930fa2\s*vicl\.16\s*vr2,\s*vr3,\s*vr4
 \s*[0-9a-f]*:\s*fa830fa2\s*vicl\.32\s*vr2,\s*vr3,\s*vr4
+#...

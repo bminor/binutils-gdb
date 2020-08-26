@@ -216,3 +216,4 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*f8838ce2\s*mulsca\.s16\.e\s*r2,\s*r3,\s*r4
 \s*[0-9a-f]*:\s*f8838ce2\s*mulsca\.s16\.e\s*r2,\s*r3,\s*r4
 \s*[0-9a-f]*:\s*f8838442\s*mula\.32\.l\s*r2,\s*r3,\s*r4
+#...

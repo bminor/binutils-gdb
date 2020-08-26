@@ -1,3 +1,7 @@
+2020-08-26  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+        * elfcpp.h (enum SHT): New enum SHT_CSKY_ATTRIBUTES.
+
 2020-07-04  Nick Clifton  <nickc@redhat.com>
 
 	Binutils 2.35 branch created.

@@ -1,3 +1,11 @@
+2020-08-28  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* emulparams/cskyelf.sh: Support attribute section.
+	* testsuite/ld-csky/tls-le-v1.d: Match .csky.attributes section.
+	* ld/testsuite/ld-csky/tls-le.d: Likewise.
+	* testsuite/ld-elf/non-contiguous.ld: Ignore .csky.attributes
+	section.
+
 2020-08-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 19011

@@ -148,3 +148,4 @@ Disassembly of section \.text:
 \s*[0-9a-f]*:\s*1e37\s*or\s*r7, r7, r3
 \s*[0-9a-f]*:\s*1715\s*xor\s*r5, r5, r1
 \s*[0-9a-f]*:\s*1726\s*xor\s*r6, r6, r2
+#...

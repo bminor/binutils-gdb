@@ -1,3 +1,57 @@
+2020-08-28  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* elf/csky.h (SHT_CSKY_ATTRIBUTES): Define.
+	(Tag_CSKY_ARCH_NAME): New enum constant.
+	(Tag_CSKY_CPU_NAME): Likewise.
+	(Tag_CSKY_ISA_FLAGS): Likewise.
+	(Tag_CSKY_DSP_VERSION): Likewise.
+	(Tag_CSKY_VDSP_VERSION): Likewise.
+	(Tag_CSKY_FPU_VERSION): Likewise.
+	(Tag_CSKY_FPU_ABI): Likewise.
+	(Tag_CSKY_FPU_ROUNDING): Likewise.
+	(Tag_CSKY_FPU_DENORMAL): Likewise.
+	(Tag_CSKY_FPU_Exception): Likewise.
+	(Tag_CSKY_FPU_NUMBER_MODULE): Likewise.
+	(Tag_CSKY_FPU_HARDFP): Likewise.
+	(Tag_CSKY_MAX): Likewise.
+	(VAL_CSKY_DSP_VERSION_EXTENSION): Likewise.
+	(VAL_CSKY_DSP_VERSION_2): Likewise.
+	(VAL_CSKY_VDSP_VERSION_1): Likewise.
+	(VAL_CSKY_VDSP_VERSION_2): Likewise.
+	(VAL_CSKY_FPU_ABI_SOFT): Likewise.
+	(VAL_CSKY_FPU_ABI_SOFTFP): Likewise.
+	(VAL_CSKY_FPU_ABI_HARD): Likewise.
+	(VAL_CSKY_FPU_HARDFP_HALF): Likewise.
+	(VAL_CSKY_FPU_HARDFP_SINGLE): Likewise.
+	(VAL_CSKY_FPU_HARDFP_DOUBLE): Likewise.
+	* opcode/csky.h (CSKY_ISA_VDSP_V2): Define.
+	CSKYV1_ISA_E1: Change to long constant type.
+	CSKYV2_ISA_E1: Likewise.
+	CSKYV2_ISA_1E2: Likewise.
+	CSKYV2_ISA_2E3: Likewise.
+	CSKYV2_ISA_3E7: Likewise.
+	CSKYV2_ISA_7E10: Likewise.
+	CSKYV2_ISA_3E3R1: Likewise.
+	CSKYV2_ISA_3E3R2: Likewise.
+	CSKYV2_ISA_10E60: Likewise.
+	CSKY_ISA_TRUST: Likewise.
+	CSKY_ISA_CACHE: Likewise.
+	CSKY_ISA_NVIC: Likewise.
+	CSKY_ISA_CP: Likewise.
+	CSKY_ISA_MP: Likewise.
+	CSKY_ISA_MP_1E2: Likewise.
+	CSKY_ISA_JAVA: Likewise.
+	CSKY_ISA_MAC: Likewise.
+	CSKY_ISA_MAC_DSP: Likewise.
+	CSKY_ISA_DSP: Likewise.
+	CSKY_ISA_DSP_1E2: Likewise.
+	CSKY_ISA_DSP_ENHANCE: Likewise.
+	CSKY_ISA_FLOAT_E1: Likewise.
+	CSKY_ISA_FLOAT_1E2: Likewise.
+	CSKY_ISA_FLOAT_1E3: Likewise.
+	CSKY_ISA_FLOAT_3E4: Likewise.
+	CSKY_ISA_VDSP: Likewise.
+
 2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ctf-api.h (ctf_errwarning_next): New err parameter.

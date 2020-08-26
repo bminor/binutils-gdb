@@ -212,7 +212,7 @@ enum
 unsigned int mach_flag = 0;
 unsigned int arch_flag = 0;
 unsigned int other_flag = 0;
-unsigned int isa_flag = 0;
+BFD_HOST_U_64_BIT isa_flag = 0;
 unsigned int dsp_flag = 0;
 
 typedef struct stack_size_entry
@@ -233,7 +233,7 @@ struct csky_cpu_info
 {
   const char *name;
   unsigned int mach_flag;
-  unsigned int isa_flag;
+  BFD_HOST_U_64_BIT isa_flag;
 };
 
 typedef enum
@@ -249,7 +249,7 @@ struct csky_macro_info
   const char *name;
   /* How many operands : if operands == 5, all of 1,2,3,4 are ok.  */
   long oprnd_num;
-  int isa_flag;
+  BFD_HOST_U_64_BIT isa_flag;
   /* Do the work.  */
   void (*handle_func)(void);
 };
@@ -1186,6 +1186,78 @@ md_show_usage (FILE *fp)
   -mvdsp			enable vector DSP instructions\n"));
 }
 
+static void set_csky_attribute (void)
+{
+  if (mach_flag & CSKY_ARCH_DSP)
+    {
+      if (dsp_flag & CSKY_DSP_FLAG_V2)
+	{
+	  /* Set DSPV2.  */
+	  bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+				    Tag_CSKY_DSP_VERSION,
+				    VAL_CSKY_DSP_VERSION_2);
+	}
+      else if (isa_flag & CSKY_ISA_DSP)
+	{
+	  /* Set DSP extension.  */
+	  bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+				    Tag_CSKY_DSP_VERSION,
+				    VAL_CSKY_DSP_VERSION_EXTENSION);
+	}
+      /* Set VDSP attribute.  */
+      if (isa_flag & CSKY_ISA_VDSP)
+	bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+				  Tag_CSKY_VDSP_VERSION,
+				  VAL_CSKY_VDSP_VERSION_1);
+
+      else if (isa_flag & CSKY_ISA_VDSP_2)
+	bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+				  Tag_CSKY_VDSP_VERSION,
+				  VAL_CSKY_VDSP_VERSION_2);
+
+    }
+
+  if (mach_flag & CSKY_ARCH_FLOAT)
+    {
+      unsigned int val = VAL_CSKY_FPU_HARDFP_SINGLE;
+      if (IS_CSKY_ARCH_V1 (mach_flag)) {
+	bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+				  Tag_CSKY_FPU_VERSION,
+				  VAL_CSKY_FPU_VERSION_1);
+      }
+      else
+	{
+	  if (isa_flag & CSKY_ISA_FLOAT_3E4)
+	    {
+	      bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+					Tag_CSKY_FPU_VERSION,
+					VAL_CSKY_FPU_VERSION_2);
+	      val |= VAL_CSKY_FPU_HARDFP_DOUBLE;
+	    }
+	  else
+	    {
+	      bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+					Tag_CSKY_FPU_VERSION,
+					VAL_CSKY_FPU_VERSION_2);
+	    }
+
+	  bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+				    Tag_CSKY_FPU_HARDFP,
+				    val);
+	  bfd_elf_add_obj_attr_string (stdoutput, OBJ_ATTR_PROC,
+				    Tag_CSKY_FPU_NUMBER_MODULE,
+				    "IEEE 754");
+	}
+    }
+
+
+  bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+			    Tag_CSKY_ISA_FLAGS, isa_flag);
+
+  bfd_elf_add_obj_attr_int (stdoutput, OBJ_ATTR_PROC,
+			    Tag_CSKY_ISA_EXT_FLAGS, (isa_flag >> 32));
+}
+
 /* Target-specific initialization and option handling.  */
 
 void
@@ -1263,6 +1335,8 @@ md_begin (void)
   for (p_arch = csky_archs; p_arch->arch_flag != 0; p_arch++)
     if ((mach_flag & CSKY_ARCH_MASK) == (p_arch->arch_flag & CSKY_ARCH_MASK))
       {
+	bfd_elf_add_obj_attr_string (stdoutput, OBJ_ATTR_PROC,
+				     Tag_CSKY_ARCH_NAME, p_arch->name);
 	bfd_mach_flag =  p_arch->bfd_mach_flag;
 	break;
       }
@@ -1271,6 +1345,8 @@ md_begin (void)
   for (p_cpu = csky_cpus; p_cpu->mach_flag != 0; p_cpu++)
     if ((mach_flag & CPU_ARCH_MASK) == p_cpu->mach_flag)
       {
+	bfd_elf_add_obj_attr_string (stdoutput, OBJ_ATTR_PROC,
+				     Tag_CSKY_CPU_NAME, p_cpu->name);
 	isa_flag |= p_cpu->isa_flag;
 	break;
       }
@@ -1298,6 +1374,7 @@ md_begin (void)
 	    {
 	      /* In 803, dspv1 is conflict with dspv2. We keep dspv2.  */
 	      as_warn ("option -mdsp conflicts with -medsp, only enabling -medsp");
+        dsp_flag &= ~CSKY_DSP_FLAG_V1;
 	      isa_flag &= ~(CSKY_ISA_MAC_DSP | CSKY_ISA_DSP);
 	      isa_flag |= CSKY_ISA_DSP_ENHANCE;
 	    }
@@ -1306,6 +1383,7 @@ md_begin (void)
 	{
 	  if (dsp_flag & CSKY_DSP_FLAG_V2)
 	    {
+	      dsp_flag &= ~CSKY_DSP_FLAG_V2;
 	      isa_flag &= ~CSKY_ISA_DSP_ENHANCE;
 	      as_warn ("-medsp option is only supported by ck803s, ignoring -medsp");
 	    }
@@ -1370,7 +1448,7 @@ md_begin (void)
       else
 	do_intr_stack = 1;
     }
-  /* TODO: add isa_flag(SIMP/CACHE/APS).  */
+  /* Add isa_flag(SIMP/CACHE/APS).  */
   isa_flag |= (mach_flag & CSKY_ARCH_MAC) ? CSKY_ISA_MAC : 0;
   isa_flag |= (mach_flag & CSKY_ARCH_MP) ? CSKY_ISA_MP : 0;
   isa_flag |= (mach_flag & CSKY_ARCH_CP) ? CSKY_ISA_CP : 0;
@@ -1418,9 +1496,11 @@ md_begin (void)
     str_hash_insert (csky_macros_hash,
 		     v2_lrw_macro_opcode.name, &v2_lrw_macro_opcode, 0);
   /* Set e_flag to ELF Head.  */
-  bfd_set_private_flags (stdoutput, mach_flag);
+  bfd_set_private_flags (stdoutput, mach_flag & ~(0xffff));
   /* Set bfd_mach to bfd backend data.  */
   bfd_set_arch_mach (stdoutput, bfd_arch_csky, bfd_mach_flag);
+
+  set_csky_attribute ();
 }
 
 /* The C-SKY assembler emits mapping symbols $t and $d to mark the

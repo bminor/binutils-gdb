@@ -23,6 +23,7 @@
 #include "config.h"
 #include <stdio.h>
 #include "bfd_stdint.h"
+#include <elf/csky.h>
 #include "disassemble.h"
 #include "elf-bfd.h"
 #include "opcode/csky.h"
@@ -32,6 +33,7 @@
 
 #define CSKY_INST_TYPE unsigned long
 #define HAS_SUB_OPERAND (unsigned int)0xffffffff
+#define CSKY_DEFAULT_ISA 0xffffffff
 
 enum sym_type
 {
@@ -47,6 +49,7 @@ struct csky_dis_info
   disassemble_info *info;
   /* Opcode information.  */
   struct csky_opcode_info const *opinfo;
+  BFD_HOST_U_64_BIT isa;
   /* The value of operand to show.  */
   int value;
   /* Whether to look up/print a symbol name.  */
@@ -159,10 +162,8 @@ csky_find_inst_info (struct csky_opcode_info const **pinfo,
   p = g_opcodeP;
   while (p->mnemonic)
     {
-      /* FIXME: Skip 860's instruction in other CPUs. It is not suitable.
-	 These codes need to be optimized.  */
-      if (((CSKY_ARCH_MASK & mach_flag) != CSKY_ARCH_860)
-	  && (p->isa_flag32 & CSKYV2_ISA_10E60))
+	if (!(p->isa_flag16 & dis_info.isa)
+	      && !(p->isa_flag32 & dis_info.isa))
 	{
 	  p++;
 	  continue;
@@ -235,9 +236,28 @@ csky_symbol_is_valid (asymbol *sym,
 disassembler_ftype
 csky_get_disassembler (bfd *abfd)
 {
-  if (abfd != NULL)
-    mach_flag = elf_elfheader (abfd)->e_flags;
-  return print_insn_csky;
+  obj_attribute *attr;
+  const char *sec_name = NULL;
+  if (!abfd)
+    return NULL;
+
+  mach_flag = elf_elfheader (abfd)->e_flags;
+
+  sec_name = get_elf_backend_data (abfd)->obj_attrs_section;
+  /* Skip any input that hasn't attribute section.
+     This enables to link object files without attribute section with
+     any others.  */
+  if (bfd_get_section_by_name (abfd, sec_name) != NULL)
+    {
+      attr = elf_known_obj_attributes_proc (abfd);
+      dis_info.isa = attr[Tag_CSKY_ISA_EXT_FLAGS].i;
+      dis_info.isa <<= 32;
+      dis_info.isa |= attr[Tag_CSKY_ISA_FLAGS].i;
+    }
+  else
+    dis_info.isa = CSKY_DEFAULT_ISA;
+
+   return print_insn_csky;
 }
 
 static int
@@ -937,10 +957,16 @@ print_insn_csky (bfd_vma memaddr, struct disassemble_info *info)
   if (mach_flag != INIT_MACH_FLAG && mach_flag != BINARY_MACH_FLAG)
     info->mach = mach_flag;
   else if (mach_flag == INIT_MACH_FLAG)
-    mach_flag = info->mach;
+    {
+      mach_flag = info->mach;
+      dis_info.isa = CSKY_DEFAULT_ISA;
+    }
 
   if (mach_flag == BINARY_MACH_FLAG && info->endian == BFD_ENDIAN_UNKNOWN)
-    info->endian = BFD_ENDIAN_LITTLE;
+    {
+      info->endian = BFD_ENDIAN_LITTLE;
+      dis_info.isa = CSKY_DEFAULT_ISA;
+    }
 
   /* First check the full symtab for a mapping symbol, even if there
      are no usable non-mapping symbols for this address.  */
