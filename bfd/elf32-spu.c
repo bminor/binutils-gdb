@@ -2209,14 +2209,14 @@ find_function_stack_adjust (asection *sec,
 			    bfd_vma *lr_store,
 			    bfd_vma *sp_adjust)
 {
-  int reg[128];
+  int32_t reg[128];
 
   memset (reg, 0, sizeof (reg));
   for ( ; offset + 4 <= sec->size; offset += 4)
     {
       unsigned char buf[4];
       int rt, ra;
-      int imm;
+      uint32_t imm;
 
       /* Assume no relocs on stack adjusing insns.  */
       if (!bfd_get_section_contents (sec->owner, sec, buf, offset, 4))
