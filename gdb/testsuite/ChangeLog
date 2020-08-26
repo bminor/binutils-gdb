@@ -1,3 +1,18 @@
+2020-08-27  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.arch/amd64-byte.exp: Make test names unique, use
+	gdb_breakpoint, and fix typo 'forth' -> 'fourth'.
+	* gdb.arch/amd64-dword.exp: Likewise.
+	* gdb.arch/amd64-pseudo.c: Fix typo 'forth' -> 'fourth'.
+	* gdb.arch/amd64-stap-special-operands.exp: Make test names
+	unique.
+	* gdb.arch/amd64-tailcall-ret.exp: Likewise.
+	* gdb.arch/amd64-word.exp: Make test names unique, use
+	gdb_breakpoint, and fix typo 'forth' -> 'fourth'.
+	* gdb.arch/i386-byte.exp: Make test names unique, use
+	gdb_breakpoint.
+	* gdb.arch/i386-word.exp: Likewise.
+
 2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
 
 	* gdb.arch/arc-tdesc-cpu.xml: Use new feature names.
