@@ -7753,6 +7753,9 @@ xg_get_trampoline_chain (struct trampoline_seg *ts,
   struct trampoline_chain_index *idx = &ts->chain_index;
   struct trampoline_chain c;
 
+  if (idx->n_entries == 0)
+    return NULL;
+
   if (idx->needs_sorting)
     {
       qsort (idx->entry, idx->n_entries, sizeof (*idx->entry),
