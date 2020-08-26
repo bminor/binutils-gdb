@@ -1,5 +1,10 @@
 2020-08-26  Alan Modra  <amodra@gmail.com>
 
+	PR 26478
+	* mmo.c (mmo_write_symbols_and_terminator): Don't memcpy empty table.
+
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
 	PR 26475
 	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections): Check
 	sstubs->contents != NULL.
