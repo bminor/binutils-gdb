@@ -1,5 +1,9 @@
 2020-08-26  Alan Modra  <amodra@gmail.com>
 
+	* bfdio.c (bfd_get_file_size): Don't segv on NULL adata.
+
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
 	PR 26415
 	* vms-misc.c (vms_time_t_to_vms_time): Don't use unsigned short vars.
 
