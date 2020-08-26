@@ -1,3 +1,8 @@
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
+	PR 26412
+	* objcopy.c (copy_object): Don't fwrite NULL contents.
+
 2020-08-26  Katayama Hirofumi  <katayama.hirofumi.mz@gmail.com>
 
 	PR 26340

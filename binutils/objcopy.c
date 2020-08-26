@@ -3011,7 +3011,8 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	    }
 
 	  bfd_size_type size = bfd_section_size (osec);
-	  /* Note - we allow the dumping of zero-sized sections.  */
+	  /* Note - we allow the dumping of zero-sized sections,
+	     creating an empty file.  */
 
 	  f = fopen (pdump->filename, FOPEN_WB);
 	  if (f == NULL)
@@ -3023,7 +3024,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
 	  if (bfd_malloc_and_get_section (ibfd, osec, &contents))
 	    {
-	      if (fwrite (contents, 1, size, f) != size)
+	      if (size != 0 && fwrite (contents, 1, size, f) != size)
 		{
 		  non_fatal (_("error writing section contents to %s (error: %s)"),
 			     pdump->filename,
