@@ -2804,6 +2804,9 @@ som_prep_for_fixups (bfd *abfd, asymbol **syms, unsigned long num_syms)
   asymbol **sorted_syms;
   size_t amt;
 
+  if (num_syms == 0)
+    return TRUE;
+
   /* Most SOM relocations involving a symbol have a length which is
      dependent on the index of the symbol.  So symbols which are
      used often in relocations should have a small index.  */
