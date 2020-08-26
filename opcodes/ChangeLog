@@ -1,3 +1,7 @@
+2020-08-26  Jose E. Marchesi  <jemarch@gnu.org>
+
+	* disassemble.c (enum epbf_isa_attr): Add ISA_XBPFBE, ISA_EBPFMAX.
+
 2020-08-26  David Faust  <david.faust@oracle.com>
 
 	* bpf-desc.c: Regenerate.

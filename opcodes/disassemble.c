@@ -115,7 +115,7 @@
 # ifdef ARCH_m32c
 enum epbf_isa_attr
 {
- ISA_EBPFLE, ISA_EBPFBE, ISA_EBPFMAX
+  ISA_EBPFLE, ISA_EBPFBE, ISA_XBPFLE, ISA_XBPFBE, ISA_EBPFMAX
 };
 # else
 #  include "bpf-desc.h"
