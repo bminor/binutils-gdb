@@ -12172,7 +12172,8 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 					     s->contents));
 
 	    /* Clean up a dummy stub function entry in .text.  */
-	    if (htab->sstubs != NULL)
+	    if (htab->sstubs != NULL
+		&& htab->sstubs->contents != NULL)
 	      {
 		file_ptr dummy_offset;
 

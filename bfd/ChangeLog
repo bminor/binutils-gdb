@@ -1,5 +1,11 @@
 2020-08-26  Alan Modra  <amodra@gmail.com>
 
+	PR 26475
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_sections): Check
+	sstubs->contents != NULL.
+
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
 	PR 26453
 	* som.c (som_prep_for_fixups): Return early when no symbols.
 
