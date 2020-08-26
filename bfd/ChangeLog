@@ -1,5 +1,11 @@
 2020-08-26  Nick Clifton  <nickc@redhat.com>
 
+	PR 26433
+	* elf32-avr.c (avr_final_link_relocate):  Fix undefined shift
+	behaviour.
+	(avr_elf32_load_records_from_section): Use bfd_get_16 and
+	bfd_get_32 to load values from potentially unaligned pointers.
+
 	PR 26416
 	* elf64-alpha.c (elf64_alpha_relax_tls_get_addr): Test for and
 	ignore local symbols.

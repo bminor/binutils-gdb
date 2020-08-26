@@ -1052,7 +1052,7 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
       if (srel > ((1 << 7) - 1) || (srel < - (1 << 7)))
 	return bfd_reloc_overflow;
       x = bfd_get_16 (input_bfd, contents);
-      x = (x & 0xfc07) | (((srel >> 1) << 3) & 0x3f8);
+      x = (x & 0xfc07) | (((srel >> 1) * 8) & 0x3f8);
       bfd_put_16 (input_bfd, x, contents);
       break;
 
@@ -4039,7 +4039,7 @@ avr_elf32_load_records_from_section (bfd *abfd, asection *sec)
   ptr++;
   flags = *((bfd_byte *) ptr);
   ptr++;
-  record_count = *((uint16_t *) ptr);
+  record_count = bfd_get_16 (abfd, ptr);
   ptr+=2;
   BFD_ASSERT (ptr - contents == AVR_PROPERTY_SECTION_HEADER_SIZE);
 
@@ -4106,7 +4106,7 @@ avr_elf32_load_records_from_section (bfd *abfd, asection *sec)
 	    }
 	}
 
-      address = *((uint32_t *) ptr);
+      address = bfd_get_32 (abfd, ptr);
       ptr += 4;
       size -= 4;
 
@@ -4148,7 +4148,7 @@ avr_elf32_load_records_from_section (bfd *abfd, asection *sec)
 	  /* Just a 4-byte fill to load.  */
 	  if (size < 4)
 	    goto load_failed;
-	  r_list->records [i].data.org.fill = *((uint32_t *) ptr);
+	  r_list->records [i].data.org.fill = bfd_get_32 (abfd, ptr);
 	  ptr += 4;
 	  size -= 4;
 	  break;
@@ -4156,7 +4156,7 @@ avr_elf32_load_records_from_section (bfd *abfd, asection *sec)
 	  /* Just a 4-byte alignment to load.  */
 	  if (size < 4)
 	    goto load_failed;
-	  r_list->records [i].data.align.bytes = *((uint32_t *) ptr);
+	  r_list->records [i].data.align.bytes = bfd_get_32 (abfd, ptr);
 	  ptr += 4;
 	  size -= 4;
 	  /* Just initialise PRECEDING_DELETED field, this field is
@@ -4167,9 +4167,9 @@ avr_elf32_load_records_from_section (bfd *abfd, asection *sec)
 	  /* A 4-byte alignment, and a 4-byte fill to load.  */
 	  if (size < 8)
 	    goto load_failed;
-	  r_list->records [i].data.align.bytes = *((uint32_t *) ptr);
+	  r_list->records [i].data.align.bytes = bfd_get_32 (abfd, ptr);
 	  ptr += 4;
-	  r_list->records [i].data.align.fill = *((uint32_t *) ptr);
+	  r_list->records [i].data.align.fill = bfd_get_32 (abfd, ptr);
 	  ptr += 4;
 	  size -= 8;
 	  /* Just initialise PRECEDING_DELETED field, this field is
