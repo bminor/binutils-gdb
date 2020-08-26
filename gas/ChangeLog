@@ -1,3 +1,10 @@
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
+	PR 26447
+	* expr.c (expr <O_left_shift>): Do an unsigned shift.
+
+2020-08-25  Alan Modra  <amodra@gmail.com>
+
 2020-08-26  David Faust  <david.faust@oracle.com>
 
 	* config/tc-bpf.c: Add option -mxbpf to select xbpf isa.
@@ -9,7 +16,7 @@
 
 2020-08-25  Alan Modra  <amodra@gmail.com>
 
-	PR26501
+	PR 26501
 	* gas/config/tc-tic54x.c (tic54x_undefined_symbol): Properly treat
 	misc_symbol_hash entries without values.
 

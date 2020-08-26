@@ -1933,12 +1933,21 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	    case O_multiply:		resultP->X_add_number *= v; break;
 	    case O_divide:		resultP->X_add_number /= v; break;
 	    case O_modulus:		resultP->X_add_number %= v; break;
-	    case O_left_shift:		resultP->X_add_number <<= v; break;
+	    case O_left_shift:
+	      /* We always use unsigned shifts.  According to the ISO
+		 C standard, left shift of a signed type having a
+		 negative value is undefined behaviour, and right
+		 shift of a signed type having negative value is
+		 implementation defined.  Left shift of a signed type
+		 when the result overflows is also undefined
+		 behaviour.  So don't trigger ubsan warnings or rely
+		 on characteristics of the compiler.  */
+	      resultP->X_add_number
+		= (valueT) resultP->X_add_number << (valueT) v;
+	      break;
 	    case O_right_shift:
-	      /* We always use unsigned shifts, to avoid relying on
-		 characteristics of the compiler used to compile gas.  */
-	      resultP->X_add_number =
-		(offsetT) ((valueT) resultP->X_add_number >> (valueT) v);
+	      resultP->X_add_number
+		= (valueT) resultP->X_add_number >> (valueT) v;
 	      break;
 	    case O_bit_inclusive_or:	resultP->X_add_number |= v; break;
 	    case O_bit_or_not:		resultP->X_add_number |= ~v; break;
