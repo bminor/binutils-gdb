@@ -1,5 +1,19 @@
 2020-08-26  Alan Modra  <amodra@gmail.com>
 
+	PR 26484
+	PR 26485
+	PR 26486
+	PR 26487
+	PR 26488
+	PR 26490
+	* elf64-ppc.c (is_tls_get_addr): Avoid UB &h->elf when h is NULL.
+	(ppc64_elf_tls_setup): Likewise.
+	(branch_reloc_hash_match): Likewise.
+	(build_plt_stub): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
 	PR 26478
 	* mmo.c (mmo_write_symbols_and_terminator): Don't memcpy empty table.
 

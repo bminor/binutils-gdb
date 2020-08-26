@@ -5650,8 +5650,10 @@ static bfd_boolean
 is_tls_get_addr (struct elf_link_hash_entry *h,
 		 struct ppc_link_hash_table *htab)
 {
-  return (h == &htab->tls_get_addr_fd->elf || h == &htab->tga_desc_fd->elf
-	  || h == &htab->tls_get_addr->elf || h == &htab->tga_desc->elf);
+  return (h == (struct elf_link_hash_entry *) htab->tls_get_addr_fd
+	  || h == (struct elf_link_hash_entry *) htab->tga_desc_fd
+	  || h == (struct elf_link_hash_entry *) htab->tls_get_addr
+	  || h == (struct elf_link_hash_entry *) htab->tga_desc);
 }
 
 static bfd_boolean func_desc_adjust (struct elf_link_hash_entry *, void *);
@@ -7830,7 +7832,7 @@ ppc64_elf_tls_setup (struct bfd_link_info *info)
 		  if (tga_fd != NULL)
 		    {
 		      htab->tls_get_addr_fd = ppc_elf_hash_entry (opt_fd);
-		      tga = &htab->tls_get_addr->elf;
+		      tga = (struct elf_link_hash_entry *) htab->tls_get_addr;
 		      if (opt != NULL && tga != NULL)
 			{
 			  tga->root.type = bfd_link_hash_indirect;
@@ -7909,8 +7911,10 @@ branch_reloc_hash_match (const bfd *ibfd,
 
       h = sym_hashes[r_symndx - symtab_hdr->sh_info];
       h = elf_follow_link (h);
-      if (h == &hash1->elf || h == &hash2->elf
-	  || h == &hash3->elf || h == &hash4->elf)
+      if (h == (struct elf_link_hash_entry *) hash1
+	  || h == (struct elf_link_hash_entry *) hash2
+	  || h == (struct elf_link_hash_entry *) hash3
+	  || h == (struct elf_link_hash_entry *) hash4)
 	return TRUE;
     }
   return FALSE;
@@ -10945,7 +10949,8 @@ build_plt_stub (struct ppc_link_hash_table *htab,
   if (!ALWAYS_USE_FAKE_DEP
       && plt_load_toc
       && plt_thread_safe
-      && !(is_tls_get_addr (&stub_entry->h->elf, htab)
+      && !(stub_entry->h != NULL
+	   && is_tls_get_addr (&stub_entry->h->elf, htab)
 	   && htab->params->tls_get_addr_opt))
     {
       bfd_vma pltoff = stub_entry->plt_ent->plt.offset & ~1;
@@ -15686,6 +15691,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      if (stub_entry->stub_type == ppc_stub_plt_call
 		  && !htab->opd_abi
 		  && htab->params->plt_localentry0 != 0
+		  && h != NULL
 		  && is_elfv2_localentry0 (&h->elf))
 		{
 		  /* The function doesn't use or change r2.  */
@@ -15948,7 +15954,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    break;
 	  from = TOCstart + htab->sec_info[input_section->id].toc_off;
 	  if (relocation + addend - from + 0x8000 < 0x10000
-	      && SYMBOL_REFERENCES_LOCAL (info, &h->elf))
+	      && (h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
 	    {
 	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
 	      if ((insn & (0x3fu << 26 | 0x3)) == 58u << 26 /* ld */)
@@ -15968,7 +15974,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    break;
 	  from = TOCstart + htab->sec_info[input_section->id].toc_off;
 	  if (relocation + addend - from + 0x80008000ULL < 0x100000000ULL
-	      && SYMBOL_REFERENCES_LOCAL (info, &h->elf))
+	      && (h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
 	    {
 	      insn = bfd_get_32 (input_bfd, contents + (rel->r_offset & ~3));
 	      if ((insn & (0x3fu << 26 | 0x3)) == 58u << 26 /* ld */)
@@ -15994,7 +16000,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  + input_section->output_section->vma
 		  + input_section->output_offset);
 	  if (!(relocation - from + (1ULL << 33) < 1ULL << 34
-		&& SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
+		&& (h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->elf))))
 	    break;
 
 	  offset = rel->r_offset;
@@ -16018,7 +16024,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      && rel + 1 < relend
 	      && rel[1].r_offset == rel->r_offset
 	      && rel[1].r_info == ELF64_R_INFO (0, R_PPC64_PCREL_OPT)
-	      && SYMBOL_REFERENCES_LOCAL (info, &h->elf))
+	      && (h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
 	    {
 	      offset = rel->r_offset;
 	      pinsn = bfd_get_32 (input_bfd, contents + offset);
@@ -16144,7 +16150,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	    struct got_entry *ent;
 
 	    if (tls_type == (TLS_TLS | TLS_LD)
-		&& SYMBOL_REFERENCES_LOCAL (info, &h->elf))
+		&& (h == NULL || SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
 	      ent = ppc64_tlsld_got (input_bfd);
 	    else
 	      {
@@ -16220,7 +16226,9 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 				 || !UNDEFWEAK_NO_DYNAMIC_RELOC (info, &h->elf))
 			     && !(tls_type != 0
 				  && bfd_link_executable (info)
-				  && SYMBOL_REFERENCES_LOCAL (info, &h->elf))))
+				  && (h == NULL
+				      || SYMBOL_REFERENCES_LOCAL (info,
+								  &h->elf)))))
 		  relgot = ppc64_elf_tdata (ent->owner)->relgot;
 		if (relgot != NULL)
 		  {
@@ -16619,7 +16627,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
-	      else if (!SYMBOL_REFERENCES_LOCAL (info, &h->elf)
+	      else if (h != NULL
+		       && !SYMBOL_REFERENCES_LOCAL (info, &h->elf)
 		       && !is_opd
 		       && r_type != R_PPC64_TOC)
 		{
@@ -17220,11 +17229,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			   && (h->elf.root.type == bfd_link_hash_undefweak
 			       || h->elf.root.type == bfd_link_hash_undefined)
 			   && is_branch_reloc (r_type))))
-		info->callbacks->reloc_overflow (info, &h->elf.root,
-						 sym_name, reloc_name,
-						 orig_rel.r_addend,
-						 input_bfd, input_section,
-						 rel->r_offset);
+		info->callbacks->reloc_overflow
+		  (info, (struct bfd_link_hash_entry *) h, sym_name,
+		   reloc_name, orig_rel.r_addend, input_bfd, input_section,
+		   rel->r_offset);
 	    }
 	  else
 	    {
