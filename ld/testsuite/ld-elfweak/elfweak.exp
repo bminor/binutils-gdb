@@ -267,13 +267,14 @@ proc build_lib {test libname objs dynsymexp} {
     global shared
     global srcdir
     global subdir
+    global NOSANTIZE_CFLAGS
 
     set files ""
     foreach obj $objs {
       set files "$files $tmpdir/$obj"
     }
 
-    if {![ld_link $CC $tmpdir/$libname.so "$shared $files"]} {
+    if {![ld_link "$CC $NOSANTIZE_CFLAGS" $tmpdir/$libname.so "$shared $files"]} {
 	fail $test
 	return
     }
@@ -354,6 +355,9 @@ set cc_cmd "$CC"
 if {[check_lto_available]} {
    append cc_cmd " -fno-lto"
 }
+
+# Disable all sanitizers.
+append cc_cmd " $NOSANTIZE_CFLAGS"
 
 # Old version of GCC for MIPS default to enabling -fpic
 # and get confused if it is used on the command line.

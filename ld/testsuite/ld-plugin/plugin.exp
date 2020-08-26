@@ -295,9 +295,9 @@ if { !$can_compile || $failed_compile } {
 run_ld_link_tests $plugin_tests
 
 if { [is_elf_format] \
-     && [ld_compile "$CC $CFLAGS" $srcdir/$subdir/func1p.c tmpdir/func1p.o] \
-     && [ld_compile "$CC $CFLAGS" $srcdir/$subdir/func2i.c tmpdir/func2i.o] \
-     && [ld_compile "$CC $CFLAGS" $srcdir/$subdir/func3h.c tmpdir/func3h.o] } {
+     && [ld_compile "$CC $CFLAGS $NOSANTIZE_CFLAGS" $srcdir/$subdir/func1p.c tmpdir/func1p.o] \
+     && [ld_compile "$CC $CFLAGS $NOSANTIZE_CFLAGS" $srcdir/$subdir/func2i.c tmpdir/func2i.o] \
+     && [ld_compile "$CC $CFLAGS $NOSANTIZE_CFLAGS" $srcdir/$subdir/func3h.c tmpdir/func3h.o] } {
     run_ld_link_tests $plugin_extra_elf_tests
 }
 

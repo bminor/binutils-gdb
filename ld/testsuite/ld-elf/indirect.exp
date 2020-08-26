@@ -64,6 +64,9 @@ if {[check_lto_available]} {
    append cc_cmd " -fno-lto"
 }
 
+# Disable all sanitizers.
+append cc_cmd " $NOSANTIZE_CFLAGS"
+
 if { ![ld_compile $cc_cmd $srcdir/$subdir/indirect1a.c tmpdir/indirect1a.o]
      || ![ld_compile $cc_cmd $srcdir/$subdir/indirect1b.c tmpdir/indirect1b.o]
      || ![ld_compile "$cc_cmd -fPIC" $srcdir/$subdir/indirect2.c tmpdir/indirect2.o]

@@ -489,8 +489,9 @@ proc build_binary { shared pic test source libname other mapfile verexp versymex
     global CC
     global CFLAGS
     global script
+    global NOSANTIZE_CFLAGS
 
-    if ![ld_compile "$CC -S $pic $CFLAGS" $srcdir/$subdir/$source $tmpdir/$libname.s]     {
+    if ![ld_compile "$CC -S $pic $CFLAGS $NOSANTIZE_CFLAGS" $srcdir/$subdir/$source $tmpdir/$libname.s]     {
 	unresolved "$test"
 	return
     }
@@ -687,6 +688,7 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
     global objdump
     global CC
     global CFLAGS
+    global NOSANTIZE_CFLAGS
 
     set shared "--shared --no-undefined-version"
     set script --version-script
@@ -696,6 +698,9 @@ proc build_exec { test source execname flags solibname verexp versymexp symexp }
     if {[check_lto_available]} {
 	append cc_cmd " -fno-lto"
     }
+
+    # Disable all sanitizers.
+    append cc_cmd " $NOSANTIZE_CFLAGS"
 
     if ![ld_compile $cc_cmd $srcdir/$subdir/$source $tmpdir/$execname.s]     {
 	unresolved "$test"

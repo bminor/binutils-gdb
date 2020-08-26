@@ -749,15 +749,6 @@ set build_tests {
   {"Build needed3"
    "tmpdir/needed3.o -Wl,--as-needed -Ltmpdir -lneeded3a -lneeded3b -lneeded1b" ""
    {dummy.c} {} "needed3"}
-  {"Build libpr2404a.so"
-   "-shared" "-fPIC"
-   {pr2404a.c} {} "libpr2404a.so"}
-  {"Build libpr2404n.so"
-   "-shared -Wl,-z,now" "-fPIC"
-   {pr2404a.c} {} "libpr2404n.so"}
-  {"Build libpr2404b.a"
-   "" ""
-   {pr2404b.c} {} "libpr2404b.a"}
   {"Build rdynamic-1"
    "-Wl,--no-dynamic-linker,-export-dynamic,--gc-sections" "-ffunction-sections"
    {rdynamic-1.c} {{readelf {-s} rdynamic-1.rd}} "rdynamic-1"}
@@ -792,6 +783,34 @@ set build_tests {
    "-shared -Wl,-z,now tmpdir/libpr18458a.so" "-fPIC"
    {pr18458b.c} {} "libpr18458b.so"}
 }
+
+run_cc_link_tests [list \
+    [list \
+	"Build libpr2404a.so" \
+	"-shared $NOSANTIZE_CFLAGS" \
+	"-fPIC $NOSANTIZE_CFLAGS" \
+	{pr2404a.c} \
+	{} \
+	"libpr2404a.so" \
+    ] \
+    [list \
+	"Build libpr2404n.so" \
+	"-shared -Wl,-z,now $NOSANTIZE_CFLAGS" \
+	"-fPIC $NOSANTIZE_CFLAGS" \
+	{pr2404a.c} \
+	{} \
+	"libpr2404n.so" \
+    ] \
+    [list \
+	"Build libpr2404b.a" \
+	"" \
+	"$NOSANTIZE_CFLAGS" \
+	{pr2404b.c} \
+	{} \
+	"libpr2404b.a" \
+    ] \
+]
+
 # pr19073.s uses .set, which has a different meaning on alpha.
 if { ![istarget alpha-*-*] } {
     append build_tests {
@@ -873,7 +892,7 @@ run_ld_link_tests [list \
 	{ pr22269-1.c } \
 	{{readelf -rW pr22269-1.rd}} \
 	"pr22269-1" \
-	"-fPIE -O2" \
+	"-fPIE -O2 $NOSANTIZE_CFLAGS" \
     ] \
 ]
 
@@ -1006,11 +1025,16 @@ set run_tests [list \
      "-Wl,--no-as-needed,-rpath=tmpdir -Ltmpdir -lrel" "" \
      {relmain.c} "relmain" "relmain.out" ] \
     [list "Run pr2404" \
-     "-Wl,--no-as-needed tmpdir/pr2404b.o tmpdir/libpr2404a.so" "" \
-     {dummy.c} "pr2404" "pr2404.out" ] \
+     "$NOSANTIZE_CFLAGS -Wl,--no-as-needed \
+      tmpdir/pr2404b.o tmpdir/libpr2404a.so" \
+     "" \
+     {dummy.c} "pr2404" "pr2404.out" \
+     "$NOSANTIZE_CFLAGS" ] \
     [list "Run pr2404n" \
-     "-Wl,-z,now -Wl,--no-as-needed tmpdir/pr2404b.o tmpdir/libpr2404n.so" "" \
-     {dummy.c} "pr2404n" "pr2404.out" ] \
+     "$NOSANTIZE_CFLAGS -Wl,-z,now \
+      -Wl,--no-as-needed tmpdir/pr2404b.o tmpdir/libpr2404n.so" "" \
+     {dummy.c} "pr2404n" "pr2404.out" \
+     "$NOSANTIZE_CFLAGS" ] \
     [list "Run pr18458" \
      "-Wl,--no-as-needed,-z,now tmpdir/libpr18458a.so tmpdir/libpr18458b.so" "" \
      {pr18458c.c} "pr18458" "pass.out" ] \
@@ -1126,13 +1150,28 @@ set build_cxx_tests {
   {"Build libdl3a.so with --dynamic-list-cpp-typeinfo"
    "-shared -Wl,--dynamic-list-cpp-typeinfo" "-fPIC"
    {dl3.cc} {} "libdl3c.so" "c++"}
-  {"Build libdnew1a.so with --Bsymbolic-functions --dynamic-list-cpp-new"
-   "-shared -Wl,-Bsymbolic-functions,--dynamic-list-cpp-new" "-fPIC -ansi"
-   {del.cc new.cc} {} "libnew1a.so" "c++"}
-  {"Build libdnew1b.so with --dynamic-list-data --dynamic-list-cpp-new"
-   "-shared -Wl,--dynamic-list-data,--dynamic-list-cpp-new" "-fPIC -ansi"
-   {del.cc new.cc} {} "libnew1b.so" "c++"}
 }
+
+run_cc_link_tests [list \
+    [list \
+	"Build libdnew1a.so with --Bsymbolic-functions --dynamic-list-cpp-new" \
+	"-shared $NOSANTIZE_CFLAGS -Wl,-Bsymbolic-functions,--dynamic-list-cpp-new" \
+	"-fPIC -ansi $NOSANTIZE_CFLAGS" \
+	{del.cc new.cc} \
+	{} \
+	"libnew1a.so" \
+	"c++" \
+    ] \
+    [list \
+	"Build libdnew1b.so with --dynamic-list-data --dynamic-list-cpp-new" \
+	"-shared $NOSANTIZE_CFLAGS -Wl,--dynamic-list-data,--dynamic-list-cpp-new" \
+	"-fPIC -ansi $NOSANTIZE_CFLAGS" \
+	{del.cc new.cc} \
+	{} \
+	"libnew1b.so" \
+	"c++" \
+    ] \
+]
 
 # "-shared -Bsymbolic" only works with gcc 4.5.0 and newer.
 #    {"Run with libdl3b.so"
@@ -1145,13 +1184,30 @@ set run_cxx_tests {
     {"Run with libdl3c.so"
      "-Wl,--no-as-needed tmpdir/libdl3c.so" ""
      {dl3main.cc} "dl3c" "dl3a.out" "" "c++"}
-    {"Run with libnew1a.so"
-     "-Wl,--no-as-needed tmpdir/libnew1a.so" ""
-     {dl5.cc} "dl5a" "dl5.out" "-ansi" "c++"}
-    {"Run with libnew1b.so"
-     "-Wl,--no-as-needed tmpdir/libnew1b.so" ""
-     {dl5.cc} "dl5b" "dl5.out" "-ansi" "c++"}
 }
+
+run_ld_link_exec_tests [list \
+    [list \
+	"Run with libnew1a.so" \
+	"-Wl,--no-as-needed tmpdir/libnew1a.so $NOSANTIZE_CFLAGS" \
+	"" \
+	{dl5.cc} \
+	"dl5a" \
+	"dl5.out" \
+	"-ansi $NOSANTIZE_CFLAGS" \
+	"c++" \
+    ] \
+    [list \
+	"Run with libnew1b.so" \
+	"-Wl,--no-as-needed tmpdir/libnew1b.so $NOSANTIZE_CFLAGS" \
+	"" \
+	{dl5.cc} \
+	"dl5b" \
+	"dl5.out" \
+	"-ansi $NOSANTIZE_CFLAGS" \
+	"c++" \
+    ] \
+]
 
 run_cc_link_tests $build_cxx_tests
 run_ld_link_exec_tests $run_cxx_tests
@@ -1163,7 +1219,7 @@ if { [istarget *-*-linux*]
 	[list \
 	    "Build libpr2404b.a with PIE" \
 	    "" \
-	    "-fPIE" \
+	    "-fPIE $NOSANTIZE_CFLAGS" \
 	    { pr2404b.c } \
 	    {} \
 	    "libpr2404b.a" \
@@ -1249,21 +1305,21 @@ if { [istarget *-*-linux*]
 	] \
 	[list \
 	    "Run pr2404 with PIE" \
-	    "-pie -Wl,--no-as-needed tmpdir/pr2404b.o tmpdir/libpr2404a.so" \
+	    "-pie $NOSANTIZE_CFLAGS -Wl,--no-as-needed tmpdir/pr2404b.o tmpdir/libpr2404a.so" \
 	    "" \
 	    { dummy.c } \
 	    "pr2404pie" \
 	    "pr2404.out" \
-	    "-fPIE" \
+	    "-fPIE $NOSANTIZE_CFLAGS" \
 	] \
 	[list \
 	    "Run pr2404 with PIE (-z now)" \
-	    "-pie -Wl,-z,now -Wl,--no-as-needed tmpdir/pr2404b.o tmpdir/libpr2404n.so" \
+	    "-pie $NOSANTIZE_CFLAGS -Wl,-z,now -Wl,--no-as-needed tmpdir/pr2404b.o tmpdir/libpr2404n.so" \
 	    "" \
 	    { dummy.c } \
 	    "pr2404pien" \
 	    "pr2404.out" \
-	    "-fPIE" \
+	    "-fPIE $NOSANTIZE_CFLAGS" \
 	] \
 	[list \
 	    "Run pr18718" \
@@ -1499,7 +1555,7 @@ if { ([istarget "*-*-linux*"]
 	    { pr23162a.c } \
 	    "" \
 	    "libpr23162a.so" \
-	    "-fPIC -O2" \
+	    "-fPIC -O2 $NOSANTIZE_CFLAGS" \
 	] \
 	[list \
 	    "Build pr23162a" \
@@ -1509,7 +1565,7 @@ if { ([istarget "*-*-linux*"]
 	    { pr23162b.c } \
 	    {{readelf {-rW} pr23162.rd}} \
 	    "pr23162a" \
-	    "-fPIC -O0" \
+	    "-fPIC -O0 $NOSANTIZE_CFLAGS" \
 	] \
 	[list \
 	    "Build libpr23162b.so" \
@@ -1519,7 +1575,7 @@ if { ([istarget "*-*-linux*"]
 	    { pr23162a.c } \
 	    "" \
 	    "libpr23162b.so" \
-	    "-fPIC -O2" \
+	    "-fPIC -O2 $NOSANTIZE_CFLAGS" \
 	] \
 	[list \
 	    "Build pr23162b" \
@@ -1529,7 +1585,7 @@ if { ([istarget "*-*-linux*"]
 	    { pr23162b.c } \
 	    {{readelf {-rW} pr23162.rd}} \
 	    "pr23162b" \
-	    "-fPIC -O0" \
+	    "-fPIC -O0 $NOSANTIZE_CFLAGS" \
 	] \
 	[list \
 	    "Build libpr23161a.so" \
