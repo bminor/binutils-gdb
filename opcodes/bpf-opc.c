@@ -1552,6 +1552,18 @@ static const CGEN_OPCODE bpf_cgen_insn_opcode_table[MAX_INSNS] =
     { { MNEM, ' ', OP (DISP32), 0 } },
     & ifmt_callle, { 0x85 }
   },
+/* call $dstle */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (DSTLE), 0 } },
+    & ifmt_negle, { 0x8d }
+  },
+/* call $dstbe */
+  {
+    { 0, 0, 0, 0 },
+    { { MNEM, ' ', OP (DSTBE), 0 } },
+    & ifmt_negbe, { 0x8d }
+  },
 /* ja $disp16 */
   {
     { 0, 0, 0, 0 },

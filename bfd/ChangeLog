@@ -1,3 +1,10 @@
+2020-08-26  David Faust  <david.faust@oracle.com>
+
+	* archures.c (bfd_mach_xbpf): Define.
+	* bfd-in2.h: Regenerate.
+	* cpu-bpf.c (bfd_xbpf_arch) New.
+	(bfd_bpf_arch) Update next in list field to point to xbpf arch.
+
 2020-08-26  Alan Modra  <amodra@gmail.com>
 
 	* archures.c (bfd_mach_ck860): Define.
