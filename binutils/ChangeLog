@@ -1,3 +1,8 @@
+2020-08-26  Katayama Hirofumi  <katayama.hirofumi.mz@gmail.com>
+
+	PR 26340
+	* rcparse.y (AUTOCHECKBOX): Add WS_TABSTOP to the base style.
+
 2020-08-24  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (dump_section_as_strings) Avoid false positive

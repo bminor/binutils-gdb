@@ -571,7 +571,7 @@ control:
 	| AUTOCHECKBOX optresidc
 	    {
 	      default_style = BS_AUTOCHECKBOX | WS_TABSTOP;
-	      base_style = BS_AUTOCHECKBOX;
+	      base_style = BS_AUTOCHECKBOX | WS_TABSTOP;
 	      class.named = 0;
 	      class.u.id = CTL_BUTTON;
 	      res_text_field = $2;
