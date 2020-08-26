@@ -824,6 +824,13 @@ This program has absolutely no warranty.\n"));
 	      && md_parse_option (optc, optarg))
 	    continue;
 
+	  /* We end up here for any -gsomething-not-already-a-long-option.
+	     give some useful feedback on not (yet) supported -gdwarfxxx
+	     versions/sections/options.  */
+	  if (strncmp (old_argv[optind - 1], "-gdwarf",
+		       strlen ("-gdwarf")) == 0)
+	    as_fatal (_("unknown DWARF option %s\n"), old_argv[optind - 1]);
+
 	  if (md_debug_format_selector)
 	    debug_type = md_debug_format_selector (& use_gnu_debug_info_extensions);
 	  else if (IS_ELF)
