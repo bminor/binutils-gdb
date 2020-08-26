@@ -1,3 +1,8 @@
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
+	PR 26458
+	* elf/common.h (ELF32_R_INFO): Cast symbol index to unsigned.
+
 2020-08-24  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* opcode/csky.h (CSKYV2_ISA_10E60): New.

@@ -942,7 +942,7 @@
 
 #define ELF32_R_SYM(i)		((i) >> 8)
 #define ELF32_R_TYPE(i)		((i) & 0xff)
-#define ELF32_R_INFO(s,t)	(((s) << 8) + ((t) & 0xff))
+#define ELF32_R_INFO(s,t)	(((unsigned) (s) << 8) + ((t) & 0xff))
 
 #define ELF64_R_SYM(i)		((i) >> 32)
 #define ELF64_R_TYPE(i)		((i) & 0xffffffff)
