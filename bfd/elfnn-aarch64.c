@@ -7139,7 +7139,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 
 		 Try to catch this situation here and provide a more helpful
 		 error message to the user.  */
-	      if (addend & ((1 << howto->rightshift) - 1)
+	      if (addend & ((1UL << howto->rightshift) - 1)
 		  /* FIXME: Are we testing all of the appropriate reloc
 		     types here ?  */
 		  && (real_r_type == BFD_RELOC_AARCH64_LD_LO19_PCREL
