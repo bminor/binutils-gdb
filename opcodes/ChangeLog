@@ -1,3 +1,12 @@
+2020-08-26  David Faust  <david.faust@oracle.com>
+
+	* bpf-desc.c: Regenerate.
+	* bpf-desc.h: Likewise.
+	* bpf-opc.c: Likewise.
+	* bpf-opc.h: Likewise.
+	* disassemble.c (disassemble_init_for_target): Set bits for xBPF
+	ISA when appropriate.
+
 2020-08-18  Peter Bergner  <bergner@linux.ibm.com>
 
 	Backported from master:

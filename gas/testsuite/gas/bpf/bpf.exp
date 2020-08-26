@@ -38,4 +38,7 @@ if {[istarget bpf*-*-*]} {
     run_dump_test exit-be
     run_dump_test atomic-be
     run_dump_test data-be
+
+    run_dump_test indcall-1
+    run_list_test indcall-bad-1
 }

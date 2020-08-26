@@ -36,8 +36,8 @@
   ;; It is confusing that the simulator follows the emulated memory
   ;; access conventions for fetching instructions by pieces...
   (default-alignment unaligned)
-  (machs bpf)
-  (isas ebpfle ebpfbe))
+  (machs bpf xbpf)
+  (isas ebpfle ebpfbe xbpfle xbpfbe))
 
 ;;;; The ISAs
 
@@ -105,18 +105,33 @@
 (define-bpf-isa le)
 (define-bpf-isa be)
 
-(define-pmacro all-isas () (ISA ebpfle,ebpfbe))
+(define-pmacro (define-xbpf-isa x-endian)
+  (define-isa
+    (name (.sym xbpf x-endian))
+    (comment "The xBPF instruction set")
+    (default-insn-word-bitsize 64)
+    (default-insn-bitsize 64)
+    (base-insn-bitsize 64)))
+
+(define-xbpf-isa le)
+(define-xbpf-isa be)
+
+(define-pmacro all-isas () (ISA ebpfle,ebpfbe,xbpfle,xbpfbe))
+(define-pmacro xbpf-isas () (ISA xbpfle,xbpfbe))
+
+(define-pmacro (endian-isas x-endian)
+  ((ISA (.sym ebpf x-endian) (.sym xbpf x-endian))))
 
 ;;;; Hardware Hierarchy
 
 ;;
-;;     bpf         architecture
-;;      |
-;;    bpfbf        cpu-family
-;;      |
-;;     bpf         machine
-;;      |
-;;   bpf-def       model
+;;         bpf            architecture
+;;          |
+;;        bpfbf           cpu-family
+;;      /       \
+;;     bpf     xbpf       machine
+;;      |       |
+;;   bpf-def  xbpf-def    model
 
 (define-cpu
   (name bpfbf)
@@ -143,6 +158,25 @@
     () ; profile action (default)
     ))
 
+(define-mach
+  (name xbpf)
+  (comment "Experimental BPF")
+  (cpu bpfbf)
+  (isas ebpfle ebpfbe xbpfle xbpfbe))
+
+(define-model
+  (name xbpf-def)
+  (comment "xBPF default model")
+  (mach xbpf)
+  (unit u-exec "execution unit" ()
+    1 ; issue
+    1 ; done
+    () ; state
+    () ; inputs
+    () ; outputs
+    () ; profile action (default)
+    ))
+
 ;;;; Hardware Elements
 
 ;; eBPF programs can access 10 general-purpose registers which are
@@ -151,7 +185,7 @@
 (define-hardware
   (name h-gpr)
   (comment "General Purpose Registers")
-  (attrs all-isas (MACH bpf))
+  (attrs all-isas (MACH bpf xbpf))
   (type register DI (16))
   (indices keyword "%"
            ;; XXX the frame pointer fp is read-only, so it should
@@ -259,11 +293,11 @@
 ;; NOT use registers, where endianness is irrelevant i.e. f-regs is a
 ;; constant 0 opcode.
 
-(dwf f-dstle "eBPF dst register field" ((ISA ebpfle)) 8 8 3 4 UINT)
-(dwf f-srcle "eBPF source register field" ((ISA ebpfle)) 8 8 7 4 UINT)
+(dwf f-dstle "eBPF dst register field" ((ISA ebpfle xbpfle)) 8 8 3 4 UINT)
+(dwf f-srcle "eBPF source register field" ((ISA ebpfle xbpfle)) 8 8 7 4 UINT)
 
-(dwf f-dstbe "eBPF dst register field" ((ISA ebpfbe)) 8 8 7 4 UINT)
-(dwf f-srcbe "eBPF source register field" ((ISA ebpfbe)) 8 8 3 4 UINT)
+(dwf f-dstbe "eBPF dst register field" ((ISA ebpfbe xbpfbe)) 8 8 7 4 UINT)
+(dwf f-srcbe "eBPF source register field" ((ISA ebpfbe xbpfbe)) 8 8 3 4 UINT)
 
 (dwf f-regs "eBPF registers field" (all-isas) 8 8 7 8 UINT)
 
@@ -303,11 +337,11 @@
 ;; A couple of source and destination register operands are defined
 ;; for each ISA: ebpfle and ebpfbe.
 
-(dno dstle "destination register" ((ISA ebpfle)) h-gpr f-dstle)
-(dno srcle "source register" ((ISA ebpfle)) h-gpr f-srcle)
+(dno dstle "destination register" ((ISA ebpfle xbpfle)) h-gpr f-dstle)
+(dno srcle "source register" ((ISA ebpfle xbpfle)) h-gpr f-srcle)
 
-(dno dstbe "destination register" ((ISA ebpfbe)) h-gpr f-dstbe)
-(dno srcbe "source register" ((ISA ebpfbe)) h-gpr f-srcbe)
+(dno dstbe "destination register" ((ISA ebpfbe xbpfbe)) h-gpr f-dstbe)
+(dno srcbe "source register" ((ISA ebpfbe xbpfbe)) h-gpr f-srcbe)
 
 ;; Jump instructions have a 16-bit PC-relative address.
 ;; CALL instructions have a 32-bit PC-relative address.
@@ -378,7 +412,7 @@
                  x-endian x-mode x-semop)
   (dni (.sym x-basename x-suffix x-endian)
        (.str x-basename x-suffix)
-       ((ISA (.sym ebpf x-endian)))
+       (endian-isas x-endian)
        (.str x-basename x-suffix " $dst" x-endian)
        (+ (f-imm32 0) (f-offset16 0) ((.sym f-src x-endian) 0) (.sym dst x-endian)
           x-op-class OP_SRC_K x-op-code)
@@ -391,7 +425,7 @@
     ;; dst = dst OP immediate
     (dni (.sym x-basename x-suffix "i" x-endian)
          (.str x-basename x-suffix " immediate")
-         ((ISA (.sym ebpf x-endian)))
+         (endian-isas x-endian)
          (.str x-basename x-suffix " $dst" x-endian ",$imm32")
          (+ imm32 (f-offset16 0) ((.sym f-src x-endian) 0) (.sym dst x-endian)
             x-op-class OP_SRC_K x-op-code)
@@ -400,7 +434,7 @@
     ;; dst = dst OP src
     (dni (.sym x-basename x-suffix "r" x-endian)
          (.str x-basename x-suffix " register")
-         ((ISA (.sym ebpf x-endian)))
+         (endian-isas x-endian)
          (.str x-basename x-suffix " $dst" x-endian ",$src" x-endian)
          (+ (f-imm32 0) (f-offset16 0) (.sym src x-endian) (.sym dst x-endian)
             x-op-class OP_SRC_X x-op-code)
@@ -413,7 +447,7 @@
   (begin
     (dni (.sym mov x-suffix "i" x-endian)
          (.str mov x-suffix " immediate")
-         ((ISA (.sym ebpf x-endian)))
+         (endian-isas x-endian)
          (.str x-basename x-suffix " $dst" x-endian ",$imm32")
          (+ imm32 (f-offset16 0) ((.sym f-src x-endian) 0) (.sym dst x-endian)
             x-op-class OP_SRC_K x-op-code)
@@ -421,7 +455,7 @@
          ())
     (dni (.sym mov x-suffix "r" x-endian)
          (.str mov x-suffix " register")
-         ((ISA (.sym ebpf x-endian)))
+         (endian-isas x-endian)
          (.str x-basename x-suffix " $dst" x-endian ",$src" x-endian)
          (+ (f-imm32 0) (f-offset16 0) (.sym src x-endian) (.sym dst x-endian)
             x-op-class OP_SRC_X x-op-code)
@@ -483,7 +517,7 @@
 (define-pmacro (define-endian-insn x-suffix x-op-src x-endian)
   (dni (.sym "end" x-suffix x-endian)
        (.str "end" x-suffix " register")
-       ((ISA (.sym ebpf x-endian)))
+       (endian-isas x-endian)
        (.str "end" x-suffix " $dst" x-endian ",$endsize")
        (+  (f-offset16 0) ((.sym f-src x-endian) 0) (.sym dst x-endian) endsize
            OP_CLASS_ALU x-op-src OP_CODE_END)
@@ -508,7 +542,7 @@
 (define-pmacro (define-lddw x-endian)
   (dni (.sym lddw x-endian)
        (.str "lddw" x-endian)
-       ((ISA (.sym ebpf x-endian)))
+       (endian-isas x-endian)
        (.str "lddw $dst" x-endian ",$imm64")
        (+ imm64 (f-offset16 0) ((.sym f-src x-endian) 0)
           (.sym dst x-endian)
@@ -557,7 +591,7 @@
 (define-pmacro (dlind x-suffix x-size x-endian x-smode)
   (dni (.sym "ldind" x-suffix x-endian)
        (.str "ldind" x-suffix)
-       ((ISA (.sym ebpf x-endian)))
+       (endian-isas x-endian)
        (.str "ldind" x-suffix " $src" x-endian ",$imm32")
        (+ imm32 (f-offset16 0) ((.sym f-dst x-endian) 0) (.sym src x-endian)
           OP_CLASS_LD OP_MODE_IND (.sym OP_SIZE_ x-size))
@@ -598,7 +632,7 @@
 (define-pmacro (dxli x-basename x-suffix x-size x-endian x-mode)
   (dni (.sym x-basename x-suffix x-endian)
        (.str x-basename x-suffix)
-       ((ISA (.sym ebpf x-endian)))
+       (endian-isas x-endian)
        (.str x-basename x-suffix " $dst" x-endian ",[$src" x-endian "+$offset16]")
        (+ (f-imm32 0) offset16 (.sym src x-endian) (.sym dst x-endian)
           OP_CLASS_LDX (.sym OP_SIZE_ x-size) OP_MODE_MEM)
@@ -610,7 +644,7 @@
 (define-pmacro (dxsi x-basename x-suffix x-size x-endian x-mode)
   (dni (.sym x-basename x-suffix x-endian)
        (.str x-basename x-suffix)
-       ((ISA (.sym ebpf x-endian)))
+       (endian-isas x-endian)
        (.str x-basename x-suffix " [$dst" x-endian "+$offset16],$src" x-endian)
        (+ (f-imm32 0) offset16 (.sym src x-endian) (.sym dst x-endian)
           OP_CLASS_STX (.sym OP_SIZE_ x-size) OP_MODE_MEM)
@@ -643,7 +677,7 @@
 (define-pmacro (dsti x-suffix x-size x-endian x-mode)
   (dni (.sym "st" x-suffix x-endian)
        (.str "st" x-suffix)
-       ((ISA (.sym ebpf x-endian)))
+       (endian-isas x-endian)
        (.str "st" x-suffix " [$dst" x-endian "+$offset16],$imm32")
        (+ imm32 offset16 ((.sym f-src x-endian) 0) (.sym dst x-endian)
           OP_CLASS_ST (.sym OP_SIZE_ x-size) OP_MODE_MEM)
@@ -677,7 +711,7 @@
   (begin
     (dni (.sym j x-cond x-suffix i x-endian)
          (.str j x-cond x-suffix " i")
-         ((ISA (.sym ebpf x-endian)))
+         (endian-isas x-endian)
          (.str "j" x-cond x-suffix " $dst" x-endian ",$imm32,$disp16")
          (+ imm32 disp16 ((.sym f-src x-endian) 0) (.sym dst x-endian)
             x-op-class OP_SRC_K (.sym OP_CODE_ x-op-code))
@@ -688,7 +722,7 @@
          ())
     (dni (.sym j x-cond x-suffix r x-endian)
          (.str j x-cond x-suffix " r")
-         ((ISA (.sym ebpf x-endian)))
+         (endian-isas x-endian)
          (.str "j" x-cond x-suffix " $dst" x-endian ",$src" x-endian ",$disp16")
          (+ (f-imm32 0) disp16 (.sym src x-endian) (.sym dst x-endian)
             x-op-class OP_SRC_X (.sym OP_CODE_ x-op-code))
@@ -728,7 +762,7 @@
 (define-pmacro (define-call-insn x-endian)
   (dni (.sym call x-endian)
        "call"
-       ((ISA (.sym ebpf x-endian)))
+       (endian-isas x-endian)
        "call $disp32"
        (+ disp32 (f-offset16 0) (f-regs 0)
           OP_CLASS_JMP OP_SRC_K OP_CODE_CALL)
@@ -738,6 +772,20 @@
 
 (define-call-insn le)
 (define-call-insn be)
+
+(define-pmacro (define-callr-insn x-endian)
+  (dni (.sym callr x-endian)
+       "callr"
+       ((ISA (.sym xbpf x-endian)))
+       (.str "call $dst" x-endian)
+       (+ (f-imm32 0) (f-offset16 0) ((.sym f-src x-endian) 0) (.sym dst x-endian)
+          OP_CLASS_JMP OP_SRC_X OP_CODE_CALL)
+       (c-call VOID
+               "bpfbf_callr" (ifield (.sym f-dst x-endian)))
+       ()))
+
+(define-callr-insn le)
+(define-callr-insn be)
 
 ;; The jump-always and `exit' instructions dont make use of either
 ;; source nor destination registers, so only one variant per
@@ -773,7 +821,7 @@
   (begin
     (dni (.str "xadddw" x-endian)
          "xadddw"
-         ((ISA (.sym ebpf x-endian)))
+         (endian-isas x-endian)
          (.str "xadddw [$dst" x-endian "+$offset16],$src" x-endian)
          (+ (f-imm32 0) (.sym src x-endian) (.sym dst x-endian)
             offset16 OP_MODE_XADD OP_SIZE_DW OP_CLASS_STX)
@@ -781,7 +829,7 @@
          ())
     (dni (.str "xaddw" x-endian)
          "xaddw"
-         ((ISA (.sym ebpf x-endian)))
+         (endian-isas x-endian)
          (.str "xaddw [$dst" x-endian "+$offset16],$src" x-endian)
          (+ (f-imm32 0) (.sym src x-endian) (.sym dst x-endian)
             offset16 OP_MODE_XADD OP_SIZE_W OP_CLASS_STX)

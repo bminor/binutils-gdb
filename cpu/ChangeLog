@@ -1,3 +1,21 @@
+2020-08-26  David Faust  <david.faust@oracle.com>
+
+	* bpf.cpu (arch bpf): Add xbpf mach and isas.
+	(define-xbpf-isa) New pmacro.
+	(all-isas) Add xbpfle,xbpfbe.
+	(endian-isas): New pmacro.
+	(mach xbpf): New.
+	(model xbpf-def): Likewise.
+	(h-gpr): Add xbpf mach.
+	(f-dstle, f-srcle, dstle, srcle): Add xbpfle isa.
+	(f-dstbe, f-srcbe, dstbe, srcbe): Add xbpfbe isa.
+	(define-alu-insn-un): Use new endian-isas pmacro.
+	(define-alu-insn-bin, define-alu-insn-mov): Likewise.
+	(define-endian-insn, define-lddw): Likewise.
+	(dlind, dxli, dxsi, dsti): Likewise.
+	(define-cond-jump-insn, define-call-insn): Likewise.
+	(define-atomic-insns): Likewise.
+
 2020-07-04  Nick Clifton  <nickc@redhat.com>
 
 	Binutils 2.35 branch created.

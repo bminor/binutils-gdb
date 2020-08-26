@@ -1,3 +1,12 @@
+2020-08-26  David Faust  <david.faust@oracle.com>
+
+	* config/tc-bpf.c: Add option -mxbpf to select xbpf isa.
+	* testsuite/gas/bpf/indcall-1.d: New file.
+	* testsuite/gas/bpf/indcall-1.s: Likewise.
+	* testsuite/gas/bpf/indcall-bad-1.l: Likewise.
+	* testsuite/gas/bpf/indcall-bad-1.s: Likewise.
+	* testsuite/gas/bpf/bpf.exp: Run new tests.
+
 2020-08-25  Nick Clifton  <nickc@redhat.com>
 
 	Backport from mainline:
