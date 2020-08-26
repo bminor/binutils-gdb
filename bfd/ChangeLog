@@ -1,5 +1,18 @@
 2020-08-26  Nick Clifton  <nickc@redhat.com>
 
+	PR 26416
+	* elf64-alpha.c (elf64_alpha_relax_tls_get_addr): Test for and
+	ignore local symbols.
+	(elf64_alpha_relax_got_load): Do not check for local dynamic
+	symbols.
+	(OP_LDA, OP_LDAH, OP_LDQ, OP_BR, OP_BSR): Use unsigned constant
+	values.
+	(INSN_A) Cast the A parameter to unsigned.
+	(INSN_AB): Define in terms of INSN_A.
+	(INSN_ABC): Likewise.
+	(INSN_ABO): Likewise.
+	(INSN_AD): Likewise.
+
 	PR 26411
 	* elfnn-aarch64.c (elfNN_aarch64_relocate_section): Use an
 	unsigned long constant when creating a mask to test for alignment
