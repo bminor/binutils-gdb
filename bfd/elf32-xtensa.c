@@ -6014,13 +6014,16 @@ find_removed_literal (removed_literal_list *removed_list, bfd_vma addr)
   if (removed_list->map == NULL)
     map_removed_literal (removed_list);
 
-  p = bsearch (&addr, removed_list->map, removed_list->n_map,
-	       sizeof (*removed_list->map), removed_literal_compare);
-  if (p)
+  if (removed_list->map != NULL)
     {
-      while (p != removed_list->map && (p - 1)->addr == addr)
-	--p;
-      r = p->literal;
+      p = bsearch (&addr, removed_list->map, removed_list->n_map,
+		   sizeof (*removed_list->map), removed_literal_compare);
+      if (p)
+	{
+	  while (p != removed_list->map && (p - 1)->addr == addr)
+	    --p;
+	  r = p->literal;
+	}
     }
   return r;
 }

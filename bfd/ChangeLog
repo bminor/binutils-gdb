@@ -1,5 +1,10 @@
 2020-08-26  Alan Modra  <amodra@gmail.com>
 
+	PR 26507
+	* elf32-xtensa.c (find_removed_literal): Don't bsearch empty map.
+
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
 	PR 26506
 	* elf32-xtensa.c (elf_xtensa_combine_prop_entries): Return early
 	when section is empty.
