@@ -1,3 +1,7 @@
+2020-08-26  Mark Wielaard  <mark@klomp.org>
+
+	* as.c (parse_args): Handle bad -gdwarf options.
+
 2020-08-28  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* gas/config/tc-csky.c (md_begin): Set attributes.
