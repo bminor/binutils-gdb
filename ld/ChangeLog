@@ -1,5 +1,10 @@
 2020-08-26  Alan Modra  <amodra@gmail.com>
 
+	PR 26499
+	* emultempl/spuelf.em (spu_elf_relink): Check for NULL tmp_file_list.
+
+2020-08-26  Alan Modra  <amodra@gmail.com>
+
 	PR 26431
 	* pe-dll.c (auto_export): Don't call bsearch with zero count.
 

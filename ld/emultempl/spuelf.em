@@ -395,7 +395,7 @@ spu_elf_relink (void)
 
   memcpy (argv, my_argv, my_argc * sizeof (*argv));
   argv[my_argc++] = "--no-auto-overlay";
-  if (tmp_file_list->name == auto_overlay_file)
+  if (tmp_file_list != NULL && tmp_file_list->name == auto_overlay_file)
     argv[my_argc - 1] = concat (argv[my_argc - 1], "=",
 				auto_overlay_file, (const char *) NULL);
   argv[my_argc++] = "-T";
