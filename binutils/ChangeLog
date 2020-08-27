@@ -1,3 +1,9 @@
+2020-08-27  Ralf Habacker  <ralf.habacker@freenet.de>
+
+	PR 26088
+	* mclex.c (skip_until_eol): If eol was found, increment line
+	number.
+
 2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
 
 	* objdump.c (dump_ctf_errs): Unquote CTF error messages.

@@ -334,7 +334,10 @@ skip_until_eol (void)
   if (input_stream_pos[0] == 0)
     return 0;
   if (input_stream_pos[0] == '\n')
-    ++input_stream_pos;
+    {
+      ++input_stream_pos;
+      input_line += 1;
+    }
   return 1;
 }
 
