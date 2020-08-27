@@ -1,3 +1,9 @@
+2020-08-27  Alan Modra  <amodra@gmail.com>
+
+	PR 26467
+	* cgen.c (weak_operand_overflow_check): Handle opmask for
+	operand length zero.  Use 1UL constant.
+
 2020-08-26  Alan Modra  <amodra@gmail.com>
 
 	PR 26508

@@ -759,7 +759,7 @@ weak_operand_overflow_check (const expressionS *  exp,
 {
   const unsigned long len = operand->length;
   unsigned long mask;
-  unsigned long opmask = (((1L << (len - 1)) - 1) << 1) | 1;
+  unsigned long opmask = len == 0 ? 0 : (1UL << (len - 1) << 1) - 1;
 
   if (!exp)
     return NULL;
