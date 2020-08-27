@@ -466,6 +466,9 @@ bfd_check_overflow (enum complain_overflow how,
   bfd_vma fieldmask, addrmask, signmask, ss, a;
   bfd_reloc_status_type flag = bfd_reloc_ok;
 
+  if (bitsize == 0)
+    return flag;
+
   /* Note: BITSIZE should always be <= ADDRSIZE, but in case it's not,
      we'll be permissive: extra bits in the field mask will
      automatically extend the address mask for purposes of the
