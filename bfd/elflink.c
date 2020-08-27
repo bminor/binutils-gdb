@@ -32,6 +32,13 @@
 #include "plugin.h"
 #endif
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
+
 /* This struct is used to pass information to routines called via
    elf_link_hash_traverse which must return failure.  */
 
@@ -8427,12 +8434,12 @@ struct elf_outext_info
    implementation of them consists of two parts: complex symbols, and the
    relocations themselves.
 
-   The relocations are use a reserved elf-wide relocation type code (R_RELC
+   The relocations use a reserved elf-wide relocation type code (R_RELC
    external / BFD_RELOC_RELC internal) and an encoding of relocation field
    information (start bit, end bit, word width, etc) into the addend.  This
    information is extracted from CGEN-generated operand tables within gas.
 
-   Complex symbols are mangled symbols (BSF_RELC external / STT_RELC
+   Complex symbols are mangled symbols (STT_RELC external / BSF_RELC
    internal) representing prefix-notation expressions, including but not
    limited to those sorts of expressions normally encoded as addends in the
    addend field.  The symbol mangling format is:
@@ -8607,6 +8614,7 @@ undefined_reference (const char *reftype, const char *name)
   /* xgettext:c-format */
   _bfd_error_handler (_("undefined %s reference in complex symbol: %s"),
 		      reftype, name);
+  bfd_set_error (bfd_error_bad_value);
 }
 
 static bfd_boolean
@@ -8715,7 +8723,7 @@ eval_symbol (bfd_vma *result,
       return TRUE;						\
     }
 
-#define BINARY_OP(op)						\
+#define BINARY_OP_HEAD(op)					\
   if (strncmp (sym, #op, strlen (#op)) == 0)			\
     {								\
       sym += strlen (#op);					\
@@ -8728,18 +8736,33 @@ eval_symbol (bfd_vma *result,
       ++*symp;							\
       if (!eval_symbol (&b, symp, input_bfd, flinfo, dot,	\
 			isymbuf, locsymcount, signed_p))	\
-	return FALSE;						\
+	return FALSE;
+#define BINARY_OP_TAIL(op)					\
       if (signed_p)						\
 	*result = ((bfd_signed_vma) a) op ((bfd_signed_vma) b);	\
       else							\
 	*result = a op b;					\
       return TRUE;						\
     }
+#define BINARY_OP(op) BINARY_OP_HEAD(op) BINARY_OP_TAIL(op)
 
     default:
       UNARY_OP  (0-);
-      BINARY_OP (<<);
-      BINARY_OP (>>);
+      BINARY_OP_HEAD (<<);
+      if (b >= sizeof (a) * CHAR_BIT)
+	{
+	  *result = 0;
+	  return TRUE;
+	}
+      signed_p = 0;
+      BINARY_OP_TAIL (<<);
+      BINARY_OP_HEAD (>>);
+      if (b >= sizeof (a) * CHAR_BIT)
+	{
+	  *result = signed_p && (bfd_signed_vma) a < 0 ? -1 : 0;
+	  return TRUE;
+	}
+      BINARY_OP_TAIL (>>);
       BINARY_OP (==);
       BINARY_OP (!=);
       BINARY_OP (<=);
@@ -8749,8 +8772,22 @@ eval_symbol (bfd_vma *result,
       UNARY_OP  (~);
       UNARY_OP  (!);
       BINARY_OP (*);
-      BINARY_OP (/);
-      BINARY_OP (%);
+      BINARY_OP_HEAD (/);
+      if (b == 0)
+	{
+	  _bfd_error_handler (_("division by zero"));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+      BINARY_OP_TAIL (/);
+      BINARY_OP_HEAD (%);
+      if (b == 0)
+	{
+	  _bfd_error_handler (_("division by zero"));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+      BINARY_OP_TAIL (%);
       BINARY_OP (^);
       BINARY_OP (|);
       BINARY_OP (&);

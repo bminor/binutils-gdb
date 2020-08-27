@@ -1,5 +1,20 @@
 2020-08-27  Alan Modra  <amodra@gmail.com>
 
+	PR 26469
+	* elflink.c: Include limits.h.
+	(CHAR_BIT): Provide fallback define.
+	(set_symbol_value): Correct complex reloc comment.
+	(undefined_reference): Set bfd_error.
+	(BINARY_OP_HEAD, BINARY_OP_TAIL): Split out from..
+	(BINARY_OP): ..this.
+	(eval_symbol): Limit shifts.  Force unsigned for left shift.
+	Catch divide by zero.
+	* configure.ac (AC_CHECK_HEADERS): Combine, sort and add limits.h.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2020-08-27  Alan Modra  <amodra@gmail.com>
+
 	PR 26462
 	* reloc.c (bfd_check_overflow): Return early if zero bitsize.
 
