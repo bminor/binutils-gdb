@@ -1,3 +1,13 @@
+2020-08-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* gdb_bfd.h (gdb_bfd_section_iterator, gdb_bfd_section_range,
+	gdb_bfd_sections): New.
+	* maint.c (print_bfd_section_info): Change param type to
+	maint_print_section_data.
+	(print_objfile_section_info): Likewise.
+	(print_bfd_section_info_maybe_relocated): Likewise.
+	(maintenance_info_sections): Use gdb_bfd_sections.
+
 2020-08-25  Shahab Vahedi  <shahab@synopsys.com>
 
 	* MAINTAINERS: Add ARC target and maintainer.

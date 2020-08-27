@@ -23,6 +23,7 @@
 #include "registry.h"
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/gdb_ref_ptr.h"
+#include "gdbsupport/next-iterator.h"
 
 DECLARE_REGISTRY (bfd);
 
@@ -192,5 +193,22 @@ int gdb_bfd_requires_relocations (bfd *abfd);
 
 bool gdb_bfd_get_full_section_contents (bfd *abfd, asection *section,
 					gdb::byte_vector *contents);
+
+/* Range adapter for a BFD's sections.
+
+   To be used as:
+
+     for (asection *sect : gdb_bfd_all_sections (bfd))
+       ... use SECT ...
+ */
+
+using gdb_bfd_section_iterator = next_iterator<asection>;
+using gdb_bfd_section_range = next_adapter<asection, gdb_bfd_section_iterator>;
+
+static inline
+gdb_bfd_section_range gdb_bfd_sections (bfd *abfd)
+{
+  return gdb_bfd_section_range (abfd->sections);
+}
 
 #endif /* GDB_BFD_H */

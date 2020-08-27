@@ -266,7 +266,7 @@ struct maint_print_section_data
   maint_print_section_data (struct objfile *objfile, const char *arg,
 			    bfd *abfd)
     : objfile (objfile),
-      arg(arg)
+      arg (arg)
   {
     int section_count = gdb_bfd_count_sections (abfd);
     index_digits = ((int) log10 ((float) section_count)) + 1;
@@ -292,21 +292,19 @@ print_section_index (bfd *abfd,
   printf_filtered ("%-*s", (index_digits + 4), result.c_str ());
 }
 
-/* Print information about ASECT from ABFD.  DATUM holds a pointer to a
-   maint_print_section_data object.  The section will be printed using the
-   VMA's from the bfd, which will not be the relocated addresses for bfds
-   that should be relocated.  The information must be printed with the
-   same layout as PRINT_OBJFILE_SECTION_INFO below.  */
+/* Print information about ASECT from ABFD.  The section will be printed using
+   the VMA's from the bfd, which will not be the relocated addresses for bfds
+   that should be relocated.  The information must be printed with the same
+   layout as PRINT_OBJFILE_SECTION_INFO below.  */
 
 static void
 print_bfd_section_info (bfd *abfd,
 			asection *asect,
-			void *datum)
+			const maint_print_section_data &print_data)
 {
   flagword flags = bfd_section_flags (asect);
   const char *name = bfd_section_name (asect);
-  maint_print_section_data *print_data = (maint_print_section_data *) datum;
-  const char *arg = print_data->arg;
+  const char *arg = print_data.arg;
 
   if (arg == NULL || *arg == '\0'
       || match_substring (arg, name)
@@ -318,7 +316,7 @@ print_bfd_section_info (bfd *abfd,
 
       addr = bfd_section_vma (asect);
       endaddr = addr + bfd_section_size (asect);
-      print_section_index (abfd, asect, print_data->index_digits);
+      print_section_index (abfd, asect, print_data.index_digits);
       maint_print_section_info (name, flags, addr, endaddr,
 				asect->filepos, addr_size);
     }
@@ -332,11 +330,11 @@ print_bfd_section_info (bfd *abfd,
 static void
 print_objfile_section_info (bfd *abfd,
 			    struct obj_section *asect,
-			    maint_print_section_data *print_data)
+			    const maint_print_section_data &print_data)
 {
   flagword flags = bfd_section_flags (asect->the_bfd_section);
   const char *name = bfd_section_name (asect->the_bfd_section);
-  const char *string = print_data->arg;
+  const char *string = print_data.arg;
 
   if (string == NULL || *string == '\0'
       || match_substring (string, name)
@@ -346,7 +344,7 @@ print_objfile_section_info (bfd *abfd,
       int addr_size = gdbarch_addr_bit (gdbarch) / 8;
 
       print_section_index (abfd, asect->the_bfd_section,
-			   print_data->index_digits);
+			   print_data.index_digits);
       maint_print_section_info (name, flags,
 				obj_section_addr (asect),
 				obj_section_endaddr (asect),
@@ -376,24 +374,21 @@ maint_obj_section_from_bfd_section (bfd *abfd,
   return osect;
 }
 
-/* Print information about ASECT from ABFD.  DATUM holds a pointer to a
-   maint_print_section_data object.  Where possible the information for
+/* Print information about ASECT from ABFD.  Where possible the information for
    ASECT will print the relocated addresses of the section.  */
 
 static void
-print_bfd_section_info_maybe_relocated (bfd *abfd,
-					asection *asect,
-					void *datum)
+print_bfd_section_info_maybe_relocated
+  (bfd *abfd, asection *asect, const maint_print_section_data &print_data)
 {
-  maint_print_section_data *print_data = (maint_print_section_data *) datum;
-  objfile *objfile = print_data->objfile;
+  objfile *objfile = print_data.objfile;
 
   gdb_assert (objfile->sections != NULL);
   obj_section *osect
     = maint_obj_section_from_bfd_section (abfd, asect, objfile);
 
   if (osect->the_bfd_section == NULL)
-    print_bfd_section_info (abfd, asect, datum);
+    print_bfd_section_info (abfd, asect, print_data);
   else
     print_objfile_section_info (abfd, osect, print_data);
 }
@@ -432,9 +427,9 @@ maintenance_info_sections (const char *arg, int from_tty)
 
 	  maint_print_section_data print_data (ofile, arg, ofile->obfd);
 
-	  bfd_map_over_sections (ofile->obfd,
-				 print_bfd_section_info_maybe_relocated,
-				 (void *) &print_data);
+	  for (asection *sect : gdb_bfd_sections (ofile->obfd))
+	    print_bfd_section_info_maybe_relocated (ofile->obfd, sect,
+						    print_data);
 	}
     }
 
@@ -446,8 +441,9 @@ maintenance_info_sections (const char *arg, int from_tty)
       printf_filtered ("    `%s', ", bfd_get_filename (core_bfd));
       wrap_here ("        ");
       printf_filtered (_("file type %s.\n"), bfd_get_target (core_bfd));
-      bfd_map_over_sections (core_bfd, print_bfd_section_info,
-			     (void *) &print_data);
+
+      for (asection *sect : gdb_bfd_sections (core_bfd))
+	print_bfd_section_info (core_bfd, sect, print_data);
     }
 }
 
