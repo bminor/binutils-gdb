@@ -10,3 +10,4 @@
 
 Contents of section .got:
  [0-9a-f]+ 00000000 00000000 00000000 00000000  .*
+#pass

@@ -1,3 +1,10 @@
+2020-08-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 26416
+	* testsuite/ld-alpha/tlsbinr.rd: Update expected output.
+	* testsuite/ld-alpha/tlsbinr.dd: Likewise.
+	* testsuite/ld-alpha/tlsbinr.sd: Likewise.
+
 2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ldlang.c (dump_ctf_errs): Unquote CTF error messages.
