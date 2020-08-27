@@ -66,6 +66,11 @@ for {set f 0} {$f < 3} {incr f} {
 
 
     # Display register values.
-    gdb_test "info registers rax rbx rcx r8 r9" "rax\\s+${pattern_rax_rbx_rcx_info}\\s*\r\nrbx\\s+${pattern_rax_rbx_rcx_info}\\s*\r\nrcx\\s+${pattern_rax_rbx_rcx_info}\\s*\r\nr8\\s+${pattern_r8_r9_info}\\s*\r\nr9\\s+${pattern_r8_r9_info}\\s*" \
+    gdb_test "info registers rax rbx rcx r8 r9" \
+	[multi_line "rax\\s+${pattern_rax_rbx_rcx_info}\\s*" \
+		    "rbx\\s+${pattern_rax_rbx_rcx_info}\\s*" \
+		    "rcx\\s+${pattern_rax_rbx_rcx_info}\\s*" \
+		    "r8\\s+${pattern_r8_r9_info}\\s*" \
+		    "r9\\s+${pattern_r8_r9_info}\\s*"] \
 	"Check values of rax, rbx, rcx, r8, r9 in frame ${f}"
 }

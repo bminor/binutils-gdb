@@ -1,3 +1,7 @@
+2020-08-27  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	*  gdb.dwarf2/dw2-reg-undefined.exp: Use multi_line.
+
 2020-08-27  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* gdb.arch/amd64-byte.exp: Make test names unique, use
