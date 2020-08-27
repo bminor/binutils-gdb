@@ -1,3 +1,26 @@
+2020-08-27  Jeremy Drake  <sourceware-bugzilla@jdrake.com>
+
+	PR 19011
+	* emultempl/pe.em (DEFAULT_DLL_CHARACTERISTICS): Define.
+	(pe_dll_characteristics): Initialise to DEFAULT_DLL_CHARACTERISTICS.
+	(add_options): Add options to disable DLL characteristics.
+	(list_options): List the new options.
+	(handle_options): Handle the new options.
+	* emultempl/pep.em: Similar changes to above.
+	(NT_EXE_IMAGE_BASE): Default to an address above 4G.
+	(NT_DLL_IMAGE_BASE, NT_DLL_AUTO_IMAGE_BASE,
+	(NT_DLL_AUTO_IMAGE_MASK): Likewise.
+	* ld.texi: Document the new options.
+	* pe-dll.c (pe_dll_enable_reloc_section): Change to default to
+	true.
+	(generate_reloc): Do nothing if there is no reloc section.
+	(pe_exe_fill_sections): Only assign the reloc section contents if
+	the section exists.
+	* testsuite/ld-pe/pe.exp: Add the --disable-reloc-section flag to
+	the .secrel32 tests.
+	* testsuite/ld-scripts/provide-8.d: Expect for fail on PE targets.
+	* NEWS: Mention the change in DLL generation.
+
 2020-08-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* testsuite/ld-elf/indirect.exp: Append $NOSANTIZE_CFLAGS to CC.

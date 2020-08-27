@@ -3129,47 +3129,63 @@ of the PE file header:
 
 @kindex --high-entropy-va
 @item --high-entropy-va
+@itemx --disable-high-entropy-va
 Image is compatible with 64-bit address space layout randomization
-(ASLR).
+(ASLR).  This option is enabled by default for 64-bit PE images.
+
 This option also implies @option{--dynamicbase} and
 @option{--enable-reloc-section}.
 
 @kindex --dynamicbase
 @item --dynamicbase
+@itemx --disable-dynamicbase
 The image base address may be relocated using address space layout
 randomization (ASLR).  This feature was introduced with MS Windows
-Vista for i386 PE targets.
+Vista for i386 PE targets.  This option is enabled by default but
+can be disabled via the @option{--disable-dynamicbase} option.
 This option also implies @option{--enable-reloc-section}.
 
 @kindex --forceinteg
 @item --forceinteg
-Code integrity checks are enforced.
+@itemx --disable-forceinteg
+Code integrity checks are enforced.  This option is disabled by
+default.
 
 @kindex --nxcompat
 @item --nxcompat
+@item --disable-nxcompat
 The image is compatible with the Data Execution Prevention.
-This feature was introduced with MS Windows XP SP2 for i386 PE targets.
+This feature was introduced with MS Windows XP SP2 for i386 PE
+targets.  The option is enabled by default.
 
 @kindex --no-isolation
 @item --no-isolation
+@itemx --disable-no-isolation
 Although the image understands isolation, do not isolate the image.
+This option is disabled by default.
 
 @kindex --no-seh
 @item --no-seh
+@itemx --disable-no-seh
 The image does not use SEH. No SE handler may be called from
-this image.
+this image.  This option is disabled by default.
 
 @kindex --no-bind
 @item --no-bind
-Do not bind this image.
+@itemx --disable-no-bind
+Do not bind this image.  This option is disabled by default.
 
 @kindex --wdmdriver
 @item --wdmdriver
-The driver uses the MS Windows Driver Model.
+@itemx --disable-wdmdriver
+The driver uses the MS Windows Driver Model.  This option is disabled
+by default.
 
 @kindex --tsaware
 @item --tsaware
-The image is Terminal Server aware.
+@itemx --disable-tsaware
+The image is Terminal Server aware.  This option is disabled by
+default.
 
 @kindex --insert-timestamp
 @item --insert-timestamp
@@ -3185,8 +3201,10 @@ identically.
 
 @kindex --enable-reloc-section
 @item --enable-reloc-section
+@itemx --disable-reloc-section
 Create the base relocation table, which is necessary if the image
 is loaded at a different image base than specified in the PE header.
+This option is enabled by default.
 @end table
 
 @c man end

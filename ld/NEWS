@@ -1,5 +1,8 @@
 -*- text -*-
 
+* The creation of PE format DLLs now defaults to using a more secure set of DLL
+  characteristics.
+
 * The linker now deduplicates the types in .ctf sections.  The new
   command-line option --ctf-share-types describes how to do this:
   its default value, share-unconflicted, produces the most compact
