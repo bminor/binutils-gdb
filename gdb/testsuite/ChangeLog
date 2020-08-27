@@ -1,3 +1,7 @@
+2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
+	* gdb.python/py-startup-opt.exp: New file.
+
 2021-04-27  Luis Machado  <luis.machado@linaro.org>
 
 	* gdb.base/maint.exp: Drop a pattern that is not needed.

@@ -103,6 +103,44 @@ controlled using @code{set python print-stack}: if @code{full}, then
 full Python stack printing is enabled; if @code{none}, then Python stack
 and message printing is disabled; if @code{message}, the default, only
 the message component of the error is printed.
+
+@kindex set python ignore-environment
+@item set python ignore-environment @r{[}on@r{|}off@r{]}
+By default this option is @samp{off}, and, when @value{GDBN}
+initializes its internal Python interpreter, the Python interpreter
+will check the environment for variables that will effect how it
+behaves, for example @env{PYTHONHOME}, and
+@env{PYTHONPATH}@footnote{See the ENVIRONMENT VARIABLES section of
+@command{man 1 python} for a comprehensive list.}.
+
+If this option is set to @samp{on} before Python is initialized then
+Python will ignore all such environment variables.  As Python is
+initialized early during @value{GDBN}'s startup process, then this
+option must be placed into the early initialization file
+(@pxref{Initialization Files}) to have the desired effect.
+
+This option is equivalent to passing @option{-E} to the real
+@command{python} executable.
+
+@kindex set python dont-write-bytecode
+@item set python dont-write-bytecode @r{[}auto@r{|}on@r{|}off@r{]}
+When this option is @samp{off}, then, once @value{GDBN} has
+initialized the Python interpreter, the interpreter will byte-compile
+any Python modules that it imports and write the byte code to disk in
+@file{.pyc} files.
+
+If this option is set to @samp{on} before Python is initialized then
+Python will no longer write the byte code to disk.  As Python is
+initialized early during @value{GDBN}'s startup process, then this
+option must be placed into the early initialization file
+(@pxref{Initialization Files}) to have the desired effect.
+
+By default this option is set to @samp{auto}, in this mode Python will
+check the environment variable @env{PYTHONDONTWRITEBYTECODE} to see
+if it should write out byte-code or not.
+
+This option is equivalent to passing @option{-B} to the real
+@command{python} executable.
 @end table
 
 It is also possible to execute a Python script from the @value{GDBN}

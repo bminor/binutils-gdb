@@ -106,6 +106,22 @@ show print type hex
   When 'on', the 'ptype' command uses hexadecimal notation to print sizes
   and offsets of struct members.  When 'off', decimal notation is used.
 
+set python ignore-environment on|off
+show python ignore-environment
+  When 'on', this causes GDB's builtin Python to ignore any
+  environment variables that would otherwise effect how Python
+  behaves.  This command needs to be added to an early initialization
+  file (e.g. ~/.config/gdb/gdbearlyinit) in order to affect GDB.
+
+set python dont-write-bytecode auto|on|off
+show python dont-write-bytecode
+  When 'on', this causes GDB's builtin Python to not write any
+  byte-code (.pyc files) to disk.  This command needs to be added to
+  an early initialization file (e.g. ~/.config/gdb/gdbearlyinit) in
+  order to affect GDB.  When 'off' byte-code will always be written.
+  When set to 'auto' (the default) Python will check the
+  PYTHONDONTWRITEBYTECODE. environment variable.
+
 * Changed commands
 
 break [PROBE_MODIFIER] [LOCATION] [thread THREADNUM]

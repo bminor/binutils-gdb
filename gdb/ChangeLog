@@ -1,5 +1,16 @@
 2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
 
+	* NEWS: Mention new commands.
+	* python/python.c (python_ignore_environment): New static global.
+	(show_python_ignore_environment): New function.
+	(set_python_ignore_environment): New function.
+	(python_dont_write_bytecode): New static global.
+	(show_python_dont_write_bytecode): New function.
+	(set_python_dont_write_bytecode): New function.
+	(_initialize_python): Register new commands.
+
+2021-04-28  Andrew Burgess  <andrew.burgess@embecosm.com>
+
 	* extension-priv.h (struct extension_language_ops): Rename
 	'finish_initialization' to 'initialize'.
 	* extension.c (finish_ext_lang_initialization): Renamed to...
