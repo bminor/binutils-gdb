@@ -261,7 +261,6 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
   char * lower_name;
   char * upper_name;
   char * name;
-  char * buf = NULL;
   lang_output_section_statement_type * lower;
   lang_output_section_statement_type * upper;
 
@@ -294,7 +293,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
      only use the part of the name before the second dot.  */
   if (strchr (secname + 1, '.') != NULL)
     {
-      buf = name = xstrdup (secname);
+      name = xstrdup (secname);
 
       * strchr (name + 1, '.') = 0;
     }
@@ -330,7 +329,6 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
  end:
   free (upper_name);
   free (lower_name);
-  free (buf);
   return lower;
 }
 EOF

@@ -1,3 +1,7 @@
+2020-08-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* emultempl/msp430.em: Remove unused variable "buf".
+
 2020-08-27  Nick Alcock  <nick.alcock@oracle.com>
 
 	* ldlang.c (dump_ctf_errs): Unquote CTF error messages.
