@@ -4267,7 +4267,7 @@ get_tic6x_section_type_name (unsigned int sh_type)
 }
 
 static const char *
-get_msp430x_section_type_name (unsigned int sh_type)
+get_msp430_section_type_name (unsigned int sh_type)
 {
   switch (sh_type)
     {
@@ -4384,7 +4384,7 @@ get_section_type_name (Filedata * filedata, unsigned int sh_type)
 	      result = get_tic6x_section_type_name (sh_type);
 	      break;
 	    case EM_MSP430:
-	      result = get_msp430x_section_type_name (sh_type);
+	      result = get_msp430_section_type_name (sh_type);
 	      break;
 	    case EM_NFP:
 	      result = get_nfp_section_type_name (sh_type);
@@ -16174,7 +16174,7 @@ display_raw_attribute (unsigned char * p, unsigned char const * const end)
 }
 
 static unsigned char *
-display_msp430x_attribute (unsigned char * p,
+display_msp430_attribute (unsigned char * p,
 			   const unsigned char * const end)
 {
   unsigned int val;
@@ -20110,7 +20110,7 @@ process_arch_specific (Filedata * filedata)
 
     case EM_MSP430:
      return process_attributes (filedata, "mspabi", SHT_MSP430_ATTRIBUTES,
-				display_msp430x_attribute,
+				display_msp430_attribute,
 				display_msp430_gnu_attribute);
 
     case EM_RISCV:

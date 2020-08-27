@@ -1,3 +1,12 @@
+2020-08-27  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* readelf.c (get_msp430x_section_type_name): Rename to ...
+	(get_msp430_section_type_name): ... this.
+	(get_section_type_name): Use get_msp430_section_type_name.
+	(display_msp430x_attribute): Rename to ...
+	(display_msp430_attribute): ... this.
+	(process_arch_specific): Use display_msp430_attribute.
+
 2020-08-27  John David Anglin  <danglin@gcc.gnu.org>
 
 	PR 26356
