@@ -1,3 +1,8 @@
+2020-08-27  Alan Modra  <amodra@gmail.com>
+
+	PR 26416
+	* elf64-alpha.c (elf64_alpha_relax_tls_get_addr): Correct "dynamic".
+
 2020-08-26  Nick Clifton  <nickc@redhat.com>
 
 	PR 26433

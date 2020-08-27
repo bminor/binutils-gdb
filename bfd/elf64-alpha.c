@@ -3464,9 +3464,8 @@ elf64_alpha_relax_tls_get_addr (struct alpha_relax_info *info, bfd_vma symval,
   bfd_boolean dynamic, use_gottprel;
   unsigned long new_symndx;
 
-  if (info->h == NULL)
-    return TRUE; /* FIXME: Should this be return FALSE ?  */
-  dynamic = alpha_elf_dynamic_symbol_p (&info->h->root, info->link_info);
+  dynamic = (info->h != NULL
+	     && alpha_elf_dynamic_symbol_p (&info->h->root, info->link_info));
 
   /* If a TLS symbol is accessed using IE at least once, there is no point
      to use dynamic model for it.  */
