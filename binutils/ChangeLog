@@ -1,3 +1,12 @@
+2020-08-27  John David Anglin  <danglin@gcc.gnu.org>
+
+	PR 26356
+	* testsuite/binutils-all/objcopy.exp (objcopy --reverse-bytes): Add
+	"-j $PRIVATE$" to command on hppa*-*-hpux*.
+	* testsuite/lib/utils-lib.exp (default_binutils_run): Remove existing
+	dollar-sign quotes before quoting.  Do this prior to generating log
+	output.
+
 2020-08-27  Ralf Habacker  <ralf.habacker@freenet.de>
 
 	PR 26088

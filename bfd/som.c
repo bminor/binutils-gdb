@@ -5455,8 +5455,18 @@ som_bfd_copy_private_section_data (bfd *ibfd,
 
   /* Reparent if necessary.  */
   if (som_section_data (osection)->copy_data->container)
-    som_section_data (osection)->copy_data->container =
-      som_section_data (osection)->copy_data->container->output_section;
+    {
+      if (som_section_data (osection)->copy_data->container->output_section)
+	som_section_data (osection)->copy_data->container =
+	  som_section_data (osection)->copy_data->container->output_section;
+      else
+	{
+	  /* User has specified a subspace without its containing space.  */
+	  _bfd_error_handler (_("%pB[%pA]: no output section for space %pA"),
+	    obfd, osection, som_section_data (osection)->copy_data->container);
+	  return FALSE;
+	}
+    }
 
   return TRUE;
 }

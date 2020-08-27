@@ -80,12 +80,15 @@ proc default_binutils_run { prog progargs } {
         regsub -- "-j \\.bss"  $progargs "-j [lindex $sect_names 2]" progargs
     }
 
+    # Gotta quote dollar-signs because they get mangled by the
+    # shell otherwise.  Since get_standard_section_names returns
+    # quoted section names, we first remove the original quote
+    # and then requote.
+    regsub -all {\\\$} "$progargs" {$} progargs
+    regsub -all {\$} "$progargs" {\$} progargs
+
     send_log "$prog $progargs\n"
     verbose "$prog $progargs"
-
-    # Gotta quote dollar-signs because they get mangled by the
-    # shell otherwise.
-    regsub -all "\\$" "$progargs" "\\$" progargs
 
     set state [remote_exec host $prog $progargs]
     set binutils_run_status [lindex $state 0]

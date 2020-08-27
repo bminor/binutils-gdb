@@ -1,3 +1,9 @@
+2020-08-27  John David Anglin  <danglin@gcc.gnu.org>
+
+	PR 26356
+	* som.c (som_bfd_copy_private_section_data): Issue error when a
+	subspace is specified without its containing space.
+
 2020-08-27  Alan Modra  <amodra@gmail.com>
 
 	PR 26469
