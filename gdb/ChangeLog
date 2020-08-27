@@ -1,5 +1,20 @@
 2020-08-27  Pedro Alves  <pedro@palves.net>
 
+	PR gdb/26524
+	* breakpoint.c (until_break_fsm) <location_breakpoint,
+	caller_breakpoint>: Delete fields.
+	<breakpoints>: New field.
+	<until_break_fsm>: Adjust to save a breakpoint vector instead of
+	two individual breakpoints.
+	(until_break_fsm::should_stop): Loop over breakpoints in the
+	breakpoint vector.
+	(until_break_fsm::clean_up): Adjust to clear the breakpoints
+	vector.
+	(until_break_command): Handle location expanding into multiple
+	sals.
+
+2020-08-27  Pedro Alves  <pedro@palves.net>
+
 	PR gdb/26523
 	* inline-frame.c (stopped_by_user_bp_inline_frame): Also consider
 	bp_until breakpoints user-specified locations.  Update intro

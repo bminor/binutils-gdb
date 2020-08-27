@@ -1,3 +1,10 @@
+2020-08-27  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26523
+	PR gdb/26524
+	* gdb.base/advance-until-multiple-locations.cc: New.
+	* gdb.base/advance-until-multiple-locations.exp: New.
+
 2020-08-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	*  gdb.dwarf2/dw2-reg-undefined.exp: Use multi_line.

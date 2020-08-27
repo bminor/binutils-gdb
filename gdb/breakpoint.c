@@ -10939,20 +10939,15 @@ struct until_break_fsm : public thread_fsm
   /* The thread that was current when the command was executed.  */
   int thread;
 
-  /* The breakpoint set at the destination location.  */
-  breakpoint_up location_breakpoint;
-
-  /* Breakpoint set at the return address in the caller frame.  May be
-     NULL.  */
-  breakpoint_up caller_breakpoint;
+  /* The breakpoint set at the return address in the caller frame,
+     plus breakpoints at all the destination locations.  */
+  std::vector<breakpoint_up> breakpoints;
 
   until_break_fsm (struct interp *cmd_interp, int thread,
-		   breakpoint_up &&location_breakpoint,
-		   breakpoint_up &&caller_breakpoint)
+		   std::vector<breakpoint_up> &&breakpoints)
     : thread_fsm (cmd_interp),
       thread (thread),
-      location_breakpoint (std::move (location_breakpoint)),
-      caller_breakpoint (std::move (caller_breakpoint))
+      breakpoints (std::move (breakpoints))
   {
   }
 
@@ -10967,12 +10962,13 @@ struct until_break_fsm : public thread_fsm
 bool
 until_break_fsm::should_stop (struct thread_info *tp)
 {
-  if (bpstat_find_breakpoint (tp->control.stop_bpstat,
-			      location_breakpoint.get ()) != NULL
-      || (caller_breakpoint != NULL
-	  && bpstat_find_breakpoint (tp->control.stop_bpstat,
-				     caller_breakpoint.get ()) != NULL))
-    set_finished ();
+  for (const breakpoint_up &bp : breakpoints)
+    if (bpstat_find_breakpoint (tp->control.stop_bpstat,
+				bp.get ()) != NULL)
+      {
+	set_finished ();
+	break;
+      }
 
   return true;
 }
@@ -10984,8 +10980,7 @@ void
 until_break_fsm::clean_up (struct thread_info *)
 {
   /* Clean up our temporary breakpoints.  */
-  location_breakpoint.reset ();
-  caller_breakpoint.reset ();
+  breakpoints.clear ();
   delete_longjmp_breakpoint (thread);
 }
 
@@ -11023,15 +11018,11 @@ until_break_command (const char *arg, int from_tty, int anywhere)
        : decode_line_1 (location.get (), DECODE_LINE_FUNFIRSTLINE,
 			NULL, NULL, 0));
 
-  if (sals.size () != 1)
+  if (sals.empty ())
     error (_("Couldn't get information on specified line."));
-
-  symtab_and_line &sal = sals[0];
 
   if (*arg)
     error (_("Junk at end of arguments."));
-
-  resolve_sal_pc (&sal);
 
   tp = inferior_thread ();
   thread = tp->global_num;
@@ -11049,7 +11040,7 @@ until_break_command (const char *arg, int from_tty, int anywhere)
   /* Keep within the current frame, or in frames called by the current
      one.  */
 
-  breakpoint_up caller_breakpoint;
+  std::vector<breakpoint_up> breakpoints;
 
   gdb::optional<delete_longjmp_breakpoint_cleanup> lj_deleter;
 
@@ -11061,10 +11052,11 @@ until_break_command (const char *arg, int from_tty, int anywhere)
       sal2 = find_pc_line (frame_unwind_caller_pc (frame), 0);
       sal2.pc = frame_unwind_caller_pc (frame);
       caller_gdbarch = frame_unwind_caller_arch (frame);
-      caller_breakpoint = set_momentary_breakpoint (caller_gdbarch,
-						    sal2,
-						    caller_frame_id,
-						    bp_until);
+
+      breakpoint_up caller_breakpoint
+	= set_momentary_breakpoint (caller_gdbarch, sal2,
+				    caller_frame_id, bp_until);
+      breakpoints.emplace_back (std::move (caller_breakpoint));
 
       set_longjmp_breakpoint (tp, caller_frame_id);
       lj_deleter.emplace (thread);
@@ -11073,21 +11065,24 @@ until_break_command (const char *arg, int from_tty, int anywhere)
   /* set_momentary_breakpoint could invalidate FRAME.  */
   frame = NULL;
 
-  breakpoint_up location_breakpoint;
-  if (anywhere)
-    /* If the user told us to continue until a specified location,
-       we don't specify a frame at which we need to stop.  */
-    location_breakpoint = set_momentary_breakpoint (frame_gdbarch, sal,
-						    null_frame_id, bp_until);
-  else
-    /* Otherwise, specify the selected frame, because we want to stop
-       only at the very same frame.  */
-    location_breakpoint = set_momentary_breakpoint (frame_gdbarch, sal,
-						    stack_frame_id, bp_until);
+  /* If the user told us to continue until a specified location, we
+     don't specify a frame at which we need to stop.  Otherwise,
+     specify the selected frame, because we want to stop only at the
+     very same frame.  */
+  frame_id stop_frame_id = anywhere ? null_frame_id : stack_frame_id;
+
+  for (symtab_and_line &sal : sals)
+    {
+      resolve_sal_pc (&sal);
+
+      breakpoint_up location_breakpoint
+	= set_momentary_breakpoint (frame_gdbarch, sal,
+				    stop_frame_id, bp_until);
+      breakpoints.emplace_back (std::move (location_breakpoint));
+    }
 
   tp->thread_fsm = new until_break_fsm (command_interp (), tp->global_num,
-					std::move (location_breakpoint),
-					std::move (caller_breakpoint));
+					std::move (breakpoints));
 
   if (lj_deleter)
     lj_deleter->release ();
