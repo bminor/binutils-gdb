@@ -1,3 +1,10 @@
+2020-08-27  Pedro Alves  <pedro@palves.net>
+
+	PR gdb/26523
+	* inline-frame.c (stopped_by_user_bp_inline_frame): Also consider
+	bp_until breakpoints user-specified locations.  Update intro
+	comment.
+
 2020-08-27  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* gdb_bfd.h (gdb_bfd_section_iterator, gdb_bfd_section_range,

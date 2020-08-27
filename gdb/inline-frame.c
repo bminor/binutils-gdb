@@ -303,7 +303,8 @@ block_starting_point_at (CORE_ADDR pc, const struct block *block)
 }
 
 /* Loop over the stop chain and determine if execution stopped in an
-   inlined frame because of a user breakpoint set at FRAME_BLOCK.  */
+   inlined frame because of a breakpoint with a user-specified location
+   set at FRAME_BLOCK.  */
 
 static bool
 stopped_by_user_bp_inline_frame (const block *frame_block, bpstat stop_chain)
@@ -312,7 +313,8 @@ stopped_by_user_bp_inline_frame (const block *frame_block, bpstat stop_chain)
     {
       struct breakpoint *bpt = s->breakpoint_at;
 
-      if (bpt != NULL && user_breakpoint_p (bpt))
+      if (bpt != NULL
+	  && (user_breakpoint_p (bpt) || bpt->type == bp_until))
 	{
 	  bp_location *loc = s->bp_location_at;
 	  enum bp_loc_type t = loc->loc_type;
