@@ -1,5 +1,10 @@
 2020-08-27  Alan Modra  <amodra@gmail.com>
 
+	* elf32-arm.c (elf32_arm_final_link_relocate): Don't segfault
+	on sym_sec not being output.
+
+2020-08-27  Alan Modra  <amodra@gmail.com>
+
 	PR 26416
 	* elf64-alpha.c (elf64_alpha_relax_tls_get_addr): Correct "dynamic".
 

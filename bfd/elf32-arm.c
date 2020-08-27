@@ -10595,7 +10595,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
 		    osec = sym_sec->output_section;
 		  else
 		    osec = input_section->output_section;
-		  symbol = elf_section_data (osec)->dynindx;
+		  symbol = 0;
+		  if (osec && elf_section_data (osec))
+		    symbol = elf_section_data (osec)->dynindx;
 		  if (symbol == 0)
 		    {
 		      struct elf_link_hash_table *htab = elf_hash_table (info);
