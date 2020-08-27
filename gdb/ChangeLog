@@ -65,7 +65,7 @@
 	    Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	PR m2/26372
-        * m2-exp.y (exp): Improve comment for non_empty_arglist case, add
+	* m2-exp.y (exp): Improve comment for non_empty_arglist case, add
 	an assert.  Remove single element array indexing pattern as the
 	MULTI_SUBSCRIPT support will handle this case too.
 

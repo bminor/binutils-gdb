@@ -43,8 +43,8 @@
 2020-08-25  Gaius Mulley  <gaiusmod2@gmail.com>
 
 	PR m2/26372
-        * gdb.modula2/multidim.c: New file.
-        * gdb.modula2/multidim.exp: New file.
+	* gdb.modula2/multidim.c: New file.
+	* gdb.modula2/multidim.exp: New file.
 
 2020-08-24  Simon Marchi  <simon.marchi@polymtl.ca>
 
@@ -2536,7 +2536,7 @@
 	disabled.
 
 2020-03-02  Pedro Alves  <palves@redhat.com>
-	      Tom de Vries  <tdevries@suse.de>
+	    Tom de Vries  <tdevries@suse.de>
 
 	* lib/gdb.exp (gdb_test_multiple): Handle prompt_regexp option using
 	-prompt prefix, before user_code argument.  Add -lbl option likewise.
