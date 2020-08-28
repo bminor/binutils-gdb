@@ -1,3 +1,8 @@
+2020-08-28  Alan Modra  <amodra@gmail.com>
+
+	PR 26418
+	* ecofflink.c (WRITE): Really don't write zero size chunks.
+
 2020-08-28  Tuckker  <tuckkern+sourceware@gmail.com>
 
 	PR 26543

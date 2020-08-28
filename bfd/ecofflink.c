@@ -1491,7 +1491,7 @@ bfd_ecoff_write_debug (bfd *abfd,
 #define WRITE(ptr, count, size, offset) \
   BFD_ASSERT (symhdr->offset == 0				\
 	      || (bfd_vma) bfd_tell (abfd) == symhdr->offset);	\
-  if (size != 0							\
+  if (symhdr->count != 0					\
       && bfd_bwrite (debug->ptr,				\
 		     (bfd_size_type) size * symhdr->count,	\
 		     abfd) != size * symhdr->count)		\
