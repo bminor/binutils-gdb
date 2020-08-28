@@ -826,6 +826,85 @@ msp430_elf_after_allocation (void)
   gld${EMULATION_NAME}_after_allocation ();
 }
 
+/* Return TRUE if a non-debug input section in L has positive size and matches
+   the given name.  */
+static int
+input_section_exists (lang_statement_union_type * l, const char * name)
+{
+  while (l != NULL)
+    {
+      switch (l->header.type)
+	{
+	case lang_input_section_enum:
+	  if ((l->input_section.section->flags & SEC_ALLOC)
+	      && l->input_section.section->size > 0
+	      && !strcmp (l->input_section.section->name, name))
+	    return TRUE;
+	  break;
+
+	case lang_wild_statement_enum:
+	  if (input_section_exists (l->wild_statement.children.head, name))
+	    return TRUE;
+	  break;
+
+	default:
+	  break;
+	}
+      l = l->header.next;
+    }
+  return FALSE;
+}
+
+/* Some MSP430 linker scripts do not include ALIGN directives to ensure
+   __preinit_array_start, __init_array_start or __fini_array_start are word
+   aligned.
+   If __*_array_start symbols are not word aligned, the code in crt0 to run
+   through the array and call the functions will crash.
+   To avoid warning unnecessarily when the .*_array sections are not being
+   used for running constructors/destructors, only emit the warning if
+   the associated section exists and has size.  */
+static void
+check_array_section_alignment (void)
+{
+  int i;
+  lang_output_section_statement_type * rodata_sec;
+  lang_output_section_statement_type * rodata2_sec;
+  const char * array_names[3][2] = { { ".init_array", "__init_array_start" },
+	{ ".preinit_array", "__preinit_array_start" },
+	{ ".fini_array", "__fini_array_start" } };
+
+  /* .{preinit,init,fini}_array could be in either .rodata or .rodata2.  */
+  rodata_sec = lang_output_section_find (".rodata");
+  rodata2_sec = lang_output_section_find (".rodata2");
+  if (rodata_sec == NULL && rodata2_sec == NULL)
+    return;
+
+  /* There are 3 .*_array sections which must be checked for alignment.  */
+  for (i = 0; i < 3; i++)
+    {
+      struct bfd_link_hash_entry * sym;
+      if (((rodata_sec && input_section_exists (rodata_sec->children.head,
+						array_names[i][0]))
+	   || (rodata2_sec && input_section_exists (rodata2_sec->children.head,
+						    array_names[i][0])))
+	  && (sym = bfd_link_hash_lookup (link_info.hash, array_names[i][1],
+					  FALSE, FALSE, TRUE))
+	  && sym->type == bfd_link_hash_defined
+	  && sym->u.def.value % 2)
+	{
+	  einfo ("%P: warning: \"%s\" symbol (%pU) is not word aligned\n",
+		 array_names[i][1], NULL);
+	}
+    }
+}
+
+static void
+gld${EMULATION_NAME}_finish (void)
+{
+  finish_default ();
+  check_array_section_alignment ();
+}
+
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
 {
   ${LDEMUL_BEFORE_PARSE-gld${EMULATION_NAME}_before_parse},
@@ -842,7 +921,7 @@ struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
   ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},
   "${EMULATION_NAME}",
   "${OUTPUT_FORMAT}",
-  ${LDEMUL_FINISH-finish_default},
+  gld${EMULATION_NAME}_finish,
   ${LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS-NULL},
   ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-NULL},
   ${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan},

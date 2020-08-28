@@ -1,5 +1,22 @@
 2020-08-28  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
+	* emultempl/msp430.em (input_section_exists): New.
+	(check_array_section_alignment): New.
+	(gld${EMULATION_NAME}_finish): New.
+	* scripttempl/elf32msp430.sc: Add ALIGN directives before the
+	definition of __*_array_start symbols.
+	* testsuite/ld-msp430-elf/finiarray-warn.ld: New test.
+	* testsuite/ld-msp430-elf/finiarray-warn.r: New test.
+	* testsuite/ld-msp430-elf/initarray-nowarn.ld: New test.
+	* testsuite/ld-msp430-elf/initarray-warn.ld: New test.
+	* testsuite/ld-msp430-elf/initarray-warn.r: New test.
+	* testsuite/ld-msp430-elf/initarray.s: New test.
+	* testsuite/ld-msp430-elf/msp430-elf.exp: Run new tests.
+	* testsuite/ld-msp430-elf/preinitarray-warn.ld: New test.
+	* testsuite/ld-msp430-elf/preinitarray-warn.r: New test.
+
+2020-08-28  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
 	* ldmisc.c (vfinfo): Support new "%pU" format specifier.
 
 2020-08-28  Cooper Qu  <cooper.qu@linux.alibaba.com>
