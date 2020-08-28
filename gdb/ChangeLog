@@ -1,3 +1,18 @@
+2020-10-12  Pedro Alves  <pedro@palves.net>
+
+	PR exp/26602
+	* valops.c (struct struct_field_searcher): New.
+	(update_search_result): Rename to ...
+	(struct_field_searcher::update_result): ... this.  Simplify
+	prototype.  Record all found fields.
+	(do_search_struct_field): Rename to ...
+	(struct_field_searcher::search): ... this.  Simplify prototype.
+	Maintain stack of visited baseclass path.  Call update_result for
+	fields too.  Keep searching fields in baseclasses instead of
+	stopping at the first found field.
+	(search_struct_field): Use struct_field_searcher.  When looking
+	for fields, report ambiguous access attempts.
+
 2020-10-11  Andrew Burgess  <andrew.burgess@embecosm.com>
 
 	* frame.c (inside_main_func): Check full symbols as well as

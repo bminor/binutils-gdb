@@ -1766,54 +1766,132 @@ typecmp (int staticp, int varargs, int nargs,
   return i + 1;
 }
 
-/* Helper class for do_search_struct_field that updates *RESULT_PTR
-   and *LAST_BOFFSET, and possibly throws an exception if the field
-   search has yielded ambiguous results.  */
+/* Helper class for search_struct_field that keeps track of found
+   results and possibly throws an exception if the search yields
+   ambiguous results.  See search_struct_field for description of
+   LOOKING_FOR_BASECLASS.  */
 
-static void
-update_search_result (struct value **result_ptr, struct value *v,
-		      LONGEST *last_boffset, LONGEST boffset,
-		      const char *name, struct type *type)
+struct struct_field_searcher
+{
+  /* A found field.  */
+  struct found_field
+  {
+    /* Path to the structure where the field was found.  */
+    std::vector<struct type *> path;
+
+    /* The field found.  */
+    struct value *field_value;
+  };
+
+  /* See corresponding fields for description of parameters.  */
+  struct_field_searcher (const char *name,
+			 struct type *outermost_type,
+			 bool looking_for_baseclass)
+    : m_name (name),
+      m_looking_for_baseclass (looking_for_baseclass),
+      m_outermost_type (outermost_type)
+  {
+  }
+
+  /* The search entry point.  If LOOKING_FOR_BASECLASS is true and the
+     base class search yields ambiguous results, this throws an
+     exception.  If LOOKING_FOR_BASECLASS is false, the found fields
+     are accumulated and the caller (search_struct_field) takes care
+     of throwing an error if the field search yields ambiguous
+     results.  The latter is done that way so that the error message
+     can include a list of all the found candidates.  */
+  void search (struct value *arg, LONGEST offset, struct type *type);
+
+  const std::vector<found_field> &fields ()
+  {
+    return m_fields;
+  }
+
+  struct value *baseclass ()
+  {
+    return m_baseclass;
+  }
+
+private:
+  /* Update results to include V, a found field/baseclass.  */
+  void update_result (struct value *v, LONGEST boffset);
+
+  /* The name of the field/baseclass we're searching for.  */
+  const char *m_name;
+
+  /* Whether we're looking for a baseclass, or a field.  */
+  const bool m_looking_for_baseclass;
+
+  /* The offset of the baseclass containing the field/baseclass we
+     last recorded.  */
+  LONGEST m_last_boffset = 0;
+
+  /* If looking for a baseclass, then the result is stored here.  */
+  struct value *m_baseclass = nullptr;
+
+  /* When looking for fields, the found candidates are stored
+     here.  */
+  std::vector<found_field> m_fields;
+
+  /* The type of the initial type passed to search_struct_field; this
+     is used for error reporting when the lookup is ambiguous.  */
+  struct type *m_outermost_type;
+
+  /* The full path to the struct being inspected.  E.g. for field 'x'
+     defined in class B inherited by class A, we have A and B pushed
+     on the path.  */
+  std::vector <struct type *> m_struct_path;
+};
+
+void
+struct_field_searcher::update_result (struct value *v, LONGEST boffset)
 {
   if (v != NULL)
     {
-      if (*result_ptr != NULL
-	  /* The result is not ambiguous if all the classes that are
-	     found occupy the same space.  */
-	  && *last_boffset != boffset)
-	error (_("base class '%s' is ambiguous in type '%s'"),
-	       name, TYPE_SAFE_NAME (type));
-      *result_ptr = v;
-      *last_boffset = boffset;
+      if (m_looking_for_baseclass)
+	{
+	  if (m_baseclass != nullptr
+	      /* The result is not ambiguous if all the classes that are
+		 found occupy the same space.  */
+	      && m_last_boffset != boffset)
+	    error (_("base class '%s' is ambiguous in type '%s'"),
+		   m_name, TYPE_SAFE_NAME (m_outermost_type));
+
+	  m_baseclass = v;
+	  m_last_boffset = boffset;
+	}
+      else
+	{
+	  /* The field is not ambiguous if it occupies the same
+	     space.  */
+	  if (m_fields.empty () || m_last_boffset != boffset)
+	    m_fields.push_back ({m_struct_path, v});
+	}
     }
 }
 
 /* A helper for search_struct_field.  This does all the work; most
-   arguments are as passed to search_struct_field.  The result is
-   stored in *RESULT_PTR, which must be initialized to NULL.
-   OUTERMOST_TYPE is the type of the initial type passed to
-   search_struct_field; this is used for error reporting when the
-   lookup is ambiguous.  */
+   arguments are as passed to search_struct_field.  */
 
-static void
-do_search_struct_field (const char *name, struct value *arg1, LONGEST offset,
-			struct type *type, int looking_for_baseclass,
-			struct value **result_ptr,
-			LONGEST *last_boffset,
-			struct type *outermost_type)
+void
+struct_field_searcher::search (struct value *arg1, LONGEST offset,
+			       struct type *type)
 {
   int i;
   int nbases;
 
+  m_struct_path.push_back (type);
+  SCOPE_EXIT { m_struct_path.pop_back (); };
+
   type = check_typedef (type);
   nbases = TYPE_N_BASECLASSES (type);
 
-  if (!looking_for_baseclass)
+  if (!m_looking_for_baseclass)
     for (i = type->num_fields () - 1; i >= nbases; i--)
       {
 	const char *t_field_name = TYPE_FIELD_NAME (type, i);
 
-	if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
+	if (t_field_name && (strcmp_iw (t_field_name, m_name) == 0))
 	  {
 	    struct value *v;
 
@@ -1821,7 +1899,8 @@ do_search_struct_field (const char *name, struct value *arg1, LONGEST offset,
 	      v = value_static_field (type, i);
 	    else
 	      v = value_primitive_field (arg1, offset, i, type);
-	    *result_ptr = v;
+
+	    update_result (v, offset);
 	    return;
 	  }
 
@@ -1845,7 +1924,6 @@ do_search_struct_field (const char *name, struct value *arg1, LONGEST offset,
 		   represented as a struct, with a member for each
 		   <variant field>.  */
 
-		struct value *v = NULL;
 		LONGEST new_offset = offset;
 
 		/* This is pretty gross.  In G++, the offset in an
@@ -1859,16 +1937,7 @@ do_search_struct_field (const char *name, struct value *arg1, LONGEST offset,
 			&& TYPE_FIELD_BITPOS (field_type, 0) == 0))
 		  new_offset += TYPE_FIELD_BITPOS (type, i) / 8;
 
-		do_search_struct_field (name, arg1, new_offset, 
-					field_type,
-					looking_for_baseclass, &v,
-					last_boffset,
-					outermost_type);
-		if (v)
-		  {
-		    *result_ptr = v;
-		    return;
-		  }
+		search (arg1, new_offset, field_type);
 	      }
 	  }
       }
@@ -1880,10 +1949,10 @@ do_search_struct_field (const char *name, struct value *arg1, LONGEST offset,
       /* If we are looking for baseclasses, this is what we get when
          we hit them.  But it could happen that the base part's member
          name is not yet filled in.  */
-      int found_baseclass = (looking_for_baseclass
+      int found_baseclass = (m_looking_for_baseclass
 			     && TYPE_BASECLASS_NAME (type, i) != NULL
-			     && (strcmp_iw (name, 
-					    TYPE_BASECLASS_NAME (type, 
+			     && (strcmp_iw (m_name,
+					    TYPE_BASECLASS_NAME (type,
 								 i)) == 0));
       LONGEST boffset = value_embedded_offset (arg1) + offset;
 
@@ -1924,28 +1993,17 @@ do_search_struct_field (const char *name, struct value *arg1, LONGEST offset,
 	  if (found_baseclass)
 	    v = v2;
 	  else
-	    {
-	      do_search_struct_field (name, v2, 0,
-				      TYPE_BASECLASS (type, i),
-				      looking_for_baseclass,
-				      result_ptr, last_boffset,
-				      outermost_type);
-	    }
+	    search (v2, 0, TYPE_BASECLASS (type, i));
 	}
       else if (found_baseclass)
 	v = value_primitive_field (arg1, offset, i, type);
       else
 	{
-	  do_search_struct_field (name, arg1,
-				  offset + TYPE_BASECLASS_BITPOS (type, 
-								  i) / 8,
-				  basetype, looking_for_baseclass,
-				  result_ptr, last_boffset,
-				  outermost_type);
+	  search (arg1, offset + TYPE_BASECLASS_BITPOS (type, i) / 8,
+		  basetype);
 	}
 
-      update_search_result (result_ptr, v, last_boffset,
-			    boffset, name, outermost_type);
+      update_result (v, boffset);
     }
 }
 
@@ -1960,12 +2018,55 @@ static struct value *
 search_struct_field (const char *name, struct value *arg1,
 		     struct type *type, int looking_for_baseclass)
 {
-  struct value *result = NULL;
-  LONGEST boffset = 0;
+  struct_field_searcher searcher (name, type, looking_for_baseclass);
 
-  do_search_struct_field (name, arg1, 0, type, looking_for_baseclass,
-			  &result, &boffset, type);
-  return result;
+  searcher.search (arg1, 0, type);
+
+  if (!looking_for_baseclass)
+    {
+      const auto &fields = searcher.fields ();
+
+      if (fields.empty ())
+	return nullptr;
+      else if (fields.size () == 1)
+	return fields[0].field_value;
+      else
+	{
+	  std::string candidates;
+
+	  for (auto &&candidate : fields)
+	    {
+	      gdb_assert (!candidate.path.empty ());
+
+	      struct type *field_type = value_type (candidate.field_value);
+	      struct type *struct_type = candidate.path.back ();
+
+	      std::string path;
+	      bool first = true;
+	      for (struct type *t : candidate.path)
+		{
+		  if (first)
+		    first = false;
+		  else
+		    path += " -> ";
+		  path += t->name ();
+		}
+
+	      candidates += string_printf ("\n  '%s %s::%s' (%s)",
+					   TYPE_SAFE_NAME (field_type),
+					   TYPE_SAFE_NAME (struct_type),
+					   name,
+					   path.c_str ());
+	    }
+
+	  error (_("Request for member '%s' is ambiguous in type '%s'."
+		   " Candidates are:%s"),
+		 name, TYPE_SAFE_NAME (type),
+		 candidates.c_str ());
+	}
+    }
+  else
+    return searcher.baseclass ();
 }
 
 /* Helper function used by value_struct_elt to recurse through

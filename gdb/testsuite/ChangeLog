@@ -1,3 +1,17 @@
+2020-10-12  Pedro Alves  <pedro@palves.net>
+
+	PR exp/26602
+	PR c++/26550
+	* gdb.cp/ambiguous.cc (marker1): Delete.
+	(main): Initialize all the fields of the locals.  Replace marker1
+	call with a "set breakpoint here" marker.
+	* gdb.cp/ambiguous.exp: Modernize.  Use gdb_continue_to_breakpoint
+	instead of running to marker1.  Add tests printing all the
+	variables and all the fields of the variables.
+	(test_ambiguous): New proc, expecting the new GDB output when a
+	field access is ambiguous.  Change all "warning: X ambiguous"
+	tests to use it.
+
 2020-10-12  Gary Benson <gbenson@redhat.com>
 
 	* gdb.base/msym-bp.c (foo): Add __attribute__ ((used)).
