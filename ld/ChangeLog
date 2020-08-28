@@ -1,3 +1,9 @@
+2020-08-28  Alan Modra  <amodra@gmail.com>
+
+	PR 19011
+	* testsuite/ld-plugin/plugin.exp: Use modified CFLAGS throughout
+	file.  Add --image-base for pecoff.
+
 2020-08-28  Nelson Chu  <nelson.chu@sifive.com>
 
 	testsuite/ld-riscv-elf/lib-nopic-01a.s: Use R_RISCV_JAL rather
