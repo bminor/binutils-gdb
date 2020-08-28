@@ -1,3 +1,27 @@
+2020-08-28  Tom de Vries  <tdevries@suse.de>
+
+	PR breakpoint/26544
+	* breakpoint.c (parse_breakpoint_sals): Remove const from struct
+	event_location.
+	(create_breakpoint): Same.
+	(base_breakpoint_decode_location): Same.
+	(bkpt_create_sals_from_location): Same.
+	(bkpt_decode_location): Same.
+	(bkpt_probe_create_sals_from_location): Same.
+	(bkpt_probe_decode_location): Same.
+	(tracepoint_create_sals_from_location): Same.
+	(tracepoint_decode_location): Same.
+	(tracepoint_probe_decode_location): Same.
+	(strace_marker_create_sals_from_location): Same.
+	(strace_marker_decode_location): Same.
+	(create_sals_from_location_default): Same.
+	(decode_location_default): Same.
+	* breakpoint.h (struct breakpoint_ops): Same.
+	(create_breakpoint): Same.
+	* linespec.h (decode_line_full): Same.
+	* linespec.c (decode_line_full): Same.  Throw error if
+	result.size () == 0.
+
 2020-08-27  Pedro Alves  <pedro@palves.net>
 
 	PR gdb/26524

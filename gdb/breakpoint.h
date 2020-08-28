@@ -609,7 +609,7 @@ struct breakpoint_ops
      `create_sals_from_location_default'.
 
      This function is called inside `create_breakpoint'.  */
-  void (*create_sals_from_location) (const struct event_location *location,
+  void (*create_sals_from_location) (struct event_location *location,
 				     struct linespec_result *canonical,
 				     enum bptype type_wanted);
 
@@ -636,7 +636,7 @@ struct breakpoint_ops
      This function is called inside `location_to_sals'.  */
   std::vector<symtab_and_line> (*decode_location)
     (struct breakpoint *b,
-     const struct event_location *location,
+     struct event_location *location,
      struct program_space *search_pspace);
 
   /* Return true if this breakpoint explains a signal.  See
@@ -1386,7 +1386,7 @@ enum breakpoint_create_flags
    Returns true if any breakpoint was created; false otherwise.  */
 
 extern int create_breakpoint (struct gdbarch *gdbarch,
-			      const struct event_location *location,
+			      struct event_location *location,
 			      const char *cond_string, int thread,
 			      const char *extra_string,
 			      int parse_extra,

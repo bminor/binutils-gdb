@@ -3201,7 +3201,7 @@ event_location_to_sals (linespec_parser *parser,
 /* See linespec.h.  */
 
 void
-decode_line_full (const struct event_location *location, int flags,
+decode_line_full (struct event_location *location, int flags,
 		  struct program_space *search_pspace,
 		  struct symtab *default_symtab,
 		  int default_line, struct linespec_result *canonical,
@@ -3229,6 +3229,10 @@ decode_line_full (const struct event_location *location, int flags,
   std::vector<symtab_and_line> result = event_location_to_sals (&parser,
 								location);
   state = PARSER_STATE (&parser);
+
+  if (result.size () == 0)
+    throw_error (NOT_SUPPORTED_ERROR, _("Location %s not available"),
+		 event_location_to_string (location));
 
   gdb_assert (result.size () == 1 || canonical->pre_expanded);
   canonical->pre_expanded = 1;
