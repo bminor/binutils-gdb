@@ -302,7 +302,6 @@ print_program_space (struct ui_out *uiout, int requested)
 
   for (struct program_space *pspace : program_spaces)
     {
-      struct inferior *inf;
       int printed_header;
 
       if (requested != -1 && requested != pspace->num)
@@ -328,9 +327,16 @@ print_program_space (struct ui_out *uiout, int requested)
 	 e.g., both parent/child inferiors in a vfork, or, on targets
 	 that share pspaces between inferiors.  */
       printed_header = 0;
-      for (inf = inferior_list; inf; inf = inf->next)
+
+      /* We're going to switch inferiors.  */
+      scoped_restore_current_thread restore_thread;
+
+      for (inferior *inf : all_inferiors ())
 	if (inf->pspace == pspace)
 	  {
+	    /* Switch to inferior in order to call target methods.  */
+	    switch_to_inferior_no_thread (inf);
+
 	    if (!printed_header)
 	      {
 		printed_header = 1;
