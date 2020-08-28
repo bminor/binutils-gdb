@@ -3095,8 +3095,13 @@ bfd_generic_define_common_symbol (bfd *output_bfd,
   section = h->u.c.p->section;
 
   /* Increase the size of the section to align the common symbol.
-     The alignment must be a power of two.  */
-  alignment = bfd_octets_per_byte (output_bfd, section) << power_of_two;
+     The alignment must be a power of two.  But if the section does
+     not have any alignment requirement then do not increase the
+     alignment unnecessarily.  */
+  if (power_of_two)
+    alignment = bfd_octets_per_byte (output_bfd, section) << power_of_two;
+  else
+    alignment = 1;
   BFD_ASSERT (alignment != 0 && (alignment & -alignment) == alignment);
   section->size += alignment - 1;
   section->size &= -alignment;
