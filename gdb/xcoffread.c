@@ -2038,8 +2038,7 @@ xcoff_end_psymtab (struct objfile *objfile, legacy_psymtab *pst,
       && pst->n_global_syms == 0
       && pst->n_static_syms == 0)
     {
-      /* Throw away this psymtab, it's empty.  We can't deallocate it, since
-         it is on the obstack, but we can forget to chain it on the list.  */
+      /* Throw away this psymtab, it's empty.  */
       /* Empty psymtabs happen as a result of header files which don't have
          any symbols in them.  There can be a lot of them.  */
 
