@@ -1,3 +1,9 @@
+2020-08-28  Alan Modra  <amodra@gmail.com>
+
+	PR 26460
+	* config/tc-ia64.c (parse_operands): Don't access past end of
+	idesc->operands.
+
 2020-08-26  Mark Wielaard  <mark@klomp.org>
 
 	* as.c (parse_args): Handle bad -gdwarf options.

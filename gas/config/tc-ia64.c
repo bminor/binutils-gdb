@@ -6098,8 +6098,10 @@ parse_operands (struct ia64_opcode *idesc)
     {
       if (i < NELEMS (CURR_SLOT.opnd))
 	{
-	  sep = parse_operand_maybe_eval (CURR_SLOT.opnd + i, '=',
-					  idesc->operands[i]);
+	  enum ia64_opnd op = IA64_OPND_NIL;
+	  if (i < NELEMS (idesc->operands))
+	    op = idesc->operands[i];
+	  sep = parse_operand_maybe_eval (CURR_SLOT.opnd + i, '=', op);
 	  if (CURR_SLOT.opnd[i].X_op == O_absent)
 	    break;
 	}
