@@ -1,3 +1,9 @@
+2020-08-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 26548
+	* dwarf.c (read_leb128): When checking for overflow of a signed
+	read, use a signed shift.
+
 2020-08-28  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* readelf.c (get_csky_section_type_name): New.
