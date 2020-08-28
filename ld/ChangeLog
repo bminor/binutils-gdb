@@ -1,3 +1,7 @@
+2020-08-28  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
+
+	* ldmisc.c (vfinfo): Support new "%pU" format specifier.
+
 2020-08-28  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* emulparams/cskyelf.sh: Support attribute section.
