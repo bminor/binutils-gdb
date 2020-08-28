@@ -85,13 +85,13 @@ insert_1 (CGEN_CPU_DESC cd,
 	  int word_length,
 	  unsigned char *bufp)
 {
-  unsigned long x,mask;
+  unsigned long x, mask;
   int shift;
 
   x = cgen_get_insn_value (cd, bufp, word_length, cd->endian);
 
   /* Written this way to avoid undefined behaviour.  */
-  mask = (((1L << (length - 1)) - 1) << 1) | 1;
+  mask = (1UL << (length - 1) << 1) - 1;
   if (CGEN_INSN_LSB0_P)
     shift = (start + 1) - length;
   else
@@ -131,12 +131,14 @@ insert_normal (CGEN_CPU_DESC cd,
 	       CGEN_INSN_BYTES_PTR buffer)
 {
   static char errbuf[100];
-  /* Written this way to avoid undefined behaviour.  */
-  unsigned long mask = (((1L << (length - 1)) - 1) << 1) | 1;
+  unsigned long mask;
 
   /* If LENGTH is zero, this operand doesn't contribute to the value.  */
   if (length == 0)
     return NULL;
+
+  /* Written this way to avoid undefined behaviour.  */
+  mask = (1UL << (length - 1) << 1) - 1;
 
   if (word_length > 8 * sizeof (CGEN_INSN_INT))
     abort ();
@@ -314,7 +316,7 @@ put_insn_int_value (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
     {
       int shift = insn_length - length;
       /* Written this way to avoid undefined behaviour.  */
-      CGEN_INSN_INT mask = (((1L << (length - 1)) - 1) << 1) | 1;
+      CGEN_INSN_INT mask = length == 0 ? 0 : (1UL << (length - 1) << 1) - 1;
 
       *buf = (*buf & ~(mask << shift)) | ((value & mask) << shift);
     }
@@ -491,7 +493,7 @@ extract_normal (CGEN_CPU_DESC cd,
 #endif /* ! CGEN_INT_INSN_P */
 
   /* Written this way to avoid undefined behaviour.  */
-  mask = (((1L << (length - 1)) - 1) << 1) | 1;
+  mask = (1UL << (length - 1) << 1) - 1;
 
   value &= mask;
   /* sign extend? */

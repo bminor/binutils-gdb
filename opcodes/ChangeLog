@@ -1,3 +1,16 @@
+2020-08-28  Alan Modra  <amodra@gmail.com>
+
+	PR 26449
+	PR 26450
+	* cgen-ibld.in (insert_1): Use 1UL in forming mask.
+	(extract_normal): Likewise.
+	(insert_normal): Likewise, and move past zero length test.
+	(put_insn_int_value): Handle mask for zero length, use 1UL.
+	* bpf-ibld.c, * epiphany-ibld.c, * fr30-ibld.c, * frv-ibld.c,
+	* ip2k-ibld.c, * iq2000-ibld.c, * lm32-ibld.c, * m32c-ibld.c,
+	* m32r-ibld.c, * mep-ibld.c, * mt-ibld.c, * or1k-ibld.c,
+	* xc16x-ibld.c, * xstormy16-ibld.c: Regenerate.
+
 2020-08-28  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* csky-dis.c (CSKY_DEFAULT_ISA): Define.
