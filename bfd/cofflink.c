@@ -3053,9 +3053,15 @@ _bfd_coff_generic_relocate_section (bfd *output_bfd,
 	    }
 
 	  else if (! bfd_link_relocatable (info))
-	    (*info->callbacks->undefined_symbol)
-	      (info, h->root.root.string, input_bfd, input_section,
-	       rel->r_vaddr - input_section->vma, TRUE);
+	    {
+	      (*info->callbacks->undefined_symbol)
+		(info, h->root.root.string, input_bfd, input_section,
+		 rel->r_vaddr - input_section->vma, TRUE);
+	      /* Stop the linker from issueing errors about truncated relocs
+		 referencing this undefined symbol by giving it an address
+		 that should be in range.  */
+	      val = input_section->output_section->vma;
+	    }
 	}
 
       /* If the input section defining the symbol has been discarded

@@ -378,7 +378,7 @@ proc ld_link_defsyms {} {
 
     # Windows targets need __main, some prefixed with underscore.
     if {[istarget *-*-cygwin* ] || [istarget *-*-mingw*]} {
-        append flags " --defsym __main=0 --defsym ___main=0"
+        append flags " --defsym __main=main --defsym ___main=main"
     }
 
     # PowerPC EABI code calls __eabi.

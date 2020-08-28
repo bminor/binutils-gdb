@@ -1,3 +1,10 @@
+2020-08-28  Nick Clifton  <nickc@redhat.com>
+
+	PR19011
+	* cofflink.c (_bfd_coff_generic_relocate_section): Provide a value
+	for undefined symbols which will not generate extra warning
+	messages about truncated relocs.
+
 2020-08-28  Nelson Chu  <nelson.chu@sifive.com>
 
 	* elfnn-riscv.c (riscv_elf_check_relocs): Treat R_RISCV_CALL

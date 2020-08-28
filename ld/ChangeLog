@@ -1,3 +1,9 @@
+2020-08-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 19011
+	* testsuite/lib/ld-lib.exp (ld_link_defsyms): For PE based targets
+	define the __main and ___main symbols in terms of the main symbol.
+
 2020-08-28  Alan Modra  <amodra@gmail.com>
 
 	PR 19011
