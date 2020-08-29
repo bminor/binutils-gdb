@@ -22,7 +22,7 @@
 #include "opcode/csky.h"
 
 #define OP_TABLE_NUM    2
-#define MAX_OPRND_NUM   4
+#define MAX_OPRND_NUM   5
 
 enum operand_type
 {
@@ -222,7 +222,7 @@ struct soperand
 
 union csky_operand
 {
-  struct operand oprnds[5];
+  struct operand oprnds[MAX_OPRND_NUM];
   struct suboperand1
   {
     struct operand oprnd;

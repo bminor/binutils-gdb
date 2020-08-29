@@ -1,3 +1,9 @@
+2020-08-29  Alan Modra  <amodra@gmail.com>
+
+	PR 26446
+	* csky-opc.h (MAX_OPRND_NUM): Define to 5.
+	(union csky_operand): Use MAX_OPRND_NUM to size oprnds array.
+
 2020-08-28  Alan Modra  <amodra@gmail.com>
 
 	PR 26449
