@@ -270,7 +270,7 @@ md_assemble (char *str)
     }
   else
     {
-      int an;
+      unsigned int an;
 
       output = frag_more (opcode->len);
       output[idx++] = opcode->opcode;
@@ -278,7 +278,7 @@ md_assemble (char *str)
       if (opcode->opcode_next != -1)
 	output[idx++] = opcode->opcode_next;
 
-      for (an = 0; opcode->arg[an]; an++)
+      for (an = 0; an < ARRAY_SIZE (opcode->arg) && opcode->arg[an]; an++)
 	{
 	  expressionS arg;
 
