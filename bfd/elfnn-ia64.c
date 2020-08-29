@@ -1867,18 +1867,16 @@ get_dyn_sym_info (struct elfNN_ia64_link_hash_table *ia64_info,
 	      key.addend = addend;
 	      dyn_i = bsearch (&key, info, sorted_count,
 			       sizeof (*info), addend_compare);
-
 	      if (dyn_i)
-		{
-		  return dyn_i;
-		}
+		return dyn_i;
 	    }
 
-	  /* Do a quick check for the last inserted entry.  */
-	  dyn_i = info + count - 1;
-	  if (dyn_i->addend == addend)
+	  if (count != 0)
 	    {
-	      return dyn_i;
+	      /* Do a quick check for the last inserted entry.  */
+	      dyn_i = info + count - 1;
+	      if (dyn_i->addend == addend)
+		return dyn_i;
 	    }
 	}
 
@@ -1932,19 +1930,23 @@ get_dyn_sym_info (struct elfNN_ia64_link_hash_table *ia64_info,
       if (size != count)
 	{
 	  amt = count * sizeof (*info);
-	  info = bfd_malloc (amt);
-	  if (info != NULL)
-	    {
-	      memcpy (info, *info_p, amt);
-	      free (*info_p);
-	      *size_p = count;
-	      *info_p = info;
-	    }
+	  info = bfd_realloc (info, amt);
+	  *size_p = count;
+	  if (info == NULL && count != 0)
+	    /* realloc should never fail since we are reducing size here,
+	       but if it does use the old array.  */
+	    info = *info_p;
+	  else
+	    *info_p = info;
 	}
 
-      key.addend = addend;
-      dyn_i = bsearch (&key, info, count,
-		       sizeof (*info), addend_compare);
+      if (count == 0)
+	dyn_i = NULL;
+      else
+	{
+	  key.addend = addend;
+	  dyn_i = bsearch (&key, info, count, sizeof (*info), addend_compare);
+	}
     }
 
   return dyn_i;
