@@ -1,3 +1,15 @@
+2020-08-30  Alan Modra  <amodra@gmail.com>
+
+	PR26437
+	PR26438
+	* config/tc-cr16.c: Include limits.h, formatting.
+	(CR16_PRINT): Wrap params in parentheses.  Remove parens from uses
+	throughout file.
+	(getconstant): Handle zero nbits.
+	(print_operand): Use unsigned variables.  Simplify handling of
+	index regs.
+	(check_range): Use int32_t variables.  Correct range checks.
+
 2020-08-29  Alan Modra  <amodra@gmail.com>
 
 	PR 26481
