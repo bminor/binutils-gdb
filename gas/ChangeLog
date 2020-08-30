@@ -11,8 +11,8 @@
 
 2020-08-30  Alan Modra  <amodra@gmail.com>
 
-	PR26437
-	PR26438
+	PR 26437
+	PR 26438
 	* config/tc-cr16.c: Include limits.h, formatting.
 	(CR16_PRINT): Wrap params in parentheses.  Remove parens from uses
 	throughout file.
