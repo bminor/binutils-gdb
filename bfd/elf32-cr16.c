@@ -922,10 +922,7 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
      as signed or unsigned.  */
   check = Rvalue >> howto->rightshift;
 
-  /* Assumes two's complement.  This expression avoids
-     overflow if howto->bitsize is the number of bits in
-     bfd_vma.  */
-  reloc_bits = (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
+  reloc_bits = ((bfd_vma) 1 << (howto->bitsize - 1) << 1) - 1;
 
   /* For GOT and GOTC relocs no boundary checks applied.  */
   if (!((r_type == R_CR16_GOT_REGREL20)
