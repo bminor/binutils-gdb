@@ -1102,7 +1102,11 @@ set dlopen_run_tests [list \
 if [check_libdl_available] {
   # XFAIL on NetBSD ELF systems as they do not currently support the .*_array
   # sections.
+  # Disable all sanitizers.
+  set old_CFLAGS "$CFLAGS"
+  append CFLAGS " $NOSANTIZE_CFLAGS"
   run_ld_link_exec_tests $dlopen_run_tests "*-*-netbsdelf*"
+  set CFLAGS "$old_CFLAGS"
 }
 
 # Check --no-add-needed and --no-copy-dt-needed-entries

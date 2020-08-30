@@ -1,3 +1,11 @@
+2020-08-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* testsuite/ld-elf/dwarf.exp: Append $NOSANTIZE_CFLAGS to CFLAGS.
+	* testsuite/ld-elf/shared.exp: Likewise.
+	* testsuite/ld-elfvsb/elfvsb.exp: Likewise.
+	* testsuite/ld-shared/shared.exp: Likewise.
+	* testsuite/ld-size/size.exp: Likewise.
+
 2020-08-28  Jozef Lawrynowicz  <jozef.l@mittosystems.com>
 
 	* emultempl/msp430.em (input_section_exists): New.
