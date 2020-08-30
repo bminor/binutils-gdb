@@ -453,8 +453,8 @@ tic4x_gen_to_words (FLONUM_TYPE flonum, LITTLENUM_TYPE *words, int precision)
   /* Store the mantissa data into smant and the roundbit into rbit */
   for (p = flonum.leader; p >= flonum.low && shift > -16; p--)
     {
-      tmp = shift >= 0 ? *p << shift : *p >> -shift;
-      rbit = shift < 0 ? ((*p >> (-shift-1)) & 0x1) : 0;
+      tmp = shift >= 0 ? (unsigned) *p << shift : (unsigned) *p >> -shift;
+      rbit = shift < 0 ? (((unsigned) *p >> (-shift-1)) & 0x1) : 0;
       smant |= tmp;
       shift -= 16;
     }
@@ -463,18 +463,14 @@ tic4x_gen_to_words (FLONUM_TYPE flonum, LITTLENUM_TYPE *words, int precision)
   if(rbit)
     {
       /* If the mantissa is going to overflow when added, lets store
-         the extra bit in mover. -- A special case exists when
-         mantissa_bits is 31 (E_PRECISION). Then the first test cannot
-         be trusted, as result is host-dependent, thus the second
-         test. */
-      if( smant == ((unsigned)(1<<(mantissa_bits+1))-1)
-          || smant == (unsigned)-1 )  /* This is to catch E_PRECISION cases */
+	 the extra bit in mover.  */
+      if (smant == (1u << mantissa_bits << 1) - 1)
         mover=1;
       smant++;
     }
 
   /* Get the scaled one value */
-  sone = (1 << (mantissa_bits));
+  sone = 1u << mantissa_bits;
 
   /* The number may be unnormalised so renormalise it...  */
   if(mover)
@@ -527,7 +523,7 @@ tic4x_gen_to_words (FLONUM_TYPE flonum, LITTLENUM_TYPE *words, int precision)
   else
     {
       /* Insert the exponent data into the word */
-      sfract |= exponent << (mantissa_bits+1);
+      sfract |= (unsigned) exponent << (mantissa_bits + 1);
 
       if (precision == S_PRECISION)
         words[0] = sfract;

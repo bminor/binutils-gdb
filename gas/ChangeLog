@@ -1,3 +1,9 @@
+2020-08-30  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-tic4x.c (tic4x_gen_to_words): Rewrite mantissa
+	overflow test without UB.  Avoid other UB shifts by making them
+	unsigned.
+
 2020-08-31  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* config/tc-csky.c (csky_error_state): New member 'arg_int'.
