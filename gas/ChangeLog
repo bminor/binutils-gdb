@@ -1,5 +1,16 @@
 2020-08-30  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/gas/cr16/cbitb_test.d: Update expected output.
+	* testsuite/gas/cr16/cbitw_test.d: Likewise.
+	* testsuite/gas/cr16/sbitb_test.d: Likewise.
+	* testsuite/gas/cr16/sbitw_test.d: Likewise.
+	* testsuite/gas/cr16/storb_test.d: Likewise.
+	* testsuite/gas/cr16/storw_test.d: Likewise.
+	* testsuite/gas/cr16/tbitb_test.d: Likewise.
+	* testsuite/gas/cr16/tbitw_test.d: Likewise.
+
+2020-08-30  Alan Modra  <amodra@gmail.com>
+
 	PR26437
 	PR26438
 	* config/tc-cr16.c: Include limits.h, formatting.

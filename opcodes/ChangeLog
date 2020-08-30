@@ -1,3 +1,12 @@
+2020-08-30  Alan Modra  <amodra@gmail.com>
+
+	* cr16-dis.c: Formatting.
+	(parameter): Delete struct typedef.  Use dwordU instead
+	throughout file.
+	(make_argument <arg_idxr>): Simplify detection of cbitb, sbitb
+	and tbitb.
+	(make_argument <arg_cr>): Extract 20-bit field not 16-bit.
+
 2020-08-29  Alan Modra  <amodra@gmail.com>
 
 	PR 26446
