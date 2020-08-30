@@ -1,5 +1,11 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26442
+	* elf32-crx.c (crx_elf_final_link_relocate): Calculate reloc_bits
+	without undefined behaviour.  Tidy excess casts.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	* elf-m10300.c (mn10300_elf_relax_delete_bytes): Calculate
 	alignment from reloc addend after reloc type R_MN10300_ALIGN is
 	found.

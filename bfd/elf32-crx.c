@@ -506,25 +506,18 @@ crx_elf_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
      as signed or unsigned.  */
   check = Rvalue >> howto->rightshift;
 
-  /* Assumes two's complement.  This expression avoids
-     overflow if howto->bitsize is the number of bits in
-     bfd_vma.  */
-  reloc_bits = (((1 << (howto->bitsize - 1)) - 1) << 1) | 1;
+  reloc_bits = ((bfd_vma) 1 << (howto->bitsize - 1) << 1) - 1;
 
-  if (((bfd_vma) check & ~reloc_bits) != 0
-      && (((bfd_vma) check & ~reloc_bits)
-	  != (-(bfd_vma) 1 & ~reloc_bits)))
+  if ((check & ~reloc_bits) != 0
+      && (check & ~reloc_bits) != ((bfd_vma) -1 & ~reloc_bits))
     {
       /* The above right shift is incorrect for a signed
 	 value.  See if turning on the upper bits fixes the
 	 overflow.  */
       if (howto->rightshift && (bfd_signed_vma) Rvalue < 0)
 	{
-	  check |= ((bfd_vma) - 1
-		    & ~((bfd_vma) - 1
-			>> howto->rightshift));
-	  if (((bfd_vma) check & ~reloc_bits)
-	      != (-(bfd_vma) 1 & ~reloc_bits))
+	  check |= (bfd_vma) -1 & ~((bfd_vma) -1 >> howto->rightshift);
+	  if ((check & ~reloc_bits) != ((bfd_vma) -1 & ~reloc_bits))
 	    return bfd_reloc_overflow;
 	}
       else
@@ -532,7 +525,7 @@ crx_elf_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
     }
 
   /* Drop unwanted bits from the value we are relocating to.  */
-  Rvalue >>= (bfd_vma) howto->rightshift;
+  Rvalue >>= howto->rightshift;
 
   /* Apply dst_mask to select only relocatable part of the insn.  */
   Rvalue &= howto->dst_mask;
