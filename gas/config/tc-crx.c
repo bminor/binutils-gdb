@@ -47,7 +47,7 @@
 
 /* Assign a number NUM, shifted by SHIFT bytes, into a location
    pointed by index BYTE of array 'output_opcode'.  */
-#define CRX_PRINT(BYTE, NUM, SHIFT)   output_opcode[BYTE] |= (NUM << SHIFT)
+#define CRX_PRINT(BYTE, NUM, SHIFT)   output_opcode[BYTE] |= (NUM) << (SHIFT)
 
 /* Operand errors.  */
 typedef enum
@@ -140,31 +140,8 @@ const relax_typeS md_relax_table[] =
   {0xfffffe, -0x1000000, 6, 0}		/* 24 */
 };
 
-static void    reset_vars	        (char *);
-static reg     get_register	        (char *);
-static copreg  get_copregister	        (char *);
-static argtype get_optype	        (operand_type);
-static int     get_opbits	        (operand_type);
-static int     get_opflags	        (operand_type);
-static int     get_number_of_operands   (void);
-static void    parse_operand	        (char *, ins *);
-static int     gettrap		        (const char *);
-static void    handle_LoadStor	        (const char *);
-static int     get_cinv_parameters      (const char *);
-static long    getconstant		(long, int);
-static op_err  check_range		(long *, int, unsigned int, int);
-static int     getreg_image	        (int);
-static void    parse_operands	        (ins *, char *);
-static void    parse_insn	        (ins *, char *);
-static void    print_operand	        (int, int, argument *);
-static void    print_constant	        (int, int, argument *);
-static int     exponent2scale	        (int);
-static void    mask_reg		        (int, unsigned short *);
-static void    process_label_constant   (char *, ins *);
-static void    set_operand	        (char *, ins *);
-static char *  preprocess_reglist       (char *, int *);
-static int     assemble_insn	        (char *, ins *);
-static void    print_insn	        (ins *);
+static int     get_cinv_parameters	(const char *);
+static char *  preprocess_reglist	(char *, int *);
 static void    warn_if_needed		(ins *);
 static int     adjust_if_needed		(ins *);
 
@@ -618,42 +595,42 @@ process_label_constant (char *str, ins * crx_ins)
       switch (cur_arg->type)
 	{
 	case arg_cr:
-          if (IS_INSN_TYPE (LD_STOR_INS_INC))
+	  if (IS_INSN_TYPE (LD_STOR_INS_INC))
 	    crx_ins->rtype = BFD_RELOC_CRX_REGREL12;
-          else if (IS_INSN_TYPE (CSTBIT_INS)
+	  else if (IS_INSN_TYPE (CSTBIT_INS)
 		   || IS_INSN_TYPE (STOR_IMM_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_REGREL28;
-          else
+	  else
 	    crx_ins->rtype = BFD_RELOC_CRX_REGREL32;
 	  break;
 
 	case arg_idxr:
-	    crx_ins->rtype = BFD_RELOC_CRX_REGREL22;
+	  crx_ins->rtype = BFD_RELOC_CRX_REGREL22;
 	  break;
 
 	case arg_c:
-          if (IS_INSN_MNEMONIC ("bal") || IS_INSN_TYPE (DCR_BRANCH_INS))
+	  if (IS_INSN_MNEMONIC ("bal") || IS_INSN_TYPE (DCR_BRANCH_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_REL16;
 	  else if (IS_INSN_TYPE (BRANCH_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_REL8;
-          else if (IS_INSN_TYPE (LD_STOR_INS) || IS_INSN_TYPE (STOR_IMM_INS)
+	  else if (IS_INSN_TYPE (LD_STOR_INS) || IS_INSN_TYPE (STOR_IMM_INS)
 		   || IS_INSN_TYPE (CSTBIT_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_ABS32;
 	  else if (IS_INSN_TYPE (BRANCH_NEQ_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_REL4;
-          else if (IS_INSN_TYPE (CMPBR_INS) || IS_INSN_TYPE (COP_BRANCH_INS))
+	  else if (IS_INSN_TYPE (CMPBR_INS) || IS_INSN_TYPE (COP_BRANCH_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_REL8_CMP;
 	  break;
 
 	case arg_ic:
-          if (IS_INSN_TYPE (ARITH_INS))
+	  if (IS_INSN_TYPE (ARITH_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_IMM32;
 	  else if (IS_INSN_TYPE (ARITH_BYTE_INS))
 	    crx_ins->rtype = BFD_RELOC_CRX_IMM16;
 	  break;
 	default:
 	  break;
-      }
+	}
       break;
 
     default:
@@ -782,7 +759,7 @@ set_operand (char *operand, ins * crx_ins)
       if (c == ')')
 	cur_arg->scale = 0;
       else
-        {
+	{
 	  while (*operandE != ')')
 	    operandE++;
 	  *operandE = '\0';
@@ -796,12 +773,12 @@ set_operand (char *operand, ins * crx_ins)
 	  scale_val = scale.X_add_number;
 
 	  /* Check if the scale value is legal.  */
-          if (scale_val != 1 && scale_val != 2
-              && scale_val != 4 && scale_val != 8)
+	  if (scale_val != 1 && scale_val != 2
+	      && scale_val != 4 && scale_val != 8)
 	    as_bad (_("Illegal Scale - `%d'"), scale_val);
 
 	  cur_arg->scale = exponent2scale (scale_val);
-        }
+	}
       break;
 
     default:
@@ -849,7 +826,7 @@ parse_operand (char *operand, ins * crx_ins)
       if (strchr (operand, '(') != NULL)
 	cur_arg->type = arg_icr;
       else
-        cur_arg->type = arg_ic;
+	cur_arg->type = arg_ic;
       goto set_params;
       break;
 
@@ -864,14 +841,14 @@ parse_operand (char *operand, ins * crx_ins)
       break;
 
     default:
-	break;
+      break;
     }
 
   if (strchr (operand, '(') != NULL)
     {
       if (strchr (operand, ',') != NULL
-          && (strchr (operand, ',') > strchr (operand, '(')))
-	    cur_arg->type = arg_idxr;
+	  && (strchr (operand, ',') > strchr (operand, '(')))
+	cur_arg->type = arg_idxr;
       else
 	cur_arg->type = arg_cr;
     }
@@ -906,12 +883,12 @@ parse_operands (ins * crx_ins, char *operands)
   while (*operandT != '\0')
     {
       if (*operandT == ',' && bracket_flag != 1 && sq_bracket_flag != 1)
-        {
+	{
 	  *operandT++ = '\0';
 	  operand[op_num++] = strdup (operandH);
-          operandH = operandT;
-          continue;
-        }
+	  operandH = operandT;
+	  continue;
+	}
 
       if (*operandT == ' ')
 	as_bad (_("Illegal operands (whitespace): `%s'"), ins_parse);
@@ -1169,8 +1146,7 @@ static void
 print_constant (int nbits, int shift, argument *arg)
 {
   unsigned long mask = 0;
-
-  long constant = getconstant (arg->constant, nbits);
+  unsigned long constant = getconstant (arg->constant, nbits);
 
   switch (nbits)
   {
@@ -1191,7 +1167,7 @@ print_constant (int nbits, int shift, argument *arg)
 	      output_opcode[0]    output_opcode[1]     */
 
       CRX_PRINT (0, (constant >> WORD_SHIFT) & mask, 0);
-      CRX_PRINT (1, (constant & 0xFFFF), WORD_SHIFT);
+      CRX_PRINT (1, constant & 0xFFFF, WORD_SHIFT);
       break;
 
     case 16:
@@ -1455,9 +1431,9 @@ assemble_insn (char *mnemonic, ins *insn)
   /* Operand error (used for issuing various constant error messages).  */
   op_err op_error, const_err = OP_LEGAL;
 
-/* Retrieve data (based on FUNC) for each operand of a given instruction.  */
-#define GET_CURRENT_DATA(FUNC, ARRAY)				  \
-  for (i = 0; i < insn->nargs; i++)				  \
+  /* Retrieve data (based on FUNC) for each operand of a given instruction.  */
+#define GET_CURRENT_DATA(FUNC, ARRAY)			\
+  for (i = 0; i < insn->nargs; i++)			\
     ARRAY[i] = FUNC (instruction->operands[i].op_type)
 
 #define GET_CURRENT_TYPE    GET_CURRENT_DATA(get_optype, cur_type)
@@ -1500,7 +1476,7 @@ assemble_insn (char *mnemonic, ins *insn)
 
       /* Check for type compatibility.  */
       for (i = 0; i < insn->nargs; i++)
-        {
+	{
 	  if (cur_type[i] != insn->arg[i].type)
 	    {
 	      if (invalid_optype == -1)
@@ -1516,32 +1492,29 @@ assemble_insn (char *mnemonic, ins *insn)
 	     Index 0	  -->> 1
 	     Index 1	  -->> 0
 	     Other index  -->> stays the same.  */
-	  int j = instruction->flags & REVERSE_MATCH ?
-		  i == 0 ? 1 :
-		  i == 1 ? 0 : i :
-		  i;
+	  int j = (instruction->flags & REVERSE_MATCH) && i <= 1 ? 1 - i : i;
 
 	  /* Only check range - don't update the constant's value, since the
 	     current instruction may not be the last we try to match.
 	     The constant's value will be updated later, right before printing
 	     it to the object file.  */
-  	  if ((insn->arg[j].X_op == O_constant)
-	       && (op_error = check_range (&insn->arg[j].constant, cur_size[j],
-					   cur_flags[j], 0)))
-  	    {
+	  if ((insn->arg[j].X_op == O_constant)
+	      && (op_error = check_range (&insn->arg[j].constant, cur_size[j],
+					  cur_flags[j], 0)))
+	    {
 	      if (invalid_const == -1)
-	      {
-		invalid_const = j + 1;
-		const_err = op_error;
-	      }
+		{
+		  invalid_const = j + 1;
+		  const_err = op_error;
+		}
 	      goto next_insn;
 	    }
 	  /* For symbols, we make sure the relocation size (which was already
 	     determined) is sufficient.  */
 	  else if ((insn->arg[j].X_op == O_symbol)
-		    && ((bfd_reloc_type_lookup (stdoutput, insn->rtype))->bitsize
-			 > cur_size[j]))
-		  goto next_insn;
+		   && ((bfd_reloc_type_lookup (stdoutput, insn->rtype))->bitsize
+		       > cur_size[j]))
+	    goto next_insn;
 	}
       found_const_within_range = 1;
 
@@ -1562,30 +1535,32 @@ assemble_insn (char *mnemonic, ins *insn)
       else if (!found_same_argument_types)
 	as_bad (_("Illegal type of operand (arg %d)"), invalid_optype);
       else if (!found_const_within_range)
-      {
-	switch (const_err)
 	{
-	case OP_OUT_OF_RANGE:
-	  as_bad (_("Operand out of range (arg %d)"), invalid_const);
-	  break;
-	case OP_NOT_EVEN:
-	  as_bad (_("Operand has odd displacement (arg %d)"), invalid_const);
-	  break;
-	case OP_ILLEGAL_DISPU4:
-	  as_bad (_("Invalid DISPU4 operand value (arg %d)"), invalid_const);
-	  break;
-	case OP_ILLEGAL_CST4:
-	  as_bad (_("Invalid CST4 operand value (arg %d)"), invalid_const);
-	  break;
-	case OP_NOT_UPPER_64KB:
-	  as_bad (_("Operand value is not within upper 64 KB (arg %d)"),
-		    invalid_const);
-	  break;
-	default:
-	  as_bad (_("Illegal operand (arg %d)"), invalid_const);
-	  break;
+	  switch (const_err)
+	    {
+	    case OP_OUT_OF_RANGE:
+	      as_bad (_("Operand out of range (arg %d)"), invalid_const);
+	      break;
+	    case OP_NOT_EVEN:
+	      as_bad (_("Operand has odd displacement (arg %d)"),
+		      invalid_const);
+	      break;
+	    case OP_ILLEGAL_DISPU4:
+	      as_bad (_("Invalid DISPU4 operand value (arg %d)"),
+		      invalid_const);
+	      break;
+	    case OP_ILLEGAL_CST4:
+	      as_bad (_("Invalid CST4 operand value (arg %d)"), invalid_const);
+	      break;
+	    case OP_NOT_UPPER_64KB:
+	      as_bad (_("Operand value is not within upper 64 KB (arg %d)"),
+		      invalid_const);
+	      break;
+	    default:
+	      as_bad (_("Illegal operand (arg %d)"), invalid_const);
+	      break;
+	    }
 	}
-      }
 
       return 0;
     }
@@ -1603,28 +1578,25 @@ assemble_insn (char *mnemonic, ins *insn)
 	GET_CURRENT_SIZE;
 
       for (i = 0; i < insn->nargs; i++)
-        {
-	  int j = instruction->flags & REVERSE_MATCH ?
-		  i == 0 ? 1 :
-		  i == 1 ? 0 : i :
-		  i;
+	{
+	  int j = (instruction->flags & REVERSE_MATCH) && i <= 1 ? 1 - i : i;
 
 	  /* This time, update constant value before printing it.  */
-  	  if ((insn->arg[j].X_op == O_constant)
-	       && (check_range (&insn->arg[j].constant, cur_size[j],
-				cur_flags[j], 1) != OP_LEGAL))
-	      as_fatal (_("Illegal operand (arg %d)"), j+1);
+	  if ((insn->arg[j].X_op == O_constant)
+	      && (check_range (&insn->arg[j].constant, cur_size[j],
+			       cur_flags[j], 1) != OP_LEGAL))
+	    as_fatal (_("Illegal operand (arg %d)"), j+1);
 	}
 
       /* First, copy the instruction's opcode.  */
       output_opcode[0] = BIN (instruction->match, instruction->match_bits);
 
       for (i = 0; i < insn->nargs; i++)
-        {
+	{
 	  cur_arg_num = i;
-          print_operand (cur_size[i], instruction->operands[i].shift,
+	  print_operand (cur_size[i], instruction->operands[i].shift,
 			 &insn->arg[i]);
-        }
+	}
     }
 
   return 1;
@@ -1681,13 +1653,13 @@ adjust_if_needed (ins *insn)
     {
       if ((instruction->operands[0].op_type == cst4)
 	  && instruction->operands[1].op_type == regr)
-        {
-          if (insn->arg[0].constant == 0 && insn->arg[1].r == r0)
+	{
+	  if (insn->arg[0].constant == 0 && insn->arg[1].r == r0)
 	    {
 	      instruction++;
 	      ret_value = 1;
 	    }
-        }
+	}
     }
 
   /* Optimization: Omit a zero displacement in bit operations,
@@ -1695,12 +1667,12 @@ adjust_if_needed (ins *insn)
   if (IS_INSN_TYPE (CSTBIT_INS))
     {
       if ((instruction->operands[1].op_type == rbase_disps12)
-	   && (insn->arg[1].X_op == O_constant)
-	   && (insn->arg[1].constant == 0))
-            {
-              instruction--;
-	      ret_value = 1;
-            }
+	  && (insn->arg[1].X_op == O_constant)
+	  && (insn->arg[1].constant == 0))
+	{
+	  instruction--;
+	  ret_value = 1;
+	}
     }
 
   return ret_value;
@@ -1766,21 +1738,21 @@ preprocess_reglist (char *param, int *allocated)
 
       /* Coprocessor register c<N>.  */
       if (IS_INSN_TYPE (COP_REG_INS))
-        {
-          if (((cr = get_copregister (reg_name)) == nullcopregister)
+	{
+	  if (((cr = get_copregister (reg_name)) == nullcopregister)
 	      || (crx_copregtab[cr-MAX_REG].type != CRX_C_REGTYPE))
 	    as_fatal (_("Illegal register `%s' in cop-register list"), reg_name);
 	  mask_reg (getreg_image (cr - c0), &mask);
-        }
+	}
       /* Coprocessor Special register cs<N>.  */
       else if (IS_INSN_TYPE (COPS_REG_INS))
-        {
-          if (((cr = get_copregister (reg_name)) == nullcopregister)
+	{
+	  if (((cr = get_copregister (reg_name)) == nullcopregister)
 	      || (crx_copregtab[cr-MAX_REG].type != CRX_CS_REGTYPE))
 	    as_fatal (_("Illegal register `%s' in cop-special-register list"),
 		      reg_name);
 	  mask_reg (getreg_image (cr - cs0), &mask);
-        }
+	}
       /* User register u<N>.  */
       else if (instruction->flags & USER_REG)
 	{
@@ -1794,15 +1766,15 @@ preprocess_reglist (char *param, int *allocated)
 	      lo_found = 1;
 	      goto next_inst;
 	    }
-          else if (((r = get_register (reg_name)) == nullregister)
-	      || (crx_regtab[r].type != CRX_U_REGTYPE))
+	  else if (((r = get_register (reg_name)) == nullregister)
+		   || (crx_regtab[r].type != CRX_U_REGTYPE))
 	    as_fatal (_("Illegal register `%s' in user register list"), reg_name);
 
 	  mask_reg (getreg_image (r - u0), &mask);
 	}
       /* General purpose register r<N>.  */
       else
-        {
+	{
 	  if (streq(reg_name, "hi"))
 	    {
 	      hi_found = 1;
@@ -1813,12 +1785,12 @@ preprocess_reglist (char *param, int *allocated)
 	      lo_found = 1;
 	      goto next_inst;
 	    }
-          else if (((r = get_register (reg_name)) == nullregister)
-	      || (crx_regtab[r].type != CRX_R_REGTYPE))
+	  else if (((r = get_register (reg_name)) == nullregister)
+		   || (crx_regtab[r].type != CRX_R_REGTYPE))
 	    as_fatal (_("Illegal register `%s' in register list"), reg_name);
 
 	  mask_reg (getreg_image (r - r0), &mask);
-        }
+	}
 
       if (++reg_counter > MAX_REGS_IN_MASK16)
 	as_bad (_("Maximum %d bits may be set in `mask16' operand"),
@@ -1826,7 +1798,7 @@ preprocess_reglist (char *param, int *allocated)
 
     next_inst:
       while (!ISALNUM (*paramP) && *paramP != '}')
-	  paramP++;
+	paramP++;
     }
 
   if (*++paramP != '\0')
@@ -1864,7 +1836,7 @@ preprocess_reglist (char *param, int *allocated)
 /* Print the instruction.
    Handle also cases where the instruction is relaxable/relocatable.  */
 
-void
+static void
 print_insn (ins *insn)
 {
   unsigned int i, j, insn_size;

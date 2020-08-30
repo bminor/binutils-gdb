@@ -224,8 +224,8 @@ static valueT
 generic_bignum_to_int32 (void)
 {
   valueT number =
-	   ((generic_bignum[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
-	   | (generic_bignum[0] & LITTLENUM_MASK);
+    ((((valueT) generic_bignum[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
+     | ((valueT) generic_bignum[0] & LITTLENUM_MASK));
   number &= 0xffffffff;
   return number;
 }

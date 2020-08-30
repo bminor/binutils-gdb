@@ -1,5 +1,21 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-crx.c: Formatting.
+	(CRX_PRINT): Wrap params in parentheses.  Remove parens from uses
+	throughout file.
+	(reset_vars, get_register, get_copregister, get_optype, get_opbits),
+	(get_opflags, get_number_of_operands, parse_operand, gettrap),
+	(handle_LoadStor, getconstant, check_range, getreg_image),
+	(parse_operands, parse_insn, print_operand, print_constant),
+	(exponent2scale, mask_reg, process_label_constant, set_operand),
+	(assemble_insn, print_insn): Delete unnecessary forward declaration.
+	(print_insn): Make static.
+	(print_constant): Make "constant" unsigned.
+	(assemble_insn): Tidy REVERSE_MATCH index calc.
+	* expr.c (generic_bignum_to_int32): Cast elements to valueT.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26509
 	* config/tc-z80.c (is_overflow): Use 1UL in mask shift expression.
 
