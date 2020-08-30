@@ -19662,7 +19662,7 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
 
 	while (bytes --)
 	  {
-	    unsigned long byte = (* name ++) & 0xff;
+	    unsigned long long byte = *name++ & 0xff;
 
 	    val |= byte << shift;
 	    shift += 8;

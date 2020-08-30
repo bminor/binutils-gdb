@@ -1,3 +1,8 @@
+2020-08-30  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (print_gnu_build_attribute_name): Use unsigned long
+	long for "bytes".
+
 2020-08-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 26548
