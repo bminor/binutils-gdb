@@ -1,3 +1,9 @@
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
+	* elf-m10300.c (mn10300_elf_relax_delete_bytes): Calculate
+	alignment from reloc addend after reloc type R_MN10300_ALIGN is
+	found.
+
 2020-08-30  Alan Modra  <amodra@gmail.com>
 
 	PR 26435

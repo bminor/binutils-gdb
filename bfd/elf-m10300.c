@@ -2418,17 +2418,19 @@ mn10300_elf_relax_delete_bytes (bfd *abfd,
 	 are deleting.  */
       for (; irel < irelend; irel++)
 	{
-	  int alignment = 1 << irel->r_addend;
-
 	  if (ELF32_R_TYPE (irel->r_info) == (int) R_MN10300_ALIGN
 	      && irel->r_offset > addr
-	      && irel->r_offset < toaddr
-	      && (count < alignment
-		  || alignment % count != 0))
+	      && irel->r_offset < toaddr)
 	    {
-	      irelalign = irel;
-	      toaddr = irel->r_offset;
-	      break;
+	      int alignment = 1 << irel->r_addend;
+
+	      if (count < alignment
+		  || alignment % count != 0)
+		{
+		  irelalign = irel;
+		  toaddr = irel->r_offset;
+		  break;
+		}
 	    }
 	}
     }
