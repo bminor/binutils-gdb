@@ -1,5 +1,10 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26502
+	* config/tc-tic6x.c (md_apply_fix): Use unsigned variables.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26497
 	* config/tc-sh.c (assemble_ppi): Use unsigned variables.
 
