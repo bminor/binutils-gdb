@@ -1,5 +1,39 @@
 2020-08-31  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
+	* config/tc-csky.c (csky_error_state): New member 'arg_int'.
+	(SET_ERROR_NUMBER): Rename to SET_ERROR_STRING.
+	(SET_ERROR_INTEGER): New.
+	(err_formats): Add error format for ERROR_FREG_OVER_RANGE and
+	ERROR_VREG_OVER_RANGE.
+	(csky_show_error): Pass an integer argument for some error
+	numbers.
+	(parse_exp): Call SET_ERROR_STRING instead of SET_ERROR_NUMBER.
+	(parse_rt): Likewise.
+	(parse_type_ctrlreg): Likewise.
+	(csky_get_reg_val): Likewise.
+	(is_reglist_legal): Likewise.
+	(is_freglist_legal): Likewise.
+	(is_reglist_dash_comma_legal): Likewise.
+	(is_reg_lshift_illegal): Likewise.
+	(is_psr_bit): Likewise.
+	(parse_type_cpreg): Likewise.
+	(parse_type_cpcreg): Likewise.
+	(parse_type_areg): Likewise.
+	(parse_type_freg): Likewise.
+	(parse_ldst_imm): Likewise and call SET_ERROR_INTEGER.
+	(get_operand_value): Likewise.
+	(parse_operands_op): Likewise and call is_imm_within_range,
+	is_imm_within_range_ext and is_oimm_within_range.
+	(md_assemble): Likewise.
+	(is_imm_within_range): New.
+	(is_imm_within_range_ext): Rename from is_imm_over_range.
+	(is_oimm_within_range): Rename from is_oimm_over_range.
+	(v2_work_add_sub): Call SET_ERROR_INTEGER.
+	(csky_rolc): call is_imm_within_range instead of
+	is_imm_over_range.
+
+2020-08-31  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
 	* config/tc-csky.c (md_begin): Add warning when -mdsp and
 	-mcpu=ck803ern are both added.
 	(parse_ldst_imm): Fix error message.

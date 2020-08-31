@@ -1,3 +1,8 @@
+2020-08-31  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* csky-dis.c (csky_output_operand): Assign dis_info.value for
+	OPRND_TYPE_VREG.
+
 2020-08-30  Alan Modra  <amodra@gmail.com>
 
 	* cr16-dis.c: Formatting.

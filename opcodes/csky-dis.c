@@ -342,6 +342,7 @@ csky_output_operand (char *str, struct operand const *oprnd,
       strcat (str, buf);
       break;
     case OPRND_TYPE_VREG:
+      dis_info.value = value;
       sprintf (buf, "vr%d", (int)value);
       strcat (str, buf);
       break;
