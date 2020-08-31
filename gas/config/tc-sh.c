@@ -2205,12 +2205,12 @@ find_cooked_opcode (char **str_p)
 static unsigned int
 assemble_ppi (char *op_end, sh_opcode_info *opcode)
 {
-  int movx = 0;
-  int movy = 0;
-  int cond = 0;
-  int field_b = 0;
+  unsigned int movx = 0;
+  unsigned int movy = 0;
+  unsigned int cond = 0;
+  unsigned int field_b = 0;
   char *output;
-  int move_code;
+  unsigned int move_code;
   unsigned int size;
 
   for (;;)
@@ -2464,7 +2464,7 @@ assemble_ppi (char *op_end, sh_opcode_info *opcode)
   if (field_b)
     {
       /* Parallel processing insn.  */
-      unsigned long ppi_code = (movx | movy | 0xf800) << 16 | field_b;
+      unsigned int ppi_code = (movx | movy | 0xf800) << 16 | field_b;
 
       output = frag_more (4);
       size = 4;
