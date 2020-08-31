@@ -1617,7 +1617,7 @@ md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED,
 		 segT seg ATTRIBUTE_UNUSED,
 		 fragS *fragP)
 {
-  int addend, rn, bit = 0;
+  uint32_t addend, rn, bit = 0;
   int operand;
   int where = fragP->fr_opcode - fragP->fr_literal;
   int e = target_big_endian ? 0 : 1;
@@ -1697,7 +1697,7 @@ md_convert_frag (bfd *abfd  ATTRIBUTE_UNUSED,
 	/* The default relax_frag doesn't change the state if there is no
 	   growth, so we must manually handle converting out-of-range BEQ
 	   instructions to JMP.  */
-	if (addend <= 65535 && addend >= -65536)
+	if (addend + 65536 < 131071)
 	  {
 	    if (core_mode)
 	      fragP->fr_fix += 2;

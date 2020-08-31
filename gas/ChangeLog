@@ -1,5 +1,11 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26468
+	* config/tc-mep.c (md_convert_frag): Use uint32_t for addend and
+	other variables.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26493
 	* config/tc-riscv.c (riscv_ip): Cast X_add_number passed to
 	VALID_* macros to unsigned.
