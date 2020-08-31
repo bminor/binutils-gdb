@@ -1,3 +1,9 @@
+2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
+
+	* frame-unwind.h (frame_prev_register_ftype): Fix adjective
+	ordering in comment.
+	* frame.c (frame_id_eq): Fix indentation.
+
 2020-08-31  Scott Linder  <scott@scottlinder.com>
 	    Simon Marchi  <simon.marchi@efficios.com>
 

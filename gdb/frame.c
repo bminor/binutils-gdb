@@ -774,7 +774,7 @@ frame_id_eq (frame_id l, frame_id r)
   bool eq;
 
   if (l.stack_status == FID_STACK_INVALID
-	   || r.stack_status == FID_STACK_INVALID)
+      || r.stack_status == FID_STACK_INVALID)
     /* Like a NaN, if either ID is invalid, the result is false.
        Note that a frame ID is invalid iff it is the null frame ID.  */
     eq = false;

@@ -134,7 +134,7 @@ typedef void (frame_this_id_ftype) (struct frame_info *this_frame,
    a register in THIS frame, or a non-lvalue.
 
    If the previous frame's register was not saved by THIS_FRAME and is
-   therefore undefined, return a not_lval wholly optimized-out value.
+   therefore undefined, return a wholly optimized-out not_lval value.
 
    THIS_PROLOGUE_CACHE can be used to share any prolog analysis data
    with the other unwind methods.  Memory for that cache should be

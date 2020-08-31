@@ -1,5 +1,9 @@
 2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
 
+	* gdb.dwarf2/dw2-reg-undefined.exp: Remove spurious #.
+
+2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdb.dwarf2/frame-inlined-in-outer-frame.exp: New file.
 	* gdb.dwarf2/frame-inlined-in-outer-frame.S: New file.
 
