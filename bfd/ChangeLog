@@ -1,5 +1,11 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26461
+	* elfxx-ia64.c (ia64_elf_install_value): Make expressions unsigned
+	that might shift values into sign bit.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26445
 	* elf32-csky.c (csky_relocate_contents): Make relocation a bfd_vma,
 	and similarly for variables dealing with overflow.
