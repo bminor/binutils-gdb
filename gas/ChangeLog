@@ -1,5 +1,10 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26479
+	* config/tc-nios2.c (md_chars_to_number): Cast buf[i] before shifting.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26472
 	PR 26473
 	PR 26474
