@@ -1,5 +1,13 @@
 2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
 
+	* frame.h (enum frame_id_stack_status) <FID_STACK_OUTER>: New.
+	* frame.c (fprint_frame_id): Handle FID_STACK_OUTER.
+	(outer_frame_id): Use FID_STACK_OUTER instead of
+	FID_STACK_INVALID.
+	(frame_id_p): Don't check for outer_frame_id.
+
+2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
+
 	* frame-unwind.c (frame_unwind_got_optimized): Don't set
 	regnum/frame in value.  Call allocate_value_lazy.
 	* frame.c (frame_unwind_register_value): Use

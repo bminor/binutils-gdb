@@ -85,8 +85,7 @@ struct frame_print_options;
 
 enum frame_id_stack_status
 {
-  /* Stack address is invalid.  E.g., this frame is the outermost
-     (i.e., _start), and the stack hasn't been setup yet.  */
+  /* Stack address is invalid.  */
   FID_STACK_INVALID = 0,
 
   /* Stack address is valid, and is found in the stack_addr field.  */
@@ -94,6 +93,12 @@ enum frame_id_stack_status
 
   /* Sentinel frame.  */
   FID_STACK_SENTINEL = 2,
+
+  /* Outer frame.  Since a frame's stack address is typically defined as the
+     value the stack pointer had prior to the activation of the frame, an outer
+     frame doesn't have a stack address.  The frame ids of frames inlined in the
+     outer frame are also of this type.  */
+  FID_STACK_OUTER = 3,
 
   /* Stack address is unavailable.  I.e., there's a valid stack, but
      we don't know where it is (because memory or registers we'd

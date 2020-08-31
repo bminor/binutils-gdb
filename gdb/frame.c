@@ -396,8 +396,11 @@ fprint_frame_id (struct ui_file *file, struct frame_id id)
     fprintf_unfiltered (file, "stack=<unavailable>");
   else if (id.stack_status == FID_STACK_SENTINEL)
     fprintf_unfiltered (file, "stack=<sentinel>");
+  else if (id.stack_status == FID_STACK_OUTER)
+    fprintf_unfiltered (file, "stack=<outer>");
   else
     fprintf_unfiltered (file, "stack=%s", hex_string (id.stack_addr));
+
   fprintf_unfiltered (file, ",");
 
   fprint_field (file, "code", id.code_addr_p, id.code_addr);
@@ -672,7 +675,7 @@ frame_unwind_caller_id (struct frame_info *next_frame)
 
 const struct frame_id null_frame_id = { 0 }; /* All zeros.  */
 const struct frame_id sentinel_frame_id = { 0, 0, 0, FID_STACK_SENTINEL, 0, 1, 0 };
-const struct frame_id outer_frame_id = { 0, 0, 0, FID_STACK_INVALID, 0, 1, 0 };
+const struct frame_id outer_frame_id = { 0, 0, 0, FID_STACK_OUTER, 0, 1, 0 };
 
 struct frame_id
 frame_id_build_special (CORE_ADDR stack_addr, CORE_ADDR code_addr,
@@ -746,10 +749,6 @@ frame_id_p (frame_id l)
   /* The frame is valid iff it has a valid stack address.  */
   bool p = l.stack_status != FID_STACK_INVALID;
 
-  /* outer_frame_id is also valid.  */
-  if (!p && memcmp (&l, &outer_frame_id, sizeof (l)) == 0)
-    p = true;
-
   if (frame_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "{ frame_id_p (l=");
@@ -774,15 +773,7 @@ frame_id_eq (frame_id l, frame_id r)
 {
   bool eq;
 
-  if (l.stack_status == FID_STACK_INVALID && l.special_addr_p
-      && r.stack_status == FID_STACK_INVALID && r.special_addr_p)
-    /* The outermost frame marker is equal to itself.  This is the
-       dodgy thing about outer_frame_id, since between execution steps
-       we might step into another function - from which we can't
-       unwind either.  More thought required to get rid of
-       outer_frame_id.  */
-    eq = true;
-  else if (l.stack_status == FID_STACK_INVALID
+  if (l.stack_status == FID_STACK_INVALID
 	   || r.stack_status == FID_STACK_INVALID)
     /* Like a NaN, if either ID is invalid, the result is false.
        Note that a frame ID is invalid iff it is the null frame ID.  */
