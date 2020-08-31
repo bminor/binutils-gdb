@@ -1014,12 +1014,12 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
 
   /* Evaluate the argument to STRUCTOP_STRUCT, then find its
      type in order to look up the method.  */
-  arg0 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+  arg0 = evaluate_subexp (nullptr, exp, pos, noside);
 
   if (noside == EVAL_SKIP)
     {
       for (i = 0; i < num_args; ++i)
-	evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	evaluate_subexp (nullptr, exp, pos, noside);
       return arg0;
     }
 
@@ -1056,7 +1056,7 @@ rust_evaluate_funcall (struct expression *exp, int *pos, enum noside noside)
   function = address_of_variable (sym.symbol, block);
 
   for (i = 0; i < num_args; ++i)
-    args[i + 1] = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+    args[i + 1] = evaluate_subexp (nullptr, exp, pos, noside);
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     result = value_zero (TYPE_TARGET_TYPE (fn_type), not_lval);
@@ -1084,10 +1084,10 @@ rust_range (struct expression *exp, int *pos, enum noside noside)
 
   if (kind == HIGH_BOUND_DEFAULT || kind == NONE_BOUND_DEFAULT
       || kind == NONE_BOUND_DEFAULT_EXCLUSIVE)
-    low = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+    low = evaluate_subexp (nullptr, exp, pos, noside);
   if (kind == LOW_BOUND_DEFAULT || kind == LOW_BOUND_DEFAULT_EXCLUSIVE
       || kind == NONE_BOUND_DEFAULT || kind == NONE_BOUND_DEFAULT_EXCLUSIVE)
-    high = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+    high = evaluate_subexp (nullptr, exp, pos, noside);
   bool inclusive = (kind == NONE_BOUND_DEFAULT || kind == LOW_BOUND_DEFAULT);
 
   if (noside == EVAL_SKIP)
@@ -1216,8 +1216,8 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
   int want_slice = 0;
 
   ++*pos;
-  lhs = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-  rhs = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+  lhs = evaluate_subexp (nullptr, exp, pos, noside);
+  rhs = evaluate_subexp (nullptr, exp, pos, noside);
 
   if (noside == EVAL_SKIP)
     return lhs;
@@ -1396,7 +1396,7 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	struct value *value;
 
 	++*pos;
-	value = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	value = evaluate_subexp (nullptr, exp, pos, noside);
 	if (noside == EVAL_SKIP)
 	  {
 	    /* Preserving the type is enough.  */
@@ -1527,9 +1527,9 @@ rust_evaluate_subexp (struct type *expect_type, struct expression *exp,
         pc = (*pos)++;
         field_number = longest_to_int (exp->elts[pc + 1].longconst);
         (*pos) += 2;
-        lhs = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	lhs = evaluate_subexp (nullptr, exp, pos, noside);
 
-        type = value_type (lhs);
+	type = value_type (lhs);
 
 	if (type->code () == TYPE_CODE_STRUCT)
 	  {
@@ -1599,7 +1599,7 @@ tuple structs, and tuple-like enum variants"));
         pc = (*pos)++;
         tem = longest_to_int (exp->elts[pc + 1].longconst);
         (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
-        lhs = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	lhs = evaluate_subexp (nullptr, exp, pos, noside);
 
 	const char *field_name = &exp->elts[pc + 2].string;
         type = value_type (lhs);

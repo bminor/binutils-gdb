@@ -136,7 +136,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
       return evaluate_subexp_standard (expect_type, exp, pos, noside);
 
     case UNOP_ABS:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	return eval_skip_value (exp);
       type = value_type (arg1);
@@ -159,7 +159,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
       error (_("ABS of type %s not supported"), TYPE_SAFE_NAME (type));
 
     case BINOP_MOD:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
       if (noside == EVAL_SKIP)
 	return eval_skip_value (exp);
@@ -193,7 +193,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 
     case UNOP_FORTRAN_CEILING:
       {
-	arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	arg1 = evaluate_subexp (nullptr, exp, pos, noside);
 	if (noside == EVAL_SKIP)
 	  return eval_skip_value (exp);
 	type = value_type (arg1);
@@ -208,7 +208,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 
     case UNOP_FORTRAN_FLOOR:
       {
-	arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	arg1 = evaluate_subexp (nullptr, exp, pos, noside);
 	if (noside == EVAL_SKIP)
 	  return eval_skip_value (exp);
 	type = value_type (arg1);
@@ -223,7 +223,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
 
     case BINOP_FORTRAN_MODULO:
       {
-	arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	arg1 = evaluate_subexp (nullptr, exp, pos, noside);
 	arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
 	if (noside == EVAL_SKIP)
 	  return eval_skip_value (exp);
@@ -260,7 +260,7 @@ evaluate_subexp_f (struct type *expect_type, struct expression *exp,
       }
 
     case BINOP_FORTRAN_CMPLX:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
       if (noside == EVAL_SKIP)
 	return eval_skip_value (exp);

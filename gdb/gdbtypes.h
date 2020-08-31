@@ -1148,8 +1148,6 @@ struct type
   struct main_type *main_type;
 };
 
-#define	NULL_TYPE ((struct type *) 0)
-
 struct fn_fieldlist
 {
 

@@ -9147,7 +9147,7 @@ ada_enum_name (const char *name)
 static struct value *
 evaluate_subexp_type (struct expression *exp, int *pos)
 {
-  return evaluate_subexp (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
+  return evaluate_subexp (nullptr, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
 }
 
 /* If VAL is wrapped in an aligner or subtype wrapper, return the
@@ -10133,7 +10133,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       return ada_evaluate_subexp (type, exp, pos, noside);
 
     case BINOP_ASSIGN:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       if (exp->elts[*pos].opcode == OP_AGGREGATE)
 	{
 	  arg1 = assign_aggregate (arg1, arg1, exp, pos, noside);
@@ -10221,8 +10221,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     case BINOP_DIV:
     case BINOP_REM:
     case BINOP_MOD:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
+      arg2 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -10243,7 +10243,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case BINOP_EQUAL:
     case BINOP_NOTEQUAL:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
@@ -10260,7 +10260,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       return value_from_longest (type, (LONGEST) tem);
 
     case UNOP_NEG:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
       else if (ada_is_gnat_encoded_fixed_point_type (value_type (arg1)))
@@ -10289,8 +10289,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       {
         struct value *val;
 
-        arg1 = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
-        *pos = pc;
+	arg1 = evaluate_subexp (nullptr, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
+	*pos = pc;
         val = evaluate_subexp_standard (expect_type, exp, pos, noside);
 
         return value_cast (value_type (arg1), val);
@@ -10341,7 +10341,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 		 a fixed type would result in the loss of that type name,
 		 thus preventing us from printing the name of the ancestor
 		 type in the type description.  */
-	      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_NORMAL);
+	      arg1 = evaluate_subexp (nullptr, exp, pos, EVAL_NORMAL);
 
 	      if (type->code () != TYPE_CODE_REF)
 		{
@@ -10404,8 +10404,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       else
         {
           for (tem = 0; tem <= nargs; tem += 1)
-            argvec[tem] = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-          argvec[tem] = 0;
+	    argvec[tem] = evaluate_subexp (nullptr, exp, pos, noside);
+	  argvec[tem] = 0;
 
           if (noside == EVAL_SKIP)
             goto nosideret;
@@ -10534,12 +10534,12 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case TERNOP_SLICE:
       {
-        struct value *array = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-        struct value *low_bound_val =
-          evaluate_subexp (NULL_TYPE, exp, pos, noside);
-        struct value *high_bound_val =
-          evaluate_subexp (NULL_TYPE, exp, pos, noside);
-        LONGEST low_bound;
+	struct value *array = evaluate_subexp (nullptr, exp, pos, noside);
+	struct value *low_bound_val
+	  = evaluate_subexp (nullptr, exp, pos, noside);
+	struct value *high_bound_val
+	  = evaluate_subexp (nullptr, exp, pos, noside);
+	LONGEST low_bound;
         LONGEST high_bound;
 
         low_bound_val = coerce_ref (low_bound_val);
@@ -10617,7 +10617,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case UNOP_IN_RANGE:
       (*pos) += 2;
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       type = check_typedef (exp->elts[pc + 1].type);
 
       if (noside == EVAL_SKIP)
@@ -10649,8 +10649,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case BINOP_IN_BOUNDS:
       (*pos) += 2;
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
+      arg2 = evaluate_subexp (nullptr, exp, pos, noside);
 
       if (noside == EVAL_SKIP)
         goto nosideret;
@@ -10681,9 +10681,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                                 || value_equal (arg2, arg1)));
 
     case TERNOP_IN_RANGE:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      arg3 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
+      arg2 = evaluate_subexp (nullptr, exp, pos, noside);
+      arg3 = evaluate_subexp (nullptr, exp, pos, noside);
 
       if (noside == EVAL_SKIP)
         goto nosideret;
@@ -10706,14 +10706,14 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
         if (exp->elts[*pos].opcode == OP_TYPE)
           {
-            evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
-            arg1 = NULL;
+	    evaluate_subexp (nullptr, exp, pos, EVAL_SKIP);
+	    arg1 = NULL;
             type_arg = check_typedef (exp->elts[pc + 2].type);
           }
         else
           {
-            arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-            type_arg = NULL;
+	    arg1 = evaluate_subexp (nullptr, exp, pos, noside);
+	    type_arg = NULL;
           }
 
         if (exp->elts[*pos].opcode != OP_LONG)
@@ -10843,7 +10843,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       }
 
     case OP_ATR_TAG:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
 
@@ -10854,9 +10854,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case OP_ATR_MIN:
     case OP_ATR_MAX:
-      evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      evaluate_subexp (nullptr, exp, pos, EVAL_SKIP);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
+      arg2 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -10872,8 +10872,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       {
         struct type *type_arg = check_typedef (exp->elts[pc + 2].type);
 
-        evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
-        if (noside == EVAL_SKIP)
+	evaluate_subexp (nullptr, exp, pos, EVAL_SKIP);
+	if (noside == EVAL_SKIP)
           goto nosideret;
 
         if (!ada_is_modular_type (type_arg))
@@ -10885,8 +10885,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
 
     case OP_ATR_POS:
-      evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      evaluate_subexp (nullptr, exp, pos, EVAL_SKIP);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
       type = builtin_type (exp->gdbarch)->builtin_int;
@@ -10896,7 +10896,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	return value_pos_atr (type, arg1);
 
     case OP_ATR_SIZE:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       type = value_type (arg1);
 
       /* If the argument is a reference, then dereference its type, since
@@ -10914,8 +10914,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                                    TARGET_CHAR_BIT * TYPE_LENGTH (type));
 
     case OP_ATR_VAL:
-      evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      evaluate_subexp (nullptr, exp, pos, EVAL_SKIP);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       type = exp->elts[pc + 2].type;
       if (noside == EVAL_SKIP)
         goto nosideret;
@@ -10925,8 +10925,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         return value_val_atr (type, arg1);
 
     case BINOP_EXP:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
+      arg2 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -10944,14 +10944,14 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	}
 
     case UNOP_PLUS:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
       else
         return arg1;
 
     case UNOP_ABS:
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
       unop_promote (exp->language_defn, exp->gdbarch, &arg1);
@@ -10962,7 +10962,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case UNOP_IND:
       preeval_pos = *pos;
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
       type = ada_check_typedef (value_type (arg1));
@@ -10991,8 +10991,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 		   || type->code () == TYPE_CODE_PTR)
 		  && ada_is_tagged_type (TYPE_TARGET_TYPE (type), 0))
 		{
-		  arg1 = evaluate_subexp (NULL_TYPE, exp, &preeval_pos,
-					  EVAL_NORMAL);
+		  arg1
+		    = evaluate_subexp (nullptr, exp, &preeval_pos, EVAL_NORMAL);
 		  type = value_type (ada_value_ind (arg1));
 		}
 	      else
@@ -11046,7 +11046,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       tem = longest_to_int (exp->elts[pc + 1].longconst);
       (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
       preeval_pos = *pos;
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -11065,8 +11065,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
               if (type == NULL)
 		{
-		  arg1 = evaluate_subexp (NULL_TYPE, exp, &preeval_pos,
-					  EVAL_NORMAL);
+		  arg1
+		    = evaluate_subexp (nullptr, exp, &preeval_pos, EVAL_NORMAL);
 		  arg1 = ada_value_struct_elt (arg1,
 					       &exp->elts[pc + 2].string,
 					       0);

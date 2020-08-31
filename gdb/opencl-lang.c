@@ -739,7 +739,7 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
        scalar-to-vector widening.  */
     case BINOP_ASSIGN:
       (*pos)++;
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       type1 = value_type (arg1);
       arg2 = evaluate_subexp (type1, exp, pos, noside);
 
@@ -784,7 +784,7 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
     case BINOP_GEQ:
     case BINOP_LEQ:
       (*pos)++;
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
 
       if (noside == EVAL_SKIP)
@@ -796,7 +796,7 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
     /* Handle the logical unary operator not(!).  */
     case UNOP_LOGICAL_NOT:
       (*pos)++;
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
 
       if (noside == EVAL_SKIP)
 	return value_from_longest (builtin_type (exp->gdbarch)->
@@ -808,11 +808,11 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
     case BINOP_LOGICAL_AND:
     case BINOP_LOGICAL_OR:
       (*pos)++;
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
 
       if (noside == EVAL_SKIP)
 	{
-	  evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	  evaluate_subexp (nullptr, exp, pos, noside);
 
 	  return value_from_longest (builtin_type (exp->gdbarch)->
 				     builtin_int, 1);
@@ -826,8 +826,7 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 	     Therefore we evaluate it once using EVAL_AVOID_SIDE_EFFECTS.  */
 	  int oldpos = *pos;
 
-	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos,
-				  EVAL_AVOID_SIDE_EFFECTS);
+	  arg2 = evaluate_subexp (nullptr, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
 	  *pos = oldpos;
 	  type1 = check_typedef (value_type (arg1));
 	  type2 = check_typedef (value_type (arg2));
@@ -835,7 +834,7 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 	  if ((type1->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type1))
 	      || (type2->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type2)))
 	    {
-	      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	      arg2 = evaluate_subexp (nullptr, exp, pos, noside);
 
 	      return opencl_relop (exp, arg1, arg2, op);
 	    }
@@ -850,8 +849,8 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 	      if (op == BINOP_LOGICAL_OR)
 		tmp = !tmp;
 
-	      arg2 = evaluate_subexp (NULL_TYPE, exp, pos,
-				      tmp ? EVAL_SKIP : noside);
+	      arg2
+		= evaluate_subexp (nullptr, exp, pos, tmp ? EVAL_SKIP : noside);
 	      type1 = language_bool_type (exp->language_defn, exp->gdbarch);
 
 	      if (op == BINOP_LOGICAL_AND)
@@ -866,7 +865,7 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
     /* Handle the ternary selection operator.  */
     case TERNOP_COND:
       (*pos)++;
-      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      arg1 = evaluate_subexp (nullptr, exp, pos, noside);
       type1 = check_typedef (value_type (arg1));
       if (type1->code () == TYPE_CODE_ARRAY && TYPE_VECTOR (type1))
 	{
@@ -875,8 +874,8 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 	  int t2_is_vec, t3_is_vec, i;
 	  LONGEST lowb1, lowb2, lowb3, highb1, highb2, highb3;
 
-	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-	  arg3 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	  arg2 = evaluate_subexp (nullptr, exp, pos, noside);
+	  arg3 = evaluate_subexp (nullptr, exp, pos, noside);
 	  type2 = check_typedef (value_type (arg2));
 	  type3 = check_typedef (value_type (arg3));
 	  t2_is_vec
@@ -942,15 +941,15 @@ Cannot perform conditional operation on vectors with different sizes"));
 	  if (value_logical_not (arg1))
 	    {
 	      /* Skip the second operand.  */
-	      evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
+	      evaluate_subexp (nullptr, exp, pos, EVAL_SKIP);
 
-	      return evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	      return evaluate_subexp (nullptr, exp, pos, noside);
 	    }
 	  else
 	    {
 	      /* Skip the third operand.  */
-	      arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
-	      evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);
+	      arg2 = evaluate_subexp (nullptr, exp, pos, noside);
+	      evaluate_subexp (nullptr, exp, pos, EVAL_SKIP);
 
 	      return arg2;
 	    }
@@ -963,7 +962,7 @@ Cannot perform conditional operation on vectors with different sizes"));
 	int tem = longest_to_int (exp->elts[pc + 1].longconst);
 
 	(*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
-	arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+	arg1 = evaluate_subexp (nullptr, exp, pos, noside);
 	type1 = check_typedef (value_type (arg1));
 
 	if (noside == EVAL_SKIP)
