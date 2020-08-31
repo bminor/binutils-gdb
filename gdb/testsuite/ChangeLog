@@ -1,3 +1,7 @@
+2020-08-31  Tom de Vries  <tdevries@suse.de>
+
+	* gdb.base/eh_return.exp: Use nopie.
+
 2020-08-28  Pedro Alves  <pedro@palves.net>
 
 	* gdb.base/advance-until-multiple-locations.exp

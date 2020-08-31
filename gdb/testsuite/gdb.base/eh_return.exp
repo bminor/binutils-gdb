@@ -18,7 +18,8 @@
 
 standard_testfile
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
+	 {debug nopie}]} {
     return -1
 }
 
