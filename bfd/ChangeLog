@@ -1,5 +1,11 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26445
+	* elf32-csky.c (csky_relocate_contents): Make relocation a bfd_vma,
+	and similarly for variables dealing with overflow.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26442
 	* elf32-crx.c (crx_elf_final_link_relocate): Calculate reloc_bits
 	without undefined behaviour.  Tidy excess casts.

@@ -3918,7 +3918,7 @@ elf32_csky_setup_section_lists (bfd *output_bfd,
 static bfd_reloc_status_type
 csky_relocate_contents (reloc_howto_type *howto,
 			bfd *input_bfd,
-			long relocation,
+			bfd_vma relocation,
 			bfd_byte *location)
 {
   int size;
@@ -3961,7 +3961,7 @@ csky_relocate_contents (reloc_howto_type *howto,
 
 	  if (R_CKCORE_DOFFSET_LO16 == howto->type)
 	    {
-	      if ((signed) relocation < 0)
+	      if ((bfd_signed_vma) relocation < 0)
 		{
 		  x |= CSKY_INSN_ADDI_TO_SUBI;
 		  relocation = -relocation;
@@ -3972,7 +3972,7 @@ csky_relocate_contents (reloc_howto_type *howto,
 	    }
 	  else if (R_CKCORE_TOFFSET_LO16 == howto->type)
 	    {
-	      if ((signed) relocation < 0)
+	      if ((bfd_signed_vma) relocation < 0)
 		{
 		  x |= CSKY_INSN_ADDI_TO_SUBI;
 		  relocation = -relocation;
@@ -3993,13 +3993,13 @@ csky_relocate_contents (reloc_howto_type *howto,
   flag = bfd_reloc_ok;
   if (howto->complain_on_overflow != complain_overflow_dont)
     {
-      int addrmask;
-      int fieldmask;
-      int signmask;
-      int ss;
-      int a;
-      int b;
-      int sum;
+      bfd_vma addrmask;
+      bfd_vma fieldmask;
+      bfd_vma signmask;
+      bfd_vma ss;
+      bfd_vma a;
+      bfd_vma b;
+      bfd_vma sum;
       /* Get the values to be added together.  For signed and unsigned
 	 relocations, we assume that all values should be truncated to
 	 the size of an address.  For bitfields, all the bits matter.
@@ -4085,7 +4085,7 @@ csky_relocate_contents (reloc_howto_type *howto,
 
     }
   /* Put RELOCATION in the right bits.  */
-  relocation >>= (bfd_vma) rightshift;
+  relocation >>= rightshift;
 
   if ((howto->type == R_CKCORE_DOFFSET_LO16
        || howto->type == R_CKCORE_TOFFSET_LO16)
@@ -4112,7 +4112,7 @@ csky_relocate_contents (reloc_howto_type *howto,
 	  csky_put_insn_32 (input_bfd, CSKY_INSN_JSR_R26, location + 4);
 	}
 
-      relocation <<= (bfd_vma) bitpos;
+      relocation <<= bitpos;
       /* Add RELOCATION to the right bits of X.  */
       x = ((x & ~howto->dst_mask)
 	   | (((x & howto->src_mask) + relocation) & howto->dst_mask));
