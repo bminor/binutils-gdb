@@ -1,5 +1,11 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26493
+	* config/tc-riscv.c (riscv_ip): Cast X_add_number passed to
+	VALID_* macros to unsigned.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-crx.c: Formatting.
 	(CRX_PRINT): Wrap params in parentheses.  Remove parens from uses
 	throughout file.

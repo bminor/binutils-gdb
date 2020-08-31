@@ -1905,18 +1905,18 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		case '<':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_IMM (imm_expr->X_add_number)
 		      || imm_expr->X_add_number <= 0
-		      || imm_expr->X_add_number >= 32)
+		      || imm_expr->X_add_number >= 32
+		      || !VALID_RVC_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case '8':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_UIMM8 (imm_expr->X_add_number)
 		      || imm_expr->X_add_number < 0
-		      || imm_expr->X_add_number >= 256)
+		      || imm_expr->X_add_number >= 256
+		      || !VALID_RVC_UIMM8 ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_UIMM8 (imm_expr->X_add_number);
 		  goto rvc_imm_done;
@@ -1924,7 +1924,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
 		      || imm_expr->X_add_number == 0
-		      || !VALID_RVC_SIMM3 (imm_expr->X_add_number))
+		      || !VALID_RVC_SIMM3 ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_SIMM3 (imm_expr->X_add_number);
 		  goto rvc_imm_done;
@@ -1932,7 +1932,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
 		      || imm_expr->X_add_number == 0
-		      || !VALID_RVC_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
@@ -1941,7 +1941,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_LW_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_LW_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_LW_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
@@ -1950,7 +1950,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_LD_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_LD_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_LD_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
@@ -1959,7 +1959,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_LWSP_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_LWSP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
 		    ENCODE_RVC_LWSP_IMM (imm_expr->X_add_number);
@@ -1969,7 +1969,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_LDSP_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_LDSP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
 		    ENCODE_RVC_LDSP_IMM (imm_expr->X_add_number);
@@ -1980,15 +1980,15 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      /* C.addiw, c.li, and c.andi allow zero immediate.
 			 C.addi allows zero immediate as hint.  Otherwise this
 			 is same as 'j'.  */
-		      || !VALID_RVC_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |= ENCODE_RVC_IMM (imm_expr->X_add_number);
 		  goto rvc_imm_done;
 		case 'K':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_ADDI4SPN_IMM (imm_expr->X_add_number)
-		      || imm_expr->X_add_number == 0)
+		      || imm_expr->X_add_number == 0
+		      || !VALID_RVC_ADDI4SPN_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
 		    ENCODE_RVC_ADDI4SPN_IMM (imm_expr->X_add_number);
@@ -1996,8 +1996,8 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		case 'L':
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_ADDI16SP_IMM (imm_expr->X_add_number)
-		      || imm_expr->X_add_number == 0)
+		      || imm_expr->X_add_number == 0
+		      || !VALID_RVC_ADDI16SP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
 		    ENCODE_RVC_ADDI16SP_IMM (imm_expr->X_add_number);
@@ -2007,7 +2007,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_SWSP_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_SWSP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
 		    ENCODE_RVC_SWSP_IMM (imm_expr->X_add_number);
@@ -2017,7 +2017,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		    continue;
 		  if (my_getSmallExpression (imm_expr, imm_reloc, s, p)
 		      || imm_expr->X_op != O_constant
-		      || !VALID_RVC_SDSP_IMM (imm_expr->X_add_number))
+		      || !VALID_RVC_SDSP_IMM ((valueT) imm_expr->X_add_number))
 		    break;
 		  ip->insn_opcode |=
 		    ENCODE_RVC_SDSP_IMM (imm_expr->X_add_number);
