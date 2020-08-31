@@ -1295,7 +1295,7 @@ frame_unwind_register_value (frame_info *next_frame, int regnum)
       if (value_optimized_out (value))
 	{
 	  fprintf_unfiltered (gdb_stdlog, " ");
-	  val_print_optimized_out (value, gdb_stdlog);
+	  val_print_not_saved (gdb_stdlog);
 	}
       else
 	{

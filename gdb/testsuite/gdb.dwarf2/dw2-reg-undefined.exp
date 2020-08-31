@@ -74,3 +74,15 @@ for {set f 0} {$f < 3} {incr f} {
 		    "r9\\s+${pattern_r8_r9_info}\\s*"] \
 	"Check values of rax, rbx, rcx, r8, r9 in frame ${f}"
 }
+
+# Test that the debug log statement in frame_unwind_register_value produces
+# "not saved" and not# "optimized out".
+gdb_test "set debug frame 1"
+gdb_test {print $rax} {frame_unwind_register_value[^\r\n]+rax[^\r\n]+not saved.*}
+gdb_test "set debug frame 0"
+
+# Test that history values show "not saved" and not "optimized out".
+gdb_test "print" " = <not saved>"
+
+# Test that convenience variables _don't_ show "not saved".
+gdb_test {print $foo = $rax} " = <optimized out>"

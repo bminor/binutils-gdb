@@ -1,3 +1,9 @@
+2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
+
+	* gdb.dwarf2/dw2-reg-undefined.exp: Test "set debug frame 1"
+	output, printing a "not saved" value from history and printing a
+	convenience variable created from a "not saved" value.
+
 2020-08-31  Tom de Vries  <tdevries@suse.de>
 
 	* gdb.base/eh_return.exp: Use nopie.

@@ -1,5 +1,12 @@
 2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
 
+	* frame-unwind.c (frame_unwind_got_optimized): Don't set
+	regnum/frame in value.  Call allocate_value_lazy.
+	* frame.c (frame_unwind_register_value): Use
+	val_print_not_saved.
+
+2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
+
 	* gdbtypes.h (NULL_TYPE): Remove, change all uses to nullptr.
 
 2020-08-29  Pedro Alves  <pedro@palves.net>
