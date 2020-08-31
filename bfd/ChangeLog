@@ -1,5 +1,14 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26476
+	PR 26477
+	* elfxx-mips.c (CRINFO_CTYPE, CRINFO_RTYPE, CRINFO_DIST2TO),
+	(CRINFO_RELVADDR): Make unsigned.
+	(mips_elf_nullify_got_load): Use unsigned constant when shifting
+	into sign bit.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26466
 	* mep-relocs.pl (emit_apply): Handle HI16S adjustment.  Use "u"
 	variable and rewrite signed overflow check.

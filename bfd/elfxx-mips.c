@@ -698,13 +698,13 @@ typedef struct
 
 /* These are the constants used to swap the bitfields in a crinfo.  */
 
-#define CRINFO_CTYPE (0x1)
+#define CRINFO_CTYPE (0x1U)
 #define CRINFO_CTYPE_SH (31)
-#define CRINFO_RTYPE (0xf)
+#define CRINFO_RTYPE (0xfU)
 #define CRINFO_RTYPE_SH (27)
-#define CRINFO_DIST2TO (0xff)
+#define CRINFO_DIST2TO (0xffU)
 #define CRINFO_DIST2TO_SH (19)
-#define CRINFO_RELVADDR (0x7ffff)
+#define CRINFO_RELVADDR (0x7ffffU)
 #define CRINFO_RELVADDR_SH (0)
 
 /* A compact relocation info has long (3 words) or short (2 words)
@@ -5367,7 +5367,7 @@ mips_elf_nullify_got_load (bfd *input_bfd, bfd_byte *contents,
   if (mips16_reloc_p (r_type)
       && (((x >> 22) & 0x3ff) == 0x3d3				/* LW */
 	  || ((x >> 22) & 0x3ff) == 0x3c7))			/* LD */
-    x = (0x3cd << 22) | (x & (7 << 16)) << 3;			/* LI */
+    x = (0x3cdU << 22) | (x & (7 << 16)) << 3;			/* LI */
   else if (micromips_reloc_p (r_type)
 	   && ((x >> 26) & 0x37) == 0x37)			/* LW/LD */
     x = (0xc << 26) | (x & (0x1f << 21));			/* ADDIU */
