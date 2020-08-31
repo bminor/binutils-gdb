@@ -1,5 +1,13 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26472
+	PR 26473
+	PR 26474
+	* config/tc-mips.c (operand_reg_mask): Shift 1u left.
+	(load_register): Shift 0xffffU left.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26471
 	* config/tc-metag.c (md_chars_to_number): Make retval unsigned.
 

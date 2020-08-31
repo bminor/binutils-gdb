@@ -4656,7 +4656,7 @@ operand_reg_mask (const struct mips_cl_insn *insn,
 	if (!(type_mask & (1 << reg_op->reg_type)))
 	  return 0;
 	uval = insn_extract_operand (insn, operand);
-	return 1 << mips_decode_reg_operand (reg_op, uval);
+	return 1u << mips_decode_reg_operand (reg_op, uval);
       }
 
     case OP_REG_PAIR:
@@ -4667,28 +4667,28 @@ operand_reg_mask (const struct mips_cl_insn *insn,
 	if (!(type_mask & (1 << pair_op->reg_type)))
 	  return 0;
 	uval = insn_extract_operand (insn, operand);
-	return (1 << pair_op->reg1_map[uval]) | (1 << pair_op->reg2_map[uval]);
+	return (1u << pair_op->reg1_map[uval]) | (1u << pair_op->reg2_map[uval]);
       }
 
     case OP_CLO_CLZ_DEST:
       if (!(type_mask & (1 << OP_REG_GP)))
 	return 0;
       uval = insn_extract_operand (insn, operand);
-      return (1 << (uval & 31)) | (1 << (uval >> 5));
+      return (1u << (uval & 31)) | (1u << (uval >> 5));
 
     case OP_SAME_RS_RT:
       if (!(type_mask & (1 << OP_REG_GP)))
 	return 0;
       uval = insn_extract_operand (insn, operand);
       gas_assert ((uval & 31) == (uval >> 5));
-      return 1 << (uval & 31);
+      return 1u << (uval & 31);
 
     case OP_CHECK_PREV:
     case OP_NON_ZERO_REG:
       if (!(type_mask & (1 << OP_REG_GP)))
 	return 0;
       uval = insn_extract_operand (insn, operand);
-      return 1 << (uval & 31);
+      return 1u << (uval & 31);
 
     case OP_LWM_SWM_LIST:
       abort ();
@@ -4703,12 +4703,12 @@ operand_reg_mask (const struct mips_cl_insn *insn,
       vsel = uval >> 5;
       if ((vsel & 0x18) == 0x18)
 	return 0;
-      return 1 << (uval & 31);
+      return 1u << (uval & 31);
 
     case OP_REG_INDEX:
       if (!(type_mask & (1 << OP_REG_GP)))
 	return 0;
-      return 1 << insn_extract_operand (insn, operand);
+      return 1u << insn_extract_operand (insn, operand);
     }
   abort ();
 }
@@ -9564,11 +9564,11 @@ load_register (int reg, expressionS *ep, int dbl)
 	  if (shift < 32)
 	    {
 	      himask = 0xffff >> (32 - shift);
-	      lomask = (0xffff << shift) & 0xffffffff;
+	      lomask = (0xffffU << shift) & 0xffffffff;
 	    }
 	  else
 	    {
-	      himask = 0xffff << (shift - 32);
+	      himask = 0xffffU << (shift - 32);
 	      lomask = 0;
 	    }
 	  if ((hi32.X_add_number & ~(offsetT) himask) == 0
