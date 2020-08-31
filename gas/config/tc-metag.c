@@ -7030,7 +7030,7 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 static unsigned int
 md_chars_to_number (char *val, int n)
 {
-  int retval;
+  unsigned int retval;
   unsigned char * where = (unsigned char *) val;
 
   for (retval = 0; n--;)

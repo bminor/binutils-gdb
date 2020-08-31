@@ -1,5 +1,10 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26471
+	* config/tc-metag.c (md_chars_to_number): Make retval unsigned.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26468
 	* config/tc-mep.c (md_convert_frag): Use uint32_t for addend and
 	other variables.
