@@ -1,3 +1,9 @@
+2020-09-01  Alan Modra  <amodra@gmail.com>
+
+	* mep-core.cpu (f-8s8a2, f-12s4a2, f-17s16a2): Multiply signed
+	value by two rather than shifting left.
+	(f-24s5a2n): Similarly multiply signed f-24s5a2n-hi to extract.
+
 2020-08-26  David Faust  <david.faust@oracle.com>
 
 	* bpf.cpu (arch bpf): Add xbpf mach and isas.

@@ -1,3 +1,7 @@
+2020-09-01  Alan Modra  <amodra@gmail.com>
+
+	* mep-ibld.c: Regenerate.
+
 2020-08-31  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* csky-dis.c (csky_output_operand): Assign dis_info.value for
