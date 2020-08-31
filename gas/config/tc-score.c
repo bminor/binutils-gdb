@@ -7065,10 +7065,10 @@ s3_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
 static void
 s3_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
-  offsetT value = *valP;
-  offsetT newval;
-  offsetT content;
-  unsigned short HI, LO;
+  valueT value = *valP;
+  valueT newval;
+  valueT content;
+  valueT HI, LO;
 
   char *buf = fixP->fx_frag->fr_literal + fixP->fx_where;
 
@@ -7099,7 +7099,7 @@ s3_apply_fix (fixS *fixP, valueT *valP, segT seg)
       if (fixP->fx_done)        /* For la rd, imm32.  */
         {
           newval = s3_md_chars_to_number (buf, s3_INSN_SIZE);
-          HI = (value) >> 16;   /* mul to 2, then take the hi 16 bit.  */
+          HI = value >> 16;   /* mul to 2, then take the hi 16 bit.  */
           newval |= (HI & 0x3fff) << 1;
           newval |= ((HI >> 14) & 0x3) << 16;
           s3_md_number_to_chars (buf, newval, s3_INSN_SIZE);
@@ -7109,7 +7109,7 @@ s3_apply_fix (fixS *fixP, valueT *valP, segT seg)
       if (fixP->fx_done)        /* For la rd, imm32.  */
         {
           newval = s3_md_chars_to_number (buf, s3_INSN_SIZE);
-          LO = (value) & 0xffff;
+          LO = value & 0xffff;
           newval |= (LO & 0x3fff) << 1; /* 16 bit: imm -> 14 bit in lo, 2 bit in hi.  */
           newval |= ((LO >> 14) & 0x3) << 16;
           s3_md_number_to_chars (buf, newval, s3_INSN_SIZE);

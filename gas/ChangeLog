@@ -1,5 +1,11 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26495
+	* config/tc-score.c (s3_apply_fix): Use unsigned variables.
+	* config/tc-score7.c (s7_apply_fix): Likewise.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26480
 	* config/tc-nios2.c (nios2_parse_reglist): Shift 1UL left.
 

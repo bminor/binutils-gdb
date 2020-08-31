@@ -6613,11 +6613,11 @@ s7_section_align (segT segment, valueT size)
 static void
 s7_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
-  offsetT value = *valP;
-  offsetT abs_value = 0;
-  offsetT newval;
-  offsetT content;
-  unsigned short HI, LO;
+  valueT value = *valP;
+  valueT abs_value = 0;
+  valueT newval;
+  valueT content;
+  valueT HI, LO;
 
   char *buf = fixP->fx_frag->fr_literal + fixP->fx_where;
 
@@ -6648,7 +6648,7 @@ s7_apply_fix (fixS *fixP, valueT *valP, segT seg)
       if (fixP->fx_done)
         {                       /* For la rd, imm32.  */
           newval = s7_md_chars_to_number (buf, s7_INSN_SIZE);
-          HI = (value) >> 16;   /* mul to 2, then take the hi 16 bit.  */
+          HI = value >> 16;   /* mul to 2, then take the hi 16 bit.  */
           newval |= (HI & 0x3fff) << 1;
           newval |= ((HI >> 14) & 0x3) << 16;
           s7_number_to_chars (buf, newval, s7_INSN_SIZE);
@@ -6658,7 +6658,7 @@ s7_apply_fix (fixS *fixP, valueT *valP, segT seg)
       if (fixP->fx_done)        /* For la rd, imm32.  */
         {
           newval = s7_md_chars_to_number (buf, s7_INSN_SIZE);
-          LO = (value) & 0xffff;
+          LO = value & 0xffff;
           newval |= (LO & 0x3fff) << 1; /* 16 bit: imm -> 14 bit in lo, 2 bit in hi.  */
           newval |= ((LO >> 14) & 0x3) << 16;
           s7_number_to_chars (buf, newval, s7_INSN_SIZE);
@@ -6668,7 +6668,7 @@ s7_apply_fix (fixS *fixP, valueT *valP, segT seg)
       {
         content = s7_md_chars_to_number (buf, s7_INSN_SIZE);
         value = fixP->fx_offset;
-        if (!(value >= 0 && value <= 0x1ffffff))
+        if (value > 0x1ffffff)
           {
             as_bad_where (fixP->fx_file, fixP->fx_line,
                           _("j or jl truncate (0x%x)  [0 ~ 2^25-1]"), (unsigned int) value);
@@ -6723,7 +6723,7 @@ s7_apply_fix (fixS *fixP, valueT *valP, segT seg)
       content = s7_md_chars_to_number (buf, s7_INSN16_SIZE);
       content &= 0xf001;
       value = fixP->fx_offset;
-      if (!(value >= 0 && value <= 0xfff))
+      if (value > 0xfff)
         {
           as_bad_where (fixP->fx_file, fixP->fx_line,
                         _("j! or jl! truncate (0x%x)  [0 ~ 2^12-1]"), (unsigned int) value);
