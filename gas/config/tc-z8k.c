@@ -953,7 +953,7 @@ get_specific (opcode_entry_type *opcode, op_type *operands)
     return 0;
 }
 
-static char buffer[20];
+static unsigned char buffer[20];
 
 static void
 newfix (int ptr, bfd_reloc_code_real_type type, int size, expressionS *operand)
@@ -984,9 +984,9 @@ newfix (int ptr, bfd_reloc_code_real_type type, int size, expressionS *operand)
     }
 }
 
-static char *
-apply_fix (char *ptr, bfd_reloc_code_real_type type, expressionS *operand,
-	   int size)
+static unsigned char *
+apply_fix (unsigned char *ptr, bfd_reloc_code_real_type type,
+	   expressionS *operand, int size)
 {
   long n = operand->X_add_number;
 
@@ -1020,7 +1020,7 @@ apply_fix (char *ptr, bfd_reloc_code_real_type type, expressionS *operand,
 static void
 build_bytes (opcode_entry_type *this_try, struct z8k_op *operand ATTRIBUTE_UNUSED)
 {
-  char *output_ptr = buffer;
+  unsigned char *output_ptr = buffer;
   int c;
   int nibble;
   unsigned int *class_ptr;
@@ -1183,12 +1183,12 @@ build_bytes (opcode_entry_type *this_try, struct z8k_op *operand ATTRIBUTE_UNUSE
   /* Copy from the nibble buffer into the frag.  */
   {
     int length = (output_ptr - buffer) / 2;
-    char *src = buffer;
-    char *fragp = frag_more (length);
+    unsigned char *src = buffer;
+    unsigned char *fragp = (unsigned char *) frag_more (length);
 
     while (src < output_ptr)
       {
-	*fragp = (src[0] << 4) | src[1];
+	*fragp = ((src[0] & 0xf) << 4) | (src[1] & 0xf);
 	src += 2;
 	fragp++;
       }

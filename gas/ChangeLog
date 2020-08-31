@@ -1,5 +1,12 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26510
+	* config/tc-z8k.c (buffer): Use unsigned char.
+	(apply_fix): Use unsigned char* pointers.
+	(build_bytes): Likewise and mask nibbles when packing.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26503
 	* config/tc-v850.c (parse_register_list): Shift 1u left.
 
