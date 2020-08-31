@@ -1,5 +1,11 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26493
+	* opcode/riscv.h (OP_MASK_CSR, OP_MASK_CUSTOM_IMM)
+	(OP_MASK_FUNCT7, OP_MASK_RS3): Make unsigned.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26457
 	* som/aout.h (SOM_SUBSPACE_ACCESS_CONTROL_BITS_MASK): Make unsigned.
 	(SOM_SUBSPACE_MEMORY_RESIDENT, SOM_SUBSPACE_DUP_COMMON)

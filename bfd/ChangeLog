@@ -1,5 +1,12 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26493
+	* elfnn-riscv.c (riscv_make_plt_header): Cast PLT_HEADER_SIZE to
+	unsigned when using with RISCV_ITYPE.
+	(_bfd_riscv_relax_call): Use an unsigned foff.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26476
 	PR 26477
 	* elfxx-mips.c (CRINFO_CTYPE, CRINFO_RTYPE, CRINFO_DIST2TO),

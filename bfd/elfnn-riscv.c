@@ -199,7 +199,7 @@ riscv_make_plt_header (bfd *output_bfd, bfd_vma gotplt_addr, bfd_vma addr,
   entry[0] = RISCV_UTYPE (AUIPC, X_T2, gotplt_offset_high);
   entry[1] = RISCV_RTYPE (SUB, X_T1, X_T1, X_T3);
   entry[2] = RISCV_ITYPE (LREG, X_T3, X_T2, gotplt_offset_low);
-  entry[3] = RISCV_ITYPE (ADDI, X_T1, X_T1, -(PLT_HEADER_SIZE + 12));
+  entry[3] = RISCV_ITYPE (ADDI, X_T1, X_T1, (uint32_t) -(PLT_HEADER_SIZE + 12));
   entry[4] = RISCV_ITYPE (ADDI, X_T0, X_T2, gotplt_offset_low);
   entry[5] = RISCV_ITYPE (SRLI, X_T1, X_T1, 4 - RISCV_ELF_LOG_WORD_BYTES);
   entry[6] = RISCV_ITYPE (LREG, X_T0, X_T0, RISCV_ELF_WORD_BYTES);
@@ -3455,7 +3455,7 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
 		       bfd_boolean undefined_weak ATTRIBUTE_UNUSED)
 {
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
-  bfd_signed_vma foff = symval - (sec_addr (sec) + rel->r_offset);
+  bfd_vma foff = symval - (sec_addr (sec) + rel->r_offset);
   bfd_boolean near_zero = (symval + RISCV_IMM_REACH/2) < RISCV_IMM_REACH;
   bfd_vma auipc, jalr;
   int rd, r_type, len = 4, rvc = elf_elfheader (abfd)->e_flags & EF_RISCV_RVC;
@@ -3469,7 +3469,7 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
       if (sym_sec->output_section == sec->output_section
 	  && sym_sec->output_section != bfd_abs_section_ptr)
 	max_alignment = (bfd_vma) 1 << sym_sec->output_section->alignment_power;
-      foff += (foff < 0 ? -max_alignment : max_alignment);
+      foff += ((bfd_signed_vma) foff < 0 ? -max_alignment : max_alignment);
     }
 
   /* See if this function call can be shortened.  */
