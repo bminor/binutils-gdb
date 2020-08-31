@@ -1359,8 +1359,20 @@ md_begin (void)
 	{
 	  if ((dsp_flag & CSKY_DSP_FLAG_V1))
 	    {
-	      isa_flag |= (CSKY_ISA_MAC_DSP | CSKY_ISA_DSP);
-	      isa_flag &= ~CSKY_ISA_DSP_ENHANCE;
+	      if (isa_flag & CSKY_ISA_DSP_ENHANCE)
+		{
+		  /* Option -mdsp conflicts with -mcpu=ck803ern,
+		     CPU already indicates the dsp version.  */
+		  as_warn ("Option -mdsp conflicts with -mcpu=ck803ern which "
+		           "has indicated DSP version, ignoring -mdsp.");
+		  isa_flag &= ~(CSKY_ISA_MAC_DSP | CSKY_ISA_DSP);
+		  isa_flag |= CSKY_ISA_DSP_ENHANCE;
+		}
+	      else
+		{
+		  isa_flag |= (CSKY_ISA_MAC_DSP | CSKY_ISA_DSP);
+		  isa_flag &= ~CSKY_ISA_DSP_ENHANCE;
+		}
 	    }
 
 	  if ((dsp_flag & CSKY_DSP_FLAG_V2))
@@ -2938,7 +2950,8 @@ parse_ldst_imm (char **oper, struct csky_opcode_info *op ATTRIBUTE_UNUSED,
   if ((e.X_add_number % (1 << shift)) != 0)
     {
       /* Not aligned.  */
-      SET_ERROR_NUMBER (ERROR_OFFSET_UNALIGNED, ((unsigned long)1 << shift));
+      SET_ERROR_NUMBER (ERROR_OFFSET_UNALIGNED,
+			(void *)"Operand format is error. eg. \"ld rz, (rx, n)\"");
       return FALSE;
     }
 

@@ -1,3 +1,9 @@
+2020-08-31  Cooper Qu  <cooper.qu@linux.alibaba.com>
+
+	* config/tc-csky.c (md_begin): Add warning when -mdsp and
+	-mcpu=ck803ern are both added.
+	(parse_ldst_imm): Fix error message.
+
 2020-08-30  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/gas/cr16/cbitb_test.d: Update expected output.
