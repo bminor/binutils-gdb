@@ -3593,27 +3593,40 @@ elf32_arm_allocate_local_sym_info (bfd *abfd)
 
       num_syms = elf_tdata (abfd)->symtab_hdr.sh_info;
       size = num_syms * (sizeof (bfd_signed_vma)
-			 + sizeof (struct arm_local_iplt_info *)
 			 + sizeof (bfd_vma)
-			 + sizeof (char)
-			 + sizeof (struct fdpic_local));
+			 + sizeof (struct arm_local_iplt_info *)
+			 + sizeof (struct fdpic_local)
+			 + sizeof (char));
       data = bfd_zalloc (abfd, size);
       if (data == NULL)
 	return FALSE;
 
-      elf32_arm_local_fdpic_cnts (abfd) = (struct fdpic_local *) data;
-      data += num_syms * sizeof (struct fdpic_local);
-
+      /* It is important that these all be allocated in descending
+	 order of required alignment, so that arrays allocated later
+	 will be sufficiently aligned.  */
       elf_local_got_refcounts (abfd) = (bfd_signed_vma *) data;
       data += num_syms * sizeof (bfd_signed_vma);
-
-      elf32_arm_local_iplt (abfd) = (struct arm_local_iplt_info **) data;
-      data += num_syms * sizeof (struct arm_local_iplt_info *);
 
       elf32_arm_local_tlsdesc_gotent (abfd) = (bfd_vma *) data;
       data += num_syms * sizeof (bfd_vma);
 
+      elf32_arm_local_iplt (abfd) = (struct arm_local_iplt_info **) data;
+      data += num_syms * sizeof (struct arm_local_iplt_info *);
+
+      elf32_arm_local_fdpic_cnts (abfd) = (struct fdpic_local *) data;
+      data += num_syms * sizeof (struct fdpic_local);
+
       elf32_arm_local_got_tls_type (abfd) = data;
+#if GCC_VERSION >= 3000
+      BFD_ASSERT (__alignof__ (*elf32_arm_local_tlsdesc_gotent (abfd))
+		  <= __alignof__ (*elf_local_got_refcounts (abfd)));
+      BFD_ASSERT (__alignof__ (*elf32_arm_local_iplt (abfd))
+		  <= __alignof__ (*elf32_arm_local_tlsdesc_gotent (abfd)));
+      BFD_ASSERT (__alignof__ (*elf32_arm_local_fdpic_cnts (abfd))
+		  <= __alignof__ (*elf32_arm_local_iplt (abfd)));
+      BFD_ASSERT (__alignof__ (*elf32_arm_local_got_tls_type (abfd))
+		  <= __alignof__ (*elf32_arm_local_fdpic_cnts (abfd)));
+#endif
     }
   return TRUE;
 }
