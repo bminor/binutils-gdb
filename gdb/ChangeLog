@@ -1,3 +1,9 @@
+2020-08-31  Scott Linder  <scott@scottlinder.com>
+	    Simon Marchi  <simon.marchi@efficios.com>
+
+	* inline-frame.c (inline_frame_this_id): Remove assert that prevents
+	inline frame ids in outer frame.
+
 2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
 
 	* frame.h (enum frame_id_stack_status) <FID_STACK_OUTER>: New.
