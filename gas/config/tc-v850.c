@@ -1444,7 +1444,7 @@ parse_register_list (unsigned long *insn,
 	    {
 	      if (regs[i] == exp.X_add_number)
 		{
-		  *insn |= (1 << i);
+		  *insn |= 1u << i;
 		  break;
 		}
 	    }

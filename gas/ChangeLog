@@ -1,5 +1,10 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26503
+	* config/tc-v850.c (parse_register_list): Shift 1u left.
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26502
 	* config/tc-tic6x.c (md_apply_fix): Use unsigned variables.
 
