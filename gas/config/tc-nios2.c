@@ -1631,7 +1631,7 @@ nios2_parse_reglist (char *token, const struct nios2_opcode *op)
 	    }
 	}
 
-      mask |= 1 << regno;
+      mask |= 1UL << regno;
       last = regno;
     }
 
