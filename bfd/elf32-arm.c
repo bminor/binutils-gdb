@@ -10234,7 +10234,7 @@ calculate_group_reloc_mask (bfd_vma value, int n, bfd_vma *final_residual)
 	  /* Determine the most significant bit in the residual and
 	     align the resulting value to a 2-bit boundary.  */
 	  for (msb = 30; msb >= 0; msb -= 2)
-	    if (residual & (3 << msb))
+	    if (residual & (3u << msb))
 	      break;
 
 	  /* The desired shift is now (msb - 6), or zero, whichever

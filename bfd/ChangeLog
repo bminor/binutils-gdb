@@ -1,3 +1,8 @@
+2020-09-01  Alan Modra  <amodra@gmail.com>
+
+	PR 26423
+	* elf32-arm.c (calculate_group_reloc_mask): Use 3u in shift.
+
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
 	PR 26493
