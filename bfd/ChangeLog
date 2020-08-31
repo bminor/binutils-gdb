@@ -1,5 +1,13 @@
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
+	PR 26466
+	* mep-relocs.pl (emit_apply): Handle HI16S adjustment.  Use "u"
+	variable and rewrite signed overflow check.
+	* elf32-mep.c: Regenerate.
+	(mep_final_link_relocate): Delete "s".
+
+2020-08-31  Alan Modra  <amodra@gmail.com>
+
 	PR 26461
 	* elfxx-ia64.c (ia64_elf_install_value): Make expressions unsigned
 	that might shift values into sign bit.
