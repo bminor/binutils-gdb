@@ -1,3 +1,23 @@
+2020-09-01  Alan Modra  <amodra@gmail.com>
+
+	PR 26420
+	PR 26421
+	PR 26425
+	PR 26427
+	* config/tc-arm.c (struct arm_it): Make size, size_req, cond and
+	uncond_value unsigned.
+	(parse_vfp_reg_list): Make setmask unsigned, vpr_str_len size_t.
+	(parse_big_immediate): Cast generic_bignum elements to unsigned.
+	(encode_thumb32_immediate): Shift left 0xffU.
+	(double_to_single): Make sign unsigned.  Tidy.
+	(move_or_literal_pool): Cast LITTLE_NUM elements to uint64_t or
+	valueT.
+	(vfp_or_neon_is_neon): Adjust inst.uncond_value expression.
+	(md_assemble): Likewise.
+	(handle_pred_state): Make cond unsigned.
+	(thumb32_negate_data_op): Make variables unsigned.
+	(md_apply_fix): Make value and newval unsigned, adjust uses.
+
 2020-08-31  Alan Modra  <amodra@gmail.com>
 
 	PR 26510

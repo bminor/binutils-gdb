@@ -517,13 +517,13 @@ struct arm_it
 {
   const char *	error;
   unsigned long instruction;
-  int		size;
-  int		size_req;
-  int		cond;
+  unsigned int	size;
+  unsigned int	size_req;
+  unsigned int	cond;
   /* "uncond_value" is set to the value in place of the conditional field in
-     unconditional versions of the instruction, or -1 if nothing is
+     unconditional versions of the instruction, or -1u if nothing is
      appropriate.  */
-  int		uncond_value;
+  unsigned int	uncond_value;
   struct neon_type vectype;
   /* This does not indicate an actual NEON instruction, only that
      the mnemonic accepts neon-style type suffixes.  */
@@ -2175,9 +2175,9 @@ parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype,
 
   do
     {
-      int setmask = 1, addregs = 1;
+      unsigned int setmask = 1, addregs = 1;
       const char vpr_str[] = "vpr";
-      int vpr_str_len = strlen (vpr_str);
+      size_t vpr_str_len = strlen (vpr_str);
 
       new_base = arm_typed_reg_parse (&str, regtype, &regtype, NULL);
 
@@ -5263,12 +5263,12 @@ parse_big_immediate (char **str, int i, expressionS *in_exp,
 
       inst.operands[i].imm = 0;
       for (j = 0; j < parts; j++, idx++)
-	inst.operands[i].imm |= generic_bignum[idx]
-				<< (LITTLENUM_NUMBER_OF_BITS * j);
+	inst.operands[i].imm |= ((unsigned) generic_bignum[idx]
+				 << (LITTLENUM_NUMBER_OF_BITS * j));
       inst.operands[i].reg = 0;
       for (j = 0; j < parts; j++, idx++)
-	inst.operands[i].reg |= generic_bignum[idx]
-				<< (LITTLENUM_NUMBER_OF_BITS * j);
+	inst.operands[i].reg |= ((unsigned) generic_bignum[idx]
+				 << (LITTLENUM_NUMBER_OF_BITS * j));
       inst.operands[i].regisimm = 1;
     }
   else if (!(exp_p->X_op == O_symbol && allow_symbol_p))
@@ -8289,7 +8289,7 @@ encode_thumb32_immediate (unsigned int val)
   for (i = 1; i <= 24; i++)
     {
       a = val >> i;
-      if ((val & ~(0xff << i)) == 0)
+      if ((val & ~(0xffU << i)) == 0)
 	return ((val >> i) & 0x7f) | ((32 - i) << 7);
     }
 
@@ -8773,9 +8773,9 @@ is_double_a_single (bfd_int64_t v)
 static int
 double_to_single (bfd_int64_t v)
 {
-  int sign = (int) ((v >> 63) & 1l);
-  int exp = (int) ((v >> 52) & 0x7FF);
-  bfd_int64_t mantissa = (v & (bfd_int64_t)0xFFFFFFFFFFFFFULL);
+  unsigned int sign = (v >> 63) & 1;
+  int exp = (v >> 52) & 0x7FF;
+  bfd_int64_t mantissa = (v & (bfd_int64_t) 0xFFFFFFFFFFFFFULL);
 
   if (exp == 0x7FF)
     exp = 0xFF;
@@ -8867,17 +8867,16 @@ move_or_literal_pool (int i, enum lit_type t, bfd_boolean mode_3)
 	    l = generic_bignum;
 
 #if defined BFD_HOST_64_BIT
-	  v =
-	    ((((((((bfd_int64_t) l[3] & LITTLENUM_MASK)
-		  << LITTLENUM_NUMBER_OF_BITS)
-		 | ((bfd_int64_t) l[2] & LITTLENUM_MASK))
+	  v = ((((bfd_uint64_t) l[3] & LITTLENUM_MASK)
 		<< LITTLENUM_NUMBER_OF_BITS)
-	       | ((bfd_int64_t) l[1] & LITTLENUM_MASK))
-	      << LITTLENUM_NUMBER_OF_BITS)
-	     | ((bfd_int64_t) l[0] & LITTLENUM_MASK));
+	       | (((bfd_int64_t) l[2] & LITTLENUM_MASK)
+		  << LITTLENUM_NUMBER_OF_BITS)
+	       | (((bfd_uint64_t) l[1] & LITTLENUM_MASK)
+		  << LITTLENUM_NUMBER_OF_BITS)
+	       | (l[0] & LITTLENUM_MASK));
 #else
-	  v = ((l[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
-	    |  (l[0] & LITTLENUM_MASK);
+	  v = ((((valueT) l[1] & LITTLENUM_MASK) << LITTLENUM_NUMBER_OF_BITS)
+	       | (l[0] & LITTLENUM_MASK));
 #endif
 	}
       else
@@ -16834,7 +16833,7 @@ if (!thumb_mode && (check & NEON_CHECK_CC))
 	first_error (_(BAD_COND));
 	return FAIL;
       }
-    if (inst.uncond_value != -1)
+    if (inst.uncond_value != -1u)
       inst.instruction |= inst.uncond_value << 28;
   }
 
@@ -23065,7 +23064,8 @@ handle_pred_state (void)
 
     case MANUAL_PRED_BLOCK:
       {
-	int cond, is_last;
+	unsigned int cond;
+	int is_last;
 	if (now_pred.type == SCALAR_PRED)
 	  {
 	    /* Check conditional suffixes.  */
@@ -23461,7 +23461,7 @@ md_assemble (char *str)
 
   /* The value which unconditional instructions should have in place of the
      condition field.  */
-  inst.uncond_value = (opcode->tag == OT_csuffixF) ? 0xf : -1;
+  inst.uncond_value = (opcode->tag == OT_csuffixF) ? 0xf : -1u;
 
   if (thumb_mode)
     {
@@ -28178,10 +28178,10 @@ negate_data_op (unsigned long * instruction,
 /* Like negate_data_op, but for Thumb-2.   */
 
 static unsigned int
-thumb32_negate_data_op (offsetT *instruction, unsigned int value)
+thumb32_negate_data_op (valueT *instruction, unsigned int value)
 {
-  int op, new_inst;
-  int rd;
+  unsigned int op, new_inst;
+  unsigned int rd;
   unsigned int negated, inverted;
 
   negated = encode_thumb32_immediate (-value);
@@ -28317,8 +28317,8 @@ md_apply_fix (fixS *	fixP,
 	       valueT * valP,
 	       segT	seg)
 {
-  offsetT	 value = * valP;
-  offsetT	 newval;
+  valueT	 value = * valP;
+  valueT	 newval;
   unsigned int	 newimm;
   unsigned long	 temp;
   int		 sign;
@@ -28381,7 +28381,7 @@ md_apply_fix (fixS *	fixP,
       temp = md_chars_to_number (buf, INSN_SIZE);
 
       /* If the offset is negative, we should use encoding A2 for ADR.  */
-      if ((temp & 0xfff0000) == 0x28f0000 && value < 0)
+      if ((temp & 0xfff0000) == 0x28f0000 && (offsetT) value < 0)
 	newimm = negate_data_op (&temp, value);
       else
 	{
@@ -28399,7 +28399,7 @@ md_apply_fix (fixS *	fixP,
 	      && ((temp >> DATA_OP_SHIFT) & 0xf) == OPCODE_MOV
 	      && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2)
 	      && !((temp >> SBIT_SHIFT) & 0x1)
-	      && value >= 0 && value <= 0xffff)
+	      && value <= 0xffff)
 	    {
 	      /* Clear bits[23:20] to change encoding from A1 to A2.  */
 	      temp &= 0xff0fffff;
@@ -28496,9 +28496,9 @@ md_apply_fix (fixS *	fixP,
       /* Fall through.  */
 
     case BFD_RELOC_ARM_LITERAL:
-      sign = value > 0;
+      sign = (offsetT) value > 0;
 
-      if (value < 0)
+      if ((offsetT) value < 0)
 	value = - value;
 
       if (validate_offset_imm (value, 0) == FAIL)
@@ -28526,9 +28526,9 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_ARM_OFFSET_IMM8:
     case BFD_RELOC_ARM_HWLITERAL:
-      sign = value > 0;
+      sign = (offsetT) value > 0;
 
-      if (value < 0)
+      if ((offsetT) value < 0)
 	value = - value;
 
       if (validate_offset_imm (value, 1) == FAIL)
@@ -28555,7 +28555,7 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_T32_OFFSET_U8:
-      if (value < 0 || value > 1020 || value % 4 != 0)
+      if (value > 1020 || value % 4 != 0)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("bad immediate value for offset (%ld)"), (long) value);
       value /= 4;
@@ -28591,7 +28591,7 @@ md_apply_fix (fixS *	fixP,
       if ((newval & 0xf0000000) == 0xe0000000)
 	{
 	  /* Doubleword load/store: 8-bit offset, scaled by 4.  */
-	  if (value >= 0)
+	  if ((offsetT) value >= 0)
 	    newval |= (1 << 23);
 	  else
 	    value = -value;
@@ -28613,7 +28613,7 @@ md_apply_fix (fixS *	fixP,
       else if ((newval & 0x000f0000) == 0x000f0000)
 	{
 	  /* PC-relative, 12-bit offset.  */
-	  if (value >= 0)
+	  if ((offsetT) value >= 0)
 	    newval |= (1 << 23);
 	  else
 	    value = -value;
@@ -28628,7 +28628,7 @@ md_apply_fix (fixS *	fixP,
       else if ((newval & 0x00000100) == 0x00000100)
 	{
 	  /* Writeback: 8-bit, +/- offset.  */
-	  if (value >= 0)
+	  if ((offsetT) value >= 0)
 	    newval |= (1 << 9);
 	  else
 	    value = -value;
@@ -28643,7 +28643,7 @@ md_apply_fix (fixS *	fixP,
       else if ((newval & 0x00000f00) == 0x00000e00)
 	{
 	  /* T-instruction: positive 8-bit offset.  */
-	  if (value < 0 || value > 0xff)
+	  if (value > 0xff)
 	    {
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("offset out of range"));
@@ -28655,8 +28655,8 @@ md_apply_fix (fixS *	fixP,
       else
 	{
 	  /* Positive 12-bit or negative 8-bit offset.  */
-	  int limit;
-	  if (value >= 0)
+	  unsigned int limit;
+	  if ((offsetT) value >= 0)
 	    {
 	      newval |= (1 << 23);
 	      limit = 0xfff;
@@ -28682,7 +28682,7 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_ARM_SHIFT_IMM:
       newval = md_chars_to_number (buf, INSN_SIZE);
-      if (((unsigned long) value) > 32
+      if (value > 32
 	  || (value == 32
 	      && (((newval & 0x60) == 0) || (newval & 0x60) == 0x60)))
 	{
@@ -28745,7 +28745,7 @@ md_apply_fix (fixS *	fixP,
 	      if ((newval & 0x00100000) == 0)
 		{
 		  /* 12 bit immediate for addw/subw.  */
-		  if (value < 0)
+		  if ((offsetT) value < 0)
 		    {
 		      value = -value;
 		      newval ^= 0x00a00000;
@@ -28768,7 +28768,7 @@ md_apply_fix (fixS *	fixP,
 		  && (((newval >> 16) & 0xf) == 0xf)
 		  && ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v6t2_v8m)
 		  && !((newval >> T2_SBIT_SHIFT) & 0x1)
-		  && value >= 0 && value <= 0xffff)
+		  && value <= 0xffff)
 		{
 		  /* Toggle bit[25] to change encoding from T2 to T3.  */
 		  newval ^= 1 << 25;
@@ -28799,7 +28799,7 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_SMC:
-      if (((unsigned long) value) > 0xf)
+      if (value > 0xf)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("invalid smc expression"));
 
@@ -28809,7 +28809,7 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_HVC:
-      if (((unsigned long) value) > 0xffff)
+      if (value > 0xffff)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("invalid hvc expression"));
       newval = md_chars_to_number (buf, INSN_SIZE);
@@ -28820,7 +28820,7 @@ md_apply_fix (fixS *	fixP,
     case BFD_RELOC_ARM_SWI:
       if (fixP->tc_fix_data != 0)
 	{
-	  if (((unsigned long) value) > 0xff)
+	  if (value > 0xff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("invalid swi expression"));
 	  newval = md_chars_to_number (buf, THUMB_SIZE);
@@ -28829,7 +28829,7 @@ md_apply_fix (fixS *	fixP,
 	}
       else
 	{
-	  if (((unsigned long) value) > 0x00ffffff)
+	  if (value > 0x00ffffff)
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("invalid swi expression"));
 	  newval = md_chars_to_number (buf, INSN_SIZE);
@@ -28839,7 +28839,7 @@ md_apply_fix (fixS *	fixP,
       break;
 
     case BFD_RELOC_ARM_MULTI:
-      if (((unsigned long) value) > 0xffff)
+      if (value > 0xffff)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("invalid expression in load/store multiple"));
       newval = value | md_chars_to_number (buf, INSN_SIZE);
@@ -28923,8 +28923,8 @@ md_apply_fix (fixS *	fixP,
       if (value & temp)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("misaligned branch destination"));
-      if ((value & (offsetT)0xfe000000) != (offsetT)0
-	  && (value & (offsetT)0xfe000000) != (offsetT)0xfe000000)
+      if ((value & 0xfe000000) != 0
+	  && (value & 0xfe000000) != 0xfe000000)
 	as_bad_where (fixP->fx_file, fixP->fx_line, BAD_RANGE);
 
       if (fixP->fx_done || !seg->use_rela_p)
@@ -28952,7 +28952,7 @@ md_apply_fix (fixS *	fixP,
 
 	 FIXME: It may be better to remove the instruction completely and
 	 perform relaxation.  */
-      if (value == -2)
+      if ((offsetT) value == -2)
 	{
 	  newval = md_chars_to_number (buf, THUMB_SIZE);
 	  newval = 0xbf00; /* NOP encoding T1 */
@@ -29225,24 +29225,24 @@ md_apply_fix (fixS *	fixP,
       if ((newval & 0x0f200f00) == 0x0d000900)
 	{
 	  /* This is a fp16 vstr/vldr.  The immediate offset in the mnemonic
-	     has permitted values that are multiples of 2, in the range 0
+	     has permitted values that are multiples of 2, in the range -510
 	     to 510.  */
-	  if (value < -510 || value > 510 || (value & 1))
+	  if (value + 510 > 510 + 510 || (value & 1))
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("co-processor offset out of range"));
 	}
       else if ((newval & 0xfe001f80) == 0xec000f80)
 	{
-	  if (value < -511 || value > 512 || (value & 3))
+	  if (value + 511 > 512 + 511 || (value & 3))
 	    as_bad_where (fixP->fx_file, fixP->fx_line,
 			  _("co-processor offset out of range"));
 	}
-      else if (value < -1023 || value > 1023 || (value & 3))
+      else if (value + 1023 > 1023 + 1023 || (value & 3))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("co-processor offset out of range"));
     cp_off_common:
-      sign = value > 0;
-      if (value < 0)
+      sign = (offsetT) value > 0;
+      if ((offsetT) value < 0)
 	value = -value;
       if (fixP->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM
 	  || fixP->fx_r_type == BFD_RELOC_ARM_CP_OFF_IMM_S2)
@@ -29284,7 +29284,7 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_ARM_CP_OFF_IMM_S2:
     case BFD_RELOC_ARM_T32_CP_OFF_IMM_S2:
-      if (value < -255 || value > 255)
+      if (value + 255 > 255 + 255)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("co-processor offset out of range"));
       value *= 4;
@@ -29390,11 +29390,11 @@ md_apply_fix (fixS *	fixP,
 			_("invalid Hi register with immediate"));
 
 	/* If value is negative, choose the opposite instruction.  */
-	if (value < 0)
+	if ((offsetT) value < 0)
 	  {
 	    value = -value;
 	    subtract = !subtract;
-	    if (value < 0)
+	    if ((offsetT) value < 0)
 	      as_bad_where (fixP->fx_file, fixP->fx_line,
 			    _("immediate value out of range"));
 	  }
@@ -29478,7 +29478,7 @@ md_apply_fix (fixS *	fixP,
 
     case BFD_RELOC_ARM_THUMB_IMM:
       newval = md_chars_to_number (buf, THUMB_SIZE);
-      if (value < 0 || value > 255)
+      if (value > 255)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("invalid immediate: %ld is out of range"),
 		      (long) value);
@@ -29490,7 +29490,7 @@ md_apply_fix (fixS *	fixP,
       /* 5bit shift value (0..32).  LSL cannot take 32.	 */
       newval = md_chars_to_number (buf, THUMB_SIZE) & 0xf83f;
       temp = newval & 0xf800;
-      if (value < 0 || value > 32 || (value == 32 && temp == T_OPCODE_LSL_I))
+      if (value > 32 || (value == 32 && temp == T_OPCODE_LSL_I))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("invalid shift value: %ld"), (long) value);
       /* Shifts of zero must be encoded as LSL.	 */
@@ -29517,7 +29517,7 @@ md_apply_fix (fixS *	fixP,
 	  /* REL format relocations are limited to a 16-bit addend.  */
 	  if (!fixP->fx_done)
 	    {
-	      if (value < -0x8000 || value > 0x7fff)
+	      if (value + 0x8000 > 0x7fff + 0x8000)
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
 				_("offset out of range"));
 	    }
@@ -29560,7 +29560,7 @@ md_apply_fix (fixS *	fixP,
 	bfd_vma encoded_addend = value;
 
 	/* Check that addend can be encoded in instruction.  */
-	if (!seg->use_rela_p && (value < 0 || value > 255))
+	if (!seg->use_rela_p && value > 255)
 	  as_bad_where (fixP->fx_file, fixP->fx_line,
 			_("the offset 0x%08lX is not representable"),
 			(unsigned long) encoded_addend);
@@ -29626,7 +29626,7 @@ md_apply_fix (fixS *	fixP,
        {
 	 bfd_vma insn;
 	 bfd_vma encoded_addend;
-	 bfd_vma addend_abs = llabs (value);
+	 bfd_vma addend_abs = llabs ((offsetT) value);
 
 	 /* Check that the absolute value of the addend can be
 	    expressed as an 8-bit constant plus a rotation.  */
@@ -29642,7 +29642,7 @@ md_apply_fix (fixS *	fixP,
 	 /* If the addend is positive, use an ADD instruction.
 	    Otherwise use a SUB.  Take care not to destroy the S bit.  */
 	 insn &= 0xff1fffff;
-	 if (value < 0)
+	 if ((offsetT) value < 0)
 	   insn |= 1 << 22;
 	 else
 	   insn |= 1 << 23;
@@ -29667,7 +29667,7 @@ md_apply_fix (fixS *	fixP,
       if (!seg->use_rela_p)
 	{
 	  bfd_vma insn;
-	  bfd_vma addend_abs = llabs (value);
+	  bfd_vma addend_abs = llabs ((offsetT) value);
 
 	  /* Check that the absolute value of the addend can be
 	     encoded in 12 bits.  */
@@ -29681,7 +29681,7 @@ md_apply_fix (fixS *	fixP,
 
 	  /* If the addend is negative, clear bit 23 of the instruction.
 	     Otherwise set it.  */
-	  if (value < 0)
+	  if ((offsetT) value < 0)
 	    insn &= ~(1 << 23);
 	  else
 	    insn |= 1 << 23;
@@ -29706,7 +29706,7 @@ md_apply_fix (fixS *	fixP,
       if (!seg->use_rela_p)
 	{
 	  bfd_vma insn;
-	  bfd_vma addend_abs = llabs (value);
+	  bfd_vma addend_abs = llabs ((offsetT) value);
 
 	  /* Check that the absolute value of the addend can be
 	     encoded in 8 bits.  */
@@ -29720,7 +29720,7 @@ md_apply_fix (fixS *	fixP,
 
 	  /* If the addend is negative, clear bit 23 of the instruction.
 	     Otherwise set it.  */
-	  if (value < 0)
+	  if ((offsetT) value < 0)
 	    insn &= ~(1 << 23);
 	  else
 	    insn |= 1 << 23;
@@ -29746,7 +29746,7 @@ md_apply_fix (fixS *	fixP,
       if (!seg->use_rela_p)
 	{
 	  bfd_vma insn;
-	  bfd_vma addend_abs = llabs (value);
+	  bfd_vma addend_abs = llabs ((offsetT) value);
 
 	  /* Check that the absolute value of the addend is a multiple of
 	     four and, when divided by four, fits in 8 bits.  */
@@ -29765,7 +29765,7 @@ md_apply_fix (fixS *	fixP,
 
 	  /* If the addend is negative, clear bit 23 of the instruction.
 	     Otherwise set it.  */
-	  if (value < 0)
+	  if ((offsetT) value < 0)
 	    insn &= ~(1 << 23);
 	  else
 	    insn |= 1 << 23;
@@ -29813,7 +29813,7 @@ md_apply_fix (fixS *	fixP,
 	{
 	  fixP->fx_done = 0;
 	}
-      if ((value & ~0x7f) && ((value & ~0x3f) != ~0x3f))
+      if ((value & ~0x7f) && ((value & ~0x3f) != (valueT) ~0x3f))
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("branch out of range"));
 
