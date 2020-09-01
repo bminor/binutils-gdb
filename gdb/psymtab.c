@@ -1590,9 +1590,8 @@ psymbol_compare (const void *addr1, const void *addr2, int length)
    different domain (or address) is possible and correct.  */
 
 static struct partial_symbol *
-add_psymbol_to_bcache (const partial_symbol &psymbol,
-		       struct objfile *objfile,
-		       int *added)
+add_psymbol_to_bcache (const partial_symbol &psymbol, struct objfile *objfile,
+		       bool *added)
 {
   /* Stash the partial symbol away in the cache.  */
   return ((struct partial_symbol *)
@@ -1618,12 +1617,10 @@ add_psymbol_to_list (const partial_symbol &psymbol,
 		     psymbol_placement where,
 		     struct objfile *objfile)
 {
-  struct partial_symbol *psym;
-
-  int added;
+  bool added;
 
   /* Stash the partial symbol away in the cache.  */
-  psym = add_psymbol_to_bcache (psymbol, objfile, &added);
+  partial_symbol *psym = add_psymbol_to_bcache (psymbol, objfile, &added);
 
   /* Do not duplicate global partial symbols.  */
   if (where == psymbol_placement::GLOBAL && !added)

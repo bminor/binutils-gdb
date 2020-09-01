@@ -1,3 +1,11 @@
+2020-09-01  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* bcache.h (struct bcache) <insert>: Change type of `added` to
+	pointer to bool.
+	* bcache.c (bcache::insert): Likewise.
+	* gdbtypes.c (check_types_worklist): Adjust.
+	* psymtab.c (add_psymbol_to_bcache): Adjust.
+
 2020-08-31  Kevin Buettner  <kevinb@redhat.com>
 
 	* corelow.c (unordered_set): Include.

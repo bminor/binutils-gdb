@@ -4088,7 +4088,7 @@ check_types_worklist (std::vector<type_equality_entry> *worklist,
 {
   while (!worklist->empty ())
     {
-      int added;
+      bool added;
 
       struct type_equality_entry entry = std::move (worklist->back ());
       worklist->pop_back ();

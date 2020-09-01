@@ -140,15 +140,15 @@ bcache::expand_hash_table ()
    returning an old entry.  */
 
 const void *
-bcache::insert (const void *addr, int length, int *added)
+bcache::insert (const void *addr, int length, bool *added)
 {
   unsigned long full_hash;
   unsigned short half_hash;
   int hash_index;
   struct bstring *s;
 
-  if (added)
-    *added = 0;
+  if (added != nullptr)
+    *added = false;
 
   /* Lazily initialize the obstack.  This can save quite a bit of
      memory in some cases.  */
@@ -203,8 +203,8 @@ bcache::insert (const void *addr, int length, int *added)
     m_unique_size += length;
     m_structure_size += BSTRING_SIZE (length);
 
-    if (added)
-      *added = 1;
+    if (added != nullptr)
+      *added = true;
 
     return &newobj->d.data;
   }
