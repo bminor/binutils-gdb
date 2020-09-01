@@ -1,3 +1,8 @@
+2020-09-01  Mark Wielaard  <mark@klomp.org>
+
+	* dwarf2dbg.c (out_debug_abbrev): Use DW_FORM_sec_offset for DWARF
+	version 4 or higher.
+
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
 	* expr.c (add_to_result, subtract_from_result): Use unsigned
