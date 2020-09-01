@@ -1190,40 +1190,40 @@ struct fnfieldlist
    pass lists of data member fields and lists of member function fields
    in an instance of a field_info structure, as defined below.  */
 struct field_info
+{
+  /* List of data member and baseclasses fields.  */
+  std::vector<struct nextfield> fields;
+  std::vector<struct nextfield> baseclasses;
+
+  /* Set if the accessibility of one of the fields is not public.  */
+  int non_public_fields = 0;
+
+  /* Member function fieldlist array, contains name of possibly overloaded
+     member function, number of overloaded member functions and a pointer
+     to the head of the member function field chain.  */
+  std::vector<struct fnfieldlist> fnfieldlists;
+
+  /* typedefs defined inside this class.  TYPEDEF_FIELD_LIST contains head of
+     a NULL terminated list of TYPEDEF_FIELD_LIST_COUNT elements.  */
+  std::vector<struct decl_field> typedef_field_list;
+
+  /* Nested types defined by this class and the number of elements in this
+     list.  */
+  std::vector<struct decl_field> nested_types_list;
+
+  /* If non-null, this is the variant part we are currently
+     reading.  */
+  variant_part_builder *current_variant_part = nullptr;
+  /* This holds all the top-level variant parts attached to the type
+     we're reading.  */
+  std::vector<variant_part_builder> variant_parts;
+
+  /* Return the total number of fields (including baseclasses).  */
+  int nfields () const
   {
-    /* List of data member and baseclasses fields.  */
-    std::vector<struct nextfield> fields;
-    std::vector<struct nextfield> baseclasses;
-
-    /* Set if the accessibility of one of the fields is not public.  */
-    int non_public_fields = 0;
-
-    /* Member function fieldlist array, contains name of possibly overloaded
-       member function, number of overloaded member functions and a pointer
-       to the head of the member function field chain.  */
-    std::vector<struct fnfieldlist> fnfieldlists;
-
-    /* typedefs defined inside this class.  TYPEDEF_FIELD_LIST contains head of
-       a NULL terminated list of TYPEDEF_FIELD_LIST_COUNT elements.  */
-    std::vector<struct decl_field> typedef_field_list;
-
-    /* Nested types defined by this class and the number of elements in this
-       list.  */
-    std::vector<struct decl_field> nested_types_list;
-
-    /* If non-null, this is the variant part we are currently
-       reading.  */
-    variant_part_builder *current_variant_part = nullptr;
-    /* This holds all the top-level variant parts attached to the type
-       we're reading.  */
-    std::vector<variant_part_builder> variant_parts;
-
-    /* Return the total number of fields (including baseclasses).  */
-    int nfields () const
-    {
-      return fields.size () + baseclasses.size ();
-    }
-  };
+    return fields.size () + baseclasses.size ();
+  }
+};
 
 /* Loaded secondary compilation units are kept in memory until they
    have not been referenced for the processing of this many
