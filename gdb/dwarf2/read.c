@@ -1196,7 +1196,7 @@ struct field_info
   std::vector<struct nextfield> baseclasses;
 
   /* Set if the accessibility of one of the fields is not public.  */
-  int non_public_fields = 0;
+  bool non_public_fields = false;
 
   /* Member function fieldlist array, contains name of possibly overloaded
      member function, number of overloaded member functions and a pointer
@@ -15015,7 +15015,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
   else
     new_field->accessibility = dwarf2_default_access_attribute (die, cu);
   if (new_field->accessibility != DW_ACCESS_public)
-    fip->non_public_fields = 1;
+    fip->non_public_fields = true;
 
   attr = dwarf2_attr (die, DW_AT_virtuality, cu);
   if (attr != nullptr)
@@ -15112,7 +15112,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 	{
 	  FIELD_ARTIFICIAL (*fp) = 1;
 	  new_field->accessibility = DW_ACCESS_private;
-	  fip->non_public_fields = 1;
+	  fip->non_public_fields = true;
 	}
     }
   else if (die->tag == DW_TAG_member || die->tag == DW_TAG_variable)

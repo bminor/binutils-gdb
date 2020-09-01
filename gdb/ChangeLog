@@ -1,5 +1,10 @@
 2020-08-31  Simon Marchi  <simon.marchi@polymtl.ca>
 
+	* dwarf2/read.c (struct field_info) <non_public_fields>: Change
+	type to bool.
+
+2020-08-31  Simon Marchi  <simon.marchi@polymtl.ca>
+
 	* dwarf2/read.c (struct field_info): Fix indentation.
 
 2020-08-31  Simon Marchi  <simon.marchi@efficios.com>
