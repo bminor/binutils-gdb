@@ -1,3 +1,8 @@
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-pdp11.c (md_number_to_chars): Condition nbytes=8 code
+	on BFD64.
+
 2020-09-02  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* config/tc-csky.c (csky_cpus): Add ck803r3.

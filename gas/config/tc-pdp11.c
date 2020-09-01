@@ -220,6 +220,7 @@ md_number_to_chars (char con[], valueT value, int nbytes)
       con[2] =  value        & 0xff;
       con[3] = (value >>  8) & 0xff;
       break;
+#ifdef BFD64
     case 8:
       con[0] = (value >> 48) & 0xff;
       con[1] = (value >> 56) & 0xff;
@@ -230,6 +231,7 @@ md_number_to_chars (char con[], valueT value, int nbytes)
       con[6] =  value        & 0xff;
       con[7] = (value >>  8) & 0xff;
       break;
+#endif
     default:
       BAD_CASE (nbytes);
     }
