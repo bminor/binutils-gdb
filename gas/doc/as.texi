@@ -4507,6 +4507,9 @@ Some machine configurations provide additional directives.
 
 * Text::                        @code{.text @var{subsection}}
 * Title::                       @code{.title "@var{heading}"}
+@ifset ELF
+* Tls_common::                  @code{.tls_common @var{symbol}, @var{length}[, @var{alignment}]}
+@end ifset
 @ifset COFF-ELF
 * Type::                        @code{.type <@var{int} | @var{name} , @var{type description}>}
 @end ifset
@@ -7181,6 +7184,16 @@ source file name and pagenumber) when generating assembly listings.
 
 This directive affects subsequent pages, as well as the current page if
 it appears within ten lines of the top of a page.
+
+@ifset ELF
+@node Tls_common
+@section @code{.tls_common @var{symbol}, @var{length}[, @var{alignment}]}
+
+@cindex @code{tls_common} directive
+This directive behaves in the same way as the @code{.comm} directive
+(@pxref{Comm}) except that @var{symbol} has type of STT_TLS instead of
+STT_OBJECT.
+@end ifset
 
 @ifset COFF-ELF
 @node Type
