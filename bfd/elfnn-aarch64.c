@@ -5447,7 +5447,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
   bfd_vma orig_value = value;
   bfd_boolean resolved_to_zero;
   bfd_boolean abs_symbol_p;
-  bfd_boolean via_plt_p;
 
   globals = elf_aarch64_hash_table (info);
 
@@ -5469,8 +5468,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		  : bfd_is_und_section (sym_sec));
   abs_symbol_p = h != NULL && bfd_is_abs_symbol (&h->root);
 
-  via_plt_p = (globals->root.splt != NULL && h != NULL
-	       && h->plt.offset != (bfd_vma) - 1);
 
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle
      it here if it is defined in a non-shared object.  */
@@ -5806,23 +5803,12 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	value += signed_addend;
       break;
 
-    case BFD_RELOC_AARCH64_BRANCH19:
-    case BFD_RELOC_AARCH64_TSTBR14:
-      /* A conditional branch to an undefined weak symbol is converted to a
-	 branch to itself.  */
-      if (weak_undef_p && !via_plt_p)
-	{
-	  value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
-						       place, value,
-						       signed_addend,
-						       weak_undef_p);
-	  break;
-	}
-      /* Fall through.  */
     case BFD_RELOC_AARCH64_CALL26:
     case BFD_RELOC_AARCH64_JUMP26:
       {
 	asection *splt = globals->root.splt;
+	bfd_boolean via_plt_p =
+	  splt != NULL && h != NULL && h->plt.offset != (bfd_vma) - 1;
 
 	/* A call to an undefined weak symbol is converted to a jump to
 	   the next instruction unless a PLT entry will be created.
@@ -5900,6 +5886,23 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	       "recompile with -fPIC"),
 	     input_bfd, elfNN_aarch64_howto_table[howto_index].name,
 	     h->root.root.string);
+	  bfd_set_error (bfd_error_bad_value);
+	  return bfd_reloc_notsupported;
+	}
+      value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						   place, value,
+						   signed_addend,
+						   weak_undef_p);
+      break;
+
+    case BFD_RELOC_AARCH64_BRANCH19:
+    case BFD_RELOC_AARCH64_TSTBR14:
+      if (h && h->root.type == bfd_link_hash_undefined)
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%pB: conditional branch to undefined symbol `%s' "
+	       "not allowed"), input_bfd, h->root.root.string);
 	  bfd_set_error (bfd_error_bad_value);
 	  return bfd_reloc_notsupported;
 	}
@@ -7968,8 +7971,6 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    break;
 	  }
 
-	case BFD_RELOC_AARCH64_BRANCH19:
-	case BFD_RELOC_AARCH64_TSTBR14:
 	case BFD_RELOC_AARCH64_CALL26:
 	case BFD_RELOC_AARCH64_JUMP26:
 	  /* If this is a local symbol then we resolve it

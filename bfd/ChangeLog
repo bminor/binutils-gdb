@@ -1,3 +1,10 @@
+2020-09-10  Siddhesh Poyarekar  <siddesh.poyarekar@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Revert
+	changes in 7e05773767820b441b23a16628b55c98cb1aef46.  Set
+	error for undefined symbol in BFD_RELOC_AARCH64_BRANCH19 and
+	BFD_RELOC_AARCH64_TSTBR14 relocations.
+
 2020-09-09  Nick Clifton  <nickc@redhat.com>
 
 	* cofflink.c (coff_link_check_archive_element): Move the check for
