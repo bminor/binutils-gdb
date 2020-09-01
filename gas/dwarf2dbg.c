@@ -2429,15 +2429,22 @@ out_debug_abbrev (segT abbrev_seg,
 		  segT info_seg ATTRIBUTE_UNUSED,
 		  segT line_seg ATTRIBUTE_UNUSED)
 {
+  int secoff_form;
   subseg_set (abbrev_seg, 0);
 
   out_uleb128 (1);
   out_uleb128 (DW_TAG_compile_unit);
   out_byte (DW_CHILDREN_no);
-  if (DWARF2_FORMAT (line_seg) == dwarf2_format_32bit)
-    out_abbrev (DW_AT_stmt_list, DW_FORM_data4);
+  if (DWARF2_VERSION < 4)
+    {
+      if (DWARF2_FORMAT (line_seg) == dwarf2_format_32bit)
+	secoff_form = DW_FORM_data4;
+      else
+	secoff_form = DW_FORM_data8;
+    }
   else
-    out_abbrev (DW_AT_stmt_list, DW_FORM_data8);
+    secoff_form = DW_FORM_sec_offset;
+  out_abbrev (DW_AT_stmt_list, secoff_form);
   if (all_segs->next == NULL)
     {
       out_abbrev (DW_AT_low_pc, DW_FORM_addr);
@@ -2447,12 +2454,7 @@ out_debug_abbrev (segT abbrev_seg,
 	out_abbrev (DW_AT_high_pc, DW_FORM_udata);
     }
   else
-    {
-      if (DWARF2_FORMAT (info_seg) == dwarf2_format_32bit)
-	out_abbrev (DW_AT_ranges, DW_FORM_data4);
-      else
-	out_abbrev (DW_AT_ranges, DW_FORM_data8);
-    }
+    out_abbrev (DW_AT_ranges, secoff_form);
   out_abbrev (DW_AT_name, DW_FORM_strp);
   out_abbrev (DW_AT_comp_dir, DW_FORM_strp);
   out_abbrev (DW_AT_producer, DW_FORM_strp);
