@@ -1391,7 +1391,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield,/* complain_on_overflow */
+	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_TLS_DESCSEQ",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -1683,7 +1683,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 0,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_bitfield,/* complain_on_overflow */
+	 complain_overflow_dont,/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_THM_TLS_DESCSEQ",/* name */
 	 FALSE,			/* partial_inplace */

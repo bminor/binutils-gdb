@@ -1,5 +1,11 @@
 2020-09-01  Alan Modra  <amodra@gmail.com>
 
+	* reloc.c (N_ONES): Handle N=0.
+	* elf32-arm.c (elf32_arm_howto_table_1): Set complain_overflow_dont
+	for R_ARM_TLS_DESCSEQ and R_ARM_THM_TLS_DESCSEQ.
+
+2020-09-01  Alan Modra  <amodra@gmail.com>
+
 	PR 26429
 	* elf32-arm.c (elf32_arm_allocate_local_sym_info): Allocate arrays
 	in descending order of alignment.
