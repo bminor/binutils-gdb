@@ -43,7 +43,7 @@ mi_gdb_test "-interpreter-exec console \"set print object on\"" \
     "(.*=cmd-param-changed,param=\"print object\",value=\"on\".*|)\\^done" \
     "set print object on"
 
-mi_runto main
+mi_runto_main
 
 mi_continue_to_line $line_invalid_pointer_value "continue to invalid pointer value"
 

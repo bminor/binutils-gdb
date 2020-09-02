@@ -355,7 +355,7 @@ with_test_prefix "mi" {
 	continue
     }
     mi_gdb_load ${binfile}
-    mi_runto main
+    mi_runto_main
 
     set line_number [gdb_get_line_number "set mi break here"]
     mi_gdb_test "-break-insert ${srcfile}:${line_number}" \
