@@ -1056,7 +1056,7 @@ proc mi_run_to_main { } {
 #   -1  if test suppressed, failed, timedout
 #    0  if test passed
 
-proc mi_runto_helper {func run_or_continue} {
+proc mi_runto_helper {func run_or_continue {qualified 0}} {
   global suppress_flag
   if { $suppress_flag } {
     return -1
@@ -1068,7 +1068,11 @@ proc mi_runto_helper {func run_or_continue} {
   set test "mi runto $func"
   set bp [mi_make_breakpoint -type breakpoint -disp del \
 	      -func $func\(\\\(.*\\\)\)?]
-  mi_gdb_test "200-break-insert -t $func" "200\\^done,$bp" \
+  set extra_opts ""
+  if {$qualified} {
+      append extra_opts "--qualified"
+  }
+  mi_gdb_test "200-break-insert $extra_opts -t $func" "200\\^done,$bp" \
       "breakpoint at $func"
 
   if {$run_or_continue == "run"} {
@@ -1089,7 +1093,7 @@ proc mi_runto {func} {
 # Just like runto_main but works with the MI interface.
 
 proc mi_runto_main {} {
-    return [mi_runto_helper "main" "run"]
+    return [mi_runto_helper "main" "run" 1]
 }
 
 # Next to the next statement
