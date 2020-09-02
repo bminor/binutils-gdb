@@ -1143,7 +1143,7 @@ in_signed_range (bfd_signed_vma val, bfd_signed_vma max)
      0xffffffff is always considered -1 on sparc32.  */
   if (sparc_arch_size == 32)
     {
-      bfd_signed_vma sign = (bfd_signed_vma) 1 << 31;
+      bfd_vma sign = (bfd_vma) 1 << 31;
       val = ((val & U0xffffffff) ^ sign) - sign;
     }
   if (val > max)
