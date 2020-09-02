@@ -1,3 +1,8 @@
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
+	* elf32-pru.c (pru_elf32_do_ldi32_relocate): Use an unsigned
+	type for "relocation".
+
 2020-09-01  Alan Modra  <amodra@gmail.com>
 
 	* reloc.c (N_ONES): Handle N=0.
