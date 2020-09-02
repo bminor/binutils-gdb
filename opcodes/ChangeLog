@@ -1,5 +1,11 @@
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
+	* i386-dis.c (OP_E_memory): Don't cast to signed type when
+	negating.
+	(get32, get32s): Use unsigned types in shift expressions.
+
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
 	* csky-dis.c (print_insn_csky): Use unsigned type for "given".
 
 2020-09-02  Alan Modra  <amodra@gmail.com>
