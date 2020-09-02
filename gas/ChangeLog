@@ -1,5 +1,10 @@
 2020-09-02  Alan Modra  <amodra@gmail.com>
 
+	* config/obj-macho.c (obj_mach_o_zerofill): Correct type of
+	constant shifted left.
+
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
 	* config/bfin-lex.l: Use an unsigned type for "value".
 
 2020-09-02  Alan Modra  <amodra@gmail.com>

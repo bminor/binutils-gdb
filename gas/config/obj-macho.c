@@ -500,7 +500,7 @@ obj_mach_o_zerofill (int ignore ATTRIBUTE_UNUSED)
 	}
 
       size = exp.X_add_number;
-      size &= ((offsetT) 2 << (stdoutput->arch_info->bits_per_address - 1)) - 1;
+      size &= ((valueT) 2 << (stdoutput->arch_info->bits_per_address - 1)) - 1;
       if (exp.X_add_number != size || !exp.X_unsigned)
 	{
 	  as_warn (_("size (%ld) out of range, ignored"),
