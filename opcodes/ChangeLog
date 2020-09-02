@@ -1,3 +1,7 @@
+2020-09-02  Alan Modra  <amodra@gmail.com>
+
+	* bfin-dis.c (MASKBITS): Use SIGNBIT.
+
 2020-09-02  Cooper Qu  <cooper.qu@linux.alibaba.com>
 
 	* csky-opc.h (csky_v2_opcodes): Move divul and divsl
